@@ -98,6 +98,7 @@ enum classType {
 
   DofClass,
   MasterDofClass,
+  SimpleSlaveDofClass,
   SlaveDofClass,
   DofManagerClass,
   NodeClass,
@@ -805,6 +806,27 @@ enum ElementExtension {
 
 };
 
+#ifdef __PARALLEL_MODE
+/**
+   The communicator mode determines the communication:
+   
+   (Static) The mode can be static, meaning that each node can assemble its communication maps
+   independently (or by independent communication). This implies that the size of
+   communication buffers is known in advance. Also if no data are planned to send to remote node, there
+   is no communication with this node (both sender and receiver know that there will be no data to send).
+   
+   (Dynamic) In this case the communication pattern and the ammount of data sent between nodes is 
+   not known in advance. This requires to use dynamic (packeted) buffering.
+*/
+enum CommunicatorMode {
+  CommMode_Static,
+  CommMode_Dynamic
+};
+
+enum CommBuffType {CBT_static, CBT_dynamic};
+
+#endif
+
 #ifdef __OOFEG
 
 enum DrawMode {
@@ -978,6 +1000,15 @@ typedef unsigned long  NM_Status;
 #define NM_ForceRestart (1L << 4)
 
       
+/* Dof Type, determines the type of DOF created 
+ */
+enum dofType {
+  DT_master = 0,
+  DT_simpleSlave = 1,
+  DT_slave = 2
+};
+
+
 /* mask definning the physical meaning of particular DOF in node.
   mask array are also used in elements, where these arrays
   are determining required DOFs needed by element and which are then 
@@ -1145,7 +1176,15 @@ enum Element_Geometry_Type {
  EGT_unknown     // unknown element geometry type
 };
 
-
+/**
+   Type allowing to specify the required renumbering scheme;
+   One can have a renumbering scheme for dof managers
+   and another one for elements;
+ */
+enum EntityRenumberingScheme {
+  ERS_DofManager,
+  ERS_Element
+};
 
 enum contextIOResultType {
  CIO_OK = 0,        // ok
@@ -1173,6 +1212,16 @@ public:
 
 #define THROW_CIOERR(e) throw ContextIOERR (e,__FILE__, __LINE__);
 #define THROW_CIOERRM(e,m) throw ContextIOERR (e,m,__FILE__, __LINE__);
+
+/**
+   Context mode (mask), defining the type of information written/read to/from context
+*/
+typedef unsigned long  ContextMode;
+/* Mask selecting status */
+#define CM_None         0
+#define CM_State        (1L << 1) 
+#define CM_Definition   (1L << 2)
+
 
 /// oofem terminate exception class
 
