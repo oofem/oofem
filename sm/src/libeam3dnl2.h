@@ -124,8 +124,8 @@ protected:
   void          computeBmatrixAt (GaussPoint*, FloatMatrix&, int, int) 
   {_error("computeBmatrixAt: not implemented");}
   //int           computeGtoLRotationMatrix (FloatMatrix& answer);
-  contextIOResultType           saveContext (FILE* stream, void *obj);
-  contextIOResultType           restoreContext (FILE* stream, void *obj);
+  contextIOResultType           saveContext (DataStream* stream, ContextMode mode, void *obj);
+  contextIOResultType           restoreContext (DataStream* stream, ContextMode mode, void *obj);
   // nonlinear part of geometrical eqs. for i-th component of strain vector.
   // void          computeNLBMatrixAt (FloatMatrix& answer, GaussPoint*, int ) ;
   void          computeNmatrixAt (GaussPoint*, FloatMatrix &) ;
