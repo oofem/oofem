@@ -331,6 +331,7 @@ DSSMatrix::~DSSMatrix () {}
 
 SparseMtrx* DSSMatrix::GiveCopy () const {
   OOFEM_ERROR ("DSSMatrix: can't create, DSS support not compiled");
+  return NULL;
 }
 
 void DSSMatrix::times (const FloatArray& x, FloatArray& answer) const {}
