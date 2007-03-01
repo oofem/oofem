@@ -163,4 +163,23 @@ ExportModule* CreateUsrDefExportModuleOfType (char* name, EngngModel* emodel);
 */
 NonlocalBarrier* CreateUsrDefNonlocalBarrierOfType (char* name, int num, Domain*d);
 
+
+#ifdef __PARALLEL_MODE
+/**
+ Creates new instance of element corresponding to given element keyword.
+ @param type element id determining the type of new instance
+ @param num  element number
+ @param d    domain assigned to new element
+ @return newly allocated object of requested type, null if keyword not suppported
+*/
+Element* CreateUsrDefElementOfType (classType type, int, Domain*);
+/**
+ Creates new instance of user defined dof manager corresponding to given keyword.
+ @param type id determining the type of new instance
+ @param num  component number
+ @param d    domain assigned to new object
+ @return newly allocated object of requested type, null if keyword not suppported
+*/
+DofManager* CreateUsrDefDofManagerOfType (classType type, int, Domain*);
+#endif
 #endif

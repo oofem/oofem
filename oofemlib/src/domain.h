@@ -47,6 +47,10 @@
 #ifndef __MAKEDEPEND
 #include <stdio.h>
 #include <time.h>
+#ifdef __PARALLEL_MODE
+#include <list>
+#include <map>
+#endif
 #endif
 
 #ifdef __OOFEG 
@@ -63,6 +67,10 @@ class EngngModel; class ConnectivityTable;
 class ErrorEstimator; class SpatialLocalizer;
 class NodalRecoveryModel; class NonlocalBarrier;
 
+#ifdef __PARALLEL_MODE
+class ProcessCommunicator;
+class LoadBallancer;
+#endif
 /**
  Class and object Domain. Domain contains mesh description, or if program runs in parrallel then it contains 
  description of domain associated to particular processor or thread of execution. Generally, it contain and
@@ -184,6 +192,18 @@ class Domain
   because in case of multiple domains stateCounter should be kept independently for each domain.
   */
  StateCounterType nonlocalUpdateStateCounter;
+
+#ifdef __PARALLEL_MODE
+ /**@name Load Ballancing data structures */
+ //@{
+ /// Global dof manager map (index is global of man number)
+ std::map<int, DofManager*> dmanMap;
+ /// List of received elements
+ std::list<Element*> recvElemList;
+ /// Load ballancer
+ LoadBallancer* loadBallancer;
+ //@}
+#endif
 
  public:
   /**
@@ -376,6 +396,29 @@ int               giveNumber () {return this->number;}
   the receiver does not provide any support for this at the moment.
   */
  void               setSmoother (NodalRecoveryModel* smoother, int destroyOld = 1);
+
+#ifdef __PARALLEL_MODE
+ /**@name Load Ballancing support methods */
+ //@{
+ int packMigratingData (ProcessCommunicator& pc) ;
+ int unpackMigratingData (ProcessCommunicator& pc) ;
+ void migrateLoad () ;
+ void initGlobalDofManMap ();
+ void deleteRemoteDofManagers ();
+ void deleteRemoteElements ();
+ void renumberDofManagers ();
+ void initializeNewDofManList (AList<DofManager>* dofManagerList);
+ void compressElementData (AList<Element>* elementList);
+ void renumberElementData ();
+ void renumberDofManData ();
+ LoadBallancer* giveLoadBallancer();
+ /** Return updated local entity number after load ballancing */
+ int  LB_giveUpdatedLocalNumber (int oldnum, EntityRenumberingScheme scheme);
+ /** Return updated local entity number after load ballancing */
+ int  LB_giveUpdatedGlobalNumber (int oldnum, EntityRenumberingScheme scheme);
+
+ //@}
+#endif
 
 #ifdef __OOFEG   
  void               drawYourself (oofegGraphicContext& context);  

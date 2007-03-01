@@ -68,6 +68,11 @@
 
 #ifdef __PARALLEL_MODE
 #include "parallel.h"
+#include "processcomm.h"
+#include "loadballancer.h"
+#include "datastream.h"
+#include "communicator.h"
+#include "parmetisloadballancer.h"
 #endif
 
 #ifndef __MAKEDEPEND
@@ -1121,3 +1126,483 @@ Domain::giveErrorEstimator () {
 }
 
 
+#ifdef __PARALLEL_MODE
+
+/***********************************
+ Load Ballancing methods
+***********************************/
+
+/* packs data for remote partition
+   please note, that if entity has to be physically moved (not updated) then
+   all links (such as element node numbers) should be packed in global numbering !!
+   the remote local numbering could not be recovered on local partition!
+ */
+int
+Domain::packMigratingData (ProcessCommunicator& pc) 
+{
+  int myrank = this->giveEngngModel()->giveRank();
+  int iproc = pc.giveRank();
+  int idofman, ndofman;
+  classType dtype;
+  LoadBallancer* lb = this->giveLoadBallancer();
+  DofManager* dofman;
+  LoadBallancer::DofManMode dmode;
+
+  //  **************************************************
+  //  Pack migrating data to remote partition 
+  //  **************************************************
+
+  // pack dofManagers
+  if (iproc == myrank) return 1; // skip local partition 
+  // query process communicator to use
+  ProcessCommunicatorBuff* pcbuff = pc.giveProcessCommunicatorBuff();
+  ProcessCommDataStream pcDataStream (pcbuff);
+  // loop over dofManagers
+  ndofman = this->giveNumberOfDofManagers();
+  for (idofman=1; idofman <= ndofman; idofman++) {
+    dofman = this->giveDofManager (idofman);
+    dmode = lb->giveDofManState(idofman);
+    dtype = dofman->giveClassID();
+    if ((dmode== LoadBallancer::DM_SharedMerge)) {
+      if (lb->giveDofManPartitions(idofman)->at(1) == iproc) {
+        // we notice new partition containing merging node 
+        pcbuff->packInt (dtype);
+        pcbuff->packInt (dmode);
+        pcbuff->packInt (dofman->giveGlobalNumber());
+        // send list of old partitions
+        pcbuff->packIntArray (*(dofman->givePartitionList()));
+      }
+    } else if ((dmode == LoadBallancer::DM_SharedNew)) {
+      // new shared node -> we send this to newly sharing partitions
+      if (lb->giveDofManPartitions(idofman)->findFirstIndexOf(iproc)) {
+        pcbuff->packInt (dtype);
+        pcbuff->packInt (dmode);
+        pcbuff->packInt (dofman->giveGlobalNumber());
+        // send list of new partitions
+        pcbuff->packIntArray (*(lb->giveDofManPartitions(idofman)));
+        // pack dofman state (this is the local dofman, not available on remote)
+        dofman->saveContext (&pcDataStream, CM_Definition | CM_State);
+      }
+    } else if ((dmode == LoadBallancer::DM_SharedUpdate)) {
+      // already shared, but partition list has changed
+      // notice all new partitions
+      if (lb->giveDofManPartitions(idofman)->findFirstIndexOf(iproc)) {
+        pcbuff->packInt (dtype);
+        pcbuff->packInt (dmode);
+        pcbuff->packInt (dofman->giveGlobalNumber());
+        // send list of new partitions
+        pcbuff->packIntArray (*(lb->giveDofManPartitions(idofman)));
+        // pack dofman state (this is the local dofman, not available on remote)
+        dofman->saveContext (&pcDataStream, CM_Definition | CM_State);
+      }
+    } else if ((dmode == LoadBallancer::DM_Remote)) {
+      // local node becoming remote -> notice new owner partition
+      if (lb->giveDofManPartitions(idofman)->findFirstIndexOf(iproc)) {
+        pcbuff->packInt (dtype);
+        pcbuff->packInt (dmode);
+        pcbuff->packInt (dofman->giveGlobalNumber());
+        // send list of new partitions
+        pcbuff->packIntArray (*(lb->giveDofManPartitions(idofman)));
+        // pack dofman state (this is the local dofman, not available on remote)
+        dofman->saveContext (&pcDataStream, CM_Definition | CM_State);
+      }
+    }
+  } // end loop over dofManagers
+
+  // pack end-of-dofman-section record
+  pcbuff->packInt (LOADBALLANCER_END_DATA);
+
+  int ielem, nelem = this->giveNumberOfElements();
+  
+  Element* elem;
+
+  for (ielem=1; ielem<=nelem; ielem++) { // begin loop over elements
+    elem = this->giveElement(ielem);
+    if ((elem->giveParallelMode() == Element_local) && (lb->giveElementPartition(ielem) == iproc)) {
+      // pack local element (node numbers shuld be global ones!!!)
+      // pack type
+      pcbuff->packInt (elem->giveClassID());
+      // nodal numbers shuld be packed as global !!
+      elem->saveContext (&pcDataStream, CM_Definition | CM_State);
+    }
+  } // end loop over elements
+  // pack end-of-element-record
+  pcbuff->packInt (LOADBALLANCER_END_DATA);
+
+  return 1;
+}
+
+
+int
+Domain::unpackMigratingData (ProcessCommunicator& pc) 
+{
+  // create temp space for dofManagers and elements
+  // merging should be made by domain ?
+  // maps of new dofmanagers and elements indexed by global number
+
+  // we can put local dofManagers and elements into maps (should be done before unpacking)
+  // int nproc=this->giveEngngModel()->giveNumberOfProcesses();
+  int myrank=this->giveEngngModel()->giveRank();
+  int iproc = pc.giveRank();
+  int _mode, _globnum, _type;
+  classType _etype;
+  IntArray _partitions;
+  //LoadBallancer::DofManMode dmode;
+  DofManager* dofman;
+
+  //  **************************************************
+  //  Unpack migrating data to remote partition 
+  //  **************************************************
+
+  if (iproc == myrank) return 1; // skip local partition 
+  // query process communicator to use
+  ProcessCommunicatorBuff* pcbuff = pc.giveProcessCommunicatorBuff();
+  ProcessCommDataStream pcDataStream (pcbuff);
+  // unpack dofman data
+  do {
+    pcbuff->unpackInt (_type);
+    _etype = (classType) _type;
+    pcbuff->unpackInt (_mode);
+    switch (_mode) {
+    case LoadBallancer::DM_Remote: // receiving new local dofManager
+      dofman = CreateUsrDefDofManagerOfType (_etype, 0, this);
+      pcbuff->unpackInt (_globnum);
+      dofman->setGlobalNumber(_globnum);
+      // unpack list of new partitions
+      pcbuff->unpackIntArray (_partitions);
+      dofman->setPartitionList (_partitions);
+      // unpack dofman state (this is the local dofman, not available on remote)
+      dofman->restoreContext (&pcDataStream, CM_Definition | CM_State);
+      dofman->setParallelMode (DofManager_local);
+      dofman->setNumber (0); // received dof mans assigned with zero; this allows to distinguish them later form local ones
+#ifdef DEBUG
+      if (dmanMap.find(_globnum) == dmanMap.end()) OOFEM_ERROR ("LoadBallancer::unpackMigratingData: DM_Remode data incostency: record already exist");
+#endif      
+      dmanMap[_globnum] = dofman;
+      break;
+
+    case LoadBallancer::DM_SharedNew:      
+      // receiving new shared dofManager, that was local on remote partition
+      dofman = CreateUsrDefDofManagerOfType (_etype, 0, this);
+      pcbuff->unpackInt (_globnum);
+      dofman->setGlobalNumber(_globnum);
+      // unpack list of new partitions
+      pcbuff->unpackIntArray (_partitions);
+      dofman->setPartitionList (_partitions);
+      // unpack dofman state (this is the local dofman, not available on remote)
+     dofman->restoreContext (&pcDataStream, CM_Definition | CM_State);
+     dofman->setParallelMode (DofManager_shared);
+
+#ifdef DEBUG
+      if (dmanMap.find(_globnum) == dmanMap.end()) OOFEM_ERROR ("LoadBallancer::unpackMigratingData: DM_SharedNew data incostency: record already exist");
+#endif      
+      dmanMap[_globnum] = dofman;
+      break;
+       
+    case LoadBallancer::DM_SharedMerge:
+    case LoadBallancer::DM_SharedUpdate:
+      // Existing shared node to be updated
+      pcbuff->unpackInt (_globnum);
+      if (dmanMap.find(_globnum) != dmanMap.end()) { // dofman is already available -> update only
+        dofman = dmanMap[_globnum];
+       } else { // data not available -> mode should be SharedUpdate
+        dofman = CreateUsrDefDofManagerOfType (_etype, 0, this);
+       }
+      // unpack list of new partitions
+      pcbuff->unpackIntArray (_partitions);
+      dofman->setPartitionList (_partitions);
+      // unpack dofman state (this is the local dofman, not available on remote)
+      dofman->restoreContext (&pcDataStream, CM_Definition | CM_State);
+      dofman->setParallelMode (DofManager_shared);
+      // update record 
+      if (_mode == LoadBallancer::DM_SharedMerge) {
+	int _pos = dofman->givePartitionList()->findFirstIndexOf (iproc);
+        if (_pos) dofman->givePartitionList()->erase (_pos);
+      }
+      break;
+      // 
+    default:
+      OOFEM_ERROR ("LoadBallancer::unpackMigratingData: unexpected dof manager type");
+    }
+
+  } while (_type != LOADBALLANCER_END_DATA);
+
+  // unpack element data
+  Element* elem;
+  do {
+    pcbuff->unpackInt (_type);
+    if (_type == LOADBALLANCER_END_DATA) break;
+    elem = CreateUsrDefElementOfType (_etype, 0, this);
+    elem->restoreContext (&pcDataStream, CM_Definition | CM_State);
+    recvElemList.push_back(elem);    
+  } while (1);
+
+  return 1;
+}
+
+
+// general algorithm common to all load ballancers
+void 
+Domain::migrateLoad ()
+{
+  int nproc=this->giveEngngModel()->giveNumberOfProcesses();
+  int myrank=this->giveEngngModel()->giveRank();
+  CommunicatorBuff cb (nproc, CBT_dynamic);
+  Communicator com (this->giveEngngModel(), &cb, myrank, nproc, CommMode_Dynamic);
+
+  // move existing dofmans and elements, that will be local on current partition,
+  // into local map
+  com.packAllData (this, &Domain::packMigratingData);
+  com.initExchange (MIGRATE_LOAD_TAG);
+  
+  // do something in between 
+  this->deleteRemoteDofManagers ();
+  this->deleteRemoteElements ();
+  this->initGlobalDofManMap ();
+  
+  // receive remote data
+  com.unpackAllData (this, &Domain::unpackMigratingData);
+
+  // Compress local data 
+
+  AList<DofManager> *dofManagerList_new = new AList<DofManager>(0) ;
+  AList<Element>    *elementList_new    = new AList<Element>(0) ;
+
+  this->renumberDofManagers ();
+  this->renumberDofManData () ;
+  this->initializeNewDofManList (dofManagerList_new);
+
+  this->compressElementData (elementList_new);
+  this->renumberElementData ();
+
+  // 
+  this->dofManagerList->clear(false); // not the data
+  this->dofManagerList = dofManagerList_new;
+
+  this->elementList->clear(false);
+  this->elementList = elementList_new;
+
+  // clean up
+  this->dmanMap.clear();
+  this->recvElemList.clear();
+  
+}
+
+void 
+Domain::initGlobalDofManMap ()
+{
+  // initializes global dof man map according to domain dofman list
+
+  int key, idofman, ndofman = this->giveNumberOfDofManagers();
+  DofManager* dofman;
+  dmanMap.clear();
+
+  for (idofman=1; idofman <= ndofman; idofman++) {
+    dofman = this->giveDofManager (idofman);
+    key = dofman->giveGlobalNumber();
+    dmanMap[key] = dofman;
+  }
+}
+
+
+/* will delete those dofmanagers, that were sent to remote partition and are locally owned here
+   so they are no longer necessary (those with state equal to DM_Remote and DM_SharedMerge)
+   This will update domain DofManager list as well as global dmanMap and physically deletes the remote dofManager
+*/
+void
+Domain::deleteRemoteDofManagers ()
+{
+  int i, ndofman =  this->giveNumberOfDofManagers();
+  LoadBallancer* lb = this->giveLoadBallancer();
+  LoadBallancer::DofManMode dmode;
+  DofManager* dman;
+
+  // loop over local nodes
+  
+  for (i = 1; i<= ndofman; i++) {
+    dmode = lb->giveDofManState(i);
+    if ((dmode == LoadBallancer::DM_Remote) || (dmode == LoadBallancer::DM_SharedMerge)) {
+      // positive candidate found
+      dmanMap.erase (this->giveDofManager (i)->giveGlobalNumber());
+      //
+      // this->deleteDofManager (i);  // delete and set entry to NULL
+      //
+      dman = dofManagerList->unlink (i);
+      delete dman;
+    }
+  }
+}
+
+/* will delete those elements, that were sent to remote partition and are locally owned here
+   so they are no longer necessary (those with state equal to DM_Remote and DM_SharedMerge)
+   This will update domain DofManager list as well as global dmanMap and physically deletes the remote dofManager
+*/
+void
+Domain::deleteRemoteElements ()
+{
+  int i, nelem =  this->giveNumberOfElements();
+  int myrank=this->giveEngngModel()->giveRank();
+  LoadBallancer* lb = this->giveLoadBallancer();
+  Element* elem;
+
+  // loop over local nodes
+  
+  for (i = 1; i<= nelem; i++) {
+    if (lb->giveElementPartition(i) != myrank) {
+      // positive candidate found
+      // this->deleteElement (i);  // delete and set entry to NULL
+      elem = elementList->unlink (i);
+      delete (elem);
+    }
+  }
+}
+
+
+
+/*
+  Assigns new local number (stored as dofmanager number, so it can be requested) 
+  Assigns new local number to all dofManagers available in domanMap.
+*/
+void 
+Domain::renumberDofManagers ()
+{
+  int _locnum;
+  std::map<int, DofManager*>::iterator it;
+
+  for (_locnum=1, it=dmanMap.begin(); it!=dmanMap.end(); it++) {
+    it->second->setNumber(_locnum++);
+  }
+}
+
+
+int
+Domain::LB_giveUpdatedLocalNumber (int num, EntityRenumberingScheme scheme)
+{
+  if (scheme == ERS_DofManager) {
+    DofManager* dm = this->giveDofManager (num);
+    if (dm) {
+      return dm->giveNumber();
+    } else {
+      _error2 ("LB_giveUpdatedLocalNumber: dofman %d moved to remote partition, updated number not available", num);
+    }
+  } else {
+    _error ("LB_giveUpdatedLocalNumber: unsuported renumbering scheme");
+  }
+  return 0;
+}
+
+int
+Domain::LB_giveUpdatedGlobalNumber (int num, EntityRenumberingScheme scheme)
+{
+  if (scheme == ERS_DofManager) {
+    DofManager* dm = dmanMap[num];
+    if (dm) {
+      return dm->giveNumber();
+    } else {
+      _error2 ("LB_giveUpdatedGlobalNumber: dofman [%d] not available on local partition, updated number not available", num);
+      return 0;
+    }
+  } else {
+    _error ("LB_giveUpdatedGlobalNumber: unsuported renumbering scheme");
+  }
+  return 0;
+}
+
+
+void 
+Domain::initializeNewDofManList (AList<DofManager>* dofManagerList)
+{
+  int _i, _size = dmanMap.size();
+  std::map<int, DofManager*>::iterator it;
+  dofManagerList->clear();
+  dofManagerList->growTo(_size);
+
+  for (_i=0, it=dmanMap.begin(); it!=dmanMap.end(); it++) {
+    dofManagerList->put (++_i, it->second);
+  }
+}
+
+void
+Domain::compressElementData (AList<Element>* elementList)
+{
+  int i, count, nelem = this->giveNumberOfElements();
+  int myrank=this->giveEngngModel()->giveRank();
+  LoadBallancer* lb = this->giveLoadBallancer();
+
+  // determine real number of elements (excluding remote ones)
+  
+  for (i = 1; i<= this->giveNumberOfElements(); i++) {
+    if (! ((lb->giveElementPartition(i) != myrank) || (this->giveElement(i) == NULL)) ) nelem++;
+  }
+  nelem+= recvElemList.size();
+
+  elementList->clear(); elementList->growTo (nelem);
+  count = 1;
+  for (i = 1; i<= this->giveNumberOfElements(); i++) {
+    if (! ((lb->giveElementPartition(i) != myrank) || (this->giveElement(i) == NULL)) ) 
+      elementList->put(count++, this->giveElement(i));
+  }
+  std::list<Element*>::const_iterator it;
+  for (it = recvElemList.begin(); it != recvElemList.end(); it++) {
+    elementList->put(count++, *it);
+  }
+}
+
+void 
+Domain::renumberElementData () {
+
+  int i, nelems = this->giveNumberOfElements();
+  int myrank = engineeringModel->giveRank();
+  LoadBallancer* lb = this->giveLoadBallancer();
+
+  // loop first over local elements
+  for (i = 1; i<= nelems; i++) {
+    // skip remote ones
+    if (lb->giveElementPartition(i) == myrank) continue;
+    //  ask elelement to update numbering
+    this->giveElement(i)->updateLocalNumbering (this, &Domain::LB_giveUpdatedLocalNumber); // should call LoadBallncer for translation
+  }
+  // now loop over received elemens (they have node numbers in global numbering)
+  std::list<Element*>::const_iterator it;
+  for (it = recvElemList.begin(); it != recvElemList.end(); it++) {
+    (*it)->updateLocalNumbering (this, &Domain::LB_giveUpdatedGlobalNumber); // g_to_l
+  }
+}
+
+/* renumber here the master node number for rigid and hanging dofs, etc;
+   existing local nodes need mapping from old_local to new numbering,
+   but received nodes need mapping from global to new numbering
+
+   -> we need to keep the list of received nodes! (now they are only introduced into globally indexed dmanMap!);
+*/
+void
+Domain::renumberDofManData () {
+  int _i;
+  std::map<int, DofManager*>::iterator it;
+
+  for (_i=0, it=dmanMap.begin(); it!=dmanMap.end(); it++) {
+    if (it->second->giveNumber() == 0) {
+      // received dof manager -> we map global numbers to new local number
+      it->second->updateLocalNumbering (this, &Domain::LB_giveUpdatedGlobalNumber); // g_to_l
+    } else {
+      // existing dof manager -> we map old local number to new local number
+      it->second->updateLocalNumbering (this, &Domain::LB_giveUpdatedLocalNumber); // l_to_l
+    }
+  }
+}
+
+LoadBallancer*
+Domain::giveLoadBallancer ()
+{
+  if (this->loadBallancer == NULL) {
+#ifdef __PARMETIS_MODULE
+    this->loadBallancer = new ParmetisLoadBallancer (this);
+#endif    
+  }
+  if (this->loadBallancer == NULL) {
+    OOFEM_ERROR ("Domain::giveLoadBallancer: can't create any load ballancer");
+  }
+  return this->loadBallancer;
+}
+
+#endif

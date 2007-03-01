@@ -43,6 +43,7 @@
 #endif
 #endif
 
+#include "node.h"
 #include "element.h"
 #include "engngm.h"
 #include "load.h"
@@ -70,6 +71,8 @@
 
 #include "subspaceit.h"
 #include "inverseit.h"
+
+
 
 #ifdef __SM_MODULE
 
@@ -683,3 +686,19 @@ NonlocalBarrier* CreateUsrDefNonlocalBarrierOfType (char* aClass, int num, Domai
  return answer;
 }
 
+#ifdef __PARALLEL_MODE
+Element* CreateUsrDefElementOfType (classType type, int number, Domain* domain)
+{
+  Element* answer = NULL;
+
+  if (type == PlaneStress2dClass) answer = new PlaneStress2d(number,domain) ;
+  return answer;
+}
+
+DofManager* CreateUsrDefDofManagerOfType (classType type, int number, Domain* domain)
+{
+  DofManager* answer = NULL;
+  if (type == NodeClass) answer = new Node (number,domain) ;
+  return answer;
+}
+#endif
