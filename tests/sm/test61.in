@@ -1,0 +1,36 @@
+test61.out
+Patch test of Truss2d elements -> simple structure with slave dofs 
+LinearStatic nsteps 1
+domain 2dBeam
+OutputManager tstep_all dofman_all element_all
+ndofman 6 nelem 3 ncrosssect  1 nmat 1 nbc 2 nic 0 nltf  1
+node 1 coords 3 0.  0.  0.  bc 3 1 1 0
+node 2 coords 3 8.  0.  0.  bc 3 0 1 0 
+node 3 coords 3 2.  0.0 3.  bc 3 0 0 0 load 1 2
+node 4 coords 3 0.  0.  0.  bc 3 0 0 0 masterMask 3 1 1 0
+node 5 coords 3 8.  0.  0.  bc 3 0 0 0 masterMask 3 2 2 0 
+node 6 coords 3 2.  0.  3.  bc 3 0 0 0 masterMask 3 3 3 0 
+Beam2d 1 nodes 2 1 2 mat 1 crossSect 1
+Beam2d 2 nodes 2 4 3 mat 1 crossSect 1
+Beam2d 3 nodes 2 5 6 mat 1 crossSect 1
+SimpleCS 1 area 1.0 Iy 0.0039366 beamShearCoeff 1.e18 thick 0.54 
+IsoLE 1 d 1. E 1.0 n 0.2  tAlpha 0.000012
+BoundaryCondition  1 loadTimeFunction 1 prescribedvalue 0.0 
+NodalLoad 2 loadTimeFunction 1 Components 3 0.0 -1.0 0.0
+ConstantFunction 1 f(t) 1.0
+#
+#
+#%BEGIN_CHECK% tolerance 1.e-4
+## check reactions 
+#REACTION tStep 1 comNumber 1 dof 1 value 0.0
+#REACTION tStep 1 comNumber 1 dof 2 value 7.5e-1
+#REACTION tStep 1 comNumber 2 dof 2 value 2.5e-1
+## check all nodes
+## check element stress vector
+#BEAM_ELEMENT tStep 1 number 1 gp 1 record 1 component 1  value -0.5
+#BEAM_ELEMENT tStep 1 number 2 gp 1 record 1 component 1  value 9.0139e-1
+#BEAM_ELEMENT tStep 1 number 3 gp 1 record 1 component 1  value 5.5902e-1
+#%END_CHECK%
+#
+
+

@@ -1,0 +1,62 @@
+###############################
+# brazilian splitting test 2D #
+###############################
+#
+# R = 40mm
+# B = 10mm
+# b =  3mm
+
+# t3d -d 5
+
+vertex 1 xyz 0 0 0
+vertex 2 xyz 40 0 0
+vertex 1003 xyz 0 40 0 virtual
+
+curve 1 vertex 1 2
+curve 1002 vertex 2 1003 order 3 virtual
+polygon 1 xyz 40 40 0 weight 0.707106781186
+
+vertex 3 xyz 5 0 0 fixed curve 1
+vertex 4 xyz 5 39.68626967 0 fixed curve 1002
+vertex 5 xyz 0 39.68626967 0
+
+curve 2 vertex 2 4 fixed curve 1002
+curve 3 vertex 4 5
+curve 4 vertex 5 1
+
+patch 1 normal 0 0 1 boundary curve 1 2 3 4 size def quad
+
+vertex 6 xyz 5 42.68626967 0
+vertex 7 xyz 0 42.68626967 0
+vertex 8 xyz 1 42.68626967 0
+
+curve 5 vertex 4 6
+curve 8 vertex 6 8
+curve 9 vertex 8 7
+curve 7 vertex 7 5
+
+patch 2 normal 0 0 1 boundary curve 5 8 9 7 -3 size def * 0.2 quad
+
+vertex 12301 xyz 0 0 0 virtual size def * 0.2
+vertex 12302 xyz 4 0 0 virtual size def * 0.2
+vertex 12303 xyz 4 40 0 virtual size def * 0.2
+vertex 12304 xyz 0 40 0 virtual size def * 0.2
+
+curve 12301 vertex 12301 12302 virtual
+curve 12302 vertex 12302 12303 virtual
+curve 12303 vertex 12303 12304 virtual
+curve 12304 vertex 12304 12301 virtual
+
+surface 12301 curve 12301 12304 12303 12302 virtual
+
+vertex 12401 xyz 4 0 0 virtual size def * 0.2
+vertex 12402 xyz 10 0 0 virtual size def * 0.5
+vertex 12403 xyz 10 40 0 virtual size def * 0.5
+vertex 12404 xyz 4 40 0 virtual size def * 0.2
+
+curve 12401 vertex 12401 12402 virtual
+curve 12402 vertex 12402 12403 virtual
+curve 12403 vertex 12403 12404 virtual
+curve 12404 vertex 12404 12401 virtual
+
+surface 12401 curve 12401 12404 12403 12402 virtual

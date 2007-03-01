@@ -1,0 +1,243 @@
+/*
+
+                   *****    *****   ******  ******  ***   ***
+                 **   **  **   **  **      **      ** *** **
+                **   **  **   **  ****    ****    **  *  **
+               **   **  **   **  **      **      **     **
+              **   **  **   **  **      **      **     **
+              *****    *****   **      ******  **     **
+
+               OOFEM : Object Oriented Finite Element Code
+
+                 Copyright (C) 1993 - 2005   Borek Patzak
+
+         Czech Technical University, Faculty of Civil Engineering,
+     Department of Structural Mechanics, 166 29 Prague, Czech Republic
+                  www.oofem.org    e-mail: info@oofem.org
+     
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.                                                                              
+*/
+
+CONTENS:
+
+[1]   What is here
+[2]   Pre-requisities
+[3]   Installation
+[4]   Running oofem and oofeg
+[5]   Related Links
+
+
+
+
+[1] What is here
+==============================================================================
+The directory tree below holds source code to the OOFEM package.  
+
+The directory "doc" contains the "User's guide", 
+sources to generate "Reference manual", documents describing 
+the input file specifications, element and material libraries, 
+and other useful documents. 
+
+The directory "oofemlib" contains the core part of OOFEM, the OOFEMlib module.
+
+The directory "sm" contains the sources of structural analysis module.
+
+The directory "tm" contains the sources of transport problem analysis
+module.
+
+The directory "fm" contains the sources of fluid mechanics module.
+
+The directory "tools" contains sources for several utility programs.
+
+The directory "tests" contains several tests, which are useful to verify
+the program functionality.
+
+Directory "dss" includes the sources for Direct Sparse Solver (DSS,
+contributed by R. Vondracek)
+
+The directory "main" contains the sources containing implementation of some 
+global functions (like main) for oofem, oofeg, and poofem targets.
+
+
+
+
+[2] Pre-requisities
+==============================================================================
+The oofem requires the C++ compiler with STL (Standard Template Library).
+
+The oofem contains interface to IML++ library. It is the C++ templated 
+library of modern iterative methods for solving both symmetric and 
+non-symmetric linear systems of equations, written by 
+Roldan Pozo. It can be downloaded from http://math.nist.gov/iml++/. 
+It is recomended to install IML++ and compile OOFEM with IML++ support.
+
+The graphical post-processor (oofeg) requires the ELIXIR and Ckit libraries
+by Petr Krysl (http://www.multires.caltech.edu/~pkrysl/), to be installed. 
+They provide X-windows graphics support.  
+The version of Elixir to be used with OOFEM is likely to be not compatible 
+with the original version maintained by the Petr Krysl. The compatible
+Elixir version is available at oofem home page 
+(http://ksm.fsv.cvut.cz/oofem/oofem.html). The Ckit library can be obtained 
+at the same location.
+
+Parallel version (poofem) requires MPI library to be installed. 
+If you do not have any, you can use MPICH. It is a freely available, portable 
+implementation of MPI (http://www-unix.mcs.anl.gov/mpi/mpich/).
+
+If you want to use PETSc toolkit, the PETSc version 2.3.0 or higher is
+required. The toolkit can be downloaded from PETSc project home page 
+(http://www-unix.mcs.anl.gov/petsc/petsc-as/index.html). 
+
+The reference manual can be generated automatically from the sources.
+You can use it to generate documentation of your classes, too.
+To do this, you have to install doxygen documentation system 
+(http://sourceforge.net/projects/doxygen/)
+or (http://www.stack.nl/~dimitri/doxygen/) 
+and the Graph visualization toolkit 
+(http://www.research.att.com/sw/tools/graphviz/)
+
+The compiled Reference Manual itself is not included in release 
+due to its size. It can be accessed online from oofem home page.
+
+
+
+
+[3] Installation
+==============================================================================
+The installation procedure uses the top-level makefile
+The build process has been tested so far on:
+
+        o i386 with Linux and gcc -- no problems,
+        o IBM RS/6000 with AIX 3.4 with gcc 2.95.2 -- no problems,
+        o IRIX64 6.2 and MIPSpro C++ 7.2 compiler -- problems: 
+          Disabled exception handling. Also switch on "template prelinker".
+          If you are using SGI MIPSproTM C++ 7.1 or later, 
+          you should also use -n32, or -64 option.
+          fix: set the corresponding configure CXXFLAGS on the command line as
+          $ CXXFLAGS="-64 -exceptions -prelink -ptused" ./configure
+        o Compaq Tru64 UNIX V5.1 and Compaq_C++ (Version_6.3A)
+          add -std gnu option to CXXFLAGS, for example by invoking 
+          configure script as
+          $ CXXFLAGS="-std gnu" ./configure
+
+***********************************
+Installation instructions for UNIX:
+***********************************
+
+1) Unpack the distribution 
+   (for example by running "gunzip -c oofem-x.y.tar.gz | tar xof - ")
+1) Change the directory to the OOFEM source directory
+2) Optionally download and unpack IML++ distribution 
+   in the oofem source directory under "iml" directory
+3) Run the configure script as: ./configure
+   o) If you want to compile with IML++ support use "--enable-iml" parameter
+   o) If you want to build graphical post-processor (oofeg) use "--enable-oofeg" parameter
+   o) If you want to build parallel version (poofem) use "--enable-poofem" parameter
+   o) If you want to use PETSc library use "--enable-petsc" together with
+      "--with-PETSCDIR=dir" and "--with-PETSCARCH=arch" options to
+      configure PETSC support (dir is the patch to PETSC installation
+      directory, arch is PETSC architecture. See PETSC installation
+      manual for details.)
+   o) Add --enable-dss to compile with Direct Sparse Solver support (DSS)
+   o) If you want to build also debug versions for selected targets
+      use "--enable-debug" parameter
+
+4) Run make to compile the required targets as: make all 
+
+   The target executables are in bin/Release or bin/Debug directories.
+
+
+To build the utilities do the following:
+
+1) change to tools directory: cd tools
+2) Run make:
+   make all
+
+Optionally to test the oofem package (requires the utilities):
+
+1) cd tests
+2) run batch do_test:
+	 bash ./do_test
+3) look the result file:
+	 more ./result
+4) Optionally, to test parallel version (all tests require PETSC support):
+   4.1) Change the directory to the OOFEM source directory
+   4.2) cd tests/partest
+   4.3) run "bash ./do_test"
+   4.4) look the result file "more ./result"
+
+Optionally to build reference manuals
+
+OOFEMlib reference manual:
+1) cd oofemlib/doc/refman
+2) make htmldoc
+
+OOFEM reference manual (including OOFEMlib):
+1) cd doc/refman
+2) make htmldoc
+
+
+[4] Running oofem and oofeg
+==============================================================================
+The oofem program prints out the available options when run without
+any option. To run a specific job, you can enter
+
+oofem -f input_file_name
+ 
+
+To run oofeg (graphic post-processor), you need job context file 
+(created by oofem, for example using -context option). To run oofeg, enter
+
+oofeg -f input_file_name
+
+There are few useful oofeg key-bindings:
+Fast viewing
+
+B1            =  window
+Ctrl B1       =  pan
+Ctrl B2       =  zoom
+Shift B2      =  fit all (only active drawing window will be affected)
+Ctrl Shift B1 =  rotate
+B3            =  done
+
+Selection
+
+B1            =  select
+Ctrl B1       =  select window
+Shift B1      =  select nearest point 
+                 (confirm by B1 or select next one by Shift B1)
+B2            =  accept
+B3            =  reject
+
+
+
+[5] Further documentation
+==============================================================================
+Please consult oofem home page (http://www.oofem.org) for 
+more documentation, manuals and new versions.
+
+Bugs
+==============================================================================
+
+Please mail all bug reports and suggestions to [info@oofem.org]. I will try to
+give satisfaction, if the time is at least partially on my side. 
+
+
+                                Enjoy
+                                        Borek Patzak
+
+
+

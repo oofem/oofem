@@ -1,0 +1,669 @@
+axi01.oofem.out
+axisymmetric 2D pipe test in radial direction, inlet velocity (constant), outlet: pressure, no friction
+supg nsteps 10 lstype 0 smtype 1 deltaT 100.0 rtolv 1.e-4 alpha 0.5 renumber 1
+domain 2dIncompFlow
+OutputManager tstep_all dofman_all element_all
+ndofman 231 nelem 400 ncrosssect 1 nmat 1 nbc 3 nic 0 nltf 1
+node 1 coords 3 1.000000e+00 0.000000e+00 0.000000e+00 bc 3 1 2 0
+node 2 coords 3 5.000000e+00 0.000000e+00 0.000000e+00 bc 3 0 2 3
+node 3 coords 3 5.000000e+00 2.000000e+00 0.000000e+00 bc 3 0 2 3
+node 4 coords 3 1.000000e+00 2.000000e+00 0.000000e+00 bc 3 1 2 0
+node 5 coords 3 1.200000e+00 0.000000e+00 0.000000e+00 bc 3 0 2 0
+node 6 coords 3 1.400000e+00 0.000000e+00 0.000000e+00 bc 3 0 2 0
+node 7 coords 3 1.600000e+00 0.000000e+00 0.000000e+00 bc 3 0 2 0
+node 8 coords 3 1.800000e+00 0.000000e+00 0.000000e+00 bc 3 0 2 0
+node 9 coords 3 2.000000e+00 0.000000e+00 0.000000e+00 bc 3 0 2 0
+node 10 coords 3 2.200000e+00 0.000000e+00 0.000000e+00 bc 3 0 2 0
+node 11 coords 3 2.400000e+00 0.000000e+00 0.000000e+00 bc 3 0 2 0
+node 12 coords 3 2.600000e+00 0.000000e+00 0.000000e+00 bc 3 0 2 0
+node 13 coords 3 2.800000e+00 0.000000e+00 0.000000e+00 bc 3 0 2 0
+node 14 coords 3 3.000000e+00 0.000000e+00 0.000000e+00 bc 3 0 2 0
+node 15 coords 3 3.200000e+00 0.000000e+00 0.000000e+00 bc 3 0 2 0
+node 16 coords 3 3.400000e+00 0.000000e+00 0.000000e+00 bc 3 0 2 0
+node 17 coords 3 3.600000e+00 0.000000e+00 0.000000e+00 bc 3 0 2 0
+node 18 coords 3 3.800000e+00 0.000000e+00 0.000000e+00 bc 3 0 2 0
+node 19 coords 3 4.000000e+00 0.000000e+00 0.000000e+00 bc 3 0 2 0
+node 20 coords 3 4.200000e+00 0.000000e+00 0.000000e+00 bc 3 0 2 0
+node 21 coords 3 4.400000e+00 0.000000e+00 0.000000e+00 bc 3 0 2 0
+node 22 coords 3 4.600000e+00 0.000000e+00 0.000000e+00 bc 3 0 2 0
+node 23 coords 3 4.800000e+00 0.000000e+00 0.000000e+00 bc 3 0 2 0
+node 24 coords 3 5.000000e+00 2.000000e-01 0.000000e+00 bc 3 0 0 3
+node 25 coords 3 5.000000e+00 4.000000e-01 0.000000e+00 bc 3 0 0 3
+node 26 coords 3 5.000000e+00 6.000000e-01 0.000000e+00 bc 3 0 0 3
+node 27 coords 3 5.000000e+00 8.000000e-01 0.000000e+00 bc 3 0 0 3
+node 28 coords 3 5.000000e+00 1.000000e+00 0.000000e+00 bc 3 0 0 3
+node 29 coords 3 5.000000e+00 1.200000e+00 0.000000e+00 bc 3 0 0 3
+node 30 coords 3 5.000000e+00 1.400000e+00 0.000000e+00 bc 3 0 0 3
+node 31 coords 3 5.000000e+00 1.600000e+00 0.000000e+00 bc 3 0 0 3
+node 32 coords 3 5.000000e+00 1.800000e+00 0.000000e+00 bc 3 0 0 3
+node 33 coords 3 4.800000e+00 2.000000e+00 0.000000e+00 bc 3 0 2 0
+node 34 coords 3 4.600000e+00 2.000000e+00 0.000000e+00 bc 3 0 2 0
+node 35 coords 3 4.400000e+00 2.000000e+00 0.000000e+00 bc 3 0 2 0
+node 36 coords 3 4.200000e+00 2.000000e+00 0.000000e+00 bc 3 0 2 0
+node 37 coords 3 4.000000e+00 2.000000e+00 0.000000e+00 bc 3 0 2 0
+node 38 coords 3 3.800000e+00 2.000000e+00 0.000000e+00 bc 3 0 2 0
+node 39 coords 3 3.600000e+00 2.000000e+00 0.000000e+00 bc 3 0 2 0
+node 40 coords 3 3.400000e+00 2.000000e+00 0.000000e+00 bc 3 0 2 0
+node 41 coords 3 3.200000e+00 2.000000e+00 0.000000e+00 bc 3 0 2 0
+node 42 coords 3 3.000000e+00 2.000000e+00 0.000000e+00 bc 3 0 2 0
+node 43 coords 3 2.800000e+00 2.000000e+00 0.000000e+00 bc 3 0 2 0
+node 44 coords 3 2.600000e+00 2.000000e+00 0.000000e+00 bc 3 0 2 0
+node 45 coords 3 2.400000e+00 2.000000e+00 0.000000e+00 bc 3 0 2 0
+node 46 coords 3 2.200000e+00 2.000000e+00 0.000000e+00 bc 3 0 2 0
+node 47 coords 3 2.000000e+00 2.000000e+00 0.000000e+00 bc 3 0 2 0
+node 48 coords 3 1.800000e+00 2.000000e+00 0.000000e+00 bc 3 0 2 0
+node 49 coords 3 1.600000e+00 2.000000e+00 0.000000e+00 bc 3 0 2 0
+node 50 coords 3 1.400000e+00 2.000000e+00 0.000000e+00 bc 3 0 2 0
+node 51 coords 3 1.200000e+00 2.000000e+00 0.000000e+00 bc 3 0 2 0
+node 52 coords 3 1.000000e+00 1.800000e+00 0.000000e+00 bc 3 1 2 0
+node 53 coords 3 1.000000e+00 1.600000e+00 0.000000e+00 bc 3 1 2 0
+node 54 coords 3 1.000000e+00 1.400000e+00 0.000000e+00 bc 3 1 2 0
+node 55 coords 3 1.000000e+00 1.200000e+00 0.000000e+00 bc 3 1 2 0
+node 56 coords 3 1.000000e+00 1.000000e+00 0.000000e+00 bc 3 1 2 0
+node 57 coords 3 1.000000e+00 8.000000e-01 0.000000e+00 bc 3 1 2 0
+node 58 coords 3 1.000000e+00 6.000000e-01 0.000000e+00 bc 3 1 2 0
+node 59 coords 3 1.000000e+00 4.000000e-01 0.000000e+00 bc 3 1 2 0
+node 60 coords 3 1.000000e+00 2.000000e-01 0.000000e+00 bc 3 1 2 0
+node 61 coords 3 1.200000e+00 2.000000e-01 0.000000e+00
+node 62 coords 3 1.400000e+00 2.000000e-01 0.000000e+00
+node 63 coords 3 1.600000e+00 2.000000e-01 0.000000e+00
+node 64 coords 3 1.800000e+00 2.000000e-01 0.000000e+00
+node 65 coords 3 2.000000e+00 2.000000e-01 0.000000e+00
+node 66 coords 3 2.200000e+00 2.000000e-01 0.000000e+00
+node 67 coords 3 2.400000e+00 2.000000e-01 0.000000e+00
+node 68 coords 3 2.600000e+00 2.000000e-01 0.000000e+00
+node 69 coords 3 2.800000e+00 2.000000e-01 0.000000e+00
+node 70 coords 3 3.000000e+00 2.000000e-01 0.000000e+00
+node 71 coords 3 3.200000e+00 2.000000e-01 0.000000e+00
+node 72 coords 3 3.400000e+00 2.000000e-01 0.000000e+00
+node 73 coords 3 3.600000e+00 2.000000e-01 0.000000e+00
+node 74 coords 3 3.800000e+00 2.000000e-01 0.000000e+00
+node 75 coords 3 4.000000e+00 2.000000e-01 0.000000e+00
+node 76 coords 3 4.200000e+00 2.000000e-01 0.000000e+00
+node 77 coords 3 4.400000e+00 2.000000e-01 0.000000e+00
+node 78 coords 3 4.600000e+00 2.000000e-01 0.000000e+00
+node 79 coords 3 4.800000e+00 2.000000e-01 0.000000e+00
+node 80 coords 3 1.200000e+00 4.000000e-01 0.000000e+00
+node 81 coords 3 1.400000e+00 4.000000e-01 0.000000e+00
+node 82 coords 3 1.600000e+00 4.000000e-01 0.000000e+00
+node 83 coords 3 1.800000e+00 4.000000e-01 0.000000e+00
+node 84 coords 3 2.000000e+00 4.000000e-01 0.000000e+00
+node 85 coords 3 2.200000e+00 4.000000e-01 0.000000e+00
+node 86 coords 3 2.400000e+00 4.000000e-01 0.000000e+00
+node 87 coords 3 2.600000e+00 4.000000e-01 0.000000e+00
+node 88 coords 3 2.800000e+00 4.000000e-01 0.000000e+00
+node 89 coords 3 3.000000e+00 4.000000e-01 0.000000e+00
+node 90 coords 3 3.200000e+00 4.000000e-01 0.000000e+00
+node 91 coords 3 3.400000e+00 4.000000e-01 0.000000e+00
+node 92 coords 3 3.600000e+00 4.000000e-01 0.000000e+00
+node 93 coords 3 3.800000e+00 4.000000e-01 0.000000e+00
+node 94 coords 3 4.000000e+00 4.000000e-01 0.000000e+00
+node 95 coords 3 4.200000e+00 4.000000e-01 0.000000e+00
+node 96 coords 3 4.400000e+00 4.000000e-01 0.000000e+00
+node 97 coords 3 4.600000e+00 4.000000e-01 0.000000e+00
+node 98 coords 3 4.800000e+00 4.000000e-01 0.000000e+00
+node 99 coords 3 1.200000e+00 6.000000e-01 0.000000e+00
+node 100 coords 3 1.400000e+00 6.000000e-01 0.000000e+00
+node 101 coords 3 1.600000e+00 6.000000e-01 0.000000e+00
+node 102 coords 3 1.800000e+00 6.000000e-01 0.000000e+00
+node 103 coords 3 2.000000e+00 6.000000e-01 0.000000e+00
+node 104 coords 3 2.200000e+00 6.000000e-01 0.000000e+00
+node 105 coords 3 2.400000e+00 6.000000e-01 0.000000e+00
+node 106 coords 3 2.600000e+00 6.000000e-01 0.000000e+00
+node 107 coords 3 2.800000e+00 6.000000e-01 0.000000e+00
+node 108 coords 3 3.000000e+00 6.000000e-01 0.000000e+00
+node 109 coords 3 3.200000e+00 6.000000e-01 0.000000e+00
+node 110 coords 3 3.400000e+00 6.000000e-01 0.000000e+00
+node 111 coords 3 3.600000e+00 6.000000e-01 0.000000e+00
+node 112 coords 3 3.800000e+00 6.000000e-01 0.000000e+00
+node 113 coords 3 4.000000e+00 6.000000e-01 0.000000e+00
+node 114 coords 3 4.200000e+00 6.000000e-01 0.000000e+00
+node 115 coords 3 4.400000e+00 6.000000e-01 0.000000e+00
+node 116 coords 3 4.600000e+00 6.000000e-01 0.000000e+00
+node 117 coords 3 4.800000e+00 6.000000e-01 0.000000e+00
+node 118 coords 3 1.200000e+00 8.000000e-01 0.000000e+00
+node 119 coords 3 1.400000e+00 8.000000e-01 0.000000e+00
+node 120 coords 3 1.600000e+00 8.000000e-01 0.000000e+00
+node 121 coords 3 1.800000e+00 8.000000e-01 0.000000e+00
+node 122 coords 3 2.000000e+00 8.000000e-01 0.000000e+00
+node 123 coords 3 2.200000e+00 8.000000e-01 0.000000e+00
+node 124 coords 3 2.400000e+00 8.000000e-01 0.000000e+00
+node 125 coords 3 2.600000e+00 8.000000e-01 0.000000e+00
+node 126 coords 3 2.800000e+00 8.000000e-01 0.000000e+00
+node 127 coords 3 3.000000e+00 8.000000e-01 0.000000e+00
+node 128 coords 3 3.200000e+00 8.000000e-01 0.000000e+00
+node 129 coords 3 3.400000e+00 8.000000e-01 0.000000e+00
+node 130 coords 3 3.600000e+00 8.000000e-01 0.000000e+00
+node 131 coords 3 3.800000e+00 8.000000e-01 0.000000e+00
+node 132 coords 3 4.000000e+00 8.000000e-01 0.000000e+00
+node 133 coords 3 4.200000e+00 8.000000e-01 0.000000e+00
+node 134 coords 3 4.400000e+00 8.000000e-01 0.000000e+00
+node 135 coords 3 4.600000e+00 8.000000e-01 0.000000e+00
+node 136 coords 3 4.800000e+00 8.000000e-01 0.000000e+00
+node 137 coords 3 1.200000e+00 1.000000e+00 0.000000e+00
+node 138 coords 3 1.400000e+00 1.000000e+00 0.000000e+00
+node 139 coords 3 1.600000e+00 1.000000e+00 0.000000e+00
+node 140 coords 3 1.800000e+00 1.000000e+00 0.000000e+00
+node 141 coords 3 2.000000e+00 1.000000e+00 0.000000e+00
+node 142 coords 3 2.200000e+00 1.000000e+00 0.000000e+00
+node 143 coords 3 2.400000e+00 1.000000e+00 0.000000e+00
+node 144 coords 3 2.600000e+00 1.000000e+00 0.000000e+00
+node 145 coords 3 2.800000e+00 1.000000e+00 0.000000e+00
+node 146 coords 3 3.000000e+00 1.000000e+00 0.000000e+00
+node 147 coords 3 3.200000e+00 1.000000e+00 0.000000e+00
+node 148 coords 3 3.400000e+00 1.000000e+00 0.000000e+00
+node 149 coords 3 3.600000e+00 1.000000e+00 0.000000e+00
+node 150 coords 3 3.800000e+00 1.000000e+00 0.000000e+00
+node 151 coords 3 4.000000e+00 1.000000e+00 0.000000e+00
+node 152 coords 3 4.200000e+00 1.000000e+00 0.000000e+00
+node 153 coords 3 4.400000e+00 1.000000e+00 0.000000e+00
+node 154 coords 3 4.600000e+00 1.000000e+00 0.000000e+00
+node 155 coords 3 4.800000e+00 1.000000e+00 0.000000e+00
+node 156 coords 3 1.200000e+00 1.200000e+00 0.000000e+00
+node 157 coords 3 1.400000e+00 1.200000e+00 0.000000e+00
+node 158 coords 3 1.600000e+00 1.200000e+00 0.000000e+00
+node 159 coords 3 1.800000e+00 1.200000e+00 0.000000e+00
+node 160 coords 3 2.000000e+00 1.200000e+00 0.000000e+00
+node 161 coords 3 2.200000e+00 1.200000e+00 0.000000e+00
+node 162 coords 3 2.400000e+00 1.200000e+00 0.000000e+00
+node 163 coords 3 2.600000e+00 1.200000e+00 0.000000e+00
+node 164 coords 3 2.800000e+00 1.200000e+00 0.000000e+00
+node 165 coords 3 3.000000e+00 1.200000e+00 0.000000e+00
+node 166 coords 3 3.200000e+00 1.200000e+00 0.000000e+00
+node 167 coords 3 3.400000e+00 1.200000e+00 0.000000e+00
+node 168 coords 3 3.600000e+00 1.200000e+00 0.000000e+00
+node 169 coords 3 3.800000e+00 1.200000e+00 0.000000e+00
+node 170 coords 3 4.000000e+00 1.200000e+00 0.000000e+00
+node 171 coords 3 4.200000e+00 1.200000e+00 0.000000e+00
+node 172 coords 3 4.400000e+00 1.200000e+00 0.000000e+00
+node 173 coords 3 4.600000e+00 1.200000e+00 0.000000e+00
+node 174 coords 3 4.800000e+00 1.200000e+00 0.000000e+00
+node 175 coords 3 1.200000e+00 1.400000e+00 0.000000e+00
+node 176 coords 3 1.400000e+00 1.400000e+00 0.000000e+00
+node 177 coords 3 1.600000e+00 1.400000e+00 0.000000e+00
+node 178 coords 3 1.800000e+00 1.400000e+00 0.000000e+00
+node 179 coords 3 2.000000e+00 1.400000e+00 0.000000e+00
+node 180 coords 3 2.200000e+00 1.400000e+00 0.000000e+00
+node 181 coords 3 2.400000e+00 1.400000e+00 0.000000e+00
+node 182 coords 3 2.600000e+00 1.400000e+00 0.000000e+00
+node 183 coords 3 2.800000e+00 1.400000e+00 0.000000e+00
+node 184 coords 3 3.000000e+00 1.400000e+00 0.000000e+00
+node 185 coords 3 3.200000e+00 1.400000e+00 0.000000e+00
+node 186 coords 3 3.400000e+00 1.400000e+00 0.000000e+00
+node 187 coords 3 3.600000e+00 1.400000e+00 0.000000e+00
+node 188 coords 3 3.800000e+00 1.400000e+00 0.000000e+00
+node 189 coords 3 4.000000e+00 1.400000e+00 0.000000e+00
+node 190 coords 3 4.200000e+00 1.400000e+00 0.000000e+00
+node 191 coords 3 4.400000e+00 1.400000e+00 0.000000e+00
+node 192 coords 3 4.600000e+00 1.400000e+00 0.000000e+00
+node 193 coords 3 4.800000e+00 1.400000e+00 0.000000e+00
+node 194 coords 3 1.200000e+00 1.600000e+00 0.000000e+00
+node 195 coords 3 1.400000e+00 1.600000e+00 0.000000e+00
+node 196 coords 3 1.600000e+00 1.600000e+00 0.000000e+00
+node 197 coords 3 1.800000e+00 1.600000e+00 0.000000e+00
+node 198 coords 3 2.000000e+00 1.600000e+00 0.000000e+00
+node 199 coords 3 2.200000e+00 1.600000e+00 0.000000e+00
+node 200 coords 3 2.400000e+00 1.600000e+00 0.000000e+00
+node 201 coords 3 2.600000e+00 1.600000e+00 0.000000e+00
+node 202 coords 3 2.800000e+00 1.600000e+00 0.000000e+00
+node 203 coords 3 3.000000e+00 1.600000e+00 0.000000e+00
+node 204 coords 3 3.200000e+00 1.600000e+00 0.000000e+00
+node 205 coords 3 3.400000e+00 1.600000e+00 0.000000e+00
+node 206 coords 3 3.600000e+00 1.600000e+00 0.000000e+00
+node 207 coords 3 3.800000e+00 1.600000e+00 0.000000e+00
+node 208 coords 3 4.000000e+00 1.600000e+00 0.000000e+00
+node 209 coords 3 4.200000e+00 1.600000e+00 0.000000e+00
+node 210 coords 3 4.400000e+00 1.600000e+00 0.000000e+00
+node 211 coords 3 4.600000e+00 1.600000e+00 0.000000e+00
+node 212 coords 3 4.800000e+00 1.600000e+00 0.000000e+00
+node 213 coords 3 1.200000e+00 1.800000e+00 0.000000e+00
+node 214 coords 3 1.400000e+00 1.800000e+00 0.000000e+00
+node 215 coords 3 1.600000e+00 1.800000e+00 0.000000e+00
+node 216 coords 3 1.800000e+00 1.800000e+00 0.000000e+00
+node 217 coords 3 2.000000e+00 1.800000e+00 0.000000e+00
+node 218 coords 3 2.200000e+00 1.800000e+00 0.000000e+00
+node 219 coords 3 2.400000e+00 1.800000e+00 0.000000e+00
+node 220 coords 3 2.600000e+00 1.800000e+00 0.000000e+00
+node 221 coords 3 2.800000e+00 1.800000e+00 0.000000e+00
+node 222 coords 3 3.000000e+00 1.800000e+00 0.000000e+00
+node 223 coords 3 3.200000e+00 1.800000e+00 0.000000e+00
+node 224 coords 3 3.400000e+00 1.800000e+00 0.000000e+00
+node 225 coords 3 3.600000e+00 1.800000e+00 0.000000e+00
+node 226 coords 3 3.800000e+00 1.800000e+00 0.000000e+00
+node 227 coords 3 4.000000e+00 1.800000e+00 0.000000e+00
+node 228 coords 3 4.200000e+00 1.800000e+00 0.000000e+00
+node 229 coords 3 4.400000e+00 1.800000e+00 0.000000e+00
+node 230 coords 3 4.600000e+00 1.800000e+00 0.000000e+00
+node 231 coords 3 4.800000e+00 1.800000e+00 0.000000e+00
+tr1supgaxi 1 nodes 3 60 1 5 crossSect 1 mat 1
+tr1supgaxi 2 nodes 3 5 61 60 crossSect 1 mat 1
+tr1supgaxi 3 nodes 3 61 5 6 crossSect 1 mat 1
+tr1supgaxi 4 nodes 3 6 62 61 crossSect 1 mat 1
+tr1supgaxi 5 nodes 3 62 6 7 crossSect 1 mat 1
+tr1supgaxi 6 nodes 3 7 63 62 crossSect 1 mat 1
+tr1supgaxi 7 nodes 3 63 7 8 crossSect 1 mat 1
+tr1supgaxi 8 nodes 3 8 64 63 crossSect 1 mat 1
+tr1supgaxi 9 nodes 3 64 8 9 crossSect 1 mat 1
+tr1supgaxi 10 nodes 3 9 65 64 crossSect 1 mat 1
+tr1supgaxi 11 nodes 3 65 9 10 crossSect 1 mat 1
+tr1supgaxi 12 nodes 3 10 66 65 crossSect 1 mat 1
+tr1supgaxi 13 nodes 3 66 10 11 crossSect 1 mat 1
+tr1supgaxi 14 nodes 3 11 67 66 crossSect 1 mat 1
+tr1supgaxi 15 nodes 3 67 11 12 crossSect 1 mat 1
+tr1supgaxi 16 nodes 3 12 68 67 crossSect 1 mat 1
+tr1supgaxi 17 nodes 3 68 12 13 crossSect 1 mat 1
+tr1supgaxi 18 nodes 3 13 69 68 crossSect 1 mat 1
+tr1supgaxi 19 nodes 3 69 13 14 crossSect 1 mat 1
+tr1supgaxi 20 nodes 3 14 70 69 crossSect 1 mat 1
+tr1supgaxi 21 nodes 3 70 14 15 crossSect 1 mat 1
+tr1supgaxi 22 nodes 3 15 71 70 crossSect 1 mat 1
+tr1supgaxi 23 nodes 3 71 15 16 crossSect 1 mat 1
+tr1supgaxi 24 nodes 3 16 72 71 crossSect 1 mat 1
+tr1supgaxi 25 nodes 3 72 16 17 crossSect 1 mat 1
+tr1supgaxi 26 nodes 3 17 73 72 crossSect 1 mat 1
+tr1supgaxi 27 nodes 3 73 17 18 crossSect 1 mat 1
+tr1supgaxi 28 nodes 3 18 74 73 crossSect 1 mat 1
+tr1supgaxi 29 nodes 3 74 18 19 crossSect 1 mat 1
+tr1supgaxi 30 nodes 3 19 75 74 crossSect 1 mat 1
+tr1supgaxi 31 nodes 3 75 19 20 crossSect 1 mat 1
+tr1supgaxi 32 nodes 3 20 76 75 crossSect 1 mat 1
+tr1supgaxi 33 nodes 3 76 20 21 crossSect 1 mat 1
+tr1supgaxi 34 nodes 3 21 77 76 crossSect 1 mat 1
+tr1supgaxi 35 nodes 3 77 21 22 crossSect 1 mat 1
+tr1supgaxi 36 nodes 3 22 78 77 crossSect 1 mat 1
+tr1supgaxi 37 nodes 3 78 22 23 crossSect 1 mat 1
+tr1supgaxi 38 nodes 3 23 79 78 crossSect 1 mat 1
+tr1supgaxi 39 nodes 3 79 23 2 crossSect 1 mat 1
+tr1supgaxi 40 nodes 3 2 24 79 crossSect 1 mat 1
+tr1supgaxi 41 nodes 3 59 60 61 crossSect 1 mat 1
+tr1supgaxi 42 nodes 3 61 80 59 crossSect 1 mat 1
+tr1supgaxi 43 nodes 3 80 61 62 crossSect 1 mat 1
+tr1supgaxi 44 nodes 3 62 81 80 crossSect 1 mat 1
+tr1supgaxi 45 nodes 3 81 62 63 crossSect 1 mat 1
+tr1supgaxi 46 nodes 3 63 82 81 crossSect 1 mat 1
+tr1supgaxi 47 nodes 3 82 63 64 crossSect 1 mat 1
+tr1supgaxi 48 nodes 3 64 83 82 crossSect 1 mat 1
+tr1supgaxi 49 nodes 3 83 64 65 crossSect 1 mat 1
+tr1supgaxi 50 nodes 3 65 84 83 crossSect 1 mat 1
+tr1supgaxi 51 nodes 3 84 65 66 crossSect 1 mat 1
+tr1supgaxi 52 nodes 3 66 85 84 crossSect 1 mat 1
+tr1supgaxi 53 nodes 3 85 66 67 crossSect 1 mat 1
+tr1supgaxi 54 nodes 3 67 86 85 crossSect 1 mat 1
+tr1supgaxi 55 nodes 3 86 67 68 crossSect 1 mat 1
+tr1supgaxi 56 nodes 3 68 87 86 crossSect 1 mat 1
+tr1supgaxi 57 nodes 3 87 68 69 crossSect 1 mat 1
+tr1supgaxi 58 nodes 3 69 88 87 crossSect 1 mat 1
+tr1supgaxi 59 nodes 3 88 69 70 crossSect 1 mat 1
+tr1supgaxi 60 nodes 3 70 89 88 crossSect 1 mat 1
+tr1supgaxi 61 nodes 3 89 70 71 crossSect 1 mat 1
+tr1supgaxi 62 nodes 3 71 90 89 crossSect 1 mat 1
+tr1supgaxi 63 nodes 3 90 71 72 crossSect 1 mat 1
+tr1supgaxi 64 nodes 3 72 91 90 crossSect 1 mat 1
+tr1supgaxi 65 nodes 3 91 72 73 crossSect 1 mat 1
+tr1supgaxi 66 nodes 3 73 92 91 crossSect 1 mat 1
+tr1supgaxi 67 nodes 3 92 73 74 crossSect 1 mat 1
+tr1supgaxi 68 nodes 3 74 93 92 crossSect 1 mat 1
+tr1supgaxi 69 nodes 3 93 74 75 crossSect 1 mat 1
+tr1supgaxi 70 nodes 3 75 94 93 crossSect 1 mat 1
+tr1supgaxi 71 nodes 3 94 75 76 crossSect 1 mat 1
+tr1supgaxi 72 nodes 3 76 95 94 crossSect 1 mat 1
+tr1supgaxi 73 nodes 3 95 76 77 crossSect 1 mat 1
+tr1supgaxi 74 nodes 3 77 96 95 crossSect 1 mat 1
+tr1supgaxi 75 nodes 3 96 77 78 crossSect 1 mat 1
+tr1supgaxi 76 nodes 3 78 97 96 crossSect 1 mat 1
+tr1supgaxi 77 nodes 3 97 78 79 crossSect 1 mat 1
+tr1supgaxi 78 nodes 3 79 98 97 crossSect 1 mat 1
+tr1supgaxi 79 nodes 3 98 79 24 crossSect 1 mat 1
+tr1supgaxi 80 nodes 3 24 25 98 crossSect 1 mat 1
+tr1supgaxi 81 nodes 3 58 59 80 crossSect 1 mat 1
+tr1supgaxi 82 nodes 3 80 99 58 crossSect 1 mat 1
+tr1supgaxi 83 nodes 3 99 80 81 crossSect 1 mat 1
+tr1supgaxi 84 nodes 3 81 100 99 crossSect 1 mat 1
+tr1supgaxi 85 nodes 3 100 81 82 crossSect 1 mat 1
+tr1supgaxi 86 nodes 3 82 101 100 crossSect 1 mat 1
+tr1supgaxi 87 nodes 3 101 82 83 crossSect 1 mat 1
+tr1supgaxi 88 nodes 3 83 102 101 crossSect 1 mat 1
+tr1supgaxi 89 nodes 3 102 83 84 crossSect 1 mat 1
+tr1supgaxi 90 nodes 3 84 103 102 crossSect 1 mat 1
+tr1supgaxi 91 nodes 3 103 84 85 crossSect 1 mat 1
+tr1supgaxi 92 nodes 3 85 104 103 crossSect 1 mat 1
+tr1supgaxi 93 nodes 3 104 85 86 crossSect 1 mat 1
+tr1supgaxi 94 nodes 3 86 105 104 crossSect 1 mat 1
+tr1supgaxi 95 nodes 3 105 86 87 crossSect 1 mat 1
+tr1supgaxi 96 nodes 3 87 106 105 crossSect 1 mat 1
+tr1supgaxi 97 nodes 3 106 87 88 crossSect 1 mat 1
+tr1supgaxi 98 nodes 3 88 107 106 crossSect 1 mat 1
+tr1supgaxi 99 nodes 3 107 88 89 crossSect 1 mat 1
+tr1supgaxi 100 nodes 3 89 108 107 crossSect 1 mat 1
+tr1supgaxi 101 nodes 3 108 89 90 crossSect 1 mat 1
+tr1supgaxi 102 nodes 3 90 109 108 crossSect 1 mat 1
+tr1supgaxi 103 nodes 3 109 90 91 crossSect 1 mat 1
+tr1supgaxi 104 nodes 3 91 110 109 crossSect 1 mat 1
+tr1supgaxi 105 nodes 3 110 91 92 crossSect 1 mat 1
+tr1supgaxi 106 nodes 3 92 111 110 crossSect 1 mat 1
+tr1supgaxi 107 nodes 3 111 92 93 crossSect 1 mat 1
+tr1supgaxi 108 nodes 3 93 112 111 crossSect 1 mat 1
+tr1supgaxi 109 nodes 3 112 93 94 crossSect 1 mat 1
+tr1supgaxi 110 nodes 3 94 113 112 crossSect 1 mat 1
+tr1supgaxi 111 nodes 3 113 94 95 crossSect 1 mat 1
+tr1supgaxi 112 nodes 3 95 114 113 crossSect 1 mat 1
+tr1supgaxi 113 nodes 3 114 95 96 crossSect 1 mat 1
+tr1supgaxi 114 nodes 3 96 115 114 crossSect 1 mat 1
+tr1supgaxi 115 nodes 3 115 96 97 crossSect 1 mat 1
+tr1supgaxi 116 nodes 3 97 116 115 crossSect 1 mat 1
+tr1supgaxi 117 nodes 3 116 97 98 crossSect 1 mat 1
+tr1supgaxi 118 nodes 3 98 117 116 crossSect 1 mat 1
+tr1supgaxi 119 nodes 3 117 98 25 crossSect 1 mat 1
+tr1supgaxi 120 nodes 3 25 26 117 crossSect 1 mat 1
+tr1supgaxi 121 nodes 3 57 58 99 crossSect 1 mat 1
+tr1supgaxi 122 nodes 3 99 118 57 crossSect 1 mat 1
+tr1supgaxi 123 nodes 3 118 99 100 crossSect 1 mat 1
+tr1supgaxi 124 nodes 3 100 119 118 crossSect 1 mat 1
+tr1supgaxi 125 nodes 3 119 100 101 crossSect 1 mat 1
+tr1supgaxi 126 nodes 3 101 120 119 crossSect 1 mat 1
+tr1supgaxi 127 nodes 3 120 101 102 crossSect 1 mat 1
+tr1supgaxi 128 nodes 3 102 121 120 crossSect 1 mat 1
+tr1supgaxi 129 nodes 3 121 102 103 crossSect 1 mat 1
+tr1supgaxi 130 nodes 3 103 122 121 crossSect 1 mat 1
+tr1supgaxi 131 nodes 3 122 103 104 crossSect 1 mat 1
+tr1supgaxi 132 nodes 3 104 123 122 crossSect 1 mat 1
+tr1supgaxi 133 nodes 3 123 104 105 crossSect 1 mat 1
+tr1supgaxi 134 nodes 3 105 124 123 crossSect 1 mat 1
+tr1supgaxi 135 nodes 3 124 105 106 crossSect 1 mat 1
+tr1supgaxi 136 nodes 3 106 125 124 crossSect 1 mat 1
+tr1supgaxi 137 nodes 3 125 106 107 crossSect 1 mat 1
+tr1supgaxi 138 nodes 3 107 126 125 crossSect 1 mat 1
+tr1supgaxi 139 nodes 3 126 107 108 crossSect 1 mat 1
+tr1supgaxi 140 nodes 3 108 127 126 crossSect 1 mat 1
+tr1supgaxi 141 nodes 3 127 108 109 crossSect 1 mat 1
+tr1supgaxi 142 nodes 3 109 128 127 crossSect 1 mat 1
+tr1supgaxi 143 nodes 3 128 109 110 crossSect 1 mat 1
+tr1supgaxi 144 nodes 3 110 129 128 crossSect 1 mat 1
+tr1supgaxi 145 nodes 3 129 110 111 crossSect 1 mat 1
+tr1supgaxi 146 nodes 3 111 130 129 crossSect 1 mat 1
+tr1supgaxi 147 nodes 3 130 111 112 crossSect 1 mat 1
+tr1supgaxi 148 nodes 3 112 131 130 crossSect 1 mat 1
+tr1supgaxi 149 nodes 3 131 112 113 crossSect 1 mat 1
+tr1supgaxi 150 nodes 3 113 132 131 crossSect 1 mat 1
+tr1supgaxi 151 nodes 3 132 113 114 crossSect 1 mat 1
+tr1supgaxi 152 nodes 3 114 133 132 crossSect 1 mat 1
+tr1supgaxi 153 nodes 3 133 114 115 crossSect 1 mat 1
+tr1supgaxi 154 nodes 3 115 134 133 crossSect 1 mat 1
+tr1supgaxi 155 nodes 3 134 115 116 crossSect 1 mat 1
+tr1supgaxi 156 nodes 3 116 135 134 crossSect 1 mat 1
+tr1supgaxi 157 nodes 3 135 116 117 crossSect 1 mat 1
+tr1supgaxi 158 nodes 3 117 136 135 crossSect 1 mat 1
+tr1supgaxi 159 nodes 3 136 117 26 crossSect 1 mat 1
+tr1supgaxi 160 nodes 3 26 27 136 crossSect 1 mat 1
+tr1supgaxi 161 nodes 3 56 57 118 crossSect 1 mat 1
+tr1supgaxi 162 nodes 3 118 137 56 crossSect 1 mat 1
+tr1supgaxi 163 nodes 3 137 118 119 crossSect 1 mat 1
+tr1supgaxi 164 nodes 3 119 138 137 crossSect 1 mat 1
+tr1supgaxi 165 nodes 3 138 119 120 crossSect 1 mat 1
+tr1supgaxi 166 nodes 3 120 139 138 crossSect 1 mat 1
+tr1supgaxi 167 nodes 3 139 120 121 crossSect 1 mat 1
+tr1supgaxi 168 nodes 3 121 140 139 crossSect 1 mat 1
+tr1supgaxi 169 nodes 3 140 121 122 crossSect 1 mat 1
+tr1supgaxi 170 nodes 3 122 141 140 crossSect 1 mat 1
+tr1supgaxi 171 nodes 3 141 122 123 crossSect 1 mat 1
+tr1supgaxi 172 nodes 3 123 142 141 crossSect 1 mat 1
+tr1supgaxi 173 nodes 3 142 123 124 crossSect 1 mat 1
+tr1supgaxi 174 nodes 3 124 143 142 crossSect 1 mat 1
+tr1supgaxi 175 nodes 3 143 124 125 crossSect 1 mat 1
+tr1supgaxi 176 nodes 3 125 144 143 crossSect 1 mat 1
+tr1supgaxi 177 nodes 3 144 125 126 crossSect 1 mat 1
+tr1supgaxi 178 nodes 3 126 145 144 crossSect 1 mat 1
+tr1supgaxi 179 nodes 3 145 126 127 crossSect 1 mat 1
+tr1supgaxi 180 nodes 3 127 146 145 crossSect 1 mat 1
+tr1supgaxi 181 nodes 3 146 127 128 crossSect 1 mat 1
+tr1supgaxi 182 nodes 3 128 147 146 crossSect 1 mat 1
+tr1supgaxi 183 nodes 3 147 128 129 crossSect 1 mat 1
+tr1supgaxi 184 nodes 3 129 148 147 crossSect 1 mat 1
+tr1supgaxi 185 nodes 3 148 129 130 crossSect 1 mat 1
+tr1supgaxi 186 nodes 3 130 149 148 crossSect 1 mat 1
+tr1supgaxi 187 nodes 3 149 130 131 crossSect 1 mat 1
+tr1supgaxi 188 nodes 3 131 150 149 crossSect 1 mat 1
+tr1supgaxi 189 nodes 3 150 131 132 crossSect 1 mat 1
+tr1supgaxi 190 nodes 3 132 151 150 crossSect 1 mat 1
+tr1supgaxi 191 nodes 3 151 132 133 crossSect 1 mat 1
+tr1supgaxi 192 nodes 3 133 152 151 crossSect 1 mat 1
+tr1supgaxi 193 nodes 3 152 133 134 crossSect 1 mat 1
+tr1supgaxi 194 nodes 3 134 153 152 crossSect 1 mat 1
+tr1supgaxi 195 nodes 3 153 134 135 crossSect 1 mat 1
+tr1supgaxi 196 nodes 3 135 154 153 crossSect 1 mat 1
+tr1supgaxi 197 nodes 3 154 135 136 crossSect 1 mat 1
+tr1supgaxi 198 nodes 3 136 155 154 crossSect 1 mat 1
+tr1supgaxi 199 nodes 3 155 136 27 crossSect 1 mat 1
+tr1supgaxi 200 nodes 3 27 28 155 crossSect 1 mat 1
+tr1supgaxi 201 nodes 3 55 56 137 crossSect 1 mat 1
+tr1supgaxi 202 nodes 3 137 156 55 crossSect 1 mat 1
+tr1supgaxi 203 nodes 3 156 137 138 crossSect 1 mat 1
+tr1supgaxi 204 nodes 3 138 157 156 crossSect 1 mat 1
+tr1supgaxi 205 nodes 3 157 138 139 crossSect 1 mat 1
+tr1supgaxi 206 nodes 3 139 158 157 crossSect 1 mat 1
+tr1supgaxi 207 nodes 3 158 139 140 crossSect 1 mat 1
+tr1supgaxi 208 nodes 3 140 159 158 crossSect 1 mat 1
+tr1supgaxi 209 nodes 3 159 140 141 crossSect 1 mat 1
+tr1supgaxi 210 nodes 3 141 160 159 crossSect 1 mat 1
+tr1supgaxi 211 nodes 3 160 141 142 crossSect 1 mat 1
+tr1supgaxi 212 nodes 3 142 161 160 crossSect 1 mat 1
+tr1supgaxi 213 nodes 3 161 142 143 crossSect 1 mat 1
+tr1supgaxi 214 nodes 3 143 162 161 crossSect 1 mat 1
+tr1supgaxi 215 nodes 3 162 143 144 crossSect 1 mat 1
+tr1supgaxi 216 nodes 3 144 163 162 crossSect 1 mat 1
+tr1supgaxi 217 nodes 3 163 144 145 crossSect 1 mat 1
+tr1supgaxi 218 nodes 3 145 164 163 crossSect 1 mat 1
+tr1supgaxi 219 nodes 3 164 145 146 crossSect 1 mat 1
+tr1supgaxi 220 nodes 3 146 165 164 crossSect 1 mat 1
+tr1supgaxi 221 nodes 3 165 146 147 crossSect 1 mat 1
+tr1supgaxi 222 nodes 3 147 166 165 crossSect 1 mat 1
+tr1supgaxi 223 nodes 3 166 147 148 crossSect 1 mat 1
+tr1supgaxi 224 nodes 3 148 167 166 crossSect 1 mat 1
+tr1supgaxi 225 nodes 3 167 148 149 crossSect 1 mat 1
+tr1supgaxi 226 nodes 3 149 168 167 crossSect 1 mat 1
+tr1supgaxi 227 nodes 3 168 149 150 crossSect 1 mat 1
+tr1supgaxi 228 nodes 3 150 169 168 crossSect 1 mat 1
+tr1supgaxi 229 nodes 3 169 150 151 crossSect 1 mat 1
+tr1supgaxi 230 nodes 3 151 170 169 crossSect 1 mat 1
+tr1supgaxi 231 nodes 3 170 151 152 crossSect 1 mat 1
+tr1supgaxi 232 nodes 3 152 171 170 crossSect 1 mat 1
+tr1supgaxi 233 nodes 3 171 152 153 crossSect 1 mat 1
+tr1supgaxi 234 nodes 3 153 172 171 crossSect 1 mat 1
+tr1supgaxi 235 nodes 3 172 153 154 crossSect 1 mat 1
+tr1supgaxi 236 nodes 3 154 173 172 crossSect 1 mat 1
+tr1supgaxi 237 nodes 3 173 154 155 crossSect 1 mat 1
+tr1supgaxi 238 nodes 3 155 174 173 crossSect 1 mat 1
+tr1supgaxi 239 nodes 3 174 155 28 crossSect 1 mat 1
+tr1supgaxi 240 nodes 3 28 29 174 crossSect 1 mat 1
+tr1supgaxi 241 nodes 3 54 55 156 crossSect 1 mat 1
+tr1supgaxi 242 nodes 3 156 175 54 crossSect 1 mat 1
+tr1supgaxi 243 nodes 3 175 156 157 crossSect 1 mat 1
+tr1supgaxi 244 nodes 3 157 176 175 crossSect 1 mat 1
+tr1supgaxi 245 nodes 3 176 157 158 crossSect 1 mat 1
+tr1supgaxi 246 nodes 3 158 177 176 crossSect 1 mat 1
+tr1supgaxi 247 nodes 3 177 158 159 crossSect 1 mat 1
+tr1supgaxi 248 nodes 3 159 178 177 crossSect 1 mat 1
+tr1supgaxi 249 nodes 3 178 159 160 crossSect 1 mat 1
+tr1supgaxi 250 nodes 3 160 179 178 crossSect 1 mat 1
+tr1supgaxi 251 nodes 3 179 160 161 crossSect 1 mat 1
+tr1supgaxi 252 nodes 3 161 180 179 crossSect 1 mat 1
+tr1supgaxi 253 nodes 3 180 161 162 crossSect 1 mat 1
+tr1supgaxi 254 nodes 3 162 181 180 crossSect 1 mat 1
+tr1supgaxi 255 nodes 3 181 162 163 crossSect 1 mat 1
+tr1supgaxi 256 nodes 3 163 182 181 crossSect 1 mat 1
+tr1supgaxi 257 nodes 3 182 163 164 crossSect 1 mat 1
+tr1supgaxi 258 nodes 3 164 183 182 crossSect 1 mat 1
+tr1supgaxi 259 nodes 3 183 164 165 crossSect 1 mat 1
+tr1supgaxi 260 nodes 3 165 184 183 crossSect 1 mat 1
+tr1supgaxi 261 nodes 3 184 165 166 crossSect 1 mat 1
+tr1supgaxi 262 nodes 3 166 185 184 crossSect 1 mat 1
+tr1supgaxi 263 nodes 3 185 166 167 crossSect 1 mat 1
+tr1supgaxi 264 nodes 3 167 186 185 crossSect 1 mat 1
+tr1supgaxi 265 nodes 3 186 167 168 crossSect 1 mat 1
+tr1supgaxi 266 nodes 3 168 187 186 crossSect 1 mat 1
+tr1supgaxi 267 nodes 3 187 168 169 crossSect 1 mat 1
+tr1supgaxi 268 nodes 3 169 188 187 crossSect 1 mat 1
+tr1supgaxi 269 nodes 3 188 169 170 crossSect 1 mat 1
+tr1supgaxi 270 nodes 3 170 189 188 crossSect 1 mat 1
+tr1supgaxi 271 nodes 3 189 170 171 crossSect 1 mat 1
+tr1supgaxi 272 nodes 3 171 190 189 crossSect 1 mat 1
+tr1supgaxi 273 nodes 3 190 171 172 crossSect 1 mat 1
+tr1supgaxi 274 nodes 3 172 191 190 crossSect 1 mat 1
+tr1supgaxi 275 nodes 3 191 172 173 crossSect 1 mat 1
+tr1supgaxi 276 nodes 3 173 192 191 crossSect 1 mat 1
+tr1supgaxi 277 nodes 3 192 173 174 crossSect 1 mat 1
+tr1supgaxi 278 nodes 3 174 193 192 crossSect 1 mat 1
+tr1supgaxi 279 nodes 3 193 174 29 crossSect 1 mat 1
+tr1supgaxi 280 nodes 3 29 30 193 crossSect 1 mat 1
+tr1supgaxi 281 nodes 3 53 54 175 crossSect 1 mat 1
+tr1supgaxi 282 nodes 3 175 194 53 crossSect 1 mat 1
+tr1supgaxi 283 nodes 3 194 175 176 crossSect 1 mat 1
+tr1supgaxi 284 nodes 3 176 195 194 crossSect 1 mat 1
+tr1supgaxi 285 nodes 3 195 176 177 crossSect 1 mat 1
+tr1supgaxi 286 nodes 3 177 196 195 crossSect 1 mat 1
+tr1supgaxi 287 nodes 3 196 177 178 crossSect 1 mat 1
+tr1supgaxi 288 nodes 3 178 197 196 crossSect 1 mat 1
+tr1supgaxi 289 nodes 3 197 178 179 crossSect 1 mat 1
+tr1supgaxi 290 nodes 3 179 198 197 crossSect 1 mat 1
+tr1supgaxi 291 nodes 3 198 179 180 crossSect 1 mat 1
+tr1supgaxi 292 nodes 3 180 199 198 crossSect 1 mat 1
+tr1supgaxi 293 nodes 3 199 180 181 crossSect 1 mat 1
+tr1supgaxi 294 nodes 3 181 200 199 crossSect 1 mat 1
+tr1supgaxi 295 nodes 3 200 181 182 crossSect 1 mat 1
+tr1supgaxi 296 nodes 3 182 201 200 crossSect 1 mat 1
+tr1supgaxi 297 nodes 3 201 182 183 crossSect 1 mat 1
+tr1supgaxi 298 nodes 3 183 202 201 crossSect 1 mat 1
+tr1supgaxi 299 nodes 3 202 183 184 crossSect 1 mat 1
+tr1supgaxi 300 nodes 3 184 203 202 crossSect 1 mat 1
+tr1supgaxi 301 nodes 3 203 184 185 crossSect 1 mat 1
+tr1supgaxi 302 nodes 3 185 204 203 crossSect 1 mat 1
+tr1supgaxi 303 nodes 3 204 185 186 crossSect 1 mat 1
+tr1supgaxi 304 nodes 3 186 205 204 crossSect 1 mat 1
+tr1supgaxi 305 nodes 3 205 186 187 crossSect 1 mat 1
+tr1supgaxi 306 nodes 3 187 206 205 crossSect 1 mat 1
+tr1supgaxi 307 nodes 3 206 187 188 crossSect 1 mat 1
+tr1supgaxi 308 nodes 3 188 207 206 crossSect 1 mat 1
+tr1supgaxi 309 nodes 3 207 188 189 crossSect 1 mat 1
+tr1supgaxi 310 nodes 3 189 208 207 crossSect 1 mat 1
+tr1supgaxi 311 nodes 3 208 189 190 crossSect 1 mat 1
+tr1supgaxi 312 nodes 3 190 209 208 crossSect 1 mat 1
+tr1supgaxi 313 nodes 3 209 190 191 crossSect 1 mat 1
+tr1supgaxi 314 nodes 3 191 210 209 crossSect 1 mat 1
+tr1supgaxi 315 nodes 3 210 191 192 crossSect 1 mat 1
+tr1supgaxi 316 nodes 3 192 211 210 crossSect 1 mat 1
+tr1supgaxi 317 nodes 3 211 192 193 crossSect 1 mat 1
+tr1supgaxi 318 nodes 3 193 212 211 crossSect 1 mat 1
+tr1supgaxi 319 nodes 3 212 193 30 crossSect 1 mat 1
+tr1supgaxi 320 nodes 3 30 31 212 crossSect 1 mat 1
+tr1supgaxi 321 nodes 3 52 53 194 crossSect 1 mat 1
+tr1supgaxi 322 nodes 3 194 213 52 crossSect 1 mat 1
+tr1supgaxi 323 nodes 3 213 194 195 crossSect 1 mat 1
+tr1supgaxi 324 nodes 3 195 214 213 crossSect 1 mat 1
+tr1supgaxi 325 nodes 3 214 195 196 crossSect 1 mat 1
+tr1supgaxi 326 nodes 3 196 215 214 crossSect 1 mat 1
+tr1supgaxi 327 nodes 3 215 196 197 crossSect 1 mat 1
+tr1supgaxi 328 nodes 3 197 216 215 crossSect 1 mat 1
+tr1supgaxi 329 nodes 3 216 197 198 crossSect 1 mat 1
+tr1supgaxi 330 nodes 3 198 217 216 crossSect 1 mat 1
+tr1supgaxi 331 nodes 3 217 198 199 crossSect 1 mat 1
+tr1supgaxi 332 nodes 3 199 218 217 crossSect 1 mat 1
+tr1supgaxi 333 nodes 3 218 199 200 crossSect 1 mat 1
+tr1supgaxi 334 nodes 3 200 219 218 crossSect 1 mat 1
+tr1supgaxi 335 nodes 3 219 200 201 crossSect 1 mat 1
+tr1supgaxi 336 nodes 3 201 220 219 crossSect 1 mat 1
+tr1supgaxi 337 nodes 3 220 201 202 crossSect 1 mat 1
+tr1supgaxi 338 nodes 3 202 221 220 crossSect 1 mat 1
+tr1supgaxi 339 nodes 3 221 202 203 crossSect 1 mat 1
+tr1supgaxi 340 nodes 3 203 222 221 crossSect 1 mat 1
+tr1supgaxi 341 nodes 3 222 203 204 crossSect 1 mat 1
+tr1supgaxi 342 nodes 3 204 223 222 crossSect 1 mat 1
+tr1supgaxi 343 nodes 3 223 204 205 crossSect 1 mat 1
+tr1supgaxi 344 nodes 3 205 224 223 crossSect 1 mat 1
+tr1supgaxi 345 nodes 3 224 205 206 crossSect 1 mat 1
+tr1supgaxi 346 nodes 3 206 225 224 crossSect 1 mat 1
+tr1supgaxi 347 nodes 3 225 206 207 crossSect 1 mat 1
+tr1supgaxi 348 nodes 3 207 226 225 crossSect 1 mat 1
+tr1supgaxi 349 nodes 3 226 207 208 crossSect 1 mat 1
+tr1supgaxi 350 nodes 3 208 227 226 crossSect 1 mat 1
+tr1supgaxi 351 nodes 3 227 208 209 crossSect 1 mat 1
+tr1supgaxi 352 nodes 3 209 228 227 crossSect 1 mat 1
+tr1supgaxi 353 nodes 3 228 209 210 crossSect 1 mat 1
+tr1supgaxi 354 nodes 3 210 229 228 crossSect 1 mat 1
+tr1supgaxi 355 nodes 3 229 210 211 crossSect 1 mat 1
+tr1supgaxi 356 nodes 3 211 230 229 crossSect 1 mat 1
+tr1supgaxi 357 nodes 3 230 211 212 crossSect 1 mat 1
+tr1supgaxi 358 nodes 3 212 231 230 crossSect 1 mat 1
+tr1supgaxi 359 nodes 3 231 212 31 crossSect 1 mat 1
+tr1supgaxi 360 nodes 3 31 32 231 crossSect 1 mat 1
+tr1supgaxi 361 nodes 3 4 52 213 crossSect 1 mat 1
+tr1supgaxi 362 nodes 3 213 51 4 crossSect 1 mat 1
+tr1supgaxi 363 nodes 3 51 213 214 crossSect 1 mat 1
+tr1supgaxi 364 nodes 3 214 50 51 crossSect 1 mat 1
+tr1supgaxi 365 nodes 3 50 214 215 crossSect 1 mat 1
+tr1supgaxi 366 nodes 3 215 49 50 crossSect 1 mat 1
+tr1supgaxi 367 nodes 3 49 215 216 crossSect 1 mat 1
+tr1supgaxi 368 nodes 3 216 48 49 crossSect 1 mat 1
+tr1supgaxi 369 nodes 3 48 216 217 crossSect 1 mat 1
+tr1supgaxi 370 nodes 3 217 47 48 crossSect 1 mat 1
+tr1supgaxi 371 nodes 3 47 217 218 crossSect 1 mat 1
+tr1supgaxi 372 nodes 3 218 46 47 crossSect 1 mat 1
+tr1supgaxi 373 nodes 3 46 218 219 crossSect 1 mat 1
+tr1supgaxi 374 nodes 3 219 45 46 crossSect 1 mat 1
+tr1supgaxi 375 nodes 3 45 219 220 crossSect 1 mat 1
+tr1supgaxi 376 nodes 3 220 44 45 crossSect 1 mat 1
+tr1supgaxi 377 nodes 3 44 220 221 crossSect 1 mat 1
+tr1supgaxi 378 nodes 3 221 43 44 crossSect 1 mat 1
+tr1supgaxi 379 nodes 3 43 221 222 crossSect 1 mat 1
+tr1supgaxi 380 nodes 3 222 42 43 crossSect 1 mat 1
+tr1supgaxi 381 nodes 3 42 222 223 crossSect 1 mat 1
+tr1supgaxi 382 nodes 3 223 41 42 crossSect 1 mat 1
+tr1supgaxi 383 nodes 3 41 223 224 crossSect 1 mat 1
+tr1supgaxi 384 nodes 3 224 40 41 crossSect 1 mat 1
+tr1supgaxi 385 nodes 3 40 224 225 crossSect 1 mat 1
+tr1supgaxi 386 nodes 3 225 39 40 crossSect 1 mat 1
+tr1supgaxi 387 nodes 3 39 225 226 crossSect 1 mat 1
+tr1supgaxi 388 nodes 3 226 38 39 crossSect 1 mat 1
+tr1supgaxi 389 nodes 3 38 226 227 crossSect 1 mat 1
+tr1supgaxi 390 nodes 3 227 37 38 crossSect 1 mat 1
+tr1supgaxi 391 nodes 3 37 227 228 crossSect 1 mat 1
+tr1supgaxi 392 nodes 3 228 36 37 crossSect 1 mat 1
+tr1supgaxi 393 nodes 3 36 228 229 crossSect 1 mat 1
+tr1supgaxi 394 nodes 3 229 35 36 crossSect 1 mat 1
+tr1supgaxi 395 nodes 3 35 229 230 crossSect 1 mat 1
+tr1supgaxi 396 nodes 3 230 34 35 crossSect 1 mat 1
+tr1supgaxi 397 nodes 3 34 230 231 crossSect 1 mat 1
+tr1supgaxi 398 nodes 3 231 33 34 crossSect 1 mat 1
+tr1supgaxi 399 nodes 3 33 231 32 crossSect 1 mat 1
+tr1supgaxi 400 nodes 3 32 3 33 crossSect 1 mat 1
+emptycs 1
+newtonianfluid 1 d 1.0 mu 1.0
+#prescribed inlet velocity v = 1m/s
+BoundaryCondition 1 loadTimeFunction 1 prescribedvalue 1.0
+#zero velocity (wall) condition
+BoundaryCondition 2 loadTimeFunction 1 prescribedvalue 0.0
+#pressure 
+BoundaryCondition 3 loadTimeFunction 1 prescribedvalue 0.0
+ConstantFunction 1 f(t) 1.0
+
+#%BEGIN_CHECK% tolerance 1.e-1
+#NODE tStep 1.e3 number 2 dof 1 unknown v value  0.2
+#NODE tStep 1.e3 number 3 dof 1 unknown v value  0.2
+#NODE tStep 1.e3 number 24 dof 1 unknown v value 0.2
+#NODE tStep 1.e3 number 25 dof 1 unknown v value 0.2
+#NODE tStep 1.e3 number 26 dof 1 unknown v value 0.2
+#NODE tStep 1.e3 number 27 dof 1 unknown v value 0.2
+#NODE tStep 1.e3 number 28 dof 1 unknown v value 0.2
+#NODE tStep 1.e3 number 29 dof 1 unknown v value 0.2
+#NODE tStep 1.e3 number 30 dof 1 unknown v value 0.2
+#NODE tStep 1.e3 number 31 dof 1 unknown v value 0.2
+#NODE tStep 1.e3 number 32 dof 1 unknown v value 0.2
+#NODE tStep 1.e3 number 24 dof 2 unknown v value 0.0
+#NODE tStep 1.e3 number 25 dof 2 unknown v value 0.0
+#NODE tStep 1.e3 number 26 dof 2 unknown v value 0.0
+#NODE tStep 1.e3 number 27 dof 2 unknown v value 0.0
+#NODE tStep 1.e3 number 28 dof 2 unknown v value 0.0
+#NODE tStep 1.e3 number 29 dof 2 unknown v value 0.0
+#NODE tStep 1.e3 number 30 dof 2 unknown v value 0.0
+#NODE tStep 1.e3 number 31 dof 2 unknown v value 0.0
+#NODE tStep 1.e3 number 32 dof 2 unknown v value 0.0
+#%END_CHECK%

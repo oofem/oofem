@@ -1,0 +1,44 @@
+test52.out
+Test of nodal coordinate system
+#only momentum influence to the displacements is taken into account
+#beamShearCoeff is artificially enlarged.
+LinearStatic nsteps 1
+domain 3dShell
+OutputManager tstep_all dofman_all element_all
+ndofman 4 nelem 3 ncrosssect  1 nmat 1 nbc 2 nic 0 nltf 1
+node 1 coords 3 0.  3.0 0. bc 6 1 1 1 1 1 0
+node 2 coords 3 0.0 0.  0. bc 6 0 0 0 0 0 0
+node 3 coords 3 2.0 0.  0. bc 6 0 0 0 0 0 0 load 1 2
+node 4 coords 3 4.0 0.  0. bc 6 0 1 1 1 1 0 lcs 6 0.866025 -0.5 0.0 0.5 0.866025 0.0  
+Beam3d 1 nodes 2 1 2 mat 1 crossSect 1 refNode 4
+Beam3d 2 nodes 2 2 3 mat 1 crossSect 1 refNode 1
+Beam3d 3 nodes 2 3 4 mat 1 crossSect 1 refNode 1 
+SimpleCS 1 area 0.1575 Iy 0.002657812 Iz 0.001607812 Ik 0.003606447115384616 beamShearCoeff 1.e30 thick 0.43 width 0.35 
+IsoLE 1 d 1. E 25.e6 n 0.2 tAlpha 1.2e-5
+BoundaryCondition  1 loadTimeFunction 1 prescribedvalue 0.0 	
+NodalLoad          2 loadTimeFunction 1 Components 6 0.0 10.0 0.0 0. 0. 0.
+ConstantFunction 1 f(t) 1.
+#
+# exact solution
+#
+#%BEGIN_CHECK% tolerance 1.e-8
+## check reactions 
+#REACTION tStep 1 comNumber 1 dof 1 value 2.0145e+00
+#REACTION tStep 1 comNumber 1 dof 2 value -6.5108e+00
+#REACTION tStep 1 comNumber 4 dof 2 value -4.0289e+00
+##
+## check all nodes
+## check element no. 3 force vector
+#BEAM_ELEMENT tStep 1 number 3  record 1 component 1  value 2.0145e+00
+#BEAM_ELEMENT tStep 1 number 3  record 1 component 2  value 3.4892e+00
+#BEAM_ELEMENT tStep 1 number 3  record 1 component 3  value 0.0
+#BEAM_ELEMENT tStep 1 number 3  record 1 component 4  value 0.0
+#BEAM_ELEMENT tStep 1 number 3  record 1 component 5  value 0.0
+#BEAM_ELEMENT tStep 1 number 3  record 1 component 6  value  6.9783e+00
+#BEAM_ELEMENT tStep 1 number 3  record 1 component 7  value -2.0145e+00
+#BEAM_ELEMENT tStep 1 number 3  record 1 component 8  value -3.4892e+00
+#BEAM_ELEMENT tStep 1 number 3  record 1 component 9  value 0.0
+#BEAM_ELEMENT tStep 1 number 3  record 1 component 10 value 0.0
+#BEAM_ELEMENT tStep 1 number 3  record 1 component 11 value 0.0
+#BEAM_ELEMENT tStep 1 number 3  record 1 component 12 value 0.0
+#%END_CHECK%

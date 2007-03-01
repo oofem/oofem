@@ -1,0 +1,35 @@
+crtest10.out
+Test of 1D creep behaviour using Truss2d elements and B3 material model
+#
+#
+IncrLinearStatic endOfTimeOfInterest 1000.0  prescribedTimes 55 0.10 0.1373 0.1887 0.2592 0.3562 0.4893 0.6723 0.9236 1.2689 1.7433 2.3950 3.2903 4.5203 6.2101 8.5316 11.7210 16.1026 22.1221 30.3919 41.7531 57.3615 78.8046 108.2636 148.7352 204.3359 280.7216 400.0 400.1 400.1373 400.1887 400.2592 400.3562 400.4893 400.6723 400.9236 401.2689 401.7433 402.3950 403.2903 404.5203 406.2101 408.5316 411.7210 416.1026 422.1221 430.3919 441.7531 457.3615 478.8046 508.2636 548.7352 604.3359 880.7216 929.8316  1000.
+domain 2dTruss
+OutputManager tstep_all dofman_all element_all
+ndofman 3 nelem 2 ncrosssect  1 nmat 1 nbc 3 nic 0 nltf 2
+node 1 coords 3 0.  0.  0.  bc 2 1 1
+node 2 coords 3 0.  0.  1.  bc 2 1 0
+node 3 coords 3 0.  0.  2.0 bc 2 1 0 load 2 2 3
+Truss2d 1 nodes 2 1 2 crossSect 1 mat 1 
+Truss2d 2 nodes 2 2 3 crossSect 1 mat 1 
+SimpleCS 1 thick 1.0 width 1.0
+#CebFip78 1 d 0. E28 36.e3 relMatAge 3. n 0.2 nChainUnits 4 fibf 3.8 kap_a 3.0 kap_c 1.0 kap_tt 0.633 u 3.0
+#DoublePowerLaw 1 relMatAge 30. E28 45625.868 fi1 3.538 m 0.305 n 0.166 alpha 0.081
+B3Mat 1 relMatAge 28. fc 27.58 cc 219.45 w/c 0.60 a/c 7.0 t0 28 shmode 0 d 0.0 n 0.18 timefactor 1.0 talpha 1.2e-5
+BoundaryCondition  1 loadTimeFunction 1 prescribedvalue  0.0
+NodalLoad 2 loadTimeFunction 1 Components 2 0.0  0.1
+NodalLoad 3 loadTimeFunction 2 Components 2 0.0 -0.1
+ConstantFunction 1 f(t) 1.0
+HeavisideLTF 2 origin 400. value 1.0
+#
+#
+#%BEGIN_CHECK% tolerance 1.e-12
+## check nodal values at the end of time interest
+#NODE tStep 1000. number 2 dof 2 unknown d value 3.21122451e-06
+#NODE tStep 1000. number 3 dof 2 unknown d value 6.42244903e-06
+## check element no. 1 strain vector
+#ELEMENT tStep 1000.  number 1 gp 1 record 0 component 1  value 3.2112e-06
+#ELEMENT tStep 1000.  number 1 gp 1 record 1 component 1  value 5.2592e-18 
+#ELEMENT tStep 1000.  number 2 gp 1 record 0 component 1  value 3.2112e-06
+#ELEMENT tStep 1000.  number 2 gp 1 record 1 component 1  value 5.2592e-18 
+#%END_CHECK%
+#

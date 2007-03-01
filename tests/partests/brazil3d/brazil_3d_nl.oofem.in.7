@@ -1,0 +1,2713 @@
+brazil_3d_nl.oofem.out.7
+3D brazilian splitting test
+#
+# lstype (if metasteps are used, must be specified for each metastep)
+#====================================================================
+# direct solver 0 (default)
+# CG solver     1
+# GMRES solver  2
+#
+# smtype (must be in analysis record)
+#====================================
+# symmetric skyline             0 (default)
+# symmetric compressed columns  4 (only with CG or GMRES)
+# dynamic compressed columns    2 (only with CG or GMRES)
+#
+# solverParams (if metasteps are used, must be specified for each metastep)
+#==========================================================================
+# lstol (should be at least by two orders of magnitude less than rtolv)
+# lsiter (large enough)
+# lsprecond 
+#----------
+# incomplete cholesky    3 (only for smtype 4)
+# incomplete LU          2 (only for smtype 2)       droptol (default 1.0e-9) partfill (default 5)
+#
+linearstatic nsteps 1 lstype 4 smtype 7
+domain 3d
+OutputManager tstep_all dofman_all element_all
+ndofman 550 nelem 2123 ncrosssect 2 nmat 2 nbc 2 nltf 1 nic 0
+node 1 coords 3 4.000000e+01 8.000000e+01 0.000000e+00 globNum 10 bc 3 0 0 1
+node 2 coords 3 2.979714e+01 8.000000e+01 0.000000e+00 globNum 49 Shared partitions 1 6 bc 3 0 0 1
+node 3 coords 3 3.884674e+01 8.000000e+01 9.535769e+00 globNum 50
+node 4 coords 3 3.552862e+01 8.000000e+01 1.837708e+01 globNum 51
+node 5 coords 3 3.042121e+01 8.000000e+01 2.597210e+01 globNum 52
+node 6 coords 3 2.406710e+01 8.000000e+01 3.194957e+01 globNum 53 Shared partitions 1 5
+node 7 coords 3 0.000000e+00 4.000000e+01 0.000000e+00 globNum 88 Shared partitions 1 0 bc 3 1 0 1
+node 8 coords 3 0.000000e+00 4.250000e+01 0.000000e+00 globNum 89 bc 3 1 0 1
+node 9 coords 3 0.000000e+00 4.500000e+01 0.000000e+00 globNum 90 bc 3 1 0 1
+node 10 coords 3 0.000000e+00 4.750000e+01 0.000000e+00 globNum 91 bc 3 1 0 1
+node 11 coords 3 0.000000e+00 5.000000e+01 0.000000e+00 globNum 92 bc 3 1 0 1
+node 12 coords 3 0.000000e+00 5.250000e+01 0.000000e+00 globNum 93 bc 3 1 0 1
+node 13 coords 3 0.000000e+00 5.500000e+01 0.000000e+00 globNum 94 bc 3 1 0 1
+node 14 coords 3 0.000000e+00 5.750000e+01 0.000000e+00 globNum 95 bc 3 1 0 1
+node 15 coords 3 0.000000e+00 6.000000e+01 0.000000e+00 globNum 96 bc 3 1 0 1
+node 16 coords 3 0.000000e+00 6.250000e+01 0.000000e+00 globNum 97 Shared partitions 1 6 bc 3 1 0 1
+node 17 coords 3 4.000000e+01 4.000000e+01 0.000000e+00 globNum 107 Shared partitions 1 0 bc 3 0 0 1
+node 18 coords 3 4.000000e+01 5.000000e+01 0.000000e+00 globNum 108 bc 3 0 0 1
+node 19 coords 3 4.000000e+01 6.000000e+01 0.000000e+00 globNum 109 bc 3 0 0 1
+node 20 coords 3 4.000000e+01 7.000000e+01 0.000000e+00 globNum 110 bc 3 0 0 1
+node 21 coords 3 2.885339e+01 8.000000e+01 1.064561e+01 globNum 311 Shared partitions 1 6
+node 22 coords 3 2.579346e+01 8.000000e+01 1.837076e+01 globNum 312 Shared partitions 1 6
+node 23 coords 3 2.158882e+01 8.000000e+01 2.472941e+01 globNum 313
+node 24 coords 3 1.682803e+01 8.000000e+01 2.979444e+01 globNum 314 Shared partitions 1 5
+node 25 coords 3 1.822414e+01 8.000000e+01 1.856282e+01 globNum 339 Shared partitions 1 6
+node 26 coords 3 1.418391e+01 8.000000e+01 2.376525e+01 globNum 340 Shared partitions 2 5 6
+node 27 coords 3 3.201379e+01 3.388916e+01 0.000000e+00 globNum 384 Shared partitions 1 0 bc 3 0 0 1
+node 28 coords 3 3.198006e+01 4.384159e+01 0.000000e+00 globNum 385 bc 3 0 0 1
+node 29 coords 3 3.188445e+01 5.382921e+01 0.000000e+00 globNum 386 bc 3 0 0 1
+node 30 coords 3 3.098792e+01 6.430982e+01 0.000000e+00 globNum 387 bc 3 0 0 1
+node 31 coords 3 3.305446e+01 7.322807e+01 0.000000e+00 globNum 388 bc 3 0 0 1
+node 32 coords 3 2.439775e+01 7.181147e+01 0.000000e+00 globNum 389 Shared partitions 1 6 bc 3 0 0 1
+node 33 coords 3 2.081905e+00 6.122266e+01 0.000000e+00 globNum 401 Shared partitions 1 6 bc 3 0 0 1
+node 34 coords 3 2.066035e+00 5.874284e+01 0.000000e+00 globNum 402 bc 3 0 0 1
+node 35 coords 3 2.057699e+00 5.626305e+01 0.000000e+00 globNum 403 bc 3 0 0 1
+node 36 coords 3 2.053719e+00 5.377574e+01 0.000000e+00 globNum 404 bc 3 0 0 1
+node 37 coords 3 2.050588e+00 5.128622e+01 0.000000e+00 globNum 405 bc 3 0 0 1
+node 38 coords 3 2.048278e+00 4.879397e+01 0.000000e+00 globNum 406 bc 3 0 0 1
+node 39 coords 3 2.047898e+00 4.630337e+01 0.000000e+00 globNum 407 bc 3 0 0 1
+node 40 coords 3 2.050045e+00 4.381199e+01 0.000000e+00 globNum 408 bc 3 0 0 1
+node 41 coords 3 2.054204e+00 4.132170e+01 0.000000e+00 globNum 409 bc 3 0 0 1
+node 42 coords 3 2.057892e+00 3.882925e+01 0.000000e+00 globNum 410 Shared partitions 1 0 bc 3 0 0 1
+node 43 coords 3 2.401730e+01 3.769081e+01 0.000000e+00 globNum 433 Shared partitions 1 0 bc 3 0 0 1
+node 44 coords 3 2.387880e+01 4.769088e+01 0.000000e+00 globNum 434 bc 3 0 0 1
+node 45 coords 3 2.435966e+01 5.716473e+01 0.000000e+00 globNum 435 bc 3 0 0 1
+node 46 coords 3 3.869281e+00 6.242473e+01 0.000000e+00 globNum 444 Shared partitions 1 6 bc 3 0 0 1
+node 47 coords 3 4.438577e+00 5.995237e+01 0.000000e+00 globNum 445 bc 3 0 0 1
+node 48 coords 3 3.807991e+00 5.750836e+01 0.000000e+00 globNum 446 bc 3 0 0 1
+node 49 coords 3 4.406370e+00 5.504547e+01 0.000000e+00 globNum 447 bc 3 0 0 1
+node 50 coords 3 3.794327e+00 5.255922e+01 0.000000e+00 globNum 448 bc 3 0 0 1
+node 51 coords 3 4.392970e+00 5.009257e+01 0.000000e+00 globNum 449 bc 3 0 0 1
+node 52 coords 3 3.783697e+00 4.759006e+01 0.000000e+00 globNum 450 bc 3 0 0 1
+node 53 coords 3 4.390741e+00 4.513573e+01 0.000000e+00 globNum 451 bc 3 0 0 1
+node 54 coords 3 3.793085e+00 4.262583e+01 0.000000e+00 globNum 452 bc 3 0 0 1
+node 55 coords 3 4.410319e+00 4.018053e+01 0.000000e+00 globNum 453 Shared partitions 1 0 bc 3 0 0 1
+node 56 coords 3 2.311804e+01 6.414343e+01 0.000000e+00 globNum 471 Shared partitions 1 6 bc 3 0 0 1
+node 57 coords 3 1.929164e+01 4.193824e+01 0.000000e+00 globNum 474 Shared partitions 1 0 bc 3 0 0 1
+node 58 coords 3 1.832972e+01 5.289003e+01 0.000000e+00 globNum 475 bc 3 0 0 1
+node 59 coords 3 1.764688e+01 6.014181e+01 0.000000e+00 globNum 476 Shared partitions 1 6 bc 3 0 0 1
+node 60 coords 3 6.111389e+00 6.232018e+01 0.000000e+00 globNum 480 Shared partitions 1 6 bc 3 0 0 1
+node 61 coords 3 6.025425e+00 5.751294e+01 0.000000e+00 globNum 481 bc 3 0 0 1
+node 62 coords 3 6.017808e+00 5.260860e+01 0.000000e+00 globNum 482 bc 3 0 0 1
+node 63 coords 3 5.988479e+00 4.766634e+01 0.000000e+00 globNum 483 bc 3 0 0 1
+node 64 coords 3 6.013674e+00 4.274386e+01 0.000000e+00 globNum 484 Shared partitions 1 0 bc 3 0 0 1
+node 65 coords 3 1.336135e+01 6.408052e+01 0.000000e+00 globNum 493 Shared partitions 1 6 bc 3 0 0 1
+node 66 coords 3 7.073238e+00 5.990278e+01 0.000000e+00 globNum 496 bc 3 0 0 1
+node 67 coords 3 7.045754e+00 5.509022e+01 0.000000e+00 globNum 497 bc 3 0 0 1
+node 68 coords 3 7.023569e+00 5.017084e+01 0.000000e+00 globNum 498 bc 3 0 0 1
+node 69 coords 3 7.015829e+00 4.525610e+01 0.000000e+00 globNum 499 bc 3 0 0 1
+node 70 coords 3 1.697761e+01 4.658082e+01 0.000000e+00 globNum 510 bc 3 0 0 1
+node 71 coords 3 1.348871e+01 5.557130e+01 0.000000e+00 globNum 511 bc 3 0 0 1
+node 72 coords 3 1.267832e+01 5.990550e+01 0.000000e+00 globNum 512 bc 3 0 0 1
+node 73 coords 3 9.392683e+00 6.210176e+01 0.000000e+00 globNum 515 Shared partitions 1 6 bc 3 0 0 1
+node 74 coords 3 9.324444e+00 5.755581e+01 0.000000e+00 globNum 516 bc 3 0 0 1
+node 75 coords 3 9.386389e+00 5.271595e+01 0.000000e+00 globNum 517 bc 3 0 0 1
+node 76 coords 3 9.269178e+00 4.781065e+01 0.000000e+00 globNum 518 bc 3 0 0 1
+node 77 coords 3 9.361119e+00 4.300295e+01 0.000000e+00 globNum 519 Shared partitions 1 0 bc 3 0 0 1
+node 78 coords 3 1.402129e+01 4.112908e+01 0.000000e+00 globNum 528 Shared partitions 1 0 bc 3 0 0 1
+node 79 coords 3 1.263184e+01 4.572289e+01 0.000000e+00 globNum 531 bc 3 0 0 1
+node 80 coords 3 1.339650e+01 5.020286e+01 0.000000e+00 globNum 532 bc 3 0 0 1
+node 81 coords 3 2.008287e+01 7.255837e+01 3.459304e+01 globNum 564 Shared partitions 1 5
+node 82 coords 3 2.716899e+01 7.215083e+01 2.935722e+01 globNum 565
+node 83 coords 3 3.319034e+01 7.142822e+01 2.232491e+01 globNum 566
+node 84 coords 3 3.754588e+01 7.202215e+01 1.379518e+01 globNum 567
+node 85 coords 3 3.950345e+01 7.349683e+01 6.283123e+00 globNum 568
+node 86 coords 3 3.923683e+01 6.545651e+01 7.776321e+00 globNum 569
+node 87 coords 3 3.907894e+01 5.547309e+01 8.534448e+00 globNum 570
+node 88 coords 3 3.908128e+01 4.519457e+01 8.523686e+00 globNum 571 Shared partitions 1 0
+node 89 coords 3 2.380258e+01 6.627019e+01 3.214712e+01 globNum 597 Shared partitions 1 5
+node 90 coords 3 2.945984e+01 6.264646e+01 2.705768e+01 globNum 598 Shared partitions 1 5
+node 91 coords 3 3.602380e+01 6.173534e+01 1.738636e+01 globNum 599
+node 92 coords 3 3.634925e+01 5.043679e+01 1.669528e+01 globNum 600
+node 93 coords 3 3.638055e+01 4.023577e+01 1.662696e+01 globNum 601 Shared partitions 1 0
+node 94 coords 3 3.255908e+01 5.462650e+01 2.323589e+01 globNum 620
+node 95 coords 3 3.169493e+01 4.532563e+01 2.440147e+01 globNum 621 Shared partitions 2 0 4
+node 96 coords 3 2.727824e+01 5.294244e+01 2.925572e+01 globNum 631 Shared partitions 2 5 4
+node 97 coords 3 0.000000e+00 4.125006e+01 2.166918e+00 globNum 686 Shared partitions 1 0 bc 3 1 0 0
+node 98 coords 3 0.000000e+00 4.375013e+01 2.166923e+00 globNum 687 bc 3 1 0 0
+node 99 coords 3 0.000000e+00 4.625024e+01 2.166942e+00 globNum 688 bc 3 1 0 0
+node 100 coords 3 0.000000e+00 4.875042e+01 2.167013e+00 globNum 689 bc 3 1 0 0
+node 101 coords 3 0.000000e+00 5.125065e+01 2.167247e+00 globNum 690 bc 3 1 0 0
+node 102 coords 3 0.000000e+00 5.375093e+01 2.167930e+00 globNum 691 bc 3 1 0 0
+node 103 coords 3 0.000000e+00 5.625130e+01 2.169644e+00 globNum 692 bc 3 1 0 0
+node 104 coords 3 0.000000e+00 5.875202e+01 2.173279e+00 globNum 693 bc 3 1 0 0
+node 105 coords 3 0.000000e+00 6.125366e+01 2.179579e+00 globNum 694 Shared partitions 1 6 bc 3 1 0 0
+node 106 coords 3 0.000000e+00 4.250016e+01 4.334370e+00 globNum 777 Shared partitions 1 0 bc 3 1 0 0
+node 107 coords 3 0.000000e+00 4.500034e+01 4.334378e+00 globNum 778 bc 3 1 0 0
+node 108 coords 3 0.000000e+00 4.750064e+01 4.334412e+00 globNum 779 bc 3 1 0 0
+node 109 coords 3 0.000000e+00 5.000111e+01 4.334561e+00 globNum 780 bc 3 1 0 0
+node 110 coords 3 0.000000e+00 5.250169e+01 4.335109e+00 globNum 781 bc 3 1 0 0
+node 111 coords 3 0.000000e+00 5.500230e+01 4.336829e+00 globNum 782 bc 3 1 0 0
+node 112 coords 3 0.000000e+00 5.750302e+01 4.341372e+00 globNum 783 bc 3 1 0 0
+node 113 coords 3 0.000000e+00 6.000474e+01 4.351241e+00 globNum 784 bc 3 1 0 0
+node 114 coords 3 0.000000e+00 6.250936e+01 4.367844e+00 globNum 785 Shared partitions 1 6 bc 3 1 0 0
+node 115 coords 3 0.000000e+00 4.125016e+01 6.503960e+00 globNum 856 Shared partitions 1 0 bc 3 1 0 0
+node 116 coords 3 0.000000e+00 4.375037e+01 6.503960e+00 globNum 857 bc 3 1 0 0
+node 117 coords 3 0.000000e+00 4.625079e+01 6.503963e+00 globNum 858 bc 3 1 0 0
+node 118 coords 3 0.000000e+00 4.875153e+01 6.503985e+00 globNum 859 bc 3 1 0 0
+node 119 coords 3 0.000000e+00 5.125264e+01 6.504149e+00 globNum 860 bc 3 1 0 0
+node 120 coords 3 0.000000e+00 5.375391e+01 6.504982e+00 globNum 861 bc 3 1 0 0
+node 121 coords 3 0.000000e+00 5.625487e+01 6.508135e+00 globNum 862 bc 3 1 0 0
+node 122 coords 3 0.000000e+00 5.875543e+01 6.517609e+00 globNum 863 bc 3 1 0 0
+node 123 coords 3 0.000000e+00 6.125835e+01 6.540124e+00 globNum 864 bc 3 1 0 0
+node 124 coords 3 0.000000e+00 6.377115e+01 6.578043e+00 globNum 865 Shared partitions 1 6 bc 3 1 0 0
+node 125 coords 3 0.000000e+00 4.000012e+01 8.677682e+00 globNum 930 Shared partitions 1 0 bc 3 1 0 0
+node 126 coords 3 0.000000e+00 4.250034e+01 8.677680e+00 globNum 931 bc 3 1 0 0
+node 127 coords 3 0.000000e+00 4.500082e+01 8.677683e+00 globNum 932 bc 3 1 0 0
+node 128 coords 3 0.000000e+00 4.750179e+01 8.677661e+00 globNum 933 bc 3 1 0 0
+node 129 coords 3 0.000000e+00 5.000353e+01 8.677565e+00 globNum 934 bc 3 1 0 0
+node 130 coords 3 0.000000e+00 5.250610e+01 8.677435e+00 globNum 935 bc 3 1 0 0
+node 131 coords 3 0.000000e+00 5.500879e+01 8.677908e+00 globNum 936 bc 3 1 0 0
+node 132 coords 3 0.000000e+00 5.750956e+01 8.681917e+00 globNum 937 bc 3 1 0 0
+node 133 coords 3 0.000000e+00 6.000665e+01 8.698719e+00 globNum 938 bc 3 1 0 0
+node 134 coords 3 0.000000e+00 6.250856e+01 8.749237e+00 globNum 939 Shared partitions 1 6 bc 3 1 0 0
+node 135 coords 3 0.000000e+00 4.125026e+01 1.085883e+01 globNum 998 Shared partitions 1 0 bc 3 1 0 0
+node 136 coords 3 0.000000e+00 4.375071e+01 1.085885e+01 globNum 999 bc 3 1 0 0
+node 137 coords 3 0.000000e+00 4.625174e+01 1.085887e+01 globNum 1000 bc 3 1 0 0
+node 138 coords 3 0.000000e+00 4.875391e+01 1.085880e+01 globNum 1001 bc 3 1 0 0
+node 139 coords 3 0.000000e+00 5.125794e+01 1.085836e+01 globNum 1002 bc 3 1 0 0
+node 140 coords 3 0.000000e+00 5.376403e+01 1.085701e+01 globNum 1003 bc 3 1 0 0
+node 141 coords 3 0.000000e+00 5.627001e+01 1.085446e+01 globNum 1004 bc 3 1 0 0
+node 142 coords 3 0.000000e+00 5.876830e+01 1.085380e+01 globNum 1005 bc 3 1 0 0
+node 143 coords 3 0.000000e+00 6.124646e+01 1.087331e+01 globNum 1006 bc 3 1 0 0
+node 144 coords 3 0.000000e+00 6.371679e+01 1.098134e+01 globNum 1007 Shared partitions 1 6 bc 3 1 0 0
+node 145 coords 3 0.000000e+00 4.000015e+01 1.305243e+01 globNum 1057 Shared partitions 1 0 bc 3 1 0 0
+node 146 coords 3 0.000000e+00 4.250050e+01 1.305244e+01 globNum 1058 bc 3 1 0 0
+node 147 coords 3 0.000000e+00 4.500138e+01 1.305252e+01 globNum 1059 bc 3 1 0 0
+node 148 coords 3 0.000000e+00 4.750350e+01 1.305264e+01 globNum 1060 bc 3 1 0 0
+node 149 coords 3 0.000000e+00 5.000821e+01 1.305259e+01 globNum 1061 bc 3 1 0 0
+node 150 coords 3 0.000000e+00 5.251738e+01 1.305152e+01 globNum 1062 bc 3 1 0 0
+node 151 coords 3 0.000000e+00 5.503211e+01 1.304707e+01 globNum 1063 bc 3 1 0 0
+node 152 coords 3 0.000000e+00 5.754747e+01 1.303404e+01 globNum 1064 bc 3 1 0 0
+node 153 coords 3 0.000000e+00 6.003963e+01 1.300625e+01 globNum 1065 bc 3 1 0 0
+node 154 coords 3 0.000000e+00 6.244551e+01 1.297664e+01 globNum 1066 bc 3 1 0 0
+node 155 coords 3 0.000000e+00 6.455163e+01 1.299971e+01 globNum 1067 Shared partitions 1 6 bc 3 1 0 0
+node 156 coords 3 0.000000e+00 3.875002e+01 1.526499e+01 globNum 1108 Shared partitions 1 0 bc 3 1 0 0
+node 157 coords 3 0.000000e+00 4.125027e+01 1.526494e+01 globNum 1109 bc 3 1 0 0
+node 158 coords 3 0.000000e+00 4.375087e+01 1.526503e+01 globNum 1110 bc 3 1 0 0
+node 159 coords 3 0.000000e+00 4.625248e+01 1.526528e+01 globNum 1111 bc 3 1 0 0
+node 160 coords 3 0.000000e+00 4.875659e+01 1.526574e+01 globNum 1112 bc 3 1 0 0
+node 161 coords 3 0.000000e+00 5.126619e+01 1.526617e+01 globNum 1113 bc 3 1 0 0
+node 162 coords 3 0.000000e+00 5.378628e+01 1.526492e+01 globNum 1114 bc 3 1 0 0
+node 163 coords 3 0.000000e+00 5.632216e+01 1.525571e+01 globNum 1115 bc 3 1 0 0
+node 164 coords 3 0.000000e+00 5.886898e+01 1.521890e+01 globNum 1116 bc 3 1 0 0
+node 165 coords 3 0.000000e+00 6.137297e+01 1.510625e+01 globNum 1117 bc 3 1 0 0
+node 166 coords 3 0.000000e+00 6.374552e+01 1.490502e+01 globNum 1118 Shared partitions 1 6 bc 3 1 0 0
+node 167 coords 3 0.000000e+00 6.469468e+01 1.869370e+01 globNum 1119 Shared partitions 1 6 bc 3 1 0 0
+node 168 coords 3 0.000000e+00 6.466831e+01 2.124624e+01 globNum 1120 Shared partitions 2 6 5 bc 3 1 0 0
+node 169 coords 3 0.000000e+00 6.489324e+01 1.656035e+01 globNum 1144 Shared partitions 1 6 bc 3 1 0 0
+node 170 coords 3 0.000000e+00 3.749991e+01 1.750226e+01 globNum 1155 Shared partitions 2 0 1 bc 3 1 0 0
+node 171 coords 3 0.000000e+00 4.000009e+01 1.750208e+01 globNum 1156 bc 3 1 0 0
+node 172 coords 3 0.000000e+00 4.250042e+01 1.750210e+01 globNum 1157 bc 3 1 0 0
+node 173 coords 3 0.000000e+00 4.500135e+01 1.750233e+01 globNum 1158 Shared partitions 1 4 bc 3 1 0 0
+node 174 coords 3 0.000000e+00 4.750401e+01 1.750296e+01 globNum 1159 Shared partitions 1 4 bc 3 1 0 0
+node 175 coords 3 0.000000e+00 5.001116e+01 1.750438e+01 globNum 1160 Shared partitions 1 4 bc 3 1 0 0
+node 176 coords 3 0.000000e+00 5.252890e+01 1.750691e+01 globNum 1161 Shared partitions 1 4 bc 3 1 0 0
+node 177 coords 3 0.000000e+00 5.506921e+01 1.750923e+01 globNum 1162 Shared partitions 1 4 bc 3 1 0 0
+node 178 coords 3 0.000000e+00 5.765274e+01 1.750186e+01 globNum 1163 Shared partitions 2 5 4 bc 3 1 0 0
+node 179 coords 3 0.000000e+00 6.030109e+01 1.743976e+01 globNum 1164 bc 3 1 0 0
+node 180 coords 3 0.000000e+00 6.284580e+01 1.710154e+01 globNum 1165 bc 3 1 0 0
+node 181 coords 3 0.000000e+00 6.206093e+01 1.989785e+01 globNum 1166 Shared partitions 1 5 bc 3 1 0 0
+node 182 coords 3 0.000000e+00 3.874998e+01 1.976375e+01 globNum 1195 Shared partitions 2 1 4 bc 3 1 0 0
+node 183 coords 3 0.000000e+00 4.125014e+01 1.976368e+01 globNum 1196 Shared partitions 1 4 bc 3 1 0 0
+node 184 coords 3 0.000000e+00 4.375053e+01 1.976379e+01 globNum 1197 Shared partitions 1 4 bc 3 1 0 0
+node 185 coords 3 0.000000e+00 5.902699e+01 1.982896e+01 globNum 1203 Shared partitions 1 5 bc 3 1 0 0
+node 186 coords 3 2.935404e+01 7.299440e+01 7.031028e+00 globNum 1283 Shared partitions 1 6
+node 187 coords 3 2.994736e+01 7.229459e+01 1.576244e+01 globNum 1284
+node 188 coords 3 2.490367e+01 7.229452e+01 2.220601e+01 globNum 1285
+node 189 coords 3 1.951179e+01 7.399505e+01 2.790567e+01 globNum 1286 Shared partitions 1 5
+node 190 coords 3 2.231956e+01 7.254896e+01 1.334700e+01 globNum 1311 Shared partitions 1 6
+node 191 coords 3 1.745934e+01 7.336018e+01 2.199814e+01 globNum 1320 Shared partitions 2 6 5
+node 192 coords 3 3.182026e+01 3.848070e+01 7.630157e+00 globNum 1360 Shared partitions 1 0
+node 193 coords 3 3.191393e+01 4.850087e+01 7.535229e+00 globNum 1361
+node 194 coords 3 3.166284e+01 5.827754e+01 6.603060e+00 globNum 1362
+node 195 coords 3 3.431859e+01 6.893755e+01 7.672454e+00 globNum 1363
+node 196 coords 3 1.827014e+00 6.001554e+01 1.857877e+00 globNum 1370 Shared partitions 1 6
+node 197 coords 3 1.760798e+00 5.752464e+01 1.850334e+00 globNum 1371
+node 198 coords 3 1.748729e+00 5.502906e+01 1.855843e+00 globNum 1372
+node 199 coords 3 1.692860e+00 5.250851e+01 1.855909e+00 globNum 1373
+node 200 coords 3 1.706928e+00 4.998785e+01 1.839582e+00 globNum 1374
+node 201 coords 3 1.640828e+00 4.750348e+01 1.850473e+00 globNum 1375
+node 202 coords 3 1.700742e+00 4.503157e+01 1.868544e+00 globNum 1376
+node 203 coords 3 1.684478e+00 4.253938e+01 1.858095e+00 globNum 1377
+node 204 coords 3 1.729730e+00 4.005223e+01 1.856745e+00 globNum 1378 Shared partitions 1 0
+node 205 coords 3 2.344195e+01 4.281429e+01 6.876977e+00 globNum 1404 Shared partitions 1 0
+node 206 coords 3 2.456547e+01 5.224159e+01 6.798734e+00 globNum 1405
+node 207 coords 3 2.413063e+01 5.994856e+01 6.675980e+00 globNum 1406
+node 208 coords 3 1.951037e+01 6.655794e+01 6.394102e+00 globNum 1407 Shared partitions 1 6
+node 209 coords 3 3.445345e+00 6.113479e+01 1.964049e+00 globNum 1414 Shared partitions 1 6
+node 210 coords 3 3.874432e+00 5.874465e+01 2.303820e+00 globNum 1415
+node 211 coords 3 3.438749e+00 5.654641e+01 2.009392e+00 globNum 1416
+node 212 coords 3 3.555811e+00 5.401582e+01 2.054572e+00 globNum 1417
+node 213 coords 3 3.425356e+00 5.134575e+01 2.013517e+00 globNum 1418
+node 214 coords 3 3.386852e+00 4.871466e+01 1.985207e+00 globNum 1419
+node 215 coords 3 3.077256e+00 4.647847e+01 2.137564e+00 globNum 1420
+node 216 coords 3 3.514752e+00 4.400593e+01 2.062336e+00 globNum 1421
+node 217 coords 3 3.338650e+00 4.154535e+01 1.991584e+00 globNum 1422 Shared partitions 1 0
+node 218 coords 3 1.784459e+01 4.837020e+01 5.611595e+00 globNum 1450
+node 219 coords 3 1.818519e+01 5.656899e+01 7.235834e+00 globNum 1451
+node 220 coords 3 1.410758e+01 6.286078e+01 5.032284e+00 globNum 1452 Shared partitions 1 6
+node 221 coords 3 5.115466e+00 6.070489e+01 2.462961e+00 globNum 1455 Shared partitions 1 6
+node 222 coords 3 5.590567e+00 5.624389e+01 2.281887e+00 globNum 1456
+node 223 coords 3 5.226491e+00 5.105058e+01 2.314511e+00 globNum 1457
+node 224 coords 3 5.127044e+00 4.931698e+01 2.236055e+00 globNum 1458
+node 225 coords 3 5.152820e+00 4.616786e+01 2.010373e+00 globNum 1459
+node 226 coords 3 5.274476e+00 4.056469e+01 2.190867e+00 globNum 1460 Shared partitions 1 0
+node 227 coords 3 6.938251e+00 6.264194e+01 2.279788e+00 globNum 1468 Shared partitions 1 6
+node 228 coords 3 6.566725e+00 5.899881e+01 2.993168e+00 globNum 1469
+node 229 coords 3 6.195610e+00 5.365698e+01 2.839545e+00 globNum 1470
+node 230 coords 3 6.516072e+00 4.794604e+01 2.525355e+00 globNum 1471
+node 231 coords 3 6.554569e+00 4.301307e+01 3.070108e+00 globNum 1472 Shared partitions 1 0
+node 232 coords 3 1.456314e+01 4.339126e+01 5.015744e+00 globNum 1482 Shared partitions 1 0
+node 233 coords 3 1.421667e+01 5.252599e+01 4.647625e+00 globNum 1483
+node 234 coords 3 1.188144e+01 5.763527e+01 5.862635e+00 globNum 1484
+node 235 coords 3 1.034137e+01 6.098755e+01 3.055311e+00 globNum 1485 Shared partitions 1 6
+node 236 coords 3 7.367069e+00 5.087616e+01 2.963769e+00 globNum 1486
+node 237 coords 3 8.369483e+00 4.565409e+01 2.756849e+00 globNum 1487
+node 238 coords 3 8.603178e+00 5.556995e+01 4.090563e+00 globNum 1497
+node 239 coords 3 1.042937e+01 4.289274e+01 3.848111e+00 globNum 1502 Shared partitions 1 0
+node 240 coords 3 1.192314e+01 4.720538e+01 3.950138e+00 globNum 1503
+node 241 coords 3 1.036378e+01 5.167371e+01 4.217381e+00 globNum 1504
+node 242 coords 3 2.126455e+01 6.600384e+01 2.442545e+01 globNum 1568 Shared partitions 1 5
+node 243 coords 3 2.662474e+01 6.687137e+01 1.875382e+01 globNum 1569
+node 244 coords 3 2.920662e+01 6.534010e+01 1.121076e+01 globNum 1570
+node 245 coords 3 2.848979e+01 5.532333e+01 1.332747e+01 globNum 1571
+node 246 coords 3 2.810029e+01 4.516858e+01 1.388409e+01 globNum 1572 Shared partitions 1 0
+node 247 coords 3 2.560851e+01 5.958525e+01 1.974286e+01 globNum 1588
+node 248 coords 3 2.475884e+01 5.053411e+01 2.006214e+01 globNum 1602 Shared partitions 2 4 0
+node 249 coords 3 1.978959e+01 5.806150e+01 2.439851e+01 globNum 1611 Shared partitions 2 5 4
+node 250 coords 3 1.807455e+00 4.106423e+01 3.791798e+00 globNum 1698 Shared partitions 1 0
+node 251 coords 3 1.895373e+00 4.354896e+01 3.923661e+00 globNum 1699
+node 252 coords 3 1.794703e+00 4.608044e+01 3.797904e+00 globNum 1700
+node 253 coords 3 1.770931e+00 4.856310e+01 3.765984e+00 globNum 1701
+node 254 coords 3 1.766393e+00 5.103468e+01 3.782167e+00 globNum 1702
+node 255 coords 3 1.889895e+00 5.357983e+01 3.919993e+00 globNum 1703
+node 256 coords 3 1.860428e+00 5.612170e+01 3.772070e+00 globNum 1704
+node 257 coords 3 2.190522e+00 5.884814e+01 3.580678e+00 globNum 1705
+node 258 coords 3 1.931168e+00 6.135639e+01 3.752672e+00 globNum 1706 Shared partitions 1 6
+node 259 coords 3 1.661503e+00 3.992625e+01 6.078035e+00 globNum 1783 Shared partitions 1 0
+node 260 coords 3 1.811576e+00 4.222610e+01 5.939437e+00 globNum 1784
+node 261 coords 3 1.712715e+00 4.487420e+01 6.072026e+00 globNum 1785
+node 262 coords 3 2.000146e+00 4.744851e+01 5.876204e+00 globNum 1786
+node 263 coords 3 1.826433e+00 5.015173e+01 5.989805e+00 globNum 1787
+node 264 coords 3 1.636719e+00 5.250780e+01 6.066213e+00 globNum 1788
+node 265 coords 3 1.798310e+00 5.517572e+01 5.922080e+00 globNum 1789
+node 266 coords 3 1.773829e+00 5.776779e+01 5.865708e+00 globNum 1790
+node 267 coords 3 1.743904e+00 6.039730e+01 5.686141e+00 globNum 1791
+node 268 coords 3 1.911390e+00 6.253258e+01 5.857686e+00 globNum 1792 Shared partitions 1 6
+node 269 coords 3 2.047632e+00 3.874693e+01 8.123711e+00 globNum 1858 Shared partitions 1 0
+node 270 coords 3 1.700941e+00 4.118252e+01 8.342735e+00 globNum 1859
+node 271 coords 3 2.046486e+00 4.358067e+01 8.103265e+00 globNum 1860
+node 272 coords 3 1.885234e+00 4.631730e+01 8.247861e+00 globNum 1861
+node 273 coords 3 1.861600e+00 4.893353e+01 8.256145e+00 globNum 1862
+node 274 coords 3 1.663494e+00 5.129057e+01 8.392094e+00 globNum 1863
+node 275 coords 3 1.946562e+00 5.380417e+01 8.099879e+00 globNum 1864
+node 276 coords 3 1.465835e+00 5.651196e+01 8.177643e+00 globNum 1865
+node 277 coords 3 1.502163e+00 5.916365e+01 8.138317e+00 globNum 1866
+node 278 coords 3 1.502620e+00 6.182594e+01 7.875093e+00 globNum 1867 Shared partitions 1 6
+node 279 coords 3 1.708620e+00 6.340078e+01 9.608989e+00 globNum 1906 Shared partitions 1 6
+node 280 coords 3 1.993581e+00 4.001081e+01 1.032960e+01 globNum 1930 Shared partitions 1 0
+node 281 coords 3 1.876592e+00 4.260965e+01 1.041078e+01 globNum 1931
+node 282 coords 3 1.860763e+00 4.509777e+01 1.042301e+01 globNum 1932
+node 283 coords 3 1.858335e+00 4.765742e+01 1.043186e+01 globNum 1933
+node 284 coords 3 1.808946e+00 5.018439e+01 1.050721e+01 globNum 1934
+node 285 coords 3 1.769504e+00 5.267248e+01 1.052518e+01 globNum 1935
+node 286 coords 3 1.701123e+00 5.521409e+01 1.045357e+01 globNum 1936
+node 287 coords 3 1.505790e+00 5.769693e+01 1.045819e+01 globNum 1937
+node 288 coords 3 1.487989e+00 6.061543e+01 1.014280e+01 globNum 1938
+node 289 coords 3 1.573864e+00 6.242472e+01 1.177544e+01 globNum 1975 Shared partitions 1 6
+node 290 coords 3 2.088950e+00 4.131463e+01 1.242246e+01 globNum 1996 Shared partitions 1 0
+node 291 coords 3 1.939895e+00 4.394395e+01 1.255179e+01 globNum 1997
+node 292 coords 3 1.905009e+00 4.645005e+01 1.257788e+01 globNum 1998
+node 293 coords 3 1.873547e+00 4.897083e+01 1.264946e+01 globNum 1999
+node 294 coords 3 1.820646e+00 5.144732e+01 1.271625e+01 globNum 2000
+node 295 coords 3 1.758386e+00 5.396634e+01 1.273196e+01 globNum 2001
+node 296 coords 3 1.699799e+00 5.655879e+01 1.259960e+01 globNum 2002
+node 297 coords 3 1.724076e+00 5.921827e+01 1.258674e+01 globNum 2003
+node 298 coords 3 1.778114e+00 6.104852e+01 1.397465e+01 globNum 2036
+node 299 coords 3 1.662744e+00 6.352429e+01 1.383233e+01 globNum 2037 Shared partitions 1 6
+node 300 coords 3 2.001536e+00 3.985029e+01 1.465224e+01 globNum 2063 Shared partitions 1 0
+node 301 coords 3 2.162647e+00 4.259016e+01 1.453533e+01 globNum 2064
+node 302 coords 3 2.006128e+00 4.522682e+01 1.467568e+01 globNum 2065
+node 303 coords 3 1.966443e+00 4.772272e+01 1.477966e+01 globNum 2066
+node 304 coords 3 1.907220e+00 5.021676e+01 1.486875e+01 globNum 2067
+node 305 coords 3 1.804154e+00 5.270609e+01 1.490856e+01 globNum 2068
+node 306 coords 3 1.671684e+00 5.516438e+01 1.508528e+01 globNum 2069
+node 307 coords 3 1.784244e+00 5.725838e+01 1.430161e+01 globNum 2070
+node 308 coords 3 1.970868e+00 6.530127e+01 1.528316e+01 globNum 2071 Shared partitions 1 6
+node 309 coords 3 1.854692e+00 6.516537e+01 1.749826e+01 globNum 2072 Shared partitions 1 6
+node 310 coords 3 1.784213e+00 6.515120e+01 1.988514e+01 globNum 2073 Shared partitions 2 6 5
+node 311 coords 3 1.726895e+00 5.736683e+01 1.656024e+01 globNum 2085 Shared partitions 1 4
+node 312 coords 3 1.600386e+00 6.025951e+01 1.637613e+01 globNum 2086
+node 313 coords 3 2.018832e+00 6.286161e+01 1.625882e+01 globNum 2087
+node 314 coords 3 1.544770e+00 6.369278e+01 2.015132e+01 globNum 2088 Shared partitions 1 5
+node 315 coords 3 2.093260e+00 3.868994e+01 1.658592e+01 globNum 2114 Shared partitions 1 0
+node 316 coords 3 2.168779e+00 4.126528e+01 1.649656e+01 globNum 2115 Shared partitions 1 0
+node 317 coords 3 2.307584e+00 4.379689e+01 1.628191e+01 globNum 2116
+node 318 coords 3 2.122989e+00 4.626685e+01 1.663137e+01 globNum 2117 Shared partitions 1 4
+node 319 coords 3 2.064664e+00 4.876778e+01 1.676591e+01 globNum 2118 Shared partitions 1 4
+node 320 coords 3 1.973555e+00 5.127295e+01 1.677353e+01 globNum 2119 Shared partitions 1 4
+node 321 coords 3 1.847936e+00 5.338388e+01 1.681570e+01 globNum 2120 Shared partitions 1 4
+node 322 coords 3 1.582109e+00 6.327229e+01 1.859927e+01 globNum 2121
+node 323 coords 3 1.943723e+00 3.892180e+01 1.864362e+01 globNum 2131 Shared partitions 3 1 4 0
+node 324 coords 3 1.956989e+00 4.149124e+01 1.857864e+01 globNum 2132 Shared partitions 1 4
+node 325 coords 3 1.980661e+00 4.399132e+01 1.829783e+01 globNum 2133 Shared partitions 1 4
+node 326 coords 3 1.822096e+00 5.357743e+01 1.813167e+01 globNum 2137 Shared partitions 1 4
+node 327 coords 3 1.904159e+00 5.923009e+01 1.803953e+01 globNum 2139 Shared partitions 2 5 4
+node 328 coords 3 1.747534e+00 6.143522e+01 1.811321e+01 globNum 2140
+node 329 coords 3 1.549560e+00 6.033367e+01 1.916092e+01 globNum 2163 Shared partitions 1 5
+node 330 coords 3 2.532592e+00 5.901648e+01 1.478392e+01 globNum 2184
+node 331 coords 3 2.532995e+00 5.515292e+01 1.732868e+01 globNum 2190 Shared partitions 1 4
+node 332 coords 3 2.391591e+00 6.196168e+01 1.994885e+01 globNum 2191 Shared partitions 1 5
+node 333 coords 3 1.555598e+01 6.807290e+01 1.368637e+01 globNum 2243 Shared partitions 1 6
+node 334 coords 3 3.266334e+00 6.253947e+01 3.643575e+00 globNum 2275 Shared partitions 1 6
+node 335 coords 3 2.009568e+01 5.617269e+01 1.441303e+01 globNum 2280
+node 336 coords 3 2.149875e+01 6.311441e+01 1.416125e+01 globNum 2281
+node 337 coords 3 2.124943e+01 4.863163e+01 1.305829e+01 globNum 2296 Shared partitions 1 0
+node 338 coords 3 1.599556e+01 4.421725e+01 1.059489e+01 globNum 2297 Shared partitions 1 0
+node 339 coords 3 1.165243e+01 6.784507e+01 8.969827e+00 globNum 2298 Shared partitions 1 6
+node 340 coords 3 3.581232e+00 6.049623e+01 3.931541e+00 globNum 2299
+node 341 coords 3 3.886296e+00 5.731786e+01 4.276824e+00 globNum 2300
+node 342 coords 3 4.652198e+00 5.925516e+01 3.997157e+00 globNum 2301
+node 343 coords 3 3.842124e+00 5.497308e+01 4.201593e+00 globNum 2302
+node 344 coords 3 3.754329e+00 5.227002e+01 4.060430e+00 globNum 2303
+node 345 coords 3 3.958747e+00 4.761334e+01 4.013973e+00 globNum 2304
+node 346 coords 3 3.512376e+00 4.984977e+01 4.172141e+00 globNum 2305
+node 347 coords 3 3.722359e+00 4.502370e+01 4.327045e+00 globNum 2306
+node 348 coords 3 3.976107e+00 4.232199e+01 3.919824e+00 globNum 2307
+node 349 coords 3 3.655589e+00 4.006327e+01 4.271157e+00 globNum 2308 Shared partitions 1 0
+node 350 coords 3 1.186771e+01 4.896154e+01 8.299095e+00 globNum 2322
+node 351 coords 3 9.723578e+00 6.294791e+01 8.556199e+00 globNum 2323 Shared partitions 1 6
+node 352 coords 3 4.630432e+00 6.218342e+01 4.230007e+00 globNum 2325 Shared partitions 1 6
+node 353 coords 3 4.854637e+00 6.030316e+01 4.622066e+00 globNum 2327
+node 354 coords 3 5.756615e+00 5.623830e+01 4.977067e+00 globNum 2328
+node 355 coords 3 5.412009e+00 5.031953e+01 4.874377e+00 globNum 2329
+node 356 coords 3 5.703426e+00 4.633768e+01 5.112897e+00 globNum 2330
+node 357 coords 3 5.558821e+00 4.078502e+01 4.776104e+00 globNum 2331 Shared partitions 1 0
+node 358 coords 3 1.219714e+01 5.458681e+01 9.653986e+00 globNum 2340
+node 359 coords 3 6.589895e+00 6.115303e+01 5.048532e+00 globNum 2341 Shared partitions 1 6
+node 360 coords 3 7.229821e+00 5.213679e+01 6.178483e+00 globNum 2342
+node 361 coords 3 7.922788e+00 4.430003e+01 6.272451e+00 globNum 2343 Shared partitions 1 0
+node 362 coords 3 9.468438e+00 5.343245e+01 8.169968e+00 globNum 2353
+node 363 coords 3 7.901174e+00 5.836853e+01 5.756554e+00 globNum 2355
+node 364 coords 3 1.045903e+01 4.454001e+01 8.386120e+00 globNum 2361 Shared partitions 1 0
+node 365 coords 3 7.689179e+00 4.815135e+01 6.377117e+00 globNum 2362
+node 366 coords 3 1.896560e+01 6.850517e+01 1.878419e+01 globNum 2407 Shared partitions 1 6
+node 367 coords 3 1.417208e+01 6.566410e+01 2.418084e+01 globNum 2418 Shared partitions 3 5 6 4
+node 368 coords 3 1.533504e+01 6.116809e+01 1.904158e+01 globNum 2436 Shared partitions 2 4 6
+node 369 coords 3 1.653471e+01 4.533474e+01 1.925733e+01 globNum 2448 Shared partitions 2 4 0
+node 370 coords 3 1.640147e+01 5.299184e+01 1.908373e+01 globNum 2449 Shared partitions 1 4
+node 371 coords 3 3.243452e+00 4.348260e+01 5.950249e+00 globNum 2482
+node 372 coords 3 3.120739e+00 5.375138e+01 5.932493e+00 globNum 2483
+node 373 coords 3 3.518750e+00 5.913269e+01 5.695008e+00 globNum 2484
+node 374 coords 3 3.352002e+00 6.142033e+01 5.415649e+00 globNum 2485 Shared partitions 1 6
+node 375 coords 3 3.557866e+00 4.108823e+01 6.737627e+00 globNum 2547 Shared partitions 1 0
+node 376 coords 3 3.757136e+00 4.562300e+01 6.809788e+00 globNum 2548
+node 377 coords 3 4.098777e+00 4.867266e+01 6.723949e+00 globNum 2549
+node 378 coords 3 3.392671e+00 5.153542e+01 6.798645e+00 globNum 2550
+node 379 coords 3 3.635000e+00 5.612300e+01 6.628027e+00 globNum 2551
+node 380 coords 3 2.996152e+00 6.051181e+01 7.783960e+00 globNum 2552 Shared partitions 1 6
+node 381 coords 3 3.349645e+00 5.497663e+01 9.191323e+00 globNum 2584
+node 382 coords 3 3.098054e+00 5.746601e+01 8.588218e+00 globNum 2585
+node 383 coords 3 3.536000e+00 4.005464e+01 8.992033e+00 globNum 2620 Shared partitions 1 0
+node 384 coords 3 3.409035e+00 4.209023e+01 9.114870e+00 globNum 2621
+node 385 coords 3 3.431588e+00 4.444731e+01 9.164224e+00 globNum 2622
+node 386 coords 3 3.589297e+00 4.706280e+01 8.983701e+00 globNum 2623
+node 387 coords 3 3.764540e+00 4.971668e+01 9.004990e+00 globNum 2624
+node 388 coords 3 3.449290e+00 5.224760e+01 9.217242e+00 globNum 2625
+node 389 coords 3 3.192219e+00 6.198420e+01 9.498926e+00 globNum 2626 Shared partitions 1 6
+node 390 coords 3 3.435358e+00 5.597049e+01 1.134451e+01 globNum 2654
+node 391 coords 3 3.246180e+00 5.924625e+01 1.059212e+01 globNum 2655
+node 392 coords 3 3.396514e+00 6.359118e+01 1.110196e+01 globNum 2656 Shared partitions 1 6
+node 393 coords 3 3.979556e+00 4.133931e+01 1.073805e+01 globNum 2674 Shared partitions 1 0
+node 394 coords 3 3.616279e+00 4.349753e+01 1.121081e+01 globNum 2675
+node 395 coords 3 3.701602e+00 4.576378e+01 1.088883e+01 globNum 2676
+node 396 coords 3 3.576587e+00 4.867006e+01 1.115391e+01 globNum 2677
+node 397 coords 3 3.496595e+00 5.093628e+01 1.140613e+01 globNum 2678
+node 398 coords 3 3.561222e+00 5.329697e+01 1.130410e+01 globNum 2679
+node 399 coords 3 3.073540e+00 6.117968e+01 1.176588e+01 globNum 2680
+node 400 coords 3 3.286210e+00 6.517746e+01 1.315552e+01 globNum 2681 Shared partitions 1 6
+node 401 coords 3 3.417699e+00 5.787597e+01 1.309999e+01 globNum 2711
+node 402 coords 3 3.562402e+00 6.233051e+01 1.346236e+01 globNum 2712
+node 403 coords 3 3.982110e+00 4.036978e+01 1.301446e+01 globNum 2737 Shared partitions 1 0
+node 404 coords 3 4.040133e+00 4.280988e+01 1.309883e+01 globNum 2738
+node 405 coords 3 3.692590e+00 4.484555e+01 1.332697e+01 globNum 2739
+node 406 coords 3 4.001491e+00 4.737703e+01 1.306387e+01 globNum 2740
+node 407 coords 3 3.688149e+00 4.989154e+01 1.345973e+01 globNum 2741
+node 408 coords 3 3.603202e+00 5.235768e+01 1.355203e+01 globNum 2742
+node 409 coords 3 3.312822e+00 5.502531e+01 1.365307e+01 globNum 2743
+node 410 coords 3 3.442099e+00 6.011147e+01 1.331639e+01 globNum 2744
+node 411 coords 3 3.635664e+00 6.595110e+01 1.879834e+01 globNum 2746 Shared partitions 1 6
+node 412 coords 3 3.297267e+00 5.685266e+01 1.554110e+01 globNum 2763
+node 413 coords 3 3.529314e+00 6.101321e+01 1.524174e+01 globNum 2764
+node 414 coords 3 3.808884e+00 6.382910e+01 1.520751e+01 globNum 2765 Shared partitions 1 6
+node 415 coords 3 3.458235e+00 6.396933e+01 1.704658e+01 globNum 2766 Shared partitions 1 6
+node 416 coords 3 3.249480e+00 6.381424e+01 2.061316e+01 globNum 2767 Shared partitions 2 5 6
+node 417 coords 3 4.016604e+00 4.148715e+01 1.519702e+01 globNum 2792 Shared partitions 1 0
+node 418 coords 3 3.973921e+00 4.396077e+01 1.527564e+01 globNum 2793
+node 419 coords 3 3.804915e+00 4.622062e+01 1.541209e+01 globNum 2794
+node 420 coords 3 3.953573e+00 4.870600e+01 1.581477e+01 globNum 2795
+node 421 coords 3 3.737194e+00 5.113244e+01 1.576004e+01 globNum 2796
+node 422 coords 3 3.390468e+00 5.379327e+01 1.578517e+01 globNum 2797
+node 423 coords 3 3.394552e+00 5.916861e+01 1.662802e+01 globNum 2798
+node 424 coords 3 3.595509e+00 6.142677e+01 1.736294e+01 globNum 2799
+node 425 coords 3 3.770326e+00 3.968314e+01 1.742576e+01 globNum 2813 Shared partitions 2 0 4
+node 426 coords 3 3.890457e+00 4.237313e+01 1.732781e+01 globNum 2814 Shared partitions 1 4
+node 427 coords 3 3.649444e+00 4.474824e+01 1.758754e+01 globNum 2815 Shared partitions 1 4
+node 428 coords 3 3.723325e+00 4.703667e+01 1.767299e+01 globNum 2816 Shared partitions 1 4
+node 429 coords 3 3.424567e+00 4.981612e+01 1.795288e+01 globNum 2817 Shared partitions 1 4
+node 430 coords 3 3.355349e+00 5.231829e+01 1.753956e+01 globNum 2818 Shared partitions 1 4
+node 431 coords 3 3.386622e+00 5.365263e+01 1.736946e+01 globNum 2819 Shared partitions 1 4
+node 432 coords 3 3.235290e+00 5.745471e+01 1.785242e+01 globNum 2820 Shared partitions 2 4 5
+node 433 coords 3 2.958226e+00 6.240131e+01 1.832755e+01 globNum 2821
+node 434 coords 3 3.080322e+00 6.019528e+01 1.893365e+01 globNum 2847 Shared partitions 1 5
+node 435 coords 3 1.496964e+01 5.149383e+01 1.211981e+01 globNum 2863
+node 436 coords 3 1.362223e+01 6.068542e+01 1.145044e+01 globNum 2864
+node 437 coords 3 8.494763e+00 6.075538e+01 6.894986e+00 globNum 2867 Shared partitions 1 6
+node 438 coords 3 2.809039e+00 6.363501e+01 1.877598e+01 globNum 2877
+node 439 coords 3 5.409219e+00 5.840040e+01 5.837200e+00 globNum 2891
+node 440 coords 3 4.961287e+00 5.373616e+01 6.127208e+00 globNum 2892
+node 441 coords 3 5.299279e+00 4.323854e+01 6.027435e+00 globNum 2893 Shared partitions 1 0
+node 442 coords 3 9.211070e+00 5.776941e+01 9.253259e+00 globNum 2901
+node 443 coords 3 6.794550e+00 6.360170e+01 7.992510e+00 globNum 2902 Shared partitions 1 6
+node 444 coords 3 6.788347e+00 5.527164e+01 7.025730e+00 globNum 2903
+node 445 coords 3 8.426706e+00 5.058674e+01 8.626722e+00 globNum 2904
+node 446 coords 3 3.991738e+00 5.383845e+01 7.662296e+00 globNum 2921
+node 447 coords 3 4.345022e+00 4.321252e+01 7.802299e+00 globNum 2927
+node 448 coords 3 4.279297e+00 5.909808e+01 1.472096e+01 globNum 2950
+node 449 coords 3 4.228722e+00 5.510970e+01 1.717252e+01 globNum 2956 Shared partitions 1 4
+node 450 coords 3 4.016991e+00 6.164637e+01 1.969839e+01 globNum 2957 Shared partitions 1 5
+node 451 coords 3 9.813329e+00 6.604652e+01 1.506543e+01 globNum 2982 Shared partitions 1 6
+node 452 coords 3 1.065719e+01 4.538186e+01 1.403565e+01 globNum 3003 Shared partitions 2 0 4
+node 453 coords 3 9.832651e+00 5.113836e+01 1.255946e+01 globNum 3009
+node 454 coords 3 4.680571e+00 6.130862e+01 6.762666e+00 globNum 3010 Shared partitions 1 6
+node 455 coords 3 6.030668e+00 5.002492e+01 8.020859e+00 globNum 3011
+node 456 coords 3 5.188210e+00 5.193088e+01 7.705687e+00 globNum 3012
+node 457 coords 3 5.582569e+00 4.526339e+01 8.332443e+00 globNum 3013
+node 458 coords 3 8.541673e+00 5.423147e+01 1.195550e+01 globNum 3021
+node 459 coords 3 1.133431e+01 5.593957e+01 1.475788e+01 globNum 3022
+node 460 coords 3 9.121959e+00 6.024498e+01 1.266937e+01 globNum 3023
+node 461 coords 3 6.332402e+00 5.929240e+01 8.460509e+00 globNum 3026
+node 462 coords 3 7.395100e+00 4.584931e+01 8.945200e+00 globNum 3027
+node 463 coords 3 6.527570e+00 4.240655e+01 8.093302e+00 globNum 3028 Shared partitions 1 0
+node 464 coords 3 8.200614e+00 4.159406e+01 1.189139e+01 globNum 3034 Shared partitions 1 0
+node 465 coords 3 6.831277e+00 5.252853e+01 9.432804e+00 globNum 3036
+node 466 coords 3 7.530554e+00 4.366894e+01 1.009637e+01 globNum 3041 Shared partitions 1 0
+node 467 coords 3 1.001565e+01 6.309939e+01 2.082403e+01 globNum 3089 Shared partitions 3 4 6 5
+node 468 coords 3 1.116110e+01 5.520747e+01 1.985588e+01 globNum 3107 Shared partitions 1 4
+node 469 coords 3 1.173826e+01 5.069913e+01 1.739928e+01 globNum 3108 Shared partitions 1 4
+node 470 coords 3 4.416420e+00 5.868567e+01 7.972019e+00 globNum 3115
+node 471 coords 3 5.304302e+00 4.082863e+01 7.902842e+00 globNum 3124 Shared partitions 1 0
+node 472 coords 3 5.190288e+00 4.765380e+01 7.663733e+00 globNum 3125
+node 473 coords 3 5.077125e+00 5.623917e+01 7.815359e+00 globNum 3126
+node 474 coords 3 4.729068e+00 6.049136e+01 9.416245e+00 globNum 3142
+node 475 coords 3 4.849594e+00 6.328019e+01 8.568920e+00 globNum 3143 Shared partitions 1 6
+node 476 coords 3 5.056367e+00 4.317696e+01 9.851761e+00 globNum 3158 Shared partitions 1 0
+node 477 coords 3 5.567911e+00 4.792613e+01 9.931754e+00 globNum 3159
+node 478 coords 3 5.182880e+00 5.098325e+01 1.012175e+01 globNum 3160
+node 479 coords 3 5.078465e+00 5.402457e+01 9.397074e+00 globNum 3161
+node 480 coords 3 4.921095e+00 5.728222e+01 1.045690e+01 globNum 3162
+node 481 coords 3 5.010711e+00 6.007242e+01 1.231980e+01 globNum 3190
+node 482 coords 3 5.368703e+00 6.403679e+01 1.302504e+01 globNum 3191 Shared partitions 1 6
+node 483 coords 3 4.646842e+00 6.225140e+01 1.093133e+01 globNum 3192 Shared partitions 1 6
+node 484 coords 3 5.733559e+00 4.277234e+01 1.230335e+01 globNum 3205 Shared partitions 1 0
+node 485 coords 3 5.588178e+00 4.523786e+01 1.165914e+01 globNum 3207
+node 486 coords 3 6.169018e+00 4.795452e+01 1.229873e+01 globNum 3208
+node 487 coords 3 5.460935e+00 4.973586e+01 1.224362e+01 globNum 3209
+node 488 coords 3 5.256425e+00 5.195876e+01 1.212247e+01 globNum 3210
+node 489 coords 3 5.777296e+00 5.431353e+01 1.219564e+01 globNum 3211
+node 490 coords 3 5.346511e+00 4.371715e+01 1.426285e+01 globNum 3246
+node 491 coords 3 5.786697e+00 4.151626e+01 1.388176e+01 globNum 3247 Shared partitions 1 0
+node 492 coords 3 5.303168e+00 4.622183e+01 1.416989e+01 globNum 3248
+node 493 coords 3 5.180230e+00 4.846587e+01 1.421825e+01 globNum 3249
+node 494 coords 3 5.148752e+00 5.075111e+01 1.437400e+01 globNum 3250
+node 495 coords 3 5.100032e+00 5.351236e+01 1.473594e+01 globNum 3251
+node 496 coords 3 5.093415e+00 5.660581e+01 1.433691e+01 globNum 3252
+node 497 coords 3 4.900829e+00 6.103918e+01 1.424352e+01 globNum 3253
+node 498 coords 3 5.397630e+00 6.449362e+01 1.510794e+01 globNum 3254 Shared partitions 1 6
+node 499 coords 3 5.138334e+00 6.511670e+01 1.664905e+01 globNum 3256 Shared partitions 1 6
+node 500 coords 3 4.375930e+00 6.344096e+01 1.866186e+01 globNum 3257
+node 501 coords 3 4.946260e+00 6.519738e+01 2.083708e+01 globNum 3258 Shared partitions 2 6 5
+node 502 coords 3 4.844814e+00 5.774096e+01 1.651658e+01 globNum 3269
+node 503 coords 3 5.128668e+00 6.269742e+01 1.591744e+01 globNum 3270
+node 504 coords 3 5.230375e+00 6.019926e+01 1.611061e+01 globNum 3271
+node 505 coords 3 5.372336e+00 4.013077e+01 1.623101e+01 globNum 3283 Shared partitions 1 0
+node 506 coords 3 5.296563e+00 4.508179e+01 1.650722e+01 globNum 3284 Shared partitions 1 4
+node 507 coords 3 5.562398e+00 4.242003e+01 1.624042e+01 globNum 3285 Shared partitions 2 4 0
+node 508 coords 3 5.435953e+00 4.763455e+01 1.595018e+01 globNum 3286
+node 509 coords 3 5.809133e+00 4.993766e+01 1.590183e+01 globNum 3287
+node 510 coords 3 4.995808e+00 5.252038e+01 1.649510e+01 globNum 3288
+node 511 coords 3 4.635045e+00 5.922306e+01 1.833438e+01 globNum 3289 Shared partitions 1 5
+node 512 coords 3 5.096359e+00 6.314413e+01 2.109032e+01 globNum 3290 Shared partitions 1 5
+node 513 coords 3 4.995840e+00 4.106784e+01 1.835731e+01 globNum 3311 Shared partitions 2 4 0
+node 514 coords 3 5.419096e+00 4.771035e+01 1.875964e+01 globNum 3314 Shared partitions 1 4
+node 515 coords 3 5.152541e+00 5.030749e+01 1.770428e+01 globNum 3315 Shared partitions 1 4
+node 516 coords 3 4.696841e+00 5.316854e+01 1.859461e+01 globNum 3316 Shared partitions 1 4
+node 517 coords 3 4.884400e+00 5.690072e+01 1.888812e+01 globNum 3317 Shared partitions 2 4 5
+node 518 coords 3 8.131506e+00 4.762186e+01 1.067848e+01 globNum 3340
+node 519 coords 3 6.988822e+00 6.143115e+01 1.051064e+01 globNum 3342
+node 520 coords 3 9.864261e+00 6.001547e+01 1.665423e+01 globNum 3373 Shared partitions 1 4
+node 521 coords 3 8.153682e+00 6.299963e+01 1.297693e+01 globNum 3375 Shared partitions 1 6
+node 522 coords 3 7.033172e+00 5.570195e+01 9.691961e+00 globNum 3377
+node 523 coords 3 7.409810e+00 5.812836e+01 1.289848e+01 globNum 3378
+node 524 coords 3 6.154629e+00 6.398500e+01 1.049408e+01 globNum 3379 Shared partitions 1 6
+node 525 coords 3 6.843285e+00 4.965452e+01 9.864460e+00 globNum 3380
+node 526 coords 3 7.322293e+00 5.106269e+01 1.129969e+01 globNum 3381
+node 527 coords 3 5.879332e+00 5.935261e+01 1.477092e+01 globNum 3407
+node 528 coords 3 6.105150e+00 5.478492e+01 1.705371e+01 globNum 3412 Shared partitions 1 4
+node 529 coords 3 5.898223e+00 6.119603e+01 1.912523e+01 globNum 3413 Shared partitions 1 5
+node 530 coords 3 7.009734e+00 6.411997e+01 2.134671e+01 globNum 3423 Shared partitions 2 5 6
+node 531 coords 3 7.038292e+00 4.868010e+01 1.400504e+01 globNum 3429
+node 532 coords 3 7.040063e+00 4.553192e+01 1.426510e+01 globNum 3430
+node 533 coords 3 8.936532e+00 5.315174e+01 1.635686e+01 globNum 3431 Shared partitions 1 4
+node 534 coords 3 7.507588e+00 5.515387e+01 1.491990e+01 globNum 3435
+node 535 coords 3 6.594487e+00 6.130475e+01 1.387846e+01 globNum 3436
+node 536 coords 3 8.050963e+00 6.004410e+01 1.992368e+01 globNum 3444 Shared partitions 2 4 5
+node 537 coords 3 8.533837e+00 5.588274e+01 1.866992e+01 globNum 3450 Shared partitions 2 4 5
+node 538 coords 3 8.103754e+00 4.915753e+01 1.686458e+01 globNum 3458 Shared partitions 1 4
+node 539 coords 3 8.057919e+00 4.444875e+01 1.825335e+01 globNum 3460 Shared partitions 2 4 0
+node 540 coords 3 6.829970e+00 6.394672e+01 1.559048e+01 globNum 3464 Shared partitions 1 6
+node 541 coords 3 7.246633e+00 4.294535e+01 1.515618e+01 globNum 3471 Shared partitions 1 0
+node 542 coords 3 6.935643e+00 5.201577e+01 1.442976e+01 globNum 3472
+node 543 coords 3 7.244461e+00 6.112216e+01 1.595666e+01 globNum 3473
+node 544 coords 3 6.030194e+00 6.422351e+01 1.853174e+01 globNum 3474 Shared partitions 1 6
+node 545 coords 3 6.955682e+00 5.797919e+01 1.701442e+01 globNum 3479 Shared partitions 2 5 4
+node 546 coords 3 6.422811e+00 4.450082e+01 1.760210e+01 globNum 3485 Shared partitions 1 4
+node 547 coords 3 6.775188e+00 4.103329e+01 1.814492e+01 globNum 3486 Shared partitions 2 0 4
+node 548 coords 3 6.639945e+00 4.757212e+01 1.708377e+01 globNum 3487 Shared partitions 1 4
+node 549 coords 3 6.662610e+00 5.216731e+01 1.818621e+01 globNum 3488 Shared partitions 1 4
+node 550 coords 3 8.048151e+00 6.298034e+01 1.762851e+01 globNum 3502 Shared partitions 1 6
+LTrSpace 1 nodes 4 1 3 2 31 globNum 176 mat 1 crossSect 1
+LTrSpace 2 nodes 4 3 4 21 84 globNum 177 mat 1 crossSect 1
+LTrSpace 3 nodes 4 4 5 22 83 globNum 178 mat 1 crossSect 1
+LTrSpace 4 nodes 4 5 6 23 82 globNum 179 mat 1 crossSect 1
+LTrSpace 5 nodes 4 2 3 21 186 globNum 208 mat 1 crossSect 1
+LTrSpace 6 nodes 4 21 4 22 187 globNum 209 mat 1 crossSect 1
+LTrSpace 7 nodes 4 22 5 23 188 globNum 210 mat 1 crossSect 1
+LTrSpace 8 nodes 4 23 6 24 189 globNum 211 mat 1 crossSect 1
+LTrSpace 9 nodes 4 191 22 23 188 globNum 238 mat 1 crossSect 1
+LTrSpace 10 nodes 4 23 24 26 189 globNum 239 mat 1 crossSect 1
+LTrSpace 11 nodes 4 25 23 26 191 globNum 265 mat 1 crossSect 1
+LTrSpace 12 nodes 4 17 18 28 88 globNum 350 mat 1 crossSect 1
+LTrSpace 13 nodes 4 18 19 29 87 globNum 351 mat 1 crossSect 1
+LTrSpace 14 nodes 4 19 20 30 86 globNum 352 mat 1 crossSect 1
+LTrSpace 15 nodes 4 20 1 31 85 globNum 353 mat 1 crossSect 1
+LTrSpace 16 nodes 4 16 15 33 105 globNum 361 mat 1 crossSect 1
+LTrSpace 17 nodes 4 15 14 34 104 globNum 362 mat 1 crossSect 1
+LTrSpace 18 nodes 4 14 13 35 103 globNum 363 mat 1 crossSect 1
+LTrSpace 19 nodes 4 13 12 36 102 globNum 364 mat 1 crossSect 1
+LTrSpace 20 nodes 4 12 11 37 101 globNum 365 mat 1 crossSect 1
+LTrSpace 21 nodes 4 11 10 38 100 globNum 366 mat 1 crossSect 1
+LTrSpace 22 nodes 4 10 9 39 99 globNum 367 mat 1 crossSect 1
+LTrSpace 23 nodes 4 9 8 40 98 globNum 368 mat 1 crossSect 1
+LTrSpace 24 nodes 4 8 7 41 97 globNum 369 mat 1 crossSect 1
+LTrSpace 25 nodes 4 27 17 28 192 globNum 389 mat 1 crossSect 1
+LTrSpace 26 nodes 4 28 18 29 193 globNum 390 mat 1 crossSect 1
+LTrSpace 27 nodes 4 29 19 30 194 globNum 391 mat 1 crossSect 1
+LTrSpace 28 nodes 4 31 2 32 186 globNum 392 mat 1 crossSect 1
+LTrSpace 29 nodes 4 33 15 34 196 globNum 405 mat 1 crossSect 1
+LTrSpace 30 nodes 4 34 14 35 197 globNum 406 mat 1 crossSect 1
+LTrSpace 31 nodes 4 35 13 36 198 globNum 407 mat 1 crossSect 1
+LTrSpace 32 nodes 4 36 12 37 199 globNum 408 mat 1 crossSect 1
+LTrSpace 33 nodes 4 37 11 38 200 globNum 409 mat 1 crossSect 1
+LTrSpace 34 nodes 4 38 10 39 201 globNum 410 mat 1 crossSect 1
+LTrSpace 35 nodes 4 39 9 40 202 globNum 411 mat 1 crossSect 1
+LTrSpace 36 nodes 4 40 8 41 203 globNum 412 mat 1 crossSect 1
+LTrSpace 37 nodes 4 41 7 42 204 globNum 413 mat 1 crossSect 1
+LTrSpace 38 nodes 4 27 28 43 192 globNum 438 mat 1 crossSect 1
+LTrSpace 39 nodes 4 28 29 44 193 globNum 439 mat 1 crossSect 1
+LTrSpace 40 nodes 4 29 30 45 194 globNum 440 mat 1 crossSect 1
+LTrSpace 41 nodes 4 30 31 32 186 globNum 441 mat 1 crossSect 1
+LTrSpace 42 nodes 4 33 34 47 196 globNum 453 mat 1 crossSect 1
+LTrSpace 43 nodes 4 34 35 48 197 globNum 454 mat 1 crossSect 1
+LTrSpace 44 nodes 4 35 36 49 198 globNum 455 mat 1 crossSect 1
+LTrSpace 45 nodes 4 36 37 50 199 globNum 456 mat 1 crossSect 1
+LTrSpace 46 nodes 4 37 38 51 200 globNum 457 mat 1 crossSect 1
+LTrSpace 47 nodes 4 38 39 52 201 globNum 458 mat 1 crossSect 1
+LTrSpace 48 nodes 4 39 40 53 202 globNum 459 mat 1 crossSect 1
+LTrSpace 49 nodes 4 40 41 54 203 globNum 460 mat 1 crossSect 1
+LTrSpace 50 nodes 4 41 42 55 204 globNum 461 mat 1 crossSect 1
+LTrSpace 51 nodes 4 43 28 44 205 globNum 484 mat 1 crossSect 1
+LTrSpace 52 nodes 4 44 29 45 206 globNum 485 mat 1 crossSect 1
+LTrSpace 53 nodes 4 45 30 56 207 globNum 486 mat 1 crossSect 1
+LTrSpace 54 nodes 4 208 30 56 32 globNum 487 mat 1 crossSect 1
+LTrSpace 55 nodes 4 46 33 47 209 globNum 498 mat 1 crossSect 1
+LTrSpace 56 nodes 4 47 34 48 210 globNum 499 mat 1 crossSect 1
+LTrSpace 57 nodes 4 48 35 49 211 globNum 500 mat 1 crossSect 1
+LTrSpace 58 nodes 4 49 36 50 212 globNum 501 mat 1 crossSect 1
+LTrSpace 59 nodes 4 50 37 51 213 globNum 502 mat 1 crossSect 1
+LTrSpace 60 nodes 4 51 38 52 214 globNum 503 mat 1 crossSect 1
+LTrSpace 61 nodes 4 52 39 53 215 globNum 504 mat 1 crossSect 1
+LTrSpace 62 nodes 4 53 40 54 216 globNum 505 mat 1 crossSect 1
+LTrSpace 63 nodes 4 54 41 55 217 globNum 506 mat 1 crossSect 1
+LTrSpace 64 nodes 4 43 44 57 205 globNum 528 mat 1 crossSect 1
+LTrSpace 65 nodes 4 44 45 58 206 globNum 529 mat 1 crossSect 1
+LTrSpace 66 nodes 4 45 56 59 207 globNum 530 mat 1 crossSect 1
+LTrSpace 67 nodes 4 46 47 60 209 globNum 539 mat 1 crossSect 1
+LTrSpace 68 nodes 4 47 48 61 210 globNum 540 mat 1 crossSect 1
+LTrSpace 69 nodes 4 48 49 61 211 globNum 541 mat 1 crossSect 1
+LTrSpace 70 nodes 4 49 50 62 212 globNum 542 mat 1 crossSect 1
+LTrSpace 71 nodes 4 50 51 62 213 globNum 543 mat 1 crossSect 1
+LTrSpace 72 nodes 4 51 52 63 214 globNum 544 mat 1 crossSect 1
+LTrSpace 73 nodes 4 225 53 52 63 globNum 545 mat 1 crossSect 1
+LTrSpace 74 nodes 4 53 54 64 216 globNum 546 mat 1 crossSect 1
+LTrSpace 75 nodes 4 54 55 64 217 globNum 547 mat 1 crossSect 1
+LTrSpace 76 nodes 4 44 58 70 218 globNum 567 mat 1 crossSect 1
+LTrSpace 77 nodes 4 58 45 59 219 globNum 568 mat 1 crossSect 1
+LTrSpace 78 nodes 4 60 47 66 221 globNum 577 mat 1 crossSect 1
+LTrSpace 79 nodes 4 47 61 66 221 globNum 578 mat 1 crossSect 1
+LTrSpace 80 nodes 4 61 49 67 222 globNum 579 mat 1 crossSect 1
+LTrSpace 81 nodes 4 229 67 49 222 globNum 580 mat 1 crossSect 1
+LTrSpace 82 nodes 4 62 51 68 223 globNum 581 mat 1 crossSect 1
+LTrSpace 83 nodes 4 51 63 68 224 globNum 582 mat 1 crossSect 1
+LTrSpace 84 nodes 4 63 53 69 225 globNum 583 mat 1 crossSect 1
+LTrSpace 85 nodes 4 53 64 69 225 globNum 584 mat 1 crossSect 1
+LTrSpace 86 nodes 4 57 44 70 218 globNum 605 mat 1 crossSect 1
+LTrSpace 87 nodes 4 233 59 58 71 globNum 606 mat 1 crossSect 1
+LTrSpace 88 nodes 4 235 59 65 220 globNum 607 mat 1 crossSect 1
+LTrSpace 89 nodes 4 60 66 73 227 globNum 614 mat 1 crossSect 1
+LTrSpace 90 nodes 4 66 61 74 228 globNum 615 mat 1 crossSect 1
+LTrSpace 91 nodes 4 74 61 222 228 globNum 616 mat 1 crossSect 1
+LTrSpace 92 nodes 4 67 62 75 229 globNum 617 mat 1 crossSect 1
+LTrSpace 93 nodes 4 62 68 75 229 globNum 618 mat 1 crossSect 1
+LTrSpace 94 nodes 4 68 63 76 230 globNum 619 mat 1 crossSect 1
+LTrSpace 95 nodes 4 63 69 76 230 globNum 620 mat 1 crossSect 1
+LTrSpace 96 nodes 4 69 64 77 231 globNum 621 mat 1 crossSect 1
+LTrSpace 97 nodes 4 57 70 78 232 globNum 642 mat 1 crossSect 1
+LTrSpace 98 nodes 4 58 71 80 233 globNum 643 mat 1 crossSect 1
+LTrSpace 99 nodes 4 235 71 59 234 globNum 644 mat 1 crossSect 1
+LTrSpace 100 nodes 4 72 65 73 235 globNum 645 mat 1 crossSect 1
+LTrSpace 101 nodes 4 73 66 74 228 globNum 650 mat 1 crossSect 1
+LTrSpace 102 nodes 4 74 67 75 229 globNum 651 mat 1 crossSect 1
+LTrSpace 103 nodes 4 75 68 76 236 globNum 652 mat 1 crossSect 1
+LTrSpace 104 nodes 4 76 69 77 237 globNum 653 mat 1 crossSect 1
+LTrSpace 105 nodes 4 78 70 79 232 globNum 665 mat 1 crossSect 1
+LTrSpace 106 nodes 4 70 58 80 233 globNum 666 mat 1 crossSect 1
+LTrSpace 107 nodes 4 72 73 74 235 globNum 667 mat 1 crossSect 1
+LTrSpace 108 nodes 4 74 75 71 238 globNum 668 mat 1 crossSect 1
+LTrSpace 109 nodes 4 241 76 75 80 globNum 669 mat 1 crossSect 1
+LTrSpace 110 nodes 4 76 77 79 237 globNum 670 mat 1 crossSect 1
+LTrSpace 111 nodes 4 78 79 77 239 globNum 680 mat 1 crossSect 1
+LTrSpace 112 nodes 4 79 70 80 240 globNum 681 mat 1 crossSect 1
+LTrSpace 113 nodes 4 80 71 75 241 globNum 682 mat 1 crossSect 1
+LTrSpace 114 nodes 4 80 76 79 240 globNum 683 mat 1 crossSect 1
+LTrSpace 115 nodes 4 3 1 85 31 globNum 714 mat 1 crossSect 1
+LTrSpace 116 nodes 4 81 6 82 189 globNum 750 mat 1 crossSect 1
+LTrSpace 117 nodes 4 82 5 83 188 globNum 751 mat 1 crossSect 1
+LTrSpace 118 nodes 4 83 4 84 187 globNum 752 mat 1 crossSect 1
+LTrSpace 119 nodes 4 84 3 85 186 globNum 753 mat 1 crossSect 1
+LTrSpace 120 nodes 4 30 85 86 20 globNum 754 mat 1 crossSect 1
+LTrSpace 121 nodes 4 86 19 87 194 globNum 755 mat 1 crossSect 1
+LTrSpace 122 nodes 4 87 18 88 193 globNum 756 mat 1 crossSect 1
+LTrSpace 123 nodes 4 81 82 89 189 globNum 798 mat 1 crossSect 1
+LTrSpace 124 nodes 4 82 83 90 188 globNum 799 mat 1 crossSect 1
+LTrSpace 125 nodes 4 83 84 91 187 globNum 800 mat 1 crossSect 1
+LTrSpace 126 nodes 4 84 85 86 195 globNum 801 mat 1 crossSect 1
+LTrSpace 127 nodes 4 86 87 91 194 globNum 802 mat 1 crossSect 1
+LTrSpace 128 nodes 4 87 88 92 193 globNum 803 mat 1 crossSect 1
+LTrSpace 129 nodes 4 89 82 90 242 globNum 829 mat 1 crossSect 1
+LTrSpace 130 nodes 4 90 83 91 243 globNum 830 mat 1 crossSect 1
+LTrSpace 131 nodes 4 91 84 86 244 globNum 831 mat 1 crossSect 1
+LTrSpace 132 nodes 4 91 87 92 245 globNum 832 mat 1 crossSect 1
+LTrSpace 133 nodes 4 193 93 92 246 globNum 833 mat 1 crossSect 1
+LTrSpace 134 nodes 4 90 91 94 247 globNum 856 mat 1 crossSect 1
+LTrSpace 135 nodes 4 91 92 94 245 globNum 857 mat 1 crossSect 1
+LTrSpace 136 nodes 4 92 93 95 246 globNum 858 mat 1 crossSect 1
+LTrSpace 137 nodes 4 90 94 96 247 globNum 878 mat 1 crossSect 1
+LTrSpace 138 nodes 4 94 92 95 248 globNum 879 mat 1 crossSect 1
+LTrSpace 139 nodes 4 94 95 96 248 globNum 898 mat 1 crossSect 1
+LTrSpace 140 nodes 4 97 8 98 203 globNum 1068 mat 1 crossSect 1
+LTrSpace 141 nodes 4 98 9 99 202 globNum 1069 mat 1 crossSect 1
+LTrSpace 142 nodes 4 99 10 100 201 globNum 1070 mat 1 crossSect 1
+LTrSpace 143 nodes 4 100 11 101 200 globNum 1071 mat 1 crossSect 1
+LTrSpace 144 nodes 4 101 12 102 199 globNum 1072 mat 1 crossSect 1
+LTrSpace 145 nodes 4 102 13 103 198 globNum 1073 mat 1 crossSect 1
+LTrSpace 146 nodes 4 103 14 104 197 globNum 1074 mat 1 crossSect 1
+LTrSpace 147 nodes 4 104 15 105 196 globNum 1075 mat 1 crossSect 1
+LTrSpace 148 nodes 4 97 98 106 203 globNum 1160 mat 1 crossSect 1
+LTrSpace 149 nodes 4 98 99 107 202 globNum 1161 mat 1 crossSect 1
+LTrSpace 150 nodes 4 99 100 108 201 globNum 1162 mat 1 crossSect 1
+LTrSpace 151 nodes 4 100 101 109 200 globNum 1163 mat 1 crossSect 1
+LTrSpace 152 nodes 4 101 102 110 199 globNum 1164 mat 1 crossSect 1
+LTrSpace 153 nodes 4 102 103 111 198 globNum 1165 mat 1 crossSect 1
+LTrSpace 154 nodes 4 103 104 112 197 globNum 1166 mat 1 crossSect 1
+LTrSpace 155 nodes 4 104 105 113 196 globNum 1167 mat 1 crossSect 1
+LTrSpace 156 nodes 4 106 98 107 251 globNum 1248 mat 1 crossSect 1
+LTrSpace 157 nodes 4 107 99 108 252 globNum 1249 mat 1 crossSect 1
+LTrSpace 158 nodes 4 108 100 109 253 globNum 1250 mat 1 crossSect 1
+LTrSpace 159 nodes 4 109 101 110 254 globNum 1251 mat 1 crossSect 1
+LTrSpace 160 nodes 4 110 102 111 255 globNum 1252 mat 1 crossSect 1
+LTrSpace 161 nodes 4 111 103 112 256 globNum 1253 mat 1 crossSect 1
+LTrSpace 162 nodes 4 112 104 113 257 globNum 1254 mat 1 crossSect 1
+LTrSpace 163 nodes 4 113 105 114 258 globNum 1255 mat 1 crossSect 1
+LTrSpace 164 nodes 4 106 107 116 251 globNum 1331 mat 1 crossSect 1
+LTrSpace 165 nodes 4 107 108 117 252 globNum 1332 mat 1 crossSect 1
+LTrSpace 166 nodes 4 108 109 118 253 globNum 1333 mat 1 crossSect 1
+LTrSpace 167 nodes 4 109 110 119 254 globNum 1334 mat 1 crossSect 1
+LTrSpace 168 nodes 4 110 111 120 255 globNum 1335 mat 1 crossSect 1
+LTrSpace 169 nodes 4 111 112 121 256 globNum 1336 mat 1 crossSect 1
+LTrSpace 170 nodes 4 266 113 112 122 globNum 1337 mat 1 crossSect 1
+LTrSpace 171 nodes 4 267 114 113 123 globNum 1338 mat 1 crossSect 1
+LTrSpace 172 nodes 4 115 106 116 260 globNum 1410 mat 1 crossSect 1
+LTrSpace 173 nodes 4 116 107 117 261 globNum 1411 mat 1 crossSect 1
+LTrSpace 174 nodes 4 117 108 118 262 globNum 1412 mat 1 crossSect 1
+LTrSpace 175 nodes 4 118 109 119 263 globNum 1413 mat 1 crossSect 1
+LTrSpace 176 nodes 4 119 110 120 264 globNum 1414 mat 1 crossSect 1
+LTrSpace 177 nodes 4 120 111 121 265 globNum 1415 mat 1 crossSect 1
+LTrSpace 178 nodes 4 121 112 122 266 globNum 1416 mat 1 crossSect 1
+LTrSpace 179 nodes 4 122 113 123 267 globNum 1417 mat 1 crossSect 1
+LTrSpace 180 nodes 4 123 114 124 268 globNum 1418 mat 1 crossSect 1
+LTrSpace 181 nodes 4 115 116 126 260 globNum 1486 mat 1 crossSect 1
+LTrSpace 182 nodes 4 116 117 127 261 globNum 1487 mat 1 crossSect 1
+LTrSpace 183 nodes 4 117 118 128 262 globNum 1488 mat 1 crossSect 1
+LTrSpace 184 nodes 4 118 119 129 263 globNum 1489 mat 1 crossSect 1
+LTrSpace 185 nodes 4 119 120 130 264 globNum 1490 mat 1 crossSect 1
+LTrSpace 186 nodes 4 120 121 131 265 globNum 1491 mat 1 crossSect 1
+LTrSpace 187 nodes 4 276 122 121 132 globNum 1492 mat 1 crossSect 1
+LTrSpace 188 nodes 4 277 123 122 133 globNum 1493 mat 1 crossSect 1
+LTrSpace 189 nodes 4 278 124 123 134 globNum 1494 mat 1 crossSect 1
+LTrSpace 190 nodes 4 125 115 126 270 globNum 1558 mat 1 crossSect 1
+LTrSpace 191 nodes 4 126 116 127 271 globNum 1559 mat 1 crossSect 1
+LTrSpace 192 nodes 4 127 117 128 272 globNum 1560 mat 1 crossSect 1
+LTrSpace 193 nodes 4 128 118 129 273 globNum 1561 mat 1 crossSect 1
+LTrSpace 194 nodes 4 129 119 130 274 globNum 1562 mat 1 crossSect 1
+LTrSpace 195 nodes 4 130 120 131 275 globNum 1563 mat 1 crossSect 1
+LTrSpace 196 nodes 4 131 121 132 276 globNum 1564 mat 1 crossSect 1
+LTrSpace 197 nodes 4 132 122 133 277 globNum 1565 mat 1 crossSect 1
+LTrSpace 198 nodes 4 133 123 134 278 globNum 1566 mat 1 crossSect 1
+LTrSpace 199 nodes 4 125 126 135 270 globNum 1629 mat 1 crossSect 1
+LTrSpace 200 nodes 4 126 127 136 271 globNum 1630 mat 1 crossSect 1
+LTrSpace 201 nodes 4 127 128 137 272 globNum 1631 mat 1 crossSect 1
+LTrSpace 202 nodes 4 128 129 138 273 globNum 1632 mat 1 crossSect 1
+LTrSpace 203 nodes 4 129 130 139 274 globNum 1633 mat 1 crossSect 1
+LTrSpace 204 nodes 4 130 131 140 275 globNum 1634 mat 1 crossSect 1
+LTrSpace 205 nodes 4 131 132 141 276 globNum 1635 mat 1 crossSect 1
+LTrSpace 206 nodes 4 132 133 142 277 globNum 1636 mat 1 crossSect 1
+LTrSpace 207 nodes 4 288 134 133 143 globNum 1637 mat 1 crossSect 1
+LTrSpace 208 nodes 4 135 126 136 281 globNum 1696 mat 1 crossSect 1
+LTrSpace 209 nodes 4 136 127 137 282 globNum 1697 mat 1 crossSect 1
+LTrSpace 210 nodes 4 137 128 138 283 globNum 1698 mat 1 crossSect 1
+LTrSpace 211 nodes 4 138 129 139 284 globNum 1699 mat 1 crossSect 1
+LTrSpace 212 nodes 4 139 130 140 285 globNum 1700 mat 1 crossSect 1
+LTrSpace 213 nodes 4 140 131 141 286 globNum 1701 mat 1 crossSect 1
+LTrSpace 214 nodes 4 141 132 142 287 globNum 1702 mat 1 crossSect 1
+LTrSpace 215 nodes 4 142 133 143 288 globNum 1703 mat 1 crossSect 1
+LTrSpace 216 nodes 4 135 136 146 281 globNum 1756 mat 1 crossSect 1
+LTrSpace 217 nodes 4 136 137 147 282 globNum 1757 mat 1 crossSect 1
+LTrSpace 218 nodes 4 137 138 148 283 globNum 1758 mat 1 crossSect 1
+LTrSpace 219 nodes 4 138 139 149 284 globNum 1759 mat 1 crossSect 1
+LTrSpace 220 nodes 4 139 140 150 285 globNum 1760 mat 1 crossSect 1
+LTrSpace 221 nodes 4 140 141 151 286 globNum 1761 mat 1 crossSect 1
+LTrSpace 222 nodes 4 141 142 152 287 globNum 1762 mat 1 crossSect 1
+LTrSpace 223 nodes 4 142 143 153 288 globNum 1763 mat 1 crossSect 1
+LTrSpace 224 nodes 4 143 144 154 289 globNum 1764 mat 1 crossSect 1
+LTrSpace 225 nodes 4 145 135 146 290 globNum 1812 mat 1 crossSect 1
+LTrSpace 226 nodes 4 146 136 147 291 globNum 1813 mat 1 crossSect 1
+LTrSpace 227 nodes 4 147 137 148 292 globNum 1814 mat 1 crossSect 1
+LTrSpace 228 nodes 4 148 138 149 293 globNum 1815 mat 1 crossSect 1
+LTrSpace 229 nodes 4 149 139 150 294 globNum 1816 mat 1 crossSect 1
+LTrSpace 230 nodes 4 150 140 151 295 globNum 1817 mat 1 crossSect 1
+LTrSpace 231 nodes 4 151 141 152 296 globNum 1818 mat 1 crossSect 1
+LTrSpace 232 nodes 4 152 142 153 297 globNum 1819 mat 1 crossSect 1
+LTrSpace 233 nodes 4 153 143 154 289 globNum 1820 mat 1 crossSect 1
+LTrSpace 234 nodes 4 154 144 155 289 globNum 1821 mat 1 crossSect 1
+LTrSpace 235 nodes 4 145 146 157 290 globNum 1868 mat 1 crossSect 1
+LTrSpace 236 nodes 4 146 147 158 291 globNum 1869 mat 1 crossSect 1
+LTrSpace 237 nodes 4 147 148 159 292 globNum 1870 mat 1 crossSect 1
+LTrSpace 238 nodes 4 148 149 160 293 globNum 1871 mat 1 crossSect 1
+LTrSpace 239 nodes 4 149 150 161 294 globNum 1872 mat 1 crossSect 1
+LTrSpace 240 nodes 4 150 151 162 295 globNum 1873 mat 1 crossSect 1
+LTrSpace 241 nodes 4 151 152 163 296 globNum 1874 mat 1 crossSect 1
+LTrSpace 242 nodes 4 152 153 164 297 globNum 1875 mat 1 crossSect 1
+LTrSpace 243 nodes 4 153 154 165 298 globNum 1876 mat 1 crossSect 1
+LTrSpace 244 nodes 4 154 155 166 299 globNum 1877 mat 1 crossSect 1
+LTrSpace 245 nodes 4 156 145 157 300 globNum 1920 mat 1 crossSect 1
+LTrSpace 246 nodes 4 157 146 158 301 globNum 1921 mat 1 crossSect 1
+LTrSpace 247 nodes 4 158 147 159 302 globNum 1922 mat 1 crossSect 1
+LTrSpace 248 nodes 4 159 148 160 303 globNum 1923 mat 1 crossSect 1
+LTrSpace 249 nodes 4 160 149 161 304 globNum 1924 mat 1 crossSect 1
+LTrSpace 250 nodes 4 161 150 162 305 globNum 1925 mat 1 crossSect 1
+LTrSpace 251 nodes 4 162 151 163 306 globNum 1926 mat 1 crossSect 1
+LTrSpace 252 nodes 4 163 152 164 307 globNum 1927 mat 1 crossSect 1
+LTrSpace 253 nodes 4 164 153 165 298 globNum 1928 mat 1 crossSect 1
+LTrSpace 254 nodes 4 165 154 166 299 globNum 1929 mat 1 crossSect 1
+LTrSpace 255 nodes 4 156 157 171 300 globNum 1968 mat 1 crossSect 1
+LTrSpace 256 nodes 4 157 158 172 301 globNum 1969 mat 1 crossSect 1
+LTrSpace 257 nodes 4 158 159 173 302 globNum 1970 mat 1 crossSect 1
+LTrSpace 258 nodes 4 159 160 174 303 globNum 1971 mat 1 crossSect 1
+LTrSpace 259 nodes 4 160 161 175 304 globNum 1972 mat 1 crossSect 1
+LTrSpace 260 nodes 4 161 162 176 305 globNum 1973 mat 1 crossSect 1
+LTrSpace 261 nodes 4 162 163 177 306 globNum 1974 mat 1 crossSect 1
+LTrSpace 262 nodes 4 163 164 178 311 globNum 1975 mat 1 crossSect 1
+LTrSpace 263 nodes 4 164 165 179 312 globNum 1976 mat 1 crossSect 1
+LTrSpace 264 nodes 4 165 166 180 313 globNum 1977 mat 1 crossSect 1
+LTrSpace 265 nodes 4 166 169 180 313 globNum 1978 mat 1 crossSect 1
+LTrSpace 266 nodes 4 169 167 180 309 globNum 1979 mat 1 crossSect 1
+LTrSpace 267 nodes 4 167 168 181 314 globNum 1980 mat 1 crossSect 1
+LTrSpace 268 nodes 4 170 156 171 315 globNum 2014 mat 1 crossSect 1
+LTrSpace 269 nodes 4 171 157 172 316 globNum 2015 mat 1 crossSect 1
+LTrSpace 270 nodes 4 172 158 173 317 globNum 2016 mat 1 crossSect 1
+LTrSpace 271 nodes 4 173 159 174 318 globNum 2017 mat 1 crossSect 1
+LTrSpace 272 nodes 4 174 160 175 319 globNum 2018 mat 1 crossSect 1
+LTrSpace 273 nodes 4 175 161 176 320 globNum 2019 mat 1 crossSect 1
+LTrSpace 274 nodes 4 176 162 177 321 globNum 2020 mat 1 crossSect 1
+LTrSpace 275 nodes 4 177 163 178 311 globNum 2021 mat 1 crossSect 1
+LTrSpace 276 nodes 4 178 164 179 312 globNum 2022 mat 1 crossSect 1
+LTrSpace 277 nodes 4 179 165 180 312 globNum 2023 mat 1 crossSect 1
+LTrSpace 278 nodes 4 180 167 181 322 globNum 2024 mat 1 crossSect 1
+LTrSpace 279 nodes 4 170 171 182 323 globNum 2054 mat 1 crossSect 1
+LTrSpace 280 nodes 4 171 172 183 324 globNum 2055 mat 1 crossSect 1
+LTrSpace 281 nodes 4 172 173 184 325 globNum 2056 mat 1 crossSect 1
+LTrSpace 282 nodes 4 178 179 185 327 globNum 2061 mat 1 crossSect 1
+LTrSpace 283 nodes 4 179 180 181 328 globNum 2062 mat 1 crossSect 1
+LTrSpace 284 nodes 4 182 171 183 323 globNum 2090 mat 1 crossSect 1
+LTrSpace 285 nodes 4 183 172 184 324 globNum 2091 mat 1 crossSect 1
+LTrSpace 286 nodes 4 185 179 181 329 globNum 2098 mat 1 crossSect 1
+LTrSpace 287 nodes 4 2 31 3 186 globNum 2292 mat 1 crossSect 1
+LTrSpace 288 nodes 4 21 84 4 187 globNum 2293 mat 1 crossSect 1
+LTrSpace 289 nodes 4 3 84 21 186 globNum 2294 mat 1 crossSect 1
+LTrSpace 290 nodes 4 22 83 5 188 globNum 2295 mat 1 crossSect 1
+LTrSpace 291 nodes 4 4 83 22 187 globNum 2296 mat 1 crossSect 1
+LTrSpace 292 nodes 4 23 82 6 189 globNum 2297 mat 1 crossSect 1
+LTrSpace 293 nodes 4 5 82 23 188 globNum 2298 mat 1 crossSect 1
+LTrSpace 294 nodes 4 6 81 24 189 globNum 2300 mat 1 crossSect 1
+LTrSpace 295 nodes 4 21 187 22 190 globNum 2349 mat 1 crossSect 1
+LTrSpace 296 nodes 4 22 191 23 25 globNum 2362 mat 1 crossSect 1
+LTrSpace 297 nodes 4 23 189 26 191 globNum 2364 mat 1 crossSect 1
+LTrSpace 298 nodes 4 28 88 18 193 globNum 2470 mat 1 crossSect 1
+LTrSpace 299 nodes 4 17 88 28 192 globNum 2471 mat 1 crossSect 1
+LTrSpace 300 nodes 4 29 87 19 194 globNum 2472 mat 1 crossSect 1
+LTrSpace 301 nodes 4 18 87 29 193 globNum 2473 mat 1 crossSect 1
+LTrSpace 302 nodes 4 85 30 86 195 globNum 2474 mat 1 crossSect 1
+LTrSpace 303 nodes 4 19 86 30 194 globNum 2475 mat 1 crossSect 1
+LTrSpace 304 nodes 4 30 85 20 31 globNum 2476 mat 1 crossSect 1
+LTrSpace 305 nodes 4 33 105 15 196 globNum 2488 mat 1 crossSect 1
+LTrSpace 306 nodes 4 34 104 14 197 globNum 2490 mat 1 crossSect 1
+LTrSpace 307 nodes 4 15 104 34 196 globNum 2491 mat 1 crossSect 1
+LTrSpace 308 nodes 4 35 103 13 198 globNum 2492 mat 1 crossSect 1
+LTrSpace 309 nodes 4 14 103 35 197 globNum 2493 mat 1 crossSect 1
+LTrSpace 310 nodes 4 36 102 12 199 globNum 2494 mat 1 crossSect 1
+LTrSpace 311 nodes 4 13 102 36 198 globNum 2495 mat 1 crossSect 1
+LTrSpace 312 nodes 4 37 101 11 200 globNum 2496 mat 1 crossSect 1
+LTrSpace 313 nodes 4 12 101 37 199 globNum 2497 mat 1 crossSect 1
+LTrSpace 314 nodes 4 38 100 10 201 globNum 2498 mat 1 crossSect 1
+LTrSpace 315 nodes 4 11 100 38 200 globNum 2499 mat 1 crossSect 1
+LTrSpace 316 nodes 4 39 99 9 202 globNum 2500 mat 1 crossSect 1
+LTrSpace 317 nodes 4 10 99 39 201 globNum 2501 mat 1 crossSect 1
+LTrSpace 318 nodes 4 40 98 8 203 globNum 2502 mat 1 crossSect 1
+LTrSpace 319 nodes 4 9 98 40 202 globNum 2503 mat 1 crossSect 1
+LTrSpace 320 nodes 4 41 97 7 204 globNum 2504 mat 1 crossSect 1
+LTrSpace 321 nodes 4 8 97 41 203 globNum 2505 mat 1 crossSect 1
+LTrSpace 322 nodes 4 186 30 31 85 globNum 2536 mat 1 crossSect 1
+LTrSpace 323 nodes 4 43 192 28 205 globNum 2553 mat 1 crossSect 1
+LTrSpace 324 nodes 4 44 193 29 206 globNum 2555 mat 1 crossSect 1
+LTrSpace 325 nodes 4 28 193 44 205 globNum 2556 mat 1 crossSect 1
+LTrSpace 326 nodes 4 45 194 30 207 globNum 2557 mat 1 crossSect 1
+LTrSpace 327 nodes 4 30 186 32 208 globNum 2558 mat 1 crossSect 1
+LTrSpace 328 nodes 4 47 196 34 210 globNum 2576 mat 1 crossSect 1
+LTrSpace 329 nodes 4 33 196 47 209 globNum 2577 mat 1 crossSect 1
+LTrSpace 330 nodes 4 48 197 35 211 globNum 2578 mat 1 crossSect 1
+LTrSpace 331 nodes 4 34 197 48 210 globNum 2579 mat 1 crossSect 1
+LTrSpace 332 nodes 4 49 198 36 212 globNum 2580 mat 1 crossSect 1
+LTrSpace 333 nodes 4 35 198 49 211 globNum 2581 mat 1 crossSect 1
+LTrSpace 334 nodes 4 50 199 37 213 globNum 2582 mat 1 crossSect 1
+LTrSpace 335 nodes 4 36 199 50 212 globNum 2583 mat 1 crossSect 1
+LTrSpace 336 nodes 4 51 200 38 214 globNum 2584 mat 1 crossSect 1
+LTrSpace 337 nodes 4 37 200 51 213 globNum 2585 mat 1 crossSect 1
+LTrSpace 338 nodes 4 52 201 39 215 globNum 2586 mat 1 crossSect 1
+LTrSpace 339 nodes 4 38 201 52 214 globNum 2587 mat 1 crossSect 1
+LTrSpace 340 nodes 4 53 202 40 216 globNum 2588 mat 1 crossSect 1
+LTrSpace 341 nodes 4 39 202 53 215 globNum 2589 mat 1 crossSect 1
+LTrSpace 342 nodes 4 54 203 41 217 globNum 2590 mat 1 crossSect 1
+LTrSpace 343 nodes 4 40 203 54 216 globNum 2591 mat 1 crossSect 1
+LTrSpace 344 nodes 4 41 204 55 217 globNum 2593 mat 1 crossSect 1
+LTrSpace 345 nodes 4 194 45 206 207 globNum 2625 mat 1 crossSect 1
+LTrSpace 346 nodes 4 30 208 56 207 globNum 2626 mat 1 crossSect 1
+LTrSpace 347 nodes 4 57 205 44 218 globNum 2649 mat 1 crossSect 1
+LTrSpace 348 nodes 4 58 206 45 219 globNum 2651 mat 1 crossSect 1
+LTrSpace 349 nodes 4 44 206 58 218 globNum 2652 mat 1 crossSect 1
+LTrSpace 350 nodes 4 59 207 56 208 globNum 2653 mat 1 crossSect 1
+LTrSpace 351 nodes 4 45 207 59 219 globNum 2654 mat 1 crossSect 1
+LTrSpace 352 nodes 4 60 209 47 221 globNum 2662 mat 1 crossSect 1
+LTrSpace 353 nodes 4 61 210 48 211 globNum 2663 mat 1 crossSect 1
+LTrSpace 354 nodes 4 47 210 61 221 globNum 2664 mat 1 crossSect 1
+LTrSpace 355 nodes 4 61 211 49 222 globNum 2665 mat 1 crossSect 1
+LTrSpace 356 nodes 4 62 212 50 213 globNum 2666 mat 1 crossSect 1
+LTrSpace 357 nodes 4 229 212 49 62 globNum 2667 mat 1 crossSect 1
+LTrSpace 358 nodes 4 62 213 51 223 globNum 2668 mat 1 crossSect 1
+LTrSpace 359 nodes 4 225 214 52 215 globNum 2669 mat 1 crossSect 1
+LTrSpace 360 nodes 4 51 214 63 224 globNum 2670 mat 1 crossSect 1
+LTrSpace 361 nodes 4 225 52 53 215 globNum 2671 mat 1 crossSect 1
+LTrSpace 362 nodes 4 64 216 54 217 globNum 2672 mat 1 crossSect 1
+LTrSpace 363 nodes 4 53 216 64 225 globNum 2673 mat 1 crossSect 1
+LTrSpace 364 nodes 4 64 217 55 226 globNum 2674 mat 1 crossSect 1
+LTrSpace 365 nodes 4 233 70 218 240 globNum 2692 mat 1 crossSect 1
+LTrSpace 366 nodes 4 60 221 66 227 globNum 2700 mat 1 crossSect 1
+LTrSpace 367 nodes 4 66 221 61 228 globNum 2701 mat 1 crossSect 1
+LTrSpace 368 nodes 4 74 222 61 67 globNum 2702 mat 1 crossSect 1
+LTrSpace 369 nodes 4 67 229 49 62 globNum 2703 mat 1 crossSect 1
+LTrSpace 370 nodes 4 68 223 51 224 globNum 2704 mat 1 crossSect 1
+LTrSpace 371 nodes 4 62 223 68 229 globNum 2705 mat 1 crossSect 1
+LTrSpace 372 nodes 4 68 224 63 230 globNum 2706 mat 1 crossSect 1
+LTrSpace 373 nodes 4 63 225 69 230 globNum 2707 mat 1 crossSect 1
+LTrSpace 374 nodes 4 69 225 64 231 globNum 2708 mat 1 crossSect 1
+LTrSpace 375 nodes 4 57 218 70 232 globNum 2730 mat 1 crossSect 1
+LTrSpace 376 nodes 4 59 233 58 219 globNum 2731 mat 1 crossSect 1
+LTrSpace 377 nodes 4 59 235 65 72 globNum 2732 mat 1 crossSect 1
+LTrSpace 378 nodes 4 73 227 66 228 globNum 2738 mat 1 crossSect 1
+LTrSpace 379 nodes 4 229 74 67 222 globNum 2739 mat 1 crossSect 1
+LTrSpace 380 nodes 4 75 229 68 236 globNum 2740 mat 1 crossSect 1
+LTrSpace 381 nodes 4 68 230 76 236 globNum 2741 mat 1 crossSect 1
+LTrSpace 382 nodes 4 76 230 69 237 globNum 2742 mat 1 crossSect 1
+LTrSpace 383 nodes 4 69 231 77 237 globNum 2743 mat 1 crossSect 1
+LTrSpace 384 nodes 4 80 233 71 241 globNum 2764 mat 1 crossSect 1
+LTrSpace 385 nodes 4 71 235 59 72 globNum 2765 mat 1 crossSect 1
+LTrSpace 386 nodes 4 59 234 71 233 globNum 2766 mat 1 crossSect 1
+LTrSpace 387 nodes 4 73 228 74 235 globNum 2769 mat 1 crossSect 1
+LTrSpace 388 nodes 4 74 229 75 238 globNum 2770 mat 1 crossSect 1
+LTrSpace 389 nodes 4 79 232 70 240 globNum 2782 mat 1 crossSect 1
+LTrSpace 390 nodes 4 78 232 79 239 globNum 2783 mat 1 crossSect 1
+LTrSpace 391 nodes 4 70 233 80 240 globNum 2784 mat 1 crossSect 1
+LTrSpace 392 nodes 4 235 72 71 74 globNum 2785 mat 1 crossSect 1
+LTrSpace 393 nodes 4 235 238 74 71 globNum 2786 mat 1 crossSect 1
+LTrSpace 394 nodes 4 71 238 75 241 globNum 2787 mat 1 crossSect 1
+LTrSpace 395 nodes 4 241 76 80 240 globNum 2788 mat 1 crossSect 1
+LTrSpace 396 nodes 4 76 241 75 236 globNum 2789 mat 1 crossSect 1
+LTrSpace 397 nodes 4 79 237 77 239 globNum 2790 mat 1 crossSect 1
+LTrSpace 398 nodes 4 76 237 79 240 globNum 2791 mat 1 crossSect 1
+LTrSpace 399 nodes 4 3 31 85 186 globNum 2839 mat 1 crossSect 1
+LTrSpace 400 nodes 4 84 186 85 195 globNum 2862 mat 1 crossSect 1
+LTrSpace 401 nodes 4 89 189 82 242 globNum 2901 mat 1 crossSect 1
+LTrSpace 402 nodes 4 90 188 83 243 globNum 2903 mat 1 crossSect 1
+LTrSpace 403 nodes 4 82 188 90 242 globNum 2904 mat 1 crossSect 1
+LTrSpace 404 nodes 4 91 187 84 244 globNum 2905 mat 1 crossSect 1
+LTrSpace 405 nodes 4 83 187 91 243 globNum 2906 mat 1 crossSect 1
+LTrSpace 406 nodes 4 84 195 86 244 globNum 2907 mat 1 crossSect 1
+LTrSpace 407 nodes 4 91 194 87 245 globNum 2908 mat 1 crossSect 1
+LTrSpace 408 nodes 4 86 194 91 244 globNum 2909 mat 1 crossSect 1
+LTrSpace 409 nodes 4 193 92 93 88 globNum 2910 mat 1 crossSect 1
+LTrSpace 410 nodes 4 87 193 92 245 globNum 2911 mat 1 crossSect 1
+LTrSpace 411 nodes 4 193 192 88 93 globNum 2913 mat 1 crossSect 1
+LTrSpace 412 nodes 4 90 243 91 247 globNum 2938 mat 1 crossSect 1
+LTrSpace 413 nodes 4 94 247 91 245 globNum 2965 mat 1 crossSect 1
+LTrSpace 414 nodes 4 94 245 92 248 globNum 2966 mat 1 crossSect 1
+LTrSpace 415 nodes 4 92 246 95 248 globNum 2968 mat 1 crossSect 1
+LTrSpace 416 nodes 4 96 247 94 248 globNum 2985 mat 1 crossSect 1
+LTrSpace 417 nodes 4 90 247 96 249 globNum 2986 mat 1 crossSect 1
+LTrSpace 418 nodes 4 106 203 98 251 globNum 3208 mat 1 crossSect 1
+LTrSpace 419 nodes 4 97 203 106 250 globNum 3209 mat 1 crossSect 1
+LTrSpace 420 nodes 4 107 202 99 252 globNum 3210 mat 1 crossSect 1
+LTrSpace 421 nodes 4 98 202 107 251 globNum 3211 mat 1 crossSect 1
+LTrSpace 422 nodes 4 108 201 100 253 globNum 3212 mat 1 crossSect 1
+LTrSpace 423 nodes 4 99 201 108 252 globNum 3213 mat 1 crossSect 1
+LTrSpace 424 nodes 4 109 200 101 254 globNum 3214 mat 1 crossSect 1
+LTrSpace 425 nodes 4 100 200 109 253 globNum 3215 mat 1 crossSect 1
+LTrSpace 426 nodes 4 110 199 102 255 globNum 3216 mat 1 crossSect 1
+LTrSpace 427 nodes 4 101 199 110 254 globNum 3217 mat 1 crossSect 1
+LTrSpace 428 nodes 4 111 198 103 256 globNum 3218 mat 1 crossSect 1
+LTrSpace 429 nodes 4 102 198 111 255 globNum 3219 mat 1 crossSect 1
+LTrSpace 430 nodes 4 112 197 104 257 globNum 3220 mat 1 crossSect 1
+LTrSpace 431 nodes 4 103 197 112 256 globNum 3221 mat 1 crossSect 1
+LTrSpace 432 nodes 4 113 196 105 258 globNum 3222 mat 1 crossSect 1
+LTrSpace 433 nodes 4 104 196 113 257 globNum 3223 mat 1 crossSect 1
+LTrSpace 434 nodes 4 115 250 106 260 globNum 3374 mat 1 crossSect 1
+LTrSpace 435 nodes 4 116 251 107 261 globNum 3376 mat 1 crossSect 1
+LTrSpace 436 nodes 4 106 251 116 260 globNum 3377 mat 1 crossSect 1
+LTrSpace 437 nodes 4 117 252 108 262 globNum 3378 mat 1 crossSect 1
+LTrSpace 438 nodes 4 107 252 117 261 globNum 3379 mat 1 crossSect 1
+LTrSpace 439 nodes 4 118 253 109 263 globNum 3380 mat 1 crossSect 1
+LTrSpace 440 nodes 4 108 253 118 262 globNum 3381 mat 1 crossSect 1
+LTrSpace 441 nodes 4 119 254 110 264 globNum 3382 mat 1 crossSect 1
+LTrSpace 442 nodes 4 109 254 119 263 globNum 3383 mat 1 crossSect 1
+LTrSpace 443 nodes 4 120 255 111 265 globNum 3384 mat 1 crossSect 1
+LTrSpace 444 nodes 4 121 256 112 266 globNum 3385 mat 1 crossSect 1
+LTrSpace 445 nodes 4 111 256 121 265 globNum 3386 mat 1 crossSect 1
+LTrSpace 446 nodes 4 113 266 112 257 globNum 3387 mat 1 crossSect 1
+LTrSpace 447 nodes 4 114 267 113 258 globNum 3388 mat 1 crossSect 1
+LTrSpace 448 nodes 4 255 120 264 265 globNum 3483 mat 1 crossSect 1
+LTrSpace 449 nodes 4 113 267 122 266 globNum 3484 mat 1 crossSect 1
+LTrSpace 450 nodes 4 114 268 123 267 globNum 3485 mat 1 crossSect 1
+LTrSpace 451 nodes 4 125 259 115 270 globNum 3529 mat 1 crossSect 1
+LTrSpace 452 nodes 4 126 260 116 271 globNum 3531 mat 1 crossSect 1
+LTrSpace 453 nodes 4 115 260 126 270 globNum 3532 mat 1 crossSect 1
+LTrSpace 454 nodes 4 127 261 117 272 globNum 3533 mat 1 crossSect 1
+LTrSpace 455 nodes 4 116 261 127 271 globNum 3534 mat 1 crossSect 1
+LTrSpace 456 nodes 4 128 262 118 273 globNum 3535 mat 1 crossSect 1
+LTrSpace 457 nodes 4 117 262 128 272 globNum 3536 mat 1 crossSect 1
+LTrSpace 458 nodes 4 129 263 119 274 globNum 3537 mat 1 crossSect 1
+LTrSpace 459 nodes 4 118 263 129 273 globNum 3538 mat 1 crossSect 1
+LTrSpace 460 nodes 4 130 264 120 275 globNum 3539 mat 1 crossSect 1
+LTrSpace 461 nodes 4 119 264 130 274 globNum 3540 mat 1 crossSect 1
+LTrSpace 462 nodes 4 131 265 121 276 globNum 3541 mat 1 crossSect 1
+LTrSpace 463 nodes 4 122 276 121 266 globNum 3542 mat 1 crossSect 1
+LTrSpace 464 nodes 4 123 277 122 267 globNum 3543 mat 1 crossSect 1
+LTrSpace 465 nodes 4 124 278 123 268 globNum 3544 mat 1 crossSect 1
+LTrSpace 466 nodes 4 265 131 275 276 globNum 3627 mat 1 crossSect 1
+LTrSpace 467 nodes 4 122 277 132 276 globNum 3628 mat 1 crossSect 1
+LTrSpace 468 nodes 4 123 278 133 277 globNum 3629 mat 1 crossSect 1
+LTrSpace 469 nodes 4 135 270 126 281 globNum 3680 mat 1 crossSect 1
+LTrSpace 470 nodes 4 125 270 135 280 globNum 3681 mat 1 crossSect 1
+LTrSpace 471 nodes 4 136 271 127 282 globNum 3682 mat 1 crossSect 1
+LTrSpace 472 nodes 4 126 271 136 281 globNum 3683 mat 1 crossSect 1
+LTrSpace 473 nodes 4 137 272 128 283 globNum 3684 mat 1 crossSect 1
+LTrSpace 474 nodes 4 127 272 137 282 globNum 3685 mat 1 crossSect 1
+LTrSpace 475 nodes 4 138 273 129 284 globNum 3686 mat 1 crossSect 1
+LTrSpace 476 nodes 4 128 273 138 283 globNum 3687 mat 1 crossSect 1
+LTrSpace 477 nodes 4 139 274 130 285 globNum 3688 mat 1 crossSect 1
+LTrSpace 478 nodes 4 129 274 139 284 globNum 3689 mat 1 crossSect 1
+LTrSpace 479 nodes 4 140 275 131 286 globNum 3690 mat 1 crossSect 1
+LTrSpace 480 nodes 4 130 275 140 285 globNum 3691 mat 1 crossSect 1
+LTrSpace 481 nodes 4 141 276 132 287 globNum 3692 mat 1 crossSect 1
+LTrSpace 482 nodes 4 132 277 142 287 globNum 3693 mat 1 crossSect 1
+LTrSpace 483 nodes 4 134 288 133 278 globNum 3694 mat 1 crossSect 1
+LTrSpace 484 nodes 4 276 141 286 287 globNum 3767 mat 1 crossSect 1
+LTrSpace 485 nodes 4 277 142 288 133 globNum 3768 mat 1 crossSect 1
+LTrSpace 486 nodes 4 134 289 144 143 globNum 3769 mat 1 crossSect 1
+LTrSpace 487 nodes 4 145 280 135 290 globNum 3808 mat 1 crossSect 1
+LTrSpace 488 nodes 4 146 281 136 291 globNum 3810 mat 1 crossSect 1
+LTrSpace 489 nodes 4 135 281 146 290 globNum 3811 mat 1 crossSect 1
+LTrSpace 490 nodes 4 147 282 137 292 globNum 3812 mat 1 crossSect 1
+LTrSpace 491 nodes 4 136 282 147 291 globNum 3813 mat 1 crossSect 1
+LTrSpace 492 nodes 4 148 283 138 293 globNum 3814 mat 1 crossSect 1
+LTrSpace 493 nodes 4 137 283 148 292 globNum 3815 mat 1 crossSect 1
+LTrSpace 494 nodes 4 149 284 139 294 globNum 3816 mat 1 crossSect 1
+LTrSpace 495 nodes 4 138 284 149 293 globNum 3817 mat 1 crossSect 1
+LTrSpace 496 nodes 4 150 285 140 295 globNum 3818 mat 1 crossSect 1
+LTrSpace 497 nodes 4 139 285 150 294 globNum 3819 mat 1 crossSect 1
+LTrSpace 498 nodes 4 151 286 141 296 globNum 3820 mat 1 crossSect 1
+LTrSpace 499 nodes 4 140 286 151 295 globNum 3821 mat 1 crossSect 1
+LTrSpace 500 nodes 4 152 287 142 297 globNum 3822 mat 1 crossSect 1
+LTrSpace 501 nodes 4 153 288 143 289 globNum 3823 mat 1 crossSect 1
+LTrSpace 502 nodes 4 142 288 153 297 globNum 3824 mat 1 crossSect 1
+LTrSpace 503 nodes 4 287 152 296 297 globNum 3888 mat 1 crossSect 1
+LTrSpace 504 nodes 4 153 289 154 298 globNum 3889 mat 1 crossSect 1
+LTrSpace 505 nodes 4 154 289 155 299 globNum 3890 mat 1 crossSect 1
+LTrSpace 506 nodes 4 157 290 146 301 globNum 3935 mat 1 crossSect 1
+LTrSpace 507 nodes 4 145 290 157 300 globNum 3936 mat 1 crossSect 1
+LTrSpace 508 nodes 4 158 291 147 302 globNum 3937 mat 1 crossSect 1
+LTrSpace 509 nodes 4 146 291 158 301 globNum 3938 mat 1 crossSect 1
+LTrSpace 510 nodes 4 159 292 148 303 globNum 3939 mat 1 crossSect 1
+LTrSpace 511 nodes 4 147 292 159 302 globNum 3940 mat 1 crossSect 1
+LTrSpace 512 nodes 4 160 293 149 304 globNum 3941 mat 1 crossSect 1
+LTrSpace 513 nodes 4 148 293 160 303 globNum 3942 mat 1 crossSect 1
+LTrSpace 514 nodes 4 161 294 150 305 globNum 3943 mat 1 crossSect 1
+LTrSpace 515 nodes 4 149 294 161 304 globNum 3944 mat 1 crossSect 1
+LTrSpace 516 nodes 4 162 295 151 306 globNum 3945 mat 1 crossSect 1
+LTrSpace 517 nodes 4 150 295 162 305 globNum 3946 mat 1 crossSect 1
+LTrSpace 518 nodes 4 163 296 152 307 globNum 3947 mat 1 crossSect 1
+LTrSpace 519 nodes 4 151 296 163 306 globNum 3948 mat 1 crossSect 1
+LTrSpace 520 nodes 4 164 297 153 298 globNum 3949 mat 1 crossSect 1
+LTrSpace 521 nodes 4 152 297 164 307 globNum 3950 mat 1 crossSect 1
+LTrSpace 522 nodes 4 165 298 154 299 globNum 3951 mat 1 crossSect 1
+LTrSpace 523 nodes 4 163 307 164 311 globNum 3998 mat 1 crossSect 1
+LTrSpace 524 nodes 4 164 298 165 312 globNum 3999 mat 1 crossSect 1
+LTrSpace 525 nodes 4 165 299 166 313 globNum 4000 mat 1 crossSect 1
+LTrSpace 526 nodes 4 166 308 169 313 globNum 4001 mat 1 crossSect 1
+LTrSpace 527 nodes 4 167 310 168 314 globNum 4002 mat 1 crossSect 1
+LTrSpace 528 nodes 4 171 300 157 316 globNum 4040 mat 1 crossSect 1
+LTrSpace 529 nodes 4 156 300 171 315 globNum 4041 mat 1 crossSect 1
+LTrSpace 530 nodes 4 172 301 158 317 globNum 4042 mat 1 crossSect 1
+LTrSpace 531 nodes 4 157 301 172 316 globNum 4043 mat 1 crossSect 1
+LTrSpace 532 nodes 4 173 302 159 318 globNum 4044 mat 1 crossSect 1
+LTrSpace 533 nodes 4 158 302 173 317 globNum 4045 mat 1 crossSect 1
+LTrSpace 534 nodes 4 174 303 160 319 globNum 4046 mat 1 crossSect 1
+LTrSpace 535 nodes 4 159 303 174 318 globNum 4047 mat 1 crossSect 1
+LTrSpace 536 nodes 4 175 304 161 320 globNum 4048 mat 1 crossSect 1
+LTrSpace 537 nodes 4 160 304 175 319 globNum 4049 mat 1 crossSect 1
+LTrSpace 538 nodes 4 176 305 162 321 globNum 4050 mat 1 crossSect 1
+LTrSpace 539 nodes 4 161 305 176 320 globNum 4051 mat 1 crossSect 1
+LTrSpace 540 nodes 4 177 306 163 311 globNum 4052 mat 1 crossSect 1
+LTrSpace 541 nodes 4 162 306 177 321 globNum 4053 mat 1 crossSect 1
+LTrSpace 542 nodes 4 178 311 164 312 globNum 4054 mat 1 crossSect 1
+LTrSpace 543 nodes 4 165 313 180 312 globNum 4055 mat 1 crossSect 1
+LTrSpace 544 nodes 4 180 313 169 309 globNum 4056 mat 1 crossSect 1
+LTrSpace 545 nodes 4 180 309 167 322 globNum 4057 mat 1 crossSect 1
+LTrSpace 546 nodes 4 167 314 181 322 globNum 4059 mat 1 crossSect 1
+LTrSpace 547 nodes 4 170 315 171 323 globNum 4090 mat 1 crossSect 1
+LTrSpace 548 nodes 4 171 316 172 324 globNum 4091 mat 1 crossSect 1
+LTrSpace 549 nodes 4 172 317 173 325 globNum 4092 mat 1 crossSect 1
+LTrSpace 550 nodes 4 178 312 179 327 globNum 4098 mat 1 crossSect 1
+LTrSpace 551 nodes 4 179 312 180 328 globNum 4099 mat 1 crossSect 1
+LTrSpace 552 nodes 4 180 322 181 328 globNum 4100 mat 1 crossSect 1
+LTrSpace 553 nodes 4 171 324 183 323 globNum 4130 mat 1 crossSect 1
+LTrSpace 554 nodes 4 172 325 184 324 globNum 4131 mat 1 crossSect 1
+LTrSpace 555 nodes 4 185 327 179 329 globNum 4140 mat 1 crossSect 1
+LTrSpace 556 nodes 4 179 328 181 329 globNum 4142 mat 1 crossSect 1
+LTrSpace 557 nodes 4 84 187 21 186 globNum 4331 mat 1 crossSect 1
+LTrSpace 558 nodes 4 83 188 22 187 globNum 4332 mat 1 crossSect 1
+LTrSpace 559 nodes 4 82 189 23 188 globNum 4333 mat 1 crossSect 1
+LTrSpace 560 nodes 4 22 190 187 188 globNum 4360 mat 1 crossSect 1
+LTrSpace 561 nodes 4 187 190 21 186 globNum 4361 mat 1 crossSect 1
+LTrSpace 562 nodes 4 23 191 188 189 globNum 4379 mat 1 crossSect 1
+LTrSpace 563 nodes 4 191 22 188 190 globNum 4418 mat 1 crossSect 1
+LTrSpace 564 nodes 4 88 193 28 192 globNum 4484 mat 1 crossSect 1
+LTrSpace 565 nodes 4 87 194 29 193 globNum 4485 mat 1 crossSect 1
+LTrSpace 566 nodes 4 244 86 30 195 globNum 4486 mat 1 crossSect 1
+LTrSpace 567 nodes 4 30 186 195 85 globNum 4487 mat 1 crossSect 1
+LTrSpace 568 nodes 4 104 197 34 196 globNum 4495 mat 1 crossSect 1
+LTrSpace 569 nodes 4 103 198 35 197 globNum 4496 mat 1 crossSect 1
+LTrSpace 570 nodes 4 102 199 36 198 globNum 4497 mat 1 crossSect 1
+LTrSpace 571 nodes 4 101 200 37 199 globNum 4498 mat 1 crossSect 1
+LTrSpace 572 nodes 4 100 201 38 200 globNum 4499 mat 1 crossSect 1
+LTrSpace 573 nodes 4 99 202 39 201 globNum 4500 mat 1 crossSect 1
+LTrSpace 574 nodes 4 98 203 40 202 globNum 4501 mat 1 crossSect 1
+LTrSpace 575 nodes 4 97 204 41 203 globNum 4502 mat 1 crossSect 1
+LTrSpace 576 nodes 4 28 205 192 193 globNum 4540 mat 1 crossSect 1
+LTrSpace 577 nodes 4 29 206 193 194 globNum 4542 mat 1 crossSect 1
+LTrSpace 578 nodes 4 193 206 44 205 globNum 4543 mat 1 crossSect 1
+LTrSpace 579 nodes 4 30 207 194 244 globNum 4544 mat 1 crossSect 1
+LTrSpace 580 nodes 4 45 194 206 29 globNum 4545 mat 1 crossSect 1
+LTrSpace 581 nodes 4 34 210 196 197 globNum 4566 mat 1 crossSect 1
+LTrSpace 582 nodes 4 196 210 47 209 globNum 4567 mat 1 crossSect 1
+LTrSpace 583 nodes 4 35 211 197 198 globNum 4568 mat 1 crossSect 1
+LTrSpace 584 nodes 4 197 211 48 210 globNum 4569 mat 1 crossSect 1
+LTrSpace 585 nodes 4 36 212 198 199 globNum 4570 mat 1 crossSect 1
+LTrSpace 586 nodes 4 198 212 49 211 globNum 4571 mat 1 crossSect 1
+LTrSpace 587 nodes 4 37 213 199 200 globNum 4572 mat 1 crossSect 1
+LTrSpace 588 nodes 4 199 213 50 212 globNum 4573 mat 1 crossSect 1
+LTrSpace 589 nodes 4 38 214 200 201 globNum 4574 mat 1 crossSect 1
+LTrSpace 590 nodes 4 200 214 51 213 globNum 4575 mat 1 crossSect 1
+LTrSpace 591 nodes 4 39 215 201 202 globNum 4576 mat 1 crossSect 1
+LTrSpace 592 nodes 4 201 215 52 214 globNum 4577 mat 1 crossSect 1
+LTrSpace 593 nodes 4 40 216 202 203 globNum 4578 mat 1 crossSect 1
+LTrSpace 594 nodes 4 202 216 53 215 globNum 4579 mat 1 crossSect 1
+LTrSpace 595 nodes 4 41 217 203 204 globNum 4580 mat 1 crossSect 1
+LTrSpace 596 nodes 4 203 217 54 216 globNum 4581 mat 1 crossSect 1
+LTrSpace 597 nodes 4 206 207 45 219 globNum 4617 mat 1 crossSect 1
+LTrSpace 598 nodes 4 30 208 207 244 globNum 4618 mat 1 crossSect 1
+LTrSpace 599 nodes 4 44 218 205 206 globNum 4642 mat 1 crossSect 1
+LTrSpace 600 nodes 4 205 218 57 232 globNum 4643 mat 1 crossSect 1
+LTrSpace 601 nodes 4 206 219 58 218 globNum 4645 mat 1 crossSect 1
+LTrSpace 602 nodes 4 59 208 220 219 globNum 4646 mat 1 crossSect 1
+LTrSpace 603 nodes 4 208 59 207 219 globNum 4647 mat 1 crossSect 1
+LTrSpace 604 nodes 4 47 221 209 210 globNum 4656 mat 1 crossSect 1
+LTrSpace 605 nodes 4 210 211 61 222 globNum 4657 mat 1 crossSect 1
+LTrSpace 606 nodes 4 61 221 210 228 globNum 4658 mat 1 crossSect 1
+LTrSpace 607 nodes 4 49 222 211 212 globNum 4659 mat 1 crossSect 1
+LTrSpace 608 nodes 4 229 223 344 213 globNum 4660 mat 1 crossSect 1
+LTrSpace 609 nodes 4 229 49 212 222 globNum 4661 mat 1 crossSect 1
+LTrSpace 610 nodes 4 51 223 213 224 globNum 4662 mat 1 crossSect 1
+LTrSpace 611 nodes 4 214 225 52 63 globNum 4663 mat 1 crossSect 1
+LTrSpace 612 nodes 4 63 224 214 225 globNum 4664 mat 1 crossSect 1
+LTrSpace 613 nodes 4 214 224 51 213 globNum 4665 mat 1 crossSect 1
+LTrSpace 614 nodes 4 53 225 215 216 globNum 4666 mat 1 crossSect 1
+LTrSpace 615 nodes 4 217 64 348 226 globNum 4667 mat 1 crossSect 1
+LTrSpace 616 nodes 4 64 225 216 231 globNum 4668 mat 1 crossSect 1
+LTrSpace 617 nodes 4 70 233 218 58 globNum 4689 mat 1 crossSect 1
+LTrSpace 618 nodes 4 218 240 70 232 globNum 4690 mat 1 crossSect 1
+LTrSpace 619 nodes 4 66 227 221 228 globNum 4699 mat 1 crossSect 1
+LTrSpace 620 nodes 4 222 74 238 229 globNum 4700 mat 1 crossSect 1
+LTrSpace 621 nodes 4 222 228 61 210 globNum 4701 mat 1 crossSect 1
+LTrSpace 622 nodes 4 223 224 68 236 globNum 4702 mat 1 crossSect 1
+LTrSpace 623 nodes 4 68 229 223 236 globNum 4703 mat 1 crossSect 1
+LTrSpace 624 nodes 4 229 212 213 344 globNum 4704 mat 1 crossSect 1
+LTrSpace 625 nodes 4 63 230 224 225 globNum 4705 mat 1 crossSect 1
+LTrSpace 626 nodes 4 224 230 68 236 globNum 4706 mat 1 crossSect 1
+LTrSpace 627 nodes 4 69 230 225 237 globNum 4707 mat 1 crossSect 1
+LTrSpace 628 nodes 4 225 231 69 237 globNum 4708 mat 1 crossSect 1
+LTrSpace 629 nodes 4 64 348 231 216 globNum 4710 mat 1 crossSect 1
+LTrSpace 630 nodes 4 59 233 219 234 globNum 4731 mat 1 crossSect 1
+LTrSpace 631 nodes 4 219 233 58 218 globNum 4732 mat 1 crossSect 1
+LTrSpace 632 nodes 4 220 235 59 234 globNum 4733 mat 1 crossSect 1
+LTrSpace 633 nodes 4 227 228 73 235 globNum 4737 mat 1 crossSect 1
+LTrSpace 634 nodes 4 222 238 74 228 globNum 4738 mat 1 crossSect 1
+LTrSpace 635 nodes 4 238 236 75 241 globNum 4739 mat 1 crossSect 1
+LTrSpace 636 nodes 4 76 230 237 365 globNum 4740 mat 1 crossSect 1
+LTrSpace 637 nodes 4 77 237 231 239 globNum 4741 mat 1 crossSect 1
+LTrSpace 638 nodes 4 71 241 234 238 globNum 4761 mat 1 crossSect 1
+LTrSpace 639 nodes 4 233 241 80 240 globNum 4762 mat 1 crossSect 1
+LTrSpace 640 nodes 4 241 71 234 233 globNum 4763 mat 1 crossSect 1
+LTrSpace 641 nodes 4 74 235 228 238 globNum 4766 mat 1 crossSect 1
+LTrSpace 642 nodes 4 238 75 236 229 globNum 4767 mat 1 crossSect 1
+LTrSpace 643 nodes 4 232 240 79 239 globNum 4777 mat 1 crossSect 1
+LTrSpace 644 nodes 4 238 235 234 71 globNum 4779 mat 1 crossSect 1
+LTrSpace 645 nodes 4 241 365 236 76 globNum 4780 mat 1 crossSect 1
+LTrSpace 646 nodes 4 237 239 79 240 globNum 4781 mat 1 crossSect 1
+LTrSpace 647 nodes 4 244 84 186 187 globNum 4860 mat 1 crossSect 1
+LTrSpace 648 nodes 4 82 242 189 188 globNum 4900 mat 1 crossSect 1
+LTrSpace 649 nodes 4 83 243 188 187 globNum 4902 mat 1 crossSect 1
+LTrSpace 650 nodes 4 188 243 90 242 globNum 4903 mat 1 crossSect 1
+LTrSpace 651 nodes 4 187 244 91 243 globNum 4904 mat 1 crossSect 1
+LTrSpace 652 nodes 4 87 245 194 193 globNum 4905 mat 1 crossSect 1
+LTrSpace 653 nodes 4 194 245 91 244 globNum 4906 mat 1 crossSect 1
+LTrSpace 654 nodes 4 192 193 246 93 globNum 4907 mat 1 crossSect 1
+LTrSpace 655 nodes 4 193 246 92 245 globNum 4908 mat 1 crossSect 1
+LTrSpace 656 nodes 4 91 247 243 244 globNum 4935 mat 1 crossSect 1
+LTrSpace 657 nodes 4 243 247 90 242 globNum 4936 mat 1 crossSect 1
+LTrSpace 658 nodes 4 91 245 247 244 globNum 4967 mat 1 crossSect 1
+LTrSpace 659 nodes 4 247 245 94 248 globNum 4968 mat 1 crossSect 1
+LTrSpace 660 nodes 4 92 248 245 246 globNum 4969 mat 1 crossSect 1
+LTrSpace 661 nodes 4 247 248 96 249 globNum 4990 mat 1 crossSect 1
+LTrSpace 662 nodes 4 247 249 90 242 globNum 4991 mat 1 crossSect 1
+LTrSpace 663 nodes 4 97 250 204 203 globNum 5190 mat 1 crossSect 1
+LTrSpace 664 nodes 4 98 251 203 202 globNum 5192 mat 1 crossSect 1
+LTrSpace 665 nodes 4 203 251 106 250 globNum 5193 mat 1 crossSect 1
+LTrSpace 666 nodes 4 99 252 202 201 globNum 5194 mat 1 crossSect 1
+LTrSpace 667 nodes 4 202 252 107 251 globNum 5195 mat 1 crossSect 1
+LTrSpace 668 nodes 4 100 253 201 200 globNum 5196 mat 1 crossSect 1
+LTrSpace 669 nodes 4 201 253 108 252 globNum 5197 mat 1 crossSect 1
+LTrSpace 670 nodes 4 101 254 200 199 globNum 5198 mat 1 crossSect 1
+LTrSpace 671 nodes 4 200 254 109 253 globNum 5199 mat 1 crossSect 1
+LTrSpace 672 nodes 4 102 255 199 198 globNum 5200 mat 1 crossSect 1
+LTrSpace 673 nodes 4 199 255 110 254 globNum 5201 mat 1 crossSect 1
+LTrSpace 674 nodes 4 103 256 198 197 globNum 5202 mat 1 crossSect 1
+LTrSpace 675 nodes 4 198 256 111 255 globNum 5203 mat 1 crossSect 1
+LTrSpace 676 nodes 4 104 257 197 196 globNum 5204 mat 1 crossSect 1
+LTrSpace 677 nodes 4 197 257 112 256 globNum 5205 mat 1 crossSect 1
+LTrSpace 678 nodes 4 196 258 113 257 globNum 5207 mat 1 crossSect 1
+LTrSpace 679 nodes 4 106 260 250 251 globNum 5369 mat 1 crossSect 1
+LTrSpace 680 nodes 4 250 260 115 259 globNum 5370 mat 1 crossSect 1
+LTrSpace 681 nodes 4 107 261 251 252 globNum 5371 mat 1 crossSect 1
+LTrSpace 682 nodes 4 251 261 116 260 globNum 5372 mat 1 crossSect 1
+LTrSpace 683 nodes 4 108 262 252 253 globNum 5373 mat 1 crossSect 1
+LTrSpace 684 nodes 4 252 262 117 261 globNum 5374 mat 1 crossSect 1
+LTrSpace 685 nodes 4 109 263 253 254 globNum 5375 mat 1 crossSect 1
+LTrSpace 686 nodes 4 253 263 118 262 globNum 5376 mat 1 crossSect 1
+LTrSpace 687 nodes 4 110 264 254 255 globNum 5377 mat 1 crossSect 1
+LTrSpace 688 nodes 4 254 264 119 263 globNum 5378 mat 1 crossSect 1
+LTrSpace 689 nodes 4 111 265 255 256 globNum 5379 mat 1 crossSect 1
+LTrSpace 690 nodes 4 120 255 264 110 globNum 5380 mat 1 crossSect 1
+LTrSpace 691 nodes 4 112 266 256 257 globNum 5381 mat 1 crossSect 1
+LTrSpace 692 nodes 4 256 266 121 265 globNum 5382 mat 1 crossSect 1
+LTrSpace 693 nodes 4 113 266 257 267 globNum 5383 mat 1 crossSect 1
+LTrSpace 694 nodes 4 114 267 258 268 globNum 5384 mat 1 crossSect 1
+LTrSpace 695 nodes 4 258 267 113 257 globNum 5385 mat 1 crossSect 1
+LTrSpace 696 nodes 4 264 265 120 275 globNum 5500 mat 1 crossSect 1
+LTrSpace 697 nodes 4 122 266 267 277 globNum 5501 mat 1 crossSect 1
+LTrSpace 698 nodes 4 123 267 268 278 globNum 5502 mat 1 crossSect 1
+LTrSpace 699 nodes 4 115 270 259 260 globNum 5547 mat 1 crossSect 1
+LTrSpace 700 nodes 4 259 270 125 269 globNum 5548 mat 1 crossSect 1
+LTrSpace 701 nodes 4 116 271 260 261 globNum 5549 mat 1 crossSect 1
+LTrSpace 702 nodes 4 260 271 126 270 globNum 5550 mat 1 crossSect 1
+LTrSpace 703 nodes 4 117 272 261 262 globNum 5551 mat 1 crossSect 1
+LTrSpace 704 nodes 4 261 272 127 271 globNum 5552 mat 1 crossSect 1
+LTrSpace 705 nodes 4 118 273 262 263 globNum 5553 mat 1 crossSect 1
+LTrSpace 706 nodes 4 262 273 128 272 globNum 5554 mat 1 crossSect 1
+LTrSpace 707 nodes 4 119 274 263 264 globNum 5555 mat 1 crossSect 1
+LTrSpace 708 nodes 4 263 274 129 273 globNum 5556 mat 1 crossSect 1
+LTrSpace 709 nodes 4 264 275 130 274 globNum 5557 mat 1 crossSect 1
+LTrSpace 710 nodes 4 121 276 265 266 globNum 5558 mat 1 crossSect 1
+LTrSpace 711 nodes 4 131 265 275 120 globNum 5559 mat 1 crossSect 1
+LTrSpace 712 nodes 4 122 276 266 277 globNum 5560 mat 1 crossSect 1
+LTrSpace 713 nodes 4 123 277 267 278 globNum 5561 mat 1 crossSect 1
+LTrSpace 714 nodes 4 275 276 131 286 globNum 5642 mat 1 crossSect 1
+LTrSpace 715 nodes 4 132 276 277 287 globNum 5643 mat 1 crossSect 1
+LTrSpace 716 nodes 4 133 277 278 288 globNum 5644 mat 1 crossSect 1
+LTrSpace 717 nodes 4 125 280 269 270 globNum 5689 mat 1 crossSect 1
+LTrSpace 718 nodes 4 126 281 270 271 globNum 5691 mat 1 crossSect 1
+LTrSpace 719 nodes 4 270 281 135 280 globNum 5692 mat 1 crossSect 1
+LTrSpace 720 nodes 4 127 282 271 272 globNum 5693 mat 1 crossSect 1
+LTrSpace 721 nodes 4 271 282 136 281 globNum 5694 mat 1 crossSect 1
+LTrSpace 722 nodes 4 128 283 272 273 globNum 5695 mat 1 crossSect 1
+LTrSpace 723 nodes 4 272 283 137 282 globNum 5696 mat 1 crossSect 1
+LTrSpace 724 nodes 4 129 284 273 274 globNum 5697 mat 1 crossSect 1
+LTrSpace 725 nodes 4 273 284 138 283 globNum 5698 mat 1 crossSect 1
+LTrSpace 726 nodes 4 130 285 274 275 globNum 5699 mat 1 crossSect 1
+LTrSpace 727 nodes 4 274 285 139 284 globNum 5700 mat 1 crossSect 1
+LTrSpace 728 nodes 4 275 286 140 285 globNum 5701 mat 1 crossSect 1
+LTrSpace 729 nodes 4 141 276 286 131 globNum 5702 mat 1 crossSect 1
+LTrSpace 730 nodes 4 142 277 288 287 globNum 5703 mat 1 crossSect 1
+LTrSpace 731 nodes 4 134 288 278 279 globNum 5704 mat 1 crossSect 1
+LTrSpace 732 nodes 4 143 288 134 289 globNum 5705 mat 1 crossSect 1
+LTrSpace 733 nodes 4 286 287 141 296 globNum 5788 mat 1 crossSect 1
+LTrSpace 734 nodes 4 142 287 288 297 globNum 5789 mat 1 crossSect 1
+LTrSpace 735 nodes 4 279 289 134 288 globNum 5791 mat 1 crossSect 1
+LTrSpace 736 nodes 4 135 290 280 281 globNum 5835 mat 1 crossSect 1
+LTrSpace 737 nodes 4 136 291 281 282 globNum 5837 mat 1 crossSect 1
+LTrSpace 738 nodes 4 281 291 146 290 globNum 5838 mat 1 crossSect 1
+LTrSpace 739 nodes 4 137 292 282 283 globNum 5839 mat 1 crossSect 1
+LTrSpace 740 nodes 4 282 292 147 291 globNum 5840 mat 1 crossSect 1
+LTrSpace 741 nodes 4 138 293 283 284 globNum 5841 mat 1 crossSect 1
+LTrSpace 742 nodes 4 283 293 148 292 globNum 5842 mat 1 crossSect 1
+LTrSpace 743 nodes 4 139 294 284 285 globNum 5843 mat 1 crossSect 1
+LTrSpace 744 nodes 4 284 294 149 293 globNum 5844 mat 1 crossSect 1
+LTrSpace 745 nodes 4 140 295 285 286 globNum 5845 mat 1 crossSect 1
+LTrSpace 746 nodes 4 285 295 150 294 globNum 5846 mat 1 crossSect 1
+LTrSpace 747 nodes 4 286 296 151 295 globNum 5847 mat 1 crossSect 1
+LTrSpace 748 nodes 4 152 287 296 141 globNum 5848 mat 1 crossSect 1
+LTrSpace 749 nodes 4 288 289 153 297 globNum 5849 mat 1 crossSect 1
+LTrSpace 750 nodes 4 296 297 152 307 globNum 5924 mat 1 crossSect 1
+LTrSpace 751 nodes 4 154 298 289 299 globNum 5925 mat 1 crossSect 1
+LTrSpace 752 nodes 4 289 298 153 297 globNum 5926 mat 1 crossSect 1
+LTrSpace 753 nodes 4 146 301 290 291 globNum 5977 mat 1 crossSect 1
+LTrSpace 754 nodes 4 290 301 157 300 globNum 5978 mat 1 crossSect 1
+LTrSpace 755 nodes 4 147 302 291 292 globNum 5979 mat 1 crossSect 1
+LTrSpace 756 nodes 4 291 302 158 301 globNum 5980 mat 1 crossSect 1
+LTrSpace 757 nodes 4 148 303 292 293 globNum 5981 mat 1 crossSect 1
+LTrSpace 758 nodes 4 292 303 159 302 globNum 5982 mat 1 crossSect 1
+LTrSpace 759 nodes 4 149 304 293 294 globNum 5983 mat 1 crossSect 1
+LTrSpace 760 nodes 4 293 304 160 303 globNum 5984 mat 1 crossSect 1
+LTrSpace 761 nodes 4 150 305 294 295 globNum 5985 mat 1 crossSect 1
+LTrSpace 762 nodes 4 294 305 161 304 globNum 5986 mat 1 crossSect 1
+LTrSpace 763 nodes 4 151 306 295 296 globNum 5987 mat 1 crossSect 1
+LTrSpace 764 nodes 4 295 306 162 305 globNum 5988 mat 1 crossSect 1
+LTrSpace 765 nodes 4 296 307 163 306 globNum 5989 mat 1 crossSect 1
+LTrSpace 766 nodes 4 297 298 164 330 globNum 5990 mat 1 crossSect 1
+LTrSpace 767 nodes 4 164 307 297 330 globNum 5991 mat 1 crossSect 1
+LTrSpace 768 nodes 4 298 299 165 313 globNum 5992 mat 1 crossSect 1
+LTrSpace 769 nodes 4 164 311 307 330 globNum 6041 mat 1 crossSect 1
+LTrSpace 770 nodes 4 307 311 163 306 globNum 6042 mat 1 crossSect 1
+LTrSpace 771 nodes 4 165 312 298 313 globNum 6043 mat 1 crossSect 1
+LTrSpace 772 nodes 4 298 312 164 330 globNum 6044 mat 1 crossSect 1
+LTrSpace 773 nodes 4 166 313 299 308 globNum 6045 mat 1 crossSect 1
+LTrSpace 774 nodes 4 169 313 308 309 globNum 6046 mat 1 crossSect 1
+LTrSpace 775 nodes 4 322 310 167 314 globNum 6048 mat 1 crossSect 1
+LTrSpace 776 nodes 4 157 316 300 301 globNum 6091 mat 1 crossSect 1
+LTrSpace 777 nodes 4 300 316 171 315 globNum 6092 mat 1 crossSect 1
+LTrSpace 778 nodes 4 158 317 301 302 globNum 6093 mat 1 crossSect 1
+LTrSpace 779 nodes 4 301 317 172 316 globNum 6094 mat 1 crossSect 1
+LTrSpace 780 nodes 4 159 318 302 303 globNum 6095 mat 1 crossSect 1
+LTrSpace 781 nodes 4 302 318 173 317 globNum 6096 mat 1 crossSect 1
+LTrSpace 782 nodes 4 160 319 303 304 globNum 6097 mat 1 crossSect 1
+LTrSpace 783 nodes 4 303 319 174 318 globNum 6098 mat 1 crossSect 1
+LTrSpace 784 nodes 4 161 320 304 305 globNum 6099 mat 1 crossSect 1
+LTrSpace 785 nodes 4 304 320 175 319 globNum 6100 mat 1 crossSect 1
+LTrSpace 786 nodes 4 162 321 305 306 globNum 6101 mat 1 crossSect 1
+LTrSpace 787 nodes 4 305 321 176 320 globNum 6102 mat 1 crossSect 1
+LTrSpace 788 nodes 4 306 311 177 331 globNum 6103 mat 1 crossSect 1
+LTrSpace 789 nodes 4 177 321 306 331 globNum 6104 mat 1 crossSect 1
+LTrSpace 790 nodes 4 164 312 311 330 globNum 6105 mat 1 crossSect 1
+LTrSpace 791 nodes 4 311 312 178 327 globNum 6106 mat 1 crossSect 1
+LTrSpace 792 nodes 4 180 312 313 328 globNum 6107 mat 1 crossSect 1
+LTrSpace 793 nodes 4 313 309 180 322 globNum 6108 mat 1 crossSect 1
+LTrSpace 794 nodes 4 310 322 167 309 globNum 6109 mat 1 crossSect 1
+LTrSpace 795 nodes 4 181 322 314 332 globNum 6111 mat 1 crossSect 1
+LTrSpace 796 nodes 4 171 323 315 324 globNum 6150 mat 1 crossSect 1
+LTrSpace 797 nodes 4 172 324 316 325 globNum 6152 mat 1 crossSect 1
+LTrSpace 798 nodes 4 316 324 171 315 globNum 6153 mat 1 crossSect 1
+LTrSpace 799 nodes 4 173 325 317 318 globNum 6154 mat 1 crossSect 1
+LTrSpace 800 nodes 4 317 325 172 316 globNum 6155 mat 1 crossSect 1
+LTrSpace 801 nodes 4 177 326 321 331 globNum 6162 mat 1 crossSect 1
+LTrSpace 802 nodes 4 179 327 312 328 globNum 6166 mat 1 crossSect 1
+LTrSpace 803 nodes 4 181 328 322 332 globNum 6167 mat 1 crossSect 1
+LTrSpace 804 nodes 4 322 328 180 313 globNum 6168 mat 1 crossSect 1
+LTrSpace 805 nodes 4 179 329 327 328 globNum 6205 mat 1 crossSect 1
+LTrSpace 806 nodes 4 181 329 328 332 globNum 6207 mat 1 crossSect 1
+LTrSpace 807 nodes 4 187 188 190 243 globNum 6354 mat 1 crossSect 1
+LTrSpace 808 nodes 4 190 186 187 244 globNum 6355 mat 1 crossSect 1
+LTrSpace 809 nodes 4 188 189 191 242 globNum 6375 mat 1 crossSect 1
+LTrSpace 810 nodes 4 86 244 30 194 globNum 6468 mat 1 crossSect 1
+LTrSpace 811 nodes 4 186 30 244 208 globNum 6473 mat 1 crossSect 1
+LTrSpace 812 nodes 4 30 186 244 195 globNum 6474 mat 1 crossSect 1
+LTrSpace 813 nodes 4 192 193 205 246 globNum 6496 mat 1 crossSect 1
+LTrSpace 814 nodes 4 193 194 206 245 globNum 6498 mat 1 crossSect 1
+LTrSpace 815 nodes 4 206 205 193 246 globNum 6499 mat 1 crossSect 1
+LTrSpace 816 nodes 4 194 244 207 245 globNum 6500 mat 1 crossSect 1
+LTrSpace 817 nodes 4 207 206 194 245 globNum 6501 mat 1 crossSect 1
+LTrSpace 818 nodes 4 196 197 210 257 globNum 6515 mat 1 crossSect 1
+LTrSpace 819 nodes 4 210 209 196 257 globNum 6516 mat 1 crossSect 1
+LTrSpace 820 nodes 4 197 198 211 256 globNum 6517 mat 1 crossSect 1
+LTrSpace 821 nodes 4 211 210 197 257 globNum 6518 mat 1 crossSect 1
+LTrSpace 822 nodes 4 198 199 212 255 globNum 6519 mat 1 crossSect 1
+LTrSpace 823 nodes 4 212 211 198 256 globNum 6520 mat 1 crossSect 1
+LTrSpace 824 nodes 4 199 200 213 254 globNum 6521 mat 1 crossSect 1
+LTrSpace 825 nodes 4 213 212 199 255 globNum 6522 mat 1 crossSect 1
+LTrSpace 826 nodes 4 200 201 214 253 globNum 6523 mat 1 crossSect 1
+LTrSpace 827 nodes 4 214 213 200 254 globNum 6524 mat 1 crossSect 1
+LTrSpace 828 nodes 4 201 202 215 252 globNum 6525 mat 1 crossSect 1
+LTrSpace 829 nodes 4 215 214 201 253 globNum 6526 mat 1 crossSect 1
+LTrSpace 830 nodes 4 202 203 216 251 globNum 6527 mat 1 crossSect 1
+LTrSpace 831 nodes 4 216 215 202 252 globNum 6528 mat 1 crossSect 1
+LTrSpace 832 nodes 4 203 204 217 250 globNum 6529 mat 1 crossSect 1
+LTrSpace 833 nodes 4 217 216 203 251 globNum 6530 mat 1 crossSect 1
+LTrSpace 834 nodes 4 207 219 206 335 globNum 6561 mat 1 crossSect 1
+LTrSpace 835 nodes 4 207 244 208 336 globNum 6562 mat 1 crossSect 1
+LTrSpace 836 nodes 4 205 206 218 337 globNum 6584 mat 1 crossSect 1
+LTrSpace 837 nodes 4 218 232 205 338 globNum 6585 mat 1 crossSect 1
+LTrSpace 838 nodes 4 219 218 206 337 globNum 6587 mat 1 crossSect 1
+LTrSpace 839 nodes 4 208 336 219 207 globNum 6588 mat 1 crossSect 1
+LTrSpace 840 nodes 4 219 208 220 436 globNum 6589 mat 1 crossSect 1
+LTrSpace 841 nodes 4 219 220 59 234 globNum 6590 mat 1 crossSect 1
+LTrSpace 842 nodes 4 209 210 221 340 globNum 6595 mat 1 crossSect 1
+LTrSpace 843 nodes 4 211 222 210 341 globNum 6596 mat 1 crossSect 1
+LTrSpace 844 nodes 4 210 228 221 342 globNum 6597 mat 1 crossSect 1
+LTrSpace 845 nodes 4 211 212 222 343 globNum 6598 mat 1 crossSect 1
+LTrSpace 846 nodes 4 229 213 212 62 globNum 6599 mat 1 crossSect 1
+LTrSpace 847 nodes 4 212 229 222 343 globNum 6600 mat 1 crossSect 1
+LTrSpace 848 nodes 4 223 213 346 344 globNum 6601 mat 1 crossSect 1
+LTrSpace 849 nodes 4 215 225 214 345 globNum 6602 mat 1 crossSect 1
+LTrSpace 850 nodes 4 214 225 224 345 globNum 6603 mat 1 crossSect 1
+LTrSpace 851 nodes 4 224 213 214 346 globNum 6604 mat 1 crossSect 1
+LTrSpace 852 nodes 4 215 216 225 347 globNum 6605 mat 1 crossSect 1
+LTrSpace 853 nodes 4 64 217 348 216 globNum 6606 mat 1 crossSect 1
+LTrSpace 854 nodes 4 216 231 225 347 globNum 6607 mat 1 crossSect 1
+LTrSpace 855 nodes 4 218 233 240 350 globNum 6627 mat 1 crossSect 1
+LTrSpace 856 nodes 4 240 232 218 350 globNum 6628 mat 1 crossSect 1
+LTrSpace 857 nodes 4 359 228 221 227 globNum 6636 mat 1 crossSect 1
+LTrSpace 858 nodes 4 354 222 228 238 globNum 6637 mat 1 crossSect 1
+LTrSpace 859 nodes 4 228 210 222 341 globNum 6638 mat 1 crossSect 1
+LTrSpace 860 nodes 4 224 236 223 355 globNum 6639 mat 1 crossSect 1
+LTrSpace 861 nodes 4 223 236 229 355 globNum 6640 mat 1 crossSect 1
+LTrSpace 862 nodes 4 223 229 62 213 globNum 6641 mat 1 crossSect 1
+LTrSpace 863 nodes 4 224 225 230 345 globNum 6642 mat 1 crossSect 1
+LTrSpace 864 nodes 4 230 236 224 355 globNum 6643 mat 1 crossSect 1
+LTrSpace 865 nodes 4 225 237 230 356 globNum 6644 mat 1 crossSect 1
+LTrSpace 866 nodes 4 231 237 225 356 globNum 6645 mat 1 crossSect 1
+LTrSpace 867 nodes 4 64 231 348 226 globNum 6647 mat 1 crossSect 1
+LTrSpace 868 nodes 4 219 234 233 358 globNum 6668 mat 1 crossSect 1
+LTrSpace 869 nodes 4 435 219 233 358 globNum 6669 mat 1 crossSect 1
+LTrSpace 870 nodes 4 235 234 220 351 globNum 6670 mat 1 crossSect 1
+LTrSpace 871 nodes 4 228 235 227 359 globNum 6675 mat 1 crossSect 1
+LTrSpace 872 nodes 4 222 354 229 238 globNum 6676 mat 1 crossSect 1
+LTrSpace 873 nodes 4 238 360 229 236 globNum 6677 mat 1 crossSect 1
+LTrSpace 874 nodes 4 231 239 237 361 globNum 6678 mat 1 crossSect 1
+LTrSpace 875 nodes 4 241 234 362 233 globNum 6694 mat 1 crossSect 1
+LTrSpace 876 nodes 4 241 240 233 350 globNum 6695 mat 1 crossSect 1
+LTrSpace 877 nodes 4 241 362 234 238 globNum 6696 mat 1 crossSect 1
+LTrSpace 878 nodes 4 228 238 235 363 globNum 6699 mat 1 crossSect 1
+LTrSpace 879 nodes 4 360 238 241 236 globNum 6700 mat 1 crossSect 1
+LTrSpace 880 nodes 4 240 239 232 364 globNum 6712 mat 1 crossSect 1
+LTrSpace 881 nodes 4 235 238 234 363 globNum 6714 mat 1 crossSect 1
+LTrSpace 882 nodes 4 76 237 240 365 globNum 6715 mat 1 crossSect 1
+LTrSpace 883 nodes 4 365 241 240 76 globNum 6716 mat 1 crossSect 1
+LTrSpace 884 nodes 4 237 240 365 361 globNum 6717 mat 1 crossSect 1
+LTrSpace 885 nodes 4 84 244 186 195 globNum 6797 mat 1 crossSect 1
+LTrSpace 886 nodes 4 243 242 188 366 globNum 6831 mat 1 crossSect 1
+LTrSpace 887 nodes 4 244 243 187 190 globNum 6832 mat 1 crossSect 1
+LTrSpace 888 nodes 4 246 245 193 206 globNum 6833 mat 1 crossSect 1
+LTrSpace 889 nodes 4 243 244 247 336 globNum 6853 mat 1 crossSect 1
+LTrSpace 890 nodes 4 247 242 243 336 globNum 6854 mat 1 crossSect 1
+LTrSpace 891 nodes 4 247 244 245 336 globNum 6883 mat 1 crossSect 1
+LTrSpace 892 nodes 4 245 248 247 335 globNum 6884 mat 1 crossSect 1
+LTrSpace 893 nodes 4 245 246 248 337 globNum 6885 mat 1 crossSect 1
+LTrSpace 894 nodes 4 248 249 247 335 globNum 6906 mat 1 crossSect 1
+LTrSpace 895 nodes 4 249 242 247 368 globNum 6907 mat 1 crossSect 1
+LTrSpace 896 nodes 4 251 250 203 217 globNum 7048 mat 1 crossSect 1
+LTrSpace 897 nodes 4 252 251 202 216 globNum 7049 mat 1 crossSect 1
+LTrSpace 898 nodes 4 253 252 201 215 globNum 7050 mat 1 crossSect 1
+LTrSpace 899 nodes 4 254 253 200 214 globNum 7051 mat 1 crossSect 1
+LTrSpace 900 nodes 4 255 254 199 213 globNum 7052 mat 1 crossSect 1
+LTrSpace 901 nodes 4 256 255 198 212 globNum 7053 mat 1 crossSect 1
+LTrSpace 902 nodes 4 257 256 197 211 globNum 7054 mat 1 crossSect 1
+LTrSpace 903 nodes 4 258 257 196 209 globNum 7055 mat 1 crossSect 1
+LTrSpace 904 nodes 4 250 251 260 348 globNum 7156 mat 1 crossSect 1
+LTrSpace 905 nodes 4 260 259 250 349 globNum 7157 mat 1 crossSect 1
+LTrSpace 906 nodes 4 251 252 261 347 globNum 7158 mat 1 crossSect 1
+LTrSpace 907 nodes 4 261 260 251 371 globNum 7159 mat 1 crossSect 1
+LTrSpace 908 nodes 4 252 253 262 345 globNum 7160 mat 1 crossSect 1
+LTrSpace 909 nodes 4 262 261 252 347 globNum 7161 mat 1 crossSect 1
+LTrSpace 910 nodes 4 253 254 263 346 globNum 7162 mat 1 crossSect 1
+LTrSpace 911 nodes 4 263 262 253 346 globNum 7163 mat 1 crossSect 1
+LTrSpace 912 nodes 4 254 255 264 344 globNum 7164 mat 1 crossSect 1
+LTrSpace 913 nodes 4 264 263 254 344 globNum 7165 mat 1 crossSect 1
+LTrSpace 914 nodes 4 255 256 265 343 globNum 7166 mat 1 crossSect 1
+LTrSpace 915 nodes 4 265 264 255 372 globNum 7167 mat 1 crossSect 1
+LTrSpace 916 nodes 4 256 257 266 341 globNum 7168 mat 1 crossSect 1
+LTrSpace 917 nodes 4 266 265 256 341 globNum 7169 mat 1 crossSect 1
+LTrSpace 918 nodes 4 257 267 266 373 globNum 7170 mat 1 crossSect 1
+LTrSpace 919 nodes 4 258 268 267 374 globNum 7171 mat 1 crossSect 1
+LTrSpace 920 nodes 4 267 257 258 340 globNum 7172 mat 1 crossSect 1
+LTrSpace 921 nodes 4 265 275 264 372 globNum 7283 mat 1 crossSect 1
+LTrSpace 922 nodes 4 267 277 266 373 globNum 7284 mat 1 crossSect 1
+LTrSpace 923 nodes 4 380 268 267 278 globNum 7285 mat 1 crossSect 1
+LTrSpace 924 nodes 4 259 260 270 375 globNum 7330 mat 1 crossSect 1
+LTrSpace 925 nodes 4 270 269 259 375 globNum 7331 mat 1 crossSect 1
+LTrSpace 926 nodes 4 260 261 271 371 globNum 7332 mat 1 crossSect 1
+LTrSpace 927 nodes 4 271 270 260 375 globNum 7333 mat 1 crossSect 1
+LTrSpace 928 nodes 4 261 262 272 376 globNum 7334 mat 1 crossSect 1
+LTrSpace 929 nodes 4 272 271 261 376 globNum 7335 mat 1 crossSect 1
+LTrSpace 930 nodes 4 262 263 273 377 globNum 7336 mat 1 crossSect 1
+LTrSpace 931 nodes 4 273 272 262 377 globNum 7337 mat 1 crossSect 1
+LTrSpace 932 nodes 4 263 264 274 378 globNum 7338 mat 1 crossSect 1
+LTrSpace 933 nodes 4 274 273 263 378 globNum 7339 mat 1 crossSect 1
+LTrSpace 934 nodes 4 275 274 264 378 globNum 7340 mat 1 crossSect 1
+LTrSpace 935 nodes 4 265 266 276 379 globNum 7341 mat 1 crossSect 1
+LTrSpace 936 nodes 4 276 275 265 379 globNum 7342 mat 1 crossSect 1
+LTrSpace 937 nodes 4 382 266 276 277 globNum 7343 mat 1 crossSect 1
+LTrSpace 938 nodes 4 267 278 277 380 globNum 7344 mat 1 crossSect 1
+LTrSpace 939 nodes 4 276 286 275 381 globNum 7427 mat 1 crossSect 1
+LTrSpace 940 nodes 4 277 287 276 382 globNum 7428 mat 1 crossSect 1
+LTrSpace 941 nodes 4 278 288 277 380 globNum 7429 mat 1 crossSect 1
+LTrSpace 942 nodes 4 269 270 280 383 globNum 7474 mat 1 crossSect 1
+LTrSpace 943 nodes 4 270 271 281 384 globNum 7476 mat 1 crossSect 1
+LTrSpace 944 nodes 4 281 280 270 384 globNum 7477 mat 1 crossSect 1
+LTrSpace 945 nodes 4 271 272 282 385 globNum 7478 mat 1 crossSect 1
+LTrSpace 946 nodes 4 282 281 271 385 globNum 7479 mat 1 crossSect 1
+LTrSpace 947 nodes 4 272 273 283 386 globNum 7480 mat 1 crossSect 1
+LTrSpace 948 nodes 4 283 282 272 386 globNum 7481 mat 1 crossSect 1
+LTrSpace 949 nodes 4 273 274 284 387 globNum 7482 mat 1 crossSect 1
+LTrSpace 950 nodes 4 284 283 273 387 globNum 7483 mat 1 crossSect 1
+LTrSpace 951 nodes 4 274 275 285 388 globNum 7484 mat 1 crossSect 1
+LTrSpace 952 nodes 4 285 284 274 388 globNum 7485 mat 1 crossSect 1
+LTrSpace 953 nodes 4 286 285 275 381 globNum 7486 mat 1 crossSect 1
+LTrSpace 954 nodes 4 287 286 276 382 globNum 7487 mat 1 crossSect 1
+LTrSpace 955 nodes 4 391 277 287 288 globNum 7488 mat 1 crossSect 1
+LTrSpace 956 nodes 4 278 279 288 389 globNum 7489 mat 1 crossSect 1
+LTrSpace 957 nodes 4 287 296 286 390 globNum 7569 mat 1 crossSect 1
+LTrSpace 958 nodes 4 288 297 287 391 globNum 7570 mat 1 crossSect 1
+LTrSpace 959 nodes 4 289 288 279 389 globNum 7572 mat 1 crossSect 1
+LTrSpace 960 nodes 4 280 281 290 393 globNum 7612 mat 1 crossSect 1
+LTrSpace 961 nodes 4 281 282 291 394 globNum 7614 mat 1 crossSect 1
+LTrSpace 962 nodes 4 291 290 281 394 globNum 7615 mat 1 crossSect 1
+LTrSpace 963 nodes 4 282 283 292 395 globNum 7616 mat 1 crossSect 1
+LTrSpace 964 nodes 4 292 291 282 395 globNum 7617 mat 1 crossSect 1
+LTrSpace 965 nodes 4 283 284 293 396 globNum 7618 mat 1 crossSect 1
+LTrSpace 966 nodes 4 293 292 283 396 globNum 7619 mat 1 crossSect 1
+LTrSpace 967 nodes 4 284 285 294 397 globNum 7620 mat 1 crossSect 1
+LTrSpace 968 nodes 4 294 293 284 397 globNum 7621 mat 1 crossSect 1
+LTrSpace 969 nodes 4 285 286 295 398 globNum 7622 mat 1 crossSect 1
+LTrSpace 970 nodes 4 295 294 285 398 globNum 7623 mat 1 crossSect 1
+LTrSpace 971 nodes 4 296 295 286 390 globNum 7624 mat 1 crossSect 1
+LTrSpace 972 nodes 4 297 296 287 391 globNum 7625 mat 1 crossSect 1
+LTrSpace 973 nodes 4 289 297 288 399 globNum 7626 mat 1 crossSect 1
+LTrSpace 974 nodes 4 297 307 296 401 globNum 7696 mat 1 crossSect 1
+LTrSpace 975 nodes 4 289 299 298 402 globNum 7697 mat 1 crossSect 1
+LTrSpace 976 nodes 4 298 297 289 399 globNum 7698 mat 1 crossSect 1
+LTrSpace 977 nodes 4 290 291 301 404 globNum 7747 mat 1 crossSect 1
+LTrSpace 978 nodes 4 301 300 290 403 globNum 7748 mat 1 crossSect 1
+LTrSpace 979 nodes 4 291 292 302 405 globNum 7749 mat 1 crossSect 1
+LTrSpace 980 nodes 4 302 301 291 405 globNum 7750 mat 1 crossSect 1
+LTrSpace 981 nodes 4 292 293 303 406 globNum 7751 mat 1 crossSect 1
+LTrSpace 982 nodes 4 303 302 292 406 globNum 7752 mat 1 crossSect 1
+LTrSpace 983 nodes 4 293 294 304 407 globNum 7753 mat 1 crossSect 1
+LTrSpace 984 nodes 4 304 303 293 407 globNum 7754 mat 1 crossSect 1
+LTrSpace 985 nodes 4 294 295 305 408 globNum 7755 mat 1 crossSect 1
+LTrSpace 986 nodes 4 305 304 294 408 globNum 7756 mat 1 crossSect 1
+LTrSpace 987 nodes 4 295 296 306 409 globNum 7757 mat 1 crossSect 1
+LTrSpace 988 nodes 4 306 305 295 409 globNum 7758 mat 1 crossSect 1
+LTrSpace 989 nodes 4 409 307 296 306 globNum 7759 mat 1 crossSect 1
+LTrSpace 990 nodes 4 298 330 297 410 globNum 7760 mat 1 crossSect 1
+LTrSpace 991 nodes 4 297 330 307 401 globNum 7761 mat 1 crossSect 1
+LTrSpace 992 nodes 4 299 313 298 402 globNum 7762 mat 1 crossSect 1
+LTrSpace 993 nodes 4 307 330 311 412 globNum 7809 mat 1 crossSect 1
+LTrSpace 994 nodes 4 311 306 307 412 globNum 7810 mat 1 crossSect 1
+LTrSpace 995 nodes 4 298 313 312 413 globNum 7811 mat 1 crossSect 1
+LTrSpace 996 nodes 4 312 330 298 413 globNum 7812 mat 1 crossSect 1
+LTrSpace 997 nodes 4 299 308 313 414 globNum 7813 mat 1 crossSect 1
+LTrSpace 998 nodes 4 308 309 313 415 globNum 7814 mat 1 crossSect 1
+LTrSpace 999 nodes 4 300 301 316 417 globNum 7855 mat 1 crossSect 1
+LTrSpace 1000 nodes 4 301 302 317 418 globNum 7857 mat 1 crossSect 1
+LTrSpace 1001 nodes 4 317 316 301 417 globNum 7858 mat 1 crossSect 1
+LTrSpace 1002 nodes 4 302 303 318 419 globNum 7859 mat 1 crossSect 1
+LTrSpace 1003 nodes 4 318 317 302 419 globNum 7860 mat 1 crossSect 1
+LTrSpace 1004 nodes 4 303 304 319 420 globNum 7861 mat 1 crossSect 1
+LTrSpace 1005 nodes 4 319 318 303 420 globNum 7862 mat 1 crossSect 1
+LTrSpace 1006 nodes 4 304 305 320 421 globNum 7863 mat 1 crossSect 1
+LTrSpace 1007 nodes 4 320 319 304 421 globNum 7864 mat 1 crossSect 1
+LTrSpace 1008 nodes 4 305 306 321 422 globNum 7865 mat 1 crossSect 1
+LTrSpace 1009 nodes 4 321 320 305 422 globNum 7866 mat 1 crossSect 1
+LTrSpace 1010 nodes 4 311 331 306 412 globNum 7867 mat 1 crossSect 1
+LTrSpace 1011 nodes 4 306 331 321 422 globNum 7868 mat 1 crossSect 1
+LTrSpace 1012 nodes 4 311 330 312 423 globNum 7869 mat 1 crossSect 1
+LTrSpace 1013 nodes 4 312 327 311 423 globNum 7870 mat 1 crossSect 1
+LTrSpace 1014 nodes 4 313 328 312 424 globNum 7871 mat 1 crossSect 1
+LTrSpace 1015 nodes 4 438 313 309 415 globNum 7872 mat 1 crossSect 1
+LTrSpace 1016 nodes 4 438 332 314 322 globNum 7874 mat 1 crossSect 1
+LTrSpace 1017 nodes 4 315 324 323 425 globNum 7910 mat 1 crossSect 1
+LTrSpace 1018 nodes 4 316 325 324 426 globNum 7912 mat 1 crossSect 1
+LTrSpace 1019 nodes 4 324 315 316 425 globNum 7913 mat 1 crossSect 1
+LTrSpace 1020 nodes 4 317 318 325 427 globNum 7914 mat 1 crossSect 1
+LTrSpace 1021 nodes 4 325 316 317 426 globNum 7915 mat 1 crossSect 1
+LTrSpace 1022 nodes 4 321 331 326 431 globNum 7922 mat 1 crossSect 1
+LTrSpace 1023 nodes 4 312 328 327 424 globNum 7926 mat 1 crossSect 1
+LTrSpace 1024 nodes 4 322 332 328 433 globNum 7927 mat 1 crossSect 1
+LTrSpace 1025 nodes 4 328 313 322 433 globNum 7928 mat 1 crossSect 1
+LTrSpace 1026 nodes 4 327 328 329 434 globNum 7965 mat 1 crossSect 1
+LTrSpace 1027 nodes 4 328 332 329 434 globNum 7968 mat 1 crossSect 1
+LTrSpace 1028 nodes 4 190 243 188 366 globNum 8109 mat 1 crossSect 1
+LTrSpace 1029 nodes 4 186 244 190 208 globNum 8110 mat 1 crossSect 1
+LTrSpace 1030 nodes 4 188 242 191 366 globNum 8121 mat 1 crossSect 1
+LTrSpace 1031 nodes 4 191 366 190 188 globNum 8123 mat 1 crossSect 1
+LTrSpace 1032 nodes 4 205 246 206 337 globNum 8227 mat 1 crossSect 1
+LTrSpace 1033 nodes 4 207 245 244 336 globNum 8228 mat 1 crossSect 1
+LTrSpace 1034 nodes 4 206 245 207 335 globNum 8229 mat 1 crossSect 1
+LTrSpace 1035 nodes 4 209 257 210 340 globNum 8242 mat 1 crossSect 1
+LTrSpace 1036 nodes 4 210 257 211 341 globNum 8243 mat 1 crossSect 1
+LTrSpace 1037 nodes 4 211 256 212 343 globNum 8244 mat 1 crossSect 1
+LTrSpace 1038 nodes 4 212 255 213 344 globNum 8245 mat 1 crossSect 1
+LTrSpace 1039 nodes 4 213 254 214 346 globNum 8246 mat 1 crossSect 1
+LTrSpace 1040 nodes 4 214 253 215 345 globNum 8247 mat 1 crossSect 1
+LTrSpace 1041 nodes 4 215 252 216 347 globNum 8248 mat 1 crossSect 1
+LTrSpace 1042 nodes 4 216 251 217 348 globNum 8249 mat 1 crossSect 1
+LTrSpace 1043 nodes 4 206 335 219 337 globNum 8277 mat 1 crossSect 1
+LTrSpace 1044 nodes 4 219 335 207 336 globNum 8278 mat 1 crossSect 1
+LTrSpace 1045 nodes 4 208 336 244 190 globNum 8279 mat 1 crossSect 1
+LTrSpace 1046 nodes 4 205 337 218 338 globNum 8302 mat 1 crossSect 1
+LTrSpace 1047 nodes 4 350 232 338 364 globNum 8303 mat 1 crossSect 1
+LTrSpace 1048 nodes 4 218 337 219 435 globNum 8305 mat 1 crossSect 1
+LTrSpace 1049 nodes 4 208 333 436 336 globNum 8306 mat 1 crossSect 1
+LTrSpace 1050 nodes 4 208 219 336 436 globNum 8307 mat 1 crossSect 1
+LTrSpace 1051 nodes 4 220 234 219 436 globNum 8308 mat 1 crossSect 1
+LTrSpace 1052 nodes 4 221 334 209 340 globNum 8315 mat 1 crossSect 1
+LTrSpace 1053 nodes 4 221 340 210 342 globNum 8316 mat 1 crossSect 1
+LTrSpace 1054 nodes 4 222 341 211 343 globNum 8317 mat 1 crossSect 1
+LTrSpace 1055 nodes 4 221 342 228 353 globNum 8318 mat 1 crossSect 1
+LTrSpace 1056 nodes 4 228 342 210 341 globNum 8319 mat 1 crossSect 1
+LTrSpace 1057 nodes 4 222 343 229 354 globNum 8320 mat 1 crossSect 1
+LTrSpace 1058 nodes 4 229 343 212 344 globNum 8321 mat 1 crossSect 1
+LTrSpace 1059 nodes 4 355 223 224 346 globNum 8322 mat 1 crossSect 1
+LTrSpace 1060 nodes 4 223 346 213 224 globNum 8323 mat 1 crossSect 1
+LTrSpace 1061 nodes 4 225 345 215 347 globNum 8324 mat 1 crossSect 1
+LTrSpace 1062 nodes 4 214 345 224 346 globNum 8325 mat 1 crossSect 1
+LTrSpace 1063 nodes 4 226 348 217 349 globNum 8326 mat 1 crossSect 1
+LTrSpace 1064 nodes 4 225 347 231 356 globNum 8327 mat 1 crossSect 1
+LTrSpace 1065 nodes 4 231 347 216 348 globNum 8328 mat 1 crossSect 1
+LTrSpace 1066 nodes 4 233 350 218 435 globNum 8354 mat 1 crossSect 1
+LTrSpace 1067 nodes 4 232 350 240 364 globNum 8355 mat 1 crossSect 1
+LTrSpace 1068 nodes 4 359 352 221 353 globNum 8362 mat 1 crossSect 1
+LTrSpace 1069 nodes 4 359 221 228 353 globNum 8364 mat 1 crossSect 1
+LTrSpace 1070 nodes 4 222 354 228 341 globNum 8365 mat 1 crossSect 1
+LTrSpace 1071 nodes 4 229 355 236 360 globNum 8366 mat 1 crossSect 1
+LTrSpace 1072 nodes 4 223 355 229 344 globNum 8367 mat 1 crossSect 1
+LTrSpace 1073 nodes 4 230 345 225 356 globNum 8368 mat 1 crossSect 1
+LTrSpace 1074 nodes 4 224 345 230 355 globNum 8369 mat 1 crossSect 1
+LTrSpace 1075 nodes 4 365 230 355 236 globNum 8370 mat 1 crossSect 1
+LTrSpace 1076 nodes 4 237 356 231 361 globNum 8371 mat 1 crossSect 1
+LTrSpace 1077 nodes 4 226 357 231 348 globNum 8373 mat 1 crossSect 1
+LTrSpace 1078 nodes 4 233 358 234 362 globNum 8394 mat 1 crossSect 1
+LTrSpace 1079 nodes 4 234 358 219 436 globNum 8395 mat 1 crossSect 1
+LTrSpace 1080 nodes 4 219 435 233 218 globNum 8396 mat 1 crossSect 1
+LTrSpace 1081 nodes 4 220 351 234 436 globNum 8397 mat 1 crossSect 1
+LTrSpace 1082 nodes 4 234 351 235 437 globNum 8398 mat 1 crossSect 1
+LTrSpace 1083 nodes 4 235 359 228 363 globNum 8405 mat 1 crossSect 1
+LTrSpace 1084 nodes 4 228 354 238 363 globNum 8406 mat 1 crossSect 1
+LTrSpace 1085 nodes 4 444 238 229 354 globNum 8407 mat 1 crossSect 1
+LTrSpace 1086 nodes 4 241 360 236 365 globNum 8408 mat 1 crossSect 1
+LTrSpace 1087 nodes 4 230 356 237 365 globNum 8409 mat 1 crossSect 1
+LTrSpace 1088 nodes 4 240 237 239 361 globNum 8410 mat 1 crossSect 1
+LTrSpace 1089 nodes 4 241 362 238 360 globNum 8429 mat 1 crossSect 1
+LTrSpace 1090 nodes 4 233 362 241 350 globNum 8430 mat 1 crossSect 1
+LTrSpace 1091 nodes 4 240 350 241 365 globNum 8431 mat 1 crossSect 1
+LTrSpace 1092 nodes 4 442 238 234 362 globNum 8432 mat 1 crossSect 1
+LTrSpace 1093 nodes 4 240 364 361 239 globNum 8447 mat 1 crossSect 1
+LTrSpace 1094 nodes 4 235 363 234 437 globNum 8448 mat 1 crossSect 1
+LTrSpace 1095 nodes 4 242 366 243 336 globNum 8581 mat 1 crossSect 1
+LTrSpace 1096 nodes 4 243 190 244 336 globNum 8582 mat 1 crossSect 1
+LTrSpace 1097 nodes 4 245 206 246 337 globNum 8583 mat 1 crossSect 1
+LTrSpace 1098 nodes 4 242 336 247 368 globNum 8598 mat 1 crossSect 1
+LTrSpace 1099 nodes 4 249 367 242 368 globNum 8628 mat 1 crossSect 1
+LTrSpace 1100 nodes 4 247 336 245 335 globNum 8629 mat 1 crossSect 1
+LTrSpace 1101 nodes 4 248 335 245 337 globNum 8630 mat 1 crossSect 1
+LTrSpace 1102 nodes 4 247 335 249 368 globNum 8651 mat 1 crossSect 1
+LTrSpace 1103 nodes 4 249 335 248 370 globNum 8652 mat 1 crossSect 1
+LTrSpace 1104 nodes 4 250 217 251 348 globNum 8740 mat 1 crossSect 1
+LTrSpace 1105 nodes 4 251 216 252 347 globNum 8741 mat 1 crossSect 1
+LTrSpace 1106 nodes 4 252 215 253 345 globNum 8742 mat 1 crossSect 1
+LTrSpace 1107 nodes 4 253 214 254 346 globNum 8743 mat 1 crossSect 1
+LTrSpace 1108 nodes 4 254 213 255 344 globNum 8744 mat 1 crossSect 1
+LTrSpace 1109 nodes 4 255 212 256 343 globNum 8745 mat 1 crossSect 1
+LTrSpace 1110 nodes 4 256 211 257 341 globNum 8746 mat 1 crossSect 1
+LTrSpace 1111 nodes 4 257 209 258 340 globNum 8747 mat 1 crossSect 1
+LTrSpace 1112 nodes 4 260 348 251 371 globNum 8838 mat 1 crossSect 1
+LTrSpace 1113 nodes 4 250 348 260 349 globNum 8839 mat 1 crossSect 1
+LTrSpace 1114 nodes 4 259 349 260 375 globNum 8840 mat 1 crossSect 1
+LTrSpace 1115 nodes 4 251 347 261 371 globNum 8841 mat 1 crossSect 1
+LTrSpace 1116 nodes 4 262 345 253 346 globNum 8842 mat 1 crossSect 1
+LTrSpace 1117 nodes 4 252 345 262 347 globNum 8843 mat 1 crossSect 1
+LTrSpace 1118 nodes 4 261 347 262 376 globNum 8844 mat 1 crossSect 1
+LTrSpace 1119 nodes 4 263 346 254 344 globNum 8845 mat 1 crossSect 1
+LTrSpace 1120 nodes 4 262 346 263 377 globNum 8846 mat 1 crossSect 1
+LTrSpace 1121 nodes 4 264 344 255 372 globNum 8847 mat 1 crossSect 1
+LTrSpace 1122 nodes 4 263 344 264 378 globNum 8848 mat 1 crossSect 1
+LTrSpace 1123 nodes 4 265 343 256 341 globNum 8849 mat 1 crossSect 1
+LTrSpace 1124 nodes 4 255 343 265 372 globNum 8850 mat 1 crossSect 1
+LTrSpace 1125 nodes 4 266 341 257 373 globNum 8851 mat 1 crossSect 1
+LTrSpace 1126 nodes 4 265 341 266 379 globNum 8852 mat 1 crossSect 1
+LTrSpace 1127 nodes 4 267 373 257 340 globNum 8853 mat 1 crossSect 1
+LTrSpace 1128 nodes 4 258 374 267 340 globNum 8854 mat 1 crossSect 1
+LTrSpace 1129 nodes 4 268 374 258 334 globNum 8855 mat 1 crossSect 1
+LTrSpace 1130 nodes 4 264 372 275 378 globNum 8967 mat 1 crossSect 1
+LTrSpace 1131 nodes 4 275 372 265 379 globNum 8968 mat 1 crossSect 1
+LTrSpace 1132 nodes 4 266 373 277 382 globNum 8969 mat 1 crossSect 1
+LTrSpace 1133 nodes 4 277 373 267 380 globNum 8970 mat 1 crossSect 1
+LTrSpace 1134 nodes 4 268 380 267 374 globNum 8971 mat 1 crossSect 1
+LTrSpace 1135 nodes 4 269 375 270 383 globNum 9018 mat 1 crossSect 1
+LTrSpace 1136 nodes 4 271 371 261 376 globNum 9019 mat 1 crossSect 1
+LTrSpace 1137 nodes 4 260 371 271 375 globNum 9020 mat 1 crossSect 1
+LTrSpace 1138 nodes 4 270 375 271 384 globNum 9021 mat 1 crossSect 1
+LTrSpace 1139 nodes 4 272 376 262 377 globNum 9022 mat 1 crossSect 1
+LTrSpace 1140 nodes 4 271 376 272 385 globNum 9023 mat 1 crossSect 1
+LTrSpace 1141 nodes 4 273 377 263 378 globNum 9024 mat 1 crossSect 1
+LTrSpace 1142 nodes 4 272 377 273 386 globNum 9025 mat 1 crossSect 1
+LTrSpace 1143 nodes 4 273 378 274 387 globNum 9026 mat 1 crossSect 1
+LTrSpace 1144 nodes 4 274 378 275 388 globNum 9027 mat 1 crossSect 1
+LTrSpace 1145 nodes 4 275 379 276 381 globNum 9028 mat 1 crossSect 1
+LTrSpace 1146 nodes 4 266 382 276 379 globNum 9029 mat 1 crossSect 1
+LTrSpace 1147 nodes 4 286 381 276 382 globNum 9117 mat 1 crossSect 1
+LTrSpace 1148 nodes 4 277 380 288 391 globNum 9118 mat 1 crossSect 1
+LTrSpace 1149 nodes 4 288 380 278 389 globNum 9119 mat 1 crossSect 1
+LTrSpace 1150 nodes 4 280 383 270 384 globNum 9160 mat 1 crossSect 1
+LTrSpace 1151 nodes 4 281 384 271 385 globNum 9163 mat 1 crossSect 1
+LTrSpace 1152 nodes 4 280 384 281 393 globNum 9164 mat 1 crossSect 1
+LTrSpace 1153 nodes 4 282 385 272 386 globNum 9165 mat 1 crossSect 1
+LTrSpace 1154 nodes 4 281 385 282 394 globNum 9166 mat 1 crossSect 1
+LTrSpace 1155 nodes 4 283 386 273 387 globNum 9167 mat 1 crossSect 1
+LTrSpace 1156 nodes 4 282 386 283 395 globNum 9168 mat 1 crossSect 1
+LTrSpace 1157 nodes 4 284 387 274 388 globNum 9169 mat 1 crossSect 1
+LTrSpace 1158 nodes 4 283 387 284 396 globNum 9170 mat 1 crossSect 1
+LTrSpace 1159 nodes 4 285 388 275 381 globNum 9171 mat 1 crossSect 1
+LTrSpace 1160 nodes 4 284 388 285 397 globNum 9172 mat 1 crossSect 1
+LTrSpace 1161 nodes 4 285 381 286 398 globNum 9173 mat 1 crossSect 1
+LTrSpace 1162 nodes 4 286 382 287 390 globNum 9174 mat 1 crossSect 1
+LTrSpace 1163 nodes 4 277 391 287 382 globNum 9175 mat 1 crossSect 1
+LTrSpace 1164 nodes 4 296 390 287 391 globNum 9260 mat 1 crossSect 1
+LTrSpace 1165 nodes 4 297 391 288 399 globNum 9261 mat 1 crossSect 1
+LTrSpace 1166 nodes 4 288 389 289 399 globNum 9264 mat 1 crossSect 1
+LTrSpace 1167 nodes 4 290 393 281 394 globNum 9300 mat 1 crossSect 1
+LTrSpace 1168 nodes 4 291 394 282 395 globNum 9303 mat 1 crossSect 1
+LTrSpace 1169 nodes 4 290 394 291 404 globNum 9304 mat 1 crossSect 1
+LTrSpace 1170 nodes 4 292 395 283 396 globNum 9305 mat 1 crossSect 1
+LTrSpace 1171 nodes 4 291 395 292 405 globNum 9306 mat 1 crossSect 1
+LTrSpace 1172 nodes 4 293 396 284 397 globNum 9307 mat 1 crossSect 1
+LTrSpace 1173 nodes 4 292 396 293 406 globNum 9308 mat 1 crossSect 1
+LTrSpace 1174 nodes 4 294 397 285 398 globNum 9309 mat 1 crossSect 1
+LTrSpace 1175 nodes 4 293 397 294 407 globNum 9310 mat 1 crossSect 1
+LTrSpace 1176 nodes 4 295 398 286 390 globNum 9311 mat 1 crossSect 1
+LTrSpace 1177 nodes 4 294 398 295 408 globNum 9312 mat 1 crossSect 1
+LTrSpace 1178 nodes 4 295 390 296 409 globNum 9313 mat 1 crossSect 1
+LTrSpace 1179 nodes 4 296 391 297 401 globNum 9314 mat 1 crossSect 1
+LTrSpace 1180 nodes 4 289 400 299 402 globNum 9317 mat 1 crossSect 1
+LTrSpace 1181 nodes 4 289 402 298 399 globNum 9384 mat 1 crossSect 1
+LTrSpace 1182 nodes 4 297 399 298 410 globNum 9385 mat 1 crossSect 1
+LTrSpace 1183 nodes 4 301 404 291 405 globNum 9424 mat 1 crossSect 1
+LTrSpace 1184 nodes 4 290 404 301 403 globNum 9425 mat 1 crossSect 1
+LTrSpace 1185 nodes 4 300 403 301 417 globNum 9426 mat 1 crossSect 1
+LTrSpace 1186 nodes 4 302 405 292 406 globNum 9427 mat 1 crossSect 1
+LTrSpace 1187 nodes 4 301 405 302 418 globNum 9428 mat 1 crossSect 1
+LTrSpace 1188 nodes 4 303 406 293 407 globNum 9429 mat 1 crossSect 1
+LTrSpace 1189 nodes 4 302 406 303 419 globNum 9430 mat 1 crossSect 1
+LTrSpace 1190 nodes 4 304 407 294 408 globNum 9431 mat 1 crossSect 1
+LTrSpace 1191 nodes 4 303 407 304 420 globNum 9432 mat 1 crossSect 1
+LTrSpace 1192 nodes 4 305 408 295 409 globNum 9433 mat 1 crossSect 1
+LTrSpace 1193 nodes 4 304 408 305 421 globNum 9434 mat 1 crossSect 1
+LTrSpace 1194 nodes 4 409 296 307 401 globNum 9435 mat 1 crossSect 1
+LTrSpace 1195 nodes 4 305 409 306 422 globNum 9436 mat 1 crossSect 1
+LTrSpace 1196 nodes 4 409 412 401 307 globNum 9437 mat 1 crossSect 1
+LTrSpace 1197 nodes 4 297 410 330 401 globNum 9438 mat 1 crossSect 1
+LTrSpace 1198 nodes 4 330 410 298 413 globNum 9439 mat 1 crossSect 1
+LTrSpace 1199 nodes 4 307 401 330 412 globNum 9440 mat 1 crossSect 1
+LTrSpace 1200 nodes 4 298 402 313 413 globNum 9441 mat 1 crossSect 1
+LTrSpace 1201 nodes 4 313 402 299 414 globNum 9442 mat 1 crossSect 1
+LTrSpace 1202 nodes 4 299 400 308 414 globNum 9443 mat 1 crossSect 1
+LTrSpace 1203 nodes 4 309 411 310 438 globNum 9448 mat 1 crossSect 1
+LTrSpace 1204 nodes 4 311 412 330 423 globNum 9495 mat 1 crossSect 1
+LTrSpace 1205 nodes 4 312 413 313 424 globNum 9496 mat 1 crossSect 1
+LTrSpace 1206 nodes 4 330 413 312 423 globNum 9497 mat 1 crossSect 1
+LTrSpace 1207 nodes 4 313 414 308 415 globNum 9498 mat 1 crossSect 1
+LTrSpace 1208 nodes 4 310 416 314 438 globNum 9499 mat 1 crossSect 1
+LTrSpace 1209 nodes 4 310 322 309 438 globNum 9500 mat 1 crossSect 1
+LTrSpace 1210 nodes 4 314 322 310 438 globNum 9501 mat 1 crossSect 1
+LTrSpace 1211 nodes 4 419 317 418 427 globNum 9545 mat 1 crossSect 1
+LTrSpace 1212 nodes 4 301 418 317 417 globNum 9546 mat 1 crossSect 1
+LTrSpace 1213 nodes 4 316 417 317 426 globNum 9547 mat 1 crossSect 1
+LTrSpace 1214 nodes 4 420 318 419 428 globNum 9548 mat 1 crossSect 1
+LTrSpace 1215 nodes 4 317 419 318 427 globNum 9549 mat 1 crossSect 1
+LTrSpace 1216 nodes 4 421 319 420 429 globNum 9550 mat 1 crossSect 1
+LTrSpace 1217 nodes 4 318 420 319 428 globNum 9551 mat 1 crossSect 1
+LTrSpace 1218 nodes 4 422 320 421 430 globNum 9552 mat 1 crossSect 1
+LTrSpace 1219 nodes 4 319 421 320 429 globNum 9553 mat 1 crossSect 1
+LTrSpace 1220 nodes 4 320 422 321 430 globNum 9554 mat 1 crossSect 1
+LTrSpace 1221 nodes 4 306 412 331 422 globNum 9555 mat 1 crossSect 1
+LTrSpace 1222 nodes 4 331 412 311 432 globNum 9556 mat 1 crossSect 1
+LTrSpace 1223 nodes 4 321 422 331 431 globNum 9557 mat 1 crossSect 1
+LTrSpace 1224 nodes 4 311 423 327 432 globNum 9558 mat 1 crossSect 1
+LTrSpace 1225 nodes 4 327 423 312 424 globNum 9559 mat 1 crossSect 1
+LTrSpace 1226 nodes 4 328 424 313 433 globNum 9560 mat 1 crossSect 1
+LTrSpace 1227 nodes 4 313 438 309 322 globNum 9561 mat 1 crossSect 1
+LTrSpace 1228 nodes 4 332 438 314 416 globNum 9563 mat 1 crossSect 1
+LTrSpace 1229 nodes 4 316 426 324 425 globNum 9611 mat 1 crossSect 1
+LTrSpace 1230 nodes 4 317 427 325 426 globNum 9612 mat 1 crossSect 1
+LTrSpace 1231 nodes 4 321 431 326 430 globNum 9619 mat 1 crossSect 1
+LTrSpace 1232 nodes 4 327 424 328 434 globNum 9621 mat 1 crossSect 1
+LTrSpace 1233 nodes 4 328 433 332 434 globNum 9622 mat 1 crossSect 1
+LTrSpace 1234 nodes 4 332 433 322 438 globNum 9623 mat 1 crossSect 1
+LTrSpace 1235 nodes 4 322 433 313 438 globNum 9624 mat 1 crossSect 1
+LTrSpace 1236 nodes 4 243 366 190 336 globNum 9797 mat 1 crossSect 1
+LTrSpace 1237 nodes 4 191 366 242 367 globNum 9804 mat 1 crossSect 1
+LTrSpace 1238 nodes 4 190 333 208 336 globNum 9830 mat 1 crossSect 1
+LTrSpace 1239 nodes 4 190 366 333 336 globNum 9833 mat 1 crossSect 1
+LTrSpace 1240 nodes 4 245 336 207 335 globNum 9911 mat 1 crossSect 1
+LTrSpace 1241 nodes 4 245 335 206 337 globNum 9912 mat 1 crossSect 1
+LTrSpace 1242 nodes 4 209 334 258 340 globNum 9923 mat 1 crossSect 1
+LTrSpace 1243 nodes 4 210 340 257 373 globNum 9925 mat 1 crossSect 1
+LTrSpace 1244 nodes 4 257 341 210 373 globNum 9926 mat 1 crossSect 1
+LTrSpace 1245 nodes 4 256 343 211 341 globNum 9927 mat 1 crossSect 1
+LTrSpace 1246 nodes 4 343 344 255 212 globNum 9928 mat 1 crossSect 1
+LTrSpace 1247 nodes 4 254 346 213 344 globNum 9929 mat 1 crossSect 1
+LTrSpace 1248 nodes 4 253 345 214 346 globNum 9930 mat 1 crossSect 1
+LTrSpace 1249 nodes 4 252 347 215 345 globNum 9931 mat 1 crossSect 1
+LTrSpace 1250 nodes 4 347 348 251 216 globNum 9932 mat 1 crossSect 1
+LTrSpace 1251 nodes 4 250 349 217 348 globNum 9933 mat 1 crossSect 1
+LTrSpace 1252 nodes 4 219 337 335 435 globNum 9955 mat 1 crossSect 1
+LTrSpace 1253 nodes 4 335 336 219 436 globNum 9956 mat 1 crossSect 1
+LTrSpace 1254 nodes 4 218 338 337 435 globNum 9981 mat 1 crossSect 1
+LTrSpace 1255 nodes 4 232 350 338 218 globNum 9982 mat 1 crossSect 1
+LTrSpace 1256 nodes 4 339 208 436 220 globNum 9984 mat 1 crossSect 1
+LTrSpace 1257 nodes 4 208 339 436 333 globNum 9985 mat 1 crossSect 1
+LTrSpace 1258 nodes 4 339 351 220 436 globNum 9987 mat 1 crossSect 1
+LTrSpace 1259 nodes 4 221 352 334 340 globNum 9993 mat 1 crossSect 1
+LTrSpace 1260 nodes 4 210 342 340 373 globNum 9994 mat 1 crossSect 1
+LTrSpace 1261 nodes 4 340 342 221 353 globNum 9995 mat 1 crossSect 1
+LTrSpace 1262 nodes 4 341 343 222 354 globNum 9996 mat 1 crossSect 1
+LTrSpace 1263 nodes 4 228 353 342 439 globNum 9997 mat 1 crossSect 1
+LTrSpace 1264 nodes 4 210 341 342 373 globNum 9998 mat 1 crossSect 1
+LTrSpace 1265 nodes 4 229 354 343 440 globNum 9999 mat 1 crossSect 1
+LTrSpace 1266 nodes 4 343 344 229 440 globNum 10000 mat 1 crossSect 1
+LTrSpace 1267 nodes 4 223 355 344 346 globNum 10001 mat 1 crossSect 1
+LTrSpace 1268 nodes 4 345 347 225 356 globNum 10002 mat 1 crossSect 1
+LTrSpace 1269 nodes 4 224 346 345 355 globNum 10003 mat 1 crossSect 1
+LTrSpace 1270 nodes 4 348 349 226 357 globNum 10004 mat 1 crossSect 1
+LTrSpace 1271 nodes 4 231 356 347 441 globNum 10005 mat 1 crossSect 1
+LTrSpace 1272 nodes 4 347 348 231 441 globNum 10006 mat 1 crossSect 1
+LTrSpace 1273 nodes 4 218 435 350 338 globNum 10034 mat 1 crossSect 1
+LTrSpace 1274 nodes 4 350 435 233 358 globNum 10035 mat 1 crossSect 1
+LTrSpace 1275 nodes 4 240 364 350 365 globNum 10036 mat 1 crossSect 1
+LTrSpace 1276 nodes 4 221 353 352 340 globNum 10042 mat 1 crossSect 1
+LTrSpace 1277 nodes 4 352 359 221 227 globNum 10043 mat 1 crossSect 1
+LTrSpace 1278 nodes 4 228 359 353 439 globNum 10045 mat 1 crossSect 1
+LTrSpace 1279 nodes 4 236 360 355 365 globNum 10046 mat 1 crossSect 1
+LTrSpace 1280 nodes 4 355 360 229 440 globNum 10047 mat 1 crossSect 1
+LTrSpace 1281 nodes 4 229 344 355 440 globNum 10048 mat 1 crossSect 1
+LTrSpace 1282 nodes 4 345 356 230 355 globNum 10049 mat 1 crossSect 1
+LTrSpace 1283 nodes 4 230 365 355 356 globNum 10050 mat 1 crossSect 1
+LTrSpace 1284 nodes 4 231 361 356 441 globNum 10051 mat 1 crossSect 1
+LTrSpace 1285 nodes 4 356 361 237 365 globNum 10052 mat 1 crossSect 1
+LTrSpace 1286 nodes 4 231 348 357 441 globNum 10055 mat 1 crossSect 1
+LTrSpace 1287 nodes 4 234 362 358 442 globNum 10082 mat 1 crossSect 1
+LTrSpace 1288 nodes 4 358 362 233 350 globNum 10083 mat 1 crossSect 1
+LTrSpace 1289 nodes 4 219 436 358 435 globNum 10084 mat 1 crossSect 1
+LTrSpace 1290 nodes 4 358 436 234 442 globNum 10085 mat 1 crossSect 1
+LTrSpace 1291 nodes 4 234 436 351 442 globNum 10086 mat 1 crossSect 1
+LTrSpace 1292 nodes 4 351 437 234 442 globNum 10088 mat 1 crossSect 1
+LTrSpace 1293 nodes 4 228 363 359 439 globNum 10096 mat 1 crossSect 1
+LTrSpace 1294 nodes 4 359 363 235 437 globNum 10097 mat 1 crossSect 1
+LTrSpace 1295 nodes 4 238 363 354 444 globNum 10098 mat 1 crossSect 1
+LTrSpace 1296 nodes 4 354 363 228 439 globNum 10099 mat 1 crossSect 1
+LTrSpace 1297 nodes 4 444 440 229 360 globNum 10100 mat 1 crossSect 1
+LTrSpace 1298 nodes 4 444 229 238 360 globNum 10101 mat 1 crossSect 1
+LTrSpace 1299 nodes 4 360 365 241 445 globNum 10102 mat 1 crossSect 1
+LTrSpace 1300 nodes 4 240 361 364 365 globNum 10103 mat 1 crossSect 1
+LTrSpace 1301 nodes 4 238 360 362 444 globNum 10119 mat 1 crossSect 1
+LTrSpace 1302 nodes 4 362 360 241 445 globNum 10120 mat 1 crossSect 1
+LTrSpace 1303 nodes 4 241 350 362 445 globNum 10121 mat 1 crossSect 1
+LTrSpace 1304 nodes 4 241 365 350 445 globNum 10122 mat 1 crossSect 1
+LTrSpace 1305 nodes 4 442 234 238 363 globNum 10123 mat 1 crossSect 1
+LTrSpace 1306 nodes 4 442 444 363 238 globNum 10124 mat 1 crossSect 1
+LTrSpace 1307 nodes 4 234 437 363 442 globNum 10133 mat 1 crossSect 1
+LTrSpace 1308 nodes 4 366 336 242 368 globNum 10261 mat 1 crossSect 1
+LTrSpace 1309 nodes 4 247 368 336 335 globNum 10273 mat 1 crossSect 1
+LTrSpace 1310 nodes 4 242 368 367 366 globNum 10307 mat 1 crossSect 1
+LTrSpace 1311 nodes 4 335 337 248 370 globNum 10308 mat 1 crossSect 1
+LTrSpace 1312 nodes 4 249 368 335 370 globNum 10331 mat 1 crossSect 1
+LTrSpace 1313 nodes 4 369 370 248 337 globNum 10357 mat 1 crossSect 1
+LTrSpace 1314 nodes 4 348 347 251 371 globNum 10402 mat 1 crossSect 1
+LTrSpace 1315 nodes 4 344 343 255 372 globNum 10403 mat 1 crossSect 1
+LTrSpace 1316 nodes 4 348 371 260 375 globNum 10450 mat 1 crossSect 1
+LTrSpace 1317 nodes 4 260 349 348 375 globNum 10451 mat 1 crossSect 1
+LTrSpace 1318 nodes 4 261 371 347 376 globNum 10452 mat 1 crossSect 1
+LTrSpace 1319 nodes 4 345 346 262 377 globNum 10453 mat 1 crossSect 1
+LTrSpace 1320 nodes 4 262 347 345 376 globNum 10454 mat 1 crossSect 1
+LTrSpace 1321 nodes 4 346 344 263 378 globNum 10455 mat 1 crossSect 1
+LTrSpace 1322 nodes 4 263 377 346 378 globNum 10456 mat 1 crossSect 1
+LTrSpace 1323 nodes 4 344 372 264 378 globNum 10457 mat 1 crossSect 1
+LTrSpace 1324 nodes 4 343 341 265 379 globNum 10458 mat 1 crossSect 1
+LTrSpace 1325 nodes 4 265 372 343 379 globNum 10459 mat 1 crossSect 1
+LTrSpace 1326 nodes 4 341 373 266 379 globNum 10460 mat 1 crossSect 1
+LTrSpace 1327 nodes 4 373 340 267 374 globNum 10461 mat 1 crossSect 1
+LTrSpace 1328 nodes 4 374 340 258 334 globNum 10462 mat 1 crossSect 1
+LTrSpace 1329 nodes 4 275 378 372 446 globNum 10585 mat 1 crossSect 1
+LTrSpace 1330 nodes 4 372 379 275 446 globNum 10586 mat 1 crossSect 1
+LTrSpace 1331 nodes 4 277 382 373 380 globNum 10587 mat 1 crossSect 1
+LTrSpace 1332 nodes 4 373 382 266 379 globNum 10588 mat 1 crossSect 1
+LTrSpace 1333 nodes 4 267 380 373 374 globNum 10589 mat 1 crossSect 1
+LTrSpace 1334 nodes 4 270 383 375 384 globNum 10639 mat 1 crossSect 1
+LTrSpace 1335 nodes 4 371 376 271 447 globNum 10641 mat 1 crossSect 1
+LTrSpace 1336 nodes 4 271 375 371 447 globNum 10642 mat 1 crossSect 1
+LTrSpace 1337 nodes 4 271 384 375 447 globNum 10643 mat 1 crossSect 1
+LTrSpace 1338 nodes 4 262 377 376 345 globNum 10644 mat 1 crossSect 1
+LTrSpace 1339 nodes 4 376 377 272 386 globNum 10645 mat 1 crossSect 1
+LTrSpace 1340 nodes 4 272 385 376 386 globNum 10646 mat 1 crossSect 1
+LTrSpace 1341 nodes 4 376 385 271 447 globNum 10647 mat 1 crossSect 1
+LTrSpace 1342 nodes 4 377 378 273 387 globNum 10648 mat 1 crossSect 1
+LTrSpace 1343 nodes 4 273 386 377 387 globNum 10649 mat 1 crossSect 1
+LTrSpace 1344 nodes 4 274 387 378 388 globNum 10650 mat 1 crossSect 1
+LTrSpace 1345 nodes 4 275 388 378 446 globNum 10651 mat 1 crossSect 1
+LTrSpace 1346 nodes 4 276 381 379 382 globNum 10652 mat 1 crossSect 1
+LTrSpace 1347 nodes 4 379 381 275 446 globNum 10653 mat 1 crossSect 1
+LTrSpace 1348 nodes 4 381 382 286 390 globNum 10751 mat 1 crossSect 1
+LTrSpace 1349 nodes 4 288 391 380 389 globNum 10752 mat 1 crossSect 1
+LTrSpace 1350 nodes 4 380 391 277 382 globNum 10753 mat 1 crossSect 1
+LTrSpace 1351 nodes 4 383 384 280 393 globNum 10796 mat 1 crossSect 1
+LTrSpace 1352 nodes 4 271 385 384 447 globNum 10800 mat 1 crossSect 1
+LTrSpace 1353 nodes 4 384 385 281 394 globNum 10801 mat 1 crossSect 1
+LTrSpace 1354 nodes 4 281 393 384 394 globNum 10802 mat 1 crossSect 1
+LTrSpace 1355 nodes 4 385 386 282 395 globNum 10803 mat 1 crossSect 1
+LTrSpace 1356 nodes 4 282 394 385 395 globNum 10804 mat 1 crossSect 1
+LTrSpace 1357 nodes 4 386 387 283 396 globNum 10805 mat 1 crossSect 1
+LTrSpace 1358 nodes 4 283 395 386 396 globNum 10806 mat 1 crossSect 1
+LTrSpace 1359 nodes 4 387 388 284 397 globNum 10807 mat 1 crossSect 1
+LTrSpace 1360 nodes 4 284 396 387 397 globNum 10808 mat 1 crossSect 1
+LTrSpace 1361 nodes 4 275 381 388 446 globNum 10809 mat 1 crossSect 1
+LTrSpace 1362 nodes 4 388 381 285 398 globNum 10810 mat 1 crossSect 1
+LTrSpace 1363 nodes 4 285 397 388 398 globNum 10811 mat 1 crossSect 1
+LTrSpace 1364 nodes 4 286 398 381 390 globNum 10812 mat 1 crossSect 1
+LTrSpace 1365 nodes 4 287 390 382 391 globNum 10813 mat 1 crossSect 1
+LTrSpace 1366 nodes 4 390 391 296 401 globNum 10909 mat 1 crossSect 1
+LTrSpace 1367 nodes 4 288 399 391 389 globNum 10910 mat 1 crossSect 1
+LTrSpace 1368 nodes 4 391 399 297 410 globNum 10911 mat 1 crossSect 1
+LTrSpace 1369 nodes 4 392 400 289 402 globNum 10913 mat 1 crossSect 1
+LTrSpace 1370 nodes 4 289 389 392 399 globNum 10914 mat 1 crossSect 1
+LTrSpace 1371 nodes 4 393 394 290 404 globNum 10950 mat 1 crossSect 1
+LTrSpace 1372 nodes 4 394 395 291 405 globNum 10954 mat 1 crossSect 1
+LTrSpace 1373 nodes 4 291 404 394 405 globNum 10955 mat 1 crossSect 1
+LTrSpace 1374 nodes 4 395 396 292 406 globNum 10956 mat 1 crossSect 1
+LTrSpace 1375 nodes 4 292 405 395 406 globNum 10957 mat 1 crossSect 1
+LTrSpace 1376 nodes 4 396 397 293 407 globNum 10958 mat 1 crossSect 1
+LTrSpace 1377 nodes 4 293 406 396 407 globNum 10959 mat 1 crossSect 1
+LTrSpace 1378 nodes 4 397 398 294 408 globNum 10960 mat 1 crossSect 1
+LTrSpace 1379 nodes 4 294 407 397 408 globNum 10961 mat 1 crossSect 1
+LTrSpace 1380 nodes 4 398 390 295 409 globNum 10962 mat 1 crossSect 1
+LTrSpace 1381 nodes 4 295 408 398 409 globNum 10963 mat 1 crossSect 1
+LTrSpace 1382 nodes 4 296 409 390 401 globNum 10964 mat 1 crossSect 1
+LTrSpace 1383 nodes 4 297 401 391 410 globNum 10965 mat 1 crossSect 1
+LTrSpace 1384 nodes 4 299 402 400 414 globNum 10967 mat 1 crossSect 1
+LTrSpace 1385 nodes 4 298 399 402 410 globNum 11037 mat 1 crossSect 1
+LTrSpace 1386 nodes 4 402 399 289 392 globNum 11038 mat 1 crossSect 1
+LTrSpace 1387 nodes 4 404 405 301 418 globNum 11075 mat 1 crossSect 1
+LTrSpace 1388 nodes 4 301 403 404 417 globNum 11076 mat 1 crossSect 1
+LTrSpace 1389 nodes 4 404 403 290 393 globNum 11077 mat 1 crossSect 1
+LTrSpace 1390 nodes 4 405 406 302 419 globNum 11079 mat 1 crossSect 1
+LTrSpace 1391 nodes 4 302 418 405 419 globNum 11080 mat 1 crossSect 1
+LTrSpace 1392 nodes 4 406 407 303 420 globNum 11081 mat 1 crossSect 1
+LTrSpace 1393 nodes 4 303 419 406 420 globNum 11082 mat 1 crossSect 1
+LTrSpace 1394 nodes 4 407 408 304 421 globNum 11083 mat 1 crossSect 1
+LTrSpace 1395 nodes 4 304 420 407 421 globNum 11084 mat 1 crossSect 1
+LTrSpace 1396 nodes 4 408 409 305 422 globNum 11085 mat 1 crossSect 1
+LTrSpace 1397 nodes 4 305 421 408 422 globNum 11086 mat 1 crossSect 1
+LTrSpace 1398 nodes 4 412 409 306 307 globNum 11087 mat 1 crossSect 1
+LTrSpace 1399 nodes 4 306 422 409 412 globNum 11088 mat 1 crossSect 1
+LTrSpace 1400 nodes 4 330 401 410 448 globNum 11089 mat 1 crossSect 1
+LTrSpace 1401 nodes 4 298 413 410 402 globNum 11090 mat 1 crossSect 1
+LTrSpace 1402 nodes 4 410 413 330 448 globNum 11091 mat 1 crossSect 1
+LTrSpace 1403 nodes 4 330 412 401 448 globNum 11092 mat 1 crossSect 1
+LTrSpace 1404 nodes 4 313 413 402 414 globNum 11093 mat 1 crossSect 1
+LTrSpace 1405 nodes 4 310 438 411 416 globNum 11099 mat 1 crossSect 1
+LTrSpace 1406 nodes 4 411 438 309 415 globNum 11100 mat 1 crossSect 1
+LTrSpace 1407 nodes 4 330 423 412 448 globNum 11140 mat 1 crossSect 1
+LTrSpace 1408 nodes 4 412 423 311 432 globNum 11141 mat 1 crossSect 1
+LTrSpace 1409 nodes 4 313 424 413 414 globNum 11142 mat 1 crossSect 1
+LTrSpace 1410 nodes 4 413 424 312 423 globNum 11143 mat 1 crossSect 1
+LTrSpace 1411 nodes 4 413 423 330 448 globNum 11144 mat 1 crossSect 1
+LTrSpace 1412 nodes 4 414 415 313 424 globNum 11145 mat 1 crossSect 1
+LTrSpace 1413 nodes 4 317 419 418 302 globNum 11189 mat 1 crossSect 1
+LTrSpace 1414 nodes 4 418 427 317 426 globNum 11190 mat 1 crossSect 1
+LTrSpace 1415 nodes 4 317 417 418 426 globNum 11191 mat 1 crossSect 1
+LTrSpace 1416 nodes 4 418 417 301 404 globNum 11192 mat 1 crossSect 1
+LTrSpace 1417 nodes 4 417 426 316 425 globNum 11193 mat 1 crossSect 1
+LTrSpace 1418 nodes 4 318 420 419 303 globNum 11194 mat 1 crossSect 1
+LTrSpace 1419 nodes 4 419 428 318 427 globNum 11195 mat 1 crossSect 1
+LTrSpace 1420 nodes 4 319 421 420 304 globNum 11196 mat 1 crossSect 1
+LTrSpace 1421 nodes 4 420 429 319 428 globNum 11197 mat 1 crossSect 1
+LTrSpace 1422 nodes 4 320 422 421 305 globNum 11198 mat 1 crossSect 1
+LTrSpace 1423 nodes 4 421 430 320 429 globNum 11199 mat 1 crossSect 1
+LTrSpace 1424 nodes 4 321 430 422 431 globNum 11200 mat 1 crossSect 1
+LTrSpace 1425 nodes 4 331 422 412 449 globNum 11201 mat 1 crossSect 1
+LTrSpace 1426 nodes 4 412 432 331 449 globNum 11202 mat 1 crossSect 1
+LTrSpace 1427 nodes 4 331 431 422 449 globNum 11203 mat 1 crossSect 1
+LTrSpace 1428 nodes 4 327 432 423 434 globNum 11204 mat 1 crossSect 1
+LTrSpace 1429 nodes 4 423 424 327 434 globNum 11205 mat 1 crossSect 1
+LTrSpace 1430 nodes 4 313 433 424 415 globNum 11206 mat 1 crossSect 1
+LTrSpace 1431 nodes 4 424 433 328 434 globNum 11207 mat 1 crossSect 1
+LTrSpace 1432 nodes 4 415 438 313 433 globNum 11208 mat 1 crossSect 1
+LTrSpace 1433 nodes 4 332 438 416 450 globNum 11211 mat 1 crossSect 1
+LTrSpace 1434 nodes 4 332 434 433 450 globNum 11268 mat 1 crossSect 1
+LTrSpace 1435 nodes 4 433 438 332 450 globNum 11269 mat 1 crossSect 1
+LTrSpace 1436 nodes 4 333 336 366 368 globNum 11406 mat 1 crossSect 1
+LTrSpace 1437 nodes 4 335 435 337 370 globNum 11484 mat 1 crossSect 1
+LTrSpace 1438 nodes 4 219 435 335 436 globNum 11485 mat 1 crossSect 1
+LTrSpace 1439 nodes 4 336 436 335 368 globNum 11486 mat 1 crossSect 1
+LTrSpace 1440 nodes 4 337 435 338 369 globNum 11509 mat 1 crossSect 1
+LTrSpace 1441 nodes 4 338 350 364 452 globNum 11510 mat 1 crossSect 1
+LTrSpace 1442 nodes 4 333 436 336 368 globNum 11512 mat 1 crossSect 1
+LTrSpace 1443 nodes 4 339 436 333 451 globNum 11513 mat 1 crossSect 1
+LTrSpace 1444 nodes 4 351 436 339 451 globNum 11515 mat 1 crossSect 1
+LTrSpace 1445 nodes 4 334 340 352 374 globNum 11519 mat 1 crossSect 1
+LTrSpace 1446 nodes 4 353 340 373 374 globNum 11520 mat 1 crossSect 1
+LTrSpace 1447 nodes 4 343 354 341 379 globNum 11521 mat 1 crossSect 1
+LTrSpace 1448 nodes 4 342 439 353 373 globNum 11522 mat 1 crossSect 1
+LTrSpace 1449 nodes 4 341 228 439 354 globNum 11523 mat 1 crossSect 1
+LTrSpace 1450 nodes 4 342 373 341 439 globNum 11524 mat 1 crossSect 1
+LTrSpace 1451 nodes 4 228 341 439 342 globNum 11525 mat 1 crossSect 1
+LTrSpace 1452 nodes 4 343 440 354 379 globNum 11526 mat 1 crossSect 1
+LTrSpace 1453 nodes 4 343 372 344 440 globNum 11527 mat 1 crossSect 1
+LTrSpace 1454 nodes 4 344 346 355 378 globNum 11528 mat 1 crossSect 1
+LTrSpace 1455 nodes 4 347 356 345 376 globNum 11529 mat 1 crossSect 1
+LTrSpace 1456 nodes 4 345 355 346 377 globNum 11530 mat 1 crossSect 1
+LTrSpace 1457 nodes 4 349 357 348 375 globNum 11531 mat 1 crossSect 1
+LTrSpace 1458 nodes 4 347 441 356 376 globNum 11532 mat 1 crossSect 1
+LTrSpace 1459 nodes 4 347 371 348 441 globNum 11533 mat 1 crossSect 1
+LTrSpace 1460 nodes 4 350 338 435 452 globNum 11563 mat 1 crossSect 1
+LTrSpace 1461 nodes 4 435 358 350 453 globNum 11564 mat 1 crossSect 1
+LTrSpace 1462 nodes 4 352 340 353 374 globNum 11567 mat 1 crossSect 1
+LTrSpace 1463 nodes 4 353 359 352 454 globNum 11568 mat 1 crossSect 1
+LTrSpace 1464 nodes 4 353 439 359 454 globNum 11570 mat 1 crossSect 1
+LTrSpace 1465 nodes 4 355 365 360 455 globNum 11571 mat 1 crossSect 1
+LTrSpace 1466 nodes 4 360 440 355 456 globNum 11572 mat 1 crossSect 1
+LTrSpace 1467 nodes 4 378 440 355 344 globNum 11573 mat 1 crossSect 1
+LTrSpace 1468 nodes 4 356 355 345 377 globNum 11574 mat 1 crossSect 1
+LTrSpace 1469 nodes 4 365 355 377 455 globNum 11575 mat 1 crossSect 1
+LTrSpace 1470 nodes 4 356 441 361 457 globNum 11576 mat 1 crossSect 1
+LTrSpace 1471 nodes 4 361 365 356 457 globNum 11578 mat 1 crossSect 1
+LTrSpace 1472 nodes 4 358 442 362 458 globNum 11599 mat 1 crossSect 1
+LTrSpace 1473 nodes 4 358 435 436 459 globNum 11600 mat 1 crossSect 1
+LTrSpace 1474 nodes 4 436 442 358 459 globNum 11601 mat 1 crossSect 1
+LTrSpace 1475 nodes 4 351 442 436 460 globNum 11602 mat 1 crossSect 1
+LTrSpace 1476 nodes 4 359 439 363 461 globNum 11609 mat 1 crossSect 1
+LTrSpace 1477 nodes 4 363 437 359 461 globNum 11610 mat 1 crossSect 1
+LTrSpace 1478 nodes 4 444 354 439 363 globNum 11611 mat 1 crossSect 1
+LTrSpace 1479 nodes 4 440 444 229 354 globNum 11612 mat 1 crossSect 1
+LTrSpace 1480 nodes 4 365 445 360 455 globNum 11613 mat 1 crossSect 1
+LTrSpace 1481 nodes 4 361 364 365 462 globNum 11614 mat 1 crossSect 1
+LTrSpace 1482 nodes 4 362 444 360 465 globNum 11630 mat 1 crossSect 1
+LTrSpace 1483 nodes 4 360 445 362 465 globNum 11631 mat 1 crossSect 1
+LTrSpace 1484 nodes 4 444 442 362 238 globNum 11632 mat 1 crossSect 1
+LTrSpace 1485 nodes 4 363 442 437 461 globNum 11640 mat 1 crossSect 1
+LTrSpace 1486 nodes 4 335 370 368 459 globNum 11811 mat 1 crossSect 1
+LTrSpace 1487 nodes 4 370 337 369 435 globNum 11837 mat 1 crossSect 1
+LTrSpace 1488 nodes 4 441 348 375 371 globNum 11885 mat 1 crossSect 1
+LTrSpace 1489 nodes 4 347 376 371 441 globNum 11886 mat 1 crossSect 1
+LTrSpace 1490 nodes 4 346 378 377 355 globNum 11887 mat 1 crossSect 1
+LTrSpace 1491 nodes 4 372 378 344 440 globNum 11888 mat 1 crossSect 1
+LTrSpace 1492 nodes 4 343 379 372 440 globNum 11889 mat 1 crossSect 1
+LTrSpace 1493 nodes 4 373 379 341 439 globNum 11890 mat 1 crossSect 1
+LTrSpace 1494 nodes 4 372 446 378 440 globNum 11969 mat 1 crossSect 1
+LTrSpace 1495 nodes 4 379 446 372 440 globNum 11970 mat 1 crossSect 1
+LTrSpace 1496 nodes 4 373 380 382 470 globNum 11971 mat 1 crossSect 1
+LTrSpace 1497 nodes 4 382 379 373 470 globNum 11972 mat 1 crossSect 1
+LTrSpace 1498 nodes 4 373 374 380 454 globNum 11973 mat 1 crossSect 1
+LTrSpace 1499 nodes 4 375 384 383 471 globNum 12022 mat 1 crossSect 1
+LTrSpace 1500 nodes 4 376 447 371 441 globNum 12024 mat 1 crossSect 1
+LTrSpace 1501 nodes 4 371 447 375 441 globNum 12025 mat 1 crossSect 1
+LTrSpace 1502 nodes 4 375 447 384 471 globNum 12026 mat 1 crossSect 1
+LTrSpace 1503 nodes 4 376 345 377 356 globNum 12027 mat 1 crossSect 1
+LTrSpace 1504 nodes 4 377 386 376 472 globNum 12028 mat 1 crossSect 1
+LTrSpace 1505 nodes 4 376 386 385 457 globNum 12029 mat 1 crossSect 1
+LTrSpace 1506 nodes 4 385 447 376 457 globNum 12030 mat 1 crossSect 1
+LTrSpace 1507 nodes 4 378 387 377 456 globNum 12031 mat 1 crossSect 1
+LTrSpace 1508 nodes 4 377 387 386 472 globNum 12032 mat 1 crossSect 1
+LTrSpace 1509 nodes 4 378 388 387 456 globNum 12033 mat 1 crossSect 1
+LTrSpace 1510 nodes 4 378 446 388 456 globNum 12034 mat 1 crossSect 1
+LTrSpace 1511 nodes 4 379 382 381 473 globNum 12035 mat 1 crossSect 1
+LTrSpace 1512 nodes 4 381 446 379 473 globNum 12036 mat 1 crossSect 1
+LTrSpace 1513 nodes 4 480 381 382 473 globNum 12132 mat 1 crossSect 1
+LTrSpace 1514 nodes 4 380 389 391 474 globNum 12133 mat 1 crossSect 1
+LTrSpace 1515 nodes 4 380 391 382 470 globNum 12134 mat 1 crossSect 1
+LTrSpace 1516 nodes 4 384 393 383 471 globNum 12176 mat 1 crossSect 1
+LTrSpace 1517 nodes 4 384 447 385 476 globNum 12180 mat 1 crossSect 1
+LTrSpace 1518 nodes 4 385 394 384 476 globNum 12181 mat 1 crossSect 1
+LTrSpace 1519 nodes 4 384 394 393 476 globNum 12182 mat 1 crossSect 1
+LTrSpace 1520 nodes 4 386 395 385 457 globNum 12183 mat 1 crossSect 1
+LTrSpace 1521 nodes 4 385 395 394 476 globNum 12184 mat 1 crossSect 1
+LTrSpace 1522 nodes 4 387 396 386 477 globNum 12185 mat 1 crossSect 1
+LTrSpace 1523 nodes 4 386 396 395 477 globNum 12186 mat 1 crossSect 1
+LTrSpace 1524 nodes 4 388 397 387 478 globNum 12187 mat 1 crossSect 1
+LTrSpace 1525 nodes 4 387 397 396 478 globNum 12188 mat 1 crossSect 1
+LTrSpace 1526 nodes 4 388 446 381 479 globNum 12189 mat 1 crossSect 1
+LTrSpace 1527 nodes 4 381 398 388 479 globNum 12190 mat 1 crossSect 1
+LTrSpace 1528 nodes 4 388 398 397 478 globNum 12191 mat 1 crossSect 1
+LTrSpace 1529 nodes 4 381 390 398 479 globNum 12192 mat 1 crossSect 1
+LTrSpace 1530 nodes 4 382 391 390 480 globNum 12193 mat 1 crossSect 1
+LTrSpace 1531 nodes 4 391 401 390 480 globNum 12281 mat 1 crossSect 1
+LTrSpace 1532 nodes 4 389 391 474 483 globNum 12282 mat 1 crossSect 1
+LTrSpace 1533 nodes 4 399 410 391 481 globNum 12283 mat 1 crossSect 1
+LTrSpace 1534 nodes 4 400 402 392 482 globNum 12285 mat 1 crossSect 1
+LTrSpace 1535 nodes 4 392 399 389 483 globNum 12286 mat 1 crossSect 1
+LTrSpace 1536 nodes 4 394 404 393 484 globNum 12318 mat 1 crossSect 1
+LTrSpace 1537 nodes 4 395 405 394 485 globNum 12322 mat 1 crossSect 1
+LTrSpace 1538 nodes 4 394 405 404 485 globNum 12323 mat 1 crossSect 1
+LTrSpace 1539 nodes 4 477 396 395 406 globNum 12324 mat 1 crossSect 1
+LTrSpace 1540 nodes 4 485 395 405 406 globNum 12325 mat 1 crossSect 1
+LTrSpace 1541 nodes 4 397 407 396 487 globNum 12326 mat 1 crossSect 1
+LTrSpace 1542 nodes 4 396 407 406 487 globNum 12327 mat 1 crossSect 1
+LTrSpace 1543 nodes 4 398 408 397 488 globNum 12328 mat 1 crossSect 1
+LTrSpace 1544 nodes 4 397 408 407 488 globNum 12329 mat 1 crossSect 1
+LTrSpace 1545 nodes 4 390 409 398 489 globNum 12330 mat 1 crossSect 1
+LTrSpace 1546 nodes 4 398 409 408 489 globNum 12331 mat 1 crossSect 1
+LTrSpace 1547 nodes 4 496 390 409 401 globNum 12332 mat 1 crossSect 1
+LTrSpace 1548 nodes 4 391 410 401 481 globNum 12333 mat 1 crossSect 1
+LTrSpace 1549 nodes 4 400 414 402 482 globNum 12335 mat 1 crossSect 1
+LTrSpace 1550 nodes 4 402 410 399 481 globNum 12400 mat 1 crossSect 1
+LTrSpace 1551 nodes 4 399 392 402 483 globNum 12401 mat 1 crossSect 1
+LTrSpace 1552 nodes 4 405 418 404 490 globNum 12436 mat 1 crossSect 1
+LTrSpace 1553 nodes 4 404 417 403 491 globNum 12437 mat 1 crossSect 1
+LTrSpace 1554 nodes 4 403 393 404 484 globNum 12438 mat 1 crossSect 1
+LTrSpace 1555 nodes 4 406 419 405 492 globNum 12440 mat 1 crossSect 1
+LTrSpace 1556 nodes 4 405 419 418 492 globNum 12441 mat 1 crossSect 1
+LTrSpace 1557 nodes 4 407 420 406 493 globNum 12442 mat 1 crossSect 1
+LTrSpace 1558 nodes 4 406 420 419 493 globNum 12443 mat 1 crossSect 1
+LTrSpace 1559 nodes 4 408 421 407 494 globNum 12444 mat 1 crossSect 1
+LTrSpace 1560 nodes 4 407 421 420 494 globNum 12445 mat 1 crossSect 1
+LTrSpace 1561 nodes 4 409 422 408 495 globNum 12446 mat 1 crossSect 1
+LTrSpace 1562 nodes 4 408 422 421 495 globNum 12447 mat 1 crossSect 1
+LTrSpace 1563 nodes 4 401 412 409 496 globNum 12448 mat 1 crossSect 1
+LTrSpace 1564 nodes 4 410 448 401 481 globNum 12449 mat 1 crossSect 1
+LTrSpace 1565 nodes 4 410 402 413 497 globNum 12450 mat 1 crossSect 1
+LTrSpace 1566 nodes 4 413 448 410 497 globNum 12451 mat 1 crossSect 1
+LTrSpace 1567 nodes 4 401 448 412 496 globNum 12452 mat 1 crossSect 1
+LTrSpace 1568 nodes 4 503 413 402 497 globNum 12453 mat 1 crossSect 1
+LTrSpace 1569 nodes 4 411 416 438 500 globNum 12459 mat 1 crossSect 1
+LTrSpace 1570 nodes 4 438 415 411 500 globNum 12460 mat 1 crossSect 1
+LTrSpace 1571 nodes 4 412 448 423 502 globNum 12498 mat 1 crossSect 1
+LTrSpace 1572 nodes 4 423 432 412 502 globNum 12499 mat 1 crossSect 1
+LTrSpace 1573 nodes 4 413 414 424 503 globNum 12500 mat 1 crossSect 1
+LTrSpace 1574 nodes 4 424 423 413 504 globNum 12501 mat 1 crossSect 1
+LTrSpace 1575 nodes 4 423 448 413 504 globNum 12502 mat 1 crossSect 1
+LTrSpace 1576 nodes 4 415 424 414 503 globNum 12503 mat 1 crossSect 1
+LTrSpace 1577 nodes 4 418 419 427 506 globNum 12541 mat 1 crossSect 1
+LTrSpace 1578 nodes 4 427 426 418 506 globNum 12542 mat 1 crossSect 1
+LTrSpace 1579 nodes 4 418 426 417 507 globNum 12543 mat 1 crossSect 1
+LTrSpace 1580 nodes 4 417 404 418 490 globNum 12544 mat 1 crossSect 1
+LTrSpace 1581 nodes 4 426 425 417 505 globNum 12545 mat 1 crossSect 1
+LTrSpace 1582 nodes 4 419 420 428 508 globNum 12546 mat 1 crossSect 1
+LTrSpace 1583 nodes 4 428 427 419 506 globNum 12547 mat 1 crossSect 1
+LTrSpace 1584 nodes 4 515 420 421 509 globNum 12548 mat 1 crossSect 1
+LTrSpace 1585 nodes 4 420 514 428 508 globNum 12549 mat 1 crossSect 1
+LTrSpace 1586 nodes 4 421 422 430 510 globNum 12550 mat 1 crossSect 1
+LTrSpace 1587 nodes 4 515 421 429 430 globNum 12551 mat 1 crossSect 1
+LTrSpace 1588 nodes 4 422 431 430 510 globNum 12552 mat 1 crossSect 1
+LTrSpace 1589 nodes 4 432 449 412 502 globNum 12553 mat 1 crossSect 1
+LTrSpace 1590 nodes 4 422 449 431 510 globNum 12554 mat 1 crossSect 1
+LTrSpace 1591 nodes 4 423 434 432 511 globNum 12556 mat 1 crossSect 1
+LTrSpace 1592 nodes 4 424 434 423 511 globNum 12557 mat 1 crossSect 1
+LTrSpace 1593 nodes 4 424 415 500 503 globNum 12558 mat 1 crossSect 1
+LTrSpace 1594 nodes 4 433 434 424 450 globNum 12559 mat 1 crossSect 1
+LTrSpace 1595 nodes 4 438 433 415 500 globNum 12560 mat 1 crossSect 1
+LTrSpace 1596 nodes 4 416 450 438 500 globNum 12563 mat 1 crossSect 1
+LTrSpace 1597 nodes 4 438 450 433 500 globNum 12618 mat 1 crossSect 1
+LTrSpace 1598 nodes 4 435 370 335 459 globNum 12798 mat 1 crossSect 1
+LTrSpace 1599 nodes 4 335 436 435 459 globNum 12799 mat 1 crossSect 1
+LTrSpace 1600 nodes 4 335 368 436 459 globNum 12800 mat 1 crossSect 1
+LTrSpace 1601 nodes 4 338 369 435 452 globNum 12821 mat 1 crossSect 1
+LTrSpace 1602 nodes 4 364 452 350 518 globNum 12822 mat 1 crossSect 1
+LTrSpace 1603 nodes 4 436 368 333 451 globNum 12824 mat 1 crossSect 1
+LTrSpace 1604 nodes 4 521 436 351 451 globNum 12826 mat 1 crossSect 1
+LTrSpace 1605 nodes 4 340 353 373 342 globNum 12829 mat 1 crossSect 1
+LTrSpace 1606 nodes 4 341 379 354 439 globNum 12830 mat 1 crossSect 1
+LTrSpace 1607 nodes 4 454 439 373 353 globNum 12831 mat 1 crossSect 1
+LTrSpace 1608 nodes 4 354 379 440 473 globNum 12832 mat 1 crossSect 1
+LTrSpace 1609 nodes 4 440 378 355 456 globNum 12833 mat 1 crossSect 1
+LTrSpace 1610 nodes 4 356 376 441 457 globNum 12834 mat 1 crossSect 1
+LTrSpace 1611 nodes 4 350 452 435 453 globNum 12848 mat 1 crossSect 1
+LTrSpace 1612 nodes 4 362 350 453 445 globNum 12849 mat 1 crossSect 1
+LTrSpace 1613 nodes 4 358 453 435 459 globNum 12850 mat 1 crossSect 1
+LTrSpace 1614 nodes 4 350 365 518 445 globNum 12851 mat 1 crossSect 1
+LTrSpace 1615 nodes 4 365 350 518 364 globNum 12852 mat 1 crossSect 1
+LTrSpace 1616 nodes 4 352 374 353 454 globNum 12861 mat 1 crossSect 1
+LTrSpace 1617 nodes 4 355 455 360 456 globNum 12862 mat 1 crossSect 1
+LTrSpace 1618 nodes 4 456 440 444 360 globNum 12863 mat 1 crossSect 1
+LTrSpace 1619 nodes 4 365 377 355 356 globNum 12864 mat 1 crossSect 1
+LTrSpace 1620 nodes 4 472 365 356 377 globNum 12865 mat 1 crossSect 1
+LTrSpace 1621 nodes 4 361 457 441 463 globNum 12866 mat 1 crossSect 1
+LTrSpace 1622 nodes 4 356 457 365 472 globNum 12867 mat 1 crossSect 1
+LTrSpace 1623 nodes 4 365 457 361 462 globNum 12868 mat 1 crossSect 1
+LTrSpace 1624 nodes 4 348 441 375 357 globNum 12872 mat 1 crossSect 1
+LTrSpace 1625 nodes 4 522 442 362 444 globNum 12899 mat 1 crossSect 1
+LTrSpace 1626 nodes 4 358 458 362 453 globNum 12900 mat 1 crossSect 1
+LTrSpace 1627 nodes 4 442 458 358 459 globNum 12901 mat 1 crossSect 1
+LTrSpace 1628 nodes 4 350 362 453 358 globNum 12902 mat 1 crossSect 1
+LTrSpace 1629 nodes 4 460 442 459 523 globNum 12903 mat 1 crossSect 1
+LTrSpace 1630 nodes 4 437 443 359 461 globNum 12904 mat 1 crossSect 1
+LTrSpace 1631 nodes 4 351 443 437 519 globNum 12905 mat 1 crossSect 1
+LTrSpace 1632 nodes 4 442 351 519 460 globNum 12906 mat 1 crossSect 1
+LTrSpace 1633 nodes 4 351 442 519 437 globNum 12907 mat 1 crossSect 1
+LTrSpace 1634 nodes 4 443 454 359 461 globNum 12915 mat 1 crossSect 1
+LTrSpace 1635 nodes 4 444 461 439 473 globNum 12916 mat 1 crossSect 1
+LTrSpace 1636 nodes 4 454 439 461 470 globNum 12917 mat 1 crossSect 1
+LTrSpace 1637 nodes 4 444 439 354 473 globNum 12918 mat 1 crossSect 1
+LTrSpace 1638 nodes 4 456 444 440 479 globNum 12919 mat 1 crossSect 1
+LTrSpace 1639 nodes 4 440 444 354 473 globNum 12920 mat 1 crossSect 1
+LTrSpace 1640 nodes 4 360 455 445 465 globNum 12921 mat 1 crossSect 1
+LTrSpace 1641 nodes 4 365 455 525 445 globNum 12922 mat 1 crossSect 1
+LTrSpace 1642 nodes 4 365 462 364 518 globNum 12923 mat 1 crossSect 1
+LTrSpace 1643 nodes 4 364 462 361 466 globNum 12924 mat 1 crossSect 1
+LTrSpace 1644 nodes 4 456 465 360 444 globNum 12940 mat 1 crossSect 1
+LTrSpace 1645 nodes 4 522 465 362 458 globNum 12941 mat 1 crossSect 1
+LTrSpace 1646 nodes 4 362 465 526 458 globNum 12942 mat 1 crossSect 1
+LTrSpace 1647 nodes 4 363 444 442 461 globNum 12943 mat 1 crossSect 1
+LTrSpace 1648 nodes 4 437 461 442 519 globNum 12952 mat 1 crossSect 1
+LTrSpace 1649 nodes 4 368 459 370 468 globNum 13124 mat 1 crossSect 1
+LTrSpace 1650 nodes 4 369 469 370 435 globNum 13153 mat 1 crossSect 1
+LTrSpace 1651 nodes 4 377 355 378 456 globNum 13182 mat 1 crossSect 1
+LTrSpace 1652 nodes 4 379 439 373 470 globNum 13183 mat 1 crossSect 1
+LTrSpace 1653 nodes 4 378 440 446 456 globNum 13235 mat 1 crossSect 1
+LTrSpace 1654 nodes 4 446 440 379 473 globNum 13236 mat 1 crossSect 1
+LTrSpace 1655 nodes 4 391 380 474 470 globNum 13237 mat 1 crossSect 1
+LTrSpace 1656 nodes 4 380 470 373 454 globNum 13238 mat 1 crossSect 1
+LTrSpace 1657 nodes 4 379 470 382 473 globNum 13239 mat 1 crossSect 1
+LTrSpace 1658 nodes 4 374 454 373 353 globNum 13240 mat 1 crossSect 1
+LTrSpace 1659 nodes 4 447 441 376 457 globNum 13289 mat 1 crossSect 1
+LTrSpace 1660 nodes 4 375 441 447 471 globNum 13290 mat 1 crossSect 1
+LTrSpace 1661 nodes 4 384 471 447 476 globNum 13291 mat 1 crossSect 1
+LTrSpace 1662 nodes 4 376 356 377 472 globNum 13292 mat 1 crossSect 1
+LTrSpace 1663 nodes 4 376 472 386 457 globNum 13293 mat 1 crossSect 1
+LTrSpace 1664 nodes 4 447 457 385 476 globNum 13294 mat 1 crossSect 1
+LTrSpace 1665 nodes 4 377 456 387 455 globNum 13295 mat 1 crossSect 1
+LTrSpace 1666 nodes 4 386 472 387 477 globNum 13296 mat 1 crossSect 1
+LTrSpace 1667 nodes 4 387 472 377 455 globNum 13297 mat 1 crossSect 1
+LTrSpace 1668 nodes 4 387 456 388 478 globNum 13298 mat 1 crossSect 1
+LTrSpace 1669 nodes 4 388 456 446 479 globNum 13299 mat 1 crossSect 1
+LTrSpace 1670 nodes 4 446 473 381 479 globNum 13300 mat 1 crossSect 1
+LTrSpace 1671 nodes 4 380 454 389 474 globNum 13301 mat 1 crossSect 1
+LTrSpace 1672 nodes 4 381 480 382 390 globNum 13403 mat 1 crossSect 1
+LTrSpace 1673 nodes 4 391 480 470 474 globNum 13404 mat 1 crossSect 1
+LTrSpace 1674 nodes 4 393 471 384 476 globNum 13439 mat 1 crossSect 1
+LTrSpace 1675 nodes 4 393 476 394 484 globNum 13441 mat 1 crossSect 1
+LTrSpace 1676 nodes 4 385 457 395 476 globNum 13442 mat 1 crossSect 1
+LTrSpace 1677 nodes 4 395 457 386 477 globNum 13443 mat 1 crossSect 1
+LTrSpace 1678 nodes 4 394 476 395 485 globNum 13444 mat 1 crossSect 1
+LTrSpace 1679 nodes 4 396 477 387 478 globNum 13445 mat 1 crossSect 1
+LTrSpace 1680 nodes 4 396 478 397 487 globNum 13446 mat 1 crossSect 1
+LTrSpace 1681 nodes 4 388 479 398 478 globNum 13447 mat 1 crossSect 1
+LTrSpace 1682 nodes 4 397 478 398 488 globNum 13448 mat 1 crossSect 1
+LTrSpace 1683 nodes 4 398 479 390 489 globNum 13449 mat 1 crossSect 1
+LTrSpace 1684 nodes 4 390 479 381 480 globNum 13450 mat 1 crossSect 1
+LTrSpace 1685 nodes 4 389 475 392 483 globNum 13452 mat 1 crossSect 1
+LTrSpace 1686 nodes 4 390 480 401 496 globNum 13544 mat 1 crossSect 1
+LTrSpace 1687 nodes 4 401 480 391 481 globNum 13545 mat 1 crossSect 1
+LTrSpace 1688 nodes 4 391 389 399 483 globNum 13546 mat 1 crossSect 1
+LTrSpace 1689 nodes 4 391 481 483 399 globNum 13547 mat 1 crossSect 1
+LTrSpace 1690 nodes 4 392 482 402 483 globNum 13550 mat 1 crossSect 1
+LTrSpace 1691 nodes 4 404 484 394 485 globNum 13581 mat 1 crossSect 1
+LTrSpace 1692 nodes 4 404 485 405 490 globNum 13586 mat 1 crossSect 1
+LTrSpace 1693 nodes 4 477 406 487 396 globNum 13587 mat 1 crossSect 1
+LTrSpace 1694 nodes 4 485 406 492 486 globNum 13588 mat 1 crossSect 1
+LTrSpace 1695 nodes 4 407 487 397 488 globNum 13589 mat 1 crossSect 1
+LTrSpace 1696 nodes 4 406 487 407 493 globNum 13590 mat 1 crossSect 1
+LTrSpace 1697 nodes 4 408 488 398 489 globNum 13591 mat 1 crossSect 1
+LTrSpace 1698 nodes 4 407 488 408 494 globNum 13592 mat 1 crossSect 1
+LTrSpace 1699 nodes 4 408 489 409 495 globNum 13593 mat 1 crossSect 1
+LTrSpace 1700 nodes 4 390 496 409 489 globNum 13594 mat 1 crossSect 1
+LTrSpace 1701 nodes 4 503 482 402 414 globNum 13596 mat 1 crossSect 1
+LTrSpace 1702 nodes 4 402 481 399 483 globNum 13657 mat 1 crossSect 1
+LTrSpace 1703 nodes 4 410 481 402 497 globNum 13658 mat 1 crossSect 1
+LTrSpace 1704 nodes 4 418 490 405 492 globNum 13689 mat 1 crossSect 1
+LTrSpace 1705 nodes 4 404 491 403 484 globNum 13691 mat 1 crossSect 1
+LTrSpace 1706 nodes 4 417 491 404 490 globNum 13692 mat 1 crossSect 1
+LTrSpace 1707 nodes 4 419 492 406 493 globNum 13694 mat 1 crossSect 1
+LTrSpace 1708 nodes 4 418 492 419 506 globNum 13695 mat 1 crossSect 1
+LTrSpace 1709 nodes 4 420 493 407 494 globNum 13696 mat 1 crossSect 1
+LTrSpace 1710 nodes 4 419 493 420 508 globNum 13697 mat 1 crossSect 1
+LTrSpace 1711 nodes 4 421 494 408 495 globNum 13698 mat 1 crossSect 1
+LTrSpace 1712 nodes 4 420 494 421 509 globNum 13699 mat 1 crossSect 1
+LTrSpace 1713 nodes 4 422 495 409 496 globNum 13700 mat 1 crossSect 1
+LTrSpace 1714 nodes 4 421 495 422 510 globNum 13701 mat 1 crossSect 1
+LTrSpace 1715 nodes 4 422 412 496 409 globNum 13702 mat 1 crossSect 1
+LTrSpace 1716 nodes 4 412 422 496 449 globNum 13703 mat 1 crossSect 1
+LTrSpace 1717 nodes 4 401 481 448 496 globNum 13704 mat 1 crossSect 1
+LTrSpace 1718 nodes 4 448 481 410 497 globNum 13705 mat 1 crossSect 1
+LTrSpace 1719 nodes 4 448 497 413 504 globNum 13706 mat 1 crossSect 1
+LTrSpace 1720 nodes 4 412 496 448 502 globNum 13707 mat 1 crossSect 1
+LTrSpace 1721 nodes 4 503 402 413 414 globNum 13708 mat 1 crossSect 1
+LTrSpace 1722 nodes 4 415 499 411 500 globNum 13710 mat 1 crossSect 1
+LTrSpace 1723 nodes 4 414 503 499 415 globNum 13712 mat 1 crossSect 1
+LTrSpace 1724 nodes 4 416 500 411 501 globNum 13713 mat 1 crossSect 1
+LTrSpace 1725 nodes 4 504 502 423 448 globNum 13752 mat 1 crossSect 1
+LTrSpace 1726 nodes 4 432 502 423 511 globNum 13753 mat 1 crossSect 1
+LTrSpace 1727 nodes 4 413 503 424 504 globNum 13754 mat 1 crossSect 1
+LTrSpace 1728 nodes 4 423 504 424 511 globNum 13755 mat 1 crossSect 1
+LTrSpace 1729 nodes 4 502 504 423 511 globNum 13756 mat 1 crossSect 1
+LTrSpace 1730 nodes 4 417 507 426 505 globNum 13796 mat 1 crossSect 1
+LTrSpace 1731 nodes 4 418 507 417 490 globNum 13797 mat 1 crossSect 1
+LTrSpace 1732 nodes 4 425 505 426 513 globNum 13799 mat 1 crossSect 1
+LTrSpace 1733 nodes 4 419 508 428 506 globNum 13800 mat 1 crossSect 1
+LTrSpace 1734 nodes 4 515 420 514 429 globNum 13802 mat 1 crossSect 1
+LTrSpace 1735 nodes 4 420 428 514 429 globNum 13803 mat 1 crossSect 1
+LTrSpace 1736 nodes 4 421 510 430 515 globNum 13804 mat 1 crossSect 1
+LTrSpace 1737 nodes 4 515 421 420 429 globNum 13805 mat 1 crossSect 1
+LTrSpace 1738 nodes 4 430 510 431 516 globNum 13806 mat 1 crossSect 1
+LTrSpace 1739 nodes 4 412 502 449 496 globNum 13807 mat 1 crossSect 1
+LTrSpace 1740 nodes 4 449 502 432 517 globNum 13808 mat 1 crossSect 1
+LTrSpace 1741 nodes 4 431 510 449 516 globNum 13809 mat 1 crossSect 1
+LTrSpace 1742 nodes 4 449 510 422 495 globNum 13810 mat 1 crossSect 1
+LTrSpace 1743 nodes 4 434 511 424 450 globNum 13811 mat 1 crossSect 1
+LTrSpace 1744 nodes 4 424 500 415 433 globNum 13812 mat 1 crossSect 1
+LTrSpace 1745 nodes 4 450 424 433 500 globNum 13813 mat 1 crossSect 1
+LTrSpace 1746 nodes 4 416 512 450 500 globNum 13815 mat 1 crossSect 1
+LTrSpace 1747 nodes 4 500 424 503 529 globNum 13873 mat 1 crossSect 1
+LTrSpace 1748 nodes 4 370 459 435 469 globNum 14018 mat 1 crossSect 1
+LTrSpace 1749 nodes 4 436 459 368 520 globNum 14019 mat 1 crossSect 1
+LTrSpace 1750 nodes 4 435 452 369 469 globNum 14040 mat 1 crossSect 1
+LTrSpace 1751 nodes 4 350 518 452 453 globNum 14041 mat 1 crossSect 1
+LTrSpace 1752 nodes 4 466 452 364 518 globNum 14042 mat 1 crossSect 1
+LTrSpace 1753 nodes 4 368 451 436 520 globNum 14044 mat 1 crossSect 1
+LTrSpace 1754 nodes 4 521 351 436 460 globNum 14046 mat 1 crossSect 1
+LTrSpace 1755 nodes 4 521 520 460 436 globNum 14047 mat 1 crossSect 1
+LTrSpace 1756 nodes 4 354 439 379 473 globNum 14048 mat 1 crossSect 1
+LTrSpace 1757 nodes 4 439 454 373 470 globNum 14049 mat 1 crossSect 1
+LTrSpace 1758 nodes 4 376 457 356 472 globNum 14050 mat 1 crossSect 1
+LTrSpace 1759 nodes 4 435 453 452 469 globNum 14058 mat 1 crossSect 1
+LTrSpace 1760 nodes 4 453 445 350 518 globNum 14059 mat 1 crossSect 1
+LTrSpace 1761 nodes 4 435 459 453 469 globNum 14060 mat 1 crossSect 1
+LTrSpace 1762 nodes 4 453 459 358 458 globNum 14061 mat 1 crossSect 1
+LTrSpace 1763 nodes 4 477 518 365 525 globNum 14062 mat 1 crossSect 1
+LTrSpace 1764 nodes 4 439 454 461 359 globNum 14066 mat 1 crossSect 1
+LTrSpace 1765 nodes 4 360 456 455 465 globNum 14067 mat 1 crossSect 1
+LTrSpace 1766 nodes 4 455 456 355 377 globNum 14068 mat 1 crossSect 1
+LTrSpace 1767 nodes 4 465 456 479 444 globNum 14069 mat 1 crossSect 1
+LTrSpace 1768 nodes 4 456 479 440 446 globNum 14070 mat 1 crossSect 1
+LTrSpace 1769 nodes 4 365 472 455 377 globNum 14071 mat 1 crossSect 1
+LTrSpace 1770 nodes 4 365 472 477 455 globNum 14072 mat 1 crossSect 1
+LTrSpace 1771 nodes 4 447 463 457 476 globNum 14073 mat 1 crossSect 1
+LTrSpace 1772 nodes 4 457 463 361 466 globNum 14074 mat 1 crossSect 1
+LTrSpace 1773 nodes 4 477 365 457 472 globNum 14075 mat 1 crossSect 1
+LTrSpace 1774 nodes 4 361 462 457 466 globNum 14076 mat 1 crossSect 1
+LTrSpace 1775 nodes 4 522 362 442 458 globNum 14101 mat 1 crossSect 1
+LTrSpace 1776 nodes 4 453 362 445 526 globNum 14102 mat 1 crossSect 1
+LTrSpace 1777 nodes 4 458 459 442 523 globNum 14103 mat 1 crossSect 1
+LTrSpace 1778 nodes 4 460 459 520 523 globNum 14104 mat 1 crossSect 1
+LTrSpace 1779 nodes 4 442 460 459 436 globNum 14105 mat 1 crossSect 1
+LTrSpace 1780 nodes 4 443 461 437 519 globNum 14106 mat 1 crossSect 1
+LTrSpace 1781 nodes 4 351 519 460 521 globNum 14107 mat 1 crossSect 1
+LTrSpace 1782 nodes 4 460 519 442 523 globNum 14108 mat 1 crossSect 1
+LTrSpace 1783 nodes 4 519 524 521 351 globNum 14109 mat 1 crossSect 1
+LTrSpace 1784 nodes 4 524 519 443 351 globNum 14110 mat 1 crossSect 1
+LTrSpace 1785 nodes 4 439 473 461 470 globNum 14116 mat 1 crossSect 1
+LTrSpace 1786 nodes 4 461 444 439 363 globNum 14117 mat 1 crossSect 1
+LTrSpace 1787 nodes 4 440 479 444 473 globNum 14118 mat 1 crossSect 1
+LTrSpace 1788 nodes 4 445 465 455 525 globNum 14119 mat 1 crossSect 1
+LTrSpace 1789 nodes 4 518 477 365 462 globNum 14120 mat 1 crossSect 1
+LTrSpace 1790 nodes 4 364 518 462 466 globNum 14121 mat 1 crossSect 1
+LTrSpace 1791 nodes 4 465 522 362 444 globNum 14140 mat 1 crossSect 1
+LTrSpace 1792 nodes 4 362 526 465 445 globNum 14141 mat 1 crossSect 1
+LTrSpace 1793 nodes 4 442 461 444 522 globNum 14142 mat 1 crossSect 1
+LTrSpace 1794 nodes 4 461 442 523 522 globNum 14150 mat 1 crossSect 1
+LTrSpace 1795 nodes 4 370 468 459 469 globNum 14305 mat 1 crossSect 1
+LTrSpace 1796 nodes 4 439 470 379 473 globNum 14353 mat 1 crossSect 1
+LTrSpace 1797 nodes 4 440 473 446 479 globNum 14372 mat 1 crossSect 1
+LTrSpace 1798 nodes 4 380 474 470 454 globNum 14373 mat 1 crossSect 1
+LTrSpace 1799 nodes 4 391 470 480 382 globNum 14374 mat 1 crossSect 1
+LTrSpace 1800 nodes 4 382 473 470 480 globNum 14375 mat 1 crossSect 1
+LTrSpace 1801 nodes 4 463 447 457 441 globNum 14412 mat 1 crossSect 1
+LTrSpace 1802 nodes 4 447 471 441 463 globNum 14413 mat 1 crossSect 1
+LTrSpace 1803 nodes 4 447 476 471 463 globNum 14414 mat 1 crossSect 1
+LTrSpace 1804 nodes 4 386 457 472 477 globNum 14415 mat 1 crossSect 1
+LTrSpace 1805 nodes 4 387 455 456 478 globNum 14416 mat 1 crossSect 1
+LTrSpace 1806 nodes 4 387 477 472 455 globNum 14417 mat 1 crossSect 1
+LTrSpace 1807 nodes 4 388 478 456 479 globNum 14418 mat 1 crossSect 1
+LTrSpace 1808 nodes 4 381 479 473 480 globNum 14419 mat 1 crossSect 1
+LTrSpace 1809 nodes 4 389 474 454 475 globNum 14420 mat 1 crossSect 1
+LTrSpace 1810 nodes 4 391 480 474 481 globNum 14490 mat 1 crossSect 1
+LTrSpace 1811 nodes 4 394 484 476 485 globNum 14525 mat 1 crossSect 1
+LTrSpace 1812 nodes 4 395 476 457 485 globNum 14526 mat 1 crossSect 1
+LTrSpace 1813 nodes 4 485 477 395 406 globNum 14527 mat 1 crossSect 1
+LTrSpace 1814 nodes 4 387 478 477 455 globNum 14528 mat 1 crossSect 1
+LTrSpace 1815 nodes 4 477 478 396 487 globNum 14529 mat 1 crossSect 1
+LTrSpace 1816 nodes 4 406 477 487 486 globNum 14530 mat 1 crossSect 1
+LTrSpace 1817 nodes 4 397 487 478 488 globNum 14531 mat 1 crossSect 1
+LTrSpace 1818 nodes 4 398 478 479 488 globNum 14532 mat 1 crossSect 1
+LTrSpace 1819 nodes 4 390 489 479 480 globNum 14533 mat 1 crossSect 1
+LTrSpace 1820 nodes 4 479 489 398 488 globNum 14534 mat 1 crossSect 1
+LTrSpace 1821 nodes 4 475 483 389 474 globNum 14536 mat 1 crossSect 1
+LTrSpace 1822 nodes 4 401 496 480 481 globNum 14606 mat 1 crossSect 1
+LTrSpace 1823 nodes 4 480 496 390 489 globNum 14607 mat 1 crossSect 1
+LTrSpace 1824 nodes 4 391 483 481 474 globNum 14608 mat 1 crossSect 1
+LTrSpace 1825 nodes 4 481 402 497 482 globNum 14611 mat 1 crossSect 1
+LTrSpace 1826 nodes 4 484 485 404 490 globNum 14636 mat 1 crossSect 1
+LTrSpace 1827 nodes 4 485 395 477 457 globNum 14641 mat 1 crossSect 1
+LTrSpace 1828 nodes 4 406 485 492 405 globNum 14642 mat 1 crossSect 1
+LTrSpace 1829 nodes 4 405 490 485 492 globNum 14643 mat 1 crossSect 1
+LTrSpace 1830 nodes 4 486 487 406 493 globNum 14644 mat 1 crossSect 1
+LTrSpace 1831 nodes 4 406 492 486 493 globNum 14645 mat 1 crossSect 1
+LTrSpace 1832 nodes 4 487 488 407 494 globNum 14646 mat 1 crossSect 1
+LTrSpace 1833 nodes 4 407 493 487 494 globNum 14647 mat 1 crossSect 1
+LTrSpace 1834 nodes 4 488 489 408 495 globNum 14648 mat 1 crossSect 1
+LTrSpace 1835 nodes 4 408 494 488 495 globNum 14649 mat 1 crossSect 1
+LTrSpace 1836 nodes 4 409 495 489 496 globNum 14650 mat 1 crossSect 1
+LTrSpace 1837 nodes 4 482 503 402 497 globNum 14652 mat 1 crossSect 1
+LTrSpace 1838 nodes 4 482 498 414 503 globNum 14654 mat 1 crossSect 1
+LTrSpace 1839 nodes 4 402 481 483 482 globNum 14698 mat 1 crossSect 1
+LTrSpace 1840 nodes 4 490 492 418 506 globNum 14725 mat 1 crossSect 1
+LTrSpace 1841 nodes 4 491 484 404 490 globNum 14728 mat 1 crossSect 1
+LTrSpace 1842 nodes 4 491 490 417 507 globNum 14729 mat 1 crossSect 1
+LTrSpace 1843 nodes 4 492 493 419 508 globNum 14731 mat 1 crossSect 1
+LTrSpace 1844 nodes 4 419 506 492 508 globNum 14732 mat 1 crossSect 1
+LTrSpace 1845 nodes 4 493 494 420 509 globNum 14733 mat 1 crossSect 1
+LTrSpace 1846 nodes 4 420 508 493 509 globNum 14734 mat 1 crossSect 1
+LTrSpace 1847 nodes 4 494 495 421 510 globNum 14735 mat 1 crossSect 1
+LTrSpace 1848 nodes 4 421 509 494 510 globNum 14736 mat 1 crossSect 1
+LTrSpace 1849 nodes 4 495 496 422 449 globNum 14737 mat 1 crossSect 1
+LTrSpace 1850 nodes 4 448 496 481 527 globNum 14738 mat 1 crossSect 1
+LTrSpace 1851 nodes 4 481 497 448 527 globNum 14739 mat 1 crossSect 1
+LTrSpace 1852 nodes 4 413 504 497 503 globNum 14740 mat 1 crossSect 1
+LTrSpace 1853 nodes 4 497 504 448 527 globNum 14741 mat 1 crossSect 1
+LTrSpace 1854 nodes 4 448 502 496 527 globNum 14742 mat 1 crossSect 1
+LTrSpace 1855 nodes 4 544 500 411 499 globNum 14744 mat 1 crossSect 1
+LTrSpace 1856 nodes 4 499 500 415 503 globNum 14745 mat 1 crossSect 1
+LTrSpace 1857 nodes 4 414 499 503 498 globNum 14746 mat 1 crossSect 1
+LTrSpace 1858 nodes 4 500 501 416 512 globNum 14747 mat 1 crossSect 1
+LTrSpace 1859 nodes 4 502 511 432 517 globNum 14782 mat 1 crossSect 1
+LTrSpace 1860 nodes 4 529 424 511 450 globNum 14783 mat 1 crossSect 1
+LTrSpace 1861 nodes 4 426 506 507 418 globNum 14814 mat 1 crossSect 1
+LTrSpace 1862 nodes 4 426 505 507 513 globNum 14816 mat 1 crossSect 1
+LTrSpace 1863 nodes 4 507 505 417 491 globNum 14817 mat 1 crossSect 1
+LTrSpace 1864 nodes 4 507 490 418 506 globNum 14818 mat 1 crossSect 1
+LTrSpace 1865 nodes 4 506 428 514 508 globNum 14821 mat 1 crossSect 1
+LTrSpace 1866 nodes 4 508 515 509 420 globNum 14822 mat 1 crossSect 1
+LTrSpace 1867 nodes 4 430 515 510 516 globNum 14824 mat 1 crossSect 1
+LTrSpace 1868 nodes 4 510 515 421 509 globNum 14825 mat 1 crossSect 1
+LTrSpace 1869 nodes 4 420 515 514 508 globNum 14826 mat 1 crossSect 1
+LTrSpace 1870 nodes 4 449 496 502 528 globNum 14827 mat 1 crossSect 1
+LTrSpace 1871 nodes 4 502 517 449 528 globNum 14828 mat 1 crossSect 1
+LTrSpace 1872 nodes 4 449 516 510 528 globNum 14829 mat 1 crossSect 1
+LTrSpace 1873 nodes 4 510 495 449 528 globNum 14831 mat 1 crossSect 1
+LTrSpace 1874 nodes 4 450 500 512 529 globNum 14833 mat 1 crossSect 1
+LTrSpace 1875 nodes 4 424 500 450 529 globNum 14897 mat 1 crossSect 1
+LTrSpace 1876 nodes 4 368 467 451 520 globNum 14952 mat 1 crossSect 1
+LTrSpace 1877 nodes 4 468 368 459 520 globNum 14982 mat 1 crossSect 1
+LTrSpace 1878 nodes 4 452 453 518 531 globNum 14998 mat 1 crossSect 1
+LTrSpace 1879 nodes 4 466 532 464 452 globNum 14999 mat 1 crossSect 1
+LTrSpace 1880 nodes 4 541 452 464 532 globNum 15000 mat 1 crossSect 1
+LTrSpace 1881 nodes 4 520 521 451 436 globNum 15002 mat 1 crossSect 1
+LTrSpace 1882 nodes 4 538 453 452 531 globNum 15006 mat 1 crossSect 1
+LTrSpace 1883 nodes 4 445 518 453 526 globNum 15007 mat 1 crossSect 1
+LTrSpace 1884 nodes 4 453 469 459 533 globNum 15008 mat 1 crossSect 1
+LTrSpace 1885 nodes 4 459 458 453 533 globNum 15009 mat 1 crossSect 1
+LTrSpace 1886 nodes 4 365 518 445 525 globNum 15010 mat 1 crossSect 1
+LTrSpace 1887 nodes 4 470 461 454 474 globNum 15012 mat 1 crossSect 1
+LTrSpace 1888 nodes 4 455 465 456 478 globNum 15013 mat 1 crossSect 1
+LTrSpace 1889 nodes 4 456 465 479 478 globNum 15014 mat 1 crossSect 1
+LTrSpace 1890 nodes 4 457 476 463 466 globNum 15015 mat 1 crossSect 1
+LTrSpace 1891 nodes 4 365 477 457 462 globNum 15016 mat 1 crossSect 1
+LTrSpace 1892 nodes 4 442 522 458 523 globNum 15032 mat 1 crossSect 1
+LTrSpace 1893 nodes 4 362 453 458 526 globNum 15033 mat 1 crossSect 1
+LTrSpace 1894 nodes 4 459 523 458 534 globNum 15034 mat 1 crossSect 1
+LTrSpace 1895 nodes 4 460 520 459 436 globNum 15035 mat 1 crossSect 1
+LTrSpace 1896 nodes 4 460 521 519 535 globNum 15036 mat 1 crossSect 1
+LTrSpace 1897 nodes 4 519 523 460 535 globNum 15037 mat 1 crossSect 1
+LTrSpace 1898 nodes 4 519 524 443 475 globNum 15039 mat 1 crossSect 1
+LTrSpace 1899 nodes 4 461 443 475 519 globNum 15043 mat 1 crossSect 1
+LTrSpace 1900 nodes 4 443 461 475 454 globNum 15044 mat 1 crossSect 1
+LTrSpace 1901 nodes 4 473 444 461 522 globNum 15045 mat 1 crossSect 1
+LTrSpace 1902 nodes 4 455 525 465 478 globNum 15046 mat 1 crossSect 1
+LTrSpace 1903 nodes 4 465 525 445 526 globNum 15047 mat 1 crossSect 1
+LTrSpace 1904 nodes 4 365 525 455 477 globNum 15048 mat 1 crossSect 1
+LTrSpace 1905 nodes 4 462 466 518 485 globNum 15049 mat 1 crossSect 1
+LTrSpace 1906 nodes 4 532 466 518 452 globNum 15061 mat 1 crossSect 1
+LTrSpace 1907 nodes 4 444 479 522 473 globNum 15064 mat 1 crossSect 1
+LTrSpace 1908 nodes 4 479 444 522 465 globNum 15065 mat 1 crossSect 1
+LTrSpace 1909 nodes 4 458 522 465 489 globNum 15066 mat 1 crossSect 1
+LTrSpace 1910 nodes 4 489 465 526 488 globNum 15067 mat 1 crossSect 1
+LTrSpace 1911 nodes 4 461 523 442 519 globNum 15068 mat 1 crossSect 1
+LTrSpace 1912 nodes 4 459 469 468 533 globNum 15178 mat 1 crossSect 1
+LTrSpace 1913 nodes 4 468 537 520 459 globNum 15179 mat 1 crossSect 1
+LTrSpace 1914 nodes 4 474 480 470 461 globNum 15228 mat 1 crossSect 1
+LTrSpace 1915 nodes 4 461 473 480 470 globNum 15229 mat 1 crossSect 1
+LTrSpace 1916 nodes 4 454 475 474 461 globNum 15239 mat 1 crossSect 1
+LTrSpace 1917 nodes 4 474 481 480 461 globNum 15256 mat 1 crossSect 1
+LTrSpace 1918 nodes 4 476 485 484 466 globNum 15280 mat 1 crossSect 1
+LTrSpace 1919 nodes 4 466 457 485 462 globNum 15281 mat 1 crossSect 1
+LTrSpace 1920 nodes 4 485 462 457 477 globNum 15282 mat 1 crossSect 1
+LTrSpace 1921 nodes 4 477 455 478 525 globNum 15283 mat 1 crossSect 1
+LTrSpace 1922 nodes 4 478 487 477 525 globNum 15284 mat 1 crossSect 1
+LTrSpace 1923 nodes 4 477 487 486 525 globNum 15285 mat 1 crossSect 1
+LTrSpace 1924 nodes 4 526 487 478 525 globNum 15286 mat 1 crossSect 1
+LTrSpace 1925 nodes 4 479 488 478 465 globNum 15287 mat 1 crossSect 1
+LTrSpace 1926 nodes 4 489 488 479 465 globNum 15288 mat 1 crossSect 1
+LTrSpace 1927 nodes 4 475 524 483 519 globNum 15290 mat 1 crossSect 1
+LTrSpace 1928 nodes 4 483 474 475 519 globNum 15291 mat 1 crossSect 1
+LTrSpace 1929 nodes 4 496 489 480 523 globNum 15351 mat 1 crossSect 1
+LTrSpace 1930 nodes 4 483 481 474 519 globNum 15352 mat 1 crossSect 1
+LTrSpace 1931 nodes 4 485 490 484 532 globNum 15373 mat 1 crossSect 1
+LTrSpace 1932 nodes 4 518 485 477 462 globNum 15378 mat 1 crossSect 1
+LTrSpace 1933 nodes 4 486 492 485 532 globNum 15379 mat 1 crossSect 1
+LTrSpace 1934 nodes 4 485 492 490 532 globNum 15380 mat 1 crossSect 1
+LTrSpace 1935 nodes 4 531 487 486 493 globNum 15381 mat 1 crossSect 1
+LTrSpace 1936 nodes 4 486 493 492 531 globNum 15382 mat 1 crossSect 1
+LTrSpace 1937 nodes 4 542 488 526 487 globNum 15383 mat 1 crossSect 1
+LTrSpace 1938 nodes 4 531 494 487 493 globNum 15384 mat 1 crossSect 1
+LTrSpace 1939 nodes 4 542 489 526 488 globNum 15385 mat 1 crossSect 1
+LTrSpace 1940 nodes 4 542 488 494 495 globNum 15386 mat 1 crossSect 1
+LTrSpace 1941 nodes 4 489 496 495 534 globNum 15387 mat 1 crossSect 1
+LTrSpace 1942 nodes 4 482 503 497 535 globNum 15388 mat 1 crossSect 1
+LTrSpace 1943 nodes 4 498 503 482 540 globNum 15390 mat 1 crossSect 1
+LTrSpace 1944 nodes 4 481 535 482 497 globNum 15430 mat 1 crossSect 1
+LTrSpace 1945 nodes 4 492 506 490 532 globNum 15456 mat 1 crossSect 1
+LTrSpace 1946 nodes 4 490 507 491 541 globNum 15460 mat 1 crossSect 1
+LTrSpace 1947 nodes 4 493 508 492 531 globNum 15462 mat 1 crossSect 1
+LTrSpace 1948 nodes 4 492 508 506 532 globNum 15463 mat 1 crossSect 1
+LTrSpace 1949 nodes 4 494 509 493 531 globNum 15464 mat 1 crossSect 1
+LTrSpace 1950 nodes 4 493 509 508 531 globNum 15465 mat 1 crossSect 1
+LTrSpace 1951 nodes 4 495 510 494 542 globNum 15466 mat 1 crossSect 1
+LTrSpace 1952 nodes 4 494 510 509 542 globNum 15467 mat 1 crossSect 1
+LTrSpace 1953 nodes 4 496 449 495 528 globNum 15468 mat 1 crossSect 1
+LTrSpace 1954 nodes 4 497 527 481 535 globNum 15469 mat 1 crossSect 1
+LTrSpace 1955 nodes 4 535 503 497 504 globNum 15470 mat 1 crossSect 1
+LTrSpace 1956 nodes 4 448 527 504 502 globNum 15471 mat 1 crossSect 1
+LTrSpace 1957 nodes 4 535 504 527 543 globNum 15472 mat 1 crossSect 1
+LTrSpace 1958 nodes 4 545 496 502 527 globNum 15473 mat 1 crossSect 1
+LTrSpace 1959 nodes 4 544 411 500 501 globNum 15474 mat 1 crossSect 1
+LTrSpace 1960 nodes 4 500 503 499 544 globNum 15475 mat 1 crossSect 1
+LTrSpace 1961 nodes 4 499 503 498 540 globNum 15476 mat 1 crossSect 1
+LTrSpace 1962 nodes 4 501 512 500 544 globNum 15477 mat 1 crossSect 1
+LTrSpace 1963 nodes 4 502 504 511 545 globNum 15511 mat 1 crossSect 1
+LTrSpace 1964 nodes 4 511 517 502 545 globNum 15512 mat 1 crossSect 1
+LTrSpace 1965 nodes 4 424 529 504 503 globNum 15513 mat 1 crossSect 1
+LTrSpace 1966 nodes 4 424 529 511 504 globNum 15514 mat 1 crossSect 1
+LTrSpace 1967 nodes 4 490 506 507 541 globNum 15540 mat 1 crossSect 1
+LTrSpace 1968 nodes 4 506 514 546 548 globNum 15543 mat 1 crossSect 1
+LTrSpace 1969 nodes 4 515 548 514 508 globNum 15544 mat 1 crossSect 1
+LTrSpace 1970 nodes 4 506 548 508 514 globNum 15545 mat 1 crossSect 1
+LTrSpace 1971 nodes 4 510 516 515 549 globNum 15546 mat 1 crossSect 1
+LTrSpace 1972 nodes 4 515 509 510 549 globNum 15547 mat 1 crossSect 1
+LTrSpace 1973 nodes 4 538 508 515 509 globNum 15548 mat 1 crossSect 1
+LTrSpace 1974 nodes 4 517 528 502 545 globNum 15549 mat 1 crossSect 1
+LTrSpace 1975 nodes 4 510 528 516 549 globNum 15550 mat 1 crossSect 1
+LTrSpace 1976 nodes 4 495 528 510 542 globNum 15552 mat 1 crossSect 1
+LTrSpace 1977 nodes 4 512 529 500 544 globNum 15553 mat 1 crossSect 1
+LTrSpace 1978 nodes 4 500 529 503 544 globNum 15611 mat 1 crossSect 1
+LTrSpace 1979 nodes 4 451 520 467 550 globNum 15652 mat 1 crossSect 1
+LTrSpace 1980 nodes 4 518 531 453 526 globNum 15702 mat 1 crossSect 1
+LTrSpace 1981 nodes 4 452 531 518 532 globNum 15703 mat 1 crossSect 1
+LTrSpace 1982 nodes 4 460 520 521 543 globNum 15706 mat 1 crossSect 1
+LTrSpace 1983 nodes 4 521 520 451 550 globNum 15707 mat 1 crossSect 1
+LTrSpace 1984 nodes 4 453 538 452 469 globNum 15710 mat 1 crossSect 1
+LTrSpace 1985 nodes 4 518 526 445 525 globNum 15711 mat 1 crossSect 1
+LTrSpace 1986 nodes 4 469 533 453 538 globNum 15712 mat 1 crossSect 1
+LTrSpace 1987 nodes 4 453 533 458 542 globNum 15713 mat 1 crossSect 1
+LTrSpace 1988 nodes 4 458 533 459 534 globNum 15714 mat 1 crossSect 1
+LTrSpace 1989 nodes 4 457 466 485 476 globNum 15716 mat 1 crossSect 1
+LTrSpace 1990 nodes 4 458 523 522 489 globNum 15727 mat 1 crossSect 1
+LTrSpace 1991 nodes 4 458 526 453 542 globNum 15728 mat 1 crossSect 1
+LTrSpace 1992 nodes 4 458 534 523 489 globNum 15729 mat 1 crossSect 1
+LTrSpace 1993 nodes 4 523 534 459 545 globNum 15730 mat 1 crossSect 1
+LTrSpace 1994 nodes 4 460 523 520 543 globNum 15731 mat 1 crossSect 1
+LTrSpace 1995 nodes 4 520 523 459 545 globNum 15732 mat 1 crossSect 1
+LTrSpace 1996 nodes 4 482 519 521 535 globNum 15733 mat 1 crossSect 1
+LTrSpace 1997 nodes 4 521 535 460 543 globNum 15734 mat 1 crossSect 1
+LTrSpace 1998 nodes 4 460 535 523 543 globNum 15735 mat 1 crossSect 1
+LTrSpace 1999 nodes 4 523 535 519 481 globNum 15736 mat 1 crossSect 1
+LTrSpace 2000 nodes 4 519 475 461 474 globNum 15740 mat 1 crossSect 1
+LTrSpace 2001 nodes 4 473 461 480 522 globNum 15741 mat 1 crossSect 1
+LTrSpace 2002 nodes 4 526 465 478 488 globNum 15742 mat 1 crossSect 1
+LTrSpace 2003 nodes 4 526 478 465 525 globNum 15743 mat 1 crossSect 1
+LTrSpace 2004 nodes 4 518 485 466 532 globNum 15744 mat 1 crossSect 1
+LTrSpace 2005 nodes 4 485 518 477 486 globNum 15745 mat 1 crossSect 1
+LTrSpace 2006 nodes 4 464 532 466 484 globNum 15751 mat 1 crossSect 1
+LTrSpace 2007 nodes 4 480 479 522 489 globNum 15757 mat 1 crossSect 1
+LTrSpace 2008 nodes 4 465 522 479 489 globNum 15758 mat 1 crossSect 1
+LTrSpace 2009 nodes 4 465 489 526 458 globNum 15759 mat 1 crossSect 1
+LTrSpace 2010 nodes 4 480 461 523 522 globNum 15770 mat 1 crossSect 1
+LTrSpace 2011 nodes 4 481 461 519 523 globNum 15771 mat 1 crossSect 1
+LTrSpace 2012 nodes 4 520 536 467 550 globNum 15820 mat 1 crossSect 1
+LTrSpace 2013 nodes 4 459 533 468 537 globNum 15840 mat 1 crossSect 1
+LTrSpace 2014 nodes 4 479 480 522 473 globNum 15900 mat 1 crossSect 1
+LTrSpace 2015 nodes 4 481 461 474 519 globNum 15907 mat 1 crossSect 1
+LTrSpace 2016 nodes 4 484 466 485 532 globNum 15920 mat 1 crossSect 1
+LTrSpace 2017 nodes 4 518 525 477 486 globNum 15921 mat 1 crossSect 1
+LTrSpace 2018 nodes 4 487 526 478 488 globNum 15922 mat 1 crossSect 1
+LTrSpace 2019 nodes 4 483 519 524 482 globNum 15923 mat 1 crossSect 1
+LTrSpace 2020 nodes 4 481 496 523 527 globNum 15954 mat 1 crossSect 1
+LTrSpace 2021 nodes 4 496 481 523 480 globNum 15955 mat 1 crossSect 1
+LTrSpace 2022 nodes 4 480 523 489 522 globNum 15956 mat 1 crossSect 1
+LTrSpace 2023 nodes 4 489 523 496 534 globNum 15957 mat 1 crossSect 1
+LTrSpace 2024 nodes 4 482 481 519 535 globNum 15958 mat 1 crossSect 1
+LTrSpace 2025 nodes 4 481 482 519 483 globNum 15960 mat 1 crossSect 1
+LTrSpace 2026 nodes 4 484 532 490 541 globNum 15980 mat 1 crossSect 1
+LTrSpace 2027 nodes 4 486 532 485 518 globNum 15984 mat 1 crossSect 1
+LTrSpace 2028 nodes 4 492 532 486 531 globNum 15985 mat 1 crossSect 1
+LTrSpace 2029 nodes 4 526 486 487 525 globNum 15986 mat 1 crossSect 1
+LTrSpace 2030 nodes 4 542 487 531 494 globNum 15987 mat 1 crossSect 1
+LTrSpace 2031 nodes 4 542 489 495 534 globNum 15988 mat 1 crossSect 1
+LTrSpace 2032 nodes 4 488 542 494 487 globNum 15989 mat 1 crossSect 1
+LTrSpace 2033 nodes 4 495 534 496 528 globNum 15990 mat 1 crossSect 1
+LTrSpace 2034 nodes 4 503 535 543 504 globNum 15991 mat 1 crossSect 1
+LTrSpace 2035 nodes 4 503 535 482 540 globNum 15992 mat 1 crossSect 1
+LTrSpace 2036 nodes 4 501 530 512 544 globNum 16000 mat 1 crossSect 1
+LTrSpace 2037 nodes 4 490 532 506 541 globNum 16049 mat 1 crossSect 1
+LTrSpace 2038 nodes 4 491 541 484 490 globNum 16051 mat 1 crossSect 1
+LTrSpace 2039 nodes 4 492 531 508 532 globNum 16053 mat 1 crossSect 1
+LTrSpace 2040 nodes 4 532 506 546 548 globNum 16054 mat 1 crossSect 1
+LTrSpace 2041 nodes 4 509 531 494 542 globNum 16055 mat 1 crossSect 1
+LTrSpace 2042 nodes 4 509 542 510 549 globNum 16056 mat 1 crossSect 1
+LTrSpace 2043 nodes 4 481 535 527 523 globNum 16057 mat 1 crossSect 1
+LTrSpace 2044 nodes 4 535 527 504 497 globNum 16058 mat 1 crossSect 1
+LTrSpace 2045 nodes 4 504 543 503 529 globNum 16059 mat 1 crossSect 1
+LTrSpace 2046 nodes 4 504 502 527 545 globNum 16060 mat 1 crossSect 1
+LTrSpace 2047 nodes 4 527 543 504 545 globNum 16061 mat 1 crossSect 1
+LTrSpace 2048 nodes 4 496 545 502 528 globNum 16062 mat 1 crossSect 1
+LTrSpace 2049 nodes 4 499 544 503 540 globNum 16063 mat 1 crossSect 1
+LTrSpace 2050 nodes 4 511 545 504 529 globNum 16096 mat 1 crossSect 1
+LTrSpace 2051 nodes 4 506 546 507 541 globNum 16124 mat 1 crossSect 1
+LTrSpace 2052 nodes 4 508 538 515 548 globNum 16132 mat 1 crossSect 1
+LTrSpace 2053 nodes 4 528 549 510 542 globNum 16136 mat 1 crossSect 1
+LTrSpace 2054 nodes 4 528 542 495 534 globNum 16138 mat 1 crossSect 1
+LTrSpace 2055 nodes 4 529 544 512 530 globNum 16141 mat 1 crossSect 1
+LTrSpace 2056 nodes 4 503 544 529 543 globNum 16190 mat 1 crossSect 1
+LTrSpace 2057 nodes 4 459 537 520 545 globNum 16235 mat 1 crossSect 1
+LTrSpace 2058 nodes 4 453 526 531 542 globNum 16255 mat 1 crossSect 1
+LTrSpace 2059 nodes 4 518 526 525 486 globNum 16256 mat 1 crossSect 1
+LTrSpace 2060 nodes 4 518 532 531 486 globNum 16257 mat 1 crossSect 1
+LTrSpace 2061 nodes 4 531 532 452 538 globNum 16258 mat 1 crossSect 1
+LTrSpace 2062 nodes 4 532 541 452 539 globNum 16259 mat 1 crossSect 1
+LTrSpace 2063 nodes 4 464 541 532 484 globNum 16260 mat 1 crossSect 1
+LTrSpace 2064 nodes 4 451 550 540 521 globNum 16262 mat 1 crossSect 1
+LTrSpace 2065 nodes 4 543 521 550 520 globNum 16263 mat 1 crossSect 1
+LTrSpace 2066 nodes 4 458 542 533 534 globNum 16265 mat 1 crossSect 1
+LTrSpace 2067 nodes 4 538 453 542 533 globNum 16266 mat 1 crossSect 1
+LTrSpace 2068 nodes 4 459 534 533 537 globNum 16267 mat 1 crossSect 1
+LTrSpace 2069 nodes 4 458 542 534 489 globNum 16275 mat 1 crossSect 1
+LTrSpace 2070 nodes 4 542 458 526 489 globNum 16276 mat 1 crossSect 1
+LTrSpace 2071 nodes 4 459 545 534 537 globNum 16277 mat 1 crossSect 1
+LTrSpace 2072 nodes 4 523 545 527 496 globNum 16278 mat 1 crossSect 1
+LTrSpace 2073 nodes 4 520 543 523 545 globNum 16279 mat 1 crossSect 1
+LTrSpace 2074 nodes 4 519 482 521 524 globNum 16280 mat 1 crossSect 1
+LTrSpace 2075 nodes 4 535 543 521 540 globNum 16281 mat 1 crossSect 1
+LTrSpace 2076 nodes 4 523 543 535 527 globNum 16282 mat 1 crossSect 1
+LTrSpace 2077 nodes 4 461 480 523 481 globNum 16293 mat 1 crossSect 1
+LTrSpace 2078 nodes 4 520 537 536 545 globNum 16310 mat 1 crossSect 1
+LTrSpace 2079 nodes 4 467 550 536 530 globNum 16312 mat 1 crossSect 1
+LTrSpace 2080 nodes 4 536 550 520 543 globNum 16313 mat 1 crossSect 1
+LTrSpace 2081 nodes 4 452 539 538 532 globNum 16359 mat 1 crossSect 1
+LTrSpace 2082 nodes 4 526 518 531 486 globNum 16373 mat 1 crossSect 1
+LTrSpace 2083 nodes 4 526 487 486 531 globNum 16374 mat 1 crossSect 1
+LTrSpace 2084 nodes 4 545 523 534 496 globNum 16377 mat 1 crossSect 1
+LTrSpace 2085 nodes 4 542 531 487 526 globNum 16384 mat 1 crossSect 1
+LTrSpace 2086 nodes 4 489 542 495 488 globNum 16385 mat 1 crossSect 1
+LTrSpace 2087 nodes 4 503 543 535 540 globNum 16386 mat 1 crossSect 1
+LTrSpace 2088 nodes 4 482 540 535 521 globNum 16387 mat 1 crossSect 1
+LTrSpace 2089 nodes 4 506 541 532 546 globNum 16407 mat 1 crossSect 1
+LTrSpace 2090 nodes 4 538 532 508 531 globNum 16411 mat 1 crossSect 1
+LTrSpace 2091 nodes 4 506 532 508 548 globNum 16412 mat 1 crossSect 1
+LTrSpace 2092 nodes 4 509 538 531 542 globNum 16413 mat 1 crossSect 1
+LTrSpace 2093 nodes 4 538 509 515 549 globNum 16414 mat 1 crossSect 1
+LTrSpace 2094 nodes 4 543 529 504 545 globNum 16415 mat 1 crossSect 1
+LTrSpace 2095 nodes 4 543 545 527 523 globNum 16416 mat 1 crossSect 1
+LTrSpace 2096 nodes 4 545 528 496 534 globNum 16417 mat 1 crossSect 1
+LTrSpace 2097 nodes 4 503 540 544 543 globNum 16418 mat 1 crossSect 1
+LTrSpace 2098 nodes 4 507 541 546 547 globNum 16456 mat 1 crossSect 1
+LTrSpace 2099 nodes 4 549 542 528 533 globNum 16464 mat 1 crossSect 1
+LTrSpace 2100 nodes 4 542 534 528 533 globNum 16465 mat 1 crossSect 1
+LTrSpace 2101 nodes 4 544 530 529 550 globNum 16466 mat 1 crossSect 1
+LTrSpace 2102 nodes 4 529 543 544 550 globNum 16493 mat 1 crossSect 1
+LTrSpace 2103 nodes 4 532 538 508 548 globNum 16524 mat 1 crossSect 1
+LTrSpace 2104 nodes 4 541 539 532 546 globNum 16525 mat 1 crossSect 1
+LTrSpace 2105 nodes 4 521 543 550 540 globNum 16526 mat 1 crossSect 1
+LTrSpace 2106 nodes 4 453 538 542 531 globNum 16527 mat 1 crossSect 1
+LTrSpace 2107 nodes 4 533 537 534 528 globNum 16528 mat 1 crossSect 1
+LTrSpace 2108 nodes 4 534 537 545 528 globNum 16531 mat 1 crossSect 1
+LTrSpace 2109 nodes 4 543 545 520 536 globNum 16532 mat 1 crossSect 1
+LTrSpace 2110 nodes 4 536 530 550 529 globNum 16540 mat 1 crossSect 1
+LTrSpace 2111 nodes 4 550 543 536 529 globNum 16541 mat 1 crossSect 1
+LTrSpace 2112 nodes 4 533 549 537 528 globNum 16564 mat 1 crossSect 1
+LTrSpace 2113 nodes 4 538 549 533 542 globNum 16566 mat 1 crossSect 1
+LTrSpace 2114 nodes 4 538 532 539 548 globNum 16567 mat 1 crossSect 1
+LTrSpace 2115 nodes 4 532 548 546 539 globNum 16582 mat 1 crossSect 1
+LTrSpace 2116 nodes 4 538 508 509 531 globNum 16583 mat 1 crossSect 1
+LTrSpace 2117 nodes 4 509 549 538 542 globNum 16584 mat 1 crossSect 1
+LTrSpace 2118 nodes 4 529 545 543 536 globNum 16585 mat 1 crossSect 1
+LTrSpace 2119 nodes 4 544 543 540 550 globNum 16586 mat 1 crossSect 1
+LTrSpace 2120 nodes 4 546 547 541 539 globNum 16597 mat 1 crossSect 1
+LTrSpace 2121 nodes 4 514 546 548 539 globNum 16601 mat 1 crossSect 1
+LTrSpace 2122 nodes 4 230 76 236 365 globNum 16617 mat 1 crossSect 1
+LTrSpace 2123 nodes 4 477 485 486 406 globNum 16628 mat 1 crossSect 1
+SimpleCS 1 thick 1.0 width 1.0
+SimpleCS 2 thick 1.0 width 1.0
+IsoLE  1 d 1.0 E 37.7e3 n 0.2 talpha 0.0
+IsoLE  2 d 1.0 E 300.e3 n 0.2 talpha 0.0
+#idnlm1 1 d 1.0 E 30.e3 n 0.18 talpha 0.0 e0 0.00011666666667 ef 0.0059953333333 R 5.0 equivstraintype 1 regionMap 2 0 1
+#IsoLE  2 d 1.0 E 210.e3 n 0.3 talpha 0.0
+BoundaryCondition 1 loadTimeFunction 1 prescribedvalue 0.0 
+ConstantSurfaceLoad 2 loadTimeFunction 1 components 3 0 0 -1.0 loadType 3 ndofs 3
+ConstantFunction 1 f(t) 1.0
+
+#%BEGIN_CHECK% tolerance 1.e-10
+#%END_CHECK%

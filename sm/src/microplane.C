@@ -1,0 +1,91 @@
+/* $Header: /home/cvs/bp/oofem/sm/src/microplane.C,v 1.2 2003/04/06 14:08:31 bp Exp $ */
+/*
+
+                   *****    *****   ******  ******  ***   ***                            
+                 **   **  **   **  **      **      ** *** **                             
+                **   **  **   **  ****    ****    **  *  **                              
+               **   **  **   **  **      **      **     **                               
+              **   **  **   **  **      **      **     **                                
+              *****    *****   **      ******  **     **         
+            
+                                                                   
+               OOFEM : Object Oriented Finite Element Code                 
+                    
+                 Copyright (C) 1993 - 2000   Borek Patzak                                       
+
+
+
+         Czech Technical University, Faculty of Civil Engineering,
+     Department of Structural Mechanics, 166 29 Prague, Czech Republic
+                                                                               
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.                                                                              
+*/
+
+#include "microplane.h"
+#include "element.h"
+#include "domain.h"
+#include "matstatus.h"
+#include "material.h"
+#include "debug.h"
+#ifndef __MAKEDEPEND
+#include <string.h>
+#endif
+
+Microplane :: Microplane (Element* e, int n, MaterialMode mode) :
+GaussPoint (e, n, NULL, 0., mode)
+
+   // Constructor. Creates a Microplane belonging to element e, with number
+   // n, with coordinates a, with weight w.
+{
+}
+
+
+Microplane :: ~Microplane ()
+   // Destructor.
+{
+}
+
+
+
+void  
+Microplane :: printOutputAt (FILE * File, TimeStep* stepN)
+   // Prints the strains and stresses on the data file.
+{
+
+/*
+   int  i ;
+   // int n;
+
+ 
+   fprintf (File,"  GP %d :",number) ;
+   if (matStatus) matStatus -> printOutputAt (File,stepN) ;
+
+  if ( numberOfGp != 0)  // layered material
+   {
+    fprintf (File,"Layers report \n{\n");
+    for ( i = 0; i< numberOfGp ; i++)
+     {
+      gaussPointArray[i]->printOutputAt (File,stepN);
+     }
+    fprintf (File,"} end layers report\n");
+   }
+*/  
+ }
+
+
+
+
+
+

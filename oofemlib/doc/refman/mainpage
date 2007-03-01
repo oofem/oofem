@@ -1,0 +1,29 @@
+/** \mainpage OOFEMlib Reference Documentation
+ *
+ * <CENTER><H2>
+ * Welcome to the world of OOFEMlib </H2></CENTER>
+ *
+ * OOFEMlib is a general purpose object oriented FEM kernel, written in C++. 
+ * This library contains the basic set of integrated classes offering the basic 
+ * functionality of general FEM kernel (enhanced support is provided for mechanical analysis). OOFEMlib
+ * allows user to directly focus on his/her problem, by writting some derived classes.
+ *
+ * For an introduction to the philosophy of OOFEMlib go on reading the \ref Introduction.
+ * This reference manual will provide you with a complete documentation of the
+ * features provided by OOFEMlib.
+ * If you think OOFEMlib can help you with your projects and you want to get your
+ * copy of OOFEMlib go on reading section \ref Distribution.
+ *
+ *
+ * See (<A HREF="http://oofem.org"> http://oofem.org</A>) 
+ * for more information about OOFEM and OOFEMlib.
+ *
+ *
+ * <CENTER>
+ * <H2>Enjoy!</H2></CENTER>
+ * 
+ *
+ * @author <A HREF="http://mech.fsv.cvut.cz/~bp/bp.html">Borek Patzak</A>
+ */
+
+

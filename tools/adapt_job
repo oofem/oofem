@@ -1,0 +1,84 @@
+# OOFEM Adaptive job scheduler
+# (c) Borek Patzak 2000
+#
+# <RESTRICTED_FILE>
+#
+# Paths to programs
+#
+OOFEM_BIN_DIR="/home/bp/oofem/bin/Release";
+T3D_BIN_DIR="/home/bp/bin";
+T3D2OOFEM_BIN_DIR="/home/bp/bin";
+OOFEMTOOLS_BIN_DIR="/home/bp/bin";
+#
+#
+# command: 
+#  "adapt_job jobname njobs [irun restartStep]"
+#
+# parameters: 
+#  njobs - number of required subsequent jobs 
+#  irun  - run number to be used; default 0
+#  restartStep - last step to be restarted; default 0
+#
+# requires: 
+#  t3d input file: $jobname.t3d.in 
+#  oofem controll file $jobmane.ctrl (used by t3d2oofem)
+#  oofem extractor record(s) $jobname.extractor (can be empty)
+#
+#
+echo "=================================================="
+echo "Adaptive job scheduler "
+echo "(c) Borek Patzak 2000"
+echo "=================================================="
+date
+echo "Sheduled $1 subsequent jobs"
+#
+# set job name 
+jobname=$1;
+nruns="$2";
+irun="${3:-0}";
+step="${4:-0}";
+#
+while [ "$irun" -le "$nruns" ]
+do
+echo
+echo "=================================================="
+echo "Starting job No. $irun"
+echo "=================================================="
+echo "Processing job no. $irun / $step" >&2
+if [ "$irun" -eq 0 ]
+then $T3D_BIN_DIR/t3d -i $jobname.t3d.in -o $jobname$irun.t3d.out; 
+else $T3D_BIN_DIR/t3d -i $jobname.t3d.in -o $jobname$irun.t3d.out -b t3d.bmf; 
+fi
+#transform to oofem
+$T3D2OOFEM_BIN_DIR/t3d2oofem $jobname.ctrl $jobname$irun.t3d.out $jobname$irun.oofem.in
+#appen extractor record
+cat $jobname.extractor >> $jobname$irun.oofem.in
+gawk --source '/^[^#]/ {ct +=1; if (ct > 3) print $0}'< $jobname$irun.oofem.in > $jobname.out.domain.1.$irun.din
+#gawk '{ct +=1; if (ct > 3) print $0}' < $jobname$irun.oofem.in > $jobname.out.domain.1.$irun.din
+#
+if [ "$step" -gt 0 ]
+then 
+echo $OOFEM_BIN_DIR/oofem -f "$jobname"0.oofem.in -rn -ar $step 
+$OOFEM_BIN_DIR/oofem -f "$jobname"0.oofem.in -rn -ar $step 
+else 
+echo $OOFEM_BIN_DIR/oofem -f "$jobname"$irun.oofem.in -rn ;
+$OOFEM_BIN_DIR/oofem -f "$jobname"$irun.oofem.in -rn ;
+fi
+#
+#run extractor
+$OOFEMTOOLS_BIN_DIR/extractor -f $jobname$irun.oofem.in > $jobname$irun.gr
+#determine last step solved
+step=`$OOFEMTOOLS_BIN_DIR/findlaststeptime.pl $jobname.out`;
+#time is measured from 0, steps from 1
+#but first restart alvays from elastic case
+if [ "$irun" -eq 0 ]
+then  step=$[step-1]; 
+fi
+echo "=================================================="
+echo "job $irun finished, last step to be restarted $step"
+echo "=================================================="
+#increment run counter
+irun=$[irun+1];
+done
+date
+

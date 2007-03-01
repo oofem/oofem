@@ -1,0 +1,251 @@
+# $Header: /home/cvs/bp/oofem/sm/src/makefile.in,v 1.18.4.2 2004/04/08 11:39:23 bp Exp $ 
+
+#   makefile 1.27 95/02/27 08:39:22
+#
+ 
+
+.SUFFIXES:  .h .C
+
+SHELL      = /bin/bash
+#
+PETSC_DIR  = @PETSC_DIR@
+PETSC_ARCH = @PETSC_ARCH@
+BOPT       = @PETSC_BOPT@
+@PETSC_MAKE_INCLUDE@
+
+SHELL      = /bin/sh
+#
+INCLUDE_DIR= @OOFEMLIB_INCLUDES@ @IML_INCLUDES@ @SPOOLES_INCLUDES@ @PETSC_INCLUDES@
+GRAPHICS_INCLUDE_DIR= @CKIT_INCLUDES@ @ELIXIR_INCLUDES@
+PARALLEL_INCLUDE_DIR= @MPI_INCLUDES@
+PARALLEL_SYMBOLS    = @MPI_MODULE_SYMBOLS@
+#   Libraries
+LOCAL_LIBSG= @ELIXIR_LIBS@ @CKIT_LIB@
+SYS_LIBSG  = @X_PRE_LIBS@ @X_LIBS@ @X_EXTRA_LIBS@
+SYS_LIBS   = @LIBS@
+#
+#Compiler flags
+#OPTFLAGS used only for non-debug version
+#CFLAGS     = -64 -exceptions -prelink -ptused  #required on SGI
+CFLAGS        = @MODULE_SYMBOLS@
+RELEASE_FLAGS = -O -Wall @CXXFLAGS@
+DEBUG_FLAGS   = -g -Wall @CXXFLAGS@  #recomended on Linux
+OOFEG_FLAGS   = @OOFEG_DIRECTIVES@
+#DEBUG_FLAGS   = -g 
+# LINUX, GNU
+LD         = @CXX@
+CC         = @CXX@
+SLD         = @SERIAL_CXX@
+SCC         = @SERIAL_CXX@
+PLD         = @MPI_CXX@
+PCC         = @MPI_CXX@
+#
+AR          = ar -r
+RM         = rm -f
+ARCHIVE    = OOFEM
+PROGRAM    = @TARGETS@
+
+
+# For large systems, it is often desirable to put sources in a separate
+# directory from the binaries.  The "directory search" features of `make'
+# facilitate this by searching several directories automatically to find
+# a prerequisite.  When you redistribute the files among directories, you
+# do not need to change the individual rules, just the search paths.
+# The value of the `make' variable `VPATH' specifies a list of
+# directories that `make' should search.  Most often, the directories are
+# expected to contain prerequisite files that are not in the current
+# directory; however, `VPATH' specifies a search list that `make' applies
+# for all files, including files which are targets of rules.
+#
+# Example:
+#
+# VPATH = .:../mysources
+
+#
+# You probably don't need to change anything below here.
+#
+
+#######################################################################
+#
+
+
+SMLIB_OOFEM_OBJ_PATH  = ../oofem_obj
+SMLIB_OOFEG_OBJ_PATH  = ../oofeg_obj
+SMLIB_POOFEM_OBJ_PATH = ../poofem_obj
+
+##
+## source files
+##
+srcs0=
+
+srcs1=
+
+srcs2= axisymm3d.C  b3mat.C cct.C cebfip78.C  concrete2.C concrete3.C incrementallinearstatic.C deformationtheorymaterial.C deidynamic.C diidynamic.C doublepowerlaw.C eigenvaluedynamic.C 
+
+srcs3= heavisideltf.C  layeredcrosssection.C libeam2d.C lspace.C ltrelemppde.C l4axisymm.C maxwellChM.C  nldeidynamic.C nlinearstatic.C  
+
+srcs4= ortholinearelasticmaterial.C  peak.C piecewis.C  piecewisper.C planstrss.C quad1planestrain.C rershell.C qplanstrss.C qspace.C qtrplstr.C q4axisymm.C rcm2.C   
+srcs5=  truss2d.C trplanstrss.C trplanrot.C ltrspace.C 
+
+srcs6=  beam2d.C beam3d.C rcsd.C rcsde.C rcsdnl.C linearstability.C pnldeidynamic.C usrdeftimefunct.C
+
+srcs7=  microplane.C microplanematerial.C microplanematerial_bazant.C m4.C libeam2dnl.C libeam3dnl.C truss3d.C trplanestrain.C libeam3dnl2.C libeam3d.C libeam3d2.C  
+
+srcs8=  isodamagemodel.C idm1.C idmnl1.C mazarsmodel.C mazarsmodelnl.C usrdeftempfield.C tf1.C fiberedcs.C linearstatic.C truss1d.C vtkexportmodule.C polylinenonlocalbarrier.C druckerPragerPlasticitySM.C mplasticmaterial2.C masonry02.C interfaceelem2dquad.C isointerfacedamage01.C j2mat.C symmetrybarrier.C interfaceelement1d.C  mat_cebfip90.C hellmat.C hydram.C
+
+srcs9= scalarerrorindicator.C directerrorindicatorrc.C t3dinterface.C adaptnlinearstatic.C eleminterpunknownmapper.C mmaclosestiptransfer.C targe2interface.C freeminterface.C zzerrorestimator.C adaptlinearstatic.C combinedzzsiee.C mdm.C mmashapefunctprojection.C mmaleastsquareprojection.C huertaerrorestimator.C refinedelement.C refinedmesh.C poiexportmodule.C
+
+#OBSOLETE stuff
+srcs99= steel1.C plasticmaterial.C perfectlyplasticmaterial.C j2plasticmaterial.C mplasticmaterial.C j2mplasticmaterial.C rankinepm.C
+
+#parallel stuff
+psrc1=  feticommunicator.C fetiboundarydofman.C fetisolver.C plinearstatic.C
+
+
+all_src = $(srcs0) $(srcs1) $(srcs2) $(srcs3) $(srcs4) $(srcs5) $(srcs6) $(srcs7) $(srcs8) $(srcs9) $(srcs99) $(psrc1)
+oofem_src = $(srcs0) $(srcs1) $(srcs2) $(srcs3) $(srcs4) $(srcs5) $(srcs6) $(srcs7) $(srcs8) $(srcs9) $(srcs99)
+oofeg_src = $(srcs0) $(srcs1) $(srcs2) $(srcs3) $(srcs4) $(srcs5) $(srcs6) $(srcs7) $(srcs8) $(srcs9) $(srcs99)
+poofem_src = $(srcs0) $(srcs1) $(srcs2) $(srcs3) $(srcs4) $(srcs5) $(srcs6) $(srcs7) $(srcs8) $(srcs9) $(srcs99) $(psrc1)
+
+##
+## object files
+##
+oofem_objs := $(oofem_src:.C=.o)
+oofeg_objs := $(oofeg_src:.C=.o)
+poofem_objs := $(poofem_src:.C=.o)
+
+smlib_oofem_Release_objs := $(foreach obj,$(oofem_objs),$(SMLIB_OOFEM_OBJ_PATH)/Release/$(obj))
+smlib_oofem_Debug_objs   := $(foreach obj,$(oofem_objs),$(SMLIB_OOFEM_OBJ_PATH)/Debug/$(obj))
+
+smlib_oofeg_Release_objs := $(foreach obj,$(oofeg_objs),$(SMLIB_OOFEG_OBJ_PATH)/Release/$(obj))
+smlib_oofeg_Debug_objs   := $(foreach obj,$(oofeg_objs),$(SMLIB_OOFEG_OBJ_PATH)/Debug/$(obj))
+
+smlib_poofem_Release_objs := $(foreach obj,$(poofem_objs),$(SMLIB_POOFEM_OBJ_PATH)/Release/$(obj))
+smlib_poofem_Debug_objs   := $(foreach obj,$(poofem_objs),$(SMLIB_POOFEM_OBJ_PATH)/Debug/$(obj))
+
+
+all:: $(PROGRAM) 
+
+oofem-release: smlib-oofem-release
+oofem-debug: smlib-oofem-debug
+oofeg-release: smlib-oofeg-release
+oofeg-debug: smlib-oofeg-debug
+poofem-release: smlib-poofem-release
+poofem-debug: smlib-poofem-debug
+
+$(SMLIB_OOFEM_OBJ_PATH)/Release/%.o:	%.C
+	@if [ ! -d $(SMLIB_OOFEM_OBJ_PATH)/Release ]; then mkdir -p $(SMLIB_OOFEM_OBJ_PATH)/Release; fi
+	$(CC) -c $(INCLUDE_DIR) $(CFLAGS) $(RELEASE_FLAGS) $< -o $@
+
+$(SMLIB_OOFEM_OBJ_PATH)/Release/%.o:	%.c
+	@if [ ! -d $(SMLIB_OOFEM_OBJ_PATH)/Release ]; then mkdir -p $(SMLIB_OOFEM_OBJ_PATH)/Release; fi
+	$(CC) -c $(INCLUDE_DIR) $(CFLAGS) $(RELEASE_FLAGS) $< -o $@
+
+$(SMLIB_OOFEM_OBJ_PATH)/Debug/%.o:	%.C
+	@if [ ! -d $(SMLIB_OOFEM_OBJ_PATH)/Debug ]; then mkdir -p $(SMLIB_OOFEM_OBJ_PATH)/Debug; fi
+	$(CC) -c $(INCLUDE_DIR) $(CFLAGS) $(DEBUG_FLAGS) $< -o $@
+
+$(SMLIB_OOFEM_OBJ_PATH)/Debug/%.o:	%.c
+	@if [ ! -d $(SMLIB_OOFEM_OBJ_PATH)/Debug ]; then mkdir -p $(SMLIB_OOFEM_OBJ_PATH)/Debug; fi
+	$(CC) -c $(INCLUDE_DIR) $(CFLAGS) $(DEBUG_FLAGS) $< -o $@
+
+$(SMLIB_OOFEG_OBJ_PATH)/Release/%.o:	%.C
+	@if [ ! -d $(SMLIB_OOFEG_OBJ_PATH)/Release ]; then mkdir -p $(SMLIB_OOFEG_OBJ_PATH)/Release; fi
+	$(CC) -c -D__OOFEG $(OOFEG_FLAGS) $(INCLUDE_DIR) $(GRAPHICS_INCLUDE_DIR) $(CFLAGS) $(RELEASE_FLAGS) $< -o $@
+
+$(SMLIB_OOFEG_OBJ_PATH)/Release/%.o:	%.c
+	@if [ ! -d $(SMLIB_OOFEG_OBJ_PATH)/Release ]; then mkdir -p $(SMLIB_OOFEG_OBJ_PATH)/Release; fi
+	$(CC) -c -D__OOFEG $(OOFEG_FLAGS) $(INCLUDE_DIR) $(GRAPHICS_INCLUDE_DIR) $(CFLAGS) $(RELEASE_FLAGS) $< -o $@
+
+$(SMLIB_OOFEG_OBJ_PATH)/Debug/%.o:	%.C
+	@if [ ! -d $(SMLIB_OOFEG_OBJ_PATH)/Debug ]; then mkdir -p $(SMLIB_OOFEG_OBJ_PATH)/Debug; fi
+	$(CC) -c -D__OOFEG $(OOFEG_FLAGS) $(INCLUDE_DIR) $(GRAPHICS_INCLUDE_DIR) $(CFLAGS) $(DEBUG_FLAGS) $< -o $@
+
+$(SMLIB_OOFEG_OBJ_PATH)/Debug/%.o:	%.c
+	@if [ ! -d $(SMLIB_OOFEG_OBJ_PATH)/Debug ]; then mkdir -p $(SMLIB_OOFEG_OBJ_PATH)/Debug; fi
+	$(CC) -c -D__OOFEG $(OOFEG_FLAGS) $(INCLUDE_DIR) $(GRAPHICS_INCLUDE_DIR) $(CFLAGS) $(DEBUG_FLAGS) $< -o $@
+
+$(SMLIB_POOFEM_OBJ_PATH)/Release/%.o:	%.C
+	@if [ ! -d $(SMLIB_POOFEM_OBJ_PATH)/Release ]; then mkdir -p $(SMLIB_POOFEM_OBJ_PATH)/Release; fi
+	$(PCC) -c -D__PARALLEL_MODE $(INCLUDE_DIR) $(PARALLEL_INCLUDE_DIR) $(CFLAGS) $(RELEASE_FLAGS) $(PARALLEL_SYMBOLS)  $< -o $@
+
+$(SMLIB_POOFEM_OBJ_PATH)/Release/%.o:	%.c
+	@if [ ! -d $(SMLIB_POOFEM_OBJ_PATH)/Release ]; then mkdir -p $(SMLIB_POOFEM_OBJ_PATH)/Release; fi
+	$(PCC) -c -D__PARALLEL_MODE $(INCLUDE_DIR) $(PARALLEL_INCLUDE_DIR) $(CFLAGS) $(RELEASE_FLAGS) $(PARALLEL_SYMBOLS)  $< -o $@
+
+$(SMLIB_POOFEM_OBJ_PATH)/Debug/%.o:	%.C
+	@if [ ! -d $(SMLIB_POOFEM_OBJ_PATH)/Debug ]; then mkdir -p $(SMLIB_POOFEM_OBJ_PATH)/Debug; fi
+	$(PCC) -c -D__PARALLEL_MODE $(INCLUDE_DIR) $(PARALLEL_INCLUDE_DIR) $(CFLAGS) $(DEBUG_FLAGS) $(PARALLEL_SYMBOLS)  $< -o $@
+
+$(SMLIB_POOFEM_OBJ_PATH)/Debug/%.o:	%.c
+	@if [ ! -d $(SMLIB_POOFEM_OBJ_PATH)/Debug ]; then mkdir -p $(SMLIB_POOFEM_OBJ_PATH)/Debug; fi
+	$(PCC) -c -D__PARALLEL_MODE $(INCLUDE_DIR) $(PARALLEL_INCLUDE_DIR) $(CFLAGS) $(DEBUG_FLAGS) $(PARALLEL_SYMBOLS)  $< -o $@
+
+#
+# local targets
+#
+smlib-oofem-release: $(SMLIB_OOFEM_OBJ_PATH)/Release/smlib.a
+smlib-oofem-debug: $(SMLIB_OOFEM_OBJ_PATH)/Debug/smlib.a
+smlib-oofeg-release: $(SMLIB_OOFEG_OBJ_PATH)/Release/smlib.a
+smlib-oofeg-debug: $(SMLIB_OOFEG_OBJ_PATH)/Debug/smlib.a
+smlib-poofem-release: $(SMLIB_POOFEM_OBJ_PATH)/Release/smlib.a
+smlib-poofem-debug: $(SMLIB_POOFEM_OBJ_PATH)/Debug/smlib.a
+
+$(SMLIB_OOFEM_OBJ_PATH)/Release/smlib.a: $(smlib_oofem_Release_objs)
+	rm -f $(SMLIB_OOFEM_OBJ_PATH)/Release/smlib.a
+	@echo $(AR) $(SMLIB_OOFEM_OBJ_PATH)/Release/smlib.a
+	@$(AR) $(SMLIB_OOFEM_OBJ_PATH)/Release/smlib.a $(smlib_oofem_Release_objs)
+
+$(SMLIB_OOFEM_OBJ_PATH)/Debug/smlib.a:  $(smlib_oofem_Debug_objs) 
+	rm -f $(SMLIB_OOFEM_OBJ_PATH)/Debug/smlib.a
+	@echo $(AR) $(SMLIB_OOFEM_OBJ_PATH)/Debug/smlib.a
+	@$(AR) $(SMLIB_OOFEM_OBJ_PATH)/Debug/smlib.a $(smlib_oofem_Debug_objs)
+
+$(SMLIB_OOFEG_OBJ_PATH)/Release/smlib.a: $(smlib_oofeg_Release_objs)
+	rm -f $(SMLIB_OOFEG_OBJ_PATH)/Release/smlib.a
+	@echo $(AR) $(SMLIB_OOFEG_OBJ_PATH)/Release/smlib.a
+	@$(AR) $(SMLIB_OOFEG_OBJ_PATH)/Release/smlib.a $(smlib_oofeg_Release_objs)
+
+$(SMLIB_OOFEG_OBJ_PATH)/Debug/smlib.a: $(smlib_oofeg_Debug_objs)
+	rm -f $(SMLIB_OOFEG_OBJ_PATH)/Debug/smlib.a
+	@echo $(AR) $(SMLIB_OOFEG_OBJ_PATH)/Debug/smlib.a
+	@$(AR) $(SMLIB_OOFEG_OBJ_PATH)/Debug/smlib.a $(smlib_oofeg_Debug_objs)
+
+$(SMLIB_POOFEM_OBJ_PATH)/Release/smlib.a:  $(smlib_poofem_Release_objs)
+	rm -f $(SMLIB_POOFEM_OBJ_PATH)/Release/smlib.a
+	@echo $(AR) $(SMLIB_POOFEM_OBJ_PATH)/Release/smlib.a
+	@$(AR) $(SMLIB_POOFEM_OBJ_PATH)/Release/smlib.a $(smlib_poofem_Release_objs)
+
+$(SMLIB_POOFEM_OBJ_PATH)/Debug/smlib.a:  $(smlib_poofem_Debug_objs)
+	rm -f $(SMLIB_POOFEM_OBJ_PATH)/Debug/smlib.a
+	@echo $(AR) $(SMLIB_POOFEM_OBJ_PATH)/Debug/smlib.a
+	@$(AR) $(SMLIB_POOFEM_OBJ_PATH)/Debug/smlib.a $(smlib_poofem_Debug_objs)
+
+
+clean: clean-oofem clean-oofeg clean-poofem
+
+clean-oofem:
+	rm -fr $(SMLIB_OOFEM_OBJ_PATH)
+
+clean-oofeg:
+	rm -fr $(SMLIB_OOFEG_OBJ_PATH)
+
+clean-poofem:
+	rm -fr $(SMLIB_POOFEM_OBJ_PATH)
+
+
+#Split to multiple targets in order to have dependency on particular set of sources.
+#this allows to use substitution macro $^ and allows to support VPATH settings
+makedepend :  makedepend_oofem makedepend_oofeg makedepend_poofem
+
+makedepend_oofem : $(oofem_src)
+	makedepend -D__MAKEDEPEND -p$(SMLIB_OOFEM_OBJ_PATH)/Release/  $(INCLUDE_DIR) $^
+	makedepend -D__MAKEDEPEND -p$(SMLIB_OOFEM_OBJ_PATH)/Debug/    $(INCLUDE_DIR) $^ -a
+
+makedepend_oofeg : $(oofeg_src)
+	makedepend -D__MAKEDEPEND -p$(SMLIB_OOFEG_OBJ_PATH)/Release/ -D__OOFEG  $(INCLUDE_DIR) $(GRAPHICS_INCLUDE_DIR) $^  -a
+	makedepend -D__MAKEDEPEND -p$(SMLIB_OOFEG_OBJ_PATH)/Debug/ -D__OOFEG  $(INCLUDE_DIR) $(GRAPHICS_INCLUDE_DIR) $^  -a
+
+makedepend_poofem : $(poofem_src)
+	makedepend -D__MAKEDEPEND -p$(SMLIB_POOFEM_OBJ_PATH)/Release/ -D__PARALLEL_MODE  $(INCLUDE_DIR) $(PARALLEL_INCLUDE_DIR) $^ -a
+	makedepend -D__MAKEDEPEND -p$(SMLIB_POOFEM_OBJ_PATH)/Debug/ -D__PARALLEL_MODE  $(INCLUDE_DIR) $(PARALLEL_INCLUDE_DIR) $^ -a

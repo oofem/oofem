@@ -1,0 +1,622 @@
+% **************************************************************************** %
+%                      STYL PRO CASOPIS ACTA POLYTECHNICA                      %
+% **************************************************************************** %
+
+\def\@bookname{ACTA POLYTECHNICA}
+%\def\issue{Vol. 38, No. 2/1998}      %      ro‡n¡k, ‡¡slo - sou‡ st hlavi‡ky
+%\def\issue{Zvl\'{a}\v{s}tn\'{\i} \v{c}\'{\i}slo}      %  ‡¡slo k v˜ro‡¡ prof. Hor ka
+\typeout{}
+%\typeout{This is \@bookname\space typesetting style by Antonin Strejc, 1997}
+\typeout{}
+
+% ---------------------------------------------------------------------------- %
+%                         ROZMERY A STYL STRANY                                %
+% ---------------------------------------------------------------------------- %
+
+% ZRCADLO  (170x264mm)
+% ~~~~~~~~~~~~~~~~~~~~
+%  vodorovne:               svisle:
+%
+\textwidth=170mm        \headheight=  5mm
+                        \headsep   =  9mm
+                        \textheight=240mm
+                        \footskip  = 14mm  \footheight= 4mm
+                        %           -----
+                        % celkem:   268mm
+
+% UMISTENI DO STREDU LISTU A4 (210x297mm)
+% ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+% pravy a levy okraj shodny:       horni a dolni okraj shodny:
+% (210-170)/2 = 20mm               (297-268)/2 = 14.5mm
+
+\oddsidemargin = 20mm              \topmargin = 14.5mm
+\advance\oddsidemargin by -1in     \advance\topmargin by -1in
+\evensidemargin=\oddsidemargin
+
+% STYL BEZNE STRANKY PRISPEVKU
+% ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+\def\u@line{\kern-\textwidth\rule[-2mm]{\textwidth}{0.4pt}}  % cara v hlavicce
+
+\def\ps@page{%
+    \def\@evenhead{\def\\{ }\bf\the\shortauthors\hfill\u@line}
+    \def\@oddhead{\def\\{ }\bf\xiiboldmath\the\shorttitle\hfill\u@line}
+    \def\@evenfoot{\rm\thepage\hfill}
+    \def\@oddfoot{\hfill\rm\thepage}}
+
+% STYL TITULN‹ STRANKY PRISPEVKU
+% ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+\def\ps@tpage{%
+    \def\@oddhead{\bf\@bookname\hfill
+        \ifx\issue\undefined\else\issue\fi\u@line}
+    \let\@evenhead\@oddhead}
+
+% DALSI PARAMETRY
+% ~~~~~~~~~~~~~~~
+% horizontalni:                  vertikalni:
+%
+\hfuzz=0.4pt                     \vfuzz=0.4pt
+\hbadness=1100                   \vbadness=1100
+\parindent=8mm                   \parskip=0pt
+\overfullrule=10mm               \widowpenalty=10000
+\hyphenpenalty=500               \clubpenalty=10000
+\exhyphenpenalty=10000
+\doublehyphendemerits=9000000
+\frenchspacing
+
+% ---------------------------------------------------------------------------- %
+%                                  FONTY                                       %
+% ---------------------------------------------------------------------------- %
+
+% 21pt                                              % 10pt
+\font\xxi@bf =cmbx10  at 20.74pt                    \font\x@bf =cmbx10
+\font\xxi@mib=cmmib10 at 20.74pt                    \font\x@mib=cmmib10
+\font\xxi@syb=cmbsy10 at 20.74pt                    \font\x@syb=cmbsy10
+
+% 17pt                                              %  8pt
+\font\xvii@bf =cmbx10  at 17.28pt                   \font\viii@bf =cmbx8
+\font\xvii@mib=cmmib10 at 17.28pt                   \font\viii@mib=cmmib8
+\font\xvii@syb=cmbsy10 at 17.28pt                   \font\viii@syb=cmbsy8
+
+% 14pt                                              %  7pt
+\font\xiv@bf =cmbx10  at 14.4pt                     \font\vii@bf =cmbx7
+\font\xiv@mib=cmmib10 at 14.4pt                     \font\vii@mib=cmmib7
+\font\xiv@syb=cmbsy10 at 14.4pt                     \font\vii@syb=cmbsy7
+
+% 12pt                        synonyma:             %  6pt
+\font\xii@rm =cmr10   at 12pt \let\twlrm=\xii@rm    \font\vi@bf =cmbx6
+\font\xii@bf =cmbx10  at 12pt \let\twlbf=\xii@bf    \font\vi@mib=cmmib6
+\font\xii@it =cmti10  at 12pt \let\twlit=\xii@it    \font\vi@syb=cmbsy6
+\font\xii@mib=cmmib10 at 12pt
+\font\xii@syb=cmbsy10 at 12pt
+
+
+% ---------------------------------------------------------------------------- %
+%                        ZACATEK A KONEC DOKUMENTU                             %
+% ---------------------------------------------------------------------------- %
+% Je upraveno makro \document, tak aby ponechavalo makrem \begin otevrenou
+% skupinu, a makro \enddocument, aby ji uzaviralo. Tim se zajisti, ze definice
+% a zmeny parametru mezi radky \begin{document} a \end{document} kazdeho
+% prispevku budou mit lokalni platnost. Do makra \document je navic pridano
+% nastaveni \pagestyle a nektere dalsi veci.
+%
+% \beg   -- Zkratka pro \begin{document}
+% \en    -- Zkratka pro \end{document}
+
+\def\document{\@colht\textheight  \@colroom\textheight \vsize\textheight
+    \columnwidth\textwidth \@clubpenalty\clubpenalty
+    \hsize\columnwidth \linewidth\hsize {\@floatplacement\@dblfloatplacement
+    \makeatletter\let\@writefile\@gobbletwo \@input{\jobname.aux}}
+    \if@filesw \immediate\openout\@mainaux=\jobname.aux
+    \immediate\write\@mainaux{\relax}\fi \csname process@table\endcsname
+    \let\glb@currsize\@empty \def\do##1{\let ##1\@notprerr}\@preamblecmds
+    \let\do\noexpand \@normalsize\everypar{}\@noskipsecfalse
+    \pagestyle{page} \shorttitle\empty \shortauthors\empty \@shortnumbering}
+
+\def\enddocument{\@checkend{document}\clearpage
+    \if@filesw \immediate\closeout\@mainaux
+    \def\global\@namedef##1##2{}\def\newlabel{\@testdef r}%
+    \def\bibcite{\@testdef b}\@tempswafalse \makeatletter\input \jobname.aux
+    \if@tempswa \@@warning{Label(s) may have changed.  Rerun to get
+    cross-references right}\fi\fi\endgroup\deadcycles\z@\@@end}
+
+\def\beg{\begin{document}}
+\def\en{\end{document}}
+
+% ---------------------------------------------------------------------------- %
+%                        TITULNI STRANA PRISPEVKU                              %
+% ---------------------------------------------------------------------------- %
+%
+% \title{TEXT} -- Makro pro vysazeni nazvu prispevku. Pokud se viceradkovy
+%                 nazev nenalame sam uspokojivym zpusobem, je mozne pouzit
+%                 oznaceni \\ konce radku. TEXT se automaticky prevadi na velka
+%                 pismena. Pokud se v nazvu vyskytne pismeno, ktere musi
+%                 zustat male, je nutno pouzit konstrukci \lowercase{...}
+%                 V nazvu je mozne pouzivat matematiku $...$.
+%
+% \authors{NAME1, NAME2, ...}  -- Makro pro vysazeni jmen autoru. Jmena se
+%                 oddeluji carkami. Pokud je jmen vice, lze je rozdelit do
+%                 vice radek pomoci \\
+%
+% \keywords{WORD1, WORD2, ... , WORDn} -- Makro pro vysazeni klicovych slov.
+%                 Prvni slovo psat s velkym pismenem, na konci uvest tecku.
+%
+% \abstract{TEXT} -- Makro pro vysazeni abstraktu. TEXT muze byt v nutnem
+%                 pripade rozdelen i do vice odstavcu (prefix \long).
+%
+% \shorttitle{TEXT} -- Zkraceny nazev prispevku, pro pripad, ze se plny nazev
+%                 nevejde do hlavicky stranky. Jinak se nemusi uvadet.
+%
+% \shortauthors{NAMES} -- Zkraceny zapis jmen autoru (nejcasteji NAME1 et al.),
+%                 pro pripad, ze vsechna jmena se nevejdou do hlavicky stranky.
+%                 Jinak se nemusi uvadet.
+
+\newtoks\shorttitle
+\newtoks\shortauthors
+
+\def\title#1{\thispagestyle{tpage}
+    \edef\@tmp{\the\shorttitle}\ifx\@tmp\empty\shorttitle={#1}\fi
+    \vglue0mm\vbox{\centering\LARGE\bf\lineskiplimit-50pt\baselineskip30pt
+    \xxiboldmath\uppercase{#1}\par}
+    {\def\\{\ }\addtocontents{toc}{\protect\ltitle{#1}{\thepage}}}}
+
+\def\authors#1{%
+    \edef\@tmp{\the\shortauthors}\ifx\@tmp\empty\shortauthors={#1}\fi
+    \vskip2\bigskipamount
+    \vbox{\centering\sc\lineskiplimit-10pt\baselineskip16pt{#1}\par}
+    {\def\\{\penalty-2000\ }\global\czauthors{#1}
+    \addtocontents{toc}{\protect\lauthors{#1}}}}
+
+\def\keywords#1{\vskip3\bigskipamount
+    \noindent{\leavevmode\hbox to 74pt{\bf Key words:\hfil}#1
+    \rightskip0mm plus20mm\hangindent74pt\hangafter1\par}}
+
+\long\def\abstract#1{\vskip2\bigskipamount{\it #1\par}}
+
+
+% ---------------------------------------------------------------------------- %
+%                               MATEMATIKA                                     %
+% ---------------------------------------------------------------------------- %
+%
+% \eq{MATHTEXT}  -- Zkratka pro \begin{equation} MATHTEXT \end{equation}.
+%                   Vysazi cislovanou rovnici (viz cislovani objektu).
+% \eqa{MATHTEXT} -- Zkratka pro \begin{eqnarray} MATHTEXT \end{eqnarray}.
+%                   Soustava rovnic. Kazdy radek, ktery neni oznacen \nonumber,
+%                   je cislovan (viz cislovani objektu).
+% \dis{MATHTEXT} -- Zkratka pro \begin{displaymath} MATHTEXT \end{displaymath}.
+%                   Rovnice bez cisla.
+%
+% \bfrac{NUMER}{DENOM} -- Makro, vysazi citatele i jmenovatele zlomku normalni
+%                  (tj. nezmensenou) velikosti pisma.
+
+\def\eq#1{\begin{equation}#1\end{equation}}
+
+\def\eqa#1{\begin{eqnarray}#1\end{eqnarray}}
+
+\def\dis#1{\begin{displaymath}#1\end{displaymath}}
+
+\def\bfrac#1#2{\displaystyle{\textstyle#1\over\textstyle#2}}
+
+
+% MATEMATIKA V TUCNYCH NADPISECH
+% ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+% Puvodni LaTeXovsky \boldmath generuje skakave cislice, navic funguje jen do
+% elikosti pisma 14pt. Presto je jeho pripadne uziti mozne -- nasledujici makra
+% jsou alternativy generujici spravne cislice a fungujici pro 12, 14, 17 a 21pt.
+%
+% Prestoze jsou nasledujici definice koncipovany jako uzivatelske (nazvy
+% neobsahuji zavinac), je jiz timto stylem zarizeno pouziti tucne matematiky
+% v nadpisech, proto je v techto pripadech uzivatel nemusi explicitne uvadet.
+
+\def\xiiboldmath{%
+    \textfont0=\xii@bf  \scriptfont0=\viii@bf \scriptscriptfont0=\vi@bf
+    \textfont1=\xii@mib \scriptfont1=\viii@mib\scriptscriptfont1=\vi@mib
+    \textfont2=\xii@syb \scriptfont2=\viii@syb\scriptscriptfont2=\vi@syb}
+
+\def\xivboldmath{%
+    \textfont0=\xiv@bf  \scriptfont0=\x@bf  \scriptscriptfont0=\vii@bf
+    \textfont1=\xiv@mib \scriptfont1=\x@mib \scriptscriptfont1=\vii@mib
+    \textfont2=\xiv@syb \scriptfont2=\x@syb \scriptscriptfont2=\vii@syb}
+
+\def\xviiboldmath{%
+    \textfont0=\xvii@bf \scriptfont0=\xii@bf \scriptscriptfont0=\viii@bf
+    \textfont1=\xvii@mib\scriptfont1=\xii@mib\scriptscriptfont1=\viii@mib
+    \textfont2=\xvii@syb\scriptfont2=\xii@syb\scriptscriptfont2=\viii@syb}
+
+\def\xxiboldmath{%
+    \textfont0=\xxi@bf \scriptfont0=\xiv@bf \scriptscriptfont0=\x@bf
+    \textfont1=\xxi@mib\scriptfont1=\xiv@mib\scriptscriptfont1=\x@mib
+    \textfont2=\xxi@syb\scriptfont2=\xiv@syb\scriptscriptfont2=\x@syb}
+
+% ---------------------------------------------------------------------------- %
+%                        PROSTREDI ITEMIZE A ENUMERATE                         %
+% ---------------------------------------------------------------------------- %
+
+% Jsou upraveny nektere horizontalni i vertikalni parametry vyctovych prostredi
+% itemize a enumerate. Zejmena se sleduje uspora mista ve svislem smeru.
+
+\def\set@listpar{\parsep=0pt\itemsep=.25\baselineskip%
+    \topsep=0pt\partopsep=.5\baselineskip%
+    \leftmargin=\ifcase\@listdepth\or16mm\else8mm\fi%
+    \@itempenalty-3000\relax}
+
+\def\enumerate{\ifnum\@enumdepth>3\@toodeep\else\advance\@enumdepth\@ne
+     \edef\@enumctr{enum\romannumeral\the\@enumdepth}%
+     \list{\csname label\@enumctr\endcsname}{\set@listpar%
+     \usecounter{\@enumctr}\def\makelabel##1{\hss\llap{##1}}}\fi}
+
+\def\itemize{\ifnum\@itemdepth>3\@toodeep\else\advance\@itemdepth\@ne
+    \edef\@itemitem{labelitem\romannumeral\the\@itemdepth}%
+    \list{\csname\@itemitem\endcsname}{\set@listpar%
+    \def\makelabel##1{\hss\llap{##1}}}\fi}
+
+% ---------------------------------------------------------------------------- %
+%                     RUZNE SYSTEMY CISLOVANI OBJEKTU                          %
+% ---------------------------------------------------------------------------- %
+% \shortnumbering{OBJ} -- Zapina "kratke" cislovani objektu OBJ.
+%                         Je-li aktivni pridavne pismenne znaceni, rusi je.
+% \longnumbering{OBJ}  -- Zapina "dlouhe" cislovani objektu OBJ.
+%                         Je-li aktivni pridaqvne pismenne znaceni, rusi je.
+% \beginlettering{OBJ} -- Zapina pridavne pismenne znaceni objektu OBJ.
+% \endlettering{OBJ}   -- Rusi pridavne pismenne znaceni objektu OBJ.
+%
+% Symbolem OBJ se rozumi retezec `equation', `figure', `table', `bibitem'
+% nebo `enumi'.
+% Celkem jsou tedy mozne 4 varianty cislovani kazdeho objektu:
+%  -- kratka (hodnota OBJ): 1, 2, 3 atd.
+%  -- dlouha (\thesection a hodnota OBJ): 4.1, 4.2, 4.3 atd.
+%  -- kratka s pridanym pismenem: 10a, 10b, 10c atd.
+%  -- dlouha s pridanym pismenem: 5.3a, 5.3b, 5.3c, atd.
+
+% Priznaky `long':      Priznaky pism. znaceni:    Uschovani hodnot citacu:
+
+\newif\iflong@equation  \newif\iflett@equation     \newcount\equation@echo
+\newif\iflong@figure    \newif\iflett@figure       \newcount\figure@echo
+\newif\iflong@table     \newif\iflett@table        \newcount\table@echo
+\newif\iflong@bibitem   \newif\iflett@bibitem      \newcount\bibitem@echo
+\newif\iflong@enumi     \newif\iflett@enumi        \newcount\enumi@echo
+
+% Citace, ktere maji nastaven priznak `long', se stavaji podrizenymi citaci
+% citace {section}, tak jako citac {subsection}, a je treba je pridat
+% do seznamu citacu, ktere se maji vynulovat pri zmene citace {section}.
+% Zde je to zarizeno tak, ze se pri kazdem zapinani kratkeho ci dlouheho
+% cislovani sestavuje cely seznam \cl@section znovu.
+
+\def\set@cl@section{\def\cl@section{\@elt{subsection}}
+    \iflong@equation\@addtoreset{equation}{section}\fi
+    \iflong@figure\@addtoreset{figure}{section}\fi
+    \iflong@table\@addtoreset{table}{section}\fi
+    \iflong@bibitem\@addtoreset{bibitem}{section}\fi
+    \iflong@enumi\@addtoreset{enumi}{section}\fi}
+
+\def\shortnumbering#1{\csname long@#1false\endcsname
+    \endlettering{#1}\set@cl@section}
+
+\def\longnumbering#1{\csname long@#1true\endcsname
+    \endlettering{#1}\set@cl@section}
+
+\def\beginlettering#1{\csname lett@#1true\endcsname\stepcounter{#1}
+    \csname #1@echo\endcsname=\value{#1}\setcounter{#1}{0}
+    \expandafter\def\csname the#1\endcsname{\csname iflong@#1\endcsname
+    \thesection\fi\the\csname #1@echo\endcsname\alph{#1}}}
+
+\def\endlettering#1{\expandafter\def\csname the#1\endcsname
+    {\csname iflong@#1\endcsname\thesection\fi\arabic{#1}}
+    \csname iflett@#1\endcsname\setcounter{#1}{\the\csname #1@echo\endcsname}
+    \csname lett@#1false\endcsname\fi}
+
+\def\@shortnumbering{\shortnumbering{equation}\shortnumbering{figure}%
+    \shortnumbering{table}\shortnumbering{bibitem}\shortnumbering{enumi}}
+
+% ---------------------------------------------------------------------------- %
+%                     PLOVOUCI OBJEKTY (FIGURE, TABLE)                         %
+% ---------------------------------------------------------------------------- %
+%
+% POPISKY OBRAZKU A TABULEK
+% ~~~~~~~~~~~~~~~~~~~~~~~~~
+% \captionmargin  -- pozadovana velikost leveho a praveho okraje kolem popisky,
+%                    po vysazeni popisky se automaticky vynuluje.
+% \captionwidth   -- pozadovana sirka popisky, po vysazeni se take vynuluje.
+%
+% Je mozne nastavovat libovolne oba tyto parametry, \captionwidth vsak ma vyssi
+% prioritu a je-li > 0pt, pak se uzivatelem stanoveny \captionmargin neuplatni,
+% resp. pred vystupem popisky se provede vypocet \captionmargin podle pozadovane
+% sirky, ktery pripadnou drive definovanou hodnotu \captionmargin prepise.
+%
+% Kratke popisky se sazeji centrovane, delsi se sazeji jako odstavec zleva
+% i zprava odsazeny o \captionmargin, dalsi radky jsou navic zleva odsazene
+% o sirku oznaceni. P¡smo je o bod mensi (11pt).
+
+\newdimen\captionmargin  \newdimen\captionwidth
+
+\def\@setcaptionmargin{\captionmargin=\hsize \advance\captionmargin by
+     -\captionwidth \captionmargin=.5\captionmargin}
+
+\def\@makecaption#1#2{\ifdim\captionwidth>0pt\@setcaptionmargin\fi
+    \small\baselineskip=12.8pt\lineskiplimit=-10pt
+    \setbox\@tempboxa=\hbox{#1: }\hangindent=\wd\@tempboxa\hangafter=\@ne
+    \ifdim\hsize>.5\textwidth \leftskip=\captionmargin \rightskip=\leftskip\fi
+    \setbox\@tempboxa=\hbox{\kern2\leftskip\box\@tempboxa\ignorespaces #2}
+    \ifdim\wd\@tempboxa>\hsize \noindent\kern-2\leftskip\unhbox\@tempboxa\par
+    \else\hbox to \hsize{\hfil\kern-2\leftskip\box\@tempboxa\hfil}\fi
+    \global\captionmargin=0pt\global\captionwidth=0pt}
+
+
+% VERTIKALNI PROSTOR PRO OBRAZEK
+% ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+% \fig[PAR]{VSPACE}{CAPTION} -- plovouci objekt -- mezera VSPACE pro obrazek
+% vcetne popisky CAPTION za uziti nepovinnych parametru PAR = t|b|p|h, ktere
+% urcuji umisteni na strance (t=top, b=bottom, p=separate page, h=here)
+
+\def\@fig[#1]#2#3{\begin{figure}[#1]\vglue#2\caption{#3}\end{figure}}
+
+\def\fig{\@ifnextchar[{\@fig}{\@fig[tbp]}}
+
+
+% VERTIKALNI PROSTOR PRO DVOJICI OBRAZKU VEDLE SEBE
+% ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+% \twofigs[PAR]{VSPACE}{CAPTION1}{CAPTION2} -- plovouci objekt -- mezera VSPACE
+% pro dvojici obrazku, popisky CAPTION1, CAPTION2, nepovinne parametry PAR.
+
+\def\@twofigs[#1]#2#3#4{\begin{figure}[#1]\vglue#2
+    \spaceskip=.33em plus.3em minus.15em
+    \noindent\parbox[t]{.48\hsize}{\caption{#3}}\hfill
+    \parbox[t]{.48\hsize}{\caption{#4}}\end{figure}}
+
+\def\twofigs{\@ifnextchar[{\@twofigs}{\@twofigs[tbp]}}
+
+
+% ---------------------------------------------------------------------------- %
+%                       €LEN‰N‹ DO KAPITOL, PODKAPITOL                         %
+% ---------------------------------------------------------------------------- %
+% Prispevek je clenen pomoci \section, \subsection a \subsubsection. Pouziti
+% \chapter neni dovoleno a zpusobi chybove hlaseni na terminalu.
+
+\def\thesection{\arabic{section}.}
+\def\thesubsection{\thesection\arabic{subsection}}
+\def\thesubsubsection{\thesubsection.\arabic{subsubsection}}
+
+\def\chapter{\a@warning{\string\chapter\space not allowed within this style}}
+
+\def\section{\@startsection{section}{1}{\z@}
+    {4.5ex plus 1.2ex minus 0.6ex}
+    {2.2ex plus 0.6ex minus 0.3ex}
+    {\Large\bf\xviiboldmath\raggedright}}
+
+\def\subsection{\@startsection{subsection}{2}{\z@}
+    {3.2ex plus 1.0ex minus 0.5ex}
+    {1.6ex plus 0.5ex minus 0.3ex}
+    {\large\bf\xivboldmath\raggedright}}
+
+\def\subsubsection{\@startsection{subsubsection}{2}{\z@}
+    {2.8ex plus 0.8ex minus 0.4ex}
+    {1.4ex plus 0.4ex minus 0.2ex}
+    {\normalsize\bf\xiiboldmath\raggedright}}
+
+%----------------------------------------------------------------------------- %
+%                       POZNAMKY POD CAROU (FOOTNOTES)                         %
+%----------------------------------------------------------------------------- %
+% Jedina uprava spociva v tom, ze poznamky pod carou se cisluji na dane strance
+% vzdy od jednicky. Citac {footnote} neni podrizen zadnemu jinemu citaci, nez
+% citaci {page}.
+
+\@addtoreset{footnote}{page}
+
+%----------------------------------------------------------------------------- %
+%                       SEZNAM LITERATURY (REFERENCES)                         %
+%----------------------------------------------------------------------------- %
+% \begin{thebibliography}{WIDEST}   -- standardni LaTeXovske prostredi, kde
+% \end{thebibliography}                WIDEST je nejsirsi label v seznamu.
+%                       Pokud je nastaveno kratke cislovani polozek, sazi se
+%                       seznam jako \section*, pokud dlouhe, pak se sazi jako
+%                       \subsection* (seznam je soucasti predesle \section).
+%
+% \begin{references} -- totez, ale nastavuje automaticky WIDEST -- pri kratkem
+% \end{references}      cislovani na "99", pri dlouhem na "9999"
+%
+% \etal -- makro, zkratka pro \lowercase{et al.} ve jmenech autoru publikaci
+%
+% \bibitem[LABEL]{KEY}AUTHORS:{TITLE}MORE  -- standardni polozka seznamu
+%         literatury je zde upravena pro konkretni styl pozadovany v casopise.
+%         [LABEL] je nepovinny parametr, chybi-li, je labelem \thebibitem.
+%         KEY je klic, kterym lze polozku citovat v textu prikazem \cite{KEY};
+%         AUTHORS: jsou jmena autoru zakoncena povinnou dvojteckou. Povolene
+%                  jsou tyto tvary (mala pismena se automaticky prevadeji na
+%                  velka, neni-li explicitne uvedeno \lowercase):
+%                     KNUTH, D. E.:
+%                     Knuth, D. E.:
+%                     knuth, d. e.:
+%                     Smith, C. L. -- Green, J. -- Nishihara, O. -- Saito, Y.:
+%                     Smith, C. L. \etal:
+%                     M\lowercase{c}Donald, J.:
+%                     V\lowercase{an der} ELST, F.:
+%                  atd.;
+%         {TITLE} je titul publikace povinne uzavreny ve slozenych zavorkach;
+%         MORE jsou dalsi vydavatelske udaje, bez zavorek, povinne zakoncene
+%              koncem odstavce (\par nebo prazdny radek)
+%
+% \refitem AUTHORS:{TITLE}MORE -- je zjednodusena varianta \bibitem. Jako
+%          label se pouzije vzdy \thebibitem. Chybi KEY, proto se na takovou
+%          polozku nemuze v textu odkazovat prikazem \cite. Tento prikaz je
+%          urcen predevsim pro pripad konverze textu z nizsich editoru, kde
+%          nejsou mozne krizove odkazy a kde je tedy vse jiz udelano "natvrdo".
+
+\newcounter{bibitem}
+
+\def\bibname{References}
+
+\def\etal{\lowercase{et~al.}}
+
+\def\@lbibitem[#1]#2#3:#4#5\par{\item[\@biblabel{#1}\hfill]
+    \setbox\@tempboxa=\hbox{#3}\ifdim\wd\@tempboxa>10pt
+    \uppercase{#3}: \fi{\it#4\/} \ignorespaces#5
+    \edef\@tmp{#2}\ifx\@tmp\empty\else
+    \if@filesw{\def\protect##1{\string ##1\space}\immediate
+    \write\@auxout{\string\bibcite{#2}{#1}}}\fi\fi}
+
+\def\@bibitem#1#2:#3#4\par{\item
+    \setbox\@tempboxa=\hbox{#2}\ifdim\wd\@tempboxa>10pt
+    \uppercase{#2}: \fi{\it#3\/} \ignorespaces#4
+    \edef\@tmp{#1}\ifx\@tmp\empty\else
+    \if@filesw\immediate\write\@auxout
+    {\string\bibcite{#1}{\thebibitem}}\fi\fi}
+
+\def\thebibliography#1{\iflong@bibitem\let\section=\subsection\fi
+    \section*{\bibname} \list
+    {\@biblabel{\thebibitem}}{\settowidth\labelwidth{\@biblabel{#1}}%
+    \labelsep=1em\leftmargin=\labelwidth \advance\leftmargin by \labelsep
+    \itemsep=0pt\usecounter{bibitem}\let\p@bibitem\@empty}%
+    \def\newblock{\hskip .11em plus.33em minus.07em}\sloppy}
+
+\def\references{\begin{thebibliography}{99\iflong@bibitem99\fi}}
+
+\def\endreferences{\end{thebibliography}}
+
+\def\refitem{\@bibitem{}}
+
+
+% ---------------------------------------------------------------------------- %
+%                            ZAKONCENI PRISPEVKU                               %
+% ---------------------------------------------------------------------------- %
+
+% CESKE RESUME
+% ~~~~~~~~~~~~
+% \cztitle{CZECH TITLE} -- Cesky nazev prispevku pro ceske resume. Povinny.
+% \czauthors{NAME1, NAME2, ... , NAMEn} -- Jmena autoru v ceskem resume. Neni-li
+%                          definovano, sazeji se jmena tak, jak jsou uvedena
+%                          v parametru makra \authors.
+% \begin{resume}        -- Ceske resume prispevku. Makro vysazi cesky nazev,
+% \end{resume}              ktery je ulozenv \cztitle a jmena autoru (bud dle
+%                          \authors, anebo \czauthors)
+
+\newtoks\cztitle
+\newtoks\czauthors
+
+\def\resume{\edef\@tmp{\the\cztitle}\ifx\@tmp\empty\a@warning{Missing Czech
+title. Please, specify \string\cztitle{Cesky nazev} in your document.}\else
+\section*{\the\cztitle}\fi
+%%\subsubsection*{\def\\{ }\the\czauthors}\chyph}
+\subsubsection*{\def\\{ }\the\czauthors}}
+
+
+% DATUM PRIJETI A SIGNATURA
+% ~~~~~~~~~~~~~~~~~~~~~~~~~
+% \received{YYYY}{MM}{DD} -- ulozi "do pameti" rok, mesic a den prijeti
+%                            prispevku redakci
+% \signature{TEXT}        -- zvedne citac signatur o 1 a ulozi "do pameti"
+%                            TEXT signatury (jmeno s tituly, pracoviste, adresa
+%                            telefon, email atd.).
+% \makesignature          -- vybere potrebna data "z pameti" a vysazi je.
+
+\newcount\@sno         % pocet pouzitych signatur
+\newcount\@i           % pomocna promenna cyklu loop
+
+\def\received#1#2#3{\edef\@received{Received: #1.#2.#3}}
+
+\def\signature#1{\advance\@sno by 1\relax
+    \expandafter\def\csname @sig\romannumeral\@sno\endcsname{#1}}
+
+\def\@sep{\ifodd\@sno\ifodd\@i\hfill\else\vskip\baselineskip\fi
+    \else\ifodd\@i\vskip\baselineskip\else\hfill\fi\fi}
+
+\def\makesignature{{\vfill\parindent0pt
+    \ifx\@received\undefined\received{????}{??}{??}
+    \a@warning{Missing date of reception. Please specify
+    \string\received{YYYY}{MM}{DD} in your document.}\fi
+    \parbox{.48\textwidth}{\small\@received}\hfill
+    \@i=0 \loop\advance\@i by 1\relax\@sep\parbox[t]{.48\textwidth}
+    {\small\csname @sig\romannumeral\@i\endcsname}
+    \ifnum\@i<\@sno\repeat\par}}
+
+
+% ---------------------------------------------------------------------------- %
+%                            CHYBOVA HLASENI                                   %
+% ---------------------------------------------------------------------------- %
+
+\def\a@warning#1{\typeout{*** WARNING: #1}}
+
+% ---------------------------------------------------------------------------- %
+%                MAKRA PRO SESAZOVANI PRISPEVKU A VYROBU CISLA                 %
+% ---------------------------------------------------------------------------- %
+
+%...OBSAH
+%   ~~~~~
+\def\contentsname{CONTENTS}
+
+\def\tableofcontents{\cleardoublepage\thispagestyle{tpage}
+\vglue0mm\rightline{\xxi@bf\contentsname}\vskip40pt
+{\def\dotfill{\leaders\hbox to 6pt{\hss.}\hfill}
+\input \jobname.toc }}
+
+% Nazvy sekci, subsekci, atd. se ignoruji (v obsahu se neuvadeji)
+%
+\def\contentsline#1#2#3{}
+
+% V obsahu se ale uvedou nazvy vsech prispevku...
+%
+\def\ltitle#1#2{\vskip12pt\noindent{\rightskip=12mm plus 20mm
+    #1\dotfill~#2\kern-12mm\par}}
+
+% ...spolu se jmeny autoru.
+%
+\def\lauthors#1{\vskip2pt\noindent{\rightskip=20mm plus 30mm
+    \leftskip=\parindent\it#1\par}}
+
+
+%...OZNACENI VAKATU PRO EDICNI STREDISKO
+%   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+\def\emptypage{\thispagestyle{empty}\ \vfill\centerline{\Huge V A K \'A T}
+    \vskip10mm\centerline{\Large(\thepage)}\vfill}
+
+\def\cleardoublepage{\vfil\break\ifodd\count0\relax\else\emptypage\break\fi}
+
+
+
+\endinput
+
+% ---------------------------------------------------------------------------- %
+%   ABECEDNI SEZNAM NOVYCH RIDICICH SEKVENCI POUZITELNYCH VE ZDROJOVEM TEXTU   %
+% ---------------------------------------------------------------------------- %
+
+% Nazev              Vyznam  Strucny popis
+% ............................................................................
+% \abstract          makro   abstrakt (povinny format)
+% \authors           makro   jmena autoru (povinny format)
+% \beg               makro   zkratka pro \begin{document}
+% \beginlettering    makro   zapina pridavne pismenne znaceni #1
+% \begin{references} envir   alternativa \begin{thebibliography}
+% \begin{resume}     envir   zacatek ceskeho resume
+% \bfrac             makro   zlomek s potlacenym zmensovanim velikosti pisma
+% bibitem            count   citac polozek seznamu literatury
+% \bibitem           makro   polozka seznamu literatury
+% \captionmargin     dimen   okraje kolem popisky pristiho obrazku nebo tabulky
+% \captionwidth      dimen   sirka popisky pristiho obrazku nebo tabulky
+% \cztitle           token   cesky nazev prispevku pro ceske resume (povinny)
+% \czauthors         token   jmena autoru v ceskem resume (nepovinna)
+% \dis               makro   zkratka \begin{displaymath}#1\end{displaymath}
+% \emptypage         makro   prazdna strana s vyraznym oznacenim "VAKAT"
+% \en                makro   zkratka pro \end{document}
+% \endlettering      makro   rusi pridavne pismenne znaceni #1
+% \end{references}   envir   alternativa \end{thebibliography}
+% \end{resume}       envir   konec ceskeho resume
+% \eq                makro   zkratka \begin{equation}#1\end{equation}
+% \eqa               makro   zkratka \begin{eqnarray}#1\end{eqnarray}
+% \etal              makro   zkratka "et~al." ve jmenech autoru publikaci
+% \fig               makro   volny prostor pro obrazek s popiskou
+% \keywords          makro   klicova slova (povinny format)
+% \lauthors          makro   jmena autoru v obsahu
+% \longnumbering     makro   zapina dlouhe cislovani pro #1
+% \ltitle            makro   nazev prispevku v obsahu
+% \makesignature     makro   vysazi vsechny dosud definovane signatury
+% \received          makro   definuje datum prijeti prispevku
+% \refitem           makro   zjednodusena polozka seznamu literatury
+% \shortauthors      token   zkracena jmena autoru (do hlavicky)
+% \shortnumbering    makro   zapina kratke cislovani pro #1
+% \shorttitle        token   zkraceny nazev prispevku (do hlavicky)
+% \signature         makro   definuje v poradi dalsi signaturu
+% \title             makro   nazev prispevku (povinny format)
+% \twofigs           makro   volny prostor pro dvojici obrazku s popiskami
+% \xiiboldmath       makro   matematika ve 12bodovem tucnem textu
+% \xivboldmath       makro   matematika ve 14bodovem tucnem textu
+% \xviiboldmath      makro   matematika v 17bodovem tucnem textu
+% \xxiboldmath       makro   matematika v 21bodovem tucnem textu
+

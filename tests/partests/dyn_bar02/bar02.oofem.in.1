@@ -1,0 +1,27 @@
+#
+# partition 1
+#
+bar02.oofem.out.1
+Parallel test of explicit oofem computation
+#
+PNlDEIDynamic nsteps 5 dumpcoef 0.0 deltaT 1.0 ElementCutMode
+domain 2dTruss
+#
+OutputManager tstep_all dofman_all element_all
+ndofman 2 nelem 1 ncrosssect 1 nmat 1 nbc 2 nic 0 nltf 1
+#
+Node 1 coords 3 0. 0. 2. bc 2 1 0 globNum 2 Remote partitions 1 0
+Node 2 coords 3 0. 0. 4. bc 2 1 0 globNum 3 load 1 2 
+Truss2d 1 nodes 2 1 2 mat 1 crossSect 1
+SimpleCS 1 thick 0.1 width 10.0
+IsoLE 1  tAlpha 0.000012  d 10.0  E 1.0  n 0.2  
+BoundaryCondition  1 loadTimeFunction 1 prescribedvalue 0.0
+NodalLoad 2 loadTimeFunction 1 Components 2 0. 1.0
+ConstantFunction 1 f(t) 1.0
+
+
+#%BEGIN_CHECK% tolerance 1.e-8
+#NODE tStep 2.0 number 1 dof 2 unknown v value 1.25e-3
+#NODE tStep 2.0 number 2 dof 2 unknown v value 1.475e-1
+##
+#%END_CHECK%

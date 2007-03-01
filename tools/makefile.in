@@ -1,0 +1,23 @@
+.SUFFIXES:  .h .C
+
+CFLAGS = @CXXFLAGS@
+CC = @CXX@
+
+
+%.o:   %.C
+	$(CC)  $(CFLAGS)  -c $< -o $@
+
+all:			systemstudentextractor checker extractor
+
+systemstudentextractor: checker.C tokenizer.o seek.o
+					$(CC) $(CFLAGS) -o systemstudentextractor -DSYSYTEM_STUDENT_EXTRACTOR_MODE checker.C tokenizer.o seek.o -lm
+
+checker: 	checker.C tokenizer.o seek.o
+					$(CC) $(CFLAGS) -o checker -DCHECKER_MODE checker.C tokenizer.o seek.o -lm
+
+extractor: checker.C tokenizer.o seek.o
+					$(CC) $(CFLAGS) -o extractor -DEXTRACTOR_MODE checker.C tokenizer.o seek.o -lm
+
+clean:
+					rm checker.o tokenizer.o seek.o
+

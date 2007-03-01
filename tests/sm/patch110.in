@@ -1,0 +1,119 @@
+patch110.out
+Patch test of QPlaneStress2d elements -> pure compression 
+LinearStatic nsteps 1
+domain 2dPlaneStress
+OutputManager tstep_all dofman_all element_all
+ndofman 20 nelem 5 ncrosssect  1 nmat 1 nbc 3 nic 0 nltf 1
+Node  1 coords 3  0.0   0.0   0.0  bc 2 1 1
+Node  2 coords 3  0.0   4.0   0.0  bc 2 1 1
+Node  3 coords 3  2.0   2.0   0.0  bc 2 0 1
+Node  4 coords 3  3.0   1.0   0.0  bc 2 0 1
+Node  5 coords 3  8.0   0.8   0.0  bc 2 0 1
+Node  6 coords 3  7.0   3.0   0.0  bc 2 0 1
+Node  7 coords 3  9.0   0.0   0.0  bc 2 0 1  load 1 2
+Node  8 coords 3  9.0   4.0   0.0  bc 2 0 1  load 1 2
+Node  9 coords 3  4.5   0.0   0.0  bc 2 0 1
+Node 10 coords 3  1.5   0.5   0.0  bc 2 0 1
+Node 11 coords 3  5.5   0.9   0.0  bc 2 0 1
+Node 12 coords 3  0.0   2.0   0.0  bc 2 1 1
+Node 13 coords 3  2.5   1.5   0.0  bc 2 0 1
+Node 14 coords 3  1.0   3.0   0.0  bc 2 0 1
+Node 15 coords 3  4.5   2.5   0.0  bc 2 0 1
+Node 16 coords 3  4.5   4.0   0.0  bc 2 0 1
+Node 17 coords 3  8.0   3.5   0.0  bc 2 0 1
+Node 18 coords 3  7.5   1.9   0.0  bc 2 0 1
+Node 19 coords 3  8.5   0.4   0.0  bc 2 0 1
+Node 20 coords 3  9.0   2.0   0.0  bc 2 0 1  load 1 3
+QPlaneStress2d 1 nodes 8 1 4 3 2 10 13 14 12  mat 1 NIP 16 crossSect 1
+QPlaneStress2d 2 nodes 8 1 7 5 4  9 19 11 10  mat 1 NIP 16 crossSect 1
+QPlaneStress2d 3 nodes 8 4 5 6 3 11 18 15 13  mat 1 NIP 16 crossSect 1
+QPlaneStress2d 4 nodes 8 3 6 8 2 15 17 16 14  mat 1 NIP 16 crossSect 1
+QPlaneStress2d 5 nodes 8 5 7 8 6 19 20 17 18  mat 1 NIP 16 crossSect 1
+SimpleCS 1 thick 0.15 width 10.0
+IsoLE 1  tAlpha 0.000012  d 1.0  E 15.0  n 0.25  
+BoundaryCondition  1 loadTimeFunction 1 prescribedvalue 0.0 
+NodalLoad 2 loadTimeFunction 1 Components 2 -0.833333333333 0.0
+NodalLoad 3 loadTimeFunction 1 Components 2 -3.333333333333 0.0
+ConstantFunction 1 f(t) 1.0
+#
+#  exact solution
+#
+#  DISPLACEMENT                   STRAIN                     STRESS
+#
+#  Node 1   0.0                epsilon_x = -0.520833333   sigma_x = -8.333333333
+#  Node 2   0.0                epsilon_y =  0.0           sigma_y = -2.083333333
+#  Node 3  -1.041666666        gama_xy   =  0.0           tau_xy  =  0.0
+#  Node 4  -1.5625
+#  Node 5  -4.166666666
+#  Node 6  -3.645833333           REACTION
+#  Node 7  -4.6875             Node 1   R_u = 0.833333333  R_v =  0.46875
+#  Node 8  -4.6875             Node 2   R_u = 0.833333333  R_v = -0.46875
+#  Node 9  -2.34375            Node 7   R_u = 0.0          R_v =  0.46875
+#  Node 10 -0.78125            Node 8   R_u = 0.0          R_v = -0.46875
+#  Node 11 -2.864583333        Node 9   R_u = 0.0          R_v =  1.875
+#  Node 12  0.0                Node 12  R_u = 3.333333333  R_v =  0.0
+#  Node 13 -1.302083333        Node 16  R_u = 0.0          R_v = -1.875 
+#  Node 14 -0.520833333
+#  Node 15 -2.34375
+#  Node 16 -2.34375
+#  Node 17 -4.166666666
+#  Node 18 -3.90625
+#  Node 19 -4.427083333
+#  Node 20 -4.6875
+#
+#%BEGIN_CHECK% tolerance 1.e-10
+## check reactions 
+#REACTION tStep 1 comNumber 1 dof 1 value 8.3333e-01
+#REACTION tStep 1 comNumber 1 dof 2 value 4.6875e-01
+#REACTION tStep 1 comNumber 2 dof 1 value 8.3333e-01
+#REACTION tStep 1 comNumber 2 dof 2 value -4.6875e-01
+#REACTION tStep 1 comNumber 7 dof 2 value 4.6875e-01
+#REACTION tStep 1 comNumber 8 dof 2 value -4.6875e-01
+#REACTION tStep 1 comNumber 9 dof 2 value 1.8750e+00
+#REACTION tStep 1 comNumber 12 dof 1 value 3.3333e+00
+#REACTION tStep 1 comNumber 12 dof 2 value 0.0
+#REACTION tStep 1 comNumber 16 dof 2 value -1.8750e+00
+## check all nodes
+#NODE tStep 1 number 3 dof 1 unknown d value -1.04166667e+00
+#NODE tStep 1 number 4 dof 1 unknown d value -1.56250000e+00
+#NODE tStep 1 number 5 dof 1 unknown d value  -4.16666667e+00
+#NODE tStep 1 number 6 dof 1 unknown d value -3.64583333e+00
+#NODE tStep 1 number 7 dof 1 unknown d value -4.68750000e+00
+#NODE tStep 1 number 8 dof 1 unknown d value -4.68750000e+00
+#NODE tStep 1 number 9 dof 1 unknown d value -2.34375000e+00
+#NODE tStep 1 number 10 dof 1 unknown d value -7.81250000e-01
+#NODE tStep 1 number 11 dof 1 unknown d value -2.86458333e+00
+#NODE tStep 1 number 12 dof 1 unknown d value 0.0
+#NODE tStep 1 number 13 dof 1 unknown d value -1.30208333e+00
+#NODE tStep 1 number 14 dof 1 unknown d value -5.20833333e-01
+#NODE tStep 1 number 15 dof 1 unknown d value -2.34375000e+00
+#NODE tStep 1 number 16 dof 1 unknown d value -2.34375000e+00
+#NODE tStep 1 number 17 dof 1 unknown d value -4.16666667e+00
+#NODE tStep 1 number 18 dof 1 unknown d value -3.90625000e+00
+#NODE tStep 1 number 19 dof 1 unknown d value -4.42708333e+00
+#NODE tStep 1 number 20 dof 1 unknown d value -4.68750000e+00
+## check element strain vector
+#ELEMENT tStep 1 number 1 gp 1 record 0 component 1  value -5.2083e-01
+#ELEMENT tStep 1 number 1 gp 1 record 0 component 2  value 0.0
+#ELEMENT tStep 1 number 1 gp 1 record 0 component 6  value 0.0
+#ELEMENT tStep 1 number 1 gp 2 record 0 component 1  value -5.2083e-01
+#ELEMENT tStep 1 number 1 gp 2 record 0 component 2  value 0.0
+#ELEMENT tStep 1 number 1 gp 2 record 0 component 6  value 0.0
+#ELEMENT tStep 1 number 1 gp 6 record 0 component 1  value -5.2083e-01
+#ELEMENT tStep 1 number 1 gp 6 record 0 component 2  value 0.0
+#ELEMENT tStep 1 number 1 gp 6 record 0 component 6  value 0.0
+#ELEMENT tStep 1 number 2 gp 3 record 0 component 1  value -5.2083e-01
+#ELEMENT tStep 1 number 2 gp 3 record 0 component 2  value 0.0 
+#ELEMENT tStep 1 number 2 gp 3 record 0 component 6  value 0.0
+## check element stress vector
+#ELEMENT tStep 1 number 1 gp 1 record 1 component 1  value -8.3333e+00
+#ELEMENT tStep 1 number 1 gp 1 record 1 component 2  value -2.0833e+00 
+#ELEMENT tStep 1 number 1 gp 1 record 1 component 6  value 0.0
+#ELEMENT tStep 1 number 1 gp 1 record 1 component 1  value -8.3333e+00
+#ELEMENT tStep 1 number 1 gp 1 record 1 component 2  value -2.0833e+00 
+#ELEMENT tStep 1 number 1 gp 1 record 1 component 6  value 0.0
+#ELEMENT tStep 1 number 2 gp 3 record 1 component 1  value -8.3333e+00
+#ELEMENT tStep 1 number 2 gp 3 record 1 component 2  value -2.0833e+00 
+#ELEMENT tStep 1 number 2 gp 3 record 1 component 6  value 0.0
+##
+#%END_CHECK%

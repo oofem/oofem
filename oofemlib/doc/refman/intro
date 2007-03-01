@@ -1,0 +1,37 @@
+/**
+\page page1 Additional information
+\section Introduction Introduction
+The idea of OOFEMlib is to provide to the FEM analyst highly modular,
+easily extensible and robust enviroment. It can be also thought as an general
+FEM kernel of general FE program.
+
+    Here is a list of highlights:
+<UL>    
+<LI>object oriented architecture</LI>
+<LI>modular and extensible FEM kernel (OOFEMlib)
+          fully extensible - The kernel is extensible in any "direction". The possibility of
+          adding new element type, new material model with any type and number of internal
+          history parameters, new boundary condition, new numerical algorithm or new
+          analysis module is matter of course.</LI>
+<LI>independent problem formulation, numerical solution and data storage  -
+          The kernel provides the independent abstractions for analysis, general numerical
+          method and data storage (sparse matrices). The component mapping concept
+          allows to formulate problem and numerical method independently and allows to use
+          any suitable numerical method for problem solution without changes. This concept is
+          further enhanced by abstract sparse matrix interface, allowing to formulate
+          numerical method independently on sparse matrix implementation.</LI>
+<LI>full restart support - The kernel supports full restart from any previously saved
+          state.</LI>
+<LI>support for parallel processing (message passing) - General classes for
+          efficient inter domain communication are provided  built over the abstract general
+          layer for message passing libraries, which is available on many parallel platforms
+          (massively parallel computers, shared memory systems and workstation clusters) .</LI>
+<LI>adaptive analysis support - multiple domain concept, fast spatial localization algorithms 
+					based on tree techniques are available.</LI>
+<LI>includes enhanced support for structural analysis.</LI>
+</UL>
+
+\section Distribution Distribution
+The OOFEM www-page (<A HREF="http://oofem.org"> http://oofem.org</A>) is the source of up-to-date information and documentation.
+*/
+

@@ -1,0 +1,264 @@
+# $Header: /home/cvs/bp/oofem/main/src/makefile.in,v 1.8.4.2 2004/04/08 11:39:20 bp Exp $ 
+
+#   makefile 1.27 95/02/27 08:39:22
+#
+ 
+
+.SUFFIXES:  .h .C
+
+SHELL      = /bin/sh
+#
+PETSC_DIR  = @PETSC_DIR@
+PETSC_ARCH = @PETSC_ARCH@
+BOPT       = @PETSC_BOPT@
+@PETSC_MAKE_INCLUDE@
+
+INCLUDE_DIR= @MODULE_INCLUDES@ 
+GRAPHICS_INCLUDE_DIR= @CKIT_INCLUDES@ @ELIXIR_INCLUDES@
+PARALLEL_INCLUDE_DIR= @MPI_INCLUDES@
+PARALLEL_SYMBOLS    = @MPI_MODULE_SYMBOLS@
+LOCAL_LIBSG= @ELIXIR_LIBS@ @CKIT_LIB@
+SYS_LIBSG  = @X_PRE_LIBS@ @X_LIBS@ @X_EXTRA_LIBS@ @LIBS@ 
+SYS_LIBS   = @LIBS@
+MODULES    = @MODULE_SYMBOLS@
+MODULE_LIST= @MODULE_LIST@
+HOST_TYPE  = @host@
+HOST_NAME  = @HOST_NAME@
+#
+#Compiler flags
+#OPTFLAGS used only for non-debug version
+#CFLAGS     = -64 -exceptions -prelink -ptused @MODULE_SYMBOLS@ #required on SGI
+CFLAGS        = @MODULE_SYMBOLS@ 
+RELEASE_FLAGS = -O -Wall @CXXFLAGS@
+DEBUG_FLAGS   = -g -Wall @CXXFLAGS@  #recomended on Linux
+OOFEG_FLAGS   = @OOFEG_DIRECTIVES@
+#DEBUG_FLAGS   = -g 
+# LINUX, GNU
+LD         = @CXX@
+CC         = @CXX@
+SLD         = @SERIAL_CXX@
+SCC         = @SERIAL_CXX@
+PLD         = @MPI_CXX@
+PCC         = @MPI_CXX@
+#
+PROGRAM    = @TARGETS@
+RM         = rm -f
+ARCHIVE    = OOFEM
+MV         = mv
+# For large systems, it is often desirable to put sources in a separate
+# directory from the binaries.  The "directory search" features of `make'
+# facilitate this by searching several directories automatically to find
+# a prerequisite.  When you redistribute the files among directories, you
+# do not need to change the individual rules, just the search paths.
+# The value of the `make' variable `VPATH' specifies a list of
+# directories that `make' should search.  Most often, the directories are
+# expected to contain prerequisite files that are not in the current
+# directory; however, `VPATH' specifies a search list that `make' applies
+# for all files, including files which are targets of rules.
+#
+# Example:
+#
+# VPATH = .:../mysources
+
+#
+# You probably don't need to change anything below here.
+#
+
+#######################################################################
+OOFEMLIB_PATH      = ../../oofemlib
+SM_PATH            = ../../sm
+TM_PATH            = ../../tm
+FM_PATH            = ../../fm
+DSS_PATH           = @DSS_DIR@
+INSTALL_DIR        = ../../bin
+
+#
+# local sources
+#
+oofemsrc0= main.C usrdefsub.C 
+oofegsrc0= oofeg.C  usrdefsub.C 
+poofemsrc0= main.C usrdefsub.C 
+
+#
+# Module targets
+#
+oofemlib-release oofemlib-debug oofeglib-release oofeglib-debug poofemlib-release poofemlib-debug:
+	$(MAKE) -C $(OOFEMLIB_PATH)/src  $@
+
+smlib-oofem-release smlib-oofem-debug smlib-oofeg-release smlib-oofeg-debug smlib-poofem-release smlib-poofem-debug:
+	$(MAKE) -C $(SM_PATH)/src  $@
+
+tmlib-oofem-release tmlib-oofem-debug tmlib-oofeg-release tmlib-oofeg-debug tmlib-poofem-release tmlib-poofem-debug:
+	$(MAKE) -C $(TM_PATH)/src  $@
+
+fmlib-oofem-release fmlib-oofem-debug fmlib-oofeg-release fmlib-oofeg-debug fmlib-poofem-release fmlib-poofem-debug:
+	$(MAKE) -C $(FM_PATH)/src  $@
+dsslib:
+	$(MAKE) -C $(DSS_PATH) all
+
+#
+# target libraries
+#
+
+OOFEM_RELEASE_LIBS  = @OOFEM_RELEASE_LIBS@
+OOFEM_DEBUG_LIBS    = @OOFEM_DEBUG_LIBS@
+OOFEG_RELEASE_LIBS  = @OOFEG_RELEASE_LIBS@
+OOFEG_DEBUG_LIBS    = @OOFEG_DEBUG_LIBS@
+POOFEM_RELEASE_LIBS = @POOFEM_RELEASE_LIBS@
+POOFEM_DEBUG_LIBS   = @POOFEM_DEBUG_LIBS@
+
+#
+# local rules
+#
+
+OOFEM_OBJ_PATH  = ../oofem_obj
+OOFEG_OBJ_PATH  = ../oofeg_obj
+POOFEM_OBJ_PATH = ../poofem_obj
+
+
+oofem_src = $(oofemsrc0) 
+oofeg_src = $(oofegsrc0)
+poofem_src = $(poofemsrc0)
+
+# obj
+oofem_objs := $(oofem_src:.C=.o)
+oofeg_objs := $(oofeg_src:.C=.o)
+poofem_objs := $(poofem_src:.C=.o)
+
+oofem_Release_objs := $(foreach obj,$(oofem_objs),$(OOFEM_OBJ_PATH)/Release/$(obj))
+oofem_Debug_objs   := $(foreach obj,$(oofem_objs),$(OOFEM_OBJ_PATH)/Debug/$(obj))
+
+oofeg_Release_objs := $(foreach obj,$(oofeg_objs),$(OOFEG_OBJ_PATH)/Release/$(obj))
+oofeg_Debug_objs   := $(foreach obj,$(oofeg_objs),$(OOFEG_OBJ_PATH)/Debug/$(obj))
+
+poofem_Release_objs := $(foreach obj,$(poofem_objs),$(POOFEM_OBJ_PATH)/Release/$(obj))
+poofem_Debug_objs   := $(foreach obj,$(poofem_objs),$(POOFEM_OBJ_PATH)/Debug/$(obj))
+
+
+all:: $(PROGRAM) 
+
+oofem-release: $(OOFEM_OBJ_PATH)/Release/oofem
+oofem-debug  : $(OOFEM_OBJ_PATH)/Debug/oofem
+oofeg-release: $(OOFEG_OBJ_PATH)/Release/oofeg
+oofeg-debug  : $(OOFEG_OBJ_PATH)/Debug/oofeg
+poofem-release: $(POOFEM_OBJ_PATH)/Release/poofem
+poofem-debug  : $(POOFEM_OBJ_PATH)/Debug/poofem
+
+$(OOFEM_OBJ_PATH)/Release/%.o:	%.C
+	@if [ ! -d $(OOFEM_OBJ_PATH)/Release ]; then mkdir -p $(OOFEM_OBJ_PATH)/Release; fi
+	$(CC) -c $(INCLUDE_DIR) $(CFLAGS) $(RELEASE_FLAGS) $< -o $@
+
+$(OOFEM_OBJ_PATH)/Release/%.o:	%.c
+	@if [ ! -d $(OOFEM_OBJ_PATH)/Release ]; then mkdir -p $(OOFEM_OBJ_PATH)/Release; fi
+	$(CC) -c $(INCLUDE_DIR) $(CFLAGS) $(RELEASE_FLAGS) $< -o $@
+
+$(OOFEM_OBJ_PATH)/Debug/%.o:	%.C
+	@if [ ! -d $(OOFEM_OBJ_PATH)/Debug ]; then mkdir -p $(OOFEM_OBJ_PATH)/Debug; fi
+	$(CC) -c $(INCLUDE_DIR) $(CFLAGS) $(DEBUG_FLAGS) $< -o $@
+
+$(OOFEM_OBJ_PATH)/Debug/%.o:	%.c
+	@if [ ! -d $(OOFEM_OBJ_PATH)/Debug ]; then mkdir -p $(OOFEM_OBJ_PATH)/Debug; fi
+	$(CC) -c $(INCLUDE_DIR) $(CFLAGS) $(DEBUG_FLAGS) $< -o $@
+
+$(OOFEG_OBJ_PATH)/Release/%.o:	%.C
+	@if [ ! -d $(OOFEG_OBJ_PATH)/Release ]; then mkdir -p $(OOFEG_OBJ_PATH)/Release; fi
+	$(CC) -c -D__OOFEG $(OOFEG_FLAGS) $(INCLUDE_DIR) $(GRAPHICS_INCLUDE_DIR) $(CFLAGS) $(RELEASE_FLAGS) $< -o $@
+
+$(OOFEG_OBJ_PATH)/Release/%.o:	%.c
+	@if [ ! -d $(OOFEG_OBJ_PATH)/Release ]; then mkdir -p $(OOFEG_OBJ_PATH)/Release; fi
+	$(CC) -c -D__OOFEG $(OOFEG_FLAGS) $(INCLUDE_DIR) $(GRAPHICS_INCLUDE_DIR) $(CFLAGS) $(RELEASE_FLAGS) $< -o $@
+
+$(OOFEG_OBJ_PATH)/Debug/%.o:	%.C
+	@if [ ! -d $(OOFEG_OBJ_PATH)/Debug ]; then mkdir -p $(OOFEG_OBJ_PATH)/Debug; fi
+	$(CC) -c -D__OOFEG $(OOFEG_FLAGS) $(INCLUDE_DIR) $(GRAPHICS_INCLUDE_DIR) $(CFLAGS) $(DEBUG_FLAGS) $< -o $@
+
+$(OOFEG_OBJ_PATH)/Debug/%.o:	%.c
+	@if [ ! -d $(OOFEG_OBJ_PATH)/Debug ]; then mkdir -p $(OOFEG_OBJ_PATH)/Debug; fi
+	$(CC) -c -D__OOFEG $(OOFEG_FLAGS) $(INCLUDE_DIR) $(GRAPHICS_INCLUDE_DIR) $(CFLAGS) $(DEBUG_FLAGS) $< -o $@
+
+$(POOFEM_OBJ_PATH)/Release/%.o:	%.C
+	@if [ ! -d $(POOFEM_OBJ_PATH)/Release ]; then mkdir -p $(POOFEM_OBJ_PATH)/Release; fi
+	$(PCC) -c -D__PARALLEL_MODE $(INCLUDE_DIR) $(PARALLEL_INCLUDE_DIR) $(CFLAGS) $(RELEASE_FLAGS) $(PARALLEL_SYMBOLS)  $< -o $@
+
+$(POOFEM_OBJ_PATH)/Release/%.o:	%.c
+	@if [ ! -d $(POOFEM_OBJ_PATH)/Release ]; then mkdir -p $(POOFEM_OBJ_PATH)/Release; fi
+	$(PCC) -c -D__PARALLEL_MODE $(INCLUDE_DIR) $(PARALLEL_INCLUDE_DIR) $(CFLAGS) $(RELEASE_FLAGS) $(PARALLEL_SYMBOLS)  $< -o $@
+
+$(POOFEM_OBJ_PATH)/Debug/%.o:	%.C
+	@if [ ! -d $(POOFEM_OBJ_PATH)/Debug ]; then mkdir -p $(POOFEM_OBJ_PATH)/Debug; fi
+	$(PCC) -c -D__PARALLEL_MODE $(INCLUDE_DIR) $(PARALLEL_INCLUDE_DIR) $(CFLAGS) $(DEBUG_FLAGS) $(PARALLEL_SYMBOLS)  $< -o $@
+
+$(POOFEM_OBJ_PATH)/Debug/%.o:	%.c
+	@if [ ! -d $(POOFEM_OBJ_PATH)/Debug ]; then mkdir -p $(POOFEM_OBJ_PATH)/Debug; fi
+	$(PCC) -c -D__PARALLEL_MODE $(INCLUDE_DIR) $(PARALLEL_INCLUDE_DIR) $(CFLAGS) $(DEBUG_FLAGS) $(PARALLEL_SYMBOLS)  $< -o $@
+
+#
+# local targets
+#
+
+$(OOFEM_OBJ_PATH)/Release/oofem:  $(oofem_Release_objs) @OOFEM_RELEASE_DEP_TARGETS@
+	rm -f $(OOFEM_OBJ_PATH)/Release/$@
+	$(LD) $(CFLAGS) $(RELEASE_FLAGS) -o $(OOFEM_OBJ_PATH)/Release/oofem $(oofem_Release_objs) $(OOFEM_RELEASE_LIBS) $(SYS_LIBS) 
+	@if [ ! -d $(INSTALL_DIR)/Release ]; then mkdir -p $(INSTALL_DIR)/Release; fi
+	$(MV) $(OOFEM_OBJ_PATH)/Release/oofem $(INSTALL_DIR)/Release
+
+$(OOFEM_OBJ_PATH)/Debug/oofem:  $(oofem_Debug_objs) @OOFEM_DEBUG_DEP_TARGETS@
+	rm -f $(OOFEM_OBJ_PATH)/Debug/$@
+	$(LD) $(CFLAGS) $(DEBUG_FLAGS) -o $(OOFEM_OBJ_PATH)/Debug/oofem $(oofem_Debug_objs) $(OOFEM_DEBUG_LIBS) $(SYS_LIBS) 
+	@if [ ! -d $(INSTALL_DIR)/Debug ]; then mkdir -p $(INSTALL_DIR)/Debug; fi
+	$(MV) $(OOFEM_OBJ_PATH)/Debug/oofem $(INSTALL_DIR)/Debug
+
+$(OOFEG_OBJ_PATH)/Release/oofeg: $(oofeg_Release_objs) @OOFEG_RELEASE_DEP_TARGETS@
+	rm -f $(OOFEG_OBJ_PATH)/Release/$@
+	$(LD)  $(CFLAGS) $(RELEASE_FLAGS) -D__OOFEG -o $(OOFEG_OBJ_PATH)/Release/oofeg $(oofeg_Release_objs) $(OOFEG_RELEASE_LIBS)  $(LOCAL_LIBSG) $(SYS_LIBSG)
+	@if [ ! -d $(INSTALL_DIR)/Release ]; then mkdir -p $(INSTALL_DIR)/Release; fi
+	$(MV) $(OOFEG_OBJ_PATH)/Release/oofeg $(INSTALL_DIR)/Release
+
+$(OOFEG_OBJ_PATH)/Debug/oofeg: $(oofeg_Debug_objs) @OOFEG_DEBUG_DEP_TARGETS@
+	rm -f $(OOFEG_OBJ_PATH)/Debug/$@
+	$(LD) $(CFLAGS) $(DEBUG_FLAGS) -D__OOFEG -o $(OOFEG_OBJ_PATH)/Debug/oofeg $(oofeg_Debug_objs) $(OOFEG_DEBUG_LIBS)  $(LOCAL_LIBSG) $(SYS_LIBSG)
+	@if [ ! -d $(INSTALL_DIR)/Debug ]; then mkdir -p $(INSTALL_DIR)/Debug; fi
+	$(MV) $(OOFEG_OBJ_PATH)/Debug/oofeg $(INSTALL_DIR)/Debug
+
+$(POOFEM_OBJ_PATH)/Release/poofem:  $(poofem_Release_objs) @POOFEM_RELEASE_DEP_TARGETS@
+	rm -f $(POOFEM_OBJ_PATH)/Release/$@
+	$(PLD) $(CFLAGS) $(RELEASE_FLAGS) -o $(POOFEM_OBJ_PATH)/Release/poofem $(poofem_Release_objs) $(POOFEM_RELEASE_LIBS) $(SYS_LIBS) 
+	@if [ ! -d $(INSTALL_DIR)/Release ]; then mkdir -p $(INSTALL_DIR)/Release; fi
+	$(MV) $(POOFEM_OBJ_PATH)/Release/poofem $(INSTALL_DIR)/Release
+
+$(POOFEM_OBJ_PATH)/Debug/poofem:  $(poofem_Debug_objs) @POOFEM_DEBUG_DEP_TARGETS@
+	rm -f $(POOFEM_OBJ_PATH)/Debug/$@
+	$(PLD) $(CFLAGS) $(DEBUG_FLAGS) -o $(POOFEM_OBJ_PATH)/Debug/poofem $(poofem_Debug_objs) $(POOFEM_DEBUG_LIBS) $(SYS_LIBS) 
+	@if [ ! -d $(INSTALL_DIR)/Debug ]; then mkdir -p $(INSTALL_DIR)/Debug; fi
+	$(MV) $(POOFEM_OBJ_PATH)/Debug/poofem $(INSTALL_DIR)/Debug
+
+clean: clean-oofem clean-oofeg clean-poofem
+	rm -fr $(INSTALL_DIR)
+
+clean-oofem:
+	rm -fr $(OOFEM_OBJ_PATH)
+	rm -fr $(INSTALL_DIR)/*/oofem
+
+clean-oofeg:
+	rm -fr $(OOFEG_OBJ_PATH)
+	rm -fr $(INSTALL_DIR)/*/oofeg
+
+clean-poofem:
+	rm -fr $(POOFEM_OBJ_PATH)
+	rm -fr $(INSTALL_DIR)/*/poofem
+
+#Split to multiple targets in order to have dependency on particular set of sources.
+#this allows to use substitution macro $^ and allows to support VPATH settings
+makedepend :  makedepend_oofem makedepend_oofeg makedepend_poofem
+
+makedepend_oofem : $(oofem_src)
+	makedepend -D__MAKEDEPEND -p$(OOFEM_OBJ_PATH)/Release/  $(MODULES) $(INCLUDE_DIR) $^
+	makedepend -D__MAKEDEPEND -p$(OOFEM_OBJ_PATH)/Debug/    $(MODULES) $(INCLUDE_DIR) $^ -a
+
+makedepend_oofeg : $(oofeg_src)
+	makedepend -D__MAKEDEPEND -p$(OOFEG_OBJ_PATH)/Release/ -D__OOFEG  $(MODULES) $(INCLUDE_DIR) $(GRAPHICS_INCLUDE_DIR) $^  -a
+	makedepend -D__MAKEDEPEND -p$(OOFEG_OBJ_PATH)/Debug/ -D__OOFEG  $(MODULES) $(INCLUDE_DIR) $(GRAPHICS_INCLUDE_DIR) $^  -a
+
+makedepend_poofem : $(poofem_src)
+	makedepend -D__MAKEDEPEND -p$(POOFEM_OBJ_PATH)/Release/ -D__PARALLEL_MODE  $(MODULES) $(INCLUDE_DIR) $(PARALLEL_INCLUDE_DIR) $^ -a
+	makedepend -D__MAKEDEPEND -p$(POOFEM_OBJ_PATH)/Debug/ -D__PARALLEL_MODE  $(MODULES) $(INCLUDE_DIR) $(PARALLEL_INCLUDE_DIR) $^ -a

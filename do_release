@@ -1,0 +1,95 @@
+BACKUP_NAME=oofem.tar.gz
+DOC_RELEASE_FILES="elementlibmanual/elementlibmanual.ps paper-actap/paper-actap.ps extractorInput/extractorInput.ps matlibmanual/matlibmanual.ps oofemInput/oofemInput.ps programmer/programmer.ps"
+DOC_DIRS="doc/elementlibmanual doc/paper-actap doc/extractorInput doc/matlibmanual doc/oofemInput doc/programmer"
+
+if [ -z $1 ]
+then
+echo usage: do_release release_name
+exit
+fi
+
+if [ -f "$1.tar.gz" ]
+then
+echo error: $1.tar.gz already exist
+exit
+fi
+
+if [ -d "$1" ]
+then
+echo error: $1 dir already exist
+exit
+fi
+
+echo =========================================
+echo Building Release $1
+echo =========================================
+make backup
+if [ ! -f $BACKUP_NAME ]
+then
+echo error: Backup file $BACKUP_NAME does not exist
+exit
+fi
+mkdir $1
+cd $1
+tar xzvf ../$BACKUP_NAME
+#
+#<RESTRICTED_SECTION>
+
+if [ -d ./hmworks ]
+then
+echo removing hmworks directory
+rm -fr ./hmworks
+fi
+
+FILES=`find .`
+for i in $FILES
+do
+if [ ! -d "$i" ]
+then
+echo processing ..... $i
+perl ../release_filter.pl $i
+fi
+done
+#release filter changes the permissions
+#make configure script executable
+if [ -f ./configure ]
+then
+chmod a+x ./configure
+fi 
+# 
+# generate documentation
+#
+echo building documentation
+cd doc
+make ps-doc
+# copy doc files to top doc directory
+for i in $DOC_RELEASE_FILES
+do
+if [ ! -f $i ]
+then
+echo
+echo error: File $i missing
+fi
+cp $i .
+done
+# generate reference manual
+# cd refman; make htmldoc; cd ..
+#
+cd ..
+#remove doc sources
+rm -fr $DOC_DIRS
+#
+# generate refman of OOFEMlib
+# cd oofemlib/doc/refman; pwd; make htmldoc; cd ../../..
+cd ..
+#
+#
+#</RESTRICTED_SECTION>
+#
+
+tar czvf $1.tar.gz $1
+rm -fr $1
+echo =========================================
+echo Release $1.tar.gz created
+echo =========================================
+

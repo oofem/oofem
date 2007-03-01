@@ -1,0 +1,61 @@
+/* $Header: /home/cvs/bp/oofem/oofemlib/src/compiler.h,v 1.10 2003/05/19 13:03:57 bp Exp $ */
+/*
+
+                   *****    *****   ******  ******  ***   ***                            
+                 **   **  **   **  **      **      ** *** **                             
+                **   **  **   **  ****    ****    **  *  **                              
+               **   **  **   **  **      **      **     **                               
+              **   **  **   **  **      **      **     **                                
+              *****    *****   **      ******  **     **         
+            
+                                                                   
+               OOFEM : Object Oriented Finite Element Code                 
+                    
+                 Copyright (C) 1993 - 2000   Borek Patzak                                       
+
+
+
+         Czech Technical University, Faculty of Civil Engineering,
+     Department of Structural Mechanics, 166 29 Prague, Czech Republic
+                                                                               
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.                                                                              
+*/
+
+
+#ifndef compiler_h
+
+#include "oofemcfg.h"
+
+#ifndef HAVE_FALSETRUE
+enum {FALSE=0, TRUE = 1};
+#endif
+
+#ifndef HAVE_BOOLTYPE
+typedef int bool;
+enum {false=0, true =1};
+#endif
+
+#ifndef HAVE_STRNCASECMP
+int strncasecmp (const char* s1, const char* s2, int count);
+#endif
+
+#define __OOFEM_DO_NOT_PARSE_NULL
+
+#ifdef _MSC_VER // If Microsoft C do not complain about names longer than 255
+#pragma warning( disable : 4786 ) 
+#endif
+
+#define compiler_h
+#endif

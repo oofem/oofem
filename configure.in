@@ -1,0 +1,979 @@
+dnl Process this file with autoconf to produce a configure scrip.t
+
+dnl - following options added
+dnl
+dnl Module options
+dnl
+dnl   --enable-iml           --disable-iml
+dnl   --enable-sm            --disable-sm
+dnl   --enable-tm            --disable-tm
+dnl   --enable-fm            --disable-fm
+dnl   --enable-spooles       --disable-spooles
+dnl   --with-PETSC[=PETSC_DIR]
+dnl   --with-PETCS-ARCH=PETSC_ARCH
+dnl   --enable-dss           --disble-dss
+dnl
+dnl Code generation
+dnl 
+dnl   --enable-oofeg,      --disable-oofeg
+dnl   --enable-poofem,     --disable-poofem
+dnl   --enable-debug,      --disable-debug
+dnl   --enable-oofeg-devel-interface --disable-oofeg-devel-interface
+dnl
+dnl
+
+dnl --------------------------------------------------------------------
+dnl Default values of implemented options
+dnl --------------------------------------------------------------------
+sm_module=yes
+tm_module=yes
+fm_module=yes
+iml_module=no
+spooles_module=no
+petsc_module=no
+dss_module=no
+oofeg_val=no
+poofem_val=no
+debug_val=no
+oofeg_di=no
+
+AC_INIT(tools/checker.C)
+AC_CONFIG_HEADER(oofemlib/src/oofemcfg.h)
+
+dnl --------------------------------------------------------------------
+dnl check if PWD variable is defined
+dnl --------------------------------------------------------------------
+if test x"$PWD" = x""; then
+  PWD=`pwd`
+fi
+
+if test x"$CXXFLAGS" = x""; then
+	cflags=no
+else
+	cflags=yes
+fi
+
+dnl --------------------------------------------------------------------
+dnl Check system type.
+dnl --------------------------------------------------------------------
+AC_CANONICAL_HOST
+
+dnl --------------------------------------------------------------------
+dnl Checks for programs.
+dnl --------------------------------------------------------------------
+
+AC_PROG_CXX
+AC_PROG_CXXCPP
+AC_LANG_CPLUSPLUS
+AC_PROG_INSTALL
+AC_PROG_RANLIB
+AC_PROG_MAKE_SET
+
+
+dnl --------------------------------------------------------------------
+dnl Checks for header files.
+dnl --------------------------------------------------------------------
+AC_HEADER_STDC
+AC_CHECK_HEADERS(limits.h malloc.h strings.h unistd.h sys/time.h sys/resource.h)
+
+dnl --------------------------------------------------------------------
+dnl Checks for typedefs, structures, and compiler characteristics.
+dnl --------------------------------------------------------------------
+AC_HEADER_TIME
+
+dnl --------------------------------------------------------------------
+dnl Checks for library functions.
+dnl --------------------------------------------------------------------
+AC_CHECK_FUNCS(strstr strtod strtol strncasecmp access)
+
+dnl --------------------------------------------------------------------
+dnl Checks for math library functions.
+dnl --------------------------------------------------------------------
+AC_CHECK_FUNCS(nearest)
+
+dnl --------------------------------------------------------------------
+dnl check for enum {FALSE=0, TRUE = 1};
+dnl --------------------------------------------------------------------
+AC_MSG_CHECKING([FALSE, TRUE enum/constants])
+AC_TRY_COMPILE([#include<stdio.h>],[if (1) return FALSE; else return TRUE;], [
+AC_MSG_RESULT(yes)
+AC_DEFINE(HAVE_FALSETRUE,,Define if bool type is defined)
+],
+[
+AC_MSG_RESULT(no)
+])
+
+dnl --------------------------------------------------------------------
+dnl check for bool type {false=0, true = 1};
+dnl --------------------------------------------------------------------
+AC_MSG_CHECKING([typedef bool])
+AC_TRY_COMPILE([#include<stdio.h>],[bool val = true;], [
+AC_MSG_RESULT(yes)
+AC_DEFINE(HAVE_BOOLTYPE,,)
+],
+[
+AC_MSG_RESULT(no)
+])
+
+dnl --------------------------------------------------------------------
+dnl check for M_PI
+dnl --------------------------------------------------------------------
+AC_MSG_CHECKING(M_PI constant)
+AC_TRY_COMPILE([#include<math.h>],[double a = M_PI;], [
+AC_MSG_RESULT(yes)
+AC_DEFINE(HAVE_M_PI,,Define if M_PI is defined)
+],
+[
+AC_MSG_RESULT(no)
+])
+
+dnl --------------------------------------------------------------------
+dnl check for M_LN2
+dnl --------------------------------------------------------------------
+AC_MSG_CHECKING(M_LN2 constant)
+AC_TRY_COMPILE([#include<math.h>],[double a = M_LN2;], [
+AC_MSG_RESULT(yes)
+AC_DEFINE(HAVE_M_LN2,,Define if M_LN2 is defined)
+],
+[
+AC_MSG_RESULT(no)
+])
+
+
+dnl --------------------------------------------------------------------
+dnl check for STL
+dnl --------------------------------------------------------------------
+AC_MSG_CHECKING(STL support)
+AC_TRY_COMPILE([#include<vector>],[std::vector<int> a; a.push_back(12);], [
+AC_MSG_RESULT(yes)
+],
+[
+AC_MSG_RESULT(no)
+echo "STL library is required to compile OOFEM."
+exit
+])
+
+dnl --------------------------------------------------------------------
+dnl check for Macro VA_ARGS support
+dnl --------------------------------------------------------------------
+AC_MSG_CHECKING(Macro __VA_ARGS__ support)
+AC_TRY_COMPILE(
+[
+#include <stdio.h>
+#define LOG_FATAL(file,...) fprintf (file, __VA_ARGS__)
+],
+[
+LOG_FATAL(stderr, "%s", "huhu");
+],
+[
+AC_MSG_RESULT(yes)
+AC_DEFINE(HAVE_MACRO_VA_ARGS,,Define if __VA_ARGS__ is supported)
+],
+[
+AC_MSG_RESULT(no)
+])
+
+dnl --------------------------------------------------------------------
+dnl check for Function Templates support
+dnl --------------------------------------------------------------------
+AC_MSG_CHECKING(Function Templates support)
+AC_TRY_COMPILE(
+[
+#include<vector>
+using namespace std;
+
+template<class T> void sort (vector<T>& v) { int n=v.size();
+for(int gap=n/2;0<gap;gap/=2)
+for(int i=gap;i<n;i++)
+for(int j=i-gap;0<=j;j-=gap)
+if (v[j+gap]<v[j]) swap(v[j],v[j+gap]);
+}
+void f(vector<int>&vi) {sort(vi);}],
+[
+vector<int> a;
+a.push_back(3);
+a.push_back(8);
+f(a);],
+[
+AC_MSG_RESULT(yes)],
+[
+AC_MSG_RESULT(no)
+echo "c++ compiler support for function templates required."
+exit])
+
+
+
+
+dnl --------------------------------------------------------------------
+dnl Check for iml module
+dnl --------------------------------------------------------------------
+AC_ARG_ENABLE(iml, [  --enable-iml       adds iml module],
+ 	[
+ 		iml_module=$enableval
+ 	],
+	[
+	iml_module=no
+	]
+)
+
+dnl --------------------------------------------------------------------
+dnl Check for spooles module
+dnl --------------------------------------------------------------------
+AC_ARG_ENABLE(spooles, [  --enable-spooles       adds spooles module support],
+ 	[
+ 		spooles_module=$enableval
+ 	],
+	[
+	spooles_module=no
+	]
+)
+
+dnl --------------------------------------------------------------------
+dnl Check for dss module
+dnl --------------------------------------------------------------------
+AC_ARG_ENABLE(dss, [  --enable-dss       adds dss module support],
+ 	[
+ 		dss_module=$enableval
+ 	],
+	[
+     dss_module=no
+	]
+)
+
+dnl --------------------------------------------------------------------
+dnl Check for petsc module
+dnl --------------------------------------------------------------------
+AC_ARG_ENABLE(petsc, [  --enable-petsc       adds PETSc module support],
+ [
+  		petsc_module=$enableval
+ ],                  
+ [
+	  petsc_module=no
+ ]
+)
+
+AC_ARG_WITH(PETSCDIR, [  --with-PETSCDIR=dir  allows to specify PETSC_DIR] , 
+ [
+   if test -d $withval
+   then
+     PETSC_DIR=$withval
+   fi
+ ]
+)
+
+AC_ARG_WITH(PETSCARCH, [  --with-PETSCARCH=val allows to specify PETSC_ARCH] , 
+ [
+   PETSC_ARCH=$withval
+ ]
+)
+dnl ,
+dnl  [ 
+dnl  ])
+
+dnl AC_ARG_VAR(PETSC_DIR, Allows to set PETSC_DIR, a directory contatining PETSC distribution])
+dnl AC_ARG_VAR(PETSC_ARCH, Allows to set PETSC_ARCH, a variable determining PETS Architecture])
+
+
+dnl --------------------------------------------------------------------
+dnl Check for internal oofem modules
+dnl --------------------------------------------------------------------
+AC_ARG_ENABLE(sm, [  --enable-sm        adds sm module],
+ 	[
+ 		sm_module=$enableval
+ 	],
+	[
+	sm_module=yes
+	]
+)
+
+AC_ARG_ENABLE(tm, [  --enable-tm        adds tm module],
+ 	[
+ 		tm_module=$enableval
+ 	],
+	[
+	tm_module=yes
+	]
+)
+
+AC_ARG_ENABLE(fm, [  --enable-fm        adds fm module],
+ 	[
+ 		fm_module=$enableval
+ 	],
+	[
+  	fm_module=yes
+	]
+)
+
+dnl --------------------------------------------------------------------
+dnl Checks for libraries.
+dnl --------------------------------------------------------------------
+
+dnl Replace `main' with a function in -lm:
+AC_CHECK_LIB(m, sqrt)
+
+AC_ARG_ENABLE(oofeg, [  --enable-oofeg        builds and installs oofeg],
+ 	[
+ 		oofeg_val=$enableval
+ 	]
+)
+
+
+dnl --------------------------------------------------------------------
+dnl Search for iml module
+dnl --------------------------------------------------------------------
+if test x$iml_module = xyes; then
+	AC_MSG_CHECKING(IML module location)
+		dir=$PWD/iml
+		if test -f $dir/gmres.h; then
+			AC_MSG_RESULT($dir)
+		else
+			while test ! -f $dir/gmres.h; do
+				echo "IML includes not found in $dir."
+				echo "Type in directory (use absolute path):"
+				read dir
+			done;
+		fi
+		IML_INCLUDES="-I$dir"
+fi
+
+
+DSS_MAKEFILE=""
+dnl --------------------------------------------------------------------
+dnl Search for dss module
+dnl --------------------------------------------------------------------
+if test x$dss_module = xyes; then
+	AC_MSG_CHECKING(dss module location)
+		dir=dss/src
+		if test -f $dir/DSSolver.h; then
+			AC_MSG_RESULT($dir)
+		else
+			AC_MSG_ERROR("DSS slover not found in $PWD/dss")
+		fi
+		DSS_INCLUDES="-I$PWD/$dir"
+    DSS_DIR="$PWD/$dir"
+		DSS_LIB="$PWD/$dir/dsslib.a"
+    DSS_MAKEFILE="$dir/makefile"
+fi
+
+
+dnl --------------------------------------------------------------------
+dnl Search for spooles module
+dnl --------------------------------------------------------------------
+if test x$spooles_module = xyes; then
+	AC_MSG_CHECKING(SPOOLES module location)
+  dir=$PWD/../spooles
+  if test -f $dir/InpMtx.h; then
+    AC_MSG_RESULT($dir)
+  else
+    while test ! -f $dir/InpMtx.h; do
+      echo "Directory $dir does not seem to be spooles dir."
+      echo "Type in directory (use absolute path):"
+      read dir
+    done;
+  fi
+  SPOOLES_INCLUDES="-I$dir"
+
+  SPOOLES_LIB="-L?"
+  AC_CHECK_LIB(spooles, InpMtx_new,
+	[
+		SPOOLES_LIB="-lspooles"
+		AC_DEFINE(HAVE_LIBSPOOLES)
+	],
+	[
+		dir=$PWD/../spooles
+		AC_MSG_CHECKING(guess of spooles.a location)
+		if test -f $dir/spooles.a; then
+			AC_MSG_RESULT($dir)
+		else
+			while test ! -f $dir/spooles.a; do
+				echo "Spooles library not found in $dir."
+				echo "Type in directory (use absolute path):"
+				read dir
+			done;
+		fi
+		SPOOLES_LIB="$dir/spooles.a"
+		AC_DEFINE(HAVE_LIBSPOOLES)
+	]
+  )
+fi
+
+dnl --------------------------------------------------------------------
+dnl Search for petsc module
+dnl --------------------------------------------------------------------
+if test x$petsc_module = xyes; then
+
+  dnl petsc requires mpi
+  dnl
+  AC_CHECK_HEADER(mpi.h,
+	[
+		AC_DEFINE(HAVE_MPI_H)
+	],
+	[
+		dir=/usr/local/mpi/include
+		AC_MSG_CHECKING(guess of MPI includes location)
+		if test -f $dir/mpi.h; then
+			AC_MSG_RESULT($dir)
+		else
+			while test ! -f $dir/mpi.h; do
+				echo "MPI includes not found in $dir."
+				echo "Type in directory:"
+				read dir
+			done;
+		fi
+		MPI_INCLUDES="-I$dir"
+		AC_DEFINE(HAVE_MPI_H)
+	]
+  )
+  MPI_MODULE_SYMBOLS="-DMPICH_IGNORE_CXX_SEEK"
+ 
+  AC_MSG_CHECKING(PETSc module location)
+  
+ dnl set PETSC_DIR if not set before
+ dnl : ${PETSC_DIR=$PWD/../petsc} 
+  if test -f ${PETSC_DIR}/include/petscksp.h; then
+    AC_MSG_RESULT(${PETSC_DIR})
+  else
+    while test ! -f ${PETSC_DIR}/include/petscksp.h; do
+      echo "Directory ${PETSC_DIR} does not seem to be PETSC dir."
+      echo "Type in directory (use absolute path):"
+      read PETSC_DIR
+    done;
+  fi
+  dnl PETSC_ARCH=`PETSC_DIR=${PETSC_DIR} ${PETSC_DIR}/bin/petscarch`
+  PETSC_MAKE_INCLUDE="include ${PETSC_DIR}/bmake/common/base"
+  PETSC_INCLUDES="\${PETSC_INCLUDE}"
+  AC_MSG_CHECKING(PETSC_ARCH)
+  if test -f ${PETSC_DIR}/lib/$PETSC_ARCH/libpetsc.a; then
+    AC_MSG_RESULT(${PETSC_ARCH})
+  else
+    while test ! -f ${PETSC_DIR}/lib/$PETSC_ARCH/libpetsc.a; do
+      echo "PETSC_ARCH ${PETSC_ARCH} does not seem to be available."
+      echo "Type in available PETSC_ARCH:"
+      read PETSC_ARCH
+    done;
+    AC_MSG_RESULT(${PETSC_ARCH})
+  fi
+fi
+
+
+dnl
+dnl oofeg active - check graphics libraries
+dnl
+if test x$oofeg_val = xyes; then
+AC_ARG_ENABLE(oofeg-devel-interface, [  --enable-oofeg-devel-interface   enables devel oofeg interface],
+ 	[
+ 		oofeg_di=$enableval
+ 	]
+)
+
+dnl --------------------------------------------------------------------
+dnl  X11 libraries
+dnl --------------------------------------------------------------------
+AC_PATH_XTRA
+dnl Replace `main' with a function in -lX11:
+dnl AC_CHECK_LIB(X11, main)
+dnl Replace `main' with a function in -lXaw:
+dnl AC_CHECK_LIB(Xaw, XawDialogGetValueString)
+dnl Replace `main' with a function in -lXext:
+dnl AC_CHECK_LIB(Xext, main)
+dnl Replace `main' with a function in -lXmu:
+dnl AC_CHECK_LIB(Xmu, main)
+dnl Replace `main' with a function in -lXt:
+dnl AC_CHECK_LIB(Xt, XtNameToWidget)
+
+AC_CHECK_LIB(Xt, XtNameToWidget, 
+	[
+		AC_DEFINE(HAVE_LIBX)
+		X_LIBS="$X_LIBS -lXaw -lXmu -lXt -lXext -lX11"
+	],
+	[
+		AC_MSG_WARN(No support for X11 libraries)
+	], 
+	$X_PRE_LIBS $X_LIBS -lXaw -lXmu -lXt -lXext -lX11 $X_EXTRA_LIBS
+)
+
+
+dnl --------------------------------------------------------------------
+dnl Must have Ckit. If not in standard places, the user must supply path
+dnl --------------------------------------------------------------------
+
+
+CKIT_INCLUDES="-I."
+AC_CHECK_HEADER(ckitcfg.h,
+	[
+		AC_DEFINE(HAVE_CKIT_H)
+	],
+	[
+		dir=$PWD/../Ckit/include
+		AC_MSG_CHECKING(guess of Ckit includes location)
+		if test -f $dir/ckitcfg.h; then
+			AC_MSG_RESULT($dir)
+		else
+			while test ! -f $dir/ckitcfg.h; do
+				echo "Ckit includes not found in $dir."
+				echo "Type in directory (use absolute path):"
+				read dir
+			done;
+		fi
+		CKIT_INCLUDES="-I$dir"
+		AC_DEFINE(HAVE_CKIT_H)
+	]
+)
+
+CKIT_LIB="-L?"
+AC_CHECK_LIB(ckit, _get_list_next,
+	[
+		CKIT_LIB="-lckit"
+		AC_DEFINE(HAVE_LIBCKIT)
+	],
+	[
+		dir=$PWD/../Ckit/src
+		AC_MSG_CHECKING(guess of libckit.a location)
+		if test -f $dir/libckit.a; then
+			AC_MSG_RESULT($dir)
+		else	
+			while test ! -f $dir/libckit.a; do
+				echo "Ckit library not found in $dir."
+				echo "Type in directory (use absolute path):"
+				read dir
+			done;
+		fi
+		CKIT_LIB="$dir/libckit.a"
+		AC_DEFINE(HAVE_LIBCKIT)
+	]
+)
+
+dnl
+dnl --------------------------------------------------------------------
+dnl Must have Elixir. If not in standard places, the user must supply path
+dnl --------------------------------------------------------------------
+dnl
+
+ELIXIR_INCLUDES="-I."
+AC_CHECK_HEADER(Ecfg.h,
+	[
+		AC_DEFINE(HAVE_ELIXIR_H)
+	],
+	[
+		dir=$PWD/../Elixir/include
+		AC_MSG_CHECKING(guess of Elixir includes location)
+		if test -f $dir/Ecfg.h; then
+			AC_MSG_RESULT($dir)
+		else
+			while test ! -f $dir/Ecfg.h; do
+				echo "Elixir includes not found in $dir."
+				echo "Type in directory (use absolute path):"
+				read dir
+			done;
+		fi
+		ELIXIR_INCLUDES="-I$dir"
+		AC_DEFINE(HAVE_ELIXIR_H)
+	]
+)
+
+
+cat > elixirtest.c << EOF
+#include <X11/Intrinsic.h>
+void ESICustomize(Widget pp){}
+EOF
+
+ELIXIR_LIB="-L?"
+AC_CHECK_LIB(elixir, ElixirInit,
+	[
+		ELIXIR_LIB="-lelixir"
+		AC_DEFINE(HAVE_LIBELIXIR)
+	],
+	[
+		dir=$PWD/../Elixir/src
+		AC_MSG_CHECKING(guess of libelixir.a location)
+		if test -f $dir/libelixir.a; then
+			AC_MSG_RESULT($dir)
+		else
+			while test ! -f $dir/libelixir.a; do
+				echo "Elixir library not found in $dir."
+				echo "Type in directory (use absolute path):"
+				read dir
+			done;
+		fi
+		ELIXIR_LIB="$dir/libelixir.a"
+		AC_DEFINE(HAVE_LIBELIXIR)
+	],
+	elixirtest.c -lesi -lelixir $CKIT_LIB $X_PRE_LIBS $X_LIBS $X_EXTRA_LIBS
+)
+
+ESI_LIB="-L?"
+AC_CHECK_LIB(esi, ESIBuildInterface,
+	[
+		ESI_LIB="-lesi"
+		AC_DEFINE(HAVE_LIBESI)
+	],
+	[
+		dir=$PWD/../Elixir/src
+		AC_MSG_CHECKING(guess of libesi.a location)
+		if test -f $dir/libesi.a; then
+			AC_MSG_RESULT($dir)
+		else
+			while test ! -f $dir/libesi.a; do
+				echo "Esi library not found in $dir."
+				echo "Type in directory (use absolute path):"
+				read dir
+			done;
+		fi
+		ESI_LIB="$dir/libesi.a"
+		AC_DEFINE(HAVE_LIBESI)
+	],
+	elixirtest.c -lesi -lelixir $CKIT_LIB $X_PRE_LIBS $X_LIBS $X_EXTRA_LIBS
+)
+
+dnl Ordering -lesi -lelixir is relevant
+
+ELIXIR_LIBS="$ESI_LIB $ELIXIR_LIB"
+else
+ 	oofeg_val=no
+fi
+
+
+dnl
+dnl --------------------------------------------------------------------
+dnl test for poofem related stuff
+dnl --------------------------------------------------------------------
+dnl
+
+AC_ARG_ENABLE(poofem, [  --enable-poofem        builds and installs poofem],
+ 	[
+ 			poofem_val=$enableval
+ 	]
+)
+
+if test x$poofem_val = xyes; then
+dnl
+AC_CHECK_HEADER(mpi.h,
+	[
+		AC_DEFINE(HAVE_MPI_H)
+	],
+	[
+		dir=/usr/local/mpi/include
+		AC_MSG_CHECKING(guess of MPI includes location)
+		if test -f $dir/mpi.h; then
+			AC_MSG_RESULT($dir)
+		else
+			while test ! -f $dir/mpi.h; do
+				echo "MPI includes not found in $dir."
+				echo "Type in MPI include directory:"
+				read dir
+			done;
+		fi
+		MPI_INCLUDES="-I$dir"
+		AC_DEFINE(HAVE_MPI_H)
+	]
+)
+
+MPI_MODULE_SYMBOLS="-DMPICH_IGNORE_CXX_SEEK"
+
+dnl check for mpi Compiler batch
+AC_MSG_CHECKING(checking MPI compiler batch)
+AC_PATH_PROG(MPI_CXX, mpiCC, "x")
+if test x$MPI_CXX = xx; then
+	dir=/usr/local/mpi/bin
+	AC_MSG_CHECKING(guess of mpiCC location)
+	while test ! -f $dir/mpiCC; do
+		echo "no MPI compiler batch found in $dir."
+		echo "Type in path:"
+		read dir
+	done;
+	MPI_CXX="$dir/mpiCC"
+	echo "$MPI_CXX\n"
+fi
+
+
+else 
+	poofem_val=no
+fi
+
+
+
+dnl
+dnl --------------------------------------------------------------------
+dnl assemble targets
+dnl --------------------------------------------------------------------
+dnl
+
+AC_ARG_ENABLE(debug, [  --enable-debug        builds and installs debug versions, too],
+ 	[
+ 			debug_val=$enableval
+ 	]
+)
+
+dnl assemble oofem-release target
+TARGETS="oofem-release"
+
+if test x$debug_val = xyes; then
+  TARGETS="$TARGETS oofem-debug"
+fi
+
+if test x$oofeg_val = xyes; then
+ TARGETS="$TARGETS oofeg-release"
+ if test x$debug_val = xyes; then
+  TARGETS="$TARGETS oofeg-debug"
+ fi
+fi
+if test x$poofem_val = xyes; then
+ TARGETS="$TARGETS poofem-release"
+ if test x$debug_val = xyes; then
+  TARGETS="$TARGETS poofem-debug"
+ fi
+fi
+
+OOFEG_DIRECTIVES=""
+if test x$oofeg_di = xyes; then
+ OOFEG_DIRECTIVES="-DOOFEG_DEVEL"
+fi
+
+dnl
+dnl --------------------------------------------------------------------
+dnl assemble list of modules
+dnl --------------------------------------------------------------------
+dnl
+
+
+
+OOFEMLIB_INCLUDES="-I$PWD/oofemlib/src"
+SM_INCLUDES="-I$PWD/sm/src"
+TM_INCLUDES="-I$PWD/tm/src"
+FM_INCLUDES="-I$PWD/fm/src"
+
+MODULE_INCLUDES="$OOFEMLIB_INCLUDES"
+OOFEM_RELEASE_LIBS="$PWD/oofemlib/oofem_obj/Release/oofemlib.a"
+OOFEM_DEBUG_LIBS="$PWD/oofemlib/oofem_obj/Debug/oofemlib.a"
+OOFEG_RELEASE_LIBS="$PWD/oofemlib/oofeg_obj/Release/oofeglib.a"
+OOFEG_DEBUG_LIBS="$PWD/oofemlib/oofeg_obj/Debug/oofeglib.a"
+POOFEM_RELEASE_LIBS="$PWD/oofemlib/poofem_obj/Release/poofemlib.a"
+POOFEM_DEBUG_LIBS="$PWD/oofemlib/poofem_obj/Debug/poofemlib.a"
+dnl
+dnl dependency targets 
+dnl
+OOFEM_RELEASE_DEP_TARGETS="oofemlib-release"
+OOFEM_DEBUG_DEP_TARGETS="oofemlib-debug"
+OOFEG_RELEASE_DEP_TARGETS="oofeglib-release"
+OOFEG_DEBUG_DEP_TARGETS="oofeglib-debug"
+POOFEM_RELEASE_DEP_TARGETS="poofemlib-release"
+POOFEM_DEBUG_DEP_TARGETS="poofemlib-debug"
+
+
+MODULE_LIST="oofemlib"
+MODULE_SYMBOLS="-D__OOFEMLIB_MODULE"
+
+if test x$sm_module = xyes; then
+	MODULE_LIST="$MODULE_LIST sm"
+	MODULE_SYMBOLS="$MODULE_SYMBOLS -D__SM_MODULE"
+	MODULE_INCLUDES="$MODULE_INCLUDES $SM_INCLUDES"
+  TEST_TARGETS="sm"
+	OOFEM_RELEASE_LIBS="$PWD/sm/oofem_obj/Release/smlib.a $OOFEM_RELEASE_LIBS"
+	OOFEM_DEBUG_LIBS="$PWD/sm/oofem_obj/Debug/smlib.a $OOFEM_DEBUG_LIBS "
+	OOFEG_RELEASE_LIBS="$PWD/sm/oofeg_obj/Release/smlib.a $OOFEG_RELEASE_LIBS "
+	OOFEG_DEBUG_LIBS="$PWD/sm/oofeg_obj/Debug/smlib.a $OOFEG_DEBUG_LIBS "
+	POOFEM_RELEASE_LIBS="$PWD/sm/poofem_obj/Release/smlib.a $POOFEM_RELEASE_LIBS "
+	POOFEM_DEBUG_LIBS="$PWD/sm/poofem_obj/Debug/smlib.a $POOFEM_DEBUG_LIBS "
+
+	OOFEM_RELEASE_DEP_TARGETS="$OOFEM_RELEASE_DEP_TARGETS smlib-oofem-release"
+	OOFEM_DEBUG_DEP_TARGETS="$OOFEM_DEBUG_DEP_TARGETS smlib-oofem-debug"
+	OOFEG_RELEASE_DEP_TARGETS="$OOFEG_RELEASE_DEP_TARGETS smlib-oofeg-release"
+	OOFEG_DEBUG_DEP_TARGETS="$OOFEG_DEBUG_DEP_TARGETS smlib-oofeg-debug"
+	POOFEM_RELEASE_DEP_TARGETS="$POOFEM_RELEASE_DEP_TARGETS smlib-poofem-release"
+	POOFEM_DEBUG_DEP_TARGETS="$POOFEM_DEBUG_DEP_TARGETS smlib-poofem-debug"
+fi
+
+if test x$tm_module = xyes; then
+	MODULE_LIST="$MODULE_LIST tm"
+	MODULE_SYMBOLS="$MODULE_SYMBOLS -D__TM_MODULE"
+	MODULE_INCLUDES="$MODULE_INCLUDES $TM_INCLUDES"
+  TEST_TARGETS="$TEST_TARGETS tm"
+	OOFEM_RELEASE_LIBS="$PWD/tm/oofem_obj/Release/tmlib.a $OOFEM_RELEASE_LIBS"
+	OOFEM_DEBUG_LIBS="$PWD/tm/oofem_obj/Debug/tmlib.a $OOFEM_DEBUG_LIBS "
+	OOFEG_RELEASE_LIBS="$PWD/tm/oofeg_obj/Release/tmlib.a $OOFEG_RELEASE_LIBS "
+	OOFEG_DEBUG_LIBS="$PWD/tm/oofeg_obj/Debug/tmlib.a $OOFEG_DEBUG_LIBS "
+	POOFEM_RELEASE_LIBS="$PWD/tm/poofem_obj/Release/tmlib.a $POOFEM_RELEASE_LIBS "
+	POOFEM_DEBUG_LIBS="$PWD/tm/poofem_obj/Debug/tmlib.a $POOFEM_DEBUG_LIBS "
+
+	OOFEM_RELEASE_DEP_TARGETS="$OOFEM_RELEASE_DEP_TARGETS tmlib-oofem-release"
+	OOFEM_DEBUG_DEP_TARGETS="$OOFEM_DEBUG_DEP_TARGETS tmlib-oofem-debug"
+	OOFEG_RELEASE_DEP_TARGETS="$OOFEG_RELEASE_DEP_TARGETS tmlib-oofeg-release"
+	OOFEG_DEBUG_DEP_TARGETS="$OOFEG_DEBUG_DEP_TARGETS tmlib-oofeg-debug"
+	POOFEM_RELEASE_DEP_TARGETS="$POOFEM_RELEASE_DEP_TARGETS tmlib-poofem-release"
+	POOFEM_DEBUG_DEP_TARGETS="$POOFEM_DEBUG_DEP_TARGETS tmlib-poofem-debug"
+fi
+
+if test x$fm_module = xyes; then
+	MODULE_LIST="$MODULE_LIST fm"
+	MODULE_SYMBOLS="$MODULE_SYMBOLS -D__FM_MODULE"
+	MODULE_INCLUDES="$MODULE_INCLUDES $FM_INCLUDES"
+  TEST_TARGETS="$TEST_TARGETS fm"
+	OOFEM_RELEASE_LIBS="$PWD/fm/oofem_obj/Release/fmlib.a $OOFEM_RELEASE_LIBS"
+	OOFEM_DEBUG_LIBS="$PWD/fm/oofem_obj/Debug/fmlib.a $OOFEM_DEBUG_LIBS "
+	OOFEG_RELEASE_LIBS="$PWD/fm/oofeg_obj/Release/fmlib.a $OOFEG_RELEASE_LIBS "
+	OOFEG_DEBUG_LIBS="$PWD/fm/oofeg_obj/Debug/fmlib.a $OOFEG_DEBUG_LIBS "
+	POOFEM_RELEASE_LIBS="$PWD/fm/poofem_obj/Release/fmlib.a $POOFEM_RELEASE_LIBS "
+	POOFEM_DEBUG_LIBS="$PWD/fm/poofem_obj/Debug/fmlib.a $POOFEM_DEBUG_LIBS "
+
+	OOFEM_RELEASE_DEP_TARGETS="$OOFEM_RELEASE_DEP_TARGETS fmlib-oofem-release"
+	OOFEM_DEBUG_DEP_TARGETS="$OOFEM_DEBUG_DEP_TARGETS fmlib-oofem-debug"
+	OOFEG_RELEASE_DEP_TARGETS="$OOFEG_RELEASE_DEP_TARGETS fmlib-oofeg-release"
+	OOFEG_DEBUG_DEP_TARGETS="$OOFEG_DEBUG_DEP_TARGETS fmlib-oofeg-debug"
+	POOFEM_RELEASE_DEP_TARGETS="$POOFEM_RELEASE_DEP_TARGETS fmlib-poofem-release"
+	POOFEM_DEBUG_DEP_TARGETS="$POOFEM_DEBUG_DEP_TARGETS fmlib-poofem-debug"
+fi
+
+if test x$iml_module = xyes; then
+	MODULE_LIST="$MODULE_LIST iml"
+	MODULE_SYMBOLS="$MODULE_SYMBOLS -D__IML_MODULE"
+	IML_MODULE_SYMBOL="-D__IML_MODULE"
+	MODULE_INCLUDES="$MODULE_INCLUDES $IML_INCLUDES"
+fi
+
+if test x$dss_module = xyes; then
+	MODULE_LIST="$MODULE_LIST dss"
+	MODULE_SYMBOLS="$MODULE_SYMBOLS -D__DSS_MODULE"
+	DSS_MODULE_SYMBOL="-D__DSS_MODULE"
+	MODULE_INCLUDES="$MODULE_INCLUDES $DSS_INCLUDES"
+
+	OOFEM_RELEASE_LIBS="$OOFEM_RELEASE_LIBS $DSS_LIB"
+	OOFEM_DEBUG_LIBS="$OOFEM_DEBUG_LIBS $DSS_LIB"
+	OOFEG_RELEASE_LIBS="$OOFEG_RELEASE_LIBS $DSS_LIB"
+	OOFEG_DEBUG_LIBS="$OOFEG_DEBUG_LIBS $DSS_LIB"
+	POOFEM_RELEASE_LIBS="$POOFEM_RELEASE_LIBS $DSS_LIB"
+	POOFEM_DEBUG_LIBS="$POOFEM_DEBUG_LIBS $DSS_LIB"
+
+	OOFEM_RELEASE_DEP_TARGETS="$OOFEM_RELEASE_DEP_TARGETS dsslib"
+	OOFEM_DEBUG_DEP_TARGETS="$OOFEM_DEBUG_DEP_TARGETS dsslib"
+	OOFEG_RELEASE_DEP_TARGETS="$OOFEG_RELEASE_DEP_TARGETS dsslib"
+	OOFEG_DEBUG_DEP_TARGETS="$OOFEG_DEBUG_DEP_TARGETS dsslib"
+	POOFEM_RELEASE_DEP_TARGETS="$POOFEM_RELEASE_DEP_TARGETS dsslib"
+	POOFEM_DEBUG_DEP_TARGETS="$POOFEM_DEBUG_DEP_TARGETS dsslib"
+fi
+
+if test x$spooles_module = xyes; then
+	MODULE_LIST="$MODULE_LIST spooles"
+	MODULE_SYMBOLS="$MODULE_SYMBOLS -D__SPOOLES_MODULE"
+	SPOOLES_MODULE_SYMBOL="-D__SPOOLES_MODULE"
+	MODULE_INCLUDES="$MODULE_INCLUDES $SPOOLES_INCLUDES"
+
+	OOFEM_RELEASE_LIBS="$OOFEM_RELEASE_LIBS $SPOOLES_LIB"
+	OOFEM_DEBUG_LIBS="$OOFEM_DEBUG_LIBS $SPOOLES_LIB"
+	OOFEG_RELEASE_LIBS="$OOFEG_RELEASE_LIBS $SPOOLES_LIB"
+	OOFEG_DEBUG_LIBS="$OOFEG_DEBUG_LIBS $SPOOLES_LIB"
+	POOFEM_RELEASE_LIBS="$POOFEM_RELEASE_LIBS $SPOOLES_LIB"
+	POOFEM_DEBUG_LIBS="$POOFEM_DEBUG_LIBS $SPOOLES_LIB"
+fi
+
+if test x$petsc_module = xyes; then
+	MODULE_LIST="$MODULE_LIST petsc"
+	MODULE_SYMBOLS="$MODULE_SYMBOLS -D__PETSC_MODULE"
+	SPOOLES_MODULE_SYMBOL="-D__PETSC_MODULE"
+	MODULE_INCLUDES="$MODULE_INCLUDES \${PETSC_INCLUDE}"
+
+	OOFEM_RELEASE_LIBS="$OOFEM_RELEASE_LIBS \${PETSC_C_SH_LIB_PATH} \${PETSC_LIB}"
+	OOFEM_DEBUG_LIBS="$OOFEM_DEBUG_LIBS \${PETSC_C_SH_LIB_PATH} \${PETSC_LIB}"
+	OOFEG_RELEASE_LIBS="$OOFEG_RELEASE_LIBS \${PETSC_C_SH_LIB_PATH} \${PETSC_LIB}"
+	OOFEG_DEBUG_LIBS="$OOFEG_DEBUG_LIBS \${PETSC_C_SH_LIB_PATH} \${PETSC_LIB}"
+	POOFEM_RELEASE_LIBS="$POOFEM_RELEASE_LIBS \${PETSC_C_SH_LIB_PATH} \${PETSC_LIB}"
+	POOFEM_DEBUG_LIBS="$POOFEM_DEBUG_LIBS \${PETSC_C_SH_LIB_PATH} \${PETSC_LIB}"
+fi
+
+
+
+dnl
+dnl --------------------------------------------------------------------
+dnl Remove CXXFLAGS added by configure if no cflags were specified as configure option
+dnl --------------------------------------------------------------------
+dnl
+
+if test x$cflags = xno; then
+ 	CXXFLAGS=""
+fi
+
+dnl get host name
+AC_MSG_CHECKING(Determining hostname)
+HOST_NAME=`hostname -f`
+AC_MSG_RESULT($HOST_NAME)
+
+dnl get version
+AC_MSG_CHECKING(OOFEM version)
+VERSION=`cat VERSION`
+AC_MSG_RESULT($VERSION)
+
+AC_SUBST(srcdir)
+AC_SUBST(top_srcdir)
+AC_SUBST(host)
+AC_SUBST(HOST_NAME)
+AC_SUBST(VERSION)
+
+AC_SUBST(OOFEMLIB_INCLUDES)
+AC_SUBST(SM_INCLUDES)
+AC_SUBST(TM_INCLUDES)
+AC_SUBST(IML_INCLUDES)
+AC_SUBST(DSS_INCLUDES)
+AC_SUBST(SPOOLES_INCLUDES)
+
+AC_SUBST(MODULE_INCLUDES)
+AC_SUBST(MODULE_SYMBOLS)
+AC_SUBST(MODULE_LIST)
+AC_SUBST(TEST_TARGETS)
+AC_SUBST(IML_MODULE_SYMBOL)
+AC_SUBST(DSS_MODULE_SYMBOL)
+AC_SUBST(SPOOLES_MODULE_SYMBOL)
+AC_SUBST(MPI_MODULE_SYMBOLS)
+
+AC_SUBST(OOFEM_RELEASE_LIBS)
+AC_SUBST(OOFEM_DEBUG_LIBS)
+AC_SUBST(OOFEG_RELEASE_LIBS)
+AC_SUBST(OOFEG_DEBUG_LIBS)
+AC_SUBST(POOFEM_RELEASE_LIBS)
+AC_SUBST(POOFEM_DEBUG_LIBS)
+
+AC_SUBST(OOFEM_RELEASE_DEP_TARGETS)
+AC_SUBST(OOFEM_DEBUG_DEP_TARGETS)
+AC_SUBST(OOFEG_RELEASE_DEP_TARGETS)
+AC_SUBST(OOFEG_DEBUG_DEP_TARGETS)
+AC_SUBST(POOFEM_RELEASE_DEP_TARGETS)
+AC_SUBST(POOFEM_DEBUG_DEP_TARGETS)
+
+AC_SUBST(CKIT_LIB)
+AC_SUBST(CKIT_INCLUDES)
+AC_SUBST(ELIXIR_LIBS)
+AC_SUBST(ELIXIR_INCLUDES)
+AC_SUBST(OOFEG_DIRECTIVES)
+
+AC_SUBST(CFLAGS)
+AC_SUBST(CXXFLAGS)
+AC_SUBST(LIBS)
+AC_SUBST(x_libraries)
+AC_SUBST(x_includes)
+
+AC_SUBST(MPI_INCLUDES)
+
+AC_SUBST(MPI_CXX)
+SERIAL_CXX=$CXX
+AC_SUBST(SERIAL_CXX)
+if test x$petsc_module = xyes; then
+   CXX=$MPI_CXX
+fi                  
+
+AC_SUBST(DSS_DIR)
+AC_SUBST(INCLUDES)
+
+
+AC_SUBST(PETSC_DIR)
+AC_SUBST(PETSC_ARCH)
+AC_SUBST(PETSC_MAKE_INCLUDE)
+AC_SUBST(PETSC_INCLUDES)
+AC_SUBST(PETSC_BOPT)
+
+AC_SUBST(TARGETS)
+
+dnl AC_CONFIG_FILES(dss/src/makefile)
+dnl AC_OUTPUT(oofemlib/src/makefile sm/src/makefile tm/src/makefile main/src/makefile tools/makefile makefile hmworks/makefile)
+AC_OUTPUT(oofemlib/src/makefile oofemlib/src/oofemdef.h sm/src/makefile tm/src/makefile fm/src/makefile main/src/makefile tools/makefile tests/do_test makefile $DSS_MAKEFILE)
+
+echo
+echo Modules to be included: $MODULE_LIST
+echo Targets to be built: $TARGETS

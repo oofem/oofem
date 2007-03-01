@@ -1,0 +1,77 @@
+test2500.out
+Test of proper handling of changes of static system during computation
+#
+# supported only by some engng. models
+#
+IncrLinearStatic endOfTimeOfInterest 5.0  prescribedTimes 5. 1. 2. 3. 4. 5.
+domain 2dTruss
+OutputManager tstep_all dofman_all element_all
+ndofman 4 nelem 3 ncrosssect  1 nmat 1 nbc 6 nic 0 nltf 5
+node 1 coords 3 0.  0.  0.  bc 2 1 1
+node 2 coords 3 2.  0.  0.  bc 2 3 1
+node 3 coords 3 4.  0.  0.  bc 2 2 1 
+node 4 coords 3 6.  0.  0.  bc 2 0 1 load 3 4 5 6
+Truss2d 1 nodes 2 1 2 crossSect 1 mat 1 
+Truss2d 2 nodes 2 2 3 crossSect 1 mat 1 
+Truss2d 3 nodes 2 3 4 crossSect 1 mat 1
+SimpleCS 1 thick 1.0 width 1.0
+IsoLE 1 tAlpha 0.000012  d 1.0  E 0.5  n 0.2  
+BoundaryCondition  1 loadTimeFunction 1 prescribedvalue 0.0
+BoundaryCondition  2 loadTimeFunction 2 isImposedTimeFunction 2  prescribedvalue 0.0
+BoundaryCondition  3 loadTimeFunction 4 isImposedTimeFunction 4  prescribedvalue 1.0
+NodalLoad 4 loadTimeFunction 1 Components 2 1.0 0.0
+NodalLoad 5 loadTimeFunction 3 Components 2 1.0 0.0
+NodalLoad 6 loadTimeFunction 5 Components 2 -1.0 0.0
+ConstantFunction 1 f(t) 1.0
+PeakFunction 2 t 2.0 f(t)  1.
+HeavisideLTF 3 origin 1.5 value 1.0
+HeavisideLTF 4 origin 3.5 value 1.0
+HeavisideLTF 5 origin 4.5 value 1.0
+
+#
+#
+#%BEGIN_CHECK% tolerance 1.e-12
+## exact solution
+## check nodal values at the end of time interest
+##
+## step 1
+#NODE tStep 1. number 1 dof 1 unknown d value 0.0
+#NODE tStep 1. number 2 dof 1 unknown d value 4.0
+#NODE tStep 1. number 3 dof 1 unknown d value 8.0
+#NODE tStep 1. number 4 dof 1 unknown d value 12.0
+#ELEMENT tStep 1.  number 1 gp 1 record 1 component 1  value 1.0
+#ELEMENT tStep 1.  number 2 gp 1 record 1 component 1  value 1.0
+#ELEMENT tStep 1.  number 3 gp 1 record 1 component 1  value 1.0
+## step 2
+#NODE tStep 2. number 1 dof 1 unknown d value 0.0
+#NODE tStep 2. number 2 dof 1 unknown d value 4.0
+#NODE tStep 2. number 3 dof 1 unknown d value 8.0
+#NODE tStep 2. number 4 dof 1 unknown d value 16.0
+#ELEMENT tStep 2.  number 1 gp 1 record 1 component 1  value 1.0
+#ELEMENT tStep 2.  number 2 gp 1 record 1 component 1  value 1.0
+#ELEMENT tStep 2.  number 3 gp 1 record 1 component 1  value 2.0
+## step 3
+#NODE tStep 3. number 1 dof 1 unknown d value 0.0
+#NODE tStep 3. number 2 dof 1 unknown d value 8.0
+#NODE tStep 3. number 3 dof 1 unknown d value 16.0
+#NODE tStep 3. number 4 dof 1 unknown d value 24.0
+#ELEMENT tStep 3.  number 1 gp 1 record 1 component 1  value 2.0
+#ELEMENT tStep 3.  number 2 gp 1 record 1 component 1  value 2.0
+#ELEMENT tStep 3.  number 3 gp 1 record 1 component 1  value 2.0
+## step 4
+#NODE tStep 4. number 1 dof 1 unknown d value 0.0
+#NODE tStep 4. number 2 dof 1 unknown d value 9.0
+#NODE tStep 4. number 3 dof 1 unknown d value 17.0
+#NODE tStep 4. number 4 dof 1 unknown d value 25.0
+#ELEMENT tStep 4.  number 1 gp 1 record 1 component 1  value 2.25
+#ELEMENT tStep 4.  number 2 gp 1 record 1 component 1  value 2.0
+#ELEMENT tStep 4.  number 3 gp 1 record 1 component 1  value 2.0
+## step 5
+#NODE tStep 5. number 1 dof 1 unknown d value 0.0
+#NODE tStep 5. number 2 dof 1 unknown d value 9.0
+#NODE tStep 5. number 3 dof 1 unknown d value 13.0
+#NODE tStep 5. number 4 dof 1 unknown d value 17.0
+#ELEMENT tStep 5.  number 1 gp 1 record 1 component 1  value 2.25
+#ELEMENT tStep 5.  number 2 gp 1 record 1 component 1  value 1.0
+#ELEMENT tStep 5.  number 3 gp 1 record 1 component 1  value 1.0
+#%END_CHECK%

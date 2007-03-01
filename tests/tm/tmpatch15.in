@@ -1,0 +1,31 @@
+tmpatch15.out
+Patch test of Quad1_ht elements 
+#StationaryProblem nsteps 1
+#NonStationaryProblem nsteps 200 deltat 600000.0 alpha 0.5
+nltransienttransportproblem nsteps 200 deltat 600000.0 rtol 0.001 alpha 0.5
+domain HeatTransfer
+OutputManager tstep_all dofman_all element_all
+ndofman 6 nelem 2 ncrosssect  1 nmat 1 nbc 2 nic 0 nltf 1
+node 1 coords 3  0.0   0.0   0.0  bc 1 1
+node 2 coords 3  2.0   0.0   0.0  bc 1 1
+node 3 coords 3  0.0   1.0   0.0  bc 1 0
+node 4 coords 3  2.0   1.0   0.0  bc 1 0
+node 5 coords 3  0.0   8.0   0.0  bc 1 0
+node 6 coords 3  2.0   8.0   0.0  bc 1 0
+quad1ht 1 nodes 4 1 3 4 2  crossSect 1 mat 1 NIP 4
+quad1ht 2 nodes 4 3 5 6 4  crossSect 1 mat 1 NIP 4 boundaryloads 2 2 2
+SimpleCS 1 thick 0.15 width 1.0
+IsoHeat 1 d 2400. k 3.0 c 1000.0
+BoundaryCondition  1 loadTimeFunction 1 prescribedvalue 0.0 
+#BoundaryCondition  1 loadTimeFunction 1 prescribedvalue 15.0 
+#Newton bc
+constantedgeload 2 loadTimeFunction 1 ndofs 1 components 1 15.0 properties 1 a 0.8 loadtype 3
+ConstantFunction 1 f(t) 1.0
+
+#%BEGIN_CHECK%
+#NODE tStep 1.19400000e+08 number 3 dof 1 unknown f value 1.2765957447
+#NODE tStep 1.19400000e+08 number 4 dof 1 unknown f value 1.2765957447
+#NODE tStep 1.19400000e+08 number 5 dof 1 unknown f value 10.212765957
+#NODE tStep 1.19400000e+08 number 6 dof 1 unknown f value 10.212765957
+#%END_CHECK%
+

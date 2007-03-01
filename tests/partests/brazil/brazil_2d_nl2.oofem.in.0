@@ -1,0 +1,570 @@
+brazil_2d_nl.oofem.out.0
+2D brazilian splitting test
+#linearstatic nsteps 1 renumber 1
+#
+#nonlinearstatic nsteps 100 renumber 1 stiffMode 1 controllmode 0 psi 0.0 steplength 0.0001 initialsteplength 0.0002 rtolv 0.0001 MaxIter 200 reqIterations 30 manrmsteps 10 hpcmode 1 hpc 2 3 1 nonlocalext lstype 4 smtype 7
+#
+nonlinearstatic nsteps 1 nmsteps 5 renumber 1 nonlocalext lstype 4 smtype 7
+#
+metastep 1 nsteps 4 stiffMode 2 controllmode 0 psi 0.0 steplength 0.0001 initialsteplength 0.0002 rtolv 0.0001 MaxIter 200 reqIterations 30 manrmsteps 10 hpcmode 1 hpc 2 3 1 keepll nonlocalext lstype 4 smtype 7
+metastep 2 nsteps 3 stiffMode 2 controllmode 0 psi 0.0 steplength 0.00002 rtolv 0.0001 MaxIter 200 reqIterations 30 manrmsteps 10 hpcmode 1 hpc 2 3 1 keepll nonlocalext lstype 4 smtype 7
+metastep 3 nsteps 4 stiffMode 2 controllmode 0 psi 0.0 steplength 0.00001 rtolv 0.0001 MaxIter 200 reqIterations 30 manrmsteps 10 hpcmode 1 hpc 2 3 1 keepll nonlocalext lstype 4 smtype 7
+metastep 4 nsteps 9 stiffMode 2 controllmode 0 psi 0.0 steplength 0.0001 rtolv 0.0001 MaxIter 200 reqIterations 30 manrmsteps 10 hpcmode 1 hpc 2 3 1 keepll nonlocalext lstype 4 smtype 7
+metastep 5 nsteps 10 stiffMode 2 controllmode 0 psi 0.0 steplength 0.001 rtolv 0.0001 MaxIter 200 reqIterations 30 manrmsteps 10 hpcmode 1 hpc 2 3 1 keepll nonlocalext lstype 4 smtype 7
+#
+domain PlaneStrain
+OutputManager tstep_all dofman_all element_all
+ndofman 287 nelem 253 ncrosssect 2 nmat 2 nbc 2 nltf 1 nic 0
+node 1 coords 3 5.000000e+00 3.968627e+01 0.000000e+00 globNum 4
+node 2 coords 3 0.000000e+00 3.968627e+01 0.000000e+00 globNum 5 bc 2 1 0
+node 3 coords 3 5.000000e+00 4.268627e+01 0.000000e+00 globNum 6
+node 4 coords 3 0.000000e+00 4.268627e+01 0.000000e+00 globNum 7 bc 2 1 0
+node 5 coords 3 1.000000e+00 4.268627e+01 0.000000e+00 globNum 8
+node 6 coords 3 3.512079e+01 1.914497e+01 0.000000e+00 globNum 26 Null
+node 7 coords 3 3.246427e+01 2.336817e+01 0.000000e+00 globNum 27 Null
+node 8 coords 3 2.931350e+01 2.721615e+01 0.000000e+00 globNum 28 Shared partitions 1 1
+node 9 coords 3 2.580112e+01 3.056636e+01 0.000000e+00 globNum 29
+node 10 coords 3 2.204065e+01 3.337978e+01 0.000000e+00 globNum 30
+node 11 coords 3 1.826270e+01 3.558755e+01 0.000000e+00 globNum 31
+node 12 coords 3 1.529538e+01 3.696013e+01 0.000000e+00 globNum 32
+node 13 coords 3 1.296849e+01 3.783937e+01 0.000000e+00 globNum 33
+node 14 coords 3 1.076117e+01 3.852528e+01 0.000000e+00 globNum 34
+node 15 coords 3 8.708467e+00 3.904053e+01 0.000000e+00 globNum 35
+node 16 coords 3 7.145501e+00 3.935660e+01 0.000000e+00 globNum 36
+node 17 coords 3 6.013581e+00 3.954538e+01 0.000000e+00 globNum 37
+node 18 coords 3 3.999929e+00 3.968627e+01 0.000000e+00 globNum 38
+node 19 coords 3 2.999839e+00 3.968627e+01 0.000000e+00 globNum 39
+node 20 coords 3 1.999778e+00 3.968627e+01 0.000000e+00 globNum 40
+node 21 coords 3 9.998060e-01 3.968627e+01 0.000000e+00 globNum 41
+node 22 coords 3 0.000000e+00 3.866867e+01 0.000000e+00 globNum 42 bc 2 1 0
+node 23 coords 3 0.000000e+00 3.765108e+01 0.000000e+00 globNum 43 bc 2 1 0
+node 24 coords 3 0.000000e+00 3.663348e+01 0.000000e+00 globNum 44 bc 2 1 0
+node 25 coords 3 0.000000e+00 3.561588e+01 0.000000e+00 globNum 45 bc 2 1 0
+node 26 coords 3 0.000000e+00 3.459829e+01 0.000000e+00 globNum 46 bc 2 1 0
+node 27 coords 3 0.000000e+00 3.358069e+01 0.000000e+00 globNum 47 bc 2 1 0
+node 28 coords 3 0.000000e+00 3.256309e+01 0.000000e+00 globNum 48 bc 2 1 0
+node 29 coords 3 0.000000e+00 3.154550e+01 0.000000e+00 globNum 49 bc 2 1 0
+node 30 coords 3 0.000000e+00 3.052790e+01 0.000000e+00 globNum 50 bc 2 1 0
+node 31 coords 3 0.000000e+00 2.951030e+01 0.000000e+00 globNum 51 bc 2 1 0
+node 32 coords 3 0.000000e+00 2.849271e+01 0.000000e+00 globNum 52 bc 2 1 0
+node 33 coords 3 0.000000e+00 2.747511e+01 0.000000e+00 globNum 53 bc 2 1 0
+node 34 coords 3 0.000000e+00 2.645751e+01 0.000000e+00 globNum 54 bc 2 1 0
+node 35 coords 3 0.000000e+00 2.543992e+01 0.000000e+00 globNum 55 bc 2 1 0
+node 36 coords 3 0.000000e+00 2.442232e+01 0.000000e+00 globNum 56 bc 2 1 0
+node 37 coords 3 0.000000e+00 2.340472e+01 0.000000e+00 globNum 57 bc 2 1 0
+node 38 coords 3 0.000000e+00 2.238713e+01 0.000000e+00 globNum 58 bc 2 1 0
+node 39 coords 3 0.000000e+00 2.136953e+01 0.000000e+00 globNum 59 bc 2 1 0
+node 40 coords 3 0.000000e+00 2.035193e+01 0.000000e+00 globNum 60 bc 2 1 0
+node 41 coords 3 0.000000e+00 1.933434e+01 0.000000e+00 globNum 61 Shared partitions 1 1 bc 2 1 0
+node 42 coords 3 0.000000e+00 1.831674e+01 0.000000e+00 globNum 62 Null bc 2 1 0
+node 43 coords 3 0.000000e+00 1.729914e+01 0.000000e+00 globNum 63 Null bc 2 1 0
+node 44 coords 3 0.000000e+00 1.628155e+01 0.000000e+00 globNum 64 Null bc 2 1 0
+node 45 coords 3 0.000000e+00 1.526395e+01 0.000000e+00 globNum 65 Null bc 2 1 0
+node 46 coords 3 0.000000e+00 1.424635e+01 0.000000e+00 globNum 66 Null bc 2 1 0
+node 47 coords 3 5.000000e+00 4.068682e+01 0.000000e+00 globNum 80
+node 48 coords 3 5.000000e+00 4.168668e+01 0.000000e+00 globNum 81
+node 49 coords 3 4.000000e+00 4.268627e+01 0.000000e+00 globNum 82
+node 50 coords 3 3.000000e+00 4.268627e+01 0.000000e+00 globNum 83
+node 51 coords 3 2.000000e+00 4.268627e+01 0.000000e+00 globNum 84
+node 52 coords 3 0.000000e+00 4.168627e+01 0.000000e+00 globNum 85 bc 2 1 0
+node 53 coords 3 0.000000e+00 4.068627e+01 0.000000e+00 globNum 86 bc 2 1 0
+node 54 coords 3 3.173712e+01 1.599657e+01 0.000000e+00 globNum 104 Null
+node 55 coords 3 2.876985e+01 1.991895e+01 0.000000e+00 globNum 105 Null
+node 56 coords 3 2.581529e+01 2.380594e+01 0.000000e+00 globNum 106 Shared partitions 1 1
+node 57 coords 3 2.279994e+01 2.727814e+01 0.000000e+00 globNum 107
+node 58 coords 3 1.981862e+01 3.024676e+01 0.000000e+00 globNum 108
+node 59 coords 3 1.692104e+01 3.260294e+01 0.000000e+00 globNum 109
+node 60 coords 3 1.436994e+01 3.434013e+01 0.000000e+00 globNum 110
+node 61 coords 3 1.216642e+01 3.561886e+01 0.000000e+00 globNum 111
+node 62 coords 3 1.017411e+01 3.660731e+01 0.000000e+00 globNum 112
+node 63 coords 3 8.400653e+00 3.738904e+01 0.000000e+00 globNum 113
+node 64 coords 3 6.971749e+00 3.799850e+01 0.000000e+00 globNum 114
+node 65 coords 3 5.845597e+00 3.842724e+01 0.000000e+00 globNum 115
+node 66 coords 3 4.933221e+00 3.869163e+01 0.000000e+00 globNum 116
+node 67 coords 3 4.035028e+00 3.869546e+01 0.000000e+00 globNum 117
+node 68 coords 3 3.050439e+00 3.867965e+01 0.000000e+00 globNum 118
+node 69 coords 3 2.034013e+00 3.867208e+01 0.000000e+00 globNum 119
+node 70 coords 3 1.015768e+00 3.866955e+01 0.000000e+00 globNum 120
+node 71 coords 3 1.036177e+00 3.765028e+01 0.000000e+00 globNum 121
+node 72 coords 3 1.053020e+00 3.662602e+01 0.000000e+00 globNum 122
+node 73 coords 3 1.054217e+00 3.560011e+01 0.000000e+00 globNum 123
+node 74 coords 3 1.046021e+00 3.457749e+01 0.000000e+00 globNum 124
+node 75 coords 3 1.033041e+00 3.355872e+01 0.000000e+00 globNum 125
+node 76 coords 3 1.019970e+00 3.254365e+01 0.000000e+00 globNum 126
+node 77 coords 3 1.011597e+00 3.153055e+01 0.000000e+00 globNum 127
+node 78 coords 3 1.008871e+00 3.051670e+01 0.000000e+00 globNum 128
+node 79 coords 3 1.008918e+00 2.950094e+01 0.000000e+00 globNum 129
+node 80 coords 3 1.008741e+00 2.848408e+01 0.000000e+00 globNum 130
+node 81 coords 3 1.007110e+00 2.746736e+01 0.000000e+00 globNum 131
+node 82 coords 3 1.004944e+00 2.645089e+01 0.000000e+00 globNum 132
+node 83 coords 3 1.003133e+00 2.543387e+01 0.000000e+00 globNum 133
+node 84 coords 3 1.001073e+00 2.441632e+01 0.000000e+00 globNum 134
+node 85 coords 3 9.986690e-01 2.339956e+01 0.000000e+00 globNum 135
+node 86 coords 3 9.966760e-01 2.238455e+01 0.000000e+00 globNum 136
+node 87 coords 3 9.964290e-01 2.137056e+01 0.000000e+00 globNum 137
+node 88 coords 3 9.983280e-01 2.035561e+01 0.000000e+00 globNum 138
+node 89 coords 3 1.001176e+00 1.933838e+01 0.000000e+00 globNum 139 Shared partitions 1 1
+node 90 coords 3 1.003573e+00 1.831928e+01 0.000000e+00 globNum 140 Null
+node 91 coords 3 1.004880e+00 1.729964e+01 0.000000e+00 globNum 141 Null
+node 92 coords 3 1.005204e+00 1.628040e+01 0.000000e+00 globNum 142 Null
+node 93 coords 3 1.004933e+00 1.526169e+01 0.000000e+00 globNum 143 Null
+node 94 coords 3 1.004108e+00 1.424335e+01 0.000000e+00 globNum 144 Null
+node 95 coords 3 2.869930e+01 1.140897e+01 0.000000e+00 globNum 169 Null
+node 96 coords 3 2.503614e+01 1.650858e+01 0.000000e+00 globNum 170 Null
+node 97 coords 3 2.234397e+01 2.079571e+01 0.000000e+00 globNum 171 Shared partitions 1 1
+node 98 coords 3 1.974887e+01 2.445388e+01 0.000000e+00 globNum 172 Shared partitions 1 1
+node 99 coords 3 1.747853e+01 2.768667e+01 0.000000e+00 globNum 173
+node 100 coords 3 1.521897e+01 3.021984e+01 0.000000e+00 globNum 174
+node 101 coords 3 1.309394e+01 3.216571e+01 0.000000e+00 globNum 175
+node 102 coords 3 1.115641e+01 3.368140e+01 0.000000e+00 globNum 176
+node 103 coords 3 9.374386e+00 3.489203e+01 0.000000e+00 globNum 177
+node 104 coords 3 7.755183e+00 3.589963e+01 0.000000e+00 globNum 178
+node 105 coords 3 6.495726e+00 3.680120e+01 0.000000e+00 globNum 179
+node 106 coords 3 5.456693e+00 3.745690e+01 0.000000e+00 globNum 180
+node 107 coords 3 4.850003e+00 3.795789e+01 0.000000e+00 globNum 181
+node 108 coords 3 4.157402e+00 3.773081e+01 0.000000e+00 globNum 182
+node 109 coords 3 3.138062e+00 3.766948e+01 0.000000e+00 globNum 183
+node 110 coords 3 2.078596e+00 3.765396e+01 0.000000e+00 globNum 184
+node 111 coords 3 2.130144e+00 3.661843e+01 0.000000e+00 globNum 185
+node 112 coords 3 2.126926e+00 3.557754e+01 0.000000e+00 globNum 186
+node 113 coords 3 2.107450e+00 3.454743e+01 0.000000e+00 globNum 187
+node 114 coords 3 2.077549e+00 3.352594e+01 0.000000e+00 globNum 188
+node 115 coords 3 2.045834e+00 3.251401e+01 0.000000e+00 globNum 189
+node 116 coords 3 2.025479e+00 3.150842e+01 0.000000e+00 globNum 190
+node 117 coords 3 2.019885e+00 3.050093e+01 0.000000e+00 globNum 191
+node 118 coords 3 2.021653e+00 2.948771e+01 0.000000e+00 globNum 192
+node 119 coords 3 2.022187e+00 2.847111e+01 0.000000e+00 globNum 193
+node 120 coords 3 2.017905e+00 2.745526e+01 0.000000e+00 globNum 194
+node 121 coords 3 2.012289e+00 2.644085e+01 0.000000e+00 globNum 195
+node 122 coords 3 2.008513e+00 2.542474e+01 0.000000e+00 globNum 196
+node 123 coords 3 2.003606e+00 2.440636e+01 0.000000e+00 globNum 197
+node 124 coords 3 1.997144e+00 2.338983e+01 0.000000e+00 globNum 198
+node 125 coords 3 1.990882e+00 2.237860e+01 0.000000e+00 globNum 199
+node 126 coords 3 1.989145e+00 2.137116e+01 0.000000e+00 globNum 200
+node 127 coords 3 1.993951e+00 2.036166e+01 0.000000e+00 globNum 201
+node 128 coords 3 2.001730e+00 1.934572e+01 0.000000e+00 globNum 202 Shared partitions 1 1
+node 129 coords 3 2.008388e+00 1.832435e+01 0.000000e+00 globNum 203 Null
+node 130 coords 3 2.012068e+00 1.730129e+01 0.000000e+00 globNum 204 Null
+node 131 coords 3 2.013125e+00 1.627928e+01 0.000000e+00 globNum 205 Null
+node 132 coords 3 2.012774e+00 1.525871e+01 0.000000e+00 globNum 206 Null
+node 133 coords 3 2.011091e+00 1.423890e+01 0.000000e+00 globNum 207 Null
+node 134 coords 3 2.027428e+01 1.389360e+01 0.000000e+00 globNum 228 Null
+node 135 coords 3 1.866996e+01 1.835984e+01 0.000000e+00 globNum 229 Null
+node 136 coords 3 1.637184e+01 2.196687e+01 0.000000e+00 globNum 230 Shared partitions 1 1
+node 137 coords 3 1.504515e+01 2.567326e+01 0.000000e+00 globNum 231
+node 138 coords 3 1.335669e+01 2.834824e+01 0.000000e+00 globNum 232
+node 139 coords 3 1.162589e+01 3.039100e+01 0.000000e+00 globNum 233
+node 140 coords 3 9.998812e+00 3.203779e+01 0.000000e+00 globNum 234
+node 141 coords 3 8.429218e+00 3.336263e+01 0.000000e+00 globNum 235
+node 142 coords 3 6.764476e+00 3.447102e+01 0.000000e+00 globNum 236
+node 143 coords 3 5.788852e+00 3.579058e+01 0.000000e+00 globNum 237
+node 144 coords 3 4.614406e+00 3.660899e+01 0.000000e+00 globNum 238
+node 145 coords 3 3.276316e+00 3.661086e+01 0.000000e+00 globNum 239
+node 146 coords 3 3.236212e+00 3.553340e+01 0.000000e+00 globNum 240
+node 147 coords 3 3.201845e+00 3.449324e+01 0.000000e+00 globNum 241
+node 148 coords 3 3.145431e+00 3.346435e+01 0.000000e+00 globNum 242
+node 149 coords 3 3.082117e+00 3.245652e+01 0.000000e+00 globNum 243
+node 150 coords 3 3.041109e+00 3.146741e+01 0.000000e+00 globNum 244
+node 151 coords 3 3.034523e+00 3.047411e+01 0.000000e+00 globNum 245
+node 152 coords 3 3.044626e+00 2.946478e+01 0.000000e+00 globNum 246
+node 153 coords 3 3.049186e+00 2.844560e+01 0.000000e+00 globNum 247
+node 154 coords 3 3.038351e+00 2.742975e+01 0.000000e+00 globNum 248
+node 155 coords 3 3.024670e+00 2.642063e+01 0.000000e+00 globNum 249
+node 156 coords 3 3.019677e+00 2.540690e+01 0.000000e+00 globNum 250
+node 157 coords 3 3.009853e+00 2.438481e+01 0.000000e+00 globNum 251
+node 158 coords 3 2.994925e+00 2.336627e+01 0.000000e+00 globNum 252
+node 159 coords 3 2.977242e+00 2.236206e+01 0.000000e+00 globNum 253
+node 160 coords 3 2.969814e+00 2.137046e+01 0.000000e+00 globNum 254
+node 161 coords 3 2.981136e+00 2.037539e+01 0.000000e+00 globNum 255
+node 162 coords 3 3.000599e+00 1.936346e+01 0.000000e+00 globNum 256 Shared partitions 1 1
+node 163 coords 3 3.017255e+00 1.833717e+01 0.000000e+00 globNum 257 Null
+node 164 coords 3 3.026342e+00 1.730629e+01 0.000000e+00 globNum 258 Null
+node 165 coords 3 3.029024e+00 1.627802e+01 0.000000e+00 globNum 259 Null
+node 166 coords 3 3.028987e+00 1.525352e+01 0.000000e+00 globNum 260 Null
+node 167 coords 3 3.026737e+00 1.423023e+01 0.000000e+00 globNum 261 Null
+node 168 coords 3 1.086180e+01 9.360018e+00 0.000000e+00 globNum 276 Null
+node 169 coords 3 1.293245e+01 1.086971e+01 0.000000e+00 globNum 277 Null
+node 170 coords 3 1.701268e+01 1.445858e+01 0.000000e+00 globNum 278 Null
+node 171 coords 3 1.504092e+01 1.274756e+01 0.000000e+00 globNum 279 Null
+node 172 coords 3 1.352324e+01 2.033504e+01 0.000000e+00 globNum 280
+node 173 coords 3 1.468860e+01 1.908659e+01 0.000000e+00 globNum 281 Shared partitions 1 1
+node 174 coords 3 1.279697e+01 2.470885e+01 0.000000e+00 globNum 282
+node 175 coords 3 1.373694e+01 2.216095e+01 0.000000e+00 globNum 283
+node 176 coords 3 1.150248e+01 2.702500e+01 0.000000e+00 globNum 284
+node 177 coords 3 1.004112e+01 2.898935e+01 0.000000e+00 globNum 285
+node 178 coords 3 8.791819e+00 3.070566e+01 0.000000e+00 globNum 286
+node 179 coords 3 7.606254e+00 3.201243e+01 0.000000e+00 globNum 287
+node 180 coords 3 5.418277e+00 3.432807e+01 0.000000e+00 globNum 288
+node 181 coords 3 5.221787e+00 3.518913e+01 0.000000e+00 globNum 289
+node 182 coords 3 4.354780e+00 3.543954e+01 0.000000e+00 globNum 290
+node 183 coords 3 4.323158e+00 3.440748e+01 0.000000e+00 globNum 291
+node 184 coords 3 4.225184e+00 3.335693e+01 0.000000e+00 globNum 292
+node 185 coords 3 4.114599e+00 3.235195e+01 0.000000e+00 globNum 293
+node 186 coords 3 4.038398e+00 3.139959e+01 0.000000e+00 globNum 294
+node 187 coords 3 4.044599e+00 3.043857e+01 0.000000e+00 globNum 295
+node 188 coords 3 4.084675e+00 2.943279e+01 0.000000e+00 globNum 296
+node 189 coords 3 4.103924e+00 2.839838e+01 0.000000e+00 globNum 297
+node 190 coords 3 4.073523e+00 2.737650e+01 0.000000e+00 globNum 298
+node 191 coords 3 4.037903e+00 2.638241e+01 0.000000e+00 globNum 299
+node 192 coords 3 4.041839e+00 2.537575e+01 0.000000e+00 globNum 300
+node 193 coords 3 4.023425e+00 2.434031e+01 0.000000e+00 globNum 301
+node 194 coords 3 3.993144e+00 2.331110e+01 0.000000e+00 globNum 302
+node 195 coords 3 3.945447e+00 2.231881e+01 0.000000e+00 globNum 303
+node 196 coords 3 3.919080e+00 2.136584e+01 0.000000e+00 globNum 304
+node 197 coords 3 3.947258e+00 2.040790e+01 0.000000e+00 globNum 305
+node 198 coords 3 3.994948e+00 1.940555e+01 0.000000e+00 globNum 306 Shared partitions 1 1
+node 199 coords 3 4.034366e+00 1.836756e+01 0.000000e+00 globNum 307 Null
+node 200 coords 3 4.054581e+00 1.731883e+01 0.000000e+00 globNum 308 Null
+node 201 coords 3 4.059615e+00 1.627691e+01 0.000000e+00 globNum 309 Null
+node 202 coords 3 4.060493e+00 1.524526e+01 0.000000e+00 globNum 310 Null
+node 203 coords 3 4.061363e+00 1.421471e+01 0.000000e+00 globNum 311 Null
+node 204 coords 3 9.768622e+00 1.095317e+01 0.000000e+00 globNum 326 Null
+node 205 coords 3 1.131858e+01 1.260191e+01 0.000000e+00 globNum 327 Null
+node 206 coords 3 1.302939e+01 1.500090e+01 0.000000e+00 globNum 328 Null
+node 207 coords 3 1.574785e+01 1.658265e+01 0.000000e+00 globNum 329 Null
+node 208 coords 3 1.214418e+01 1.975757e+01 0.000000e+00 globNum 330
+node 209 coords 3 1.261844e+01 1.772647e+01 0.000000e+00 globNum 331 Shared partitions 1 1
+node 210 coords 3 1.171037e+01 2.177294e+01 0.000000e+00 globNum 332
+node 211 coords 3 1.087691e+01 2.391553e+01 0.000000e+00 globNum 333
+node 212 coords 3 9.748092e+00 2.591300e+01 0.000000e+00 globNum 334
+node 213 coords 3 8.219405e+00 2.782414e+01 0.000000e+00 globNum 335
+node 214 coords 3 7.523153e+00 2.976661e+01 0.000000e+00 globNum 336
+node 215 coords 3 5.995771e+00 3.183583e+01 0.000000e+00 globNum 337
+node 216 coords 3 6.782132e+00 3.104102e+01 0.000000e+00 globNum 338
+node 217 coords 3 6.444612e+00 3.289575e+01 0.000000e+00 globNum 339
+node 218 coords 3 5.323456e+00 3.318530e+01 0.000000e+00 globNum 340
+node 219 coords 3 5.107914e+00 3.217734e+01 0.000000e+00 globNum 341
+node 220 coords 3 4.956091e+00 3.131164e+01 0.000000e+00 globNum 342
+node 221 coords 3 5.026467e+00 3.042618e+01 0.000000e+00 globNum 343
+node 222 coords 3 5.154082e+00 2.941257e+01 0.000000e+00 globNum 344
+node 223 coords 3 5.218450e+00 2.831683e+01 0.000000e+00 globNum 345
+node 224 coords 3 5.123141e+00 2.726414e+01 0.000000e+00 globNum 346
+node 225 coords 3 5.018405e+00 2.631920e+01 0.000000e+00 globNum 347
+node 226 coords 3 5.090566e+00 2.533593e+01 0.000000e+00 globNum 348
+node 227 coords 3 5.047863e+00 2.425584e+01 0.000000e+00 globNum 349
+node 228 coords 3 5.001132e+00 2.318871e+01 0.000000e+00 globNum 350
+node 229 coords 3 4.874685e+00 2.221136e+01 0.000000e+00 globNum 351
+node 230 coords 3 4.787149e+00 2.135321e+01 0.000000e+00 globNum 352
+node 231 coords 3 4.866702e+00 2.048867e+01 0.000000e+00 globNum 353
+node 232 coords 3 4.982298e+00 1.950176e+01 0.000000e+00 globNum 354 Shared partitions 1 1
+node 233 coords 3 5.069860e+00 1.843346e+01 0.000000e+00 globNum 355 Null
+node 234 coords 3 5.109430e+00 1.734489e+01 0.000000e+00 globNum 356 Null
+node 235 coords 3 5.113382e+00 1.627475e+01 0.000000e+00 globNum 357 Null
+node 236 coords 3 5.112874e+00 1.523459e+01 0.000000e+00 globNum 358 Null
+node 237 coords 3 5.136924e+00 1.419296e+01 0.000000e+00 globNum 359 Null
+node 238 coords 3 8.570287e+00 1.205642e+01 0.000000e+00 globNum 371 Null
+node 239 coords 3 9.525384e+00 1.358068e+01 0.000000e+00 globNum 373 Null
+node 240 coords 3 1.043381e+01 1.542305e+01 0.000000e+00 globNum 374 Null
+node 241 coords 3 1.038554e+01 1.938001e+01 0.000000e+00 globNum 375 Shared partitions 1 1
+node 242 coords 3 1.061077e+01 1.747441e+01 0.000000e+00 globNum 376 Shared partitions 1 1
+node 243 coords 3 9.914985e+00 2.124533e+01 0.000000e+00 globNum 377 Shared partitions 1 1
+node 244 coords 3 9.158837e+00 2.312049e+01 0.000000e+00 globNum 378
+node 245 coords 3 8.339661e+00 2.486683e+01 0.000000e+00 globNum 379
+node 246 coords 3 7.257510e+00 2.626677e+01 0.000000e+00 globNum 380
+node 247 coords 3 6.282051e+00 2.947125e+01 0.000000e+00 globNum 381
+node 248 coords 3 5.942499e+00 3.053852e+01 0.000000e+00 globNum 382
+node 249 coords 3 5.648425e+00 3.122921e+01 0.000000e+00 globNum 383
+node 250 coords 3 6.176136e+00 2.700040e+01 0.000000e+00 globNum 384
+node 251 coords 3 6.488682e+00 2.816910e+01 0.000000e+00 globNum 385
+node 252 coords 3 5.819838e+00 2.623932e+01 0.000000e+00 globNum 386
+node 253 coords 3 6.250506e+00 2.533772e+01 0.000000e+00 globNum 387
+node 254 coords 3 6.065354e+00 2.411062e+01 0.000000e+00 globNum 388
+node 255 coords 3 6.069912e+00 2.293419e+01 0.000000e+00 globNum 389
+node 256 coords 3 5.731018e+00 2.195153e+01 0.000000e+00 globNum 390
+node 257 coords 3 6.487813e+00 2.130193e+01 0.000000e+00 globNum 391
+node 258 coords 3 5.703204e+00 2.070190e+01 0.000000e+00 globNum 392
+node 259 coords 3 5.977087e+00 1.970936e+01 0.000000e+00 globNum 393 Shared partitions 1 1
+node 260 coords 3 6.150035e+00 1.856074e+01 0.000000e+00 globNum 394 Null
+node 261 coords 3 6.216063e+00 1.738632e+01 0.000000e+00 globNum 395 Null
+node 262 coords 3 6.198036e+00 1.625941e+01 0.000000e+00 globNum 396 Null
+node 263 coords 3 6.168644e+00 1.522649e+01 0.000000e+00 globNum 397 Null
+node 264 coords 3 6.310329e+00 1.418611e+01 0.000000e+00 globNum 398 Null
+node 265 coords 3 6.179696e+00 1.301322e+01 0.000000e+00 globNum 399 Null
+node 266 coords 3 7.353330e+00 1.275634e+01 0.000000e+00 globNum 405 Null
+node 267 coords 3 8.608228e+00 1.582703e+01 0.000000e+00 globNum 406 Null
+node 268 coords 3 7.778151e+00 1.430765e+01 0.000000e+00 globNum 407 Null
+node 269 coords 3 8.735017e+00 1.906467e+01 0.000000e+00 globNum 408 Null
+node 270 coords 3 8.851298e+00 1.742582e+01 0.000000e+00 globNum 409 Null
+node 271 coords 3 8.293373e+00 2.070452e+01 0.000000e+00 globNum 410 Shared partitions 1 1
+node 272 coords 3 7.447763e+00 2.244226e+01 0.000000e+00 globNum 411
+node 273 coords 3 7.142423e+00 2.414334e+01 0.000000e+00 globNum 412
+node 274 coords 3 7.034905e+00 2.010884e+01 0.000000e+00 globNum 413 Shared partitions 1 1
+node 275 coords 3 7.339091e+00 1.876705e+01 0.000000e+00 globNum 414 Null
+node 276 coords 3 7.426628e+00 1.742630e+01 0.000000e+00 globNum 415 Null
+node 277 coords 3 7.323843e+00 1.617465e+01 0.000000e+00 globNum 416 Null
+node 278 coords 3 7.081568e+00 1.523291e+01 0.000000e+00 globNum 417 Null
+node 279 coords 3 5.439777e+00 2.133281e+01 0.000000e+00 globNum 418
+node 280 coords 3 3.999954e+00 4.068647e+01 0.000000e+00 globNum 420
+node 281 coords 3 3.999979e+00 4.168644e+01 0.000000e+00 globNum 421
+node 282 coords 3 2.999961e+00 4.168634e+01 0.000000e+00 globNum 422
+node 283 coords 3 1.999954e+00 4.168630e+01 0.000000e+00 globNum 423
+node 284 coords 3 9.999670e-01 4.168628e+01 0.000000e+00 globNum 424
+node 285 coords 3 9.999150e-01 4.068628e+01 0.000000e+00 globNum 425
+node 286 coords 3 1.999889e+00 4.068630e+01 0.000000e+00 globNum 426
+node 287 coords 3 2.999910e+00 4.068634e+01 0.000000e+00 globNum 427
+TrPlaneStrain2d 1 nodes 3 253 254 273 globNum 2 mat 1 crossSect 1
+Quad1PlaneStrain 2 nodes 4 6 7 55 54 globNum 22 Remote partitions 1 1 mat 1 crossSect 1
+Quad1PlaneStrain 3 nodes 4 7 8 56 55 globNum 23 Remote partitions 1 1 mat 1 crossSect 1
+Quad1PlaneStrain 4 nodes 4 8 9 57 56 globNum 24 mat 1 crossSect 1
+Quad1PlaneStrain 5 nodes 4 9 10 58 57 globNum 25 mat 1 crossSect 1
+Quad1PlaneStrain 6 nodes 4 10 11 59 58 globNum 26 mat 1 crossSect 1
+Quad1PlaneStrain 7 nodes 4 11 12 60 59 globNum 27 mat 1 crossSect 1
+Quad1PlaneStrain 8 nodes 4 12 13 61 60 globNum 28 mat 1 crossSect 1
+Quad1PlaneStrain 9 nodes 4 13 14 62 61 globNum 29 mat 1 crossSect 1
+Quad1PlaneStrain 10 nodes 4 14 15 63 62 globNum 30 mat 1 crossSect 1
+Quad1PlaneStrain 11 nodes 4 15 16 64 63 globNum 31 mat 1 crossSect 1
+Quad1PlaneStrain 12 nodes 4 16 17 65 64 globNum 32 mat 1 crossSect 1
+Quad1PlaneStrain 13 nodes 4 17 1 66 65 globNum 33 mat 1 crossSect 1
+Quad1PlaneStrain 14 nodes 4 1 18 67 66 globNum 34 mat 1 crossSect 1
+Quad1PlaneStrain 15 nodes 4 18 19 68 67 globNum 35 mat 1 crossSect 1
+Quad1PlaneStrain 16 nodes 4 19 20 69 68 globNum 36 mat 1 crossSect 1
+Quad1PlaneStrain 17 nodes 4 20 21 70 69 globNum 37 mat 1 crossSect 1
+Quad1PlaneStrain 18 nodes 4 21 2 22 70 globNum 38 mat 1 crossSect 1
+Quad1PlaneStrain 19 nodes 4 22 23 71 70 globNum 39 mat 1 crossSect 1
+Quad1PlaneStrain 20 nodes 4 23 24 72 71 globNum 40 mat 1 crossSect 1
+Quad1PlaneStrain 21 nodes 4 24 25 73 72 globNum 41 mat 1 crossSect 1
+Quad1PlaneStrain 22 nodes 4 25 26 74 73 globNum 42 mat 1 crossSect 1
+Quad1PlaneStrain 23 nodes 4 26 27 75 74 globNum 43 mat 1 crossSect 1
+Quad1PlaneStrain 24 nodes 4 27 28 76 75 globNum 44 mat 1 crossSect 1
+Quad1PlaneStrain 25 nodes 4 28 29 77 76 globNum 45 mat 1 crossSect 1
+Quad1PlaneStrain 26 nodes 4 29 30 78 77 globNum 46 mat 1 crossSect 1
+Quad1PlaneStrain 27 nodes 4 30 31 79 78 globNum 47 mat 1 crossSect 1
+Quad1PlaneStrain 28 nodes 4 31 32 80 79 globNum 48 mat 1 crossSect 1
+Quad1PlaneStrain 29 nodes 4 32 33 81 80 globNum 49 mat 1 crossSect 1
+Quad1PlaneStrain 30 nodes 4 33 34 82 81 globNum 50 mat 1 crossSect 1
+Quad1PlaneStrain 31 nodes 4 34 35 83 82 globNum 51 mat 1 crossSect 1
+Quad1PlaneStrain 32 nodes 4 35 36 84 83 globNum 52 mat 1 crossSect 1
+Quad1PlaneStrain 33 nodes 4 36 37 85 84 globNum 53 mat 1 crossSect 1
+Quad1PlaneStrain 34 nodes 4 37 38 86 85 globNum 54 mat 1 crossSect 1
+Quad1PlaneStrain 35 nodes 4 38 39 87 86 globNum 55 mat 1 crossSect 1
+Quad1PlaneStrain 36 nodes 4 39 40 88 87 globNum 56 mat 1 crossSect 1
+Quad1PlaneStrain 37 nodes 4 40 41 89 88 globNum 57 mat 1 crossSect 1
+Quad1PlaneStrain 38 nodes 4 41 42 90 89 globNum 58 Remote partitions 1 1 mat 1 crossSect 1
+Quad1PlaneStrain 39 nodes 4 42 43 91 90 globNum 59 Remote partitions 1 1 mat 1 crossSect 1
+Quad1PlaneStrain 40 nodes 4 43 44 92 91 globNum 60 Remote partitions 1 1 mat 1 crossSect 1
+Quad1PlaneStrain 41 nodes 4 44 45 93 92 globNum 61 Remote partitions 1 1 mat 1 crossSect 1
+Quad1PlaneStrain 42 nodes 4 45 46 94 93 globNum 62 Remote partitions 1 1 mat 1 crossSect 1
+Quad1PlaneStrain 43 nodes 4 95 54 55 96 globNum 91 Remote partitions 1 1 mat 1 crossSect 1
+Quad1PlaneStrain 44 nodes 4 55 56 97 96 globNum 92 Remote partitions 1 1 mat 1 crossSect 1
+Quad1PlaneStrain 45 nodes 4 56 57 98 97 globNum 93 mat 1 crossSect 1
+Quad1PlaneStrain 46 nodes 4 57 58 99 98 globNum 94 mat 1 crossSect 1
+Quad1PlaneStrain 47 nodes 4 58 59 100 99 globNum 95 mat 1 crossSect 1
+Quad1PlaneStrain 48 nodes 4 59 60 101 100 globNum 96 mat 1 crossSect 1
+Quad1PlaneStrain 49 nodes 4 60 61 102 101 globNum 97 mat 1 crossSect 1
+Quad1PlaneStrain 50 nodes 4 61 62 103 102 globNum 98 mat 1 crossSect 1
+Quad1PlaneStrain 51 nodes 4 62 63 104 103 globNum 99 mat 1 crossSect 1
+Quad1PlaneStrain 52 nodes 4 63 64 105 104 globNum 100 mat 1 crossSect 1
+Quad1PlaneStrain 53 nodes 4 64 65 106 105 globNum 101 mat 1 crossSect 1
+Quad1PlaneStrain 54 nodes 4 65 66 107 106 globNum 102 mat 1 crossSect 1
+Quad1PlaneStrain 55 nodes 4 66 67 108 107 globNum 103 mat 1 crossSect 1
+Quad1PlaneStrain 56 nodes 4 67 68 109 108 globNum 104 mat 1 crossSect 1
+Quad1PlaneStrain 57 nodes 4 68 69 110 109 globNum 105 mat 1 crossSect 1
+Quad1PlaneStrain 58 nodes 4 69 70 71 110 globNum 106 mat 1 crossSect 1
+Quad1PlaneStrain 59 nodes 4 71 72 111 110 globNum 107 mat 1 crossSect 1
+Quad1PlaneStrain 60 nodes 4 72 73 112 111 globNum 108 mat 1 crossSect 1
+Quad1PlaneStrain 61 nodes 4 73 74 113 112 globNum 109 mat 1 crossSect 1
+Quad1PlaneStrain 62 nodes 4 74 75 114 113 globNum 110 mat 1 crossSect 1
+Quad1PlaneStrain 63 nodes 4 75 76 115 114 globNum 111 mat 1 crossSect 1
+Quad1PlaneStrain 64 nodes 4 76 77 116 115 globNum 112 mat 1 crossSect 1
+Quad1PlaneStrain 65 nodes 4 77 78 117 116 globNum 113 mat 1 crossSect 1
+Quad1PlaneStrain 66 nodes 4 78 79 118 117 globNum 114 mat 1 crossSect 1
+Quad1PlaneStrain 67 nodes 4 79 80 119 118 globNum 115 mat 1 crossSect 1
+Quad1PlaneStrain 68 nodes 4 80 81 120 119 globNum 116 mat 1 crossSect 1
+Quad1PlaneStrain 69 nodes 4 81 82 121 120 globNum 117 mat 1 crossSect 1
+Quad1PlaneStrain 70 nodes 4 82 83 122 121 globNum 118 mat 1 crossSect 1
+Quad1PlaneStrain 71 nodes 4 83 84 123 122 globNum 119 mat 1 crossSect 1
+Quad1PlaneStrain 72 nodes 4 84 85 124 123 globNum 120 mat 1 crossSect 1
+Quad1PlaneStrain 73 nodes 4 85 86 125 124 globNum 121 mat 1 crossSect 1
+Quad1PlaneStrain 74 nodes 4 86 87 126 125 globNum 122 mat 1 crossSect 1
+Quad1PlaneStrain 75 nodes 4 87 88 127 126 globNum 123 mat 1 crossSect 1
+Quad1PlaneStrain 76 nodes 4 88 89 128 127 globNum 124 mat 1 crossSect 1
+Quad1PlaneStrain 77 nodes 4 89 90 129 128 globNum 125 Remote partitions 1 1 mat 1 crossSect 1
+Quad1PlaneStrain 78 nodes 4 90 91 130 129 globNum 126 Remote partitions 1 1 mat 1 crossSect 1
+Quad1PlaneStrain 79 nodes 4 91 92 131 130 globNum 127 Remote partitions 1 1 mat 1 crossSect 1
+Quad1PlaneStrain 80 nodes 4 92 93 132 131 globNum 128 Remote partitions 1 1 mat 1 crossSect 1
+Quad1PlaneStrain 81 nodes 4 93 94 133 132 globNum 129 Remote partitions 1 1 mat 1 crossSect 1
+Quad1PlaneStrain 82 nodes 4 96 97 135 134 globNum 153 Remote partitions 1 1 mat 1 crossSect 1
+Quad1PlaneStrain 83 nodes 4 97 98 136 135 globNum 154 Remote partitions 1 1 mat 1 crossSect 1
+Quad1PlaneStrain 84 nodes 4 98 99 137 136 globNum 155 mat 1 crossSect 1
+Quad1PlaneStrain 85 nodes 4 99 100 138 137 globNum 156 mat 1 crossSect 1
+Quad1PlaneStrain 86 nodes 4 100 101 139 138 globNum 157 mat 1 crossSect 1
+Quad1PlaneStrain 87 nodes 4 101 102 140 139 globNum 158 mat 1 crossSect 1
+Quad1PlaneStrain 88 nodes 4 102 103 141 140 globNum 159 mat 1 crossSect 1
+Quad1PlaneStrain 89 nodes 4 103 104 142 141 globNum 160 mat 1 crossSect 1
+Quad1PlaneStrain 90 nodes 4 104 105 143 142 globNum 161 mat 1 crossSect 1
+Quad1PlaneStrain 91 nodes 4 105 106 144 143 globNum 162 mat 1 crossSect 1
+Quad1PlaneStrain 92 nodes 4 106 107 108 144 globNum 163 mat 1 crossSect 1
+Quad1PlaneStrain 93 nodes 4 144 108 109 145 globNum 164 mat 1 crossSect 1
+Quad1PlaneStrain 94 nodes 4 109 110 111 145 globNum 165 mat 1 crossSect 1
+Quad1PlaneStrain 95 nodes 4 111 112 146 145 globNum 166 mat 1 crossSect 1
+Quad1PlaneStrain 96 nodes 4 112 113 147 146 globNum 167 mat 1 crossSect 1
+Quad1PlaneStrain 97 nodes 4 113 114 148 147 globNum 168 mat 1 crossSect 1
+Quad1PlaneStrain 98 nodes 4 114 115 149 148 globNum 169 mat 1 crossSect 1
+Quad1PlaneStrain 99 nodes 4 115 116 150 149 globNum 170 mat 1 crossSect 1
+Quad1PlaneStrain 100 nodes 4 116 117 151 150 globNum 171 mat 1 crossSect 1
+Quad1PlaneStrain 101 nodes 4 117 118 152 151 globNum 172 mat 1 crossSect 1
+Quad1PlaneStrain 102 nodes 4 118 119 153 152 globNum 173 mat 1 crossSect 1
+Quad1PlaneStrain 103 nodes 4 119 120 154 153 globNum 174 mat 1 crossSect 1
+Quad1PlaneStrain 104 nodes 4 120 121 155 154 globNum 175 mat 1 crossSect 1
+Quad1PlaneStrain 105 nodes 4 121 122 156 155 globNum 176 mat 1 crossSect 1
+Quad1PlaneStrain 106 nodes 4 122 123 157 156 globNum 177 mat 1 crossSect 1
+Quad1PlaneStrain 107 nodes 4 123 124 158 157 globNum 178 mat 1 crossSect 1
+Quad1PlaneStrain 108 nodes 4 124 125 159 158 globNum 179 mat 1 crossSect 1
+Quad1PlaneStrain 109 nodes 4 125 126 160 159 globNum 180 mat 1 crossSect 1
+Quad1PlaneStrain 110 nodes 4 126 127 161 160 globNum 181 mat 1 crossSect 1
+Quad1PlaneStrain 111 nodes 4 127 128 162 161 globNum 182 mat 1 crossSect 1
+Quad1PlaneStrain 112 nodes 4 128 129 163 162 globNum 183 Remote partitions 1 1 mat 1 crossSect 1
+Quad1PlaneStrain 113 nodes 4 129 130 164 163 globNum 184 Remote partitions 1 1 mat 1 crossSect 1
+Quad1PlaneStrain 114 nodes 4 130 131 165 164 globNum 185 Remote partitions 1 1 mat 1 crossSect 1
+Quad1PlaneStrain 115 nodes 4 131 132 166 165 globNum 186 Remote partitions 1 1 mat 1 crossSect 1
+Quad1PlaneStrain 116 nodes 4 132 133 167 166 globNum 187 Remote partitions 1 1 mat 1 crossSect 1
+Quad1PlaneStrain 117 nodes 4 172 173 136 175 globNum 206 mat 1 crossSect 1
+Quad1PlaneStrain 118 nodes 4 136 137 174 175 globNum 207 mat 1 crossSect 1
+Quad1PlaneStrain 119 nodes 4 137 138 176 174 globNum 208 mat 1 crossSect 1
+Quad1PlaneStrain 120 nodes 4 138 139 177 176 globNum 209 mat 1 crossSect 1
+Quad1PlaneStrain 121 nodes 4 139 140 178 177 globNum 210 mat 1 crossSect 1
+Quad1PlaneStrain 122 nodes 4 140 141 179 178 globNum 211 mat 1 crossSect 1
+Quad1PlaneStrain 123 nodes 4 142 143 181 180 globNum 212 mat 1 crossSect 1
+Quad1PlaneStrain 124 nodes 4 143 144 182 181 globNum 213 mat 1 crossSect 1
+Quad1PlaneStrain 125 nodes 4 144 145 146 182 globNum 214 mat 1 crossSect 1
+Quad1PlaneStrain 126 nodes 4 146 147 183 182 globNum 215 mat 1 crossSect 1
+Quad1PlaneStrain 127 nodes 4 147 148 184 183 globNum 216 mat 1 crossSect 1
+Quad1PlaneStrain 128 nodes 4 148 149 185 184 globNum 217 mat 1 crossSect 1
+Quad1PlaneStrain 129 nodes 4 149 150 186 185 globNum 218 mat 1 crossSect 1
+Quad1PlaneStrain 130 nodes 4 150 151 187 186 globNum 219 mat 1 crossSect 1
+Quad1PlaneStrain 131 nodes 4 151 152 188 187 globNum 220 mat 1 crossSect 1
+Quad1PlaneStrain 132 nodes 4 152 153 189 188 globNum 221 mat 1 crossSect 1
+Quad1PlaneStrain 133 nodes 4 153 154 190 189 globNum 222 mat 1 crossSect 1
+Quad1PlaneStrain 134 nodes 4 154 155 191 190 globNum 223 mat 1 crossSect 1
+Quad1PlaneStrain 135 nodes 4 155 156 192 191 globNum 224 mat 1 crossSect 1
+Quad1PlaneStrain 136 nodes 4 156 157 193 192 globNum 225 mat 1 crossSect 1
+Quad1PlaneStrain 137 nodes 4 157 158 194 193 globNum 226 mat 1 crossSect 1
+Quad1PlaneStrain 138 nodes 4 158 159 195 194 globNum 227 mat 1 crossSect 1
+Quad1PlaneStrain 139 nodes 4 159 160 196 195 globNum 228 mat 1 crossSect 1
+Quad1PlaneStrain 140 nodes 4 160 161 197 196 globNum 229 mat 1 crossSect 1
+Quad1PlaneStrain 141 nodes 4 161 162 198 197 globNum 230 mat 1 crossSect 1
+Quad1PlaneStrain 142 nodes 4 162 163 199 198 globNum 231 Remote partitions 1 1 mat 1 crossSect 1
+Quad1PlaneStrain 143 nodes 4 163 164 200 199 globNum 232 Remote partitions 1 1 mat 1 crossSect 1
+Quad1PlaneStrain 144 nodes 4 164 165 201 200 globNum 233 Remote partitions 1 1 mat 1 crossSect 1
+Quad1PlaneStrain 145 nodes 4 165 166 202 201 globNum 234 Remote partitions 1 1 mat 1 crossSect 1
+Quad1PlaneStrain 146 nodes 4 166 167 203 202 globNum 235 Remote partitions 1 1 mat 1 crossSect 1
+Quad1PlaneStrain 147 nodes 4 168 169 205 204 globNum 251 Remote partitions 1 1 mat 1 crossSect 1
+Quad1PlaneStrain 148 nodes 4 169 171 206 205 globNum 252 Remote partitions 1 1 mat 1 crossSect 1
+Quad1PlaneStrain 149 nodes 4 171 170 207 206 globNum 253 Remote partitions 1 1 mat 1 crossSect 1
+Quad1PlaneStrain 150 nodes 4 173 172 208 209 globNum 254 mat 1 crossSect 1
+Quad1PlaneStrain 151 nodes 4 172 175 210 208 globNum 255 mat 1 crossSect 1
+Quad1PlaneStrain 152 nodes 4 175 174 211 210 globNum 256 mat 1 crossSect 1
+Quad1PlaneStrain 153 nodes 4 174 176 212 211 globNum 257 mat 1 crossSect 1
+Quad1PlaneStrain 154 nodes 4 176 177 213 212 globNum 258 mat 1 crossSect 1
+Quad1PlaneStrain 155 nodes 4 177 178 214 213 globNum 259 mat 1 crossSect 1
+Quad1PlaneStrain 156 nodes 4 178 179 216 214 globNum 260 mat 1 crossSect 1
+Quad1PlaneStrain 157 nodes 4 179 141 142 217 globNum 261 mat 1 crossSect 1
+Quad1PlaneStrain 158 nodes 4 217 142 180 218 globNum 262 mat 1 crossSect 1
+Quad1PlaneStrain 159 nodes 4 183 180 181 182 globNum 263 mat 1 crossSect 1
+Quad1PlaneStrain 160 nodes 4 184 218 180 183 globNum 264 mat 1 crossSect 1
+Quad1PlaneStrain 161 nodes 4 184 185 219 218 globNum 265 mat 1 crossSect 1
+Quad1PlaneStrain 162 nodes 4 185 186 220 219 globNum 266 mat 1 crossSect 1
+Quad1PlaneStrain 163 nodes 4 186 187 221 220 globNum 267 mat 1 crossSect 1
+Quad1PlaneStrain 164 nodes 4 187 188 222 221 globNum 268 mat 1 crossSect 1
+Quad1PlaneStrain 165 nodes 4 188 189 223 222 globNum 269 mat 1 crossSect 1
+Quad1PlaneStrain 166 nodes 4 189 190 224 223 globNum 270 mat 1 crossSect 1
+Quad1PlaneStrain 167 nodes 4 190 191 225 224 globNum 271 mat 1 crossSect 1
+Quad1PlaneStrain 168 nodes 4 191 192 226 225 globNum 272 mat 1 crossSect 1
+Quad1PlaneStrain 169 nodes 4 192 193 227 226 globNum 273 mat 1 crossSect 1
+Quad1PlaneStrain 170 nodes 4 193 194 228 227 globNum 274 mat 1 crossSect 1
+Quad1PlaneStrain 171 nodes 4 194 195 229 228 globNum 275 mat 1 crossSect 1
+Quad1PlaneStrain 172 nodes 4 195 196 230 229 globNum 276 mat 1 crossSect 1
+Quad1PlaneStrain 173 nodes 4 196 197 231 230 globNum 277 mat 1 crossSect 1
+Quad1PlaneStrain 174 nodes 4 197 198 232 231 globNum 278 mat 1 crossSect 1
+Quad1PlaneStrain 175 nodes 4 198 199 233 232 globNum 279 Remote partitions 1 1 mat 1 crossSect 1
+Quad1PlaneStrain 176 nodes 4 199 200 234 233 globNum 280 Remote partitions 1 1 mat 1 crossSect 1
+Quad1PlaneStrain 177 nodes 4 200 201 235 234 globNum 281 Remote partitions 1 1 mat 1 crossSect 1
+Quad1PlaneStrain 178 nodes 4 201 202 236 235 globNum 282 Remote partitions 1 1 mat 1 crossSect 1
+Quad1PlaneStrain 179 nodes 4 202 203 237 236 globNum 283 Remote partitions 1 1 mat 1 crossSect 1
+Quad1PlaneStrain 180 nodes 4 204 205 239 238 globNum 296 Remote partitions 1 1 mat 1 crossSect 1
+Quad1PlaneStrain 181 nodes 4 205 206 240 239 globNum 297 Remote partitions 1 1 mat 1 crossSect 1
+Quad1PlaneStrain 182 nodes 4 173 209 206 207 globNum 298 Remote partitions 1 1 mat 1 crossSect 1
+Quad1PlaneStrain 183 nodes 4 209 208 241 242 globNum 299 mat 1 crossSect 1
+Quad1PlaneStrain 184 nodes 4 208 210 243 241 globNum 300 mat 1 crossSect 1
+Quad1PlaneStrain 185 nodes 4 210 211 244 243 globNum 301 mat 1 crossSect 1
+Quad1PlaneStrain 186 nodes 4 211 212 245 244 globNum 302 mat 1 crossSect 1
+Quad1PlaneStrain 187 nodes 4 212 213 246 245 globNum 303 mat 1 crossSect 1
+Quad1PlaneStrain 188 nodes 4 213 214 247 251 globNum 304 mat 1 crossSect 1
+Quad1PlaneStrain 189 nodes 4 214 216 248 247 globNum 305 mat 1 crossSect 1
+Quad1PlaneStrain 190 nodes 4 216 215 249 248 globNum 306 mat 1 crossSect 1
+Quad1PlaneStrain 191 nodes 4 218 219 215 217 globNum 307 mat 1 crossSect 1
+Quad1PlaneStrain 192 nodes 4 220 221 248 249 globNum 308 mat 1 crossSect 1
+Quad1PlaneStrain 193 nodes 4 221 222 247 248 globNum 309 mat 1 crossSect 1
+Quad1PlaneStrain 194 nodes 4 223 224 250 251 globNum 310 mat 1 crossSect 1
+Quad1PlaneStrain 195 nodes 4 224 225 252 250 globNum 311 mat 1 crossSect 1
+Quad1PlaneStrain 196 nodes 4 225 226 253 252 globNum 312 mat 1 crossSect 1
+Quad1PlaneStrain 197 nodes 4 226 227 254 253 globNum 313 mat 1 crossSect 1
+Quad1PlaneStrain 198 nodes 4 227 228 255 254 globNum 314 mat 1 crossSect 1
+Quad1PlaneStrain 199 nodes 4 228 229 256 255 globNum 315 mat 1 crossSect 1
+Quad1PlaneStrain 200 nodes 4 256 229 230 279 globNum 316 mat 1 crossSect 1
+Quad1PlaneStrain 201 nodes 4 279 230 231 258 globNum 317 mat 1 crossSect 1
+Quad1PlaneStrain 202 nodes 4 231 232 259 258 globNum 318 mat 1 crossSect 1
+Quad1PlaneStrain 203 nodes 4 232 233 260 259 globNum 319 Remote partitions 1 1 mat 1 crossSect 1
+Quad1PlaneStrain 204 nodes 4 233 234 261 260 globNum 320 Remote partitions 1 1 mat 1 crossSect 1
+Quad1PlaneStrain 205 nodes 4 234 235 262 261 globNum 321 Remote partitions 1 1 mat 1 crossSect 1
+Quad1PlaneStrain 206 nodes 4 235 236 263 262 globNum 322 Remote partitions 1 1 mat 1 crossSect 1
+Quad1PlaneStrain 207 nodes 4 236 237 264 263 globNum 323 Remote partitions 1 1 mat 1 crossSect 1
+Quad1PlaneStrain 208 nodes 4 238 239 268 266 globNum 334 Remote partitions 1 1 mat 1 crossSect 1
+Quad1PlaneStrain 209 nodes 4 270 267 240 242 globNum 335 Remote partitions 1 1 mat 1 crossSect 1
+Quad1PlaneStrain 210 nodes 4 242 241 269 270 globNum 336 Remote partitions 1 1 mat 1 crossSect 1
+Quad1PlaneStrain 211 nodes 4 241 243 271 269 globNum 337 Remote partitions 1 1 mat 1 crossSect 1
+Quad1PlaneStrain 212 nodes 4 243 244 272 271 globNum 338 mat 1 crossSect 1
+Quad1PlaneStrain 213 nodes 4 244 245 273 272 globNum 339 mat 1 crossSect 1
+Quad1PlaneStrain 214 nodes 4 245 246 253 273 globNum 340 mat 1 crossSect 1
+Quad1PlaneStrain 215 nodes 4 246 213 251 250 globNum 341 mat 1 crossSect 1
+Quad1PlaneStrain 216 nodes 4 254 255 272 273 globNum 342 mat 1 crossSect 1
+Quad1PlaneStrain 217 nodes 4 274 257 258 259 globNum 343 mat 1 crossSect 1
+Quad1PlaneStrain 218 nodes 4 259 260 275 274 globNum 344 Remote partitions 1 1 mat 1 crossSect 1
+Quad1PlaneStrain 219 nodes 4 260 261 276 275 globNum 345 Remote partitions 1 1 mat 1 crossSect 1
+Quad1PlaneStrain 220 nodes 4 261 262 277 276 globNum 346 Remote partitions 1 1 mat 1 crossSect 1
+Quad1PlaneStrain 221 nodes 4 262 263 278 277 globNum 347 Remote partitions 1 1 mat 1 crossSect 1
+Quad1PlaneStrain 222 nodes 4 263 264 268 278 globNum 348 Remote partitions 1 1 mat 1 crossSect 1
+Quad1PlaneStrain 223 nodes 4 264 265 266 268 globNum 349 Remote partitions 1 1 mat 1 crossSect 1
+Quad1PlaneStrain 224 nodes 4 270 269 275 276 globNum 351 Remote partitions 1 1 mat 1 crossSect 1
+Quad1PlaneStrain 225 nodes 4 269 271 274 275 globNum 352 Remote partitions 1 1 mat 1 crossSect 1
+Quad1PlaneStrain 226 nodes 4 271 272 257 274 globNum 353 mat 1 crossSect 1
+Quad1PlaneStrain 227 nodes 4 134 135 207 170 globNum 354 Remote partitions 1 1 mat 1 crossSect 1
+Quad1PlaneStrain 228 nodes 4 223 251 247 222 globNum 356 mat 1 crossSect 1
+Quad1PlaneStrain 229 nodes 4 277 278 268 267 globNum 357 Remote partitions 1 1 mat 1 crossSect 1
+Quad1PlaneStrain 230 nodes 4 270 276 277 267 globNum 358 Remote partitions 1 1 mat 1 crossSect 1
+Quad1PlaneStrain 231 nodes 4 256 257 272 255 globNum 359 mat 1 crossSect 1
+Quad1PlaneStrain 232 nodes 4 209 242 240 206 globNum 361 Remote partitions 1 1 mat 1 crossSect 1
+Quad1PlaneStrain 233 nodes 4 246 250 252 253 globNum 362 mat 1 crossSect 1
+Quad1PlaneStrain 234 nodes 4 219 220 249 215 globNum 363 mat 1 crossSect 1
+Quad1PlaneStrain 235 nodes 4 179 217 215 216 globNum 366 mat 1 crossSect 1
+Quad1PlaneStrain 236 nodes 4 267 268 239 240 globNum 367 Remote partitions 1 1 mat 1 crossSect 1
+Quad1PlaneStrain 237 nodes 4 256 279 258 257 globNum 369 mat 1 crossSect 1
+Quad1PlaneStrain 238 nodes 4 135 136 173 207 globNum 371 Remote partitions 1 1 mat 1 crossSect 1
+Quad1PlaneStrain 239 nodes 4 1 47 280 18 globNum 372 mat 2 crossSect 2
+Quad1PlaneStrain 240 nodes 4 47 48 281 280 globNum 373 mat 2 crossSect 2
+Quad1PlaneStrain 241 nodes 4 48 3 49 281 globNum 374 mat 2 crossSect 2
+Quad1PlaneStrain 242 nodes 4 49 50 282 281 globNum 375 mat 2 crossSect 2
+Quad1PlaneStrain 243 nodes 4 50 51 283 282 globNum 376 mat 2 crossSect 2
+Quad1PlaneStrain 244 nodes 4 51 5 284 283 globNum 377 mat 2 crossSect 2
+Quad1PlaneStrain 245 nodes 4 5 4 52 284 globNum 378 boundaryLoads 2 2 1 mat 2 crossSect 2
+Quad1PlaneStrain 246 nodes 4 52 53 285 284 globNum 379 mat 2 crossSect 2
+Quad1PlaneStrain 247 nodes 4 53 2 21 285 globNum 380 mat 2 crossSect 2
+Quad1PlaneStrain 248 nodes 4 21 20 286 285 globNum 381 mat 2 crossSect 2
+Quad1PlaneStrain 249 nodes 4 20 19 287 286 globNum 382 mat 2 crossSect 2
+Quad1PlaneStrain 250 nodes 4 19 18 280 287 globNum 383 mat 2 crossSect 2
+Quad1PlaneStrain 251 nodes 4 280 281 282 287 globNum 384 mat 2 crossSect 2
+Quad1PlaneStrain 252 nodes 4 282 283 286 287 globNum 385 mat 2 crossSect 2
+Quad1PlaneStrain 253 nodes 4 283 284 285 286 globNum 386 mat 2 crossSect 2
+SimpleCS 1 thick 1.0 width 1.0
+SimpleCS 2 thick 1.0 width 1.0
+idmnl1 1 d 1.0 E 37.7e3 n 0.2 talpha 0.0 e0 6.75e-5 ef 3.0e-4 R 5.0 equivstraintype 1 regionMap 2 0 1
+IsoLE  2 d 1.0 E 300.e3 n 0.2 talpha 0.0
+##idmnl1 1 d 1.0 E 30.e3 n 0.18 talpha 0.0 e0 0.00011666666667 ef 0.0059953333333 R 5.0 equivstraintype 1 regionMap 2 0 1
+##IsoLE  2 d 1.0 E 210.e3 n 0.3 talpha 0.0
+BoundaryCondition 1 loadTimeFunction 1 prescribedvalue 0.0 
+ConstantEdgeLoad 2 loadTimeFunction 1 components 2 0 -1.0 loadType 3 ndofs 2
+ConstantFunction 1 f(t) 1.0
+#%BEGIN_CHECK% tolerance 1.e-5
+#LOADLEVEL tStep 29 value 110.856160
+#NODE  tStep 29 number 4 dof 2 unknown d value -1.08831150e-02
+#%END_CHECK%

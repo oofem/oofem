@@ -1,0 +1,25 @@
+bar.oofem.out.0
+1D test
+#
+# note this example cannot be processed by run_problem
+# because imperfection must be made in input file
+#
+nonlinearstatic nsteps 15 rtolv 0.0001 MaxIter 200 reqIterations 80 manrmsteps 10 stiffMode 1 controllmode 0 psi 0.0 renumber 0 hpcmode 1 hpc 2 2 1 stepLength 1.0 lstype 4 smtype 7
+domain 1dTruss
+OutputManager tstep_all dofman_all element_all
+ndofman 3 nelem 2 ncrosssect 1 nmat 2 nbc 2 nltf 2 nic 0
+node 1 coords 3 6.000000e+00 0.000000e+00 0.000000e+00 globNum 8 Shared partitions 1 3
+node 2 coords 3 7.000000e+00 0.000000e+00 0.000000e+00 globNum 9
+node 3 coords 3 8.000000e+00 0.000000e+00 0.000000e+00 globNum 10 Shared partitions 1 1
+truss1d 1 nodes 2 1 2 globNum 7 mat 1 crossSect 1
+truss1d 2 nodes 2 2 3 globNum 8 mat 1 crossSect 1
+SimpleCS 1 thick 1.0 width 1.0
+idm1 1 d 1.0  E 1.0  n 0.2  e0 1.0 ef 5.0 equivstraintype 1 talpha 0.0
+idm1 2 d 1.0  E 1.0  n 0.2  e0 0.97 ef 5.0 equivstraintype 1 talpha 0.0
+BoundaryCondition 1 loadTimeFunction 1 prescribedvalue 0.0
+NodalLoad 2 loadTimeFunction 1 components 1 1.0
+ConstantFunction 1 f(t) 1.0
+PiecewiseLinFunction 2 nPoints 2 t 2 0.0 1000.0 f(t) 2 1.0 1001.0
+
+#%BEGIN_CHECK% tolerance 1.e-5
+#%END_CHECK%

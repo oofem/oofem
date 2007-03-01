@@ -1,0 +1,112 @@
+###############################
+# brazilian splitting test 3D #
+###############################
+#
+# R = 40mm
+# B = 10mm
+# b =  3mm
+# L = 80mm
+
+# t3d -d 10
+
+vertex 1 xyz 0 0 0
+vertex 2 xyz 40 0 0
+vertex 1003 xyz 0 0 40 virtual
+
+curve 1 vertex 1 2
+curve 1002 vertex 2 1003 order 3 virtual
+polygon 1 xyz 40 0 40 weight 0.707106781186
+
+vertex 3 xyz 5 0 0 fixed curve 1
+vertex 4 xyz 5 0 39.68626967 fixed curve 1002
+vertex 5 xyz 0 0 39.68626967
+
+curve 2 vertex 2 4 fixed curve 1002
+curve 3 vertex 4 5
+curve 4 vertex 5 1
+
+surface 1 curve 1 4 3 2
+
+vertex 6 xyz 5 0 42.68626967
+vertex 7 xyz 0 0 42.68626967
+
+curve 5 vertex 4 6
+curve 6 vertex 6 7
+curve 7 vertex 7 5
+
+vertex 8 xyz 1 0 42.68626967 fixed curve 6
+
+curve 8 vertex 6 8 fixed curve 6
+curve 9 vertex 8 7 fixed curve 6
+
+surface 2 curve 3 7 6 5
+
+
+vertex 11 xyz 0 80 0
+vertex 12 xyz 40 80 0
+vertex 1013 xyz 0 80 40 virtual
+
+curve 11 vertex 11 12
+curve 1012 vertex 12 1013 order 3 virtual
+polygon 1 xyz 40 80 40 weight 0.707106781186
+
+vertex 13 xyz 5 80 0 fixed curve 11
+vertex 14 xyz 5 80 39.68626967 fixed curve 1012
+vertex 15 xyz 0 80 39.68626967
+
+curve 12 vertex 12 14 fixed curve 1012
+curve 13 vertex 14 15
+curve 14 vertex 15 11
+
+surface 11 curve 11 14 13 12
+
+vertex 16 xyz 5 80 42.68626967
+vertex 17 xyz 0 80 42.68626967
+
+curve 15 vertex 14 16
+curve 16 vertex 16 17
+curve 17 vertex 17 15
+
+vertex 18 xyz 1 80 42.68626967 fixed curve 16
+
+curve 18 vertex 16 18 fixed curve 16
+curve 19 vertex 18 17 fixed curve 16
+
+surface 12 curve 13 17 16 15
+
+
+curve 21 vertex 1 11
+curve 22 vertex 2 12
+curve 24 vertex 4 14
+curve 25 vertex 5 15
+curve 26 vertex 6 16
+curve 27 vertex 7 17
+curve 28 vertex 8 18
+
+surface 21 curve 1 21 11 22
+surface 22 curve 2 22 12 24
+surface 23 curve 3 24 13 25
+surface 24 curve 4 25 14 21
+
+region 1 boundary surface 1 -11 -21 -22 -23 -24 size def
+
+surface 25 curve 5 24 15 26
+surface 27 curve 7 27 17 25
+surface 28 curve 8 26 18 28
+surface 29 curve 9 28 19 27
+
+region 2 boundary surface 2 -12 23 -25 -27 -28 -29 size def
+
+
+vertex 123001 fixed vertex 1 virtual size def * 0.25
+vertex 123011 fixed vertex 11 virtual size def * 0.25
+vertex 123005 fixed vertex 5 virtual size def * 0.25
+vertex 123015 fixed vertex 15 virtual size def * 0.25
+
+curve 123001 vertex 123001 123011 virtual
+curve 123002 vertex 123011 123015 virtual
+curve 123003 vertex 123015 123005 virtual
+curve 123004 vertex 123005 123001 virtual
+
+surface 123001 curve 123001 123004 123003 123002 virtual
+

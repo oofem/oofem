@@ -1,0 +1,11 @@
+###################
+# truss1d example #
+###################
+
+# t3d -d 1.0
+
+vertex 1 xyz 0 0 0
+vertex 2 xyz 11 0 0
+
+curve 1 vertex 1 2
+

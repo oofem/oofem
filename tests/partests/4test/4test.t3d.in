@@ -1,0 +1,32 @@
+
+# t3d -d 1.0
+
+vertex 1 xyz 0 0 0
+vertex 2 xyz 5 0 0
+vertex 3 xyz 10 0 0
+vertex 4 xyz 0 1 0
+vertex 5 xyz 5 1 0
+vertex 6 xyz 10 1 0
+vertex 7 xyz 0 2 0
+vertex 8 xyz 5 2 0
+vertex 9 xyz 10 2 0
+
+curve 1 vertex 1 2 count 2
+curve 2 vertex 2 3 count 2
+curve 3 vertex 3 6 count 1
+curve 4 vertex 6 9 count 1
+curve 5 vertex 9 8
+curve 6 vertex 8 7
+curve 7 vertex 7 4
+curve 8 vertex 4 1
+curve 9 vertex 2 5
+curve 10 vertex 5 8
+curve 11 vertex 4 5
+curve 12 vertex 5 6
+
+patch 1 normal 0 0 1 boundary curve 1 9 -11 8 quad map yes
+patch 2 normal 0 0 1 boundary curve 2 3 -12 -9 quad map yes 
+patch 3 normal 0 0 1 boundary curve 12 4 5 -10 quad map yes
+patch 4 normal 0 0 1 boundary curve 11 10 6 7 quad map yes
+
+

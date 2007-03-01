@@ -1,0 +1,34 @@
+echo OOFEM Test result file  >result
+echo ################################################## >>result
+echo started `date`         >>result
+echo                        >>result
+# determine oofem version to use
+if [ -f ../bin/Debug/oofem ]
+then 
+OOFEM=../bin/Debug/oofem
+elif [ -f  ../bin/Release/oofem ]
+then
+OOFEM=../bin/Release/oofem
+else
+echo "oofem executable not found" >> result
+fi
+echo "using $OOFEM" >> result
+echo                        >>result
+
+for module in sm tm fm
+do
+  echo Running tests for module $module >>result
+  cd $module; ln -s ../$OOFEM ./oofem; for i in *.in
+  do
+    echo
+    echo $i
+    echo
+    ./oofem -f $i -l 2
+    ../../tools/checker -f $i    >>../result
+    rm ${i%.in}.out
+  done
+  rm ./oofem
+  cd ..
+done
+
+echo finished `date`        >>result

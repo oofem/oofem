@@ -1,0 +1,83 @@
+/* $Header: /home/cvs/bp/oofem/oofemlib/src/boundary.C,v 1.8.4.1 2004/04/05 15:19:43 bp Exp $ */
+/*
+
+                   *****    *****   ******  ******  ***   ***                            
+                 **   **  **   **  **      **      ** *** **                             
+                **   **  **   **  ****    ****    **  *  **                              
+               **   **  **   **  **      **      **     **                               
+              **   **  **   **  **      **      **     **                                
+              *****    *****   **      ******  **     **         
+            
+                                                                   
+               OOFEM : Object Oriented Finite Element Code                 
+                    
+                 Copyright (C) 1993 - 2000   Borek Patzak                                       
+
+
+
+         Czech Technical University, Faculty of Civil Engineering,
+     Department of Structural Mechanics, 166 29 Prague, Czech Republic
+                                                                               
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.                                                                              
+*/
+
+//
+//   file BOUNDARY.C
+//
+
+ 
+#include "tractionpressurebc.h"
+#include "timestep.h"
+#include "loadtime.h"
+#include "verbose.h"
+#include "cltypes.h"
+
+double  TractionPressureBC :: give (Dof* dof, ValueModeType mode, TimeStep* stepN)
+   // Returns the value at stepN of the prescribed value of the kinematic 
+   // unknown 'u'. Returns 0 if 'u' has no prescribed value.
+{
+  double value = this->domain->giveEngngModel()->giveUnknownComponent (PrescribedTractionPressure, VM_Total, stepN, domain, dof);
+  return value;
+}
+
+IRResultType 
+TractionPressureBC::initializeFrom (InputRecord* ir)
+// Sets up the dictionary where the receiver stores the conditions it
+// imposes.
+{
+ const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
+ IRResultType result;                   // Required by IR_GIVE_FIELD macro
+
+ GeneralBoundaryCondition::initializeFrom(ir);
+
+ isImposedTimeFunction = 0;
+ IR_GIVE_OPTIONAL_FIELD (ir, isImposedTimeFunction, IFT_BoundaryCondition_IsImposedTimeFunct, "isimposedtimefunction"); // Macro
+
+ return IRRT_OK;
+
+}
+
+int
+TractionPressureBC::giveInputRecordString(std::string &str, bool keyword)
+{
+ char buff[1024];
+
+ GeneralBoundaryCondition::giveInputRecordString(str, keyword);
+ sprintf(buff, " isimposedtimefunction %d ", this -> isImposedTimeFunction);
+ str += buff;
+
+ return 1;
+}
+

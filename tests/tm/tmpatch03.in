@@ -1,0 +1,34 @@
+tmpatch03.out
+Patch test of Quad1_ht elements 
+StationaryProblem nsteps 1
+domain HeatTransfer
+OutputManager tstep_all dofman_all element_all
+ndofman 10 nelem 4 ncrosssect  1 nmat 1 nbc 2 nic 0 nltf 1
+node 1 coords 3  0.0   0.0   0.0  bc 1 1
+node 2 coords 3  2.0   0.0   0.0  bc 1 1
+node 3 coords 3  0.0   1.0   0.0  bc 1 0
+node 4 coords 3  2.0   1.0   0.0  bc 1 0
+node 5 coords 3  0.0   6.0   0.0  bc 1 0
+node 6 coords 3  2.0   9.0   0.0  bc 1 0
+node 7 coords 3  0.0   10.0   0.0  bc 1 0
+node 8 coords 3  2.0   10.0   0.0  bc 1 0
+node 9 coords 3  0.0   15.0   0.0  bc 1 2
+node 10 coords 3  2.0  15.0   0.0  bc 1 2
+quad1ht 1 nodes 4 1 3 4 2  crossSect 1 mat 1 NIP 1
+quad1ht 2 nodes 4 3 5 6 4  crossSect 1 mat 1 NIP 1
+quad1ht 3 nodes 4 5 7 8 6  crossSect 1 mat 1 NIP 1
+quad1ht 4 nodes 4 7 9 10 8  crossSect 1 mat 1 NIP 1
+SimpleCS 1 thick 0.15 width 1.0
+IsoHeat 1 d 0. k 1.0 c 1.0
+BoundaryCondition  1 loadTimeFunction 1 prescribedvalue 0.0 
+BoundaryCondition  2 loadTimeFunction 1 prescribedvalue 15.0 
+ConstantFunction 1 f(t) 1.0
+
+#%BEGIN_CHECK%
+#NODE tStep 1 number 3 dof 1 unknown f value 1.
+#NODE tStep 1 number 4 dof 1 unknown f value 1.
+#NODE tStep 1 number 5 dof 1 unknown f value 6.
+#NODE tStep 1 number 6 dof 1 unknown f value 9.
+#NODE tStep 1 number 7 dof 1 unknown f value 10.
+#NODE tStep 1 number 8 dof 1 unknown f value 10.
+#%END_CHECK%

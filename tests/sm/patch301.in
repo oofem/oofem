@@ -1,0 +1,86 @@
+patch301.out
+compression patch test of LTRSpace elements
+LinearStatic nsteps 1
+domain 3d
+OutputManager tstep_all dofman_all element_all
+ndofman 6 nelem 3 ncrosssect  1 nmat 1 nbc 2 nic 0 nltf 1
+node 1 coords 3 0. 0. 0. bc 3 1 1 1
+node 2 coords 3 3. 0. 0. bc 3 1 1 1
+node 3 coords 3 0. 3. 0. bc 3 1 1 1
+node 4 coords 3 0. 0. 6. bc 3 1 1 0 
+node 5 coords 3 3. 0. 6. bc 3 1 1 0 
+node 6 coords 3 0. 3. 6. bc 3 1 1 0 
+LTRSpace  1 nodes 4 1 2 3 4 crossSect 1 mat 1 NIP 1
+LTRSpace  2 nodes 4 4 5 2 3 crossSect 1 mat 1 NIP 1
+LTRSpace  3 nodes 4 4 6 5 3 crossSect 1 mat 1 NIP 1 boundaryLoads 2 2 1
+SimpleCS 1 thick 0.5 width 1.0 
+IsoLE 1 d 0.0 E 15.0 n 0.25 tAlpha 0.000012
+BoundaryCondition 1 loadTimeFunction 1 prescribedvalue 0.0
+constantsurfaceload 2 loadtimefunction 1 ndofs 3 components 3 0.0 0.0 -1.0
+#NodalLoad 1 loadTimeFunction 1 Components 3 0.0 0.0 -1.5
+ConstantFunction 1 f(t) 1.0
+#
+#
+#
+#%BEGIN_CHECK% tolerance 1.e-5
+##
+## Note: this is the exact solution
+##
+## check reactions 
+#REACTION tStep 1 comNumber 1 dof 3 value 1.5
+#REACTION tStep 1 comNumber 2 dof 3 value 1.5
+#REACTION tStep 1 comNumber 3 dof 3 value 1.5
+## check all nodes
+#NODE tStep 1 number 4 dof 1 unknown d value 0.0
+#NODE tStep 1 number 4 dof 2 unknown d value 0.0
+#NODE tStep 1 number 4 dof 3 unknown d value -0.333333333
+#NODE tStep 1 number 5 dof 1 unknown d value 0.0
+#NODE tStep 1 number 5 dof 2 unknown d value 0.0
+#NODE tStep 1 number 5 dof 3 unknown d value -0.333333333
+#NODE tStep 1 number 6 dof 1 unknown d value 0.0
+#NODE tStep 1 number 6 dof 2 unknown d value 0.0
+#NODE tStep 1 number 6 dof 3 unknown d value -0.333333333
+## check element's stress & strain vectors
+#ELEMENT tStep 1 number 1 gp 1 record 0 component 1  value 0.0
+#ELEMENT tStep 1 number 1 gp 1 record 0 component 2  value 0.0
+#ELEMENT tStep 1 number 1 gp 1 record 0 component 3  value -0.05555555
+#ELEMENT tStep 1 number 1 gp 1 record 0 component 4  value 0.0
+#ELEMENT tStep 1 number 1 gp 1 record 0 component 5  value 0.0
+#ELEMENT tStep 1 number 1 gp 1 record 0 component 6  value 0.0
+##
+#ELEMENT tStep 1 number 1 gp 1 record 1 component 1  value -0.33333333
+#ELEMENT tStep 1 number 1 gp 1 record 1 component 2  value -0.33333333
+#ELEMENT tStep 1 number 1 gp 1 record 1 component 3  value -1.0
+#ELEMENT tStep 1 number 1 gp 1 record 1 component 4  value 0.0
+#ELEMENT tStep 1 number 1 gp 1 record 1 component 5  value 0.0
+#ELEMENT tStep 1 number 1 gp 1 record 1 component 6  value 0.0
+##
+#ELEMENT tStep 1 number 2 gp 1 record 0 component 1  value 0.0
+#ELEMENT tStep 1 number 2 gp 1 record 0 component 2  value 0.0
+#ELEMENT tStep 1 number 2 gp 1 record 0 component 3  value -0.05555555
+#ELEMENT tStep 1 number 2 gp 1 record 0 component 4  value 0.0
+#ELEMENT tStep 1 number 2 gp 1 record 0 component 5  value 0.0
+#ELEMENT tStep 1 number 2 gp 1 record 0 component 6  value 0.0
+##
+#ELEMENT tStep 1 number 2 gp 1 record 1 component 1  value -0.33333333
+#ELEMENT tStep 1 number 2 gp 1 record 1 component 2  value -0.33333333
+#ELEMENT tStep 1 number 2 gp 1 record 1 component 3  value -1.0
+#ELEMENT tStep 1 number 2 gp 1 record 1 component 4  value 0.0
+#ELEMENT tStep 1 number 2 gp 1 record 1 component 5  value 0.0
+#ELEMENT tStep 1 number 2 gp 1 record 1 component 6  value 0.0
+##
+#ELEMENT tStep 1 number 3 gp 1 record 0 component 1  value 0.0
+#ELEMENT tStep 1 number 3 gp 1 record 0 component 2  value 0.0
+#ELEMENT tStep 1 number 3 gp 1 record 0 component 3  value -0.05555555
+#ELEMENT tStep 1 number 3 gp 1 record 0 component 4  value 0.0
+#ELEMENT tStep 1 number 3 gp 1 record 0 component 5  value 0.0
+#ELEMENT tStep 1 number 3 gp 1 record 0 component 6  value 0.0
+##
+#ELEMENT tStep 1 number 3 gp 1 record 1 component 1  value -0.33333333
+#ELEMENT tStep 1 number 3 gp 1 record 1 component 2  value -0.33333333
+#ELEMENT tStep 1 number 3 gp 1 record 1 component 3  value -1.0
+#ELEMENT tStep 1 number 3 gp 1 record 1 component 4  value 0.0
+#ELEMENT tStep 1 number 3 gp 1 record 1 component 5  value 0.0
+#ELEMENT tStep 1 number 3 gp 1 record 1 component 6  value 0.0
+##
+#%END_CHECK%

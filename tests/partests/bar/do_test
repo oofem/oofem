@@ -1,0 +1,35 @@
+# determine oofem version to use
+if [ -f ../../../bin/Debug/oofem ]
+then
+OOFEM=../../../bin/Debug/oofem
+elif [ -f  ../../../bin/Release/oofem ]
+then  
+OOFEM=../../../bin/Release/oofem
+else
+echo "oofem executable not found" >> ../result
+fi
+
+# determine poofem version to use
+if [ -f ../../../bin/Debug/poofem ]
+then
+POOFEM=../../../bin/Debug/poofem
+elif [ -f  ../../../bin/Release/poofem ]
+then  
+POOFEM=../../../bin/Release/poofem
+else
+echo "poofem executable not found" >> ../result
+fi
+
+ln -s $OOFEM  ./oofem
+ln -s $POOFEM ./poofem
+
+./oofem -f bar.oofem.in -ksp_rtol 1.e-15
+../../../tools/checker -f bar.oofem.in >> ../result
+mpirun -np 4 ./poofem -f bar.oofem.in -ksp_rtol 1.e-15
+for i in *.in??; do ../../../tools/checker -f $i; done >> ../result
+
+rm *.oofem.out
+rm *.oofem.out.*
+
+rm oofem
+rm poofem
