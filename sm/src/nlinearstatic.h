@@ -172,8 +172,8 @@ TASK:
   IRResultType initializeFrom (InputRecord* ir);
   TimeStep* giveNextStep ();
   NumericalMethod* giveNumericalMethod (TimeStep*);
-  contextIOResultType saveContext (FILE* stream, void *obj = NULL) ;
-  contextIOResultType restoreContext (FILE* stream, void *obj = NULL);
+  contextIOResultType saveContext (DataStream* stream, ContextMode mode, void *obj = NULL) ;
+  contextIOResultType restoreContext (DataStream* stream, ContextMode mode, void *obj = NULL);
 
   /**
      Assembles characteristic vector of required type into given vector.
