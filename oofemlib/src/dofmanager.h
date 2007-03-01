@@ -51,7 +51,7 @@
 #endif
 
 #ifdef __PARALLEL_MODE
-#include "combuff.h"
+class CommunicationBuffer;
 /**
  In parallel mode, this type indicates the mode of DofManager.
  <UL>
@@ -123,6 +123,8 @@ protected:
   /** Indicates if dofManager is boundary (true boundary or on boundary between regions) or interior.
   This information is required by some recovery technigues. */
  bool         isBoundaryFlag;
+ /// flag indicating whether receiver has slave dofs
+ bool hasSlaveDofs;
 #ifdef __PARALLEL_MODE
 /**
  In parallel mode, globalNumber contains globally unique DoFManager number.
@@ -156,8 +158,14 @@ public:
   @see DofManager::findDofWithDofId
   */
  Dof*         giveDof (int i) const;
+ /// Returns DOF with given dofID; issues error if not present
+ Dof* giveDofWithID (int dofID) const; // termitovo
   /** Returns total number of dofs managed by receiver */
  int          giveNumberOfDofs () const;
+ /** Returns the number of primary dofs on which receiver dofs (given in dofArray) depend on.
+     If receiver has only prinary dofs, the answer is the size of dofArray.
+ */
+ int giveNumberOfPrimaryMasterDofs (IntArray& dofArray) const;
  //virtual int          giveNumberOfDofs () const;
   /** Returns location array (array containing for each requested dof related equation number)
   of receiver. Equation number of dof with active boundary condition is zero.
@@ -289,10 +297,8 @@ public:
   identifying physical meaning of particular DOF, see cltypes.h) for which transfromation mtrx is
   assembled. if dofIDArry is NULL, then all receiver dofs are assumed.
   */
-  virtual void computeDofTransformation (FloatMatrix& answer, const IntArray* dofIDArry, DofManTrasfType mode)
-  {_error ("computeDofTransformation: method is not implemented");}
-  virtual void computeLoadTransformation (FloatMatrix& answer, const IntArray* dofIDArry, DofManTrasfType mode)
-  {_error ("computeLoadTransformation: method is not implemented");}
+   virtual void computeDofTransformation (FloatMatrix& answer, const IntArray* dofIDArry, DofManTrasfType mode);
+   virtual void computeLoadTransformation (FloatMatrix& answer, const IntArray* dofIDArry, DofManTrasfType mode);
   /**
   Indicates, whether dofManager requires the transformation from global c.s. to 
   dof manager specific coordinate system.
@@ -321,7 +327,7 @@ public:
  // miscellaneous
   bool         isBoundary () {return isBoundaryFlag;}
   /// Returns true if receiver contains slave dofs
- virtual int  hasSlaveDofs ();
+ virtual int  hasAnySlaveDofs ();
  /**
   Returns a newly allocated DofManager, with type depending on parameter.
   Creates new object for following classes Node, ElementSide, RigidArmNode otherwise
@@ -345,12 +351,22 @@ public:
   Stores receiver state to output stream. 
   @exception throws an ContextIOERR exception if error encountered
   */
- virtual contextIOResultType    saveContext (FILE* stream, void *obj = NULL);
+ virtual contextIOResultType    saveContext (DataStream* stream, ContextMode mode, void *obj = NULL);
  /**
   Restores the receiver state previously written in stream.
   @exception throws an ContextIOERR exception if error encountered
   */
- virtual contextIOResultType    restoreContext(FILE* stream, void *obj = NULL);
+ virtual contextIOResultType    restoreContext(DataStream* stream, ContextMode mode, void *obj = NULL);
+
+ /// Returns true if dof of given type is allowed to be associated to receiver
+ virtual bool isDofTypeCompatible (dofType type) const {return false;}
+ /**
+    Checks internal data consistency in node. 
+    Current implementation checks (when receiver has slave dofs) if receiver has the same 
+    coordinate system as master dofManager of slave dof.
+    @return nonzero if receiver check is o.k.
+ */
+ virtual int    checkConsistency () ;
 
 #ifdef __OOFEG
  virtual void   drawYourself (oofegGraphicContext& context) {}
@@ -360,10 +376,14 @@ public:
   Returns receiver globally unique number.
   */
   int giveGlobalNumber () const {return globalNumber;}
+  /** sets receiver global number */
+  void setGlobalNumber (int _number) {globalNumber = _number;}
   /**
   Return dofManagerParallelMode of receiver. Defined for __Parallel_Mode only.
   */
   dofManagerParallelMode giveParallelMode  () const {return parallel_mode;}
+  /** Sets parallel mode of receiver */
+  void setParallelMode (dofManagerParallelMode _mode) {parallel_mode = _mode;}
   /**
   Packs specific  DOF Manager's dofs unknowns into communication buffer. 
   @param buff communication buffer to pack data.
@@ -385,16 +405,24 @@ public:
   Returns partition list of receiver.
   @return partition array.
   */
-  const IntArray* givePartitionList () const  {return &partitions;}
+  IntArray* givePartitionList ()  {return &partitions;}
+  /** Sets receiver's partition list */
+  void setPartitionList (IntArray& _p) {partitions = _p;}
   /** 
       Returns number of partitions sharing given receiver (=number of shared partitions + local one)
   */
   const int givePartitionsConnectivitySize () {return partitions.giveSize()+1;}
+  /// Returns true if receiver is locally maintained
+  bool isLocal ();
+  /// Returns true if receiver is shared
+  bool isShared() {if (parallel_mode == DofManager_shared) return true; else return false;}
 
 #endif
 protected:
  virtual IRResultType resolveDofIDArray (InputRecord* ir, IntArray& dofIDArry);
-
+ void computeSlaveLoadTransformation (FloatMatrix& answer, const IntArray* dofMask, DofManTrasfType mode);
+ void computeSlaveDofTransformation (FloatMatrix& answer, const IntArray* dofMask, DofManTrasfType mode);
+ IntArray* giveCompleteGlobalDofIDArray (void) const; 
 
 } ;
 

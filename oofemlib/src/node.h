@@ -143,6 +143,9 @@ public:
   base vector of global c.s.
   */
  FloatMatrix* giveLocalCoordinateTriplet () {return localCoordinateSystem;}
+ /** Returns true, if the local coordinate systems of receiver and given node are the same */
+ bool hasSameLCS (Node* remote);
+
   /** Computes receiver DOF transformation matrix from global cs. to dofManager specific
   coordinate system - if mode == _toNodalCS, otherwise reverse transformation is computed.
   (In the dofManager specifis cs the governing equations are assembled, for example the
@@ -178,7 +181,7 @@ public:
   dof manager specific coordinate system.
   @return nonzero if transformation is necessary, even for single dof.
   */
-  int requiresTransformation () {return this->hasLocalCS();}
+  int requiresTransformation () {return (this->hasLocalCS() || hasSlaveDofs);}
   /** Computes the load vector of receiver in given time.
       @param answer load vector.
       @param stepN time step when answer is computed.
@@ -221,6 +224,21 @@ public:
   @return nonzero if receiver check is o.k.
   */
   virtual int    checkConsistency () ;
+  /// Returns true if dof of given type is allowed to be associated to receiver
+  virtual bool isDofTypeCompatible (dofType type) const {return (type == DT_master || type == DT_simpleSlave);}
+
+  /** 
+   Stores receiver state to output stream.  
+   @exception throws an ContextIOERR exception if error encountered.
+   */
+   contextIOResultType    saveContext (DataStream* stream, ContextMode mode, void *obj = NULL);
+  /**
+   Restores the receiver state previously written in stream.
+   @exception throws an ContextIOERR exception if error encountered.
+   */
+   contextIOResultType    restoreContext(DataStream* stream, ContextMode mode, void *obj = NULL);
+
+
 #ifdef __OOFEG
  void         drawYourself (oofegGraphicContext& );
 #endif

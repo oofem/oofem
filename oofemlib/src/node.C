@@ -44,6 +44,7 @@
 #include "node.h"
 #include "dof.h"
 #include "slavedof.h"
+#include "simpleslavedof.h"
 #include "nodload.h"
 #include "timestep.h"
 
@@ -52,6 +53,7 @@
 #include "intarray.h"
 #include "debug.h"
 #include "verbose.h"
+#include "datastream.h"
 #ifndef __MAKEDEPEND
 #include <math.h>
 #include <stdlib.h>
@@ -112,6 +114,7 @@ Node :: initializeFrom (InputRecord* ir)
    this->coordinates.times (1./lscale);
  }
 
+ 
  // Read if available local coordinate system in this node
  triplets.resize(0);
  IR_GIVE_OPTIONAL_FIELD (ir, triplets, IFT_Node_lcs, "lcs"); // Macro
@@ -187,6 +190,16 @@ Node :: computeLoadVectorAt (FloatArray& answer, TimeStep* stepN, ValueModeType 
       //delete contribution ;
     }
   }
+  
+  // transform "local dofs" to master dofs
+  if (hasSlaveDofs && answer.isNotEmpty ()) {
+    FloatMatrix masterTransf;
+    
+    // assemble transformation contributions from local dofs
+    computeLoadTransformation (masterTransf, NULL, _toNodalCS);
+    answer.rotatedWith (masterTransf,'n');
+  }
+  
   return ;
   
 }
@@ -299,7 +312,7 @@ Node::checkConsistency () {
  result = result && DofManager::checkConsistency();
 
  for (i=1; i<=ndofs; i++) 
-  if (this->giveDof (i)->giveClassID() == SlaveDofClass) nslaves ++;
+  if (this->giveDof (i)->giveClassID() == SimpleSlaveDofClass) nslaves ++;
 
  if (nslaves == 0) return result;  // return o.k. if no slaves exists
  
@@ -310,58 +323,64 @@ Node::checkConsistency () {
  Node* masterNode;
 
  for (i=1; i<=ndofs; i++) {
-  if ((idof = this->giveDof (i))->giveClassID() == SlaveDofClass) {
-   alreadyFound  = 0;
-   master = ((SlaveDof*) idof)->giveMasterDofManagerNum();
-   for (j=1; j<= numberOfMDM; j++) 
-    if (masterDofManagers.at(j) == master) {
-     alreadyFound = 1;
-     break;
-    }
-   if (alreadyFound == 0) {
-    // check master for same coordinate system
-    // first mark master as checked
-    numberOfMDM ++;
-    masterDofManagers.at(numberOfMDM) = master;
-    // compare coordinate systems
-    masterNode = dynamic_cast<Node*>(domain->giveDofManager(master));
-    if (masterNode) {
-
-     FloatMatrix *thisLcs, *masterLcs;
-     thisLcs = this->giveLocalCoordinateTriplet();
-     masterLcs = masterNode->giveLocalCoordinateTriplet();
-     int k,l;
-
-     if ((this->hasLocalCS()) && (masterNode->hasLocalCS())) {
-      for (k=1; k<=3; k++)
-       for (l=1; l<=3; l++)
-        if (fabs(thisLcs->at(k,l)-masterLcs->at(k,l)) > 1.e-4) {
+   if ((idof = this->giveDof (i))->giveClassID() == SimpleSlaveDofClass) {
+     alreadyFound  = 0;
+     master = ((SimpleSlaveDof*) idof)->giveMasterDofManagerNum();
+     for (j=1; j<= numberOfMDM; j++) 
+       if (masterDofManagers.at(j) == master) {
+         alreadyFound = 1;
+         break;
+       }
+     if (alreadyFound == 0) {
+       // check master for same coordinate system
+       // first mark master as checked
+       numberOfMDM ++;
+       masterDofManagers.at(numberOfMDM) = master;
+       // compare coordinate systems
+       masterNode = dynamic_cast<Node*>(domain->giveDofManager(master));
+       if (!masterNode) {
+         _warning2 ("checkConsistency: master dofManager is not compatible", 1);
+         result = 0;
+       }
+       else if (!this->hasSameLCS (masterNode)) {
          _warning2 ("checkConsistency: different lcs for master/slave nodes", 1);
-         return 0;
-        }
-     } else if (this->hasLocalCS()) {
-      for (k=1; k<=3; k++)
-       for (l=1; l<=3; l++)
-        if (fabs(thisLcs->at(k,l)-(k==l)) > 1.e-4) {
-         _warning2 ("checkConsistency: different lcs for master/slave nodes", 1);
-         return 0;
-        }
-     } else if (masterNode->hasLocalCS()) {
-      for (k=1; k<=3; k++)
-       for (l=1; l<=3; l++)
-        if (fabs(masterLcs->at(k,l)-(k==l)) > 1.e-4) {
-         _warning2 ("checkConsistency: different lcs for master/slave nodes", 1);
-         return 0;
-        }
+         result = 0;
+       }
      }
-    } else {
-     _warning2 ("checkConsistency: master dofManager is not compatible", 1);
-     return 0;
-    }
    }
-  }
  }
  return result;
+}
+
+
+bool
+Node :: hasSameLCS (Node* remote) 
+{
+  FloatMatrix *thisLcs, *masterLcs;
+  thisLcs = this->giveLocalCoordinateTriplet();
+  masterLcs = remote->giveLocalCoordinateTriplet();
+  int k,l;
+  
+  if ((this->hasLocalCS()) && (remote->hasLocalCS())) {
+    for (k=1; k<=3; k++)
+      for (l=1; l<=3; l++)
+        if (fabs(thisLcs->at(k,l)-masterLcs->at(k,l)) > 1.e-4) {
+          return false;
+        }
+  } else if (this->hasLocalCS()) {
+    for (k=1; k<=3; k++)
+      for (l=1; l<=3; l++)
+        if (fabs(thisLcs->at(k,l)-(k==l)) > 1.e-4) {
+          return false;
+        }
+  } else if (remote->hasLocalCS()) {
+    for (k=1; k<=3; k++)
+      for (l=1; l<=3; l++)
+        if (fabs(masterLcs->at(k,l)-(k==l)) > 1.e-4) {
+          return false;
+        }
+  }
+  return true;
 }
 
 
@@ -373,32 +392,76 @@ Node::computeDofTransformation (FloatMatrix& answer, const IntArray* dofIDArry, 
  // as well as further necessary transformations (for example in case 
  // rigid arms this must include transformation to master dofs).
 
- this->computeGNDofTransformation (answer, dofIDArry);
- if (mode == _toGlobalCS) {
-  FloatMatrix answert;
-  answert.beTranspositionOf (answer);
-  answer = answert;
- }
+  if (!hasSlaveDofs && !hasLocalCS()) {
+    int _size = (dofIDArry == NULL) ? numberOfDofs : dofIDArry->giveSize();
+    answer.resize (_size, _size);
+    answer.beUnitMatrix ();
+    return;
+  }
+  
+  if (hasSlaveDofs)
+    this->computeSlaveDofTransformation (answer, dofIDArry, mode);
+  
+  if (hasLocalCS()) {
+    FloatMatrix GNTransf;
+    this->computeGNDofTransformation (GNTransf, dofIDArry);
+    
+    if (mode == _toGlobalCS)
+      if (hasSlaveDofs) answer.beTProductOf (GNTransf, *answer.GiveCopy());
+      else             answer.beTranspositionOf (GNTransf);
+    else
+      if (hasSlaveDofs) answer.beProductOf (*answer.GiveCopy(), GNTransf);
+      else             answer = GNTransf;
+  }
 }
 
 void
-Node::computeLoadTransformation (FloatMatrix& answer, const IntArray* dofIDArry, DofManTrasfType mode)
+Node::computeLoadTransformation (FloatMatrix& answer, const IntArray* dofMask, DofManTrasfType mode)
 {
  // computes trasformation matrix of receiver.
  // transformation should include trasformation from global cs to nodal cs,
  // as well as further necessary transformations (for example in case 
  // rigid arms this must include transformation to master dofs).
 
- this->computeGNDofTransformation (answer, dofIDArry);
- if (mode == _toGlobalCS) {
-  FloatMatrix answert;
-  answert.beTranspositionOf (answer);
-  answer = answert;
- }
+  if (mode != _toNodalCS) _error ("computeLoadTransformation: unsupported mode");
+   
+  FloatMatrix t;
+  
+  computeDofTransformation (t, dofMask, _toGlobalCS);
+  answer.beTranspositionOf (t);
+  
+/*
+  if (!hasSlaveDofs && !hasLocalCS()) {
+    int _size = (dofMask == NULL) ? numberOfDofs : dofMask->giveSize();
+    answer.resize(_size,_size); 
+    answer.beUnitMatrix();
+    return;
+  }
+  
+  if (hasSlaveDofs) {
+    if (mode != _toNodalCS) _error ("computeSlaveLoadTransformation: unsupported mode");
+    FloatMatrix t;
+    computeSlaveDofTransformation (t, dofMask, _toGlobalCS);
+    answer.beTranspositionOf (t);
+  }
+  
+  if (hasLocalCS()) {
+    FloatMatrix GNTransf;
+    this->computeGNDofTransformation (GNTransf, dofMask);
+    
+    if (mode == _toGlobalCS)
+      if (hasSlaveDofs) answer.beTProductOf (GNTransf, *answer.GiveCopy());
+      else             answer.beTranspositionOf (GNTransf);
+    else
+      if (hasSlaveDofs) answer.beProductOf (*answer.GiveCopy(), GNTransf);
+      else             answer = GNTransf;
+  }
+*/
 }
 
+
 void
-Node::computeGNDofTransformation (FloatMatrix& answer, const IntArray* map) 
+Node::computeGNDofTransformation (FloatMatrix& answer, const IntArray* dofIDArry) 
 {
  //
  // computes transfromation of receiver from global cs to nodal (user-defined) cs.
@@ -413,13 +476,13 @@ Node::computeGNDofTransformation (FloatMatrix& answer, const IntArray* map)
  if (localCoordinateSystem == NULL) {
   // localCoordinateSystem same as global c.s.
   int size;
-  if (map == NULL) size = numberOfDofs; else size = map->giveSize();
+  if (dofIDArry == NULL) size = numberOfDofs; else size = dofIDArry->giveSize();
   answer.resize (size, size);
   answer.zero();
   for (i=1; i<=size; i++) answer.at(i,i) = 1.0;
 
  } else {
-  if (map == NULL) {
+  if (dofIDArry == NULL) {
    // response for all local dofs is computed
    
    answer.resize (numberOfDofs, numberOfDofs);
@@ -460,20 +523,20 @@ Node::computeGNDofTransformation (FloatMatrix& answer, const IntArray* map)
      _error ("computeGNTransformation: unknown dofID");
     }
    }
-  } else { // end if (map == NULL) 
+  } else { // end if (dofIDArry == NULL) 
    // map is provided -> assemble for requested dofs
-   int size = map->giveSize();
+   int size = dofIDArry->giveSize();
    answer.resize (size, size);
    answer.zero();
    
    for (i=1; i<=size; i++) {
     // test for vector quantities
-    switch (id = (DofIDItem) map->at(i)) {
+    switch (id = (DofIDItem) dofIDArry->at(i)) {
     case D_u:
     case D_v:
     case D_w:
      for (j=1; j<= size; j++) {
-      id2 = (DofIDItem) map->at(j);
+      id2 = (DofIDItem) dofIDArry->at(j);
       if ((id2 == D_u) || (id2 == D_v) || (id2 == D_w))
        answer.at(i,j) = localCoordinateSystem->at((int)(id)-(int)(D_u)+1, (int)(id2)-(int)(D_u)+1);
      }
@@ -483,7 +546,7 @@ Node::computeGNDofTransformation (FloatMatrix& answer, const IntArray* map)
     case R_v:
     case R_w:
      for (j=1; j<= size; j++) {
-      id2 = (DofIDItem) map->at(j);
+      id2 = (DofIDItem) dofIDArry->at(j);
       if ((id2 == R_u) || (id2 == R_v) || (id2 == R_w))
        answer.at(i,j) = localCoordinateSystem->at((int)(id)-(int)(R_u)+1, (int)(id2)-(int)(R_u)+1);
      }
@@ -505,6 +568,57 @@ Node::computeGNDofTransformation (FloatMatrix& answer, const IntArray* map)
 }
 
 
+contextIOResultType
+Node :: saveContext (DataStream* stream, ContextMode mode, void *obj)
+//
+// saves full node context (saves state variables, that completely describe
+// current state)
+//
+{
+  contextIOResultType iores ;
+  if (stream == NULL) _error ("saveContex : can't write into NULL stream");
+  
+  if ((iores = DofManager::saveContext (stream, mode, obj)) != CIO_OK) THROW_CIOERR(iores);
+
+  if (mode & CM_Definition ) {
+    int _haslcs = hasLocalCS();
+    if ((iores = coordinates.storeYourself(stream, mode)) != CIO_OK) THROW_CIOERR(iores);
+    if (!stream->write (&_haslcs,1)) THROW_CIOERR(CIO_IOERR);
+    if (_haslcs) {
+      if ((iores = localCoordinateSystem->storeYourself(stream, mode)) != CIO_OK) THROW_CIOERR(iores);
+    }
+  }
+
+  return CIO_OK;
+}
+
+
+contextIOResultType 
+Node :: restoreContext (DataStream* stream, ContextMode mode, void *obj)
+//
+// restores full node context (saves state variables, that completely describe
+// current state)
+//
+{
+  contextIOResultType iores ;
+  if (stream == NULL) _error ("restoreContex : can't write into NULL stream");
+
+  if ((iores = DofManager::restoreContext (stream, mode, obj)) != CIO_OK) THROW_CIOERR(iores);
+
+  if (mode & CM_Definition ) {
+    int _haslcs;
+    if ((iores = coordinates.restoreYourself(stream, mode)) != CIO_OK) THROW_CIOERR(iores);
+    if (!stream->read (&_haslcs,1)) THROW_CIOERR(CIO_IOERR);
+    if (_haslcs) {
+      if (localCoordinateSystem ==NULL) localCoordinateSystem = new FloatMatrix();
+      if ((iores = localCoordinateSystem->restoreYourself(stream, mode)) != CIO_OK) THROW_CIOERR(iores);
+    } else {
+      localCoordinateSystem = NULL;
+    }
+  }
+  
+  return CIO_OK;
+}
 
 
 

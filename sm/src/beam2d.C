@@ -464,25 +464,39 @@ Beam2d :: giveInternalForcesVector (FloatArray& answer, TimeStep* tStep, int use
 void 
 Beam2d :: giveEndForcesVector (FloatArray& answer, TimeStep* tStep)
 {
- // computes exact global end-forces vector
- FloatArray loadEndForces;
- FloatMatrix T_NtoG;
- int isT_NtoG;
-
- this->giveInternalForcesVector (answer, tStep);
- 
- // add exact end forces due to nonnodal loading
- this-> computeForceLoadVector (loadEndForces, tStep, VM_Total);
- if (loadEndForces.giveSize()) {
-  loadEndForces.times(-1.0);
-  answer.add(loadEndForces);
- }
-
- // transform result in nodal cs to global cs
- isT_NtoG = this->computeGNLoadRotationMatrix (T_NtoG, _toGlobalCS);
- if (isT_NtoG) answer.rotatedWith (T_NtoG, 'n');
-
- return ;
+  // stress equivalent vector in nodes (vector of internal forces) 
+  FloatArray  u, load;
+  FloatMatrix stiffness, T_GtoL, T_NtoG;
+  
+  this->computeGtoLRotationMatrix  (T_GtoL);
+  this->computeGNDofRotationMatrix (T_NtoG, _toGlobalCS);
+  
+  // compute stifness matrix in global cs
+  this-> computeLocalStiffnessMatrix (stiffness, SecantStiffness, tStep);
+  stiffness.rotatedWith (T_GtoL);
+  
+  // compute vector of unknowns in global cs
+  this-> computeVectorOf (EID_MomentumBalance, VM_Total, tStep, u);
+  if (T_NtoG.isNotEmpty())
+    u.rotatedWith (T_NtoG,'n');
+  
+  answer.beProductOf (stiffness, u);
+  
+  // substract prescribed strain load
+  this-> computePrescribedStrainLocalLoadVectorAt (load, tStep, VM_Total);
+  if (load.isNotEmpty()) {
+    load.rotatedWith (T_GtoL,'t');
+    answer.substract (load);
+  }
+  
+  // substract exact end forces due to nonnodal loading
+  this-> computeLocalForceLoadVector (load, tStep, VM_Total);
+  if (load.isNotEmpty()) {
+    load.rotatedWith (T_GtoL,'t');
+    answer.substract (load);
+  }
+  
+  return ;
 }
 
 

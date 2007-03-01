@@ -94,7 +94,7 @@ EIPrimaryUnknownMapper::mapAndUpdate (FloatArray& answer, ValueModeType mode, Eq
    //
    //
    newd->giveNode(inode)->giveLocationArray (dofMask, locationArray);
-   if (newd->giveNode(inode)->hasSlaveDofs()) {
+   if (newd->giveNode(inode)->hasAnySlaveDofs()) {
     for (int ii=1; ii<=dofMask.giveSize(); ii++)
      // exclude slaves; they are determined from masters
      if (newd->giveNode(inode)->giveDof(ii)->isPrimaryDof())  

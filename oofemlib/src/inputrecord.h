@@ -40,15 +40,16 @@
 #ifndef inputrecord_h
 
 #include "cltypes.h"
-#ifndef __MAKEDEPEND
-#include <stdio.h>
-#include <string.h>
-#endif
 #include "intarray.h"
 #include "flotarry.h"
 #include "dictionr.h"
 #include "dynalist.h"
 #include "range.h"
+
+#ifndef __MAKEDEPEND
+#include <stdio.h>
+#include <string.h>
+#endif
 
 /**
  Type defining the return values of InputRecord reading operations.
@@ -284,6 +285,7 @@ enum InputFieldType {
   IFT_DofManager_bc,
   IFT_DofManager_ic,
   IFT_DofManager_mastermask,
+  IFT_DofManager_doftypemask,
   IFT_DofManager_boundaryflag,
   IFT_DofManager_globnum,
   IFT_DofManager_partitions,
@@ -308,6 +310,7 @@ enum InputFieldType {
 
   IFT_HangingNode_type,
   IFT_HangingNode_masters,
+  IFT_HangingNode_weigths,
   IFT_HangingNode_ksi,
   IFT_HangingNode_eta,
   IFT_HangingNode_dzeta,

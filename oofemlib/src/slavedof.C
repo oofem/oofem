@@ -1,190 +1,229 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/slavedof.C,v 1.8.4.1 2004/05/14 13:45:27 bp Exp $ */
-/*
 
-                   *****    *****   ******  ******  ***   ***                            
-                 **   **  **   **  **      **      ** *** **                             
-                **   **  **   **  ****    ****    **  *  **                              
-               **   **  **   **  **      **      **     **                               
-              **   **  **   **  **      **      **     **                                
-              *****    *****   **      ******  **     **         
-            
-                                                                   
-               OOFEM : Object Oriented Finite Element Code                 
-                    
-                 Copyright (C) 1993 - 2000   Borek Patzak                                       
-
-
-
-         Czech Technical University, Faculty of Civil Engineering,
-     Department of Structural Mechanics, 166 29 Prague, Czech Republic
-                                                                               
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.                                                                              
-*/
-
-//   file SLAVEDOF.CC
+//
+//  termitovo - zaloha
+//
 
 #include "slavedof.h"
-#include "dofmanager.h"
-#include "domain.h"
-#include "timestep.h"
-#include "boundary.h"
-#include "initial.h"
+#include "node.h"
 
-#include "flotarry.h"
-#include "dictionr.h"
-
-#include "debug.h"
-#include "cltypes.h"
 #ifndef __MAKEDEPEND
 #include <stdlib.h>
 #include <ctype.h>
-#include <string.h>
 #endif
 
 
-SlaveDof :: SlaveDof (int i, DofManager* aNode, int master, DofID id) : Dof (i, aNode, id)
-   // Constructor. Creates a new d.o.f., with number i, belonging
-   // to aNode with bc=nbc, ic=nic
+
+/**
+ */
+SlaveDof :: SlaveDof (int n, DofManager* aNode, DofID id) : Dof (n, aNode, id), masterContribution()
 {
-  masterDofMngr = master;
-  masterDofIndx = -1;
-/*   unknowns       = new Dictionary() ;           // unknown size ?
-   pastUnknowns   = NULL ; */
+  countOfPrimaryMasterDofs = -1;
 }
 
 
-Dof* SlaveDof::giveMasterDof () 
+/**
+ */
+void
+SlaveDof :: initialize (int cntOfMstrDfMngr, Node** mstrNode, const IntArray* mstrDofID, const FloatArray* mstrContribution)
 {
-  // returns reference to master dof
-  // checks dof compatibility and slave to slave references
-
-  if (this->masterDofIndx == -1) {
-  this->masterDofIndx = dofManager->giveDomain()->giveDofManager(masterDofMngr)
-  ->findDofWithDofId(this->dofID);
-
-  if (this->masterDofIndx) {
-
-  classType masterDofCT = dofManager->giveDomain()->giveDofManager(masterDofMngr)->
-    giveDof(masterDofIndx)->giveClassID();
-  if ((masterDofCT != MasterDofClass)&&(masterDofCT != SharedMasterDofClass)&&(masterDofCT != RemoteMasterDofClass)) {
+  int i, id;
+  bool idSame = false;
+  
+  
+  if (mstrDofID==NULL)  idSame = true;
+  else
+    if (mstrDofID->giveSize() < cntOfMstrDfMngr)
+      _error3 ("initialize: mstrDofID.giveSize %d != cntOfMstrDfMngr %d", mstrDofID->giveSize(), cntOfMstrDfMngr);
+  
+  if (mstrContribution->giveSize() < cntOfMstrDfMngr)
+    _error3 ("initialize: mstrContribution.giveSize %d != cntOfMstrDfMngr %d", mstrContribution->giveSize(), cntOfMstrDfMngr);
+  
+  
+  countOfMasterDofs  = cntOfMstrDfMngr;
+  masterContribution = *mstrContribution;
+  
+  masterDof = new Dof* [countOfMasterDofs];
+  
+  for (i=1; i<=countOfMasterDofs; i++){
+    if (idSame) id = this->dofID;
+    else        id = mstrDofID->at(i);
     
-    _error ("giveMasterDof: slaveDof to slaveDof reference not allowed");
+    masterDof[i-1] = mstrNode[i-1]->giveDofWithID (id);
   }
-  } else {
-  _error ("giveMasterDof: no dof with dofID in master found");
+}
+
+int
+SlaveDof :: giveNumberOfPrimaryMasterDofs (void)
+{
+  if (countOfPrimaryMasterDofs > 0)
+    return countOfPrimaryMasterDofs;
+  else
+    if (countOfPrimaryMasterDofs==0)
+      _error2 ("giveNumberOfPrimaryDofs: slaveDof number %ld is own master", this->giveNumber());
+  
+  countOfPrimaryMasterDofs = 0;
+  
+  long i, c=0;
+  for (i=1; i<=countOfMasterDofs; i++)
+    if (! masterDof[i-1]->isPrimaryDof())
+      c += masterDof[i-1]->giveNumberOfPrimaryMasterDofs();
+    else
+      c += 1;
+  
+  return countOfPrimaryMasterDofs = c;
+}
+
+void
+SlaveDof :: giveUnknowns (FloatArray& masterUnknowns, EquationID type, ValueModeType mode, TimeStep* stepN)
+{
+  int i, k;
+  FloatArray mstrUnknwns;
+  
+  masterUnknowns.resize (this->giveNumberOfPrimaryMasterDofs());
+  
+  for (k=1, i=1; i<=countOfMasterDofs; i++) {
+    if (! masterDof[i-1]->isPrimaryDof()) {
+      masterDof[i-1]->giveUnknowns (mstrUnknwns, type, mode, stepN);
+      masterUnknowns.copySubVector (mstrUnknwns, k);
+      k += mstrUnknwns.giveSize();
+    }
+    else
+      masterUnknowns.at(k++) = masterDof[i-1]->giveUnknown (type, mode, stepN);
   }
+}
+
+void
+SlaveDof :: giveUnknowns (FloatArray& masterUnknowns, PrimaryField& field, ValueModeType mode, TimeStep* stepN)
+{
+  int i, k;
+  FloatArray mstrUnknwns;
+  
+  masterUnknowns.resize (this->giveNumberOfPrimaryMasterDofs());
+  
+  for (k=1, i=1; i<=countOfMasterDofs; i++) {
+    if (! masterDof[i-1]->isPrimaryDof()) {
+      masterDof[i-1]->giveUnknowns (mstrUnknwns, field, mode, stepN);
+      masterUnknowns.copySubVector (mstrUnknwns, k);
+      k += mstrUnknwns.giveSize();
+    }
+    else
+      masterUnknowns.at(k++) = masterDof[i-1]->giveUnknown (field, mode, stepN);
   }
-
-  return dofManager->giveDomain()->giveDofManager(masterDofMngr)->
-  giveDof(masterDofIndx);
 }
 
-BoundaryCondition*  SlaveDof :: giveBc () 
-   // Returns the boundary condition the receiver is subjected to.
+void
+SlaveDof :: giveBcValues (FloatArray& masterBcValues, ValueModeType mode, TimeStep* stepN)
 {
-   return  this->giveMasterDof()->giveBc();
+  int i, k;
+  FloatArray mstrBcVlus;
+  Dof *dofJ;
+  
+  masterBcValues.resize (this->giveNumberOfPrimaryMasterDofs());
+  
+  for (k=1, i=1; i<=countOfMasterDofs; i++) {
+    if (! masterDof[i-1]->isPrimaryDof()) {
+      masterDof[i-1]->giveBcValues (mstrBcVlus, mode, stepN);
+      masterBcValues.copySubVector (mstrBcVlus, k);
+      k += mstrBcVlus.giveSize();
+    }
+    else {
+      dofJ = masterDof[i-1];
+      if (dofJ-> hasBc(stepN))
+	masterBcValues.at(k++) = dofJ-> giveBcValue(mode,stepN);
+      else
+	masterBcValues.at(k++) = 0.0;
+    }
+  }
 }
 
-
-int  SlaveDof :: giveEquationNumber ()
-   // Returns the number of the equation in the governing system of equations that corres-
-   // ponds to the receiver. The equation number is 0 if the receiver is
-   // subjected to a boundary condition, else it is n+1, where n is the
-   // equation number of the most recently numbered degree of freedom.
+void
+SlaveDof :: computeDofTransformation (FloatArray& masterContribs)
 {
-
-  return  this->giveMasterDof()->giveEquationNumber();
+  int i, k;
+  FloatArray mstrContrs;
+  
+  masterContribs.resize (this->giveNumberOfPrimaryMasterDofs());
+  
+  for (k=1, i=1; i<=countOfMasterDofs; i++) {
+    if (! masterDof[i-1]->isPrimaryDof()) {
+      masterDof[i-1]->computeDofTransformation (mstrContrs);
+      mstrContrs.times (masterContribution.at(i));
+      masterContribs.copySubVector (mstrContrs, k);
+      k += mstrContrs.giveSize();
+    }
+    else {
+      masterContribs.at(k++) = masterContribution.at(i);
+    }
+  }
 }
 
-int  SlaveDof :: givePrescribedEquationNumber ()
-   // Returns the number of the equation in the governing system of equations that corres-
-   // ponds to the receiver. The equation number is 0 if the receiver is
-   // subjected to a boundary condition, else it is n+1, where n is the
-   // equation number of the most recently numbered degree of freedom.
+void
+SlaveDof :: giveEquationNumbers (IntArray& masterEqNumbers)
 {
-
-  return  this->giveMasterDof()->givePrescribedEquationNumber();
+  int i, k;
+  IntArray mstrEqNmbrs;
+  
+  masterEqNumbers.resize (this->giveNumberOfPrimaryMasterDofs());
+  
+  for (k=1, i=1; i<=countOfMasterDofs; i++) {
+    if (! masterDof[i-1]->isPrimaryDof()) {
+      masterDof[i-1]->giveEquationNumbers (mstrEqNmbrs);
+      masterEqNumbers.copySubVector (mstrEqNmbrs, k);
+      k += mstrEqNmbrs.giveSize();
+    }
+    else {
+      masterEqNumbers.at(k++) = masterDof[i-1]->giveEquationNumber();
+    }
+  }
 }
 
-InitialCondition*  SlaveDof :: giveIc () 
-   // Returns the initial condition on the receiver. Not used.
+void
+SlaveDof :: givePrescribedEquationNumbers (IntArray& masterEqNumbers)
 {
-  return this->giveMasterDof()->giveIc ();
-}
-
-
-double  SlaveDof :: giveUnknown (EquationID type, ValueModeType mode, TimeStep* stepN)
-   // The key method of class Dof. Returns the value of the unknown 'u'
-   // (e.g., the displacement) of the receiver, at stepN. This value may,
-   // or may not, be already available. It may depend on a boundary (if it
-   // is not a predicted unknown) or initial condition. stepN is not the
-   // current time step n, it is assumed to be the previous one (n-1).
-{
-  return this->giveMasterDof()->giveUnknown(type, mode, stepN);
-}
-
-double  SlaveDof :: giveUnknown (PrimaryField& field, ValueModeType mode, TimeStep* stepN)
-{
-  return this->giveMasterDof()->giveUnknown(field, mode, stepN);
-}
-
-
-int  SlaveDof :: hasBc (TimeStep* tStep) 
-   // Returns True if the receiver is subjected to a boundary condition, else
-   // returns False. If necessary, reads the answer in the data file.
-{
-  return this->giveMasterDof()->hasBc (tStep);
-}
-
-
-int  SlaveDof :: hasIc () 
-   // Returns True if the receiver is subjected to an initial condition,
-   // else returns False.
-{
-  return this->giveMasterDof()->hasIc ();
-}
-
-
-int  SlaveDof :: hasIcOn (ValueModeType u)
-   // Returns True if the unknown 'u' (e.g., the displacement 'd') of the
-   // receiver is subjected to an initial condition, else returns False.
-{
-  return this->giveMasterDof()->hasIcOn (u);
-}
-
-int SlaveDof :: giveBcIdValue ()
-{
- return this->giveMasterDof()->giveBcIdValue ();
-}
-
-
-contextIOResultType SlaveDof :: saveContext (FILE* stream, void *obj) 
-//
-// saves full node context (saves state variables, that completely describe
-// current state)
-//
-{
-  return Dof::saveContext(stream, obj);
+  int i, k;
+  IntArray mstrEqNmbrs;
+  
+  masterEqNumbers.resize (this->giveNumberOfPrimaryMasterDofs());
+  
+  for (k=1, i=1; i<=countOfMasterDofs; i++) {
+    if (! masterDof[i-1]->isPrimaryDof()) {
+      masterDof[i-1]->givePrescribedEquationNumbers (mstrEqNmbrs);
+      masterEqNumbers.copySubVector (mstrEqNmbrs, k);
+      k += mstrEqNmbrs.giveSize();
+    }
+    else {
+      masterEqNumbers.at(k++) = masterDof[i-1]->givePrescribedEquationNumber();
+    }
+  }
 }
 
 
-contextIOResultType SlaveDof :: restoreContext (FILE* stream, void *obj)
-//
-// restores full node context (saves state variables, that completely describe
-// current state)
-//
+/**
+   Returns the value of the unknown associated with the receiver at given time step.
+   Slave simply asks vector of corresponding master dofs and own transformation
+   vector and returns result as dot product of these vectors. Standart element
+   services have to transform global unknown vector transform into their local c.s
+   before using it (when computing strain vector by \eps=Br, for example, 
+   where B is element geometrical matrix). This transformation should contain also
+   nodal to global coordinate system transformation. So, this specialized 
+   standard method for unknown query returns the corresponding master DOF value.
+   @see MasterDof::giveUnknown function
+*/
+double SlaveDof :: giveUnknown (EquationID type, ValueModeType mode, TimeStep* stepN)
 {
-  return Dof::restoreContext (stream, obj);
+  FloatArray masterUnknowns, t;
+  
+  giveUnknowns (masterUnknowns, type, mode, stepN);
+  computeDofTransformation (t);
+  
+  return dotProduct (masterUnknowns, t, t.giveSize());
+}
+double SlaveDof :: giveUnknown (PrimaryField& field, ValueModeType mode, TimeStep* stepN)
+{
+  FloatArray masterUnknowns, t;
+  
+  giveUnknowns (masterUnknowns, field, mode, stepN);
+  computeDofTransformation (t);
+  
+  return dotProduct (masterUnknowns, t, t.giveSize());
 }

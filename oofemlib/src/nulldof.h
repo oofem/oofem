@@ -144,9 +144,9 @@ class NullDof : public Dof
     int giveBcIdValue () {return 0;}
 
    /// Stores receiver state to output stream.  
-    contextIOResultType    saveContext (FILE* stream, void *obj = NULL)  {return CIO_OK;}
+    contextIOResultType    saveContext (DataStream* stream, ContextMode mode, void *obj = NULL)  {return CIO_OK;}
    /// Restores the receiver state previously written in stream.
-    contextIOResultType    restoreContext(FILE* stream, void *obj = NULL) {return CIO_OK;}
+    contextIOResultType    restoreContext(DataStream* stream, ContextMode mode, void *obj = NULL) {return CIO_OK;}
 
 protected:
     /**

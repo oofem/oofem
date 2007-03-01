@@ -39,6 +39,7 @@
 #include "dofmanager.h"
 #include "masterdof.h"
 #include "slavedof.h"
+#include "simpleslavedof.h"
 #include "timestep.h"
 #include "load.h"
 #include "flotarry.h"
@@ -51,8 +52,8 @@
 #include "rigidarmnode.h"
 #include "hangingnode.h"
 #include "usrdefsub.h"
+#include "mathfem.h"
 #ifndef __MAKEDEPEND
-#include <math.h>
 #include <stdlib.h>
 #endif
 
@@ -76,6 +77,7 @@ DofManager :: DofManager (int n, Domain* aDomain)
    numberOfDofs  = 0 ;
    dofArray      = NULL ;
   isBoundaryFlag= false;
+  hasSlaveDofs  = false;
    // locationArray = NULL ;
 #ifdef __PARALLEL_MODE
   partitions.resize(0);
@@ -125,6 +127,17 @@ DofManager :: computeLoadVectorAt (FloatArray& answer, TimeStep* stepN, ValueMod
    //delete contribution ;
   }
  }
+
+ // transform "local dofs" to master dofs
+ if (hasSlaveDofs && answer.isNotEmpty ()) {
+   FloatMatrix masterTransf;
+   
+   // assemble transformation contributions from local dofs
+   computeLoadTransformation (masterTransf, NULL, _toNodalCS);
+   answer.rotatedWith (masterTransf,'n');
+ }
+
+
  return ;
  
 }
@@ -146,6 +159,16 @@ Dof*  DofManager :: giveDof (int i) const
    return dofArray[i-1] ;
 }
 
+Dof*  DofManager :: giveDofWithID (int dofID) const
+  // Returns the degree of freedom of the receiver with 'dofID'.
+{
+  int indx = this->findDofWithDofId ((DofID) dofID);
+  
+  // musi zde byt error - spoleham na to
+  if (!indx) _error ("giveDofWithID: dof with given DofID doesnot exists");
+  
+  return dofArray[indx-1] ;
+}
 
 IntArray*  DofManager :: giveLoadArray ()
    // Returns the list containing the number of every nodal loads that act on
@@ -164,20 +187,64 @@ DofManager :: giveLocationArray (const IntArray& dofIDArry, IntArray& locationAr
   // In dofIDArray are stored DofID's of requsted DOFs in receiver.
   // The DofID's are determining the physical meaning of particular DOFs
 {
+  if (!hasSlaveDofs) {
 
-  int i,size,indx ;
-  // prevents some size problem when connecting different elements with 
-  // different number of dofs
-  size = dofIDArry.giveSize();
-  locationArray.resize(size) ;
-  for (i=1;i<=size;i++) {
-    if ((indx=this->findDofWithDofId ((DofID) dofIDArry.at(i))) == 0) {
-      _error ("giveLocationArray: incompatible dof requested");
+    int i,size,indx ;
+    // prevents some size problem when connecting different elements with 
+    // different number of dofs
+    size = dofIDArry.giveSize();
+    locationArray.resize(size) ;
+    for (i=1;i<=size;i++) {
+      if ((indx=this->findDofWithDofId ((DofID) dofIDArry.at(i))) == 0) {
+        _error ("giveLocationArray: incompatible dof requested");
+      }
+      locationArray.at(i)=this->giveDof(indx)->giveEquationNumber();
     }
-    locationArray.at(i)=this->giveDof(indx)->giveEquationNumber();
-  }
+  } else {
+
   
+    int i, k, indx;
+    IntArray dofArray, mstrEqNmbrs;
+    
+    this-> giveDofArray(dofIDArry, dofArray);
+    locationArray.resize (giveNumberOfPrimaryMasterDofs(dofArray));
+    
+    for (k=1,i=1; i<=dofArray.giveSize(); i++) {
+      indx = dofArray.at(i);
+      if (!this->giveDof(indx)->isPrimaryDof()) { // slave DOF
+        this->giveDof(indx)->giveEquationNumbers (mstrEqNmbrs);
+        locationArray.copySubVector (mstrEqNmbrs, k);
+        k += mstrEqNmbrs.giveSize();
+      }
+      else { // primary DOF
+        locationArray.at(k++) = this-> giveDof(indx)-> giveEquationNumber();
+      }
+    }
+
+
+  }
   return  ;
+}
+
+
+
+void  DofManager :: giveCompleteLocationArray (IntArray& locationArray) const
+   // Returns the complete location array of the receiver.
+   // including all available dofs
+{
+  if (!hasSlaveDofs) {
+
+    int i ;
+    // prevents some size problem when connecting different elements with 
+    // different number of dofs
+    locationArray.resize (numberOfDofs) ;
+    for (i=1;i<=numberOfDofs;i++) {
+      locationArray.at(i)=this->giveDof(i)->giveEquationNumber();
+    }
+  } else {
+    giveLocationArray (*giveCompleteGlobalDofIDArray(), locationArray);
+  }
+ return ;
 }
 
 void 
@@ -188,51 +255,61 @@ DofManager :: givePrescribedLocationArray (const IntArray& dofIDArry, IntArray& 
   // In dofIDArray are stored DofID's of requsted DOFs in receiver.
   // The DofID's are determining the physical meaning of particular DOFs
 {
+  if (!hasSlaveDofs) {
+    int i,size,indx ;
+    // prevents some size problem when connecting different elements with 
+    // different number of dofs
+    size = dofIDArry.giveSize();
+    locationArray.resize(size) ;
+    for (i=1;i<=size;i++) {
+      if ((indx=this->findDofWithDofId ((DofID) dofIDArry.at(i))) == 0) {
+        _error ("givePrescribedLocationArray: incompatible dof requested");
+      }
+      locationArray.at(i)=this->giveDof(indx)->givePrescribedEquationNumber();
+    }
+  } else {
 
- int i,size,indx ;
- // prevents some size problem when connecting different elements with 
- // different number of dofs
- size = dofIDArry.giveSize();
- locationArray.resize(size) ;
- for (i=1;i<=size;i++) {
-  if ((indx=this->findDofWithDofId ((DofID) dofIDArry.at(i))) == 0) {
-    _error ("givePrescribedLocationArray: incompatible dof requested");
+  
+    int i, k, indx;
+    IntArray dofArray, mstrEqNmbrs;
+    
+    this-> giveDofArray(dofIDArry, dofArray);
+    locationArray.resize (giveNumberOfPrimaryMasterDofs(dofArray));
+    
+    for (k=1,i=1; i<=dofArray.giveSize(); i++) {
+      indx = dofArray.at(i);
+      if (!this->giveDof(indx)->isPrimaryDof()) { // slave DOF
+        this->giveDof(indx)->givePrescribedEquationNumbers (mstrEqNmbrs);
+        locationArray.copySubVector (mstrEqNmbrs, k);
+        k += mstrEqNmbrs.giveSize();
+      }
+      else { // primary DOF
+        locationArray.at(k++) = this-> giveDof(indx)-> givePrescribedEquationNumber();
+      }
+    }
+    
   }
-  locationArray.at(i)=this->giveDof(indx)->givePrescribedEquationNumber();
- }
- 
- return  ;
+  
+  return  ;
 }
 
-
-void  DofManager :: giveCompleteLocationArray (IntArray& locationArray) const
-   // Returns the complete location array of the receiver.
-   // including all available dofs
-{
-
- int i ;
- // prevents some size problem when connecting different elements with 
- // different number of dofs
- locationArray.resize (numberOfDofs) ;
- for (i=1;i<=numberOfDofs;i++) {
-  locationArray.at(i)=this->giveDof(i)->giveEquationNumber();
- }
- return ;
-}
 
 void  DofManager :: giveCompletePrescribedLocationArray (IntArray& locationArray) const
    // Returns the complete location array of the receiver.
    // including all available dofs
 {
+  if (!hasSlaveDofs) {
 
- int i ;
- // prevents some size problem when connecting different elements with 
- // different number of dofs
- locationArray.resize (numberOfDofs) ;
- for (i=1;i<=numberOfDofs;i++) {
-  locationArray.at(i)=this->giveDof(i)->givePrescribedEquationNumber();
- }
- return ;
+    int i ;
+    // prevents some size problem when connecting different elements with 
+    // different number of dofs
+    locationArray.resize (numberOfDofs) ;
+    for (i=1;i<=numberOfDofs;i++) {
+      locationArray.at(i)=this->giveDof(i)->givePrescribedEquationNumber();
+    }
+  } else {
+    givePrescribedLocationArray (*giveCompleteGlobalDofIDArray(), locationArray);
+  }
 }
 
 
@@ -284,6 +361,23 @@ int  DofManager :: giveNumberOfDofs () const
    return numberOfDofs ;
 }
 
+int
+DofManager :: giveNumberOfPrimaryMasterDofs (IntArray& dofArray) const
+{
+  if (!hasSlaveDofs) return this->giveNumberOfDofs();
+  
+  int i, answer=0;
+  
+  for (i=1; i<=dofArray.giveSize(); i++)
+    if (!this->giveDof(dofArray.at(i))->isPrimaryDof())
+      answer += ((SlaveDof*)this->giveDof(dofArray.at(i)))->giveNumberOfPrimaryMasterDofs();
+    else
+      answer += 1;
+  
+  return answer;
+}
+
+
 
 IRResultType DofManager::  resolveDofIDArray (InputRecord* ir, IntArray& dofIDArry)
 {
@@ -311,7 +405,113 @@ IRResultType DofManager::  resolveDofIDArray (InputRecord* ir, IntArray& dofIDAr
  return IRRT_OK;
 }
 
+IRResultType
+DofManager :: initializeFrom (InputRecord* ir)
+{
+  const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
+  IRResultType result;                   // Required by IR_GIVE_FIELD macro
 
+  int j ;
+  IntArray dofIDArry;
+  IntArray bc, ic, masterMask, dofTypeMask; // termitovo
+ 
+  loadArray.resize(0);
+  IR_GIVE_OPTIONAL_FIELD (ir, loadArray, IFT_DofManager_load, "load"); // Macro
+
+  if (this->resolveDofIDArray (ir, dofIDArry) != IRRT_OK) IR_IOERR (giveClassName(), __proc,  IFT_Unknown, "", ir, result);
+
+  // numberOfDofs = domain->giveNumberOfDofs () ;
+  bc.resize(0);
+  IR_GIVE_OPTIONAL_FIELD (ir, bc, IFT_DofManager_bc, "bc"); // Macro
+
+  ic.resize(0);
+  IR_GIVE_OPTIONAL_FIELD (ir, ic, IFT_DofManager_ic, "ic"); // Macro
+  // reads master mask - in this array are numbers of master dofManagers
+  // to which are connected dofs in receiver.
+  // if master mask index is zero then dof is created as master (i.e., having own equation number)
+  // othervise slave dof connected to master DofManager is created.
+  // by default if masterMask is not specifyed, all dofs are created as masters.
+  dofTypeMask.resize(0); // termitovo
+  IR_GIVE_OPTIONAL_FIELD (ir, dofTypeMask, IFT_DofManager_doftypemask, "doftype"); // Macro
+
+  // read boundary flag
+  if (ir->hasField(IFT_DofManager_boundaryflag, "boundary")) isBoundaryFlag = true;
+
+
+#ifdef __PARALLEL_MODE
+  globalNumber = 0;
+  IR_GIVE_OPTIONAL_FIELD (ir, globalNumber, IFT_DofManager_globnum, "globnum"); // Macro
+
+  partitions.resize(0);
+  IR_GIVE_OPTIONAL_FIELD (ir, partitions, IFT_DofManager_partitions, "partitions"); // Macro
+
+  if (ir->hasField (IFT_DofManager_sharedflag, "shared")) parallel_mode = DofManager_shared;
+  else if (ir->hasField (IFT_DofManager_remoteflag, "remote")) parallel_mode = DofManager_remote;
+  else if (ir->hasField (IFT_DofManager_nullflag, "null")) parallel_mode = DofManager_null;
+  else parallel_mode = DofManager_local;
+
+  // in parallel mode,  slaves are allowed, because ((Dr. Rypl promissed)
+  // masters have to be in same partition as slaves. They can be again Remote copies.
+#endif
+
+
+
+  int hasIc,hasBc,dofIc=0,dofBc=0, hasTypeinfo=0; 
+  dofType dtype;
+ 
+  hasIc = !(ic.giveSize() == 0);
+  hasBc = !(bc.giveSize() == 0);
+  hasTypeinfo = !(dofTypeMask.giveSize() == 0);
+
+  // check sizes
+  if (hasBc) if (bc.giveSize() != this->giveNumberOfDofs()) _error ("initializeFrom: bc size mismatch");
+  if (hasIc) if (ic.giveSize() != this->giveNumberOfDofs()) _error ("initializeFrom: ic size mismatch");
+  if (hasTypeinfo) if (dofTypeMask.giveSize() != this->giveNumberOfDofs()) 
+    _error ("initializeFrom: dofTypeMask size mismatch");
+
+  dofArray = new Dof* [this->giveNumberOfDofs()] ;
+  for (j=0 ; j<numberOfDofs ; j++) {
+  
+    if (hasTypeinfo) dtype = (dofType) dofTypeMask.at(j+1);
+    else dtype = DT_master;
+    
+    if (this->isDofTypeCompatible(dtype)) {
+      
+      if (dtype == DT_master) {
+        if(hasIc) dofIc = ic.at(j+1) ;
+        if(hasBc) dofBc = bc.at(j+1) ;
+#ifdef __PARALLEL_MODE
+        if (parallel_mode == DofManager_remote) 
+          dofArray[j] = new RemoteMasterDof(j+1,this,dofBc,dofIc,(DofID) dofIDArry.at(j+1)) ;
+        else if (parallel_mode == DofManager_shared)
+          dofArray[j] = new SharedMasterDof(j+1,this,dofBc,dofIc,(DofID) dofIDArry.at(j+1)) ;
+        else if (parallel_mode == DofManager_null)
+          // ignore applied bc
+          dofArray[j] = new NullDof (j+1, this, dofIc, (DofID) dofIDArry.at(j+1)) ;
+        else
+          dofArray[j] = new MasterDof      (j+1,this,dofBc,dofIc,(DofID) dofIDArry.at(j+1)) ;
+#else
+        dofArray[j] = new MasterDof(j+1,this,dofBc,dofIc,(DofID) dofIDArry.at(j+1)) ;
+#endif
+      } else if (dtype == DT_simpleSlave) { // Simple slave dof
+        if (masterMask.giveSize() == 0) {
+          IR_GIVE_FIELD (ir, masterMask, IFT_DofManager_mastermask, "mastermask"); // Macro
+          if (masterMask.giveSize() != numberOfDofs) _error ("initializeFrom: mastermask size mismatch");
+        }
+        dofArray[j] = new SimpleSlaveDof (j+1,this,masterMask.at(j+1),(DofID) dofIDArry.at(j+1)) ;
+      } else if (dtype == DT_slave) { // Slave dof
+        dofArray[j] = new SlaveDof (j+1,this,(DofID) dofIDArry.at(j+1)) ;
+      } else {
+        _error ("initializeFrom: unknown dof type");
+      }
+    } else {
+      _error ("initializeFrom: incompatible dof type");
+    }
+  }
+  return IRRT_OK;
+}
+
+/*
 IRResultType
 DofManager :: initializeFrom (InputRecord* ir)
 {
@@ -384,7 +584,7 @@ DofManager :: initializeFrom (InputRecord* ir)
     if (hasSlaveDofs) {
      masterManagerIndx = masterMask.at(j+1);
      if (masterManagerIndx) {
-      dofArray[j] = new SlaveDof (j+1,this,masterManagerIndx, (DofID) dofIDArry.at(j+1)) ;
+      dofArray[j] = new SimpleSlaveDof (j+1,this,masterManagerIndx, (DofID) dofIDArry.at(j+1)) ;
      } else {
 #ifdef __PARALLEL_MODE
       if (parallel_mode == DofManager_remote) 
@@ -420,7 +620,7 @@ DofManager :: initializeFrom (InputRecord* ir)
 
  return IRRT_OK;
 }
-
+*/
 
 void  DofManager :: printOutputAt (FILE* stream, TimeStep* stepN)
 {
@@ -466,36 +666,36 @@ void  DofManager :: updateYourself (TimeStep* tStep)
  }
 
 
-contextIOResultType DofManager :: saveContext (FILE* stream, void *obj)
+contextIOResultType DofManager :: saveContext (DataStream* stream, ContextMode mode, void *obj)
 //
 // saves full node context (saves state variables, that completely describe
 // current state)
 //
 {
   int i;
- contextIOResultType iores;
-
- if ((iores = FEMComponent::saveContext(stream,obj)) != CIO_OK) THROW_CIOERR(iores);
+  contextIOResultType iores;
+  
+  if ((iores = FEMComponent::saveContext(stream,mode,obj)) != CIO_OK) THROW_CIOERR(iores);
   for (i=1 ; i<=numberOfDofs ; i++) {
-     if ((iores = this->giveDof(i)->saveContext(stream,obj)) != CIO_OK) THROW_CIOERR(iores);
+    if ((iores = this->giveDof(i)->saveContext(stream,mode,obj)) != CIO_OK) THROW_CIOERR(iores);
   }
 
   return CIO_OK;
 }
 
 
-contextIOResultType DofManager :: restoreContext (FILE* stream, void *obj)
+contextIOResultType DofManager :: restoreContext (DataStream* stream, ContextMode mode, void *obj)
 //
 // restores full node context (saves state variables, that completely describe
 // current state)
 //
 {
   contextIOResultType iores;
- int i ;
+  int i ;
 
- if ((iores = FEMComponent::restoreContext(stream,obj)) != CIO_OK) THROW_CIOERR(iores);
+  if ((iores = FEMComponent::restoreContext(stream,mode,obj)) != CIO_OK) THROW_CIOERR(iores);
   for (i=1 ; i<=numberOfDofs ; i++) {
-    if ((iores = this->giveDof(i)->restoreContext(stream,obj)) != CIO_OK) THROW_CIOERR(iores);
+    if ((iores = this->giveDof(i)->restoreContext(stream,mode,obj)) != CIO_OK) THROW_CIOERR(iores);
   }
 
   return CIO_OK;
@@ -529,18 +729,41 @@ void
 DofManager::giveUnknownVector (FloatArray& answer, const IntArray& dofMask, 
                                EquationID type, ValueModeType mode, TimeStep* stepN)
 {
- int j, size;
- IntArray dofArray;
+ if (!hasSlaveDofs) {
 
- answer.resize (size = dofMask.giveSize());
- this-> giveDofArray(dofMask, dofArray);
+   int j, size;
+   IntArray dofArray;
+
+   answer.resize (size = dofMask.giveSize());
+   this-> giveDofArray(dofMask, dofArray);
+   
+   for (j=1 ; j<=size ; j++)
+     //if (this->giveDof(dofArray.at(j))->giveUnknownType() == type)
+     answer.at(j) = this->giveDof(dofArray.at(j))->giveUnknown(type, mode, stepN) ;
+   //else 
+   // _error ("giveUnknownVector :: dofMask compatibility Error");
+ } else {
+   
+   int i, k, indx;
+   IntArray dofArray;
+   FloatArray mstrUnknwns;
+   
+   this-> giveDofArray(dofMask, dofArray);
+   answer.resize (giveNumberOfPrimaryMasterDofs(dofArray));
+   
+   for (k=1,i=1; i<=dofArray.giveSize(); i++) {
+     indx = dofArray.at(i);
+     if (!this->giveDof(indx)->isPrimaryDof()) { // slave DOF
+       this->giveDof(indx)->giveUnknowns (mstrUnknwns, type, mode, stepN);
+       answer.copySubVector (mstrUnknwns, k);
+       k += mstrUnknwns.giveSize();
+     }
+     else { // primary DOF
+       answer.at(k++) = this-> giveDof(indx)-> giveUnknown(type, mode, stepN);
+     }
+   }
+ }  
  
- for (j=1 ; j<=size ; j++)
-  //if (this->giveDof(dofArray.at(j))->giveUnknownType() == type)
-    answer.at(j) = this->giveDof(dofArray.at(j))->giveUnknown(type, mode, stepN) ;
-  //else 
-  // _error ("giveUnknownVector :: dofMask compatibility Error");
-
 }
 
 
@@ -548,51 +771,213 @@ void
 DofManager::giveUnknownVector (FloatArray& answer, const IntArray& dofMask, 
                 PrimaryField& field, ValueModeType mode, TimeStep* stepN)
 {
- int j, size;
- IntArray dofArray;
 
- answer.resize (size = dofMask.giveSize());
- this-> giveDofArray(dofMask, dofArray);
- 
- for (j=1 ; j<=size ; j++)
-  //if (this->giveDof(dofArray.at(j))->giveUnknownType() == type)
-    answer.at(j) = this->giveDof(dofArray.at(j))->giveUnknown(field, mode, stepN) ;
-  //else 
-  // _error ("giveUnknownVector :: dofMask compatibility Error");
+  if (!hasSlaveDofs) {
 
+    int j, size;
+    IntArray dofArray;
+    
+    answer.resize (size = dofMask.giveSize());
+    this-> giveDofArray(dofMask, dofArray);
+    
+    for (j=1 ; j<=size ; j++)
+      //if (this->giveDof(dofArray.at(j))->giveUnknownType() == type)
+      answer.at(j) = this->giveDof(dofArray.at(j))->giveUnknown(field, mode, stepN) ;
+    //else 
+    // _error ("giveUnknownVector :: dofMask compatibility Error");
+  } else {
+
+    int i, k, indx;
+    IntArray dofArray;
+    FloatArray mstrUnknwns;
+    
+    this-> giveDofArray(dofMask, dofArray);
+    answer.resize (giveNumberOfPrimaryMasterDofs(dofArray));
+    
+    for (k=1,i=1; i<=dofArray.giveSize(); i++) {
+      indx = dofArray.at(i);
+      if (!this->giveDof(indx)->isPrimaryDof()) { // slave DOF
+        this->giveDof(indx)->giveUnknowns (mstrUnknwns, field, mode, stepN);
+        answer.copySubVector (mstrUnknwns, k);
+        k += mstrUnknwns.giveSize();
+      }
+      else { // primary DOF
+        answer.at(k++) = this-> giveDof(indx)-> giveUnknown(field, mode, stepN);
+      }
+    }
+  }    
+  
 }
 
 void 
 DofManager:: givePrescribedUnknownVector (FloatArray& answer, const IntArray& dofMask, 
                      ValueModeType mode, TimeStep* stepN)
 {
- int j, size;
- IntArray dofArray;
- Dof        *dofJ ;
- 
- answer.resize (size = dofMask.giveSize());
- this-> giveDofArray(dofMask, dofArray);
- 
- for (j=1 ; j<=size ; j++) {
-  dofJ = this->giveDof(dofArray.at(j)) ;
-  
-  //if (dofJ -> hasBc(stepN) && (dofJ ->giveUnknownType() == type))
-  if (dofJ -> hasBc(stepN))
-   answer.at(j) = dofJ->giveBcValue(mode,stepN) ;//giveUnknown(u,stepN) ;
-  // answer.at(j) = dofJ->giveBcValue(type, mode,stepN) ;//giveUnknown(u,stepN) ;
-  else
-   answer.at(j) = 0. ;
- }
+  if (!hasSlaveDofs) {
+
+    int j, size;
+    IntArray dofArray;
+    Dof        *dofJ ;
+    
+    answer.resize (size = dofMask.giveSize());
+    this-> giveDofArray(dofMask, dofArray);
+    
+    for (j=1 ; j<=size ; j++) {
+      dofJ = this->giveDof(dofArray.at(j)) ;
+      
+      //if (dofJ -> hasBc(stepN) && (dofJ ->giveUnknownType() == type))
+      if (dofJ -> hasBc(stepN))
+        answer.at(j) = dofJ->giveBcValue(mode,stepN) ;//giveUnknown(u,stepN) ;
+      // answer.at(j) = dofJ->giveBcValue(type, mode,stepN) ;//giveUnknown(u,stepN) ;
+      else
+        answer.at(j) = 0. ;
+    }
+  } else {
+
+    int i, k, indx;
+    IntArray dofArray;
+    FloatArray mstrBcVlus;
+    Dof *dofJ;
+    
+    this-> giveDofArray(dofMask, dofArray);
+    answer.resize (giveNumberOfPrimaryMasterDofs(dofArray));
+    
+    for (k=1,i=1; i<=dofArray.giveSize(); i++) {
+      indx = dofArray.at(i);
+      if (!this->giveDof(indx)->isPrimaryDof()) { // slave DOF
+        this->giveDof(indx)->giveBcValues (mstrBcVlus, mode, stepN);
+        answer.copySubVector (mstrBcVlus, k);
+        k += mstrBcVlus.giveSize();
+      }
+      else { // primary DOF
+        dofJ = this-> giveDof(indx);
+        if (dofJ-> hasBc(stepN))
+          answer.at(k++) = dofJ-> giveBcValue(mode, stepN);
+        else
+          answer.at(k++) = 0.0;
+      }
+    }
+  }
 }
 
 int
-DofManager::hasSlaveDofs() 
+DofManager::hasAnySlaveDofs() 
 {
- int i;
- for (i=1; i<=numberOfDofs; i++)
-  if (!this->giveDof (i)->isPrimaryDof()) return 1;
- return 0;
+  int i;
+  for (i=1; i<=numberOfDofs; i++)
+    if (!this->giveDof (i)->isPrimaryDof()) return 1;
+  return 0;
 }
+
+
+int
+DofManager :: checkConsistency ()
+  // Checks internal data consistency in node. 
+  // Current implementation checks (when receiver has simple slave dofs) if receiver
+  // has the same coordinate system as master dofManager of slave dof.
+{
+  int i;
+  
+  hasSlaveDofs = false;
+  for (i=1; i<=numberOfDofs; i++) {
+    if (this->giveDof(i)->giveClassID() == SlaveDofClass) { 
+      hasSlaveDofs = true;
+      continue;
+    }
+  }
+  
+  return 1;
+}
+
+
+void
+DofManager :: computeDofTransformation (FloatMatrix& answer, const IntArray* dofMask, DofManTrasfType mode)
+  // computes trasformation matrix of receiver.
+  // transformation should include trasformation from global cs to nodal cs,
+  // as well as further necessary transformations (for example in case 
+  // rigid arms this must include transformation to master dofs).
+{
+  if (!hasSlaveDofs) {
+    int _size = (dofMask == NULL) ? numberOfDofs : dofMask->giveSize();
+    answer.resize (_size, _size);
+    answer.beUnitMatrix();
+  } else {
+    this->computeSlaveDofTransformation (answer, dofMask, mode);
+  }
+}
+
+void
+DofManager :: computeLoadTransformation (FloatMatrix& answer, const IntArray* dofMask, DofManTrasfType mode)
+  // computes trasformation matrix of receiver.
+  // transformation should include trasformation from global cs to nodal cs,
+  // as well as further necessary transformations (for example in case 
+  // rigid arms this must include transformation to master dofs).
+{
+  if (mode != _toNodalCS) _error ("computeSlaveLoadTransformation: unsupported mode");
+  
+  FloatMatrix t;
+  
+  computeDofTransformation (t, dofMask, _toGlobalCS);
+  answer.beTranspositionOf (t);
+
+  /*
+  if (!hasSlaveDofs) {
+    int _size = (dofMask == NULL) ? numberOfDofs : dofMask->giveSize();
+    answer.resize(_size, _size);
+    answer.beUnitMatrix ();
+  } else {
+    this->computeSlaveLoadTransformation (answer, dofMask, mode);
+  }
+  */
+}
+
+void
+DofManager :: computeSlaveDofTransformation (FloatMatrix& answer, const IntArray* dofMask, DofManTrasfType mode)
+  // computes trasformation matrix of receiver.
+  // transformation should include trasformation from global cs to nodal cs,
+  // as well as further necessary transformations (for example in case 
+  // rigid arms this must include transformation to master dofs).
+{
+  if (mode != _toGlobalCS) _error ("computeSlaveDofTransformation: unknown mode");
+  
+  int i, k, indx;
+  IntArray dofArray;
+  FloatArray mstrContrs;
+  
+  if (dofMask==NULL) {
+    dofArray.resize(numberOfDofs);
+    for (i=1; i<=numberOfDofs; i++)  dofArray.at(i) = i;
+  }
+  else
+    this->giveDofArray (*dofMask, dofArray);
+  
+  answer.resize (dofArray.giveSize(), giveNumberOfPrimaryMasterDofs(dofArray));
+  answer.zero ();
+  
+  for (k=1,i=1; i<=dofArray.giveSize(); i++) {
+    indx = dofArray.at(i);
+    if (!this->giveDof(indx)->isPrimaryDof()) { // slave DOF
+      this->giveDof(indx)->computeDofTransformation (mstrContrs);
+      answer.copySubVectorRow (mstrContrs, i, k);
+      k += mstrContrs.giveSize();
+    }
+    else { // primary DOF
+      answer.at(i,k++) = 1.0;
+    }
+  }
+}
+
+IntArray*
+DofManager :: giveCompleteGlobalDofIDArray (void) const
+{
+  IntArray* answer = new IntArray(numberOfDofs);
+  
+  for (int i=1; i<=numberOfDofs; i++)
+    answer->at(i) = (int)this->giveDof(i)->giveDofID();
+  
+  return answer;
+}
+
 
 
 #ifdef __PARALLEL_MODE
@@ -605,5 +990,23 @@ DofManager::packDOFsUnknowns (CommunicationBuffer& buff, EquationID type,
   result &= this->giveDof (i)->packUnknowns (buff, type, mode, stepN);
  return result;
 }
+
+bool 
+DofManager :: isLocal () {
+  if (parallel_mode == DofManager_local) return true;
+  if (parallel_mode == DofManager_shared) {
+    // determine if problem is the lowest one sharing the dofman; if yes the receiver is responsible to 
+    // deliver number
+    int n = partitions.giveSize();
+    int myrank = this->giveDomain()->giveEngngModel()->giveRank();
+    int minrank = myrank;
+    
+    for (int j=1; j<=n; j++) minrank = min (minrank, partitions.at(j));
+    if (minrank == myrank) return true;
+  }
+  return false;
+}
+
+
 
 #endif
