@@ -2140,7 +2140,7 @@ StructuralMaterial::giveIPValue (FloatArray& answer, GaussPoint* aGaussPoint, In
       IntArray dofid (1); dofid.at(1) = (int) T_f;
       ((StructuralElement*)aGaussPoint->giveElement())->computeGlobalCoordinates (gcoords, *aGaussPoint->giveCoordinates());
       if ((err = tf->evaluateAt (answer, gcoords, dofid, VM_Total, atTime)))
-        _error2 ("giveIPValue: tf->evaluateAt failed, error code %d", err);
+        _error3 ("giveIPValue: tf->evaluateAt failed, element %d, error code %d", aGaussPoint->giveElement()->giveNumber(), err);
     } else {answer.resize(1); answer.zero();}
     return 1;
   } else if ((type == IST_CylindricalStressTensor) || (type == IST_CylindricalStrainTensor)) {
@@ -2259,7 +2259,7 @@ StructuralMaterial::computeStressIndependentStrainVector (FloatArray& answer,
   IntArray dofid (1); dofid.at(1) = (int) T_f;
   elem->computeGlobalCoordinates (gcoords, *gp->giveCoordinates());
   if ((err = tf->evaluateAt (et2, gcoords, dofid, mode, stepN)))
-    _error2 ("computeStressIndependentStrainVector: tf->evaluateAt failed, error code %d", err);
+    _error3 ("computeStressIndependentStrainVector: tf->evaluateAt failed, element %d, error code %d", elem->giveNumber(), err);
   if (et2.isNotEmpty()) 
    if (et.isEmpty()) et = et2; else et.at(1) += et2.at(1);
  }
