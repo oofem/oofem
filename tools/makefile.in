@@ -19,5 +19,6 @@ extractor: checker.C tokenizer.o seek.o
 					$(CC) $(CFLAGS) -o extractor -DEXTRACTOR_MODE checker.C tokenizer.o seek.o -lm
 
 clean:
-					rm checker.o tokenizer.o seek.o
+					rm -fr tokenizer.o seek.o
+	 				rm -fr systemstudentextractor checker extractor
 
