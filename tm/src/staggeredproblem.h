@@ -180,10 +180,11 @@ public:
   If stream is NULL, new file descriptor is created and this must be also closed at the end. 
   @param stream - context stream. If NULL then new file descriptor will be openned and closed
   at the end else the stream given as parameter will be used and not closed at the end.
+  @param mode determines ammount of info required in stream (state, definition,...)
   @return contextIOResultType.
   @exception throws an ContextIOERR exception if error encountered
   */
-  virtual contextIOResultType                saveContext (FILE *stream, void *obj = NULL) ;
+  virtual contextIOResultType                saveContext (DataStream *stream, ContextMode mode, void *obj = NULL) ;
  /**
   Restores the  state of model from output stream. Restores not only the receiver state,
   but also same function is invoked for all DofManagers and Elements in associated
@@ -195,11 +196,12 @@ public:
   Restoring context will change current time step in order to correspond to newly restored
   context.
   @param stream context file
+  @param mode determines ammount of info required in stream (state, definition,...)
   @param obj context corresponding to  time step number (retyped as (void*)) will be restored.
   @return contextIOResultType.
   @exception throws an ContextIOERR exception if error encountered.
   */
-  virtual contextIOResultType    restoreContext (FILE* stream, void* obj = NULL) ;
+  virtual contextIOResultType    restoreContext (DataStream* stream, ContextMode mode, void* obj = NULL) ;
    /**
    Updates domain links after the domains of receiver have changed. Used mainly after 
    restoring context - the domains may change and this service is then used
