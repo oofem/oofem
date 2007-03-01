@@ -55,7 +55,9 @@
 
 #ifdef __OOFEG 
 #include "oofeggraphiccontext.h"
+#ifndef __MAKEDEPEND
 #include "Emarkwd3d.h"
+#endif
 #endif
 
 InterfaceElem2dQuad :: InterfaceElem2dQuad (int n, Domain* aDomain) 

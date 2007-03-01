@@ -58,7 +58,9 @@
 #include "oofeggraphiccontext.h"
 #include "oofegutils.h"
 #include "conTable.h"
+#ifndef __MAKEDEPEND
 #include "Etetrawd.h"
+#endif
 #endif
 
 FEI3dTrLin LTRSpace :: interpolation;

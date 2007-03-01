@@ -35,7 +35,9 @@
 
 #ifndef logger_h
 #include "oofemcfg.h"
+#ifndef __MAKEDEPEND
 #include <stdio.h>
+#endif
 
 
 class Logger {

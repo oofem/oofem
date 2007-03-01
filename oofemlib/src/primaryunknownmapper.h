@@ -43,7 +43,9 @@
 #include "compiler.h"
 #include "cltypes.h"
 #include "interface.h"
+#ifndef __MAKEDEPEND
 #include <stdio.h>
+#endif
 
 class Domain;
 class Element;

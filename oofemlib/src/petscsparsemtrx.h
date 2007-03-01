@@ -36,8 +36,10 @@
 #ifndef petscsparsemtrx_h
 
 #include "sparsemtrx.h"
-#include "petscksp.h"
 #include "cltypes.h"
+#ifndef __MAKEDEPEND
+#include "petscksp.h"
+#endif
 
 /**
  This class provides an sparse matrix interface to PETSc Matrices

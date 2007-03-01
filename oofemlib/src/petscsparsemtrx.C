@@ -37,13 +37,13 @@
 
 #include "petscsparsemtrx.h"
 #include "petscordering.h"
-#include "petscksp.h"
 #include "engngm.h"
 
 #ifndef __MAKEDEPEND
 #include <stdio.h>
 #include <set>
 #include <vector>
+#include "petscksp.h"
 #endif
  
 SparseMtrx*
