@@ -205,8 +205,23 @@ LSpace ::   giveDofManDofIDMask  (int inode, EquationID ut, IntArray& answer) co
 double
 LSpace::giveCharacteristicLenght(GaussPoint* gp, const FloatArray &normalToCrackPlane) 
 {
- double factor = __OOFEM_POW((double) this->numberOfGaussPoints, 1./3.);
- return this -> giveLenghtInDir (normalToCrackPlane)/factor;
+  if (normalToCrackPlane.giveSize() != 0) {
+    double factor = __OOFEM_POW((double) this->numberOfGaussPoints, 1./3.);
+    return this -> giveLenghtInDir (normalToCrackPlane)/factor;
+  } else {
+    int i;
+    IntegrationRule* iRule;
+    GaussPoint* gp ;
+    double volume = 0.0;
+    
+    iRule = integrationRulesArray[giveDefaultIntegrationRule()];
+    for (i=0 ; i < iRule->getNumberOfIntegrationPoints() ; i++) {
+      gp  = iRule->getIntegrationPoint(i) ;
+      volume += this -> computeVolumeAround(gp) ;
+    } 
+    
+    return __OOFEM_POW(volume, 1./3.);
+  }
 }
 
 
@@ -618,6 +633,7 @@ void LSpace :: drawRawGeometry (oofegGraphicContext &gc)
   EGAttachObject(go, (EObjectP) this);
   EMAddGraphicsToModel(ESIModel(), go);
 
+  /*
   FloatArray c(3); 
   c.at(1) = -1.0; c.at(2) = 0.0; c.at(3) = 0.0;
   this->drawTriad (c,4);
@@ -631,6 +647,7 @@ void LSpace :: drawRawGeometry (oofegGraphicContext &gc)
   this->drawTriad (c,2);
   c.at(1) = 0.0; c.at(2) = 0.0; c.at(3) =  1.0;
   this->drawTriad (c,1);
+  */
 }
 
 void LSpace :: drawTriad (FloatArray &coords, int isurf)
