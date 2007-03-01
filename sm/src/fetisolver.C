@@ -46,7 +46,7 @@
 #include "engngm.h"
 #include "feticommunicator.h"
 
-FETISolver::FETISolver (int i, Domain* d, EngngModel* m) : SparseLinearSystemNM (i,d,m), pcbuff(), processCommunicator (m, &pcbuff, 0)
+FETISolver::FETISolver (int i, Domain* d, EngngModel* m) : SparseLinearSystemNM (i,d,m), pcbuff(CBT_static), processCommunicator (m, &pcbuff, 0)
 {
  err    = 1.e-6;
  ni     = 20;
@@ -88,7 +88,7 @@ FETISolver::estimateMaxPackSize (IntArray &map, CommunicationBuffer &buff, int &
  
 }
  
- return (buff.giveDoubleVecPackSize (1) * count * FETISOLVER_MAX_RBM);
+ return (buff.givePackSize (MPI_DOUBLE, 1) * count * FETISOLVER_MAX_RBM);
 }
 
 
@@ -116,7 +116,7 @@ void FETISolver :: setUpCommunicationMaps ()
  int nnodes = domain->giveNumberOfDofManagers();
  int boundaryDofManNum = 0;
  int i, j, indx = 1, neq;
- CommunicationBuffer commBuff (MPI_COMM_WORLD);
+ StaticCommunicationBuffer commBuff (MPI_COMM_WORLD);
  IntArray commMap;
 
  // determine the total number of boundary dof managers 
@@ -125,7 +125,7 @@ void FETISolver :: setUpCommunicationMaps ()
  }
 
  if (domain->giveEngngModel()->giveRank() != 0)  {
-  commBuff.resize(commBuff.giveIntVecPackSize(1));
+  commBuff.resize(commBuff.givePackSize(MPI_INT, 1));
   commBuff.packInt (boundaryDofManNum);
   
 #ifdef __VERBOSE_PARALLEL
@@ -148,7 +148,7 @@ void FETISolver :: setUpCommunicationMaps ()
 
  commMap.resize (boundaryDofManNum);
 
- commBuff.resize(commBuff.giveIntVecPackSize(1)*2*boundaryDofManNum);
+ commBuff.resize(commBuff.givePackSize(MPI_INT, 1)*2*boundaryDofManNum);
  commBuff.init();
  // determine total number of DOFs per each boundary node
  // and build communication map simultaneously
@@ -243,7 +243,7 @@ FETISolver::packRBM (ProcessCommunicator& processComm)
  int i, ir, size;
  int j, ndofs, eqNum;
  IntArray const* toSendMap = processComm.giveToSendMap();
- CommunicationBuffer* send_buff = processComm.giveSendBuff();
+ CommunicationBuffer* send_buff = processComm.giveProcessCommunicatorBuff()->giveSendBuff();
  IntArray locationArray;
 
 
@@ -270,7 +270,7 @@ FETISolver::masterUnpackRBM (ProcessCommunicator& processComm)
  int i, irbm, idof, size, receivedRank;
  int j, nshared, part, eqNum;
  IntArray const* toRecvMap = processComm.giveToRecvMap();
- CommunicationBuffer* recv_buff = processComm.giveRecvBuff();
+ CommunicationBuffer* recv_buff = processComm.giveProcessCommunicatorBuff()->giveRecvBuff();
  IntArray locationArray;
  double value;
 
@@ -372,7 +372,7 @@ FETISolver::packQQProducts (ProcessCommunicator& processComm)
  int result = 1;
  int i, size;
  IntArray const* toSendMap = processComm.giveToSendMap();
- CommunicationBuffer* send_buff = processComm.giveSendBuff();
+ CommunicationBuffer* send_buff = processComm.giveProcessCommunicatorBuff()->giveSendBuff();
  IntArray locationArray;
 
 
@@ -390,7 +390,7 @@ FETISolver::masterUnpackQQProduct (ProcessCommunicator& processComm)
  int result = 1;
  int i, receivedRank;
  //IntArray const* toRecvMap = processComm.giveToRecvMap();
- CommunicationBuffer* recv_buff = processComm.giveRecvBuff();
+ CommunicationBuffer* recv_buff = processComm.giveProcessCommunicatorBuff()->giveRecvBuff();
  IntArray locationArray;
  //double value;
 
@@ -432,7 +432,7 @@ FETISolver::packSolution (ProcessCommunicator& processComm)
  int j, k, ndofs, eqNum, nshared, part, from;
  double val;
  IntArray const* toSendMap = processComm.giveToSendMap();
- CommunicationBuffer* send_buff = processComm.giveSendBuff();
+ CommunicationBuffer* send_buff = processComm.giveProcessCommunicatorBuff()->giveSendBuff();
  IntArray locationArray;
 
  int rank = processComm.giveRank();
@@ -477,7 +477,7 @@ FETISolver::unpackSolution (ProcessCommunicator& processComm)
  int j, ndofs, eqNum;
  double value;
  IntArray const* toRecvMap = processComm.giveToRecvMap();
- CommunicationBuffer* recv_buff = processComm.giveRecvBuff();
+ CommunicationBuffer* recv_buff = processComm.giveProcessCommunicatorBuff()->giveRecvBuff();
  IntArray locationArray;
 
  receivedRank = processComm.giveRank();
@@ -567,7 +567,7 @@ FETISolver::packResiduals (ProcessCommunicator& processComm)
  int i, size;
  int j, ndofs, eqNum;
  IntArray const* toSendMap = processComm.giveToSendMap();
- CommunicationBuffer* send_buff = processComm.giveSendBuff();
+ CommunicationBuffer* send_buff = processComm.giveProcessCommunicatorBuff()->giveSendBuff();
  IntArray locationArray;
 
 
@@ -594,7 +594,7 @@ FETISolver::unpackResiduals (ProcessCommunicator& processComm)
  int i, size, receivedRank, to;
  int j, idof, nshared, part, eqNum;
  IntArray const* toRecvMap = processComm.giveToRecvMap();
- CommunicationBuffer* recv_buff = processComm.giveRecvBuff();
+ CommunicationBuffer* recv_buff = processComm.giveProcessCommunicatorBuff()->giveRecvBuff();
  IntArray locationArray;
  double value;
 
@@ -699,7 +699,7 @@ FETISolver::packDirectionVector (ProcessCommunicator& processComm)
  int j, k, ndofs, eqNum, nshared, part, from;
  double val;
  IntArray const* toSendMap = processComm.giveToSendMap();
- CommunicationBuffer* send_buff = processComm.giveSendBuff();
+ CommunicationBuffer* send_buff = processComm.giveProcessCommunicatorBuff()->giveSendBuff();
  IntArray locationArray;
 
  int rank = processComm.giveRank();
@@ -745,7 +745,7 @@ FETISolver::unpackDirectionVector (ProcessCommunicator& processComm)
  int i, size;
  int j, ndofs, eqNum;
  IntArray const* toRecvMap = processComm.giveToRecvMap();
- CommunicationBuffer* recv_buff = processComm.giveRecvBuff();
+ CommunicationBuffer* recv_buff = processComm.giveProcessCommunicatorBuff()->giveRecvBuff();
  IntArray locationArray;
  // int receivedRank = domainComm.giveRank();
  
@@ -826,7 +826,7 @@ FETISolver::packPPVector (ProcessCommunicator& processComm)
  int i, size;
  int j, ndofs, eqNum;
  IntArray const* toSendMap = processComm.giveToSendMap();
- CommunicationBuffer* send_buff = processComm.giveSendBuff();
+ CommunicationBuffer* send_buff = processComm.giveProcessCommunicatorBuff()->giveSendBuff();
  IntArray locationArray;
 
  
@@ -854,7 +854,7 @@ FETISolver::unpackPPVector (ProcessCommunicator& processComm)
  int i, size, receivedRank, to;
  int j, idof, nshared, part, eqNum;
  IntArray const* toRecvMap = processComm.giveToRecvMap();
- CommunicationBuffer* recv_buff = processComm.giveRecvBuff();
+ CommunicationBuffer* recv_buff = processComm.giveProcessCommunicatorBuff()->giveRecvBuff();
  IntArray locationArray;
  double value;
 
@@ -953,7 +953,7 @@ FETISolver::packGammas (ProcessCommunicator& processComm)
 
  int irbm, result = 1;
  int rank = processComm.giveRank();
- CommunicationBuffer* send_buff = processComm.giveSendBuff();
+ CommunicationBuffer* send_buff = processComm.giveProcessCommunicatorBuff()->giveSendBuff();
 
  for (irbm = 1; irbm <= nsem.at(rank+1); irbm++) {
   result &= send_buff->packDouble (gamma.at(rbmAddr.at(rank+1)+irbm-1));
@@ -968,7 +968,7 @@ FETISolver::unpackGammas (ProcessCommunicator& processComm)
 { 
  // slaves
  int irbm, result = 1;
- CommunicationBuffer* recv_buff = processComm.giveRecvBuff();
+ CommunicationBuffer* recv_buff = processComm.giveProcessCommunicatorBuff()->giveRecvBuff();
  
  localGammas.resize(nse);
  for (irbm = 1; irbm <= nse; irbm++) {
@@ -1002,7 +1002,7 @@ FETISolver::solve (SparseMtrx* A, FloatArray* partitionLoad, FloatArray* partiti
  int masterLoopStatus;
  double nom=0.0, denom, alpha, beta, ares, energyNorm=0.0;
  FloatMatrix l1;
- CommunicationBuffer commBuff (MPI_COMM_WORLD);
+ StaticCommunicationBuffer commBuff (MPI_COMM_WORLD);
  Skyline* partitionStiffness;
 
  if (A->giveType() != SMT_Skyline)  _error ("solve: unsuported sparse matrix type");
@@ -1073,7 +1073,7 @@ FETISolver::solve (SparseMtrx* A, FloatArray* partitionLoad, FloatArray* partiti
 
 //  commBuff.init();
   if (rank==0){
-  commBuff.resize(commBuff.giveIntVecPackSize(1));
+  commBuff.resize(commBuff.givePackSize(MPI_INT, 1));
   //
   // receive data
   //
@@ -1111,7 +1111,7 @@ FETISolver::solve (SparseMtrx* A, FloatArray* partitionLoad, FloatArray* partiti
                     rank,"FETISolver :: solveYourselfAt", nse);
 #endif
 
-  commBuff.resize(commBuff.giveIntVecPackSize(1));
+  commBuff.resize(commBuff.givePackSize(MPI_INT, 1));
   commBuff.packInt(nse);
   commBuff.iSend (0, FETISolver::NumberOfRBMMsg);
 
@@ -1212,7 +1212,7 @@ FETISolver::solve (SparseMtrx* A, FloatArray* partitionLoad, FloatArray* partiti
 
   // receive send aproximation of solution
   processCommunicator.initReceive (FETISolver::SolutionMessage);
-  while (!processCommunicator.giveRecvBuff ()->testCompletion (source, tag)) ;
+  while (!processCommunicator.receiveCompleted()) ;
   processCommunicator.unpackData (this, &FETISolver::unpackSolution);
  }
 
@@ -1295,7 +1295,7 @@ FETISolver::solve (SparseMtrx* A, FloatArray* partitionLoad, FloatArray* partiti
 
    // receive direction vector on slaves
    processCommunicator.initReceive (FETISolver::DirectionVectorMessage);
-   while (!processCommunicator.giveRecvBuff ()->testCompletion (source, tag)) ;
+   while (!processCommunicator.receiveCompleted()) ;
    processCommunicator.unpackData (this, &FETISolver::unpackDirectionVector);
   }
   
@@ -1328,7 +1328,7 @@ FETISolver::solve (SparseMtrx* A, FloatArray* partitionLoad, FloatArray* partiti
 
       if (fabs(denom) < FETISOLVER_ZERONUM){
         OOFEM_LOG_RELEVANT ("FETISolver::solve :  v modifikovane metode sdruzenych gradientu je nulovy jmenovatel u soucinitele alpha\n");
-        commBuff.resize(commBuff.giveIntVecPackSize(1));
+        commBuff.resize(commBuff.givePackSize(MPI_INT, 1));
         commBuff.init();
         commBuff.packInt(FETISolverIterationBreak);
         commBuff.bcast (0);
@@ -1355,7 +1355,7 @@ FETISolver::solve (SparseMtrx* A, FloatArray* partitionLoad, FloatArray* partiti
       denom = nom;
       if (fabs(denom) < FETISOLVER_ZERONUM) {
         OOFEM_LOG_RELEVANT ("FETISolver::solve : v modifikovane metode sdruzenych gradientu je nulovy jmenovatel u soucinitele beta\n");
-        commBuff.resize(commBuff.giveIntVecPackSize(1));
+        commBuff.resize(commBuff.givePackSize(MPI_INT, 1));
         commBuff.init();
         commBuff.packInt(FETISolverIterationBreak);
         commBuff.bcast (0);
@@ -1365,7 +1365,7 @@ FETISolver::solve (SparseMtrx* A, FloatArray* partitionLoad, FloatArray* partiti
       nom = dotProduct (g,g,masterCommunicator->giveNumberOfEquations());
 
       if (nom < err)  {
-    commBuff.resize(commBuff.giveIntVecPackSize(1));
+    commBuff.resize(commBuff.givePackSize(MPI_INT, 1));
     commBuff.init();
     commBuff.packInt(FETISolverIterationBreak);
     commBuff.bcast (0);
@@ -1386,12 +1386,12 @@ FETISolver::solve (SparseMtrx* A, FloatArray* partitionLoad, FloatArray* partiti
 
 
   if (rank == 0) {
-    commBuff.resize(commBuff.giveIntVecPackSize(1));
+    commBuff.resize(commBuff.givePackSize(MPI_INT, 1));
     commBuff.init();
     commBuff.packInt(FETISolverIterationContinue);
     commBuff.bcast (0);
    } else {
-    commBuff.resize(commBuff.giveIntVecPackSize(1));
+    commBuff.resize(commBuff.givePackSize(MPI_INT, 1));
     commBuff.init();
     commBuff.bcast (0);
     commBuff.unpackInt(masterLoopStatus);
@@ -1419,7 +1419,7 @@ FETISolver::solve (SparseMtrx* A, FloatArray* partitionLoad, FloatArray* partiti
     } else {
      // receive send aproximation of solution
      processCommunicator.initReceive (FETISolver::SolutionMessage);
-     while (!processCommunicator.giveRecvBuff ()->testCompletion (source, tag)) ;
+     while (!processCommunicator.receiveCompleted()) ;
      processCommunicator.unpackData (this, &FETISolver::unpackSolution);
     }
    
@@ -1496,7 +1496,7 @@ FETISolver::solve (SparseMtrx* A, FloatArray* partitionLoad, FloatArray* partiti
 
   // receive solution
   processCommunicator.initReceive (FETISolver::SolutionMessage);
-  while (!processCommunicator.giveRecvBuff ()->testCompletion (source, tag)) ;
+  while (!processCommunicator.receiveCompleted()) ;
   processCommunicator.unpackData (this, &FETISolver::unpackSolution);
  }
  MPI_Barrier (MPI_COMM_WORLD);
@@ -1576,7 +1576,7 @@ FETISolver::solve (SparseMtrx* A, FloatArray* partitionLoad, FloatArray* partiti
  
   // receive gammas
   processCommunicator.initReceive (FETISolver::GammasMessage);
-  while (!processCommunicator.giveRecvBuff ()->testCompletion (source, tag)) ;
+  while (!processCommunicator.receiveCompleted()) ;
   processCommunicator.unpackData (this, &FETISolver::unpackGammas);
  }
  MPI_Barrier (MPI_COMM_WORLD);

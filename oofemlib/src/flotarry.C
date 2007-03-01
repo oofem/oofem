@@ -45,6 +45,7 @@
 #include "flotmtrx.h"
 #include "mathfem.h"
 #include "error.h"
+#include "datastream.h"
 #ifndef __MAKEDEPEND
 #include <math.h>
 #include <string.h>
@@ -623,18 +624,16 @@ FloatArray :: rotatedWith (FloatMatrix& r, char mode)
    // If mode = 't', the method performs the operation  a = r(transp) * a .
    // If mode = 'n', the method performs the operation  a = r * a .
 {
-   FloatMatrix  rot ;
-   FloatArray   rta ;
-
-   if (mode == 't') {
-      rot.beTranspositionOf(r) ;
-   rta.beProductOf (rot, *this);
+  FloatArray   rta ;
+  
+  if (mode == 't') {
+    rta.beTProductOf (r, *this);
   } else if (mode == 'n') {
-   rta.beProductOf (r, *this);
+    rta.beProductOf (r, *this);
   } else {
     OOFEM_ERROR ("FloatArray :: rotatedWith: unsupported mode");
   }
-
+  
   *this = rta;
 }
 
@@ -793,9 +792,35 @@ FloatArray :: computeNorm()
  return sqrt (norm);
 }
  
+double
+FloatArray :: sum ()
+  // Returns sum of all values of receiver.
+{
+  register int i;
+  double* p, sum=0;
+  
+  p = values;
+  i = size;
+  while (i--)
+    sum += *(p++);
+  
+  return sum;
+}
+
+void 
+FloatArray :: copySubVector (const FloatArray& src, int si)
+{
+  int i, reqSize, n = src.giveSize();
+  
+  si --;
+  reqSize = si+n;
+  if (this->giveSize() < reqSize) this->resize(reqSize);
+  
+  for (i=1; i<= n; i++) this->at(si+i) = src.at(i);
+}
 
 
-contextIOResultType  FloatArray :: storeYourself (FILE* stream)
+contextIOResultType  FloatArray :: storeYourself (DataStream* stream, ContextMode mode)
 // writes receiver's binary image into stream
 // use id to distinguish some instances
 // return value >0 succes
@@ -803,18 +828,18 @@ contextIOResultType  FloatArray :: storeYourself (FILE* stream)
 {
   int type_id = FloatArrayClass;
   // write class header
-  if (fwrite(&type_id,sizeof(int),1,stream)!= 1) return CIO_IOERR;
+  if (!stream->write(&type_id,1)) return CIO_IOERR;
   // write size 
-  if (fwrite(&size,sizeof(int),1,stream)!= 1) return CIO_IOERR;
+  if (!stream->write(&size,1)) return CIO_IOERR;
   // write raw data
- if (size) {
-  if (fwrite(values,sizeof(double),size,stream) != (size_t) size) return CIO_IOERR;
- }
+  if (size) {
+    if (!stream->write(values,size)) return CIO_IOERR;
+  }
   // return result back
   return CIO_OK;
 }
 
-contextIOResultType  FloatArray :: restoreYourself (FILE* stream)
+contextIOResultType  FloatArray :: restoreYourself (DataStream* stream, ContextMode mode)
 // reads receiver from stream
 // warning - overwrites existing data!
 // returns 0 if file i/o error
@@ -822,16 +847,16 @@ contextIOResultType  FloatArray :: restoreYourself (FILE* stream)
 {
   int class_id;
   // read class header
-  if (fread(&class_id,sizeof(int),1,stream) != 1) return CIO_IOERR;
+  if (!stream->read(&class_id,1)) return CIO_IOERR;
   if (class_id != FloatArrayClass) return CIO_BADVERSION;
   // read size 
-  if (fread(&size,sizeof(int),1,stream) != 1) return CIO_IOERR;
+  if (!stream->read(&size,1)) return CIO_IOERR;
   if (values!=NULL) freeDouble(values);
   if (size) {
     values = allocDouble(size) ;
   allocatedSize = size;
   // read raw data
-  if (fread(values,sizeof(double),size,stream) != (size_t)size) return CIO_IOERR;
+  if (!stream->read(values,size)) return CIO_IOERR;
   } else {
     values = NULL ;
   allocatedSize = 0;
@@ -850,7 +875,7 @@ FloatArray :: packToCommBuffer (CommunicationBuffer& buff) const
  // pack size
  result &= buff.packInt (size);
  // pack data
- result &= buff.packDoubleArray (this->values, size);
+ result &= buff.packArray (this->values, size);
  
  return result;
 }
@@ -863,7 +888,7 @@ FloatArray :: unpackFromCommBuffer (CommunicationBuffer& buff)
  result &= buff.unpackInt (newSize);
  // resize yourself
  this->resize(newSize);
- result &= buff.unpackDoubleArray (this->values, newSize);
+ result &= buff.unpackArray (this->values, newSize);
 
  return result;
 }
@@ -871,7 +896,7 @@ FloatArray :: unpackFromCommBuffer (CommunicationBuffer& buff)
 int 
 FloatArray :: givePackSize (CommunicationBuffer& buff) const
 {
- return buff.giveDoubleVecPackSize (1) + buff.giveDoubleVecPackSize (this->size);
+ return buff.givePackSize (MPI_INT, 1) + buff.givePackSize (MPI_DOUBLE, this->size);
 }
 
 #endif

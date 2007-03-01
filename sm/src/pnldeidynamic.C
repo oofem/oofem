@@ -55,6 +55,7 @@
 #include "verbose.h"
 #include "outputmanager.h"
 #include "mathfem.h"
+#include "datastream.h"
 
 #ifdef __PARALLEL_MODE
 #include "problemcomm.h"
@@ -556,11 +557,12 @@ void  PNlDEIDynamic :: solveYourselfAt (TimeStep* tStep) {
 
 void    PNlDEIDynamic :: updateYourself (TimeStep* stepN) 
 {
- // updates internal state to reached one
- // all internal variables are directly updated by 
- // numerical method - void function here
- this->updateInternalState(stepN);
- StructuralEngngModel::updateYourself(stepN);
+  // updates internal state to reached one
+  // all internal variables are directly updated by 
+  // numerical method - void function here
+
+  // this->updateInternalState(stepN);
+  StructuralEngngModel::updateYourself(stepN);
 }
 
 
@@ -948,7 +950,7 @@ PNlDEIDynamic :: packMasses (ProcessCommunicator& processComm)
  int j, ndofs, eqNum;
  Domain* domain = this->giveDomain(1);
  IntArray const* toSendMap = processComm.giveToSendMap();
- CommunicationBuffer* send_buff = processComm.giveSendBuff();
+ CommunicationBuffer* send_buff = processComm.giveProcessCommunicatorBuff()->giveSendBuff();
  DofManager* dman;
  Dof* jdof;
 
@@ -975,7 +977,7 @@ PNlDEIDynamic::unpackMasses (ProcessCommunicator& processComm)
  Domain* domain = this->giveDomain(1);
  dofManagerParallelMode dofmanmode;
  IntArray const* toRecvMap = processComm.giveToRecvMap();
- CommunicationBuffer* recv_buff = processComm.giveRecvBuff();
+ CommunicationBuffer* recv_buff = processComm.giveProcessCommunicatorBuff()->giveRecvBuff();
  DofManager* dman;
  Dof* jdof;
  double value;
@@ -1092,7 +1094,7 @@ PNlDEIDynamic :: estimateMaxPackSize (IntArray& commMap, CommunicationBuffer& bu
   for (i=1; i<= mapSize; i++) {
    count += domain->giveDofManager (commMap.at(i))->giveNumberOfDofs();
   }
-  return (buff.giveDoubleVecPackSize (1) * count);
+  return (buff.givePackSize (MPI_DOUBLE, 1) * count);
  } else if (packUnpackType == ProblemCommunicator::PC__NODE_CUT) {
   for (i=1; i<= mapSize; i++) {
    ndofs = (dman = domain->giveDofManager (commMap.at(i)))->giveNumberOfDofs();
@@ -1107,7 +1109,7 @@ PNlDEIDynamic :: estimateMaxPackSize (IntArray& commMap, CommunicationBuffer& bu
   }
 
   //printf ("\nestimated count is %d\n",count);
-  return (buff.giveDoubleVecPackSize (1) * max(count,pcount));
+  return (buff.givePackSize (MPI_DOUBLE, 1) * max(count,pcount));
  } else  if (packUnpackType == ProblemCommunicator::PC__REMOTE_ELEMENT_MODE) {
 
   for (i=1; i<= mapSize; i++) {
@@ -1232,36 +1234,38 @@ int PNlDEIDynamic::exchangeRemoteElementData ()
 
 
 
-contextIOResultType PNlDEIDynamic :: saveContext (FILE* stream, void *obj)
+contextIOResultType PNlDEIDynamic :: saveContext (DataStream* stream, ContextMode mode, void *obj)
 // 
 // saves state variable - displacement vector
 //
 {
  contextIOResultType iores;
  int closeFlag = 0;
+ FILE* file;
 
   if (stream==NULL) {
-  if (!this->giveContextFile(&stream, this->giveCurrentStep()->giveNumber(), 
+  if (!this->giveContextFile(&file, this->giveCurrentStep()->giveNumber(), 
                 this->giveCurrentStep()->giveVersion(), contextMode_write)) 
    THROW_CIOERR(CIO_IOERR); // override 
+  stream = new FileDataStream(file);
   closeFlag = 1;
  }
- if ((iores = StructuralEngngModel :: saveContext (stream)) != CIO_OK) THROW_CIOERR(iores);
+ if ((iores = StructuralEngngModel :: saveContext (stream, mode)) != CIO_OK) THROW_CIOERR(iores);
 
- if ((iores = previousIncrementOfDisplacementVector.storeYourself(stream)) != CIO_OK) THROW_CIOERR(iores);
- if ((iores = displacementVector.storeYourself(stream)) != CIO_OK) THROW_CIOERR(iores);
- if ((iores = velocityVector.storeYourself(stream)) != CIO_OK) THROW_CIOERR(iores);
- if ((iores = accelerationVector.storeYourself(stream)) != CIO_OK) THROW_CIOERR(iores);
+ if ((iores = previousIncrementOfDisplacementVector.storeYourself(stream, mode)) != CIO_OK) THROW_CIOERR(iores);
+ if ((iores = displacementVector.storeYourself(stream, mode)) != CIO_OK) THROW_CIOERR(iores);
+ if ((iores = velocityVector.storeYourself(stream, mode)) != CIO_OK) THROW_CIOERR(iores);
+ if ((iores = accelerationVector.storeYourself(stream, mode)) != CIO_OK) THROW_CIOERR(iores);
 
- if (fwrite(&deltaT,sizeof(double),1,stream) != 1) THROW_CIOERR(CIO_IOERR);
+ if (!stream->write(&deltaT,1)) THROW_CIOERR(CIO_IOERR);
  
-  if (closeFlag) fclose (stream); // ensure consistent records
+  if (closeFlag) {fclose (file); delete stream; stream=NULL;}// ensure consistent records
   return CIO_OK;
 }
 
 
 
-contextIOResultType PNlDEIDynamic :: restoreContext (FILE* stream, void *obj)
+contextIOResultType PNlDEIDynamic :: restoreContext (DataStream* stream, ContextMode mode, void *obj)
 // 
 // restore state variable - displacement vector
 //
@@ -1269,26 +1273,28 @@ contextIOResultType PNlDEIDynamic :: restoreContext (FILE* stream, void *obj)
   contextIOResultType iores;
  int closeFlag = 0;
  int istep, iversion;
+ FILE* file;
 
  this->resolveCorrespondingStepNumber (istep, iversion, obj);
 
  if (stream == NULL) {
-  if (!this->giveContextFile(&stream, istep, iversion, contextMode_read)) 
-   THROW_CIOERR(CIO_IOERR); // override 
+  if (!this->giveContextFile(&file, istep, iversion, contextMode_read)) 
+    THROW_CIOERR(CIO_IOERR); // override 
+  stream= new FileDataStream(file);
   closeFlag = 1;
  }
  
  // save element context
- if ((iores = StructuralEngngModel :: restoreContext (stream, obj)) != CIO_OK) THROW_CIOERR(iores);  
+ if ((iores = StructuralEngngModel :: restoreContext (stream, mode, obj)) != CIO_OK) THROW_CIOERR(iores);  
  
- if ((iores = previousIncrementOfDisplacementVector.restoreYourself(stream)) != CIO_OK) THROW_CIOERR(iores);  
- if ((iores = displacementVector.restoreYourself(stream)) != CIO_OK) THROW_CIOERR(iores);  
- if ((iores = velocityVector.restoreYourself(stream)) != CIO_OK) THROW_CIOERR(iores);
- if ((iores = accelerationVector.restoreYourself(stream)) != CIO_OK) THROW_CIOERR(iores);
+ if ((iores = previousIncrementOfDisplacementVector.restoreYourself(stream, mode)) != CIO_OK) THROW_CIOERR(iores);  
+ if ((iores = displacementVector.restoreYourself(stream, mode)) != CIO_OK) THROW_CIOERR(iores);  
+ if ((iores = velocityVector.restoreYourself(stream, mode)) != CIO_OK) THROW_CIOERR(iores);
+ if ((iores = accelerationVector.restoreYourself(stream, mode)) != CIO_OK) THROW_CIOERR(iores);
 
- if (fread (&deltaT,sizeof(double),1,stream) != 1) THROW_CIOERR(CIO_IOERR);
+ if (!stream->read (&deltaT,1)) THROW_CIOERR(CIO_IOERR);
 
-  if (closeFlag) fclose (stream); // ensure consistent records
+  if (closeFlag) {fclose (file); delete stream; stream=NULL;}// ensure consistent records
  return CIO_OK;
 }
 

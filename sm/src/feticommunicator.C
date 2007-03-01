@@ -66,7 +66,7 @@ FETICommunicator :: setUpCommunicationMaps (EngngModel* pm)
  int numberOfBoundaryDofMans;
  int source, tag;
  IntArray numberOfPartitionBoundaryDofMans(size);
- CommunicationBuffer commBuff (MPI_COMM_WORLD);
+ StaticCommunicationBuffer commBuff (MPI_COMM_WORLD);
  // FETIBoundaryDofManager *dofmanrec;
  // Map containing boundary dof managers records, the key is corresponding global number
  // value is corresponding local master dof manager number
@@ -83,7 +83,7 @@ FETICommunicator :: setUpCommunicationMaps (EngngModel* pm)
  }
 
  // resize receive buffer
- commBuff.resize (commBuff.giveIntVecPackSize(1));
+ commBuff.resize (commBuff.givePackSize(MPI_INT, 1));
  
  //
  // receive data
@@ -121,7 +121,7 @@ FETICommunicator :: setUpCommunicationMaps (EngngModel* pm)
  for (i=0; i< size; i++) 
   if (numberOfPartitionBoundaryDofMans.at(i+1) > maxRec) maxRec = numberOfPartitionBoundaryDofMans.at(i+1);
  
- commBuff.resize (2*maxRec*commBuff.giveIntVecPackSize(1));
+ commBuff.resize (2*maxRec*commBuff.givePackSize(MPI_INT, 1));
  // resize communication maps acordingly
  for (i=0; i< size; i++) {
   j = numberOfPartitionBoundaryDofMans.at(i+1);

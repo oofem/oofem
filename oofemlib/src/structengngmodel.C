@@ -258,7 +258,7 @@ StructuralEngngModel :: computeInternalForceReactionContribution (FloatArray& re
 /*
       if (kDof->hasBc(tStep)) { // kDof is supported
        // find corresponding master dofManager and dof number
-       if (kDof->giveClassID() == SlaveDofClass) {
+       if (kDof->giveClassID() == SimpleSlaveDofClass) {
         restrDofManNum = ((SlaveDof*) kDof)->giveMasterDofManagerNum();
         restrDofNum    = ((SlaveDof*) kDof)->giveMasterDofIndx();
        } else {
@@ -384,7 +384,7 @@ StructuralEngngModel :: computeElementLoadReactionContribution (FloatArray& reac
       /*
         if (kDof->hasBc(tStep)) { // kDof is supported
         // find corresponding master dofManager and dof number
-        if (kDof->giveClassID() == SlaveDofClass) {
+        if (kDof->giveClassID() == SimpleSlaveDofClass) {
         restrDofManNum = ((SlaveDof*) kDof)->giveMasterDofManagerNum();
         restrDofNum    = ((SlaveDof*) kDof)->giveMasterDofIndx();
         } else {
@@ -497,7 +497,7 @@ StructuralEngngModel :: computeNodalLoadReactionContribution (FloatArray& reacti
 /*
       if (iDofMan->giveDof(j)->isPrimaryDof()) {
        dofManNum = iDofMan->giveNumber();
-      } else if (iDofMan->giveDof(j)->giveClassID() == SlaveDofClass) {
+      } else if (iDofMan->giveDof(j)->giveClassID() == SimpleSlaveDofClass) {
        dofManNum = ((SlaveDof*)iDofMan->giveDof(j))->giveMasterDofManagerNum();
       } else {
        _error ("printReactionForces: unknown non-primary dof type");
@@ -595,7 +595,7 @@ StructuralEngngModel::buildReactionTable (IntArray& restrDofMans, IntArray& rest
   indofs = inode -> giveNumberOfDofs();
   for (j=1; j<= indofs; j++) {
    jdof = inode->giveDof(j);
-   if ((jdof->giveClassID() != SlaveDofClass) && (jdof-> hasBc (tStep))) { // skip slave dofs
+   if ((jdof->giveClassID() != SimpleSlaveDofClass) && (jdof-> hasBc (tStep))) { // skip slave dofs
     rindex = jdof->givePrescribedEquationNumber();
     if (rindex) {
      count ++;
@@ -624,7 +624,7 @@ StructuralEngngModel::packInternalForces (FloatArray* src, ProcessCommunicator& 
  int j, ndofs, eqNum;
  Domain* domain = this->giveDomain(1);
  IntArray const* toSendMap = processComm.giveToSendMap();
- CommunicationBuffer* send_buff = processComm.giveSendBuff();
+ ProcessCommunicatorBuff* pcbuff = processComm.giveProcessCommunicatorBuff();
  DofManager* dman;
  Dof* jdof;
 
@@ -636,7 +636,7 @@ StructuralEngngModel::packInternalForces (FloatArray* src, ProcessCommunicator& 
    jdof = dman->giveDof(j);
    if (jdof->isPrimaryDof() && (eqNum = jdof->giveEquationNumber())) {
      //fprintf (stderr, "[%d->%d] %d:%d -> %lf\n", rank,  processComm.giveRank(), toSendMap->at(i), j, src->at(eqNum));
-     result &= send_buff->packDouble (src->at(eqNum));
+     result &= pcbuff->packDouble (src->at(eqNum));
    }
   }
  }
@@ -653,7 +653,7 @@ StructuralEngngModel::unpackInternalForces (FloatArray* dest,ProcessCommunicator
  Domain* domain = this->giveDomain(1);
  dofManagerParallelMode dofmanmode;
  IntArray const* toRecvMap = processComm.giveToRecvMap();
- CommunicationBuffer* recv_buff = processComm.giveRecvBuff();
+ ProcessCommunicatorBuff* pcbuff = processComm.giveProcessCommunicatorBuff();
  DofManager* dman;
  Dof* jdof;
  double value;
@@ -667,9 +667,9 @@ StructuralEngngModel::unpackInternalForces (FloatArray* dest,ProcessCommunicator
   for (j=1; j<=ndofs; j++) {
    jdof = dman->giveDof(j);
    if (jdof->isPrimaryDof() && (eqNum = jdof->giveEquationNumber())) {
-    result &= recv_buff->unpackDouble (value);
+    result &= pcbuff->unpackDouble (value);
     //fprintf (stderr, "[%d->%d] %d:%d <- %lf\n", rank,  processComm.giveRank(), toRecvMap->at(i), j, value);
-   if (dofmanmode == DofManager_shared) 
+    if (dofmanmode == DofManager_shared) 
      dest->at(eqNum) += value;
     else if (dofmanmode == DofManager_remote)
      dest->at(eqNum)  = value;
@@ -689,7 +689,7 @@ StructuralEngngModel::packLoad (FloatArray* src, ProcessCommunicator& processCom
  int j, ndofs, eqNum;
  Domain* domain = this->giveDomain(1);
  IntArray const* toSendMap = processComm.giveToSendMap();
- CommunicationBuffer* send_buff = processComm.giveSendBuff();
+ ProcessCommunicatorBuff* pcbuff = processComm.giveProcessCommunicatorBuff();
  DofManager* dman;
  Dof* jdof;
 
@@ -700,7 +700,7 @@ StructuralEngngModel::packLoad (FloatArray* src, ProcessCommunicator& processCom
   for (j=1; j<=ndofs; j++) {
    jdof = dman->giveDof(j);
    if (jdof->isPrimaryDof() && (eqNum = jdof->giveEquationNumber())) {
-    result &= send_buff->packDouble (src->at(eqNum));
+    result &= pcbuff->packDouble (src->at(eqNum));
    }
   }
  }
@@ -717,7 +717,7 @@ StructuralEngngModel::unpackLoad (FloatArray* dest, ProcessCommunicator& process
  Domain* domain = this->giveDomain(1);
  dofManagerParallelMode dofmanmode;
  IntArray const* toRecvMap = processComm.giveToRecvMap();
- CommunicationBuffer* recv_buff = processComm.giveRecvBuff();
+ ProcessCommunicatorBuff* pcbuff = processComm.giveProcessCommunicatorBuff();
  DofManager* dman;
  Dof* jdof;
  double value;
@@ -731,7 +731,7 @@ StructuralEngngModel::unpackLoad (FloatArray* dest, ProcessCommunicator& process
   for (j=1; j<=ndofs; j++) {
    jdof = dman->giveDof(j);
    if (jdof->isPrimaryDof() && (eqNum = jdof->giveEquationNumber())) {
-    result &= recv_buff->unpackDouble (value);
+    result &= pcbuff->unpackDouble (value);
     if (dofmanmode == DofManager_shared) 
      dest->at(eqNum) += value;
     else if (dofmanmode == DofManager_remote)
@@ -750,7 +750,7 @@ StructuralEngngModel :: packRemoteElementData (ProcessCommunicator& processComm)
  int result = 1;
  int i, size;
  IntArray const* toSendMap = processComm.giveToSendMap();
- CommunicationBuffer* send_buff = processComm.giveSendBuff();
+ CommunicationBuffer* send_buff = processComm.giveProcessCommunicatorBuff()->giveSendBuff();
  Domain* domain = this->giveDomain(1);
 
 
@@ -767,7 +767,7 @@ StructuralEngngModel::unpackRemoteElementData (ProcessCommunicator& processComm)
  int result = 1;
  int i, size;
  IntArray const* toRecvMap = processComm.giveToRecvMap();
- CommunicationBuffer* recv_buff = processComm.giveRecvBuff();
+ CommunicationBuffer* recv_buff = processComm.giveProcessCommunicatorBuff()->giveRecvBuff();
  Element* element;
  Domain* domain = this->giveDomain(1);
 
@@ -791,7 +791,8 @@ StructuralEngngModel::packReactions (FloatArray* src, ProcessCommunicator& proce
  int j, ndofs, eqNum;
  Domain* domain = this->giveDomain(1);
  IntArray const* toSendMap = processComm.giveToSendMap();
- CommunicationBuffer* send_buff = processComm.giveSendBuff();
+ ProcessCommunicatorBuff* pcbuff = processComm.giveProcessCommunicatorBuff();
+ //CommunicationBuffer* send_buff = processComm.giveSendBuff();
  DofManager* dman;
  Dof* jdof;
 
@@ -802,7 +803,7 @@ StructuralEngngModel::packReactions (FloatArray* src, ProcessCommunicator& proce
   for (j=1; j<=ndofs; j++) {
    jdof = dman->giveDof(j);
    if (jdof->isPrimaryDof() && (eqNum = jdof->givePrescribedEquationNumber())) {
-    result &= send_buff->packDouble (src->at(eqNum));
+    result &= pcbuff->packDouble (src->at(eqNum));
    }
   }
  }
@@ -819,7 +820,8 @@ StructuralEngngModel::unpackReactions (FloatArray* dest,ProcessCommunicator& pro
  Domain* domain = this->giveDomain(1);
  dofManagerParallelMode dofmanmode;
  IntArray const* toRecvMap = processComm.giveToRecvMap();
- CommunicationBuffer* recv_buff = processComm.giveRecvBuff();
+ ProcessCommunicatorBuff* pcbuff = processComm.giveProcessCommunicatorBuff();
+ //CommunicationBuffer* recv_buff = processComm.giveRecvBuff();
  DofManager* dman;
  Dof* jdof;
  double value;
@@ -833,7 +835,7 @@ StructuralEngngModel::unpackReactions (FloatArray* dest,ProcessCommunicator& pro
   for (j=1; j<=ndofs; j++) {
    jdof = dman->giveDof(j);
    if (jdof->isPrimaryDof() && (eqNum = jdof->givePrescribedEquationNumber())) {
-    result &= recv_buff->unpackDouble (value);
+    result &= pcbuff->unpackDouble (value);
     if (dofmanmode == DofManager_shared) 
      dest->at(eqNum) += value;
     else if (dofmanmode == DofManager_remote)

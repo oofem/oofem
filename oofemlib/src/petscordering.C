@@ -216,8 +216,8 @@ PetscNatural2GlobalOrdering::init (EngngModel* emodel, EquationID ut, int di, Eq
   // pack data for remote procs
   CommunicationBuffer** buffs = new CommunicationBuffer* [nproc];
   for (p=0; p<nproc; p++) {
-    buffs[p] = new CommunicationBuffer (MPI_COMM_WORLD, 0);
-    buffs[p] -> resize (buffs[p] -> giveIntVecPackSize(1)*sizeToSend(p));
+    buffs[p] = new StaticCommunicationBuffer (MPI_COMM_WORLD, 0);
+    buffs[p] -> resize (buffs[p] -> givePackSize(MPI_INT, 1)*sizeToSend(p));
   }
 
 
@@ -289,8 +289,8 @@ PetscNatural2GlobalOrdering::init (EngngModel* emodel, EquationID ut, int di, Eq
   // receive remote eqs and complete global numbering
   CommunicationBuffer** rbuffs = new CommunicationBuffer* [nproc];
   for (p=0; p<nproc; p++) {
-    rbuffs[p] = new CommunicationBuffer (MPI_COMM_WORLD,0); 
-    rbuffs[p]->resize(rbuffs[p]->giveIntVecPackSize(1)*sizeToRecv(p));
+    rbuffs[p] = new StaticCommunicationBuffer (MPI_COMM_WORLD,0); 
+    rbuffs[p]->resize(rbuffs[p]->givePackSize(MPI_INT, 1)*sizeToRecv(p));
   }
 
   //fprintf (stderr, "[%d] Receiving glob nums ...", myrank);
@@ -301,7 +301,7 @@ PetscNatural2GlobalOrdering::init (EngngModel* emodel, EquationID ut, int di, Eq
   do {
     for (p=0; p<nproc; p++) {
       if (finished.at(p+1) == 0) {
-        if (rbuffs[p]->testCompletion()) {
+        if (rbuffs[p]->receiveCompleted()) {
           // data are here
           // unpack them
           int nite = nrecToReceive(p);

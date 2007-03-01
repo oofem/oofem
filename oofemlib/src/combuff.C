@@ -49,11 +49,10 @@
 #include "error.h"
 
 #ifdef __USE_MPI
-CommunicationBuffer :: CommunicationBuffer(MPI_Comm comm, int size, bool dynamic) 
+MPIBuffer :: MPIBuffer (int size, bool dynamic) 
 {
  this->size = 0;
  curr_pos = 0;
- communicator = comm;
  buff = NULL;
  isDynamic = dynamic;
  request = MPI_REQUEST_NULL;
@@ -62,11 +61,10 @@ CommunicationBuffer :: CommunicationBuffer(MPI_Comm comm, int size, bool dynamic
 }
 
 
-CommunicationBuffer :: CommunicationBuffer (MPI_Comm comm, bool dynamic)
+MPIBuffer :: MPIBuffer (bool dynamic)
 {
  this->size = 0;
  curr_pos = 0;
- communicator = comm;
  buff = NULL;
  isDynamic = dynamic;
  request = MPI_REQUEST_NULL;
@@ -74,14 +72,14 @@ CommunicationBuffer :: CommunicationBuffer (MPI_Comm comm, bool dynamic)
 
 #endif
 
-CommunicationBuffer :: ~CommunicationBuffer ()
+MPIBuffer :: ~MPIBuffer ()
 {
  if (buff) delete buff;
 }
 
 
 int 
-CommunicationBuffer :: resize (int newSize)
+MPIBuffer :: resize (int newSize)
 {
  // do not shrink
  if (size >= newSize) return 1;
@@ -103,7 +101,7 @@ CommunicationBuffer :: resize (int newSize)
  if ((newBuff = (ComBuff_BYTE_TYPE*) 
       malloc (newSize*sizeof (ComBuff_BYTE_TYPE))) == NULL) {
    // alloc failed -> memory error
-   OOFEM_ERROR ("CommunicationBuffer :: resize failed");
+   OOFEM_ERROR ("MPIBuffer :: resize failed");
  }
  // copy old buffer into new one
  memmove (newBuff, this->buff, curr_pos);
@@ -116,7 +114,7 @@ CommunicationBuffer :: resize (int newSize)
 }
 
 void
-CommunicationBuffer :: init ()
+MPIBuffer :: init ()
 {
  curr_pos = 0;
  request = MPI_REQUEST_NULL;
@@ -125,11 +123,11 @@ CommunicationBuffer :: init ()
 #ifdef __USE_MPI
 
 int 
-CommunicationBuffer :: packIntArray (int* src, int n)
+MPIBuffer :: packArray (MPI_Comm communicator, const void* src, int n, MPI_Datatype type)
 {
  int _size;
  // ask MPI for packing size for integer
- _size = this->giveIntVecPackSize (n);
+ _size = this->givePackSize (communicator, type, n);
  
  if ((this->curr_pos + _size > this->size))  {
    // reallocate itself
@@ -140,141 +138,117 @@ CommunicationBuffer :: packIntArray (int* src, int n)
      return 0;
    }
  }
- return (MPI_Pack (src, n, MPI_INT, this->buff, this->size, 
-          &this->curr_pos, this->communicator) == MPI_SUCCESS);
+ void* __src = const_cast<void*>(src); // throw away const
+ return (MPI_Pack (__src, n, type, this->buff, this->size, 
+          &this->curr_pos, communicator) == MPI_SUCCESS);
 }
 
 int 
-CommunicationBuffer :: packDoubleArray (double* src, int n)
-{
- int _size;
- // ask MPI for packing size for double
- _size = this->giveDoubleVecPackSize (n);
- 
- if ((this->curr_pos + _size > this->size))  {
-   // reallocate itself
-   if (isDynamic) {
-     if (this->resize (this->curr_pos + _size + __CommunicationBuffer_ALLOC_CHUNK) == 0) return 0;
-   } else {
-     OOFEM_WARNING ("CommunicationBuffer :: packIntArray: Resize requested in static mode");
-     return 0;
-   }
- }
- return (MPI_Pack (src, n, MPI_DOUBLE, this->buff, this->size, 
-          &this->curr_pos, this->communicator) == MPI_SUCCESS);
-}
-
-int
-CommunicationBuffer :: packIntArray (const IntArray &arry)
-{
- return arry.packToCommBuffer (*this);
-}
-
-int 
-CommunicationBuffer::packFloatArray (const FloatArray &arry)
-{
- return arry.packToCommBuffer (*this);
-}
-
-int 
-CommunicationBuffer::packFloatMatrix (const FloatMatrix &mtrx)
-{
- return mtrx.packToCommBuffer (*this);
-}
-
-int 
-CommunicationBuffer :: unpackIntArray (int* dest, int n)
+MPIBuffer :: unpackArray (MPI_Comm communicator, void* dest, int n, MPI_Datatype type)
 {
  return (MPI_Unpack (this->buff, this->size, &this->curr_pos, 
-           dest, n, MPI_INT, this->communicator) == MPI_SUCCESS);
+                     dest, n, type, communicator) == MPI_SUCCESS);
 }
 
 int 
-CommunicationBuffer :: unpackDoubleArray (double* dest, int n)
-{
- return (MPI_Unpack (this->buff, this->size, &this->curr_pos, 
-           dest, n, MPI_DOUBLE, this->communicator) == MPI_SUCCESS);
-}
-
-int 
-CommunicationBuffer :: unpackIntArray (IntArray &arry) 
-{ return arry.unpackFromCommBuffer (*this);}
-
-int CommunicationBuffer :: unpackFloatArray (FloatArray &arry) 
-{ return arry.unpackFromCommBuffer (*this);}
-
-int CommunicationBuffer :: unpackFloatMatrix (FloatMatrix&mtrx)
-{ return mtrx.unpackFromCommBuffer (*this);}
-
-
-int 
-CommunicationBuffer::iSend (int dest, int tag)
+MPIBuffer::iSend (MPI_Comm communicator,int dest, int tag)
 {
  return (MPI_Isend (this->buff, this->curr_pos, MPI_PACKED, dest, tag, 
-           this->communicator, &this->request) == MPI_SUCCESS);
+                    communicator, &this->request) == MPI_SUCCESS);
 }
 
 
 int 
-CommunicationBuffer::iRecv (int source, int tag, int count)
+MPIBuffer::iRecv (MPI_Comm communicator, int source, int tag, int count)
 {
- if (count) {
-  if (count >= this->size)  {
-   // reallocate itself
-   if (this->resize (count) == 0) return 0;
+  if (count) {
+    if (count >= this->size)  {
+      // reallocate itself
+      if (this->resize (count) == 0) return 0;
+    }
   }
- }
- return (MPI_Irecv (this->buff,this->size, MPI_PACKED, source, tag, 
-           this->communicator, &this->request) == MPI_SUCCESS);
+  return (MPI_Irecv (this->buff,this->size, MPI_PACKED, source, tag, 
+                     communicator, &this->request) == MPI_SUCCESS);
 }
 
 int
-CommunicationBuffer :: testCompletion ()
+MPIBuffer :: testCompletion ()
 {
- int flag;
- MPI_Status status;
- 
- MPI_Test (&this->request, &flag, &status);
- return flag;
+  int flag;
+  MPI_Status status;
+  
+  MPI_Test (&this->request, &flag, &status);
+  return flag;
 }
 
 int
-CommunicationBuffer :: testCompletion (int &source, int& tag)
+MPIBuffer :: testCompletion (int &source, int& tag)
 {
- int flag;
- MPI_Status status;
- 
- MPI_Test (&this->request, &flag, &status);
-
- source = status.MPI_SOURCE;
- tag = status.MPI_TAG;
-
- return flag;
+  int flag;
+  MPI_Status status;
+  
+  MPI_Test (&this->request, &flag, &status);
+  
+  source = status.MPI_SOURCE;
+  tag = status.MPI_TAG;
+  
+  return flag;
 }
 
 int
-CommunicationBuffer :: bcast (int root)
+MPIBuffer :: bcast (MPI_Comm communicator,int root)
 {
- return MPI_Bcast (this->buff, this->size, MPI_PACKED, root, this->communicator);
+  return MPI_Bcast (this->buff, this->size, MPI_PACKED, root, communicator);
 }
 
 
 int 
-CommunicationBuffer :: giveIntVecPackSize(int size) 
+MPIBuffer :: givePackSize(MPI_Comm communicator, MPI_Datatype type, int size) 
 {
- int requredSpace;
- MPI_Pack_size (size, MPI_INT, this->communicator, &requredSpace);
- return requredSpace;
+  int requredSpace;
+  MPI_Pack_size (size, type, communicator, &requredSpace);
+  return requredSpace;
 }
+
+
+void
+MPIBuffer :: dump()
+{
+  int _i;
+  for (_i=0; _i< 20; ++_i) {
+    fprintf (stderr, "%d ", buff[_i]);
+  }
+  fprintf (stderr, "\n");
+}
+
+
+
+/*** CommunicationBuffer CLASS ****/
+
 
 int 
-CommunicationBuffer :: giveDoubleVecPackSize(int size) 
-{
- int requredSpace;
- MPI_Pack_size (size, MPI_DOUBLE, this->communicator, &requredSpace);
- return requredSpace;
-}
+CommunicationBuffer::packIntArray (const IntArray &arry)
+{return arry.packToCommBuffer (*this);}
 
+int
+CommunicationBuffer::packFloatArray (const FloatArray &arry) 
+{return arry.packToCommBuffer (*this);}
+
+int
+CommunicationBuffer::packFloatMatrix (const FloatMatrix &mtrx) 
+{return mtrx.packToCommBuffer (*this);}
+
+int
+CommunicationBuffer::unpackIntArray (IntArray &arry) 
+{return arry.unpackFromCommBuffer (*this);}
+
+int
+CommunicationBuffer::unpackFloatArray (FloatArray &arry) 
+{ return arry.unpackFromCommBuffer (*this);}
+
+int
+CommunicationBuffer::unpackFloatMatrix (FloatMatrix&mtrx) 
+{ return mtrx.unpackFromCommBuffer (*this);}
 
 #endif
 

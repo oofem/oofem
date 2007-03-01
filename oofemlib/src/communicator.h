@@ -66,33 +66,47 @@
 */
 class CommunicatorBuff
 {
-protected:
- /// number of processes
- int size;
- /// array of process communicators
- ProcessCommunicatorBuff** processCommBuffs;
-
-public:
-  CommunicatorBuff (int s);
-
- /**
-   Returns i-th process communicator buff. The process comm buffs are numbered from rank 0.
-   @param i process communicator buff index [0..size-1]
-   @return pointer to corresponding process communicator buff, NULL otherwise.
-   */
- ProcessCommunicatorBuff*
-   giveProcessCommunicatorBuff (int i) {if (i < size) return processCommBuffs[i]; else return NULL;}
+ public:
+ protected:
+  /// number of processes
+  int size;
+  /// array of process communicators
+  ProcessCommunicatorBuff** processCommBuffs;
+  
+ public:
+  CommunicatorBuff (int s, CommBuffType t=CBT_static);
+  ~CommunicatorBuff ();
+  
+  /**
+     Returns i-th process communicator buff. The process comm buffs are numbered from rank 0.
+     @param i process communicator buff index [0..size-1]
+     @return pointer to corresponding process communicator buff, NULL otherwise.
+  */
+  ProcessCommunicatorBuff*
+    giveProcessCommunicatorBuff (int i) {if (i < size) return processCommBuffs[i]; else return NULL;}
 };
+
 
 /**
  Class representing communicator.
  It is usually attribute of  Engng model.
  Problem comunicator provides all services for communication with 
  associated remote problems. It manages several process (task) comunicators.
+
+ The communicator mode determines the communication:
+
+ (Static) The mode can be static, meaning that each node can assemble its communication maps
+ independently (or by independent communication). This implies that the size of
+ communication buffers is known in advance. Also if no data are planned to send to remote node, there
+ is no communication with this node (both sender and receiver know that there will be no data to send).
+ 
+ (Dynamic) In this case the communication pattern and the ammount of data sent between nodes is 
+ not known in advance. This requires to use dynamic (packeted) buffering.
+ 
 */
 class Communicator 
 {
-protected:
+ protected:
  /// rank of process 
  int rank; 
  /// number of processes
@@ -101,6 +115,9 @@ protected:
  ProcessCommunicator** processComms;
  /// Engng model
  EngngModel* engngModel;
+ /// mode
+ CommunicatorMode mode;
+ 
 
 public:
  /** 
@@ -110,7 +127,7 @@ public:
   @param size #number of colaborating processes
   @param mode communicator mode.
   */
- Communicator (EngngModel* emodel, CommunicatorBuff* b, int rank, int size);
+ Communicator (EngngModel* emodel, CommunicatorBuff* b, int rank, int size, CommunicatorMode m=CommMode_Static);
  /// Destructor
  virtual ~Communicator () ;
 
@@ -175,7 +192,7 @@ public:
   Service for setting up the communication patterns with other remote processes.
   Sets up the toSend and toRecv attributes in associated problem communicators.
   */
- virtual void setUpCommunicationMaps (EngngModel* pm) = 0;
+ virtual void setUpCommunicationMaps (EngngModel* pm) {}
 
  /// prints error message and exits
  void error (char* file, int line, char *format, ...) const ;
@@ -225,7 +242,8 @@ Communicator :: unpackAllData (T* ptr, int (T::*unpackFunc) (ProcessCommunicator
    received = 0;
    for  (i=0; i<size; i++)  {
     if (recvFlag.at(i+1)) {
-     if (giveProcessCommunicator(i)->giveRecvBuff()->testCompletion()) {
+      //if (giveProcessCommunicator(i)->giveRecvBuff()->testCompletion()) {
+      if (giveProcessCommunicator(i)->receiveCompleted()) {
       
 #ifdef __VERBOSE_PARALLEL
        OOFEM_LOG_DEBUG("[process rank %3d]: %-30s: Received data from partition %3d\n",
@@ -279,7 +297,9 @@ Communicator :: unpackAllData (T* ptr, FloatArray* dest, int (T::*unpackFunc) (F
    received = 0;
    for  (i=0; i<size; i++)  {
     if (recvFlag.at(i+1)) {
-     if (giveProcessCommunicator(i)->giveRecvBuff()->testCompletion()) {
+      //if (giveProcessCommunicator(i)->giveRecvBuff()->testCompletion()) {
+      if (giveProcessCommunicator(i)->receiveCompleted()) {
+      
       
 #ifdef __VERBOSE_PARALLEL
        OOFEM_LOG_DEBUG("[process rank %3d]: %-30s: Received data from partition %3d\n",

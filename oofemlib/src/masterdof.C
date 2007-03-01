@@ -45,6 +45,7 @@
 
 #include "flotarry.h"
 #include "dictionr.h"
+#include "datastream.h"
 
 #include "debug.h"
 #include "cltypes.h"
@@ -333,7 +334,7 @@ void  MasterDof :: printYourself ()
 }
 
   
-contextIOResultType MasterDof :: saveContext (FILE* stream, void *obj)
+contextIOResultType MasterDof :: saveContext (DataStream* stream, ContextMode mode, void *obj)
 //
 // saves full node context (saves state variables, that completely describe
 // current state)
@@ -342,17 +343,23 @@ contextIOResultType MasterDof :: saveContext (FILE* stream, void *obj)
   contextIOResultType iores ;
   if (stream == NULL) _error ("saveContex : can't write into NULL stream");
   
-  if ((iores = Dof::saveContext (stream, obj)) != CIO_OK) THROW_CIOERR(iores);
- // store equation number of receiver
- if (fwrite (&equationNumber,sizeof(int),1,stream) != 1) THROW_CIOERR(CIO_IOERR);
+  if ((iores = Dof::saveContext (stream, mode, obj)) != CIO_OK) THROW_CIOERR(iores);
+
+  if (mode & CM_Definition ) {
+    if (!stream->write (&bc,1)) THROW_CIOERR(CIO_IOERR);
+    if (!stream->write (&ic,1)) THROW_CIOERR(CIO_IOERR);
+  }
+
+  // store equation number of receiver
+  if (!stream->write (&equationNumber,1)) THROW_CIOERR(CIO_IOERR);
   if (dofManager -> giveDomain() -> giveEngngModel() -> requiresUnknowsDictionaryUpdate()) 
-  if ((iores = unknowns->saveContext (stream,obj)) != CIO_OK) THROW_CIOERR(iores);
+  if ((iores = unknowns->saveContext (stream,mode,obj)) != CIO_OK) THROW_CIOERR(iores);
 
   return CIO_OK;
 }
 
 
-contextIOResultType MasterDof :: restoreContext (FILE* stream, void *obj)
+contextIOResultType MasterDof :: restoreContext (DataStream* stream, ContextMode mode, void *obj)
 //
 // restores full node context (saves state variables, that completely describe
 // current state)
@@ -361,11 +368,18 @@ contextIOResultType MasterDof :: restoreContext (FILE* stream, void *obj)
   contextIOResultType iores ;
   if (stream == NULL) _error ("restoreContex : can't write into NULL stream");
 
-  if ((iores = Dof::restoreContext (stream, obj)) != CIO_OK) THROW_CIOERR(iores);
- // read equation number of receiver
- if (fread (&equationNumber,sizeof(int),1,stream) != 1) THROW_CIOERR(CIO_IOERR);
+  if ((iores = Dof::restoreContext (stream, mode, obj)) != CIO_OK) THROW_CIOERR(iores);
+
+  if (mode & CM_Definition ) {
+    if (!stream->read (&bc,1)) THROW_CIOERR(CIO_IOERR);
+    if (!stream->read (&ic,1)) THROW_CIOERR(CIO_IOERR);
+  }
+  
+
+  // read equation number of receiver
+  if (!stream->read (&equationNumber,1)) THROW_CIOERR(CIO_IOERR);
   if (dofManager -> giveDomain() -> giveEngngModel() -> requiresUnknowsDictionaryUpdate()) 
-  if ((iores = unknowns->restoreContext (stream,obj)) != CIO_OK) THROW_CIOERR(iores);
+  if ((iores = unknowns->restoreContext (stream,mode,obj)) != CIO_OK) THROW_CIOERR(iores);
   
   return CIO_OK;
 }

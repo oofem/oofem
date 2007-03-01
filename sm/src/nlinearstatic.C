@@ -60,13 +60,15 @@
 //#include "skyline.h"
 //#include "skylineu.h"
 #include "outputmanager.h"
-
+#include "datastream.h"
 //#include "dyncompcol.h"
 #include "usrdefsub.h"
 #include "clock.h"
 
 #ifdef TIME_REPORT
+#ifndef __MAKEDEPEND
 #include <time.h>
+#endif
 #endif
 
 NonLinearStatic :: NonLinearStatic (int i, EngngModel* _master) : LinearStatic (i,_master),
@@ -222,7 +224,8 @@ NonLinearStatic :: initializeFrom (InputRecord* ir)
  //else if (ir->hasField ("elementcutmode")) commMode = ProblemCommunicator::PC__ELEMENT_CUT;
  //else _error ("instanciateFrom: ProblemCommunicator comm mode not specified");
  if (isParallel()) {
-   commBuff = new CommunicatorBuff (this->giveNumberOfProcesses());
+   //commBuff = new CommunicatorBuff (this->giveNumberOfProcesses(), CBT_dynamic);
+   commBuff = new CommunicatorBuff (this->giveNumberOfProcesses(), CBT_static);
    communicator = new ProblemCommunicator (this, commBuff, this->giveRank(), 
                                            this->giveNumberOfProcesses(), 
                                            this->commMode);
@@ -829,11 +832,11 @@ void   NonLinearStatic :: terminate (TimeStep* stepN)
   
   if ((domain->giveContextOutputMode() == ALWAYS) ||
   (domain->giveContextOutputMode() == REQUIRED)) {
-   this->saveContext(NULL);
+   this->saveContext(NULL, CM_State);
   }
   else if (domain->giveContextOutputMode() == USERDEFINED) {
    if (stepN->giveNumber()%domain->giveContextOutputStep() == 0) 
-    this->saveContext(NULL);
+    this->saveContext(NULL, CM_State);
   }
 
   
@@ -861,44 +864,47 @@ NonLinearStatic :: printOutputAt (FILE* File,TimeStep* stepN)
  
 }
 
-contextIOResultType NonLinearStatic :: saveContext (FILE* stream, void *obj)
+contextIOResultType NonLinearStatic :: saveContext (DataStream* stream, ContextMode mode, void *obj)
 // 
 // saves state variable - displacement vector
 //
 {
  int closeFlag = 0;
  contextIOResultType iores;
+ FILE* file;
 
   if (stream==NULL) {
-  if (!this->giveContextFile(&stream, this->giveCurrentStep()->giveNumber(), 
-                this->giveCurrentStep()->giveVersion(), contextMode_write)) 
+  if (!this->giveContextFile(&file, this->giveCurrentStep()->giveNumber(), 
+			     this->giveCurrentStep()->giveVersion(), contextMode_write)) 
    THROW_CIOERR(CIO_IOERR); // override 
+  stream = new FileDataStream(file);
   closeFlag = 1;
  }
 
- if ((iores = EngngModel :: saveContext (stream))!= CIO_OK) THROW_CIOERR(iores);
+ if ((iores = EngngModel :: saveContext (stream, mode))!= CIO_OK) THROW_CIOERR(iores);
  //if ((iores = this->giveNumericalMethod(giveCurrentStep())->saveContext (stream)) != CIO_OK) THROW_CIOERR(iores);
  
- if ((iores = totalDisplacement.storeYourself(stream))!= CIO_OK) THROW_CIOERR(iores);
- if ((iores = incrementOfDisplacement.storeYourself(stream))!= CIO_OK) THROW_CIOERR(iores);
+ if ((iores = totalDisplacement.storeYourself(stream, mode))!= CIO_OK) THROW_CIOERR(iores);
+ if ((iores = incrementOfDisplacement.storeYourself(stream, mode))!= CIO_OK) THROW_CIOERR(iores);
 
- if (fwrite(&controllMode,sizeof(NonLinearStatic_controllType),1,stream) != 1) THROW_CIOERR(CIO_IOERR);
- if (fwrite(&loadLevel,sizeof(double),1,stream) != 1) THROW_CIOERR(CIO_IOERR);
- if (fwrite(&cumulatedLoadLevel,sizeof(double),1,stream) != 1) THROW_CIOERR(CIO_IOERR);
+ int _cm = controllMode;
+ if (!stream->write(&_cm,1)) THROW_CIOERR(CIO_IOERR);
+ if (!stream->write(&loadLevel,1)) THROW_CIOERR(CIO_IOERR);
+ if (!stream->write(&cumulatedLoadLevel,1)) THROW_CIOERR(CIO_IOERR);
 
  if (this->nMetaSteps > 1) {
   // store InitialLoadVector
-  if ((iores = initialLoadVector.storeYourself(stream))!= CIO_OK) THROW_CIOERR(iores);
-  if ((iores = initialLoadVectorOfPrescribed.storeYourself(stream))!= CIO_OK) THROW_CIOERR(iores);
+  if ((iores = initialLoadVector.storeYourself(stream,mode))!= CIO_OK) THROW_CIOERR(iores);
+  if ((iores = initialLoadVectorOfPrescribed.storeYourself(stream,mode))!= CIO_OK) THROW_CIOERR(iores);
  }
  
-  if (closeFlag) fclose (stream); // ensure consistent records
+  if (closeFlag) {fclose (file); delete stream; stream=NULL;}// ensure consistent records
   return CIO_OK;
 }
 
 
 
-contextIOResultType NonLinearStatic :: restoreContext (FILE* stream, void *obj)
+contextIOResultType NonLinearStatic :: restoreContext (DataStream* stream, ContextMode mode, void *obj)
 // 
 // restore state variable - displacement vector
 //
@@ -906,33 +912,37 @@ contextIOResultType NonLinearStatic :: restoreContext (FILE* stream, void *obj)
  int closeFlag = 0;
  int istep, iversion; 
  contextIOResultType iores;
+ FILE* file;
 
  this->resolveCorrespondingStepNumber (istep, iversion, obj);
  if (stream == NULL) {
-  if (!this->giveContextFile(&stream, istep, iversion, contextMode_read)) 
+  if (!this->giveContextFile(&file, istep, iversion, contextMode_read)) 
    THROW_CIOERR(CIO_IOERR); // override 
+  stream = new FileDataStream(file);
   closeFlag = 1;
  }
 
  // save element context
- if ((iores = EngngModel :: restoreContext (stream, obj)) != CIO_OK) THROW_CIOERR(iores);  
+ if ((iores = EngngModel :: restoreContext (stream, mode, obj)) != CIO_OK) THROW_CIOERR(iores);  
  //if ((iores = this->giveNumericalMethod(giveCurrentStep())->restoreContext (stream)) !=CIO_OK) THROW_CIOERR(iores);
  
- if ((iores = totalDisplacement.restoreYourself(stream))!= CIO_OK) THROW_CIOERR(iores);
- if ((iores = incrementOfDisplacement.restoreYourself(stream))!= CIO_OK) THROW_CIOERR(iores);
+ if ((iores = totalDisplacement.restoreYourself(stream, mode))!= CIO_OK) THROW_CIOERR(iores);
+ if ((iores = incrementOfDisplacement.restoreYourself(stream, mode))!= CIO_OK) THROW_CIOERR(iores);
 
- if (fread (&controllMode,sizeof(NonLinearStatic_controllType),1,stream) != 1) THROW_CIOERR(CIO_IOERR);
- if (fread (&loadLevel,sizeof(double),1,stream) != 1) THROW_CIOERR(CIO_IOERR);
- if (fread (&cumulatedLoadLevel,sizeof(double),1,stream) != 1) THROW_CIOERR(CIO_IOERR);
+ int _cm;
+ if (!stream->read (&_cm,1)) THROW_CIOERR(CIO_IOERR);
+ controllMode = (NonLinearStatic_controllType) _cm;
+ if (!stream->read (&loadLevel,1)) THROW_CIOERR(CIO_IOERR);
+ if (!stream->read (&cumulatedLoadLevel,1)) THROW_CIOERR(CIO_IOERR);
 
 
  if (this->nMetaSteps > 1) {
   // store InitialLoadVector
-  if ((iores = initialLoadVector.restoreYourself(stream))!= CIO_OK) THROW_CIOERR(iores);
-  if ((iores = initialLoadVectorOfPrescribed.restoreYourself(stream))!= CIO_OK) THROW_CIOERR(iores);
+  if ((iores = initialLoadVector.restoreYourself(stream,mode))!= CIO_OK) THROW_CIOERR(iores);
+  if ((iores = initialLoadVectorOfPrescribed.restoreYourself(stream,mode))!= CIO_OK) THROW_CIOERR(iores);
  }
  
-  if (closeFlag) fclose (stream); // ensure consistent records
+  if (closeFlag) {fclose (file); delete stream; stream=NULL;}// ensure consistent records
  return CIO_OK;
 
 }
@@ -1111,7 +1121,7 @@ NonLinearStatic :: estimateMaxPackSize (IntArray& commMap, CommunicationBuffer& 
   for (i=1; i<= mapSize; i++) {
    count += domain->giveDofManager (commMap.at(i))->giveNumberOfDofs();
   }
-  return (buff.giveDoubleVecPackSize (1) * count);
+  return (buff.givePackSize (MPI_DOUBLE, 1) * count);
  } else if (packUnpackType == ProblemCommunicator::PC__NODE_CUT) {
   for (i=1; i<= mapSize; i++) {
    ndofs = (dman = domain->giveDofManager (commMap.at(i)))->giveNumberOfDofs();
@@ -1122,7 +1132,7 @@ NonLinearStatic :: estimateMaxPackSize (IntArray& commMap, CommunicationBuffer& 
   }
 
   //printf ("\nestimated count is %d\n",count);
-  return (buff.giveDoubleVecPackSize (1) * max(count, pcount));
+  return (buff.givePackSize (MPI_DOUBLE, 1) * max(count, pcount));
  } else  if (packUnpackType == ProblemCommunicator::PC__REMOTE_ELEMENT_MODE) {
 
   for (i=1; i<= mapSize; i++) {

@@ -47,31 +47,37 @@
 #endif
 #endif
 
-CommunicatorBuff :: CommunicatorBuff (int s)
+CommunicatorBuff :: CommunicatorBuff (int s, CommBuffType t)
 {
   int i;
   this->size = s;
 
   if (size) {
     processCommBuffs = new ProcessCommunicatorBuff* [size];
-    for (i=0; i< size; i++) processCommBuffs[i] = new ProcessCommunicatorBuff ();
+    for (i=0; i< size; i++) processCommBuffs[i] = new ProcessCommunicatorBuff (t);
   } else processCommBuffs = NULL;
 }
 
+CommunicatorBuff::~CommunicatorBuff ()
+{
+  int i;
+  for (i=0; i< size; i++) if (processCommBuffs[i]) delete (processCommBuffs[i]);
+  if (processCommBuffs) delete processCommBuffs;
+}
 
-
-Communicator::Communicator (EngngModel* emodel, CommunicatorBuff* b, int rank, int size)
+Communicator::Communicator (EngngModel* emodel, CommunicatorBuff* b, int rank, int size, CommunicatorMode m)
 {
  int i;
  
  this->engngModel = emodel;
  this->rank = rank;
  this->size = size;
+ this->mode = m;
 
  if (size) {
   processComms = new ProcessCommunicator* [size];
   for (i=0; i< size; i++) processComms[i] = 
-    new ProcessCommunicator (emodel->giveEngngModel(), b->giveProcessCommunicatorBuff(i), i);
+    new ProcessCommunicator (emodel->giveEngngModel(), b->giveProcessCommunicatorBuff(i), i, mode);
  } else processComms = NULL;
 }
 

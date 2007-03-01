@@ -51,17 +51,19 @@
 #include "debug.h"
 #include "cltypes.h"
 #include "iml.h"
+
 #ifndef __MAKEDEPEND
 #include <stdlib.h>
 #include <stdio.h>
 #include <assert.h>
 #endif
 
-#ifdef __PARALLEL_MODE
-#include "combuff.h"
-#endif
 
 class IntArray ; class FloatMatrix ;
+class DataStream;
+#ifdef __PARALLEL_MODE
+class CommunicationBuffer;
+#endif
 
 /**
  Class representing vector of real numbers. This array can grow or shrink to
@@ -259,6 +261,17 @@ protected:
    be added to receiver value at position loc(i) 
    (if this loc(i) value is nonzero).
    */
+  /**
+     copy the given vector as sub-vector to receiver. The sub-vector values will be set to receivers
+     values starting at at positions (si,...,si+src.size). The size of receiver will be 
+     adjusted, if necesary.
+     @param src the sub-vector to be added
+     @param si determines the position (receiver's 1-based index) of first src value to be added.
+  */
+  void copySubVector (const FloatArray& src, int si);
+  /// computes the sum of receiver values
+  double sum (void);
+  
   void         assemble (const FloatArray& fe, const IntArray& loc) ;
   /**
    Computes vector product of vectors given as parameters (v1 x v2) and stores the
@@ -292,14 +305,14 @@ protected:
    @param stream Stream used to write image.
    @return contextIOResultType.
    */
-  contextIOResultType          storeYourself(FILE* stream);
+  contextIOResultType          storeYourself(DataStream* stream, ContextMode mode);
   /**
    Restores receiver image from stream. id parameter is checked against 
    id read from stream. If these id values are different, error is generated.
    @param stream Stream used to read image.
    @return contextIOResultType.
    */
-  contextIOResultType          restoreYourself(FILE* stream);
+  contextIOResultType          restoreYourself(DataStream* stream, ContextMode mode);
   FloatArray*  beCopyOf (FloatArray*) ;
   FloatArray*  setValuesToZero ();
   FloatArray*  rotatedWith (FloatMatrix* r, char mode) ;

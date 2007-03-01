@@ -54,6 +54,7 @@
 //#include "skyline.h"
 #include "structuralelement.h"
 #include "usrdefsub.h"
+#include "datastream.h"
 //#include "compcol.h"
 //#include "dyncompcol.h"
 
@@ -317,31 +318,33 @@ void    LinearStatic :: updateYourself (TimeStep* stepN)
 }
 
 
-contextIOResultType LinearStatic :: saveContext (FILE* stream, void *obj)
+contextIOResultType LinearStatic :: saveContext (DataStream* stream, ContextMode mode, void *obj)
 // 
 // saves state variable - displacement vector
 //
 {
  contextIOResultType iores;
  int closeFlag = 0;
+ FILE* file;
 
  if (stream==NULL) {
-  if (!this->giveContextFile(&stream, this->giveCurrentStep()->giveNumber(), 
+  if (!this->giveContextFile(&file, this->giveCurrentStep()->giveNumber(), 
                 this->giveCurrentStep()->giveVersion(), contextMode_write)) 
    THROW_CIOERR(CIO_IOERR); // override 
+  stream = new FileDataStream (file);
   closeFlag = 1;
  }
 
-  if ((iores = StructuralEngngModel :: saveContext (stream)) != CIO_OK) THROW_CIOERR(iores);
-  if ((iores = displacementVector.storeYourself(stream)) != CIO_OK) THROW_CIOERR(iores);
+  if ((iores = StructuralEngngModel :: saveContext (stream,mode)) != CIO_OK) THROW_CIOERR(iores);
+  if ((iores = displacementVector.storeYourself(stream,mode)) != CIO_OK) THROW_CIOERR(iores);
 
- if (closeFlag) fclose (stream); // ensure consistent records
+ if (closeFlag) {fclose (file); delete stream; stream=NULL;}// ensure consistent records
   return CIO_OK;
 }
 
 
 
-contextIOResultType LinearStatic :: restoreContext (FILE* stream, void *obj)
+contextIOResultType LinearStatic :: restoreContext (DataStream* stream, ContextMode mode, void *obj)
 // 
 // restore state variable - displacement vector
 //
@@ -349,21 +352,23 @@ contextIOResultType LinearStatic :: restoreContext (FILE* stream, void *obj)
  contextIOResultType iores;
  int closeFlag = 0;
  int istep, iversion;
+ FILE* file;
 
  this->resolveCorrespondingStepNumber (istep, iversion, obj);
 
  if (stream == NULL) {
-  if (!this->giveContextFile(&stream, istep, iversion, contextMode_read))
+  if (!this->giveContextFile(&file, istep, iversion, contextMode_read))
    THROW_CIOERR(CIO_IOERR); // override 
+  stream = new FileDataStream (file);
   closeFlag = 1;
  }
 
- if ((iores = StructuralEngngModel :: restoreContext (stream, obj)) != CIO_OK) THROW_CIOERR(iores);
- if ((iores = displacementVector.restoreYourself(stream)) != CIO_OK) THROW_CIOERR(iores);
+ if ((iores = StructuralEngngModel :: restoreContext (stream, mode, obj)) != CIO_OK) THROW_CIOERR(iores);
+ if ((iores = displacementVector.restoreYourself(stream, mode)) != CIO_OK) THROW_CIOERR(iores);
 
  
-  if (closeFlag) fclose (stream); // ensure consistent records
- return CIO_OK;
+  if (closeFlag) {fclose (file); delete stream; stream=NULL;}// ensure consistent records
+  return CIO_OK;
 }
 
 
@@ -438,7 +443,7 @@ LinearStatic :: estimateMaxPackSize (IntArray& commMap, CommunicationBuffer& buf
   for (i=1; i<= mapSize; i++) {
    count += domain->giveDofManager (commMap.at(i))->giveNumberOfDofs();
   }
-  return (buff.giveDoubleVecPackSize (1) * count);
+  return (buff.givePackSize (MPI_DOUBLE, 1) * count);
  } else if (packUnpackType == ProblemCommunicator::PC__NODE_CUT) {
   for (i=1; i<= mapSize; i++) {
    ndofs = (dman = domain->giveDofManager (commMap.at(i)))->giveNumberOfDofs();
@@ -452,7 +457,7 @@ LinearStatic :: estimateMaxPackSize (IntArray& commMap, CommunicationBuffer& buf
   // only pcount is relevant here, since only prescribed componnts are exchanged !!!!
   // --------------------------------------------------------------------------------
 
-  return (buff.giveDoubleVecPackSize (1) * pcount);
+  return (buff.givePackSize (MPI_DOUBLE, 1) * pcount);
  } else  if (packUnpackType == ProblemCommunicator::PC__REMOTE_ELEMENT_MODE) {
 
   for (i=1; i<= mapSize; i++) {
