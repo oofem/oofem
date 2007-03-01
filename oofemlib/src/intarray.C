@@ -45,6 +45,7 @@
 #include "freestor.h"
 #include "cltypes.h"
 #include "error.h"
+#include "datastream.h"
 #ifndef __MAKEDEPEND
 #include <stdio.h>
 #endif
@@ -260,6 +261,22 @@ void  IntArray :: followedBy (const int b, int allocChunk)
   size   = newSize;
  }
 }
+
+void
+IntArray::erase (int _pos)
+{
+  // this will erase the element at given position (1-based index)
+  // receiver size will shrink accordingly
+  // the (_pos+1, size) elements will become (_pos, size-1) elements;
+
+  this->checkBounds (_pos);
+  // adjust size; keep allocated size untouched
+  size--;
+  for (int _i=_pos-1; _i<size; _i++)
+    values[_i]=values[_i+1];
+}
+
+
 int
 IntArray::containsOnlyZeroes () const 
 {
@@ -282,7 +299,7 @@ void  IntArray :: printYourself () const
 }
 
 
-contextIOResultType  IntArray :: storeYourself (FILE* stream) const
+contextIOResultType  IntArray :: storeYourself (DataStream* stream, ContextMode mode) const
 // writes receiver's binary image into stream
 // use id to distinguish some instances
 // return value >0 succes
@@ -290,16 +307,16 @@ contextIOResultType  IntArray :: storeYourself (FILE* stream) const
 {
   int type_id = IntArrayClass;
   // write class header
-  if (fwrite(&type_id,sizeof(int),1,stream)!=1)  return (CIO_IOERR);
+  if (!stream->write(&type_id,1))  return (CIO_IOERR);
   // write size 
-  if (fwrite(&size,sizeof(int),1,stream)!=1) return (CIO_IOERR);
+  if (!stream->write(&size,1)) return (CIO_IOERR);
   // write raw data
-  if (fwrite(values,sizeof(int),size,stream)!= (size_t)size) return (CIO_IOERR);
+  if (!stream->write(values,size)) return (CIO_IOERR);
   // return result back
   return CIO_OK;
 }
 
-contextIOResultType  IntArray :: restoreYourself (FILE* stream)
+contextIOResultType  IntArray :: restoreYourself (DataStream* stream, ContextMode mode)
 // reads receiver from stream
 // warning - overwrites existing data!
 // returns 0 if file i/o error
@@ -307,17 +324,17 @@ contextIOResultType  IntArray :: restoreYourself (FILE* stream)
 {
   int class_id;
   // read class header
-  if (fread(&class_id,sizeof(int),1,stream) != 1)  return (CIO_IOERR);
+  if (!stream->read(&class_id,1))  return (CIO_IOERR);
   if (class_id != IntArrayClass) return CIO_BADVERSION;
   // read size 
-  if (fread(&size,sizeof(int),1,stream) != 1)  return (CIO_IOERR);
+  if (!stream->read(&size,1))  return (CIO_IOERR);
   if (values!=NULL) freeInt(values);
   if (size)
     values = allocInt(size) ;
   else
     values = NULL ;
   // write raw data
-  if (fread(values,sizeof(int),size,stream) != (size_t)size) return (CIO_IOERR);
+  if (!stream->read(values,size)) return (CIO_IOERR);
   // return result back
   return CIO_OK;
 }
@@ -336,6 +353,29 @@ IntArray :: findFirstIndexOf (int value)   const
  return 0;
 }
 
+void
+IntArray :: addSubVector (const IntArray& src, int si)
+{
+ int i, reqSize, n = src.giveSize();
+
+ si --;
+ reqSize = si+n;
+ if (this->giveSize() < reqSize) this->resize(reqSize);
+
+ for (i=1; i<= n; i++) this->at(si+i) += src.at(i);
+}
+
+void
+IntArray :: copySubVector (const IntArray& src, int si)
+{
+  int i, reqSize, n = src.giveSize();
+  
+  si --;
+  reqSize = si+n;
+  if (this->giveSize() < reqSize) this->resize(reqSize);
+  
+  for (i=1; i<= n; i++) this->at(si+i) = src.at(i);
+}
 
 
 #ifdef __PARALLEL_MODE
@@ -346,7 +386,7 @@ IntArray :: packToCommBuffer (CommunicationBuffer& buff) const
  // pack size
  result &= buff.packInt (size);
  // pack data
- result &= buff.packIntArray (this->values, size);
+ result &= buff.packArray (this->values, size);
  
  return result;
 }
@@ -359,7 +399,7 @@ IntArray :: unpackFromCommBuffer (CommunicationBuffer& buff)
  result &= buff.unpackInt (newSize);
  // resize yourself
  this->resize(newSize);
- result &= buff.unpackIntArray (this->values, newSize);
+ result &= buff.unpackArray (this->values, newSize);
 
  return result;
 }
@@ -367,6 +407,6 @@ IntArray :: unpackFromCommBuffer (CommunicationBuffer& buff)
 int 
 IntArray :: givePackSize (CommunicationBuffer& buff)
 {
- return buff.giveIntVecPackSize (1) + buff.giveIntVecPackSize (this->size);
+ return buff.givePackSize (MPI_INT, 1) + buff.givePackSize (MPI_INT, this->size);
 }
 #endif

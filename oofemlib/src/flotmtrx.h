@@ -51,16 +51,17 @@
 #include "debug.h"
 #include "freestor.h"
 #include "cltypes.h"
+
 #ifndef __MAKEDEPEND
 #include <stdio.h>
 #include <stdlib.h>
 #endif
 
-#ifdef __PARALLEL_MODE
-#include "combuff.h"
-#endif
-
 class FloatArray ; class DiagonalMatrix ; class IntArray;
+class DataStream;
+#ifdef __PARALLEL_MODE
+class CommunicationBuffer;
+#endif
 
 /**
  Implementation of matrix containing floatin point numbers. FloatMatrix can grow and shring
@@ -189,6 +190,9 @@ class FloatMatrix : public Matrix
  double        giveDeterminant () ;
  /// Zeroes all coeficint of receiver.
  void          zero () const;
+ /// sets receiver to unity matrix.
+ void beUnitMatrix  ();
+
  /** Assigns to the receiver the tharansposition of parameter.
     Grows or shrinks if necessary */
  void          beTranspositionOf (const FloatMatrix& src) ;
@@ -238,6 +242,12 @@ class FloatMatrix : public Matrix
    @param size Receiver becomes square (size, size) matrix.
   */
  void          beSubMatrixOfSizeOf (const FloatMatrix& src, const IntArray &indx, int size);
+ /** Adds given vector to receiver row sr, starting at column sc */
+ void addSubVectorRow (const FloatArray& src, int sr, int sc);
+ /** Copy (set)  given vector to receiver row sr, starting at column sc */
+ void copySubVectorRow (const FloatArray& src, int sr, int sc);
+
+
  /**
   Modifies receiver to become inverse of given parameter. Size of receiver will be adjusted.
   */
@@ -352,8 +362,8 @@ class FloatMatrix : public Matrix
 
  FloatMatrix*  hardResize (int, int); // hard memory realoocation 
  void          printYourself () const;
- contextIOResultType           storeYourself(FILE* stream);
- contextIOResultType           restoreYourself(FILE* stream);
+ contextIOResultType           storeYourself(DataStream* stream, ContextMode mode);
+ contextIOResultType           restoreYourself(DataStream* stream, ContextMode mode);
 
 #ifdef __PARALLEL_MODE
  /**@name Methods for  packing/unpacking to/from communication buffer */
