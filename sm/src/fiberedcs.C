@@ -558,7 +558,7 @@ FiberedCrossSection :: printYourself ()
 
 
 contextIOResultType
-FiberedCrossSection :: saveContext (FILE* stream, void *obj)
+FiberedCrossSection :: saveContext (DataStream* stream, ContextMode mode, void *obj)
 //
 // saves full material context (saves state variables, that completely describe
 // current state)
@@ -568,7 +568,7 @@ FiberedCrossSection :: saveContext (FILE* stream, void *obj)
  GaussPoint *masterGp = (GaussPoint*) obj;
  contextIOResultType iores; 
 
- if ((iores = CrossSection :: saveContext (stream,obj)) != CIO_OK) THROW_CIOERR(iores);
+ if ((iores = CrossSection :: saveContext (stream,mode,obj)) != CIO_OK) THROW_CIOERR(iores);
  // saved master gp record;
 
  StructuralMaterial* mat;
@@ -577,7 +577,7 @@ FiberedCrossSection :: saveContext (FILE* stream, void *obj)
  for (int i=1; i<= numberOfFibers; i++) {
    slaveGP = this->giveSlaveGaussPoint (masterGp,i-1);
    mat = dynamic_cast<StructuralMaterial*>(domain -> giveMaterial (fiberMaterials.at(i)));
-   if ((iores = mat->saveContext(stream, (void*) slaveGP)) != CIO_OK) THROW_CIOERR(iores);
+   if ((iores = mat->saveContext(stream, mode, (void*) slaveGP)) != CIO_OK) THROW_CIOERR(iores);
  }
  return CIO_OK;
 }
@@ -586,7 +586,7 @@ FiberedCrossSection :: saveContext (FILE* stream, void *obj)
 
 
 contextIOResultType
-FiberedCrossSection :: restoreContext (FILE* stream, void *obj)
+FiberedCrossSection :: restoreContext (DataStream* stream, ContextMode mode, void *obj)
 //
 // restores full material context (saves state variables, that completely describe
 // current state)
@@ -597,7 +597,7 @@ FiberedCrossSection :: restoreContext (FILE* stream, void *obj)
  GaussPoint *masterGp = (GaussPoint*) obj;
  contextIOResultType iores;
 
- if ((iores = CrossSection :: restoreContext(stream,obj)) != CIO_OK) THROW_CIOERR(iores); // saved masterGp
+ if ((iores = CrossSection :: restoreContext(stream,mode,obj)) != CIO_OK) THROW_CIOERR(iores); // saved masterGp
 
  // and now save slave gp of master:
  StructuralMaterial* mat;
@@ -606,7 +606,7 @@ FiberedCrossSection :: restoreContext (FILE* stream, void *obj)
   // creates also slaves if they don't exists
    slaveGP = this->giveSlaveGaussPoint (masterGp,i-1);
    mat = dynamic_cast<StructuralMaterial*>(domain -> giveMaterial (fiberMaterials.at(i)));
-   if ((iores = mat-> restoreContext (stream, (void*) slaveGP)) != CIO_OK) THROW_CIOERR(iores);
+   if ((iores = mat-> restoreContext (stream, mode, (void*) slaveGP)) != CIO_OK) THROW_CIOERR(iores);
  }
  return CIO_OK;
 }

@@ -146,8 +146,8 @@ public:
   virtual void giveElementCharacteristicMatrix (FloatMatrix& answer, int num, CharType type, TimeStep* tStep, Domain* domain) ;
 
 
-  contextIOResultType saveContext (FILE* stream, void *obj = NULL) ;
-  contextIOResultType restoreContext (FILE* stream, void *obj = NULL);
+  contextIOResultType saveContext (DataStream* stream, ContextMode mode, void *obj = NULL) ;
+  contextIOResultType restoreContext (DataStream* stream, ContextMode mode, void *obj = NULL);
  
   void   updateDomainLinks();
   

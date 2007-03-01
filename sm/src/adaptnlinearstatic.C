@@ -66,6 +66,7 @@
 #include "eleminterpunknownmapper.h"
 #include "errorestimator.h"
 #include "usrdefsub.h"
+#include "datastream.h"
 
 #ifdef __PETSC_MODULE
 #include "petsccontext.h" 
@@ -412,7 +413,7 @@ AdaptiveNonLinearStatic::initializeAdaptive (int stepNumber)
  int ielem, nelem, result = 1;
 
  try {
-  this -> restoreContext (NULL, (void *) &stepNumber);
+  this -> restoreContext (NULL, CM_State, (void *) &stepNumber);
  }
  catch (ContextIOERR& c) {
   c.print();
@@ -710,43 +711,47 @@ AdaptiveNonLinearStatic::initializeAdaptive (int stepNumber)
 }
  
 contextIOResultType 
-AdaptiveNonLinearStatic:: saveContext (FILE* stream, void* obj) {
+AdaptiveNonLinearStatic:: saveContext (DataStream* stream, ContextMode mode, void* obj) {
 
  int closeFlag = 0;
  contextIOResultType iores;
+ FILE* file;
 
   if (stream==NULL) {
-  if (!this->giveContextFile(&stream, this->giveCurrentStep()->giveNumber(), 
-                this->giveCurrentStep()->giveVersion(), contextMode_write)) 
-   THROW_CIOERR(CIO_IOERR); // override 
+  if (!this->giveContextFile(&file, this->giveCurrentStep()->giveNumber(), 
+			     this->giveCurrentStep()->giveVersion(), contextMode_write)) 
+    THROW_CIOERR(CIO_IOERR); // override 
+  stream = new FileDataStream(file);
   closeFlag = 1;
  }
  
- if ((iores = NonLinearStatic::saveContext (stream, obj)) != CIO_OK) THROW_CIOERR(iores);
- if ((iores = timeStepLoadLevels.storeYourself(stream))!= CIO_OK) THROW_CIOERR(iores);
+ if ((iores = NonLinearStatic::saveContext (stream, mode, obj)) != CIO_OK) THROW_CIOERR(iores);
+ if ((iores = timeStepLoadLevels.storeYourself(stream, mode))!= CIO_OK) THROW_CIOERR(iores);
 
-  if (closeFlag) fclose (stream); // ensure consistent records
+ if (closeFlag) {fclose (file); delete stream; stream=NULL;}// ensure consistent records
  return CIO_OK;
 }
 
 contextIOResultType 
-AdaptiveNonLinearStatic:: restoreContext (FILE* stream, void* obj) {
+AdaptiveNonLinearStatic:: restoreContext (DataStream* stream, ContextMode mode, void* obj) {
 
  int closeFlag = 0;
  int istep, iversion; 
  contextIOResultType iores;
+ FILE* file;
  
  this->resolveCorrespondingStepNumber (istep, iversion, obj);
  if (stream == NULL) {
-  if (!this->giveContextFile(&stream, istep, iversion, contextMode_read)) 
+  if (!this->giveContextFile(&file, istep, iversion, contextMode_read)) 
    THROW_CIOERR(CIO_IOERR); // override 
+  stream = new FileDataStream(file);
   closeFlag = 1;
  }
 
- if ((iores = NonLinearStatic::restoreContext (stream, obj)) != CIO_OK) THROW_CIOERR(iores);
- if ((iores = timeStepLoadLevels.restoreYourself(stream))!= CIO_OK) THROW_CIOERR(iores);
+ if ((iores = NonLinearStatic::restoreContext (stream, mode, obj)) != CIO_OK) THROW_CIOERR(iores);
+ if ((iores = timeStepLoadLevels.restoreYourself(stream, mode))!= CIO_OK) THROW_CIOERR(iores);
 
-  if (closeFlag) fclose (stream); // ensure consistent records
+ if (closeFlag) {fclose (file); delete stream; stream=NULL;}// ensure consistent records
  return CIO_OK;
 }
 

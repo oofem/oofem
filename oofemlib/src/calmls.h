@@ -40,7 +40,10 @@
  
 #ifndef calm_h
 
+
+#ifndef __MAKEDEPEND
 #include <stdio.h>
+#endif
 #include "sparselinsystemnm.h"
 #include "sparsenonlinsystemnm.h"
 #include "sparsemtrx.h"
@@ -125,14 +128,14 @@ class CylindricalALM : public SparseNonLinearSystemNM
 */
 protected:
   /**
-   CALM mode type; determines the calm step length controll.
-   calm_hpc_off - full ALM with kvadratic constrain and all dofs
-   calm_hpc_on  - full ALM with kvadratic constrain, taking into account only selected dofs
-   calml_hpc - linearized ALM (only displacements), taking into account only selected dofs with given weight
+     CALM mode type; determines the calm step length controll.
+     calm_hpc_off - full ALM with kvadratic constrain and all dofs
+     calm_hpc_on  - full ALM with kvadratic constrain, taking into account only selected dofs
+     calml_hpc - linearized ALM (only displacements), taking into account only selected dofs with given weight
   */
   enum    calm_ControllType {calm_hpc_off = 0, calm_hpc_on, calml_hpc};
-   enum    calm_NR_ModeType {calm_modifiedNRM, calm_fullNRM, calm_accelNRM};
-
+  enum    calm_NR_ModeType {calm_modifiedNRM, calm_fullNRM, calm_accelNRM};
+  
   //FloatArray     *F;
   int            nsmax;
   double         Psi;
@@ -141,18 +144,18 @@ protected:
   calm_NR_ModeType calm_NR_Mode, calm_NR_OldMode;
   int            calm_NR_ModeTick;
   int            calm_MANRMSteps;
-
+  
   // variables for HyperPlaneControll
   int            calm_hpc_init;
   calm_ControllType  calm_Controll;
   IntArray       calm_HPCIndirectDofMask;
   FloatArray    calm_HPCWeights;
-
+  
   // linear system solver
   SparseLinearSystemNM* linSolver;
   // linear system solver ID
- LinSystSolverType solverType;
-
+  LinSystSolverType solverType;
+  
   /// lineserach flag
   int lsFlag;
   /// line search tolerance
@@ -161,67 +164,68 @@ protected:
   double amplifFactor;
   /// line search parameters (limits)
   double maxEta, minEta;
-
+  
   public :
-      CylindricalALM (int i, Domain* d,EngngModel* m, EquationID ut);
-                                      // constructor
-      ~CylindricalALM () ;              // destructor
-
-
- /**
-  Solves the given sparse linear system of equations g(x,l)=l-F(x); dx=K^{-1}g+ dl K^{-1}R.
-  Total load vector not passed, it is defined as l*R+R0, where l is scale factor
-  @param K coefficient matrix (K = dF/dx; stiffness matrix)
-  @param R  incremental Rhs (incremental load)
-  @param R0 initial Rhs (initial load)
-  @param Rr linearization of K*rri, where rri is increment of prescribed displacements
-  @param r  total solution (total displacement)
-  @param dr increment of solution (incremental displacaments)
-  @param l  Rhs scale factor (load level)
-  @param rtol prescribed tolerance (g residual and iterative r change;)
-  @param F  InternalRhs (real internal forces)
-  @param rlm - reference load mode
-  @return NM_Status value
+    CylindricalALM (int i, Domain* d,EngngModel* m, EquationID ut);
+  // constructor
+  ~CylindricalALM () ;              // destructor
+  
+  
+  /**
+     Solves the given sparse linear system of equations g(x,l)=l-F(x); dx=K^{-1}g+ dl K^{-1}R.
+     Total load vector not passed, it is defined as l*R+R0, where l is scale factor
+     @param K coefficient matrix (K = dF/dx; stiffness matrix)
+     @param R  incremental Rhs (incremental load)
+     @param R0 initial Rhs (initial load)
+     @param Rr linearization of K*rri, where rri is increment of prescribed displacements
+     @param r  total solution (total displacement)
+     @param dr increment of solution (incremental displacaments)
+     @param l  Rhs scale factor (load level)
+     @param rtol prescribed tolerance (g residual and iterative r change;)
+     @param F  InternalRhs (real internal forces)
+     @param rlm - reference load mode
+     @return NM_Status value
   */
- virtual NM_Status solve (SparseMtrx* k, FloatArray* Ri, FloatArray* R0,
-              FloatArray* Rr, FloatArray* r, FloatArray* DeltaR, FloatArray* F,
-              double& ReachedLambda, double rtol, referenceLoadInputModeType rlm,
-              int& nite, TimeStep*);
-
+  virtual NM_Status solve (SparseMtrx* k, FloatArray* Ri, FloatArray* R0,
+                           FloatArray* Rr, FloatArray* r, FloatArray* DeltaR, FloatArray* F,
+                           double& ReachedLambda, double rtol, referenceLoadInputModeType rlm,
+                           int& nite, TimeStep*);
+  
   virtual double giveCurrentStepLength() {return deltaL;}
- virtual void   setStepLength(double l) {deltaL = l;}
-
+  virtual void   setStepLength(double l) {deltaL = l;}
+  
   // management  components
   IRResultType initializeFrom (InputRecord* ir);
-
-     /** Stores receiver state to output stream. 
-         Receiver should write class-id first in order to allow test
-     whether correct data are then restored.
-       @param stream output stream 
-    @param obj special parameter, used only to send particular integration
-     point to material class version of this method. Except this 
-     case, obj parameter is always NULL pointer.*/
-      contextIOResultType    saveContext (FILE* stream, void *obj = NULL);
-     /** Restores the receiver state previously written in stream.
-    @see saveContext member function.*/
-      contextIOResultType    restoreContext(FILE* stream, void *obj = NULL);
-
-      // identification 
-     const char*  giveClassName () const { return "CylindricalALM";}
-      classType giveClassID () const { return CylindricalALMSolverClass ;}
-      /// sets associated Domain 
-   virtual void         setDomain (Domain* d) {this->domain = d; if (linSolver) linSolver->setDomain(d);}
+  
+  /** Stores receiver state to output stream. 
+      Receiver should write class-id first in order to allow test
+      whether correct data are then restored.
+      @param stream output stream 
+      @param mode determines ammount of info in stream (state, definition,...)
+      @param obj special parameter, used only to send particular integration
+      point to material class version of this method. Except this 
+      case, obj parameter is always NULL pointer.*/
+  contextIOResultType    saveContext (DataStream* stream, ContextMode mode, void *obj = NULL);
+  /** Restores the receiver state previously written in stream.
+      @see saveContext member function.*/
+  contextIOResultType    restoreContext(DataStream* stream, ContextMode mode, void *obj = NULL);
+  
+  // identification 
+  const char*  giveClassName () const { return "CylindricalALM";}
+  classType giveClassID () const { return CylindricalALMSolverClass ;}
+  /// sets associated Domain 
+  virtual void         setDomain (Domain* d) {this->domain = d; if (linSolver) linSolver->setDomain(d);}
  protected:
-       void convertHPCMap ();
-       SparseLinearSystemNM* giveLinearSolver() ;
-       int  computeDeltaLambda (double& deltaLambda, FloatArray& DeltaR, FloatArray& deltaRt, 
-                FloatArray& deltaR_, FloatArray& R, double RR, double eta, 
-                double deltaL, double DeltaLambda0, int neq);
-
-       void search (int istep, FloatArray& prod, FloatArray& eta, double amp, 
-          double maxeta, double mineta, int& status);
-
- };
+  void convertHPCMap ();
+  SparseLinearSystemNM* giveLinearSolver() ;
+  int  computeDeltaLambda (double& deltaLambda, FloatArray& DeltaR, FloatArray& deltaRt, 
+                           FloatArray& deltaR_, FloatArray& R, double RR, double eta, 
+                           double deltaL, double DeltaLambda0, int neq);
+  
+  void search (int istep, FloatArray& prod, FloatArray& eta, double amp, 
+               double maxeta, double mineta, int& status);
+  
+};
 
 #define calm_h
 #endif

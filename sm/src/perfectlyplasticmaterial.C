@@ -46,6 +46,7 @@
 #include "flotarry.h"
 #include "cltypes.h"
 #include "mathfem.h"
+#include "datastream.h"
 #ifndef __MAKEDEPEND
 #include <stdlib.h>
 #include <math.h>
@@ -1090,7 +1091,7 @@ PerfectlyPlasticMaterial:: CreateStatus (GaussPoint* gp) const
 
 
 contextIOResultType
-PerfectlyPlasticMaterial :: saveContext (FILE* stream, void *obj)
+PerfectlyPlasticMaterial :: saveContext (DataStream* stream, ContextMode mode, void *obj)
 //
 // saves full status for this material, also invokes saving
 // for sub-objects of this (yieldcriteria, loadingcriteria, linearElasticMaterial)
@@ -1099,7 +1100,7 @@ PerfectlyPlasticMaterial :: saveContext (FILE* stream, void *obj)
  contextIOResultType iores;
 
  if (stream == NULL) _error ("saveContex : can't write into NULL stream");
- if ((iores = Material :: saveContext (stream, obj)) != CIO_OK) THROW_CIOERR(iores);
+ if ((iores = Material :: saveContext (stream, mode, obj)) != CIO_OK) THROW_CIOERR(iores);
 
  // return result back
  return CIO_OK;
@@ -1107,7 +1108,7 @@ PerfectlyPlasticMaterial :: saveContext (FILE* stream, void *obj)
 
 
 contextIOResultType 
-PerfectlyPlasticMaterial :: restoreContext (FILE* stream, void *obj)
+PerfectlyPlasticMaterial :: restoreContext (DataStream* stream, ContextMode mode, void *obj)
 // 
 //
 // resaves full status for this material, also invokes saving
@@ -1118,7 +1119,7 @@ PerfectlyPlasticMaterial :: restoreContext (FILE* stream, void *obj)
 {
  contextIOResultType iores;
 
-  if ((iores = Material :: restoreContext( stream, obj)) != CIO_OK) THROW_CIOERR(iores);
+  if ((iores = Material :: restoreContext( stream, mode, obj)) != CIO_OK) THROW_CIOERR(iores);
   // return result back
   return CIO_OK;
 }
@@ -1226,38 +1227,38 @@ PerfectlyPlasticMaterialStatus :: ~PerfectlyPlasticMaterialStatus ()
 
 
 contextIOResultType
-PerfectlyPlasticMaterialStatus :: saveContext (FILE* stream, void *obj)
+PerfectlyPlasticMaterialStatus :: saveContext (DataStream* stream, ContextMode mode, void *obj)
 //
 // saves full information stored in this Status
 // 
 {
   contextIOResultType iores;
 
- if ((iores = StructuralMaterialStatus :: saveContext (stream, obj)) != CIO_OK) THROW_CIOERR(iores);
+ if ((iores = StructuralMaterialStatus :: saveContext (stream, mode, obj)) != CIO_OK) THROW_CIOERR(iores);
 
  // write a raw data
- if (fwrite(&yield_flag,sizeof(int),1,stream) != 1) THROW_CIOERR(CIO_IOERR);
+ if (!stream->write(&yield_flag,1)) THROW_CIOERR(CIO_IOERR);
 
- if ((iores = plasticStrainVector.storeYourself(stream))!= CIO_OK) THROW_CIOERR(iores);
+ if ((iores = plasticStrainVector.storeYourself(stream, mode))!= CIO_OK) THROW_CIOERR(iores);
  // return result back
  return CIO_OK;
 }
 
 
 contextIOResultType 
-PerfectlyPlasticMaterialStatus :: restoreContext (FILE* stream, void *obj)
+PerfectlyPlasticMaterialStatus :: restoreContext (DataStream* stream, ContextMode mode, void *obj)
 // 
 // restore state variables from stream
 //
 {
   contextIOResultType iores;
 
-  if ((iores = StructuralMaterialStatus :: restoreContext(stream, obj)) != CIO_OK) THROW_CIOERR(iores);
+  if ((iores = StructuralMaterialStatus :: restoreContext(stream, mode, obj)) != CIO_OK) THROW_CIOERR(iores);
 
   // read raw data 
-  if (fread(&yield_flag,sizeof(int),1,stream) !=1) THROW_CIOERR(CIO_IOERR);
+  if (!stream->read(&yield_flag,1)) THROW_CIOERR(CIO_IOERR);
 
-  if ((iores = plasticStrainVector.restoreYourself(stream)) != CIO_OK) THROW_CIOERR(iores);
+  if ((iores = plasticStrainVector.restoreYourself(stream, mode)) != CIO_OK) THROW_CIOERR(iores);
   // return result back
   return CIO_OK;
 }

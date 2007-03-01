@@ -44,6 +44,7 @@
 #include "timestep.h"
 #include "domain.h"
 #include "engngm.h"
+#include "datastream.h"
 #ifndef __MAKEDEPEND
 #include <stdio.h>
 #endif
@@ -148,44 +149,44 @@ int  TimeStep :: isTheCurrentTimeStep ()
 
 
 contextIOResultType    
-TimeStep :: saveContext (FILE* stream, void *obj) 
+TimeStep :: saveContext (DataStream* stream, ContextMode mode, void *obj) 
 {
   int type_id = TimeStepClass;
   // write class header
-  if (fwrite(&type_id,sizeof(int),1,stream) != 1) THROW_CIOERR(CIO_IOERR);
+  if (!stream->write(&type_id,1)) THROW_CIOERR(CIO_IOERR);
  // write step number
-  if (fwrite(&number,sizeof(int),1,stream) != 1) THROW_CIOERR(CIO_IOERR);
+  if (!stream->write(&number,1)) THROW_CIOERR(CIO_IOERR);
  // write meta step number
-  if (fwrite(&mstepNumber,sizeof(int),1,stream) != 1) THROW_CIOERR(CIO_IOERR);
+  if (!stream->write(&mstepNumber,1)) THROW_CIOERR(CIO_IOERR);
   // write time
-  if (fwrite(&this->t,sizeof(double),1,stream) != 1) THROW_CIOERR(CIO_IOERR);
+  if (!stream->write(&this->t,1)) THROW_CIOERR(CIO_IOERR);
   // write deltaT
-  if (fwrite(&this->deltaT,sizeof(double),1,stream) != 1) THROW_CIOERR(CIO_IOERR);
+  if (!stream->write(&this->deltaT,1)) THROW_CIOERR(CIO_IOERR);
   // write solutionStateCounter
-  if (fwrite(&this->solutionStateCounter,sizeof(StateCounterType),1,stream) != 1) THROW_CIOERR(CIO_IOERR);
+  if (!stream->write(&this->solutionStateCounter,1)) THROW_CIOERR(CIO_IOERR);
  
   // return result back
   return CIO_OK;
 }
 
 contextIOResultType   
-TimeStep ::  restoreContext(FILE* stream, void *obj) 
+TimeStep ::  restoreContext(DataStream* stream, ContextMode mode, void *obj) 
 {
   int class_id;
   // read class header
-  if (fread(&class_id,sizeof(int),1,stream) != 1) THROW_CIOERR(CIO_IOERR);
+  if (!stream->read(&class_id,1)) THROW_CIOERR(CIO_IOERR);
   if (class_id != TimeStepClass) THROW_CIOERR(CIO_BADVERSION);
 
  // read step number
-  if (fread(&number,sizeof(int),1,stream) != 1) THROW_CIOERR(CIO_IOERR);
+  if (!stream->read(&number,1)) THROW_CIOERR(CIO_IOERR);
  // read meta step number
-  if (fread(&mstepNumber,sizeof(int),1,stream) != 1) THROW_CIOERR(CIO_IOERR);
+  if (!stream->read(&mstepNumber,1)) THROW_CIOERR(CIO_IOERR);
   // read time
-  if (fread(&this->t,sizeof(double),1,stream) != 1) THROW_CIOERR(CIO_IOERR);
+  if (!stream->read(&this->t,1)) THROW_CIOERR(CIO_IOERR);
   // read deltaT
-  if (fread(&this->deltaT,sizeof(double),1,stream) != 1) THROW_CIOERR(CIO_IOERR);
+  if (!stream->read(&this->deltaT,1)) THROW_CIOERR(CIO_IOERR);
   // read solutionStateCounter
-  if (fread(&this->solutionStateCounter,sizeof(StateCounterType),1,stream) != 1) THROW_CIOERR(CIO_IOERR);
+  if (!stream->read(&this->solutionStateCounter,1)) THROW_CIOERR(CIO_IOERR);
   // return result back
   return CIO_OK;
 

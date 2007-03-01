@@ -42,6 +42,7 @@
 #include "gausspnt.h"
 #include "engngm.h"
 #include "mathfem.h"
+#include "datastream.h"
 #ifndef __MAKEDEPEND
 #include <stdlib.h>
 #endif
@@ -544,7 +545,7 @@ BinghamFluidMaterial2Status :: initTempStatus ()
 
 
 contextIOResultType
-BinghamFluidMaterial2Status :: saveContext (FILE* stream, void *obj)
+BinghamFluidMaterial2Status :: saveContext (DataStream* stream, ContextMode mode, void *obj)
 //
 // saves full ms context (saves state variables, that completely describe
 // current state)
@@ -553,17 +554,17 @@ BinghamFluidMaterial2Status :: saveContext (FILE* stream, void *obj)
  contextIOResultType iores;
  if (stream == NULL) _error ("saveContex : can't write into NULL stream");
 
- if ((iores = FluidDynamicMaterialStatus::saveContext (stream, obj)) != CIO_OK) THROW_CIOERR(iores);
- if (fwrite(&devStrainMagnitude,sizeof(double),1,stream) != 1) THROW_CIOERR(CIO_IOERR);
- if (fwrite(&devStressMagnitude,sizeof(double),1,stream) != 1) THROW_CIOERR(CIO_IOERR);
- if ((iores = deviatoricStrainVector.storeYourself(stream)) != CIO_OK) THROW_CIOERR(iores);
+ if ((iores = FluidDynamicMaterialStatus::saveContext (stream, mode, obj)) != CIO_OK) THROW_CIOERR(iores);
+ if (!stream->write(&devStrainMagnitude,1)) THROW_CIOERR(CIO_IOERR);
+ if (!stream->write(&devStressMagnitude,1)) THROW_CIOERR(CIO_IOERR);
+ if ((iores = deviatoricStrainVector.storeYourself(stream, mode)) != CIO_OK) THROW_CIOERR(iores);
 
  return CIO_OK;
 }
 
 
 contextIOResultType
-BinghamFluidMaterial2Status :: restoreContext (FILE* stream, void *obj)
+BinghamFluidMaterial2Status :: restoreContext (DataStream* stream, ContextMode mode, void *obj)
 //
 // restores full material context (saves state variables, that completely describe
 // current state)
@@ -573,10 +574,10 @@ BinghamFluidMaterial2Status :: restoreContext (FILE* stream, void *obj)
  contextIOResultType iores;
  if (stream == NULL) _error ("saveContex : can't write into NULL stream");
 
- if ((iores = FluidDynamicMaterialStatus::restoreContext (stream, obj)) != CIO_OK) THROW_CIOERR(iores);
- if (fread (&devStrainMagnitude,sizeof(double),1,stream) != 1) THROW_CIOERR(CIO_IOERR);
- if (fread (&devStressMagnitude,sizeof(double),1,stream) != 1) THROW_CIOERR(CIO_IOERR);
- if ((iores = deviatoricStrainVector.restoreYourself(stream)) != CIO_OK) THROW_CIOERR(iores);
+ if ((iores = FluidDynamicMaterialStatus::restoreContext (stream, mode, obj)) != CIO_OK) THROW_CIOERR(iores);
+ if (!stream->read (&devStrainMagnitude,1)) THROW_CIOERR(CIO_IOERR);
+ if (!stream->read (&devStressMagnitude,1)) THROW_CIOERR(CIO_IOERR);
+ if ((iores = deviatoricStrainVector.restoreYourself(stream, mode)) != CIO_OK) THROW_CIOERR(iores);
 
 
  return CIO_OK;

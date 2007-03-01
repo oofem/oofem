@@ -61,6 +61,7 @@
 #include "oofeggraphiccontext.h"
 #endif
 
+class DataStream;
 /**
  The top abstract class of all classes constituting the finite element mesh.
  Defines the atributes and methods common to all components of mesh.
@@ -116,9 +117,19 @@ public:
       Domain*        giveDomain () const           {return domain ;}
      /// sets associated Domain 
      virtual void         setDomain (Domain* d) {this->domain = d;}
-    /** Returns component number of receiver.
-     */
-      int            giveNumber () const           {return number ;}
+     /** Returns component number of receiver.
+      */
+     int            giveNumber () const           {return number ;}
+     /// sets number of receiver
+     void setNumber (int _num) {this->number = _num;}
+     /**
+	Local renumbering support. For some tasks (parallel load ballancing, for example) it is necessary to
+	renumber the entities. The various fem components (such as nodes or elements) typically contain
+	links to other entities in terms of their local numbers, etc. This service allows to update 
+	these relations to reflext updated numbering. The renumbering funciton is passed, which is supposed
+	to return an updated number of specified entyty type based on old number. 
+      */
+     template <class T> void updateLocalNumbering (T* src, int (T::*renumberMethod) (int oldnum, EntityRenumberingScheme scheme )) {}
      /** Initializes receiver acording to object description stored in input record.
          This function is called immediately after creating object using
       constructor. Input record can be imagined as data record in component database
@@ -133,20 +144,21 @@ public:
      /** Stores receiver state to output stream. 
          Writes the FEMComponent class-id in order to allow test whether correct data are then restored.
      @param stream output stream 
+     @param mode determines ammount of info required in stream (state, definition,...)
      @param obj special parameter, used only to send particular integration
      point to material class version of this method. Except this 
      case, obj parameter is always NULL pointer.
      @return contextIOResultType
      @exception throws an ContextIOERR exception if error encountered
      */
-      virtual contextIOResultType    saveContext (FILE* stream, void *obj = NULL);
+     virtual contextIOResultType    saveContext (DataStream* stream, ContextMode mode, void *obj = NULL);
      /** Restores the receiver state previously written in stream.
          Readss the FEMComponent class-id in order to allow test consistency.
      @see saveContext member function.
      @return contextIOResultType
      @exception throws an ContextIOERR exception if error encountered
     */
-      virtual contextIOResultType    restoreContext(FILE* stream, void *obj = NULL);
+      virtual contextIOResultType    restoreContext(DataStream* stream, ContextMode mode, void *obj = NULL);
                      // saves current context(state) into stream
   /** Allows programmer to test some internal data, before computation begins.
       For example, one may use this function, to ensure that element has material with

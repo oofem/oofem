@@ -76,7 +76,7 @@ CrossSection :: printYourself ()
 
 
 contextIOResultType
-CrossSection :: saveContext (FILE* stream, void *obj)
+CrossSection :: saveContext (DataStream* stream, ContextMode mode, void *obj)
 //
 // saves full material context (saves state variables, that completely describe
 // current state)
@@ -86,15 +86,15 @@ CrossSection :: saveContext (FILE* stream, void *obj)
  GaussPoint *gp = (GaussPoint*) obj;
  Material *mat = gp->giveMaterial();
 
- if ((iores = FEMComponent::saveContext(stream, obj)) != CIO_OK) THROW_CIOERR(iores);
- if ((iores = mat->saveContext (stream, (void*) gp)) != CIO_OK) THROW_CIOERR(iores);
+ if ((iores = FEMComponent::saveContext(stream, mode, obj)) != CIO_OK) THROW_CIOERR(iores);
+ if ((iores = mat->saveContext (stream, mode, (void*) gp)) != CIO_OK) THROW_CIOERR(iores);
 
  return CIO_OK;
 }
 
 
 contextIOResultType
-CrossSection :: restoreContext (FILE* stream, void *obj)
+CrossSection :: restoreContext (DataStream* stream, ContextMode mode, void *obj)
 //
 // restores full material context (saves state variables, that completely describe
 // current state)
@@ -104,8 +104,8 @@ CrossSection :: restoreContext (FILE* stream, void *obj)
  GaussPoint *gp = (GaussPoint*) obj;
  Material *mat = gp->giveMaterial();
 
- if ((iores = FEMComponent::restoreContext(stream, obj)) != CIO_OK) THROW_CIOERR(iores);
- if ((iores = mat->restoreContext (stream, (void*) gp)) != CIO_OK) THROW_CIOERR(iores);
+ if ((iores = FEMComponent::restoreContext(stream, mode, obj)) != CIO_OK) THROW_CIOERR(iores);
+ if ((iores = mat->restoreContext (stream, mode, (void*) gp)) != CIO_OK) THROW_CIOERR(iores);
 
  return CIO_OK;
 }

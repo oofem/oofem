@@ -197,7 +197,7 @@ public:
   to write class id info for each integration rule.
   @exception throws an ContextIOERR exception if error encountered.
   */
-  contextIOResultType saveContext (FILE* stream, void *obj);
+  contextIOResultType saveContext (DataStream* stream, ContextMode mode, void *obj);
  /**
   Restores receiver's context to stream.
   Calls restoreContext service for all receiver's integration points.
@@ -205,7 +205,7 @@ public:
   to write class id info for each integration rule.
   @exception throws an ContextIOERR exception if error encountered.
   */
-  contextIOResultType restoreContext (FILE* stream, void *obj);
+  contextIOResultType restoreContext (DataStream* stream, ContextMode mode, void *obj);
   /**
      Clears the receiver, ie dealocates all integration points
   */

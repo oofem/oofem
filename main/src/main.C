@@ -47,18 +47,22 @@
 #include "usrdefsub.h"
 #include "error.h"
 #include "logger.h"
-#ifndef __MAKEDEPEND
 
 #ifdef __PETSC_MODULE
+#ifndef __MAKEDEPEND
 #include "petsc.h"
 #endif
+#endif
 
+#ifndef __MAKEDEPEND
 #include <stdio.h>
 #include <string.h>
 #include <new>
-
 #endif
 
+
+// debug
+void oofem_debug (EngngModel* emodel);
 
 
 int gPF = 0;
@@ -80,6 +84,7 @@ int main (int argc, char* argv[])
   int i;
   int contextFlag=0, inputFileFlag=0, restartFlag=0, adaptiveRestartFlag=0, restartStepInfo[2];
   int renumberFlag=0;
+  bool debugFlag = false;
   char inputFileName[MAX_FILENAME_LENGTH+10], buff[MAX_FILENAME_LENGTH];
   EngngModel* problem ;
   
@@ -159,6 +164,8 @@ int main (int argc, char* argv[])
           // print header to redirected output
           LOG_FORCED_MSG (oofem_logger, PRG_HEADER_SM);
         }
+      } else if (strcmp(argv[i],"-d") == 0) {
+        debugFlag = true;
       }
     }
   } else {
@@ -191,7 +198,7 @@ int main (int argc, char* argv[])
   }
   if (restartFlag) {
    try {
-    problem -> restoreContext (NULL, (void *) restartStepInfo);
+    problem -> restoreContext (NULL, CM_State, (void *) restartStepInfo);
    } 
    catch (ContextIOERR& c) {
     c.print();
@@ -200,9 +207,12 @@ int main (int argc, char* argv[])
    problem -> initStepIncrements();
   } else if (adaptiveRestartFlag) {
    problem -> initializeAdaptive (adaptiveRestartFlag);
-   problem -> saveContext(NULL);
+   problem -> saveContext(NULL, CM_State);
    // exit (1);
   }
+
+  if (debugFlag) oofem_debug (problem);
+
 
   try {
     problem -> solveYourself() ;
@@ -263,4 +273,15 @@ oofem_print_epilog () {
   printf("\n%s\n", OOFEM_COPYRIGHT);
   printf("This is free software; see the source for copying conditions.  There is NO\n");
   printf("warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n\n");
+}
+
+#ifndef __MAKEDEPEND
+#include "parmetisloadballancer.h"
+#endif
+void oofem_debug (EngngModel* emodel)
+{
+#ifdef __PARALLEL_MODE
+  ParmetisLoadBallancer lb (emodel->giveDomain(1));
+  lb.ballanceLoad();
+#endif
 }

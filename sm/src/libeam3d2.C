@@ -706,30 +706,30 @@ LIBeam3d2 :: initForNewStep ()
 
 
 
-contextIOResultType LIBeam3d2 :: saveContext (FILE* stream, void *obj)
+contextIOResultType LIBeam3d2 :: saveContext (DataStream* stream, ContextMode mode, void *obj)
 //
 // saves full element context (saves state variables, that completely describe
 // current state)
 //
 {
   contextIOResultType iores;
- if ((iores = NLStructuralElement::saveContext (stream, obj)) != CIO_OK) THROW_CIOERR(iores);
- if ((iores = tc.storeYourself(stream)) != CIO_OK) THROW_CIOERR(iores);
+ if ((iores = NLStructuralElement::saveContext (stream, mode, obj)) != CIO_OK) THROW_CIOERR(iores);
+ if ((iores = tc.storeYourself(stream, mode)) != CIO_OK) THROW_CIOERR(iores);
 
   return CIO_OK;
 }
 
 
 
-contextIOResultType LIBeam3d2 :: restoreContext (FILE* stream, void *obj)
+contextIOResultType LIBeam3d2 :: restoreContext (DataStream* stream, ContextMode mode, void *obj)
 //
 // restores full element context (saves state variables, that completely describe
 // current state)
 //
 {
   contextIOResultType iores;
- if ((iores = NLStructuralElement::restoreContext (stream, obj)) != CIO_OK) THROW_CIOERR(iores);
- if ((iores = tc.restoreYourself(stream)) != CIO_OK) THROW_CIOERR(iores);
+ if ((iores = NLStructuralElement::restoreContext (stream, mode, obj)) != CIO_OK) THROW_CIOERR(iores);
+ if ((iores = tc.restoreYourself(stream, mode)) != CIO_OK) THROW_CIOERR(iores);
 
   return CIO_OK;
 }

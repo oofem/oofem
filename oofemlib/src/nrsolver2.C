@@ -319,12 +319,12 @@ NRSolver2 :: initializeFrom (InputRecord* ir)
 }
 
 contextIOResultType    
-NRSolver2 :: saveContext (FILE* stream, void *obj) {
+NRSolver2 :: saveContext (DataStream* stream, ContextMode mode, void *obj) {
  return CIO_OK;
 }
 
 contextIOResultType    
-NRSolver2 :: restoreContext(FILE* stream, void *obj) {
+NRSolver2 :: restoreContext(DataStream* stream, ContextMode mode, void *obj) {
  return CIO_OK;
 }
 

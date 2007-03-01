@@ -80,8 +80,11 @@ TASK:
   //int requiresNewLhs () {return 0;}
 
   double   giveUnknownComponent ( EquationID, ValueModeType, TimeStep*, Domain*, Dof*);
-  contextIOResultType saveContext (FILE* stream, void *obj = NULL) ;
-  contextIOResultType restoreContext (FILE* stream, void *obj = NULL);
+  /** Stores receiver state to output stream */
+  contextIOResultType saveContext (DataStream* stream, ContextMode mode, void *obj = NULL) ;
+  /** Restores the receiver state previously written in stream */
+  contextIOResultType restoreContext (DataStream* stream, ContextMode mode, void *obj = NULL);
+
   TimeStep* giveNextStep ();
   NumericalMethod* giveNumericalMethod (TimeStep*);
   void               terminate (TimeStep*);

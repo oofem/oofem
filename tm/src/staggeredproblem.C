@@ -278,22 +278,22 @@ StaggeredProblem :: printOutputAt (FILE * File,TimeStep* stepN)
 
 
 contextIOResultType 
-StaggeredProblem :: saveContext(FILE* stream, void *obj )
+StaggeredProblem :: saveContext(DataStream* stream, ContextMode mode, void *obj )
 {
- EngngModel::saveContext (stream, obj);
+ EngngModel::saveContext (stream, mode, obj);
  for (int i=1; i<=nModels; i++)
-  this->giveSlaveProblem(i)->saveContext (stream, obj);
+  this->giveSlaveProblem(i)->saveContext (stream, mode, obj);
 
  return CIO_OK;
 }
 
 
 contextIOResultType 
-StaggeredProblem :: restoreContext(FILE* stream, void *obj)
+StaggeredProblem :: restoreContext(DataStream* stream, ContextMode mode, void *obj)
 {
- EngngModel::restoreContext (stream, obj);
+ EngngModel::restoreContext (stream, mode, obj);
  for (int i=1; i<=nModels; i++)
-  this->giveSlaveProblem(i)->restoreContext (stream, obj);
+  this->giveSlaveProblem(i)->restoreContext (stream, mode, obj);
 
  return CIO_OK;
 }

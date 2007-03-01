@@ -40,6 +40,7 @@
 #include "intarray.h"
 #include "flotmtrx.h"
 #include "error.h"
+#include "datastream.h"
 
 StressStrainBaseVector::StressStrainBaseVector (MaterialMode m):FloatArray()
 {
@@ -120,22 +121,22 @@ StressStrainBaseVector::convertFromFullForm (const FloatArray& vector, MaterialM
 
 
 contextIOResultType
-StressStrainBaseVector::storeYourself(FILE* stream)
+StressStrainBaseVector::storeYourself(DataStream* stream, ContextMode mode)
 {
  contextIOResultType iores;
- if ((iores = FloatArray::storeYourself(stream)) != CIO_OK) return CIO_OK;
+ if ((iores = FloatArray::storeYourself(stream,mode)) != CIO_OK) return CIO_OK;
  // write material mode
- if (fwrite(&mode, sizeof(StressStrainMatMode), 1, stream)!= 1) return CIO_IOERR;
+ if (!stream->write(&mode, 1)) return CIO_IOERR;
  return CIO_OK;
 }
 
 contextIOResultType
-StressStrainBaseVector::restoreYourself(FILE* stream)
+StressStrainBaseVector::restoreYourself(DataStream* stream, ContextMode mode)
 {
  contextIOResultType iores;
- if ((iores = FloatArray::restoreYourself (stream)) != CIO_OK) return iores;
+ if ((iores = FloatArray::restoreYourself (stream, mode)) != CIO_OK) return iores;
  // read material mode
- if (fread(&mode, sizeof(StressStrainMatMode), 1, stream)!= 1) return CIO_IOERR;
+ if (!stream->read(&mode, 1)) return CIO_IOERR;
  return CIO_OK;
 }
 

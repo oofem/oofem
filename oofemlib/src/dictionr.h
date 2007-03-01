@@ -50,6 +50,8 @@
 #include <string>
 #endif
 
+class DataStream;
+
 /**   
  This class implements a linked list whose entries are Pairs (see below).
  A dictionary stores its pairs in a linked list form. It knows the first
@@ -118,13 +120,13 @@ protected:
    @return contextIOResultType value.
    @exception throws an ContextIOERR exception if error encountered
    */
-  contextIOResultType    saveContext (FILE* stream, void *obj = NULL);
+  contextIOResultType    saveContext (DataStream* stream, ContextMode mode, void *obj = NULL);
   /**
    Restores the receiver contens (state) from given stream.
    @return contextIOResultType value.
    @exception throws an ContextIOERR exception if error encountered
    */
-  contextIOResultType    restoreContext(FILE* stream, void *obj = NULL);
+  contextIOResultType    restoreContext(DataStream* stream, ContextMode mode, void *obj = NULL);
 } ;
 
 #define dictionr_h

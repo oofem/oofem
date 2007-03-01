@@ -144,7 +144,7 @@ StructuralMaterialStatus :: initTempStatus ()
 
 
 contextIOResultType
-StructuralMaterialStatus :: saveContext (FILE* stream, void *obj)
+StructuralMaterialStatus :: saveContext (DataStream* stream, ContextMode mode, void *obj)
 //
 // saves full ms context (saves state variables, that completely describe
 // current state)
@@ -153,16 +153,16 @@ StructuralMaterialStatus :: saveContext (FILE* stream, void *obj)
  contextIOResultType iores;
  if (stream == NULL) _error ("saveContex : can't write into NULL stream");
 
- if ((iores = MaterialStatus::saveContext (stream, obj)) != CIO_OK) THROW_CIOERR(iores);
- if ((iores = strainVector.storeYourself(stream)) != CIO_OK) THROW_CIOERR(iores);
- if ((iores = stressVector.storeYourself(stream)) != CIO_OK) THROW_CIOERR(iores);
+ if ((iores = MaterialStatus::saveContext (stream, mode, obj)) != CIO_OK) THROW_CIOERR(iores);
+ if ((iores = strainVector.storeYourself(stream, mode)) != CIO_OK) THROW_CIOERR(iores);
+ if ((iores = stressVector.storeYourself(stream, mode)) != CIO_OK) THROW_CIOERR(iores);
 
  return CIO_OK;
 }
 
 
 contextIOResultType
-StructuralMaterialStatus :: restoreContext (FILE* stream, void *obj)
+StructuralMaterialStatus :: restoreContext (DataStream* stream, ContextMode mode, void *obj)
 //
 // restores full material context (saves state variables, that completely describe
 // current state)
@@ -172,9 +172,9 @@ StructuralMaterialStatus :: restoreContext (FILE* stream, void *obj)
  contextIOResultType iores;
  if (stream == NULL) _error ("saveContex : can't write into NULL stream");
 
- if ((iores = MaterialStatus::restoreContext (stream, obj)) != CIO_OK) THROW_CIOERR(iores);
- if ((iores = strainVector.restoreYourself(stream)) != CIO_OK) THROW_CIOERR(iores);
- if ((iores = stressVector.restoreYourself(stream)) != CIO_OK) THROW_CIOERR(iores);
+ if ((iores = MaterialStatus::restoreContext (stream, mode, obj)) != CIO_OK) THROW_CIOERR(iores);
+ if ((iores = strainVector.restoreYourself(stream, mode)) != CIO_OK) THROW_CIOERR(iores);
+ if ((iores = stressVector.restoreYourself(stream, mode)) != CIO_OK) THROW_CIOERR(iores);
 
  return CIO_OK;
 }

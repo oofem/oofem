@@ -42,6 +42,7 @@
 #include "flotarry.h"
 #include "structuralcrosssection.h"
 #include "mathfem.h"
+#include "datastream.h"
 
 CebFipSlip90Material :: CebFipSlip90Material (int n, Domain *d) : StructuralMaterial (n,d)
 //
@@ -420,29 +421,29 @@ CebFipSlip90MaterialStatus::updateYourself(TimeStep* atTime)
 
 
 contextIOResultType
-CebFipSlip90MaterialStatus::saveContext (FILE* stream, void *obj)
+CebFipSlip90MaterialStatus::saveContext (DataStream* stream, ContextMode mode, void *obj)
 {
  contextIOResultType iores;
 
  // save parent class status
- if ((iores = StructuralMaterialStatus :: saveContext (stream, obj)) != CIO_OK) THROW_CIOERR(iores);
+ if ((iores = StructuralMaterialStatus :: saveContext (stream, mode, obj)) != CIO_OK) THROW_CIOERR(iores);
 
  // write a raw data
- if (fwrite(&kappa,sizeof(double),1,stream) != 1) THROW_CIOERR(CIO_IOERR);
+ if (!stream->write(&kappa,1)) THROW_CIOERR(CIO_IOERR);
 
  return CIO_OK;
 }
 
 contextIOResultType
-CebFipSlip90MaterialStatus::restoreContext(FILE* stream, void *obj)
+CebFipSlip90MaterialStatus::restoreContext(DataStream* stream, ContextMode mode, void *obj)
 {
  contextIOResultType iores;
 
  // read parent class status
- if ((iores = StructuralMaterialStatus :: restoreContext (stream,obj)) != CIO_OK) THROW_CIOERR(iores);
+ if ((iores = StructuralMaterialStatus :: restoreContext (stream, mode, obj)) != CIO_OK) THROW_CIOERR(iores);
 
  // read raw data 
- if (fread (&kappa,sizeof(double),1,stream) != 1) THROW_CIOERR(CIO_IOERR);
+ if (!stream->read (&kappa,1)) THROW_CIOERR(CIO_IOERR);
 
  return CIO_OK;
 }

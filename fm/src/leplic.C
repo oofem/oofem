@@ -39,6 +39,7 @@
 #include "geotoolbox.h"
 #include "node.h"
 #include "conTable.h"
+#include "datastream.h"
 
 #define LEPLIC_ZERO_VOF  1.e-12
 #define LEPLIC_BRENT_EPS 1.e-12
@@ -72,29 +73,29 @@ LEPlicElementInterface::isBoundary ()
 
 
 contextIOResultType
-LEPlicElementInterface::saveContext (FILE* stream, void *obj)
+LEPlicElementInterface::saveContext (DataStream* stream, ContextMode mode, void *obj)
 {
   contextIOResultType iores;
 
  // write a raw data
- if (fwrite(&vof,sizeof(double),1,stream) != 1) THROW_CIOERR(CIO_IOERR);
- if (fwrite(&p,sizeof(double),1,stream) != 1) THROW_CIOERR(CIO_IOERR);
- if ((iores = normal.storeYourself(stream))!=CIO_OK) THROW_CIOERR(iores);
+ if (!stream->write(&vof,1)) THROW_CIOERR(CIO_IOERR);
+ if (!stream->write(&p,1)) THROW_CIOERR(CIO_IOERR);
+ if ((iores = normal.storeYourself(stream, mode))!=CIO_OK) THROW_CIOERR(iores);
 
  return CIO_OK;
 }
 
 contextIOResultType
-LEPlicElementInterface::restoreContext(FILE* stream, void *obj)
+LEPlicElementInterface::restoreContext(DataStream* stream, ContextMode mode, void *obj)
 {
   contextIOResultType iores;
 
  // read raw data 
- if (fread (&vof,sizeof(double),1,stream) != 1) THROW_CIOERR(CIO_IOERR);
+ if (!stream->read (&vof,1)) THROW_CIOERR(CIO_IOERR);
  temp_vof=vof;
- if (fread (&p,sizeof(double),1,stream) != 1) THROW_CIOERR(CIO_IOERR);
+ if (!stream->read (&p,1)) THROW_CIOERR(CIO_IOERR);
  temp_p=p;
- if ((iores = normal.restoreYourself(stream))!=CIO_OK) THROW_CIOERR(iores);
+ if ((iores = normal.restoreYourself(stream, mode))!=CIO_OK) THROW_CIOERR(iores);
  temp_normal=normal;
  return CIO_OK;
 }

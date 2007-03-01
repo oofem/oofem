@@ -8,9 +8,11 @@
 #ifndef hellmat_h
 
 // standard includes
+#ifndef __MAKEDEPEND
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#endif
 
 // oofem includes
 #include "cltypes.h" // cltypes.h entry: classType HellmichMaterialStatusClass, HellmichMaterialClass
@@ -110,8 +112,8 @@ class PlastData {
  void initTempStatus(GaussPoint* gp);
  void updateYourself();
 
- contextIOResultType saveContext(FILE* stream);
- contextIOResultType restoreContext(FILE* stream);
+ contextIOResultType saveContext(DataStream* stream, ContextMode mode);
+ contextIOResultType restoreContext(DataStream* stream, ContextMode mode);
 };
 
 /// Class for storing creep status data
@@ -122,8 +124,8 @@ class CreepData {
  CreepData() : viscousStrainVector(), flowStrainVector(), tempViscousStrainVector(), tempFlowStrainVector() {}
  void initTempStatus(GaussPoint* gp);
  void updateYourself();
- contextIOResultType saveContext(FILE* stream);
- contextIOResultType restoreContext(FILE* stream);
+ contextIOResultType saveContext(DataStream* stream, ContextMode mode);
+ contextIOResultType restoreContext(DataStream* stream, ContextMode mode);
 };
 /// Class for storing non-isothermal or material-level status data
 class NonisoData {
@@ -160,8 +162,8 @@ class NonisoData {
  NonisoData();
  // status update - temp->equilib, sets update flag to 0
  void updateYourself();
- contextIOResultType saveContext(FILE* stream);
- contextIOResultType restoreContext(FILE* stream);
+ contextIOResultType saveContext(DataStream* stream, ContextMode mode);
+ contextIOResultType restoreContext(DataStream* stream, ContextMode mode);
 };
 
 class HellmichMaterialStatus : public StructuralMaterialStatus, public HydrationModelStatusInterface
@@ -298,9 +300,9 @@ class HellmichMaterialStatus : public StructuralMaterialStatus, public Hydration
  /// Outputs the status variables
  void printOutputAt(FILE *file, TimeStep* atTime);
  /// Saves current context(state) into stream. Saves equilib variables after updateYourself at step end
- contextIOResultType saveContext(FILE* stream, void *obj = NULL);
+ contextIOResultType saveContext(DataStream* stream, ContextMode mode, void *obj = NULL);
  /// Restores context from stream, reads equilib variables
- contextIOResultType restoreContext(FILE* stream, void *obj = NULL);
+ contextIOResultType restoreContext(DataStream* stream, ContextMode mode, void *obj = NULL);
 
  // identification
  const char* giveClassName () const { return "HellmichMaterialStatus"; }
@@ -527,8 +529,8 @@ class HellmichMaterial : public StructuralMaterial, public HydrationModelInterfa
  HeMoTKMaterial* giveHeMoMaterial();
 
  // saves current context(state) into stream
- contextIOResultType saveContext(FILE* stream, void *obj = NULL);
- contextIOResultType restoreContext(FILE* stream, void *obj = NULL);
+ contextIOResultType saveContext(DataStream* stream, ContextMode mode, void *obj = NULL);
+ contextIOResultType restoreContext(DataStream* stream, ContextMode mode, void *obj = NULL);
 
  // stress return visualization output
  void	plotReturn(FILE *outputStream, GaussPoint* gp, TimeStep* atTime);

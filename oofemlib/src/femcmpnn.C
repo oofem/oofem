@@ -46,6 +46,7 @@
 #include "cltypes.h"
 #include "engngm.h"
 #include "logger.h"
+#include "datastream.h"
 #ifndef __MAKEDEPEND
 #include <stdio.h>
 #include <stdlib.h>
@@ -56,28 +57,34 @@
 
 
 contextIOResultType
-FEMComponent::saveContext (FILE* stream, void *obj)
+FEMComponent::saveContext (DataStream* stream, ContextMode mode, void *obj)
 { 
  if (stream == NULL) 
   THROW_CIOERR(CIO_IOERR);
  int type_id = this->giveClassID ();
  // write class header
- if (fwrite(&type_id,sizeof(int),1,stream) != 1) 
-  THROW_CIOERR(CIO_IOERR);
+ if (!stream->write(&type_id,1)) THROW_CIOERR(CIO_IOERR);
+
+ if (mode & CM_Definition ) {
+   if (!stream->write(&number,1)) THROW_CIOERR(CIO_IOERR);
+ }
  return CIO_OK;
- 
 }
 
 contextIOResultType   
-FEMComponent::restoreContext(FILE* stream, void *obj)
+FEMComponent::restoreContext(DataStream* stream, ContextMode mode, void *obj)
 {
  int class_id;
  int type_id = this->giveClassID ();
  // read class header
- if (fread(&class_id,sizeof(int),1,stream) != 1) 
-  THROW_CIOERR(CIO_IOERR);
+ if (!stream->read(&class_id,1)) THROW_CIOERR(CIO_IOERR);
  if (class_id != type_id) 
   THROW_CIOERR(CIO_BADVERSION);
+
+ if (mode & CM_Definition ) {
+   if (!stream->read(&number,1)) THROW_CIOERR(CIO_IOERR);
+ }
+ 
  
  return CIO_OK;
 }

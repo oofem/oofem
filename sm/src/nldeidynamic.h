@@ -119,8 +119,8 @@ displacementVector(), velocityVector(), accelerationVector() { ndomains = 1; ini
   IRResultType initializeFrom (InputRecord* ir);
   TimeStep* giveNextStep ();
   NumericalMethod* giveNumericalMethod (TimeStep*);
-  contextIOResultType saveContext (FILE* stream, void *obj = NULL) ;
-  contextIOResultType restoreContext (FILE* stream, void *obj = NULL);
+  contextIOResultType saveContext (DataStream* stream, ContextMode mode, void *obj = NULL) ;
+  contextIOResultType restoreContext (DataStream* stream, ContextMode mode, void *obj = NULL);
 
   void    terminate(TimeStep*);
   void    giveInternalForces (FloatArray& answer, TimeStep* stepN);

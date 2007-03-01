@@ -938,7 +938,7 @@ LayeredCrossSection :: printYourself ()
 
 
 contextIOResultType
-LayeredCrossSection :: saveContext (FILE* stream, void *obj)
+LayeredCrossSection :: saveContext (DataStream* stream, ContextMode mode, void *obj)
 //
 // saves full material context (saves state variables, that completely describe
 // current state)
@@ -948,7 +948,7 @@ LayeredCrossSection :: saveContext (FILE* stream, void *obj)
  GaussPoint *masterGp = (GaussPoint*) obj;
  contextIOResultType iores;
 
- if ((iores = CrossSection :: saveContext (stream,obj)) != CIO_OK) THROW_CIOERR (iores);
+ if ((iores = CrossSection :: saveContext (stream,mode,obj)) != CIO_OK) THROW_CIOERR (iores);
  // saved master gp record;
 
  // and now save slave gp of master:
@@ -957,7 +957,7 @@ LayeredCrossSection :: saveContext (FILE* stream, void *obj)
  for (int i=1; i<= numberOfLayers; i++) {
    slaveGP = this->giveSlaveGaussPoint (masterGp,i-1);
    mat = dynamic_cast<StructuralMaterial*>(domain -> giveMaterial (layerMaterials.at(i)));
-   if ((iores = mat->saveContext (stream, (void*) slaveGP)) != CIO_OK) THROW_CIOERR(iores);
+   if ((iores = mat->saveContext (stream, mode,(void*) slaveGP)) != CIO_OK) THROW_CIOERR(iores);
  }
  return CIO_OK;
 }
@@ -966,7 +966,7 @@ LayeredCrossSection :: saveContext (FILE* stream, void *obj)
 
 
 contextIOResultType
-LayeredCrossSection :: restoreContext (FILE* stream, void *obj)
+LayeredCrossSection :: restoreContext (DataStream* stream, ContextMode mode, void *obj)
 //
 // restores full material context (saves state variables, that completely describe
 // current state)
@@ -977,7 +977,7 @@ LayeredCrossSection :: restoreContext (FILE* stream, void *obj)
   GaussPoint *masterGp = (GaussPoint*) obj;
   contextIOResultType iores;
 
-  if ((iores = CrossSection :: restoreContext(stream,obj)) != CIO_OK) THROW_CIOERR(iores); // saved masterGp
+  if ((iores = CrossSection :: restoreContext(stream,mode,obj)) != CIO_OK) THROW_CIOERR(iores); // saved masterGp
   
   // and now save slave gp of master:
   StructuralMaterial* mat;
@@ -986,7 +986,7 @@ LayeredCrossSection :: restoreContext (FILE* stream, void *obj)
     // creates also slaves if they don't exists
     slaveGP = this->giveSlaveGaussPoint (masterGp,i-1);
     mat = dynamic_cast<StructuralMaterial*>(domain -> giveMaterial (layerMaterials.at(i)));
-    if ((iores = mat->restoreContext (stream, (void*) slaveGP)) !=CIO_OK) THROW_CIOERR(iores);
+    if ((iores = mat->restoreContext (stream, mode, (void*) slaveGP)) !=CIO_OK) THROW_CIOERR(iores);
   }
   return CIO_OK;
 }

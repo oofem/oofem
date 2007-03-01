@@ -162,8 +162,8 @@ protected:
    
  
  // store & restore context functions
- contextIOResultType    saveContext (FILE* stream, void *obj = NULL);
- contextIOResultType    restoreContext(FILE* stream, void *obj = NULL);
+ contextIOResultType    saveContext (DataStream* stream, ContextMode mode, void *obj = NULL);
+ contextIOResultType    restoreContext(DataStream* stream, ContextMode mode, void *obj = NULL);
  
 #ifdef __PARALLEL_MODE
   /**

@@ -44,6 +44,7 @@
 #include "structuralcrosssection.h"
 #include "engngm.h"
 #include "mathfem.h"
+#include "datastream.h"
 
 #define _MAZAR_MODEL_ITER_TOL 1.e-15
 
@@ -413,7 +414,7 @@ MazarsMaterialStatus :: MazarsMaterialStatus (int n, Domain*d, GaussPoint *g)
 }
 
 contextIOResultType
-MazarsMaterialStatus :: saveContext (FILE* stream, void *obj)
+MazarsMaterialStatus :: saveContext (DataStream* stream, ContextMode mode, void *obj)
 //
 // saves full information stored in this Status
 // no temp variables stored
@@ -421,25 +422,25 @@ MazarsMaterialStatus :: saveContext (FILE* stream, void *obj)
 {
  contextIOResultType iores;
  // save parent class status
- if ((iores = IsotropicDamageMaterial1Status :: saveContext (stream, obj))!= CIO_OK) THROW_CIOERR(iores);
+ if ((iores = IsotropicDamageMaterial1Status :: saveContext (stream, mode, obj))!= CIO_OK) THROW_CIOERR(iores);
 
  // write a raw data
- if (fwrite(&lec,sizeof(double),1,stream) != 1) THROW_CIOERR(CIO_IOERR);
+ if (!stream->write(&lec,1)) THROW_CIOERR(CIO_IOERR);
 
  return CIO_OK;
 }
 
 contextIOResultType
-MazarsMaterialStatus :: restoreContext(FILE* stream, void *obj)
+MazarsMaterialStatus :: restoreContext(DataStream* stream, ContextMode mode, void *obj)
 //
 // restores full information stored in stream to this Status
 //
 {
  contextIOResultType iores;
  // read parent class status
- if ((iores = IsotropicDamageMaterial1Status :: restoreContext (stream,obj)) != CIO_OK) THROW_CIOERR(iores);
+ if ((iores = IsotropicDamageMaterial1Status :: restoreContext (stream, mode, obj)) != CIO_OK) THROW_CIOERR(iores);
  // read raw data 
- if (fread (&lec,sizeof(double),1,stream) != 1) THROW_CIOERR(CIO_IOERR);
+ if (!stream->read (&lec,1)) THROW_CIOERR(CIO_IOERR);
 
  return CIO_OK;
 }

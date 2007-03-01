@@ -97,8 +97,8 @@ TASK:
   */
   virtual void               updateYourself (TimeStep*) ;
   double   giveUnknownComponent ( EquationID, ValueModeType, TimeStep*, Domain*, Dof*);
-  contextIOResultType saveContext (FILE* stream, void *obj = NULL) ;
-  contextIOResultType restoreContext (FILE* stream, void *obj = NULL);
+  contextIOResultType saveContext (DataStream* stream, ContextMode mode, void *obj = NULL) ;
+  contextIOResultType restoreContext (DataStream* stream, ContextMode mode, void *obj = NULL);
 
  void   updateDomainLinks();
 

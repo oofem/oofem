@@ -49,12 +49,15 @@
 #include "debug.h"
 #include "cltypes.h"
 #include "logger.h"
+#include "datastream.h"
+
 #ifndef __MAKEDEPEND
 #include <string.h>
 #include <stdlib.h>
 #include <ctype.h>
 #include <stdarg.h>
 #endif
+
 
 
 Dof :: Dof (int i, DofManager* aNode, DofID id)
@@ -66,6 +69,9 @@ Dof :: Dof (int i, DofManager* aNode, DofID id)
   dofID          = (DofIDItem) id  ;;
 }
 
+
+int
+Dof :: giveDofManNumber () const {return this->dofManager->giveNumber();} // termitovo
 
 
 void  Dof :: printSingleOutputAt (FILE *File, TimeStep* stepN, char ch,
@@ -198,6 +204,37 @@ Dof :: giveBcValue (ValueModeType mode, TimeStep* tStep)
 
  return this->giveBc()->give (this, mode, tStep) - rel;
 }
+
+contextIOResultType  
+Dof::saveContext (DataStream* stream, ContextMode mode, void *obj)  
+{
+ if (stream == NULL) THROW_CIOERR(CIO_IOERR);
+
+ if (mode & CM_Definition ) {
+   int _val = dofID;
+
+   if (!stream->write(&number,1)) THROW_CIOERR(CIO_IOERR);
+   if (!stream->write(&_val,1)) THROW_CIOERR(CIO_IOERR);
+ }
+ return CIO_OK;
+}
+
+
+contextIOResultType  
+Dof::restoreContext(DataStream* stream, ContextMode mode, void *obj) 
+{
+  if (mode & CM_Definition ) {
+    int _val;
+
+    if (!stream->read(&number,1)) THROW_CIOERR(CIO_IOERR);
+    if (!stream->read(&_val,1)) THROW_CIOERR(CIO_IOERR);
+    dofID = (DofIDItem) _val;
+  }
+  return CIO_OK;
+}
+
+
+
   
 #ifdef __PARALLEL_MODE
 #endif

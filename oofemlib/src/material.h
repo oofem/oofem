@@ -176,7 +176,7 @@ public:
  /**
     Returns true, if material activated for given solution step
  */
- bool   isActivated (TimeStep* atTime) {return (atTime->giveTime() >= this->castingTime);}
+ bool   isActivated (TimeStep* atTime) {if (atTime) return (atTime->giveTime() >= this->castingTime); else return true;}
 
   // identification and auxiliary functions
  /**
@@ -267,11 +267,12 @@ public:
   (which is void*) to integration point pointer, requests material status, and 
   invokes saveContext function on this status.
   @param stream stream where to write data
+  @param mode determines ammount of info in stream (state, definition,...)
   @param obj pointer to integration point, which invokes this method
   @return contextIOResultType.
   @exception throws an ContextIOERR exception if error encountered.
   */
-  contextIOResultType    saveContext (FILE* stream, void *obj = NULL);
+  contextIOResultType    saveContext (DataStream* stream, ContextMode mode, void *obj = NULL);
  /**
   Restores context of receiver from given stream. This method is called from 
   integration point restoeContext function, to restore material related staus in 
@@ -280,11 +281,12 @@ public:
   (which is void*) to integration point pointer, requests material status, and 
   invokes restoreContext function on this status.
   @param stream stream where to read data
+  @param mode determines ammount of info in stream (state, definition,...)
   @param obj pointer to integration point, which invokes this method
   @return contextIOResultType.
   @exception throws an ContextIOERR exception if error encountered.
   */
-  contextIOResultType    restoreContext(FILE* stream, void *obj = NULL);
+  contextIOResultType    restoreContext(DataStream* stream, ContextMode mode, void *obj = NULL);
   
   // initialize gp record at the begining of new load Increment
  /**

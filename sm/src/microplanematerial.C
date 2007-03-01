@@ -124,33 +124,33 @@ MicroplaneMaterial::initTempStatus (GaussPoint* gp)
 }
 
 contextIOResultType
-MicroplaneMaterial :: saveContext (FILE* stream, void *obj)
+MicroplaneMaterial :: saveContext (DataStream* stream, ContextMode mode, void *obj)
 {
   contextIOResultType iores;
- int mPlaneIndex;
+  int mPlaneIndex;
   Microplane* mPlane;
- MaterialStatus* status;
+  MaterialStatus* status;
 
- if (stream == NULL) _error ("saveContex : can't write into NULL stream");
+  if (stream == NULL) _error ("saveContex : can't write into NULL stream");
 
- GaussPoint* gp = (GaussPoint*) obj;
- if (gp == NULL) THROW_CIOERR(CIO_BADOBJ);
+  GaussPoint* gp = (GaussPoint*) obj;
+  if (gp == NULL) THROW_CIOERR(CIO_BADOBJ);
 
  // save master
- if ((iores = StructuralMaterial::saveContext (stream, obj)) != CIO_OK) THROW_CIOERR(iores);
+ if ((iores = StructuralMaterial::saveContext (stream, mode, obj)) != CIO_OK) THROW_CIOERR(iores);
 
  // save microplanes
  for (mPlaneIndex=0; mPlaneIndex < numberOfMicroplanes; mPlaneIndex++) {
-    mPlane = this->giveMicroplane (mPlaneIndex, gp); 
-  status =  this->giveMicroplaneStatus(mPlane);
-  if (status) if ((iores = status->saveContext (stream, obj)) != CIO_OK) THROW_CIOERR(iores);
-  }
+   mPlane = this->giveMicroplane (mPlaneIndex, gp); 
+   status =  this->giveMicroplaneStatus(mPlane);
+   if (status) if ((iores = status->saveContext (stream, mode, obj)) != CIO_OK) THROW_CIOERR(iores);
+ }
 
  return CIO_OK;
 }
 
 contextIOResultType
-MicroplaneMaterial :: restoreContext (FILE* stream, void *obj)
+MicroplaneMaterial :: restoreContext (DataStream* stream, ContextMode mode, void *obj)
 {
  
  contextIOResultType iores;
@@ -163,14 +163,14 @@ MicroplaneMaterial :: restoreContext (FILE* stream, void *obj)
  if (gp == NULL)  THROW_CIOERR(CIO_BADOBJ);
 
  // save master
- if ((iores = StructuralMaterial::restoreContext (stream, obj)) != CIO_OK) THROW_CIOERR(iores);
+ if ((iores = StructuralMaterial::restoreContext (stream, mode, obj)) != CIO_OK) THROW_CIOERR(iores);
 
  // save microplanes
  for (mPlaneIndex=0; mPlaneIndex < numberOfMicroplanes; mPlaneIndex++) {
     mPlane = this->giveMicroplane (mPlaneIndex, gp); 
-  status =  this->giveMicroplaneStatus(mPlane);
-  if (status) if ((iores = status->restoreContext (stream, obj)) != CIO_OK) THROW_CIOERR(iores);
-  }
+    status =  this->giveMicroplaneStatus(mPlane);
+    if (status) if ((iores = status->restoreContext (stream, mode, obj)) != CIO_OK) THROW_CIOERR(iores);
+ }
 
  return CIO_OK;
 }

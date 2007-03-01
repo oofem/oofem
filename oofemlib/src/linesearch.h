@@ -98,9 +98,9 @@ public:
               IntArray& eqnmask, double lambda, double&etaValue, LS_status& status, TimeStep*);
 
  // management  components
-  IRResultType initializeFrom (InputRecord* ir) ;
- contextIOResultType    saveContext (FILE* stream, void *obj = NULL) {return CIO_OK;}
- contextIOResultType    restoreContext(FILE* stream, void *obj = NULL) {return CIO_OK;}
+ IRResultType initializeFrom (InputRecord* ir) ;
+ contextIOResultType    saveContext (DataStream* stream, ContextMode mode, void *obj = NULL) {return CIO_OK;}
+ contextIOResultType    restoreContext(DataStream* stream, ContextMode mode, void *obj = NULL) {return CIO_OK;}
 
 
 

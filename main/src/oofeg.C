@@ -852,12 +852,12 @@ void OOFEGSimpleCmd( char* buf)
   istep = atoi(remain);
   stepinfo[0]=istep;
   stepinfo[1]=iversion;
-  try {result = problem -> restoreContext (NULL, (void *) stepinfo);}
+  try {result = problem -> restoreContext (NULL, CM_State, (void *) stepinfo);}
   catch (ContextIOERR& m) {
    m.print();
    stepinfo[0]=pstep;
    stepinfo[1]=iversion;
-   try {result = problem -> restoreContext (NULL, (void *) stepinfo);}
+   try {result = problem -> restoreContext (NULL, CM_State, (void *) stepinfo);}
    catch (ContextIOERR& m2) {
     m2.print();
     exit(1);
@@ -874,7 +874,7 @@ void OOFEGSimpleCmd( char* buf)
   gc[0].setActiveStep (istep);
   stepinfo[0]=istep;
   stepinfo[1]=iversion;
-  try {problem -> restoreContext (NULL, (void *) stepinfo);}
+  try {problem -> restoreContext (NULL, CM_State, (void *) stepinfo);}
   catch (ContextIOERR& m) {
    m.print();
    exit (1);
@@ -1028,12 +1028,12 @@ void nextStep (Widget wid, XtPointer cl, XtPointer cd)
    istepVersion = prevStepVersion+1;
    stepInfo[0]=prevStep; stepInfo[1]=istepVersion;
    printf ("OOFEG: restoring context file %d.%d\n",stepInfo[0],stepInfo[1]);
-   try {result = problem -> restoreContext (NULL, (void *) stepInfo);}
+   try {result = problem -> restoreContext (NULL, CM_State, (void *) stepInfo);}
    catch (ContextIOERR& m) {
     m.print();
     istepVersion = 0;
     stepInfo[0]=prevStep; stepInfo[1]=0;
-    try {problem -> restoreContext (NULL, (void *) stepInfo);}
+    try {problem -> restoreContext (NULL, CM_State, (void *) stepInfo);}
     catch (ContextIOERR& m2) {
      m2.print();
      exit (1);
@@ -1047,11 +1047,11 @@ void nextStep (Widget wid, XtPointer cl, XtPointer cd)
    stepInfo[0]=istep; stepInfo[1]=0;
    
    //printf ("NextStep: prevStep %d, nstep %d, stepStep %d\n", prevStep, istep, stepStep);
-   try {result = problem -> restoreContext (NULL, (void *) stepInfo);}
+   try {result = problem -> restoreContext (NULL, CM_State, (void *) stepInfo);}
    catch (ContextIOERR& m) {
     m.print();
     stepInfo[0]=prevStep; stepInfo[1]=0;
-    try {problem -> restoreContext (NULL, (void *) stepInfo);}
+    try {problem -> restoreContext (NULL, CM_State, (void *) stepInfo);}
     catch (ContextIOERR& m2) {
      m2.print();
      exit (1);
@@ -1065,7 +1065,7 @@ void nextStep (Widget wid, XtPointer cl, XtPointer cd)
    istep = problem->giveNumberOfFirstStep()+ stepStep-1;
    gc[0].setActiveStep(istep);
    stepInfo[0]=istep; stepInfo[1]=0;
-   try {result = problem -> restoreContext (NULL, (void *) stepInfo);}
+   try {result = problem -> restoreContext (NULL, CM_State, (void *) stepInfo);}
    catch (ContextIOERR& m) {
     m.print();
     exit (1); 
@@ -1088,11 +1088,11 @@ void previousStep (Widget wid, XtPointer cl, XtPointer cd)
   istep = prevStep - stepStep;
   if (istep >= 0) {
    stepInfo[0] = istep; stepInfo[1]=0;
-   try {result = problem -> restoreContext (NULL, (void *) stepInfo);}
+   try {result = problem -> restoreContext (NULL, CM_State, (void *) stepInfo);}
    catch (ContextIOERR& m) {
     m.print();
     stepInfo[0]=prevStep; stepInfo[1]=0;
-    try {problem -> restoreContext (NULL, (void *) stepInfo);}
+    try {problem -> restoreContext (NULL, CM_State, (void *) stepInfo);}
     catch (ContextIOERR& m2) {
      m2.print();
      exit (1);
@@ -1107,7 +1107,7 @@ void previousStep (Widget wid, XtPointer cl, XtPointer cd)
   gc[0].setActiveStep(istep);
   gc[0].setActiveStepVersion (0);
   stepInfo[0]=istep; stepInfo[1]=0;
-  try {result = problem -> restoreContext (NULL, (void *) stepInfo);}
+  try {result = problem -> restoreContext (NULL, CM_State, (void *) stepInfo);}
   catch (ContextIOERR& m) {
    m.print();
    exit (1);
@@ -1924,7 +1924,7 @@ pass_setanimate_command(Widget w, XtPointer ptr, XtPointer call_data)
    
    stepinfo[0]=istep;
    stepinfo[1]=iversion;
-   try {result = problem -> restoreContext (NULL, (void *) stepinfo);}
+   try {result = problem -> restoreContext (NULL, CM_State, (void *) stepinfo);}
    catch (ContextIOERR& m) {
      m.print();
      return;

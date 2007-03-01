@@ -44,6 +44,7 @@
 #include "engngm.h"
 #include "timestep.h"
 #include "structuralcrosssection.h"
+#include "datastream.h"
 #ifndef __MAKEDEPEND
 #include <stdlib.h>
 #include <math.h>
@@ -1274,24 +1275,24 @@ Concrete2MaterialStatus :: ~Concrete2MaterialStatus ()
 }
 
 contextIOResultType
-Concrete2MaterialStatus :: saveContext (FILE* stream, void *obj)
+Concrete2MaterialStatus :: saveContext (DataStream* stream, ContextMode mode, void *obj)
 //
 // saves full information stored in this Status
 // 
 {
  contextIOResultType iores;
 
- if ((iores = StructuralMaterialStatus::saveContext (stream, obj)) != CIO_OK) THROW_CIOERR(iores); 
+ if ((iores = StructuralMaterialStatus::saveContext (stream, mode, obj)) != CIO_OK) THROW_CIOERR(iores); 
 
  // write a raw data
- if (fwrite(&this->SCCM,sizeof(double),1,stream) != 1) THROW_CIOERR( CIO_IOERR);
- if (fwrite(&EPM ,sizeof(double),1,stream) != 1) THROW_CIOERR( CIO_IOERR);
- if (fwrite(&SCTM,sizeof(double),1,stream) != 1) THROW_CIOERR( CIO_IOERR);
- if (fwrite(&E0PM,sizeof(double),1,stream) != 1) THROW_CIOERR( CIO_IOERR);
- if (fwrite(&SRF ,sizeof(double),1,stream) != 1) THROW_CIOERR( CIO_IOERR);
- if (fwrite(&SEZ ,sizeof(double),1,stream) != 1) THROW_CIOERR( CIO_IOERR);
- 
- if ((iores = plasticStrainVector.storeYourself(stream)) != CIO_OK) THROW_CIOERR(iores);
+ if (!stream->write(&this->SCCM,1)) THROW_CIOERR( CIO_IOERR);
+ if (!stream->write(&EPM ,1)) THROW_CIOERR( CIO_IOERR);
+ if (!stream->write(&SCTM,1)) THROW_CIOERR( CIO_IOERR);
+ if (!stream->write(&E0PM,1)) THROW_CIOERR( CIO_IOERR);
+ if (!stream->write(&SRF ,1)) THROW_CIOERR( CIO_IOERR);
+ if (!stream->write(&SEZ ,1)) THROW_CIOERR( CIO_IOERR);
+
+ if ((iores = plasticStrainVector.storeYourself(stream, mode)) != CIO_OK) THROW_CIOERR(iores);
 
  // return result back
  return CIO_OK;
@@ -1299,24 +1300,24 @@ Concrete2MaterialStatus :: saveContext (FILE* stream, void *obj)
 
 
 contextIOResultType 
-Concrete2MaterialStatus :: restoreContext (FILE* stream, void *obj)
+Concrete2MaterialStatus :: restoreContext (DataStream* stream, ContextMode mode, void *obj)
 // 
 // restore state variables from stream
 //
 {
  contextIOResultType iores;
 
-  if ((iores=StructuralMaterialStatus::restoreContext (stream,obj)) != CIO_OK) THROW_CIOERR(iores);
+  if ((iores=StructuralMaterialStatus::restoreContext (stream,mode,obj)) != CIO_OK) THROW_CIOERR(iores);
 
   // read raw data 
-  if (fread(&SCCM,sizeof(double),1,stream) != 1) THROW_CIOERR(CIO_IOERR);
-  if (fread(&EPM ,sizeof(double),1,stream) != 1) THROW_CIOERR(CIO_IOERR);
-  if (fread(&SCTM,sizeof(double),1,stream) != 1) THROW_CIOERR(CIO_IOERR);
-  if (fread(&E0PM,sizeof(double),1,stream) != 1) THROW_CIOERR(CIO_IOERR);
-  if (fread(&SRF ,sizeof(double),1,stream) != 1) THROW_CIOERR(CIO_IOERR);
-  if (fread(&SEZ ,sizeof(double),1,stream) != 1) THROW_CIOERR(CIO_IOERR);
+  if (!stream->read(&SCCM,1)) THROW_CIOERR(CIO_IOERR);
+  if (!stream->read(&EPM ,1)) THROW_CIOERR(CIO_IOERR);
+  if (!stream->read(&SCTM,1)) THROW_CIOERR(CIO_IOERR);
+  if (!stream->read(&E0PM,1)) THROW_CIOERR(CIO_IOERR);
+  if (!stream->read(&SRF ,1)) THROW_CIOERR(CIO_IOERR);
+  if (!stream->read(&SEZ ,1)) THROW_CIOERR(CIO_IOERR);
 
-  if ((iores = plasticStrainVector.restoreYourself(stream)) != CIO_OK) THROW_CIOERR(iores);
+  if ((iores = plasticStrainVector.restoreYourself(stream, mode)) != CIO_OK) THROW_CIOERR(iores);
   
   // return result back
   return CIO_OK;

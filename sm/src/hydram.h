@@ -125,9 +125,9 @@ public:
  /// Prints status (hydrationDegree) into stream
  void printOutputAt (FILE *file, TimeStep* atTime);
  /// Saves current state (hydrationDegree) into stream
- contextIOResultType saveContext (FILE* stream, void *obj = NULL);
+ contextIOResultType saveContext (DataStream* stream, ContextMode mode, void *obj = NULL);
  /// Restores current state (hydrationDegree) from stream
- contextIOResultType restoreContext(FILE* stream, void *obj = NULL);
+ contextIOResultType restoreContext(DataStream* stream, ContextMode mode, void *obj = NULL);
 
  // --- identification and auxiliary functions ---
  /// Returns "HydrationModelStatus" - class  name of the receiver.
@@ -313,8 +313,10 @@ class HydrationModelInterface : public Interface
  */
  IRResultType initializeFrom (InputRecord* ir);
 
- contextIOResultType saveContext (FILE* stream, void *obj = NULL) { if (hydrationModel) hydrationModel->saveContext(stream, obj); return CIO_OK; }
- contextIOResultType restoreContext(FILE* stream, void *obj = NULL) { if (hydrationModel) hydrationModel->restoreContext(stream, obj); return CIO_OK; }
+ contextIOResultType saveContext (DataStream* stream, ContextMode mode, void *obj = NULL) 
+   { if (hydrationModel) hydrationModel->saveContext(stream, mode, obj); return CIO_OK; }
+ contextIOResultType restoreContext(DataStream* stream, ContextMode mode, void *obj = NULL) 
+   { if (hydrationModel) hydrationModel->restoreContext(stream, mode, obj); return CIO_OK; }
 
  virtual void updateInternalState (const FloatArray& vec, GaussPoint* gp, TimeStep* atTime);
  /**

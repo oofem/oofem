@@ -102,8 +102,8 @@ TASK:
   */
   virtual void               updateYourself (TimeStep *) ;
   //double   giveUnknownComponent (CharType, int);
-  contextIOResultType saveContext (FILE* stream, void *obj = NULL) ;
-  contextIOResultType restoreContext (FILE* stream, void *obj = NULL);
+  contextIOResultType saveContext (DataStream* stream, ContextMode mode, void *obj = NULL) ;
+  contextIOResultType restoreContext (DataStream* stream, ContextMode mode, void *obj = NULL);
   TimeStep* giveNextStep ();
 
   double             giveDiscreteTime (int);

@@ -185,15 +185,16 @@ public:
   Receiver should write class-id first in order to allow test
   whether correct data are then restored.
   @param stream output stream 
+  @param mode determines ammount of info required in stream (state, definition,...)
   @param obj special parameter, used only to send particular integration
   point to material class version of this method. Except this 
   case, obj parameter is always NULL pointer.
   @exception throws an ContextIOERR exception if error encountered.
   */
-  contextIOResultType    saveContext (FILE* stream, void *obj = NULL) ;
+  contextIOResultType    saveContext (DataStream* stream, ContextMode mode, void *obj = NULL) ;
  /** Restores the receiver state previously written in stream.
   @see saveContext member function.*/
- contextIOResultType    restoreContext(FILE* stream, void *obj = NULL) ;
+ contextIOResultType    restoreContext(DataStream* stream, ContextMode mode, void *obj = NULL) ;
 
 } ;
 

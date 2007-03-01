@@ -383,7 +383,7 @@ RCSDNLMaterial ::giveMinCrackStrainsForFullyOpenCrack (GaussPoint* gp, int i)
 }
 
 contextIOResultType
-RCSDNLMaterial :: saveContext (FILE* stream, void *obj)
+RCSDNLMaterial :: saveContext (DataStream* stream, ContextMode mode, void *obj)
 //
 // saves full status for this material, also invokes saving
 // for sub-objects of this (yieldcriteria, loadingcriteria, linearElasticMaterial)
@@ -392,14 +392,14 @@ RCSDNLMaterial :: saveContext (FILE* stream, void *obj)
  contextIOResultType iores;
  if (stream == NULL) _error ("saveContex : can't write into NULL stream");
 
- if ((iores = RCSDEMaterial :: saveContext (stream, obj)) != CIO_OK) THROW_CIOERR(iores);
+ if ((iores = RCSDEMaterial :: saveContext (stream, mode, obj)) != CIO_OK) THROW_CIOERR(iores);
  // return result back
  return CIO_OK;
 }
 
 
 contextIOResultType 
-RCSDNLMaterial :: restoreContext (FILE* stream, void *obj)
+RCSDNLMaterial :: restoreContext (DataStream* stream, ContextMode mode, void *obj)
 // 
 //
 // resaves full status for this material, also invokes saving
@@ -410,7 +410,7 @@ RCSDNLMaterial :: restoreContext (FILE* stream, void *obj)
 {
   contextIOResultType iores;
 
-  if ((iores = RCSDEMaterial :: restoreContext( stream, obj)) != CIO_OK) THROW_CIOERR(iores);
+  if ((iores = RCSDEMaterial :: restoreContext(stream, mode, obj)) != CIO_OK) THROW_CIOERR(iores);
 
   // return result back
   return CIO_OK;
@@ -529,7 +529,7 @@ RCSDNLMaterialStatus :: updateYourself(TimeStep* atTime)
 
 
 contextIOResultType
-RCSDNLMaterialStatus :: saveContext (FILE* stream, void *obj)
+RCSDNLMaterialStatus :: saveContext (DataStream* stream, ContextMode mode, void *obj)
 //
 // saves full information stored in this Status
 // no temp variables stored
@@ -539,16 +539,16 @@ RCSDNLMaterialStatus :: saveContext (FILE* stream, void *obj)
  contextIOResultType iores;
 
  // save parent class status
- if ((iores = RCSDEMaterialStatus :: saveContext (stream, obj)) != CIO_OK) THROW_CIOERR(iores);
+ if ((iores = RCSDEMaterialStatus :: saveContext (stream, mode, obj)) != CIO_OK) THROW_CIOERR(iores);
 
  // write a raw data
- if ((iores = nonlocalStrainVector.storeYourself(stream)) != CIO_OK) THROW_CIOERR(iores);
+ if ((iores = nonlocalStrainVector.storeYourself(stream, mode)) != CIO_OK) THROW_CIOERR(iores);
 
  return CIO_OK;
 }
 
 contextIOResultType
-RCSDNLMaterialStatus :: restoreContext(FILE* stream, void *obj)
+RCSDNLMaterialStatus :: restoreContext(DataStream* stream, ContextMode mode, void *obj)
 //
 // restores full information stored in stream to this Status
 //
@@ -556,11 +556,11 @@ RCSDNLMaterialStatus :: restoreContext(FILE* stream, void *obj)
  contextIOResultType iores;
 
  // read parent class status
- if ((iores = RCSDEMaterialStatus :: restoreContext (stream,obj)) != CIO_OK) THROW_CIOERR(iores);
+ if ((iores = RCSDEMaterialStatus :: restoreContext (stream, mode, obj)) != CIO_OK) THROW_CIOERR(iores);
 
  // read raw data 
 
- if ((iores = nonlocalStrainVector.restoreYourself(stream)) != CIO_OK) THROW_CIOERR(iores);
+ if ((iores = nonlocalStrainVector.restoreYourself(stream, mode)) != CIO_OK) THROW_CIOERR(iores);
 
  return CIO_OK;  // return succes
 }

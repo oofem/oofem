@@ -52,6 +52,7 @@
 #include "verbose.h"
 #include "conTable.h"
 #include "usrdefsub.h"
+#include "datastream.h"
 
 IncrementalLinearStatic :: IncrementalLinearStatic(int i, EngngModel* _master) : StructuralEngngModel (i,_master),
 incrementOfLoadVector(), incrementOfDisplacementVector(), totalDisplacementVector(), discreteTimes()
@@ -335,37 +336,40 @@ IncrementalLinearStatic :: updateYourself (TimeStep* stepN)
 
 
 contextIOResultType 
-IncrementalLinearStatic :: saveContext (FILE* stream, void *obj)
+IncrementalLinearStatic :: saveContext (DataStream* stream, ContextMode mode, void *obj)
 // 
 // saves state variable - displacement vector
 //
 {
  int closeFlag = 0;
  contextIOResultType iores;
+ FILE* file;
 
   if (stream==NULL) {
-  if (!this->giveContextFile(&stream, this->giveCurrentStep()->giveNumber(), 
-                this->giveCurrentStep()->giveVersion(), contextMode_write)) 
-   THROW_CIOERR (CIO_IOERR); // override 
+  if (!this->giveContextFile(&file, this->giveCurrentStep()->giveNumber(), 
+			     this->giveCurrentStep()->giveVersion(), contextMode_write)) 
+    THROW_CIOERR (CIO_IOERR); // override 
+  stream = new FileDataStream (file);
   closeFlag = 1;
  }
 
-  if ((iores = StructuralEngngModel :: saveContext (stream)) != CIO_OK) THROW_CIOERR (iores);
+  if ((iores = StructuralEngngModel :: saveContext (stream,mode)) != CIO_OK) THROW_CIOERR (iores);
 
-  if (closeFlag) fclose (stream); // ensure consistent records
+  if (closeFlag) {fclose (file); delete stream; stream=NULL;}// ensure consistent records
  return CIO_OK;
 }
 
 
 
 contextIOResultType 
-IncrementalLinearStatic :: restoreContext (FILE* stream, void *obj)
+IncrementalLinearStatic :: restoreContext (DataStream* stream, ContextMode mode, void *obj)
 // 
 // restore state variable - displacement vector
 //
 {
  int closeFlag = 0, istep, iversion;
  contextIOResultType iores;
+ FILE* file;
  /* if (totalDisplacementVector == NULL) {
   // allocate some meanigless space - will be overriden by restoreYourself()
   totalDisplacementVector = new FloatArray (1);
@@ -373,15 +377,16 @@ IncrementalLinearStatic :: restoreContext (FILE* stream, void *obj)
 */
  this->resolveCorrespondingStepNumber (istep, iversion, obj);
  if (stream == NULL) {
-  if (!this->giveContextFile(&stream, istep, iversion, contextMode_read)) THROW_CIOERR(CIO_IOERR); // override 
+  if (!this->giveContextFile(&file, istep, iversion, contextMode_read)) THROW_CIOERR(CIO_IOERR); // override 
+  stream=new FileDataStream(file);
   closeFlag = 1;
  }
 
  // save element context
  
- if ((iores = StructuralEngngModel :: restoreContext (stream, obj)) != CIO_OK) THROW_CIOERR(iores);  
+ if ((iores = StructuralEngngModel :: restoreContext (stream, mode, obj)) != CIO_OK) THROW_CIOERR(iores);  
  
- if (closeFlag) fclose (stream); // ensure consistent records
+ if (closeFlag) {fclose (file); delete stream; stream=NULL;}// ensure consistent records
  return CIO_OK;
 }
 

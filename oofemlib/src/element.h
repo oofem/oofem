@@ -50,10 +50,11 @@
 class TimeStep ; class Node ; class Material ; class GaussPoint ;
 class FloatMatrix ; class FloatArray ; class IntArray ; 
 class CrossSection ; class ElementSide; class IntegrationRule;
-
+class CommunicationBuffer;
 
 #ifdef __PARALLEL_MODE
-#include "combuff.h"
+class CommunicationBuffer;
+
 /**
  In parallel mode, this type indicates the mode of element.
  <UL>
@@ -378,12 +379,12 @@ protected:
   Stores receiver state to output stream. 
   @exception throws an ContextIOERR exception if error encountered
   */
-  contextIOResultType   saveContext (FILE* stream, void *obj = NULL) ;
+  contextIOResultType   saveContext (DataStream* stream, ContextMode mode, void *obj = NULL) ;
  /**
   Restores the receiver state previously written in stream.
   @exception throws an ContextIOERR exception if error encountered
   */  
-  contextIOResultType   restoreContext (FILE* stream, void *obj = NULL);
+  contextIOResultType   restoreContext (DataStream* stream, ContextMode mode, void *obj = NULL);
 
  // time step termination
  /** 
@@ -695,7 +696,14 @@ protected:
   @return partition array.
   */
   const IntArray* givePartitionList () const  {return &partitions;}
-
+  /**
+     Returns the weight representing relative computational cost of receiver
+  */
+  virtual int predictRelativeComputationalCost () {return 1;}
+  /**
+     Returns the relative redistribution cost of the receiver
+  */
+  virtual int predictRelativeRedistributionCost () {return 1;}
 #endif
 
 public:

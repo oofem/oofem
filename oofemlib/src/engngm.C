@@ -46,6 +46,7 @@
 #include "cltypes.h"
 #include "mathfem.h"
 #include "clock.h"
+#include "datastream.h"
 //#include "linearstatic.h"
 //#include "nlinearstatic.h"
 //#include "eigenvaluedynamic.h"
@@ -94,7 +95,9 @@
 #endif
 
 #ifdef __PETSC_MODULE
-#include "petscvec.h" 
+#ifndef __MAKEDEPEND
+#include "petscvec.h"
+#endif 
 #endif
 
 EngngModel :: EngngModel (int i, EngngModel* _master) : domainNeqs(), domainPrescribedNeqs()
@@ -732,12 +735,12 @@ EngngModel :: saveStepContext (TimeStep* stepN)
  // default - save only if ALWAYS is set ( see cltypes.h )
  
  if ((this->giveContextOutputMode() == ALWAYS) ||
-   (this->giveContextOutputMode() == REQUIRED)) {
-  this->saveContext(NULL);
+     (this->giveContextOutputMode() == REQUIRED)) {
+   this->saveContext(NULL, CM_State);
  }
  else if (this->giveContextOutputMode() == USERDEFINED) {
   if (stepN->giveNumber()%this->giveContextOutputStep() == 0) 
-   this->saveContext(NULL);
+    this->saveContext(NULL, CM_State);
  }
 }
 
@@ -1312,7 +1315,7 @@ EngngModel :: initStepIncrements ()
 
 
 
-contextIOResultType EngngModel :: saveContext(FILE* stream, void *obj )
+contextIOResultType EngngModel :: saveContext(DataStream* stream, ContextMode mode, void *obj )
 //
 // this procedure is used mainly for two reasons:
 //
@@ -1333,29 +1336,32 @@ contextIOResultType EngngModel :: saveContext(FILE* stream, void *obj )
 {
  contextIOResultType iores;
  int i, serNum, closeFlag = 0;
-  Element *element;
+ Element *element;
  Domain* domain;
  ErrorEstimator* ee;
+ FILE* file;
+ 
 
   OOFEM_LOG_INFO ("Storing context\n");
   if (stream==NULL) {
-  if (!this->giveContextFile(&stream, this->giveCurrentStep()->giveNumber(), 
-                this->giveCurrentStep()->giveVersion(), contextMode_write)) 
-   THROW_CIOERR(CIO_IOERR); // override 
-  closeFlag = 1;
+    if (!this->giveContextFile(&file, this->giveCurrentStep()->giveNumber(), 
+                               this->giveCurrentStep()->giveVersion(), contextMode_write)) 
+      THROW_CIOERR(CIO_IOERR); // override 
+    stream = new FileDataStream (file);
+    closeFlag = 1;
  }
  
  // store solution step
- if ((iores = giveCurrentStep ()->saveContext (stream)) != CIO_OK) THROW_CIOERR(iores);
+ if ((iores = giveCurrentStep ()->saveContext (stream, mode)) != CIO_OK) THROW_CIOERR(iores);
  
  // store numberOfEquations and domainNeqs array
- if (fwrite (&numberOfEquations,sizeof(int),1,stream) != 1) THROW_CIOERR(CIO_IOERR);
- if ((iores = domainNeqs.storeYourself (stream)) != CIO_OK) THROW_CIOERR(iores);
+ if (!stream->write (&numberOfEquations,1)) THROW_CIOERR(CIO_IOERR);
+ if ((iores = domainNeqs.storeYourself (stream, mode)) != CIO_OK) THROW_CIOERR(iores);
  // store numberOfPrescribedEquations and domainNeqs array
- if (fwrite (&numberOfPrescribedEquations,sizeof(int),1,stream) != 1) THROW_CIOERR(CIO_IOERR);
- if ((iores = domainPrescribedNeqs.storeYourself (stream)) != CIO_OK) THROW_CIOERR(iores);
+ if (!stream->write (&numberOfPrescribedEquations,1)) THROW_CIOERR(CIO_IOERR);
+ if ((iores = domainPrescribedNeqs.storeYourself (stream,mode)) != CIO_OK) THROW_CIOERR(iores);
  // store renumber flag
- if (fwrite (&renumberFlag,sizeof(int),1,stream) != 1) THROW_CIOERR(CIO_IOERR);
+ if (!stream->write (&renumberFlag,1)) THROW_CIOERR(CIO_IOERR);
 
  
  for (int idomain = 1; idomain <= this->ndomains; idomain++) {
@@ -1363,12 +1369,12 @@ contextIOResultType EngngModel :: saveContext(FILE* stream, void *obj )
    
    // save domain serial number
    serNum = domain->giveSerialNumber();
-   if (fwrite (&serNum, sizeof(int), 1, stream) != 1) THROW_CIOERR(CIO_IOERR);
+   if (!stream->write (&serNum, 1)) THROW_CIOERR(CIO_IOERR);
    
    // nodes & sides and corresponding dofs
    int nnodes = domain->giveNumberOfDofManagers ();
    for (i = 1; i <= nnodes ; i++ ) {
-     if ((iores = domain -> giveDofManager(i)->saveContext(stream)) != CIO_OK) THROW_CIOERR(iores);
+     if ((iores = domain -> giveDofManager(i)->saveContext(stream, mode)) != CIO_OK) THROW_CIOERR(iores);
    }
    
    // elements and corresponding integration points
@@ -1381,13 +1387,13 @@ contextIOResultType EngngModel :: saveContext(FILE* stream, void *obj )
      // allow local averaging on domains without fine grain communication between domains).
      if (element->giveParallelMode () == Element_remote) continue;
 #endif
-     if ((iores = element->saveContext(stream)) != CIO_OK) THROW_CIOERR(iores);
+     if ((iores = element->saveContext(stream, mode)) != CIO_OK) THROW_CIOERR(iores);
    }
    
    // store error estimator data
    ee = this->giveDomainErrorEstimator(idomain);
    if (ee) 
-     if ((iores = ee->saveContext(stream)) != CIO_OK) THROW_CIOERR(iores);
+     if ((iores = ee->saveContext(stream, mode)) != CIO_OK) THROW_CIOERR(iores);
    
  }
 
@@ -1395,15 +1401,15 @@ contextIOResultType EngngModel :: saveContext(FILE* stream, void *obj )
  // store nMethod
  NumericalMethod* nmethod = this->giveNumericalMethod(giveCurrentStep());
  if (nmethod) 
-  if ((iores = nmethod->saveContext(stream)) != CIO_OK) THROW_CIOERR(iores);
+  if ((iores = nmethod->saveContext(stream, mode)) != CIO_OK) THROW_CIOERR(iores);
 
 
- if (closeFlag) fclose (stream); // ensure consistent records
+ if (closeFlag) {fclose(file); delete (stream); stream=NULL;} // ensure consistent records
  return CIO_OK;
 }  
   
 
-contextIOResultType EngngModel :: restoreContext(FILE* stream, void *obj)
+contextIOResultType EngngModel :: restoreContext(DataStream* stream, ContextMode mode, void *obj)
 //
 // this procedure is used mainly for two reasons:
 //
@@ -1427,23 +1433,25 @@ contextIOResultType EngngModel :: restoreContext(FILE* stream, void *obj)
 //
 {
   contextIOResultType iores;
- int i, serNum, closeFlag = 0, istep, iversion;
- bool domainUpdated = false;
- Element* element;
- Domain* domain;
- ErrorEstimator* ee;
+  int i, serNum, closeFlag = 0, istep, iversion;
+  bool domainUpdated = false;
+  Element* element;
+  Domain* domain;
+  ErrorEstimator* ee;
+  FILE* file;
 
   this -> resolveCorrespondingStepNumber (istep, iversion, obj);
   OOFEM_LOG_RELEVANT ("Restoring context for tStep %d.%d\n",istep,iversion);
 
  if (stream == NULL) {
-  if (!this->giveContextFile(&stream, istep, iversion, contextMode_read)) THROW_CIOERR(CIO_IOERR); // override 
-  closeFlag = 1;
+   if (!this->giveContextFile(&file, istep, iversion, contextMode_read)) THROW_CIOERR(CIO_IOERR); // override 
+   stream = new FileDataStream (file);
+   closeFlag = 1;
  }
 
  // restore solution step
-  if (currentStep == NULL) currentStep = new TimeStep (istep,this,0, 0.,0.,0) ;
- if ((iores = currentStep -> restoreContext(stream)) != CIO_OK) THROW_CIOERR(iores);
+ if (currentStep == NULL) currentStep = new TimeStep (istep,this,0, 0.,0.,0) ;
+ if ((iores = currentStep -> restoreContext(stream, mode)) != CIO_OK) THROW_CIOERR(iores);
  // this->updateAttributes (currentStep);
 
  int pmstep = currentStep->giveMetaStepNumber();
@@ -1456,20 +1464,20 @@ contextIOResultType EngngModel :: restoreContext(FILE* stream, void *obj)
                 currentStep->giveTimeIncrement(), currentStep->giveSolutionStateCounter () - 1);
 
  // restore numberOfEquations and domainNeqs array
- if (fread (&numberOfEquations,sizeof(int),1,stream) != 1) THROW_CIOERR(CIO_IOERR);
- if ((iores = domainNeqs.restoreYourself (stream)) != CIO_OK) THROW_CIOERR(iores);
+ if (!stream->read (&numberOfEquations,1)) THROW_CIOERR(CIO_IOERR);
+ if ((iores = domainNeqs.restoreYourself (stream, mode)) != CIO_OK) THROW_CIOERR(iores);
  // restore numberOfPrescribedEquations and domainNeqs array
- if (fread (&numberOfPrescribedEquations,sizeof(int),1,stream) != 1) THROW_CIOERR(CIO_IOERR);
- if ((iores = domainPrescribedNeqs.restoreYourself (stream)) != CIO_OK) THROW_CIOERR(iores);
+ if (!stream->read (&numberOfPrescribedEquations,1)) THROW_CIOERR(CIO_IOERR);
+ if ((iores = domainPrescribedNeqs.restoreYourself (stream, mode)) != CIO_OK) THROW_CIOERR(iores);
  // restore renumber flag
- if (fread (&renumberFlag,sizeof(int),1,stream) != 1) THROW_CIOERR(CIO_IOERR);
+ if (!stream->read (&renumberFlag,1)) THROW_CIOERR(CIO_IOERR);
 
   for (int idomain = 1; idomain <= this->ndomains; idomain++) {
     domain= this->giveDomain(idomain);
     
     domainUpdated = false;
     // restore domain serial number
-    if (fread (&serNum, sizeof(int), 1, stream) != 1) THROW_CIOERR(CIO_IOERR);
+    if (!stream->read (&serNum, 1)) THROW_CIOERR(CIO_IOERR);
     if (serNum != domain->giveSerialNumber()) {
       
       OOFEM_LOG_INFO ("deleting old domain\n");
@@ -1492,7 +1500,7 @@ contextIOResultType EngngModel :: restoreContext(FILE* stream, void *obj)
     // nodes & sides and corresponding dofs
     int nnodes = domain->giveNumberOfDofManagers ();
     for (i = 1; i <= nnodes ; i++ ) {
-      if ((iores = domain -> giveDofManager(i)->restoreContext(stream)) != CIO_OK) THROW_CIOERR(iores);
+      if ((iores = domain -> giveDofManager(i)->restoreContext(stream,mode)) != CIO_OK) THROW_CIOERR(iores);
     }
     
     int nelem = domain -> giveNumberOfElements ();
@@ -1504,27 +1512,27 @@ contextIOResultType EngngModel :: restoreContext(FILE* stream, void *obj)
       // allow local averaging on domains without fine grain communication between domains).
       if (element->giveParallelMode () == Element_remote) continue;
 #endif
-      if ((iores = element->restoreContext(stream)) != CIO_OK) THROW_CIOERR(iores) ;
+      if ((iores = element->restoreContext(stream,mode)) != CIO_OK) THROW_CIOERR(iores) ;
     }
     
     // restore error estimator data
     ee = this->giveDomainErrorEstimator(idomain);
     if (domainUpdated) ee->setDomain (domain);
     if (ee) 
-      if ((iores = ee->restoreContext(stream)) != CIO_OK) THROW_CIOERR(iores);
+      if ((iores = ee->restoreContext(stream,mode)) != CIO_OK) THROW_CIOERR(iores);
     
   }
  
  // restore nMethod
  NumericalMethod* nmethod = this->giveNumericalMethod(giveCurrentStep());
  if (nmethod) 
- if ((iores = nmethod->restoreContext(stream)) != CIO_OK) THROW_CIOERR(iores);
+ if ((iores = nmethod->restoreContext(stream,mode)) != CIO_OK) THROW_CIOERR(iores);
 
  this->updateDomainLinks();
  this->updateAttributes (currentStep);
  this->initStepIncrements();
 
-  if (closeFlag) fclose (stream); // ensure consistent records
+  if (closeFlag) {fclose (file); delete stream; stream = NULL;} // ensure consistent records
   return CIO_OK;
 }  
 

@@ -109,11 +109,11 @@ public:
 	void  initTempStatus () ;
 	void  updateYourself (TimeStep*) ;
  	void  printOutputAt (FILE *file, TimeStep* tStep) ;
-	contextIOResultType  saveContext (FILE*, void *obj = NULL) ;
-	contextIOResultType  restoreContext (FILE*, void *obj = NULL) ;
+	contextIOResultType  saveContext (DataStream* stream, ContextMode mode, void *obj = NULL) ;
+	contextIOResultType  restoreContext (DataStream* stream, ContextMode mode, void *obj = NULL) ;
 	const char*  giveClassName () const 
 		{ return "DruckerPragerPlasticitySMStatus" ; }
-  classType  giveClassID () const
+	classType  giveClassID () const
 		 { return DruckerPragerPlasticitySMStatusClass ; }
 
 	// Inline functions for access to state variables 

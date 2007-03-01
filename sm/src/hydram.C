@@ -26,9 +26,12 @@
 */
 
 #include "hydram.h"
+#include "datastream.h"
+#ifndef __MAKEDEPEND
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#endif
 
 // ======= class HydrationModelStatus implementation =======
 HydrationModelStatus :: HydrationModelStatus (int n, Domain*d, GaussPoint* g) : MaterialStatus(n,d,g)
@@ -68,19 +71,19 @@ HydrationModelStatus :: updateYourself (TimeStep* atTime)
 
 //modified_zh 25.6.2004 obj = NULL is set in .h
 contextIOResultType
-HydrationModelStatus :: saveContext (FILE* stream, void *obj)
+HydrationModelStatus :: saveContext (DataStream* stream, ContextMode mode, void *obj)
 // saves current context(state) into stream
 {
- if (fwrite(&hydrationDegree,sizeof(double),1,stream) != 1) THROW_CIOERR( CIO_IOERR);
+ if (!stream->write(&hydrationDegree,1)) THROW_CIOERR( CIO_IOERR);
  return CIO_OK;
 }
 
 //modified_zh 25.6.2004 obj = NULL is set in .h
 contextIOResultType
-HydrationModelStatus :: restoreContext(FILE* stream, void *obj)
+HydrationModelStatus :: restoreContext(DataStream* stream, ContextMode mode, void *obj)
 // restores current context(state) from stream
 {
- if (fread(&hydrationDegree,sizeof(double),1,stream) != 1) THROW_CIOERR( CIO_IOERR);
+ if (!stream->read(&hydrationDegree,1)) THROW_CIOERR( CIO_IOERR);
  tempHydrationDegree = hydrationDegree; // for oofeg
  return CIO_OK;
 }

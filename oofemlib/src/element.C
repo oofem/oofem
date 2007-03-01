@@ -74,6 +74,7 @@
 #include "cltypes.h"
 #include "usrdefsub.h"
 #include "elementside.h"
+#include "datastream.h"
 #ifndef __MAKEDEPEND
 #include <stdlib.h>
 #include <stdio.h>
@@ -529,37 +530,72 @@ void  Element ::initForNewStep ()
 
 
 
-contextIOResultType Element :: saveContext (FILE* stream, void *obj)
+contextIOResultType Element :: saveContext (DataStream* stream, ContextMode mode, void *obj)
 //
 // saves full element context (saves state variables, that completely describe
 // current state)
 //
 {
   contextIOResultType iores;
- int         i ;
+  int         i ;
 
-  if ((iores = FEMComponent::saveContext(stream,obj)) != CIO_OK) THROW_CIOERR(iores);
-  for (i=0 ; i < numberOfIntegrationRules ; i++) {
-    if ((iores = integrationRulesArray[i]->saveContext(stream,obj)) != CIO_OK) THROW_CIOERR(iores);
+  if ((iores = FEMComponent::saveContext(stream,mode,obj)) != CIO_OK) THROW_CIOERR(iores);
+  
+  if (mode & CM_Definition ) {
+     if (!stream->write (&numberOfDofMans,1)) THROW_CIOERR(CIO_IOERR);
+     if (!stream->write (&material,1)) THROW_CIOERR(CIO_IOERR);
+     if (!stream->write (&crossSection,1)) THROW_CIOERR(CIO_IOERR);
+     
+     if ((iores = dofManArray.storeYourself(stream, mode)) != CIO_OK) THROW_CIOERR(iores);
+     if ((iores = bodyLoadArray.storeYourself(stream, mode)) != CIO_OK) THROW_CIOERR(iores);
+     if ((iores = boundaryLoadArray.storeYourself(stream, mode)) != CIO_OK) THROW_CIOERR(iores);
+#ifdef __PARALLEL_MODE
+     int _mode;
+     if (!stream->write (&globalNumber,1)) THROW_CIOERR(CIO_IOERR);
+     _mode = parallel_mode; if (!stream->write (&_mode,1)) THROW_CIOERR(CIO_IOERR);
+     if ((iores = partitions.storeYourself(stream, mode)) != CIO_OK) THROW_CIOERR(iores);
+#endif
   }
 
+  for (i=0 ; i < numberOfIntegrationRules ; i++) {
+    if ((iores = integrationRulesArray[i]->saveContext(stream,mode,obj)) != CIO_OK) THROW_CIOERR(iores);
+  }
+  
   return CIO_OK;
 }
 
 
 
-contextIOResultType Element :: restoreContext (FILE* stream, void *obj)
+contextIOResultType Element :: restoreContext (DataStream* stream, ContextMode mode, void *obj)
 //
 // restores full element context (saves state variables, that completely describe
 // current state)
 //
 {
   contextIOResultType iores;
- int         i ;
+  int         i ;
 
-  if ((iores = FEMComponent::restoreContext(stream,obj)) != CIO_OK) THROW_CIOERR(iores);
+  if ((iores = FEMComponent::restoreContext(stream,mode,obj)) != CIO_OK) THROW_CIOERR(iores);
+
+  if (mode & CM_Definition ) {
+     if (!stream->read (&numberOfDofMans,1)) THROW_CIOERR(CIO_IOERR);
+     if (!stream->read (&material,1)) THROW_CIOERR(CIO_IOERR);
+     if (!stream->read (&crossSection,1)) THROW_CIOERR(CIO_IOERR);
+     
+     if ((iores = dofManArray.restoreYourself(stream, mode)) != CIO_OK) THROW_CIOERR(iores);
+     if ((iores = bodyLoadArray.restoreYourself(stream, mode)) != CIO_OK) THROW_CIOERR(iores);
+     if ((iores = boundaryLoadArray.restoreYourself(stream, mode)) != CIO_OK) THROW_CIOERR(iores);
+#ifdef __PARALLEL_MODE
+     int _mode;
+     if (!stream->read (&globalNumber,1)) THROW_CIOERR(CIO_IOERR);
+     if (!stream->read (&_mode,1)) THROW_CIOERR(CIO_IOERR); parallel_mode = (elementParallelMode) _mode;
+     if ((iores = partitions.restoreYourself(stream, mode)) != CIO_OK) THROW_CIOERR(iores);
+#endif
+  }
+
+
   for (i=0 ; i < numberOfIntegrationRules ; i++) {
-    if ((iores = integrationRulesArray[i]->restoreContext(stream,obj)) != CIO_OK) THROW_CIOERR(iores);
+    if ((iores = integrationRulesArray[i]->restoreContext(stream,mode,obj)) != CIO_OK) THROW_CIOERR(iores);
   }
 
   return CIO_OK;
