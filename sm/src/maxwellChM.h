@@ -97,8 +97,8 @@ public:
  virtual void updateYourself(TimeStep*);    // update after new equilibrium state reached
 
  // saves current context(state) into stream
- contextIOResultType    saveContext (FILE* stream, void *obj = NULL);
- contextIOResultType    restoreContext(FILE* stream, void *obj = NULL);
+ contextIOResultType    saveContext (DataStream* stream, ContextMode mode, void *obj = NULL);
+ contextIOResultType    restoreContext(DataStream* stream, ContextMode mode, void *obj = NULL);
   
  // definition
  const char* giveClassName () const { return "MaxwellChainMaterialStatus" ;}
@@ -173,8 +173,8 @@ protected:
  void     printYourself () ;
 
  // store & restore context functions
- contextIOResultType    saveContext (FILE* stream, void *obj = NULL);
- contextIOResultType    restoreContext(FILE* stream, void *obj = NULL);
+ contextIOResultType    saveContext (DataStream* stream, ContextMode mode, void *obj = NULL);
+ contextIOResultType    restoreContext(DataStream* stream, ContextMode mode, void *obj = NULL);
 
 
  virtual void  give3dMaterialStiffnessMatrix (FloatMatrix& answer,
