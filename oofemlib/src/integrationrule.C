@@ -221,10 +221,10 @@ IntegrationRule :: restoreContext (DataStream* stream, ContextMode mode, void *o
         gp->setElement (domain->giveElement(n));
         gp->setMaterialMode (m);
       }
+    }
       // read gp data
       gp = gaussPointArray[i] ;
       if ((iores = gp -> giveCrossSection()->restoreContext(stream,mode,gp)) != CIO_OK) THROW_CIOERR(iores);
-    }
   } 
   return CIO_OK;
 }
