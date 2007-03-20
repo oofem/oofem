@@ -138,6 +138,11 @@ public:
   */
   virtual int                initializeAdaptive (int stepNumber) {return 0;}
   /**
+    Terminates the solution of time step. 
+  */
+  virtual void               terminate (TimeStep*);
+
+  /**
   Prints the ouput of the solution step (using virtual this->printOutputAtservice) 
   to the stream detemined using this->giveOutputStream() method
   and calls exportModuleManager to do output.

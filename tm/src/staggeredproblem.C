@@ -253,6 +253,14 @@ StaggeredProblem::updateYourself (TimeStep* stepN)
 }
 
 void
+StaggeredProblem :: terminate (TimeStep* tStep) {
+
+ for (int i=1; i<=nModels; i++) {
+   this->giveSlaveProblem(i)->terminate (tStep);
+ }
+}
+
+void
 StaggeredProblem :: doStepOutput (TimeStep* stepN)
 {
  FILE* File = this->giveOutputStream();
