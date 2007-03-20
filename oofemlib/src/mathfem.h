@@ -91,6 +91,8 @@ inline double sgn (double i)
 
 /// Returns the postive part of given float
 inline double macbra (double x) {return (x+fabs(x))/2.0;}
+/// Returns the negative part of given float
+inline double negbra (double x) {return (x-fabs(x))/2.0;}
 
 /**
  Solves cubic equation for real roots.
