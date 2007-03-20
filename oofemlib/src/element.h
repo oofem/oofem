@@ -346,6 +346,8 @@ protected:
  virtual double        computeVolumeAround (GaussPoint* gp) {return 0. ;}
  
  // data management
+ ///Returns (global) number of i-th dofmanager of element
+ int                    giveDofManagerNumber (int i) const {return dofManArray.at(i);}
  ///Rerurns reference to the i-th dofmanager of element.
  DofManager*            giveDofManager (int i) const;
  /**Returns reference to the i-th node of element. 
