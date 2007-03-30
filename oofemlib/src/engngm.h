@@ -74,7 +74,7 @@
 #endif
 
 class Domain ; class NumericalMethod ; class TimeStep ;
-class ErrorEstimator; class MetaStep;
+class ErrorEstimator; class MetaStep; class MaterialInterface;
 
 /**
  Class EngngModelContext represents a context, which is shared by all problem engng sub-models.
@@ -312,6 +312,9 @@ enum EngngModel_UpdateMode {EngngModel_SUMM_Mode, EngngModel_SET_Mode};
  int         giveNumberOfDomains () {return ndomains;}
  /** Service for accessing ErrorEstimator corresponding to particular domain */
  virtual ErrorEstimator* giveDomainErrorEstimator (int n) {return NULL;}
+ /** Returns material interface representation for given domain */
+ virtual MaterialInterface* giveMaterialInterface (int n) {return NULL;}
+
  // input / output
  /// Returns input file path.
  //char*              giveInputDataFileName () ;
@@ -476,6 +479,7 @@ enum EngngModel_UpdateMode {EngngModel_SUMM_Mode, EngngModel_SET_Mode};
   */
  virtual double    giveUnknownComponent (EquationID, ValueModeType, TimeStep*, Domain*, Dof*) {return 0.0;}
  virtual double    giveUnknownComponent (UnknownType, ValueModeType, TimeStep*, Domain*, Dof*) {return 0.0;}
+
 #ifdef __PARALLEL_MODE
  /**
   Updates unknown. Unknown at give time step is characterized by its type and mode
