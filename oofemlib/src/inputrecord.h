@@ -780,6 +780,10 @@ enum InputFieldType {
 
   IFT_LEPLIC_refVol,
 
+  IFT_LSPCS_levelSetValues,
+  IFT_LSPCS_refmatpoly_x,
+  IFT_LSPCS_refmatpoly_y,
+
   IFT_Unknown
 };
 

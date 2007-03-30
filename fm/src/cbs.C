@@ -293,7 +293,10 @@ CBS :: solveYourselfAt (TimeStep* tStep)
       mm.resize (momneq); mm.zero();
       this->assembleVectorFromElements(mm, tStep, EID_MomentumBalance, LumpedMassMatrix, VM_Total, this->giveDomain(1));
     }
-   
+    //<RESTRICTED_SECTION> 
+    // init material interface
+    if (materialInterface) materialInterface->initialize();
+    //</RESTRICTED_SECTION>
     initFlag = 0;
   } 
 //<RESTRICTED_SECTION> 
@@ -394,6 +397,9 @@ CBS :: updateYourself (TimeStep* stepN)
 {
  this->updateInternalState(stepN);
  EngngModel::updateYourself(stepN);
+//<RESTRICTED_SECTION>
+ if (materialInterface) materialInterface->updateYourself(stepN);
+//</RESTRICTED_SECTION> 
  //previousSolutionVector = solutionVector;
 }
 

@@ -41,6 +41,7 @@
 #include "zznodalrecoverymodel.h"
 #include "nodalaveragingrecoverymodel.h"
 #include "sprnodalrecoverymodel.h"
+#include "materialinterface.h"
 #include "mathfem.h"
 #ifndef __MAKEDEPEND
 #include <vector>
@@ -472,7 +473,7 @@ VTKExportModule::exportIntVarAs (InternalStateType valID, InternalStateValueType
    fprintf(stream,"LOOKUP_TABLE default\n");
   }
   
-  if (valID != IST_DisplacementVector) 
+  if (!((valID == IST_DisplacementVector) || (valID == IST_MaterialInterfaceVal))) 
    this->smoother->recoverValues (valID, tStep);
 
 #ifdef RBR_SUPPORT
@@ -504,6 +505,13 @@ VTKExportModule::exportIntVarAs (InternalStateType valID, InternalStateValueType
           iVal.at(3) = dman->giveDof(j)->giveUnknown (EID_MomentumBalance,VM_Total,tStep);
       }
      */
+    } else if (valID == IST_MaterialInterfaceVal) {
+      MaterialInterface* mi = emodel->giveMaterialInterface(1);
+      if (mi) {
+        iVal.resize(1);
+        val = &iVal;
+        iVal.at(1) = mi->giveNodalScalarRepresentation (inode);
+      }
     } else {
      for (ireg=1; ireg<=nregions;ireg++){
       this->smoother->giveNodalVector(val, inode, ireg ) ; // only one region assumed
@@ -583,8 +591,15 @@ VTKExportModule::exportIntVarAs (InternalStateType valID, InternalStateValueType
        iVal.at(j) = d->giveNode(regionNodalNumbers.at(inode))->giveUpdatedCoordinate(j, tStep,EID_MomentumBalance, 1.0) - 
         d->giveNode(regionNodalNumbers.at(inode))->giveCoordinate(j);
       }
+     } else if (valID == IST_MaterialInterfaceVal) {
+       MaterialInterface* mi = emodel->giveMaterialInterface(1);
+       if (mi) {
+         iVal.resize(1);
+         val = &iVal;
+         iVal.at(1) = mi->giveNodalScalarRepresentation (regionNodalNumbers.at(inode));
+       }
      } else {
-      this->smoother->giveNodalVector(val, regionNodalNumbers.at(inode), ireg) ; 
+       this->smoother->giveNodalVector(val, regionNodalNumbers.at(inode), ireg) ; 
      }
      
      if (type == ISVT_SCALAR) {

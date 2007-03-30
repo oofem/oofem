@@ -51,6 +51,7 @@
 #include "nodalaveragingrecoverymodel.h"
 #include "sprnodalrecoverymodel.h"
 #include "leplic.h"
+#include "levelsetpcs.h"
 
 
 class TimeStep ; class Node ; class Material ; class GaussPoint ;
@@ -66,7 +67,7 @@ class FloatMatrix ; class FloatArray ; class IntArray ;
   as material model for this situation.
  */
 class TR1_2D_SUPG : public SUPGElement, public SpatialLocalizerInterface, public EIPrimaryFieldInterface, public ZZNodalRecoveryModelInterface, public NodalAveragingRecoveryModelInterface, public SPRNodalRecoveryModelInterface
-, public LEPlicElementInterface
+		  , public LEPlicElementInterface, public LevelSetPCSElementInterface
 {
 protected:
   //double a[3];
@@ -300,6 +301,26 @@ public:
   //void SPRNodalRecoveryMI_giveIPValue (FloatArray& answer, int ipNum, InternalStateType type);
   void SPRNodalRecoveryMI_computeIPGlobalCoordinates (FloatArray& coords, GaussPoint* gp);
   SPRPatchType SPRNodalRecoveryMI_givePatchType();
+  //@}
+
+  /**
+     @name The element interface required by LevelSetPCSElementInterface
+  */
+  //@{
+  /** Evaluetes F in level set equation of the form
+      fi_t+F(grad(fi), x)*norm(grad(fi)) = 0
+      where for interface position driven by flow with speed u: 
+      F=dotProduct(u,grad(fi))/norm(grad(fi))
+  */
+  double LS_PCS_computeF (LevelSetPCS*, TimeStep*);
+  
+  /** Returns gradient of shape functions (assumed constatnt <- linear approx)
+   */
+  void LS_PCS_computedN (FloatMatrix& answer);
+  ///Returns receiver's volume
+  double LS_PCS_computeVolume() {return area;}
+  virtual double LS_PCS_computeS (LevelSetPCS*, TimeStep*);
+  void LS_PCS_computeVOFFractions (FloatArray& answer, FloatArray& fi);
   //@}
 
 

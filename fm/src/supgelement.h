@@ -179,7 +179,7 @@ public:
  virtual void computeDeviatoricStress (FloatArray& answer, GaussPoint* gp, TimeStep* ) = 0;
 } ;
 
-#define cbselement_h
+#define supgelement_h
 #endif
 
 

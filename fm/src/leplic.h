@@ -146,6 +146,19 @@ class LEPlic : public MaterialInterface
     The existing internal state is used for update.
    */
   virtual void updateYourself (TimeStep* tStep) {}
+
+  /**
+     Returns relative material contens at given point. Usually only one material is presented in given point,
+     but some smoothing may be applied close to material interface to make transition smooth 
+  */
+  virtual void giveMaterialMixtureAt (FloatArray& answer, FloatArray& position);
+  /**
+     Returns volumetric (or other based measure) of relative material contens in given element.
+  */
+  virtual void giveElementMaterialMixture (FloatArray& answer, int ielem);
+  /** Returns scalar value representation of material Interface at given point. For visualization */
+  virtual double giveNodalScalarRepresentation (int) ;
+ 
   /**
      Returns updated nodal positions
   */

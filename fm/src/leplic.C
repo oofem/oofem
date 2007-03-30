@@ -40,6 +40,7 @@
 #include "node.h"
 #include "conTable.h"
 #include "datastream.h"
+#include "spatiallocalizer.h"
 
 #define LEPLIC_ZERO_VOF  1.e-12
 #define LEPLIC_BRENT_EPS 1.e-12
@@ -600,4 +601,66 @@ LEPlic::computeCriticalTimeStep (TimeStep* tStep)
     }
   }
   return 0.9*dt;
+}
+
+void
+LEPlic::giveMaterialMixtureAt (FloatArray& answer, FloatArray& position)
+{
+  answer.resize(2);
+  Element* elem = domain->giveSpatialLocalizer()->giveElementContainingPoint (position);
+  LEPlicElementInterface *interface = (LEPlicElementInterface*) elem->giveInterface(LEPlicElementInterfaceType);
+  if (interface) {
+    Polygon pg;
+    FloatArray n;
+    interface->giveTempInterfaceNormal(n);
+    interface->formVolumeInterfacePoly (pg,this,n,interface->giveTempLineConstant(),false);
+    if (pg.testPoint(position.at(1), position.at(2))) {
+      answer.at(1) = 1.0;
+      answer.at(2) = 0.0;
+    } else {
+       answer.at(1) = 0.0;
+       answer.at(2) = 1.0;
+    }
+  } else {
+    answer.at(1) = 1.0;
+    answer.at(2) = 0.0;
+  }
+}
+
+void
+LEPlic::giveElementMaterialMixture (FloatArray& answer, int ie)
+{
+  answer.resize(2);
+  Element* elem = domain->giveElement(ie);
+  LEPlicElementInterface *interface = (LEPlicElementInterface*) elem->giveInterface(LEPlicElementInterfaceType);
+  if (interface) {
+    answer.at(1) = interface->giveTempVolumeFraction();
+    answer.at(2) = 1.-answer.at(1);
+  } else {
+    answer.at(1) = 1.0;
+    answer.at(2) = 0.0;
+  }
+}
+
+double
+LEPlic::giveNodalScalarRepresentation (int inode)
+{
+  IntArray* shelem;
+  bool vof_1=false, vof_0=false;
+  double vof, vofsum=0.0;
+  domain->giveConnectivityTable()->giveDofManConnectivityArray(inode);
+
+  for (int i=1; i<=shelem->giveSize(); i++) {
+    LEPlicElementInterface *interface = (LEPlicElementInterface*) domain->giveElement(i)->giveInterface(LEPlicElementInterfaceType);
+    if (interface) {
+      vof = interface->giveTempVolumeFraction();
+      if (vof == 0.0) vof_0=true;
+      else if (vof == 1.0) vof_1 = true;
+      vofsum+=vof;
+    }
+  }
+  if (vof_0 && vof_1) return 0.5;
+  else if (vof_0) return 0.0;
+  else if (vof_1) return 1.0;
+  else return vofsum/shelem->giveSize();
 }

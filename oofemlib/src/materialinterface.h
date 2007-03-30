@@ -55,6 +55,10 @@ class MaterialInterface : public FEMComponent
   */
   MaterialInterface (int n,Domain* d) : FEMComponent (n,d) {}
 
+  /** 
+      Initializes receiver
+  */
+  virtual void initialize () {}
   /**
      Updates the position of interface according to state reached in given solution step.
    */
@@ -70,6 +74,18 @@ class MaterialInterface : public FEMComponent
      Computes critical time step induced by receiver integration algorithm
   */
   virtual double computeCriticalTimeStep (TimeStep*) = 0;
+
+  /**
+     Returns relative material contens at given point. Usually only one material is presented in given point,
+     but some smoothing may be applied close to material interface to make transition smooth 
+   */
+  virtual void giveMaterialMixtureAt (FloatArray& answer, FloatArray& position) = 0;
+  /**
+     Returns volumetric (or other based measure) of relative material contens in given element.
+   */
+  virtual void giveElementMaterialMixture (FloatArray& answer, int ielem) = 0;
+  /** Returns scalar value representation of material Interface at given point. For visualization */
+  virtual double giveNodalScalarRepresentation (int) = 0;
   
 };
 

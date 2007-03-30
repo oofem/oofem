@@ -41,7 +41,8 @@
 #include "flotmtrx.h"
 #include "gausspnt.h"
 #include "engngm.h"
-#include "leplic.h"
+#include "materialinterface.h"
+//#include "leplic.h"
 #ifndef __MAKEDEPEND
 #include <stdlib.h>
 #endif
@@ -199,11 +200,21 @@ TwoFluidMaterial::giveDeviatoricStiffnessMatrix (FloatMatrix& answer, MatRespons
 double
 TwoFluidMaterial::giveTempVOF (GaussPoint* gp)
 {
+  /*
   Element* elem = gp->giveElement();
   LEPlicElementInterface *interface = (LEPlicElementInterface*) elem->giveInterface(LEPlicElementInterfaceType);
   if (interface) {
     return interface->giveTempVolumeFraction();
   } else {
     return 0.0; // the default
+  }
+  */
+  FloatArray vof(2);
+  MaterialInterface* mi = domain->giveEngngModel()->giveMaterialInterface(domain->giveNumber());
+  if (mi) {
+    mi->giveElementMaterialMixture(vof, gp->giveElement()->giveNumber());
+    return vof.at(1);
+  } else {
+    return 0.0;
   }
 }

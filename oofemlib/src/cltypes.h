@@ -311,7 +311,8 @@ enum classType {
   
   PrimaryFieldClass,
   
-  LEPlicClass
+  LEPlicClass,
+  LevelSetPCSClass
 
     
 };
@@ -446,62 +447,65 @@ enum CharType {
  Values of this type are used, when these internal variables are requested.
 */
 enum InternalStateType {
- IST_Undedfined,
- IST_StressTensor,
- IST_PrincipalStressTensor,
- IST_PrincipalStressTempTensor,
- IST_StrainTensor,
- IST_PrincipalStrainTensor,
- IST_PrincipalStrainTempTensor,
- IST_BeamForceMomentumTensor,
- IST_BeamStrainCurvatureTensor,
+ IST_Undedfined                    = 0,                   
+ IST_StressTensor                  = 1,
+ IST_PrincipalStressTensor         = 2,
+ IST_PrincipalStressTempTensor     = 3,
+ IST_StrainTensor                  = 4,
+ IST_PrincipalStrainTensor         = 5,
+ IST_PrincipalStrainTempTensor     = 6,
+ IST_BeamForceMomentumTensor       = 7,
+ IST_BeamStrainCurvatureTensor     = 8,
  
- IST_ShellForceMomentumTensor,
- IST_ShellStrainCurvatureTensor,
+ IST_ShellForceMomentumTensor      = 9,
+ IST_ShellStrainCurvatureTensor    = 10,
  //IST_ForceTensor,
  //IST_MomentumTensor,
- IST_CurvatureTensor,
- IST_DisplacementVector,
- IST_DamageTensor,
- IST_DamageInvTensor,
- IST_PrincipalDamageTensor,
- IST_PrincipalDamageTempTensor,
- IST_CrackState,
+ IST_CurvatureTensor               = 11,
+ IST_DisplacementVector            = 12,
+ IST_DamageTensor                  = 13,
+ IST_DamageInvTensor               = 14,
+ IST_PrincipalDamageTensor         = 15,
+ IST_PrincipalDamageTempTensor     = 16,
+ IST_CrackState                    = 17,
 
- IST_StressTensorTemp,
- IST_StrainTensorTemp,
- IST_ForceTensorTemp,
- IST_MomentumTensorTemp,
- IST_CurvatureTensorTemp,
- IST_DisplacementVectorTemp,
- IST_DamageTensorTemp,
- IST_DamageInvTensorTemp,
- IST_CrackStateTemp,
- IST_PlasticStrainTensor,
- IST_PrincipalPlasticStrainTensor,
+ IST_StressTensorTemp              = 18,
+ IST_StrainTensorTemp              = 19,
+ IST_ForceTensorTemp               = 20,
+ IST_MomentumTensorTemp            = 21,
+ IST_CurvatureTensorTemp           = 22,
+ IST_DisplacementVectorTemp        = 23,
+ IST_DamageTensorTemp              = 24,
+ IST_DamageInvTensorTemp           = 25,
+ IST_CrackStateTemp                = 26,
+ IST_PlasticStrainTensor           = 27,
+ IST_PrincipalPlasticStrainTensor  = 28,
 
- IST_CylindricalStressTensor,
- IST_CylindricalStrainTensor,
+ IST_CylindricalStressTensor       = 29,
+ IST_CylindricalStrainTensor       = 30,
 
- IST_MaxEquivalentStrainLevel,
- IST_ErrorIndicatorLevel,
- IST_InternalStressError,
- IST_PrimaryUnknownError,
- IST_RelMeshDensity,
+ IST_MaxEquivalentStrainLevel      = 31,
+ IST_ErrorIndicatorLevel           = 32,
+ IST_InternalStressError           = 33,
+ IST_PrimaryUnknownError           = 34,
+ IST_RelMeshDensity                = 35,
 
- IST_MicroplaneDamageValues,
+ IST_MicroplaneDamageValues        = 36,
 
- IST_Temperature,
- IST_MassConcentration_1,
+ IST_Temperature                   = 37,
+ IST_MassConcentration_1           = 38,
 
- IST_HydrationDegree,
- IST_Humidity,
+ IST_HydrationDegree               = 39,
+ IST_Humidity                      = 40,
 
- IST_Velocity,
- IST_Pressure,
+ IST_Velocity                      = 41,
+ IST_Pressure                      = 42,
 
- IST_VOFFraction,
- IST_Density,
+ IST_VOFFraction                   = 43,
+ IST_Density                       = 44,
+ 
+ IST_MaterialInterfaceVal          = 45,
+
 
   //IST_StressVector,
   //IST_StrainVector,
@@ -1103,7 +1107,8 @@ enum InterfaceType {
  HydrationModelInterfaceType,
  HydrationModelStatusInterfaceType,
 
- LEPlicElementInterfaceType
+ LEPlicElementInterfaceType,
+ LevelSetPCSElementInterfaceType,
 };
 
 

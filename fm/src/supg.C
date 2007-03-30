@@ -53,6 +53,7 @@
 #include "mathfem.h"
 #include "dofdistributedprimaryfield.h"
 #include "leplic.h"
+#include "levelsetpcs.h"
 #include "datastream.h"
 #ifndef __MAKEDEPEND
 #include <stdio.h>
@@ -142,7 +143,7 @@ SUPG :: initializeFrom (InputRecord* ir)
 
  val = 0;
  IR_GIVE_OPTIONAL_FIELD (ir, val, IFT_SUPG_miflag, "miflag");
- if (val) {
+ if (val==1) {
    this->materialInterface = new LEPlic (1, this->giveDomain(1));
    this->materialInterface->initializeFrom (ir);
    // export velocity field
@@ -151,6 +152,10 @@ SUPG :: initializeFrom (InputRecord* ir)
 
    //fsflag = 0;
    //IR_GIVE_OPTIONAL_FIELD (ir, fsflag, IFT_SUPG_fsflag, "fsflag");
+ } else if (val==2) {
+   // positive coefficient scheme level set alg
+   this->materialInterface = new LevelSetPCS (1, this->giveDomain(1));
+   this->materialInterface->initializeFrom (ir);
  }
 
  return IRRT_OK;
@@ -339,6 +344,7 @@ SUPG :: solveYourselfAt (TimeStep* tStep)
 
   if (tStep->giveNumber() == giveNumberOfFirstStep()) {
     TimeStep *stepWhenIcApply = tStep->givePreviousStep();
+    if (materialInterface) materialInterface->initialize();
     this->applyIC (stepWhenIcApply);
     //if (this->fsflag) this->updateDofManActivityMap(tStep);
   }
@@ -623,6 +629,7 @@ SUPG :: updateYourself (TimeStep* stepN)
 {
  this->updateInternalState(stepN);
  EngngModel::updateYourself(stepN);
+ if (materialInterface) materialInterface->updateYourself(stepN);
  //previousSolutionVector = solutionVector;
 }
 

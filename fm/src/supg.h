@@ -221,6 +221,9 @@ public:
   */
   virtual int       forceEquationNumbering () {return EngngModel::forceEquationNumbering();}
 
+  /** Returns material interface representation for given domain */
+  virtual MaterialInterface* giveMaterialInterface (int n) {return materialInterface;}
+ 
 
 
 protected:
