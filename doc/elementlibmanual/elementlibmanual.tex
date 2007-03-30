@@ -119,7 +119,7 @@ to 1.
 
 \subsection{Beam Elements}
 \subsubsection{Beam2d element}
-Beam element for 2d analysis. Structure should be defined in x,z
+Beam element for 2d analysis, based on Timoshenko hypothesis. Structure should be defined in x,z
 plane. The internal condensation
 of arbitrary DOF is supported and is performed in local coordinate
 system. On output, the local end displacement and local end forces are
@@ -162,7 +162,7 @@ section model is defined.
 \descitem{Status} Reliable.
 
 \subsubsection{Beam3d element}
-Beam element for 3d {\bf linear} analysis. The internal condensation
+Beam element for 3d {\bf linear} analysis, based on Timoshenko hypothesis. The internal condensation
 of arbitrary DOF is supported and is performed in local coordinate
 system. On output, the local end-displacement and local end-forces are
 printed. Requires the local coordinate system to be chosen according
@@ -481,7 +481,7 @@ anti-clockwise (see fig. (\ref{TrplaneStrain})).
 \subsection{Plate\&Shell Elements}
 \subsubsection {CCT Element}
 Implementation of constant curvature triangular element for plate
-analysis. The structure should be defined in x,y plane. 
+analysis. Formulation based on Mindlin hypothesis. The structure should be defined in x,y plane. 
 The nodes should be numbered anti-clockwise (positive rotation around
 z-axis). 
 
@@ -504,7 +504,7 @@ not supported now.
 \descitem{Status} Reliable.
 
 \subsubsection {RerShell Element}
-Combination of CCT plate element with triangular plane stress element
+Combination of CCT plate element (Mindlin hypothesis) with triangular plane stress element
 for membrane behavior. The element curvature can be specified. 
 Although element requires generally six dofs per node, no stiffness to
 local rotation along z-axis (rotation around element normal) is supplied.
