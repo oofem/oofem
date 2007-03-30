@@ -1825,10 +1825,17 @@ Represents the Heaviside-like time function. Up to time, given by
 parameter \param{origin}, the value of time function is zero. If time
 greater than \param{origin} parameter, the value is
 equal to parameter \param{value} value.
-\item \entKeywordInst{UsrDefLTF} \field{f(t)}{expr}.\\
-Represents user defined time function. The function must be expressed
-using t parameter, for which actual time will be substituted and
-expression evaluated. Very general, but relatively slow.
+\item \entKeywordInst{UsrDefLTF} \field{f(t)}{expr}
+  \optField{dfdt(t)}{expr} \optField{d2fdt2(t)}{expr}.\\
+Represents user defined time function. The expressions can depend on
+  ``t'' parameter, for which actual time will be substituted and
+expression evaluated. The function is defined using \param{f(t)}
+  parameter, and optionally, its first and second time derivatives 
+  using \param{dfdt(t)} and \param{d2fdt2(t)} parameters. 
+The first and second derivatives may be required, this depend on type
+  of analysis.
+
+Very general, but relatively slow.
 \end{itemize}
 
 \section{Examples}
