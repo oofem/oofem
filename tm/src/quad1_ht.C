@@ -473,6 +473,107 @@ Quad1_ht::SpatialLocalizerI_giveDistanceFromParametricCenter (const FloatArray& 
 }
 
 
+#define POINT_TOL 1.e-6
+
+int
+Quad1_ht::computeLocalCoordinates (FloatArray& answer, const FloatArray& coords)
+{
+  Node    *node1,*node2,*node3,*node4;
+  double  x1,x2,x3,x4,y1,y2,y3,y4,a1,a2,a3,a4,b1,b2,b3,b4;
+  double a,b,c, ksi1, ksi2, ksi3, eta1=0.0, eta2=0.0, denom;
+  int nroot;
+  
+  answer.resize(2);
+
+  node1 = this -> giveNode(1) ;
+  node2 = this -> giveNode(2) ;
+  node3 = this -> giveNode(3) ;
+  node4 = this -> giveNode(4) ;
+  
+
+  x1 = node1 -> giveCoordinate(1) ;
+  x2 = node2 -> giveCoordinate(1) ;
+  x3 = node3 -> giveCoordinate(1) ;
+  x4 = node4 -> giveCoordinate(1) ;
+  
+  y1 = node1 -> giveCoordinate(2) ;
+  y2 = node2 -> giveCoordinate(2) ;
+  y3 = node3 -> giveCoordinate(2) ;
+  y4 = node4 -> giveCoordinate(2) ;
+  
+  a1 = x1+x2+x3+x4;
+  a2 = x1-x2-x3+x4;
+  a3 = x1+x2-x3-x4;
+  a4 = x1-x2+x3-x4;
+  
+  b1 = y1+y2+y3+y4;
+  b2 = y1-y2-y3+y4;
+  b3 = y1+y2-y3-y4;
+  b4 = y1-y2+y3-y4;
+
+  a = a2*b4-b2*a4;
+  b = a1*b4+a2*b3-a3*b2-b1*a4-b4*4.0*coords.at(1)+a4*4.0*coords.at(2);
+  c = a1*b3-a3*b1-4.0*coords.at(1)*b3+4.0*coords.at(2)*a3;
+
+  // solve quadratic equation for ksi
+  cubic (0.0, a, b, c, &ksi1, &ksi2, &ksi3, &nroot);
+
+  if (nroot == 0) return 0;
+  if(nroot){
+   denom = (b3+ksi1*b4);
+   if (fabs(denom) <= 1.0e-10) 
+    eta1 = (4.0*coords.at(1)-a1-ksi1*a2) / (a3+ksi1*a4);
+   else eta1 = (4.0*coords.at(2)-b1-ksi1*b2) / denom;
+  }
+
+  if(nroot > 1){
+   double diff_ksi1, diff_eta1, diff_ksi2, diff_eta2, diff1, diff2;
+
+   denom = b3+ksi2*b4;
+   if (fabs(denom) <= 1.0e-10) 
+    eta2 = (4.0*coords.at(1)-a1-ksi2*a2) / (a3+ksi2*a4);
+   else eta2 = (4.0*coords.at(2)-b1-ksi2*b2) / denom;
+   
+   // choose the one which seems to be closer to the parametric space (square <-1;1>x<-1;1>)
+   diff_ksi1 = 0.0;
+   if(ksi1 > 1.0)diff_ksi1 = ksi1 - 1.0;
+   if(ksi1 < -1.0)diff_ksi1 = ksi1 + 1.0;
+
+   diff_eta1 = 0.0;
+   if(eta1 > 1.0)diff_eta1 = eta1 - 1.0;
+   if(eta1 < -1.0)diff_eta1 = eta1 + 1.0;
+   
+   diff_ksi2 = 0.0;
+   if(ksi2 > 1.0)diff_ksi2 = ksi2 - 1.0;
+   if(ksi2 < -1.0)diff_ksi2 = ksi2 + 1.0;
+
+   diff_eta2 = 0.0;
+   if(eta2 > 1.0)diff_eta2 = eta2 - 1.0;
+   if(eta2 < -1.0)diff_eta2 = eta2 + 1.0;
+   
+   diff1 = diff_ksi1 * diff_ksi1 + diff_eta1 * diff_eta1;
+   diff2 = diff_ksi2 * diff_ksi2 + diff_eta2 * diff_eta2;
+
+   // ksi2, eta2 seems to be closer
+   if(diff1 > diff2){
+    ksi1 = ksi2;
+    eta1 = eta2;
+   }
+  }
+
+  answer.at(1) = ksi1;
+  answer.at(2) = eta1;
+
+  // test if inside
+  for (int i=1; i<=2; i++) {
+   if (answer.at(i)<(-1.-POINT_TOL)) return 0;
+   if (answer.at(i)>(1.+POINT_TOL)) return 0;
+  }
+
+  return 1;
+}
+
+/*
 #define _SMALLNUM 1.e-6
 int
 Quad1_ht::computeLocalCoordinates (FloatArray& answer, const FloatArray& coords)
@@ -534,6 +635,7 @@ Quad1_ht::computeLocalCoordinates (FloatArray& answer, const FloatArray& coords)
   if (nroot > 1) {
    if ((r2>=(-1.0-_SMALLNUM))&&(r2<=(1.0+_SMALLNUM))) {
     eta = (4.0*coords.at(2)-b1-r2*b2) / (b3+r2*b4);
+    fprintf (stderr, "%e\n", eta);
     if ((eta>=(-1.0-_SMALLNUM))&&(eta<=(1.0+_SMALLNUM))) {
      answer.at(1) = r2;
      answer.at(2) = eta;
@@ -545,7 +647,7 @@ Quad1_ht::computeLocalCoordinates (FloatArray& answer, const FloatArray& coords)
   // given point not inside receiver volume
   return 0;
 }
-
+*/
 
 
 

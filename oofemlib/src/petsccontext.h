@@ -36,8 +36,10 @@
 #ifndef petscscontext_h
 #define petscscontext_h
 
+#ifndef __MAKEDPEND
 #include "petscksp.h"
 #include "petscordering.h"
+#endif
 #include "cltypes.h"
 
 class EngngModel;

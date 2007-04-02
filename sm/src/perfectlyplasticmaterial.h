@@ -88,8 +88,8 @@ public:
  int    giveTempYieldFlag ()     { return temp_yield_flag;}
  int    giveYieldFlag() {return yield_flag;}
  // saves current context(state) into stream
- contextIOResultType    saveContext (FILE* stream, void *obj = NULL);
- contextIOResultType    restoreContext(FILE* stream, void *obj = NULL);
+ contextIOResultType    saveContext (DataStream* stream, ContextMode mode, void *obj = NULL);
+ contextIOResultType    restoreContext(DataStream* stream, ContextMode mode, void *obj = NULL);
 
  virtual void initTempStatus () ;
  void   updateYourself(TimeStep* tNow) ;
@@ -167,8 +167,8 @@ public:
  void     printYourself () ;
  LinearElasticMaterial* giveLinearElasticMaterial () {return linearElasticMaterial;}
 
- contextIOResultType    saveContext (FILE* stream, void *obj = NULL);
- contextIOResultType    restoreContext(FILE* stream, void *obj = NULL);
+ contextIOResultType    saveContext (DataStream* stream, ContextMode mode, void *obj = NULL);
+ contextIOResultType    restoreContext(DataStream* stream, ContextMode mode, void *obj = NULL);
 
  
  // non-standart  - returns time independent material constant

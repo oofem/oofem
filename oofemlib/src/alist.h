@@ -116,8 +116,8 @@ template <class T> class AList
     Deletes the old value, if exist.
     */
       void            put (int i, T* anObject) ;
-   /// forces receiver to be empty; objects are DELETED.
-   void            clear ();
+   /// forces receiver to be empty; objects are DELETED if deleteObjectflag is true (default) .
+   void            clear (bool deleteObjectflag = true);
    /// Deleletes the object at i-th position.
    void            remove (int i);
    /**
@@ -152,23 +152,26 @@ template <class T> AList<T> ::  AList (int s, int sizeIncrement)
 template <class T> AList<T> :: ~AList ()
    // Destructor.
 {
- this->clear ();
+ this->clear (true);
 }
 
 template <class T> void
-AList<T> :: clear ()
+AList<T> :: clear (bool deleteObjectFlag)
 {
    int i = size;
 
    if (size) {
-      while (i--)
-  delete (values[i]) ;
-  //      delete [size] values ;}
-      delete  values ;}
+     if (deleteObjectFlag) {
+       while (i--)
+	 delete (values[i]) ;
+     }
+     //      delete [size] values ;}
+     delete  values ;
+   }
   
-  allocatedSize = size = 0;
-  values = NULL ;
-
+   allocatedSize = size = 0;
+   values = NULL ;
+   
 }
 
 template <class T> void

@@ -9,9 +9,12 @@ dnl   --enable-sm            --disable-sm
 dnl   --enable-tm            --disable-tm
 dnl   --enable-fm            --disable-fm
 dnl   --enable-spooles       --disable-spooles
-dnl   --with-PETSC[=PETSC_DIR]
+dnl   --enable-petsc         --disable-petsc
+dnl   --with-PETSCDIR[=PETSC_DIR]
 dnl   --with-PETCS-ARCH=PETSC_ARCH
 dnl   --enable-dss           --disble-dss
+dnl   --enable-parmetis      --disable-parmetis
+dnl   --with-PARMETISDIR[=PARMETIS_DIR]
 dnl
 dnl Code generation
 dnl 
@@ -32,6 +35,8 @@ iml_module=no
 spooles_module=no
 petsc_module=no
 dss_module=no
+parmetis_module=no
+
 oofeg_val=no
 poofem_val=no
 debug_val=no
@@ -254,10 +259,10 @@ AC_ARG_ENABLE(petsc, [  --enable-petsc       adds PETSc module support],
 
 AC_ARG_WITH(PETSCDIR, [  --with-PETSCDIR=dir  allows to specify PETSC_DIR] , 
  [
-   if test -d $withval
-   then
+dnl   if test -d $withval
+dnl   then
      PETSC_DIR=$withval
-   fi
+dnl   fi
  ]
 )
 
@@ -273,6 +278,30 @@ dnl  ])
 dnl AC_ARG_VAR(PETSC_DIR, Allows to set PETSC_DIR, a directory contatining PETSC distribution])
 dnl AC_ARG_VAR(PETSC_ARCH, Allows to set PETSC_ARCH, a variable determining PETS Architecture])
 
+dnl --------------------------------------------------------------------
+dnl Check for parmetis module
+dnl --------------------------------------------------------------------
+AC_ARG_ENABLE(parmetis, [  --enable-parmetis       adds ParMETIS module support],
+ [
+  		parmetis_module=$enableval
+ ],                  
+ [
+	  parmetis_module=no
+ ]
+)
+
+AC_ARG_WITH(PARMETISDIR, [  --with-PARMETISDIR=dir  allows to specify ParMETIS_DIR] , 
+ [
+     PARMETIS_DIR=$withval
+ ]
+)
+
+dnl ,
+dnl  [ 
+dnl  ])
+
+dnl AC_ARG_VAR(PETSC_DIR, Allows to set PETSC_DIR, a directory contatining PETSC distribution])
+dnl AC_ARG_VAR(PETSC_ARCH, Allows to set PETSC_ARCH, a variable determining PETS Architecture])
 
 dnl --------------------------------------------------------------------
 dnl Check for internal oofem modules
@@ -421,11 +450,12 @@ if test x$petsc_module = xyes; then
 			done;
 		fi
 		MPI_INCLUDES="-I$dir"
+    MPI_MODULE_SYMBOLS="-DMPICH_IGNORE_CXX_SEEK"
 		AC_DEFINE(HAVE_MPI_H)
 	]
   )
   MPI_MODULE_SYMBOLS="-DMPICH_IGNORE_CXX_SEEK"
- 
+
   AC_MSG_CHECKING(PETSc module location)
   
  dnl set PETSC_DIR if not set before
@@ -454,6 +484,30 @@ if test x$petsc_module = xyes; then
     AC_MSG_RESULT(${PETSC_ARCH})
   fi
 fi
+
+
+dnl --------------------------------------------------------------------
+dnl Search for parmetis module
+dnl --------------------------------------------------------------------
+if test x$parmetis_module = xyes; then
+
+  dnl parmetis requires mpi
+  AC_MSG_CHECKING(ParMETIS module location)
+
+dnl  PARMETIS_DIR=$PWD/../ParMETIS
+  if test -f ${PARMETIS_DIR}/parmetis.h; then
+    AC_MSG_RESULT(${PARMETIS_DIR})
+  else
+    while test ! -f ${PARMETIS_DIR}/parmetis.h; do
+      echo "Directory ${PARMETIS_DIR} does not seem to be ParMetis dir."
+      echo "Type in directory (use absolute path):"
+      read PARMETIS_DIR
+    done;
+  fi
+  PARMETIS_INCLUDES="-I${PARMETIS_DIR}"
+  PARMETIS_LIB="${PARMETIS_DIR}/libparmetis.a ${PARMETIS_DIR}/libmetis.a "
+fi
+
 
 
 dnl
@@ -667,7 +721,6 @@ AC_CHECK_HEADER(mpi.h,
 		AC_DEFINE(HAVE_MPI_H)
 	]
 )
-
 MPI_MODULE_SYMBOLS="-DMPICH_IGNORE_CXX_SEEK"
 
 dnl check for mpi Compiler batch
@@ -880,6 +933,18 @@ if test x$petsc_module = xyes; then
 fi
 
 
+if test x$parmetis_module = xyes; then
+	MODULE_LIST="$MODULE_LIST parmetis"
+	MODULE_SYMBOLS="$MODULE_SYMBOLS -D__PARMETIS_MODULE"
+	MODULE_INCLUDES="$MODULE_INCLUDES ${PARMETIS_INCLUDES}"
+
+	OOFEM_RELEASE_LIBS="$OOFEM_RELEASE_LIBS ${PARMETIS_LIB}"
+	OOFEM_DEBUG_LIBS="$OOFEM_DEBUG_LIBS ${PARMETIS_LIB}"
+	OOFEG_RELEASE_LIBS="$OOFEG_RELEASE_LIBS ${PARMETIS_LIB}"
+	OOFEG_DEBUG_LIBS="$OOFEG_DEBUG_LIBS ${PARMETIS_LIB}"
+	POOFEM_RELEASE_LIBS="$POOFEM_RELEASE_LIBS ${PARMETIS_LIB}"
+	POOFEM_DEBUG_LIBS="$POOFEM_DEBUG_LIBS ${PARMETIS_LIB}"
+fi
 
 dnl
 dnl --------------------------------------------------------------------
@@ -967,6 +1032,9 @@ AC_SUBST(PETSC_ARCH)
 AC_SUBST(PETSC_MAKE_INCLUDE)
 AC_SUBST(PETSC_INCLUDES)
 AC_SUBST(PETSC_BOPT)
+
+AC_SUBST(PARMETIS_INCLUDES)
+AC_SUBST(PARMETIS_LIB)
 
 AC_SUBST(TARGETS)
 

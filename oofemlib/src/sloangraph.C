@@ -41,12 +41,13 @@
 #include "element.h"
 #include "node.h"
 #include "dof.h"
-#include "slavedof.h"
+#include "simpleslavedof.h"
 #include "rigidarmnode.h"
 #include "elementside.h"
 #include "intarray.h"
 #ifndef __MAKEDEPEND
 #include <time.h>
+#include <set>
 #endif
  
 SloanGraph :: SloanGraph(Domain* d)  : nodes(0), queue(), OptimalRenumberingTable()
@@ -102,32 +103,64 @@ void SloanGraph :: initialize()
  // loop over dof managers and test if there are some "slave" or rigidArm connection
  // if yes, such dependency is reflected in the graph by introducing additional
  // graph edges betwenn slaves and corresponding masters
+  /*
  DofManager* iDofMan;
-  for (i=1; i <= nnodes; i++){
-  if (domain->giveDofManager (i)->hasSlaveDofs()) {
-   iDofMan = domain->giveDofManager (i);
-   if (iDofMan->giveClassID() == RigidArmNodeClass) {
-    // rigid arm node -> has only one master
-    int master = ((RigidArmNode*)iDofMan)->giveMasterDofMngr()->giveNumber();
-    // add edge
-    this->giveNode(i)->addNeighbor (master);
-    this->giveNode(master)->addNeighbor(i);
+ for (i=1; i <= nnodes; i++){
+   if (domain->giveDofManager (i)->hasAnySlaveDofs()) {
+     iDofMan = domain->giveDofManager (i);
+     if (iDofMan->giveClassID() == RigidArmNodeClass) {
+       // rigid arm node -> has only one master
+       int master = ((RigidArmNode*)iDofMan)->giveMasterDofMngr()->giveNumber();
+       // add edge
+       this->giveNode(i)->addNeighbor (master);
+       this->giveNode(master)->addNeighbor(i);
     
-   } else {
+     } else {
     // slave dofs are present in dofManager
     // first - ask for masters, these may be different for each dof
-    int j;
-    for (j=1; j<=iDofMan->giveNumberOfDofs(); j++) 
-     if (iDofMan->giveDof (j)->giveClassID() == SlaveDofClass) {
-      int master = ((SlaveDof*) iDofMan->giveDof (j))->giveMasterDofManagerNum();
-      // add edge
-      this->giveNode(i)->addNeighbor (master);
-      this->giveNode(master)->addNeighbor(i);
-      
+       int j;
+       for (j=1; j<=iDofMan->giveNumberOfDofs(); j++) 
+	 if (iDofMan->giveDof (j)->giveClassID() == SimpleSlaveDofClass) {
+	   int master = ((SimpleSlaveDof*) iDofMan->giveDof (j))->giveMasterDofManagerNum();
+	   // add edge
+	   this->giveNode(i)->addNeighbor (master);
+	   this->giveNode(master)->addNeighbor(i);
+	   
+	 }
      }
-   }
-  } 
- } // end dof man loop
+   } 
+   } // end dof man loop */
+
+  // loop over dof managers and test if there are some "slave" or rigidArm connection
+  // if yes, such dependency is reflected in the graph by introducing additional
+  // graph edges betwenn slaves and corresponding masters
+  
+  std::set <int, std::less<int> > masters;
+  std::set <int, std::less<int> > :: iterator it;
+  
+  IntArray dofMasters;
+  DofManager* iDofMan;
+  for (i=1; i <= nnodes; i++){
+    if (domain->giveDofManager (i)->hasAnySlaveDofs()) {
+      // slave dofs are present in dofManager
+      // first - ask for masters, these may be different for each dof
+      masters.clear();
+      iDofMan = domain->giveDofManager (i);
+      int j,k;
+      for (j=1; j<=iDofMan->giveNumberOfDofs(); j++) {
+        if (!iDofMan->giveDof(j)->isPrimaryDof()) {
+          iDofMan->giveDof(j)->giveMasterDofManArray(dofMasters);
+          for (k=1; k<=dofMasters.giveSize(); k++) masters.insert(dofMasters.at(k));
+        }
+      }
+      
+      for (it = masters.begin(); it != masters.end(); ++it) {
+        this->giveNode(i)->addNeighbor (*(it));
+        this->giveNode(*(it))->addNeighbor(i);
+      }
+    }
+  } // end dof man loop
+  
 }
 
 

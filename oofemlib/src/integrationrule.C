@@ -40,7 +40,7 @@
 #include "material.h"
 #include "crosssection.h"
 #include "gausspnt.h"
-
+#include "datastream.h"
 // initialize class member 
 
 IntegrationRule::IntegrationRule (int n, Domain* domain, int startIndx, int endIndx, bool dynamic)
@@ -122,7 +122,7 @@ IntegrationRule :: initForNewStep ()
 
 
 contextIOResultType
-IntegrationRule :: saveContext (FILE* stream, void *obj)
+IntegrationRule :: saveContext (DataStream* stream, ContextMode mode, void *obj)
 {
  //
  // saves full  context (saves state variables, that completely describe
@@ -134,34 +134,36 @@ IntegrationRule :: saveContext (FILE* stream, void *obj)
   GaussPoint* gp ;
 
   if (stream == NULL) _error ("saveContex : can't write into NULL stream");
+  if (isDynamic) mode |= CM_Definition; // store definition if dynamic
 
-  if (!isDynamic) {
-    for (i=0 ; i < numberOfIntegrationPoints ; i++) {
-      gp = gaussPointArray[i] ;
-      if ((iores = gp->giveCrossSection()->saveContext(stream,gp)) != CIO_OK) THROW_CIOERR(iores);
-    }
-  } else {
-    // write size 
-    if (fwrite(&numberOfIntegrationPoints,sizeof(int),1,stream)!=1) THROW_CIOERR (CIO_IOERR);
-    for (i=0 ; i < numberOfIntegrationPoints ; i++) {
-      gp = gaussPointArray[i] ;
-      // write gp weight, coordinates, element number, and material mode
+  if (mode & CM_Definition ) {
+    if (!stream->write(&numberOfIntegrationPoints,1)) THROW_CIOERR (CIO_IOERR);
+  } 
+  for (i=0 ; i < numberOfIntegrationPoints ; i++) {
+    gp = gaussPointArray[i] ;
+    if (mode & CM_Definition ) {
+       // write gp weight, coordinates, element number, and material mode
       double dval = gp->giveWeight();
-      if (fwrite(&dval,sizeof(double),1,stream) != 1) THROW_CIOERR(CIO_IOERR);
-      if ((iores = gp->giveCoordinates()->storeYourself(stream))!=CIO_OK) THROW_CIOERR(iores);
+      if (!stream->write(&dval,1)) THROW_CIOERR(CIO_IOERR);
+      if ((iores = gp->giveCoordinates()->storeYourself(stream,mode))!=CIO_OK) THROW_CIOERR(iores);
       int ival = gp->giveElement()->giveNumber();
-      if (fwrite(&ival,sizeof(int),1,stream) != 1) THROW_CIOERR(CIO_IOERR);
-      MaterialMode m = gp->giveMaterialMode();
-      if (fwrite(&m,sizeof(MaterialMode),1,stream) != 1) THROW_CIOERR(CIO_IOERR);
-      // write gp data
-      if ((iores = gp->giveCrossSection()->saveContext(stream,gp)) != CIO_OK) THROW_CIOERR(iores);
+      if (!stream->write(&ival,1)) THROW_CIOERR(CIO_IOERR);
+      int mmode = gp->giveMaterialMode();
+      if (!stream->write(&mmode,1) != 1) THROW_CIOERR(CIO_IOERR);
+      int isdyn = isDynamic;
+      if (!stream->write(&isdyn,1) != 1) THROW_CIOERR(CIO_IOERR);
+      // write first and last integration indices
+      if (!stream->write(&firstLocalStrainIndx,1) != 1) THROW_CIOERR(CIO_IOERR);
+      if (!stream->write(&lastLocalStrainIndx,1) != 1) THROW_CIOERR(CIO_IOERR);
     }
-  }    
+    // write gp data
+    if ((iores = gp->giveCrossSection()->saveContext(stream,mode,gp)) != CIO_OK) THROW_CIOERR(iores);
+  } 
   return CIO_OK;
 }
 
 contextIOResultType
-IntegrationRule :: restoreContext (FILE* stream, void *obj)
+IntegrationRule :: restoreContext (DataStream* stream, ContextMode mode, void *obj)
 {
  //
  // restores full element context (saves state variables, that completely describe
@@ -169,42 +171,47 @@ IntegrationRule :: restoreContext (FILE* stream, void *obj)
  //
  
   contextIOResultType iores;
- int         i ;
+  int         i, size ;
+  bool __create = false;
   GaussPoint* gp ;
  
   if (stream == NULL) _error ("restoreContex : can't write into NULL stream");
 
-  if (!isDynamic) {
-    for (i=0 ; i < numberOfIntegrationPoints ; i++) {
-      gp = gaussPointArray[i] ;
-      if ((iores = gp -> giveCrossSection()->restoreContext(stream,gp)) != CIO_OK) THROW_CIOERR(iores);
-    }
-  } else {
-    // read size
-    bool __create = false;
-    int size;
+  if (isDynamic) mode |= CM_Definition; // store definition if dynamic
 
-    if (fread (&size,sizeof(int),1,stream) != 1) THROW_CIOERR(CIO_IOERR);
+  if (mode & CM_Definition ) {
+    if (!stream->read(&size,1)) THROW_CIOERR (CIO_IOERR);
     if (numberOfIntegrationPoints != size) {
       this->clear();
       __create = true;
       gaussPointArray = new GaussPoint* [size];
       numberOfIntegrationPoints = size;
-
     }
-    
-    for (i=0 ; i < numberOfIntegrationPoints ; i++) {
+  } 
+
+  for (i=0 ; i < numberOfIntegrationPoints ; i++) {
+    if (mode & CM_Definition ) {
+
       // read weight
       double w;
-      if (fread (&w,sizeof(double),1,stream) != 1) THROW_CIOERR(CIO_IOERR);
+      if (!stream->read (&w,1)) THROW_CIOERR(CIO_IOERR);
       // read coords
       FloatArray c;
-      if ((iores = c.restoreYourself(stream))!= CIO_OK) THROW_CIOERR(iores);
+      if ((iores = c.restoreYourself(stream,mode))!= CIO_OK) THROW_CIOERR(iores);
       // read element number and material mode
       int n;
-      if (fread(&n,sizeof(int),1,stream) != 1) THROW_CIOERR(CIO_IOERR);
-      MaterialMode m;
-      if (fread(&m,sizeof(MaterialMode),1,stream) != 1) THROW_CIOERR(CIO_IOERR);
+      if (!stream->read(&n,1)) THROW_CIOERR(CIO_IOERR);
+      MaterialMode m; int _m;
+      if (!stream->read(&_m,1)) THROW_CIOERR(CIO_IOERR);
+      m = (MaterialMode) _m;
+      // read dynamic flag
+      int isdyn;
+      if (!stream->read(&isdyn,1) != 1) THROW_CIOERR(CIO_IOERR);
+      isDynamic = (bool) isdyn;
+      // read first and last integration indices
+      if (!stream->read(&firstLocalStrainIndx,1) != 1) THROW_CIOERR(CIO_IOERR);
+      if (!stream->read(&lastLocalStrainIndx,1) != 1) THROW_CIOERR(CIO_IOERR);
+      
       if (__create) {
         (gaussPointArray)[i] = new GaussPoint(domain->giveElement(n),i+1,c.GiveCopy(),w,m);
       } else {
@@ -214,12 +221,11 @@ IntegrationRule :: restoreContext (FILE* stream, void *obj)
         gp->setElement (domain->giveElement(n));
         gp->setMaterialMode (m);
       }
+    }
       // read gp data
       gp = gaussPointArray[i] ;
-      if ((iores = gp -> giveCrossSection()->restoreContext(stream,gp)) != CIO_OK) THROW_CIOERR(iores);
-    }
-  }
- 
+      if ((iores = gp -> giveCrossSection()->restoreContext(stream,mode,gp)) != CIO_OK) THROW_CIOERR(iores);
+  } 
   return CIO_OK;
 }
 

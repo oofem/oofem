@@ -39,6 +39,7 @@
 #include "dof.h"
 #include "element.h"
 #include "timestep.h"
+#include "datastream.h"
 
 PrimaryField::PrimaryField (EngngModel* a, int idomain, 
                             FieldBaseID ft, EquationID ut, int nHist) : Field (ft), solutionVectors(nHist+1), solStepList(nHist+1)
@@ -152,54 +153,54 @@ PrimaryField::advanceSolution (TimeStep* atTime)
 
 
 contextIOResultType    
-PrimaryField::saveContext (FILE* stream)
+PrimaryField::saveContext (DataStream* stream, ContextMode mode)
 {
   int i, type_id = PrimaryFieldClass;
- contextIOResultType iores;
+  contextIOResultType iores;
   // write class header
-  if (fwrite(&type_id,sizeof(int),1,stream)!= 1) return CIO_IOERR;
+  if (!stream->write(&type_id,1)) return CIO_IOERR;
 
- if (fwrite(&actualStepNumber,sizeof(int),1,stream) != 1) THROW_CIOERR(CIO_IOERR);
- if (fwrite(&actualStepIndx,sizeof(int),1,stream) != 1) THROW_CIOERR(CIO_IOERR);
+  if (!stream->write(&actualStepNumber,1)) THROW_CIOERR(CIO_IOERR);
+  if (!stream->write(&actualStepIndx,1)) THROW_CIOERR(CIO_IOERR);
 
- for (i=0; i<=nHistVectors; i++) 
-  if ((iores = solutionVectors.at(i+1)->storeYourself(stream))!= CIO_OK) THROW_CIOERR(iores);
+  for (i=0; i<=nHistVectors; i++) 
+    if ((iores = solutionVectors.at(i+1)->storeYourself(stream,mode))!= CIO_OK) THROW_CIOERR(iores);
  
- TimeStep *iStep;
- bool flag;
- for (i=0; i<=nHistVectors; i++) {
-  if ((iStep = solStepList.at(i+1))) flag = true; else flag = false;
-  if (fwrite(&flag,sizeof(bool),1,stream) != 1) THROW_CIOERR(CIO_IOERR);
-  if (flag) 
-   if ((iores = solStepList.at(i+1)->saveContext(stream))!= CIO_OK) THROW_CIOERR(iores);
- }
+  TimeStep *iStep;
+  int flag;
+  for (i=0; i<=nHistVectors; i++) {
+    if ((iStep = solStepList.at(i+1))) flag = 1; else flag = 0;
+    if (!stream->write(&flag,1)) THROW_CIOERR(CIO_IOERR);
+    if (flag) 
+      if ((iores = solStepList.at(i+1)->saveContext(stream,mode))!= CIO_OK) THROW_CIOERR(iores);
+  }
   return CIO_OK;
 }
 
 contextIOResultType    
-PrimaryField::restoreContext(FILE* stream)
+PrimaryField::restoreContext(DataStream* stream, ContextMode mode)
 {
   int i, class_id;
  contextIOResultType iores;
   // read class header
-  if (fread(&class_id,sizeof(int),1,stream) != 1) return CIO_IOERR;
+  if (!stream->read(&class_id,1)) return CIO_IOERR;
   if (class_id != PrimaryFieldClass) return CIO_BADVERSION;
 
- if (fread (&actualStepNumber,sizeof(int),1,stream) != 1) THROW_CIOERR(CIO_IOERR);
- if (fread (&actualStepIndx,sizeof(int),1,stream) != 1) THROW_CIOERR(CIO_IOERR);
+ if (!stream->read (&actualStepNumber,1)) THROW_CIOERR(CIO_IOERR);
+ if (!stream->read (&actualStepIndx,1)) THROW_CIOERR(CIO_IOERR);
 
  for (i=0; i<=nHistVectors; i++) 
-  if ((iores = solutionVectors.at(i+1)->restoreYourself(stream))!= CIO_OK) THROW_CIOERR(iores);
+  if ((iores = solutionVectors.at(i+1)->restoreYourself(stream,mode))!= CIO_OK) THROW_CIOERR(iores);
  
- bool flag;
+ int flag;
  TimeStep *iStep;
  for (i=0; i<=nHistVectors; i++) {
-  if (fread (&flag,sizeof(bool),1,stream) != 1) THROW_CIOERR(CIO_IOERR);
+  if (!stream->read (&flag,1)) THROW_CIOERR(CIO_IOERR);
   if (flag) {
    iStep = new TimeStep(emodel);
-   if ((iores = iStep->restoreContext(stream))!= CIO_OK) THROW_CIOERR(iores);
+   if ((iores = iStep->restoreContext(stream,mode))!= CIO_OK) THROW_CIOERR(iores);
   } else {
-   iStep = NULL;
+    iStep = NULL;
   }
   solStepList.put (i+1, iStep);
  }

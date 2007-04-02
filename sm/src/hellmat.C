@@ -5,10 +5,12 @@
 //  ?? standalone thermochemical analysis - temperature history as input / both ksi & T input ... thermochemo a few steps ahead - temperature interpolation for given time / coordinates
 // file hellmat.C
 
+#ifndef __MAKEDEPEND
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
 #include <string.h>
+#endif
 
 #include "gausspnt.h"
 #include "timestep.h"
@@ -18,6 +20,7 @@
 #include "hellmat.h"
 #include "mathfem.h"
 #include "oofemtxtinputrecord.h"
+#include "datastream.h"
 
 // --------- class AgingIsoLEMaterial implementation---------
 AgingIsoLEMaterial::AgingIsoLEMaterial(int n, Domain* d, double E, double nu) : IsotropicLinearElasticMaterial (n,d,E,nu) {}
@@ -2002,7 +2005,7 @@ HellmichMaterial::computeStressIndependentStrainVector (FloatArray& answer,
  return ;
 }
 
-contextIOResultType HellmichMaterial::saveContext(FILE* stream, void *obj)
+contextIOResultType HellmichMaterial::saveContext(DataStream* stream, ContextMode mode, void *obj)
 // saves full status for this material, also invokes saving
 // for sub-objects of this.
 {
@@ -2014,20 +2017,20 @@ contextIOResultType HellmichMaterial::saveContext(FILE* stream, void *obj)
   StateCounterType c = ((GaussPoint*)obj)->giveDomain()->giveEngngModel()->giveCurrentStep()->giveSolutionStateCounter();
   if (materialGpSaveAt != c) {
    materialGpSaveAt = c;
-   if ((iores = saveContext(stream, giveMaterialGp())) != CIO_OK) THROW_CIOERR(iores);
+   if ((iores = saveContext(stream, mode, giveMaterialGp())) != CIO_OK) THROW_CIOERR(iores);
   }
  }
 
  // write parent data
- if ((iores = StructuralMaterial::saveContext(stream, obj))!= CIO_OK) THROW_CIOERR(iores);
+ if ((iores = StructuralMaterial::saveContext(stream, mode, obj))!= CIO_OK) THROW_CIOERR(iores);
  // save hydration model data - maybe should check moHydration?
  // needs to save only in case nonisodata is present = moIsothermal option is not set in gp options
  if (obj && !(((HellmichMaterialStatus*)giveStatus((GaussPoint*) obj))->giveMaterialOptions() & moIsothermal)) {
-  if ((iores = HydrationModelInterface::saveContext(stream, obj))!= CIO_OK) THROW_CIOERR(iores);
+  if ((iores = HydrationModelInterface::saveContext(stream, mode, obj))!= CIO_OK) THROW_CIOERR(iores);
  }
  return CIO_OK;
 }
-contextIOResultType HellmichMaterial::restoreContext(FILE* stream, void *obj)
+contextIOResultType HellmichMaterial::restoreContext(DataStream* stream, ContextMode mode, void *obj)
 // restores full status for this material, also invokes restoring for sub-objects of this.
 //!!! gp is passed in obj
 {
@@ -2038,14 +2041,14 @@ contextIOResultType HellmichMaterial::restoreContext(FILE* stream, void *obj)
   StateCounterType c = ((GaussPoint*) obj)->giveDomain()->giveEngngModel()->giveCurrentStep()->giveSolutionStateCounter();
   if (materialGpRestoreAt != c) {
    materialGpRestoreAt = c;
-   if ((iores = restoreContext(stream, giveMaterialGp())) != CIO_OK) THROW_CIOERR(iores);
+   if ((iores = restoreContext(stream, mode, giveMaterialGp())) != CIO_OK) THROW_CIOERR(iores);
   }
  }
  // read parent data
- if ((iores = StructuralMaterial::restoreContext(stream, obj)) != CIO_OK) THROW_CIOERR(iores);
+ if ((iores = StructuralMaterial::restoreContext(stream, mode, obj)) != CIO_OK) THROW_CIOERR(iores);
  // read hydration model data - maybe should check moHydration?
  if (obj && !(((HellmichMaterialStatus*)giveStatus((GaussPoint*) obj))->giveMaterialOptions() & moIsothermal)) {
-  if ((iores = HydrationModelInterface::restoreContext(stream, obj))!= CIO_OK) THROW_CIOERR(iores);
+  if ((iores = HydrationModelInterface::restoreContext(stream, mode, obj))!= CIO_OK) THROW_CIOERR(iores);
  }
  return CIO_OK;
 }
@@ -2521,42 +2524,42 @@ void HellmichMaterialStatus::printOutputAt(FILE* stream, TimeStep* atTime)
 }
 
 contextIOResultType
-PlastData::saveContext(FILE* stream)
+PlastData::saveContext(DataStream* stream, ContextMode mode)
 // Saves the plasticity status data
 {
  contextIOResultType iores;
- if ((iores = plasticStrainVector.storeYourself(stream)) != CIO_OK) THROW_CIOERR(iores);
- if (fwrite(&hardeningVar,sizeof(double),1,stream) != 1) THROW_CIOERR(CIO_IOERR);
+ if ((iores = plasticStrainVector.storeYourself(stream,mode)) != CIO_OK) THROW_CIOERR(iores);
+ if (!stream->write(&hardeningVar,1)) THROW_CIOERR(CIO_IOERR);
 
- if (fwrite(&activeSurface,sizeof(ActiveSurface),1,stream) != 1) THROW_CIOERR(CIO_IOERR);
+ int _as = activeSurface; if (!stream->write(&_as,1)) THROW_CIOERR(CIO_IOERR);
 
  return CIO_OK;
 }
 contextIOResultType
-CreepData::saveContext(FILE* stream)
+CreepData::saveContext(DataStream* stream, ContextMode mode)
 // Saves the plasticity status data
 {
  contextIOResultType iores;
- if ((iores = viscousStrainVector.storeYourself(stream)) != CIO_OK) THROW_CIOERR(iores);
- if ((iores = flowStrainVector.storeYourself(stream)) != CIO_OK) THROW_CIOERR(iores);
+ if ((iores = viscousStrainVector.storeYourself(stream,mode)) != CIO_OK) THROW_CIOERR(iores);
+ if ((iores = flowStrainVector.storeYourself(stream,mode)) != CIO_OK) THROW_CIOERR(iores);
  return CIO_OK;
 }
 contextIOResultType
-NonisoData::saveContext(FILE* stream)
+NonisoData::saveContext(DataStream* stream, ContextMode mode)
 // Saves the non-isothermal/mat.level status data
 {
  //contextIOResultType iores;
- if (fwrite(&initialTemperature,sizeof(double),1,stream) != 1) THROW_CIOERR(CIO_IOERR);
- if (fwrite(&temperature,sizeof(double),1,stream) != 1) THROW_CIOERR(CIO_IOERR);
- if (fwrite(&humidity,sizeof(double),1,stream) != 1) THROW_CIOERR(CIO_IOERR);
- if (fwrite(&gamma0,sizeof(double),1,stream) != 1) THROW_CIOERR(CIO_IOERR);
- if (fwrite(&viscousSlip,sizeof(double),1,stream) != 1) THROW_CIOERR(CIO_IOERR);
- if (fwrite(&viscosity,sizeof(double),1,stream) != 1) THROW_CIOERR(CIO_IOERR);
+ if (!stream->write(&initialTemperature,1)) THROW_CIOERR(CIO_IOERR);
+ if (!stream->write(&temperature,1)) THROW_CIOERR(CIO_IOERR);
+ if (!stream->write(&humidity,1)) THROW_CIOERR(CIO_IOERR);
+ if (!stream->write(&gamma0,1)) THROW_CIOERR(CIO_IOERR);
+ if (!stream->write(&viscousSlip,1)) THROW_CIOERR(CIO_IOERR);
+ if (!stream->write(&viscosity,1)) THROW_CIOERR(CIO_IOERR);
 
  return CIO_OK;
 }
 contextIOResultType
-HellmichMaterialStatus::saveContext(FILE* stream, void *obj)
+HellmichMaterialStatus::saveContext(DataStream* stream, ContextMode mode, void *obj)
 // saves full information stored in this Status
 // no temp variables stored
 {
@@ -2566,76 +2569,76 @@ HellmichMaterialStatus::saveContext(FILE* stream, void *obj)
  // save flag for each module to enable consistency check at restoreContext
  int dataFlag;
  // save parent class status
- if ((iores = StructuralMaterialStatus::saveContext(stream, obj)) != CIO_OK) THROW_CIOERR(iores);
+ if ((iores = StructuralMaterialStatus::saveContext(stream, mode, obj)) != CIO_OK) THROW_CIOERR(iores);
  // Plasticity
  if (((options & moPlasticity) == 0) ^ (plastData == NULL)) _error("saveContext: plastic status inconsistent with material options.");
  dataFlag = (plastData)?1:0;
- if (fwrite(&dataFlag,sizeof(int),1,stream) != 1) THROW_CIOERR(CIO_IOERR);
- if (dataFlag && ((iores = plastData->saveContext(stream)) != CIO_OK)) THROW_CIOERR(iores);
+ if (!stream->write(&dataFlag,1)) THROW_CIOERR(CIO_IOERR);
+ if (dataFlag && ((iores = plastData->saveContext(stream,mode)) != CIO_OK)) THROW_CIOERR(iores);
  // Creep
  if (((options & moCreep) == 0) ^ (creepData == NULL)) _error("saveContext: creep status inconsistent with material options.");
  dataFlag = (creepData)?1:0;
- if (fwrite(&dataFlag,sizeof(int),1,stream) != 1) THROW_CIOERR(CIO_IOERR);
- if (dataFlag && ((iores = creepData->saveContext(stream)) != CIO_OK)) THROW_CIOERR(iores);
+ if (!stream->write(&dataFlag,1)) THROW_CIOERR(CIO_IOERR);
+ if (dataFlag && ((iores = creepData->saveContext(stream,mode)) != CIO_OK)) THROW_CIOERR(iores);
  // Non-isothermal or material-level auxiliary status
  if (((options & moIsothermal) != 0) ^ (nonisoData == NULL)) _error("saveContext: non-isothermal status inconsistent with material options.");
  dataFlag = (nonisoData)?1:0;
- if (fwrite(&dataFlag,sizeof(int),1,stream) != 1) THROW_CIOERR(CIO_IOERR);
- if (dataFlag && ((iores = nonisoData->saveContext(stream)) != CIO_OK)) THROW_CIOERR(iores);
+ if (!stream->write(&dataFlag,1)) THROW_CIOERR(CIO_IOERR);
+ if (dataFlag && ((iores = nonisoData->saveContext(stream,mode)) != CIO_OK)) THROW_CIOERR(iores);
  return CIO_OK;
 }
 
 contextIOResultType
-PlastData::restoreContext(FILE* stream)
+PlastData::restoreContext(DataStream* stream, ContextMode mode)
 // Restores the plasticity status data
 {
  contextIOResultType iores;
- if ((iores = plasticStrainVector.restoreYourself(stream)) != CIO_OK) THROW_CIOERR(iores);
- if (fread(&hardeningVar,sizeof(double),1,stream) != 1) THROW_CIOERR(CIO_IOERR);
- if (fread(&activeSurface,sizeof(ActiveSurface),1,stream) != 1) THROW_CIOERR(CIO_IOERR);
+ if ((iores = plasticStrainVector.restoreYourself(stream,mode)) != CIO_OK) THROW_CIOERR(iores);
+ if (!stream->read(&hardeningVar,1)) THROW_CIOERR(CIO_IOERR);
+ int _as; if (!stream->read(&_as,1)) THROW_CIOERR(CIO_IOERR); activeSurface = (ActiveSurface) _as;
  return CIO_OK;
 }
 contextIOResultType
-CreepData::restoreContext(FILE* stream)
+CreepData::restoreContext(DataStream* stream, ContextMode mode)
 // Restores the plasticity status data
 {
  contextIOResultType iores;
- if ((iores = viscousStrainVector.restoreYourself(stream)) != CIO_OK) THROW_CIOERR(iores);
- if ((iores = flowStrainVector.restoreYourself(stream)) != CIO_OK) THROW_CIOERR(iores);
+ if ((iores = viscousStrainVector.restoreYourself(stream,mode)) != CIO_OK) THROW_CIOERR(iores);
+ if ((iores = flowStrainVector.restoreYourself(stream,mode)) != CIO_OK) THROW_CIOERR(iores);
  return CIO_OK;
 }
 contextIOResultType
-NonisoData::restoreContext(FILE* stream)
+NonisoData::restoreContext(DataStream* stream, ContextMode mode)
 // Restores the non-isothermal/mat.level status data
 {
- if (fread(&initialTemperature,sizeof(double),1,stream) != 1) THROW_CIOERR(CIO_IOERR);
- if (fread(&temperature,sizeof(double),1,stream) != 1) THROW_CIOERR(CIO_IOERR);
- if (fread(&humidity,sizeof(double),1,stream) != 1) THROW_CIOERR(CIO_IOERR);
- if (fread(&gamma0,sizeof(double),1,stream) != 1) THROW_CIOERR(CIO_IOERR);
- if (fread(&viscousSlip,sizeof(double),1,stream) != 1) THROW_CIOERR(CIO_IOERR);
- if (fread(&viscosity,sizeof(double),1,stream) != 1) THROW_CIOERR(CIO_IOERR);
+ if (!stream->read(&initialTemperature,1)) THROW_CIOERR(CIO_IOERR);
+ if (!stream->read(&temperature,1)) THROW_CIOERR(CIO_IOERR);
+ if (!stream->read(&humidity,1)) THROW_CIOERR(CIO_IOERR);
+ if (!stream->read(&gamma0,1)) THROW_CIOERR(CIO_IOERR);
+ if (!stream->read(&viscousSlip,1)) THROW_CIOERR(CIO_IOERR);
+ if (!stream->read(&viscosity,1)) THROW_CIOERR(CIO_IOERR);
  return CIO_OK;
 }
 contextIOResultType
-HellmichMaterialStatus::restoreContext(FILE* stream, void *obj)
+HellmichMaterialStatus::restoreContext(DataStream* stream, ContextMode mode, void *obj)
 /// Restores full information stored in stream to this Status
 {
  contextIOResultType iores;
  // read flag for each module to enable consistency check
  int dataFlag;
  // read parent class status
- if ((iores = StructuralMaterialStatus::restoreContext(stream, obj)) != CIO_OK) THROW_CIOERR(iores);
+ if ((iores = StructuralMaterialStatus::restoreContext(stream, mode, obj)) != CIO_OK) THROW_CIOERR(iores);
  // Plasticity
- if (fread(&dataFlag,sizeof(int),1,stream) != 1) THROW_CIOERR(CIO_IOERR);
+ if (!stream->read(&dataFlag,1)) THROW_CIOERR(CIO_IOERR);
  if ((dataFlag==0) ^ (plastData==NULL)) _error("restoreContext: creep status inconsistent with material options.");
- if (dataFlag && ((iores = plastData->restoreContext(stream)) != CIO_OK)) THROW_CIOERR(iores);
+ if (dataFlag && ((iores = plastData->restoreContext(stream,mode)) != CIO_OK)) THROW_CIOERR(iores);
  // Creep
- if (fread(&dataFlag,sizeof(int),1,stream) != 1) THROW_CIOERR(CIO_IOERR);
+ if (!stream->read(&dataFlag,1)) THROW_CIOERR(CIO_IOERR);
  if ((dataFlag==0) ^ (creepData==NULL)) _error("restoreContext: creep status inconsistent with material options.");
- if (dataFlag && ((iores = creepData->restoreContext(stream)) != CIO_OK)) THROW_CIOERR(iores);
+ if (dataFlag && ((iores = creepData->restoreContext(stream,mode)) != CIO_OK)) THROW_CIOERR(iores);
  // Non-isothermal or material-level auxiliary status
- if (fread(&dataFlag,sizeof(int),1,stream) != 1) THROW_CIOERR(CIO_IOERR);
+ if (!stream->read(&dataFlag,1)) THROW_CIOERR(CIO_IOERR);
  if ((dataFlag==0) ^ (nonisoData==NULL)) _error("restoreContext: non-isothermal status inconsistent with material options.");
- if (dataFlag && ((iores = nonisoData->restoreContext(stream)) != CIO_OK)) THROW_CIOERR(iores);
+ if (dataFlag && ((iores = nonisoData->restoreContext(stream,mode)) != CIO_OK)) THROW_CIOERR(iores);
  return CIO_OK;
 }

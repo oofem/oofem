@@ -217,7 +217,8 @@ int seekNodeRecord (Tokenizer *t, int node)
  if (currState.currNodeSide == node) return 1;
  while (!t->isEOF()) {
   if (t->giveNumberOfTokens() > 1) {
-   if (!strncmp(t->giveToken(1),"Node",4) || !strncmp(t->giveToken(1),"Side",4) || !strncmp(t->giveToken(1),"RigidArmNode",12)) {
+   if (!strncmp(t->giveToken(1),"Node",4) || !strncmp(t->giveToken(1),"Side",4) ||
+       !strncmp(t->giveToken(1),"RigidArmNode",12) || !strncmp(t->giveToken(1),"HangingNode",11)) {
     sscanf(t->giveToken(2),"%d",&n);
     if (node == n) {
      resetStateExceptCurrStep();;

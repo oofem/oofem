@@ -879,7 +879,7 @@ MaxwellChainMaterial ::giveEndOfTimeOfInterest()
 }
 
 contextIOResultType
-MaxwellChainMaterial :: saveContext (FILE* stream, void *obj)
+MaxwellChainMaterial :: saveContext (DataStream* stream, ContextMode mode, void *obj)
 //
 // saves full status for this material, also invokes saving
 // for sub-objects of this (yieldcriteria, loadingcriteria, linearElasticMaterial)
@@ -888,14 +888,14 @@ MaxwellChainMaterial :: saveContext (FILE* stream, void *obj)
  contextIOResultType iores;
 
  if (stream == NULL) _error ("saveContex : can't write into NULL stream");
- if ((iores = Material :: saveContext (stream, obj)) != CIO_OK) THROW_CIOERR(iores);
- if ((iores = giveLinearElasticMaterial()->saveContext(stream,obj)) != CIO_OK) THROW_CIOERR(iores);
+ if ((iores = Material :: saveContext (stream, mode, obj)) != CIO_OK) THROW_CIOERR(iores);
+ if ((iores = giveLinearElasticMaterial()->saveContext(stream, mode, obj)) != CIO_OK) THROW_CIOERR(iores);
  return CIO_OK;
 }
 
 
 contextIOResultType 
-MaxwellChainMaterial :: restoreContext (FILE* stream, void *obj)
+MaxwellChainMaterial :: restoreContext (DataStream* stream, ContextMode mode, void *obj)
 // 
 //
 // resaves full status for this material, also invokes saving
@@ -906,9 +906,9 @@ MaxwellChainMaterial :: restoreContext (FILE* stream, void *obj)
 {
  contextIOResultType iores;
 
-  if ((iores = Material :: restoreContext( stream, obj)) != CIO_OK) THROW_CIOERR(iores);
-  // invoke possible restoring of statuses for yield conditions and submaterials
-  if ((iores = giveLinearElasticMaterial()->restoreContext(stream,obj)) != CIO_OK) THROW_CIOERR(iores);
+ if ((iores = Material :: restoreContext( stream, mode, obj)) != CIO_OK) THROW_CIOERR(iores);
+ // invoke possible restoring of statuses for yield conditions and submaterials
+ if ((iores = giveLinearElasticMaterial()->restoreContext(stream, mode, obj)) != CIO_OK) THROW_CIOERR(iores);
  return CIO_OK;
 }
 
@@ -1007,7 +1007,7 @@ MaxwellChainMaterialStatus :: initTempStatus ()
 }
 
 contextIOResultType
-MaxwellChainMaterialStatus :: saveContext (FILE* stream, void *obj)
+MaxwellChainMaterialStatus :: saveContext (DataStream* stream, ContextMode mode, void *obj)
 //
 // saves full information stored in this Status
 // 
@@ -1017,15 +1017,15 @@ MaxwellChainMaterialStatus :: saveContext (FILE* stream, void *obj)
 
  if (stream == NULL) _error ("saveContex : can't write into NULL stream");
 
- if ((iores = StructuralMaterialStatus :: saveContext (stream, obj)) != CIO_OK) THROW_CIOERR(iores);
+ if ((iores = StructuralMaterialStatus :: saveContext (stream, mode, obj)) != CIO_OK) THROW_CIOERR(iores);
 
  // write a raw data
  for (i=0; i<nMaxwellUnits; i++) {
   if (hiddenStreses[i] == NULL) hiddenStreses[i] = new FloatArray(0);
-  if ((iores = hiddenStreses[i]->storeYourself(stream)) != CIO_OK) THROW_CIOERR(iores);
+  if ((iores = hiddenStreses[i]->storeYourself(stream, mode)) != CIO_OK) THROW_CIOERR(iores);
  }
 
- if ((iores = shrinkageStrain.storeYourself(stream)) != CIO_OK) THROW_CIOERR(iores);
+ if ((iores = shrinkageStrain.storeYourself(stream, mode)) != CIO_OK) THROW_CIOERR(iores);
  
  
  // return result back
@@ -1034,7 +1034,7 @@ MaxwellChainMaterialStatus :: saveContext (FILE* stream, void *obj)
 
 
 contextIOResultType 
-MaxwellChainMaterialStatus :: restoreContext (FILE* stream, void *obj)
+MaxwellChainMaterialStatus :: restoreContext (DataStream* stream, ContextMode mode, void *obj)
 // 
 // restore state variables from stream
 //
@@ -1042,15 +1042,15 @@ MaxwellChainMaterialStatus :: restoreContext (FILE* stream, void *obj)
  int i;
  contextIOResultType iores;
 
- if ((iores = StructuralMaterialStatus :: restoreContext (stream, obj))!=CIO_OK) THROW_CIOERR (iores);
+ if ((iores = StructuralMaterialStatus :: restoreContext (stream, mode, obj))!=CIO_OK) THROW_CIOERR (iores);
  
  // read raw data 
  for (i=0; i<nMaxwellUnits; i++) {
   if (hiddenStreses[i] == NULL) hiddenStreses[i] = new FloatArray(0);
-  if ((iores = hiddenStreses[i]->restoreYourself(stream))!= CIO_OK) THROW_CIOERR(iores);
+  if ((iores = hiddenStreses[i]->restoreYourself(stream, mode))!= CIO_OK) THROW_CIOERR(iores);
  }
  
- if ((iores = shrinkageStrain.restoreYourself(stream)) != CIO_OK) THROW_CIOERR(iores);
+ if ((iores = shrinkageStrain.restoreYourself(stream, mode)) != CIO_OK) THROW_CIOERR(iores);
 
  // return result back
  return CIO_OK;

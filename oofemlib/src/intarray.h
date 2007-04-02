@@ -49,16 +49,17 @@
 #include "freestor.h"
 #include "debug.h"
 #include "cltypes.h"
+
 #ifndef __MAKEDEPEND
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
 #endif
 
+class DataStream;
 #ifdef __PARALLEL_MODE
-#include "combuff.h"
+class CommunicationBuffer;
 #endif
-
 /**
  Class implementing an array of integers. Array can grow or shrink to desired dimension.
  The lower value index of array is 1, upper depends on array size.
@@ -189,14 +190,26 @@ public:
    @return index of first value in array, otherwise zero
   */
   int        findFirstIndexOf (int value)  const ;
+  /**
+     Erase the element at given position (1-based index)
+     Receiver will shrink accordingly, the values at positions (_pos+1,...,size) 
+     will be moved to positions (_pos,...,size-1)
+  */
+  void       erase (int _pos);
+
+  /// add given subvector to receiver values starting at position si
+  void addSubVector (const IntArray& src, int si);
+  /// copy given subvector to receiver values starting at position si
+  void copySubVector (const IntArray& src, int si);
+
   /// Prints receiver on stdin.
   void       printYourself () const ;
   /** Stores array  to output stream. 
    @see FEMComponent class */
-  contextIOResultType          storeYourself(FILE* stream) const ;
+  contextIOResultType          storeYourself(DataStream* stream, ContextMode mode) const ;
   /** Restores array from image on stream.
    @see FEMComponent class */
-  contextIOResultType          restoreYourself(FILE* stream);
+  contextIOResultType          restoreYourself(DataStream* stream, ContextMode mode);
   /// Sets all component to zero.
   void       zero() ;
   int*       givePointer ()  const     { return values ;} 

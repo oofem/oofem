@@ -157,14 +157,14 @@ public:
   @param obj pointer to integration point, which invokes this method
   @return contextIOResultType.
   */
- contextIOResultType saveContext(FILE* stream, void *obj = NULL);
+ contextIOResultType saveContext(DataStream* stream, ContextMode mode, void *obj = NULL);
  /**
   Restores context of receiver from given stream. 
   @param stream stream where to read data
   @param obj pointer to integration point, which invokes this method
   @return contextIOResultType.
   */
- contextIOResultType restoreContext(FILE* stream, void *obj = NULL);
+ contextIOResultType restoreContext(DataStream* stream, ContextMode mode, void *obj = NULL);
 
 private:
   /** Builds refined mesh 

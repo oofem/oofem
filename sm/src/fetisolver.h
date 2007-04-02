@@ -40,9 +40,6 @@
 #ifdef __PARALLEL_MODE
 #ifndef fetisolver_h
 
-#ifndef __MAKEDEPEND
-#include <stdio.h>
-#endif
 #include "sparselinsystemnm.h"
 #include "sparsemtrx.h"
 #include "flotarry.h"
@@ -52,6 +49,10 @@
 #include "processcomm.h"
 #include "feticommunicator.h"
 #include "engngm.h"
+
+#ifndef __MAKEDEPEND
+#include <stdio.h>
+#endif
 
 class Domain; class EngngModel; 
 
@@ -158,7 +159,7 @@ public:
   int masterMapDirectionVector();
   int masterMapPPVector ();
   int masterMapGammas ();
-
+  
   enum {FETISolverZeroTag, NumberOfRBMMsg, RBMMessage, QQMessage, SolutionMessage, ResidualMessage, DirectionVectorMessage, PPVectorMessage, GammasMessage, FETISolverIterationContinue, FETISolverIterationBreak};
   
  };

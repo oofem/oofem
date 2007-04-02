@@ -70,6 +70,7 @@
 #include "flotarry.h"
 #include "skyline.h"
 #include "usrdefsub.h"
+#include "datastream.h"
 
 #ifdef __OOFEG
 #include "oofeggraphiccontext.h"
@@ -482,56 +483,60 @@ void   LinearStability :: terminate (TimeStep* stepN)
 }
 
 
-contextIOResultType LinearStability :: saveContext (FILE* stream, void *obj)
+contextIOResultType LinearStability :: saveContext (DataStream* stream, ContextMode mode, void *obj)
 // 
 // saves state variable - displacement vector
 //
 {
  contextIOResultType iores;
  int closeFlag = 0;
+ FILE* file;
 
  OOFEM_LOG_INFO ("Storing context \n");
   if (stream==NULL) {
-  if (!this->giveContextFile(&stream, this->giveCurrentStep()->giveNumber(), 
+  if (!this->giveContextFile(&file, this->giveCurrentStep()->giveNumber(), 
                 this->giveCurrentStep()->giveVersion(), contextMode_write)) 
    THROW_CIOERR(CIO_IOERR); // override 
+  stream=new FileDataStream (file);
   closeFlag = 1;
  }
 
-  if ((iores = StructuralEngngModel :: saveContext (stream)) != CIO_OK) THROW_CIOERR(iores);
-  if ((iores = displacementVector.storeYourself(stream)) != CIO_OK) THROW_CIOERR(iores);
-  if ((iores = eigVal.storeYourself(stream)) != CIO_OK) THROW_CIOERR(iores);
-  if ((iores = eigVec.storeYourself(stream)) != CIO_OK) THROW_CIOERR(iores);
+  if ((iores = StructuralEngngModel :: saveContext (stream,mode)) != CIO_OK) THROW_CIOERR(iores);
+  if ((iores = displacementVector.storeYourself(stream,mode)) != CIO_OK) THROW_CIOERR(iores);
+  if ((iores = eigVal.storeYourself(stream,mode)) != CIO_OK) THROW_CIOERR(iores);
+  if ((iores = eigVec.storeYourself(stream,mode)) != CIO_OK) THROW_CIOERR(iores);
 
-  if (closeFlag) fclose (stream); // ensure consistent records
+  if (closeFlag) {fclose (file); delete stream; stream=NULL;}// ensure consistent records
   return CIO_OK;
 }
 
 
 
-contextIOResultType LinearStability :: restoreContext (FILE* stream, void *obj)
+contextIOResultType LinearStability :: restoreContext (DataStream* stream, ContextMode mode, void *obj)
 // 
 // restore state variable - displacement vector
 //
 {
   int activeVector, version;
- int istep = 1, iversion = 1;
- int closeFlag = 0;
- contextIOResultType iores;
+  int istep = 1, iversion = 1;
+  int closeFlag = 0;
+  contextIOResultType iores;
+  FILE* file;
 
  this->resolveCorrespondingStepNumber (activeVector, version, obj);
   if (eigVal.isEmpty()) { // not restored before
   if (stream == NULL) {
-   if (!this->giveContextFile(&stream, istep, iversion, contextMode_read)) 
+   if (!this->giveContextFile(&file, istep, iversion, contextMode_read)) 
     THROW_CIOERR(CIO_IOERR); // override 
+   stream=new FileDataStream(file);
    closeFlag = 1;
   }
   
-  if ((iores = StructuralEngngModel :: restoreContext (stream, (void*) &istep)) != CIO_OK) THROW_CIOERR(iores);  
-  if ((iores = displacementVector.restoreYourself(stream)) != CIO_OK) THROW_CIOERR(iores); 
-  if ((iores = eigVal.restoreYourself(stream)) != CIO_OK) THROW_CIOERR(iores);
-  if ((iores = eigVec.restoreYourself(stream)) != CIO_OK) THROW_CIOERR(iores);
-  if (closeFlag) fclose (stream); // ensure consistent records
+  if ((iores = StructuralEngngModel :: restoreContext (stream, mode, (void*) &istep)) != CIO_OK) THROW_CIOERR(iores);  
+  if ((iores = displacementVector.restoreYourself(stream,mode)) != CIO_OK) THROW_CIOERR(iores); 
+  if ((iores = eigVal.restoreYourself(stream,mode)) != CIO_OK) THROW_CIOERR(iores);
+  if ((iores = eigVec.restoreYourself(stream,mode)) != CIO_OK) THROW_CIOERR(iores);
+  if (closeFlag) {fclose (file); delete stream; stream=NULL;}// ensure consistent records
  } 
 //  if (istep > numberOfRequiredEigenValues) istep = numberOfRequiredEigenValues ;
 //  printf( "Restoring - corresponding index is %d, EigenValue is %lf\n",

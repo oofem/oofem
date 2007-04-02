@@ -50,6 +50,7 @@
 #include "timestep.h"
 #include "boundaryload.h"
 #include "cltypes.h"
+#include "materialinterface.h"
 #ifndef __MAKEDEPEND
 #include <math.h>
 #include <stdio.h>
@@ -1045,12 +1046,20 @@ TR1_2D_SUPG :: computeGlobalCoordinates (FloatArray& answer, const FloatArray& l
 Interface* 
 TR1_2D_SUPG :: giveInterface (InterfaceType interface)
 {
-  if (interface == ZZNodalRecoveryModelInterfaceType) return (ZZNodalRecoveryModelInterface*) this;
-  else if (interface == NodalAveragingRecoveryModelInterfaceType) return (NodalAveragingRecoveryModelInterface*) this;
-  else if (interface == SPRNodalRecoveryModelInterfaceType) return (SPRNodalRecoveryModelInterface*) this;
-  else if (interface == SpatialLocalizerInterfaceType) return (SpatialLocalizerInterface*) this;
-  else if (interface == EIPrimaryFieldInterfaceType) return (EIPrimaryFieldInterface*) this;
-  else if (interface == LEPlicElementInterfaceType) return (LEPlicElementInterface*) this;
+  if (interface == ZZNodalRecoveryModelInterfaceType) 
+    return (ZZNodalRecoveryModelInterface*) this;
+  else if (interface == NodalAveragingRecoveryModelInterfaceType) 
+    return (NodalAveragingRecoveryModelInterface*) this;
+  else if (interface == SPRNodalRecoveryModelInterfaceType) 
+    return (SPRNodalRecoveryModelInterface*) this;
+  else if (interface == SpatialLocalizerInterfaceType) 
+    return (SpatialLocalizerInterface*) this;
+  else if (interface == EIPrimaryFieldInterfaceType) 
+    return (EIPrimaryFieldInterface*) this;
+  else if (interface == LEPlicElementInterfaceType) 
+    return (LEPlicElementInterface*) this;
+  else if (interface == LevelSetPCSElementInterfaceType) 
+    return (LevelSetPCSElementInterface*) this;
   return NULL;
 }
 
@@ -1513,8 +1522,16 @@ int
 TR1_2D_SUPG::giveIPValue (FloatArray& answer, GaussPoint* aGaussPoint, InternalStateType type, TimeStep* atTime)
 {
  if (type == IST_VOFFraction) {
-   answer.resize(1); answer.at(1) = this->giveTempVolumeFraction();
-   return 1;
+   MaterialInterface* mi = domain->giveEngngModel()->giveMaterialInterface(domain->giveNumber());
+   if (mi) {
+     FloatArray val;
+     mi->giveElementMaterialMixture(val, aGaussPoint->giveElement()->giveNumber());
+     answer.resize(1); answer.at(1) = val.at(1);
+     return 1;
+   } else {
+     answer.resize(1); answer.at(1) = 1.0;
+     return 1;
+   }
  } else if (type == IST_Density) {
    answer.resize(1); answer.at(1) = this->giveMaterial()->giveCharacteristicValue(MRM_Density, aGaussPoint, atTime);  
    return 1;
@@ -1659,7 +1676,7 @@ TR1_2D_SUPG:: printOutputAt (FILE* file, TimeStep* stepN)
 
 
 
-contextIOResultType TR1_2D_SUPG :: saveContext (FILE* stream, void *obj)
+contextIOResultType TR1_2D_SUPG :: saveContext (DataStream* stream, ContextMode mode, void *obj)
 //
 // saves full element context (saves state variables, that completely describe
 // current state)
@@ -1667,15 +1684,15 @@ contextIOResultType TR1_2D_SUPG :: saveContext (FILE* stream, void *obj)
 {
   contextIOResultType iores;
   
-  if ((iores = SUPGElement::saveContext(stream,obj)) != CIO_OK) THROW_CIOERR(iores);
-  if ((iores = LEPlicElementInterface::saveContext(stream,obj)) != CIO_OK) THROW_CIOERR(iores);
+  if ((iores = SUPGElement::saveContext(stream, mode, obj)) != CIO_OK) THROW_CIOERR(iores);
+  if ((iores = LEPlicElementInterface::saveContext(stream, mode, obj)) != CIO_OK) THROW_CIOERR(iores);
 
   return CIO_OK;
 }
 
 
 
-contextIOResultType TR1_2D_SUPG :: restoreContext (FILE* stream, void *obj)
+contextIOResultType TR1_2D_SUPG :: restoreContext (DataStream* stream, ContextMode mode, void *obj)
 //
 // restores full element context (saves state variables, that completely describe
 // current state)
@@ -1683,14 +1700,192 @@ contextIOResultType TR1_2D_SUPG :: restoreContext (FILE* stream, void *obj)
 {
   contextIOResultType iores;
 
-  if ((iores = SUPGElement::restoreContext(stream,obj)) != CIO_OK) THROW_CIOERR(iores);
-  if ((iores = LEPlicElementInterface::restoreContext(stream,obj)) != CIO_OK) THROW_CIOERR(iores);
+  if ((iores = SUPGElement::restoreContext(stream, mode, obj)) != CIO_OK) THROW_CIOERR(iores);
+  if ((iores = LEPlicElementInterface::restoreContext(stream, mode, obj)) != CIO_OK) THROW_CIOERR(iores);
 
 
   return CIO_OK;
 }
 
 
+double
+TR1_2D_SUPG :: LS_PCS_computeF (LevelSetPCS* ls, TimeStep* atTime)
+{
+  int i;
+  double answer;
+  FloatArray fi(3), un(6);
+
+  this -> computeVectorOf(EID_MomentumBalance,VM_Total,atTime, un) ;
+  for (i=1; i<=3; i++) fi.at(i)=ls->giveLevelSetDofManValue(dofManArray.at(i));
+
+  double fix = b[0]*fi.at(1)+b[1]*fi.at(2)+b[2]*fi.at(3);
+  double fiy = c[0]*fi.at(1)+c[1]*fi.at(2)+c[2]*fi.at(3);
+  double norm= sqrt(fix*fix+fiy*fiy);
+
+  answer = (1./3.)*(fix*(un.at(1)+un.at(3)+un.at(5))+fiy*(un.at(2)+un.at(4)+un.at(6)))/norm;
+  return answer;
+}
+
+
+double
+TR1_2D_SUPG :: LS_PCS_computeS (LevelSetPCS* ls, TimeStep* atTime)
+{
+#if 0
+  int i;
+  double fi, answer, eps = 0.0;
+  FloatArray s(3);
+
+  for (i=1; i<=3; i++) {
+    fi = ls->giveLevelSetDofManValue(dofManArray.at(i));
+    s.at(i)= fi/sqrt(fi*fi+eps*eps);
+  }
+
+  answer = (1./3.)*(s.at(1) + s.at(2) + s.at(3));
+  return answer;
+#else
+
+  int i, neg=0, pos=0, zero = 0, si=0;
+  double x1,x2,x3,y1,y2,y3  ;
+  FloatArray fi(3);
+
+  for (i=1; i<=3; i++) fi.at(i) = ls->giveLevelSetDofManValue(dofManArray.at(i));
+
+
+  for (i=1; i<= 3; i++) {
+    if (fi.at(i) >= 0.) pos++;
+    if (fi.at(i) < 0.0) neg++;
+    if (fi.at(i) == 0.) zero++;
+  }
+  if (zero == 3) {
+    return 0.0;
+  } else if (neg==0) { // all level set values positive
+    return area;
+  } else if (pos==0) { // all level set values negative
+    return -area;
+  } else {
+    // zero level set inside
+    // find the vertex vith level set sign different from other two
+    for (i=1; i<= 3; i++) {
+      if ((pos>neg) && (fi.at(i) < 0.0)) {si = i; break;}
+      if ((pos<neg) && (fi.at(i) >=0.0)) {si = i; break;}
+    }
+    if (si) {
+      x1=this->giveNode(si)->giveCoordinate(1);
+      y1=this->giveNode(si)->giveCoordinate(2);
+
+      // compute intersections
+      int prev_node = (si>1)?si-1:3;
+      int next_node = (si<3)?si+1:1;
+      
+      double l = this->giveNode(si)->giveCoordinates()->distance(this->giveNode(next_node)->giveCoordinates());
+      double t = fi.at(si)/(fi.at(si)-fi.at(next_node));
+      x2 = x1+t*(this->giveNode(next_node)->giveCoordinate(1)-this->giveNode(si)->giveCoordinate(1));
+      y2 = y1+t*(this->giveNode(next_node)->giveCoordinate(2)-this->giveNode(si)->giveCoordinate(2));
+      
+      l = this->giveNode(si)->giveCoordinates()->distance(this->giveNode(prev_node)->giveCoordinates());
+      t = fi.at(si)/(fi.at(si)-fi.at(prev_node));
+      x3 = x1+t*(this->giveNode(prev_node)->giveCoordinate(1)-this->giveNode(si)->giveCoordinate(1));
+      y3 = y1+t*(this->giveNode(prev_node)->giveCoordinate(2)-this->giveNode(si)->giveCoordinate(2));
+       
+      // compute area
+      double __area = 0.5*(x2*y3+x1*y2+y1*x3-x2*y1-x3*y2-x1*y3);
+      
+      if (pos>neg) {
+        // negative area computed
+        return (area-__area)-__area;
+      } else {
+        // postive area computed
+        return __area-(area-__area);
+      }
+    } else {
+      OOFEM_ERROR ("TR1_2D_SUPG::LS_PCS_computeVOFFractions: internal consistency error");
+      return 0.0;
+    }
+  }
+#endif
+}
+
+
+void
+TR1_2D_SUPG :: LS_PCS_computedN (FloatMatrix& answer)
+{
+  int i;
+  answer.resize (3,2);
+
+  for (i=1;i<=3;i++) {
+    answer.at(i,1) = b[i-1];
+    answer.at(i,2) = c[i-1];
+  }
+}
+
+
+void
+TR1_2D_SUPG::LS_PCS_computeVOFFractions (FloatArray& answer, FloatArray& fi)
+{
+  int i, neg=0, pos=0, zero = 0, si=0;
+  double x1,x2,x3,y1,y2,y3;
+
+  answer.resize(2);
+  for (i=1; i<= 3; i++) {
+    if (fi.at(i) >= 0.) pos++;
+    if (fi.at(i) < 0.0) neg++;
+    if (fi.at(i) == 0.) zero++;
+  }
+  if (neg==0) { // all level set values positive
+    answer.at(1) = 1.0;
+    answer.at(2) = 0.0;
+  } else if (pos==0) { // all level set values negative
+    answer.at(1) = 0.0;
+    answer.at(2) = 1.0;
+  } else if (zero == 3) {
+    // ???????
+    answer.at(1) = 1.0;
+    answer.at(2) = 0.0;
+   
+  } else {
+    // zero level set inside
+    // find the vertex with level set sign different from other two
+    for (i=1; i<= 3; i++) {
+      if ((pos>neg) && (fi.at(i) < 0.0)) {si = i; break;}
+      if ((pos<neg) && (fi.at(i) >=0.0)) {si = i; break;}
+    }
+    if (si && ((pos+neg) == 3)) {
+      x1=this->giveNode(si)->giveCoordinate(1);
+      y1=this->giveNode(si)->giveCoordinate(2);
+
+      // compute intersections
+      int prev_node = (si>1)?si-1:3;
+      int next_node = (si<3)?si+1:1;
+      
+      double l = this->giveNode(si)->giveCoordinates()->distance(this->giveNode(next_node)->giveCoordinates());
+      double t = fi.at(si)/(fi.at(si)-fi.at(next_node));
+      x2 = x1+t*(this->giveNode(next_node)->giveCoordinate(1)-this->giveNode(si)->giveCoordinate(1));
+      y2 = y1+t*(this->giveNode(next_node)->giveCoordinate(2)-this->giveNode(si)->giveCoordinate(2));
+      
+      l = this->giveNode(si)->giveCoordinates()->distance(this->giveNode(prev_node)->giveCoordinates());
+      t = fi.at(si)/(fi.at(si)-fi.at(prev_node));
+      x3 = x1+t*(this->giveNode(prev_node)->giveCoordinate(1)-this->giveNode(si)->giveCoordinate(1));
+      y3 = y1+t*(this->giveNode(prev_node)->giveCoordinate(2)-this->giveNode(si)->giveCoordinate(2));
+       
+      // compute area
+      double __area = 0.5*(x2*y3+x1*y2+y1*x3-x2*y1-x3*y2-x1*y3);
+      if (fabs(__area)/area > 1.00001) {
+	OOFEM_ERROR ("TR1_2D_SUPG::LS_PCS_computeVOFFractions: internal consistency error");
+      }
+      if (pos>neg) {
+        // negative area computed
+        answer.at(2) = fabs(__area)/area;
+        answer.at(1) = 1.0 - answer.at(2);
+      } else {
+        // postive area computed
+        answer.at(1) = fabs(__area)/area;
+        answer.at(2) = 1.0 - answer.at(1);
+      }
+    } else {
+      OOFEM_ERROR ("TR1_2D_SUPG::LS_PCS_computeVOFFractions: internal consistency error");
+    }
+  }
+}
 
 
 #ifdef __OOFEG

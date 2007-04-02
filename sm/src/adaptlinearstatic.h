@@ -79,7 +79,7 @@ class AdaptiveLinearStatic : public LinearStatic
   domain. Note that by restoring element  context also contexts of all associated
   integration points (and material statuses) are restored.
   */  
-  virtual contextIOResultType                restoreContext (FILE* stream, void* obj = NULL) ;
+  virtual contextIOResultType                restoreContext (DataStream* stream, ContextMode mode, void* obj = NULL) ;
 
   void updateDomainLinks();
  

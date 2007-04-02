@@ -315,7 +315,7 @@ ConnectivityTable :: instanciateReactionForceTable (TimeStep* tStep)
   indofs = inode -> giveNumberOfDofs();
   for (j=1; j<= indofs; j++) {
    jdof = inode->giveDof(j);
-   if ((jdof->giveClassID() != SlaveDofClass) && (jdof-> hasBc (tStep))) this->numRestrDofs++; // skip slave dofs
+   if ((jdof->giveClassID() != SimpleSlaveDofClass) && (jdof-> hasBc (tStep))) this->numRestrDofs++; // skip slave dofs
   }    
  }
 
@@ -329,7 +329,7 @@ ConnectivityTable :: instanciateReactionForceTable (TimeStep* tStep)
   indofs = inode -> giveNumberOfDofs();
   for (j=1; j<= indofs; j++) {
    jdof = inode->giveDof(j);
-   if ((jdof->giveClassID() != SlaveDofClass) && (jdof-> hasBc (tStep))) { // skip slave dofs
+   if ((jdof->giveClassID() != SimpleSlaveDofClass) && (jdof-> hasBc (tStep))) { // skip slave dofs
     iRestrDof ++;
     this->restrDofManager.at(iRestrDof) = i;
     this->restrDof.at(iRestrDof) = j; 

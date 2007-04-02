@@ -69,9 +69,12 @@ void cubic (double a, double b, double c, double d, double*r1, double *r2, doubl
     *num = 0;
     return;
    }else{
-    *r1 = (-c + sqrt(D)) / 2.0 / b;
-    *r2 = (-c - sqrt(D)) / 2.0 / b;
-    *num = 2;
+     //*r1 = (-c + sqrt(D)) / 2.0 / b;
+     //*r2 = (-c - sqrt(D)) / 2.0 / b;
+     help = -(c+sgn(c)*sqrt(D))/2.0;
+     *r1 = help/b;
+     *r2 = d/help;
+     *num = 2;
    }
   }
  }
@@ -159,9 +162,12 @@ void cubic3r (double a, double b, double c, double d, double*r1, double *r2, dou
     *num = 0;
     return;
    }else{
-    *r1 = (-c + sqrt(D)) / 2.0 / b;
-    *r2 = (-c - sqrt(D)) / 2.0 / b;
-    *num = 2;
+     //*r1 = (-c + sqrt(D)) / 2.0 / b;
+     //*r2 = (-c - sqrt(D)) / 2.0 / b;
+     help=-(c+sgn(c)*sqrt(D))/2.0;
+     *r1 = help/b;
+     *r2 = d/help;
+     *num = 2;
     return;
    }
   }

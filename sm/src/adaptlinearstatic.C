@@ -119,10 +119,10 @@ AdaptiveLinearStatic::initializeAdaptive (int stepNumber)
 }
  
 
-contextIOResultType AdaptiveLinearStatic:: restoreContext (FILE* stream, void* obj) {
- contextIOResultType iores;
- if ((iores = LinearStatic::restoreContext (stream, obj)) != CIO_OK) THROW_CIOERR (iores);
- return CIO_OK;
+contextIOResultType AdaptiveLinearStatic:: restoreContext (DataStream* stream, ContextMode mode, void* obj) {
+  contextIOResultType iores;
+  if ((iores = LinearStatic::restoreContext (stream, mode, obj)) != CIO_OK) THROW_CIOERR (iores);
+  return CIO_OK;
 }
 
 IRResultType

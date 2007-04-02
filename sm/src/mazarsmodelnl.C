@@ -44,6 +44,11 @@
 #include "mathfem.h"
 #include "isolinearelasticmaterial.h"
 #include "nonlocalmaterialext.h"
+
+#ifdef __PARALLEL_MODE
+#include "combuff.h"
+#endif
+
 #ifndef __MAKEDEPEND
 #include <math.h>
 #endif
@@ -236,7 +241,7 @@ MazarsNLMaterialStatus :: updateYourself(TimeStep* atTime)
 
 
 contextIOResultType
-MazarsNLMaterialStatus :: saveContext (FILE* stream, void *obj)
+MazarsNLMaterialStatus :: saveContext (DataStream* stream, ContextMode mode, void *obj)
 //
 // saves full information stored in this Status
 // no temp variables stored
@@ -244,17 +249,17 @@ MazarsNLMaterialStatus :: saveContext (FILE* stream, void *obj)
 {
 
  // save parent class status
- return MazarsMaterialStatus :: saveContext (stream, obj);
+ return MazarsMaterialStatus :: saveContext (stream, mode, obj);
 }
 
 contextIOResultType
-MazarsNLMaterialStatus :: restoreContext(FILE* stream, void *obj)
+MazarsNLMaterialStatus :: restoreContext(DataStream* stream, ContextMode mode, void *obj)
 //
 // restores full information stored in stream to this Status
 //
 {
  // read parent class status
- return  MazarsMaterialStatus :: restoreContext (stream,obj);
+ return  MazarsMaterialStatus :: restoreContext (stream, mode, obj);
 }
 
 Interface* 
@@ -297,7 +302,7 @@ MazarsNLMaterial::estimatePackSize (CommunicationBuffer& buff, GaussPoint* ip)
  //
  //MazarsNLMaterialStatus *status = (MazarsNLMaterialStatus*) this -> giveStatus (ip);
 
- return buff.giveDoubleVecPackSize (1);
+ return buff.givePackSize (MPI_DOUBLE, 1);
 }
 
 #endif

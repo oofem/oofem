@@ -185,30 +185,30 @@ HydratingIsoHeatMaterial :: giveCharacteristicValue (MatResponseMode rmode, Gaus
 }
 
 contextIOResultType
-HydratingIsoHeatMaterial :: saveContext(FILE* stream, void *obj)
+HydratingIsoHeatMaterial :: saveContext(DataStream* stream, ContextMode mode, void *obj)
 // saves full status for this material, also invokes saving
 // for sub-objects of this.
 {
  contextIOResultType iores;
 
  // write parent data
- if ((iores = TransportMaterial::saveContext(stream, obj))!= CIO_OK) THROW_CIOERR(iores);
+ if ((iores = TransportMaterial::saveContext(stream, mode, obj))!= CIO_OK) THROW_CIOERR(iores);
  // save hydration model data - maybe should check hydration option?
- if ((iores = HydrationModelInterface::saveContext(stream, obj))!= CIO_OK) THROW_CIOERR(iores);
+ if ((iores = HydrationModelInterface::saveContext(stream, mode, obj))!= CIO_OK) THROW_CIOERR(iores);
 
  return CIO_OK;
 }
 
 contextIOResultType
-HydratingIsoHeatMaterial :: restoreContext(FILE* stream, void *obj)
+HydratingIsoHeatMaterial :: restoreContext(DataStream* stream, ContextMode mode, void *obj)
 // restores full status for this material, also invokes restoring for sub-objects of this.
 {
  contextIOResultType iores;
 
  // read parent data
- if ((iores = TransportMaterial::restoreContext(stream, obj)) != CIO_OK) THROW_CIOERR(iores);
+ if ((iores = TransportMaterial::restoreContext(stream, mode, obj)) != CIO_OK) THROW_CIOERR(iores);
  // read hydration model data - maybe should check hydration option?
- if ((iores = HydrationModelInterface::restoreContext(stream, obj))!= CIO_OK) THROW_CIOERR(iores);
+ if ((iores = HydrationModelInterface::restoreContext(stream, mode, obj))!= CIO_OK) THROW_CIOERR(iores);
 
  return CIO_OK;
 }

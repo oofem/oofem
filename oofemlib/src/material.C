@@ -212,7 +212,7 @@ Material :: ofType (char* aClass)
 //
 
 contextIOResultType
-Material :: saveContext (FILE* stream, void *obj)
+Material :: saveContext (DataStream* stream, ContextMode mode, void *obj)
 //
 // saves full material status (saves state variables, that completely describe
 // current state) stored in gp->matstatusDict with key =  (int)this->giveClassID()
@@ -226,7 +226,7 @@ Material :: saveContext (FILE* stream, void *obj)
 {
  contextIOResultType iores;
 
- if ((iores = FEMComponent::saveContext (stream, obj)) != CIO_OK) THROW_CIOERR(iores);
+ if ((iores = FEMComponent::saveContext (stream, mode, obj)) != CIO_OK) THROW_CIOERR(iores);
  // corresponding gp is passed in obj
  GaussPoint* gp = (GaussPoint*) obj;
  if (gp == NULL) THROW_CIOERR(CIO_BADOBJ);
@@ -234,13 +234,13 @@ Material :: saveContext (FILE* stream, void *obj)
  // write raw data - we save status there for this
  MaterialStatus* status =  this->giveStatus(gp);
 
- if (status) if ((iores = status->saveContext (stream, obj)) != CIO_OK) THROW_CIOERR(iores);
+ if (status) if ((iores = status->saveContext (stream, mode, obj)) != CIO_OK) THROW_CIOERR(iores);
 
  return CIO_OK;
 }
 
 contextIOResultType
-Material :: restoreContext (FILE* stream, void *obj)
+Material :: restoreContext (DataStream* stream, ContextMode mode, void *obj)
 //
 // restores full material status (saves state variables, that completely describe
 // current state) stored in gp->matstatusDict with key =  (int)this->giveClassID()
@@ -254,7 +254,7 @@ Material :: restoreContext (FILE* stream, void *obj)
 {
  contextIOResultType iores;
  // invoke base class service
- if ((iores = FEMComponent::restoreContext (stream, obj)) != CIO_OK) THROW_CIOERR(iores);
+ if ((iores = FEMComponent::restoreContext (stream, mode, obj)) != CIO_OK) THROW_CIOERR(iores);
 
  // corresponding gp is passed in obj
  GaussPoint* gp = (GaussPoint*) obj;
@@ -262,7 +262,7 @@ Material :: restoreContext (FILE* stream, void *obj)
  
  // read raw data - context
  MaterialStatus* status =  this->giveStatus(gp);
- if (status) if ((iores = status->restoreContext (stream, obj)) != CIO_OK) THROW_CIOERR(iores);
+ if (status) if ((iores = status->restoreContext (stream, mode, obj)) != CIO_OK) THROW_CIOERR(iores);
 
  return CIO_OK;
 }

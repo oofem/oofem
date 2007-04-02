@@ -55,6 +55,7 @@
 #include "flotarry.h"
 #include "skyline.h"
 #include "usrdefsub.h"
+#include "datastream.h"
 
 #ifdef __OOFEG
 #include "oofeggraphiccontext.h"
@@ -322,54 +323,58 @@ void   EigenValueDynamic :: terminate (TimeStep* stepN)
 }
 
 
-contextIOResultType EigenValueDynamic :: saveContext (FILE* stream, void *obj)
+contextIOResultType EigenValueDynamic :: saveContext (DataStream* stream, ContextMode mode, void *obj)
 // 
 // saves state variable - displacement vector
 //
 {
  int closeFlag = 0;
  contextIOResultType iores;
+ FILE* file;
 
   if (stream==NULL) {
-  if (!this->giveContextFile(&stream, this->giveCurrentStep()->giveNumber(), 
+  if (!this->giveContextFile(&file, this->giveCurrentStep()->giveNumber(), 
                 this->giveCurrentStep()->giveVersion(), contextMode_write)) 
    THROW_CIOERR(CIO_IOERR); // override 
+  stream = new FileDataStream (file);
   closeFlag = 1;
  }
 
-  if ((iores = EngngModel :: saveContext (stream)) != CIO_OK) THROW_CIOERR(iores);
-  if ((iores = eigVal.storeYourself(stream)) != CIO_OK) THROW_CIOERR(iores);
-  if ((eigVec.storeYourself(stream)) != CIO_OK) THROW_CIOERR(iores);
+  if ((iores = EngngModel :: saveContext (stream,mode)) != CIO_OK) THROW_CIOERR(iores);
+  if ((iores = eigVal.storeYourself(stream,mode)) != CIO_OK) THROW_CIOERR(iores);
+  if ((eigVec.storeYourself(stream,mode)) != CIO_OK) THROW_CIOERR(iores);
 
-  if (closeFlag) fclose (stream); // ensure consistent records
+  if (closeFlag) {fclose (file); delete stream; stream=NULL;}// ensure consistent records
   return CIO_OK;
 }
 
 
 
-contextIOResultType EigenValueDynamic :: restoreContext (FILE* stream, void *obj)
+contextIOResultType EigenValueDynamic :: restoreContext (DataStream* stream, ContextMode mode, void *obj)
 // 
 // restore state variable - displacement vector
 //
 {
  int closeFlag = 0;
-  int activeVector = this->resolveCorrespondingEigenStepNumber (obj);
+ int activeVector = this->resolveCorrespondingEigenStepNumber (obj);
  int istep = 1, iversion = 0;
  contextIOResultType iores;
+ FILE* file;
 
   if (restoreFlag == 0) { // not restored before
 
    if (stream == NULL) {
-    if (!this->giveContextFile(&stream, istep, iversion, contextMode_read)) 
+    if (!this->giveContextFile(&file, istep, iversion, contextMode_read)) 
      THROW_CIOERR(CIO_IOERR); // override 
+    stream = new FileDataStream (file);
     closeFlag = 1;
    }
-      // save element context
+   // save element context
   
-      if ((iores = EngngModel :: restoreContext (stream, (void*) &istep)) != CIO_OK) THROW_CIOERR(iores);
-      if ((iores = eigVal.restoreYourself(stream)) != CIO_OK) THROW_CIOERR(iores);
-      if ((iores = eigVec.restoreYourself(stream)) != CIO_OK) THROW_CIOERR(iores);
-   if (closeFlag) fclose (stream); // ensure consistent records
+      if ((iores = EngngModel :: restoreContext (stream, mode, (void*) &istep)) != CIO_OK) THROW_CIOERR(iores);
+      if ((iores = eigVal.restoreYourself(stream,mode)) != CIO_OK) THROW_CIOERR(iores);
+      if ((iores = eigVec.restoreYourself(stream,mode)) != CIO_OK) THROW_CIOERR(iores);
+   if (closeFlag) {fclose (file); delete stream; stream=NULL;}// ensure consistent records
    
     } 
 

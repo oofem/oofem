@@ -108,18 +108,20 @@ public:
   Stores context of receiver into given stream. 
   Corresponding parent method invoked.
   @param stream stream where to write data
+  @param mode determines ammount of info required in stream (state, definition,...)
   @param obj pointer to integration point, which invokes this method
   @return contextIOResultType.
   */
- contextIOResultType    saveContext (FILE* stream, void *obj = NULL);
+ contextIOResultType    saveContext (DataStream* stream, ContextMode mode, void *obj = NULL);
  /**
   Restores context of receiver from given stream. 
   Corresponding parent method invoked.
   @param stream stream where to read data
+  @param mode determines ammount of info required in stream (state, definition,...)
   @param obj pointer to integration point, which invokes this method
   @return contextIOResultType.
   */
- contextIOResultType    restoreContext(FILE* stream, void *obj = NULL);
+ contextIOResultType    restoreContext(DataStream* stream, ContextMode mode, void *obj = NULL);
  /**
   Interface requesting service.
   In the case of nonlocal constitutive models, 

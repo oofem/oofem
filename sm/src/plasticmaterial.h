@@ -114,8 +114,8 @@ public:
  virtual void updateYourself(TimeStep*); // update after new equilibrium state reached
 
  // saves current context(state) into stream
- contextIOResultType    saveContext (FILE* stream, void *obj = NULL);
- contextIOResultType    restoreContext(FILE* stream, void *obj = NULL);
+ contextIOResultType    saveContext (DataStream* stream, ContextMode mode, void *obj = NULL);
+ contextIOResultType    restoreContext(DataStream* stream, ContextMode mode, void *obj = NULL);
 
  // add internal variables access functions and other auxiliary functions here
   void givePlasticStrainVector (FloatArray& answer) const {answer = plasticStrainVector;}
@@ -185,8 +185,8 @@ public:
   const char*    giveClassName () const { return "PlasticMaterial" ;}
   classType giveClassID ()         const { return PerfectlyPlasticMaterialClass;}
 
-  contextIOResultType    saveContext (FILE* stream, void *obj = NULL);
-  contextIOResultType    restoreContext(FILE* stream, void *obj = NULL);
+  contextIOResultType    saveContext (DataStream* stream, ContextMode mode, void *obj = NULL);
+  contextIOResultType    restoreContext(DataStream* stream, ContextMode mode, void *obj = NULL);
 
   /// Returns reference to undamaged (bulk) material
  LinearElasticMaterial* giveLinearElasticMaterial () {return linearElasticMaterial;}

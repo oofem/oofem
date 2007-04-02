@@ -14,7 +14,7 @@ PETSC_ARCH = @PETSC_ARCH@
 BOPT       = @PETSC_BOPT@
 @PETSC_MAKE_INCLUDE@
 
-INCLUDE_DIR=  @IML_INCLUDES@ @SPOOLES_INCLUDES@ @PETSC_INCLUDES@ @DSS_INCLUDES@
+INCLUDE_DIR=  @IML_INCLUDES@ @SPOOLES_INCLUDES@ @PETSC_INCLUDES@ @PARMETIS_INCLUDES@ @DSS_INCLUDES@
 GRAPHICS_INCLUDE_DIR= @CKIT_INCLUDES@ @ELIXIR_INCLUDES@
 PARALLEL_INCLUDE_DIR= @MPI_INCLUDES@
 PARALLEL_SYMBOLS    = @MPI_MODULE_SYMBOLS@
@@ -62,11 +62,11 @@ srcs3=gausspnt.C initial.C intarray.C isolinearelasticmaterial.C ldltfact.C line
 
 srcs4=material.C mathfem.C matrix.C matstatus.C nlstructuralelement.C node.C nodload.C nummet.C simplecrosssection.C skyline.C stationaryflow.C inputrecord.C tokenizer.C strreader.C structuralcrosssection.C structuralelement.C structuralmaterial.C structengngmodel.C
 
-srcs5=structuralms.C timestep.C structtemperatureload.C dofmanager.C elementside.C integrationrule.C boundaryload.C gaussintegrationrule.C masterdof.C slavedof.C nonlocalmaterialext.C structuralnonlocalmaterialext.C linearedgeload.C constantedgeload.C constantsurfaceload.C lobattoir.C
+srcs5=structuralms.C timestep.C structtemperatureload.C dofmanager.C elementside.C integrationrule.C boundaryload.C gaussintegrationrule.C masterdof.C simpleslavedof.C slavedof.C nonlocalmaterialext.C structuralnonlocalmaterialext.C linearedgeload.C constantedgeload.C constantsurfaceload.C lobattoir.C
 
-srcs6=remotemasterdof.C sharedmasterdof.C outputmanager.C nulldof.C compiler.C parser.C rigidarmnode.C rigidarmslavedof.C spatiallocalizer.C dummylocalizer.C octreelocalizer.C nodalrecoverymodel.C util.C sloangraph.C sloangraphnode.C sloanlevelstruct.C metastep.C diagpre.C exportmodule.C exportmodulemanager.C zznodalrecoverymodel.C nodalaveragingrecoverymodel.C sprnodalrecoverymodel.C
+srcs6=remotemasterdof.C sharedmasterdof.C outputmanager.C nulldof.C compiler.C parser.C rigidarmnode.C spatiallocalizer.C dummylocalizer.C octreelocalizer.C nodalrecoverymodel.C util.C sloangraph.C sloangraphnode.C sloanlevelstruct.C metastep.C diagpre.C exportmodule.C exportmodulemanager.C zznodalrecoverymodel.C nodalaveragingrecoverymodel.C sprnodalrecoverymodel.C
 
-srcs7=calmls.C nrsolver.C nrsolver2.C subspaceit.C gjacobi.C linesearch.C nonlocalbarrier.C primaryfield.C field.C fieldmanager.C oofemtxtdatareader.C oofemtxtinputrecord.C buffereddatareader.C stressstrainbasevector.C stressvector.C strainvector.C fei1dlin.C  fei2dquadlin.C  fei2dtrlin.C fei3dtrlin.C fei3dhexalin.C spoolessparsemtrx.C spoolessolver.C petscsparsemtrx.C petscsolver.C petsccontext.C hangingnode.C hangingdof.C  pointload.C
+srcs7=calmls.C nrsolver.C nrsolver2.C subspaceit.C gjacobi.C linesearch.C nonlocalbarrier.C primaryfield.C field.C fieldmanager.C oofemtxtdatareader.C oofemtxtinputrecord.C buffereddatareader.C stressstrainbasevector.C stressvector.C strainvector.C fei1dlin.C  fei2dquadlin.C  fei2dtrlin.C fei3dtrlin.C fei3dhexalin.C spoolessparsemtrx.C spoolessolver.C petscsparsemtrx.C petscsolver.C petsccontext.C hangingnode.C pointload.C
 
 srcs8=errorestimator.C remeshingcrit.C primaryunknownmapper.C materialmappingalgorithm.C dofdistributedprimaryfield.C 
 
@@ -76,7 +76,7 @@ srcs9=geotoolbox.C dss.C dsssolver.C
 srcs99=ppdeelement.C heatcrosssection.C heatmaterial.C isolinearheatmat.C
 
 #parallel
-psrcs1=communicator.C processcomm.C problemcomm.C combuff.C petscordering.C
+psrcs1=communicator.C processcomm.C problemcomm.C combuff.C petscordering.C dyncombuff.C loadballancer.C parmetisloadballancer.C
 
 all_src = $(srcs0) $(srcs1) $(srcs2) $(srcs3) $(srcs4) $(srcs5) $(srcs6) $(srcs7) $(srcs8) $(srcs9) $(srcs99) $(psrcs1) 
 oofem_src = $(srcs0) $(srcs2) $(srcs3) $(srcs4) $(srcs5) $(srcs6) $(srcs7) $(srcs8) $(srcs9) $(srcs99) 

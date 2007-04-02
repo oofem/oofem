@@ -43,7 +43,9 @@
 #include "flotarry.h"
 #include "cltypes.h"
 #ifdef __PETSC_MODULE
+#ifndef __MAKEDEPEND
 #include "petscksp.h"
+#endif
 #endif
 
 class Domain; class EngngModel; class FloatMatrix;

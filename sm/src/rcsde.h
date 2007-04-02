@@ -121,8 +121,8 @@ public:
  virtual void updateYourself(TimeStep*); // update after new equilibrium state reached
 
  // saves current context(state) into stream
- contextIOResultType    saveContext (FILE* stream, void *obj = NULL);
- contextIOResultType    restoreContext(FILE* stream, void *obj = NULL);
+ contextIOResultType    saveContext (DataStream* stream, ContextMode mode, void *obj = NULL);
+ contextIOResultType    restoreContext(DataStream* stream, ContextMode mode, void *obj = NULL);
  
 }; 
 
@@ -155,8 +155,8 @@ public:
  // contextIOResultType    saveContext (FILE* stream, void *obj = NULL);
  // contextIOResultType    restoreContext(FILE* stream, void *obj = NULL);
 IRResultType initializeFrom (InputRecord* ir);
-contextIOResultType    saveContext (FILE* stream, void *obj = NULL);
-contextIOResultType    restoreContext(FILE* stream, void *obj = NULL);
+contextIOResultType    saveContext (DataStream* stream, ContextMode mode, void *obj = NULL);
+contextIOResultType    restoreContext(DataStream* stream, ContextMode mode, void *obj = NULL);
 
  // non-standart - returns time independent material constant
  double   give (int) ; 

@@ -118,6 +118,49 @@ Polygon::computeVolume() const
   return 0.5*fabs(area) ;
 }
 
+
+double
+Polygon::pointDistance (double xp, double yp) const
+{
+  // computes distance of a given point from a closed polygon
+  // distance is signed, for polygon with positive orientation 
+  // (anticlockwise vertex ordering) the positive distance is for a point
+  // located outside
+  
+  Polygon::PolygonEdgeIterator it(this);
+  Vertex p1,p2;
+  double x1,x2,y1,y2,d,dist,l,tx,ty,t,nx,ny;
+  bool init=true;
+
+  while (it.giveNext(p1,p2)) {
+    x1=p1.coords(0); y1=p1.coords(1);
+    x2=p2.coords(0); y2=p2.coords(1);
+
+    // first check start vertex (end vertex checked by next edge)
+    d = sqrt((xp-x1)*(xp-x1)+(yp-y1)*(yp-y1));
+    if (init) {dist=d;init=false;} else {dist = min (dist, d);}
+
+    // edge unit tangent
+    l = sqrt((x2-x1)*(x2-x1)+(y2-y1)*(y2-y1));
+    tx= (x2-x1)/l; ty= (y2-y1)/l;
+    // projection of position vector (xp-x1,yp-y1) onto edge
+    t = (xp-x1)*tx+(yp-y1)*ty;
+    // test if inside
+    if ((t>=0.0) && (t<=l)) {
+      // compute distance from edge
+      nx=ty; ny=-tx;
+      d = fabs((xp-x1)*nx+(yp-y1)*ny);
+      dist = min (dist, d);
+    }
+
+  }
+
+  if (this->testPoint (xp, yp)) return -1.0*dist;
+  else return dist;
+}
+
+
+
 #ifdef __OOFEG
 GraphicObj*
 Polygon::draw (oofegGraphicContext& gc, bool filled, int layer)

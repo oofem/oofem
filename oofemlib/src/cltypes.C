@@ -117,6 +117,7 @@ InternalStateValueType giveInternalStateValueType (InternalStateType type)
  case IST_RelMeshDensity:
  case IST_VOFFraction:
  case IST_Density:
+ case IST_MaterialInterfaceVal:
   return ISVT_SCALAR;
   //break;
  default:

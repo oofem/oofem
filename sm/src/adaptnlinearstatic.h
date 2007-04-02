@@ -129,8 +129,8 @@ public:
   domain. Note that by restoring element  context also contexts of all associated
   integration points (and material statuses) are restored.
   */  
-  contextIOResultType restoreContext (FILE* stream, void* obj = NULL) ;
-  contextIOResultType saveContext (FILE* stream, void *obj = NULL) ;
+  contextIOResultType restoreContext (DataStream* stream, ContextMode mode, void* obj = NULL) ;
+  contextIOResultType saveContext (DataStream* stream, ContextMode mode, void *obj = NULL) ;
 
   void updateDomainLinks();
 

@@ -43,6 +43,7 @@
 #include "intarray.h"
 #include "cltypes.h"
 #include "structuralcrosssection.h"
+#include "datastream.h"
 #ifndef __MAKEDEPEND
 #include <math.h>
 #endif
@@ -103,7 +104,7 @@ PlasticMaterial :: CreateStatus (GaussPoint* gp) const
 
 
 contextIOResultType
-PlasticMaterial :: saveContext (FILE* stream, void *obj)
+PlasticMaterial :: saveContext (DataStream* stream, ContextMode mode, void *obj)
 //
 // saves full status for this material, also invokes saving
 // for sub-objects of this (yieldcriteria, loadingcriteria, linearElasticMaterial)
@@ -112,13 +113,13 @@ PlasticMaterial :: saveContext (FILE* stream, void *obj)
  contextIOResultType iores;
  if (stream == NULL) _error ("saveContex : can't write into NULL stream");
 
- if ((iores = StructuralMaterial :: saveContext (stream, obj))!= CIO_OK) THROW_CIOERR(iores);
+ if ((iores = StructuralMaterial :: saveContext (stream, mode, obj))!= CIO_OK) THROW_CIOERR(iores);
  return CIO_OK;
 }
 
 
 contextIOResultType 
-PlasticMaterial :: restoreContext (FILE* stream, void *obj)
+PlasticMaterial :: restoreContext (DataStream* stream, ContextMode mode, void *obj)
 // 
 //
 // resaves full status for this material, also invokes saving
@@ -129,7 +130,7 @@ PlasticMaterial :: restoreContext (FILE* stream, void *obj)
 {
   contextIOResultType iores;
 
-  if ((iores = StructuralMaterial :: restoreContext( stream, obj)) != CIO_OK) THROW_CIOERR(iores);
+  if ((iores = StructuralMaterial :: restoreContext( stream, mode, obj)) != CIO_OK) THROW_CIOERR(iores);
   return CIO_OK;
 }
 
@@ -953,7 +954,7 @@ PlasticMaterialStatus :: updateYourself(TimeStep* atTime)
 
 
 contextIOResultType
-PlasticMaterialStatus :: saveContext (FILE* stream, void *obj)
+PlasticMaterialStatus :: saveContext (DataStream* stream, ContextMode mode, void *obj)
 //
 // saves full information stored in this Status
 // no temp variables stored
@@ -962,14 +963,14 @@ PlasticMaterialStatus :: saveContext (FILE* stream, void *obj)
  contextIOResultType iores;
 
  // save parent class status
- if ((iores = StructuralMaterialStatus :: saveContext (stream, obj)) != CIO_OK) THROW_CIOERR(iores);
+ if ((iores = StructuralMaterialStatus :: saveContext (stream, mode, obj)) != CIO_OK) THROW_CIOERR(iores);
 
  // write a raw data
- if ((iores = plasticStrainVector.storeYourself(stream)) != CIO_OK) THROW_CIOERR(iores);
- if ((iores = strainSpaceHardeningVarsVector.storeYourself(stream)) != CIO_OK) THROW_CIOERR(iores);
+ if ((iores = plasticStrainVector.storeYourself(stream, mode)) != CIO_OK) THROW_CIOERR(iores);
+ if ((iores = strainSpaceHardeningVarsVector.storeYourself(stream, mode)) != CIO_OK) THROW_CIOERR(iores);
 
- if (fwrite(&state_flag,sizeof(int),1,stream) != 1) THROW_CIOERR(CIO_IOERR);
- if (fwrite(&gamma,sizeof(double),1,stream) != 1) THROW_CIOERR(CIO_IOERR);
+ if (!stream->write(&state_flag,1)) THROW_CIOERR(CIO_IOERR);
+ if (!stream->write(&gamma,1)) THROW_CIOERR(CIO_IOERR);
 
  return CIO_OK;
 }
@@ -977,7 +978,7 @@ PlasticMaterialStatus :: saveContext (FILE* stream, void *obj)
 
 
 contextIOResultType
-PlasticMaterialStatus :: restoreContext(FILE* stream, void *obj)
+PlasticMaterialStatus :: restoreContext(DataStream* stream, ContextMode mode, void *obj)
 //
 // restores full information stored in stream to this Status
 //
@@ -985,13 +986,13 @@ PlasticMaterialStatus :: restoreContext(FILE* stream, void *obj)
  contextIOResultType iores;
 
  // read parent class status
- if ((iores = StructuralMaterialStatus :: restoreContext (stream,obj)) != CIO_OK) THROW_CIOERR(iores);
+ if ((iores = StructuralMaterialStatus :: restoreContext (stream, mode, obj)) != CIO_OK) THROW_CIOERR(iores);
 
- if ((iores = plasticStrainVector.restoreYourself(stream)) != CIO_OK) THROW_CIOERR(iores);
- if ((iores = strainSpaceHardeningVarsVector.restoreYourself(stream)) != CIO_OK) THROW_CIOERR(iores);
+ if ((iores = plasticStrainVector.restoreYourself(stream, mode)) != CIO_OK) THROW_CIOERR(iores);
+ if ((iores = strainSpaceHardeningVarsVector.restoreYourself(stream, mode)) != CIO_OK) THROW_CIOERR(iores);
 
- if (fread(&state_flag,sizeof(int),1,stream) != 1) THROW_CIOERR(CIO_IOERR);
- if (fread(&gamma,sizeof(double),1,stream) != 1) THROW_CIOERR(CIO_IOERR);
+ if (!stream->read(&state_flag,1)) THROW_CIOERR(CIO_IOERR);
+ if (!stream->read(&gamma,1)) THROW_CIOERR(CIO_IOERR);
 
  return CIO_OK;  // return succes
 }

@@ -174,10 +174,11 @@ void computeStrainVectorComponents (FloatArray& answer, Microplane* mplane,
   invokes this method. This implementation loops over all slaves ip (microplanes) 
   and saves their satuses as wel as status of master is saved. 
   @param stream stream where to write data
+  @param mode determines ammount of info required in stream (state, definition,...)
   @param obj pointer to integration point, which invokes this method
   @return contextIOResultType.
   */
-  contextIOResultType    saveContext (FILE* stream, void *obj = NULL);
+  contextIOResultType    saveContext (DataStream* stream, ContextMode mode, void *obj = NULL);
  /**
   Restores context of receiver from given stream. This method is called from 
   integration point restoeContext function, to restore material related staus in 
@@ -185,10 +186,11 @@ void computeStrainVectorComponents (FloatArray& answer, Microplane* mplane,
   invokes this method. This implementation loops over all slaves ip (microplanes) 
   and loads their satuses as wel as status of master is loaded. 
   @param stream stream where to read data
+  @param mode determines ammount of info required in stream (state, definition,...)
   @param obj pointer to integration point, which invokes this method
   @return contextIOResultType.
   */
-  contextIOResultType    restoreContext(FILE* stream, void *obj = NULL);
+  contextIOResultType    restoreContext(DataStream* stream, ContextMode mode, void *obj = NULL);
 
   /// Instanciates receiver from input record.
  IRResultType initializeFrom (InputRecord* ir);

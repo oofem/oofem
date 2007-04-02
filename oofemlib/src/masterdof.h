@@ -249,12 +249,12 @@ class MasterDof  : public Dof
    Stores receiver state to output stream.  
    @exception throws an ContextIOERR exception if error encountered.
    */
-   contextIOResultType    saveContext (FILE* stream, void *obj = NULL);
+   contextIOResultType    saveContext (DataStream* stream, ContextMode mode, void *obj = NULL);
   /**
    Restores the receiver state previously written in stream.
    @exception throws an ContextIOERR exception if error encountered.
    */
-   contextIOResultType    restoreContext(FILE* stream, void *obj = NULL);
+   contextIOResultType    restoreContext(DataStream* stream, ContextMode mode, void *obj = NULL);
 
 #ifdef __PARALLEL_MODE
   /**

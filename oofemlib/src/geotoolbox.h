@@ -79,6 +79,7 @@ class Polygon
   void addVertex (Vertex v) {vertices.push_back(v);}
   double computeVolume () const ;
   int testPoint (double x, double y) const ; 
+  double pointDistance (double x, double y) const;
   void clear() {vertices.clear();}
 #ifdef __OOFEG
   GraphicObj* draw (oofegGraphicContext&, bool filled, int layer = OOFEG_DEBUG_LAYER);

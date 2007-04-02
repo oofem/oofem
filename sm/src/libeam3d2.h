@@ -119,8 +119,8 @@ public :
   IRResultType initializeFrom (InputRecord* ir);
 
   // due to nonlinearity
-  contextIOResultType           saveContext (FILE* stream, void *obj);
-  contextIOResultType           restoreContext (FILE* stream, void *obj);
+  contextIOResultType           saveContext (DataStream* stream, ContextMode mode, void *obj);
+  contextIOResultType           restoreContext (DataStream* stream, ContextMode mode, void *obj);
 
 #ifdef __OOFEG
       void          drawRawGeometry (oofegGraphicContext&);

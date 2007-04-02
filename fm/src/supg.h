@@ -146,8 +146,8 @@ public:
   virtual void giveElementCharacteristicMatrix (FloatMatrix& answer, int num, CharType type, TimeStep* tStep, Domain* domain) ;
 
 
-  contextIOResultType saveContext (FILE* stream, void *obj = NULL) ;
-  contextIOResultType restoreContext (FILE* stream, void *obj = NULL);
+  contextIOResultType saveContext (DataStream* stream, ContextMode mode, void *obj = NULL) ;
+  contextIOResultType restoreContext (DataStream* stream, ContextMode mode, void *obj = NULL);
  
   void   updateDomainLinks();
   
@@ -221,6 +221,9 @@ public:
   */
   virtual int       forceEquationNumbering () {return EngngModel::forceEquationNumbering();}
 
+  /** Returns material interface representation for given domain */
+  virtual MaterialInterface* giveMaterialInterface (int n) {return materialInterface;}
+ 
 
 
 protected:

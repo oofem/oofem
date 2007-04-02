@@ -90,7 +90,7 @@ TransportMaterialStatus :: initTempStatus ()
 
 
 contextIOResultType
-TransportMaterialStatus :: saveContext (FILE* stream, void *obj)
+TransportMaterialStatus :: saveContext (DataStream* stream, ContextMode mode, void *obj)
 //
 // saves full ms context (saves state variables, that completely describe
 // current state)
@@ -99,15 +99,15 @@ TransportMaterialStatus :: saveContext (FILE* stream, void *obj)
  contextIOResultType iores;
  if (stream == NULL) _error ("saveContex : can't write into NULL stream");
 
- if ((iores = MaterialStatus::saveContext (stream, obj)) != CIO_OK) THROW_CIOERR(iores);
- if ((iores = stateVector.storeYourself(stream)) != CIO_OK) THROW_CIOERR(iores);
+ if ((iores = MaterialStatus::saveContext (stream, mode, obj)) != CIO_OK) THROW_CIOERR(iores);
+ if ((iores = stateVector.storeYourself(stream, mode)) != CIO_OK) THROW_CIOERR(iores);
 
  return CIO_OK;
 }
 
 
 contextIOResultType
-TransportMaterialStatus :: restoreContext (FILE* stream, void *obj)
+TransportMaterialStatus :: restoreContext (DataStream* stream, ContextMode mode, void *obj)
 //
 // restores full material context (saves state variables, that completely describe
 // current state)
@@ -117,8 +117,8 @@ TransportMaterialStatus :: restoreContext (FILE* stream, void *obj)
  contextIOResultType iores;
  if (stream == NULL) _error ("saveContex : can't write into NULL stream");
 
- if ((iores = MaterialStatus::restoreContext (stream, obj)) != CIO_OK) THROW_CIOERR(iores);
- if ((iores = stateVector.restoreYourself(stream)) != CIO_OK) THROW_CIOERR(iores);
+ if ((iores = MaterialStatus::restoreContext (stream, mode, obj)) != CIO_OK) THROW_CIOERR(iores);
+ if ((iores = stateVector.restoreYourself(stream, mode)) != CIO_OK) THROW_CIOERR(iores);
 
  return CIO_OK;
 }

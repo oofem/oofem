@@ -206,7 +206,7 @@ ProblemCommunicator :: setUpCommunicationMapsForElementCut (EngngModel* pm)
 #endif
 
 
-  CommunicationBuffer commBuff (MPI_COMM_WORLD);
+  StaticCommunicationBuffer commBuff (MPI_COMM_WORLD);
   IntArray remoteDomainRecvList;
   IntArray toSendMap;
   int localExpectedSize, globalRecvSize ;
@@ -411,7 +411,7 @@ ProblemCommunicator :: setUpCommunicationMapsForRemoteElementMode (EngngModel* p
 #endif
 
 
-  CommunicationBuffer commBuff (MPI_COMM_WORLD);
+  StaticCommunicationBuffer commBuff (MPI_COMM_WORLD);
   IntArray remoteDomainRecvList;
   IntArray toSendMap;
   int localExpectedSize, globalRecvSize ;

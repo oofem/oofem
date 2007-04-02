@@ -1276,36 +1276,36 @@ MDMStatus::MDMStatus (int n, int nsd, int nmplanes, Domain*d, GaussPoint* g) : S
 MDMStatus::~MDMStatus () {}
 
 contextIOResultType
-MDMStatus::saveContext (FILE* stream, void *obj)
+MDMStatus::saveContext (DataStream* stream, ContextMode mode, void *obj)
 {
  //if (stream == NULL) StructuralMaterialStatus::_error ("saveContex : can't write into NULL stream");
  if (stream == NULL) _error ("saveContex : can't write into NULL stream");
  contextIOResultType iores;
 
  // save parent class status
- if ((iores = StructuralMaterialStatus :: saveContext (stream, obj)) != CIO_OK) THROW_CIOERR(iores);
+ if ((iores = StructuralMaterialStatus :: saveContext (stream, mode, obj)) != CIO_OK) THROW_CIOERR(iores);
  
- if ((iores = Psi.storeYourself(stream)) != CIO_OK) THROW_CIOERR(iores);
- if ((iores = DamageTensor.storeYourself(stream)) != CIO_OK) THROW_CIOERR(iores);
- if ((iores = damageTensorEigenValues.storeYourself(stream)) != CIO_OK) THROW_CIOERR(iores);
- if ((iores = damageTensorEigenVectors.storeYourself(stream)) != CIO_OK) THROW_CIOERR(iores);
+ if ((iores = Psi.storeYourself(stream,mode)) != CIO_OK) THROW_CIOERR(iores);
+ if ((iores = DamageTensor.storeYourself(stream,mode)) != CIO_OK) THROW_CIOERR(iores);
+ if ((iores = damageTensorEigenValues.storeYourself(stream,mode)) != CIO_OK) THROW_CIOERR(iores);
+ if ((iores = damageTensorEigenVectors.storeYourself(stream,mode)) != CIO_OK) THROW_CIOERR(iores);
  
  return CIO_OK;
 }
 
 
 contextIOResultType
-MDMStatus::restoreContext(FILE* stream, void *obj)
+MDMStatus::restoreContext(DataStream* stream, ContextMode mode, void *obj)
 {
  contextIOResultType iores;
  
  // read parent class status
- if ((iores = StructuralMaterialStatus :: restoreContext (stream,obj)) != CIO_OK) THROW_CIOERR(iores);
+ if ((iores = StructuralMaterialStatus :: restoreContext (stream,mode,obj)) != CIO_OK) THROW_CIOERR(iores);
  
- if ((iores = Psi.restoreYourself(stream)) != CIO_OK) THROW_CIOERR(iores);
- if ((iores = DamageTensor.restoreYourself(stream)) != CIO_OK) THROW_CIOERR(iores);
- if ((iores = damageTensorEigenValues.restoreYourself(stream)) != CIO_OK) THROW_CIOERR(iores);
- if ((iores = damageTensorEigenVectors.restoreYourself(stream)) != CIO_OK) THROW_CIOERR(iores);
+ if ((iores = Psi.restoreYourself(stream,mode)) != CIO_OK) THROW_CIOERR(iores);
+ if ((iores = DamageTensor.restoreYourself(stream,mode)) != CIO_OK) THROW_CIOERR(iores);
+ if ((iores = damageTensorEigenValues.restoreYourself(stream,mode)) != CIO_OK) THROW_CIOERR(iores);
+ if ((iores = damageTensorEigenVectors.restoreYourself(stream,mode)) != CIO_OK) THROW_CIOERR(iores);
  
  return CIO_OK;
 }

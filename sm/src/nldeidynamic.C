@@ -53,6 +53,7 @@
 #include "cltypes.h"
 #include "verbose.h"
 #include "mathfem.h"
+#include "datastream.h"
 
 #define ZERO_REL_MASS  1.E-6
 
@@ -454,11 +455,13 @@ void  NlDEIDynamic :: solveYourselfAt (TimeStep* tStep) {
 
 void    NlDEIDynamic :: updateYourself (TimeStep* stepN) 
 {
- // updates internal state to reached one
- // all internal variables are directly updated by 
- // numerical method - void function here
- this->updateInternalState(stepN);
- StructuralEngngModel::updateYourself(stepN);
+  // updates internal state to reached one
+  // all internal variables are directly updated by 
+  // numerical method - void function here
+  
+  
+  //this->updateInternalState(stepN);
+  StructuralEngngModel::updateYourself(stepN);
 }
 
 
@@ -492,61 +495,65 @@ NlDEIDynamic :: giveInternalForces (FloatArray& answer, TimeStep* stepN)
 }
 
 
-contextIOResultType NlDEIDynamic :: saveContext (FILE* stream, void *obj)
+contextIOResultType NlDEIDynamic :: saveContext (DataStream* stream, ContextMode mode, void *obj)
 // 
 // saves state variable - displacement vector
 //
 {
   int closeFlag = 0;
- contextIOResultType iores;
- 
+  contextIOResultType iores;
+  FILE* file;
+
   if (stream==NULL) {
-  if (!this->giveContextFile(&stream, this->giveCurrentStep()->giveNumber(), 
+  if (!this->giveContextFile(&file, this->giveCurrentStep()->giveNumber(), 
                 this->giveCurrentStep()->giveVersion(), contextMode_write))
    THROW_CIOERR(CIO_IOERR);
+  stream=new FileDataStream(file);
   closeFlag = 1;
  }
 
- if ((iores = StructuralEngngModel :: saveContext (stream)) != CIO_OK) THROW_CIOERR(iores);
- if ((iores = incrementOfDisplacementVector.storeYourself(stream))!= CIO_OK) THROW_CIOERR(iores);
- if ((iores = displacementVector.storeYourself(stream)) != CIO_OK) THROW_CIOERR(iores);
- if ((iores = velocityVector.storeYourself(stream))!= CIO_OK) THROW_CIOERR(iores);
- if ((iores = accelerationVector.storeYourself(stream))!= CIO_OK) THROW_CIOERR(iores);
+ if ((iores = StructuralEngngModel :: saveContext (stream, mode)) != CIO_OK) THROW_CIOERR(iores);
+ if ((iores = incrementOfDisplacementVector.storeYourself(stream, mode))!= CIO_OK) THROW_CIOERR(iores);
+ if ((iores = displacementVector.storeYourself(stream, mode)) != CIO_OK) THROW_CIOERR(iores);
+ if ((iores = velocityVector.storeYourself(stream, mode))!= CIO_OK) THROW_CIOERR(iores);
+ if ((iores = accelerationVector.storeYourself(stream, mode))!= CIO_OK) THROW_CIOERR(iores);
 
- if (fwrite(&deltaT,sizeof(double),1,stream) != 1) THROW_CIOERR(CIO_IOERR);
+ if (!stream->write(&deltaT,1)) THROW_CIOERR(CIO_IOERR);
  
-  if (closeFlag) fclose (stream); // ensure consistent records
+  if (closeFlag) {fclose (file); delete stream; stream=NULL;}// ensure consistent records
   return CIO_OK;
 }
 
 
 
-contextIOResultType NlDEIDynamic :: restoreContext (FILE* stream, void *obj)
+contextIOResultType NlDEIDynamic :: restoreContext (DataStream* stream, ContextMode mode, void *obj)
 // 
 // restore state variable - displacement vector
 //
 {
   int closeFlag = 0;
- int istep, iversion;
- contextIOResultType iores;
+  int istep, iversion;
+  contextIOResultType iores;
+  FILE* file;
 
  this->resolveCorrespondingStepNumber (istep, iversion, obj);
  if (stream == NULL) {
-  if (!this->giveContextFile(&stream, istep, iversion, contextMode_read)) 
+  if (!this->giveContextFile(&file, istep, iversion, contextMode_read)) 
    THROW_CIOERR(CIO_IOERR); // override 
+  stream=new FileDataStream(file);
   closeFlag = 1;
  }
 
  // save element context
- if ((iores = StructuralEngngModel :: restoreContext (stream, obj)) != CIO_OK) THROW_CIOERR(iores);  
- if ((iores = incrementOfDisplacementVector.restoreYourself(stream))!= CIO_OK) THROW_CIOERR(iores);
- if ((iores = displacementVector.restoreYourself(stream))!= CIO_OK) THROW_CIOERR(iores);
- if ((iores = velocityVector.restoreYourself(stream))!= CIO_OK) THROW_CIOERR(iores);
- if ((iores = accelerationVector.restoreYourself(stream))!= CIO_OK) THROW_CIOERR(iores);
+ if ((iores = StructuralEngngModel :: restoreContext (stream, mode, obj)) != CIO_OK) THROW_CIOERR(iores);  
+ if ((iores = incrementOfDisplacementVector.restoreYourself(stream, mode))!= CIO_OK) THROW_CIOERR(iores);
+ if ((iores = displacementVector.restoreYourself(stream, mode))!= CIO_OK) THROW_CIOERR(iores);
+ if ((iores = velocityVector.restoreYourself(stream, mode))!= CIO_OK) THROW_CIOERR(iores);
+ if ((iores = accelerationVector.restoreYourself(stream, mode))!= CIO_OK) THROW_CIOERR(iores);
 
- if (fread (&deltaT,sizeof(double),1,stream) != 1) THROW_CIOERR(CIO_IOERR);
+ if (!stream->read (&deltaT,1)) THROW_CIOERR(CIO_IOERR);
 
-  if (closeFlag) fclose (stream); // ensure consistent records
+ if (closeFlag) {fclose (file); delete stream; stream=NULL;}// ensure consistent records
  return CIO_OK;
 }
 

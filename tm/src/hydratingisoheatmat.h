@@ -109,8 +109,8 @@ public:
                                           TimeStep* atTime);
 
  // saves current context(state) into stream
- contextIOResultType saveContext(FILE* stream, void *obj = NULL);
- contextIOResultType restoreContext(FILE* stream, void *obj = NULL);
+ contextIOResultType saveContext(DataStream* stream, ContextMode mode, void *obj = NULL);
+ contextIOResultType restoreContext(DataStream* stream, ContextMode mode, void *obj = NULL);
 
  // identification and auxiliary functions
  const char*    giveClassName () const {return "HydratingIsoHeatMaterial" ;}

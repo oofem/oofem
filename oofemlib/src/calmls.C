@@ -47,7 +47,7 @@
 #include "imlsolver.h"
 #include "timestep.h"
 #include "flotmtrx.h"
-//#include "nlinearstatic.h"
+#include "datastream.h"
 #include "mathfem.h"
 // includes for HPC - not very clean (NumMethod knows what is "node" and "dof")
 #include "node.h"
@@ -1016,18 +1016,18 @@ void  CylindricalALM  :: convertHPCMap ()
 
 
 contextIOResultType    
-CylindricalALM :: saveContext (FILE* stream, void *obj) {
+CylindricalALM :: saveContext (DataStream* stream, ContextMode mode, void *obj) {
 
   // write current deltaL
-  if (fwrite(&deltaL,sizeof(double),1,stream) != 1) THROW_CIOERR (CIO_IOERR);
- return CIO_OK;
+  if (!stream->write(&deltaL,1)) THROW_CIOERR (CIO_IOERR);
+  return CIO_OK;
 }
 
 contextIOResultType    
-CylindricalALM :: restoreContext(FILE* stream, void *obj) {
+CylindricalALM :: restoreContext(DataStream* stream, ContextMode mode, void *obj) {
 
  // read last deltaL
- if (fread (&deltaL,sizeof(double),1,stream) != 1) THROW_CIOERR (CIO_IOERR);
+ if (!stream->read (&deltaL,1)) THROW_CIOERR (CIO_IOERR);
  return CIO_OK;
 }
 

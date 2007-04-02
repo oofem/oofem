@@ -35,8 +35,12 @@
 
 #ifdef __PARALLEL_MODE
 
+#include "cltypes.h"
 #include "processcomm.h"
 #include "intarray.h"
+
+#include "combuff.h"
+#include "dyncombuff.h"
 
 #ifdef __USE_MPI
 #ifndef __MAKEDEPEND
@@ -45,13 +49,25 @@
 #endif
 
 
+ProcessCommunicatorBuff :: ProcessCommunicatorBuff (CommBuffType t) 
+{
+  if (t == CBT_static) {
+    send_buff = new StaticCommunicationBuffer (MPI_COMM_WORLD);
+    recv_buff = new StaticCommunicationBuffer (MPI_COMM_WORLD);
+  } else {
+    send_buff = new DynamicCommunicationBuffer (MPI_COMM_WORLD);
+    recv_buff = new DynamicCommunicationBuffer (MPI_COMM_WORLD);
+  }
+}
 
-ProcessCommunicator :: ProcessCommunicator (EngngModel* d, ProcessCommunicatorBuff* b, int rank)
+
+ProcessCommunicator :: ProcessCommunicator (EngngModel* d, ProcessCommunicatorBuff* b, int rank, CommunicatorMode m)
 : toSend(), toReceive()
 {
  this->localProblem = d;
  this->rank         = rank;
  this->pcBuffer =  b;
+ this->mode         = m;
 }
 
 
@@ -59,10 +75,10 @@ int
 ProcessCommunicator :: initSend (int tag)
 {
  int result = 1;
- if (!toSend.isEmpty()) {
+ if (!toSend.isEmpty() || (this->mode == CommMode_Dynamic)) {
 //  fprintf (stderr, "\nPNlDEIDynamicDomainComunicator :: initExchange: sending to %d",rank);
-  result = giveSendBuff()->iSend (this->rank, tag);
- } else giveSendBuff()->init ();
+  result = giveProcessCommunicatorBuff()->initSend (this->rank, tag);
+ } else giveProcessCommunicatorBuff()->initSendBuff ();
  return result;
 }
 
@@ -71,10 +87,10 @@ int
 ProcessCommunicator :: initReceive (int tag)
 {
  int result = 1;
- if (!toReceive.isEmpty()) {
+ if (!toReceive.isEmpty() || (this->mode == CommMode_Dynamic)) {
 //  fprintf (stderr, "\nPNlDEIDynamicDomainComunicator :: initExchange: recv from %d",rank);
-  result &= giveRecvBuff()->iRecv (this->rank, tag, 0);
- } else giveRecvBuff()->init ();
+  result &= giveProcessCommunicatorBuff()->initReceive (this->rank, tag);
+ } else giveProcessCommunicatorBuff()->initRecvBuff ();
 
  return result;
 }
@@ -94,8 +110,7 @@ ProcessCommunicator :: initExchange (int tag)
 void
 ProcessCommunicator::clearBuffers ()
 {
- giveSendBuff()->init ();
- giveRecvBuff()->init ();
+ giveProcessCommunicatorBuff()->init ();
 }
 
 

@@ -91,19 +91,21 @@ public:
   Stores context of receiver into given stream (the equilibriun stress and strains vectors are stored). 
   Generally, only non-temp internal history variables should be stored.
   @param stream stream where to write data
+  @param mode determines ammount of info required in stream (state, definition,...)
   @param obj pointer to integration point, which invokes this method
   @return contextIOResultType.
   @exception throws an ContextIOERR exception if error encountered.
   */
-  contextIOResultType    saveContext (FILE* stream, void *obj = NULL)   ;
+  contextIOResultType    saveContext (DataStream* stream, ContextMode mode, void *obj = NULL)   ;
  /**
   Restores context of receiver from given stream (the equilibriun stress and strains vectors are restored).
   @param stream stream where to read data
+  @param mode determines ammount of info required in stream (state, definition,...)
   @param obj pointer to integration point, which invokes this method
   @return contextIOResultType.
   @exception throws an ContextIOERR exception if error encountered.
   */
-  contextIOResultType    restoreContext(FILE* stream, void *obj = NULL) ;
+  contextIOResultType    restoreContext(DataStream* stream, ContextMode mode, void *obj = NULL) ;
   // saves current context(state) into stream
 
   /// Returns the const pointer to receiver's stateVector attribute

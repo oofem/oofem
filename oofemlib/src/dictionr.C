@@ -38,6 +38,7 @@
 #include "dictionr.h"
 #include "debug.h"
 #include "logger.h"
+#include "datastream.h"
 #ifndef __MAKEDEPEND
 #include <stdlib.h>
 #endif
@@ -162,7 +163,7 @@ Dictionary::formatAsString(std::string &str)
 }
 
 
-contextIOResultType Dictionary :: saveContext (FILE* stream, void *obj)
+contextIOResultType Dictionary :: saveContext (DataStream* stream, ContextMode mode, void *obj)
 //
 // saves full node context (saves state variables, that completely describe
 // current state)
@@ -181,25 +182,25 @@ contextIOResultType Dictionary :: saveContext (FILE* stream, void *obj)
  }
 
  // write class header
-  if (fwrite(&type_id,sizeof(int),1,stream) != 1) THROW_CIOERR(CIO_IOERR);
-
+ if (!stream->write(&type_id,1)) THROW_CIOERR(CIO_IOERR);
+ 
   // write size 
-  if (fwrite(&nitems,sizeof(int),1,stream) != 1) THROW_CIOERR(CIO_IOERR);
-  // write raw data
+ if (!stream->write(&nitems,1)) THROW_CIOERR(CIO_IOERR);
+ // write raw data
  next = first ;
  while (next) {
-  key = next->giveKey();
-  value = next->giveValue();
-  if (fwrite(&key,sizeof(int),1,stream) != 1) THROW_CIOERR(CIO_IOERR);
-  if (fwrite(&value,sizeof(double),1,stream) != 1) THROW_CIOERR(CIO_IOERR);
-  next = next -> giveNext() ;
+   key = next->giveKey();
+   value = next->giveValue();
+   if (!stream->write(&key,1)) THROW_CIOERR(CIO_IOERR);
+   if (!stream->write(&value,1)) THROW_CIOERR(CIO_IOERR);
+   next = next -> giveNext() ;
  }
   // return result back
   return CIO_OK;
 }
 
 
-contextIOResultType Dictionary :: restoreContext (FILE* stream, void *obj)
+contextIOResultType Dictionary :: restoreContext (DataStream* stream, ContextMode mode, void *obj)
 //
 // restores full node context (saves state variables, that completely describe
 // current state)
@@ -207,23 +208,23 @@ contextIOResultType Dictionary :: restoreContext (FILE* stream, void *obj)
 {
   int i, size ;
   int type_id;
- int key;
- double value;
+  int key;
+  double value;
 
- // delete currently occupied space
- this->clear();
+  // delete currently occupied space
+  this->clear();
 
   // read class header
-  if (fread(&type_id,sizeof(int),1,stream) != 1) THROW_CIOERR(CIO_IOERR);
+  if (!stream->read(&type_id,1)) THROW_CIOERR(CIO_IOERR);
   if (type_id != DictionaryClass) THROW_CIOERR(CIO_BADVERSION);
   // read size 
-  if (fread(&size,sizeof(int),1,stream) != 1) THROW_CIOERR(CIO_IOERR);
- // read particular pairs
- for (i=1;i<=size;i++) {
-  if (fread(&key ,sizeof(int),1,stream)!= 1) THROW_CIOERR(CIO_IOERR);
-  if (fread(&value, sizeof(double),1,stream)!= 1) THROW_CIOERR(CIO_IOERR);
-  this->at(key)=value;
- }
+  if (!stream->read(&size,1)) THROW_CIOERR(CIO_IOERR);
+  // read particular pairs
+  for (i=1;i<=size;i++) {
+    if (!stream->read(&key, 1)) THROW_CIOERR(CIO_IOERR);
+    if (!stream->read(&value, 1)) THROW_CIOERR(CIO_IOERR);
+    this->at(key)=value;
+  }
   return CIO_OK;
 }
 

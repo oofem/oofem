@@ -795,11 +795,11 @@ int main (int argc, char* argv[]) {
  if (errorFlag) {
 #ifndef EXTRACTOR_MODE
    //printCheckErrors1 ("Error(s) encountered while parsing %s file",inputStreamName);
-   printf ("---Checker: %20s    [%sFAILED%s]\n",inputStreamName,RED,NORMAL);
+   printf ("---Checker: %50s    [%sFAILED%s]\n",inputStreamName,RED,NORMAL);
 #endif
  } else {
 #ifdef CHECKER_MODE
-  printf ("---Checker: %20s    [  %sOK%s  ]\n",inputStreamName,GREEN,NORMAL);
+  printf ("---Checker: %50s    [  %sOK%s  ]\n",inputStreamName,GREEN,NORMAL);
 #endif
 #ifdef SYSYTEM_STUDENT_EXTRACTOR_MODE
   printf ("---StudentSystemExtractor: %20s file succesfully processed\n",inputStreamName);

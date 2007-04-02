@@ -44,7 +44,7 @@
 #include "cltypes.h"
 #include "structuralcrosssection.h"
 #include "mathfem.h"
-
+#include "datastream.h"
 
 #define YIELD_TOL 1.e-6
 #define YIELD_TOL_SECONDARY 1.e-4
@@ -954,7 +954,7 @@ MPlasticMaterial2 :: cuttingPlaneReturn (FloatArray& answer,
       for (i=1; i<=nsurf; i++) {
         if (activeConditionMap.at(i)) {
           yieldValue = this-> computeYieldValueAt (gp, i, fullStressVector, strainSpaceHardeningVariables);
-          if ((yieldValue >= YIELD_TOL)) yieldConsistency=false;
+          if ((fabs(yieldValue) >= YIELD_TOL)) yieldConsistency=false;
         }
       }
 
@@ -2139,7 +2139,7 @@ MPlasticMaterial2Status :: updateYourself(TimeStep* atTime)
 
 
 contextIOResultType
-MPlasticMaterial2Status :: saveContext (FILE* stream, void *obj)
+MPlasticMaterial2Status :: saveContext (DataStream* stream, ContextMode mode, void *obj)
 //
 // saves full information stored in this Status
 // no temp variables stored
@@ -2148,15 +2148,15 @@ MPlasticMaterial2Status :: saveContext (FILE* stream, void *obj)
  contextIOResultType iores;
 
  // save parent class status
- if ((iores = StructuralMaterialStatus :: saveContext (stream, obj)) != CIO_OK) THROW_CIOERR(iores);
+ if ((iores = StructuralMaterialStatus :: saveContext (stream, mode, obj)) != CIO_OK) THROW_CIOERR(iores);
 
  // write a raw data
- if ((iores = plasticStrainVector.storeYourself(stream)) != CIO_OK) THROW_CIOERR(iores);
- if ((iores = strainSpaceHardeningVarsVector.storeYourself(stream)) != CIO_OK) THROW_CIOERR(iores);
+ if ((iores = plasticStrainVector.storeYourself(stream, mode)) != CIO_OK) THROW_CIOERR(iores);
+ if ((iores = strainSpaceHardeningVarsVector.storeYourself(stream, mode)) != CIO_OK) THROW_CIOERR(iores);
 
- if (fwrite(&state_flag,sizeof(int),1,stream) != 1) THROW_CIOERR(CIO_IOERR);
- if ((iores = gamma.storeYourself(stream)) != CIO_OK) THROW_CIOERR(iores);
- if ((iores = activeConditionMap.storeYourself(stream)) != CIO_OK) THROW_CIOERR(iores);
+ if (!stream->write(&state_flag,1)) THROW_CIOERR(CIO_IOERR);
+ if ((iores = gamma.storeYourself(stream,mode)) != CIO_OK) THROW_CIOERR(iores);
+ if ((iores = activeConditionMap.storeYourself(stream,mode)) != CIO_OK) THROW_CIOERR(iores);
  
 
  return CIO_OK;
@@ -2165,7 +2165,7 @@ MPlasticMaterial2Status :: saveContext (FILE* stream, void *obj)
 
 
 contextIOResultType
-MPlasticMaterial2Status :: restoreContext(FILE* stream, void *obj)
+MPlasticMaterial2Status :: restoreContext(DataStream* stream, ContextMode mode, void *obj)
 //
 // restores full information stored in stream to this Status
 //
@@ -2173,14 +2173,14 @@ MPlasticMaterial2Status :: restoreContext(FILE* stream, void *obj)
  contextIOResultType iores;
 
  // read parent class status
- if ((iores = StructuralMaterialStatus :: restoreContext (stream,obj)) != CIO_OK) THROW_CIOERR(iores);
+ if ((iores = StructuralMaterialStatus :: restoreContext (stream,mode,obj)) != CIO_OK) THROW_CIOERR(iores);
 
- if ((iores = plasticStrainVector.restoreYourself(stream)) != CIO_OK) THROW_CIOERR(iores);
- if ((iores = strainSpaceHardeningVarsVector.restoreYourself(stream)) != CIO_OK) THROW_CIOERR(iores);
+ if ((iores = plasticStrainVector.restoreYourself(stream,mode)) != CIO_OK) THROW_CIOERR(iores);
+ if ((iores = strainSpaceHardeningVarsVector.restoreYourself(stream,mode)) != CIO_OK) THROW_CIOERR(iores);
 
- if (fread(&state_flag,sizeof(int),1,stream) != 1) THROW_CIOERR(CIO_IOERR);
- if ((iores = gamma.restoreYourself(stream)) != CIO_OK) THROW_CIOERR(iores);
- if ((iores = activeConditionMap.restoreYourself(stream)) != CIO_OK) THROW_CIOERR(iores);
+ if (!stream->read(&state_flag,1)) THROW_CIOERR(CIO_IOERR);
+ if ((iores = gamma.restoreYourself(stream,mode)) != CIO_OK) THROW_CIOERR(iores);
+ if ((iores = activeConditionMap.restoreYourself(stream,mode)) != CIO_OK) THROW_CIOERR(iores);
 
 
  return CIO_OK;  // return succes

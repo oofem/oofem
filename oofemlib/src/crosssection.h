@@ -183,11 +183,12 @@ public:
   Derived classes, if they use slave concept, must invoke saveContext function also on all
   defined slaves of master.
   @param stream stream where to write data
+  @param mode determines ammount of info in stream
   @param obj pointer to integration point, which related context should be stored
   @return contextIOResultType value.
   @exception throws an ContextIOERR exception if error encountered
   */
- contextIOResultType    saveContext (FILE* stream, void *obj = NULL);
+ contextIOResultType    saveContext (DataStream* stream, ContextMode mode, void *obj = NULL);
  /**
   Restores context of receiver from given stream. 
   Default implementation simply retypes obj parameter 
@@ -196,11 +197,12 @@ public:
   Derived classes, if they use slave concept, must invoke restoreContext function also on all
   defined slaves of master.
   @param stream stream where to read data
+  @param mode determines ammount of info in stream
   @param obj pointer to integration point, which invokes this method
   @return contextIOResultType value.
   @exception throws an ContextIOERR exception if error encountered
   */
- contextIOResultType    restoreContext(FILE* stream, void *obj = NULL);
+ contextIOResultType    restoreContext(DataStream* stream, ContextMode mode, void *obj = NULL);
 
  /**
   Returns the integration point corresponding value in Reduced form.

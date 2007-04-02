@@ -43,6 +43,7 @@
 #include "structuralcrosssection.h"
 #include "mathfem.h"
 #include "isolinearelasticmaterial.h"
+#include "datastream.h"
 #ifndef __MAKEDEPEND
 #include <math.h>
 #endif
@@ -293,7 +294,7 @@ RCSDMaterial :: initializeFrom (InputRecord* ir)
 
 
 contextIOResultType
-RCSDMaterial :: saveContext (FILE* stream, void *obj)
+RCSDMaterial :: saveContext (DataStream* stream, ContextMode mode, void *obj)
 //
 // saves full status for this material, also invokes saving
 // for sub-objects of this (yieldcriteria, loadingcriteria, linearElasticMaterial)
@@ -302,14 +303,14 @@ RCSDMaterial :: saveContext (FILE* stream, void *obj)
  contextIOResultType iores;
  if (stream == NULL) _error ("saveContex : can't write into NULL stream");
 
- if ((iores = RCM2Material :: saveContext (stream, obj)) != CIO_OK) THROW_CIOERR(iores);
+ if ((iores = RCM2Material :: saveContext (stream, mode, obj)) != CIO_OK) THROW_CIOERR(iores);
  // return result back
  return CIO_OK;
 }
 
 
 contextIOResultType 
-RCSDMaterial :: restoreContext (FILE* stream, void *obj)
+RCSDMaterial :: restoreContext (DataStream* stream, ContextMode mode, void *obj)
 // 
 //
 // resaves full status for this material, also invokes saving
@@ -320,7 +321,7 @@ RCSDMaterial :: restoreContext (FILE* stream, void *obj)
 {
   contextIOResultType iores;
 
-  if ((iores = RCM2Material :: restoreContext( stream, obj)) != CIO_OK) THROW_CIOERR(iores);
+  if ((iores = RCM2Material :: restoreContext( stream, mode, obj)) != CIO_OK) THROW_CIOERR(iores);
   // return result back
   return CIO_OK;
 }
@@ -635,7 +636,7 @@ RCSDMaterialStatus :: updateYourself(TimeStep* atTime)
 
 
 contextIOResultType
-RCSDMaterialStatus :: saveContext (FILE* stream, void *obj)
+RCSDMaterialStatus :: saveContext (DataStream* stream, ContextMode mode, void *obj)
 //
 // saves full information stored in this Status
 // no temp variables stored
@@ -644,19 +645,19 @@ RCSDMaterialStatus :: saveContext (FILE* stream, void *obj)
  contextIOResultType iores;
 
  // save parent class status
- if ((iores = RCM2MaterialStatus :: saveContext (stream, obj)) != CIO_OK) THROW_CIOERR(iores);
+ if ((iores = RCM2MaterialStatus :: saveContext (stream, mode, obj)) != CIO_OK) THROW_CIOERR(iores);
 
  // write a raw data
- if (fwrite(&maxEquivStrain,sizeof(double),1,stream) != 1) THROW_CIOERR(CIO_IOERR);
- if (fwrite(&damageCoeff,sizeof(double),1,stream) != 1) THROW_CIOERR(CIO_IOERR);
- if (fwrite(&mode,sizeof(rcsdMode),1,stream) != 1) THROW_CIOERR(CIO_IOERR);
- if ((iores = Ds0.storeYourself(stream)) != CIO_OK) THROW_CIOERR(iores);
+ if (!stream->write(&maxEquivStrain,1)) THROW_CIOERR(CIO_IOERR);
+ if (!stream->write(&damageCoeff,1)) THROW_CIOERR(CIO_IOERR);
+ if (!stream->write(&mode,1)) THROW_CIOERR(CIO_IOERR);
+ if ((iores = Ds0.storeYourself(stream,mode)) != CIO_OK) THROW_CIOERR(iores);
 
  return CIO_OK;
 }
 
 contextIOResultType
-RCSDMaterialStatus :: restoreContext(FILE* stream, void *obj)
+RCSDMaterialStatus :: restoreContext(DataStream* stream, ContextMode mode, void *obj)
 //
 // restores full information stored in stream to this Status
 //
@@ -664,13 +665,13 @@ RCSDMaterialStatus :: restoreContext(FILE* stream, void *obj)
  contextIOResultType iores;
 
  // read parent class status
- if ((iores = RCM2MaterialStatus :: restoreContext (stream,obj)) != CIO_OK) THROW_CIOERR(iores);
+ if ((iores = RCM2MaterialStatus :: restoreContext (stream, mode, obj)) != CIO_OK) THROW_CIOERR(iores);
 
  // read raw data 
- if (fread(&maxEquivStrain,sizeof(double),1,stream)!=1) THROW_CIOERR(CIO_IOERR);
- if (fread(&damageCoeff,sizeof(double),1,stream)!=1) THROW_CIOERR(CIO_IOERR);
- if (fread(&mode,sizeof(rcsdMode),1,stream)!=1) THROW_CIOERR(CIO_IOERR);
- if ((iores = Ds0.restoreYourself(stream)) != CIO_OK) THROW_CIOERR(iores);
+ if (!stream->read(&maxEquivStrain,1)) THROW_CIOERR(CIO_IOERR);
+ if (!stream->read(&damageCoeff,1)) THROW_CIOERR(CIO_IOERR);
+ if (!stream->read(&mode,1)) THROW_CIOERR(CIO_IOERR);
+ if ((iores = Ds0.restoreYourself(stream, mode)) != CIO_OK) THROW_CIOERR(iores);
 
  return CIO_OK;  // return succes
 }

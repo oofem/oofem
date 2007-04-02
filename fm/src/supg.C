@@ -53,6 +53,8 @@
 #include "mathfem.h"
 #include "dofdistributedprimaryfield.h"
 #include "leplic.h"
+#include "levelsetpcs.h"
+#include "datastream.h"
 #ifndef __MAKEDEPEND
 #include <stdio.h>
 #endif
@@ -141,7 +143,7 @@ SUPG :: initializeFrom (InputRecord* ir)
 
  val = 0;
  IR_GIVE_OPTIONAL_FIELD (ir, val, IFT_SUPG_miflag, "miflag");
- if (val) {
+ if (val==1) {
    this->materialInterface = new LEPlic (1, this->giveDomain(1));
    this->materialInterface->initializeFrom (ir);
    // export velocity field
@@ -150,6 +152,10 @@ SUPG :: initializeFrom (InputRecord* ir)
 
    //fsflag = 0;
    //IR_GIVE_OPTIONAL_FIELD (ir, fsflag, IFT_SUPG_fsflag, "fsflag");
+ } else if (val==2) {
+   // positive coefficient scheme level set alg
+   this->materialInterface = new LevelSetPCS (1, this->giveDomain(1));
+   this->materialInterface->initializeFrom (ir);
  }
 
  return IRRT_OK;
@@ -338,6 +344,7 @@ SUPG :: solveYourselfAt (TimeStep* tStep)
 
   if (tStep->giveNumber() == giveNumberOfFirstStep()) {
     TimeStep *stepWhenIcApply = tStep->givePreviousStep();
+    if (materialInterface) materialInterface->initialize();
     this->applyIC (stepWhenIcApply);
     //if (this->fsflag) this->updateDofManActivityMap(tStep);
   }
@@ -622,6 +629,7 @@ SUPG :: updateYourself (TimeStep* stepN)
 {
  this->updateInternalState(stepN);
  EngngModel::updateYourself(stepN);
+ if (materialInterface) materialInterface->updateYourself(stepN);
  //previousSolutionVector = solutionVector;
 }
 
@@ -654,34 +662,36 @@ SUPG :: updateInternalState (TimeStep* stepN)
 
 
 contextIOResultType 
-SUPG :: saveContext (FILE* stream, void *obj)
+SUPG :: saveContext (DataStream* stream, ContextMode mode, void *obj)
 // 
 // saves state variable - displacement vector
 //
 {
  contextIOResultType iores;
  int closeFlag = 0;
+ FILE* file;
 
  if (stream==NULL) {
-  if (!this->giveContextFile(&stream, this->giveCurrentStep()->giveNumber(), 
+  if (!this->giveContextFile(&file, this->giveCurrentStep()->giveNumber(), 
                 this->giveCurrentStep()->giveVersion(), contextMode_write)) 
    THROW_CIOERR(CIO_IOERR); // override 
+  stream=new FileDataStream(file);
   closeFlag = 1;
  }
 
-  if ((iores = EngngModel :: saveContext (stream)) != CIO_OK) THROW_CIOERR(iores);
-  if ((iores = VelocityPressureField->saveContext(stream)) != CIO_OK) THROW_CIOERR(iores);
-  if ((iores = accelerationVector.storeYourself(stream)) != CIO_OK) THROW_CIOERR(iores);
+  if ((iores = EngngModel :: saveContext (stream, mode)) != CIO_OK) THROW_CIOERR(iores);
+  if ((iores = VelocityPressureField->saveContext(stream, mode)) != CIO_OK) THROW_CIOERR(iores);
+  if ((iores = accelerationVector.storeYourself(stream, mode)) != CIO_OK) THROW_CIOERR(iores);
 
 
-  if (closeFlag) fclose (stream); // ensure consistent records
+  if (closeFlag) {fclose (file); delete stream; stream=NULL;}// ensure consistent records
   return CIO_OK;
 }
 
 
 
 contextIOResultType 
-SUPG :: restoreContext (FILE* stream, void *obj)
+SUPG :: restoreContext (DataStream* stream, ContextMode mode, void *obj)
 // 
 // restore state variable - displacement vector
 //
@@ -689,20 +699,22 @@ SUPG :: restoreContext (FILE* stream, void *obj)
  contextIOResultType iores;
  int closeFlag = 0;
  int istep, iversion;
+ FILE* file;
 
  this->resolveCorrespondingStepNumber (istep, iversion, obj);
 
  if (stream == NULL) {
-  if (!this->giveContextFile(&stream, istep, iversion, contextMode_read))
+  if (!this->giveContextFile(&file, istep, iversion, contextMode_read))
    THROW_CIOERR(CIO_IOERR); // override 
+  stream = new FileDataStream(file);
   closeFlag = 1;
  }
 
- if ((iores = EngngModel :: restoreContext (stream, obj)) != CIO_OK) THROW_CIOERR(iores);
- if ((iores = VelocityPressureField->restoreContext(stream)) != CIO_OK) THROW_CIOERR(iores);
- if ((iores = accelerationVector.restoreYourself(stream)) != CIO_OK) THROW_CIOERR(iores);
+ if ((iores = EngngModel :: restoreContext (stream, mode, obj)) != CIO_OK) THROW_CIOERR(iores);
+ if ((iores = VelocityPressureField->restoreContext(stream, mode)) != CIO_OK) THROW_CIOERR(iores);
+ if ((iores = accelerationVector.restoreYourself(stream, mode)) != CIO_OK) THROW_CIOERR(iores);
 
- if (closeFlag) fclose (stream); // ensure consistent records
+ if (closeFlag) {fclose (file); delete stream; stream=NULL;} // ensure consistent records
  return CIO_OK;
 }
 

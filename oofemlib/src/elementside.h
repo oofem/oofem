@@ -120,6 +120,8 @@ public:
   @return nonzero if transformation is necessary, even for single dof.
   */
   virtual int requiresTransformation () {return 0;}
+  /// Returns true if dof of given type is allowed to be associated to receiver
+  virtual bool isDofTypeCompatible (dofType type) const {return (type == DT_master || type == DT_simpleSlave);}
 
 } ;
 

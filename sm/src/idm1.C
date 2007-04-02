@@ -43,6 +43,7 @@
 #include "flotarry.h"
 #include "structuralcrosssection.h"
 #include "mmaclosestiptransfer.h"
+#include "datastream.h"
 
 #ifndef __MAKEDEPEND
 #include <math.h>
@@ -344,7 +345,7 @@ IsotropicDamageMaterial1Status :: updateYourself(TimeStep* atTime)
 
 
 contextIOResultType
-IsotropicDamageMaterial1Status :: saveContext (FILE* stream, void *obj)
+IsotropicDamageMaterial1Status :: saveContext (DataStream* stream, ContextMode mode, void *obj)
 //
 // saves full information stored in this Status
 // no temp variables stored
@@ -352,26 +353,26 @@ IsotropicDamageMaterial1Status :: saveContext (FILE* stream, void *obj)
 {
  contextIOResultType iores;
  // save parent class status
- if ((iores = IsotropicDamageMaterialStatus :: saveContext (stream, obj)) != CIO_OK) THROW_CIOERR(iores);
+ if ((iores = IsotropicDamageMaterialStatus :: saveContext (stream, mode, obj)) != CIO_OK) THROW_CIOERR(iores);
 
  // write a raw data
- if (fwrite(&le,sizeof(double),1,stream) != 1) THROW_CIOERR(CIO_IOERR);
+ if (!stream->write(&le,1)) THROW_CIOERR(CIO_IOERR);
 
  return CIO_OK;
 }
 
 contextIOResultType
-IsotropicDamageMaterial1Status :: restoreContext(FILE* stream, void *obj)
+IsotropicDamageMaterial1Status :: restoreContext(DataStream* stream, ContextMode mode, void *obj)
 //
 // restores full information stored in stream to this Status
 //
 {
  contextIOResultType iores;
  // read parent class status
- if ((iores = IsotropicDamageMaterialStatus :: restoreContext (stream,obj)) != CIO_OK) THROW_CIOERR(iores);
+ if ((iores = IsotropicDamageMaterialStatus :: restoreContext (stream,mode,obj)) != CIO_OK) THROW_CIOERR(iores);
 
  // read raw data 
- if (fread (&le,sizeof(double),1,stream) != 1) THROW_CIOERR(CIO_IOERR);
+ if (!stream->read (&le,1)) THROW_CIOERR(CIO_IOERR);
 
  return CIO_OK;
 }

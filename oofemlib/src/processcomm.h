@@ -39,10 +39,8 @@
 #include "combuff.h"
 #include "engngm.h"
 
-#ifdef __USE_MPI
 #ifndef __MAKEDEPEND
 #include "mpi.h"
-#endif
 #endif
 
 
@@ -61,24 +59,187 @@
 */
 class ProcessCommunicatorBuff
 {
-protected:
- /// Send buffer
- CommunicationBuffer send_buff;
- /// Receive buffer
- CommunicationBuffer recv_buff;
-
-public:
+ protected:
+  /// Send buffer
+  CommunicationBuffer* send_buff;
+  /// Receive buffer
+  CommunicationBuffer* recv_buff;
+ public:
   /// Constructor, creates empty send and receive com buffs in MPI_COMM_WORLD
-  ProcessCommunicatorBuff(): send_buff(MPI_COMM_WORLD), recv_buff(MPI_COMM_WORLD) {}
-  /**
-    Returns send buffer of receiver.
+  ProcessCommunicatorBuff(CommBuffType t) ;
+  ~ProcessCommunicatorBuff() {
+    if (send_buff) delete send_buff;
+    if (recv_buff) delete recv_buff;
+  }
+  /**@name Methods for datatype packing/unpacking to/from buffer */
+  //@{
+  /** 
+      Packs single integer value into buffer. 
+      Buffer is enlarged if isDynamic flag is set, but it requires memory allocation and dealocation.
+      @return nonzero if succesfull
   */
- CommunicationBuffer* giveSendBuff () {return  &send_buff;}
- /**
-   Returns receive buffer of receiver.
- */
- CommunicationBuffer* giveRecvBuff () {return  &recv_buff;}
+  int packInt(int value) {return packArray(&value, 1);}
+  /** 
+      Packs single double value into buffer. 
+      Buffer is enlarged if isDynamic flag is set, but it requires memory allocation and dealocation.
+      @return nonzero if succesfull
+  */
+  int packDouble (double value)  {return packArray (&value, 1);}
+  /**
+     Packs array of values of given type into buffer. 
+     Buffer is enlarged if isDynamic flag is set, but it requires memory allocation and dealocation.
+     @param src adress of first value in memory
+     @param n number of packed integers
+     @return nonzero if succesfull
+  */
+  //@{
+  int packArray (const int* src, int n) {return send_buff->packArray(src,n);}
+  int packArray (const long* src, int n) {return send_buff->packArray(src,n);}
+  int packArray (const unsigned long* src, int n) {return send_buff->packArray(src,n);}
+  int packArray (const double* src, int n) {return send_buff->packArray(src,n);}
+  int packArray (const char* src, int n) {return send_buff->packArray(src,n);}
+  //@}
+  
+  /**
+     Packs given IntArray  value into buffer. 
+     Buffer is enlarged if isDynamic flag is set, but it requires memory allocation and dealocation.
+     @return nonzero if succesfull
+  */
+  int packIntArray (const IntArray &arry) {return arry.packToCommBuffer (*send_buff);}
+  /**
+     Packs given FloatArray  value into buffer. 
+     Buffer is enlarged if isDynamic flag is set, but it requires memory allocation and dealocation.
+     @return nonzero if succesfull
+  */
+  int packFloatArray (const FloatArray &arry) {return arry.packToCommBuffer (*send_buff);}
+  /**
+     Packs given FloatMatrix  value into buffer. 
+     Buffer is enlarged if isDynamic flag is set, but it requires memory allocation and dealocation.
+     @return nonzero if succesfull
+  */
+  int packFloatMatrix (const FloatMatrix &mtrx) {return mtrx.packToCommBuffer (*send_buff);}
+  /** 
+      Unpacks single integer value from buffer. 
+      @return nonzero if succesfull
+  */
+  int unpackInt(int& value)  {return unpackArray (&value, 1);}
+  /** 
+      Unpacks single double value from buffer. 
+      @return nonzero if succesfull
+  */
+  int unpackDouble (double& value) {return unpackArray (&value, 1);}
+  /**
+     unpacks array of value of given type from buffer. 
+     @param dest adress of first value in memory, where to store values
+     @param n number of unpacked integers
+     @return nonzero if succesfull
+  */
+  //@{
+  int unpackArray (int* dest, int n) {return recv_buff->unpackArray(dest, n);}
+  int unpackArray (long* dest, int n) {return recv_buff->unpackArray(dest, n);}
+  int unpackArray (unsigned long* dest, int n) {return recv_buff->unpackArray(dest, n);}
+  int unpackArray (double* dest, int n) {return recv_buff->unpackArray(dest, n);}
+  int unpackArray (char* dest, int n) {return recv_buff->unpackArray(dest, n);}
+  //@}
+  /**
+     Unpacks given IntArray  value from buffer. 
+     @return nonzero if succesfull
+  */
+  int unpackIntArray (IntArray &arry) {return arry.unpackFromCommBuffer (*recv_buff);}
+  /**
+     Unpacks given FloatArray  value from buffer. 
+     @return nonzero if succesfull
+  */
+  int unpackFloatArray (FloatArray &arry) { return arry.unpackFromCommBuffer (*recv_buff);}
+  /**
+     Unpacks given FloatMatrix  value from buffer. 
+     @return nonzero if succesfull
+  */
+  int unpackFloatMatrix (FloatMatrix&mtrx) { return mtrx.unpackFromCommBuffer (*recv_buff);}
+  //@}
+  
+  
+  /**@name Methods for determining pack size of datatype to pack/unpack to/from buffer */
+  //@{
+  /** 
+      Returns pack size required to pack an array (c-style).
+      @param array size
+      @param type type id
+      @return  pack size required
+  */
+  int givePackSize(MPI_Datatype type, int size) {
+    int requredSpace;
+    MPI_Pack_size (size, type, MPI_COMM_WORLD, &requredSpace);
+    return requredSpace;
+  }
+    //@}
+  
+  
+  /// Initializes send buffer to empty state. All packed data are lost.
+  void initSendBuff () {send_buff->init();}
+  /// Initializes send buffer to empty state. All packed data are lost.
+  void initRecvBuff () {recv_buff->init();}
+  /// initializes receiver buffers
+  void init () {initSendBuff(); initRecvBuff();}
+
+  /// Initialize for packing
+  void initForPacking () {send_buff->initForPacking();}
+  /// Initialize for Unpacking (data already received)
+  void initForUnpacking() {recv_buff->initForUnpacking();}
+ 
+  /**
+     Initializes data exchange with associated problem. 
+     if send or receive pool is empty, the send or receive communication is not preformed.
+     @param tag message tag
+     @return nonzero if success
+  */
+  int initExchange (int rank, int tag) {
+    int result = 1;
+    result &= initSend(rank,tag);
+    result &= initReceive (rank, tag);
+    
+    return result;
+  }
+  /**
+     Initialize the send data exchange with associate problem.
+     if send pool is empty, the send communication is not performed.
+     @param tag message tag
+     @return nonzero if success
+  */
+  int initSend (int rank, int tag) {return send_buff->iSend(rank, tag);}
+  /**
+     Initialize the receive data exchange with associate problem.
+     if receive pool is empty, the receive communication is not performed.
+     @param tag message tag
+     @return nonzero if success
+  */
+  int initReceive (int rank, int tag) {return recv_buff->iRecv(rank, tag);}
+  
+  /** 
+      Clears all buffer contens.
+  */
+  void clearBuffers () {}
+  
+  void resizeSendBuffer (int size) {send_buff->resize(size);}
+  void resizeReceiveBuffer (int size) {recv_buff->resize(size);}
+  
+  /**@name Methods for manipulating/testing receiver state */
+  //@{
+  int sendCompleted () {return send_buff->sendCompleted();}
+  int receiveCompleted () {return recv_buff->receiveCompleted();}
+  //@}
+
+  /**
+     Returns send buffer of receiver.
+  */
+  CommunicationBuffer* giveSendBuff () {return send_buff;}
+  /**
+     Returns receive buffer of receiver.
+  */
+  CommunicationBuffer* giveRecvBuff () {return recv_buff;}
 };
+
+
 
 
 
@@ -103,6 +264,8 @@ protected:
  IntArray toSend;
  /// nodes to receive
  IntArray toReceive;
+ /// mode
+ CommunicatorMode mode;
  
 public:
  
@@ -113,7 +276,7 @@ public:
   @param b ProcessCommunicatorBuff to use
   @param irank rank of associated partition
   */
- ProcessCommunicator (EngngModel* d, ProcessCommunicatorBuff* b, int irank);
+ ProcessCommunicator (EngngModel* d, ProcessCommunicatorBuff* b, int irank, CommunicatorMode m=CommMode_Static);
  /// Destructor
  ~ProcessCommunicator () {}
 
@@ -121,22 +284,31 @@ public:
   Returns corresponding rank of associated partition
   */
  int giveRank () {return rank;}
- /**
-  Returns send buffer of receiver.
-  */
+
+
+ /*
+ ///  Returns send buffer of receiver.
  CommunicationBuffer* giveSendBuff () {
    if (pcBuffer) return pcBuffer->giveSendBuff();
    OOFEM_ERROR ("ProcessCommunicator::giveSendBuff : ProcessCommunicatorBuff undefined");
    return NULL;
  }
- /**
-  Returns receive buffer of receiver.
-  */
+ /// Returns receive buffer of receiver.
  CommunicationBuffer* giveRecvBuff () {
    if (pcBuffer) return pcBuffer->giveRecvBuff();
    OOFEM_ERROR ("ProcessCommunicator::giveRecvBuff : ProcessCommunicatorBuff undefined");
    return NULL;
  }
+ */
+
+ ///  Returns CommunicationBuffer
+ ProcessCommunicatorBuff* giveProcessCommunicatorBuff () {
+   if (pcBuffer) return pcBuffer;
+   OOFEM_ERROR ("ProcessCommunicator::giveRecvBuff : ProcessCommunicatorBuff undefined");
+   return NULL;
+ }
+   
+
  /**
   Returns receiver to send map.
   */
@@ -176,7 +348,7 @@ public:
   @see NlDEIDynamic_Unpack_func 
   */
  template <class T> int packData (T* emodel, int (T::*packFunc) (ProcessCommunicator&))
-  { if (!toSend.isEmpty()) {giveSendBuff()->init(); return (emodel->*packFunc) (*this);} else return 1;}
+  { if (!toSend.isEmpty() || (this->mode == CommMode_Dynamic)) {giveProcessCommunicatorBuff()->initForPacking(); return (emodel->*packFunc) (*this);} else return 1;}
  /**
   Pack nodal data to send buff. 
   @param packFunc function used to pack nodal data in to buffer. It uses toSend array 
@@ -184,7 +356,7 @@ public:
   @see NlDEIDynamic_Unpack_func 
   */
  template <class T> int packData (T* emodel, FloatArray* src, int (T::*packFunc) (FloatArray*, ProcessCommunicator&))
-  { if (!toSend.isEmpty()) {giveSendBuff()->init(); return (emodel->*packFunc) (src, *this);} else return 1;}
+  { if (!toSend.isEmpty() || (this->mode == CommMode_Dynamic)) {giveProcessCommunicatorBuff()->initForPacking(); return (emodel->*packFunc) (src, *this);} else return 1;}
  /** 
   Unpack nodal data from recv buff.
   @param unpackFunc function used to unpack nodal data from buffer. It uses toRecv array 
@@ -192,7 +364,7 @@ public:
   @see NlDEIDynamic_Unpack_func 
   */
  template <class T> int unpackData (T* emodel,  int (T::*unpackFunc) (ProcessCommunicator&))
-  { if (!toReceive.isEmpty()) {giveRecvBuff()->init(); return (emodel->*unpackFunc) (*this);} else return 1;}
+   { if (!toReceive.isEmpty() || (this->mode == CommMode_Dynamic)) {giveProcessCommunicatorBuff()->initForUnpacking(); return (emodel->*unpackFunc) (*this);} else return 1;}
  /** 
   Unpack nodal data from recv buff.
   @param unpackFunc function used to unpack nodal data from buffer. It uses toRecv array 
@@ -200,7 +372,7 @@ public:
   @see NlDEIDynamic_Unpack_func 
   */
  template <class T> int unpackData (T* emodel,  FloatArray* dest, int (T::*unpackFunc) (FloatArray*, ProcessCommunicator&))
-  { if (!toReceive.isEmpty()) {giveRecvBuff()->init(); return (emodel->*unpackFunc) (dest, *this);} else return 1;}
+  { if (!toReceive.isEmpty() || (this->mode == CommMode_Dynamic)) {giveProcessCommunicatorBuff()->initForUnpacking(); return (emodel->*unpackFunc) (dest, *this);} else return 1;}
  /**
   Initializes data exchange with associated problem. 
   if send or receive pool is empty, the send or receive communication is not preformed.
@@ -223,6 +395,11 @@ public:
   */
  int initReceive (int tag);
 
+  /**@name Methods for manipulating/testing receiver state */
+  //@{
+  int sendCompleted () {return giveProcessCommunicatorBuff()->sendCompleted();}
+  int receiveCompleted () {return giveProcessCommunicatorBuff()->receiveCompleted();}
+  //@}
  /** 
   Clears all buffer contens.
   */
@@ -278,8 +455,9 @@ ProcessCommunicator :: resizeSendBuff (T* emodel, int packUnpackType)
 {
  int size;
  // determine space for send buffer
- size = emodel->estimateMaxPackSize (toSend, *giveSendBuff(), packUnpackType);
- giveSendBuff()->resize (size);
+ size = emodel->estimateMaxPackSize (toSend, *giveProcessCommunicatorBuff()->giveSendBuff(), packUnpackType);
+ giveProcessCommunicatorBuff()->resizeSendBuffer(size);
+ //giveSendBuff()->resize (size);
  return 1;
 }
 
@@ -290,8 +468,9 @@ ProcessCommunicator :: resizeRecvBuff (T* emodel, int packUnpackType)
  int size;
  
  // determine space for recv buffer
- size = emodel->estimateMaxPackSize (toReceive, *giveRecvBuff(), packUnpackType);
- giveRecvBuff()->resize (size);
+ size = emodel->estimateMaxPackSize (toReceive, *giveProcessCommunicatorBuff()->giveRecvBuff(), packUnpackType);
+ giveProcessCommunicatorBuff()->resizeReceiveBuffer(size);
+ //giveRecvBuff()->resize (size);
  
  return 1;
 }

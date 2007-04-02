@@ -132,18 +132,20 @@ public:
   Stores context of receiver into given stream. 
   Le attribute is stored. Corresponding parent method invoked.
   @param stream stream where to write data
+  @param mode determines ammount of info required in stream (state, definition,...)
   @param obj pointer to integration point, which invokes this method
   @return contextIOResultType.
   */
- contextIOResultType    saveContext (FILE* stream, void *obj = NULL);
+ contextIOResultType    saveContext (DataStream* stream, ContextMode mode, void *obj = NULL);
  /**
   Restores context of receiver from given stream. 
   Le attribute is restored. Corresponding parent method invoked.
   @param stream stream where to read data
+  @param mode determines ammount of info required in stream (state, definition,...)
   @param obj pointer to integration point, which invokes this method
   @return contextIOResultType.
   */
- contextIOResultType    restoreContext(FILE* stream, void *obj = NULL);
+ contextIOResultType    restoreContext(DataStream* stream, ContextMode mode, void *obj = NULL);
 }; 
 
 /**

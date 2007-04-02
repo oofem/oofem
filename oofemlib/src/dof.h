@@ -53,7 +53,7 @@
 #include "primaryfield.h"
 
 #ifdef __PARALLEL_MODE
-#include "combuff.h"
+class CommunicationBuffer;
 #endif
 
 class Domain ; class DofManager ; class TimeStep ; class BoundaryCondition ; 
@@ -156,7 +156,9 @@ class Dof
 
  /// Returns receiver number.
  int giveNumber () const {return number;}
-
+ 
+ int giveDofManNumber () const; // termitovo
+ 
  /**
   Returns value of boundary condition of dof if it is precsribed.
   Use hasBc service to determine, if boundary condition is active.
@@ -166,6 +168,16 @@ class Dof
   @return prescribed value of unknown or zero if not prescribed
   */
   virtual double  giveBcValue (ValueModeType mode, TimeStep* tStep) ;
+  /**
+     Returns array with values of boundary condition of dof if it is precsribed.
+     For primary dof it has only one value, for slave dof the value of corresponding
+     masters dofs boundary condition is assembled and returned.
+     Use hasBc service to determine, if boundary condition is active.
+     The physical meaning of Bc is determined by corresponding DOF.
+  */  
+  virtual void giveBcValues (FloatArray& masterBcValues, ValueModeType mode, TimeStep* stepN)
+    {masterBcValues.resize(1); masterBcValues.at(1) = this->giveBcValue (mode, stepN);}
+  
  //  virtual double  giveBcValue (UnknownType type, ValueModeType mode, TimeStep* tStep) ;
  /**
   Returns equation number of receiver. If Dof has active BC, returned equation number 
@@ -178,6 +190,20 @@ class Dof
   */
   virtual int                 giveEquationNumber ()   =0;
  /**
+  Returns equation number of receiver. If Dof has active BC, returned equation number 
+  is zero. After initializing Dof by calling constructor, Dof has no equation 
+  number assigned. When firstly invoked, this function asks EngngModel object
+  for next equation prescribed equation number (this will increase also total number of equation 
+  at EngngModel level). Note: By asking nodal code numbers or element code numbers 
+  when initializing code numbers in EngngMode, designer should alter equation
+  numbering strategy. 
+
+  For slave dofs (dependent on other primary dofs) the array of master equation numbers is returned.
+  */
+  virtual void giveEquationNumbers (IntArray& masterEqNumbers)
+    {masterEqNumbers.resize(1); masterEqNumbers.at(1) = this->giveEquationNumber();}
+  
+ /**
   Returns prescribed equation number of receiver. If Dof has inactive BC, 
   returned prescribed equation number is zero.
   If Dof has active BC, then the corresponding  prescribed equation number is returned.  
@@ -189,6 +215,23 @@ class Dof
   numbering strategy. 
   */
   virtual int                 givePrescribedEquationNumber ()   =0;
+ /**
+  Returns prescribed equation number of receiver. If Dof has inactive BC, 
+  returned prescribed equation number is zero.
+  If Dof has active BC, then the corresponding  prescribed equation number is returned.  
+  is zero. After initializing Dof by calling constructor, Dof has no prescribed equation 
+  number assigned. When firstly invoked, this function asks EngngModel object
+  for next equation or prescribed equation number (this will increase also total number of equation 
+  at EngngModel level). Note: By asking nodal code numbers or element code numbers 
+  when initializing code numbers in EngngMode, designer should alter equation
+  numbering strategy. 
+
+  For slave dofs (dependent on other primary dofs) the array of master equation numbers is returned.
+  */
+  
+  virtual void givePrescribedEquationNumbers (IntArray& masterEqNumbers)
+    {masterEqNumbers.resize(1); masterEqNumbers.at(1) = this->givePrescribedEquationNumber();}
+  
  /**
   Asks EngngModel for new equation number. Necessary for EngngModels supporting
   changes of static system during solution. Then it is necessary to force
@@ -225,6 +268,33 @@ class Dof
   when IC apply, returns value given by this IC.
   */
   virtual double              giveUnknown (PrimaryField& field, ValueModeType mode, TimeStep* stepN)  =0;
+  /**
+     The key method of class Dof. Returns the value of the unknown of the receiver
+     at given time step associated to given field. For primary dof it returns is associated unknown value,
+     for slave dofs it returns an array of master values (in recursive way).
+  */
+  virtual void giveUnknowns (FloatArray& masterUnknowns, EquationID type, ValueModeType mode, TimeStep* stepN) 
+    { masterUnknowns.resize(1); masterUnknowns.at(1) = this->giveUnknown (type, mode, stepN);}
+  /**
+     The key method of class Dof. Returns the value of the unknown of the receiver
+     at given time step associated to given field. For primary dof it returns is associated unknown value,
+     for slave dofs it returns an array of master values (in recursive way).
+  */
+  virtual void giveUnknowns (FloatArray& masterUnknowns, PrimaryField& field, ValueModeType mode, TimeStep* stepN) 
+    { masterUnknowns.resize(1); masterUnknowns.at(1) = this->giveUnknown (field, mode, stepN);}
+ 
+  /**
+     Computes dof transformation array, which describes the dependence of receiver value on values of master dofs.
+     For primary dof, this thransformation is unity, hovewer, for slave DOFs, thisarray contains weights, which are multiplied by
+     corresponding master DOF values to obtain slave value.
+  */
+  virtual void computeDofTransformation (FloatArray& masterContribs) 
+    {masterContribs.resize(1); masterContribs.at(1) = 1.0;}
+  /**
+     Returns number of primary dofs, on which receiver value depends on (even recursivelly)
+   */
+  virtual int giveNumberOfPrimaryMasterDofs () {return 1;}
+
  /**
   Test if Dof has active boundary condition.
   @param tStep time when test is evaluated.
@@ -272,7 +342,10 @@ class Dof
   @param id of associated Boubdaray condition, zero otherwise
   */
  virtual int giveBcIdValue () = 0; 
-
+ /**
+    Returns an array of master DofManagers  to which the recever is linked
+ */
+ virtual void giveMasterDofManArray (IntArray& answer) {answer.resize(0);} // termitovo
 
  /**
   Prints Dof output (it prints value of unknown related to dof at given timeStep).
@@ -330,9 +403,9 @@ class Dof
  /// prints simple error message and exits
   void error (char* file, int line, char *format, ...) ;
   /// Stores receiver state to output stream.  
-  virtual contextIOResultType    saveContext (FILE* stream, void *obj = NULL)  {return CIO_OK;}
+  virtual contextIOResultType    saveContext (DataStream* stream, ContextMode mode, void *obj = NULL) ;
  /// Restores the receiver state previously written in stream.
-  virtual contextIOResultType    restoreContext(FILE* stream, void *obj = NULL) {return CIO_OK;}
+  virtual contextIOResultType    restoreContext(DataStream* stream, ContextMode mode, void *obj = NULL) ;
 
 #ifdef __PARALLEL_MODE
   /**
@@ -383,7 +456,7 @@ protected:
   */
   virtual InitialCondition*   giveIc () {return NULL;}
 
-friend class SlaveDof;
+friend class SimpleSlaveDof;
 } ;
 
 #define dof_h

@@ -124,7 +124,7 @@ class NRSolver2 : public SparseNonLinearSystemNM
 private:
 
   enum    nrsolver_ModeType {nrsolverModifiedNRM, nrsolverFullNRM, nrsolverAccelNRM};
-
+  
   int            nite,nsmax;
   double         rtol, deltaL;
   double         minStepLength;
@@ -135,61 +135,62 @@ private:
   // linear system solver
   SparseLinearSystemNM* linSolver;
   // linear system solver ID
- LinSystSolverType solverType;
+  LinSystSolverType solverType;
   /// flag indicating whether to use line-search
- int lsFlag;
+  int lsFlag;
   /// lineseach solver
- LineSearchNM* linesearchSolver;
-
-
+  LineSearchNM* linesearchSolver;
+  
+  
   public :
-      NRSolver2 (int i, Domain* d,EngngModel* m, EquationID ut);
-                                  // constructor
-      ~NRSolver2 () ;              // destructor
-
-      // solving
- /**
-  Solves the given sparse linear system of equations g(x,l)=l-F(x); dx=K^{-1}g+ dl K^{-1}R.
-  Total load vector not passed, it is defined as l*R+R0, where l is scale factor
-  @param K coefficient matrix (K = dF/dx; stiffness matrix)
-  @param R  incremental Rhs (incremental load)
-  @param R0 initial Rhs (initial load)
-  @param Rr linearization of K*rri, where rri is increment of prescribed displacements
-  @param r  total solution (total displacement)
-  @param dr increment of solution (incremental displacaments)
-  @param l  Rhs scale factor (load level)
-  @param rtol prescribed tolerance (g residual and iterative r change;)
-  @param rlm - reference load mode
-  @param F  InternalRhs (real internal forces)
-  @return NM_Status value
+    NRSolver2 (int i, Domain* d,EngngModel* m, EquationID ut);
+  // constructor
+  ~NRSolver2 () ;              // destructor
+  
+  // solving
+  /**
+     Solves the given sparse linear system of equations g(x,l)=l-F(x); dx=K^{-1}g+ dl K^{-1}R.
+     Total load vector not passed, it is defined as l*R+R0, where l is scale factor
+     @param K coefficient matrix (K = dF/dx; stiffness matrix)
+     @param R  incremental Rhs (incremental load)
+     @param R0 initial Rhs (initial load)
+     @param Rr linearization of K*rri, where rri is increment of prescribed displacements
+     @param r  total solution (total displacement)
+     @param dr increment of solution (incremental displacaments)
+     @param l  Rhs scale factor (load level)
+     @param rtol prescribed tolerance (g residual and iterative r change;)
+     @param rlm - reference load mode
+     @param F  InternalRhs (real internal forces)
+     @return NM_Status value
   */
- virtual NM_Status solve (SparseMtrx* k, FloatArray* R, FloatArray* R0,
-              FloatArray* Rr, FloatArray* r, FloatArray* dr, FloatArray* F,
-              double& l, double rtol, referenceLoadInputModeType rlm,
-              int& nite, TimeStep*) ;
-
+  virtual NM_Status solve (SparseMtrx* k, FloatArray* R, FloatArray* R0,
+                           FloatArray* Rr, FloatArray* r, FloatArray* dr, FloatArray* F,
+                           double& l, double rtol, referenceLoadInputModeType rlm,
+                           int& nite, TimeStep*) ;
+  
   virtual double giveCurrentStepLength() {return deltaL;}
- virtual void   setStepLength(double l) {deltaL = l;}
-
+  virtual void   setStepLength(double l) {deltaL = l;}
+  
   // management  components
   IRResultType initializeFrom (InputRecord* ir);
   /** Stores receiver state to output stream. 
-         Receiver should write class-id first in order to allow test
-     whether correct data are then restored.
-       @param stream output stream 
-    @param obj special parameter, used only to send particular integration
-     point to material class version of this method. Except this 
-     case, obj parameter is always NULL pointer.*/
-      contextIOResultType    saveContext (FILE* stream, void *obj = NULL);
-     /** Restores the receiver state previously written in stream.
-    @see saveContext member function.*/
-      contextIOResultType    restoreContext(FILE* stream, void *obj = NULL);
-
-      // identification 
-     const char*  giveClassName () const { return "NRSolver2" ;}
-      classType giveClassID () const { return NRSolverClass ;}
-      /// sets associated Domain 
-   virtual void         setDomain (Domain* d) {this->domain = d; if (linSolver) linSolver->setDomain(d);}
+      Receiver should write class-id first in order to allow test
+      whether correct data are then restored.
+      @param stream output stream 
+      @param mode determines ammount of info in stream (state, definition,...)
+      @param obj special parameter, used only to send particular integration
+      point to material class version of this method. Except this 
+      case, obj parameter is always NULL pointer.*/
+  contextIOResultType    saveContext (DataStream* stream, ContextMode mode, void *obj = NULL);
+  /** Restores the receiver state previously written in stream.
+      @see saveContext member function.*/
+  contextIOResultType    restoreContext(DataStream* stream, ContextMode mode, void *obj = NULL);
+  
+  // identification 
+  const char*  giveClassName () const { return "NRSolver2" ;}
+  classType giveClassID () const { return NRSolverClass ;}
+  /// sets associated Domain 
+  virtual void         setDomain (Domain* d) {this->domain = d; if (linSolver) linSolver->setDomain(d);}
 
 
  protected:

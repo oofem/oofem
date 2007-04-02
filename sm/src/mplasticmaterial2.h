@@ -100,9 +100,9 @@ class MPlasticMaterial2Status : public StructuralMaterialStatus
   virtual void updateYourself(TimeStep*);
   
   /// saves current context(state) into stream
-  contextIOResultType    saveContext (FILE* stream, void *obj = NULL);
+  contextIOResultType    saveContext (DataStream* stream, ContextMode mode, void *obj = NULL);
   /// restores state from stream
-  contextIOResultType    restoreContext(FILE* stream, void *obj = NULL);
+  contextIOResultType    restoreContext(DataStream* stream, ContextMode mode, void *obj = NULL);
   
   /// returns the equilibrated strain vector
   void givePlasticStrainVector (FloatArray& answer) const {answer = plasticStrainVector;}

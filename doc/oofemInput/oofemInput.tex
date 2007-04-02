@@ -1308,7 +1308,7 @@ following:
 [\field{load}{ra}] \newline[\field{ndofs}{in}
 \field{DofIDMask}{ia}]
 \optField{bc}{ia}
-\optField{ic}{ia} \optField{masterMask}{ia}\\ \PfieldVal{globnum}{in}
+\optField{ic}{ia} [\field{doftype}{ia} \field{masterMask}{ia}] \\ \PfieldVal{globnum}{in}
 \PoptField{shared}{} \PoptField{remote}{} \PoptField{null}{}\\
  \PoptField{partitions}{ia}.\\
 
@@ -1334,21 +1334,24 @@ the following values are supported: \{u-displacement=1, v-displacement=2,
 temperature=7\}. {\bf It is not allowed to have two DOFs
 with the same physical meaning in the same DofManager.}
 
-Parameter \param{masterMask} allows to connect some dof manager's dofs
-(so-called ``slave'' dof)
+Parameters \param{dofType} and \param{masterMask} allows to connect some dof manager's dofs
+(so-called ``slave'' dofs)
 to corresponding dof (according to their physical meaning) of another
 dof manager (so-called ``master'' dof). The master slave principle
 allows for example simple modeling of structure hinges, where multiple
 elements are connected by introducing multiple nodes (with same
 coordinates) sharing the same displacement dofs and each one possessing
 their own rotational dofs.
-In \param{masterMask} array are numbers of master dof managers to
-which particular receiver dofs are connected (linked). If master mask array value
-is zero, then corresponding dof is assumed to be master (having own
-equation number), otherwise slave dof, linked to corresponding master
-dof manager dof is created. By default, if \param{masterMask}
-parameter is omitted, all dofs are assumed to be masters.
-{\bf Note: the meaning of \param{masterMask} parameter is different for \entKeywordInst{RigidArmNode}}
+Parameter
+\param{dofType} determines the type of (slave) dof to
+create. Currently supported values are 0 for master DOF, 1 for simpleSlave DOF (linked to another single master DOF), and 2 for general
+slave dof, that can depend on different DOFs belonging to different
+dof managers. 
+If \param{dofType} is not specified, then by default all DOFs are
+created as master DOFs. If provided, masterMask is also required. 
+The meaning of \param{masterMask} parameter is
+depending on type of particular dofManager, and will be described in
+corresponding sections.
 
 \Pmode{
 The \param{globnum} represents a unique global dofmanager number across all partitions.
@@ -1401,6 +1404,18 @@ directional vector of local y-axis. The local z-axis is determined
 using vector product. The right-hand coordinate system is assumed.
 If user defined local coordinate system in node is specified, then the
  boundary conditions and applied loading are specified in this local coordinate system. 
+
+The node can create only master DOFs and SimpleSlave DOFs, so the
+allowable values of \param{dofType} array are in range {0,1}.
+For the Node dof manager, the \param{masterMask} is the array of size
+equal to number of DOFs, and the i-th value determines the
+master dof manager, to which i-th dof is directly linked (the dof with
+same physical meaning are linked together).
+The local coordinate
+system in node with same linked dofs is supported, but it should be exactly the
+same as on master. 
+
+
 \item
 \entKeywordInst{RigidArmNode} \field{coords}{ra}
 \field{master}{in} \optField{masterMask}{ia}.\\
@@ -1414,42 +1429,50 @@ arm node maps its dofs to master dofs using simple transformations
 arm node are localized directly to master related equations. 
 {\em The rigid arm node can not have its own boundary or initial conditions, they are
 determined completely from master dof conditions. Currently it is 
-possible to map only certain dofs - see \param{masterMask}.} The local coordinate
-system in rigid arm node is not supported in current implementation, the global
-lcs applies. On the other hand, rigid arm node can be loaded
+possible to map only certain dofs - see \param{dofType}. Linked DOFs
+should have dofType value equal to 2, non-linked (primary) DOFs 0.} 
+
+Rigid arm node can be loaded
 independently of master. The node coordinates in space (given by
 global coordinate system) are described using \param{coords}
 field. This array contains x, y and possibly z (depends on problem
 under consideration) coordinate of node. The \param{master} parameter is the
 master node number, to which rigid arm node dofs are mapped.
-{\em The same number of dofs and same physical dof meaning for rigid arm
-node and related master are required. The current implementation
-precludes chaining rigid arm nodes.}
-The optional parameter \param{masterMask} allows to map by rigid arm
-transformation only certain dofs. The size of \param{masterMask} array 
-should be equal to number of DOFs. The zero value indicates that
-corresponding DOF is a independent DOF (independent of master, with own
-equilibrium equation), nonzero value indicates, that corresponding DOF
-is mapped on master.
+{\em The current implementation allows chaining of rigid arm nodes.}
+The optional parameter \param{masterMask} allows to specify how
+particular mapped DOF depends on master DOFs. The size of \param{masterMask} array 
+should be equal to number of DOFs. For all linked DOFs (with
+corresponding dofType value equal to 2) the corresponding value of
+\param{masterMask} array should be 1.
+
 \item
 \entKeywordInst{HangingNode}  \field{coords}{ra} \field{type}{in} \field{masters}{ia}
-\field{ksi}{rn}\\ \optField{eta}{rn} \optField{dzeta}{rn}.\\
-Hanging node connected to other nodes (masters) using interpolation.
-Hanging node posses no degrees of freedom	- all values are
+\optField{ksi}{rn} \optField{eta}{rn} \optField{dzeta}{rn} \optField{weights}{ra}\\
+Hanging node connected to other nodes (masters) using generalized interpolation.
+Hanging node posses no degrees of freedom	(except unlined dofs) - all values are
 interpolated from corresponding master nodes and their DOFs.
 The introduction of hanging nodes allows, for example, to include reinforcing bar elements inside 
-arbitrary fe mesh of concrete specimen or facilitates the local refinment of fe-mesh.
-
+arbitrary fe mesh of concrete specimen or facilitates the local
+refinment of fe-mesh. The hanging nodes can be in chain.
 The contributions of hanging node are localized directly to master related equations.
-The hanging node can not have its own boundary or initial conditions,
-they are determined completely from master dof conditions. 
+The hanging node can have its own boundary or initial conditions, but
+only for primary unlinked DOFs, for linked DOFs, these conditions are
+determined completely from master dof conditions. 
 The local coordinate system should be same for all master nodes.
 On the other hand, hanging node can be loaded independently of
 master.
 
-Parameter \param{type} determines the type of interpolation used to
-evalueate receiver unknowns and position. The required value can be
-evaluated as 100*(number of master nodes) + 10*(order of polynomial
+Values of array \param{dofType} can have following values: {0-primary
+ DOF, 2-linked DOF}.
+
+If parameter \param{type} equals to zero, then user have to specify
+for each master its weight (determined by \param{weights} array).
+Currently, there is no possibility to have different weights for
+different DOFs - all DOFs share the same weight).
+
+If parameter \param{type} is not equal to zero value, then the value determines the type of interpolation used to
+evalueate receiver unknowns and position and \param{weights} array is not required. The value is
+defined as 100*(number of master nodes) + 10*(order of polynomial
 approximation) + dimension. For example: 211 - linear truss, 312 -
 linear triangle, 412 - linear rectangle, or 413 - linear tetrahedron.
 On input, the hanging node coordinates (specified using
@@ -1459,6 +1482,8 @@ coordinate) should be provided.  Natural coordinates are
 defined as local coordinate that yield node global coordinates for
 selected interpolation type (isoparametric interpolation (same order
 for geometry and unknowns) is assumed).
+
+
 
 
 \item
@@ -1800,10 +1825,17 @@ Represents the Heaviside-like time function. Up to time, given by
 parameter \param{origin}, the value of time function is zero. If time
 greater than \param{origin} parameter, the value is
 equal to parameter \param{value} value.
-\item \entKeywordInst{UsrDefLTF} \field{f(t)}{expr}.\\
-Represents user defined time function. The function must be expressed
-using t parameter, for which actual time will be substituted and
-expression evaluated. Very general, but relatively slow.
+\item \entKeywordInst{UsrDefLTF} \field{f(t)}{expr}
+  \optField{dfdt(t)}{expr} \optField{d2fdt2(t)}{expr}.\\
+Represents user defined time function. The expressions can depend on
+  ``t'' parameter, for which actual time will be substituted and
+expression evaluated. The function is defined using \param{f(t)}
+  parameter, and optionally, its first and second time derivatives 
+  using \param{dfdt(t)} and \param{d2fdt2(t)} parameters. 
+The first and second derivatives may be required, this depend on type
+  of analysis.
+
+Very general, but relatively slow.
 \end{itemize}
 
 \section{Examples}

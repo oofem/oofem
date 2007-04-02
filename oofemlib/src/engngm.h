@@ -41,6 +41,10 @@
  
 #ifndef engngm_h
 
+#ifdef __PARALLEL_MODE
+#include "parallel.h"
+#endif
+
 #include "alist.h"
 #include "cltypes.h"
 #include "inputrecord.h"
@@ -53,14 +57,15 @@
 #include "exportmodulemanager.h"
 #include "field.h"
 #include "fieldmanager.h"
+
+
 #ifndef __MAKEDEPEND
 #include <stdio.h>
-#endif
-
 
 #ifdef __PETSC_MODULE
 #include "petsccontext.h" 
 #include "petscordering.h"
+#endif
 #endif
 
 
@@ -69,7 +74,7 @@
 #endif
 
 class Domain ; class NumericalMethod ; class TimeStep ;
-class ErrorEstimator; class MetaStep;
+class ErrorEstimator; class MetaStep; class MaterialInterface;
 
 /**
  Class EngngModelContext represents a context, which is shared by all problem engng sub-models.
@@ -307,6 +312,9 @@ enum EngngModel_UpdateMode {EngngModel_SUMM_Mode, EngngModel_SET_Mode};
  int         giveNumberOfDomains () {return ndomains;}
  /** Service for accessing ErrorEstimator corresponding to particular domain */
  virtual ErrorEstimator* giveDomainErrorEstimator (int n) {return NULL;}
+ /** Returns material interface representation for given domain */
+ virtual MaterialInterface* giveMaterialInterface (int n) {return NULL;}
+
  // input / output
  /// Returns input file path.
  //char*              giveInputDataFileName () ;
@@ -471,6 +479,7 @@ enum EngngModel_UpdateMode {EngngModel_SUMM_Mode, EngngModel_SET_Mode};
   */
  virtual double    giveUnknownComponent (EquationID, ValueModeType, TimeStep*, Domain*, Dof*) {return 0.0;}
  virtual double    giveUnknownComponent (UnknownType, ValueModeType, TimeStep*, Domain*, Dof*) {return 0.0;}
+
 #ifdef __PARALLEL_MODE
  /**
   Updates unknown. Unknown at give time step is characterized by its type and mode
@@ -530,10 +539,11 @@ enum EngngModel_UpdateMode {EngngModel_SUMM_Mode, EngngModel_SET_Mode};
   If stream is NULL, new file descriptor is created and this must be also closed at the end. 
   @param stream - context stream. If NULL then new file descriptor will be openned and closed
   at the end else the stream given as parameter will be used and not closed at the end.
+  @param mode determines ammount of info in stream
   @return contextIOResultType.
   @exception throws an ContextIOERR exception if error encountered
   */
-  virtual contextIOResultType                saveContext (FILE *stream, void *obj = NULL) ;
+  virtual contextIOResultType                saveContext (DataStream *stream, ContextMode mode, void *obj = NULL) ;
  /**
   Restores the  state of model from output stream. Restores not only the receiver state,
   but also same function is invoked for all DofManagers and Elements in associated
@@ -545,12 +555,13 @@ enum EngngModel_UpdateMode {EngngModel_SUMM_Mode, EngngModel_SET_Mode};
   Restoring context will change current time step in order to correspond to newly restored
   context.
   @param stream context file
+  @param mode determines ammount of info in stream
   @param obj is a void pointer to an int array containing two values:time step number and 
   version of a context file to be restored.
   @return contextIOResultType.
   @exception throws an ContextIOERR exception if error encountered.
   */
-  virtual contextIOResultType    restoreContext (FILE* stream, void* obj = NULL) ;
+  virtual contextIOResultType    restoreContext (DataStream* stream, ContextMode mode, void* obj = NULL) ;
    /**
    Updates domain links after the domains of receiver have changed. Used mainly after 
    restoring context - the domains may change and this service is then used

@@ -47,6 +47,7 @@
 #include "element.h"
 #include "node.h"
 #include "dof.h"
+#include "datastream.h"
 #ifndef __MAKEDEPEND
 #include <stdio.h>
 #endif
@@ -194,30 +195,33 @@ void  StationaryFlow :: solveYourselfAt (TimeStep* tStep) {
 
 
 
-contextIOResultType StationaryFlow :: saveContext (FILE* stream, void *obj)
+contextIOResultType StationaryFlow :: saveContext (DataStream* stream, ContextMode mode, void *obj)
 // 
 // saves state variable - displacement vector
 //
 {
  contextIOResultType iores;
  int closeFlag = 0;
+ FILE* file;
+ 
  if (stream==NULL) {
-  if (!this->giveContextFile(&stream, this->giveCurrentStep()->giveNumber(), 
+  if (!this->giveContextFile(&file, this->giveCurrentStep()->giveNumber(), 
                 this->giveCurrentStep()->giveVersion(), contextMode_write)) 
    THROW_CIOERR(CIO_IOERR); // override 
+  stream = new FileDataStream (file);
   closeFlag = 1;
  }
 
-  if ((iores = EngngModel :: saveContext (stream)) != CIO_OK) THROW_CIOERR(iores);
-  if ((iores = fluxVector.storeYourself(stream)) != CIO_OK) THROW_CIOERR(iores);
+  if ((iores = EngngModel :: saveContext (stream,mode)) != CIO_OK) THROW_CIOERR(iores);
+  if ((iores = fluxVector.storeYourself(stream,mode)) != CIO_OK) THROW_CIOERR(iores);
  
- if (closeFlag) fclose (stream); // ensure consistent records
+ if (closeFlag) {fclose (file); delete stream; stream = NULL;} // ensure consistent records
   return CIO_OK;
 }
 
 
 
-contextIOResultType StationaryFlow :: restoreContext (FILE* stream, void *obj)
+contextIOResultType StationaryFlow :: restoreContext (DataStream* stream, ContextMode mode, void *obj)
 // 
 // restore state variable - displacement vector
 //
@@ -225,19 +229,21 @@ contextIOResultType StationaryFlow :: restoreContext (FILE* stream, void *obj)
  contextIOResultType iores;
  int closeFlag = 0;
  int istep, iversion;
+ FILE* file;
  
  this->resolveCorrespondingStepNumber (istep, iversion, obj);
 
  if (stream == NULL) {
-  if (!this->giveContextFile(&stream, istep, iversion, contextMode_read)) 
-   THROW_CIOERR(CIO_IOERR); // override 
+  if (!this->giveContextFile(&file, istep, iversion, contextMode_read)) 
+    THROW_CIOERR(CIO_IOERR); // override 
+  stream = new FileDataStream (file);
   closeFlag = 1;
  }
  
- if ((iores = EngngModel :: restoreContext (stream, obj)) != CIO_OK) THROW_CIOERR(iores);  
- if ((iores = fluxVector.restoreYourself(stream)) != CIO_OK) THROW_CIOERR(iores); 
+ if ((iores = EngngModel :: restoreContext (stream, mode, obj)) != CIO_OK) THROW_CIOERR(iores);  
+ if ((iores = fluxVector.restoreYourself(stream, mode)) != CIO_OK) THROW_CIOERR(iores); 
 
-  if (closeFlag) fclose (stream); // ensure consistent records
+  if (closeFlag) {fclose (file); delete stream; stream = NULL;} // ensure consistent records
  return CIO_OK;
 }
 

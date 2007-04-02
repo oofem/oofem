@@ -95,7 +95,7 @@ FluidDynamicMaterialStatus :: initTempStatus ()
 
 
 contextIOResultType
-FluidDynamicMaterialStatus :: saveContext (FILE* stream, void *obj)
+FluidDynamicMaterialStatus :: saveContext (DataStream* stream, ContextMode mode, void *obj)
 //
 // saves full ms context (saves state variables, that completely describe
 // current state)
@@ -104,15 +104,15 @@ FluidDynamicMaterialStatus :: saveContext (FILE* stream, void *obj)
  contextIOResultType iores;
  if (stream == NULL) _error ("saveContex : can't write into NULL stream");
 
- if ((iores = MaterialStatus::saveContext (stream, obj)) != CIO_OK) THROW_CIOERR(iores);
- if ((iores = deviatoricStressVector.storeYourself(stream)) != CIO_OK) THROW_CIOERR(iores);
+ if ((iores = MaterialStatus::saveContext (stream, mode, obj)) != CIO_OK) THROW_CIOERR(iores);
+ if ((iores = deviatoricStressVector.storeYourself(stream, mode)) != CIO_OK) THROW_CIOERR(iores);
 
  return CIO_OK;
 }
 
 
 contextIOResultType
-FluidDynamicMaterialStatus :: restoreContext (FILE* stream, void *obj)
+FluidDynamicMaterialStatus :: restoreContext (DataStream* stream, ContextMode mode, void *obj)
 //
 // restores full material context (saves state variables, that completely describe
 // current state)
@@ -122,8 +122,8 @@ FluidDynamicMaterialStatus :: restoreContext (FILE* stream, void *obj)
  contextIOResultType iores;
  if (stream == NULL) _error ("saveContex : can't write into NULL stream");
 
- if ((iores = MaterialStatus::restoreContext (stream, obj)) != CIO_OK) THROW_CIOERR(iores);
- if ((iores = deviatoricStressVector.restoreYourself(stream)) != CIO_OK) THROW_CIOERR(iores);
+ if ((iores = MaterialStatus::restoreContext (stream, mode, obj)) != CIO_OK) THROW_CIOERR(iores);
+ if ((iores = deviatoricStressVector.restoreYourself(stream, mode)) != CIO_OK) THROW_CIOERR(iores);
 
  return CIO_OK;
 }

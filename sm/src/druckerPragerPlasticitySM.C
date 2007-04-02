@@ -52,6 +52,7 @@
 #include "structuralmaterial.h"
 #include "isolinearelasticmaterial.h"
 #include "structuralcrosssection.h"
+#include "datastream.h"
 #ifndef __MAKEDEPEND
 #include <math.h>
 #endif
@@ -138,21 +139,21 @@ DruckerPragerPlasticitySMStatus::printOutputAt (FILE *file, TimeStep* tStep)
 }
 
 contextIOResultType
-DruckerPragerPlasticitySMStatus::saveContext (FILE* stream, void *obj)
+DruckerPragerPlasticitySMStatus::saveContext (DataStream* stream, ContextMode mode, void *obj)
 {
 	contextIOResultType iores;
 
 	// save parent class status
-	if( (iores = StructuralMaterialStatus :: saveContext (stream, obj)) != CIO_OK) THROW_CIOERR(iores);
+	if( (iores = StructuralMaterialStatus :: saveContext (stream, mode, obj)) != CIO_OK) THROW_CIOERR(iores);
 
 	// write raw data
-	if ( (iores = plasticStrainDeviator.storeYourself(stream)) != CIO_OK) 
+	if ( (iores = plasticStrainDeviator.storeYourself(stream,mode)) != CIO_OK) 
 		THROW_CIOERR(iores);
-	if( fwrite(&volumetricPlasticStrain, sizeof(double), 1, stream) != 1 ) 
+	if(!stream->write(&volumetricPlasticStrain, 1)) 
 		THROW_CIOERR(CIO_IOERR);
-	if( fwrite(&kappa, sizeof(double), 1, stream) != 1 ) 
+	if(!stream->write(&kappa, 1)) 
 		THROW_CIOERR(CIO_IOERR);
-	if( fwrite(&temp_state_flag, sizeof(int), 1, stream) != 1 ) 
+	if(!stream->write(&temp_state_flag, 1)) 
 		THROW_CIOERR(CIO_IOERR);
 
 	return CIO_OK;
@@ -160,22 +161,22 @@ DruckerPragerPlasticitySMStatus::saveContext (FILE* stream, void *obj)
 
 
 contextIOResultType
-DruckerPragerPlasticitySMStatus::restoreContext (FILE* stream, void *obj)
+DruckerPragerPlasticitySMStatus::restoreContext (DataStream* stream, ContextMode mode, void *obj)
 {
 	contextIOResultType iores;
 
 	// read parent class status
-	if((iores = StructuralMaterialStatus :: restoreContext (stream, obj)) != CIO_OK) 
+	if((iores = StructuralMaterialStatus :: restoreContext (stream, mode, obj)) != CIO_OK) 
 		 THROW_CIOERR(iores);
 
 	// read raw data
-	if ((iores = plasticStrainDeviator.restoreYourself(stream)) != CIO_OK) 
+	if ((iores = plasticStrainDeviator.restoreYourself(stream,mode)) != CIO_OK) 
 		THROW_CIOERR(iores);
-	if ( fread( &volumetricPlasticStrain, sizeof(double), 1, stream ) != 1 )
+	if (!stream->read( &volumetricPlasticStrain, 1 ))
 		THROW_CIOERR(CIO_IOERR);
-	if ( fread( &kappa, sizeof(double), 1, stream ) != 1 )
+	if (!stream->read( &kappa, 1 ))
 		THROW_CIOERR(CIO_IOERR);
-	if( fread (&temp_state_flag, sizeof(int), 1, stream) != 1 ) 
+	if (!stream->read (&temp_state_flag, 1)) 
 		THROW_CIOERR(CIO_IOERR);
 
 	return CIO_OK;

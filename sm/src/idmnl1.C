@@ -52,6 +52,10 @@
 #include <math.h>
 #endif
 
+#ifdef __PARALLEL_MODE
+#include "combuff.h"
+#endif
+
 #ifdef __OOFEG
 #include "oofeggraphiccontext.h"
 #include "conTable.h"
@@ -604,7 +608,7 @@ IDNLMaterialStatus :: updateYourself(TimeStep* atTime)
 
 
 contextIOResultType
-IDNLMaterialStatus :: saveContext (FILE* stream, void *obj)
+IDNLMaterialStatus :: saveContext (DataStream* stream, ContextMode mode, void *obj)
 //
 // saves full information stored in this Status
 // no temp variables stored
@@ -612,17 +616,17 @@ IDNLMaterialStatus :: saveContext (FILE* stream, void *obj)
 {
 
  // save parent class status
- return IsotropicDamageMaterial1Status :: saveContext (stream, obj);
+ return IsotropicDamageMaterial1Status :: saveContext (stream, mode, obj);
 }
 
 contextIOResultType
-IDNLMaterialStatus :: restoreContext(FILE* stream, void *obj)
+IDNLMaterialStatus :: restoreContext(DataStream* stream, ContextMode mode, void *obj)
 //
 // restores full information stored in stream to this Status
 //
 {
  // read parent class status
- return  IsotropicDamageMaterial1Status :: restoreContext (stream,obj);
+ return  IsotropicDamageMaterial1Status :: restoreContext (stream,mode,obj);
 }
 
 Interface* 
@@ -667,7 +671,7 @@ IDNLMaterial::estimatePackSize (CommunicationBuffer& buff, GaussPoint* ip)
 
  //IDNLMaterialStatus *status = (IDNLMaterialStatus*) this -> giveStatus (ip);
 
- return buff.giveDoubleVecPackSize (1);
+ return buff.givePackSize (MPI_DOUBLE, 1);
 }
 
 #endif

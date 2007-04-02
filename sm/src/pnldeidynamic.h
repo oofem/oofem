@@ -230,8 +230,8 @@ protected:
  /// Returns next time step (next to current step) of receiver.
   TimeStep* giveNextStep ();
   NumericalMethod* giveNumericalMethod (TimeStep*);
-  contextIOResultType saveContext (FILE* stream, void *obj = NULL) ;
-  contextIOResultType restoreContext (FILE* stream, void *obj = NULL);
+  contextIOResultType saveContext (DataStream* stream, ContextMode mode, void *obj = NULL) ;
+  contextIOResultType restoreContext (DataStream* stream, ContextMode mode, void *obj = NULL);
   /**
   Terminates the solution of time step. 
   */

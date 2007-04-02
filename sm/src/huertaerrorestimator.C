@@ -54,6 +54,7 @@
 #include "adaptnlinearstatic.h"
 #include "clock.h"
 #include "verbose.h"
+#include "datastream.h"
 #ifndef __MAKEDEPEND
 #include <vector>
 #include <string>
@@ -408,7 +409,7 @@ HuertaErrorEstimator::estimateError (EE_ErrorMode mode, TimeStep* tStep)
 	 // it would be much cleaner to call restore from engng model
 				 while(stepNumber < curNumber){
 					 try{
-						 model -> restoreContext (NULL, (void *) &stepNumber);
+						 model -> restoreContext (NULL, CM_State, (void *) &stepNumber);
 					 }
 					 catch (ContextIOERR& c){
 						 c.print();
@@ -571,7 +572,7 @@ HuertaErrorEstimator :: initializeFrom (InputRecord* ir)
 
 
 contextIOResultType
-HuertaErrorEstimator::saveContext (FILE* stream, void *obj)
+HuertaErrorEstimator::saveContext (DataStream* stream, ContextMode mode, void *obj)
 {
  contextIOResultType iores;
  TimeStep* tStep = this -> domain -> giveEngngModel() -> giveCurrentStep();
@@ -580,29 +581,29 @@ HuertaErrorEstimator::saveContext (FILE* stream, void *obj)
   this -> estimateError(equilibratedEM, tStep);
 
  // save parent class status
- if((iores = ErrorEstimator::saveContext(stream, obj)) != CIO_OK)THROW_CIOERR(iores);
+ if((iores = ErrorEstimator::saveContext(stream, mode, obj)) != CIO_OK)THROW_CIOERR(iores);
 
- if((iores = this -> eNorms.storeYourself(stream)) != CIO_OK)THROW_CIOERR(iores);
+ if((iores = this -> eNorms.storeYourself(stream,mode)) != CIO_OK)THROW_CIOERR(iores);
 
  // write a raw data
- if(fwrite(&stateCounter, sizeof(StateCounterType), 1, stream) != 1)THROW_CIOERR(CIO_IOERR);
+ if(!stream->write(&stateCounter, 1))THROW_CIOERR(CIO_IOERR);
 
  return CIO_OK;
 }
 
 
 contextIOResultType
-HuertaErrorEstimator::restoreContext(FILE* stream, void *obj)
+HuertaErrorEstimator::restoreContext(DataStream* stream, ContextMode mode, void *obj)
 {
  contextIOResultType iores;
 
  // read parent class status
- if((iores = ErrorEstimator::restoreContext(stream,obj)) != CIO_OK)THROW_CIOERR(iores);
+ if((iores = ErrorEstimator::restoreContext(stream,mode,obj)) != CIO_OK)THROW_CIOERR(iores);
 
- if((iores = eNorms.restoreYourself(stream)) != CIO_OK)THROW_CIOERR(iores);
+ if((iores = eNorms.restoreYourself(stream,mode)) != CIO_OK)THROW_CIOERR(iores);
 
  // read raw data 
- if (fread (&stateCounter, sizeof(StateCounterType), 1, stream) != 1)THROW_CIOERR(CIO_IOERR);
+ if (!stream->read (&stateCounter, 1))THROW_CIOERR(CIO_IOERR);
 
  return CIO_OK;
 }

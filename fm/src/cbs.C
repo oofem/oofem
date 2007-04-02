@@ -51,6 +51,7 @@
 #include "cbselement.h"
 #include "usrdefsub.h"
 #include "mathfem.h"
+#include "datastream.h"
 //<RESTRICTED_SECTION>
 #include "leplic.h"
 //</RESTRICTED_SECTION>
@@ -292,7 +293,10 @@ CBS :: solveYourselfAt (TimeStep* tStep)
       mm.resize (momneq); mm.zero();
       this->assembleVectorFromElements(mm, tStep, EID_MomentumBalance, LumpedMassMatrix, VM_Total, this->giveDomain(1));
     }
-   
+    //<RESTRICTED_SECTION> 
+    // init material interface
+    if (materialInterface) materialInterface->initialize();
+    //</RESTRICTED_SECTION>
     initFlag = 0;
   } 
 //<RESTRICTED_SECTION> 
@@ -393,6 +397,9 @@ CBS :: updateYourself (TimeStep* stepN)
 {
  this->updateInternalState(stepN);
  EngngModel::updateYourself(stepN);
+//<RESTRICTED_SECTION>
+ if (materialInterface) materialInterface->updateYourself(stepN);
+//</RESTRICTED_SECTION> 
  //previousSolutionVector = solutionVector;
 }
 
@@ -425,35 +432,37 @@ CBS :: updateInternalState (TimeStep* stepN)
 
 
 contextIOResultType 
-CBS :: saveContext (FILE* stream, void *obj)
+CBS :: saveContext (DataStream* stream, ContextMode mode, void *obj)
 // 
 // saves state variable - displacement vector
 //
 {
  contextIOResultType iores;
  int closeFlag = 0;
+ FILE* file;
 
  if (stream==NULL) {
-  if (!this->giveContextFile(&stream, this->giveCurrentStep()->giveNumber(), 
+  if (!this->giveContextFile(&file, this->giveCurrentStep()->giveNumber(), 
                 this->giveCurrentStep()->giveVersion(), contextMode_write)) 
    THROW_CIOERR(CIO_IOERR); // override 
+  stream = new FileDataStream(file);
   closeFlag = 1;
  }
 
-  if ((iores = EngngModel :: saveContext (stream)) != CIO_OK) THROW_CIOERR(iores);
-  if ((iores = PressureField.saveContext(stream)) != CIO_OK) THROW_CIOERR(iores);
-  if ((iores = VelocityField.saveContext(stream)) != CIO_OK) THROW_CIOERR(iores);
-  if ((iores = prescribedTractionPressure.storeYourself(stream)) != CIO_OK) THROW_CIOERR(iores);
+  if ((iores = EngngModel :: saveContext (stream, mode)) != CIO_OK) THROW_CIOERR(iores);
+  if ((iores = PressureField.saveContext(stream, mode)) != CIO_OK) THROW_CIOERR(iores);
+  if ((iores = VelocityField.saveContext(stream, mode)) != CIO_OK) THROW_CIOERR(iores);
+  if ((iores = prescribedTractionPressure.storeYourself(stream, mode)) != CIO_OK) THROW_CIOERR(iores);
   
 
- if (closeFlag) fclose (stream); // ensure consistent records
+ if (closeFlag) {fclose (file); delete stream; stream=NULL;}// ensure consistent records
   return CIO_OK;
 }
 
 
 
 contextIOResultType 
-CBS :: restoreContext (FILE* stream, void *obj)
+CBS :: restoreContext (DataStream* stream, ContextMode mode, void *obj)
 // 
 // restore state variable - displacement vector
 //
@@ -461,21 +470,23 @@ CBS :: restoreContext (FILE* stream, void *obj)
  contextIOResultType iores;
  int closeFlag = 0;
  int istep, iversion;
+ FILE* file;
 
  this->resolveCorrespondingStepNumber (istep, iversion, obj);
 
  if (stream == NULL) {
-  if (!this->giveContextFile(&stream, istep, iversion, contextMode_read))
+  if (!this->giveContextFile(&file, istep, iversion, contextMode_read))
    THROW_CIOERR(CIO_IOERR); // override 
+  stream = new FileDataStream (file);
   closeFlag = 1;
  }
 
- if ((iores = EngngModel :: restoreContext (stream, obj)) != CIO_OK) THROW_CIOERR(iores);
- if ((iores = PressureField.restoreContext(stream)) != CIO_OK) THROW_CIOERR(iores);
- if ((iores = VelocityField.restoreContext(stream)) != CIO_OK) THROW_CIOERR(iores);
- if ((iores = prescribedTractionPressure.restoreYourself(stream)) != CIO_OK) THROW_CIOERR(iores);
+ if ((iores = EngngModel :: restoreContext (stream, mode, obj)) != CIO_OK) THROW_CIOERR(iores);
+ if ((iores = PressureField.restoreContext(stream, mode)) != CIO_OK) THROW_CIOERR(iores);
+ if ((iores = VelocityField.restoreContext(stream, mode)) != CIO_OK) THROW_CIOERR(iores);
+ if ((iores = prescribedTractionPressure.restoreYourself(stream, mode)) != CIO_OK) THROW_CIOERR(iores);
  
- if (closeFlag) fclose (stream); // ensure consistent records
+ if (closeFlag) {fclose (file); delete stream; stream=NULL;}// ensure consistent records
  return CIO_OK;
 }
 

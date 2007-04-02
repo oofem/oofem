@@ -7,9 +7,9 @@ ndofman 6 nelem 3 ncrosssect  1 nmat 1 nbc 2 nic 0 nltf  1
 node 1 coords 3 0.  0.  0.  bc 3 1 1 0
 node 2 coords 3 8.  0.  0.  bc 3 0 1 0 
 node 3 coords 3 2.  0.0 3.  bc 3 0 0 0 load 1 2
-node 4 coords 3 0.  0.  0.  bc 3 0 0 0 masterMask 3 1 1 0
-node 5 coords 3 8.  0.  0.  bc 3 0 0 0 masterMask 3 2 2 0 
-node 6 coords 3 2.  0.  3.  bc 3 0 0 0 masterMask 3 3 3 0 
+node 4 coords 3 0.  0.  0.  bc 3 0 0 0 masterMask 3 1 1 0 doftype 3 1 1 0
+node 5 coords 3 8.  0.  0.  bc 3 0 0 0 masterMask 3 2 2 0 doftype 3 1 1 0
+node 6 coords 3 2.  0.  3.  bc 3 0 0 0 masterMask 3 3 3 0 doftype 3 1 1 0
 Beam2d 1 nodes 2 1 2 mat 1 crossSect 1
 Beam2d 2 nodes 2 4 3 mat 1 crossSect 1
 Beam2d 3 nodes 2 5 6 mat 1 crossSect 1

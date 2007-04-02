@@ -78,17 +78,18 @@ public:
  /** Stores receiver state to output stream. 
   Writes the FEMComponent class-id in order to allow test whether correct data are then restored.
   @param stream output stream 
+  @param mode determines ammount of info in stream
   @return contextIOResultType
   @exception throws an ContextIOERR exception if error encountered
   */
- virtual contextIOResultType    saveContext (FILE* stream);
+ virtual contextIOResultType    saveContext (DataStream* stream, ContextMode mode);
  /** Restores the receiver state previously written in stream.
   Reads the FEMComponent class-id in order to allow test consistency.
   @see saveContext member function.
   @return contextIOResultType
   @exception throws an ContextIOERR exception if error encountered
   */
- virtual contextIOResultType    restoreContext(FILE* stream);
+ virtual contextIOResultType    restoreContext(DataStream* stream, ContextMode mode);
 
 protected:
 };

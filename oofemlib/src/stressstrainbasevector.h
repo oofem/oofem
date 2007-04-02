@@ -115,14 +115,14 @@ class StressStrainBaseVector : public FloatArray
 	   @param stream Stream used to write image.
 	   @return contextIOResultType.
 	*/
-	contextIOResultType          storeYourself(FILE* stream);
+	contextIOResultType          storeYourself(DataStream* stream, ContextMode mode);
 	/**
 	   Restores receiver image from stream. id parameter is checked against 
 	   id read from stream. If these id values are different, error is generated.
 	   @param stream Stream used to read image.
 	   @return contextIOResultType.
 	*/
-	contextIOResultType          restoreYourself(FILE* stream);
+	contextIOResultType          restoreYourself(DataStream* stream, ContextMode mode);
 	
 	
  protected:

@@ -46,6 +46,7 @@
 #include "intarray.h"
 #include "mathfem.h"
 #include "error.h"
+#include "datastream.h"
 #ifndef __MAKEDEPEND
 #include <math.h>
 #endif
@@ -376,6 +377,48 @@ FloatMatrix :: beSubMatrixOf ( const FloatMatrix& src,
   return ;
   
 }
+
+void 
+FloatMatrix::addSubVectorRow (const FloatArray& src, int sr, int sc)
+{
+  sc --;
+  
+  int srcCols = src.giveSize ();
+  
+  int nr = sr;
+  int nc = sc+srcCols;
+  
+  if ((this->giveNumberOfRows() < nr) || (this->giveNumberOfColumns() < nc))
+    this->resizeWithData (max(this->giveNumberOfRows(), nr), max(this->giveNumberOfColumns(),nc));
+  
+  // add sub-matrix
+  int j;
+  for (j=1; j<=srcCols; j++)
+    this->at(sr,sc+j) += src.at(j);
+  
+}
+
+void 
+FloatMatrix :: copySubVectorRow (const FloatArray& src, int sr, int sc)
+{
+  sc --;
+  
+  int srcCols = src.giveSize ();
+  
+  int nr = sr;
+  int nc = sc+srcCols;
+  
+  if ((this->giveNumberOfRows() < nr) || (this->giveNumberOfColumns() < nc))
+    this->resizeWithData (max(this->giveNumberOfRows(), nr), max(this->giveNumberOfColumns(),nc));
+  
+  // add sub-matrix
+  int j;
+  for (j=1; j<=srcCols; j++)
+    this->at(sr,sc+j) = src.at(j);
+  
+}
+
+
 
 void  FloatMatrix :: plusProduct (const FloatMatrix& a, const FloatMatrix& b, double dV)
    // Adds to the receiver the product  a(transposed).b dV .
@@ -951,6 +994,18 @@ FloatMatrix :: zero () const
    while (i--) *P1++ = 0.;
 
 }
+
+void  FloatMatrix :: beUnitMatrix ()
+{
+  int i;
+
+  if (! this->isSquare()) {
+    OOFEM_ERROR3 ("FloatMatrix::beUnitMatrix : cannot make unit matrix of %d by %d matrix", nRows,nColumns);
+  }
+  this->zero();
+  for (i=1; i<=nRows; i++) this->at(i,i) = 1.0;
+}
+
 
 /*
 FloatMatrix*  FloatMatrix :: beCopyOf (FloatMatrix* mtrx)
@@ -1597,26 +1652,26 @@ FloatMatrix*  FloatMatrix :: timesTo (FloatMatrix* aMatrix, FloatMatrix* toMatri
 */
 
 
-contextIOResultType  FloatMatrix :: storeYourself (FILE* stream)
+contextIOResultType  FloatMatrix :: storeYourself (DataStream* stream, ContextMode mode)
 // writes receiver's binary image into stream
 // use id to distinguish some instances
 // return value >0 succes
 //              =0 file i/o error
 {
   int type_id = FloatMatrixClass;
- int size = nRows*nColumns;
+  int size = nRows*nColumns;
   // write class header
-  if (fwrite(&type_id,sizeof(int),1,stream)!= 1) return (CIO_IOERR);
+  if (!stream->write(&type_id,1)) return (CIO_IOERR);
   // write size 
-  if (fwrite(&nRows,sizeof(int),1,stream)!= 1) return (CIO_IOERR);
-  if (fwrite(&nColumns,sizeof(int),1,stream)!= 1) return (CIO_IOERR);
+  if (!stream->write(&nRows,1)) return (CIO_IOERR);
+  if (!stream->write(&nColumns,1)) return (CIO_IOERR);
   // write raw data
- if (fwrite(values,sizeof(double),size,stream) != (size_t)size)  return (CIO_IOERR);
+  if (!stream->write(values,size))  return (CIO_IOERR);
   // return result back
   return CIO_OK;
 }
 
-contextIOResultType  FloatMatrix :: restoreYourself (FILE* stream)
+contextIOResultType  FloatMatrix :: restoreYourself (DataStream* stream, ContextMode mode)
 // reads receiver from stream
 // warning - overwrites existing data!
 // returns 0 if file i/o error
@@ -1624,21 +1679,21 @@ contextIOResultType  FloatMatrix :: restoreYourself (FILE* stream)
 {
   int class_id;
   // read class header
-  if (fread(&class_id,sizeof(int),1,stream) != 1) return (CIO_IOERR);
+  if (!stream->read(&class_id,1)) return (CIO_IOERR);
   if (class_id != FloatMatrixClass) return (CIO_BADVERSION);
   // read size 
-  if (fread(&nRows,sizeof(int),1,stream) != 1) return (CIO_IOERR);
-  if (fread(&nColumns,sizeof(int),1,stream) != 1) return (CIO_IOERR);
+  if (!stream->read(&nRows,1)) return (CIO_IOERR);
+  if (!stream->read(&nColumns,1)) return (CIO_IOERR);
   if (values!=NULL) freeDouble(values);
   if (nRows*nColumns) {
     values = allocDouble(nRows*nColumns) ;
-  allocatedSize = nRows*nColumns;
- } else {
+    allocatedSize = nRows*nColumns;
+  } else {
     values = NULL ;
-  allocatedSize = 0;
- }
+    allocatedSize = 0;
+  }
   // write raw data
-  if (fread(values,sizeof(double),nRows*nColumns,stream) != (size_t)(nRows*nColumns)) return (CIO_IOERR);
+  if (!stream->read(values,nRows*nColumns)) return (CIO_IOERR);
   // return result back
   return CIO_OK;
 }
@@ -1798,7 +1853,6 @@ FloatMatrix :: GiveSubMatrixOfSize (IntArray *indx, int size)
  return answer;
 }
 */
- 
  
 
 int 
@@ -1971,7 +2025,7 @@ FloatMatrix :: packToCommBuffer (CommunicationBuffer& buff) const
  result &= buff.packInt (nRows);
  result &= buff.packInt (nColumns);
  // pack data
- result &= buff.packDoubleArray (this->values, nRows*nColumns);
+ result &= buff.packArray (this->values, nRows*nColumns);
  
  return result;
 }
@@ -1985,7 +2039,7 @@ FloatMatrix :: unpackFromCommBuffer (CommunicationBuffer& buff)
  result &= buff.unpackInt (newNColumns);
  // resize yourself
  this->resize(newNRows, newNColumns);
- result &= buff.unpackDoubleArray (this->values, newNRows*newNColumns);
+ result &= buff.unpackArray (this->values, newNRows*newNColumns);
 
  return result;
 }
@@ -1993,8 +2047,8 @@ FloatMatrix :: unpackFromCommBuffer (CommunicationBuffer& buff)
 int 
 FloatMatrix :: givePackSize (CommunicationBuffer& buff)
 {
- return buff.giveDoubleVecPackSize (1) + buff.giveDoubleVecPackSize (1) + 
-  buff.giveDoubleVecPackSize (nRows*nColumns);
+ return buff.givePackSize (MPI_INT, 1) + buff.givePackSize (MPI_INT, 1) + 
+  buff.givePackSize (MPI_DOUBLE, nRows*nColumns);
 }
 
 

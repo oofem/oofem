@@ -95,17 +95,19 @@ class LEPlicElementInterface : public Interface
      Stores context of receiver into given stream. 
      Only non-temp internal history variables are stored.
      @param stream stream where to write data
+     @param mode determines ammount of info required in stream (state, definition,...)
      @param obj pointer to integration point, which invokes this method
      @return contextIOResultType.
   */
-  contextIOResultType    saveContext (FILE* stream, void *obj = NULL);
+  contextIOResultType    saveContext (DataStream* stream, ContextMode mode, void *obj = NULL);
   /**
      Restores context of receiver from given stream. 
      @param stream stream where to read data
+     @param mode determines ammount of info required in stream (state, definition,...)
      @param obj pointer to integration point, which invokes this method
      @return contextIOResultType.
   */
-  contextIOResultType    restoreContext(FILE* stream, void *obj = NULL);
+  contextIOResultType    restoreContext(DataStream* stream, ContextMode mode, void *obj = NULL);
 
 
 };
@@ -144,6 +146,19 @@ class LEPlic : public MaterialInterface
     The existing internal state is used for update.
    */
   virtual void updateYourself (TimeStep* tStep) {}
+
+  /**
+     Returns relative material contens at given point. Usually only one material is presented in given point,
+     but some smoothing may be applied close to material interface to make transition smooth 
+  */
+  virtual void giveMaterialMixtureAt (FloatArray& answer, FloatArray& position);
+  /**
+     Returns volumetric (or other based measure) of relative material contens in given element.
+  */
+  virtual void giveElementMaterialMixture (FloatArray& answer, int ielem);
+  /** Returns scalar value representation of material Interface at given point. For visualization */
+  virtual double giveNodalScalarRepresentation (int) ;
+ 
   /**
      Returns updated nodal positions
   */
