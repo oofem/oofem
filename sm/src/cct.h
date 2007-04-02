@@ -193,6 +193,7 @@ public:
   const char* giveClassName () const { return "CCTPlate" ;}
   classType             giveClassID () const { return CCTPlateClass; } 
   IRResultType initializeFrom (InputRecord* ir);
+  Element_Geometry_Type giveGeometryType() const {return EGT_triangle_1;}
 
 protected:
  void               computeBodyLoadVectorAt (FloatArray& answer, Load*, TimeStep*, ValueModeType mode) ;

@@ -468,7 +468,7 @@ VTKExportModule::exportIntVarAs (InternalStateType valID, InternalStateValueType
   else 
    fprintf(stderr,"exportIntVarAs: unsupported variable type\n");
   
-  if (type == ISVT_SCALAR) {
+  if ((type == ISVT_SCALAR) || (type == ISVT_TENSOR_G)) {
    fprintf(stream,"LOOKUP_TABLE default\n");
   }
   
