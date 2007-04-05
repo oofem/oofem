@@ -137,6 +137,8 @@ PetscSolver::petsc_solve (PetscSparseMtrx* Lhs, Vec b, Vec x)
 {
   int nite;
   KSPConvergedReason reason;
+  if (Lhs->giveType() != SMT_PetscMtrx) _error ("solveYourselfAt: PetscSparseMtrx Expected");
+
 #ifdef TIME_REPORT
   //clock_t tstart = clock();
   oofem_timeval tstart;

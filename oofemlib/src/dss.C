@@ -56,6 +56,7 @@ DSSMatrix :: DSSMatrix (dssType _t): SparseMtrx()
   else if (_t==unsym_LU) _st = eDSSFactorizationLU;
   else OOFEM_ERROR ("DSSMatrix::DSSMatrix() -- unknown dssType"); 
   _dss->Initialize (0, _st);
+  _sm = NULL;
   isFactorized = FALSE;
 }
 
@@ -70,12 +71,14 @@ DSSMatrix::DSSMatrix (dssType _t, int n) : SparseMtrx(n,n)
   else if (_t==unsym_LU) _st = eDSSFactorizationLU;
   else OOFEM_ERROR ("DSSMatrix::DSSMatrix() -- unknown dssType"); 
   _dss->Initialize (0, _st);
+  _sm = NULL;
   isFactorized = FALSE;
 }   
 
 DSSMatrix::~DSSMatrix ()
 {
   delete _dss;
+  delete _sm;
 }
 
 /*****************************/
@@ -126,12 +129,13 @@ int DSSMatrix::buildInternalStructure (EngngModel*eModel, int di, EquationID ut)
  Domain* domain = eModel->giveDomain(di);
  int neq = eModel -> giveNumberOfDomainEquations (di,ut);
  int nelem = domain -> giveNumberOfElements() ;
- int i,ii,j,jj,n, indx;
+ int i,ii,j,jj,n;
+ unsigned long indx;
  Element* elem;
  // allocation map 
  std::vector< std::set<int> > columns(neq);
 
- int nz_ = 0;
+ unsigned long nz_ = 0;
 
  for (n=1 ; n<=nelem ; n++) {  
   elem = domain -> giveElement(n);
@@ -150,22 +154,28 @@ int DSSMatrix::buildInternalStructure (EngngModel*eModel, int di, EquationID ut)
 
  for (i=0; i<neq; i++) nz_ += columns[i].size();
   
- unsigned long rowind_[nz_];
- unsigned long colptr_[neq+1];
+ unsigned long *rowind_ = new unsigned long[nz_];
+ unsigned long *colptr_ = new unsigned long[neq+1];
+ if ((rowind_ == NULL) || (colptr_ == NULL)) 
+   OOFEM_ERROR ("DSSMatrix::buildInternalStructure: free store exhausted, exiting");
+ 
  indx = 0;
-
+ 
  std::set<int>::iterator pos;
  for (j=0; j<neq; j++) { // column loop
-  colptr_[j] = indx;
-  for (pos = columns[j].begin(); pos != columns[j].end(); ++pos) { // row loop
-   rowind_[indx++] = *pos;
-  }
+   colptr_[j] = indx;
+   for (pos = columns[j].begin(); pos != columns[j].end(); ++pos) { // row loop
+     rowind_[indx++] = *pos;
+   }
  }
  colptr_[neq] = indx;
-
- SparseMatrixF sm (neq, NULL, rowind_, colptr_, 0,0,true);
+ 
+ if (_sm) delete _sm;
+ if ((_sm = new SparseMatrixF (neq, NULL, rowind_, colptr_, 0,0,true)) == NULL) 
+   OOFEM_ERROR ("DSSMatrix::buildInternalStructure: free store exhausted, exiting");
+ 
  int bsize = eModel->giveDomain(1)->giveDefaultNodeDofIDArry().giveSize();
- _dss -> SetMatrixPattern (&sm, bsize) ;
+ _dss -> SetMatrixPattern (_sm, bsize) ;
  _dss -> PreFactorize ();
     
  OOFEM_LOG_DEBUG ("DSSMatrix info: neq is %d, bsize is %d\n",neq,nz_);
@@ -327,7 +337,12 @@ DSSMatrix::DSSMatrix(const DSSMatrix &S) {
   OOFEM_ERROR ("DSSMatrix: can't create, DSS support not compiled");
 }
 
-DSSMatrix::~DSSMatrix () {}
+DSSMatrix::~DSSMatrix () 
+{
+  if (_dss) delete _dss;
+  if (_sm) delete _sm;
+  
+}
 
 SparseMtrx* DSSMatrix::GiveCopy () const {
   OOFEM_ERROR ("DSSMatrix: can't create, DSS support not compiled");
