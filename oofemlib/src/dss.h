@@ -41,6 +41,7 @@
 
 
 class DSSolver;
+class SparseMatrixF;
 
 /**
  Interface to Direct Sparse Solver written by R.Vonracek.
@@ -54,6 +55,8 @@ public:
   enum dssType {sym_LDL, sym_LL, unsym_LU};
 
 protected:
+  /// poiner  to SparseMatrixF class rep
+  SparseMatrixF *_sm;
   /// pointer to DSSolver class (representation of Direct Sparse Solver in DSS lib)
   DSSolver* _dss;
   /// Flag indicating whether factorized.
