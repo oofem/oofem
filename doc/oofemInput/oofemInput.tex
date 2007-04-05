@@ -1003,17 +1003,23 @@ type and are summarized in table (\ref{sparsesolverparams}).
 
 \begin{table}[h]                                                                
 \begin{center}                                                                  
-\begin{tabular}{|l|l|}                                                      
+\begin{tabular}{|l|l|l|}                                                      
 \hline                                                                          
-Solver type & Solver parameters \\
+Solver type & id & Solver parameters \\
 \hline
-ST\_Direct & \\
-ST\_CG + ST\_GMRES & \field{lstol}{rn} \field{lsiter}{in}
+ST\_Direct & 0 &\\
+ST\_CG & 1 & \field{lstol}{rn} \field{lsiter}{in}
 \field{lsprecond}{in}\\
-                   &  \optField{precondattributes}{string}\\
-ST\_Spooles & \optField{msglvl}{in} \optField{msgfile}{s}\\
-ST\_Petsc & see Petsc manual, for details\footnotemark\\
-ST\_DSS & \\
+                  & &  \optField{precondattributes}{string}\\
+
+ST\_GMRES & 2 & \field{lstol}{rn} \field{lsiter}{in}
+\field{lsprecond}{in}\\
+                  & &  \optField{precondattributes}{string}\\
+
+
+ST\_Spooles & 3&  \optField{msglvl}{in} \optField{msgfile}{s}\\
+ST\_Petsc & 4 & see Petsc manual, for details\footnotemark\\
+ST\_DSS & 5& \\ 
 \hline
 \end{tabular}                                                                   
 \caption{Solver parameters.}                
@@ -1059,7 +1065,7 @@ tolerance\\
               & &                 & \param{partfill} level of
 fill-up\\
 \hline
-IML\_ICPrec   &3& SMT\_SymCompCol&Incoplete Cholesky\\
+IML\_ICPrec   &4& SMT\_SymCompCol&Incoplete Cholesky\\
               & & SMT\_CompCol   &with no fill up\\
 \hline
 \end{tabular}                                                                   
