@@ -38,8 +38,8 @@
 //
 #ifndef oofemdef_h
 
-#define PRG_VERSION "OOFEM version 1.7"
-#define OOFEG_VERSION "OOFEG version 1.7"
+#define PRG_VERSION "OOFEM version 1.8.DEVEL"
+#define OOFEG_VERSION "OOFEG version 1.8.DEVEL"
 #define OOFEM_COPYRIGHT "Copyright (C) 1994-2006 Borek Patzak"
 
 #define PRG_HEADER_SM "\
@@ -54,13 +54,13 @@ ____________________________________________________\n"
      #    #  #    #  #       #       ##  ##\n\
     #    #  #    #  #####   #####   # ## #\n\
    #    #  #    #  #       #       #    #\n\
-  #    #  #    #  #       #       #    #   OOFEM ver. 1.7\n\
+  #    #  #    #  #       #       #    #   OOFEM ver. 1.8.DEVEL\n\
   ####    ####   #       ######  #    #    Copyright (C) 1994-2006 Borek Patzak\n\
 ################################################################################\n\n"
 
 #define HOST_TYPE "i686-pc-linux-gnu"
 #define HOST_NAME "jaja2.FSV.CVUT.CZ"
-#define MODULE_LIST "oofemlib sm tm fm dss petsc"
+#define MODULE_LIST "oofemlib sm tm fm iml dss petsc parmetis"
 
 #define oofemdef_h
 #endif
