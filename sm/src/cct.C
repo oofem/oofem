@@ -684,6 +684,7 @@ CCTPlate  :: drawRawGeometry (oofegGraphicContext &gc)
    EASValsSetColor(gc.getElementColor());
    EASValsSetEdgeColor(gc.getElementEdgeColor());
    EASValsSetEdgeFlag(TRUE);
+   EASValsSetFillStyle (FILL_SOLID);
    EASValsSetLayer(OOFEG_RAW_GEOMETRY_LAYER);
    p[0].x = (FPNum) this->giveNode(1)->giveCoordinate(1);
    p[0].y = (FPNum) this->giveNode(1)->giveCoordinate(2);
@@ -696,7 +697,7 @@ CCTPlate  :: drawRawGeometry (oofegGraphicContext &gc)
    p[2].z = (FPNum) this->giveNode(3)->giveCoordinate(3);
    
    go =  CreateTriangle3D(p);
-   EGWithMaskChangeAttributes(WIDTH_MASK | COLOR_MASK | EDGE_COLOR_MASK | EDGE_FLAG_MASK | LAYER_MASK, go);
+   EGWithMaskChangeAttributes(WIDTH_MASK | FILL_MASK | COLOR_MASK | EDGE_COLOR_MASK | EDGE_FLAG_MASK | LAYER_MASK, go);
    EGAttachObject(go, (EObjectP) this);
    EMAddGraphicsToModel(ESIModel(), go);
  }
@@ -717,7 +718,7 @@ CCTPlate  :: drawDeformedGeometry (oofegGraphicContext &gc, UnknownType type)
    EASValsSetColor(gc.getDeformedElementColor());
    EASValsSetEdgeColor(gc.getElementEdgeColor());
    EASValsSetEdgeFlag(TRUE);
-   
+   EASValsSetFillStyle (FILL_SOLID);
    EASValsSetLayer(OOFEG_DEFORMED_GEOMETRY_LAYER);
    p[0].x = (FPNum) this->giveNode(1)->giveUpdatedCoordinate(1,tStep,EID_MomentumBalance,defScale);
    p[0].y = (FPNum) this->giveNode(1)->giveUpdatedCoordinate(2,tStep,EID_MomentumBalance,defScale);
@@ -730,7 +731,7 @@ CCTPlate  :: drawDeformedGeometry (oofegGraphicContext &gc, UnknownType type)
    p[2].z = (FPNum) this->giveNode(3)->giveUpdatedCoordinate(3,tStep,EID_MomentumBalance,defScale);
    
    go =  CreateTriangle3D(p);
-   EGWithMaskChangeAttributes(WIDTH_MASK | COLOR_MASK | EDGE_COLOR_MASK | EDGE_FLAG_MASK | LAYER_MASK, go);
+   EGWithMaskChangeAttributes(WIDTH_MASK | FILL_MASK | COLOR_MASK | EDGE_COLOR_MASK | EDGE_FLAG_MASK | LAYER_MASK, go);
    EMAddGraphicsToModel(ESIModel(), go);
  }
 }
