@@ -783,6 +783,8 @@ enum InputFieldType {
   IFT_LSPCS_levelSetValues,
   IFT_LSPCS_refmatpoly_x,
   IFT_LSPCS_refmatpoly_y,
+  IFT_LSPCS_reinit_dt,
+  IFT_LSPCS_reinit_err,
 
   IFT_Unknown
 };

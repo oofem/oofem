@@ -95,6 +95,10 @@ class LevelSetPCS : public MaterialInterface
   Polygon initialRefMatVol;
   bool initialRefMatFlag;
   
+  // time step used in reinitialization of LS (if apply)
+  double reinit_dt; bool reinit_dt_flag;
+  // reinitialization error limit 
+  double reinit_err;
  public:
   /** Constructor. Takes two two arguments. Creates 
       MaterialInterface instance with given number and belonging to given domain.
@@ -102,7 +106,7 @@ class LevelSetPCS : public MaterialInterface
       node number in particular domain.
       @param d domain to which component belongs to 
   */
-  LevelSetPCS (int n,Domain* d) : MaterialInterface (n,d) { initialRefMatFlag = false;}
+  LevelSetPCS (int n,Domain* d) : MaterialInterface (n,d) { initialRefMatFlag = false;reinit_dt_flag = false;}
 
   /// initialize receiver
   virtual void initialize ();
@@ -143,10 +147,12 @@ class LevelSetPCS : public MaterialInterface
   const char* giveClassName () const { return "LevelSetPCS";}
   classType giveClassID ()      const { return LevelSetPCSClass;}
 
-
+  virtual contextIOResultType saveContext(DataStream* stream, ContextMode mode, void *obj = NULL);
+  virtual contextIOResultType restoreContext(DataStream* stream, ContextMode mode, void *obj = NULL);
+  
  protected:
 
-  void pcs_stage1 (FloatArray& fs, FloatArray& w, TimeStep* atTime, PCSEqType t);
+  void pcs_stage1 (FloatArray &ls, FloatArray& fs, FloatArray& w, TimeStep* atTime, PCSEqType t);
   double evalElemFContribution (PCSEqType t, int ie, TimeStep* atTime) ;
   double evalElemfContribution (PCSEqType t, int ie, TimeStep* atTime) ;
 };

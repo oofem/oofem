@@ -1759,9 +1759,9 @@ TR1_2D_SUPG :: LS_PCS_computeS (LevelSetPCS* ls, TimeStep* atTime)
   if (zero == 3) {
     return 0.0;
   } else if (neg==0) { // all level set values positive
-    return area;
+    return 1.0; //return area;
   } else if (pos==0) { // all level set values negative
-    return -area;
+    return -1.0; //return -area;
   } else {
     // zero level set inside
     // find the vertex vith level set sign different from other two
@@ -1777,25 +1777,25 @@ TR1_2D_SUPG :: LS_PCS_computeS (LevelSetPCS* ls, TimeStep* atTime)
       int prev_node = (si>1)?si-1:3;
       int next_node = (si<3)?si+1:1;
       
-      double l = this->giveNode(si)->giveCoordinates()->distance(this->giveNode(next_node)->giveCoordinates());
+      //double l = this->giveNode(si)->giveCoordinates()->distance(this->giveNode(next_node)->giveCoordinates());
       double t = fi.at(si)/(fi.at(si)-fi.at(next_node));
-      x2 = x1+t*(this->giveNode(next_node)->giveCoordinate(1)-this->giveNode(si)->giveCoordinate(1));
-      y2 = y1+t*(this->giveNode(next_node)->giveCoordinate(2)-this->giveNode(si)->giveCoordinate(2));
+      x2 = x1+t*(this->giveNode(next_node)->giveCoordinate(1)-x1);
+      y2 = y1+t*(this->giveNode(next_node)->giveCoordinate(2)-y1);
       
-      l = this->giveNode(si)->giveCoordinates()->distance(this->giveNode(prev_node)->giveCoordinates());
+      //l = this->giveNode(si)->giveCoordinates()->distance(this->giveNode(prev_node)->giveCoordinates());
       t = fi.at(si)/(fi.at(si)-fi.at(prev_node));
-      x3 = x1+t*(this->giveNode(prev_node)->giveCoordinate(1)-this->giveNode(si)->giveCoordinate(1));
-      y3 = y1+t*(this->giveNode(prev_node)->giveCoordinate(2)-this->giveNode(si)->giveCoordinate(2));
+      x3 = x1+t*(this->giveNode(prev_node)->giveCoordinate(1)-x1);
+      y3 = y1+t*(this->giveNode(prev_node)->giveCoordinate(2)-y1);
        
       // compute area
-      double __area = 0.5*(x2*y3+x1*y2+y1*x3-x2*y1-x3*y2-x1*y3);
+      double __area = fabs(0.5*(x2*y3+x1*y2+y1*x3-x2*y1-x3*y2-x1*y3));
       
       if (pos>neg) {
         // negative area computed
-        return (area-__area)-__area;
+        return ((area-__area)-__area)/area;
       } else {
         // postive area computed
-        return __area-(area-__area);
+        return (__area-(area-__area))/area;
       }
     } else {
       OOFEM_ERROR ("TR1_2D_SUPG::LS_PCS_computeVOFFractions: internal consistency error");
