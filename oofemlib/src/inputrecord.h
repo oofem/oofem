@@ -785,6 +785,7 @@ enum InputFieldType {
   IFT_LSPCS_refmatpoly_y,
   IFT_LSPCS_reinit_dt,
   IFT_LSPCS_reinit_err,
+  IFT_LSPCS_reinit_alg,
 
   IFT_Unknown
 };

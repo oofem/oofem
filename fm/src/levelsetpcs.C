@@ -41,6 +41,7 @@
 #include "conTable.h"
 #include "spatiallocalizer.h"
 #include "geotoolbox.h"
+#include "fastmarchingmethod.h"
 #include "error.h"
 
 void
@@ -90,6 +91,10 @@ LevelSetPCS::initializeFrom (InputRecord* ir)
     }
     initialRefMatFlag = true;
   }
+  
+  reinit_alg = 0;
+  IR_GIVE_OPTIONAL_FIELD (ir, reinit_alg, IFT_LSPCS_reinit_alg, "lsra");
+
   reinit_dt=0.0;
   IR_GIVE_OPTIONAL_FIELD (ir, reinit_dt, IFT_LSPCS_reinit_dt, "rdt");
   if (reinit_dt > 0.) reinit_dt_flag=true;
@@ -196,7 +201,7 @@ LevelSetPCS::updatePosition (TimeStep* atTime)
     }
   */
   // redistance
-  this->redistance (atTime);
+  this->reinitialization (atTime);
 
 }
 
@@ -249,6 +254,18 @@ LevelSetPCS::giveElementMaterialMixture (FloatArray& answer, int ie)
 
   for (i=1; i<= inodes; i++) fi.at(i) = levelSetValues.at(ielem->giveDofManagerNumber(i));
   interface->LS_PCS_computeVOFFractions (answer, fi);
+}
+
+void
+LevelSetPCS::reinitialization (TimeStep* atTime)
+{
+  if (reinit_alg == 1) {
+    FloatArray ls1;
+    this->FMMReinitialization (ls1);
+    levelSetValues=ls1;
+  } else {
+    this->redistance (atTime);
+  }
 }
 
 
@@ -441,6 +458,56 @@ LevelSetPCS::evalElemfContribution(PCSEqType t, int ie, TimeStep* atTime)
     return interface->LS_PCS_computeS (this, atTime);
   return 0.0;
 }
+
+void
+LevelSetPCS::FMMReinitialization (FloatArray& dmanValues)
+{
+  // tag points with boundary value as known
+  // then tag as trial all points that are one grid point away
+  // finally tag as far all other grid points
+  int i, j, jnode, enodes, __pos, __neg, nelem = domain->giveNumberOfElements();
+  double _lsval;
+  Element* ie;
+  std::list<int> bcDofMans;
+  std::list<int>::iterator it; 
+
+  dmanValues.resize(domain->giveNumberOfDofManagers());
+  // here we loop over elements and identify those, that have zero level set
+  // then nodes belonging to these elements are boundary ones (with known distance)
+  for (i=1; i<=nelem; i++) {
+    ie = domain->giveElement(i);
+    enodes = ie->giveNumberOfDofManagers();
+    __pos = 0; __neg= 0; // count positive and negative level set values in element nodes
+    for (j=1; j<=enodes; j++) {
+      _lsval = this->giveLevelSetDofManValue(ie->giveDofManagerNumber(j));
+      if (_lsval>0.0) __pos++;
+      if (_lsval<0.0) __neg++;
+    }
+    if ((__pos && __neg) || (__pos+__neg < enodes)) {
+      // zero level set within element
+      // we have to tag element nodes as known and compute their boundary value
+      for (j=1; j<=enodes; j++) {
+        // simplified (here we use original level set values)
+        jnode = ie->giveDofManagerNumber(j);
+        if ((dmanValues.at(jnode) = this->giveLevelSetDofManValue(jnode)) >= 0.) 
+	  bcDofMans.push_front(jnode);
+	else 
+	   bcDofMans.push_front(-jnode);
+      }
+    }
+  }
+
+  FastMarchingMethod fmm (domain);
+  // fast marching for positive level set values
+  fmm.solve (dmanValues, bcDofMans, 1.0);
+  // revert bcDofMans signs
+  for (it=bcDofMans.begin(); it != bcDofMans.end(); ++it) *it = -*it;
+  // fast marching for negative level set values
+  fmm.solve (dmanValues, bcDofMans, -1.0);
+}
+
+
+
 
 contextIOResultType
 LevelSetPCS::saveContext(DataStream* stream, ContextMode mode, void *obj)

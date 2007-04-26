@@ -90,9 +90,9 @@ srcs5=
 srcs6= 
 
 srcs7= 
-srcs8= 
+srcs8= levelsetpcs.C fastmarchingmethod.C
 
-srcs9= leplic.C twofluidmaterial.C supg.C supgelement.C tr1_2d_supg.C tr1_2d_supg2.C tr1_2d_supg_axi.C binghamfluid2.C tr1_2d_supg2_axi.C levelsetpcs.C
+srcs9= leplic.C twofluidmaterial.C supg.C supgelement.C tr1_2d_supg.C tr1_2d_supg2.C tr1_2d_supg_axi.C binghamfluid2.C tr1_2d_supg2_axi.C 
 
 # sources included only in parallel version
 psrc1= 

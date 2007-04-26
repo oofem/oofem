@@ -890,10 +890,11 @@ fixed spatial domain (currently only in 2d). This can be also used for
 solving free surface problems, where one of the fluids should
 represent air. In the present implementation, a VOF tracking algorithm
 is used to track the position of interface. To enable multifluid
-analysis, user should set parameter \param{miflag} to a nonzero
-value. In this case, the initial distribution of reference fluid
-volumes should be specified on element level, as well as both
-constitutive models for fluid should be provided.
+analysis, user should set parameter \param{miflag}. The supported values are described in section~\ref{materialinterfaces}.
+Please note, that the initial distribution of reference fluid
+volumes should be provided as well as 
+constitutive models for both fluids.
+
 
 The characteristic equations can be solved in non-dimensional form. To
 enable this, the \param{scaleflag} should have a nonzero value,
@@ -1160,6 +1161,40 @@ in elastic regions are driven using EET\_SEI, the elastic are driven
 by EET\_ZZEE.
 \end{itemize}
 
+
+\subsection{Material interfaces}
+\label{materialinterfaces}
+The material interfaces are used to represent and track the position of 
+various interfaces on fixed grids. Typical examples include free surface, 
+evolving interface between two materials, etc.
+Available representations include:
+
+\begin{tabular}{|l|l|l|l|}                                                      
+\hline                                                                          
+MI & miflag & Compatibility  \\
+\hline
+LEPlic & 0 & 2D triangular \\
+LevelSet & 1 & 2D triangular \\
+\hline
+\end{tabular}                                                                   
+
+\begin{itemize}
+\item LEPlic- representation based on Volume-Of-Fluid approach; the initial distribution of VOF fractions should be specified for each element (see element manual)\\
+\optField{refvol}{rn}
+\begin{itemize}
+\item
+parameter \param{refvol} allows to set initial volume of reference fluid, then the reference volume is computed in each step and printed, so the accuracy and mass conservation can be monitored.
+\end{itemize}
+\item[]
+LevelSet- level set based representation\\
+\mbox{[\field{levelset}{ra} OR \field{refmatpolyx}{ra} \field{refmatpolyy}{ra}]}\\ \optField{lsra}{in} \optField{rdt}{rn} \optField{rerr}{rn}.
+\begin{itemize}
+\item \param{levelset} allows to specify the initial level set values for all nodes directly. The size should be equal to total number of nodes within the domain. 
+\item Parameters \param{refmatpolyx} and \param{refmatpolyy} allow to initialize level set by specifying interface geometry as 2d polygon. Then polygon describes the initial zero level set, and level set values are then defined as signed distance from this polygon. Positive values are on the left side when walking along polygon. The parameter \param{refmatpolyx} specifies the x-coordinates of polygon vertices, parameter \param{refmatpolyy} y-corrdinates. Please note, that level set must be initialized, either using \param{levelset} parameter or using \param{refmatpolyx} and \param{refmatpolyy}.
+\item Parameter \param{lsra} allows to select level set reinitialization algorithm. Currently supported values are 0 (re-initializes the level set representation by solving $d_{\tau} = S(\phi)(1-\vert\grad d\vert)$ to steady state, default), 1 (uses fast  marching method to build signed distance level set representation).
+\item Parameters \param{rdt} \param{rerr} are used to control reinitialization algorithm for \param{lsra} = 0. \param{rdt} allows to change time step of integration algorithm and parameter \param{rerr} allows to change default error limit used to detect steady state.
+\end{itemize}
+\end{itemize}
 
 \subsection{Mesh generator interfaces}
 \label{meshpackages}

@@ -94,7 +94,9 @@ class LevelSetPCS : public MaterialInterface
   enum PCSEqType {PCS_levelSetUpdate, PCS_levelSetRedistance};
   Polygon initialRefMatVol;
   bool initialRefMatFlag;
-  
+
+  /// type of reinitialization algorithm to use
+  int reinit_alg;
   // time step used in reinitialization of LS (if apply)
   double reinit_dt; bool reinit_dt_flag;
   // reinitialization error limit 
@@ -125,7 +127,7 @@ class LevelSetPCS : public MaterialInterface
   double computeCriticalTimeStep (TimeStep*);
   virtual IRResultType initializeFrom (InputRecord* ir) ;
 
-  virtual void redistance (TimeStep* atTime);
+  virtual void reinitialization (TimeStep* atTime);
 
 
   /**
@@ -155,6 +157,18 @@ class LevelSetPCS : public MaterialInterface
   void pcs_stage1 (FloatArray &ls, FloatArray& fs, FloatArray& w, TimeStep* atTime, PCSEqType t);
   double evalElemFContribution (PCSEqType t, int ie, TimeStep* atTime) ;
   double evalElemfContribution (PCSEqType t, int ie, TimeStep* atTime) ;
+
+  /** Reinitializes the level set representation by solving
+      \f$d_{\tau} = S(\phi)(1-\vert\grad d\vert)\f$ to steady state
+  */
+  void redistance (TimeStep* atTime);
+
+
+  /** @name Fast marching related services */
+  //@{
+  /** Reinitializes the level set representation using fast marching method */
+  void FMMReinitialization (FloatArray& ls);
+  //@}
 };
 
 #define levelsetpcs_h

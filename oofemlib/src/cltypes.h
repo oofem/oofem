@@ -312,7 +312,8 @@ enum classType {
   PrimaryFieldClass,
   
   LEPlicClass,
-  LevelSetPCSClass
+  LevelSetPCSClass,
+  FastMarchingMethodClass,
 
     
 };
