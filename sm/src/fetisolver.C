@@ -95,7 +95,7 @@ FETISolver::estimateMaxPackSize (IntArray &map, CommunicationBuffer &buff, int &
 IRResultType
 FETISolver :: initializeFrom (InputRecord* ir)
 {
- const char *__keyword, *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
+ const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
  IRResultType result;                               // Required by IR_GIVE_FIELD macro
 
  IR_GIVE_FIELD (ir, ni, IFT_FETISolver_maxiter, "maxiter"); // Macro

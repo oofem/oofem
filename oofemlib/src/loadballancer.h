@@ -36,10 +36,50 @@
 #ifdef __PARALLEL_MODE
 #include "inputrecord.h"
 #include "interface.h"
+#include "clock.h"
 
 class Domain;
+class EngngModel;
+class ProcessCommunicator;
 #define MIGRATE_LOAD_TAG       9998
 #define LOADBALLANCER_END_DATA 9999
+
+/**
+   Abstract base class representing general load ballancer monitor. The task of the monitor is to
+   detect the imbalance and to make the decision, whether to redistribute the work or to continue 
+   with existing partitioning.
+ */
+class LoadBallancerMonitor
+{
+ protected:
+  EngngModel* emodel;
+ public:
+  enum LoadBallancerDecisionType {LBD_CONTINUE, LBD_RECOVER};
+  
+  LoadBallancerMonitor (EngngModel* em) {emodel=em;}
+  virtual ~LoadBallancerMonitor() {}
+
+  /**@name Load evaluation and imbalance detection methods*/
+  //@{
+  virtual LoadBallancerDecisionType decide () = 0;
+  //@}
+  
+};
+
+/**
+   Implementation of simple wall-clock based monitor. 
+   It detect imbalance based on waal clock diference required for slotion step
+   on particular nodes. When difference in wall clock solution times is greater
+   than a treshold value, the load migration is performed.
+*/
+class WallClockLoadBallancerMonitor : public LoadBallancerMonitor
+{
+ public:
+  WallClockLoadBallancerMonitor (EngngModel* em): LoadBallancerMonitor(em) {}
+  LoadBallancerDecisionType decide ();
+};
+
+
 /**
    Abstract base class representing general load ballancer. The task of load ballancer is to 
    recover load ballance when running in parallel. This is achieved by moving work from busy 
@@ -51,14 +91,26 @@ class Domain;
    - The new partitioning should minimize data movement (the cost of repartitioning) by 
    preserving the locality as much as possible. In other words the new and existing partitioning
    should be "similar".
-   - the ballancer should decide whether the cost of rebalancing is not higher than the cost of
-   continuing without rebalancing.
  */
 class LoadBallancer
 {
  public:
-  enum LoadBallancerTimerType {LBTT_ComputationTimer, LBTT_LoadBallancingTimer, LBTT_DataTransferTimer};
-  enum DofManMode { DM_NULL, DM_Local, DM_Shared, DM_SharedMerge, DM_SharedNew, DM_SharedUpdate, DM_Remote};
+  /**
+     Describes the state of dofmanager after load ballancing 
+     on the local partition:
+     DM_NULL  - undefined (undetermined) state, if assigned means internal error
+     DM_Local - local dofman that remains local
+     DM_Remote- local dofman that becames remote (becames local on remote partition)
+     DM_SharedNew - local shared that became shared
+     DM_Shared- shared dofman that remains on local partition. 
+                It may remain shared or local, depending on received information
+		from remote partition, but from local information we can not deduce more.
+     DM_SharedExlude - shared dofman that remains shared, 
+                       possibly with changed partitions, but local partition
+		       is no more in shared list (should be exluded on remote partitions).
+     DM_SharedUpdate - Shared dofman that remains shared, the partition list may changed.
+  */
+  enum DofManMode { DM_NULL, DM_Local, DM_Shared, DM_SharedExclude, DM_SharedNew, DM_SharedUpdate, DM_Remote};
  protected:
   Domain* domain;
 
@@ -69,27 +121,17 @@ class LoadBallancer
   
   
 
- /**@name Profiling routines */
- //@{
-  void startTimer (LoadBallancerTimerType t) {}
-  void stopTimer  (LoadBallancerTimerType t) {}
- //@}
-
- /**@name Load evaluation and imbalance detection methods*/
- //@{
- //@}
-
  /**@name Work transfer calculation methods  */
  //@{
-  virtual void ballanceLoad () = 0;
+  virtual void calculateLoadTransfer () = 0;
  //@}
   
- /**@name Work migration methods */
+ /**@name Work migration methods  */
  //@{
-  virtual void migrateLoad() = 0;
+  void migrateLoad ();
  //@}
-
- /**@name Query methods after Load Ballancing */
+  
+ /**@name Query methods after work transfer calculation */
  //@{
   /// Returns the label of dofmanager after load ballancing
   virtual DofManMode giveDofManState (int idofman) = 0;
@@ -104,6 +146,7 @@ class LoadBallancer
   ///Initializes receiver acording to object description stored in input record.
   virtual IRResultType initializeFrom (InputRecord* ir) {return IRRT_OK;}
 
+ protected:
 };
 
 

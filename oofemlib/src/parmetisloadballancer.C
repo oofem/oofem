@@ -38,7 +38,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "element.h"
 #include "dofmanager.h"
 #include "conTable.h"
+#ifndef __MAKEDEPEND
 #include <set>
+#endif
 
 #define ParmetisLoadBallancer_DEBUG_PRINT 1
   
@@ -47,6 +49,7 @@ ParmetisLoadBallancer::ParmetisLoadBallancer(Domain* d) : LoadBallancer (d)
 {
 #ifdef __PARMETIS_MODULE
   elmdist = NULL;
+  tpwgts  = NULL;
 #endif
 }
 
@@ -60,10 +63,10 @@ ParmetisLoadBallancer::~ParmetisLoadBallancer ()
 
 #ifdef __PARMETIS_MODULE
 void
-ParmetisLoadBallancer::ballanceLoad ()
+ParmetisLoadBallancer::calculateLoadTransfer ()
 {
 
-  idxtype *eind, *eptr, *xadj, *adjncy, *part, *vwgt, *vsize;
+  idxtype *eind, *eptr, *xadj, *adjncy, *vwgt, *vsize;
   int i, nlocalelems, eind_size, nelem= domain->giveNumberOfElements();
   int ndofman, idofman, numflag, ncommonnodes, options[4],ie,nproc;
   int edgecut, wgtflag, ncon;
@@ -71,6 +74,7 @@ ParmetisLoadBallancer::ballanceLoad ()
   Element* ielem;
   MPI_Comm communicator = MPI_COMM_WORLD;
 
+  nproc=domain->giveEngngModel()->giveNumberOfProcesses();
   // init parmetis element numbering 
   this->initGlobalParmetisElementNumbering();
   // prepare data structures for ParMETIS_V3_Mesh2Dual
@@ -131,7 +135,7 @@ ParmetisLoadBallancer::ballanceLoad ()
   // set partition weights if not provided
   if (tpwgts == NULL) {
     if ((tpwgts = new float[nproc])==NULL) OOFEM_ERROR ("ParmetisLoadBallancer::ballanceLoad: failed to allocate tpwgts");
-    for (i=0; i< nproc; i++) tpwgts[i]=1.0;
+    for (i=0; i< nproc; i++) tpwgts[i]=1.0/nproc;
   }
   // obtain vertices weights (element weights) representing relative computational cost 
   if ((vwgt = new idxtype[nlocalelems])==NULL) OOFEM_ERROR ("ParmetisLoadBallancer::ballanceLoad: failed to allocate vwgt");
@@ -143,7 +147,6 @@ ParmetisLoadBallancer::ballanceLoad ()
       vsize[ie++] = ielem->predictRelativeRedistributionCost();
     }
   }
-  nproc=domain->giveEngngModel()->giveNumberOfProcesses();
 
   wgtflag = 2;
   numflag = 0;
@@ -164,6 +167,8 @@ ParmetisLoadBallancer::ballanceLoad ()
   delete xadj;
   delete adjncy;
   delete vwgt;
+
+  this->labelDofManagers();
 }
 
 void
@@ -249,7 +254,7 @@ ParmetisLoadBallancer::labelDofManagers()
         // assemble list of partitions sharing idofman dofmanager
         // set is used to include possibly repeated partition only once
         if (ielem->giveParallelMode() == Element_local) {
-          __dmanpartitions.insert(elmdist[ie-1]);
+          __dmanpartitions.insert(giveElementPartition(dofmanconntable->at(ie)));
         }
       }
       npart = __dmanpartitions.size();
@@ -263,14 +268,15 @@ ParmetisLoadBallancer::labelDofManagers()
     }
 #ifdef ParmetisLoadBallancer_DEBUG_PRINT
    fprintf (stderr, " | %d: ", idofman);
-   if (dofManState.at(idofman) == DM_NULL)              fprintf (stderr, "NULL ");
+   if (dofManState.at(idofman) == DM_NULL)              fprintf (stderr, "NULL  ");
    else if (dofManState.at(idofman) == DM_Local)        fprintf (stderr, "Local ");
    else if (dofManState.at(idofman) == DM_Shared)       fprintf (stderr, "Shared");
    else if (dofManState.at(idofman) == DM_Remote)       fprintf (stderr, "Remote");
-   else if (dofManState.at(idofman) == DM_SharedMerge)  fprintf (stderr, "ShdMer");
+   else if (dofManState.at(idofman) == DM_SharedExclude)fprintf (stderr, "ShdExc");
    else if (dofManState.at(idofman) == DM_SharedNew)    fprintf (stderr, "ShdNew");
    else if (dofManState.at(idofman) == DM_SharedUpdate) fprintf (stderr, "ShdUpd");
-   if ((++_cols % 4) == 0) fprintf (stderr, "\n");
+
+   if (((++_cols % 4) == 0) || (idofman==ndofman)) fprintf (stderr, "\n");
 #endif   
   }
 }
@@ -281,28 +287,38 @@ ParmetisLoadBallancer::determineDofManState (int idofman, int myrank, int npart,
   dofManagerParallelMode dmode = domain->giveDofManager(idofman)->giveParallelMode();
   int answer = DM_Local;
 
-  if (npart == 1) {
-    if (dofManPartitions[idofman-1].at(1) == myrank) {
-      if (dmode == DofManager_local) {
-        // local remains local 
-        answer = DM_Local;
-      } else if (dmode == DofManager_shared) {
-        // shared remains shared on local partition
-        answer = DM_Shared;
-      }
-    } else { 
-      if (dmode == DofManager_local) {
-        // local node now fully on remote partition
-        answer = DM_Remote;
-      } else if (dmode == DofManager_shared) {
-        // shared node now assigned to remote partition -> merging
-        answer = DM_SharedMerge;
+  if (dmode == DofManager_local) {
+    if ((npart == 1) && (dofManPartitions->at(1) == myrank)) {
+      // local remains local
+      answer = DM_Local;
+    } else if (npart == 1) {
+      // local goes to remote partition
+      answer = DM_Remote;
+    } else { // npart > 1
+      // local becomes newly shared
+      answer = DM_SharedNew;
+    }
+  } else if (dmode == DofManager_shared) {
+    // compare old and new partition list
+    int i, _same = true, containsMyRank = dofManPartitions->findFirstIndexOf (myrank);
+    const IntArray* oldpart = domain->giveDofManager(idofman)->givePartitionList();
+    for (i=1; i<=dofManPartitions->giveSize(); i++) {
+      if ((dofManPartitions->at(i)!= myrank) && 
+	  (!oldpart->findFirstIndexOf(dofManPartitions->at(i)))) {
+	_same=false; break;
       }
     }
-  } else { // npart > 1 : node will be newly shared, since cut runs through
-    if (dmode == DofManager_local) answer = DM_SharedNew;
-    else if (dmode == DofManager_shared) answer = DM_SharedUpdate;
+    if (_same && containsMyRank) {
+      answer = DM_Shared;
+    } else if (containsMyRank) {
+      answer = DM_SharedUpdate;
+    } else { // !containsMyRank
+      answer = DM_SharedExclude;
+    }
+  } else {
+    answer = DM_NULL;
   }
+
   return answer;
 }
 
@@ -323,11 +339,24 @@ ParmetisLoadBallancer::giveDofManPartitions (int idofman)
 int
 ParmetisLoadBallancer::giveElementPartition (int ielem)
 {
-  return elmdist[ielem-1];
+  return part[ielem-1];
 }
 
 #else
 void ParmetisLoadBallancer:: ballanceLoad () {}
+
+LoadBallancer::DofManMode
+ParmetisLoadBallancer::giveDofManState (int idofman)
+{ return DM_NULL;}
+
+
+IntArray*
+ParmetisLoadBallancer::giveDofManPartitions (int idofman)
+{ return NULL;}
+
+int
+ParmetisLoadBallancer::giveElementPartition (int ielem)
+{ return 0;}
 #endif
 
 

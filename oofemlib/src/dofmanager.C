@@ -53,6 +53,7 @@
 #include "hangingnode.h"
 #include "usrdefsub.h"
 #include "mathfem.h"
+#include "datastream.h"
 #ifndef __MAKEDEPEND
 #include <stdlib.h>
 #endif
@@ -672,10 +673,30 @@ contextIOResultType DofManager :: saveContext (DataStream* stream, ContextMode m
 // current state)
 //
 {
-  int i;
+  int i,_val;
   contextIOResultType iores;
   
   if ((iores = FEMComponent::saveContext(stream,mode,obj)) != CIO_OK) THROW_CIOERR(iores);
+  if (mode & CM_Definition ) {
+    if (!stream->write (&numberOfDofs,1)) THROW_CIOERR(CIO_IOERR);
+    // store dof types 
+    for (i=1 ; i<=numberOfDofs ; i++) {
+      _val =  this->giveDof(i)->giveClassID();
+      if (!stream->write (&_val,1)) THROW_CIOERR(CIO_IOERR);
+    }
+    if ((iores = loadArray.storeYourself(stream, mode)) != CIO_OK) THROW_CIOERR(iores);
+    _val = (int) isBoundaryFlag;
+    if (!stream->write (&_val,1)) THROW_CIOERR(CIO_IOERR);
+    _val = (int) hasSlaveDofs;
+    if (!stream->write (&_val,1)) THROW_CIOERR(CIO_IOERR);
+#ifdef __PARALLEL_MODE
+    if (!stream->write (&globalNumber,1)) THROW_CIOERR(CIO_IOERR);
+    _val = (int) parallel_mode;
+    if (!stream->write (&_val,1)) THROW_CIOERR(CIO_IOERR);
+    if ((iores = partitions.storeYourself(stream, mode)) != CIO_OK) THROW_CIOERR(iores);
+#endif
+  }
+
   for (i=1 ; i<=numberOfDofs ; i++) {
     if ((iores = this->giveDof(i)->saveContext(stream,mode,obj)) != CIO_OK) THROW_CIOERR(iores);
   }
@@ -691,9 +712,56 @@ contextIOResultType DofManager :: restoreContext (DataStream* stream, ContextMod
 //
 {
   contextIOResultType iores;
-  int i ;
+  int i, _val ;
 
   if ((iores = FEMComponent::restoreContext(stream,mode,obj)) != CIO_OK) THROW_CIOERR(iores);
+  if (mode & CM_Definition ) {
+    int _numberOfDofs;
+    if (!stream->read (&_numberOfDofs,1)) THROW_CIOERR(CIO_IOERR);
+    IntArray dtypes (_numberOfDofs);
+    // restore dof types
+    for (i=1 ; i<=_numberOfDofs ; i++) {
+      if (!stream->read (&dtypes.at(i),1)) THROW_CIOERR(CIO_IOERR);
+    }
+    // create new dofs if necessary
+    bool samedofs = (numberOfDofs == _numberOfDofs);
+    if (samedofs) {
+      // if size match, check types
+      for (i=1 ; i<=_numberOfDofs ; i++) {
+	if (this->giveDof(i)->giveClassID() != dtypes.at(i)) {
+	  samedofs = false;
+	  break;
+	}
+      }
+    }
+    if (!samedofs) {
+      // delete old dofs
+      if (numberOfDofs) {
+	while (i--)
+	  delete dofArray[i] ;
+	delete dofArray ;
+      }
+      // allocate new ones
+      dofArray = new Dof* [_numberOfDofs] ;
+      for (i=0 ; i<_numberOfDofs ; i++) {
+        dofArray[i] = CreateUsrDefDofOfType ((classType) dtypes(i),i+1, this);
+      }
+      numberOfDofs = _numberOfDofs;
+    }
+    
+    if ((iores = loadArray.restoreYourself(stream, mode)) != CIO_OK) THROW_CIOERR(iores);
+    if (!stream->read (&_val,1)) THROW_CIOERR(CIO_IOERR);
+    isBoundaryFlag = (bool) _val;
+    if (!stream->read (&_val,1)) THROW_CIOERR(CIO_IOERR);
+    hasSlaveDofs = (bool) _val;
+#ifdef __PARALLEL_MODE
+    if (!stream->read (&globalNumber,1)) THROW_CIOERR(CIO_IOERR);
+    if (!stream->read (&_val,1)) THROW_CIOERR(CIO_IOERR);
+    parallel_mode = (dofManagerParallelMode) _val;
+    if ((iores = partitions.restoreYourself(stream, mode)) != CIO_OK) THROW_CIOERR(iores);
+#endif
+  }
+
   for (i=1 ; i<=numberOfDofs ; i++) {
     if ((iores = this->giveDof(i)->restoreContext(stream,mode,obj)) != CIO_OK) THROW_CIOERR(iores);
   }
@@ -981,6 +1049,19 @@ DofManager :: giveCompleteGlobalDofIDArray (void) const
 
 
 #ifdef __PARALLEL_MODE
+void
+DofManager::mergePartitionList (IntArray& _p) 
+{
+  // more optimized version can be made requiring sorted partition list of receiver
+  int i, size = _p.giveSize();
+  for (i=1; i<=size; i++) {
+    if (!partitions.findFirstIndexOf(_p.at(i))) {
+      partitions.followedBy(_p.at(i),2);
+    }
+  }
+}
+
+
 int
 DofManager::packDOFsUnknowns (CommunicationBuffer& buff, EquationID type, 
                ValueModeType mode, TimeStep* stepN)

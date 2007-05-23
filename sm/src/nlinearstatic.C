@@ -236,6 +236,11 @@ NonLinearStatic :: initializeFrom (InputRecord* ir)
                                                    this->giveNumberOfProcesses(), 
                                                    ProblemCommunicator::PC__REMOTE_ELEMENT_MODE);
    }
+
+   /* Load ballancing support */
+   int _val = 0;
+   IR_GIVE_OPTIONAL_FIELD (ir, _val, IFT_NonLinearStatic_loadBallancingFlag, "lbflag"); // Macro
+   loadBallancingFlag = _val;
  }
 #endif
  return IRRT_OK;
@@ -1197,3 +1202,35 @@ NonLinearStatic :: assembleVectorFromDofManagers (FloatArray& answer, TimeStep* 
   EngngModel :: assembleVectorFromDofManagers (answer, tStep, ut, type, mode, domain) ;
   
 }
+
+
+#ifdef __PARALLEL_MODE
+LoadBallancer* 
+NonLinearStatic:: giveLoadBallancer() 
+{
+  if (lb) return lb;
+  if (loadBallancingFlag) {
+    lb = ::CreateUsrDefLoadBallancerOfType (ParmetisLoadBallancerClass, this->giveDomain(1));
+    return lb;
+  } else {
+    return NULL;
+  }
+}
+LoadBallancerMonitor* 
+NonLinearStatic::giveLoadBallancerMonitor() 
+{
+  if (lbm) return lbm;
+  if (loadBallancingFlag) {
+    lbm = ::CreateUsrDefLoadBallancerMonitorOfType (WallClockLoadBallancerMonitorClass, this);
+    return lbm;
+  } else {
+    return NULL;
+  }
+}
+
+void 
+NonLinearStatic::packMigratingData () {}
+
+void 
+NonLinearStatic::unpackMigratingData () {}
+#endif

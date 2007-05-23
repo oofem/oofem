@@ -82,6 +82,7 @@ public:
   @param dynamic flag indicating that receiver can change
   */
  GaussIntegrationRule (int , Domain*, int, int, bool dynamic=false);
+ GaussIntegrationRule (int , Domain*);
  /// Destructor
   ~GaussIntegrationRule();
 

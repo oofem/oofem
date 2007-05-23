@@ -136,6 +136,7 @@ EngngModel :: EngngModel (int i, EngngModel* _master) : domainNeqs(), domainPres
 #ifdef __PARALLEL_MODE
  initParallel ();
  parallelFlag = 1;
+ loadBallancingFlag = false;
 #else
  parallelFlag=0;
 #endif
@@ -188,6 +189,7 @@ EngngModel :: EngngModel (int i, char* s, EngngModel* _master) : domainNeqs(), d
  //dataInputFileName = new char[strlen(s)+10] ;
  //sprintf (dataInputFileName, "%s.%d", s, rank);
  dataOutputFileName = new char [MAX_FILENAME_LENGTH];
+ loadBallancingFlag = false;
 #endif
 
 #ifdef __PETSC_MODULE
@@ -222,6 +224,13 @@ EngngModel ::  ~EngngModel ()
  //fclose (inputStream) ;
  if (outputStream)
   fclose(outputStream) ;
+
+#ifdef __PARALLEL_MODE
+ if (loadBallancingFlag) {
+   if (lb) delete lb;
+   if (lbm) delete lbm;
+ }
+#endif
 }
 
 
@@ -601,7 +610,7 @@ EngngModel :: solveYourself ()
  MetaStep* activeMStep;
  FILE* out = this->giveOutputStream ();
 //#ifdef TIME_REPORT
- oofem_timeval tstart;
+ this->timer.startTimer(EngngModelTimer::EMTT_AnalysisTimer);
 //#endif
 
  if (this->currentStep) {
@@ -614,7 +623,7 @@ EngngModel :: solveYourself ()
    activeMStep = this->giveMetaStep(imstep);
    for (jstep = sjstep; jstep <= activeMStep->giveNumberOfSteps(); jstep++) {
 //#ifdef TIME_REPORT
-     ::getUtime(tstart);
+     this->timer.startTimer(EngngModelTimer::EMTT_SolutionStepTimer);
 //#endif
      this->giveNextStep();
      // update state ccording to new meta step
@@ -625,13 +634,13 @@ EngngModel :: solveYourself ()
      this->terminate (this->giveCurrentStep());
      
 //#ifdef TIME_REPORT
-     oofem_timeval ut;
-     ::getRelativeUtime (ut, tstart);
-     OOFEM_LOG_INFO ("\nEngngModel info: user time consumed by solution step %d: %.2fs\n", 
-                     this->giveCurrentStep()->giveNumber(), (double)(ut.tv_sec+ut.tv_usec/(double)OOFEM_USEC_LIM));
+     this->timer.stopTimer(EngngModelTimer::EMTT_SolutionStepTimer);
+     long int _steptime = this->timer.getUtime (EngngModelTimer::EMTT_SolutionStepTimer);
+     OOFEM_LOG_INFO ("\nEngngModel info: user time consumed by solution step %d: %lds\n", 
+                     this->giveCurrentStep()->giveNumber(), _steptime);
      
-     fprintf (out,"\nUser time consumed by solution step %d: %.2f [s]\n\n",
-              this->giveCurrentStep()->giveNumber(), (double)(ut.tv_sec+ut.tv_usec/(double)OOFEM_USEC_LIM));
+     fprintf (out,"\nUser time consumed by solution step %d: %ld [s]\n\n",
+              this->giveCurrentStep()->giveNumber(), _steptime);
 //#endif
 
    }
@@ -1803,30 +1812,26 @@ EngngModel ::  getClock ()
 void
 EngngModel :: terminateAnalysis ()
 {
- long int nsec, nmin = 0, nhrs=0;
+ long int tsec; 
+ int nsec=0, nmin = 0, nhrs=0;
  FILE* out = this->giveOutputStream ();
- time_t endTime = ::getTime ();
- //clock_t endClock = this-> getClock ();
+ time_t endTime = ::getTime();
+ this->timer.stopTimer (EngngModelTimer::EMTT_AnalysisTimer);
  
+
  fprintf (out, "\nFinishing analysis on: %s\n",ctime(&endTime));
  LOG_FORCED_MSG(oofem_logger, "\n\n____________________________________________________\n");
  // compute real time consumed
- nsec = endTime - this->startTime;
- if (nsec > 60) { nmin = nsec / 60; nsec %= 60;}
- if (nmin > 60) { nhrs = nmin / 60; nmin %= 60;}
- fprintf (out, "Real time consumed: %03ldh:%02ldm:%02lds\n",nhrs,nmin,nsec);
- LOG_FORCED_MSG(oofem_logger, "ANALYSIS FINISHED (real time consumed: %03ldh:%02ldm:%02lds)\n",nhrs,nmin,nsec);
+ tsec = this->timer.getWtime (EngngModelTimer::EMTT_AnalysisTimer);
+ this->timer.convert2HMS (nhrs, nmin, nsec, tsec);
+ fprintf (out, "Real time consumed: %03dh:%02dm:%02ds\n",nhrs,nmin,nsec);
+ LOG_FORCED_MSG(oofem_logger, "ANALYSIS FINISHED (real time consumed: %03dh:%02dm:%02ds)\n",nhrs,nmin,nsec);
  // compute processor time used by the program
  // nsec = (endClock - startClock) / CLOCKS_PER_SEC;
- oofem_timeval ut;
- getUtime (ut);
- nsec = ut.tv_sec;
- nmin = nhrs = 0;
-
- if (nsec > 60) { nmin = nsec / 60; nsec %= 60;}
- if (nmin > 60) { nhrs = nmin / 60; nmin %= 60;}
- fprintf (out, "User time consumed: %03ldh:%02ldm:%02lds\n\n\n",nhrs,nmin,nsec);
- LOG_FORCED_MSG(oofem_logger, "                  (user time consumed: %03ldh:%02ldm:%02lds)\n",nhrs,nmin,nsec);
+ tsec = this->timer.getUtime (EngngModelTimer::EMTT_AnalysisTimer);
+ this->timer.convert2HMS (nhrs, nmin, nsec, tsec);
+ fprintf (out, "User time consumed: %03dh:%02dm:%02ds\n\n\n",nhrs,nmin,nsec);
+ LOG_FORCED_MSG(oofem_logger, "                  (user time consumed: %03dh:%02dm:%02ds)\n",nhrs,nmin,nsec);
  
  LOG_FORCED_MSG(oofem_logger, "____________________________________________________\n\a");
 
@@ -1889,4 +1894,23 @@ void  EngngModel :: drawNodes (oofegGraphicContext& context) {
  this->giveDomain(context.getActiveDomain())->drawNodes (context);
 }
 
+#endif
+
+
+#ifdef __PARALLEL_MODE
+void 
+EngngModel::ballanceLoad ()
+{
+  LoadBallancerMonitor::LoadBallancerDecisionType _d;
+  this->giveLoadBallancerMonitor();
+  this->giveLoadBallancer();
+
+  _d = lbm->decide();
+  if (_d == LoadBallancerMonitor::LBD_RECOVER) {
+    lb->calculateLoadTransfer();
+    
+
+
+  }
+}
 #endif

@@ -125,6 +125,7 @@ public:
   @param dynamic flag indicating that receiver can change
   */
   IntegrationRule (int n, Domain* domain, int startIndx, int endIndx, bool dynamic);
+  IntegrationRule (int n, Domain* domain);
  /// Destructor.
   ~IntegrationRule();
   

@@ -58,7 +58,9 @@
 #endif
 
 #ifdef __PARALLEL_MODE
+#ifndef __MAKEDEPEND
 #include "mpi.h"
+#endif
 #endif
 
 

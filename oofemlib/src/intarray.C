@@ -377,6 +377,73 @@ IntArray :: copySubVector (const IntArray& src, int si)
   for (i=1; i<= n; i++) this->at(si+i) = src.at(i);
 }
 
+int
+IntArray :: findSorted (int _val)   const
+{
+  int first = 0;
+  int last = size-1;
+  int mid;
+
+  while(first<=last) { //while we haven't reached the end of
+
+    mid = (first+last)/2; //rule out half of the data by spliting the array
+    if(values[mid]==_val) //if we have found the target
+      return mid+1;
+    else if(values[mid]>_val)
+      last = mid-1; //the desired value is in the lower part of the array
+    else
+      first = mid+1;//the desired value is in the upper part of the array
+  }
+  return 0;   //there is no such element in the array
+}
+
+
+int
+IntArray :: insertSorted (int _val, int allocChunk)
+{
+  int pos, i = size;
+  int newSize = size+1;
+  int *newValues,*p1,*p2 ;
+
+  if (newSize > allocatedSize) { // realocate if needed
+    newValues = allocInt(newSize+allocChunk) ;
+
+    p1        = values ;
+    p2        = newValues ;
+  } 
+
+  while ((i>=0) && values[i] > _val) { // copy values larger than _val into destination
+    p2[i+1]=p1[i];
+    i--;
+  }
+  pos = i+1;
+  p2[pos] = _val; // insert _val
+
+  // if allocated copy smaller values to destination
+  if (newSize > allocatedSize) {
+    // if allocated copy smaller values to destination
+    while (i>=0) {
+      p2[i]=p1[i]; i--;
+    }
+    // dealocate original space
+    if (values) freeInt (values) ;
+    values = newValues ;
+    allocatedSize = newSize + allocChunk;
+  }
+  // update size
+  size   = newSize ;
+  return pos+1; // return 1-based index
+}
+
+int
+IntArray :: insertSortedOnce (int _val, int allocChunk) 
+{
+  int res;
+  if ((res = findSorted (_val))) return res; // value already present
+  return insertSorted (_val, allocChunk);
+}
+
+
 
 #ifdef __PARALLEL_MODE
 int 

@@ -355,7 +355,7 @@ public:
   to loop over required nodes.
   @see NlDEIDynamic_Unpack_func 
   */
- template <class T> int packData (T* emodel, FloatArray* src, int (T::*packFunc) (FloatArray*, ProcessCommunicator&))
+ template <class T, class P> int packData (T* emodel, P* src, int (T::*packFunc) (P*, ProcessCommunicator&))
   { if (!toSend.isEmpty() || (this->mode == CommMode_Dynamic)) {giveProcessCommunicatorBuff()->initForPacking(); return (emodel->*packFunc) (src, *this);} else return 1;}
  /** 
   Unpack nodal data from recv buff.
@@ -371,7 +371,7 @@ public:
   to loop over required nodes.
   @see NlDEIDynamic_Unpack_func 
   */
- template <class T> int unpackData (T* emodel,  FloatArray* dest, int (T::*unpackFunc) (FloatArray*, ProcessCommunicator&))
+ template <class T, class P> int unpackData (T* emodel,  P* dest, int (T::*unpackFunc) (P*, ProcessCommunicator&))
   { if (!toReceive.isEmpty() || (this->mode == CommMode_Dynamic)) {giveProcessCommunicatorBuff()->initForUnpacking(); return (emodel->*unpackFunc) (dest, *this);} else return 1;}
  /**
   Initializes data exchange with associated problem. 

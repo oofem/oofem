@@ -150,7 +150,8 @@ public:
   @param packFunc function used to pack nodal data in to buffer. 
   @see NlDEIDynamic_Unpack_func 
   */
- template <class T> int packAllData (T* ptr, FloatArray* src, int (T::*packFunc) (FloatArray*, ProcessCommunicator&));
+ //template <class T> int packAllData (T* ptr, FloatArray* src, int (T::*packFunc) (FloatArray*, ProcessCommunicator&));
+ template <class T, class P> int packAllData (T* ptr, P* src, int (T::*packFunc) (P*, ProcessCommunicator&));
  /**
   Unpack all problemCommuncators data  from recv buffers.
   Waits  untill receive completion before unpacking buffer.
@@ -164,7 +165,8 @@ public:
   @param unpackFunc function used to unpack nodal data from buffer. 
   @see NlDEIDynamic_Unpack_func 
   */
- template <class T> int unpackAllData (T* ptr, FloatArray* dest, int (T::*unpackFunc) (FloatArray*, ProcessCommunicator&));
+ //template <class T> int unpackAllData (T* ptr, FloatArray* dest, int (T::*unpackFunc) (FloatArray*, ProcessCommunicator&));
+ template <class T, class P> int unpackAllData (T* ptr, P* src, int (T::*unpackFunc) (P*, ProcessCommunicator&));
  /**
   Initializes data exchange with all problems. 
   if send or receive pool is empty, communication is not preformed.
@@ -210,9 +212,19 @@ Communicator :: packAllData (T* ptr, int (T::*packFunc) (ProcessCommunicator&))
  return result;
 }
 
-
+/*
 template <class T> int
 Communicator :: packAllData (T* ptr, FloatArray* src, int (T::*packFunc) (FloatArray*, ProcessCommunicator&))
+{
+ int i = size, result = 1;
+
+ if (size) 
+   for (i=0; i< size; i++) result &= giveProcessCommunicator(i)->packData (ptr, src, packFunc);
+ return result;
+}
+*/
+template <class T, class P> int
+Communicator :: packAllData (T* ptr, P* src, int (T::*packFunc) (P*, ProcessCommunicator&))
 {
  int i = size, result = 1;
 
@@ -229,10 +241,12 @@ Communicator :: unpackAllData (T* ptr, int (T::*unpackFunc) (ProcessCommunicator
  //MPI_Status status;
 
  for  (i=0; i<size; i++) {
-  if (giveProcessCommunicator(i)->giveToRecvMap()->giveSize()) {
-   recvFlag.at(i+1) = 1;
-   num_recv ++;
-  }
+   // receive if receive map is not empty or mode is dynamic
+   if ((giveProcessCommunicator(i)->giveToRecvMap()->giveSize()) ||
+       (this->mode == CommMode_Dynamic)) {
+     recvFlag.at(i+1) = 1;
+     num_recv ++;
+   }
  }
  
  while (num_recv--) { 
@@ -275,7 +289,7 @@ Communicator :: unpackAllData (T* ptr, int (T::*unpackFunc) (ProcessCommunicator
 }
 
 
-
+/*
 template <class T> int
 Communicator :: unpackAllData (T* ptr, FloatArray* dest, int (T::*unpackFunc) (FloatArray*, ProcessCommunicator&))
 {
@@ -284,10 +298,12 @@ Communicator :: unpackAllData (T* ptr, FloatArray* dest, int (T::*unpackFunc) (F
  //MPI_Status status;
 
  for  (i=0; i<size; i++) {
-  if (giveProcessCommunicator(i)->giveToRecvMap()->giveSize()) {
-   recvFlag.at(i+1) = 1;
-   num_recv ++;
-  }
+   // receive if receive map is not empty or mode is dynamic
+   if ((giveProcessCommunicator(i)->giveToRecvMap()->giveSize()) || 
+       (this->mode == CommMode_Dynamic)) {
+     recvFlag.at(i+1) = 1;
+     num_recv ++;
+   }
  }
  
  while (num_recv--) { 
@@ -329,8 +345,63 @@ Communicator :: unpackAllData (T* ptr, FloatArray* dest, int (T::*unpackFunc) (F
  
  return result;
 }
+*/
 
+template <class T, class P> int
+Communicator :: unpackAllData (T* ptr, P* dest, int (T::*unpackFunc) (P*, ProcessCommunicator&))
+{
+ int i, received, num_recv = 0, result = 1;
+ IntArray recvFlag (size);
+ //MPI_Status status;
 
+ for  (i=0; i<size; i++) {
+   // receive if receive map is not empty or mode is dynamic
+   if ((giveProcessCommunicator(i)->giveToRecvMap()->giveSize()) || 
+       (this->mode == CommMode_Dynamic)) {
+     recvFlag.at(i+1) = 1;
+     num_recv ++;
+   }
+ }
+ 
+ while (num_recv--) { 
+  
+  // wait for any completion
+  while (1) {
+   received = 0;
+   for  (i=0; i<size; i++)  {
+    if (recvFlag.at(i+1)) {
+      //if (giveProcessCommunicator(i)->giveRecvBuff()->testCompletion()) {
+      if (giveProcessCommunicator(i)->receiveCompleted()) {
+      
+      
+#ifdef __VERBOSE_PARALLEL
+       OOFEM_LOG_DEBUG("[process rank %3d]: %-30s: Received data from partition %3d\n",
+                       rank,"Communicator :: unpackAllData", i);
+#endif
+      
+      recvFlag.at(i+1) = 0;
+      result &= giveProcessCommunicator(i)->unpackData (ptr, dest, unpackFunc);
+      received = 1;
+      break;
+     }
+    }
+   }
+   if (received) break;
+  }
+ }
+
+#ifdef __VERBOSE_PARALLEL
+ VERBOSEPARALLEL_PRINT("Communicator :: unpackAllData", "Synchronize barrier started",rank)
+#endif
+ 
+ MPI_Barrier (MPI_COMM_WORLD);
+
+#ifdef __VERBOSE_PARALLEL
+ VERBOSEPARALLEL_PRINT("Communicator :: unpackAllData", "Synchronize barrier finished",rank)
+#endif
+ 
+ return result;
+}
 
 
 #endif

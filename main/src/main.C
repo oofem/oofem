@@ -276,12 +276,14 @@ oofem_print_epilog () {
 }
 
 #ifndef __MAKEDEPEND
-#include "parmetisloadballancer.h"
+#include "loadballancer.h"
 #endif
 void oofem_debug (EngngModel* emodel)
 {
 #ifdef __PARALLEL_MODE
-  ParmetisLoadBallancer lb (emodel->giveDomain(1));
-  lb.ballanceLoad();
+  //LoadBallancer* lb = emodel->giveDomain(1)->giveLoadBallancer();
+  //lb->calculateLoadTransfer();
+  //lb->migrateLoad();
+  //exit(1);
 #endif
 }

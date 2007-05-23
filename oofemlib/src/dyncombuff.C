@@ -51,7 +51,7 @@ CommunicationPacket :: CommunicationPacket(MPI_Comm comm,int size, int num) : MP
   this->EOF_Flag = false;
   this->number = num;
   // reserve space for packet header
-  curr_pos += givePackSize(comm, 2, MPI_INT);
+  curr_pos += givePackSize(comm, MPI_INT, 2);
 }
 
 
@@ -60,7 +60,7 @@ CommunicationPacket :: CommunicationPacket (MPI_Comm comm,int num) : MPIBuffer (
   this->EOF_Flag = false;
   this->number = num;
   // reserve space for packet header
-  curr_pos += givePackSize(comm, 2, MPI_INT);
+  curr_pos += givePackSize(comm, MPI_INT, 2);
 }
 
 
@@ -74,7 +74,7 @@ CommunicationPacket :: init (MPI_Comm comm)
   MPIBuffer::init();
   this->EOF_Flag = false;
   // reserve space for packet header
-  curr_pos += givePackSize(comm, 2, MPI_INT);
+  curr_pos += givePackSize(comm, MPI_INT, 2);
   
 }
 

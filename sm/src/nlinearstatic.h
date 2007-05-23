@@ -219,6 +219,12 @@ TASK:
 		Initializes communication maps of the receiver
 		*/
 	void initializeCommMaps();
+
+  /** returns reference to receiver's load ballancer*/
+  virtual LoadBallancer* giveLoadBallancer() ;
+  /** returns reference to receiver's load ballancer monitor*/
+  virtual LoadBallancerMonitor* giveLoadBallancerMonitor() ;
+  
   
 #endif
 
@@ -240,7 +246,21 @@ TASK:
                         FloatArray& _incrementalLoadVectorOfPrescribed,
                         SparseNonLinearSystemNM::referenceLoadInputModeType _refMode,
                         Domain* sourceDomain, EquationID ut, TimeStep* tStep);
- 
+#ifdef __PARALLEL_MODE
+ /** Packs receiver data when rebalancing load. When rebalancing happens, the local numbering will be lost on majority of processors. 
+     Instead of identifying values of solution vectors that have to be send/received and then performing renumbering, all solution vectors
+     are assumed to be stored in dof dictionaries before data migration. Then dofs will take care themselves for packing and unpacking. After 
+     data migration and local renubering, the solution vectors will be restored from dof dictionary data back.
+ */
+ virtual void packMigratingData () ;
+ /** Unpacks receiver data when rebalancing load. When rebalancing happens, the local numbering will be lost on majority of processors. 
+     Instead of identifying values of solution vectors that have to be send/received and then performing renumbering, all solution vectors
+     are assumed to be stored in dof dictionaries before data migration. Then dofs will take care themselves for packing and unpacking. After 
+     data migration and local renubering, the solution vectors will be restored from dof dictionary data back.
+ */
+ virtual void unpackMigratingData ();
+
+#endif
 } ;
 
 #define nlinearstatic_h

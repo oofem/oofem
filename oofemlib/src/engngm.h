@@ -43,6 +43,7 @@
 
 #ifdef __PARALLEL_MODE
 #include "parallel.h"
+#include "loadballancer.h"
 #endif
 
 #include "alist.h"
@@ -57,7 +58,7 @@
 #include "exportmodulemanager.h"
 #include "field.h"
 #include "fieldmanager.h"
-
+#include "timer.h"
 
 #ifndef __MAKEDEPEND
 #include <stdio.h>
@@ -269,6 +270,8 @@ enum EngngModel_UpdateMode {EngngModel_SUMM_Mode, EngngModel_SET_Mode};
   EngngModel* master;
   /// context
   EngngModelContext* context;
+  /// e-model timer
+  EngngModelTimer timer;
  /**
     flag indicating that the receiver runs in parallel.
  */
@@ -282,6 +285,15 @@ enum EngngModel_UpdateMode {EngngModel_SUMM_Mode, EngngModel_SET_Mode};
  int numProcs;
  /// processor name
  char processor_name [PROCESSOR_NAME_LENGTH];
+
+ /**@name Load balancing attributes */
+ //@{
+ LoadBallancer* lb;
+ LoadBallancerMonitor* lbm;
+ // if set to true, load ballancing is active
+ bool loadBallancingFlag;
+ //@}
+
 #endif // __PARALLEL_MODE
 
 #ifdef __PETSC_MODULE
@@ -595,6 +607,9 @@ enum EngngModel_UpdateMode {EngngModel_SUMM_Mode, EngngModel_SET_Mode};
   virtual NumericalMethod* giveNumericalMethod (TimeStep*) {return NULL;}
   /// Returns receiver's export mudule manager
   ExportModuleManager*     giveExportModuleManager() {return exportModuleManager;}
+  /// Returns reference to recever timer (EngngModelTimer)
+  const EngngModelTimer* giveTimer() {return &timer;}
+
  /**
   Increases number of equations of receiver's domain and returns newly created equation number.
   Used mainly by DofManagers to allocate their corresponding equation number if it
@@ -820,7 +835,20 @@ enum EngngModel_UpdateMode {EngngModel_SUMM_Mode, EngngModel_SET_Mode};
    void petsc_assembleVectorFromElements (Vec, TimeStep*, EquationID ut, CharType type, ValueModeType mode, Domain* domain) ;
    void petsc_assemblePrescribedVectorFromElements (Vec, TimeStep*, EquationID ut, CharType type, ValueModeType mode, Domain* domain) ;
 #endif   
-
+#ifdef __PARALLEL_MODE
+   /** Packs receiver data when rebalancing load. When rebalancing happens, the local numbering will be lost on majority of processors. 
+       Instead of identifying values of solution vectors that have to be send/received and then performing renumbering, all solution vectors
+       are assumed to be stored in dof dictionaries before data migration. Then dofs will take care themselves for packing and unpacking. After 
+       data migration and local renubering, the solution vectors will be restored from dof dictionary data back.
+   */
+   virtual void packMigratingData () {}
+   /** Unpacks receiver data when rebalancing load. When rebalancing happens, the local numbering will be lost on majority of processors. 
+       Instead of identifying values of solution vectors that have to be send/received and then performing renumbering, all solution vectors
+       are assumed to be stored in dof dictionaries before data migration. Then dofs will take care themselves for packing and unpacking. After 
+       data migration and local renubering, the solution vectors will be restored from dof dictionary data back.
+   */
+   virtual void unpackMigratingData () {}
+#endif
  public:
 
  // consistency check
@@ -904,6 +932,20 @@ enum EngngModel_UpdateMode {EngngModel_SUMM_Mode, EngngModel_SET_Mode};
   @return upper bound of space needed
   */
  virtual int estimateMaxPackSize (IntArray& commMap, CommunicationBuffer& buff, int packUnpackType) {return 0;}
+ /**
+    Recovers the load ballance between processors, if needed. Uses load balancer monitor and load ballancer 
+    instances to decide if reballancing is needed (monitor) and to repartition the domain (load ballancer).
+    Method is responsible for packing all relevant data (the use of dof dictionaries is assumed to store e-model 
+    dof related staff, which can later help in renumbering after rebalancing) and to send/receive all data. 
+    Then the local update and renumbering is necessary to get consistent data structure.
+  */
+ virtual void ballanceLoad ();
+ /** returns reference to receiver's load ballancer*/
+ virtual LoadBallancer* giveLoadBallancer() {return NULL;}
+ /** returns reference to receiver's load ballancer monitor*/
+ virtual LoadBallancerMonitor* giveLoadBallancerMonitor() {return NULL;}
+ 
+
 #endif
 
 #ifdef __PARALLEL_MODE

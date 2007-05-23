@@ -53,6 +53,15 @@ IntegrationRule::IntegrationRule (int n, Domain* domain, int startIndx, int endI
   isDynamic = dynamic;
 }
 
+IntegrationRule::IntegrationRule (int n, Domain* domain)
+: FEMComponent (n,domain)
+{
+  numberOfIntegrationPoints = 0;
+  gaussPointArray = NULL;
+  firstLocalStrainIndx = lastLocalStrainIndx = 0;
+  isDynamic = false;
+}
+
 
 IntegrationRule::~IntegrationRule ()
 {
@@ -134,6 +143,9 @@ IntegrationRule :: saveContext (DataStream* stream, ContextMode mode, void *obj)
   GaussPoint* gp ;
 
   if (stream == NULL) _error ("saveContex : can't write into NULL stream");
+  int isdyn = isDynamic;
+  if (!stream->write(&isdyn,1)) THROW_CIOERR(CIO_IOERR);
+  
   if (isDynamic) mode |= CM_Definition; // store definition if dynamic
 
   if (mode & CM_Definition ) {
@@ -149,12 +161,10 @@ IntegrationRule :: saveContext (DataStream* stream, ContextMode mode, void *obj)
       int ival = gp->giveElement()->giveNumber();
       if (!stream->write(&ival,1)) THROW_CIOERR(CIO_IOERR);
       int mmode = gp->giveMaterialMode();
-      if (!stream->write(&mmode,1) != 1) THROW_CIOERR(CIO_IOERR);
-      int isdyn = isDynamic;
-      if (!stream->write(&isdyn,1) != 1) THROW_CIOERR(CIO_IOERR);
+      if (!stream->write(&mmode,1)) THROW_CIOERR(CIO_IOERR);
       // write first and last integration indices
-      if (!stream->write(&firstLocalStrainIndx,1) != 1) THROW_CIOERR(CIO_IOERR);
-      if (!stream->write(&lastLocalStrainIndx,1) != 1) THROW_CIOERR(CIO_IOERR);
+      if (!stream->write(&firstLocalStrainIndx,1)) THROW_CIOERR(CIO_IOERR);
+      if (!stream->write(&lastLocalStrainIndx,1)) THROW_CIOERR(CIO_IOERR);
     }
     // write gp data
     if ((iores = gp->giveCrossSection()->saveContext(stream,mode,gp)) != CIO_OK) THROW_CIOERR(iores);
@@ -177,7 +187,11 @@ IntegrationRule :: restoreContext (DataStream* stream, ContextMode mode, void *o
  
   if (stream == NULL) _error ("restoreContex : can't write into NULL stream");
 
-  if (isDynamic) mode |= CM_Definition; // store definition if dynamic
+  int isdyn;
+  if (!stream->read(&isdyn,1)) THROW_CIOERR(CIO_IOERR);
+  isDynamic = (bool) isdyn;
+  
+if (isDynamic) mode |= CM_Definition; // store definition if dynamic
 
   if (mode & CM_Definition ) {
     if (!stream->read(&size,1)) THROW_CIOERR (CIO_IOERR);
@@ -205,12 +219,9 @@ IntegrationRule :: restoreContext (DataStream* stream, ContextMode mode, void *o
       if (!stream->read(&_m,1)) THROW_CIOERR(CIO_IOERR);
       m = (MaterialMode) _m;
       // read dynamic flag
-      int isdyn;
-      if (!stream->read(&isdyn,1) != 1) THROW_CIOERR(CIO_IOERR);
-      isDynamic = (bool) isdyn;
       // read first and last integration indices
-      if (!stream->read(&firstLocalStrainIndx,1) != 1) THROW_CIOERR(CIO_IOERR);
-      if (!stream->read(&lastLocalStrainIndx,1) != 1) THROW_CIOERR(CIO_IOERR);
+      if (!stream->read(&firstLocalStrainIndx,1)) THROW_CIOERR(CIO_IOERR);
+      if (!stream->read(&lastLocalStrainIndx,1)) THROW_CIOERR(CIO_IOERR);
       
       if (__create) {
         (gaussPointArray)[i] = new GaussPoint(domain->giveElement(n),i+1,c.GiveCopy(),w,m);

@@ -73,12 +73,20 @@
 inline  int min (int i,int j)
    { return (i<=j ? i : j) ; } 
 
+/// Returns smaller value from two given long decimals
+inline  long min (long i, long j)
+   { return (i<=j ? i : j) ; } 
+
 /// Returns smaller value from two given floats
 inline  double min (double i, double j)
 { return (i<=j ? i : j) ; } 
 
 /// Returns bigger value form two given decimals
 inline  int max (int i,int j)
+   { return (i>=j ? i : j) ; }
+
+/// Returns bigger value form two given long decimals
+inline  long max (long i,long j)
    { return (i>=j ? i : j) ; }
 
 /// Returns bigger value form two given floats

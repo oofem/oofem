@@ -105,6 +105,14 @@ void getUtime (oofem_timeval& answer);
  Function returning the elapsed user-time from given point, identified by oofem_timeval variable
 */
 void getRelativeUtime (oofem_timeval& answer, oofem_timeval& from);
+/**
+ Function returning the elapsed user-time startig at "from" and ending at "to", identified by oofem_timeval variables
+*/
+void getRelativeUtime (oofem_timeval& answer, oofem_timeval& from, oofem_timeval& to);
+/**
+   Function converts total seconds into hours, minutes and remaining seconds
+*/
+void convertTS2HMS (int &nhrs, int &nmin, int &nsec, long int tsec);
 
 #endif
 

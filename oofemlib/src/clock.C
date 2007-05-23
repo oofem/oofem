@@ -52,23 +52,29 @@ void getUtime (oofem_timeval& answer)
  answer.tv_usec = rsg.ru_utime.tv_usec;
 }
 
-void getRelativeUtime (oofem_timeval& answer, oofem_timeval& from)
+void getRelativeUtime (oofem_timeval& answer, oofem_timeval& from, oofem_timeval& to)
 {
- struct rusage rsg;
- getrusage (RUSAGE_SELF, &rsg);
+ if (to.tv_usec < from.tv_usec) {
 
- if (rsg.ru_utime.tv_usec < from.tv_usec) {
-
-  answer.tv_usec = (OOFEM_USEC_LIM-from.tv_usec) + rsg.ru_utime.tv_usec;
-  answer.tv_sec  = rsg.ru_utime.tv_sec-from.tv_sec-1;
+  answer.tv_usec = (OOFEM_USEC_LIM-from.tv_usec) + to.tv_usec;
+  answer.tv_sec  = to.tv_sec-from.tv_sec-1;
 
  } else {
 
-  answer.tv_usec = rsg.ru_utime.tv_usec-from.tv_usec;
-  answer.tv_sec  = rsg.ru_utime.tv_sec-from.tv_sec;
+  answer.tv_usec = to.tv_usec-from.tv_usec;
+  answer.tv_sec  = to.tv_sec-from.tv_sec;
 
  }
 
+}
+
+
+void getRelativeUtime (oofem_timeval& answer, oofem_timeval& from)
+{
+  oofem_timeval to;
+  ::getUtime(to);
+  
+  ::getRelativeUtime (answer, from, to);
 }
 
 
@@ -88,12 +94,19 @@ void getUtime (oofem_timeval& answer)
 	answer.tv_usec = 0;
 }
 
-void getRelativeUtime (oofem_timeval& answer, oofem_timeval& from)
+void getRelativeUtime (oofem_timeval& answer, oofem_timeval& from, oofem_timeval& to)
 {
 	clock_t	utime = clock();
 
-	answer.tv_sec = utime/CLOCKS_PER_SEC - from.tv_sec;
+	answer.tv_sec = to.tv_sec - from.tv_sec;
 	answer.tv_usec = 0;
+}
+
+void getRelativeUtime (oofem_timeval& answer, oofem_timeval& from)
+{
+	oofem_timeval	utime;
+  ::getUtime (utime);
+  ::getRelativeUtime (answer,from,utime);
 }
 
 
@@ -105,3 +118,10 @@ time_t getTime ()
 }
 
 #endif 
+
+void convertTS2HMS (int &nhrs, int &nmin, int &nsec, long int tsec)
+{
+  nsec = tsec;
+  if (nsec > 60) { nmin = nsec / 60; nsec %= 60;}
+  if (nmin > 60) { nhrs = nmin / 60; nmin %= 60;}
+}

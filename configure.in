@@ -725,16 +725,16 @@ MPI_MODULE_SYMBOLS="-DMPICH_IGNORE_CXX_SEEK"
 
 dnl check for mpi Compiler batch
 AC_MSG_CHECKING(checking MPI compiler batch)
-AC_PATH_PROG(MPI_CXX, mpiCC, "x")
+AC_PATH_PROG(MPI_CXX, mpicxx, "x")
 if test x$MPI_CXX = xx; then
 	dir=/usr/local/mpi/bin
-	AC_MSG_CHECKING(guess of mpiCC location)
-	while test ! -f $dir/mpiCC; do
+	AC_MSG_CHECKING(guess of mpicxx location)
+	while test ! -f $dir/mpicxx; do
 		echo "no MPI compiler batch found in $dir."
 		echo "Type in path:"
 		read dir
 	done;
-	MPI_CXX="$dir/mpiCC"
+	MPI_CXX="$dir/mpicxx"
 	echo "$MPI_CXX\n"
 fi
 

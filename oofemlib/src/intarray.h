@@ -160,20 +160,20 @@ public:
    If dimension mismatch, size is adjusted accordingly.
    Warning: after this operation array values are in undefined state, programmer should
    zero receiver 
-   @param allocChunk if reallocation needed, an aditional space for allocChunk values 
+   @param allocChunk if reallocation needed, an aditional space for allocChunk values will be allocated
    */
   void       resize (int n, int allocChunk = 0) ;
   /**
    Appends array b at the end of receiver.
    @param b array to be appended at the end of receiver
-   @param allocChunk if reallocation needed, an aditional space for allocChunk values 
+   @param allocChunk if reallocation needed, an aditional space for allocChunk values will be allocated
    will be allocated to prevent excessive realocation
   */
   void       followedBy (const IntArray& b, int allocChunk = 0) ;
   /**
    Appends given Number at the end of receiver.
    @param b value to be appended
-   @param allocChunk if reallocation needed, an aditional space for allocChunk values 
+   @param allocChunk if reallocation needed, an aditional space for allocChunk values will be allocated
    will be allocated to prevent excessive realocation
    */
   void       followedBy (const int b, int allocChunk = 0);
@@ -183,6 +183,31 @@ public:
   int        isEmpty ()  const           { return size==0 ;}
   /// Returns true if receiver contains only zeroes
   int         containsOnlyZeroes () const ;
+
+  /** finds the first occurence of given value, assuming that the receiver is sorted. 
+      Returns its index in (1-based) indexing, if not present, 0 is returned.
+  */
+  int findSorted (int value) const;
+  
+  /** Inserts given value into a receiver, which is assumed to be sorted. 
+      The size of receiver is changed accordingly.
+      @param value value to insert
+      @param allocChunk if reallocation needed, an aditional space for allocChunk values will be allocated
+      @return index of inserted (or existing) value
+  */
+  int insertSorted (int value, int allocChunk = 0);
+  /** Inserts given value into a receiver, which is assumed to be sorted. 
+      The value is inserted only if it does not exist.
+      The size of receiver is changed accordingly.
+      @param value value to insert
+      @param allocChunk if reallocation needed, an aditional space for allocChunk values will be allocated
+      @return index of inserted (or existing) value
+  */
+  int insertSortedOnce (int value, int allocChunk = 0);
+  
+    
+
+
   /**
    Finds index of first occurence of given value in array. If such value is not presented,
    returns zero value.

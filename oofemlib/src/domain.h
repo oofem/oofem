@@ -135,8 +135,6 @@ class Domain
  /// Nonlocal barier list
  AList<NonlocalBarrier>*  nonlocalBarierList ;
 
- int                     numberOfElements ;
-
  // numberOfDefaultDofsPerNode specifyies default number of dofs per node
  // for current domain type. The defaultDofMask describes the physical meaning of these
  // dofs.
@@ -318,7 +316,7 @@ int               giveNumber () {return this->number;}
  /// Returns number of dof managers in domain.
  int                giveNumberOfDofManagers () {return dofManagerList->giveSize();}
  /// Returns number of elements in domain.
- int                giveNumberOfElements() ;
+ int                giveNumberOfElements() {return elementList->giveSize();}
  /// Returns number of material models in domain
  int                giveNumberOfMaterialModels() {return materialList->giveSize();}
  /// Returns number of cross section models in domain
@@ -400,18 +398,17 @@ int               giveNumber () {return this->number;}
 #ifdef __PARALLEL_MODE
  /**@name Load Ballancing support methods */
  //@{
- int packMigratingData (ProcessCommunicator& pc) ;
- int unpackMigratingData (ProcessCommunicator& pc) ;
- void migrateLoad () ;
+ int packMigratingData (LoadBallancer*, ProcessCommunicator& pc) ;
+ int unpackMigratingData (LoadBallancer*, ProcessCommunicator& pc) ;
+ void migrateLoad (LoadBallancer* ) ;
  void initGlobalDofManMap ();
- void deleteRemoteDofManagers ();
- void deleteRemoteElements ();
+ void deleteRemoteDofManagers (LoadBallancer* );
+ void deleteRemoteElements (LoadBallancer* );
  void renumberDofManagers ();
  void initializeNewDofManList (AList<DofManager>* dofManagerList);
- void compressElementData (AList<Element>* elementList);
- void renumberElementData ();
+ void compressElementData (AList<Element>* elementList, LoadBallancer* lb);
+ void renumberElementData (LoadBallancer* lb);
  void renumberDofManData ();
- LoadBallancer* giveLoadBallancer();
  /** Return updated local entity number after load ballancing */
  int  LB_giveUpdatedLocalNumber (int oldnum, EntityRenumberingScheme scheme);
  /** Return updated local entity number after load ballancing */

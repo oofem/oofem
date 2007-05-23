@@ -230,9 +230,14 @@
 #include "twofluidmaterial.h"
 #include "binghamfluid2.h"
 
-
-
 #endif // __FM_Module
+
+// GENERAL 
+#include "masterdof.h"
+#ifdef __PARALLEL_MODE
+#include "loadballancer.h"
+#include "parmetisloadballancer.h"
+#endif
 
 Element* CreateUsrDefElementOfType (char* aClass, int number, Domain* domain) 
 {
@@ -578,7 +583,7 @@ SparseMtrx* CreateUsrDefSparseMtrx(SparseMtrxType type)
  else if (type == SMT_DSS_unsym_LU) answer = new DSSMatrix(DSSMatrix::unsym_LU);
 #endif
  else {
-   fprintf(stderr, "CreateUsrDefSparseMtrx: Unknowm mtrx type\n");
+   fprintf(stderr, "CreateUsrDefSparseMtrx: Unknown mtrx type\n");
    exit(1);
  }
 
@@ -612,7 +617,7 @@ SparseLinearSystemNM* CreateUsrDefSparseLinSolver(LinSystSolverType st, int i, D
     return nm;
 #endif
   } else {
-    fprintf(stderr, "CreateUsrDefSparseLinSolver: Unknowm solver type\n");
+    fprintf(stderr, "CreateUsrDefSparseLinSolver: Unknown solver type\n");
     exit(1);
   }
   return nm;
@@ -629,7 +634,7 @@ SparseGeneralEigenValueSystemNM* CreateUsrDefGeneralizedEigenValueSolver(GenEigv
     nm = (SparseGeneralEigenValueSystemNM*) new InverseIteration (i,d,m);
     return nm;
   } else {
-    fprintf(stderr, "CreateUsrDefGeneralizedEigenValueSolver: Unknowm solver type\n");
+    fprintf(stderr, "CreateUsrDefGeneralizedEigenValueSolver: Unknown solver type\n");
     exit(1);
   }
   return nm;
@@ -650,7 +655,7 @@ CreateUsrDefErrorEstimator(ErrorEstimatorType type, int number, Domain* d)
 #endif //__SM_MODULE
 
  if (answer == NULL){
-  fprintf(stderr, "CreateUsrDefErrorEstimator: Unknowm error estimator type\n");
+  fprintf(stderr, "CreateUsrDefErrorEstimator: Unknown error estimator type\n");
   exit(1);
  }
 
@@ -686,12 +691,22 @@ NonlocalBarrier* CreateUsrDefNonlocalBarrierOfType (char* aClass, int num, Domai
  return answer;
 }
 
-#ifdef __PARALLEL_MODE
+IntegrationRule* CreateUsrDefIRuleOfType (classType type, int number, Domain* d)
+{
+  IntegrationRule* answer = NULL;
+  if (type == GaussIntegrationRuleClass) answer = new GaussIntegrationRule (number, d);
+
+  if (answer == NULL)  OOFEM_ERROR2 ("CreateUsrDefIRuleOfType: Unknown integration rule type [%d]", type);
+  return answer;
+}
+
+
 Element* CreateUsrDefElementOfType (classType type, int number, Domain* domain)
 {
   Element* answer = NULL;
 
   if (type == PlaneStress2dClass) answer = new PlaneStress2d(number,domain) ;
+  if (answer == NULL)  OOFEM_ERROR2 ("CreateUsrDefElementOfType: Unknown element type [%d]", type);
   return answer;
 }
 
@@ -699,6 +714,35 @@ DofManager* CreateUsrDefDofManagerOfType (classType type, int number, Domain* do
 {
   DofManager* answer = NULL;
   if (type == NodeClass) answer = new Node (number,domain) ;
+
+  if (answer == NULL)  OOFEM_ERROR2 ("CreateUsrDefDofManagerOfType: Unknown dofman type [%d]", type);
+  return answer;
+}
+
+Dof* CreateUsrDefDofOfType (classType type, int number, DofManager* dman)
+{
+  Dof* answer = NULL;
+  if  (type == MasterDofClass) answer = new MasterDof (number, dman);
+
+  if (answer == NULL)  OOFEM_ERROR2 ("CreateUsrDefDofOfType: Unknown dof type [%d]", type);
+  return answer;
+}
+#ifdef __PARALLEL_MODE
+LoadBallancerMonitor* CreateUsrDefLoadBallancerMonitorOfType (classType type, EngngModel* e)
+{
+  LoadBallancerMonitor *answer = NULL;
+  if (type == WallClockLoadBallancerMonitorClass) answer = new WallClockLoadBallancerMonitor (e);
+  
+  if (answer == NULL) OOFEM_ERROR2 ("CreateUsrDefLoadBallancerMonitorOfType: Unknown type [%d]", type);
+  return answer;
+}
+
+LoadBallancer* CreateUsrDefLoadBallancerOfType (classType type, Domain* d)
+{
+  LoadBallancer *answer = NULL;
+  if (type == ParmetisLoadBallancerClass) answer = new ParmetisLoadBallancer (d);
+  
+  if (answer == NULL) OOFEM_ERROR2 ("CreateUsrDefLoadBallancerOfType: Unknown type [%d]", type);
   return answer;
 }
 #endif

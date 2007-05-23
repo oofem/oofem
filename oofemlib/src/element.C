@@ -537,7 +537,7 @@ contextIOResultType Element :: saveContext (DataStream* stream, ContextMode mode
 //
 {
   contextIOResultType iores;
-  int         i ;
+  int         i, _val;
 
   if ((iores = FEMComponent::saveContext(stream,mode,obj)) != CIO_OK) THROW_CIOERR(iores);
   
@@ -549,6 +549,12 @@ contextIOResultType Element :: saveContext (DataStream* stream, ContextMode mode
      if ((iores = dofManArray.storeYourself(stream, mode)) != CIO_OK) THROW_CIOERR(iores);
      if ((iores = bodyLoadArray.storeYourself(stream, mode)) != CIO_OK) THROW_CIOERR(iores);
      if ((iores = boundaryLoadArray.storeYourself(stream, mode)) != CIO_OK) THROW_CIOERR(iores);
+     if (!stream->write (&numberOfIntegrationRules,1)) THROW_CIOERR(CIO_IOERR);
+     for (i=0 ; i< numberOfIntegrationRules ; i++) {
+       _val = integrationRulesArray[i]->giveClassID();
+       if (!stream->write (&_val,1)) THROW_CIOERR(CIO_IOERR);
+     }
+
 #ifdef __PARALLEL_MODE
      int _mode;
      if (!stream->write (&globalNumber,1)) THROW_CIOERR(CIO_IOERR);
@@ -573,7 +579,7 @@ contextIOResultType Element :: restoreContext (DataStream* stream, ContextMode m
 //
 {
   contextIOResultType iores;
-  int         i ;
+  int         i, _nrules ;
 
   if ((iores = FEMComponent::restoreContext(stream,mode,obj)) != CIO_OK) THROW_CIOERR(iores);
 
@@ -585,6 +591,35 @@ contextIOResultType Element :: restoreContext (DataStream* stream, ContextMode m
      if ((iores = dofManArray.restoreYourself(stream, mode)) != CIO_OK) THROW_CIOERR(iores);
      if ((iores = bodyLoadArray.restoreYourself(stream, mode)) != CIO_OK) THROW_CIOERR(iores);
      if ((iores = boundaryLoadArray.restoreYourself(stream, mode)) != CIO_OK) THROW_CIOERR(iores);
+     if (!stream->read (&_nrules,1)) THROW_CIOERR(CIO_IOERR);
+     // restore integration rules 
+     IntArray dtypes (_nrules);
+     for (i=1 ; i<=_nrules ; i++) {
+       if (!stream->read (&dtypes.at(i),1)) THROW_CIOERR(CIO_IOERR);
+     }
+
+     if (_nrules != numberOfIntegrationRules) {
+       // delete old int rule array
+       if (integrationRulesArray) {
+         for (i=0 ; i<numberOfIntegrationRules ; i++)
+           delete integrationRulesArray[i] ;
+         delete integrationRulesArray ;
+       }
+       // AND ALLOCATE NEW ONE
+       integrationRulesArray = new IntegrationRule*[_nrules];
+       for (i=0 ; i<_nrules ; i++) {
+         integrationRulesArray[i] = CreateUsrDefIRuleOfType ((classType) dtypes(i),i+1, this->giveDomain());
+       }
+       numberOfIntegrationRules = _nrules;
+     } else {
+       for (i=0 ; i<numberOfIntegrationRules ; i++) {
+         if (integrationRulesArray[i]->giveClassID() != dtypes(i)) {
+           delete integrationRulesArray[i] ;
+           integrationRulesArray[i] = CreateUsrDefIRuleOfType ((classType) dtypes(i),i+1, this->giveDomain());
+         }
+       }
+     }
+
 #ifdef __PARALLEL_MODE
      int _mode;
      if (!stream->read (&globalNumber,1)) THROW_CIOERR(CIO_IOERR);
@@ -809,6 +844,7 @@ Element::adaptiveFinish (TimeStep* tStep)
  return result;
  
 }
+
 
 
 #ifdef __PARALLEL_MODE

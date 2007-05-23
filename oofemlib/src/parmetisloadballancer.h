@@ -58,15 +58,15 @@ class ParmetisLoadBallancer : public LoadBallancer
   IntArray dofManState;
   // array of dof man partitions
   std::vector <IntArray>  dofManPartitions;
-
+  /// partition vector of the locally-stored elements
+  idxtype *part;
 #endif
 
  public:
   ParmetisLoadBallancer (Domain *d);
   ~ParmetisLoadBallancer ();
   
-  virtual void ballanceLoad ();
-  virtual void migrateLoad (){}
+  virtual void calculateLoadTransfer ();
 
 #if 1
   virtual DofManMode giveDofManState (int idofman);

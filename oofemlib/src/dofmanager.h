@@ -405,9 +405,13 @@ public:
   Returns partition list of receiver.
   @return partition array.
   */
-  IntArray* givePartitionList ()  {return &partitions;}
+  const IntArray* givePartitionList ()  {return &partitions;}
   /** Sets receiver's partition list */
   void setPartitionList (IntArray& _p) {partitions = _p;}
+  /// Removes given partition from receiver list
+  void removePartitionFromList (int _part) {int _pos=partitions.findFirstIndexOf(_part); if (_pos) partitions.erase(_pos);}
+  /// Merges receiver partition list with given lists
+  void mergePartitionList (IntArray& _p);
   /** 
       Returns number of partitions sharing given receiver (=number of shared partitions + local one)
   */

@@ -605,6 +605,16 @@ protected:
   Finishes the mapping for given time step.
   */
  virtual int adaptiveFinish (TimeStep* tStep);
+
+ /**
+    Local renumbering support. For some tasks (parallel load ballancing, for example) it is necessary to
+    renumber the entities. The various fem components (such as nodes or elements) typically contain
+    links to other entities in terms of their local numbers, etc. This service allows to update 
+    these relations to reflext updated numbering. The renumbering funciton is passed, which is supposed
+    to return an updated number of specified entyty type based on old number. 
+ */
+ template <class T> void updateLocalNumbering (T* src, int (T::*renumberMethod) (int oldnum, EntityRenumberingScheme scheme )) ;
+
  //@}
 
 
@@ -734,6 +744,17 @@ protected:
  virtual void          computeGaussPoints (){}
  
 } ;
+
+
+template <class T> void 
+Element::updateLocalNumbering (T* src, int (T::*renumberMethod) (int oldnum, EntityRenumberingScheme scheme ))
+{
+  int i;
+  for (i=1 ; i<=numberOfDofMans ; i++) {
+    dofManArray.at(i) = (src->*renumberMethod) (dofManArray.at(i), ERS_DofManager);
+  }
+}
+
 
 #define element_h
 #endif

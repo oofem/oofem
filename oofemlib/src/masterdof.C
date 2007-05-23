@@ -68,6 +68,11 @@ MasterDof :: MasterDof (int i, DofManager* aNode, int nbc, int nic, DofID id) : 
    pastUnknowns   = NULL ; */
 }
 
+MasterDof :: MasterDof (int i, DofManager* aNode) : Dof (i, aNode, Undef)
+{
+  ic = bc = equationNumber = 0 ;                         // means "uninitialized"
+  unknowns       = new Dictionary ();
+}
 
 BoundaryCondition*  MasterDof :: giveBc () 
    // Returns the boundary condition the receiver is subjected to.

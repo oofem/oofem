@@ -53,7 +53,9 @@
 //#include "nonlocalbarrier.h"
 
 #include "errorestimator.h"
-
+#ifdef __PARALLEL_MODE
+#include "loadballancer.h"
+#endif
 
 /**
  Creates new instance of element corresponding to given element keyword.
@@ -162,9 +164,15 @@ ExportModule* CreateUsrDefExportModuleOfType (char* name, EngngModel* emodel);
  @return newly allocated object of requested type, null if keyword not suppported
 */
 NonlocalBarrier* CreateUsrDefNonlocalBarrierOfType (char* name, int num, Domain*d);
+/**
+ Creates new instance of user defined integration rule corresponding to given keyword.
+ @param type id determining the type of new instance
+ @param num  component number
+ @param d    dofmanager to which new dof belongs
+ @return newly allocated object of requested type, null if keyword not suppported
+*/
+IntegrationRule* CreateUsrDefIRuleOfType (classType type, int, Domain*);
 
-
-#ifdef __PARALLEL_MODE
 /**
  Creates new instance of element corresponding to given element keyword.
  @param type element id determining the type of new instance
@@ -181,5 +189,31 @@ Element* CreateUsrDefElementOfType (classType type, int, Domain*);
  @return newly allocated object of requested type, null if keyword not suppported
 */
 DofManager* CreateUsrDefDofManagerOfType (classType type, int, Domain*);
+/**
+ Creates new instance of user defined dof corresponding to given keyword.
+ @param type id determining the type of new instance
+ @param num  component number
+ @param d    dofmanager to which new dof belongs
+ @return newly allocated object of requested type, null if keyword not suppported
+*/
+Dof* CreateUsrDefDofOfType (classType type, int, DofManager*);
+
+#ifdef __PARALLEL_MODE
+/**
+ Creates new instance of load ballance monitor corresponding to given keyword.
+ @param type id determining the type of new instance
+ @param e    engng model to which new monitor belongs
+ @return newly allocated object of requested type, null if keyword not suppported
+ */
+LoadBallancerMonitor* CreateUsrDefLoadBallancerMonitorOfType (classType type, EngngModel*);
+/**
+ Creates new instance of load ballancer corresponding to given keyword.
+ @param type id determining the type of new instance
+ @param d    domain to which new ballancer is attached
+ @return newly allocated object of requested type, null if keyword not suppported
+ */
+LoadBallancer* CreateUsrDefLoadBallancerOfType (classType type, Domain*);
 #endif
+
+
 #endif

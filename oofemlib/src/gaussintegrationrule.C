@@ -50,6 +50,8 @@ GaussIntegrationRule::GaussIntegrationRule (int n, Domain* domain,
                 int startIndx, int endIndx, bool dynamic)
 : IntegrationRule (n, domain, startIndx, endIndx, dynamic) {}
 
+GaussIntegrationRule::GaussIntegrationRule (int n, Domain* domain) 
+  : IntegrationRule (n, domain) {}
 
 GaussIntegrationRule::~GaussIntegrationRule ()
 {}

@@ -315,6 +315,9 @@ enum classType {
   LevelSetPCSClass,
   FastMarchingMethodClass,
 
+
+  WallClockLoadBallancerMonitorClass,
+  ParmetisLoadBallancerClass
     
 };
 
