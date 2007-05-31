@@ -621,7 +621,10 @@ enum ValueModeType {
  VM_Total        = 1,
  VM_Velocity     = 2,
  VM_Acceleration = 3,
- VM_Incremental
+ VM_Incremental  = 4,
+ VM_RhsTotal     = 5,
+ VM_RhsIncremental = 6,
+ VM_RhsInitial    = 7
 
 };
 
@@ -1230,6 +1233,8 @@ typedef unsigned long  ContextMode;
 #define CM_None         0
 #define CM_State        (1L << 1) 
 #define CM_Definition   (1L << 2)
+#define CM_DefinitionGlobal (1L << 3)
+#define CM_UnknownDictState (1L << 4)
 
 
 /// oofem terminate exception class

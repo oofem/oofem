@@ -83,8 +83,10 @@ public:
  /**
   Service for setting up the communication patterns with other remote processs.
   Sets up the toSend and toRecv attributes in associated process communicators.
+  @param excludeSelfCommFlag if set to true, the communication map of receiver with itself will be forced to be empty, otherwise it will be assembled.
+  @param forceReinit forces reinitilaization
   */
- void setUpCommunicationMaps (EngngModel* pm);
+ void setUpCommunicationMaps (EngngModel* pm, bool excludeSelfCommFlag, bool forceReinit=false);
  /**
   Assigns  given ToSendMap  to given process communicator. 
   Sorts map according to global entity (dofmanagers or element) numbers to ensure, that local and 
@@ -128,18 +130,21 @@ private:
  /**
   Service for setting up the receiver for node cut communication patterns with other remote processs.
   Sets up the toSend and toRecv attributes in associated process communicators.
+  @param excludeSelfCommFlag if set to true, the communication map of receiver with itself will be forced to be empty, otherwise it will be assembled.
   */
- void setUpCommunicationMapsForNodeCut (EngngModel* domain);
+ void setUpCommunicationMapsForNodeCut (EngngModel* domain, bool excludeSelfCommFlag);
   /**
   Service for setting up the receiver for element cut communication patterns with other remote processs.
   Sets up the toSend and toRecv attributes in associated process communicators.
+  @param excludeSelfCommFlag if set to true, the communication map of receiver with itself will be forced to be empty, otherwise it will be assembled.
   */
- void setUpCommunicationMapsForElementCut (EngngModel* domain);
+ void setUpCommunicationMapsForElementCut (EngngModel* domain, bool excludeSelfCommFlag);
  /**
   Service for setting up the receiver for remote element communication patterns with other remote processs.
   Sets up the toSend and toRecv attributes in associated process communicators.
+  @param excludeSelfCommFlag if set to true, the communication map of receiver with itself will be forced to be empty, otherwise it will be assembled.
   */
- void setUpCommunicationMapsForRemoteElementMode (EngngModel* domain);
+ void setUpCommunicationMapsForRemoteElementMode (EngngModel* domain, bool excludeSelfCommFlag);
 
 
 };

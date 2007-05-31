@@ -326,6 +326,12 @@ EngngModel::initializeFrom (InputRecord* ir)
 #ifdef __PARALLEL_MODE
  IR_GIVE_OPTIONAL_FIELD (ir, parallelFlag, IFT_EngngModel_parallelflag, "parallelflag"); // Macro
 // fprintf (stderr, "Parallel mode is %d\n", parallelFlag);
+ 
+ /* Load ballancing support */
+ int _val = 0;
+ IR_GIVE_OPTIONAL_FIELD (ir, _val, IFT_NonLinearStatic_loadBallancingFlag, "lbflag"); // Macro
+ loadBallancingFlag = _val;
+
 #endif
   return IRRT_OK;
 }
@@ -642,6 +648,10 @@ EngngModel :: solveYourself ()
      fprintf (out,"\nUser time consumed by solution step %d: %ld [s]\n\n",
               this->giveCurrentStep()->giveNumber(), _steptime);
 //#endif
+
+#ifdef __PARALLEL_MODE
+     if (loadBallancingFlag) this->ballanceLoad(this->giveCurrentStep());
+#endif
 
    }
  }
@@ -1899,7 +1909,7 @@ void  EngngModel :: drawNodes (oofegGraphicContext& context) {
 
 #ifdef __PARALLEL_MODE
 void 
-EngngModel::ballanceLoad ()
+EngngModel::ballanceLoad (TimeStep* atTime)
 {
   LoadBallancerMonitor::LoadBallancerDecisionType _d;
   this->giveLoadBallancerMonitor();
@@ -1907,10 +1917,38 @@ EngngModel::ballanceLoad ()
 
   _d = lbm->decide();
   if (_d == LoadBallancerMonitor::LBD_RECOVER) {
+    // determine nwe partitioning
     lb->calculateLoadTransfer();
+    // pack e-model solution data into dof dictionaries
+    this->packMigratingData(atTime);
+    // migrate data 
+    this->giveDomain(1)->migrateLoad (lb);
+    // renumber itself
+    this->forceEquationNumbering();
+#if __VERBOSE_PARALLEL
+    // debug print
+    int i, j, nnodes=giveDomain(1)->giveNumberOfDofManagers();
+    int myrank = this->giveRank();
+    fprintf (stderr, "\n[%d] Nodal Table\n", myrank);
+    for (i=1; i<=nnodes; i++) {
+      if (giveDomain(1)->giveDofManager(i)->giveParallelMode()==DofManager_local) 
+        fprintf (stderr, "[%d]: %5d[%d] local ", myrank, i, giveDomain(1)->giveDofManager(i)->giveGlobalNumber());
+      else if (giveDomain(1)->giveDofManager(i)->giveParallelMode()==DofManager_shared) {
+        fprintf (stderr, "[%d]: %5d[%d] shared ", myrank, i, giveDomain(1)->giveDofManager(i)->giveGlobalNumber());
+      }
+      for (j=1; j<=giveDomain(1)->giveDofManager(i)->giveNumberOfDofs(); j++) {
+        fprintf (stderr, "(%d)", giveDomain(1)->giveDofManager(i)->giveDof(j)->giveEquationNumber());
+      }
+      fprintf (stderr, "\n");
+    }
     
-
-
+#endif
+    // unpack (restore) e-model solution data from dof dictionaries
+    this->unpackMigratingData(atTime);
+    
+    
+    
+    
   }
 }
 #endif

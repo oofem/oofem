@@ -854,13 +854,13 @@ contextIOResultType  FloatArray :: restoreYourself (DataStream* stream, ContextM
   if (values!=NULL) freeDouble(values);
   if (size) {
     values = allocDouble(size) ;
-  allocatedSize = size;
-  // read raw data
-  if (!stream->read(values,size)) return CIO_IOERR;
+    allocatedSize = size;
+    // read raw data
+    if (!stream->read(values,size)) return CIO_IOERR;
   } else {
     values = NULL ;
-  allocatedSize = 0;
- }
+    allocatedSize = 0;
+  }
 
   // return result back
   return CIO_OK;

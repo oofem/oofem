@@ -60,7 +60,7 @@ ProblemCommunicator :: ~ProblemCommunicator ()
 
 
 void
-ProblemCommunicator :: setUpCommunicationMapsForNodeCut (EngngModel* pm)
+ProblemCommunicator :: setUpCommunicationMapsForNodeCut (EngngModel* pm, bool excludeSelfCommFlag)
 {
  Domain* domain = pm->giveDomain(1);
  int nnodes = domain->giveNumberOfDofManagers();
@@ -81,7 +81,9 @@ ProblemCommunicator :: setUpCommunicationMapsForNodeCut (EngngModel* pm)
   partitionList = domain->giveDofManager (i) -> givePartitionList();
   if (domain->giveDofManager (i)->giveParallelMode () == DofManager_shared) {
    for (j=1; j<=partitionList->giveSize(); j++) {
-    domainNodeSendCount.at(partitionList->at(j)+1) ++;
+     if (!(excludeSelfCommFlag && (this->rank == partitionList->at(j)))) {
+       domainNodeSendCount.at(partitionList->at(j)+1) ++;
+     }
    }
   }
  }
@@ -93,14 +95,16 @@ ProblemCommunicator :: setUpCommunicationMapsForNodeCut (EngngModel* pm)
  
  
  for (i=1; i<= nnodes; i++) {
-  // if combination node & eleemnt cut can occur, test for shared DofMan mode
-  partitionList = domain->giveDofManager (i) -> givePartitionList();
-  if (domain->giveDofManager (i)->giveParallelMode () == DofManager_shared) {
-   for (j=1; j<=partitionList->giveSize(); j++) {
-    partition = partitionList->at(j);
-    maps[partition]->at(++pos.at(partition+1)) = i;
-    }
-  }
+   // if combination node & eleemnt cut can occur, test for shared DofMan mode
+   partitionList = domain->giveDofManager (i) -> givePartitionList();
+   if (domain->giveDofManager (i)->giveParallelMode () == DofManager_shared) {
+     for (j=1; j<=partitionList->giveSize(); j++) {
+       partition = partitionList->at(j);
+       if (!(excludeSelfCommFlag && (this->rank == partition))) {
+	 maps[partition]->at(++pos.at(partition+1)) = i;
+       }
+     }
+   }
  }
  // set up domain communicators maps
  for (i=0; i<size; i++) {
@@ -117,7 +121,8 @@ ProblemCommunicator :: setUpCommunicationMapsForNodeCut (EngngModel* pm)
 
 
 void
-ProblemCommunicator :: setUpCommunicationMapsForElementCut (EngngModel* pm)
+ProblemCommunicator :: setUpCommunicationMapsForElementCut (EngngModel* pm, 
+							    bool excludeSelfCommFlag)
 {
  Domain* domain = pm->giveDomain(1);
  int nnodes = domain->giveNumberOfDofManagers();
@@ -155,8 +160,10 @@ ProblemCommunicator :: setUpCommunicationMapsForElementCut (EngngModel* pm)
    if (domain->giveDofManager (i)->giveParallelMode () == DofManager_remote) {
     // size of partitionList should be 1 <== only ine master
     for (j=1; j<=partitionList->giveSize(); j++) {
-     domainRecvListSize++;
-     domainNodeRecvCount.at(partitionList->at(j)+1) ++;
+      if (!(excludeSelfCommFlag && (this->rank == partitionList->at(j)))) {
+	domainRecvListSize++;
+	domainNodeRecvCount.at(partitionList->at(j)+1) ++;
+      }
     }
    }
   }
@@ -181,8 +188,10 @@ ProblemCommunicator :: setUpCommunicationMapsForElementCut (EngngModel* pm)
      partitionList = domain->giveDofManager (i) -> givePartitionList();
      // size of partitionList should be 1 <== only ine master
      for (j=1; j<=partitionList->giveSize(); j++) {
-      partition = partitionList->at(j);
-      maps[partition]->at(++pos.at(partition+1)) = i;
+       if (!(excludeSelfCommFlag && (this->rank == partitionList->at(j)))) {
+	 partition = partitionList->at(j);
+	 maps[partition]->at(++pos.at(partition+1)) = i;
+       }
      }
     }
    }
@@ -312,7 +321,8 @@ ProblemCommunicator :: setUpCommunicationMapsForElementCut (EngngModel* pm)
 
 
 void
-ProblemCommunicator :: setUpCommunicationMapsForRemoteElementMode (EngngModel* pm)
+ProblemCommunicator :: setUpCommunicationMapsForRemoteElementMode (EngngModel* pm,
+								   bool excludeSelfCommFlag)
 {
  //int nnodes = domain->giveNumberOfDofManagers();
  Domain* domain = pm->giveDomain(1);
@@ -351,8 +361,10 @@ ProblemCommunicator :: setUpCommunicationMapsForRemoteElementMode (EngngModel* p
    if (domain->giveElement (i)->giveParallelMode () == Element_remote) {
     // size of partitionList should be 1 <== only ine master
     for (j=1; j<=partitionList->giveSize(); j++) {
-     domainRecvListSize++;
-     domainNodeRecvCount.at(partitionList->at(j)+1) ++;
+      if (!(excludeSelfCommFlag && (this->rank == partitionList->at(j)))) {
+	domainRecvListSize++;
+	domainNodeRecvCount.at(partitionList->at(j)+1) ++;
+      }
     }
    }
   }
@@ -377,8 +389,10 @@ ProblemCommunicator :: setUpCommunicationMapsForRemoteElementMode (EngngModel* p
      partitionList = domain->giveElement (i) -> givePartitionList();
      // size of partitionList should be 1 <== only ine master
      for (j=1; j<=partitionList->giveSize(); j++) {
-      partition = partitionList->at(j);
-      maps[partition]->at(++pos.at(partition+1)) = i;
+       if (!(excludeSelfCommFlag && (this->rank == partitionList->at(j)))) {
+	 partition = partitionList->at(j);
+	 maps[partition]->at(++pos.at(partition+1)) = i;
+       }
      }
     }
    }
@@ -531,21 +545,22 @@ ProblemCommunicator :: setUpCommunicationMapsForRemoteElementMode (EngngModel* p
 }
 
 void
-ProblemCommunicator :: setUpCommunicationMaps (EngngModel* pm)
+ProblemCommunicator :: setUpCommunicationMaps (EngngModel* pm, bool excludeSelfCommFlag, 
+					       bool forceReinit)
 {
  
 #ifdef __VERBOSE_PARALLEL
  VERBOSEPARALLEL_PRINT("ProblemCommunicator :: setUpCommunicationMaps", "Setting up communication maps", rank);
 #endif
  
- if(initialized)return;
+ if(!forceReinit && initialized)return;
 
  if (this->mode == PC__NODE_CUT) 
-  setUpCommunicationMapsForNodeCut (pm);
+  setUpCommunicationMapsForNodeCut (pm, excludeSelfCommFlag);
  else if (this->mode == PC__ELEMENT_CUT) 
-  setUpCommunicationMapsForElementCut (pm);
+  setUpCommunicationMapsForElementCut (pm, excludeSelfCommFlag);
  else if (this->mode == PC__REMOTE_ELEMENT_MODE) 
-  setUpCommunicationMapsForRemoteElementMode (pm);
+  setUpCommunicationMapsForRemoteElementMode (pm, excludeSelfCommFlag);
  else _error ("setUpCommunicationMaps: unknown mode");
  
  initialized=true;

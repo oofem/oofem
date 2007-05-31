@@ -96,6 +96,18 @@ public:
 
  EngngModel*  giveEngngModel() {return engngModel;}
 
+ /**
+    Reinitializes the receiver. This is used, when topology of problem has changed 
+    (for example after adaptive refinement or load transfer in parallel applications).
+    This is necessary for numerical metods, that cache some data between solution
+    steps and that may depend on domain or problem topology. The caching of data by 
+    receiver is intended only for speeding up the calculation, but numerical method
+    must be always able to generate this data again.
+    This method clears receiver cached data dependent on topology, when it changes.
+    
+  */
+ virtual void reinitialize () {}
+
  // identification 
  /// Returns class name of the receiver.
  const char*  giveClassName () const { return "NumericalMethod" ;}

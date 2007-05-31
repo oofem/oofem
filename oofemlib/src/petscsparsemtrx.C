@@ -35,6 +35,7 @@
 
 #ifdef __PETSC_MODULE
 
+#include "parallel.h"
 #include "petscsparsemtrx.h"
 #include "petscordering.h"
 #include "engngm.h"
@@ -73,6 +74,8 @@ PetscSparseMtrx:: buildInternalStructure (EngngModel* eModel, int di, EquationID
   Domain* domain = eModel->giveDomain(di);
   int nelem;
 
+  if (mtrx) MatDestroy(mtrx);
+
   this->ut = ut;
 #ifdef __PARALLEL_MODE
   int rank;
@@ -96,17 +99,20 @@ PetscSparseMtrx:: buildInternalStructure (EngngModel* eModel, int di, EquationID
   // initialize n2g map
   // n2g.init(eModel, di);
 
+
   leqs = n2g->giveNumberOfLocalEqs();
   geqs = n2g->giveNumberOfGlobalEqs();
+
+#ifdef __VERBOSE_PARALLEL
+  OOFEM_LOG_INFO ("[%d]PetscSparseMtrx:: buildInternalStructure: l_eqs = %d, g_eqs = %d, n_eqs = %d\n",rank,leqs, geqs, eModel->giveNumberOfEquations(ut));
+#endif
+ 
 #else
   leqs = geqs = eModel->giveNumberOfEquations(ut);
   //map = new LocalizationMap();
 #endif
 
-#ifdef __VERBOSE_PARALLEL
-  OOFEM_LOG_INFO ("[%d]PetscSparseMtrx:: buildInternalStructure: l_eqs = %d, g_eqs = %d, n_eqs = %d\n",rank,leqs, geqs, eModel->giveNumberOfEquations());
-#endif
-  
+ 
   //determine nonzero structure of a "local (maintained)" part of matrix
 
 #ifdef __PARALLEL_MODE

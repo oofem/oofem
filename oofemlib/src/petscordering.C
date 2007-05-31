@@ -232,7 +232,9 @@ PetscNatural2GlobalOrdering::init (EngngModel* emodel, EquationID ut, int di, Eq
         for (j=1; j<=psize; j++) {
           p = plist->at(j);
           if (p == myrank) continue;
-	  //fprintf (stderr, "[%d] Sending localShared node %d to proc %d\n", myrank, dman->giveGlobalNumber(), p);
+#if 0
+	  fprintf (stderr, "[%d] Sending localShared node %d to proc %d\n", myrank, dman->giveGlobalNumber(), p);
+#endif
           buffs[p]->packInt(dman->giveGlobalNumber());
           ndofs = dman->giveNumberOfDofs ();
           for (k=1; k<=ndofs; k++) {
@@ -344,16 +346,24 @@ PetscNatural2GlobalOrdering::init (EngngModel* emodel, EquationID ut, int di, Eq
     fprintf (stderr, "%d ",locGlobMap.at(i));
   */
 
-  /*
-  for (i=1; i<=ndofman; i++) {
-    dman = d->giveDofManager(i);
-    ndofs = dman->giveNumberOfDofs ();
-    for (j=1; j<=ndofs; j++) {
-      printf ("[%d] n:%d (%d), leq = %d, geq = %d\n", emodel->giveRank(), i,j,  dman->giveDof(j)->giveEquationNumber(), locGlobMap.at(dman->giveDof(j)->giveEquationNumber()));
+#if  __VERBOSE_PARALLEL
+  if (et == et_standard) {
+    int _eq; char* ptr; char* locname = "local", *shname="shared", *unkname="unknown";
+    for (i=1; i<=ndofman; i++) {
+      dman = d->giveDofManager(i);
+      if (dman->giveParallelMode() == DofManager_local) ptr=locname;
+      else if (dman->giveParallelMode() == DofManager_shared) ptr=shname;
+      else ptr = unkname;
+      ndofs = dman->giveNumberOfDofs ();
+      for (j=1; j<=ndofs; j++) {
+        if ((_eq = dman->giveDof(j)->giveEquationNumber()))
+          fprintf (stderr, "[%d] n:%6s %d[%d] (%d), leq = %d, geq = %d\n", emodel->giveRank(), ptr, i,dman->giveGlobalNumber(),j,_eq, locGlobMap.at(_eq));
+        else 
+          fprintf (stderr, "[%d] n:%6s %d[%d] (%d), leq = %d, geq = %d\n", emodel->giveRank(), ptr, i,dman->giveGlobalNumber(),j,_eq, 0);
+      }
     }
   }
-  */
-        
+#endif        
 
 
   // build reverse map
@@ -361,6 +371,7 @@ PetscNatural2GlobalOrdering::init (EngngModel* emodel, EquationID ut, int di, Eq
   if (et == et_standard) lneq = emodel->giveNumberOfEquations(ut);
   else lneq = emodel->giveNumberOfPrescribedEquations(ut);
 
+  globLocMap.clear();
   for (i=1; i<=lneq; i++) 
     globLocMap[locGlobMap.at(i)] = i;
 
@@ -442,11 +453,11 @@ PetscNatural2LocalOrdering::init (EngngModel* emodel, EquationID ut, int di,  Eq
     for (j=1; j<=ndofs; j++) {
       if (dman->giveDof(j)->isPrimaryDof()) {
         if (et == et_standard) {
-	  n_eq = dman->giveDof(j)->giveEquationNumber();
-	} else {
-	  n_eq = dman->giveDof(j)->givePrescribedEquationNumber();
-	}
-
+          n_eq = dman->giveDof(j)->giveEquationNumber();
+        } else {
+          n_eq = dman->giveDof(j)->givePrescribedEquationNumber();
+        }
+        
         if (n_eq == 0) continue;
         if (lFlag) {
 	  n2l.at(n_eq) = loc_eq++;

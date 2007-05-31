@@ -541,12 +541,24 @@ contextIOResultType Element :: saveContext (DataStream* stream, ContextMode mode
 
   if ((iores = FEMComponent::saveContext(stream,mode,obj)) != CIO_OK) THROW_CIOERR(iores);
   
-  if (mode & CM_Definition ) {
+  if ((mode & CM_Definition)) {
      if (!stream->write (&numberOfDofMans,1)) THROW_CIOERR(CIO_IOERR);
      if (!stream->write (&material,1)) THROW_CIOERR(CIO_IOERR);
      if (!stream->write (&crossSection,1)) THROW_CIOERR(CIO_IOERR);
      
+#ifdef __PARALLEL_MODE
+     if (mode & CM_DefinitionGlobal) { 
+       // send global numbers instead of local ones
+       int s = dofManArray.giveSize();
+       IntArray globDN (s);
+       for (i=1; i<=s; i++) globDN.at(i) = this->giveDofManager(i)->giveGlobalNumber();
+       if ((iores = globDN.storeYourself(stream, mode)) != CIO_OK) THROW_CIOERR(iores);
+     } else {
+       if ((iores = dofManArray.storeYourself(stream, mode)) != CIO_OK) THROW_CIOERR(iores);
+     } 
+#else
      if ((iores = dofManArray.storeYourself(stream, mode)) != CIO_OK) THROW_CIOERR(iores);
+#endif
      if ((iores = bodyLoadArray.storeYourself(stream, mode)) != CIO_OK) THROW_CIOERR(iores);
      if ((iores = boundaryLoadArray.storeYourself(stream, mode)) != CIO_OK) THROW_CIOERR(iores);
      if (!stream->write (&numberOfIntegrationRules,1)) THROW_CIOERR(CIO_IOERR);

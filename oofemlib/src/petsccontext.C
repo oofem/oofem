@@ -61,8 +61,15 @@ PetscContext :: init (int di)
 
     n2g_prescribed.init(emodel, ut, di,ApplicationOrdering::et_prescribed);
     n2l_prescribed.init(emodel, ut, di,ApplicationOrdering::et_prescribed);
+
+    fprintf (stderr, "[%d] Petsccontext::init leq:%d, neq:%d, geq:%d\n",emodel->giveRank(), giveNumberOfLocalEqs(),giveNumberOfNaturalEqs(), giveNumberOfGlobalEqs());
+
  }
 #endif
+  if (n2gvecscat) {
+    VecScatterDestroy (n2gvecscat);
+    n2gvecscat=NULL;
+  }
 }
 
 

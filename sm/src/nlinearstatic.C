@@ -237,10 +237,6 @@ NonLinearStatic :: initializeFrom (InputRecord* ir)
                                                    ProblemCommunicator::PC__REMOTE_ELEMENT_MODE);
    }
 
-   /* Load ballancing support */
-   int _val = 0;
-   IR_GIVE_OPTIONAL_FIELD (ir, _val, IFT_NonLinearStatic_loadBallancingFlag, "lbflag"); // Macro
-   loadBallancingFlag = _val;
  }
 #endif
  return IRRT_OK;
@@ -570,7 +566,7 @@ NonLinearStatic :: proceedStep (TimeStep* tStep)
     delete mht;
   */
   
-  stiffnessMatrix = ::CreateUsrDefSparseMtrx(sparseMtrxType); 
+  if (!stiffnessMatrix) stiffnessMatrix = ::CreateUsrDefSparseMtrx(sparseMtrxType); 
   if (stiffnessMatrix==NULL) _error ("proceedStep: sparse matrix creation failed");
   if (nonlocalStiffnessFlag) {
    //stiffnessMatrix = new SkylineUnsym ();
@@ -1152,12 +1148,12 @@ NonLinearStatic :: estimateMaxPackSize (IntArray& commMap, CommunicationBuffer& 
 
 
 void
-NonLinearStatic :: initializeCommMaps()
+NonLinearStatic :: initializeCommMaps(bool forceInit)
 {
 
 // set up communication patterns
- communicator->setUpCommunicationMaps (this);
- if (nonlocalExt) nonlocCommunicator->setUpCommunicationMaps (this);
+ communicator->setUpCommunicationMaps (this, true, forceInit);
+ if (nonlocalExt) nonlocCommunicator->setUpCommunicationMaps (this, true, forceInit);
 }
 
 #endif
@@ -1229,8 +1225,92 @@ NonLinearStatic::giveLoadBallancerMonitor()
 }
 
 void 
-NonLinearStatic::packMigratingData () {}
+NonLinearStatic::packMigratingData (TimeStep* atTime) 
+{
+  Domain* domain = this->giveDomain(1);
+  int ndofman =  domain -> giveNumberOfDofManagers(), ndofs, idofman, idof, _eq;
+  DofManager* _dm;
+  Dof* _dof;
+  
+  for (idofman=1; idofman <= ndofman; idofman++) {
+    _dm = domain->giveDofManager(idofman);
+    ndofs = _dm->giveNumberOfDofs();
+    for (idof=1; idof<=ndofs; idof++) {
+      _dof = _dm->giveDof(idof);
+      if (_dof->isPrimaryDof()) {
+        if ((_eq = _dof->giveEquationNumber())) {
+          // pack values in solution vectors
+          _dof->updateUnknownsDictionary (atTime, EID_MomentumBalance, VM_Total, totalDisplacement.at(_eq));
+          _dof->updateUnknownsDictionary (atTime, EID_MomentumBalance, VM_RhsInitial, initialLoadVector.at(_eq));
+          _dof->updateUnknownsDictionary (atTime, EID_MomentumBalance, VM_RhsIncremental, incrementalLoadVector.at(_eq));
+          
+        } else if ((_eq = _dof->givePrescribedEquationNumber())) {
+          // pack values in prescribed solution vectors
+          _dof->updateUnknownsDictionary (atTime, EID_MomentumBalance, VM_RhsInitial, initialLoadVectorOfPrescribed.at(_eq));
+          _dof->updateUnknownsDictionary (atTime, EID_MomentumBalance, VM_RhsIncremental, incrementalLoadVectorOfPrescribed.at(_eq));
+         
+        }
+      } // end primary dof
+    } // end dof loop 
+  } // end dofman loop
+
+}
 
 void 
-NonLinearStatic::unpackMigratingData () {}
+NonLinearStatic::unpackMigratingData (TimeStep* atTime) 
+{
+  Domain* domain = this->giveDomain(1);
+  int ndofman =  domain -> giveNumberOfDofManagers(), ndofs, idofman, idof, _eq;
+  int myrank = this->giveRank();
+  DofManager* _dm;
+  Dof* _dof;
+  
+  // resize target arrays
+  int neq = this->giveNumberOfEquations (EID_MomentumBalance);
+  totalDisplacement.resize (neq); 
+  incrementOfDisplacement.resize (neq);
+  incrementalLoadVector.resize(neq);
+  initialLoadVector.resize(neq);
+  initialLoadVectorOfPrescribed.resize(giveNumberOfPrescribedEquations(EID_MomentumBalance));
+  incrementalLoadVectorOfPrescribed.resize(giveNumberOfPrescribedEquations(EID_MomentumBalance));
+
+  for (idofman=1; idofman <= ndofman; idofman++) {
+    _dm = domain->giveDofManager(idofman);
+    ndofs = _dm->giveNumberOfDofs();
+    for (idof=1; idof<=ndofs; idof++) {
+      _dof = _dm->giveDof(idof);
+      if (_dof->isPrimaryDof()) {
+        if ((_eq = _dof->giveEquationNumber())) {
+          // pack values in solution vectors
+          _dof->giveUnknownsDictionaryValue (atTime, EID_MomentumBalance, VM_Total, totalDisplacement.at(_eq));
+          _dof->giveUnknownsDictionaryValue (atTime, EID_MomentumBalance, VM_RhsInitial, initialLoadVector.at(_eq));
+          _dof->giveUnknownsDictionaryValue (atTime, EID_MomentumBalance, VM_RhsIncremental, incrementalLoadVector.at(_eq));
+
+#if 0
+          // debug print
+          if (_dm->giveParallelMode() == DofManager_shared) {
+            fprintf (stderr, "[%d] Shared: %d(%d) -> %d\n",myrank, idofman, idof, _eq);
+          } else {
+            fprintf (stderr, "[%d] Local : %d(%d) -> %d\n",myrank, idofman, idof, _eq);          
+          }
+#endif
+        } else if ((_eq = _dof->givePrescribedEquationNumber())) {
+          // pack values in prescribed solution vectors
+          _dof->giveUnknownsDictionaryValue (atTime, EID_MomentumBalance, VM_RhsInitial, initialLoadVectorOfPrescribed.at(_eq));
+          _dof->giveUnknownsDictionaryValue (atTime, EID_MomentumBalance, VM_RhsIncremental, incrementalLoadVectorOfPrescribed.at(_eq));
+
+#if 0
+          // debug print
+          fprintf (stderr, "[%d] %d(%d) -> %d\n",myrank, idofman, idof, -_eq);
+#endif
+         
+        }
+      } // end primary dof
+    } // end dof loop 
+  } // end dofman loop
+
+  this->initializeCommMaps(true);
+  nMethod->reinitialize();
+  initFlag = true;
+}
 #endif

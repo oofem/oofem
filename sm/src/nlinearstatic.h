@@ -190,6 +190,9 @@ TASK:
   fMode giveFormulation () { return TL; }
   /// Returns nonzero if nonlocal stiffness option activated.
  virtual int useNonlocalStiffnessOption () {return this->nonlocalStiffnessFlag;}
+ /// For load ballancing purposes we store all values with same EquationID; so hash is computed from mode value only
+ virtual int       giveUnknownDictHashIndx (EquationID type, ValueModeType mode, TimeStep* stepN)
+   {return (int) mode;}
 
 #ifdef __OOFEG   
   /**
@@ -218,7 +221,7 @@ TASK:
 	/**
 		Initializes communication maps of the receiver
 		*/
-	void initializeCommMaps();
+	void initializeCommMaps(bool forceInit=false);
 
   /** returns reference to receiver's load ballancer*/
   virtual LoadBallancer* giveLoadBallancer() ;
@@ -252,13 +255,13 @@ TASK:
      are assumed to be stored in dof dictionaries before data migration. Then dofs will take care themselves for packing and unpacking. After 
      data migration and local renubering, the solution vectors will be restored from dof dictionary data back.
  */
- virtual void packMigratingData () ;
+ virtual void packMigratingData (TimeStep*) ;
  /** Unpacks receiver data when rebalancing load. When rebalancing happens, the local numbering will be lost on majority of processors. 
      Instead of identifying values of solution vectors that have to be send/received and then performing renumbering, all solution vectors
      are assumed to be stored in dof dictionaries before data migration. Then dofs will take care themselves for packing and unpacking. After 
      data migration and local renubering, the solution vectors will be restored from dof dictionary data back.
  */
- virtual void unpackMigratingData ();
+ virtual void unpackMigratingData (TimeStep*);
 
 #endif
 } ;

@@ -841,13 +841,13 @@ enum EngngModel_UpdateMode {EngngModel_SUMM_Mode, EngngModel_SET_Mode};
        are assumed to be stored in dof dictionaries before data migration. Then dofs will take care themselves for packing and unpacking. After 
        data migration and local renubering, the solution vectors will be restored from dof dictionary data back.
    */
-   virtual void packMigratingData () {}
+   virtual void packMigratingData (TimeStep*) {}
    /** Unpacks receiver data when rebalancing load. When rebalancing happens, the local numbering will be lost on majority of processors. 
        Instead of identifying values of solution vectors that have to be send/received and then performing renumbering, all solution vectors
        are assumed to be stored in dof dictionaries before data migration. Then dofs will take care themselves for packing and unpacking. After 
        data migration and local renubering, the solution vectors will be restored from dof dictionary data back.
    */
-   virtual void unpackMigratingData () {}
+   virtual void unpackMigratingData (TimeStep*) {}
 #endif
  public:
 
@@ -939,7 +939,7 @@ enum EngngModel_UpdateMode {EngngModel_SUMM_Mode, EngngModel_SET_Mode};
     dof related staff, which can later help in renumbering after rebalancing) and to send/receive all data. 
     Then the local update and renumbering is necessary to get consistent data structure.
   */
- virtual void ballanceLoad ();
+ virtual void ballanceLoad (TimeStep*);
  /** returns reference to receiver's load ballancer*/
  virtual LoadBallancer* giveLoadBallancer() {return NULL;}
  /** returns reference to receiver's load ballancer monitor*/

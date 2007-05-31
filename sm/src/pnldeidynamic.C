@@ -222,8 +222,8 @@ void PNlDEIDynamic :: solveYourself ()
 #endif
 
  // set up communication patterns
- communicator->setUpCommunicationMaps (this);
- if (nonlocalExt) nonlocCommunicator->setUpCommunicationMaps (this);
+ communicator->setUpCommunicationMaps (this, true);
+ if (nonlocalExt) nonlocCommunicator->setUpCommunicationMaps (this,true);
  // init remote dofman list
  // this->initRemoteDofManList ();
 #endif

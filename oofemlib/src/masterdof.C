@@ -328,6 +328,19 @@ void MasterDof :: updateUnknownsDictionary (TimeStep* tStep, EquationID type,
   unknowns -> at(hash) = dofValue;
 }
 
+void MasterDof :: giveUnknownsDictionaryValue (TimeStep* tStep, EquationID type, 
+                                               ValueModeType mode, double& dofValue)
+{
+ // Updates the receiver's unknown dictionary at end of step.
+ // to value dofValue.
+#ifdef DEBUG
+// if (type != this->giveUnknownType ())
+//  _error ("giveUnknown: Noncompatible Request");  
+#endif 
+
+  int hash = dofManager->giveDomain()->giveEngngModel()->giveUnknownDictHashIndx(type,mode,tStep);
+  dofValue = unknowns -> at(hash);
+}
 
 void  MasterDof :: printYourself ()
  // Prints the receiver on screen.
@@ -357,8 +370,8 @@ contextIOResultType MasterDof :: saveContext (DataStream* stream, ContextMode mo
 
   // store equation number of receiver
   if (!stream->write (&equationNumber,1)) THROW_CIOERR(CIO_IOERR);
-  if (dofManager -> giveDomain() -> giveEngngModel() -> requiresUnknowsDictionaryUpdate()) 
-  if ((iores = unknowns->saveContext (stream,mode,obj)) != CIO_OK) THROW_CIOERR(iores);
+  if ((mode & CM_UnknownDictState) || (dofManager -> giveDomain() -> giveEngngModel() -> requiresUnknowsDictionaryUpdate()))
+    if ((iores = unknowns->saveContext (stream,mode,obj)) != CIO_OK) THROW_CIOERR(iores);
 
   return CIO_OK;
 }
@@ -383,8 +396,8 @@ contextIOResultType MasterDof :: restoreContext (DataStream* stream, ContextMode
 
   // read equation number of receiver
   if (!stream->read (&equationNumber,1)) THROW_CIOERR(CIO_IOERR);
-  if (dofManager -> giveDomain() -> giveEngngModel() -> requiresUnknowsDictionaryUpdate()) 
-  if ((iores = unknowns->restoreContext (stream,mode,obj)) != CIO_OK) THROW_CIOERR(iores);
+  if ((mode & CM_UnknownDictState) || (dofManager -> giveDomain() -> giveEngngModel() -> requiresUnknowsDictionaryUpdate()))
+    if ((iores = unknowns->restoreContext (stream,mode,obj)) != CIO_OK) THROW_CIOERR(iores);
   
   return CIO_OK;
 }

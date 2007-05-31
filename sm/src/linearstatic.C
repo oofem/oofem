@@ -189,8 +189,8 @@ void LinearStatic :: solveYourself ()
 
   // set up communication patterns
   // needed only for correct shared rection computation
-  communicator->setUpCommunicationMaps (this);
-  if (nonlocalExt) nonlocCommunicator->setUpCommunicationMaps (this);
+  communicator->setUpCommunicationMaps (this,true);
+  if (nonlocalExt) nonlocCommunicator->setUpCommunicationMaps (this,true);
 #endif
 
  StructuralEngngModel::solveYourself();

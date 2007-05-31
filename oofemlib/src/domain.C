@@ -1164,7 +1164,8 @@ Domain::packMigratingData (LoadBallancer* lb, ProcessCommunicator& pc)
 	/* this is a potential performance leak, sending shared dofman to a partition,
 	   in which is already shared does not require to send context (is already there)
 	   here for simplicity it is always send */
-        dofman->saveContext (&pcDataStream, CM_Definition | CM_State);
+        dofman->saveContext (&pcDataStream, CM_Definition | CM_State | CM_UnknownDictState);
+
       }
     }
   }
@@ -1184,7 +1185,7 @@ Domain::packMigratingData (LoadBallancer* lb, ProcessCommunicator& pc)
       // pack type
       pcbuff->packInt (elem->giveClassID());
       // nodal numbers shuld be packed as global !!
-      elem->saveContext (&pcDataStream, CM_Definition | CM_State);
+      elem->saveContext (&pcDataStream, CM_Definition | CM_DefinitionGlobal | CM_State);
     }
   } // end loop over elements
   // pack end-of-element-record
@@ -1235,7 +1236,7 @@ Domain::unpackMigratingData ( LoadBallancer* lb, ProcessCommunicator& pc)
       pcbuff->unpackIntArray (_partitions);
       dofman->setPartitionList (_partitions);
       // unpack dofman state (this is the local dofman, not available on remote)
-      dofman->restoreContext (&pcDataStream, CM_Definition | CM_State);
+      dofman->restoreContext (&pcDataStream, CM_Definition | CM_State| CM_UnknownDictState);
       dofman->setParallelMode (DofManager_local);
       dofman->setNumber (0); // received dof mans assigned with zero; this allows to distinguish them later form local ones
 #ifdef DEBUG
@@ -1252,10 +1253,13 @@ Domain::unpackMigratingData ( LoadBallancer* lb, ProcessCommunicator& pc)
       dofman->setGlobalNumber(_globnum);
       // unpack list of new partitions
       pcbuff->unpackIntArray (_partitions);
-      dofman->setPartitionList (_partitions);
       // unpack dofman state (this is the local dofman, not available on remote)
-      dofman->restoreContext (&pcDataStream, CM_Definition | CM_State);
+      dofman->restoreContext (&pcDataStream, CM_Definition | CM_State| CM_UnknownDictState);
+      dofman->setPartitionList (_partitions);
       dofman->setParallelMode (DofManager_shared);
+#if __VERBOSE_PARALLEL
+      fprintf (stderr, "[%d] received Shared new dofman [%d]\n", myrank, _globnum);
+#endif
 
 #ifdef DEBUG
       if (dmanMap.find(_globnum) != dmanMap.end()) OOFEM_ERROR ("LoadBallancer::unpackMigratingData: DM_SharedNew data incostency: record already exist");
@@ -1277,13 +1281,18 @@ Domain::unpackMigratingData ( LoadBallancer* lb, ProcessCommunicator& pc)
       // unpack list of new partitions
       pcbuff->unpackIntArray (_partitions);
       // unpack dofman state (this is the local dofman, not available on remote)
-      dofman->restoreContext (&pcDataStream, CM_Definition | CM_State);
+      dofman->restoreContext (&pcDataStream, CM_Definition | CM_State| CM_UnknownDictState);
       // merge it with the old one
       dofman->mergePartitionList (_partitions);
       dofman->setParallelMode (DofManager_shared);
       if (_mode == LoadBallancer::DM_SharedExclude) {
 	// exlude sending partition from partition list 
         dofman->removePartitionFromList (iproc);
+	int _s = dofman->givePartitionList()->giveSize();
+	if ((_s == 0) || ((_s==1) && dofman->givePartitionList()->findFirstIndexOf(myrank))) {
+	  // becoming local
+	  dofman->setParallelMode (DofManager_local);
+	}
       }
       dmanMap[_globnum] = dofman;
       break;
@@ -1356,13 +1365,22 @@ Domain::migrateLoad (LoadBallancer* lb)
   this->dmanMap.clear();
   this->recvElemList.clear();
 
+#if 0
   // debug print
   int i, j, nnodes=giveNumberOfDofManagers(), nelems=giveNumberOfElements();
   fprintf (stderr, "\n[%d] Nodal Table\n", myrank);
   for (i=1; i<=nnodes; i++) {
-    fprintf (stderr, "%5d[%d] ", i, giveDofManager(i)->giveGlobalNumber());
-    if (((i % 8) == 0) || (i==nnodes)) fprintf (stderr, "\n");
+    if (giveDofManager(i)->giveParallelMode()==DofManager_local) 
+      fprintf (stderr, "[%d]: %5d[%d] local\n", myrank, i, giveDofManager(i)->giveGlobalNumber());
+    else if (giveDofManager(i)->giveParallelMode()==DofManager_shared) {
+      fprintf (stderr, "[%d]: %5d[%d] shared ", myrank, i, giveDofManager(i)->giveGlobalNumber());
+      for (j=1; j<=giveDofManager(i)->givePartitionList()->giveSize(); j++) {
+        fprintf (stderr, "%d ", giveDofManager(i)->givePartitionList()->at(j));
+      }
+      fprintf (stderr, "\n");
+    }
   }
+  
   fprintf (stderr, "\n[%d] Element Table\n", myrank);
   for (i=1; i<=nelems; i++) {
     fprintf (stderr, "%5d {", i);
@@ -1370,7 +1388,7 @@ Domain::migrateLoad (LoadBallancer* lb)
       fprintf (stderr, "%d ", giveElement(i)->giveDofManager(j)->giveNumber());
     fprintf (stderr, "}\n");
   }
-  
+#endif
   
 }
 
@@ -1415,7 +1433,19 @@ Domain::deleteRemoteDofManagers (LoadBallancer* lb)
       //
       dman = dofManagerList->unlink (i);
       delete dman;
+    } else if (dmode == LoadBallancer::DM_SharedNew) {
+      dman = this->giveDofManager (i);
+      dman->setPartitionList (*(lb->giveDofManPartitions(i)));
+      dman->setParallelMode (DofManager_shared);
+#if __VERBOSE_PARALLEL
+      fprintf (stderr,"domain: new shared node %d, partitions:", i);
+      for (int j=1; j<=lb->giveDofManPartitions(i)->giveSize(); j++)
+	fprintf (stderr, "%d ", lb->giveDofManPartitions(i)->at(j));
+      fprintf (stderr, "\n");
+#endif
+      
     }
+
   }
 }
 

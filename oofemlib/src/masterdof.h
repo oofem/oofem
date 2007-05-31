@@ -245,6 +245,9 @@ class MasterDof  : public Dof
    */
   void                updateUnknownsDictionary (TimeStep*tStep, EquationID type,
                          ValueModeType mode, double dofValue);
+  /** access dictionary value, if not present zero is returned */
+  virtual  void       giveUnknownsDictionaryValue (TimeStep *tStep, EquationID type, 
+                                                   ValueModeType mode, double& dofValue);
 
   /** 
    Stores receiver state to output stream.  

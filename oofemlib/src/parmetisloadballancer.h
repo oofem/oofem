@@ -37,7 +37,9 @@
 
 #ifdef __PARMETIS_MODULE
 #include "parmetis.h"
+#ifndef __MAKEDEPEND
 #include <vector>
+#endif
 #endif
 
 /**

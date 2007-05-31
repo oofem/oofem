@@ -231,7 +231,8 @@ class NRSolver : public SparseNonLinearSystemNM
   classType giveClassID () const { return NRSolverClass ;}
   /// sets associated Domain 
   virtual void         setDomain (Domain* d) {this->domain = d; if (linSolver) linSolver->setDomain(d);}
-
+  /// This method clears receiver cached data dependent on topology, when it changes.
+  virtual void reinitialize () {if (linSolver) linSolver->reinitialize();}
  protected:
 
   SparseLinearSystemNM* giveLinearSolver() ;

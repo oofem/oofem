@@ -329,10 +329,13 @@ contextIOResultType  IntArray :: restoreYourself (DataStream* stream, ContextMod
   // read size 
   if (!stream->read(&size,1))  return (CIO_IOERR);
   if (values!=NULL) freeInt(values);
-  if (size)
+  if (size) {
     values = allocInt(size) ;
-  else
+    allocatedSize = size;
+  } else {
     values = NULL ;
+    allocatedSize = 0;
+  }
   // write raw data
   if (!stream->read(values,size)) return (CIO_IOERR);
   // return result back

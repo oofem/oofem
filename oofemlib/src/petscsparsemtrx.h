@@ -60,12 +60,12 @@ class PetscSparseMtrx : public SparseMtrx
 public:
 #ifdef __PARALLEL_MODE
   PetscSparseMtrx (int n, int m) : SparseMtrx (n,m)
-    {di=0; leqs = n; geqs = n; symmFlag = false;}
+    {di=0; leqs = n; geqs = n; symmFlag = false; mtrx=NULL;}
 #else
   PetscSparseMtrx (int n, int m) : SparseMtrx (n,m)
-    {di=0; leqs = n; geqs = n; symmFlag = false;}
+    {di=0; leqs = n; geqs = n; symmFlag = false; mtrx=NULL;}
 #endif  
-  PetscSparseMtrx () : SparseMtrx () {di=0;}
+  PetscSparseMtrx () : SparseMtrx () {di=0; mtrx=NULL;}
   ~PetscSparseMtrx() {MatDestroy(mtrx); }
 
  /** Returns {\bf newly allocated} copy of receiver. Programmer must take 

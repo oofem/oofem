@@ -37,6 +37,7 @@
 #include "engngm.h"
 #include "timer.h"
 #include "mathfem.h"
+#include "timestep.h"
 
 LoadBallancer::LoadBallancer (Domain* d) 
 {
@@ -55,10 +56,11 @@ LoadBallancerMonitor::LoadBallancerDecisionType
 WallClockLoadBallancerMonitor::decide()
 {
   int i, nproc=emodel->giveNumberOfProcesses();
-  //int myrank=domain->giveEngngModel()->giveRank();
+  int myrank=emodel->giveRank();
   long int *node_solutiontimes = new long int [nproc];
   long min_st, max_st;
-  double wallClockImbalance;
+  double relWallClockImbalance;
+  long int absWallClockImbalance;
 
   if (node_solutiontimes == NULL) OOFEM_ERROR ("LoadBallancer::LoadEvaluation failed to allocate node_solutiontimes array");
 
@@ -73,14 +75,22 @@ WallClockLoadBallancerMonitor::decide()
     min_st = min (min_st, node_solutiontimes[i]);
     max_st = max (max_st, node_solutiontimes[i]);
   }
-  wallClockImbalance = ((max_st-min_st)/min_st);
+  absWallClockImbalance = (max_st-min_st);
+  if (min_st) {
+    relWallClockImbalance = ((max_st-min_st)/min_st);
+  } else {
+    relWallClockImbalance = 0.0;
+  }
+
+  // debugging -> force rebalancing in first step
+  if (emodel->giveCurrentStep()->isTheFirstStep()) relWallClockImbalance = 1.0;
 
   // decide
-  if (wallClockImbalance > 0.1) {
-    OOFEM_LOG_RELEVANT ("LoadBallancer: wall clock imbalance %5.2\%, recovering load", wallClockImbalance);
+  if ((absWallClockImbalance > 10) || (relWallClockImbalance > 0.1)) {
+    OOFEM_LOG_RELEVANT ("[%d] LoadBallancer: wall clock imbalance rel=%.2f\%,abs=%lds, recovering load\n", myrank, relWallClockImbalance, absWallClockImbalance);
     return LBD_RECOVER;
   } else {
-    OOFEM_LOG_RELEVANT ("LoadBallancer: wall clock imbalance %5.2\%, continuing", wallClockImbalance);
+    OOFEM_LOG_RELEVANT ("[%d] LoadBallancer: wall clock imbalance rel=%.2f\%,abs=%lds, continuing\n", myrank, relWallClockImbalance, absWallClockImbalance);
     return LBD_CONTINUE;
   }
 }
