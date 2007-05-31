@@ -121,7 +121,7 @@ AdaptiveNonLinearStatic::initializeFrom (InputRecord* ir)
 void  
 AdaptiveNonLinearStatic :: solveYourselfAt (TimeStep* tStep) {
  
- proceedStep (tStep);
+ proceedStep (1, tStep);
  this->updateYourself(tStep);
  
  // evaluate error of the reached solution

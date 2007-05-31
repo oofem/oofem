@@ -423,11 +423,11 @@ Node::computeLoadTransformation (FloatMatrix& answer, const IntArray* dofMask, D
  // as well as further necessary transformations (for example in case 
  // rigid arms this must include transformation to master dofs).
 
-  if (mode != _toNodalCS) _error ("computeLoadTransformation: unsupported mode");
-   
   FloatMatrix t;
   
-  computeDofTransformation (t, dofMask, _toGlobalCS);
+  if (mode == _toNodalCS)  computeDofTransformation (t, dofMask, _toGlobalCS);
+  else if (mode == _toGlobalCS) computeDofTransformation (t, dofMask, _toNodalCS);
+  else _error ("computeLoadTransformation: unsupported mode");
   answer.beTranspositionOf (t);
   
 /*

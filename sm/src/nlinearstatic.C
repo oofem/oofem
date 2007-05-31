@@ -453,7 +453,7 @@ void NonLinearStatic :: solveYourself ()
 void
 NonLinearStatic :: solveYourselfAt (TimeStep* tStep) {
 
- proceedStep (tStep);
+ proceedStep (1, tStep);
  // update nodes, elements, etc.
  this->updateYourself(this->giveCurrentStep());
 
@@ -536,7 +536,7 @@ void NonLinearStatic :: updateLoadVectors (TimeStep* stepN) {
 
 
 void
-NonLinearStatic :: proceedStep (TimeStep* tStep) 
+NonLinearStatic :: proceedStep (int di, TimeStep* tStep) 
 {
 //
 // creates system of governing eq's and solves them at given time step
@@ -573,7 +573,7 @@ NonLinearStatic :: proceedStep (TimeStep* tStep)
    if (!stiffnessMatrix->isAntisymmetric()) 
     _error ("proceedStep: stiffnessMatrix does not support antisymmetric storage");
   } 
-  stiffnessMatrix->buildInternalStructure (this,1,EID_MomentumBalance);
+  stiffnessMatrix->buildInternalStructure (this,di,EID_MomentumBalance);
  }
 
   /*
@@ -603,14 +603,14 @@ NonLinearStatic :: proceedStep (TimeStep* tStep)
   // assemble the incremental reference load vector
   //
   this->assembleIncrementalReferenceLoadVectors (incrementalLoadVector, incrementalLoadVectorOfPrescribed, 
-                                                 refLoadInputMode, this->giveDomain(1), EID_MomentumBalance, tStep);
+                                                 refLoadInputMode, this->giveDomain(di), EID_MomentumBalance, tStep);
 
   if ((controllMode == nls_directControll) || (controllMode == nls_directControll2)) {
 
    incrementalBCLoadVector.resize(this->giveNumberOfEquations(EID_MomentumBalance));
    incrementalBCLoadVector.zero();
    this->assembleVectorFromElements (incrementalBCLoadVector, tStep, EID_MomentumBalance, ElementNonForceLoadVector, 
-                    VM_Incremental, this->giveDomain(1));
+                    VM_Incremental, this->giveDomain(di));
   } else {
    incrementalBCLoadVector.resize(0);
    incrementalBCLoadVector.resize(0);
@@ -644,7 +644,7 @@ NonLinearStatic :: proceedStep (TimeStep* tStep)
      OOFEM_LOG_INFO("Assembling secant stiffness matrix\n");
 #endif
    stiffnessMatrix -> zero () ;   // zero stiffness matrix
-    this ->assemble (stiffnessMatrix , tStep, EID_MomentumBalance, SecantStiffnessMatrix, this->giveDomain(1));
+    this ->assemble (stiffnessMatrix , tStep, EID_MomentumBalance, SecantStiffnessMatrix, this->giveDomain(di));
     
    } else if (stiffMode == nls_tangentStiffness) {
     
@@ -652,7 +652,7 @@ NonLinearStatic :: proceedStep (TimeStep* tStep)
      OOFEM_LOG_INFO("Assembling tangent stiffness matrix\n");
 #endif
    stiffnessMatrix -> zero () ;   // zero stiffness matrix
-    this ->assemble (stiffnessMatrix , tStep, EID_MomentumBalance, TangentStiffnessMatrix, this->giveDomain(1));
+    this ->assemble (stiffnessMatrix , tStep, EID_MomentumBalance, TangentStiffnessMatrix, this->giveDomain(di));
 
    } else if ((stiffMode == nls_elasticStiffness) && (initFlag || (mstep->giveFirstStepNumber() == tStep->giveNumber()))) {
 
@@ -660,7 +660,7 @@ NonLinearStatic :: proceedStep (TimeStep* tStep)
      OOFEM_LOG_INFO("Assembling elastic stiffness matrix\n");
 #endif
    stiffnessMatrix -> zero () ;   // zero stiffness matrix
-    this ->assemble (stiffnessMatrix , tStep, EID_MomentumBalance, ElasticStiffnessMatrix, this->giveDomain(1));
+    this ->assemble (stiffnessMatrix , tStep, EID_MomentumBalance, ElasticStiffnessMatrix, this->giveDomain(di));
   }
   }  
 

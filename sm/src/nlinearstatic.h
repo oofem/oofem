@@ -234,11 +234,11 @@ TASK:
   protected:
   void       assemble (SparseMtrx *answer, TimeStep* tStep, EquationID ut, CharType type, Domain* domain)  ;
   void giveInternalForces (FloatArray& answer, const FloatArray& DeltaR, TimeStep* );
-   void proceedStep (TimeStep* );
-   void updateLoadVectors (TimeStep* tStep);
+  void proceedStep (int di, TimeStep* );
+  void updateLoadVectors (TimeStep* tStep);
   // void        updateInternalStepState (const FloatArray &, TimeStep* ); 
- // void assembleInitialLoadVector (FloatArray& answer, TimeStep* atTime);
- /**
+  // void assembleInitialLoadVector (FloatArray& answer, TimeStep* atTime);
+  /**
   Computes the contribution external loading to reaction forces in given domain. 
   @param reactions contains the comuted contributions
   @param tStep solution step
