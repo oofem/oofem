@@ -703,7 +703,7 @@ RCM2Material :: giveEffectiveMaterialStiffnessMatrix (FloatMatrix& answer,
     }
    }
    if (status->isCrackActive(i)) {
-    if (dcr.at(i,i) == 0.) {
+    if (dcr.at(i,i) <= 1.e-8) {
      compliance.at(indi,indi) *= rcm2_BIGNUMBER;
     } else {
      compliance.at(indi,indi) += 1./dcr.at(i,i);
@@ -729,6 +729,7 @@ RCM2Material :: giveEffectiveMaterialStiffnessMatrix (FloatMatrix& answer,
    princStrainDis = principalStrainVector.at(ii) - 
     principalStrainVector.at(jj);
    if (fabs(princStrainDis) < rcm_SMALL_STRAIN) compliance.at(indi,indi) = 1./G;
+   else if (fabs(princStressDis) < 1.e-8) compliance.at(indi,indi) = rcm2_BIGNUMBER;
    else compliance.at(indi,indi) = 2*princStrainDis/princStressDis;
   }
  }
