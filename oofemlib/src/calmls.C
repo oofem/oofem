@@ -337,7 +337,7 @@ CylindricalALM::solve (SparseMtrx* k, FloatArray* Ri, FloatArray* R0,
 
  // update solution state counter
  tNow->incrementStateCounter ();
- engngModel->updateComponent (tNow, InternalRhs);
+ engngModel->updateComponent (tNow, InternalRhs, domain->giveNumber());
  //((NonLinearStatic *)engngModel) -> giveInternalForces(F, *DeltaR, tNow);
 
  do {
@@ -357,7 +357,7 @@ CylindricalALM::solve (SparseMtrx* k, FloatArray* Ri, FloatArray* R0,
    // internal state of elements is updated by previous calling 
    // of F = engngModel->GiveInternalForces(DeltaR,tNow);
    //
-   engngModel->updateComponent (tNow, NonLinearLhs);
+   engngModel->updateComponent (tNow, NonLinearLhs, domain->giveNumber());
    //
    // compute deltaRt for i-th iteration
    //
@@ -405,7 +405,7 @@ CylindricalALM::solve (SparseMtrx* k, FloatArray* Ri, FloatArray* R0,
     // reset all changes fro previous equilibrium state
     DeltaR -> zero();
     // restore initial stiffness
-    engngModel->updateComponent (tNow, NonLinearLhs);
+    engngModel->updateComponent (tNow, NonLinearLhs, domain->giveNumber());
     //delete F;
     //delete deltaR_;
 
@@ -527,7 +527,7 @@ CylindricalALM::solve (SparseMtrx* k, FloatArray* Ri, FloatArray* R0,
     
     tNow->incrementStateCounter();              // update solution state counter
     // update internal forces according to new state
-    engngModel->updateComponent (tNow, InternalRhs);
+    engngModel->updateComponent (tNow, InternalRhs, domain->giveNumber());
 
 #ifdef __PARALLEL_MODE
 #ifdef __PETSC_MODULE
@@ -629,7 +629,7 @@ CylindricalALM::solve (SparseMtrx* k, FloatArray* Ri, FloatArray* R0,
     }
 #endif
     tNow->incrementStateCounter();              // update solution state counter
-    engngModel->updateComponent (tNow, InternalRhs);
+    engngModel->updateComponent (tNow, InternalRhs, domain->giveNumber());
     DeltaLambda = DeltaLambdam1 + deltaLambda;
     Lambda = ReachedLambda + DeltaLambda;
 
@@ -684,7 +684,7 @@ CylindricalALM::solve (SparseMtrx* k, FloatArray* Ri, FloatArray* R0,
    Lambda = ReachedLambda + DeltaLambda;
    
    tNow->incrementStateCounter();              // update solution state counter
-   engngModel->updateComponent (tNow, InternalRhs);
+   engngModel->updateComponent (tNow, InternalRhs, domain->giveNumber());
   }
   
   //
@@ -759,7 +759,7 @@ CylindricalALM::solve (SparseMtrx* k, FloatArray* Ri, FloatArray* R0,
     engngModel -> initStepIncrements();
     DeltaR -> zero();
     // restore initial stiffness
-    engngModel->updateComponent (tNow, NonLinearLhs);
+    engngModel->updateComponent (tNow, NonLinearLhs, domain->giveNumber());
     //delete F; F = NULL;
 
     OOFEM_LOG_INFO("calm iteration Reset ...\n");

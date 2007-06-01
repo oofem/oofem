@@ -1288,7 +1288,7 @@ EngngModel :: petsc_assemblePrescribedVectorFromElements (Vec answer, TimeStep* 
 #endif
 
 void 
-EngngModel ::  updateComponent (TimeStep* tStep, NumericalCmpn cmpn)
+EngngModel ::  updateComponent (TimeStep* tStep, NumericalCmpn cmpn, int di)
 //
 // updates some componet, which is used by numerical method
 // to newly reached state

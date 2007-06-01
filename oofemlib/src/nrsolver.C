@@ -190,7 +190,7 @@ NRSolver::solve (SparseMtrx* k, FloatArray* R, FloatArray* R0,
   
   if (nite > 1) {
    if ((NR_Mode == nrsolverFullNRM) || ((NR_Mode == nrsolverAccelNRM) && (nite%MANRMSteps == 0))) {
-    engngModel->updateComponent (tNow, NonLinearLhs);
+    engngModel->updateComponent (tNow, NonLinearLhs, domain->giveNumber());
     //linSolver -> setSparseMtrxAsComponent (LinearEquationLhs,k);
     applyConstraintsToStiffness (k);
    }
@@ -238,7 +238,7 @@ NRSolver::solve (SparseMtrx* k, FloatArray* R, FloatArray* R0,
    // convergency check
    //
    //((NonLinearStatic *)engngModel) -> giveInternalForces(F, *DeltaR, tNow);
-   engngModel->updateComponent (tNow, InternalRhs);
+   engngModel->updateComponent (tNow, InternalRhs, domain->giveNumber());
    //F->negated();
   }
 
@@ -325,7 +325,7 @@ NRSolver::solve (SparseMtrx* k, FloatArray* R, FloatArray* R0,
      engngModel -> initStepIncrements();
      DeltaR -> zero();
      // restore initial stiffness
-     engngModel->updateComponent (tNow, NonLinearLhs);
+     engngModel->updateComponent (tNow, NonLinearLhs, domain->giveNumber());
      // recalculate new Load Vector R
      // engngModel->updateComponent (tNow, NonLinearRhs_Incremental);
      //delete F; F = NULL;

@@ -335,7 +335,7 @@ TimeStep* NonLinearStatic :: giveNextStep ()
 
 
 void
-NonLinearStatic :: giveInternalForces (FloatArray &answer, const FloatArray& DeltaR, TimeStep* stepN)
+NonLinearStatic :: giveInternalForces (FloatArray &answer, const FloatArray& DeltaR, Domain* domain, TimeStep* stepN)
 {
   // computes nodal representation of internal forces (real ones)
   // simply assembles contributions from each element in domain
@@ -344,7 +344,6 @@ NonLinearStatic :: giveInternalForces (FloatArray &answer, const FloatArray& Del
   Element* element;
   IntArray loc;
   FloatArray  charVec;
- Domain* domain = this->giveDomain(1);
   //FloatArray* answer = new FloatArray(DeltaR->giveSize());
   int nelems;
 
@@ -734,7 +733,7 @@ void    NonLinearStatic :: updateYourself (TimeStep* stepN)
 }
 
 
-void NonLinearStatic ::  updateComponent (TimeStep* tStep, NumericalCmpn cmpn)
+void NonLinearStatic ::  updateComponent (TimeStep* tStep, NumericalCmpn cmpn, int di)
 //
 // updates some componet, which is used by numerical method
 // to newly reached state. used mainly by numerical method
@@ -750,14 +749,14 @@ void NonLinearStatic ::  updateComponent (TimeStep* tStep, NumericalCmpn cmpn)
 #ifdef VERBOSE
    OOFEM_LOG_INFO("Assembling tangent stiffness matrix\n");
 #endif
-   this ->assemble (stiffnessMatrix , tStep, EID_MomentumBalance, TangentStiffnessMatrix, this->giveDomain(1));
+   this ->assemble (stiffnessMatrix , tStep, EID_MomentumBalance, TangentStiffnessMatrix, this->giveDomain(di));
 
   } else  if (stiffMode == nls_secantStiffness)  {
 #ifdef VERBOSE
     OOFEM_LOG_INFO("Assembling secant stiffness matrix\n");
 #endif
    stiffnessMatrix -> zero () ;   // zero stiffness matrix
-    this ->assemble (stiffnessMatrix , tStep, EID_MomentumBalance, SecantStiffnessMatrix, this->giveDomain(1));
+    this ->assemble (stiffnessMatrix , tStep, EID_MomentumBalance, SecantStiffnessMatrix, this->giveDomain(di));
    
   } else {
    // currently no action , this method is mainly intended to
@@ -768,14 +767,14 @@ void NonLinearStatic ::  updateComponent (TimeStep* tStep, NumericalCmpn cmpn)
   
   break;
  case InternalRhs:
-  this -> giveInternalForces (internalForces, incrementOfDisplacement, tStep);
+  this -> giveInternalForces (internalForces, incrementOfDisplacement, this->giveDomain(di), tStep);
   break;
  case NonLinearRhs_Total:
   _error("updateComponent: Not supported.");
   break;
  case NonLinearRhs_Incremental:
   this-> assembleIncrementalReferenceLoadVectors (incrementalLoadVector, incrementalLoadVectorOfPrescribed,
-                                                  refLoadInputMode, this->giveDomain(1), EID_MomentumBalance, tStep);
+                                                  refLoadInputMode, this->giveDomain(di), EID_MomentumBalance, tStep);
   break;
 
  default:

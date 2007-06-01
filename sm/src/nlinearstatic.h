@@ -164,7 +164,7 @@ TASK:
  
   //int requiresNewLhs () {return 1;}
   virtual void               updateYourself (TimeStep*) ;
-  virtual void               updateComponent (TimeStep*, NumericalCmpn);
+  virtual void               updateComponent (TimeStep*, NumericalCmpn, int);
  void                       updateAttributes (TimeStep* );
 
   double   giveUnknownComponent ( EquationID, ValueModeType, TimeStep*, Domain*, Dof*);
@@ -233,7 +233,7 @@ TASK:
 
   protected:
   void       assemble (SparseMtrx *answer, TimeStep* tStep, EquationID ut, CharType type, Domain* domain)  ;
-  void giveInternalForces (FloatArray& answer, const FloatArray& DeltaR, TimeStep* );
+  void giveInternalForces (FloatArray& answer, const FloatArray& DeltaR, Domain* d, TimeStep* );
   void proceedStep (int di, TimeStep* );
   void updateLoadVectors (TimeStep* tStep);
   // void        updateInternalStepState (const FloatArray &, TimeStep* ); 
