@@ -446,7 +446,14 @@ IntArray :: insertSortedOnce (int _val, int allocChunk)
   return insertSorted (_val, allocChunk);
 }
 
-
+int 
+IntArray :: insertOnce (int _p)
+{
+  if (!this->findFirstIndexOf(_p)) {
+    this->followedBy(_p,2);
+  }
+  return size;
+}
 
 #ifdef __PARALLEL_MODE
 int 

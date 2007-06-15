@@ -100,7 +100,7 @@ InterfaceElem2dQuad :: computeGaussPoints ()
 {
 
   numberOfIntegrationRules = 1 ;
-  integrationRulesArray = new IntegrationRule*;
+  integrationRulesArray = new IntegrationRule*[1];
   //integrationRulesArray[0] = new LobattoIntegrationRule (1,domain, 1, 2);
   integrationRulesArray[0] = new GaussIntegrationRule (1,domain, 1, 2);
   integrationRulesArray[0]->setUpIntegrationPoints (_Line, 4, this, _2dInterface);

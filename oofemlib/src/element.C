@@ -106,7 +106,7 @@ Element :: ~Element ()
      for (i=0 ; i<numberOfIntegrationRules ; i++)
        delete integrationRulesArray[i] ;
      //      delete [numberOfGaussPoints] gaussPointArray ;}
-     delete integrationRulesArray ;}
+     delete[] integrationRulesArray ;}
 }
 
 void
@@ -615,7 +615,7 @@ contextIOResultType Element :: restoreContext (DataStream* stream, ContextMode m
        if (integrationRulesArray) {
          for (i=0 ; i<numberOfIntegrationRules ; i++)
            delete integrationRulesArray[i] ;
-         delete integrationRulesArray ;
+         delete[] integrationRulesArray ;
        }
        // AND ALLOCATE NEW ONE
        integrationRulesArray = new IntegrationRule*[_nrules];
@@ -642,7 +642,7 @@ contextIOResultType Element :: restoreContext (DataStream* stream, ContextMode m
 
 
   for (i=0 ; i < numberOfIntegrationRules ; i++) {
-    if ((iores = integrationRulesArray[i]->restoreContext(stream,mode,obj)) != CIO_OK) THROW_CIOERR(iores);
+    if ((iores = integrationRulesArray[i]->restoreContext(stream,mode,this)) != CIO_OK) THROW_CIOERR(iores);
   }
 
   return CIO_OK;

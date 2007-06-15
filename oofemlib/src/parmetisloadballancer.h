@@ -36,11 +36,14 @@
 #include "loadballancer.h"
 
 #ifdef __PARMETIS_MODULE
-#include "parmetis.h"
 #ifndef __MAKEDEPEND
+#include "parmetis.h"
 #include <vector>
 #endif
 #endif
+
+#define PARMETISLB_END_DATA 9999
+#define SHARED_DOFMAN_PARTITIONS_TAG 9998
 
 /**
    
@@ -91,6 +94,10 @@ protected:
   */
   void labelDofManagers ();
   int  determineDofManState (int idofman, int myrank, int npart, IntArray* dofManPartitions);
+
+ int packSharedDmanPartitions (ProcessCommunicator& pc) ;
+ int unpackSharedDmanPartitions (ProcessCommunicator& pc) ;
+ void addSharedDofmanPartitions (int _locnum, IntArray _partitions);
 #endif
 
 };

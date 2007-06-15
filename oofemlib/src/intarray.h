@@ -216,6 +216,13 @@ public:
   */
   int        findFirstIndexOf (int value)  const ;
   /**
+     Insert once (does not make any assumption about receiver state or ordering, quite 
+     inefficient). More efficient version InsertSortedOnce exist. Insert _p  value into
+     receiver if it does not exist.
+     @return index of sorted value;
+   */
+  int insertOnce (int _p);
+  /**
      Erase the element at given position (1-based index)
      Receiver will shrink accordingly, the values at positions (_pos+1,...,size) 
      will be moved to positions (_pos,...,size-1)

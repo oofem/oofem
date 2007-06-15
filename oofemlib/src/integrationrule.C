@@ -77,7 +77,7 @@ IntegrationRule::clear()
   if (gaussPointArray) {
     for (i=0 ; i<numberOfIntegrationPoints ; i++)
       delete gaussPointArray[i] ;
-    delete gaussPointArray ;}
+    delete[] gaussPointArray ;}
   gaussPointArray = NULL;
   numberOfIntegrationPoints = 0;
 }
@@ -150,6 +150,9 @@ IntegrationRule :: saveContext (DataStream* stream, ContextMode mode, void *obj)
 
   if (mode & CM_Definition ) {
     if (!stream->write(&numberOfIntegrationPoints,1)) THROW_CIOERR (CIO_IOERR);
+    // write first and last integration indices
+    if (!stream->write(&firstLocalStrainIndx,1)) THROW_CIOERR(CIO_IOERR);
+    if (!stream->write(&lastLocalStrainIndx,1)) THROW_CIOERR(CIO_IOERR);
   } 
   for (i=0 ; i < numberOfIntegrationPoints ; i++) {
     gp = gaussPointArray[i] ;
@@ -158,13 +161,10 @@ IntegrationRule :: saveContext (DataStream* stream, ContextMode mode, void *obj)
       double dval = gp->giveWeight();
       if (!stream->write(&dval,1)) THROW_CIOERR(CIO_IOERR);
       if ((iores = gp->giveCoordinates()->storeYourself(stream,mode))!=CIO_OK) THROW_CIOERR(iores);
-      int ival = gp->giveElement()->giveNumber();
-      if (!stream->write(&ival,1)) THROW_CIOERR(CIO_IOERR);
+      //int ival = gp->giveElement()->giveNumber();
+      //if (!stream->write(&ival,1)) THROW_CIOERR(CIO_IOERR);
       int mmode = gp->giveMaterialMode();
       if (!stream->write(&mmode,1)) THROW_CIOERR(CIO_IOERR);
-      // write first and last integration indices
-      if (!stream->write(&firstLocalStrainIndx,1)) THROW_CIOERR(CIO_IOERR);
-      if (!stream->write(&lastLocalStrainIndx,1)) THROW_CIOERR(CIO_IOERR);
     }
     // write gp data
     if ((iores = gp->giveCrossSection()->saveContext(stream,mode,gp)) != CIO_OK) THROW_CIOERR(iores);
@@ -184,17 +184,22 @@ IntegrationRule :: restoreContext (DataStream* stream, ContextMode mode, void *o
   int         i, size ;
   bool __create = false;
   GaussPoint* gp ;
- 
+  Element* __parelem = (Element*) obj;
+  
   if (stream == NULL) _error ("restoreContex : can't write into NULL stream");
-
+  
   int isdyn;
   if (!stream->read(&isdyn,1)) THROW_CIOERR(CIO_IOERR);
   isDynamic = (bool) isdyn;
   
-if (isDynamic) mode |= CM_Definition; // store definition if dynamic
-
+  if (isDynamic) mode |= CM_Definition; // store definition if dynamic
+  
   if (mode & CM_Definition ) {
     if (!stream->read(&size,1)) THROW_CIOERR (CIO_IOERR);
+    // read first and last integration indices
+    if (!stream->read(&firstLocalStrainIndx,1)) THROW_CIOERR(CIO_IOERR);
+    if (!stream->read(&lastLocalStrainIndx,1)) THROW_CIOERR(CIO_IOERR);
+
     if (numberOfIntegrationPoints != size) {
       this->clear();
       __create = true;
@@ -202,40 +207,37 @@ if (isDynamic) mode |= CM_Definition; // store definition if dynamic
       numberOfIntegrationPoints = size;
     }
   } 
-
+  
   for (i=0 ; i < numberOfIntegrationPoints ; i++) {
     if (mode & CM_Definition ) {
-
+      
       // read weight
       double w;
       if (!stream->read (&w,1)) THROW_CIOERR(CIO_IOERR);
       // read coords
       FloatArray c;
       if ((iores = c.restoreYourself(stream,mode))!= CIO_OK) THROW_CIOERR(iores);
-      // read element number and material mode
-      int n;
-      if (!stream->read(&n,1)) THROW_CIOERR(CIO_IOERR);
+      // restore element and material mode
+      //int n;
+      //if (!stream->read(&n,1)) THROW_CIOERR(CIO_IOERR);
       MaterialMode m; int _m;
       if (!stream->read(&_m,1)) THROW_CIOERR(CIO_IOERR);
       m = (MaterialMode) _m;
       // read dynamic flag
-      // read first and last integration indices
-      if (!stream->read(&firstLocalStrainIndx,1)) THROW_CIOERR(CIO_IOERR);
-      if (!stream->read(&lastLocalStrainIndx,1)) THROW_CIOERR(CIO_IOERR);
       
       if (__create) {
-        (gaussPointArray)[i] = new GaussPoint(domain->giveElement(n),i+1,c.GiveCopy(),w,m);
+        gaussPointArray[i] = new GaussPoint(__parelem,i+1,c.GiveCopy(),w,m);
       } else {
         gp = gaussPointArray[i] ;
         gp->setWeight (w);
         gp->setCoordinates(c);
-        gp->setElement (domain->giveElement(n));
+        gp->setElement (__parelem);
         gp->setMaterialMode (m);
       }
     }
-      // read gp data
-      gp = gaussPointArray[i] ;
-      if ((iores = gp -> giveCrossSection()->restoreContext(stream,mode,gp)) != CIO_OK) THROW_CIOERR(iores);
+    // read gp data
+    gp = gaussPointArray[i] ;
+    if ((iores = gp -> giveCrossSection()->restoreContext(stream,mode,gp)) != CIO_OK) THROW_CIOERR(iores);
   } 
   return CIO_OK;
 }

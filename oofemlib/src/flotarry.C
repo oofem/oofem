@@ -851,17 +851,13 @@ contextIOResultType  FloatArray :: restoreYourself (DataStream* stream, ContextM
   if (class_id != FloatArrayClass) return CIO_BADVERSION;
   // read size 
   if (!stream->read(&size,1)) return CIO_IOERR;
-  if (values!=NULL) freeDouble(values);
-  if (size) {
+  if (size > allocatedSize) {
+    if (values!=NULL) freeDouble(values);
     values = allocDouble(size) ;
     allocatedSize = size;
-    // read raw data
-    if (!stream->read(values,size)) return CIO_IOERR;
-  } else {
-    values = NULL ;
-    allocatedSize = 0;
-  }
-
+  } 
+  // read raw data
+  if (size) if (!stream->read(values,size)) return CIO_IOERR;
   // return result back
   return CIO_OK;
 }

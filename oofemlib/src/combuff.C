@@ -74,7 +74,7 @@ MPIBuffer :: MPIBuffer (bool dynamic)
 
 MPIBuffer :: ~MPIBuffer ()
 {
- if (buff) delete buff;
+ if (buff) free(buff);
 }
 
 
@@ -83,30 +83,24 @@ MPIBuffer :: resize (int newSize)
 {
  // do not shrink
  if (size >= newSize) return 1;
-
-
-/*
- // first try realloc current buffer
- this->buff = (ComBuff_BYTE_TYPE*) 
-  realloc (buff, newSize*sizeof (ComBuff_BYTE_TYPE));
- if (this->buff == NULL) {
-  // realloc failed -> memory error
-   OOFEM_ERROR ("CommunicationBuffer::resize : resize failed");
- }
- size = newSize;
-*/
+ 
 
  ComBuff_BYTE_TYPE *newBuff;
- // allocate new memory
- if ((newBuff = (ComBuff_BYTE_TYPE*) 
-      malloc (newSize*sizeof (ComBuff_BYTE_TYPE))) == NULL) {
-   // alloc failed -> memory error
-   OOFEM_ERROR ("MPIBuffer :: resize failed");
+
+ if (newSize >0) {
+   // allocate new memory
+   if ((newBuff = (ComBuff_BYTE_TYPE*) 
+        malloc (newSize*sizeof (ComBuff_BYTE_TYPE))) == NULL) {
+     // alloc failed -> memory error
+     OOFEM_ERROR ("MPIBuffer :: resize failed");
+   }
+   // copy old buffer into new one
+   memmove (newBuff, this->buff, curr_pos);
+ } else {
+   newBuff = NULL;
  }
- // copy old buffer into new one
- memmove (newBuff, this->buff, curr_pos);
  // dealocate old buffer
- free (this->buff);
+ if (this->buff) free (this->buff);
  this->buff = newBuff;
  size = newSize;
  

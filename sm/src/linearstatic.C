@@ -80,6 +80,15 @@ LinearStatic::LinearStatic (int i, EngngModel* _master) : StructuralEngngModel (
 
 }
 
+
+LinearStatic::~LinearStatic ()
+{
+  delete  stiffnessMatrix; 
+  if (nMethod) delete nMethod;
+}
+
+
+
 NumericalMethod* LinearStatic :: giveNumericalMethod (TimeStep* atTime)
 // only one has reason for LinearStatic 
 //     - SolutionOfLinearEquations

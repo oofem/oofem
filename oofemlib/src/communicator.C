@@ -62,7 +62,7 @@ CommunicatorBuff::~CommunicatorBuff ()
 {
   int i;
   for (i=0; i< size; i++) if (processCommBuffs[i]) delete (processCommBuffs[i]);
-  if (processCommBuffs) delete processCommBuffs;
+  if (processCommBuffs) delete[] processCommBuffs;
 }
 
 Communicator::Communicator (EngngModel* emodel, CommunicatorBuff* b, int rank, int size, CommunicatorMode m)
@@ -88,7 +88,7 @@ Communicator :: ~Communicator ()
  if (size) {
   while (i--)
    delete (processComms[i]) ;
-  delete  processComms ;}
+  delete[]  processComms ;}
 }
 
 int

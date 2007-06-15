@@ -38,11 +38,19 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "element.h"
 #include "dofmanager.h"
 #include "conTable.h"
+#include "error.h"
 #ifndef __MAKEDEPEND
 #include <set>
 #endif
 
-//#define ParmetisLoadBallancer_DEBUG_PRINT
+#ifdef __PARALLEL_MODE
+#include "parallel.h"
+#include "processcomm.h"
+#include "communicator.h"
+#endif
+
+
+#define ParmetisLoadBallancer_DEBUG_PRINT
   
   
 ParmetisLoadBallancer::ParmetisLoadBallancer(Domain* d) : LoadBallancer (d)
@@ -50,13 +58,16 @@ ParmetisLoadBallancer::ParmetisLoadBallancer(Domain* d) : LoadBallancer (d)
 #ifdef __PARMETIS_MODULE
   elmdist = NULL;
   tpwgts  = NULL;
+  part    = NULL;
 #endif
 }
 
 ParmetisLoadBallancer::~ParmetisLoadBallancer ()
 {
 #ifdef __PARMETIS_MODULE
-  if (elmdist) delete elmdist;
+  if (elmdist) delete[] elmdist;
+  if (tpwgts)  delete[] tpwgts;
+  if (part)    delete[] part;
 #endif
 }
 
@@ -164,9 +175,12 @@ ParmetisLoadBallancer::calculateLoadTransfer ()
 #endif
   
   // delete allocated xadj, adjncy arrays by ParMETIS
-  delete xadj;
-  delete adjncy;
-  delete vwgt;
+  delete[] eind;
+  delete[] eptr;
+  delete[] vwgt;
+  delete[] vsize;
+  free (xadj);
+  free (adjncy);
 
   this->labelDofManagers();
 }
@@ -227,7 +241,7 @@ ParmetisLoadBallancer::labelDofManagers()
   dofManagerParallelMode dmode;
   std::set<int, std::less<int> > __dmanpartitions;
   int myrank=domain->giveEngngModel()->giveRank();
-  //int nproc=domain->giveEngngModel()->giveNumberOfProcesses();
+  int nproc=domain->giveEngngModel()->giveNumberOfProcesses();
   int ie, npart, __i;
   
   std::set<int, std::less<int> > :: iterator it;
@@ -261,20 +275,39 @@ ParmetisLoadBallancer::labelDofManagers()
       dofManPartitions[idofman-1].resize(__dmanpartitions.size());
       for (__i=1, it=__dmanpartitions.begin(); it!=__dmanpartitions.end(); it++)
         dofManPartitions[idofman-1].at(__i++) = *it;
+    }
+  }
+
+  /* Exchange new partitions for shared nodes */
+  CommunicatorBuff cb (nproc, CBT_dynamic);
+  Communicator com (domain->giveEngngModel(), &cb, myrank, nproc, CommMode_Dynamic);
+  com.packAllData (this, &ParmetisLoadBallancer::packSharedDmanPartitions);
+  com.initExchange(SHARED_DOFMAN_PARTITIONS_TAG);
+  com.unpackAllData (this, &ParmetisLoadBallancer::unpackSharedDmanPartitions);
+
+  /* label dof managers */
+  for (idofman=1; idofman <= ndofman; idofman++) {
+    dofman = domain->giveDofManager (idofman);
+    dmode = dofman -> giveParallelMode();
+    npart = dofManPartitions[idofman-1].giveSize();
+    if ((dmode == DofManager_local) || (dmode == DofManager_shared)) {
       // determine its state after ballancing -> label
       dofManState.at(idofman) = this->determineDofManState (idofman, myrank, npart, &dofManPartitions[idofman-1]);
     } else {
       dofManState.at(idofman) = DM_NULL;
     }
+    
+    
 #ifdef ParmetisLoadBallancer_DEBUG_PRINT
    fprintf (stderr, " | %d: ", idofman);
    if (dofManState.at(idofman) == DM_NULL)              fprintf (stderr, "NULL  ");
    else if (dofManState.at(idofman) == DM_Local)        fprintf (stderr, "Local ");
    else if (dofManState.at(idofman) == DM_Shared)       fprintf (stderr, "Shared");
    else if (dofManState.at(idofman) == DM_Remote)       fprintf (stderr, "Remote");
-   else if (dofManState.at(idofman) == DM_SharedExclude)fprintf (stderr, "ShdExc");
-   else if (dofManState.at(idofman) == DM_SharedNew)    fprintf (stderr, "ShdNew");
-   else if (dofManState.at(idofman) == DM_SharedUpdate) fprintf (stderr, "ShdUpd");
+   else fprintf (stderr, "Unknown");
+   //else if (dofManState.at(idofman) == DM_SharedExclude)fprintf (stderr, "ShdExc");
+   //else if (dofManState.at(idofman) == DM_SharedNew)    fprintf (stderr, "ShdNew");
+   //else if (dofManState.at(idofman) == DM_SharedUpdate) fprintf (stderr, "ShdUpd");
 
    if (((++_cols % 4) == 0) || (idofman==ndofman)) fprintf (stderr, "\n");
 #endif   
@@ -286,7 +319,23 @@ ParmetisLoadBallancer::determineDofManState (int idofman, int myrank, int npart,
 {
   dofManagerParallelMode dmode = domain->giveDofManager(idofman)->giveParallelMode();
   int answer = DM_Local;
-
+  
+  if ((dmode == DofManager_local) || (dmode == DofManager_shared)) {
+    if ((npart == 1) && (dofManPartitions->at(1) == myrank)) {
+      // local remains local
+      answer = DM_Local;
+    } else if (npart == 1) {
+      // local goes to remote partition
+      answer = DM_Remote;
+    } else { // npart > 1
+      // local becomes newly shared
+      answer = DM_Shared;
+    }
+  } else {
+    answer = DM_NULL;
+  }
+  
+  /*
   if (dmode == DofManager_local) {
     if ((npart == 1) && (dofManPartitions->at(1) == myrank)) {
       // local remains local
@@ -318,7 +367,7 @@ ParmetisLoadBallancer::determineDofManState (int idofman, int myrank, int npart,
   } else {
     answer = DM_NULL;
   }
-
+  */
   return answer;
 }
 
@@ -340,6 +389,78 @@ int
 ParmetisLoadBallancer::giveElementPartition (int ielem)
 {
   return part[ielem-1];
+}
+
+int 
+ParmetisLoadBallancer::packSharedDmanPartitions (ProcessCommunicator& pc) 
+{
+  int myrank = domain->giveEngngModel()->giveRank();
+  int iproc = pc.giveRank();
+  int ndofman, idofman;
+  DofManager* dofman;
+
+  if (iproc == myrank) return 1; // skip local partition 
+  // query process communicator to use
+  ProcessCommunicatorBuff* pcbuff = pc.giveProcessCommunicatorBuff();
+  // loop over dofManagers and pack shared dofMan data
+  ndofman = domain->giveNumberOfDofManagers();
+  for (idofman=1; idofman <= ndofman; idofman++) {
+    dofman = domain->giveDofManager (idofman);
+    // test if iproc is in list of existing shared partitions
+    if ((dofman->giveParallelMode()==DofManager_shared) &&
+        (dofman->givePartitionList()->findFirstIndexOf (iproc))) {
+      // send new partitions to remote representation
+      // fprintf (stderr, "[%d] sending shared plist of %d to [%d]\n", myrank, dofman->giveGlobalNumber(), iproc);
+      pcbuff->packInt (dofman->giveGlobalNumber());
+      pcbuff->packIntArray (*(this->giveDofManPartitions(idofman)));
+    }
+  }
+  pcbuff->packInt (PARMETISLB_END_DATA);
+  return 1;
+}
+
+int 
+ParmetisLoadBallancer::unpackSharedDmanPartitions (ProcessCommunicator& pc)
+{
+  int myrank = domain->giveEngngModel()->giveRank();
+  int iproc = pc.giveRank();
+  int _globnum, _locnum;
+  IntArray _partitions;
+
+  if (iproc == myrank) return 1; // skip local partition 
+  // query process communicator to use
+  ProcessCommunicatorBuff* pcbuff = pc.giveProcessCommunicatorBuff();
+  // init domain global2local map
+  domain->initGlobalDofManMap();
+
+  pcbuff->unpackInt (_globnum);
+  // unpack dofman data
+  while (_globnum != PARMETISLB_END_DATA) {
+    pcbuff->unpackIntArray (_partitions);
+    if ((_locnum = domain->dofmanGlobal2local (_globnum))) {
+      this->addSharedDofmanPartitions (_locnum, _partitions);
+    } else {
+      OOFEM_ERROR2 ("ParmetisLoadBallancer::unpackSharedDmanPartitions: internal error, unknown global dofman %d", _globnum);
+    }
+
+    /*
+    fprintf (stderr,"[%d] Received shared plist of %d ", myrank, _globnum);
+    for (int _i=1; _i<=dofManPartitions[_locnum-1].giveSize(); _i++)
+      fprintf (stderr,"%d ", dofManPartitions[_locnum-1].at(_i));
+    fprintf (stderr,"\n");
+    */
+    pcbuff->unpackInt (_globnum);
+  }
+
+  return 1;
+}
+
+
+void ParmetisLoadBallancer::addSharedDofmanPartitions (int _locnum, IntArray _partitions)
+{
+  int i,s = _partitions.giveSize();
+  for (i=1; i<=s; i++)
+    dofManPartitions[_locnum-1].insertOnce (_partitions.at(i));
 }
 
 #else

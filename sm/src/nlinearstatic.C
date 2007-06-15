@@ -1185,7 +1185,7 @@ NonLinearStatic :: assembleVectorFromDofManagers (FloatArray& answer, TimeStep* 
       node -> giveCompleteLocationArray (loc);
       node -> computeLoadVectorAt (charVec, tStep, mode);
       if (node -> giveParallelMode() == DofManager_shared ) {
-        scale = 1./(node -> givePartitionList() ->giveSize() + 1);
+        scale = 1./(node -> givePartitionsConnectivitySize());
         charVec.times(scale);
       }
       if(charVec.giveSize()) answer.assemble (charVec, loc) ;

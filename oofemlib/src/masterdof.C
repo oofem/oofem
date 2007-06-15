@@ -77,16 +77,12 @@ MasterDof :: MasterDof (int i, DofManager* aNode) : Dof (i, aNode, Undef)
 BoundaryCondition*  MasterDof :: giveBc () 
    // Returns the boundary condition the receiver is subjected to.
 {
-#  ifdef DEBUG
-  if (bc == -1) {
-    _error (" does not know yet if has bc or not \n") ;
-    exit(0) ;}
-#  endif
-  GeneralBoundaryCondition* bcptr = dofManager -> giveDomain() -> giveBc(bc);
-  if (bcptr->giveClassID() == BoundaryConditionClass)
-    return  (BoundaryCondition*) bcptr ;
-  else 
-    _error2 ("Incompatible BC (%d) applied as Dirichlet/Primary BC", bc);
+  if (bc) {
+    GeneralBoundaryCondition* bcptr = dofManager -> giveDomain() -> giveBc(bc);
+    if (bcptr->giveClassID() == BoundaryConditionClass)
+      return  (BoundaryCondition*) bcptr ;
+  }
+  _error2 ("Incompatible BC (%d) applied as Dirichlet/Primary BC", bc);
   return NULL;
 }
 
@@ -99,12 +95,8 @@ int  MasterDof :: giveEquationNumber ()
  
 {
 
-  // EngngModel* model;
-  // model = (EngngModel*) (dofManager->giveDomain()->giveEngngModel());
-
-  if (!equationNumber) 
-    _error ("giveEquationNumber : Dof has undefined equationNumber");
- //equationNumber = this->askNewEquationNumber();
+  //if (!equationNumber) 
+  //  _error ("giveEquationNumber : Dof has undefined equationNumber");
   return (equationNumber>0)?equationNumber:0 ;
 }
 
@@ -115,12 +107,8 @@ int  MasterDof :: givePrescribedEquationNumber ()
   // or equationNumber >0.
 {
 
-  // EngngModel* model;
-  // model = (EngngModel*) (dofManager->giveDomain()->giveEngngModel());
-
-  if (!equationNumber) 
-    _error ("giveEquationNumber: Dof has undefined equationNumber");
- //equationNumber = this->askNewEquationNumber();
+  //if (!equationNumber) 
+  //  _error ("giveEquationNumber: Dof has undefined equationNumber");
   return (equationNumber<0)?-1*equationNumber:0 ;
 }
 
@@ -135,25 +123,29 @@ int  MasterDof :: askNewEquationNumber (TimeStep* tStep)
   EngngModel* model;
   model = (EngngModel*) (dofManager->giveDomain()->giveEngngModel());
 
- if (this->hasBc(tStep)) equationNumber = 
-  -1*model -> giveNewPrescribedEquationNumber (dofManager->giveDomain()->giveNumber(), this->dofID);
- else equationNumber = 
-  model -> giveNewEquationNumber (dofManager->giveDomain()->giveNumber(), this->dofID);
-
- return equationNumber ;
+#ifdef __PARALLEL_MODE
+  if (dofManager->giveParallelMode () == DofManager_null)
+    return 1;
+#endif
+  if (this->hasBc(tStep)) {
+    equationNumber = -1*model -> giveNewPrescribedEquationNumber (dofManager->giveDomain()->giveNumber(), this->dofID);
+  } else {
+    equationNumber = model -> giveNewEquationNumber (dofManager->giveDomain()->giveNumber(), this->dofID);
+  }
+  
+  return equationNumber ;
 }
 
 
 InitialCondition*  MasterDof :: giveIc () 
    // Returns the initial condition on the receiver. Not used.
 {
-#  ifdef DEBUG
-      if (ic == -1) {
+  if (ic) {
+    return  (dofManager -> giveDomain() -> giveIc(ic)) ;
+  } else {
     _error ("giveIc:  does not know yet if has InitCond or not \n") ;
-    exit(0) ;}
-#  endif
-
-   return  (dofManager -> giveDomain() -> giveIc(ic)) ;
+    exit(0) ;
+  }
 }
 
 
@@ -191,6 +183,11 @@ double  MasterDof :: giveUnknown (EquationID type, ValueModeType mode, TimeStep*
  //if (type != this->giveUnknownType ())
  // _error ("giveUnknown: Noncompatible Request");  
 #endif 
+
+#ifdef __PARALLEL_MODE
+ if (dofManager->giveParallelMode () == DofManager_null)
+   return 0.0;
+#endif
 
  // first try if IC apply
  if (stepN->giveNumber() == dofManager->giveDomain()->giveEngngModel()->giveNumberOfTimeStepWhenIcApply())
@@ -239,6 +236,12 @@ double  MasterDof :: giveUnknown (PrimaryField& field, ValueModeType mode, TimeS
  
 #ifdef DEBUG
 #endif 
+
+#ifdef __PARALLEL_MODE
+ if (dofManager->giveParallelMode () == DofManager_null)
+   return 0.0;
+#endif
+
  // first try if IC apply
  if (stepN->giveNumber() == dofManager->giveDomain()->giveEngngModel()->giveNumberOfTimeStepWhenIcApply())
   { // step when Ic apply
@@ -265,6 +268,11 @@ int  MasterDof :: hasBc (TimeStep* tStep)
    // Returns True if the receiver is subjected to a boundary condition, else
    // returns False. If necessary, reads the answer in the data file.
 {
+#ifdef __PARALLEL_MODE
+ if (dofManager->giveParallelMode () == DofManager_null)
+   return 1;
+#endif
+
    if (bc == -1) {
    _error ("hasBc:  does not know yet if has InitCond or not \n") ;
    exit(0) ;}
@@ -414,21 +422,25 @@ int
 MasterDof :: unpackAndUpdateUnknown (CommunicationBuffer& buff, EquationID type, 
                    ValueModeType mode, TimeStep* stepN)
 {
-
-// result = buff.unpackDouble (&value);
-
+  EngngModel::EngngModel_UpdateMode __umode;
+  double value;
+  int result=0;
  // if dof belonging to shared or remote DofManager, engng model unknowns are updated 
  // to accomodate remote contribution or "prescribed" remote values.
  // The unknown dictionary is not updated, it is engng model job to update 
  // all unknowns dictionaries.
 
-// if (dofManager->giveParallelMode () == DofManager_shared) mode = EngngModel_Add_Mode;
-// else if (dofManager->giveParallelMode () == DofManager_remote) mode = EngngModel_Set_Mode;
-// else _error ("unpackAndUpdateUnknown: unknown dofManager ParallelMode");
- _error ("unpackAndUpdateUnknown: masterDof is not supposed to unpack and update");
-// dofManager->giveDomain()->giveEngngModel()->
-//  updateUnknownComponent(type, mode, stepN, this->giveEquationNumber(), value, updMode);
- return 0;
+  if (dofManager->giveParallelMode () == DofManager_shared)
+    __umode = EngngModel::EngngModel_SUMM_Mode;
+  else if (dofManager->giveParallelMode () == DofManager_remote)
+    __umode = EngngModel::EngngModel_SET_Mode;
+  else _error ("unpackAndUpdateUnknown: unknown dofManager ParallelMode");
+
+  result = buff.unpackDouble (value);
+  dofManager->giveDomain()->giveEngngModel()->
+    updateUnknownComponent(type, mode, stepN, this->giveEquationNumber(), 
+			   value, __umode);
+  return result;
 }
 
 #endif

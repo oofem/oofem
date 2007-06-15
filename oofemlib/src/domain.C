@@ -111,6 +111,9 @@ Domain :: Domain (int n, int serNum, EngngModel* pm) : defaultNodeDofIDArry(), d
  smoother = NULL;
 
  nonlocalUpdateStateCounter = 0;
+#ifdef __PARALLEL_MODE
+ dmanMapInitialized = false;
+#endif
 }
 
 Domain :: ~Domain ()
@@ -1149,24 +1152,22 @@ Domain::packMigratingData (LoadBallancer* lb, ProcessCommunicator& pc)
     dofman = this->giveDofManager (idofman);
     dmode = lb->giveDofManState(idofman);
     dtype = dofman->giveClassID();
-    if (lb->giveDofManPartitions(idofman)->findFirstIndexOf(iproc)) {
-      if ((dmode == LoadBallancer::DM_SharedExclude) ||
-	  (dmode == LoadBallancer::DM_SharedNew)     ||
-	  (dmode == LoadBallancer::DM_SharedUpdate)  ||
-	  (dmode == LoadBallancer::DM_Remote)) {
-        
-	pcbuff->packInt (dtype);
-        pcbuff->packInt (dmode);
-        pcbuff->packInt (dofman->giveGlobalNumber());
-        // send list of new partitions
-        pcbuff->packIntArray (*(lb->giveDofManPartitions(idofman)));
-        // pack dofman state (this is the local dofman, not available on remote)
-	/* this is a potential performance leak, sending shared dofman to a partition,
-	   in which is already shared does not require to send context (is already there)
-	   here for simplicity it is always send */
-        dofman->saveContext (&pcDataStream, CM_Definition | CM_State | CM_UnknownDictState);
+    // sync data to remote partition 
+    // if dofman already present on remote partition then there is no need to sync
+    //if ((lb->giveDofManPartitions(idofman)->findFirstIndexOf(iproc))) {
+    if ((lb->giveDofManPartitions(idofman)->findFirstIndexOf(iproc)) &&
+       (!dofman->givePartitionList()->findFirstIndexOf(iproc))) { 
+      pcbuff->packInt (dtype);
+      pcbuff->packInt (dmode);
+      pcbuff->packInt (dofman->giveGlobalNumber());
 
-      }
+      // pack dofman state (this is the local dofman, not available on remote)
+      /* this is a potential performance leak, sending shared dofman to a partition,
+         in which is already shared does not require to send context (is already there)
+         here for simplicity it is always send */
+      dofman->saveContext (&pcDataStream, CM_Definition | CM_State | CM_UnknownDictState);
+      // send list of new partitions
+      pcbuff->packIntArray (*(lb->giveDofManPartitions(idofman)));
     }
   }
 
@@ -1208,7 +1209,7 @@ Domain::unpackMigratingData ( LoadBallancer* lb, ProcessCommunicator& pc)
   int iproc = pc.giveRank();
   int _mode, _globnum, _type;
   classType _etype;
-  IntArray _partitions;
+  IntArray _partitions, local_partitions;
   //LoadBallancer::DofManMode dmode;
   DofManager* dofman;
 
@@ -1228,75 +1229,49 @@ Domain::unpackMigratingData ( LoadBallancer* lb, ProcessCommunicator& pc)
     pcbuff->unpackInt (_mode);
     switch (_mode) {
     case LoadBallancer::DM_Remote: 
-      // receiving new local dofManager, that was local on sending partition
-      dofman = CreateUsrDefDofManagerOfType (_etype, 0, this);
+      // receiving new local dofManager
       pcbuff->unpackInt (_globnum);
+
+      if (dmanMap.find(_globnum) != dmanMap.end()) { 
+	// dofman is already available -> update only
+        dofman = dmanMap[_globnum];
+      } else { // data not available -> mode should be SharedUpdate
+        dofman = CreateUsrDefDofManagerOfType (_etype, 0, this);
+      }
       dofman->setGlobalNumber(_globnum);
+      // unpack dofman state (this is the local dofman, not available on remote)
+      dofman->restoreContext (&pcDataStream, CM_Definition | CM_State| CM_UnknownDictState);
       // unpack list of new partitions
       pcbuff->unpackIntArray (_partitions);
       dofman->setPartitionList (_partitions);
-      // unpack dofman state (this is the local dofman, not available on remote)
-      dofman->restoreContext (&pcDataStream, CM_Definition | CM_State| CM_UnknownDictState);
       dofman->setParallelMode (DofManager_local);
-      dofman->setNumber (0); // received dof mans assigned with zero; this allows to distinguish them later form local ones
-#ifdef DEBUG
-      if (dmanMap.find(_globnum) != dmanMap.end()) OOFEM_ERROR ("LoadBallancer::unpackMigratingData: DM_Remode data incostency: record already exist");
-#endif      
       dmanMap[_globnum] = dofman;
       break;
 
-    case LoadBallancer::DM_SharedNew:      
+    case LoadBallancer::DM_Shared:      
       // receiving new shared dofManager, that was local on sending partition
       // should be received only once (from partition where was local)
-      dofman = CreateUsrDefDofManagerOfType (_etype, 0, this);
       pcbuff->unpackInt (_globnum);
+
+      if (dmanMap.find(_globnum) != dmanMap.end()) { 
+	// dofman is already available -> update only
+        dofman = dmanMap[_globnum];
+      } else { // data not available -> mode should be SharedUpdate
+        dofman = CreateUsrDefDofManagerOfType (_etype, 0, this);
+      }
       dofman->setGlobalNumber(_globnum);
-      // unpack list of new partitions
-      pcbuff->unpackIntArray (_partitions);
       // unpack dofman state (this is the local dofman, not available on remote)
       dofman->restoreContext (&pcDataStream, CM_Definition | CM_State| CM_UnknownDictState);
+      // unpack list of new partitions
+      pcbuff->unpackIntArray (_partitions);
       dofman->setPartitionList (_partitions);
       dofman->setParallelMode (DofManager_shared);
 #if __VERBOSE_PARALLEL
       fprintf (stderr, "[%d] received Shared new dofman [%d]\n", myrank, _globnum);
 #endif
-
-#ifdef DEBUG
-      if (dmanMap.find(_globnum) != dmanMap.end()) OOFEM_ERROR ("LoadBallancer::unpackMigratingData: DM_SharedNew data incostency: record already exist");
-#endif      
       dmanMap[_globnum] = dofman;
       break;
        
-    case LoadBallancer::DM_SharedExclude:
-    case LoadBallancer::DM_SharedUpdate:
-      // Existing shared node to be updated; 
-      // sending partition should be exluded from the list
-      pcbuff->unpackInt (_globnum);
-      if (dmanMap.find(_globnum) != dmanMap.end()) { // dofman is already available -> update only
-        dofman = dmanMap[_globnum];
-       } else { // data not available -> mode should be SharedUpdate
-        dofman = CreateUsrDefDofManagerOfType (_etype, 0, this);
-       }
-      dofman->setGlobalNumber(_globnum);
-      // unpack list of new partitions
-      pcbuff->unpackIntArray (_partitions);
-      // unpack dofman state (this is the local dofman, not available on remote)
-      dofman->restoreContext (&pcDataStream, CM_Definition | CM_State| CM_UnknownDictState);
-      // merge it with the old one
-      dofman->mergePartitionList (_partitions);
-      dofman->setParallelMode (DofManager_shared);
-      if (_mode == LoadBallancer::DM_SharedExclude) {
-	// exlude sending partition from partition list 
-        dofman->removePartitionFromList (iproc);
-	int _s = dofman->givePartitionList()->giveSize();
-	if ((_s == 0) || ((_s==1) && dofman->givePartitionList()->findFirstIndexOf(myrank))) {
-	  // becoming local
-	  dofman->setParallelMode (DofManager_local);
-	}
-      }
-      dmanMap[_globnum] = dofman;
-      break;
-      // 
     default:
       OOFEM_ERROR ("LoadBallancer::unpackMigratingData: unexpected dof manager type");
     }
@@ -1365,7 +1340,7 @@ Domain::migrateLoad (LoadBallancer* lb)
   this->dmanMap.clear();
   this->recvElemList.clear();
 
-#if 0
+#if 1
   // debug print
   int i, j, nnodes=giveNumberOfDofManagers(), nelems=giveNumberOfElements();
   fprintf (stderr, "\n[%d] Nodal Table\n", myrank);
@@ -1393,18 +1368,21 @@ Domain::migrateLoad (LoadBallancer* lb)
 }
 
 void 
-Domain::initGlobalDofManMap ()
+Domain::initGlobalDofManMap (bool forceinit)
 {
   // initializes global dof man map according to domain dofman list
 
-  int key, idofman, ndofman = this->giveNumberOfDofManagers();
-  DofManager* dofman;
-  dmanMap.clear();
+  if (forceinit || !dmanMapInitialized) {
 
-  for (idofman=1; idofman <= ndofman; idofman++) {
-    dofman = this->giveDofManager (idofman);
-    key = dofman->giveGlobalNumber();
-    dmanMap[key] = dofman;
+    int key, idofman, ndofman = this->giveNumberOfDofManagers();
+    DofManager* dofman;
+    dmanMap.clear();
+    
+    for (idofman=1; idofman <= ndofman; idofman++) {
+      dofman = this->giveDofManager (idofman);
+      key = dofman->giveGlobalNumber();
+      dmanMap[key] = dofman;
+    }
   }
 }
 
@@ -1420,12 +1398,12 @@ Domain::deleteRemoteDofManagers (LoadBallancer* lb)
   //LoadBallancer* lb = this->giveLoadBallancer();
   LoadBallancer::DofManMode dmode;
   DofManager* dman;
-
+  int myrank=this->giveEngngModel()->giveRank();
   // loop over local nodes
   
   for (i = 1; i<= ndofman; i++) {
     dmode = lb->giveDofManState(i);
-    if ((dmode == LoadBallancer::DM_Remote) || (dmode == LoadBallancer::DM_SharedExclude)) {
+    if ((dmode == LoadBallancer::DM_Remote)) {
       // positive candidate found
       dmanMap.erase (this->giveDofManager (i)->giveGlobalNumber());
       //
@@ -1433,19 +1411,23 @@ Domain::deleteRemoteDofManagers (LoadBallancer* lb)
       //
       dman = dofManagerList->unlink (i);
       delete dman;
-    } else if (dmode == LoadBallancer::DM_SharedNew) {
+    } else if (dmode == LoadBallancer::DM_Shared) {
       dman = this->giveDofManager (i);
       dman->setPartitionList (*(lb->giveDofManPartitions(i)));
       dman->setParallelMode (DofManager_shared);
-#if __VERBOSE_PARALLEL
-      fprintf (stderr,"domain: new shared node %d, partitions:", i);
-      for (int j=1; j<=lb->giveDofManPartitions(i)->giveSize(); j++)
-	fprintf (stderr, "%d ", lb->giveDofManPartitions(i)->at(j));
-      fprintf (stderr, "\n");
-#endif
-      
+      if (!dman->givePartitionList()->findFirstIndexOf (myrank)) {
+        dmanMap.erase (this->giveDofManager (i)->giveGlobalNumber());
+        dman = dofManagerList->unlink (i);
+        delete dman;
+      }
+    } else if (dmode == LoadBallancer::DM_Local) {
+      IntArray _empty(0);
+      dman = this->giveDofManager (i);
+      dman->setPartitionList(_empty);
+      dman->setParallelMode (DofManager_local);
+    } else {
+      OOFEM_ERROR ("Domain::deleteRemoteDofManagers: unknown dmode encountered");
     }
-
   }
 }
 
@@ -1605,6 +1587,15 @@ Domain::renumberDofManData () {
       it->second->updateLocalNumbering (this, &Domain::LB_giveUpdatedLocalNumber); // l_to_l
     }
   }
+}
+
+int
+Domain::dofmanGlobal2local (int _globnum)
+{
+  if (dmanMap.find(_globnum) != dmanMap.end()) { 
+    // dofman is already available -> update only
+    return (dmanMap[_globnum]->giveNumber());
+  } else return 0;
 }
 
 #endif

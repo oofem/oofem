@@ -101,16 +101,14 @@ class LoadBallancer
      DM_NULL  - undefined (undetermined) state, if assigned means internal error
      DM_Local - local dofman that remains local
      DM_Remote- local dofman that becames remote (becames local on remote partition)
-     DM_SharedNew - local shared that became shared
-     DM_Shared- shared dofman that remains on local partition. 
-                It may remain shared or local, depending on received information
-		from remote partition, but from local information we can not deduce more.
-     DM_SharedExlude - shared dofman that remains shared, 
+     //DM_SharedNew - local shared that became shared
+     DM_Shared- shared dofman that remains shared.
+     //DM_SharedExlude - shared dofman that remains shared, 
                        possibly with changed partitions, but local partition
 		       is no more in shared list (should be exluded on remote partitions).
-     DM_SharedUpdate - Shared dofman that remains shared, the partition list may changed.
+     //DM_SharedUpdate - Shared dofman that remains shared, the partition list may changed.
   */
-  enum DofManMode { DM_NULL, DM_Local, DM_Shared, DM_SharedExclude, DM_SharedNew, DM_SharedUpdate, DM_Remote};
+  enum DofManMode { DM_NULL, DM_Local, DM_Shared, DM_Remote};
  protected:
   Domain* domain;
 

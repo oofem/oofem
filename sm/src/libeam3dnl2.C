@@ -421,8 +421,8 @@ LIBeam3dNL2 :: computeGaussPoints ()
    // Sets up the array of Gauss Points of the receiver.
 {
 
-   numberOfIntegrationRules = 1 ;
-  integrationRulesArray = new IntegrationRule*;
+  numberOfIntegrationRules = 1 ;
+  integrationRulesArray = new IntegrationRule*[1];
   integrationRulesArray[0] = new GaussIntegrationRule (1,domain, 1, 2);
   integrationRulesArray[0]->setUpIntegrationPoints (_Line, 1 , this,  _3dBeam);
 

@@ -66,9 +66,9 @@
 #endif
 
 #ifdef __PARALLEL_MODE
-#include "remotemasterdof.h"
-#include "sharedmasterdof.h"
-#include "nulldof.h"
+//#include "remotemasterdof.h"
+//#include "sharedmasterdof.h"
+//#include "nulldof.h"
 #endif
 
 DofManager :: DofManager (int n, Domain* aDomain)
@@ -91,14 +91,14 @@ DofManager :: DofManager (int n, Domain* aDomain)
 DofManager :: ~DofManager()
    // Destructor.
 {
-   int i = numberOfDofs ;
-
-   if (numberOfDofs) {
-      while (i--)
-  delete dofArray[i] ;
-  //      delete [numberOfDofs] dofArray ;}
-      delete dofArray ;}
-   // delete locationArray ;
+  int i = numberOfDofs ;
+  
+  if (numberOfDofs) {
+    while (i--)
+      delete dofArray[i] ;
+    delete[] dofArray ;
+  }
+  // delete locationArray ;
 #ifdef __PARALLEL_MODE
 #endif
 }
@@ -481,19 +481,9 @@ DofManager :: initializeFrom (InputRecord* ir)
       if (dtype == DT_master) {
         if(hasIc) dofIc = ic.at(j+1) ;
         if(hasBc) dofBc = bc.at(j+1) ;
-#ifdef __PARALLEL_MODE
-        if (parallel_mode == DofManager_remote) 
-          dofArray[j] = new RemoteMasterDof(j+1,this,dofBc,dofIc,(DofID) dofIDArry.at(j+1)) ;
-        else if (parallel_mode == DofManager_shared)
-          dofArray[j] = new SharedMasterDof(j+1,this,dofBc,dofIc,(DofID) dofIDArry.at(j+1)) ;
-        else if (parallel_mode == DofManager_null)
-          // ignore applied bc
-          dofArray[j] = new NullDof (j+1, this, dofIc, (DofID) dofIDArry.at(j+1)) ;
-        else
-          dofArray[j] = new MasterDof      (j+1,this,dofBc,dofIc,(DofID) dofIDArry.at(j+1)) ;
-#else
+
         dofArray[j] = new MasterDof(j+1,this,dofBc,dofIc,(DofID) dofIDArry.at(j+1)) ;
-#endif
+
       } else if (dtype == DT_simpleSlave) { // Simple slave dof
         if (masterMask.giveSize() == 0) {
           IR_GIVE_FIELD (ir, masterMask, IFT_DofManager_mastermask, "mastermask"); // Macro
@@ -739,7 +729,7 @@ contextIOResultType DofManager :: restoreContext (DataStream* stream, ContextMod
       if (numberOfDofs) {
 	while (i--)
 	  delete dofArray[i] ;
-	delete dofArray ;
+	delete[] dofArray ;
       }
       // allocate new ones
       dofArray = new Dof* [_numberOfDofs] ;
@@ -1055,9 +1045,7 @@ DofManager::mergePartitionList (IntArray& _p)
   // more optimized version can be made requiring sorted partition list of receiver
   int i, size = _p.giveSize();
   for (i=1; i<=size; i++) {
-    if (!partitions.findFirstIndexOf(_p.at(i))) {
-      partitions.followedBy(_p.at(i),2);
-    }
+    partitions.insertOnce (_p.at(i));
   }
 }
 
@@ -1088,6 +1076,13 @@ DofManager :: isLocal () {
   return false;
 }
 
-
+const int 
+DofManager::givePartitionsConnectivitySize () 
+{
+  int n = partitions.giveSize();
+  int myrank = this->giveDomain()->giveEngngModel()->giveRank();
+  if (partitions.findFirstIndexOf (myrank)) return n;
+  else return n+1;
+}
 
 #endif

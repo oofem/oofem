@@ -137,6 +137,9 @@ EngngModel :: EngngModel (int i, EngngModel* _master) : domainNeqs(), domainPres
  initParallel ();
  parallelFlag = 1;
  loadBallancingFlag = false;
+ force_load_rebalance_in_first_step = false; 
+ lb = NULL;
+ lbm = NULL;
 #else
  parallelFlag=0;
 #endif
@@ -190,6 +193,9 @@ EngngModel :: EngngModel (int i, char* s, EngngModel* _master) : domainNeqs(), d
  //sprintf (dataInputFileName, "%s.%d", s, rank);
  dataOutputFileName = new char [MAX_FILENAME_LENGTH];
  loadBallancingFlag = false;
+ force_load_rebalance_in_first_step = false;
+ lb = NULL;
+ lbm = NULL;
 #endif
 
 #ifdef __PETSC_MODULE
@@ -209,7 +215,7 @@ EngngModel ::  ~EngngModel ()
   //delete nMethod;
 
  //delete dataInputFileName ;
- delete dataOutputFileName;
+ delete[] dataOutputFileName;
  delete domainList;
  delete metaStepList;
 
@@ -331,6 +337,10 @@ EngngModel::initializeFrom (InputRecord* ir)
  int _val = 0;
  IR_GIVE_OPTIONAL_FIELD (ir, _val, IFT_NonLinearStatic_loadBallancingFlag, "lbflag"); // Macro
  loadBallancingFlag = _val;
+
+ _val = 0;
+ IR_GIVE_OPTIONAL_FIELD (ir, _val, IFT_NonLinearStatic_forceloadBallancingFlag, "forcelb1"); // Macro
+ force_load_rebalance_in_first_step = _val;
 
 #endif
   return IRRT_OK;
@@ -1916,7 +1926,8 @@ EngngModel::ballanceLoad (TimeStep* atTime)
   this->giveLoadBallancer();
 
   _d = lbm->decide();
-  if (_d == LoadBallancerMonitor::LBD_RECOVER) {
+  if ((_d == LoadBallancerMonitor::LBD_RECOVER) || 
+      ((atTime->isTheFirstStep()) && force_load_rebalance_in_first_step)) {
     // determine nwe partitioning
     lb->calculateLoadTransfer();
     // pack e-model solution data into dof dictionaries

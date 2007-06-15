@@ -288,10 +288,13 @@ enum EngngModel_UpdateMode {EngngModel_SUMM_Mode, EngngModel_SET_Mode};
 
  /**@name Load balancing attributes */
  //@{
+ /// Load Ballancer
  LoadBallancer* lb;
  LoadBallancerMonitor* lbm;
- // if set to true, load ballancing is active
+ /// if set to true, load ballancing is active
  bool loadBallancingFlag;
+ /// debug flag forcing load balancing after first step
+ bool force_load_rebalance_in_first_step;
  //@}
 
 #endif // __PARALLEL_MODE

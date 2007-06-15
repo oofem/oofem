@@ -379,9 +379,9 @@ PetscNatural2GlobalOrdering::init (EngngModel* emodel, EquationID ut, int di, Eq
     delete rbuffs[p];
     delete buffs[p];
   } 
-  delete rbuffs;
-  delete buffs;
-  delete leqs;
+  delete[] rbuffs;
+  delete[] buffs;
+  delete[] leqs;
 
   //MPI_Barrier (MPI_COMM_WORLD);
 #ifdef __VERBOSE_PARALLEL

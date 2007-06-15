@@ -196,6 +196,8 @@ class Domain
  //@{
  /// Global dof manager map (index is global of man number)
  std::map<int, DofManager*> dmanMap;
+ /// dmanMap init flag
+ bool dmanMapInitialized;
  /// List of received elements
  std::list<Element*> recvElemList;
  /// Load ballancer
@@ -401,7 +403,8 @@ int               giveNumber () {return this->number;}
  int packMigratingData (LoadBallancer*, ProcessCommunicator& pc) ;
  int unpackMigratingData (LoadBallancer*, ProcessCommunicator& pc) ;
  void migrateLoad (LoadBallancer* ) ;
- void initGlobalDofManMap ();
+ void initGlobalDofManMap (bool forceinit=false);
+ int  dofmanGlobal2local (int _globnum);
  void deleteRemoteDofManagers (LoadBallancer* );
  void deleteRemoteElements (LoadBallancer* );
  void renumberDofManagers ();

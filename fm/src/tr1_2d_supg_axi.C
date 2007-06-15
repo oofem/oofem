@@ -70,7 +70,7 @@ TR1_2D_SUPG_AXI :: computeGaussPoints ()
 // Sets up the array containing the four Gauss points of the receiver.
 {
   numberOfIntegrationRules = 1 ;
-  integrationRulesArray = new IntegrationRule*;
+  integrationRulesArray = new IntegrationRule*[1];
   integrationRulesArray[0] = new GaussIntegrationRule (1,domain, 1, 3);
   integrationRulesArray[0]->setUpIntegrationPoints (_Triangle, 7, this, _2dAxiFlow);
 }

@@ -223,17 +223,19 @@ class DynamicCommunicationBuffer : public  CommunicationBuffer
  template <class T> int __packArray (T* src, int n, MPI_Datatype type) {
    int _result=1;
    int start_indx=0, end_indx, _size;
+   int remaining_size=n;
 
    do {
-     _size = this->giveFitSize(type, active_packet -> giveAvailableSpace(), n);
+     _size = this->giveFitSize(type, active_packet -> giveAvailableSpace(), remaining_size);
      end_indx = start_indx + _size;
      
      if (_size) _result &= active_packet -> packArray (communicator, src+start_indx,_size, type);
-     if (end_indx == n) break;
+     if (end_indx >= n) break;
      // active packet full, allocate a new one
      active_packet = this->allocateNewPacket (++number_of_packets);
      packet_list.push_back(active_packet);
      start_indx = end_indx;
+     remaining_size -= _size;
    } while (1);
    
    return _result;
@@ -247,16 +249,18 @@ class DynamicCommunicationBuffer : public  CommunicationBuffer
 
    int _result=1;
    int start_indx=0, end_indx, _size;
+   int remaining_size=n;
    
    do {
-     _size = this->giveFitSize(type, active_packet -> giveAvailableSpace(), n);
+     _size = this->giveFitSize(type, active_packet -> giveAvailableSpace(), remaining_size);
      end_indx = start_indx + _size;
      
      if (_size) _result &= active_packet->unpackArray (communicator,dest+start_indx,_size, type);
-     if (end_indx == n) break;
+     if (end_indx >= n) break;
      // active packet exhausted, pop a new one
      this->popNewRecvPacket();
      start_indx = end_indx;
+     remaining_size -= _size;
    } while (1);
    
    return _result;

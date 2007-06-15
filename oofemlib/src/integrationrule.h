@@ -204,6 +204,7 @@ public:
   Calls restoreContext service for all receiver's integration points.
   Note: does not call the FEMComponent::restoreContext service, in order not
   to write class id info for each integration rule.
+  @param obj should be a pointer to invoking element, ie., to which the receiver will belong to.
   @exception throws an ContextIOERR exception if error encountered.
   */
   contextIOResultType restoreContext (DataStream* stream, ContextMode mode, void *obj);

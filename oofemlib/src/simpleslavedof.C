@@ -76,12 +76,14 @@ Dof* SimpleSlaveDof::giveMasterDof ()
 
   if (this->masterDofIndx) {
 
+  /*
   classType masterDofCT = dofManager->giveDomain()->giveDofManager(masterDofMngr)->
     giveDof(masterDofIndx)->giveClassID();
   if ((masterDofCT != MasterDofClass)&&(masterDofCT != SharedMasterDofClass)&&(masterDofCT != RemoteMasterDofClass)) {
     
     _error ("giveMasterDof: slaveDof to slaveDof reference not allowed");
   }
+  */
   } else {
   _error ("giveMasterDof: no dof with dofID in master found");
   }

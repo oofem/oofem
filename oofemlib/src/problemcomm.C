@@ -116,7 +116,7 @@ ProblemCommunicator :: setUpCommunicationMapsForNodeCut (EngngModel* pm, bool ex
  
  // delete local maps
  for (i=0; i<size; i++) delete maps[i];
- delete maps;
+ delete[] maps;
 }
 
 

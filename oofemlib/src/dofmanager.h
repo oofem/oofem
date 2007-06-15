@@ -396,12 +396,6 @@ public:
   */
   int packDOFsUnknowns (CommunicationBuffer& buff, EquationID type, ValueModeType mode, TimeStep* stepN);
   /**
-  Unpacks DOFManager DOFs and updates their unknowns if necessary.
-  @see Dof::unpackAndUpdateDOFsUnknown for description
-  */
-  int unpackAndUpdateDOFsUnknowns (CommunicationBuffer& buff, UnknownType type, 
-                  ValueModeType mode, TimeStep* stepN);
-  /**
   Returns partition list of receiver.
   @return partition array.
   */
@@ -415,7 +409,7 @@ public:
   /** 
       Returns number of partitions sharing given receiver (=number of shared partitions + local one)
   */
-  const int givePartitionsConnectivitySize () {return partitions.giveSize()+1;}
+  const int givePartitionsConnectivitySize () ;
   /// Returns true if receiver is locally maintained
   bool isLocal ();
   /// Returns true if receiver is shared

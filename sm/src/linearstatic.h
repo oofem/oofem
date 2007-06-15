@@ -83,8 +83,7 @@ TASK:
 
  public:
   LinearStatic (int i, EngngModel* _master = NULL) ;
-  ~LinearStatic () 
-    {delete  stiffnessMatrix; if (nMethod) delete nMethod;}
+  ~LinearStatic () ;
 // solving
   void solveYourself ();
   void solveYourselfAt (TimeStep *);

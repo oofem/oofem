@@ -82,8 +82,7 @@ WallClockLoadBallancerMonitor::decide()
     relWallClockImbalance = 0.0;
   }
 
-  // debugging -> force rebalancing in first step
-  if (emodel->giveCurrentStep()->isTheFirstStep()) relWallClockImbalance = 1.0;
+  delete[] node_solutiontimes;
 
   // decide
   if ((absWallClockImbalance > 10) || (relWallClockImbalance > 0.1)) {

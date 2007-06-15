@@ -166,7 +166,7 @@ AList<T> :: clear (bool deleteObjectFlag)
 	 delete (values[i]) ;
      }
      //      delete [size] values ;}
-     delete  values ;
+     delete[]  values ;
    }
   
    allocatedSize = size = 0;
@@ -201,7 +201,7 @@ AList<T> :: growTo (int newSize)
 
    if (values)
     //      delete [size] values ;
-    delete  values ;
+    delete[]  values ;
 
    values = newValues ;
    this->allocatedSize = newSize + this->sizeIncrement;

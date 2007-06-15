@@ -105,9 +105,9 @@ enum classType {
   RigidArmNodeClass,
   HangingNodeClass,
   ElementSideClass,
-  RemoteMasterDofClass,
-  SharedMasterDofClass,
-  NullDofClass,
+  //RemoteMasterDofClass,
+  //SharedMasterDofClass,
+  //NullDofClass,
   RigidArmSlaveDofClass,
   HangingDofClass,
 
