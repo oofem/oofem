@@ -164,7 +164,7 @@ TASK:
  
   //int requiresNewLhs () {return 1;}
   virtual void               updateYourself (TimeStep*) ;
-  virtual void               updateComponent (TimeStep*, NumericalCmpn, int);
+  virtual void               updateComponent (TimeStep*, NumericalCmpn, Domain*);
  void                       updateAttributes (TimeStep* );
 
   double   giveUnknownComponent ( EquationID, ValueModeType, TimeStep*, Domain*, Dof*);

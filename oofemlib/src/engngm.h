@@ -656,9 +656,9 @@ enum EngngModel_UpdateMode {EngngModel_SUMM_Mode, EngngModel_SET_Mode};
   when using updated Newton-Raphson method). 
   @param tStep time when component is updated.
   @param cmpn Numerical component to update.
-  @param di domain number
+  @param d domain 
   */
-  virtual void      updateComponent (TimeStep* tStep, NumericalCmpn cmpn, int di);
+  virtual void      updateComponent (TimeStep* tStep, NumericalCmpn cmpn, Domain* d);
  /**
   Initializes solution of new time step. Default implementation
   resets all internal history variables (in integration points of elements)

@@ -733,7 +733,7 @@ void    NonLinearStatic :: updateYourself (TimeStep* stepN)
 }
 
 
-void NonLinearStatic ::  updateComponent (TimeStep* tStep, NumericalCmpn cmpn, int di)
+void NonLinearStatic ::  updateComponent (TimeStep* tStep, NumericalCmpn cmpn, Domain* d)
 //
 // updates some componet, which is used by numerical method
 // to newly reached state. used mainly by numerical method
@@ -749,14 +749,14 @@ void NonLinearStatic ::  updateComponent (TimeStep* tStep, NumericalCmpn cmpn, i
 #ifdef VERBOSE
    OOFEM_LOG_INFO("Assembling tangent stiffness matrix\n");
 #endif
-   this ->assemble (stiffnessMatrix , tStep, EID_MomentumBalance, TangentStiffnessMatrix, this->giveDomain(di));
+   this ->assemble (stiffnessMatrix , tStep, EID_MomentumBalance, TangentStiffnessMatrix, d);
 
   } else  if (stiffMode == nls_secantStiffness)  {
 #ifdef VERBOSE
     OOFEM_LOG_INFO("Assembling secant stiffness matrix\n");
 #endif
    stiffnessMatrix -> zero () ;   // zero stiffness matrix
-    this ->assemble (stiffnessMatrix , tStep, EID_MomentumBalance, SecantStiffnessMatrix, this->giveDomain(di));
+    this ->assemble (stiffnessMatrix , tStep, EID_MomentumBalance, SecantStiffnessMatrix, d);
    
   } else {
    // currently no action , this method is mainly intended to
@@ -767,14 +767,14 @@ void NonLinearStatic ::  updateComponent (TimeStep* tStep, NumericalCmpn cmpn, i
   
   break;
  case InternalRhs:
-  this -> giveInternalForces (internalForces, incrementOfDisplacement, this->giveDomain(di), tStep);
+  this -> giveInternalForces (internalForces, incrementOfDisplacement, d, tStep);
   break;
  case NonLinearRhs_Total:
   _error("updateComponent: Not supported.");
   break;
  case NonLinearRhs_Incremental:
   this-> assembleIncrementalReferenceLoadVectors (incrementalLoadVector, incrementalLoadVectorOfPrescribed,
-                                                  refLoadInputMode, this->giveDomain(di), EID_MomentumBalance, tStep);
+                                                  refLoadInputMode, d, EID_MomentumBalance, tStep);
   break;
 
  default:

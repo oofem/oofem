@@ -81,7 +81,7 @@ LineSearchNM::solve(FloatArray* r, FloatArray* dr, FloatArray* F, FloatArray* R,
   OOFEM_LOG_DEBUG ("LS: product uphill, eta=%e\n", 1.0);
   r->add(dr);
   tNow->incrementStateCounter();              // update solution state counter
-  engngModel->updateComponent (tNow, InternalRhs, domain->giveNumber());
+  engngModel->updateComponent (tNow, InternalRhs, domain);
   etaValue = 1.0;
   status= ls_ok;
   return NM_Success;
@@ -105,7 +105,7 @@ LineSearchNM::solve(FloatArray* r, FloatArray* dr, FloatArray* F, FloatArray* R,
   for (ii=1; ii<=neq; ii++) r->at(ii) = rb.at(ii)+this->eta.at(ils)*dr->at(ii);
   tNow->incrementStateCounter();              // update solution state counter
   // update internal forces according to new state
-  engngModel->updateComponent (tNow, InternalRhs, domain->giveNumber());
+  engngModel->updateComponent (tNow, InternalRhs, domain);
   // compute out-of balance forces g in new state
   g = *R;
   g.times(lambda);
@@ -143,7 +143,7 @@ LineSearchNM::solve(FloatArray* r, FloatArray* dr, FloatArray* F, FloatArray* R,
  /* update F before */
  for (ii=1; ii<=neq; ii++) r->at(ii) = rb.at(ii) + dr->at(ii);
  tNow->incrementStateCounter();              // update solution state counter
- engngModel->updateComponent (tNow, InternalRhs, domain->giveNumber());
+ engngModel->updateComponent (tNow, InternalRhs, domain);
  etaValue = 1.0;
  status= ls_failed;
  return NM_NoSuccess;
