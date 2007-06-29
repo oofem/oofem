@@ -1933,7 +1933,7 @@ EngngModel::ballanceLoad (TimeStep* atTime)
     // pack e-model solution data into dof dictionaries
     this->packMigratingData(atTime);
     // migrate data 
-    this->giveDomain(1)->migrateLoad (lb);
+    lb->migrateLoad (this->giveDomain(1));
     // renumber itself
     this->forceEquationNumbering();
 #if __VERBOSE_PARALLEL

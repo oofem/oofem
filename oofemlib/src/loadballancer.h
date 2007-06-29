@@ -126,7 +126,7 @@ class LoadBallancer
   
  /**@name Work migration methods  */
  //@{
-  void migrateLoad ();
+  void migrateLoad (Domain* d);
  //@}
   
  /**@name Query methods after work transfer calculation */
@@ -145,6 +145,13 @@ class LoadBallancer
   virtual IRResultType initializeFrom (InputRecord* ir) {return IRRT_OK;}
 
  protected:
+
+  int packMigratingData (Domain*, ProcessCommunicator& pc) ;
+  int unpackMigratingData (Domain*, ProcessCommunicator& pc) ;
+  void deleteRemoteDofManagers (Domain* );
+  void deleteRemoteElements (Domain* );
+  
+
 };
 
 

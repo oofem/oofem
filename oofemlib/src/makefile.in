@@ -70,7 +70,7 @@ srcs6=outputmanager.C compiler.C parser.C rigidarmnode.C spatiallocalizer.C dumm
 
 srcs7=calmls.C nrsolver.C nrsolver2.C subspaceit.C gjacobi.C linesearch.C nonlocalbarrier.C primaryfield.C field.C fieldmanager.C oofemtxtdatareader.C oofemtxtinputrecord.C buffereddatareader.C stressstrainbasevector.C stressvector.C strainvector.C fei1dlin.C  fei2dquadlin.C  fei2dtrlin.C fei3dtrlin.C fei3dhexalin.C spoolessparsemtrx.C spoolessolver.C petscsparsemtrx.C petscsolver.C petsccontext.C hangingnode.C pointload.C
 
-srcs8=errorestimator.C remeshingcrit.C primaryunknownmapper.C materialmappingalgorithm.C dofdistributedprimaryfield.C 
+srcs8=errorestimator.C remeshingcrit.C primaryunknownmapper.C materialmappingalgorithm.C dofdistributedprimaryfield.C domaintransactionmanager.C
 
 srcs9=geotoolbox.C dss.C dsssolver.C
 

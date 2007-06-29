@@ -47,9 +47,9 @@
 #ifndef __MAKEDEPEND
 #include <stdio.h>
 #include <time.h>
+#include <map>
 #ifdef __PARALLEL_MODE
 #include <list>
-#include <map>
 #endif
 #endif
 
@@ -66,6 +66,7 @@ class DofManager; class OutputManager;
 class EngngModel; class ConnectivityTable;
 class ErrorEstimator; class SpatialLocalizer;
 class NodalRecoveryModel; class NonlocalBarrier;
+class DomainTransactionManager;
 
 #ifdef __PARALLEL_MODE
 class ProcessCommunicator;
@@ -191,13 +192,23 @@ class Domain
   */
  StateCounterType nonlocalUpdateStateCounter;
 
-#ifdef __PARALLEL_MODE
- /**@name Load Ballancing data structures */
- //@{
+ /**
+    Transaction mamager. The purpose of this class is to
+    make the domain modification (in terms of adding and deleting components) versatile.
+  */
+ DomainTransactionManager* transactionManager;
  /// Global dof manager map (index is global of man number)
  std::map<int, DofManager*> dmanMap;
  /// dmanMap init flag
  bool dmanMapInitialized;
+ /// Global element map (index is global of man number)
+ std::map<int, Element*> elementMap;
+ /// dmanMap init flag
+ bool elementMapInitialized;
+ 
+#ifdef __PARALLEL_MODE
+ /**@name Load Ballancing data structures */
+ //@{
  /// List of received elements
  std::list<Element*> recvElemList;
  /// Load ballancer
@@ -397,26 +408,45 @@ int               giveNumber () {return this->number;}
   */
  void               setSmoother (NodalRecoveryModel* smoother, int destroyOld = 1);
 
+
 #ifdef __PARALLEL_MODE
- /**@name Load Ballancing support methods */
+ /**@name Domain transaction support methods.
+    The purpose of these methods is to privide a unified approach 
+    for changing domain at runtime (meaning mainly adding and deleting dofmanagers and elements).
+    The changes are recorded in transaction manager and untill the are commited, 
+    no change is reflected in domain itself.
+ */
  //@{
- int packMigratingData (LoadBallancer*, ProcessCommunicator& pc) ;
- int unpackMigratingData (LoadBallancer*, ProcessCommunicator& pc) ;
- void migrateLoad (LoadBallancer* ) ;
+ /**
+    Returns domain transaction manager.
+ */
+ DomainTransactionManager* giveTransactionManager ();
+ /**
+    Commits transactions recorded in transaction manager. The purpose of transaction manager is to
+    make the domain modification (adding and deleting components) possible and versatile. 
+   
+    The changes are recorded in transaction manager and untill the are commited, 
+    no change is reflected in domain itself. After transactions are commited, the local numbering can change.
+    A message to the system is sent to update the numbering.
+ */
+ int commitTransactions (DomainTransactionManager *tm);
+
  void initGlobalDofManMap (bool forceinit=false);
- int  dofmanGlobal2local (int _globnum);
- void deleteRemoteDofManagers (LoadBallancer* );
- void deleteRemoteElements (LoadBallancer* );
+ void initGlobalElementMap (bool forceinit=false);
  void renumberDofManagers ();
- void initializeNewDofManList (AList<DofManager>* dofManagerList);
- void compressElementData (AList<Element>* elementList, LoadBallancer* lb);
- void renumberElementData (LoadBallancer* lb);
- void renumberDofManData ();
+ void renumberDofManData (DomainTransactionManager *tm);
+ void renumberElements ();
+ void renumberElementData (DomainTransactionManager *tm);
  /** Return updated local entity number after load ballancing */
  int  LB_giveUpdatedLocalNumber (int oldnum, EntityRenumberingScheme scheme);
  /** Return updated local entity number after load ballancing */
  int  LB_giveUpdatedGlobalNumber (int oldnum, EntityRenumberingScheme scheme);
+ //@}
 
+
+ /**@name Load Ballancing support methods */
+ //@{
+ int  dofmanGlobal2local (int _globnum);
  //@}
 #endif
 
