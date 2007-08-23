@@ -208,7 +208,11 @@ PetscSolver::petsc_solve (PetscSparseMtrx* Lhs, Vec b, Vec x)
   
 }
 
-
+void 
+PetscSolver::reinitialize () 
+{
+  if (kspInit) KSPDestroy(ksp); kspInit=false;
+}
 
 
 
@@ -228,4 +232,9 @@ PetscSolver :: initializeFrom (InputRecord* ir) { return IRRT_OK;}
 
 NM_Status 
 PetscSolver::solve (SparseMtrx* A, FloatArray* b, FloatArray* x) {return NM_NoSuccess;}
+
+void 
+PetscSolver::reinitialize () 
+{}
+
 #endif

@@ -98,7 +98,7 @@ public:
 #endif
   /// Initializes receiver from given record. Empty implementation.
   IRResultType initializeFrom (InputRecord* ir);
-  void reinitialize () {if (kspInit) KSPDestroy(ksp); kspInit=false;}
+  void reinitialize ();
 
   
   // identification 
