@@ -694,7 +694,8 @@ enum MaterialMode {  // characteristic (material) mode for gaussian
   _3dHeMo,
 
   _2dFlow,
-  _2dAxiFlow
+  _2dAxiFlow,
+  _3dFlow
 
 } ;
 
@@ -945,7 +946,9 @@ enum domainType {
   _2dBeamMode,
   _HeatTransferMode,
   _HeatMass1Mode,   // Coupled heat and mass (1 matter) transfer
-  _2dIncompressibleFlow // 2d Incompressible flow, no energy eq
+  _2dIncompressibleFlow,// 2d Incompressible flow, no energy eq
+  _3dIncompressibleFlow // 3d Incompressible flow, no energy eq
+
 };
 
 enum problemMode {

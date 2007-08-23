@@ -92,7 +92,7 @@ srcs6=
 srcs7= 
 srcs8= levelsetpcs.C fastmarchingmethod.C
 
-srcs9= leplic.C twofluidmaterial.C supg.C supgelement.C tr1_2d_supg.C tr1_2d_supg2.C tr1_2d_supg_axi.C binghamfluid2.C tr1_2d_supg2_axi.C 
+srcs9= leplic.C twofluidmaterial.C supg.C supgelement.C tr1_2d_supg.C tr1_2d_supg2.C tr1_2d_supg_axi.C binghamfluid2.C tr1_2d_supg2_axi.C supgelement2.C py1_3d_supg.C
 
 # sources included only in parallel version
 psrc1= 

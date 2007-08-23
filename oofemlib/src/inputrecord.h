@@ -788,6 +788,10 @@ enum InputFieldType {
   IFT_LSPCS_reinit_dt,
   IFT_LSPCS_reinit_err,
   IFT_LSPCS_reinit_alg,
+  IFT_LSPCS_nsd,
+  IFT_LSPCS_ci1,
+  IFT_LSPCS_ci2,
+
 
   IFT_Unknown
 };

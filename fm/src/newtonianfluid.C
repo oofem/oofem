@@ -52,7 +52,7 @@ NewtonianFluidMaterial :: hasMaterialModeCapability (MaterialMode mode)
 // returns whether receiver supports given mode
 //
 {
-  if ((mode == _2dFlow)) return 1;
+  if ((mode == _2dFlow)||(mode == _3dFlow)) return 1;
   return 0;
 }
 
@@ -149,7 +149,17 @@ NewtonianFluidMaterial::computeDeviatoricStressVector (FloatArray& answer, Gauss
     answer.at(4) = eps.at(4)*viscosity;
 #endif
 
-  } else _error ("computeDeviatoricStressVector: unsuported material mode");
+  } else if (gp->giveMaterialMode() == _3dFlow) {
+    double ekk = eps.at(1)+eps.at(2)+eps.at(3);
+
+    answer.at(1) = 2.0*viscosity*(eps.at(1)-ekk/3.0);
+    answer.at(2) = 2.0*viscosity*(eps.at(2)-ekk/3.0);
+    answer.at(3) = 2.0*viscosity*(eps.at(3)-ekk/3.0);
+    answer.at(4) = eps.at(4)*viscosity;
+    answer.at(5) = eps.at(5)*viscosity;
+    answer.at(6) = eps.at(6)*viscosity;
+
+  }  else _error ("computeDeviatoricStressVector: unsuported material mode");
 
   ((FluidDynamicMaterialStatus*) this->giveStatus(gp)) -> letTempDeviatoricStressVectorBe (answer);
 }
@@ -182,6 +192,17 @@ NewtonianFluidMaterial::giveDeviatoricStiffnessMatrix (FloatMatrix& answer, MatR
     answer.at(1,1) = answer.at(2,2) = answer.at(3,3) = 2.0*viscosity;
     answer.at(4,4) = viscosity;
 #endif
+
+  } else if (gp->giveMaterialMode() == _3dFlow) {
+
+    answer.resize(6,6);  answer.zero();
+
+    answer.at(1,1) = answer.at(2,2) = answer.at(3,3) = 2.0*viscosity*(2./3.);
+    answer.at(1,2) = answer.at(1,3) = -2.0*viscosity*(1./3.);
+    answer.at(2,1) = answer.at(2,3) = -2.0*viscosity*(1./3.);
+    answer.at(3,1) = answer.at(3,2) = -2.0*viscosity*(1./3.);
+    
+    answer.at(4,4) = answer.at(5,5) = answer.at(6,6) = viscosity;
 
   }
   else _error ("giveDeviatoricStiffnessMatrix: unsupportted material mode");

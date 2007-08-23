@@ -593,9 +593,9 @@ SUPG :: solveYourselfAt (TimeStep* tStep)
   } while ((rnorm > rtolv) && (_absErrResid > atolv) && (nite <= maxiter));
 
   if (nite <= maxiter) {
-    OOFEM_LOG_INFO ("SUPG info: number of iteraions: %d\n", nite);
+    OOFEM_LOG_INFO ("SUPG info: number of iterations: %d\n", nite);
   } else {
-    OOFEM_WARNING2 ("SUPG info: Convergence not reached, number of iteraions: %d\n", nite);
+    OOFEM_WARNING2 ("SUPG info: Convergence not reached, number of iterations: %d\n", nite);
     if (stopmaxiter) exit (1);
   }
   

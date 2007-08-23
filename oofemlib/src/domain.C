@@ -727,6 +727,12 @@ Domain :: giveDefaultNodeDofIDArry ()
     defaultNodeDofIDArry.at(1)=V_u;
     defaultNodeDofIDArry.at(2)=V_v;
     defaultNodeDofIDArry.at(3)=P_f;
+  }  else if (dType == _3dIncompressibleFlow) {
+    defaultNodeDofIDArry.resize (4);
+    defaultNodeDofIDArry.at(1)=V_u;
+    defaultNodeDofIDArry.at(2)=V_v;
+    defaultNodeDofIDArry.at(3)=V_w;
+    defaultNodeDofIDArry.at(4)=P_f;
   } else {
     _error("giveDefaultNodeDofIDArry : unknown domainType");
   }
@@ -838,57 +844,49 @@ void Domain ::  resolveDomainDofsDefaults(char* typeName)
 // and also resolves default dof mask according to domain type.
 //
 {
- numberOfDefaultDofsPerSide = 0;
-
+  numberOfDefaultDofsPerSide = 0;
+  
   if(!strncasecmp(typeName,"2dplanestressrot",16)) {
     dType = _2dPlaneStressRotMode; 
-  numberOfDefaultDofsPerNode = 3;
- }
-  else if(!strncasecmp(typeName,"2dplanestress",12)) {
+    numberOfDefaultDofsPerNode = 3;
+  } else if(!strncasecmp(typeName,"2dplanestress",12)) {
     dType = _2dPlaneStressMode; 
-  numberOfDefaultDofsPerNode = 2;
- }
-  else if(!strncasecmp(typeName,"planestrain",11)) {
+    numberOfDefaultDofsPerNode = 2;
+  } else if(!strncasecmp(typeName,"planestrain",11)) {
     dType = _PlaneStrainMode; 
-  numberOfDefaultDofsPerNode = 2;
- }
- else if (! strncasecmp(typeName,"3daxisymm",9)) {
+    numberOfDefaultDofsPerNode = 2;
+  } else if (! strncasecmp(typeName,"3daxisymm",9)) {
     dType = _3dAxisymmMode;
-  numberOfDefaultDofsPerNode = 3;
- }
-  else if  (! strncasecmp(typeName,"2dmindlinplate",14)) {
+    numberOfDefaultDofsPerNode = 3;
+  } else if  (! strncasecmp(typeName,"2dmindlinplate",14)) {
     dType = _2dMindlinPlateMode;
-  numberOfDefaultDofsPerNode = 3;
- }
- else if (! strncasecmp(typeName,"3dshell",7)) {
+    numberOfDefaultDofsPerNode = 3;
+  } else if (! strncasecmp(typeName,"3dshell",7)) {
     dType = _3dShellMode;
-  numberOfDefaultDofsPerNode = 6;
- }
-  else if  (! strncasecmp(typeName,"2dtruss",7)){
+    numberOfDefaultDofsPerNode = 6;
+  } else if  (! strncasecmp(typeName,"2dtruss",7)){
     dType = _2dTrussMode; 
-  numberOfDefaultDofsPerNode = 2;
- }
-  else if  (! strncasecmp(typeName,"1dtruss",7)){
+    numberOfDefaultDofsPerNode = 2;
+  } else if  (! strncasecmp(typeName,"1dtruss",7)){
     dType = _1dTrussMode; 
-  numberOfDefaultDofsPerNode = 1;
- }
-  else if  (! strncasecmp(typeName,"2dbeam",6)) {
+    numberOfDefaultDofsPerNode = 1;
+  } else if  (! strncasecmp(typeName,"2dbeam",6)) {
     dType = _2dBeamMode;  
-  numberOfDefaultDofsPerNode = 3;
- }
-  else if  (! strncasecmp(typeName,"3d",2))     {
-    dType = _3dMode;
-  numberOfDefaultDofsPerNode = 3;
- }
-  else if  (! strncasecmp(typeName,"heattransfer",11)) {
+    numberOfDefaultDofsPerNode = 3;
+  } else if  (! strncasecmp(typeName,"heattransfer",11)) {
     dType = _HeatTransferMode;
-  numberOfDefaultDofsPerNode = 1;
- }  
-  else if  (! strncasecmp(typeName,"hema1",5)) {
+    numberOfDefaultDofsPerNode = 1;
+  } else if  (! strncasecmp(typeName,"hema1",5)) {
     dType = _HeatMass1Mode;
-  numberOfDefaultDofsPerNode = 2;
+    numberOfDefaultDofsPerNode = 2;
   } else if (! strncasecmp(typeName,"2dincompflow",12)) {
     dType = _2dIncompressibleFlow;
+    numberOfDefaultDofsPerNode = 3;
+  } else if (! strncasecmp(typeName,"3dincompflow",12)) {
+    dType = _3dIncompressibleFlow;
+    numberOfDefaultDofsPerNode = 4;
+  } else if  (! strncasecmp(typeName,"3d",2))     {
+    dType = _3dMode;
     numberOfDefaultDofsPerNode = 3;
   } else { 
     _error("resolveDomainDofsDefaults : unknown domainType");

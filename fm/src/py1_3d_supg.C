@@ -1,0 +1,566 @@
+/* $Header: /home/cvs/bp/oofem/tm/src/tr1_ht.C,v 1.2 2003/04/23 14:22:15 bp Exp $ */
+/*
+
+                   *****    *****   ******  ******  ***   ***                            
+                 **   **  **   **  **      **      ** *** **                             
+                **   **  **   **  ****    ****    **  *  **                              
+               **   **  **   **  **      **      **     **                               
+              **   **  **   **  **      **      **     **                                
+              *****    *****   **      ******  **     **         
+            
+                                                                   
+               OOFEM : Object Oriented Finite Element Code                 
+                    
+                 Copyright (C) 1993 - 2002   Borek Patzak                                       
+
+
+
+         Czech Technical University, Faculty of Civil Engineering,
+     Department of Structural Mechanics, 166 29 Prague, Czech Republic
+                                                                               
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.                                                                              
+*/
+
+#include "py1_3d_supg.h"
+#include "node.h"
+#include "material.h"
+#include "crosssection.h"
+#include "gausspnt.h"
+#include "gaussintegrationrule.h"
+#include "flotmtrx.h"
+#include "flotarry.h"
+#include "intarray.h"
+#include "domain.h"
+#include "mathfem.h"
+#include "engngm.h"
+#include "fluiddynamicmaterial.h"
+#include "load.h"
+#include "timestep.h"
+#include "boundaryload.h"
+#include "cltypes.h"
+#include "materialinterface.h"
+#ifndef __MAKEDEPEND
+#include <math.h>
+#include <stdio.h>
+#endif
+
+#ifdef __OOFEG
+#include "oofeggraphiccontext.h"
+#include "conTable.h"
+#endif
+
+FEI3dTrLin PY1_3D_SUPG :: interpolation;
+
+PY1_3D_SUPG :: PY1_3D_SUPG (int n, Domain* aDomain)
+  : SUPGElement2 (n,aDomain)
+  // Constructor.
+{
+  numberOfDofMans  = 4 ;
+}
+
+PY1_3D_SUPG :: ~PY1_3D_SUPG ()
+  // Destructor
+{}
+
+
+
+int
+PY1_3D_SUPG :: computeNumberOfDofs (EquationID ut) 
+{
+  if (ut == EID_MomentumBalance) return 12;
+  else if (ut == EID_ConservationEquation) return 4;
+  else _error ("computeNumberOfDofs: Unknown equation id encountered");
+  return 0;
+}
+
+void
+PY1_3D_SUPG ::   giveDofManDofIDMask  (int inode, EquationID ut, IntArray& answer) const 
+{
+  // returns DofId mask array for inode element node.
+  // DofId mask array determines the dof ordering requsted from node.
+  // DofId mask array contains the DofID constants (defined in cltypes.h)
+  // describing physical meaning of particular DOFs.
+  if ((ut == EID_MomentumBalance) || (ut == EID_AuxMomentumBalance)) {
+    answer.resize (3);
+    answer.at(1) = V_u;
+    answer.at(2) = V_v;
+    answer.at(3) = V_w;
+  } else if (ut == EID_ConservationEquation) {
+    answer.resize(1);
+    answer.at(1) = P_f;
+  } else if (ut == EID_MomentumBalance_ConservationEquation) {
+    answer.resize(4);
+    answer.at(1) = V_u;
+    answer.at(2) = V_v;
+    answer.at(3) = V_w;
+    answer.at(4) = P_f;
+  } else {
+    _error ("giveDofManDofIDMask: Unknown equation id encountered");
+  }
+}
+
+void
+PY1_3D_SUPG ::   giveElementDofIDMask  (EquationID ut, IntArray& answer) const 
+{
+  this->giveDofManDofIDMask(1,ut,answer);
+}
+
+
+IRResultType
+PY1_3D_SUPG :: initializeFrom (InputRecord* ir)
+{
+  //const char*__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
+  //IRResultType result;                  // Required by IR_GIVE_FIELD macro
+
+ this->SUPGElement2 :: initializeFrom (ir);
+
+ this -> computeGaussPoints();
+ return IRRT_OK;
+}
+
+void
+PY1_3D_SUPG :: computeGaussPoints ()
+// Sets up the array containing the integration points of the receiver.
+{
+  numberOfIntegrationRules = 2 ;
+  integrationRulesArray = new IntegrationRule*[2];
+  integrationRulesArray[0] = new GaussIntegrationRule (1,domain, 1, 3);
+  integrationRulesArray[0]->setUpIntegrationPoints (_Tetrahedra, 1, this, _3dFlow);
+
+  integrationRulesArray[1] = new GaussIntegrationRule (1,domain, 1, 3);
+  integrationRulesArray[1]->setUpIntegrationPoints (_Tetrahedra, 4, this, _3dFlow);
+}
+
+
+Interface* 
+PY1_3D_SUPG :: giveInterface (InterfaceType interface)
+{
+  if (interface == LevelSetPCSElementInterfaceType) 
+    return (LevelSetPCSElementInterface*) this;
+  return NULL;
+}
+
+
+void
+PY1_3D_SUPG :: computeNuMatrix (FloatMatrix& answer, GaussPoint* gp) 
+{
+  int i;
+  FloatArray n(4);
+  this->interpolation.evalN (n, *gp->giveCoordinates(), 0.0); 
+ 
+  answer.resize(3,12);
+  answer.zero();
+  
+  for (i=1; i<=4; i++) {
+    answer.at(1,3*i-2)  = n.at(i) ;
+    answer.at(2,3*i-1)  = n.at(i) ;
+    answer.at(3,3*i-0)  = n.at(i) ;
+  }
+  return  ;
+}
+
+void
+PY1_3D_SUPG :: computeUDotGradUMatrix (FloatMatrix& answer, GaussPoint* gp, TimeStep* atTime) 
+{
+  int i;
+  FloatMatrix n, dn (4,3);
+  FloatArray u, un;
+  interpolation.evaldNdx (dn, domain, dofManArray, *gp->giveCoordinates(), 0.0);
+  this->computeNuMatrix (n, gp);
+  this -> computeVectorOf(EID_MomentumBalance,VM_Total,atTime, un) ;
+  u.beProductOf (n,un);
+  
+  answer.resize (3,12); answer.zero();
+  for (i=1; i<=4; i++) {
+    answer.at(1,3*i-2) = u.at(1)*dn.at(i,1)+u.at(2)*dn.at(i,2)+u.at(3)*dn.at(i,3);
+    answer.at(2,3*i-1) = u.at(1)*dn.at(i,1)+u.at(2)*dn.at(i,2)+u.at(3)*dn.at(i,3);
+    answer.at(3,3*i-0) = u.at(1)*dn.at(i,1)+u.at(2)*dn.at(i,2)+u.at(3)*dn.at(i,3);
+  }
+}
+
+void
+PY1_3D_SUPG :: computeBMatrix (FloatMatrix& answer, GaussPoint* gp)
+{
+  int i;
+  FloatMatrix dn (4,3);
+  interpolation.evaldNdx (dn, domain, dofManArray, *gp->giveCoordinates(), 0.0);
+  
+  answer.resize (6,12);
+  answer.zero();
+  
+  for (i=1; i<=4; i++) {
+    answer.at(1,3*i-2) = dn.at(i,1);
+    answer.at(2,3*i-1) = dn.at(i,2);
+    answer.at(3,3*i-0) = dn.at(i,3);
+    
+    answer.at(4,3*i-1) = dn.at(i,3);
+    answer.at(4,3*i-0) = dn.at(i,2);
+    
+    answer.at(5,3*i-2) = dn.at(i,3);
+    answer.at(5,3*i-0) = dn.at(i,1);
+    
+    answer.at(6,3*i-2) = dn.at(i,2);
+    answer.at(6,3*i-1) = dn.at(i,1);
+  } 
+}
+
+void
+PY1_3D_SUPG :: computeDivUMatrix (FloatMatrix& answer, GaussPoint* gp)
+{
+  int i;
+  FloatMatrix dn (4,3);
+  interpolation.evaldNdx (dn, domain, dofManArray, *gp->giveCoordinates(), 0.0);
+
+  answer.resize (1,12);
+  answer.zero();
+  
+  for (i=1; i<=4; i++) {
+    answer.at(1,3*i-2) = dn.at(i,1);
+    answer.at(1,3*i-1) = dn.at(i,2);
+    answer.at(1,3*i-0) = dn.at(i,3);
+  }
+}
+
+void
+PY1_3D_SUPG :: computeNpMatrix (FloatMatrix& answer, GaussPoint* gp) 
+{
+  FloatArray n(4);
+  this->interpolation.evalN (n, *gp->giveCoordinates(), 0.0); 
+  
+  answer.resize(1,4);
+  answer.zero();
+  
+  answer.at(1,1)  = n.at(1) ;
+  answer.at(1,2)  = n.at(2) ;
+  answer.at(1,3)  = n.at(3) ;
+  answer.at(1,4)  = n.at(4) ;
+
+  return  ;
+}
+
+
+void
+PY1_3D_SUPG :: computeGradPMatrix (FloatMatrix& answer, GaussPoint* gp) 
+{
+  FloatMatrix dn (4,3);
+  interpolation.evaldNdx (dn, domain, dofManArray, *gp->giveCoordinates(), 0.0);
+  
+  answer.beTranspositionOf (dn);
+  return  ;
+}
+
+int
+PY1_3D_SUPG::giveNumberOfSpatialDimensions ()
+{
+  return 3;
+}
+
+double 
+PY1_3D_SUPG :: computeCriticalTimeStep (TimeStep* tStep)
+{
+  FloatArray u;
+  double Re = domain->giveEngngModel()->giveUnknownComponent(ReynoldsNumber, VM_Unknown, tStep, domain, NULL); 
+
+  this -> computeVectorOf(EID_MomentumBalance,VM_Total,tStep, u) ;
+
+  double vn1 = sqrt(u.at(1)*u.at(1)+u.at(2)*u.at(2)+u.at(3)*u.at(3));
+  double vn2 = sqrt(u.at(4)*u.at(4)+u.at(5)*u.at(5)+u.at(6)*u.at(6));
+  double vn3 = sqrt(u.at(7)*u.at(7)+u.at(8)*u.at(8)+u.at(9)*u.at(9));
+  double vn4 = sqrt(u.at(10)*u.at(10)+u.at(11)*u.at(11)+u.at(12)*u.at(12));
+  double veln = max (vn1, max(vn2, max(vn3, vn4)));
+
+  int i,j,k,l;
+  double ln = 1.e6;
+  Node *inode, *jnode, *knode, *lnode;
+  FloatArray t1(3),t2(3),n3(3),n(3);
+  for (l=1; l<=4; l++) {
+    i=(l>3)?1:l+1;
+    j=(i>3)?1:i+1;
+    k=(j>3)?1:j+1;
+    
+    inode = this->giveNode(i);
+    jnode = this->giveNode(j);
+    knode = this->giveNode(k);
+    lnode = this->giveNode(l);
+    t1.at(1) = inode->giveCoordinate(1)-jnode->giveCoordinate(1);
+    t1.at(2) = inode->giveCoordinate(2)-jnode->giveCoordinate(2);
+    t1.at(3) = inode->giveCoordinate(3)-jnode->giveCoordinate(3);
+
+    t2.at(1) = knode->giveCoordinate(1)-jnode->giveCoordinate(1);
+    t2.at(2) = knode->giveCoordinate(2)-jnode->giveCoordinate(2);
+    t2.at(3) = knode->giveCoordinate(3)-jnode->giveCoordinate(3);
+
+    n.beVectorProductOf (t1,t2);
+    n.normalize();
+
+    n3.at(1) = lnode->giveCoordinate(1)-jnode->giveCoordinate(1);
+    n3.at(2) = lnode->giveCoordinate(2)-jnode->giveCoordinate(2);
+    n3.at(3) = lnode->giveCoordinate(3)-jnode->giveCoordinate(3);
+    
+    ln = min (ln, sqrt(fabs(dotProduct(n,n3,3))));
+  }
+
+  if (veln != 0.0) return ln/veln;
+  else return 0.5*ln*ln*Re;
+}
+
+
+double
+PY1_3D_SUPG :: computeVolumeAround (GaussPoint* aGaussPoint)
+  // Returns the portion of the receiver which is attached to aGaussPoint.
+{
+  double       determinant,weight,volume;
+  determinant = fabs(this->interpolation.giveTransformationJacobian (domain, dofManArray, 
+                                                                     *aGaussPoint->giveCoordinates(), 0.0)); 
+  
+  
+  weight      = aGaussPoint -> giveWeight();
+  volume      = determinant * weight;
+  
+  return volume;
+}
+
+
+double
+PY1_3D_SUPG :: LS_PCS_computeF (LevelSetPCS* ls, TimeStep* atTime)
+{
+  int i,k;
+  double answer=0.0, norm, dV, vol = 0.0;
+  FloatMatrix n(3,4), dn (4,3);
+  FloatArray fi(4), u, un, gfi;
+  GaussPoint* gp;
+
+  this -> computeVectorOf(EID_MomentumBalance,VM_Total,atTime, un) ;
+  for (i=1; i<=4; i++) fi.at(i)=ls->giveLevelSetDofManValue(dofManArray.at(i));  
+
+  IntegrationRule* iRule = this->integrationRulesArray[0];
+  for (k=0; k < iRule->getNumberOfIntegrationPoints(); k++) {
+    gp = iRule->getIntegrationPoint(k);
+    dV  = this -> computeVolumeAround (gp);
+    interpolation.evaldNdx (dn, domain, dofManArray, *gp->giveCoordinates(), 0.0);
+    this->computeNuMatrix (n, gp);
+    u.beProductOf (n,un);
+    gfi.beTProductOf (dn, fi);
+    norm = sqrt(dotProduct(gfi,gfi,3));
+    
+    vol += dV;
+    answer += dV*dotProduct(u,gfi,3)/norm;
+  }
+  return answer/vol;
+}
+
+void
+PY1_3D_SUPG :: LS_PCS_computedN (FloatMatrix& answer)
+{
+  IntegrationRule* iRule = this->integrationRulesArray[0];
+  GaussPoint* gp = iRule->getIntegrationPoint(0);
+  interpolation.evaldNdx (answer, domain, dofManArray, *gp->giveCoordinates(), 0.0);
+}
+
+
+double 
+PY1_3D_SUPG :: LS_PCS_computeVolume() 
+{
+  int k;
+  double answer = 0.0;
+  GaussPoint* gp;
+  
+  IntegrationRule* iRule = this->integrationRulesArray[0];
+  for (k=0; k < iRule->getNumberOfIntegrationPoints(); k++) {
+    gp = iRule->getIntegrationPoint(k);
+    answer+=this -> computeVolumeAround (gp);
+  }
+  return answer;
+}
+
+double
+PY1_3D_SUPG :: LS_PCS_computeS (LevelSetPCS* ls, TimeStep* atTime)
+{
+  int i;
+  FloatArray voff(2), fi(4);
+  for (i=1; i<=4; i++) fi.at(i) = ls->giveLevelSetDofManValue(dofManArray.at(i));
+
+  this->LS_PCS_computeVOFFractions (voff, fi);
+  return (voff.at(1)-voff.at(2));
+}
+
+
+
+
+void
+PY1_3D_SUPG::LS_PCS_computeVOFFractions (FloatArray& answer, FloatArray& fi)
+{
+  int i, neg=0, pos=0, zero = 0, si=0;
+  double x1,y1,z1;
+  answer.resize(2);
+
+  for (i=1; i<= 4; i++) {
+    if (fi.at(i) >= 0.) pos++;
+    if (fi.at(i) < 0.0) neg++;
+    if (fi.at(i) == 0.) zero++;
+  }
+  
+  if (neg==0) { // all level set values positive
+    answer.at(1) = 1.0;
+    answer.at(2) = 0.0;
+    return; //return area;
+  } else if (pos==0) { // all level set values negative
+    answer.at(1) = 0.0;
+    answer.at(2) = 1.0;
+    return ; //return -area;
+  } else if (zero == 4) {
+    // ???????
+    answer.at(1) = 1.0;
+    answer.at(2) = 0.0;
+    return;
+  } else {
+    // zero level set inside
+    // distinguish two poosible cases
+    if (max(pos,neg) == 3) {
+
+      // find the vertex vith level set sign different from other three
+      for (i=1; i<= 4; i++) {
+	if ((pos>neg) && (fi.at(i) < 0.0)) {si = i; break;}
+	if ((pos<neg) && (fi.at(i) >=0.0)) {si = i; break;}
+      }
+      if (si) {
+	x1=this->giveNode(si)->giveCoordinate(1);
+	y1=this->giveNode(si)->giveCoordinate(2);
+	z1=this->giveNode(si)->giveCoordinate(3);
+
+
+	int ii;
+	double t, xi[3],yi[3],zi[3];
+	// compute intersections with element sides originating from this vertex
+	for (i=0; i< 3; i++) {
+	  ii = (si+i)%4+1;	
+	  t = fi.at(si)/(fi.at(si)-fi.at(ii));
+	  xi[i] = x1+t*(this->giveNode(ii)->giveCoordinate(1)-x1);
+	  yi[i] = y1+t*(this->giveNode(ii)->giveCoordinate(2)-y1);
+	  zi[i] = z1+t*(this->giveNode(ii)->giveCoordinate(3)-z1);
+	}
+	
+	// compute volume of this pyramid (si, xi[0], xi[1], xi[2])
+	double __vol = fabs((1./6.)*((x1-xi[0])*((yi[1]-yi[0])*(zi[2]-zi[0])-(zi[1]-zi[0])*(yi[2]-yi[0])) +
+				(y1-yi[0])*((zi[1]-zi[0])*(xi[2]-xi[0])-(xi[1]-xi[0])*(zi[2]-zi[0])) +
+				(z1-zi[0])*((xi[1]-xi[0])*(yi[2]-yi[0])-(yi[1]-yi[0])*(xi[2]-xi[0]))));
+
+
+	double vol = LS_PCS_computeVolume();
+	if ((__vol<0)||(__vol>vol)) {
+	  OOFEM_ERROR ("TR1_2D_SUPG::LS_PCS_computeVOFFractions: internal consistency error");
+	}
+
+	if (pos>neg) {
+	  // negative vol computed
+	  answer.at(2) = fabs(__vol)/vol;
+	  answer.at(1) = 1.0 - answer.at(2);
+	} else {
+	  // postive vol computed
+	  answer.at(1) = fabs(__vol)/vol;
+	  answer.at(2) = 1.0 - answer.at(1);
+	}
+      } else {
+	OOFEM_ERROR ("TR1_2D_SUPG::LS_PCS_computeVOFFractions: internal consistency error");
+      }
+
+    } else if (max (pos,neg) == 2) {
+      // two vertices positive; two negative; compute positive volume
+      int p1=0,p2=0;
+      // find the vertex vith level set sign different from other three
+      for (i=1; i<= 4; i++) {
+	if (fi.at(i) >=0.0) {
+	  if (p1) {
+	    p2 = i;break;
+	  } else {
+	    p1 = i;
+	  }
+	}
+      }
+      
+      int _ind, ii;
+      double t;
+      double p1i_x[3], p1i_y[3], p1i_z[3];
+      double p2i_x[3], p2i_y[3], p2i_z[3];
+
+      if (p1 && p2) {
+	// find the two intersections sharing edge with p1 and p2
+	p1i_x[0]=this->giveNode(p1)->giveCoordinate(1);
+	p1i_y[0]=this->giveNode(p1)->giveCoordinate(2);
+	p1i_z[0]=this->giveNode(p1)->giveCoordinate(3);
+
+	p2i_x[0]=this->giveNode(p2)->giveCoordinate(1);
+	p2i_y[0]=this->giveNode(p2)->giveCoordinate(2);
+	p2i_z[0]=this->giveNode(p2)->giveCoordinate(3);
+	
+	_ind = 1;
+	for (i=0; i< 3; i++) {
+	  ii = (p1+i)%4+1;	
+	  if ((ii==p2)||(ii==p1)) continue;
+	  t = fi.at(p1)/(fi.at(p1)-fi.at(ii));
+	  p1i_x[_ind] = p1i_x[0]+t*(this->giveNode(ii)->giveCoordinate(1)-p1i_x[0]);
+	  p1i_y[_ind] = p1i_y[0]+t*(this->giveNode(ii)->giveCoordinate(2)-p1i_y[0]);
+	  p1i_z[_ind] = p1i_z[0]+t*(this->giveNode(ii)->giveCoordinate(3)-p1i_z[0]);
+	  
+	  t = fi.at(p2)/(fi.at(p2)-fi.at(ii));
+	  p2i_x[_ind] =   p2i_x[0]+t*(this->giveNode(ii)->giveCoordinate(1)-p2i_x[0]);
+	  p2i_y[_ind] =   p2i_y[0]+t*(this->giveNode(ii)->giveCoordinate(2)-p2i_y[0]);
+	  p2i_z[_ind++] = p2i_z[0]+t*(this->giveNode(ii)->giveCoordinate(3)-p2i_z[0]);
+	  
+	}
+	
+	// compute volume of this wedge as a sum of volumes of three
+	// pyramids 
+	double __v1 = ((p2i_x[0]-p1i_x[0])*(p1i_y[1]-p1i_y[0])*(p1i_z[2]-p1i_z[0])-
+		       (p2i_x[0]-p1i_x[0])*(p1i_y[2]-p1i_y[0])*(p1i_z[1]-p1i_z[0])+
+		       (p1i_x[2]-p1i_x[0])*(p2i_y[0]-p1i_y[0])*(p1i_z[1]-p1i_z[0])-
+		       (p1i_x[1]-p1i_x[0])*(p2i_y[0]-p1i_y[0])*(p1i_z[2]-p1i_z[0])+
+		       (p1i_x[1]-p1i_x[0])*(p1i_y[2]-p1i_y[0])*(p2i_z[0]-p1i_z[0])-
+		       (p1i_x[2]-p1i_x[0])*(p1i_y[1]-p1i_y[0])*(p2i_z[0]-p1i_z[0]))/6.0;
+
+	double __v2 = ((p2i_x[0]-p1i_x[1])*(p1i_y[2]-p1i_y[1])*(p2i_z[1]-p1i_z[1])-
+		       (p2i_x[0]-p1i_x[1])*(p2i_y[1]-p1i_y[1])*(p1i_z[2]-p1i_z[1])+
+		       (p2i_x[1]-p1i_x[1])*(p2i_y[0]-p1i_y[1])*(p1i_z[2]-p1i_z[1])-
+		       (p1i_x[2]-p1i_x[1])*(p2i_y[0]-p1i_y[1])*(p2i_z[1]-p1i_z[1])+
+		       (p1i_x[2]-p1i_x[1])*(p2i_y[1]-p1i_y[1])*(p2i_z[0]-p1i_z[1])-
+		       (p2i_x[1]-p1i_x[1])*(p1i_y[2]-p1i_y[1])*(p2i_z[0]-p1i_z[1]))/6.0;
+	
+	double __v3 = ((p1i_x[2]-p2i_x[0])*(p2i_y[1]-p2i_y[0])*(p2i_z[2]-p2i_z[0])-
+		       (p1i_x[2]-p2i_x[0])*(p2i_y[2]-p2i_y[0])*(p2i_z[1]-p2i_z[0])+
+		       (p2i_x[2]-p2i_x[0])*(p1i_y[2]-p2i_y[0])*(p2i_z[1]-p2i_z[0])-
+		       (p2i_x[1]-p2i_x[0])*(p1i_y[2]-p2i_y[0])*(p2i_z[2]-p2i_z[0])+
+		       (p2i_x[1]-p2i_x[0])*(p2i_y[2]-p2i_y[0])*(p1i_z[2]-p2i_z[0])-
+		       (p2i_x[2]-p2i_x[0])*(p2i_y[1]-p2i_y[0])*(p1i_z[2]-p2i_z[0]))/6.0;
+
+	double __vol = fabs(__v1)+fabs(__v2)+fabs(__v3);
+	double vol = LS_PCS_computeVolume();
+
+	if ((__vol<0)||(__vol>vol)) {
+	  OOFEM_ERROR ("TR1_2D_SUPG::LS_PCS_computeVOFFractions: internal consistency error");
+	}
+	
+        answer.at(1) = fabs(__vol)/vol;
+        answer.at(2) = 1.0 - answer.at(1);
+
+      } else {
+	OOFEM_ERROR ("TR1_2D_SUPG::LS_PCS_computeVOFFractions: internal consistency error");
+      }
+      
+    } else {
+      OOFEM_ERROR ("PY1_3D_SUPG::LS_PCS_computeVOFFractions: internal consistency error");
+    }
+  }
+}
+
