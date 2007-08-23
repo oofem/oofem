@@ -213,6 +213,10 @@ TwoFluidMaterial::giveTempVOF (GaussPoint* gp)
   MaterialInterface* mi = domain->giveEngngModel()->giveMaterialInterface(domain->giveNumber());
   if (mi) {
     mi->giveElementMaterialMixture(vof, gp->giveElement()->giveNumber());
+
+    if ((vof.at(1)<0.) || (vof.at(1) > 1.0)) 
+    _error2 ("giveTempVOF: vof value out of range (vof=%lf)", vof.at(1));
+      
     return vof.at(1);
   } else {
     return 0.0;

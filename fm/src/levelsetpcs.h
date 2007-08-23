@@ -37,6 +37,11 @@
 #include "materialinterface.h"
 #include "mathfem.h"
 #include "geotoolbox.h"
+#ifndef __MAKEDEPEND
+#include <vector>
+#endif
+
+#define LevelSetPCS_CACHE_ELEMENT_VOF 0
 
 class LevelSetPCS;
 
@@ -94,6 +99,8 @@ class LevelSetPCS : public MaterialInterface
   enum PCSEqType {PCS_levelSetUpdate, PCS_levelSetRedistance};
   Polygon initialRefMatVol;
   bool initialRefMatFlag;
+  /// indexes of nodal coordinates used to init levelset using initialRefMatVol
+  int ci1, ci2;
 
   /// type of reinitialization algorithm to use
   int reinit_alg;
@@ -101,6 +108,15 @@ class LevelSetPCS : public MaterialInterface
   double reinit_dt; bool reinit_dt_flag;
   // reinitialization error limit 
   double reinit_err;
+  /// number of spatial dimensions
+  int nsd;
+  /// level st values version
+  long int levelSetVersion;
+
+#ifdef LevelSetPCS_CACHE_ELEMENT_VOF
+  std::vector<FloatArray> elemVof;
+  long int elemVofLevelSetVersion;
+#endif
  public:
   /** Constructor. Takes two two arguments. Creates 
       MaterialInterface instance with given number and belonging to given domain.
@@ -108,7 +124,7 @@ class LevelSetPCS : public MaterialInterface
       node number in particular domain.
       @param d domain to which component belongs to 
   */
-  LevelSetPCS (int n,Domain* d) : MaterialInterface (n,d) { initialRefMatFlag = false;reinit_dt_flag = false;}
+  LevelSetPCS (int n,Domain* d) : MaterialInterface (n,d) { initialRefMatFlag = false;reinit_dt_flag = false;levelSetVersion=0;}
 
   /// initialize receiver
   virtual void initialize ();
