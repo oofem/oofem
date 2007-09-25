@@ -48,6 +48,7 @@
 
 #include "nlstructuralelement.h"
 #include "gaussintegrationrule.h"
+#include "gausspnt.h"
 
 /**
    This class implements a two-node truss bar element for two-dimensional

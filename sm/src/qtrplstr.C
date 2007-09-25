@@ -421,10 +421,10 @@ QTrPlaneStress2d::computeLocalCoordinates (FloatArray& answer, const FloatArray&
 void  QTrPlaneStress2d :: computeGaussPoints ()
    // Sets up the array containing the four Gauss points of the receiver.
 {
-   numberOfIntegrationRules = 1 ;
+  numberOfIntegrationRules = 1 ;
   integrationRulesArray = new IntegrationRule*[1];
-  integrationRulesArray[0] = new GaussIntegrationRule (1,domain, 1, 3);
-  integrationRulesArray[0]->setUpIntegrationPoints (_Triangle, numberOfGaussPoints, this, _PlaneStress);
+  integrationRulesArray[0] = new GaussIntegrationRule (1,this, 1, 3);
+  integrationRulesArray[0]->setUpIntegrationPoints (_Triangle, numberOfGaussPoints, _PlaneStress);
 
 }
 

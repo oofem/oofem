@@ -700,10 +700,10 @@ NonlocalBarrier* CreateUsrDefNonlocalBarrierOfType (char* aClass, int num, Domai
  return answer;
 }
 
-IntegrationRule* CreateUsrDefIRuleOfType (classType type, int number, Domain* d)
+IntegrationRule* CreateUsrDefIRuleOfType (classType type, int number, Element* e)
 {
   IntegrationRule* answer = NULL;
-  if (type == GaussIntegrationRuleClass) answer = new GaussIntegrationRule (number, d);
+  if (type == GaussIntegrationRuleClass) answer = new GaussIntegrationRule (number, e);
 
   if (answer == NULL)  OOFEM_ERROR2 ("CreateUsrDefIRuleOfType: Unknown integration rule type [%d]", type);
   return answer;

@@ -287,11 +287,11 @@ Q4Axisymm :: computeGaussPoints ()
 {
  numberOfIntegrationRules = 2 ;
  integrationRulesArray = new IntegrationRule*[2];
- integrationRulesArray[0] = new GaussIntegrationRule (1,domain, 1, 2);
- integrationRulesArray[0]->setUpIntegrationPoints (_Square, numberOfGaussPoints, this, _3dMat);
+ integrationRulesArray[0] = new GaussIntegrationRule (1,this, 1, 2);
+ integrationRulesArray[0]->setUpIntegrationPoints (_Square, numberOfGaussPoints, _3dMat);
 
- integrationRulesArray[1] = new GaussIntegrationRule (2,domain, 3, 6);
- integrationRulesArray[1]->setUpIntegrationPoints (_Square, numberOfFiAndShGaussPoints, this, _3dMat);
+ integrationRulesArray[1] = new GaussIntegrationRule (2,this, 3, 6);
+ integrationRulesArray[1]->setUpIntegrationPoints (_Square, numberOfFiAndShGaussPoints, _3dMat);
 
 }
 

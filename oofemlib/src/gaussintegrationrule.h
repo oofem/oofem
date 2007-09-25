@@ -81,8 +81,8 @@ public:
   @param endIndx last component, for which rule applies
   @param dynamic flag indicating that receiver can change
   */
- GaussIntegrationRule (int , Domain*, int, int, bool dynamic=false);
- GaussIntegrationRule (int , Domain*);
+ GaussIntegrationRule (int , Element*, int, int, bool dynamic=false);
+ GaussIntegrationRule (int , Element*);
  /// Destructor
   ~GaussIntegrationRule();
 

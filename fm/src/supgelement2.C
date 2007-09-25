@@ -420,8 +420,8 @@ SUPGElement2::computeDiffusionDerivativeTerm_MB (FloatMatrix& answer, MatRespons
 void
 SUPGElement2 :: computePressureTerm_MB (FloatMatrix& answer, TimeStep* atTime)
 {
-  int i,j,k,l, nsd = this->giveNumberOfSpatialDimensions();
-  double dV, sum;
+  int k;
+  double dV;
   GaussPoint* gp;
   FloatMatrix gu, np, b;
   int undofs = this->computeNumberOfDofs(EID_MomentumBalance); 

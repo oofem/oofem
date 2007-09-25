@@ -81,7 +81,7 @@ public:
   @param endIndx last component, for which rule applies
   @param dynamic flag indicating that receiver can change
   */
- LobattoIntegrationRule (int , Domain*, int, int, bool dynamic);
+ LobattoIntegrationRule (int , Element*, int, int, bool dynamic);
  /// Destructor
   ~LobattoIntegrationRule();
 

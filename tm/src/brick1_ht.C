@@ -121,8 +121,8 @@ Brick1_ht :: computeGaussPoints ()
 
  numberOfIntegrationRules = 1 ;
  integrationRulesArray = new IntegrationRule*[1];
- integrationRulesArray[0] = new GaussIntegrationRule (1,domain, 1, 2);
- integrationRulesArray[0]->setUpIntegrationPoints (_Cube, numberOfGaussPoints, this, mmode);
+ integrationRulesArray[0] = new GaussIntegrationRule (1,this, 1, 2);
+ integrationRulesArray[0]->setUpIntegrationPoints (_Cube, numberOfGaussPoints, mmode);
 
 }
 
@@ -272,9 +272,9 @@ Brick1_ht :: computeEdgeIpGlobalCoords (FloatArray& answer, GaussPoint* gp, int 
 
 IntegrationRule* Brick1_ht :: GetSurfaceIntegrationRule (int approxOrder) 
 {
-  IntegrationRule* iRule = new GaussIntegrationRule (1,domain, 1, 1);
+  IntegrationRule* iRule = new GaussIntegrationRule (1,this, 1, 1);
   int npoints = iRule -> getRequiredNumberOfIntegrationPoints (_Square, approxOrder);
-  iRule ->setUpIntegrationPoints (_Square, npoints, this, _Unknown);
+  iRule ->setUpIntegrationPoints (_Square, npoints, _Unknown);
   return iRule;
 }
 

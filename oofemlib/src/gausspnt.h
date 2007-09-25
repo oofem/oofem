@@ -47,14 +47,14 @@
 #define gausspnt_h
 
 #include "flotarry.h"
-#include "element.h"
-#include "femcmpnn.h"
+#include "integrationrule.h"
 #include "matstatus.h"
 #include "tdictionary.h"
 
 class Element ; class Material ; class LayeredCrossSection;
 class MicroplaneMaterial; class FiberedCrossSection;
 class CrossSction;
+class IntegrationRule;
 
 /**
  Class representing integration point in finite element program.
@@ -90,7 +90,7 @@ class CrossSction;
  to compute its jacobian, for examle. These coordinates are stored in localCoordinates attribute.
 
 */
-class GaussPoint : public FEMComponent
+class GaussPoint
 {
 /*
    This class implements a point for a gaussian quadrature. A Gauss point is
@@ -120,14 +120,16 @@ class GaussPoint : public FEMComponent
 */
 
 private:
- /// Reference to parent element.
-  Element*     element ;
- /// Natural Element Coordinates of receiver.
- FloatArray*  coordinates ;
- /// Optional local subpatch (subpatches form element volume) coordinates of the receiver 
- FloatArray* localCoordinates;
- /// Integraation weight.
- double       weight ;
+  /// Number
+  int number;
+  /// Reference to parent integration rule.
+  IntegrationRule*     irule ;
+  /// Natural Element Coordinates of receiver.
+  FloatArray*  coordinates ;
+  /// Optional local subpatch (subpatches form element volume) coordinates of the receiver 
+  FloatArray* localCoordinates;
+  /// Integraation weight.
+  double       weight ;
   //    FloatArray*  strainVector ;  // full form
   //    FloatArray*  stressVector ;  // full form
   //    FloatArray*  stressIncrementVector;// increments are used mainly in nonlinear analysis
@@ -149,16 +151,17 @@ protected:
 
 public:
  /**
-  Constructor.  Creates integration point belonging to given element, with given number, integration weight, coordinates and material mode.
-  @param e element to which integration point belongs to.
+  Constructor.  Creates integration point belonging to given integration rule, 
+  with given number, integration weight, coordinates and material mode.
+  @param ir integration rule to which integration point belongs to.
   @param n integration point number
   @param a coordinates 
   @param w integration weight
   @param mode material mode
   */
- GaussPoint  (Element* e,int n,FloatArray* a,double w,MaterialMode mode) ;    // constructor
+ GaussPoint  (IntegrationRule* ir,int n,FloatArray* a,double w,MaterialMode mode) ;    // constructor
  /// Destructor
- ~GaussPoint  () ;                                  // destructor
+ virtual ~GaussPoint  () ;                                  // destructor
  
  /// Returns i-th natural element coordinate of receiver
  double       giveCoordinate (int i)      { return coordinates->at(i) ;}
@@ -185,18 +188,20 @@ public:
  void                 setWeight  (double w) {weight=w;}
  /// Returns number of receiver.
  int          giveNumber ()               { return number ;}
+ /// Returns corresponding integration rule to receiver
+ IntegrationRule* giveIntegrationRule()   { return irule;}
  /// Returns corresponding element to receiver.
- Element*     giveElement()               { return element;}
+ Element*     giveElement()               { return irule->giveElement();}
  /// Sets element of gp
- void         setElement (Element* e)     { element=e;}
+ //void         setElement (Element* e)     { element=e;}
  /// Returns corresponding material mode of receiver.
  MaterialMode giveMaterialMode()          { return this->materialMode;}
  /// Sets material mode of receiver.
  void         setMaterialMode (MaterialMode newMode) { this->materialMode = newMode;}
  /// Returns reference to material associated to related element of receiver.
- Material*    giveMaterial ()             { return element->giveMaterial();}
+ Material*    giveMaterial ()             { return giveElement()->giveMaterial();}
  /// Returns reference to cross section associated to related element of receiver.
- CrossSection* giveCrossSection ()        { return element->giveCrossSection();}
+ CrossSection* giveCrossSection ()        { return giveElement()->giveCrossSection();}
  /// Returns reference to associated material status (NULL if not defined)
  MaterialStatus* giveMaterialStatus ()    { return   matStatus;}
  /**
@@ -229,14 +234,14 @@ public:
   associated status is called. The same fuction is also invoked for all available
   slaves of receiver.
   */
- void         printOutputAt (FILE *, TimeStep*) ;
+ virtual void         printOutputAt (FILE *, TimeStep*) ;
  /**
   Updates internal state of receiver after finishing time step.
   Material::updateYourself (receiver, tStep) function is called to 
   update material status. Same fuction is also invoked for
   all receiver's slaves.
   */
- void         updateYourself (TimeStep*) ;
+ virtual void         updateYourself (TimeStep*) ;
  //    void         resetYourself () ;
  
  // store & restore context functions
@@ -267,11 +272,11 @@ public:
   */
  //contextIOResultType    restoreContext(FILE* stream, void *obj = NULL);
  /// Returns classType id of receiver.
- classType giveClassID () const {return GaussPointClass;}
+ virtual classType giveClassID () const {return GaussPointClass;}
  /// Returns class name of the receiver.
- const char*  giveClassName () const {return "GaussPoint" ;}
+ virtual const char*  giveClassName () const {return "GaussPoint" ;}
  ///Initializes receiver acording to object description stored in initString.
- IRResultType initializeFrom (InputRecord* ir) {return IRRT_OK;}
+ virtual IRResultType initializeFrom (InputRecord* ir) {return IRRT_OK;}
  
 friend class LayeredCrossSection ; 
 friend class MicroplaneMaterial ; 

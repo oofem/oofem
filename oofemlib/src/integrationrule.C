@@ -43,9 +43,10 @@
 #include "datastream.h"
 // initialize class member 
 
-IntegrationRule::IntegrationRule (int n, Domain* domain, int startIndx, int endIndx, bool dynamic)
-: FEMComponent (n,domain)
+IntegrationRule::IntegrationRule (int n, Element* e, int startIndx, int endIndx, bool dynamic)
 {
+  number = n;
+  elem = e;
   numberOfIntegrationPoints = 0;
   gaussPointArray = NULL;
   firstLocalStrainIndx = startIndx;
@@ -53,9 +54,10 @@ IntegrationRule::IntegrationRule (int n, Domain* domain, int startIndx, int endI
   isDynamic = dynamic;
 }
 
-IntegrationRule::IntegrationRule (int n, Domain* domain)
-: FEMComponent (n,domain)
+IntegrationRule::IntegrationRule (int n, Element* e)
 {
+  number=n;
+  elem = e;
   numberOfIntegrationPoints = 0;
   gaussPointArray = NULL;
   firstLocalStrainIndx = lastLocalStrainIndx = 0;
@@ -87,7 +89,7 @@ IntegrationRule :: getIntegrationPoint (int i)
 {
 #  ifdef DEBUG
  if ((i < 0) || (i >= numberOfIntegrationPoints)) {
-   _error2 ("IntegrationRule::getIntegrationPoint - request out of bounds (%d)",i);
+   OOFEM_ERROR2 ("IntegrationRule::getIntegrationPoint - request out of bounds (%d)",i);
  }
 #  endif
  return gaussPointArray[i];
@@ -142,7 +144,7 @@ IntegrationRule :: saveContext (DataStream* stream, ContextMode mode, void *obj)
   int         i ;
   GaussPoint* gp ;
 
-  if (stream == NULL) _error ("saveContex : can't write into NULL stream");
+  if (stream == NULL) OOFEM_ERROR ("saveContex : can't write into NULL stream");
   int isdyn = isDynamic;
   if (!stream->write(&isdyn,1)) THROW_CIOERR(CIO_IOERR);
   
@@ -184,9 +186,9 @@ IntegrationRule :: restoreContext (DataStream* stream, ContextMode mode, void *o
   int         i, size ;
   bool __create = false;
   GaussPoint* gp ;
-  Element* __parelem = (Element*) obj;
+  //Element* __parelem = (Element*) obj;
   
-  if (stream == NULL) _error ("restoreContex : can't write into NULL stream");
+  if (stream == NULL) OOFEM_ERROR ("restoreContex : can't write into NULL stream");
   
   int isdyn;
   if (!stream->read(&isdyn,1)) THROW_CIOERR(CIO_IOERR);
@@ -226,12 +228,12 @@ IntegrationRule :: restoreContext (DataStream* stream, ContextMode mode, void *o
       // read dynamic flag
       
       if (__create) {
-        gaussPointArray[i] = new GaussPoint(__parelem,i+1,c.GiveCopy(),w,m);
+        gaussPointArray[i] = new GaussPoint(this,i+1,c.GiveCopy(),w,m);
       } else {
         gp = gaussPointArray[i] ;
         gp->setWeight (w);
         gp->setCoordinates(c);
-        gp->setElement (__parelem);
+        //gp->setElement (__parelem);
         gp->setMaterialMode (m);
       }
     }
@@ -244,8 +246,8 @@ IntegrationRule :: restoreContext (DataStream* stream, ContextMode mode, void *o
 
 
 int 
-IntegrationRule :: setUpIntegrationPoints (integrationDomain mode, int nPoints, Element* elem,
-               MaterialMode matMode)
+IntegrationRule :: setUpIntegrationPoints (integrationDomain mode, int nPoints, 
+                                           MaterialMode matMode)
 {
   switch (mode) {
   case _Line:
@@ -264,21 +266,21 @@ IntegrationRule :: setUpIntegrationPoints (integrationDomain mode, int nPoints, 
     return  (numberOfIntegrationPoints = this->SetUpPointsOnTetrahedra (nPoints , elem, matMode, &gaussPointArray)) ;
 
   default:
-    _error ("IntegrationRule::setUpIntegrationPoints - unknown mode");
+    OOFEM_ERROR ("IntegrationRule::setUpIntegrationPoints - unknown mode");
   }
   return 0;
 }
 
 int 
-IntegrationRule::setUpEmbeddedIntegrationPoints (integrationDomain mode, int nPoints, Element *elem, MaterialMode matMode,
-						 const FloatArray** coords)
+IntegrationRule::setUpEmbeddedIntegrationPoints (integrationDomain mode, int nPoints, MaterialMode matMode,
+                                                 const FloatArray** coords)
 {
   switch (mode) {
   case _Embedded2dLine:
     return  (numberOfIntegrationPoints = this->SetUpPointsOn2DEmbeddedLine (nPoints , elem, matMode, &gaussPointArray, coords)) ;
 
   default:
-    _error ("IntegrationRule::setUpEmbeddedIntegrationPoints - unknown mode");
+    OOFEM_ERROR ("IntegrationRule::setUpEmbeddedIntegrationPoints - unknown mode");
   }
   return 0;
 }

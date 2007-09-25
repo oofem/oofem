@@ -165,10 +165,10 @@ RerShell :: computeBmatrixAt (GaussPoint *aGaussPoint, FloatMatrix& answer, int 
 void  RerShell :: computeGaussPoints ()
    // Sets up the array containing the four Gauss points of the receiver.
 {
-   numberOfIntegrationRules = 1 ;
+  numberOfIntegrationRules = 1 ;
   integrationRulesArray = new IntegrationRule*[1];
-  integrationRulesArray[0] = new GaussIntegrationRule (1,domain, 1, 8);
-  integrationRulesArray[0]->setUpIntegrationPoints (_Triangle, numberOfGaussPoints, this, _3dShell);
+  integrationRulesArray[0] = new GaussIntegrationRule (1,this, 1, 8);
+  integrationRulesArray[0]->setUpIntegrationPoints (_Triangle, numberOfGaussPoints, _3dShell);
 
 }
 

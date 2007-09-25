@@ -136,11 +136,11 @@ PY1_3D_SUPG :: computeGaussPoints ()
 {
   numberOfIntegrationRules = 2 ;
   integrationRulesArray = new IntegrationRule*[2];
-  integrationRulesArray[0] = new GaussIntegrationRule (1,domain, 1, 3);
-  integrationRulesArray[0]->setUpIntegrationPoints (_Tetrahedra, 1, this, _3dFlow);
+  integrationRulesArray[0] = new GaussIntegrationRule (1,this, 1, 3);
+  integrationRulesArray[0]->setUpIntegrationPoints (_Tetrahedra, 1, _3dFlow);
 
-  integrationRulesArray[1] = new GaussIntegrationRule (1,domain, 1, 3);
-  integrationRulesArray[1]->setUpIntegrationPoints (_Tetrahedra, 4, this, _3dFlow);
+  integrationRulesArray[1] = new GaussIntegrationRule (1,this, 1, 3);
+  integrationRulesArray[1]->setUpIntegrationPoints (_Tetrahedra, 4, _3dFlow);
 }
 
 

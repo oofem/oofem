@@ -898,7 +898,7 @@ LayeredCrossSection :: giveSlaveGaussPoint (GaussPoint* masterGp, int i)
    zCoord = new FloatArray (1);
      zCoord -> at(1) = (2.0*(currentZCoord) -top-bottom)/ (top-bottom);
      // in gp - is stored isoparametric coordinate (-1,1) of z-coordinate
-   masterGp->gaussPointArray [j] = new GaussPoint (masterGp->giveElement(), j+1, zCoord, 0.,slaveMode);
+   masterGp->gaussPointArray [j] = new GaussPoint (masterGp->giveIntegrationRule(), j+1, zCoord, 0.,slaveMode);
   }
   slave = masterGp->gaussPointArray [i];
  }

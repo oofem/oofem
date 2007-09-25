@@ -60,6 +60,7 @@ HellmichMaterial::createMaterialGp()
  */
 {
  Element* elem = new Element(0, giveDomain());
+ IntegrationRule* ir = new IntegrationRule(0, elem);
  char eirstr[50];
  sprintf(eirstr, "mat %d crosssect 1 nodes 0", giveNumber());
  OOFEMTXTInputRecord eir(eirstr);
@@ -67,7 +68,8 @@ HellmichMaterial::createMaterialGp()
  // initialize elem to have reference to this material
  elem->initializeFrom(&eir);
  // number 0, no coords, zero weight, unknown material mode
- materialGp = new GaussPoint(elem, 0, NULL, 0, _3dMat);
+ // materialGp = new GaussPoint(elem, 0, NULL, 0, _3dMat);
+ materialGp = new GaussPoint(ir, 0, NULL, 0, _3dMat);
  if (!materialGp) _error("Could not create the material-level gp.");
  ((HellmichMaterialStatus*)giveStatus(materialGp))->setInitialTemperature(initialTemperature); // set material temperature in K
 #ifdef VERBOSE_HELLMAT
@@ -2014,7 +2016,7 @@ contextIOResultType HellmichMaterial::saveContext(DataStream* stream, ContextMod
 
  // save material gp status if necessary
  if (obj && options & moIsothermal) {
-  StateCounterType c = ((GaussPoint*)obj)->giveDomain()->giveEngngModel()->giveCurrentStep()->giveSolutionStateCounter();
+  StateCounterType c = ((GaussPoint*)obj)->giveElement()->giveDomain()->giveEngngModel()->giveCurrentStep()->giveSolutionStateCounter();
   if (materialGpSaveAt != c) {
    materialGpSaveAt = c;
    if ((iores = saveContext(stream, mode, giveMaterialGp())) != CIO_OK) THROW_CIOERR(iores);
@@ -2038,7 +2040,7 @@ contextIOResultType HellmichMaterial::restoreContext(DataStream* stream, Context
  if (stream == NULL) _error("restoreContext: can't read from NULL stream");
  // read material gp status if necessary
  if (options & moIsothermal) {
-  StateCounterType c = ((GaussPoint*) obj)->giveDomain()->giveEngngModel()->giveCurrentStep()->giveSolutionStateCounter();
+  StateCounterType c = ((GaussPoint*) obj)->giveElement()->giveDomain()->giveEngngModel()->giveCurrentStep()->giveSolutionStateCounter();
   if (materialGpRestoreAt != c) {
    materialGpRestoreAt = c;
    if ((iores = restoreContext(stream, mode, giveMaterialGp())) != CIO_OK) THROW_CIOERR(iores);
@@ -2092,7 +2094,7 @@ HellmichMaterial::initGpForNewStep (GaussPoint* gp)
 */
 {
  // get current time step - needed for initAuxStatus
- TimeStep* atTime = gp->giveDomain()->giveEngngModel()->giveCurrentStep();
+ TimeStep* atTime = gp->giveElement()->giveDomain()->giveEngngModel()->giveCurrentStep();
 
  // initialize the material-level status
  if ((options & moIsothermal) && (materialGpInitAt < atTime->giveSolutionStateCounter())) {

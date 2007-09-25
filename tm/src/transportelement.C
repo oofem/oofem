@@ -501,8 +501,8 @@ TransportElement::computeEdgeBCSubVectorAt (FloatArray& answer, Load* load, int 
     
     approxOrder = edgeLoad->giveApproxOrder()+this->giveApproxOrder(indx); 
     numberOfEdgeIPs = (int) ceil ((approxOrder+1.)/2.);
-    GaussIntegrationRule iRule(1, domain, 1, 1);
-    iRule.setUpIntegrationPoints (_Line, numberOfEdgeIPs,this,_Unknown);
+    GaussIntegrationRule iRule(1, this, 1, 1);
+    iRule.setUpIntegrationPoints (_Line, numberOfEdgeIPs, _Unknown);
     GaussPoint* gp ;
     FloatArray reducedAnswer, val, ntf;
     IntArray mask;
@@ -622,8 +622,8 @@ TransportElement :: computeBCSubMtrxAt (FloatMatrix& answer, TimeStep* tStep, Va
         defined = 1;
         int approxOrder = 2*this->giveApproxOrder(indx); 
         int numberOfEdgeIPs = (int) ceil ((approxOrder+1.)/2.);
-        GaussIntegrationRule iRule(1, domain, 1, 1);
-        iRule.setUpIntegrationPoints (_Line, numberOfEdgeIPs,this,_Unknown);
+        GaussIntegrationRule iRule(1, this, 1, 1);
+        iRule.setUpIntegrationPoints (_Line, numberOfEdgeIPs, _Unknown);
         GaussPoint* gp ;
         FloatArray val;
         IntArray mask;

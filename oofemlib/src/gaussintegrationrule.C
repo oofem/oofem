@@ -46,12 +46,12 @@
 
 // initialize class member 
 
-GaussIntegrationRule::GaussIntegrationRule (int n, Domain* domain, 
+GaussIntegrationRule::GaussIntegrationRule (int n, Element* e, 
                 int startIndx, int endIndx, bool dynamic)
-: IntegrationRule (n, domain, startIndx, endIndx, dynamic) {}
+: IntegrationRule (n, e, startIndx, endIndx, dynamic) {}
 
-GaussIntegrationRule::GaussIntegrationRule (int n, Domain* domain) 
-  : IntegrationRule (n, domain) {}
+GaussIntegrationRule::GaussIntegrationRule (int n, Element* e) 
+  : IntegrationRule (n, e) {}
 
 GaussIntegrationRule::~GaussIntegrationRule ()
 {}
@@ -77,7 +77,7 @@ GaussIntegrationRule :: SetUpPointsOnLine (int nPoints, Element* elem,
   coord = new FloatArray(1);
   coord -> at(1) = 0.0;
   weight = 2.0;
-  (*arry)[0] = new GaussPoint (elem,1,coord,weight,mode);
+  (*arry)[0] = new GaussPoint (this,1,coord,weight,mode);
   break;
   
  case 2:
@@ -97,7 +97,7 @@ GaussIntegrationRule :: SetUpPointsOnLine (int nPoints, Element* elem,
    coord = new FloatArray(1);
    coord -> at(1) = c->at(i+1);
    weight = w->at(i+1);
-   (*arry)[i] = new GaussPoint(elem,i+1,coord,weight,mode);
+   (*arry)[i] = new GaussPoint(this,i+1,coord,weight,mode);
   }
   delete c;  delete w;
   break;
@@ -121,7 +121,7 @@ GaussIntegrationRule :: SetUpPointsOnLine (int nPoints, Element* elem,
    coord  = new FloatArray(1);
    coord -> at(1) = c->at(i+1);
    weight = w->at(i+1);
-   (*arry)[i] = new GaussPoint(elem,i+1,coord,weight,mode);
+   (*arry)[i] = new GaussPoint(this,i+1,coord,weight,mode);
   }
   delete c;  delete w;
   break;
@@ -147,13 +147,13 @@ GaussIntegrationRule :: SetUpPointsOnLine (int nPoints, Element* elem,
    coord  = new FloatArray(1);
    coord -> at(1) = c->at(i+1);
    weight = w->at(i+1);
-   (*arry)[i] = new GaussPoint(elem,i+1,coord,weight,mode);
+   (*arry)[i] = new GaussPoint(this,i+1,coord,weight,mode);
   }
   delete c;  delete w;
   break;
   
  default:
-   _error2 ("SetUpPointsOnLine: unsupported number of IPs (%d)",nPoints);
+   OOFEM_ERROR2 ("SetUpPointsOnLine: unsupported number of IPs (%d)",nPoints);
  }
  return nPoints;
 }
@@ -175,7 +175,7 @@ GaussIntegrationRule :: SetUpPointsOnTriagle (int nPoints, Element* elem,
   coord1             = new FloatArray(2);
   coord1 -> at(1)    = 0.333333333333;
   coord1 -> at(2)    = 0.333333333333;
-  (*arry )[0]        = new GaussPoint(elem,1,coord1,0.5,mode);
+  (*arry )[0]        = new GaussPoint(this,1,coord1,0.5,mode);
   break;
 
  case 4: 
@@ -185,22 +185,22 @@ GaussIntegrationRule :: SetUpPointsOnTriagle (int nPoints, Element* elem,
   coord1             = new FloatArray(2);
   coord1 -> at(1)    = 0.2;
   coord1 -> at(2)    = 0.2;
-  (*arry)[0]         = new GaussPoint(elem,1,coord1,0.260416666666,mode);
+  (*arry)[0]         = new GaussPoint(this,1,coord1,0.260416666666,mode);
   
   coord1             = new FloatArray(2);
   coord1 -> at(1)    = 0.6;
   coord1 -> at(2)    = 0.2;
-  (*arry)[1]         = new GaussPoint(elem,2,coord1,0.260416666666,mode);
+  (*arry)[1]         = new GaussPoint(this,2,coord1,0.260416666666,mode);
   
   coord1             = new FloatArray(2);
   coord1 -> at(1)    = 0.2;
   coord1 -> at(2)    = 0.6;
-  (*arry)[2]         = new GaussPoint(elem,3,coord1,0.260416666666,mode);
+  (*arry)[2]         = new GaussPoint(this,3,coord1,0.260416666666,mode);
   
   coord1             = new FloatArray(2);
   coord1 -> at(1)    = 0.333333333333333333;
   coord1 -> at(2)    = 0.333333333333333333;
-  (*arry)[3]         = new GaussPoint(elem,4,coord1,-0.28125,mode);
+  (*arry)[3]         = new GaussPoint(this,4,coord1,-0.28125,mode);
   
   break;
   
@@ -211,41 +211,41 @@ GaussIntegrationRule :: SetUpPointsOnTriagle (int nPoints, Element* elem,
   coord1             = new FloatArray(2);
   coord1 -> at(1)    = 0.4701420641;
   coord1 -> at(2)    = 0.0597158717;
-  (*arry)[0]         = new GaussPoint(elem,1,coord1,0.06619705,mode);
+  (*arry)[0]         = new GaussPoint(this,1,coord1,0.06619705,mode);
   
   coord1             = new FloatArray(2);
   coord1 -> at(1)    = 0.4701420641;
   coord1 -> at(2)    = 0.4701420641;
-  (*arry)[1]         = new GaussPoint(elem,2,coord1,0.06619705,mode);
+  (*arry)[1]         = new GaussPoint(this,2,coord1,0.06619705,mode);
   
   coord1             = new FloatArray(2);
   coord1 -> at(1)    = 0.0597158717;
   coord1 -> at(2)    = 0.4701420641;
-  (*arry)[2]         = new GaussPoint(elem,3,coord1,0.06619705,mode);
+  (*arry)[2]         = new GaussPoint(this,3,coord1,0.06619705,mode);
   
   coord1             = new FloatArray(2);
   coord1 -> at(1)    = 0.1012865073;
   coord1 -> at(2)    = 0.1012865073;
-  (*arry)[3]         = new GaussPoint(elem,4,coord1,0.0629695902,mode);
+  (*arry)[3]         = new GaussPoint(this,4,coord1,0.0629695902,mode);
   
   coord1             = new FloatArray(2);
   coord1 -> at(1)    = 0.7974269853;
   coord1 -> at(2)    = 0.1012865073;
-  (*arry)[4]         = new GaussPoint(elem,5,coord1,0.0629695902,mode);
+  (*arry)[4]         = new GaussPoint(this,5,coord1,0.0629695902,mode);
   
   coord1             = new FloatArray(2);
   coord1 -> at(1)    = 0.1012865073;
   coord1 -> at(2)    = 0.7974269853;
-  (*arry)[5]         = new GaussPoint(elem,6,coord1,0.0629695902,mode);
+  (*arry)[5]         = new GaussPoint(this,6,coord1,0.0629695902,mode);
   
   coord1             = new FloatArray(2);
   coord1 -> at(1)    = 0.333333333333333333;
   coord1 -> at(2)    = 0.333333333333333333;
-  (*arry)[6]         = new GaussPoint(elem,7,coord1,0.1125,mode);
+  (*arry)[6]         = new GaussPoint(this,7,coord1,0.1125,mode);
   
   break;
  default:
-  _error2 ("SetUpPointsOnTriangle: unsupported number of IPs (%d)", nPoints);
+  OOFEM_ERROR2 ("SetUpPointsOnTriangle: unsupported number of IPs (%d)", nPoints);
  }
  return nPoints;
 }
@@ -270,7 +270,7 @@ GaussIntegrationRule :: SetUpPointsOnSquare  (int nPoints, Element* elem,
   coord -> at(1) = 0.0;
   coord -> at(2) = 0.0;
   weight = 4.0;
-  (*arry)[0] = new GaussPoint (elem,1,coord,weight,mode);
+  (*arry)[0] = new GaussPoint (this,1,coord,weight,mode);
   break;
   
  case 4:
@@ -292,7 +292,7 @@ GaussIntegrationRule :: SetUpPointsOnSquare  (int nPoints, Element* elem,
     coord -> at(1) = c->at(i+1);
     coord -> at(2) = c->at(j+1);
     weight = w->at(i+1) * w->at(j+1);
-    (*arry)[2*i+j] = new GaussPoint(elem,2*i+j+1,coord,weight,mode);
+    (*arry)[2*i+j] = new GaussPoint(this,2*i+j+1,coord,weight,mode);
    }
   delete c;  delete w;
   break;
@@ -318,7 +318,7 @@ GaussIntegrationRule :: SetUpPointsOnSquare  (int nPoints, Element* elem,
     coord -> at(1) = c->at(i+1);
     coord -> at(2) = c->at(j+1);
     weight = w->at(i+1) * w->at(j+1);
-    (*arry)[3*i+j] = new GaussPoint(elem,3*i+j+1,coord,weight,mode);
+    (*arry)[3*i+j] = new GaussPoint(this,3*i+j+1,coord,weight,mode);
    }
   delete c;  delete w;
   break;
@@ -346,13 +346,13 @@ GaussIntegrationRule :: SetUpPointsOnSquare  (int nPoints, Element* elem,
     coord -> at(1) = c->at(i+1);
     coord -> at(2) = c->at(j+1);
     weight = w->at(i+1) * w->at(j+1);
-    (*arry)[4*i+j] = new GaussPoint(elem,4*i+j+1,coord,weight,mode);
+    (*arry)[4*i+j] = new GaussPoint(this,4*i+j+1,coord,weight,mode);
    }
   delete c;  delete w;
   break;
   
  default:
-  _error2 ("SetUpPointsOnSquare: unsupported number of IPs (%d)", nPoints);
+  OOFEM_ERROR2 ("SetUpPointsOnSquare: unsupported number of IPs (%d)", nPoints);
  }
  return nPoints;
 }
@@ -378,7 +378,7 @@ GaussIntegrationRule :: SetUpPointsOnCube (int nPoints, Element* elem,
   coord -> at(2) = 0.0;
   coord -> at(3) = 0.0;
   weight = 8.0;
-  (*arry)[0] = new GaussPoint (elem,1,coord,weight,mode);
+  (*arry)[0] = new GaussPoint (this,1,coord,weight,mode);
   break;
   
  case 8:
@@ -402,7 +402,7 @@ GaussIntegrationRule :: SetUpPointsOnCube (int nPoints, Element* elem,
      coord -> at(2) = c->at(j+1);
      coord -> at(3) = c->at(k+1);
      weight = w->at(i+1) * w->at(j+1) * w->at(k+1);
-     (*arry)[4*i+2*j+k] = new GaussPoint(elem,4*i+2*j+k+1,coord,weight,mode);
+     (*arry)[4*i+2*j+k] = new GaussPoint(this,4*i+2*j+k+1,coord,weight,mode);
     }
   delete c;  delete w;
   break;
@@ -430,7 +430,7 @@ GaussIntegrationRule :: SetUpPointsOnCube (int nPoints, Element* elem,
      coord -> at(2) = c->at(j+1);
      coord -> at(3) = c->at(k+1);
      weight = w->at(i+1) * w->at(j+1) * w->at(k+1);
-     (*arry)[9*i+3*j+k] = new GaussPoint(elem,9*i+3*j+k+1,coord,weight,mode);
+     (*arry)[9*i+3*j+k] = new GaussPoint(this,9*i+3*j+k+1,coord,weight,mode);
     }
   delete c;  delete w;
   break;
@@ -460,13 +460,13 @@ GaussIntegrationRule :: SetUpPointsOnCube (int nPoints, Element* elem,
      coord -> at(2) = c->at(j+1);
      coord -> at(3) = c->at(k+1);
      weight = w->at(i+1) * w->at(j+1) * w->at(k+1);
-     (*arry)[16*i+4*j+k] = new GaussPoint(elem,16*i+4*j+k+1,coord,weight,mode);
+     (*arry)[16*i+4*j+k] = new GaussPoint(this,16*i+4*j+k+1,coord,weight,mode);
     }
   delete c;  delete w;
   break;
   
  default:
-  _error2 ("SetUpPointsOnCube: unsupported number of IPs (%d)", nPoints);
+  OOFEM_ERROR2 ("SetUpPointsOnCube: unsupported number of IPs (%d)", nPoints);
  }
  return nPoints;
 }
@@ -492,7 +492,7 @@ GaussIntegrationRule :: SetUpPointsOnTetrahedra (int nPoints, Element* elem,
   coord1 -> at(1)    = 0.25;
   coord1 -> at(2)    = 0.25;
   coord1 -> at(3)    = 0.25;
-  (*arry )[0]        = new GaussPoint(elem,1,coord1,1.,mode);
+  (*arry )[0]        = new GaussPoint(this,1,coord1,1.,mode);
   break;
   
  case 4:
@@ -504,25 +504,25 @@ GaussIntegrationRule :: SetUpPointsOnTetrahedra (int nPoints, Element* elem,
   coord1 -> at(1)    = 0.58541020;
   coord1 -> at(2)    = 0.13819660;
   coord1 -> at(3)    = 0.13819660;
-  (*arry )[0]        = new GaussPoint(elem,1,coord1,1./4.,mode);
+  (*arry )[0]        = new GaussPoint(this,1,coord1,1./4.,mode);
 
   coord1 = new FloatArray(3);
   coord1 -> at(1)    = 0.13819660;
   coord1 -> at(2)    = 0.58541020;
   coord1 -> at(3)    = 0.13819660;
-  (*arry )[1]        = new GaussPoint(elem,1,coord1,1./4.,mode);
+  (*arry )[1]        = new GaussPoint(this,1,coord1,1./4.,mode);
 
   coord1 = new FloatArray(3);
   coord1 -> at(1)    = 0.13819660;
   coord1 -> at(2)    = 0.13819660;
   coord1 -> at(3)    = 0.58541020;
-  (*arry )[2]        = new GaussPoint(elem,1,coord1,1./4.,mode);
+  (*arry )[2]        = new GaussPoint(this,1,coord1,1./4.,mode);
 
   coord1 = new FloatArray(3);
   coord1 -> at(1)    = 0.13819660;
   coord1 -> at(2)    = 0.13819660;
   coord1 -> at(3)    = 0.13819660;
-  (*arry )[3]        = new GaussPoint(elem,1,coord1,1./4.,mode);
+  (*arry )[3]        = new GaussPoint(this,1,coord1,1./4.,mode);
 
   break;
 
@@ -535,36 +535,36 @@ GaussIntegrationRule :: SetUpPointsOnTetrahedra (int nPoints, Element* elem,
   coord1 -> at(1)    = 0.25;
   coord1 -> at(2)    = 0.25;
   coord1 -> at(3)    = 0.25;
-  (*arry )[0]        = new GaussPoint(elem,1,coord1,-4./5.,mode);
+  (*arry )[0]        = new GaussPoint(this,1,coord1,-4./5.,mode);
 
   coord1 = new FloatArray(3);
   coord1 -> at(1)    = 0.5;
   coord1 -> at(2)    = 1./6.;
   coord1 -> at(3)    = 1./6.;
-  (*arry )[1]        = new GaussPoint(elem,1,coord1,9./20.,mode);
+  (*arry )[1]        = new GaussPoint(this,1,coord1,9./20.,mode);
 
   coord1 = new FloatArray(3);
   coord1 -> at(1)    = 1./6.;
   coord1 -> at(2)    = 0.5;
   coord1 -> at(3)    = 1./6.;
-  (*arry )[2]        = new GaussPoint(elem,1,coord1,9./20.,mode);
+  (*arry )[2]        = new GaussPoint(this,1,coord1,9./20.,mode);
 
   coord1 = new FloatArray(3);
   coord1 -> at(1)    = 1./6.;
   coord1 -> at(2)    = 1./6.;
   coord1 -> at(3)    = 0.5;
-  (*arry )[3]        = new GaussPoint(elem,1,coord1,9./20.,mode);
+  (*arry )[3]        = new GaussPoint(this,1,coord1,9./20.,mode);
 
   coord1 = new FloatArray(3);
   coord1 -> at(1)    = 1./6.;
   coord1 -> at(2)    = 1./6.;
   coord1 -> at(3)    = 1./6.;
-  (*arry )[4]        = new GaussPoint(elem,1,coord1,9./20.,mode);
+  (*arry )[4]        = new GaussPoint(this,1,coord1,9./20.,mode);
    
   break;
   
  default:
-  _error2 ("SetUpPointsOnTetrahedra: unsupported number of IPs (%d)", nPoints);
+  OOFEM_ERROR2 ("SetUpPointsOnTetrahedra: unsupported number of IPs (%d)", nPoints);
  }
  return nPoints;
 }
@@ -606,7 +606,7 @@ GaussIntegrationRule::getRequiredNumberOfIntegrationPoints (integrationDomain dT
   return -1;
 
  default:
-    _error ("GaussIntegrationRule::setUpIntegrationPoints - unknown integrationDomain");
+    OOFEM_ERROR ("GaussIntegrationRule::setUpIntegrationPoints - unknown integrationDomain");
   
  }
   return -1;
@@ -633,7 +633,7 @@ GaussIntegrationRule :: SetUpPointsOn2DEmbeddedLine (int nPoints, Element* elem,
 		coord1 -> at(1) =(1.-(l+1)*0.5)*coords[0]->at(1)+(l+1)*0.5*coords[1]->at(1);
     coord1 -> at(2) =(1.-(l+1)*0.5)*coords[0]->at(2)+(l+1)*0.5*coords[1]->at(2);
 	 	weight = 2.0;
-		(*arry )[0] = new GaussPoint (elem,1,coord1,weight,mode);
+		(*arry )[0] = new GaussPoint (this,1,coord1,weight,mode);
 		break;
 		
 	case 2:
@@ -645,7 +645,7 @@ GaussIntegrationRule :: SetUpPointsOn2DEmbeddedLine (int nPoints, Element* elem,
     weight = 1.0;
     coord1 -> at(1) =(1.-(l+1)*0.5)*coords[0]->at(1)+(l+1)*0.5*coords[1]->at(1);
     coord1 -> at(2) =(1.-(l+1)*0.5)*coords[0]->at(2)+(l+1)*0.5*coords[1]->at(2);
-		(*arry )[0]         = new GaussPoint(elem,1,coord1,weight,mode);
+		(*arry )[0]         = new GaussPoint(this,1,coord1,weight,mode);
 		
 		coord1             = new FloatArray(2);
     
@@ -653,7 +653,7 @@ GaussIntegrationRule :: SetUpPointsOn2DEmbeddedLine (int nPoints, Element* elem,
     weight = 1.0;
     coord1 -> at(1) =(1.-(l+1)*0.5)*coords[0]->at(1)+(l+1)*0.5*coords[1]->at(1);
     coord1 -> at(2) =(1.-(l+1)*0.5)*coords[0]->at(2)+(l+1)*0.5*coords[1]->at(2);
-		(*arry )[1]         = new GaussPoint(elem,2,coord1,weight,mode);
+		(*arry )[1]         = new GaussPoint(this,2,coord1,weight,mode);
     
     
 		break;
@@ -667,7 +667,7 @@ GaussIntegrationRule :: SetUpPointsOn2DEmbeddedLine (int nPoints, Element* elem,
     weight =  0.555555555555555;
     coord1 -> at(1) =(1.-(l+1)*0.5)*coords[0]->at(1)+(l+1)*0.5*coords[1]->at(1);
     coord1 -> at(2) =(1.-(l+1)*0.5)*coords[0]->at(2)+(l+1)*0.5*coords[1]->at(2);
-		(*arry )[0]         = new GaussPoint(elem,1,coord1,weight,mode);
+		(*arry )[0]         = new GaussPoint(this,1,coord1,weight,mode);
 		
 		coord1             = new FloatArray(2);
     
@@ -675,7 +675,7 @@ GaussIntegrationRule :: SetUpPointsOn2DEmbeddedLine (int nPoints, Element* elem,
     weight = 0.888888888888888;
     coord1 -> at(1) =(1.-(l+1)*0.5)*coords[0]->at(1)+(l+1)*0.5*coords[1]->at(1);
     coord1 -> at(2) =(1.-(l+1)*0.5)*coords[0]->at(2)+(l+1)*0.5*coords[1]->at(2);
-		(*arry )[1]         = new GaussPoint(elem,2,coord1,weight,mode);
+		(*arry )[1]         = new GaussPoint(this,2,coord1,weight,mode);
     
 		coord1             = new FloatArray(2);
     
@@ -683,7 +683,7 @@ GaussIntegrationRule :: SetUpPointsOn2DEmbeddedLine (int nPoints, Element* elem,
     weight =  0.555555555555555;
     coord1 -> at(1) =(1.-(l+1)*0.5)*coords[0]->at(1)+(l+1)*0.5*coords[1]->at(1);
     coord1 -> at(2) =(1.-(l+1)*0.5)*coords[0]->at(2)+(l+1)*0.5*coords[1]->at(2);
-		(*arry )[2]         = new GaussPoint(elem,3,coord1,weight,mode);
+		(*arry )[2]         = new GaussPoint(this,3,coord1,weight,mode);
 		break;
     
 	case 4:
@@ -696,7 +696,7 @@ GaussIntegrationRule :: SetUpPointsOn2DEmbeddedLine (int nPoints, Element* elem,
     weight =  0.347854845137454;
     coord1 -> at(1) =(1.-(l+1)*0.5)*coords[0]->at(1)+(l+1)*0.5*coords[1]->at(1);
     coord1 -> at(2) =(1.-(l+1)*0.5)*coords[0]->at(2)+(l+1)*0.5*coords[1]->at(2);
-		(*arry )[0]         = new GaussPoint(elem,1,coord1,weight,mode);
+		(*arry )[0]         = new GaussPoint(this,1,coord1,weight,mode);
 		
 		coord1             = new FloatArray(2);
     
@@ -704,7 +704,7 @@ GaussIntegrationRule :: SetUpPointsOn2DEmbeddedLine (int nPoints, Element* elem,
     weight = 0.652145154862546;
     coord1 -> at(1) =(1.-(l+1)*0.5)*coords[0]->at(1)+(l+1)*0.5*coords[1]->at(1);
     coord1 -> at(2) =(1.-(l+1)*0.5)*coords[0]->at(2)+(l+1)*0.5*coords[1]->at(2);
-		(*arry )[1]         = new GaussPoint(elem,2,coord1,weight,mode);
+		(*arry )[1]         = new GaussPoint(this,2,coord1,weight,mode);
     
 		coord1             = new FloatArray(2);
     
@@ -712,13 +712,13 @@ GaussIntegrationRule :: SetUpPointsOn2DEmbeddedLine (int nPoints, Element* elem,
     weight =   0.652145154862546;
     coord1 -> at(1) =(1.-(l+1)*0.5)*coords[0]->at(1)+(l+1)*0.5*coords[1]->at(1);
     coord1 -> at(2) =(1.-(l+1)*0.5)*coords[0]->at(2)+(l+1)*0.5*coords[1]->at(2);
-		(*arry )[2]         = new GaussPoint(elem,3,coord1,weight,mode);
+		(*arry )[2]         = new GaussPoint(this,3,coord1,weight,mode);
     
 		l=  0.861136311594053; //local coordinate on the line
     weight =   0.347854845137454;
     coord1 -> at(1) =(1.-(l+1)*0.5)*coords[0]->at(1)+(l+1)*0.5*coords[1]->at(1);
     coord1 -> at(2) =(1.-(l+1)*0.5)*coords[0]->at(2)+(l+1)*0.5*coords[1]->at(2);
-		(*arry )[3]         = new GaussPoint(elem,4,coord1,weight,mode);
+		(*arry )[3]         = new GaussPoint(this,4,coord1,weight,mode);
     break;
     
     

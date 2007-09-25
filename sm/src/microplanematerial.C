@@ -70,7 +70,7 @@ MicroplaneMaterial :: giveMicroplane (int i, GaussPoint* masterGp)
   masterGp -> numberOfGp = this -> numberOfMicroplanes;
   masterGp -> gaussPointArray = new GaussPoint* [numberOfMicroplanes] ;
   for (int j = 0; j< numberOfMicroplanes; j++)  {
-   masterGp->gaussPointArray [j] = new Microplane (masterGp->giveElement(), j+1, slaveMode);
+   masterGp->gaussPointArray [j] = new Microplane (masterGp->giveIntegrationRule(), j+1, slaveMode);
   }
   slave = masterGp->gaussPointArray [i];
  }

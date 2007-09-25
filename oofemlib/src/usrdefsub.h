@@ -171,7 +171,7 @@ NonlocalBarrier* CreateUsrDefNonlocalBarrierOfType (char* name, int num, Domain*
  @param d    dofmanager to which new dof belongs
  @return newly allocated object of requested type, null if keyword not suppported
 */
-IntegrationRule* CreateUsrDefIRuleOfType (classType type, int, Domain*);
+IntegrationRule* CreateUsrDefIRuleOfType (classType type, int, Element*);
 
 /**
  Creates new instance of element corresponding to given element keyword.

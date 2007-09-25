@@ -146,8 +146,8 @@ TR1_2D_CBS :: computeGaussPoints ()
 {
   numberOfIntegrationRules = 1 ;
   integrationRulesArray = new IntegrationRule*[1];
-  integrationRulesArray[0] = new GaussIntegrationRule (1,domain, 1, 3);
-  integrationRulesArray[0]->setUpIntegrationPoints (_Triangle, 1, this, _2dFlow);
+  integrationRulesArray[0] = new GaussIntegrationRule (1,this, 1, 3);
+  integrationRulesArray[0]->setUpIntegrationPoints (_Triangle, 1, _2dFlow);
 }
 
 void

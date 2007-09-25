@@ -44,6 +44,7 @@
 
 #include "nlstructuralelement.h"
 #include "gaussintegrationrule.h"
+#include "gausspnt.h"
 #include "directerrorindicatorrc.h"
 
 class Truss3d : public NLStructuralElement

@@ -248,7 +248,7 @@ StructuralElement :: computePointLoadVectorAt (FloatArray& answer, Load* load, T
   pointLoad->giveCoordinates (coords);
   pointLoad->computeValueAt (force, tStep, coords, mode);
   if (this->computeLocalCoordinates (lcoords, coords)) {
-    GaussPoint __gp (this, 0, lcoords.GiveCopy(), 1.0, _Unknown);
+    GaussPoint __gp (NULL, 0, lcoords.GiveCopy(), 1.0, _Unknown);
     this -> computeNmatrixAt(&__gp, n) ;
     answer.beTProductOf (n, force);
   } else {
@@ -292,8 +292,8 @@ StructuralElement :: computeEdgeLoadVectorAt (FloatArray& answer, Load* load,
   if (edgeLoad) {
   approxOrder = edgeLoad->giveApproxOrder()+this->giveApproxOrder();
   numberOfGaussPoints = (int) ceil ((approxOrder+1.)/2.);
-  GaussIntegrationRule iRule(1, domain, 1, 1);
-  iRule.setUpIntegrationPoints (_Line, numberOfGaussPoints,this,_Unknown);
+  GaussIntegrationRule iRule(1, this, 1, 1);
+  iRule.setUpIntegrationPoints (_Line, numberOfGaussPoints,_Unknown);
   GaussPoint* gp ;
   FloatArray reducedAnswer, force, ntf;
   IntArray mask;
@@ -548,15 +548,15 @@ StructuralElement :: computeConsistentMassMatrix (FloatMatrix& answer, TimeStep*
    double      density,dV ;
    FloatMatrix n ;
    GaussPoint  *gp ;
-  GaussIntegrationRule iRule(1, domain, 1, 1);
+  GaussIntegrationRule iRule(1, this, 1, 1);
   IntArray mask;
 
   if ((nip = this->giveNumberOfIPForMassMtrxIntegration()) == 0)
    _error ("computeConsistentMassMatrix no integration points available");
   iRule.setUpIntegrationPoints (this->giveIntegrationDomain(), 
-                 nip, this,_Unknown);
+                                nip, _Unknown);
   
-   answer.resize (ndofs,ndofs);
+  answer.resize (ndofs,ndofs);
   answer.zero();
   this->giveMassMtrxIntegrationgMask (mask);
 

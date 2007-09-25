@@ -185,8 +185,8 @@ void  CCTPlate :: computeGaussPoints ()
 {
    numberOfIntegrationRules = 1 ;
   integrationRulesArray = new IntegrationRule*[1];
-  integrationRulesArray[0] = new GaussIntegrationRule (1, domain, 1, 5);
-  integrationRulesArray[0]->setUpIntegrationPoints (_Triangle, numberOfGaussPoints, this, _2dPlate);
+  integrationRulesArray[0] = new GaussIntegrationRule (1, this, 1, 5);
+  integrationRulesArray[0]->setUpIntegrationPoints (_Triangle, numberOfGaussPoints, _2dPlate);
 }
 
 

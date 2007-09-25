@@ -41,10 +41,11 @@
 #ifndef integrationrule_h
 #define integrationrule_h
 
-#include "gausspnt.h"
 #include "cltypes.h"
 #include "element.h"
 #include "femcmpnn.h"
+
+class GaussPoint;
 
 /**
  Abstract base class representing integration rule. The integration rule is 
@@ -66,7 +67,7 @@
  the unique copy of integration rule must exist on each element. The integration rule is 
  exclusively possessed by particular finite element.
 */
-class IntegrationRule : public FEMComponent
+class IntegrationRule 
 {
 /*
 DESCRIPTION:
@@ -101,6 +102,11 @@ REMARK
 */
 private:
 
+  /// number
+  int number;
+  /// Pointer to element  
+  Element* elem;
+
  /// Array containing integration points
  GaussPoint** gaussPointArray;
  /// Number of integration point of receiver
@@ -124,10 +130,10 @@ public:
   @param endIndx last component, for which rule applies
   @param dynamic flag indicating that receiver can change
   */
-  IntegrationRule (int n, Domain* domain, int startIndx, int endIndx, bool dynamic);
-  IntegrationRule (int n, Domain* domain);
+  IntegrationRule (int n, Element* e, int startIndx, int endIndx, bool dynamic);
+  IntegrationRule (int n, Element* e);
  /// Destructor.
-  ~IntegrationRule();
+  virtual ~IntegrationRule();
   
  /**
   Returns number of integration points of receiver.
@@ -150,27 +156,25 @@ public:
   Initializes the receiver. Receiver integration points are created acording to given parameters.
   @param mode describes integration domain
   @param nPoints required number of integration points of receiver
-  @param elem associated element
   @param matMode material mode of receiver's intagration points
   @return nPoints
   */
-  int setUpIntegrationPoints (integrationDomain mode, int nPoints, Element *elem, MaterialMode matMode);
-/**
+  int setUpIntegrationPoints (integrationDomain mode, int nPoints, MaterialMode matMode);
+  /**
   Initializes the receiver. Receiver integration points are created acording to given parameters.
   @param mode describes integration domain
   @param nPoints required number of integration points of receiver
-  @param elem associated element
   @param matMode material mode of receiver's intagration points
   @return nPoints
   */
-  int setUpEmbeddedIntegrationPoints (integrationDomain mode, int nPoints, Element *elem, MaterialMode matMode,
+  int setUpEmbeddedIntegrationPoints (integrationDomain mode, int nPoints, MaterialMode matMode,
 				      const FloatArray** coords);
 
  /**
   Prints receiver's output to given stream.
   Invokes printOutputAt service on all receiver's integration points.
   */
-  void printOutputAt (FILE* file, TimeStep* stepN);
+  virtual void printOutputAt (FILE* file, TimeStep* stepN);
  /**
   Updates receiver state.
    Calls updateYourself service of all receiver's integration points.
@@ -182,14 +186,17 @@ public:
   */
   void initForNewStep ();
 
- /**
-  Abstract service.
-  Returns requred number of integration points to exactly integrate
-  polynomial of order approxOrder on given domain.
-  When approxOrder is too large and is not supported by implementation
-  method returns -1. Must be overloaded by derived classes.
- */
- virtual int getRequiredNumberOfIntegrationPoints (integrationDomain dType, int approxOrder) = 0; 
+  /** Returns reference to element containing receiver */
+  Element* giveElement () {return elem;}
+
+  /**
+     Abstract service.
+     Returns requred number of integration points to exactly integrate
+     polynomial of order approxOrder on given domain.
+     When approxOrder is too large and is not supported by implementation
+     method returns -1. Must be overloaded by derived classes.
+  */
+  virtual int getRequiredNumberOfIntegrationPoints (integrationDomain dType, int approxOrder) {return 0;}
   
  /**
   Saves receiver's context to stream.
@@ -198,7 +205,7 @@ public:
   to write class id info for each integration rule.
   @exception throws an ContextIOERR exception if error encountered.
   */
-  contextIOResultType saveContext (DataStream* stream, ContextMode mode, void *obj);
+  virtual contextIOResultType saveContext (DataStream* stream, ContextMode mode, void *obj);
  /**
   Restores receiver's context to stream.
   Calls restoreContext service for all receiver's integration points.
@@ -207,17 +214,17 @@ public:
   @param obj should be a pointer to invoking element, ie., to which the receiver will belong to.
   @exception throws an ContextIOERR exception if error encountered.
   */
-  contextIOResultType restoreContext (DataStream* stream, ContextMode mode, void *obj);
+  virtual contextIOResultType restoreContext (DataStream* stream, ContextMode mode, void *obj);
   /**
      Clears the receiver, ie dealocates all integration points
   */
   void clear ();
 
- ///Returns classType id of receiver.
-  classType giveClassID () const  {return IntegrationRuleClass;}
- /// Returns class name of the receiver.
-  const char*  giveClassName () const {return "IntegrationRule" ;}
- IRResultType initializeFrom (InputRecord* ir) {return IRRT_OK;}
+  ///Returns classType id of receiver.
+  virtual classType giveClassID () const  {return IntegrationRuleClass;}
+  /// Returns class name of the receiver.
+  virtual const char*  giveClassName () const {return "IntegrationRule" ;}
+  virtual IRResultType initializeFrom (InputRecord* ir) {return IRRT_OK;}
 
 protected:
  /** 

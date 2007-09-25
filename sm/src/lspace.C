@@ -123,10 +123,10 @@ LSpace :: computeBmatrixAt (GaussPoint *aGaussPoint, FloatMatrix& answer, int li
 void  LSpace :: computeGaussPoints ()
    // Sets up the array containing the four Gauss points of the receiver.
 {
-   numberOfIntegrationRules = 1 ;
+  numberOfIntegrationRules = 1 ;
   integrationRulesArray = new IntegrationRule*[1];
-  integrationRulesArray[0] = new GaussIntegrationRule (1,domain,1, 6);
-  integrationRulesArray[0]->setUpIntegrationPoints (_Cube, numberOfGaussPoints, this,  _3dMat);
+  integrationRulesArray[0] = new GaussIntegrationRule (1,this,1, 6);
+  integrationRulesArray[0]->setUpIntegrationPoints (_Cube, numberOfGaussPoints, _3dMat);
 
 }
 
@@ -1186,9 +1186,9 @@ LSpace :: giveSurfaceDofMapping (IntArray& answer, int iSurf) const
 IntegrationRule* 
 LSpace :: GetSurfaceIntegrationRule (int approxOrder)
 {
- IntegrationRule* iRule = new GaussIntegrationRule (1,domain, 1, 1);
+ IntegrationRule* iRule = new GaussIntegrationRule (1,this, 1, 1);
  int npoints = iRule -> getRequiredNumberOfIntegrationPoints (_Square, approxOrder);
- iRule ->setUpIntegrationPoints (_Square, npoints, this, _Unknown);
+ iRule ->setUpIntegrationPoints (_Square, npoints, _Unknown);
  return iRule;
 }
 

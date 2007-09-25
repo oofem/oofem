@@ -273,9 +273,9 @@ TrPlaneStrRot :: computeBmatrixAt (GaussPoint *aGaussPoint, FloatMatrix& answer,
 {
  int i,j,k,size, ind = 1;
  double area;
- FloatArray *nx,*ny, *coord;
+ FloatArray *nx,*ny;
  // FloatMatrix *gm;
- GaussPoint  *helpGaussPoint;
+ // GaussPoint  *helpGaussPoint;
 
  
  FloatArray b (3);
@@ -320,13 +320,12 @@ TrPlaneStrRot :: computeBmatrixAt (GaussPoint *aGaussPoint, FloatMatrix& answer,
   delete nx; delete ny;
  }
  if ((li <=3) && (ui >= 3)) {
-  coord = new FloatArray(2);
-  coord -> at(1)    = 0.3333333333333333;
-  coord -> at(2)    = 0.3333333333333333;
-  helpGaussPoint     = new GaussPoint(this,1,coord,2.0,_PlaneStress);
+  GaussIntegrationRule ir (1,this, 1, 3);
+  ir.setUpIntegrationPoints (_Triangle, 1, _PlaneStress);
+  //helpGaussPoint     = new GaussPoint(this,1,coord,2.0,_PlaneStress);
  
-  nx = this -> GiveDerivativeVX (helpGaussPoint);
-  ny = this -> GiveDerivativeUY (helpGaussPoint);
+  nx = this -> GiveDerivativeVX (ir.getIntegrationPoint(0));
+  ny = this -> GiveDerivativeUY (ir.getIntegrationPoint(0));
 
   for (i=1;i<=3;i++){
    answer.at(ind,3*i-2) = c.at(i) * 1./(2.*area);
@@ -334,7 +333,7 @@ TrPlaneStrRot :: computeBmatrixAt (GaussPoint *aGaussPoint, FloatMatrix& answer,
    answer.at(ind,3*i-0) = (nx->at(i) + ny->at(i)) * 1./(2.*area);
   }
   ind++;
-  delete helpGaussPoint;
+  //delete helpGaussPoint;
   delete nx; delete ny;
  }
 
@@ -370,13 +369,13 @@ void
 TrPlaneStrRot :: computeGaussPoints ()
 //  Sets up the array containing the four Gauss points of the receiver.
 {
-   numberOfIntegrationRules = 2 ;
+  numberOfIntegrationRules = 2 ;
   integrationRulesArray = new IntegrationRule*[2];
-  integrationRulesArray[0] = new GaussIntegrationRule (1,domain, 1, 3);
-  integrationRulesArray[0]->setUpIntegrationPoints (_Triangle, numberOfGaussPoints, this, _PlaneStressRot);
+  integrationRulesArray[0] = new GaussIntegrationRule (1,this, 1, 3);
+  integrationRulesArray[0]->setUpIntegrationPoints (_Triangle, numberOfGaussPoints, _PlaneStressRot);
 
-  integrationRulesArray[1] = new GaussIntegrationRule (2,domain, 4, 4);
-  integrationRulesArray[1]->setUpIntegrationPoints (_Triangle, numberOfRotGaussPoints, this, _PlaneStressRot);
+  integrationRulesArray[1] = new GaussIntegrationRule (2,this, 4, 4);
+  integrationRulesArray[1]->setUpIntegrationPoints (_Triangle, numberOfRotGaussPoints, _PlaneStressRot);
 
 }
 

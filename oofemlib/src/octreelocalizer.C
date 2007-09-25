@@ -37,6 +37,7 @@
 #include "element.h"
 #include "domain.h"
 #include "integrationrule.h"
+#include "gausspnt.h"
 #include "dofmanager.h"
 #include "node.h"
 #include "conTable.h"

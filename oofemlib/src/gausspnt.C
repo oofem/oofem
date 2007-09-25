@@ -46,14 +46,11 @@
 #include <string.h>
 #endif
 
-GaussPoint :: GaussPoint (Element* e, int n, FloatArray* a, double w, MaterialMode mode) :
-FEMComponent (n,NULL)
-
-   // Constructor. Creates a Gauss point belonging to element e, with number
-   // n, with coordinates a, with weight w.
+GaussPoint :: GaussPoint (IntegrationRule* ir, int n, FloatArray* a, double w, MaterialMode mode)
+  // Constructor. Creates a Gauss point belonging to element e, with number
+  // n, with coordinates a, with weight w.
 {
-  domain       = e->giveDomain();
-   element      = e ;
+   irule        = ir ;
    number       = n ;
    coordinates  = a ;
    weight       = w ;
@@ -140,7 +137,7 @@ GaussPoint* GaussPoint :: giveSlaveGaussPoint (int index)
 // 
 {
  if ((gaussPointArray == NULL)) return NULL;
- if ((index<0) || (index >= numberOfGp)) _error ("giveSlaveGaussPoint: index out of range");
+ if ((index<0) || (index >= numberOfGp)) OOFEM_ERROR ("giveSlaveGaussPoint: index out of range");
  return gaussPointArray[index];
 }
  

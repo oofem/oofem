@@ -1308,8 +1308,10 @@ HuertaErrorEstimatorInterface::setupRefinedElementProblem1D (Element *element, R
 
 // create a fictitious integration point
    locCoord = new FloatArray;
-   gp = new GaussPoint(element, 1, locCoord, 1.0, mode);
-
+   IntegrationRule ir (1,element);
+   //gp = new GaussPoint(element, 1, locCoord, 1.0, mode);
+   gp = new GaussPoint(&ir, 1, locCoord, 1.0, mode);
+   
    for(inode = startNode; inode <= endNode; inode++){
     xc = corner[inode - 1] -> at(1);
     yc = corner[inode - 1] -> at(2);
@@ -1784,7 +1786,8 @@ HuertaErrorEstimatorInterface::setupRefinedElementProblem2D (Element *element, R
 
 // create a fictitious integration point
    locCoord = new FloatArray;
-   gp = new GaussPoint(element, 1, locCoord, 1.0, mode);
+   IntegrationRule ir (0, element);
+   gp = new GaussPoint(&ir, 1, locCoord, 1.0, mode);
 
    for(inode = startNode; inode <= endNode; inode++){
     s1 = inode;
@@ -2385,7 +2388,8 @@ HuertaErrorEstimatorInterface::setupRefinedElementProblem3D (Element *element, R
 
 // create a fictitious integration point
    locCoord = new FloatArray;
-   gp = new GaussPoint(element, 1, locCoord, 1.0, mode);
+   IntegrationRule ir (0,element);
+   gp = new GaussPoint(&ir, 1, locCoord, 1.0, mode);
    
    for(inode = startNode; inode <= endNode; inode++){
     s1 = hexaSideNode[inode - 1][0];

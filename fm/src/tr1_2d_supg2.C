@@ -182,8 +182,8 @@ TR1_2D_SUPG2 :: computeGaussPoints ()
 {
   numberOfIntegrationRules = 2 ;
   integrationRulesArray = new IntegrationRule*[2];
-  integrationRulesArray[0] = new GaussIntegrationRule (1,domain, 1, 3, true);
-  integrationRulesArray[1] = new GaussIntegrationRule (2,domain, 1, 3, true);
+  integrationRulesArray[0] = new GaussIntegrationRule (1,this, 1, 3, true);
+  integrationRulesArray[1] = new GaussIntegrationRule (2,this, 1, 3, true);
 
 
 }
@@ -1687,7 +1687,7 @@ TR1_2D_SUPG2::updateIntegrationRules()
       j++;
     }      
     
-    integrationRulesArray[i]->setUpIntegrationPoints(id[i], 4, this, _2dFlow);
+    integrationRulesArray[i]->setUpIntegrationPoints(id[i], 4, _2dFlow);
     
     // remap ip coords into area coords of receiver
     for (ip=0 ; ip < integrationRulesArray[i]->getNumberOfIntegrationPoints() ; ip++) {

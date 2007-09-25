@@ -531,7 +531,7 @@ FiberedCrossSection :: giveSlaveGaussPoint (GaussPoint* masterGp, int i)
    coords -> at(1) = fiberYcoords.at(j+1);
    coords -> at(2) = fiberZcoords.at(j+1);
      // in gp - is stored isoparametric coordinate (-1,1) of z-coordinate
-   masterGp->gaussPointArray [j] = new GaussPoint (masterGp->giveElement(), j+1, coords, 0.,slaveMode);
+   masterGp->gaussPointArray [j] = new GaussPoint (masterGp->giveIntegrationRule(), j+1, coords, 0.,slaveMode);
   }
   slave = masterGp->gaussPointArray [i];
  }

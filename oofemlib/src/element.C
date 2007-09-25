@@ -620,14 +620,14 @@ contextIOResultType Element :: restoreContext (DataStream* stream, ContextMode m
        // AND ALLOCATE NEW ONE
        integrationRulesArray = new IntegrationRule*[_nrules];
        for (i=0 ; i<_nrules ; i++) {
-         integrationRulesArray[i] = CreateUsrDefIRuleOfType ((classType) dtypes(i),i+1, this->giveDomain());
+         integrationRulesArray[i] = CreateUsrDefIRuleOfType ((classType) dtypes(i),i+1, this);
        }
        numberOfIntegrationRules = _nrules;
      } else {
        for (i=0 ; i<numberOfIntegrationRules ; i++) {
          if (integrationRulesArray[i]->giveClassID() != dtypes(i)) {
            delete integrationRulesArray[i] ;
-           integrationRulesArray[i] = CreateUsrDefIRuleOfType ((classType) dtypes(i),i+1, this->giveDomain());
+           integrationRulesArray[i] = CreateUsrDefIRuleOfType ((classType) dtypes(i),i+1, this);
          }
        }
      }

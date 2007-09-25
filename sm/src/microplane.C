@@ -43,8 +43,8 @@
 #include <string.h>
 #endif
 
-Microplane :: Microplane (Element* e, int n, MaterialMode mode) :
-GaussPoint (e, n, NULL, 0., mode)
+Microplane :: Microplane (IntegrationRule* ir, int n, MaterialMode mode) :
+GaussPoint (ir, n, NULL, 0., mode)
 
    // Constructor. Creates a Microplane belonging to element e, with number
    // n, with coordinates a, with weight w.

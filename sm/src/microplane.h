@@ -86,7 +86,7 @@ public:
   @param n integration point number
   @param mode material mode
   */
- Microplane  (Element* e,int n,MaterialMode mode);
+ Microplane  (IntegrationRule* ir,int n,MaterialMode mode);
  /// Destructor
  ~Microplane  () ;                                  // destructor
  

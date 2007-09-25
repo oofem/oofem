@@ -37,6 +37,7 @@
 #include "element.h"
 #include "domain.h"
 #include "integrationrule.h"
+#include "gausspnt.h"
 
 Element*
 DummySpatialLocalizer::giveElementContainingPoint (const FloatArray& coords, const IntArray* regionList)

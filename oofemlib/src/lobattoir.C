@@ -44,9 +44,9 @@
 
 // initialize class member 
 
-LobattoIntegrationRule::LobattoIntegrationRule (int n, Domain* domain, 
+LobattoIntegrationRule::LobattoIntegrationRule (int n, Element* e, 
                                                 int startIndx, int endIndx, bool dynamic)
-  : IntegrationRule (n, domain, startIndx, endIndx, dynamic) {}
+  : IntegrationRule (n, e, startIndx, endIndx, dynamic) {}
 
 
 LobattoIntegrationRule::~LobattoIntegrationRule ()
@@ -73,7 +73,7 @@ LobattoIntegrationRule :: SetUpPointsOnLine (int nPoints, Element* elem,
   coord = new FloatArray(1);
   coord -> at(1) = 0.0;
   weight = 2.0;
-  (*arry)[0] = new GaussPoint (elem,1,coord,weight,mode);
+  (*arry)[0] = new GaussPoint (this,1,coord,weight,mode);
   break;
   
  case 2:
@@ -93,7 +93,7 @@ LobattoIntegrationRule :: SetUpPointsOnLine (int nPoints, Element* elem,
    coord = new FloatArray(1);
    coord -> at(1) = c->at(i+1);
    weight = w->at(i+1);
-   (*arry)[i] = new GaussPoint(elem,i+1,coord,weight,mode);
+   (*arry)[i] = new GaussPoint(this,i+1,coord,weight,mode);
   }
   delete c;  delete w;
   break;
@@ -117,7 +117,7 @@ LobattoIntegrationRule :: SetUpPointsOnLine (int nPoints, Element* elem,
    coord  = new FloatArray(1);
    coord -> at(1) = c->at(i+1);
    weight = w->at(i+1);
-   (*arry)[i] = new GaussPoint(elem,i+1,coord,weight,mode);
+   (*arry)[i] = new GaussPoint(this,i+1,coord,weight,mode);
   }
   delete c;  delete w;
   break;
@@ -143,7 +143,7 @@ LobattoIntegrationRule :: SetUpPointsOnLine (int nPoints, Element* elem,
    coord  = new FloatArray(1);
    coord -> at(1) = c->at(i+1);
    weight = w->at(i+1);
-   (*arry)[i] = new GaussPoint(elem,i+1,coord,weight,mode);
+   (*arry)[i] = new GaussPoint(this,i+1,coord,weight,mode);
   }
   delete c;  delete w;
   break;
@@ -172,7 +172,7 @@ LobattoIntegrationRule :: SetUpPointsOnLine (int nPoints, Element* elem,
    coord  = new FloatArray(1);
    coord -> at(1) = c->at(i+1);
    weight = w->at(i+1);
-   (*arry)[i] = new GaussPoint(elem,i+1,coord,weight,mode);
+   (*arry)[i] = new GaussPoint(this,i+1,coord,weight,mode);
   }
   delete c;  delete w;
   break;
@@ -202,13 +202,13 @@ LobattoIntegrationRule :: SetUpPointsOnLine (int nPoints, Element* elem,
    coord  = new FloatArray(1);
    coord -> at(1) = c->at(i+1);
    weight = w->at(i+1);
-   (*arry)[i] = new GaussPoint(elem,i+1,coord,weight,mode);
+   (*arry)[i] = new GaussPoint(this,i+1,coord,weight,mode);
   }
   delete c;  delete w;
   break;
 
  default:
-   _error2 ("SetUpPointsOnLine: unsupported number of IPs (%d)",nPoints);
+   OOFEM_ERROR2 ("SetUpPointsOnLine: unsupported number of IPs (%d)",nPoints);
  }
  return nPoints;
 }
@@ -220,7 +220,7 @@ LobattoIntegrationRule :: SetUpPointsOnTriagle (int nPoints, Element* elem,
 // ( don't confuse with GaussPoint - elem is only the container where to 
 //   store corrdinates and weights)
 {
-  _error2 ("SetUpPointsOnTriangle: unsupported number of IPs (%d)", nPoints);
+  OOFEM_ERROR2 ("SetUpPointsOnTriangle: unsupported number of IPs (%d)", nPoints);
   return nPoints;
 }
 
@@ -231,7 +231,7 @@ LobattoIntegrationRule :: SetUpPointsOnSquare  (int nPoints, Element* elem,
 // ( don't confuse with GaussPoint - elem is only the container where to 
 //   store corrdinates and weights)
 {
-  _error2 ("SetUpPointsOnSquare: unsupported number of IPs (%d)", nPoints);
+  OOFEM_ERROR2 ("SetUpPointsOnSquare: unsupported number of IPs (%d)", nPoints);
   return nPoints;
 }
 
@@ -242,7 +242,7 @@ LobattoIntegrationRule :: SetUpPointsOnCube (int nPoints, Element* elem,
 // ( don't confuse with GaussPoint - elem is only the container where to 
 //   store corrdinates and weights)
 {
-  _error2 ("SetUpPointsOnCube: unsupported number of IPs (%d)", nPoints);
+  OOFEM_ERROR2 ("SetUpPointsOnCube: unsupported number of IPs (%d)", nPoints);
   return nPoints;
 }
 
@@ -254,7 +254,7 @@ LobattoIntegrationRule :: SetUpPointsOnTetrahedra (int nPoints, Element* elem,
 // ( don't confuse with GaussPoint - elem is only the container where to 
 //   store corrdinates and weights)
 {
-  _error2 ("SetUpPointsOnTetrahedra: unsupported number of IPs (%d)", nPoints);
+  OOFEM_ERROR2 ("SetUpPointsOnTetrahedra: unsupported number of IPs (%d)", nPoints);
   return nPoints;
 }
 
@@ -273,7 +273,7 @@ LobattoIntegrationRule::getRequiredNumberOfIntegrationPoints (integrationDomain 
     return requiredNIP;
 
  default:
-   _error ("LobattoIntegrationRule::setUpIntegrationPoints - unknown integrationDomain");
+   OOFEM_ERROR ("LobattoIntegrationRule::setUpIntegrationPoints - unknown integrationDomain");
    
   }
   return -1;
