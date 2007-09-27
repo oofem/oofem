@@ -269,7 +269,9 @@ IntArray::erase (int _pos)
   // receiver size will shrink accordingly
   // the (_pos+1, size) elements will become (_pos, size-1) elements;
 
+#ifdef DEBUG
   this->checkBounds (_pos);
+#endif
   // adjust size; keep allocated size untouched
   size--;
   for (int _i=_pos-1; _i<size; _i++)
