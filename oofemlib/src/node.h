@@ -119,6 +119,7 @@ public:
  ~Node () ;                                            // destructor
  
  // coordinates
+ bool        hasCoordinates() {return true;}
   /// Returns i-th coordinate of node.
  double       giveCoordinate (int i) ;
   /// Returns pointer to node coordinate array.

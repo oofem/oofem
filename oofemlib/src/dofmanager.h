@@ -318,6 +318,17 @@ public:
  IntArray*    giveLoadArray () ;
   //@}
 
+  /**@name Position querry functions */
+  //@{
+  virtual bool        hasCoordinates() {return false;}
+  /// Returns i-th coordinate of node.
+  virtual double       giveCoordinate (int i) {return 0.0;}
+  /// Returns pointer to node coordinate array.
+  virtual FloatArray*  giveCoordinates () {return NULL;}
+  //@}
+
+
+
  // time step termination
  /** Prints output of receiver to stream, for given time step */
  void         printOutputAt (FILE*, TimeStep*) ;
