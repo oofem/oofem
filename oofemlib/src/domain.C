@@ -1410,11 +1410,23 @@ Domain::LB_giveUpdatedGlobalNumber (int num, EntityRenumberingScheme scheme)
 
 
 int
-Domain::dofmanGlobal2local (int _globnum)
+Domain::dofmanGlobal2Local (int _globnum)
 {
   if (dmanMap.find(_globnum) != dmanMap.end()) { 
     // dofman is already available -> update only
     return (dmanMap[_globnum]->giveNumber());
   } else return 0;
 }
+
+int
+Domain::elementGlobal2Local (int _globnum)
+{
+  if (elementMap.find(_globnum) != elementMap.end()) { 
+    // element is already available -> update only
+    return (elementMap[_globnum]->giveNumber());
+  } else return 0;
+}
+
+
+
 #endif

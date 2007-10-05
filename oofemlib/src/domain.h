@@ -446,7 +446,8 @@ int               giveNumber () {return this->number;}
 
  /**@name Load Ballancing support methods */
  //@{
- int  dofmanGlobal2local (int _globnum);
+ int  dofmanGlobal2Local (int _globnum);
+ int  elementGlobal2Local (int _globnum);
  //@}
 #endif
 

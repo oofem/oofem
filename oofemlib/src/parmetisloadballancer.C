@@ -437,7 +437,7 @@ ParmetisLoadBallancer::unpackSharedDmanPartitions (ProcessCommunicator& pc)
   // unpack dofman data
   while (_globnum != PARMETISLB_END_DATA) {
     pcbuff->unpackIntArray (_partitions);
-    if ((_locnum = domain->dofmanGlobal2local (_globnum))) {
+    if ((_locnum = domain->dofmanGlobal2Local (_globnum))) {
       this->addSharedDofmanPartitions (_locnum, _partitions);
     } else {
       OOFEM_ERROR2 ("ParmetisLoadBallancer::unpackSharedDmanPartitions: internal error, unknown global dofman %d", _globnum);
