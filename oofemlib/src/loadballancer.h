@@ -140,10 +140,12 @@ class LoadBallancer
   /// Returns the new partition number assigned to local element after LB
   virtual int giveElementPartition(int ielem) = 0;
 
- //@}
+  //@}
   ///Initializes receiver acording to object description stored in input record.
   virtual IRResultType initializeFrom (InputRecord* ir) {return IRRT_OK;}
 
+  /// Returns reference to its domain
+  Domain* giveDomain() {return domain;}
  protected:
 
   int packMigratingData (Domain*, ProcessCommunicator& pc) ;
@@ -151,7 +153,45 @@ class LoadBallancer
   void deleteRemoteDofManagers (Domain* );
   void deleteRemoteElements (Domain* );
   
+ public:
 
+  class WorkTransferPlugin
+    {
+    protected:
+      LoadBallancer* lb;
+    public:
+      WorkTransferPlugin (LoadBallancer* _lb) {lb=_lb;}
+      virtual ~WorkTransferPlugin() {}
+      
+      /** 
+	  initializes receiver; should be called before any work transfer.
+	  Current implementation assembles for each local element the list
+	  of contributing global element numbers. 
+	  This is extracted from IP nonlocal tables;
+      */
+      virtual void init (Domain* d);
+      /*
+	Migrates necessary local elements to remote processors, where they 
+	become remote elements needed to efficiently handle nonlocal dependencies.
+	
+	This involves several steps:
+	- send and receive nonlocElementDependencyArry of migrating regular
+	elements to remote partition
+	- build domain nonlocal element dependency list. 
+	- then exclude local elements - what remains are unsatisfied 
+	remote dependencies that have to be broadcasted 
+	and received from partitions owning relevant elements
+	- transfer of local elements and nodes to remote partitions 
+	(remote elements and null dofmans)
+      */
+      virtual void migrate ();
+      /*
+	Called after all wtps migrated their data. 
+	Intended to update local data structure.
+	Current implementations rebuilds the nonlocal integration point tables.
+      */
+      virtual void update ();
+    };
 };
 
 
