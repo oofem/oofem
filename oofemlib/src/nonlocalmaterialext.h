@@ -195,6 +195,14 @@ public:
  void buildNonlocalPointTable (GaussPoint* gp);
 
  /**
+    Rebuild list of integration points which take part
+    in nonlocal average in given integration point.
+    if contributingElems param is not NULL, then it is assumed that it contains
+    a COMPLETE list of elements contributing to receiver. Ifis equal to NULL
+    existing list is cleared and  buildNonlocalPointTable service is invoked.
+  */
+ void rebuildNonlocalPointTable (GaussPoint* gp, IntArray* contributingElems);
+ /**
   Computes the value of nonlocal weight function in given point. 
   @param src coordinates of source point.
   @param coord coordinates of point, where nonlocal weight function is evaluated.

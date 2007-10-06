@@ -178,6 +178,77 @@ NonlocalMaterialExtensionInterface :: buildNonlocalPointTable (GaussPoint* gp)
 
 }
 
+void 
+NonlocalMaterialExtensionInterface :: rebuildNonlocalPointTable (GaussPoint* gp, IntArray* contributingElems)
+{
+  //int nelem, i, j;
+  int j;
+  double radius, weight, elemVolume, integrationVolume = 0.;
+  
+  NonlocalMaterialStatusExtensionInterface* statusExt = 
+    (NonlocalMaterialStatusExtensionInterface*) gp->giveMaterialStatus()->
+    giveInterface(NonlocalMaterialStatusExtensionInterfaceType);
+  dynaList<localIntegrationRecord>* iList ;
+  
+  Element* ielem;
+  GaussPoint* jGp;
+  IntegrationRule* iRule;
+  
+  if (!statusExt) {
+    OOFEM_ERROR ("NonlocalMaterialExtensionInterface::buildNonlocalPointTable : local material status encountered");
+  }
+  
+  // test for bounded support - if no bounded support, the nonlocal point table is 
+  // big vasting of space.
+  if (!this->hasBoundedSupport()) return;
+
+  iList = statusExt->giveIntegrationDomainList();
+  iList ->clear();
+  
+  if (contributingElems == NULL) {
+    // no element table provided, use standart method
+    this->buildNonlocalPointTable (gp);
+  } else {
+
+    FloatArray gpCoords, jGpCoords;
+    int _e, _size = contributingElems->giveSize();
+    if (gp->giveElement()->computeGlobalCoordinates (gpCoords, *(gp->giveCoordinates())) == 0) {
+      OOFEM_ERROR ("NonlocalMaterialExtensionInterface::buildNonlocalPointTable: computeGlobalCoordinates of target failed");
+    }
+    // ask for radius of influence
+    this->giveSupportRadius (radius);
+
+    // initialize iList
+    for (_e=1; _e<=_size; _e++) {
+      ielem = this->giveDomain()->giveElement(_e);
+      if (regionMap.at(ielem->giveRegionNumber()) == 0) {
+        iRule = ielem->giveDefaultIntegrationRulePtr ();
+        for (j=0 ; j < iRule->getNumberOfIntegrationPoints() ; j++) {
+          jGp = iRule->getIntegrationPoint(j) ;
+          if (ielem->computeGlobalCoordinates (jGpCoords, *(jGp->giveCoordinates()))) {
+            weight = this->computeWeightFunction (gpCoords, jGpCoords);
+            
+            this->applyBarrierConstraints (gpCoords, jGpCoords, weight);
+            if (weight > NonlocalMaterialZeroWeight) {
+              localIntegrationRecord ir;
+              ir.nearGp = jGp;                   // store gp 
+              elemVolume = weight * jGp->giveElement()->computeVolumeAround (jGp);
+              ir.weight = elemVolume;            // store gp weight
+              iList->pushBack(ir); // store own copy in list
+              integrationVolume += elemVolume;
+            }
+          } else {
+            OOFEM_ERROR ("NonlocalMaterialExtensionInterface::buildNonlocalPointTable: computeGlobalCoordinates of target failed");
+          }
+        }
+      }
+    } // loop over elements
+    statusExt->setIntegrationScale (integrationVolume); // remember scaling factor
+  }
+}
+
+
+
 IRResultType
 NonlocalMaterialExtensionInterface :: initializeFrom (InputRecord* ir)
 {
