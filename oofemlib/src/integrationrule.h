@@ -42,10 +42,10 @@
 #define integrationrule_h
 
 #include "cltypes.h"
-#include "element.h"
 #include "femcmpnn.h"
 
 class GaussPoint;
+class Element;
 
 /**
  Abstract base class representing integration rule. The integration rule is 
