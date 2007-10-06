@@ -40,16 +40,19 @@
  
 
 #ifndef element_h
+#define element_h
 
 #include "femcmpnn.h"
 #include "domain.h"
 #include "flotmtrx.h"
 #include "cltypes.h"
 #include "primaryfield.h"
+#include "integrationrule.h"
+
 
 class TimeStep ; class Node ; class Material ; class GaussPoint ;
 class FloatMatrix ; class FloatArray ; class IntArray ; 
-class CrossSection ; class ElementSide; class IntegrationRule;
+class CrossSection ; class ElementSide; 
 class CommunicationBuffer;
 
 #ifdef __PARALLEL_MODE
@@ -615,6 +618,13 @@ protected:
  */
  template <class T> void updateLocalNumbering (T* src, int (T::*renumberMethod) (int oldnum, EntityRenumberingScheme scheme )) ;
 
+ /// Integration point evaluator, loops over receiver IP's and calls given function (passed as f parameter) on them. The IP is parameter to function f.
+ template <class T> void ipEvaluator (T* src, void (T::*f) (GaussPoint* gp));
+ /// Integration point evaluator, loops over receiver IP's and calls given function (passed as f parameter) on them. The IP is parameter to function f as well as additional array.
+ template <class T, class S> void ipEvaluator (T* src, void (T::*f) (GaussPoint*, S&), S& _val);
+
+
+
  //@}
 
 
@@ -670,13 +680,15 @@ protected:
 
 #ifdef __PARALLEL_MODE
   /**
-  Returns receiver globally unique number.
+     Returns receiver globally unique number.
   */
   int giveGlobalNumber () const {return globalNumber;}
   /**
-  Return elementParallelMode of receiver. Defined for __Parallel_Mode only.
+     Return elementParallelMode of receiver. Defined for __Parallel_Mode only.
   */
   elementParallelMode giveParallelMode  () const {return parallel_mode;}
+  /// Sets parallel mode of element
+  void setParallelMode (elementParallelMode _mode) {parallel_mode = _mode;}
   /**
   Pack all necessary data of element (according to its parallel_mode) integration points
   into given communication buffer. The corresponding cross section service is invoked, which in
@@ -745,7 +757,6 @@ protected:
  
 } ;
 
-
 template <class T> void 
 Element::updateLocalNumbering (T* src, int (T::*renumberMethod) (int oldnum, EntityRenumberingScheme scheme ))
 {
@@ -755,8 +766,37 @@ Element::updateLocalNumbering (T* src, int (T::*renumberMethod) (int oldnum, Ent
   }
 }
 
+template <class T> void 
+Element::ipEvaluator (T* src, void (T::*f) (GaussPoint* gp))
+{
+  int ir, ip, nir,nip;
+  GaussPoint* gp;
+  
+  for (ir=0 ; ir<numberOfIntegrationRules ; ir++) {
+    nip = integrationRulesArray[ir]->getNumberOfIntegrationPoints();
+    for (ip=0; ip < nip; ip++){
+      gp = integrationRulesArray[ir]->getIntegrationPoint(ip);
+      (src->*f) (gp);
+    }
+  }
+}
 
-#define element_h
+template <class T, class S> void 
+Element::ipEvaluator (T* src, void (T::*f) (GaussPoint*, S&), S& _val)
+{
+  int ir, ip, nip;
+  GaussPoint* gp;
+  
+  for (ir=0 ; ir<numberOfIntegrationRules ; ir++) {
+    nip = integrationRulesArray[ir]->getNumberOfIntegrationPoints();
+    for (ip=0; ip < nip; ip++){
+      gp = integrationRulesArray[ir]->getIntegrationPoint(ip);
+      (src->*f) (gp, _val);
+    }
+  }
+}
+
+
 #endif
 
 
