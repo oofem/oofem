@@ -188,6 +188,10 @@ public:
       Returns its index in (1-based) indexing, if not present, 0 is returned.
   */
   int findSorted (int value) const;
+  /**
+     returns true if receiver contains given value
+   */
+  bool containsSorted (int value) const {return (findSorted (value) >0);}
   
   /** Inserts given value into a receiver, which is assumed to be sorted. 
       The size of receiver is changed accordingly.
@@ -215,6 +219,10 @@ public:
    @return index of first value in array, otherwise zero
   */
   int        findFirstIndexOf (int value)  const ;
+  /**
+     returns true if receiver contains given value
+   */
+  bool contains (int value) const {return (findFirstIndexOf (value) >0);}
   /**
      Insert once (does not make any assumption about receiver state or ordering, quite 
      inefficient). More efficient version InsertSortedOnce exist. Insert _p  value into
