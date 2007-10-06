@@ -50,8 +50,9 @@
 #include "integrationrule.h"
 #include "matstatus.h"
 #include "tdictionary.h"
+#include "element.h"
 
-class Element ; class Material ; class LayeredCrossSection;
+class Material ; class LayeredCrossSection;
 class MicroplaneMaterial; class FiberedCrossSection;
 class CrossSction;
 class IntegrationRule;
