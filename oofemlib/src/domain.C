@@ -70,10 +70,8 @@
 #ifdef __PARALLEL_MODE
 #include "parallel.h"
 #include "processcomm.h"
-#include "loadballancer.h"
 #include "datastream.h"
 #include "communicator.h"
-#include "parmetisloadballancer.h"
 #endif
 
 #ifndef __MAKEDEPEND

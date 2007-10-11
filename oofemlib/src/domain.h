@@ -211,8 +211,6 @@ class Domain
  //@{
  /// List of received elements
  std::list<Element*> recvElemList;
- /// Load ballancer
- LoadBallancer* loadBallancer;
  //@}
 #endif
 
