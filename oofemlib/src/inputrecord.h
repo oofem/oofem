@@ -792,6 +792,7 @@ enum InputFieldType {
   IFT_LSPCS_ci1,
   IFT_LSPCS_ci2,
 
+  IFT_LoadBallancer_wtp,
 
   IFT_Unknown
 };

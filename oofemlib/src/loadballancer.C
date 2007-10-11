@@ -46,21 +46,64 @@
 #include "datastream.h"
 #include "communicator.h"
 #include "domaintransactionmanager.h"
+#include "nonlocalmatwtp.h"
 #endif
 
-LoadBallancer::LoadBallancer (Domain* d) 
+LoadBallancer::LoadBallancer (Domain* d)  : wtpList (0)
 {
   domain = d;
 }
 
 #ifdef __PARALLEL_MODE
+
+IRResultType
+LoadBallancer::initializeFrom (InputRecord* ir)
+{
+  const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
+  IRResultType result;                   // Required by IR_GIVE_FIELD macro
+
+  IntArray wtp;
+  IR_GIVE_OPTIONAL_FIELD (ir, wtp, IFT_LoadBallancer_wtp, "wtp"); // Macro
+
+  this->initializeWtp (wtp);
+
+  return IRRT_OK;
+}
+
+void
+LoadBallancer::initializeWtp (IntArray& wtp) {
+
+  int i, size = wtp.giveSize();
+  WorkTransferPlugin *plugin;
+
+  if (size) {
+    wtpList.growTo (size);
+    for (i=1; i<=size; i++) {
+      if (wtp.at(i)==1) {
+        plugin = new NonlocalMaterialWTP (this);
+      } else {
+        OOFEM_ERROR ("LoadBallancer::initializeWtp: Unknown work transfer plugin type");
+      }
+      wtpList.put(i, plugin);
+    }
+  }
+}
+                                      
+                                    
 void 
 LoadBallancer::migrateLoad (Domain* d)
 {
   // domain->migrateLoad(this);
-
+  int i;
   int nproc= d->giveEngngModel()->giveNumberOfProcesses();
   int myrank=d->giveEngngModel()->giveRank();
+
+
+  // initialize work transfer plugins before any transfer
+  for (i=1; i<=wtpList.giveSize(); i++) {
+    wtpList.at(i)->init (d);
+  }
+
   CommunicatorBuff cb (nproc, CBT_dynamic);
   Communicator com (d->giveEngngModel(), &cb, myrank, nproc, CommMode_Dynamic);
 
@@ -83,7 +126,7 @@ LoadBallancer::migrateLoad (Domain* d)
 
 #if 1
   // debug print
-  int i, j, nnodes=d->giveNumberOfDofManagers(), nelems=d->giveNumberOfElements();
+  int j, nnodes=d->giveNumberOfDofManagers(), nelems=d->giveNumberOfElements();
   fprintf (stderr, "\n[%d] Nodal Table\n", myrank);
   for (i=1; i<=nnodes; i++) {
     if (d->giveDofManager(i)->giveParallelMode()==DofManager_local) 
@@ -105,7 +148,17 @@ LoadBallancer::migrateLoad (Domain* d)
     fprintf (stderr, "}\n");
   }
 #endif
-  
+
+  // migrate work transfer plugin data 
+  for (i=1; i<=wtpList.giveSize(); i++) {
+    wtpList.at(i)->migrate ();
+  }
+
+  // update work transfer plugin data 
+  for (i=1; i<=wtpList.giveSize(); i++) {
+    wtpList.at(i)->update ();
+  }
+
 }
 
 int
@@ -405,4 +458,11 @@ WallClockLoadBallancerMonitor::decide()
 #else //__PARALLEL_MODE
 void 
 LoadBallancer::migrateLoad () {}
+
+IRResultType
+LoadBallancer::initializeFrom (InputRecord* ir) {return IRRT_OK;}
 #endif
+
+
+LoadBallancer::WorkTransferPlugin::WorkTransferPlugin (LoadBallancer* _lb) {lb=_lb;}
+LoadBallancer::WorkTransferPlugin::~WorkTransferPlugin () {}

@@ -37,6 +37,7 @@
 #include "inputrecord.h"
 #include "interface.h"
 #include "clock.h"
+#include "alist.h"
 
 class Domain;
 class EngngModel;
@@ -59,6 +60,9 @@ class LoadBallancerMonitor
   LoadBallancerMonitor (EngngModel* em) {emodel=em;}
   virtual ~LoadBallancerMonitor() {}
 
+  ///Initializes receiver acording to object description stored in input record.
+  virtual IRResultType initializeFrom (InputRecord* ir) {return IRRT_OK;}
+  
   /**@name Load evaluation and imbalance detection methods*/
   //@{
   virtual LoadBallancerDecisionType decide () = 0;
@@ -142,16 +146,21 @@ class LoadBallancer
 
   //@}
   ///Initializes receiver acording to object description stored in input record.
-  virtual IRResultType initializeFrom (InputRecord* ir) {return IRRT_OK;}
+  virtual IRResultType initializeFrom (InputRecord* ir);
 
   /// Returns reference to its domain
   Domain* giveDomain() {return domain;}
+
+  /// Returns class name of the receiver.
+  const char* giveClassName () const { return "LoadBallancer" ;}
+
  protected:
 
   int packMigratingData (Domain*, ProcessCommunicator& pc) ;
   int unpackMigratingData (Domain*, ProcessCommunicator& pc) ;
   void deleteRemoteDofManagers (Domain* );
   void deleteRemoteElements (Domain* );
+  void initializeWtp (IntArray& wtp);
   
  public:
 
@@ -160,8 +169,8 @@ class LoadBallancer
     protected:
       LoadBallancer* lb;
     public:
-      WorkTransferPlugin (LoadBallancer* _lb) {lb=_lb;}
-      virtual ~WorkTransferPlugin() {}
+      WorkTransferPlugin (LoadBallancer* _lb);
+      virtual ~WorkTransferPlugin();
       
       /** 
 	  initializes receiver; should be called before any work transfer.
@@ -169,7 +178,7 @@ class LoadBallancer
 	  of contributing global element numbers. 
 	  This is extracted from IP nonlocal tables;
       */
-      virtual void init (Domain* d);
+      virtual void init (Domain* d) = 0;
       /*
 	Migrates necessary local elements to remote processors, where they 
 	become remote elements needed to efficiently handle nonlocal dependencies.
@@ -184,14 +193,18 @@ class LoadBallancer
 	- transfer of local elements and nodes to remote partitions 
 	(remote elements and null dofmans)
       */
-      virtual void migrate ();
+      virtual void migrate () = 0;
       /*
 	Called after all wtps migrated their data. 
 	Intended to update local data structure.
 	Current implementations rebuilds the nonlocal integration point tables.
       */
-      virtual void update ();
+      virtual void update () = 0;
     };
+
+ protected:
+  /// list of work transfer plugins
+  AList<WorkTransferPlugin> wtpList ;
 };
 
 

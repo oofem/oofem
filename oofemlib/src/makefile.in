@@ -78,7 +78,7 @@ srcs9=geotoolbox.C dss.C dsssolver.C
 srcs99=ppdeelement.C heatcrosssection.C heatmaterial.C isolinearheatmat.C
 
 #parallel
-psrcs1=communicator.C processcomm.C problemcomm.C combuff.C petscordering.C dyncombuff.C loadballancer.C parmetisloadballancer.C
+psrcs1=communicator.C processcomm.C problemcomm.C combuff.C petscordering.C dyncombuff.C loadballancer.C parmetisloadballancer.C nonlocalmatwtp.C
 
 all_src = $(srcs0) $(srcs1) $(srcs2) $(srcs3) $(srcs4) $(srcs5) $(srcs6) $(srcs7) $(srcs8) $(srcs9) $(srcs99) $(psrcs1) 
 oofem_src = $(srcs0) $(srcs2) $(srcs3) $(srcs4) $(srcs5) $(srcs6) $(srcs7) $(srcs8) $(srcs9) $(srcs99) 
