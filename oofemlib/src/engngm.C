@@ -686,6 +686,14 @@ EngngModel :: updateAttributes (TimeStep* atTime)
  
  if(this->giveNumericalMethod (atTime)) 
   this->giveNumericalMethod (atTime) -> initializeFrom (ir);
+
+#ifdef __PARALLEL_MODE
+ if (this->giveLoadBallancer())
+   this->giveLoadBallancer()->initializeFrom (ir);
+
+ if (this->giveLoadBallancerMonitor())
+   this->giveLoadBallancerMonitor()->initializeFrom (ir);
+#endif
 }
 
 
