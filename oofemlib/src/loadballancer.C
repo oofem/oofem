@@ -408,7 +408,9 @@ LoadBallancer::deleteRemoteElements (Domain* d)
       //elem = elementList->unlink (i);        
       //dmanMap.erase (elem->giveGlobalNumber());
       //delete (elem);
-    }
+    } else if (d->giveElement(i)->giveParallelMode() != Element_local) {
+      dtm->addTransaction (DomainTransactionManager::DTT_Remove, DomainTransactionManager::DCT_Element, d->giveElement (i)->giveGlobalNumber(), NULL);
+    }      
   }
 }
 

@@ -102,15 +102,28 @@ NonlocalMaterialWTP::giveNonlocalDepArryElementPlugin (GaussPoint* gp, std::set<
 
 */
 void
-NonlocalMaterialWTP::init (Domain* d)
+NonlocalMaterialWTP::init (Domain* domain)
 {
-  int ie, nelem = d->giveNumberOfElements();
+  int ie, gie, nelem = domain->giveNumberOfElements();
+  EngngModel* emodel = domain->giveEngngModel();
+  int nproc= emodel->giveNumberOfProcesses();
+  int myrank= emodel->giveRank();
+  CommunicatorBuff cb (nproc, CBT_dynamic);
+  Communicator com (emodel, &cb, myrank, nproc, CommMode_Dynamic);
 
   // build nonlocal element dependency array for each element 
   for (ie=1; ie<=nelem; ie++) {
-    this->giveElementNonlocalDepArry (nonlocElementDependencyMap[ie], d, ie);
+    gie = domain->giveElement(ie)->giveGlobalNumber();
+    this->giveElementNonlocalDepArry (nonlocElementDependencyMap[gie], domain, ie);
   }
+
+  /* send and receive nonlocElementDependencyArry of migrating elements to remote partition */
+  com.packAllData (this, domain, &NonlocalMaterialWTP::packMigratingElementDependencies);
+  com.initExchange (MIGRATE_NONLOCALDEP_TAG);
+  com.unpackAllData (this, domain, &NonlocalMaterialWTP::unpackMigratingElementDependencies);
+  
 }
+
 
 
 /* 
@@ -128,16 +141,11 @@ NonlocalMaterialWTP::migrate ()
   Communicator com (emodel, &cb, myrank, nproc, CommMode_Dynamic);
   StaticCommunicationBuffer commBuff (MPI_COMM_WORLD);
 
-  /* send and receive nonlocElementDependencyArry of migrating elements to remote partition */
-  com.packAllData (this, domain, &NonlocalMaterialWTP::packMigratingElementDependencies);
-  com.initExchange (MIGRATE_NONLOCALDEP_TAG);
-  com.unpackAllData (this, domain, &NonlocalMaterialWTP::unpackMigratingElementDependencies);
-
   /* 
      build domain nonlocal element dependency list. Then exclude local elements - what remains are unsatisfied 
      remote dependencies that have to be broadcasted and received from partitions owning relevant elements 
   */
-  int _locsize, i, _i, _size, _globnum, ie, result, nelems=domain->giveNumberOfElements();
+  int _locsize, i, _i, ie, _size, _globnum, result, nelems=domain->giveNumberOfElements();
   int _globsize, _val;
   Element* elem;
   std::set <int> domainElementDepSet;
@@ -148,26 +156,48 @@ NonlocalMaterialWTP::migrate ()
     elem = domain->giveElement(ie);
     if ((elem->giveParallelMode() == Element_local)) {
       _globnum = elem->giveGlobalNumber();
-      IntArray &iedep = nonlocElementDependencyMap[ie];
+      IntArray &iedep = nonlocElementDependencyMap[_globnum];
       _size=iedep.giveSize();
       for (_i=1; _i<=_size; _i++) domainElementDepSet.insert(iedep.at(_i));
+#if 1
+  fprintf (stderr, "[%d] element %d dependency:", myrank, _globnum);
+  for (_i=1; _i<=_size; _i++) fprintf (stderr, "%d ", iedep.at(_i));
+  fprintf (stderr, "\n");
+#endif
     }
   }
-
+#if 1
+  fprintf (stderr, "[%d] nonlocal domain dependency:", myrank);
+  for (sit=domainElementDepSet.begin(); 
+       sit != domainElementDepSet.end(); ++sit) {
+    fprintf (stderr, "%d ", *sit);
+  }
+  fprintf (stderr, "\n");
+#endif
+  
   // now exclude local elements (local dependency is always satisfied)
   for (_i=1; _i<=nelems; _i++) {
     elem = domain->giveElement(_i);
     if (elem->giveParallelMode()==Element_local)
       domainElementDepSet.erase (elem->giveGlobalNumber());
   }
+#if 1
+  fprintf (stderr, "[%d] remote elem wish list:", myrank);
+  for (sit=domainElementDepSet.begin(); 
+       sit != domainElementDepSet.end(); ++sit) {
+    fprintf (stderr, "%d ", *sit);
+  }
+  fprintf (stderr, "\n");
+#endif
+
   // broadcast remaining elements (unsatisfied domain nonlocal dependency) to remaining partitions
   _locsize = domainElementDepSet.size()+1;
   result = MPI_Allreduce (&_locsize, &_globsize, 1, MPI_INT, MPI_MAX, MPI_COMM_WORLD);
   if (result != MPI_SUCCESS) OOFEM_ERROR ("NonlocalMaterialWTP::migrate: MPI_Allreduce to determine  broadcast buffer size failed");
-  commBuff.resize (_globsize);
+  commBuff.resize (commBuff.givePackSize(MPI_INT,_globsize));
   // remote domain wish list
   std::set <int> remoteWishSet;
-
+  
   toSendList.resize(nproc);
   for (i=0; i<nproc; i++) { // loop over partitions
     commBuff.init();
@@ -198,15 +228,30 @@ NonlocalMaterialWTP::migrate ()
     }
   } // end loop over partitions broadcast
 
-  // now exchange remote elements between partitions
-  com.clearBuffers();
-  
+
+#if 1
+  std::list<int>::const_iterator lit;
+  for (i=0; i<nproc; i++) { // loop over partitions
+    // print some info
+    fprintf (stderr, "[%d] elements scheduled for mirroring at [%d]:",
+	     myrank,i);
+    for (lit=toSendList[i].begin(); lit!=toSendList[i].end(); ++lit) {
+      fprintf (stderr, "%d ", *lit);
+    }
+    fprintf (stderr, "\n");
+  }
+#endif
+
+
+
+
+
   com.packAllData (this, domain, &NonlocalMaterialWTP::packRemoteElements);
   com.initExchange (MIGRATE_REMOTE_ELEMENTS_TAG);
   com.unpackAllData (this, domain, &NonlocalMaterialWTP::unpackRemoteElements);
   
 #ifdef __VERBOSE_PARALLEL
-   VERBOSEPARALLEL_PRINT("NonlocalMaterialWTP::migrate", "Finished migrating remote elements", rank);
+   VERBOSEPARALLEL_PRINT("NonlocalMaterialWTP::migrate", "Finished migrating remote elements", myrank);
 #endif
 }
 
