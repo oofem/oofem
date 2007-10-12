@@ -379,10 +379,12 @@ figures \ref{nodecut}, \ref{nodecut-lm}, and \ref{nodecut-nlm}).
 partitioning cut led across the element edges or surfaces (see 
 figures \ref{elmentcut} and \ref{elmentcut-lm}).
 \end{itemize}
+\Pmode{
 The \param{nonlocalext} turns on the nonlocal constitutive
 extension. The extension considers a band of remote elements involved
 in computation of nonlocal variables (see fig. \ref{nodecut-nlm} illustrating
 this approach for node-cut partitioning).
+}
 }
 
 \subsection{DEIDynamic}
@@ -446,9 +448,10 @@ The extended syntax uses the ``metastep'' concept and has the
 following format:
 %%\begin{enumerate}
 %%\item[0]
-\entKeywordInst{NonLinearStatic} \optField{nmsteps}{in} \field{nsteps}{in}
-\optField{nonlocstiff}{in}\\ \optField{contextOutputStep}{in}
+\entKeywordInst{NonLinearStatic} \optField{nmsteps}{in} \field{nsteps}{in}\\
+\optField{contextOutputStep}{in}
 \optField{sparselinsolverparams}{string}\\
+\PoptField{nonlocstiff}{in} \PoptField{nonlocalext}{}.\\
 This is immediately followed by metastep records with the following format:
 %%\item[1]
 \field{nsteps}{in} \field{attributes}{string}\\
@@ -461,15 +464,20 @@ The analysis parameters have following meaning
 \item \param{nmsteps} - determines the number of
 ``metasteps'', default is 1.
 \item \param{nsteps} - determines number of solution steps.
-\item \param{nonlocstiff} - determines whether the tangent stiffness
-extension for nonlocal models is activated. If == 0 (default) this
-option is not active. If == 1 the support for nonlocal tangent
-stiffness is activated.
 \item \param{contextOutputStep} - Causes the context file to be
 created for every con\-text\-Out\-put\-Step-th step and when needed. Useful for
 postprocessing.
 \item The  \param{sparselinsolverparams} parameter describes the sparse
 linear solver attributes and is explained in section \ref{sparselinsolver}.
+\item \Pmode{\param{nonlocstiff} - determines whether the tangent stiffness
+extension for nonlocal models is activated. If == 0 (default) this
+option is not active. If == 1 the support for nonlocal tangent
+stiffness is activated.}
+\item \Pmode{The \param{nonlocalext} turns on the nonlocal constitutive
+extension. The extension considers a band of remote elements involved
+in computation of nonlocal variables (see fig. \ref{nodecut-nlm} illustrating
+this approach for node-cut partitioning).
+}
 
 \end{itemize}
 The metasteps \fieldVal{num}{in} is the metastep number and the
@@ -479,7 +487,7 @@ The metastep attribute field has following general syntax:\\
 \optField{controllmode}{in} \optField{deltat}{rn}
 \field{rtolv}{rn} \optField{stiffmode}{in}\\
 \optField{refloadmode}{in} \field{solverParams}{}
-\optField{sparselinsolverparams}{string} \optField{donotfixload}{},\\
+\optField{sparselinsolverparams}{string}\\ \optField{donotfixload}{},\\
 where 
 \begin{itemize}
 \item[-] \param{controllmode} - determines the type of solution
@@ -639,7 +647,8 @@ then following\\
 \optField{nonlocstiff}{in}\\
  \optField{contextOutputStep}{in} \optField{controllmode}{in} \optField{deltat}{rn}\\
 \field{rtolv}{rn} \optField{stiffmode}{in} \field{lstype}{in}
-\field{smtype}{in} \field{solverParams}{}.\\ The
+\field{smtype}{in} \field{solverParams}{}\\
+\PoptField{nonlocstiff}{in} \PoptField{nonlocalext}{}.\\ The
 meaning of parameters is the same as for extended syntax.
 
 %
