@@ -58,7 +58,6 @@ ParmetisLoadBallancer::ParmetisLoadBallancer(Domain* d) : LoadBallancer (d)
 #ifdef __PARMETIS_MODULE
   elmdist = NULL;
   tpwgts  = NULL;
-  part    = NULL;
 #endif
 }
 
@@ -67,7 +66,6 @@ ParmetisLoadBallancer::~ParmetisLoadBallancer ()
 #ifdef __PARMETIS_MODULE
   if (elmdist) delete[] elmdist;
   if (tpwgts)  delete[] tpwgts;
-  if (part)    delete[] part;
 #endif
 }
 
@@ -78,6 +76,7 @@ ParmetisLoadBallancer::calculateLoadTransfer ()
 {
 
   idxtype *eind, *eptr, *xadj, *adjncy, *vwgt, *vsize;
+  idxtype *part;
   int i, nlocalelems, eind_size, nelem= domain->giveNumberOfElements();
   int ndofman, idofman, numflag, ncommonnodes, options[4],ie,nproc;
   int edgecut, wgtflag, ncon;
@@ -120,6 +119,8 @@ ParmetisLoadBallancer::calculateLoadTransfer ()
   eptr[nlocalelems]=eind_pos;
 
   // call ParMETIS_V3_Mesh2Dual to construct dual graph (in parallel)
+  // dual graph: elements are vertices; element edges are graph edges
+  // this is necessary, since cut runs through graph edges
   numflag = 0; ncommonnodes = 2;
   ParMETIS_V3_Mesh2Dual (elmdist, eptr, eind, &numflag, &ncommonnodes, &xadj, &adjncy, &communicator);
  
@@ -166,11 +167,29 @@ ParmetisLoadBallancer::calculateLoadTransfer ()
   // call ParMETIS ballancing routineParMETIS_V3_AdaptiveRepart
   ParMETIS_V3_AdaptiveRepart (elmdist, xadj, adjncy, vwgt, vsize, NULL, &wgtflag, &numflag, &ncon, &nproc, 
                               tpwgts, ubvec, &itr, options, &edgecut, part, &communicator);
-  
+
+  // part contains partition vector for local elements on receiver
+  // we need to map it to domain elements (this is not the same, since
+  // domain may contain not only its local elements but remote elements as well)
+  int loc_num = 0;
+  this->elementPart.resize(nelem);
+  for (i=1; i<=nelem; i++) {
+    ielem = domain->giveElement(i);
+    if (ielem->giveParallelMode() == Element_local) {
+      this->elementPart.at(i) = part[loc_num++];
+    } else {
+      // we can not say anything about remote elements; this information is available on partition 
+      // that has its local counterpart
+      this->elementPart.at(i) = -1;
+    }
+  }
+
+  if (part)    delete[] part;
+      
 #ifdef ParmetisLoadBallancer_DEBUG_PRINT
   // debug
-  fprintf (stderr, "[%d] edgecut: %d part:", myrank, edgecut);
-  for (i=0; i< nlocalelems; i++) fprintf (stderr, " %d", part[i]);
+  fprintf (stderr, "[%d] edgecut: %d elementPart:", myrank, edgecut);
+  for (i=1; i<= nelem; i++) fprintf (stderr, " %d", elementPart.at(i));
   fprintf (stderr, "\n");
 #endif
   
@@ -296,22 +315,23 @@ ParmetisLoadBallancer::labelDofManagers()
     } else {
       dofManState.at(idofman) = DM_NULL;
     }
-    
+  } 
     
 #ifdef ParmetisLoadBallancer_DEBUG_PRINT
-   fprintf (stderr, " | %d: ", idofman);
-   if (dofManState.at(idofman) == DM_NULL)              fprintf (stderr, "NULL  ");
-   else if (dofManState.at(idofman) == DM_Local)        fprintf (stderr, "Local ");
-   else if (dofManState.at(idofman) == DM_Shared)       fprintf (stderr, "Shared");
-   else if (dofManState.at(idofman) == DM_Remote)       fprintf (stderr, "Remote");
-   else fprintf (stderr, "Unknown");
-   //else if (dofManState.at(idofman) == DM_SharedExclude)fprintf (stderr, "ShdExc");
-   //else if (dofManState.at(idofman) == DM_SharedNew)    fprintf (stderr, "ShdNew");
-   //else if (dofManState.at(idofman) == DM_SharedUpdate) fprintf (stderr, "ShdUpd");
-
-   if (((++_cols % 4) == 0) || (idofman==ndofman)) fprintf (stderr, "\n");
-#endif   
+  for (idofman=1; idofman <= ndofman; idofman++) {
+    fprintf (stderr, " | %d: ", idofman);
+    if (dofManState.at(idofman) == DM_NULL)              fprintf (stderr, "NULL  ");
+    else if (dofManState.at(idofman) == DM_Local)        fprintf (stderr, "Local ");
+    else if (dofManState.at(idofman) == DM_Shared)       fprintf (stderr, "Shared");
+    else if (dofManState.at(idofman) == DM_Remote)       fprintf (stderr, "Remote");
+    else fprintf (stderr, "Unknown");
+    //else if (dofManState.at(idofman) == DM_SharedExclude)fprintf (stderr, "ShdExc");
+    //else if (dofManState.at(idofman) == DM_SharedNew)    fprintf (stderr, "ShdNew");
+    //else if (dofManState.at(idofman) == DM_SharedUpdate) fprintf (stderr, "ShdUpd");
+    
+    if (((++_cols % 4) == 0) || (idofman==ndofman)) fprintf (stderr, "\n");
   }
+#endif   
 }
 
 int
@@ -388,7 +408,7 @@ ParmetisLoadBallancer::giveDofManPartitions (int idofman)
 int
 ParmetisLoadBallancer::giveElementPartition (int ielem)
 {
-  return part[ielem-1];
+  return elementPart.at(ielem);
 }
 
 int 

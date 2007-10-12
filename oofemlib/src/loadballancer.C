@@ -359,6 +359,11 @@ LoadBallancer::deleteRemoteDofManagers (Domain* d)
       // dmanMap.erase (d->giveDofManager (i)->giveGlobalNumber());
       //dman = dofManagerList->unlink (i);
       //delete dman;
+    } else if ((dmode == LoadBallancer::DM_NULL)) {
+      // positive candidate found; we delete all null dof managers
+      // they will be created by nonlocalmatwtp if necessary. 
+      // potentially, they can be reused, but this will make the code too complex
+      dtm->addTransaction (DomainTransactionManager::DTT_Remove, DomainTransactionManager::DCT_DofManager, d->giveDofManager (i)->giveGlobalNumber(), NULL);
     } else if (dmode == LoadBallancer::DM_Shared) {
       dman = d->giveDofManager (i);
       dman->setPartitionList (*(this->giveDofManPartitions(i)));

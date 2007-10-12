@@ -1230,7 +1230,9 @@ NonLinearStatic::packMigratingData (TimeStep* atTime)
   int ndofman =  domain -> giveNumberOfDofManagers(), ndofs, idofman, idof, _eq;
   DofManager* _dm;
   Dof* _dof;
-  
+  bool initialLoadVectorEmpty = initialLoadVector.isEmpty();
+  bool initialLoadVectorOfPrescribedEmpty = initialLoadVectorOfPrescribed.isEmpty();
+
   for (idofman=1; idofman <= ndofman; idofman++) {
     _dm = domain->giveDofManager(idofman);
     ndofs = _dm->giveNumberOfDofs();
@@ -1240,12 +1242,20 @@ NonLinearStatic::packMigratingData (TimeStep* atTime)
         if ((_eq = _dof->giveEquationNumber())) {
           // pack values in solution vectors
           _dof->updateUnknownsDictionary (atTime, EID_MomentumBalance, VM_Total, totalDisplacement.at(_eq));
-          _dof->updateUnknownsDictionary (atTime, EID_MomentumBalance, VM_RhsInitial, initialLoadVector.at(_eq));
+          if (initialLoadVectorEmpty) {
+            _dof->updateUnknownsDictionary (atTime, EID_MomentumBalance, VM_RhsInitial, 0.0);
+          } else {
+            _dof->updateUnknownsDictionary (atTime, EID_MomentumBalance, VM_RhsInitial, initialLoadVector.at(_eq));
+          }
           _dof->updateUnknownsDictionary (atTime, EID_MomentumBalance, VM_RhsIncremental, incrementalLoadVector.at(_eq));
           
         } else if ((_eq = _dof->givePrescribedEquationNumber())) {
           // pack values in prescribed solution vectors
-          _dof->updateUnknownsDictionary (atTime, EID_MomentumBalance, VM_RhsInitial, initialLoadVectorOfPrescribed.at(_eq));
+          if (initialLoadVectorOfPrescribedEmpty) {
+            _dof->updateUnknownsDictionary (atTime, EID_MomentumBalance, VM_RhsInitial, 0.0);
+          } else {
+            _dof->updateUnknownsDictionary (atTime, EID_MomentumBalance, VM_RhsInitial, initialLoadVectorOfPrescribed.at(_eq));
+          }
           _dof->updateUnknownsDictionary (atTime, EID_MomentumBalance, VM_RhsIncremental, incrementalLoadVectorOfPrescribed.at(_eq));
          
         }
@@ -1263,7 +1273,7 @@ NonLinearStatic::unpackMigratingData (TimeStep* atTime)
   int myrank = this->giveRank();
   DofManager* _dm;
   Dof* _dof;
-  
+ 
   // resize target arrays
   int neq = this->giveNumberOfEquations (EID_MomentumBalance);
   totalDisplacement.resize (neq); 

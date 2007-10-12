@@ -64,7 +64,7 @@ class ParmetisLoadBallancer : public LoadBallancer
   // array of dof man partitions
   std::vector <IntArray>  dofManPartitions;
   /// partition vector of the locally-stored elements
-  idxtype *part;
+  IntArray elementPart;
 #endif
 
  public:
