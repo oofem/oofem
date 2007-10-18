@@ -236,7 +236,7 @@ NonlocalMaterialWTP::migrate ()
     fprintf (stderr, "[%d] elements scheduled for mirroring at [%d]:",
 	     myrank,i);
     for (lit=toSendList[i].begin(); lit!=toSendList[i].end(); ++lit) {
-      fprintf (stderr, "%d ", *lit);
+      fprintf (stderr, "%d[%d] ", *lit, domain->giveElement(*lit)->giveGlobalNumber());
     }
     fprintf (stderr, "\n");
   }
@@ -249,7 +249,8 @@ NonlocalMaterialWTP::migrate ()
   com.packAllData (this, domain, &NonlocalMaterialWTP::packRemoteElements);
   com.initExchange (MIGRATE_REMOTE_ELEMENTS_TAG);
   com.unpackAllData (this, domain, &NonlocalMaterialWTP::unpackRemoteElements);
-  
+
+  domain->commitTransactions (domain->giveTransactionManager());
 #ifdef __VERBOSE_PARALLEL
    VERBOSEPARALLEL_PRINT("NonlocalMaterialWTP::migrate", "Finished migrating remote elements", myrank);
 #endif
@@ -344,7 +345,7 @@ int NonlocalMaterialWTP::packRemoteElements (Domain* d, ProcessCommunicator& pc)
   // these have to be send (except those that are shared)
   std::set <int> nodesToSend;
   for (it=toSendList[iproc].begin(); it!=toSendList[iproc].end(); ++it) {
-    ie = d->elementGlobal2Local(*it);
+    ie = *it; //ie = d->elementGlobal2Local(*it);
     elem = d->giveElement(ie);
     nnodes = elem->giveNumberOfDofManagers();
     for (i=1; i<=nnodes; i++) {
@@ -367,7 +368,7 @@ int NonlocalMaterialWTP::packRemoteElements (Domain* d, ProcessCommunicator& pc)
   pcbuff->packInt (NonlocalMaterialWTP_END_DATA);
 
   for (it=toSendList[iproc].begin(); it!=toSendList[iproc].end(); ++it) {
-    ie = d->elementGlobal2Local(*it);
+    ie=*it; //ie = d->elementGlobal2Local(*it);
     elem = d->giveElement(ie);
     // pack local element (node numbers shuld be global ones!!!)
     // pack type
