@@ -124,8 +124,10 @@ int  MasterDof :: askNewEquationNumber (TimeStep* tStep)
   model = (EngngModel*) (dofManager->giveDomain()->giveEngngModel());
 
 #ifdef __PARALLEL_MODE
-  if (dofManager->giveParallelMode () == DofManager_null)
-    return 1;
+  if (dofManager->giveParallelMode () == DofManager_null) {
+    equationNumber = 0;
+    return 0;
+  }
 #endif
   if (this->hasBc(tStep)) {
     equationNumber = -1*model -> giveNewPrescribedEquationNumber (dofManager->giveDomain()->giveNumber(), this->dofID);
