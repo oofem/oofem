@@ -304,7 +304,7 @@ LoadBallancer::unpackMigratingData (Domain* d, ProcessCommunicator& pc)
       pcbuff->unpackIntArray (_partitions);
       dofman->setPartitionList (_partitions);
       dofman->setParallelMode (DofManager_shared);
-#if __VERBOSE_PARALLEL
+#ifdef __VERBOSE_PARALLEL
       fprintf (stderr, "[%d] received Shared new dofman [%d]\n", myrank, _globnum);
 #endif
       // add transaction if new entry allocated; otherwise existing one has been modified via returned dofman
