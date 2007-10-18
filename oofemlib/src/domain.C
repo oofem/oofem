@@ -1153,25 +1153,29 @@ int Domain::commitTransactions (DomainTransactionManager *tm)
         dmanMap.erase (it->first);
         delete dman;
       }
-      if (it->second) dmanMap[it->first] = (DofManager*) it->second;
+      if (it->second) 
+        dmanMap[it->first] = (DofManager*) it->second;
     } // end loop over DofmanTransactions
   }
 
   if (!tm->elementTransactions.empty()) {
     this->initGlobalElementMap ();
+    int gen;
     Element* elem;
     
     for (it=tm->elementTransactions.begin(); it!=tm->elementTransactions.end(); ++it) {
-      bool _exist= false; if (elementMap.find(it->first) != elementMap.end()) _exist = true;
+      gen=it->first;
+      bool _exist= false; if (elementMap.find(gen) != elementMap.end()) _exist = true;
       
       if (_exist) {
-        int lnum = elementMap[it->first]->giveNumber();
+        int lnum = elementMap[gen]->giveNumber();
         elem = elementList->unlink (lnum);        
-        elementMap.erase (it->first);
+        elementMap.erase (gen);
         delete elem;
       }
       
-      if (it->second) elementMap[it->first] = (Element*) it->second;
+      if (it->second) 
+        elementMap[gen] = (Element*) it->second;
     }
   }
 
