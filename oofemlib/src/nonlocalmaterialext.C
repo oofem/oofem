@@ -220,7 +220,7 @@ NonlocalMaterialExtensionInterface :: rebuildNonlocalPointTable (GaussPoint* gp,
 
     // initialize iList
     for (_e=1; _e<=_size; _e++) {
-      ielem = this->giveDomain()->giveElement(_e);
+      ielem = this->giveDomain()->giveElement(contributingElems->at(_e));
       if (regionMap.at(ielem->giveRegionNumber()) == 0) {
         iRule = ielem->giveDefaultIntegrationRulePtr ();
         for (j=0 ; j < iRule->getNumberOfIntegrationPoints() ; j++) {
