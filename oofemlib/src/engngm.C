@@ -1944,7 +1944,7 @@ EngngModel::ballanceLoad (TimeStep* atTime)
     lb->migrateLoad (this->giveDomain(1));
     // renumber itself
     this->forceEquationNumbering();
-#if __VERBOSE_PARALLEL
+#ifdef __VERBOSE_PARALLEL
     // debug print
     int i, j, nnodes=giveDomain(1)->giveNumberOfDofManagers();
     int myrank = this->giveRank();
