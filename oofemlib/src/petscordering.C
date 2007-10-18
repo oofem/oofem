@@ -346,7 +346,7 @@ PetscNatural2GlobalOrdering::init (EngngModel* emodel, EquationID ut, int di, Eq
     fprintf (stderr, "%d ",locGlobMap.at(i));
   */
 
-#if  __VERBOSE_PARALLEL
+#ifdef  __VERBOSE_PARALLEL
   if (et == et_standard) {
     int _eq; char* ptr; char* locname = "local", *shname="shared", *unkname="unknown";
     for (i=1; i<=ndofman; i++) {
