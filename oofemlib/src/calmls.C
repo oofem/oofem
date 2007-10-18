@@ -71,7 +71,7 @@
 #define CALM_MAX_REL_ERROR_BOUND 1.e10
 
 CylindricalALM ::CylindricalALM (int i, Domain* d,EngngModel* m, EquationID ut) : 
- SparseNonLinearSystemNM (i,d,m,ut), calm_HPCIndirectDofMask(), calm_HPCWeights()
+ SparseNonLinearSystemNM (i,d,m,ut), calm_HPCWeights(), calm_HPCIndirectDofMask(), calm_HPCDmanDofSrcArray()
 {
   // 
   // constructor
@@ -901,8 +901,8 @@ CylindricalALM :: initializeFrom (InputRecord* ir)
  hpcMode = 0;
  IR_GIVE_OPTIONAL_FIELD (ir, hpcMode, IFT_CylindricalALM_hpcmode, "hpcmode"); // Macro
 
-  calm_HPCIndirectDofMask.resize(0);
- IR_GIVE_OPTIONAL_FIELD (ir, calm_HPCIndirectDofMask, IFT_CylindricalALM_hpc, "hpc"); // Macro
+  calm_HPCDmanDofSrcArray.resize(0);
+ IR_GIVE_OPTIONAL_FIELD (ir, calm_HPCDmanDofSrcArray, IFT_CylindricalALM_hpc, "hpc"); // Macro
 
  calm_HPCWeights.resize(0);
  IR_GIVE_OPTIONAL_FIELD (ir, calm_HPCWeights, IFT_CylindricalALM_hpcw, "hpcw"); // Macro
@@ -914,15 +914,15 @@ CylindricalALM :: initializeFrom (InputRecord* ir)
   // -> because dof eqs. are not known now, we derefer this to 
   // solveYourselfAt() subroutine. The need for converting is indicated by
   // calm_HPControll = hpc_init
-  if (calm_HPCIndirectDofMask.giveSize() != 0) {
+  if (calm_HPCDmanDofSrcArray.giveSize() != 0) {
   int i, nsize ;
   if (hpcMode==1) {calm_Controll = calm_hpc_on; }
   else if (hpcMode == 2) calm_Controll = calml_hpc; 
   else calm_Controll = calm_hpc_on; // default is to use hpc_on
   
-  if ((calm_HPCIndirectDofMask.giveSize() % 2) != 0)
+  if ((calm_HPCDmanDofSrcArray.giveSize() % 2) != 0)
     _error ("HPC Map size must be even number, it contains pairs <node, nodeDof>");
-  nsize = calm_HPCIndirectDofMask.giveSize() / 2;
+  nsize = calm_HPCDmanDofSrcArray.giveSize() / 2;
   if (calm_HPCWeights.giveSize() == 0) {
    // no weights -> set to 1.0 by default
    calm_HPCWeights.resize(nsize);
@@ -984,17 +984,17 @@ void  CylindricalALM  :: convertHPCMap ()
 #ifdef __PARALLEL_MODE
 #ifdef __PETSC_MODULE
  int j,jglobnum,count=0, ndofman = domain->giveNumberOfDofManagers();
- size = calm_HPCIndirectDofMask.giveSize() /2 ;
+ size = calm_HPCDmanDofSrcArray.giveSize() /2 ;
  indirectMap.resize (size);
  for (j=1; j<= ndofman; j++) {
    jglobnum = domain->giveNode(j)->giveGlobalNumber();
    for (i=1; i<=size; i++) {
-     inode = calm_HPCIndirectDofMask.at(2*i-1);
-     idof  = calm_HPCIndirectDofMask.at(2*i);
+     inode = calm_HPCDmanDofSrcArray.at(2*i-1);
+     idof  = calm_HPCDmanDofSrcArray.at(2*i);
      if (inode == jglobnum) {
 // HUHU hard wired domain no 1
        if (engngModel->givePetscContext(1,ut)->giveN2Gmap()->isLocal(domain->giveNode(j))) 
-	 indirectMap.at(++count) = domain->giveNode(j)->giveDof(idof)->giveEquationNumber();
+         indirectMap.at(++count) = domain->giveNode(j)->giveDof(idof)->giveEquationNumber();
        continue;
      }
    }
@@ -1004,11 +1004,11 @@ void  CylindricalALM  :: convertHPCMap ()
 
 #endif
 #else
- size = calm_HPCIndirectDofMask.giveSize() /2 ;
+ size = calm_HPCDmanDofSrcArray.giveSize() /2 ;
  indirectMap.resize (size);
  for (i = 1; i<=size; i++) {
-  inode = calm_HPCIndirectDofMask.at(2*i-1);
-  idof  = calm_HPCIndirectDofMask.at(2*i);
+  inode = calm_HPCDmanDofSrcArray.at(2*i-1);
+  idof  = calm_HPCDmanDofSrcArray.at(2*i);
   indirectMap.at(i) = domain->giveNode(inode)->giveDof(idof)->giveEquationNumber();
  }
  calm_HPCIndirectDofMask = indirectMap;

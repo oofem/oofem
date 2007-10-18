@@ -148,8 +148,11 @@ protected:
   // variables for HyperPlaneControll
   int            calm_hpc_init;
   calm_ControllType  calm_Controll;
-  IntArray       calm_HPCIndirectDofMask;
   FloatArray    calm_HPCWeights;
+  // array containing equation numbers of dofs under indirect controll 
+  IntArray       calm_HPCIndirectDofMask;
+  // input array containing dofmanagers and corresponding dof numbers under indirect controll
+  IntArray       calm_HPCDmanDofSrcArray;
   
   // linear system solver
   SparseLinearSystemNM* linSolver;
@@ -216,7 +219,7 @@ protected:
   /// sets associated Domain 
   virtual void         setDomain (Domain* d) {this->domain = d; if (linSolver) linSolver->setDomain(d);}
   /// This method clears receiver cached data dependent on topology, when it changes.
-  virtual void reinitialize () {if (linSolver) linSolver->reinitialize();}
+  virtual void reinitialize () {calm_hpc_init = 1; if (linSolver) linSolver->reinitialize();}
  protected:
   void convertHPCMap ();
   SparseLinearSystemNM* giveLinearSolver() ;
