@@ -388,6 +388,7 @@ int NonlocalMaterialWTP::unpackRemoteElements (Domain* d, ProcessCommunicator& p
   int _type;
   classType _etype;
   DofManager *dofman;
+  IntArray _partitions;
   
   if (iproc == myrank) return 1; // skip local partition 
   // query process communicator to use
@@ -419,6 +420,7 @@ int NonlocalMaterialWTP::unpackRemoteElements (Domain* d, ProcessCommunicator& p
 
   // unpack element data
   Element* elem;
+  _partitions.resize(1); _partitions.at(1) = iproc;
   do {
     pcbuff->unpackInt (_type);
     if (_type == NonlocalMaterialWTP_END_DATA) break;
@@ -426,6 +428,7 @@ int NonlocalMaterialWTP::unpackRemoteElements (Domain* d, ProcessCommunicator& p
     elem = ::CreateUsrDefElementOfType (_etype, 0, d);
     elem->restoreContext (&pcDataStream, CM_Definition | CM_State);
     elem->setParallelMode (Element_remote);
+    elem->setPartitionList (_partitions);
     d->giveTransactionManager()->addTransaction (DomainTransactionManager::DTT_ADD, 
 						 DomainTransactionManager::DCT_Element,
 						 elem->giveGlobalNumber(),elem);
