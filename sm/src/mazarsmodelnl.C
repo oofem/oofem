@@ -276,8 +276,8 @@ MazarsNLMaterial::packUnknowns (CommunicationBuffer& buff, TimeStep* stepN, Gaus
 {
  MazarsNLMaterialStatus *status = (MazarsNLMaterialStatus*) this -> giveStatus (ip);
 
- this->buildNonlocalPointTable(ip);
- this->updateDomainBeforeNonlocAverage(stepN);
+ //this->buildNonlocalPointTable(ip);
+ //this->updateDomainBeforeNonlocAverage(stepN);
 
  return buff.packDouble (status->giveLocalEquivalentStrainForAverage());
 }

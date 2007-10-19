@@ -644,8 +644,8 @@ IDNLMaterial::packUnknowns (CommunicationBuffer& buff, TimeStep* stepN, GaussPoi
 {
  IDNLMaterialStatus *status = (IDNLMaterialStatus*) this -> giveStatus (ip);
 
- this->buildNonlocalPointTable(ip);
- this->updateDomainBeforeNonlocAverage(stepN);
+ //this->buildNonlocalPointTable(ip);
+ //this->updateDomainBeforeNonlocAverage(stepN);
 
  return buff.packDouble (status->giveLocalEquivalentStrainForAverage());
 }
