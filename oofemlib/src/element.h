@@ -716,10 +716,14 @@ protected:
   nature of packed data is material model dependent.  */
  int estimatePackSize (CommunicationBuffer& buff);
   /**
-  Returns partition list of receiver.
-  @return partition array.
+     Returns partition list of receiver.
+     @return partition array.
   */
   const IntArray* givePartitionList () const  {return &partitions;}
+  /**
+     Sets partition list of receiver
+   */
+  void setPartitionList (IntArray &pl) {partitions=pl;}
   /**
      Returns the weight representing relative computational cost of receiver
   */
