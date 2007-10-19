@@ -48,6 +48,9 @@
 #include "spatiallocalizer.h"
 #include "domain.h"
 #include "nonlocalbarrier.h"
+#ifdef __PARALLEL_MODE
+#include "parallel.h"
+#endif
 #ifndef __MAKEDEPEND
 #include <math.h>
 #endif
@@ -244,6 +247,16 @@ NonlocalMaterialExtensionInterface :: rebuildNonlocalPointTable (GaussPoint* gp,
       }
     } // loop over elements
     statusExt->setIntegrationScale (integrationVolume); // remember scaling factor
+#ifdef __PARALLEL_MODE  
+#ifdef __VERBOSE_PARALLEL
+    dynaList<localIntegrationRecord>::iterator pos;
+    fprintf (stderr, "%d(%d):",gp->giveElement()->giveGlobalNumber(), gp->giveNumber());
+    for (pos = iList->begin(); pos!= iList->end(); ++pos) {
+      fprintf (stderr, "%d,%d(%e)",(*pos).nearGp->giveElement()->giveGlobalNumber(), (*pos).nearGp->giveNumber(), (*pos).weight);
+    }
+    fprintf (stderr, "\n");
+#endif   
+#endif
   }
 }
 
