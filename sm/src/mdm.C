@@ -1244,6 +1244,40 @@ MDM::giveInterface (InterfaceType type)
 }
 
 
+#ifdef __PARALLEL_MODE
+int
+MDM::packUnknowns (CommunicationBuffer& buff, TimeStep* stepN, GaussPoint* ip)
+{
+ MDMStatus *status = (MDMStatus*) this -> giveStatus (ip);
+
+ return status->giveLocalDamageTensorForAveragePtr()->packToCommBuffer (buff);
+}
+
+int 
+MDM::unpackAndUpdateUnknowns (CommunicationBuffer& buff, TimeStep* stepN, GaussPoint* ip)
+{
+ int result ;
+ MDMStatus *status = (MDMStatus*) this -> giveStatus (ip);
+ FloatMatrix _LocalDamageTensorForAverage;
+
+ result = _LocalDamageTensorForAverage.unpackFromCommBuffer (buff);
+ status->setLocalDamageTensorForAverage (_LocalDamageTensorForAverage);
+ return result;
+}
+
+int 
+MDM::estimatePackSize (CommunicationBuffer& buff, GaussPoint* ip)
+{
+  // 
+  // Note: status localStrainVectorForAverage memeber must be properly sized!
+  //
+  if (nonlocal) {
+    FloatMatrix _help (nsd,nsd);
+    return _help.givePackSize (buff);
+  } else return 0;
+}
+
+#endif
 
 
 

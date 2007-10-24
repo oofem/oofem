@@ -117,6 +117,7 @@ class MDMStatus : public StructuralMaterialStatus, public StructuralNonlocalMate
   void   setTempDamageTensor (FloatMatrix& src) {DamageTensorTemp = src;}
   void   setLocalDamageTensorForAverage (FloatMatrix& src) {localDamageTensor = src;}
   void   giveLocalDamageTensorForAverage (FloatMatrix& answer) {answer = localDamageTensor;}
+  const FloatMatrix* giveLocalDamageTensorForAveragePtr () {return &localDamageTensor;}
 
 
   // definition
@@ -393,6 +394,32 @@ class MDM : public MicroplaneMaterial, public StructuralNonlocalMaterialExtensio
   */
   virtual int MMI_finish (TimeStep* tStep) ;
   //@}
+
+#ifdef __PARALLEL_MODE
+  /**
+  Updates domain before nonloc average (using updateDomainBeforeNonlocAverage service)
+  to ensure, that the tempDamageTensor status variable is correctly updated and
+  pack this into given buffer to be send to remote partition and receiver's remote conterpart.
+  Packs only when in nonlocal mode.
+  @see Material::packUnknowns for description.
+  @param buff communication buffer
+  @param stepN solution step
+  @param ip integration point
+  */
+  int packUnknowns (CommunicationBuffer& buff, TimeStep* stepN, GaussPoint* ip);
+  /**
+  Unpack tempDamageTensor value from given buffer.  Unpacks only when in nonlocal mode.
+  @see Material::unpackAndUpdateUnknowns service.
+  @param buff communication buffer
+  @param stepN solution step.
+  @param ip integration point
+  */
+  int unpackAndUpdateUnknowns (CommunicationBuffer& buff, TimeStep* stepN, GaussPoint* ip);
+ /**
+  Estimates the necessary pack size to hold all packed data of receiver.
+  */
+ int estimatePackSize (CommunicationBuffer& buff, GaussPoint* ip);
+#endif
 
   virtual MaterialStatus* CreateStatus (GaussPoint* gp) const;
 
