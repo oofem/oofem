@@ -44,6 +44,9 @@
 #ifndef __MAKEDEPEND
 #include <set>
 #endif
+
+#define NonlocalMaterialWTP_DEBUG_PRINT 0
+
 /*
   Returns array storing nonlocal dependency 
   (in terms of global element numbers) for given element
@@ -159,14 +162,14 @@ NonlocalMaterialWTP::migrate ()
       IntArray &iedep = nonlocElementDependencyMap[_globnum];
       _size=iedep.giveSize();
       for (_i=1; _i<=_size; _i++) domainElementDepSet.insert(iedep.at(_i));
-#if 1
+#if NonlocalMaterialWTP_DEBUG_PRINT
   fprintf (stderr, "[%d] element %d dependency:", myrank, _globnum);
   for (_i=1; _i<=_size; _i++) fprintf (stderr, "%d ", iedep.at(_i));
   fprintf (stderr, "\n");
 #endif
     }
   }
-#if 1
+#if NonlocalMaterialWTP_DEBUG_PRINT
   fprintf (stderr, "[%d] nonlocal domain dependency:", myrank);
   for (sit=domainElementDepSet.begin(); 
        sit != domainElementDepSet.end(); ++sit) {
@@ -181,7 +184,7 @@ NonlocalMaterialWTP::migrate ()
     if (elem->giveParallelMode()==Element_local)
       domainElementDepSet.erase (elem->giveGlobalNumber());
   }
-#if 1
+#if NonlocalMaterialWTP_DEBUG_PRINT
   fprintf (stderr, "[%d] remote elem wish list:", myrank);
   for (sit=domainElementDepSet.begin(); 
        sit != domainElementDepSet.end(); ++sit) {
@@ -229,7 +232,7 @@ NonlocalMaterialWTP::migrate ()
   } // end loop over partitions broadcast
 
 
-#if 1
+#if NonlocalMaterialWTP_DEBUG_PRINT
   std::list<int>::const_iterator lit;
   for (i=0; i<nproc; i++) { // loop over partitions
     // print some info

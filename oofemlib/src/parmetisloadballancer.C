@@ -50,7 +50,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #endif
 
 
-#define ParmetisLoadBallancer_DEBUG_PRINT
+//#define ParmetisLoadBallancer_DEBUG_PRINT
   
   
 ParmetisLoadBallancer::ParmetisLoadBallancer(Domain* d) : LoadBallancer (d)

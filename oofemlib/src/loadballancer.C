@@ -49,6 +49,8 @@
 #include "nonlocalmatwtp.h"
 #endif
 
+#define LoadBallancer_debug_print 0
+
 LoadBallancer::LoadBallancer (Domain* d)  : wtpList (0)
 {
   domain = d;
@@ -98,6 +100,7 @@ LoadBallancer::migrateLoad (Domain* d)
   int nproc= d->giveEngngModel()->giveNumberOfProcesses();
   int myrank=d->giveEngngModel()->giveRank();
 
+  OOFEM_LOG_RELEVANT ("[%d] LoadBallancer: migrateLoad: migrating load\n", myrank);
 
   // initialize work transfer plugins before any transfer
   for (i=1; i<=wtpList.giveSize(); i++) {
@@ -124,7 +127,7 @@ LoadBallancer::migrateLoad (Domain* d)
 
   d->commitTransactions (d->giveTransactionManager());
 
-#if 1
+#if LoadBallancer_debug_print
   // debug print
   int j, nnodes=d->giveNumberOfDofManagers(), nelems=d->giveNumberOfElements();
   fprintf (stderr, "\n[%d] Nodal Table\n", myrank);
@@ -208,7 +211,7 @@ LoadBallancer::packMigratingData (Domain* d, ProcessCommunicator& pc)
   // pack end-of-dofman-section record
   pcbuff->packInt (LOADBALLANCER_END_DATA);
   
-  int ielem, nelem = d->giveNumberOfElements();
+  int ielem, nelem = d->giveNumberOfElements(), nsend = 0;
   
   Element* elem;
 
@@ -221,11 +224,14 @@ LoadBallancer::packMigratingData (Domain* d, ProcessCommunicator& pc)
       pcbuff->packInt (elem->giveClassID());
       // nodal numbers shuld be packed as global !!
       elem->saveContext (&pcDataStream, CM_Definition | CM_DefinitionGlobal | CM_State);
+      nsend++;
     }
   } // end loop over elements
   // pack end-of-element-record
   pcbuff->packInt (LOADBALLANCER_END_DATA);
   
+  OOFEM_LOG_RELEVANT ("[%d] LoadBallancer:: sending %d migrating elements to %d\n",myrank,nsend,iproc);
+
   return 1;
 }
 
@@ -322,6 +328,7 @@ LoadBallancer::unpackMigratingData (Domain* d, ProcessCommunicator& pc)
   
   // unpack element data
   Element* elem;
+  int nrecv = 0;
   do {
     pcbuff->unpackInt (_type);
     if (_type == LOADBALLANCER_END_DATA) break;
@@ -329,8 +336,11 @@ LoadBallancer::unpackMigratingData (Domain* d, ProcessCommunicator& pc)
     elem = CreateUsrDefElementOfType (_etype, 0, d);
     elem->restoreContext (&pcDataStream, CM_Definition | CM_State);
     dtm->addTransaction (DomainTransactionManager::DTT_ADD, DomainTransactionManager::DCT_Element, elem->giveGlobalNumber(), elem);
+    nrecv++;
     //recvElemList.push_back(elem);    
   } while (1);
+
+  OOFEM_LOG_RELEVANT ("[%d] LoadBallancer:: receiving %d migrating elements from %d\n",myrank,nrecv,iproc);
 
   return 1;
 }
@@ -432,9 +442,19 @@ WallClockLoadBallancerMonitor::decide()
 
   // compute wall solution time of my node
   long int mySolutionTime = emodel->giveTimer()->getWtime(EngngModelTimer::EMTT_SolutionStepTimer);
-  
+
   // collect wall clock computational time
   MPI_Allgather (&mySolutionTime, 1, MPI_LONG, node_solutiontimes, 1, MPI_LONG, MPI_COMM_WORLD);
+
+  OOFEM_LOG_RELEVANT ("LoadBallancer:: individual processor times [sec]: (");
+  if (myrank==0) {
+    for (i=0; i< nproc; i++) {
+      OOFEM_LOG_RELEVANT (" %ld",node_solutiontimes[i]);
+    }
+    OOFEM_LOG_RELEVANT (")\n");
+  }
+  
+
   // detect imbalance
   min_st = max_st = node_solutiontimes[0];
   for (i=0; i< nproc; i++) {

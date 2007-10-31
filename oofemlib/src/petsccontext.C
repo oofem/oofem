@@ -36,6 +36,8 @@
 #include "petsccontext.h"
 #include "engngm.h"
 
+//#define PetscContext_debug_print
+
 PetscContext :: PetscContext (EngngModel* e, EquationID ut)
 #ifdef __PARALLEL_MODE
   : n2g(), n2l()
@@ -62,7 +64,9 @@ PetscContext :: init (int di)
     n2g_prescribed.init(emodel, ut, di,ApplicationOrdering::et_prescribed);
     n2l_prescribed.init(emodel, ut, di,ApplicationOrdering::et_prescribed);
 
+#ifdef  PetscContext_debug_print
     fprintf (stderr, "[%d] Petsccontext::init leq:%d, neq:%d, geq:%d\n",emodel->giveRank(), giveNumberOfLocalEqs(),giveNumberOfNaturalEqs(), giveNumberOfGlobalEqs());
+#endif
 
  }
 #endif
