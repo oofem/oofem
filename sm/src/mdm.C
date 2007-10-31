@@ -1250,6 +1250,9 @@ MDM::packUnknowns (CommunicationBuffer& buff, TimeStep* stepN, GaussPoint* ip)
 {
  MDMStatus *status = (MDMStatus*) this -> giveStatus (ip);
 
+ this->buildNonlocalPointTable(ip);
+ this->updateDomainBeforeNonlocAverage(stepN);
+
  return status->giveLocalDamageTensorForAveragePtr()->packToCommBuffer (buff);
 }
 

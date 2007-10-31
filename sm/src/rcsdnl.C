@@ -583,8 +583,8 @@ RCSDNLMaterial::packUnknowns (CommunicationBuffer& buff, TimeStep* stepN, GaussP
 {
  RCSDNLMaterialStatus *status = (RCSDNLMaterialStatus*) this -> giveStatus (ip);
 
- //this->buildNonlocalPointTable(ip);
- //this->updateDomainBeforeNonlocAverage(stepN);
+ this->buildNonlocalPointTable(ip);
+ this->updateDomainBeforeNonlocAverage(stepN);
 
  return status->giveLocalStrainVectorForAverage().packToCommBuffer (buff);
 }

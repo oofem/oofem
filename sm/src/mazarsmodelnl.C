@@ -44,6 +44,7 @@
 #include "mathfem.h"
 #include "isolinearelasticmaterial.h"
 #include "nonlocalmaterialext.h"
+#include "datastream.h"
 
 #ifdef __PARALLEL_MODE
 #include "combuff.h"
@@ -247,9 +248,12 @@ MazarsNLMaterialStatus :: saveContext (DataStream* stream, ContextMode mode, voi
 // no temp variables stored
 //
 {
+ contextIOResultType iores;
 
  // save parent class status
- return MazarsMaterialStatus :: saveContext (stream, mode, obj);
+ if ((iores = MazarsMaterialStatus :: saveContext (stream, mode, obj)) != CIO_OK) THROW_CIOERR(iores);
+ //if (!stream->write(&localEquivalentStrainForAverage,1)) THROW_CIOERR(CIO_IOERR);
+ return CIO_OK;
 }
 
 contextIOResultType
@@ -258,8 +262,13 @@ MazarsNLMaterialStatus :: restoreContext(DataStream* stream, ContextMode mode, v
 // restores full information stored in stream to this Status
 //
 {
+ contextIOResultType iores;
  // read parent class status
- return  MazarsMaterialStatus :: restoreContext (stream, mode, obj);
+ if ((iores = MazarsMaterialStatus :: restoreContext (stream,mode,obj)) != CIO_OK) THROW_CIOERR(iores);
+ // read raw data 
+ //if (!stream->read (&localEquivalentStrainForAverage,1)) THROW_CIOERR(CIO_IOERR);
+
+ return CIO_OK;
 }
 
 Interface* 
@@ -276,8 +285,8 @@ MazarsNLMaterial::packUnknowns (CommunicationBuffer& buff, TimeStep* stepN, Gaus
 {
  MazarsNLMaterialStatus *status = (MazarsNLMaterialStatus*) this -> giveStatus (ip);
 
- //this->buildNonlocalPointTable(ip);
- //this->updateDomainBeforeNonlocAverage(stepN);
+ this->buildNonlocalPointTable(ip);
+ this->updateDomainBeforeNonlocAverage(stepN);
 
  return buff.packDouble (status->giveLocalEquivalentStrainForAverage());
 }

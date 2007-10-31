@@ -48,6 +48,8 @@
 #include "dynalist.h"
 #include "error.h"
 #include "nonlocalmaterialext.h"
+#include "datastream.h"
+
 #ifndef __MAKEDEPEND
 #include <math.h>
 #endif
@@ -614,9 +616,11 @@ IDNLMaterialStatus :: saveContext (DataStream* stream, ContextMode mode, void *o
 // no temp variables stored
 //
 {
-
+ contextIOResultType iores;
  // save parent class status
- return IsotropicDamageMaterial1Status :: saveContext (stream, mode, obj);
+ if ((iores = IsotropicDamageMaterial1Status :: saveContext (stream, mode, obj)) != CIO_OK) THROW_CIOERR(iores);
+ //if (!stream->write(&localEquivalentStrainForAverage,1)) THROW_CIOERR(CIO_IOERR);
+ return CIO_OK;
 }
 
 contextIOResultType
@@ -625,8 +629,13 @@ IDNLMaterialStatus :: restoreContext(DataStream* stream, ContextMode mode, void 
 // restores full information stored in stream to this Status
 //
 {
+ contextIOResultType iores;
  // read parent class status
- return  IsotropicDamageMaterial1Status :: restoreContext (stream,mode,obj);
+ if ((iores = IsotropicDamageMaterial1Status :: restoreContext (stream,mode,obj)) != CIO_OK) THROW_CIOERR(iores);
+ // read raw data 
+ //if (!stream->read (&localEquivalentStrainForAverage,1)) THROW_CIOERR(CIO_IOERR);
+
+ return CIO_OK;
 }
 
 Interface* 
@@ -644,8 +653,8 @@ IDNLMaterial::packUnknowns (CommunicationBuffer& buff, TimeStep* stepN, GaussPoi
 {
  IDNLMaterialStatus *status = (IDNLMaterialStatus*) this -> giveStatus (ip);
 
- //this->buildNonlocalPointTable(ip);
- //this->updateDomainBeforeNonlocAverage(stepN);
+ this->buildNonlocalPointTable(ip);
+ this->updateDomainBeforeNonlocAverage(stepN);
 
  return buff.packDouble (status->giveLocalEquivalentStrainForAverage());
 }
