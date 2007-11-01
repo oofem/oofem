@@ -319,7 +319,7 @@ LoadBallancer::unpackMigratingData (Domain* d, ProcessCommunicator& pc)
       break;
        
     default:
-      OOFEM_ERROR ("LoadBallancer::unpackMigratingData: unexpected dof manager type");
+      OOFEM_ERROR2 ("LoadBallancer::unpackMigratingData: unexpected dof manager type (%d)", _type);
     }
     // get next type record
     pcbuff->unpackInt (_type);
@@ -433,23 +433,23 @@ WallClockLoadBallancerMonitor::decide()
 {
   int i, nproc=emodel->giveNumberOfProcesses();
   int myrank=emodel->giveRank();
-  long int *node_solutiontimes = new long int [nproc];
-  long min_st, max_st;
+  double *node_solutiontimes = new double [nproc];
+  double min_st, max_st;
   double relWallClockImbalance;
-  long int absWallClockImbalance;
+  double absWallClockImbalance;
 
   if (node_solutiontimes == NULL) OOFEM_ERROR ("LoadBallancer::LoadEvaluation failed to allocate node_solutiontimes array");
 
   // compute wall solution time of my node
-  long int mySolutionTime = emodel->giveTimer()->getWtime(EngngModelTimer::EMTT_SolutionStepTimer);
+  double mySolutionTime = emodel->giveTimer()->getWtime(EngngModelTimer::EMTT_NetComputationalStepTimer);
 
   // collect wall clock computational time
-  MPI_Allgather (&mySolutionTime, 1, MPI_LONG, node_solutiontimes, 1, MPI_LONG, MPI_COMM_WORLD);
+  MPI_Allgather (&mySolutionTime, 1, MPI_DOUBLE, node_solutiontimes, 1, MPI_DOUBLE, MPI_COMM_WORLD);
 
   OOFEM_LOG_RELEVANT ("LoadBallancer:: individual processor times [sec]: (");
   if (myrank==0) {
     for (i=0; i< nproc; i++) {
-      OOFEM_LOG_RELEVANT (" %ld",node_solutiontimes[i]);
+      OOFEM_LOG_RELEVANT (" %.3f",node_solutiontimes[i]);
     }
     OOFEM_LOG_RELEVANT (")\n");
   }
@@ -472,10 +472,10 @@ WallClockLoadBallancerMonitor::decide()
 
   // decide
   if ((absWallClockImbalance > 10) || (relWallClockImbalance > 0.1)) {
-    OOFEM_LOG_RELEVANT ("[%d] LoadBallancer: wall clock imbalance rel=%.2f\%,abs=%lds, recovering load\n", myrank, relWallClockImbalance, absWallClockImbalance);
+    OOFEM_LOG_RELEVANT ("[%d] LoadBallancer: wall clock imbalance rel=%.2f\%,abs=%.2fs, recovering load\n", myrank, relWallClockImbalance, absWallClockImbalance);
     return LBD_RECOVER;
   } else {
-    OOFEM_LOG_RELEVANT ("[%d] LoadBallancer: wall clock imbalance rel=%.2f\%,abs=%lds, continuing\n", myrank, relWallClockImbalance, absWallClockImbalance);
+    OOFEM_LOG_RELEVANT ("[%d] LoadBallancer: wall clock imbalance rel=%.2f\%,abs=%.2fs, continuing\n", myrank, relWallClockImbalance, absWallClockImbalance);
     return LBD_CONTINUE;
   }
 }
