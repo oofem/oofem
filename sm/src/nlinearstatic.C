@@ -354,11 +354,13 @@ NonLinearStatic :: giveInternalForces (FloatArray &answer, const FloatArray& Del
  // stepN-> incrementStateCounter();              // update solution state counter
 
 #ifdef __PARALLEL_MODE
-  if (isParallel()) exchangeRemoteElementData ();
+ if (isParallel()) exchangeRemoteElementData ();
 #endif
 
   // this -> deltaR = deltaR;
   nelems = domain-> giveNumberOfElements();
+  this->timer.resumeTimer(EngngModelTimer::EMTT_NetComputationalStepTimer);
+
   for (int i = 1; i<= nelems; i++) {
     element = (NLStructuralElement*) domain->giveElement (i);
     // if (!element -> hasNLCapability ()) {
@@ -389,6 +391,7 @@ NonLinearStatic :: giveInternalForces (FloatArray &answer, const FloatArray& Del
   // end debug loop
   */
   }    
+  this->timer.pauseTimer(EngngModelTimer::EMTT_NetComputationalStepTimer);
 
 #ifdef __PARALLEL_MODE
 /*
@@ -403,6 +406,7 @@ NonLinearStatic :: giveInternalForces (FloatArray &answer, const FloatArray& Del
 
 #ifdef __PARALLEL_MODE
   if (isParallel()) {
+
 #ifdef __VERBOSE_PARALLEL
     VERBOSEPARALLEL_PRINT("PNlDEIDynamic :: giveInternalForces","Packing internal forces",this->giveRank());
 #endif
