@@ -87,7 +87,9 @@ private:
   {domain = d;dofManagersConnectivity= NULL; 
    nodalConnectivityFlag = 0;}
   /// Destructor
- ~ConnectivityTable () ;
+  ~ConnectivityTable () ;
+  /// reset receiver to an initial state (will force table update, when needed next time)
+  void reset();
 
 #ifdef __OOFEG
   /**
