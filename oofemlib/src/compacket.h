@@ -47,7 +47,7 @@ class IntArray;
 class FloatArray;
 class FloatMatrix;
 
-#define __CommunicationPacket_DEFAULT_SIZE 1024
+#define __CommunicationPacket_DEFAULT_SIZE 10240
 
 /**
  Class CommunicationPacket represent a data-packet, that is used to implement dynamic 
