@@ -43,6 +43,18 @@
 #include "clock.h"
 #include "compiler.h"
 #ifndef _MSC_VER
+#ifndef __MAKEDEPEND
+#if TIME_WITH_SYS_TIME
+#include <sys/time.h>
+#include <time.h>
+#else
+# if HAVE_SYS_TIME_H
+#  include <sys/time.h>
+# else
+#  include <time.h>
+# endif
+#endif
+#endif
 
 void getUtime (oofem_timeval& answer)
 {
@@ -77,6 +89,11 @@ void getRelativeUtime (oofem_timeval& answer, oofem_timeval& from)
   ::getRelativeUtime (answer, from, to);
 }
 
+void getTime (oofem_timeval& answer)
+{
+  gettimeofday(&answer, NULL); 
+}
+
 
 time_t getTime ()
 {
@@ -109,6 +126,13 @@ void getRelativeUtime (oofem_timeval& answer, oofem_timeval& from)
   ::getRelativeUtime (answer,from,utime);
 }
 
+void getTime (oofem_timeval& answer)
+{
+  time_t t;
+  t = time(NULL);
+  answer.tv_sec = (unsigned long) t;
+  answer.tv_usec = 0;
+}
 
 time_t getTime ()
 {
@@ -121,7 +145,16 @@ time_t getTime ()
 
 void convertTS2HMS (int &nhrs, int &nmin, int &nsec, long int tsec)
 {
-  nsec = tsec;
-  if (nsec > 60) { nmin = nsec / 60; nsec %= 60;}
+  long int _nsec = tsec;
+  if (nsec > 60) { nmin = _nsec / 60; _nsec %= 60;}
   if (nmin > 60) { nhrs = nmin / 60; nmin %= 60;}
+  nsec = _nsec;
+}
+
+void convertTS2HMS (int &nhrs, int &nmin, int &nsec, double tsec)
+{
+  long int _nsec = (long int) tsec;
+  if (nsec > 60) { nmin = _nsec / 60; _nsec %= 60;}
+  if (nmin > 60) { nhrs = nmin / 60; nmin %= 60;}
+  nsec = _nsec;
 }

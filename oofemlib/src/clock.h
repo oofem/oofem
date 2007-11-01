@@ -90,12 +90,16 @@ struct timeval
 typedef timeval oofem_timeval;
 
 /**
- Returns current time in seconds as returned by time call.
- @return current time in time_t structure.
+ Returns current time in seconds.
+ @return current time in oofem_timeval structure.
  */
 
-time_t             getTime ();
+void getTime (oofem_timeval& answer);
 
+/**
+   Returns current time in seconds in time_t.
+ */
+time_t getTime ();
 /**
  Function returns user time stored in oofem_timeval structure.
 */
@@ -113,6 +117,7 @@ void getRelativeUtime (oofem_timeval& answer, oofem_timeval& from, oofem_timeval
    Function converts total seconds into hours, minutes and remaining seconds
 */
 void convertTS2HMS (int &nhrs, int &nmin, int &nsec, long int tsec);
+void convertTS2HMS (int &nhrs, int &nmin, int &nsec, double   tsec);
 
 #endif
 

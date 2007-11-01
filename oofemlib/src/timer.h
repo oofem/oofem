@@ -40,24 +40,42 @@
 */
 class Timer {
   // wall clock time structures
-  time_t start_wtime, end_wtime;
+  oofem_timeval start_wtime, end_wtime;
   // user time struct
   oofem_timeval start_utime, end_utime; 
+  // accumulated wtime and utime (in seconds) from start
+  oofem_timeval elapsedWTime, elapsedUTime;
 
  public:
-  void startTimer () {start_wtime = ::getTime(); ::getUtime(start_utime);}
-  void stopTimer  () {end_wtime = ::getTime(); ::getUtime(end_utime);}
+  void startTimer () {this->initTimer(); ::getTime(start_wtime); ::getUtime(start_utime);}
+  void stopTimer  () {this->pauseTimer();}
+  void pauseTimer () {::getTime(end_wtime);   ::getUtime(end_utime); this->updateElapsedTime();}
+  void resumeTimer() {::getTime(start_wtime); ::getUtime(start_utime);}
+  void initTimer  () {elapsedWTime.tv_sec = elapsedWTime.tv_usec = elapsedUTime.tv_sec = elapsedUTime.tv_usec = 0; }
 
   /// Returns total user time elapsed in seconds
-  long int getUtime  () const {return (long int) (end_utime.tv_sec-start_utime.tv_sec);}
+  double getUtime  () const {return (double)elapsedUTime.tv_sec+(double)elapsedUTime.tv_usec/OOFEM_USEC_LIM;}
   /// Returns total elapsed wall clock time in seconds
-  long int getWtime ()  const {return end_wtime-start_wtime;}
+  double getWtime ()  const {return (double)elapsedWTime.tv_sec+(double)elapsedWTime.tv_usec/OOFEM_USEC_LIM;}
 
   // converts total seconds into hours, mins, and seconds
   void convert2HMS (int &nhrs, int &nmin, int &nsec, long int tsec) const {::convertTS2HMS (nhrs, nmin, nsec, tsec);}
+  // converts total seconds into hours, mins, and seconds
+  void convert2HMS (int &nhrs, int &nmin, int &nsec, double tsec) const {::convertTS2HMS (nhrs, nmin, nsec, tsec);}
+
+
   
   /// short prints receiver state into a string
-  void sprintYourselfShort (char* buff) const {sprintf (buff, "ut: %lds, wt: %lds", getUtime(), getWtime());}
+  void sprintYourselfShort (char* buff) const {sprintf (buff, "ut: %f.3s, wt: %f.3s", getUtime(), getWtime());}
+  void updateElapsedTime () { 
+    oofem_timeval etime;
+    timersub(&end_wtime, &start_wtime, &etime); 
+    timeradd(&etime, &elapsedWTime, &elapsedWTime);
+
+    timersub(&end_utime, &start_utime, &etime);
+    timeradd(&etime, &elapsedUTime, &elapsedUTime);
+
+    start_utime=end_utime; start_wtime=end_wtime;}
 };
   
   
@@ -70,7 +88,12 @@ class Timer {
 class EngngModelTimer
 {
  public:
-  enum EngngModelTimerType {EMTT_AnalysisTimer, EMTT_SolutionStepTimer, EMTT_LoadBallancingTimer, EMTT_DataTransferTimer, EMTT_LastTimer};
+  /**
+     Enumeration to distinguish different type of timers.
+
+     EMTT_NetComputationalStepTimer timer (and particularly its wall clock time) should measure only computation itself, no communication, therefore it should be measure of workload (in terms of wall clock time) on particular processors. It also typically not include time needed to solve the system of equations, since this has to be done in parallel, so solution takes the same time on all processors and include unwanted synchronization. 
+   */
+  enum EngngModelTimerType {EMTT_AnalysisTimer, EMTT_SolutionStepTimer, EMTT_NetComputationalStepTimer, EMTT_LoadBallancingTimer, EMTT_DataTransferTimer, EMTT_LastTimer};
  protected:
 
   /// Array of Timer classes.
@@ -87,18 +110,22 @@ class EngngModelTimer
   //@{
   void startTimer (EngngModelTimerType t) {timers[t].startTimer();}
   void stopTimer  (EngngModelTimerType t) {timers[t].stopTimer();}
+  void pauseTimer (EngngModelTimerType t) {timers[t].pauseTimer();}
+  void resumeTimer(EngngModelTimerType t) {timers[t].resumeTimer();}
+  void initTimer  (EngngModelTimerType t) {timers[t].initTimer();}
   //@}
   
   /** Reporting routines */
   //@{
   /// Returns total user time elapsed 
-  long int getUtime  (EngngModelTimerType t) const {return timers[t].getUtime();}
+  double getUtime  (EngngModelTimerType t) const {return timers[t].getUtime();}
   /// Returns elapsed wall clock time
-  long int getWtime (EngngModelTimerType t) const {return timers[t].getWtime();}
+  double getWtime (EngngModelTimerType t) const {return timers[t].getWtime();}
   /// Returns pointer to timer determined by EngngModelTimerType
   const Timer* getTimer (EngngModelTimerType t) const {return timers+t;}
   /// converts total seconds into hours, mins, and seconds
   void convert2HMS (int &nhrs, int &nmin, int &nsec, long int tsec) const {::convertTS2HMS (nhrs, nmin, nsec, tsec);}
+  void convert2HMS (int &nhrs, int &nmin, int &nsec, double tsec) const {::convertTS2HMS (nhrs, nmin, nsec, tsec);}
   //@}
 };
 
