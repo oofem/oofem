@@ -51,9 +51,16 @@
 ConnectivityTable :: ~ConnectivityTable ()
 // destructor
 {
-  if (dofManagersConnectivity) freeInt(dofManagersConnectivity);
+  this->reset();
 }
 
+void
+ConnectivityTable :: reset ()
+{
+  if (dofManagersConnectivity) freeInt(dofManagersConnectivity);
+  dofManagersConnectivity = NULL;
+  nodalConnectivityFlag = 0;
+}
 
 #ifdef __OOFEG
 /*****
