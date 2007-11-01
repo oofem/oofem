@@ -1261,6 +1261,7 @@ int Domain::commitTransactions (DomainTransactionManager *tm)
   delete elementList ;
   this->elementList = elementList_new;
 
+  this->giveConnectivityTable()->reset();
   return 1;
 }
 
