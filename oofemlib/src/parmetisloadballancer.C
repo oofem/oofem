@@ -266,8 +266,9 @@ ParmetisLoadBallancer::labelDofManagers()
   std::set<int, std::less<int> > :: iterator it;
 
   // resize label array
-  dofManState.resize(ndofman);
+  dofManState.resize(ndofman); dofManState.zero();
   // resize dof man partitions
+  dofManPartitions.clear();
   dofManPartitions.resize(ndofman);
 
 #ifdef ParmetisLoadBallancer_DEBUG_PRINT
