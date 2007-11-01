@@ -640,6 +640,7 @@ EngngModel :: solveYourself ()
    for (jstep = sjstep; jstep <= activeMStep->giveNumberOfSteps(); jstep++) {
 //#ifdef TIME_REPORT
      this->timer.startTimer(EngngModelTimer::EMTT_SolutionStepTimer);
+     this->timer.initTimer(EngngModelTimer::EMTT_NetComputationalStepTimer);
 //#endif
      this->giveNextStep();
      // update state ccording to new meta step
@@ -651,11 +652,12 @@ EngngModel :: solveYourself ()
      
 //#ifdef TIME_REPORT
      this->timer.stopTimer(EngngModelTimer::EMTT_SolutionStepTimer);
-     long int _steptime = this->timer.getUtime (EngngModelTimer::EMTT_SolutionStepTimer);
-     OOFEM_LOG_INFO ("\nEngngModel info: user time consumed by solution step %d: %lds\n", 
+     //this->timer.stopTimer(EngngModelTimer::EMTT_NetComputationalStepTimer);
+     double _steptime = this->timer.getUtime (EngngModelTimer::EMTT_SolutionStepTimer);
+     OOFEM_LOG_INFO ("\nEngngModel info: user time consumed by solution step %d: %.2fs\n", 
                      this->giveCurrentStep()->giveNumber(), _steptime);
      
-     fprintf (out,"\nUser time consumed by solution step %d: %ld [s]\n\n",
+     fprintf (out,"\nUser time consumed by solution step %d: %.3f [s]\n\n",
               this->giveCurrentStep()->giveNumber(), _steptime);
 //#endif
 
@@ -860,6 +862,7 @@ void EngngModel :: assemble (SparseMtrx* answer, TimeStep* tStep, EquationID ut,
 
   if (answer == NULL)  _error("assemble: NULL pointer encountered.");
 
+  this->timer.resumeTimer(EngngModelTimer::EMTT_NetComputationalStepTimer);
   int nelem = domain -> giveNumberOfElements ();
   for ( ielem = 1; ielem <= nelem ; ielem++ ) {
     element = domain -> giveElement(ielem);
@@ -877,8 +880,11 @@ void EngngModel :: assemble (SparseMtrx* answer, TimeStep* tStep, EquationID ut,
 	_error("assemble: sparse matrix assemble error");
     }  
   }
+  this->timer.pauseTimer(EngngModelTimer::EMTT_NetComputationalStepTimer);
+
   answer->assembleBegin();
   answer->assembleEnd();
+
 }
 
 void EngngModel :: assemble (SparseMtrx* answer, TimeStep* tStep, EquationID r_id, EquationID c_id, CharType type, Domain* domain) 
@@ -897,6 +903,7 @@ void EngngModel :: assemble (SparseMtrx* answer, TimeStep* tStep, EquationID r_i
 
   if (answer == NULL)  _error("assemble: NULL pointer encountered.");
 
+  this->timer.resumeTimer(EngngModelTimer::EMTT_NetComputationalStepTimer);
   int nelem = domain -> giveNumberOfElements ();
   for ( ielem = 1; ielem <= nelem ; ielem++ ) {
     element = domain -> giveElement(ielem);
@@ -915,11 +922,12 @@ void EngngModel :: assemble (SparseMtrx* answer, TimeStep* tStep, EquationID r_i
       if (answer -> assemble (r_loc, c_loc, mat) == 0) 
 	_error("assemble: sparse matrix assemble error");
     }
-    answer->assembleBegin();
-    answer->assembleEnd();
   }
-  //answer->assembleBegin();
-  //answer->assembleEnd();
+  this->timer.pauseTimer(EngngModelTimer::EMTT_NetComputationalStepTimer);
+
+  answer->assembleBegin();
+  answer->assembleEnd();
+
 }
 
 
@@ -1037,6 +1045,7 @@ void EngngModel :: assembleVectorFromDofManagers (FloatArray& answer, TimeStep* 
   
   int nnode = domain -> giveNumberOfDofManagers();
   
+  this->timer.resumeTimer(EngngModelTimer::EMTT_NetComputationalStepTimer);
   for (i = 1; i <= nnode ; i++ ) {
     node = domain -> giveDofManager(i);
     node -> computeLoadVectorAt (charVec, tStep, mode);
@@ -1045,6 +1054,7 @@ void EngngModel :: assembleVectorFromDofManagers (FloatArray& answer, TimeStep* 
       answer.assemble (charVec, loc) ;
     }
   }
+  this->timer.pauseTimer(EngngModelTimer::EMTT_NetComputationalStepTimer);
 }
 
 
@@ -1065,6 +1075,7 @@ void EngngModel :: assemblePrescribedVectorFromDofManagers (FloatArray& answer, 
   
   int nnode = domain -> giveNumberOfDofManagers();
   
+  this->timer.resumeTimer(EngngModelTimer::EMTT_NetComputationalStepTimer);
   for (i = 1; i <= nnode ; i++ ) {
     node = domain -> giveDofManager(i);
     node -> computeLoadVectorAt (charVec, tStep, mode);
@@ -1073,6 +1084,7 @@ void EngngModel :: assemblePrescribedVectorFromDofManagers (FloatArray& answer, 
       answer.assemble (charVec, loc) ;
     }
   }
+  this->timer.pauseTimer(EngngModelTimer::EMTT_NetComputationalStepTimer);
 }
 
 void EngngModel :: assembleVectorFromElements (FloatArray& answer, TimeStep* tStep, EquationID ut,
@@ -1092,18 +1104,20 @@ void EngngModel :: assembleVectorFromElements (FloatArray& answer, TimeStep* tSt
  
   int nelem = domain -> giveNumberOfElements ();
 
- for (i = 1; i <= nelem ; i++ ) {
-  element = domain -> giveElement(i);
+  this->timer.resumeTimer(EngngModelTimer::EMTT_NetComputationalStepTimer);
+  for (i = 1; i <= nelem ; i++ ) {
+    element = domain -> giveElement(i);
 #ifdef __PARALLEL_MODE
-  // skip remote elements (these are used as mirrors of remote eleemnts on other domains
-  // when nonlocal constitutive models are used. They introduction is necessary to
-  // allow local averaging on domains without fine grain communication between domains).
-  if (element->giveParallelMode () == Element_remote) continue;
+    // skip remote elements (these are used as mirrors of remote eleemnts on other domains
+    // when nonlocal constitutive models are used. They introduction is necessary to
+    // allow local averaging on domains without fine grain communication between domains).
+    if (element->giveParallelMode () == Element_remote) continue;
 #endif
-  element -> giveLocationArray (loc, ut);
-  this -> giveElementCharacteristicVector (charVec, i, type, mode, tStep, domain);
-  if(charVec.giveSize()) answer.assemble (charVec, loc) ;
- }  
+    element -> giveLocationArray (loc, ut);
+    this -> giveElementCharacteristicVector (charVec, i, type, mode, tStep, domain);
+    if(charVec.giveSize()) answer.assemble (charVec, loc) ;
+  }  
+  this->timer.pauseTimer(EngngModelTimer::EMTT_NetComputationalStepTimer);
 }
 
 void EngngModel :: assemblePrescribedVectorFromElements (FloatArray& answer, TimeStep* tStep, EquationID ut, 
@@ -1123,19 +1137,22 @@ void EngngModel :: assemblePrescribedVectorFromElements (FloatArray& answer, Tim
  
   int nelem = domain -> giveNumberOfElements ();
 
- for (i = 1; i <= nelem ; i++ ) {
-  element = domain -> giveElement(i);
+  this->timer.resumeTimer(EngngModelTimer::EMTT_NetComputationalStepTimer);
+  for (i = 1; i <= nelem ; i++ ) {
+    element = domain -> giveElement(i);
 #ifdef __PARALLEL_MODE
-  // skip remote elements (these are used as mirrors of remote eleemnts on other domains
-  // when nonlocal constitutive models are used. They introduction is necessary to
-  // allow local averaging on domains without fine grain communication between domains).
-  if (element->giveParallelMode () == Element_remote) continue;
+    // skip remote elements (these are used as mirrors of remote eleemnts on other domains
+    // when nonlocal constitutive models are used. They introduction is necessary to
+    // allow local averaging on domains without fine grain communication between domains).
+    if (element->giveParallelMode () == Element_remote) continue;
 #endif
-  element -> givePrescribedLocationArray (loc, ut);
-  if (loc.containsOnlyZeroes()) continue;
-  this -> giveElementCharacteristicVector (charVec, i, type, mode, tStep, domain);
-  if(charVec.giveSize()) answer.assemble (charVec, loc) ;
- }  
+    element -> givePrescribedLocationArray (loc, ut);
+    if (loc.containsOnlyZeroes()) continue;
+    this -> giveElementCharacteristicVector (charVec, i, type, mode, tStep, domain);
+    if(charVec.giveSize()) answer.assemble (charVec, loc) ;
+  }  
+  this->timer.pauseTimer(EngngModelTimer::EMTT_NetComputationalStepTimer);
+  
 }
 
 
@@ -1162,7 +1179,8 @@ EngngModel :: petsc_assembleVectorFromDofManagers (Vec answer, TimeStep* tStep, 
   DofManager *node ;
  
   int nnode = domain -> giveNumberOfDofManagers();
-  
+
+  this->timer.resumeTimer(EngngModelTimer::EMTT_NetComputationalStepTimer);
   for (i = 1; i <= nnode ; i++ ) {
     node = domain -> giveDofManager(i);
     node -> computeLoadVectorAt (charVec, tStep, mode);
@@ -1177,6 +1195,7 @@ EngngModel :: petsc_assembleVectorFromDofManagers (Vec answer, TimeStep* tStep, 
 #endif
     }
   }
+  this->timer.pauseTimer(EngngModelTimer::EMTT_NetComputationalStepTimer);
 }
 
 void 
@@ -1199,6 +1218,7 @@ EngngModel :: petsc_assemblePrescribedVectorFromDofManagers (Vec answer, TimeSte
   DofManager *node ;
   
   int nnode = domain -> giveNumberOfDofManagers();
+  this->timer.resumeTimer(EngngModelTimer::EMTT_NetComputationalStepTimer);
   
   for (i = 1; i <= nnode ; i++ ) {
     node = domain -> giveDofManager(i);
@@ -1214,6 +1234,7 @@ EngngModel :: petsc_assemblePrescribedVectorFromDofManagers (Vec answer, TimeSte
 #endif
     }
   }
+  this->timer.pauseTimer(EngngModelTimer::EMTT_NetComputationalStepTimer);
 }
 
 void 
@@ -1236,6 +1257,7 @@ EngngModel :: petsc_assembleVectorFromElements (Vec answer, TimeStep* tStep, Equ
   Element *element ;
  
   int nelem = domain -> giveNumberOfElements ();
+  this->timer.resumeTimer(EngngModelTimer::EMTT_NetComputationalStepTimer);
   
   for (i = 1; i <= nelem ; i++ ) {
     element = domain -> giveElement(i);
@@ -1258,6 +1280,7 @@ EngngModel :: petsc_assembleVectorFromElements (Vec answer, TimeStep* tStep, Equ
 
     }  
   }
+  this->timer.pauseTimer(EngngModelTimer::EMTT_NetComputationalStepTimer);
 }
 
 void 
@@ -1280,6 +1303,7 @@ EngngModel :: petsc_assemblePrescribedVectorFromElements (Vec answer, TimeStep* 
   Element *element ;
   
   int nelem = domain -> giveNumberOfElements ();
+  this->timer.resumeTimer(EngngModelTimer::EMTT_NetComputationalStepTimer);
   
   for (i = 1; i <= nelem ; i++ ) {
     element = domain -> giveElement(i);
@@ -1301,6 +1325,7 @@ EngngModel :: petsc_assemblePrescribedVectorFromElements (Vec answer, TimeStep* 
 #endif
     }
   }  
+  this->timer.pauseTimer(EngngModelTimer::EMTT_NetComputationalStepTimer);
 }
 
 #endif
@@ -1840,7 +1865,7 @@ EngngModel ::  getClock ()
 void
 EngngModel :: terminateAnalysis ()
 {
- long int tsec; 
+ double tsec; 
  int nsec=0, nmin = 0, nhrs=0;
  FILE* out = this->giveOutputStream ();
  time_t endTime = ::getTime();
@@ -1933,41 +1958,49 @@ EngngModel::ballanceLoad (TimeStep* atTime)
   this->giveLoadBallancerMonitor();
   this->giveLoadBallancer();
 
-  _d = lbm->decide();
-  if ((_d == LoadBallancerMonitor::LBD_RECOVER) || 
-      ((atTime->isTheFirstStep()) && force_load_rebalance_in_first_step)) {
-    // determine nwe partitioning
-    lb->calculateLoadTransfer();
-    // pack e-model solution data into dof dictionaries
-    this->packMigratingData(atTime);
-    // migrate data 
-    lb->migrateLoad (this->giveDomain(1));
-    // renumber itself
-    this->forceEquationNumbering();
+  if (atTime->isNotTheLastStep()) {
+
+    _d = lbm->decide();
+    if ((_d == LoadBallancerMonitor::LBD_RECOVER) || 
+        ((atTime->isTheFirstStep()) && force_load_rebalance_in_first_step)) {
+      
+      this->timer.startTimer(EngngModelTimer::EMTT_LoadBallancingTimer);
+
+      // determine nwe partitioning
+      lb->calculateLoadTransfer();
+      // pack e-model solution data into dof dictionaries
+      this->packMigratingData(atTime);
+      // migrate data 
+      lb->migrateLoad (this->giveDomain(1));
+      // renumber itself
+      this->forceEquationNumbering();
 #ifdef __VERBOSE_PARALLEL
-    // debug print
-    int i, j, nnodes=giveDomain(1)->giveNumberOfDofManagers();
-    int myrank = this->giveRank();
-    fprintf (stderr, "\n[%d] Nodal Table\n", myrank);
-    for (i=1; i<=nnodes; i++) {
-      if (giveDomain(1)->giveDofManager(i)->giveParallelMode()==DofManager_local) 
-        fprintf (stderr, "[%d]: %5d[%d] local ", myrank, i, giveDomain(1)->giveDofManager(i)->giveGlobalNumber());
-      else if (giveDomain(1)->giveDofManager(i)->giveParallelMode()==DofManager_shared) {
-        fprintf (stderr, "[%d]: %5d[%d] shared ", myrank, i, giveDomain(1)->giveDofManager(i)->giveGlobalNumber());
+      // debug print
+      int i, j, nnodes=giveDomain(1)->giveNumberOfDofManagers();
+      int myrank = this->giveRank();
+      fprintf (stderr, "\n[%d] Nodal Table\n", myrank);
+      for (i=1; i<=nnodes; i++) {
+        if (giveDomain(1)->giveDofManager(i)->giveParallelMode()==DofManager_local) 
+          fprintf (stderr, "[%d]: %5d[%d] local ", myrank, i, giveDomain(1)->giveDofManager(i)->giveGlobalNumber());
+        else if (giveDomain(1)->giveDofManager(i)->giveParallelMode()==DofManager_shared) {
+          fprintf (stderr, "[%d]: %5d[%d] shared ", myrank, i, giveDomain(1)->giveDofManager(i)->giveGlobalNumber());
+        }
+        for (j=1; j<=giveDomain(1)->giveDofManager(i)->giveNumberOfDofs(); j++) {
+          fprintf (stderr, "(%d)", giveDomain(1)->giveDofManager(i)->giveDof(j)->giveEquationNumber());
+        }
+        fprintf (stderr, "\n");
       }
-      for (j=1; j<=giveDomain(1)->giveDofManager(i)->giveNumberOfDofs(); j++) {
-        fprintf (stderr, "(%d)", giveDomain(1)->giveDofManager(i)->giveDof(j)->giveEquationNumber());
-      }
-      fprintf (stderr, "\n");
-    }
-    
+      
 #endif
-    // unpack (restore) e-model solution data from dof dictionaries
-    this->unpackMigratingData(atTime);
-    
-    
-    
-    
+      // unpack (restore) e-model solution data from dof dictionaries
+      this->unpackMigratingData(atTime);
+
+      this->timer.stopTimer(EngngModelTimer::EMTT_LoadBallancingTimer);
+      double _steptime = this->timer.getUtime (EngngModelTimer::EMTT_LoadBallancingTimer);
+      OOFEM_LOG_INFO ("[%d] EngngModel info: user time consumed by load rebalancing %.2fs\n", 
+                      this->giveRank(),_steptime);
+      
+    }
   }
 }
 #endif
