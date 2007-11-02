@@ -134,14 +134,14 @@ PetscSparseMtrx:: buildInternalStructure (EngngModel* eModel, int di, EquationID
       elem -> giveLocationArray (loc, ut) ;
       n2l.map2New(lloc, loc, 0);  // translate natural->local numbering
       for (i=1 ; i <= lloc.giveSize() ; i++) {
-	if ((ii = lloc.at(i))) {
-	  for (j=1; j <= lloc.giveSize() ; j++) {
-	    if ((jj = lloc.at(j))) {
-	      //fprintf (stderr, "{[%d] %d-%d %d-%d} ", rank, loc.at(i),ii-1,loc.at(j),jj-1); 
-	      rows[ii-1].insert(jj-1);
-	    }
-	  }
-	}
+        if ((ii = lloc.at(i))) {
+          for (j=1; j <= lloc.giveSize() ; j++) {
+            if ((jj = lloc.at(j))) {
+              //fprintf (stderr, "{[%d] %d-%d %d-%d} ", rank, loc.at(i),ii-1,loc.at(j),jj-1); 
+              rows[ii-1].insert(jj-1);
+            }
+          }
+        }
       }
       //fprintf (stderr, "\n"); 
     }
@@ -155,11 +155,17 @@ PetscSparseMtrx:: buildInternalStructure (EngngModel* eModel, int di, EquationID
     //fprintf (stderr,"\n[%d]PetscSparseMtrx: Creating MPIAIJ Matrix ...\n",rank);
     
     // create PETSc mat
+    /*
     MatCreateMPIAIJ(PETSC_COMM_WORLD,leqs,leqs,geqs,geqs,
 		    leqs,d_nnz.givePointer(), // counted
 		    6,PETSC_NULL, // guess
 		    &mtrx); 
-
+    */
+    MatCreate(PETSC_COMM_WORLD,&mtrx);
+    MatSetSizes(mtrx,leqs,leqs,geqs,geqs);
+    MatSetType(mtrx,MATMPIAIJ);
+    MatMPIAIJSetPreallocation(mtrx,1,d_nnz.givePointer(),6,PETSC_NULL);
+   
     // To allow the insertion of values using MatSetValues in column major order
     MatSetOption(mtrx,MAT_COLUMN_ORIENTED); 
     
@@ -183,21 +189,28 @@ PetscSparseMtrx:: buildInternalStructure (EngngModel* eModel, int di, EquationID
       elem = domain -> giveElement(n);
       elem -> giveLocationArray (loc, ut) ;
       for (i=1 ; i <= loc.giveSize() ; i++) {
-	if ((ii = loc.at(i))) {
-	  for (j=1; j <= loc.giveSize() ; j++) {
-          jj = loc.at(j);
-          if ((jj = loc.at(j))) {
-            rows[ii-1].insert(jj-1);
+        if ((ii = loc.at(i))) {
+          for (j=1; j <= loc.giveSize() ; j++) {
+            jj = loc.at(j);
+            if ((jj = loc.at(j))) {
+              rows[ii-1].insert(jj-1);
+            }
           }
-	  }
-	}
+        }
       }
     }
     
     for (i=0; i<leqs; i++) d_nnz(i) = rows[i].size();
     
     // create PETSc mat
+    /*
     MatCreateSeqAIJ(PETSC_COMM_SELF,leqs,leqs,0,d_nnz.givePointer(),&mtrx);
+    */
+    MatCreate(PETSC_COMM_WORLD,&mtrx);
+    MatSetSizes(mtrx,leqs,leqs,leqs,leqs);
+    MatSetType(mtrx,MATSEQAIJ);
+    MatSeqAIJSetPreallocation(mtrx,0,d_nnz.givePointer());
+
 #ifdef __PARALLEL_MODE
   }
 #endif
