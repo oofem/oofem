@@ -146,7 +146,7 @@ time_t getTime ()
 void convertTS2HMS (int &nhrs, int &nmin, int &nsec, long int tsec)
 {
   long int _nsec = tsec;
-  if (nsec > 60) { nmin = _nsec / 60; _nsec %= 60;}
+  if (_nsec > 60) { nmin = _nsec / 60; _nsec %= 60;}
   if (nmin > 60) { nhrs = nmin / 60; nmin %= 60;}
   nsec = _nsec;
 }
@@ -154,7 +154,7 @@ void convertTS2HMS (int &nhrs, int &nmin, int &nsec, long int tsec)
 void convertTS2HMS (int &nhrs, int &nmin, int &nsec, double tsec)
 {
   long int _nsec = (long int) tsec;
-  if (nsec > 60) { nmin = _nsec / 60; _nsec %= 60;}
+  if (_nsec > 60) { nmin = _nsec / 60; _nsec %= 60;}
   if (nmin > 60) { nhrs = nmin / 60; nmin %= 60;}
   nsec = _nsec;
 }
