@@ -164,12 +164,10 @@ PetscSparseMtrx:: buildInternalStructure (EngngModel* eModel, int di, EquationID
     MatCreate(PETSC_COMM_WORLD,&mtrx);
     MatSetSizes(mtrx,leqs,leqs,geqs,geqs);
     MatSetType(mtrx,MATMPIAIJ);
-    MatMPIAIJSetPreallocation(mtrx,1,d_nnz.givePointer(),6,PETSC_NULL);
-   
     // To allow the insertion of values using MatSetValues in column major order
     MatSetOption(mtrx,MAT_COLUMN_ORIENTED); 
-    
-    //MatSetFromOptions(mtrx);
+    MatSetFromOptions(mtrx);
+    MatMPIAIJSetPreallocation(mtrx,1,d_nnz.givePointer(),6,PETSC_NULL);
     
 #ifdef __VERBOSE_PARALLEL
     VERBOSEPARALLEL_PRINT("PetscSparseMtrx:: buildInternalStructure","done", rank);
@@ -209,6 +207,7 @@ PetscSparseMtrx:: buildInternalStructure (EngngModel* eModel, int di, EquationID
     MatCreate(PETSC_COMM_WORLD,&mtrx);
     MatSetSizes(mtrx,leqs,leqs,leqs,leqs);
     MatSetType(mtrx,MATSEQAIJ);
+    MatSetFromOptions(mtrx);
     MatSeqAIJSetPreallocation(mtrx,0,d_nnz.givePointer());
 
 #ifdef __PARALLEL_MODE

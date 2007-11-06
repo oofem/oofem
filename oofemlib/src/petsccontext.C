@@ -129,8 +129,8 @@ PetscContext::scatterG2N (Vec src, Vec dest, InsertMode mode)
       VecScatterCreate(dest,naturalIS,src,globalIS,&n2gvecscat);
     } 
     
-    VecScatterBegin(src,dest,mode,SCATTER_REVERSE,n2gvecscat); //
-    return VecScatterEnd(src,dest,mode,SCATTER_REVERSE,n2gvecscat);   //
+    VecScatterBegin(n2gvecscat,src,dest,mode,SCATTER_REVERSE); //
+    return VecScatterEnd(n2gvecscat,src,dest,mode,SCATTER_REVERSE);   //
   } else {
 #endif
     return VecCopy (src, dest);
@@ -188,8 +188,8 @@ PetscContext::scatterN2G (Vec src, Vec dest, InsertMode mode)
       VecScatterCreate(src,naturalIS,dest,globalIS,&n2gvecscat);
     } 
     
-    VecScatterBegin(src,dest,mode,SCATTER_FORWARD,n2gvecscat); //
-    VecScatterEnd(src,dest,mode,SCATTER_FORWARD,n2gvecscat);   //
+    VecScatterBegin(n2gvecscat,src,dest,mode,SCATTER_FORWARD); //
+    VecScatterEnd(n2gvecscat,src,dest,mode,SCATTER_FORWARD);   //
   } else {
 #endif
   VecCopy (src, dest);
