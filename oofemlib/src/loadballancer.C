@@ -472,10 +472,10 @@ WallClockLoadBallancerMonitor::decide()
 
   // decide
   if ((absWallClockImbalance > 10) || (relWallClockImbalance > 0.1)) {
-    OOFEM_LOG_RELEVANT ("[%d] LoadBallancer: wall clock imbalance rel=%.2f\%,abs=%.2fs, recovering load\n", myrank, relWallClockImbalance, absWallClockImbalance);
+    OOFEM_LOG_RELEVANT ("[%d] LoadBallancer: wall clock imbalance rel=%.2f\%,abs=%.2fs, recovering load\n", myrank, 100*relWallClockImbalance, absWallClockImbalance);
     return LBD_RECOVER;
   } else {
-    OOFEM_LOG_RELEVANT ("[%d] LoadBallancer: wall clock imbalance rel=%.2f\%,abs=%.2fs, continuing\n", myrank, relWallClockImbalance, absWallClockImbalance);
+    OOFEM_LOG_RELEVANT ("[%d] LoadBallancer: wall clock imbalance rel=%.2f\%,abs=%.2fs, continuing\n", myrank, 100*relWallClockImbalance, absWallClockImbalance);
     return LBD_CONTINUE;
   }
 }
