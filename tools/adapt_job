@@ -46,8 +46,8 @@ echo "Starting job No. $irun"
 echo "=================================================="
 echo "Processing job no. $irun / $step" >&2
 if [ "$irun" -eq 0 ]
-then $T3D_BIN_DIR/t3d -i $jobname.t3d.in -o $jobname$irun.t3d.out; 
-else $T3D_BIN_DIR/t3d -i $jobname.t3d.in -o $jobname$irun.t3d.out -b t3d.bmf; 
+then $T3D_BIN_DIR/t3d -i $jobname.t3d.in -o $jobname$irun.t3d.out -p 8; 
+else $T3D_BIN_DIR/t3d -i $jobname.t3d.in -o $jobname$irun.t3d.out -m t3d.bmf -p 8; 
 fi
 #transform to oofem
 $T3D2OOFEM_BIN_DIR/t3d2oofem $jobname.ctrl $jobname$irun.t3d.out $jobname$irun.oofem.in
