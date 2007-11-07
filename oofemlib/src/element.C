@@ -904,6 +904,18 @@ Element :: estimatePackSize (CommunicationBuffer& buff)
  }
  return result;
 }
+
+int 
+Element::predictRelativeComputationalCost ()
+{
+  int j, nip, wgt = 0;
+  IntegrationRule* iRule = this->giveDefaultIntegrationRulePtr();
+  nip = iRule->getNumberOfIntegrationPoints();
+  for (j=0; j < nip; j++)
+    wgt += this->giveCrossSection()->predictRelativeComputationalCost (iRule->getIntegrationPoint(j));
+  return (this->giveRelativeSelfComputationalCost()*wgt/nip);
+}
+
 #endif
 
 

@@ -726,12 +726,25 @@ protected:
   void setPartitionList (IntArray &pl) {partitions=pl;}
   /**
      Returns the weight representing relative computational cost of receiver
+     The reference element is triangular plane stress element with
+     linear approximation, single integration point and linear isotropic material. 
+     Its weight is equal to 100. 
+     Default implementation computes average computational cost of cross section model (this include material as well)
+     and multiplies it by element type weight (obtained by giveRelativeSelfComputationalCost())
+     The other elements should compare to this reference element.
   */
-  virtual int predictRelativeComputationalCost () {return 1;}
+  virtual int predictRelativeComputationalCost ();
+  /**
+     Returns the weight representing relative computational cost of receiver
+     The reference element is triangular plane stress element.
+     Its weight is equal to 100. 
+     The other elements should compare to this reference element.
+  */
+  virtual int giveRelativeSelfComputationalCost() {return 100;}
   /**
      Returns the relative redistribution cost of the receiver
   */
-  virtual int predictRelativeRedistributionCost () {return 1;}
+  virtual int predictRelativeRedistributionCost () {return 100;}
 #endif
 
 public:

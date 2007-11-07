@@ -269,6 +269,26 @@ public:
   */
  virtual int estimatePackSize (CommunicationBuffer& buff, GaussPoint* ip)
   {return ip->giveMaterial()->estimatePackSize (buff, ip);}
+  /**
+     Returns the weight representing relative computational cost of receiver
+     The reference cross section is integral model in plane stress.
+     Its weight is equal to 100. 
+     Default implementation computes average computational cost of material model 
+     and multiplies it by cross section type weight (obtained by giveRelativeSelfComputationalCost())
+     The other cross section models should compare to this reference.
+  */
+  virtual int predictRelativeComputationalCost (GaussPoint* gp);
+  /**
+     Returns the weight representing relative computational cost of receiver
+     The reference element is integral model in plane stress.
+     Its weight is equal to 100. 
+     The other  cross section models should compare to this reference.
+  */
+  virtual int giveRelativeSelfComputationalCost() {return 100;}
+  /**
+     Returns the relative redistribution cost of the receiver
+  */
+  virtual int predictRelativeRedistributionCost (GaussPoint* gp) {return 100;}
 #endif
 
  friend class Material;

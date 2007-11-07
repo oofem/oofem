@@ -159,3 +159,12 @@ bool
 CrossSection::isCharacteristicMtrxSymmetric (MatResponseMode rMode, int mat) {
   return domain->giveMaterial(mat)->isCharacteristicMtrxSymmetric(rMode);
 }
+
+
+#ifdef __PARALLEL_MODE
+int 
+CrossSection::predictRelativeComputationalCost (GaussPoint* gp)
+{
+  return this->giveRelativeSelfComputationalCost() * gp->giveMaterial()->predictRelativeComputationalCost(gp);
+}
+#endif
