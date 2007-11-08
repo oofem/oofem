@@ -15,6 +15,7 @@ dnl   --with-PETCS-ARCH=PETSC_ARCH
 dnl   --enable-dss           --disble-dss
 dnl   --enable-parmetis      --disable-parmetis
 dnl   --with-PARMETISDIR[=PARMETIS_DIR]
+dnl   --with-MPIDIR[=MPI_DIR]
 dnl
 dnl Code generation
 dnl 
@@ -207,6 +208,30 @@ echo "c++ compiler support for function templates required."
 exit])
 
 
+dnl
+dnl --------------------------------------------------------------------
+dnl test for poofem related stuff
+dnl --------------------------------------------------------------------
+dnl
+
+AC_ARG_ENABLE(poofem, [  --enable-poofem        builds and installs poofem],
+ 	[
+ 			poofem_val=$enableval
+ 	]
+)
+
+
+dnl
+dnl --------------------------------------------------------------------
+dnl assemble targets
+dnl --------------------------------------------------------------------
+dnl
+
+AC_ARG_ENABLE(debug, [  --enable-debug        builds and installs debug versions, too],
+ 	[
+ 			debug_val=$enableval
+ 	]
+)
 
 
 dnl --------------------------------------------------------------------
@@ -245,6 +270,17 @@ AC_ARG_ENABLE(dss, [  --enable-dss       adds dss module support],
 	]
 )
 
+dnl--------------------------------------------------------------------
+dnl Check for MPI
+dnl --------------------------------------------------------------------
+AC_ARG_WITH(MPIDIR, [  --with-MPIDIR=dir  allows to specify MPI_DIR] , 
+ [
+     MPI_DIR=$withval
+ ]
+)
+
+
+
 dnl --------------------------------------------------------------------
 dnl Check for petsc module
 dnl --------------------------------------------------------------------
@@ -271,12 +307,7 @@ AC_ARG_WITH(PETSCARCH, [  --with-PETSCARCH=val allows to specify PETSC_ARCH] ,
    PETSC_ARCH=$withval
  ]
 )
-dnl ,
-dnl  [ 
-dnl  ])
 
-dnl AC_ARG_VAR(PETSC_DIR, Allows to set PETSC_DIR, a directory contatining PETSC distribution])
-dnl AC_ARG_VAR(PETSC_ARCH, Allows to set PETSC_ARCH, a variable determining PETS Architecture])
 
 dnl --------------------------------------------------------------------
 dnl Check for parmetis module
@@ -426,35 +457,50 @@ if test x$spooles_module = xyes; then
   )
 fi
 
+
+dnl --------------------------------------------------------------------
+dnl Search for mpi module
+dnl --------------------------------------------------------------------
+dnl
+if test x$petsc_module = xyes; then 
+  mpi_module="yes"
+fi
+if test x$poofem_val = xyes; then
+  mpi_module="yes"
+fi
+
+if test x$mpi_module = xyes; then
+  dnl parmetis requires mpi
+  AC_MSG_CHECKING(MPI location)
+
+  if test -f ${MPI_DIR}/include/mpi.h; then
+    AC_MSG_RESULT(${MPI_DIR})
+  else
+    while test ! -f ${MPI_DIR}/include/mpi.h; do
+      echo "Directory ${MPI_DIR} does not seem to be MPI dir."
+      echo "Type in directory (use absolute path):"
+      read MPI_DIR
+    done;
+  fi
+  MPI_INCLUDES="-I${MPI_DIR}/include"
+  AC_DEFINE(HAVE_MPI_H)
+  MPI_MODULE_SYMBOLS="-DMPICH_IGNORE_CXX_SEEK"
+
+dnl check for mpi Compiler batch
+ AC_PATH_PROG(MPI_CXX, mpicxx, "x", ${MPI_DIR}/bin)
+ if test x$MPI_CXX = xx; then
+	 echo "MPI compiler not found in $dir."
+   exit
+ fi
+fi
+
+
+
+
 dnl --------------------------------------------------------------------
 dnl Search for petsc module
 dnl --------------------------------------------------------------------
 if test x$petsc_module = xyes; then
-
-  dnl petsc requires mpi
-  dnl
-  AC_CHECK_HEADER(mpi.h,
-	[
-		AC_DEFINE(HAVE_MPI_H)
-	],
-	[
-		dir=/usr/local/mpi/include
-		AC_MSG_CHECKING(guess of MPI includes location)
-		if test -f $dir/mpi.h; then
-			AC_MSG_RESULT($dir)
-		else
-			while test ! -f $dir/mpi.h; do
-				echo "MPI includes not found in $dir."
-				echo "Type in directory:"
-				read dir
-			done;
-		fi
-		MPI_INCLUDES="-I$dir"
-    MPI_MODULE_SYMBOLS="-DMPICH_IGNORE_CXX_SEEK"
-		AC_DEFINE(HAVE_MPI_H)
-	]
-  )
-  MPI_MODULE_SYMBOLS="-DMPICH_IGNORE_CXX_SEEK"
 
   AC_MSG_CHECKING(PETSc module location)
   
@@ -484,6 +530,7 @@ if test x$petsc_module = xyes; then
     AC_MSG_RESULT(${PETSC_ARCH})
   fi
 fi
+
 
 
 dnl --------------------------------------------------------------------
@@ -687,75 +734,6 @@ else
 fi
 
 
-dnl
-dnl --------------------------------------------------------------------
-dnl test for poofem related stuff
-dnl --------------------------------------------------------------------
-dnl
-
-AC_ARG_ENABLE(poofem, [  --enable-poofem        builds and installs poofem],
- 	[
- 			poofem_val=$enableval
- 	]
-)
-
-if test x$poofem_val = xyes; then
-dnl
-AC_CHECK_HEADER(mpi.h,
-	[
-		AC_DEFINE(HAVE_MPI_H)
-	],
-	[
-		dir=/usr/local/mpi/include
-		AC_MSG_CHECKING(guess of MPI includes location)
-		if test -f $dir/mpi.h; then
-			AC_MSG_RESULT($dir)
-		else
-			while test ! -f $dir/mpi.h; do
-				echo "MPI includes not found in $dir."
-				echo "Type in MPI include directory:"
-				read dir
-			done;
-		fi
-		MPI_INCLUDES="-I$dir"
-		AC_DEFINE(HAVE_MPI_H)
-	]
-)
-MPI_MODULE_SYMBOLS="-DMPICH_IGNORE_CXX_SEEK"
-
-dnl check for mpi Compiler batch
-AC_MSG_CHECKING(checking MPI compiler batch)
-AC_PATH_PROG(MPI_CXX, mpicxx, "x")
-if test x$MPI_CXX = xx; then
-	dir=/usr/local/mpi/bin
-	AC_MSG_CHECKING(guess of mpicxx location)
-	while test ! -f $dir/mpicxx; do
-		echo "no MPI compiler batch found in $dir."
-		echo "Type in path:"
-		read dir
-	done;
-	MPI_CXX="$dir/mpicxx"
-	echo "$MPI_CXX\n"
-fi
-
-
-else 
-	poofem_val=no
-fi
-
-
-
-dnl
-dnl --------------------------------------------------------------------
-dnl assemble targets
-dnl --------------------------------------------------------------------
-dnl
-
-AC_ARG_ENABLE(debug, [  --enable-debug        builds and installs debug versions, too],
- 	[
- 			debug_val=$enableval
- 	]
-)
 
 dnl assemble oofem-release target
 TARGETS="oofem-release"
