@@ -424,7 +424,7 @@ int
 MasterDof :: unpackAndUpdateUnknown (CommunicationBuffer& buff, EquationID type, 
                    ValueModeType mode, TimeStep* stepN)
 {
-  EngngModel::EngngModel_UpdateMode __umode;
+  EngngModel::EngngModel_UpdateMode __umode = EngngModel::EngngModel_Unknown_Mode;
   double value;
   int result=0;
  // if dof belonging to shared or remote DofManager, engng model unknowns are updated 

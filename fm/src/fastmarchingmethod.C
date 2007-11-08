@@ -135,7 +135,7 @@ FastMarchingMethod::initialize(FloatArray &dmanValues,
 void
 FastMarchingMethod::updateTrialValue (FloatArray &dmanValues, int id, double F)
 {
-  int i,j,ai,bi,ci,_ind,h, nroot;
+  int i,j,ai,bi,ci,h, nroot, _ind=0;
   double at,bt,ht,a,b,u, cos_fi, sin_fi, _a, _b, _c, r1,r2,r3,t,_h;
   bool reg_upd_flag;
   Element* ie; 

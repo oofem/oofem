@@ -645,13 +645,12 @@ LEPlic::giveElementMaterialMixture (FloatArray& answer, int ie)
 double
 LEPlic::giveNodalScalarRepresentation (int inode)
 {
-  IntArray* shelem;
   bool vof_1=false, vof_0=false;
   double vof, vofsum=0.0;
-  domain->giveConnectivityTable()->giveDofManConnectivityArray(inode);
+  const IntArray* shelem = domain->giveConnectivityTable()->giveDofManConnectivityArray(inode);
 
   for (int i=1; i<=shelem->giveSize(); i++) {
-    LEPlicElementInterface *interface = (LEPlicElementInterface*) domain->giveElement(i)->giveInterface(LEPlicElementInterfaceType);
+    LEPlicElementInterface *interface = (LEPlicElementInterface*) domain->giveElement(shelem->at(i))->giveInterface(LEPlicElementInterfaceType);
     if (interface) {
       vof = interface->giveTempVolumeFraction();
       if (vof == 0.0) vof_0=true;

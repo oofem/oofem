@@ -76,7 +76,7 @@ void
 LoadBallancer::initializeWtp (IntArray& wtp) {
 
   int i, size = wtp.giveSize();
-  WorkTransferPlugin *plugin;
+  WorkTransferPlugin *plugin=NULL;
 
   if (size) {
     wtpList.growTo (size);

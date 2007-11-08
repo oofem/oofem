@@ -318,7 +318,7 @@ HydrationModel :: computeHydrationDegreeIncrement(double ksi, double T, double h
 /// Computes the hydration degree increment according to given hydration degree, temperature and time increment.
 //!!! sets aux values in material
 {
- double result;
+ double result=0.0;
 
  if (ksi<1.0) {
   auxksi = ksi;

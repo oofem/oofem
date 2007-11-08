@@ -129,7 +129,7 @@ Polygon::pointDistance (double xp, double yp) const
   
   Polygon::PolygonEdgeIterator it(this);
   Vertex p1,p2;
-  double x1,x2,y1,y2,d,dist,l,tx,ty,t,nx,ny;
+  double x1,x2,y1,y2,d,l,tx,ty,t,nx,ny,dist=0.0;
   bool init=true;
 
   while (it.giveNext(p1,p2)) {

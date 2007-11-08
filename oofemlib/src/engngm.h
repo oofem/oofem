@@ -208,7 +208,7 @@ class EngngModel
   public:
 
 #ifdef __PARALLEL_MODE
-enum EngngModel_UpdateMode {EngngModel_SUMM_Mode, EngngModel_SET_Mode};
+  enum EngngModel_UpdateMode {EngngModel_Unknown_Mode, EngngModel_SUMM_Mode, EngngModel_SET_Mode};
 #endif
 
  protected:
