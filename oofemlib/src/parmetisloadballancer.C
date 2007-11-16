@@ -83,6 +83,8 @@ ParmetisLoadBallancer::calculateLoadTransfer ()
   float ubvec[1], itr;
   Element* ielem;
   MPI_Comm communicator = MPI_COMM_WORLD;
+  LoadBallancerMonitor* lbm = domain->giveEngngModel()->giveLoadBallancerMonitor();
+  FloatArray _procweights;
 
   nproc=domain->giveEngngModel()->giveNumberOfProcesses();
   // init parmetis element numbering 
@@ -123,10 +125,10 @@ ParmetisLoadBallancer::calculateLoadTransfer ()
   // this is necessary, since cut runs through graph edges
   numflag = 0; ncommonnodes = 2;
   ParMETIS_V3_Mesh2Dual (elmdist, eptr, eind, &numflag, &ncommonnodes, &xadj, &adjncy, &communicator);
+  int myrank=domain->giveEngngModel()->giveRank();
  
 #ifdef ParmetisLoadBallancer_DEBUG_PRINT
   // DEBUG PRINT
-  int myrank=domain->giveEngngModel()->giveRank();
   fprintf (stderr, "[%d] xadj:", myrank);
   for (i=0; i<= nlocalelems; i++) fprintf (stderr, " %d", xadj[i]);
   fprintf (stderr, "\n[%d] adjncy:", myrank);
@@ -144,19 +146,28 @@ ParmetisLoadBallancer::calculateLoadTransfer ()
   options[3]=1; // sub-domains and processors are coupled
   // set ratio of inter-proc communication compared to data redistribution time
   itr = 1000.0;
-  // set partition weights if not provided
+  // set partition weights by quering load ballance monitor
+  lbm->giveProcessorWeights (_procweights);
   if (tpwgts == NULL) {
     if ((tpwgts = new float[nproc])==NULL) OOFEM_ERROR ("ParmetisLoadBallancer::ballanceLoad: failed to allocate tpwgts");
-    for (i=0; i< nproc; i++) tpwgts[i]=1.0/nproc;
   }
+  for (i=0; i< nproc; i++) tpwgts[i] = _procweights(i);
+
+  /*
+  // log processor weights
+  OOFEM_LOG_RELEVANT ("[%d] ParmetisLoadBallancer: proc weights: ", myrank);
+  for (i=0; i<nproc; i++) OOFEM_LOG_RELEVANT ("%4.3f ",tpwgts[i]);
+  OOFEM_LOG_RELEVANT ("\n");
+  */
+
   // obtain vertices weights (element weights) representing relative computational cost 
   if ((vwgt = new idxtype[nlocalelems])==NULL) OOFEM_ERROR ("ParmetisLoadBallancer::ballanceLoad: failed to allocate vwgt");
   if ((vsize= new idxtype[nlocalelems])==NULL) OOFEM_ERROR ("ParmetisLoadBallancer::ballanceLoad: failed to allocate vsize");
   for (ie = 0, i=0; i< nelem; i++) {
     ielem = domain->giveElement(i+1);
     if (ielem->giveParallelMode() == Element_local) {
-      vwgt[ie]    = ielem->predictRelativeComputationalCost();
-      vsize[ie++] = ielem->predictRelativeRedistributionCost();
+      vwgt[ie]    = (int) (ielem->predictRelativeComputationalCost()*100.0);
+      vsize[ie++] = 1; //ielem->predictRelativeRedistributionCost();
     }
   }
 

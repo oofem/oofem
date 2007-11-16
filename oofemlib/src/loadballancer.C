@@ -434,7 +434,7 @@ WallClockLoadBallancerMonitor::decide()
   int i, nproc=emodel->giveNumberOfProcesses();
   int myrank=emodel->giveRank();
   double *node_solutiontimes = new double [nproc];
-  double min_st, max_st;
+  double min_st, max_st, sum_st=0.0;
   double relWallClockImbalance;
   double absWallClockImbalance;
 
@@ -446,7 +446,7 @@ WallClockLoadBallancerMonitor::decide()
   // collect wall clock computational time
   MPI_Allgather (&mySolutionTime, 1, MPI_DOUBLE, node_solutiontimes, 1, MPI_DOUBLE, MPI_COMM_WORLD);
 
-  OOFEM_LOG_RELEVANT ("LoadBallancer:: individual processor times [sec]: (");
+  OOFEM_LOG_RELEVANT ("\nLoadBallancer:: individual processor times [sec]: (");
   if (myrank==0) {
     for (i=0; i< nproc; i++) {
       OOFEM_LOG_RELEVANT (" %.3f",node_solutiontimes[i]);
@@ -460,6 +460,7 @@ WallClockLoadBallancerMonitor::decide()
   for (i=0; i< nproc; i++) {
     min_st = min (min_st, node_solutiontimes[i]);
     max_st = max (max_st, node_solutiontimes[i]);
+    sum_st += node_solutiontimes[i];
   }
   absWallClockImbalance = (max_st-min_st);
   if (min_st) {
@@ -468,7 +469,15 @@ WallClockLoadBallancerMonitor::decide()
     relWallClockImbalance = 0.0;
   }
 
+  // update node (processor) weights
+  for (i=0; i<nproc; i++) nodeWeights(i)=node_solutiontimes[i]/sum_st;
+
   delete[] node_solutiontimes;
+
+  // log processor weights
+  OOFEM_LOG_RELEVANT ("[%d] LoadBallancer: updated proc weights: ", myrank);
+  for (i=0; i<nproc; i++) OOFEM_LOG_RELEVANT ("%4.3f ",nodeWeights(i));
+  OOFEM_LOG_RELEVANT ("\n");
 
   // decide
   if ((absWallClockImbalance > 10) || (relWallClockImbalance > 0.1)) {
@@ -480,6 +489,24 @@ WallClockLoadBallancerMonitor::decide()
   }
 }
 
+IRResultType 
+LoadBallancerMonitor::initializeFrom (InputRecord* ir) 
+{
+  const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
+  IRResultType result;                   // Required by IR_GIVE_FIELD macro
+  int i, nproc = emodel->giveNumberOfProcesses();
+
+  nodeWeights.resize(nproc);
+  for (i=0; i<nproc; i++) nodeWeights(i)=1.0;
+
+  IR_GIVE_OPTIONAL_FIELD (ir, nodeWeights, IFT_LoadBallancerMonitor_initialnodeweights, "nw"); // Macro
+  if (nodeWeights.giveSize()!=nproc) {
+    OOFEM_ERROR ("nodeWeights size not equal to number of processors");
+  }
+  
+  return IRRT_OK;
+}
+
 
 
 #else //__PARALLEL_MODE
@@ -487,9 +514,18 @@ void
 LoadBallancer::migrateLoad () {}
 
 IRResultType
-LoadBallancer::initializeFrom (InputRecord* ir) {return IRRT_OK;}
+LoadBallancer::initializeFrom (InputRecord* ir) {
+
+  return IRRT_OK;
+}
+
+IRResultType 
+LoadBallancerMonitor::initializeFrom (InputRecord* ir) {return IRRT_OK;}
+
 #endif
 
 
 LoadBallancer::WorkTransferPlugin::WorkTransferPlugin (LoadBallancer* _lb) {lb=_lb;}
 LoadBallancer::WorkTransferPlugin::~WorkTransferPlugin () {}
+
+

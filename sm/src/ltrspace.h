@@ -123,6 +123,15 @@ void               computeMassMatrix (FloatMatrix& answer, TimeStep* tStep)
   virtual void  drawSpecial  (oofegGraphicContext&);
   //void          drawInternalState (oofegGraphicContext&);
 #endif
+#ifdef __PARALLEL_MODE
+  /**
+     Returns the weight representing relative computational cost of receiver
+     The reference element is triangular plane stress element.
+     Its weight is equal to 1.0
+     The other elements should compare to this reference element.
+  */
+  virtual double giveRelativeSelfComputationalCost() {return 2.15;}
+#endif
 
 /**
  @name The element interface required by ZZNodalRecoveryModel

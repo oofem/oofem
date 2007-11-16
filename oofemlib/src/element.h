@@ -728,23 +728,23 @@ protected:
      Returns the weight representing relative computational cost of receiver
      The reference element is triangular plane stress element with
      linear approximation, single integration point and linear isotropic material. 
-     Its weight is equal to 100. 
+     Its weight is equal to 1.0 
      Default implementation computes average computational cost of cross section model (this include material as well)
      and multiplies it by element type weight (obtained by giveRelativeSelfComputationalCost())
      The other elements should compare to this reference element.
   */
-  virtual int predictRelativeComputationalCost ();
+  virtual double predictRelativeComputationalCost ();
   /**
      Returns the weight representing relative computational cost of receiver
      The reference element is triangular plane stress element.
-     Its weight is equal to 100. 
+     Its weight is equal to 1.0 
      The other elements should compare to this reference element.
   */
-  virtual int giveRelativeSelfComputationalCost() {return 100;}
+  virtual double giveRelativeSelfComputationalCost() {return 1.0;}
   /**
      Returns the relative redistribution cost of the receiver
   */
-  virtual int predictRelativeRedistributionCost () {return 100;}
+  virtual double predictRelativeRedistributionCost () {return 1.0;}
 #endif
 
 public:

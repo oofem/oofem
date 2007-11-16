@@ -1280,20 +1280,17 @@ MDM::estimatePackSize (CommunicationBuffer& buff, GaussPoint* ip)
   } else return 0;
 }
 
-int
+double
 MDM::predictRelativeComputationalCost (GaussPoint* gp)
 {
   //
   // The values returned come from mesurement 
   // do not change them unless you know what are you doing
   //
-  FloatArray damageTensor;
-  int i;
+  if (nsd == 2) return 1.5;
+  else if (nsd == 3) return 1.8;
 
-  this->giveIPValue (damageTensor, gp, IST_PrincipalDamageTensor, NULL);
-  for (i=1; i<=nsd; i++)
-    if (damageTensor.at(i) > 1.e-3) return 165;
-  return 140;
+  return 1.0;
 }
 
 #endif

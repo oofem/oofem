@@ -905,10 +905,11 @@ Element :: estimatePackSize (CommunicationBuffer& buff)
  return result;
 }
 
-int 
+double
 Element::predictRelativeComputationalCost ()
 {
-  int j, nip, wgt = 0;
+  int j, nip;
+  double wgt = 0;
   IntegrationRule* iRule = this->giveDefaultIntegrationRulePtr();
   nip = iRule->getNumberOfIntegrationPoints();
   for (j=0; j < nip; j++)

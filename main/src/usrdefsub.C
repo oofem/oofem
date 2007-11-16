@@ -715,6 +715,9 @@ Element* CreateUsrDefElementOfType (classType type, int number, Domain* domain)
   Element* answer = NULL;
 
   if (type == PlaneStress2dClass) answer = new PlaneStress2d(number,domain) ;
+  else if (type == TrPlaneStress2dClass) answer = new TrPlaneStress2d (number, domain);
+  else if (type == LTRSpaceClass) answer = new LTRSpace (number, domain);
+
   if (answer == NULL)  OOFEM_ERROR2 ("CreateUsrDefElementOfType: Unknown element type [%d]", type);
   return answer;
 }

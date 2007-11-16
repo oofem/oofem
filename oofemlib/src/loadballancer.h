@@ -49,11 +49,14 @@ class ProcessCommunicator;
    Abstract base class representing general load ballancer monitor. The task of the monitor is to
    detect the imbalance and to make the decision, whether to redistribute the work or to continue 
    with existing partitioning.
+   It provides partition weights, reflecting their relative computational performance. These weights should
+   be continuosly updated to reflect changing work load during solution process.
  */
 class LoadBallancerMonitor
 {
  protected:
   EngngModel* emodel;
+  FloatArray nodeWeights;
  public:
   enum LoadBallancerDecisionType {LBD_CONTINUE, LBD_RECOVER};
   
@@ -61,12 +64,18 @@ class LoadBallancerMonitor
   virtual ~LoadBallancerMonitor() {}
 
   ///Initializes receiver acording to object description stored in input record.
-  virtual IRResultType initializeFrom (InputRecord* ir) {return IRRT_OK;}
+  virtual IRResultType initializeFrom (InputRecord* ir) ;
   
   /**@name Load evaluation and imbalance detection methods*/
   //@{
+  /// returns flag indicating whether reballancing is necessary; should update node weights as well
   virtual LoadBallancerDecisionType decide () = 0;
+  /// Returns processor weights; the larger weight means more powerfull node, sum of weights should equal to one.
+  void giveProcessorWeights(FloatArray& answer) {answer = nodeWeights;}
   //@}
+ 
+  /// Returns class name of the receiver.
+  const char* giveClassName () const { return "LoadBallancerMonitor" ;}
   
 };
 

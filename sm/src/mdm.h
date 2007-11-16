@@ -421,14 +421,14 @@ class MDM : public MicroplaneMaterial, public StructuralNonlocalMaterialExtensio
  int estimatePackSize (CommunicationBuffer& buff, GaussPoint* ip);
  /**
      Returns the weight representing relative computational cost of receiver
-     The reference material model  is linear isotropic material - its weight is set to 100. 
+     The reference material model  is linear isotropic material - its weight is set to 1.0
      The other material models should compare to this reference model.
   */
- virtual int predictRelativeComputationalCost (GaussPoint* gp);
+ virtual double predictRelativeComputationalCost (GaussPoint* gp);
   /**
      Returns the relative redistribution cost of the receiver
   */
-  virtual int predictRelativeRedistributionCost (GaussPoint* gp) {return 100;}
+ virtual double predictRelativeRedistributionCost (GaussPoint* gp) {return 1.0;}
 
 #endif
 

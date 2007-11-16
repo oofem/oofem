@@ -272,23 +272,23 @@ public:
   /**
      Returns the weight representing relative computational cost of receiver
      The reference cross section is integral model in plane stress.
-     Its weight is equal to 100. 
+     Its weight is equal to 1.0 
      Default implementation computes average computational cost of material model 
      and multiplies it by cross section type weight (obtained by giveRelativeSelfComputationalCost())
      The other cross section models should compare to this reference.
   */
-  virtual int predictRelativeComputationalCost (GaussPoint* gp);
+ virtual double predictRelativeComputationalCost (GaussPoint* gp);
   /**
      Returns the weight representing relative computational cost of receiver
      The reference element is integral model in plane stress.
-     Its weight is equal to 100. 
+     Its weight is equal to 1.0 
      The other  cross section models should compare to this reference.
   */
-  virtual int giveRelativeSelfComputationalCost() {return 100;}
+ virtual double giveRelativeSelfComputationalCost() {return 1.0;}
   /**
      Returns the relative redistribution cost of the receiver
   */
-  virtual int predictRelativeRedistributionCost (GaussPoint* gp) {return 100;}
+ virtual double predictRelativeRedistributionCost (GaussPoint* gp) {return 1.0;}
 #endif
 
  friend class Material;
