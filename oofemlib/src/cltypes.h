@@ -572,10 +572,10 @@ enum UnknownType {
   UnknownType_Unknown,
   DisplacementVector,
   GeneralizedDisplacementVector,
-  //HeMaCVector, // heat and mass concetration vector
-  FluxVector,
+  FluxVector,    // mass concentrations
   VelocityVector,
   PressureVector,
+  TemperatureVector,
 
   EigenValue,
   EigenVector,

@@ -707,7 +707,7 @@ VTKExportModule::exportPrimVarAs (UnknownType valID, FILE* stream, TimeStep* tSt
  int nScalarComp = 1;
 
  if ((valID == DisplacementVector) || (valID == VelocityVector)) type = ISVT_VECTOR;
- else if ((valID == FluxVector) || (valID == PressureVector)) {
+ else if ((valID == FluxVector) || (valID == PressureVector) || (valID == TemperatureVector)) {
   type = ISVT_SCALAR;
   //nScalarComp = d->giveNumberOfDefaultNodeDofs();
  } else OOFEM_ERROR("VTKExportModule::exportPrimVarAs: unsupported UnknownType");
@@ -757,6 +757,14 @@ VTKExportModule::exportPrimVarAs (UnknownType valID, FILE* stream, TimeStep* tSt
        id = dman->giveDof(j)->giveDofID();
        if ((id == C_1)) iVal.at(1) = dman->giveDof(j)->giveUnknown (EID_ConservationEquation,VM_Total,tStep);
      }
+   } else if (valID == TemperatureVector) {
+     iVal.resize(1);
+     
+     for (j=1 ; j<=numberOfDofs ; j++) {
+       id = dman->giveDof(j)->giveDofID();
+       if ((id == T_f)) iVal.at(1) = dman->giveDof(j)->giveUnknown (EID_ConservationEquation,VM_Total,tStep);
+     }
+     
    } else if (valID == PressureVector) {
      iVal.resize(1);
      
@@ -819,7 +827,14 @@ VTKExportModule::exportPrimVarAs (UnknownType valID, FILE* stream, TimeStep* tSt
       
        for (j=1 ; j<=numberOfDofs ; j++) {
          id = dman->giveDof(j)->giveDofID();
-         if ((id == C_1)) iVal.at(1) = dman->giveDof(j)->giveUnknown (EID_ConservationEquation,VM_Total,tStep);
+         if (id == C_1) iVal.at(1) = dman->giveDof(j)->giveUnknown (EID_ConservationEquation,VM_Total,tStep);
+       }
+     } else if (valID == TemperatureVector) {
+       iVal.resize(1);
+      
+       for (j=1 ; j<=numberOfDofs ; j++) {
+         id = dman->giveDof(j)->giveDofID();
+         if (id == T_f) iVal.at(1) = dman->giveDof(j)->giveUnknown (EID_ConservationEquation,VM_Total,tStep);
        }
      } else if (valID == PressureVector) {
        iVal.resize(1);
