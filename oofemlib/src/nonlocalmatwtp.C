@@ -222,11 +222,13 @@ NonlocalMaterialWTP::migrate ()
       }
       // determine which local elements are to be sent to remotepartition
       for (_i=1; _i<=nelems; _i++) {
-        if (remoteWishSet.find(domain->giveElement(_i)->giveGlobalNumber()) !=remoteWishSet.end()) {
-          // store local element number 
-          toSendList[i].push_back(_i);
+        elem = domain->giveElement(_i);
+        if (elem->giveParallelMode()==Element_local) {
+          if (remoteWishSet.find(elem->giveGlobalNumber()) !=remoteWishSet.end()) {
+            // store local element number 
+            toSendList[i].push_back(_i);
+          }
         }
-        
       }
     }
   } // end loop over partitions broadcast
