@@ -109,6 +109,7 @@ NonlocalMaterialWTP::init (Domain* domain)
 {
   int ie, gie, nelem = domain->giveNumberOfElements();
   EngngModel* emodel = domain->giveEngngModel();
+  Element* elem;
   int nproc= emodel->giveNumberOfProcesses();
   int myrank= emodel->giveRank();
   CommunicatorBuff cb (nproc, CBT_dynamic);
@@ -116,8 +117,11 @@ NonlocalMaterialWTP::init (Domain* domain)
 
   // build nonlocal element dependency array for each element 
   for (ie=1; ie<=nelem; ie++) {
-    gie = domain->giveElement(ie)->giveGlobalNumber();
-    this->giveElementNonlocalDepArry (nonlocElementDependencyMap[gie], domain, ie);
+    elem = domain->giveElement(ie);
+    if ((elem->giveParallelMode() == Element_local)) {
+      gie = elem->giveGlobalNumber();
+      this->giveElementNonlocalDepArry (nonlocElementDependencyMap[gie], domain, ie);
+    }
   }
 
   /* send and receive nonlocElementDependencyArry of migrating elements to remote partition */
@@ -204,6 +208,7 @@ NonlocalMaterialWTP::migrate ()
   toSendList.resize(nproc);
   for (i=0; i<nproc; i++) { // loop over partitions
     commBuff.init();
+    toSendList[i].clear();
     if (i == myrank) {
       // current domain has to send its receive wish list to all domains
       commBuff.packInt (_locsize);
