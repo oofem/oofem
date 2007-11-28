@@ -52,10 +52,7 @@
 // includes for HPC - not very clean (NumMethod knows what is "node" and "dof")
 #include "node.h"
 #include "dof.h"
-
-#ifdef __PETSC_MODULE
-#include "petscsolver.h"
-#endif
+#include "usrdefsub.h"
 
 #ifdef __PARALLEL_MODE
 #ifndef __MAKEDEPEND
@@ -1036,29 +1033,17 @@ CylindricalALM :: restoreContext(DataStream* stream, ContextMode mode, void *obj
 SparseLinearSystemNM*
 CylindricalALM :: giveLinearSolver() {
 
- if (solverType == ST_Direct) {
   if (linSolver) {
-   if (linSolver->giveClassID() == LDLTFactorizationClass) return linSolver;
-   else delete linSolver;
+    if (linSolver->giveLinSystSolverType()==solverType) {
+      return linSolver;
+    } else {
+      delete linSolver;
+    }
   }
-  linSolver = new LDLTFactorization (this->giveNumber()+1,this->giveDomain(), engngModel);
- } else if ((solverType == ST_CG) || (solverType == ST_GMRES)) {
-  if (linSolver) {
-   if (linSolver->giveClassID() == IMLSolverClass) return linSolver;
-   else delete linSolver;
-  } 
-  linSolver = new IMLSolver (this->giveNumber()+1,this->giveDomain(), engngModel);
-#ifdef __PETSC_MODULE
- } else if (solverType == ST_Petsc) {
-   if (linSolver) {
-     if (linSolver->giveClassID() == PetscSolverClass) return linSolver;
-     else delete linSolver;
-   } 
-   linSolver = new PetscSolver (this->giveNumber()+1,this->giveDomain(), engngModel);
-#endif
- } else _error ("giveLinearSolver: unknown solver type");
-
- return linSolver;
+  
+  linSolver = :: CreateUsrDefSparseLinSolver (solverType, 1, domain, engngModel);
+  if (linSolver==NULL) _error ("giveLinearSolver: linear solver creation failed");
+  return linSolver;
 }
 
 

@@ -1,9 +1,9 @@
 \documentclass[draft]{article}
 
 \usepackage{graphics}
-\usepackage{epsf}
-\usepackage{html}
-\input{include.tex}
+%\usepackage{epsf}
+%\usepackage{html}
+%\input{include.tex}
 \newcommand{\mbf}[1]{\mbox{\boldmath$#1$}}
 %% Definitions for PostScript output
 %\newcommand{\param}[1]{mbox{\texttt{#1}}}
@@ -960,9 +960,9 @@ The sparselinsolverparams field has the following general syntax:\\
 where 
 Parameter \param{lstype} allows to select solver for linear system of
 equations. Currently supported values are 0 (default) for direct solver
-(ST\_Direct), 1 for Conjugate Gradient solver (ST\_CG), 2 for
-GMRES solver (ST\_GMRES), 3 for Spooles direct solver, 4 for Petsc
-library family of solvers, and 5 for DirectSparseSolver (ST\_DSS).
+(ST\_Direct), 1 for Iterative Method Library (IML) solver (ST\_IML), 
+2 for Spooles direct solver, 3 for Petsc
+library family of solvers, and 4 for DirectSparseSolver (ST\_DSS).
 Parameter \param{smtype} allows to select sparse matrix storage
 scheme. The scheme should be compatible with solver type.
 Currently supported values (marked as ``id'') are summarized in table
@@ -982,24 +982,24 @@ with solver parameters related to specific solver.
 \begin{table}[h]                                                                
 \begin{center}
 %%\scalebox{0.50}{
-\begin{tabular}{|l|c|c|c|c|c|c|c|}                                                      
+\begin{tabular}{|l|c|c|c|c|c|c|}                                                      
 \hline                                                                          
 Storage format & id & \multicolumn{6}{c|}{Sparse solver} \\
 \hline
- && \tiny{Direct} &\tiny{CG} &\tiny{GMRES}
+ && \tiny{Direct} &\tiny{IML}
  &\tiny{Spooles}& \tiny{Petsc}& \tiny{DSS}\\
 \hline
-\small{SMT\_Skyline} &0& + &+&+&&&\\
-\small{SMT\_SkylineU} &1& + &+&+&&&\\
-\small{SMT\_CompCol} &2& & +&+&&&\\
-\small{SMT\_DynCompCol} &3& &+&+&&&\\
-\small{SMT\_SymCompCol} &4& &+&+&&&\\
-\small{SMT\_DynCompRow} &5&&+&+&&&\\
-\small{SMT\_SpoolesMtrx}&6&&&&+&&\\
-\small{SMT\_PetscMtrx }&7&&&&&+&\\
-\small{SMT\_DSS\_sym\_LDL}&8&&&&&&+\\
-\small{SMT\_DSS\_sym\_LL}&9&&&&&&+\\
-\small{SMT\_DSS\_unsym\_LU}&10&&&&&&+\\
+\small{SMT\_Skyline}       & 0&+&+& & & \\
+\small{SMT\_SkylineU}      & 1&+&+& & & \\
+\small{SMT\_CompCol}       & 2& &+& & & \\
+\small{SMT\_DynCompCol}    & 3& &+& & & \\
+\small{SMT\_SymCompCol}    & 4& &+& & & \\
+\small{SMT\_DynCompRow}    & 5& &+& & & \\
+\small{SMT\_SpoolesMtrx}   & 6& & &+& & \\
+\small{SMT\_PetscMtrx }    & 7& & & &+& \\
+\small{SMT\_DSS\_sym\_LDL} & 8& & & & &+\\
+\small{SMT\_DSS\_sym\_LL}  & 9& & & & &+\\
+\small{SMT\_DSS\_unsym\_LU}&10& & & & &+\\
 \hline
 \end{tabular}   
 %%}
@@ -1017,19 +1017,14 @@ type and are summarized in table (\ref{sparsesolverparams}).
 \hline                                                                          
 Solver type & id & Solver parameters \\
 \hline
-ST\_Direct & 0 &\\
-ST\_CG & 1 & \field{lstol}{rn} \field{lsiter}{in}
+ST\_Direct  &0&\\
+ST\_IML     &1& \optField{stype}{in} \field{lstol}{rn} \field{lsiter}{in}
 \field{lsprecond}{in}\\
                   & &  \optField{precondattributes}{string}\\
 
-ST\_GMRES & 2 & \field{lstol}{rn} \field{lsiter}{in}
-\field{lsprecond}{in}\\
-                  & &  \optField{precondattributes}{string}\\
-
-
-ST\_Spooles & 3&  \optField{msglvl}{in} \optField{msgfile}{s}\\
-ST\_Petsc & 4 & see Petsc manual, for details\footnotemark\\
-ST\_DSS & 5& \\ 
+ST\_Spooles &2&  \optField{msglvl}{in} \optField{msgfile}{s}\\
+ST\_Petsc   &3& see Petsc manual, for details\footnotemark\\
+ST\_DSS     &4& \\ 
 \hline
 \end{tabular}                                                                   
 \caption{Solver parameters.}                
@@ -1042,7 +1037,7 @@ ST\_DSS & 5& \\
      \mbox{-ksp\_monitor} \mbox{-ksp\_rtol}~$<$rtol$>$ \mbox{-ksp\_view} \mbox{-ksp\_converged\_reason}.
      These options will override those that are default (PETSC KSPSetFromOptions() routine is called after any other customization
      routines).}
-The \param{lstol} represents the maximum value of residual after the
+The \param{stype} allows to select particular iterative solver from IML library, currently supported values are 0 (default) for Conjugate-Gradient solver, 1 for GMRES solver. Parameter \param{lstol} represents the maximum value of residual after the
 final iteration and the \param{lsiter} is maximum number of iteration  for
 iterative solver. 
 The \param{precondattributes} parameters contains the optional

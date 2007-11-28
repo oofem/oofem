@@ -50,6 +50,7 @@
 #include "flotmtrx.h"
 //#include "nlinearstatic.h"
 #include "mathfem.h"
+#include "usrdefsub.h"
 
 
 #define nrsolver_SMALL_NUM 1.e-20
@@ -332,21 +333,17 @@ NRSolver2 :: restoreContext(DataStream* stream, ContextMode mode, void *obj) {
 SparseLinearSystemNM*
 NRSolver2 :: giveLinearSolver() {
   
- if (solverType == ST_Direct) {
   if (linSolver) {
-   if (linSolver->giveClassID() == LDLTFactorizationClass) return linSolver;
-   else delete linSolver;
+    if (linSolver->giveLinSystSolverType()==solverType) {
+      return linSolver;
+    } else {
+      delete linSolver;
+    }
   }
-  linSolver = new LDLTFactorization (this->giveNumber()+1,this->giveDomain(), engngModel);
- } else if ((solverType == ST_CG) || (solverType == ST_GMRES)) {
-  if (linSolver) {
-   if (linSolver->giveClassID() == IMLSolverClass) return linSolver;
-   else delete linSolver;
-  } 
-  linSolver = new IMLSolver (this->giveNumber()+1,this->giveDomain(), engngModel);
- } else _error ("giveLinearSolver: unknown solver type");
-
- return linSolver;
+  
+  linSolver = :: CreateUsrDefSparseLinSolver (solverType, 1, domain, engngModel);
+  if (linSolver==NULL) _error ("giveLinearSolver: linear solver creation failed");
+  return linSolver;
 }
 
 LineSearchNM* 

@@ -55,12 +55,7 @@
 #include "dof.h"
 #include "loadtime.h"
 #include "linesearch.h"
-#ifdef __PETSC_MODULE
-#include "petscsolver.h"
-#include "petscsparsemtrx.h"
-#endif
-
-
+#include "usrdefsub.h"
 
 #define nrsolver_ERROR_NORM_SMALL_NUM 1.e-6
 #define NRSOLVER_MAX_REL_ERROR_BOUND 1.e10
@@ -460,29 +455,17 @@ NRSolver :: restoreContext(DataStream* stream, ContextMode mode, void *obj) {
 SparseLinearSystemNM*
 NRSolver :: giveLinearSolver() {
 
- if (solverType == ST_Direct) {
   if (linSolver) {
-   if (linSolver->giveClassID() == LDLTFactorizationClass) return linSolver;
-   else delete linSolver;
+    if (linSolver->giveLinSystSolverType()==solverType) {
+      return linSolver;
+    } else {
+      delete linSolver;
+    }
   }
-  linSolver = new LDLTFactorization (this->giveNumber()+1,this->giveDomain(), engngModel);
- } else if ((solverType == ST_CG) || (solverType == ST_GMRES)) {
-  if (linSolver) {
-   if (linSolver->giveClassID() == IMLSolverClass) return linSolver;
-   else delete linSolver;
-  } 
-  linSolver = new IMLSolver (this->giveNumber()+1,this->giveDomain(), engngModel);
-#ifdef __PETSC_MODULE
- } else if (solverType == ST_Petsc) {
-   if (linSolver) {
-     if (linSolver->giveClassID() == PetscSolverClass) return linSolver;
-     else delete linSolver;
-   } 
-   linSolver = new PetscSolver (this->giveNumber()+1,this->giveDomain(), engngModel);
-#endif
- } else _error ("giveLinearSolver: unknown solver type");
-
- return linSolver;
+  
+  linSolver = :: CreateUsrDefSparseLinSolver (solverType, 1, domain, engngModel);
+  if (linSolver==NULL) _error ("giveLinearSolver: linear solver creation failed");
+  return linSolver;
 }
 
 LineSearchNM* 

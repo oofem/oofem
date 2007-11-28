@@ -606,7 +606,7 @@ SparseLinearSystemNM* CreateUsrDefSparseLinSolver(LinSystSolverType st, int i, D
   if (st == ST_Direct) {
     nm = (SparseLinearSystemNM*) new LDLTFactorization (i,d,m);
     return nm;
-  } else if ((st == ST_CG) || (st == ST_GMRES)) {
+  } else if (st == ST_IML) {
     nm = (SparseLinearSystemNM*) new IMLSolver (i,d,m);
     return nm;
   } else if (st == ST_Spooles) {

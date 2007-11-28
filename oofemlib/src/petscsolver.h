@@ -104,6 +104,7 @@ public:
   // identification 
   const char*  giveClassName () const { return "PetscSolver" ;}
   classType giveClassID () const { return  PetscSolverClass ;}
+  LinSystSolverType giveLinSystSolverType() const {return ST_Petsc;}
 };
 
 #define petscsolver_h

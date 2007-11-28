@@ -73,7 +73,7 @@ IMLSolver::IMLSolver (int i, Domain* d,EngngModel* m) : SparseLinearSystemNM (i,
 {
  Lhs = NULL;
  M = NULL;
- solverType = ST_CG;
+ solverType = IML_ST_CG;
  precondType = IML_VoidPrec;
  precondInit = true;
 }
@@ -92,8 +92,8 @@ IMLSolver :: initializeFrom (InputRecord* ir)
  int val;
 
  val = 0;
- IR_GIVE_OPTIONAL_FIELD (ir, val, IFT_IMLSolver_lstype, "lstype"); // Macro
- solverType = (LinSystSolverType) val;
+ IR_GIVE_OPTIONAL_FIELD (ir, val, IFT_IMLSolver_lstype, "stype"); // Macro
+ solverType = (IMLSolverType) val;
  
  tol=1.e-5;
  IR_GIVE_OPTIONAL_FIELD (ir, tol, IFT_IMLSolver_lstol, "lstol"); // Macro
@@ -160,12 +160,12 @@ IMLSolver::solve (SparseMtrx* A, FloatArray* b, FloatArray* x)
 #endif
 
 
- if (solverType == ST_CG) {
+ if (solverType == IML_ST_CG) {
   int mi = this->maxite;
   double t = this->tol;
   result = CG (*Lhs, *x, *b, *M, mi, t);
   OOFEM_LOG_INFO ("CG(%s): flag=%d, nite %d, achieved tol. %g\n",M->giveClassName(), result, mi,t);
- } else if (solverType == ST_GMRES) {
+ } else if (solverType == IML_ST_GMRES) {
   int mi = this->maxite, restart = 100;
   double t = this->tol;
   FloatMatrix H (restart+1, restart);   // storage for upper Hesenberg

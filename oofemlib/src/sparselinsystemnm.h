@@ -77,6 +77,10 @@ public:
   @see FEMComponent::giveClassID 
   */
  classType giveClassID () const { return SparseLinearSystemNMClass ;}
+ /**
+    Returns LinSystSolverType value, corresponding to receiver
+ */
+ virtual LinSystSolverType giveLinSystSolverType() const = 0;
 
  /**
   Solves the given sparse linear system of equations Ax=b.

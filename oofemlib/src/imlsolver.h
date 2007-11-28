@@ -58,8 +58,10 @@ class Domain; class EngngModel; class FloatMatrix;
 class IMLSolver : public SparseLinearSystemNM
 {
 private:
+  /// solver type
+  enum IMLSolverType {IML_ST_CG, IML_ST_GMRES};
   /// Preconditioner type
- enum IMLPrecondType {IML_VoidPrec, IML_DiagPrec, IML_ILU_CompColPrec, IML_ILU_CompRowPrec, IML_ICPrec};
+  enum IMLPrecondType {IML_VoidPrec, IML_DiagPrec, IML_ILU_CompColPrec, IML_ILU_CompRowPrec, IML_ICPrec};
 
  /// last mapped Lhs matrix
  SparseMtrx*    Lhs;
@@ -68,7 +70,7 @@ private:
  /// Preconditioner
  Preconditioner* M;
  /// IML Solver type
- LinSystSolverType solverType;
+ IMLSolverType solverType;
  /// IML Preconditioner type
  IMLPrecondType precondType;
  /// precond init flag
@@ -108,7 +110,7 @@ private:
  const char*  giveClassName () const { return "IMLSolver" ;}
  /// Returns LDLTFactorizationClass - classType id of receiver.
   classType giveClassID () const { return  IMLSolverClass ;}
-  
+  LinSystSolverType giveLinSystSolverType() const {return ST_IML;}  
 
  };
 

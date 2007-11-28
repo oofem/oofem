@@ -96,6 +96,7 @@ public:
   // identification 
  const char*  giveClassName () const { return "SpoolesSolver" ;}
   classType giveClassID () const { return  SpoolesSolverClass ;}
+  LinSystSolverType giveLinSystSolverType() const {return ST_Spooles;}
  };
 
 #define spoolessolver_h

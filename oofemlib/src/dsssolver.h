@@ -85,6 +85,7 @@ public:
       const char*  giveClassName () const { return "LDLTFactorization" ;}
       /// Returns LDLTFactorizationClass - classType id of receiver.
       classType giveClassID () const { return  LDLTFactorizationClass ;}
+      LinSystSolverType giveLinSystSolverType() const {return ST_DSS;}
    };
 
 #define dsssolver_h
