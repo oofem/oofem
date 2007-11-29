@@ -56,6 +56,11 @@
 #include "loadtime.h"
 #include "linesearch.h"
 #include "usrdefsub.h"
+#ifdef __PETSC_MODULE 
+#include "petscsolver.h" 	 
+#include "petscsparsemtrx.h" 	 
+#endif 	 
+  	 
 
 #define nrsolver_ERROR_NORM_SMALL_NUM 1.e-6
 #define NRSOLVER_MAX_REL_ERROR_BOUND 1.e10

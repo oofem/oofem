@@ -133,6 +133,7 @@ public:
       // identification 
       const char*  giveClassName () const { return "FETISolver" ;}
       classType giveClassID () const { return NumericalMethodClass ;}
+      LinSystSolverType giveLinSystSolverType() const {return ST_Feti;}  
 
 
   void projection (FloatArray &v, FloatMatrix &l,FloatMatrix &l1);
