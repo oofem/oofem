@@ -113,7 +113,7 @@ void  Dof :: printYourself ()
 }
 
 
-void Dof :: error (char* file, int line, char *format, ...) 
+void Dof :: error (const char* file, int line, const char *format, ...) 
 {
   char buffer[MAX_ERROR_MSG_LENGTH];
 	va_list args;

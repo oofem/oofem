@@ -42,7 +42,7 @@
 #include <stdarg.h>
 #endif
 
-void  Field :: error (char* file, int line, char *format, ...) const
+void  Field :: error (const char* file, int line, const char *format, ...) const
 {
   char buffer[MAX_ERROR_MSG_LENGTH];
 	va_list args;
@@ -55,7 +55,7 @@ void  Field :: error (char* file, int line, char *format, ...) const
 }
 
 
-void  Field :: warning (char* file, int line, char *format, ...) const
+void  Field :: warning (const char* file, int line, const char *format, ...) const
 {
   char buffer[MAX_ERROR_MSG_LENGTH];
 	va_list args;

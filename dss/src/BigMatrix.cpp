@@ -371,12 +371,12 @@ TraceableMatrix::TraceableMatrix()
 	eMT = &MT;
 }
 
-void TraceableMatrix::Writeln(char* cmd)
+void TraceableMatrix::Writeln(const char* cmd)
 {
 	if (eMT)
 		eMT->Writeln(cmd);
 }
-void TraceableMatrix::Write(char* cmd)
+void TraceableMatrix::Write(const char* cmd)
 {
 	if (eMT)
 		eMT->Write(cmd);

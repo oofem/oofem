@@ -66,13 +66,13 @@ void MathTracer::Writeln()
 	printf("\n");
 }
 
-void MathTracer::Writeln(char* str)
+void MathTracer::Writeln(const char* str)
 {
 	printf(str);
 	printf("\n");
 }
 
-void MathTracer::Write(char* str)
+void MathTracer::Write(const char* str)
 {
 	printf(str);
 }

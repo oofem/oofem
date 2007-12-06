@@ -635,7 +635,7 @@ int  Domain :: instanciateYourself (DataReader* dr)
 }
 
 
-void  Domain :: error (char* file, int line, char *format, ...) 
+void  Domain :: error (const char* file, int line, const char *format, ...) 
 {
   char buffer[MAX_ERROR_MSG_LENGTH];
 	va_list args;
@@ -648,7 +648,7 @@ void  Domain :: error (char* file, int line, char *format, ...)
 }
 
 
-void  Domain :: warning (char* file, int line, char *format, ...) 
+void  Domain :: warning (const char* file, int line, const char *format, ...) 
 {
   char buffer[MAX_ERROR_MSG_LENGTH];
 	va_list args;

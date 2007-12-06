@@ -1686,7 +1686,7 @@ EngngModel :: GiveDomainDataReader(int domainNum, int domainSerNum, ContextFileM
 }
 
 void 
-EngngModel :: error (char* file, int line, char *format, ...) const
+EngngModel :: error (const char* file, int line, const char *format, ...) const
 {
   char buffer[MAX_ERROR_MSG_LENGTH];
 	va_list args;
@@ -1702,7 +1702,7 @@ EngngModel :: error (char* file, int line, char *format, ...) const
 }
 
 
-void  EngngModel :: warning (char* file, int line, char *format, ...) const
+void  EngngModel :: warning (const char* file, int line, const char *format, ...) const
 //
 // this function handles error reporting
 // prints errorMsg enriched by ClasName and Number

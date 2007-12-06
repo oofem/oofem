@@ -128,7 +128,7 @@ InternalStateValueType giveInternalStateValueType (InternalStateType type)
 
 
 
-ContextIOERR::ContextIOERR(contextIOResultType e, char* file, int line)
+ContextIOERR::ContextIOERR(contextIOResultType e, const char* file, int line)
 {
  error = e;
  this->file = file;
@@ -136,7 +136,7 @@ ContextIOERR::ContextIOERR(contextIOResultType e, char* file, int line)
  this->msg = NULL;
 }
 
-ContextIOERR::ContextIOERR (contextIOResultType e, char* msg , char* file, int line)
+ContextIOERR::ContextIOERR (contextIOResultType e, const char* msg , const char* file, int line)
 {
  error = e;
  this->file = file;

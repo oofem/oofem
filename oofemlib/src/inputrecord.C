@@ -57,7 +57,7 @@ InputRecord::operator= (const InputRecord& src)
  return *this;
 }
 
-char*
+const char*
 InputRecord::strerror (IRResultType rt)
 {
  switch(rt) {

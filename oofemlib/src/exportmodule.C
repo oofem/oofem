@@ -102,7 +102,7 @@ ExportModule :: testDomainOutput (int n)
 
 
 
-void ExportModule :: error (char* file, int line, char *format, ...) const
+void ExportModule :: error (const char* file, int line, const char *format, ...) const
 {
   char buffer[MAX_ERROR_MSG_LENGTH];
 	va_list args;

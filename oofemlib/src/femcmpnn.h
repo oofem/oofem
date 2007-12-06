@@ -183,9 +183,9 @@ public:
   */
   //@{
   /// prints error message and exits
-  void error (char* file, int line, char *format, ...) const ;
+  void error (const char* file, int line, const char *format, ...) const ;
   /// prints warning message
-  void warning (char* file, int line, char *format, ...) const ;
+  void warning (const char* file, int line, const char *format, ...) const ;
  //@}
 #ifdef __OOFEG
       virtual void   drawYourself (oofegGraphicContext& ) {}

@@ -197,7 +197,7 @@ public:
  virtual void setUpCommunicationMaps (EngngModel* pm) {}
 
  /// prints error message and exits
- void error (char* file, int line, char *format, ...) const ;
+ void error (const char* file, int line, const char *format, ...) const ;
 
 private:
 };

@@ -1005,7 +1005,7 @@ HuertaErrorEstimatorInterface::setupRefinedElementProblem1D (Element *element, R
       FloatArray **corner, FloatArray &midNode, 
       int &localNodeId, int &localElemId, int &localBcId,
       IntArray &controlNode, IntArray &controlDof,
-      HuertaErrorEstimator::AnalysisMode aMode, char *edgetype)
+      HuertaErrorEstimator::AnalysisMode aMode, const char *edgetype)
 {
  char line [OOFEM_MAX_LINE_LENGTH+1];
  IntArray *connectivity, boundary(1);
@@ -1422,7 +1422,7 @@ HuertaErrorEstimatorInterface::setupRefinedElementProblem2D (Element *element, R
       FloatArray **corner, FloatArray *midSide, FloatArray &midNode, 
       int &localNodeId, int &localElemId, int &localBcId,
       IntArray &controlNode, IntArray &controlDof,
-      HuertaErrorEstimator::AnalysisMode aMode, char *quadtype)
+      HuertaErrorEstimator::AnalysisMode aMode, const char *quadtype)
 {
  char line [OOFEM_MAX_LINE_LENGTH+1];
  IntArray *connectivity, boundary(2);
@@ -1941,7 +1941,7 @@ HuertaErrorEstimatorInterface::setupRefinedElementProblem3D (Element *element, R
       int &localNodeId, int &localElemId, int &localBcId, 
       int hexaSideNode[1][3], int hexaFaceNode[1][3],
       IntArray &controlNode, IntArray &controlDof,
-      HuertaErrorEstimator::AnalysisMode aMode, char *hexatype)
+      HuertaErrorEstimator::AnalysisMode aMode, const char *hexatype)
 {
  char line [OOFEM_MAX_LINE_LENGTH+1];
  IntArray *connectivity, boundary(3);
@@ -3717,7 +3717,7 @@ HuertaErrorEstimator::extractVectorFrom(Element *element, FloatArray &vector, Fl
 
 
 void
-HuertaErrorEstimator::setupRefinedProblemProlog(char *problemName, int problemId, IntArray &localNodeIdArray,
+HuertaErrorEstimator::setupRefinedProblemProlog(const char *problemName, int problemId, IntArray &localNodeIdArray,
                         int nodes, int elems, int csects, int mats, int loads, int ltfuncs,
                         IntArray &controlNode, IntArray &controlDof, TimeStep *tStep)
 {

@@ -106,7 +106,7 @@ FEMComponent :: giveInputRecordString(std::string &str, bool keyword)
 
 
 void 
-FEMComponent :: error (char* file, int line, char *format, ...) const
+FEMComponent :: error (const char* file, int line, const char *format, ...) const
 {
   char buffer[MAX_ERROR_MSG_LENGTH];
 	va_list args;
@@ -119,7 +119,7 @@ FEMComponent :: error (char* file, int line, char *format, ...) const
 }
 
 void 
-FEMComponent :: warning (char* file, int line, char *format, ...) const
+FEMComponent :: warning (const char* file, int line, const char *format, ...) const
 {
   char buffer[MAX_ERROR_MSG_LENGTH];
 	va_list args;

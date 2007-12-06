@@ -1218,13 +1218,13 @@ enum contextIOResultType {
 class ContextIOERR 
 {
  contextIOResultType error;
- char *msg, *file;
+ const char *msg, *file;
  int line;
 
 public:
 
- ContextIOERR (contextIOResultType e, char* file, int line);
- ContextIOERR (contextIOResultType e, char* msg , char* file, int line);
+ ContextIOERR (contextIOResultType e, const char* file, int line);
+ ContextIOERR (contextIOResultType e, const char* msg , const char* file, int line);
  ~ContextIOERR ();
 
  void print ();

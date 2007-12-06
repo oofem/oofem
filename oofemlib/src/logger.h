@@ -68,9 +68,9 @@ public:
   void appendlogTo (char* fname);
   
   /* writes the normal log message */
-  void writeLogMsg (logLevelType level, char *format, ...);
+  void writeLogMsg (logLevelType level, const char *format, ...);
   /* writes extended log message with file and line info */
-  void writeELogMsg (logLevelType level, const char* _file, int _line, char *format, ...);
+  void writeELogMsg (logLevelType level, const char* _file, int _line, const char *format, ...);
   /* flushes the log stream */
   void flush () {fflush (mylogStream);}
   

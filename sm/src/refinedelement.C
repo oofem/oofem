@@ -600,7 +600,7 @@ InitialCondition* = element -> giveNode(1) -> giveDof(1) -> giveIc()
 int element -> giveNode(1) -> giveDof(1) -> giveBc() -> isImposed(tStep)
 */
 
-void  RefinedElement :: error (char* file, int line, char *format, ...) const
+void  RefinedElement :: error (const char* file, int line, const char *format, ...) const
 {
   char buffer[MAX_ERROR_MSG_LENGTH];
 	va_list args;

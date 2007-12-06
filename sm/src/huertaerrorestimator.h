@@ -202,7 +202,7 @@ private:
   */
   void extractVectorFrom(Element *element, FloatArray &vector, FloatArray &answer, int dofs, TimeStep* tStep);
 
-  void setupRefinedProblemProlog(char *problemName, int problemId, IntArray &localNodeIdArray,
+  void setupRefinedProblemProlog(const char *problemName, int problemId, IntArray &localNodeIdArray,
                  int nodes, int elems, int csects, int mats, int loads, int ltfuncs,
                  IntArray &controlNode, IntArray &controlDof, TimeStep *tStep);
   void setupRefinedProblemEpilog1(int csects, int mats, int loads, int nlbarriers);
@@ -244,7 +244,7 @@ protected:
                     FloatArray **corner, FloatArray &midNode, 
                     int &localNodeId, int &localElemId, int &localBcId,
                     IntArray &controlNode, IntArray &controlDof,
-                     HuertaErrorEstimator::AnalysisMode aMode, char *edgetype);
+                     HuertaErrorEstimator::AnalysisMode aMode, const char *edgetype);
 
     void setupRefinedElementProblem2D (Element *element, RefinedElement *refinedElement, 
                     int level, int nodeId, IntArray &localNodeIdArray, IntArray &globalNodeIdArray, 
@@ -252,7 +252,7 @@ protected:
                     FloatArray **corner, FloatArray *midSide, FloatArray &midNode, 
                     int &localNodeId, int &localElemId, int &localBcId,
                     IntArray &controlNode, IntArray &controlDof,
-                     HuertaErrorEstimator::AnalysisMode aMode, char *quadtype);
+                     HuertaErrorEstimator::AnalysisMode aMode, const char *quadtype);
 
     void setupRefinedElementProblem3D (Element *element, RefinedElement *refinedElement,
                     int level, int nodeId, IntArray &localNodeIdArray, IntArray &globalNodeIdArray, 
@@ -261,7 +261,7 @@ protected:
                     int &localNodeId, int &localElemId, int &localBcId, 
                     int hexaSideNode[1][3], int hexaFaceNode[1][3],
                     IntArray &controlNode, IntArray &controlDof,
-                     HuertaErrorEstimator::AnalysisMode aMode, char *hexatype);
+                     HuertaErrorEstimator::AnalysisMode aMode, const char *hexatype);
 };
 
 

@@ -197,13 +197,13 @@ class Graph
 
 class GT_Exception
 {
-   char *msg, *file;
+   const char *msg, *file;
    int line;
 
 public:
 
- GT_Exception (char* file, int line) {this->file=file; this->line=line; this->msg=NULL;}
- GT_Exception (char* msg , char* file, int line) {this->file=file; this->line=line; this->msg=msg;}
+ GT_Exception (const char* file, int line) {this->file=file; this->line=line; this->msg=NULL;}
+ GT_Exception (const char* msg , const char* file, int line) {this->file=file; this->line=line; this->msg=msg;}
  ~GT_Exception () {}
 
  void print ();

@@ -466,8 +466,8 @@ int               giveNumber () {return this->number;}
  private:
  void                resolveDomainDofsDefaults(char* );
 
- void error (char* file, int line, char *format, ...) ;
- void warning (char* file, int line, char *format, ...) ;
+ void error (const char* file, int line, const char *format, ...) ;
+ void warning (const char* file, int line, const char *format, ...) ;
 
 };
 

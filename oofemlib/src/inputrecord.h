@@ -931,7 +931,7 @@ public:
  virtual bool         hasField  (const InputFieldType fieldID, const char* idString) = 0;
  
  /// Returns error string corresponding to given value of IRResultType type
- char* strerror (IRResultType); 
+ const char* strerror (IRResultType); 
 
  /// Prints the error message 
  void report_error (const char* _class, const char* proc, const InputFieldType fieldID, const char* kwd, 

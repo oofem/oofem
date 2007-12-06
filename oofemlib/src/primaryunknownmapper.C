@@ -43,7 +43,7 @@
 #endif
 
 
-void  PrimaryUnknownMapper :: error (char* file, int line, char *format, ...) const
+void  PrimaryUnknownMapper :: error (const char* file, int line, const char *format, ...) const
 {
   char buffer[MAX_ERROR_MSG_LENGTH];
 	va_list args;
@@ -55,7 +55,7 @@ void  PrimaryUnknownMapper :: error (char* file, int line, char *format, ...) co
   __OOFEM_ERROR2 (file, line, "Class: PrimaryUnknownMapper\n%s", buffer);
 }
 
-void  PrimaryUnknownMapper :: warning (char* file, int line, char *format, ...) const
+void  PrimaryUnknownMapper :: warning (const char* file, int line, const char *format, ...) const
 {
   char buffer[MAX_ERROR_MSG_LENGTH];
 	va_list args;

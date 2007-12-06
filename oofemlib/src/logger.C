@@ -74,7 +74,7 @@ Logger :: appendlogTo (char* fname)
 }
 
 void
-Logger :: writeLogMsg (logLevelType level, char *format, ...)
+Logger :: writeLogMsg (logLevelType level, const char *format, ...)
 {
   va_list args;
   
@@ -91,7 +91,7 @@ Logger :: writeLogMsg (logLevelType level, char *format, ...)
 
 
 void
-Logger :: writeELogMsg (logLevelType level, const char* _file, int _line, char *format, ...)
+Logger :: writeELogMsg (logLevelType level, const char* _file, int _line, const char *format, ...)
 {
   va_list args;
   

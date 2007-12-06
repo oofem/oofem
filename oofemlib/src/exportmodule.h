@@ -121,7 +121,7 @@ protected:
  int testDomainOutput (int n);
 
  /// prints simple error message and exits
- void error (char* file, int line, char *format, ...) const;
+ void error (const char* file, int line, const char *format, ...) const;
 
 protected:
 };

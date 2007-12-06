@@ -216,8 +216,8 @@ public:
 	
 	TraceableMatrix();
 	
-	void Writeln(char* cmd);
-	void Write(char* cmd);
+	void Writeln(const char* cmd);
+	void Write(const char* cmd);
 	
 	void CS();
 	

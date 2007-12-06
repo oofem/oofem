@@ -86,7 +86,7 @@ protected:
                 ValueModeType mode, TimeStep* tStep);
  
   /// prints simple error message and exits
-  void error (char* file, int line, char *format, ...) const ;
+  void error (const char* file, int line, const char *format, ...) const ;
 };
 
 #define refinedelement_h

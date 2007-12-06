@@ -404,7 +404,7 @@ class Dof
                                                    ValueModeType mode, double& dofValue) {}
 
  /// prints simple error message and exits
-  void error (char* file, int line, char *format, ...) ;
+  void error (const char* file, int line, const char *format, ...) ;
   /// Stores receiver state to output stream.  
   virtual contextIOResultType    saveContext (DataStream* stream, ContextMode mode, void *obj = NULL) ;
  /// Restores the receiver state previously written in stream.

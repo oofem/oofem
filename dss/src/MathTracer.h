@@ -61,8 +61,8 @@ public:
 	virtual void Write(double a);
 	virtual void Write(int a);
 	virtual void Writeln();
-	virtual void Writeln(char* str);
-	virtual void Write(char* str);
+	virtual void Writeln(const char* str);
+	virtual void Write(const char* str);
 
 //	virtual void DrawProgress(double e);
 
