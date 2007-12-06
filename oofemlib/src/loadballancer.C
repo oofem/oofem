@@ -447,12 +447,10 @@ WallClockLoadBallancerMonitor::decide()
   MPI_Allgather (&mySolutionTime, 1, MPI_DOUBLE, node_solutiontimes, 1, MPI_DOUBLE, MPI_COMM_WORLD);
 
   OOFEM_LOG_RELEVANT ("\nLoadBallancer:: individual processor times [sec]: (");
-  if (myrank==0) {
-    for (i=0; i< nproc; i++) {
-      OOFEM_LOG_RELEVANT (" %.3f",node_solutiontimes[i]);
-    }
-    OOFEM_LOG_RELEVANT (")\n");
+  for (i=0; i< nproc; i++) {
+    OOFEM_LOG_RELEVANT (" %.3f",node_solutiontimes[i]);
   }
+  OOFEM_LOG_RELEVANT (")\n");
   
 
   // detect imbalance
@@ -460,7 +458,6 @@ WallClockLoadBallancerMonitor::decide()
   for (i=0; i< nproc; i++) {
     min_st = min (min_st, node_solutiontimes[i]);
     max_st = max (max_st, node_solutiontimes[i]);
-    sum_st += node_solutiontimes[i];
   }
   absWallClockImbalance = (max_st-min_st);
   if (min_st) {
@@ -470,7 +467,9 @@ WallClockLoadBallancerMonitor::decide()
   }
 
   // update node (processor) weights
-  for (i=0; i<nproc; i++) nodeWeights(i)=node_solutiontimes[i]/sum_st;
+  sum_st = 0.0;
+  for (i=0; i<nproc; i++) sum_st+=(nodeWeights(i)=max_st/node_solutiontimes[i]);
+  nodeWeights.times(1.0/sum_st);
 
   delete[] node_solutiontimes;
 
