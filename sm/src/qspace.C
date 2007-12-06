@@ -229,7 +229,7 @@ QSpace :: computeBmatrixAt (GaussPoint *aGaussPoint, FloatMatrix& answer, int li
    answer.at(3,51) = x17*j31+y17*j32+z17*j33 ;
    answer.at(3,54) = x18*j31+y18*j32+z18*j33 ;
    answer.at(3,57) = x19*j31+y19*j32+z19*j33 ;
-   answer.at(3,60) = x20*j21+y20*j32+z20*j33 ; 
+   answer.at(3,60) = x20*j31+y20*j32+z20*j33 ; 
 
 
    answer.at(4,2)  = x1*j31+y1*j32+z1*j33 ;
