@@ -204,10 +204,10 @@ OrthotropicLinearElasticMaterial :: give (int aProperty)
 // 'E') of the receiver.
 //
 {
- if (aProperty == NYzx) return this->give(NYxz)*this->give(Ex) / this->give(Ez);
- if (aProperty == NYzy) return this->give(NYyz)*this->give(Ey) / this->give(Ez);
- if (aProperty == NYyx) return this->give(NYxy)*this->give(Ex) / this->give(Ey);
- 
+ if (aProperty == NYzx) return this->give(NYxz)*this->give(Ez) / this->give(Ex);
+ if (aProperty == NYzy) return this->give(NYyz)*this->give(Ez) / this->give(Ey);
+ if (aProperty == NYyx) return this->give(NYxy)*this->give(Ey) / this->give(Ex);
+
  return this -> Material :: give(aProperty);
 }
 
