@@ -1332,16 +1332,16 @@ particular records will follow immediately in input file. The general format is:
 \field{ncrosssect}{in}  \field{nmat}{in}  \field{nbc}{in} \field{nic}{in}
 \field{nltf}{in} \optField{nbarrier}{in},\\
 
-where \param{ndofman} represents number of nodes (or sides) and theirs associated  records,
-\param{nelem} represents number of elements and theirs associated records, \param{ncrosssect} is
-number of cross sections and theirs records, \param{nmatdnMat}{} is number of material
-models and theirs records, \param{nbc}{} represents number of boundary
-conditions (including loads) and theirs
+where \param{ndofman} represents number of nodes (or sides) and their associated  records,
+\param{nelem} represents number of elements and their associated records, \param{ncrosssect} is
+number of cross sections and their records, \param{nmatdnMat}{} is number of material
+models and their records, \param{nbc}{} represents number of boundary
+conditions (including loads) and their
 records, \param{nic} parameter determines the number of initial
 conditions, and \param{nltf} represents number of time functions and
-theirs associated records. The optional parameter \param{nbarrier}
+their associated records. The optional parameter \param{nbarrier}
 represents the number of nonlocal barriers and their records. If not
-specified, no barriers and their records are assumed.
+specified, no barriers are assumed.
 
 \subsection{Node \& element-side records}
 \label{_NodeElementSideRecords}
@@ -1358,16 +1358,20 @@ following:
  \PoptField{partitions}{ia}.\\
 
 The order of particular records is optional, dof manager number is determined by \fieldVal{num}{} parameter. 
-Applied load  is described using \param{load} array. Items of this array are
-corresponding load record numbers. These records should be of NodalLoad type.
-Boundary conditions are described using \param{bc} parameter. The
-values of this array are the corresponding boundary conditions record
-numbers (specified in load, boundary  and initial conditions record(s) section).
-Analogously, initial conditions are
-represented using \param{ic} array. 
-By default, the number of DOFs per node or side  and their physical meanings are
-determined by domain record (\entKeyword{domainType} keyword).
 
+The applied primary (Dirichlet) boundary conditions are specified using
+"bc" record, while natural boundary conditions using "load" parameter.
+\begin{itemize}
+\item The size of "bc" array (primary bc) should be equal to number of DOFs in dof manager and i-th value relates to i-th DOF - the ordering and physical meaning of DOFs is determined by domain record and can be optionally specified for each dof manager individually (see next paragraph). The values of this array are corresponding boundary condition record numbers or zero, if no primary bc is applied to corresponding DOF. The compatible boundary condition type are required: primary conditions require "BoundaryCondition" records.
+\item The load "array" contains record numbers of natural boundary conditions that are applied. The required record type for natural condition is "NodalLoad". The actual value is the summation of all contributions, if more than one natural bc is applied. See section on boundary conditions for the syntax. Please note, that the values of natural bc for individual DOFs are specified in its record, not in dofmanager record.
+\end{itemize}
+
+By default, if "bc" and/or "load" parameters are omitted, no primary
+and/or natural bc are applied.
+
+Analogously, initial conditions are represented using \param{ic} array. The size of \param{ic} array should be equal to number of DOFs in dof manager. The values of this array are corresponding initial condition record numbers or zero, if no initial condition is applied to corresponding DOF (in this case zero value is assumed as value of initial condition).
+
+By default, the number of DOFs per node or side  and their physical meanings are determined by domain record (\entKeyword{domainType} keyword).
 If it is necessary to have
 different number of DOFs, then the \param{ndofs} field
 determines number of DOFs in DofManager, and their physical meaning is
