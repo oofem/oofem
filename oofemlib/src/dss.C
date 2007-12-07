@@ -215,16 +215,17 @@ int DSSMatrix::assemble (const IntArray& loc, const FloatMatrix& mat)
    for (j=1; j<=dim; j++) {
      jj = loc.at(j);
      if(jj){
-       for (i=j; i<=dim; i++) {
+       for (i=1; i<=dim; i++) {
          ii = loc.at(i);
          if(ii){
-           _dss->ElementAt(ii-1,jj-1) += mat.at(i,j); 
+					 if (jj>ii) continue;
+           _dss->ElementAt(jj-1,ii-1) += mat.at(j,i); 
          }
        }
      }
    }
  }
- 
+	 
  // increment version
  this->version++;
  
