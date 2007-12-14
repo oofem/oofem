@@ -611,7 +611,7 @@ class EngngModel
   /// Returns receiver's export mudule manager
   ExportModuleManager*     giveExportModuleManager() {return exportModuleManager;}
   /// Returns reference to recever timer (EngngModelTimer)
-  const EngngModelTimer* giveTimer() {return &timer;}
+  EngngModelTimer* giveTimer() {return &timer;}
 
  /**
   Increases number of equations of receiver's domain and returns newly created equation number.

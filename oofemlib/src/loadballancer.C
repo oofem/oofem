@@ -425,6 +425,28 @@ LoadBallancer::deleteRemoteElements (Domain* d)
 }
 
 
+void
+LoadBallancer::printStatistics () const
+{
+  EngngModel* emodel=domain->giveEngngModel();
+  int nelem, nnode;
+  int lelem=0, lnode=0;
+  int myrank=emodel->giveRank();
+  int i;
+  
+  nelem=domain->giveNumberOfElements();
+  nnode=domain->giveNumberOfDofManagers();
+  
+  for (i=1;i<=nnode;i++) if (domain->giveDofManager(i)->giveParallelMode()==DofManager_local) lnode++;
+  for (i=1;i<=nelem;i++) if (domain->giveElement(i)->giveParallelMode()==Element_local) lelem++;
+  
+  double mySolutionWTime = emodel->giveTimer()->getWtime(EngngModelTimer::EMTT_AnalysisTimer);
+  double mySolutionUTime = emodel->giveTimer()->getUtime(EngngModelTimer::EMTT_AnalysisTimer);
+  
+  OOFEM_LOG_RELEVANT ("[%d] LB Statistics:  wt=%.1f ut=%.1f nelem=%d nnode=%d\n", myrank,
+                      mySolutionWTime, mySolutionUTime, lelem, lnode);
+  
+}
 
 
 

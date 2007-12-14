@@ -1957,6 +1957,9 @@ EngngModel::ballanceLoad (TimeStep* atTime)
   LoadBallancerMonitor::LoadBallancerDecisionType _d;
   this->giveLoadBallancerMonitor();
   this->giveLoadBallancer();
+  
+  //print statistics for current step
+  lb->printStatistics();
 
   if (atTime->isNotTheLastStep()) {
 

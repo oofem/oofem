@@ -73,7 +73,7 @@ class LoadBallancerMonitor
   /// Returns processor weights; the larger weight means more powerfull node, sum of weights should equal to one.
   void giveProcessorWeights(FloatArray& answer) {answer = nodeWeights;}
   //@}
- 
+
   /// Returns class name of the receiver.
   const char* giveClassName () const { return "LoadBallancerMonitor" ;}
   
@@ -142,6 +142,9 @@ class LoadBallancer
   void migrateLoad (Domain* d);
  //@}
   
+  /// Print receiver statistics
+  virtual void  printStatistics() const;
+
  /**@name Query methods after work transfer calculation */
  //@{
   /// Returns the label of dofmanager after load ballancing
