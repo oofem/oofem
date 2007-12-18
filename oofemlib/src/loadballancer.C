@@ -501,7 +501,7 @@ WallClockLoadBallancerMonitor::decide()
   OOFEM_LOG_RELEVANT ("\n");
 
   // decide
-  if ((absWallClockImbalance > 10) || (relWallClockImbalance > 0.1)) {
+  if ((absWallClockImbalance > this->absWallClockImbalanceTreshold) || (relWallClockImbalance > this->relWallClockImbalanceTreshold)) {
     OOFEM_LOG_RELEVANT ("[%d] LoadBallancer: wall clock imbalance rel=%.2f\%,abs=%.2fs, recovering load\n", myrank, 100*relWallClockImbalance, absWallClockImbalance);
     return LBD_RECOVER;
   } else {
@@ -528,6 +528,19 @@ LoadBallancerMonitor::initializeFrom (InputRecord* ir)
   return IRRT_OK;
 }
 
+IRResultType 
+WallClockLoadBallancerMonitor::initializeFrom (InputRecord* ir) 
+{
+  const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
+  IRResultType result;                   // Required by IR_GIVE_FIELD macro
+
+  result = LoadBallancerMonitor::initializeFrom(ir);
+
+  IR_GIVE_OPTIONAL_FIELD (ir, relWallClockImbalanceTreshold, IFT_WallClockLoadBallancerMonitor_relwct, "relwct"); // Macro
+  IR_GIVE_OPTIONAL_FIELD (ir, absWallClockImbalanceTreshold, IFT_WallClockLoadBallancerMonitor_abswct, "abswct"); // Macro
+  
+  return result;
+}
 
 
 #else //__PARALLEL_MODE

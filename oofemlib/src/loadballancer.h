@@ -87,9 +87,13 @@ class LoadBallancerMonitor
 */
 class WallClockLoadBallancerMonitor : public LoadBallancerMonitor
 {
+ protected:
+  double relWallClockImbalanceTreshold, absWallClockImbalanceTreshold;
  public:
-  WallClockLoadBallancerMonitor (EngngModel* em): LoadBallancerMonitor(em) {}
+  WallClockLoadBallancerMonitor (EngngModel* em): LoadBallancerMonitor(em) {relWallClockImbalanceTreshold=0.1; absWallClockImbalanceTreshold=10.0;}
   LoadBallancerDecisionType decide ();
+  ///Initializes receiver acording to object description stored in input record.
+  virtual IRResultType initializeFrom (InputRecord* ir) ;
 };
 
 
