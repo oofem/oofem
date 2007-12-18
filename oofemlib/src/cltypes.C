@@ -103,6 +103,7 @@ InternalStateValueType giveInternalStateValueType (InternalStateType type)
  case IST_DamageInvTensor:
  case IST_PrincipalDamageTensor:
  case IST_PrincipalDamageTempTensor:
+ case IST_PlasticStrainTensor:
   return ISVT_TENSOR_S3;
  case IST_BeamForceMomentumTensor:
  case IST_BeamStrainCurvatureTensor:
