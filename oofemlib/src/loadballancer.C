@@ -489,10 +489,16 @@ WallClockLoadBallancerMonitor::decide()
   }
 
   // update node (processor) weights
-  sum_st = 0.0;
-  for (i=0; i<nproc; i++) sum_st+=(nodeWeights(i)=max_st/node_solutiontimes[i]);
-  nodeWeights.times(1.0/sum_st);
 
+  double average_solution_time=0.0;
+  for (i=0; i<nproc; i++) average_solution_time+=node_solutiontimes[i];
+  average_solution_time=average_solution_time/nproc;
+  for (i=0; i<nproc; i++) {
+    node_solutiontimes[i]=0.75*(node_solutiontimes[i]-average_solution_time)+average_solution_time;
+    sum_st+=(nodeWeights(i)=(1.0/node_solutiontimes[i]));
+  }
+  nodeWeights.times(1.0/sum_st);
+ 
   delete[] node_solutiontimes;
 
   // log processor weights
