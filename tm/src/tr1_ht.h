@@ -79,6 +79,7 @@ public:
  virtual int            computeNumberOfDofs (EquationID ut) {return 3;}
  virtual void           giveDofManDofIDMask  (int inode, EquationID, IntArray& ) const;
  IRResultType           initializeFrom (InputRecord* ir);
+ Element_Geometry_Type giveGeometryType() const {return EGT_triangle_1;}
  
   /** Interface requesting service */
   Interface* giveInterface (InterfaceType);
