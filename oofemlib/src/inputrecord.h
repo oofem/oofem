@@ -796,6 +796,7 @@ enum InputFieldType {
   IFT_LoadBallancerMonitor_initialnodeweights,
   IFT_WallClockLoadBallancerMonitor_relwct,
   IFT_WallClockLoadBallancerMonitor_abswct,
+  IFT_WallClockLoadBallancerMonitor_lbstep,
 
   IFT_Unknown
 };

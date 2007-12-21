@@ -39,9 +39,12 @@
 #include "clock.h"
 #include "alist.h"
 
+
 class Domain;
 class EngngModel;
 class ProcessCommunicator;
+class TimeStep;
+
 #define MIGRATE_LOAD_TAG       9998
 #define LOADBALLANCER_END_DATA 9999
 
@@ -69,7 +72,7 @@ class LoadBallancerMonitor
   /**@name Load evaluation and imbalance detection methods*/
   //@{
   /// returns flag indicating whether reballancing is necessary; should update node weights as well
-  virtual LoadBallancerDecisionType decide () = 0;
+  virtual LoadBallancerDecisionType decide (TimeStep*) = 0;
   /// Returns processor weights; the larger weight means more powerfull node, sum of weights should equal to one.
   void giveProcessorWeights(FloatArray& answer) {answer = nodeWeights;}
   //@}
@@ -89,9 +92,14 @@ class WallClockLoadBallancerMonitor : public LoadBallancerMonitor
 {
  protected:
   double relWallClockImbalanceTreshold, absWallClockImbalanceTreshold;
+  // the reballancing done every lbstep
+  int lbstep;
  public:
-  WallClockLoadBallancerMonitor (EngngModel* em): LoadBallancerMonitor(em) {relWallClockImbalanceTreshold=0.1; absWallClockImbalanceTreshold=10.0;}
-  LoadBallancerDecisionType decide ();
+  WallClockLoadBallancerMonitor (EngngModel* em): LoadBallancerMonitor(em) {
+    relWallClockImbalanceTreshold=0.1; absWallClockImbalanceTreshold=10.0;
+    lbstep = 5;
+  }
+  LoadBallancerDecisionType decide (TimeStep*);
   ///Initializes receiver acording to object description stored in input record.
   virtual IRResultType initializeFrom (InputRecord* ir) ;
 };

@@ -1963,7 +1963,7 @@ EngngModel::ballanceLoad (TimeStep* atTime)
 
   if (atTime->isNotTheLastStep()) {
 
-    _d = lbm->decide();
+    _d = lbm->decide(atTime);
     if ((_d == LoadBallancerMonitor::LBD_RECOVER) || 
         ((atTime->isTheFirstStep()) && force_load_rebalance_in_first_step)) {
       

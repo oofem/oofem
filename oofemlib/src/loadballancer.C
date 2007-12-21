@@ -451,12 +451,12 @@ LoadBallancer::printStatistics () const
 
 
 LoadBallancerMonitor::LoadBallancerDecisionType 
-WallClockLoadBallancerMonitor::decide()
+WallClockLoadBallancerMonitor::decide(TimeStep* atTime)
 {
   int i, nproc=emodel->giveNumberOfProcesses();
   int myrank=emodel->giveRank();
   double *node_solutiontimes = new double [nproc];
-  double min_st, max_st, sum_st=0.0;
+  double min_st, max_st;
   double relWallClockImbalance;
   double absWallClockImbalance;
 
@@ -494,10 +494,9 @@ WallClockLoadBallancerMonitor::decide()
   for (i=0; i<nproc; i++) average_solution_time+=node_solutiontimes[i];
   average_solution_time=average_solution_time/nproc;
   for (i=0; i<nproc; i++) {
-    node_solutiontimes[i]=0.75*(node_solutiontimes[i]-average_solution_time)+average_solution_time;
-    sum_st+=(nodeWeights(i)=(1.0/node_solutiontimes[i]));
+    node_solutiontimes[i]=0.75*(average_solution_time-node_solutiontimes[i])+average_solution_time;
+    nodeWeights(i)=node_solutiontimes[i]/(nproc*average_solution_time);
   }
-  nodeWeights.times(1.0/sum_st);
  
   delete[] node_solutiontimes;
 
@@ -507,7 +506,7 @@ WallClockLoadBallancerMonitor::decide()
   OOFEM_LOG_RELEVANT ("\n");
 
   // decide
-  if ((absWallClockImbalance > this->absWallClockImbalanceTreshold) || (relWallClockImbalance > this->relWallClockImbalanceTreshold)) {
+  if ((atTime->giveNumber()%this->lbstep == 0) && ((absWallClockImbalance > this->absWallClockImbalanceTreshold) || (relWallClockImbalance > this->relWallClockImbalanceTreshold))) {
     OOFEM_LOG_RELEVANT ("[%d] LoadBallancer: wall clock imbalance rel=%.2f\%,abs=%.2fs, recovering load\n", myrank, 100*relWallClockImbalance, absWallClockImbalance);
     return LBD_RECOVER;
   } else {
@@ -544,6 +543,7 @@ WallClockLoadBallancerMonitor::initializeFrom (InputRecord* ir)
 
   IR_GIVE_OPTIONAL_FIELD (ir, relWallClockImbalanceTreshold, IFT_WallClockLoadBallancerMonitor_relwct, "relwct"); // Macro
   IR_GIVE_OPTIONAL_FIELD (ir, absWallClockImbalanceTreshold, IFT_WallClockLoadBallancerMonitor_abswct, "abswct"); // Macro
+  IR_GIVE_OPTIONAL_FIELD (ir, lbstep, IFT_WallClockLoadBallancerMonitor_lbstep, "lbstep"); // Macro
   
   return result;
 }
