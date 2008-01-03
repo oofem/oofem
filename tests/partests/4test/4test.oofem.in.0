@@ -1,6 +1,6 @@
 4test.oofem.out.0
 1D PETSc test
-linearstatic nsteps 1 lstype 4 smtype 7
+linearstatic nsteps 1 lstype 3 smtype 7
 domain 2dPlaneStress
 OutputManager tstep_all dofman_all element_all
 ndofman 6 nelem 2 ncrosssect 1 nmat 1 nbc 2 nltf 1 nic 0
