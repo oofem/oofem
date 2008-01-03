@@ -38,6 +38,7 @@
 //
 //  The DEBUG option MUST be used (check in file 'debug.def').
 //  See also file 'main2.c'.
+#ifdef __OOFEG
 
 #include "oofemtxtdatareader.h"
 #include "engngm.h"
@@ -2467,3 +2468,4 @@ void debug_run (Widget w, XtPointer ptr, XtPointer call_data)
   }
 }
 #endif
+#endif // __OOFEG

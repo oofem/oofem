@@ -31,6 +31,7 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.                                                                              
 */
+#ifdef __PARALLEL_MODE
 
 #include "parmetisloadballancer.h"
 #include "domain.h"
@@ -43,11 +44,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <set>
 #endif
 
-#ifdef __PARALLEL_MODE
+
 #include "parallel.h"
 #include "processcomm.h"
 #include "communicator.h"
-#endif
 
 
 //#define ParmetisLoadBallancer_DEBUG_PRINT
@@ -495,7 +495,7 @@ void ParmetisLoadBallancer::addSharedDofmanPartitions (int _locnum, IntArray _pa
     dofManPartitions[_locnum-1].insertOnce (_partitions.at(i));
 }
 
-#else
+#else //PARMETIS_MODULE
 void ParmetisLoadBallancer:: ballanceLoad () {}
 
 LoadBallancer::DofManMode
@@ -510,6 +510,7 @@ ParmetisLoadBallancer::giveDofManPartitions (int idofman)
 int
 ParmetisLoadBallancer::giveElementPartition (int ielem)
 { return 0;}
+#endif
 #endif
 
 

@@ -37,6 +37,8 @@
 //  Solves finite element problems.
 //
 
+#ifndef __OOFEG
+
 #include "engngm.h"
 #include "freestor.h"
 #include "compiler.h"
@@ -287,3 +289,5 @@ void oofem_debug (EngngModel* emodel)
   //exit(1);
 #endif
 }
+
+#endif

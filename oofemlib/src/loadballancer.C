@@ -31,6 +31,7 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.                                                                              
 */
+#ifdef __PARALLEL_MODE
 
 #include "loadballancer.h"
 #include "domain.h"
@@ -40,14 +41,14 @@
 #include "timestep.h"
 #include "usrdefsub.h"
 
-#ifdef __PARALLEL_MODE
+
 #include "parallel.h"
 #include "processcomm.h"
 #include "datastream.h"
 #include "communicator.h"
 #include "domaintransactionmanager.h"
 #include "nonlocalmatwtp.h"
-#endif
+
 
 #define LoadBallancer_debug_print 0
 
@@ -56,7 +57,6 @@ LoadBallancer::LoadBallancer (Domain* d)  : wtpList (0)
   domain = d;
 }
 
-#ifdef __PARALLEL_MODE
 
 IRResultType
 LoadBallancer::initializeFrom (InputRecord* ir)
@@ -548,7 +548,7 @@ WallClockLoadBallancerMonitor::initializeFrom (InputRecord* ir)
   return result;
 }
 
-
+/*
 #else //__PARALLEL_MODE
 void 
 LoadBallancer::migrateLoad () {}
@@ -561,11 +561,11 @@ LoadBallancer::initializeFrom (InputRecord* ir) {
 
 IRResultType 
 LoadBallancerMonitor::initializeFrom (InputRecord* ir) {return IRRT_OK;}
+*/
 
-#endif
 
 
 LoadBallancer::WorkTransferPlugin::WorkTransferPlugin (LoadBallancer* _lb) {lb=_lb;}
 LoadBallancer::WorkTransferPlugin::~WorkTransferPlugin () {}
 
-
+#endif
