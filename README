@@ -52,26 +52,28 @@ OOFEM_TOP_DIR
 |         documents describing the input file specifications, element and
 |         material libraries, and other useful documents. 
 |
-|-- oofemlib - sources of the core part of OOFEM, the OOFEMlib module.
+|-- src - source files of all oofem modules
+|   |
+|   |-- oofemlib - sources of the core part of OOFEM, the OOFEMlib module.
+|   |
+|   |-- sm       - sources of structural analysis module.
+|   |
+|   |-- tm       - sources of transport problem module.
+|   |
+|   |-- fm       - sources of fluid mechanics module.
+|   |
+|   |-- dss      - includes the sources for Direct Sparse Solver (DSS),
+|   |              contributed by R. Vondracek)
+|   |
+|   |-- main     - contains the sources of main() and implementation of some 
+|                  global functions for oofem, oofeg, and poofem targets.
 |
-|-- sm - sources of structural analysis module.
+|-- tools   - sources for several utility programs.
 |
-|-- tm -  sources of transport problem module.
+|-- tests   - contains several tests, which are useful to verify
+|             the program functionality.
 |
-|-- fm -  sources of fluid mechanics module.
-|
-|-- tools - sources for several utility programs.
-|
-|-- tests - contains several tests, which are useful to verify
-|           the program functionality.
-|
-|-- dss -  includes the sources for Direct Sparse Solver (DSS),
-|          contributed by R. Vondracek)
-|
-|-- main - contains the sources of main() and implementation of some 
-|          global functions for oofem, oofeg, and poofem targets.
-|
-|-- base - contains templates for target makefiles.
+|-- base    - contains templates for target makefiles.
 |-- targets - will contain compiled targets after successful compilation
 
 
