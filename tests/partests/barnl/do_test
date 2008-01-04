@@ -1,34 +1,46 @@
-# determine oofem version to use
-if [ -f ../../../bin/Debug/oofem ]
+#
+# should be run as ./do_test oofem_target_dir_path
+#
+RESULT=$1/test_results
+
+#test if param provided
+if [ -z $1 ]
 then
-OOFEM=../../../bin/Debug/oofem
-elif [ -f  ../../../bin/Release/oofem ]
-then  
-OOFEM=../../../bin/Release/oofem
-else
-echo "oofem executable not found" >> ../result
+echo "usage: do_test oofem_target_dir_path"
+exit
+fi
+
+#test if valid target provided
+if [ ! -d $1 ]
+then
+echo "invalid oofem_target_dir_path"
+exit 
+fi
+
+# determine oofem version to use
+if [ ! -f $1/bin/oofem ]
+then
+echo "oofem executable not found" >> ${RESULT}
+exit
 fi
 
 # determine poofem version to use
-if [ -f ../../../bin/Debug/poofem ]
+if [ ! -f $1/bin/poofem ]
 then
-POOFEM=../../../bin/Debug/poofem
-elif [ -f  ../../../bin/Release/poofem ]
-then  
-POOFEM=../../../bin/Release/poofem
-else
-echo "poofem executable not found" >> ../result
+echo "poofem executable not found" >> ${RESULT}
+exit
 fi
 
-ln -s $OOFEM  ./oofem
-ln -s $POOFEM ./poofem
+ln -s $1/bin/oofem  ./oofem
+ln -s $1/bin/poofem ./poofem
+
 
 ./oofem -f barnl.oofem.in
-../../../tools/checker -f barnl.oofem.in >> ../result
+../../../tools/checker -f barnl.oofem.in >> ${RESULT}
 mpirun -np 4 ./poofem -f barnl.oofem.in -ksp_rtol 1.e-15
-for i in barnl.oofem.in??; do ../../../tools/checker -f $i; done >> ../result
+for i in barnl.oofem.in??; do ../../../tools/checker -f $i; done >> ${RESULT}
 mpirun -np 2 ./poofem -f barnl2.oofem.in -ksp_rtol 1.e-15
-for i in barnl2.oofem.in??; do ../../../tools/checker -f $i; done >> ../result
+for i in barnl2.oofem.in??; do ../../../tools/checker -f $i; done >> ${RESULT}
 
 rm *.oofem.out
 rm *.oofem.out.*

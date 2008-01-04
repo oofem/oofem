@@ -12,7 +12,7 @@ PROG_NAME  = @PROG_NAME@
 OOFEM_DIR  = @OOFEM_DIR@
 
 # for testing
-OOFEM=@OOFEM_DIR@/targets/@OOFEM_TARGET@/bin/@PROG_NAME@
+OOFEM=@OOFEM_DIR@/targets/@OOFEM_TARGET@/bin/oofem
 CHECKER=@OOFEM_DIR@/tools/checker
 RESULT=@OOFEM_DIR@/targets/@OOFEM_TARGET@/test_results
 
