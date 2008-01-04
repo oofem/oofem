@@ -41,7 +41,7 @@
 #ifndef hydratingisoheatmat_h
 
 #include "isoheatmat.h"
-#include "../../sm/src/hydram.h"
+#include "../sm/hydram.h"
 #include "dictionr.h"
 #include "flotarry.h"
 #include "flotmtrx.h"

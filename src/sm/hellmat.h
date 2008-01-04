@@ -23,7 +23,7 @@
 #include "isolinearelasticmaterial.h"
 
 // Hellmat includes
-#include "../../tm/src/hemotkmat.h"      // for inverse sorption isotherm function
+#include "../tm/hemotkmat.h"      // for inverse sorption isotherm function
 #include "hydram.h"                      // hydration model
 
 class GaussPoint;
