@@ -1042,13 +1042,21 @@ void EngngModel :: assembleVectorFromDofManagers (FloatArray& answer, TimeStep* 
   IntArray loc ;
   FloatArray charVec ;
   DofManager *node ;
-  
+#ifdef __PARALLEL_MODE
+  double scale;
+#endif
   int nnode = domain -> giveNumberOfDofManagers();
   
   this->timer.resumeTimer(EngngModelTimer::EMTT_NetComputationalStepTimer);
   for (i = 1; i <= nnode ; i++ ) {
     node = domain -> giveDofManager(i);
     node -> computeLoadVectorAt (charVec, tStep, mode);
+#ifdef __PARALLEL_MODE
+    if (node -> giveParallelMode() == DofManager_shared ) {
+      scale = 1./(node -> givePartitionsConnectivitySize());
+      charVec.times(scale);
+    }
+#endif
     if(charVec.giveSize()) {
       node -> giveCompleteLocationArray (loc);
       answer.assemble (charVec, loc) ;
@@ -1072,13 +1080,21 @@ void EngngModel :: assemblePrescribedVectorFromDofManagers (FloatArray& answer, 
   IntArray loc ;
   FloatArray charVec ;
   DofManager *node ;
-  
+#ifdef __PARALLEL_MODE
+  double scale;
+#endif  
   int nnode = domain -> giveNumberOfDofManagers();
   
   this->timer.resumeTimer(EngngModelTimer::EMTT_NetComputationalStepTimer);
   for (i = 1; i <= nnode ; i++ ) {
     node = domain -> giveDofManager(i);
     node -> computeLoadVectorAt (charVec, tStep, mode);
+#ifdef __PARALLEL_MODE
+    if (node -> giveParallelMode() == DofManager_shared ) {
+      scale = 1./(node -> givePartitionsConnectivitySize());
+      charVec.times(scale);
+    }
+#endif
     if(charVec.giveSize()) {
       node -> giveCompletePrescribedLocationArray (loc);
       answer.assemble (charVec, loc) ;
@@ -1174,6 +1190,7 @@ EngngModel :: petsc_assembleVectorFromDofManagers (Vec answer, TimeStep* tStep, 
   IntArray loc;
 #ifdef __PARALLEL_MODE
   IntArray gloc ;
+  double scale;
 #endif
   FloatArray charVec ;
   DofManager *node ;
@@ -1187,6 +1204,10 @@ EngngModel :: petsc_assembleVectorFromDofManagers (Vec answer, TimeStep* tStep, 
     if((ni = charVec.giveSize())) {
       node -> giveCompleteLocationArray (loc);
 #ifdef __PARALLEL_MODE
+      if (node -> giveParallelMode() == DofManager_shared ) {
+	scale = 1./(node -> givePartitionsConnectivitySize());
+	charVec.times(scale);
+      }
       this->givePetscContext(domain->giveNumber(),ut)->giveN2Gmap()->map2New(gloc, loc, 0);
       VecSetValues(answer, ni, gloc.givePointer(), charVec.givePointer(), ADD_VALUES);
 #else
@@ -1213,6 +1234,7 @@ EngngModel :: petsc_assemblePrescribedVectorFromDofManagers (Vec answer, TimeSte
   IntArray loc ;
 #ifdef __PARALLEL_MODE
   IntArray gloc ;
+  double scale;
 #endif
   FloatArray charVec ;
   DofManager *node ;
@@ -1226,6 +1248,10 @@ EngngModel :: petsc_assemblePrescribedVectorFromDofManagers (Vec answer, TimeSte
     if((ni=charVec.giveSize())) {
       node -> giveCompletePrescribedLocationArray (loc);
 #ifdef __PARALLEL_MODE
+      if (node -> giveParallelMode() == DofManager_shared ) {
+	scale = 1./(node -> givePartitionsConnectivitySize());
+	charVec.times(scale);
+      }
       this->givePetscContext(domain->giveNumber(),ut)->giveN2Gmap()->map2New(gloc, loc, 0); // ????
       VecSetValues(answer, ni, gloc.givePointer(), charVec.givePointer(), ADD_VALUES);
 #else

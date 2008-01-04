@@ -259,6 +259,7 @@ void  LinearStatic :: solveYourselfAt (TimeStep* tStep) {
 #ifdef __PETSC_MODULE
   // direct interface to PETSC
   if (solverType == ST_Petsc) {
+    VecSetOption(_loadVec, VEC_IGNORE_NEGATIVE_INDICES);
     this->petsc_assembleVectorFromElements(_loadVec, tStep, EID_MomentumBalance, ElementForceLoadVector, VM_Total, this->giveDomain(1));
     this->petsc_assembleVectorFromElements(_loadVec, tStep, EID_MomentumBalance, ElementNonForceLoadVector, VM_Total, this->giveDomain(1));
     this->petsc_assembleVectorFromDofManagers(_loadVec, tStep, EID_MomentumBalance, NodalLoadVector, VM_Total, this->giveDomain(1)) ;

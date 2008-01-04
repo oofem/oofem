@@ -617,7 +617,7 @@ PNlDEIDynamic :: computeLoadVector (FloatArray& answer, ValueModeType mode, Time
  this->assembleVectorFromDofManagers(answer, stepN, EID_MomentumBalance, NodalLoadVector, mode, domain);
 
 
- 
+/* 
 #ifdef __PARALLEL_MODE
  // nodal load for shared nodes is applied on all partitions; local value should be rescaled
  
@@ -643,7 +643,7 @@ PNlDEIDynamic :: computeLoadVector (FloatArray& answer, ValueModeType mode, Time
    }
  }
 #endif
-
+*/
  // 
  // assembling the element part of load vector
  //

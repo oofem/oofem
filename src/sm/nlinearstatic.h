@@ -175,14 +175,6 @@ TASK:
   contextIOResultType saveContext (DataStream* stream, ContextMode mode, void *obj = NULL) ;
   contextIOResultType restoreContext (DataStream* stream, ContextMode mode, void *obj = NULL);
 
-  /**
-     Assembles characteristic vector of required type into given vector.
-     Overloaded in order to properly handle nodal loading of shared DofManagers.
-  */
-  void assembleVectorFromDofManagers (FloatArray& answer, TimeStep* tStep, EquationID ut, 
-                                      CharType type, ValueModeType mode, Domain* domain);
-
-
 // identification
   const char* giveClassName () const { return "NonLinearStatic";}
   classType giveClassID () const {return NonLinearStaticClass;}

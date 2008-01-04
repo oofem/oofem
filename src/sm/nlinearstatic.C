@@ -1162,47 +1162,6 @@ NonLinearStatic :: initializeCommMaps(bool forceInit)
 #endif
 
 
-void
-NonLinearStatic :: assembleVectorFromDofManagers (FloatArray& answer, TimeStep* tStep, EquationID ut, 
-                                                  CharType type, ValueModeType mode, Domain* domain) 
-{
-  /*
-    Assembles characteristic vector of required type into given vector.
-    Overloaded in order to properly handle nodal loading of shared DofManagers.
-    According to general rules, all shared nodes records on all partitions must
-    contain loading. It is therefore necessary to localize loading only on on partition or 
-    localize scaled loading on all partitions to guarantee the proper value.
-    The last is used.
-  */
-  
-#ifdef __PARALLEL_MODE
-  if (type == NodalLoadVector) {
-    int i ;
-    IntArray loc ;
-    FloatArray charVec ;
-    double scale;
-    int nnode = domain -> giveNumberOfDofManagers();
-    
-    DofManager *node ;
-    for (i = 1; i <= nnode ; i++ ) {
-      node = domain -> giveDofManager(i);
-      node -> giveCompleteLocationArray (loc);
-      node -> computeLoadVectorAt (charVec, tStep, mode);
-      if (node -> giveParallelMode() == DofManager_shared ) {
-        scale = 1./(node -> givePartitionsConnectivitySize());
-        charVec.times(scale);
-      }
-      if(charVec.giveSize()) answer.assemble (charVec, loc) ;
-    }
-    return;
-  }
-#endif
-  
-  EngngModel :: assembleVectorFromDofManagers (answer, tStep, ut, type, mode, domain) ;
-  
-}
-
-
 #ifdef __PARALLEL_MODE
 LoadBallancer* 
 NonLinearStatic:: giveLoadBallancer() 
