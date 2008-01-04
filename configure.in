@@ -16,6 +16,8 @@ dnl   --enable-dss           --disble-dss
 dnl   --enable-parmetis      --disable-parmetis
 dnl   --with-PARMETISDIR[=PARMETIS_DIR]
 dnl   --with-MPIDIR[=MPI_DIR]
+dnl   --with-CKITDIR[=CKIT_DIR]
+dnl   --with-ELIXIRDIR[=ELIXIR_DIR]
 dnl
 dnl Code generation
 dnl 
@@ -29,6 +31,7 @@ dnl
 dnl --------------------------------------------------------------------
 dnl Default values of implemented options
 dnl --------------------------------------------------------------------
+OOFEM_TARGET=default
 sm_module=yes
 tm_module=yes
 fm_module=yes
@@ -43,8 +46,9 @@ poofem_val=no
 debug_val=no
 oofeg_di=no
 
+
+
 AC_INIT(tools/checker.C)
-AC_CONFIG_HEADER(oofemlib/src/oofemcfg.h)
 
 dnl --------------------------------------------------------------------
 dnl check if PWD variable is defined
@@ -63,6 +67,59 @@ dnl --------------------------------------------------------------------
 dnl Check system type.
 dnl --------------------------------------------------------------------
 AC_CANONICAL_HOST
+
+dnl default prog name
+PROG_NAME=oofem
+
+
+dnl --------------------------------------------------------------------
+dnl Determine oofem top dir
+dnl --------------------------------------------------------------------
+AC_ARG_VAR(OOFEM_DIR, sets the oofem top dir)
+AC_MSG_CHECKING(OOFEM_DIR)
+if test -f $OOFEM_DIR/src/oofemlib/cltypes.h; then
+   AC_MSG_RESULT($OOFEM_DIR)			         
+elif test -f $PWD/src/oofemlib/cltypes.h; then
+     OOFEM_DIR=$PWD
+     AC_MSG_RESULT($OOFEM_DIR)			         
+else
+     AC_MSG_ERROR("DSS slover not found in $PWD/dss")     
+fi
+
+dnl --------------------------------------------------------------------
+dnl Check target
+dnl --------------------------------------------------------------------
+AC_ARG_VAR(OOFEM_TARGET,sets the target name)
+if test x"$OOFEM_TARGET" = x"";  then
+   echo OOFEM_TARGET not specified, using default 
+   OOFEM_TARGET=default
+fi
+
+echo configuring OOFEM_TARGET="$OOFEM_TARGET"
+if test -d targets/$OOFEM_TARGET; then
+   echo existing target directory found
+else
+   mkdir -p targets/$OOFEM_TARGET
+fi
+   mkdir  -p targets/$OOFEM_TARGET/lib
+   mkdir  -p targets/$OOFEM_TARGET/lib/oofemlib
+   mkdir  -p targets/$OOFEM_TARGET/lib/sm
+   mkdir  -p targets/$OOFEM_TARGET/lib/tm
+   mkdir  -p targets/$OOFEM_TARGET/lib/fm
+   mkdir  -p targets/$OOFEM_TARGET/lib/dss
+   mkdir  -p targets/$OOFEM_TARGET/lib/main
+   mkdir  -p targets/$OOFEM_TARGET/include
+   cp base/target_makefile.in targets/$OOFEM_TARGET/makefile.in
+   cp base/oofemlib_makefile.in targets/$OOFEM_TARGET/lib/oofemlib/makefile.in
+   cp base/sm_makefile.in targets/$OOFEM_TARGET/lib/sm/makefile.in
+   cp base/tm_makefile.in targets/$OOFEM_TARGET/lib/tm/makefile.in
+   cp base/fm_makefile.in targets/$OOFEM_TARGET/lib/fm/makefile.in
+   cp base/dss_makefile.in targets/$OOFEM_TARGET/lib/dss/makefile.in
+   cp base/main_makefile.in targets/$OOFEM_TARGET/lib/main/makefile.in
+   cp base/oofemcfg.h.in targets/$OOFEM_TARGET/include
+   cp base/oofemdef.h.in targets/$OOFEM_TARGET/include
+   echo target directory configured
+
 
 dnl --------------------------------------------------------------------
 dnl Checks for programs.
@@ -217,6 +274,7 @@ dnl
 AC_ARG_ENABLE(poofem, [  --enable-poofem        builds and installs poofem],
  	[
  			poofem_val=$enableval
+			PROG_NAME="poofem"
  	]
 )
 
@@ -374,8 +432,21 @@ AC_CHECK_LIB(m, sqrt)
 AC_ARG_ENABLE(oofeg, [  --enable-oofeg        builds and installs oofeg],
  	[
  		oofeg_val=$enableval
+		PROG_NAME="oofeg"
+
  	]
 )
+
+dnl --------------------------------------------------------------------
+dnl define PROG SYMBOL
+dnl --------------------------------------------------------------------
+if test x$poofem_val = xyes; then
+   MODULE_SYMBOLS="-D__OOFEM -D__PARALLEL_MODE"
+elif test x$oofeg_val = xyes; then
+   MODULE_SYMBOLS="-D__OOFEG"
+else
+   MODULE_SYMBOLS="-D__OOFEM"	
+fi
 
 
 dnl --------------------------------------------------------------------
@@ -403,7 +474,7 @@ dnl Search for dss module
 dnl --------------------------------------------------------------------
 if test x$dss_module = xyes; then
 	AC_MSG_CHECKING(dss module location)
-		dir=dss/src
+		dir=src/dss
 		if test -f $dir/DSSolver.h; then
 			AC_MSG_RESULT($dir)
 		else
@@ -411,7 +482,6 @@ if test x$dss_module = xyes; then
 		fi
 		DSS_INCLUDES="-I$PWD/$dir"
     DSS_DIR="$PWD/$dir"
-		DSS_LIB="$PWD/$dir/dsslib.a"
     DSS_MAKEFILE="$dir/makefile"
 fi
 
@@ -484,11 +554,11 @@ if test x$mpi_module = xyes; then
   fi
   MPI_INCLUDES="-I${MPI_DIR}/include"
   AC_DEFINE(HAVE_MPI_H)
-  MPI_MODULE_SYMBOLS="-DMPICH_IGNORE_CXX_SEEK"
+  MODULE_SYMBOLS="$MODULE_SYMBOLS -DMPICH_IGNORE_CXX_SEEK"
 
 dnl check for mpi Compiler batch
- AC_PATH_PROG(MPI_CXX, mpicxx, "x", ${MPI_DIR}/bin)
- if test x$MPI_CXX = xx; then
+ AC_PATH_PROG(CXX, mpicxx, "x", ${MPI_DIR}/bin)
+ if test x$CXX = xx; then
 	 echo "MPI compiler not found in $dir."
    exit
  fi
@@ -597,6 +667,21 @@ AC_CHECK_LIB(Xt, XtNameToWidget,
 dnl --------------------------------------------------------------------
 dnl Must have Ckit. If not in standard places, the user must supply path
 dnl --------------------------------------------------------------------
+dnl --------------------------------------------------------------------
+dnl Check for ckit and elixir libs location
+dnl --------------------------------------------------------------------
+AC_ARG_WITH(CKITDIR, [  --with-CKITDIR=dir  allows to specify CKIT_DIR] , 
+ [
+     CKIT_DIR=$withval
+ ]
+)
+
+AC_ARG_WITH(ELIXIRDIR, [  --with-ELIXIRDIR=dir  allows to specify ELIXIR_DIR] , 
+ [
+     ELIXIR_DIR=$withval
+ ]
+)
+
 
 
 CKIT_INCLUDES="-I."
@@ -605,7 +690,7 @@ AC_CHECK_HEADER(ckitcfg.h,
 		AC_DEFINE(HAVE_CKIT_H)
 	],
 	[
-		dir=$PWD/../Ckit/include
+		dir=$CKIT_DIR/include
 		AC_MSG_CHECKING(guess of Ckit includes location)
 		if test -f $dir/ckitcfg.h; then
 			AC_MSG_RESULT($dir)
@@ -628,7 +713,7 @@ AC_CHECK_LIB(ckit, _get_list_next,
 		AC_DEFINE(HAVE_LIBCKIT)
 	],
 	[
-		dir=$PWD/../Ckit/src
+		dir=$CKIT_DIR/src
 		AC_MSG_CHECKING(guess of libckit.a location)
 		if test -f $dir/libckit.a; then
 			AC_MSG_RESULT($dir)
@@ -656,7 +741,7 @@ AC_CHECK_HEADER(Ecfg.h,
 		AC_DEFINE(HAVE_ELIXIR_H)
 	],
 	[
-		dir=$PWD/../Elixir/include
+		dir=$ELIXIR_DIR/include
 		AC_MSG_CHECKING(guess of Elixir includes location)
 		if test -f $dir/Ecfg.h; then
 			AC_MSG_RESULT($dir)
@@ -685,7 +770,7 @@ AC_CHECK_LIB(elixir, ElixirInit,
 		AC_DEFINE(HAVE_LIBELIXIR)
 	],
 	[
-		dir=$PWD/../Elixir/src
+		dir=$ELIXIR_DIR/src
 		AC_MSG_CHECKING(guess of libelixir.a location)
 		if test -f $dir/libelixir.a; then
 			AC_MSG_RESULT($dir)
@@ -709,7 +794,7 @@ AC_CHECK_LIB(esi, ESIBuildInterface,
 		AC_DEFINE(HAVE_LIBESI)
 	],
 	[
-		dir=$PWD/../Elixir/src
+		dir=$ELIXIR_DIR/src
 		AC_MSG_CHECKING(guess of libesi.a location)
 		if test -f $dir/libesi.a; then
 			AC_MSG_RESULT($dir)
@@ -735,26 +820,6 @@ fi
 
 
 
-dnl assemble oofem-release target
-TARGETS="oofem-release"
-
-if test x$debug_val = xyes; then
-  TARGETS="$TARGETS oofem-debug"
-fi
-
-if test x$oofeg_val = xyes; then
- TARGETS="$TARGETS oofeg-release"
- if test x$debug_val = xyes; then
-  TARGETS="$TARGETS oofeg-debug"
- fi
-fi
-if test x$poofem_val = xyes; then
- TARGETS="$TARGETS poofem-release"
- if test x$debug_val = xyes; then
-  TARGETS="$TARGETS poofem-debug"
- fi
-fi
-
 OOFEG_DIRECTIVES=""
 if test x$oofeg_di = xyes; then
  OOFEG_DIRECTIVES="-DOOFEG_DEVEL"
@@ -767,91 +832,44 @@ dnl --------------------------------------------------------------------
 dnl
 
 
-
-OOFEMLIB_INCLUDES="-I$PWD/oofemlib/src"
-SM_INCLUDES="-I$PWD/sm/src"
-TM_INCLUDES="-I$PWD/tm/src"
-FM_INCLUDES="-I$PWD/fm/src"
+TARGET_CONFIG_INCLUDES="-I$OOFEM_DIR/targets/$OOFEM_TARGET/include"
+OOFEMLIB_INCLUDES="-I$PWD/src/oofemlib"
+SM_INCLUDES="-I$PWD/src/sm"
+TM_INCLUDES="-I$PWD/src/tm"
+FM_INCLUDES="-I$PWD/src/fm"
 
 MODULE_INCLUDES="$OOFEMLIB_INCLUDES"
-OOFEM_RELEASE_LIBS="$PWD/oofemlib/oofem_obj/Release/oofemlib.a"
-OOFEM_DEBUG_LIBS="$PWD/oofemlib/oofem_obj/Debug/oofemlib.a"
-OOFEG_RELEASE_LIBS="$PWD/oofemlib/oofeg_obj/Release/oofeglib.a"
-OOFEG_DEBUG_LIBS="$PWD/oofemlib/oofeg_obj/Debug/oofeglib.a"
-POOFEM_RELEASE_LIBS="$PWD/oofemlib/poofem_obj/Release/poofemlib.a"
-POOFEM_DEBUG_LIBS="$PWD/oofemlib/poofem_obj/Debug/poofemlib.a"
-dnl
-dnl dependency targets 
-dnl
-OOFEM_RELEASE_DEP_TARGETS="oofemlib-release"
-OOFEM_DEBUG_DEP_TARGETS="oofemlib-debug"
-OOFEG_RELEASE_DEP_TARGETS="oofeglib-release"
-OOFEG_DEBUG_DEP_TARGETS="oofeglib-debug"
-POOFEM_RELEASE_DEP_TARGETS="poofemlib-release"
-POOFEM_DEBUG_DEP_TARGETS="poofemlib-debug"
-
+OOFEM_LIBS="$PWD/targets/$OOFEM_TARGET/lib/oofemlib/oofemlib.a"
 
 MODULE_LIST="oofemlib"
-MODULE_SYMBOLS="-D__OOFEMLIB_MODULE"
+MODULE_TOBUILD="oofemlib"	
+MODULE_SYMBOLS="$MODULE_SYMBOLS -D__OOFEMLIB_MODULE"
 
 if test x$sm_module = xyes; then
 	MODULE_LIST="$MODULE_LIST sm"
+	MODULE_TOBUILD="$MODULE_TOBUILD sm"
 	MODULE_SYMBOLS="$MODULE_SYMBOLS -D__SM_MODULE"
 	MODULE_INCLUDES="$MODULE_INCLUDES $SM_INCLUDES"
-  TEST_TARGETS="sm"
-	OOFEM_RELEASE_LIBS="$PWD/sm/oofem_obj/Release/smlib.a $OOFEM_RELEASE_LIBS"
-	OOFEM_DEBUG_LIBS="$PWD/sm/oofem_obj/Debug/smlib.a $OOFEM_DEBUG_LIBS "
-	OOFEG_RELEASE_LIBS="$PWD/sm/oofeg_obj/Release/smlib.a $OOFEG_RELEASE_LIBS "
-	OOFEG_DEBUG_LIBS="$PWD/sm/oofeg_obj/Debug/smlib.a $OOFEG_DEBUG_LIBS "
-	POOFEM_RELEASE_LIBS="$PWD/sm/poofem_obj/Release/smlib.a $POOFEM_RELEASE_LIBS "
-	POOFEM_DEBUG_LIBS="$PWD/sm/poofem_obj/Debug/smlib.a $POOFEM_DEBUG_LIBS "
-
-	OOFEM_RELEASE_DEP_TARGETS="$OOFEM_RELEASE_DEP_TARGETS smlib-oofem-release"
-	OOFEM_DEBUG_DEP_TARGETS="$OOFEM_DEBUG_DEP_TARGETS smlib-oofem-debug"
-	OOFEG_RELEASE_DEP_TARGETS="$OOFEG_RELEASE_DEP_TARGETS smlib-oofeg-release"
-	OOFEG_DEBUG_DEP_TARGETS="$OOFEG_DEBUG_DEP_TARGETS smlib-oofeg-debug"
-	POOFEM_RELEASE_DEP_TARGETS="$POOFEM_RELEASE_DEP_TARGETS smlib-poofem-release"
-	POOFEM_DEBUG_DEP_TARGETS="$POOFEM_DEBUG_DEP_TARGETS smlib-poofem-debug"
+	OOFEM_LIBS="$PWD/targets/$OOFEM_TARGET/lib/sm/smlib.a $OOFEM_LIBS"	
+	TEST_TARGETS="sm"
 fi
 
 if test x$tm_module = xyes; then
 	MODULE_LIST="$MODULE_LIST tm"
+	MODULE_TOBUILD="$MODULE_TOBUILD tm"
 	MODULE_SYMBOLS="$MODULE_SYMBOLS -D__TM_MODULE"
 	MODULE_INCLUDES="$MODULE_INCLUDES $TM_INCLUDES"
-  TEST_TARGETS="$TEST_TARGETS tm"
-	OOFEM_RELEASE_LIBS="$PWD/tm/oofem_obj/Release/tmlib.a $OOFEM_RELEASE_LIBS"
-	OOFEM_DEBUG_LIBS="$PWD/tm/oofem_obj/Debug/tmlib.a $OOFEM_DEBUG_LIBS "
-	OOFEG_RELEASE_LIBS="$PWD/tm/oofeg_obj/Release/tmlib.a $OOFEG_RELEASE_LIBS "
-	OOFEG_DEBUG_LIBS="$PWD/tm/oofeg_obj/Debug/tmlib.a $OOFEG_DEBUG_LIBS "
-	POOFEM_RELEASE_LIBS="$PWD/tm/poofem_obj/Release/tmlib.a $POOFEM_RELEASE_LIBS "
-	POOFEM_DEBUG_LIBS="$PWD/tm/poofem_obj/Debug/tmlib.a $POOFEM_DEBUG_LIBS "
-
-	OOFEM_RELEASE_DEP_TARGETS="$OOFEM_RELEASE_DEP_TARGETS tmlib-oofem-release"
-	OOFEM_DEBUG_DEP_TARGETS="$OOFEM_DEBUG_DEP_TARGETS tmlib-oofem-debug"
-	OOFEG_RELEASE_DEP_TARGETS="$OOFEG_RELEASE_DEP_TARGETS tmlib-oofeg-release"
-	OOFEG_DEBUG_DEP_TARGETS="$OOFEG_DEBUG_DEP_TARGETS tmlib-oofeg-debug"
-	POOFEM_RELEASE_DEP_TARGETS="$POOFEM_RELEASE_DEP_TARGETS tmlib-poofem-release"
-	POOFEM_DEBUG_DEP_TARGETS="$POOFEM_DEBUG_DEP_TARGETS tmlib-poofem-debug"
+	OOFEM_LIBS="$PWD/targets/$OOFEM_TARGET/lib/tm/tmlib.a $OOFEM_LIBS"	
+	TEST_TARGETS="$TEST_TARGETS tm"
 fi
 
 if test x$fm_module = xyes; then
 	MODULE_LIST="$MODULE_LIST fm"
+	MODULE_TOBUILD="$MODULE_TOBUILD fm"
 	MODULE_SYMBOLS="$MODULE_SYMBOLS -D__FM_MODULE"
 	MODULE_INCLUDES="$MODULE_INCLUDES $FM_INCLUDES"
-  TEST_TARGETS="$TEST_TARGETS fm"
-	OOFEM_RELEASE_LIBS="$PWD/fm/oofem_obj/Release/fmlib.a $OOFEM_RELEASE_LIBS"
-	OOFEM_DEBUG_LIBS="$PWD/fm/oofem_obj/Debug/fmlib.a $OOFEM_DEBUG_LIBS "
-	OOFEG_RELEASE_LIBS="$PWD/fm/oofeg_obj/Release/fmlib.a $OOFEG_RELEASE_LIBS "
-	OOFEG_DEBUG_LIBS="$PWD/fm/oofeg_obj/Debug/fmlib.a $OOFEG_DEBUG_LIBS "
-	POOFEM_RELEASE_LIBS="$PWD/fm/poofem_obj/Release/fmlib.a $POOFEM_RELEASE_LIBS "
-	POOFEM_DEBUG_LIBS="$PWD/fm/poofem_obj/Debug/fmlib.a $POOFEM_DEBUG_LIBS "
-
-	OOFEM_RELEASE_DEP_TARGETS="$OOFEM_RELEASE_DEP_TARGETS fmlib-oofem-release"
-	OOFEM_DEBUG_DEP_TARGETS="$OOFEM_DEBUG_DEP_TARGETS fmlib-oofem-debug"
-	OOFEG_RELEASE_DEP_TARGETS="$OOFEG_RELEASE_DEP_TARGETS fmlib-oofeg-release"
-	OOFEG_DEBUG_DEP_TARGETS="$OOFEG_DEBUG_DEP_TARGETS fmlib-oofeg-debug"
-	POOFEM_RELEASE_DEP_TARGETS="$POOFEM_RELEASE_DEP_TARGETS fmlib-poofem-release"
-	POOFEM_DEBUG_DEP_TARGETS="$POOFEM_DEBUG_DEP_TARGETS fmlib-poofem-debug"
+	OOFEM_LIBS="$PWD/targets/$OOFEM_TARGET/lib/fm/fmlib.a $OOFEM_LIBS"	
+	TEST_TARGETS="$TEST_TARGETS fm"
 fi
 
 if test x$iml_module = xyes; then
@@ -863,23 +881,11 @@ fi
 
 if test x$dss_module = xyes; then
 	MODULE_LIST="$MODULE_LIST dss"
+	MODULE_TOBUILD="$MODULE_TOBUILD dss"
 	MODULE_SYMBOLS="$MODULE_SYMBOLS -D__DSS_MODULE"
 	DSS_MODULE_SYMBOL="-D__DSS_MODULE"
 	MODULE_INCLUDES="$MODULE_INCLUDES $DSS_INCLUDES"
-
-	OOFEM_RELEASE_LIBS="$OOFEM_RELEASE_LIBS $DSS_LIB"
-	OOFEM_DEBUG_LIBS="$OOFEM_DEBUG_LIBS $DSS_LIB"
-	OOFEG_RELEASE_LIBS="$OOFEG_RELEASE_LIBS $DSS_LIB"
-	OOFEG_DEBUG_LIBS="$OOFEG_DEBUG_LIBS $DSS_LIB"
-	POOFEM_RELEASE_LIBS="$POOFEM_RELEASE_LIBS $DSS_LIB"
-	POOFEM_DEBUG_LIBS="$POOFEM_DEBUG_LIBS $DSS_LIB"
-
-	OOFEM_RELEASE_DEP_TARGETS="$OOFEM_RELEASE_DEP_TARGETS dsslib"
-	OOFEM_DEBUG_DEP_TARGETS="$OOFEM_DEBUG_DEP_TARGETS dsslib"
-	OOFEG_RELEASE_DEP_TARGETS="$OOFEG_RELEASE_DEP_TARGETS dsslib"
-	OOFEG_DEBUG_DEP_TARGETS="$OOFEG_DEBUG_DEP_TARGETS dsslib"
-	POOFEM_RELEASE_DEP_TARGETS="$POOFEM_RELEASE_DEP_TARGETS dsslib"
-	POOFEM_DEBUG_DEP_TARGETS="$POOFEM_DEBUG_DEP_TARGETS dsslib"
+	OOFEM_LIBS="$OOFEM_LIBS $PWD/targets/$OOFEM_TARGET/lib/dss/dsslib.a"	
 fi
 
 if test x$spooles_module = xyes; then
@@ -887,13 +893,7 @@ if test x$spooles_module = xyes; then
 	MODULE_SYMBOLS="$MODULE_SYMBOLS -D__SPOOLES_MODULE"
 	SPOOLES_MODULE_SYMBOL="-D__SPOOLES_MODULE"
 	MODULE_INCLUDES="$MODULE_INCLUDES $SPOOLES_INCLUDES"
-
-	OOFEM_RELEASE_LIBS="$OOFEM_RELEASE_LIBS $SPOOLES_LIB"
-	OOFEM_DEBUG_LIBS="$OOFEM_DEBUG_LIBS $SPOOLES_LIB"
-	OOFEG_RELEASE_LIBS="$OOFEG_RELEASE_LIBS $SPOOLES_LIB"
-	OOFEG_DEBUG_LIBS="$OOFEG_DEBUG_LIBS $SPOOLES_LIB"
-	POOFEM_RELEASE_LIBS="$POOFEM_RELEASE_LIBS $SPOOLES_LIB"
-	POOFEM_DEBUG_LIBS="$POOFEM_DEBUG_LIBS $SPOOLES_LIB"
+	OOFEM_LIBS="$OOFEM_LIBS $SPOOLES_LIB"
 fi
 
 if test x$petsc_module = xyes; then
@@ -901,13 +901,7 @@ if test x$petsc_module = xyes; then
 	MODULE_SYMBOLS="$MODULE_SYMBOLS -D__PETSC_MODULE"
 	SPOOLES_MODULE_SYMBOL="-D__PETSC_MODULE"
 	MODULE_INCLUDES="$MODULE_INCLUDES \${PETSC_INCLUDE}"
-
-	OOFEM_RELEASE_LIBS="$OOFEM_RELEASE_LIBS \${PETSC_C_SH_LIB_PATH} \${PETSC_LIB}"
-	OOFEM_DEBUG_LIBS="$OOFEM_DEBUG_LIBS \${PETSC_C_SH_LIB_PATH} \${PETSC_LIB}"
-	OOFEG_RELEASE_LIBS="$OOFEG_RELEASE_LIBS \${PETSC_C_SH_LIB_PATH} \${PETSC_LIB}"
-	OOFEG_DEBUG_LIBS="$OOFEG_DEBUG_LIBS \${PETSC_C_SH_LIB_PATH} \${PETSC_LIB}"
-	POOFEM_RELEASE_LIBS="$POOFEM_RELEASE_LIBS \${PETSC_C_SH_LIB_PATH} \${PETSC_LIB}"
-	POOFEM_DEBUG_LIBS="$POOFEM_DEBUG_LIBS \${PETSC_C_SH_LIB_PATH} \${PETSC_LIB}"
+	OOFEM_LIBS="$OOFEM_LIBS \${PETSC_C_SH_LIB_PATH} \${PETSC_LIB}"
 fi
 
 
@@ -915,13 +909,7 @@ if test x$parmetis_module = xyes; then
 	MODULE_LIST="$MODULE_LIST parmetis"
 	MODULE_SYMBOLS="$MODULE_SYMBOLS -D__PARMETIS_MODULE"
 	MODULE_INCLUDES="$MODULE_INCLUDES ${PARMETIS_INCLUDES}"
-
-	OOFEM_RELEASE_LIBS="$OOFEM_RELEASE_LIBS ${PARMETIS_LIB}"
-	OOFEM_DEBUG_LIBS="$OOFEM_DEBUG_LIBS ${PARMETIS_LIB}"
-	OOFEG_RELEASE_LIBS="$OOFEG_RELEASE_LIBS ${PARMETIS_LIB}"
-	OOFEG_DEBUG_LIBS="$OOFEG_DEBUG_LIBS ${PARMETIS_LIB}"
-	POOFEM_RELEASE_LIBS="$POOFEM_RELEASE_LIBS ${PARMETIS_LIB}"
-	POOFEM_DEBUG_LIBS="$POOFEM_DEBUG_LIBS ${PARMETIS_LIB}"
+	OOFEM_LIBS="$OOFEM_LIBS ${PARMETIS_LIB}"
 fi
 
 dnl
@@ -950,6 +938,7 @@ AC_SUBST(host)
 AC_SUBST(HOST_NAME)
 AC_SUBST(VERSION)
 
+AC_SUBST(TARGET_CONFIG_INCLUDES)
 AC_SUBST(OOFEMLIB_INCLUDES)
 AC_SUBST(SM_INCLUDES)
 AC_SUBST(TM_INCLUDES)
@@ -960,25 +949,12 @@ AC_SUBST(SPOOLES_INCLUDES)
 AC_SUBST(MODULE_INCLUDES)
 AC_SUBST(MODULE_SYMBOLS)
 AC_SUBST(MODULE_LIST)
+AC_SUBST(MODULE_TOBUILD)
 AC_SUBST(TEST_TARGETS)
-AC_SUBST(IML_MODULE_SYMBOL)
 AC_SUBST(DSS_MODULE_SYMBOL)
 AC_SUBST(SPOOLES_MODULE_SYMBOL)
-AC_SUBST(MPI_MODULE_SYMBOLS)
 
-AC_SUBST(OOFEM_RELEASE_LIBS)
-AC_SUBST(OOFEM_DEBUG_LIBS)
-AC_SUBST(OOFEG_RELEASE_LIBS)
-AC_SUBST(OOFEG_DEBUG_LIBS)
-AC_SUBST(POOFEM_RELEASE_LIBS)
-AC_SUBST(POOFEM_DEBUG_LIBS)
-
-AC_SUBST(OOFEM_RELEASE_DEP_TARGETS)
-AC_SUBST(OOFEM_DEBUG_DEP_TARGETS)
-AC_SUBST(OOFEG_RELEASE_DEP_TARGETS)
-AC_SUBST(OOFEG_DEBUG_DEP_TARGETS)
-AC_SUBST(POOFEM_RELEASE_DEP_TARGETS)
-AC_SUBST(POOFEM_DEBUG_DEP_TARGETS)
+AC_SUBST(OOFEM_LIBS)
 
 AC_SUBST(CKIT_LIB)
 AC_SUBST(CKIT_INCLUDES)
@@ -994,16 +970,10 @@ AC_SUBST(x_includes)
 
 AC_SUBST(MPI_INCLUDES)
 
-AC_SUBST(MPI_CXX)
-SERIAL_CXX=$CXX
-AC_SUBST(SERIAL_CXX)
-if test x$petsc_module = xyes; then
-   CXX=$MPI_CXX
-fi                  
+AC_SUBST(CXX)
 
 AC_SUBST(DSS_DIR)
 AC_SUBST(INCLUDES)
-
 
 AC_SUBST(PETSC_DIR)
 AC_SUBST(PETSC_ARCH)
@@ -1014,12 +984,16 @@ AC_SUBST(PETSC_BOPT)
 AC_SUBST(PARMETIS_INCLUDES)
 AC_SUBST(PARMETIS_LIB)
 
-AC_SUBST(TARGETS)
+AC_SUBST(OOFEM_TARGET)
+AC_SUBST(OOFEM_DIR)
+AC_SUBST(PROG_NAME)
 
+AC_CONFIG_HEADER(targets/$OOFEM_TARGET/include/oofemcfg.h)
 dnl AC_CONFIG_FILES(dss/src/makefile)
 dnl AC_OUTPUT(oofemlib/src/makefile sm/src/makefile tm/src/makefile main/src/makefile tools/makefile makefile hmworks/makefile)
-AC_OUTPUT(oofemlib/src/makefile oofemlib/src/oofemdef.h sm/src/makefile tm/src/makefile fm/src/makefile main/src/makefile tools/makefile tests/do_test makefile $DSS_MAKEFILE)
+AC_OUTPUT(makefile targets/$OOFEM_TARGET/include/oofemdef.h targets/$OOFEM_TARGET/makefile targets/$OOFEM_TARGET/lib/oofemlib/makefile targets/$OOFEM_TARGET/lib/sm/makefile targets/$OOFEM_TARGET/lib/tm/makefile targets/$OOFEM_TARGET/lib/fm/makefile targets/$OOFEM_TARGET/lib/dss/makefile targets/$OOFEM_TARGET/lib/main/makefile tools/makefile)
 
 echo
 echo Modules to be included: $MODULE_LIST
-echo Targets to be built: $TARGETS
+echo Target configured: $OOFEM_TARGET
+echo PROG_NAME: $PROG_NAME

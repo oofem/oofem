@@ -1,5 +1,7 @@
-# $Header: /home/cvs/bp/oofem/makefile.in,v 1.13.4.2 2004/04/22 12:12:52 bp Exp $
 
+#
+# top oofem makefile
+#
 SHELL      = /bin/sh
 BACKUPFILES= oofemlib/src/*.h oofemlib/src/*.h.in oofemlib/src/*.C  oofemlib/src/makefile.in sm/src/*.h sm/src/*.C  sm/src/makefile.in tm/src/*.h tm/src/*.C tm/src/makefile.in fm/src/*.h fm/src/*.C fm/src/makefile.in main/src/*.h main/src/*.C  main/src/makefile.in ./makefile.in ./configure.in ./configure ./config.sub ./config.guess ./install.sh ./README ./ChangeLog ./gpl.txt ./do_release ./VERSION ./*.pl tools/*.h tools/*.C tools/*.pl tools/makefile.in tools/adapt_job doc/refman/doxygen.cfg doc/refman/*.html doc/refman/*.shtml doc/refman/intro doc/refman/mainpage doc/refman/makefile iml/*.h oofemlib/doc/refman/doxygen.cfg oofemlib/doc/refman/*.html oofemlib/doc/refman/intro oofemlib/doc/refman/mainpage oofemlib/doc/refman/makefile dss/src/*.cpp dss/src/*.h dss/src/makefile.in
 BACKUPDOCFILES=.+tex$$|.+el$$|.+sty$$|.+fig$$.+xmgr$$|.+eps$$|.+ps$$|.+shtml$$|makefile$$|do_release$$
@@ -7,64 +9,15 @@ BACKUPDOCDIR= doc/elementlibmanual  doc/paper-actap doc/extractorInput doc/matli
 BACKUPTESTFILES=README$$|do_test$$|do_test.in$$|.+in$$|.+in\..$$|.+ctrl$$|.+t3d.in$$|.+t3d.out$$
 BACKUPTESTDIR= tests
 
-all: @TARGETS@
 
-oofem-release: 
-	cd main/src; make oofem-release
+all:
+	cd targets/${OOFEM_TARGET}; ${MAKE} OOFEM_TARGET=${OOFEM_TARGET}
 	@echo
-	@echo oofem-release target done
-	@echo
-
-oofem-debug: 
-	cd main/src; make oofem-debug
-	@echo
-	@echo oofem-debug target done
-	@echo
-
-oofeg-release: 
-	cd main/src; make oofeg-release
-	@echo
-	@echo oofeg-release target done
-	@echo
-
-oofeg-debug: 
-	cd main/src; make oofeg-debug
-	@echo
-	@echo oofeg-debug target done
-	@echo
-
-poofem-release: 
-	cd main/src; make poofem-release
-	@echo
-	@echo poofem-release target done
-	@echo
-
-poofem-debug: 
-	cd main/src; make poofem-debug
-	@echo
-	@echo poofem-debug target done
+	@echo ${OOFEM_TARGET} target done
 	@echo
 
 clean:
-	cd oofemlib/src; make clean
-	cd sm/src; make clean
-	cd tm/src; make clean
-	cd fm/src; make clean
-	cd main/src; make clean
-	cd dss/src; make clean
-	@echo
-	@echo clean target done
-	@echo
-
-makedepend:
-	cd oofemlib/src; make makedepend
-	cd sm/src; make makedepend
-	cd tm/src; make makedepend
-	cd fm/src; make makedepend
-	cd main/src; make makedepend
-	@echo
-	@echo makedepend target done
-	@echo
+	cd targets/${OOFEM_TARGET}; ${MAKE} OOFEM_TARGET=${OOFEM_TARGET} clean
 
 backup:
 	rm -f oofem.tar.gz
@@ -74,8 +27,4 @@ backup:
 	echo "doc/makefile" >> files_to_backup
 	tar cvf oofem.tar --files-from files_to_backup
 	gzip oofem.tar
-
-tapebackup: 
-	$(MAKE) backup
-	tar cvf /dev/fd0 oofem.tar.gz
-
+	

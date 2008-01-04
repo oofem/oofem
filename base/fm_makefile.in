@@ -1,0 +1,75 @@
+#
+# fmlib target makefile
+#
+
+SHELL      = /bin/bash
+#
+PETSC_DIR  = @PETSC_DIR@
+PETSC_ARCH = @PETSC_ARCH@
+BOPT       = @PETSC_BOPT@
+@PETSC_MAKE_INCLUDE@
+
+INCLUDE_DIR=  @TARGET_CONFIG_INCLUDES@ @OOFEMLIB_INCLUDES@ @IML_INCLUDES@ @SPOOLES_INCLUDES@ @PETSC_INCLUDES@ @PARMETIS_INCLUDES@ @DSS_INCLUDES@ @CKIT_INCLUDES@ @ELIXIR_INCLUDES@ @MPI_INCLUDES@
+SYMBOLS    = @MODULE_SYMBOLS@
+#   Libraries
+LOCAL_LIBS = @ELIXIR_LIBS@ @CKIT_LIB@
+SYS_LIBS  =  @LIBS@ @X_PRE_LIBS@ @X_LIBS@ @X_EXTRA_LIBS@
+#Compiler flags
+CFLAGS      = @CXXFLAGS@ @MODULE_SYMBOLS@
+LDFLAGS     = $(CFLAGS) @LDFLAGS@
+#
+# 
+LD         = @CXX@
+CC         = @CXX@
+#
+AR         = ar -r
+RM         = rm -f
+
+VPATH=@OOFEM_DIR@/src/fm
+
+## source files
+srcs0= cbselement.C fluiddynamicmaterial.C cbs.C tr1_2d_cbs.C newtonianfluid.C tractionpressurebc.C fmelement.C
+srcs1= 
+srcs2= 
+srcs3= 
+srcs4=
+srcs5= 
+srcs6= 
+srcs7= 
+srcs8= levelsetpcs.C fastmarchingmethod.C
+srcs9= leplic.C twofluidmaterial.C supg.C supgelement.C tr1_2d_supg.C tr1_2d_supg2.C tr1_2d_supg_axi.C binghamfluid2.C tr1_2d_supg2_axi.C supgelement2.C py1_3d_supg.C
+
+all_src = $(srcs0) $(srcs1) $(srcs2) $(srcs3) $(srcs4) $(srcs5) $(srcs6) $(srcs7) $(srcs8) $(srcs9) $(psrc1) 
+
+## object files
+fmLib_objs := $(all_src:.C=.o)
+## dependency files
+fmLib_deps := $(all_src:.C=.d)
+
+
+all: fmlib.a 
+	echo all target done
+
+include $(fmLib_deps)
+
+%.o:	%.C
+	$(CC) -c $(CFLAGS) $(RELEASE_FLAGS) $(INCLUDE_DIR) $< -o $@
+
+%.o:	%.c
+	$(CC) -c $(CFLAGS) $(RELEASE_FLAGS) $(INCLUDE_DIR) $< -o $@
+
+%.d:	%.C
+	set -e; \
+	$(CC) -MM $(INCLUDE_DIR) $< | sed 's|\($*\)\.o[ :]*|\1.o $@ : |g' > $@; \
+	[ -s $@ ] || rm -f $@
+
+fmlib.a:  $(fmLib_objs) 
+	echo huhu
+	rm -f fmlib.a
+	@echo $(AR) fmlib.a
+	@$(AR) fmlib.a $(fmLib_objs) 
+
+clean: 
+	rm -fr *.o *.d *.a
+
+

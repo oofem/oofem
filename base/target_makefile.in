@@ -1,0 +1,91 @@
+
+#
+# target oofem makefile
+#
+SHELL      = /bin/bash
+TARGET     = @OOFEM_TARGET@
+MODULES    =@MODULE_TOBUILD@
+MODULE_TARGETS := $(foreach obj,$(MODULES),$(obj)_mod)
+
+INSTALL_DIR        = bin
+PROG_NAME  = @PROG_NAME@
+OOFEM_DIR  = @OOFEM_DIR@
+
+# for testing
+OOFEM=@OOFEM_DIR@/targets/@OOFEM_TARGET@/bin/@PROG_NAME@
+CHECKER=@OOFEM_DIR@/tools/checker
+RESULT=@OOFEM_DIR@/targets/@OOFEM_TARGET@/test_results
+
+all: $(MODULE_TARGETS)
+	cd lib/main; ${MAKE} all
+
+clean:
+	cd lib/oofemlib; ${MAKE} clean
+	cd lib/sm; ${MAKE} clean
+	cd lib/tm; ${MAKE} clean
+	cd lib/fm; ${MAKE} clean
+	cd lib/main;${MAKE} clean
+	cd lib/dss;${MAKE} clean
+
+tests:
+	echo OOFEM Test result file  > ${RESULT}
+	echo ################################################## >> ${RESULT}
+	echo started `date`         >> ${RESULT}
+	echo                        >> ${RESULT}
+	if [ -f  ${OOFEM} ] && [ -f ${CHECKER} ] ;\
+	then \
+	  echo "using ${OOFEM}" >> ${RESULT};\
+	  echo                >> ${RESULT};\
+	  for module in @TEST_TARGETS@;\
+	  do\
+	    echo Running tests for module $$module >> ${RESULT};\
+	    for i in @OOFEM_DIR@/tests/$$module/*.in ;\
+	    do\
+		ib=`basename $$i`;\
+		echo;\
+		echo $${ib};\
+		echo;\
+		${OOFEM} -f $$i -l 2;\
+		${CHECKER} -f $$i    >> ${RESULT};\
+		rm $${ib%.in}.out;\
+	    done;\
+	  done;\
+	  echo finished `date`  >> ${RESULT};\
+	elif [ ! -f  ${OOFEM} ] ;\
+	  then\
+	  echo "oofem executable   not found" >> ${RESULT};\
+	  echo "oofem executable   not found";\
+	else\
+	  echo "checker executable not found" >> ${RESULT};\
+	  echo "checker executable not found";\
+	fi
+#	cd tests; bash ../do_tests
+
+
+partests:
+	echo  ====== Paralel test batch  ======= > ${RESULT}
+	cd @OOFEM_DIR@/tests/partests; \
+	for id in *;\
+	do\
+	  if [ -d $${id} ]; then\
+	    echo ====== Job: $${id} ======== >> ${RESULT};\
+	    cd $${id}; bash ./do_test @OOFEM_DIR@/targets/@OOFEM_TARGET@; cd ..;\
+	  fi;\
+	done
+
+
+oofemlib_mod:
+	$(MAKE) -C lib/oofemlib all
+
+sm_mod:
+	$(MAKE) -C lib/sm all
+
+tm_mod:
+	$(MAKE) -C lib/tm all
+
+fm_mod:
+	$(MAKE) -C lib/fm all
+
+dss_mod:
+	$(MAKE) -C lib/dss all
+

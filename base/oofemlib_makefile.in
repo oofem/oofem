@@ -1,0 +1,80 @@
+#
+# oofemlib target makefile
+#
+
+SHELL      = /bin/bash
+#
+PETSC_DIR  = @PETSC_DIR@
+PETSC_ARCH = @PETSC_ARCH@
+BOPT       = @PETSC_BOPT@
+@PETSC_MAKE_INCLUDE@
+
+INCLUDE_DIR=  @TARGET_CONFIG_INCLUDES@ @IML_INCLUDES@ @SPOOLES_INCLUDES@ @PETSC_INCLUDES@ @PARMETIS_INCLUDES@ @DSS_INCLUDES@ @CKIT_INCLUDES@ @ELIXIR_INCLUDES@ @MPI_INCLUDES@
+SYMBOLS    = @MODULE_SYMBOLS@
+#   Libraries
+LOCAL_LIBS = @ELIXIR_LIBS@ @CKIT_LIB@
+SYS_LIBS  =  @LIBS@ @X_PRE_LIBS@ @X_LIBS@ @X_EXTRA_LIBS@
+#Compiler flags
+CFLAGS      = @CXXFLAGS@ @MODULE_SYMBOLS@
+LDFLAGS     = $(CFLAGS) @LDFLAGS@
+#
+# 
+LD         = @CXX@
+CC         = @CXX@
+#
+AR         = ar -r
+RM         = rm -f
+
+VPATH=@OOFEM_DIR@/src/oofemlib
+
+
+## sources
+srcs0=
+srcs1=  oofeggraphiccontext.C 
+srcs2= generalbc.C bodyload.C boundary.C clock.C cltypes.C column.C conTable.C constant.C crosssection.C deadwght.C dictionr.C dof.C domain.C element.C engngm.C femcmpnn.C flotarry.C flotmtrx.C freestor.C error.C logger.C emptycs.C feinterpol.C
+srcs3=gausspnt.C initial.C intarray.C isolinearelasticmaterial.C ldltfact.C linearelasticmaterial.C load.C loadtime.C rowcol.C skylineu.C imlsolver.C compcol.C iluprecond.C dyncompcol.C symcompcol.C precond.C icprecond.C dyncomprow.C ilucomprowprecond.C voidprecond.C sparselinsystemnm.C sparsegeneigenvalsystemnm.C sparsenonlinsystemnm.C inverseit.C
+srcs4=material.C mathfem.C matrix.C matstatus.C nlstructuralelement.C node.C nodload.C nummet.C simplecrosssection.C skyline.C stationaryflow.C inputrecord.C tokenizer.C strreader.C structuralcrosssection.C structuralelement.C structuralmaterial.C structengngmodel.C
+srcs5=structuralms.C timestep.C structtemperatureload.C dofmanager.C elementside.C integrationrule.C boundaryload.C gaussintegrationrule.C masterdof.C simpleslavedof.C slavedof.C nonlocalmaterialext.C structuralnonlocalmaterialext.C linearedgeload.C constantedgeload.C constantsurfaceload.C lobattoir.C
+srcs6=outputmanager.C compiler.C parser.C rigidarmnode.C spatiallocalizer.C dummylocalizer.C octreelocalizer.C nodalrecoverymodel.C util.C sloangraph.C sloangraphnode.C sloanlevelstruct.C metastep.C diagpre.C exportmodule.C exportmodulemanager.C zznodalrecoverymodel.C nodalaveragingrecoverymodel.C sprnodalrecoverymodel.C
+srcs7=calmls.C nrsolver.C nrsolver2.C subspaceit.C gjacobi.C linesearch.C nonlocalbarrier.C primaryfield.C field.C fieldmanager.C oofemtxtdatareader.C oofemtxtinputrecord.C buffereddatareader.C stressstrainbasevector.C stressvector.C strainvector.C fei1dlin.C  fei2dquadlin.C  fei2dtrlin.C fei3dtrlin.C fei3dhexalin.C spoolessparsemtrx.C spoolessolver.C petscsparsemtrx.C petscsolver.C petsccontext.C hangingnode.C pointload.C
+srcs8=errorestimator.C remeshingcrit.C primaryunknownmapper.C materialmappingalgorithm.C dofdistributedprimaryfield.C domaintransactionmanager.C
+srcs9=geotoolbox.C dss.C dsssolver.C
+#obsolete 
+srcs99=ppdeelement.C heatcrosssection.C heatmaterial.C isolinearheatmat.C
+#parallel
+psrcs1=communicator.C processcomm.C problemcomm.C combuff.C petscordering.C dyncombuff.C loadballancer.C parmetisloadballancer.C nonlocalmatwtp.C
+
+all_src = $(srcs0) $(srcs1) $(srcs2) $(srcs3) $(srcs4) $(srcs5) $(srcs6) $(srcs7) $(srcs8) $(srcs9) $(srcs99) $(psrcs1) 
+
+## object files
+oofemLib_objs := $(all_src:.C=.o)
+## dependency files
+oofemLib_deps := $(all_src:.C=.d)
+
+all: oofemlib.a 
+	echo all target done
+
+include $(oofemLib_deps)
+
+
+%.o:	%.C
+	$(CC) -c $(CFLAGS) $(RELEASE_FLAGS) $(INCLUDE_DIR) $< -o $@
+
+%.o:	%.c
+	$(CC) -c $(CFLAGS) $(RELEASE_FLAGS) $(INCLUDE_DIR) $< -o $@
+
+%.d:	%.C
+	set -e; \
+	$(CC) -MM $(INCLUDE_DIR) $< | sed 's|\($*\)\.o[ :]*|\1.o $@ : |g' > $@; \
+	[ -s $@ ] || rm -f $@
+
+oofemlib.a:  $(oofemLib_objs) 
+	echo huhu
+	rm -f oofemlib.a
+	@echo $(AR) oofemlib.a
+	@$(AR) oofemlib.a $(oofemLib_objs) 
+
+clean: 
+	rm -fr *.o *.d *.a
+
+

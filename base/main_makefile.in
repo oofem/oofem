@@ -1,0 +1,98 @@
+# $Header: /home/cvs/bp/oofem/main/src/makefile.in,v 1.8.4.2 2004/04/08 11:39:20 bp Exp $ 
+
+#   makefile 1.27 95/02/27 08:39:22
+#
+ 
+
+.SUFFIXES:  .h .C
+
+SHELL      = /bin/sh
+#
+PETSC_DIR  = @PETSC_DIR@
+PETSC_ARCH = @PETSC_ARCH@
+BOPT       = @PETSC_BOPT@
+@PETSC_MAKE_INCLUDE@
+
+INCLUDE_DIR= @TARGET_CONFIG_INCLUDES@ @MODULE_INCLUDES@ @CKIT_INCLUDES@ @ELIXIR_INCLUDES@ @MPI_INCLUDES@
+SYMBOLS    = @MODULE_SYMBOLS@
+LOCAL_LIBS = @ELIXIR_LIBS@ @CKIT_LIB@
+SYS_LIBS   = @LIBS@ @X_PRE_LIBS@ @X_LIBS@ @X_EXTRA_LIBS@ @LIBS@ 
+OOFEM_LIBS = @OOFEM_LIBS@
+MODULES    = @MODULE_SYMBOLS@
+MODULE_LIST= @MODULE_LIST@
+HOST_TYPE  = @host@
+HOST_NAME  = @HOST_NAME@
+#
+#Compiler flags
+#OPTFLAGS used only for non-debug version
+#CFLAGS     = -64 -exceptions -prelink -ptused @MODULE_SYMBOLS@ #required on SGI
+CFLAGS        = @CXXFLAGS@ @MODULE_SYMBOLS@ @OOFEG_DIRECTIVES@
+#DEBUG_FLAGS   = -g 
+# LINUX, GNU
+LD         = @CXX@
+CC         = @CXX@
+#
+PROG_NAME  = @PROG_NAME@
+RM         = rm -f
+ARCHIVE    = OOFEM
+MV         = mv
+# For large systems, it is often desirable to put sources in a separate
+# directory from the binaries.  The "directory search" features of `make'
+# facilitate this by searching several directories automatically to find
+# a prerequisite.  When you redistribute the files among directories, you
+# do not need to change the individual rules, just the search paths.
+# The value of the `make' variable `VPATH' specifies a list of
+# directories that `make' should search.  Most often, the directories are
+# expected to contain prerequisite files that are not in the current
+# directory; however, `VPATH' specifies a search list that `make' applies
+# for all files, including files which are targets of rules.
+#
+# Example:
+#
+# VPATH = .:../mysources
+
+#
+# You probably don't need to change anything below here.
+#
+
+#######################################################################
+INSTALL_DIR        = @OOFEM_DIR@/targets/@OOFEM_TARGET@/bin
+
+VPATH=@OOFEM_DIR@/src/main
+
+#
+# local sources
+#
+oofemsrc0= main.C oofeg.C usrdefsub.C 
+#
+# Module targets
+#
+all_src = $(oofemsrc0) 
+# obj
+all_objs := $(all_src:.C=.o)
+all_deps := $(all_src:.C=.d)
+
+all:: $(PROG_NAME)
+
+include $(all_deps)
+
+%.o:	%.C
+	$(CC) -c $(INCLUDE_DIR) $(CFLAGS) $(RELEASE_FLAGS) $< -o $@
+
+%.d:	%.C
+	set -e; \
+	$(CC) -MM $(INCLUDE_DIR) $< | sed 's|\($*\)\.o[ :]*|\1.o $@ : |g' > $@; \
+	[ -s $@ ] || rm -f $@
+
+#
+# local targets
+#
+
+$(PROG_NAME):  $(all_objs) 
+	rm -fr $@
+	$(LD) $(CFLAGS) $(RELEASE_FLAGS) -o $(PROG_NAME) $(all_objs) $(OOFEM_LIBS) $(LOCAL_LIBS) $(SYS_LIBS) 
+	@if [ ! -d $(INSTALL_DIR) ]; then mkdir -p $(INSTALL_DIR); fi
+	$(MV) $(PROG_NAME) $(INSTALL_DIR)
+
+clean:
+	rm -fr *.o *.d oofem
