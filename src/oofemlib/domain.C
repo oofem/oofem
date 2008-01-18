@@ -732,7 +732,7 @@ Domain :: giveDefaultNodeDofIDArry ()
     defaultNodeDofIDArry.at(3)=V_w;
     defaultNodeDofIDArry.at(4)=P_f;
   } else {
-    _error("giveDefaultNodeDofIDArry : unknown domainType");
+    _error2("giveDefaultNodeDofIDArry : unknown domainType (%s)", __domainTypeToString(dType));
   }
  return defaultNodeDofIDArry;
 }
@@ -811,7 +811,7 @@ Domain :: giveDefaultSideDofIDArry ()
  return answer;
  */
 
-  _error("giveDefaultSideDofIDArry : unknown domainType");
+  _error2("giveDefaultSideDofIDArry : unknown domainType (%s)", __domainTypeToString(dType));
   defaultSideDofIDArry.resize(0);
   return defaultSideDofIDArry;
 }
@@ -887,7 +887,7 @@ void Domain ::  resolveDomainDofsDefaults(char* typeName)
     dType = _3dMode;
     numberOfDefaultDofsPerNode = 3;
   } else { 
-    _error("resolveDomainDofsDefaults : unknown domainType");
+    _error2("resolveDomainDofsDefaults : unknown domainType (%s)", typeName);
     return;
   }
 }

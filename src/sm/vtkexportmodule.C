@@ -459,13 +459,13 @@ VTKExportModule::exportIntVarAs (InternalStateType valID, InternalStateValueType
  for (int indx = 1; indx <= nindx; indx++) {
   // print header
   if (type == ISVT_SCALAR) 
-   fprintf(stream,"SCALARS int_scalar_%d float 1\n", (int)valID);
+    fprintf(stream,"SCALARS %s float 1\n", __InternalStateTypeToString(valID));
   else if (type == ISVT_VECTOR)
-   fprintf(stream,"VECTORS int_vector_%d float\n", (int)valID);
+   fprintf(stream,"VECTORS %s float\n", __InternalStateTypeToString(valID));
   else if ((type == ISVT_TENSOR_S3) || (type == ISVT_TENSOR_S3E))
-   fprintf(stream,"TENSORS int_tensor_%d float\n", (int)valID);
+   fprintf(stream,"TENSORS %s float\n", __InternalStateTypeToString(valID));
   else if (type == ISVT_TENSOR_G) 
-   fprintf(stream,"SCALARS int_scalar_%d(%d) float 1\n", (int)valID, indx);
+   fprintf(stream,"SCALARS %s_%d float 1\n", __InternalStateTypeToString(valID), indx);
   else 
    fprintf(stderr,"exportIntVarAs: unsupported variable type\n");
   
@@ -710,18 +710,18 @@ VTKExportModule::exportPrimVarAs (UnknownType valID, FILE* stream, TimeStep* tSt
  else if ((valID == FluxVector) || (valID == PressureVector) || (valID == TemperatureVector)) {
   type = ISVT_SCALAR;
   //nScalarComp = d->giveNumberOfDefaultNodeDofs();
- } else OOFEM_ERROR("VTKExportModule::exportPrimVarAs: unsupported UnknownType");
+ } else OOFEM_ERROR2("VTKExportModule::exportPrimVarAs: unsupported UnknownType (%s)",__UnknownTypeToString(valID));
 
  // print header
  if (type == ISVT_SCALAR) 
-  fprintf(stream,"SCALARS prim_scalar_%d float %d\n", (int)valID, nScalarComp);
+   fprintf(stream,"SCALARS %s float %d\n",  __UnknownTypeToString(valID), nScalarComp);
  else if (type == ISVT_VECTOR)
-  fprintf(stream,"VECTORS vector_%d float\n", (int)valID);
+   fprintf(stream,"VECTORS %s float\n", __UnknownTypeToString(valID));
  else 
-  fprintf(stderr,"exportPrimVarAs: unsupported variable type\n");
+   fprintf(stderr,"exportPrimVarAs: unsupported variable type\n");
  
  if (type == ISVT_SCALAR) {
-  fprintf(stream,"LOOKUP_TABLE default\n");
+   fprintf(stream,"LOOKUP_TABLE default\n");
  }
  
  DofManager* dman;
@@ -774,7 +774,7 @@ VTKExportModule::exportPrimVarAs (UnknownType valID, FILE* stream, TimeStep* tSt
      }
      
    } else {
-     OOFEM_ERROR("VTKExportModule: unsupported unknownType");
+     OOFEM_ERROR2("VTKExportModule: unsupported unknownType (%s)",__UnknownTypeToString(valID));
      //d->giveDofManager(inode)->giveUnknownVector(iVal, d->giveDefaultNodeDofIDArry(), valID, VM_Total, tStep);
    }
    
@@ -845,7 +845,7 @@ VTKExportModule::exportPrimVarAs (UnknownType valID, FILE* stream, TimeStep* tSt
        }
        
     } else {
-      OOFEM_ERROR("VTKExportModule: unsupported unknownType");
+       OOFEM_ERROR2("VTKExportModule: unsupported unknownType (%s)",__UnknownTypeToString(valID));
       //d->giveDofManager(regionNodalNumbers.at(inode))->giveUnknownVector(iVal, d->giveDefaultNodeDofIDArry(), valID, VM_Total, tStep);
     }
     

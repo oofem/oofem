@@ -279,7 +279,7 @@ StructuralCrossSection :: imposeStressConstrainsOnGradient (GaussPoint* gp,
    gradientStressVector3d->at(i) = 0.;
   break;
  default:
-  _error ("ImposeStressConstrainsOnGradient: unknown mode");
+   _error2 ("ImposeStressConstrainsOnGradient: unknown mode (%s)", __MaterialModeToString(mode));
   break;
  }
  return gradientStressVector3d;
@@ -322,7 +322,7 @@ StructuralCrossSection :: imposeStrainConstrainsOnGradient (GaussPoint* gp,
    gradientStrainVector3d->at(i) = 0.;
   break;
  default:
-  _error ("ImposeStrainConstrainsOnGradient: unknown mode");
+   _error2 ("ImposeStrainConstrainsOnGradient: unknown mode (%s)", __MaterialModeToString(mode));
   break;
  }
  return gradientStrainVector3d;

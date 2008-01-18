@@ -132,7 +132,7 @@ CrossSection :: ofType (char* aClass)
      // last resort - call aditional user defined subroutine
      newCrossSection = ::CreateUsrDefCrossSectionOfType (aClass,number,domain);
      if (newCrossSection == NULL) {
-       _error ("ofType:  unknown cross section type \n") ;
+       _error2 ("ofType:  unknown cross section type (%s)\n", aClass) ;
        exit(0) ;
      }
    }

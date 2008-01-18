@@ -493,7 +493,7 @@ DofManager :: initializeFrom (InputRecord* ir)
       } else if (dtype == DT_slave) { // Slave dof
         dofArray[j] = new SlaveDof (j+1,this,(DofID) dofIDArry.at(j+1)) ;
       } else {
-        _error ("initializeFrom: unknown dof type");
+        _error2 ("initializeFrom: unknown dof type (%s)",  __dofTypeToString (dtype));
       }
     } else {
       _error ("initializeFrom: incompatible dof type");

@@ -105,7 +105,7 @@ StructuralMaterial :: giveCharacteristicMatrix (FloatMatrix& answer,
   this->give1dFiberStiffMtrx(answer,form,rMode,gp,atTime);
   break; 
  default:
-  _error ("giveCharacteristicMatrix : unknown mode");
+   _error2 ("giveCharacteristicMatrix : unknown mode (%s)", __MaterialModeToString(mMode));
   return ;
  }
  return ;
@@ -175,7 +175,7 @@ StructuralMaterial ::  reduceStiffMtrx3d (FloatMatrix& answer, MatResponseForm f
   this-> reduceTo1dFiberStiffMtrx (answer, form, gp, stiffMtrx3d);
   break; 
  default:
-  _error ("reduceStiffMtrx3d : unknown mode");
+   _error2 ("reduceStiffMtrx3d : unknown mode (%s)", __MaterialModeToString(mode));
   return ;
  }
  return ;
@@ -217,7 +217,7 @@ StructuralMaterial ::  reduceComplMtrx3d (FloatMatrix& answer, MatResponseForm f
   this-> reduceTo1dFiberComplMtrx (answer, form, gp, complMtrx3d);
   break; 
  default:
-  _error ("reduceComplMtrx3d : unknown mode");
+   _error2 ("reduceComplMtrx3d : unknown mode (%s)", __MaterialModeToString(mode));
   return;
  }
  return ;
@@ -292,7 +292,7 @@ StructuralMaterial :: giveSizeOfReducedStressStrainVector (MaterialMode mode)
   return 3;
 
   default:
-    _error ("giveSizeOfReducedStressStrainVector : unknown mode");
+    _error2 ("giveSizeOfReducedStressStrainVector : unknown mode (%s)", __MaterialModeToString(mode));
   }
   return 0;
 }
@@ -369,7 +369,7 @@ StructuralMaterial :: giveStressStrainComponentIndOf (MatResponseForm form, Mate
 
    
   default:
-   _error ("giveStressStrainComponentIndIn : unknown mode");
+    _error2 ("giveStressStrainComponentIndIn : unknown mode (%s)", __MaterialModeToString(mmode));
   }
   return 0;
  } else if (form == FullForm) {
@@ -431,7 +431,7 @@ StructuralMaterial :: giveStressStrainComponentIndOf (MatResponseForm form, Mate
     else if (ind == 4) return 8;
     break;
   default:
-   _error ("giveStressStrainComponentIndIn : unknown mode");
+    _error2 ("giveStressStrainComponentIndIn : unknown mode (%s)", __MaterialModeToString(mmode));
   }
   return 0;
  } else _error ("giveStressStrainComponentIndIn : unknown form mode");
@@ -554,7 +554,7 @@ StructuralMaterial :: giveStressStrainMask(IntArray& answer, MatResponseForm for
    answer.at(8) = 4;
    break;
   default:
-   _error ("giveStressStrainMask : unknown mode");
+    _error2 ("giveStressStrainMask : unknown mode (%s)", __MaterialModeToString(mmode));
   }
  } else if (form == FullForm) {
   switch(mmode) {
@@ -646,7 +646,7 @@ StructuralMaterial :: giveStressStrainMask(IntArray& answer, MatResponseForm for
    break;
    
   default:
-   _error ("giveStressStrainMask : unknown mode");
+    _error2 ("giveStressStrainMask : unknown mode (%s)", __MaterialModeToString(mmode));
   }
  } else _error ("giveStressStrainMask : unknown form mode");
  

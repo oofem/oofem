@@ -88,7 +88,7 @@ FluidDynamicElement ::  giveCharacteristicMatrix (FloatMatrix& answer,
   else if (mtrx == CouplingUPMatrix)
     this -> computeCouplingUPMatrix (answer, tStep);
 
-  else _error("giveCharacteristicMatrix: Unknown Type of characteristic mtrx.");
+  else _error2("giveCharacteristicMatrix: Unknown Type of characteristic mtrx (%s)", __CharTypeToString(mtrx));
   
   return ;
 }
@@ -101,7 +101,8 @@ FluidDynamicElement ::  giveCharacteristicVector (FloatArray& answer, CharType m
 //
 {
   if (mtrx == ElementBCTransportVector) this->computeBCVectorAt (answer, tStep, mode); 
-  else _error("giveCharacteristicVector: Unknown Type of characteristic mtrx.");
+  else _error2("giveCharacteristicVector: Unknown Type of characteristic mtrx (%s)",
+	       __CharTypeToString(mtrx));
   
   return ;
 }

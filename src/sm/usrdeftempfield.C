@@ -48,7 +48,7 @@ UserDefinedTemperatureField:: computeValueAt (FloatArray& answer, TimeStep* step
  FloatArray c(3);
  
  if ((mode!=VM_Incremental)&&(mode!=VM_Total))
-  _error ("computeComponentArrayAt: unknown mode");
+   _error2 ("computeComponentArrayAt: unknown mode (%s)",__ValueModeTypeToString (mode));
  
  for (i=1; i<=coords.giveSize(); i++) c.at(i) = coords.at(i);
  

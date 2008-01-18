@@ -61,6 +61,14 @@
 
 #define ERR_TAIL   "_______________________________________________________\a\n"
 
+
+/*
+  The enum declaration and to_string conversion
+  inspired by X-Macros technique, as described in Wikipedia entry on C preprocessor 
+  (http://en.wikipedia.org/wiki/C_preprocessor)
+*/
+
+
 /**
  Type introduced to distinguish between classes. Intended for run-time
  type checking. Every derived class from FemComponent base class should 
@@ -332,110 +340,75 @@ enum classType {
  and returns result. If passed CharType value is of unsupported value, error is generated.
  @see see also ValueModeType type.
  */
-enum CharType {
  // if modified , modify also isCharMtrxIncrementalValue function in cltypes.C
 
- // characteristic matrices 
+#define CharType_DEF				\
+  ENUM_ITEM(UnknownCharType)			\
+  ENUM_ITEM(StiffnessMatrix)			\
+  ENUM_ITEM(TangentStiffnessMatrix)		\
+  ENUM_ITEM(SecantStiffnessMatrix)		\
+  ENUM_ITEM(ElasticStiffnessMatrix)		\
+  ENUM_ITEM(MassMatrix)				\
+  ENUM_ITEM(LumpedMassMatrix)			\
+  ENUM_ITEM(DIIModifiedStiffnessMatrix)		\
+  ENUM_ITEM(ConductivityMatrix)			\
+  ENUM_ITEM(CapacityMatrix)			\
+  ENUM_ITEM(InitialStressMatrix)		\
+  ENUM_ITEM(HeatAndMoistureCharMatrix)		\
+  /* CBS */					\
+  ENUM_ITEM(IntermediateConvectionTerm)		\
+  ENUM_ITEM(IntermediateDiffusionTerm)		\
+  ENUM_ITEM(DensityRhsVelocityTerms)		\
+  ENUM_ITEM(DensityRhsPressureTerms)		\
+  ENUM_ITEM(DensityPrescribedTractionPressure)		\
+  ENUM_ITEM(NumberOfNodalPrescribedTractionPressureContributions)	\
+  ENUM_ITEM(PressureLhs)						\
+  ENUM_ITEM(CorrectionRhs)						\
+  ENUM_ITEM(CriticalTimeStep)						\
+  ENUM_ITEM(PrescribedVelocityRhsVector)				\
+  ENUM_ITEM(PrescribedDensityRhsVector)					\
+  /* SUPG/PSPG */							\
+  ENUM_ITEM(AccelerationTerm_MB)					\
+  ENUM_ITEM(AdvectionDerivativeTerm_MB)					\
+  ENUM_ITEM(DiffusionDerivativeTerm_MB)					\
+  ENUM_ITEM(SecantDiffusionDerivativeTerm_MB)				\
+  ENUM_ITEM(TangentDiffusionDerivativeTerm_MB)				\
+  ENUM_ITEM(InitialDiffusionDerivativeTerm_MB)				\
+  ENUM_ITEM(PressureTerm_MB)						\
+  ENUM_ITEM(LSICStabilizationTerm_MB)					\
+  ENUM_ITEM(LinearAdvectionTerm_MC)					\
+  ENUM_ITEM(AdvectionTerm_MC)						\
+  ENUM_ITEM(AdvectionDerivativeTerm_MC)					\
+  ENUM_ITEM(AccelerationTerm_MC)					\
+  ENUM_ITEM(DiffusionDerivativeTerm_MC)					\
+  ENUM_ITEM(DiffusionTerm_MC)						\
+  ENUM_ITEM(PressureTerm_MC)						\
+  ENUM_ITEM(BCRhsTerm_MB)						\
+  ENUM_ITEM(BCRhsTerm_MC)						\
+  ENUM_ITEM(AlgorithmicRhsTerm_MB)					\
+  ENUM_ITEM(AlgorithmicRhsTerm_MC)					\
+  ENUM_ITEM(AdvectionTerm_MB)						\
+  ENUM_ITEM(DiffusionTerm_MB)						\
+  /* characteristic vectors */						\
+  ENUM_ITEM(LoadVector)							\
+  ENUM_ITEM(NodalInternalForcesVector)					\
+  ENUM_ITEM(LastEquilibratedNodalInternalForcesVector)			\
+  ENUM_ITEM(ElementPPDELoadVector)					\
+  ENUM_ITEM(ElementForceLoadVector)					\
+  ENUM_ITEM(ElementNonForceLoadVector)					\
+  ENUM_ITEM(NodalLoadVector)						\
+  ENUM_ITEM(BcLhsDueToConvection)					\
+  ENUM_ITEM(ElementHEMOLoadVector)					\
+  ENUM_ITEM(ElementBCTransportVector)					\
+  ENUM_ITEM(ElementInternalSourceVector)				\
+  ENUM_ITEM(LHSBCMatrix)  /* LHS due to Boundary Conditions (Transport problems) */ \
+  ENUM_ITEM(NSTP_MidpointLhs) /* NonStationaryTransportProblem - LHS for midpoint disretization alg. */	\
+  ENUM_ITEM(NSTP_MidpointRhs) /* NonStationaryTransportProblem - RHS for midpoint disretization alg. */	\
+  ENUM_ITEM(IntSourceLHSMatrix)  /* LHS due to material internal source (Transport problems) */	\
+  ENUM_ITEM(ElementForceLoadVectorOfPrescribed)  /* Prescribed here means corresponding to prescribed dofs*/ \
+  ENUM_ITEM(NodalLoadVectorOfPrescribed)				\
+  ENUM_ITEM(PrescribedRhsVector)
 
-  UnknownCharType,
-  StiffnessMatrix,
-  TangentStiffnessMatrix,
-  SecantStiffnessMatrix,
-  ElasticStiffnessMatrix,
-  MassMatrix,
-  LumpedMassMatrix,
-  DIIModifiedStiffnessMatrix,
-  ConductivityMatrix,
-  CapacityMatrix,
-  InitialStressMatrix,
-  HeatAndMoistureCharMatrix,
-
-  // CBS
-  IntermediateConvectionTerm,
-  IntermediateDiffusionTerm,
-  DensityRhsVelocityTerms,
-  DensityRhsPressureTerms,
-  DensityPrescribedTractionPressure,
-  NumberOfNodalPrescribedTractionPressureContributions,
-  PressureLhs,
-  CorrectionRhs,
-  CriticalTimeStep,
-  PrescribedVelocityRhsVector,
-  PrescribedDensityRhsVector,
-  // SUPG/PSPG
-  AccelerationTerm_MB,
-  AdvectionDerivativeTerm_MB,
-  DiffusionDerivativeTerm_MB,
-  SecantDiffusionDerivativeTerm_MB,
-  TangentDiffusionDerivativeTerm_MB,
-  InitialDiffusionDerivativeTerm_MB,
-  PressureTerm_MB,
-  LSICStabilizationTerm_MB,
-  LinearAdvectionTerm_MC,
-  AdvectionTerm_MC,
-  AdvectionDerivativeTerm_MC,
-  AccelerationTerm_MC,
-  DiffusionDerivativeTerm_MC,
-  DiffusionTerm_MC,
-  PressureTerm_MC,
-  BCRhsTerm_MB,
-  BCRhsTerm_MC,
-  AlgorithmicRhsTerm_MB,
-  AlgorithmicRhsTerm_MC,
-  AdvectionTerm_MB,
-  DiffusionTerm_MB,
-
-
-  // characteristic vectors
-  
-  LoadVector,
-  NodalInternalForcesVector,
-  LastEquilibratedNodalInternalForcesVector,
-  
-  ElementPPDELoadVector,
-  ElementForceLoadVector,
-  ElementNonForceLoadVector,
-  NodalLoadVector,
-  BcLhsDueToConvection,
-  ElementHEMOLoadVector,
-  ElementBCTransportVector,
-  ElementInternalSourceVector,
-  LHSBCMatrix,  // LHS due to Boundary Conditions (Transport problems)
-  
-  NSTP_MidpointLhs, // NonStationaryTransportProblem - LHS for midpoint disretization alg.
-  NSTP_MidpointRhs, // NonStationaryTransportProblem - RHS for midpoint disretization alg.
-  IntSourceLHSMatrix,  // LHS due to material internal source (Transport problems)
-  ElementForceLoadVectorOfPrescribed,   // Prescribed here means corresponding to prescribed dofs
-  NodalLoadVectorOfPrescribed,
-  PrescribedRhsVector
-  
-/*
-  LoadVector,
-  NodalInternalForcesVector_Total,
-  NodalInternalForcesVector_Incremental,
- ElementPPDELoadVector_Total,
- ElementPPDELoadVector_Incremental,
-  ElementForceLoadVector_Total,
-  ElementForceLoadVector_Incremental,
- ElementNonForceLoadVector_Total,
- ElementNonForceLoadVector_Incremental,
-  NodalLoadVector_Total,
-  NodalLoadVector_Incremental,
-  BcLhsDueToConvection,
- ElementHEMOLoadVector_Total,
- ElementBCTransportVector_Total,
- ElementBCTransportVector_Incremental,
- ElementInternalSourceVector_Total,
- ElementInternalSourceVector_Incremental,
- LHSBCMatrix_Total,  // LHS due to Boundary Conditions (Transport problems)
- LHSBCMatrix_Incremental,
-
- ElementForceLoadVectorOfPrescribed_Total,   // Prescribed here means corresponding to prescribed dofs
- ElementForceLoadVectorOfPrescribed_Incremental,
- NodalLoadVectorOfPrescribed_Total,
- NodalLoadVectorOfPrescribed_Incremental
-*/
-};
 
 //
 // following type determine the mode of some value.
@@ -450,89 +423,57 @@ enum CharType {
  Type  representing the physical meaning of element or constitutive model internal variable.
  Values of this type are used, when these internal variables are requested.
 */
-enum InternalStateType {
- IST_Undedfined                    = 0,                   
- IST_StressTensor                  = 1,
- IST_PrincipalStressTensor         = 2,
- IST_PrincipalStressTempTensor     = 3,
- IST_StrainTensor                  = 4,
- IST_PrincipalStrainTensor         = 5,
- IST_PrincipalStrainTempTensor     = 6,
- IST_BeamForceMomentumTensor       = 7,
- IST_BeamStrainCurvatureTensor     = 8,
- 
- IST_ShellForceMomentumTensor      = 9,
- IST_ShellStrainCurvatureTensor    = 10,
- //IST_ForceTensor,
- //IST_MomentumTensor,
- IST_CurvatureTensor               = 11,
- IST_DisplacementVector            = 12,
- IST_DamageTensor                  = 13,
- IST_DamageInvTensor               = 14,
- IST_PrincipalDamageTensor         = 15,
- IST_PrincipalDamageTempTensor     = 16,
- IST_CrackState                    = 17,
-
- IST_StressTensorTemp              = 18,
- IST_StrainTensorTemp              = 19,
- IST_ForceTensorTemp               = 20,
- IST_MomentumTensorTemp            = 21,
- IST_CurvatureTensorTemp           = 22,
- IST_DisplacementVectorTemp        = 23,
- IST_DamageTensorTemp              = 24,
- IST_DamageInvTensorTemp           = 25,
- IST_CrackStateTemp                = 26,
- IST_PlasticStrainTensor           = 27,
- IST_PrincipalPlasticStrainTensor  = 28,
-
- IST_CylindricalStressTensor       = 29,
- IST_CylindricalStrainTensor       = 30,
-
- IST_MaxEquivalentStrainLevel      = 31,
- IST_ErrorIndicatorLevel           = 32,
- IST_InternalStressError           = 33,
- IST_PrimaryUnknownError           = 34,
- IST_RelMeshDensity                = 35,
-
- IST_MicroplaneDamageValues        = 36,
-
- IST_Temperature                   = 37,
- IST_MassConcentration_1           = 38,
-
- IST_HydrationDegree               = 39,
- IST_Humidity                      = 40,
-
- IST_Velocity                      = 41,
- IST_Pressure                      = 42,
-
- IST_VOFFraction                   = 43,
- IST_Density                       = 44,
- 
- IST_MaterialInterfaceVal          = 45,
-
-
-  //IST_StressVector,
-  //IST_StrainVector,
-  PlasticStrainVector,
-  CrackStatuses,
- CrackedFlag,
-  PositiveEffStrains,
-  CrackStrains,
-  MaxCrackStrains,
-  MaxEffTotalStrains,
-  ReachedSofteningStress,
-  CrackDirs,
-  MinEffStrainsForFullyOpenCrack,
-  CharLengths,
-  OldPrincipalStrain,
-  PrincipalStrain,
-  OldPrincipalStress,
-  PrincipalStress,
-  CrackMap,
-  HiddenStress,
- NonlocalStrainVector
-
-};
+#define InternalStateType_DEF\
+  ENUM_ITEM_WITH_VALUE(IST_Undedfined,0)\
+  ENUM_ITEM_WITH_VALUE(IST_StressTensor,1)\
+  ENUM_ITEM_WITH_VALUE(IST_PrincipalStressTensor,2)\
+  ENUM_ITEM_WITH_VALUE(IST_PrincipalStressTempTensor,3)\
+  ENUM_ITEM_WITH_VALUE(IST_StrainTensor,4)\
+  ENUM_ITEM_WITH_VALUE(IST_PrincipalStrainTensor,5)\
+  ENUM_ITEM_WITH_VALUE(IST_PrincipalStrainTempTensor,6)\
+  ENUM_ITEM_WITH_VALUE(IST_BeamForceMomentumTensor,7)\
+  ENUM_ITEM_WITH_VALUE(IST_BeamStrainCurvatureTensor,8)\
+  ENUM_ITEM_WITH_VALUE(IST_ShellForceMomentumTensor,9)\
+  ENUM_ITEM_WITH_VALUE(IST_ShellStrainCurvatureTensor,10)\
+  ENUM_ITEM_WITH_VALUE(IST_CurvatureTensor,11)\
+  ENUM_ITEM_WITH_VALUE(IST_DisplacementVector,12)\
+  ENUM_ITEM_WITH_VALUE(IST_DamageTensor,13)\
+  ENUM_ITEM_WITH_VALUE(IST_DamageInvTensor,14)\
+  ENUM_ITEM_WITH_VALUE(IST_PrincipalDamageTensor,15)\
+  ENUM_ITEM_WITH_VALUE(IST_PrincipalDamageTempTensor,16)\
+  ENUM_ITEM_WITH_VALUE(IST_CrackState,17)\
+  ENUM_ITEM_WITH_VALUE(IST_StressTensorTemp,18)\
+  ENUM_ITEM_WITH_VALUE(IST_StrainTensorTemp,19)\
+  ENUM_ITEM_WITH_VALUE(IST_ForceTensorTemp,20)\
+  ENUM_ITEM_WITH_VALUE(IST_MomentumTensorTemp,21)\
+  ENUM_ITEM_WITH_VALUE(IST_CurvatureTensorTemp,22)\
+  ENUM_ITEM_WITH_VALUE(IST_DisplacementVectorTemp,23)\
+  ENUM_ITEM_WITH_VALUE(IST_DamageTensorTemp,24)\
+  ENUM_ITEM_WITH_VALUE(IST_DamageInvTensorTemp,25)\
+  ENUM_ITEM_WITH_VALUE(IST_CrackStateTemp,26)\
+  ENUM_ITEM_WITH_VALUE(IST_PlasticStrainTensor,27)\
+  ENUM_ITEM_WITH_VALUE(IST_PrincipalPlasticStrainTensor,28)\
+  ENUM_ITEM_WITH_VALUE(IST_CylindricalStressTensor,29)\
+  ENUM_ITEM_WITH_VALUE(IST_CylindricalStrainTensor,30)\
+  ENUM_ITEM_WITH_VALUE(IST_MaxEquivalentStrainLevel,31)\
+  ENUM_ITEM_WITH_VALUE(IST_ErrorIndicatorLevel,32)\
+  ENUM_ITEM_WITH_VALUE(IST_InternalStressError,33)\
+  ENUM_ITEM_WITH_VALUE(IST_PrimaryUnknownError,34)\
+  ENUM_ITEM_WITH_VALUE(IST_RelMeshDensity,35)\
+  ENUM_ITEM_WITH_VALUE(IST_MicroplaneDamageValues,36)\
+  ENUM_ITEM_WITH_VALUE(IST_Temperature,37)\
+  ENUM_ITEM_WITH_VALUE(IST_MassConcentration_1,38)\
+  ENUM_ITEM_WITH_VALUE(IST_HydrationDegree,39)\
+  ENUM_ITEM_WITH_VALUE(IST_Humidity,40)\
+  ENUM_ITEM_WITH_VALUE(IST_Velocity,41)\
+  ENUM_ITEM_WITH_VALUE(IST_Pressure,42)\
+  ENUM_ITEM_WITH_VALUE(IST_VOFFraction,43)\
+  ENUM_ITEM_WITH_VALUE(IST_Density,44)\
+  ENUM_ITEM_WITH_VALUE(IST_MaterialInterfaceVal,45)\
+  \
+  ENUM_ITEM(CrackStatuses)\
+  ENUM_ITEM(CrackedFlag)\
+  ENUM_ITEM(CrackDirs)\
 
 
 /// type determining the scale corresponding to particular variable
@@ -568,25 +509,22 @@ enum InternalStateMode {
 /**
  Type representing particular unknown (its physical meaning). 
 */
-enum UnknownType {
-  UnknownType_Unknown,
-  DisplacementVector,
-  GeneralizedDisplacementVector,
-  FluxVector,    // mass concentrations
-  VelocityVector,
-  PressureVector,
-  TemperatureVector,
 
-  EigenValue,
-  EigenVector,
-  TotalLoadLevel,
-  
-  ReynoldsNumber,
-  Theta_1, // CBS integration constant
-  Theta_2, // CBS integration constant
-  PrescribedTractionPressure // CBS prescribed pressure due to applied traction
-
-};
+#define UnknownType_DEF\
+  ENUM_ITEM(UnknownType_Unknown)\
+  ENUM_ITEM(DisplacementVector)\
+  ENUM_ITEM(GeneralizedDisplacementVector)\
+  ENUM_ITEM(FluxVector)\
+  ENUM_ITEM(VelocityVector)			\
+  ENUM_ITEM(PressureVector)			\
+  ENUM_ITEM(TemperatureVector)			\
+  ENUM_ITEM(EigenValue)				\
+  ENUM_ITEM(EigenVector)			\
+  ENUM_ITEM(TotalLoadLevel)			\
+  ENUM_ITEM(ReynoldsNumber)						\
+  ENUM_ITEM(Theta_1) /* CBS integration constan)*/			\
+  ENUM_ITEM(Theta_2) /* CBS integration constan)*/			\
+  ENUM_ITEM(PrescribedTractionPressure) /* CBS prescribed pressure due to applied tractio)*/
 
 
 /**
@@ -616,17 +554,16 @@ enum EquationID {
   value can be futher classified to be total displacement (TotalMode) or  velocity of 
  displacement (VelocityMode) an so on.
 */
-enum ValueModeType {
- VM_Unknown      = 0, 
- VM_Total        = 1,
- VM_Velocity     = 2,
- VM_Acceleration = 3,
- VM_Incremental  = 4,
- VM_RhsTotal     = 5,
- VM_RhsIncremental = 6,
- VM_RhsInitial    = 7
+#define ValueModeType_DEF\
+  ENUM_ITEM_WITH_VALUE(VM_Unknown,0)\
+  ENUM_ITEM_WITH_VALUE(VM_Total,1)		\
+  ENUM_ITEM_WITH_VALUE(VM_Velocity,2)		\
+  ENUM_ITEM_WITH_VALUE(VM_Acceleration,3)	\
+  ENUM_ITEM_WITH_VALUE(VM_Incremental,4)	\
+  ENUM_ITEM_WITH_VALUE(VM_RhsTotal,5)		\
+  ENUM_ITEM_WITH_VALUE(VM_RhsIncremental,6)	\
+  ENUM_ITEM_WITH_VALUE(VM_RhsInitial,7)
 
-};
 
 /**
  Type representing numerical component. The components of characteristic equations are mapped 
@@ -665,68 +602,63 @@ enum NumericalCmpn {
 /**
  Type representing material mode of integration point.
  */
-enum MaterialMode {  // characteristic (material) mode for gaussian
-                   // point (material point)
-  _Unknown,
-  _3dMat,
-  _PlaneStress,
-  _PlaneStrain,
-  _2dPlate,
-  _1dMat,
-  _2dBeam,
-  _3dBeam,
-  _3dShell,
-  _3dRotContinuum, // axisymmetry
-  
-  _2dPlateLayer,
-  _2dBeamLayer,
-  _3dShellLayer,
-  _PlaneStressRot,
-
-  _1dFiber,
-  _3dMicroplane,
-  _2dInterface,
-  _1dInterface,
-
-  _2dHeat,// 2d heat
-  _2dHeMo,// 2d heat and mass (one component) transfer
-  _3dHeat,
-  _3dHeMo,
-
-  _2dFlow,
-  _2dAxiFlow,
-  _3dFlow
-
-} ;
+#define MaterialMode_DEF\
+  ENUM_ITEM(_Unknown)	\
+  ENUM_ITEM(_3dMat)\
+  ENUM_ITEM(_PlaneStress)\
+  ENUM_ITEM(_PlaneStrain)\
+  ENUM_ITEM(_2dPlate)\
+  ENUM_ITEM(_1dMat)\
+  ENUM_ITEM(_2dBeam)\
+  ENUM_ITEM(_3dBeam)\
+  ENUM_ITEM(_3dShell)\
+  ENUM_ITEM(_3dRotContinuum) /* axisymmetry */\
+  \
+  ENUM_ITEM(_2dPlateLayer)\
+  ENUM_ITEM(_2dBeamLayer)\
+  ENUM_ITEM(_3dShellLayer)\
+  ENUM_ITEM(_PlaneStressRot)\
+  \
+  ENUM_ITEM(_1dFiber)\
+  ENUM_ITEM(_3dMicroplane)\
+  ENUM_ITEM(_2dInterface)\
+  ENUM_ITEM(_1dInterface)\
+  \
+  ENUM_ITEM(_2dHeat) /* 2d heat */ \
+  ENUM_ITEM(_2dHeMo) /* 2d heat and mass (one component) transfer */\
+  ENUM_ITEM(_3dHeat)\
+  ENUM_ITEM(_3dHeMo)\
+  \
+  ENUM_ITEM(_2dFlow)\
+  ENUM_ITEM(_2dAxiFlow)\
+  ENUM_ITEM(_3dFlow)\
 
 
 /**
  Describes the character of characteristic material matrix.
 */
-enum MatResponseMode {
- TangentStiffness,
- SecantStiffness,
- ElasticStiffness,
- Conductivity,    // element level conductivity matrix
- Conductivity_ww, // material level conductivity submatrix
- Conductivity_hh, // material level conductivity submatrix
- Conductivity_hw, // material level conductivity submatrix
- Conductivity_wh, // material level conductivity submatrix
- Capacity,
- Capacity_ww, // material level capacity submatrix
- Capacity_hh, // material level capacity submatrix
- Capacity_hw, // material level capacity submatrix
- Capacity_wh, // material level capacity submatrix
+#define MatResponseMode_DEF\
+  ENUM_ITEM(TangentStiffness)\
+  ENUM_ITEM(SecantStiffness) \
+  ENUM_ITEM(ElasticStiffness)						\
+  ENUM_ITEM(Conductivity)    /* element level conductivity matrix */	\
+  ENUM_ITEM(Conductivity_ww) /* material level conductivity submatrix */ \
+  ENUM_ITEM(Conductivity_hh) /* material level conductivity submatrix */ \
+  ENUM_ITEM(Conductivity_hw) /* material level conductivity submatrix */ \
+  ENUM_ITEM(Conductivity_wh) /* material level conductivity submatrix */ \
+  ENUM_ITEM(Capacity)							\
+  ENUM_ITEM(Capacity_ww) /* material level capacity submatrix */	\
+  ENUM_ITEM(Capacity_hh) /* material level capacity submatrix */	\
+  ENUM_ITEM(Capacity_hw) /* material level capacity submatrix */	\
+  ENUM_ITEM(Capacity_wh) /* material level capacity submatrix */	\
+  ENUM_ITEM(IntSource)							\
+  ENUM_ITEM(IntSource_ww) /* material level internal source submatrix - water source */ \
+  ENUM_ITEM(IntSource_hh) /*  - heat source */				\
+  ENUM_ITEM(IntSource_hw) /*  - heat source dependency on water content change */ \
+  ENUM_ITEM(IntSource_wh) /*  - water source dependency on temperature change */ \
+  ENUM_ITEM(MRM_Density)  /* material density */			\
+  ENUM_ITEM(MRM_Viscosity)
 
- IntSource,
- IntSource_ww, // material level internal source submatrix - water source
- IntSource_hh, //  - heat source
- IntSource_hw, //  - heat source dependency on water content change
- IntSource_wh, //  - water source dependency on temperature change
-
- MRM_Density,      // material density
- MRM_Viscosity
-};
 
 /**
  Type representing the form of returned characteristic value (for cross section and material models).
@@ -932,24 +864,23 @@ enum fMode {
  Domain type (the member value of Domain class) is used to determine the default 
  number of DOFs per node and side and to determine their corresponding physical meaning.
  */
-enum domainType {
-  _unknownMode,
-  _2dPlaneStressMode,
-  _PlaneStrainMode,
-  _2dPlaneStressRotMode,
-  _3dMode,
-  _3dAxisymmMode,
-  _2dMindlinPlateMode,
-  _3dShellMode,
-  _2dTrussMode,
-  _1dTrussMode,
-  _2dBeamMode,
-  _HeatTransferMode,
-  _HeatMass1Mode,   // Coupled heat and mass (1 matter) transfer
-  _2dIncompressibleFlow,// 2d Incompressible flow, no energy eq
-  _3dIncompressibleFlow // 3d Incompressible flow, no energy eq
+#define domainType_DEF\
+  ENUM_ITEM(_unknownMode)\
+  ENUM_ITEM(_2dPlaneStressMode)\
+  ENUM_ITEM(_PlaneStrainMode)\
+  ENUM_ITEM(_2dPlaneStressRotMode)\
+  ENUM_ITEM(_3dMode)\
+  ENUM_ITEM(_3dAxisymmMode)\
+  ENUM_ITEM(_2dMindlinPlateMode)\
+  ENUM_ITEM(_3dShellMode)\
+  ENUM_ITEM(_2dTrussMode)\
+  ENUM_ITEM(_1dTrussMode)\
+  ENUM_ITEM(_2dBeamMode)\
+  ENUM_ITEM(_HeatTransferMode)\
+  ENUM_ITEM(_HeatMass1Mode)   /* Coupled heat and mass (1 matter) transfer */ \
+  ENUM_ITEM(_2dIncompressibleFlow) /* 2d Incompressible flow, no energy eq */ \
+  ENUM_ITEM(_3dIncompressibleFlow) /* 3d Incompressible flow, no energy eq */ 
 
-};
 
 enum problemMode {
   _processor,
@@ -1016,11 +947,10 @@ typedef unsigned long  NM_Status;
       
 /* Dof Type, determines the type of DOF created 
  */
-enum dofType {
-  DT_master = 0,
-  DT_simpleSlave = 1,
-  DT_slave = 2
-};
+#define dofType_DEF\
+  ENUM_ITEM_WITH_VALUE(DT_master,0)\
+  ENUM_ITEM_WITH_VALUE(DT_simpleSlave,1)\
+  ENUM_ITEM_WITH_VALUE(DT_slave,2)
 
 
 /* mask definning the physical meaning of particular DOF in node.
@@ -1038,26 +968,26 @@ typedef char DofID;
  Note: implementation of Node::computeGNTransformation rely on D_u, D_v and D_w (R_u, R_v, R_w) order.
  Do not change their order and do not insert any values between these values. 
  */
-enum DofIDItem {
- Undef, // Erorr value
- D_u = 1,   // u-displacement (in direction of x-axis)
- D_v = 2,   // v-displacement (in direction of y-axis)
- D_w = 3,   // w-displacement (in direction of z-axis)
- R_u = 4,   // rotation around x-axis (right hand rule assumed)
- R_v = 5,   // rotation around y-axis
- R_w = 6,   // rotation around z-axis 
-
- V_u = 7,   // u-velocity (in direction of x-axis)
- V_v = 8,   // v-velocity (in direction of y-axis)
- V_w = 9,   // w-velocity (in direction of z-axis)
-
- T_f =10,   // temperature field
- P_f =11,   // pressure field
- G_0 =12,   // DOF for gradient formulation no. 0
- G_1 =13,   // DOF for gradient formulation no. 1
- C_1 =14    // mass concentration of the first constituent
+#define DofIDItem_DEF\
+  ENUM_ITEM_WITH_VALUE(Undef,0) /* Erorr value */	\
+  ENUM_ITEM_WITH_VALUE(D_u,1)   /* u-displacement (in direction of x-axis) */ \
+  ENUM_ITEM_WITH_VALUE(D_v,2)   /* v-displacement (in direction of y-axis) */ \
+  ENUM_ITEM_WITH_VALUE(D_w,3)   /* w-displacement (in direction of z-axis) */ \
+  ENUM_ITEM_WITH_VALUE(R_u,4)   /* rotation around x-axis (right hand rule assumed) */ \
+  ENUM_ITEM_WITH_VALUE(R_v,5)   /* rotation around y-axis */		\
+  ENUM_ITEM_WITH_VALUE(R_w,6)   /* rotation around z-axis */		\
+  \
+  ENUM_ITEM_WITH_VALUE(V_u,7)   /* u-velocity (in direction of x-axis) */ \
+  ENUM_ITEM_WITH_VALUE(V_v,8)   /* v-velocity (in direction of y-axis) */ \
+  ENUM_ITEM_WITH_VALUE(V_w,9)   /* w-velocity (in direction of z-axis) */ \
+  \
+  ENUM_ITEM_WITH_VALUE(T_f,10)  /* temperature field */	\
+  ENUM_ITEM_WITH_VALUE(P_f,11)  /* pressure field */			\
+  ENUM_ITEM_WITH_VALUE(G_0,12)  /* DOF for gradient formulation no. 0 */ \
+  ENUM_ITEM_WITH_VALUE(G_1,13)  /* DOF for gradient formulation no. 1 */ \
+  ENUM_ITEM_WITH_VALUE(C_1,14)  /* mass concentration of the first constituent */ 
   
-};
+
 // max length of text string with DofIdName + 1
 // see Dof::giveDofIDName function
 #define DofIdNameMaxLength 5
@@ -1185,17 +1115,16 @@ enum ErrorEstimatorType {
   EGT_tetra_1 - tetrahedron with 4 nodes
  EGT_hexa_1  - hexahedron with 8 nodes
 */
-enum Element_Geometry_Type {
- EGT_line_1,   // line elements with two nodes  1-------2
- EGT_line_2,   // line element with three nodes 1---2---3
- EGT_triangle_1, // triangle element with three nodes
- EGT_triangle_2, // triangle element with 6 nodes
- EGT_quad_1,     // quadrialateral with 4 nodes
- EGT_tetra_1,    // tetrahedron with 4 nodes
- EGT_hexa_1,     // hexahedron with 8 nodes
- 
- EGT_unknown     // unknown element geometry type
-};
+#define Element_Geometry_Type_DEF\
+  ENUM_ITEM(EGT_line_1)   /* line elements with two nodes  1-------2 */\
+  ENUM_ITEM(EGT_line_2)   /* line element with three nodes 1---2---3 */	\
+  ENUM_ITEM(EGT_triangle_1) /* triangle element with three nodes */\
+  ENUM_ITEM(EGT_triangle_2) /* triangle element with 6 nodes */\
+  ENUM_ITEM(EGT_quad_1)     /* quadrialateral with 4 nodes */\
+  ENUM_ITEM(EGT_tetra_1)    /* tetrahedron with 4 nodes */\
+  ENUM_ITEM(EGT_hexa_1)     /* hexahedron with 8 nodes */ \
+  ENUM_ITEM(EGT_unknown)    /* unknown element geometry type */
+
 
 /**
    Type allowing to specify the required renumbering scheme;
@@ -1261,6 +1190,86 @@ public:
   OOFEM_Terminate (OOFEM_exit_status s = ES_OK) {status = s;}
 };
 
+/*
+  The enum declaration and to_string conversion
+  inspired by X-Macros technique, as described in Wikipedia entry on C preprocessor 
+  (http://en.wikipedia.org/wiki/C_preprocessor)
+*/
+
+
+#define ENUM_ITEM(element) element,
+#define ENUM_ITEM_WITH_VALUE(element,val) element=val,
+enum InternalStateType {
+  InternalStateType_DEF
+};
+
+enum UnknownType {
+  UnknownType_DEF
+};
+
+
+enum dofType {
+  dofType_DEF
+};
+
+enum domainType {
+  domainType_DEF
+};
+
+enum MaterialMode {
+  MaterialMode_DEF
+};
+
+enum Element_Geometry_Type {
+  Element_Geometry_Type_DEF
+};
+
+enum ValueModeType {
+  ValueModeType_DEF
+};
+
+enum MatResponseMode {
+  MatResponseMode_DEF
+};
+
+enum DofIDItem {
+  DofIDItem_DEF
+};
+
+enum CharType {
+  CharType_DEF
+};
+
+char* __InternalStateTypeToString (InternalStateType _value);
+char* __UnknownTypeToString (UnknownType _value);
+char* __dofTypeToString (dofType _value);
+char* __domainTypeToString (domainType _value);
+char* __MaterialModeToString (MaterialMode _value);
+char* __Element_Geometry_TypeToString(Element_Geometry_Type _value);
+char* __ValueModeTypeToString(ValueModeType _value);
+char* __MatResponseModeToString(MatResponseMode _value);
+char* __DofIDItemToString(DofIDItem _value);
+char* __CharTypeToString(CharType _value);
+
+#undef ENUM_ITEM
+#undef ENUM_ITEM_WITH_VALUE
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 //char   cltypesGiveUnknownTypeKey (UnknownType type);
 char   cltypesGiveUnknownTypeModeKey (ValueModeType mode);
@@ -1270,15 +1279,4 @@ InternalStateValueType giveInternalStateValueType (InternalStateType type);
 
 #define cltypes_h
 #endif
-
-
-
-
-
-
-
-
-
-
-
 

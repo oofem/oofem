@@ -1322,8 +1322,8 @@ SUPG:: updateDofManVals (TimeStep* tStep)
             else if (type == V_w) {
               _error ("3d not yet supported");
             } else if (type == P_f) {
-              //iDof->updateUnknownsDictionary (tStep, EID_MomentumBalance_ConservationEquation, VM_Total, 0.0); 
-            } else {_error ("unknown DOF type encountered");}
+	    //iDof->updateUnknownsDictionary (tStep, EID_MomentumBalance_ConservationEquation, VM_Total, 0.0); 
+	    } else {_error2 ("unknown DOF type encountered (%s)", __DofIDItemToString (type));}
         }
       }
     }

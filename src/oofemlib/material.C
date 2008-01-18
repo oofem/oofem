@@ -76,7 +76,7 @@ Material :: giveCharacteristicMatrix (FloatMatrix& answer,
 // Returns characteristic material stiffness matrix of the receiver
 //
 {
-  _error ("giveCharacteristicMatrix - unknown CharacteristicMatrix type");
+  _error ("Material::giveCharacteristicMatrix is fully abstract, no implementation");
   return ;
 }
 
@@ -89,7 +89,7 @@ Material :: giveCharacteristicValue (MatResponseMode rMode,
 // Returns characteristic value of the receiver
 //
 {
-  _error ("giveCharacteristicValue - unknown MatResponseMode value");
+  _error ("Material :: giveCharacteristicValue is purely abstract");
   return 0.0;
 }
 
@@ -198,8 +198,8 @@ Material :: ofType (char* aClass)
   newMaterial = ::CreateUsrDefMaterialOfType (aClass,number,domain);
   if (newMaterial == NULL) {
    
-   _error ("ofType:  unknown material type \n") ;
-   exit(0) ;}
+    _error2 ("ofType:  unknown material (%s)\n", aClass) ;
+    exit(0) ;}
  }
  return newMaterial ;
 }

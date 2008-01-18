@@ -66,7 +66,7 @@ HeatMaterial :: giveCharacteristicMatrix (FloatMatrix& answer,MatResponseForm fo
   this->give2dHeatConductivityCharMtrx (answer, form,rMode,gp,atTime);
   break;
  default:
-  _error ("giveCharacteristicMatrix : unknown mode");
+   _error2 ("giveCharacteristicMatrix : unknown mode (%s)",  __MaterialModeToString(mMode));
   return ;
  }
  return ;

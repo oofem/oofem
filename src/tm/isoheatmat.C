@@ -95,7 +95,7 @@ IsotropicHeatTransferMaterial :: giveCharacteristicMatrix (FloatMatrix& answer,
   answer.at(3,3) = k;
   return;
  default:
-  _error ("giveCharacteristicMatrix : unknown mode");
+   _error2 ("giveCharacteristicMatrix : unknown mode (%s)", __MaterialModeToString (mMode));
  }
 }
 
@@ -107,6 +107,6 @@ IsotropicHeatTransferMaterial:: giveCharacteristicValue (MatResponseMode mode,
 {
   if (mode == Capacity) return (c * this->give('d'));
   else
-    _error ("giveCharacteristicValue : unknown mode");
+    _error2 ("giveCharacteristicValue : unknown mode (%s)", __MatResponseModeToString(mode));
   return 0; // to make compiler happy
 }

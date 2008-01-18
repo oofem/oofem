@@ -811,7 +811,8 @@ Element::giveNumberOfBoundarySides (void)
   break;
  }
 
- _error("giveSpatialDimension: failure (maybe new element type was registered)");
+ _error2("giveSpatialDimension: failure, unsupported geometry type (%s)", 
+	 __Element_Geometry_TypeToString(this->giveGeometryType()));
  return 0; // to make compiler happy
 }
 

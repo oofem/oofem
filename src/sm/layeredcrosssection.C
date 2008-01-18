@@ -797,7 +797,7 @@ LayeredCrossSection :: giveStressStrainMask (IntArray& answer, MatResponseForm f
     for (i = 1; i<=8; i++) answer.at(i) = i;
     break;
    default:
-    _error ("giveStressStrainMask : unknown mode");
+     _error2 ("giveStressStrainMask : unknown mode (%s)", __MaterialModeToString(mmode));
    }
   } else if (form == FullForm) {
    switch(mmode) {
@@ -830,7 +830,7 @@ LayeredCrossSection :: giveStressStrainMask (IntArray& answer, MatResponseForm f
     for (i = 1; i<=8; i++) answer.at(i) = i;
     break;
    default:
-    _error ("giveStressStrainMask : unknown mode");
+     _error2 ("giveStressStrainMask : unknown mode (%s)", __MaterialModeToString(mmode));
    }
   } else _error ("giveStressStrainMask : unknown form mode");
   

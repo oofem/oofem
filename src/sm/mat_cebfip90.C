@@ -267,7 +267,7 @@ CebFipSlip90Material::give1dInterfaceMaterialStiffnessMatrix (FloatMatrix& answe
     
   } else if ((rMode == TangentStiffness)) {
     answer.at(1,1) = computeBondForceStiffness (status->giveTempKappa()) ;
-  }  else _error ("give2dInterfaceMaterialStiffnessMatrix: unknown MatResponseMode");
+  }  else _error2 ("give2dInterfaceMaterialStiffnessMatrix: unknown MatResponseMode (%s)", __MatResponseModeToString(rMode));
   
   return ;
 }

@@ -89,7 +89,8 @@ T3DInterface::createInput (Domain* d, TimeStep* stepN) {
    hexas++;
    break;
   case EGT_unknown:
-    OOFEM_ERROR ("T3DInterface::createInput unknown element type");
+    OOFEM_ERROR2 ("T3DInterface::createInput unknown element type (%s)", 
+		  __Element_Geometry_TypeToString(ielem->giveGeometryType()));
   }
  }
 

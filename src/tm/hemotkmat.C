@@ -105,7 +105,7 @@ HeMoTKMaterial :: giveCharacteristicMatrix (FloatMatrix& answer,
  if ((mode == Conductivity_ww) || (mode == Conductivity_hh) || (mode == Conductivity_hw) || (mode == Conductivity_wh))
   this->computeConductivityMtrx (answer, mode, gp, atTime);
  else 
-  _error ("giveCharacteristicMatrix : unknown mode");
+   _error2 ("giveCharacteristicMatrix : unknown mode (%s)", __MatResponseModeToString(mode));
 }
 
 
@@ -533,7 +533,7 @@ HeMoTKMaterial::isCharacteristicMtrxSymmetric (MatResponseMode mode)
  if ((mode == Conductivity_ww) || (mode == Conductivity_hh) || (mode == Conductivity_hw) || (mode == Conductivity_wh))
   return false;
  else 
-  _error ("isCharacteristicMtrxSymmetric : unknown mode");
+   _error2 ("isCharacteristicMtrxSymmetric : unknown mode (%s)", __MatResponseModeToString(mode));
  return false; // to make compiler happy
 }
 

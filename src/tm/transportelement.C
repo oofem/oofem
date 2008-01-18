@@ -110,7 +110,7 @@ TransportElement ::  giveCharacteristicMatrix (FloatMatrix& answer,
     this -> computeBCMtrxAt (answer, tStep, VM_Total);
   else if (mtrx == IntSourceLHSMatrix)
     this -> computeIntSourceLHSMatrix (answer, tStep);
-  else _error("giveCharacteristicMatrix: Unknown Type of characteristic mtrx.");
+  else _error2("giveCharacteristicMatrix: Unknown Type of characteristic mtrx (%s)", __CharTypeToString(mtrx));
   
   return ;
 }
@@ -124,7 +124,8 @@ TransportElement ::  giveCharacteristicVector (FloatArray& answer, CharType mtrx
 {
   if (mtrx == ElementBCTransportVector) this->computeBCVectorAt (answer, tStep, mode); 
   else if (mtrx == ElementInternalSourceVector) this->computeInternalSourceRhsVectorAt (answer, tStep, mode);
-  else _error("giveCharacteristicVector: Unknown Type of characteristic mtrx.");
+  else _error2("giveCharacteristicVector: Unknown Type of characteristic mtrx (%s)",
+	       __CharTypeToString(mtrx));
   
   return ;
 }

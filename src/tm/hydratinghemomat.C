@@ -207,7 +207,7 @@ HydratingHeMoMaterial :: giveCharacteristicValue (MatResponseMode rmode, GaussPo
 
    delete vec;
   }
- } else _error2("giveCharacteristicValue: unknown MatResponseMode %d.",rmode);
+ } else _error2("giveCharacteristicValue: unknown MatResponseMode (%s)",__MatResponseModeToString(rmode));
 
  return answer;
 }

@@ -179,7 +179,7 @@ HydratingIsoHeatMaterial :: giveCharacteristicValue (MatResponseMode rmode, Gaus
   answer = hydrationModel->giveCharacteristicValue(*vec, rmode, gp, atTime)
            / atTime->giveTimeIncrement();
   delete vec;
- } else _error("giveCharacteristicValue: unknown MatResponseMode.");
+ } else _error2 ("giveCharacteristicValue: unknown MatResponseMode (%s)", __MatResponseModeToString(rmode));
 
  return answer;
 }

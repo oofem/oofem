@@ -1065,7 +1065,7 @@ StructuralElement ::  giveCharacteristicMatrix (FloatMatrix& answer,
   this -> computeLumpedMassMatrix(answer, tStep);
  else if (mtrx == InitialStressMatrix) 
   this -> computeInitialStressMatrix(answer, tStep);
-  else _error("giveCharacteristicMatrix: Unknown Type of characteristic mtrx.");
+ else _error2 ("giveCharacteristicMatrix: Unknown Type of characteristic mtrx (%s)", __CharTypeToString(mtrx));
 
   return ;
 }
@@ -1088,7 +1088,7 @@ StructuralElement ::  giveCharacteristicVector (FloatArray& answer, CharType mtr
        and this will sause to integrate internal forces using existing (nontemp, equlibrated) stresses in
        statuses. Mainly used to compute reaction forces */
     this->giveInternalForcesVector (answer, tStep, 1);
-  else _error("giveCharacteristicVector: Unknown Type of characteristic mtrx.");
+  else _error2("giveCharacteristicVector: Unknown Type of characteristic mtrx (%s)", __CharTypeToString(mtrx));
 
   return ;
 }

@@ -165,11 +165,11 @@ StressStrainBaseVector :: giveReducedSize (MaterialMode mode) const
   case _3dRotContinuum:
     return 4;
 
-	case _Unknown:
-		return 0;
+  case _Unknown:
+    return 0;
 
   default:
-    OOFEM_ERROR ("StressStrainBaseVector::giveReducedSize : unknown mode");
+    OOFEM_ERROR2 ("StressStrainBaseVector::giveReducedSize : unknown mode (%s)", __MaterialModeToString(mode));
   }
   return 0;
 }
@@ -225,7 +225,7 @@ StressStrainBaseVector :: giveStressStrainMask(IntArray& answer, MatResponseForm
     OOFEM_ERROR("giveStressMask :  No Mask for 3dRotContinuum"); 
     break;
   default:
-    OOFEM_ERROR("giveStressStrainMask : unknown mode");
+    OOFEM_ERROR2("giveStressStrainMask : unknown mode (%s)", __MaterialModeToString(mmode));
   }
  } else if (form == FullForm) {
   switch(mmode) {
@@ -254,7 +254,7 @@ StressStrainBaseVector :: giveStressStrainMask(IntArray& answer, MatResponseForm
     OOFEM_ERROR("giveStressMask :  No Mask for 3dRotContinuum"); 
     break;
   default:
-    OOFEM_ERROR("giveStressStrainMask : unknown mode");
+    OOFEM_ERROR2("giveStressStrainMask : unknown mode (%s)", __MaterialModeToString(mmode));
   }
  } else OOFEM_ERROR("giveStressStrainMask : unknown form mode");
  

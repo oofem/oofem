@@ -159,4 +159,60 @@ ContextIOERR::print ()
   }
 }
  
+/*
+  The enum declaration and to_string conversion
+  inspired by X-Macros technique, as described in Wikipedia entry on C preprocessor 
+  (http://en.wikipedia.org/wiki/C_preprocessor)
+*/
  
+#define ENUM_ITEM(element) case element: return #element; 
+#define ENUM_ITEM_WITH_VALUE(element,val) case element: return  #element;
+#define TO_STRING_BODY(enum_def)			\
+  switch (_value) {\
+    enum_def\
+  default: return "Unknown";\
+  }
+
+char* __InternalStateTypeToString (InternalStateType _value) {
+  TO_STRING_BODY(InternalStateType_DEF)
+}
+
+char* __UnknownTypeToString (UnknownType _value) {
+  TO_STRING_BODY(UnknownType_DEF)
+}
+
+char* __dofTypeToString (dofType _value) {
+  TO_STRING_BODY(dofType_DEF)
+}
+
+char* __domainTypeToString (domainType _value) {
+  TO_STRING_BODY(domainType_DEF)
+}
+
+char* __MaterialModeToString (MaterialMode _value) {
+  TO_STRING_BODY(MaterialMode_DEF)
+}
+
+char* __Element_Geometry_TypeToString (Element_Geometry_Type _value) {
+  TO_STRING_BODY(Element_Geometry_Type_DEF)
+}
+
+char* __ValueModeTypeToString (ValueModeType _value) {
+  TO_STRING_BODY(ValueModeType_DEF)
+}
+
+char* __MatResponseModeToString (MatResponseMode _value) {
+  TO_STRING_BODY(MatResponseMode_DEF)
+}
+
+char* __DofIDItemToString (DofIDItem _value) {
+  TO_STRING_BODY(DofIDItem_DEF)
+}
+
+char* __CharTypeToString (CharType _value) {
+  TO_STRING_BODY(CharType_DEF)
+}
+
+#undef ENUM_ITEM
+#undef ENUM_ITEM_WITH_VALUE
+#undef TO_STRING_BODY

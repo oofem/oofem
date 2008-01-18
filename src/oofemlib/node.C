@@ -520,7 +520,7 @@ Node::computeGNDofTransformation (FloatMatrix& answer, const IntArray* dofIDArry
      break;
      
     default:
-     _error ("computeGNTransformation: unknown dofID");
+      _error2 ("computeGNTransformation: unknown dofID (%s)",__DofIDItemToString(id));
     }
    }
   } else { // end if (dofIDArry == NULL) 
@@ -559,7 +559,7 @@ Node::computeGNDofTransformation (FloatMatrix& answer, const IntArray* dofIDArry
      break;
      
     default:
-     _error ("computeGNTransformation: unknown dofID");
+      _error2 ("computeGNTransformation: unknown dofID (%s)", __DofIDItemToString(id));
     }
     
    }
