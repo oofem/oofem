@@ -182,6 +182,14 @@ o) To set up graphical postprocessor (oofeg) with debugging information:
 
 4) Run make to compile the required targets as: 
       make OOFEM_TARGET="target_name"
+
+      or
+      cd targets/target_name; make 
+
+      or
+      export OOFEM_TARGET="target_name"
+      make
+
       supply valid target name (as set up when running configure script)
       for target_name
 
