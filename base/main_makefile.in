@@ -94,5 +94,7 @@ $(PROG_NAME):  $(all_objs)
 	@if [ ! -d $(INSTALL_DIR) ]; then mkdir -p $(INSTALL_DIR); fi
 	$(MV) $(PROG_NAME) $(INSTALL_DIR)
 
+deps:   $(all_deps)
+
 clean:
 	rm -fr *.o *.d oofem

@@ -74,6 +74,8 @@ oofemlib.a:  $(oofemLib_objs)
 	@echo $(AR) oofemlib.a
 	@$(AR) oofemlib.a $(oofemLib_objs) 
 
+deps:   $(oofemLib_deps)
+
 clean: 
 	rm -fr *.o *.d *.a
 

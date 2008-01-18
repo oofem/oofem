@@ -21,6 +21,9 @@ dsslib.a: $(OBJS)
 	@echo $(AR) -r  dsslib.a
 	@$(AR) -r  dsslib.a *.o
 
+deps:
+	@echo
+
 clean:
 	rm -f *.o  dsslib.a
 

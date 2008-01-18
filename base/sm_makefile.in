@@ -73,6 +73,8 @@ smlib.a:  $(smLib_objs)
 	@echo $(AR) smlib.a
 	@$(AR) smlib.a $(smLib_objs) 
 
+deps:	$(smLib_deps)
+
 clean: 
 	rm -fr *.o *.d *.a
 

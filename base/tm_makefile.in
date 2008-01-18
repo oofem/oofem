@@ -71,6 +71,8 @@ tmlib.a:  $(tmLib_objs)
 	@echo $(AR) tmlib.a
 	@$(AR) tmlib.a $(tmLib_objs) 
 
+deps:	$(tmLib_deps)
+
 clean: 
 	rm -fr *.o *.d *.a
 
