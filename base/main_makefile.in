@@ -15,7 +15,7 @@ BOPT       = @PETSC_BOPT@
 
 INCLUDE_DIR= @TARGET_CONFIG_INCLUDES@ @MODULE_INCLUDES@ @CKIT_INCLUDES@ @ELIXIR_INCLUDES@ @MPI_INCLUDES@
 SYMBOLS    = @MODULE_SYMBOLS@
-LOCAL_LIBS = @ELIXIR_LIBS@ @CKIT_LIB@
+LOCAL_LIBS = @LOCAL_LIBS@
 SYS_LIBS   = @LIBS@ @X_PRE_LIBS@ @X_LIBS@ @X_EXTRA_LIBS@ @LIBS@ 
 OOFEM_LIBS = @OOFEM_LIBS@
 MODULES    = @MODULE_SYMBOLS@
@@ -72,7 +72,7 @@ all_src = $(oofemsrc0)
 all_objs := $(all_src:.C=.o)
 all_deps := $(all_src:.C=.d)
 
-all:: $(PROG_NAME)
+all:: $(INSTALL_DIR)/$(PROG_NAME)
 
 include $(all_deps)
 
@@ -88,11 +88,11 @@ include $(all_deps)
 # local targets
 #
 
-$(PROG_NAME):  $(all_objs) 
-	rm -fr $@
-	$(LD) $(CFLAGS) $(RELEASE_FLAGS) -o $(PROG_NAME) $(all_objs) $(OOFEM_LIBS) $(LOCAL_LIBS) $(SYS_LIBS) 
+$(INSTALL_DIR)/$(PROG_NAME):  $(all_objs) $(OOFEM_LIBS)
+#	rm -fr $@
 	@if [ ! -d $(INSTALL_DIR) ]; then mkdir -p $(INSTALL_DIR); fi
-	$(MV) $(PROG_NAME) $(INSTALL_DIR)
+	$(LD) $(CFLAGS) $(RELEASE_FLAGS) -o $(INSTALL_DIR)/$(PROG_NAME) $(all_objs) $(OOFEM_LIBS) $(LOCAL_LIBS) $(SYS_LIBS) 
+#	$(MV) $(PROG_NAME) $(INSTALL_DIR)
 
 deps:   $(all_deps)
 
