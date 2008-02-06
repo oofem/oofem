@@ -43,21 +43,18 @@
 #include "inputrecord.h"
 #include "intarray.h"
 #include "flotarry.h"
+#include "flotmtrx.h"
 #include "dictionr.h"
 #include "dynalist.h"
 #include "range.h"
 
 #define IR_MAX_ERROR_LENGTH 100
 
-/** Define this directive to use tokenizer to parse records.
-  This also enables to perform additional check for input records, since
-  unread fields can be detected
+/** Tokenizer is used to parse records.
+    This also enables to perform additional check for input records, since
+    unread fields can be detected
 */
-#define IR_USE_TOKENIZER
-
-#ifdef IR_USE_TOKENIZER 
 #include "tokenizer.h"
-#endif
 
 
 
@@ -68,10 +65,10 @@
 class OOFEMTXTInputRecord : public InputRecord
 {
  protected:
-#ifdef IR_USE_TOKENIZER 
+
   Tokenizer tokenizer;
   bool readFlag[MAX_TOKENS];
-#endif
+
   // record representation
   char record[OOFEM_MAX_LINE_LENGTH];
 
@@ -123,6 +120,8 @@ public:
  virtual IRResultType giveField (FloatArray& answer, const InputFieldType fieldI, const char* idString);
  /// Reads the IntArray field value
  virtual IRResultType giveField (IntArray& answer, const InputFieldType fieldID, const char* idString);
+ /// Reads the FloatMatrix field value
+ virtual IRResultType giveField (FloatMatrix& answer, const InputFieldType fieldI, const char* idString);
  /// Reads the Dictionary field value
  virtual IRResultType giveField (Dictionary& answer, const InputFieldType fieldID, const char* idString);
  /// Reads the dynaList<Range> field value
@@ -146,6 +145,8 @@ public:
  virtual IRResultType giveOptionalField (FloatArray& answer, const InputFieldType fieldID, const char* idString);
  /// Reads the IntArray field value
  virtual IRResultType giveOptionalField (IntArray& answer, const InputFieldType fieldID, const char* idString);
+ /// Reads the FloatMatrix field value
+ virtual IRResultType giveOptionalField (FloatMatrix& answer, const InputFieldType fieldID, const char* idString);
  /// Reads the Dictionary field value
  virtual IRResultType giveOptionalField (Dictionary& answer, const InputFieldType fieldID, const char* idString);
  /// Reads the dynaList<Range> field value
@@ -157,25 +158,21 @@ public:
 
 protected:
 
-#ifdef IR_USE_TOKENIZER 
   int giveKeywordIndx (const char* kwd);
   int scanInteger (const char* source, int& value);
   int scanDouble  (const char* source, double& value);
   void setReadFlag (int itok) {readFlag[itok-1]=true;}
  
-#endif
 
-#ifndef IR_USE_TOKENIZER 
+  const char* __getPosAfter (const char*, const char *) ;
+  const char* __scanInteger (const char* source, int* value);
+  const char* __scanDouble  (const char* source, double* value);
+  const char* __skipNextWord (const char* src) ;
 
-  char* getPosAfter (char*, const char *) ;
-  char* scanInteger (char* source, int* value);
-  char* scanDouble  (char* source, double* value);
-  char* skipNextWord (char* src) ;
+  char*  __readSimpleString (const char* source, char* simpleString, int maxchar, const char** remain); 
+  const char*  __readKeyAndVal    (const char* source, char* key, int* val, int maxchar, const char** remain);
+  const char*  __readKeyAndVal    (const char* source, char* key, double* val, int maxchar, const char** remain);
 
-  char*  readSimpleString (char* source, char* simpleString, int maxchar, char** remain); 
-  char*  readKeyAndVal    (char* source, char* key, int* val, int maxchar, char** remain);
-  char*  readKeyAndVal    (char* source, char* key, double* val, int maxchar, char** remain);
-#endif
  /**
   Reads single range record from input record represented by *helpSource  string.
   @param helpSource pointer to current string possition, on return helpSource points
@@ -185,6 +182,15 @@ protected:
   @return on success nonzero valur returned
   */
  int    readRange (const char** helpSource, int& li, int& hi);
+ /**
+  Reads single matrix record from input record represented by *helpSource  string.
+  @param helpSource pointer to current string possition, on return helpSource points
+  to next charcter after reading range record.
+  @param r,c matrix dimensions
+  @param ans float matrix 
+  @return on success nonzero valur returned
+  */
+ int    readMatrix (const char* helpSource, int r, int c, FloatMatrix& ans);
 
 };
 

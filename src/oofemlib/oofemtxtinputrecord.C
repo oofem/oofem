@@ -43,8 +43,6 @@
 #include <ctype.h>
 #endif
 
-#ifdef IR_USE_TOKENIZER 
-
 OOFEMTXTInputRecord::OOFEMTXTInputRecord () : InputRecord(), tokenizer() {
   record[0]='\0';
 }
@@ -195,6 +193,26 @@ OOFEMTXTInputRecord::giveField(FloatArray& answer, const InputFieldType fieldID,
 
 
 IRResultType 
+OOFEMTXTInputRecord::giveField(FloatMatrix& answer, const InputFieldType fieldID, const char* idString)
+{
+  double value; int nrows, ncols ;
+  int indx = this->giveKeywordIndx (idString);
+  if (indx) {
+    setReadFlag(indx);
+
+    if(scanInteger(tokenizer.giveToken (++indx), nrows) == 0)  return IRRT_BAD_FORMAT;
+    setReadFlag(indx);
+    if(scanInteger(tokenizer.giveToken (++indx), ncols) == 0)  return IRRT_BAD_FORMAT;
+    setReadFlag(indx);
+
+    if (readMatrix(tokenizer.giveToken (++indx), nrows, ncols, answer) == 0)  return IRRT_BAD_FORMAT;
+    setReadFlag(indx);
+    return IRRT_OK;
+  } else return IRRT_NOTFOUND;
+}
+
+
+IRResultType 
 OOFEMTXTInputRecord::giveField (Dictionary& answer, const InputFieldType fieldID, const char* idString)
 {
   double value; int size ;
@@ -327,280 +345,18 @@ OOFEMTXTInputRecord :: finish (bool wrn)
   }
 }
 
-#endif // #ifdef IR_USE_TOKENIZER 
 
 
-
-
-
-
-
-
-#ifndef IR_USE_TOKENIZER 
-
-OOFEMTXTInputRecord::OOFEMTXTInputRecord () : InputRecord() {
-  record[0]='\0';
-}
-
-OOFEMTXTInputRecord::OOFEMTXTInputRecord (char* source)
-{
- strncpy (this->record, source, OOFEM_MAX_LINE_LENGTH);
- this->record[OOFEM_MAX_LINE_LENGTH-1]='\0';
-}
-
-OOFEMTXTInputRecord::OOFEMTXTInputRecord (const OOFEMTXTInputRecord& src) : InputRecord (src)
-{
- strncpy (this->record, src.record, OOFEM_MAX_LINE_LENGTH);
- this->record[OOFEM_MAX_LINE_LENGTH-1]='\0';
-}
-
-
-
-OOFEMTXTInputRecord&
-OOFEMTXTInputRecord::operator= (const OOFEMTXTInputRecord& src)
-{
- strncpy (this->record, src.record, OOFEM_MAX_LINE_LENGTH);
- this->record[OOFEM_MAX_LINE_LENGTH-1]='\0';
- return *this;
-}
-
-
-void
-OOFEMTXTInputRecord::setRecordString (char* newRec) 
-{
- strncpy (this->record, newRec, OOFEM_MAX_LINE_LENGTH-1);
- this->record[OOFEM_MAX_LINE_LENGTH-1]='\0';
-}
-
-IRResultType 
-OOFEMTXTInputRecord::giveRecordKeywordField (char* answer, int& value, int maxchar)
-{
- char* curr = this->record; // read record keyword;
- int len = 0;
-
- if (!curr) { return IRRT_NOTFOUND;}
- // skip whitespaces
- while (isspace(*curr) || !*curr) curr++;
- if (!curr) return IRRT_BAD_FORMAT; //{fprintf (stderr,"End-of-line encountered\a\n"); exit(1);} 
- if (*curr == '"') { // read quoted string
-   curr++;
-   while (!(*curr == '"')) {
-     if ((*curr == '\n') || !*curr) return IRRT_BAD_FORMAT; //{ fprintf (stderr,"readQuotedString: final \" expected\a\n"); exit(1);}
-     if (++len == (maxchar)) { *answer = 0; break;}
-     *answer++ = *curr++;
-   }
-   *answer = 0;
- } else { // read simple string
-   char *s;
-   readSimpleString (curr, answer, maxchar, &s);
- } 
- curr = scanInteger(curr, &value);
- if (curr == NULL) return IRRT_BAD_FORMAT;
- return IRRT_OK;
-}
-
-
-IRResultType 
-OOFEMTXTInputRecord::giveRecordKeywordField (char* answer, int maxchar)
-{
- char* curr = this->record; // read record keyword;
- int len = 0;
-
- if (!curr) { return IRRT_NOTFOUND;}
- // skip whitespaces
- while (isspace(*curr) || !*curr) curr++;
- if (!curr) return IRRT_BAD_FORMAT; //{fprintf (stderr,"End-of-line encountered\a\n"); exit(1);} 
- if (*curr == '"') { // read quoted string
-   curr++;
-   while (!(*curr == '"')) {
-     if ((*curr == '\n') || !*curr) return IRRT_BAD_FORMAT; //{ fprintf (stderr,"readQuotedString: final \" expected\a\n"); exit(1);}
-     if (++len == (maxchar)) { *answer = 0; break;}
-     *answer++ = *curr++;
-   }
-   *answer = 0;
- } else { // read simple string
-   char *s;
-   readSimpleString (curr, answer, maxchar, &s);
- } 
-
- return IRRT_OK;
-}
-
-
-IRResultType 
-OOFEMTXTInputRecord::giveField (int& answer, const InputFieldType fieldID, const char* idString)
-{
-  char* str = getPosAfter(this->record,idString);
-  if (str == NULL) return IRRT_NOTFOUND;
- answer = atoi(str);
- return IRRT_OK;
-}
-
-IRResultType
-OOFEMTXTInputRecord::giveField(double& answer, const InputFieldType fieldID, const char* idString)
-{
-  char* str = getPosAfter(this->record,idString);
-  
-  if (str == NULL) return IRRT_NOTFOUND;
-  answer = strtod (str, NULL);
- return IRRT_OK;
- 
-}
-
-IRResultType 
-OOFEMTXTInputRecord::giveField(char* answer, int maxchar, const InputFieldType fieldID, const char* idString)
-{
- char* curr;
- int len = 0;
-
- if (idString)  curr = getPosAfter(this->record,idString) ;
- else curr = this->record; // read record keyword
-
- if (!curr) { return IRRT_NOTFOUND;}
- // skip whitespaces
- while (isspace(*curr) || !*curr) curr++;
-  if (!curr) return IRRT_BAD_FORMAT; //{fprintf (stderr,"End-of-line encountered\a\n"); exit(1);} 
- if (*curr == '"') { // read quoted string
-  curr++;
-  while (!(*curr == '"')) {
-   if ((*curr == '\n') || !*curr) return IRRT_BAD_FORMAT; //{ fprintf (stderr,"readQuotedString: final \" expected\a\n"); exit(1);}
-   if (++len == (maxchar)) { *answer = 0; break;}
-   *answer++ = *curr++;
-  }
-  *answer = 0;
- } else { // read simple string
-  char *s;
-  readSimpleString (curr, answer, maxchar, &s);
- } 
- return IRRT_OK;
-}
-
-
-IRResultType 
-OOFEMTXTInputRecord :: giveField (IntArray& answer, const InputFieldType fieldID, const char* idString)
-{
-  char *str1; int value,size ;
-
-  str1 = getPosAfter(this->record,idString) ;
- if (str1 == NULL) return IRRT_NOTFOUND;
-  str1 = scanInteger(str1,&size) ;
- if(str1 == NULL)  return IRRT_BAD_FORMAT;
-  answer.resize(size);
- 
-  for (int i = 1 ; i<=size; i++){
-    str1 = scanInteger (str1,&value);
-  if (str1)
-   answer.at(i) = value;
-  else return IRRT_BAD_FORMAT;
-  }
-  return IRRT_OK;
-}
-
-
-IRResultType 
-OOFEMTXTInputRecord::giveField(FloatArray& answer, const InputFieldType fieldID, const char* idString)
-{
-  char *str1; double  value; int size ;
-
-  str1 = getPosAfter(this->record,idString) ;
- if (str1 == NULL) return IRRT_NOTFOUND;
-  str1 = scanInteger(str1,&size) ;
-  if(str1 == NULL)  return IRRT_BAD_FORMAT;
-  answer.resize(size);
-  for (int i = 1 ; i<=size; i++){
-    str1 = scanDouble (str1,&value);
-  if (str1)
-   answer.at(i) = value;
-  else return IRRT_BAD_FORMAT;
-  }
-  return IRRT_OK;
-}
-
-
-IRResultType 
-OOFEMTXTInputRecord::giveField (Dictionary& answer, const InputFieldType fieldID, const char* idString)
-{
-  char *str1; double  value; int size ;
-  char key [MAX_NAME_LENGTH+1]; // 'key' is eventually of size 1, but some words that are
-                                // read in the meantime in the data file can be larger !
-
-  str1 = getPosAfter(this->record,idString) ;  // move after idString
- if (str1 == NULL) return IRRT_NOTFOUND;
-  str1 = scanInteger(str1,&size) ;       // read number of conditions
- if(str1 == NULL)  return IRRT_BAD_FORMAT;
- answer.clear();
-
-  for (int i = 1 ; i<=size; i++){
-    readSimpleString (str1,key,MAX_NAME_LENGTH+1,&str1);
-    str1 = scanDouble(str1,&value);
-  if (str1 == NULL) return IRRT_BAD_FORMAT;
-    answer.add(key[0], value);
-  }
-  return IRRT_OK;
-}
-
-IRResultType  
-OOFEMTXTInputRecord:: giveField (dynaList<Range> &list, const InputFieldType fieldID, const char* idString)
-{
- int li, hi;
- char* str1;
- const char *helpSource = this->record ;
- // Range* range;
-
- // find first valid occurence of idString
- int len = strlen(idString);
- do {
-  if ((str1 =strstr(helpSource,idString))==NULL) return IRRT_NOTFOUND;
-  helpSource = str1+1;
- } while (! ((*(helpSource+len-1) == ' ') || (*(helpSource+len-1) == '\t') || (*(helpSource+len-1) == '\n')) );
- 
-
- helpSource = str1 + len;
- // find first nonwhitespace character
- // skip whitespaces
- while (isspace(*helpSource)) helpSource ++;
- // test if list left bracked found
- if (*helpSource != '{') {
-   OOFEM_WARNING ("OOFEMTXTInputRecord::readRangeList: parse error - missing left '{'");
-   list.clear();
-   return IRRT_BAD_FORMAT;
- }
- helpSource ++;
- // read ranges
- while (readRange (&helpSource, li, hi)) {
-  Range range (li, hi);
-  list.pushBack (range);
- }
- // skip whitespaces after last range
- while (isspace(*helpSource)) helpSource ++;
- // test for enclosing bracket
- if (*helpSource != '}') {
-   OOFEM_WARNING ("OOFEMTXTInputRecord::readRangeList: parse error - missing end '}'");
-   list.clear();
-   return IRRT_BAD_FORMAT;
- }
- return IRRT_OK;
-}
-
-bool
-OOFEMTXTInputRecord :: hasField (const InputFieldType fieldID, const char* idString)
-{
-  //returns nonzero if idString is present in source
-  char* str = strstr(this->record,idString);
-  if (str == NULL) return false;
-  return true;
-}
-
-char* OOFEMTXTInputRecord :: readSimpleString (char* source, char* simpleString, int maxchar, char** remain)
+char* OOFEMTXTInputRecord :: __readSimpleString (const char* source, char* simpleString, int maxchar, const char** remain)
 // reads Simple string from source according to following rules:
 // at begining skips whitespace (blank, tab)
 // read string terminated by whitespace or end-of-line
 // remain is unread remain of source string.
 // maximum of maxchar (including terminating '\0') is copyied into simpleString.
 {
-  char *curr = source;
+  const char *curr = source;
   char *ss = simpleString ;
- int count = 0;
+  int count = 0;
   
   if (source == NULL) {*remain = NULL; return NULL;}
 
@@ -615,30 +371,30 @@ char* OOFEMTXTInputRecord :: readSimpleString (char* source, char* simpleString,
 }
  
 
-char*  OOFEMTXTInputRecord :: readKeyAndVal (char* source, char* key, int* val, int maxchar, char** remain)
+const char*  OOFEMTXTInputRecord :: __readKeyAndVal (const char* source, char* key, int* val, int maxchar, const char** remain)
 //
 // 
 //
 {
 
-  key = readSimpleString (source,key,maxchar,remain);
-  *remain = scanInteger(*remain,val);
+  key = __readSimpleString (source,key,maxchar,remain);
+  *remain = __scanInteger(*remain,val);
   return *remain;
 }
 
 
-char*  
-OOFEMTXTInputRecord :: readKeyAndVal (char* source, char* key, double* val, int maxchar, char** remain)
+const char*  
+OOFEMTXTInputRecord :: __readKeyAndVal (const char* source, char* key, double* val, int maxchar, const char** remain)
 //
 // 
 //
 {
-  key = readSimpleString (source,key,maxchar,remain);
-  *remain = scanDouble(*remain,val);
+  key = __readSimpleString (source,key,maxchar,remain);
+  *remain = __scanDouble(*remain,val);
   return *remain;
 }
 
-char* OOFEMTXTInputRecord :: getPosAfter (char* source, const char* idString)
+const char* OOFEMTXTInputRecord :: __getPosAfter (const char* source, const char* idString)
 // 
 // returns possition of substring idString in source
 // return value pointer at the end of occurence idString in source
@@ -646,7 +402,7 @@ char* OOFEMTXTInputRecord :: getPosAfter (char* source, const char* idString)
 // if string not found, returns NULL
 //
 {
- char* str1, *helpSource = source;
+  const char* str1; const char *helpSource = source;
  int len = strlen(idString);
  int whitespaceBefore, whitespaceAfter;
 
@@ -661,7 +417,7 @@ char* OOFEMTXTInputRecord :: getPosAfter (char* source, const char* idString)
  return str1+len;
 }
 
-char* OOFEMTXTInputRecord :: skipNextWord (char*src)
+const char* OOFEMTXTInputRecord :: __skipNextWord (const char*src)
 //
 // skips next word in src ; returns pointer after it
 //
@@ -675,41 +431,40 @@ char* OOFEMTXTInputRecord :: skipNextWord (char*src)
   }
     
 
-char* OOFEMTXTInputRecord :: scanInteger (char* source, int* value)
+const char* OOFEMTXTInputRecord :: __scanInteger (const char* source, int* value)
 {
 // 
 // reads integer value from source, returns pointer to char after this number
 //
   int i;
+  char* endptr;
 
   if (source == NULL) {*value = 0; return NULL;}
 
-  i = sscanf (source,"%d",value);
-  if (i == EOF ){ *value =0 ; return NULL ;}
-  return skipNextWord(source);
+  *value = (int) strtol (source, &endptr, 10);
+  //  i = sscanf (source,"%d",value);
+  // if (i == EOF ){ *value =0 ; return NULL ;}
+  return endptr;
 }
   
 
-char* OOFEMTXTInputRecord :: scanDouble (char* source, double* value)
+const char* OOFEMTXTInputRecord :: __scanDouble (const char* source, double* value)
 {
 // 
 // reads integer value from source, returns pointer to char after this number
 //
   int i;
+  char* endptr;
 
   if (source == NULL) {*value = 0; return NULL;}
-
-  i = sscanf (source,"%lf",value);
-  if (i == EOF ){ *value =0 ; return NULL ;}
-  return skipNextWord(source);
+  *value = strtod (source, &endptr);
+  //i = sscanf (source,"%lf",value);
+  //if (i == EOF ){ *value =0 ; return NULL ;}
+  //return __skipNextWord(source);
+  return endptr;
 }
 
 
-void
-OOFEMTXTInputRecord :: finish (bool wrn)
-{}
-
-#endif // #ifndef IR_USE_TOKENIZER 
 
 
 IRResultType 
@@ -751,6 +506,15 @@ OOFEMTXTInputRecord::giveOptionalField (IntArray& answer, const InputFieldType f
  if (r == IRRT_NOTFOUND) return IRRT_OK;
  else return r;
 }
+
+IRResultType
+OOFEMTXTInputRecord::giveOptionalField (FloatMatrix& answer, const InputFieldType fieldID, const char* idString)
+{
+ IRResultType r = this->giveField (answer, fieldID, idString);
+ if (r == IRRT_NOTFOUND) return IRRT_OK;
+ else return r;
+}
+
 
 IRResultType
 OOFEMTXTInputRecord::giveOptionalField (Dictionary& answer, const InputFieldType fieldID, const char* idString)
@@ -807,3 +571,50 @@ OOFEMTXTInputRecord :: readRange (const char** helpSource, int& li, int& hi)
  return 0;
 }
 
+int
+OOFEMTXTInputRecord :: readMatrix (const char* helpSource, int r, int c, FloatMatrix& ans)
+{
+ const char* endptr = helpSource;
+ int i,j;
+ 
+ if (helpSource == NULL) {ans.resize(0,0); return 0;}
+ 
+ ans.resize(r,c);
+ // skip whitespaces
+ while (isspace(*endptr)) (endptr) ++;
+ if (*endptr == '{') {
+  // range left parenthesis found
+  (endptr)++;
+  // read row by row separated by semicolon
+  for (i=1;i<=r;i++) {
+    for (j=1;j<=c;j++) {
+      endptr = __scanDouble(endptr, &ans.at(i,j));
+    }
+    if (i<r) {
+      // skip whitespaces
+      while (isspace(*endptr)) (endptr) ++;
+      // test for row terminating semicolon
+      if (*endptr == ';') {(endptr)++;}
+      else {
+	OOFEM_WARNING ("OOFEMTXTInputRecord::readMatrix: missing row terminating semicolon");
+	return 0;
+      }
+    }
+  }
+  // skip whitespaces
+  while (isspace(*endptr)) (endptr) ++;
+  // test for enclosing bracket
+  if (*endptr == '}') {
+    (endptr)++;
+    helpSource = endptr;
+    return 1;
+  } else {
+    OOFEM_WARNING ("OOFEMTXTInputRecord::readMatrix: end '}' missing while parsing matrix value");
+    return 0;
+  }
+ } else {
+   return 0;
+ }   
+ 
+ return 0;
+}
