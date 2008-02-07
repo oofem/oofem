@@ -193,7 +193,7 @@ public:
   */
   //virtual void                  printOutputAt (FILE *, TimeStep*) ;
 
-  virtual int       requiresUnknowsDictionaryUpdate () {return renumberFlag;}
+  virtual int       requiresUnknownsDictionaryUpdate () {return renumberFlag;}
   virtual bool      requiresEquationRenumbering(TimeStep*) {return renumberFlag;}
   virtual void      updateDofUnknownsDictionary (DofManager*, TimeStep*);
   /*

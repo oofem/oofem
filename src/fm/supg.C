@@ -136,7 +136,7 @@ SUPG :: initializeFrom (InputRecord* ir)
    Re = 1.0;
  }
 
- if (requiresUnknowsDictionaryUpdate()) 
+ if (requiresUnknownsDictionaryUpdate()) 
    VelocityPressureField = new DofDistributedPrimaryField(this,1,FBID_VelocityPressureField, EID_MomentumBalance_ConservationEquation, 1);
  else
    VelocityPressureField = new PrimaryField(this,1,FBID_VelocityPressureField, EID_MomentumBalance_ConservationEquation, 1);
@@ -349,7 +349,7 @@ SUPG :: solveYourselfAt (TimeStep* tStep)
     //if (this->fsflag) this->updateDofManActivityMap(tStep);
   }
 
-  if (!requiresUnknowsDictionaryUpdate()) {
+  if (!requiresUnknownsDictionaryUpdate()) {
     VelocityPressureField->advanceSolution(tStep);
     solutionVector = VelocityPressureField->giveSolutionVector(tStep);
     prevSolutionVector = VelocityPressureField->giveSolutionVector(tStep->givePreviousStep());
@@ -357,7 +357,7 @@ SUPG :: solveYourselfAt (TimeStep* tStep)
 
   if (initFlag) {
 
-    if (!requiresUnknowsDictionaryUpdate()) {
+    if (!requiresUnknownsDictionaryUpdate()) {
       //previousAccelerationVector.resize(neq);
       accelerationVector.resize(neq); 
       solutionVector->resize(neq);
@@ -371,14 +371,14 @@ SUPG :: solveYourselfAt (TimeStep* tStep)
 
     if (materialInterface) this->updateElementsForNewInterfacePosition (tStep);
     initFlag = 0;
-  } else if (requiresUnknowsDictionaryUpdate()) {
+  } else if (requiresUnknownsDictionaryUpdate()) {
     // rebuild lhs structure and resize solution vector
     incrementalSolutionVector.resize(neq);
     lhs->buildInternalStructure (this, 1, EID_MomentumBalance_ConservationEquation);
   }
   
 
-  if (!requiresUnknowsDictionaryUpdate()) 
+  if (!requiresUnknownsDictionaryUpdate()) 
     for (i=1; i<=neq; i++) solutionVector->at(i) = prevSolutionVector->at(i);
   //previousAccelerationVector=accelerationVector;
 
@@ -390,7 +390,7 @@ SUPG :: solveYourselfAt (TimeStep* tStep)
   // predictor
   //
 
-  if (requiresUnknowsDictionaryUpdate()) {
+  if (requiresUnknownsDictionaryUpdate()) {
     this->  updateDofUnknownsDictionary_predictor (tStep);
   } else {
     //for (i=1; i<=neq; i++) solutionVector->at(i) = prevSolutionVector->at(i) + deltaT*accelerationVector.at(i);
@@ -497,7 +497,7 @@ SUPG :: solveYourselfAt (TimeStep* tStep)
 
 
     
-    if (requiresUnknowsDictionaryUpdate()) {
+    if (requiresUnknownsDictionaryUpdate()) {
       this->  updateDofUnknownsDictionary_corrector (tStep);
     } else {
 
@@ -570,7 +570,7 @@ SUPG :: solveYourselfAt (TimeStep* tStep)
     _absErrResid = 0.0;
     for (i=1; i<=neq;i++) _absErrResid = max(_absErrResid, fabs(rhs.at(i)));
     
-    if (requiresUnknowsDictionaryUpdate()) {
+    if (requiresUnknownsDictionaryUpdate()) {
       OOFEM_LOG_INFO ("%-10d       n/a       %-15e %-15e\n", nite, rnorm, _absErrResid);
     } else {
       OOFEM_LOG_INFO ("%-10d %-15e %-15e %-15e\n", nite, err, rnorm, _absErrResid);
@@ -645,7 +645,7 @@ SUPG :: updateInternalState (TimeStep* stepN)
     domain= this->giveDomain(idomain);
     
     nnodes = domain->giveNumberOfDofManagers ();
-    if (requiresUnknowsDictionaryUpdate()) {
+    if (requiresUnknownsDictionaryUpdate()) {
       for( j=1;j<=nnodes;j++) {
         this->updateDofUnknownsDictionary(domain->giveDofManager(j),stepN) ;
       }
@@ -816,7 +816,7 @@ SUPG :: applyIC (TimeStep* stepWhenIcApply)
  Dof  *iDof;
  DofIDItem type;
  
- if (!requiresUnknowsDictionaryUpdate()) {
+ if (!requiresUnknownsDictionaryUpdate()) {
    VelocityPressureField->advanceSolution(stepWhenIcApply);
    vp_vector = VelocityPressureField->giveSolutionVector(stepWhenIcApply);
    vp_vector->resize(neq); vp_vector->zero();
@@ -824,7 +824,7 @@ SUPG :: applyIC (TimeStep* stepWhenIcApply)
 
  accelerationVector.resize(neq); accelerationVector.zero();
 
- if (!requiresUnknowsDictionaryUpdate()) {
+ if (!requiresUnknownsDictionaryUpdate()) {
    for (j=1; j<= nman; j++) {
      node = domain->giveDofManager(j);
      nDofs = node->giveNumberOfDofs() ;
@@ -1127,7 +1127,7 @@ SUPG::updateDofUnknownsDictionary_predictor (TimeStep* tStep)
 
  int nnodes = domain->giveNumberOfDofManagers ();
 
- if (requiresUnknowsDictionaryUpdate()) {
+ if (requiresUnknownsDictionaryUpdate()) {
    for( j=1;j<=nnodes;j++) {
      inode = domain->giveDofManager(j);
      ndofs = inode->giveNumberOfDofs();
@@ -1170,7 +1170,7 @@ SUPG::updateDofUnknownsDictionary_corrector (TimeStep* tStep)
   int nnodes = domain->giveNumberOfDofManagers ();
 
  
-  if (requiresUnknowsDictionaryUpdate()) {
+  if (requiresUnknownsDictionaryUpdate()) {
     for( j=1;j<=nnodes;j++) {
       inode = domain->giveDofManager(j);
       ndofs = inode->giveNumberOfDofs();

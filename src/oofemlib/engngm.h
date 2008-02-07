@@ -704,7 +704,7 @@ class EngngModel
   value (dof will use its dictionary, does not asks back EngngModel) adds corresponding increment
   and updates total value in dictionary. 
   */
-  virtual int       requiresUnknowsDictionaryUpdate () {return 0;}
+  virtual int       requiresUnknownsDictionaryUpdate () {return 0;}
   /**
      Returns true if equation renumbering is required for given solution step.
      This may of course change the number of equation and in general there is no gauarantee
@@ -715,7 +715,7 @@ class EngngModel
   //virtual int       supportsBoundaryConditionChange () {return 0;}
  /**
   Updates necessary values in Dofs unknown dictionaries. 
-  @see EngngModel::requiresUnknowsDictionaryUpdate
+  @see EngngModel::requiresUnknownsDictionaryUpdate
   @see Dof::updateUnknownsDictionary
   */
   virtual void      updateDofUnknownsDictionary (DofManager*, TimeStep*) {}

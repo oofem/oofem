@@ -276,7 +276,7 @@ NLTransientTransportProblem :: updateInternalState (TimeStep* stepN)
   domain= this->giveDomain(idomain);
 
   nnodes = domain->giveNumberOfDofManagers ();
-  if (requiresUnknowsDictionaryUpdate()) {
+  if (requiresUnknownsDictionaryUpdate()) {
    for( j=1;j<=nnodes;j++) {
     this->updateDofUnknownsDictionary(domain->giveDofManager(j),stepN) ;
    }

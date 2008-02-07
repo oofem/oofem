@@ -149,7 +149,7 @@ StructuralElement :: computeBcLoadVectorAt (FloatArray& answer, TimeStep* stepN,
   // if engngmodel supports dynamic change of static system
   // we must test if there was previous BC on some DOF and now it is released.
   // if was, it is necessary to load it by reaction force.
-  if (domain->giveEngngModel()->requiresUnknowsDictionaryUpdate()) {
+  if (domain->giveEngngModel()->requiresUnknownsDictionaryUpdate()) {
    FloatArray prevInternalForces ; 
    IntArray   elementNodeMask, dofMask;
    DofManager *nodeI ;

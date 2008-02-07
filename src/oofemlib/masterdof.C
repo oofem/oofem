@@ -204,7 +204,7 @@ double  MasterDof :: giveUnknown (EquationID type, ValueModeType mode, TimeStep*
      return value;
    }
 
- if (dofManager -> giveDomain() -> giveEngngModel() -> requiresUnknowsDictionaryUpdate()) {
+ if (dofManager -> giveDomain() -> giveEngngModel() -> requiresUnknownsDictionaryUpdate()) {
    // if this feature is active, engng model must ensure 
    // valid data in unknowns dictionary
    // the e-model must ensure that bc and ic values are correctly set in unknowns dictionaries
@@ -381,7 +381,7 @@ contextIOResultType MasterDof :: saveContext (DataStream* stream, ContextMode mo
 
   // store equation number of receiver
   if (!stream->write (&equationNumber,1)) THROW_CIOERR(CIO_IOERR);
-  if ((mode & CM_UnknownDictState) || (dofManager -> giveDomain() -> giveEngngModel() -> requiresUnknowsDictionaryUpdate()))
+  if ((mode & CM_UnknownDictState) || (dofManager -> giveDomain() -> giveEngngModel() -> requiresUnknownsDictionaryUpdate()))
     if ((iores = unknowns->saveContext (stream,mode,obj)) != CIO_OK) THROW_CIOERR(iores);
 
   return CIO_OK;
@@ -407,7 +407,7 @@ contextIOResultType MasterDof :: restoreContext (DataStream* stream, ContextMode
 
   // read equation number of receiver
   if (!stream->read (&equationNumber,1)) THROW_CIOERR(CIO_IOERR);
-  if ((mode & CM_UnknownDictState) || (dofManager -> giveDomain() -> giveEngngModel() -> requiresUnknowsDictionaryUpdate()))
+  if ((mode & CM_UnknownDictState) || (dofManager -> giveDomain() -> giveEngngModel() -> requiresUnknownsDictionaryUpdate()))
     if ((iores = unknowns->restoreContext (stream,mode,obj)) != CIO_OK) THROW_CIOERR(iores);
   
   return CIO_OK;

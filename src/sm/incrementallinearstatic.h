@@ -127,7 +127,7 @@ TASK:
   classType giveClassID () const {return IncrementalLinearStaticClass;}
   fMode giveFormulation () { return TL; } 
   // virtual  LoadResponseMode giveLoadResponseMode () {return IncrementOfLoad;}
- virtual int       requiresUnknowsDictionaryUpdate () {return 1;}
+ virtual int       requiresUnknownsDictionaryUpdate () {return 1;}
  virtual bool      requiresEquationRenumbering(TimeStep*) {return true;}
  virtual void      updateDofUnknownsDictionary (DofManager*, TimeStep*);
  /*

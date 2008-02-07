@@ -289,7 +289,7 @@ void   EigenValueDynamic :: terminate (TimeStep* stepN)
       i,eigVal.at(i));
   stepN->setTime ((double) i);  // we use time as intrinsic eigen value index
   
-  if (this->requiresUnknowsDictionaryUpdate()) {
+  if (this->requiresUnknownsDictionaryUpdate()) {
    for( j=1;j<=nnodes;j++) 
     this->updateDofUnknownsDictionary (domain -> giveDofManager(j),stepN) ;
   }

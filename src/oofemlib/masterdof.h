@@ -163,7 +163,7 @@ class MasterDof  : public Dof
   equation renumbering after finishing each time step.
   @param tStep time step determining the time
   @see Dof::updateUnknownsDictionary function.
-  @see EngngModel::requiresUnknowsDictionaryUpdate.
+  @see EngngModel::requiresUnknownsDictionaryUpdate.
   */
   int                 askNewEquationNumber (TimeStep* tStep);
 //      double              givePastUnknown (char,TimeStep*) ;
@@ -238,10 +238,10 @@ class MasterDof  : public Dof
    When dof is asked for unknown, uses values stored in its private dictionary rather than requesting
    EngngModel for this value. But EngngModel must correctly update these values after finishing each time step.
    If EngngModel does not support changes of static system 
-   (recognized calling  EngngModel::requiresUnknowsDictionaryUpdate method), the dof
+   (recognized calling  EngngModel::requiresUnknownsDictionaryUpdate method), the dof
    frowards the requests for its unknowns to EngngModel, where unknowns are naturaly kept.
    @see Dof::updateUnknownsDictionary for detailed explanation
-   @see EngngModel::requiresUnknowsDictionaryUpdate
+   @see EngngModel::requiresUnknownsDictionaryUpdate
    */
   void                updateUnknownsDictionary (TimeStep*tStep, EquationID type,
                          ValueModeType mode, double dofValue);

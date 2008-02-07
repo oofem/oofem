@@ -579,7 +579,7 @@ void PNlDEIDynamic :: terminate (TimeStep* stepN)
   
   int nman   = domain->giveNumberOfDofManagers ();
  
-  if (requiresUnknowsDictionaryUpdate()) {
+  if (requiresUnknownsDictionaryUpdate()) {
   for( j=1;j<=nman;j++) {
    this->updateDofUnknownsDictionary(domain->giveDofManager(j),stepN) ;
   }

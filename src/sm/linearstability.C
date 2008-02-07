@@ -367,7 +367,7 @@ LinearStability :: terminateLinStatic (TimeStep* stepN)
   
   int nnodes = domain->giveNumberOfDofManagers ();
 
- if (requiresUnknowsDictionaryUpdate()) {
+ if (requiresUnknownsDictionaryUpdate()) {
   for( j=1;j<=nnodes;j++) {
    this->updateDofUnknownsDictionary(domain->giveDofManager(j),stepN) ;
   }
@@ -443,7 +443,7 @@ void   LinearStability :: terminate (TimeStep* stepN)
       i,eigVal.at(i));
     stepN->setTime ((double)i);
   
-  if (this->requiresUnknowsDictionaryUpdate()) {
+  if (this->requiresUnknownsDictionaryUpdate()) {
    for( j=1;j<=nnodes;j++) 
     this->updateDofUnknownsDictionary (domain -> giveDofManager(j),stepN) ;
   }

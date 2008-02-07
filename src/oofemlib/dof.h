@@ -238,7 +238,7 @@ class Dof
   equation renumbering after finishing each time step.
   @param tStep time step determining the time
   @see Dof::updateUnknownsDictionary function.
-  @see EngngModel::requiresUnknowsDictionaryUpdate.
+  @see EngngModel::requiresUnknownsDictionaryUpdate.
   */
   virtual int                 askNewEquationNumber (TimeStep* tStep) =0;
 //      double              givePastUnknown (char,TimeStep*) ;
@@ -369,7 +369,7 @@ class Dof
   Abstract function, allowing Dof to store its unknowns in its own private 
   dictionary. Dof then uses this dictionary instead of forwarding the requests to
   EngngModel (with equationNUmber as parameter). If EngngModel does not support changes
-  of static system (see EngngModel::requiresUnknowsDictionaryUpdate method), the dof
+  of static system (see EngngModel::requiresUnknownsDictionaryUpdate method), the dof
   frowards the requests for its unknowns to EngngModel, where unknowns are naturaly kept.
   This is posible, because dof equation number is same during whole solution.
   But when changes of static system are allowed, several problem arise. For example 
@@ -394,7 +394,7 @@ class Dof
   UnknownType types then  UnknownType type of receiver.
   @param mode mode of stored unknown.
   @param dofValue value of unknown. Old value will generaly be lost.
-  @see EngngModel::requiresUnknowsDictionaryUpdate
+  @see EngngModel::requiresUnknownsDictionaryUpdate
   
   */
   virtual  void       updateUnknownsDictionary (TimeStep *tStep, EquationID type, 
