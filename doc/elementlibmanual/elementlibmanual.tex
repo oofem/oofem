@@ -580,6 +580,7 @@ $\gamma_rz$) are integrated using one point integration formula.\\
 
 \subsection{3d Continuum Elements}
 \subsubsection{LSpace element}
+\label{lspacesect}
 Implementation of Linear 3d  eight - node 
 finite element. Each node has 3 degrees of freedom.
 \begin{figure}[tb]
@@ -601,6 +602,10 @@ allows to change the integration formula.\\
 \descitem{Features} Adaptivity support.\\
 \descitem{Loads} \\
 \descitem{Status} 
+
+\subsubsection{LSpaceBB element}
+Implementation of 3d brick  eight - node 
+linear approximation element with selective integration of deviatoric and volumetric strain contributions (B-bar formulation) for incompressible problems. Features and description identical to conventional lspace element, see section ~\ref{lspacesect}.
 
 \subsubsection{QSpace element}
 Implementation of quadratic 3d  20-node 
