@@ -134,6 +134,7 @@ enum classType {
   TrPlaneStress2dClass,
   CCTPlateClass,
   LSpaceClass,
+  LSpaceBBClass,
   QSpaceClass,
   LTRSpaceClass,
   Truss2dClass,

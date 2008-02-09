@@ -86,6 +86,7 @@
 #include "qplanstrss.h"
 #include "qtrplstr.h"
 #include "lspace.h"
+#include "lspacebb.h"
 #include "qspace.h"
 #include "axisymm3d.h"
 #include "q4axisymm.h"
@@ -263,6 +264,8 @@ Element* CreateUsrDefElementOfType (char* aClass, int number, Domain* domain)
      newElement = new Q4Axisymm (number,domain) ;
    else if (! strncasecmp(aClass,"l4axisymm",9))
      newElement = new L4Axisymm (number,domain) ;
+   else if (! strncasecmp(aClass,"lspacebb",8))
+     newElement = new LSpaceBB(number,domain) ; 
    else if (! strncasecmp(aClass,"lspace",6))
      newElement = new LSpace(number,domain) ; 
    else if (! strncasecmp(aClass,"qspace",6))

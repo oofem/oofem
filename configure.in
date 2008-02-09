@@ -46,6 +46,8 @@ poofem_val=no
 debug_val=no
 oofeg_di=no
 
+LOCAL_LIBS=""
+
 
 
 AC_INIT(tools/checker.C)
@@ -725,7 +727,6 @@ AC_CHECK_LIB(ckit, _get_list_next,
 			done;
 		fi
 		CKIT_LIB="$dir/libckit.a"
-    LOCAL_LIBS="$LOCAL_LIBS $CKIT_LIB"
 		AC_DEFINE(HAVE_LIBCKIT)
 	]
 )
@@ -783,7 +784,6 @@ AC_CHECK_LIB(elixir, ElixirInit,
 			done;
 		fi
 		ELIXIR_LIB="$dir/libelixir.a"
-    LOCAL_LIBS="$LOCAL_LIBS $ELIXIR_LIB"
 		AC_DEFINE(HAVE_LIBELIXIR)
 	],
 	elixirtest.c -lesi -lelixir $CKIT_LIB $X_PRE_LIBS $X_LIBS $X_EXTRA_LIBS
@@ -816,6 +816,9 @@ AC_CHECK_LIB(esi, ESIBuildInterface,
 dnl Ordering -lesi -lelixir is relevant
 
 ELIXIR_LIBS="$ESI_LIB $ELIXIR_LIB"
+LOCAL_LIBS="${LOCAL_LIBS} ${ELIXIR_LIBS}"
+LOCAL_LIBS="${LOCAL_LIBS} ${CKIT_LIB}"
+
 else
  	oofeg_val=no
 fi
@@ -842,7 +845,6 @@ FM_INCLUDES="-I$PWD/src/fm"
 
 MODULE_INCLUDES="$OOFEMLIB_INCLUDES"
 OOFEM_LIBS="$PWD/targets/$OOFEM_TARGET/lib/oofemlib/oofemlib.a"
-LOCAL_LIBS=""
 
 MODULE_LIST="oofemlib"
 MODULE_TOBUILD="oofemlib"	
