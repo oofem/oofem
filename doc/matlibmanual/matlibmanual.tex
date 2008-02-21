@@ -126,9 +126,43 @@ When vector  is parallel to z-axis an error occurs. The \param{scs} array contai
 defining direction vector . If no local coordinate system is
 specified, by default a global coordinate system is used. 
 
-Please note, that there is only nine independent material parameters,
+For 3D case the material compliance matrix has the following form
+\begin{equation}
+  \mbf{C}=\left[\begin{array}{cccccc}
+      1/E_X & -\nu_{xy}/E_x& -\nu_{xz}/E_x& 0& 0&0\\
+      -\nu_{yx}/E_y & 1/E_y& -\nu_{yz}/E_y& 0& 0&0\\
+      -\nu_{zx}/E_z & -\nu_{zy}/E_z& 1/E_z& 0& 0&0\\
+      0 & 0 & 0 & 1/G_{yz} & 0 & 0\\
+      0 & 0 & 0 & 0 & 1/G_{xz} & 0\\
+      0 & 0 & 0 & 0 & 0 & 1/G_{xy}
+    \end{array}\right]
+\end{equation}
+By inversion, the material stiffness matrix has the form
+\begin{equation}
+  \mbf{D}=\left[\begin{array}{cccccc}
+      d_{xx} & d_{xy} & d_{xz} & 0 & 0 & 0\\
+      & d_{yy} & d_{yz} & 0 & 0 & 0\\
+      \rm {sym} & & d_{zz} & 0 & 0 & 0\\
+      0 & 0 & 0 & G_{yz} & 0 & 0\\
+      0 & 0 & 0 & 0 & G_{xz} & 0\\
+      0 & 0 & 0 & 0 & 0 & G_{xy}
+    \end{array}\right]
+\end{equation}
+where $\xi=1-(\nu_{xy}*\nu_{yx}+\nu_{yz}*\nu_{zy}+\nu_{zx}*\nu_{xz})-(\nu_{xy}*\nu_{yz}*\nu_{zx}+\nu_{yx}*\nu_{zy}*\nu_{xz})$ and
+\begin{eqnarray}
+  d_{xx}&=&E_X(1-\nu_{yz}*\nu_{zy})/\xi,\\
+  d_{xy}&=&E_y*(\nu_{xy}+\nu_{xz}*\nu_{zy})/\xi,\\
+  d_{xz}&=&E_z*(\nu_{xz}+\nu_{yz}*\nu_{xy})/\xi,\\
+  d_{yy}&=&E_y*(1-\nu_{xz}*\nu_{zx})/\xi,\\
+  d_{yz}&=&E_z*(\nu_{yz}+\nu_{yx}*\nu_{xz})/\xi,\\
+  d_{zz}&=&E_z*(1-\nu_{yx}*\nu_{xy})/\xi.  
+\end{eqnarray}
+
+
+ $E_i$ is the Young's modulus in the $i$-th direction, $G_{ij}$ is the shear modulus in $ij$ plane, $\nu_{ij}$ major Poisson's ratio, and $\nu_{ji}$ minor Poisson's ratio. Assuming that $E_x>E_y>E_z$, $\nu_{xy} > \nu_{yx}$ etc., then the $\nu_{xy}$ is refered to as major Poisson's ratio, while $\nu_{yx}$ refered as minor Poisson's ratio.
+Note, that there is only nine independent material parameters,
 because of symmetry conditions. The symmetry condition yields
-$$\nu_{xy}E_x=\nu_{yx}E_y,\ \ \nu_{yz}E_y=\nu_{zy}E_z,\ \ \nu_{zx}E_z=\nu_{xz}E_x$$
+$$\nu_{xy}E_y=\nu_{yx}E_x,\ \ \nu_{yz}E_z=\nu_{zy}E_y,\ \ \nu_{zx}E_x=\nu_{xz}E_z$$
 The model description and parameters are summarized
 in table~\ref{OrthoLE_table}.
 
@@ -147,7 +181,7 @@ Record Format & \descitem{OrthoLE} \elemparam{num}{in}
 Parameters &- \param{num} material model number\\
 &- \param{d} material density\\
 &- \param{Ex}, \param{Ey}, \param{Ez} Young moduluses for x,y, and z directions\\
-&- \param{NYyz}, \param{NYxz}, \param{NYxy} Poisson ratio
+&- \param{NYyz}, \param{NYxz}, \param{NYxy} major Poisson's ratio
 coefficients\\
 &- \param{Gyz}, \param{Gxz}, \param{Gxy} Shear moduluses \\
 &- \param{tAlphax}, \param{tAlphay}, \param{tAlphaz} thermal

@@ -207,7 +207,7 @@ OrthotropicLinearElasticMaterial :: give (int aProperty)
  if (aProperty == NYzx) return this->give(NYxz)*this->give(Ez) / this->give(Ex);
  if (aProperty == NYzy) return this->give(NYyz)*this->give(Ez) / this->give(Ey);
  if (aProperty == NYyx) return this->give(NYxy)*this->give(Ey) / this->give(Ex);
-
+ 
  return this -> Material :: give(aProperty);
 }
 
@@ -238,15 +238,15 @@ OrthotropicLinearElasticMaterial :: give3dMaterialStiffnessMatrix (FloatMatrix& 
  //constitutiveMatrix = new FloatMatrix(6,6) ;
  answer.resize (6,6);
  answer.zero();
+ // switched letters from original oofem -> now produces same material stiffness matrix as Abaqus method
+ answer.at(1,1) =  this->give(Ex)*(1.-nyz*nzy)/eksi ;
+ answer.at(1,2) =  this->give(Ey)*(nxy+nxz*nzy)/eksi;
+ answer.at(1,3) =  this->give(Ez)*(nxz+nyz*nxy)/eksi; 
+ answer.at(2,2) =  this->give(Ey)*(1.-nxz*nzx)/eksi; 
+ answer.at(2,3) =  this->give(Ez)*(nyz+nyx*nxz)/eksi; 
+ answer.at(3,3) =  this->give(Ez)*(1.-nyx*nxy)/eksi;
  
- answer.at(1,1) =  this->give(Ex)*(1.-nzy*nyz)/eksi ;
- answer.at(1,2) =  this->give(Ey)*(nyx+nzx*nyz)/eksi;
- answer.at(1,3) =  this->give(Ez)*(nzx+nzy*nyx)/eksi; 
- answer.at(2,2) =  this->give(Ey)*(1.-nzx*nxz)/eksi; 
- answer.at(2,3) =  this->give(Ez)*(nzy+nxy*nzx)/eksi; 
- answer.at(3,3) =  this->give(Ez)*(1.-nxy*nyx)/eksi;
- 
- // define the lover triangle
+ // define the lower triangle
  for (i=1;i<4;i++)
   for (j=1; j< i; j++)
    answer.at(i,j)=answer.at(j,i);
