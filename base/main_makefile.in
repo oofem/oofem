@@ -81,7 +81,7 @@ include $(all_deps)
 
 %.d:	%.C
 	set -e; \
-	$(CC) -MM $(INCLUDE_DIR) $< | sed 's|\($*\)\.o[ :]*|\1.o $@ : |g' > $@; \
+	$(CC) -MM $(INCLUDE_DIR) $(SYMBOLS) $< | sed 's|\($*\)\.o[ :]*|\1.o $@ : |g' > $@; \
 	[ -s $@ ] || rm -f $@
 
 #
