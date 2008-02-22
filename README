@@ -97,8 +97,9 @@ Elixir version is available at oofem home page
 at the same location.
 
 Parallel version (poofem) requires MPI library to be installed. 
-If you do not have any, you can use MPICH. It is a freely available, portable 
-implementation of MPI (http://www-unix.mcs.anl.gov/mpi/mpich/).
+If you do not have any, we recommend to use Open MPI. 
+This is a freely available, high-performance, and portable 
+implementation of MPI (http://www.open-mpi.org/).
 
 If you want to use PETSc toolkit, the PETSc version 2.3.0 or higher is
 required. The toolkit can be downloaded from PETSc project home page 
