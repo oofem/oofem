@@ -40,11 +40,11 @@ srcs7=calmls.C nrsolver.C nrsolver2.C subspaceit.C gjacobi.C linesearch.C nonloc
 srcs8=errorestimator.C remeshingcrit.C primaryunknownmapper.C materialmappingalgorithm.C dofdistributedprimaryfield.C domaintransactionmanager.C
 srcs9=geotoolbox.C dss.C dsssolver.C
 #obsolete 
-srcs99=ppdeelement.C heatcrosssection.C heatmaterial.C isolinearheatmat.C
+srcs99=
 #parallel
 psrcs1=communicator.C processcomm.C problemcomm.C combuff.C petscordering.C dyncombuff.C loadballancer.C parmetisloadballancer.C nonlocalmatwtp.C
 
-all_src = $(srcs0) $(srcs1) $(srcs2) $(srcs3) $(srcs4) $(srcs5) $(srcs6) $(srcs7) $(srcs8) $(srcs9) $(srcs99) $(psrcs1) 
+all_src = $(srcs0) $(srcs1) $(srcs2) $(srcs3) $(srcs4) $(srcs5) $(srcs6) $(srcs7) $(srcs8) $(srcs9) $(psrcs1) 
 
 ## object files
 oofemLib_objs := $(all_src:.C=.o)

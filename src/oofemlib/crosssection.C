@@ -37,9 +37,7 @@
 
 #include "crosssection.h"
 #include "simplecrosssection.h"
-//#include "layeredcrosssection.h"
 #include "structuralelement.h"
-#include "heatcrosssection.h"
 #include "emptycs.h"
 #include "gausspnt.h"
 #include "material.h"
@@ -120,12 +118,6 @@ CrossSection :: ofType (char* aClass)
 
    if (! strncasecmp(aClass,"simplecs",8))
      newCrossSection = new SimpleCrossSection (this->giveNumber(),domain) ;
-   // else if (! strncasecmp(aClass,"layeredcs",14))
-   //  newCrossSection = new LayeredCrossSection (number,domain) ;
-   else if (! strncasecmp(aClass,"heatcs",14))
-     newCrossSection = new HeatCrossSection (number,domain) ;
-   /*   else if (! strncasecmp(aClass,"steel1",6))
-        newMaterial = new Steel1 (number,domain) ;*/
    else if (! strncasecmp(aClass,"emptycs",7))
      newCrossSection = new EmptyCS (number,domain) ;
    else {

@@ -104,7 +104,6 @@
 #include "truss1d.h"
 #include "cct.h"
 #include "rershell.h"
-#include "ltrelemppde.h"
 #include "interfaceelem2dquad.h"
 #include "interfaceelement1d.h"
 
@@ -280,8 +279,6 @@ Element* CreateUsrDefElementOfType (char* aClass, int number, Domain* domain)
      newElement = new Truss2d(number,domain) ; 
    else if (! strncasecmp(aClass,"rershell",8))
      newElement = new RerShell(number,domain) ;
-   else if (! strncasecmp(aClass,"ltrelemppde",11))
-     newElement = new LTrElementPPDE(number,domain) ;
    else if (! strncasecmp(aClass,"beam2d",12))
      newElement = new Beam2d (number,domain) ;
    else if (! strncasecmp(aClass,"beam3d",12))

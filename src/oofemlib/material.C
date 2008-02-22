@@ -49,7 +49,7 @@
 //#include "cebfip78.h"
 //#include "doublepowerlaw.h"
 //#include "b3mat.h"
-#include "isolinearheatmat.h"
+//#include "isolinearheatmat.h"
 
 #include "gausspnt.h"
 #include "flotmtrx.h"
@@ -176,23 +176,6 @@ Material :: ofType (char* aClass)
   
   if (! strncasecmp(aClass,"isole",5))
   newMaterial = new IsotropicLinearElasticMaterial (this->giveNumber(),domain);
-/*  else if (! strncasecmp(aClass,"orthole",7))
-  newMaterial = new OrthotropicLinearElasticMaterial(this->giveNumber(),domain);
-  else if (! strncasecmp(aClass,"steel1",6))
-  newMaterial = new Steel1 (number,domain) ;
-  else if (! strncasecmp(aClass,"concrete2",9))
-  newMaterial = new Concrete2 (number,domain) ;
-  else if (! strncasecmp(aClass,"concrete3",9))
-  newMaterial = new Concrete3 (number,domain) ;
-  else if (! strncasecmp(aClass,"cebfip78",8))
-  newMaterial = new CebFip78Material (number,domain) ;
-  else if (! strncasecmp(aClass,"doublepowerlaw",14))
-  newMaterial = new DoublePowerLawMaterial (number,domain) ;
-  else if (! strncasecmp(aClass,"b3mat",5))
-  newMaterial = new B3Material (number,domain) ;  */
-  else if (! strncasecmp(aClass,"isolhm",6))
-    newMaterial = new IsotropicLinearHeatMaterial (number,domain) ;
-  
   else {
   // last resort - call aditional user defined subroutine
   newMaterial = ::CreateUsrDefMaterialOfType (aClass,number,domain);
