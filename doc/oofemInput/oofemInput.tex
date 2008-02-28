@@ -451,7 +451,7 @@ following format:
 \entKeywordInst{NonLinearStatic} \optField{nmsteps}{in} \field{nsteps}{in}\\
 \optField{contextOutputStep}{in}
 \optField{sparselinsolverparams}{string}\\
-\PoptField{nonlocstiff}{in} \PoptField{nonlocalext}{}.\\
+\PoptField{nonlocstiff}{in} \PoptField{nonlocalext}{} \PoptField{loadballancing}{}.\\
 This is immediately followed by metastep records with the following format:
 %%\item[1]
 \field{nsteps}{in} \field{attributes}{string}\\
@@ -476,8 +476,10 @@ stiffness is activated.}
 \item \Pmode{The \param{nonlocalext} turns on the nonlocal constitutive
 extension. The extension considers a band of remote elements involved
 in computation of nonlocal variables (see fig. \ref{nodecut-nlm} illustrating
-this approach for node-cut partitioning).
-}
+this approach for node-cut partitioning)}.
+\item \Pmode{The  \param{loadballancing} parameter describes the dynamic load ballancing
+attributes and is explained in section \ref{dynamicloadballancing}}.
+
 
 \end{itemize}
 The metasteps \fieldVal{num}{in} is the metastep number and the
@@ -648,7 +650,7 @@ then following\\
  \optField{contextOutputStep}{in} \optField{controllmode}{in} \optField{deltat}{rn}\\
 \field{rtolv}{rn} \optField{stiffmode}{in} \field{lstype}{in}
 \field{smtype}{in} \field{solverParams}{}\\
-\PoptField{nonlocstiff}{in} \PoptField{nonlocalext}{}.\\ The
+\PoptField{nonlocstiff}{in} \PoptField{nonlocalext}{} \PoptField{loadballancing}{}.\\ The
 meaning of parameters is the same as for extended syntax.
 
 %
@@ -897,11 +899,9 @@ consistent mass matrix will be used instead of (default) lumped one.
 The algorithm allows to solve the flow of two immiscible fluids in
 fixed spatial domain (currently only in 2d). This can be also used for
 solving free surface problems, where one of the fluids should
-represent air. In the present implementation, a VOF tracking algorithm
-is used to track the position of interface. To enable multifluid
-analysis, user should set parameter \param{miflag}. The supported values are described in section~\ref{materialinterfaces}.
+represent air. To enable multi-fluid analysis, user should set parameter \param{miflag}. The supported values are described in section~\ref{materialinterfaces}. 
 Please note, that the initial distribution of reference fluid
-volumes should be provided as well as 
+volume should be provided as well as 
 constitutive models for both fluids.
 
 
@@ -957,8 +957,7 @@ provided.
 \label{sparselinsolver}
 The sparselinsolverparams field has the following general syntax:\\
 \optField{lstype$^M$}{in} \optField{smtype}{in} \field{solverParams$^M$}{string},\\
-where 
-Parameter \param{lstype} allows to select solver for linear system of
+where parameter \param{lstype} allows to select solver for linear system of
 equations. Currently supported values are 0 (default) for direct solver
 (ST\_Direct), 1 for Iterative Method Library (IML) solver (ST\_IML), 
 2 for Spooles direct solver, 3 for Petsc
@@ -1076,8 +1075,26 @@ IML\_ICPrec   &4& SMT\_SymCompCol&Incoplete Cholesky\\
 \end{tabular}                                                                   
 \caption{Preconditioning summary.}                
 \label{precondtable}                                                         
-\end{center}                                                                    
+\end{center}                          sparselinsolver                                          
 \end{table}                                                                     
+
+
+\subsection{\Pmode{Dynamic load ballancing parameters\footnote{Available in parallel mode only}}}
+\label{dynamicloadballancing}
+There are in general two basic factors causing load imbalance between individual subdomains: (i) one comming from application nature, such as switching from linear to nonlinear response in certain regions or local adaptive refinment, and (ii) external factors, caused by resourse realocation, typical for nondedicated cluster environments, where indivudual processors are shared by different applications and users, leading to time variation in allocated processing power. The load ballance recovery is achieved by repartitioning of the problem domain and transferring the work (represented typically by finite elements) from one subdomain to another.
+This section describes the structure and syntax of parameters related to dynamic load ballancing. 
+The corresponding part of record has the following general syntax:\\
+\optField{lbflag$^M$}{in} \optField{forcelb1}{in} \optField{wtp}{ia} \optField{relwct}{rn} \optField{abswct}{rn}\\
+where the parameters have following meaning:
+\begin{itemize}
+\item \param{lbflag}, when set to nonzero value activates the dynamic load ballancing. Default value is zero.
+\item \param{forcelb1} forces the load rebalancing after the first solution step, when set to nonzero value.
+\item \param{wtp} allows to activate optional load ballancing plugins. At present, the only supported value is 1, that activates nonlocal plugin, necessary for nonlocal averaging to work properly when dynamic load ballancing is active.
+\item \param{relwcr} sets relative wall-clock imbalance treshold. When achieved relative imbalance between wall clock solution time of individual processors is greater than provided treshold, the reballancing procedure will be activated.
+\item \param{abswct} sets absolute wall-clock imbalance treshold. When achieved absolute imbalance between wall clock solution time of individual processors is greater than provided treshold, the reballancing procedure will be activated.
+\end{itemize}
+At present, the load ballancing support requires ParMETIS module to be configured and compiled.
+
 
 %
 \subsection{Error estimators and indicators}
