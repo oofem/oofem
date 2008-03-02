@@ -121,8 +121,8 @@ enum InputFieldType {
   IFT_NonLinearStatic_donotfixload,
   IFT_NonLinearStatic_nonlocstiff,
   IFT_NonLinearStatic_nonlocalext,
-  IFT_NonLinearStatic_loadBallancingFlag,
-  IFT_NonLinearStatic_forceloadBallancingFlag,
+  IFT_NonLinearStatic_loadBalancingFlag,
+  IFT_NonLinearStatic_forceloadBalancingFlag,
 
   IFT_EigenValueDynamic_nroot,
   IFT_EigenValueDynamic_rtolv,

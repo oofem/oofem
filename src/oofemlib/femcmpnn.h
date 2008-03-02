@@ -123,7 +123,7 @@ public:
      /// sets number of receiver
      void setNumber (int _num) {this->number = _num;}
      /**
-	Local renumbering support. For some tasks (parallel load ballancing, for example) it is necessary to
+	Local renumbering support. For some tasks (parallel load balancing, for example) it is necessary to
 	renumber the entities. The various fem components (such as nodes or elements) typically contain
 	links to other entities in terms of their local numbers, etc. This service allows to update 
 	these relations to reflext updated numbering. The renumbering funciton is passed, which is supposed

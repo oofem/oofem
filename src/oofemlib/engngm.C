@@ -136,7 +136,7 @@ EngngModel :: EngngModel (int i, EngngModel* _master) : domainNeqs(), domainPres
 #ifdef __PARALLEL_MODE
  initParallel ();
  parallelFlag = 1;
- loadBallancingFlag = false;
+ loadBalancingFlag = false;
  force_load_rebalance_in_first_step = false; 
  lb = NULL;
  lbm = NULL;
@@ -192,7 +192,7 @@ EngngModel :: EngngModel (int i, char* s, EngngModel* _master) : domainNeqs(), d
  //dataInputFileName = new char[strlen(s)+10] ;
  //sprintf (dataInputFileName, "%s.%d", s, rank);
  dataOutputFileName = new char [MAX_FILENAME_LENGTH];
- loadBallancingFlag = false;
+ loadBalancingFlag = false;
  force_load_rebalance_in_first_step = false;
  lb = NULL;
  lbm = NULL;
@@ -232,7 +232,7 @@ EngngModel ::  ~EngngModel ()
   fclose(outputStream) ;
 
 #ifdef __PARALLEL_MODE
- if (loadBallancingFlag) {
+ if (loadBalancingFlag) {
    if (lb) delete lb;
    if (lbm) delete lbm;
  }
@@ -333,13 +333,13 @@ EngngModel::initializeFrom (InputRecord* ir)
  IR_GIVE_OPTIONAL_FIELD (ir, parallelFlag, IFT_EngngModel_parallelflag, "parallelflag"); // Macro
 // fprintf (stderr, "Parallel mode is %d\n", parallelFlag);
  
- /* Load ballancing support */
+ /* Load balancing support */
  int _val = 0;
- IR_GIVE_OPTIONAL_FIELD (ir, _val, IFT_NonLinearStatic_loadBallancingFlag, "lbflag"); // Macro
- loadBallancingFlag = _val;
+ IR_GIVE_OPTIONAL_FIELD (ir, _val, IFT_NonLinearStatic_loadBalancingFlag, "lbflag"); // Macro
+ loadBalancingFlag = _val;
 
  _val = 0;
- IR_GIVE_OPTIONAL_FIELD (ir, _val, IFT_NonLinearStatic_forceloadBallancingFlag, "forcelb1"); // Macro
+ IR_GIVE_OPTIONAL_FIELD (ir, _val, IFT_NonLinearStatic_forceloadBalancingFlag, "forcelb1"); // Macro
  force_load_rebalance_in_first_step = _val;
 
 #endif
@@ -662,7 +662,7 @@ EngngModel :: solveYourself ()
 //#endif
 
 #ifdef __PARALLEL_MODE
-     if (loadBallancingFlag) this->ballanceLoad(this->giveCurrentStep());
+     if (loadBalancingFlag) this->balanceLoad(this->giveCurrentStep());
 #endif
 
    }
@@ -1978,7 +1978,7 @@ void  EngngModel :: drawNodes (oofegGraphicContext& context) {
 
 #ifdef __PARALLEL_MODE
 void 
-EngngModel::ballanceLoad (TimeStep* atTime)
+EngngModel::balanceLoad (TimeStep* atTime)
 {
   LoadBalancerMonitor::LoadBalancerDecisionType _d;
   this->giveLoadBalancerMonitor();
@@ -1993,7 +1993,7 @@ EngngModel::ballanceLoad (TimeStep* atTime)
     if ((_d == LoadBalancerMonitor::LBD_RECOVER) || 
         ((atTime->isTheFirstStep()) && force_load_rebalance_in_first_step)) {
       
-      this->timer.startTimer(EngngModelTimer::EMTT_LoadBallancingTimer);
+      this->timer.startTimer(EngngModelTimer::EMTT_LoadBalancingTimer);
 
       // determine nwe partitioning
       lb->calculateLoadTransfer();
@@ -2024,8 +2024,8 @@ EngngModel::ballanceLoad (TimeStep* atTime)
       // unpack (restore) e-model solution data from dof dictionaries
       this->unpackMigratingData(atTime);
 
-      this->timer.stopTimer(EngngModelTimer::EMTT_LoadBallancingTimer);
-      double _steptime = this->timer.getUtime (EngngModelTimer::EMTT_LoadBallancingTimer);
+      this->timer.stopTimer(EngngModelTimer::EMTT_LoadBalancingTimer);
+      double _steptime = this->timer.getUtime (EngngModelTimer::EMTT_LoadBalancingTimer);
       OOFEM_LOG_INFO ("[%d] EngngModel info: user time consumed by load rebalancing %.2fs\n", 
                       this->giveRank(),_steptime);
       

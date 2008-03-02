@@ -115,7 +115,7 @@ NRSolver::solve (SparseMtrx* k, FloatArray* R, FloatArray* R0,
          double& l, double rtol, referenceLoadInputModeType rlm, 
          int& nite, TimeStep* tNow)
 //
-// this function solve the problem of the unballanced equilibrium 
+// this function solve the problem of the unbalanced equilibrium 
 // using NR scheme
 //
 //
@@ -250,7 +250,7 @@ NRSolver::solve (SparseMtrx* k, FloatArray* R, FloatArray* R0,
   //
   // compute forceError
   //
-    // err is relative error of unballanced forces
+    // err is relative error of unbalanced forces
   // account for quasi BC
   for (int ii=1; ii<=numberOfPrescribedDofs; ii++) {
    rhs.at(prescribedEqs.at(ii)) = 0.0;

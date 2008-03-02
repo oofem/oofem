@@ -102,7 +102,7 @@ NonlocalMaterialWTP::giveNonlocalDepArryElementPlugin (GaussPoint* gp, std::set<
 
 /*
   prepares the communication maps for remote elements
-  should be called immediately after load ballancing,
+  should be called immediately after load balancing,
   before any work transfer.
 
 */

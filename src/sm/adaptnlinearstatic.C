@@ -616,7 +616,7 @@ AdaptiveNonLinearStatic::initializeAdaptive (int stepNumber)
   //
   // compute forceError
   //
-  // err is relative error of unballanced forces
+  // err is relative error of unbalanced forces
   double RR, RR0, forceErr = dotProduct (rhs.givePointer(),rhs.givePointer(),rhs.giveSize());
   if (initialLoadVector.isNotEmpty()) 
    RR0 = dotProduct (initialLoadVector.givePointer(), initialLoadVector.givePointer(), initialLoadVector.giveSize());

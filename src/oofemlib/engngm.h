@@ -288,11 +288,11 @@ class EngngModel
 
  /**@name Load balancing attributes */
  //@{
- /// Load Ballancer
+ /// Load Balancer
  LoadBalancer* lb;
  LoadBalancerMonitor* lbm;
- /// if set to true, load ballancing is active
- bool loadBallancingFlag;
+ /// if set to true, load balancing is active
+ bool loadBalancingFlag;
  /// debug flag forcing load balancing after first step
  bool force_load_rebalance_in_first_step;
  //@}
@@ -937,16 +937,16 @@ class EngngModel
   */
  virtual int estimateMaxPackSize (IntArray& commMap, CommunicationBuffer& buff, int packUnpackType) {return 0;}
  /**
-    Recovers the load ballance between processors, if needed. Uses load balancer monitor and load ballancer 
-    instances to decide if reballancing is needed (monitor) and to repartition the domain (load ballancer).
+    Recovers the load balance between processors, if needed. Uses load balancer monitor and load balancer 
+    instances to decide if rebalancing is needed (monitor) and to repartition the domain (load balancer).
     Method is responsible for packing all relevant data (the use of dof dictionaries is assumed to store e-model 
     dof related staff, which can later help in renumbering after rebalancing) and to send/receive all data. 
     Then the local update and renumbering is necessary to get consistent data structure.
   */
- virtual void ballanceLoad (TimeStep*);
- /** returns reference to receiver's load ballancer*/
+ virtual void balanceLoad (TimeStep*);
+ /** returns reference to receiver's load balancer*/
  virtual LoadBalancer* giveLoadBalancer() {return NULL;}
- /** returns reference to receiver's load ballancer monitor*/
+ /** returns reference to receiver's load balancer monitor*/
  virtual LoadBalancerMonitor* giveLoadBalancerMonitor() {return NULL;}
  
 

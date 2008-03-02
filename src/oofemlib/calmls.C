@@ -711,7 +711,7 @@ CylindricalALM::solve (SparseMtrx* k, FloatArray* Ri, FloatArray* R0,
   drr = colerr[1];
 #endif
 #else
-  // err is relative error of unballanced forces
+  // err is relative error of unbalanced forces
   forceErr = dotProduct (rhs.givePointer(),rhs.givePointer(),neq);
   // err is relative displacement change
   drr = dotProduct (r->givePointer(), r->givePointer(),neq);

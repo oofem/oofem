@@ -77,7 +77,7 @@ class CylindricalALM : public SparseNonLinearSystemNM
 
    Kt     - tangential stiffness
    deltaR - increment of displacements
-   g      - vector of unballanced forces (at the end should be zero one)
+   g      - vector of unbalanced forces (at the end should be zero one)
    Lambda - Load level
    Rt     - Quasi Total Load vector Rt = R0 + Lambda*R
    r      - total displacement vector

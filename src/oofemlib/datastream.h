@@ -46,7 +46,7 @@
    The purpose of DataStream abstract class is to allow to store/restore context to different streams, 
    including file, communication buffers, etc., using the same routine. 
    This will facilitate many algorithms relying on saving/moving state of componets 
-   (such as load ballancing), without writting new (and wery similar) routines. 
+   (such as load balancing), without writting new (and wery similar) routines. 
    This  will lead to a  better consistency of code.
  */
 class DataStream {

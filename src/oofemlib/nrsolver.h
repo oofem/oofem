@@ -84,7 +84,7 @@ class NRSolver : public SparseNonLinearSystemNM
 
     Kt     - tangential stiffness
     deltaR - increment of displacements
-    g      - vector of unballanced forces (at the end should be zero one)
+    g      - vector of unbalanced forces (at the end should be zero one)
     R      - Load vector (Incremental)
     R0     - Initial Load vector
     RT     - TotalLoadVector

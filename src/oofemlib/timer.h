@@ -109,7 +109,7 @@ class EngngModelTimer
 
      EMTT_NetComputationalStepTimer timer (and particularly its wall clock time) should measure only computation itself, no communication, therefore it should be measure of workload (in terms of wall clock time) on particular processors. It also typically not include time needed to solve the system of equations, since this has to be done in parallel, so solution takes the same time on all processors and include unwanted synchronization. 
    */
-  enum EngngModelTimerType {EMTT_AnalysisTimer, EMTT_SolutionStepTimer, EMTT_NetComputationalStepTimer, EMTT_LoadBallancingTimer, EMTT_DataTransferTimer, EMTT_LastTimer};
+  enum EngngModelTimerType {EMTT_AnalysisTimer, EMTT_SolutionStepTimer, EMTT_NetComputationalStepTimer, EMTT_LoadBalancingTimer, EMTT_DataTransferTimer, EMTT_LastTimer};
  protected:
 
   /// Array of Timer classes.

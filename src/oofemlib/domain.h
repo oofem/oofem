@@ -207,7 +207,7 @@ class Domain
  bool elementMapInitialized;
  
 #ifdef __PARALLEL_MODE
- /**@name Load Ballancing data structures */
+ /**@name Load Balancing data structures */
  //@{
  /// List of received elements
  std::list<Element*> recvElemList;
@@ -435,14 +435,14 @@ int               giveNumber () {return this->number;}
  void renumberDofManData (DomainTransactionManager *tm);
  void renumberElements ();
  void renumberElementData (DomainTransactionManager *tm);
- /** Return updated local entity number after load ballancing */
+ /** Return updated local entity number after load balancing */
  int  LB_giveUpdatedLocalNumber (int oldnum, EntityRenumberingScheme scheme);
- /** Return updated local entity number after load ballancing */
+ /** Return updated local entity number after load balancing */
  int  LB_giveUpdatedGlobalNumber (int oldnum, EntityRenumberingScheme scheme);
  //@}
 
 
- /**@name Load Ballancing support methods */
+ /**@name Load Balancing support methods */
  //@{
  int  dofmanGlobal2Local (int _globnum);
  int  elementGlobal2Local (int _globnum);
