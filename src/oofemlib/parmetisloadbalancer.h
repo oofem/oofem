@@ -88,7 +88,7 @@ protected:
   /**
      Label local partition nodes (thode that are local or shared).
      Labeling consist of assigning corresponding id that characterize the
-     status of local dof managar after ballancing the load. Labeling determines 
+     status of local dof managar after balancing the load. Labeling determines 
      which of local nodes remain local, or became local on other partition, 
      or became shared, etc.
   */

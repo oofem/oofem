@@ -49,7 +49,7 @@ class TimeStep;
 #define LOADBALANCER_END_DATA 9999
 
 /**
-   Abstract base class representing general load ballancer monitor. The task of the monitor is to
+   Abstract base class representing general load balancer monitor. The task of the monitor is to
    detect the imbalance and to make the decision, whether to redistribute the work or to continue 
    with existing partitioning.
    It provides partition weights, reflecting their relative computational performance. These weights should
@@ -71,7 +71,7 @@ class LoadBalancerMonitor
   
   /**@name Load evaluation and imbalance detection methods*/
   //@{
-  /// returns flag indicating whether reballancing is necessary; should update node weights as well
+  /// returns flag indicating whether rebalancing is necessary; should update node weights as well
   virtual LoadBalancerDecisionType decide (TimeStep*) = 0;
   /// Returns processor weights; the larger weight means more powerfull node, sum of weights should equal to one.
   void giveProcessorWeights(FloatArray& answer) {answer = nodeWeights;}
@@ -92,7 +92,7 @@ class WallClockLoadBalancerMonitor : public LoadBalancerMonitor
 {
  protected:
   double relWallClockImbalanceTreshold, absWallClockImbalanceTreshold;
-  // the reballancing done every lbstep
+  // the rebalancing done every lbstep
   int lbstep;
  public:
   WallClockLoadBalancerMonitor (EngngModel* em): LoadBalancerMonitor(em) {
@@ -106,10 +106,10 @@ class WallClockLoadBalancerMonitor : public LoadBalancerMonitor
 
 
 /**
-   Abstract base class representing general load ballancer. The task of load ballancer is to 
-   recover load ballance when running in parallel. This is achieved by moving work from busy 
+   Abstract base class representing general load balancer. The task of load balancer is to 
+   recover load balance when running in parallel. This is achieved by moving work from busy 
    nodes to other nodes to achieve an equal distribution of work. 
-   In general load ballancer should repartition the problem domain, taking into account several 
+   In general load balancer should repartition the problem domain, taking into account several 
    criteria:
    - It should take into account different computational requirement of different elements
    - The new partitioning should minimize the cut (to minimize the communication)
@@ -121,7 +121,7 @@ class LoadBalancer
 {
  public:
   /**
-     Describes the state of dofmanager after load ballancing 
+     Describes the state of dofmanager after load balancing 
      on the local partition:
      DM_NULL  - undefined (undetermined) state, if assigned means internal error
      DM_Local - local dofman that remains local
@@ -159,7 +159,7 @@ class LoadBalancer
 
  /**@name Query methods after work transfer calculation */
  //@{
-  /// Returns the label of dofmanager after load ballancing
+  /// Returns the label of dofmanager after load balancing
   virtual DofManMode giveDofManState (int idofman) = 0;
   
   /// Returns the partition list of given dofmanager after load balancing

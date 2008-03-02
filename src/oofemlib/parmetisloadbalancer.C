@@ -102,7 +102,7 @@ ParmetisLoadBalancer::calculateLoadTransfer ()
   // allocate eind and eptr arrays
   eind = new idxtype[eind_size];
   eptr = new idxtype[nlocalelems+1];
-  if ((eind==NULL) || (eptr==NULL)) OOFEM_ERROR ("ParmetisLoadBalancer::ballanceLoad: failed to allocate eind and eptr arrays");
+  if ((eind==NULL) || (eptr==NULL)) OOFEM_ERROR ("ParmetisLoadBalancer::balanceLoad: failed to allocate eind and eptr arrays");
   
   // fill in the eind and eptr (mesh graph)
   int eind_pos=0, eptr_pos=0;
@@ -146,10 +146,10 @@ ParmetisLoadBalancer::calculateLoadTransfer ()
   options[3]=1; // sub-domains and processors are coupled
   // set ratio of inter-proc communication compared to data redistribution time
   itr = 1000.0;
-  // set partition weights by quering load ballance monitor
+  // set partition weights by quering load balance monitor
   lbm->giveProcessorWeights (_procweights);
   if (tpwgts == NULL) {
-    if ((tpwgts = new float[nproc])==NULL) OOFEM_ERROR ("ParmetisLoadBalancer::ballanceLoad: failed to allocate tpwgts");
+    if ((tpwgts = new float[nproc])==NULL) OOFEM_ERROR ("ParmetisLoadBalancer::balanceLoad: failed to allocate tpwgts");
   }
   for (i=0; i< nproc; i++) tpwgts[i] = _procweights(i);
 
@@ -175,7 +175,7 @@ ParmetisLoadBalancer::calculateLoadTransfer ()
   numflag = 0;
   ncon = 1;
   if ((part = new idxtype[nlocalelems]) == NULL) OOFEM_ERROR ("ParmetisLoadBalancer::balanceLoad: failed to allocate part");
-  // call ParMETIS ballancing routineParMETIS_V3_AdaptiveRepart
+  // call ParMETIS balancing routineParMETIS_V3_AdaptiveRepart
   ParMETIS_V3_AdaptiveRepart (elmdist, xadj, adjncy, vwgt, vsize, NULL, &wgtflag, &numflag, &ncon, &nproc, 
                               tpwgts, ubvec, &itr, options, &edgecut, part, &communicator);
 
@@ -245,7 +245,7 @@ ParmetisLoadBalancer::initGlobalParmetisElementNumbering ()
   
   /* assemble maps of local numbering
      map is necessary since we may have remote elements that are not 
-     part of local domain for load ballancing purposes
+     part of local domain for load balancing purposes
   */
   globnum = myGlobNumOffset+1;
   lToGMap.resize(nelem); gToLMap.resize(nelem);
@@ -322,7 +322,7 @@ ParmetisLoadBalancer::labelDofManagers()
     dmode = dofman -> giveParallelMode();
     npart = dofManPartitions[idofman-1].giveSize();
     if ((dmode == DofManager_local) || (dmode == DofManager_shared)) {
-      // determine its state after ballancing -> label
+      // determine its state after balancing -> label
       dofManState.at(idofman) = this->determineDofManState (idofman, myrank, npart, &dofManPartitions[idofman-1]);
     } else {
       dofManState.at(idofman) = DM_NULL;
@@ -496,7 +496,7 @@ void ParmetisLoadBalancer::addSharedDofmanPartitions (int _locnum, IntArray _par
 }
 
 #else //PARMETIS_MODULE
-void ParmetisLoadBalancer:: ballanceLoad () {}
+void ParmetisLoadBalancer:: balanceLoad () {}
 
 LoadBalancer::DofManMode
 ParmetisLoadBalancer::giveDofManState (int idofman)

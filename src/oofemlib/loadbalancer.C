@@ -354,7 +354,7 @@ void
 LoadBalancer::deleteRemoteDofManagers (Domain* d)
 {
   int i, ndofman =  d->giveNumberOfDofManagers();
-  //LoadBalancer* lb = this->giveLoadBallancer();
+  //LoadBalancer* lb = this->giveLoadBalancer();
   LoadBalancer::DofManMode dmode;
   DofManager* dman;
   int myrank= d->giveEngngModel()->giveRank();
@@ -404,7 +404,7 @@ LoadBalancer::deleteRemoteElements (Domain* d)
 {
   int i, nelem =  d->giveNumberOfElements();
   int myrank= d->giveEngngModel()->giveRank();
-  //LoadBalancer* lb = this->giveLoadBallancer();
+  //LoadBalancer* lb = this->giveLoadBalancer();
   DomainTransactionManager* dtm = d->giveTransactionManager();
   //Element* elem;
 
