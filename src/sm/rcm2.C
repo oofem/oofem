@@ -344,7 +344,7 @@ RCM2Material ::  giveRealPrincipalStressVector3d (FloatArray& answer, GaussPoint
   }
   //
   
-  // compute unballanced stress
+  // compute unbalanced stress
   // dSigma = sigmaEl - sigmaCr for active cracks
   fullDSigma = sigmaEl;
   fullDSigma.substract(sigmaCr);

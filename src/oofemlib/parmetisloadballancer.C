@@ -33,7 +33,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 #ifdef __PARALLEL_MODE
 
-#include "parmetisloadballancer.h"
+#include "parmetisloadbalancer.h"
 #include "domain.h"
 #include "engngm.h"
 #include "element.h"
@@ -50,10 +50,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "communicator.h"
 
 
-//#define ParmetisLoadBallancer_DEBUG_PRINT
+//#define ParmetisLoadBalancer_DEBUG_PRINT
   
   
-ParmetisLoadBallancer::ParmetisLoadBallancer(Domain* d) : LoadBallancer (d)
+ParmetisLoadBalancer::ParmetisLoadBalancer(Domain* d) : LoadBalancer (d)
 {
 #ifdef __PARMETIS_MODULE
   elmdist = NULL;
@@ -61,7 +61,7 @@ ParmetisLoadBallancer::ParmetisLoadBallancer(Domain* d) : LoadBallancer (d)
 #endif
 }
 
-ParmetisLoadBallancer::~ParmetisLoadBallancer ()
+ParmetisLoadBalancer::~ParmetisLoadBalancer ()
 {
 #ifdef __PARMETIS_MODULE
   if (elmdist) delete[] elmdist;
@@ -72,7 +72,7 @@ ParmetisLoadBallancer::~ParmetisLoadBallancer ()
 
 #ifdef __PARMETIS_MODULE
 void
-ParmetisLoadBallancer::calculateLoadTransfer ()
+ParmetisLoadBalancer::calculateLoadTransfer ()
 {
 
   idxtype *eind, *eptr, *xadj, *adjncy, *vwgt, *vsize;
@@ -83,7 +83,7 @@ ParmetisLoadBallancer::calculateLoadTransfer ()
   float ubvec[1], itr;
   Element* ielem;
   MPI_Comm communicator = MPI_COMM_WORLD;
-  LoadBallancerMonitor* lbm = domain->giveEngngModel()->giveLoadBallancerMonitor();
+  LoadBalancerMonitor* lbm = domain->giveEngngModel()->giveLoadBalancerMonitor();
   FloatArray _procweights;
 
   nproc=domain->giveEngngModel()->giveNumberOfProcesses();
@@ -102,7 +102,7 @@ ParmetisLoadBallancer::calculateLoadTransfer ()
   // allocate eind and eptr arrays
   eind = new idxtype[eind_size];
   eptr = new idxtype[nlocalelems+1];
-  if ((eind==NULL) || (eptr==NULL)) OOFEM_ERROR ("ParmetisLoadBallancer::ballanceLoad: failed to allocate eind and eptr arrays");
+  if ((eind==NULL) || (eptr==NULL)) OOFEM_ERROR ("ParmetisLoadBalancer::ballanceLoad: failed to allocate eind and eptr arrays");
   
   // fill in the eind and eptr (mesh graph)
   int eind_pos=0, eptr_pos=0;
@@ -127,7 +127,7 @@ ParmetisLoadBallancer::calculateLoadTransfer ()
   ParMETIS_V3_Mesh2Dual (elmdist, eptr, eind, &numflag, &ncommonnodes, &xadj, &adjncy, &communicator);
   int myrank=domain->giveEngngModel()->giveRank();
  
-#ifdef ParmetisLoadBallancer_DEBUG_PRINT
+#ifdef ParmetisLoadBalancer_DEBUG_PRINT
   // DEBUG PRINT
   fprintf (stderr, "[%d] xadj:", myrank);
   for (i=0; i<= nlocalelems; i++) fprintf (stderr, " %d", xadj[i]);
@@ -149,20 +149,20 @@ ParmetisLoadBallancer::calculateLoadTransfer ()
   // set partition weights by quering load ballance monitor
   lbm->giveProcessorWeights (_procweights);
   if (tpwgts == NULL) {
-    if ((tpwgts = new float[nproc])==NULL) OOFEM_ERROR ("ParmetisLoadBallancer::ballanceLoad: failed to allocate tpwgts");
+    if ((tpwgts = new float[nproc])==NULL) OOFEM_ERROR ("ParmetisLoadBalancer::ballanceLoad: failed to allocate tpwgts");
   }
   for (i=0; i< nproc; i++) tpwgts[i] = _procweights(i);
 
   /*
   // log processor weights
-  OOFEM_LOG_RELEVANT ("[%d] ParmetisLoadBallancer: proc weights: ", myrank);
+  OOFEM_LOG_RELEVANT ("[%d] ParmetisLoadBalancer: proc weights: ", myrank);
   for (i=0; i<nproc; i++) OOFEM_LOG_RELEVANT ("%4.3f ",tpwgts[i]);
   OOFEM_LOG_RELEVANT ("\n");
   */
 
   // obtain vertices weights (element weights) representing relative computational cost 
-  if ((vwgt = new idxtype[nlocalelems])==NULL) OOFEM_ERROR ("ParmetisLoadBallancer::ballanceLoad: failed to allocate vwgt");
-  if ((vsize= new idxtype[nlocalelems])==NULL) OOFEM_ERROR ("ParmetisLoadBallancer::ballanceLoad: failed to allocate vsize");
+  if ((vwgt = new idxtype[nlocalelems])==NULL) OOFEM_ERROR ("ParmetisLoadBalancer::balanceLoad: failed to allocate vwgt");
+  if ((vsize= new idxtype[nlocalelems])==NULL) OOFEM_ERROR ("ParmetisLoadBalancer::balanceLoad: failed to allocate vsize");
   for (ie = 0, i=0; i< nelem; i++) {
     ielem = domain->giveElement(i+1);
     if (ielem->giveParallelMode() == Element_local) {
@@ -174,7 +174,7 @@ ParmetisLoadBallancer::calculateLoadTransfer ()
   wgtflag = 2;
   numflag = 0;
   ncon = 1;
-  if ((part = new idxtype[nlocalelems]) == NULL) OOFEM_ERROR ("ParmetisLoadBallancer::ballanceLoad: failed to allocate part");
+  if ((part = new idxtype[nlocalelems]) == NULL) OOFEM_ERROR ("ParmetisLoadBalancer::balanceLoad: failed to allocate part");
   // call ParMETIS ballancing routineParMETIS_V3_AdaptiveRepart
   ParMETIS_V3_AdaptiveRepart (elmdist, xadj, adjncy, vwgt, vsize, NULL, &wgtflag, &numflag, &ncon, &nproc, 
                               tpwgts, ubvec, &itr, options, &edgecut, part, &communicator);
@@ -197,7 +197,7 @@ ParmetisLoadBallancer::calculateLoadTransfer ()
 
   if (part)    delete[] part;
       
-#ifdef ParmetisLoadBallancer_DEBUG_PRINT
+#ifdef ParmetisLoadBalancer_DEBUG_PRINT
   // debug
   fprintf (stderr, "[%d] edgecut: %d elementPart:", myrank, edgecut);
   for (i=1; i<= nelem; i++) fprintf (stderr, " %d", elementPart.at(i));
@@ -216,7 +216,7 @@ ParmetisLoadBallancer::calculateLoadTransfer ()
 }
 
 void
-ParmetisLoadBallancer::initGlobalParmetisElementNumbering ()
+ParmetisLoadBalancer::initGlobalParmetisElementNumbering ()
 {
   int nproc=domain->giveEngngModel()->giveNumberOfProcesses();
   int myrank=domain->giveEngngModel()->giveRank();
@@ -224,7 +224,7 @@ ParmetisLoadBallancer::initGlobalParmetisElementNumbering ()
 
   //if (procElementCounts) delete procElementCounts;
   elmdist = new idxtype[nproc+1];
-  if (elmdist == NULL) OOFEM_ERROR ("ParmetisLoadBallancer::initGlobalParmetisNumbering: failed to allocate elmdist array");
+  if (elmdist == NULL) OOFEM_ERROR ("ParmetisLoadBalancer::initGlobalParmetisNumbering: failed to allocate elmdist array");
   
   // determine number of local elements for the receiver
   int i, nlocelem = 0, nelem = domain->giveNumberOfElements();
@@ -261,7 +261,7 @@ ParmetisLoadBallancer::initGlobalParmetisElementNumbering ()
 }
 
 void
-ParmetisLoadBallancer::labelDofManagers()
+ParmetisLoadBalancer::labelDofManagers()
 {
   int idofman, ndofman = domain->giveNumberOfDofManagers();
   ConnectivityTable* ct = domain->giveConnectivityTable();
@@ -282,7 +282,7 @@ ParmetisLoadBallancer::labelDofManagers()
   dofManPartitions.clear();
   dofManPartitions.resize(ndofman);
 
-#ifdef ParmetisLoadBallancer_DEBUG_PRINT
+#ifdef ParmetisLoadBalancer_DEBUG_PRINT
   int _cols = 0;
   fprintf (stderr, "[%d] DofManager labels:\n", myrank);
 #endif
@@ -312,9 +312,9 @@ ParmetisLoadBallancer::labelDofManagers()
   /* Exchange new partitions for shared nodes */
   CommunicatorBuff cb (nproc, CBT_dynamic);
   Communicator com (domain->giveEngngModel(), &cb, myrank, nproc, CommMode_Dynamic);
-  com.packAllData (this, &ParmetisLoadBallancer::packSharedDmanPartitions);
+  com.packAllData (this, &ParmetisLoadBalancer::packSharedDmanPartitions);
   com.initExchange(SHARED_DOFMAN_PARTITIONS_TAG);
-  com.unpackAllData (this, &ParmetisLoadBallancer::unpackSharedDmanPartitions);
+  com.unpackAllData (this, &ParmetisLoadBalancer::unpackSharedDmanPartitions);
 
   /* label dof managers */
   for (idofman=1; idofman <= ndofman; idofman++) {
@@ -329,7 +329,7 @@ ParmetisLoadBallancer::labelDofManagers()
     }
   } 
     
-#ifdef ParmetisLoadBallancer_DEBUG_PRINT
+#ifdef ParmetisLoadBalancer_DEBUG_PRINT
   for (idofman=1; idofman <= ndofman; idofman++) {
     fprintf (stderr, " | %d: ", idofman);
     if (dofManState.at(idofman) == DM_NULL)              fprintf (stderr, "NULL  ");
@@ -347,7 +347,7 @@ ParmetisLoadBallancer::labelDofManagers()
 }
 
 int
-ParmetisLoadBallancer::determineDofManState (int idofman, int myrank, int npart, IntArray* dofManPartitions)
+ParmetisLoadBalancer::determineDofManState (int idofman, int myrank, int npart, IntArray* dofManPartitions)
 {
   dofManagerParallelMode dmode = domain->giveDofManager(idofman)->giveParallelMode();
   int answer = DM_Local;
@@ -404,27 +404,27 @@ ParmetisLoadBallancer::determineDofManState (int idofman, int myrank, int npart,
 }
 
 
-LoadBallancer::DofManMode
-ParmetisLoadBallancer::giveDofManState (int idofman)
+LoadBalancer::DofManMode
+ParmetisLoadBalancer::giveDofManState (int idofman)
 {
-  return (LoadBallancer::DofManMode) dofManState.at(idofman);
+  return (LoadBalancer::DofManMode) dofManState.at(idofman);
 }
 
 
 IntArray*
-ParmetisLoadBallancer::giveDofManPartitions (int idofman)
+ParmetisLoadBalancer::giveDofManPartitions (int idofman)
 {
   return &dofManPartitions[idofman-1];
 }
 
 int
-ParmetisLoadBallancer::giveElementPartition (int ielem)
+ParmetisLoadBalancer::giveElementPartition (int ielem)
 {
   return elementPart.at(ielem);
 }
 
 int 
-ParmetisLoadBallancer::packSharedDmanPartitions (ProcessCommunicator& pc) 
+ParmetisLoadBalancer::packSharedDmanPartitions (ProcessCommunicator& pc) 
 {
   int myrank = domain->giveEngngModel()->giveRank();
   int iproc = pc.giveRank();
@@ -452,7 +452,7 @@ ParmetisLoadBallancer::packSharedDmanPartitions (ProcessCommunicator& pc)
 }
 
 int 
-ParmetisLoadBallancer::unpackSharedDmanPartitions (ProcessCommunicator& pc)
+ParmetisLoadBalancer::unpackSharedDmanPartitions (ProcessCommunicator& pc)
 {
   int myrank = domain->giveEngngModel()->giveRank();
   int iproc = pc.giveRank();
@@ -472,7 +472,7 @@ ParmetisLoadBallancer::unpackSharedDmanPartitions (ProcessCommunicator& pc)
     if ((_locnum = domain->dofmanGlobal2Local (_globnum))) {
       this->addSharedDofmanPartitions (_locnum, _partitions);
     } else {
-      OOFEM_ERROR2 ("ParmetisLoadBallancer::unpackSharedDmanPartitions: internal error, unknown global dofman %d", _globnum);
+      OOFEM_ERROR2 ("ParmetisLoadBalancer::unpackSharedDmanPartitions: internal error, unknown global dofman %d", _globnum);
     }
 
     /*
@@ -488,7 +488,7 @@ ParmetisLoadBallancer::unpackSharedDmanPartitions (ProcessCommunicator& pc)
 }
 
 
-void ParmetisLoadBallancer::addSharedDofmanPartitions (int _locnum, IntArray _partitions)
+void ParmetisLoadBalancer::addSharedDofmanPartitions (int _locnum, IntArray _partitions)
 {
   int i,s = _partitions.giveSize();
   for (i=1; i<=s; i++)
@@ -496,19 +496,19 @@ void ParmetisLoadBallancer::addSharedDofmanPartitions (int _locnum, IntArray _pa
 }
 
 #else //PARMETIS_MODULE
-void ParmetisLoadBallancer:: ballanceLoad () {}
+void ParmetisLoadBalancer:: ballanceLoad () {}
 
-LoadBallancer::DofManMode
-ParmetisLoadBallancer::giveDofManState (int idofman)
+LoadBalancer::DofManMode
+ParmetisLoadBalancer::giveDofManState (int idofman)
 { return DM_NULL;}
 
 
 IntArray*
-ParmetisLoadBallancer::giveDofManPartitions (int idofman)
+ParmetisLoadBalancer::giveDofManPartitions (int idofman)
 { return NULL;}
 
 int
-ParmetisLoadBallancer::giveElementPartition (int ielem)
+ParmetisLoadBalancer::giveElementPartition (int ielem)
 { return 0;}
 #endif
 #endif

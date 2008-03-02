@@ -32,7 +32,7 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.                                                                              
 */
-#ifndef loadballancer_h
+#ifndef loadbalancer_h
 #ifdef __PARALLEL_MODE
 #include "inputrecord.h"
 #include "interface.h"
@@ -46,7 +46,7 @@ class ProcessCommunicator;
 class TimeStep;
 
 #define MIGRATE_LOAD_TAG       9998
-#define LOADBALLANCER_END_DATA 9999
+#define LOADBALANCER_END_DATA 9999
 
 /**
    Abstract base class representing general load ballancer monitor. The task of the monitor is to
@@ -55,16 +55,16 @@ class TimeStep;
    It provides partition weights, reflecting their relative computational performance. These weights should
    be continuosly updated to reflect changing work load during solution process.
  */
-class LoadBallancerMonitor
+class LoadBalancerMonitor
 {
  protected:
   EngngModel* emodel;
   FloatArray nodeWeights;
  public:
-  enum LoadBallancerDecisionType {LBD_CONTINUE, LBD_RECOVER};
+  enum LoadBalancerDecisionType {LBD_CONTINUE, LBD_RECOVER};
   
-  LoadBallancerMonitor (EngngModel* em) {emodel=em;}
-  virtual ~LoadBallancerMonitor() {}
+  LoadBalancerMonitor (EngngModel* em) {emodel=em;}
+  virtual ~LoadBalancerMonitor() {}
 
   ///Initializes receiver acording to object description stored in input record.
   virtual IRResultType initializeFrom (InputRecord* ir) ;
@@ -72,13 +72,13 @@ class LoadBallancerMonitor
   /**@name Load evaluation and imbalance detection methods*/
   //@{
   /// returns flag indicating whether reballancing is necessary; should update node weights as well
-  virtual LoadBallancerDecisionType decide (TimeStep*) = 0;
+  virtual LoadBalancerDecisionType decide (TimeStep*) = 0;
   /// Returns processor weights; the larger weight means more powerfull node, sum of weights should equal to one.
   void giveProcessorWeights(FloatArray& answer) {answer = nodeWeights;}
   //@}
 
   /// Returns class name of the receiver.
-  const char* giveClassName () const { return "LoadBallancerMonitor" ;}
+  const char* giveClassName () const { return "LoadBalancerMonitor" ;}
   
 };
 
@@ -88,18 +88,18 @@ class LoadBallancerMonitor
    on particular nodes. When difference in wall clock solution times is greater
    than a treshold value, the load migration is performed.
 */
-class WallClockLoadBallancerMonitor : public LoadBallancerMonitor
+class WallClockLoadBalancerMonitor : public LoadBalancerMonitor
 {
  protected:
   double relWallClockImbalanceTreshold, absWallClockImbalanceTreshold;
   // the reballancing done every lbstep
   int lbstep;
  public:
-  WallClockLoadBallancerMonitor (EngngModel* em): LoadBallancerMonitor(em) {
+  WallClockLoadBalancerMonitor (EngngModel* em): LoadBalancerMonitor(em) {
     relWallClockImbalanceTreshold=0.1; absWallClockImbalanceTreshold=10.0;
     lbstep = 5;
   }
-  LoadBallancerDecisionType decide (TimeStep*);
+  LoadBalancerDecisionType decide (TimeStep*);
   ///Initializes receiver acording to object description stored in input record.
   virtual IRResultType initializeFrom (InputRecord* ir) ;
 };
@@ -117,7 +117,7 @@ class WallClockLoadBallancerMonitor : public LoadBallancerMonitor
    preserving the locality as much as possible. In other words the new and existing partitioning
    should be "similar".
  */
-class LoadBallancer
+class LoadBalancer
 {
  public:
   /**
@@ -139,8 +139,8 @@ class LoadBallancer
 
  public:
 
-  LoadBallancer (Domain* d);
-  virtual ~LoadBallancer () {}
+  LoadBalancer (Domain* d);
+  virtual ~LoadBalancer () {}
   
   
 
@@ -176,7 +176,7 @@ class LoadBallancer
   Domain* giveDomain() {return domain;}
 
   /// Returns class name of the receiver.
-  const char* giveClassName () const { return "LoadBallancer" ;}
+  const char* giveClassName () const { return "LoadBalancer" ;}
 
  protected:
 
@@ -191,9 +191,9 @@ class LoadBallancer
   class WorkTransferPlugin
     {
     protected:
-      LoadBallancer* lb;
+      LoadBalancer* lb;
     public:
-      WorkTransferPlugin (LoadBallancer* _lb);
+      WorkTransferPlugin (LoadBalancer* _lb);
       virtual ~WorkTransferPlugin();
       
       /** 
@@ -232,14 +232,14 @@ class LoadBallancer
 };
 
 
-class LoadBallancerElementInterface : public Interface
+class LoadBalancerElementInterface : public Interface
 {
  public:
-  LoadBallancerElementInterface () {}
+  LoadBalancerElementInterface () {}
   
   virtual double predictRelativeComputationalCost ();
 };
 
 #endif
-#define loadballancer_h
+#define loadbalancer_h
 #endif

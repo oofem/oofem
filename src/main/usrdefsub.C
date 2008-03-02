@@ -237,8 +237,8 @@
 // GENERAL 
 #include "masterdof.h"
 #ifdef __PARALLEL_MODE
-#include "loadballancer.h"
-#include "parmetisloadballancer.h"
+#include "loadbalancer.h"
+#include "parmetisloadbalancer.h"
 #endif
 
 Element* CreateUsrDefElementOfType (char* aClass, int number, Domain* domain) 
@@ -740,21 +740,21 @@ Dof* CreateUsrDefDofOfType (classType type, int number, DofManager* dman)
   return answer;
 }
 #ifdef __PARALLEL_MODE
-LoadBallancerMonitor* CreateUsrDefLoadBallancerMonitorOfType (classType type, EngngModel* e)
+LoadBalancerMonitor* CreateUsrDefLoadBalancerMonitorOfType (classType type, EngngModel* e)
 {
-  LoadBallancerMonitor *answer = NULL;
-  if (type == WallClockLoadBallancerMonitorClass) answer = new WallClockLoadBallancerMonitor (e);
+  LoadBalancerMonitor *answer = NULL;
+  if (type == WallClockLoadBalancerMonitorClass) answer = new WallClockLoadBalancerMonitor (e);
   
-  if (answer == NULL) OOFEM_ERROR2 ("CreateUsrDefLoadBallancerMonitorOfType: Unknown type [%d]", type);
+  if (answer == NULL) OOFEM_ERROR2 ("CreateUsrDefLoadBalancerMonitorOfType: Unknown type [%d]", type);
   return answer;
 }
 
-LoadBallancer* CreateUsrDefLoadBallancerOfType (classType type, Domain* d)
+LoadBalancer* CreateUsrDefLoadBalancerOfType (classType type, Domain* d)
 {
-  LoadBallancer *answer = NULL;
-  if (type == ParmetisLoadBallancerClass) answer = new ParmetisLoadBallancer (d);
+  LoadBalancer *answer = NULL;
+  if (type == ParmetisLoadBalancerClass) answer = new ParmetisLoadBalancer (d);
   
-  if (answer == NULL) OOFEM_ERROR2 ("CreateUsrDefLoadBallancerOfType: Unknown type [%d]", type);
+  if (answer == NULL) OOFEM_ERROR2 ("CreateUsrDefLoadBalancerOfType: Unknown type [%d]", type);
   return answer;
 }
 #endif

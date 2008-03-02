@@ -182,7 +182,7 @@ TASK:
   fMode giveFormulation () { return TL; }
   /// Returns nonzero if nonlocal stiffness option activated.
  virtual int useNonlocalStiffnessOption () {return this->nonlocalStiffnessFlag;}
- /// For load ballancing purposes we store all values with same EquationID; so hash is computed from mode value only
+ /// For load balancing purposes we store all values with same EquationID; so hash is computed from mode value only
  virtual int       giveUnknownDictHashIndx (EquationID type, ValueModeType mode, TimeStep* stepN)
    {return (int) mode;}
 
@@ -210,15 +210,15 @@ TASK:
   */
   int estimateMaxPackSize (IntArray& commMap, CommunicationBuffer& buff, int packUnpackType) ;
 
-	/**
-		Initializes communication maps of the receiver
-		*/
-	void initializeCommMaps(bool forceInit=false);
+  /**
+     Initializes communication maps of the receiver
+  */
+  void initializeCommMaps(bool forceInit=false);
 
-  /** returns reference to receiver's load ballancer*/
-  virtual LoadBallancer* giveLoadBallancer() ;
-  /** returns reference to receiver's load ballancer monitor*/
-  virtual LoadBallancerMonitor* giveLoadBallancerMonitor() ;
+  /** returns reference to receiver's load balancer*/
+  virtual LoadBalancer* giveLoadBalancer() ;
+  /** returns reference to receiver's load balancer monitor*/
+  virtual LoadBalancerMonitor* giveLoadBalancerMonitor() ;
   
   
 #endif

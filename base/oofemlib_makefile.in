@@ -42,7 +42,7 @@ srcs9=geotoolbox.C dss.C dsssolver.C
 #obsolete 
 srcs99=
 #parallel
-psrcs1=communicator.C processcomm.C problemcomm.C combuff.C petscordering.C dyncombuff.C loadballancer.C parmetisloadballancer.C nonlocalmatwtp.C
+psrcs1=communicator.C processcomm.C problemcomm.C combuff.C petscordering.C dyncombuff.C loadbalancer.C parmetisloadbalancer.C nonlocalmatwtp.C
 
 all_src = $(srcs0) $(srcs1) $(srcs2) $(srcs3) $(srcs4) $(srcs5) $(srcs6) $(srcs7) $(srcs8) $(srcs9) $(psrcs1) 
 

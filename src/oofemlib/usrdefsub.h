@@ -54,7 +54,7 @@
 
 #include "errorestimator.h"
 #ifdef __PARALLEL_MODE
-#include "loadballancer.h"
+#include "loadbalancer.h"
 #endif
 
 /**
@@ -205,14 +205,14 @@ Dof* CreateUsrDefDofOfType (classType type, int, DofManager*);
  @param e    engng model to which new monitor belongs
  @return newly allocated object of requested type, null if keyword not suppported
  */
-LoadBallancerMonitor* CreateUsrDefLoadBallancerMonitorOfType (classType type, EngngModel*);
+LoadBalancerMonitor* CreateUsrDefLoadBallancerMonitorOfType (classType type, EngngModel*);
 /**
  Creates new instance of load ballancer corresponding to given keyword.
  @param type id determining the type of new instance
  @param d    domain to which new ballancer is attached
  @return newly allocated object of requested type, null if keyword not suppported
  */
-LoadBallancer* CreateUsrDefLoadBallancerOfType (classType type, Domain*);
+LoadBalancer* CreateUsrDefLoadBallancerOfType (classType type, Domain*);
 #endif
 
 

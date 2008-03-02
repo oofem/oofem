@@ -1163,23 +1163,23 @@ NonLinearStatic :: initializeCommMaps(bool forceInit)
 
 
 #ifdef __PARALLEL_MODE
-LoadBallancer* 
-NonLinearStatic:: giveLoadBallancer() 
+LoadBalancer* 
+NonLinearStatic:: giveLoadBalancer() 
 {
   if (lb) return lb;
-  if (loadBallancingFlag) {
-    lb = ::CreateUsrDefLoadBallancerOfType (ParmetisLoadBallancerClass, this->giveDomain(1));
+  if (loadBalancingFlag) {
+    lb = ::CreateUsrDefLoadBalancerOfType (ParmetisLoadBalancerClass, this->giveDomain(1));
     return lb;
   } else {
     return NULL;
   }
 }
-LoadBallancerMonitor* 
-NonLinearStatic::giveLoadBallancerMonitor() 
+LoadBalancerMonitor* 
+NonLinearStatic::giveLoadBalancerMonitor() 
 {
   if (lbm) return lbm;
-  if (loadBallancingFlag) {
-    lbm = ::CreateUsrDefLoadBallancerMonitorOfType (WallClockLoadBallancerMonitorClass, this);
+  if (loadBalancingFlag) {
+    lbm = ::CreateUsrDefLoadBalancerMonitorOfType (WallClockLoadBalancerMonitorClass, this);
     return lbm;
   } else {
     return NULL;

@@ -278,12 +278,12 @@ oofem_print_epilog () {
 }
 
 #ifndef __MAKEDEPEND
-#include "loadballancer.h"
+#include "loadbalancer.h"
 #endif
 void oofem_debug (EngngModel* emodel)
 {
 #ifdef __PARALLEL_MODE
-  //LoadBallancer* lb = emodel->giveDomain(1)->giveLoadBallancer();
+  //LoadBalancer* lb = emodel->giveDomain(1)->giveLoadBalancer();
   //lb->calculateLoadTransfer();
   //lb->migrateLoad();
   //exit(1);

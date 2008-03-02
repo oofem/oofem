@@ -70,7 +70,7 @@ class DomainTransactionManager;
 
 #ifdef __PARALLEL_MODE
 class ProcessCommunicator;
-class LoadBallancer;
+class LoadBalancer;
 #endif
 /**
  Class and object Domain. Domain contains mesh description, or if program runs in parrallel then it contains 

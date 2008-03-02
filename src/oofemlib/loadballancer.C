@@ -33,7 +33,7 @@
 */
 #ifdef __PARALLEL_MODE
 
-#include "loadballancer.h"
+#include "loadbalancer.h"
 #include "domain.h"
 #include "engngm.h"
 #include "timer.h"
@@ -50,22 +50,22 @@
 #include "nonlocalmatwtp.h"
 
 
-#define LoadBallancer_debug_print 0
+#define LoadBalancer_debug_print 0
 
-LoadBallancer::LoadBallancer (Domain* d)  : wtpList (0)
+LoadBalancer::LoadBalancer (Domain* d)  : wtpList (0)
 {
   domain = d;
 }
 
 
 IRResultType
-LoadBallancer::initializeFrom (InputRecord* ir)
+LoadBalancer::initializeFrom (InputRecord* ir)
 {
   const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
   IRResultType result;                   // Required by IR_GIVE_FIELD macro
 
   IntArray wtp;
-  IR_GIVE_OPTIONAL_FIELD (ir, wtp, IFT_LoadBallancer_wtp, "wtp"); // Macro
+  IR_GIVE_OPTIONAL_FIELD (ir, wtp, IFT_LoadBalancer_wtp, "wtp"); // Macro
 
   this->initializeWtp (wtp);
 
@@ -73,7 +73,7 @@ LoadBallancer::initializeFrom (InputRecord* ir)
 }
 
 void
-LoadBallancer::initializeWtp (IntArray& wtp) {
+LoadBalancer::initializeWtp (IntArray& wtp) {
 
   int i, size = wtp.giveSize();
   WorkTransferPlugin *plugin=NULL;
@@ -84,7 +84,7 @@ LoadBallancer::initializeWtp (IntArray& wtp) {
       if (wtp.at(i)==1) {
         plugin = new NonlocalMaterialWTP (this);
       } else {
-        OOFEM_ERROR ("LoadBallancer::initializeWtp: Unknown work transfer plugin type");
+        OOFEM_ERROR ("LoadBalancer::initializeWtp: Unknown work transfer plugin type");
       }
       wtpList.put(i, plugin);
     }
@@ -93,14 +93,14 @@ LoadBallancer::initializeWtp (IntArray& wtp) {
                                       
                                     
 void 
-LoadBallancer::migrateLoad (Domain* d)
+LoadBalancer::migrateLoad (Domain* d)
 {
   // domain->migrateLoad(this);
   int i;
   int nproc= d->giveEngngModel()->giveNumberOfProcesses();
   int myrank=d->giveEngngModel()->giveRank();
 
-  OOFEM_LOG_RELEVANT ("[%d] LoadBallancer: migrateLoad: migrating load\n", myrank);
+  OOFEM_LOG_RELEVANT ("[%d] LoadBalancer: migrateLoad: migrating load\n", myrank);
 
   // initialize work transfer plugins before any transfer
   for (i=1; i<=wtpList.giveSize(); i++) {
@@ -112,7 +112,7 @@ LoadBallancer::migrateLoad (Domain* d)
 
   // move existing dofmans and elements, that will be local on current partition,
   // into local map
-  com.packAllData (this, d, &LoadBallancer::packMigratingData);
+  com.packAllData (this, d, &LoadBalancer::packMigratingData);
   com.initExchange (MIGRATE_LOAD_TAG);
   
   // do something in between 
@@ -123,11 +123,11 @@ LoadBallancer::migrateLoad (Domain* d)
   this->deleteRemoteElements (d);
   
   // receive remote data
-  com.unpackAllData (this, d, &LoadBallancer::unpackMigratingData);
+  com.unpackAllData (this, d, &LoadBalancer::unpackMigratingData);
 
   d->commitTransactions (d->giveTransactionManager());
 
-#if LoadBallancer_debug_print
+#if LoadBalancer_debug_print
   // debug print
   int j, nnodes=d->giveNumberOfDofManagers(), nelems=d->giveNumberOfElements();
   fprintf (stderr, "\n[%d] Nodal Table\n", myrank);
@@ -165,14 +165,14 @@ LoadBallancer::migrateLoad (Domain* d)
 }
 
 int
-LoadBallancer::packMigratingData (Domain* d, ProcessCommunicator& pc) 
+LoadBalancer::packMigratingData (Domain* d, ProcessCommunicator& pc) 
 {
   int myrank = d->giveEngngModel()->giveRank();
   int iproc = pc.giveRank();
   int idofman, ndofman;
   classType dtype;
   DofManager* dofman;
-  LoadBallancer::DofManMode dmode;
+  LoadBalancer::DofManMode dmode;
 
   //  **************************************************
   //  Pack migrating data to remote partition 
@@ -209,7 +209,7 @@ LoadBallancer::packMigratingData (Domain* d, ProcessCommunicator& pc)
   }
 
   // pack end-of-dofman-section record
-  pcbuff->packInt (LOADBALLANCER_END_DATA);
+  pcbuff->packInt (LOADBALANCER_END_DATA);
   
   int ielem, nelem = d->giveNumberOfElements(), nsend = 0;
   
@@ -228,16 +228,16 @@ LoadBallancer::packMigratingData (Domain* d, ProcessCommunicator& pc)
     }
   } // end loop over elements
   // pack end-of-element-record
-  pcbuff->packInt (LOADBALLANCER_END_DATA);
+  pcbuff->packInt (LOADBALANCER_END_DATA);
   
-  OOFEM_LOG_RELEVANT ("[%d] LoadBallancer:: sending %d migrating elements to %d\n",myrank,nsend,iproc);
+  OOFEM_LOG_RELEVANT ("[%d] LoadBalancer:: sending %d migrating elements to %d\n",myrank,nsend,iproc);
 
   return 1;
 }
 
 
 int
-LoadBallancer::unpackMigratingData (Domain* d, ProcessCommunicator& pc) 
+LoadBalancer::unpackMigratingData (Domain* d, ProcessCommunicator& pc) 
 {
   // create temp space for dofManagers and elements
   // merging should be made by domain ?
@@ -251,7 +251,7 @@ LoadBallancer::unpackMigratingData (Domain* d, ProcessCommunicator& pc)
   bool _newentry;
   classType _etype;
   IntArray _partitions, local_partitions;
-  //LoadBallancer::DofManMode dmode;
+  //LoadBalancer::DofManMode dmode;
   DofManager* dofman;
   DomainTransactionManager* dtm = d->giveTransactionManager();
 
@@ -266,11 +266,11 @@ LoadBallancer::unpackMigratingData (Domain* d, ProcessCommunicator& pc)
 
   pcbuff->unpackInt (_type);
   // unpack dofman data
-  while (_type != LOADBALLANCER_END_DATA) {
+  while (_type != LOADBALANCER_END_DATA) {
     _etype = (classType) _type;
     pcbuff->unpackInt (_mode);
     switch (_mode) {
-    case LoadBallancer::DM_Remote: 
+    case LoadBalancer::DM_Remote: 
       // receiving new local dofManager
       pcbuff->unpackInt (_globnum);
 
@@ -292,7 +292,7 @@ LoadBallancer::unpackMigratingData (Domain* d, ProcessCommunicator& pc)
       //dmanMap[_globnum] = dofman;
       break;
 
-    case LoadBallancer::DM_Shared:      
+    case LoadBalancer::DM_Shared:      
       // receiving new shared dofManager, that was local on sending partition
       // should be received only once (from partition where was local)
       pcbuff->unpackInt (_globnum);
@@ -319,19 +319,19 @@ LoadBallancer::unpackMigratingData (Domain* d, ProcessCommunicator& pc)
       break;
        
     default:
-      OOFEM_ERROR2 ("LoadBallancer::unpackMigratingData: unexpected dof manager type (%d)", _type);
+      OOFEM_ERROR2 ("LoadBalancer::unpackMigratingData: unexpected dof manager type (%d)", _type);
     }
     // get next type record
     pcbuff->unpackInt (_type);
     
-  } ; // while (_type != LOADBALLANCER_END_DATA);
+  } ; // while (_type != LOADBALANCER_END_DATA);
   
   // unpack element data
   Element* elem;
   int nrecv = 0;
   do {
     pcbuff->unpackInt (_type);
-    if (_type == LOADBALLANCER_END_DATA) break;
+    if (_type == LOADBALANCER_END_DATA) break;
     _etype = (classType) _type;
     elem = CreateUsrDefElementOfType (_etype, 0, d);
     elem->restoreContext (&pcDataStream, CM_Definition | CM_State);
@@ -340,7 +340,7 @@ LoadBallancer::unpackMigratingData (Domain* d, ProcessCommunicator& pc)
     //recvElemList.push_back(elem);    
   } while (1);
 
-  OOFEM_LOG_RELEVANT ("[%d] LoadBallancer:: receiving %d migrating elements from %d\n",myrank,nrecv,iproc);
+  OOFEM_LOG_RELEVANT ("[%d] LoadBalancer:: receiving %d migrating elements from %d\n",myrank,nrecv,iproc);
 
   return 1;
 }
@@ -351,11 +351,11 @@ LoadBallancer::unpackMigratingData (Domain* d, ProcessCommunicator& pc)
    This will update domain DofManager list as well as global dmanMap and physically deletes the remote dofManager
 */
 void
-LoadBallancer::deleteRemoteDofManagers (Domain* d)
+LoadBalancer::deleteRemoteDofManagers (Domain* d)
 {
   int i, ndofman =  d->giveNumberOfDofManagers();
-  //LoadBallancer* lb = this->giveLoadBallancer();
-  LoadBallancer::DofManMode dmode;
+  //LoadBalancer* lb = this->giveLoadBallancer();
+  LoadBalancer::DofManMode dmode;
   DofManager* dman;
   int myrank= d->giveEngngModel()->giveRank();
   DomainTransactionManager* dtm = d->giveTransactionManager();
@@ -363,18 +363,18 @@ LoadBallancer::deleteRemoteDofManagers (Domain* d)
   
   for (i = 1; i<= ndofman; i++) {
     dmode = this->giveDofManState(i);
-    if ((dmode == LoadBallancer::DM_Remote)) {
+    if ((dmode == LoadBalancer::DM_Remote)) {
       // positive candidate found
       dtm->addTransaction (DomainTransactionManager::DTT_Remove, DomainTransactionManager::DCT_DofManager, d->giveDofManager (i)->giveGlobalNumber(), NULL);
       // dmanMap.erase (d->giveDofManager (i)->giveGlobalNumber());
       //dman = dofManagerList->unlink (i);
       //delete dman;
-    } else if ((dmode == LoadBallancer::DM_NULL)) {
+    } else if ((dmode == LoadBalancer::DM_NULL)) {
       // positive candidate found; we delete all null dof managers
       // they will be created by nonlocalmatwtp if necessary. 
       // potentially, they can be reused, but this will make the code too complex
       dtm->addTransaction (DomainTransactionManager::DTT_Remove, DomainTransactionManager::DCT_DofManager, d->giveDofManager (i)->giveGlobalNumber(), NULL);
-    } else if (dmode == LoadBallancer::DM_Shared) {
+    } else if (dmode == LoadBalancer::DM_Shared) {
       dman = d->giveDofManager (i);
       dman->setPartitionList (*(this->giveDofManPartitions(i)));
       dman->setParallelMode (DofManager_shared);
@@ -384,7 +384,7 @@ LoadBallancer::deleteRemoteDofManagers (Domain* d)
         //dman = dofManagerList->unlink (i);
         //delete dman;
       }
-    } else if (dmode == LoadBallancer::DM_Local) {
+    } else if (dmode == LoadBalancer::DM_Local) {
       IntArray _empty(0);
       dman = d->giveDofManager (i);
       dman->setPartitionList(_empty);
@@ -400,11 +400,11 @@ LoadBallancer::deleteRemoteDofManagers (Domain* d)
    This will update domain DofManager list as well as global dmanMap and physically deletes the remote dofManager
 */
 void
-LoadBallancer::deleteRemoteElements (Domain* d)
+LoadBalancer::deleteRemoteElements (Domain* d)
 {
   int i, nelem =  d->giveNumberOfElements();
   int myrank= d->giveEngngModel()->giveRank();
-  //LoadBallancer* lb = this->giveLoadBallancer();
+  //LoadBalancer* lb = this->giveLoadBallancer();
   DomainTransactionManager* dtm = d->giveTransactionManager();
   //Element* elem;
 
@@ -426,7 +426,7 @@ LoadBallancer::deleteRemoteElements (Domain* d)
 
 
 void
-LoadBallancer::printStatistics () const
+LoadBalancer::printStatistics () const
 {
   EngngModel* emodel=domain->giveEngngModel();
   int nelem, nnode;
@@ -450,8 +450,8 @@ LoadBallancer::printStatistics () const
 
 
 
-LoadBallancerMonitor::LoadBallancerDecisionType 
-WallClockLoadBallancerMonitor::decide(TimeStep* atTime)
+LoadBalancerMonitor::LoadBalancerDecisionType 
+WallClockLoadBalancerMonitor::decide(TimeStep* atTime)
 {
   int i, nproc=emodel->giveNumberOfProcesses();
   int myrank=emodel->giveRank();
@@ -460,7 +460,7 @@ WallClockLoadBallancerMonitor::decide(TimeStep* atTime)
   double relWallClockImbalance;
   double absWallClockImbalance;
 
-  if (node_solutiontimes == NULL) OOFEM_ERROR ("LoadBallancer::LoadEvaluation failed to allocate node_solutiontimes array");
+  if (node_solutiontimes == NULL) OOFEM_ERROR ("LoadBalancer::LoadEvaluation failed to allocate node_solutiontimes array");
 
   // compute wall solution time of my node
   double mySolutionTime = emodel->giveTimer()->getWtime(EngngModelTimer::EMTT_NetComputationalStepTimer);
@@ -468,7 +468,7 @@ WallClockLoadBallancerMonitor::decide(TimeStep* atTime)
   // collect wall clock computational time
   MPI_Allgather (&mySolutionTime, 1, MPI_DOUBLE, node_solutiontimes, 1, MPI_DOUBLE, MPI_COMM_WORLD);
 
-  OOFEM_LOG_RELEVANT ("\nLoadBallancer:: individual processor times [sec]: (");
+  OOFEM_LOG_RELEVANT ("\nLoadBalancer:: individual processor times [sec]: (");
   for (i=0; i< nproc; i++) {
     OOFEM_LOG_RELEVANT (" %.3f",node_solutiontimes[i]);
   }
@@ -501,22 +501,22 @@ WallClockLoadBallancerMonitor::decide(TimeStep* atTime)
   delete[] node_solutiontimes;
 
   // log processor weights
-  OOFEM_LOG_RELEVANT ("[%d] LoadBallancer: updated proc weights: ", myrank);
+  OOFEM_LOG_RELEVANT ("[%d] LoadBalancer: updated proc weights: ", myrank);
   for (i=0; i<nproc; i++) OOFEM_LOG_RELEVANT ("%4.3f ",nodeWeights(i));
   OOFEM_LOG_RELEVANT ("\n");
 
   // decide
   if ((atTime->giveNumber()%this->lbstep == 0) && ((absWallClockImbalance > this->absWallClockImbalanceTreshold) || (relWallClockImbalance > this->relWallClockImbalanceTreshold))) {
-    OOFEM_LOG_RELEVANT ("[%d] LoadBallancer: wall clock imbalance rel=%.2f\%,abs=%.2fs, recovering load\n", myrank, 100*relWallClockImbalance, absWallClockImbalance);
+    OOFEM_LOG_RELEVANT ("[%d] LoadBalancer: wall clock imbalance rel=%.2f\%,abs=%.2fs, recovering load\n", myrank, 100*relWallClockImbalance, absWallClockImbalance);
     return LBD_RECOVER;
   } else {
-    OOFEM_LOG_RELEVANT ("[%d] LoadBallancer: wall clock imbalance rel=%.2f\%,abs=%.2fs, continuing\n", myrank, 100*relWallClockImbalance, absWallClockImbalance);
+    OOFEM_LOG_RELEVANT ("[%d] LoadBalancer: wall clock imbalance rel=%.2f\%,abs=%.2fs, continuing\n", myrank, 100*relWallClockImbalance, absWallClockImbalance);
     return LBD_CONTINUE;
   }
 }
 
 IRResultType 
-LoadBallancerMonitor::initializeFrom (InputRecord* ir) 
+LoadBalancerMonitor::initializeFrom (InputRecord* ir) 
 {
   const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
   IRResultType result;                   // Required by IR_GIVE_FIELD macro
@@ -525,7 +525,7 @@ LoadBallancerMonitor::initializeFrom (InputRecord* ir)
   nodeWeights.resize(nproc);
   for (i=0; i<nproc; i++) nodeWeights(i)=1.0;
 
-  IR_GIVE_OPTIONAL_FIELD (ir, nodeWeights, IFT_LoadBallancerMonitor_initialnodeweights, "nw"); // Macro
+  IR_GIVE_OPTIONAL_FIELD (ir, nodeWeights, IFT_LoadBalancerMonitor_initialnodeweights, "nw"); // Macro
   if (nodeWeights.giveSize()!=nproc) {
     OOFEM_ERROR ("nodeWeights size not equal to number of processors");
   }
@@ -534,16 +534,16 @@ LoadBallancerMonitor::initializeFrom (InputRecord* ir)
 }
 
 IRResultType 
-WallClockLoadBallancerMonitor::initializeFrom (InputRecord* ir) 
+WallClockLoadBalancerMonitor::initializeFrom (InputRecord* ir) 
 {
   const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
   IRResultType result;                   // Required by IR_GIVE_FIELD macro
 
-  result = LoadBallancerMonitor::initializeFrom(ir);
+  result = LoadBalancerMonitor::initializeFrom(ir);
 
-  IR_GIVE_OPTIONAL_FIELD (ir, relWallClockImbalanceTreshold, IFT_WallClockLoadBallancerMonitor_relwct, "relwct"); // Macro
-  IR_GIVE_OPTIONAL_FIELD (ir, absWallClockImbalanceTreshold, IFT_WallClockLoadBallancerMonitor_abswct, "abswct"); // Macro
-  IR_GIVE_OPTIONAL_FIELD (ir, lbstep, IFT_WallClockLoadBallancerMonitor_lbstep, "lbstep"); // Macro
+  IR_GIVE_OPTIONAL_FIELD (ir, relWallClockImbalanceTreshold, IFT_WallClockLoadBalancerMonitor_relwct, "relwct"); // Macro
+  IR_GIVE_OPTIONAL_FIELD (ir, absWallClockImbalanceTreshold, IFT_WallClockLoadBalancerMonitor_abswct, "abswct"); // Macro
+  IR_GIVE_OPTIONAL_FIELD (ir, lbstep, IFT_WallClockLoadBalancerMonitor_lbstep, "lbstep"); // Macro
   
   return result;
 }
@@ -551,21 +551,21 @@ WallClockLoadBallancerMonitor::initializeFrom (InputRecord* ir)
 /*
 #else //__PARALLEL_MODE
 void 
-LoadBallancer::migrateLoad () {}
+LoadBalancer::migrateLoad () {}
 
 IRResultType
-LoadBallancer::initializeFrom (InputRecord* ir) {
+LoadBalancer::initializeFrom (InputRecord* ir) {
 
   return IRRT_OK;
 }
 
 IRResultType 
-LoadBallancerMonitor::initializeFrom (InputRecord* ir) {return IRRT_OK;}
+LoadBalancerMonitor::initializeFrom (InputRecord* ir) {return IRRT_OK;}
 */
 
 
 
-LoadBallancer::WorkTransferPlugin::WorkTransferPlugin (LoadBallancer* _lb) {lb=_lb;}
-LoadBallancer::WorkTransferPlugin::~WorkTransferPlugin () {}
+LoadBalancer::WorkTransferPlugin::WorkTransferPlugin (LoadBalancer* _lb) {lb=_lb;}
+LoadBalancer::WorkTransferPlugin::~WorkTransferPlugin () {}
 
 #endif

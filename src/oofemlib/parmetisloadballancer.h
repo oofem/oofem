@@ -31,9 +31,9 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.                                                                              
 */
-#ifndef parmetisloadballancer_h
+#ifndef parmetisloadbalancer_h
 #ifdef __PARALLEL_MODE
-#include "loadballancer.h"
+#include "loadbalancer.h"
 
 #ifdef __PARMETIS_MODULE
 #ifndef __MAKEDEPEND
@@ -48,7 +48,7 @@
 /**
    
  */
-class ParmetisLoadBallancer : public LoadBallancer
+class ParmetisLoadBalancer : public LoadBalancer
 {
  protected:
 
@@ -68,8 +68,8 @@ class ParmetisLoadBallancer : public LoadBallancer
 #endif
 
  public:
-  ParmetisLoadBallancer (Domain *d);
-  ~ParmetisLoadBallancer ();
+  ParmetisLoadBalancer (Domain *d);
+  ~ParmetisLoadBalancer ();
   
   virtual void calculateLoadTransfer ();
 
@@ -104,5 +104,5 @@ protected:
 
 
 #endif
-#define parmetisloadballancer_h
+#define parmetisloadbalancer_h
 #endif

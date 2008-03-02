@@ -43,7 +43,7 @@
 
 #ifdef __PARALLEL_MODE
 #include "parallel.h"
-#include "loadballancer.h"
+#include "loadbalancer.h"
 #endif
 
 #include "alist.h"
@@ -289,8 +289,8 @@ class EngngModel
  /**@name Load balancing attributes */
  //@{
  /// Load Ballancer
- LoadBallancer* lb;
- LoadBallancerMonitor* lbm;
+ LoadBalancer* lb;
+ LoadBalancerMonitor* lbm;
  /// if set to true, load ballancing is active
  bool loadBallancingFlag;
  /// debug flag forcing load balancing after first step
@@ -945,9 +945,9 @@ class EngngModel
   */
  virtual void ballanceLoad (TimeStep*);
  /** returns reference to receiver's load ballancer*/
- virtual LoadBallancer* giveLoadBallancer() {return NULL;}
+ virtual LoadBalancer* giveLoadBalancer() {return NULL;}
  /** returns reference to receiver's load ballancer monitor*/
- virtual LoadBallancerMonitor* giveLoadBallancerMonitor() {return NULL;}
+ virtual LoadBalancerMonitor* giveLoadBalancerMonitor() {return NULL;}
  
 
 #endif

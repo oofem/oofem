@@ -38,7 +38,7 @@
 #define MIGRATE_NONLOCALDEP_TAG 4008
 #define MIGRATE_REMOTE_ELEMENTS_TAG 4009
 
-#include "loadballancer.h"
+#include "loadbalancer.h"
 #ifndef __MAKEDEPEND
 #include <map>
 #include <list>
@@ -53,7 +53,7 @@ class GaussPoint;
    extension to efficiently handle nonlocal dependency of 
    nonlocal materials via remote elements. 
  */
-class NonlocalMaterialWTP : public LoadBallancer::WorkTransferPlugin
+class NonlocalMaterialWTP : public LoadBalancer::WorkTransferPlugin
 {
  protected:
   std::map <int, IntArray> nonlocElementDependencyMap;
@@ -61,8 +61,8 @@ class NonlocalMaterialWTP : public LoadBallancer::WorkTransferPlugin
   std::vector<std::list<int> > toSendList;
 
  public:
-  NonlocalMaterialWTP (LoadBallancer* _lb):
-    LoadBallancer::WorkTransferPlugin (_lb) {}
+  NonlocalMaterialWTP (LoadBalancer* _lb):
+  LoadBalancer::WorkTransferPlugin (_lb) {}
   
   /** 
       initializes receiver; should be called before any work transfer.

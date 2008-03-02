@@ -792,11 +792,11 @@ enum InputFieldType {
   IFT_LSPCS_ci1,
   IFT_LSPCS_ci2,
 
-  IFT_LoadBallancer_wtp,
-  IFT_LoadBallancerMonitor_initialnodeweights,
-  IFT_WallClockLoadBallancerMonitor_relwct,
-  IFT_WallClockLoadBallancerMonitor_abswct,
-  IFT_WallClockLoadBallancerMonitor_lbstep,
+  IFT_LoadBalancer_wtp,
+  IFT_LoadBalancerMonitor_initialnodeweights,
+  IFT_WallClockLoadBalancerMonitor_relwct,
+  IFT_WallClockLoadBalancerMonitor_abswct,
+  IFT_WallClockLoadBalancerMonitor_lbstep,
 
   IFT_Unknown
 };

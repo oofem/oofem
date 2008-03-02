@@ -690,11 +690,11 @@ EngngModel :: updateAttributes (TimeStep* atTime)
   this->giveNumericalMethod (atTime) -> initializeFrom (ir);
 
 #ifdef __PARALLEL_MODE
- if (this->giveLoadBallancer())
-   this->giveLoadBallancer()->initializeFrom (ir);
+ if (this->giveLoadBalancer())
+   this->giveLoadBalancer()->initializeFrom (ir);
 
- if (this->giveLoadBallancerMonitor())
-   this->giveLoadBallancerMonitor()->initializeFrom (ir);
+ if (this->giveLoadBalancerMonitor())
+   this->giveLoadBalancerMonitor()->initializeFrom (ir);
 #endif
 }
 
@@ -1980,9 +1980,9 @@ void  EngngModel :: drawNodes (oofegGraphicContext& context) {
 void 
 EngngModel::ballanceLoad (TimeStep* atTime)
 {
-  LoadBallancerMonitor::LoadBallancerDecisionType _d;
-  this->giveLoadBallancerMonitor();
-  this->giveLoadBallancer();
+  LoadBalancerMonitor::LoadBalancerDecisionType _d;
+  this->giveLoadBalancerMonitor();
+  this->giveLoadBalancer();
   
   //print statistics for current step
   lb->printStatistics();
@@ -1990,7 +1990,7 @@ EngngModel::ballanceLoad (TimeStep* atTime)
   if (atTime->isNotTheLastStep()) {
 
     _d = lbm->decide(atTime);
-    if ((_d == LoadBallancerMonitor::LBD_RECOVER) || 
+    if ((_d == LoadBalancerMonitor::LBD_RECOVER) || 
         ((atTime->isTheFirstStep()) && force_load_rebalance_in_first_step)) {
       
       this->timer.startTimer(EngngModelTimer::EMTT_LoadBallancingTimer);
