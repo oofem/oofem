@@ -2206,7 +2206,7 @@ StructuralElement :: computeStiffnessMatrix (FloatMatrix& answer,
      dV = this -> computeVolumeAround(gp) ; 
      // evaluate stiffness
      dbj.beProductOf (d, bj) ;
-     answer.plusProduct(bj,dbj,dV) ; 
+     answer.plusProductSymmUpper(bj,dbj,dV) ; 
 
   }
  
@@ -2386,6 +2386,8 @@ class Truss2d : public StructuralElement
  parameters which determine the range of strain components for which
  response is assembled. This has something to do with support for
  reduced/selective integration and is not important in presented simple case.
+
+ Recently, the interpolation classes have been added, that can significantly facilitate the element implementation. They provide shape functions, their derivatives, transformation jacobians out of the box. 
  \begin{verbatim}
  void
  Truss2d :: computeNmatrixAt (GaussPoint* aGaussPoint, 
