@@ -139,10 +139,11 @@ class CommunicationPacketPool
 
   CommunicationPacket* popPacket (MPI_Comm);
   void pushPacket (CommunicationPacket*);
+
+  void printInfo ();
   
  private:
   void clear();
-  void printInfo ();
 };
 
 
@@ -205,6 +206,8 @@ class DynamicCommunicationBuffer : public  CommunicationBuffer
 
  virtual int sendCompleted ();
  virtual int receiveCompleted ();
+
+ static void printInfo () {packetPool.printInfo();}
 
  protected:
  CommunicationPacket* allocateNewPacket (int);

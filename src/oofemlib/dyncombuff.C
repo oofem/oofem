@@ -446,8 +446,8 @@ CommunicationPacketPool::clear()
 void
 CommunicationPacketPool::printInfo ()
 {
-  OOFEM_LOG_INFO("CommunicationPacketPool: allocated %d packets (%d leased, %d free)\n", 
-                 allocatedPackets, leasedPackets,freePackets);
+  OOFEM_LOG_INFO("CommunicationPacketPool: allocated %d packets\n(packet size: %d, %d leased, %d free)\n", 
+                 allocatedPackets,  __CommunicationPacket_DEFAULT_SIZE, leasedPackets,freePackets);
 
 }
 #endif

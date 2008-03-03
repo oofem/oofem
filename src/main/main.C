@@ -50,6 +50,10 @@
 #include "error.h"
 #include "logger.h"
 
+#ifdef __PARALLEL_MODE
+#include "dyncombuff.h"
+#endif
+
 #ifdef __PETSC_MODULE
 #ifndef __MAKEDEPEND
 #include "petsc.h"
@@ -231,6 +235,9 @@ int main (int argc, char* argv[])
   }
 
   problem -> terminateAnalysis ();
+#ifdef __PARALLEL_MODE
+  DynamicCommunicationBuffer::printInfo();
+#endif
   oofem_errLogger.printStatistics();
   delete problem ;
   
