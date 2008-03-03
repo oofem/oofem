@@ -5,6 +5,7 @@
 \usepackage{html}
 \input{include.tex}
 \newcommand{\mbf}[1]{\mbox{\boldmath$#1$}}
+\newcommand{\grad}{\nabla}
 %% Definitions for PostScript output
 %\newcommand{\param}[1]{mbox{\texttt{#1}}}
 %\newcommand{\fieldVal}[2]{${\mbox{\#\rm\it #1}}_{\rm #2}$}
@@ -983,7 +984,7 @@ with solver parameters related to specific solver.
 %%\scalebox{0.50}{
 \begin{tabular}{|l|c|c|c|c|c|c|}                                                      
 \hline                                                                          
-Storage format & id & \multicolumn{6}{c|}{Sparse solver} \\
+Storage format & id & \multicolumn{5}{c|}{Sparse solver} \\
 \hline
  && \tiny{Direct} &\tiny{IML}
  &\tiny{Spooles}& \tiny{Petsc}& \tiny{DSS}\\
@@ -1079,7 +1080,7 @@ IML\_ICPrec   &4& SMT\_SymCompCol&Incoplete Cholesky\\
 \end{table}                                                                     
 
 
-\subsection{\Pmode{Dynamic load ballancing parameters\footnote{Available in parallel mode only}}}
+\subsection{\Pmode{Dynamic load ballancing parameters}}\footnote{Available in parallel mode only}
 \label{dynamicloadballancing}
 There are in general two basic factors causing load imbalance between individual subdomains: (i) one comming from application nature, such as switching from linear to nonlinear response in certain regions or local adaptive refinment, and (ii) external factors, caused by resourse realocation, typical for nondedicated cluster environments, where indivudual processors are shared by different applications and users, leading to time variation in allocated processing power. The load ballance recovery is achieved by repartitioning of the problem domain and transferring the work (represented typically by finite elements) from one subdomain to another.
 This section describes the structure and syntax of parameters related to dynamic load ballancing. 
