@@ -294,7 +294,7 @@ TR1_2D_SUPG_AXI :: computeDiffusionDerivativeTerm_MB (FloatMatrix& answer, MatRe
                                                                                   gp, atTime);
     _db.beProductOf (_d,_b);
     answer.plusProductUnsym (_b, _db,dV);
-    //answer.plusProduct (_bs,_db,dV*t_supg);
+    //answer.plusProductSymmUpper (_bs,_db,dV*t_supg);
     // }    
 
 #if 1

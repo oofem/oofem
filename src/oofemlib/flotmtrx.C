@@ -420,7 +420,7 @@ FloatMatrix :: copySubVectorRow (const FloatArray& src, int sr, int sc)
 
 
 
-void  FloatMatrix :: plusProduct (const FloatMatrix& a, const FloatMatrix& b, double dV)
+void  FloatMatrix :: plusProductSymmUpper (const FloatMatrix& a, const FloatMatrix& b, double dV)
    // Adds to the receiver the product  a(transposed).b dV .
    // The receiver size is adjusted, if necessary.
    // This method assumes that both the receiver and the product above are
@@ -1423,7 +1423,7 @@ FloatMatrix*  FloatMatrix :: plusDiagonalMatrix (DiagonalMatrix* aMatrix)
 }
 */
 /*
-void  FloatMatrix :: plusProduct (FloatMatrix* a, FloatMatrix* b, double dV)
+void  FloatMatrix :: plusProductSymmUpper (FloatMatrix* a, FloatMatrix* b, double dV)
    // Adds to the receiver the product  a(transposed).b dV .
    // If the receiver has a null size, it is expanded.
    // This method assumes that both the receiver and the product above are
@@ -1431,7 +1431,7 @@ void  FloatMatrix :: plusProduct (FloatMatrix* a, FloatMatrix* b, double dV)
    // receiver ; the lower half is not modified. Other advantage : it does
    // not compute the transposition of matrix a.
 {
-  this->plusProduct (*a, *b, dV);
+  this->plusProductSymmUpper (*a, *b, dV);
 }
 */
 

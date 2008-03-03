@@ -343,7 +343,7 @@ ZZNodalRecoveryModelInterface::ZZNodalRecoveryMI_computeNNMatrix (FloatArray& an
   gp  = iRule->getIntegrationPoint(i);
   dV  = elem -> computeVolumeAround(gp) ;
   this->ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx (n, gp, type);
-  fullAnswer.plusProduct(n,n,dV);
+  fullAnswer.plusProductSymmUpper(n,n,dV);
   }
 
   fullAnswer.symmetrized();
@@ -420,7 +420,7 @@ ZZNodalRecoveryModelInterface::ZZNodalRecoveryMI_computeNNMatrix (FloatArray& an
   gp  = iRule->getIntegrationPoint(i);
   dV  = elem -> computeVolumeAround(gp) ;
   this->ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx (n, gp, type);
-  fullAnswer.plusProduct(n,n,dV);
+  fullAnswer.plusProductSymmUpper(n,n,dV);
   pok += (n.at(1,1)*dV);
   volume += dV;
   }

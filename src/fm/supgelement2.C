@@ -468,7 +468,7 @@ SUPGElement2::computeLSICStabilizationTerm_MB (FloatMatrix& answer, TimeStep* at
     rho = this->giveMaterial()->giveCharacteristicValue(MRM_Density, gp, atTime);
     this->computeDivUMatrix (b, gp);
     
-    answer.plusProduct (b,b, dV*rho*t_lsic);
+    answer.plusProductSymmUpper (b,b, dV*rho*t_lsic);
   
   }
   answer.symmetrized() ;
@@ -615,7 +615,7 @@ SUPGElement2::computePressureTerm_MC (FloatMatrix& answer, TimeStep* atTime)
     dV  = this -> computeVolumeAround (gp);
     rho = this->giveMaterial()->giveCharacteristicValue(MRM_Density, gp, atTime);
     coeff = dV*t_pspg/rho;
-    answer.plusProduct (g,g,coeff);
+    answer.plusProductSymmUpper (g,g,coeff);
   }
   answer.symmetrized() ;
 }

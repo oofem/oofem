@@ -241,7 +241,7 @@ InterfaceElem2dQuad :: computeStiffnessMatrix (FloatMatrix& answer, MatResponseM
     bj.beProductOf(bjl,t);
     dbj.beProductOf (d, bj) ;
     dV = this->computeVolumeAround (gp);
-    if (matStiffSymmFlag) answer.plusProduct (bj,dbj,dV); else answer.plusProductUnsym (bj,dbj,dV);
+    if (matStiffSymmFlag) answer.plusProductSymmUpper (bj,dbj,dV); else answer.plusProductUnsym (bj,dbj,dV);
     
   }
   return  ;

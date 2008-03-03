@@ -147,7 +147,7 @@ FluidDynamicElement::computeMassSubMatrix (FloatMatrix& answer, int ip, int iri,
     gp      = iRule->getIntegrationPoint(i) ;
     this -> computeNSubMatrixAt(n, ip, gp->giveCoordinates()) ;
     dV      = this -> computeVolumeAround(gp) ;
-    answer.plusProduct(n, n, dV * c) ;
+    answer.plusProductSymmUpper(n, n, dV * c) ;
   }
   
   answer.symmetrized() ;

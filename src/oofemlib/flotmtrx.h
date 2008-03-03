@@ -272,7 +272,7 @@ class FloatMatrix : public Matrix
   @param b float matrix
   @param dV double value
   */
- void          plusProduct (const FloatMatrix& a, const FloatMatrix& b,double dV) ;
+ void          plusProductSymmUpper (const FloatMatrix& a, const FloatMatrix& b,double dV) ;
  /**
   Adds to the receiver the product  \f$a^T b dV\f$. If the receiver has zero size, it is expanded.
   @param a float matrix 
@@ -333,7 +333,7 @@ class FloatMatrix : public Matrix
  //FloatMatrix*  plus (FloatMatrix*) ;
  //FloatMatrix*  plusDiagonalMatrix (DiagonalMatrix*) ;
  void          assemble (FloatMatrix* src, IntArray* loc) {this-> assemble (*src, *loc);}
- //void          plusProduct (FloatMatrix*,FloatMatrix*,double) ;
+ //void          plusProductSymmUpper (FloatMatrix*,FloatMatrix*,double) ;
  //FloatMatrix*  RotatedWith (FloatMatrix*) ;
  /**
   Multiplies the receiver by given number.

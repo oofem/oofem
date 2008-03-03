@@ -578,8 +578,8 @@ TR1_2D_SUPG2 :: computeDiffusionDerivativeTerm_MB (FloatMatrix& answer, MatRespo
       ((FluidDynamicMaterial*) this->_giveMaterial(ifluid))->giveDeviatoricStiffnessMatrix(_d,mode,
 											   gp, atTime);
       _db.beProductOf (_d,_b);
-      answer.plusProduct (_b, _db,dV);
-      //answer.plusProduct (_bs,_db,dV*t_supg);
+      answer.plusProductSymmUpper (_b, _db,dV);
+      //answer.plusProductSymmUpper (_bs,_db,dV*t_supg);
 
       answer.symmetrized() ;
     }

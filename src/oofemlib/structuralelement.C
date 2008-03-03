@@ -570,7 +570,7 @@ StructuralElement :: computeConsistentMassMatrix (FloatMatrix& answer, TimeStep*
    mass   += density*dV;
 
       if (mask.isEmpty()) {
-    answer.plusProduct( n, n,density*dV) ;
+    answer.plusProductSymmUpper( n, n,density*dV) ;
    } else {
     int    i,j,k ;
     double summ ;
@@ -886,7 +886,7 @@ StructuralElement :: computeStiffnessMatrix (FloatMatrix& answer, MatResponseMod
       }
       dV  = this -> computeVolumeAround (gp);
       dbj.beProductOf( dij, bj);
-      if (matStiffSymmFlag) answer.plusProduct (bi,dbj,dV); else answer.plusProductUnsym (bi,dbj,dV);
+      if (matStiffSymmFlag) answer.plusProductSymmUpper (bi,dbj,dV); else answer.plusProductUnsym (bi,dbj,dV);
       //delete bi; delete d; delete dij; delete dbj;
       //if (i!=j) delete bj;
       //delete d;
@@ -903,7 +903,7 @@ StructuralElement :: computeStiffnessMatrix (FloatMatrix& answer, MatResponseMod
       this -> computeConstitutiveMatrixAt(d, rMode, gp, tStep);
       dV = this -> computeVolumeAround(gp) ;
       dbj.beProductOf (d, bj) ;
-      if (matStiffSymmFlag) answer.plusProduct (bj,dbj,dV); else answer.plusProductUnsym (bj,dbj,dV);
+      if (matStiffSymmFlag) answer.plusProductSymmUpper (bj,dbj,dV); else answer.plusProductUnsym (bj,dbj,dV);
 
       //delete b ;
       //delete db ;

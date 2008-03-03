@@ -369,7 +369,7 @@ NLStructuralElement :: computeStiffnessMatrix (FloatMatrix& answer,
      dij.beSubMatrixOf (d, iStartIndx,iEndIndx,jStartIndx,jEndIndx);
      dV  = this -> computeVolumeAround (gp);
      dbj.beProductOf(dij, bj);
-     answer.plusProduct (bi,dbj,dV);
+     answer.plusProductSymmUpper (bi,dbj,dV);
      // delete bi; delete d; delete dij; delete dbj;
      // delete d;
      // if (i!=j) delete bj;
@@ -401,7 +401,7 @@ NLStructuralElement :: computeStiffnessMatrix (FloatMatrix& answer,
       this -> computeConstitutiveMatrixAt(d, rMode,gp,tStep);
       dV = this -> computeVolumeAround(gp) ;
       dbj.beProductOf(d,bj) ;
-      answer.plusProduct(bj,dbj,dV) ;
+      answer.plusProductSymmUpper(bj,dbj,dV) ;
       
       // delete bj ;
       // delete dbj ;

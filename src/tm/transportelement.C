@@ -223,7 +223,7 @@ TransportElement::computeCapacitySubMatrix (FloatMatrix& answer, MatResponseMode
     // ask for capacity coefficient
     c = ((TransportMaterial*)this->giveMaterial())->giveCharacteristicValue(rmode,gp,tStep);
     dV      = this -> computeVolumeAround(gp) ;
-    answer.plusProduct(n, n, dV * c) ;
+    answer.plusProductSymmUpper(n, n, dV * c) ;
   }
   
   answer.symmetrized() ;
@@ -247,7 +247,7 @@ TransportElement::computeConductivitySubMatrix (FloatMatrix& answer, int nsd, in
     dV = this -> computeVolumeAround(gp) ;
     
     db.beProductOf(d,b);
-    answer.plusProduct(b, db, dV) ;
+    answer.plusProductSymmUpper(b, db, dV) ;
     //answer.plusProductUnsym(b,db,dV) ;
   }
   answer.symmetrized() ;
@@ -367,7 +367,7 @@ TransportElement::computeIntSourceLHSSubMatrix (FloatMatrix& answer, MatResponse
     // ask for coefficient from material
     c = ((TransportMaterial*)this->giveMaterial())->giveCharacteristicValue(rmode,gp,tStep);
     dV      = this -> computeVolumeAround(gp) ;
-    answer.plusProduct(n, n, dV * c) ;
+    answer.plusProductSymmUpper(n, n, dV * c) ;
   }
 
   answer.symmetrized() ;
@@ -634,7 +634,7 @@ TransportElement :: computeBCSubMtrxAt (FloatMatrix& answer, TimeStep* tStep, Va
           gp  = iRule.getIntegrationPoint(igp) ;
           this -> computeEgdeNMatrixAt(n, gp) ;
           dV  = this -> computeEdgeVolumeAround(gp, id) ;
-          subAnswer.plusProduct(n, n, dV*edgeLoad->giveProperty ('a')) ;
+          subAnswer.plusProductSymmUpper(n, n, dV*edgeLoad->giveProperty ('a')) ;
         }
         subAnswer.symmetrized();
         this -> giveEdgeDofMapping (mask, id);
@@ -657,7 +657,7 @@ TransportElement :: computeBCSubMtrxAt (FloatMatrix& answer, TimeStep* tStep, Va
           gp  = iRule->getIntegrationPoint(igp) ;
           this -> computeSurfaceNMatrixAt(n, gp) ;
           dV  = this -> computeSurfaceVolumeAround(gp, id) ;
-          subAnswer.plusProduct(n, n, dV*surfLoad->giveProperty ('a')) ;
+          subAnswer.plusProductSymmUpper(n, n, dV*surfLoad->giveProperty ('a')) ;
         }
         delete iRule;
         subAnswer.symmetrized();
