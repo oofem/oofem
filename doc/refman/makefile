@@ -8,17 +8,17 @@ DOCXX      = doxygen
 ROBOT = /home/bp/oofem-doc/www/robot.pl
 RCP = scp
 
-all: htmldoc 
+all: www-doc 
 
-htmldoc:
+www-doc:
 	$(ROBOT) < footer.shtml > footer.html
 	$(DOCXX) doxygen.cfg
 
-psdoc: htmldoc
+ps-doc: www-doc
 	cd $(BUILD_DIR_LATEX); latex refman.tex; latex refman.tex; dvips -o refman.ps refman
 	cp $(BUILD_DIR_LATEX)/refman.ps ..
 
-www-install: htmldoc
+www-install: www-doc
 ifdef INSTALLDIR
 	mv $(BUILD_DIR_HTML) $(INST_DIR)
 	$(RCP) -r $(INST_DIR) $(INSTALLDIR)/resources/doc

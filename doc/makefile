@@ -7,7 +7,7 @@ www-doc:
 	cd extractorInput; make www-doc
 	cd matlibmanual; make www-doc
 	cd programmer; make www-doc
-	cd refman; make htmldoc
+	cd refman; make www-doc
 
 ps-doc:
 	cd elementlibmanual; make ps-doc
