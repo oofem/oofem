@@ -64,8 +64,9 @@ tests:
 	  echo "oofem executable   not found" >> ${RESULT};\
 	  echo "oofem executable   not found";\
 	else\
-	  echo "checker executable not found" >> ${RESULT};\
-	  echo "checker executable not found";\
+	  echo\
+	  echo "checker executable not found. Have you built tools in ${OOFEM_DIR}/tools?" >> ${RESULT};\
+	  echo "checker executable not found. Have you built tools in ${OOFEM_DIR}/tools?";\
 	fi
 #	cd tests; bash ../do_tests
 
