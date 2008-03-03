@@ -2,7 +2,8 @@
 # top oofem makefile
 #
 SHELL      = /bin/bash
-BACKUPFILES=.+C$$|.+h$$|.+in$$|.+tex$$|.+el$$|.+sty$$|.+fig$$.+xmgr$$|.+eps$$|.+ps$$|.+shtml$$|makefile$$|do_release|.+txt$$|ChangeLog|README|VERSION|.+pl$$|.+cfg$$|.+html$$|*.+shtml$$|intro|mainpage|do_test$$|.+in$$|.+ctrl$$|.+t3d.in$$|.+t3d.out$$
+BACKUPFILES=.+\.C$$|.+\.h$$|.+\.in$$|.+\.tex$$|.+\.el$$|.+\.sty$$|.+\.fig$$.+\.xmgr$$|.+\.eps$$|.+\.ps$$|.+\.shtml$$|makefile$$|do_release|.+\.txt$$|ChangeLog|README|VERSION|.+\.pl$$|.+\.cfg$$|.+\.html$$|*.+\.shtml$$|intro|mainpage|do_test$$|.+\.in$$|.+\.ctrl$$|.+t3d.in$$|.+t3d.out$$|.+configure$$|.+config.guess$$|.+config.sub$$|.+install.sh$$
+EXCLUDEFILES=/\.svn/|/iml/|/targets/
 
 all:
 	if [ -d targets/${OOFEM_TARGET} ]; then \
@@ -21,6 +22,6 @@ clean:
 
 backup:
 	rm -f oofem.tar.gz
-	find . | grep -E -e '$(BACKUPFILES)' > files_to_backup
+	find . | grep -E -e '$(BACKUPFILES)'|grep -v -E -e '$(EXCLUDEFILES)'  > files_to_backup
 	tar cvf oofem.tar --files-from files_to_backup
 	gzip oofem.tar
