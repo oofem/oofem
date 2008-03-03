@@ -175,7 +175,7 @@ class LevelSetPCS : public MaterialInterface
   double evalElemfContribution (PCSEqType t, int ie, TimeStep* atTime) ;
 
   /** Reinitializes the level set representation by solving
-      \f$d_{\tau} = S(\phi)(1-\vert\grad d\vert)\f$ to steady state
+      \f$d_{\tau} = S(\phi)(1-\vert\nabla d\vert)\f$ to steady state
   */
   void redistance (TimeStep* atTime);
 
