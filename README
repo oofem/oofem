@@ -140,8 +140,8 @@ Detailed Installation instructions for UNIX:
    in the oofem source directory under "iml" directory
 3) Run the configure script as: ./configure
    o) The configure will set up the default target (named "default"). 
-      By default, the solver (oofem) will be build with no optimization
-      or debug options.
+      By default, the solver (oofem) will be build with "-O" optimization
+      and no debug options.
    o) To specify compiler flags, set CXXFLAGS environment variable accordingly.
       For example, to build optimized version, use 
       ./configure CXXFLAGS="-O2"
