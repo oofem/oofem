@@ -1,3 +1,90 @@
+2008-03-02  Borek Patzak  <Borek.Patzak@fsv.cvut.cz>
+
+	* New installation and compilation procedure implemented. Now uses
+	"targets", representing set of specific settings to produce target
+	executable. Targets allow to set up specific compilers, compiler
+	options, include different external libraries, etc. Arbitrary
+	number of targets can be configured and built. In order to compile
+	solver (oofem), its parallel version (poofem) and graphics
+	post-processor (oofeg) you have to set up three different
+	targets. The project directory structure has been altered. The new
+	installation instructions as well as directory structure are
+	described in README file.
+
+	* Implemented generic dynamic load balancing framework for
+	parallel jobs. Most of the time has been devoted to development of
+	framework general structure and corresponding fundamental
+	algorithms. Despite this, this framework is ready to use for
+	nonlinear static computations. Active development is scheduled for
+	upcoming versions in this direction.
+	
+	* Corrected implementation of orthotropic material, now uses major
+	Poisson's ratios (submitted by Douglas Beaton). Improved and
+	enhanced corresponding documentation entry.
+
+	* Added implementation of 2D and 3D level set algorithm for
+	tracking evolving interfaces.
+
+	* Added b-bar lspace element (lspacebb) for incompressible
+	problems
+
+	* Added InputRecord giveField method allowing to read FloatMatrix
+	values directly.
+
+	* Added set of new macros allowing to declare enum types and
+	automatically generate function returning string representation of
+	enum value. Implementation is inspired by X-Macros technique, as
+	described in Wikipedia entry on C
+	preprocessor (http://en.wikipedia.org/wiki/C_preprocessor) Some
+	frequently used enums converted to new style and new string to
+	enum conversions are used in many error reporting sections
+	throughout the modified sources. Also vtk export module uses this
+	technique to tag exported fields using their real names instead of
+	integer numbers.
+
+	* Fixed PETSc error in linear static when negative code numbers
+	encountered. Used VecSetOption call to ignore negative indices.
+
+	* Scaling of dof manager loading in assembly operations
+	implemented in general service at Engng model level. Individual
+	implementations at particular engng models consequently removed.
+
+	* Fixed major bug causing invalid assembly of symmetric DSS sparse
+	matrices (SMT_DSS_sym_LDL and SMT_DSS_sym_LL). The unsymmetric
+	variant SMT_DSS_unsym_LU has been assembled correctly.
+
+	* Fixed - char pointers in error and warning reporting methods
+	made const to remove compiler warnings of new gcc (4.2.2), related
+	to conversions from string to char*
+
+	* Consolidated LinSystSolverType, particularly removed ST_CG and
+	ST_GMRES values, which are replaced by a single ST_IML value. The
+	values of this type should be related not to specific solvers, but
+	more likely to specific packages that provide linear solver
+	interface (and can offer several types of solvers under single
+	interface) and which are represented by a class derived from
+	SparseLinearSystemNM. The selection of particular solver from
+	package should be done using keywords, related to particular
+	package. The side effect is that the values of "lstype" parameter
+	have changed.
+
+	* Fixed problem in vtk export module preventing to export
+	temperature field. New UnknownType value introduced for
+	temperature itself, while FluxVector value scheduled for mass
+	concentrations.
+
+	* Changed prototype for VecScatterBegin() and VecScatterEnd(),
+	needed to compy with PETSc 2.3.3. Added MatSetFromOptions call to
+	allow runtime petsc config
+
+	* Solution of quadratic equation in cubic modified to more careful
+	floating-point implementation
+
+	* Save&Restore context services migrated to use DataStream
+	representation instead of plain FILE
+
+	* Many minor enhancement and bug-fixes.
+
 2006-11-02  Borek Patzak  <Borek.Patzak@fsv.cvut.cz>
 
 	* OOFEM 1.7 released
