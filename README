@@ -153,19 +153,26 @@ Detailed Installation instructions for UNIX:
       use "--enable-oofeg" parameter. 
       Requires Ckit and Elixir libs to be installed.
       Use --with-CKITDIR=dir and --with-ELIXIRDIR=dir configure options
-      to specify location of Ckit and Elixir installation directories.
+      to specify the location of Ckit and Elixir installation directories. 
+      Use absolute paths! 
    o) If you want to build parallel version (poofem) 
       use "--enable-poofem" parameter. Requires MPI library to be installed.
-      Use "--with-MPIDIR=dir" to set up MPI installation directory.
+      Use "--with-MPIDIR=dir" to set up MPI installation directory (use absolute path!).
    o) If you want to use PETSc library use "--enable-petsc" together with
       "--with-PETSCDIR=dir" and "--with-PETSCARCH=arch" options to
-      configure PETSC support (dir is the patch to PETSC installation
-      directory, arch is PETSC architecture. See PETSC installation
-      manual for details.)
+      configure PETSC support (dir is the path to PETSC installation
+      directory - use absolute path, arch is PETSC architecture. 
+      See PETSC installation manual for details.)
    o) If you want to use ParMETIS, use "--enable-parmetis" with 
-      "--with-PARMETISDIR=dir" to set up ParMETIS installation directory.
+      "--with-PARMETISDIR=dir" to set up ParMETIS installation directory,
+       again use absolute path.
    o) Add --enable-dss to compile with Direct Sparse Solver support (DSS)
    o) Use "./configure --help" to see all configure options.
+
+Please, note that all configure parameters that describe location of
+optional package installation directories should be specified using
+absolute paths, since different makefiles in different directories
+depend on these parameters.
 
 The difference with the previous installation procedure 
 is the introduction of targets. 
