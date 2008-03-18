@@ -465,6 +465,19 @@ WallClockLoadBalancerMonitor::decide(TimeStep* atTime)
   // compute wall solution time of my node
   double mySolutionTime = emodel->giveTimer()->getWtime(EngngModelTimer::EMTT_NetComputationalStepTimer);
 
+#ifdef __LB_DEBUG
+  // perturb solution time artificially if requested
+  bool perturb = false;
+  dynaList<Range>::iterator perturbedStepsIter;
+  for (perturbedStepsIter = perturbedSteps.begin(); perturbedStepsIter!=perturbedSteps.end(); ++perturbedStepsIter) {
+    if ((*perturbedStepsIter).test (atTime->giveNumber())) {perturb  = true; break;}
+  }
+  
+  if (perturb) {
+    mySolutionTime *= perturbFactor;
+  }
+#endif
+
   // collect wall clock computational time
   MPI_Allgather (&mySolutionTime, 1, MPI_DOUBLE, node_solutiontimes, 1, MPI_DOUBLE, MPI_COMM_WORLD);
 
@@ -544,7 +557,14 @@ WallClockLoadBalancerMonitor::initializeFrom (InputRecord* ir)
   IR_GIVE_OPTIONAL_FIELD (ir, relWallClockImbalanceTreshold, IFT_WallClockLoadBalancerMonitor_relwct, "relwct"); // Macro
   IR_GIVE_OPTIONAL_FIELD (ir, absWallClockImbalanceTreshold, IFT_WallClockLoadBalancerMonitor_abswct, "abswct"); // Macro
   IR_GIVE_OPTIONAL_FIELD (ir, lbstep, IFT_WallClockLoadBalancerMonitor_lbstep, "lbstep"); // Macro
-  
+
+#ifdef __LB_DEBUG
+  perturbedSteps.clear();
+  IR_GIVE_OPTIONAL_FIELD (ir, perturbedSteps, IFT_WallClockLoadBalancerMonitor_perturbedsteps, "lbperturbedsteps"); // Macro
+  perturbFactor = 1.0;
+  IR_GIVE_OPTIONAL_FIELD (ir, perturbFactor, IFT_WallClockLoadBalancerMonitor_perturbfactor, "lbperturbfactor"); // Macro
+#endif
+
   return result;
 }
 

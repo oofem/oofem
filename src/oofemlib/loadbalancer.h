@@ -39,6 +39,12 @@
 #include "clock.h"
 #include "alist.h"
 
+//#define __LB_DEBUG
+
+#ifdef __LB_DEBUG
+#include "dynalist.h"
+#include "range.h"
+#endif
 
 class Domain;
 class EngngModel;
@@ -92,8 +98,14 @@ class WallClockLoadBalancerMonitor : public LoadBalancerMonitor
 {
  protected:
   double relWallClockImbalanceTreshold, absWallClockImbalanceTreshold;
-  // the rebalancing done every lbstep
+  /// the rebalancing done every lbstep
   int lbstep;
+#ifdef __LB_DEBUG
+  // list of steps with perturbed ballancing
+  dynaList< Range > perturbedSteps;
+  // perturbing factor
+  double perturbFactor;
+#endif
  public:
   WallClockLoadBalancerMonitor (EngngModel* em): LoadBalancerMonitor(em) {
     relWallClockImbalanceTreshold=0.1; absWallClockImbalanceTreshold=10.0;
