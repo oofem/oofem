@@ -76,7 +76,7 @@ class Timer {
 
   
   /// short prints receiver state into a string
-  void sprintYourselfShort (char* buff)  {sprintf (buff, "ut: %f.3s, wt: %f.3s", getUtime(), getWtime());}
+  void toString (char* buff)  {sprintf (buff, "ut: %f.3s, wt: %f.3s", getUtime(), getWtime());}
   void updateElapsedTime ()  {
     if (running) {
       pauseTimer();
@@ -142,7 +142,9 @@ class EngngModelTimer
   /// converts total seconds into hours, mins, and seconds
   void convert2HMS (int &nhrs, int &nmin, int &nsec, long int tsec) const {::convertTS2HMS (nhrs, nmin, nsec, tsec);}
   void convert2HMS (int &nhrs, int &nmin, int &nsec, double tsec) const {::convertTS2HMS (nhrs, nmin, nsec, tsec);}
-  //@}
+  /// printing & formatting
+  void toString (EngngModelTimerType t, char* buff) {return timers[t].toString(buff);}
+   //@}
 };
 
 #define timer_h
