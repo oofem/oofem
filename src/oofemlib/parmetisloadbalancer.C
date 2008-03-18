@@ -496,7 +496,7 @@ void ParmetisLoadBalancer::addSharedDofmanPartitions (int _locnum, IntArray _par
 }
 
 #else //PARMETIS_MODULE
-void ParmetisLoadBalancer:: balanceLoad () {}
+void ParmetisLoadBalancer:: calculateLoadTransfer () {}
 
 LoadBalancer::DofManMode
 ParmetisLoadBalancer::giveDofManState (int idofman)
