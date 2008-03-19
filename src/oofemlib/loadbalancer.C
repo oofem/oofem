@@ -475,6 +475,7 @@ WallClockLoadBalancerMonitor::decide(TimeStep* atTime)
   
   if (perturb) {
     mySolutionTime *= perturbFactor;
+    OOFEM_LOG_RELEVANT ("[%d] WallClockLoadBalancerMonitor: perturbed solution time by factor=%.2f\n", perturbFactor);
   }
 #endif
 
