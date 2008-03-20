@@ -262,7 +262,7 @@ This record describes the type of analysis, which should be
 performed. The general format of this record can be specified in 
 \begin{itemize}
 \item ``standard-syntax''\\
-\entKeyword{AnalysisType} \field{nsteps}{in}
+\entKeyword{AnalysisType} \field{nsteps}{in} \optField{renumber}{in}
 \field{attributes}{string} \optField{nmodules}{in}.
 \item ``meta step-syntax''\\
 \entKeyword{AnalysisType} \field{nmsteps}{in}
@@ -277,6 +277,10 @@ parameters in ``standard syntax'') is following:
 \begin{itemize}
 \item \param{nsteps} - determines number of subsequent solution steps
 within me\-ta\-step.
+Nonzero value of optional parameter \param{renumber} turns on the
+equation renumbering to optimize the profile of characteristic matrix
+(uses Sloan algorithm). By default, profile optimization is not
+performed. It will not work in parallel mode.
 \item \param{attributes} - contains the metastep related attributes of
 analysis (and solver), which are valid for corresponding solution
 steps within meta step. If used in standard syntax, the attributes are
@@ -308,7 +312,7 @@ Currently, supported analysis types are
 
 \subsection{Linear static analysis}
 \label{LinearStatic}
-\entKeywordInst{LinearStatic} \field{nsteps}{in}
+\entKeywordInst{LinearStatic} \field{nsteps}{in} \optField{renumber}{in}
 \optField{sparselinsolverparams}{}.\\
 Linear static analysis.
 Parameter \param{nsteps} indicates the number of loading cases.
@@ -317,6 +321,12 @@ For each load case an auxiliary time-step is generated with time
 equal to load case number.
 Load vectors for each load case are formed as load vectors at
 this auxiliary time.
+
+Nonzero value of optional parameter \param{renumber} turns on the
+equation renumbering to optimize the profile of characteristic matrix
+(uses Sloan algorithm). By default, profile optimization is not
+performed. It will not work in parallel mode.
+
 The  \param{sparselinsolverparams} parameter describes the sparse
 linear solver attributes and is explained in section \ref{sparselinsolver}.
 \Pmode{Can be used in parallel mode. The input record must be the same
@@ -325,7 +335,7 @@ for all processors. At present, parallel version requires PETSc module.}
 
 \subsection{LinearStability}
 \label{LinearStability}
-\entKeywordInst{LinearStability} \field{nroot}{in}
+\entKeywordInst{LinearStability} \field{nroot}{in} \optField{renumber}{in}
 \field{rtolv}{rn} \optField{stype}[in].\\
 Solves linear stability problem. Only first \param{nroot} smallest
 eigenvalues and corresponding eigenvectors will be computed. 
@@ -333,10 +343,14 @@ Relative convergence tolerance is specified using \param{rtolv} parameter.
 Parameter \param{stype} allows to select eigen value solver, supported
 values are 0 (default) for subspace iteration solver, and 1 for solver
 based on inverse iteration algorithm.
+Nonzero value of optional parameter \param{renumber} turns on the
+equation renumbering to optimize the profile of characteristic matrix
+(uses Sloan algorithm). By default, profile optimization is not
+performed. It will not work in parallel mode.
 
 \subsection{EigenValueDynamic}
 \label{EigenValueDynamic}
-\entKeywordInst{EigenValueDynamic} \field{nroot}{in}
+\entKeywordInst{EigenValueDynamic} \field{nroot}{in} \optField{renumber}{in}
 \field{rtolv}{rn} \optField{stype}[in].\\
 Represents the eigen value dynamic analysis.
 Only \param{nroot} smallest eigenvalues and corresponding
@@ -345,10 +359,14 @@ governed using \param{rtolv} parameter.
 Parameter \param{stype} allows to select eigen value solver, supported
 values are 0 (default) for subspace iteration solver, and 1 for solver
 based on inverse itaration algorithm.
+Nonzero value of optional parameter \param{renumber} turns on the
+equation renumbering to optimize the profile of characteristic matrix
+(uses Sloan algorithm). By default, profile optimization is not
+performed. It will not work in parallel mode.
 
 \subsection{NlDEIDynamic}
 \label{NlDEIDynamic}
-\entKeywordInst{NlDEIDynamic} \field{nsteps}{in}
+\entKeywordInst{NlDEIDynamic} \field{nsteps}{in} \optField{renumber}{in}
 \field{dumpcoef}{rn} \optField{deltaT}{rn}.\\
 Represents the direct explicit  nonlinear dynamic  integration.
 The central difference method with diagonal mass matrix is used,
@@ -358,6 +376,10 @@ $\mbf{M}$ is diagonal mass matrix. \param{deltaT} is time step length used for
 integration, which may be reduced by program in order to satisfy
 solution stability conditions. Parameter \param{nsteps} specifies
 how many time steps will be analyzed.
+Nonzero value of optional parameter \param{renumber} turns on the
+equation renumbering to optimize the profile of characteristic matrix
+(uses Sloan algorithm). By default, profile optimization is not
+performed. It will not work in parallel mode.
 \\ \\
 \noindent
 \PentKeywordInst{PNlDEIDynamic} \Pfield{nsteps}{in}
@@ -402,7 +424,7 @@ how many time steps will be analyzed.
 
 \subsection{DIIDynamic}
 \label{DIIDynamic}
-\entKeywordInst{DIIDynamic} \field{nsteps}{in}
+\entKeywordInst{DIIDynamic} \field{nsteps}{in} \optField{renumber}{in}
 \field{deltaT}{rn} \field{alpha}{rn} \field{beta}{rn}
 \field{Psi}{rn}.\\
 Represents direct implicit integration of linear dynamic
@@ -411,14 +433,22 @@ problems. Damping is modeled as Rayleigh damping $(\mbf{c} =
 integration method used, for\param{Psi} = 1 the Newmark and for \param{Psi} $\ge$ 1.37 the Wilson method
 will be used. Parameter \param{deltaT} is required time integration
 step length.
+Nonzero value of optional parameter \param{renumber} turns on the
+equation renumbering to optimize the profile of characteristic matrix
+(uses Sloan algorithm). By default, profile optimization is not
+performed. It will not work in parallel mode.
 
 \subsection{IncrementalLinearStatic}
 \label{IncrementalLinearStatic}
 \entKeywordInst{IncrLinearStatic}
-\field{endOfTimeOfInterest}{rn} \field{pre\-scri\-bed\-Ti\-mes}{ra}.\\
+\field{endOfTimeOfInterest}{rn} \field{pre\-scri\-bed\-Ti\-mes}{ra} \optField{renumber}{in}.\\
 Represents incremental {\bf linear} static problem.
 The problem is solved as series of linear solutions and is intended to 
 be used for solving linear creep problems or incremental perfect plasticity.
+Nonzero value of optional parameter \param{renumber} turns on the
+equation renumbering to optimize the profile of characteristic matrix
+(uses Sloan algorithm). By default, profile optimization is not
+performed. It will not work in parallel mode.
 
 Supports the changes of static scheme (applying, removing and changing  boundary conditions) 
 during the analysis.
@@ -449,7 +479,7 @@ The extended syntax uses the ``metastep'' concept and has the
 following format:
 %%\begin{enumerate}
 %%\item[0]
-\entKeywordInst{NonLinearStatic} \optField{nmsteps}{in} \field{nsteps}{in}\\
+\entKeywordInst{NonLinearStatic} \optField{nmsteps}{in} \field{nsteps}{in} \optField{renumber}{in}\\
 \optField{contextOutputStep}{in}
 \optField{sparselinsolverparams}{string}\\
 \PoptField{nonlocstiff}{in} \PoptField{nonlocalext}{} \PoptField{loadballancing}{}.\\
@@ -465,6 +495,10 @@ The analysis parameters have following meaning
 \item \param{nmsteps} - determines the number of
 ``metasteps'', default is 1.
 \item \param{nsteps} - determines number of solution steps.
+\item Nonzero value of optional parameter \param{renumber} turns on the
+equation renumbering to optimize the profile of characteristic matrix
+(uses Sloan algorithm). By default, profile optimization is not
+performed. It will not work in parallel mode.
 \item \param{contextOutputStep} - Causes the context file to be
 created for every con\-text\-Out\-put\-Step-th step and when needed. Useful for
 postprocessing.
@@ -657,7 +691,7 @@ meaning of parameters is the same as for extended syntax.
 %
 \subsection{Adaptive linear static}
 \label{AdaptiveLinearStatic}
-\entKeywordInst{Adaptlinearstatic} \field{nsteps}{in}
+\entKeywordInst{Adaptlinearstatic} \field{nsteps}{in} \optField{renumber}{in}
 \optField{sparselinsolverparams}{} \\\optField{meshpackage}{in} \field{errorestimatorparams}{}.\\
 Adaptive linear static analysis. Multiple loading cases are not
 supported. Due to linearity of a problem, the complete reanalysis from
@@ -676,6 +710,11 @@ details, see element and material model manuals.
 Parameter \param{nsteps} indicates the number of loading cases.
 Should be set to 1.
 \item[-]
+Nonzero value of optional parameter \param{renumber} turns on the
+equation renumbering to optimize the profile of characteristic matrix
+(uses Sloan algorithm). By default, profile optimization is not
+performed. It will not work in parallel mode.
+\item[-]
 The  \param{sparselinsolverparams} parameter describes the sparse
 linear solver attributes and is explained in section \ref{sparselinsolver}.
 \item[-]
@@ -689,7 +728,7 @@ of Zien\-kie\-wicz Zhu Error Estimator. These are described in section \ref{erro
 \end{itemize}
 
 \subsection{Adaptive nonlinear static}
-\entKeywordInst{Adaptnlinearstatic} \field{Nonlinearstaticparams}{} \optField{equilmc}{in}\\ \optField{meshpackage}{in}
+\entKeywordInst{Adaptnlinearstatic} \field{Nonlinearstaticparams}{} \optField{equilmc}{in} \optField{renumber}{in}\\ \optField{meshpackage}{in}
 \optField{eetype}{} \field{errorestimatorparams}{}.\\
 Represents Adaptive Non-LinearStatic problem. Solution is performed  as a series of increments (loading or displacement).
 The error is estimated at the end of each load increment (after
@@ -731,7 +770,7 @@ to selected error estimator. For description, follow to section
 
 \subsection{Stationary transport problem}
 \label{StationaryTransport}
-\entKeywordInst{StationaryProblem} \field{nsteps}{in}
+\entKeywordInst{StationaryProblem} \field{nsteps}{in} \optField{renumber}{in}
 \optField{sparselinsolverparams}{}\\ \optField{exportfields}{}
 \optField{atomicfields}{in}.\\
 Stationary transport problem. 
@@ -742,6 +781,10 @@ Load vectors for each load case are formed as load vectors at
 this auxiliary time.
 The  \param{sparselinsolverparams} parameter describes the sparse
 linear solver attributes and is explained in section \ref{sparselinsolver}.
+Nonzero value of optional parameter \param{renumber} turns on the
+equation renumbering to optimize the profile of characteristic matrix
+(uses Sloan algorithm). By default, profile optimization is not
+performed. It will not work in parallel mode.
 
 If the present problem is used within the context
 of staggered-like analysis, the temperature field obtained by the
@@ -759,7 +802,7 @@ atomic id) and take them into account, if they support such feature.
 
 \subsection{Transient transport problem - linear case}
 \label{LinearTransientTransport}
-\entKeywordInst{NonStationaryProblem} \field{nsteps}{in}
+\entKeywordInst{NonStationaryProblem} \field{nsteps}{in} \optField{renumber}{in}
 \field{deltaT}{rn} \field{alpha}{rn}\\ \optField{lumpedcapa}{}
 \optField{sparselinsolverparams}{}\\
 \optField{exportfields}{} \optField{atomicfields}{in}.\\
@@ -774,6 +817,10 @@ which is unconditionally stable, and first-order accurate
 in $\Delta t$. \param{deltaT} is time step length used for
 integration, \param{nsteps} parameter specifies
 number of time steps to be solved.
+Nonzero value of optional parameter \param{renumber} turns on the
+equation renumbering to optimize the profile of characteristic matrix
+(uses Sloan algorithm). By default, profile optimization is not
+performed. It will not work in parallel mode.
 If \param{lumpedcapa} is set, then the stabilization of numerical
 algorithm using lumped capacity matrix will be used, reducing the
 initial oscillations.
@@ -789,7 +836,7 @@ configuration.
 
 \subsection{Transient transport problem - nonlinear case}
 \label{TransientTransport}
-\entKeywordInst{NlTransientTransportProblem} \field{nsteps}{in}
+\entKeywordInst{NlTransientTransportProblem} \field{nsteps}{in} \optField{renumber}{in}
 \field{deltaT}{rn} \field{alpha}{rn}\\ \optField{lumpedcapa}{}
 \optField{nsmax}{in} \field{rtol}{rn} \optField{manrmsteps}{in}\\
 \optField{sparselinsolverparams}{}
@@ -814,6 +861,10 @@ N-R scheme is used, with the left-hand side matrix updated after
 If \param{lumpedcapa} is set, then the stabilization of numerical
 algorithm using lumped capacity matrix will be used, reducing the
 initial oscillations.
+Nonzero value of optional parameter \param{renumber} turns on the
+equation renumbering to optimize the profile of characteristic matrix
+(uses Sloan algorithm). By default, profile optimization is not
+performed. It will not work in parallel mode.
 See section \ref{sparselinsolver} for explanation of
 \param{exportfields} and \param{atomicfields} parameters.
 
@@ -823,7 +874,7 @@ configuration.
 
 \subsection{Transient incompressible flow - CBS Algorithm}
 \label{cbsIncomp}
-\entKeywordInst{CBS} \field{nsteps}{in} 
+\entKeywordInst{CBS} \field{nsteps}{in} \optField{renumber}{in}
 \field{deltaT}{} \optField{theta1}{in} \optField{theta2}{in} \optField{cmflag}{in}\newline
 [\field{scaleflag}{in} \field{lscale}{in}
   \field{uscale}{in}\field{dscale}{in}]\newline \optField{lstype}{in} \optField{smtype}{in}
@@ -853,9 +904,14 @@ equations. Parameter \param{smtype} allows to select sparse matrix storage
 scheme. The scheme should be compatible with solver type. See section
 \ref{sparselinsolver} for further details.
 
+Nonzero value of optional parameter \param{renumber} turns on the
+equation renumbering to optimize the profile of characteristic matrix
+(uses Sloan algorithm). By default, profile optimization is not
+performed. It will not work in parallel mode.
+
 \subsection{Transient incompressible flow - SUPG/PSPG Algorithm}
 \label{supgIncomp}
-\entKeywordInst{SUPG} \field{nsteps}{in} 
+\entKeywordInst{SUPG} \field{nsteps}{in}  \optField{renumber}{in}
 \field{deltaT}{rn} \field{rtolv}{rn} \optField{atolv}{rn}
 \optField{stopmaxiter}{in}\newline
 \optField{alpha}{rn} \optField{cmflag}{in} \optField{deltatltf}{in}
@@ -887,6 +943,11 @@ integration. Alternatively, the load time function can be used to
 determine time step length for particular solution step. The load time
 function number is determined by parameter \param{deltatltf} and its
 value evaluated for solution step number should yield the step length.
+
+Nonzero value of optional parameter \param{renumber} turns on the
+equation renumbering to optimize the profile of characteristic matrix
+(uses Sloan algorithm). By default, profile optimization is not
+performed. It will not work in parallel mode.
 
 Parametrs \param{rtolv} and \param{atolv} allow to
 specify relative and absolute errors norms for residual vector.
