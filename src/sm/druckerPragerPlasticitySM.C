@@ -266,33 +266,41 @@ DruckerPragerPlasticitySM::hasMaterialModeCapability (MaterialMode mMode)
 
 void  
 DruckerPragerPlasticitySM::giveRealStressVector (FloatArray& answer,  
-																								 MatResponseForm form, 
-																								 GaussPoint* gp , 
-																								 const FloatArray& strainVector, 
-																								 TimeStep* atTime)
+						 MatResponseForm form, 
+						 GaussPoint* gp , 
+						 const FloatArray& totalStrain, 
+						 TimeStep* atTime)
 {
-	if ( stressDeviator.giveStressStrainMode() == _Unknown )
-		stressDeviator.letStressStrainModeBe( gp->giveMaterialMode() ) ;
+  FloatArray  strainVectorR;
 
-	DruckerPragerPlasticitySMStatus *status = 
-		(DruckerPragerPlasticitySMStatus*) (this -> giveStatus (gp)) ;
-
-	// Initialize temp variables for this gauss point
-	initTempStatus(gp) ;
-
-	// perform the local stress return and update the history variables
-	StrainVector strain ( strainVector, gp->giveMaterialMode() ) ;
-	performLocalStressReturn(gp, strain) ;
-		
-	// copy total strain vector to the temp status
-	status -> letTempStrainVectorBe(strainVector) ;
-
-	// give back correct form of stressVector to giveRealStressVector
+  if ( stressDeviator.giveStressStrainMode() == _Unknown )
+    stressDeviator.letStressStrainModeBe( gp->giveMaterialMode() ) ;
+  
+  DruckerPragerPlasticitySMStatus *status = 
+    (DruckerPragerPlasticitySMStatus*) (this -> giveStatus (gp)) ;
+  
+  // Initialize temp variables for this gauss point
+  initTempStatus(gp) ;
+  
+  // substract stress independent part
+  // note: eigenStrains (tepmerature) is not contained in mechanical strain stored in gp
+  // therefore it is necessary to substract always the total eigen strain value
+  this->giveStressDependentPartOfStrainVector(strainVectorR, gp, totalStrain, 
+					      atTime, VM_Total);
+  
+  // perform the local stress return and update the history variables
+  StrainVector strain ( strainVectorR, gp->giveMaterialMode() ) ;
+  performLocalStressReturn(gp, strain) ;
+  
+  // copy total strain vector to the temp status
+  status -> letTempStrainVectorBe(totalStrain) ;
+  
+  // give back correct form of stressVector to giveRealStressVector
   if (form == ReducedForm) answer = status -> giveTempStressVector() ;
-	else ((StructuralCrossSection*)(gp -> giveElement()->giveCrossSection()))
-		-> giveFullCharacteristicVector(answer, gp, status->giveTempStressVector() );
-
-	return ;
+  else ((StructuralCrossSection*)(gp -> giveElement()->giveCrossSection()))
+	 -> giveFullCharacteristicVector(answer, gp, status->giveTempStressVector() );
+  
+  return ;
 }
 
 void

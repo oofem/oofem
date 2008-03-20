@@ -425,6 +425,18 @@ public:
    */
  virtual bool isCharacteristicMtrxSymmetric (MatResponseMode rMode) {return false;}
 
+ /**
+    Returns a vector of coefficients of thermal dilatation in direction
+    of each material principal (local) axis.
+    @param answer vector of thermal dilatation coefficients
+    @param gp integration point
+    @param tStep time step (most models are able to respond only when atTime is current time step)
+ */
+ void giveThermalDilatationVector (FloatArray &answer, GaussPoint*gp, TimeStep* atTime)
+ {
+   LEMaterial->giveThermalDilatationVector(answer,gp,atTime);
+ }
+ 
  MaterialStatus*  CreateStatus (GaussPoint* gp) const ;
 
 protected:   
