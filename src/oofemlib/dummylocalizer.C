@@ -102,7 +102,7 @@ DummySpatialLocalizer::giveClosestIP (const FloatArray& coords, int region)
 
  for (i=1; i<=nelem; i++) {
   ielem = this->giveDomain()->giveElement(i);
-  if (region == ielem->giveRegionNumber()) {
+  if ((region < 0) || (region == ielem->giveRegionNumber())) {
    iRule = ielem->giveDefaultIntegrationRulePtr ();
    for (j=0 ; j < iRule->getNumberOfIntegrationPoints() ; j++) {
     jGp = iRule->getIntegrationPoint(j) ;

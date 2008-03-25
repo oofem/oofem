@@ -213,6 +213,11 @@ char* __CharTypeToString (CharType _value) {
   TO_STRING_BODY(CharType_DEF)
 }
 
+char* __MaterialMappingAlgorithmTypeToString (MaterialMappingAlgorithmType _value) {
+  TO_STRING_BODY(MaterialMappingAlgorithmType_DEF)
+}
+
+
 #undef ENUM_ITEM
 #undef ENUM_ITEM_WITH_VALUE
 #undef TO_STRING_BODY

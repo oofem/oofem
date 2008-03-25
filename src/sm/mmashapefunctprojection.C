@@ -47,91 +47,48 @@
 MMAShapeFunctProjection::MMAShapeFunctProjection () : MaterialMappingAlgorithm ()
 {
  stateCounter = 0;
+ //smootherList(0);
+ domain = NULL;
 }
 
-MMAShapeFunctProjection::~MMAShapeFunctProjection() {}
+MMAShapeFunctProjection::~MMAShapeFunctProjection() 
+{}
 
 void 
-MMAShapeFunctProjection::__init (Domain* dold, Domain* dnew, IntArray& varTypes, FloatArray& coords, int region, TimeStep* tStep)
+MMAShapeFunctProjection::__init (Domain* dold, IntArray& varTypes, FloatArray& coords, int region, TimeStep* tStep)
 //(Domain* dold, IntArray& varTypes, GaussPoint* gp, TimeStep* tStep) 
 {
- MMAShapeFunctProjectionInterface* interface;
- int ivar, nvar = varTypes.giveSize();
- // check time stemp
- if (stateCounter == tStep->giveSolutionStateCounter()) return;
-
-
- // Project Gauss point components to nodes on old mesh
- if (dold->giveSmoother()==NULL) {
-  //dold->setSmoother (new ZZNodalRecoveryModel(dold));
-  OOFEM_LOG_INFO("MMAShapeFunctProjection: setting NodalAveragingRecoveryModel\n");
-  dold->setSmoother (new NodalAveragingRecoveryModel(dold));
- }
-
- int inode, nnodes = dnew -> giveNumberOfDofManagers();
- int j, nbelemnodes;
- Element *belem;
- MMAShapeFunctProjectionInterface::nodalValContainerType container;
- const FloatArray *nodVal;
- 
- this->intVarTypes = varTypes;
- nodalValList.clear();
- nodalValList.growTo (nvar);
-
- for (ivar = 1; ivar <= nvar; ivar++) {
-
-  nodalValList.put (ivar, new AList<FloatArray> (nnodes));
-  for (inode = 1; inode <= nnodes; inode++) nodalValList.at(ivar)->put (inode, new FloatArray);
-//  nodalValList.at(ivar)->clear();
-//  nodalValList.at(ivar)->growTo (nnodes);
+  int ivar, nvar = varTypes.giveSize();
+  // check time stemp
+  if (stateCounter == tStep->giveSolutionStateCounter()) return;
   
-  dold -> giveSmoother() -> recoverValues ((InternalStateType)varTypes.at(ivar), tStep);
   
-  // Transfer nodal components from the old to a new mesh
-  
-  for (inode = 1; inode <= nnodes; inode++) {
-   // find background element containing new node 
-   belem = dold->giveSpatialLocalizer()->giveElementContainingPoint(*dnew->giveNode(inode)->giveCoordinates());
-   if (belem == NULL) {
-     OOFEM_ERROR2 ("MMAShapeFunctProjection::init node %d not in old mesh",inode);
-   }
-   // map internal variable to new node
-   if ((interface = (MMAShapeFunctProjectionInterface*) 
-      belem->giveInterface (MMAShapeFunctProjectionInterfaceType)) == NULL) {
-    abort ();
-   }
-   // set up  belement nodal values
-   nbelemnodes = belem->giveNumberOfDofManagers();
-   if (container.giveSize() < nbelemnodes) {
-    int oldSize = container.giveSize();
-    container.growTo(nbelemnodes);
-    for (int i = oldSize+1; i<=nbelemnodes; i++) 
-     container.put(i, new FloatArray);
-   }
-   
-   for (j=1; j<= nbelemnodes; j++) {
-    dold -> giveSmoother() -> giveNodalVector(nodVal, belem->giveDofManager(j)->giveNumber(), 
-                                              belem->giveRegionNumber());
-    *(container.at(j)) = *nodVal;
-   }
-   
-   interface -> MMAShapeFunctProjectionInterface_interpolateIntVarAt (*nodalValList.at(ivar)->at(inode), 
-                                     *dnew->giveNode(inode)->giveCoordinates(),
-                                     MMAShapeFunctProjectionInterface::coordType_global,
-                                     container, (InternalStateType)varTypes.at(ivar),
-                                     tStep);
+  // Project Gauss point components to nodes on old mesh
+  if (this->smootherList.giveSize() != nvar) {
+    this->smootherList.clear();
+    this->smootherList.growTo(nvar);
+    for (ivar=1;ivar<=nvar;ivar++) {
+      this->smootherList.put(ivar, new NodalAveragingRecoveryModel(dold));
+    }
   }
- }  
- // remember time stemp
- stateCounter = tStep->giveSolutionStateCounter();
+ 
+  this->intVarTypes = varTypes;
+  for (ivar = 1; ivar <= nvar; ivar++) {
+    
+    this->smootherList.at(ivar) -> recoverValues ((InternalStateType)varTypes.at(ivar), tStep);
+    
+  }  
+  // remember time stemp
+  stateCounter = tStep->giveSolutionStateCounter();
+  this->domain = dold;
 }
 
 
 void
 MMAShapeFunctProjection::finish (TimeStep* tStep)
 {
- // delete nodalValList
- nodalValList.clear();
+  this->smootherList.clear();
+  stateCounter = -1;
 }
 
 int
@@ -141,6 +98,7 @@ MMAShapeFunctProjection::mapVariable (FloatArray& answer, GaussPoint* gp, Intern
  int inode, nnodes = elem->giveNumberOfDofManagers();
  MMAShapeFunctProjectionInterface::nodalValContainerType container(nnodes);
  MMAShapeFunctProjectionInterface* interface;
+ const FloatArray* nvec;
  
  if ((interface = (MMAShapeFunctProjectionInterface*) 
     elem->giveInterface (MMAShapeFunctProjectionInterfaceType)) == NULL) {
@@ -152,7 +110,9 @@ MMAShapeFunctProjection::mapVariable (FloatArray& answer, GaussPoint* gp, Intern
 
   for (inode = 1; inode <= nnodes; inode ++) {
    container.put(inode, new FloatArray);
-   *(container.at(inode)) = *(this->nodalValList.at(indx)->at(elem->giveDofManager(inode)->giveNumber()));
+   this->smootherList.at(indx)->giveNodalVector(nvec, elem->giveDofManager(inode)->giveNumber(), 
+						elem->giveRegionNumber());
+   *(container.at(inode)) = *nvec;
   }
   
   interface -> MMAShapeFunctProjectionInterface_interpolateIntVarAt (answer, (*gp->giveCoordinates()),
@@ -166,10 +126,10 @@ MMAShapeFunctProjection::mapVariable (FloatArray& answer, GaussPoint* gp, Intern
 
 
 int
-MMAShapeFunctProjection::__mapVariable (FloatArray& answer, FloatArray& coords, Domain* dnew, 
+MMAShapeFunctProjection::__mapVariable (FloatArray& answer, FloatArray& coords, 
                                         InternalStateType type, TimeStep* tStep)
 {
- Element* elem = dnew -> giveSpatialLocalizer() -> giveElementContainingPoint (coords);
+ Element* elem = domain -> giveSpatialLocalizer() -> giveElementContainingPoint (coords);
  if (!elem)  {
    OOFEM_ERROR ("MMAShapeFunctProjection::__mapVariable: no suitable source found");
  }
@@ -177,7 +137,8 @@ MMAShapeFunctProjection::__mapVariable (FloatArray& answer, FloatArray& coords, 
  int inode, nnodes = elem->giveNumberOfDofManagers();
  MMAShapeFunctProjectionInterface::nodalValContainerType container(nnodes);
  MMAShapeFunctProjectionInterface* interface;
- 
+ const FloatArray* nvec;
+
  if ((interface = (MMAShapeFunctProjectionInterface*) 
       elem->giveInterface (MMAShapeFunctProjectionInterfaceType)) == NULL) {
    abort ();
@@ -188,7 +149,9 @@ MMAShapeFunctProjection::__mapVariable (FloatArray& answer, FloatArray& coords, 
 
   for (inode = 1; inode <= nnodes; inode ++) {
    container.put(inode, new FloatArray);
-   *(container.at(inode)) = *(this->nodalValList.at(indx)->at(elem->giveDofManager(inode)->giveNumber()));
+   this->smootherList.at(indx)->giveNodalVector(nvec, elem->giveDofManager(inode)->giveNumber(), 
+						elem->giveRegionNumber());
+   *(container.at(inode)) = *nvec;
   }
   
   interface -> MMAShapeFunctProjectionInterface_interpolateIntVarAt (answer, coords,

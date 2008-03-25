@@ -121,6 +121,8 @@ public:
   the IP reference is containing all the information. 
   NOTE: Only the gp belonging to the given region are taken into account.
   @param coords global problem coordinates of point of interest
+  @param region - if  value > 0 then only closet point from given
+  region will be considered, if value < 0 all regions will be valid
   @return the IP belonging to associated domain (only those provided by elements in default integration rule
   are taken into acount), NULL otherwise
   */

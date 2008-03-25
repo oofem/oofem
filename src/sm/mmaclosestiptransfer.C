@@ -68,7 +68,7 @@ MMAClosestIPTransfer::MMAClosestIPTransfer () : MaterialMappingAlgorithm()
 {}
 
 void
-MMAClosestIPTransfer:: __init (Domain* dold, Domain* dnew, IntArray& type, FloatArray& coords, int region, TimeStep* tStep)
+MMAClosestIPTransfer:: __init (Domain* dold, IntArray& type, FloatArray& coords, int region, TimeStep* tStep)
 {
  SpatialLocalizer* sl = dold -> giveSpatialLocalizer();
  this->source = sl->giveClosestIP (coords, region);
@@ -79,7 +79,7 @@ MMAClosestIPTransfer:: __init (Domain* dold, Domain* dnew, IntArray& type, Float
 }
 
 int
-MMAClosestIPTransfer::__mapVariable(FloatArray& answer, FloatArray& coords, Domain* dnew, 
+MMAClosestIPTransfer::__mapVariable(FloatArray& answer, FloatArray& coords,  
                                     InternalStateType type, TimeStep* tStep)
 {
   if (source) {

@@ -44,7 +44,7 @@ MaterialMappingAlgorithm :: init (Domain* dold, IntArray& type, GaussPoint* gp, 
   if (gp->giveElement()->computeGlobalCoordinates (coords, *(gp->giveCoordinates())) == 0) {
     OOFEM_ERROR ("MaterialMappingAlgorithm::init: computeGlobalCoordinates failed");
   }
-  this->__init (dold, gp->giveElement()->giveDomain(), type, coords, gp->giveElement()->giveRegionNumber(), tStep);
+  this->__init (dold, type, coords, gp->giveElement()->giveRegionNumber(), tStep);
 }
 
 int 
@@ -54,5 +54,5 @@ MaterialMappingAlgorithm::mapVariable (FloatArray& answer, GaussPoint* gp, Inter
   if (gp->giveElement()->computeGlobalCoordinates (coords, *(gp->giveCoordinates())) == 0) {
     OOFEM_ERROR ("MaterialMappingAlgorithm::init : computeGlobalCoordinates failed");
   }
-  return this->__mapVariable (answer, coords, gp->giveElement()->giveDomain(), type, tStep);
+  return this->__mapVariable (answer, coords, type, tStep);
 }

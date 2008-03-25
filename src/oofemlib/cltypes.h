@@ -319,6 +319,7 @@ enum classType {
   PolylineNonlocalBarrierClass,
   
   PrimaryFieldClass,
+  InternalVariableFieldClass,
   
   LEPlicClass,
   LevelSetPCSClass,
@@ -1128,6 +1129,17 @@ enum ErrorEstimatorType {
 
 
 /**
+   Enumerative type used to classify supported 
+   MaterialMappingAlgorithms
+*/
+#define MaterialMappingAlgorithmType_DEF\
+  ENUM_ITEM(MMA_ClosestPoint)\
+  ENUM_ITEM(MMA_LeastSquareProjection)\
+  ENUM_ITEM(MMA_ShapeFunctionProjection)
+  
+
+
+/**
    Type allowing to specify the required renumbering scheme;
    One can have a renumbering scheme for dof managers
    and another one for elements;
@@ -1241,6 +1253,10 @@ enum CharType {
   CharType_DEF
 };
 
+enum MaterialMappingAlgorithmType {
+  MaterialMappingAlgorithmType_DEF
+};
+  
 char* __InternalStateTypeToString (InternalStateType _value);
 char* __UnknownTypeToString (UnknownType _value);
 char* __dofTypeToString (dofType _value);
@@ -1251,6 +1267,7 @@ char* __ValueModeTypeToString(ValueModeType _value);
 char* __MatResponseModeToString(MatResponseMode _value);
 char* __DofIDItemToString(DofIDItem _value);
 char* __CharTypeToString(CharType _value);
+char* __MaterialMappingAlgorithmTypeToString(MaterialMappingAlgorithmType _value);
 
 #undef ENUM_ITEM
 #undef ENUM_ITEM_WITH_VALUE

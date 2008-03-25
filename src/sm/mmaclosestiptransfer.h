@@ -71,10 +71,11 @@ public:
   @note new domain can be obtained from given ip.
   @param dold old domain
   @param varTypes array of InternalStateType values, identifiing all vars to be mapped
-  @param gp integration point 
+  @param coords coordinates of the receiver point
+  @param region if > 0 region id of receiver point,, if < 0 ignore regions.
   @param tStep time step
   */
- void __init (Domain* dold, Domain* dnew, IntArray& type, FloatArray& coords, int region, TimeStep* tStep) ;
+ void __init (Domain* dold, IntArray& type, FloatArray& coords, int region, TimeStep* tStep) ;
  /**
   Finishes the mapping for given time step. Used to perform cleanup. 
   Typically some mappers reguire to compute some global mesh data related to
@@ -89,11 +90,10 @@ public:
   @param answer contains result
   @param type determines the type of internal variable
   @param coords coordinates of receiver to which mapping occur
-  @param dnew new mesh reference
   @param tStep time step
   @return nonzero if o.k.
   */
- virtual int __mapVariable (FloatArray& answer, FloatArray& coords, Domain* dnew, InternalStateType type, TimeStep* tStep);
+ virtual int __mapVariable (FloatArray& answer, FloatArray& coords, InternalStateType type, TimeStep* tStep);
  /** Returns class name of the receiver */
  const char* giveClassName () const { return "MMAClosestIPTransfer" ;}
 

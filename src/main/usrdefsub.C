@@ -739,6 +739,20 @@ Dof* CreateUsrDefDofOfType (classType type, int number, DofManager* dman)
   if (answer == NULL)  OOFEM_ERROR2 ("CreateUsrDefDofOfType: Unknown dof type [%d]", type);
   return answer;
 }
+
+MaterialMappingAlgorithm* CreateUsrDefMaterialMappingAlgorithm (MaterialMappingAlgorithmType type)
+{
+  MaterialMappingAlgorithm* answer=NULL;
+  if (type == MMA_ClosestPoint) answer = new MMAClosestIPTransfer ();
+  else if (type == MMA_LeastSquareProjection) answer = new MMALeastSquareProjection();
+  else if (type == MMA_ShapeFunctionProjection) answer = new MMAShapeFunctProjection();
+
+  if (answer == NULL) OOFEM_ERROR2 ("CreateUsrDefMaterialMappingAlgorithm: Unknown mma type [%d]", type);
+  return answer;
+
+}
+
+
 #ifdef __PARALLEL_MODE
 LoadBalancerMonitor* CreateUsrDefLoadBalancerMonitorOfType (classType type, EngngModel* e)
 {

@@ -97,7 +97,6 @@ public:
   Stores Times stamp of last initialization, so multiple calls for same step
   do not initialize receiver again.
   @param dold old domain
-  @param dnew new domain
   @param varTypes array of InternalStateType values, identifiing all vars to be mapped
   @param tStep time step
   */
@@ -108,13 +107,12 @@ public:
   Stores Times stamp of last initialization, so multiple calls for same step
   do not initialize receiver again.
   @param dold old domain
-  @param dnew new domain
   @param varTypes array of InternalStateType values, identifiing all vars to be mapped
   @param coords coordinates of the receiver point
-  @param region region id of receiver point
+  @param region if > 0 region id of receiver point,, if < 0 ignore regions.
   @param tStep time step
   */
- virtual void __init (Domain* dold, Domain* dnew, IntArray& varTypes, FloatArray& coords, int region, TimeStep* tStep) = 0;
+ virtual void __init (Domain* dold, IntArray& varTypes, FloatArray& coords, int region, TimeStep* tStep) = 0;
  /**
   Finishes the mapping for given time step. Used to perform cleanup. 
   Typically some mappers reguire to compute some global mesh data related to
@@ -136,11 +134,10 @@ public:
   @param answer contains result
   @param type determines the type of internal variable
   @param coords coordinates of receiver point to which mapping occur
-  @param dnew new domain
-    @param tStep time step
+  @param tStep time step
   @return nonzero if o.k.
   */
- virtual int __mapVariable (FloatArray& answer, FloatArray& coords, Domain* dnew, InternalStateType type, TimeStep* tStep) = 0;
+ virtual int __mapVariable (FloatArray& answer, FloatArray& coords, InternalStateType type, TimeStep* tStep) = 0;
  /** Initializes receiver acording to object description stored in input record.
   InitString can be imagined as data record in component database
   belonging to receiver. Receiver may use value-name extracting functions 

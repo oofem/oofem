@@ -54,7 +54,7 @@ MMALeastSquareProjection::MMALeastSquareProjection () : MaterialMappingAlgorithm
 MMALeastSquareProjection::~MMALeastSquareProjection() {}
 
 void 
-MMALeastSquareProjection::__init (Domain* dold, Domain* dnew, IntArray& type, FloatArray& coords, int region, TimeStep* tStep)
+MMALeastSquareProjection::__init (Domain* dold, IntArray& type, FloatArray& coords, int region, TimeStep* tStep)
 //(Domain* dold, IntArray& varTypes, GaussPoint* gp, TimeStep* tStep) 
 {
   GaussPoint* sourceIp;
@@ -255,7 +255,7 @@ MMALeastSquareProjection::finish (TimeStep* tStep)
 
 
 int
-MMALeastSquareProjection::__mapVariable (FloatArray& answer, FloatArray& targetCoords, Domain* dnew, 
+MMALeastSquareProjection::__mapVariable (FloatArray& answer, FloatArray& targetCoords, 
                                          InternalStateType type, TimeStep* tStep)
 {
  //int nelem, ielem, 

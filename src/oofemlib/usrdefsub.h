@@ -50,6 +50,7 @@
 #include "material.h"
 #include "sparselinsystemnm.h"
 #include "sparsegeneigenvalsystemnm.h"
+#include "materialmappingalgorithm.h"
 //#include "nonlocalbarrier.h"
 
 #include "errorestimator.h"
@@ -197,6 +198,12 @@ DofManager* CreateUsrDefDofManagerOfType (classType type, int, Domain*);
  @return newly allocated object of requested type, null if keyword not suppported
 */
 Dof* CreateUsrDefDofOfType (classType type, int, DofManager*);
+/**
+ Creates new instance of matrial mapping algorithm, corresponding to given MaterialMappingAlgorithmType.
+ @param type id determining the type of new instance
+ @return newly allocated object of requested type, null if keyword not suppported
+ */
+MaterialMappingAlgorithm* CreateUsrDefMaterialMappingAlgorithm (MaterialMappingAlgorithmType type);
 
 #ifdef __PARALLEL_MODE
 /**
@@ -214,6 +221,4 @@ LoadBalancerMonitor* CreateUsrDefLoadBalancerMonitorOfType (classType type, Engn
  */
 LoadBalancer* CreateUsrDefLoadBalancerOfType (classType type, Domain*);
 #endif
-
-
 #endif

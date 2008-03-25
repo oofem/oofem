@@ -41,6 +41,7 @@
 
 #include "alist.h"
 #include "materialmappingalgorithm.h"
+#include "nodalrecoverymodel.h"
 #include "interface.h"
 #include "compiler.h"
 #include "cltypes.h"
@@ -112,12 +113,14 @@ public:
 class MMAShapeFunctProjection : public MaterialMappingAlgorithm  {
 
 protected:
+ /// smother
+ AList<NodalRecoveryModel> smootherList;
  /// Solution state counter.
  StateCounterType        stateCounter;
  /// Internal variables in list
  IntArray intVarTypes;
- /// Array of new mesh nodal values 
- AList<AList<FloatArray> > nodalValList;
+ /// Source domain
+ Domain* domain;
 public:
  /** Constructor
   @param oldd old mesh reference
@@ -131,11 +134,12 @@ public:
   Stores Times stamp of last initialization, so multiple calls for same step
   do not initialize receiver again.
   @param dold old domain
-  @param dnew new domain
   @param varTypes array of InternalStateType values, identifiing all vars to be mapped
+  @param coords coordinates of the receiver point
+  @param region if > 0 region id of receiver point,, if < 0 ignore regions.
   @param tStep time step
   */
- virtual void __init (Domain* dold, Domain* dnew, IntArray& type, FloatArray& coords, int region, TimeStep* tStep) ;
+ virtual void __init (Domain* dold, IntArray& type, FloatArray& coords, int region, TimeStep* tStep) ;
  /**
   Finishes the mapping for given time step. Used to perform cleanup. 
   Typically some mappers reguire to compute some global mesh data related to
@@ -160,11 +164,10 @@ public:
   @param answer contains result
   @param type determines the type of internal variable
   @param coords coordinates of receiver point to which mapping occur
-  @param dnew new mesh reference
   @param tStep time step
   @return nonzero if o.k.
   */
- virtual int __mapVariable (FloatArray& answer, FloatArray& coords, Domain* dnew, InternalStateType type, TimeStep* tStep) ;
+ virtual int __mapVariable (FloatArray& answer, FloatArray& coords, InternalStateType type, TimeStep* tStep) ;
 
  /** Returns class name of the receiver */
  const char* giveClassName () const { return "MMAShapeFunctProjectionInterface" ;}

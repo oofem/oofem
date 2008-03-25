@@ -739,11 +739,11 @@ OctreeSpatialLocalizer::giveClosestIP (const FloatArray& coords, int region)
 
 /* HUHU CHEATING */
 #ifdef __PARALLEL_MODE
-	 if(ielem -> giveParallelMode() == Element_remote)continue;
+   if(ielem -> giveParallelMode() == Element_remote)continue;
 #endif
 
    //igp   = ipContainer[i].giveGp();
-   if (region != ielem->giveRegionNumber()) continue;
+   if ((region >0) && (region != ielem->giveRegionNumber())) continue;
    // test if element already visited
    // if (!visitedElems.insert(*pos).second) continue;
    iRule = ielem->giveDefaultIntegrationRulePtr ();
@@ -864,10 +864,10 @@ OctreeSpatialLocalizer::giveClosestIPWithinOctant (oofemOctantRec* currentCell, 
 
 /* HUHU CHEATING */
 #ifdef __PARALLEL_MODE
-	 if(ielem -> giveParallelMode() == Element_remote)continue;
+    if(ielem -> giveParallelMode() == Element_remote)continue;
 #endif
 
-    if (region != ielem->giveRegionNumber()) continue;
+    if ((region >0) && (region != ielem->giveRegionNumber())) continue;
     // test if element already visited
     // if (!visitedElems.insert(*pos).second) continue;
     // is one of his ip's  within given bbox -> inset it into elemSet

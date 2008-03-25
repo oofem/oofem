@@ -162,7 +162,7 @@ POIExportModule::exportIntVars (FILE* stream, TimeStep* tStep)
  poiCoords.at(3) = (*PoiIter).z;
  region = (*PoiIter).region;
  
- this->giveMapper()->__init(d, d, internalVarsToExport, poiCoords, region, tStep);
+ this->giveMapper()->__init(d, internalVarsToExport, poiCoords, region, tStep);
 
  for (i=1; i<=n; i++) {
    type = (InternalStateType) internalVarsToExport.at(i);
@@ -193,8 +193,8 @@ POIExportModule::exportIntVarAs (InternalStateType valID, FILE* stream, TimeStep
     poiCoords.at(3) = (*PoiIter).z;
     region = (*PoiIter).region;
     
-    this->giveMapper()->__init(d, d, toMap, poiCoords, region, tStep);
-    result = this->giveMapper()->__mapVariable (val, poiCoords, d, valID, tStep);
+    this->giveMapper()->__init(d, toMap, poiCoords, region, tStep);
+    result = this->giveMapper()->__mapVariable (val, poiCoords, valID, tStep);
     fprintf (stream,"%10d ", (*PoiIter).id);
     for (i=1; i<=val.giveSize(); i++) fprintf (stream," %15e", val.at(i));
     fprintf (stream,"\n");
