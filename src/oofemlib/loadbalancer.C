@@ -455,12 +455,18 @@ WallClockLoadBalancerMonitor::decide(TimeStep* atTime)
 {
   int i, nproc=emodel->giveNumberOfProcesses();
   int myrank=emodel->giveRank();
+  Domain* d =emodel->giveLoadBalancer()->giveDomain();
+  int ie, nelem;
   double *node_solutiontimes = new double [nproc];
+  double *node_relcomppowers = new double [nproc];
   double min_st, max_st;
   double relWallClockImbalance;
   double absWallClockImbalance;
+  double neqelems, sum_relcomppowers;
+  double myRelativeComputationalPower;
 
   if (node_solutiontimes == NULL) OOFEM_ERROR ("LoadBalancer::LoadEvaluation failed to allocate node_solutiontimes array");
+  if (node_relcomppowers == NULL) OOFEM_ERROR ("LoadBalancer::LoadEvaluation failed to allocate node_relcomppowers array");
 
   // compute wall solution time of my node
   double mySolutionTime = emodel->giveTimer()->getWtime(EngngModelTimer::EMTT_NetComputationalStepTimer);
@@ -487,6 +493,7 @@ WallClockLoadBalancerMonitor::decide(TimeStep* atTime)
     OOFEM_LOG_RELEVANT (" %.3f",node_solutiontimes[i]);
   }
   OOFEM_LOG_RELEVANT (")\n");
+
   
 
   // detect imbalance
@@ -504,15 +511,27 @@ WallClockLoadBalancerMonitor::decide(TimeStep* atTime)
 
   // update node (processor) weights
 
-  double average_solution_time=0.0;
-  for (i=0; i<nproc; i++) average_solution_time+=node_solutiontimes[i];
-  average_solution_time=average_solution_time/nproc;
-  for (i=0; i<nproc; i++) {
-    node_solutiontimes[i]=0.75*(average_solution_time-node_solutiontimes[i])+average_solution_time;
-    nodeWeights(i)=node_solutiontimes[i]/(nproc*average_solution_time);
+  // compute number or equivalent elements (equavalent element has computational weight equal to 1.0)
+  nelem = d->giveNumberOfElements();
+  neqelems = 0.0;
+  for (ie=1; ie<=nelem; ie++) {
+    neqelems += d->giveElement(ie)->predictRelativeComputationalCost();
   }
- 
+
+  // compute relative computational power (solution_time/number_of_equivalent_elements)
+  myRelativeComputationalPower = neqelems/mySolutionTime;
+  // collect relative powers
+  MPI_Allgather (&myRelativeComputationalPower, 1, MPI_DOUBLE, node_relcomppowers, 1, MPI_DOUBLE, MPI_COMM_WORLD);
+
+  // normalize computational powers
+  sum_relcomppowers = 0.0;
+  for (i=0; i<nproc; i++) 
+    sum_relcomppowers += node_relcomppowers[i];
+  for (i=0; i<nproc; i++) 
+    nodeWeights(i) = node_relcomppowers[i]/sum_relcomppowers;
+
   delete[] node_solutiontimes;
+  delete[] node_relcomppowers;
 
   // log processor weights
   OOFEM_LOG_RELEVANT ("[%d] LoadBalancer: updated proc weights: ", myrank);
