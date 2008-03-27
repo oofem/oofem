@@ -38,6 +38,7 @@
   //   *********************************************************
 
 #ifndef mazarsmodelnl_h 
+#define mazarsmodelnl_h 
  
 #include "mazarsmodel.h"
 #include "structuralnonlocalmaterialext.h"
@@ -240,7 +241,6 @@ class MazarsNLMaterial : public MazarsMaterial, public StructuralNonlocalMateria
 } ;
 
 
-#define idmnl1_h
 #endif
 
 
