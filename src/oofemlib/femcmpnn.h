@@ -44,6 +44,7 @@
 //
  
 #ifndef femcmpnn_h
+#define femcmpnn_h
 
 #ifndef __MAKEDEPEND
 #include <stdio.h>
@@ -192,8 +193,7 @@ public:
 #endif
 } ;
 
-#define femcmpnn_h
-#endif
+#endif // femcmpnn_h
 
 
 

@@ -38,6 +38,7 @@
 //
 
 #ifndef linearstability_h
+#define linearstability_h
 
 #ifndef __MAKEDEPEND
 #include <stdio.h>
@@ -128,5 +129,4 @@ TASK:
 
 } ;
 
-#define linearstability_h
-#endif
+#endif // linearstability_h

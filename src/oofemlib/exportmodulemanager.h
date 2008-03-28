@@ -40,6 +40,7 @@
 
  
 #ifndef exportmodulemanager_h
+#define exportmodulemanager_h
 
 #include "alist.h"
 #include "exportmodule.h"
@@ -112,5 +113,4 @@ protected:
 };
 
 
-#define exportmodulemanager_h
-#endif
+#endif // exportmodulemanager_h

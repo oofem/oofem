@@ -34,6 +34,7 @@
 */
 
 #ifndef tr1_2d_supg_axi_h
+#define tr1_2d_supg_axi_h
 
 
 #include "tr1_2d_supg.h"
@@ -134,8 +135,7 @@ public:
 
 } ;
 
-#define tr1_2d_supg_axi_h
-#endif
+#endif // tr1_2d_supg_axi_h
 
 
 

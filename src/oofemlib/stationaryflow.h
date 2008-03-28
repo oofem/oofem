@@ -39,6 +39,7 @@
 //
 
 #ifndef stationaryflow_h
+#define stationaryflow_h
 
 #ifndef __MAKEDEPEND
 #include <stdio.h>
@@ -105,5 +106,4 @@ TASK:
   
 } ;
 
-#define stationaryflow_h
-#endif
+#endif // stationaryflow_h

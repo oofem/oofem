@@ -38,6 +38,7 @@
 //   *******************************
 
 #ifndef j2mat_h
+#define j2mat_h
 
 #include "mplasticmaterial2.h"
 
@@ -127,5 +128,4 @@ protected:
  void        giveStressBackVector (FloatArray& answer, GaussPoint* gp, const FloatArray& strainSpaceHardeningVars);
 };
 
-#define j2mat_h
-#endif
+#endif // j2mat_h

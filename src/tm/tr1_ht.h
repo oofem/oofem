@@ -124,12 +124,4 @@ protected:
  int giveApproxOrder (int unknownIndx) {return 1;}
 } ;
 
-#endif
-
-
-
-
-
-
-
-
+#endif // tr1_ht_h

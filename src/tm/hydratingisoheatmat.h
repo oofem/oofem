@@ -39,6 +39,7 @@
 //   ********************************************************
 
 #ifndef hydratingisoheatmat_h
+#define hydratingisoheatmat_h
 
 #include "isoheatmat.h"
 #include "../sm/hydram.h"
@@ -134,5 +135,4 @@ protected:
 } ;
 
 
-#define hydratingisoheatmat_h
-#endif
+#endif // hydratingisoheatmat_h

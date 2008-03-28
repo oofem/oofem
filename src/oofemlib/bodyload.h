@@ -39,7 +39,7 @@
 //   ***********************
  
 #ifndef bodyload_h
-
+#define bodyload_h
 
 #include "load.h"
 #include "cltypes.h"
@@ -79,8 +79,7 @@ public:
 
 } ;
 
-#define bodyload_h
-#endif
+#endif // bodyload_h
 
 
 

@@ -89,4 +89,4 @@ protected:
  int  qsortColPartition (IntArray&, FloatArray&, int l, int r);
 };
 
-#endif
+#endif // ilucomprowprecond_h

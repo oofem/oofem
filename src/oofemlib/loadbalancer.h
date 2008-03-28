@@ -33,6 +33,8 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.                                                                              
 */
 #ifndef loadbalancer_h
+#define loadbalancer_h
+
 #ifdef __PARALLEL_MODE
 #include "inputrecord.h"
 #include "interface.h"
@@ -253,5 +255,4 @@ class LoadBalancerElementInterface : public Interface
 };
 
 #endif
-#define loadbalancer_h
-#endif
+#endif // loadbalancer_h

@@ -36,8 +36,8 @@
    Author: Richard Vondracek, <richard.vondracek@seznam.cz>
 */
 
-#ifndef _SPARSEGRIDMTX_H__
-#define _SPARSEGRIDMTX_H__
+#ifndef sparsegridmtx_h
+#define sparsegridmtx_h
 
 #include "SparseGridColumn.h"
 #include "SparseMatrixF.h"
@@ -134,4 +134,4 @@ public:
 
 DSS_NAMESPASE_END
 
-#endif// _SPARSEGRIDMTX_H__
+#endif

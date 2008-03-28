@@ -61,4 +61,4 @@ class LSpaceBB  : public LSpace
   void               computeBmatrixAt (GaussPoint*, FloatMatrix&, int=1,int=ALL_STRAINS) ;
 } ;
 
-#endif
+#endif // lspacebb_h

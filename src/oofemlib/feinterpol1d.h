@@ -39,6 +39,7 @@
 
 
 #ifndef feinterpol1d_h
+#define feinterpol1d_h
 
 #include "feinterpol.h"
 #include "flotarry.h"
@@ -59,9 +60,7 @@ public:
 
 
 
-
-#define feinterpol1d_h
-#endif
+#endif // feinterpol1d_h
 
 
 

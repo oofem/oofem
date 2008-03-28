@@ -32,8 +32,10 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.                                                                              
 */
-#ifdef __PETSC_MODULE
 #ifndef petscsparsemtrx_h
+#define petscsparsemtrx_h
+
+#ifdef __PETSC_MODULE
 
 #include "sparsemtrx.h"
 #include "cltypes.h"
@@ -173,7 +175,5 @@ public:
 
 };
 
-#define petscsparsemtrx_h
 #endif
-
-#endif //ifdef __PETSC_MODULE
+#endif // petscsparsemtrx_h

@@ -245,4 +245,4 @@ protected:
 
 };
 
-#endif
+#endif // planstrss_h

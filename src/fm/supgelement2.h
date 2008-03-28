@@ -38,6 +38,7 @@
 //   *******************************************************************
  
 #ifndef supgelement2_h
+#define supgelement2_h
 
 
 #include "supgelement.h"
@@ -205,8 +206,7 @@ public:
 
 } ;
 
-#define supgelement2_h
-#endif
+#endif // supgelement2_h
 
 
 

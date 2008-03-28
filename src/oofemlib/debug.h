@@ -39,12 +39,13 @@
   This file defines the variable DEBUG, which causes the safer (and slower)
   version of the code to be compiled and executed.
 */
-
+#ifndef debug_h
+#define debug_h
 
 
 #ifndef DEBUG
 //#define DEBUG                     // activate or de-activate this line 
 #endif
 
-
+#endif // debug_h
 

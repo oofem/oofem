@@ -40,6 +40,7 @@
 
 
 #ifndef elementside_h
+#define elementside_h
 
 #include "dofmanager.h"
 #include "domain.h"
@@ -126,8 +127,7 @@ public:
 } ;
 
 
-#define elementside_h
-#endif
+#endif // elementside_h
 
 
 

@@ -44,6 +44,7 @@
 
 
 #ifndef timestep_h
+#define timestep_h
 
 #include "femcmpnn.h"
 #include "engngm.h"
@@ -198,5 +199,4 @@ public:
 
 } ;
 
-#define timestep_h
-#endif
+#endif // timestep_h

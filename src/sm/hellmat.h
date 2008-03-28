@@ -6,6 +6,7 @@
 //  Or copying both T and hydration degree from thermochemical analysis
 
 #ifndef hellmat_h
+#define hellmat_h
 
 // standard includes
 #ifndef __MAKEDEPEND
@@ -718,5 +719,4 @@ class HellmichMaterial : public StructuralMaterial, public HydrationModelInterfa
  MaterialStatus* CreateStatus (GaussPoint* gp) const;
 };
 
-#define hellmat_h
-#endif
+#endif // hellmat_h

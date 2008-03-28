@@ -39,6 +39,7 @@
  
 
 #ifndef deadwght_h
+#define deadwght_h
 
 #include "bodyload.h"
 
@@ -73,8 +74,7 @@ public:
 } ;
 
 
-#define deadwght_h
-#endif
+#endif // deadwght_h
 
 
 

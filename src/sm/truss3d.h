@@ -137,12 +137,4 @@ protected:
 
 } ;
 
-#endif
-
-
-
-
-
-
-
-
+#endif // truss3d_h

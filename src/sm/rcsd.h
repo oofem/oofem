@@ -38,6 +38,7 @@
 //   ************************************************************************************
 
 #ifndef rcsd_h 
+#define rcsd_h 
 
 #include "rcm2.h"
 #include "cltypes.h"
@@ -192,8 +193,7 @@ protected:
 } ;
 
 
-#define rcsd_h
-#endif
+#endif // rcsd_h 
 
 
 

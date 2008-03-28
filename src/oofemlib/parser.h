@@ -34,6 +34,7 @@
 */
 
 #ifndef parser_h
+#define parser_h
 
 #ifndef __MAKEDEPEND
 #include <stdio.h>
@@ -79,5 +80,4 @@ private:
 };
 
 
-#define parser_h
-#endif
+#endif // parser_h

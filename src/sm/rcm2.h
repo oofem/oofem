@@ -38,6 +38,7 @@
 //   ****************************************************
 
 #ifndef rcm2_h 
+#define rcm2_h 
 
 #include "material.h"
 #include "linearelasticmaterial.h"
@@ -367,6 +368,5 @@ class RCM2Material : public StructuralMaterial
 } ;
 
 
-#define rcm2_h
-#endif
+#endif // rcm2_h 
 

@@ -37,7 +37,8 @@
 //   *** CLASS ISOTROPIC DAMAGE MODEL FOR INTERFACE ELEMENTS   ************
 //   **********************************************************************
 
-#ifndef mat_slipcebfip90_h 
+#ifndef slipmodelcebfip90_h 
+#define slipmodelcebfip90_h 
 
 #include "material.h"
 #include "linearelasticmaterial.h"
@@ -307,6 +308,5 @@ protected:
 } ;
 
 
-#define isointerfacedamage01_h
-#endif
+#endif // slipmodelcebfip90_h 
 

@@ -109,4 +109,4 @@ protected:
 
 } ;
 
-#endif
+#endif // libeam2d_h

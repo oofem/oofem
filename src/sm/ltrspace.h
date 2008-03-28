@@ -37,6 +37,7 @@
 //   *** CLASS LINEAR TETRAHEDRA ***
 //   *******************************
 #ifndef ltrspace_h
+#define ltrspace_h
 
 #include "structuralelement.h"
 #include "fei3dtrlin.h"
@@ -327,8 +328,7 @@ protected:
 //@}
 } ;
 
-#define ltrspace_h
-#endif   
+#endif // ltrspace_h
 
 
 

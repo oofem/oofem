@@ -37,8 +37,8 @@
 //   *** CLASS Beam3d ***
 //   ********************
 
-#ifndef Beam3d_h
-#define Beam3d_h
+#ifndef beam3d_h
+#define beam3d_h
 
 #include "structuralelement.h"
 #include "fiberedcs.h"
@@ -134,4 +134,4 @@ virtual void computeLocalStiffnessMatrix (FloatMatrix& answer,
   virtual int  giveNumberOfIPForMassMtrxIntegration () {return 4;}
 } ;
 
-#endif
+#endif // beam3d_h

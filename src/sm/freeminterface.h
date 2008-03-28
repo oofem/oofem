@@ -38,6 +38,7 @@
 //   *****************************
 
 #ifndef freeminterface_h 
+#define freeminterface_h 
 
 #include "mesherinterface.h"
 #include "flotarry.h"
@@ -70,5 +71,4 @@ protected:
  void smoothNodalDensities (Domain* d,  FloatArray& nodalDensities, TimeStep* stepN);
 };
 
-#define freeminterface_h 
-#endif
+#endif // freeminterface_h 

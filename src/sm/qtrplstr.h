@@ -38,6 +38,7 @@
 //   **************************
  
 #ifndef qtrplstr_h
+#define qtrplstr_h
 
 
 #include "structuralelement.h"
@@ -211,5 +212,4 @@ protected:
 
 };
 
-#define qtrplstr_h 
-#endif
+#endif // qtrplstr_h

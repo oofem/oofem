@@ -33,8 +33,8 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.                                                                              
 */
 
-#ifndef interfaceelem1d_h
-#define interfaceelem1d_h
+#ifndef interfaceelement1d_h
+#define interfaceelement1d_h
 
 
 #include "structuralelement.h"
@@ -114,7 +114,7 @@ protected:
   cmode giveCoordMode () const  {return this->mode;} 
 } ;
 
-#endif
+#endif // interfaceelement1d_h
 
 
 

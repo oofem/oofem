@@ -39,6 +39,7 @@
 //
 
 #ifndef buffereddatareader_h
+#define buffereddatareader_h
 
 #ifndef __MAKEDEPEND
 #include <stdio.h>
@@ -88,5 +89,4 @@ protected:
  void giveLineFromInput (char* line);
 };
 
-#define buffereddatareader_h
-#endif
+#endif // buffereddatareader_h

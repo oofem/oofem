@@ -39,6 +39,7 @@
 //   *******************************
  
 #ifndef initial_h
+#define initial_h
 
 #include "generalbc.h"
 #include "dictionr.h"
@@ -137,5 +138,4 @@ public:
     const char* giveClassName () const  {return "InitialCondition";}
 } ;
 
-#define initial_h
-#endif
+#endif // initial_h

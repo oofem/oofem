@@ -36,6 +36,8 @@
 
 
 #ifndef refinedmesh_h
+#define refinedmesh_h
+
 #include "alist.h"
 
 
@@ -161,11 +163,4 @@ public:
 
 };
 
-#define refinedmesh_h
-#endif
-
-
-
-
-
-
+#endif // refinedmesh_h

@@ -221,4 +221,4 @@ LoadBalancerMonitor* CreateUsrDefLoadBalancerMonitorOfType (classType type, Engn
  */
 LoadBalancer* CreateUsrDefLoadBalancerOfType (classType type, Domain*);
 #endif
-#endif
+#endif // usrdefsub_h

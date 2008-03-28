@@ -40,6 +40,7 @@
 
  
 #ifndef sparselinsystemnm_h
+#define sparselinsystemnm_h
 
 
 #include "nummet.h"
@@ -95,8 +96,7 @@ public:
  public:
  };
 
-#define sparselinsystemnm_h
-#endif
+#endif // sparselinsystemnm_h
 
 
 

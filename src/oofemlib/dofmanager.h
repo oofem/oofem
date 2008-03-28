@@ -435,7 +435,7 @@ protected:
 
 } ;
 
-#endif
+#endif // dofmanager_h
 
 
 

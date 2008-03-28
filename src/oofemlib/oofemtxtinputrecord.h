@@ -34,6 +34,7 @@
 */
 
 #ifndef oofemtxtinputrecord_h
+#define oofemtxtinputrecord_h
 
 #include "cltypes.h"
 #ifndef __MAKEDEPEND
@@ -194,5 +195,4 @@ protected:
 
 };
 
-#define oofemtxtinputrecord_h
-#endif
+#endif // oofemtxtinputrecord_h

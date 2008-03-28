@@ -36,8 +36,8 @@
    Author: Richard Vondracek, <richard.vondracek@seznam.cz>
 */
 
-#ifndef _DENSEMATRIXARITH_H__
-#define _DENSEMATRIXARITH_H__
+#ifndef densematrixarithmeticsnn_h
+#define densematrixarithmeticsnn_h
 
 #include "MathTracer.h"
 #include "Array.h"
@@ -220,5 +220,5 @@ public:
 
 DSS_NAMESPASE_END
 
-#endif //_DENSEMATRIXARITH_H__
+#endif
 

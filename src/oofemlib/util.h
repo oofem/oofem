@@ -35,6 +35,7 @@
 
 
 #ifndef util_h
+#define util_h
 
 /**
   Reads the input line from file and converts all characters to lower case
@@ -50,5 +51,5 @@ char*  giveInputDataFileName (char* dataInputFileName, int maxlen);
 
 //Instanciates the new problem
 EngngModel* InstanciateProblem (DataReader* dr, problemMode mode, int contextFlag, EngngModel* master = NULL);
-#define util_h
-#endif
+
+#endif // util_h

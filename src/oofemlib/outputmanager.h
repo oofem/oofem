@@ -38,6 +38,7 @@
 //
 
 #ifndef outputmanager_h
+#define outputmanager_h
 
 #ifndef __MAKEDEPEND
 #include <stdio.h>
@@ -149,8 +150,8 @@ public:
 protected:
 };
 
-#define outputmanager_h
-#endif
+
+#endif // outputmanager_h
 
 
 

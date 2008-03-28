@@ -35,6 +35,7 @@
 
 #ifndef petscordering_h
 #define petscordering_h
+
 #ifdef __PARALLEL_MODE
 
 #include "appordering.h"
@@ -110,4 +111,4 @@ public:
 };
 
 #endif
-#endif
+#endif // petscordering_h

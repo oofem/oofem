@@ -39,6 +39,7 @@
 //   ************************************************
 
 #ifndef isoheatmat_h 
+#define isoheatmat_h 
 
 #include "transportmaterial.h"
 #include "dictionr.h"
@@ -97,5 +98,4 @@ protected:
 } ;
 
 
-#define isoheatmat_h
-#endif
+#endif // isoheatmat_h 

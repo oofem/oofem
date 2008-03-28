@@ -38,6 +38,7 @@
 //   ***********************************
 
 #ifndef skylineu_h
+#define skylineu_h
 
 #include "sparsemtrx.h"
 #include "rowcol.h"
@@ -173,6 +174,5 @@ protected:
 } ;
 
 
-#define skylineu_h
-#endif
+#endif // skylineu_h
 

@@ -38,6 +38,7 @@
 //   **********************************************************
 
 #ifndef eleminterpunknownmapper_h 
+#define eleminterpunknownmapper_h 
 
 #include "primaryunknownmapper.h"
 #include "compiler.h"
@@ -98,8 +99,7 @@ public:
 protected:
 };
 
-#define eleminterpunknownmapper_h
-#endif
+#endif // eleminterpunknownmapper_h 
 
 
 

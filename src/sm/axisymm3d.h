@@ -38,6 +38,7 @@
 //   ********************************************************************
  
 #ifndef axisymm3d_h
+#define axisymm3d_h
 
 #include "nlstructuralelement.h"
 #include "fei2dtrlin.h"
@@ -184,5 +185,4 @@ protected:
   int   computeLoadLEToLRotationMatrix (FloatMatrix&, int, GaussPoint*) ;
 } ;
 
-#define axisymm3d_h
-#endif
+#endif // axisymm3d_h

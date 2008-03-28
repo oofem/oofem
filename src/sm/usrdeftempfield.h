@@ -39,6 +39,7 @@
  
 
 #ifndef usrdeftempfield_h
+#define usrdeftempfield_h
 
 #include "structtemperatureload.h"
 #include "domain.h"
@@ -100,14 +101,4 @@ public:
  
 } ;
 
-#define usrdeftempfield_h
-#endif
-
-
-
-
-
-
-
-
-
+#endif // usrdeftempfield_h

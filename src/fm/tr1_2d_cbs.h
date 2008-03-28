@@ -38,6 +38,7 @@
 //   *****************************************************************************************
  
 #ifndef tr1_2d_cbs_h
+#define tr1_2d_cbs_h
 
 
 #include "cbselement.h"
@@ -298,8 +299,7 @@ public:
  virtual void computeDeviatoricStress (FloatArray& answer, GaussPoint* gp, TimeStep* );
 } ;
 
-#define tr1_2d_cbs_h
-#endif
+#endif // tr1_2d_cbs_h
 
 
 

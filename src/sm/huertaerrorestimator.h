@@ -38,6 +38,7 @@
 //   *************************************************************************
 
 #ifndef huertaerrorestimator_h 
+#define huertaerrorestimator_h 
 
 #include "errorestimator.h"
 #include "interface.h"
@@ -372,6 +373,5 @@ public:
 
 
 
-#define huertaerrorestimator_h
-#endif
+#endif // huertaerrorestimator_h 
 

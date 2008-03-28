@@ -130,4 +130,4 @@ class RigidArmNode : public Node
 };
 
 
-#endif
+#endif // rigidarmnode_h

@@ -38,6 +38,7 @@
 //
 
 #ifndef linearstatic_h
+#define linearstatic_h
 
 #ifndef __MAKEDEPEND
 #include <stdio.h>
@@ -137,5 +138,4 @@ TASK:
  
 } ;
 
-#define linearstatic_h
-#endif
+#endif // linearstatic_h

@@ -38,6 +38,7 @@
 //   ***********************************
 
 #ifndef layeredcrosssection_h 
+#define layeredcrosssection_h 
 
 #include "structuralcrosssection.h"
 #include "structuralmaterial.h"
@@ -263,7 +264,6 @@ public:
 };
 
 
-#define layeredcrosssection_h
-#endif
+#endif // layeredcrosssection_h 
 
 

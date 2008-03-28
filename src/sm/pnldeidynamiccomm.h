@@ -38,6 +38,8 @@
 //
 
 #ifndef pnldeidynamiccomm_h
+#define pnldeidynamiccomm_h
+
 #ifdef __PARALLEL_MODE
 
 #include "communicator.h"
@@ -135,7 +137,7 @@ private:
 
 
 #endif
-#endif
+#endif // pnldeidynamiccomm_h
 
 
 

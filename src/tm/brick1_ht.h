@@ -135,12 +135,4 @@ protected:
  int giveApproxOrder (int unknownIndx) {return 1;}
 } ;
 
-#endif
-
-
-
-
-
-
-
-
+#endif // brick1_ht_h

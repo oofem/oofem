@@ -38,8 +38,8 @@
 //   ********************************************
 
  
-#ifndef calm_h
-
+#ifndef calmls_h
+#define calmls_h
 
 #ifndef __MAKEDEPEND
 #include <stdio.h>
@@ -232,8 +232,7 @@ protected:
   
 };
 
-#define calm_h
-#endif
+#endif // calmls_h
 
 
 

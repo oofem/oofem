@@ -108,7 +108,7 @@ protected:
   int          computeGtoLRotationMatrix(FloatMatrix& answer);
 } ;
 
-#endif
+#endif // interfaceelem2dquad_h
 
 
 

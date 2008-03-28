@@ -39,6 +39,7 @@
 //   **********************************
 
 #ifndef simplecrosssection_h 
+#define simplecrosssection_h 
 
 #include "structuralcrosssection.h"
 #include "structuralmaterial.h"
@@ -246,7 +247,6 @@ protected:
 } ;
 
 
-#define simplecrosssection_h
-#endif
+#endif // simplecrosssection_h 
  
  

@@ -39,6 +39,7 @@
 //   *****************************************************************
 
 #ifndef hydratinghemomat_h
+#define hydratinghemomat_h
 
 #include "hemotkmat.h"
 #include "hydratingisoheatmat.h"
@@ -121,5 +122,4 @@ protected:
 } ;
 
 
-#define hydratinghemomat_h
-#endif
+#endif // hydratinghemomat_h

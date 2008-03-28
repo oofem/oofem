@@ -38,6 +38,7 @@
 //   ******************************
 
 #ifndef targe2interface_h 
+#define targe2interface_h 
 
 #include "mesherinterface.h"
 
@@ -67,5 +68,4 @@ protected:
  int createInput (Domain* d, TimeStep* stepN);
 };
 
-#define targe2interface_h 
-#endif
+#endif // targe2interface_h 

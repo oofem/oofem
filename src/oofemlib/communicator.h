@@ -39,6 +39,7 @@
 
 #ifndef communicator_h
 #define communicator_h
+
 #ifdef __PARALLEL_MODE
 
 #include "processcomm.h"
@@ -405,4 +406,4 @@ Communicator :: unpackAllData (T* ptr, P* dest, int (T::*unpackFunc) (P*, Proces
 
 
 #endif
-#endif
+#endif // communicator_h

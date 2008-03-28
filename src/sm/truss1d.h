@@ -299,12 +299,4 @@ protected:
       
 } ;
 
-#endif
-
-
-
-
-
-
-
-
+#endif // truss1d_h

@@ -38,7 +38,8 @@
 //   *********************************
  
 
-#ifndef tdictionr_h
+#ifndef tdictionary_h
+#define tdictionary_h
 
 #include "compiler.h"
 #include "error.h"
@@ -216,7 +217,6 @@ template <class Key, class T> T*  TDictionaryIterator<Key,T>::next () {
 
 
 
-#define tdictionr_h
-#endif
+#endif // tdictionary_h
 
 

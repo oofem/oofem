@@ -37,7 +37,8 @@
   //*** ABSTRACT CLASS MICROPLANE MATERIAL ACCORDING TO BAZANTS APPROACH ***
   //*************************************************************************
 
-#ifndef M4Material__h 
+#ifndef m4_h 
+#define m4_h 
 
 #include "microplanematerial_bazant.h"
 #include "structuralms.h"
@@ -174,5 +175,4 @@ class M4Material : public MicroplaneMaterial_Bazant
 
 };
 
-#define M4Material__h 
-#endif
+#endif // m4_h 

@@ -34,6 +34,7 @@
 */
 
 #ifndef transportmaterial_h 
+#define transportmaterial_h 
 
 #include "material.h"
 #include "dictionr.h"
@@ -229,10 +230,4 @@ public:
 } ;
 
 
-#define transportmaterial_h
-#endif
-
-
-
-
-
+#endif // transportmaterial_h

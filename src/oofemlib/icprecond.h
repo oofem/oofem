@@ -89,4 +89,4 @@ protected:
 
 };
 
-#endif
+#endif // icprecond_h

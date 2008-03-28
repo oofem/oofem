@@ -41,6 +41,7 @@
  
 
 #ifndef masterdof_h
+#define masterdof_h
 
 #include "dof.h"
 #include "compiler.h"
@@ -310,5 +311,4 @@ protected:
 
 } ;
 
-#define masterdof_h
-#endif
+#endif // masterdof_h

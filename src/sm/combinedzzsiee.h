@@ -38,6 +38,7 @@
 //   *************************************************************************************
 
 #ifndef combinedzzsiee_h 
+#define combinedzzsiee_h 
 
 #include "zzerrorestimator.h"
 #include "scalarerrorindicator.h"
@@ -173,6 +174,5 @@ protected:
   
 };
 
-#define combinedzzsiee_h
-#endif
+#endif // combinedzzsiee_h 
 

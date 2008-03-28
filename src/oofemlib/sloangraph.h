@@ -42,6 +42,7 @@
 /* Author: Milan Jirasek */
 
 #ifndef sloangraph_h
+#define sloangraph_h
 
 #include "sloangraphnode.h"
 #include "sloanlevelstruct.h"
@@ -207,8 +208,7 @@ public:
 };
 
 
-#define sloangraph_h
-#endif
+#endif // sloangraph_h
 
 
 

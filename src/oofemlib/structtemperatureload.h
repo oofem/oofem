@@ -40,6 +40,7 @@
 
  
 #ifndef structtemperatureload_h
+#define structtemperatureload_h
 
 
 #include "load.h"
@@ -81,8 +82,7 @@ public:
 
 } ;
 
-#define structtemperatureload_h
-#endif
+#endif // structtemperatureload_h
 
 
 

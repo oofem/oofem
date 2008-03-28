@@ -34,6 +34,7 @@
 */
 
 #ifndef dofdistributedprimaryfield_h
+#define dofdistributedprimaryfield_h
 
 #include "primaryfield.h"
 #include "cltypes.h"
@@ -95,5 +96,4 @@ protected:
 };
 
 
-#define dofdistributedprimaryfield_h
-#endif
+#endif // dofdistributedprimaryfield_h

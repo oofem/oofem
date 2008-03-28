@@ -37,7 +37,8 @@
 // class StructuralNonlocalMaterialExtension
 //
 
-#ifndef structuralnonlocalmaterialextension_h
+#ifndef structuralnonlocalmaterialext_h
+#define structuralnonlocalmaterialext_h
 
 #include "nonlocalmaterialext.h"
 #include "cltypes.h"
@@ -104,7 +105,6 @@ public:
  
 };
 
-#define structuralnonlocalmaterialextension_h
-#endif
+#endif // structuralnonlocalmaterialext_h
 
  

@@ -38,6 +38,7 @@
 //   **********************************************
 
 #ifndef materilmappingalgorithm_h 
+#define materilmappingalgorithm_h 
 
 #include "compiler.h"
 #include "cltypes.h"
@@ -151,8 +152,7 @@ public:
 protected:
 };
 
-#define materilmappingalgorithm_h
-#endif
+#endif // materilmappingalgorithm_h 
 
 
 

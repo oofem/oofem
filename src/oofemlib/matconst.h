@@ -43,6 +43,9 @@ property dictionary
 
 */
 
+#ifndef matconst_h
+#define matconst_h
+
 /* poiss coeficients */
 #define NYxz 300
 #define NYyz 301
@@ -75,3 +78,5 @@ property dictionary
 /* Viscosity */
 #define Viscosity 500
 #define YieldStress 501
+
+#endif // matconst_h

@@ -38,7 +38,8 @@
 // class NonlocalMaterialExtension
 //
 
-#ifndef nonlocalmaterialextension_h
+#ifndef nonlocalmaterialext_h
+#define nonlocalmaterialext_h
 
 //#include "material.h"
 #include "cltypes.h"
@@ -263,7 +264,6 @@ protected:
 
 };
 
-#define nonlocalmaterialextension_h
-#endif
+#endif // nonlocalmaterialext_h
 
  

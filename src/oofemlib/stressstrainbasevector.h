@@ -34,6 +34,8 @@
 */
 
 #ifndef stressstrainbasevector_h
+#define stressstrainbasevector_h
+
 #include "flotarry.h"
 
 typedef char StressStrainMatMode;
@@ -159,5 +161,4 @@ class StressStrainBaseVector : public FloatArray
 
 };
 
-#define stressstrainbasevector_h
-#endif
+#endif // stressstrainbasevector_h

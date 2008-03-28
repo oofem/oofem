@@ -39,6 +39,7 @@
 //   ***************************************************
 
 #ifndef nonlocmatstiffinterface_h
+#define nonlocmatstiffinterface_h
 
 /**
  Class Nonlocal Material Stiffness Interface. This is only abstract class.
@@ -81,7 +82,6 @@ public:
 #endif
 };
  
-#define nonlocmatstiffinterface_h
-#endif
+#endif // nonlocmatstiffinterface_h
 
 

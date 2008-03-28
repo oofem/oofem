@@ -39,6 +39,7 @@
 
 #ifndef dyncombuff_h
 #define dyncombuff_h
+
 #ifdef __PARALLEL_MODE
 
 #include "parallel.h"
@@ -276,4 +277,4 @@ class DynamicCommunicationBuffer : public  CommunicationBuffer
 
 
 #endif
-#endif
+#endif // dyncombuff_h

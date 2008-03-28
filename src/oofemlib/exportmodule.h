@@ -38,6 +38,7 @@
 //
 
 #ifndef exportmodule_h
+#define exportmodule_h
 
 #ifndef __MAKEDEPEND
 #include <stdio.h>
@@ -126,8 +127,8 @@ protected:
 protected:
 };
 
-#define exportmodule_h
-#endif
+
+#endif // exportmodule_h
 
 
 

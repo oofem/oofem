@@ -39,6 +39,7 @@
 //   ***************************
 
 #ifndef crosssection_h 
+#define crosssection_h 
 
 #include "femcmpnn.h"
 #include "material.h"
@@ -295,6 +296,5 @@ public:
 } ;
 
 
-#define crosssection_h
-#endif
+#endif // crosssection_h 
 

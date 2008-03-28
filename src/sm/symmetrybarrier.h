@@ -38,6 +38,7 @@
 // class PolylineNonlocalBarrier
 //
 #ifndef symmetrybarrier_h
+#define symmetrybarrier_h
 
 #include "nonlocalbarrier.h"
 #include "domain.h"
@@ -99,6 +100,5 @@ public:
 
 };
 
-#define symmetrybarrier_h
-#endif
+#endif // symmetrybarrier_h
 

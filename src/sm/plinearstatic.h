@@ -36,9 +36,10 @@
 //
 // Class PLinearStatic
 //
-#ifdef __PARALLEL_MODE
-
 #ifndef plinearstatic_h
+#define plinearstatic_h
+
+#ifdef __PARALLEL_MODE
 
 #ifndef __MAKEDEPEND
 #include <stdio.h>
@@ -91,6 +92,6 @@ public:
   virtual void               assembleVectorFromDofManagers (FloatArray&, TimeStep*, EquationID ut, 
                                                             CharType type, ValueModeType mode, Domain* domain) ;
 };
-#define plinearstatic_h
-#endif //plinearstatic_h
-#endif //__PARALLEL_MODE
+
+#endif 
+#endif // plinearstatic_h

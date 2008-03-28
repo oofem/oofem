@@ -38,6 +38,7 @@
 //
 
 #ifndef diidynamic_h
+#define diidynamic_h
 
 #ifndef __MAKEDEPEND
 #include <stdio.h>
@@ -118,5 +119,4 @@ TASK:
   
 } ;
 
-#define diidynamic_h
-#endif
+#endif // diidynamic_h

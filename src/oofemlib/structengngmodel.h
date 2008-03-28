@@ -37,7 +37,8 @@
 // Class LinearStatic
 //
 
-#ifndef structEngngModel_h
+#ifndef structengngmodel_h
+#define structengngmodel_h
 
 #ifndef __MAKEDEPEND
 #include <stdio.h>
@@ -262,5 +263,5 @@ public:
   void               showSparseMtrxStructure (int type, oofegGraphicContext& context, TimeStep* atTime);
 #endif
 };
-#define structEngngModel_h
-#endif
+
+#endif // structengngmodel_h

@@ -38,6 +38,7 @@
 //   **********************************
 
 #ifndef rankinepm_h
+#define rankinepm_h
 
 #include "mplasticmaterial.h"
 
@@ -95,5 +96,4 @@ protected:
  
 };
 
-#define rankinepm_h
-#endif
+#endif // rankinepm_h

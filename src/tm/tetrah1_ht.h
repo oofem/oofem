@@ -134,12 +134,4 @@ protected:
  int giveApproxOrder (int unknownIndx) {return 1;}
 } ;
 
-#endif
-
-
-
-
-
-
-
-
+#endif // tetrah1_ht_h

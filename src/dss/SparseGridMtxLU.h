@@ -37,8 +37,8 @@
 */
 
 
-#ifndef _SPARSEGRIDMTXLU_H__
-#define _SPARSEGRIDMTXLU_H__
+#ifndef sparsegridmtxlu_h
+#define sparsegridmtxlu_h
 
 #include "SparseGridMtx.h"
 
@@ -111,4 +111,4 @@ public:
 
 DSS_NAMESPASE_END
 
-#endif// _SPARSEGRIDMTXLU_H__
+#endif

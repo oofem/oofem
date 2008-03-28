@@ -38,6 +38,7 @@
 //   ************************************
 
 #ifndef scalarerrorindicator_h 
+#define scalarerrorindicator_h 
 
 #include "compiler.h"
 #include "cltypes.h"
@@ -99,11 +100,4 @@ public:
 protected:
 };
 
-#define scalarerrorindicator_h
-#endif
-
-
-
-
-
-
+#endif // scalarerrorindicator_h 

@@ -34,6 +34,7 @@
 */
 
 #ifndef primaryfield_h
+#define primaryfield_h
 
 #include "field.h"
 #include "interface.h"
@@ -139,5 +140,4 @@ protected:
 };
 
 
-#define primaryfield_h
-#endif
+#endif // primaryfield_h

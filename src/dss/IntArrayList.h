@@ -37,8 +37,8 @@
 */
 
 
-#ifndef _INTARRAYLIST_H__
-#define _INTARRAYLIST_H__
+#ifndef intarraylist_h
+#define intarraylist_h
 
 #include "Array.h"
 
@@ -137,4 +137,4 @@ public:
 
 DSS_NAMESPASE_END
 
-#endif //INTARRAYLIST_H__
+#endif

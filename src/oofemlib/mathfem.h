@@ -39,7 +39,8 @@
 // ref : Lippman p 104
 // ! friend functions may not be declared inline (C++\Views p 17)
 */
-#ifndef __mathfem_h
+#ifndef mathfem_h
+#define mathfem_h
 
 #ifndef __MAKEDEPEND
 #include <math.h>
@@ -309,5 +310,4 @@ template <class T> double brent (double ax, double bx, double cx, const T& f,
       
 }
 
-#define __mathfem_h
-#endif
+#endif // mathfem_h

@@ -39,6 +39,8 @@
 //   ************************************
 
 #ifndef error_h
+#define error_h
+
 #include "oofemcfg.h"
 #include "logger.h"
 #ifndef __MAKEDEPEND
@@ -159,5 +161,5 @@ void oofem_exit (int code);
 #define __OOFEM_WARNING(_file,_line,_1) __OOFEM_WARNING1(_file,_line,_1)
 //@}
 
-#define error_h
-#endif
+
+#endif // error_h

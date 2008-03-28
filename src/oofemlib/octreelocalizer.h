@@ -38,6 +38,7 @@
 //   **************************************
 
 #ifndef octreelocalizer_h 
+#define octreelocalizer_h 
 
 #include "spatiallocalizer.h"
 #include "compiler.h"
@@ -348,8 +349,7 @@ protected:
                        const double radius, oofemOctantRec* currentCell) ;
 };
 
-#define octreelocalizer_h
-#endif
+#endif // octreelocalizer_h 
 
 
 

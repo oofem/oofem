@@ -62,12 +62,4 @@ protected:
  double computeRadiusAt (GaussPoint* gp);
 } ;
 
-#endif
-
-
-
-
-
-
-
-
+#endif // traxisym1_ht_h

@@ -40,6 +40,7 @@
 
  
 #ifndef sparsenonlinsystemnm_h
+#define sparsenonlinsystemnm_h
 
 
 #include "nummet.h"
@@ -124,8 +125,7 @@ public:
  public:
  };
 
-#define sparsenonlinsystemnm_h
-#endif
+#endif // sparsenonlinsystemnm_h
 
 
 

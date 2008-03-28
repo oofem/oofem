@@ -37,7 +37,8 @@
 //   *** CLASS MATERIAL - DEFORMATION THEORY ***
 //   *******************************************
 
-#ifndef deftheorymaterial_h 
+#ifndef deformationtheorymaterial_h 
+#define deformationtheorymaterial_h 
 
 #include "femcmpnn.h"
 #include "cltypes.h"
@@ -84,5 +85,4 @@ public:
 } ;
 
 
-#define deftheorymaterial_h
-#endif
+#endif // deformationtheorymaterial_h 

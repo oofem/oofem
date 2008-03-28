@@ -39,6 +39,7 @@
 
 #ifndef problemcomm_h
 #define problemcomm_h
+
 #ifdef __PARALLEL_MODE
 
 #include "communicator.h"
@@ -151,7 +152,7 @@ private:
 
 
 #endif
-#endif
+#endif // problemcomm_h
 
 
 

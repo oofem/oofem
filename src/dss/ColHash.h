@@ -37,8 +37,8 @@
 */
 
 
-#ifndef _COLHASH_H__
-#define _COLHASH_H__
+#ifndef colhash_h
+#define colhash_h
 
 #include "Array.h"
 #include "IntArrayList.h"
@@ -104,4 +104,4 @@ public:
 
 DSS_NAMESPASE_END
 
-#endif //_COLHASH_H__
+#endif

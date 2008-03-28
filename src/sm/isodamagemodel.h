@@ -37,7 +37,8 @@
 //   *** CLASS SIMPLE ISOTROPIC DAMAGE MODEL   ************
 //   ******************************************************
 
-#ifndef isodamgemodel_h 
+#ifndef isodamagemodel_h 
+#define isodamagemodel_h 
 
 #include "material.h"
 #include "linearelasticmaterial.h"
@@ -356,6 +357,5 @@ protected:
 } ;
 
 
-#define isodamgemodel_h
-#endif
+#endif // isodamagemodel_h 
 

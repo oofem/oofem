@@ -32,6 +32,8 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.                                                                              
 */
 #ifndef parmetisloadbalancer_h
+#define parmetisloadbalancer_h
+
 #ifdef __PARALLEL_MODE
 #include "loadbalancer.h"
 
@@ -104,5 +106,4 @@ protected:
 
 
 #endif
-#define parmetisloadbalancer_h
-#endif
+#endif // parmetisloadbalancer_h

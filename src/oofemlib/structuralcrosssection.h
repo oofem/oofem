@@ -39,6 +39,7 @@
 //   ***************************
 
 #ifndef structuralcrosssection_h 
+#define structuralcrosssection_h 
 
   
 #include "crosssection.h"
@@ -348,6 +349,5 @@ friend class StructuralMaterial;
 } ;
 
 
-#define structuralcrosssection_h
-#endif
+#endif // structuralcrosssection_h 
 

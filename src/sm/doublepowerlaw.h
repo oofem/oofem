@@ -36,7 +36,8 @@
 //   *********************************************
 //   *** CLASS RHEOLOGIC DOUBLE POWER LAW Material
 //   *********************************************
-#ifndef doublepowerlawmat_h 
+#ifndef doublepowerlaw_h 
+#define doublepowerlaw_h 
 
 #include "cltypes.h"
 #include "maxwellChM.h"
@@ -71,5 +72,4 @@ protected:
 } ;
 
 
-#define doublepowerlawmat_h
-#endif
+#endif // doublepowerlaw_h 

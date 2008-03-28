@@ -41,6 +41,7 @@
 */
 
 #ifndef freestor_h
+#define freestor_h
 
 
 /*
@@ -75,8 +76,7 @@
    void     freeDouble (double*) ;
 
 
-#define freestor_h
-#endif
+#endif // freestor_h
 
 
 

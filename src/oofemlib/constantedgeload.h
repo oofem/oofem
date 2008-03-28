@@ -38,6 +38,7 @@
 //   ******************************
 
 #ifndef constantedgeload_h 
+#define constantedgeload_h 
 
 #include "boundaryload.h"
 #include "gausspnt.h"
@@ -84,8 +85,7 @@ private:
 } ;
 
 
-#define constantedgeload_h
-#endif
+#endif // constantedgeload_h 
 
 
 

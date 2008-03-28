@@ -37,8 +37,8 @@
 //   *** CLASS QUADRATIC PLANE STRAIN ***
 //   ************************************
  
-#ifndef __qplanstrss_h
-#define __qplanstrss_h
+#ifndef qplanstrss_h
+#define qplanstrss_h
 
 #include "structuralelement.h"
 
@@ -102,4 +102,4 @@ protected:
 
 };
    
-#endif
+#endif // qplanstrss_h

@@ -36,8 +36,8 @@
    Author: Richard Vondracek, <richard.vondracek@seznam.cz>
 */
 
-#ifndef _DSSOLVER_H__
-#define _DSSOLVER_H__
+#ifndef dssolver_h
+#define dssolver_h
 
 #include "DSSAfx.h"
 #include "SparseConectivityMtx.h"
@@ -278,4 +278,4 @@ public:
 
 DSS_NAMESPASE_END
 
-#endif //_DSSOLVER_H__
+#endif 

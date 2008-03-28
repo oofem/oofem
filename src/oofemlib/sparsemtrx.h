@@ -39,6 +39,7 @@
 //   *************************************************************************
 
 #ifndef sparsemtrx_h 
+#define sparsemtrx_h 
 
 //#ifdef __GNUG__
 //#pragma interface
@@ -213,6 +214,5 @@ ents a base class for sparse matrices containing
 
 };
 
-#define sparsemtrx_h
-#endif
+#endif // sparsemtrx_h 
 

@@ -38,6 +38,7 @@
 // class NonlocalBarrier
 //
 #ifndef nonlocalbarrier_h
+#define nonlocalbarrier_h
 
 #include "femcmpnn.h"
 #include "domain.h"
@@ -101,6 +102,5 @@ public:
 
 };
 
-#define nonlocalbarrier_h
-#endif
+#endif // nonlocalbarrier_h
 

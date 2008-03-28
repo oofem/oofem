@@ -39,6 +39,7 @@
 //   ********************************
 
 #ifndef remeshingcrit_h 
+#define remeshingcrit_h 
 
 #include "femcmpnn.h"
 #include "compiler.h"
@@ -110,8 +111,7 @@ public:
 protected:
 };
 
-#define remeshingcrit_h
-#endif
+#endif // remeshingcrit_h 
 
 
 

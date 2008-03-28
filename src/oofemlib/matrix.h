@@ -45,6 +45,7 @@
  
 
 #ifndef matrix_h
+#define matrix_h
 
 /* class FloatMatrix ; class IntArray ; */
 
@@ -99,8 +100,7 @@ class Matrix
 
 } ;
 
-#define matrix_h
-#endif
+#endif // matrix_h
 
 
 

@@ -155,7 +155,7 @@ protected:
   int           updateRotationMatrix () ;
 } ;
 
-#endif
+#endif // libeam3d2_h
 
 
 

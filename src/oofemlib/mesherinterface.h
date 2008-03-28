@@ -38,6 +38,7 @@
 //   ******************************
 
 #ifndef mesherinterface_h 
+#define mesherinterface_h 
 
 
 class Domain;
@@ -68,5 +69,4 @@ public:
  virtual int createMesh (Domain* d, TimeStep*, int domainNumber, int domainSerNum) = 0;
 };
 
-#define mesherinterface_h 
-#endif
+#endif // mesherinterface_h 

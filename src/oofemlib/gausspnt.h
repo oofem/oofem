@@ -288,7 +288,7 @@ friend class FiberedCrossSection;
 } ;
 
 
-#endif
+#endif // gausspnt_h
 
 
 

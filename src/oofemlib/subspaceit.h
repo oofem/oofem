@@ -39,6 +39,7 @@
 
  
 #ifndef subspaceit_h
+#define subspaceit_h
 
 #ifndef __MAKEDEPEND
 #include <stdio.h>
@@ -133,8 +134,7 @@ private:
  protected:
 };
 
-#define subspaceit_h
-#endif
+#endif // subspaceit_h
 
 
 

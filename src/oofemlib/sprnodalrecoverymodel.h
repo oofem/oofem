@@ -38,6 +38,7 @@
 //   **************************************
 
 #ifndef sprnodalrecoverymodel_h 
+#define sprnodalrecoverymodel_h 
 
 #include "compiler.h"
 #include "cltypes.h"
@@ -114,8 +115,7 @@ public:
 };
 
 
-#define sprnodalrecoverymodel_h
-#endif
+#endif // sprnodalrecoverymodel_h 
 
 
 

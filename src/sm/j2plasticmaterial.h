@@ -37,7 +37,8 @@
 //   *** CLASS J2 plastic material  
 //   *******************************
 
-#ifndef J2plasticMaterial_h
+#ifndef j2plasticmaterial_h
+#define j2plasticmaterial_h
 
 #include "plasticmaterial.h"
 
@@ -114,5 +115,4 @@ protected:
                    const FloatArray& stressSpaceHardeningVars);
 };
 
-#define J2plasticMaterial_h
-#endif
+#endif // j2plasticmaterial_h

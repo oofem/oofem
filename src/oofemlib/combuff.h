@@ -38,6 +38,8 @@
 //
 
 #ifndef combuff_h
+#define combuff_h
+
 #ifdef __PARALLEL_MODE
 
 #include "parallel.h"
@@ -490,11 +492,7 @@ class StaticCommunicationBuffer : public CommunicationBuffer, public MPIBuffer
 };
 
 
-
-
-
-#define combuff_h
 #endif
-#endif
+#endif // combuff_h
 
 

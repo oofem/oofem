@@ -38,6 +38,7 @@
 //
 
 #ifndef eigenvaluedynamic_h
+#define eigenvaluedynamic_h
 
 #ifndef __MAKEDEPEND
 #include <stdio.h>
@@ -115,5 +116,4 @@ TASK:
   classType giveClassID ()      const { return EigenValueDynamicClass;}
 } ;
 
-#define linearstatic_h
-#endif
+#endif // eigenvaluedynamic_h

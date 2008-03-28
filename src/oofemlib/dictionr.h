@@ -40,6 +40,7 @@
  
 
 #ifndef dictionr_h
+#define dictionr_h
 
 #include "compiler.h"
 #include "pair.h"
@@ -129,8 +130,7 @@ protected:
   contextIOResultType    restoreContext(DataStream* stream, ContextMode mode, void *obj = NULL);
 } ;
 
-#define dictionr_h
-#endif
+#endif // dictionr_h
 
 
 

@@ -38,7 +38,8 @@
 //   *** CLASS SPARSE MATRIX SKYLINE CLASS                        ************
 //   *************************************************************************
 
-#ifndef skyline2_h 
+#ifndef skyline_h 
+#define skyline_h 
 
 #include "sparsemtrx.h"
 
@@ -199,6 +200,5 @@ class Skyline : public SparseMtrx
    Skyline (int , int, double*, IntArray*);
 };
 
-#define skyline2_h
-#endif
+#endif // skyline_h 
 

@@ -39,6 +39,7 @@
 
 
 #ifndef fei3dtrlin_h
+#define fei3dtrlin_h
 
 
 #include "flotarry.h"
@@ -299,9 +300,7 @@ public:
 
 
 
-
-#define fei3dtrlin_h
-#endif
+#endif // fei3dtrlin_h
 
 
 

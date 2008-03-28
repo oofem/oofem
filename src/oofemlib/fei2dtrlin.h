@@ -34,6 +34,7 @@
 */
 
 #ifndef fei2dtrlin_h
+#define fei2dtrlin_h
 
 #include "flotarry.h"
 #include "intarray.h"
@@ -230,8 +231,7 @@ protected:
   double edgeComputeLength (IntArray& edgeNodes, const FloatArray** coords);
 } ;
 
-#define fei2dtrlin_h
-#endif
+#endif // fei2dtrlin_h
 
 
 

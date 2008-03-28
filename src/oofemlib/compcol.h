@@ -71,6 +71,7 @@
 
 
 #ifndef compcol_h
+#define compcol_h
 
 #include "sparsemtrx.h"
 #include "intarray.h"
@@ -190,6 +191,5 @@ protected:
 } ;
 
 
-#define compcol_h
-#endif
+#endif // compcol_h
 

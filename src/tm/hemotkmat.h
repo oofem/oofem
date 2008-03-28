@@ -34,6 +34,7 @@
 */
 
 #ifndef hemotkmat_h 
+#define hemotkmat_h 
 
 #include "transportmaterial.h"
 #include "flotarry.h"
@@ -187,10 +188,4 @@ protected:
 } ;
 
 
-#define hemotkmat_h
-#endif
-
-
-
-
-
+#endif // hemotkmat_h 

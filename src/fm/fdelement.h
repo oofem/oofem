@@ -37,7 +37,8 @@
 //   *** CLASS GENERAL ELEMENT CLASS FOR FLUID DYNAMIC PROBLEMS ***
 //   **************************************************************
  
-#ifndef fluiddynamicelement_h
+#ifndef fdelement_h
+#define fdelement_h
 
 
 #include "element.h"
@@ -120,8 +121,7 @@ int giveInternalStateAtNode (FloatArray& answer, InternalStateType type, Interna
 protected:
 } ;
 
-#define fluiddynamicelement_h
-#endif
+#endif // fdelement_h
 
 
 

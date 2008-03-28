@@ -68,4 +68,4 @@ class VoidPreconditioner : public Preconditioner {
 
 };
 
-#endif
+#endif // voidprecond_h

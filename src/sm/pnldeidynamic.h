@@ -37,7 +37,8 @@
 // Class NlDEIDynamic - DirectExplicitIntegrationDynamic
 //
 
-#ifndef PNlDEIDynamic_h
+#ifndef pnldeidynamic_h
+#define pnldeidynamic_h
 
 #ifndef __MAKEDEPEND
 #include <stdio.h>
@@ -338,5 +339,4 @@ public:
 #endif
 } ;
 
-#define PNlDEIDynamic_h
-#endif
+#endif // pnldeidynamic_h

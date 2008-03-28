@@ -34,6 +34,7 @@
 */
 
 #ifndef masonry02_h
+#define masonry02_h
 
 #include "mplasticmaterial2.h"
 
@@ -159,5 +160,4 @@ protected:
  double computeF3HardeningGradient (double k);
 };
 
-#define masonry02_h
-#endif
+#endif // masonry02_h

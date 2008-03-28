@@ -40,6 +40,7 @@
 
  
 #ifndef dsssolver_h
+#define dsssolver_h
 
 #ifndef __MAKEDEPEND
 #include <stdio.h>
@@ -88,8 +89,8 @@ public:
       LinSystSolverType giveLinSystSolverType() const {return ST_DSS;}
    };
 
-#define dsssolver_h
-#endif
+
+#endif // dsssolver_h
 
 
 

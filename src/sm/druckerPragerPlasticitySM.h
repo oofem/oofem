@@ -41,8 +41,8 @@
 //   *** CLASS DRUCKER-PRAGER PLASTICITY STRUCTURAL MATERIAL STATUS   ***
 //   ********************************************************************
 
-#ifndef DruckerPragerPlasticitySM_h
-#define DruckerPragerPlasticitySM_h
+#ifndef druckerpragerplasticitysm_h
+#define druckerpragerplasticitysm_h
 
 #include "flotarry.h"
 #include "flotmtrx.h"
@@ -442,5 +442,5 @@ public:
 protected:   
 } ;
 
-#endif
+#endif // druckerpragerplasticitysm_h
 

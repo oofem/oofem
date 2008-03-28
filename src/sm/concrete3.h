@@ -38,6 +38,7 @@
 //   ********************************************************************************
 
 #ifndef concrete3_h
+#define concrete3_h
 
 #include "rcm2.h"
 #include "isolinearelasticmaterial.h"
@@ -88,8 +89,7 @@ protected:
 } ;
 
 
-#define concrete3_h
-#endif
+#endif // concrete3_h
 
 
 

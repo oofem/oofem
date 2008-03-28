@@ -37,7 +37,8 @@
 //   *** CLASS ORTHOTROPIC LINEAR ELACSTIC MATERIAL ***
 //   **************************************************
 
-#ifndef orthotropiclinearelasticmaterial_h 
+#ifndef ortholinearelasticmaterial_h 
+#define ortholinearelasticmaterial_h 
 
 #include "linearelasticmaterial.h"
 #include "dictionr.h"
@@ -134,6 +135,5 @@ friend class CrossSection;
 } ;
 
 
-#define orthoropiclinearelasticmaterial_h
-#endif
+#endif // ortholinearelasticmaterial_h 
 

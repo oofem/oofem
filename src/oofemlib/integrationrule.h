@@ -271,4 +271,4 @@ protected:
 
 };
 
-#endif
+#endif // integrationrule_h

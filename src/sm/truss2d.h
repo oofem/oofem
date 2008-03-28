@@ -132,12 +132,4 @@ protected:
   
 } ;
 
-#endif
-
-
-
-
-
-
-
-
+#endif // truss2d_h

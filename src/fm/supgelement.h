@@ -38,6 +38,7 @@
 //   *******************************************************************
  
 #ifndef supgelement_h
+#define supgelement_h
 
 
 #include "fmelement.h"
@@ -179,8 +180,7 @@ public:
  virtual void computeDeviatoricStress (FloatArray& answer, GaussPoint* gp, TimeStep* ) = 0;
 } ;
 
-#define supgelement_h
-#endif
+#endif // supgelement_h
 
 
 

@@ -38,6 +38,7 @@
 //
 
 #ifndef nonstationarytransportproblem_h
+#define nonstationarytransportproblem_h
 
 #include "structengngmodel.h"
 #include "sparselinsystemnm.h"
@@ -163,5 +164,4 @@ protected:
                                              CharType lhsType, Domain* d);
 } ;
 
-#define nonstationarytransportproblem_h
-#endif
+#endif // nonstationarytransportproblem_h

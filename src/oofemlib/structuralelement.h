@@ -40,6 +40,7 @@
  
 
 #ifndef structuralelement_h
+#define structuralelement_h
 
 #include "element.h"
 #include "femcmpnn.h"
@@ -717,8 +718,7 @@ protected:
 friend  class IDNLMaterial;
 } ;
 
-#define structuralelement_h
-#endif
+#endif // structuralelement_h
 
 
 

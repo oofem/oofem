@@ -34,6 +34,7 @@
 */
 
 #ifndef newtonianfluid_h 
+#define newtonianfluid_h 
 
 #include "fluiddynamicmaterial.h"
 #include "flotarry.h"
@@ -151,8 +152,7 @@ public:
 } ;
 
 
-#define newtonianfluid_h
-#endif
+#endif // newtonianfluid_h 
 
 
 

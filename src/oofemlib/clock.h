@@ -40,6 +40,7 @@
 */
 
 #ifndef clock_h
+#define clock_h
 
 #ifndef _MSC_VER // If no Microsoft C
 
@@ -119,5 +120,5 @@ void getRelativeUtime (oofem_timeval& answer, oofem_timeval& from, oofem_timeval
 void convertTS2HMS (int &nhrs, int &nmin, int &nsec, long int tsec);
 void convertTS2HMS (int &nhrs, int &nmin, int &nsec, double   tsec);
 
-#endif
+#endif // clock_h
 

@@ -33,6 +33,7 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.                                                                              
 */
 #ifndef nodalaveragingrecoverymodel_h 
+#define nodalaveragingrecoverymodel_h 
 
 #include "compiler.h"
 #include "cltypes.h"
@@ -108,8 +109,7 @@ public:
 };
 
 
-#define nodalaveragingrecoverymodel_h
-#endif
+#endif // nodalaveragingrecoverymodel_h 
 
 
 

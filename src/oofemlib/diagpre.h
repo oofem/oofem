@@ -29,8 +29,8 @@
 /*                                                                           */
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
-#ifndef DIAGPRE_H
-#define DIAGPRE_H
+#ifndef diagpre_h
+#define diagpre_h
 
 #include "flotarry.h"
 #include "sparsemtrx.h"
@@ -69,4 +69,4 @@ public:
   double&           diag(int i) { return diag_(i); }
 };
 
-#endif
+#endif // diagpre_h

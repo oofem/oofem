@@ -38,6 +38,7 @@
 //   *********************************
  
 #ifndef fmelement_h
+#define fmelement_h
 
 
 #include "element.h"
@@ -84,8 +85,7 @@ public:
   
 } ;
 
-#define fmelement_h
-#endif
+#endif // fmelement_h
 
 
 

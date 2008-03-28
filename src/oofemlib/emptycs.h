@@ -39,6 +39,7 @@
 //   ***************************
 
 #ifndef emptycs_h 
+#define emptycs_h 
 
 #include "crosssection.h"
 #include "material.h"
@@ -87,6 +88,5 @@ public:
 } ;
 
 
-#define emptycs_h
-#endif
+#endif // emptycs_h 
 

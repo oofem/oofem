@@ -32,6 +32,8 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.                                                                              
 */
 #ifndef nonlocalmatwtp_h
+#define nonlocalmatwtp_h
+
 #ifdef __PARALLEL_MODE
 
 #define NonlocalMaterialWTP_END_DATA -9999
@@ -113,7 +115,6 @@ class NonlocalMaterialWTP : public LoadBalancer::WorkTransferPlugin
 };
 
 #endif
-#define nonlocalmatwtp_h
-#endif
+#endif // nonlocalmatwtp_h
 
 

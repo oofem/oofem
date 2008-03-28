@@ -38,6 +38,7 @@
 // class PolylineNonlocalBarrier
 //
 #ifndef polylinenonlocalbarrier_h
+#define polylinenonlocalbarrier_h
 
 #include "nonlocalbarrier.h"
 #include "domain.h"
@@ -117,6 +118,5 @@ public:
 
 };
 
-#define polylinenonlocalbarrier_h
-#endif
+#endif // polylinenonlocalbarrier_h
 

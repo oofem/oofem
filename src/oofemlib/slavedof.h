@@ -142,4 +142,4 @@ class SlaveDof : public Dof
 } ;
 
 
-#endif
+#endif // slavedof_h

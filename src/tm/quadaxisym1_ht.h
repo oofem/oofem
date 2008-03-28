@@ -62,12 +62,4 @@ protected:
  double computeRadiusAt (GaussPoint* gp);
 } ;
 
-#endif
-
-
-
-
-
-
-
-
+#endif // quadaxisym1_ht_h

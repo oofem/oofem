@@ -34,6 +34,8 @@
 */
 
 #ifndef levelsetpcs_h
+#define levelsetpcs_h
+
 #include "materialinterface.h"
 #include "mathfem.h"
 #include "geotoolbox.h"
@@ -187,5 +189,4 @@ class LevelSetPCS : public MaterialInterface
   //@}
 };
 
-#define levelsetpcs_h
-#endif
+#endif // levelsetpcs_h

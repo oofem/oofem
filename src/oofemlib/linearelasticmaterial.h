@@ -39,6 +39,7 @@
 //   **************************************
 
 #ifndef linearelasticmaterial_h 
+#define linearelasticmaterial_h 
 
   
 #include "structuralmaterial.h"
@@ -208,5 +209,4 @@ protected:
 } ;
 
 
-#define linearelasticmaterial_h
-#endif
+#endif // linearelasticmaterial_h 

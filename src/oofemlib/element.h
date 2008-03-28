@@ -814,7 +814,7 @@ Element::ipEvaluator (T* src, void (T::*f) (GaussPoint*, S&), S& _val)
 }
 
 
-#endif
+#endif //element_h
 
 
 

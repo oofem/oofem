@@ -153,4 +153,4 @@ protected:
   
 } ;
 
-#endif
+#endif // beam2d_h

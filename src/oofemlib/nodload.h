@@ -39,6 +39,7 @@
 //   ************************
 
 #ifndef nodload_h 
+#define nodload_h 
 
 #include "load.h"
 
@@ -119,8 +120,7 @@ public:
  } ;
 
 
-#define nodload_h
-#endif
+#endif // nodload_h 
 
 
 

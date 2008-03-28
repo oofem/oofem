@@ -40,6 +40,7 @@
  
 
 #ifndef nlstructuralelement_h
+#define nlstructuralelement_h
 
 #include "structuralelement.h"
 #include "femcmpnn.h"
@@ -176,8 +177,8 @@ protected:
 
 } ;
 
-#define nlstructuralelement_h
-#endif
+
+#endif // nlstructuralelement_h
 
 
 

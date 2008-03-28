@@ -37,6 +37,7 @@
 //   *** CLASS CEB-FIP 78 rheologic model *****
 //   ******************************************
 #ifndef cebfip78_h 
+#define cebfip78_h 
 
 #include "cltypes.h"
 #include "maxwellChM.h"
@@ -75,5 +76,4 @@ protected:
 } ;
 
 
-#define cebfip78_h
-#endif
+#endif // cebfip78_h 

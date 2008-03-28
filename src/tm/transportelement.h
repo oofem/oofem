@@ -39,6 +39,7 @@
  
 
 #ifndef transportelement_h
+#define transportelement_h
 
 
 #include "element.h"
@@ -261,13 +262,4 @@ protected:
  
 } ;
 
-#define transportelement_h
-#endif
-
-
-
-
-
-
-
-
+#endif // transportelement_h

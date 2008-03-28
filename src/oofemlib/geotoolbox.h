@@ -34,6 +34,8 @@
 */
 
 #ifndef geotoolbox_h
+#define geotoolbox_h
+
 #ifndef __MAKEDEPEND
 #include <list>
 #endif
@@ -215,5 +217,4 @@ public:
 
 
 
-#define geotoolbox_h
-#endif
+#endif // geotoolbox_h

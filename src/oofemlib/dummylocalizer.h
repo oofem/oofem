@@ -39,6 +39,7 @@
 //   *************************************
 
 #ifndef dummylocalizer_h 
+#define dummylocalizer_h 
 
 #include "spatiallocalizer.h"
 #include "compiler.h"
@@ -103,8 +104,8 @@ public:
 protected:
 };
 
-#define dummylocalizer_h
-#endif
+
+#endif // dummylocalizer_h 
 
 
 

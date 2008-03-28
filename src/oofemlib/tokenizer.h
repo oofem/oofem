@@ -33,6 +33,7 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.                                                                              
 */
 #ifndef tokenizer_h
+#define tokenizer_h
 
 #ifndef __MAKEDEPEND
 #include <stdio.h>
@@ -102,5 +103,4 @@ protected:
 };
 
 
-#define tokenizer_h
-#endif
+#endif // tokenizer_h

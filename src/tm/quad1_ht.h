@@ -128,12 +128,4 @@ protected:
  int giveApproxOrder (int unknownIndx) {return 1;}
 } ;
 
-#endif
-
-
-
-
-
-
-
-
+#endif // quad1_ht_h

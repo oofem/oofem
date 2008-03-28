@@ -39,6 +39,7 @@
 
 
 #ifndef dyncomprow_h
+#define dyncomprow_h
 
 #include "sparsemtrx.h"
 #include "intarray.h"
@@ -172,6 +173,5 @@ protected:
 } ;
 
 
-#define dyncomprow_h
-#endif
+#endif // dyncomprow_h
 

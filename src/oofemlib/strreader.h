@@ -39,6 +39,7 @@
 //
 
 #ifndef strreader_h
+#define strreader_h
 
 #ifndef __MAKEDEPEND
 #include <stdio.h>
@@ -125,8 +126,7 @@ private:
   char* skipNextWord (char* src) ;
 };
 
-#define strreader_h
-#endif
+#endif // strreader_h
 
 
 

@@ -34,6 +34,8 @@
 */
 
 #ifndef fastmarchingmethod_h
+#define fastmarchingmethod_h
+
 #include "domain.h"
 #include "mathfem.h"
 #ifndef __MAKEDEPEND
@@ -125,5 +127,4 @@ class FastMarchingMethod
   int  getSmallestTrialDofMan ();
 };
 
-#define fastmarchingmethod_h
-#endif
+#endif // fastmarchingmethod_h

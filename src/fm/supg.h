@@ -34,6 +34,7 @@
 */
 
 #ifndef supg_h
+#define supg_h
 
 #include "engngm.h"
 #include "sparselinsystemnm.h"
@@ -250,5 +251,4 @@ protected:
 
 } ;
 
-#define supg_h
-#endif
+#endif // supg_h

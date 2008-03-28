@@ -38,6 +38,7 @@
 //   ************************************************************************************************
  
 #ifndef py1_3d_supg_h
+#define py1_3d_supg_h
 
 
 #include "supgelement2.h"
@@ -117,8 +118,7 @@ public:
   virtual int  giveNumberOfSpatialDimensions ();
 } ;
 
-#define py1_3d_supg_h
-#endif
+#endif // py1_3d_supg_h
 
 
 

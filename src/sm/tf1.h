@@ -39,6 +39,7 @@
  
 
 #ifndef tf1_h
+#define tf1_h
 
 #include "structtemperatureload.h"
 #include "domain.h"
@@ -90,14 +91,4 @@ public:
  
 } ;
 
-#define tf1_h
-#endif
-
-
-
-
-
-
-
-
-
+#endif // tf1_h

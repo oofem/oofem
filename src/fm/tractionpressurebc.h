@@ -39,6 +39,7 @@
  
 
 #ifndef tractionpressurebc_h
+#define tractionpressurebc_h
 
 #include "boundary.h"
 #include "cltypes.h"
@@ -89,6 +90,5 @@ class TractionPressureBC : public BoundaryCondition
 } ;
 
 
-#define tractionpressurebc_h
-#endif
+#endif // tractionpressurebc_h
 

@@ -35,6 +35,7 @@
 
 
 #ifndef staggeredproblem_h
+#define staggeredproblem_h
 
 #include "engngm.h"
 #include "alist.h"
@@ -306,14 +307,4 @@ protected:
  int instanciateSlaveProblems ();
 };
 
-#define staggeredproblem_h
-#endif
-
-
-
-
-
-
-
-
-
+#endif // staggeredproblem_h

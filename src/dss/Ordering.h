@@ -37,8 +37,8 @@
 */
 
 
-#ifndef _ORDERING_H__
-#define _ORDERING_H__
+#ifndef ordering_h
+#define ordering_h
 
 #include "IntArrayList.h"
 #include "BigMatrix.h"
@@ -102,4 +102,4 @@ public:
 
 DSS_NAMESPASE_END
 
-#endif //_ORDERING_H__
+#endif

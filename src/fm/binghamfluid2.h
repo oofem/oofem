@@ -34,6 +34,7 @@
 */
 
 #ifndef binghamfluid2_h 
+#define binghamfluid2_h 
 
 #include "fluiddynamicmaterial.h"
 #include "flotarry.h"
@@ -245,8 +246,7 @@ public:
 } ;
 
 
-#define binghamfluid2_h
-#endif
+#endif // binghamfluid2_h 
 
 
 

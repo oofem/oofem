@@ -119,7 +119,7 @@ protected:
 
 } ;
 
-#endif
+#endif // libeam3d_h
 
 
 

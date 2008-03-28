@@ -37,8 +37,8 @@
 */
 
 
-#ifndef _SPARSECONMTX_H__
-#define _SPARSECONMTX_H__
+#ifndef sparseconectivitymtx_h
+#define sparseconectivitymtx_h
 
 #include "ColHash.h"
 #include "ConList.h"
@@ -191,4 +191,4 @@ public:
 
 DSS_NAMESPASE_END
 
-#endif //_SPARSECONMTX_H__
+#endif

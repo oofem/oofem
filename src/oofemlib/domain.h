@@ -40,6 +40,7 @@
 
  
 #ifndef domain_h
+#define domain_h
 
 #include "alist.h"
 #include "datareader.h"
@@ -471,8 +472,7 @@ int               giveNumber () {return this->number;}
 
 };
 
-#define domain_h
-#endif
+#endif // domain_h
 
 
 

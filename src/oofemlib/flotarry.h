@@ -45,6 +45,7 @@
  
 
 #ifndef flotarry_h
+#define flotarry_h
 
 #include "freestor.h"
 #include "compiler.h"
@@ -405,8 +406,7 @@ double  dotProduct (const FloatArray& p1, const FloatArray& p2, int i);
 
 #endif
 
-#define flotarry_h
-#endif
+#endif // flotarry_h
 
 
 

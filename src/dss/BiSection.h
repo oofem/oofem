@@ -37,8 +37,8 @@
 */
 
 
-#ifndef _BISECTION_H__
-#define _BISECTION_H__
+#ifndef bisection_h
+#define bisection_h
 
 #include "SparseConectivityMtx.h"
 
@@ -93,4 +93,4 @@ private:
 
 DSS_NAMESPASE_END
 
-#endif //_BISECTION_H__
+#endif 

@@ -39,6 +39,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  
 
 #ifndef simpleslavedof_h
+#define simpleslavedof_h
 
 #include "dof.h"
 #include "compiler.h"
@@ -233,5 +234,4 @@ class SimpleSlaveDof : public Dof
 
 } ;
 
-#define simpleslavedof_h
-#endif
+#endif // simpleslavedof_h

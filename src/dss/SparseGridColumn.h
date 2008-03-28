@@ -36,8 +36,8 @@
    Author: Richard Vondracek, <richard.vondracek@seznam.cz>
 */
 
-#ifndef _GRIDCOLUMN_H__
-#define _GRIDCOLUMN_H__
+#ifndef sparsegridcolumn_h
+#define sparsegridcolumn_h
 
 #include "IntArrayList.h"
 #include "Array.h"
@@ -107,4 +107,4 @@ public:
 
 DSS_NAMESPASE_END
 
-#endif //GRIDCOLUMN_H__
+#endif

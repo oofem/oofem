@@ -38,6 +38,7 @@
 //
 
 #ifndef nlinearstatic_h
+#define nlinearstatic_h
 
 #ifndef __MAKEDEPEND
 #include <stdio.h>
@@ -258,5 +259,4 @@ TASK:
 #endif
 } ;
 
-#define nlinearstatic_h
-#endif
+#endif // nlinearstatic_h

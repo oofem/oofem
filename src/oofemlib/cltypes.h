@@ -38,6 +38,7 @@
 //
 
 #ifndef cltypes_h
+#define cltypes_h
 
 /// Maximum input line length read.
 #define OOFEM_MAX_LINE_LENGTH 32768
@@ -1295,6 +1296,5 @@ int    isUnknownTypeModeIncremental (ValueModeType) ;
 /// Returns the value type of corresponding InternalStateType
 InternalStateValueType giveInternalStateValueType (InternalStateType type);
 
-#define cltypes_h
-#endif
+#endif // cltypes_h
 

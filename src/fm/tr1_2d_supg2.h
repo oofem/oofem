@@ -38,6 +38,7 @@
 //   ************************************************************************************************
  
 #ifndef tr1_2d_supg2_h
+#define tr1_2d_supg2_h
 
 
 #include "tr1_2d_supg.h"
@@ -353,8 +354,7 @@ public:
  Material* _giveMaterial (int indx) {return domain->giveMaterial(mat[indx]);}
 } ;
 
-#define tr1_2d_supg2_h
-#endif
+#endif // tr1_2d_supg2_h
 
 
 

@@ -34,6 +34,7 @@
 */
 
 #ifndef fei1dlin_h
+#define fei1dlin_h
 
 #include "feinterpol1d.h"
 #include "flotarry.h"
@@ -149,8 +150,7 @@ protected:
 
 
 
-#define fei1dlin_h
-#endif
+#endif // fei1dlin_h
 
 
 

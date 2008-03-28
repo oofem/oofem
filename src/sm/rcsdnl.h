@@ -38,6 +38,7 @@
 //   *********************************************************************************************
 
 #ifndef rcsdnl_h 
+#define rcsdnl_h 
 
 #include "rcsde.h"
 #include "structuralnonlocalmaterialext.h"
@@ -216,8 +217,7 @@ protected:
 } ;
 
 
-#define rcsdnl_h
-#endif
+#endif // rcsdnl_h 
 
 
 

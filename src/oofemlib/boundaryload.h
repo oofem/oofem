@@ -37,7 +37,8 @@
 //   *** CLASS BOUNDARY LOAD ***
 //   ************************
 
-#ifndef boundaryLoad_h 
+#ifndef boundaryload_h 
+#define boundaryload_h 
 
 #include "load.h"
 #include "gausspnt.h"
@@ -248,8 +249,7 @@ protected:
 } ;
 
 
-#define boundaryLoad_h
-#endif
+#endif // boundaryload_h 
 
 
 

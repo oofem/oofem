@@ -33,6 +33,7 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.                                                                              
 */
 #ifndef petscsolver_h
+#define petscsolver_h
 
 #ifndef __MAKEDEPEND
 #include <stdio.h>
@@ -107,6 +108,6 @@ public:
   LinSystSolverType giveLinSystSolverType() const {return ST_Petsc;}
 };
 
-#define petscsolver_h
-#endif
+
+#endif // petscsolver_h
 

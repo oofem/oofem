@@ -180,4 +180,4 @@ class HangingDof : public Dof
   
 } ;
 
-#endif
+#endif // hangingdof_h

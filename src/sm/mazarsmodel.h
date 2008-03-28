@@ -37,7 +37,8 @@
   //   *** CLASS MAZARS DAMAGE MODEL FOR CONCRETE ************
   //   *******************************************************
 
-#ifndef mazarsmaterial_h 
+#ifndef mazarsmodel_h 
+#define mazarsmodel_h 
 
 #include "linearelasticmaterial.h"
 #include "idm1.h"
@@ -192,6 +193,5 @@ class MazarsMaterial : public IsotropicDamageMaterial1
 					 GaussPoint*gp, TimeStep* atTime) ;
 };
 
-#define mazarsmaterial_h
-#endif
+#endif // mazarsmodel_h 
 

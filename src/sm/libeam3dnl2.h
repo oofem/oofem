@@ -189,4 +189,4 @@ protected:
  
 } ;
 
-#endif
+#endif // libeam3dnl2_h

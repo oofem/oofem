@@ -38,6 +38,7 @@
 //   *******************************************************
 
 #ifndef directerrorindicatorrc_h 
+#define directerrorindicatorrc_h 
 
 #include "compiler.h"
 #include "cltypes.h"
@@ -136,8 +137,7 @@ public:
 
 };
 
-#define directerrorindicatorrc_h
-#endif
+#endif // directerrorindicatorrc_h 
 
 
 

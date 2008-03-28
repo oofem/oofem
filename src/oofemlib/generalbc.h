@@ -40,6 +40,7 @@
  
 
 #ifndef generalbc_h
+#define generalbc_h
 
 #include "femcmpnn.h"
 #include "domain.h"
@@ -142,6 +143,5 @@ protected:
 
 } ;
 
-#define generalbc_h
-#endif
+#endif // generalbc_h
 

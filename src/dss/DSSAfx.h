@@ -41,8 +41,8 @@
 //  or project specific include files that are used frequently, but
 //      are changed infrequently
 //
-#if !defined(_DSSAFX_H__)
-#define _DSSAFX_H__
+#ifndef dssafx_h
+#define dssafx_h
 
 #if _MSC_VER > 1000
 #pragma once
@@ -102,5 +102,5 @@ typedef unsigned long ULONG;
 //#define DSS_NAMESPASE_BEGIN namespace DSS {
 //#define DSS_NAMESPASE_END }
 
-#endif // !defined(_DSSAFX_H__)
+#endif
 

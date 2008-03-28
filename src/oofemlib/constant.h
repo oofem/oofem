@@ -37,6 +37,9 @@
 //   *** CLASS CONSTANT FUNCTION ***
 //   *******************************
 
+#ifndef constant_h
+#define constant_h
+
 #include "loadtime.h"
 
 /**
@@ -95,3 +98,5 @@ class ConstantFunction : public LoadTimeFunction
   */
   virtual double     __at (double)            { return this->giveValue();}
 };
+
+#endif // constant_h

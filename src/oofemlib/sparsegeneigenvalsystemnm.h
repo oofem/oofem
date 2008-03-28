@@ -40,6 +40,7 @@
 
  
 #ifndef sparsegeneigenvalsystemnm_h
+#define sparsegeneigenvalsystemnm_h
 
 
 #include "nummet.h"
@@ -94,8 +95,7 @@ public:
  public:
  };
 
-#define sparsegeneigenvalsystemnm_h
-#endif
+#endif // sparsegeneigenvalsystemnm_h
 
 
 

@@ -36,8 +36,8 @@
    Author: Richard Vondracek, <richard.vondracek@seznam.cz>
 */
 
-#ifndef _MATH_TRACER_H__
-#define _MATH_TRACER_H__
+#ifndef mathtracer_h
+#define mathtracer_h
 
 #include "DSSAfx.h"
 
@@ -87,4 +87,4 @@ protected:
 
 DSS_NAMESPASE_END
 
-#endif //_MATH_TRACER_H__
+#endif

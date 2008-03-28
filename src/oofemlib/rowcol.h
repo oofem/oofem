@@ -120,5 +120,5 @@ protected:
 
 } ;
 
-#endif
+#endif // rowcol_h
 

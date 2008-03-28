@@ -33,6 +33,7 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.                                                                              
 */
 #ifndef spoolessolver_h
+#define spoolessolver_h
 
 #ifndef __MAKEDEPEND
 #include <stdio.h>
@@ -99,8 +100,8 @@ public:
   LinSystSolverType giveLinSystSolverType() const {return ST_Spooles;}
  };
 
-#define spoolessolver_h
-#endif
+
+#endif // spoolessolver_h
 
 
 

@@ -38,6 +38,7 @@
 //   ************************
  
 #ifndef microplane_h
+#define microplane_h
 
 #include "gausspnt.h"
 #include "microplanematerial.h"
@@ -111,8 +112,7 @@ public:
  
 } ;
 
-#define microplane_h
-#endif
+#endif // microplane_h
 
 
 

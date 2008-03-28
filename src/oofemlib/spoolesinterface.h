@@ -32,6 +32,8 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.                                                                              
 */
+#ifndef spoolesinterface_h
+#define spoolesinterface_h
 
 #ifdef __SPOOLES_MODULE
 
@@ -40,3 +42,4 @@
 #include "SymbFac.h"
 
 #endif //ifdef __SPOOLES_MODULE
+#endif // spoolesinterface_h

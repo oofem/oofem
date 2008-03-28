@@ -38,6 +38,7 @@
 //   ********************************************************
 
 #ifndef perfectlyplasticmaterial_h 
+#define perfectlyplasticmaterial_h 
 
 #include "structuralmaterial.h"
 #include "linearelasticmaterial.h"
@@ -295,5 +296,4 @@ protected:
 } ;
 
 
-#define perfectlyplasticmaterial_h
-#endif
+#endif // perfectlyplasticmaterial_h 

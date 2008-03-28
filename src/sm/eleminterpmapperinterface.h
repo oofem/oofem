@@ -34,6 +34,7 @@
 */
 
 #ifndef eleminterpmapperinterface_h 
+#define eleminterpmapperinterface_h 
 
 #include "compiler.h"
 #include "cltypes.h"
@@ -69,8 +70,7 @@ public:
 };
 
 
-#define eleminterpmapperinterface_h
-#endif
+#endif // eleminterpmapperinterface_h 
 
 
 

@@ -39,6 +39,7 @@
  
 
 #ifndef cct_h
+#define cct_h
 
 #include "nlstructuralelement.h"
 #include "layeredcrosssection.h"
@@ -210,8 +211,7 @@ protected:
 } ;
 
    
-#define cct_h
-#endif
+#endif // cct_h
 
 
 

@@ -39,7 +39,8 @@
 //   **************************
 
  
-#ifndef linesearchnm_h
+#ifndef linesearch_h
+#define linesearch_h
 
 
 #include "nummet.h"
@@ -108,8 +109,7 @@ protected:
  void search (int istep, FloatArray& prod, FloatArray& eta, double amp, double maxeta, double mineta, int& status);
  };
 
-#define linesearchnm_h
-#endif
+#endif // linesearch_h
 
 
 

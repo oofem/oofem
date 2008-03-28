@@ -34,6 +34,7 @@
 */
 
 #ifndef fieldmanager_h
+#define fieldmanager_h
 
 #include "field.h"
 #ifndef __MAKEDEPEND
@@ -74,5 +75,4 @@ public:
 
 };
 
-#define fieldmanager_h
-#endif
+#endif // fieldmanager_h

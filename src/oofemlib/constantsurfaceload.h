@@ -38,6 +38,7 @@
 //   ***********************************
 
 #ifndef constantsurfaceload_h 
+#define constantsurfaceload_h 
 
 #include "boundaryload.h"
 #include "gausspnt.h"
@@ -84,8 +85,7 @@ private:
 } ;
 
 
-#define constantsurfaceload_h
-#endif
+#endif // constantsurfaceload_h 
 
 
 

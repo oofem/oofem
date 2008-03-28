@@ -39,6 +39,7 @@
 
  
 #ifndef imlsolver_h
+#define imlsolver_h
 
 #ifndef __MAKEDEPEND
 #include <stdio.h>
@@ -114,8 +115,7 @@ private:
 
  };
 
-#define imlsolver_h
-#endif
+#endif // imlsolver_h
 
 
 

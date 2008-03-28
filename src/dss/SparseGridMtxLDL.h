@@ -37,8 +37,8 @@
 */
 
 
-#ifndef _SPARSEGRIDMTXLDL_H__
-#define _SPARSEGRIDMTXLDL_H__
+#ifndef sparsegridmtxldl_h
+#define sparsegridmtxldl_h
 
 #include "SparseGridMtx.h"
 
@@ -145,4 +145,4 @@ public:
 
 DSS_NAMESPASE_END
 
-#endif// _SPARSEGRIDMTXLDL_H__
+#endif

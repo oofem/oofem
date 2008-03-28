@@ -34,7 +34,8 @@
 */
 
 
-#ifndef oofeggraphicscontext_h
+#ifndef oofeggraphiccontext_h
+#define oofeggraphiccontext_h
 
 #ifdef __OOFEG
 
@@ -304,7 +305,6 @@ extern void deleteLayerGraphics(int iLayer);
 
 
 #endif
-#define oofeggraphicscontext_h
-#endif
+#endif // oofeggraphiccontext_h
 
 

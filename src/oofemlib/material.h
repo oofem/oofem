@@ -39,6 +39,7 @@
 //   **********************
 
 #ifndef material_h 
+#define material_h 
 
 #include "femcmpnn.h"
 #include "dictionr.h"
@@ -382,5 +383,4 @@ protected:
 } ;
 
 
-#define material_h
-#endif
+#endif // material_h 

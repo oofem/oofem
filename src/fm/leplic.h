@@ -34,6 +34,8 @@
 */
 
 #ifndef leplic_h
+#define leplic_h
+
 #include "materialinterface.h"
 #include "geotoolbox.h"
 #include "mathfem.h"
@@ -202,5 +204,4 @@ class LEPlic : public MaterialInterface
   
 };
 
-#define leplic_h
-#endif
+#endif // leplic_h

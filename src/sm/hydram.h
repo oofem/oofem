@@ -70,6 +70,7 @@
 
 
 #ifndef hydram_h
+#define hydram_h
 
 // oofem includes
 #include "cltypes.h" // cltypes.h entry: classType HellmichMaterialStatusClass, HellmichMaterialClass
@@ -332,5 +333,4 @@ class HydrationModelInterface : public Interface
  ~HydrationModelInterface() { delete hydrationModel; }
 };
 
-#define hydram_h
-#endif
+#endif // hydram_h

@@ -36,8 +36,9 @@
 //   ************************************************
 //   *** CLASS PERIODIC PIECEWISE LINEAR FUNCTION ***
 //   ************************************************
+#ifndef piecewisper_h
+#define piecewisper_h
 
- 
 #include "flotarry.h"
 #include "piecewis.h"
 
@@ -93,3 +94,4 @@ public:
  virtual double    __derAt (double) ;
 } ;
 
+#endif // piecewisper_h

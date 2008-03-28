@@ -34,6 +34,7 @@
 */
 
 #ifndef twofluidmaterial_h 
+#define twofluidmaterial_h 
 
 #include "fluiddynamicmaterial.h"
 #include "flotarry.h"
@@ -156,8 +157,7 @@ public:
 } ;
 
 
-#define twofluidmaterial_h
-#endif
+#endif // twofluidmaterial_h 
 
 
 

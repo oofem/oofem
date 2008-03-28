@@ -37,8 +37,8 @@
 */
 
 
-#ifndef _SKYLINEMTX_H__
-#define _SKYLINEMTX_H__
+#ifndef skylinemtx_h
+#define skylinemtx_h
 
 #include "SparseMatrixF.h"
 #include "Ordering.h"
@@ -101,4 +101,4 @@ public:
 
 DSS_NAMESPASE_END
 
-#endif// _SKYLINEMTX_H__
+#endif

@@ -32,6 +32,8 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.                                                                              
 */
 #ifndef domaintransactionmanager_h
+#define domaintransactionmanager_h
+
 #ifdef __PARALLEL_MODE
 #ifndef __MAKEDEPEND
 #include <map>
@@ -103,8 +105,8 @@ class DomainTransactionManager
   friend class Domain;
 };
 #endif
-#define domaintransactionmanager_h
-#endif
+
+#endif // domaintransactionmanager_h
 
 
 

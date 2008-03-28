@@ -70,6 +70,7 @@
 
 
 #ifndef symcompcol_h
+#define symcompcol_h
 
 #include "compcol.h"
 
@@ -178,6 +179,5 @@ protected:
 } ;
 
 
-#define symcompcol_h
-#endif
+#endif // symcompcol_h
 

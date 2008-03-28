@@ -38,6 +38,7 @@
 //   ************************************************************************************************
  
 #ifndef tr1_2d_supg_h
+#define tr1_2d_supg_h
 
 
 #include "supgelement.h"
@@ -361,8 +362,7 @@ public:
  virtual void initGeometry            ();
 } ;
 
-#define tr1_2d_supg_h
-#endif
+#endif // tr1_2d_supg_h
 
 
 

@@ -34,6 +34,8 @@
 */
 
 #ifndef logger_h
+#define logger_h
+
 #include "oofemcfg.h"
 #ifndef __MAKEDEPEND
 #include <stdio.h>
@@ -182,5 +184,4 @@ void OOFEM_LOG_DEBUG(const char *format, ...);
 #endif
 
 
-#define logger_h
-#endif
+#endif // logger_h

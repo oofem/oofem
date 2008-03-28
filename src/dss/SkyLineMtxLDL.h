@@ -37,8 +37,8 @@
 */
 
 
-#ifndef _SKYLINEMTXLDL_H__
-#define _SKYLINEMTXLDL_H__
+#ifndef skylinemtxldl_h
+#define skylinemtxldl_h
 
 #include "SkyLineMtx.h"
 
@@ -79,4 +79,4 @@ public:
 
 DSS_NAMESPASE_END
 
-#endif// _SKYLINEMTXLDL_H__
+#endif

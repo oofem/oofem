@@ -37,7 +37,9 @@
 //   *** CLASS FIBERED CROSSSECTOION ***
 //   *********************************
 
-#ifndef fiberedcrosssection_h 
+#ifndef fiberedcs_h 
+#define fiberedcs_h 
+
 
 #include "structuralcrosssection.h"
 #include "structuralmaterial.h"
@@ -244,7 +246,6 @@ public:
 };
 
 
-#define fiberedcrosssection_h
-#endif
+#endif // fiberedcs_h 
 
 

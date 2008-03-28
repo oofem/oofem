@@ -45,6 +45,7 @@
  
 
 #ifndef intarray_h
+#define intarray_h
 
 #include "freestor.h"
 #include "debug.h"
@@ -316,7 +317,6 @@ template <class operation> void quickSort (IntArray& arry, int l, int r, operati
  */
 template <class operation> void sort (IntArray& arry, operation op) {quickSort (arry, 1, arry.giveSize(), op);}
 
-#define intarray_h
-#endif
+#endif // intarray_h
 
 

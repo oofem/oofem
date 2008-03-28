@@ -34,6 +34,8 @@
 */
 
 #ifndef strainvector_h
+#define strainvector_h
+
 #include "stressstrainbasevector.h"
 
 class StressVector ;
@@ -114,5 +116,5 @@ public:
                              int transpose = 0) const;
 
 };
-#define strainvector_h
-#endif
+
+#endif // strainvector_h

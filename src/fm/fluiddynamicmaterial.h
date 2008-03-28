@@ -34,6 +34,7 @@
 */
 
 #ifndef fluiddynamicmaterial_h 
+#define fluiddynamicmaterial_h 
 
 #include "material.h"
 #include "dictionr.h"
@@ -184,8 +185,7 @@ public:
 } ;
 
 
-#define fluiddynamicmaterial_h
-#endif
+#endif // fluiddynamicmaterial_h 
 
 
 

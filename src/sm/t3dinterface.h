@@ -38,6 +38,7 @@
 //   ***************************
 
 #ifndef t3dinterface_h 
+#define t3dinterface_h 
 
 #include "mesherinterface.h"
 
@@ -69,5 +70,4 @@ protected:
  int createInput (Domain* d, TimeStep* stepN);
 };
 
-#define t3dinterface_h 
-#endif
+#endif // t3dinterface_h 

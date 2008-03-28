@@ -39,5 +39,7 @@
 
 #ifndef iml_h
 #define iml_h
+
 #define IML_COMPAT
-#endif
+
+#endif // iml_h

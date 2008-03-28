@@ -38,6 +38,8 @@
 //   *** CLASS PAIR ***
 //   ******************
 
+#ifndef pair_h
+#define pair_h
 
 
 #ifndef __MAKEDEPEND
@@ -89,9 +91,4 @@ public:
 } ;
 
 
-
-
-
-
-
-
+#endif // pair_h

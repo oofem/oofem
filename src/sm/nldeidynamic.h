@@ -37,7 +37,8 @@
 // Class NlDEIDynamic - DirectExplicitIntegrationDynamic
 //
 
-#ifndef NlDEIDynamic_h
+#ifndef nldeidynamic_h
+#define nldeidynamic_h
 
 #ifndef __MAKEDEPEND
 #include <stdio.h>
@@ -144,5 +145,4 @@ displacementVector(), velocityVector(), accelerationVector() { ndomains = 1; ini
  virtual int        giveNumberOfTimeStepWhenIcApply() {return 0;}
 } ;
 
-#define NlDEIDynamic_h
-#endif
+#endif // nldeidynamic_h

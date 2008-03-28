@@ -40,6 +40,7 @@
  
 
 #ifndef load_h
+#define load_h
 
 #include "generalbc.h"
 #include "domain.h"
@@ -142,6 +143,5 @@ protected:
 
 } ;
 
-#define load_h
-#endif
+#endif // load_h
 

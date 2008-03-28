@@ -37,7 +37,8 @@
 //   *** CLASS QUADRATIC PLANE STRAIN ***
 //   ************************************
 // 
-#ifndef __q4axisymm_h
+#ifndef q4axisymm_h
+#define q4axisymm_h
 
 #include "structuralelement.h"
 
@@ -98,6 +99,5 @@ protected:
  //
 };
 
-#define  __q4axisymm_h
-#endif
+#endif // q4axisymm_h
 

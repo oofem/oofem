@@ -272,4 +272,4 @@ protected:
 //@}
 } ;
 
-#endif
+#endif // lspace_h

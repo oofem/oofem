@@ -39,6 +39,7 @@
 
  
 #ifndef nrsolver2_h
+#define nrsolver2_h
 
 #ifndef __MAKEDEPEND
 #include <stdio.h>
@@ -200,8 +201,7 @@ private:
    LineSearchNM* giveLineSearchSolver() ;
  };
 
-#define nrsolver2_h
-#endif
+#endif // nrsolver2_h
 
 
 

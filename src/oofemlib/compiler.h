@@ -35,6 +35,7 @@
 
 
 #ifndef compiler_h
+#define compiler_h
 
 #include "oofemcfg.h"
 
@@ -57,5 +58,4 @@ int strncasecmp (const char* s1, const char* s2, int count);
 #pragma warning( disable : 4786 ) 
 #endif
 
-#define compiler_h
-#endif
+#endif // compiler_h

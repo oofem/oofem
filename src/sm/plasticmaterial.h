@@ -38,7 +38,8 @@
 //   *** CLASS PLASTIC  MATERIAL ************
 //   ****************************************
 
-#ifndef PlasticMaterial_h 
+#ifndef plasticmaterial_h 
+#define plasticmaterial_h 
 
 #include "structuralmaterial.h"
 #include "linearelasticmaterial.h"
@@ -336,6 +337,5 @@ protected:
 };
 
 
-#define PlasticMaterial_h
-#endif
+#endif // plasticmaterial_h 
 

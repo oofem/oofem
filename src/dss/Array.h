@@ -36,8 +36,8 @@
    Author: Richard Vondracek, <richard.vondracek@seznam.cz>
 */
 
-#ifndef _ARRAY_H__
-#define _ARRAY_H__
+#ifndef array_h
+#define array_h
 
 #include "DSSAfx.h"
 

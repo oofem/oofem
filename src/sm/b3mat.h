@@ -36,7 +36,8 @@
 //   *********************************************
 //   *** CLASS RHEOLOGIC B3 Material Model
 //   *********************************************
-#ifndef b3Material_h 
+#ifndef b3mat_h 
+#define b3mat_h 
 
 #include "cltypes.h"
 #include "maxwellChM.h"
@@ -101,5 +102,4 @@ protected:
 } ;
 
 
-#define b3Material_h
-#endif
+#endif // b3mat_h 

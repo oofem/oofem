@@ -38,7 +38,8 @@
 // CLASS CONNECTIVITY TABLE
 //
 
-#ifndef conTable_h
+#ifndef contable_h
+#define contable_h
 
 #include "domain.h"
 #include "node.h"
@@ -146,5 +147,5 @@ private:
   void               printYourself();
   
 };
-#define conTable_h
-#endif
+
+#endif // conTable_h

@@ -39,6 +39,7 @@
 // 5.5.1995
 // 
 #ifndef trplanrot_h
+#define trplanrot_h
 
 
 #include "trplanstrss.h"
@@ -99,5 +100,4 @@ protected:
 
 };
 
-#define trplanrot_h
-#endif
+#endif //  trplanrot_h

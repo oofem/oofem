@@ -38,7 +38,8 @@
 //   *** CLASS ISOTROPIC LINEAR ELACSTIC MATERIAL ***
 //   ************************************************
 
-#ifndef isotropiclinearelasticmaterial_h 
+#ifndef isolinearelasticmaterial_h 
+#define isolinearelasticmaterial_h 
 
 #include "linearelasticmaterial.h"
 #include "dictionr.h"
@@ -255,5 +256,4 @@ friend class CrossSection;
 } ;
 
 
-#define isotropiclinearelasticmaterial_h
-#endif
+#endif // isolinearelasticmaterial_h 

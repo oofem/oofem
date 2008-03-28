@@ -38,6 +38,7 @@
 //   ***************************************************
 
 #ifndef mmaclosestiptransfer_h 
+#define mmaclosestiptransfer_h 
 
 #include "compiler.h"
 #include "cltypes.h"
@@ -100,8 +101,7 @@ public:
 protected:
 };
 
-#define mmaclosestiptransfer_h
-#endif
+#endif // mmaclosestiptransfer_h 
 
 
 

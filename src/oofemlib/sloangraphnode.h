@@ -42,6 +42,7 @@
 /* Author: Milan Jirasek */
 
 #ifndef sloangraphnode_h
+#define sloangraphnode_h
 
 #include "dynalist.h"
 
@@ -125,5 +126,5 @@ public:
   int   computeProfileHeight();
 
 };
-#define sloangraphnode_h
-#endif
+
+#endif // sloangraphnode_h

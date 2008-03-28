@@ -38,6 +38,7 @@
 //
 
 #ifndef adaptnlinearstatic_h
+#define adaptnlinearstatic_h
 
 #ifndef __MAKEDEPEND
 #include <stdio.h>
@@ -148,5 +149,4 @@ protected:
  */
 } ;
 
-#define adaptnlinearstatic_h
-#endif
+#endif // adaptnlinearstatic_h

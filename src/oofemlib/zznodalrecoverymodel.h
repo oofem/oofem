@@ -38,6 +38,7 @@
 //   **************************************************
 
 #ifndef zznodalrecoverymodel_h 
+#define zznodalrecoverymodel_h 
 
 #include "compiler.h"
 #include "cltypes.h"
@@ -124,8 +125,7 @@ public:
 };
 
 
-#define zznodalrecoverymodel_h
-#endif
+#endif // zznodalrecoverymodel_h 
 
 
 

@@ -38,6 +38,7 @@
 //
 
 #ifndef stationarytransportproblem_h
+#define stationarytransportproblem_h
 
 #include "structengngmodel.h"
 #include "sparselinsystemnm.h"
@@ -134,5 +135,4 @@ protected:
   
 } ;
 
-#define stationarytransportproblem_h
-#endif
+#endif // stationarytransportproblem_h

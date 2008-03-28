@@ -37,7 +37,8 @@
 //   *** CLASS POINT LOAD ***
 //   ************************
 
-#ifndef pointLoad_h 
+#ifndef pointload_h 
+#define pointload_h 
 
 #include "load.h"
 #include "gausspnt.h"
@@ -164,8 +165,7 @@ protected:
 } ;
 
 
-#define pointLoad_h
-#endif
+#endif // pointload_h 
 
 
 

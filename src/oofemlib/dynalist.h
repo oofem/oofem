@@ -39,6 +39,8 @@
 //
 
 #ifndef dynalist_h
+#define dynalist_h
+
 #include "compiler.h"
 
 
@@ -231,5 +233,4 @@ dynaList<T> :: erase (iterator position)
 
 
 
-#define dynalist_h
-#endif
+#endif // dynalist_h

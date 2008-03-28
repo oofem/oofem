@@ -39,6 +39,7 @@
  
 
 #ifndef boudary_h
+#define boudary_h
 
 #include "generalbc.h"
 #include "dictionr.h"
@@ -160,6 +161,5 @@ class BoundaryCondition : public GeneralBoundaryCondition
 } ;
 
 
-#define boundary_h
-#endif
+#endif // boudary_h
 

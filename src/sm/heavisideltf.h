@@ -36,6 +36,8 @@
 //   ******************************************
 //   *** CLASS HEAVISIDE LOAD TIME FUNCTION ***
 //   ******************************************
+#ifndef heavisideltf_h
+#define heavisideltf_h
 
 #include "flotarry.h"
 #include "loadtime.h"
@@ -67,3 +69,4 @@ public:
 
 } ;
 
+#endif // heavisideltf_h

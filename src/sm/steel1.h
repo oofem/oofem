@@ -38,6 +38,7 @@
 //   *********************************************************************
 
 #ifndef steel1_h
+#define steel1_h
 
 #include "perfectlyplasticmaterial.h"
 #include "isolinearelasticmaterial.h"
@@ -91,5 +92,4 @@ protected:
  double      computeJ2InvariantAt(FloatArray*) ;
 };
 
-#define steel1_h
-#endif
+#endif // steel1_h

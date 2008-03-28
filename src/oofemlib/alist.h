@@ -39,6 +39,7 @@
 //   ******************
  
 #ifndef alist_h
+#define alist_h
 
 #include "compiler.h"
 #include "error.h"
@@ -270,8 +271,7 @@ template <class T> T*   AList<T> :: unlink (int i)
 }
 
 
-#define alist_h
-#endif
+#endif // alist_h
 
 
 

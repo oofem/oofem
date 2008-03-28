@@ -38,7 +38,8 @@
 //   ******************************************************************************
 
 #ifndef idmnl1_h 
- 
+#define idmnl1_h 
+
 #include "idm1.h"
 #include "structuralnonlocalmaterialext.h"
 #include "nonlocmatstiffinterface.h"
@@ -301,8 +302,7 @@ public :
 } ;
 
 
-#define idmnl1_h
-#endif
+#endif // idmnl1_h 
 
 
 

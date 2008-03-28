@@ -38,6 +38,7 @@
 //
 
 #ifndef incrementallinearstatic_h
+#define incrementallinearstatic_h
 
 #ifndef __MAKEDEPEND
 #include <stdio.h>
@@ -140,5 +141,4 @@ TASK:
   
 } ;
 
-#define incrementallinearstatic_h
-#endif
+#endif // incrementallinearstatic_h

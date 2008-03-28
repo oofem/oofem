@@ -37,7 +37,8 @@
 //   *** CLASS Maxwelll Chain Model ***
 //   *********************************
 
-#ifndef Maxwellchainmaterial_h 
+#ifndef maxwellchm_h 
+#define maxwellchm_h 
 
 #include "femcmpnn.h"
 #include "structuralmaterial.h"
@@ -297,5 +298,4 @@ protected:
 } ;
 
 
-#define Maxwellchainmaterial_h
-#endif
+#endif // maxwellchm_h 

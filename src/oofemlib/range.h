@@ -34,6 +34,7 @@
 */
 
 #ifndef range_h
+#define range_h
 
 /**
  Class Range is an abstraction for interval of integer numbers. It is decribed using its start and end values of interval 
@@ -62,5 +63,4 @@ public:
  int test (int i) {return ((i>=startIndx) && (i<=endIndx))?1:0;}
 };
 
-#define range_h
-#endif
+#endif // range_h

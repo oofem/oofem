@@ -37,8 +37,10 @@
 //   *** CLASS FETI PARALLEL SOLVER ***
 //   **********************************
 
-#ifdef __PARALLEL_MODE
 #ifndef fetisolver_h
+#define fetisolver_h
+
+#ifdef __PARALLEL_MODE
 
 #include "sparselinsystemnm.h"
 #include "sparsemtrx.h"
@@ -165,9 +167,8 @@ public:
   
  };
 
-#define fetisolver_h
 #endif
-#endif
+#endif // fetisolver_h
 
 
 

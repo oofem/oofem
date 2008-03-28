@@ -39,6 +39,7 @@
 //
 
 #ifndef oofemtxtdatareader_h
+#define oofemtxtdatareader_h
 
 #ifndef __MAKEDEPEND
 #include <stdio.h>
@@ -78,5 +79,4 @@ protected:
  void giveLineFromInput (char* line);
 };
 
-#define oofemtxtdatareader_h
-#endif
+#endif // oofemtxtdatareader_h

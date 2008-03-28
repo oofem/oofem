@@ -40,6 +40,7 @@
 //   ****************************************************************************
 
 #ifndef concrete2_h
+#define concrete2_h
 
 #include "femcmpnn.h"
 #include "dictionr.h"
@@ -248,8 +249,7 @@ public:
 } ;
 
 
-#define concrete2_h
-#endif
+#endif // concrete2_h
 
 
 

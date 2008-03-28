@@ -39,6 +39,7 @@
 //   ************************************
 
 #ifndef primaryunknownmapper_h 
+#define primaryunknownmapper_h 
 
 #include "compiler.h"
 #include "cltypes.h"
@@ -108,8 +109,7 @@ protected:
 
 };
 
-#define primaryunknownmapper_h
-#endif
+#endif // primaryunknownmapper_h 
 
 
 

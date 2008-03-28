@@ -41,6 +41,7 @@
  
 
 #ifndef dof_h
+#define dof_h
 
 #include "compiler.h"
 #include "dictionr.h"
@@ -462,5 +463,4 @@ protected:
 friend class SimpleSlaveDof;
 } ;
 
-#define dof_h
-#endif
+#endif // dof_h

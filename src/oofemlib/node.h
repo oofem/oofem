@@ -45,6 +45,7 @@
 
 
 #ifndef node_h
+#define node_h
 
 #include "dofmanager.h"
 #include "domain.h"
@@ -247,8 +248,7 @@ public:
 } ;
 
 
-#define node_h
-#endif
+#endif // node_h
 
 
 

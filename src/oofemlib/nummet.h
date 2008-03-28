@@ -40,6 +40,7 @@
 
  
 #ifndef nummet_h
+#define nummet_h
 
 
 #include "femcmpnn.h"
@@ -119,8 +120,8 @@ public:
  public:
  };
 
-#define nummet_h
-#endif
+
+#endif // nummet_h
 
 
 

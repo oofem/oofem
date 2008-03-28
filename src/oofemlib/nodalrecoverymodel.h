@@ -39,6 +39,7 @@
 //   **********************************
 
 #ifndef nodalrecoverymodel_h 
+#define nodalrecoverymodel_h 
 
 #include "compiler.h"
 #include "cltypes.h"
@@ -185,8 +186,7 @@ protected:
 
 };
 
-#define nodalrecoverymodel_h
-#endif
+#endif // nodalrecoverymodel_h 
 
 
 

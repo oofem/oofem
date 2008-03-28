@@ -39,6 +39,7 @@
 //
 
 #ifndef datareader_h
+#define datareader_h
 
 #include "cltypes.h"
 #include "inputrecord.h"
@@ -81,5 +82,4 @@ public:
 
 };
 
-#define datareader_h
-#endif
+#endif // datareader_h

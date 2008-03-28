@@ -36,7 +36,8 @@
 //   ************************************
 //   *** CLASS QUADRATIC 3D Element   ***
 //   ************************************
- 
+#ifndef qspace_h 
+#define qspace_h 
 
 #include "lspace.h"
 
@@ -84,11 +85,4 @@ protected:
 } ;
 
    
-
-
-
-
-
-
-
-
+#endif // qspace_h 

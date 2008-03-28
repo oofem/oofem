@@ -39,6 +39,7 @@
 
  
 #ifndef gjacobi_h
+#define gjacobi_h
 
 #ifndef __MAKEDEPEND
 #include <stdio.h>
@@ -127,8 +128,7 @@ class GJacobi : public NumericalMethod
 
  };
 
-#define gjacobi_h
-#endif
+#endif // gjacobi_h
 
 
 

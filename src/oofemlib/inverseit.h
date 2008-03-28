@@ -38,6 +38,7 @@
 
  
 #ifndef inverseit_h
+#define inverseit_h
 
 #ifndef __MAKEDEPEND
 #include <stdio.h>
@@ -121,8 +122,7 @@ class InverseIteration : public SparseGeneralEigenValueSystemNM
 
  };
 
-#define inverseit_h
-#endif
+#endif // inverseit_h
 
 
 

@@ -142,7 +142,7 @@ public:
  
 };
 
-#endif
+#endif // matstatus_h
 
 
 

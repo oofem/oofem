@@ -36,6 +36,8 @@
 //   ***************************
 //   *** CLASS PEAK FUNCTION ***
 //   ***************************
+#ifndef peak_h
+#define peak_h
 
 #include "loadtime.h"
 
@@ -69,7 +71,7 @@ public:
 } ;
 
 
-
+#endif // peak_h
 
 
 

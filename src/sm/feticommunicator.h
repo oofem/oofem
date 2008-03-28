@@ -32,8 +32,10 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.                                                                              
 */
-#ifdef __PARALLEL_MODE
 #ifndef feticommunicator_h
+#define feticommunicator_h
+
+#ifdef __PARALLEL_MODE
 
 #include "communicator.h"
 #include "fetiboundarydofman.h"
@@ -158,7 +160,6 @@ private:
 
 };
 
-#define feticommunicator_h
 #endif
-#endif
+#endif // feticommunicator_h
 

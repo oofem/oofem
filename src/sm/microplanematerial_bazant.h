@@ -38,6 +38,7 @@
 //   *************************************************************************
 
 #ifndef microplanematerial_bazant_h
+#define microplanematerial_bazant_h
 
 #include "structuralms.h"
 #include "microplanematerial.h"
@@ -92,5 +93,4 @@ protected:
 
 } ;
 
-#define microplanematerial_bazant_h
-#endif
+#endif // microplanematerial_bazant_h

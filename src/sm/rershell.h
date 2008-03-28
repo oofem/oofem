@@ -36,7 +36,8 @@
 //   **************************
 //   *** CLASS   RerShell   ***
 //   **************************
- 
+#ifndef rershell_h 
+#define rershell_h 
 
 #include "cct.h"
 #include "layeredcrosssection.h"
@@ -197,11 +198,4 @@ protected:
 } ;
 
    
-
-
-
-
-
-
-
-
+#endif // rershell_h 

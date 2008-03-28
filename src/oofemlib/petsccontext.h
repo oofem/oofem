@@ -32,9 +32,10 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.                                                                              
 */
-#ifdef __PETSC_MODULE
 #ifndef petscscontext_h
 #define petscscontext_h
+
+#ifdef __PETSC_MODULE
 
 #ifndef __MAKEDPEND
 #include "petscksp.h"
@@ -99,4 +100,4 @@ class PetscContext
 };
 
 #endif
-#endif
+#endif // petscscontext_h

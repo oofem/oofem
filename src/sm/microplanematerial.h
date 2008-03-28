@@ -38,6 +38,7 @@
 //   *****************************************
 
 #ifndef microplanematerial_h 
+#define microplanematerial_h 
 
 #include "structuralmaterial.h"
 #include "gausspnt.h"
@@ -208,5 +209,4 @@ protected:
 } ;
 
 
-#define microplanematerial_h
-#endif
+#endif // microplanematerial_h 

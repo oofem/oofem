@@ -39,6 +39,7 @@
 
 
 #ifndef dyncompcol_h
+#define dyncompcol_h
 
 #include "sparsemtrx.h"
 #include "intarray.h"
@@ -178,6 +179,5 @@ protected:
 } ;
 
 
-#define dyncompcol_h
-#endif
+#endif // dyncompcol_h
 

@@ -38,6 +38,7 @@
 //   ****************************************
 
 #ifndef mdm_h 
+#define mdm_h 
 
 /**
    Select the mapping algorithm. The IDM_USE_MMAShapeFunctProjection does not work, since
@@ -494,5 +495,4 @@ class MDM : public MicroplaneMaterial, public StructuralNonlocalMaterialExtensio
 } ;
 
 
-#define mdm_h
-#endif
+#endif // mdm_h 

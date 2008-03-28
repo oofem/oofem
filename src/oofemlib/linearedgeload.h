@@ -38,6 +38,7 @@
 //   ******************************
 
 #ifndef linearedgeload_h 
+#define linearedgeload_h 
 
 #include "boundaryload.h"
 #include "gausspnt.h"
@@ -95,8 +96,7 @@ protected:
 } ;
 
 
-#define linearedgeload_h
-#endif
+#endif // linearedgeload_h 
 
 
 

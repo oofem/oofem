@@ -37,8 +37,8 @@
 */
 
 
-#ifndef _MATRIX_H__
-#define _MATRIX_H__
+#ifndef bigmatrix_h
+#define bigmatrix_h
 
 #include "DenseMatrix.h"
 #include "IntArrayList.h"
@@ -238,4 +238,4 @@ struct IConectMatrix : public IMatrix
 
 DSS_NAMESPASE_END
 
-#endif //_MATRIX_H__
+#endif

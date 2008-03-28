@@ -38,6 +38,7 @@
 //
 
 #ifndef cbs_h
+#define cbs_h
 
 #include "engngm.h"
 #include "sparselinsystemnm.h"
@@ -183,5 +184,4 @@ protected:
   void assembleAlgorithmicPartOfRhs (FloatArray& rhs, EquationID ut, TimeStep* tStep, int nite);
 } ;
 
-#define cbs_h
-#endif
+#endif // cbs_h

@@ -38,6 +38,7 @@
 //
 
 #ifndef vtkexportmodule_h
+#define vtkexportmodule_h
 
 #ifndef __MAKEDEPEND
 #include <stdio.h>
@@ -159,8 +160,4 @@ protected:
   
 };
 
-#define vtkexportmodule_h
-#endif
-
-
-
+#endif // vtkexportmodule_h

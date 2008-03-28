@@ -39,6 +39,7 @@
 //   **********************************************
 
 #ifndef materilmapperinterface_h 
+#define materilmapperinterface_h 
 
 #include "compiler.h"
 #include "cltypes.h"
@@ -95,8 +96,7 @@ public:
 protected:
 };
 
-#define materilmapperinterface_h
-#endif
+#endif // materilmapperinterface_h 
 
 
 

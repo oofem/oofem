@@ -33,7 +33,8 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.                                                                              
 */
 
-#ifndef plasticmaterial2_h 
+#ifndef mplasticmaterial2_h 
+#define mplasticmaterial2_h 
 
 #include "structuralmaterial.h"
 #include "linearelasticmaterial.h"
@@ -417,6 +418,5 @@ protected:
 };
 
 
-#define plasticmaterial2_h
-#endif
+#endif // mplasticmaterial2_h 
 

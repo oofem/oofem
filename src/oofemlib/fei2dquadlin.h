@@ -34,6 +34,7 @@
 */
 
 #ifndef fei2dquadlin_h
+#define fei2dquadlin_h
 
 #include "flotarry.h"
 #include "intarray.h"
@@ -239,8 +240,7 @@ protected:
 
 
 
-#define fei2dquadlin_h
-#endif
+#endif // fei2dquadlin_h
 
 
 

@@ -45,6 +45,7 @@
  
 
 #ifndef loadtime_h
+#define loadtime_h
 
 #include "femcmpnn.h"
 #include "domain.h"
@@ -137,8 +138,8 @@ public:
 
 } ;
 
-#define loadtime_h
-#endif
+
+#endif // loadtime_h
 
 
 

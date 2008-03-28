@@ -38,6 +38,7 @@
 //
 
 #ifndef nltransienttransportproblem_h
+#define nltransienttransportproblem_h
 
 #include "nonstationarytransportproblem.h"
 #include "sparselinsystemnm.h"
@@ -93,5 +94,4 @@ protected:
   void assembleAlgorithmicPartOfRhs (FloatArray& rhs, EquationID ut, TimeStep* tStep, int nite);
 } ;
 
-#define nltransienttransportproblem_h
-#endif
+#endif // nltransienttransportproblem_h

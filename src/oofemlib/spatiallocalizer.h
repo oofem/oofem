@@ -39,6 +39,7 @@
 //   *******************************
 
 #ifndef spatiallocalizer_h 
+#define spatiallocalizer_h 
 
 #include "femcmpnn.h"
 #include "compiler.h"
@@ -155,8 +156,7 @@ public:
 protected:
 };
 
-#define spatiallocalizer_h
-#endif
+#endif // spatiallocalizer_h 
 
 
 

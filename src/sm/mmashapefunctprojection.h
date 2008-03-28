@@ -38,6 +38,7 @@
 //   *********************************************************
 
 #ifndef mmashapefunctprojection_h 
+#define mmashapefunctprojection_h 
 
 #include "alist.h"
 #include "materialmappingalgorithm.h"
@@ -174,8 +175,7 @@ public:
 protected:
 };
 
-#define mmashapefunctprojection_h
-#endif
+#endif // mmashapefunctprojection_h 
 
 
 

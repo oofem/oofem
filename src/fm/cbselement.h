@@ -38,6 +38,7 @@
 //   ****************************************************************************************
  
 #ifndef cbselement_h
+#define cbselement_h
 
 
 #include "fmelement.h"
@@ -146,8 +147,7 @@ public:
  virtual void computeDeviatoricStress (FloatArray& answer, GaussPoint* gp, TimeStep* ) = 0;
 } ;
 
-#define cbselement_h
-#endif
+#endif // cbselement_h
 
 
 

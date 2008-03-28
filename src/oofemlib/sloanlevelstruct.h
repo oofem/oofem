@@ -43,6 +43,8 @@
 
 
 #ifndef sloanlevelstruct_h
+#define sloanlevelstruct_h
+
 #include "alist.h"
 #include "intarray.h"
 
@@ -107,5 +109,5 @@ private:
   void  computeWidth();
 
 };
-#define sloanlevelstruct_h
-#endif
+
+#endif // sloanlevelstruct_h

@@ -37,7 +37,8 @@
 // Class AdaptiveLinearStatic
 //
 
-#ifndef adaptivelinearstatic_h
+#ifndef adaptlinearstatic_h
+#define adaptlinearstatic_h
 
 #ifndef __MAKEDEPEND
 #include <stdio.h>
@@ -92,5 +93,4 @@ class AdaptiveLinearStatic : public LinearStatic
   classType giveClassID ()      const { return AdaptiveLinearStaticClass;}
 } ;
 
-#define adaptivelinearstatic_h
-#endif
+#endif // adaptlinearstatic_h

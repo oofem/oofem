@@ -39,6 +39,7 @@
 
  
 #ifndef nrsolver_h
+#define nrsolver_h
 
 #ifndef __MAKEDEPEND
 #include <stdio.h>
@@ -246,8 +247,7 @@ class NRSolver : public SparseNonLinearSystemNM
 
 };
 
-#define nrsolver_h
-#endif
+#endif // nrsolver_h
 
 
 

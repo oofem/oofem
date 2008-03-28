@@ -86,4 +86,4 @@ class Column : public FloatArray
 
 } ;
 
-#endif
+#endif // column_h

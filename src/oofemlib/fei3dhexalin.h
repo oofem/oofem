@@ -39,6 +39,7 @@
 
 
 #ifndef fei3dhexalin_h
+#define fei3dhexalin_h
 
 
 #include "flotarry.h"
@@ -303,8 +304,7 @@ public:
 
 
 
-#define fei3dhexalin_h
-#endif
+#endif //  fei3dhexalin_h
 
 
 

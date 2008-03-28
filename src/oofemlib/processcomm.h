@@ -34,6 +34,8 @@
 */
 
 #ifndef processcomm_h
+#define processcomm_h
+
 #ifdef __PARALLEL_MODE
 
 #include "combuff.h"
@@ -476,7 +478,6 @@ ProcessCommunicator :: resizeRecvBuff (T* emodel, int packUnpackType)
 }
 
 #endif
-#define processcomm_h
-#endif
+#endif // processcomm_h
 
 

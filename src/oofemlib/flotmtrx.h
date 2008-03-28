@@ -45,6 +45,7 @@
 
 
 #ifndef flotmtrx_h
+#define flotmtrx_h
 
 #include "compiler.h"
 #include "matrix.h"
@@ -391,6 +392,5 @@ class FloatMatrix : public Matrix
  protected:
 } ;
 
-#define flotmtrx_h
-#endif
+#endif // flotmtrx_h
 

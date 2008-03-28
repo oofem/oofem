@@ -38,6 +38,7 @@
 //
 
 #ifndef poiexportmodule_h
+#define poiexportmodule_h
 
 #ifndef __MAKEDEPEND
 #include <stdio.h>
@@ -122,8 +123,7 @@ protected:
  MaterialMappingAlgorithm* giveMapper () ;
 };
 
-#define poiexportmodule_h
-#endif
+#endif // poiexportmodule_h
 
 
 

@@ -135,4 +135,4 @@ protected:
   
 };
 
-#endif
+#endif // gaussintegrationrule_h

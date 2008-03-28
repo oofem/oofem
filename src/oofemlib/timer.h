@@ -33,6 +33,8 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.                                                                              
 */
 #ifndef timer_h
+#define timer_h
+
 #include "clock.h"
 
 /**
@@ -147,5 +149,4 @@ class EngngModelTimer
    //@}
 };
 
-#define timer_h
-#endif
+#endif // timer_h

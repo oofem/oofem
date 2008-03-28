@@ -39,6 +39,7 @@
 //
 
 #ifndef plaintextdatareader_h
+#define plaintextdatareader_h
 
 #ifndef __MAKEDEPEND
 #include <stdio.h>
@@ -78,5 +79,4 @@ protected:
  void giveLineFromInput (char* line);
 };
 
-#define plaintextdatareader_h
-#endif
+#endif // plaintextdatareader_h

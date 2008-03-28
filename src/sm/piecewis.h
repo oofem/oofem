@@ -39,6 +39,7 @@
 
 
 #ifndef piecewis_h
+#define piecewis_h
 
 
  
@@ -100,6 +101,5 @@ public:
   
 } ;
 
-#define piecewis_h
-#endif
+#endif // piecewis_h
 

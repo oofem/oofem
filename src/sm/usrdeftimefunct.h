@@ -39,6 +39,7 @@
  
 
 #ifndef usrdeftimefunct_h
+#define usrdeftimefunct_h
 
 #include "loadtime.h"
 #include "domain.h"
@@ -107,14 +108,4 @@ public:
  
 } ;
 
-#define usrdeftimefunct_h
-#endif
-
-
-
-
-
-
-
-
-
+#endif // usrdeftimefunct_h

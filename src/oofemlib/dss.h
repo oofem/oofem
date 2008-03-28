@@ -36,6 +36,8 @@
 
 
 #ifndef dss_h
+#define dss_h
+
 #include "sparsemtrx.h"
 #include "intarray.h"
 
@@ -158,6 +160,5 @@ public:
 } ;
 
 
-#define dss_h
-#endif
+#endif // dss_h
 

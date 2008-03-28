@@ -36,8 +36,8 @@
    Author: Richard Vondracek, <richard.vondracek@seznam.cz>
 */
 
-#ifndef CONLIST_H__
-#define CONLIST_H__
+#ifndef conlist_h
+#define conlist_h
 
 #include "Array.h"
 
@@ -93,4 +93,4 @@ public:
 
 DSS_NAMESPASE_END
 
-#endif //CONLIST_H__
+#endif 

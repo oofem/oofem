@@ -241,7 +241,7 @@ class MazarsNLMaterial : public MazarsMaterial, public StructuralNonlocalMateria
 } ;
 
 
-#endif
+#endif // mazarsmodelnl_h 
 
 
 

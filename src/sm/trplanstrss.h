@@ -38,6 +38,7 @@
 //   **************************
  
 #ifndef trplanstrss_h
+#define trplanstrss_h
 
 #include "nlstructuralelement.h"
 #include "zznodalrecoverymodel.h"
@@ -315,12 +316,4 @@ protected:
 
 } ;
 
-#define trplanstrss_h 
-#endif
-
-
-
-
-
-
-
+#endif // trplanstrss_h

@@ -37,7 +37,8 @@
 // Class DEIDynamic - DirectExplicitIntegrationDynamic
 //
 
-#ifndef DEIDynamic_h
+#ifndef deidynamic_h
+#define deidynamic_h
 
 #ifndef __MAKEDEPEND
 #include <stdio.h>
@@ -124,5 +125,4 @@ TASK:
  
 } ;
 
-#define DEIDynamic_h
-#endif
+#endif // deidynamic_h

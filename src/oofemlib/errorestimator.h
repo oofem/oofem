@@ -39,6 +39,7 @@
 //   *****************************************
 
 #ifndef errorestimator_h 
+#define errorestimator_h 
 
 #include "femcmpnn.h"
 #include "compiler.h"
@@ -140,8 +141,8 @@ public:
 protected:
 };
 
-#define errorestimator_h
-#endif
+
+#endif // errorestimator_h 
 
 
 

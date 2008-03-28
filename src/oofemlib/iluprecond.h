@@ -94,4 +94,4 @@ protected:
  int  qsortRowPartition (IntArray&, FloatArray&, int l, int r);
 };
 
-#endif
+#endif // iluprecond_h

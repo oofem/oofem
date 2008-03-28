@@ -171,4 +171,4 @@ protected:
  
 } ;
 
-#endif
+#endif // libeam3dnl_h

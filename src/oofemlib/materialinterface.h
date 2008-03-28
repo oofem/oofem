@@ -34,6 +34,8 @@
 */
 
 #ifndef materialinterface_h
+#define materialinterface_h
+
 #include "femcmpnn.h"
 
 
@@ -89,5 +91,4 @@ class MaterialInterface : public FEMComponent
   
 };
 
-#define materialinterface_h
-#endif
+#endif // materialinterface_h

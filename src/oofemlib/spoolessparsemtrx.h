@@ -32,8 +32,10 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.                                                                              
 */
-#ifdef __SPOOLES_MODULE
 #ifndef spoolessparsemtrx_h
+#define spoolessparsemtrx_h
+
+#ifdef __SPOOLES_MODULE
 
 #include "sparsemtrx.h"
 #include "spoolesinterface.h"
@@ -154,7 +156,5 @@ class SpoolesSparseMtrx : public SparseMtrx
 
 };
 
-#define spoolessparsemtrx_h
 #endif
-
-#endif //ifdef __SPOOLES_MODULE
+#endif // spoolessparsemtrx_h

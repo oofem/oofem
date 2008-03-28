@@ -38,6 +38,7 @@
 //   *************************************************************************
 
 #ifndef zzerrorestimator_h 
+#define zzerrorestimator_h 
 
 #include "errorestimator.h"
 #include "interface.h"
@@ -265,6 +266,5 @@ public:
 
 
 
-#define zzerrorestimator_h
-#endif
+#endif // zzerrorestimator_h 
 

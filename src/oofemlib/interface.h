@@ -39,6 +39,7 @@
 //   ***********************
 
 #ifndef interface_h
+#define interface_h
 
 /**
  Class Interface. Interface class is abstract base class. 
@@ -88,5 +89,5 @@ public:
  virtual const char*  giveClassName () const  = 0 ;
 };
  
-#define interface_h
-#endif
+
+#endif // interface_h

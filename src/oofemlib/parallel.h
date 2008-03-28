@@ -33,7 +33,8 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.                                                                              
 */
 
-#ifndef parallelmode_h
+#ifndef parallel_h
+#define parallel_h
 
 // turn on parallel verbose mode if uncommented
 //#define __VERBOSE_PARALLEL
@@ -57,7 +58,8 @@
 #endif
 #endif
 
-#define parallelmode_h
-#endif
-
 #define PROCESSOR_NAME_LENGTH 60
+
+#endif // parallel_h
+
+

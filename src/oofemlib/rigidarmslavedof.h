@@ -40,6 +40,7 @@
  
 
 #ifndef rigidarmslavedof_h
+#define rigidarmslavedof_h
 
 #include "dof.h"
 #include "compiler.h"
@@ -222,5 +223,4 @@ enum RigidArmSlaveDofTransfType {
                        EquationID type, IntArray& mode, int nite);
 } ;
 
-#define rigidarmslavedof_h
-#endif
+#endif // rigidarmslavedof_h

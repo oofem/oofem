@@ -38,6 +38,7 @@
 //   *********************************
 
 #ifndef structuralmaterial_h 
+#define structuralmaterial_h 
 
 #include "material.h"
 #include "dictionr.h"
@@ -756,8 +757,7 @@ protected:
 } ;
 
 
-#define structuralmaterial_h
-#endif
+#endif // structuralmaterial_h 
 
 
 

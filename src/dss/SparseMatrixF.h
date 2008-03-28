@@ -37,8 +37,8 @@
 */
 
 
-#ifndef _SPARSEMATRIXF_H__
-#define _SPARSEMATRIXF_H__
+#ifndef sparsematrixf_h
+#define sparsematrixf_h
 
 #include "DSSAfx.h"
 
@@ -117,4 +117,4 @@ public:
 
 DSS_NAMESPASE_END
 
-#endif//_SPARSEMATRIXF_H__
+#endif

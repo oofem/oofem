@@ -38,6 +38,7 @@
 //   **********************************************************************
 
 #ifndef isointerfacedamage01_h 
+#define isointerfacedamage01_h 
 
 #include "material.h"
 #include "linearelasticmaterial.h"
@@ -308,6 +309,5 @@ protected:
 } ;
 
 
-#define isointerfacedamage01_h
-#endif
+#endif // isointerfacedamage01_h 
 

@@ -40,6 +40,7 @@
 
  
 #ifndef ldltfact_h
+#define ldltfact_h
 
 #ifndef __MAKEDEPEND
 #include <stdio.h>
@@ -88,8 +89,8 @@ public:
     LinSystSolverType giveLinSystSolverType() const {return ST_Direct;}
    };
 
-#define ldltfact_h
-#endif
+
+#endif // ldltfact_h
 
 
 

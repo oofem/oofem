@@ -38,6 +38,7 @@
 //   **********************************************************************
 
 #ifndef mat_cebfip90_h 
+#define mat_cebfip90_h 
 
 #include "material.h"
 #include "linearelasticmaterial.h"
@@ -294,6 +295,5 @@ protected:
 } ;
 
 
-#define mat_cebfip90_h
-#endif
+#endif // mat_cebfip90_h 
 

@@ -40,6 +40,7 @@
 //   *********************************************************
 
 #ifndef mmaleastsquareprojection_h 
+#define mmaleastsquareprojection_h 
 
 #include "alist.h"
 #include "materialmappingalgorithm.h"
@@ -142,8 +143,7 @@ protected:
 
 };
 
-#define mmaleastsquareprojection_h
-#endif
+#endif // mmaleastsquareprojection_h 
 
 
 

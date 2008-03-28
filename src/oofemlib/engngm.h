@@ -40,6 +40,7 @@
 
  
 #ifndef engngm_h
+#define engngm_h
 
 #ifdef __PARALLEL_MODE
 #include "parallel.h"
@@ -996,8 +997,7 @@ class EngngModel
 
 typedef EngngModel Problem;
 
-#define engngm_h
-#endif
+#endif // engngm_h
 
 
 

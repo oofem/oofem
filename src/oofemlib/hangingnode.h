@@ -134,4 +134,4 @@ class HangingNode : public Node
 };
 
 
-#endif
+#endif // hangingnode_h

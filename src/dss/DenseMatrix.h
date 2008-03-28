@@ -37,8 +37,8 @@
 */
 
 
-#ifndef _DENSEMATRIX_H__
-#define _DENSEMATRIX_H__
+#ifndef densematrix_h
+#define densematrix_h
 
 #include "DenseMatrixArithmeticsNN.h"
 
@@ -152,4 +152,4 @@ DSS_NAMESPASE_BEGIN
 
 DSS_NAMESPASE_END
 
-#endif //_DENSEMATRIX_H__
+#endif

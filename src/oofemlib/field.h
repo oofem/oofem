@@ -34,6 +34,7 @@
 */
 
 #ifndef field_h
+#define field_h
 
 #include "domain.h"
 
@@ -121,5 +122,5 @@ public:
  //@}
 };
 
-#define field_h
-#endif
+
+#endif // field_h

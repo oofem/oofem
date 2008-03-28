@@ -34,6 +34,7 @@
 */
 
 #ifndef refinedelement_h
+#define refinedelement_h
 
 #include "alist.h"
 #include "intarray.h"
@@ -89,8 +90,7 @@ protected:
   void error (const char* file, int line, const char *format, ...) const ;
 };
 
-#define refinedelement_h
-#endif
+#endif // refinedelement_h
 
 
 

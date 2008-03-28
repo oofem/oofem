@@ -35,6 +35,8 @@
 /*
    Author: Richard Vondracek, <richard.vondracek@seznam.cz>
 */
+#ifndef sparseconectivitymtxfixed_h
+#define sparseconectivitymtxfixed_h
 
 using System;
 using System.Collections;
@@ -80,3 +82,5 @@ namespace MathKer
 		}
 	}
 }
+
+#endif

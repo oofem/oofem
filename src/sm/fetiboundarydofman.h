@@ -32,8 +32,10 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.                                                                              
 */
+#ifndef fetiboundarydofman_h
+#define fetiboundarydofman_h
+
 #ifdef __PARALLEL_MODE
-#ifndef fetiboundarydofmanager_h
 
 #include "intarray.h"
 #ifndef __MAKEDEPEND
@@ -120,6 +122,5 @@ public:
  int  setCodeNumbers (int &equationCounter) ;
 } ;
 
-#define fetiboundarydofmanager_h
 #endif
-#endif
+#endif // fetiboundarydofman_h

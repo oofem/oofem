@@ -118,4 +118,4 @@ protected:
 
 } ;
 
-#endif
+#endif // libeam2dnl_h

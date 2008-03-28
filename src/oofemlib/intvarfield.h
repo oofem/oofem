@@ -34,6 +34,7 @@
 */
 
 #ifndef intvarfield_h
+#define intvarfield_h
 
 #include "domain.h"
 #include "field.h"
@@ -90,5 +91,4 @@ public:
   virtual const char*  giveClassName () const {return "InternalVariableField" ;}
 };
 
-#define intvarfield_h
-#endif
+#endif // intvarfield_h
