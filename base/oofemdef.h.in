@@ -37,6 +37,7 @@
 // file: oofemdef.h
 //
 #ifndef oofemdef_h
+#define oofemdef_h
 
 #define PRG_VERSION "OOFEM version @VERSION@"
 #define OOFEG_VERSION "OOFEG version @VERSION@"
@@ -62,5 +63,4 @@ ____________________________________________________\n"
 #define HOST_NAME "@HOST_NAME@"
 #define MODULE_LIST "@MODULE_LIST@"
 
-#define oofemdef_h
-#endif
+#endif // oofemdef_h

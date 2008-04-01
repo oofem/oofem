@@ -1,4 +1,5 @@
-                                                                                
+#ifndef oofemcfg_h
+#define oofemcfg_h                                                                                
 /* Define if you need to in order for stat and other things to work.  */        
 #undef _POSIX_SOURCE             
 
@@ -40,3 +41,5 @@
 
 /* Define if __VA_ARGS__ macro is supported by preprocessor */
 #undef HAVE_MACRO_VA_ARGS
+
+#endif // oofemcfg_h
