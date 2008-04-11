@@ -147,10 +147,17 @@ public:
 
 
 /**
- Base class representing general isotropic damage model.
- It is based on isotropic damage concept, assuming that damage evolution law
- is postulated in explicit form, relatin damage parameter (omega) to scalar measure 
- of the largest strain level ever reached in material (kappa).
+   Simple isotropic damage based model for 2d interface elements.
+   In 2d, the interface elements are used to model contact layer between 
+   element edges. The generalized strain vector contains two relative displacements 
+   (in normal and shear direction). The generalized stress vector contains corresponding 
+   tractions in normal and tangent direction. 
+
+   The behaviour of the model is elastic, described by normal and shear stifness components.
+   Isotropic damage is initiated  when the stress reaches the tensile strength. Damage evolution
+   is governed by normal component of generalized strain vector (normal relative displacement) 
+   by an exponential softening law.
+
 */
 class IsoInterfaceDamageMaterial : public StructuralMaterial
 {
