@@ -223,6 +223,23 @@ OrthotropicLinearElasticMaterial :: give3dMaterialStiffnessMatrix (FloatMatrix& 
 //
 {
  FloatMatrix *rotationMatrix ;
+
+ this->give3dLocalMaterialStiffnessMatrix (answer, form, mode, gp, atTime);
+
+ rotationMatrix = this -> GiveRotationMatrix (gp);
+ answer.rotatedWith (*rotationMatrix);
+ delete rotationMatrix;
+
+ return ;
+}
+
+void
+OrthotropicLinearElasticMaterial :: give3dLocalMaterialStiffnessMatrix (FloatMatrix& answer,
+                                                                        MatResponseForm form,
+                                                                        MatResponseMode mode,
+                                                                        GaussPoint* gp, 
+                                                                        TimeStep* atTime)
+{
  double eksi,nxz,nyz,nxy,nzx,nzy,nyx;
  int i,j ;
  
@@ -256,13 +273,8 @@ OrthotropicLinearElasticMaterial :: give3dMaterialStiffnessMatrix (FloatMatrix& 
  answer.at(5,5) =  this->give(Gxz);
  answer.at(6,6) =  this->give(Gxy);
 
- rotationMatrix = this -> GiveRotationMatrix (gp);
- answer.rotatedWith (*rotationMatrix);
- delete rotationMatrix;
-
  return ;
 }
-
 
 
 FloatMatrix*

@@ -117,6 +117,11 @@ public:
 
  virtual MaterialStatus* CreateStatus (GaussPoint* gp) const;
 
+ /// Computes local 3d stiffness matirx of the receiver
+ void  give3dLocalMaterialStiffnessMatrix (FloatMatrix& answer, 
+                                           MatResponseForm, MatResponseMode,GaussPoint* gp, 
+                                           TimeStep* atTime);
+ 
 
 protected:
 /* 
