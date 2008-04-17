@@ -356,9 +356,6 @@ DofManager :: findDofWithDofId (DofID dofID) const
 int  DofManager :: giveNumberOfDofs () const
    // Returns the number of degrees of freedom of the receiver.
 {
-   if (! numberOfDofs)
-      _error ("giveNumberOfDofs: NumberOfDofs is not known yet");
-
    return numberOfDofs ;
 }
 
@@ -385,12 +382,12 @@ IRResultType DofManager::  resolveDofIDArray (InputRecord* ir, IntArray& dofIDAr
  const char *__keyword, *__proc = "resolveDofIDArray";
  IRResultType result; 
 
- numberOfDofs = 0;
+ numberOfDofs = -1;
  __keyword = "ndofs"; result = ir->giveOptionalField(numberOfDofs, IFT_DofManager_ndofs, __keyword);
  if (result != IRRT_OK) IR_IOERR (giveClassName(), __proc, IFT_DofManager_ndofs, __keyword, ir, result);
 
  // returns nonzero if succes
- if(numberOfDofs == 0) {
+ if(numberOfDofs == -1) {
   numberOfDofs = domain-> giveNumberOfDefaultNodeDofs () ;
   dofIDArry = domain->giveDefaultNodeDofIDArry ();
  } else {
