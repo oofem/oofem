@@ -195,7 +195,7 @@ OOFEMTXTInputRecord::giveField(FloatArray& answer, const InputFieldType fieldID,
 IRResultType 
 OOFEMTXTInputRecord::giveField(FloatMatrix& answer, const InputFieldType fieldID, const char* idString)
 {
-  double value; int nrows, ncols ;
+  int nrows, ncols ;
   int indx = this->giveKeywordIndx (idString);
   if (indx) {
     setReadFlag(indx);
@@ -436,7 +436,6 @@ const char* OOFEMTXTInputRecord :: __scanInteger (const char* source, int* value
 // 
 // reads integer value from source, returns pointer to char after this number
 //
-  int i;
   char* endptr;
 
   if (source == NULL) {*value = 0; return NULL;}
@@ -453,7 +452,6 @@ const char* OOFEMTXTInputRecord :: __scanDouble (const char* source, double* val
 // 
 // reads integer value from source, returns pointer to char after this number
 //
-  int i;
   char* endptr;
 
   if (source == NULL) {*value = 0; return NULL;}
