@@ -1839,12 +1839,28 @@ EngngModel :: giveOutputStream ()
    // Returns an output stream on the data file of the receiver.
 {
    if (! outputStream) {
-   char* tmp = tmpnam (NULL);
-   _warning2 ("giveOutputStream: using default output stream %s",tmp);
-   outputStream = fopen (tmp,"w") ;
-  }
+     /*
+       char* tmp = tmpnam (NULL);
+       _warning2 ("giveOutputStream: using default output stream %s",tmp);
+       outputStream = fopen (tmp,"w") ;
 
-   return outputStream ;
+     */
+     char sfn[] = "oofem.out.XXXXXX";
+     int fd = -1;
+     FILE *sfp;
+     
+     if ((fd = mkstemp(sfn)) == -1 ||
+	 (sfp = fdopen(fd, "w+")) == NULL) {
+       if (fd != -1) {
+	 unlink(sfn);
+	 close(fd);
+       }
+       OOFEM_ERROR2("Failed to create tempopary file %s\n", sfn);
+       return (NULL);
+     }
+     outputStream = sfp;
+   }
+   return outputStream;
 }
 
 
