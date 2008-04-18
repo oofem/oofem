@@ -162,23 +162,15 @@ void
 FEI2dTrLin :: edgeEvaldNdx (FloatMatrix&answer, int iedge, 
 			    const FloatArray** coords, const FloatArray& lcoords, double time)
 {
- double coeff,l,x1,x2,y1,y2;
- IntArray edgeNodes;
- this->computeLocalEdgeMapping (edgeNodes, iedge);
- l = this->edgeComputeLength(edgeNodes, coords);
- coeff = 1.0/l/l;
-
- x1 = coords[edgeNodes.at(1)-1]->at(xind);
- y1 = coords[edgeNodes.at(1)-1]->at(yind);
- x2 = coords[edgeNodes.at(2)-1]->at(xind);
- y2 = coords[edgeNodes.at(2)-1]->at(yind);
-
- answer.resize (2,2);
- answer.at(1,1) = (x1-x2)*coeff;
- answer.at(1,2) = (y1-y2)*coeff;
-
- answer.at(2,1) = (x2-x1)*coeff;
- answer.at(2,2) = (y2-y1)*coeff;
+  double l;
+  IntArray edgeNodes;
+  this->computeLocalEdgeMapping (edgeNodes, iedge);
+  l = this->edgeComputeLength(edgeNodes, coords);
+  
+  answer.resize (2,1);
+  answer.at(1,1) = -1.0/l;
+  answer.at(2,1) =  1.0/l;
+  
 }
 
 void

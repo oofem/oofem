@@ -37,7 +37,7 @@ srcs4=material.C mathfem.C matrix.C matstatus.C nlstructuralelement.C node.C nod
 srcs5=structuralms.C timestep.C structtemperatureload.C dofmanager.C elementside.C integrationrule.C boundaryload.C gaussintegrationrule.C masterdof.C simpleslavedof.C slavedof.C nonlocalmaterialext.C structuralnonlocalmaterialext.C linearedgeload.C constantedgeload.C constantsurfaceload.C lobattoir.C
 srcs6=outputmanager.C compiler.C parser.C rigidarmnode.C spatiallocalizer.C dummylocalizer.C octreelocalizer.C nodalrecoverymodel.C util.C sloangraph.C sloangraphnode.C sloanlevelstruct.C metastep.C diagpre.C exportmodule.C exportmodulemanager.C zznodalrecoverymodel.C nodalaveragingrecoverymodel.C sprnodalrecoverymodel.C
 srcs7=calmls.C nrsolver.C nrsolver2.C subspaceit.C gjacobi.C linesearch.C nonlocalbarrier.C primaryfield.C field.C fieldmanager.C oofemtxtdatareader.C oofemtxtinputrecord.C buffereddatareader.C stressstrainbasevector.C stressvector.C strainvector.C fei1dlin.C  fei2dquadlin.C  fei2dtrlin.C fei3dtrlin.C fei3dhexalin.C spoolessparsemtrx.C spoolessolver.C petscsparsemtrx.C petscsolver.C petsccontext.C hangingnode.C pointload.C
-srcs8=errorestimator.C remeshingcrit.C primaryunknownmapper.C materialmappingalgorithm.C dofdistributedprimaryfield.C domaintransactionmanager.C
+srcs8=errorestimator.C remeshingcrit.C primaryunknownmapper.C materialmappingalgorithm.C dofdistributedprimaryfield.C domaintransactionmanager.C fei2dtrquad.C
 srcs9=geotoolbox.C dss.C dsssolver.C intvarfield.C
 #obsolete 
 srcs99=

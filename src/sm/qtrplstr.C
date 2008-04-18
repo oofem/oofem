@@ -58,6 +58,8 @@
 #include "oofegutils.h"
 #endif
 
+FEI2dTrQuad QTrPlaneStress2d::interpolation (1,2);
+
 QTrPlaneStress2d :: QTrPlaneStress2d (int n, Domain* aDomain)
                   : StructuralElement (n,aDomain), SpatialLocalizerInterface()
    , DirectErrorIndicatorRCInterface(), EIPrimaryUnknownMapperInterface()
@@ -154,32 +156,20 @@ QTrPlaneStress2d :: computeNmatrixAt (GaussPoint* aGaussPoint, FloatMatrix& answ
 // Returns the displacement interpolation matrix {N} of the receiver, eva-
 // luated at aGaussPoint.
 {
- double l1,l2,l3;
- //FloatMatrix  *answer;
+  int i;
+  FloatArray n(6);
+  
+  answer.resize(2,12);
+  answer.zero();
 
-   l1 = aGaussPoint -> giveCoordinate(1);
-   l2 = aGaussPoint -> giveCoordinate(2);
-   l3 = 1.0 - l1 - l2;
-
- //answer = new FloatMatrix(2,12);
- answer.resize (2,12);
- answer.zero();
-
- answer.at(1,1)  = (2.*l1-1.)*l1;
- answer.at(1,3)  = (2.*l2-1.)*l2;
- answer.at(1,5)  = (2.*l3-1.)*l3;
- answer.at(1,7)  = 4.*l1*l2;
- answer.at(1,9)  = 4.*l2*l3;
- answer.at(1,11) = 4.*l3*l1;
- 
- answer.at(2,2)  = (2.*l1-1.)*l1;
- answer.at(2,4)  = (2.*l2-1.)*l2;
- answer.at(2,6)  = (2.*l3-1.)*l3;
- answer.at(2,8)  = 4.*l1*l2;
- answer.at(2,10) = 4.*l2*l3;
- answer.at(2,12) = 4.*l3*l1;
- 
- return ;
+  this->interpolation.evalN (n, *aGaussPoint->giveCoordinates(), 0.0); 
+  
+  for (i=1;i<=6;i++){
+    answer.at(1,2*i-1) = n.at(i);
+    answer.at(2,2*i-0) = n.at(i);
+  }
+  
+  return ;
 }
 
 IRResultType
@@ -208,143 +198,47 @@ QTrPlaneStress2d :: computeBmatrixAt (GaussPoint *aGaussPoint, FloatMatrix& answ
 // Returns the [3x12] strain-displacement matrix {B} of the receiver, eva-
 // luated at aGaussPoint.
 {
- FloatMatrix jacMtrx, inv;
- FloatArray dksi, deta;
- double ksi, eta;
- int i;
 
- ksi = aGaussPoint -> giveCoordinate(1);
- eta = aGaussPoint -> giveCoordinate(2);
+  int i;
+  FloatMatrix  dnx ;
+  
+  this->interpolation.evaldNdx (dnx, this->giveDomain(), dofManArray, *aGaussPoint->giveCoordinates(), 0.0);
+ 
+  answer.resize(3,12);
+  answer.zero();
 
- this->computeDerivativeKsi (dksi, ksi, eta);
- this->computeDerivativeEta (deta, ksi, eta);
- this->computeJacobianMatrixAt (jacMtrx, aGaussPoint);
- inv.beInverseOf(jacMtrx);
+  for (i=1;i<=6;i++){
+    answer.at(1,2*i-1) = dnx.at(i,1);
+    answer.at(2,2*i-0) = dnx.at(i,2);
 
- answer.resize(3,12);
- answer.zero();
+    answer.at(3,2*i-1) = dnx.at(i,2);
+    answer.at(3,2*i-0) = dnx.at(i,1);
+  }
 
- for (i=1;i<=6;i++){
-  answer.at(1,2*i-1) = dksi.at(i)*inv.at(1,1) + deta.at(i)*inv.at(1,2);
-  answer.at(2,2*i-0) = dksi.at(i)*inv.at(2,1) + deta.at(i)*inv.at(2,2);
-
-  answer.at(3,2*i-1) = dksi.at(i)*inv.at(2,1) + deta.at(i)*inv.at(2,2);
-  answer.at(3,2*i-0) = dksi.at(i)*inv.at(1,1) + deta.at(i)*inv.at(1,2);
- }
-}
-
-
-void
-QTrPlaneStress2d :: computeJacobianMatrixAt (FloatMatrix& answer, GaussPoint* aGaussPoint)
-// Returns the jacobian matrix  J (x,y)/(ksi,eta)  of the receiver.
-// Computes it if it does not exist yet.
-{
- int        i;
- double     x,y, ksi, eta;
- FloatArray dksi,deta;
-
- answer.resize(2,2);
- answer.zero();
-
- ksi = aGaussPoint -> giveCoordinate(1);
- eta = aGaussPoint -> giveCoordinate(2);
-
- this->computeDerivativeKsi(dksi, ksi, eta);
- this->computeDerivativeEta(deta, ksi, eta);
-
- for (i=1;i<=6;i++){
-  x = this -> giveNode(i) -> giveCoordinate(1);
-  y = this -> giveNode(i) -> giveCoordinate(2);
-
-  answer.at(1,1) += dksi.at(i)*x;
-  answer.at(1,2) += dksi.at(i)*y;
-  answer.at(2,1) += deta.at(i)*x;
-  answer.at(2,2) += deta.at(i)*y;
- }
-}
-
-
-void
-QTrPlaneStress2d :: computeDerivativeKsi (FloatArray& answer, double ksi, double eta)
-{
- double l1,l2,l3;
-
-  l1 = ksi;
- l2 = eta;
- l3 = 1.0 - l1 - l2;
-
- answer.resize (6); answer.zero();
-
- answer.at(1) = 4.0*l1-1.0;
- answer.at(2) = 0.0;
- answer.at(3) = -1.0*(4.0*l3-1.0);
- answer.at(4) = 4.0*l2;
- answer.at(5) = -4.0*l2;
- answer.at(6) = 4.0*l3-4.0*l1;
-
-}
-
-void
-QTrPlaneStress2d :: computeDerivativeEta (FloatArray& answer, double ksi, double eta)
-{
- double l1,l2,l3;
-
-  l1 = ksi;
- l2 = eta;
- l3 = 1.0 - l1 - l2;
-
- answer.resize (6); answer.zero();
-
- answer.at(1) = 0.0;
- answer.at(2) = 4.0*l2-1.0;
- answer.at(3) = -1.0*(4.0*l3-1.0);
- answer.at(4) = 4.0*l1;
- answer.at(5) = 4.0*l3-4.0*l2;
- answer.at(6) = -4.0*l1;
+  return;
 }
 
 double
 QTrPlaneStress2d :: computeVolumeAround (GaussPoint* aGaussPoint)
 // Returns the portion of the receiver which is attached to aGaussPoint.
 {
- FloatMatrix jacMtrx;
- double       determinant,weight,thickness,volume;
 
- this -> computeJacobianMatrixAt(jacMtrx, aGaussPoint);
- determinant = fabs (jacMtrx.giveDeterminant());
- weight      = aGaussPoint -> giveWeight();
- thickness   = this -> giveCrossSection() -> give('t');
- volume      = determinant * weight * thickness ;
-
-   return volume;
+  double       determinant,weight,thickness,volume;
+  determinant = fabs(this->interpolation.giveTransformationJacobian (domain, dofManArray, 
+								     *aGaussPoint->giveCoordinates(), 0.0)); 
+  weight      = aGaussPoint -> giveWeight();
+  thickness   = this -> giveCrossSection() -> give('t');
+  volume      = determinant * weight * thickness ;
+  
+  return volume;
 }
 
 
 int
 QTrPlaneStress2d :: computeGlobalCoordinates (FloatArray& answer, const FloatArray& lcoords) 
 {
- FloatArray n (6);
- double l1,l2,l3;
- int i;
-   
- l1 = lcoords.at(1);
- l2 = lcoords.at(2);
- l3 = 1.0 - l1 - l2;
- 
- n.at(1) = (2.*l1-1.)*l1;
- n.at(2) = (2.*l2-1.)*l2;
- n.at(3) = (2.*l3-1.)*l3;
- n.at(4) = 4.*l1*l2;
- n.at(5) = 4.*l2*l3;
- n.at(6) = 4.*l3*l1;
-
- answer.resize (2);
- answer.zero();
- for (i=1; i<=6; i++) {
-  answer.at(1) += n.at(i)*giveNode(i)->giveCoordinate(1);
-  answer.at(2) += n.at(i)*giveNode(i)->giveCoordinate(2);
- }
- return 1;
+  this->interpolation.local2global (answer, domain, dofManArray, lcoords, 0.0); 
+  return 1;
 }
 
 
@@ -353,69 +247,7 @@ QTrPlaneStress2d :: computeGlobalCoordinates (FloatArray& answer, const FloatArr
 int
 QTrPlaneStress2d::computeLocalCoordinates (FloatArray& answer, const FloatArray& coords)
 {
- FloatArray r(2),n(6),dksi,deta,delta;
- FloatMatrix p(2,2);
- double l1,l2,l3, x,y;
- int i, nite = 0;
-   
- // setup initial guess
- answer.resize(2); answer.zero();
-
- // apply Newton-Raphson to solve the problem
- do {
-  if ((++nite) > 10) {
-   //_error ("computeLocalCoords: no convergence after 10 iterations");
-   return 0;
-  }
-  // compute the residual
-  l1 = answer.at(1);
-  l2 = answer.at(2);
-  l3 = 1.0-l1-l2;
-
-  n.at(1) = (2.*l1-1.)*l1;
-  n.at(2) = (2.*l2-1.)*l2;
-  n.at(3) = (2.*l3-1.)*l3;
-  n.at(4) = 4.*l1*l2;
-  n.at(5) = 4.*l2*l3;
-  n.at(6) = 4.*l3*l1;
-
-  r.at(1) = coords.at(1);
-  r.at(2) = coords.at(2);
-  for (i=1; i<=6; i++) {
-   r.at(1) -= n.at(i)*giveNode(i)->giveCoordinate(1);
-   r.at(2) -= n.at(i)*giveNode(i)->giveCoordinate(2);
-  }
-  
-  // check for convergence
-  if (sqrt(dotProduct(r,r,2)) < 1.e-10) break;
-  
-  // compute the corrections
-  this->computeDerivativeKsi(dksi,l1,l2);
-  this->computeDerivativeEta(deta,l1,l2);
-  
-  p.zero();
-  for (i=1;i<=6;i++){
-   x = this -> giveNode(i) -> giveCoordinate(1);
-   y = this -> giveNode(i) -> giveCoordinate(2);
-   
-   p.at(1,1) += dksi.at(i)*x;
-   p.at(1,2) += deta.at(i)*x;
-   p.at(2,1) += dksi.at(i)*y;
-   p.at(2,2) += deta.at(i)*y;
-  }
-  
-  // solve for corrections
-  p.solveForRhs (r, delta);
-  // update guess
-  answer.add(delta);
- } while (1);
-
-
- for (i=1; i<=2; i++) {
-  if (answer.at(i)<(0.-POINT_TOL)) return 0;
-  if (answer.at(i)>(1.+POINT_TOL)) return 0;
- }
- return 1;
+  return this->interpolation.global2local (answer, domain, dofManArray, coords, 0.0); 
 }
 
 void  QTrPlaneStress2d :: computeGaussPoints ()
@@ -764,38 +596,23 @@ QTrPlaneStress2d::EIPrimaryUnknownMI_computePrimaryUnknownVectorAt (ValueModeTyp
                                   TimeStep* stepN, const FloatArray& coords,
                                   FloatArray& answer)
 {
- FloatArray lcoords, u;
- FloatMatrix n;
- double l1,l2,l3;
- int result;
+  FloatArray lcoords, u, nn;
+  FloatMatrix n (2,12);
+ int i, result;
 
- result = this->computeLocalCoordinates (lcoords, coords);
-
- n.resize (2,12);
- n.zero();
-
- l1 = lcoords.at(1);
- l2 = lcoords.at(2);
- l3 = 1.0 - l1 - l2;
-
- n.at(1,1)  = (2.*l1-1.)*l1;
- n.at(1,3)  = (2.*l2-1.)*l2;
- n.at(1,5)  = (2.*l3-1.)*l3;
- n.at(1,7)  = 4.*l1*l2;
- n.at(1,9)  = 4.*l2*l3;
- n.at(1,11) = 4.*l3*l1;
- 
- n.at(2,2)  = (2.*l1-1.)*l1;
- n.at(2,4)  = (2.*l2-1.)*l2;
- n.at(2,6)  = (2.*l3-1.)*l3;
- n.at(2,8)  = 4.*l1*l2;
- n.at(2,10) = 4.*l2*l3;
- n.at(2,12) = 4.*l3*l1;
-
- this->computeVectorOf (EID_MomentumBalance, mode, stepN, u);
- answer.beProductOf (n,u);
-
- return result;
+  result = this->computeLocalCoordinates (lcoords, coords);
+  
+  this->interpolation.evalN (nn, lcoords, 0.0); 
+  
+  for (i=1;i<=6;i++){
+    n.at(1,2*i-1) = nn.at(i);
+    n.at(2,2*i-0) = nn.at(i);
+  }
+  
+  this->computeVectorOf (EID_MomentumBalance, mode, stepN, u);
+  answer.beProductOf (n,u);
+  
+  return result;
 }
 
 void 

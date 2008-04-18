@@ -42,6 +42,7 @@
 
 
 #include "structuralelement.h"
+#include "fei2dtrquad.h"
 #include "spatiallocalizer.h"
 //#include "zznodalrecoverymodel.h"
 #include "sprnodalrecoverymodel.h"
@@ -67,6 +68,7 @@ public SPRNodalRecoveryModelInterface// , public ZZNodalRecoveryModelInterface
 */
 
 protected:
+  static FEI2dTrQuad interpolation;
   int numberOfGaussPoints;
   
 public:
