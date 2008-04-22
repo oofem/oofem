@@ -42,56 +42,56 @@
 #endif
 
 /**
- Implemantation of ILU (Incomplete LU) Preconditioner.
- No fill-up - ILU(0).
-*/
-class CompCol_ILUPreconditioner : public Preconditioner {
-
- private:
-  FloatArray l_val_;
-  IntArray   l_colptr_;
-  IntArray   l_rowind_;
-  int l_nz_;
-
-  FloatArray    u_val_;
-  IntArray      u_colptr_;
-  IntArray      u_rowind_;
-  int u_nz_;
-
-  int dim_[2];
-  
- public:
- /// Constructor. Initializes the the receiver (constructs the precontioning matrix M) of given matrix.
-  CompCol_ILUPreconditioner(const SparseMtrx &A, InputRecord& attributes);
-  /// Constructor. The user should call initializeFrom and init services in this given order to ensure consistency.
-  CompCol_ILUPreconditioner () : Preconditioner() {}
-  /// Destructor
-  ~CompCol_ILUPreconditioner(void){};
-
- /**
-  Initializes the receiver (constructs the precontioning matrix M) of given matrix.
-  @param a sparse matrix to be preconditioned
+ * Implemantation of ILU (Incomplete LU) Preconditioner.
+ * No fill-up - ILU(0).
  */
- virtual void init (const SparseMtrx&);
+class CompCol_ILUPreconditioner : public Preconditioner
+{
+private:
+    FloatArray l_val_;
+    IntArray l_colptr_;
+    IntArray l_rowind_;
+    int l_nz_;
 
-  void initialize (const CompCol &A);
-  void initialize (const DynCompCol &A);
+    FloatArray u_val_;
+    IntArray u_colptr_;
+    IntArray u_rowind_;
+    int u_nz_;
 
-  
- /// Solves the linear system
-  void           solve(const FloatArray &x, FloatArray&y) const;
- /// Solves transposed system
-  void           trans_solve(const FloatArray &x, FloatArray&y) const;
+    int dim_ [ 2 ];
 
- /// returns the preconditioner name
- virtual const char*  giveClassName () const {return "ILU";}
+public:
+    /// Constructor. Initializes the the receiver (constructs the precontioning matrix M) of given matrix.
+    CompCol_ILUPreconditioner(const SparseMtrx &A, InputRecord &attributes);
+    /// Constructor. The user should call initializeFrom and init services in this given order to ensure consistency.
+    CompCol_ILUPreconditioner() : Preconditioner() { }
+    /// Destructor
+    ~CompCol_ILUPreconditioner(void) { };
 
- /// Initializes receiver from given record. Empty implementation.
- virtual IRResultType initializeFrom (InputRecord* ir);
+    /**
+     * Initializes the receiver (constructs the precontioning matrix M) of given matrix.
+     * @param a sparse matrix to be preconditioned
+     */
+    virtual void init(const SparseMtrx &);
+
+    void initialize(const CompCol &A);
+    void initialize(const DynCompCol &A);
+
+
+    /// Solves the linear system
+    void           solve(const FloatArray &x, FloatArray &y) const;
+    /// Solves transposed system
+    void           trans_solve(const FloatArray &x, FloatArray &y) const;
+
+    /// returns the preconditioner name
+    virtual const char *giveClassName() const { return "ILU"; }
+
+    /// Initializes receiver from given record. Empty implementation.
+    virtual IRResultType initializeFrom(InputRecord *ir);
 
 protected:
- void qsortRow (IntArray&, FloatArray&, int l, int r);
- int  qsortRowPartition (IntArray&, FloatArray&, int l, int r);
+    void qsortRow(IntArray &, FloatArray &, int l, int r);
+    int  qsortRowPartition(IntArray &, FloatArray &, int l, int r);
 };
 
 #endif // iluprecond_h

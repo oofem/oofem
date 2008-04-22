@@ -1,37 +1,37 @@
 /* $Header: /home/cvs/bp/oofem/oofemlib/src/ldltfact.C,v 1.7 2003/04/06 14:08:24 bp Exp $ */
 /*
-
-                   *****    *****   ******  ******  ***   ***                            
-                 **   **  **   **  **      **      ** *** **                             
-                **   **  **   **  ****    ****    **  *  **                              
-               **   **  **   **  **      **      **     **                               
-              **   **  **   **  **      **      **     **                                
-              *****    *****   **      ******  **     **         
-            
-                                                                   
-               OOFEM : Object Oriented Finite Element Code                 
-                    
-                 Copyright (C) 1993 - 2000   Borek Patzak                                       
-
-
-
-         Czech Technical University, Faculty of Civil Engineering,
-     Department of Structural Mechanics, 166 29 Prague, Czech Republic
-                                                                               
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.                                                                              
-*/
+ *
+ *                 #####    #####   ######  ######  ###   ###
+ *               ##   ##  ##   ##  ##      ##      ## ### ##
+ *              ##   ##  ##   ##  ####    ####    ##  #  ##
+ *             ##   ##  ##   ##  ##      ##      ##     ##
+ *            ##   ##  ##   ##  ##      ##      ##     ##
+ *            #####    #####   ##      ######  ##     ##
+ *
+ *
+ *             OOFEM : Object Oriented Finite Element Code
+ *
+ *               Copyright (C) 1993 - 2008   Borek Patzak
+ *
+ *
+ *
+ *       Czech Technical University, Faculty of Civil Engineering,
+ *   Department of Structural Mechanics, 166 29 Prague, Czech Republic
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
 
 
 //
@@ -44,61 +44,74 @@
 #endif
 #include "cltypes.h"
 
-LDLTFactorization :: LDLTFactorization (int i, Domain* d,EngngModel* m) : 
- SparseLinearSystemNM (i,d,m) {
-// 
-// constructor
-//
+LDLTFactorization :: LDLTFactorization(int i, Domain *d, EngngModel *m) :
+    SparseLinearSystemNM(i, d, m) {
+    //
+    // constructor
+    //
 }
 
-LDLTFactorization ::  ~LDLTFactorization () {
-//
-// destructor
-//
+LDLTFactorization ::  ~LDLTFactorization() {
+    //
+    // destructor
+    //
 }
 
-NM_Status 
-LDLTFactorization::solve (SparseMtrx* A, FloatArray* b, FloatArray* x)
+NM_Status
+LDLTFactorization :: solve(SparseMtrx *A, FloatArray *b, FloatArray *x)
 {
-  int size;
+    int size;
 
-  // first check whether Lhs is defined
-  if (! A) _error("solveYourselfAt: unknown Lhs");
-  
-  // and whether Rhs 
-  if (! b) _error("solveYourselfAt: unknown Rhs");
+    // first check whether Lhs is defined
+    if ( !A ) {
+        _error("solveYourselfAt: unknown Lhs");
+    }
 
-  // and whether previous Solution exist
-  if (! x ) _error("solveYourselfAt: unknown solution array");
-  if ((size = x->giveSize()) != b->giveSize()) 
-    _error("solveYourselfAt: size mismatch");
+    // and whether Rhs
+    if ( !b ) {
+        _error("solveYourselfAt: unknown Rhs");
+    }
 
- // check whether Lhs supports factorization
- if (!A->canBeFactorized()) _error("solveYourselfAt: Lhs not support factorization");
+    // and whether previous Solution exist
+    if ( !x ) {
+        _error("solveYourselfAt: unknown solution array");
+    }
 
-  for (int i=1; i<=size; i++) x->at(i) = b->at(i);
-  // solving
-  // depends on method used (direct or iterative ), on used matrix storage type ...
-  /*
-  #if defined(skyline_h)
-  x = A -> factorized()
-  
-  -> forwardReductionWith(x)
-  -> diagonalScalingWith (x)
-  -> backSubstitutionWith(x) ;
-  */
-  // skyline2.h version
-  A->factorized()->backSubstitutionWith(*x);
+    if ( ( size = x->giveSize() ) != b->giveSize() ) {
+        _error("solveYourselfAt: size mismatch");
+    }
 
- return NM_Success;
+    // check whether Lhs supports factorization
+    if ( !A->canBeFactorized() ) {
+        _error("solveYourselfAt: Lhs not support factorization");
+    }
+
+    for ( int i = 1; i <= size; i++ ) {
+        x->at(i) = b->at(i);
+    }
+
+    // solving
+    // depends on method used (direct or iterative ), on used matrix storage type ...
+    /*
+     #if defined(skyline_h)
+     * x = A -> factorized()
+     *
+     * -> forwardReductionWith(x)
+     * -> diagonalScalingWith (x)
+     * -> backSubstitutionWith(x) ;
+     */
+    // skyline2.h version
+    A->factorized()->backSubstitutionWith(* x);
+
+    return NM_Success;
 }
 
 IRResultType
-LDLTFactorization :: initializeFrom (InputRecord* ir)
+LDLTFactorization :: initializeFrom(InputRecord *ir)
 //
-// 
+//
 //
 {
-  return IRRT_OK;
+    return IRRT_OK;
 }
 

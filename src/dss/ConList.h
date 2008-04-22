@@ -1,40 +1,39 @@
 /*
-
-                   *****    *****   ******  ******  ***   ***
-                 **   **  **   **  **      **      ** *** **
-                **   **  **   **  ****    ****    **  *  **
-               **   **  **   **  **      **      **     **
-              **   **  **   **  **      **      **     **
-              *****    *****   **      ******  **     **
-
-
-               OOFEM : Object Oriented Finite Element Code
-
-                 Copyright (C) 1993 - 2000   Borek Patzak
-
-
-
-         Czech Technical University, Faculty of Civil Engineering,
-     Department of Structural Mechanics, 166 29 Prague, Czech Republic
-
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-*/
+ *
+ *                 #####    #####   ######  ######  ###   ###
+ *               ##   ##  ##   ##  ##      ##      ## ### ##
+ *              ##   ##  ##   ##  ####    ####    ##  #  ##
+ *             ##   ##  ##   ##  ##      ##      ##     ##
+ *            ##   ##  ##   ##  ##      ##      ##     ##
+ *            #####    #####   ##      ######  ##     ##
+ *
+ *
+ *             OOFEM : Object Oriented Finite Element Code
+ *
+ *               Copyright (C) 1993 - 2008   Borek Patzak
+ *
+ *
+ *
+ *       Czech Technical University, Faculty of Civil Engineering,
+ *   Department of Structural Mechanics, 166 29 Prague, Czech Republic
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
 /*
-   Author: Richard Vondracek, <richard.vondracek@seznam.cz>
-*/
+ * Author: Richard Vondracek, <richard.vondracek@seznam.cz>
+ */
 
 #ifndef conlist_h
 #define conlist_h
@@ -46,51 +45,53 @@ DSS_NAMESPASE_BEGIN
 class IntLinkArray
 {
 public:
-	long* last;
-	long* next;
+    long *last;
+    long *next;
 
-	long first;
-	long N;
+    long first;
+    long N;
 
-	IntLinkArray()
-	{
-		last = next = NULL;
-		first = 0;
-		N = 0;
-	}
-				 	
-	IntLinkArray(long* l,long* n,long N)
-	{
-		last = l;
-		next = n;
-		first = 0;
-		this->N = N;
-	}
+    IntLinkArray()
+    {
+        last = next = NULL;
+        first = 0;
+        N = 0;
+    }
 
-	void Init(long* l,long* n,long N)
-	{
-		last = l;
-		next = n;
-		first = 0;
-		this->N = N;
-	}
+    IntLinkArray(long *l, long *n, long N)
+    {
+        last = l;
+        next = n;
+        first = 0;
+        this->N = N;
+    }
 
-	void Remove(long i)
-	{
-		//if(!(last[i]!=-2))	{i =i;}
+    void Init(long *l, long *n, long N)
+    {
+        last = l;
+        next = n;
+        first = 0;
+        this->N = N;
+    }
 
-		if (last[i]>=0)	next[last[i]] = next[i];
-		if (next[i]>=0)	last[next[i]] = last[i];
+    void Remove(long i)
+    {
+        //if(!(last[i]!=-2))	{i =i;}
 
-		if (i == first)
-			first = next[i];
-		N--;
+        if ( last [ i ] >= 0 ) { next [ last [ i ] ] = next [ i ]; }
 
-		//if(!((last[i]=-2)==-2))	{i =i;}
-	}
+        if ( next [ i ] >= 0 ) { last [ next [ i ] ] = last [ i ]; }
 
+        if ( i == first ) {
+            first = next [ i ];
+        }
+
+        N--;
+
+        //if(!((last[i]=-2)==-2))	{i =i;}
+    }
 };
 
 DSS_NAMESPASE_END
 
-#endif 
+#endif

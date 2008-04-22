@@ -1,37 +1,37 @@
 /* $Header: /home/cvs/bp/oofem/sm/src/targe2interface.C,v 1.3.4.1 2004/04/05 15:19:47 bp Exp $ */
 /*
-
-                   *****    *****   ******  ******  ***   ***                            
-                 **   **  **   **  **      **      ** *** **                             
-                **   **  **   **  ****    ****    **  *  **                              
-               **   **  **   **  **      **      **     **                               
-              **   **  **   **  **      **      **     **                                
-              *****    *****   **      ******  **     **         
-            
-                                                                   
-               OOFEM : Object Oriented Finite Element Code                 
-                    
-                 Copyright (C) 1993 - 2000   Borek Patzak                                       
-
-
-
-         Czech Technical University, Faculty of Civil Engineering,
-     Department of Structural Mechanics, 166 29 Prague, Czech Republic
-                                                                               
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.                                                                              
-*/
+ *
+ *                 #####    #####   ######  ######  ###   ###
+ *               ##   ##  ##   ##  ##      ##      ## ### ##
+ *              ##   ##  ##   ##  ####    ####    ##  #  ##
+ *             ##   ##  ##   ##  ##      ##      ##     ##
+ *            ##   ##  ##   ##  ##      ##      ##     ##
+ *            #####    #####   ##      ######  ##     ##
+ *
+ *
+ *             OOFEM : Object Oriented Finite Element Code
+ *
+ *               Copyright (C) 1993 - 2008   Borek Patzak
+ *
+ *
+ *
+ *       Czech Technical University, Faculty of Civil Engineering,
+ *   Department of Structural Mechanics, 166 29 Prague, Czech Republic
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
 
 #include "targe2interface.h"
 #include "errorestimator.h"
@@ -44,36 +44,36 @@
 
 
 int
-Targe2Interface::createMesh (Domain* d, TimeStep* stepN, int domainNumber, int domainSerNum)
+Targe2Interface :: createMesh(Domain *d, TimeStep *stepN, int domainNumber, int domainSerNum)
 {
- return this->createInput (d, stepN);
+    return this->createInput(d, stepN);
 }
 
 int
-Targe2Interface::createInput (Domain* d, TimeStep* stepN) {
- 
- int i;
- int nelem = d->giveNumberOfElements();
- FILE* outputStrem;
- Element* ielem;
- RemeshingCriteria* rc = d->giveErrorEstimator ()->giveRemeshingCrit();
+Targe2Interface :: createInput(Domain *d, TimeStep *stepN) {
+    int i;
+    int nelem = d->giveNumberOfElements();
+    FILE *outputStrem;
+    Element *ielem;
+    RemeshingCriteria *rc = d->giveErrorEstimator()->giveRemeshingCrit();
 
- outputStrem = fopen ("targe2.bmf","w");
- // print header for 2D
+    outputStrem = fopen("targe2.bmf", "w");
+    // print header for 2D
 
- for (i=1; i<=nelem; i++) {
-  ielem = d->giveElement(i);
-  fprintf (outputStrem, "MC-T %e %e %e %e %e %e   %e %e %e\n",
-       ielem->giveNode(1)->giveCoordinate(1), ielem->giveNode(1)->giveCoordinate(2),
-       ielem->giveNode(2)->giveCoordinate(1), ielem->giveNode(2)->giveCoordinate(2),
-       ielem->giveNode(3)->giveCoordinate(1), ielem->giveNode(3)->giveCoordinate(2),
-       rc->giveRequiredDofManDensity (ielem->giveNode(1)->giveNumber(), stepN),
-       rc->giveRequiredDofManDensity (ielem->giveNode(2)->giveNumber(), stepN),
-       rc->giveRequiredDofManDensity (ielem->giveNode(3)->giveNumber(), stepN));
- }
- fclose (outputStrem);
+    for ( i = 1; i <= nelem; i++ ) {
+        ielem = d->giveElement(i);
+        fprintf( outputStrem, "MC-T %e %e %e %e %e %e   %e %e %e\n",
+                ielem->giveNode(1)->giveCoordinate(1), ielem->giveNode(1)->giveCoordinate(2),
+                ielem->giveNode(2)->giveCoordinate(1), ielem->giveNode(2)->giveCoordinate(2),
+                ielem->giveNode(3)->giveCoordinate(1), ielem->giveNode(3)->giveCoordinate(2),
+                rc->giveRequiredDofManDensity(ielem->giveNode(1)->giveNumber(), stepN),
+                rc->giveRequiredDofManDensity(ielem->giveNode(2)->giveNumber(), stepN),
+                rc->giveRequiredDofManDensity(ielem->giveNode(3)->giveNumber(), stepN) );
+    }
 
- OOFEM_LOG_INFO ("Targe2 .bmf file created\n");
- return 1;
+    fclose(outputStrem);
+
+    OOFEM_LOG_INFO("Targe2 .bmf file created\n");
+    return 1;
 }
 

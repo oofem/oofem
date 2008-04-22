@@ -1,40 +1,39 @@
 /*
-
-                   *****    *****   ******  ******  ***   ***
-                 **   **  **   **  **      **      ** *** **
-                **   **  **   **  ****    ****    **  *  **
-               **   **  **   **  **      **      **     **
-              **   **  **   **  **      **      **     **
-              *****    *****   **      ******  **     **
-
-
-               OOFEM : Object Oriented Finite Element Code
-
-                 Copyright (C) 1993 - 2000   Borek Patzak
-
-
-
-         Czech Technical University, Faculty of Civil Engineering,
-     Department of Structural Mechanics, 166 29 Prague, Czech Republic
-
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-*/
+ *
+ *                 #####    #####   ######  ######  ###   ###
+ *               ##   ##  ##   ##  ##      ##      ## ### ##
+ *              ##   ##  ##   ##  ####    ####    ##  #  ##
+ *             ##   ##  ##   ##  ##      ##      ##     ##
+ *            ##   ##  ##   ##  ##      ##      ##     ##
+ *            #####    #####   ##      ######  ##     ##
+ *
+ *
+ *             OOFEM : Object Oriented Finite Element Code
+ *
+ *               Copyright (C) 1993 - 2008   Borek Patzak
+ *
+ *
+ *
+ *       Czech Technical University, Faculty of Civil Engineering,
+ *   Department of Structural Mechanics, 166 29 Prague, Czech Republic
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
 /*
-   Author: Richard Vondracek, <richard.vondracek@seznam.cz>
-*/
+ * Author: Richard Vondracek, <richard.vondracek@seznam.cz>
+ */
 
 
 #ifndef colhash_h
@@ -48,58 +47,67 @@ DSS_NAMESPASE_BEGIN
 class ColHash
 {
 public:
-	IntArrayList** buckets;
-	IntArrayList occupied_buckets;
-	int n;
+    IntArrayList **buckets;
+    IntArrayList occupied_buckets;
+    int n;
 
-	ColHash()
-	{
-		buckets = NULL;
-	}
+    ColHash()
+    {
+        buckets = NULL;
+    }
 
-	ColHash(long n)
-	{
-		buckets = new IntArrayList*[n];
-		memset(buckets,0,n*sizeof(IntArrayList*));
-		this->n = n;
-		//for (long i=0; i<n; i++)
-		//	buckets[i] = new IntArrayList();
-	}
+    ColHash(long n)
+    {
+        buckets = new IntArrayList * [ n ];
+        memset( buckets, 0, n * sizeof( IntArrayList * ) );
+        this->n = n;
+        //for (long i=0; i<n; i++)
+        //	buckets[i] = new IntArrayList();
+    }
 
-	void Init(long n)
-	{
-		if (buckets) delete [] buckets;
-		buckets = new IntArrayList*[n];
-		memset(buckets,0,n*sizeof(IntArrayList*));
-		this->n = n;
-	}
+    void Init(long n)
+    {
+        if ( buckets ) { delete [] buckets; }
 
-	~ColHash()
-	{
-		for (int i=0; i<n; i++)
-			if (buckets[i]) {delete buckets[i];buckets[i] = NULL;}
-		if (buckets) delete [] buckets;
-		buckets = NULL;
-	}
+        buckets = new IntArrayList * [ n ];
+        memset( buckets, 0, n * sizeof( IntArrayList * ) );
+        this->n = n;
+    }
 
-	void AddValue(long bucket,long obj)
-	{
-		if (buckets[bucket]==NULL)
-			buckets[bucket] = new IntArrayList();
-		//buckets[bucket].Add(obj);
+    ~ColHash()
+    {
+        for ( int i = 0; i < n; i++ ) {
+            if ( buckets [ i ] ) { delete buckets [ i ];
+                                   buckets [ i ] = NULL; } }
 
-		long i = buckets[bucket]->Add(obj);
-		if (i==0)
-			occupied_buckets.Add(bucket);
-	}
+        if ( buckets ) { delete [] buckets; }
 
-	void Clear()
-	{
-		long*pI = occupied_buckets.Items;
-		for(long* p = pI+occupied_buckets.Count-1; p>=pI; p--)
-			buckets[*p]->Clear();
-		occupied_buckets.Clear();
-	}
+        buckets = NULL;
+    }
+
+    void AddValue(long bucket, long obj)
+    {
+        if ( buckets [ bucket ] == NULL ) {
+            buckets [ bucket ] = new IntArrayList();
+        }
+
+        //buckets[bucket].Add(obj);
+
+        long i = buckets [ bucket ]->Add(obj);
+        if ( i == 0 ) {
+            occupied_buckets.Add(bucket);
+        }
+    }
+
+    void Clear()
+    {
+        long *pI = occupied_buckets.Items;
+        for ( long *p = pI + occupied_buckets.Count - 1; p >= pI; p-- ) {
+            buckets [ * p ]->Clear();
+        }
+
+        occupied_buckets.Clear();
+    }
 };
 
 DSS_NAMESPASE_END

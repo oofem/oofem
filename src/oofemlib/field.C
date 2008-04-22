@@ -1,37 +1,37 @@
 /* $Header: /home/cvs/bp/oofem/oofemlib/src/field.C,v 1.1.4.1 2004/04/05 15:19:43 bp Exp $ */
 /*
-
-                   *****    *****   ******  ******  ***   ***                            
-                 **   **  **   **  **      **      ** *** **                             
-                **   **  **   **  ****    ****    **  *  **                              
-               **   **  **   **  **      **      **     **                               
-              **   **  **   **  **      **      **     **                                
-              *****    *****   **      ******  **     **         
-            
-                                                                   
-               OOFEM : Object Oriented Finite Element Code                 
-                    
-                 Copyright (C) 1993 - 2002   Borek Patzak                                       
-
-
-
-         Czech Technical University, Faculty of Civil Engineering,
-     Department of Structural Mechanics, 166 29 Prague, Czech Republic
-                                                                               
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA. 
-*/
+ *
+ *                 #####    #####   ######  ######  ###   ###
+ *               ##   ##  ##   ##  ##      ##      ## ### ##
+ *              ##   ##  ##   ##  ####    ####    ##  #  ##
+ *             ##   ##  ##   ##  ##      ##      ##     ##
+ *            ##   ##  ##   ##  ##      ##      ##     ##
+ *            #####    #####   ##      ######  ##     ##
+ *
+ *
+ *             OOFEM : Object Oriented Finite Element Code
+ *
+ *               Copyright (C) 1993 - 2008   Borek Patzak
+ *
+ *
+ *
+ *       Czech Technical University, Faculty of Civil Engineering,
+ *   Department of Structural Mechanics, 166 29 Prague, Czech Republic
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
 
 #include "field.h"
 #include "cltypes.h"
@@ -42,27 +42,27 @@
 #include <stdarg.h>
 #endif
 
-void  Field :: error (const char* file, int line, const char *format, ...) const
+void Field :: error(const char *file, int line, const char *format, ...) const
 {
-  char buffer[MAX_ERROR_MSG_LENGTH];
-	va_list args;
+    char buffer [ MAX_ERROR_MSG_LENGTH ];
+    va_list args;
 
-	va_start(args, format);
-	vsprintf(buffer, format, args);
-	va_end(args);
-  
-  __OOFEM_ERROR3 (file, line, "Class: %s\n%s",giveClassName(), buffer);
+    va_start(args, format);
+    vsprintf(buffer, format, args);
+    va_end(args);
+
+    __OOFEM_ERROR3(file, line, "Class: %s\n%s", giveClassName(), buffer);
 }
 
 
-void  Field :: warning (const char* file, int line, const char *format, ...) const
+void Field :: warning(const char *file, int line, const char *format, ...) const
 {
-  char buffer[MAX_ERROR_MSG_LENGTH];
-	va_list args;
+    char buffer [ MAX_ERROR_MSG_LENGTH ];
+    va_list args;
 
-	va_start(args, format);
-	vsprintf(buffer, format, args);
-	va_end(args);
-  
-  __OOFEM_WARNING3 (file, line, "Class: %s\n%s",giveClassName(), buffer);
+    va_start(args, format);
+    vsprintf(buffer, format, args);
+    va_end(args);
+
+    __OOFEM_WARNING3(file, line, "Class: %s\n%s", giveClassName(), buffer);
 }

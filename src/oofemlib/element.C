@@ -1,37 +1,37 @@
 /* $Header: /home/cvs/bp/oofem/oofemlib/src/element.C,v 1.19.4.1 2004/04/05 15:19:43 bp Exp $ */
 /*
-
-                   *****    *****   ******  ******  ***   ***                            
-                 **   **  **   **  **      **      ** *** **                             
-                **   **  **   **  ****    ****    **  *  **                              
-               **   **  **   **  **      **      **     **                               
-              **   **  **   **  **      **      **     **                                
-              *****    *****   **      ******  **     **         
-            
-                                                                   
-               OOFEM : Object Oriented Finite Element Code                 
-                    
-                 Copyright (C) 1993 - 2000   Borek Patzak                                       
-
-
-
-         Czech Technical University, Faculty of Civil Engineering,
-     Department of Structural Mechanics, 166 29 Prague, Czech Republic
-                                                                               
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.                                                                              
-*/
+ *
+ *                 #####    #####   ######  ######  ###   ###
+ *               ##   ##  ##   ##  ##      ##      ## ### ##
+ *              ##   ##  ##   ##  ####    ####    ##  #  ##
+ *             ##   ##  ##   ##  ##      ##      ##     ##
+ *            ##   ##  ##   ##  ##      ##      ##     ##
+ *            #####    #####   ##      ######  ##     ##
+ *
+ *
+ *             OOFEM : Object Oriented Finite Element Code
+ *
+ *               Copyright (C) 1993 - 2008   Borek Patzak
+ *
+ *
+ *
+ *       Czech Technical University, Faculty of Civil Engineering,
+ *   Department of Structural Mechanics, 166 29 Prague, Czech Republic
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
 
 
 //   file ELEMENT.CC
@@ -84,266 +84,289 @@
 #include "remeshingcrit.h"
 #include "materialmapperinterface.h"
 
-Element :: Element (int n, Domain* aDomain)
-  : FEMComponent (n, aDomain), dofManArray(), bodyLoadArray(), boundaryLoadArray()
-   // Constructor. Creates an element with number n, belonging to aDomain.
+Element :: Element(int n, Domain *aDomain) :
+    FEMComponent(n, aDomain), dofManArray(), bodyLoadArray(), boundaryLoadArray()
+    // Constructor. Creates an element with number n, belonging to aDomain.
 {
-  material           = 0    ;
-  numberOfDofMans    = 0    ;
-  numberOfIntegrationRules = 0;
-  locationArray      = NULL ;
-  integrationRulesArray  = NULL ;
+    material           = 0;
+    numberOfDofMans    = 0;
+    numberOfIntegrationRules = 0;
+    locationArray      = NULL;
+    integrationRulesArray  = NULL;
 }
 
 
-Element :: ~Element ()
-   // Destructor.
+Element :: ~Element()
+// Destructor.
 {
-   int i ;
+    int i;
 
-   delete locationArray ;
-   if (integrationRulesArray) {
-     for (i=0 ; i<numberOfIntegrationRules ; i++)
-       delete integrationRulesArray[i] ;
-     //      delete [numberOfGaussPoints] gaussPointArray ;}
-     delete[] integrationRulesArray ;}
+    delete locationArray;
+    if ( integrationRulesArray ) {
+        for ( i = 0; i < numberOfIntegrationRules; i++ ) {
+            delete integrationRulesArray [ i ];
+        }
+
+        //      delete [numberOfGaussPoints] gaussPointArray ;}
+        delete[] integrationRulesArray;
+    }
 }
 
 void
-Element :: computeVectorOf (EquationID type, ValueModeType u, TimeStep* stepN, FloatArray& answer)
-   // Forms the vector containing the values of the unknown 'u' (e.g., the
-   // Total value) of the dofs of the receiver's nodes (in nodal cs).
-   // Dofs cointaining expected unknowns (of expected type) are determined 
-   // using this->GiveNodeDofIDMask function
+Element :: computeVectorOf(EquationID type, ValueModeType u, TimeStep *stepN, FloatArray &answer)
+// Forms the vector containing the values of the unknown 'u' (e.g., the
+// Total value) of the dofs of the receiver's nodes (in nodal cs).
+// Dofs cointaining expected unknowns (of expected type) are determined
+// using this->GiveNodeDofIDMask function
 {
-   // FloatArray *answer ;
-   int        i,j,k,nDofs,size ;
-  IntArray   elementNodeMask;
-  FloatArray vec;
-   //answer = new FloatArray(size = this->computeNumberOfDofs()) ;
-  answer.resize (size = this->computeGlobalNumberOfDofs(type));
+    // FloatArray *answer ;
+    int i, j, k, nDofs, size;
+    IntArray elementNodeMask;
+    FloatArray vec;
+    //answer = new FloatArray(size = this->computeNumberOfDofs()) ;
+    answer.resize( size = this->computeGlobalNumberOfDofs(type) );
 
-   k      = 0 ;
-   for (i=1 ; i<=numberOfDofMans ; i++) {
-   this ->  giveDofManDofIDMask (i, type, elementNodeMask);
-   this->giveDofManager(i)->giveUnknownVector (vec, elementNodeMask, type, u, stepN);
-   nDofs = vec.giveSize();
-   for (j=1 ; j<=nDofs ; j++)
-    answer.at(++k) = vec.at(j);
-   //delete elementNodeMask;
-   //delete dofMask;
-  }
+    k      = 0;
+    for ( i = 1; i <= numberOfDofMans; i++ ) {
+        this->giveDofManDofIDMask(i, type, elementNodeMask);
+        this->giveDofManager(i)->giveUnknownVector(vec, elementNodeMask, type, u, stepN);
+        nDofs = vec.giveSize();
+        for ( j = 1; j <= nDofs; j++ ) {
+            answer.at(++k) = vec.at(j);
+        }
 
-  if (size != k) _error ("computeVectorOf: Unknown vector and location array size mismatch");
- 
-  return  ;
- }
+        //delete elementNodeMask;
+        //delete dofMask;
+    }
+
+    if ( size != k ) {
+        _error("computeVectorOf: Unknown vector and location array size mismatch");
+    }
+
+    return;
+}
 
 void
-Element :: computeVectorOf (PrimaryField& field, ValueModeType u, TimeStep* stepN, FloatArray& answer)
-   // Forms the vector containing the values of the unknown 'u' (e.g., the
-   // Total value) of the dofs of the receiver's nodes (in nodal cs).
-   // Dofs cointaining expected unknowns (of expected type) are determined 
-   // using this->GiveNodeDofIDMask function
+Element :: computeVectorOf(PrimaryField &field, ValueModeType u, TimeStep *stepN, FloatArray &answer)
+// Forms the vector containing the values of the unknown 'u' (e.g., the
+// Total value) of the dofs of the receiver's nodes (in nodal cs).
+// Dofs cointaining expected unknowns (of expected type) are determined
+// using this->GiveNodeDofIDMask function
 {
-   int        i,j,k,nDofs,size ;
-  IntArray   elementNodeMask;
-  FloatArray vec;
-  answer.resize (size = this->computeGlobalNumberOfDofs(field.giveEquationID()));
+    int i, j, k, nDofs, size;
+    IntArray elementNodeMask;
+    FloatArray vec;
+    answer.resize( size = this->computeGlobalNumberOfDofs( field.giveEquationID() ) );
 
-   k      = 0 ;
-   for (i=1 ; i<=numberOfDofMans ; i++) {
-   this ->  giveDofManDofIDMask (i, field.giveEquationID(), elementNodeMask);
-   this->giveDofManager(i)->giveUnknownVector (vec, elementNodeMask, field, u, stepN);
-   nDofs = vec.giveSize();
-   for (j=1 ; j<=nDofs ; j++)
-    answer.at(++k) = vec.at(j);
-  }
-  
-  if (size != k) _error ("computeVectorOf: Unknown vector and location array size mismatch");
-  
-  return  ;
- }
+    k      = 0;
+    for ( i = 1; i <= numberOfDofMans; i++ ) {
+        this->giveDofManDofIDMask(i, field.giveEquationID(), elementNodeMask);
+        this->giveDofManager(i)->giveUnknownVector(vec, elementNodeMask, field, u, stepN);
+        nDofs = vec.giveSize();
+        for ( j = 1; j <= nDofs; j++ ) {
+            answer.at(++k) = vec.at(j);
+        }
+    }
 
-void 
-Element :: computeVectorOfPrescribed (EquationID ut, ValueModeType mode, TimeStep* stepN,
-                   FloatArray& answer)
-   // Forms the vector containing the prescribed values of the unknown 'u'
-   // (e.g., the prescribed displacement) of the dofs of the receiver's
-   // nodes. Puts 0 at each free dof.
+    if ( size != k ) {
+        _error("computeVectorOf: Unknown vector and location array size mismatch");
+    }
+
+    return;
+}
+
+void
+Element :: computeVectorOfPrescribed(EquationID ut, ValueModeType mode, TimeStep *stepN,
+                                     FloatArray &answer)
+// Forms the vector containing the prescribed values of the unknown 'u'
+// (e.g., the prescribed displacement) of the dofs of the receiver's
+// nodes. Puts 0 at each free dof.
 {
-   // FloatArray *answer ;
-   int        i,j,k,size,nDofs ;
-  IntArray   elementNodeMask, dofMask;
-  FloatArray vec;
+    // FloatArray *answer ;
+    int i, j, k, size, nDofs;
+    IntArray elementNodeMask, dofMask;
+    FloatArray vec;
 
-  // answer = new FloatArray(this->computeNumberOfDofs()) ;
-  answer.resize (size = this->computeGlobalNumberOfDofs(ut));
+    // answer = new FloatArray(this->computeNumberOfDofs()) ;
+    answer.resize( size = this->computeGlobalNumberOfDofs(ut) );
 
-   k      = 0 ;
-  for (i=1 ; i<=numberOfDofMans ; i++) {
-   this ->  giveDofManDofIDMask (i, ut, elementNodeMask);
-   this->giveDofManager(i)->givePrescribedUnknownVector (vec, elementNodeMask, mode, stepN);
-   nDofs = vec.giveSize();
-   for (j=1 ; j<=nDofs ; j++)
-    answer.at(++k) = vec.at(j);
-   //delete elementNodeMask;
-   //delete dofMask;
-  }
+    k      = 0;
+    for ( i = 1; i <= numberOfDofMans; i++ ) {
+        this->giveDofManDofIDMask(i, ut, elementNodeMask);
+        this->giveDofManager(i)->givePrescribedUnknownVector(vec, elementNodeMask, mode, stepN);
+        nDofs = vec.giveSize();
+        for ( j = 1; j <= nDofs; j++ ) {
+            answer.at(++k) = vec.at(j);
+        }
 
-  if (size != k) _error ("computeVectorOf: Unknown vector and location array size mismatch");
-  
-  return  ;
- }
+        //delete elementNodeMask;
+        //delete dofMask;
+    }
+
+    if ( size != k ) {
+        _error("computeVectorOf: Unknown vector and location array size mismatch");
+    }
+
+    return;
+}
 
 
 int
-Element :: computeGlobalNumberOfDofs (EquationID ut) 
+Element :: computeGlobalNumberOfDofs(EquationID ut)
 {
- if (this->locationArray) {
-  return this->locationArray->giveSize();
- } else {
-  IntArray loc;
-  this-> giveLocationArray (loc, ut);
-  return loc.giveSize();
- }
+    if ( this->locationArray ) {
+        return this->locationArray->giveSize();
+    } else {
+        IntArray loc;
+        this->giveLocationArray(loc, ut);
+        return loc.giveSize();
+    }
 }
 
-IntArray*  Element :: giveBodyLoadArray ()
-   // Returns the array which contains the number of every body load that act
-   // on the receiver.
+IntArray *Element :: giveBodyLoadArray()
+// Returns the array which contains the number of every body load that act
+// on the receiver.
 {
-   return &bodyLoadArray ;
-}
-
-
-IntArray*  Element :: giveBoundaryLoadArray ()
-   // Returns the array which contains the number of every body load that act
-   // on the receiver.
-{
-   return &boundaryLoadArray ;
+    return & bodyLoadArray;
 }
 
 
-void  Element :: giveLocationArray (IntArray& locationArray, EquationID ut) const
-   // Returns the location array of the receiver. This array is obtained by
-   // simply appending the location array of every node of the receiver.
+IntArray *Element :: giveBoundaryLoadArray()
+// Returns the array which contains the number of every body load that act
+// on the receiver.
 {
- IntArray  nodeDofIDMask ;
- IntArray  nodalArray;
- int       i ;
-
- if (this->locationArray) {
-  locationArray = *this->locationArray;
-  return;
- } else {
-
-  locationArray.resize (0);
-  for (i=1 ; i<=numberOfDofMans ; i++) {
-   this->giveDofManDofIDMask (i, ut, nodeDofIDMask);
-   this -> giveDofManager(i) -> giveLocationArray(nodeDofIDMask, nodalArray) ;
-   locationArray.followedBy(nodalArray) ;
-   // delete nodeDofIDMask;
-  }
- }
- return ;
-}
-
-void  Element :: givePrescribedLocationArray (IntArray& locationArray, EquationID ut) const
-   // Returns the location array of the receiver. This array is obtained by
-   // simply appending the location array of every node of the receiver.
-{
- IntArray  nodeDofIDMask ;
- IntArray  nodalArray;
- int       i ;
-
- locationArray.resize (0);
- for (i=1 ; i<=numberOfDofMans ; i++) {
-  this->giveDofManDofIDMask (i, ut, nodeDofIDMask);
-  this -> giveDofManager(i) -> givePrescribedLocationArray(nodeDofIDMask, nodalArray) ;
-  locationArray.followedBy(nodalArray) ;
- }
-
- return ;
-}
-
-void 
-Element :: invalidateLocationArray ()
-{
- // invalitaes current location array in receiver
- // next call of giveLocationArray() will asemble
- // new location array
- // used mainly for model supporting dynamic changes of
- // static system
-
-
- // force assembling
- // of new location array
- if (locationArray) delete locationArray;
- locationArray = NULL;
-}
-
-Material*  Element :: giveMaterial ()
-   // Returns the material of the receiver.
-{
-   if (! material)
-     // material = this -> readInteger("mat") ;
-     _error ("giveMaterial: material not defined");
-
-   return  domain -> giveMaterial(material) ;
+    return & boundaryLoadArray;
 }
 
 
-CrossSection*  Element :: giveCrossSection ()
-   // Returns the crossSection of the receiver.
+void Element :: giveLocationArray(IntArray &locationArray, EquationID ut) const
+// Returns the location array of the receiver. This array is obtained by
+// simply appending the location array of every node of the receiver.
 {
-   if (! crossSection)
-     _error ("giveCrossSection: crossSection not defined");
+    IntArray nodeDofIDMask;
+    IntArray nodalArray;
+    int i;
 
-   return  domain -> giveCrossSection (crossSection) ;
+    if ( this->locationArray ) {
+        locationArray = * this->locationArray;
+        return;
+    } else {
+        locationArray.resize(0);
+        for ( i = 1; i <= numberOfDofMans; i++ ) {
+            this->giveDofManDofIDMask(i, ut, nodeDofIDMask);
+            this->giveDofManager(i)->giveLocationArray(nodeDofIDMask, nodalArray);
+            locationArray.followedBy(nodalArray);
+            // delete nodeDofIDMask;
+        }
+    }
+
+    return;
+}
+
+void Element :: givePrescribedLocationArray(IntArray &locationArray, EquationID ut) const
+// Returns the location array of the receiver. This array is obtained by
+// simply appending the location array of every node of the receiver.
+{
+    IntArray nodeDofIDMask;
+    IntArray nodalArray;
+    int i;
+
+    locationArray.resize(0);
+    for ( i = 1; i <= numberOfDofMans; i++ ) {
+        this->giveDofManDofIDMask(i, ut, nodeDofIDMask);
+        this->giveDofManager(i)->givePrescribedLocationArray(nodeDofIDMask, nodalArray);
+        locationArray.followedBy(nodalArray);
+    }
+
+    return;
+}
+
+void
+Element :: invalidateLocationArray()
+{
+    // invalitaes current location array in receiver
+    // next call of giveLocationArray() will asemble
+    // new location array
+    // used mainly for model supporting dynamic changes of
+    // static system
+
+
+    // force assembling
+    // of new location array
+    if ( locationArray ) {
+        delete locationArray;
+    }
+
+    locationArray = NULL;
+}
+
+Material *Element :: giveMaterial()
+// Returns the material of the receiver.
+{
+    if ( !material ) {
+        // material = this -> readInteger("mat") ;
+        _error("giveMaterial: material not defined");
+    }
+
+    return domain->giveMaterial(material);
+}
+
+
+CrossSection *Element :: giveCrossSection()
+// Returns the crossSection of the receiver.
+{
+    if ( !crossSection ) {
+        _error("giveCrossSection: crossSection not defined");
+    }
+
+    return domain->giveCrossSection(crossSection);
 }
 
 int
-Element::giveRegionNumber () 
+Element :: giveRegionNumber()
 {
- return this->giveCrossSection()->giveNumber();
+    return this->giveCrossSection()->giveNumber();
 }
 
 
-DofManager*  Element :: giveDofManager (int i) const
-   // Returns the i-th node of the receiver.
+DofManager *Element :: giveDofManager(int i) const
+// Returns the i-th node of the receiver.
 {
-   int  n ;
-  if ((i <= 0) || (i > dofManArray.giveSize()))
-    _error ("giveNode: Node is not defined");
+    int n;
+    if ( ( i <= 0 ) || ( i > dofManArray.giveSize() ) ) {
+        _error("giveNode: Node is not defined");
+    }
 
-   n = dofManArray.at(i) ;
-   return  domain -> giveDofManager(n) ;
+    n = dofManArray.at(i);
+    return domain->giveDofManager(n);
 }
 
 
 
-Node*  Element :: giveNode (int i) const
-   // Returns the i-th node of the receiver.
+Node *Element :: giveNode(int i) const
+// Returns the i-th node of the receiver.
 {
-   int  n ;
-  if ((i <= 0) || (i > dofManArray.giveSize()))
-    _error ("giveNode: Node is not defined");
+    int n;
+    if ( ( i <= 0 ) || ( i > dofManArray.giveSize() ) ) {
+        _error("giveNode: Node is not defined");
+    }
 
-   n = dofManArray.at(i) ;
-   return  domain -> giveNode(n) ;
+    n = dofManArray.at(i);
+    return domain->giveNode(n);
 }
 
 
-ElementSide*  Element :: giveSide (int i) const
-   // Returns the i-th side of the receiver.
+ElementSide *Element :: giveSide(int i) const
+// Returns the i-th side of the receiver.
 {
-   int  n ;
+    int n;
 
-  if ((i <= 0) || (i > dofManArray.giveSize()))
-   _error ("giveNode: Side is not defined");
-   n = dofManArray.at(i) ;
-   return  domain -> giveSide(n) ;
+    if ( ( i <= 0 ) || ( i > dofManArray.giveSize() ) ) {
+        _error("giveNode: Side is not defined");
+    }
+
+    n = dofManArray.at(i);
+    return domain->giveSide(n);
 }
 
 
@@ -351,571 +374,693 @@ ElementSide*  Element :: giveSide (int i) const
 
 
 void
-Element ::  giveCharacteristicMatrix (FloatMatrix &answer, 
-                   CharType mtrx, TimeStep *tStep) 
-// 
+Element ::  giveCharacteristicMatrix(FloatMatrix &answer,
+                                     CharType mtrx, TimeStep *tStep)
+//
 // returns characteristics matrix of receiver accordind to mtrx
 //
 {
-  _error("giveCharacteristicMatrix: Unknown Type of characteristic mtrx.");
-  return ;
+    _error("giveCharacteristicMatrix: Unknown Type of characteristic mtrx.");
+    return;
 }
 
 
 
 void
-Element ::  giveCharacteristicVector (FloatArray& answer, CharType type, ValueModeType mode, TimeStep *tStep) 
-// 
+Element ::  giveCharacteristicVector(FloatArray &answer, CharType type, ValueModeType mode, TimeStep *tStep)
+//
 // returns characteristics vector of receiver accordind to mtrx
 //
 {
-  _error("giveCharacteristicVector: Unknown Type of characteristic mtrx.");
-  return ;
+    _error("giveCharacteristicVector: Unknown Type of characteristic mtrx.");
+    return;
 }
 
 
 
-double Element ::  giveCharacteristicValue  (CharType mtrx, TimeStep *tStep) 
-// 
+double Element ::  giveCharacteristicValue(CharType mtrx, TimeStep *tStep)
+//
 // returns characteristics value of receiver accordind to CharType
 //
 {
-  _error("giveCharacteristicValue: Unknown Type of characteristic mtrx.");
-  return 0.;
+    _error("giveCharacteristicValue: Unknown Type of characteristic mtrx.");
+    return 0.;
 }
 
 IRResultType
-Element :: initializeFrom (InputRecord* ir)
+Element :: initializeFrom(InputRecord *ir)
 {
- const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
- IRResultType result;                               // Required by IR_GIVE_FIELD macro
- 
+    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
+    IRResultType result;                            // Required by IR_GIVE_FIELD macro
+
 #  ifdef VERBOSE
-// VERBOSE_PRINT1("Instanciating element ",number);
+    // VERBOSE_PRINT1("Instanciating element ",number);
 #  endif
- IR_GIVE_FIELD (ir, material, IFT_Element_mat, "mat"); // Macro
+    IR_GIVE_FIELD(ir, material, IFT_Element_mat, "mat"); // Macro
 
- IR_GIVE_FIELD (ir, crossSection, IFT_Element_crosssect, "crosssect"); // Macro
+    IR_GIVE_FIELD(ir, crossSection, IFT_Element_crosssect, "crosssect"); // Macro
 
- IR_GIVE_FIELD (ir, dofManArray, IFT_Element_nodes, "nodes"); // Macro
+    IR_GIVE_FIELD(ir, dofManArray, IFT_Element_nodes, "nodes"); // Macro
 
- //sideArray.resize(0);
- //IR_GIVE_OPTIONAL_FIELD (ir, sideArray, IFT_Element_sides, "sides"); // Macro
- 
- bodyLoadArray.resize(0);
- IR_GIVE_OPTIONAL_FIELD (ir, bodyLoadArray, IFT_Element_bodyload, "bodyloads"); // Macro
+    //sideArray.resize(0);
+    //IR_GIVE_OPTIONAL_FIELD (ir, sideArray, IFT_Element_sides, "sides"); // Macro
 
- boundaryLoadArray.resize(0);
- IR_GIVE_OPTIONAL_FIELD (ir, boundaryLoadArray, IFT_Element_boundaryload, "boundaryloads"); // Macro
+    bodyLoadArray.resize(0);
+    IR_GIVE_OPTIONAL_FIELD(ir, bodyLoadArray, IFT_Element_bodyload, "bodyloads"); // Macro
+
+    boundaryLoadArray.resize(0);
+    IR_GIVE_OPTIONAL_FIELD(ir, boundaryLoadArray, IFT_Element_boundaryload, "boundaryloads"); // Macro
 
 #ifdef __PARALLEL_MODE
- globalNumber = 0;
- IR_GIVE_OPTIONAL_FIELD (ir, globalNumber, IFT_Element_globnum, "globnum"); // Macro
- partitions.resize(0);
- IR_GIVE_OPTIONAL_FIELD (ir, partitions, IFT_Element_partitions, "partitions"); // Macro
- // if (hasString (initString, "shared")) parallel_mode = Element_shared;
- if (ir->hasField (IFT_Element_remote, "remote")) parallel_mode = Element_remote;
- else parallel_mode = Element_local;
+    globalNumber = 0;
+    IR_GIVE_OPTIONAL_FIELD(ir, globalNumber, IFT_Element_globnum, "globnum"); // Macro
+    partitions.resize(0);
+    IR_GIVE_OPTIONAL_FIELD(ir, partitions, IFT_Element_partitions, "partitions"); // Macro
+    // if (hasString (initString, "shared")) parallel_mode = Element_shared;
+    if ( ir->hasField(IFT_Element_remote, "remote") ) {
+        parallel_mode = Element_remote;
+    } else {
+        parallel_mode = Element_local;
+    }
 
 #endif
 
- return IRRT_OK;
-}
-
- 
-Element*  Element :: ofType (char* aClass)
-   // Returns a new element, which has the same number than the receiver,
-   // but belongs to aClass (PlaneStrain, or Truss2D,..).
-{
-   Element* newElement ;
-
-/*   if (! strncasecmp(aClass,"planestress2d",12))
-     newElement = new PlaneStress2d(number,domain) ;
-   else if (! strncasecmp(aClass,"qplanestress2d",12))
-     newElement = new QPlaneStress2d(number,domain) ; 
-   else if (! strncasecmp(aClass,"trplanestress2d",12))
-     newElement = new TrPlaneStress2d(number,domain) ;
-   else if (! strncasecmp(aClass,"qtrplstr",8))
-     newElement = new QTrPlaneStress2d(number,domain) ;
-   else if (! strncasecmp(aClass,"trplanestrrot",12))
-     newElement = new TrPlaneStrRot(number,domain) ;
-   else if (! strncasecmp(aClass,"axisymm3d",9))
-     newElement = new Axisymm3d (number,domain) ;
-   else if (! strncasecmp(aClass,"q4axisymm",9))
-     newElement = new Q4Axisymm (number,domain) ;
-   else if (! strncasecmp(aClass,"l4axisymm",9))
-     newElement = new L4Axisymm (number,domain) ;
-   else if (! strncasecmp(aClass,"lspace",6))
-     newElement = new LSpace(number,domain) ; 
-   else if (! strncasecmp(aClass,"qspace",6))
-     newElement = new QSpace(number,domain) ; 
-   else if (! strncasecmp(aClass,"cctplate",8))
-     newElement = new CCTPlate(number,domain) ; 
-   else if (! strncasecmp(aClass,"ltrspace",8))
-     newElement = new LTRSpace(number,domain) ; 
-   else if (! strncasecmp(aClass,"truss2d",7))
-     newElement = new Truss2d(number,domain) ; 
-   else if (! strncasecmp(aClass,"libeam2d",8))
-     newElement = new LIBeam2d(number,domain) ;
-   else if (! strncasecmp(aClass,"rershell",8))
-     newElement = new RerShell(number,domain) ;
-   else if (! strncasecmp(aClass,"ltrelemppde",11))
-     newElement = new LTrElementPPDE(number,domain) ;
-*/ if (0) {}
-   else {
-   // last resort - call aditional user defined subroutine
-   newElement = ::CreateUsrDefElementOfType (aClass,number,domain);
-   if (newElement == NULL) {
-     _error2 ("ofType : unknown element type (%s)",aClass) ;
-   }
-  }
-   return newElement ;
+    return IRRT_OK;
 }
 
 
-void  Element :: printOutputAt (FILE* file, TimeStep* stepN)
-   // Performs end-of-step operations.
+Element *Element :: ofType(char *aClass)
+// Returns a new element, which has the same number than the receiver,
+// but belongs to aClass (PlaneStrain, or Truss2D,..).
 {
-   int         i ;
+    Element *newElement;
+
+    /*   if (! strncasecmp(aClass,"planestress2d",12))
+     *   newElement = new PlaneStress2d(number,domain) ;
+     * else if (! strncasecmp(aClass,"qplanestress2d",12))
+     *   newElement = new QPlaneStress2d(number,domain) ;
+     * else if (! strncasecmp(aClass,"trplanestress2d",12))
+     *   newElement = new TrPlaneStress2d(number,domain) ;
+     * else if (! strncasecmp(aClass,"qtrplstr",8))
+     *   newElement = new QTrPlaneStress2d(number,domain) ;
+     * else if (! strncasecmp(aClass,"trplanestrrot",12))
+     *   newElement = new TrPlaneStrRot(number,domain) ;
+     * else if (! strncasecmp(aClass,"axisymm3d",9))
+     *   newElement = new Axisymm3d (number,domain) ;
+     * else if (! strncasecmp(aClass,"q4axisymm",9))
+     *   newElement = new Q4Axisymm (number,domain) ;
+     * else if (! strncasecmp(aClass,"l4axisymm",9))
+     *   newElement = new L4Axisymm (number,domain) ;
+     * else if (! strncasecmp(aClass,"lspace",6))
+     *   newElement = new LSpace(number,domain) ;
+     * else if (! strncasecmp(aClass,"qspace",6))
+     *   newElement = new QSpace(number,domain) ;
+     * else if (! strncasecmp(aClass,"cctplate",8))
+     *   newElement = new CCTPlate(number,domain) ;
+     * else if (! strncasecmp(aClass,"ltrspace",8))
+     *   newElement = new LTRSpace(number,domain) ;
+     * else if (! strncasecmp(aClass,"truss2d",7))
+     *   newElement = new Truss2d(number,domain) ;
+     * else if (! strncasecmp(aClass,"libeam2d",8))
+     *   newElement = new LIBeam2d(number,domain) ;
+     * else if (! strncasecmp(aClass,"rershell",8))
+     *   newElement = new RerShell(number,domain) ;
+     * else if (! strncasecmp(aClass,"ltrelemppde",11))
+     *   newElement = new LTrElementPPDE(number,domain) ;
+     */if ( 0 ) { } else {
+        // last resort - call aditional user defined subroutine
+        newElement = :: CreateUsrDefElementOfType(aClass, number, domain);
+        if ( newElement == NULL ) {
+            _error2("ofType : unknown element type (%s)", aClass);
+        }
+    }
+
+    return newElement;
+}
+
+
+void Element :: printOutputAt(FILE *file, TimeStep *stepN)
+// Performs end-of-step operations.
+{
+    int i;
 
 #ifdef __PARALLEL_MODE
-  fprintf (file,"element %d [%8d] :\n",this->giveNumber(), this->giveGlobalNumber()) ;
+    fprintf( file, "element %d [%8d] :\n", this->giveNumber(), this->giveGlobalNumber() );
 #else
-   fprintf (file,"element %d :\n",number) ;
+    fprintf(file, "element %d :\n", number);
 #endif
 
-   for (i=0 ; i < numberOfIntegrationRules ; i++) 
-      integrationRulesArray[i]->printOutputAt(file,stepN);
+    for ( i = 0; i < numberOfIntegrationRules; i++ ) {
+        integrationRulesArray [ i ]->printOutputAt(file, stepN);
+    }
 }
 
 /*
-Element*  Element :: typed ()
-   // Returns a new element, which has the same number than the receiver,
-   // but is typed (PlaneStrain, or Truss2D,..).
+ * Element*  Element :: typed ()
+ * // Returns a new element, which has the same number than the receiver,
+ * // but is typed (PlaneStrain, or Truss2D,..).
+ * {
+ * Element* newElement ;
+ * char     type[32] ;
+ *
+ * this -> readString("class",type) ;
+ * newElement = this -> ofType(type) ;
+ *
+ * return newElement ;
+ * }
+ */
+
+void Element :: updateYourself(TimeStep *tStep)
+// Updates the receiver at end of step.
 {
-   Element* newElement ;
-   char     type[32] ;
-
-   this -> readString("class",type) ;
-   newElement = this -> ofType(type) ;
-
-   return newElement ;
-}
-*/
-
-void  Element :: updateYourself (TimeStep* tStep)
-   // Updates the receiver at end of step.
-{
- int i ;
+    int i;
 
 #  ifdef VERBOSE
-// VERBOSE_PRINT1("Updating Element ",number)
+    // VERBOSE_PRINT1("Updating Element ",number)
 #  endif
- for (i=0 ; i < numberOfIntegrationRules ; i++)
-  integrationRulesArray[i] -> updateYourself(tStep) ;
+    for ( i = 0; i < numberOfIntegrationRules; i++ ) {
+        integrationRulesArray [ i ]->updateYourself(tStep);
+    }
 }
 
-void  Element ::initForNewStep ()
-   // initializes receiver to new time step or can be used
-   // if current time step must be restarted
-   // 
-   // call material->initGpForNewStep() for all GPs.
-   //
+void Element :: initForNewStep()
+// initializes receiver to new time step or can be used
+// if current time step must be restarted
+//
+// call material->initGpForNewStep() for all GPs.
+//
 {
- int i;
- 
- for (i=0 ; i < numberOfIntegrationRules ; i++)
-  integrationRulesArray[i] -> initForNewStep ();
+    int i;
+
+    for ( i = 0; i < numberOfIntegrationRules; i++ ) {
+        integrationRulesArray [ i ]->initForNewStep();
+    }
 }
 
 
 
-contextIOResultType Element :: saveContext (DataStream* stream, ContextMode mode, void *obj)
+contextIOResultType Element :: saveContext(DataStream *stream, ContextMode mode, void *obj)
 //
 // saves full element context (saves state variables, that completely describe
 // current state)
 //
 {
-  contextIOResultType iores;
-  int         i, _val;
+    contextIOResultType iores;
+    int i, _val;
 
-  if ((iores = FEMComponent::saveContext(stream,mode,obj)) != CIO_OK) THROW_CIOERR(iores);
-  
-  if ((mode & CM_Definition)) {
-     if (!stream->write (&numberOfDofMans,1)) THROW_CIOERR(CIO_IOERR);
-     if (!stream->write (&material,1)) THROW_CIOERR(CIO_IOERR);
-     if (!stream->write (&crossSection,1)) THROW_CIOERR(CIO_IOERR);
-     
+    if ( ( iores = FEMComponent :: saveContext(stream, mode, obj) ) != CIO_OK ) {
+        THROW_CIOERR(iores);
+    }
+
+    if ( ( mode & CM_Definition ) ) {
+        if ( !stream->write(& numberOfDofMans, 1) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+
+        if ( !stream->write(& material, 1) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+
+        if ( !stream->write(& crossSection, 1) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+
 #ifdef __PARALLEL_MODE
-     if (mode & CM_DefinitionGlobal) { 
-       // send global numbers instead of local ones
-       int s = dofManArray.giveSize();
-       IntArray globDN (s);
-       for (i=1; i<=s; i++) globDN.at(i) = this->giveDofManager(i)->giveGlobalNumber();
-       if ((iores = globDN.storeYourself(stream, mode)) != CIO_OK) THROW_CIOERR(iores);
-     } else {
-       if ((iores = dofManArray.storeYourself(stream, mode)) != CIO_OK) THROW_CIOERR(iores);
-     } 
+        if ( mode & CM_DefinitionGlobal ) {
+            // send global numbers instead of local ones
+            int s = dofManArray.giveSize();
+            IntArray globDN(s);
+            for ( i = 1; i <= s; i++ ) {
+                globDN.at(i) = this->giveDofManager(i)->giveGlobalNumber();
+            }
+
+            if ( ( iores = globDN.storeYourself(stream, mode) ) != CIO_OK ) {
+                THROW_CIOERR(iores);
+            }
+        } else {
+            if ( ( iores = dofManArray.storeYourself(stream, mode) ) != CIO_OK ) {
+                THROW_CIOERR(iores);
+            }
+        }
+
 #else
-     if ((iores = dofManArray.storeYourself(stream, mode)) != CIO_OK) THROW_CIOERR(iores);
+        if ( ( iores = dofManArray.storeYourself(stream, mode) ) != CIO_OK ) {
+            THROW_CIOERR(iores);
+        }
+
 #endif
-     if ((iores = bodyLoadArray.storeYourself(stream, mode)) != CIO_OK) THROW_CIOERR(iores);
-     if ((iores = boundaryLoadArray.storeYourself(stream, mode)) != CIO_OK) THROW_CIOERR(iores);
-     if (!stream->write (&numberOfIntegrationRules,1)) THROW_CIOERR(CIO_IOERR);
-     for (i=0 ; i< numberOfIntegrationRules ; i++) {
-       _val = integrationRulesArray[i]->giveClassID();
-       if (!stream->write (&_val,1)) THROW_CIOERR(CIO_IOERR);
-     }
+        if ( ( iores = bodyLoadArray.storeYourself(stream, mode) ) != CIO_OK ) {
+            THROW_CIOERR(iores);
+        }
+
+        if ( ( iores = boundaryLoadArray.storeYourself(stream, mode) ) != CIO_OK ) {
+            THROW_CIOERR(iores);
+        }
+
+        if ( !stream->write(& numberOfIntegrationRules, 1) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+
+        for ( i = 0; i < numberOfIntegrationRules; i++ ) {
+            _val = integrationRulesArray [ i ]->giveClassID();
+            if ( !stream->write(& _val, 1) ) {
+                THROW_CIOERR(CIO_IOERR);
+            }
+        }
 
 #ifdef __PARALLEL_MODE
-     int _mode;
-     if (!stream->write (&globalNumber,1)) THROW_CIOERR(CIO_IOERR);
-     _mode = parallel_mode; if (!stream->write (&_mode,1)) THROW_CIOERR(CIO_IOERR);
-     if ((iores = partitions.storeYourself(stream, mode)) != CIO_OK) THROW_CIOERR(iores);
-#endif
-  }
+        int _mode;
+        if ( !stream->write(& globalNumber, 1) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
 
-  for (i=0 ; i < numberOfIntegrationRules ; i++) {
-    if ((iores = integrationRulesArray[i]->saveContext(stream,mode,obj)) != CIO_OK) THROW_CIOERR(iores);
-  }
-  
-  return CIO_OK;
+        _mode = parallel_mode;
+        if ( !stream->write(& _mode, 1) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+
+        if ( ( iores = partitions.storeYourself(stream, mode) ) != CIO_OK ) {
+            THROW_CIOERR(iores);
+        }
+
+#endif
+    }
+
+    for ( i = 0; i < numberOfIntegrationRules; i++ ) {
+        if ( ( iores = integrationRulesArray [ i ]->saveContext(stream, mode, obj) ) != CIO_OK ) {
+            THROW_CIOERR(iores);
+        }
+    }
+
+    return CIO_OK;
 }
 
 
 
-contextIOResultType Element :: restoreContext (DataStream* stream, ContextMode mode, void *obj)
+contextIOResultType Element :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
 //
 // restores full element context (saves state variables, that completely describe
 // current state)
 //
 {
-  contextIOResultType iores;
-  int         i, _nrules ;
+    contextIOResultType iores;
+    int i, _nrules;
 
-  if ((iores = FEMComponent::restoreContext(stream,mode,obj)) != CIO_OK) THROW_CIOERR(iores);
+    if ( ( iores = FEMComponent :: restoreContext(stream, mode, obj) ) != CIO_OK ) {
+        THROW_CIOERR(iores);
+    }
 
-  if (mode & CM_Definition ) {
-     if (!stream->read (&numberOfDofMans,1)) THROW_CIOERR(CIO_IOERR);
-     if (!stream->read (&material,1)) THROW_CIOERR(CIO_IOERR);
-     if (!stream->read (&crossSection,1)) THROW_CIOERR(CIO_IOERR);
-     
-     if ((iores = dofManArray.restoreYourself(stream, mode)) != CIO_OK) THROW_CIOERR(iores);
-     if ((iores = bodyLoadArray.restoreYourself(stream, mode)) != CIO_OK) THROW_CIOERR(iores);
-     if ((iores = boundaryLoadArray.restoreYourself(stream, mode)) != CIO_OK) THROW_CIOERR(iores);
-     if (!stream->read (&_nrules,1)) THROW_CIOERR(CIO_IOERR);
-     // restore integration rules 
-     IntArray dtypes (_nrules);
-     for (i=1 ; i<=_nrules ; i++) {
-       if (!stream->read (&dtypes.at(i),1)) THROW_CIOERR(CIO_IOERR);
-     }
+    if ( mode & CM_Definition ) {
+        if ( !stream->read(& numberOfDofMans, 1) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
 
-     if (_nrules != numberOfIntegrationRules) {
-       // delete old int rule array
-       if (integrationRulesArray) {
-         for (i=0 ; i<numberOfIntegrationRules ; i++)
-           delete integrationRulesArray[i] ;
-         delete[] integrationRulesArray ;
-       }
-       // AND ALLOCATE NEW ONE
-       integrationRulesArray = new IntegrationRule*[_nrules];
-       for (i=0 ; i<_nrules ; i++) {
-         integrationRulesArray[i] = CreateUsrDefIRuleOfType ((classType) dtypes(i),i+1, this);
-       }
-       numberOfIntegrationRules = _nrules;
-     } else {
-       for (i=0 ; i<numberOfIntegrationRules ; i++) {
-         if (integrationRulesArray[i]->giveClassID() != dtypes(i)) {
-           delete integrationRulesArray[i] ;
-           integrationRulesArray[i] = CreateUsrDefIRuleOfType ((classType) dtypes(i),i+1, this);
-         }
-       }
-     }
+        if ( !stream->read(& material, 1) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+
+        if ( !stream->read(& crossSection, 1) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+
+        if ( ( iores = dofManArray.restoreYourself(stream, mode) ) != CIO_OK ) {
+            THROW_CIOERR(iores);
+        }
+
+        if ( ( iores = bodyLoadArray.restoreYourself(stream, mode) ) != CIO_OK ) {
+            THROW_CIOERR(iores);
+        }
+
+        if ( ( iores = boundaryLoadArray.restoreYourself(stream, mode) ) != CIO_OK ) {
+            THROW_CIOERR(iores);
+        }
+
+        if ( !stream->read(& _nrules, 1) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+
+        // restore integration rules
+        IntArray dtypes(_nrules);
+        for ( i = 1; i <= _nrules; i++ ) {
+            if ( !stream->read(& dtypes.at(i), 1) ) {
+                THROW_CIOERR(CIO_IOERR);
+            }
+        }
+
+        if ( _nrules != numberOfIntegrationRules ) {
+            // delete old int rule array
+            if ( integrationRulesArray ) {
+                for ( i = 0; i < numberOfIntegrationRules; i++ ) {
+                    delete integrationRulesArray [ i ];
+                }
+
+                delete[] integrationRulesArray;
+            }
+
+            // AND ALLOCATE NEW ONE
+            integrationRulesArray = new IntegrationRule * [ _nrules ];
+            for ( i = 0; i < _nrules; i++ ) {
+                integrationRulesArray [ i ] = CreateUsrDefIRuleOfType( ( classType ) dtypes(i), i + 1, this );
+            }
+
+            numberOfIntegrationRules = _nrules;
+        } else {
+            for ( i = 0; i < numberOfIntegrationRules; i++ ) {
+                if ( integrationRulesArray [ i ]->giveClassID() != dtypes(i) ) {
+                    delete integrationRulesArray [ i ];
+                    integrationRulesArray [ i ] = CreateUsrDefIRuleOfType( ( classType ) dtypes(i), i + 1, this );
+                }
+            }
+        }
 
 #ifdef __PARALLEL_MODE
-     int _mode;
-     if (!stream->read (&globalNumber,1)) THROW_CIOERR(CIO_IOERR);
-     if (!stream->read (&_mode,1)) THROW_CIOERR(CIO_IOERR); parallel_mode = (elementParallelMode) _mode;
-     if ((iores = partitions.restoreYourself(stream, mode)) != CIO_OK) THROW_CIOERR(iores);
+        int _mode;
+        if ( !stream->read(& globalNumber, 1) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+
+        if ( !stream->read(& _mode, 1) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+
+        parallel_mode = ( elementParallelMode ) _mode;
+        if ( ( iores = partitions.restoreYourself(stream, mode) ) != CIO_OK ) {
+            THROW_CIOERR(iores);
+        }
+
 #endif
-  }
+    }
 
 
-  for (i=0 ; i < numberOfIntegrationRules ; i++) {
-    if ((iores = integrationRulesArray[i]->restoreContext(stream,mode,this)) != CIO_OK) THROW_CIOERR(iores);
-  }
+    for ( i = 0; i < numberOfIntegrationRules; i++ ) {
+        if ( ( iores = integrationRulesArray [ i ]->restoreContext(stream, mode, this) ) != CIO_OK ) {
+            THROW_CIOERR(iores);
+        }
+    }
 
-  return CIO_OK;
+    return CIO_OK;
 }
 
 
 
 double
-Element :: giveLenghtInDir (const FloatArray& normalToCrackPlane)
+Element :: giveLenghtInDir(const FloatArray &normalToCrackPlane)
 //
 // returns receivers projection length (for some material models)
 // to direction given by normalToCrackPlane;
 //
 {
- 
- FloatArray *coords;
- double maxDis, minDis, dis;
- double *p1,*p2;
- int i,nsize, nnode = giveNumberOfNodes();
+    FloatArray *coords;
+    double maxDis, minDis, dis;
+    double *p1, *p2;
+    int i, nsize, nnode = giveNumberOfNodes();
 
- p1 = normalToCrackPlane.givePointer();
- coords = this->giveNode(1)->giveCoordinates();
- p2 = coords->givePointer();
- nsize = coords->giveSize();
- minDis = maxDis = dotProduct(p1,p2,nsize);
+    p1 = normalToCrackPlane.givePointer();
+    coords = this->giveNode(1)->giveCoordinates();
+    p2 = coords->givePointer();
+    nsize = coords->giveSize();
+    minDis = maxDis = dotProduct(p1, p2, nsize);
 
 
- for (i=2 ; i<=nnode; i++) {
-   coords = this->giveNode(i)->giveCoordinates();
-   p2 = coords->givePointer();
-   nsize = coords->giveSize();
-   dis = dotProduct(p1,p2,nsize);
-   if (dis>maxDis) maxDis= dis;
-   else if (dis < minDis) minDis=dis;
- }
-  
- return maxDis - minDis;
+    for ( i = 2; i <= nnode; i++ ) {
+        coords = this->giveNode(i)->giveCoordinates();
+        p2 = coords->givePointer();
+        nsize = coords->giveSize();
+        dis = dotProduct(p1, p2, nsize);
+        if ( dis > maxDis ) {
+            maxDis = dis;
+        } else if ( dis < minDis ) {
+            minDis = dis;
+        }
+    }
+
+    return maxDis - minDis;
 }
 
-FloatArray*
-Element :: ComputeMidPlaneNormal (GaussPoint*)
-// valid only for plane elements (shells, plates, ....) 
+FloatArray *
+Element :: ComputeMidPlaneNormal(GaussPoint *)
+// valid only for plane elements (shells, plates, ....)
 // computes mid-plane normal at gaussPoint - for materials with orthotrophy
 {
- _error ("Unable to compute mid-plane normal, not supported");
- return NULL;
+    _error("Unable to compute mid-plane normal, not supported");
+    return NULL;
 }
 
-int 
-Element::giveIPValue (FloatArray& answer, GaussPoint* aGaussPoint, InternalStateType type, TimeStep* atTime)
+int
+Element :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime)
 {
- if (type == IST_ErrorIndicatorLevel) {
-  ErrorEstimator* ee = this->giveDomain()->giveErrorEstimator();
-  if (ee) { 
-   answer.resize(1); answer.at(1) = ee->giveElementError (indicatorET, this, atTime);
-  } else { 
-   answer.resize(0); return 0; 
-  }
-  return 1;
+    if ( type == IST_ErrorIndicatorLevel ) {
+        ErrorEstimator *ee = this->giveDomain()->giveErrorEstimator();
+        if ( ee ) {
+            answer.resize(1);
+            answer.at(1) = ee->giveElementError(indicatorET, this, atTime);
+        } else {
+            answer.resize(0);
+            return 0;
+        }
 
- } else if (type == IST_InternalStressError) {
-  ErrorEstimator* ee = this->giveDomain()->giveErrorEstimator();
-  if (ee) { 
-   answer.resize(1); answer.at(1) = ee->giveElementError (internalStressET, this, atTime);
-  } else { 
-   answer.resize(0); return 0; 
-  }
-  return 1;
+        return 1;
+    } else if ( type == IST_InternalStressError ) {
+        ErrorEstimator *ee = this->giveDomain()->giveErrorEstimator();
+        if ( ee ) {
+            answer.resize(1);
+            answer.at(1) = ee->giveElementError(internalStressET, this, atTime);
+        } else {
+            answer.resize(0);
+            return 0;
+        }
 
- } else if (type == IST_PrimaryUnknownError) {
-  ErrorEstimator* ee = this->giveDomain()->giveErrorEstimator();
-  if (ee) { 
-   answer.resize(1); answer.at(1) = ee->giveElementError (primaryUnknownET, this, atTime);
-  } else { 
-   answer.resize(0); return 0; 
-  }
-  return 1;
+        return 1;
+    } else if ( type == IST_PrimaryUnknownError ) {
+        ErrorEstimator *ee = this->giveDomain()->giveErrorEstimator();
+        if ( ee ) {
+            answer.resize(1);
+            answer.at(1) = ee->giveElementError(primaryUnknownET, this, atTime);
+        } else {
+            answer.resize(0);
+            return 0;
+        }
 
- } else 
-  return this->giveCrossSection ()->giveIPValue (answer, aGaussPoint, type, atTime);
+        return 1;
+    } else {
+        return this->giveCrossSection()->giveIPValue(answer, aGaussPoint, type, atTime);
+    }
 }
 
-int 
-Element::giveIntVarCompFullIndx (IntArray& answer, InternalStateType type)
+int
+Element :: giveIntVarCompFullIndx(IntArray &answer, InternalStateType type)
 {
-
- if ((type == IST_ErrorIndicatorLevel) || (type == IST_RelMeshDensity) || 
-   (type == IST_InternalStressError) || (type == IST_PrimaryUnknownError)) {
-  answer.resize (1);
-  answer.at(1) = 1;
-  return 1;
- } else 
-  return this->giveCrossSection()->giveIntVarCompFullIndx (answer, type, 
-                               this->giveDefaultIntegrationRulePtr()->
-                               getIntegrationPoint(0)->giveMaterialMode(), this->giveMaterial());
+    if ( ( type == IST_ErrorIndicatorLevel ) || ( type == IST_RelMeshDensity ) ||
+        ( type == IST_InternalStressError ) || ( type == IST_PrimaryUnknownError ) ) {
+        answer.resize(1);
+        answer.at(1) = 1;
+        return 1;
+    } else {
+        return this->giveCrossSection()->giveIntVarCompFullIndx( answer, type,
+                                                                this->giveDefaultIntegrationRulePtr()->
+                                                                getIntegrationPoint(0)->giveMaterialMode(), this->giveMaterial() );
+    }
 }
 
 
 InternalStateValueType
-Element:: giveIPValueType (InternalStateType type)
+Element :: giveIPValueType(InternalStateType type)
 {
- if ((type == IST_ErrorIndicatorLevel) || (type == IST_RelMeshDensity) || 
-   (type == IST_InternalStressError) || (type == IST_PrimaryUnknownError)) 
-  return ISVT_SCALAR;
- else 
-  return this->giveCrossSection()->giveIPValueType(type, this->giveMaterial());}
-
-
-int
-Element:: giveIPValueSize (InternalStateType type, GaussPoint* gp) 
-{
- if ((type == IST_ErrorIndicatorLevel) || (type == IST_RelMeshDensity) || 
-   (type == IST_InternalStressError) || (type == IST_PrimaryUnknownError))
-  return 1;
- else 
-  return this->giveCrossSection()->giveIPValueSize (type, gp);
+    if ( ( type == IST_ErrorIndicatorLevel ) || ( type == IST_RelMeshDensity ) ||
+        ( type == IST_InternalStressError ) || ( type == IST_PrimaryUnknownError ) ) {
+        return ISVT_SCALAR;
+    } else {
+        return this->giveCrossSection()->giveIPValueType( type, this->giveMaterial() );
+    }
 }
 
 
 int
-Element::giveSpatialDimension (void)
+Element :: giveIPValueSize(InternalStateType type, GaussPoint *gp)
 {
- switch(this->giveGeometryType()){
- case EGT_line_1:
- case EGT_line_2:
-  return 1;
- case EGT_triangle_1:
- case EGT_triangle_2:
- case EGT_quad_1:
-// case EGT_quad_2:
-  return 2;
-  case EGT_tetra_1:
-//  case EGT_tetra_2:
- case EGT_hexa_1:
-// case EGT_hexa_2:
-  return 3;
- case EGT_unknown:
-  break;
- }
-
- _error("giveSpatialDimension: failure (maybe new element type was registered)");
- return 0; //to make compiler happy
+    if ( ( type == IST_ErrorIndicatorLevel ) || ( type == IST_RelMeshDensity ) ||
+        ( type == IST_InternalStressError ) || ( type == IST_PrimaryUnknownError ) ) {
+        return 1;
+    } else {
+        return this->giveCrossSection()->giveIPValueSize(type, gp);
+    }
 }
 
 
 int
-Element::giveNumberOfBoundarySides (void)
+Element :: giveSpatialDimension(void)
 {
- switch(this->giveGeometryType()){
- case EGT_line_1:
- case EGT_line_2:
-  return 2;
- case EGT_triangle_1:
- case EGT_triangle_2:
-  return 3;
- case EGT_quad_1:
-// case EGT_quad_2:
-  return 4;
-  case EGT_tetra_1:
-//  case EGT_tetra_2:
-  return 4;
- case EGT_hexa_1:
-// case EGT_hexa_2:
-  return 6;
- case EGT_unknown:
-  break;
- }
+    switch ( this->giveGeometryType() ) {
+    case EGT_line_1:
+    case EGT_line_2:
+        return 1;
 
- _error2("giveSpatialDimension: failure, unsupported geometry type (%s)", 
-	 __Element_Geometry_TypeToString(this->giveGeometryType()));
- return 0; // to make compiler happy
+    case EGT_triangle_1:
+    case EGT_triangle_2:
+    case EGT_quad_1:
+        // case EGT_quad_2:
+        return 2;
+
+    case EGT_tetra_1:
+        //  case EGT_tetra_2:
+    case EGT_hexa_1:
+        // case EGT_hexa_2:
+        return 3;
+
+    case EGT_unknown:
+        break;
+    }
+
+    _error("giveSpatialDimension: failure (maybe new element type was registered)");
+    return 0; //to make compiler happy
 }
 
 
 int
-Element::adaptiveMap (Domain* oldd, TimeStep* tStep)
+Element :: giveNumberOfBoundarySides(void)
 {
- int i,j, result = 1 ;
- IntegrationRule* iRule ;
- MaterialModelMapperInterface* interface = (MaterialModelMapperInterface*) 
-  this->giveMaterial()->giveInterface(MaterialModelMapperInterfaceType);
- 
- if (!interface) return 0;
+    switch ( this->giveGeometryType() ) {
+    case EGT_line_1:
+    case EGT_line_2:
+        return 2;
 
- for (i=0 ; i < numberOfIntegrationRules ; i++) {
-  iRule = integrationRulesArray[i];
-  for (j=0 ; j < iRule->getNumberOfIntegrationPoints() ; j++) {
-   result &= interface->MMI_map (iRule-> getIntegrationPoint(j), oldd, tStep);
-  }
- }
- return result;
+    case EGT_triangle_1:
+    case EGT_triangle_2:
+        return 3;
 
+    case EGT_quad_1:
+        // case EGT_quad_2:
+        return 4;
+
+    case EGT_tetra_1:
+        //  case EGT_tetra_2:
+        return 4;
+
+    case EGT_hexa_1:
+        // case EGT_hexa_2:
+        return 6;
+
+    case EGT_unknown:
+        break;
+    }
+
+    _error2( "giveSpatialDimension: failure, unsupported geometry type (%s)",
+            __Element_Geometry_TypeToString( this->giveGeometryType() ) );
+    return 0; // to make compiler happy
 }
 
 
 int
-Element::adaptiveFinish (TimeStep* tStep)
+Element :: adaptiveMap(Domain *oldd, TimeStep *tStep)
 {
- int i,j, result = 1 ;
- IntegrationRule* iRule ;
- MaterialModelMapperInterface* interface = (MaterialModelMapperInterface*) 
-  this->giveMaterial()->giveInterface(MaterialModelMapperInterfaceType);
- 
- if (!interface) return 0;
- 
- for (i=0 ; i < numberOfIntegrationRules ; i++) {
-  iRule = integrationRulesArray[i];
-  for (j=0 ; j < iRule->getNumberOfIntegrationPoints() ; j++) {
-   result &= interface->MMI_finish (tStep);
-  }
- }
- return result;
- 
+    int i, j, result = 1;
+    IntegrationRule *iRule;
+    MaterialModelMapperInterface *interface = ( MaterialModelMapperInterface * )
+                                              this->giveMaterial()->giveInterface(MaterialModelMapperInterfaceType);
+
+    if ( !interface ) {
+        return 0;
+    }
+
+    for ( i = 0; i < numberOfIntegrationRules; i++ ) {
+        iRule = integrationRulesArray [ i ];
+        for ( j = 0; j < iRule->getNumberOfIntegrationPoints(); j++ ) {
+            result &= interface->MMI_map(iRule->getIntegrationPoint(j), oldd, tStep);
+        }
+    }
+
+    return result;
+}
+
+
+int
+Element :: adaptiveFinish(TimeStep *tStep)
+{
+    int i, j, result = 1;
+    IntegrationRule *iRule;
+    MaterialModelMapperInterface *interface = ( MaterialModelMapperInterface * )
+                                              this->giveMaterial()->giveInterface(MaterialModelMapperInterfaceType);
+
+    if ( !interface ) {
+        return 0;
+    }
+
+    for ( i = 0; i < numberOfIntegrationRules; i++ ) {
+        iRule = integrationRulesArray [ i ];
+        for ( j = 0; j < iRule->getNumberOfIntegrationPoints(); j++ ) {
+            result &= interface->MMI_finish(tStep);
+        }
+    }
+
+    return result;
 }
 
 
 
 #ifdef __PARALLEL_MODE
-int 
-Element::packUnknowns (CommunicationBuffer& buff, TimeStep* stepN)
+int
+Element :: packUnknowns(CommunicationBuffer &buff, TimeStep *stepN)
 {
- int  i,j, result = 1 ;
- //GaussPoint  *gp ;
- IntegrationRule* iRule;
- 
- for (i =0; i < numberOfIntegrationRules; i++) {
-  iRule = integrationRulesArray[i];
-  for (j=0; j < iRule->getNumberOfIntegrationPoints(); j++)
-   result &= this->giveCrossSection()->packUnknowns (buff, stepN, iRule->getIntegrationPoint(j));
- }
- return result;
-}
- 
- 
-int 
-Element :: unpackAndUpdateUnknowns (CommunicationBuffer& buff, TimeStep* stepN) 
-{
- int  i,j, result = 1 ;
- //GaussPoint  *gp ;
- IntegrationRule* iRule;
- 
- for (i =0; i < numberOfIntegrationRules; i++) {
-  iRule = integrationRulesArray[i];
-  for (j=0; j < iRule->getNumberOfIntegrationPoints(); j++)
-   result &= this->giveCrossSection()->unpackAndUpdateUnknowns (buff, stepN, iRule->getIntegrationPoint(j));
- }
- return result;
+    int i, j, result = 1;
+    //GaussPoint  *gp ;
+    IntegrationRule *iRule;
+
+    for ( i = 0; i < numberOfIntegrationRules; i++ ) {
+        iRule = integrationRulesArray [ i ];
+        for ( j = 0; j < iRule->getNumberOfIntegrationPoints(); j++ ) {
+            result &= this->giveCrossSection()->packUnknowns( buff, stepN, iRule->getIntegrationPoint(j) );
+        }
+    }
+
+    return result;
 }
 
-int 
-Element :: estimatePackSize (CommunicationBuffer& buff) 
+
+int
+Element :: unpackAndUpdateUnknowns(CommunicationBuffer &buff, TimeStep *stepN)
 {
- int  i,j, result = 0 ;
- IntegrationRule* iRule;
- 
- for (i =0; i < numberOfIntegrationRules; i++) {
-  iRule = integrationRulesArray[i];
-  for (j=0; j < iRule->getNumberOfIntegrationPoints(); j++)
-   result += this->giveCrossSection()->estimatePackSize (buff, iRule->getIntegrationPoint(j));
- }
- return result;
+    int i, j, result = 1;
+    //GaussPoint  *gp ;
+    IntegrationRule *iRule;
+
+    for ( i = 0; i < numberOfIntegrationRules; i++ ) {
+        iRule = integrationRulesArray [ i ];
+        for ( j = 0; j < iRule->getNumberOfIntegrationPoints(); j++ ) {
+            result &= this->giveCrossSection()->unpackAndUpdateUnknowns( buff, stepN, iRule->getIntegrationPoint(j) );
+        }
+    }
+
+    return result;
+}
+
+int
+Element :: estimatePackSize(CommunicationBuffer &buff)
+{
+    int i, j, result = 0;
+    IntegrationRule *iRule;
+
+    for ( i = 0; i < numberOfIntegrationRules; i++ ) {
+        iRule = integrationRulesArray [ i ];
+        for ( j = 0; j < iRule->getNumberOfIntegrationPoints(); j++ ) {
+            result += this->giveCrossSection()->estimatePackSize( buff, iRule->getIntegrationPoint(j) );
+        }
+    }
+
+    return result;
 }
 
 double
-Element::predictRelativeComputationalCost ()
+Element :: predictRelativeComputationalCost()
 {
-  int j, nip;
-  double wgt = 0;
-  IntegrationRule* iRule = this->giveDefaultIntegrationRulePtr();
-  nip = iRule->getNumberOfIntegrationPoints();
-  for (j=0; j < nip; j++)
-    wgt += this->giveCrossSection()->predictRelativeComputationalCost (iRule->getIntegrationPoint(j));
-  return (this->giveRelativeSelfComputationalCost()*wgt/nip);
+    int j, nip;
+    double wgt = 0;
+    IntegrationRule *iRule = this->giveDefaultIntegrationRulePtr();
+    nip = iRule->getNumberOfIntegrationPoints();
+    for ( j = 0; j < nip; j++ ) {
+        wgt += this->giveCrossSection()->predictRelativeComputationalCost( iRule->getIntegrationPoint(j) );
+    }
+
+    return ( this->giveRelativeSelfComputationalCost() * wgt / nip );
 }
 
 #endif
@@ -924,49 +1069,57 @@ Element::predictRelativeComputationalCost ()
 
 #ifdef __OOFEG
 void
-Element ::drawYourself (oofegGraphicContext& gc)
+Element :: drawYourself(oofegGraphicContext &gc)
 {
- OGC_PlotModeType mode = gc.giveIntVarPlotMode();
+    OGC_PlotModeType mode = gc.giveIntVarPlotMode();
 
-  if (mode == OGC_rawGeometry) this->drawRawGeometry(gc);
-  else if (mode == OGC_deformedGeometry) 
-  this->drawDeformedGeometry(gc,DisplacementVector);
- else if (mode == OGC_eigenVectorGeometry) 
-  this->drawDeformedGeometry(gc,EigenVector);
-  else if (mode == OGC_scalarPlot)
-  this-> drawScalar (gc);
- else if (mode == OGC_elemSpecial)
-  this-> drawSpecial (gc);
-  else _error ("drawYourself : unsupported mode");
+    if ( mode == OGC_rawGeometry ) {
+        this->drawRawGeometry(gc);
+    } else if ( mode == OGC_deformedGeometry )  {
+        this->drawDeformedGeometry(gc, DisplacementVector);
+    } else if ( mode == OGC_eigenVectorGeometry ) {
+        this->drawDeformedGeometry(gc, EigenVector);
+    } else if ( mode == OGC_scalarPlot )  {
+        this->drawScalar(gc);
+    } else if ( mode == OGC_elemSpecial ) {
+        this->drawSpecial(gc);
+    } else {
+        _error("drawYourself : unsupported mode");
+    }
 }
 
 
-int   
-Element::giveInternalStateAtNode (FloatArray& answer, InternalStateType type, InternalStateMode mode, 
-                 int node, TimeStep* atTime)
+int
+Element :: giveInternalStateAtNode(FloatArray &answer, InternalStateType type, InternalStateMode mode,
+                                   int node, TimeStep *atTime)
 {
- if (type == IST_RelMeshDensity) {
-  ErrorEstimator* ee = this->giveDomain()->giveErrorEstimator();
-  if (ee) {
-   answer.resize(1);
-   answer.at(1) = this->giveDomain()->giveErrorEstimator()->giveRemeshingCrit()->
-    giveRequiredDofManDensity (this->giveNode(node)->giveNumber(), atTime, 1);
-   return 1;
-  } else {
-   answer.resize(0);
-   return 0;
-  }
- } else {
-  if (mode == ISM_recovered) {
-   const FloatArray* nodval;
-   int result = this->giveDomain()->giveSmoother()->giveNodalVector(nodval, this->giveNode(node)->giveNumber(), 
-                                    this->giveRegionNumber());
-   if (nodval) answer = *nodval;
-   else answer.resize(0);
-   return result;
-  }
-  else return 0;
- } 
+    if ( type == IST_RelMeshDensity ) {
+        ErrorEstimator *ee = this->giveDomain()->giveErrorEstimator();
+        if ( ee ) {
+            answer.resize(1);
+            answer.at(1) = this->giveDomain()->giveErrorEstimator()->giveRemeshingCrit()->
+            giveRequiredDofManDensity(this->giveNode(node)->giveNumber(), atTime, 1);
+            return 1;
+        } else {
+            answer.resize(0);
+            return 0;
+        }
+    } else {
+        if ( mode == ISM_recovered ) {
+            const FloatArray *nodval;
+            int result = this->giveDomain()->giveSmoother()->giveNodalVector( nodval, this->giveNode(node)->giveNumber(),
+                                                                             this->giveRegionNumber() );
+            if ( nodval ) {
+                answer = * nodval;
+            } else {
+                answer.resize(0);
+            }
+
+            return result;
+        } else   {
+            return 0;
+        }
+    }
 }
 
 

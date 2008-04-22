@@ -35,48 +35,48 @@
 #include "diagpre.h"
 #include "sparsemtrx.h"
 
-DiagPreconditioner::DiagPreconditioner(const SparseMtrx &C, InputRecord& attributes) : Preconditioner (C, attributes), 
-diag_ (C.giveNumberOfRows())
-{}
+DiagPreconditioner :: DiagPreconditioner(const SparseMtrx &C, InputRecord &attributes) : Preconditioner(C, attributes),
+    diag_( C.giveNumberOfRows() )
+{ }
 
 
 void
-DiagPreconditioner::init (const SparseMtrx& C)
+DiagPreconditioner :: init(const SparseMtrx &C)
 {
-  int i, n = C.giveNumberOfRows();
- double diag;
+    int i, n = C.giveNumberOfRows();
+    double diag;
 
- diag_.resize (C.giveNumberOfRows());
- diag_.zero();
+    diag_.resize( C.giveNumberOfRows() );
+    diag_.zero();
 
-  /* Find the diagonal elements */
-  for (i = 1; i <= n; i++) {
-    diag = C.at(i,i);
-    if (diag  == 0) {
-      OOFEM_ERROR2 ("DiagPreconditioner::init : failed, zero diagonal detected in equation %d", i);
+    /* Find the diagonal elements */
+    for ( i = 1; i <= n; i++ ) {
+        diag = C.at(i, i);
+        if ( diag  == 0 ) {
+            OOFEM_ERROR2("DiagPreconditioner::init : failed, zero diagonal detected in equation %d", i);
+        }
+
+        diag_(i - 1) = 1. / diag;
     }
-    diag_(i-1) = 1. / diag;
-  }
-
-}
-
-
-void 
-DiagPreconditioner::solve (const FloatArray &x, FloatArray&y) const 
-{
- y.resize (x.giveSize());
-  for (int i = 0; i < x.giveSize(); i++)
-    y(i) = x(i) * diag(i);
-  
 }
 
 
 void
-DiagPreconditioner::trans_solve (const FloatArray &x, FloatArray&y) const 
+DiagPreconditioner :: solve(const FloatArray &x, FloatArray &y) const
 {
-  
- y.resize(x.giveSize());
- 
-  for (int i = 0; i < x.giveSize(); i++)
-    y(i) = x(i) * diag(i);
+    y.resize( x.giveSize() );
+    for ( int i = 0; i < x.giveSize(); i++ ) {
+        y(i) = x(i) * diag(i);
+    }
+}
+
+
+void
+DiagPreconditioner :: trans_solve(const FloatArray &x, FloatArray &y) const
+{
+    y.resize( x.giveSize() );
+
+    for ( int i = 0; i < x.giveSize(); i++ ) {
+        y(i) = x(i) * diag(i);
+    }
 }

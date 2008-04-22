@@ -1,37 +1,37 @@
 /* $Header: /home/cvs/bp/oofem/sm/src/j2plasticmaterial.C,v 1.4 2003/04/06 14:08:30 bp Exp $ */
 /*
-
-                   *****    *****   ******  ******  ***   ***                            
-                 **   **  **   **  **      **      ** *** **                             
-                **   **  **   **  ****    ****    **  *  **                              
-               **   **  **   **  **      **      **     **                               
-              **   **  **   **  **      **      **     **                                
-              *****    *****   **      ******  **     **         
-            
-                                                                   
-               OOFEM : Object Oriented Finite Element Code                 
-                    
-                 Copyright (C) 1993 - 2000   Borek Patzak                                       
-
-
-
-         Czech Technical University, Faculty of Civil Engineering,
-     Department of Structural Mechanics, 166 29 Prague, Czech Republic
-                                                                               
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.                                                                              
-*/
+ *
+ *                 #####    #####   ######  ######  ###   ###
+ *               ##   ##  ##   ##  ##      ##      ## ### ##
+ *              ##   ##  ##   ##  ####    ####    ##  #  ##
+ *             ##   ##  ##   ##  ##      ##      ##     ##
+ *            ##   ##  ##   ##  ##      ##      ##     ##
+ *            #####    #####   ##      ######  ##     ##
+ *
+ *
+ *             OOFEM : Object Oriented Finite Element Code
+ *
+ *               Copyright (C) 1993 - 2008   Borek Patzak
+ *
+ *
+ *
+ *       Czech Technical University, Faculty of Civil Engineering,
+ *   Department of Structural Mechanics, 166 29 Prague, Czech Republic
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
 // file : j2plasticmaterial.C
 
 
@@ -45,436 +45,503 @@
 #include "structuralcrosssection.h"
 #include "mathfem.h"
 
-J2plasticMaterial:: J2plasticMaterial (int n, Domain* d) : PlasticMaterial (n,d)
+J2plasticMaterial :: J2plasticMaterial(int n, Domain *d) : PlasticMaterial(n, d)
 {
-  //
-  // constructor
-  //
-  kinematicHardeningFlag = isotropicHardeningFlag = 0;
- linearElasticMaterial = new IsotropicLinearElasticMaterial (n,d);
+    //
+    // constructor
+    //
+    kinematicHardeningFlag = isotropicHardeningFlag = 0;
+    linearElasticMaterial = new IsotropicLinearElasticMaterial(n, d);
 }
 
-J2plasticMaterial :: ~J2plasticMaterial () 
+J2plasticMaterial :: ~J2plasticMaterial()
 {
-  // 
-  // destructor
-  //
+    //
+    // destructor
+    //
 }
 
 IRResultType
-J2plasticMaterial :: initializeFrom (InputRecord* ir)
+J2plasticMaterial :: initializeFrom(InputRecord *ir)
 {
- const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
- IRResultType result;                   // Required by IR_GIVE_FIELD macro
-  double value;
+    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
+    IRResultType result;                // Required by IR_GIVE_FIELD macro
+    double value;
 
-  PlasticMaterial::initializeFrom(ir);
- linearElasticMaterial->initializeFrom(ir);
+    PlasticMaterial :: initializeFrom(ir);
+    linearElasticMaterial->initializeFrom(ir);
 
- IR_GIVE_FIELD (ir, value, IFT_J2plasticMaterial_ry, "ry"); // Macro
-  k = value / sqrt(3.0);
+    IR_GIVE_FIELD(ir, value, IFT_J2plasticMaterial_ry, "ry"); // Macro
+    k = value / sqrt(3.0);
 
- //  E = readDouble (initString,"e");
-  // nu = readDouble (initString,"nu");
- kinematicModuli = 0.0;
- IR_GIVE_OPTIONAL_FIELD (ir, kinematicModuli, IFT_J2plasticMaterial_khm, "khm"); // Macro
+    //  E = readDouble (initString,"e");
+    // nu = readDouble (initString,"nu");
+    kinematicModuli = 0.0;
+    IR_GIVE_OPTIONAL_FIELD(ir, kinematicModuli, IFT_J2plasticMaterial_khm, "khm"); // Macro
 
-  isotropicModuli = 0.0;
- IR_GIVE_OPTIONAL_FIELD (ir, isotropicModuli, IFT_J2plasticMaterial_ihm, "ihm"); // Macro
-  
-  if (fabs(kinematicModuli) > 1.e-12) kinematicHardeningFlag = 1;
-  if (fabs(isotropicModuli) > 1.e-12) isotropicHardeningFlag = 1;
+    isotropicModuli = 0.0;
+    IR_GIVE_OPTIONAL_FIELD(ir, isotropicModuli, IFT_J2plasticMaterial_ihm, "ihm"); // Macro
 
-  return IRRT_OK; 
- 
+    if ( fabs(kinematicModuli) > 1.e-12 ) {
+        kinematicHardeningFlag = 1;
+    }
+
+    if ( fabs(isotropicModuli) > 1.e-12 ) {
+        isotropicHardeningFlag = 1;
+    }
+
+    return IRRT_OK;
 }
 
 
-MaterialStatus* 
-J2plasticMaterial :: CreateStatus (GaussPoint* gp) const
-/* 
- creates new  material status  corresponding to this class
-*/
+MaterialStatus *
+J2plasticMaterial :: CreateStatus(GaussPoint *gp) const
+/*
+ * creates new  material status  corresponding to this class
+ */
 {
- PlasticMaterialStatus *status ;
- 
- status = new PlasticMaterialStatus (1,this->giveDomain(),gp);
- return status;
+    PlasticMaterialStatus *status;
+
+    status = new PlasticMaterialStatus(1, this->giveDomain(), gp);
+    return status;
 }
 
- 
-FloatArray* 
-J2plasticMaterial:: ComputeStressSpaceHardeningVars (GaussPoint *gp, 
-                   FloatArray* strainSpaceHardeningVariables)
+
+FloatArray *
+J2plasticMaterial :: ComputeStressSpaceHardeningVars(GaussPoint *gp,
+                                                     FloatArray *strainSpaceHardeningVariables)
 {
-  // in full stress strain space
-  
-  int i;
-  int count=0, size = this->giveSizeOfFullHardeningVarsVector(), isize, rSize;
-  IntArray mask;
+    // in full stress strain space
 
-  if (!hasHardening()) return NULL;
-  FloatArray* answer = new FloatArray (size);
-  this->giveStressStrainMask (mask,ReducedForm ,gp->giveMaterialMode());
-  isize = mask.giveSize();
-  rSize = this->giveSizeOfReducedHardeningVarsVector (gp);
-  
-  /* kinematic hardening variables are first */
-  if (this->kinematicHardeningFlag) {
-  for (i=1; i<= isize; i++)
-  // to be consistent with equivalent plastic strain formulation
-  // we multiply by (sqrt(2.)*2./3.)
-  answer->at(mask.at(i)) = (sqrt(2.)*2./3.)*this->kinematicModuli * strainSpaceHardeningVariables->at(i);
-  count =6;
-  }
+    int i;
+    int count = 0, size = this->giveSizeOfFullHardeningVarsVector(), isize, rSize;
+    IntArray mask;
 
-  if (this->isotropicHardeningFlag) {
-  answer->at(count+1) = this->isotropicModuli *
-  strainSpaceHardeningVariables->at(rSize) ;
-  }
+    if ( !hasHardening() ) {
+        return NULL;
+    }
 
-  //delete mask;
-  return answer->negated();  
-}
- 
-double 
-J2plasticMaterial::computeYieldValueAt (GaussPoint *gp, FloatArray* stressVector, 
-              FloatArray* stressSpaceHardeningVars) 
-{
- double f;
- FloatArray helpVector, backStress;
- 
- if (this->kinematicHardeningFlag) {
-   if (stressVector != NULL) {
-   this->giveStressBackVector (backStress, *stressSpaceHardeningVars);
-   helpVector = *stressVector;
-   helpVector.add (backStress);
-   } else return -k;
- } else helpVector = *stressVector;
- 
- f = sqrt (this -> computeJ2InvariantAt (&helpVector));
- 
- //if (this->kinematicHardeningFlag) delete helpVector;
+    FloatArray *answer = new FloatArray(size);
+    this->giveStressStrainMask( mask, ReducedForm, gp->giveMaterialMode() );
+    isize = mask.giveSize();
+    rSize = this->giveSizeOfReducedHardeningVarsVector(gp);
 
- return f + sqrt(1./3.)*this->giveIsotropicHardeningVar(stressSpaceHardeningVars) - this->k;
+    /* kinematic hardening variables are first */
+    if ( this->kinematicHardeningFlag ) {
+        for ( i = 1; i <= isize; i++ ) {
+            // to be consistent with equivalent plastic strain formulation
+            // we multiply by (sqrt(2.)*2./3.)
+            answer->at( mask.at(i) ) = ( sqrt(2.) * 2. / 3. ) * this->kinematicModuli *strainSpaceHardeningVariables->at(i);
+        }
+
+        count = 6;
+    }
+
+    if ( this->isotropicHardeningFlag ) {
+        answer->at(count + 1) = this->isotropicModuli *
+                                strainSpaceHardeningVariables->at(rSize);
+    }
+
+    //delete mask;
+    return answer->negated();
 }
 
- 
+double
+J2plasticMaterial :: computeYieldValueAt(GaussPoint *gp, FloatArray *stressVector,
+                                         FloatArray *stressSpaceHardeningVars)
+{
+    double f;
+    FloatArray helpVector, backStress;
+
+    if ( this->kinematicHardeningFlag ) {
+        if ( stressVector != NULL ) {
+            this->giveStressBackVector(backStress, * stressSpaceHardeningVars);
+            helpVector = * stressVector;
+            helpVector.add(backStress);
+        } else {
+            return -k;
+        }
+    } else {
+        helpVector = * stressVector;
+    }
+
+    f = sqrt( this->computeJ2InvariantAt(& helpVector) );
+
+    //if (this->kinematicHardeningFlag) delete helpVector;
+
+    return f + sqrt(1. / 3.) * this->giveIsotropicHardeningVar(stressSpaceHardeningVars) - this->k;
+}
+
+
 void
-J2plasticMaterial::computeHardeningReducedModuli (FloatMatrix& answer,
-                         GaussPoint *gp, 
-                         FloatArray* strainSpaceHardeningVariables, 
-                         TimeStep* atTime)
+J2plasticMaterial :: computeHardeningReducedModuli(FloatMatrix &answer,
+                                                   GaussPoint *gp,
+                                                   FloatArray *strainSpaceHardeningVariables,
+                                                   TimeStep *atTime)
 {
-  /* computes hardening moduli in reduced stress strain space (for kinematic back-stress)*/
+    /* computes hardening moduli in reduced stress strain space (for kinematic back-stress)*/
 
-  int i;
-  int size = this->giveSizeOfReducedHardeningVarsVector(gp);
+    int i;
+    int size = this->giveSizeOfReducedHardeningVarsVector(gp);
 
-  if (!hasHardening()) {answer.resize (0,0); return ;}
-  //FloatMatrix* answer = new FloatMatrix (size, size);
- answer.resize (size, size);
- answer.zero();
+    if ( !hasHardening() ) {
+        answer.resize(0, 0);
+        return;
+    }
 
-  /* kinematic hardening variables are first */
-  if (this->kinematicHardeningFlag) {
-  int ksize = this->giveSizeOfReducedStressStrainVector(gp->giveMaterialMode());
-  for (i=1; i<= ksize; i++)
-  answer.at(i,i) = this->kinematicModuli;
-  }
-  
-  if (this->isotropicHardeningFlag) {
-  answer.at(size,size) = this->isotropicModuli;
-  }
+    //FloatMatrix* answer = new FloatMatrix (size, size);
+    answer.resize(size, size);
+    answer.zero();
 
-  return ;
+    /* kinematic hardening variables are first */
+    if ( this->kinematicHardeningFlag ) {
+        int ksize = this->giveSizeOfReducedStressStrainVector( gp->giveMaterialMode() );
+        for ( i = 1; i <= ksize; i++ ) {
+            answer.at(i, i) = this->kinematicModuli;
+        }
+    }
+
+    if ( this->isotropicHardeningFlag ) {
+        answer.at(size, size) = this->isotropicModuli;
+    }
+
+    return;
 }
 
 
- 
-FloatArray* 
-J2plasticMaterial::ComputeStressGradient (GaussPoint *gp, FloatArray* stressVector,
-              FloatArray* stressSpaceHardeningVars) 
+
+FloatArray *
+J2plasticMaterial :: ComputeStressGradient(GaussPoint *gp, FloatArray *stressVector,
+                                           FloatArray *stressSpaceHardeningVars)
 {
-  /* stress gradient of yield function in full stress - strain space */
+    /* stress gradient of yield function in full stress - strain space */
 
- double f,ax,ay,az,sx,sy,sz;
- FloatArray *answer = new FloatArray (6);
- FloatArray helpVector, backStress;
- 
- if (this->kinematicHardeningFlag) {
-   if (stressVector != NULL) {
-   this->giveStressBackVector (backStress, *stressSpaceHardeningVars);
-   helpVector = *stressVector;
-   helpVector.add (backStress);
-   } else return answer;
- } else helpVector = *stressVector;
- 
- f = sqrt (this -> computeJ2InvariantAt (&helpVector));
- // check for yield value zero value
- if (fabs (f) < 1.e-6) return answer;
+    double f, ax, ay, az, sx, sy, sz;
+    FloatArray *answer = new FloatArray(6);
+    FloatArray helpVector, backStress;
 
- ax = helpVector.at(1);
- ay = helpVector.at(2);
- az = helpVector.at(3);
- 
- sx = (2./3.)*ax - (1./3.)*ay - (1./3.)*az;
- sy = (2./3.)*ay - (1./3.)*ax - (1./3.)*az;
- sz = (2./3.)*az - (1./3.)*ay - (1./3.)*ax;
- 
- answer->at(1) = 0.5 * sx / f;
- answer->at(2) = 0.5 * sy / f;
- answer->at(3) = 0.5 * sz / f;
- answer->at(4) = helpVector.at(4) / f;
- answer->at(5) = helpVector.at(5) / f;
- answer->at(6) = helpVector.at(6) / f;
- 
- //if (this->kinematicHardeningFlag) delete helpVector;
+    if ( this->kinematicHardeningFlag ) {
+        if ( stressVector != NULL ) {
+            this->giveStressBackVector(backStress, * stressSpaceHardeningVars);
+            helpVector = * stressVector;
+            helpVector.add(backStress);
+        } else {
+            return answer;
+        }
+    } else {
+        helpVector = * stressVector;
+    }
 
- return answer;
+    f = sqrt( this->computeJ2InvariantAt(& helpVector) );
+    // check for yield value zero value
+    if ( fabs(f) < 1.e-6 ) {
+        return answer;
+    }
+
+    ax = helpVector.at(1);
+    ay = helpVector.at(2);
+    az = helpVector.at(3);
+
+    sx = ( 2. / 3. ) * ax - ( 1. / 3. ) * ay - ( 1. / 3. ) * az;
+    sy = ( 2. / 3. ) * ay - ( 1. / 3. ) * ax - ( 1. / 3. ) * az;
+    sz = ( 2. / 3. ) * az - ( 1. / 3. ) * ay - ( 1. / 3. ) * ax;
+
+    answer->at(1) = 0.5 * sx / f;
+    answer->at(2) = 0.5 * sy / f;
+    answer->at(3) = 0.5 * sz / f;
+    answer->at(4) = helpVector.at(4) / f;
+    answer->at(5) = helpVector.at(5) / f;
+    answer->at(6) = helpVector.at(6) / f;
+
+    //if (this->kinematicHardeningFlag) delete helpVector;
+
+    return answer;
 }
 
-FloatArray*
-J2plasticMaterial:: ComputeStressSpaceHardeningVarsReducedGradient (GaussPoint *gp, FloatArray* stressVector,
-                        FloatArray* stressSpaceHardeningVars) 
+FloatArray *
+J2plasticMaterial :: ComputeStressSpaceHardeningVarsReducedGradient(GaussPoint *gp, FloatArray *stressVector,
+                                                                    FloatArray *stressSpaceHardeningVars)
 {
-  /* computes stress space hardening gradient in reduced stress-strain space */
+    /* computes stress space hardening gradient in reduced stress-strain space */
 
-  int i, kcount=0, size = this->giveSizeOfReducedHardeningVarsVector(gp);
-  //double f,ax,ay,az,sx,sy,sz;
-  FloatArray *answer;
-  FloatArray *fullKinematicGradient, reducedKinematicGrad;
-  StructuralCrossSection *crossSection = (StructuralCrossSection*)
-  (gp -> giveElement()->giveCrossSection());
-  
-  if (!hasHardening()) return NULL;
-  answer = new FloatArray (size);
-  
-  /* kinematic hardening variables first */
-  if (this->kinematicHardeningFlag) {
-  fullKinematicGradient = this->ComputeStressGradient (gp, stressVector, stressSpaceHardeningVars);
-  crossSection->giveReducedCharacteristicVector(reducedKinematicGrad, gp, *fullKinematicGradient);  
-  delete fullKinematicGradient;
-  
-  kcount = reducedKinematicGrad.giveSize();
-  }
-  
-  if (this->kinematicHardeningFlag) {
-  for (i=1; i<=kcount; i++) answer->at(i) = reducedKinematicGrad.at(i);
-  //delete reducedKinematicGrad;
-  }
-  
-  if (this->isotropicHardeningFlag) {
-  answer->at(size) = sqrt(1./3.);
-  }
-  
-  return answer;
+    int i, kcount = 0, size = this->giveSizeOfReducedHardeningVarsVector(gp);
+    //double f,ax,ay,az,sx,sy,sz;
+    FloatArray *answer;
+    FloatArray *fullKinematicGradient, reducedKinematicGrad;
+    StructuralCrossSection *crossSection = ( StructuralCrossSection * )
+                                           ( gp->giveElement()->giveCrossSection() );
+
+    if ( !hasHardening() ) {
+        return NULL;
+    }
+
+    answer = new FloatArray(size);
+
+    /* kinematic hardening variables first */
+    if ( this->kinematicHardeningFlag ) {
+        fullKinematicGradient = this->ComputeStressGradient(gp, stressVector, stressSpaceHardeningVars);
+        crossSection->giveReducedCharacteristicVector(reducedKinematicGrad, gp, * fullKinematicGradient);
+        delete fullKinematicGradient;
+
+        kcount = reducedKinematicGrad.giveSize();
+    }
+
+    if ( this->kinematicHardeningFlag ) {
+        for ( i = 1; i <= kcount; i++ ) {
+            answer->at(i) = reducedKinematicGrad.at(i);
+        }
+
+        //delete reducedKinematicGrad;
+    }
+
+    if ( this->isotropicHardeningFlag ) {
+        answer->at(size) = sqrt(1. / 3.);
+    }
+
+    return answer;
 }
-  
 
-  
+
+
 
 int
-J2plasticMaterial:: hasHardening ()
+J2plasticMaterial :: hasHardening()
 {
-  return (this->kinematicHardeningFlag || this->isotropicHardeningFlag);
+    return ( this->kinematicHardeningFlag || this->isotropicHardeningFlag );
 }
 
 
 void
-J2plasticMaterial:: computeReducedGradientMatrix (FloatMatrix& answer, 
-                         GaussPoint *gp,
-                         const FloatArray& stressVector, 
-                         const FloatArray& stressSpaceHardeningVars) 
+J2plasticMaterial :: computeReducedGradientMatrix(FloatMatrix &answer,
+                                                  GaussPoint *gp,
+                                                  const FloatArray &stressVector,
+                                                  const FloatArray &stressSpaceHardeningVars)
 {
-  int i,j,size;
-  int imask, jmask;
-  FloatArray helpVector, backStress, df(6) ;
-  IntArray mask;
-  double f, f32, f12, ax, ay, az ;
+    int i, j, size;
+    int imask, jmask;
+    FloatArray helpVector, backStress, df(6);
+    IntArray mask;
+    double f, f32, f12, ax, ay, az;
 
- this-> giveStressStrainMask(mask, FullForm, gp->giveMaterialMode());
-  size = giveSizeOfReducedStressStrainVector(gp->giveMaterialMode()) + 
-  this->giveSizeOfReducedHardeningVarsVector(gp);
+    this->giveStressStrainMask( mask, FullForm, gp->giveMaterialMode() );
+    size = giveSizeOfReducedStressStrainVector( gp->giveMaterialMode() ) +
+    this->giveSizeOfReducedHardeningVarsVector(gp);
 
-  //FloatMatrix* answer = new FloatMatrix(size,size);
- answer.resize (size,size);
- answer.zero();
+    //FloatMatrix* answer = new FloatMatrix(size,size);
+    answer.resize(size, size);
+    answer.zero();
 
-  
-  if (stressVector.giveSize() != 0) {
-  /* kinematic hardening variables first */
-  if (this->kinematicHardeningFlag) {
-  this->giveStressBackVector (backStress, stressSpaceHardeningVars);
-  helpVector = stressVector;
-  helpVector.add (backStress);
-  //delete backStress;
-  } else helpVector = stressVector;
-  
-  f = this -> computeJ2InvariantAt (&helpVector);
-  f12 = __OOFEM_POW (f,1./2.);
-  f32 = __OOFEM_POW (f,3./2.);
-  
-  ax = helpVector.at(1);
-  ay = helpVector.at(2);
-  az = helpVector.at(3);
- 
-  df.at(1) = (2./3.)*ax - (1./3.)*ay - (1./3.)*az;
-  df.at(2) = (2./3.)*ay - (1./3.)*ax - (1./3.)*az;
-  df.at(3) = (2./3.)*az - (1./3.)*ay - (1./3.)*ax;
-  df.at(4) = 2.* helpVector.at(4);
-  df.at(5) = 2.* helpVector.at(5);
-  df.at(6) = 2.* helpVector.at(6);
 
-  //delete helpVector;
+    if ( stressVector.giveSize() != 0 ) {
+        /* kinematic hardening variables first */
+        if ( this->kinematicHardeningFlag ) {
+            this->giveStressBackVector(backStress, stressSpaceHardeningVars);
+            helpVector = stressVector;
+            helpVector.add(backStress);
+            //delete backStress;
+        } else {
+            helpVector = stressVector;
+        }
 
-  for (i=1; i<=3; i++) {
-  if ((imask = mask.at(i)) == 0) continue;
-  for (j=i; j<=3; j++) {
-    if ((jmask = mask.at(j)) == 0) continue;
-    if (i==j) {
-    answer.at(imask,jmask) = -(1./4.)*(1./f32)*df.at(i)*df.at(j) + 0.5 * (1./f12)* (4./6);
-    } else{
-    answer.at(imask,jmask) = -(1./4.)*(1./f32)*df.at(i)*df.at(j) + 0.5 * (1./f12)* (-2./6);
-    answer.at(jmask,imask) = -(1./4.)*(1./f32)*df.at(i)*df.at(j) + 0.5 * (1./f12)* (-2./6);
+        f = this->computeJ2InvariantAt(& helpVector);
+        f12 = __OOFEM_POW(f, 1. / 2.);
+        f32 = __OOFEM_POW(f, 3. / 2.);
+
+        ax = helpVector.at(1);
+        ay = helpVector.at(2);
+        az = helpVector.at(3);
+
+        df.at(1) = ( 2. / 3. ) * ax - ( 1. / 3. ) * ay - ( 1. / 3. ) * az;
+        df.at(2) = ( 2. / 3. ) * ay - ( 1. / 3. ) * ax - ( 1. / 3. ) * az;
+        df.at(3) = ( 2. / 3. ) * az - ( 1. / 3. ) * ay - ( 1. / 3. ) * ax;
+        df.at(4) = 2. * helpVector.at(4);
+        df.at(5) = 2. * helpVector.at(5);
+        df.at(6) = 2. * helpVector.at(6);
+
+        //delete helpVector;
+
+        for ( i = 1; i <= 3; i++ ) {
+            if ( ( imask = mask.at(i) ) == 0 ) {
+                continue;
+            }
+
+            for ( j = i; j <= 3; j++ ) {
+                if ( ( jmask = mask.at(j) ) == 0 ) {
+                    continue;
+                }
+
+                if ( i == j ) {
+                    answer.at(imask, jmask) = -( 1. / 4. ) * ( 1. / f32 ) * df.at(i) * df.at(j) + 0.5 * ( 1. / f12 ) * ( 4. / 6 );
+                } else {
+                    answer.at(imask, jmask) = -( 1. / 4. ) * ( 1. / f32 ) * df.at(i) * df.at(j) + 0.5 * ( 1. / f12 ) * ( -2. / 6 );
+                    answer.at(jmask, imask) = -( 1. / 4. ) * ( 1. / f32 ) * df.at(i) * df.at(j) + 0.5 * ( 1. / f12 ) * ( -2. / 6 );
+                }
+            }
+        }
+
+        for ( i = 1; i <= 3; i++ ) {
+            if ( ( imask = mask.at(i) ) == 0 ) {
+                continue;
+            }
+
+            for ( j = 4; j <= 6; j++ ) {
+                if ( ( jmask = mask.at(j) ) == 0 ) {
+                    continue;
+                }
+
+                answer.at(imask, jmask) = -( 1. / 4. ) * ( 1. / f32 ) * df.at(i) * df.at(j);
+                answer.at(jmask, imask) = -( 1. / 4. ) * ( 1. / f32 ) * df.at(i) * df.at(j);
+            }
+        }
+
+        for ( i = 4; i <= 6; i++ ) {
+            if ( ( imask = mask.at(i) ) == 0 ) {
+                continue;
+            }
+
+            for ( j = i; j <= 6; j++ ) {
+                if ( ( jmask = mask.at(j) ) == 0 ) {
+                    continue;
+                }
+
+                if ( i == j ) {
+                    answer.at(imask, jmask) = -( 1. / 4. ) * ( 1. / f32 ) * df.at(i) * df.at(j) + 0.5 * ( 1. / f12 ) * 2.;
+                } else {
+                    answer.at(imask, jmask) = -( 1. / 4. ) * ( 1. / f32 ) * df.at(i) * df.at(j);
+                    answer.at(jmask, imask) = -( 1. / 4. ) * ( 1. / f32 ) * df.at(i) * df.at(j);
+                }
+            }
+        }
     }
-  }
-  }
-  
-  for (i=1; i<=3; i++) {
-  if ((imask = mask.at(i)) == 0) continue;
-  for (j=4; j<=6; j++) {
-    if ((jmask = mask.at(j)) == 0) continue;
-    answer.at(imask,jmask) = -(1./4.)*(1./f32)*df.at(i)*df.at(j);
-    answer.at(jmask,imask) = -(1./4.)*(1./f32)*df.at(i)*df.at(j);
-  }
-  }
-  
-  for (i=4; i<=6; i++) {
-  if ((imask = mask.at(i)) == 0) continue;
-  for (j=i; j<=6; j++) {
-    if ((jmask = mask.at(j)) == 0) continue;
-    if (i==j) {
-    answer.at(imask,jmask) = -(1./4.)*(1./f32)*df.at(i)*df.at(j) + 0.5 * (1./f12)* 2.;
-    } else {
-    answer.at(imask,jmask) = -(1./4.)*(1./f32)*df.at(i)*df.at(j);
-    answer.at(jmask,imask) = -(1./4.)*(1./f32)*df.at(i)*df.at(j);
-    }
-  }
-  }
-  }
 
-  //delete df;
-  //delete mask;
-  /* for isotropic hardening: the corresponding part of gradient matrix is zero valued */
-  
-  return ;
+    //delete df;
+    //delete mask;
+    /* for isotropic hardening: the corresponding part of gradient matrix is zero valued */
+
+    return;
 }
 
 
 void
-J2plasticMaterial:: computeTrialStressIncrement (FloatArray& answer, GaussPoint *gp,
-                         const FloatArray& strainIncrement, 
-                         TimeStep* atTime)
+J2plasticMaterial :: computeTrialStressIncrement(FloatArray &answer, GaussPoint *gp,
+                                                 const FloatArray &strainIncrement,
+                                                 TimeStep *atTime)
 { /* Computes the full trial elastic stress vector */
-  FloatArray   reducedAnswer;
-  FloatMatrix  reducedModuli;
-  StructuralCrossSection *crossSection = (StructuralCrossSection*)
-  (gp -> giveElement()->giveCrossSection());
-  
- this->giveLinearElasticMaterial()->giveCharacteristicMatrix (reducedModuli, ReducedForm, ElasticStiffness,
-                                gp, atTime);
+    FloatArray reducedAnswer;
+    FloatMatrix reducedModuli;
+    StructuralCrossSection *crossSection = ( StructuralCrossSection * )
+                                           ( gp->giveElement()->giveCrossSection() );
 
-  reducedAnswer.beProductOf (reducedModuli, strainIncrement);
-  crossSection->giveFullCharacteristicVector(answer, gp, reducedAnswer);
-  //delete reducedAnswer;
-  //delete reducedModuli;
-  
-  return ;
+    this->giveLinearElasticMaterial()->giveCharacteristicMatrix(reducedModuli, ReducedForm, ElasticStiffness,
+                                                                gp, atTime);
+
+    reducedAnswer.beProductOf(reducedModuli, strainIncrement);
+    crossSection->giveFullCharacteristicVector(answer, gp, reducedAnswer);
+    //delete reducedAnswer;
+    //delete reducedModuli;
+
+    return;
 }
 
 
 void
-J2plasticMaterial:: compute3dElasticModuli(FloatMatrix& answer,
-                      GaussPoint *gp,
-                      TimeStep *atTime)
+J2plasticMaterial :: compute3dElasticModuli(FloatMatrix &answer,
+                                            GaussPoint *gp,
+                                            TimeStep *atTime)
 {
- /* Returns 3d elastic moduli */
-  //FloatMatrix *FullConstitutiveMatrix = new FloatMatrix (6,6);
+    /* Returns 3d elastic moduli */
+    //FloatMatrix *FullConstitutiveMatrix = new FloatMatrix (6,6);
 
- this->giveLinearElasticMaterial()->give3dMaterialStiffnessMatrix(answer, FullForm, ElasticStiffness, gp, atTime);
+    this->giveLinearElasticMaterial()->give3dMaterialStiffnessMatrix(answer, FullForm, ElasticStiffness, gp, atTime);
 }
 
 
 double
-J2plasticMaterial:: computeJ2InvariantAt(FloatArray* stressVector) 
+J2plasticMaterial :: computeJ2InvariantAt(FloatArray *stressVector)
 {
-  double answer;
-  double v1,v2,v3;
-  
-  if (stressVector == NULL) return 0.0;
-  v1 = ((stressVector->at(1)-stressVector->at(2))*(stressVector->at(1)-stressVector->at(2)));
-  v2 = ((stressVector->at(2)-stressVector->at(3))*(stressVector->at(2)-stressVector->at(3)));
-  v3 = ((stressVector->at(3)-stressVector->at(1))*(stressVector->at(3)-stressVector->at(1)));
-  
-  answer = (1./6.)*(v1 + v2 + v3) + stressVector->at(4)*stressVector->at(4) + 
-  stressVector->at(5)*stressVector->at(5)+ stressVector->at(6)*stressVector->at(6);
+    double answer;
+    double v1, v2, v3;
 
-  return answer;
+    if ( stressVector == NULL ) {
+        return 0.0;
+    }
+
+    v1 = ( ( stressVector->at(1) - stressVector->at(2) ) * ( stressVector->at(1) - stressVector->at(2) ) );
+    v2 = ( ( stressVector->at(2) - stressVector->at(3) ) * ( stressVector->at(2) - stressVector->at(3) ) );
+    v3 = ( ( stressVector->at(3) - stressVector->at(1) ) * ( stressVector->at(3) - stressVector->at(1) ) );
+
+    answer = ( 1. / 6. ) * ( v1 + v2 + v3 ) + stressVector->at(4) * stressVector->at(4) +
+    stressVector->at(5) * stressVector->at(5) + stressVector->at(6) * stressVector->at(6);
+
+    return answer;
 }
 
 
-int 
-J2plasticMaterial:: giveSizeOfFullHardeningVarsVector() 
+int
+J2plasticMaterial :: giveSizeOfFullHardeningVarsVector()
 {
-  /* Returns the size of hardening variables vector */
-  int size = 0;
+    /* Returns the size of hardening variables vector */
+    int size = 0;
 
-  if (kinematicHardeningFlag) size+=6;  /* size of full stress vector */
-  if (isotropicHardeningFlag) size+=1;  /* scalar value */
+    if ( kinematicHardeningFlag ) {
+        size += 6;                      /* size of full stress vector */
+    }
 
-  return size;
+    if ( isotropicHardeningFlag ) {
+        size += 1;                      /* scalar value */
+    }
+
+    return size;
 }
 
-int 
-J2plasticMaterial:: giveSizeOfReducedHardeningVarsVector(GaussPoint* gp) 
+int
+J2plasticMaterial :: giveSizeOfReducedHardeningVarsVector(GaussPoint *gp)
 {
-  /* Returns the size of hardening variables vector */
-  int size = 0;
+    /* Returns the size of hardening variables vector */
+    int size = 0;
 
-  if (kinematicHardeningFlag) size+=this->giveSizeOfReducedStressStrainVector(gp->giveMaterialMode());  
-  if (isotropicHardeningFlag) size+=1;  /* scalar value */
+    if ( kinematicHardeningFlag ) {
+        size += this->giveSizeOfReducedStressStrainVector( gp->giveMaterialMode() );
+    }
 
-  return size;
+    if ( isotropicHardeningFlag ) {
+        size += 1;                      /* scalar value */
+    }
+
+    return size;
 }
 
 
 void
-J2plasticMaterial :: giveStressBackVector (FloatArray& answer, 
-                      const FloatArray& stressSpaceHardeningVars)
+J2plasticMaterial :: giveStressBackVector(FloatArray &answer,
+                                          const FloatArray &stressSpaceHardeningVars)
 {
-  /* returns part of hardening vector corresponding to kinematic hardening */
-  if (this->kinematicHardeningFlag) {
-  answer.resize (6);
-  for (int i=1; i<=6; i++) answer.at(i) = stressSpaceHardeningVars.at(i);
-  return ;
-  }
-  answer.resize (0);
- return ;
+    /* returns part of hardening vector corresponding to kinematic hardening */
+    if ( this->kinematicHardeningFlag ) {
+        answer.resize(6);
+        for ( int i = 1; i <= 6; i++ ) {
+            answer.at(i) = stressSpaceHardeningVars.at(i);
+        }
+
+        return;
+    }
+
+    answer.resize(0);
+    return;
 }
 
 
 double
-J2plasticMaterial :: giveIsotropicHardeningVar(FloatArray* stressSpaceHardeningVars)
+J2plasticMaterial :: giveIsotropicHardeningVar(FloatArray *stressSpaceHardeningVars)
 {
-  /* returns value in  hardening vector corresponding to isotropic hardening */
-  if (!isotropicHardeningFlag) {
-  return 0.;
-  } else if (this->kinematicHardeningFlag) {
-  return stressSpaceHardeningVars->at(7);
-  } else {
-  return stressSpaceHardeningVars->at(1);
-  }
+    /* returns value in  hardening vector corresponding to isotropic hardening */
+    if ( !isotropicHardeningFlag ) {
+        return 0.;
+    } else if ( this->kinematicHardeningFlag ) {
+        return stressSpaceHardeningVars->at(7);
+    } else {
+        return stressSpaceHardeningVars->at(1);
+    }
 
-  return 0.;
+    return 0.;
 }
