@@ -45,7 +45,7 @@
 #include <stdio.h>
 #include <math.h>
 #endif
-#include "cltypes.h"
+
 #include "verbose.h"
 #include "flotmtrx.h"
 #include "skyline.h"

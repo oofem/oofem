@@ -44,11 +44,12 @@
 #include "isolinearelasticmaterial.h"
 #include "flotarry.h"
 #include "flotmtrx.h"
-#include "cltypes.h"
+
 #include "matstatus.h"
 #include "gausspnt.h"
 #include "structuralcrosssection.h"
 #include "timestep.h"
+#include "contextioerr.h"
 
 
 MaxwellChainMaterial :: MaxwellChainMaterial(int n, Domain *d) : StructuralMaterial(n, d),

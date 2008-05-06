@@ -44,6 +44,7 @@
 #include <stdio.h>
 #endif
 #include "structengngmodel.h"
+#include "geneigvalsolvertype.h"
 #include "sparsegeneigenvalsystemnm.h"
 #include "sparselinsystemnm.h"
 #include "sparsemtrx.h"

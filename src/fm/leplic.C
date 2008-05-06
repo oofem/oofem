@@ -41,6 +41,7 @@
 #include "conTable.h"
 #include "datastream.h"
 #include "spatiallocalizer.h"
+#include "contextioerr.h"
 
 #define LEPLIC_ZERO_VOF  1.e-12
 #define LEPLIC_BRENT_EPS 1.e-12
@@ -267,14 +268,14 @@ LEPlic :: doInterfaceRemapping(TimeStep *atTime)
      * Final step: deposition of volume materials truncated on Lagrangian (updated)
      * grid to the target grid, which is the original one in our Eulerian case.
      */
-    int in, ie, neighbrNum, nelem = domain->giveNumberOfElements();
+    int in = 0, ie = 0, neighbrNum, nelem = domain->giveNumberOfElements();
     double in_vof, total_volume = 0.0, in_vol;
     IntArray neighbours, elNum(1);
     FloatArray normal;
     Polygon matvolpoly, elemPoly;
     Graph g;
 
-    double matVol, matVolSum;
+    double matVol = 0.0, matVolSum = 0.0;
     double __vol;
 
     LEPlicElementInterface *interface, *neghbrInterface;

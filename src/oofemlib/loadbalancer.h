@@ -41,7 +41,7 @@
 #include "clock.h"
 #include "alist.h"
 
-//#define __LB_DEBUG
+#define __LB_DEBUG
 
 #ifdef __LB_DEBUG
 #include "dynalist.h"

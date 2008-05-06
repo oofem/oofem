@@ -47,6 +47,8 @@
 #include "initial.h"
 #include "loadtime.h"
 #include "engngm.h"
+#include "oofem_limits.h"
+
 #ifndef __MAKEDEPEND
 //#include <clock.h>
 #endif
@@ -54,7 +56,7 @@
 #include "debug.h"
 #include "verbose.h"
 #include "strreader.h"
-#include "cltypes.h"
+
 #include "conTable.h"
 #include "outputmanager.h"
 #include "dummylocalizer.h"

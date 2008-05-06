@@ -59,7 +59,7 @@
 #include "skyline.h"
 #include "debug.h"
 #include "verbose.h"
-#include "cltypes.h"
+
 #include "elementside.h"
 #include "structuralnonlocalmaterialext.h"
 #include "nonlocmatstiffinterface.h"
@@ -1414,7 +1414,7 @@ StructuralElement :: condense(FloatMatrix *stiff, FloatMatrix *mass, FloatArray 
 
 
 int
-StructuralElement :: computeGNDofRotationMatrix(FloatMatrix &answer, DofManTrasfType mode)
+StructuralElement :: computeGNDofRotationMatrix(FloatMatrix &answer, DofManTransfType mode)
 {
     int i, j, k, lastRowPos = 0, lastColPos = 0, flag = 0;
 
@@ -1467,7 +1467,7 @@ StructuralElement :: computeGNDofRotationMatrix(FloatMatrix &answer, DofManTrasf
 
 
 int
-StructuralElement :: computeGNLoadRotationMatrix(FloatMatrix &answer, DofManTrasfType mode)
+StructuralElement :: computeGNLoadRotationMatrix(FloatMatrix &answer, DofManTransfType mode)
 {
     int i, j, k, lastRowPos = 0, lastColPos = 0, flag = 0;
 

@@ -42,6 +42,8 @@
 #include "flotarry.h"
 #include "structuralcrosssection.h"
 //#include "yieldcriteria.h"
+#include "contextioerr.h"
+
 #ifndef __MAKEDEPEND
 #include <math.h>
 #endif

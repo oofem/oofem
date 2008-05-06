@@ -41,7 +41,7 @@
 #ifndef inputrecord_h
 #define inputrecord_h
 
-#include "cltypes.h"
+
 #include "intarray.h"
 #include "flotarry.h"
 #include "dictionr.h"

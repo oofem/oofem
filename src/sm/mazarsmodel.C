@@ -45,6 +45,7 @@
 #include "engngm.h"
 #include "mathfem.h"
 #include "datastream.h"
+#include "contextioerr.h"
 
 #define _MAZAR_MODEL_ITER_TOL 1.e-15
 

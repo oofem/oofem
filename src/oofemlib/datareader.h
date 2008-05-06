@@ -41,7 +41,7 @@
 #ifndef datareader_h
 #define datareader_h
 
-#include "cltypes.h"
+
 #include "inputrecord.h"
 
 /**

@@ -42,7 +42,7 @@
 #ifndef __MAKEDEPEND
 #include <stdio.h>
 #endif
-#include "cltypes.h"
+
 
 LDLTFactorization :: LDLTFactorization(int i, Domain *d, EngngModel *m) :
     SparseLinearSystemNM(i, d, m) {

@@ -39,7 +39,7 @@
 #ifndef doublepowerlaw_h
 #define doublepowerlaw_h
 
-#include "cltypes.h"
+
 #include "maxwellChM.h"
 
 class DoublePowerLawMaterial : public MaxwellChainMaterial

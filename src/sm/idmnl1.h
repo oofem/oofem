@@ -43,7 +43,7 @@
 #include "idm1.h"
 #include "structuralnonlocalmaterialext.h"
 #include "nonlocmatstiffinterface.h"
-#include "cltypes.h"
+
 
 #include "sparsemtrx.h"
 #include "dynalist.h"

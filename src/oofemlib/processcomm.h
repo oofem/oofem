@@ -40,6 +40,8 @@
 
 #include "combuff.h"
 #include "engngm.h"
+#include "commbufftype.h"
+#include "communicatormode.h"
 
 #ifndef __MAKEDEPEND
 #include "mpi.h"

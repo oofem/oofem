@@ -43,7 +43,10 @@
 
 #include "generalbc.h"
 #include "dictionr.h"
-#include "cltypes.h"
+
+#include "classtype.h"
+#include "bcvaltype.h"
+#include "valuemodetype.h"
 
 /**
  * Class implementing general initial condition. Initial condition is usually attribute of

@@ -40,6 +40,7 @@
 #endif
 #include "communicator.h"
 #include "intarray.h"
+#include "oofem_limits.h"
 
 #ifdef __USE_MPI
 #ifndef __MAKEDEPEND

@@ -242,7 +242,8 @@ SparseConectivityMtxII::SparseConectivityMtxII(SparseConectivityMtxII& mtx,Order
 }
 
 //Copy constructor
-SparseConectivityMtxII::SparseConectivityMtxII(const SparseConectivityMtxII& mtx)
+SparseConectivityMtxII::SparseConectivityMtxII(const SparseConectivityMtxII& mtx) :
+    TraceableMatrix(), IConectMatrix()
 {
 	n = mtx.N();
 	ColumnsIndexes = new IntArrayList* [n];

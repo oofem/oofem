@@ -44,9 +44,10 @@
 #ifndef __MAKEDEPEND
 #include <stdio.h>
 #endif
-#include "cltypes.h"
+
 #include "datareader.h"
 #include "oofemtxtinputrecord.h"
+#include "oofem_limits.h"
 
 /**
  * Class representing the implemantaion of plain text date reader.

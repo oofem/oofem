@@ -54,7 +54,7 @@
 #include "skyline.h"
 #include "debug.h"
 #include "verbose.h"
-#include "cltypes.h"
+
 #ifndef __MAKEDEPEND
 #include <stdlib.h>
 #include <stdio.h>

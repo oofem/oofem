@@ -71,7 +71,7 @@ DynCompRow :: DynCompRow(int n) : SparseMtrx(n, n), base_(0)
 /*  Copy constructor         */
 /*****************************/
 
-DynCompRow :: DynCompRow(const DynCompRow &S) : base_(S.base_)
+DynCompRow :: DynCompRow(const DynCompRow &S) : SparseMtrx(S.nRows, S.nColumns), base_(S.base_)
 {
     int i;
     if ( S.rows_ ) {

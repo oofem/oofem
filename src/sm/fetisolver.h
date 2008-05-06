@@ -45,7 +45,7 @@
 #include "sparselinsystemnm.h"
 #include "sparsemtrx.h"
 #include "flotarry.h"
-#include "cltypes.h"
+
 #include "skyline.h"
 #include "flotmtrx.h"
 #include "processcomm.h"

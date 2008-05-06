@@ -42,7 +42,7 @@
 
 #include "spatiallocalizer.h"
 #include "compiler.h"
-#include "cltypes.h"
+
 #ifndef __MAKEDEPEND
 #include <set>
 #include <list>

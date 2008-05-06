@@ -43,6 +43,9 @@
 #include "sprnodalrecoverymodel.h"
 #include "materialinterface.h"
 #include "mathfem.h"
+#include "oofem_limits.h"
+#include "cltypes.h"
+
 #ifndef __MAKEDEPEND
 #include <vector>
 #endif

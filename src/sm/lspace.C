@@ -44,7 +44,7 @@
 #include "flotarry.h"
 #include "intarray.h"
 #include "domain.h"
-#include "cltypes.h"
+
 #include "structuralms.h"
 #include "mathfem.h"
 #ifndef __MAKEDEPEND

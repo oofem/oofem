@@ -39,7 +39,7 @@
 
 #include "engngm.h"
 #include "alist.h"
-#include "cltypes.h"
+
 #include "inputrecord.h"
 #include "fieldmanager.h"
 #ifndef __MAKEDEPEND

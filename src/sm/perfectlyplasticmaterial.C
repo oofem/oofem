@@ -44,13 +44,14 @@
 #include "gausspnt.h"
 #include "flotmtrx.h"
 #include "flotarry.h"
-#include "cltypes.h"
+
 #include "mathfem.h"
 #include "datastream.h"
 #ifndef __MAKEDEPEND
 #include <stdlib.h>
 #include <math.h>
 #endif
+#include "contextioerr.h"
 
 int
 PerfectlyPlasticMaterial :: hasMaterialModeCapability(MaterialMode mode)

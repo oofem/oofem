@@ -39,7 +39,8 @@
 #include <stdio.h>
 #include <string.h>
 #endif
-#include "cltypes.h"
+
+#include "oofem_limits.h"
 
 /**
  * Tokenizer class. This class splits given record (represented as string) to
@@ -56,7 +57,7 @@ private:
     /// common token buffer, tokens are terminated by '\0'
     char tokens [ MAX_TOKENS_LENGTH ];
     /// array of pointers to token buffer. The i-th pointer points to the position of i-th token in token buffer.
-    char *tokenPosition [ MAX_TOKENS ];
+    char *tokenPosition [ OOFEM_MAX_TOKENS ];
     //FILE* inputStream;
     /// token separator; zero represents  whitespace chars
     char separator;

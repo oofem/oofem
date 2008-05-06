@@ -45,7 +45,7 @@
 #include "elementside.h"
 #include "dof.h"
 #include "initial.h"
-#include "cltypes.h"
+
 #include "verbose.h"
 #include "conTable.h"
 #include "supgelement.h"
@@ -64,6 +64,7 @@
 #endif
 #include "clock.h"
 #endif
+#include "contextioerr.h"
 
 /* define if implicit interface update required */
 //#define SUPG_IMPLICIT_INTERFACE

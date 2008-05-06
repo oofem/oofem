@@ -46,7 +46,7 @@
 #include "dictionr.h"
 
 #include "debug.h"
-#include "cltypes.h"
+
 #ifndef __MAKEDEPEND
 #include <stdlib.h>
 #include <ctype.h>

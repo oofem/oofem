@@ -36,7 +36,7 @@
 #define nodalaveragingrecoverymodel_h
 
 #include "compiler.h"
-#include "cltypes.h"
+
 #include "nodalrecoverymodel.h"
 #include "interface.h"
 

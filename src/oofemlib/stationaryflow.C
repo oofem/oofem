@@ -48,10 +48,12 @@
 #include "node.h"
 #include "dof.h"
 #include "datastream.h"
+#include "contextioerr.h"
+
 #ifndef __MAKEDEPEND
 #include <stdio.h>
 #endif
-#include "cltypes.h"
+
 #include "verbose.h"
 #include "conTable.h"
 #include "skyline.h"

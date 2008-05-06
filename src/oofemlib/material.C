@@ -54,9 +54,11 @@
 #include "gausspnt.h"
 #include "flotmtrx.h"
 #include "flotarry.h"
-#include "cltypes.h"
+
 #include "mathfem.h"
 #include "usrdefsub.h"
+#include "contextioerr.h"
+
 #ifndef __MAKEDEPEND
 #include <stdlib.h>
 #include <math.h>

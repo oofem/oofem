@@ -41,7 +41,7 @@
 #define deformationtheorymaterial_h
 
 #include "femcmpnn.h"
-#include "cltypes.h"
+
 #include "structuralmaterial.h"
 
 class DeformationTheoryMaterial : public StructuralMaterial

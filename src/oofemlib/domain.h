@@ -44,13 +44,16 @@
 
 #include "alist.h"
 #include "datareader.h"
-#include "cltypes.h"
+#include "domaintype.h"
+#include "statecountertype.h"
+
 #ifndef __MAKEDEPEND
 #include <stdio.h>
 #include <time.h>
 #include <map>
 #ifdef __PARALLEL_MODE
 #include <list>
+#include "entityrenumberingscheme.h"
 #endif
 #endif
 

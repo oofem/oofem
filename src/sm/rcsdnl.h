@@ -42,7 +42,7 @@
 
 #include "rcsde.h"
 #include "structuralnonlocalmaterialext.h"
-#include "cltypes.h"
+
 
 class GaussPoint;
 

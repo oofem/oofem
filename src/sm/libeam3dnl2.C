@@ -51,6 +51,7 @@
 #include "mathfem.h"
 #include "engngm.h"
 #include "timestep.h"
+#include "contextioerr.h"
 
 #ifdef __OOFEG
 #include "oofeggraphiccontext.h"

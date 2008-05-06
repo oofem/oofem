@@ -36,7 +36,8 @@
 #ifndef appordering_h
 #define appordering_h
 
-#include "cltypes.h"
+#include "equationid.h"
+
 class EngngModel;
 class IntArray;
 

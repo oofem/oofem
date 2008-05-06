@@ -48,7 +48,9 @@
 #include "datastream.h"
 
 #include "debug.h"
-#include "cltypes.h"
+
+#include "contextioerr.h"
+
 #ifndef __MAKEDEPEND
 #include <stdlib.h>
 #include <ctype.h>

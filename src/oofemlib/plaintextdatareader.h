@@ -44,7 +44,7 @@
 #ifndef __MAKEDEPEND
 #include <stdio.h>
 #endif
-#include "cltypes.h"
+
 #include "datareader.h"
 #include "inputrecord.h"
 

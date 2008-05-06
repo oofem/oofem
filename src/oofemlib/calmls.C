@@ -41,7 +41,7 @@
 #include <stdio.h>
 #include <math.h>
 #endif
-#include "cltypes.h"
+
 #include "verbose.h"
 #include "ldltfact.h"
 #include "imlsolver.h"
@@ -53,6 +53,7 @@
 #include "node.h"
 #include "dof.h"
 #include "usrdefsub.h"
+#include "contextioerr.h"
 
 #ifdef __PARALLEL_MODE
 #ifndef __MAKEDEPEND

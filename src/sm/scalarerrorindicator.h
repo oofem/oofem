@@ -41,8 +41,9 @@
 #define scalarerrorindicator_h
 
 #include "compiler.h"
-#include "cltypes.h"
+
 #include "errorestimator.h"
+#include "internalstatetype.h"
 
 class Domain;
 class Element;

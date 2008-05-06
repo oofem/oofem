@@ -122,7 +122,7 @@ int Tokenizer :: tokenizeLine(const char *currentLine)
     int bpos = 0;
     nTokens = 0;
 
-    while ( nTokens < MAX_TOKENS && * ptr != '\n' && * ptr != '\0' ) {
+    while ( nTokens < OOFEM_MAX_TOKENS && * ptr != '\n' && * ptr != '\0' ) {
         tokenPosition [ nTokens ] = token = tokens + bpos;
         if ( separator == 0 ) {
             /* skip whitespaces */

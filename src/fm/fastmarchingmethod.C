@@ -138,7 +138,7 @@ void
 FastMarchingMethod :: updateTrialValue(FloatArray &dmanValues, int id, double F)
 {
     int i, j, ai, bi, ci, h, nroot, _ind = 0;
-    double at, bt, ht, a, b, u, cos_fi, sin_fi, _a, _b, _c, r1, r2, r3, t, _h;
+    double at, bt, ht, a, b, u, cos_fi, sin_fi, _a, _b, _c, r1, r2, r3, t = 0.0, _h;
     bool reg_upd_flag;
     Element *ie;
     FloatArray *ac, *bc, *cc, cb, ca;

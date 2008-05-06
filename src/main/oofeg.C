@@ -48,7 +48,7 @@
 #include "error.h"
 #include "oofeggraphiccontext.h"
 
-#include "cltypes.h"
+
 #include "conTable.h"
 #include "mathfem.h"
 #include "zznodalrecoverymodel.h"
@@ -61,6 +61,8 @@
 #include "oofemdef.h"
 #include "errorestimator.h"
 #include "remeshingcrit.h"
+#include "drawmode.h"
+#include "contextioerr.h"
 //
 // for c++ compiler to be succesfull on some c files
 //

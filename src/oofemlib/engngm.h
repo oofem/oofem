@@ -48,7 +48,7 @@
 #endif
 
 #include "alist.h"
-#include "cltypes.h"
+
 #include "inputrecord.h"
 #include "datareader.h"
 
@@ -60,6 +60,19 @@
 #include "field.h"
 #include "fieldmanager.h"
 #include "timer.h"
+#include "chartype.h"
+#include "classtype.h"
+#include "unknowntype.h"
+#include "varscaletype.h"
+#include "equationid.h"
+#include "numericalcmpn.h"
+#include "valuemodetype.h"
+#include "problemmode.h"
+#include "fmode.h"
+#include "dofiditem.h"
+#include "contextoutputmode.h"
+#include "contextfilemode.h"
+#include "contextioresulttype.h"
 
 #ifndef __MAKEDEPEND
 #include <stdio.h>

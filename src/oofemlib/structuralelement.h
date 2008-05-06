@@ -46,7 +46,12 @@
 #include "femcmpnn.h"
 #include "domain.h"
 #include "flotmtrx.h"
-#include "cltypes.h"
+
+#include "matresponseform.h"
+#include "matresponsemode.h"
+#include "valuemodetype.h"
+#include "integrationdomain.h"
+#include "dofmantransftype.h"
 
 #define ALL_STRAINS -1
 
@@ -686,7 +691,7 @@ protected:
      * necessary sets answer to empty mtrx and returns zero value.
      * @return nonzero if transformation is necessary, zero otherwise.
      */
-    virtual int  computeGNDofRotationMatrix(FloatMatrix &answer, DofManTrasfType mode);
+    virtual int  computeGNDofRotationMatrix(FloatMatrix &answer, DofManTransfType mode);
     /**
      * Returns transformation matrix for loading from global coordinate system
      * to local coordinate system in nodes (i.e. r(n)=T r(g)) if mode == _toNodalCS.
@@ -695,7 +700,7 @@ protected:
      * necessary sets answer to empty mtrx and returns zero value.
      * @return nonzero if transformation is necessary, zero otherwise.
      */
-    virtual int  computeGNLoadRotationMatrix(FloatMatrix &answer, DofManTrasfType mode);
+    virtual int  computeGNLoadRotationMatrix(FloatMatrix &answer, DofManTransfType mode);
 
     // returns maximal approximation order of the receiver
     /**

@@ -50,8 +50,10 @@
 #include "freestor.h"
 #include "compiler.h"
 #include "debug.h"
-#include "cltypes.h"
+
 #include "iml.h"
+#include "contextioresulttype.h"
+#include "contextmode.h"
 
 #ifndef __MAKEDEPEND
 #include <stdlib.h>

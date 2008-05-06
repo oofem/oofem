@@ -95,7 +95,8 @@ CompCol :: CompCol(int n) : SparseMtrx(n, n), val_(0), rowind_(0), colptr_(n), b
 /*  Copy constructor         */
 /*****************************/
 
-CompCol :: CompCol(const CompCol &S) : val_(S.val_), rowind_(S.rowind_), colptr_(S.colptr_),
+CompCol :: CompCol(const CompCol &S) : SparseMtrx(S.nRows, S.nColumns),
+    val_(S.val_), rowind_(S.rowind_), colptr_(S.colptr_),
     base_(S.base_), nz_(S.nz_)
 {
     dim_ [ 0 ] = S.dim_ [ 0 ];

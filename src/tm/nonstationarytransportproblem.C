@@ -44,7 +44,7 @@
 #include "dofmanager.h"
 #include "elementside.h"
 #include "dof.h"
-#include "cltypes.h"
+
 #include "verbose.h"
 #include "conTable.h"
 #include "transportelement.h"
@@ -53,6 +53,7 @@
 #ifndef __MAKEDEPEND
 #include <stdio.h>
 #endif
+#include "contextioerr.h"
 
 
 NumericalMethod *NonStationaryTransportProblem :: giveNumericalMethod(TimeStep *atTime)

@@ -48,11 +48,12 @@
 #ifndef __MAKEDEPEND
 #include <stdio.h>
 #endif
-#include "cltypes.h"
+
 #include "verbose.h"
 #include "conTable.h"
 #include "usrdefsub.h"
 #include "datastream.h"
+#include "contextioerr.h"
 
 IncrementalLinearStatic :: IncrementalLinearStatic(int i, EngngModel *_master) : StructuralEngngModel(i, _master),
     incrementOfLoadVector(), incrementOfDisplacementVector(), totalDisplacementVector(), discreteTimes()

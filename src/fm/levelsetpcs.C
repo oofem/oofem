@@ -43,6 +43,7 @@
 #include "geotoolbox.h"
 #include "fastmarchingmethod.h"
 #include "error.h"
+#include "contextioerr.h"
 
 void
 LevelSetPCS :: initialize()

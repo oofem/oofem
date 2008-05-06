@@ -49,6 +49,8 @@
 
 #include "femcmpnn.h"
 #include "domain.h"
+#include "classtype.h"
+#include "valuemodetype.h"
 
 /**
  * Abstract base class representing load time function. Classes derived from Load class typically

@@ -48,7 +48,7 @@
 #include "deformationtheorymaterial.h"
 #include "isolinearelasticmaterial.h"
 #include "flotarry.h"
-#include "cltypes.h"
+
 #include "structuralms.h"
 
 #define c2_SCCC  300

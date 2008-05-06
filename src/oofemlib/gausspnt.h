@@ -51,6 +51,7 @@
 #include "matstatus.h"
 #include "tdictionary.h"
 #include "element.h"
+#include "materialmode.h"
 
 class Material;
 class LayeredCrossSection;

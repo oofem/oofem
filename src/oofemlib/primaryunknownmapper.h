@@ -42,8 +42,11 @@
 #define primaryunknownmapper_h
 
 #include "compiler.h"
-#include "cltypes.h"
+
 #include "interface.h"
+#include "equationid.h"
+#include "valuemodetype.h"
+
 #ifndef __MAKEDEPEND
 #include <stdio.h>
 #endif

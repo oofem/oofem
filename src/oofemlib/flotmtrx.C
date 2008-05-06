@@ -47,6 +47,8 @@
 #include "mathfem.h"
 #include "error.h"
 #include "datastream.h"
+#include "classtype.h"
+
 #ifndef __MAKEDEPEND
 #include <math.h>
 #endif
@@ -86,14 +88,14 @@ FloatMatrix :: FloatMatrix(FloatArray *vector, int transpose)
 
 
 FloatMatrix ::
-FloatMatrix(const FloatMatrix &src)
+FloatMatrix(const FloatMatrix &src) : Matrix(src.nRows, src.nColumns)
 {
     // copy constructor
     double *P1, *P2;
     int i;
 
-    this->nRows = src.nRows;
-    this->nColumns = src.nColumns;
+    //this->nRows = src.nRows;
+    //this->nColumns = src.nColumns;
 
     allocatedSize = nRows * nColumns;
     values = allocDouble(allocatedSize);

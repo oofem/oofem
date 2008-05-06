@@ -42,6 +42,8 @@
 #define nodload_h
 
 #include "load.h"
+#include "bcgeomtype.h"
+#include "valuemodetype.h"
 
 class TimeStep;
 

@@ -41,6 +41,7 @@
 #ifndef __MAKEDEPEND
 #include <stdlib.h>
 #endif
+#include "contextioerr.h"
 
 
 IRResultType

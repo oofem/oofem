@@ -45,6 +45,7 @@
 #include "verbose.h"
 #include "usrdefsub.h"
 #include "compiler.h"
+#include "contextioerr.h"
 
 #ifndef __MAKEDEPEND
 #include <string.h>

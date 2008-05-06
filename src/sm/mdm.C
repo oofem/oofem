@@ -43,6 +43,7 @@
 #include "isolinearelasticmaterial.h"
 #include "mmaclosestiptransfer.h"
 #include "nonlocalmaterialext.h"
+#include "contextioerr.h"
 
 #ifndef MDM_MAPPING_DEBUG
 

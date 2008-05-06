@@ -43,8 +43,9 @@
 
 #include "femcmpnn.h"
 #include "compiler.h"
-#include "cltypes.h"
+
 #include "interface.h"
+#include "classtype.h"
 
 class Domain;
 class Element;

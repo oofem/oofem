@@ -44,7 +44,7 @@
 #include "druckerPragerPlasticitySM.h"
 #include "flotarry.h"
 #include "flotmtrx.h"
-#include "cltypes.h"
+
 #include "structuralms.h"
 #include "gausspnt.h"
 #include "intarray.h"
@@ -53,6 +53,8 @@
 #include "isolinearelasticmaterial.h"
 #include "structuralcrosssection.h"
 #include "datastream.h"
+#include "contextioerr.h"
+
 #ifndef __MAKEDEPEND
 #include <math.h>
 #endif

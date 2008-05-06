@@ -40,6 +40,7 @@
 #ifndef __MAKEDEPEND
 #include <stdlib.h>
 #endif
+#include "contextioerr.h"
 
 #define PRECAST_CAPACITY_COEFF 1e-2 // coefficient for obtaining capacity before cast of the material : 1e-4, tried 1e-2 for jete (no convergency with 1e-4)
 

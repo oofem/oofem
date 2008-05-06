@@ -46,6 +46,8 @@
 #include "mathfem.h"
 #include "error.h"
 #include "datastream.h"
+#include "classtype.h"
+
 #ifndef __MAKEDEPEND
 #include <math.h>
 #include <string.h>

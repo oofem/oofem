@@ -45,7 +45,7 @@
 #include "elementside.h"
 #include "dof.h"
 #include "initial.h"
-#include "cltypes.h"
+
 #include "verbose.h"
 #include "conTable.h"
 #include "cbselement.h"
@@ -64,6 +64,7 @@
 #endif
 #include "clock.h"
 #endif
+#include "contextioerr.h"
 
 NumericalMethod *CBS :: giveNumericalMethod(TimeStep *atTime)
 // only one has reason for LinearStatic

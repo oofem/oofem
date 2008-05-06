@@ -47,7 +47,8 @@
 #include "nummet.h"
 #include "skyline.h"
 #include "flotarry.h"
-#include "cltypes.h"
+
+#include "nmstatus.h"
 
 class Domain;
 class EngngModel;

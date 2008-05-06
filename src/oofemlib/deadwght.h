@@ -42,6 +42,8 @@
 #define deadwght_h
 
 #include "bodyload.h"
+#include "bcgeomtype.h"
+#include "valuemodetype.h"
 
 /**
  * This class implements a gravity-like load.

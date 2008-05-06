@@ -38,11 +38,12 @@
 #include <string.h>
 #include <ctype.h>
 #endif
-#include "cltypes.h"
+
 #include "engngm.h"
 #include "usrdefsub.h"
 #include "util.h"
 #include "inputrecord.h"
+#include "oofem_limits.h"
 
 
 char *giveLineFromInput(FILE *inputStream, char *line, int len)

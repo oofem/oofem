@@ -39,7 +39,7 @@
 #ifndef cebfip78_h
 #define cebfip78_h
 
-#include "cltypes.h"
+
 #include "maxwellChM.h"
 
 class CebFip78Material : public MaxwellChainMaterial

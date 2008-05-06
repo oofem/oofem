@@ -51,7 +51,9 @@
 #include "matrix.h"
 #include "debug.h"
 #include "freestor.h"
-#include "cltypes.h"
+
+#include "contextioresulttype.h"
+#include "contextmode.h"
 
 #ifndef __MAKEDEPEND
 #include <stdio.h>

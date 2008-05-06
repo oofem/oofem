@@ -38,6 +38,7 @@
 
 #include "alist.h"
 #include "intarray.h"
+#include "valuemodetype.h"
 
 class Domain;
 class Element;

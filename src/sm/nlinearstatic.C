@@ -50,7 +50,7 @@
 #ifndef __MAKEDEPEND
 #include <stdio.h>
 #endif
-#include "cltypes.h"
+
 #include "verbose.h"
 #include "calmls.h"
 #include "nrsolver.h"
@@ -64,6 +64,7 @@
 //#include "dyncompcol.h"
 #include "usrdefsub.h"
 #include "clock.h"
+#include "contextioerr.h"
 
 #ifdef TIME_REPORT
 #ifndef __MAKEDEPEND

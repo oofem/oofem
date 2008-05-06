@@ -38,6 +38,8 @@
 
 #include "domain.h"
 #include "mathfem.h"
+#include "classtype.h"
+
 #ifndef __MAKEDEPEND
 #include <vector>
 #include <list>

@@ -50,12 +50,14 @@
 #include <math.h>
 #endif
 #include "flotmtrx.h"
-#include "cltypes.h"
+
 #include "verbose.h"
 #include "flotarry.h"
 #include "skyline.h"
 #include "usrdefsub.h"
 #include "datastream.h"
+#include "geneigvalsolvertype.h"
+#include "contextioerr.h"
 
 #ifdef __OOFEG
 #include "oofeggraphiccontext.h"

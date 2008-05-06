@@ -46,6 +46,10 @@
 #include "domain.h"
 #include "flotarry.h"
 #include "dictionr.h"
+#include "classtype.h"
+#include "bcvaltype.h"
+#include "bcgeomtype.h"
+#include "bctype.h"
 
 /**
  * Abstract base class for all boudary conditions of problem.

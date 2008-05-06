@@ -44,6 +44,7 @@
 #include "structuralms.h"
 #include "flotarry.h"
 #include "verbose.h"
+#include "contextioerr.h"
 
 void
 LayeredCrossSection ::  giveRealStresses(FloatArray &answer, MatResponseForm form,

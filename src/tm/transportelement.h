@@ -46,8 +46,9 @@
 #include "femcmpnn.h"
 #include "domain.h"
 #include "flotmtrx.h"
-#include "cltypes.h"
+
 #include "primaryfield.h"
+#include "matresponsemode.h"
 
 class TimeStep;
 class Node;

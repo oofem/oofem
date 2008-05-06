@@ -59,6 +59,7 @@
 #include <vector>
 #include <string>
 #endif
+#include "contextioerr.h"
 
 
 //#define STIFFNESS_TYPE       TangentStiffnessMatrix

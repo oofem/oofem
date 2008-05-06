@@ -21,6 +21,7 @@
 #include "mathfem.h"
 #include "oofemtxtinputrecord.h"
 #include "datastream.h"
+#include "contextioerr.h"
 
 // --------- class AgingIsoLEMaterial implementation---------
 AgingIsoLEMaterial :: AgingIsoLEMaterial(int n, Domain *d, double E, double nu) : IsotropicLinearElasticMaterial(n, d, E, nu) { }

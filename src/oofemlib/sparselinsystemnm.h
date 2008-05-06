@@ -44,7 +44,11 @@
 
 
 #include "nummet.h"
-#include "cltypes.h"
+
+#include "classtype.h"
+#include "nmstatus.h"
+#include "linsystsolvertype.h"
+
 #ifndef __MAKEDEPEND
 #include <stdio.h>
 #endif

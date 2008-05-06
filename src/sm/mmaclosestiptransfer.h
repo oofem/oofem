@@ -41,7 +41,7 @@
 #define mmaclosestiptransfer_h
 
 #include "compiler.h"
-#include "cltypes.h"
+
 #include "materialmappingalgorithm.h"
 
 class Domain;

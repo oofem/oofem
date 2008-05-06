@@ -44,8 +44,11 @@
 
 #include "compiler.h"
 #include "pair.h"
-#include "cltypes.h"
+
 #include "error.h"
+#include "contextioresulttype.h"
+#include "contextmode.h"
+
 #ifndef __MAKEDEPEND
 #include <stdio.h>
 #include <string>

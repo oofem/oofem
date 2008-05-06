@@ -49,6 +49,10 @@
 #include "femcmpnn.h"
 #include "engngm.h"
 #include "compiler.h"
+#include "contextioresulttype.h"
+#include "contextmode.h"
+#include "statecountertype.h"
+
 #ifndef __MAKEDEPEND
 #include <stdio.h>
 #endif

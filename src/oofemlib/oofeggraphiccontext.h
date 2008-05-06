@@ -39,10 +39,11 @@
 
 #ifdef __OOFEG
 
-#include "cltypes.h"
+
 #include "intarray.h"
 #include "dynalist.h"
 #include "nodalrecoverymodel.h"
+#include "internalstatemode.h"
 //
 // for c++ compiler to be succesfull on some c files
 //

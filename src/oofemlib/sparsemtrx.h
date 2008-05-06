@@ -48,12 +48,14 @@
 #ifndef __MAKEDEPEND
 #include <stdio.h>
 #endif
-#include "cltypes.h"
+
 #include "matrix.h"
 #include "flotarry.h"
 #include "flotmtrx.h"
 #include "intarray.h"
 #include "iml.h"
+#include "equationid.h"
+#include "sparsemtrxtype.h"
 
 
 class EngngModel;

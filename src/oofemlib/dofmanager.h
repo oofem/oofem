@@ -45,10 +45,17 @@
 #include "femcmpnn.h"
 #include "domain.h"
 #include "dof.h"
-#include "cltypes.h"
+
 #ifndef __MAKEDEPEND
 #include <stdio.h>
 #endif
+#include "classtype.h"
+#include "equationid.h"
+#include "valuemodetype.h"
+#include "doftype.h"
+#include "dofmantransftype.h"
+#include "dofiditem.h"
+#include "contextioresulttype.h"
 
 #ifdef __PARALLEL_MODE
 class CommunicationBuffer;
@@ -299,8 +306,8 @@ public:
      * identifying physical meaning of particular DOF, see cltypes.h) for which transfromation mtrx is
      * assembled. if dofIDArry is NULL, then all receiver dofs are assumed.
      */
-    virtual void computeDofTransformation(FloatMatrix &answer, const IntArray *dofIDArry, DofManTrasfType mode);
-    virtual void computeLoadTransformation(FloatMatrix &answer, const IntArray *dofIDArry, DofManTrasfType mode);
+    virtual void computeDofTransformation(FloatMatrix &answer, const IntArray *dofIDArry, DofManTransfType mode);
+    virtual void computeLoadTransformation(FloatMatrix &answer, const IntArray *dofIDArry, DofManTransfType mode);
     /**
      * Indicates, whether dofManager requires the transformation from global c.s. to
      * dof manager specific coordinate system.
@@ -432,8 +439,8 @@ public:
 #endif
 protected:
     virtual IRResultType resolveDofIDArray(InputRecord *ir, IntArray &dofIDArry);
-    void computeSlaveLoadTransformation(FloatMatrix &answer, const IntArray *dofMask, DofManTrasfType mode);
-    void computeSlaveDofTransformation(FloatMatrix &answer, const IntArray *dofMask, DofManTrasfType mode);
+    void computeSlaveLoadTransformation(FloatMatrix &answer, const IntArray *dofMask, DofManTransfType mode);
+    void computeSlaveDofTransformation(FloatMatrix &answer, const IntArray *dofMask, DofManTransfType mode);
     IntArray *giveCompleteGlobalDofIDArray(void) const;
 };
 

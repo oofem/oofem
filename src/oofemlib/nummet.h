@@ -45,7 +45,9 @@
 
 #include "femcmpnn.h"
 #include "alist.h"
-#include "cltypes.h"
+
+#include "classtype.h"
+
 #ifndef __MAKEDEPEND
 #include <stdio.h>
 #endif

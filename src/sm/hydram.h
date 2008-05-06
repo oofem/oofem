@@ -73,7 +73,7 @@
 #define hydram_h
 
 // oofem includes
-#include "cltypes.h" // cltypes.h entry: classType HellmichMaterialStatusClass, HellmichMaterialClass
+ // cltypes.h entry: classType HellmichMaterialStatusClass, HellmichMaterialClass
 #include "flotarry.h"
 #include "flotmtrx.h"
 #include "timestep.h"

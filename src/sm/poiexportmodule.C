@@ -45,6 +45,7 @@
 #include "eleminterpmapperinterface.h"
 #include "mathfem.h"
 #include "util.h"
+#include "oofem_limits.h"
 
 POIExportModule :: POIExportModule(EngngModel *e) : ExportModule(e), internalVarsToExport(), primaryVarsToExport(), POIList()
 {

@@ -43,9 +43,11 @@
 
 #include "femcmpnn.h"
 #include "compiler.h"
-#include "cltypes.h"
+
 #include "interface.h"
 #include "remeshingcrit.h"
+#include "classtype.h"
+#include "errorestimatortype.h"
 
 class Domain;
 class Element;

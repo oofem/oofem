@@ -97,7 +97,7 @@ DSSMatrix :: ~DSSMatrix()
 /*  Copy constructor         */
 /*****************************/
 
-DSSMatrix :: DSSMatrix(const DSSMatrix &S)
+DSSMatrix :: DSSMatrix(const DSSMatrix &S) : SparseMtrx(S.nRows, S.nColumns)
 {
     OOFEM_ERROR("DSSMatrix::DSSMatrix(const DSSMatrix &S) -- not implemented");
 }
@@ -366,15 +366,7 @@ DSSMatrix :: DSSMatrix(const DSSMatrix &S) {
 }
 
 DSSMatrix :: ~DSSMatrix()
-{
-    if ( _dss ) {
-        delete _dss;
-    }
-
-    if ( _sm ) {
-        delete _sm;
-    }
-}
+{}
 
 SparseMtrx *DSSMatrix :: GiveCopy() const {
     OOFEM_ERROR("DSSMatrix: can't create, DSS support not compiled");

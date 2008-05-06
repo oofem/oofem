@@ -44,7 +44,7 @@
 
 #include "dofmanager.h"
 #include "domain.h"
-#include "cltypes.h"
+
 #ifndef __MAKEDEPEND
 #include <stdio.h>
 #endif

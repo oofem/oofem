@@ -41,7 +41,7 @@
 #define structuralnonlocalmaterialext_h
 
 #include "nonlocalmaterialext.h"
-#include "cltypes.h"
+
 #include "matstatus.h"
 
 

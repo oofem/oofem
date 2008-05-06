@@ -35,6 +35,10 @@
 // file: rcsdnl.cc
 
 
+#ifndef __MAKEDEPEND
+#include <math.h>
+#endif
+
 #include "rcsdnl.h"
 #include "gausspnt.h"
 #include "flotmtrx.h"
@@ -43,7 +47,7 @@
 #include "mathfem.h"
 #include "isolinearelasticmaterial.h"
 #include "nonlocalmaterialext.h"
-#include <math.h>
+#include "contextioerr.h"
 
 
 RCSDNLMaterial :: RCSDNLMaterial(int n, Domain *d) : RCSDEMaterial(n, d), StructuralNonlocalMaterialExtensionInterface(d)

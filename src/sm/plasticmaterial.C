@@ -41,12 +41,13 @@
 #include "flotmtrx.h"
 #include "flotarry.h"
 #include "intarray.h"
-#include "cltypes.h"
+
 #include "structuralcrosssection.h"
 #include "datastream.h"
 #ifndef __MAKEDEPEND
 #include <math.h>
 #endif
+#include "contextioerr.h"
 
 #define YIELD_TOL 1.e-5
 #define RES_TOL   1.e-5

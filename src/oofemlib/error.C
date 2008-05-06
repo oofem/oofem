@@ -35,7 +35,7 @@
 
 
 #include "error.h"
-#include "cltypes.h"
+
 #ifndef __MAKEDEPEND
 #include <stdlib.h>
 #endif

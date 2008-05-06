@@ -39,9 +39,11 @@
 //
 
 #include "strreader.h"
-#include "cltypes.h"
+
 // Range class is defined here
 #include "outputmanager.h"
+#include "oofem_limits.h"
+
 #ifndef __MAKEDEPEND
 #include <ctype.h>
 #endif

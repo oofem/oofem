@@ -45,6 +45,7 @@
 #include "verbose.h"
 #include "usrdefsub.h"
 #include "timestep.h"
+#include "bcvaltype.h"
 
 #ifndef __MAKEDEPEND
 #include <stdlib.h>

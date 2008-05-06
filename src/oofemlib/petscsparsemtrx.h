@@ -38,7 +38,7 @@
 #ifdef __PETSC_MODULE
 
 #include "sparsemtrx.h"
-#include "cltypes.h"
+
 #ifndef __MAKEDEPEND
 #include "petscksp.h"
 #endif

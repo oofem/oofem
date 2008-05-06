@@ -49,7 +49,7 @@
 
 #include "dofmanager.h"
 #include "domain.h"
-#include "cltypes.h"
+
 #ifndef __MAKEDEPEND
 #include <stdio.h>
 #endif
@@ -165,7 +165,7 @@ public:
      * identifying physical meaning of particular DOF, see cltypes.h) for which transfromation mtrx is
      * assembled. if dofIDArry is NULL, then all receiver dofs are assumed.
      */
-    void computeDofTransformation(FloatMatrix &answer, const IntArray *dofIDArry, DofManTrasfType mode);
+    void computeDofTransformation(FloatMatrix &answer, const IntArray *dofIDArry, DofManTransfType mode);
     /** Computes receiver LOAD transformation matrix from global cs. to dofManager specific
      * coordinate system - if mode == _toNodalCS, otherwise reverse transformation is computed.
      * (In the dofManager specifis cs the governing equations are assembled, for example the
@@ -180,7 +180,7 @@ public:
      * identifying physical meaning of particular DOF, see cltypes.h) for which transfromation mtrx is
      * assembled. if dofIDArry is NULL, then all receiver dofs are assumed.
      */
-    void computeLoadTransformation(FloatMatrix &answer, const IntArray *dofIDArry, DofManTrasfType mode);
+    void computeLoadTransformation(FloatMatrix &answer, const IntArray *dofIDArry, DofManTransfType mode);
     /**
      * Indicates, whether dofManager requires the transformation from global c.s. to
      * dof manager specific coordinate system.

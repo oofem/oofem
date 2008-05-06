@@ -46,7 +46,7 @@
 
 #include "flotarry.h"
 #include "flotmtrx.h"
-#include "cltypes.h"
+
 #include "structuralms.h"
 #include "strainvector.h"
 #include "stressvector.h"

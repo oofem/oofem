@@ -42,7 +42,9 @@
 #define bodyload_h
 
 #include "load.h"
-#include "cltypes.h"
+
+#include "classtype.h"
+#include "bcgeomtype.h"
 
 class Element;
 class TimeStep;

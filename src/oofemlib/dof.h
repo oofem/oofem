@@ -49,9 +49,15 @@
 #include <stdio.h>
 #include <string.h>
 #endif
-#include "cltypes.h"
+
 #include "error.h"
 #include "primaryfield.h"
+#include "classtype.h"
+#include "unknowntype.h"
+#include "equationid.h"
+#include "valuemodetype.h"
+#include "dofiditem.h"
+#include "contextioresulttype.h"
 
 #ifdef __PARALLEL_MODE
 class CommunicationBuffer;

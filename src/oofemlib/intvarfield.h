@@ -39,6 +39,7 @@
 #include "domain.h"
 #include "field.h"
 #include "materialmappingalgorithm.h"
+#include "materialmappingalgorithmtype.h"
 
 /**
  * Abstract class representing a field of an internal variable. Field represent the spatial distribution of certain variable and is able to evaluate its value at any point of interest. The field is usually associated to the specific domain.

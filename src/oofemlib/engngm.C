@@ -43,7 +43,7 @@
 #include "timestep.h"
 #include "metastep.h"
 #include "element.h"
-#include "cltypes.h"
+
 #include "mathfem.h"
 #include "clock.h"
 #include "datastream.h"
@@ -71,6 +71,9 @@
 #include "sloangraph.h"
 #include "logger.h"
 #include "errorestimator.h"
+#include "oofem_limits.h"
+#include "contextioerr.h"
+
 #ifndef __MAKEDEPEND
 #include <limits.h>
 #include <string.h>

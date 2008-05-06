@@ -45,7 +45,7 @@
 #ifndef __MAKEDEPEND
 #include <stdio.h>
 #endif
-#include "cltypes.h"
+
 #include "verbose.h"
 #include "conTable.h"
 #include "outputmanager.h"

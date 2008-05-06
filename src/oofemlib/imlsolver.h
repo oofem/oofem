@@ -47,7 +47,7 @@
 #include "sparselinsystemnm.h"
 #include "sparsemtrx.h"
 #include "flotarry.h"
-#include "cltypes.h"
+
 #include "precond.h"
 
 class Domain;

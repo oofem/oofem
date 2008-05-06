@@ -45,10 +45,16 @@
 #include "femcmpnn.h"
 #include "domain.h"
 #include "flotmtrx.h"
-#include "cltypes.h"
+
 #include "primaryfield.h"
 #include "integrationrule.h"
-
+#include "elementheaders.h"
+#include "equationid.h"
+#include "valuemodetype.h"
+#include "internalstatevaluetype.h"
+#include "elementextension.h"
+#include "entityrenumberingscheme.h"
+#include "unknowntype.h"
 
 class TimeStep;
 class Node;

@@ -50,6 +50,7 @@
 #include "eleminterpunknownmapper.h"
 #include "errorestimator.h"
 #include "usrdefsub.h"
+#include "contextioerr.h"
 
 void
 AdaptiveLinearStatic :: solveYourselfAt(TimeStep *tStep)

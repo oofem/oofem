@@ -43,7 +43,7 @@
 void
 FEI2dTrQuad :: evalN(FloatArray &answer, const FloatArray &lcoords, double time)
 {
-    double l1, l2, l3;
+    double l1 = 0.0, l2 = 0.0, l3 = 0.0;
     answer.resize(6);
 
     answer.at(1) = ( 2. * l1 - 1. ) * l1;

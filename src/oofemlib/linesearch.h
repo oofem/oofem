@@ -44,7 +44,9 @@
 
 
 #include "nummet.h"
-#include "cltypes.h"
+
+#include "nmstatus.h"
+
 #ifndef __MAKEDEPEND
 #include <stdio.h>
 #endif

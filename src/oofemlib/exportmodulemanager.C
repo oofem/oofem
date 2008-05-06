@@ -37,9 +37,11 @@
 #include "engngm.h"
 #include "exportmodule.h"
 #include "strreader.h"
-#include "cltypes.h"
+
 #include "usrdefsub.h"
 #include "util.h"
+#include "oofem_limits.h"
+
 #ifndef __MAKEDEPEND
 #include <stdio.h>
 #include <time.h>

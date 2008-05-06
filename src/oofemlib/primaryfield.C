@@ -40,6 +40,7 @@
 #include "element.h"
 #include "timestep.h"
 #include "datastream.h"
+#include "contextioerr.h"
 
 PrimaryField :: PrimaryField(EngngModel *a, int idomain,
                              FieldBaseID ft, EquationID ut, int nHist) : Field(ft), solutionVectors(nHist + 1), solStepList(nHist + 1)

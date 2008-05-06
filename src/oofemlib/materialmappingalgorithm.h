@@ -37,14 +37,16 @@
 //   *** CLASS MATERIAL MODEL MAPPING ALGORITHM ***
 //   **********************************************
 
-#ifndef materilmappingalgorithm_h
-#define materilmappingalgorithm_h
+#ifndef materialmappingalgorithm_h
+#define materialmappingalgorithm_h
 
 #include "compiler.h"
-#include "cltypes.h"
+
 #include "interface.h"
 #include "intarray.h"
 #include "inputrecord.h"
+#include "classtype.h"
+#include "internalstatetype.h"
 
 class Domain;
 class Element;
@@ -152,7 +154,7 @@ public:
 protected:
 };
 
-#endif // materilmappingalgorithm_h
+#endif // materialmappingalgorithm_h
 
 
 

@@ -41,8 +41,12 @@
 #ifndef integrationrule_h
 #define integrationrule_h
 
-#include "cltypes.h"
+
 #include "femcmpnn.h"
+#include "materialmode.h"
+#include "integrationdomain.h"
+#include "contextioresulttype.h"
+#include "contextmode.h"
 
 class GaussPoint;
 class Element;

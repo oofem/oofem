@@ -32,6 +32,7 @@
 #include <stdlib.h>
 #include <math.h>
 #endif
+#include "contextioerr.h"
 
 // ======= class HydrationModelStatus implementation =======
 HydrationModelStatus :: HydrationModelStatus(int n, Domain *d, GaussPoint *g) : MaterialStatus(n, d, g)

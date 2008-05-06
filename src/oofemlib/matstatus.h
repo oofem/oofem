@@ -41,6 +41,8 @@
 #include <stdio.h>
 #endif
 #include "femcmpnn.h"
+#include "classtype.h"
+
 /*
  * This class implements a material status information. It is atribute of
  * gaussPoint. This is only an abstract class, for every instance of material class

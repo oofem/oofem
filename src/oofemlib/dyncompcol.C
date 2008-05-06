@@ -70,7 +70,7 @@ DynCompCol :: DynCompCol(int n) : SparseMtrx(n, n), base_(0)
 /*  Copy constructor         */
 /*****************************/
 
-DynCompCol :: DynCompCol(const DynCompCol &S) : base_(S.base_)
+DynCompCol :: DynCompCol(const DynCompCol &S) : SparseMtrx(S.nRows, S.nColumns), base_(S.base_)
 {
 #ifndef DynCompCol_USE_STL_SETS
     int i;

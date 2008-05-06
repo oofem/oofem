@@ -45,6 +45,8 @@
 #include "timestep.h"
 #include "structuralcrosssection.h"
 #include "datastream.h"
+#include "contextioerr.h"
+
 #ifndef __MAKEDEPEND
 #include <stdlib.h>
 #include <math.h>

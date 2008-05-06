@@ -42,7 +42,7 @@
 
 #include "nonlocalbarrier.h"
 #include "domain.h"
-#include "cltypes.h"
+
 #include "flotarry.h"
 #include "flotmtrx.h"
 /**

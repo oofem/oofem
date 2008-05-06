@@ -42,6 +42,8 @@
 #include "flotmtrx.h"
 #include "flotarry.h"
 #include "structuralcrosssection.h"
+#include "contextioerr.h"
+
 #ifndef __MAKEDEPEND
 #include <math.h>
 #endif

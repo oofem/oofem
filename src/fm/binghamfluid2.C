@@ -46,6 +46,7 @@
 #ifndef __MAKEDEPEND
 #include <stdlib.h>
 #endif
+#include "contextioerr.h"
 
 #define BINGHAM_ALT 1
 //#define BINGHAM_STRESS_GROWTH_RATE 4000.0

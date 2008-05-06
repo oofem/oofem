@@ -49,6 +49,7 @@
 #include "error.h"
 #include "nonlocalmaterialext.h"
 #include "datastream.h"
+#include "contextioerr.h"
 
 #ifndef __MAKEDEPEND
 #include <math.h>

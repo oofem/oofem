@@ -48,7 +48,7 @@
 #ifndef __MAKEDEPEND
 #include <stdio.h>
 #endif
-#include "cltypes.h"
+
 #include "verbose.h"
 #include "conTable.h"
 //#include "skyline.h"
@@ -57,6 +57,7 @@
 #include "datastream.h"
 //#include "compcol.h"
 //#include "dyncompcol.h"
+#include "contextioerr.h"
 
 #ifdef __PETSC_MODULE
 #include "petscsolver.h"

@@ -42,7 +42,7 @@
 #define tractionpressurebc_h
 
 #include "boundary.h"
-#include "cltypes.h"
+
 #ifndef __MAKEDEPEND
 #include <string.h>
 #endif

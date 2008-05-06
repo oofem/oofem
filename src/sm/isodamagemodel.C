@@ -43,6 +43,7 @@
 #include "structuralcrosssection.h"
 #include "mathfem.h"
 #include "datastream.h"
+#include "contextioerr.h"
 
 IsotropicDamageMaterial :: IsotropicDamageMaterial(int n, Domain *d) : StructuralMaterial(n, d)
     //

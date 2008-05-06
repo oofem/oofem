@@ -60,12 +60,14 @@
 #include "element.h"
 #include "node.h"
 #include "elementside.h"
+#include "contextioerr.h"
+
 #ifndef __MAKEDEPEND
 #include <stdio.h>
 #include <math.h>
 #endif
 #include "flotmtrx.h"
-#include "cltypes.h"
+
 #include "verbose.h"
 #include "flotarry.h"
 #include "skyline.h"

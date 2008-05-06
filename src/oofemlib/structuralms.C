@@ -39,6 +39,7 @@
 #include "structuralms.h"
 #include "structuralcrosssection.h"
 #include "structuralmaterial.h"
+#include "contextioerr.h"
 
 StructuralMaterialStatus :: StructuralMaterialStatus(int n, Domain *d, GaussPoint *g) :
     MaterialStatus(n, d, g), strainVector(), stressVector(),

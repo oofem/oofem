@@ -41,7 +41,7 @@
 #define directerrorindicatorrc_h
 
 #include "compiler.h"
-#include "cltypes.h"
+
 #include "interface.h"
 #include "remeshingcrit.h"
 

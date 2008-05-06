@@ -42,11 +42,12 @@
 #include <stdio.h>
 #include <math.h>
 #endif
-#include "cltypes.h"
+
 #include "verbose.h"
 #include "timestep.h"
 #include "flotmtrx.h"
 #include "mathfem.h"
+#include "nmstatus.h"
 
 LineSearchNM :: LineSearchNM(int i, Domain *d, EngngModel *m) :
     NumericalMethod(i, d, m)

@@ -41,6 +41,7 @@
 #include "crosssection.h"
 #include "gausspnt.h"
 #include "datastream.h"
+#include "contextioerr.h"
 // initialize class member
 
 IntegrationRule :: IntegrationRule(int n, Element *e, int startIndx, int endIndx, bool dynamic)

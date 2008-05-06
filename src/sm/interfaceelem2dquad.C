@@ -46,7 +46,7 @@
 #include "flotmtrx.h"
 #include "flotarry.h"
 #include "intarray.h"
-#include "cltypes.h"
+
 #include "engngm.h"
 #ifndef __MAKEDEPEND
 #include <stdlib.h>

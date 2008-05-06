@@ -49,6 +49,8 @@
 #include "flotarry.h"
 #include "dof.h"
 #include "timestep.h"
+#include "contextioerr.h"
+
 #ifndef __MAKEDEPEND
 #include <math.h>
 #endif

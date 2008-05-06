@@ -53,6 +53,7 @@
 #include <math.h>
 #include <stdio.h>
 #endif
+#include "contextioerr.h"
 
 #ifdef __OOFEG
 #include "oofeggraphiccontext.h"

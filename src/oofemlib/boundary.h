@@ -43,11 +43,15 @@
 
 #include "generalbc.h"
 #include "dictionr.h"
-#include "cltypes.h"
+
 #include "dof.h"
+#include "bctype.h"
+#include "valuemodetype.h"
+
 #ifndef __MAKEDEPEND
 #include <string.h>
 #endif
+#include "classtype.h"
 
 class TimeStep;
 class Dictionary;

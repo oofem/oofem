@@ -54,6 +54,8 @@
 #include "usrdefsub.h"
 #include "mathfem.h"
 #include "datastream.h"
+#include "contextioerr.h"
+
 #ifndef __MAKEDEPEND
 #include <stdlib.h>
 #endif
@@ -1057,7 +1059,7 @@ DofManager :: checkConsistency()
 
 
 void
-DofManager :: computeDofTransformation(FloatMatrix &answer, const IntArray *dofMask, DofManTrasfType mode)
+DofManager :: computeDofTransformation(FloatMatrix &answer, const IntArray *dofMask, DofManTransfType mode)
 // computes trasformation matrix of receiver.
 // transformation should include trasformation from global cs to nodal cs,
 // as well as further necessary transformations (for example in case
@@ -1073,7 +1075,7 @@ DofManager :: computeDofTransformation(FloatMatrix &answer, const IntArray *dofM
 }
 
 void
-DofManager :: computeLoadTransformation(FloatMatrix &answer, const IntArray *dofMask, DofManTrasfType mode)
+DofManager :: computeLoadTransformation(FloatMatrix &answer, const IntArray *dofMask, DofManTransfType mode)
 // computes trasformation matrix of receiver.
 // transformation should include trasformation from global cs to nodal cs,
 // as well as further necessary transformations (for example in case
@@ -1100,7 +1102,7 @@ DofManager :: computeLoadTransformation(FloatMatrix &answer, const IntArray *dof
 }
 
 void
-DofManager :: computeSlaveDofTransformation(FloatMatrix &answer, const IntArray *dofMask, DofManTrasfType mode)
+DofManager :: computeSlaveDofTransformation(FloatMatrix &answer, const IntArray *dofMask, DofManTransfType mode)
 // computes trasformation matrix of receiver.
 // transformation should include trasformation from global cs to nodal cs,
 // as well as further necessary transformations (for example in case

@@ -48,6 +48,7 @@
 #include "sparsemtrx.h"
 #include "flotmtrx.h"
 #include "flotarry.h"
+#include "geneigvalsolvertype.h"
 
 class EigenValueDynamic : public EngngModel
 {

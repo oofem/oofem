@@ -54,6 +54,8 @@
 #include "debug.h"
 #include "verbose.h"
 #include "datastream.h"
+#include "contextioerr.h"
+
 #ifndef __MAKEDEPEND
 #include <math.h>
 #include <stdlib.h>
@@ -424,7 +426,7 @@ Node :: hasSameLCS(Node *remote)
 
 
 void
-Node :: computeDofTransformation(FloatMatrix &answer, const IntArray *dofIDArry, DofManTrasfType mode)
+Node :: computeDofTransformation(FloatMatrix &answer, const IntArray *dofIDArry, DofManTransfType mode)
 {
     // computes trasformation matrix of receiver.
     // transformation should include trasformation from global cs to nodal cs,
@@ -462,7 +464,7 @@ Node :: computeDofTransformation(FloatMatrix &answer, const IntArray *dofIDArry,
 }
 
 void
-Node :: computeLoadTransformation(FloatMatrix &answer, const IntArray *dofMask, DofManTrasfType mode)
+Node :: computeLoadTransformation(FloatMatrix &answer, const IntArray *dofMask, DofManTransfType mode)
 {
     // computes trasformation matrix of receiver.
     // transformation should include trasformation from global cs to nodal cs,

@@ -51,7 +51,12 @@
 #include "sparselinsystemnm.h"
 #include "sparsegeneigenvalsystemnm.h"
 #include "materialmappingalgorithm.h"
+#include "materialmappingalgorithmtype.h"
 //#include "nonlocalbarrier.h"
+#include "classtype.h"
+#include "sparsemtrxtype.h"
+#include "geneigvalsolvertype.h"
+#include "errorestimatortype.h"
 
 #include "errorestimator.h"
 #ifdef __PARALLEL_MODE

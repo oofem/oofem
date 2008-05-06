@@ -45,6 +45,8 @@
 #include "domain.h"
 #include "engngm.h"
 #include "datastream.h"
+#include "contextioerr.h"
+
 #ifndef __MAKEDEPEND
 #include <stdio.h>
 #endif

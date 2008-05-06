@@ -71,7 +71,7 @@
 #include "skyline.h"
 #include "debug.h"
 #include "verbose.h"
-#include "cltypes.h"
+
 #include "usrdefsub.h"
 #include "elementside.h"
 #include "datastream.h"
@@ -83,6 +83,7 @@
 #include "errorestimator.h"
 #include "remeshingcrit.h"
 #include "materialmapperinterface.h"
+#include "contextioerr.h"
 
 Element :: Element(int n, Domain *aDomain) :
     FEMComponent(n, aDomain), dofManArray(), bodyLoadArray(), boundaryLoadArray()

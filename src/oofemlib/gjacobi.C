@@ -43,9 +43,10 @@
 #include "mathfem.h"
 #include "gjacobi.h"
 #include "compiler.h"
-#include "cltypes.h"
+
 #include "verbose.h"
 #include "flotmtrx.h"
+#include "nmstatus.h"
 
 GJacobi :: GJacobi(int i, Domain *d, EngngModel *m) :
     NumericalMethod(i, d, m) {

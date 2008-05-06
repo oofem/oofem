@@ -46,7 +46,7 @@
 #include "structengngmodel.h"
 #include "sparselinsystemnm.h"
 #include "sparselinsystemnm.h"
-#include "cltypes.h"
+
 
 /**
  * This class implements Incremental LinearStatic Engineering problem.

@@ -35,7 +35,7 @@
 
 #ifdef __PARALLEL_MODE
 
-#include "cltypes.h"
+
 #include "processcomm.h"
 #include "intarray.h"
 

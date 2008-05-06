@@ -37,8 +37,22 @@
  * file cltypes.c
  */
 
-#include "cltypes.h"
+
 #include "error.h"
+#include "chartype.h"
+#include "internalstatetype.h"
+#include "internalstatevaluetype.h"
+#include "elementgeometrytype.h"
+#include "unknowntype.h"
+#include "materialmode.h"
+#include "matresponsemode.h"
+#include "valuemodetype.h"
+#include "materialmappingalgorithmtype.h"
+#include "domaintype.h"
+#include "doftype.h"
+#include "dofiditem.h"
+#include "contextioerr.h"
+
 #ifndef __MAKEDEPEND
 #include <stdio.h>
 #include <string.h>

@@ -46,6 +46,7 @@
 #include "domain.h"
 #include "flotarry.h"
 #include "dictionr.h"
+#include "valuemodetype.h"
 
 /**
  * Load is base abstract class for all loads.

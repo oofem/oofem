@@ -42,6 +42,7 @@
 
 #include "errorestimator.h"
 #include "interface.h"
+#include "internalstatetype.h"
 
 
 #define ZZErrorEstimator_ElementResultCashed

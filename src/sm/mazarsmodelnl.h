@@ -42,7 +42,7 @@
 
 #include "mazarsmodel.h"
 #include "structuralnonlocalmaterialext.h"
-#include "cltypes.h"
+
 
 class GaussPoint;
 

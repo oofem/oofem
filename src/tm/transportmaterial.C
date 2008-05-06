@@ -34,6 +34,7 @@
  */
 
 #include "transportmaterial.h"
+#include "contextioerr.h"
 
 void
 TransportMaterial :: updateInternalState(const FloatArray &vec, GaussPoint *gp, TimeStep *)

@@ -34,9 +34,9 @@
  */
 
 #include "field.h"
-#include "cltypes.h"
-#include "logger.h"
 
+#include "logger.h"
+#include "oofem_limits.h"
 
 #ifndef __MAKEDEPEND
 #include <stdarg.h>

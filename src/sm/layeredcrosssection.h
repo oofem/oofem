@@ -47,7 +47,7 @@
 #include "flotarry.h"
 #include "flotmtrx.h"
 #include "interface.h"
-#include "cltypes.h"
+
 
 class GaussPoint;
 class LayeredCrossSectionModelInterface;

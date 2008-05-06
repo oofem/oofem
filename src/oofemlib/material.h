@@ -45,12 +45,20 @@
 #include "dictionr.h"
 #include "flotarry.h"
 #include "flotmtrx.h"
-#include "cltypes.h"
+
 #include "matconst.h"
 #include "structuralelement.h"
 #include "matstatus.h"
 #include "nonlocalmaterialext.h"
 #include "timestep.h"
+#include "classtype.h"
+#include "internalstatetype.h"
+#include "internalstatevaluetype.h"
+#include "matresponseform.h"
+#include "matresponsemode.h"
+#include "materialextension.h"
+#include "contextioresulttype.h"
+#include "contextmode.h"
 
 #define STRAIN_STEPS 10.0
 

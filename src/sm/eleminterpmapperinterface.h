@@ -37,7 +37,7 @@
 #define eleminterpmapperinterface_h
 
 #include "compiler.h"
-#include "cltypes.h"
+
 #include "interface.h"
 #include "flotarry.h"
 #include "intarray.h"

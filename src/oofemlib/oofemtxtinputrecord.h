@@ -36,7 +36,7 @@
 #ifndef oofemtxtinputrecord_h
 #define oofemtxtinputrecord_h
 
-#include "cltypes.h"
+
 #ifndef __MAKEDEPEND
 #include <stdio.h>
 #include <string.h>
@@ -68,7 +68,7 @@ class OOFEMTXTInputRecord : public InputRecord
 protected:
 
     Tokenizer tokenizer;
-    bool readFlag [ MAX_TOKENS ];
+    bool readFlag [ OOFEM_MAX_TOKENS ];
 
     // record representation
     char record [ OOFEM_MAX_LINE_LENGTH ];

@@ -44,6 +44,7 @@
 #include "structuralcrosssection.h"
 #include "mmaclosestiptransfer.h"
 #include "datastream.h"
+#include "contextioerr.h"
 
 #ifndef __MAKEDEPEND
 #include <math.h>

@@ -37,6 +37,9 @@
 #define field_h
 
 #include "domain.h"
+#include "valuemodetype.h"
+#include "contextioresulttype.h"
+#include "contextmode.h"
 
 
 enum FieldType {

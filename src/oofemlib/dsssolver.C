@@ -46,7 +46,7 @@
 #ifndef __MAKEDEPEND
 #include <stdio.h>
 #endif
-#include "cltypes.h"
+
 
 DSSSolver :: DSSSolver(int i, Domain *d, EngngModel *m) :
     SparseLinearSystemNM(i, d, m) { }

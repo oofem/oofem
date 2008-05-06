@@ -49,7 +49,9 @@
 
 #include "freestor.h"
 #include "debug.h"
-#include "cltypes.h"
+
+#include "contextioresulttype.h"
+#include "contextmode.h"
 
 #ifndef __MAKEDEPEND
 #include <stdio.h>

@@ -41,7 +41,8 @@
 #include "petscksp.h"
 #include "petscordering.h"
 #endif
-#include "cltypes.h"
+
+#include "equationid.h"
 
 class EngngModel;
 class FloatArray;

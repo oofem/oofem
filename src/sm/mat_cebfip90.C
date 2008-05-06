@@ -43,6 +43,7 @@
 #include "structuralcrosssection.h"
 #include "mathfem.h"
 #include "datastream.h"
+#include "contextioerr.h"
 
 CebFipSlip90Material :: CebFipSlip90Material(int n, Domain *d) : StructuralMaterial(n, d)
     //

@@ -48,7 +48,7 @@
 #include "sparsenonlinsystemnm.h"
 #include "sparsemtrx.h"
 #include "flotarry.h"
-#include "cltypes.h"
+
 #include "linesearch.h"
 #ifdef __PETSC_MODULE
 #ifndef __MAKEDEPEND

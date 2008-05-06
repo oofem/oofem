@@ -67,6 +67,8 @@
 #include "errorestimator.h"
 #include "usrdefsub.h"
 #include "datastream.h"
+#include "contextioerr.h"
+#include "oofem_terminate.h"
 
 #ifdef __PETSC_MODULE
 #include "petsccontext.h"

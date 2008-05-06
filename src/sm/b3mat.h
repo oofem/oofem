@@ -39,7 +39,7 @@
 #ifndef b3mat_h
 #define b3mat_h
 
-#include "cltypes.h"
+
 #include "maxwellChM.h"
 
 class B3Material : public MaxwellChainMaterial

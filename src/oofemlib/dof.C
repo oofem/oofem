@@ -47,9 +47,11 @@
 #include "dictionr.h"
 
 #include "debug.h"
-#include "cltypes.h"
+
 #include "logger.h"
 #include "datastream.h"
+#include "oofem_limits.h"
+#include "contextioerr.h"
 
 #ifndef __MAKEDEPEND
 #include <string.h>

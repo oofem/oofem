@@ -38,6 +38,7 @@
 
 #include "combuff.h"
 #include "processcomm.h"
+#include "statecountertype.h"
 #ifndef __MAKEDEPEND
 #include <stdio.h>
 #endif
@@ -63,7 +64,7 @@ public:
     /// Reads count integer values into array pointed by data.
     virtual int read(int *data, const unsigned int count) = 0;
     /// Reads count unsigned long values into array pointed by data.
-    virtual int read(unsigned long *data, const unsigned int count) = 0;
+    virtual int read(StateCounterType *data, const unsigned int count) = 0;
     /// Reads count double values into array pointed by data.
     virtual int read(double *data, const unsigned int count) = 0;
     /// Reads count char values into array pointed by data.
@@ -78,7 +79,7 @@ public:
     /// Writes count int values from array pointed by data.
     virtual int write(const int *data, const unsigned int count) = 0;
     /// Writes count  values from array pointed by data.
-    virtual int write(const unsigned long *data, const unsigned int count) = 0;
+    virtual int write(const StateCounterType *data, const unsigned int count) = 0;
     /// Writes count char values from array pointed by data.
     virtual int write(const double *data, const unsigned int count) = 0;
     /// Writes count char values from array pointed by data.
@@ -112,7 +113,7 @@ public:
     //@{
     virtual int read(int *data, const unsigned int count)
     { if ( fread(data, sizeof( int ), count, stream) == count ) { return 1; } else { return 0; } }
-    virtual int read(unsigned long *data, const unsigned int count)
+    virtual int read(StateCounterType *data, const unsigned int count)
     { if ( fread(data, sizeof( unsigned long ), count, stream) == count ) { return 1; } else { return 0; } }
     virtual int read(double *data, const unsigned int count)
     { if ( fread(data, sizeof( double ), count, stream) == count ) { return 1; } else { return 0; } }
@@ -126,7 +127,7 @@ public:
     //@{
     virtual int write(const int *data, const unsigned int count)
     { if ( fwrite(data, sizeof( int ), count, stream) == count ) { return 1; } else { return 0; } }
-    virtual int write(const unsigned long *data, const unsigned int count)
+    virtual int write(const StateCounterType *data, const unsigned int count)
     { if ( fwrite(data, sizeof( unsigned long ), count, stream) == count ) { return 1; } else { return 0; } }
     virtual int write(const double *data, const unsigned int count)
     { if ( fwrite(data, sizeof( double ), count, stream) == count ) { return 1; } else { return 0; } }

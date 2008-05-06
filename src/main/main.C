@@ -42,13 +42,15 @@
 #include "engngm.h"
 #include "freestor.h"
 #include "compiler.h"
-#include "cltypes.h"
+
 #include "oofemtxtdatareader.h"
 #include "util.h"
 #include "oofemdef.h"
 #include "usrdefsub.h"
 #include "error.h"
 #include "logger.h"
+#include "contextioerr.h"
+#include "oofem_terminate.h"
 
 #ifdef __PARALLEL_MODE
 #include "dyncombuff.h"
@@ -92,7 +94,7 @@ int main(int argc, char *argv[])
     int renumberFlag = 0;
     bool debugFlag = false;
     char inputFileName [ MAX_FILENAME_LENGTH + 10 ], buff [ MAX_FILENAME_LENGTH ];
-    EngngModel *problem;
+    EngngModel *problem = 0;
 
     // print prg header on stdout
     printf("%s", PRG_HEADER_SM);

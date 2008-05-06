@@ -43,7 +43,7 @@
 #include "element.h"
 #include "dofmanager.h"
 #include "elementside.h"
-#include "cltypes.h"
+
 #include "verbose.h"
 #include "conTable.h"
 #include "transportelement.h"
@@ -52,6 +52,7 @@
 #ifndef __MAKEDEPEND
 #include <stdio.h>
 #endif
+#include "contextioerr.h"
 
 NumericalMethod *StationaryTransportProblem :: giveNumericalMethod(TimeStep *atTime)
 // only one has reason for LinearStatic

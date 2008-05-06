@@ -42,7 +42,7 @@
 #include "sparsemtrx.h"
 #include "petscsparsemtrx.h"
 #include "flotarry.h"
-#include "cltypes.h"
+
 #ifdef __PETSC_MODULE
 #ifndef __MAKEDEPEND
 #include "petscksp.h"

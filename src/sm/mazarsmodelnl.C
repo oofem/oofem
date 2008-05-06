@@ -45,6 +45,7 @@
 #include "isolinearelasticmaterial.h"
 #include "nonlocalmaterialext.h"
 #include "datastream.h"
+#include "contextioerr.h"
 
 #ifdef __PARALLEL_MODE
 #include "combuff.h"

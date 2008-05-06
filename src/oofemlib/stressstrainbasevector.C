@@ -41,6 +41,8 @@
 #include "flotmtrx.h"
 #include "error.h"
 #include "datastream.h"
+#include "materialmode.h"
+#include "matresponseform.h"
 
 StressStrainBaseVector :: StressStrainBaseVector(MaterialMode m) : FloatArray()
 {

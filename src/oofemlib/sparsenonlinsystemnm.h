@@ -44,7 +44,10 @@
 
 
 #include "nummet.h"
-#include "cltypes.h"
+
+#include "equationid.h"
+#include "nmstatus.h"
+
 #ifndef __MAKEDEPEND
 #include <stdio.h>
 #endif

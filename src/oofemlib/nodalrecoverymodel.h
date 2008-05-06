@@ -42,12 +42,14 @@
 #define nodalrecoverymodel_h
 
 #include "compiler.h"
-#include "cltypes.h"
+
 #include "tdictionary.h"
 #include "intarray.h"
 #include "flotarry.h"
 #include "alist.h"
 #include "interface.h"
+#include "internalstatetype.h"
+#include "statecountertype.h"
 
 class Domain;
 class Element;

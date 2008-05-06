@@ -344,7 +344,7 @@ LargeVector::LargeVector(const LargeVectorAttach& B)
 	Array::Copy(B.DataPtr(),data,n);
 }
 
-LargeVector::LargeVector(const LargeVector& B)
+LargeVector::LargeVector(const LargeVector& B) : LargeVectorAttach(B)
 {
 	data = new double[B.N()];
 	this->n = B.N();

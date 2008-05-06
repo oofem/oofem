@@ -39,6 +39,10 @@
 #include "debug.h"
 #include "logger.h"
 #include "datastream.h"
+#include "classtype.h"
+#include "contextioerr.h"
+#include "contextmode.h"
+
 #ifndef __MAKEDEPEND
 #include <stdlib.h>
 #endif

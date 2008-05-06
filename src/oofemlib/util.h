@@ -37,6 +37,13 @@
 #ifndef util_h
 #define util_h
 
+#ifndef __MAKEDEPEND
+#include <stdio.h>
+#endif
+#include "problemmode.h"
+class DataReader;
+class EngngModel;
+
 /**
  * Reads the input line from file and converts all characters to lower case
  * @param line contains read line
@@ -50,6 +57,6 @@ char *giveRawLineFromInput(FILE *inputStream, char *line, int len);
 char *giveInputDataFileName(char *dataInputFileName, int maxlen);
 
 //Instanciates the new problem
-EngngModel *InstanciateProblem(DataReader *dr, problemMode mode, int contextFlag, EngngModel *master = NULL);
+EngngModel *InstanciateProblem(DataReader *dr, problemMode mode, int contextFlag, EngngModel *master = 0);
 
 #endif // util_h

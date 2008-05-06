@@ -49,7 +49,13 @@
 #include "dictionr.h"
 #include "flotarry.h"
 #include "flotmtrx.h"
-#include "cltypes.h"
+
+#include "classtype.h"
+#include "internalstatetype.h"
+#include "internalstatevaluetype.h"
+#include "materialmode.h"
+#include "crosssectextension.h"
+#include "contextioresulttype.h"
 
 #define THICKNESS 400
 #define WIDTH     401

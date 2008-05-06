@@ -48,7 +48,7 @@
 #include <stdio.h>
 #include <string.h>
 #endif
-#include "cltypes.h"
+
 #include "error.h"
 
 class Domain;

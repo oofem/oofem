@@ -43,10 +43,13 @@
 
 #include "femcmpnn.h"
 #include "domain.h"
-#include "cltypes.h"
+
 #include "engngm.h"
 #include "logger.h"
 #include "datastream.h"
+#include "oofem_limits.h"
+#include "contextioerr.h"
+
 #ifndef __MAKEDEPEND
 #include <stdio.h>
 #include <stdlib.h>

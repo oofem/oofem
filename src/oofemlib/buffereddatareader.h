@@ -45,7 +45,7 @@
 #include <stdio.h>
 #include <string>
 #endif
-#include "cltypes.h"
+
 #include "datareader.h"
 #include "oofemtxtinputrecord.h"
 
