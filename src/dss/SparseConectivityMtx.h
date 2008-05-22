@@ -35,9 +35,10 @@
  * Author: Richard Vondracek, <richard.vondracek@seznam.cz>
  */
 
+// SparseConectivityMtx.h 
 
-#ifndef sparseconectivitymtx_h
-#define sparseconectivitymtx_h
+#ifndef _SPARSECONMTX_H__
+#define _SPARSECONMTX_H__
 
 #include "ColHash.h"
 #include "ConList.h"
@@ -51,57 +52,57 @@ DSS_NAMESPASE_BEGIN
 /// This is a dynamic sparse matrix format
 /// There is full set of rows but in each row are stored only nonzeros
 /// </summary>
-///
-class SparseConectivityMtxII :
-    public TraceableMatrix,
-    public IConectMatrix
+/// 
+class SparseConectivityMtxII : 
+	public TraceableMatrix,
+	public IConectMatrix
 {
 public:
-    IntArrayList **ColumnsIndexes;
-    long n;
-    long nonzeros;
+	IntArrayList** ColumnsIndexes;
+	long n;
+	long nonzeros;
 
 public:
-    long N() const { return n; }
-    long Nonzeros() const { return nonzeros; }
+	long N() const		{return n;}
+	long Nonzeros() const	{return nonzeros;}
 
 public:
+	
+	SparseConectivityMtxII(const SparseMatrixF& sm,char block_size);
+	SparseConectivityMtxII(const SparseMatrixF& sm,Ordering* node_order,char block_size);
+	SparseConectivityMtxII(SparseConectivityMtxII& mtx,Ordering* order);
+	SparseConectivityMtxII(const SparseConectivityMtxII& mtx);
+	
+	virtual ~SparseConectivityMtxII();
 
-    SparseConectivityMtxII(const SparseMatrixF &sm, char block_size);
-    SparseConectivityMtxII(const SparseMatrixF &sm, Ordering *node_order, char block_size);
-    SparseConectivityMtxII(SparseConectivityMtxII &mtx, Ordering *order);
-    SparseConectivityMtxII(const SparseConectivityMtxII &mtx);
+	void AddGrow(long i, long j);
 
-    virtual ~SparseConectivityMtxII();
+	long ColumnLength(long i);
 
-    void AddGrow(long i, long j);
+	// Returns compressed row storage, the caller must delete the data
+	void GetCmpRows(long* &adr, long* &ci);
 
-    long ColumnLength(long i);
+	IntArrayList* GetOrder_Cuthill_McKee2();
 
-    // Returns compressed row storage, the caller must delete the data
-    void GetCmpRows(long * &adr, long * &ci);
+	Ordering* GenerateMD(IntArrayList* fixed = NULL);
+	Ordering* GenerateAMD(IntArrayList* fixed = NULL);
+	Ordering* GenerateAMD_AA(IntArrayList* fixed = NULL);
+	Ordering* Get_Cuthill_McKee();
+	Ordering* Get_Reverse_Cuthill_McKee();
+	Ordering* Get_Unity();
+	Ordering* Get_RecursiveBiSection();
+	Ordering* Get_MetisDiSection();
+	Ordering* Get_ColAMD();
 
-    IntArrayList *GetOrder_Cuthill_McKee2();
+	void GenerateFillInPresorted(Ordering* ord);
 
-    Ordering *GenerateMD(IntArrayList *fixed = NULL);
-    Ordering *GenerateAMD(IntArrayList *fixed = NULL);
-    Ordering *GenerateAMD_AA(IntArrayList *fixed = NULL);
-    Ordering *Get_Cuthill_McKee();
-    Ordering *Get_Reverse_Cuthill_McKee();
-    Ordering *Get_Unity();
-    Ordering *Get_RecursiveBiSection();
-    Ordering *Get_MetisDiSection();
-    Ordering *Get_ColAMD();
+	Ordering* GetOrdering(Ordering::Type ord);
 
-    void GenerateFillInPresorted(Ordering *ord);
+	IntArrayList* GetIndexesAboveDiagonalInColumn(long j);
 
-    Ordering *GetOrdering(Ordering :: Type ord);
+	IntArrayList* DetachIndexesAboveDiagonalInColumn(long j);
 
-    IntArrayList *GetIndexesAboveDiagonalInColumn(long j);
-
-    IntArrayList *DetachIndexesAboveDiagonalInColumn(long j);
-
-    Ordering *GetPermutationAndPattern(Ordering :: Type ord, IntArrayList *fixed = NULL);
+	Ordering* GetPermutationAndPattern(Ordering::Type ord,IntArrayList* fixed = NULL);
 };
 
 /// <summary>
@@ -111,83 +112,83 @@ public:
 class MD_Qqraph
 {
 public:
-    SparseConectivityMtxII *mtx;
-    long *degrees;
-    long *amd_w;
+	SparseConectivityMtxII* mtx;
+	long* degrees;
+	long* amd_w;
 private:
-    long MinDegA, MinDegB, MinDegC;
-    long vi_Min;
+	long MinDegA,MinDegB,MinDegC;
+	long vi_Min;
 
 public:
-    IntArrayList **A;
-    IntArrayList **E;
-    IntArrayList **I;           // supervariables
-    IntArrayList **L;
+	IntArrayList** A;
+	IntArrayList** E;
+	IntArrayList** I;	// supervariables
+	IntArrayList** L;
 
-    long *pLIdx;
-    long *pPIdx;
-    long *pfixed;       // is the i-th node fixed or not
+	long* pLIdx;
+	long* pPIdx;
+	long* pfixed;	// is the i-th node fixed or not
 
-    IntLinkArray variables;
-    IntArrayList *elements;
-    long no_elements;
+	IntLinkArray variables;
+	IntArrayList* elements;
+	long no_elements;
 
-    bool approximate_degree;
-    bool keep_sorted_order;
-    bool aggressive_absorbtion;
+	bool approximate_degree;
+	bool keep_sorted_order;
+	bool aggressive_absorbtion;
 
-    long n;
-    long n_1;
-    ColHash ht;
+	long n;
+	long n_1;
+	ColHash ht;
 
-    MD_Qqraph(SparseConectivityMtxII *mtx);
+	MD_Qqraph(SparseConectivityMtxII* mtx);
 
-    ~MD_Qqraph();
+	~MD_Qqraph();
 
-    static void Insert(IntArrayList &al, long i);
+	static void Insert(IntArrayList& al, long i);
 
-    // true  - the variable is available for elimination
-    // flase - the variable is fixed (FETI border nodes)
-    inline bool IsFree(long i)
-    {
-        return bool ( pfixed == NULL || pfixed [ i ] == 0 );
-    }
+	// true  - the variable is available for elimination
+	// flase - the variable is fixed (FETI border nodes)
+	inline bool IsFree(long i)
+	{
+		return bool(pfixed==NULL || pfixed[i]==0);
+	}
 
-    void ComputeAMD_w_Le_Lp(long i);
+	void ComputeAMD_w_Le_Lp(long i);
 
-    void ClearAMD_w(long i);
+	void ClearAMD_w(long i);
 
-    long ApproximateMinumumDegree(long i, IntArrayList &Lp);
+	long ApproximateMinumumDegree(long i,IntArrayList& Lp);
 
-    /// <summary> This method computes the exact external degree </summary>
-    /// <param name="i">variable</param>
-    /// <returns>degree</returns>
-    long ExternalDegree(long i);
+	/// <summary> This method computes the exact external degree </summary>
+	/// <param name="i">variable</param>
+	/// <returns>degree</returns>
+	long ExternalDegree(long i);
 
-    /// <summary> Masselimination </summary>
-    /// <param name="p">pivot element</param>
-    void Eliminate(long p);
+	/// <summary> Masselimination </summary>
+	/// <param name="p">pivot element</param>
+	void Eliminate(long p);
 
-    long Hash(long i)
-    {
-        long hk = A [ i ]->SumElements() + E [ i ]->SumElements();
-        return ( hk % n_1 ) + 1;
-    }
+	long Hash(long i)
+	{
+		long hk = A[i]->SumElements() + E[i]->SumElements();
+		return (hk % n_1)+1;
+	}
 
-    bool IsIndistinguishable(long i, long j);
+	bool IsIndistinguishable(long i,long j);
 
-    IntArrayList hash_parents;
-    void SupervariablesDetection(IntArrayList &Lp);
+	IntArrayList hash_parents;
+	void SupervariablesDetection(IntArrayList& Lp);
 
-    /// <summary>
-    /// Returns the permutation according to minimum degree algorithm.
-    /// </summary>
-    /// <param name="approximate_degree"> true=approximate degree, false=true external degree</param>
-    /// <returns>permutation vector</returns>
-    IntArrayList *GenerateMD(bool approximate_degree, IntArrayList *fixed = NULL);
-}; //class MD_Qqraph
+	/// <summary>
+	/// Returns the permutation according to minimum degree algorithm.
+	/// </summary>
+	/// <param name="approximate_degree"> true=approximate degree, false=true external degree</param>
+	/// <returns>permutation vector</returns>
+	IntArrayList* GenerateMD(bool approximate_degree,IntArrayList* fixed = NULL);
+};//class MD_Qqraph
 
 
 DSS_NAMESPASE_END
 
-#endif
+#endif //_SPARSECONMTX_H__

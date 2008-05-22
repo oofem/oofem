@@ -35,9 +35,10 @@
  * Author: Richard Vondracek, <richard.vondracek@seznam.cz>
  */
 
+// BiSection.h 
 
-#ifndef bisection_h
-#define bisection_h
+#ifndef _BISECTION_H__
+#define _BISECTION_H__
 
 #include "SparseConectivityMtx.h"
 
@@ -46,50 +47,50 @@ DSS_NAMESPASE_BEGIN
 class CMcKee
 {
 private:
-    long n;
+	long n;
 
-    SparseConectivityMtxII *mtx;
-    long *p_node_level;
-    long *p_order;     //out
-    // 0 - unsorted available
-    //
+	SparseConectivityMtxII* mtx;
+	long* p_node_level;
+	long* p_order; //out
+	// 0 - unsorted available
+	//
 
 
 public:
-    long *nodes;      //in
-    long size;
-    long domA, domB;
+	long* nodes;  //in
+	long size;
+	long domA,domB;
 
-    CMcKee();
-    ~CMcKee();
+	CMcKee();
+	~CMcKee();
 
-    void Init(SparseConectivityMtxII *mtx);
+	void Init(SparseConectivityMtxII* mtx);
 
-    BOOL IsAvailable(int v);
+	BOOL IsAvailable(int v);
 
-    void PrepareValid();
+	void PrepareValid();
 
-    long FindFirstNode();
-    void ComputeLevels();
-    void DivideByMidLevel();
+	long FindFirstNode();
+	void ComputeLevels();
+	void DivideByMidLevel();
 };
 
 
 class CBiSection
 {
 private:
-    SparseConectivityMtxII *mtx;
-    CMcKee mck;
+	SparseConectivityMtxII* mtx;
+	CMcKee mck;
 
 public:
-    CBiSection(SparseConectivityMtxII *mtx);
-    void RecurBiSectOrder(IntArrayList *order);
+	CBiSection(SparseConectivityMtxII* mtx);
+	void RecurBiSectOrder(IntArrayList* order);
 
 private:
-    void RecurBiSect(long *nodes, long size);
-    void BiSect(long *nodes, long size, long &domA, long &domB);
+	void RecurBiSect(long* nodes,long size);
+	void BiSect(long* nodes,long size, long& domA, long& domB);
 };
 
 DSS_NAMESPASE_END
 
-#endif
+#endif //_BISECTION_H__

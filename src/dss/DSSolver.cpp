@@ -1,41 +1,41 @@
 /*
-
-                   *****    *****   ******  ******  ***   ***
-                 **   **  **   **  **      **      ** *** **
-                **   **  **   **  ****    ****    **  *  **
-               **   **  **   **  **      **      **     **
-              **   **  **   **  **      **      **     **
-              *****    *****   **      ******  **     **
-
-
-               OOFEM : Object Oriented Finite Element Code
-
-                 Copyright (C) 1993 - 2000   Borek Patzak
-
-
-
-         Czech Technical University, Faculty of Civil Engineering,
-     Department of Structural Mechanics, 166 29 Prague, Czech Republic
-
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-*/
+ *
+ *                 #####    #####   ######  ######  ###   ###
+ *               ##   ##  ##   ##  ##      ##      ## ### ##
+ *              ##   ##  ##   ##  ####    ####    ##  #  ##
+ *             ##   ##  ##   ##  ##      ##      ##     ##
+ *            ##   ##  ##   ##  ##      ##      ##     ##
+ *            #####    #####   ##      ######  ##     ##
+ *
+ *
+ *             OOFEM : Object Oriented Finite Element Code
+ *
+ *               Copyright (C) 1993 - 2008   Borek Patzak
+ *
+ *
+ *
+ *       Czech Technical University, Faculty of Civil Engineering,
+ *   Department of Structural Mechanics, 166 29 Prague, Czech Republic
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
 /*
-   Author: Richard Vondracek, <richard.vondracek@seznam.cz>
-*/
+ * Author: Richard Vondracek, <richard.vondracek@seznam.cz>
+ */
 
+// DSSolver.cpp
 
 #include "DSSolver.h"
 #include "SparseGridMtxLU.h"
@@ -56,6 +56,7 @@ DSSolver::DSSolver(MathTracer* pMT)
 	n_blocks = 0;
 	neq = 0;
 	decompid=0;
+	m_eState = ISolver::None;
 	tmpR = NULL;
 	dom_order = NULL;
 	mcn = NULL;
@@ -134,6 +135,7 @@ long DSSolver::Initialize( unsigned char run_code ,eDSSolverType solverType, eDS
 		break;
 	}
 
+	m_eState = ISolver::Initialized;
 	return 1;
 }
 
@@ -191,6 +193,7 @@ BOOL DSSolver::LoadMatrix(SparseMatrixF* smt,unsigned char block_size)
 {
 	SetMatrixPattern(smt,block_size);
 	sm.CreateLocalCopy();
+	m_eState = ISolver::Allocated;
 	return 1;
 }
 
@@ -215,7 +218,6 @@ BOOL DSSolver::SetMatrixPattern(SparseMatrixF* smt,unsigned char block_size)
 	return 1;
 }
 
-
 BOOL DSSolver::decomp()
 {
 	return decompid;
@@ -226,10 +228,77 @@ void DSSolver::changedecomp()
 	else              decompid=0;
 }
 
+BOOL DSSolver::IsFactorized()
+{
+	return m_eState == ISolver::Factorized;
+}
+
 BOOL DSSolver::Factorize ( )
 {
-	StartSolver();
-	return 1;
+	return StartSolver();
+}
+
+SparseGridMtx* DSSolver::CreateNewSparseGridMtx(IntArrayList* fixed)
+{
+	long no_nonzeros = sm.Nonzeros();
+	eMT->CS();
+
+	SparseConectivityMtxII* block_conmtx = new SparseConectivityMtxII(sm,this->mcn,blockSize);
+	block_conmtx->eMT = eMT;
+
+	long no_init_blocks = (block_conmtx->Nonzeros())/2+block_conmtx->N();
+	n_blocks = block_conmtx->N();
+
+	Ordering* order = block_conmtx->GetPermutationAndPattern(OrderingType,fixed);
+	delete block_conmtx;
+	eMT->Writeln(eMT->MC_());
+	block_conmtx = NULL;
+
+	SparseGridMtx* matrix = NULL;
+
+	eMT->Writeln("Allocating block sparse matrix");
+	switch(SolverType)
+	{
+	case eDSSFactorizationLDLTIncomplete:
+		matrix = new SparseGridMtxLDL(sm,blockSize,order,mcn,eMT,TRUE);
+		break;
+	case eDSSFactorizationLLTIncomplete:
+		matrix = new SparseGridMtxLL(sm,blockSize,order,mcn,eMT,TRUE);
+		break;
+	case eDSSFactorizationLDLT:
+		matrix = new SparseGridMtxLDL(sm,blockSize,order,mcn,eMT,TRUE);
+		break;
+	case eDSSFactorizationLLT:
+		matrix = new SparseGridMtxLL(sm,blockSize,order,mcn,eMT,TRUE);
+		break;
+	case eDSSFactorizationLU:
+		matrix = new SparseGridMtxLU(sm,blockSize,order,mcn,eMT,TRUE);
+		break;
+	case eDSSFastCG:
+		matrix = new SparseGridMtxLDL(sm,blockSize,order,mcn,eMT,TRUE);
+		break;
+	default:
+		eMT->Writeln("Unknown solver type.");
+		break;
+	}
+
+	if (matrix==NULL)
+		return NULL;
+
+	order = NULL;
+
+	matrix->WriteStatistics(no_init_blocks,no_nonzeros);
+
+	if (fixed!=NULL)
+	{
+		sprintf(str," Schur complement    : %dx%d\n",fixed->Count,fixed->Count);
+		eMT->Write(str);
+	}
+
+	if (tmpR) {delete [] tmpR;tmpR = NULL;}
+	tmpR = new double[n_blocks*blockSize];
+	Array::Clear(tmpR,0,n_blocks*blockSize);
+	return matrix;
 }
 
 BOOL DSSolver::PreFactorize()
@@ -237,64 +306,16 @@ BOOL DSSolver::PreFactorize()
 	if (sm.neq == 0 || neq == 0)
 	{
 		eMT->Write("Can't factorize empty matrix!");
-		return 0;
+		return FALSE;
 	}
 
 	switch (MatrixType)
 	{
 	case eDSSparseMatrix:
 		{
-			long no_nonzeros = sm.Nonzeros();
-
-			eMT->CS();
-			//eMT->Write("Symbolic AMD factorization  : ");
-			SparseConectivityMtxII* block_conmtx = new SparseConectivityMtxII(sm,this->mcn,blockSize);
-			block_conmtx->eMT = eMT;
-
-			long no_init_blocks = (block_conmtx->Nonzeros())/2+block_conmtx->N();
-			n_blocks = block_conmtx->N();
-
-			Ordering* order = block_conmtx->GetPermutationAndPattern(OrderingType);
-			delete block_conmtx;
-			eMT->Writeln(eMT->MC_());
-			block_conmtx = NULL;
-
-			eMT->Writeln("Allocating block sparse matrix");
-			switch(SolverType)
-			{
-				case eDSSFactorizationLDLTIncomplete:
-					this->matrix = new SparseGridMtxLDL(sm,blockSize,order,mcn,eMT,TRUE);
-					break;
-				case eDSSFactorizationLLTIncomplete:
-					this->matrix = new SparseGridMtxLL(sm,blockSize,order,mcn,eMT,TRUE);
-					break;
-				case eDSSFactorizationLDLT:
-					this->matrix = new SparseGridMtxLDL(sm,blockSize,order,mcn,eMT,TRUE);
-					break;
-				case eDSSFactorizationLLT:
-					this->matrix = new SparseGridMtxLL(sm,blockSize,order,mcn,eMT,TRUE);
-					break;
-				case eDSSFactorizationLU:
-					this->matrix = new SparseGridMtxLU(sm,blockSize,order,mcn,eMT,TRUE);
-					break;
-				case eDSSFastCG:
-					this->matrix = new SparseGridMtxLDL(sm,blockSize,order,mcn,eMT,TRUE);
-					break;
-				default:
-					eMT->Writeln("Unknown solver type.");
-					break;
-			}
-
+			this->matrix = CreateNewSparseGridMtx();
 			if (this->matrix==NULL)
 				return FALSE;
-				
-			order = NULL;
-
-			matrix->WriteStatistics(no_init_blocks,no_nonzeros);
-			
-			if (tmpR) {delete [] tmpR;tmpR = NULL;}
-			tmpR = new double[n_blocks*blockSize];
-			Array::Clear(tmpR,0,n_blocks*blockSize);
 		}
 		break;
 
@@ -302,8 +323,8 @@ BOOL DSSolver::PreFactorize()
 		switch (SolverType)
 		{
 		case eDSSFactorizationLDLT:
-			this->matrix = new SkyLineMtxLDL(sm,NULL,eMT);
-			break;
+			//this->matrix = new SkyLineMtxLDL(sm,NULL,eMT);
+			//break;
 		case eDSSFactorizationLDLTIncomplete:
 		case eDSSFactorizationLLTIncomplete:
 		case eDSSFactorizationLLT:
@@ -324,7 +345,7 @@ BOOL DSSolver::PreFactorize()
 	if (this->matrix==NULL)
 		return FALSE;
 	
-	return 1;
+	return TRUE;
 }
 
 void DSSolver::LoadZeros()
@@ -335,6 +356,7 @@ void DSSolver::LoadZeros()
 	}
 	if (matrix)
 		matrix->LoadZeros();
+	m_eState = ISolver::Allocated;
 }
 
 double& DSSolver::ElementAt(int i, int j)
@@ -356,44 +378,60 @@ BOOL DSSolver::LoadNumbers (SparseMatrixF* sm)
 	matrix->LoadMatrixNumbers(*sm);
 	eMT->Writeln(eMT->MC_());
 	
+	m_eState = ISolver::Allocated;
 	return 1;
+}
+
+void DSSolver::WriteFactorizationInfo()
+{
+	switch(SolverType)
+	{
+	case eDSSFactorizationLDLTIncomplete:
+		eMT->Write("Incomplete LDL factorization : ");
+		break;
+	case eDSSFactorizationLLTIncomplete:
+		eMT->Write("Incomplete LL factorization : ");
+		break;
+	case eDSSFactorizationLDLT:
+		eMT->Write("Numerical LDL factorization : ");
+		break;
+	case eDSSFactorizationLLT:
+		eMT->Write("Numerical LLT factorization : ");
+		break;
+	case eDSSFactorizationLU:
+		eMT->Write("Numerical LU factorization  : ");
+		break;
+	case eDSSFastCG:
+		break;
+	default:
+		eMT->Writeln("Unknown solver type.");
+		break;
+	}
 }
 
 BOOL DSSolver::ReFactorize( )
 {
-	if (matrix==NULL){
+	if (matrix==NULL && matrixPD==NULL){
 		eMT->Writeln("The matrix has to be loaded prior to the factorization.");
-		return 0;
+		return FALSE;
 	}
 
 	eMT->CS();
 
 	DenseMatrixArithmetics::zero_pivots = 0;
 
+	WriteFactorizationInfo();
 	switch(SolverType)
 	{
 		case eDSSFactorizationLDLTIncomplete:
-			eMT->Write("Incomplete LDL factorization : ");
-			//((SparseGridMtxLDL*)matrix)->Factorize_Incomplete();
-			matrix->Factorize();
-			break;
 		case eDSSFactorizationLLTIncomplete:
-			eMT->Write("Incomplete LL factorization : ");
-			matrix->Factorize();
-			//((SparseGridMtxLDL*)matrix)->Factorize_Incomplete();
-			//((SparseGridMtxLL*)matrix)->Factorize_Incomplete();
-			break;
 		case eDSSFactorizationLDLT:
-			eMT->Write("Numerical LDL factorization : ");
-			matrix->Factorize();
-			break;
 		case eDSSFactorizationLLT:
-			eMT->Write("Numerical LLT factorization : ");
-			matrix->Factorize();
-			break;
 		case eDSSFactorizationLU:
-			eMT->Write("Numerical LU factorization  : ");
-			matrix->Factorize();
+			if (matrixPD!=NULL)
+				matrixPD->SchurComplementFactorization();
+			else
+				matrix->Factorize();
 			break;
 		case eDSSFastCG:
 			break;
@@ -413,12 +451,19 @@ BOOL DSSolver::ReFactorize( )
 			eMT->Writeln("s have been found during the factorization !!!");
 	}
 	
-	return 1;
+	m_eState = ISolver::Factorized;
+	return TRUE;
 }
 
 
 BOOL DSSolver::Solve(double * r, double * f )
 {
+	if (m_eState==ISolver::Allocated)
+	{
+		if (!Factorize())
+			return FALSE;
+	}
+
 	if (matrix==NULL)
 	{
 		if (matrixD.N())
@@ -426,7 +471,7 @@ BOOL DSSolver::Solve(double * r, double * f )
 		else
 			if (r!=f)
 				Array::Copy(f,r,neq);
-		return 0;
+		return FALSE;
 	}
 
 	if (mcn)
@@ -454,7 +499,7 @@ BOOL DSSolver::Solve(double * r, double * f )
 			matrix->Solve(f,r);
 		}
 	}
-	return 1;
+	return TRUE;
 }
 
 
@@ -483,8 +528,6 @@ void DSSolver::StartSolverWriteInfo()
 		case eDSSFactorizationLLTIncomplete:
 			eMT->Writeln("Incomplete matrix LL factorization");
 			break;
-  default:
-    ;
 	}
 	sprintf(str,"Starting on          : %s",eMT->NowString());
 	eMT->Write(str);
@@ -498,20 +541,22 @@ void DSSolver::EndSolverWriteInfo()
 	eMT->Writeln(str);
 }
 
-void DSSolver::StartSolver()
+BOOL DSSolver::StartSolver()
 {
 	if (sm.neq == 0)
 	{
 		eMT->Write("Can't factorize empty matrix!");
-		return ;
+		return FALSE;
 	}
 
 	long usedmem =  0;//GC.GetTotalMemory(true);
 	clock_t solution_start = clock();
 
 	StartSolverWriteInfo();
-	PreFactorize( );
-	ReFactorize();
+	if (!PreFactorize( ))
+		return FALSE;
+	if (!ReFactorize())
+		return FALSE;
 
 	clock_t solution_end = clock();
 	EndSolverWriteInfo();
@@ -523,6 +568,7 @@ void DSSolver::StartSolver()
 	usedmem =  0;//GC.GetTotalMemory(true);
 	//sprintf(str,"%ld of used memory",usedmem);
 	//eMT->Writeln(str);
+	return TRUE;
 }
 
 void DSSolver::SetSM(SparseMatrixF* sm)
@@ -555,17 +601,56 @@ double DSSolver::GetFactorizationError()
 }
 
 
+// counts number of block which combine both fixed and nonfixed DOFs.
+// Each of these must be doubled to create only nonfixed and only fixed block
+void DSSolver::ExpandMCN(IntArrayList& mcn)
+{
+	long nb = mcn.Count/blockSize;
+	for (long b=0; b<nb; b++)
+	{
+		bool fixed = false;
+		bool nonfixed = false;
+		for (long i=0; i<blockSize; i++)
+		{
+			long v = mcn[b*blockSize+i];
+			if (v<0) fixed=true;
+			if (v>=0) nonfixed=true;
+		}
+		if (fixed && nonfixed)
+		{
+			for (long i=0; i<blockSize; i++)
+			{
+				long cfix = -1;
+				long v = mcn[b*blockSize+i];
+				if (v<0) 
+				{
+					cfix=v;
+					mcn[b*blockSize+i] = -1;
+				}
+				mcn.Add(cfix);
+			}
+		}
+	}
+}
+
 // Loads the "MatrixCodeNumbers" vector[n_blocks*block_size]
 // each entry in the vector[i] can be :
 // vector[i] >=  0  normal unknown                      (means the corresponding row in SparseMatrixF)
 // vector[i] == -1  this entry is not used      (no corresponding row in SparseMatrixF)
 BOOL DSSolver::LoadMCN (ULONG n_blocks,unsigned char block_size,long * mcn)
 {
+	this->blockSize = block_size;
 	IntArrayList* mcn_order = new IntArrayList(n_blocks*block_size);
 	mcn_order->Alloc();
-	this->n_blocks = n_blocks;
 	Array::Copy(mcn,mcn_order->Items,n_blocks*block_size);
-	
+	return LoadMCN_int(mcn_order);	
+}
+
+BOOL DSSolver::LoadMCN_int(IntArrayList* mcn_order)
+{
+	ExpandMCN(*mcn_order);
+	this->n_blocks = mcn_order->Count/blockSize;
+
 	long i=0;
 	IntArrayList* mcn_perm = new IntArrayList(mcn_order->Count);
 	mcn_perm->Alloc();
@@ -586,45 +671,61 @@ BOOL DSSolver::LoadMCN (ULONG n_blocks,unsigned char block_size,long * mcn)
 		} else {
 			mcn_perm->Items[-(oi+2)] = i;
 			no_noncondensed_DOFs++;
-		}                                                                         
+		}
 	}
 	
 	if (this->mcn) delete this->mcn;
 	this->mcn = new Ordering(mcn_perm,mcn_order);
 	
-	CreateFixedArray(no_noncondensed_DOFs);
-	
-	return true;
+	return CreateFixedArray(no_noncondensed_DOFs);
 }
 
-void DSSolver::CreateFixedArray(long no_noncondensed_DOFs)
+BOOL DSSolver::LoadMCN (IntArrayList& mcn)
+{
+	IntArrayList* mcn_new = new IntArrayList(((mcn.Count-1)/blockSize+1)*blockSize);
+	mcn_new->Alloc();
+	mcn_new->Initialize(-1);
+	Array::Copy(mcn.Items,0,mcn_new->Items,0,mcn.Count);
+	return LoadMCN_int(mcn_new);
+}
+
+BOOL DSSolver::CreateFixedArray(long no_noncondensed_DOFs)
 {
 	fixed = new IntArrayList();
 	lncn = new IntArrayList(no_noncondensed_DOFs);
 	//lncn->Count = no_noncondensed_DOFs;
-		lncn->Alloc();
-		
-		long i=0;
-		for (i=0; i<mcn->perm->Count; i++)
+	lncn->Alloc();
+	long lastFixed = -1;
+	
+	long i=0;
+	for (i=0; i<mcn->perm->Count; i++)
+	{
+		long oi = mcn->order->Items[i];
+		if (oi<-1)
 		{
-			long oi = mcn->order->Items[i];
-			if (oi<-1)
-			{
-				fixed->AddIfNotLast(i/blockSize);
-				//lncn->Add(-(oi+2));
-				// Now I know that code numbers of noncondensed 
-				// nodes form a serie [(n-no_noncondensed)..(n)]
-				long cn = -(oi+2);
-				if (cn>=neq)
-					eMT->Writeln("Warning: Array of noncondensed nodes contains index higher than neq!!");
-				if (cn<(neq-no_noncondensed_DOFs))
-					eMT->Writeln("Warning: Array of noncondensed nodes contains index lower than (neq-no_condensed) !!");
-				lncn->Items[cn-(neq-no_noncondensed_DOFs)] = cn;
-			}                                                                         
+			fixed->AddIfNotLast(i/blockSize);
+			//lncn->Add(-(oi+2));
+			// Now I know that code numbers of noncondensed 
+			// nodes form a serie [(n-no_noncondensed)..(n)]
+			long cn = -(oi+2);
+			if (cn<lastFixed) {
+				eMT->Writeln("Error: Array of fixed nodes is not monotonously growing !!");
+				m_eState = ErrorInMCN;
+			} else 
+			if (cn>=neq) {
+				eMT->Writeln("Error: Array of fixed nodes contains index higher than (neq) !!");
+				m_eState = ErrorInMCN;
+			} else if (cn<(neq-no_noncondensed_DOFs)) {
+				eMT->Writeln("Error: Array of fixed nodes contains index lower than (neq-no_fixed_DOFs) !!");
+				m_eState = ErrorInMCN;
+			} else
+				lncn->Items[cn-(neq-no_noncondensed_DOFs)] = lastFixed = cn;
 		}
+	}
+	return m_eState != ErrorInMCN;
 }
 
-/*              
+/*
 void MakeNewDOForder(long *lncn,long nbn)
 {
 	// The task of this method is to chose appropriate division of dofs into
@@ -698,106 +799,79 @@ void MakeNewDOForder(long *lncn,long nbn)
 }                                                       
 */
 
+BOOL DSSolver::FactorizeSchur()
+{
+	if (sm.neq == 0 || mcn == 0)
+	{
+		eMT->Writeln("Can't factorize empty matrix!");
+		return FALSE;
+	}
+	if (mcn == 0)
+	{
+		eMT->Writeln("The MCN vector was not set!");
+		return FALSE;
+	}
+
+	StoreFixedLastPermutation_dom_order();
+	
+	SparseGridMtx* matrix = CreateNewSparseGridMtx(fixed);
+	matrixPD = new SparseGridMtxPD(matrix,fixed->Count);
+	
+	ReFactorize( );
+	return TRUE;
+}
+
+// Sorts the domain internal DOFs first and the fixed DOFs at the end
+// Mostly gives dom_order=indentity as JK sorts all the fixed DOFs at the end already
+void DSSolver::StoreFixedLastPermutation_dom_order()
+{
+	// store "fixed-last" permutation
+	if (dom_order) delete dom_order;
+	dom_order = new IntArrayList(sm.neq);
+	dom_order->Alloc();
+	
+	int lastdo = 0;
+	
+	long* dmap = new long[neq];
+	Array::Clear(dmap,0,neq);
+	
+	if (lncn->Count)
+	{
+		long*pI = lncn->Items;
+		long idx = lncn->Count-1;
+		for(long* p = pI+idx; p>=pI; p--,idx--)
+			dmap[*p] = ~(idx+(neq-lncn->Count));
+	}
+	
+	for (long d=0; d<neq; d++)
+	{
+		if (dmap[d]==0)
+		{
+			dmap[d] = ~lastdo;
+			dom_order->Items[lastdo++] = d;
+		}
+	}
+	Array::Copy(lncn->Items,dom_order->Items+neq-lncn->Count,lncn->Count);
+	delete dmap; dmap = NULL;
+}
 
 void DSSolver::condense(double *a,double *lhs,double *rhs,long tc)
 {
-	SparseGridMtxPD* blockedMatrix = matrixPD;
 	if (tc == 1)
 	{
-		if (decompid==0 && blockedMatrix==NULL)
-		{
-			if (sm.neq == 0 || mcn == 0)
-			{
-				eMT->Writeln("Can't factorize empty matrix!");
+		if (m_eState!=ISolver::Factorized || matrixPD==NULL)
+			if (!FactorizeSchur())
 				return;
-			}
-			if (mcn == 0)
-			{
-				eMT->Writeln("The MCN vector was not set!");
-				return;
-			}
-						
-			long no_nonzeros = sm.Nonzeros();
-			eMT->CS();
-			//eMT->Write( "Symbolic factorization      : ");
-			SparseConectivityMtxII* block_conmtx = new SparseConectivityMtxII(sm,this->mcn,blockSize);
-			block_conmtx->eMT = eMT;
-			
-			long no_init_blocks = (block_conmtx->Nonzeros())/2+block_conmtx->N();
-			n_blocks = block_conmtx->N();
-			
-			// store "fixed-last" permutation
-			if (dom_order) delete dom_order;
-			dom_order = new IntArrayList(sm.neq);
-			dom_order->Alloc();
-			
-			int lastdo = 0;
-			
-			long* dmap = new long[neq];
-			Array::Clear(dmap,0,neq);
-			
-			if (lncn->Count)
-			{
-				long*pI = lncn->Items;
-				long idx = lncn->Count-1;
-				for(long* p = pI+idx; p>=pI; p--,idx--)
-					dmap[*p] = ~(idx+(neq-lncn->Count));
-			}
-			
-			for (long d=0; d<neq; d++)
-			{
-				if (dmap[d]==0)
-				{
-					dmap[d] = ~lastdo;
-					dom_order->Items[lastdo++] = d;
-				}
-			}
-			Array::Copy(lncn->Items,dom_order->Items+neq-lncn->Count,lncn->Count);
-			delete dmap; dmap = NULL;
-			
-			if (tmpR) {delete [] tmpR;tmpR = NULL;}
-			tmpR = new double[n_blocks*blockSize];
-			Array::Clear(tmpR,0,n_blocks*blockSize);
-			
-			//fixed->Alloc();
-			//Array::Copy(lncn,fixed->Items,nbn);
-			Ordering* order = block_conmtx->GetPermutationAndPattern(OrderingType,fixed);
-			delete block_conmtx;
-			block_conmtx = NULL;
-			eMT->Writeln(eMT->MC_());
-			//if (fixed) delete fixed;fixed = NULL;
-			
-			//eMT->CS();eMT->Write("Allocating ");
-			blockedMatrix = new SparseGridMtxPD(sm,blockSize,order,this->mcn,fixed->Count,eMT);
-			
-			//eMT->Writeln(eMT->MC_());
-			order = NULL;
-			
-			blockedMatrix->Matrix()->WriteStatistics(no_init_blocks,no_nonzeros);
-			
-			eMT->CS();
-			eMT->Write( "Numerical LDL factorization : ");
-			blockedMatrix->SchurComplementFactorization();
-			
-			//blockedMatrix->WriteMatrixA22(a);
-			blockedMatrix->WriteCondensedMatrixA22(a,mcn,lncn);
-			
-			eMT->Writeln(eMT->MC_());
-			this->matrixPD = blockedMatrix;
-		}
-					
-		//Array::Copy(rhs,tmpR,n_blocks*blockSize);
+
+		matrixPD->WriteCondensedMatrixA22(a,mcn,lncn);
 
 		long i=0;
 		long* perm = mcn->perm->Items;
 		long* dor = dom_order->Items;
 		for (i=0; i<neq; i++)
-			tmpR[perm[i]] = rhs[i];
+			tmpR[perm[dor[i]]] = rhs[i];
 
-		blockedMatrix->Sub_A21_A11inv(tmpR);
-		//blockedMatrix->ForwardSubstL(tmpR);
-		//blockedMatrix->SubMultL12T(tmpR,tmpR);
-		//blockedMatrix->SolveD(tmpR);
+		matrixPD->Sub_A21_A11inv(tmpR);
 
 		for (i=0; i<neq; i++)
 			rhs[i] = tmpR[perm[dor[i]]];
@@ -813,29 +887,23 @@ void DSSolver::condense(double *a,double *lhs,double *rhs,long tc)
 		for (i=neq-lncn->Count; i<neq; i++)
 			tmpR[perm[dor[i]]] = lhs[i];
 		
-		blockedMatrix->Sub_A11inv_A12(tmpR);
-		//blockedMatrix->SubMultL12(tmpR,tmpR);
-		//blockedMatrix->BackSubstL(tmpR);
+		matrixPD->Sub_A11inv_A12(tmpR);
 		
 		for (i=0; i<neq; i++)
-			lhs[i] = tmpR[perm[i]];
-		
-		///Array::Copy(tmpR,lhs,n_blocks*blockSize);
+			lhs[i] = tmpR[perm[dor[i]]];
 	}
 	else if (tc==3)
 	{
 		long i;
 		long* perm = mcn->perm->Items;
+		long* dor = dom_order->Items;
 		for (i=0; i<neq-lncn->Count; i++)
-			tmpR[perm[i]] = rhs[i];
+			tmpR[perm[dor[i]]] = rhs[i];
 		
-		blockedMatrix->SolveA11(tmpR);
-		//blockedMatrix->ForwardSubstL(tmpR);
-		//blockedMatrix->SolveD(tmpR);
-		//blockedMatrix->BackSubstL(tmpR);
+		matrixPD->SolveA11(tmpR);
 		
 		for (i=0; i<neq-lncn->Count; i++)
-			lhs[i] = tmpR[perm[i]];
+			lhs[i] = tmpR[perm[dor[i]]];
 	}
 }
 
@@ -858,7 +926,7 @@ void DSSolver::MulMatrixByVector(double *b, double *c)
 	if (SolverType==eDSSFactorizationLU)
 		sm.MulNonsymMatrixByVector(b,c);
 	else
-		sm.MulSymMatrixByVector(b,c);
+		sm.MulMatrixByVector(b,c);
 	//sm.mxv_scr(b,c);
 }
 

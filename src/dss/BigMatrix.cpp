@@ -1,43 +1,43 @@
 /*
-
-                   *****    *****   ******  ******  ***   ***
-                 **   **  **   **  **      **      ** *** **
-                **   **  **   **  ****    ****    **  *  **
-               **   **  **   **  **      **      **     **
-              **   **  **   **  **      **      **     **
-              *****    *****   **      ******  **     **
-
-
-               OOFEM : Object Oriented Finite Element Code
-
-                 Copyright (C) 1993 - 2000   Borek Patzak
-
-
-
-         Czech Technical University, Faculty of Civil Engineering,
-     Department of Structural Mechanics, 166 29 Prague, Czech Republic
-
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-*/
+ *
+ *                 #####    #####   ######  ######  ###   ###
+ *               ##   ##  ##   ##  ##      ##      ## ### ##
+ *              ##   ##  ##   ##  ####    ####    ##  #  ##
+ *             ##   ##  ##   ##  ##      ##      ##     ##
+ *            ##   ##  ##   ##  ##      ##      ##     ##
+ *            #####    #####   ##      ######  ##     ##
+ *
+ *
+ *             OOFEM : Object Oriented Finite Element Code
+ *
+ *               Copyright (C) 1993 - 2008   Borek Patzak
+ *
+ *
+ *
+ *       Czech Technical University, Faculty of Civil Engineering,
+ *   Department of Structural Mechanics, 166 29 Prague, Czech Republic
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
 /*
-   Author: Richard Vondracek, <richard.vondracek@seznam.cz>
-*/
+ * Author: Richard Vondracek, <richard.vondracek@seznam.cz>
+ */
+
+// BigMatrix.cpp
 
 #include "BigMatrix.h"
-#include <assert.h>
 
 DSS_NAMESPASE_BEGIN
 
@@ -253,6 +253,12 @@ void LargeVectorAttach::Initialize(long start_index,long length)
 {
 	Array::Clear(data,start_index,length);
 }
+
+void LargeVectorAttach::Initialize(double val)
+{
+	for (long i=n-1; i>=0; i-- )
+		data[i] = val;
+}
 	
 void LargeVectorAttach::Initialize()
 {
@@ -316,9 +322,9 @@ void LargeVectorAttach::LoadBinary(FILE* stream)
 	if (data) delete [] data;
 	data = NULL;
 
-	assert (fread(&n,sizeof(n),1,stream) == 1);
+	fread(&n,sizeof(n),1,stream);
 	data = new double[n];
-	assert (fread(data,sizeof(double),n,stream) == ((size_t) n));
+	fread(data,sizeof(double),n,stream);
 }
 
 ///////////////////////////////////////////////////////////////////////
@@ -344,7 +350,7 @@ LargeVector::LargeVector(const LargeVectorAttach& B)
 	Array::Copy(B.DataPtr(),data,n);
 }
 
-LargeVector::LargeVector(const LargeVector& B) : LargeVectorAttach(B)
+LargeVector::LargeVector(const LargeVector& B)
 {
 	data = new double[B.N()];
 	this->n = B.N();

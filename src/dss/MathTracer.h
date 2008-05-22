@@ -35,55 +35,57 @@
  * Author: Richard Vondracek, <richard.vondracek@seznam.cz>
  */
 
-#ifndef mathtracer_h
-#define mathtracer_h
+// MathTracer.h
+
+#ifndef _MATH_TRACER_H__
+#define _MATH_TRACER_H__
 
 #include "DSSAfx.h"
 
 DSS_NAMESPASE_BEGIN
 ////////////////// ////////////////////////////////////////////////////////////////////////////////////
 // You can modify this class, or inherit a new one . If you want to redirect the output somewhere else.
-class MathTracer
+class MathTracer 
 {
 private:
-    char m_string [ 128 ];
+	char m_string[128];
 
 public:
-    double min_pivot;
-    double stabil_pivot;
-    int break_flag;
-    long act_block;
-    long act_row;
+	double min_pivot;
+	double stabil_pivot;
+	int break_flag;
+	long act_block;
+	long act_row;
 
-    MathTracer();
-    virtual ~MathTracer() { }
-    virtual void Write(double a);
-    virtual void Write(int a);
-    virtual void Writeln();
-    virtual void Writeln(const char *str);
-    virtual void Write(const char *str);
+	MathTracer();
 
-    //	virtual void DrawProgress(double e);
+	virtual void Write(double a);
+	virtual void Write(int a);
+	virtual void Writeln();
+	virtual void Writeln(const char* str);
+	virtual void Write(const char* str);
 
-    // true - continue factorization
-    // false - break factorization
-    virtual bool CallUnstableDialog();
+//	virtual void DrawProgress(double e);
 
-    //	virtual void PrintUnstablePivot(long pivot);
+	// true - continue factorization
+	// false - break factorization
+	virtual bool CallUnstableDialog();
 
-    char *NowString();
-    void CS(void);
-    char *MC_();
+//	virtual void PrintUnstablePivot(long pivot);
 
-    clock_t ClockStart(void);
-    char *MeasureClock(clock_t &clock);
+	char* NowString();
+	void CS(void);
+	char* MC_();
+
+	clock_t ClockStart(void);
+	char* MeasureClock(clock_t& clock);
 
 protected:
-    time_t m_temporary_measure_start;
-    clock_t m_clock_start;
+	time_t m_temporary_measure_start;
+	clock_t m_clock_start;
 };
 
 
 DSS_NAMESPASE_END
 
-#endif
+#endif //_MATH_TRACER_H__

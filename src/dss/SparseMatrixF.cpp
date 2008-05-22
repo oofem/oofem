@@ -1,46 +1,45 @@
 /*
-
-                   *****    *****   ******  ******  ***   ***
-                 **   **  **   **  **      **      ** *** **
-                **   **  **   **  ****    ****    **  *  **
-               **   **  **   **  **      **      **     **
-              **   **  **   **  **      **      **     **
-              *****    *****   **      ******  **     **
-
-
-               OOFEM : Object Oriented Finite Element Code
-
-                 Copyright (C) 1993 - 2000   Borek Patzak
-
-
-
-         Czech Technical University, Faculty of Civil Engineering,
-     Department of Structural Mechanics, 166 29 Prague, Czech Republic
-
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-*/
+ *
+ *                 #####    #####   ######  ######  ###   ###
+ *               ##   ##  ##   ##  ##      ##      ## ### ##
+ *              ##   ##  ##   ##  ####    ####    ##  #  ##
+ *             ##   ##  ##   ##  ##      ##      ##     ##
+ *            ##   ##  ##   ##  ##      ##      ##     ##
+ *            #####    #####   ##      ######  ##     ##
+ *
+ *
+ *             OOFEM : Object Oriented Finite Element Code
+ *
+ *               Copyright (C) 1993 - 2008   Borek Patzak
+ *
+ *
+ *
+ *       Czech Technical University, Faculty of Civil Engineering,
+ *   Department of Structural Mechanics, 166 29 Prague, Czech Republic
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
 /*
-   Author: Richard Vondracek, <richard.vondracek@seznam.cz>
-*/
+ * Author: Richard Vondracek, <richard.vondracek@seznam.cz>
+ */
 
+// SparseMatrixF.cpp
 
 #include "SparseMatrixF.h"
 #include "Array.h"
 #include "BigMatrix.h"
-#include <assert.h>
 
 DSS_NAMESPASE_BEGIN
 
@@ -54,9 +53,11 @@ SparseMatrixF::SparseMatrixF()
 	Coffset = 0;
 	bJardaConvention = true;
 	bLocalCopy = false;
+	m_bIsSymmertric = false;
+	m_eSparseOrientation = eCompressedColumns;
 }
 
-SparseMatrixF::SparseMatrixF(unsigned long neq,double* a,unsigned long* ci,unsigned long *adr,ULONG Aofs ,ULONG Cofs ,bool JardaConvention )
+SparseMatrixF::SparseMatrixF(unsigned long neq,double* a,unsigned long* ci,unsigned long *adr,ULONG Aofs ,ULONG Cofs ,bool JardaConvention ,bool bIsSymetric,eOrientation sparseOri)
 {
 	this->a = a;
 	this->neq = neq;
@@ -66,6 +67,8 @@ SparseMatrixF::SparseMatrixF(unsigned long neq,double* a,unsigned long* ci,unsig
 	Coffset = Cofs;
 	bJardaConvention = JardaConvention;
 	bLocalCopy = false;
+	m_bIsSymmertric = bIsSymetric;
+	m_eSparseOrientation = sparseOri;
 }
 
 SparseMatrixF::SparseMatrixF(IConectMatrix* pConMtx)
@@ -160,15 +163,41 @@ void SparseMatrixF::GetA12block(double* pA12,long c)
 	}
 }
 
+void SparseMatrixF::MulMatrixByVector(double *b,double *c)
+{
+	if (m_bIsSymmertric)
+		MulSymMatrixByVector(b,c);
+	else
+		MulNonsymMatrixByVector(b,c);
+}
+
 void SparseMatrixF::MulNonsymMatrixByVector(double *b,double *c)
 {
-	for (ULONG j=0;j<neq;j++)
-		for (ULONG ad = Adr(j); ad<Adr(j+1); ad++)
-		{
-			double A = a[ad];
-			ULONG i = Ci(ad);
-			c[i] += A*b[j];
-		}
+	switch (m_eSparseOrientation)
+	{
+		case eCompressedColumns:
+			{
+				for (ULONG j=0;j<neq;j++)
+					for (ULONG ad = Adr(j); ad<Adr(j+1); ad++)
+					{
+						double A = a[ad];
+						ULONG i = Ci(ad);
+						c[i] += A*b[j];
+					}
+			}
+		break;
+		case eCompressedRows:
+			{
+				for (ULONG j=0;j<neq;j++)
+					for (ULONG ad = Adr(j); ad<Adr(j+1); ad++)
+					{
+						double A = a[ad];
+						ULONG i = Ci(ad);
+						c[j] += A*b[i];
+					}
+			}
+		break;
+	}
 }
 
 void SparseMatrixF::MulSymMatrixByVector(double *b,double *c)
@@ -215,14 +244,15 @@ void SparseMatrixF::ReadDiagonal(double* dv)
 void SparseMatrixF::LoadMatrix(FILE* stream)		
 {
 	neq = 0;adr = NULL;ci = NULL;a = NULL;
+	bool low = false,up = false;
 	//BinaryReader b = null;
 	//try
 	{
 		//neq = b.ReadUInt32();
-		assert (fread(&neq,sizeof(neq),1,stream) == 1);
+		fread(&neq,sizeof(neq),1,stream);
 
 		adr = new ULONG[neq+1];
-		assert(fread(adr,sizeof(ULONG),neq+1,stream) == (neq+1));
+		fread(adr,sizeof(ULONG),neq+1,stream);
 		//for (long i=0; i<=neq; i++)
 		//	adr[i] = b.ReadUInt32();
 
@@ -232,9 +262,11 @@ void SparseMatrixF::LoadMatrix(FILE* stream)
 		for (ULONG ad = 0; ad<adr[neq]; ad++)
 		{
 			//ci[ad] = b.ReadUInt32();
-			assert(fread(ci+ad,sizeof(ULONG),1,stream) == 1);
+			fread(ci+ad,sizeof(ULONG),1,stream);
 			//a[ad] = b.ReadDouble();
-			assert(fread(a+ad,sizeof(double),1,stream) == 1);
+			fread(a+ad,sizeof(double),1,stream);
+			if (ci[ad]<ad) low = true;
+			if (ci[ad]>ad) up = true;
 		}
 		if (adr[0]==1)
 		{
@@ -242,6 +274,7 @@ void SparseMatrixF::LoadMatrix(FILE* stream)
 			Coffset = 1;
 		}
 		bLocalCopy = true;
+		m_bIsSymmertric = (!low || !up);
 	}
 
 	//catch(exception e)
@@ -257,18 +290,18 @@ void SparseMatrixF::SaveMatrix(FILE *stream)
 	{
 		//b = new BinaryWriter(s);
 		//b.Write(neq);
-		assert(fwrite(&neq,sizeof(neq),1,stream) == 1);
+		fwrite(&neq,sizeof(neq),1,stream);
 
 		//for (long i=0; i<=neq; i++)
 		//	b.Write(adr[i]);
-		assert(fwrite(adr,sizeof(ULONG),neq+1,stream) == (neq+1));
+		fwrite(adr,sizeof(ULONG),neq+1,stream);
 
 		for (ULONG ad = 0; ad<adr[neq]; ad++)
 		{
 			//b.Write(ci[ad]);
-			assert(fwrite(ci+ad,sizeof(ULONG),1,stream) == 1);
+			fwrite(ci+ad,sizeof(ULONG),1,stream);
 			//b.Write(a[ad]);
-			assert(fwrite(a+ad,sizeof(double),1,stream) == 1);
+			fwrite(a+ad,sizeof(double),1,stream);
 		}
 	}
 	//catch(exception ex)

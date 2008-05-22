@@ -1,41 +1,41 @@
 /*
-
-                   *****    *****   ******  ******  ***   ***
-                 **   **  **   **  **      **      ** *** **
-                **   **  **   **  ****    ****    **  *  **
-               **   **  **   **  **      **      **     **
-              **   **  **   **  **      **      **     **
-              *****    *****   **      ******  **     **
-
-
-               OOFEM : Object Oriented Finite Element Code
-
-                 Copyright (C) 1993 - 2000   Borek Patzak
-
-
-
-         Czech Technical University, Faculty of Civil Engineering,
-     Department of Structural Mechanics, 166 29 Prague, Czech Republic
-
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-*/
+ *
+ *                 #####    #####   ######  ######  ###   ###
+ *               ##   ##  ##   ##  ##      ##      ## ### ##
+ *              ##   ##  ##   ##  ####    ####    ##  #  ##
+ *             ##   ##  ##   ##  ##      ##      ##     ##
+ *            ##   ##  ##   ##  ##      ##      ##     ##
+ *            #####    #####   ##      ######  ##     ##
+ *
+ *
+ *             OOFEM : Object Oriented Finite Element Code
+ *
+ *               Copyright (C) 1993 - 2008   Borek Patzak
+ *
+ *
+ *
+ *       Czech Technical University, Faculty of Civil Engineering,
+ *   Department of Structural Mechanics, 166 29 Prague, Czech Republic
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
 /*
-   Author: Richard Vondracek, <richard.vondracek@seznam.cz>
-*/
+ * Author: Richard Vondracek, <richard.vondracek@seznam.cz>
+ */
 
+// SparseGridMtxLU.cpp
 
 #include "SparseGridMtxLU.h"
 
@@ -256,7 +256,7 @@ void SparseGridMtxLU::AlocateMemoryByPattern(IConectMatrix* bskl)
 	long memn = ((long)columns_data_length)*sizeof(double)/1024;
 	char str[256];
 	//Write(" aloc "+memn.ToString("### ### ##0")+ "kB..");
-	sprintf(str," aloc %ld kB..",memn);
+	sprintf(str," sparse matrix size  : %ld kB..",memn);
 	Write(str);
 	this->Columns_data = new double[columns_data_length];
 	this->Rows_data = new double[columns_data_length];
@@ -292,7 +292,7 @@ void SparseGridMtxLU::MultiplyByVector(const LargeVectorAttach& x, LargeVectorAt
 		//BlockArith.MultDiagonalBlockByVector(DiagonalBlocks[bj],x, ref y,block_size,bj*block_size);
 		BlockArith->MultDiagonalBlockByVector(Columns_data+bj*block_storage,px+bj*block_size, py+bj*block_size);
 	}*/
-	// x;y;
+	x;y;
 }//MultiplyByVector
 
 void SparseGridMtxLU::Factorize()
@@ -444,7 +444,6 @@ void SparseGridMtxLU::SchurComplementFactorization(int fixed_blocks)
 				// eliminate above diagonal
 				for (long idx_J=0; idx_J<noJentries; idx_J++)
 				{
-
 					bi = columnJentries[idx_J];
 
 					SparseGridColumn &columnI = *Columns[bi];
@@ -464,10 +463,10 @@ void SparseGridMtxLU::SchurComplementFactorization(int fixed_blocks)
 							BlockArith->SubATBproduct(pAij,pBki,pAkj+ ~idx_K );
 						}
 					}
-					BlockArith->ULT_BlockSolve(dd+bi*block_storage,pAij);
+					if (bi<blocks_to_factor)
+						BlockArith->ULT_BlockSolve(dd+bi*block_storage,pAij);
 					pAij += block_storage;
 					pBij += block_storage;
-					
 				}
 
 				// compute the diagonal and divide by it
@@ -593,18 +592,18 @@ void SparseGridMtxLU::SubMultU12(double* px, double* py,long fixed_blocks)
 		long no = columnJ.Entries;
 		if (no==0) continue;
 
-		double* dst = py+block_size*ord[bj];
+		double* src = px+block_size*ord[bj];
 		double* Aij = cd +  columnJ.column_start_idx;
 
 		long* idxs = columnJ.IndexesUfa->Items;
 		//y[i] -= Lji^T * x[j]
 		for (long idx = 0; idx <no && *idxs<schur_shift; idx++,Aij += block_storage)
-			BlockArith->SubMultTBlockByVector(Aij,px+block_size*ord[*(idxs++)],dst);
+			BlockArith->SubMultBlockByVector(Aij,src,py+block_size*ord[*(idxs++)]);
 	}
 }
 
 /// <summary>  y -= L12 * x  </summary>
-void SparseGridMtxLU::SubMultL12(double* px, double* py,long fixed_blocks)
+void SparseGridMtxLU::SubMultL21(double* px, double* py,long fixed_blocks)
 {
 	long schur_shift = n_blocks-fixed_blocks;
 	if (fixed_blocks==0)
@@ -617,13 +616,13 @@ void SparseGridMtxLU::SubMultL12(double* px, double* py,long fixed_blocks)
 		long no = columnJ.Entries;
 		if (no==0) continue;
 
-		double* src = px+block_size*ord[bj];
+		double* dst = py+block_size*ord[bj];
 		double* Aij = Rows_data  +  columnJ.column_start_idx;
 
 		long* idxs = columnJ.IndexesUfa->Items;
 		//y[i] -= Lji * x[j]
 		for (long idx = 0; idx <no && *idxs<schur_shift; idx++,Aij += block_storage)
-			BlockArith->SubMultBlockByVector(Aij,src,py+block_size*ord[*(idxs++)]);
+			BlockArith->SubMultTBlockByVector(Aij,px+block_size*ord[*(idxs++)],dst);
 	}
 }
 
@@ -633,19 +632,25 @@ void SparseGridMtxLU::SolveA11(double* x,long fixed_blocks)
 	SolveLU(x,fixed_blocks);
 }
 
+//   f2 - A21*A11inv*f1 =
+// = f2 - A21*U11inv*L11inv*f1 =
+// = f2 - L21*L11inv*f1
 void SparseGridMtxLU::Sub_A21_A11inv(double* x,long fixed_blocks)
 {
 	ForwardSubstL(x,fixed_blocks);
-	SubMultU12(x,x,fixed_blocks);
+	SubMultL21(x,x,fixed_blocks);
 }
 
+//   A11inv(f1-A12*r1) = 
+// = U11inv(L11inv*f1 - L11inv*A12*r2) =
+// = U11inv(L11inv*f1 - U12*r2)
 void SparseGridMtxLU::Sub_A11inv_A12(double* x,long fixed_blocks)
 {
-	SubMultL12(x,x,fixed_blocks);
+	SubMultU12(x,x,fixed_blocks);
 	BackSubstU(x,fixed_blocks);
 }
 
-
+//resulting matrix a is stored by columns
 void SparseGridMtxLU::WriteCondensedMatrixA22(double* a,Ordering* mcn,IntArrayList* lncn)
 {
 	long blockSize = BlockSize();
@@ -667,8 +672,7 @@ void SparseGridMtxLU::WriteCondensedMatrixA22(double* a,Ordering* mcn,IntArrayLi
 			long obi = block_order->perm->Items[nbi];
 			
 			double val = GetValue(obi,obj,nsi,nsj,aux_bi_idx,aux_bj_idx);
-			a[(j) + (i)*nbn] = val;
-			//a[(i) + (j)*nbn] = val;
+			a[(j)*nbn + (i)] = val;
 		}
 	}
 }

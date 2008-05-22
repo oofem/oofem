@@ -35,188 +35,189 @@
  * Author: Richard Vondracek, <richard.vondracek@seznam.cz>
  */
 
-#ifndef densematrixarithmeticsnn_h
-#define densematrixarithmeticsnn_h
+//DenseMatrixArithmeticsNN.h
+
+#ifndef _DENSEMATRIXARITH_H__
+#define _DENSEMATRIXARITH_H__
 
 #include "MathTracer.h"
 #include "Array.h"
 
 DSS_NAMESPASE_BEGIN
 
-enum ePreferedDecomposition {
-    eLDL_decomposition,
-    eLL_decomposition
+enum ePreferedDecomposition
+{
+	eLDL_decomposition,
+	eLL_decomposition
 };
 
 
 class DenseMatrixArithmetics
 {
 public:
-    long bn;
-    long bnbn;
-    long bn1;
-    static long zero_pivots;
+	long bn;
+	long bnbn;
+	long bn1;
+	static long zero_pivots;
 
-    ePreferedDecomposition prefered_decomposition;
-    MathTracer MT;
-    MathTracer *eMT;
+	ePreferedDecomposition prefered_decomposition;
+	MathTracer MT;
+	MathTracer* eMT;
 
 private:
-    double tmp;
-    double *p;
+	double tmp;
+	double* p;
 
 public:
-    DenseMatrixArithmetics(long bn);
+	DenseMatrixArithmetics(long bn);
 
-    virtual ~DenseMatrixArithmetics();
+	virtual ~DenseMatrixArithmetics();
 
-    static DenseMatrixArithmetics *NewArithmetics(long block_size);
+	static DenseMatrixArithmetics* NewArithmetics(long block_size);
 
-    // b += B*x
-    virtual void AddMultBlockByVectorSym(double *B, double *x, double *b, long bi_bn, long bj_bn);
+	// b += B*x
+	virtual void AddMultBlockByVectorSym(double* B,double* x, double* b, long bi_bn, long bj_bn);
 
-    // b -= A*x
-    virtual void SubMultBlockByVector(double *B, double *x, double *b);
+	// b -= A*x
+	virtual void SubMultBlockByVector(double* B,double* x, double* b);
 
-    // b -= A^T * x
-    virtual void SubMultTBlockByVector(double *B, double *x, double *b);
+	// b -= A^T * x
+	virtual void SubMultTBlockByVector(double* B,double* x, double* b);
+	
+	// b += B * x
+	virtual void MultDiagonalBlockByVector(double* B,double* x, double* b);
 
-    // b += B * x
-    virtual void MultDiagonalBlockByVector(double *B, double *x, double *b);
+	// C -= A^T * B
+	// This is the most SPARSEDIRECT SOLVER innerloop operation
+	virtual void SubATBproduct(double* pC,double* pA,double* pB);
 
-    // C -= A^T * B
-    // This is the most SPARSEDIRECT SOLVER innerloop operation
-    virtual void SubATBproduct(double *pC, double *pA, double *pB);
+	/// <summary>
+	/// Solves LL' decomposition of symmetric pC column based matrix
+	/// The result is stored in lower half of the matrix pC
+	/// </summary>
+	/// <param name="pC"> matrix to be factorized</param>
+	/// <param name="p"> here we store the diagonal elements of L</param>
+	virtual void Cholesky_Decomposition(double* pC,double* &p);
 
-    /// <summary>
-    /// Solves LL' decomposition of symmetric pC column based matrix
-    /// The result is stored in lower half of the matrix pC
-    /// </summary>
-    /// <param name="pC"> matrix to be factorized</param>
-    /// <param name="p"> here we store the diagonal elements of L</param>
-    virtual void Cholesky_Decomposition(double *pC, double * &p);
+	/// <summary> Solve LL^T x = b </summary>
+	/// <param name="pC">factorized L matrix (lower triangle)</param>
+	/// <param name="p">diagonal elements of L</param>
+	/// <param name="b">right side</param>
+	/// <param name="x">unknowns</param>
+ 	virtual void Cholesky_Solve(double *pC,double* p,double* b,double* x);
+	
+	virtual void Cholesky_Linv(double* pC,double* p);
 
-    /// <summary> Solve LL^T x = b </summary>
-    /// <param name="pC">factorized L matrix (lower triangle)</param>
-    /// <param name="p">diagonal elements of L</param>
-    /// <param name="b">right side</param>
-    /// <param name="x">unknowns</param>
-    virtual void Cholesky_Solve(double *pC, double *p, double *b, double *x);
+	virtual void ComputeInversionByCholesky(double *C,double* Inv);
 
-    virtual void Cholesky_Linv(double *pC, double *p);
+	/// <summary>
+	/// Solves LL' decomposition of symmetric pC column based matrix
+	/// The result is stored in lower half of the matrix pC
+	/// </summary>
+	/// <param name="pC"> matrix to be factorized</param>
+	virtual void LL_Decomposition(double* pC);
 
-    virtual void ComputeInversionByCholesky(double *C, double *Inv);
+	/// <summary> Solve LL^T x = b </summary>
+	/// <param name="pC">factorized L matrix (lower triangle)</param>
+	/// <param name="b">right side</param>
+	/// <param name="x">unknowns</param>
+ 	virtual void LL_Solve(double *pC,double* b,double* x);
 
+	/// <summary> Solve LL^T x = b </summary>
+	/// <param name="pC">factorized L matrix (lower triangle)</param>
+	/// <param name="b">right side</param>
+	/// <param name="x">unknowns</param>
+ 	virtual void L_BlockSolve(double *C,double* B);
 
-    /// <summary>
-    /// Solves LL' decomposition of symmetric pC column based matrix
-    /// The result is stored in lower half of the matrix pC
-    /// </summary>
-    /// <param name="pC"> matrix to be factorized</param>
-    virtual void LL_Decomposition(double *pC);
+	virtual void SubstSolveL(double *pC,double* x);
 
-    /// <summary> Solve LL^T x = b </summary>
-    /// <param name="pC">factorized L matrix (lower triangle)</param>
-    /// <param name="b">right side</param>
-    /// <param name="x">unknowns</param>
-    virtual void LL_Solve(double *pC, double *b, double *x);
+	virtual void SubstSolveLT(double *pC,double* x);
 
-    /// <summary> Solve LL^T x = b </summary>
-    /// <param name="pC">factorized L matrix (lower triangle)</param>
-    /// <param name="b">right side</param>
-    /// <param name="x">unknowns</param>
-    virtual void L_BlockSolve(double *C, double *B);
+	virtual void LU_Decomposition(double* C);
 
-    virtual void SubstSolveL(double *pC, double *x);
+	void LU_Solve(double* C,double* b);
+	
+	// Solves system X*LU=B
+	// B is stored by rows
+	void ULT_BlockSolve(double* C,double* B);
+	
+	void LDL_Decomposition(double* A);
 
-    virtual void SubstSolveLT(double *pC, double *x);
+	void LDL_Solve(double* A,double* b,const long startIndex = 0);
 
-    virtual void LU_Decomposition(double *C);
+	// A - decomposed matrix
+	// B - block of right sides
+	virtual void SubstSolveBlock(double* A,double* B);
 
-    void LU_Solve(double *C, double *b);
+	virtual void FactorizeBlock(double* A);
 
-    // Solves system X*LU=B
-    // B is stored by rows
-    void ULT_BlockSolve(double *C, double *B);
+	// Solves A b = b
+	virtual void SubstSolve(double* A,double* b);
 
+	void ComputeInversionByLDL(double *C,double* Inv);
 
-    void LDL_Decomposition(double *A);
+	virtual void GetInversion(double* C,double* blockA);
 
-    void LDL_Solve(double *A, double *b, const long startIndex = 0);
-
-    // A - decomposed matrix
-    // B - block of right sides
-    virtual void SubstSolveBlock(double *A, double *B);
-
-    virtual void FactorizeBlock(double *A);
-
-    // Solves A b = b
-    virtual void SubstSolve(double *A, double *b);
-
-    void ComputeInversionByLDL(double *C, double *Inv);
-
-    virtual void GetInversion(double *C, double *blockA);
-
-    virtual bool GaussElimination(double *C, double *blockA);
+	virtual bool GaussElimination(double* C,double* blockA);
 };
 
 class DenseMatrixArithmetics1x1 : public DenseMatrixArithmetics
 {
 public:
-    DenseMatrixArithmetics1x1(long n) : DenseMatrixArithmetics(n) { }
+	DenseMatrixArithmetics1x1(long n):DenseMatrixArithmetics(n){}
 
-    void SubATBproduct(double *pC, double *pA, double *pB);
-    void GetInversion(double *pC, double *pA);
-    virtual void FactorizeBlock(double *A);
-    virtual void SubstSolveBlock(double *A, double *B);
-    virtual void SubstSolve(double *A, double *b);
+	void SubATBproduct(double* pC,double* pA,double* pB);
+	void GetInversion(double* pC,double* pA);
+	virtual void FactorizeBlock(double* A);
+	virtual void SubstSolveBlock(double* A,double* B);
+	virtual void SubstSolve(double* A,double* b);
 };
 
 class DenseMatrixArithmetics2x2 : public DenseMatrixArithmetics
 {
 public:
-    DenseMatrixArithmetics2x2(long n) : DenseMatrixArithmetics(n) { }
-    void SubATBproduct(double *pC, double *pa, double *pb);
-    void GetInversion(double *C, double *pA);
+	DenseMatrixArithmetics2x2(long n):DenseMatrixArithmetics(n){}
+	void SubATBproduct(double* pC,double* pa,double* pb);
+	void GetInversion(double* C,double* pA);
 };
 
 class DenseMatrixArithmetics3x3 : public DenseMatrixArithmetics
 {
-public:
-    DenseMatrixArithmetics3x3(long n) : DenseMatrixArithmetics(n) { }
-    void SubATBproduct(double *pC, double *pa, double *pb);
+public: 
+	DenseMatrixArithmetics3x3(long n):DenseMatrixArithmetics(n){}
+	void SubATBproduct(double* pC,double* pa,double* pb);
 };
 
 class DenseMatrixArithmetics4x4 : public DenseMatrixArithmetics
 {
 public:
-    DenseMatrixArithmetics4x4(long n) : DenseMatrixArithmetics(n)     { }
-    void SubATBproduct(double *pC, double *pa, double *pb);
+	DenseMatrixArithmetics4x4(long n):DenseMatrixArithmetics(n)	{}
+	void SubATBproduct(double* pC,double* pa,double* pb);
 };
 
 class DenseMatrixArithmetics5x5 : public DenseMatrixArithmetics
 {
 public:
-    DenseMatrixArithmetics5x5(long n) : DenseMatrixArithmetics(n)     { }
-    void SubATBproduct(double *pC, double *pA, double *pB);
+	DenseMatrixArithmetics5x5(long n):DenseMatrixArithmetics(n)	{}
+	void SubATBproduct(double* pC,double* pA,double* pB);
 };
 
 class DenseMatrixArithmetics6x6 : public DenseMatrixArithmetics
 {
 public:
-    DenseMatrixArithmetics6x6(long n) : DenseMatrixArithmetics(n) { }
+	DenseMatrixArithmetics6x6(long n):DenseMatrixArithmetics(n){}
 
-    void SubATBproduct(double *pC, double *pA, double *pB);
+	void SubATBproduct(double* pC,double* pA,double* pB);
 };
 
 class DenseMatrixArithmetics_Fake : public DenseMatrixArithmetics
 {
 public:
-    DenseMatrixArithmetics_Fake(long n) : DenseMatrixArithmetics(n) { }
-    void SubATBproduct(double *C, double *blockA, double *blockB);
+	DenseMatrixArithmetics_Fake(long n):DenseMatrixArithmetics(n){}
+	void SubATBproduct(double*C,double* blockA,double* blockB);
 };
 
 DSS_NAMESPASE_END
 
-#endif
+#endif //_DENSEMATRIXARITH_H__
 

@@ -1,40 +1,41 @@
 /*
-
-                   *****    *****   ******  ******  ***   ***
-                 **   **  **   **  **      **      ** *** **
-                **   **  **   **  ****    ****    **  *  **
-               **   **  **   **  **      **      **     **
-              **   **  **   **  **      **      **     **
-              *****    *****   **      ******  **     **
-
-
-               OOFEM : Object Oriented Finite Element Code
-
-                 Copyright (C) 1993 - 2000   Borek Patzak
-
-
-
-         Czech Technical University, Faculty of Civil Engineering,
-     Department of Structural Mechanics, 166 29 Prague, Czech Republic
-
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-*/
+ *
+ *                 #####    #####   ######  ######  ###   ###
+ *               ##   ##  ##   ##  ##      ##      ## ### ##
+ *              ##   ##  ##   ##  ####    ####    ##  #  ##
+ *             ##   ##  ##   ##  ##      ##      ##     ##
+ *            ##   ##  ##   ##  ##      ##      ##     ##
+ *            #####    #####   ##      ######  ##     ##
+ *
+ *
+ *             OOFEM : Object Oriented Finite Element Code
+ *
+ *               Copyright (C) 1993 - 2008   Borek Patzak
+ *
+ *
+ *
+ *       Czech Technical University, Faculty of Civil Engineering,
+ *   Department of Structural Mechanics, 166 29 Prague, Czech Republic
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
 /*
-   Author: Richard Vondracek, <richard.vondracek@seznam.cz>
-*/
+ * Author: Richard Vondracek, <richard.vondracek@seznam.cz>
+ */
+
+// SparseGridMtxLDL.cpp
 
 #include "SparseGridMtxLDL.h"
 
@@ -210,7 +211,7 @@ void SparseGridMtxLDL::AlocateMemoryByPattern(IConectMatrix* bskl)
 	long memn = ((long)columns_data_length)*sizeof(double)/1024;
 	char str[256];
 	//Write(" aloc "+memn.ToString("### ### ##0")+ "kB..");
-	sprintf(str," aloc %ld kB..",memn);
+	sprintf(str," sparse matrix size  : %ld kB..",memn);
 	Write(str);
 	this->Columns_data = new double[columns_data_length];
 	if (Columns_data==NULL)
@@ -683,7 +684,9 @@ void SparseGridMtxLDL::SchurComplementFactorization(int fixed_blocks)
 
 void SparseGridMtxLDL::Solve(double* b, double* x)
 {
-	SolveLDL(x,b);
+	if (x!=b)
+		Array::Copy(b,x,n);
+	SolveLDL(x);
 }
 
 void SparseGridMtxLDL::SolveLV(const LargeVector& f, LargeVector& r)
@@ -707,77 +710,15 @@ void SparseGridMtxLDL::SolveLDL_node_perm(const LargeVector& b, LargeVector& x)
 
 void SparseGridMtxLDL::SolveLDL_block_perm(const LargeVector& b, LargeVector& x)
 {
-	if (block_order!=NULL)
-	{
-		/*if (tmp_vector_BS==NULL)
-		{
-			tmp_vector_BS = new LargeVector(n_blocks*block_size);
-			tmp_vector_BS->Initialize();
-		}
-		b.GetPermuted_1Vector(tmp_vector_BS,*block_order->perm,block_size);
-		double* pb = tmp_vector_BS->DataPtr();
-		SolveLDL(pb,pb);
-		tmp_vector_BS->GetPermutedVector(&x,*block_order->perm,block_size);*/
-		double* pb = b.DataPtr();
-		double* px = x.DataPtr();
-		SolveLDL(px,pb);
-	}
-	else
-	{
-		if (&x!=&b)
-			x.Initialize(b,0,n);	
-			double* px=x.DataPtr();
-		SolveLDL(px,px);
-	}
+	Solve(x.DataPtr(),b.DataPtr());
 }
 
 // x = A^(-1) * b
-void SparseGridMtxLDL::SolveLDL(double* x,double* b)
+void SparseGridMtxLDL::SolveLDL(double* x,long fixed_blocks)
 {
-	long* ord = block_order->order->Items;
-	long bi;			
-	double* cd = this->Columns_data;
-	
-	if (x!=b) Array::Copy(b,0,x,0,n_blocks*block_size);
-
-	// forward substitution L z = f  --> z
-	for (bi=1; bi<n_blocks; bi++)
-	{
-		SparseGridColumn &rowI = *Columns[bi];
-		double* dst = x+block_size*ord[bi];
-		double* Aij = cd + rowI.column_start_idx;
-		long no = rowI.Entries;
-		long* idxs = rowI.IndexesUfa->Items;
-		for (long idx = 0; idx <no; idx++,Aij += block_storage)
-		{
-			//bj = rowI.IndexesUfa->Items[idx];
-			//r[2] = r[2] - L12^T * r[1]
-			//r[i] -= Lji^T * r[j]
-			BlockArith->SubMultTBlockByVector(Aij,x+block_size*ord[*(idxs++)],dst);
-		}
-	}
-
-	// Diagonal solution D z' = z
-	double* Dii = cd;
-	for (bi=0; bi<n_blocks; bi++,Dii+=block_storage)
-		BlockArith->SubstSolve(Dii,x+block_size*ord[bi]);
-
-	// back substitution L^T r = z'
-	for (bi=n_blocks-1; bi>=0; bi--)
-	{
-		SparseGridColumn& columnI = *Columns[bi];
-		double* src = x+block_size*ord[bi];
-		double* Aij = cd + columnI.column_start_idx;
-		long no = columnI.Entries;
-		long* idxs = columnI.IndexesUfa->Items;
-		for (long idx = 0; idx <no; idx++,Aij += block_storage)
-		{
-			//bj = columnI.IndexesUfa->Items[idx];
-			//r[2] = r[2] - L12 * r[1]
-			//r[j] -= Lij * r[i]
-			BlockArith->SubMultBlockByVector(Aij,src,x+block_size*ord[*(idxs++)]);
-		}
-	}
+	ForwardSubstL(x,fixed_blocks);
+	SolveD(x,fixed_blocks);
+	BackSubstLT(x,fixed_blocks);
 }
 
 /// <summary>  y -= L12^T * x  </summary>
@@ -836,7 +777,6 @@ void SparseGridMtxLDL::ForwardSubstL(double* x,long fixed_blocks)
 	if (this->N()==0) return;
 	long blocks_to_factor = n_blocks - fixed_blocks;
 	long* ord = block_order->order->Items;
-	double* cd = this->Columns_data;
 	// forward substitution L z = f  --> z
 	for (long bi=1; bi<blocks_to_factor; bi++)
 	{
@@ -844,7 +784,7 @@ void SparseGridMtxLDL::ForwardSubstL(double* x,long fixed_blocks)
 		long no = rowI.Entries;
 		if (no==0) continue;
 		double* dst = x+block_size*ord[bi];
-		double* Aij = cd + rowI.column_start_idx;
+		double* Aij = Columns_data + rowI.column_start_idx;
 
 		long* idxs = rowI.IndexesUfa->Items;
 		//r[i] -= Lji^T * r[j]
@@ -857,16 +797,15 @@ void SparseGridMtxLDL::SolveD(double* x,long fixed_blocks)
 {
 	if (this->N()==0) return;
 	long* ord = block_order->order->Items;
-	double* cd = this->Columns_data;
 	// Diagonal solution D z' = z
-	double* Dii = cd;
+	double* Dii = Columns_data;
 	long blocks_to_factor = n_blocks - fixed_blocks;
 	for (long bi=0; bi<blocks_to_factor; bi++,Dii+=block_storage)
 		BlockArith->SubstSolve(Dii,x+block_size*ord[bi]);
 	
 }
 
-void SparseGridMtxLDL::BackSubstL(double* x,long fixed_blocks)
+void SparseGridMtxLDL::BackSubstLT(double* x,long fixed_blocks)
 {
 	if (this->N()==0) return;
 	long* ord = block_order->order->Items;
@@ -888,9 +827,7 @@ void SparseGridMtxLDL::BackSubstL(double* x,long fixed_blocks)
 
 void SparseGridMtxLDL::SolveA11(double* x,long fixed_blocks)
 {
-	ForwardSubstL(x,fixed_blocks);
-	SolveD(x,fixed_blocks);
-	BackSubstL(x,fixed_blocks);
+	SolveLDL(x,fixed_blocks);
 }
 
 void SparseGridMtxLDL::Sub_A21_A11inv(double* x,long fixed_blocks)
@@ -903,49 +840,7 @@ void SparseGridMtxLDL::Sub_A21_A11inv(double* x,long fixed_blocks)
 void SparseGridMtxLDL::Sub_A11inv_A12(double* x,long fixed_blocks)
 {
 	SubMultL12(x,x,fixed_blocks);
-	BackSubstL(x,fixed_blocks);
-}
-
-void SparseGridMtxLDL::WriteMatrixA22(double* dst,long fixed_blocks)
-{
-	long ml = (fixed_blocks*block_size);
-	double val;
-
-	long aux_bi_idx=0,aux_bj_idx=0;
-	long schur_shift = n_blocks - fixed_blocks;
-	long* ord = block_order->order->Items;
-	for (long bi=0; bi<fixed_blocks; bi++)
-	{
-		for (long bj=0; bj<=bi; bj++)
-		{
-			long dbi = ord[schur_shift+bi];
-			long dbj = ord[schur_shift+bj];
-
-			long bbi = (dbi-schur_shift)*block_size;
-			long bbj = (dbj-schur_shift)*block_size;
-
-			if (bbi==bbj)
-				for (long si=0; si<block_size; si++)
-				{
-					for (long sj=0; sj<si; sj++)
-					{
-						val = GetValue(bi+schur_shift,bi+schur_shift,sj,si,aux_bi_idx,aux_bj_idx);
-						dst[(bbi+si) + (bbj+sj)*ml] = val;
-						dst[(bbj+sj) + (bbi+si)*ml] = val;
-					}
-					val = GetValue(bi+schur_shift,bi+schur_shift,si,si,aux_bi_idx,aux_bj_idx);
-					dst[(bbi+si)*(ml+1)] = val;
-				}
-			else
-				for (long si=0; si<block_size; si++)
-					for (long sj=0; sj<block_size; sj++)
-					{
-						val = GetValue(bi+schur_shift,bj+schur_shift,si,sj,aux_bi_idx,aux_bj_idx);
-						dst[(bbi+si) + (bbj+sj)*ml] = val;
-						dst[(bbj+sj) + (bbi+si)*ml] = val;
-					}
-		}
-	}
+	BackSubstLT(x,fixed_blocks);
 }
 
 void SparseGridMtxLDL::WriteCondensedMatrixA22(double* a,Ordering* mcn,IntArrayList* lncn)

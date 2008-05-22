@@ -35,13 +35,12 @@
  * Author: Richard Vondracek, <richard.vondracek@seznam.cz>
  */
 
-
 // DSSAfx.h : include file for standard system include files,
 //  or project specific include files that are used frequently, but
 //      are changed infrequently
 //
-#ifndef dssafx_h
-#define dssafx_h
+#if !defined(_DSSAFX_H__)
+#define _DSSAFX_H__
 
 #if _MSC_VER > 1000
 #pragma once
@@ -49,9 +48,9 @@
 
 #ifdef __WATCOMC__
  #ifndef BOOL_DEF
-enum bool { false = 0, true = 1 };
+  enum bool {false = 0, true = 1};
   #define BOOL_DEF
- #endif
+ #endif 
 #endif
 
 // This is just for compilation with MFC
@@ -60,7 +59,7 @@ enum bool { false = 0, true = 1 };
    #ifdef _DEBUG
       #define new DEBUG_NEW
       #undef THIS_FILE
-static char THIS_FILE[] = __FILE__;
+      static char THIS_FILE[] = __FILE__;
    #endif
 #endif
 
@@ -73,15 +72,15 @@ static char THIS_FILE[] = __FILE__;
 
 
 #ifndef min
-#define min(a, b) ( ( a ) < ( b ) ? ( a ) : ( b ) )
+#define min(a,b) ((a)<(b)?(a):(b))
 #endif
 
 #ifndef max
-#define max(a, b) ( ( a ) > ( b ) ? ( a ) : ( b ) )
+#define max(a,b) ((a)>(b)?(a):(b))
 #endif
 
-typedef int BOOL;
-typedef unsigned char BYTE;
+typedef int                 BOOL;
+typedef unsigned char       BYTE;
 typedef unsigned long ULONG;
 
 #ifndef FALSE
@@ -92,14 +91,14 @@ typedef unsigned long ULONG;
 #define TRUE 1
 #endif
 
-#ifndef PURE
-#define PURE = 0
+#ifndef PURE 
+#define PURE =0
 #endif
 
-#define DSS_NAMESPASE_BEGIN
-#define DSS_NAMESPASE_END
+#define DSS_NAMESPASE_BEGIN    
+#define DSS_NAMESPASE_END 
 //#define DSS_NAMESPASE_BEGIN namespace DSS {
 //#define DSS_NAMESPASE_END }
 
-#endif
+#endif // !defined(_DSSAFX_H__)
 
