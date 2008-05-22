@@ -59,7 +59,7 @@ enum MaterialMappingAlgorithmType {
 #undef enumitem_h
 
 
-char *__MaterialMappingAlgorithmTypeToString(MaterialMappingAlgorithmType _value);
+const char *__MaterialMappingAlgorithmTypeToString(MaterialMappingAlgorithmType _value);
 
 
 #endif // materialmappingalgorithmtype_h

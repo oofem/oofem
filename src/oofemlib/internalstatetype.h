@@ -115,7 +115,7 @@ enum InternalStateType {
 #undef enumitem_h
 
 
-char *__InternalStateTypeToString(InternalStateType _value);
+const char *__InternalStateTypeToString(InternalStateType _value);
 
 
 #endif // internalstatetype_h

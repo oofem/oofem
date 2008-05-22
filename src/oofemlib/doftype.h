@@ -57,7 +57,7 @@ enum dofType {
 #undef enumitem_h
 
 
-char *__dofTypeToString(dofType _value);
+const char *__dofTypeToString(dofType _value);
 
 
 #endif // doftype_h

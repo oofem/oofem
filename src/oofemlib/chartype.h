@@ -129,7 +129,7 @@ enum CharType {
 #undef enumitem_h
 
 
-char * __CharTypeToString(CharType _value);
+const char * __CharTypeToString(CharType _value);
 
 
 #endif // chartype_h

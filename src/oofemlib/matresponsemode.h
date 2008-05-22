@@ -76,7 +76,7 @@ enum MatResponseMode {
 #undef enumitem_h
 
 
-char *__MatResponseModeToString(MatResponseMode _value);
+const char *__MatResponseModeToString(MatResponseMode _value);
 
 
 #endif // matesponsemode_h

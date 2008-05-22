@@ -72,7 +72,7 @@ enum domainType {
 #undef enumitem_h
 
 
-char *__domainTypeToString(domainType _value);
+const char *__domainTypeToString(domainType _value);
 
 
 #endif // domaintype_h

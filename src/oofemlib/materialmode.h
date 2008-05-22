@@ -63,6 +63,7 @@
   \
     ENUM_ITEM(_1dFiber) \
     ENUM_ITEM(_3dMicroplane) \
+    ENUM_ITEM(_3dInterface) \
     ENUM_ITEM(_2dInterface) \
     ENUM_ITEM(_1dInterface) \
   \
@@ -84,7 +85,7 @@ enum MaterialMode {
 #undef enumitem_h
 
 
-char *__MaterialModeToString(MaterialMode _value);
+const char *__MaterialModeToString(MaterialMode _value);
 
 
 #endif // materialmode_h

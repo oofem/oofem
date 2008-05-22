@@ -77,7 +77,7 @@ enum ValueModeType {
 #undef enumitem_h
 
 
-char *__ValueModeTypeToString(ValueModeType _value);
+const char *__ValueModeTypeToString(ValueModeType _value);
 
 
 #endif // valuemodetype_h

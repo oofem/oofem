@@ -70,7 +70,7 @@ enum UnknownType {
 #undef enumitem_h
 
 
-char *__UnknownTypeToString(UnknownType _value);
+const char *__UnknownTypeToString(UnknownType _value);
 
 
 #endif // unknowntype_h

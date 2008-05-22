@@ -75,7 +75,7 @@ enum Element_Geometry_Type {
 #undef enumitem_h
 
 
-char *__Element_Geometry_TypeToString(Element_Geometry_Type _value);
+const char *__Element_Geometry_TypeToString(Element_Geometry_Type _value);
 
 
 #endif // elementgeometrytype_h
