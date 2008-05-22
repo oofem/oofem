@@ -1,0 +1,149 @@
+test301.out
+patch test of interface 3d elements
+LinearStatic nsteps 1
+domain 3d
+OutputManager tstep_all dofman_all element_all
+ndofman 16 nelem 14 ncrosssect  1 nmat 2 nbc 2 nic 0 nltf 1
+node 1 coords 3 0.2 0.  0.  bc 3 0 1 1
+node 2 coords 3 0.2 0.2 0.  
+node 3 coords 3 0.  0.2 0.  
+node 4 coords 3 0.  0.  0.  bc 3 1 1 1
+node 5 coords 3 0.2 0.  0.2 bc 3 0 1 0
+node 6 coords 3 0.2 0.2 0.2 
+node 7 coords 3 0.  0.2 0.2 
+node 8 coords 3 0.  0.  0.2 bc 3 1 1 0 
+#
+node 9 coords 3 0.2 0.2  0. 
+node 10 coords 3 0.2 0.4 0. 
+node 11 coords 3 0.  0.4 0. 
+node 12 coords 3 0.  0.2  0. 
+node 13 coords 3 0.2 0.2  0.2 
+node 14 coords 3 0.2 0.4 0.2 
+node 15 coords 3 0.  0.4 0.2 
+node 16 coords 3 0.  0.2  0.2 
+#
+LTRSpace  1 nodes 4 1 8 5 6 crossSect 1 mat 1 NIP 1
+LTRSpace  2 nodes 4 1 4 8 6 crossSect 1 mat 1 NIP 1
+LTRSpace  3 nodes 4 1 2 4 6 crossSect 1 mat 1 NIP 1
+#
+LTRSpace  4 nodes 4 2 6 7 4 crossSect 1 mat 1 NIP 1
+LTRSpace  5 nodes 4 2 7 3 4 crossSect 1 mat 1 NIP 1
+LTRSpace  6 nodes 4 6 8 7 4 crossSect 1 mat 1 NIP 1
+#
+LTRSpace  7 nodes 4 9 16 13 14 crossSect 1 mat 1 NIP 1
+LTRSpace  8 nodes 4 9 12 16 14 crossSect 1 mat 1 NIP 1
+LTRSpace  9 nodes 4 9 10 12 14 crossSect 1 mat 1 NIP 1 
+#
+LTRSpace  10 nodes 4 10 14 15 12 crossSect 1 mat 1 NIP 1 boundaryLoads 2 2 1 
+LTRSpace  11 nodes 4 10 15 11 12 crossSect 1 mat 1 NIP 1 boundaryLoads 2 2 1
+LTRSpace  12 nodes 4 14 16 15 12 crossSect 1 mat 1 NIP 1
+#
+interface3dtrlin 13 nodes 6 2 7 6 9 16 13 crossSect 1 mat 2 NIP 1
+interface3dtrlin 14 nodes 6 2 3 7 9 12 16 crossSect 1 mat 2 NIP 1
+#
+SimpleCS 1 thick 1.0 width 1.0 
+IsoLE 1 d 0.0 E 15.0 n 0.25 tAlpha 0.000012
+isointrfdm01 2 d 0.0 ks 15.e3 kn 10.e3 ft 10.0 gf 20.0 tAlpha 0.000012
+BoundaryCondition 1 loadTimeFunction 1 prescribedvalue 0.0
+ConstantSurfaceLoad 2 ndofs 3 loadType 2 Components 3 0.0 1.0 0.0 loadTimeFunction 1 
+ConstantFunction 1 f(t) 1.0
+#
+#
+#
+#%BEGIN_CHECK% tolerance 1.e-5
+##
+##
+## check reactions 
+#REACTION tStep 1 comNumber 1 dof 2 value -1.3333e-02
+#REACTION tStep 1 comNumber 4 dof 2 value -6.6667e-03
+#REACTION tStep 1 comNumber 5 dof 2 value -6.6667e-03
+#REACTION tStep 1 comNumber 8 dof 2 value -1.3333e-02
+#REACTION tStep 1 comNumber 1 dof 3 value 0.0
+#REACTION tStep 1 comNumber 4 dof 1 value 0.0
+#REACTION tStep 1 comNumber 4 dof 3 value 0.0
+#REACTION tStep 1 comNumber 8 dof 1 value 0.0
+## check all nodes
+#NODE tStep 1 number 1 dof 1 unknown d value -3.33333333e-03
+#NODE tStep 1 number 2 dof 1 unknown d value -3.33333333e-03
+#NODE tStep 1 number 2 dof 2 unknown d value  1.33333333e-02
+#NODE tStep 1 number 2 dof 3 unknown d value  0.0
+#NODE tStep 1 number 3 dof 1 unknown d value  0.0
+#NODE tStep 1 number 3 dof 2 unknown d value  1.33333333e-02
+#NODE tStep 1 number 3 dof 3 unknown d value  0.0
+#NODE tStep 1 number 5 dof 1 unknown d value -3.33333333e-03
+#NODE tStep 1 number 5 dof 3 unknown d value -3.33333333e-03
+#NODE tStep 1 number 6 dof 1 unknown d value -3.33333333e-03
+#NODE tStep 1 number 6 dof 2 unknown d value  1.33333333e-02
+#NODE tStep 1 number 6 dof 3 unknown d value -3.33333333e-03
+#NODE tStep 1 number 7 dof 1 unknown d value  0.0
+#NODE tStep 1 number 7 dof 2 unknown d value  1.33333333e-02
+#NODE tStep 1 number 7 dof 3 unknown d value -3.33333333e-03
+#NODE tStep 1 number 8 dof 3 unknown d value -3.33333333e-03
+#NODE tStep 1 number 9 dof 1 unknown d value -3.33333333e-03
+#NODE tStep 1 number 9 dof 2 unknown d value  1.34333333e-02
+#NODE tStep 1 number 9 dof 3 unknown d value  0.0
+#NODE tStep 1 number 10 dof 1 unknown d value -3.33333333e-03
+#NODE tStep 1 number 10 dof 2 unknown d value  2.67666667e-02
+#NODE tStep 1 number 10 dof 3 unknown d value  0.0
+##NODE tStep 1 number 11 dof 1 unknown d value  0.0
+##NODE tStep 1 number 11 dof 2 unknown d value  2.67666667e-02
+##NODE tStep 1 number 11 dof 3 unknown d value  0.0
+##NODE tStep 1 number 12 dof 1 unknown d value  0.0
+##NODE tStep 1 number 12 dof 2 unknown d value  1.34333333e-02 
+##NODE tStep 1 number 12 dof 3 unknown d value  0.0
+#NODE tStep 1 number 13 dof 1 unknown d value -3.33333333e-03
+#NODE tStep 1 number 13 dof 2 unknown d value  1.34333333e-02
+#NODE tStep 1 number 13 dof 3 unknown d value -3.33333333e-03
+##NODE tStep 1 number 14 dof 1 unknown d value -3.33333333e-03
+##NODE tStep 1 number 14 dof 2 unknown d value  2.67666667e-02
+##NODE tStep 1 number 14 dof 3 unknown d value -3.33333333e-03
+#NODE tStep 1 number 15 dof 1 unknown d value  0.0
+#NODE tStep 1 number 15 dof 2 unknown d value  2.67666667e-02
+#NODE tStep 1 number 15 dof 3 unknown d value -3.33333333e-03
+#NODE tStep 1 number 16 dof 1 unknown d value  0.0
+#NODE tStep 1 number 16 dof 2 unknown d value  1.34333333e-02
+#NODE tStep 1 number 16 dof 3 unknown d value -3.33333333e-03
+## check element's stress & strain vectors
+#ELEMENT tStep 1 number 1 gp 1 record 0 component 1  value -1.6667e-02
+#ELEMENT tStep 1 number 1 gp 1 record 0 component 2  value  6.6667e-02
+#ELEMENT tStep 1 number 1 gp 1 record 0 component 3  value -1.6667e-02
+#ELEMENT tStep 1 number 1 gp 1 record 0 component 4  value 0.0
+#ELEMENT tStep 1 number 1 gp 1 record 0 component 5  value 0.0
+#ELEMENT tStep 1 number 1 gp 1 record 0 component 6  value 0.0
+##
+#ELEMENT tStep 1 number 1 gp 1 record 1 component 1  value 0.0
+#ELEMENT tStep 1 number 1 gp 1 record 1 component 2  value 1.0
+#ELEMENT tStep 1 number 1 gp 1 record 1 component 3  value 0.0
+#ELEMENT tStep 1 number 1 gp 1 record 1 component 4  value 0.0
+#ELEMENT tStep 1 number 1 gp 1 record 1 component 5  value 0.0
+#ELEMENT tStep 1 number 1 gp 1 record 1 component 6  value 0.0
+##
+#ELEMENT tStep 1 number 12 gp 1 record 0 component 1  value -1.6667e-02
+#ELEMENT tStep 1 number 12 gp 1 record 0 component 2  value  6.6667e-02
+#ELEMENT tStep 1 number 12 gp 1 record 0 component 3  value -1.6667e-02
+#ELEMENT tStep 1 number 12 gp 1 record 0 component 4  value 0.0
+#ELEMENT tStep 1 number 12 gp 1 record 0 component 5  value 0.0
+#ELEMENT tStep 1 number 12 gp 1 record 0 component 6  value 0.0
+##
+#ELEMENT tStep 1 number 12 gp 1 record 1 component 1  value 0.0
+#ELEMENT tStep 1 number 12 gp 1 record 1 component 2  value 1.0
+#ELEMENT tStep 1 number 12 gp 1 record 1 component 3  value 0.0
+#ELEMENT tStep 1 number 12 gp 1 record 1 component 4  value 0.0
+#ELEMENT tStep 1 number 12 gp 1 record 1 component 5  value 0.0
+#ELEMENT tStep 1 number 12 gp 1 record 1 component 6  value 0.0
+##
+#ELEMENT tStep 1 number 13 gp 2 record 0 component 1  value 1.0000e-04
+#ELEMENT tStep 1 number 13 gp 2 record 0 component 2  value 0.0
+#ELEMENT tStep 1 number 13 gp 2 record 0 component 3  value 0.0
+#ELEMENT tStep 1 number 13 gp 2 record 0 component 4  value 0.0
+#ELEMENT tStep 1 number 13 gp 2 record 0 component 5  value 0.0
+#ELEMENT tStep 1 number 13 gp 2 record 0 component 6  value 0.0
+##
+#ELEMENT tStep 1 number 13 gp 2 record 1 component 1  value 1.0
+#ELEMENT tStep 1 number 13 gp 2 record 1 component 2  value 0.0
+#ELEMENT tStep 1 number 13 gp 2 record 1 component 3  value 0.0
+#ELEMENT tStep 1 number 13 gp 2 record 1 component 4  value 0.0
+#ELEMENT tStep 1 number 13 gp 2 record 1 component 5  value 0.0
+#ELEMENT tStep 1 number 13 gp 2 record 1 component 6  value 0.0
+##
+#%END_CHECK%

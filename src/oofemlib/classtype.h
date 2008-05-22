@@ -131,6 +131,8 @@ enum classType {
     Tetrah1_htClass,
 
     InterfaceElem1dClass,
+    InterfaceElem2dQuadClass,
+    InterfaceElement3dTrLinClass,
 
     DomainClass,
 

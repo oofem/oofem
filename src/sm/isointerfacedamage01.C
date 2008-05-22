@@ -64,7 +64,7 @@ IsoInterfaceDamageMaterial :: hasMaterialModeCapability(MaterialMode mode)
 // returns whether receiver supports given mode
 //
 {
-    if ( mode == _2dInterface ) {
+  if (( mode == _2dInterface ) || (mode == _3dInterface)) {
         return 1;
     }
 
@@ -157,6 +157,9 @@ IsoInterfaceDamageMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
     case _2dInterface:
         give2dInterfaceMaterialStiffnessMatrix(answer, form, rMode, gp, atTime);
         break;
+    case _3dInterface:
+        give3dInterfaceMaterialStiffnessMatrix(answer, form, rMode, gp, atTime);
+        break;
     default:
         StructuralMaterial :: giveCharacteristicMatrix(answer, form, rMode, gp, atTime);
     }
@@ -173,6 +176,8 @@ IsoInterfaceDamageMaterial :: giveSizeOfReducedStressStrainVector(MaterialMode m
     switch ( mode ) {
     case _2dInterface:
         return 2;
+    case _3dInterface:
+        return 3;
 
     default:
         return StructuralMaterial :: giveSizeOfReducedStressStrainVector(mode);
@@ -190,7 +195,7 @@ IsoInterfaceDamageMaterial :: giveStressStrainComponentIndOf(MatResponseForm for
 {
     //MaterialMode mode  = gp -> giveMaterialMode ();
 
-    if ( mmode == _2dInterface ) {
+  if (( mmode == _2dInterface ) || ( mmode == _3dInterface)) {
         return ind;
     } else {
         return StructuralMaterial :: giveStressStrainComponentIndOf(form, mmode, ind);
@@ -225,6 +230,11 @@ IsoInterfaceDamageMaterial :: giveStressStrainMask(IntArray &answer, MatResponse
         for ( i = 1; i <= 2; i++ ) {
             answer.at(i) = i;
         }
+    } else if ( mmode == _3dInterface ) {
+        answer.resize(3);
+        for ( i = 1; i <= 3; i++ ) {
+            answer.at(i) = i;
+        }
     } else {
         StructuralMaterial :: giveStressStrainMask(answer, form, mmode);
     }
@@ -241,7 +251,7 @@ IsoInterfaceDamageMaterial :: giveReducedCharacteristicVector(FloatArray &answer
 {
     MaterialMode mode = gp->giveMaterialMode();
 
-    if ( mode == _2dInterface ) {
+    if (( mode == _2dInterface ) || (mode == _3dInterface )) {
         answer = charVector3d;
         return;
     } else {
@@ -267,7 +277,7 @@ IsoInterfaceDamageMaterial :: giveFullCharacteristicVector(FloatArray &answer,
 //
 {
     MaterialMode mode = gp->giveMaterialMode();
-    if ( mode == _2dInterface ) {
+    if (( mode == _2dInterface ) || ( mode == _3dInterface )) {
         answer = strainVector;
         return;
     } else                                                             {
@@ -309,6 +319,66 @@ IsoInterfaceDamageMaterial :: give2dInterfaceMaterialStiffnessMatrix(FloatMatrix
         } else {
             // Tangent Stiffness
             FloatArray se(2), e(2);
+            e = status->giveTempStrainVector();
+            se.beProductOf(answer, e);
+
+            om = status->giveTempDamage();
+            un = status->giveTempStrainVector().at(1);
+            om = min(om, 0.999999);
+            // damage in tension only
+            if ( un >= 0 ) {
+                answer.times(1.0 - om);
+                return;
+
+                double dom = -( -e0 / un / un * exp( -( ft / gf ) * ( un - e0 ) ) + e0 / un * exp( -( ft / gf ) * ( un - e0 ) ) * ( -( ft / gf ) ) );
+                if ( ( om > 0. ) && ( status->giveTempKappa() > status->giveKappa() ) ) {
+                    answer.at(1, 1) -= se.at(1) * dom;
+                    answer.at(2, 1) -= se.at(2) * dom;
+                }
+            }
+        }
+    }  else {
+        _error("give2dInterfaceMaterialStiffnessMatrix: unknown MatResponseMode");
+    }
+
+    return;
+}
+
+
+void
+IsoInterfaceDamageMaterial :: give3dInterfaceMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseForm form, MatResponseMode rMode,
+                                                                     GaussPoint *gp, TimeStep *atTime)
+{
+    double om, un;
+    IsoInterfaceDamageMaterialStatus *status = ( IsoInterfaceDamageMaterialStatus * ) this->giveStatus(gp);
+
+
+    if ( ( rMode == ElasticStiffness ) || ( rMode == SecantStiffness ) || ( rMode == TangentStiffness ) ) {
+        // assemble eleastic stiffness
+        answer.resize(3, 3);
+        answer.at(1, 1) = kn;
+        answer.at(2, 2) = ks;
+        answer.at(3, 3) = ks;
+        answer.at(1, 2) = answer.at(2, 1) = answer.at(1,3) = answer.at(3,1) = answer.at(2,3) = answer.at(3,2) = 0.0;
+
+        if ( rMode == ElasticStiffness ) {
+            return;
+        }
+
+        if ( rMode == SecantStiffness ) {
+            // Secant stiffness
+            om = status->giveTempDamage();
+            un = status->giveTempStrainVector().at(1);
+            om = min(om, 0.999999);
+            // damage in tension only
+            if ( un >= 0 ) {
+                answer.times(1.0 - om);
+            }
+
+            return;
+        } else {
+            // Tangent Stiffness
+            FloatArray se, e;
             e = status->giveTempStrainVector();
             se.beProductOf(answer, e);
 

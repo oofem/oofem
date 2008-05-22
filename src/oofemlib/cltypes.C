@@ -198,47 +198,47 @@ ContextIOERR :: print()
     default: return "Unknown"; \
     }
 
-char *__InternalStateTypeToString(InternalStateType _value) {
+const char *__InternalStateTypeToString(InternalStateType _value) {
     TO_STRING_BODY(InternalStateType_DEF)
 }
 
-char *__UnknownTypeToString(UnknownType _value) {
+const char *__UnknownTypeToString(UnknownType _value) {
     TO_STRING_BODY(UnknownType_DEF)
 }
 
-char *__dofTypeToString(dofType _value) {
+const char *__dofTypeToString(dofType _value) {
     TO_STRING_BODY(dofType_DEF)
 }
 
-char *__domainTypeToString(domainType _value) {
+const char *__domainTypeToString(domainType _value) {
     TO_STRING_BODY(domainType_DEF)
 }
 
-char *__MaterialModeToString(MaterialMode _value) {
+const char *__MaterialModeToString(MaterialMode _value) {
     TO_STRING_BODY(MaterialMode_DEF)
 }
 
-char *__Element_Geometry_TypeToString(Element_Geometry_Type _value) {
+const char *__Element_Geometry_TypeToString(Element_Geometry_Type _value) {
     TO_STRING_BODY(Element_Geometry_Type_DEF)
 }
 
-char *__ValueModeTypeToString(ValueModeType _value) {
+const char *__ValueModeTypeToString(ValueModeType _value) {
     TO_STRING_BODY(ValueModeType_DEF)
 }
 
-char *__MatResponseModeToString(MatResponseMode _value) {
+const char *__MatResponseModeToString(MatResponseMode _value) {
     TO_STRING_BODY(MatResponseMode_DEF)
 }
 
-char *__DofIDItemToString(DofIDItem _value) {
+const char *__DofIDItemToString(DofIDItem _value) {
     TO_STRING_BODY(DofIDItem_DEF)
 }
 
-char *__CharTypeToString(CharType _value) {
+const char *__CharTypeToString(CharType _value) {
     TO_STRING_BODY(CharType_DEF)
 }
 
-char *__MaterialMappingAlgorithmTypeToString(MaterialMappingAlgorithmType _value) {
+const char *__MaterialMappingAlgorithmTypeToString(MaterialMappingAlgorithmType _value) {
     TO_STRING_BODY(MaterialMappingAlgorithmType_DEF)
 }
 

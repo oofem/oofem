@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/sm/src/Attic/interfaceelem2dquad.h,v 1.1.2.1 2004/04/05 15:19:47 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -33,26 +32,25 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#ifndef interfaceelem2dquad_h
-#define interfaceelem2dquad_h
+#ifndef interfaceelem3dtrlin_h
+#define interfaceelem3dtrlin_h
 
 
 #include "structuralelement.h"
 #include "gaussintegrationrule.h"
+#include "fei2dtrlin.h"
 
-class InterfaceElem2dQuad : public StructuralElement
+/*
+ * This class implements 3d triangular surface interface element with linear interpolation.
+ */
+class InterfaceElement3dTrLin : public StructuralElement
 {
-    /*
-     * This class implements a two dimensional interface element.
-     * Even if geometry approx is quadratic, the element is assumed straight
-     * If not straight, the rotation matrix depends on actual integration point
-     * and stiffness and strain computations should be modified.
-     */
-
 protected:
+    static FEI2dTrLin interpolation;
+
 public:
-    InterfaceElem2dQuad(int, Domain *);                     // constructor
-    ~InterfaceElem2dQuad()   { }                            // destructor
+    InterfaceElement3dTrLin(int, Domain *);                     // constructor
+    ~InterfaceElement3dTrLin()   { }                            // destructor
 
     /**
      * Computes the global coordinates from given element's local coordinates.
@@ -67,8 +65,8 @@ public:
      */
     virtual int computeLocalCoordinates(FloatArray &answer, const FloatArray &gcoords);
 
-    virtual int            computeNumberOfDofs(EquationID ut) { return 12; }
-    virtual void giveDofManDofIDMask(int inode, EquationID, IntArray &) const;
+    virtual int            computeNumberOfDofs(EquationID ut) { return 18; }
+    virtual void           giveDofManDofIDMask(int inode, EquationID, IntArray &) const;
 
     double        computeVolumeAround(GaussPoint *);
 
@@ -80,22 +78,21 @@ public:
 
 #ifdef __OOFEG
     void          drawRawGeometry(oofegGraphicContext &);
-    void drawDeformedGeometry(oofegGraphicContext &, UnknownType);
+    void          drawDeformedGeometry(oofegGraphicContext &, UnknownType);
     void          drawScalar(oofegGraphicContext &context);
 #endif
     //
     // definition & identification
     //
-    const char *giveClassName() const { return "InterfaceElem2dQuad"; }
-    classType            giveClassID() const { return InterfaceElem2dQuadClass; }
+    const char *giveClassName() const { return "InterfaceElement3dTrLin"; }
+    classType            giveClassID() const { return InterfaceElement3dTrLinClass; }
     IRResultType initializeFrom(InputRecord *ir);
-    Element_Geometry_Type giveGeometryType() const { return EGT_line_2; }
 
 protected:
     void          computeBmatrixAt(GaussPoint *, FloatMatrix &, int = 1, int = ALL_STRAINS);
     void          computeNmatrixAt(GaussPoint *, FloatMatrix &) { }
     void          computeGaussPoints();
-    integrationDomain  giveIntegrationDomain() { return _Line; }
+    integrationDomain  giveIntegrationDomain() { return _Triangle; }
 
     int           giveApproxOrder() { return 1; }
     /*
@@ -106,9 +103,10 @@ protected:
      * //void          computeGtoLRotationMatrix(FloatMatrix& answer, GaussPoint* gp);
      */
     int          computeGtoLRotationMatrix(FloatMatrix &answer);
+    void         computeLCS(FloatMatrix &answer);
 };
 
-#endif // interfaceelem2dquad_h
+#endif // interfaceelem3dtrlin_h
 
 
 

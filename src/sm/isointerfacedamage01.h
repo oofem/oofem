@@ -311,6 +311,8 @@ protected:
 
     void give2dInterfaceMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseForm form, MatResponseMode rMode,
                                                 GaussPoint *gp, TimeStep *atTime);
+    void give3dInterfaceMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseForm form, MatResponseMode rMode,
+                                                GaussPoint *gp, TimeStep *atTime);
 };
 
 

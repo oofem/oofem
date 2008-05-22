@@ -106,6 +106,7 @@
 #include "rershell.h"
 #include "interfaceelem2dquad.h"
 #include "interfaceelement1d.h"
+#include "interfaceelem3dtrlin.h"
 
 // Emodels of SM module
 #include "nlinearstatic.h"
@@ -306,6 +307,8 @@ Element *CreateUsrDefElementOfType(char *aClass, int number, Domain *domain)
         newElement = new Truss1d(number, domain);
     } else if ( !strncasecmp(aClass, "interface2dquad", 15) )   {
         newElement = new InterfaceElem2dQuad(number, domain);
+    } else if ( !strncasecmp(aClass, "interface3dtrlin", 16) )   {
+        newElement = new InterfaceElement3dTrLin(number, domain);
     } else if ( !strncasecmp(aClass, "interface1d", 11) )   {
         newElement = new InterfaceElem1d(number, domain);
     }
