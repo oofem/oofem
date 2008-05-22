@@ -195,8 +195,46 @@ int DSSMatrix :: buildInternalStructure(EngngModel *eModel, int di, EquationID u
     }
 
     int bsize = eModel->giveDomain(1)->giveDefaultNodeDofIDArry().giveSize();
-    _dss->SetMatrixPattern(_sm, bsize);
+    /** 
+	Assemble block to equation mapping information
+    */
+    
+    bool _succ = true;
+    int _ndofs, _neq, ndofmans = domain->giveNumberOfDofManagers();
+    long *mcn = new long [ndofmans*bsize];
+    long _c = 0;
+    DofManager* dman;
+
+    if (mcn==NULL) OOFEM_ERROR ("DSSMatrix::buildInternalStructure: free store exhausted, exiting");
+    for ( n = 1; n <= ndofmans; n++ ) {
+      dman=domain->giveDofManager(n);
+      _ndofs = dman->giveNumberOfDofs();
+      if (_ndofs>bsize) {
+	_succ = false;
+	break;
+      }
+      for (i=1; i<=_ndofs; i++) {
+	if (dman->giveDof(i)->isPrimaryDof()) {
+	  _neq = dman->giveDof(i)->giveEquationNumber();
+	  if (_neq > 0) {
+	    mcn[_c++] = _neq-1;
+	  } else {
+	    mcn[_c++] = -1; // no corresponding row in sparse mtrx structure
+	  }
+	}
+      }
+      for (i=_ndofs+1; i<= bsize; i++) mcn[_c++] = -1; // no corresponding row in sparse mtrx structure
+    }
+    if (_succ) {
+      _dss->SetMatrixPattern(_sm, bsize);
+      //_dss->LoadMCN(ndofmans, bsize, mcn);
+    } else {
+      OOFEM_LOG_INFO ("DSSMatrix: using assumed block structure");
+      _dss->SetMatrixPattern(_sm, bsize);
+    }
+
     _dss->PreFactorize();
+    delete[] mcn;
 
     OOFEM_LOG_DEBUG("DSSMatrix info: neq is %d, bsize is %d\n", neq, nz_);
 
