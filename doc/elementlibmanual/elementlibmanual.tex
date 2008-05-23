@@ -631,18 +631,30 @@ allows to change the integration formula.\\
 
 \subsubsection{LTRSpace element}
 Implementation of tetrahedra four-node finite element. 
-Each node has 3 degrees of freedom. 
+Each node has 3 degrees of freedom.
+Following node numbering convention is adopted (see also Fig.~\ref{lintetrahedron_fig}):
+\begin{itemize}
+\item Select a face that will contain the first three corners. The excluded corner will be the last one.
+\item Number these three corners in a counterclockwise sense when looking at the face from the
+      excluded corner.
+\end{itemize}
+ 
+\begin{figure}[tb]
+\begin{center}\epsfig{file=lin_tetrahedron.eps,width=120mm}\end{center}
+\caption{Linear terahedra element. Definition and node numbering convention}
+\label{lintetrahedron_fig}
+\end{figure}
 
 \elemkeyword{LTRSpace}\\
 \descitem{Parameters} None.\\
 \descitem{Unknowns}
-Two dofs, namely u-displacement and v-displacement are required in each node.\\
-\descitem{Approximation} Quadratic approximation of displacements and
+Three dofs (displacement in x,y, and z axis directions) are required in each node.\\
+\descitem{Approximation} Linear approximation of displacements and
 geometry using linear volume coordinates.
 \descitem{Integration}
 Full integration of all strain components using four point Gauss integration formula.
 \descitem{Features} Adaptivity support.\\
-\descitem{Loads} \\
+\descitem{Loads} Surface and Edge loadings supported.\\
 \descitem{Status} 
 
 \subsection{Interface elements}
