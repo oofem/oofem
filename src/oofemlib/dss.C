@@ -227,7 +227,7 @@ int DSSMatrix :: buildInternalStructure(EngngModel *eModel, int di, EquationID u
     }
     if (_succ) {
       _dss->SetMatrixPattern(_sm, bsize);
-      //_dss->LoadMCN(ndofmans, bsize, mcn);
+      _dss->LoadMCN(ndofmans, bsize, mcn);
     } else {
       OOFEM_LOG_INFO ("DSSMatrix: using assumed block structure");
       _dss->SetMatrixPattern(_sm, bsize);
