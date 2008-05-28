@@ -234,6 +234,8 @@ int DSSMatrix :: buildInternalStructure(EngngModel *eModel, int di, EquationID u
     }
 
     _dss->PreFactorize();
+    // zero matrix, put unity on diagonal with supported dofs
+    _dss->LoadZeros();
     delete[] mcn;
 
     OOFEM_LOG_DEBUG("DSSMatrix info: neq is %d, bsize is %d\n", neq, nz_);
