@@ -64,7 +64,9 @@ public:
     /// Reads count integer values into array pointed by data.
     virtual int read(int *data, const unsigned int count) = 0;
     /// Reads count unsigned long values into array pointed by data.
-    virtual int read(StateCounterType *data, const unsigned int count) = 0;
+    virtual int read(unsigned long *data, const unsigned int count) = 0;
+    /// Reads count long values into array pointed by data.
+    virtual int read(long *data, const unsigned int count) = 0;
     /// Reads count double values into array pointed by data.
     virtual int read(double *data, const unsigned int count) = 0;
     /// Reads count char values into array pointed by data.
@@ -79,7 +81,9 @@ public:
     /// Writes count int values from array pointed by data.
     virtual int write(const int *data, const unsigned int count) = 0;
     /// Writes count  values from array pointed by data.
-    virtual int write(const StateCounterType *data, const unsigned int count) = 0;
+    virtual int write(const unsigned long *data, const unsigned int count) = 0;
+    /// Writes count  values from array pointed by data.
+    virtual int write(const long *data, const unsigned int count) = 0;
     /// Writes count char values from array pointed by data.
     virtual int write(const double *data, const unsigned int count) = 0;
     /// Writes count char values from array pointed by data.
@@ -113,8 +117,10 @@ public:
     //@{
     virtual int read(int *data, const unsigned int count)
     { if ( fread(data, sizeof( int ), count, stream) == count ) { return 1; } else { return 0; } }
-    virtual int read(StateCounterType *data, const unsigned int count)
+    virtual int read(unsigned long *data, const unsigned int count)
     { if ( fread(data, sizeof( unsigned long ), count, stream) == count ) { return 1; } else { return 0; } }
+    virtual int read(long *data, const unsigned int count)
+    { if ( fread(data, sizeof( long ), count, stream) == count ) { return 1; } else { return 0; } }
     virtual int read(double *data, const unsigned int count)
     { if ( fread(data, sizeof( double ), count, stream) == count ) { return 1; } else { return 0; } }
     virtual int read(char *data, const unsigned int count)
@@ -127,8 +133,10 @@ public:
     //@{
     virtual int write(const int *data, const unsigned int count)
     { if ( fwrite(data, sizeof( int ), count, stream) == count ) { return 1; } else { return 0; } }
-    virtual int write(const StateCounterType *data, const unsigned int count)
+    virtual int write(const unsigned long *data, const unsigned int count)
     { if ( fwrite(data, sizeof( unsigned long ), count, stream) == count ) { return 1; } else { return 0; } }
+    virtual int write(const long *data, const unsigned int count)
+    { if ( fwrite(data, sizeof( long ), count, stream) == count ) { return 1; } else { return 0; } }
     virtual int write(const double *data, const unsigned int count)
     { if ( fwrite(data, sizeof( double ), count, stream) == count ) { return 1; } else { return 0; } }
     virtual int write(const char *data, const unsigned int count)
@@ -164,6 +172,7 @@ public:
     //@{
     virtual int read(int *data, const unsigned int count) { return buff->unpackArray(data, count); }
     virtual int read(unsigned long *data, const unsigned int count) { return buff->unpackArray(data, count); }
+    virtual int read(long *data, const unsigned int count) { return buff->unpackArray(data, count); }
     virtual int read(double *data, const unsigned int count) { return buff->unpackArray(data, count); }
     virtual int read(char *data, const unsigned int count) { return buff->unpackArray(data, count); }
     //@}
@@ -174,6 +183,7 @@ public:
     //@{
     virtual int write(const int *data, const unsigned int count) { return buff->packArray(data, count); }
     virtual int write(const unsigned long *data, const unsigned int count) { return buff->packArray(data, count); }
+    virtual int write(const long *data, const unsigned int count) { return buff->packArray(data, count); }
     virtual int write(const double *data, const unsigned int count) { return buff->packArray(data, count); }
     virtual int write(const char *data, const unsigned int count) { return buff->packArray(data, count); }
     //@}
@@ -204,6 +214,7 @@ public:
     //@{
     virtual int read(int *data, const unsigned int count) { return pc->unpackArray(data, count); }
     virtual int read(unsigned long *data, const unsigned int count) { return pc->unpackArray(data, count); }
+    virtual int read(long *data, const unsigned int count) { return pc->unpackArray(data, count); }
     virtual int read(double *data, const unsigned int count) { return pc->unpackArray(data, count); }
     virtual int read(char *data, const unsigned int count) { return pc->unpackArray(data, count); }
     //@}
@@ -214,6 +225,7 @@ public:
     //@{
     virtual int write(const int *data, const unsigned int count) { return pc->packArray(data, count); }
     virtual int write(const unsigned long *data, const unsigned int count) { return pc->packArray(data, count); }
+    virtual int write(const long *data, const unsigned int count) { return pc->packArray(data, count); }
     virtual int write(const double *data, const unsigned int count) { return pc->packArray(data, count); }
     virtual int write(const char *data, const unsigned int count) { return pc->packArray(data, count); }
     //@}
