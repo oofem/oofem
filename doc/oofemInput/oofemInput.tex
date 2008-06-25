@@ -1320,11 +1320,11 @@ Currently, the supported export modules are following
 The array \param{vars} contains identifiers for those internal
 variables which are to be exported. The id values are defined by
 InternalStateType enumeration, which is defined in include file
-``oofemlib/src/cltypes.h''.
+``src/oofemlib/internalstatetype.h''.
 The array \param{primvars}
 contains identifiers of primary variables to be exported.
 The possible values correspond to the values of enumerated type
-UnknownType, which is again defined in ``oofemlib/src/cltypes.h''.
+UnknownType, which is again defined in ``src/oofemlib/unknowntype.h''.
 Please note, that the values corresponding to enumerated type values
 start from zero, if not specified directly and that not all values are
 supported by particular material model or analysis type.
