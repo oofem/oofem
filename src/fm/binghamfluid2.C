@@ -52,8 +52,8 @@
 //#define BINGHAM_STRESS_GROWTH_RATE 4000.0
 //#define BINGHAM_MIN_SHEAR_RATE     1.e-12
 
-#define BINGHAM_STRESS_GROWTH_RATE 40.0
-#define BINGHAM_MIN_SHEAR_RATE     1.e-6
+#define BINGHAM_STRESS_GROWTH_RATE 400.0
+#define BINGHAM_MIN_SHEAR_RATE     1.e-10
 
 
 
@@ -118,7 +118,9 @@ BinghamFluidMaterial2 :: giveCharacteristicValue(MatResponseMode mode,
         //return this->computeActualViscosity(temp_tau, temp_gamma);
 #ifdef BINGHAM_ALT
         double gamma = status->giveTempDevStrainMagnitude(); //status->giveTempDevStrainMagnitude();
+	return computeActualViscosity(tau_0, gamma);
 
+	/*
         const FloatArray &epsd = status->giveTempDeviatoricStrainVector(); //status->giveTempDeviatoricStrainVector();
         double gamma2 = gamma * gamma;
         double dmudg, dgde1, dgde2, dgde3, mu;
@@ -137,13 +139,7 @@ BinghamFluidMaterial2 :: giveCharacteristicValue(MatResponseMode mode,
 
         return min( min( ( epsd.at(1) * dmudg * dgde1 + mu ), ( epsd.at(2) * dmudg * dgde2 + mu ) ),
                    ( epsd.at(3) * dmudg * dgde3 + mu ) );
-
-        //return computeActualViscosity(tau_0, temp_gamma);
-        //return computeActualViscosity(tau_0, 0.0);
-        //return mu_0+tau_0*exp(-BINGHAM_STRESS_GROWTH_RATE*temp_gamma)*BINGHAM_STRESS_GROWTH_RATE;
-        //return mu_0;
-        //return mu_0+((-1.0)*tau_0*(1-exp(-BINGHAM_STRESS_GROWTH_RATE*temp_gamma))/(temp_gamma*temp_gamma) +
-        //             tau_0*BINGHAM_STRESS_GROWTH_RATE*exp(-BINGHAM_STRESS_GROWTH_RATE*temp_gamma)/temp_gamma);
+	*/
 
 #else
         if ( temp_tau < tau_c ) {
