@@ -177,7 +177,7 @@ TR1_2D_SUPG2 :: initializeFrom(InputRecord *ir)
 
     this->computeGaussPoints();
     this->initGeometry();
-    //this -> updateIntegrationRules();
+    this -> updateIntegrationRules();
     return IRRT_OK;
 }
 
