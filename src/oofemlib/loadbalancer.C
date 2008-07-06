@@ -108,7 +108,7 @@ LoadBalancer :: migrateLoad(Domain *d)
     }
 
     CommunicatorBuff cb(nproc, CBT_dynamic);
-    Communicator com(d->giveEngngModel(), & cb, myrank, nproc, CommMode_Dynamic);
+    Communicator com(d->giveEngngModel(), &cb, myrank, nproc, CommMode_Dynamic);
 
     // move existing dofmans and elements, that will be local on current partition,
     // into local map
@@ -495,6 +495,7 @@ WallClockLoadBalancerMonitor :: decide(TimeStep *atTime)
     double absWallClockImbalance;
     double neqelems, sum_relcomppowers;
     double myRelativeComputationalPower;
+    IntArray node_equivelements(nproc);
 
     if ( node_solutiontimes == NULL ) {
         OOFEM_ERROR("LoadBalancer::LoadEvaluation failed to allocate node_solutiontimes array");
@@ -565,6 +566,12 @@ WallClockLoadBalancerMonitor :: decide(TimeStep *atTime)
     // collect relative powers
     MPI_Allgather(& myRelativeComputationalPower, 1, MPI_DOUBLE, node_relcomppowers, 1, MPI_DOUBLE, MPI_COMM_WORLD);
 
+
+    // get number of equivalent elements for nodes
+    for ( i = 0; i < nproc; i++ ) {
+        node_equivelements.at(i + 1) = ( int ) ( node_relcomppowers [ i ] * node_solutiontimes [ i ] );
+    }
+
     // normalize computational powers
     sum_relcomppowers = 0.0;
     for ( i = 0; i < nproc; i++ ) {
@@ -577,6 +584,15 @@ WallClockLoadBalancerMonitor :: decide(TimeStep *atTime)
 
     delete[] node_solutiontimes;
     delete[] node_relcomppowers;
+
+    // log equivalent elements on nodes
+    OOFEM_LOG_RELEVANT("[%d] LoadBalancer:  node equivalent elements: ", myrank);
+    for ( i = 0; i < nproc; i++ ) {
+        OOFEM_LOG_RELEVANT( "%6d ", node_equivelements.at(i + 1) );
+    }
+
+    OOFEM_LOG_RELEVANT("\n");
+
 
     // log processor weights
     OOFEM_LOG_RELEVANT("[%d] LoadBalancer: updated proc weights: ", myrank);
