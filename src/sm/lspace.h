@@ -234,7 +234,7 @@ public:
     void          drawRawGeometry(oofegGraphicContext &);
     void          drawDeformedGeometry(oofegGraphicContext &, UnknownType type);
     virtual void  drawScalar(oofegGraphicContext &context);
-    //void          drawInternalState (oofegGraphicContext&);
+    virtual void  drawSpecial(oofegGraphicContext &);
     void           drawTriad(FloatArray &, int isurf);
 #endif
 

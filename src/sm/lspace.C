@@ -877,87 +877,95 @@ void LSpace :: drawScalar(oofegGraphicContext &context)
     }
 }
 
+void
+LSpace :: drawSpecial(oofegGraphicContext &gc)
+{
+    int igp, i, j, k;
+    WCRec q [ 4 ];
+    GraphicObj *tr;
+    StructuralMaterial *mat = ( StructuralMaterial * ) this->giveMaterial();
+    IntegrationRule *iRule;
+    GaussPoint *gp;
+    TimeStep *tStep = domain->giveEngngModel()->giveCurrentStep();
+    FloatArray crackStatuses, cf;
 
-/*
- * void LSpace :: drawInternalState (oofegGraphicContext &gc)
- * //
- * // Draws internal state graphics representation
- * //
- * {
- * WCRec p[8];
- * GraphicObj *tr;
- * StructuralMaterial *mat = (StructuralMaterial*) this->giveMaterial();
- * GaussPoint* gp;
- * double v[8],ratio;
- * int i, nPlastGp;
- * IntegrationRule* iRule = integrationRulesArray[0];
- * DrawMode mode = gc.getDrawMode();
- * TimeStep *tStep = domain->giveEngngModel()->giveCurrentStep();
- * double defScale = gc.getDefScale();
- *
- * if (!gc.testElementGraphicActivity(this)) return;
- *
- * // check for yield mode
- * if (mode == yieldState) {
- * // loop over available GPs
- * nPlastGp = 0;
- * for (i=1 ; i<= iRule->getNumberOfIntegrationPoints() ; i++) {
- *  gp = iRule-> getIntegrationPoint(i) ;
- *  nPlastGp += (mat->giveStatusCharFlag(gp,ms_yield_flag) != 0);
- * }
- * if (nPlastGp == 0) return;
- * // nPlastGp should contain number of yielded gp in element
- * // good way should be select color accordingly
- * ratio = nPlastGp / numberOfGaussPoints;
- * EASValsSetLayer(OOFEG_YIELD_PATTERN_LAYER);
- * for (i=0; i<8; i++) {
- * if (gc.getInternalVarsDefGeoFlag()) {
- * // use deformed geometry
- * p[i].x = (FPNum) this->giveNode(i+1)->giveUpdatedCoordinate(1,tStep,EID_MomentumBalance,defScale);
- * p[i].y = (FPNum) this->giveNode(i+1)->giveUpdatedCoordinate(2,tStep,EID_MomentumBalance,defScale);
- * p[i].z = (FPNum) this->giveNode(i+1)->giveUpdatedCoordinate(3,tStep,EID_MomentumBalance,defScale);
- *
- * } else {
- *   p[i].x = (FPNum) this->giveNode(i+1)->giveCoordinate(1);
- *   p[i].y = (FPNum) this->giveNode(i+1)->giveCoordinate(2);
- *   p[i].z = (FPNum) this->giveNode(i+1)->giveCoordinate(3);
- * }
- * }
- *
- * EASValsSetColor(gc.getYieldPlotColor(ratio));
- * tr =  CreateHexahedron (p);
- * EGWithMaskChangeAttributes(WIDTH_MASK | COLOR_MASK | FILL_MASK | LAYER_MASK, tr);
- * EMAddGraphicsToModel(ESIModel(), tr);
- * }
- * // check for valid stress-strain mode
- * if (!((mode == sxForce) || (mode == syForce) || (mode == szForce) ||
- * (mode == sxyForce) || (mode == syzForce) || (mode == szxForce))) return ;
- *
- * int result = 0;
- *
- * EASValsSetLayer(OOFEG_STRESS_CONTOUR_LAYER);
- * for (i=0; i<8; i++) {
- * if (gc.getInternalVarsDefGeoFlag()) {
- * // use deformed geometry
- * p[i].x = (FPNum) this->giveNode(i+1)->giveUpdatedCoordinate(1,tStep,EID_MomentumBalance,defScale);
- * p[i].y = (FPNum) this->giveNode(i+1)->giveUpdatedCoordinate(2,tStep,EID_MomentumBalance,defScale);
- * p[i].z = (FPNum) this->giveNode(i+1)->giveUpdatedCoordinate(3,tStep,EID_MomentumBalance,defScale);
- *
- * } else {
- * p[i].x = (FPNum) this->giveNode(i+1)->giveCoordinate(1);
- * p[i].y = (FPNum) this->giveNode(i+1)->giveCoordinate(2);
- *    p[i].z = (FPNum) this->giveNode(i+1)->giveCoordinate(3);
- * }
- * result+= this->giveInternalStateAtNode (gc, i+1, &v[i]);
- * }
- *
- * if (result==8) {
- * tr = CreateHexahedronWD (p,v);
- * EGWithMaskChangeAttributes(LAYER_MASK, tr);
- * EMAddGraphicsToModel(ESIModel(), tr);
- * }
- * }
- */
+    if ( !gc.testElementGraphicActivity(this) ) {
+        return;
+    }
+
+    if ( gc.giveIntVarType() == IST_CrackState ) {
+        int crackStatus;
+        FloatArray gpc;
+	double length;
+        FloatArray crackDir;
+
+        iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
+        for ( igp = 0; igp < iRule->getNumberOfIntegrationPoints(); igp++ ) {
+            gp = iRule->getIntegrationPoint(igp);
+            if ( mat->giveIPValue(cf, gp, CrackedFlag, tStep) == 0 ) {
+                return;
+            }
+
+            if ( ( int ) cf.at(1) == 0 ) {
+                return;
+            }
+
+            //
+            // obtain gp global coordinates
+	    this->computeGlobalCoordinates(gpc, * gp->giveCoordinates() );
+            length = 0.3333 * __OOFEM_POW(this->computeVolumeAround(gp), 1. / 3.);
+            if ( mat->giveIPValue(crackDir, gp, CrackDirs, tStep) ) {
+                mat->giveIPValue(crackStatuses, gp, CrackStatuses, tStep);
+
+
+                for ( i = 1; i <= 3; i++ ) {
+                    crackStatus = ( int ) crackStatuses.at(i);
+                    if ( ( crackStatus != pscm_NONE ) && ( crackStatus != pscm_CLOSED ) ) {
+                        // draw a crack
+                        // this element is 3d element
+
+                        if ( i == 1 ) {
+                            j = 2;
+                            k = 3;
+                        } else if ( i == 2 )                            {
+                            j = 3;
+                            k = 1;
+                        } else                                                            {
+                            j = 1;
+                            k = 2;
+                        }
+
+                        q [ 0 ].x = ( FPNum ) gpc.at(1) + 0.5 * crackDir.at(0 + j) * length + 0.5 * crackDir.at(0 + k) * length;
+                        q [ 0 ].y = ( FPNum ) gpc.at(2) + 0.5 * crackDir.at(3 + j) * length + 0.5 * crackDir.at(3 + k) * length;
+                        q [ 0 ].z = ( FPNum ) gpc.at(3) + 0.5 * crackDir.at(6 + j) * length + 0.5 * crackDir.at(6 + k) * length;
+                        q [ 1 ].x = ( FPNum ) gpc.at(1) + 0.5 * crackDir.at(0 + j) * length - 0.5 * crackDir.at(0 + k) * length;
+                        q [ 1 ].y = ( FPNum ) gpc.at(2) + 0.5 * crackDir.at(3 + j) * length - 0.5 * crackDir.at(3 + k) * length;
+                        q [ 1 ].z = ( FPNum ) gpc.at(3) + 0.5 * crackDir.at(6 + j) * length - 0.5 * crackDir.at(6 + k) * length;
+                        q [ 2 ].x = ( FPNum ) gpc.at(1) - 0.5 * crackDir.at(0 + j) * length - 0.5 * crackDir.at(0 + k) * length;
+                        q [ 2 ].y = ( FPNum ) gpc.at(2) - 0.5 * crackDir.at(3 + j) * length - 0.5 * crackDir.at(3 + k) * length;
+                        q [ 2 ].z = ( FPNum ) gpc.at(3) - 0.5 * crackDir.at(6 + j) * length - 0.5 * crackDir.at(6 + k) * length;
+                        q [ 3 ].x = ( FPNum ) gpc.at(1) - 0.5 * crackDir.at(0 + j) * length + 0.5 * crackDir.at(0 + k) * length;
+                        q [ 3 ].y = ( FPNum ) gpc.at(2) - 0.5 * crackDir.at(3 + j) * length + 0.5 * crackDir.at(3 + k) * length;
+                        q [ 3 ].z = ( FPNum ) gpc.at(3) - 0.5 * crackDir.at(6 + j) * length + 0.5 * crackDir.at(6 + k) * length;
+
+                        EASValsSetLayer(OOFEG_CRACK_PATTERN_LAYER);
+                        EASValsSetLineWidth(OOFEG_CRACK_PATTERN_WIDTH);
+                        if ( ( crackStatus == pscm_SOFTENING ) || ( crackStatus == pscm_OPEN ) ) {
+                            EASValsSetColor( gc.getActiveCrackColor() );
+                        } else {
+                            EASValsSetColor( gc.getCrackPatternColor() );
+                        }
+
+                        //      EASValsSetFillStyle (FILL_HOLLOW);
+                        tr = CreateQuad3D(q);
+                        EGWithMaskChangeAttributes(WIDTH_MASK | COLOR_MASK | LAYER_MASK, tr);
+                        EMAddGraphicsToModel(ESIModel(), tr);
+                    }
+                }
+            }
+        } // end loop over gp
+    }
+}
 
 #endif
 
