@@ -1394,17 +1394,24 @@ MDM :: estimatePackSize(CommunicationBuffer &buff, GaussPoint *ip)
 double
 MDM :: predictRelativeComputationalCost(GaussPoint *gp)
 {
-    //
-    // The values returned come from mesurement
-    // do not change them unless you know what are you doing
-    //
-    if ( nsd == 2 ) {
-        return 1.5;
-    } else if ( nsd == 3 )  {
-        return 1.8;
-    }
+  //
+  // The values returned come from mesurement 
+  // do not change them unless you know what are you doing
+  //
+  double cost = 1.5; 
 
-    return 1.0;
+  if (nsd == 2) cost = 1.5;
+  else if (nsd == 3) cost = 1.8;
+
+  if (nonlocal) {
+	MDMStatus *status = (MDMStatus*) this -> giveStatus (gp);
+	int size = status->giveIntegrationDomainList()->size();
+	// just a guess (size/10) found optimal
+	// cost *= (1.0 + (size/10)*0.5);
+	cost *= (1.0 + size/15.0);
+  }
+
+  return cost;
 }
 
 #endif
