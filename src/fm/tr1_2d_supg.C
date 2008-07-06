@@ -2020,6 +2020,8 @@ TR1_2D_SUPG :: LS_PCS_computeVOFFractions(FloatArray &answer, FloatArray &fi)
             if ( fabs(__area) / area > 1.00001 ) {
                 OOFEM_ERROR("TR1_2D_SUPG::LS_PCS_computeVOFFractions: internal consistency error");
             }
+	    // prevent some roundoff errors 
+	    if ( fabs(__area) > area ) __area = sgn(__area)*area;
 
             if ( pos > neg ) {
                 // negative area computed
