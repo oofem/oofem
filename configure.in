@@ -297,6 +297,12 @@ AC_ARG_ENABLE(iml, [  --enable-iml       adds iml module],
 	]
 )
 
+AC_ARG_WITH(IMLDIR, [  --with-IMLDIR=dir  allows to specify IML_DIR] , 
+ [
+     IML_DIR=$withval
+ ]
+)
+
 dnl --------------------------------------------------------------------
 dnl Check for spooles module
 dnl --------------------------------------------------------------------
@@ -307,6 +313,12 @@ AC_ARG_ENABLE(spooles, [  --enable-spooles       adds spooles module support],
 	[
 	spooles_module=no
 	]
+)
+
+AC_ARG_WITH(SPOOLESDIR, [  --with-SPOOLESDIR=dir  allows to specify SPOOLES_DIR] , 
+ [
+     SPOOLES_DIR=$withval
+ ]
 )
 
 dnl --------------------------------------------------------------------
@@ -447,17 +459,17 @@ dnl Search for iml module
 dnl --------------------------------------------------------------------
 if test x$iml_module = xyes; then
 	AC_MSG_CHECKING(IML module location)
-		dir=$PWD/iml
-		if test -f $dir/gmres.h; then
-			AC_MSG_RESULT($dir)
+		dir=$IML_DIR/iml
+		if test -f $IML_DIR/gmres.h; then
+			AC_MSG_RESULT($IML_DIR)
 		else
-			while test ! -f $dir/gmres.h; do
+			while test ! -f $IML_DIR/gmres.h; do
 				echo "IML includes not found in $dir."
 				echo "Type in directory (use absolute path):"
-				read dir
+				read IML_DIR
 			done;
 		fi
-		IML_INCLUDES="-I$dir"
+		IML_INCLUDES="-I$IML_DIR"
 fi
 
 
@@ -484,7 +496,8 @@ dnl Search for spooles module
 dnl --------------------------------------------------------------------
 if test x$spooles_module = xyes; then
 	AC_MSG_CHECKING(SPOOLES module location)
-  dir=$PWD/../spooles
+  dir=$SPOOLES_DIR
+  	dnl $PWD/../spooles
   if test -f $dir/InpMtx.h; then
     AC_MSG_RESULT($dir)
   else
@@ -605,17 +618,22 @@ if test x$parmetis_module = xyes; then
   AC_MSG_CHECKING(ParMETIS module location)
 
 dnl  PARMETIS_DIR=$PWD/../ParMETIS
-  if test -f ${PARMETIS_DIR}/parmetis.h; then
-    AC_MSG_RESULT(${PARMETIS_DIR})
+  if test -f ${PARMETIS_DIR}/include/parmetis.h && test -f ${PARMETIS_DIR}/lib/libparmetis.a ; then
+    PARMETIS_INCLUDES="-I${PARMETIS_DIR}/include"
+    PARMETIS_LIB="${PARMETIS_DIR}/lib/libparmetis.a ${PARMETIS_DIR}/lib/libmetis.a"
   else
-    while test ! -f ${PARMETIS_DIR}/parmetis.h; do
-      echo "Directory ${PARMETIS_DIR} does not seem to be ParMetis dir."
-      echo "Type in directory (use absolute path):"
-      read PARMETIS_DIR
-    done;
-  fi
-  PARMETIS_INCLUDES="-I${PARMETIS_DIR}"
-  PARMETIS_LIB="${PARMETIS_DIR}/libparmetis.a ${PARMETIS_DIR}/libmetis.a "
+    if test -f ${PARMETIS_DIR}/parmetis.h; then
+      AC_MSG_RESULT(${PARMETIS_DIR})
+    else 
+      while test ! -f ${PARMETIS_DIR}/parmetis.h; do
+        echo "Directory ${PARMETIS_DIR} does not seem to be ParMetis dir."
+        echo "Type in directory (use absolute path):"
+        read PARMETIS_DIR
+      done;
+    fi
+    PARMETIS_INCLUDES="-I${PARMETIS_DIR}"
+    PARMETIS_LIB="${PARMETIS_DIR}/libparmetis.a ${PARMETIS_DIR}/libmetis.a "
+fi
 fi
 
 
@@ -765,7 +783,10 @@ AC_CHECK_LIB(elixir, ElixirInit,
 	[
 		dir=$ELIXIR_DIR/src
 		AC_MSG_CHECKING(guess of libelixir.a location)
-		if test -f $dir/libelixir.a; then
+		if test -f $ELIXIR_DIR/lib/libelixir.a; then
+			dir=$ELIXIR_DIR/lib
+			AC_MSG_RESULT($ELIXIR_DIR/lib);
+		elif test -f $dir/libelixir.a; then
 			AC_MSG_RESULT($dir)
 		else
 			while test ! -f $dir/libelixir.a; do
@@ -789,7 +810,10 @@ AC_CHECK_LIB(esi, ESIBuildInterface,
 	[
 		dir=$ELIXIR_DIR/src
 		AC_MSG_CHECKING(guess of libesi.a location)
-		if test -f $dir/libesi.a; then
+		if test -f $ELIXIR_DIR/lib/libesi.a; then
+			dir=$ELIXIR_DIR/lib
+			AC_MSG_RESULT($ELIXIR_DIR/lib);
+		elif test -f $dir/libesi.a; then
 			AC_MSG_RESULT($dir)
 		else
 			while test ! -f $dir/libesi.a; do
@@ -977,6 +1001,8 @@ AC_SUBST(PETSC_ARCH)
 AC_SUBST(PETSC_MAKE_INCLUDE)
 AC_SUBST(PETSC_INCLUDES)
 AC_SUBST(PETSC_BOPT)
+
+AC_SUBST(SPOOLES_DIR)
 
 AC_SUBST(PARMETIS_INCLUDES)
 AC_SUBST(PARMETIS_LIB)
