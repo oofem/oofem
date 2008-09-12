@@ -89,7 +89,7 @@ GaussPoint :: ~GaussPoint()
         }
 
         //  delete [numberOfGp] gaussPointArray ;
-        delete gaussPointArray;
+        delete [] gaussPointArray;
     }
 
     if ( localCoordinates ) {
