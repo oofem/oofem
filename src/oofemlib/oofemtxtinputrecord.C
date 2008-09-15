@@ -48,7 +48,7 @@ OOFEMTXTInputRecord :: OOFEMTXTInputRecord() : InputRecord(), tokenizer() {
 }
 
 OOFEMTXTInputRecord :: OOFEMTXTInputRecord(const OOFEMTXTInputRecord &src) : InputRecord(src), tokenizer() {
-    strncpy(this->record, src.record, OOFEM_MAX_LINE_LENGTH);
+    strncpy(this->record, src.record, OOFEM_MAX_LINE_LENGTH-1);
     this->record [ OOFEM_MAX_LINE_LENGTH - 1 ] = '\0';
     tokenizer.tokenizeLine(this->record);
     int ntok = tokenizer.giveNumberOfTokens();
@@ -59,7 +59,7 @@ OOFEMTXTInputRecord :: OOFEMTXTInputRecord(const OOFEMTXTInputRecord &src) : Inp
 
 OOFEMTXTInputRecord :: OOFEMTXTInputRecord(char *source) : InputRecord(), tokenizer()
 {
-    strncpy(this->record, source, OOFEM_MAX_LINE_LENGTH);
+    strncpy(this->record, source, OOFEM_MAX_LINE_LENGTH-1);
     this->record [ OOFEM_MAX_LINE_LENGTH - 1 ] = '\0';
     tokenizer.tokenizeLine(this->record);
     int ntok = tokenizer.giveNumberOfTokens();
@@ -71,7 +71,7 @@ OOFEMTXTInputRecord :: OOFEMTXTInputRecord(char *source) : InputRecord(), tokeni
 OOFEMTXTInputRecord &
 OOFEMTXTInputRecord :: operator=(const OOFEMTXTInputRecord &src)
 {
-    strncpy(this->record, src.record, OOFEM_MAX_LINE_LENGTH);
+    strncpy(this->record, src.record, OOFEM_MAX_LINE_LENGTH-1);
     this->record [ OOFEM_MAX_LINE_LENGTH - 1 ] = '\0';
     tokenizer.tokenizeLine(this->record);
     int ntok = tokenizer.giveNumberOfTokens();
@@ -83,7 +83,7 @@ OOFEMTXTInputRecord :: operator=(const OOFEMTXTInputRecord &src)
 }
 
 void
-OOFEMTXTInputRecord :: setRecordString(char *newRec)
+OOFEMTXTInputRecord :: setRecordString(const char *newRec)
 {
     strncpy(this->record, newRec, OOFEM_MAX_LINE_LENGTH - 1);
     this->record [ OOFEM_MAX_LINE_LENGTH - 1 ] = '\0';
@@ -98,7 +98,7 @@ IRResultType
 OOFEMTXTInputRecord :: giveRecordKeywordField(char *answer, int &value, int maxchar)
 {
     if ( tokenizer.giveNumberOfTokens() ) {
-        strncpy(answer, tokenizer.giveToken(1), maxchar);
+        strncpy(answer, tokenizer.giveToken(1), maxchar-1);
         answer [ maxchar - 1 ] = '\0';
         setReadFlag(1);
         if ( scanInteger(tokenizer.giveToken(2), value) == 0 ) {
@@ -117,7 +117,7 @@ IRResultType
 OOFEMTXTInputRecord :: giveRecordKeywordField(char *answer, int maxchar)
 {
     if ( tokenizer.giveNumberOfTokens() ) {
-        strncpy(answer, tokenizer.giveToken(1), maxchar);
+        strncpy(answer, tokenizer.giveToken(1), maxchar-1);
         answer [ maxchar - 1 ] = '\0';
         setReadFlag(1);
 
@@ -176,7 +176,7 @@ OOFEMTXTInputRecord :: giveField(char *answer, int maxchar, const InputFieldType
         indx = 1;
     }
 
-    strncpy(answer, tokenizer.giveToken(indx), maxchar);
+    strncpy(answer, tokenizer.giveToken(indx), maxchar-1);
     answer [ maxchar - 1 ] = '\0';
     setReadFlag(indx);
     return IRRT_OK;

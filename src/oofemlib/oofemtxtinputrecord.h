@@ -90,7 +90,7 @@ public:
 
 public:
     /// Sets the record string
-    void setRecordString(char *);
+    void setRecordString(const char *);
     /// Returns record string
     char *giveRecordAsString() { return this->record; }
 
