@@ -42,7 +42,7 @@
 /// Maximum input line length read.
 #define OOFEM_MAX_LINE_LENGTH 32768
 // size of token buffer, which holds tokens
-#define MAX_TOKENS_LENGTH 32768
+#define OOFEM_MAX_TOKENS_LENGTH 32768
 /// Maximum keyword name string length.
 #define MAX_NAME_LENGTH 30
 /// Maximum file name path string length.

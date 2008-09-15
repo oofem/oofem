@@ -65,7 +65,7 @@ Tokenizer :: readStructToken(int &bpos, const char * &line, char * &token)
 
     do {
         c = * line++;
-        if ( bpos < MAX_TOKENS_LENGTH - 1 ) {
+        if ( bpos < OOFEM_MAX_TOKENS_LENGTH - 1 ) {
             * token = c;
             token++;
             bpos++;
@@ -89,17 +89,19 @@ Tokenizer :: readToken(int &bpos, const char * &line, char * &token, char sep)
 {
     char c;
     if ( sep == 0 ) {
-        for ( ; ( c = * line ) != '\0' && !isspace(c); bpos++, line++ ) {
-            if ( bpos < MAX_TOKENS_LENGTH - 1 ) {
+        for ( ; ( c = * line ) != '\0' && !isspace(c); line++ ) {
+            if ( bpos < OOFEM_MAX_TOKENS_LENGTH - 1 ) {
                 * token = c;
                 token++;
+		bpos++;
             }
         }
     } else {
-        for ( ; ( c = * line ) != '\0' && c != '\n' && c != sep; bpos++, line++ ) {
-            if ( bpos < MAX_TOKENS_LENGTH - 1 ) {
+        for ( ; ( c = * line ) != '\0' && c != '\n' && c != sep; line++ ) {
+            if ( bpos < OOFEM_MAX_TOKENS_LENGTH - 1 ) {
                 * token = c;
                 token++;
+		bpos++;
             }
         }
     }
@@ -115,6 +117,7 @@ int Tokenizer :: tokenizeLine(const char *currentLine)
      * 0 - ok
      * 1 - too many tokens
      */
+    bool overflow = false;
     int c = 0;
     const char *ptr = currentLine;
     char *token;
@@ -146,11 +149,19 @@ int Tokenizer :: tokenizeLine(const char *currentLine)
 
         if ( token - tokenPosition [ nTokens ] ) {  // if some chars were valid
             * token = '\0';
-            token++;
-            bpos++;
-            nTokens++;
+	    if ( bpos < OOFEM_MAX_TOKENS_LENGTH-1 ) {
+	      token++; bpos++;
+	      nTokens ++; 
+	    } else {
+	      overflow = true;
+	    }
         }
     }
+
+    if ( overflow ) 
+      OOFEM_WARNING ("Tokenizer :: tokenizeLine: overflow detected, increase token buffer");
+    if ( nTokens >= OOFEM_MAX_TOKENS ) 
+      OOFEM_WARNING ("Tokenizer :: tokenizeLine: overflow detected, increase number of tokens");
 
     if ( * ptr == '\n' || * ptr == '\0' ) {
         return 0;

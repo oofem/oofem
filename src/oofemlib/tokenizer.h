@@ -55,7 +55,7 @@ class Tokenizer
 {
 private:
     /// common token buffer, tokens are terminated by '\0'
-    char tokens [ MAX_TOKENS_LENGTH ];
+    char tokens [ OOFEM_MAX_TOKENS_LENGTH ];
     /// array of pointers to token buffer. The i-th pointer points to the position of i-th token in token buffer.
     char *tokenPosition [ OOFEM_MAX_TOKENS ];
     //FILE* inputStream;
