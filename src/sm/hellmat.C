@@ -12,6 +12,8 @@
 #include <string.h>
 #endif
 
+#ifdef __TM_MODULE
+
 #include "gausspnt.h"
 #include "timestep.h"
 #include "loadtime.h"
@@ -3361,3 +3363,11 @@ HellmichMaterialStatus :: restoreContext(DataStream *stream, ContextMode mode, v
 
     return CIO_OK;
 }
+
+#else // #ifdef __TM_MODULE
+#include "hellmat.h"
+
+HellmichMaterial::HellmichMaterial(int n, Domain *d) : StructuralMaterial (n,d) {
+  _error ("Can't create instance of this class, TM module required");
+}
+#endif

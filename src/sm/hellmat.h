@@ -15,6 +15,9 @@
 #include <string.h>
 #endif
 
+
+#ifdef __TM_MODULE
+
 // oofem includes
  // cltypes.h entry: classType HellmichMaterialStatusClass, HellmichMaterialClass
 #include "flotarry.h"
@@ -791,5 +794,28 @@ public:
 protected:
     MaterialStatus *CreateStatus(GaussPoint *gp) const;
 };
+
+#else // #ifdef __TM_MODULE
+#include "structuralmaterial.h"
+
+class HellmichMaterial : public StructuralMaterial
+{
+ public:
+  /// === initialization ===
+  /// Constructor
+  HellmichMaterial(int n, Domain *d) ;
+  ~HellmichMaterial() {}
+  // return stress according to strain and gp material mode
+  void giveRealStressVector(FloatArray &answer, MatResponseForm f, GaussPoint *gp,
+                            const FloatArray &strain, TimeStep *tstep) {answer.resize(0);}
+  
+  /// Returns "HellmichMaterial" - class  name of the receiver.
+  const char *giveClassName() const { return "HellmichMaterial"; }
+  /// Returns HellmichMaterialClass - classType id of receiver.
+  classType giveClassID()         const { return HellmichMaterialClass; }
+};
+#endif
+
+
 
 #endif // hellmat_h
