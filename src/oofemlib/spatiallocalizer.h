@@ -141,6 +141,12 @@ public:
                                                 const double radius) = 0;
 
 
+    /**
+     * Initialize receiver data structure if not done previously
+     * If force is set to true, the initialization is enforced (useful if domain geometry has changed)
+     */
+    virtual int init(bool force = false) {} 
+
     /** Initializes receiver acording to object description stored in input record.
      * This function is called immediately after creating object using
      * constructor. Input record can be imagined as data record in component database

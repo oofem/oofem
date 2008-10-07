@@ -180,7 +180,7 @@ public:
      * Initialize receiver data structure if not done previously
      * Current implementation calls and returns the buildOctreeDataStructure service response.
      */
-    int init() { if ( !rootCell ) { return this->buildOctreeDataStructure(); } else { return 0; } }
+    int init(bool force = false);
     /**
      * Returns the element, containing given point.
      * @param coords global problem coordinates of point of interest

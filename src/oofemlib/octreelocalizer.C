@@ -1273,3 +1273,14 @@ OctreeSpatialLocalizer :: giveListOfTerminalCellsInBoundingBox(std :: list< oofe
         }
     }
 }
+
+int 
+OctreeSpatialLocalizer::init(bool force) 
+{ 
+  if (force) {
+    if (rootCell) delete rootCell; 
+    rootCell = NULL;
+    elementIPListsInitialized = 0;
+  }
+  if ( !rootCell ) { return this->buildOctreeDataStructure(); } else { return 0; } 
+}
