@@ -63,6 +63,7 @@
 #include "remeshingcrit.h"
 #include "drawmode.h"
 #include "contextioerr.h"
+#include "oofem_terminate.h"
 //
 // for c++ compiler to be succesfull on some c files
 //
@@ -279,6 +280,19 @@ main(int argc, char *argv[])
     // print prg header on stdout
     printf("%s", PRG_HEADER_SM);
 
+#ifdef __PARALLEL_MODE
+    char fileName [ MAX_FILENAME_LENGTH ];
+    int rank = 0;
+#ifdef __USE_MPI
+    MPI_Init(& argc, & argv);
+    MPI_Comm_rank(MPI_COMM_WORLD, & rank);
+#endif
+#endif
+
+#ifdef __PETSC_MODULE
+    PetscInitialize(& argc, & argv, PETSC_NULL, PETSC_NULL);
+#endif
+
     //
     // check for options
     //
@@ -303,6 +317,11 @@ main(int argc, char *argv[])
     if ( !inputFileFlag ) {
         :: giveInputDataFileName(inputFileName, MAX_FILENAME_LENGTH);
     }
+
+#ifdef __PARALLEL_MODE
+    strcpy(fileName, inputFileName);
+    sprintf(inputFileName, "%s.%d", fileName, rank);
+#endif
 
     OOFEMTXTDataReader dr(inputFileName);
 
@@ -368,6 +387,14 @@ main(int argc, char *argv[])
     updateISA(gc);
 
     ESIPopupAndRun();
+
+#ifdef __PETSC_MODULE
+        PetscFinalize();
+#endif
+#ifdef __PARALLEL_MODE
+        MPI_Finalize();
+#endif
+
     return 0;
 }
 
@@ -2618,6 +2645,12 @@ void debug_run(Widget w, XtPointer ptr, XtPointer call_data)
         problem->solveYourself();
     } catch ( OOFEM_Terminate &c ) {
         delete problem;
+#ifdef __PETSC_MODULE
+        PetscFinalize();
+#endif
+#ifdef __PARALLEL_MODE
+        MPI_Finalize();
+#endif
     }
 }
 #endif
