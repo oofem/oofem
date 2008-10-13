@@ -281,6 +281,13 @@ public:
     int givePackSize(CommunicationBuffer &buff);
     //@}
 #endif
+
+#ifdef BOOST_PYTHON
+double __getItem__ (int i) {return this->at(i);}
+void   __setItem__ (int i, double val) {this->at(i)=val;}
+#endif
+
+
 };
 
 

@@ -376,6 +376,14 @@ public:
     FloatArray &operator=(const double &);
 
 #endif
+
+#ifdef BOOST_PYTHON
+double __getItem__ (int i) {return this->at(i);}
+void   __setItem__ (int i, double val) {this->at(i)=val;}
+#endif
+
+
+
 };
 
 
