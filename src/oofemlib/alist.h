@@ -187,14 +187,22 @@ AList< T > :: growTo(int newSize)
     register int i;
     T **newValues, **p1, **p2;
 
+
+    if ( newSize < size ) {
 #ifdef DEBUG
-    if ( newSize <= size ) {
-        OOFEM_WARNING3("AList::growTo : new list size (%d) not larger than current size (%d)", newSize, size);
-    }
-
+      OOFEM_WARNING3("AList::growTo : new list size (%d) not larger than current size (%d)", newSize, size);
 #endif
+      // delete entities in indexes in the range (newSize, size)
+      i = size;
+      if ( size ) {
+	while ( (i--) >= newSize  ) {
+	  delete ( values [ i ] );
+	  values [i] = NULL;
+	}
+      }
 
-    if ( newSize > allocatedSize ) {
+    } else if ( newSize > allocatedSize ) {
+
         this->allocatedSize = newSize + this->sizeIncrement;
         newValues = new T * [ this->allocatedSize ];
         p1        = values;
