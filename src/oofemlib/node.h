@@ -125,9 +125,11 @@ public:
     // coordinates
     bool        hasCoordinates() { return true; }
     /// Returns i-th coordinate of node.
-    double       giveCoordinate(int i);
+    double      giveCoordinate(int i);
     /// Returns pointer to node coordinate array.
     FloatArray *giveCoordinates() { return & coordinates; }
+    /// Sets node coordinates to given array
+    void        setCoordinates (FloatArray& _coords) {this->coordinates = _coords;}
     /**
      * Returns updated ic-th coordinate of receiver. Return value is computed
      * as coordinate + scale * displacement, where corresponding displacement is obtained

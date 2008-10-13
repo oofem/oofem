@@ -734,7 +734,16 @@ void Node :: drawYourself(oofegGraphicContext &gc)
 
         EASValsSetLayer(OOFEG_NODE_ANNOTATION_LAYER);
         EASValsSetMType(FILLED_CIRCLE_MARKER);
+#ifdef __PARALLEL_MODE
+	if (this->giveParallelMode() == DofManager_local)
+	  EASValsSetColor( gc.getNodeColor() );
+	else if (this->giveParallelMode() == DofManager_shared)
+	  EASValsSetColor( gc.getDeformedElementColor());
+	else 
+	  EASValsSetColor( gc.getCrackPatternColor());
+#else
         EASValsSetColor( gc.getNodeColor() );
+#endif
         EASValsSetMSize(8);
         go = CreateMarker3D(p);
         EGWithMaskChangeAttributes(COLOR_MASK | LAYER_MASK | MTYPE_MASK | MSIZE_MASK, go);
@@ -742,14 +751,18 @@ void Node :: drawYourself(oofegGraphicContext &gc)
     }
 
     if ( mode == OGC_nodeAnnotation ) {
-        char num [ 6 ];
+        char num [ 30 ];
         WCRec p [ 1 ]; /* point */
         EASValsSetColor( gc.getNodeColor() );
         EASValsSetLayer(OOFEG_NODE_ANNOTATION_LAYER);
         p [ 0 ].x = ( FPNum ) this->giveCoordinate(1);
         p [ 0 ].y = ( FPNum ) this->giveCoordinate(2);
         p [ 0 ].z = ( FPNum ) this->giveCoordinate(3);
+#ifdef __PARALLEL_MODE
+	sprintf( num, "%d(%d)", this->giveNumber(), this->giveGlobalNumber());
+#else
         sprintf( num, "%d", this->giveNumber() );
+#endif
         go = CreateAnnText3D(p, num);
         EGWithMaskChangeAttributes(COLOR_MASK | LAYER_MASK, go);
         EMAddGraphicsToModel(ESIModel(), go);
