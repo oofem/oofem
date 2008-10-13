@@ -56,6 +56,7 @@ QPlaneStress2d :: QPlaneStress2d(int n, Domain *aDomain) :
     // Constructor.
 {
     numberOfDofMans  = 8;
+    numberOfGaussPoints = 4;
 }
 
 FloatArray *
@@ -225,10 +226,12 @@ void
 QPlaneStress2d :: computeGaussPoints()
 // Sets up the array containing the four Gauss points of the receiver.
 {
+  if (!integrationRulesArray) {
     numberOfIntegrationRules = 1;
     integrationRulesArray = new IntegrationRule * [ 1 ];
     integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3);
     integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Square, numberOfGaussPoints, _PlaneStress);
+  }
 }
 
 double

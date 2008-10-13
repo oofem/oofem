@@ -68,6 +68,7 @@ CCTPlate :: CCTPlate(int n, Domain *aDomain) :
 {
     numberOfDofMans  = 3;
     area = -1;
+    numberOfGaussPoints = 1;
 }
 
 Interface *
@@ -190,10 +191,12 @@ CCTPlate :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int l
 void CCTPlate :: computeGaussPoints()
 // Sets up the array containing the four Gauss points of the receiver.
 {
+  if (!integrationRulesArray) {
     numberOfIntegrationRules = 1;
     integrationRulesArray = new IntegrationRule * [ 1 ];
     integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 5);
     integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Triangle, numberOfGaussPoints, _2dPlate);
+  }
 }
 
 

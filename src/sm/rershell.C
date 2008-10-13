@@ -69,6 +69,8 @@ RerShell :: RerShell(int n, Domain *aDomain) :
     Rx = 1.e+40;
     Ry = 1.e+40;
     Rxy = 1.e+40;
+
+    numberOfGaussPoints = 1;
 }
 
 
@@ -170,10 +172,12 @@ RerShell :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int l
 void RerShell :: computeGaussPoints()
 // Sets up the array containing the four Gauss points of the receiver.
 {
+  if (!integrationRulesArray) {
     numberOfIntegrationRules = 1;
     integrationRulesArray = new IntegrationRule * [ 1 ];
     integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 8);
     integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Triangle, numberOfGaussPoints, _3dShell);
+  }
 }
 
 

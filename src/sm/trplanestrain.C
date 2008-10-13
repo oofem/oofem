@@ -71,6 +71,7 @@ TrPlaneStrain :: TrPlaneStrain(int n, Domain *aDomain) :
 {
     numberOfDofMans  = 3;
     area = -1;
+    numberOfGaussPoints = 1;
 }
 
 
@@ -234,10 +235,12 @@ TrPlaneStrain :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer,
 void TrPlaneStrain :: computeGaussPoints()
 // Sets up the array containing the four Gauss points of the receiver.
 {
+  if (!integrationRulesArray) {
     numberOfIntegrationRules = 1;
     integrationRulesArray = new IntegrationRule * [ 1 ];
     integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3);
     integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Triangle, numberOfGaussPoints, _PlaneStrain);
+  }
 }
 
 

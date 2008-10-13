@@ -67,6 +67,9 @@ L4Axisymm :: L4Axisymm(int n, Domain *aDomain) :
     // Constructor.
 {
     numberOfDofMans  = 4;
+
+    numberOfGaussPoints          = 4;
+    numberOfFiAndShGaussPoints = 1;
 }
 
 L4Axisymm :: ~L4Axisymm()
@@ -198,6 +201,7 @@ void
 L4Axisymm :: computeGaussPoints()
 // Sets up the array containing the four Gauss points of the receiver.
 {
+  if (!integrationRulesArray) {
     numberOfIntegrationRules = 2;
     integrationRulesArray = new IntegrationRule * [ 2 ];
     integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 2);
@@ -205,6 +209,7 @@ L4Axisymm :: computeGaussPoints()
 
     integrationRulesArray [ 1 ] = new GaussIntegrationRule(2, this, 3, 6);
     integrationRulesArray [ 1 ]->setUpIntegrationPoints(_Square, numberOfFiAndShGaussPoints, _3dMat);
+  }
 }
 
 double

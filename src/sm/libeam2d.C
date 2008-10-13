@@ -109,10 +109,12 @@ LIBeam2d :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int l
 void LIBeam2d :: computeGaussPoints()
 // Sets up the array of Gauss Points of the receiver.
 {
+  if (!integrationRulesArray) {
     numberOfIntegrationRules = 1;
     integrationRulesArray = new IntegrationRule * [ 1 ];
     integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 2);
     integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Line, 1, _2dBeam);
+  }
 }
 
 

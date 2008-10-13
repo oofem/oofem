@@ -66,6 +66,7 @@ QTrPlaneStress2d :: QTrPlaneStress2d(int n, Domain *aDomain) :
     // Constructor.
 {
     numberOfDofMans  = 6;
+    numberOfGaussPoints = 4;
 }
 
 Interface *
@@ -258,10 +259,12 @@ QTrPlaneStress2d :: computeLocalCoordinates(FloatArray &answer, const FloatArray
 void QTrPlaneStress2d :: computeGaussPoints()
 // Sets up the array containing the four Gauss points of the receiver.
 {
+  if (!integrationRulesArray) {
     numberOfIntegrationRules = 1;
     integrationRulesArray = new IntegrationRule * [ 1 ];
     integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3);
     integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Triangle, numberOfGaussPoints, _PlaneStress);
+  }
 }
 
 void

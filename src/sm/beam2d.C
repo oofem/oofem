@@ -123,12 +123,15 @@ Beam2d :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int li,
 void Beam2d :: computeGaussPoints()
 // Sets up the array of Gauss Points of the receiver.
 {
+  if (!integrationRulesArray) {
+    
     // the gauss point is used only when methods from crosssection and/or material
     // classes are requested
     numberOfIntegrationRules = 1;
     integrationRulesArray = new IntegrationRule * [ 1 ];
     integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3);
     integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Line, 3, _2dBeam);
+  }
 }
 
 

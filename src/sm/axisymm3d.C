@@ -73,6 +73,9 @@ Axisymm3d :: Axisymm3d(int n, Domain *aDomain) :
 {
     numberOfDofMans = 3;
     area = -1;
+
+    numberOfGaussPoints      = 1;
+    numberOfFiAndShGaussPoints    = 1;
 }
 
 Axisymm3d :: ~Axisymm3d()
@@ -224,12 +227,14 @@ Axisymm3d :: computeVolumeAround(GaussPoint *aGaussPoint)
 void
 Axisymm3d :: computeGaussPoints()
 {
+  if (!integrationRulesArray) {
     numberOfIntegrationRules = 2;
     integrationRulesArray = new IntegrationRule * [ 2 ];
     integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 2);
     integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Triangle, numberOfGaussPoints, _3dMat);
     integrationRulesArray [ 1 ] = new GaussIntegrationRule(2, this, 3, 6);
     integrationRulesArray [ 1 ]->setUpIntegrationPoints(_Triangle, numberOfFiAndShGaussPoints, _3dMat);
+  }
 }
 
 IRResultType

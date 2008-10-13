@@ -67,6 +67,7 @@ Quad1PlaneStrain :: Quad1PlaneStrain(int n, Domain *aDomain) :
 {
     numberOfDofMans  = 4;
     jacobianMatrix = NULL;
+    numberOfGaussPoints = 4;
 }
 
 Quad1PlaneStrain :: ~Quad1PlaneStrain()
@@ -166,10 +167,12 @@ void
 Quad1PlaneStrain :: computeGaussPoints()
 // Sets up the array containing the four Gauss points of the receiver.
 {
+  if (!integrationRulesArray) {
     numberOfIntegrationRules = 1;
     integrationRulesArray = new IntegrationRule * [ 1 ];
     integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3);
     integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Square, numberOfGaussPoints, _PlaneStrain);
+  }
 }
 
 void

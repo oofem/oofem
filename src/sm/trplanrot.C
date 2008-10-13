@@ -69,6 +69,8 @@ TrPlaneStrRot :: TrPlaneStrRot(int n, Domain *aDomain) :
     // Constructor.
 {
     numberOfDofMans        = 3;
+    numberOfGaussPoints = 4;
+    numberOfRotGaussPoints = 1;
 }
 
 TrPlaneStrRot :: ~TrPlaneStrRot()
@@ -416,6 +418,7 @@ void
 TrPlaneStrRot :: computeGaussPoints()
 //  Sets up the array containing the four Gauss points of the receiver.
 {
+  if (!integrationRulesArray) {
     numberOfIntegrationRules = 2;
     integrationRulesArray = new IntegrationRule * [ 2 ];
     integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3);
@@ -423,6 +426,7 @@ TrPlaneStrRot :: computeGaussPoints()
 
     integrationRulesArray [ 1 ] = new GaussIntegrationRule(2, this, 4, 4);
     integrationRulesArray [ 1 ]->setUpIntegrationPoints(_Triangle, numberOfRotGaussPoints, _PlaneStressRot);
+  }
 }
 
 void

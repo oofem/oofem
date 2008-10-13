@@ -98,11 +98,13 @@ void
 InterfaceElem2dQuad :: computeGaussPoints()
 // Sets up the array of Gauss Points of the receiver.
 {
+  if (!integrationRulesArray) {
     numberOfIntegrationRules = 1;
     integrationRulesArray = new IntegrationRule * [ 1 ];
     //integrationRulesArray[0] = new LobattoIntegrationRule (1,domain, 1, 2);
     integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 2);
     integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Line, 4, _2dInterface);
+  }
 }
 
 

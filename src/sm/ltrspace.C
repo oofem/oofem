@@ -75,6 +75,7 @@ LTRSpace :: LTRSpace(int n, Domain *aDomain) :
 {
     // Constructor.
     numberOfDofMans  = 4;
+    numberOfGaussPoints = 1;
 }
 
 
@@ -200,10 +201,12 @@ LTRSpace :: initializeFrom(InputRecord *ir)
 void LTRSpace :: computeGaussPoints()
 // Sets up the array containing the four Gauss points of the receiver.
 {
+  if (!integrationRulesArray) {
     numberOfIntegrationRules = 1;
     integrationRulesArray = new IntegrationRule * [ 1 ];
     integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 6);
     integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Tetrahedra, numberOfGaussPoints, _3dMat);
+  }
 }
 
 
