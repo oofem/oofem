@@ -139,6 +139,7 @@ void
 PY1_3D_SUPG :: computeGaussPoints()
 // Sets up the array containing the integration points of the receiver.
 {
+  if (!integrationRulesArray) {
     numberOfIntegrationRules = 2;
     integrationRulesArray = new IntegrationRule * [ 2 ];
     integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3);
@@ -146,6 +147,7 @@ PY1_3D_SUPG :: computeGaussPoints()
 
     integrationRulesArray [ 1 ] = new GaussIntegrationRule(1, this, 1, 3);
     integrationRulesArray [ 1 ]->setUpIntegrationPoints(_Tetrahedra, 4, _3dFlow);
+  }
 }
 
 

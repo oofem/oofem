@@ -151,10 +151,12 @@ void
 TR1_2D_CBS :: computeGaussPoints()
 // Sets up the array containing the four Gauss points of the receiver.
 {
+  if (!integrationRulesArray) {
     numberOfIntegrationRules = 1;
     integrationRulesArray = new IntegrationRule * [ 1 ];
     integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3);
     integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Triangle, 1, _2dFlow);
+  }
 }
 
 void

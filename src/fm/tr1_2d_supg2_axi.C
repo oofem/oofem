@@ -127,10 +127,12 @@ void
 TR1_2D_SUPG2_AXI :: computeGaussPoints()
 // Sets up the array containing the four Gauss points of the receiver.
 {
+  if (!integrationRulesArray) {
     numberOfIntegrationRules = 2;
     integrationRulesArray = new IntegrationRule * [ 2 ];
     integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3, true);
     integrationRulesArray [ 1 ] = new GaussIntegrationRule(2, this, 1, 3, true);
+  }
 }
 
 
