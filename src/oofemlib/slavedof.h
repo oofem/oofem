@@ -112,13 +112,18 @@ public:
      */
     int hasIcOn(ValueModeType) { return 0; }
 
-    /**
-     * Returns the id of associated boundary condition, if there is any.
-     * Used only for printing purposes. In general, id culd not be used
+    /** Returns the id of associated boundary condition, if there is any.
+     * Used only for printing purposes. In general, id could not be used
      * to decide whether bc is active. Use appropriate services instead.
-     * @param id of associated Boubdaray condition, zero otherwise
+     * @param id of associated Boundary condition, zero otherwise
      */
-    int giveBcIdValue() { return 0; }
+    int giveBcId () {return 0;}
+    /** Returns the id of associated initial condition, if there is any.
+     * Used only for printing purposes. In general, id could not be used
+     * to decide whether bc is active. Use appropriate services instead.
+     * @param id of associated initial condition, zero otherwise
+     */
+    int giveIcId () {return 0;}
 
     /**
      * Stores receiver state to output stream.

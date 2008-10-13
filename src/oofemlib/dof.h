@@ -353,11 +353,18 @@ public:
      */
     virtual int            isPrimaryDof() { return 0; }
     /** Returns the id of associated boundary condition, if there is any.
-     * Used only for printing purposes. In general, id culd not be used
+     * Used only for printing purposes. In general, id could not be used
      * to decide whether bc is active. Use appropriate services instead.
-     * @param id of associated Boubdaray condition, zero otherwise
+     * @param id of associated Boundary condition, zero otherwise
      */
-    virtual int giveBcIdValue() = 0;
+    virtual int giveBcId () = 0;
+    /** Returns the id of associated initial condition, if there is any.
+     * Used only for printing purposes. In general, id could not be used
+     * to decide whether bc is active. Use appropriate services instead.
+     * @param id of associated initial condition, zero otherwise
+     */
+    virtual int giveIcId () = 0;
+
     /**
      * Returns an array of master DofManagers  to which the recever is linked
      */

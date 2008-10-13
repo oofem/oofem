@@ -163,9 +163,14 @@ int SimpleSlaveDof :: hasIcOn(ValueModeType u)
     return this->giveMasterDof()->hasIcOn(u);
 }
 
-int SimpleSlaveDof :: giveBcIdValue()
+int SimpleSlaveDof :: giveBcId()
 {
-    return this->giveMasterDof()->giveBcIdValue();
+    return this->giveMasterDof()->giveBcId();
+}
+
+int SimpleSlaveDof :: giveIcId()
+{
+    return this->giveMasterDof()->giveIcId();
 }
 
 

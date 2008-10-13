@@ -231,7 +231,14 @@ public:
      * to decide whether bc is active. Use appropriate services instead.
      * @param id of associated Boubdaray condition, zero otherwise
      */
-    int giveBcIdValue();
+    int giveBcId();
+    /** Returns the id of associated initial condition, if there is any.
+     * Used only for printing purposes. In general, id could not be used
+     * to decide whether bc is active. Use appropriate services instead.
+     * @param id of associated initial condition, zero otherwise
+     */
+    int giveIcId ();
+
     /// Prints the receiver state on stdin.
     void                printYourself();
     /// Updates receiver after finishing time step.

@@ -324,11 +324,15 @@ int MasterDof :: hasIcOn(ValueModeType u)
     }
 }
 
-int MasterDof :: giveBcIdValue()
+int MasterDof :: giveBcId()
 {
     return this->bc;
 }
 
+int MasterDof :: giveIcId ()
+{
+  return this->ic;
+}
 
 void MasterDof :: updateYourself(TimeStep *tStep)
 // Updates the receiver at end of step.
