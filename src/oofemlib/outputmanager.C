@@ -43,6 +43,9 @@
 OutputManager :: OutputManager(Domain *d) : dofman_out(), dofman_except(), element_out(), element_except()
 {
     domain = d;
+    tstep_all_out_flag = 0;
+    tstep_step_out = 0;
+    dofman_all_out_flag = element_all_out_flag = 0;
 }
 
 IRResultType
