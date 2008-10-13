@@ -187,6 +187,12 @@
 #include "polylinenonlocalbarrier.h"
 #include "symmetrybarrier.h"
 
+// mesher interfaces
+#include "t3dinterface.h"
+#include "targe2interface.h"
+#include "freeminterface.h"
+#include "subdivision.h"
+
 #include "dss.h"
 #endif //__SM_MODULE
 
@@ -843,6 +849,25 @@ MaterialMappingAlgorithm *CreateUsrDefMaterialMappingAlgorithm(MaterialMappingAl
     }
 
     return answer;
+}
+
+MesherInterface *CreateUsrDefMesherInterface(MeshPackageType type, Domain* d)
+{
+  MesherInterface *answer = NULL;
+  if (type == MPT_T3D) {
+    answer = new T3DInterface(d);
+  } else if (type == MPT_TARGE2) {
+    answer = new Targe2Interface(d);
+  } else if (type == MPT_FREEM) {
+    answer = new FreemInterface(d);
+  } else if (type == MPT_SUBDIVISION) {
+    answer = new Subdivision(d);
+  } else {
+    OOFEM_ERROR2("CreateUsrDefMesherInterface: Unknown MI type [%d]", type);
+  }
+
+  return answer;
+  
 }
 
 

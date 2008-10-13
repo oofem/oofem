@@ -52,6 +52,8 @@
 #include "sparsegeneigenvalsystemnm.h"
 #include "materialmappingalgorithm.h"
 #include "materialmappingalgorithmtype.h"
+#include "meshpackagetype.h"
+#include "mesherinterface.h"
 //#include "nonlocalbarrier.h"
 #include "classtype.h"
 #include "sparsemtrxtype.h"
@@ -209,6 +211,12 @@ Dof *CreateUsrDefDofOfType(classType type, int, DofManager *);
  * @return newly allocated object of requested type, null if keyword not suppported
  */
 MaterialMappingAlgorithm *CreateUsrDefMaterialMappingAlgorithm(MaterialMappingAlgorithmType type);
+/**
+ * Creates new instance of mesher interface, corresponding to given MeshPackageType.
+ * @param type id determining the type of new instance
+ * @return newly allocated object of requested type, null if keyword not suppported
+ */
+MesherInterface *CreateUsrDefMesherInterface(MeshPackageType type, Domain* d);
 
 #ifdef __PARALLEL_MODE
 /**
