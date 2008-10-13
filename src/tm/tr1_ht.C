@@ -64,6 +64,7 @@ Tr1_ht :: Tr1_ht(int n, Domain *aDomain, ElementMode em) :
 {
     numberOfDofMans  = 3;
     area = -1.0;
+    numberOfGaussPoints = 1;
 }
 
 Tr1_ht :: ~Tr1_ht()
@@ -163,10 +164,12 @@ void
 Tr1_ht :: computeGaussPoints()
 // Sets up the array containing the four Gauss points of the receiver.
 {
+  if (!integrationRulesArray) {
     numberOfIntegrationRules = 1;
     integrationRulesArray = new IntegrationRule * [ 1 ];
     integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3);
     integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Triangle, numberOfGaussPoints, _2dHeat);
+  }
 }
 
 void

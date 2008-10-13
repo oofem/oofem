@@ -65,6 +65,7 @@ Tetrah1_ht :: Tetrah1_ht(int n, Domain *aDomain, ElementMode em) :
     // Constructor.
 {
     numberOfDofMans  = 4;
+    numberOfGaussPoints = 1;
 }
 
 Tetrah1_ht :: ~Tetrah1_ht()
@@ -128,10 +129,12 @@ Tetrah1_ht :: computeGaussPoints()
         mmode = _3dHeMo;
     }
 
+  if (!integrationRulesArray) {
     numberOfIntegrationRules = 1;
     integrationRulesArray = new IntegrationRule * [ 1 ];
     integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 2);
     integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Tetrahedra, numberOfGaussPoints, mmode);
+  }
 }
 
 void

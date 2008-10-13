@@ -64,6 +64,7 @@ Quad1_ht :: Quad1_ht(int n, Domain *aDomain, ElementMode em) :
     // Constructor.
 {
     numberOfDofMans  = 4;
+    numberOfGaussPoints = 4;
 }
 
 Quad1_ht :: ~Quad1_ht()
@@ -199,10 +200,12 @@ Quad1_ht :: computeGaussPoints()
         mmode = _2dHeMo;
     }
 
+  if (!integrationRulesArray) {
     numberOfIntegrationRules = 1;
     integrationRulesArray = new IntegrationRule * [ 1 ];
     integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3);
     integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Square, numberOfGaussPoints, mmode);
+  }
 }
 
 void

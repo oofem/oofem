@@ -65,6 +65,7 @@ Brick1_ht :: Brick1_ht(int n, Domain *aDomain, ElementMode em) :
     // Constructor.
 {
     numberOfDofMans  = 8;
+    numberOfGaussPoints = 8;
 }
 
 Brick1_ht :: ~Brick1_ht()
@@ -128,10 +129,12 @@ Brick1_ht :: computeGaussPoints()
         mmode = _3dHeMo;
     }
 
+  if (!integrationRulesArray) {
     numberOfIntegrationRules = 1;
     integrationRulesArray = new IntegrationRule * [ 1 ];
     integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 2);
     integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Cube, numberOfGaussPoints, mmode);
+  }
 }
 
 void
