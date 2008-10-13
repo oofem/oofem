@@ -168,11 +168,6 @@ int RigidArmSlaveDof :: hasIcOn(ValueModeType u)
     return 0;
 }
 
-int RigidArmSlaveDof :: giveBcIdValue()
-{
-    return 0;
-}
-
 contextIOResultType RigidArmSlaveDof :: saveContext(FILE *stream, void *obj)
 //
 // saves full node context (saves state variables, that completely describe
