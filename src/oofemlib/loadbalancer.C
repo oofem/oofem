@@ -296,7 +296,7 @@ LoadBalancer :: unpackMigratingData(Domain *d, ProcessCommunicator &pc)
             dofman->restoreContext(& pcDataStream, CM_Definition | CM_State | CM_UnknownDictState);
             // unpack list of new partitions
             pcbuff->unpackIntArray(_partitions);
-            dofman->setPartitionList(_partitions);
+            dofman->setPartitionList(&_partitions);
             dofman->setParallelMode(DofManager_local);
             // add transaction if new entry allocated; otherwise existing one has been modified via returned dofman
             if ( _newentry ) {
@@ -323,7 +323,7 @@ LoadBalancer :: unpackMigratingData(Domain *d, ProcessCommunicator &pc)
             dofman->restoreContext(& pcDataStream, CM_Definition | CM_State | CM_UnknownDictState);
             // unpack list of new partitions
             pcbuff->unpackIntArray(_partitions);
-            dofman->setPartitionList(_partitions);
+            dofman->setPartitionList(&_partitions);
             dofman->setParallelMode(DofManager_shared);
 #ifdef __VERBOSE_PARALLEL
             fprintf(stderr, "[%d] received Shared new dofman [%d]\n", myrank, _globnum);
@@ -399,7 +399,7 @@ LoadBalancer :: deleteRemoteDofManagers(Domain *d)
             dtm->addTransaction(DomainTransactionManager :: DTT_Remove, DomainTransactionManager :: DCT_DofManager, d->giveDofManager(i)->giveGlobalNumber(), NULL);
         } else if ( dmode == LoadBalancer :: DM_Shared ) {
             dman = d->giveDofManager(i);
-            dman->setPartitionList( * ( this->giveDofManPartitions(i) ) );
+            dman->setPartitionList(this->giveDofManPartitions(i));
             dman->setParallelMode(DofManager_shared);
             if ( !dman->givePartitionList()->findFirstIndexOf(myrank) ) {
                 dtm->addTransaction(DomainTransactionManager :: DTT_Remove, DomainTransactionManager :: DCT_DofManager, d->giveDofManager(i)->giveGlobalNumber(), NULL);
@@ -410,7 +410,7 @@ LoadBalancer :: deleteRemoteDofManagers(Domain *d)
         } else if ( dmode == LoadBalancer :: DM_Local ) {
             IntArray _empty(0);
             dman = d->giveDofManager(i);
-            dman->setPartitionList(_empty);
+            dman->setPartitionList(&_empty);
             dman->setParallelMode(DofManager_local);
         } else {
             OOFEM_ERROR("Domain::deleteRemoteDofManagers: unknown dmode encountered");
