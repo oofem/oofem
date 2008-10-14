@@ -179,6 +179,20 @@ Dof *DofManager :: giveDofWithID(int dofID) const
     return dofArray [ indx - 1 ];
 }
 
+void 
+DofManager::setDof (int i, Dof* dof)
+{
+  if (i<=numberOfDofs) {
+    if (dofArray[i-1]) delete dofArray[i-1];
+    dofArray[i-1] = dof;
+  } else {
+    _error("setDof: DOF index out of range");
+  }
+
+}
+
+
+
 IntArray *DofManager :: giveLoadArray()
 // Returns the list containing the number of every nodal loads that act on
 // the receiver. If this list does not exist yet, constructs it. This list
@@ -187,6 +201,11 @@ IntArray *DofManager :: giveLoadArray()
     return & loadArray;
 }
 
+
+void DofManager :: setLoadArray(IntArray& la)
+{
+  this->loadArray = la;
+}
 
 void
 DofManager :: giveLocationArray(const IntArray &dofIDArry, IntArray &locationArray) const
@@ -360,6 +379,26 @@ int DofManager :: giveNumberOfDofs() const
 // Returns the number of degrees of freedom of the receiver.
 {
     return numberOfDofs;
+}
+
+void DofManager::setNumberOfDofs(int _ndofs)
+{
+  int i;
+  if (_ndofs != this->giveNumberOfDofs()) {
+    if (dofArray) {
+      i = numberOfDofs;
+      if ( numberOfDofs ) {
+        while ( i-- ) {
+	  delete dofArray [ i ];
+        }
+	
+        delete[] dofArray;
+      }
+    }
+    dofArray = new Dof * [ this->giveNumberOfDofs() ];
+    for (i=0; i<_ndofs;i++) dofArray[i]=NULL;
+    this->numberOfDofs = _ndofs;
+  }
 }
 
 int

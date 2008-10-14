@@ -171,6 +171,7 @@ public:
     Dof *giveDofWithID(int dofID) const; // termitovo
     /** Returns total number of dofs managed by receiver */
     int          giveNumberOfDofs() const;
+
     /** Returns the number of primary dofs on which receiver dofs (given in dofArray) depend on.
      *  If receiver has only prinary dofs, the answer is the size of dofArray.
      */
@@ -324,7 +325,10 @@ public:
      * @param mode determines response mode.
      */
     virtual void         computeLoadVectorAt(FloatArray &answer, TimeStep *stepN, ValueModeType mode);
+    /// Returns the array containing applied loadings of the receiver
     IntArray *giveLoadArray();
+    /// Sets the array of applied loadings of the receiver
+    void setLoadArray (IntArray& );
     //@}
 
     /**@name Position querry functions */
@@ -388,6 +392,16 @@ public:
      */
     virtual int    checkConsistency();
 
+    /**@name Advanced functions */
+    //@{
+    /** Sets number of dofs of the receiver; Dealocates existing DOFs;
+	Resizes the dofArray accordingly */
+    void setNumberOfDofs (int _ndofs);
+    /** Sets i-th DOF of receiver to given DOF */
+    void setDof (int i, Dof* dof); 
+    //@}
+
+
 #ifdef __OOFEG
     virtual void   drawYourself(oofegGraphicContext &context) { }
 #endif
@@ -421,7 +435,7 @@ public:
      */
     const IntArray *givePartitionList()  { return & partitions; }
     /** Sets receiver's partition list */
-    void setPartitionList(IntArray &_p) { partitions = _p; }
+    void setPartitionList(const IntArray *_p) { partitions = *_p; }
     /// Removes given partition from receiver list
     void removePartitionFromList(int _part) { int _pos = partitions.findFirstIndexOf(_part);
                                               if ( _pos ) { partitions.erase(_pos); } }
