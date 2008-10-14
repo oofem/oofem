@@ -42,6 +42,7 @@
 
 #ifdef __PARALLEL_MODE
 
+#include "problemcommunicatormode.h"
 #include "communicator.h"
 #include "error.h"
 
@@ -53,19 +54,6 @@
  */
 class ProblemCommunicator : public Communicator
 {
-public:
-    /**
-     * ProblemCommunicatorMode determines the valid mode.
-     * The mode is used to set up communication pattern, which differ for
-     * node and element cut algorithms.
-     * Additional remote element mode hass been added to capture the case, when CommunicatorM is intended to
-     * support remote element data exchange (for example when nonlocal material models are present).
-     */
-    enum ProblemCommunicatorMode {
-        PC__UNKNOWN_MODE, PC__NODE_CUT,
-        PC__ELEMENT_CUT, PC__REMOTE_ELEMENT_MODE
-    };
-
 protected:
     // setup mode
     ProblemCommunicatorMode mode;

@@ -44,6 +44,7 @@
 #include <stdio.h>
 #endif
 #include "linearstatic.h"
+#include "meshpackagetype.h"
 
 class AdaptiveLinearStatic : public LinearStatic
 {
@@ -56,9 +57,6 @@ class AdaptiveLinearStatic : public LinearStatic
      */
 
 protected:
-
-    /// Type determining used mesh package
-    enum MeshPackageType { MPT_T3D, MPT_TARGE2, MPT_FREEM };
 
     ErrorEstimator *ee;
     MeshPackageType meshPackage;

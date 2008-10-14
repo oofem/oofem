@@ -93,7 +93,7 @@ NonLinearStatic :: NonLinearStatic(int i, EngngModel *_master) : LinearStatic(i,
     nMethod = NULL;
 
 #ifdef __PARALLEL_MODE
-    commMode = ProblemCommunicator :: PC__NODE_CUT;
+    commMode = ProblemCommMode__NODE_CUT;
     nonlocalExt = 0;
     communicator = nonlocCommunicator = NULL;
     commBuff = NULL;
@@ -248,8 +248,8 @@ NonLinearStatic :: initializeFrom(InputRecord *ir)
     //sparseMtrxType = (SparseMtrxType) readInteger (initString, "smtype");
 
 #ifdef __PARALLEL_MODE
-    //if (ir->hasField ("nodecutmode")) commMode = ProblemCommunicator::PC__NODE_CUT;
-    //else if (ir->hasField ("elementcutmode")) commMode = ProblemCommunicator::PC__ELEMENT_CUT;
+    //if (ir->hasField ("nodecutmode")) commMode = ProblemCommunicator::ProblemCommMode__NODE_CUT;
+    //else if (ir->hasField ("elementcutmode")) commMode = ProblemCommunicator::ProblemCommMode__ELEMENT_CUT;
     //else _error ("instanciateFrom: ProblemCommunicator comm mode not specified");
     if ( isParallel() ) {
         //commBuff = new CommunicatorBuff (this->giveNumberOfProcesses(), CBT_dynamic);
@@ -262,7 +262,7 @@ NonLinearStatic :: initializeFrom(InputRecord *ir)
             nonlocalExt = 1;
             nonlocCommunicator = new ProblemCommunicator(this, commBuff, this->giveRank(),
                                                          this->giveNumberOfProcesses(),
-                                                         ProblemCommunicator :: PC__REMOTE_ELEMENT_MODE);
+                                                         ProblemCommMode__REMOTE_ELEMENT_MODE);
         }
     }
 
@@ -1234,13 +1234,13 @@ NonLinearStatic :: estimateMaxPackSize(IntArray &commMap, CommunicationBuffer &b
     DofManager *dman;
     Dof *jdof;
 
-    if ( packUnpackType == ProblemCommunicator :: PC__ELEMENT_CUT ) {
+    if ( packUnpackType == ProblemCommMode__ELEMENT_CUT ) {
         for ( i = 1; i <= mapSize; i++ ) {
             count += domain->giveDofManager( commMap.at(i) )->giveNumberOfDofs();
         }
 
         return ( buff.givePackSize(MPI_DOUBLE, 1) * count );
-    } else if ( packUnpackType == ProblemCommunicator :: PC__NODE_CUT ) {
+    } else if ( packUnpackType == ProblemCommMode__NODE_CUT ) {
         for ( i = 1; i <= mapSize; i++ ) {
             ndofs = ( dman = domain->giveDofManager( commMap.at(i) ) )->giveNumberOfDofs();
             for ( j = 1; j <= ndofs; j++ ) {
@@ -1255,7 +1255,7 @@ NonLinearStatic :: estimateMaxPackSize(IntArray &commMap, CommunicationBuffer &b
 
         //printf ("\nestimated count is %d\n",count);
         return ( buff.givePackSize(MPI_DOUBLE, 1) * max(count, pcount) );
-    } else  if ( packUnpackType == ProblemCommunicator :: PC__REMOTE_ELEMENT_MODE ) {
+    } else  if ( packUnpackType == ProblemCommMode__REMOTE_ELEMENT_MODE ) {
         for ( i = 1; i <= mapSize; i++ ) {
             count += domain->giveElement( commMap.at(i) )->estimatePackSize(buff);
         }
@@ -1411,6 +1411,9 @@ NonLinearStatic :: unpackMigratingData(TimeStep *atTime)
 
     this->initializeCommMaps(true);
     nMethod->reinitialize();
+    // reinitialize error estimator (if any)
+    if (this->giveDomainErrorEstimator(1)) this->giveDomainErrorEstimator(1)->reinitialize(); 
+
     initFlag = true;
 }
 #endif

@@ -56,12 +56,12 @@ class FreemInterface : public MesherInterface
 {
 public:
     /// Constructor
-    FreemInterface() : MesherInterface() { }
+    FreemInterface(Domain* d) : MesherInterface(d) { }
     /// Destructor
     virtual ~FreemInterface() { }
 
     /// Runs the mesh generation, mesh will be written to corresponding domain din file
-    virtual int createMesh(Domain *d, TimeStep *tStep, int domainNumber, int domainSerNum);
+    virtual returnCode createMesh(TimeStep *tStep, int domainNumber, int domainSerNum, Domain** dNew);
 
 
 protected:

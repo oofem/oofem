@@ -142,6 +142,8 @@ public:
      * regionSkipMap variable by derivad classes, since the size check is done here.
      */
     int skipRegion(int reg) { if ( reg <= regionSkipMap.giveSize() ) { return regionSkipMap.at(reg); } else { return 0; } }
+    virtual void reinitialize() {}
+
 protected:
 };
 

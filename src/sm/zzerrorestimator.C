@@ -123,6 +123,15 @@ ZZErrorEstimator :: estimateError(EE_ErrorMode mode, TimeStep *tStep)
         this->globalSNorm += sNorm * sNorm;
     }
 
+#ifdef __PARALLEL_MODE
+    // compute global ENorm and SNorm by summing up comtributions on all partitions
+    double lnorms[2] = {this->globalENorm, this->globalSNorm};
+    double gnorms[2] = {0.0, 0.0};
+    MPI_Allreduce (lnorms, gnorms, 2, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
+    this->globalENorm = gnorms[0];
+    this->globalSNorm = gnorms[1];
+#endif
+
     // recover the stored smoother
     this->domain->setSmoother(oldSmoother); //delete old one (the rm)
 

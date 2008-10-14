@@ -46,10 +46,12 @@
 #endif
 
 
-int
-FreemInterface :: createMesh(Domain *d, TimeStep *stepN, int domainNumber, int domainSerNum)
+MesherInterface::returnCode
+FreemInterface :: createMesh(TimeStep *stepN, int domainNumber, int domainSerNum, Domain** dNew)
 {
-    return this->createInput(d, stepN);
+  *dNew = NULL;
+  if (this->createInput(this->domain, stepN)) return MI_NEEDS_EXTERNAL_ACTION;
+  else return MI_FAILED;
 }
 
 int

@@ -42,6 +42,8 @@
 #include "engngm.h"
 #include "commbufftype.h"
 #include "communicatormode.h"
+#include "flotmtrx.h"
+
 
 #ifndef __MAKEDEPEND
 #include "mpi.h"

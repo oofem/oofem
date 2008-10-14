@@ -620,7 +620,7 @@ RefinedElement :: giveCompatibleBcDofArray(Node *master_node, Node *slave_node, 
 #endif
 
             dofId = nodeDof->giveDofID();
-            bcId = nodeDof->giveBcIdValue();
+            bcId = nodeDof->giveBcId();
             bcValue = nodeDof->giveBcValue(mode, tStep);
 
             for ( j = 1; j <= master_node->giveNumberOfDofs(); j++ ) {
@@ -633,7 +633,7 @@ RefinedElement :: giveCompatibleBcDofArray(Node *master_node, Node *slave_node, 
                     continue;
                 }
 
-                if ( dof->giveBcIdValue() == bcId ) {
+                if ( dof->giveBcId() == bcId ) {
                     answer->at(++compDofs) = dofArray.at(i);
                     break;
                 }

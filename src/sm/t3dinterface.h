@@ -57,12 +57,12 @@ class T3DInterface : public MesherInterface
 {
 public:
     /// Constructor
-    T3DInterface() : MesherInterface() { }
+    T3DInterface(Domain* d) : MesherInterface(d) { }
     /// Destructor
     virtual ~T3DInterface() { }
 
     /// Runs the mesh generation, mesh will be written to corresponding domain din file
-    virtual int createMesh(Domain *d, TimeStep *tStep, int domainNumber, int domainSerNum);
+    virtual returnCode createMesh(TimeStep *tStep, int domainNumber, int domainSerNum, Domain** dNew);
 
 
 protected:

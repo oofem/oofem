@@ -46,9 +46,7 @@
 #include "nlinearstatic.h"
 #include "sparsemtrx.h"
 #include "errorestimator.h"
-
-/// Type determining used mesh package
-enum MeshPackageType { MPT_T3D, MPT_TARGE2, MPT_FREEM };
+#include "meshpackagetype.h"
 
 class AdaptiveNonLinearStatic : public NonLinearStatic
 {
@@ -121,7 +119,12 @@ public:
      * optionally restoring new global equilibrium.
      */
     virtual int                initializeAdaptiveFrom(EngngModel *sourceProblem);
-
+    /**
+     * Remaps the solution state to newly given domain. This includes mapping of source solution, 
+     * internal variable mapping procedures and optionally restoring new global equilibrium.
+     * Given domain becomes new domain of receiver.
+     */
+    int                        adaptiveRemap (Domain *dNew);
 
 
     /**

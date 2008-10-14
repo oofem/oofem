@@ -42,11 +42,6 @@
 #ifndef engngm_h
 #define engngm_h
 
-#ifdef __PARALLEL_MODE
-#include "parallel.h"
-#include "loadbalancer.h"
-#endif
-
 #include "alist.h"
 
 #include "inputrecord.h"
@@ -77,6 +72,12 @@
 #ifndef __MAKEDEPEND
 #include <stdio.h>
 
+#ifdef __PARALLEL_MODE
+#include "parallel.h"
+#include "problemcommunicatormode.h"
+#include "loadbalancer.h"
+#endif
+
 #ifdef __PETSC_MODULE
 #include "petsccontext.h"
 #include "petscordering.h"
@@ -94,6 +95,7 @@ class TimeStep;
 class ErrorEstimator;
 class MetaStep;
 class MaterialInterface;
+
 
 /**
  * Class EngngModelContext represents a context, which is shared by all problem engng sub-models.
@@ -303,6 +305,9 @@ protected:
     int numProcs;
     /// processor name
     char processor_name [ PROCESSOR_NAME_LENGTH ];
+    /// Communicator mode. Determines current strategy used.
+    ProblemCommunicatorMode commMode;
+    
 
     /**@name Load balancing attributes */
     //@{
@@ -359,7 +364,7 @@ public:
      *  @param path and base file name will be copied into the array pointed to by  dest
      *  @param not more than n bytes of src  are copied
      */
-    char *giveOutputBaseFileName(char *dest, size_t n) { return strncpy(dest, dataOutputFileName, n); }
+    char *giveOutputBaseFileName(char *dest, size_t n) { return strncpy(dest, dataOutputFileName, n-1); }
 
     //FILE*              giveInputStream () ;
 
@@ -981,6 +986,8 @@ public:
     void               initParallel();
     /// Returns reference to itself -> required by comunicator.h
     EngngModel *giveEngngModel() { return this; }
+    // returns Communicator mode. Determines current domain-decomposition strategy used.
+    ProblemCommunicatorMode giveProblemCommMode() {return this->commMode;}
 #endif
 
 #ifdef __OOFEG

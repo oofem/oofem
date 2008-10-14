@@ -48,6 +48,7 @@
 #include "matresponsemode.h"
 #include "valuemodetype.h"
 #include "materialmappingalgorithmtype.h"
+#include "meshpackagetype.h"
 #include "domaintype.h"
 #include "doftype.h"
 #include "dofiditem.h"
@@ -242,6 +243,9 @@ const char *__MaterialMappingAlgorithmTypeToString(MaterialMappingAlgorithmType 
     TO_STRING_BODY(MaterialMappingAlgorithmType_DEF)
 }
 
+const char *__MeshPackageTypeToString(MeshPackageType _value) {
+  TO_STRING_BODY(MeshPackageType_DEF)
+}
 
 #undef ENUM_ITEM
 #undef ENUM_ITEM_WITH_VALUE

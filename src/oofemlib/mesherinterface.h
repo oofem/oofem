@@ -53,20 +53,23 @@ class TimeStep;
  */
 class MesherInterface
 {
-public:
-    /// Constructor
-    MesherInterface() { }
-    /// Destructor
-    virtual ~MesherInterface() { }
-
+ protected:
+  Domain *domain;
+ public:
+  enum returnCode {MI_OK, MI_NEEDS_EXTERNAL_ACTION, MI_FAILED};
+  /// Constructor
+  MesherInterface(Domain* d) {domain=d;}
+  /// Destructor
+  virtual ~MesherInterface() { }
+    
     /**
      * Runs the mesh generation, mesh will be written to corresponding domain din file
-     * @param d the "old" domain containing the mesh density informations
-     * @param time step
+       * @param time step
      * @param domainNumber new domain number
      * @param domainSerNum new domain serial number
+     * @param newly allocated domain, representing new mesh or set to NULL if external generation has to be performed.
      */
-    virtual int createMesh(Domain *d, TimeStep *, int domainNumber, int domainSerNum) = 0;
+    virtual returnCode createMesh(TimeStep *, int domainNumber, int domainSerNum, Domain** dNew) = 0;
 };
 
 #endif // mesherinterface_h

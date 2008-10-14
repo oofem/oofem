@@ -72,7 +72,7 @@ LinearStatic :: LinearStatic(int i, EngngModel *_master) : StructuralEngngModel(
     initFlag = 1;
 
 #ifdef __PARALLEL_MODE
-    commMode = ProblemCommunicator :: PC__NODE_CUT;
+    commMode = ProblemCommMode__NODE_CUT;
     nonlocalExt = 0;
     communicator = nonlocCommunicator = NULL;
     commBuff = NULL;
@@ -492,13 +492,13 @@ LinearStatic :: estimateMaxPackSize(IntArray &commMap, CommunicationBuffer &buff
     DofManager *dman;
     Dof *jdof;
 
-    if ( packUnpackType == ProblemCommunicator :: PC__ELEMENT_CUT ) {
+    if ( packUnpackType == ProblemCommMode__ELEMENT_CUT ) {
         for ( i = 1; i <= mapSize; i++ ) {
             count += domain->giveDofManager( commMap.at(i) )->giveNumberOfDofs();
         }
 
         return ( buff.givePackSize(MPI_DOUBLE, 1) * count );
-    } else if ( packUnpackType == ProblemCommunicator :: PC__NODE_CUT ) {
+    } else if ( packUnpackType == ProblemCommMode__NODE_CUT ) {
         for ( i = 1; i <= mapSize; i++ ) {
             ndofs = ( dman = domain->giveDofManager( commMap.at(i) ) )->giveNumberOfDofs();
             for ( j = 1; j <= ndofs; j++ ) {
@@ -516,7 +516,7 @@ LinearStatic :: estimateMaxPackSize(IntArray &commMap, CommunicationBuffer &buff
         // --------------------------------------------------------------------------------
 
         return ( buff.givePackSize(MPI_DOUBLE, 1) * pcount );
-    } else  if ( packUnpackType == ProblemCommunicator :: PC__REMOTE_ELEMENT_MODE ) {
+    } else  if ( packUnpackType == ProblemCommMode__REMOTE_ELEMENT_MODE ) {
         for ( i = 1; i <= mapSize; i++ ) {
             count += domain->giveElement( commMap.at(i) )->estimatePackSize(buff);
         }

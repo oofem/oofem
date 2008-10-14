@@ -67,20 +67,25 @@ AdaptiveLinearStatic :: solveYourselfAt(TimeStep *tStep)
         return;
     } else {
         // do remeshing
-        MesherInterface *mesher;
-        if ( this->meshPackage == MPT_TARGE2 ) {
-            mesher = new Targe2Interface();
-        } else if ( this->meshPackage == MPT_FREEM )  {
-            mesher = new FreemInterface();
-        } else                                                                              {
-            mesher = new T3DInterface();
-        }
+      MesherInterface *mesher = ::CreateUsrDefMesherInterface(meshPackage, this->giveDomain(1));
+      Domain *newDomain;
 
-        mesher->createMesh(this->giveDomain(1), this->giveCurrentStep(), 1, this->giveDomain(1)->giveSerialNumber() + 1);
-        // terminate step
-        this->terminate( this->giveCurrentStep() );
-        this->terminateAnalysis();
-        exit(1);
+      MesherInterface::returnCode result = 
+	mesher->createMesh(this->giveCurrentStep(), 1, 
+			   this->giveDomain(1)->giveSerialNumber() + 1, &newDomain);
+
+ 	if (result == MesherInterface::MI_OK) {
+	  
+	} else if (result == MesherInterface::MI_NEEDS_EXTERNAL_ACTION) {
+	  
+	  // terminate step
+	  this->terminate( this->giveCurrentStep() );
+	  this->terminateAnalysis();
+	  exit(1);
+	  
+	} else {
+	  _error ("solveYourselfAt: MesherInterface::createMesh failed");
+	}
     }
 }
 

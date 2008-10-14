@@ -1,3 +1,4 @@
+
 /* $Header: /home/cvs/bp/oofem/sm/src/adaptnlinearstatic.C,v 1.15.4.2 2004/04/09 12:01:10 bp Exp $ */
 /*
  *
@@ -112,13 +113,7 @@ AdaptiveNonLinearStatic :: initializeFrom(InputRecord *ir)
     ee->initializeFrom(ir);
     int meshPackageId = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, meshPackageId, IFT_AdaptiveNonLinearStatic_meshpackage, "meshpackage"); // Macro
-    if ( meshPackageId == 1 ) {
-        meshPackage = MPT_TARGE2;
-    } else if ( meshPackageId == 2 ) {
-        meshPackage = MPT_FREEM;
-    } else {
-        meshPackage = MPT_T3D;
-    }
+    meshPackage = (MeshPackageType) meshPackageId;
 
     equilibrateMappedConfigurationFlag =  0;
     IR_GIVE_OPTIONAL_FIELD(ir, equilibrateMappedConfigurationFlag, IFT_AdaptiveNonLinearStatic_equilmc, "equilmc"); // Macro
@@ -130,20 +125,13 @@ void
 AdaptiveNonLinearStatic :: solveYourselfAt(TimeStep *tStep) {
     proceedStep(1, tStep);
     this->updateYourself(tStep);
-
+#ifdef __OOFEG
+    ESIEventLoop (YES, "AdaptiveNonLinearStatic: Solution finished; Press Ctrl-p to continue");
+#endif
     // evaluate error of the reached solution
     this->ee->estimateError( temporaryEM, this->giveCurrentStep() );
     this->ee->giveRemeshingCrit()->estimateMeshDensities( this->giveCurrentStep() );
     RemeshingStrategy strategy = this->ee->giveRemeshingCrit()->giveRemeshingStrategy( this->giveCurrentStep() );
-
-#ifdef __PARALLEL_MODE
-#ifdef __USE_MPI
-    int myRemeshing = strategy, remeshing;
-
-    MPI_Allreduce(& myRemeshing, & remeshing, 1, MPI_INT, MPI_MAX, MPI_COMM_WORLD);
-    strategy = ( RemeshingStrategy ) remeshing;
-#endif
-#endif
 
     // if ((strategy == RemeshingFromCurrentState_RS) && (this->giveDomain(1)->giveSerialNumber() == 0))
     //  strategy = RemeshingFromPreviousState_RS;
@@ -161,23 +149,25 @@ AdaptiveNonLinearStatic :: solveYourselfAt(TimeStep *tStep) {
 
 
         // do remeshing
-        MesherInterface *mesher;
-        if ( this->meshPackage == MPT_TARGE2 ) {
-            mesher = new Targe2Interface();
-        } else if ( this->meshPackage == MPT_FREEM )  {
-            mesher = new FreemInterface();
-        } else                                                                              {
-            mesher = new T3DInterface();
-        }
+        MesherInterface *mesher = ::CreateUsrDefMesherInterface(meshPackage, this->giveDomain(1));
 
-        mesher->createMesh(this->giveDomain(1), this->giveCurrentStep(), 1, this->giveDomain(1)->giveSerialNumber() + 1);
+	Domain *newDomain;
+	MesherInterface::returnCode result = mesher->createMesh(this->giveCurrentStep(), 1, 
+								this->giveDomain(1)->giveSerialNumber() + 1, &newDomain);
 
-        this->terminate( this->giveCurrentStep() );
-        this->terminateAnalysis();
-        delete mesher;
+	if (result == MesherInterface::MI_OK) {
+	  this->initFlag = 1;
+	  this->adaptiveRemap(newDomain);
+	} else if (result == MesherInterface::MI_NEEDS_EXTERNAL_ACTION) {
 
-        throw OOFEM_Terminate();
-        //exit (1);
+	  this->terminate( this->giveCurrentStep() );
+	  this->terminateAnalysis();
+	  delete mesher;
+	  throw OOFEM_Terminate();
+
+	} else {
+	  _error ("solveYourselfAt: MesherInterface::createMesh failed");
+	}
     }
 }
 
@@ -444,17 +434,18 @@ AdaptiveNonLinearStatic :: initializeAdaptiveFrom(EngngModel *sourceProblem)
 int
 AdaptiveNonLinearStatic :: initializeAdaptive(int stepNumber)
 {
-    int ielem, nelem, result = 1;
 
+  int stepinfo [2];
+
+  stepinfo [ 0 ] = stepNumber;
+  stepinfo [ 1 ] = 0;
+  
     try {
-        this->restoreContext(NULL, CM_State, ( void * ) & stepNumber);
+        this->restoreContext(NULL, CM_State, ( void * ) stepinfo);
     } catch ( ContextIOERR &c ) {
         c.print();
         exit(1);
     }
-
-    //printf ("time %e, prev time %e\n",this->giveCurrentStep()->giveTime(), this->givePreviousStep()->giveTime());
-
 
     this->initStepIncrements();
 
@@ -467,6 +458,18 @@ AdaptiveNonLinearStatic :: initializeAdaptive(int stepNumber)
     }
 
     delete domainDr;
+
+    // remap solution to new domain
+    return this->adaptiveRemap (dNew);
+}
+
+
+int
+AdaptiveNonLinearStatic :: adaptiveRemap(Domain* dNew)
+{
+    int ielem, nelem, result = 1;
+
+    this->initStepIncrements();
 
     this->ndomains = 2;
     this->domainNeqs.resize(2);
@@ -555,15 +558,6 @@ AdaptiveNonLinearStatic :: initializeAdaptive(int stepNumber)
     this->ee->setDomain(dNew);
 
 
-#ifdef __PARALLEL_MODE
-    if ( isParallel() ) {
-        // set up communication patterns
-        this->initializeCommMaps();
-        exchangeRemoteElementData();
-    }
-
-#endif
-
     //mc2 = this->getClock();
     :: getRelativeUtime(mc2, st1);
     :: getUtime(st2);
@@ -593,6 +587,16 @@ AdaptiveNonLinearStatic :: initializeAdaptive(int stepNumber)
 
         result &= this->giveDomain(1)->giveElement(ielem)->adaptiveFinish( this->giveCurrentStep() );
     }
+
+#ifdef __PARALLEL_MODE
+    if ( isParallel() ) {
+        // set up communication patterns
+        this->initializeCommMaps(true);
+        exchangeRemoteElementData();
+    }
+#endif
+    nMethod->reinitialize();
+
 
     // increment time step if mapped state will be considered as new solution stepL
     // this->giveNextStep();
@@ -676,6 +680,9 @@ AdaptiveNonLinearStatic :: initializeAdaptive(int stepNumber)
      #endif
      *************/
 
+#ifdef __OOFEG
+    ESIEventLoop (YES, "AdaptiveRemap: Press Ctrl-p to continue");
+#endif
 
     //
     // bring mapped configuration into equilibrium
@@ -688,22 +695,24 @@ AdaptiveNonLinearStatic :: initializeAdaptive(int stepNumber)
 
 
         if ( initFlag ) {
-            stiffnessMatrix = :: CreateUsrDefSparseMtrx(sparseMtrxType);
-            if ( stiffnessMatrix == NULL ) {
-                _error("proceedStep: sparse matrix creation failed");
-            }
+	  if (!stiffnessMatrix) {
+	    stiffnessMatrix = :: CreateUsrDefSparseMtrx(sparseMtrxType);
+	    if ( stiffnessMatrix == NULL ) {
+	      _error("proceedStep: sparse matrix creation failed");
+	    }
+	  }
 
-            if ( nonlocalStiffnessFlag ) {
-                //stiffnessMatrix = new SkylineUnsym ();
-                if ( !stiffnessMatrix->isAntisymmetric() ) {
-                    _error("proceedStep: stiffnessMatrix does not support antisymmetric storage");
-                }
-            }
+	  if ( nonlocalStiffnessFlag ) {
+	    //stiffnessMatrix = new SkylineUnsym ();
+	    if ( !stiffnessMatrix->isAntisymmetric() ) {
+	      _error("proceedStep: stiffnessMatrix does not support antisymmetric storage");
+	    }
+	  }
 
-            stiffnessMatrix->buildInternalStructure(this, 1, EID_MomentumBalance);
-            stiffnessMatrix->zero(); // zero stiffness matrix
-            this->assemble( stiffnessMatrix, this->giveCurrentStep(), EID_MomentumBalance, SecantStiffnessMatrix, this->giveDomain(1) );
-            initFlag = 0;
+	  stiffnessMatrix->buildInternalStructure(this, 1, EID_MomentumBalance);
+	  stiffnessMatrix->zero(); // zero stiffness matrix
+	  this->assemble( stiffnessMatrix, this->giveCurrentStep(), EID_MomentumBalance, SecantStiffnessMatrix, this->giveDomain(1) );
+	  initFlag = 0;
         }
 
         // updateYourself() not necessary - the adaptiveUpdate previously called does the job
@@ -758,6 +767,7 @@ AdaptiveNonLinearStatic :: initializeAdaptive(int stepNumber)
 
     return result;
 }
+
 
 contextIOResultType
 AdaptiveNonLinearStatic :: saveContext(DataStream *stream, ContextMode mode, void *obj) {

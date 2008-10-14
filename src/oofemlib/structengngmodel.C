@@ -108,7 +108,7 @@ StructuralEngngModel :: printReactionForces(TimeStep *tStep, int di)
 
 #ifdef __PARALLEL_MODE
 
-    if ( commMode == ProblemCommunicator :: PC__NODE_CUT ) {
+    if ( commMode == ProblemCommMode__NODE_CUT ) {
 #ifdef __VERBOSE_PARALLEL
         VERBOSEPARALLEL_PRINT( "StructuralEngngModel :: printReactionForces", "Packing reactions", this->giveRank() );
 #endif
@@ -136,7 +136,7 @@ StructuralEngngModel :: printReactionForces(TimeStep *tStep, int di)
     for ( i = 1; i <= numRestrDofs; i++ ) {
         if ( domain->giveOutputManager()->testDofManOutput(dofManMap.at(i), tStep) ) {
             //fprintf(outputStream,"\tNode %8d iDof %2d reaction % .4e\n",dofManMap.at(i), dofMap.at(i),reactions.at(eqnMap.at(i)));
-            fprintf( outputStream, "\tNode %8d iDof %2d reaction % .4e    [bc-id: %d]\n", dofManMap.at(i), dofMap.at(i), reactions.at( eqnMap.at(i) ), domain->giveDofManager( dofManMap.at(i) )->giveDof( dofMap.at(i) )->giveBcIdValue() );
+            fprintf( outputStream, "\tNode %8d iDof %2d reaction % .4e    [bc-id: %d]\n", dofManMap.at(i), dofMap.at(i), reactions.at( eqnMap.at(i) ), domain->giveDofManager( dofManMap.at(i) )->giveDof( dofMap.at(i) )->giveBcId() );
         }
     }
 
@@ -775,7 +775,7 @@ StructuralEngngModel :: unpackLoad(FloatArray *dest, ProcessCommunicator &proces
                 } else if ( dofmanmode == DofManager_remote ) {
                     dest->at(eqNum)  = value;
                 } else {
-                    _error("unpackLoad: unknown dof namager parallel mode");
+		  _error3("unpackLoad: DofMamager %d[%d]: unknown parallel mode", dman->giveNumber(), dman->giveGlobalNumber());
                 }
             }
         }

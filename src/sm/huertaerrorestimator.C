@@ -1267,7 +1267,7 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem1D(Element *element, 
                                     bcDofId = 0;
                                     nodeDof = node->giveDof(idof);
                                     if ( nodeDof->hasBc(tStep) != 0 ) {
-                                        bcDofId = nodeDof->giveBcIdValue();
+                                        bcDofId = nodeDof->giveBcId();
                                     }
 
                                     sprintf(line, " %d", bcDofId);
@@ -1297,7 +1297,7 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem1D(Element *element, 
                                         if ( bcId <= sideNumBc ) {
                                             nodeDof = node->giveDof( sideBcDofId.at(bcId) );
                                             if ( nodeDof->giveDofID() == dofIdArray.at(idof) ) {
-                                                bcDofId = nodeDof->giveBcIdValue();
+                                                bcDofId = nodeDof->giveBcId();
                                                 bcId++;
                                             }
                                         }
@@ -1774,7 +1774,7 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem2D(Element *element, 
                                         bcDofId = 0;
                                         nodeDof = node->giveDof(idof);
                                         if ( nodeDof->hasBc(tStep) != 0 ) {
-                                            bcDofId = nodeDof->giveBcIdValue();
+                                            bcDofId = nodeDof->giveBcId();
                                         }
 
                                         sprintf(line, " %d", bcDofId);
@@ -1814,7 +1814,7 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem2D(Element *element, 
                                             if ( bcId <= sideNumBc.at(index) ) {
                                                 nodeDof = node->giveDof( sideBcDofId->at(bcId) );
                                                 if ( nodeDof->giveDofID() == dofIdArray.at(idof) ) {
-                                                    bcDofId = nodeDof->giveBcIdValue();
+                                                    bcDofId = nodeDof->giveBcId();
                                                     bcId++;
                                                 }
                                             }
@@ -2438,7 +2438,7 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem3D(Element *element, 
                                             bcDofId = 0;
                                             nodeDof = node->giveDof(idof);
                                             if ( nodeDof->hasBc(tStep) != 0 ) {
-                                                bcDofId = nodeDof->giveBcIdValue();
+                                                bcDofId = nodeDof->giveBcId();
                                             }
 
                                             sprintf(line, " %d", bcDofId);
@@ -2483,7 +2483,7 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem3D(Element *element, 
                                                     if ( bcId <= sideNumBc.at(index) ) {
                                                         nodeDof = node->giveDof( sideBcDofId->at(bcId) );
                                                         if ( nodeDof->giveDofID() == dofIdArray.at(idof) ) {
-                                                            bcDofId = nodeDof->giveBcIdValue();
+                                                            bcDofId = nodeDof->giveBcId();
                                                             bcId++;
                                                         }
                                                     }
@@ -2519,7 +2519,7 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem3D(Element *element, 
                                                     if ( bcId <= faceNumBc.at(index) ) {
                                                         nodeDof = node->giveDof( faceBcDofId->at(bcId) );
                                                         if ( nodeDof->giveDofID() == dofIdArray.at(idof) ) {
-                                                            bcDofId = nodeDof->giveBcIdValue();
+                                                            bcDofId = nodeDof->giveBcId();
                                                             bcId++;
                                                         }
                                                     }
@@ -2990,7 +2990,7 @@ HuertaErrorEstimator :: solveRefinedElementProblem(int elemId, IntArray &localNo
     mats = domain->giveNumberOfMaterialModels();
     csects = domain->giveNumberOfCrossSectionModels();
     loads = domain->giveNumberOfBoundaryConditions();
-    ltfuncs = domain->giveNumberOfLoadTimeFunctionModels();
+    ltfuncs = domain->giveNumberOfLoadTimeFunctions();
     nlbarriers = domain->giveNumberOfNonlocalBarriers();
 
     localNodeIdArray.zero();
@@ -3456,7 +3456,7 @@ HuertaErrorEstimator :: solveRefinedPatchProblem(int nodeId, IntArray &localNode
     mats = domain->giveNumberOfMaterialModels();
     csects = domain->giveNumberOfCrossSectionModels();
     loads = domain->giveNumberOfBoundaryConditions();
-    ltfuncs = domain->giveNumberOfLoadTimeFunctionModels();
+    ltfuncs = domain->giveNumberOfLoadTimeFunctions();
     nlbarriers = domain->giveNumberOfNonlocalBarriers();
 
     localNodeIdArray.zero();
@@ -3772,7 +3772,7 @@ HuertaErrorEstimator :: solveRefinedWholeProblem(IntArray &localNodeIdArray, Int
     mats = domain->giveNumberOfMaterialModels();
     csects = domain->giveNumberOfCrossSectionModels();
     loads = domain->giveNumberOfBoundaryConditions();
-    ltfuncs = domain->giveNumberOfLoadTimeFunctionModels();
+    ltfuncs = domain->giveNumberOfLoadTimeFunctions();
     nlbarriers = domain->giveNumberOfNonlocalBarriers();
 
     localNodeIdArray.zero();

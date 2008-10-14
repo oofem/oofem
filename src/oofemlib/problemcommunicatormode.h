@@ -1,4 +1,4 @@
-/* $Header: /home/cvs/bp/oofem/sm/src/targe2interface.h,v 1.3 2003/04/06 14:08:31 bp Exp $ */
+/* $Header: /home/cvs/bp/oofem/oofemlib/src/Attic/problemcomm.h,v 1.1.2.1 2004/04/05 15:19:43 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -33,39 +33,26 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-//   ******************************
-//   *** CLASS TARGE2 INTERFACE ***
-//   ******************************
+//
+// Class ProblemComunicator
+//
 
-#ifndef targe2interface_h
-#define targe2interface_h
+#ifndef problemcommunicatormode_h
+#define problemcommunicatormode_h
 
-#include "mesherinterface.h"
-
-class TimeStep;
+#ifdef __PARALLEL_MODE
 
 /**
- * This class represents the interface to Targe2 mesh generation package.
- * This interface is primarly responsible for two main tasks:
- * - to create input mesher file, containing all informations including the mesh density informations
- * based on informations from remeshing criteria.
- * - possibly to launch the mesher and transform its output to oofem input (using targe2oofem)
+ * ProblemCommunicatorMode determines the valid mode.
+ * The mode is used to set up communication pattern, which differ for
+ * node and element cut algorithms.
+ * Additional remote element mode hass been added to capture the case, when CommunicatorM is intended to
+ * support remote element data exchange (for example when nonlocal material models are present).
  */
-class Targe2Interface : public MesherInterface
-{
-public:
-    /// Constructor
-    Targe2Interface(Domain* d) : MesherInterface(d) { }
-    /// Destructor
-    virtual ~Targe2Interface() { }
-
-    /// Runs the mesh generation, mesh will be written to corresponding domain din file
-    virtual returnCode createMesh(TimeStep *tStep, int domainNumber, int domainSerNum, Domain** dNew);
-
-
-protected:
-    /// Creates the mesher input, containing the required mesh density informations.
-    int createInput(Domain *d, TimeStep *stepN);
+enum ProblemCommunicatorMode {
+  ProblemCommMode__UNKNOWN_MODE, ProblemCommMode__NODE_CUT,
+  ProblemCommMode__ELEMENT_CUT, ProblemCommMode__REMOTE_ELEMENT_MODE
 };
 
-#endif // targe2interface_h
+#endif
+#endif // problemcommunicatormode_h

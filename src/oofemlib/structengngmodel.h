@@ -74,8 +74,6 @@ protected:
     StateCounterType internalVarUpdateStamp;
 
 #ifdef __PARALLEL_MODE
-    /// Communicator mode. Determines current strategy used.
-    ProblemCommunicator :: ProblemCommunicatorMode commMode;
     /// Common Communicator buffer
     CommunicatorBuff *commBuff;
     /// Communicator.
