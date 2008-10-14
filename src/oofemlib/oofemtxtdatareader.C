@@ -45,7 +45,7 @@ OOFEMTXTDataReader :: OOFEMTXTDataReader(char *inputfilename) : DataReader(), ir
         OOFEM_ERROR2("OOFEMTXTDataReader::OOFEMTXTDataReader: Can't open input stream (%s)", inputfilename);
     }
 
-    strncpy(dataSourceName, inputfilename, MAX_FILENAME_LENGTH);
+    strncpy(dataSourceName, inputfilename, MAX_FILENAME_LENGTH-1);
     dataSourceName [ MAX_FILENAME_LENGTH - 1 ] = '\0';
 }
 
