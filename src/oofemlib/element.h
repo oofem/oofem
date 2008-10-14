@@ -379,6 +379,10 @@ public:
     Material *giveMaterial();
     ///Returns reference to the associated crossSection of element.
     CrossSection *giveCrossSection();
+    ///Sets the material of receiver
+    void setMaterial (int matIndx) {this->material = matIndx;}
+    ///Sets the cross section model of receiver
+    void setCrossSection (int csIndx) {this->crossSection = csIndx;}
 
     ///Returns number of dofmanagers of receiver
     int                   giveNumberOfDofManagers() { return numberOfDofMans; }
@@ -386,12 +390,18 @@ public:
      * Default implementation returns number of dofmanagers of element
      */
     virtual int                   giveNumberOfNodes() { return numberOfDofMans; }
+    /** Sets receiver dofManagers */
+    void setDofManagers (const IntArray& _dmans);
+
+
     ///Returns number of sides (which have unknown dofs) of receiver
     //int                   giveNumberOfSides () {return numberOfSides;}
     /// Returns the corresponding element region. Currently corresponds to cross section model number.
     int                   giveRegionNumber();
     ///Initializes receiver acording to object description stored in input record.
     IRResultType initializeFrom(InputRecord *ir);
+    ///Performs a post initialization steps
+    void         postInitialize();
     /**
      * Stores receiver state to output stream.
      * @exception throws an ContextIOERR exception if error encountered
@@ -699,6 +709,11 @@ public:
      * Returns receiver globally unique number.
      */
     int giveGlobalNumber() const { return globalNumber; }
+    /**
+     * Sets receiver globally unique number.
+     */
+    void setGlobalNumber(int num) { globalNumber = num; }
+    
     /**
      * Return elementParallelMode of receiver. Defined for __Parallel_Mode only.
      */
