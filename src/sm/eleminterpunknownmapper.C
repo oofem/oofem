@@ -69,8 +69,10 @@ EIPrimaryUnknownMapper :: mapAndUpdate(FloatArray &answer, ValueModeType mode, E
     for ( inode = 1; inode <= nd_nnodes; inode++ ) {
         /* HUHU CHEATING */
 #ifdef __PARALLEL_MODE
-        if ( newd->giveNode(inode)->giveParallelMode() == DofManager_null ) {
-            continue;
+      if (( newd->giveNode(inode)->giveParallelMode() == DofManager_null ) ||
+	  ( newd->giveNode(inode)->giveParallelMode() == DofManager_remote ))
+	{
+	  continue;
         }
 
 #endif
