@@ -40,39 +40,56 @@
 #include "mathfem.h"
 #include "timestep.h"
 
+DirectErrorIndicatorRC::DirectErrorIndicatorRC(int n, ErrorEstimator *e) : RemeshingCriteria(n, e) 
+{
+  stateCounter=-1; 
+#ifdef __PARALLEL_MODE
+  dofManDensityExchangeFlag = true;
+#endif
+}
+
+DirectErrorIndicatorRC::~DirectErrorIndicatorRC ()
+{
+#ifdef __PARALLEL_MODE
+#endif
+}
 
 void
 DirectErrorIndicatorRC :: giveNodeChar(int inode, TimeStep *tStep, double &indicatorVal, double &currDensity) {
-    int isize, i;
-    const IntArray *con;
-    Domain *d = this->giveDomain();
-    ConnectivityTable *ct = d->giveConnectivityTable();
-    DirectErrorIndicatorRCInterface *interface;
-
-    con = ct->giveDofManConnectivityArray(inode);
-    isize = con->giveSize();
-
-    for ( i = 1; i <= isize; i++ ) {
-        // ask for indicator variable value and determine current mesh density
-        interface = ( DirectErrorIndicatorRCInterface * )
-                    d->giveElement( con->at(i) )->giveInterface(DirectErrorIndicatorRCInterfaceType);
-        if ( !interface ) {
-            OOFEM_WARNING2( "DirectErrorIndicatorRC::giveRequiredDofManDensity: element %d does not support DirectErrorIndicatorRCInterface", con->at(i) );
-        }
-
-        if ( i == 1 ) {
-            indicatorVal = ee->giveElementError(indicatorET, d->giveElement( con->at(i) ), tStep);
-            currDensity = interface->DirectErrorIndicatorRCI_giveCharacteristicSize();
-        } else {
-            indicatorVal = max( indicatorVal, ee->giveElementError(indicatorET, d->giveElement( con->at(i) ), tStep) );
-            currDensity =  max( currDensity, interface->DirectErrorIndicatorRCI_giveCharacteristicSize() );
-        }
-    }
+  int isize, i;
+  const IntArray *con;
+  Domain *d = this->giveDomain();
+  ConnectivityTable *ct = d->giveConnectivityTable();
+  DirectErrorIndicatorRCInterface *interface;
+  
+  con = ct->giveDofManConnectivityArray(inode);
+  isize = con->giveSize();
+  
+  currDensity = this->giveDofManDensity(inode);
+  indicatorVal =  this->giveDofManIndicator(inode, tStep);
 }
+
+
+
 
 
 double
 DirectErrorIndicatorRC :: giveDofManDensity(int num) {
+#ifdef __PARALLEL_MODE
+  Domain *d = this->giveDomain();
+  if (d->giveDofManager(num)->isShared()) {
+    return this->sharedDofManDensities[num];
+  } else {
+    return this->giveLocalDofManDensity(num);
+  }
+#else
+  return this->giveLocalDofManDensity(num);
+#endif
+}
+
+double
+DirectErrorIndicatorRC :: giveLocalDofManDensity(int num) 
+{
     int isize, i;
     double currDensity = 0.0;
     const IntArray *con;
@@ -102,6 +119,51 @@ DirectErrorIndicatorRC :: giveDofManDensity(int num) {
 }
 
 
+double
+DirectErrorIndicatorRC :: giveDofManIndicator(int num, TimeStep* tStep) {
+#ifdef __PARALLEL_MODE
+  Domain *d = this->giveDomain();
+  if (d->giveDofManager(num)->isShared()) {
+    return this->sharedDofManIndicatorVals[num];
+  } else {
+    return this->giveLocalDofManIndicator(num, tStep);
+  }
+#else
+  return this->giveLocalDofManIndicator(num, tStep);
+#endif
+}
+
+double
+DirectErrorIndicatorRC :: giveLocalDofManIndicator(int inode, TimeStep* tStep) 
+{
+  int isize, i;
+  const IntArray *con;
+  Domain *d = this->giveDomain();
+  ConnectivityTable *ct = d->giveConnectivityTable();
+  DirectErrorIndicatorRCInterface *interface;
+  double indicatorVal;
+
+  con = ct->giveDofManConnectivityArray(inode);
+  isize = con->giveSize();
+
+  for ( i = 1; i <= isize; i++ ) {
+    // ask for indicator variable value and determine current mesh density
+    interface = ( DirectErrorIndicatorRCInterface * )
+      d->giveElement( con->at(i) )->giveInterface(DirectErrorIndicatorRCInterfaceType);
+    if ( !interface ) {
+      OOFEM_WARNING2( "DirectErrorIndicatorRC::giveRequiredDofManDensity: element %d does not support DirectErrorIndicatorRCInterface", con->at(i) );
+    }
+
+    if ( i == 1 ) {
+      indicatorVal = ee->giveElementError(indicatorET, d->giveElement( con->at(i) ), tStep);
+    } else {
+      indicatorVal = max( indicatorVal, ee->giveElementError(indicatorET, d->giveElement( con->at(i) ), tStep) );
+    }
+  }
+  return indicatorVal;
+}
+
+
 
 int
 DirectErrorIndicatorRC :: estimateMeshDensities(TimeStep *tStep) {
@@ -112,6 +174,17 @@ DirectErrorIndicatorRC :: estimateMeshDensities(TimeStep *tStep) {
     if ( stateCounter == tStep->giveSolutionStateCounter() ) {
         return 1;
     }
+
+#ifdef __PARALLEL_MODE
+    if (initCommMap) {
+      communicator->setUpCommunicationMaps(d->giveEngngModel(), true, true);
+      initCommMap = false;
+    }
+
+
+    this->exchangeDofManDensities();
+    this->exchangeDofManIndicatorVals(tStep);
+#endif
 
     this->currStrategy  = NoRemeshing_RS;
     this->nodalDensities.resize(nnodes);
@@ -139,6 +212,13 @@ DirectErrorIndicatorRC :: estimateMeshDensities(TimeStep *tStep) {
             }
         }
     }
+
+#ifdef __PARALLEL_MODE
+    // exchange strategies between nodes to ensure consistency
+    int myStrategy = this->currStrategy, globalStrategy;
+    MPI_Allreduce(& myStrategy, & globalStrategy, 1, MPI_INT, MPI_MAX, MPI_COMM_WORLD);
+    this->currStrategy = ( RemeshingStrategy ) globalStrategy;
+#endif
 
     // remember time stamp
     stateCounter = tStep->giveSolutionStateCounter();
@@ -174,6 +254,17 @@ DirectErrorIndicatorRC :: initializeFrom(InputRecord *ir)
     remeshingDensityRatioToggle = 0.80;
     IR_GIVE_OPTIONAL_FIELD(ir, remeshingDensityRatioToggle, IFT_DirectErrorIndicatorRC_remeshingdensityratio, "remeshingdensityratio"); // Macro
 
+#ifdef __PARALLEL_MODE
+    EngngModel *emodel=domain->giveEngngModel();
+    ProblemCommunicatorMode commMode = emodel->giveProblemCommMode();
+    if (commMode == ProblemCommMode__NODE_CUT) {
+  
+      commBuff = new CommunicatorBuff(emodel->giveNumberOfProcesses(), CBT_dynamic);
+      communicator = new ProblemCommunicator(emodel, commBuff, emodel->giveRank(),
+					     emodel->giveNumberOfProcesses(),
+					     commMode);
+    }
+#endif
     return IRRT_OK;
 }
 
@@ -183,3 +274,159 @@ DirectErrorIndicatorRC :: giveRemeshingStrategy(TimeStep *tStep)
     this->estimateMeshDensities(tStep);
     return this->currStrategy;
 }
+
+void
+DirectErrorIndicatorRC :: reinitialize() 
+{
+  stateCounter = -1; 
+#ifdef __PARALLEL_MODE
+  dofManDensityExchangeFlag  = true;
+#endif
+}
+
+
+void     
+DirectErrorIndicatorRC :: setDomain(Domain *d)
+{
+  RemeshingCriteria::setDomain (d);
+#ifdef __PARALLEL_MODE
+  dofManDensityExchangeFlag = true;
+  initCommMap = true;
+#endif
+
+}
+
+
+#ifdef __PARALLEL_MODE
+void
+DirectErrorIndicatorRC :: exchangeDofManDensities () 
+{
+  Domain *domain = this->giveDomain();
+  EngngModel *emodel = domain->giveEngngModel();
+  ProblemCommunicatorMode commMode = emodel->giveProblemCommMode();
+
+  if (this->dofManDensityExchangeFlag) {
+
+    if (commMode == ProblemCommMode__NODE_CUT) {
+      
+      //TODO:
+      // compute local shared dofman densities
+      sharedDofManDensities.clear();
+      int i, size= domain->giveNumberOfDofManagers();
+      for (i=1; i<=size; i++) {
+	if (domain->giveDofManager(i)->giveParallelMode()==DofManager_shared) {
+	  sharedDofManDensities[i] = this->giveLocalDofManDensity(i);
+	}
+      }
+      // exchange them
+      communicator->packAllData( this, &DirectErrorIndicatorRC::packSharedDofManLocalDensities );
+      communicator->initExchange(999);
+      communicator->unpackAllData( this, &DirectErrorIndicatorRC::unpackSharedDofManLocalDensities );
+    }
+    
+    this->dofManDensityExchangeFlag = false;
+
+   } // if (this->dofManDensityExchangeFlag)
+}
+
+int
+DirectErrorIndicatorRC :: packSharedDofManLocalDensities (ProcessCommunicator &processComm)
+{
+  int result = 1, i, size;
+  Domain *d = this->giveDomain();
+  ProcessCommunicatorBuff *pcbuff = processComm.giveProcessCommunicatorBuff();
+  IntArray const *toSendMap = processComm.giveToSendMap();
+  
+  size = toSendMap->giveSize();
+  for ( i = 1; i <= size; i++ ) {
+    result &= pcbuff->packDouble (this->sharedDofManDensities[toSendMap->at(i)]);
+  } 
+  return result;
+  
+}
+
+int 
+DirectErrorIndicatorRC :: unpackSharedDofManLocalDensities (ProcessCommunicator &processComm)
+{
+    int result = 1;
+    int i, size;
+    IntArray const *toRecvMap = processComm.giveToRecvMap();
+    ProcessCommunicatorBuff *pcbuff = processComm.giveProcessCommunicatorBuff();
+    double value;
+
+    size = toRecvMap->giveSize();
+    for ( i = 1; i <= size; i++ ) {
+      result &= pcbuff->unpackDouble(value);
+      this->sharedDofManDensities[toRecvMap->at(i)] = max (value, this->sharedDofManDensities[toRecvMap->at(i)]);
+      OOFEM_LOG_INFO("unpackSharedDofManLocalDensities: node %d[%d], value %f\n",toRecvMap->at(i), domain->giveDofManager (toRecvMap->at(i))->giveGlobalNumber(), this->sharedDofManDensities[toRecvMap->at(i)]);
+    }
+    return result;
+}
+
+
+
+
+void
+DirectErrorIndicatorRC :: exchangeDofManIndicatorVals (TimeStep* tStep) 
+{
+  Domain *domain = this->giveDomain();
+  EngngModel *emodel = domain->giveEngngModel();
+  ProblemCommunicatorMode commMode = emodel->giveProblemCommMode();
+
+  if (commMode == ProblemCommMode__NODE_CUT) {
+    
+    //TODO:
+    // compute local shared dofman indicator values
+    sharedDofManIndicatorVals.clear();
+    int i, size= domain->giveNumberOfDofManagers();
+    for (i=1; i<=size; i++) {
+	if (domain->giveDofManager(i)->giveParallelMode()==DofManager_shared) {
+	  sharedDofManIndicatorVals[i] = this->giveLocalDofManIndicator (i, tStep);
+	}
+    }
+    // exchange them
+    communicator->packAllData( this, &DirectErrorIndicatorRC::packSharedDofManLocalIndicatorVals );
+    communicator->initExchange(999);
+    communicator->unpackAllData( this, &DirectErrorIndicatorRC::unpackSharedDofManLocalIndicatorVals );
+  }
+    
+}
+
+int
+DirectErrorIndicatorRC :: packSharedDofManLocalIndicatorVals (ProcessCommunicator &processComm)
+{
+  int result = 1, i, size;
+  Domain *d = this->giveDomain();
+  ProcessCommunicatorBuff *pcbuff = processComm.giveProcessCommunicatorBuff();
+  IntArray const *toSendMap = processComm.giveToSendMap();
+  
+  size = toSendMap->giveSize();
+  for ( i = 1; i <= size; i++ ) {
+    result &= pcbuff->packDouble (this->sharedDofManIndicatorVals[toSendMap->at(i)]);
+  } 
+  return result;
+  
+}
+
+int 
+DirectErrorIndicatorRC :: unpackSharedDofManLocalIndicatorVals (ProcessCommunicator &processComm)
+{
+    int result = 1;
+    int i, size;
+    IntArray const *toRecvMap = processComm.giveToRecvMap();
+    ProcessCommunicatorBuff *pcbuff = processComm.giveProcessCommunicatorBuff();
+    double value;
+
+    size = toRecvMap->giveSize();
+    for ( i = 1; i <= size; i++ ) {
+      result &= pcbuff->unpackDouble(value);
+      this->sharedDofManIndicatorVals[toRecvMap->at(i)] = max (value, this->sharedDofManIndicatorVals[toRecvMap->at(i)]);
+      OOFEM_LOG_INFO("unpackSharedDofManLocalIndicatorVals: node %d[%d], value %f\n",toRecvMap->at(i), domain->giveDofManager (toRecvMap->at(i))->giveGlobalNumber(), this->sharedDofManIndicatorVals[toRecvMap->at(i)]);    }
+    return result;
+}
+
+
+#endif
+
+
+
