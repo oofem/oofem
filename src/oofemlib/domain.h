@@ -205,6 +205,7 @@ private:
      */
     StateCounterType nonlocalUpdateStateCounter;
 
+#ifdef __PARALLEL_MODE
     /**
      * Transaction mamager. The purpose of this class is to
      * make the domain modification (in terms of adding and deleting components) versatile.
@@ -219,7 +220,7 @@ private:
     /// dmanMap init flag
     bool elementMapInitialized;
 
-#ifdef __PARALLEL_MODE
+
     /**@name Load Balancing data structures */
     //@{
     /// List of received elements
@@ -351,14 +352,54 @@ public:
     int                giveNumberOfInitialConditions() { return icList->giveSize(); }
 
     /// Returns number of load time functions in domain
-    int                giveNumberOfLoadTimeFunctionModels() { return loadTimeFunctionList->giveSize(); }
+    int                giveNumberOfLoadTimeFunctions() { return loadTimeFunctionList->giveSize(); }
 
     /// Returns number of regions. Currently regions corresponds to cross section models.
     int                giveNumberOfRegions() { return this->giveNumberOfCrossSectionModels(); }
     /// Returns number of nonlocal integration barriers
     int                giveNumberOfNonlocalBarriers() { return nonlocalBarierList->giveSize(); }
     int                giveCorrespondingCoordinateIndex(int);
+    /**
+     *@name Advanced domain manipulation methods.
+     */
+    //@{
+    /// Resizes the internal data structure to accomodate space for _newSize dofManagers
+    void resizeDofManagers (int _newSize);
+    /// Resizes the internal data structure to accomodate space for _newSize elements
+    void resizeElements (int _newSize);
+    /// Resizes the internal data structure to accomodate space for _newSize cross section models
+    void resizeCrossSectionModels (int _newSize);
+    /// Resizes the internal data structure to accomodate space for _newSize materials
+    void resizeMaterials (int _newSize);
+    /// Resizes the internal data structure to accomodate space for _newSize nonlocal barriers
+    void resizeNonlocalBarriers (int _newSize);
+    /// Resizes the internal data structure to accomodate space for _newSize boundary conditions
+    void resizeBoundaryConditions (int _newSize);
+    /// Resizes the internal data structure to accomodate space for _newSize initial conditions
+    void resizeInitialConditions (int _newSize);
+    /// Resizes the internal data structure to accomodate space for _newSize load time functions
+    void resizeLoadTimeFunctions (int _newSize);
 
+    /// Sets i-th componet. The component will be futher managed and maintained by domain object. 
+    void setDofManager (int i, DofManager* obj);
+    /// Sets i-th componet. The component will be futher managed and maintained by domain object. 
+    void setElement (int i, Element* obj);
+    /// Sets i-th componet. The component will be futher managed and maintained by domain object. 
+    void setCrossSection (int i, CrossSection* obj);
+    /// Sets i-th componet. The component will be futher managed and maintained by domain object. 
+    void setMaterial (int i, Material* obj);
+     /// Sets i-th componet. The component will be futher managed and maintained by domain object. 
+    void setNonlocalBarrier (int i, NonlocalBarrier* obj);
+    /// Sets i-th componet. The component will be futher managed and maintained by domain object. 
+    void setBoundaryCondition (int i, GeneralBoundaryCondition* obj);
+    /// Sets i-th componet. The component will be futher managed and maintained by domain object. 
+    void setInitialCondition (int i, InitialCondition* obj);
+    /// Sets i-th componet. The component will be futher managed and maintained by domain object. 
+    void setLoadTimeFunction (int i, LoadTimeFunction* obj);
+    
+    
+
+    //@}
     /**
      * Returns default DofID array which defines physical meaning of partucular DOFs
      * of nodal dofs. Default values are determined using current domain type.
@@ -380,6 +421,8 @@ public:
 
     /// Returns domain type.
     domainType         giveDomainType()        { return dType; }
+    /// Sets domain type
+    void               setDomainType(domainType _dType)         { this->dType = _dType;}
     // consistency check
     /**
      * Checks internal consistency of domain and all domain componenets.

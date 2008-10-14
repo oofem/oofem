@@ -113,9 +113,9 @@ Domain :: Domain(int n, int serNum, EngngModel *pm) : defaultNodeDofIDArry(), de
 
     nonlocalUpdateStateCounter = 0;
 
-    dmanMapInitialized = elementMapInitialized = false;
-
 #ifdef __PARALLEL_MODE
+    dmanMapInitialized = elementMapInitialized = false;
+    transactionManager = NULL;
 #endif
 }
 
@@ -137,6 +137,11 @@ Domain :: ~Domain()
     if ( smoother ) {
         delete smoother;
     }
+#ifdef __PARALLEL_MODE
+    if (transactionManager) {
+      delete transactionManager;
+    }
+#endif
 }
 
 
@@ -364,6 +369,23 @@ EngngModel *Domain :: giveEngngModel()
     return NULL;
 }
 
+void Domain::resizeDofManagers (int _newSize) {dofManagerList->growTo (_newSize);}
+void Domain::resizeElements (int _newSize) {elementList->growTo (_newSize);}
+void Domain::resizeCrossSectionModels (int _newSize) {crossSectionList->growTo (_newSize);}
+void Domain::resizeMaterials (int _newSize) {materialList->growTo (_newSize);}
+void Domain::resizeNonlocalBarriers (int _newSize) {nonlocalBarierList->growTo (_newSize);}
+void Domain::resizeBoundaryConditions (int _newSize) {bcList->growTo (_newSize);}
+void Domain::resizeInitialConditions (int _newSize) {icList->growTo (_newSize);}
+void Domain::resizeLoadTimeFunctions (int _newSize) {loadTimeFunctionList->growTo (_newSize);}
+
+void Domain::setDofManager (int i, DofManager* obj) {dofManagerList->put(i,obj);}
+void Domain::setElement (int i, Element* obj) {elementList->put(i,obj);}
+void Domain::setCrossSection (int i, CrossSection* obj) {crossSectionList->put(i,obj);}
+void Domain::setMaterial (int i, Material* obj) {materialList->put(i,obj);}
+void Domain::setNonlocalBarrier (int i, NonlocalBarrier* obj) {nonlocalBarierList->put(i,obj);}
+void Domain::setBoundaryCondition (int i, GeneralBoundaryCondition* obj) {bcList->put(i,obj);}
+void Domain::setInitialCondition (int i, InitialCondition* obj) {icList->put(i,obj);}
+void Domain::setLoadTimeFunction (int i, LoadTimeFunction* obj) {loadTimeFunctionList->put(i,obj);}
 
 int Domain :: instanciateYourself(DataReader *dr)
 // Creates all objects mentioned in the data file.
@@ -1374,6 +1396,7 @@ int Domain :: commitTransactions(DomainTransactionManager *tm)
     this->elementList = elementList_new;
 
     this->giveConnectivityTable()->reset();
+    this->giveSpatialLocalizer()->init(true);
     return 1;
 }
 
