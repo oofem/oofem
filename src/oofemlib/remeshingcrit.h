@@ -47,6 +47,10 @@
 #include "interface.h"
 #include "classtype.h"
 
+#ifdef __PARALLEL_MODE
+#include "problemcomm.h"
+#endif
+
 class Domain;
 class Element;
 class TimeStep;
@@ -69,11 +73,21 @@ class RemeshingCriteria : public FEMComponent
 protected:
 
     ErrorEstimator *ee;
+
+#ifdef __PARALLEL_MODE
+    /// Common Communicator buffer
+    CommunicatorBuff *commBuff;
+    /// Communicator.
+    ProblemCommunicator *communicator;
+    /// communicato init flag
+    bool initCommMap;
+#endif
+
 public:
     /// Constructor
     RemeshingCriteria(int n, ErrorEstimator *e);
     /// Destructor
-    virtual ~RemeshingCriteria() { }
+    virtual ~RemeshingCriteria() ;
     /** Returns the required mesh size n given dof manager.
      * The mesh density is defined as a required element size
      * (in 1D the element length, in 2D the square from element area).
