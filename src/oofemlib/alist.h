@@ -195,7 +195,7 @@ AList< T > :: growTo(int newSize)
       // delete entities in indexes in the range (newSize, size)
       i = size;
       if ( size ) {
-	while ( (i--) >= newSize  ) {
+	while ( (--i) >= newSize  ) {
 	  delete ( values [ i ] );
 	  values [i] = NULL;
 	}
