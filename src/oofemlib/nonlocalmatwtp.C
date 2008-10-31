@@ -116,6 +116,7 @@ NonlocalMaterialWTP :: init(Domain *domain)
     int myrank = emodel->giveRank();
     CommunicatorBuff cb(nproc, CBT_dynamic);
     Communicator com(emodel, & cb, myrank, nproc, CommMode_Dynamic);
+    this->nonlocElementDependencyMap.clear();
 
     // build nonlocal element dependency array for each element
     for ( ie = 1; ie <= nelem; ie++ ) {
@@ -238,7 +239,7 @@ NonlocalMaterialWTP :: migrate()
             result = commBuff.bcast(i);
             // unpack size
             commBuff.unpackInt(_size);
-            for ( _i = 1; _i <= _size; _i++ ) {
+            for ( _i = 1; _i < _size; _i++ ) {
                 commBuff.unpackInt(_val);
                 remoteWishSet.insert(_val);
             }
