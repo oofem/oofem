@@ -253,7 +253,7 @@ Subdivision::RS_Element::isIrregularShared(int leIndex, int inode, int jnode, in
   if ((mesh->giveNode(nodes.at(inode))->giveParallelMode() == DofManager_shared) &&
       (mesh->giveNode(nodes.at(jnode))->giveParallelMode() == DofManager_shared)) {
     // test if neigbor element exist (if yes and is local then the edge is not shared
-    if (mesh->giveElement(this->neghbours_base_elements.at(leIndex))) {
+    if (this->neghbours_base_elements.at(leIndex)) {
       if (mesh->giveElement(this->neghbours_base_elements.at(leIndex))->giveParallelMode() != Element_local) {
       
 	// test if parent vertex nodes are shared by the same partition
@@ -965,7 +965,7 @@ Subdivision :: createMesh(TimeStep *stepN, int domainNumber, int domainSerNum, D
   :: getRelativeUtime(dt, st);
   
   OOFEM_LOG_INFO( "Subdivision: created new mesh (%d nodes and %d elements) in %.2fs\n",
-		  nnodes, nelems, (double)(dt.tv_sec+dt.tv_usec/(double)OOFEM_USEC_LIM));
+		  nnodes, eNum, (double)(dt.tv_sec+dt.tv_usec/(double)OOFEM_USEC_LIM));
   
 #ifdef __PARALLEL_MODE
 #ifdef __VERBOSE_PARALLEL
@@ -1554,7 +1554,9 @@ Subdivision::unpackRemoteElements (Domain *d, ProcessCommunicator &pc)
   }
 
   Element *elem;
+  IntArray elemPartitions(1); elemPartitions.at(1) = iproc;
   int nrecv = 0;
+  
   do {
     pcbuff->unpackInt(_type);
     if ( _type == SUBDIVISION_END_DATA ) {
@@ -1565,6 +1567,7 @@ Subdivision::unpackRemoteElements (Domain *d, ProcessCommunicator &pc)
     elem = CreateUsrDefElementOfType(_etype, 0, d);
     elem->restoreContext(& pcDataStream, CM_Definition | CM_DefinitionGlobal);
     elem->setParallelMode (Element_remote);
+    elem->setPartitionList (elemPartitions);
     dtm->addTransaction(DomainTransactionManager :: DTT_ADD, DomainTransactionManager :: DCT_Element, elem->giveGlobalNumber(), elem);
     nrecv++;
     //OOFEM_LOG_INFO ("[%d] Received Remote elem [%d] to rank %d\n", myrank, elem->giveGlobalNumber(), iproc );
