@@ -46,7 +46,8 @@
  * Select the mapping algorithm. The IDM_USE_MMAShapeFunctProjection does not work, since
  * this mapper does not preserve the max. property of damage and equivalent strain.
  */
-#define IDM_USE_MMAClosestIPTransfer
+//#define IDM_USE_MMAClosestIPTransfer
+#define IDM_USE_MMAContainingElementProjection
 //#define IDM_USE_MMAShapeFunctProjection
 //#define IDM_USE_MMALeastSquareProjection
 
@@ -67,6 +68,10 @@
 
 #ifdef IDM_USE_MMAClosestIPTransfer
 #include "mmaclosestiptransfer.h"
+#endif
+
+#ifdef IDM_USE_MMAContainingElementProjection
+#include "mmacontainingelementprojection.h"
 #endif
 
 #ifdef IDM_USE_MMAShapeFunctProjection
@@ -187,6 +192,10 @@ protected:
 #ifdef IDM_USE_MMAClosestIPTransfer
     /// Mapper used to map internal variables in adaptivity
     static MMAClosestIPTransfer mapper;
+#endif
+#ifdef IDM_USE_MMAContainingElementProjection
+    /// Mapper used to map internal variables in adaptivity
+    static MMAContainingElementProjection mapper;
 #endif
 #ifdef IDM_USE_MMAShapeFunctProjection
     /// Mapper used to map internal variables in adaptivity

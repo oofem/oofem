@@ -55,6 +55,10 @@
 MMAClosestIPTransfer IsotropicDamageMaterial1 :: mapper;
 #endif
 
+#ifdef IDM_USE_MMAContainingElementProjection
+MMAContainingElementProjection IsotropicDamageMaterial1 :: mapper;
+#endif
+
 #ifdef IDM_USE_MMAShapeFunctProjection
 MMAShapeFunctProjection IsotropicDamageMaterial1 :: mapper;
 #endif
