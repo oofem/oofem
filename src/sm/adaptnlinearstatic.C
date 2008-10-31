@@ -539,6 +539,7 @@ AdaptiveNonLinearStatic :: adaptiveRemap(Domain* dNew)
 
 #ifdef __PETSC_MODULE
     petscContextList->put( 1, petscContextList->unlink(2) );
+    petscContextList->growTo (1);
 #endif
 
     // keep equation numbering of new domain
@@ -556,7 +557,17 @@ AdaptiveNonLinearStatic :: adaptiveRemap(Domain* dNew)
     // this->forceEquationNumbering();
     this->giveNumericalMethod( giveCurrentStep() )->setDomain(dNew);
     this->ee->setDomain(dNew);
+#ifdef __PARALLEL_MODE
+    if (this->giveLoadBalancer()) this->giveLoadBalancer()->setDomain(dNew);
+#endif
 
+#ifdef __PARALLEL_MODE
+    if ( isParallel() ) {
+        // set up communication patterns
+        this->initializeCommMaps(true);
+        exchangeRemoteElementData();
+    }
+#endif
 
     //mc2 = this->getClock();
     :: getRelativeUtime(mc2, st1);
@@ -588,13 +599,6 @@ AdaptiveNonLinearStatic :: adaptiveRemap(Domain* dNew)
         result &= this->giveDomain(1)->giveElement(ielem)->adaptiveFinish( this->giveCurrentStep() );
     }
 
-#ifdef __PARALLEL_MODE
-    if ( isParallel() ) {
-        // set up communication patterns
-        this->initializeCommMaps(true);
-        exchangeRemoteElementData();
-    }
-#endif
     nMethod->reinitialize();
 
 
