@@ -64,6 +64,8 @@
 #include "domaintransactionmanager.h"
 #endif
 
+//#define __VERBOSE_PARALLEL
+
 #ifdef __OOFEG
 void Subdivision::RS_Node::drawGeometry()
 //
@@ -145,7 +147,7 @@ Subdivision::RS_Triangle::RS_Triangle (int number, RS_Mesh* mesh, int parent, In
 
 
 void
-Subdivision::RS_Triangle::bisect(std::queue<int> &subdivqueue, std::queue<int> &sharedIrregularsQueue) {
+Subdivision::RS_Triangle::bisect(std::queue<int> &subdivqueue, std::list<int> &sharedIrregularsQueue) {
   /* this is symbolic bisection - no new elements are added, only irregular nodes are introduced */
   int inode, jnode;
   double density;
@@ -197,7 +199,7 @@ Subdivision::RS_Triangle::bisect(std::queue<int> &subdivqueue, std::queue<int> &
       irregular->setPartition (partition);
       // and put its number into queue of shared irregulars that is later used to inform remote partition about this fact
       irregular->setEdgeNodes(nodes.at(inode), nodes.at(jnode));
-      sharedIrregularsQueue.push(iNum);
+      sharedIrregularsQueue.push_back(iNum);
 #ifdef __VERBOSE_PARALLEL
       OOFEM_LOG_INFO("RS_Triangle::bisect: Shared Irregular detected, number %d [%d[%d] %d[%d]], elem %d, partition %d\n", iNum, nodes.at(inode), mesh->giveNode(nodes.at(inode))->giveGlobalNumber(), nodes.at(jnode), mesh->giveNode(nodes.at(jnode))->giveGlobalNumber(), this->number, partition);
 #endif
@@ -1021,12 +1023,12 @@ Subdivision :: exchangeSharedIrregulars () {
   // loop over local sharedIrregularQueue 
   int globalIrregularQueueEmpty, localSharedIrregularQueueEmpty = this->sharedIrregularsQueue.empty();
 #ifdef __VERBOSE_PARALLEL
-  OOFEM_LOG_INFO ("[%d]Subdivision :: exchangeSharedIrregulars: localSharedIrregularQueueEmpty %d",
+  OOFEM_LOG_INFO ("[%d]Subdivision :: exchangeSharedIrregulars: localSharedIrregularQueueEmpty %d\n",
 		  this->giveRank(), localSharedIrregularQueueEmpty);
 #endif
   MPI_Allreduce (&localSharedIrregularQueueEmpty, &globalIrregularQueueEmpty, 1, MPI_INT, MPI_LAND, MPI_COMM_WORLD); 
 #ifdef __VERBOSE_PARALLEL
-  OOFEM_LOG_INFO ("[%d]Subdivision :: exchangeSharedIrregulars:  globalIrregularQueueEmpty %d",
+  OOFEM_LOG_INFO ("[%d]Subdivision :: exchangeSharedIrregulars:  globalIrregularQueueEmpty %d\n",
 		  this->giveRank(), globalIrregularQueueEmpty);
 #endif
   if (globalIrregularQueueEmpty) {
@@ -1044,6 +1046,7 @@ Subdivision :: exchangeSharedIrregulars () {
     com.initExchange(SHARED_IRREGULAR_DATA_TAG);
     com.unpackAllData(this, this, &Subdivision::unpackSharedIrregulars);
     
+    this->sharedIrregularsQueue.clear();
     return false;
   }
 }
@@ -1055,13 +1058,16 @@ Subdivision::packSharedIrregulars (Subdivision *s, ProcessCommunicator &pc)
   int pi, inode, jnode, rproc = pc.giveRank();
   int myrank = this->giveRank();
   const IntArray *sharedPartitions;
+  std::list<int>::const_iterator sharedIrregQueueIter;
   IntArray edgeInfo (2);
   if ( rproc == myrank ) return 1; // skip local partition
 
   // query process communicator to use
   ProcessCommunicatorBuff *pcbuff = pc.giveProcessCommunicatorBuff();
-  while( !sharedIrregularsQueue.empty() ) {
-    pi = sharedIrregularsQueue.front(); sharedIrregularsQueue.pop();
+  for (sharedIrregQueueIter = sharedIrregularsQueue.begin(); 
+       sharedIrregQueueIter != sharedIrregularsQueue.end(); 
+       sharedIrregQueueIter++) {
+    pi = (*sharedIrregQueueIter);
     sharedPartitions = this->mesh->giveNode(pi)->givePartitions();
     if (sharedPartitions->contains(rproc)) {
       // the info about new local shared irregular node needs to be sent to remote partition

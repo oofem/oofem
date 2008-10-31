@@ -169,7 +169,7 @@ class Subdivision : public MesherInterface
     */
     virtual int giveIrregular (const IntArray& bEnttity) = 0;
 
-    virtual void bisect(std::queue<int> &subdivqueue, std::queue<int> &sharedIrregularsQueue) {}
+    virtual void bisect(std::queue<int> &subdivqueue, std::list<int> &sharedIrregularsQueue) {}
     virtual void generate () {}
     virtual void update_neighbours() {}
     virtual double giveDensity() {return 0.0;}
@@ -207,7 +207,7 @@ class Subdivision : public MesherInterface
     int leIndex;
   public:
     RS_Triangle (int number, Subdivision::RS_Mesh* mesh, int parent, IntArray& nodes) ;
-    void bisect(std::queue<int> &subdivqueue, std::queue<int> &sharedIrregularsQueue);
+    void bisect(std::queue<int> &subdivqueue, std::list<int> &sharedIrregularsQueue);
     void generate ();
     void update_neighbours();
     double giveDensity();
@@ -252,7 +252,7 @@ class Subdivision : public MesherInterface
   //RS_Mesh *oldMesh, *newMesh;
   RS_Mesh *mesh;
   std::queue<int> subdivqueue;
-  std::queue<int> sharedIrregularsQueue;
+  std::list<int> sharedIrregularsQueue;
   
  public:
   /// Constructor
