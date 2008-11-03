@@ -630,6 +630,10 @@ AdaptiveNonLinearStatic :: adaptiveRemap(Domain* dNew)
     // assemble new initial load for new discretization
     this->assembleInitialLoadVector( initialLoadVector, initialLoadVectorOfPrescribed,
                                     this, 1, this->giveCurrentStep() );
+    this->assembleIncrementalReferenceLoadVectors( incrementalLoadVector, incrementalLoadVectorOfPrescribed,
+						   refLoadInputMode, this->giveDomain(1), EID_MomentumBalance, 
+						   this->giveCurrentStep() );
+    
     // assemble new total load for new discretization
     // this->assembleCurrentTotalLoadVector (totalLoadVector, totalLoadVectorOfPrescribed, this->giveCurrentStep());
     // set bcloadVector to zero (no increment within same step)
@@ -729,8 +733,6 @@ AdaptiveNonLinearStatic :: adaptiveRemap(Domain* dNew)
         //double deltaL = nMethod->giveUnknownComponent (StepLength, 0);
         double deltaL = nMethod->giveCurrentStepLength();
         FloatArray ibcLoadVector;
-        this->assembleIncrementalReferenceLoadVectors( incrementalLoadVector, incrementalLoadVectorOfPrescribed,
-                                                      refLoadInputMode, this->giveDomain(1), EID_MomentumBalance, this->giveCurrentStep() );
         //
         // call numerical model to solve arised problem
         //
