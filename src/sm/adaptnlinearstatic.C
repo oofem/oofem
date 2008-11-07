@@ -84,6 +84,10 @@ AdaptiveNonLinearStatic :: AdaptiveNonLinearStatic(int i, EngngModel *_master) :
     ee = NULL;
     meshPackage = MPT_T3D;
     equilibrateMappedConfigurationFlag = 0;
+
+#ifdef __PARALLEL_MODE
+    this->preMappingLoadBalancingFlag = false;
+#endif
 }
 
 
@@ -117,6 +121,9 @@ AdaptiveNonLinearStatic :: initializeFrom(InputRecord *ir)
 
     equilibrateMappedConfigurationFlag =  0;
     IR_GIVE_OPTIONAL_FIELD(ir, equilibrateMappedConfigurationFlag, IFT_AdaptiveNonLinearStatic_equilmc, "equilmc"); // Macro
+    _val = 0;
+    IR_GIVE_OPTIONAL_FIELD(ir, _val, IFT_AdaptiveNonLinearStatic_preMappingLoadBalancingFlag, "premaplbflag"); // Macro
+    preMappingLoadBalancingFlag = _val;
 
     return IRRT_OK;
 }
@@ -125,11 +132,20 @@ void
 AdaptiveNonLinearStatic :: solveYourselfAt(TimeStep *tStep) {
     proceedStep(1, tStep);
     this->updateYourself(tStep);
+
 #ifdef __OOFEG
     ESIEventLoop (YES, "AdaptiveNonLinearStatic: Solution finished; Press Ctrl-p to continue");
 #endif
+
+    this->terminate( this->giveCurrentStep() );
+
+#ifdef __PARALLEL_MODE
+    if (preMappingLoadBalancingFlag) this->balanceLoad( this->giveCurrentStep() );
+#endif
+
     // evaluate error of the reached solution
-    this->ee->estimateError( temporaryEM, this->giveCurrentStep() );
+    this->ee->estimateError( equilibratedEM, this->giveCurrentStep() );
+    //this->ee->estimateError( temporaryEM, this->giveCurrentStep() );
     this->ee->giveRemeshingCrit()->estimateMeshDensities( this->giveCurrentStep() );
     RemeshingStrategy strategy = this->ee->giveRemeshingCrit()->giveRemeshingStrategy( this->giveCurrentStep() );
 
@@ -139,14 +155,6 @@ AdaptiveNonLinearStatic :: solveYourselfAt(TimeStep *tStep) {
     if ( strategy == NoRemeshing_RS ) {
         //
     } else  if ( ( strategy == RemeshingFromCurrentState_RS ) || ( strategy == RemeshingFromPreviousState_RS ) ) {
-        if ( strategy == RemeshingFromCurrentState_RS ) {
-            // ensure the updating the step
-            this->setContextOutputMode(ALWAYS);
-            //this->terminate (this->giveCurrentStep());
-        } else {
-            // save previous step (because update not called)
-        }
-
 
         // do remeshing
         MesherInterface *mesher = ::CreateUsrDefMesherInterface(meshPackage, this->giveDomain(1));
@@ -155,14 +163,24 @@ AdaptiveNonLinearStatic :: solveYourselfAt(TimeStep *tStep) {
 	MesherInterface::returnCode result = mesher->createMesh(this->giveCurrentStep(), 1, 
 								this->giveDomain(1)->giveSerialNumber() + 1, &newDomain);
 
+	delete mesher;
+	  
 	if (result == MesherInterface::MI_OK) {
+
 	  this->initFlag = 1;
 	  this->adaptiveRemap(newDomain);
+
 	} else if (result == MesherInterface::MI_NEEDS_EXTERNAL_ACTION) {
 
-	  this->terminate( this->giveCurrentStep() );
+	  if ( strategy == RemeshingFromCurrentState_RS ) {
+            // ensure the updating the step
+            this->setContextOutputMode(ALWAYS);
+            //this->terminate (this->giveCurrentStep());
+	  } else {
+            // save previous step (because update not called)
+	  }
+	  
 	  this->terminateAnalysis();
-	  delete mesher;
 	  throw OOFEM_Terminate();
 
 	} else {
@@ -1045,3 +1063,33 @@ AdaptiveNonLinearStatic :: giveTimeStepLoadLevel(int istep)
 }
 
 
+#ifdef __PARALLEL_MODE
+LoadBalancer *
+AdaptiveNonLinearStatic :: giveLoadBalancer()
+{
+    if ( lb ) {
+        return lb;
+    }
+
+    if ( loadBalancingFlag || preMappingLoadBalancingFlag ) {
+        lb = :: CreateUsrDefLoadBalancerOfType( ParmetisLoadBalancerClass, this->giveDomain(1) );
+        return lb;
+    } else {
+        return NULL;
+    }
+}
+LoadBalancerMonitor *
+AdaptiveNonLinearStatic :: giveLoadBalancerMonitor()
+{
+    if ( lbm ) {
+        return lbm;
+    }
+
+    if ( loadBalancingFlag || preMappingLoadBalancingFlag ) {
+        lbm = :: CreateUsrDefLoadBalancerMonitorOfType(WallClockLoadBalancerMonitorClass, this);
+        return lbm;
+    } else {
+        return NULL;
+    }
+}
+#endif
