@@ -178,6 +178,7 @@ DirectErrorIndicatorRC :: estimateMeshDensities(TimeStep *tStep) {
 #ifdef __PARALLEL_MODE
     if (initCommMap) {
       communicator->setUpCommunicationMaps(d->giveEngngModel(), true, true);
+      OOFEM_LOG_INFO ("DirectErrorIndicatorRC :: estimateMeshDensities: initialized comm maps\n");
       initCommMap = false;
     }
 
@@ -281,6 +282,7 @@ DirectErrorIndicatorRC :: reinitialize()
   stateCounter = -1; 
 #ifdef __PARALLEL_MODE
   dofManDensityExchangeFlag  = true;
+  initCommMap = true;
 #endif
 }
 
@@ -358,7 +360,9 @@ DirectErrorIndicatorRC :: unpackSharedDofManLocalDensities (ProcessCommunicator 
     for ( i = 1; i <= size; i++ ) {
       result &= pcbuff->unpackDouble(value);
       this->sharedDofManDensities[toRecvMap->at(i)] = max (value, this->sharedDofManDensities[toRecvMap->at(i)]);
+#ifdef __VERBOSE_PARALLEL
       OOFEM_LOG_INFO("unpackSharedDofManLocalDensities: node %d[%d], value %f\n",toRecvMap->at(i), domain->giveDofManager (toRecvMap->at(i))->giveGlobalNumber(), this->sharedDofManDensities[toRecvMap->at(i)]);
+#endif
     }
     return result;
 }
@@ -421,7 +425,10 @@ DirectErrorIndicatorRC :: unpackSharedDofManLocalIndicatorVals (ProcessCommunica
     for ( i = 1; i <= size; i++ ) {
       result &= pcbuff->unpackDouble(value);
       this->sharedDofManIndicatorVals[toRecvMap->at(i)] = max (value, this->sharedDofManIndicatorVals[toRecvMap->at(i)]);
-      OOFEM_LOG_INFO("unpackSharedDofManLocalIndicatorVals: node %d[%d], value %f\n",toRecvMap->at(i), domain->giveDofManager (toRecvMap->at(i))->giveGlobalNumber(), this->sharedDofManIndicatorVals[toRecvMap->at(i)]);    }
+#ifdef __VERBOSE_PARALLEL
+      OOFEM_LOG_INFO("unpackSharedDofManLocalIndicatorVals: node %d[%d], value %f\n",toRecvMap->at(i), domain->giveDofManager (toRecvMap->at(i))->giveGlobalNumber(), this->sharedDofManIndicatorVals[toRecvMap->at(i)]);
+#endif
+    }
     return result;
 }
 
