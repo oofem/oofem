@@ -505,6 +505,8 @@ ConnectivityTable :: instanciateConnectivityTable()
         return;                     // already initialized
     }
 
+    OOFEM_LOG_INFO ("ConnectivityTable: initializing\n");
+
     for ( i = 1; i <= nelems; i++ ) {
         ielem = domain->giveElement(i);
         nnodes = ielem->giveNumberOfDofManagers();
