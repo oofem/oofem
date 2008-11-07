@@ -155,6 +155,7 @@ enum InputFieldType {
     IFT_AdaptiveNonLinearStatic_controllmode,
     IFT_AdaptiveNonLinearStatic_ddm,
     IFT_AdaptiveNonLinearStatic_refloadmode,
+    IFT_AdaptiveNonLinearStatic_preMappingLoadBalancingFlag,
 
     IFT_StationaryTransportProblem_lstype,
     IFT_StationaryTransportProblem_smtype,

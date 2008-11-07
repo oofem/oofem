@@ -73,7 +73,14 @@ class AdaptiveNonLinearStatic : public NonLinearStatic
 protected:
     FloatArray d2_totalDisplacement, d2_incrementOfDisplacement;
     MeshPackageType meshPackage;
+    /// flag indication whether to restore equlibrium after adaptive remapping
     int equilibrateMappedConfigurationFlag;
+    /**
+     * Flag to trigger load balancing before adaptive remapping. 
+     * The emodel loadBalancingFlag will trigger load balancing after 
+     * mapping and optional consistency recovery.
+     */ 
+    bool preMappingLoadBalancingFlag;
     /// Error estimator
     ErrorEstimator *ee;
     /**
@@ -142,6 +149,13 @@ public:
     virtual const char *giveClassName() const { return "AdaptiveNonLinearStatic"; }
     /// Returns classType id of receiver.
     virtual classType giveClassID() const { return AdaptiveNonLinearStaticClass; }
+
+#ifdef __PARALLEL_MODE
+    /** returns reference to receiver's load balancer*/
+    virtual LoadBalancer *giveLoadBalancer();
+    /** returns reference to receiver's load balancer monitor*/
+    virtual LoadBalancerMonitor *giveLoadBalancerMonitor();
+#endif
 
 protected:
     void assembleInitialLoadVector(FloatArray &loadVector, FloatArray &loadVectorOfPrescribed,
