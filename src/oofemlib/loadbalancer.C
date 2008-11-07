@@ -358,6 +358,7 @@ LoadBalancer :: unpackMigratingData(Domain *d, ProcessCommunicator &pc)
         _etype = ( classType ) _type;
         elem = CreateUsrDefElementOfType(_etype, 0, d);
         elem->restoreContext(& pcDataStream, CM_Definition | CM_State);
+	elem->initForNewStep();
         dtm->addTransaction(DomainTransactionManager :: DTT_ADD, DomainTransactionManager :: DCT_Element, elem->giveGlobalNumber(), elem);
         nrecv++;
         //recvElemList.push_back(elem);
