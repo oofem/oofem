@@ -260,9 +260,11 @@ ParmetisLoadBalancer :: initGlobalParmetisElementNumbering()
     IntArray procElementCounts(nproc);
 
     //if (procElementCounts) delete procElementCounts;
-    elmdist = new idxtype [ nproc + 1 ];
-    if ( elmdist == NULL ) {
+    if (elmdist == NULL) {
+      elmdist = new idxtype [ nproc + 1 ];
+      if ( elmdist == NULL ) {
         OOFEM_ERROR("ParmetisLoadBalancer::initGlobalParmetisNumbering: failed to allocate elmdist array");
+      }
     }
 
     // determine number of local elements for the receiver
