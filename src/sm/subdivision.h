@@ -47,6 +47,7 @@
 #include "conTable.h"
 #ifndef __MAKEDEPEND
 #include <queue>
+#include <list>
 #endif
 
 
@@ -91,6 +92,7 @@ class Subdivision : public MesherInterface
       this->globalNumber  = -1;
 #endif
     }
+    virtual ~RS_Node() {}
     double giveRequiredDensity() {return requiredDensity;}
     FloatArray* giveCoordinates() {return &coords;}
     double giveCoordinate(int i) {return coords.at(i);}

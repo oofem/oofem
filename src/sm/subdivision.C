@@ -139,10 +139,12 @@ Subdivision::RS_Triangle::RS_Triangle (int number, RS_Mesh* mesh, int parent, In
   elength2 = mesh->giveNode(this->nodes.at(2))->giveCoordinates()->distance(*(mesh->giveNode(this->nodes.at(3))->giveCoordinates()));
   elength3 = mesh->giveNode(this->nodes.at(3))->giveCoordinates()->distance(*(mesh->giveNode(this->nodes.at(1))->giveCoordinates()));
   leIndex = 1;
-  if (elength2>elength1) leIndex = 2;
-  if (elength3>elength1) leIndex = 3;
-
-  
+  if (elength2>elength1) {
+    leIndex = 2;
+    if (elength3>elength2) leIndex = 3;
+  } else if (elength3>elength1) {
+    leIndex = 3;
+  }
 }
 
 
@@ -179,6 +181,15 @@ Subdivision::RS_Triangle::bisect(std::queue<int> &subdivqueue, std::list<int> &s
     iNum = mesh->giveNumberOfNodes() + 1;
     irregular = new Subdivision::RS_IrregularNode (iNum, 0, coords, density);
     mesh->addNode (iNum, irregular);
+
+    /*
+      #ifdef __PARALLEL_MODE
+      OOFEM_LOG_INFO ("[%d]RS_Triangle::bisecting %d[%d] nodes %d %d %d, lindex %d, new irregular %d\n",mesh->giveSubdivision()->giveRank(),this->number, this->giveGlobalNumber(),nodes.at(1), nodes.at(2), nodes.at(3), leIndex, iNum);
+      #else
+      OOFEM_LOG_INFO ("RS_Triangle::bisecting %d, new irregular %d\n",this->number, iNum);
+      #endif
+    */
+
 #ifdef __OOFEG
     irregular->drawGeometry();
 #endif
@@ -255,21 +266,25 @@ Subdivision::RS_Element::isIrregularShared(int leIndex, int inode, int jnode, in
   if ((mesh->giveNode(nodes.at(inode))->giveParallelMode() == DofManager_shared) &&
       (mesh->giveNode(nodes.at(jnode))->giveParallelMode() == DofManager_shared)) {
     // test if neigbor element exist (if yes and is local then the edge is not shared
-    if (this->neghbours_base_elements.at(leIndex)) {
-      if (mesh->giveElement(this->neghbours_base_elements.at(leIndex))->giveParallelMode() != Element_local) {
+    bool has_local_neighbor = false;
+    int base_neighbor = this->neghbours_base_elements.at(leIndex);
+    if (base_neighbor) {
+      if (mesh->giveElement(base_neighbor)->giveParallelMode() == Element_local) has_local_neighbor = true;
+    }
+
+    if (!has_local_neighbor) { 
       
-	// test if parent vertex nodes are shared by the same partition
-	const IntArray *ipartitions = mesh->giveNode(nodes.at(inode))->givePartitions();
-	const IntArray *jpartitions = mesh->giveNode(nodes.at(jnode))->givePartitions();
-	// find common partitions 
-	int i, ipsize = ipartitions->giveSize();
-	for (i=1; i<=ipsize; i++) {
-	  if (jpartitions->contains (ipartitions->at(i)) &&
-	      (ipartitions->at(i) != this->mesh->giveSubdivision()->giveRank())) { // 
-	    partition = ipartitions->at(i);
-	    if (!found) found = true; else OOFEM_ERROR ("Subdivision::RS_Triangle::isIrregularShared: topology error");
-	    
-	  }
+      // test if parent vertex nodes are shared by the same partition
+      const IntArray *ipartitions = mesh->giveNode(nodes.at(inode))->givePartitions();
+      const IntArray *jpartitions = mesh->giveNode(nodes.at(jnode))->givePartitions();
+      // find common partitions 
+      int i, ipsize = ipartitions->giveSize();
+      for (i=1; i<=ipsize; i++) {
+	if (jpartitions->contains (ipartitions->at(i)) &&
+	    (ipartitions->at(i) != this->mesh->giveSubdivision()->giveRank())) { // 
+	  partition = ipartitions->at(i);
+	  if (!found) found = true; else OOFEM_ERROR ("Subdivision::RS_Triangle::isIrregularShared: topology error");
+	  
 	}
       }
     }
@@ -641,6 +656,13 @@ Subdivision::bisectMesh () {
     
     if (rdensity < iedensity) {
       subdivqueue.push(ie);
+      /*
+	#ifdef __PARALLEL_MODE
+	OOFEM_LOG_INFO("[%d] Subdivision: scheduling element %d[%d] for bisection, dens=%lf rdens=%lf\n", myrank, ie, mesh->giveElement(ie)->giveGlobalNumber(), iedensity, rdensity);
+	#else
+	OOFEM_LOG_INFO("Subdivision: scheduling element %d for bisection, dens=%lf rdens=%lf\n", ie, iedensity, rdensity);
+	#endif
+      */
     }
   }
 #ifdef __PARALLEL_MODE
