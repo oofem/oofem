@@ -395,7 +395,7 @@ void DofManager::setNumberOfDofs(int _ndofs)
         delete[] dofArray;
       }
     }
-    dofArray = new Dof * [ this->giveNumberOfDofs() ];
+    dofArray = new Dof * [ _ndofs ];
     for (i=0; i<_ndofs;i++) dofArray[i]=NULL;
     this->numberOfDofs = _ndofs;
   }
