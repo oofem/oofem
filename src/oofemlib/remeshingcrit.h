@@ -119,6 +119,7 @@ public:
      * @see FEMComponent::giveClassID
      */
     classType                giveClassID() const { return RemeshingCriteriaClass; }
+    virtual void reinitialize() {}
 
 
 #ifdef __OOFEG
