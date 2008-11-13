@@ -299,7 +299,7 @@ FloatArray :: beVectorProductOf(const FloatArray &v1, const FloatArray &v2)
 }
 
 double
-FloatArray :: distance(const FloatArray &from) const
+FloatArray :: distance_square (const FloatArray &from) const
 //
 // returns distance between receiver and from from
 // computed using generalized pythagora formulae
@@ -318,7 +318,14 @@ FloatArray :: distance(const FloatArray &from) const
         dist += ( this->at(i) - from.at(i) ) * ( this->at(i) - from.at(i) );
     }
 
-    return sqrt(dist);
+    return dist;
+}
+
+
+double
+FloatArray :: distance (const FloatArray &from) const
+{
+  return sqrt(this->distance_square(from));
 }
 
 

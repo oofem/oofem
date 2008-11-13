@@ -287,6 +287,10 @@ public:
      */
     double       distance(const FloatArray &) const;
     /**
+     * Computes the square of distance between position represented by receiver and position given as parameter.
+     */
+    double       distance_square (const FloatArray &) const;
+    /**
      * Returns the receiver 'a' rotated according the change-of-base matrix r.
      * @param r Rotation matrix.
      * @param mode If mode == 't' the method performs the operation  a = t(transp) * r,
