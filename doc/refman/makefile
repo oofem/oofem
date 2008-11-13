@@ -5,7 +5,6 @@ BUILD_DIR_HTML  = html
 BUILD_DIR_LATEX = latex
 INST_DIR = oofemrefman
 DOCXX      = doxygen
-ROBOT = /home/bp/oofem-doc/www/robot.pl
 RCP = scp
 
 all: www-doc 

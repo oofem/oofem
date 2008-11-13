@@ -1,4 +1,5 @@
 SHELL = /bin/sh
+export ROBOT = /usr/bin/perl -I/home/bp/oofem-doc/www/en /home/bp/oofem-doc/www/robot.pl
 
 www-doc: 
 	cd elementlibmanual; make www-doc

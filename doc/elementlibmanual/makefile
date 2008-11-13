@@ -1,5 +1,4 @@
 SHELL = /bin/sh
-ROBOT = /home/bp/oofem-doc/www/robot.pl
 BACKUP_FILES = *.tex *.fig *.eps makefile
 RCP = scp
 
