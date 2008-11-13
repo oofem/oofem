@@ -187,6 +187,9 @@
 #include "polylinenonlocalbarrier.h"
 #include "symmetrybarrier.h"
 
+// random generators
+#include "localgaussianrandomgenerator.h"
+
 // mesher interfaces
 #include "t3dinterface.h"
 #include "targe2interface.h"
@@ -770,6 +773,18 @@ NonlocalBarrier *CreateUsrDefNonlocalBarrierOfType(char *aClass, int num, Domain
 
     return answer;
 }
+
+RandomFieldGenerator *CreateUsrDefRandomFieldGenerator(char *aClass, int num, Domain *d)
+{
+    RandomFieldGenerator *answer = NULL;
+    if ( !strncasecmp(aClass, "localgaussrandomgenerator", 25) ) {
+        answer = new LocalGaussianRandomGenerator(num, d);
+    }
+
+
+    return answer;
+}
+
 
 IntegrationRule *CreateUsrDefIRuleOfType(classType type, int number, Element *e)
 {

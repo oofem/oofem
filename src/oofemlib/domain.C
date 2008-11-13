@@ -100,6 +100,7 @@ Domain :: Domain(int n, int serNum, EngngModel *pm) : defaultNodeDofIDArry(), de
     loadTimeFunctionList  = new AList< LoadTimeFunction >(0);
     crossSectionList      = new AList< CrossSection >(0);
     nonlocalBarierList    = new AList< NonlocalBarrier >(0);
+    randomFieldGeneratorList = new AList< RandomFieldGenerator >(0);
     // yieldCriteriaList     = new AList(0) ;
 
     numberOfDefaultDofsPerNode = -1;
@@ -130,6 +131,7 @@ Domain :: ~Domain()
     delete loadTimeFunctionList;
     delete crossSectionList;
     delete nonlocalBarierList;
+    delete randomFieldGeneratorList;
 
     delete connectivityTable;
     delete spatialLocalizer;
@@ -339,6 +341,17 @@ NonlocalBarrier *Domain :: giveNonlocalBarrier(int n)
 }
 
 
+RandomFieldGenerator *Domain :: giveRandomFieldGenerator(int n)
+// Returns the n-th RandomFieldGenerator.
+{
+    if ( randomFieldGeneratorList->includes(n) ) {
+        return randomFieldGeneratorList->at(n);
+    } else {
+        _error2("giveRandomFieldGenerator: undefined generator (%d)", n);
+    }
+
+    return NULL;
+}
 
 /*
  * YieldCriteria*  Domain :: giveYieldCriteria (int n)
@@ -396,7 +409,7 @@ int Domain :: instanciateYourself(DataReader *dr)
 
     int i, num;
     char name [ MAX_NAME_LENGTH ];
-    int nnode, nelem, nmat, nload, nic, nloadtimefunc, ncrossSections, nbarrier;
+    int nnode, nelem, nmat, nload, nic, nloadtimefunc, ncrossSections, nbarrier, nrfg;
     DofManager *node;
     Element *elem;
     Material *mat;
@@ -405,6 +418,8 @@ int Domain :: instanciateYourself(DataReader *dr)
     LoadTimeFunction *ltf;
     CrossSection *crossSection;
     NonlocalBarrier *barrier;
+    RandomFieldGenerator *rfg;
+
     FILE *outputStream = this->giveEngngModel()->giveOutputStream();
 
     // read type of Domain to be solved
@@ -444,6 +459,11 @@ int Domain :: instanciateYourself(DataReader *dr)
     nbarrier = 0;
     __keyword = "nbarrier";
     result = ir->giveOptionalField(nbarrier,  IFT_Domain_nbarrier, __keyword);
+    // read optional number of RandomFieldGenerator
+    nrfg = 0;
+    result = ir->giveOptionalField(nrfg,  IFT_Domain_nrfg, "nrandgen");
+    
+
 
     // read nodes
     dofManagerList->growTo(nnode);
@@ -595,6 +615,38 @@ int Domain :: instanciateYourself(DataReader *dr)
         VERBOSE_PRINT0("Instanciated barriers ", nbarrier);
 #  endif
     }
+
+    if ( nrfg ) {
+        // read random field generators
+        randomFieldGeneratorList->growTo(nrfg);
+        for ( i = 0; i < nrfg; i++ ) {
+            ir = dr->giveInputRecord(DataReader :: IR_nRandomFieldGenRec, i + 1);
+            // read type of load
+            //__keyword = NULL; result = ir->giveField(name, MAX_NAME_LENGTH, __keyword);
+            IR_GIVE_RECORD_KEYWORD_FIELD(ir, name, num, MAX_NAME_LENGTH);
+
+            rfg = CreateUsrDefRandomFieldGenerator(name, num, this);
+            rfg->initializeFrom(ir);
+
+            // check number
+            if ( ( num < 1 ) || ( num > nrfg ) ) {
+                _error2("instanciateYourself: Invalid generator number (num=%d)", num);
+            }
+
+            if ( !randomFieldGeneratorList->includes(num) ) {
+                randomFieldGeneratorList->put(num, rfg);
+            } else {
+                _error2("instanciateYourself: generator entry already exist (num=%d)", num);
+            }
+
+            ir->finish();
+        }
+
+#  ifdef VERBOSE
+        VERBOSE_PRINT0("Instanciated random generators ", nbarrier);
+#  endif
+    }
+
 
 
     // read boundary conditions

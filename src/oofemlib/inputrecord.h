@@ -283,6 +283,7 @@ enum InputFieldType {
     IFT_Domain_nic,
     IFT_Domain_nloadtimefunct,
     IFT_Domain_nbarrier,
+    IFT_Domain_nrfg,
 
     IFT_DofManager_ndofs,
     IFT_DofManager_dofidmask,
@@ -802,6 +803,10 @@ enum InputFieldType {
     IFT_WallClockLoadBalancerMonitor_lbstep,
     IFT_WallClockLoadBalancerMonitor_perturbedsteps,
     IFT_WallClockLoadBalancerMonitor_perturbfactor,
+
+    IFT_LocalGaussianRandomGenerator_mean,
+    IFT_LocalGaussianRandomGenerator_variance,
+    IFT_LocalGaussianRandomGenerator_seed,
 
     IFT_Unknown
 };

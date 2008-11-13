@@ -133,6 +133,13 @@ public:
      * Invoked, after new equilibrium state has been reached.
      */
     virtual void updateYourself(TimeStep *) { } // update after new equilibrium state reached
+    /**
+     * Returns the value of material model property stored in receiving status.
+     * This is typically used when random variation of some material property is considered,
+     * in this case the individual values are to be stored in status (they are no longer material constatnts)
+     * Returns true if property is available in status,  false  
+     */
+     virtual bool giveMaterialProperty (int propID, double &value) {return false;}
 
     // definition
     /// Returns class name of the receiver.

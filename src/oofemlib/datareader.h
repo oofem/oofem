@@ -61,7 +61,8 @@ public:
     enum InputRecordType {
         IR_outFileRec, IR_jobRec, IR_domainRec, IR_outManRec, IR_domainCompRec,
         IR_emodelRec, IR_mstepRec, IR_expModuleRec, IR_dofmanRec, IR_elemRec,
-        IR_crosssectRec, IR_matRec, IR_nlocBarRec, IR_bcRec, IR_icRec, IR_ltfRec
+        IR_crosssectRec, IR_matRec, IR_nlocBarRec, IR_bcRec, IR_icRec, IR_ltfRec,
+        IR_nRandomFieldGenRec
     };
 
     /**

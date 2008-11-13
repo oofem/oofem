@@ -80,6 +80,7 @@ class SpatialLocalizer;
 class NodalRecoveryModel;
 class NonlocalBarrier;
 class DomainTransactionManager;
+class RandomFieldGenerator;
 
 #ifdef __PARALLEL_MODE
 class ProcessCommunicator;
@@ -148,6 +149,8 @@ private:
     AList< LoadTimeFunction > *loadTimeFunctionList;
     /// Nonlocal barier list
     AList< NonlocalBarrier > *nonlocalBarierList;
+    /// List of Random generators
+    AList< RandomFieldGenerator > *randomFieldGeneratorList;
 
     // numberOfDefaultDofsPerNode specifyies default number of dofs per node
     // for current domain type. The defaultDofMask describes the physical meaning of these
@@ -299,6 +302,12 @@ public:
      * @param: n pointer to n-th barrier is returned
      */
     NonlocalBarrier *giveNonlocalBarrier(int n);
+    /**
+     * Service for accessing particular domain andom field generator.
+     * Generates error if no such generator is defined.
+     * @param: n pointer to n-th object is returned
+     */
+    RandomFieldGenerator *giveRandomFieldGenerator(int n);
 
     // YieldCriteria*     giveYieldCriteria(int);
     /**

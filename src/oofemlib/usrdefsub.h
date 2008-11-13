@@ -55,6 +55,7 @@
 #include "meshpackagetype.h"
 #include "mesherinterface.h"
 //#include "nonlocalbarrier.h"
+#include "randomfieldgenerator.h"
 #include "classtype.h"
 #include "sparsemtrxtype.h"
 #include "geneigvalsolvertype.h"
@@ -172,6 +173,15 @@ ExportModule *CreateUsrDefExportModuleOfType(char *name, EngngModel *emodel);
  * @return newly allocated object of requested type, null if keyword not suppported
  */
 NonlocalBarrier *CreateUsrDefNonlocalBarrierOfType(char *name, int num, Domain *d);
+/**
+ * Creates new Instance of Random generator class corresponding to given name.
+ * @param name determines random generator type
+ * @param num  component number
+ * @param d    domain assigned to new object
+ * @return newly allocated object of requested type, null if keyword not suppported
+ */
+RandomFieldGenerator *CreateUsrDefRandomFieldGenerator(char *name, int num, Domain *d);
+
 /**
  * Creates new instance of user defined integration rule corresponding to given keyword.
  * @param type id determining the type of new instance
