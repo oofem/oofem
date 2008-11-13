@@ -660,17 +660,44 @@ Full integration of all strain components using four point Gauss integration for
 \subsection{Interface elements}
 \subsubsection{Interface2dquad element}
 Implementation of a two dimensional interface element with quadratic
-approximation of displacement field. Requires material model with
-\_2dInterface support.
+approximation of displacement field. Can be used to glue together two elements with quadratic displacement approximation along the shared edge. Note, that the nodes along the interface are doubled, each couple with identical coordinates. Nodes on the negative side are numbered first, followed by nodes on the positive part. Requires material model with \_2dInterface support. 
+
+\begin{figure}[tb]
+\begin{center}\epsfig{file=interf2d_quad.eps}\end{center}
+\caption{2D interface element with quadratic interpolation. Definition and node numbering convention}
+\label{interf2d_quad_fig}
+\end{figure}
 
 \elemkeyword{Interface2dquad}\\
 \descitem{Parameters} None.\\
 \descitem{Unknowns}
 Two dofs (u-displacement, v-displacement, w-displacement) are required in each node.\\
-\descitem{Approximation} Linear approximation of displacements and
-geometry using linear volume coordinates.
+\descitem{Approximation} quadratic approximation of displacements and
+geometry.
 \descitem{Integration}
-Full integration of all strain components using one point integration formula.
+Full integration of all strain components using four point integration formula.
+\descitem{Features} None.\\
+\descitem{Loads} \\
+\descitem{Status} 
+
+\subsubsection{Interface3dlin element}
+Implementation of a three dimensional interface element with linear
+approximation of displacement field. Can be used to glue together two elements with linear displacement approximation along the shared tringular surface. Note, that the nodes along the interface are doubled, each couple with identical coordinates. Nodes on the negative surface are numbered first, followed by nodes on the positive part. Requires material model with \_3dInterface support.
+
+\begin{figure}[tb]
+\begin{center}\epsfig{file=interf3d_lin.eps}\end{center}
+\caption{3D interface element with linear interpolation. Definition and node numbering convention}
+\label{interf3d_lin_fig}
+\end{figure}
+
+\elemkeyword{Interface3dlin}\\
+\descitem{Parameters} None.\\
+\descitem{Unknowns}
+Two dofs (u-displacement, v-displacement, w-displacement) are required in each node.\\
+\descitem{Approximation} Linear approximation of displacements and
+geometry.
+\descitem{Integration}
+Full integration of all components using one point integration formula.
 \descitem{Features} None.\\
 \descitem{Loads} \\
 \descitem{Status} 
