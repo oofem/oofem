@@ -140,6 +140,12 @@ public:
      * Returns true if property is available in status,  false  
      */
      virtual bool giveMaterialProperty (int propID, double &value) {return false;}
+    /**
+     * Allows to set the value of material model property to be stored in receiving status.
+     * This is typically used when random variation of some material property is considered,
+     * in this case the individual values are to be stored in status (they are no longer material constatnts)
+     */
+     virtual void setMaterialProperty (int propID, double value) {}
 
     // definition
     /// Returns class name of the receiver.
