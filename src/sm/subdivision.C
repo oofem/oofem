@@ -349,6 +349,8 @@ Subdivision::RS_Triangle::bisect(std::queue<int> &subdivqueue, std::list<int> &s
     // compute required density of a new node
     density = 0.5*(mesh->giveNode(nodes.at(inode))->giveRequiredDensity()+
 									 mesh->giveNode(nodes.at(jnode))->giveRequiredDensity());
+
+		/*
 		// check whether new node is boundary
 		if(this->neghbours_base_elements.at(leIndex)){
 #ifdef __PARALLEL_MODE
@@ -366,6 +368,7 @@ Subdivision::RS_Triangle::bisect(std::queue<int> &subdivqueue, std::list<int> &s
 		} else {
 			boundary=true;
 		}
+		*/
 
 		// quick hack to simulate shared boundary in sequential analysis
 		// important: a single element can have only two original nodes marked as boundary !!!
@@ -2469,6 +2472,7 @@ Subdivision :: createMesh(TimeStep *stepN, int domainNumber, int domainSerNum, D
     }
     // set node coordinates
     ((Node*) node)->setCoordinates(*mesh->giveNode(inode)->giveCoordinates());
+		node->setBoundaryFlag (mesh->giveNode(inode)->isBoundary());
     (*dNew) -> setDofManager (inode, node);
   } // end creating dof managers
 

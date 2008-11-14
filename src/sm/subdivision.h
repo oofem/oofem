@@ -302,7 +302,7 @@ class Subdivision : public MesherInterface
     RS_Mesh *m;
   public:
     RS_CompareNodePositions(RS_Mesh *_m) {m=_m;}
-    int operator() (int i, int j);
+    int operator()(int i, int j);
   };
 
   //RS_Mesh *oldMesh, *newMesh;
