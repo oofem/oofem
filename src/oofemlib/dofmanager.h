@@ -350,6 +350,7 @@ public:
 
     // miscellaneous
     bool         isBoundary() { return isBoundaryFlag; }
+    void         setBoundaryFlag (bool _b) {this->isBoundaryFlag = _b;}
     /// Returns true if receiver contains slave dofs
     virtual int  hasAnySlaveDofs();
     /**

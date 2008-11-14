@@ -48,27 +48,35 @@ MMAContainingElementProjection :: __init(Domain *dold, IntArray &type, FloatArra
 {
     SpatialLocalizer *sl = dold->giveSpatialLocalizer();	
     IntArray regionList(1); regionList.at(1)=region;
-    Element *srcElem = sl->giveElementContainingPoint (coords, &regionList);
-    IntegrationRule *iRule = srcElem->giveDefaultIntegrationRulePtr();
     GaussPoint *jGp;
     FloatArray jGpCoords;
     double distance, minDist = 1.e6;
     int j;
-    
-    this->source = NULL;
-    for ( j = 0; j < iRule->getNumberOfIntegrationPoints(); j++ ) {
-      jGp = iRule->getIntegrationPoint(j);
-      if ( srcElem->computeGlobalCoordinates( jGpCoords, * ( jGp->giveCoordinates() ) ) ) {
-	distance = coords.distance(jGpCoords);
-	if ( distance < minDist ) {
-	  minDist = distance;
-	  this->source = jGp;
-	}
-      }
-    }
+    IntegrationRule *iRule;
+    Element *srcElem;
 
-    if ( !source ) {
+    if ((srcElem = sl->giveElementContainingPoint (coords, &regionList))) {
+    
+
+      iRule = srcElem->giveDefaultIntegrationRulePtr();
+      
+      this->source = NULL;
+      for ( j = 0; j < iRule->getNumberOfIntegrationPoints(); j++ ) {
+        jGp = iRule->getIntegrationPoint(j);
+        if ( srcElem->computeGlobalCoordinates( jGpCoords, * ( jGp->giveCoordinates() ) ) ) {
+          distance = coords.distance(jGpCoords);
+          if ( distance < minDist ) {
+            minDist = distance;
+            this->source = jGp;
+          }
+        }
+      }
+      
+      if ( !source ) {
         OOFEM_ERROR("MMAContainingElementProjection::__init : no suitable source found");
+      }
+    } else {
+      OOFEM_ERROR ("MMAContainingElementProjection: No suitable element found");
     }
 }
 

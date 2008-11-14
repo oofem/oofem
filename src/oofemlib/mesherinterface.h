@@ -40,6 +40,7 @@
 #ifndef mesherinterface_h
 #define mesherinterface_h
 
+#include "inputrecord.h"
 
 class Domain;
 class TimeStep;
@@ -70,6 +71,13 @@ class MesherInterface
      * @param newly allocated domain, representing new mesh or set to NULL if external generation has to be performed.
      */
     virtual returnCode createMesh(TimeStep *, int domainNumber, int domainSerNum, Domain** dNew) = 0;
+    /** Initializes receiver acording to object description stored in input record.
+     *  This function is called immediately after creating object using
+     * constructor. Input record can be imagined as data record in component database
+     * belonging to receiver. Receiver may use value-name extracting functions
+     * to extract particular field from record.
+     * @see readInteger, readDouble and similar functions */
+    virtual IRResultType initializeFrom(InputRecord *ir) {return IRRT_OK;}
 };
 
 #endif // mesherinterface_h

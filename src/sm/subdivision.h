@@ -74,6 +74,7 @@ class Subdivision : public MesherInterface
     double requiredDensity;
     int number;
     int parent; // number of parent node or zero for new nodes
+		bool boundary;
 #ifdef __PARALLEL_MODE
     int globalNumber;
     dofManagerParallelMode parallel_mode;
@@ -84,12 +85,12 @@ class Subdivision : public MesherInterface
     IntArray partitions;
 #endif
   public:
-    RS_Node (int n, int parent, FloatArray& c, double rd) {
-      this->number=n; this->coords=c; this->requiredDensity = rd;
+    RS_Node (int n, int parent, FloatArray& c, double rd, bool boundary) {
+      this->number=n; this->coords=c; this->requiredDensity = rd; this->boundary=boundary;
       this->parent=parent;
 #ifdef __PARALLEL_MODE
       this->parallel_mode = DofManager_local;
-      this->globalNumber  = -1;
+      this->globalNumber  = 0;
 #endif
     }
     virtual ~RS_Node() {}
@@ -97,6 +98,10 @@ class Subdivision : public MesherInterface
     FloatArray* giveCoordinates() {return &coords;}
     double giveCoordinate(int i) {return coords.at(i);}
     int giveParent () {return this->parent;}
+		bool isBoundary () {return this->boundary;}
+		void setBoundary (bool b) {this -> boundary=b;}
+    int giveNumber() {return this->number;}
+    void setNumber(int _n) {this->number = _n;}
 #ifdef __PARALLEL_MODE
     dofManagerParallelMode giveParallelMode() const { return parallel_mode; }
     void setParallelMode(dofManagerParallelMode _mode) { parallel_mode = _mode; }
@@ -117,7 +122,7 @@ class Subdivision : public MesherInterface
   protected:
     int inode, jnode; // paren edge nodes
   public:
-    RS_IrregularNode (int n, int parent, FloatArray& c, double rd) : RS_Node (n, parent, c, rd) {}
+    RS_IrregularNode (int n, int parent, FloatArray& c, double rd, bool boundary) : RS_Node (n, parent, c, rd, boundary) {}
     void setEdgeNodes (int i, int j) {inode=i; jnode=j;}
     void giveEdgeNodes (int& i, int& j) {i=inode; j=jnode;}
     virtual bool isIrregular() {return true;}
@@ -136,6 +141,8 @@ class Subdivision : public MesherInterface
     IntArray children;
     // parent
     int parent;
+    // longest edge index
+    int leIndex;
     // mesh
     RS_Mesh* mesh;
 #ifdef __PARALLEL_MODE
@@ -155,21 +162,20 @@ class Subdivision : public MesherInterface
     bool hasIrregulars() {return !irregular_nodes.containsOnlyZeroes();}
     /// Returns true if receiver is terminal (not further subdivided)
     bool isTerminal() {return children.isEmpty();}
-    /** 
-        Add Irregular node and associate it to corresponding element edge, that is shared by given neighborElement
-    */
-    void addIrregular (int neighbour_base_element, int node);
     /**
        Add Irregular node to receiver, irregular identified by boundary entity identification
        (typically by an edge identified by its nodes 
     */
-    virtual void addIrregularOn (int iNum, const IntArray& bEnttity) = 0;
+    void addIrregularOn (int iNum, const IntArray& bEnttity);
+    //virtual void addIrregularOn (int iNum, const IntArray& bEnttity) = 0;  // HUHU
     /**
        Returns Irregular node of receiver identified by boundary entity identification
        (typically by an edge identified by its nodes 
        Returns zero if not found.
     */
-    virtual int giveIrregular (const IntArray& bEnttity) = 0;
+    int giveIrregularOn (const IntArray& bEnttity);
+    //virtual int giveIrregularOn (const IntArray& bEnttity) = 0;  // HUHU
+		int giveIrregular(int iedge) {return irregular_nodes.at(iedge);}
 
     virtual void bisect(std::queue<int> &subdivqueue, std::list<int> &sharedIrregularsQueue) {}
     virtual void generate () {}
@@ -178,20 +184,32 @@ class Subdivision : public MesherInterface
     virtual double giveRequiredDensity();
     void giveChildren (IntArray& c) {c=this->children;}
     virtual bool isNeighborOf (Subdivision::RS_Element* elem) = 0;
+		const IntArray *giveNeighbors () {return &this->neghbours_base_elements;}
     int giveNeighbor (int iside) {return neghbours_base_elements.at(iside);}
     void setNeighbor (int iside, int nb) {this->neghbours_base_elements.at(iside) = nb;}
+		void setIrregular (int iedge, int ir) {this->irregular_nodes.at(iedge) = ir;}
     bool containsNode (int _node) {return nodes.findFirstIndexOf (_node);}
+		virtual void giveSideNodes (int iside, IntArray& snodes) = 0;
     int giveParent() {return this->parent;}
+		int giveTopParent();
     virtual void importConnectivities(ConnectivityTable* ct) = 0;
     const IntArray* giveNodes () {return &this->nodes;}
     int giveNode(int i) {return this->nodes.at(i);}
+    int giveNumber() {return this->number;}
+    void setNumber (int newNum) {this->number=newNum;}
+		virtual int giveEdgeIndex (int inode, int jnode) = 0;
+    /// Returns the longest edge index of the receiver
+    virtual int giveLeIndex() {return this->leIndex;}
+    /// Sets the longest edge index 
+    virtual void setLeIndex (int _n) {this->leIndex = _n;}
+
 #ifdef __OOFEG
     virtual void  drawGeometry () {}
 #endif
 
 #ifdef __PARALLEL_MODE
-    // returns true if irregular node is shared with remote partition (returned in partition param)
-    bool isIrregularShared(int leIndex, int inode, int jnode, int& partition);
+    // returns number of shared remote partitions (returned in partitions param)
+    int giveIrregularSharedPartitions(int leIndex, int inode, int jnode, IntArray& partitions);
     elementParallelMode giveParallelMode() const { return parallel_mode; }
     /// Sets parallel mode of element
     void setParallelMode(elementParallelMode _mode) { parallel_mode = _mode; }
@@ -205,8 +223,6 @@ class Subdivision : public MesherInterface
   
   
   class RS_Triangle : public Subdivision::RS_Element {
-    // longest edge index
-    int leIndex;
   public:
     RS_Triangle (int number, Subdivision::RS_Mesh* mesh, int parent, IntArray& nodes) ;
     void bisect(std::queue<int> &subdivqueue, std::list<int> &sharedIrregularsQueue);
@@ -214,17 +230,49 @@ class Subdivision : public MesherInterface
     void update_neighbours();
     double giveDensity();
     bool isNeighborOf (Subdivision::RS_Element* elem);
+		void giveSideNodes (int iside, IntArray& snodes);
+		virtual void importConnectivities(ConnectivityTable* ct);
+    /** 
+        Add Irregular node and associate it to corresponding element edge, that is shared by given neighborElement
+    */
+    void addIrregular (int neighbour_base_element, int node);
+    /**
+       Add Irregular node to receiver, irregular identified by boundary entity identification
+       (typically by an edge identified by its nodes 
+    */
+    //virtual void addIrregularOn (int iNum, const IntArray& bEntity); // HUHU
+    /**
+       Returns Irregular node of receiver identified by boundary entity identification
+       (typically by an edge identified by its nodes 
+    */
+    //virtual int giveIrregularOn (const IntArray& bEnttity);  // HUHU
+		int giveEdgeIndex (int inode, int jnode);
+#ifdef __OOFEG
+    void drawGeometry() ;
+#endif
+  };
+
+	class RS_Tetra : public Subdivision::RS_Element {
+  public:
+    RS_Tetra (int number, Subdivision::RS_Mesh* mesh, int parent, IntArray& nodes) ;
+    void bisect(std::queue<int> &subdivqueue, std::list<int> &sharedIrregularsQueue);
+    void generate ();
+    void update_neighbours();
+    double giveDensity();
+    bool isNeighborOf (Subdivision::RS_Element* elem);
+		void giveSideNodes (int iside, IntArray& snodes);
+		int giveEdgeIndex (int inode, int jnode);
     virtual void importConnectivities(ConnectivityTable* ct);
     /**
        Add Irregular node to receiver, irregular identified by boundary entity identification
        (typically by an edge identified by its nodes 
     */
-    virtual void addIrregularOn (int iNum, const IntArray& bEntity);
+    //virtual void addIrregularOn (int iNum, const IntArray& bEntity); // HUHU
     /**
        Returns Irregular node of receiver identified by boundary entity identification
        (typically by an edge identified by its nodes 
     */
-    virtual int giveIrregular (const IntArray& bEnttity);
+    //virtual int giveIrregularOn (const IntArray& bEnttity); // HUHU
 
 #ifdef __OOFEG
     void drawGeometry() ;
@@ -250,23 +298,34 @@ class Subdivision : public MesherInterface
     Subdivision *giveSubdivision() {return this->subdivision;}
   };
   
+  class RS_CompareNodePositions {
+    RS_Mesh *m;
+  public:
+    RS_CompareNodePositions(RS_Mesh *_m) {m=_m;}
+    int operator() (int i, int j);
+  };
 
   //RS_Mesh *oldMesh, *newMesh;
   RS_Mesh *mesh;
   std::queue<int> subdivqueue;
   std::list<int> sharedIrregularsQueue;
-  
+  // smoothing flag
+  bool smoothingFlag;
+
  public:
   /// Constructor
-  Subdivision(Domain* d) : MesherInterface(d) {mesh=0;}
+  Subdivision(Domain* d) : MesherInterface(d) {mesh=0;smoothingFlag = true;}
   ~Subdivision() {if (mesh) delete mesh;}
   
   /// Runs the mesh generation, mesh will be written to corresponding domain din file
   virtual returnCode createMesh(TimeStep *tStep, int domainNumber, int domainSerNum, Domain** dNew);
   const char* giveClassName () {return "Subdivision";}
+  Domain* giveDomain() {return domain;}
+
  protected:
   Subdivision::RS_Mesh* giveMesh() {return mesh;}
   void bisectMesh (); 
+  void smoothMesh (); 
 #ifdef __PARALLEL_MODE
   /** Exchanges the shared irregulars between partitions. Returns true if any shared irregular has been
       exchanged between any partitions.
