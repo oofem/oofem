@@ -56,6 +56,10 @@ SkyLineMtx::SkyLineMtx(SparseMatrixF& sm,Ordering* order,MathTracer* eMT)
 
 SkyLineMtx::~SkyLineMtx()
 {
+  if (column_starts) delete[] column_starts;
+  if (columndata) delete[] columndata;
+  if (D) delete[] D;
+  
 }
 
 void SkyLineMtx::GrowSkyline(int i, int j,long* column_ns)
@@ -109,7 +113,7 @@ void SkyLineMtx::AllocateMemory(IConectMatrix* spm,int neq)
 		column_field_lenght = 1;
 	columndata = new double[column_field_lenght];
 
-	delete column_ns;
+	delete[] column_ns;
 }
 
 void SkyLineMtx::WriteStatistics(long no_init_blocks,long no_nonzeros)
