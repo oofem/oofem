@@ -680,9 +680,9 @@ Full integration of all strain components using four point integration formula.
 \descitem{Loads} \\
 \descitem{Status} 
 
-\subsubsection{Interface3dlin element}
+\subsubsection{Interface3dtrlin element}
 Implementation of a three dimensional interface element with linear
-approximation of displacement field. Can be used to glue together two elements with linear displacement approximation along the shared tringular surface. Note, that the nodes along the interface are doubled, each couple with identical coordinates. Nodes on the negative surface are numbered first, followed by nodes on the positive part. Requires material model with \_3dInterface support.
+approximation of displacement field. Can be used to glue together two elements with linear displacement approximation along the shared tringular surface. Note, that the nodes along the interface are doubled, each couple with identical coordinates. Nodes on the negative surface are numbered first, followed by nodes on the positive part. The numbering of surface nodes on interface determines the positive normal (right hand rule). The surface in the direction of positive normal is the positive surface. Requires material model with \_3dInterface support.
 
 \begin{figure}[tb]
 \begin{center}\epsfig{file=interf3d_lin.eps}\end{center}
@@ -690,7 +690,7 @@ approximation of displacement field. Can be used to glue together two elements w
 \label{interf3d_lin_fig}
 \end{figure}
 
-\elemkeyword{Interface3dlin}\\
+\elemkeyword{Interface3dtrlin}\\
 \descitem{Parameters} None.\\
 \descitem{Unknowns}
 Two dofs (u-displacement, v-displacement, w-displacement) are required in each node.\\
