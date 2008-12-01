@@ -95,6 +95,9 @@ class TimeStep;
 class ErrorEstimator;
 class MetaStep;
 class MaterialInterface;
+#ifdef __PARALLEL_MODE
+class ProblemCommunicator;
+#endif
 
 
 /**
@@ -229,6 +232,7 @@ public:
 
 #ifdef __PARALLEL_MODE
     enum EngngModel_UpdateMode { EngngModel_Unknown_Mode, EngngModel_SUMM_Mode, EngngModel_SET_Mode };
+    enum EngngModelCommType {PC_default, PC_nonlocal};
 #endif
 
 protected:
@@ -529,6 +533,7 @@ public:
     virtual void updateUnknownComponent(EquationID, ValueModeType, TimeStep *, int,
                                         double, EngngModel_UpdateMode) { return; }
 
+    virtual ProblemCommunicator* giveProblemCommunicator (EngngModelCommType t) {return  NULL;}
 #endif
     /**
      * Initializes whole problem acording to its description stored in inputStream.

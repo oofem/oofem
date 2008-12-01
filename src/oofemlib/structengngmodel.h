@@ -245,6 +245,12 @@ public:
      */
     int unpackRemoteElementData(ProcessCommunicator &processComm);
 
+    ProblemCommunicator* giveProblemCommunicator (EngngModelCommType t) {
+      if (t == PC_default) return communicator;
+      else if ( t== PC_nonlocal) return nonlocCommunicator;
+      else return NULL;
+    }
+
 #endif
 #ifdef __PETSC_MODULE
     /**
