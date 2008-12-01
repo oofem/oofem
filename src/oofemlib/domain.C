@@ -1316,8 +1316,10 @@ int Domain :: commitTransactions(DomainTransactionManager *tm)
     AList< Element > *elementList_new = new AList< Element >(0);
 
 
+    if ( tm->dofmanTransactions.empty() && tm->elementTransactions.empty()) return 1;
+
+    this->initGlobalDofManMap();
     if ( !tm->dofmanTransactions.empty() ) {
-        this->initGlobalDofManMap();
 
         DofManager *dman;
         for ( it = tm->dofmanTransactions.begin(); it != tm->dofmanTransactions.end(); ++it ) {
@@ -1340,8 +1342,8 @@ int Domain :: commitTransactions(DomainTransactionManager *tm)
 
     }
 
+    this->initGlobalElementMap();
     if ( !tm->elementTransactions.empty() ) {
-        this->initGlobalElementMap();
         int gen;
         Element *elem;
 
