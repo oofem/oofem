@@ -34,7 +34,6 @@
  */
 #ifdef __PARALLEL_MODE
 
-
 #include "engngm.h"
 #include "petscordering.h"
 #include "combuff.h"
@@ -91,7 +90,6 @@ PetscNatural2GlobalOrdering :: init(EngngModel *emodel, EquationID ut, int di, E
     DofManager *dman;
     // determine number of local eqs + number of those shared DOFs which are numbered by receiver
     // shared dofman is numbered on partition with lovest rank number
-
 
 #ifdef __VERBOSE_PARALLEL
     VERBOSEPARALLEL_PRINT("PetscNatural2GlobalOrdering :: init", "initializing N2G ordering", myrank);
@@ -167,6 +165,9 @@ PetscNatural2GlobalOrdering :: init(EngngModel *emodel, EquationID ut, int di, E
     // determine shared dofs
     int psize, nproc = emodel->giveNumberOfProcesses();
     IntArray sizeToSend(nproc), sizeToRecv(nproc), nrecToReceive(nproc);
+#ifdef __VERBOSE_PARALLEL
+    IntArray nrecToSend (nproc);
+#endif
     const IntArray *plist;
     for ( i = 1; i <= ndofman; i++ ) {
         // if (domain->giveDofManager(i)->giveParallelMode() == DofManager_shared) {
@@ -180,17 +181,26 @@ PetscNatural2GlobalOrdering :: init(EngngModel *emodel, EquationID ut, int di, E
             }
 
             if ( minrank == myrank ) { // count to send
-                for ( j = 1; j <= psize; j++ ) {
-                    sizeToSend( plist->at(j) ) += ( 1 + n );      // ndofs+dofman number
-                }
+	      for ( j = 1; j <= psize; j++ ) {
+#ifdef __VERBOSE_PARALLEL
+		nrecToSend(plist->at(j))++;
+#endif
+		sizeToSend( plist->at(j) ) += ( 1 + n );      // ndofs+dofman number
+	      }
             } else {
-                nrecToReceive(minrank)++;
-                for ( j = 1; j <= psize; j++ ) {
-                    sizeToRecv( plist->at(j) ) += ( 1 + n );      // ndofs+dofman number
-                }
+	      nrecToReceive(minrank)++;
+	      sizeToRecv( minrank ) += ( 1 + n );      // ndofs+dofman number
             }
         }
     }
+
+#ifdef __VERBOSE_PARALLEL
+    for (i=0; i<nproc; i++) {
+      OOFEM_LOG_INFO ("[%d] Record Statistics: Sending %d Receiving %d to %d\n", 
+		      myrank,nrecToSend(i), nrecToReceive(i),i);
+    }
+#endif
+
 
 
     std :: map< int, int >globloc; //  global->local mapping for shared
@@ -280,7 +290,8 @@ PetscNatural2GlobalOrdering :: init(EngngModel *emodel, EquationID ut, int di, E
                     }
 
 #if 0
-                    fprintf(stderr, "[%d] Sending localShared node %d to proc %d\n", myrank, dman->giveGlobalNumber(), p);
+                    OOFEM_LOG_INFO("[%d]PetscN2G:: init: Sending localShared node %d[%d] to proc %d\n", 
+				   myrank, i, dman->giveGlobalNumber(), p);
 #endif
                     buffs [ p ]->packInt( dman->giveGlobalNumber() );
                     ndofs = dman->giveNumberOfDofs();
@@ -341,13 +352,13 @@ PetscNatural2GlobalOrdering :: init(EngngModel *emodel, EquationID ut, int di, E
     *  }
     ****/
 
-
     // receive remote eqs and complete global numbering
     CommunicationBuffer **rbuffs = new CommunicationBuffer * [ nproc ];
     for ( p = 0; p < nproc; p++ ) {
         rbuffs [ p ] = new StaticCommunicationBuffer(MPI_COMM_WORLD, 0);
         rbuffs [ p ]->resize( rbuffs [ p ]->givePackSize(MPI_INT, 1) * sizeToRecv(p) );
     }
+
 
     //fprintf (stderr, "[%d] Receiving glob nums ...", myrank);
     for ( p = 0; p < nproc; p++ ) {
@@ -356,7 +367,8 @@ PetscNatural2GlobalOrdering :: init(EngngModel *emodel, EquationID ut, int di, E
         }
     }
 
-    IntArray finished(nproc);
+
+    IntArray finished(nproc); finished.zero();
     int fin = 1;
     finished.at(emodel->giveRank() + 1) = 1;
     do {
@@ -369,8 +381,14 @@ PetscNatural2GlobalOrdering :: init(EngngModel *emodel, EquationID ut, int di, E
                     int shdm, ldm;
                     for ( i = 1; i <= nite; i++ ) {
                         rbuffs [ p ]->unpackInt(shdm);
+
+			//
                         // find local guy coorecponding to shdm
-                        ldm = globloc [ shdm ];
+			if (globloc.find(shdm) != globloc.end()) {
+			  ldm = globloc [ shdm ];
+			} else {
+			  OOFEM_ERROR3 ("[%d] PetscNatural2GlobalOrdering :: init: invalid shared dofman received, globnum %d\n", myrank, shdm);
+			}
 
                         dman = d->giveDofManager(ldm);
                         ndofs = dman->giveNumberOfDofs();
@@ -391,13 +409,13 @@ PetscNatural2GlobalOrdering :: init(EngngModel *emodel, EquationID ut, int di, E
                             }
                         }
                     }
-
                     finished.at(p + 1) = 1;
                     fin++;
                 }
             }
         }
     } while ( fin < nproc );
+
 
     /*
      * fprintf (stderr, "[%d] Finished receiving glob nums ...", myrank);
