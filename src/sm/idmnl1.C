@@ -748,6 +748,27 @@ IDNLMaterial :: estimatePackSize(CommunicationBuffer &buff, GaussPoint *ip)
     return buff.givePackSize(MPI_DOUBLE, 1);
 }
 
+double
+IDNLMaterial :: predictRelativeComputationalCost(GaussPoint *gp)
+{
+  //
+  // The values returned come from mesurement 
+  // do not change them unless you know what are you doing
+  //
+  double cost = 1.2; 
+
+  
+  if (gp -> giveMaterialMode() == _3dMat) cost = 1.5;
+
+  IDNLMaterialStatus *status = (IDNLMaterialStatus*) this -> giveStatus (gp);
+  int size = status->giveIntegrationDomainList()->size();
+  // just a guess (size/10) found optimal
+  // cost *= (1.0 + (size/10)*0.5);
+  cost *= (1.0 + size/15.0);
+
+  return cost;
+}
+
 #endif
 
 
