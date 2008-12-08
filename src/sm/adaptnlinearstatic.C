@@ -573,11 +573,7 @@ AdaptiveNonLinearStatic :: adaptiveRemap(Domain* dNew)
     this->ndomains = 1;
     // init equation numbering
     // this->forceEquationNumbering();
-    this->giveNumericalMethod( giveCurrentStep() )->setDomain(dNew);
-    this->ee->setDomain(dNew);
-#ifdef __PARALLEL_MODE
-    if (this->giveLoadBalancer()) this->giveLoadBalancer()->setDomain(dNew);
-#endif
+    this->updateDomainLinks();
 
 #ifdef __PARALLEL_MODE
     if ( isParallel() ) {

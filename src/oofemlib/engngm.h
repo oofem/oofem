@@ -612,7 +612,9 @@ public:
      * to update domain variables in all components belonging to receiver
      * like errorestimators, solvers, etc, having domains as attributes.
      */
-    virtual void updateDomainLinks() { };
+    virtual void updateDomainLinks() {
+      this->giveExportModuleManager()->initialize(); 
+    };
     void               resolveCorrespondingStepNumber(int &, int &, void *obj);
     /// Returns current time step.
     TimeStep *giveCurrentStep() { if ( master ) { return master->giveCurrentStep(); } else { return currentStep; } }

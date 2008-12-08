@@ -1057,6 +1057,18 @@ contextIOResultType NonLinearStatic :: restoreContext(DataStream *stream, Contex
     return CIO_OK;
 }
 
+
+void
+NonLinearStatic :: updateDomainLinks() {
+  LinearStatic :: updateDomainLinks();
+
+  this->giveNumericalMethod( giveCurrentStep() )->setDomain(this->giveDomain(1));
+#ifdef __PARALLEL_MODE
+  if (this->giveLoadBalancer()) this->giveLoadBalancer()->setDomain(this->giveDomain(1));
+#endif
+}
+
+
 void
 NonLinearStatic :: assemble(SparseMtrx *answer, TimeStep *tStep, EquationID ut, CharType type, Domain *domain)
 {

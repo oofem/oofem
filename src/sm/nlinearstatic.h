@@ -177,6 +177,13 @@ public:
     NumericalMethod *giveNumericalMethod(TimeStep *);
     contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
     contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    /**
+     * Updates domain links after the domains of receiver have changed. Used mainly after
+     * restoring context - the domains may change and this service is then used
+     * to update domain variables in all components belonging to receiver
+     * like errorestimators, solvers, etc, having domains as attributes.
+     */
+    void updateDomainLinks();
 
     // identification
     const char *giveClassName() const { return "NonLinearStatic"; }
