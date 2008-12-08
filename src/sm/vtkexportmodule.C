@@ -254,7 +254,13 @@ VTKExportModule :: doOutput(TimeStep *tStep)
 
 void
 VTKExportModule :: initialize()
-{ }
+{ 
+    if ( this->smoother ) {
+        delete this->smoother;
+	this->smoother = NULL;
+    }
+
+}
 
 
 void
