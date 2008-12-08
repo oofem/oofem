@@ -3000,9 +3000,10 @@ Subdivision :: createMesh(TimeStep *stepN, int domainNumber, int domainSerNum, D
     // copy output manager settings
     ( * dNew )->giveOutputManager()->beCopyOf( domain->giveOutputManager() );
     :: getRelativeUtime(dt, st);
-
+#ifdef __PARALLEL_MODE
     OOFEM_LOG_INFO( "[%d] Subdivision: created new mesh (%d nodes and %d elements) in %.2fs\n",
                    ( * dNew )->giveEngngModel()->giveRank(), nnodes, eNum, ( double ) ( dt.tv_sec + dt.tv_usec / ( double ) OOFEM_USEC_LIM ) );
+#endif
 
 #ifdef __PARALLEL_MODE
  #ifdef __VERBOSE_PARALLEL
