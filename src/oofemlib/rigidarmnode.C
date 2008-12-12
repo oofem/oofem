@@ -146,8 +146,15 @@ RigidArmNode :: checkConsistency()
         result = 0;
     }
 
-    // allocate
+    // check if created DOFs (dofType) compatible with mastermask
     ndofs = master->giveNumberOfDofs();
+    for ( i = 1; i <= numberOfDofs; i++ ) {
+      if (masterMask->at(i) && (dofArray [ i - 1 ]->giveClassID() == MasterDofClass))
+	_error ("checkConsistency: incompatible mastermask and doftype data");
+    }
+
+
+    // allocate
     for ( i = 1; i <= numberOfDofs; i++ ) {
         if ( masterDofID [ i - 1 ] ) {
             countOfMasterDofs->at(i) = 0;
