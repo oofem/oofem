@@ -362,6 +362,7 @@ main(int argc, char *argv[])
 
     ESIBuildInterface(mask, argc, argv);
     myview  =  ElixirNewView(viewTitle, "OOFEG", OOFEG_BACKGROUND_COLOR, OOFEG_DEFAULTDRAW_COLOR, 500, 400);
+    EVSetRenderMode(myview, WIRE_RENDERING);
     EMAttachView(age_model, myview);
     gc [ 0 ].init(problem); // init all gcs
 
@@ -724,7 +725,7 @@ void ESICustomize(Widget parent_pane)
                     oofeg_add_menu_item( "SY_PLOT", "Eps_y", scalarstrain_palette, straincompPlot, ( XtPointer ) ( vectorAddr + 1 ) );
                     oofeg_add_menu_item( "SZ_PLOT", "Eps_z", scalarstrain_palette, straincompPlot, ( XtPointer ) ( vectorAddr + 2 ) );
                     oofeg_add_menu_item( "SYZ_PLOT", "Gam_yz", scalarstrain_palette, straincompPlot, ( XtPointer ) ( vectorAddr + 3 ) );
-                    oofeg_add_menu_item( "SZX_PLOT", "Gam_zz", scalarstrain_palette, straincompPlot, ( XtPointer ) ( vectorAddr + 4 ) );
+                    oofeg_add_menu_item( "SZX_PLOT", "Gam_xz", scalarstrain_palette, straincompPlot, ( XtPointer ) ( vectorAddr + 4 ) );
                     oofeg_add_menu_item( "SXY_PLOT", "Gam_xy", scalarstrain_palette, straincompPlot, ( XtPointer ) ( vectorAddr + 5 ) );
                     oofeg_add_menu_item("SEPARATOR", "--------------------", scalarstrain_palette, emptyaction, NULL);
                     oofeg_add_menu_item( "E11_PLOT", "Eps_11 ", scalarstrain_palette, princstraincompPlot, ( XtPointer ) ( vectorAddr + 0 ) );
@@ -740,7 +741,7 @@ void ESICustomize(Widget parent_pane)
                     oofeg_add_menu_item( "SY_PLOT", "Eps_y", scalarplasticstrain_palette, plaststraincompPlot, ( XtPointer ) ( vectorAddr + 1 ) );
                     oofeg_add_menu_item( "SZ_PLOT", "Eps_z", scalarplasticstrain_palette, plaststraincompPlot, ( XtPointer ) ( vectorAddr + 2 ) );
                     oofeg_add_menu_item( "SYZ_PLOT", "Gam_yz", scalarplasticstrain_palette, plaststraincompPlot, ( XtPointer ) ( vectorAddr + 3 ) );
-                    oofeg_add_menu_item( "SZX_PLOT", "Gam_zz", scalarplasticstrain_palette, plaststraincompPlot, ( XtPointer ) ( vectorAddr + 4 ) );
+                    oofeg_add_menu_item( "SZX_PLOT", "Gam_xz", scalarplasticstrain_palette, plaststraincompPlot, ( XtPointer ) ( vectorAddr + 4 ) );
                     oofeg_add_menu_item( "SXY_PLOT", "Gam_xy", scalarplasticstrain_palette, plaststraincompPlot, ( XtPointer ) ( vectorAddr + 5 ) );
                     oofeg_add_menu_item("SEPARATOR", "--------------------", scalarplasticstrain_palette, emptyaction, NULL);
                     oofeg_add_menu_item( "E11_PLOT", "Eps_11 ", scalarplasticstrain_palette,
