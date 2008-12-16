@@ -58,7 +58,7 @@ IsotropicHeatTransferMaterial :: initializeFrom(InputRecord *ir)
 
 
 double
-IsotropicHeatTransferMaterial :: give(int aProperty)
+IsotropicHeatTransferMaterial :: give(int aProperty, GaussPoint* gp)
 //
 // Returns the value of the property aProperty (e.g. the Young's modulus
 // 'E') of the receiver.
@@ -67,10 +67,10 @@ IsotropicHeatTransferMaterial :: give(int aProperty)
     if ( ( aProperty == 'k' ) ) {
         return k;
     } else if ( ( aProperty == HeatCapaCoeff ) || ( aProperty == 'c' ) ) {
-        return ( c * this->give('d') );
+      return ( c * this->give('d',gp) );
     }
 
-    return this->Material :: give(aProperty);
+    return this->Material :: give(aProperty,gp);
 }
 
 
@@ -112,7 +112,7 @@ IsotropicHeatTransferMaterial :: giveCharacteristicValue(MatResponseMode mode,
                                                          TimeStep *atTime)
 {
     if ( mode == Capacity ) {
-        return ( c * this->give('d') );
+        return ( c * this->give('d',gp) );
     } else {
         _error2( "giveCharacteristicValue : unknown mode (%s)", __MatResponseModeToString(mode) );
     }

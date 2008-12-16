@@ -203,7 +203,7 @@ StructuralElement :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, 
 //  different coordinate system in each node)
 {
     int i;
-    double dV;
+    double dens, dV;
     GaussPoint *gp;
     FloatArray force, ntf;
     FloatMatrix n, nt, T;
@@ -215,7 +215,7 @@ StructuralElement :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, 
 
     // note: force is assumed to be in global coordinate system.
     forLoad->computeComponentArrayAt(force, stepN, mode);
-    force.times( this->giveMaterial()->give('d') );
+    //force.times( this->giveMaterial()->give('d') );
 
     answer.resize(0);
 
@@ -224,9 +224,10 @@ StructuralElement :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, 
             gp  = iRule->getIntegrationPoint(i);
             this->computeNmatrixAt(gp, n);
             dV  = this->computeVolumeAround(gp);
+	    dens= this->giveMaterial()->give('d',gp);
             nt.beTranspositionOf(n);
             ntf.beProductOf(nt, force);
-            ntf.times(dV);
+            ntf.times(dV*dens);
             answer.add(ntf);
         }
     } else {
@@ -575,12 +576,13 @@ StructuralElement :: computeConsistentMassMatrix(FloatMatrix &answer, TimeStep *
     answer.zero();
     this->giveMassMtrxIntegrationgMask(mask);
 
-    density = this->giveMaterial()->give('d');
+    //density = this->giveMaterial()->give('d');
     mass = 0.;
 
     for ( i = 0; i < iRule.getNumberOfIntegrationPoints(); i++ ) {
         gp      = iRule.getIntegrationPoint(i);
         this->computeNmatrixAt(gp, n);
+	density = this->giveMaterial()->give('d',gp);
         dV      = this->computeVolumeAround(gp);
         mass   += density * dV;
 

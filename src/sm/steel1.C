@@ -68,7 +68,7 @@ Steel1 :: computeYCValueAt(GaussPoint *gp,
 // ig gp->status are posibly stored hardenining variables
 {
     // double answer;
-    return this->computeJ2InvariantAt(currentStress) - this->give('k');
+  return this->computeJ2InvariantAt(currentStress) - this->give('k',gp);
 }
 
 

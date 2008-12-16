@@ -145,8 +145,9 @@ LIBeam2d :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep)
     Material *mat;
     double halfMass;
 
+    GaussPoint* gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
     mat        = this->giveMaterial();
-    halfMass   = mat->give('d') * this->giveCrossSection()->give('A') * this->giveLength() / 2.;
+    halfMass   = mat->give('d', gp) * this->giveCrossSection()->give('A') * this->giveLength() / 2.;
     answer.resize(6, 6);
     answer.zero();
     answer.at(1, 1) = halfMass;

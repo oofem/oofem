@@ -148,10 +148,11 @@ public:
     /**
      * Returns the value of material property 'aProperty'. Property must be identified
      * by unique int id.
-     * @aProperty id of peroperty requested
+     * @param aProperty id of peroperty requested
+     * @param gp integration point
      * @return property value
      */
-    double   give(int);
+    double   give(int, GaussPoint*);
 
     /**
      * Computes full 3d material stiffness matrix at given integration point, time, respecting load history

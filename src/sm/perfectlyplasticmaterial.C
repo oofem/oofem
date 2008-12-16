@@ -1090,7 +1090,7 @@ PerfectlyPlasticMaterial :: initializeFrom(InputRecord *ir)
 
 
 double
-PerfectlyPlasticMaterial :: give(int aProperty)
+PerfectlyPlasticMaterial :: give(int aProperty, GaussPoint* gp)
 // Returns the value of the property aProperty (e.g. the Young's modulus
 // 'E') of the receiver.
 {
@@ -1100,7 +1100,7 @@ PerfectlyPlasticMaterial :: give(int aProperty)
         value = propertyDictionary->at(aProperty);
     } else {
         if ( linearElasticMaterial ) {
-            value = this->linearElasticMaterial->give(aProperty);
+	  value = this->linearElasticMaterial->give(aProperty,gp);
         } else {
             _error("give: property not defined");
         }

@@ -315,7 +315,7 @@ MDM :: computeDamageOnPlane(GaussPoint *gp, Microplane *mplane, const FloatArray
     }
 
     ParEpp = Ep / ( 1. - ParMd ); // 1d sv reduction
-    fmicroplane = linearElasticMaterial->give('E') * ParEpp;
+    fmicroplane = linearElasticMaterial->give('E',gp) * ParEpp;
     // en /= (1.-ParMd*sv);
     en /= ( 1. - ParMd * sv / ( fmicroplane ) ); // suggested by P.Grassl (ParMd is unit dependent)
 
@@ -1049,7 +1049,7 @@ MDM :: giveRawMDMParameters(double &Efp, double &Ep, const FloatArray &reducedSt
     // determine params from macroscopic ones
     if ( nonlocal ) {
         // formulas derived for 3d case
-        double EModulus = linearElasticMaterial->give('E');
+      double EModulus = linearElasticMaterial->give('E',gp);
         double gammaf = ( EModulus * this->Gf ) / ( this->R * this->Ft * this->Ft );
         double gamma  = gammaf / ( 1.47 - 0.0014 * gammaf );
         double f = this->Ft / ( 1.56 + 0.006 * gamma ); // microplane tensile strength
@@ -1086,7 +1086,7 @@ MDM :: giveRawMDMParameters(double &Efp, double &Ep, const FloatArray &reducedSt
 
         h  = gp->giveElement()->giveCharacteristicLenght(gp, dir);
 
-        double E  = this->giveLinearElasticMaterial()->give(Ex);
+        double E  = this->giveLinearElasticMaterial()->give(Ex,gp);
         Ep = this->mdm_Ep;
         if ( nsd == 2 ) {
             Efp = ( Gf / ( h * E * Ep ) + 1.2 * Ep ) / 1.75 - Ep;

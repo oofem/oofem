@@ -223,7 +223,7 @@ RCSDNLMaterial :: giveRealStressVector(FloatArray &answer, MatResponseForm form,
             double G, minG, currG, princStressDis, princStrainDis;
             int ii, jj;
 
-            minG = G = this->give(pscm_G);
+            minG = G = this->give(pscm_G,gp);
             for ( i = 4; i <= 6; i++ ) {
                 if ( ( this->giveStressStrainComponentIndOf(FullForm, gp->giveMaterialMode(), i) ) ) {
                     if ( i == 4 ) {
@@ -291,8 +291,8 @@ RCSDNLMaterial :: giveRealStressVector(FloatArray &answer, MatResponseForm form,
                 //else printf (":");
                 //
                 Le = status->giveCharLength(ipos);
-                E = linearElasticMaterial->give(Ex);
-                Gf = this->give(pscm_Gf) / Le;
+                E = linearElasticMaterial->give(Ex,gp);
+                Gf = this->give(pscm_Gf,gp) / Le;
                 ef = this->ef;
                 e0 = principalStrain.at(ipos);
                 Gf0 = -CurrFt * ef * ( exp(-status->giveCrackStrain(ipos) / ef) - 1.0 ); // already disipated + 0.5*sigma0*epsilon0
@@ -322,7 +322,7 @@ RCSDNLMaterial :: giveRealStressVector(FloatArray &answer, MatResponseForm form,
         FloatArray reducedSpaceStressVector;
         double damage = 1.0;
 
-        E = linearElasticMaterial->give(Ex);
+        E = linearElasticMaterial->give(Ex,gp);
         equivStrain = this->computeCurrEquivStrain(gp, nonlocalStrain, E, atTime);
         equivStrain = max( equivStrain, status->giveTempMaxEquivStrain() );
         ////# reducedSpaceStressVector.beProductOf (*status->giveDs0Matrix(), reducedNonlocStrainVector);

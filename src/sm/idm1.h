@@ -61,6 +61,7 @@
 #include "linearelasticmaterial.h"
 #include "isodamagemodel.h"
 #include "structuralms.h"
+#include "randommaterialext.h"
 
 
 
@@ -86,13 +87,17 @@
 // material contant's keys for give()
 #define IDM1_ITERATION_LIMIT 1.e-8
 
+
+#define e0_ID  901
+#define ef_ID  902
+
 /// Type characterizing the algorithm used to compute equivalent strain measure
 enum EquivStrainType { EST_Mazars, EST_Rankine, EST_ElasticEnergy };
 
 /**
  * This class implements associated Material Status to IsotropicDamageMaterial1.
  */
-class IsotropicDamageMaterial1Status : public IsotropicDamageMaterialStatus
+class IsotropicDamageMaterial1Status : public IsotropicDamageMaterialStatus, public RandomMaterialStatusExtensionInterface
 {
 protected:
 
@@ -132,6 +137,9 @@ public:
      */
     virtual void updateYourself(TimeStep *); // update after new equilibrium state reached
 
+    /** Interface requesting service */
+    virtual Interface *giveInterface(InterfaceType);
+
     // saves current context(state) into stream
     /**
      * Stores context of receiver into given stream.
@@ -159,7 +167,7 @@ public:
  * is postulated in explicit form, relatin damage parameter (omega) to scalar measure
  * of the largest strain level ever reached in material (kappa).
  */
-class IsotropicDamageMaterial1 : public IsotropicDamageMaterial
+class IsotropicDamageMaterial1 : public IsotropicDamageMaterial, public RandomMaterialExtensionInterface
     , public MaterialModelMapperInterface
 {
     /*
@@ -281,7 +289,24 @@ public:
     //@}
 
     /// Creates corresponding status
-    MaterialStatus *CreateStatus(GaussPoint *gp) const { return new IsotropicDamageMaterial1Status(1, IsotropicDamageMaterial1 :: domain, gp); }
+    MaterialStatus *CreateStatus(GaussPoint *gp) const;
+    /**
+     * Returns material status of receiver in given integration point.
+     * If status doe not exist yet, it is created using CreateStatus  member function.
+     * @param gp Returns reference to material status belonging to integration
+     * point gp.
+     * @return material status associated with given integration point.
+     */
+    MaterialStatus *giveStatus(GaussPoint *gp) const;
+    /**
+     * Returns the value of material property 'aProperty'. Property must be identified
+     * by unique int id. Intgeration point also passed to allow for materials with spatially
+     * varying properties
+     * @param aProperty id of peroperty requested
+     * @param gp intgration point, 
+     * @return property value
+     */
+    double   give(int aProperty, GaussPoint* gp);
 
 protected:
     /**

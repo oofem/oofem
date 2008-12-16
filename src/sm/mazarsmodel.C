@@ -136,10 +136,10 @@ MazarsMaterial :: computeEquivalentStrain(double &kappa, const FloatArray &strai
     crossSection->giveFullCharacteristicVector(strainb, gp, strain);
     // if plane stress mode -> compute strain in z-direction from condition of zero stress in corresponding direction
     if ( gp->giveMaterialMode() == _PlaneStress ) {
-        double nu = lmat->give(NYxz);
+      double nu = lmat->give(NYxz,gp);
         strainb.at(3) = -nu * ( strainb.at(1) + strainb.at(2) ) / ( 1. - nu );
     } else if ( gp->giveMaterialMode() == _1dMat ) {
-        double nu = lmat->give(NYxz);
+      double nu = lmat->give(NYxz,gp);
         strainb.at(2) = -nu *strainb.at(1);
         strainb.at(3) = -nu *strainb.at(1);
     }
@@ -217,10 +217,10 @@ MazarsMaterial :: computeDamageParam(double &omega, double kappa, const FloatArr
 
         // compute principal strains due to positive stresses
         if ( gp->giveMaterialMode() == _PlaneStress ) {
-            double nu = lmat->give(NYxz);
+	  double nu = lmat->give(NYxz,gp);
             strainb.at(3) = -nu * ( strainb.at(1) + strainb.at(2) ) / ( 1. - nu );
         } else if ( gp->giveMaterialMode() == _1dMat ) {
-            double nu = lmat->give(NYxz);
+	  double nu = lmat->give(NYxz,gp);
             strainb.at(2) = -nu *strainb.at(1);
             strainb.at(3) = -nu *strainb.at(1);
         }

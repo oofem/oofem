@@ -138,7 +138,7 @@ TwoFluidMaterial :: giveCharacteristicValue(MatResponseMode mode,
 
 
 double
-TwoFluidMaterial :: give(int aProperty)
+TwoFluidMaterial :: give(int aProperty, GaussPoint* gp)
 //
 // Returns the value of the property aProperty (e.g. the Young's modulus
 // 'E') of the receiver.

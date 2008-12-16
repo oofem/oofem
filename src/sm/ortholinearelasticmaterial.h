@@ -113,7 +113,7 @@ public:
     IRResultType initializeFrom(InputRecord *ir);
 
     // non-standart - returns time independent material constant
-    double   give(int);
+    double   give(int, GaussPoint*);
 
     void give3dMaterialStiffnessMatrix(FloatMatrix & answer,
                                        MatResponseForm, MatResponseMode, GaussPoint * gp,

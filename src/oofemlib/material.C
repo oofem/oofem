@@ -97,7 +97,7 @@ Material :: giveCharacteristicValue(MatResponseMode rMode,
 
 
 double
-Material :: give(int aProperty)
+Material :: give(int aProperty, GaussPoint* gp)
 // Returns the value of the property aProperty (e.g. the Young's modulus
 // 'E') of the receiver.
 // atTime allows time dependent behaviour to be taken into account
@@ -143,7 +143,7 @@ Material :: giveInputRecordString(std :: string &str, bool keyword)
     char buff [ 1024 ];
 
     FEMComponent :: giveInputRecordString(str, keyword);
-    sprintf( buff, " d %e", this->give('d') );
+    sprintf( buff, " d %e", propertyDictionary->at('d') );
     str += buff;
 
     return 1;

@@ -259,7 +259,7 @@ protected:
     /// pointer for linear elastic material
     IsotropicLinearElasticMaterial *LEMaterial;
     /// elastic material constants stored here for convenient access
-    double eM, gM, kM, nu;
+    /// double eM, gM, kM, nu;
 
     /// hardening variable
     double kappa;
@@ -309,19 +309,22 @@ public:
     /// Check for vertex stress return.
     /**
      *      Check if the trial stress state falls within the vertex region.
+     *      @param eM,gM,kM Elastic constants
      *      @returns true for vertex case and false if regular stress return has to be used.
      */
-    bool checkForVertexCase();
+    bool checkForVertexCase(const double eM, const double gM, const double kM);
     /// Perform stress return for regular case.
     /**
      *      Perform stress return for regular case, i.e. if the trial stress state does not lie within the vertex region.
+     *      @param eM,gM,kM Elastic constants
      */
-    void  performRegularReturn();
+    void  performRegularReturn(const double eM, const double gM, const double kM);
     /// Perform stress return for vertex case.
     /**
      *      Perform stress return for vertex case, i.e. if the trial stress state lies within the vertex region.
+     *      @param eM,gM,kM Elastic constants
      */
-    void  performVertexReturn();
+    void  performVertexReturn(const double eM, const double gM, const double kM);
     /// Compute yield value.
     /**
      *      Compute the yield value based on stress and hardening variable.
@@ -332,14 +335,16 @@ public:
      */
     double  computeYieldValue(const double volumetricStress,
                               const double JTwo,
-                              const double kappa) const;
+                              const double kappa,
+			      const double eM) const;
     /// Compute current yield stress in pure shear
     /**
      *      Compute the current yield stress in pure shear of the Drucker-Prager model according to the used hardening law. The yield stress is tauY in f(sigma, kappa) = F(sigma) - tauY(kappa).
      *      @param kappa hardening variable
+     *      @param eM elastic constant
      *      @returns yield stress in pure shear
      */
-    virtual double  computeYieldStressInShear(const double kappa) const;
+    virtual double  computeYieldStressInShear(const double kappa, const double eM) const;
 
     /// Compute derivative of yield stress with respect to kappa
     /**
@@ -347,7 +352,7 @@ public:
      *      @param kappa hardening variable
      *      @returns derivative of yield stress with respect to kappa
      */
-    virtual double  computeYieldStressPrime(const double kappa) const;
+    virtual double  computeYieldStressPrime(const double kappa, const double eM) const;
     void give3dMaterialStiffnessMatrix(FloatMatrix &, MatResponseForm,
                                        MatResponseMode, GaussPoint *, TimeStep *);
 

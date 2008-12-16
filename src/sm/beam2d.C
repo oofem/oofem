@@ -752,6 +752,7 @@ Beam2d :: computeConsistentMassMatrix(FloatMatrix &answer, TimeStep *tStep, doub
     // computes mass matrix of the receiver
 
     FloatMatrix stiff;
+    GaussPoint* gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
 
     /*
      * StructuralElement::computeMassMatrix(answer, tStep);
@@ -760,7 +761,7 @@ Beam2d :: computeConsistentMassMatrix(FloatMatrix &answer, TimeStep *tStep, doub
     double l = this->giveLength();
     double kappa = this->giveKappaCoeff();
     double kappa2 = kappa * kappa;
-    double density = this->giveMaterial()->give('d');
+    double density = this->giveMaterial()->give('d',gp);
     double area = this->giveCrossSection()->give('A');
     double c2 = ( area * density ) / ( ( 1. + 2. * kappa ) * ( 1. + 2. * kappa ) );
     double c1 = ( area * density );

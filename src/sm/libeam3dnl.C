@@ -426,9 +426,10 @@ LIBeam3dNL :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep)
 {
     Material *mat;
     double halfMass;
+    GaussPoint* gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
 
     mat        = this->giveMaterial();
-    halfMass   = mat->give('d') * this->giveCrossSection()->give('A') * this->giveLength() / 2.;
+    halfMass   = mat->give('d',gp) * this->giveCrossSection()->give('A') * this->giveLength() / 2.;
     answer.resize(12, 12);
     answer.zero();
     answer.at(1, 1) = answer.at(2, 2) = answer.at(3, 3) = halfMass;
@@ -438,7 +439,7 @@ LIBeam3dNL :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep)
     Ik   = this->giveCrossSection()->give(TORSION_MOMENT_X);
     Iy   = this->giveCrossSection()->give(INERTIA_MOMENT_Y);
     Iz   = this->giveCrossSection()->give(INERTIA_MOMENT_Z);
-    halfMass   = mat->give('d') * this->giveLength() / 2.;
+    halfMass   = mat->give('d',gp) * this->giveLength() / 2.;
     answer.at(4, 4) = answer.at(10, 10) = Ik * halfMass;
     answer.at(5, 5) = answer.at(11, 11) = Iy * halfMass;
     answer.at(6, 6) = answer.at(12, 12) = Iz * halfMass;

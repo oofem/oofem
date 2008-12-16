@@ -95,7 +95,7 @@ NewtonianFluidMaterial :: giveCharacteristicValue(MatResponseMode mode,
                                                   TimeStep *atTime)
 {
     if ( mode == MRM_Density ) {
-        return this->give('d');
+      return this->give('d',gp);
     } else if ( mode == MRM_Viscosity )  {
         return this->viscosity;
     } else                                                              {
@@ -105,7 +105,7 @@ NewtonianFluidMaterial :: giveCharacteristicValue(MatResponseMode mode,
 
 
 double
-NewtonianFluidMaterial :: give(int aProperty)
+NewtonianFluidMaterial :: give(int aProperty, GaussPoint* gp)
 //
 // Returns the value of the property aProperty (e.g. the Young's modulus
 // 'E') of the receiver.
@@ -114,7 +114,7 @@ NewtonianFluidMaterial :: give(int aProperty)
     if ( ( aProperty == Viscosity ) ) {
         return viscosity;
     } else {
-        return FluidDynamicMaterial :: give(aProperty);
+      return FluidDynamicMaterial :: give(aProperty,gp);
     }
 }
 

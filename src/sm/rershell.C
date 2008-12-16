@@ -324,7 +324,7 @@ RerShell :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep)
     gp                 =  integrationRulesArray [ 0 ]->getIntegrationPoint(0);
 
     dV = this->computeVolumeAround(gp);
-    mss1 = dV * this->giveCrossSection()->give('t') * this->giveMaterial()->give('d') / 3.;
+    mss1 = dV * this->giveCrossSection()->give('t') * this->giveMaterial()->give('d',gp) / 3.;
 
     answer.at(1, 1) = mss1;
     answer.at(2, 2) = mss1;
@@ -350,34 +350,35 @@ RerShell :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, TimeStep 
 // Computes numerically the load vector of the receiver due to the body
 // loads, at stepN. - no support for momentum bodyload
 {
-    double dV, load;
+    double dens, dV, load;
     GaussPoint *gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
     FloatArray f;
     FloatMatrix T;
 
 
     forLoad->computeComponentArrayAt(f, stepN, mode);
-    f.times( this->giveMaterial()->give('d') );
+    //f.times( this->giveMaterial()->give('d') );
 
     if ( f.giveSize() == 0 ) {
         answer.resize(0);
         return;                                             // nil resultant
     } else {
+        dens= this->giveMaterial()->give('d',gp);
         dV = this->computeVolumeAround(gp) * this->giveCrossSection()->give(THICKNESS);
 
         answer.resize(18);
 
-        load = f.at(1) * dV / 3.0;
+        load = f.at(1) * dens* dV / 3.0;
         answer.at(1) = load;
         answer.at(7) = load;
         answer.at(13) = load;
 
-        load = f.at(2) * dV / 3.0;
+        load = f.at(2) * dens* dV / 3.0;
         answer.at(2) = load;
         answer.at(8) = load;
         answer.at(14) = load;
 
-        load = f.at(3) * dV / 3.0;
+        load = f.at(3) * dens* dV / 3.0;
         answer.at(3) = load;
         answer.at(9) = load;
         answer.at(15) = load;

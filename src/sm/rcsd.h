@@ -155,7 +155,7 @@ public:
     contextIOResultType    restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 
     // non-standart - returns time independent material constant
-    double   give(int);
+    double   give(int, GaussPoint*);
 
     void giveRealStressVector(FloatArray & answer,  MatResponseForm, GaussPoint *,
                               const FloatArray &, TimeStep *);

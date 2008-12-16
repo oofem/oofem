@@ -234,7 +234,7 @@ protected:
 public:
 
     // non-standart
-    double   give(int);
+    double   give(int, GaussPoint*);
 
     // identification and auxiliary functions
 

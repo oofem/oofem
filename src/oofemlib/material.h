@@ -173,11 +173,13 @@ public:
     // non-standart - returns time independent material constant
     /**
      * Returns the value of material property 'aProperty'. Property must be identified
-     * by unique int id.
-     * @aProperty id of peroperty requested
+     * by unique int id. Intgeration point also passed to allow for materials with spatially
+     * varying properties
+     * @param aProperty id of peroperty requested
+     * @param gp intgration point, 
      * @return property value
      */
-    virtual double   give(int aProperty);
+    virtual double   give(int aProperty, GaussPoint* gp);
     /**
      * Returns casting time of the receiver
      */

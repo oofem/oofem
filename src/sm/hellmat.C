@@ -1919,7 +1919,7 @@ void HellmichMaterial :: giveThermalDilatationVector(FloatArray &answer,
 {
     answer.resize(6);
     answer.zero();
-    double aux = this->give(tAlpha);
+    double aux = this->give(tAlpha,gp);
     answer(0) = aux;
     answer(1) = aux;
     answer(2) = aux;
@@ -2759,7 +2759,7 @@ HellmichMaterial :: CreateStatus(GaussPoint *gp) const
     return new HellmichMaterialStatus(1, this->giveDomain(), gp);
 }
 
-double HellmichMaterial :: give(int aProperty)
+double HellmichMaterial :: give(int aProperty, GaussPoint* gp)
 /**
  * Returns the value of the property aProperty.
  * Only the final values of the Young and shear modulus andPoisson ratio are returned.
@@ -2783,7 +2783,7 @@ double HellmichMaterial :: give(int aProperty)
         ( aProperty == NYyx ) ) {
         return ny;
     } else {
-        return this->Material :: give(aProperty);
+      return this->Material :: give(aProperty, gp);
     }
 }
 

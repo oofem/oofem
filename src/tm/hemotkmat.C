@@ -84,13 +84,13 @@ HeMoTKMaterial :: initializeFrom(InputRecord *ir)
 
 
 double
-HeMoTKMaterial :: give(int aProperty)
+HeMoTKMaterial :: give(int aProperty, GaussPoint* gp)
 //
 // Returns the value of the property aProperty (e.g. the Young's modulus
 // 'E') of the receiver.
 //
 {
-    return this->Material :: give(aProperty);
+  return this->Material :: give(aProperty,gp);
 }
 
 

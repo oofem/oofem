@@ -109,7 +109,7 @@ BinghamFluidMaterial2 :: giveCharacteristicValue(MatResponseMode mode,
                                                  TimeStep *atTime)
 {
     if ( mode == MRM_Density ) {
-        return this->give('d');
+      return this->give('d',gp);
     } else if ( mode == MRM_Viscosity )  {
         BinghamFluidMaterial2Status *status = ( ( BinghamFluidMaterial2Status * ) this->giveStatus(gp) );
         //double temp_tau=status->giveTempDevStressMagnitude();
@@ -157,7 +157,7 @@ BinghamFluidMaterial2 :: giveCharacteristicValue(MatResponseMode mode,
 
 
 double
-BinghamFluidMaterial2 :: give(int aProperty)
+BinghamFluidMaterial2 :: give(int aProperty, GaussPoint* gp)
 //
 // Returns the value of the property aProperty (e.g. the Young's modulus
 // 'E') of the receiver.
@@ -168,7 +168,7 @@ BinghamFluidMaterial2 :: give(int aProperty)
     } else if ( ( aProperty == YieldStress ) ) {
         return tau_0;
     } else {
-        return FluidDynamicMaterial :: give(aProperty);
+      return FluidDynamicMaterial :: give(aProperty,gp);
     }
 }
 

@@ -807,6 +807,9 @@ enum InputFieldType {
     IFT_LocalGaussianRandomGenerator_mean,
     IFT_LocalGaussianRandomGenerator_variance,
     IFT_LocalGaussianRandomGenerator_seed,
+    
+    IFT_RandomMaterialExt_randVariables,
+    IFT_RandomMaterialExt_randGen,
 
     IFT_Unknown
 };

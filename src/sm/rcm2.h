@@ -248,7 +248,7 @@ public:
     contextIOResultType    restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 
     // non-standart - returns time independent material constant
-    double   give(int);
+    double   give(int, GaussPoint*);
 
     LinearElasticMaterial *giveLinearElasticMaterial() { return linearElasticMaterial; }
     virtual void give3dMaterialStiffnessMatrix(FloatMatrix & answer,

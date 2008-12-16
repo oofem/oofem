@@ -173,7 +173,7 @@ public:
 
 
     // non-standart  - returns time independent material constant
-    double   give(int);
+    double   give(int, GaussPoint*);
 
     virtual void give3dMaterialStiffnessMatrix(FloatMatrix & answer,
                                                MatResponseForm, MatResponseMode,

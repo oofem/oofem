@@ -137,7 +137,7 @@ IsotropicLinearElasticMaterial :: giveInputRecordString(std :: string &str, bool
     char buff [ 1024 ];
 
     LinearElasticMaterial :: giveInputRecordString(str, keyword);
-    sprintf( buff, " e %e n %e talpha %e", this->E, this->nu, this->give(tAlpha) );
+    sprintf( buff, " e %e n %e talpha %e", this->E, this->nu, propertyDictionary->at(tAlpha) );
     str += buff;
 
     return 1;
@@ -146,7 +146,7 @@ IsotropicLinearElasticMaterial :: giveInputRecordString(std :: string &str, bool
 
 
 double
-IsotropicLinearElasticMaterial :: give(int aProperty)
+IsotropicLinearElasticMaterial :: give(int aProperty, GaussPoint* gp)
 //
 // Returns the value of the property aProperty (e.g. the Young's modulus
 // 'E') of the receiver.
@@ -171,7 +171,7 @@ IsotropicLinearElasticMaterial :: give(int aProperty)
         return nu;
     }
 
-    return this->Material :: give(aProperty);
+    return this->Material :: give(aProperty, gp);
 }
 
 
@@ -435,9 +435,9 @@ IsotropicLinearElasticMaterial :: give3dBeamStiffMtrx(FloatMatrix &answer,
     answer.zero();
 
     answer.at(1, 1) = E * area;
-    answer.at(2, 2) = shearCoeff * this->give('G') * area;
-    answer.at(3, 3) = shearCoeff * this->give('G') * area;
-    answer.at(4, 4) = this->give('G') * Ik;
+    answer.at(2, 2) = shearCoeff * this->give('G',gp) * area;
+    answer.at(3, 3) = shearCoeff * this->give('G',gp) * area;
+    answer.at(4, 4) = this->give('G',gp) * Ik;
     answer.at(5, 5) = E * Iy;
     answer.at(6, 6) = E * Iz;
 
@@ -459,9 +459,9 @@ IsotropicLinearElasticMaterial :: giveThermalDilatationVector(FloatArray &answer
     //FloatArray *result = new FloatArray (6);
     answer.resize(6);
     answer.zero();
-    answer.at(1) = this->give(tAlpha);
-    answer.at(2) = this->give(tAlpha);
-    answer.at(3) = this->give(tAlpha);
+    answer.at(1) = this->give(tAlpha,gp);
+    answer.at(2) = this->give(tAlpha,gp);
+    answer.at(3) = this->give(tAlpha,gp);
 
     return;
 }

@@ -79,9 +79,9 @@ Concrete3 :: checkSizeLimit(GaussPoint *gp, double charLength)
 {
     double Ee, Gf, Ft, LeCrit;
 
-    Ee = this->give(pscm_Ee);
-    Gf = this->give(pscm_Gf);
-    Ft = this->give(pscm_Ft);
+    Ee = this->give(pscm_Ee,gp);
+    Gf = this->give(pscm_Gf,gp);
+    Ft = this->give(pscm_Ft,gp);
 
     LeCrit = 2.0 * Gf * Ee / ( Ft * Ft );
     return ( charLength < LeCrit );
@@ -97,9 +97,9 @@ Concrete3 :: computeStrength(GaussPoint *gp, double charLength)
 {
     double Ee, Gf, Ft;
 
-    Ee = this->give(pscm_Ee);
-    Gf = this->give(pscm_Gf);
-    Ft = this->give(pscm_Ft);
+    Ee = this->give(pscm_Ee,gp);
+    Gf = this->give(pscm_Gf,gp);
+    Ft = this->give(pscm_Ft,gp);
 
     if ( this->checkSizeLimit(gp, charLength) ) {
         ;
@@ -145,7 +145,7 @@ Concrete3 :: giveMinCrackStrainsForFullyOpenCrack(GaussPoint *gp, int i)
         double Le, Gf, Ft;
 
         Le = status->giveCharLength(i);
-        Gf = this->give(pscm_Gf);
+        Gf = this->give(pscm_Gf,gp);
         Ft = this->computeStrength(gp, Le);
 
         return 2.0 * Gf / ( Le * Ft );
@@ -267,8 +267,8 @@ Concrete3 :: giveCrackingModulus(MatResponseMode rMode, GaussPoint *gp,
     // of fracture energy Gf, which is a material constant.
     //
     //Ee = this->give(pscm_Ee);
-    Gf = this->give(pscm_Gf);
-    Ft = this->give(pscm_Ft);
+    Gf = this->give(pscm_Gf,gp);
+    Ft = this->give(pscm_Ft,gp);
     Le = status->giveCharLength(i);
 
     Ft = this->computeStrength(gp, Le);
@@ -382,7 +382,7 @@ Concrete3 :: giveNormalCrackingStress(GaussPoint *gp, double crackStrain, int i)
     Cf = this->giveCrackingModulus(TangentStiffness, gp, crackStrain, i); // < 0
     Le = status->giveCharLength(i);
     Ft = this->computeStrength(gp, Le);
-    Gf = this->give(pscm_Gf);
+    Gf = this->give(pscm_Gf,gp);
 
     if ( this->checkSizeLimit(gp, Le) ) {
         if ( softeningMode == linearSoftening ) {

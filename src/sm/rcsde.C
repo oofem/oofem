@@ -150,8 +150,8 @@ RCSDEMaterial :: giveRealStressVector(FloatArray &answer, MatResponseForm form, 
             // sd transition takes place
 
             Le = status->giveCharLength(ipos);
-            E = linearElasticMaterial->give(Ex);
-            Gf = this->give(pscm_Gf) / Le;
+            E = linearElasticMaterial->give(Ex,gp);
+            Gf = this->give(pscm_Gf,gp) / Le;
             Ft = this->computeStrength(gp, Le);
             ef = Gf / Ft;
             e0 = principalStrain.at(ipos);
@@ -179,7 +179,7 @@ RCSDEMaterial :: giveRealStressVector(FloatArray &answer, MatResponseForm form, 
         double damage = 1.0;
         //int ipos;
 
-        E = linearElasticMaterial->give(Ex);
+        E = linearElasticMaterial->give(Ex,gp);
         equivStrain = this->computeCurrEquivStrain(gp, reducedStrainVector, E, atTime);
         equivStrain = max( equivStrain, status->giveTempMaxEquivStrain() );
         reducedSpaceStressVector.beProductOf(* status->giveDs0Matrix(), reducedStrainVector);
@@ -344,7 +344,7 @@ RCSDEMaterial :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
 
 
 double
-RCSDEMaterial :: give(int aProperty)
+RCSDEMaterial :: give(int aProperty, GaussPoint* gp)
 // Returns the value of the property aProperty (e.g. the Young's modulus
 // 'E') of the receiver.
 {
@@ -352,7 +352,7 @@ RCSDEMaterial :: give(int aProperty)
         return this->SDTransitionCoeff;
     }
 
-    return RCM2Material :: give(aProperty);
+    return RCM2Material :: give(aProperty,gp);
 }
 
 
@@ -367,9 +367,9 @@ RCSDEMaterial :: checkSizeLimit(GaussPoint *gp, double charLength)
 {
     double Ee, Gf, Ft, LeCrit;
 
-    Ee = this->give(pscm_Ee);
-    Gf = this->give(pscm_Gf);
-    Ft = this->give(pscm_Ft);
+    Ee = this->give(pscm_Ee,gp);
+    Gf = this->give(pscm_Gf,gp);
+    Ft = this->give(pscm_Ft,gp);
 
     LeCrit = 2.0 * Gf * Ee / ( Ft * Ft );
     return ( charLength < LeCrit );
@@ -385,9 +385,9 @@ RCSDEMaterial :: computeStrength(GaussPoint *gp, double charLength)
 {
     double Ee, Gf, Ft;
 
-    Ee = this->give(pscm_Ee);
-    Gf = this->give(pscm_Gf);
-    Ft = this->give(pscm_Ft);
+    Ee = this->give(pscm_Ee,gp);
+    Gf = this->give(pscm_Gf,gp);
+    Ft = this->give(pscm_Ft,gp);
 
     if ( this->checkSizeLimit(gp, charLength) ) {
         ;
@@ -469,7 +469,7 @@ RCSDEMaterial :: giveCrackingModulus(MatResponseMode rMode, GaussPoint *gp,
     // of fracture energy Gf, which is a material constant.
     //
     //Ee = this->give(pscm_Ee);
-    Gf = this->give(pscm_Gf);
+    Gf = this->give(pscm_Gf,gp);
     Le = status->giveCharLength(i);
     Ft = this->computeStrength(gp, Le);
     //minEffStrainForFullyOpenCrack = this->giveMinCrackStrainsForFullyOpenCrack(gp,i);
@@ -512,7 +512,7 @@ RCSDEMaterial :: giveNormalCrackingStress(GaussPoint *gp, double crackStrain, in
 
     Le = status->giveCharLength(i);
     Ft = this->computeStrength(gp, Le);
-    Gf = this->give(pscm_Gf);
+    Gf = this->give(pscm_Gf,gp);
     ef = Gf / ( Le * Ft );
 
     if ( this->checkSizeLimit(gp, Le) ) {

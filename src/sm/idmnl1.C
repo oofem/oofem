@@ -205,10 +205,13 @@ IDNLMaterial :: computeWeightFunction(const FloatArray &src, const FloatArray &c
 
 
 void
-IDNLMaterial :: computeDamageParam(double &omega, double kappa, const FloatArray &strain, GaussPoint *g)
+IDNLMaterial :: computeDamageParam(double &omega, double kappa, const FloatArray &strain, GaussPoint *gp)
 {
-    if ( kappa > this->e0 ) {
-        omega = 1.0 - ( this->e0 / kappa ) * exp( -( kappa - this->e0 ) / ( this->ef - this->e0 ) );
+    const double e0 = this->give(e0_ID, gp);
+    const double ef = this->give(ef_ID, gp);
+
+    if ( kappa > e0 ) {
+        omega = 1.0 - ( e0 / kappa ) * exp( -( kappa - e0 ) / ( ef - e0 ) );
     } else {
         omega = 0.0;
     }
@@ -286,12 +289,15 @@ IDNLMaterial :: NonlocalMaterialStiffnessInterface_showSparseMtrxStructure(Gauss
     IDNLMaterialStatus *status = ( IDNLMaterialStatus * ) this->giveStatus(gp);
     IDNLMaterial *rmat;
 
+    const double e0 = this->give(e0_ID, gp);
+    const double ef = this->give(ef_ID, gp);
+
     strain = status->giveTempStrainVector();
     // compute equivalent strain
     this->computeEquivalentStrain(equivStrain, strain, gp, atTime);
     f = equivStrain - status->giveTempKappa();
 
-    if ( ( equivStrain <= this->e0 ) || ( f < 0.0 ) ) {
+    if ( ( equivStrain <= e0 ) || ( f < 0.0 ) ) {
         return;
     }
 
@@ -371,6 +377,9 @@ IDNLMaterial :: giveLocalNonlocalStiffnessContribution(GaussPoint *gp, IntArray 
     FloatMatrix b, de;
     FloatArray stress, strain;
 
+    const double e0 = this->give(e0_ID, gp);
+    const double ef = this->give(ef_ID, gp);
+
     /*
      * if (fabs(status->giveTempDamage()) <= 1.e-10) {
      * // already eleastic regime
@@ -384,7 +393,7 @@ IDNLMaterial :: giveLocalNonlocalStiffnessContribution(GaussPoint *gp, IntArray 
     this->computeEquivalentStrain(equivStrain, strain, gp, atTime);
     f = equivStrain - status->giveTempKappa();
 
-    if ( ( equivStrain <= this->e0 ) || ( f < 0.0 ) ) {
+    if ( ( equivStrain <= e0 ) || ( f < 0.0 ) ) {
         /*
          * if (status->lst == IDNLMaterialStatus::LST_elastic)
          * printf (" ");
@@ -413,8 +422,8 @@ IDNLMaterial :: giveLocalNonlocalStiffnessContribution(GaussPoint *gp, IntArray 
         lmat->giveCharacteristicMatrix(de, ReducedForm, SecantStiffness, gp, atTime);
         stress.beProductOf(de, strain);
 
-        f = ( this->e0 / ( equivStrain * equivStrain ) ) * exp( -( equivStrain - this->e0 ) / ( this->ef - this->e0 ) )
-        + ( this->e0 / equivStrain ) * exp( -( equivStrain - this->e0 ) / ( this->ef - this->e0 ) ) * 1.0 / ( this->ef - this->e0 );
+        f = ( e0 / ( equivStrain * equivStrain ) ) * exp( -( equivStrain - e0 ) / ( ef - e0 ) )
+        + ( e0 / equivStrain ) * exp( -( equivStrain - e0 ) / ( ef - e0 ) ) * 1.0 / ( ef - e0 );
 
         nrows = b.giveNumberOfColumns();
         nsize = stress.giveSize();
@@ -502,7 +511,7 @@ IDNLMaterial :: giveRemoteNonlocalStiffnessContribution(GaussPoint *gp, IntArray
         }
 
         if ( sum > 1.e-15 ) {
-            coeff = 1. / ( lmat->give('E') * sqrt(sum) );
+	  coeff = 1. / ( lmat->give('E',gp) * sqrt(sum) );
         } else {
             coeff = 0.0;
         }
@@ -568,7 +577,7 @@ IDNLMaterial :: giveRemoteNonlocalStiffnessContribution(GaussPoint *gp, IntArray
         this->computeLocalEquivalentStrain(equivStrain, strain, gp, atTime);
 
         nu = stress;
-        coeff = 1.0 / ( lmat->give('E') * equivStrain );
+        coeff = 1.0 / ( lmat->give('E',gp) * equivStrain );
     } else {
         _error("giveRemoteNonlocalStiffnessContribution: equivStrainType not supported");
     }
@@ -704,7 +713,7 @@ Interface *
 IDNLMaterialStatus :: giveInterface(InterfaceType type)
 {
     if ( type == NonlocalMaterialStatusExtensionInterfaceType ) {
-        return this;
+      return (StructuralNonlocalMaterialStatusExtensionInterface*)this;
     } else {
         return NULL;
     }

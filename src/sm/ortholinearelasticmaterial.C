@@ -106,12 +106,14 @@ OrthotropicLinearElasticMaterial :: initializeFrom(InputRecord *ir)
 
     // check for suspicious parameters
     // ask for dependent parameters (symmetry conditions) and check if reasonable
-    nyzx = this->give(NYzx);
-    nyzy = this->give(NYzy);
-    nyyx = this->give(NYyx);
-    if ( ( nyzx < 0. ) || ( nyzx > 0.5 ) || ( nyzy < 0. ) || ( nyzy > 0.5 ) || ( nyyx < 0. ) || ( nyyx > 0.5 ) ) {
+    /*
+      nyzx = this->give(NYzx);
+      nyzy = this->give(NYzy);
+      nyyx = this->give(NYyx);
+      if ( ( nyzx < 0. ) || ( nyzx > 0.5 ) || ( nyzy < 0. ) || ( nyzy > 0.5 ) || ( nyyx < 0. ) || ( nyyx > 0.5 ) ) {
         _warning2("instanciateFrom: suspicious parameters", 1);
-    }
+      }
+    */
 
     // Read local coordinate system of principal axes of ortotrophy
     // in localCoordinateSystem the unity vectors are stored
@@ -209,25 +211,25 @@ OrthotropicLinearElasticMaterial :: initializeFrom(InputRecord *ir)
 
 
 double
-OrthotropicLinearElasticMaterial :: give(int aProperty)
+OrthotropicLinearElasticMaterial :: give(int aProperty, GaussPoint* gp)
 //
 // Returns the value of the property aProperty (e.g. the Young's modulus
 // 'E') of the receiver.
 //
 {
     if ( aProperty == NYzx ) {
-        return this->give(NYxz) * this->give(Ez) / this->give(Ex);
+      return this->give(NYxz,gp) * this->give(Ez,gp) / this->give(Ex,gp);
     }
 
     if ( aProperty == NYzy ) {
-        return this->give(NYyz) * this->give(Ez) / this->give(Ey);
+      return this->give(NYyz,gp) * this->give(Ez,gp) / this->give(Ey,gp);
     }
 
     if ( aProperty == NYyx ) {
-        return this->give(NYxy) * this->give(Ey) / this->give(Ex);
+      return this->give(NYxy,gp) * this->give(Ey,gp) / this->give(Ex,gp);
     }
 
-    return this->Material :: give(aProperty);
+    return this->Material :: give(aProperty,gp);
 }
 
 
@@ -262,12 +264,12 @@ OrthotropicLinearElasticMaterial :: give3dLocalMaterialStiffnessMatrix(FloatMatr
     double eksi, nxz, nyz, nxy, nzx, nzy, nyx;
     int i, j;
 
-    nxz = this->give(NYxz);
-    nyz = this->give(NYyz);
-    nxy = this->give(NYxy);
-    nzx = this->give(NYzx);
-    nzy = this->give(NYzy);
-    nyx = this->give(NYyx);
+    nxz = this->give(NYxz,gp);
+    nyz = this->give(NYyz,gp);
+    nxy = this->give(NYxy,gp);
+    nzx = this->give(NYzx,gp);
+    nzy = this->give(NYzy,gp);
+    nyx = this->give(NYyx,gp);
 
     eksi = 1. - ( nxy * nyx + nyz * nzy + nzx * nxz ) - ( nxy * nyz * nzx + nyx * nzy * nxz );
 
@@ -275,12 +277,12 @@ OrthotropicLinearElasticMaterial :: give3dLocalMaterialStiffnessMatrix(FloatMatr
     answer.resize(6, 6);
     answer.zero();
     // switched letters from original oofem -> now produces same material stiffness matrix as Abaqus method
-    answer.at(1, 1) =  this->give(Ex) * ( 1. - nyz * nzy ) / eksi;
-    answer.at(1, 2) =  this->give(Ey) * ( nxy + nxz * nzy ) / eksi;
-    answer.at(1, 3) =  this->give(Ez) * ( nxz + nyz * nxy ) / eksi;
-    answer.at(2, 2) =  this->give(Ey) * ( 1. - nxz * nzx ) / eksi;
-    answer.at(2, 3) =  this->give(Ez) * ( nyz + nyx * nxz ) / eksi;
-    answer.at(3, 3) =  this->give(Ez) * ( 1. - nyx * nxy ) / eksi;
+    answer.at(1, 1) =  this->give(Ex,gp) * ( 1. - nyz * nzy ) / eksi;
+    answer.at(1, 2) =  this->give(Ey,gp) * ( nxy + nxz * nzy ) / eksi;
+    answer.at(1, 3) =  this->give(Ez,gp) * ( nxz + nyz * nxy ) / eksi;
+    answer.at(2, 2) =  this->give(Ey,gp) * ( 1. - nxz * nzx ) / eksi;
+    answer.at(2, 3) =  this->give(Ez,gp) * ( nyz + nyx * nxz ) / eksi;
+    answer.at(3, 3) =  this->give(Ez,gp) * ( 1. - nyx * nxy ) / eksi;
 
     // define the lower triangle
     for ( i = 1; i < 4; i++ ) {
@@ -290,9 +292,9 @@ OrthotropicLinearElasticMaterial :: give3dLocalMaterialStiffnessMatrix(FloatMatr
     }
 
 
-    answer.at(4, 4) =  this->give(Gyz);
-    answer.at(5, 5) =  this->give(Gxz);
-    answer.at(6, 6) =  this->give(Gxy);
+    answer.at(4, 4) =  this->give(Gyz,gp);
+    answer.at(5, 5) =  this->give(Gxz,gp);
+    answer.at(6, 6) =  this->give(Gxy,gp);
 
     return;
 }
@@ -527,9 +529,9 @@ OrthotropicLinearElasticMaterial :: giveThermalDilatationVector(FloatArray &answ
 {
     FloatMatrix *transf;
     FloatArray help(6);
-    help.at(1) = this->give(tAlpha);
-    help.at(2) = this->give(tAlpha);
-    help.at(3) = this->give(tAlpha);
+    help.at(1) = this->give(tAlpha,gp);
+    help.at(2) = this->give(tAlpha,gp);
+    help.at(3) = this->give(tAlpha,gp);
 
     transf = this->GiveRotationMatrix(gp);
     answer.beProductOf(* transf, help);

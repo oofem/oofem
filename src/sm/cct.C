@@ -295,7 +295,7 @@ CCTPlate :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep)
     gp                 = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
 
     dV = this->computeVolumeAround(gp);
-    mss1 = dV * this->giveMaterial()->give('d') *
+    mss1 = dV * this->giveMaterial()->give('d',gp) *
     this->giveCrossSection()->give(THICKNESS) / 3.;
 
     answer.at(1, 1) = mss1;
@@ -313,14 +313,14 @@ CCTPlate :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, TimeStep 
 // Computes numerically the load vector of the receiver due to the body
 // loads, at stepN.
 {
-    double dV, load;
+    double dens, dV, load;
     GaussPoint *gp = NULL;
     FloatArray f;
     FloatMatrix T;
 
 
     forLoad->computeComponentArrayAt(f, stepN, mode);
-    f.times( this->giveMaterial()->give('d') );
+    //f.times( this->giveMaterial()->give('d') );
 
     if ( f.giveSize() == 0 ) {
         answer.resize(0);
@@ -328,11 +328,12 @@ CCTPlate :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, TimeStep 
     } else {
         gp              = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
 
-        dV = this->computeVolumeAround(gp);         // Area
+	dens=this->giveMaterial()->give('d',gp);
+	dV = this->computeVolumeAround(gp);         // Area
         answer.resize(9);
         answer.zero();
 
-        load = f.at(1) * dV * this->giveCrossSection()->give(THICKNESS) / 3.0;
+        load = f.at(1) * dens * dV * this->giveCrossSection()->give(THICKNESS) / 3.0;
         answer.at(1) = load;
         answer.at(4) = load;
         answer.at(7) = load;

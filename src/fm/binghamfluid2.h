@@ -191,10 +191,11 @@ public:
     /**
      * Returns the value of material property 'aProperty'. Property must be identified
      * by unique int id.
-     * @aProperty id of peroperty requested
+     * @param aProperty id of peroperty requested
+     * @param gp integration point
      * @return property value
      */
-    virtual double   give(int aProperty);
+    virtual double   give(int aProperty, GaussPoint*);
     /**
      * Initializes receiver acording to object description stored in input record.
      * The density of material is read into property dictionary (keyword 'd')

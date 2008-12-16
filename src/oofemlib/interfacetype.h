@@ -72,6 +72,7 @@ enum InterfaceType {
     NonlocalMaterialExtensionInterfaceType,
     NonlocalMaterialStiffnessInterfaceType,
     MaterialModelMapperInterfaceType,
+    RandomMaterialStatusExtensionInterfaceType,
 
     HydrationModelInterfaceType,
     HydrationModelStatusInterfaceType,

@@ -67,7 +67,8 @@ MMAShapeFunctProjection IsotropicDamageMaterial1 :: mapper;
 MMALeastSquareProjection IsotropicDamageMaterial1 :: mapper;
 #endif
 
-IsotropicDamageMaterial1 :: IsotropicDamageMaterial1(int n, Domain *d) : IsotropicDamageMaterial(n, d)
+IsotropicDamageMaterial1 :: IsotropicDamageMaterial1(int n, Domain *d) : IsotropicDamageMaterial(n, d), 
+									 RandomMaterialExtensionInterface()
     //
     // constructor
     //
@@ -91,6 +92,7 @@ IsotropicDamageMaterial1 :: initializeFrom(InputRecord *ir)
 
     int equivStrainType;
     IsotropicDamageMaterial :: initializeFrom(ir);
+    RandomMaterialExtensionInterface :: initializeFrom(ir);
     linearElasticMaterial->initializeFrom(ir);
 
     IR_GIVE_FIELD(ir, e0, IFT_IsotropicDamageMaterial1_e0, "e0"); // Macro
@@ -149,10 +151,10 @@ IsotropicDamageMaterial1 :: computeEquivalentStrain(double &kappa, const FloatAr
 
         // if plane stress mode -> compute strain in z-direction from condition of zero stress in corresponding direction
         if ( gp->giveMaterialMode() == _PlaneStress ) {
-            double nu = lmat->give(NYxz);
+	  double nu = lmat->give(NYxz,gp);
             fullstrain.at(3) = -nu * ( fullstrain.at(1) + fullstrain.at(2) ) / ( 1. - nu );
         } else if ( gp->giveMaterialMode() == _1dMat ) {
-            double nu = lmat->give(NYxz);
+	  double nu = lmat->give(NYxz,gp);
             fullstrain.at(2) = -nu *fullstrain.at(1);
             fullstrain.at(3) = -nu *fullstrain.at(1);
         }
@@ -183,7 +185,7 @@ IsotropicDamageMaterial1 :: computeEquivalentStrain(double &kappa, const FloatAr
             }
         }
 
-        kappa = sqrt(sum) / lmat->give('E');
+        kappa = sqrt(sum) / lmat->give('E',gp);
     } else if ( this->equivStrainType == EST_ElasticEnergy ) {
         FloatMatrix de;
         FloatArray stress;
@@ -193,7 +195,7 @@ IsotropicDamageMaterial1 :: computeEquivalentStrain(double &kappa, const FloatAr
         stress.beProductOf(de, strain);
         sum = dotProduct( strain, stress, strain.giveSize() );
 
-        kappa = sqrt( sum / lmat->give('E') );
+        kappa = sqrt( sum / lmat->give('E',gp) );
     } else {
         _error("computeEquivalentStrain: unknown EquivStrainType");
     }
@@ -202,8 +204,11 @@ IsotropicDamageMaterial1 :: computeEquivalentStrain(double &kappa, const FloatAr
 void
 IsotropicDamageMaterial1 :: computeDamageParam(double &omega, double kappa, const FloatArray &strain, GaussPoint *gp)
 {
-    if ( kappa > this->e0 ) {
-        // omega = 1.0-(this->e0/kappa)*exp(-(kappa-this->e0)/(this->ef-this->e0));
+    const double e0 = this->give(e0_ID, gp);
+    const double ef = this->give(ef_ID, gp);
+
+    if ( kappa > e0 ) {
+        // omega = 1.0-(e0/kappa)*exp(-(kappa-e0)/(ef-e0));
         IsotropicDamageMaterial1Status *status = ( IsotropicDamageMaterial1Status * ) this->giveStatus(gp);
         int nite = 0;
         double R, Lhs, E, Ft, help;
@@ -214,14 +219,14 @@ IsotropicDamageMaterial1 :: computeDamageParam(double &omega, double kappa, cons
         // stress from crack-opening relation (ef = wf characterizes the carc opening diagram)
 
         omega = 0.0;
-        E = this->giveLinearElasticMaterial()->give('E');
-        Ft = E * this->e0;
+        E = this->giveLinearElasticMaterial()->give('E',gp);
+        Ft = E * e0;
         //printf ("\nle=%f, kappa=%f", status->giveLe(), kappa);
         do {
             nite++;
-            help = status->giveLe() * omega * kappa / this->ef;
+            help = status->giveLe() * omega * kappa / ef;
             R = ( 1. - omega ) * E * kappa - Ft *exp(-help);
-            Lhs = E * kappa - Ft *exp(-help) * status->giveLe() * kappa / this->ef;
+            Lhs = E * kappa - Ft *exp(-help) * status->giveLe() * kappa / ef;
             omega += R / Lhs;
             // printf ("\n%d: R=%f, omega=%f",nite, R, omega);
             if ( nite > 40 ) {
@@ -248,9 +253,13 @@ IsotropicDamageMaterial1 :: initDamaged(double kappa, FloatArray &strainVector, 
     IsotropicDamageMaterial1Status *status = ( IsotropicDamageMaterial1Status * ) this->giveStatus(gp);
     StructuralCrossSection *crossSection = ( StructuralCrossSection * ) gp->giveElement()->giveCrossSection();
 
+    const double e0 = this->give(e0_ID, gp);
+    const double ef = this->give(ef_ID, gp);
+
+
     crossSection->giveFullCharacteristicVector(fullstrain, gp, strainVector);
 
-    if ( ( kappa > this->e0 ) && ( status->giveDamage() == 0. ) ) {
+    if ( ( kappa > e0 ) && ( status->giveDamage() == 0. ) ) {
         this->computePrincipalValDir(principalStrains, principalDir, fullstrain, principal_strain);
         // finfd index of max positive principal strain
         for ( i = 2; i <= 3; i++ ) {
@@ -273,6 +282,21 @@ IsotropicDamageMaterial1 :: initDamaged(double kappa, FloatArray &strainVector, 
     }
 }
 
+double
+IsotropicDamageMaterial1 :: give(int aProperty, GaussPoint* gp)
+{
+  double answer;
+  if (RandomMaterialExtensionInterface::give(aProperty, gp, answer)) {
+    return answer;
+  } else if (aProperty == e0_ID) {
+    return this->e0;
+  } else if (aProperty == ef_ID) {
+    return this->ef;
+  } else {
+    return IsotropicDamageMaterial::give(aProperty, gp);
+  }
+}
+
 
 Interface *
 IsotropicDamageMaterial1 :: giveInterface(InterfaceType type)
@@ -283,6 +307,34 @@ IsotropicDamageMaterial1 :: giveInterface(InterfaceType type)
         return NULL;
     }
 }
+
+
+MaterialStatus*
+IsotropicDamageMaterial1::CreateStatus(GaussPoint *gp) const 
+{
+  IsotropicDamageMaterial1Status* answer = new IsotropicDamageMaterial1Status(1, IsotropicDamageMaterial1 :: domain, gp); 
+  return answer;
+}
+
+MaterialStatus *
+IsotropicDamageMaterial1 :: giveStatus(GaussPoint *gp) const
+{
+    MaterialStatus *status;
+
+    status = gp->giveMaterialStatus();
+    if ( status == NULL ) {
+        // create a new one
+        status = this->CreateStatus(gp);
+
+        if ( status != NULL ) {
+            gp->setMaterialStatus(status);
+	    this->_generateStatusVariables (gp);
+        }
+    }
+    
+    return status;
+}  
+
 
 int
 IsotropicDamageMaterial1 :: MMI_map(GaussPoint *gp, Domain *oldd, TimeStep *tStep)
@@ -351,7 +403,7 @@ IsotropicDamageMaterial1 :: MMI_finish(TimeStep *tStep)
 
 
 IsotropicDamageMaterial1Status :: IsotropicDamageMaterial1Status(int n, Domain *d, GaussPoint *g) :
-    IsotropicDamageMaterialStatus(n, d, g)
+  IsotropicDamageMaterialStatus(n, d, g), RandomMaterialStatusExtensionInterface()
 {
     le = 0.0;
 }
@@ -379,6 +431,15 @@ IsotropicDamageMaterial1Status :: updateYourself(TimeStep *atTime)
     IsotropicDamageMaterialStatus :: updateYourself(atTime);
 }
 
+Interface *
+IsotropicDamageMaterial1Status :: giveInterface(InterfaceType type)
+{
+    if ( type == RandomMaterialStatusExtensionInterfaceType ) {
+        return ( RandomMaterialStatusExtensionInterface * ) this;
+    } else {
+        return NULL;
+    }
+}
 
 
 contextIOResultType

@@ -288,7 +288,7 @@ Interface *
 MazarsNLMaterialStatus :: giveInterface(InterfaceType type)
 {
     if ( type == NonlocalMaterialStatusExtensionInterfaceType ) {
-        return this;
+      return (StructuralNonlocalMaterialStatusExtensionInterface*) this;
     } else {
         return NULL;
     }

@@ -374,7 +374,7 @@ RCM2Material ::  giveRealPrincipalStressVector3d(FloatArray &answer, GaussPoint 
             }
         }
 
-        if ( maxErr < rcm_STRESSRELERROR * this->give(pscm_Ft) ) {
+        if ( maxErr < rcm_STRESSRELERROR * this->give(pscm_Ft,gp) ) {
             //delete dSigma;
 
             status->letPrincipalStressVectorBe(sigmaEl);
@@ -764,7 +764,7 @@ RCM2Material :: giveEffectiveMaterialStiffnessMatrix(FloatMatrix &answer,
     status->getPrincipalStrainVector(principalStrainVector);
 
     // now remain to set shears
-    G = this->give(pscm_G);
+    G = this->give(pscm_G,gp);
     for ( i = 4; i <= 6; i++ ) {
         if ( ( indi = this->giveStressStrainComponentIndOf(FullForm, gp->giveMaterialMode(), i) ) ) {
             if ( i == 4 ) {
@@ -972,7 +972,7 @@ RCM2Material :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
 
 
 double
-RCM2Material :: give(int aProperty)
+RCM2Material :: give(int aProperty, GaussPoint* gp)
 // Returns the value of the property aProperty (e.g. the Young's modulus
 // 'E') of the receiver.
 {
@@ -999,7 +999,7 @@ RCM2Material :: give(int aProperty)
         value = propertyDictionary->at(aProperty);
     } else {
         if ( linearElasticMaterial ) {
-            value = this->linearElasticMaterial->give(aProperty);
+	  value = this->linearElasticMaterial->give(aProperty,gp);
         } else {
             _error("give: property not defined");
         }
