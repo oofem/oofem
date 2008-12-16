@@ -59,7 +59,7 @@ The format of section describing extracted values is following:
 [#SIDE number # dof # unknown #]
 [#EIG_NODE number # dof # unknown #]
 [#EIG_SIDE number # dof # unknown #]
-[#ELEMENT number # gp # record # component #]
+[#ELEMENT number # gp # record # component # [keyword #] ]
 [#EIG_ELEMENT number # gp # record # component #]
 [#BEAM_ELEMENT number # record # component #]
 [#EIG_BEAM_ELEMENT number # record # component #]
@@ -111,7 +111,7 @@ extracted value. Currently supported substitutions are 'd' for displacement, 'v'
 and 'a' for acceleration.
 \item[-]
 \begin{verbatim}
-[#ELEMENT number # gp # record # component #]
+[#ELEMENT number # gp # record # component # [keyword #] ]
 [#EIG_ELEMENT number # gp # record # component #]
 \end{verbatim}
 Records represent the unknowns associated to integration point of
@@ -127,6 +127,13 @@ record). The particular record may contain several values, based upon
 record nature (scalar, vector, tensorial character of record value).
 The {\em  component} value represent value at corresponding position
 in record. 
+
+The {\em keyword} is used only when status records are requested,
+i.e., when 'record' is equal to 2. The {\em keyword} is followed by a quoted string, that determines the name of status variable, values of which are requested.The element integration point status record is assumed to have the following form:
+status {name1 val1 val2 ....  name2 val1 val2 ....  }
+Each variable is assumed to be followed by array of values, and the value of {\em  component} value can be used to extract the value at corresponding position.
+
+
 \item[-]
 \begin{verbatim}
 [#BEAM_ELEMENT number # record # component #]

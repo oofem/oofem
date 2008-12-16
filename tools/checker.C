@@ -979,7 +979,7 @@ printHelp() {
     printf("single char value is expected (i.e. 'd' for displacement, 'v' for velocity,\n");
     printf("and 'a' for acceleration) and keyword, where quoted string is expected.\n");
     printf("The keyword is used only when element status value is requested,\n");
-    printf("i.e., when 'record' is equal to 3\n");
+    printf("i.e., when 'record' is equal to 2\n");
     printf("The output is printed to stdout, one row per each solution step,\n");
     printf("In particular columns, the extracted values are printed, preserving\n");
     printf("their order in input file\n\n");

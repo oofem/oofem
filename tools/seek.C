@@ -548,7 +548,8 @@ int seekAndParseMaterialStatusRecord(Tokenizer *t, char *keyword, int valIndex, 
 
     // seek keyword
     for ( int i = 1; i <= t->giveNumberOfTokens(); i++ ) {
-        if ( !strncmp(t->giveToken(i), keyword, strlen(keyword) - 1) ) {
+      //if ( !strncmp(t->giveToken(i), keyword, strlen(keyword) - 1) ) {
+      if ( !strncmp(t->giveToken(i), keyword, strlen(keyword)) ) {
             // keyword found
             if ( i + valIndex > t->giveNumberOfTokens() ) {
                 return 0;
