@@ -36,52 +36,84 @@
 //   ************************************
 //   *** CLASS QUADRATIC 3D Element   ***
 //   ************************************
+
+//
+//  Recasted by L. Svoboda
+//
 #ifndef qspace_h
 #define qspace_h
 
-#include "lspace.h"
+#include "structuralelement.h"
+#include "fei3dhexaquad.h"
+#include "zznodalrecoverymodel.h"
+#include "sprnodalrecoverymodel.h"
+#include "nodalaveragingrecoverymodel.h"
+#include "spatiallocalizer.h"
 
-class QSpace  : public StructuralElement
+
+class QSpace : public StructuralElement
+
+
 {
-    /*
-     * This class implements an Quadratic 3d  20 - node
-     * elasticity finite element. Each node has 3 degrees of freedom.
-     * DESCRIPTION :
-     * One single additional attribute is needed for Gauss integration purpose :
-     * 'jacobianMatrix'. This 3x3 matrix contains polynomials.
-     * TASKS :
-     * - calculating its Gauss points ;
-     * - calculating its B,D,N matrices and dV.
-     */
+  /*
+    This class implements an Quadratic 3d  20 - node 
+    elasticity finite element. Each node has 3 degrees of freedom.
+    DESCRIPTION :
+    One single additional attribute is needed for Gauss integration purpose :
+    'jacobianMatrix'. This 3x3 matrix contains polynomials.
+    TASKS :
+    - calculating its Gauss points ;
+    - calculating its B,D,N matrices and dV.
+  */
+  
+ protected:
+  int numberOfGaussPoints;
+  static FEI3dHexaQuad interpolation;
+  
+ public:
+  QSpace (int,Domain*) ;     // constructor
+  ~QSpace ()  {}             // destructor
+  
+  IRResultType initializeFrom (InputRecord* ir);
+  virtual void giveDofManDofIDMask (int inode, EquationID ut, IntArray& answer) const;
+  double       computeVolumeAround (GaussPoint*) ;
+  virtual int  computeGlobalCoordinates (FloatArray& answer, const FloatArray& lcoords) ;
+  double       giveCharacteristicLenght (GaussPoint* gp, const FloatArray &normalToCrackPlane);
+  
+  /** Interface requesting service */
+  Interface*  giveInterface (InterfaceType) { return NULL; }
+  virtual int testElementExtension (ElementExtension ext) 
+  {return ((ext==Element_SurfaceLoadSupport)?1:0);}
+  
+  virtual int  computeNumberOfDofs () {return 60;}
+  //
+  // definition & identification
+  //
+  const char* giveClassName () const { return "QSpace"; }
+  classType   giveClassID   () const { return QSpaceClass; }
+  Element_Geometry_Type giveGeometryType() const {return EGT_hexa_2;}
+  
+ protected:
+  void computeGaussPoints ();
+  void computeNmatrixAt (GaussPoint* ,FloatMatrix& );
+  void computeBmatrixAt (GaussPoint* ,FloatMatrix& ,int=1,int=ALL_STRAINS);
+  
+  integrationDomain  giveIntegrationDomain () {return _Cube;}
+  int giveApproxOrder () {return 2;}
+  int giveNumberOfIPForMassMtrxIntegration () {return 27;}
+  
+  //@}
+  /**
+     @name Surface load support
+  */
+  //@{
+  virtual IntegrationRule* GetSurfaceIntegrationRule (int) ;
+  virtual void   computeSurfaceNMatrixAt (FloatMatrix& answer, GaussPoint*) ;
+  virtual void   giveSurfaceDofMapping (IntArray& answer, int) const;
+  virtual double computeSurfaceVolumeAround (GaussPoint*, int) ;
+  virtual void   computeSurfIpGlobalCoords (FloatArray& answer, GaussPoint*, int) ;
+  virtual int    computeLoadLSToLRotationMatrix (FloatMatrix& answer, int, GaussPoint*) ;
+  //@}
+} ;
 
-protected:
-    int numberOfGaussPoints;
-
-public:
-    QSpace(int, Domain *);                       // constructor
-    ~QSpace()  { }                               // destructor
-
-    void    computeJacobianMatrixAt(FloatMatrix &answer, FloatArray *);
-    virtual int            computeNumberOfDofs(EquationID ut) { return 60; }
-    virtual void giveDofManDofIDMask(int inode, EquationID, IntArray &) const;
-    double             computeVolumeAround(GaussPoint *);
-    virtual int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords);
-    double        giveCharacteristicLenght(GaussPoint *gp, const FloatArray &normalToCrackPlane);
-
-    //
-    // definition & identification
-    //
-    const char *giveClassName() const { return "QSpace"; }
-    classType            giveClassID() const { return QSpaceClass; }
-    IRResultType initializeFrom(InputRecord *ir);
-    Interface *giveInterface(InterfaceType) { return NULL; }
-
-protected:
-    void          computeBmatrixAt(GaussPoint *, FloatMatrix &, int = 1, int = ALL_STRAINS);
-    void          computeNmatrixAt(GaussPoint *, FloatMatrix &);
-    void       computeGaussPoints();
-    integrationDomain  giveIntegrationDomain() { return _Cube; }
-};
-
-
-#endif // qspace_h
+#endif

@@ -55,6 +55,7 @@
  * EGT_quad_1 - quadrialateral with 4 nodes
  * EGT_tetra_1 - tetrahedron with 4 nodes
  * EGT_hexa_1  - hexahedron with 8 nodes
+ * EGT_hexa_2  - hexahedron with 20 nodes
  */
 #define Element_Geometry_Type_DEF \
     ENUM_ITEM(EGT_line_1) /* line elements with two nodes  1-------2 */   \
@@ -64,6 +65,7 @@
     ENUM_ITEM(EGT_quad_1)   /* quadrialateral with 4 nodes */   \
     ENUM_ITEM(EGT_tetra_1)  /* tetrahedron with 4 nodes */   \
     ENUM_ITEM(EGT_hexa_1)   /* hexahedron with 8 nodes */   \
+    ENUM_ITEM(EGT_hexa_2)   /* hexahedron with 20 nodes */   \
     ENUM_ITEM(EGT_unknown)  /* unknown element geometry type */
 
 enum Element_Geometry_Type {
