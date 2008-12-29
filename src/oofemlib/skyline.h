@@ -47,8 +47,10 @@
  * Class implementing sparse matrix stored in skyline form. This class
  * assumes symmetric form of matrix to be stored, i.e., only upper half
  * part is therefore stored. Coefficients are stored in one dimensional
- * float array. This requires to remember the adresses of diagonal
- * members in such array.
+ * float array, containing for each column the values from the diagonal 
+ * to the last nonzero entry. 
+ * This requires to remember the adresses of diagonal members in such
+ * array (addr attribute)
  * @see SparseMtrx class
  */
 class Skyline : public SparseMtrx
@@ -113,8 +115,8 @@ public:
     /// Builds internal structure of receiver
     int buildInternalStructure(EngngModel *, int, EquationID);
     /**
-     * allocates and built structure according to given
-     * array of maximal column heights
+     * Allocates and builds internal structure according to given
+     * array holding adresses of diagonal members values (addr).
      */
     int setInternalStructure(IntArray *a);
 
