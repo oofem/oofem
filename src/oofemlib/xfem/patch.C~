@@ -1,0 +1,76 @@
+#include "flotarry.h"
+#include "gausspnt.h"
+#include "integrationrule.h"
+#include "patch.C"
+#include "gaussintegrationrule.h"
+#include "delaunay.h"
+#include <math.h>
+#include "fei2dtrlin.h"
+#include <iostream>
+// it should be more abstract than a triangle
+
+FEI2dTrLin Patch::interpolation(1, 2);
+
+Patch::Patch(int n, Domain *aDomain, Triangle* shape, Element *parent) : Element(n, aDomain) {
+    this->shape = shape;
+    this->parent = parent;
+}
+
+void Patch::setIntegrationRule() {
+    this->numberOfIntegrationRules = 1;
+    this->integrationRulesArray = new IntegrationRule*[1];
+    this->integrationRulesArray[0] = new GaussIntegrationRule(1, this);
+    int nPoints = 3;
+    this->integrationRulesArray[0]->setUpIntegrationPoints(_Triangle, nPoints, _PlaneStress);
+}
+
+double Patch::computeVolumeAround(GaussPoint* gp) {
+    double determinant, weight, thickness, volume;
+    const FloatArray ** coords = new const FloatArray*[3];
+    for(int j = 0; j < this->getShape()->getVertices()->giveSize(); j++){
+        coords[j] = this->getShape()->getVertices()->at(j + 1);
+    }
+    determinant = fabs(this->interpolation.giveTransformationJacobian(coords, *gp->giveCoordinates(), 0.0));
+    delete [] coords;
+    weight = gp->giveWeight();
+    //    thickness = this -> giveCrossSection() -> give('t'); // we have to check the cross section
+    thickness = 1.0;
+    volume = determinant * weight * thickness;
+    return volume;
+}
+
+double Patch::computeVolume() {
+    double volume = 0;
+    for (int j = 0; j < integrationRulesArray[0]->getNumberOfIntegrationPoints(); j++) {
+          this->computeVolumeAround(integrationRulesArray[0]->getIntegrationPoint(j));
+    }
+    return volume;
+}
+
+void Patch::convertGPIntoParental(GaussPoint *gp){
+    FloatArray N;
+    this->interpolation.evalN(N, *gp->giveCoordinates(), 1.0);
+    double weight = 2 * gp->giveWeight()*this->computeVolume();
+    FloatArray lCoor;
+    FloatArray xcoor(3);
+    FloatArray ycoor(3);
+    for(int i = 1; i <= 3; i++){
+         FloatArray *point = this->getShape()->getVertices()->at(i);
+         this->parent->computeLocalCoordinates(lCoor, *point);
+         xcoor.at(i) = lCoor.at(1);
+         ycoor.at(i) = lCoor.at(2);
+    }
+    FloatArray gpCoorInParental(2);
+    gpCoorInParental.at(1) = dotProduct(N,xcoor,3);
+    gpCoorInParental.at(2) = dotProduct(N,ycoor,3);
+    gpCoorInParental.printYourself();
+    gp->setCoordinates(gpCoorInParental);
+    gp->setWeight(2 * this->computeVolume() * gp->giveWeight());
+}
+
+void Patch::convertIntoParental() {
+    for (int j = 0; j < integrationRulesArray[0]->getNumberOfIntegrationPoints(); j++) {
+        GaussPoint *gp = integrationRulesArray[0]->getIntegrationPoint(j);
+        this->convertGPIntoParental(gp);
+    }
+}
