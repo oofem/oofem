@@ -68,6 +68,7 @@
 #include "usrdefsub.h"
 #include "logger.h"
 #include "domaintransactionmanager.h"
+#include "xfemmanager.h"
 
 #ifdef __PARALLEL_MODE
 #include "parallel.h"
@@ -102,6 +103,7 @@ Domain :: Domain(int n, int serNum, EngngModel *pm) : defaultNodeDofIDArry(), de
     nonlocalBarierList    = new AList< NonlocalBarrier >(0);
     randomFieldGeneratorList = new AList< RandomFieldGenerator >(0);
     // yieldCriteriaList     = new AList(0) ;
+    xfemManager = NULL;
 
     numberOfDefaultDofsPerNode = -1;
     numberOfDefaultDofsPerSide = -1;
@@ -132,6 +134,7 @@ Domain :: ~Domain()
     delete crossSectionList;
     delete nonlocalBarierList;
     delete randomFieldGeneratorList;
+    delete xfemManager;
 
     delete connectivityTable;
     delete spatialLocalizer;
@@ -1622,6 +1625,11 @@ Domain :: elementGlobal2Local(int _globnum)
     }
 }
 
+void 
+Domain::setXfemManager(XfemManager *xfemManager)
+{
+    this->xfemManager = xfemManager;
+}
 
-
+ 
 #endif

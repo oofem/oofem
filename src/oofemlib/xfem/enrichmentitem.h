@@ -1,4 +1,4 @@
-/* 
+/*
  * File:   enrichmentitem.h
  * Author: chamrova
  *
@@ -11,11 +11,12 @@
 #include "femcmpnn.h"
 #include "domain.h"
 #include "geometry.h"
-#include <iostream>
+#include "flotmtrx.h"
+#include "enrichmentfunction.h"
 
 class Geometry;
 
-class EnrichmentItem : public FEMComponent 
+class EnrichmentItem : public FEMComponent
 {
     public:
          // constructor; there is no destructor here, since Geometry is delete in Domain
@@ -29,26 +30,26 @@ class EnrichmentItem : public FEMComponent
          // assignes geometry to a particular enrichment item
          void setGeometry (Geometry *geometry) {this->geometry = geometry;}
          bool interacts(Element* element);
-//         XfemEleType getInteractionType(Element* element);
-         void getIntersectionPoints(AList<FloatArray>* intersectionPoints, Element *element);
-         
+         void computeIntersectionPoints(AList<FloatArray>* intersectionPoints, Element *element);
+         double computeNumberOfIntersectionPoints(Element *element);
+         EnrichmentFunction* giveEnrichmentFunction() {return ef;}
+         void setEnrichmentFunction(EnrichmentFunction *ef);
     protected:
-         Geometry* geometry; 
+         Geometry* geometry;
+         EnrichmentFunction *ef;
 };
 
 class CrackTip : public EnrichmentItem {
     public:
         CrackTip (int n,Domain* aDomain) : EnrichmentItem(n, aDomain) {}
     protected:
-        // crack tip segment
-        Line* tipSegment; 
-        
 };
 
 class CrackInterior : public EnrichmentItem {
     public:
-        CrackInterior (int n,Domain* aDomain) : EnrichmentItem(n, aDomain) {} 
-    
+        CrackInterior (int n,Domain* aDomain) : EnrichmentItem(n, aDomain) {}
+
 };
 #endif	/* _ENRICHMENTITEM_H */
+
 

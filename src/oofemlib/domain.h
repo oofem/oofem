@@ -81,6 +81,7 @@ class NodalRecoveryModel;
 class NonlocalBarrier;
 class DomainTransactionManager;
 class RandomFieldGenerator;
+class XfemManager;
 
 #ifdef __PARALLEL_MODE
 class ProcessCommunicator;
@@ -207,6 +208,8 @@ private:
      * because in case of multiple domains stateCounter should be kept independently for each domain.
      */
     StateCounterType nonlocalUpdateStateCounter;
+    /// xfemManager
+    XfemManager *xfemManager ;
 
 #ifdef __PARALLEL_MODE
     /**
@@ -405,8 +408,9 @@ public:
     void setInitialCondition (int i, InitialCondition* obj);
     /// Sets i-th componet. The component will be futher managed and maintained by domain object. 
     void setLoadTimeFunction (int i, LoadTimeFunction* obj);
-    
-    
+    /// Temporary function, sets xfemManager
+    void               setXfemManager(XfemManager* xfemManager);
+
 
     //@}
     /**
