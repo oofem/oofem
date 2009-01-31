@@ -9,7 +9,7 @@ PETSC_ARCH = @PETSC_ARCH@
 BOPT       = @PETSC_BOPT@
 @PETSC_MAKE_INCLUDE@
 
-INCLUDE_DIR=  @TARGET_CONFIG_INCLUDES@ @IML_INCLUDES@ @SPOOLES_INCLUDES@ @PETSC_INCLUDES@ @PARMETIS_INCLUDES@ @DSS_INCLUDES@ @CKIT_INCLUDES@ @ELIXIR_INCLUDES@ @MPI_INCLUDES@
+INCLUDE_DIR=  @OOFEMLIB_INCLUDES@ @TARGET_CONFIG_INCLUDES@ @IML_INCLUDES@ @SPOOLES_INCLUDES@ @PETSC_INCLUDES@ @PARMETIS_INCLUDES@ @DSS_INCLUDES@ @CKIT_INCLUDES@ @ELIXIR_INCLUDES@ @MPI_INCLUDES@
 SYMBOLS    = @MODULE_SYMBOLS@
 #   Libraries
 LOCAL_LIBS = @ELIXIR_LIBS@ @CKIT_LIB@
@@ -25,7 +25,7 @@ CC         = @CXX@
 AR         = ar -r
 RM         = rm -f
 
-VPATH=@OOFEM_DIR@/src/oofemlib
+VPATH=@OOFEM_DIR@/src/oofemlib @OOFEM_DIR@/src/oofemlib/xfem 
 
 
 ## sources
@@ -39,12 +39,14 @@ srcs6=outputmanager.C compiler.C parser.C rigidarmnode.C spatiallocalizer.C dumm
 srcs7=calmls.C nrsolver.C nrsolver2.C subspaceit.C gjacobi.C linesearch.C nonlocalbarrier.C primaryfield.C field.C fieldmanager.C oofemtxtdatareader.C oofemtxtinputrecord.C buffereddatareader.C stressstrainbasevector.C stressvector.C strainvector.C fei1dlin.C  fei2dquadlin.C  fei2dtrlin.C fei3dtrlin.C fei3dhexalin.C spoolessparsemtrx.C spoolessolver.C petscsparsemtrx.C petscsolver.C petsccontext.C hangingnode.C pointload.C
 srcs8=errorestimator.C remeshingcrit.C primaryunknownmapper.C materialmappingalgorithm.C dofdistributedprimaryfield.C domaintransactionmanager.C fei2dtrquad.C localgaussianrandomgenerator.C randommaterialext.C
 srcs9=geotoolbox.C dss.C dsssolver.C intvarfield.C localgaussianrandomgenerator.C fei3dhexaquad.C
+
+xfemsrc=delaunay.C enrichmentitem.C patch.C enrichmentfunction.C geometry.C xfemmanager.C
 #obsolete 
 srcs99=
 #parallel
 psrcs1=communicator.C processcomm.C problemcomm.C combuff.C petscordering.C dyncombuff.C loadbalancer.C parmetisloadbalancer.C nonlocalmatwtp.C
 
-all_src = $(srcs0) $(srcs1) $(srcs2) $(srcs3) $(srcs4) $(srcs5) $(srcs6) $(srcs7) $(srcs8) $(srcs9) $(psrcs1) 
+all_src = $(srcs0) $(srcs1) $(srcs2) $(srcs3) $(srcs4) $(srcs5) $(srcs6) $(srcs7) $(srcs8) $(srcs9) $(xfemsrc) $(psrcs1)
 
 ## object files
 oofemLib_objs := $(all_src:.C=.o)
