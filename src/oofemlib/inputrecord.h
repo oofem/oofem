@@ -702,6 +702,7 @@ enum InputFieldType {
     IFT_CompRowPrecond_partfill,
 
     IFT_NonlocalMaterialExtensionInterface_regionmap,
+    IFT_NonlocalMaterialExtensionInterface_permanentNonlocTableFlag,
 
     IFT_OutputManager_name,
     IFT_OutputManager_tstepall,

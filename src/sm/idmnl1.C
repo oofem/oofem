@@ -122,7 +122,7 @@ IDNLMaterial :: computeEquivalentStrain(double &kappa, const FloatArray &strain,
     this->updateDomainBeforeNonlocAverage(atTime);
 
     // compute nonlocal strain increment first
-    dynaList< localIntegrationRecord > *list = status->giveIntegrationDomainList();
+    dynaList< localIntegrationRecord > *list = this->giveIPIntegrationList(gp); // !
     dynaList< localIntegrationRecord > :: iterator pos;
 
     for ( pos = list->begin(); pos != list->end(); ++pos ) {
@@ -134,6 +134,7 @@ IDNLMaterial :: computeEquivalentStrain(double &kappa, const FloatArray &strain,
     }
 
     nonlocalEquivalentStrain *= 1. / status->giveIntegrationScale();
+    this->endIPNonlocalAverage (gp); // !
 
     kappa = nonlocalEquivalentStrain;
 }

@@ -177,7 +177,7 @@ MDM :: computeDamageTensor(FloatMatrix &damageTensor, const FloatArray &totalStr
         this->updateDomainBeforeNonlocAverage(atTime);
 
         // compute nonlocal strain increment first
-        dynaList< localIntegrationRecord > *list = status->giveIntegrationDomainList();
+        dynaList< localIntegrationRecord > *list = this->giveIPIntegrationList(gp); // !
         dynaList< localIntegrationRecord > :: iterator pos;
 
         for ( pos = list->begin(); pos != list->end(); ++pos ) {
@@ -200,6 +200,7 @@ MDM :: computeDamageTensor(FloatMatrix &damageTensor, const FloatArray &totalStr
 
         nonlocalDamageTensor.times( 1. / status->giveIntegrationScale() );
         nonlocalDamageTensor.symmetrized();
+	this->endIPNonlocalAverage (gp); // !
 
         damageTensor = nonlocalDamageTensor;
     } else {

@@ -109,6 +109,8 @@ public:
     double giveIntegrationScale() { return integrationScale; }
     /// Sets associated integration scale.
     void   setIntegrationScale(double val) { integrationScale = val; }
+    /// clears the integration list of receiver
+    void clear() {integrationDomainList.clear();}
 };
 
 
@@ -153,16 +155,15 @@ protected:
     Domain *domain;
     /// map indicating regions to skip (region - cross section model)
     IntArray regionMap;
-
+    /// flag indicating whether to keep nonlocal interaction tables of integration points cached
+    bool permanentNonlocTableFlag;
 public:
     /**
      * Constructor. Creates material with given number, belonging to given domain.
      * @param n material number
      * @param d domain to which new material will belong
      */
-    NonlocalMaterialExtensionInterface(Domain *d)  : Interface()
-    { domain = d;
-      regionMap.resize( d->giveNumberOfRegions() ); /*lastUpdatedStateCounter = 0;*/ }
+    NonlocalMaterialExtensionInterface(Domain *d);
     /// Destructor.
     ~NonlocalMaterialExtensionInterface()                { }
 
@@ -189,9 +190,8 @@ public:
      * This list is stored in integration point corresponding nonlocal status.
      * Generally speaking, the nonlocal weight function with "bounded" or limited support is assumed.
      * When nonlocal weight function unbounded support is used, then keeping the list of
-     * influencing integration points has no sence (because all integration points in domain participate)
-     * and should be appropriate not to use afore mentioned list and redefine the
-     * service to void service. Therefore, current implementation skips the creation of this list.
+     * influencing integration points would be wasting of space and should be cleared after averaging has
+     * been finished in integration point. The endIPNonlocalAverage method will ensure this.
      */
     void buildNonlocalPointTable(GaussPoint *gp);
 
@@ -203,6 +203,14 @@ public:
      * existing list is cleared and  buildNonlocalPointTable service is invoked.
      */
     void rebuildNonlocalPointTable(GaussPoint *gp, IntArray *contributingElems);
+    /**
+     * Returns integration list corresponding to given integration point.
+     * Contains localIntegrationRecord structures, containing
+     * references to integration points and their weights that influence to nonlocal average in
+     * receiver's associated integration point.
+     * Rebuilds the IP list by calling  buildNonlocalPointTable(GaussPoint *gp) if not available
+     */
+    dynaList< localIntegrationRecord > *giveIPIntegrationList(GaussPoint *gp);
     /**
      * Computes the value of nonlocal weight function in given point.
      * @param src coordinates of source point.
@@ -226,7 +234,7 @@ public:
      * Determines, whether receiver has bounded weighting function (limited support)
      * @return true if weighting function bounded, zero otherwise
      */
-    virtual int hasBoundedSupport() = 0;
+    virtual int hasBoundedSupport() {return 1;}
     /**
      * Determines the width (radius) of limited support of weighting function
      */
@@ -248,6 +256,13 @@ public:
      */
     //MaterialStatus* CreateStatus (GaussPoint* gp)
     // {return  new NonlocalMaterialStatus (1,this->giveDomain(), gp);;}
+    /**
+     * Notifies the receiver, that the nonlocal averaging has been finished for given ip.
+     * It deletes IP nonlocal table if permanentNonlocTableFlag is flase.
+     * This can save significat memory, since nonlocal tables are not stored, but every time computed when needed,
+     * but on the other hand computational time may significantly grow.
+     */
+    void endIPNonlocalAverage (GaussPoint*gp);
 
 protected:
     /**

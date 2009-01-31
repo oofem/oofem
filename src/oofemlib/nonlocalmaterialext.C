@@ -61,6 +61,13 @@
 // initialize class variable
 // StateCounterType NonlocalMaterialExtensionInterface :: lastUpdatedStateCounter = 0;
 
+
+NonlocalMaterialExtensionInterface::NonlocalMaterialExtensionInterface(Domain *d)  : Interface()
+{ domain = d;
+  regionMap.resize( d->giveNumberOfRegions() ); /*lastUpdatedStateCounter = 0;*/ 
+  if (this->hasBoundedSupport()) permanentNonlocTableFlag=true; else permanentNonlocTableFlag = false;
+}
+
 void
 NonlocalMaterialExtensionInterface :: updateDomainBeforeNonlocAverage(TimeStep *atTime)
 {
@@ -107,10 +114,11 @@ NonlocalMaterialExtensionInterface :: buildNonlocalPointTable(GaussPoint *gp)
 
     // test for bounded support - if no bounded support, the nonlocal point table is
     // big vasting of space.
+    /*
     if ( !this->hasBoundedSupport() ) {
         return;
     }
-
+    */
 
     if ( !statusExt->giveIntegrationDomainList()->isEmpty() ) {
         return;                                                  // already done
@@ -213,9 +221,11 @@ NonlocalMaterialExtensionInterface :: rebuildNonlocalPointTable(GaussPoint *gp, 
 
     // test for bounded support - if no bounded support, the nonlocal point table is
     // big vasting of space.
+    /*
     if ( !this->hasBoundedSupport() ) {
         return;
     }
+    */
 
     iList = statusExt->giveIntegrationDomainList();
     iList->clear();
@@ -275,6 +285,41 @@ NonlocalMaterialExtensionInterface :: rebuildNonlocalPointTable(GaussPoint *gp, 
 }
 
 
+dynaList< localIntegrationRecord > *
+NonlocalMaterialExtensionInterface :: giveIPIntegrationList(GaussPoint *gp)
+{
+  NonlocalMaterialStatusExtensionInterface *statusExt =
+    ( NonlocalMaterialStatusExtensionInterface * ) gp->giveMaterialStatus()->
+    giveInterface(NonlocalMaterialStatusExtensionInterfaceType);
+  
+  if ( !statusExt ) {
+    OOFEM_ERROR("NonlocalMaterialExtensionInterface::givIPIntegrationList : local material status encountered");
+  }
+  
+  if ( statusExt->giveIntegrationDomainList()->isEmpty() ) {
+    this->buildNonlocalPointTable(gp);
+  }
+  
+  return statusExt->giveIntegrationDomainList();
+}
+    
+void
+NonlocalMaterialExtensionInterface :: endIPNonlocalAverage(GaussPoint *gp)
+{
+  NonlocalMaterialStatusExtensionInterface *statusExt =
+    ( NonlocalMaterialStatusExtensionInterface * ) gp->giveMaterialStatus()->
+    giveInterface(NonlocalMaterialStatusExtensionInterfaceType);
+  
+  if ( !statusExt ) {
+    OOFEM_ERROR("NonlocalMaterialExtensionInterface::givIPIntegrationList : local material status encountered");
+  }
+  
+  if ( (!this->hasBoundedSupport()) || (!permanentNonlocTableFlag)) {
+    statusExt->clear();
+  }
+}
+
+
 
 IRResultType
 NonlocalMaterialExtensionInterface :: initializeFrom(InputRecord *ir)
@@ -290,6 +335,12 @@ NonlocalMaterialExtensionInterface :: initializeFrom(InputRecord *ir)
     } else {
         regionMap.zero();
     }
+    
+    int _permanentNonlocTableFlag = this->permanentNonlocTableFlag;
+    IR_GIVE_OPTIONAL_FIELD (ir, _permanentNonlocTableFlag, 
+			    IFT_NonlocalMaterialExtensionInterface_permanentNonlocTableFlag,
+			    "permanentnonloctableflag");
+    this->permanentNonlocTableFlag = _permanentNonlocTableFlag;
 
     return IRRT_OK;
 }

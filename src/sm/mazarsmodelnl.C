@@ -124,7 +124,7 @@ MazarsNLMaterial :: computeEquivalentStrain(double &kappa, const FloatArray &str
     this->updateDomainBeforeNonlocAverage(atTime);
 
     // compute nonlocal strain increment first
-    dynaList< localIntegrationRecord > *list = status->giveIntegrationDomainList();
+    dynaList< localIntegrationRecord > *list = this->giveIPIntegrationList(gp); // !
     dynaList< localIntegrationRecord > :: iterator pos;
 
     for ( pos = list->begin(); pos != list->end(); ++pos ) {
@@ -136,7 +136,7 @@ MazarsNLMaterial :: computeEquivalentStrain(double &kappa, const FloatArray &str
     }
 
     nonlocalEquivalentStrain *= 1. / status->giveIntegrationScale();
-
+    this->endIPNonlocalAverage (gp); // !
     kappa = nonlocalEquivalentStrain;
 }
 

@@ -128,7 +128,7 @@ RCSDNLMaterial :: giveRealStressVector(FloatArray &answer, MatResponseForm form,
     this->updateDomainBeforeNonlocAverage(atTime);
 
     // compute nonlocal strain increment first
-    dynaList< localIntegrationRecord > *list = status->giveIntegrationDomainList();
+    dynaList< localIntegrationRecord > *list = this->giveIPIntegrationList(gp); // !
     dynaList< localIntegrationRecord > :: iterator listIter;
 
     for ( listIter = list->begin(); listIter != list->end(); ++listIter ) {
@@ -140,6 +140,7 @@ RCSDNLMaterial :: giveRealStressVector(FloatArray &answer, MatResponseForm form,
     }
 
     reducedNonlocStrainVector.times( 1. / status->giveIntegrationScale() );
+    this->endIPNonlocalAverage (gp); // !
 
     // substract stress independent part
     ////# this->giveStressDependentPartOfStrainVector(nonlocalStrainIncrement, gp, nonlocalTotalStrainIncrement,atTime);
