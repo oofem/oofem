@@ -49,8 +49,6 @@
 #include "intarray.h"
 #include "nodalrecoverymodel.h"
 
-#define RBR_SUPPORT
-
 /**
  * Represents VTK (Visualization Toolkit) export module. It uses vtk file format, Unstructured grid dataset.
  * There is built in support for Region By Region otput, taking care about possible nonsmooth character of
@@ -66,14 +64,19 @@ protected:
     IntArray internalVarsToExport;
     /// list of primary unknowns to export
     IntArray primaryVarsToExport;
-#ifdef RBR_SUPPORT
-    enum omodeType { wdmode, rbrmode }; // WholeDomain or RegionByRegion output
-    omodeType omode;
-#endif
+
+    enum modeType { wdmode, rbrmode }; // WholeDomain or RegionByRegion output
+    modeType outMode;
+    modeType mode;
+
     /// smoother type
     enum VTKEM_SmootherType { VTK_Smother_NA, VTK_Smoother_ZZ, VTK_Smoother_SPR } stype;
     /// smotther
     NodalRecoveryModel *smoother;
+    /// list of regions to skip
+    IntArray regionsToSkip;
+
+
 public:
 
     /// Constructor. Creates empty Output Manager. By default all components are selected.
@@ -140,7 +143,6 @@ protected:
     /** exports single variable */
     void exportPrimVarAs(UnknownType valID, FILE *stream, TimeStep *tStep);
 
-#ifdef RBR_SUPPORT
     /**
      * Assembles the region node map. Also computes the total number of nodes in region.
      * The region are numbered starting from offset+1.
@@ -156,7 +158,6 @@ protected:
      * added multiple times.
      */
     int giveTotalRBRNumberOfNodes(Domain *d);
-#endif
 };
 
 #endif // vtkexportmodule_h

@@ -87,6 +87,7 @@ public:
     const char *giveClassName() const { return "InterfaceElement3dTrLin"; }
     classType            giveClassID() const { return InterfaceElement3dTrLinClass; }
     IRResultType initializeFrom(InputRecord *ir);
+    Element_Geometry_Type giveGeometryType() const { return EGT_triangle_1; }
 
 protected:
     void          computeBmatrixAt(GaussPoint *, FloatMatrix &, int = 1, int = ALL_STRAINS);

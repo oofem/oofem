@@ -89,6 +89,7 @@ enum InputFieldType {
     IFT_VTKExportModule_vars,
     IFT_VTKExportModule_primvars,
     IFT_VTKExportModule_stype,
+    IFT_VTKExportModule_regionstoskip,
 
     IFT_POIExportModule_vars,
     IFT_POIExportModule_primvars,

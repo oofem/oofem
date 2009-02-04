@@ -54,11 +54,9 @@
 
 VTKExportModule :: VTKExportModule(EngngModel *e) : ExportModule(e), internalVarsToExport(), primaryVarsToExport()
 {
-    // omode = rbrmode;
-#ifdef RBR_SUPPORT
-    omode = rbrmode;
-#endif
-    smoother = NULL;
+  this->mode = rbrmode;
+  this->outMode = rbrmode; //applies only when mode == rbrmode
+  smoother = NULL;
 }
 
 
@@ -85,6 +83,9 @@ VTKExportModule :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_VTKExportModule_stype, "stype"); // Macro
     stype = ( VTKEM_SmootherType ) val;
 
+    regionsToSkip.resize(0);
+    IR_GIVE_OPTIONAL_FIELD(ir, regionsToSkip, IFT_VTKExportModule_regionstoskip, "regionstoskip"); // Macro
+
     return IRRT_OK;
 }
 
@@ -109,35 +110,35 @@ VTKExportModule :: doOutput(TimeStep *tStep)
     FloatArray *coords;
     int i, inode, nnodes = d->giveNumberOfDofManagers();
     // output points
-#ifdef RBR_SUPPORT
-    if ( omode == wdmode ) { // (Whole Domain)
-#endif
-    fprintf(stream, "POINTS %d double\n", nnodes);
-    for ( inode = 1; inode <= nnodes; inode++ ) {
+
+    if ((this->mode == wdmode) || ((this->mode == rbrmode)&&(this->outMode == wdmode))) {
+
+      fprintf(stream, "POINTS %d double\n", nnodes);
+      for ( inode = 1; inode <= nnodes; inode++ ) {
         coords = d->giveNode(inode)->giveCoordinates();
         for ( i = 1; i <= coords->giveSize(); i++ ) {
-            fprintf( stream, "%e ", coords->at(i) );
+          fprintf( stream, "%e ", coords->at(i) );
         }
-
+        
         for ( i = coords->giveSize() + 1; i <= 3; i++ ) {
-            fprintf(stream, "%e ", 0.0);
+          fprintf(stream, "%e ", 0.0);
         }
-
+        
         fprintf(stream, "\n");
-    }
+      }
+    } else {  // outMode = rbrmode (Region By Region)
+      // output nodes Region By Region
+      int nnodes = this->giveTotalRBRNumberOfNodes(d);
+      fprintf(stream, "POINTS %d float\n", nnodes);
+      int ireg, nregions = d->giveNumberOfRegions();
+      int regionDofMans;
+      IntArray map( d->giveNumberOfDofManagers() );
+      for ( ireg = 1; ireg <= nregions; ireg++ ) {
 
-#ifdef RBR_SUPPORT
-} else {  // omode = rbrmode (Region By Region)
-    // output nodes Region By Region
-    int nnodes = this->giveTotalRBRNumberOfNodes(d);
-    fprintf(stream, "POINTS %d float\n", nnodes);
-    int ireg, nregions = d->giveNumberOfRegions();
-    int regionDofMans;
-    IntArray map( d->giveNumberOfDofManagers() );
-    for ( ireg = 1; ireg <= nregions; ireg++ ) {
+        if (this->regionsToSkip.contains(ireg)) continue;
         // asemble local->global region map
         this->initRegionNodeNumbering(map, regionDofMans, 0, d, ireg, 1);
-
+        
         for ( inode = 1; inode <= regionDofMans; inode++ ) {
             coords = d->giveNode( map.at(inode) )->giveCoordinates();
             for ( i = 1; i <= coords->giveSize(); i++ ) {
@@ -150,52 +151,53 @@ VTKExportModule :: doOutput(TimeStep *tStep)
 
             fprintf(stream, "\n");
         }
+      }
     }
-}
-#endif
 
-    int ielem, nelem = d->giveNumberOfElements();
+    int ielem, nelem = d->giveNumberOfElements(), elemToProcess = 0;
     int ncells, celllistsize = 0;
     for ( ielem = 1; ielem <= nelem; ielem++ ) {
-        // element composed from same-type cells asumed
-        ncells = this->giveNumberOfElementCells( d->giveElement(ielem) );
-        celllistsize += ncells + ncells * this->giveNumberOfNodesPerCell( this->giveCellType( d->giveElement(ielem) ) );
+      if ((this->mode == rbrmode)&&(this->regionsToSkip.contains(d->giveElement(ielem)->giveRegionNumber()))) continue;
+      elemToProcess++;
+      // element composed from same-type cells asumed
+      ncells = this->giveNumberOfElementCells( d->giveElement(ielem) );
+      celllistsize += ncells + ncells * this->giveNumberOfNodesPerCell( this->giveCellType( d->giveElement(ielem) ) );
     }
 
     int nelemNodes;
     Element *elem;
     // output cells
-    fprintf(stream, "\nCELLS %d %d\n", nelem, celllistsize);
+    fprintf(stream, "\nCELLS %d %d\n", elemToProcess, celllistsize);
 
-#ifdef RBR_SUPPORT
-    if ( omode == wdmode ) { // (Whole Domain)
-#endif
-    for ( ielem = 1; ielem <= nelem; ielem++ ) {
+    if ((this->mode == wdmode) || ((this->mode == rbrmode)&&(this->outMode == wdmode))) {
+      for ( ielem = 1; ielem <= nelem; ielem++ ) {
         elem = d->giveElement(ielem);
         nelemNodes = elem->giveNumberOfNodes();
         fprintf(stream, "%d ", nelemNodes);
         for ( i = 1; i <= nelemNodes; i++ ) {
-            fprintf(stream, "%d ", elem->giveNode(i)->giveNumber() - 1);
+          fprintf(stream, "%d ", elem->giveNode(i)->giveNumber() - 1);
         }
-
+        
         fprintf(stream, "\n");
-    }
-
-    // output cell types
-    int vtkCellType;
-    fprintf(stream, "\nCELL_TYPES %d\n", nelem);
-    for ( ielem = 1; ielem <= nelem; ielem++ ) {
+      }
+      
+      // output cell types
+      int vtkCellType;
+      fprintf(stream, "\nCELL_TYPES %d\n", elemToProcess);
+      for ( ielem = 1; ielem <= nelem; ielem++ ) {
         elem = d->giveElement(ielem);
         vtkCellType = this->giveCellType(elem);
         fprintf(stream, "%d\n", vtkCellType);
-    }
+      }
 
-#ifdef RBR_SUPPORT
-} else {  // rbr mode
-    IntArray regionNodalNumbers(nnodes);
-    int regionDofMans = 0, offset = 0;
-    int ireg, nregions = d->giveNumberOfRegions();
-    for ( ireg = 1; ireg <= nregions; ireg++ ) {
+    } else {  // rbr mode
+      IntArray regionNodalNumbers(nnodes);
+      int regionDofMans = 0, offset = 0;
+      int ireg, nregions = d->giveNumberOfRegions();
+      for ( ireg = 1; ireg <= nregions; ireg++ ) {
+
+        if (this->regionsToSkip.contains(ireg)) continue;
+
         // assemble global->local map
         this->initRegionNodeNumbering(regionNodalNumbers, regionDofMans, offset, d, ireg, 0);
         offset += regionDofMans;
@@ -213,9 +215,12 @@ VTKExportModule :: doOutput(TimeStep *tStep)
 
             fprintf(stream, "\n");
         }
-    }
+      }
 
-    for ( ireg = 1; ireg <= nregions; ireg++ ) {
+      for ( ireg = 1; ireg <= nregions; ireg++ ) {
+
+        if (this->regionsToSkip.contains(ireg)) continue;
+
         // output cell types
         int vtkCellType;
         fprintf(stream, "\nCELL_TYPES %d\n", nelem);
@@ -230,26 +235,27 @@ VTKExportModule :: doOutput(TimeStep *tStep)
                 fprintf(stream, "%d\n", vtkCellType);
             }
         }
+      }
     }
-}
-#endif
+
     if ( primaryVarsToExport.giveSize() || internalVarsToExport.giveSize() ) {
-#ifdef RBR_SUPPORT
-        if ( omode == wdmode ) {
-            fprintf(stream, "\n\nPOINT_DATA %d\n", nnodes);
+
+      if (this->mode == rbrmode) {
+        if ( outMode == wdmode ) {
+          fprintf(stream, "\n\nPOINT_DATA %d\n", nnodes);
         } else {
-            fprintf( stream, "\n\nPOINT_DATA %d\n", this->giveTotalRBRNumberOfNodes(d) );
+          fprintf( stream, "\n\nPOINT_DATA %d\n", this->giveTotalRBRNumberOfNodes(d) );
         }
-
-#else
+      } else {
         fprintf(stream, "\n\nPOINT_DATA %d\n", nnodes);
-#endif
+      }
     }
-
+    
     this->exportPrimaryVars(stream, tStep);
     this->exportIntVars(stream, tStep);
-
+    
     fclose(stream);
+    
 }
 
 void
@@ -376,7 +382,7 @@ VTKExportModule :: exportIntVars(FILE *stream, TimeStep *tStep)
 
     /*
      #ifdef RBR_SUPPORT
-     * if (omode == wdmode)
+     * if (outMode == wdmode)
      * fprintf(stream,"\n\nPOINT_DATA %d\n", nnodes);
      * else
      * fprintf(stream,"\n\nPOINT_DATA %d\n", this->giveTotalRBRNumberOfNodes(d));
@@ -393,7 +399,6 @@ VTKExportModule :: exportIntVars(FILE *stream, TimeStep *tStep)
 }
 
 
-#ifdef RBR_SUPPORT
 int
 VTKExportModule :: giveTotalRBRNumberOfNodes(Domain *d)
 //
@@ -412,6 +417,9 @@ VTKExportModule :: giveTotalRBRNumberOfNodes(Domain *d)
     int elemnodes, ielemnode;
 
     for ( i = 1; i <= nregions; i++ ) {
+
+        if (this->regionsToSkip.contains(i)) continue;
+
         for ( j = 0; j < nnodes; j++ ) {
             map [ j ] = 0;
         }
@@ -495,7 +503,6 @@ VTKExportModule :: initRegionNodeNumbering(IntArray &regionNodalNumbers, int &re
     //  }
     return 1;
 }
-#endif
 
 
 void
@@ -541,11 +548,9 @@ VTKExportModule :: exportIntVarAs(InternalStateType valID, InternalStateValueTyp
             this->smoother->recoverValues(valID, tStep);
         }
 
-#ifdef RBR_SUPPORT
-        if ( omode == wdmode ) { // (Whole Domain)
-#endif
-        this->smoother->giveRegionRecordMap(regionVarMap, 1, valID);
-        for ( inode = 1; inode <= nnodes; inode++ ) {
+        if ( this->mode == wdmode ) { // (Whole Domain)
+          this->smoother->giveRegionRecordMap(regionVarMap, 1, valID);
+          for ( inode = 1; inode <= nnodes; inode++ ) {
             if ( valID == IST_DisplacementVector ) {
                 iVal.resize(3);
                 val = & iVal;
@@ -668,15 +673,15 @@ VTKExportModule :: exportIntVarAs(InternalStateType valID, InternalStateValueTyp
             }
 
             fprintf(stream, "\n");
-        }
+          }
 
-#ifdef RBR_SUPPORT
-    }
+        } else { // RBR mode
+          IntArray regionNodalNumbers(nnodes);
+          int regionDofMans = 0, offset = 0;
+          for ( ireg = 1; ireg <= nregions; ireg++ ) {
 
-    else { // RBR mode
-        IntArray regionNodalNumbers(nnodes);
-        int regionDofMans = 0, offset = 0;
-        for ( ireg = 1; ireg <= nregions; ireg++ ) {
+            if (this->regionsToSkip.contains(ireg)) continue;
+
             // assemble local->global map
             this->initRegionNodeNumbering(regionNodalNumbers, regionDofMans, offset, d, ireg, 1);
             this->smoother->giveRegionRecordMap(regionVarMap, ireg, valID);
@@ -698,7 +703,9 @@ VTKExportModule :: exportIntVarAs(InternalStateType valID, InternalStateValueTyp
                     }
                 } else {
                     this->smoother->giveNodalVector(val, regionNodalNumbers.at(inode), ireg);
+                    if (val==NULL) OOFEM_ERROR ("VTKExportModule::exportIntVars: internal error: invalid dofman data");
                 }
+
 
                 if ( type == ISVT_SCALAR ) {
                     if ( val->giveSize() ) {
@@ -762,10 +769,9 @@ VTKExportModule :: exportIntVarAs(InternalStateType valID, InternalStateValueTyp
 
                 fprintf(stream, "\n");
             }
+          }
         }
-    }
-#endif
-
+        
         fprintf(stream, "\n");
     }
 }
@@ -855,11 +861,9 @@ VTKExportModule :: exportPrimVarAs(UnknownType valID, FILE *stream, TimeStep *tS
     DofID id;
     int numberOfDofs;
 
-#ifdef RBR_SUPPORT
-    if ( omode == wdmode ) { // (Whole Domain)
-#endif
+    if ( this->mode == wdmode ) { // (Whole Domain)
 
-    for ( inode = 1; inode <= nnodes; inode++ ) {
+      for ( inode = 1; inode <= nnodes; inode++ ) {
         dman = d->giveNode(inode);
         numberOfDofs = dman->giveNumberOfDofs();
 
@@ -927,16 +931,17 @@ VTKExportModule :: exportPrimVarAs(UnknownType valID, FILE *stream, TimeStep *tS
                 fprintf(stream, "0.0 ");
             }
         }
-
+        
         fprintf(stream, "\n");
-    }
+      }
+      fprintf(stream, "\n");
+    } else {  // RBR mode
+      IntArray regionNodalNumbers(nnodes);
+      int regionDofMans = 0, offset = 0;
+      for ( ireg = 1; ireg <= nregions; ireg++ ) {
 
-    fprintf(stream, "\n");
-#ifdef RBR_SUPPORT
-} else {  // RBR mode
-    IntArray regionNodalNumbers(nnodes);
-    int regionDofMans = 0, offset = 0;
-    for ( ireg = 1; ireg <= nregions; ireg++ ) {
+        if (this->regionsToSkip.contains(ireg)) continue;
+
         // assemble local->global map
         this->initRegionNodeNumbering(regionNodalNumbers, regionDofMans, offset, d, ireg, 1);
 
@@ -1016,13 +1021,12 @@ VTKExportModule :: exportPrimVarAs(UnknownType valID, FILE *stream, TimeStep *tS
                     fprintf(stream, "0.0 ");
                 }
             }
-
+            
             fprintf(stream, "\n");
         }
+      }
+      
+      fprintf(stream, "\n");
     }
-
-    fprintf(stream, "\n");
-}
-#endif
 }
 
