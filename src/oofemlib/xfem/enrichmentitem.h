@@ -16,40 +16,56 @@
 
 class Geometry;
 
+
 class EnrichmentItem : public FEMComponent
 {
     public:
-         // constructor; there is no destructor here, since Geometry is delete in Domain
+         /// Constructor
          EnrichmentItem (int n,Domain* aDomain);
-         // does nothing, but has to be here since it is pure virtual in the abstract class
+         /// initializes EnrichmentItem from InputRecord
          IRResultType initializeFrom (InputRecord* ir);
-         // does nothing, but has to be here since it is pure virtual in the abstract class
+         /// returns class name
          const char* giveClassName () const { return "EnrichmentItem" ; }
-         // get method
-         Geometry* giveGeometry();
-         // assignes geometry to a particular enrichment item
-         void setGeometry (Geometry *geometry) {this->geometry = geometry;}
+         /// Accessor
+         BasicGeometry* giveGeometry();
+         /// Checks whether EnrichmentItem interacts element
          bool interacts(Element* element);
+         /// Computes intersection points with Element
          void computeIntersectionPoints(AList<FloatArray>* intersectionPoints, Element *element);
+         /// Computes number intersection points with Element
          double computeNumberOfIntersectionPoints(Element *element);
+         /// Accessor
          EnrichmentFunction* giveEnrichmentFunction() {return ef;}
+         /// Sets EnrichmentFunction
          void setEnrichmentFunction(EnrichmentFunction *ef);
+         /// Gives number of dofs
+         int giveNumberOfDofs() { return ef->giveNumberOfDofs(); }
+         /** Sets DofId Array of an Enrichment Item */
+         void setDofIdArray(IntArray & dofId) { this->dofsId = dofId; }
+         /// Accessor
+         IntArray* getDofIdArray(){ return &dofsId; }
+         /// Finds out whether a DofManager is enriched
+         bool isDofManEnriched(int nodeNumber);
+
     protected:
-         Geometry* geometry;
+         /// Geometry associated with EnrichmentItem
+         BasicGeometry* geometry;
+         /// EnrichmentFunction associated with the EnrichmentItem
          EnrichmentFunction *ef;
+         /// Additional dofIds from Enrichment
+         IntArray dofsId;
 };
 
+/** Concrete representation of EnrichmentItem */
 class CrackTip : public EnrichmentItem {
     public:
         CrackTip (int n,Domain* aDomain) : EnrichmentItem(n, aDomain) {}
-    protected:
 };
 
+/** Concrete representation of EnrichmentItem */
 class CrackInterior : public EnrichmentItem {
     public:
         CrackInterior (int n,Domain* aDomain) : EnrichmentItem(n, aDomain) {}
 
 };
 #endif	/* _ENRICHMENTITEM_H */
-
-

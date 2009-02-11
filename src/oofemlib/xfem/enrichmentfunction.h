@@ -1,4 +1,4 @@
-/* 
+/*
  * File:   enrichmentfunction.h
  * Author: chamrova
  *
@@ -6,47 +6,78 @@
  */
 
 #ifndef _ENRICHMENTFUNCTION_H
-#define	_ENRICHMENTFUNCTION_H
+#define _ENRICHMENTFUNCTION_H
 
 #include "femcmpnn.h"
-class EnrichmentItem; class Geometry;
 
-class EnrichmentFunction : public FEMComponent {
-    public:
-         EnrichmentFunction (int n,Domain* aDomain) : FEMComponent (n, aDomain){}   // constructor
-         ~EnrichmentFunction () {};
-         virtual double evaluateFunctionAt(FloatArray* point) = 0;
-         virtual void evaluateDerivativeAt(FloatArray &answer, FloatArray *point) = 0;
-         Geometry*  giveGeometry ();
-         void insertEnrichmentItem(EnrichmentItem *er);
-         void setActive(EnrichmentItem *er);
-         IRResultType initializeFrom (InputRecord* ir);
-         const char* giveClassName () const { return "EnrichmentFunction" ; }
-         void setNumber (int number) { this->number = number;}
-         
-    protected:
-         IntArray assocEnrItemArray;
-         EnrichmentItem* activeEnrItem;
-         // for branch functions
-         int number;
-    
+class EnrichmentItem;
+class BasicGeometry;
+
+/** Abstract class representing EnrichmentItem */
+class EnrichmentFunction : public FEMComponent
+{
+public:
+
+    /**
+     * Constructor.
+     * @param n number associated with receiver
+     * @param aDomain reference to domain.
+     */
+    EnrichmentFunction(int n, Domain *aDomain) : FEMComponent(n, aDomain) {}
+    /// Destructor
+    ~EnrichmentFunction() {};
+    /// Evaluates a function at a particular point
+    virtual void evaluateFunctionAt(FloatArray &answer, FloatArray *point) = 0;
+    /// Evaluates a function derivative at a particular point
+    virtual void evaluateDerivativeAt(FloatMatrix &answer, FloatArray *point) = 0;
+    /// Accessor
+    BasicGeometry *giveGeometry();
+    /// Inserts EnrichmentItem into associatedEnrItem array
+    void insertEnrichmentItem(EnrichmentItem *er);
+    /// Sets a particular EnrichmentItem active
+    void setActive(EnrichmentItem *er);
+    /// Initializes EnrichmentItem from InputRecord
+    IRResultType initializeFrom(InputRecord *ir);
+
+    const char *giveClassName() const {
+        return "EnrichmentFunction";
+    }
+    /// Accessor
+    int giveNumberOfDofs() { return numberOfDofs; }
+
+protected:
+    /// EnrichmentItems associated with this EnrichmentFunction
+    IntArray assocEnrItemArray;
+    /// active EnrichmentItem
+    EnrichmentItem *activeEnrItem;
+    // number of dofs to enrich
+    int numberOfDofs;
 };
 
+/** Class representing Heaviside EnrichmentFunction */
+class DiscontinuousFunction : public EnrichmentFunction
+{
+public:
 
-class DiscontinuousFunction : public EnrichmentFunction {
-    public:
-        DiscontinuousFunction(int n,Domain* aDomain): EnrichmentFunction(n, aDomain) {}
-        double evaluateFunctionAt(FloatArray* point);
-        void evaluateDerivativeAt(FloatArray &answer, FloatArray *point);
+    DiscontinuousFunction(int n, Domain *aDomain) : EnrichmentFunction(n, aDomain) {
+        this->numberOfDofs = 2;
+    }
+    virtual void evaluateFunctionAt(FloatArray &answer, FloatArray *point);
+    virtual void evaluateDerivativeAt(FloatMatrix &answer, FloatArray *point);
 };
 
-class BranchFunction : public EnrichmentFunction {
-    public:
-        BranchFunction(int n,Domain* aDomain): EnrichmentFunction(n, aDomain) {}
-        double evaluateFunctionAt(FloatArray* point);
-        void evaluateDerivativeAt(FloatArray &answer, FloatArray *point);
+/** Class representing Branch EnrichmentFunction */
+class BranchFunction : public EnrichmentFunction
+{
+public:
+
+    BranchFunction(int n, Domain *aDomain) : EnrichmentFunction(n, aDomain) {
+        this->numberOfDofs = 2;
+    }
+    virtual void evaluateFunctionAt(FloatArray &answer, FloatArray *point);
+    virtual void evaluateDerivativeAt(FloatMatrix &answer, FloatArray *point);
 };
 
-#endif	/* _ENRICHMENTFUNCTION_H */
+#endif  /* _ENRICHMENTFUNCTION_H */
 
 

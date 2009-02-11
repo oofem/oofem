@@ -42,6 +42,7 @@
 #define gaussintegrationrule_h
 
 #include "integrationrule.h"
+#include "element.h"
 
 /**
  * Class representing Gaussian-quadrature integration rule.
@@ -105,32 +106,32 @@ protected:
      * Sets up receiver's  integration points on unit line integration domain.
      * @returns number of integration points.
      */
-    int SetUpPointsOnLine(int, Element *, MaterialMode, GaussPoint * * *);
+    int SetUpPointsOnLine(int, MaterialMode, GaussPoint * * *);
     /**
      * Sets up receiver's  integration points on triangular (area coords) integration domain.
      * @returns number of integration points.
      */
-    int SetUpPointsOnTriagle(int, Element *, MaterialMode, GaussPoint * * *);
+    int SetUpPointsOnTriagle(int, MaterialMode, GaussPoint * * *);
     /**
      * Sets up receiver's  integration points on unit square integration domain.
      * @returns number of integration points.
      */
-    int SetUpPointsOnSquare(int, Element *, MaterialMode, GaussPoint * * *);
+    int SetUpPointsOnSquare(int, MaterialMode, GaussPoint * * *);
     /**
      * Sets up receiver's  integration points on unit cube integration domain.
      * @returns number of integration points.
      */
-    int SetUpPointsOnCube(int, Element *, MaterialMode, GaussPoint * * *);
+    int SetUpPointsOnCube(int, MaterialMode, GaussPoint * * *);
     /**
      * Sets up receiver's  integration points on tetrahedra (volume coords) integration domain.
      * @returns number of integration points.
      */
-    int SetUpPointsOnTetrahedra(int, Element *, MaterialMode, GaussPoint * * *);
+    int SetUpPointsOnTetrahedra(int, MaterialMode, GaussPoint * * *);
     /**
      * Sets up integration points on 2D embedded line inside 2D volume (the list of local coordinates
      * should be provided).
      */
-    int SetUpPointsOn2DEmbeddedLine(int nPoints, Element *elem, MaterialMode mode, GaussPoint ***,
+    int SetUpPointsOn2DEmbeddedLine(int nPoints, MaterialMode mode, GaussPoint ***,
                                     const FloatArray **coords);
 };
 

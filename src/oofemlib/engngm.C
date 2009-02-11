@@ -73,34 +73,35 @@
 #include "errorestimator.h"
 #include "oofem_limits.h"
 #include "contextioerr.h"
+#include "xfemmanager.h"
 
 #ifndef __MAKEDEPEND
-#include <limits.h>
-#include <string.h>
-#include <stdio.h>
-#include <stdarg.h>
+ #include <limits.h>
+ #include <string.h>
+ #include <stdio.h>
+ #include <stdarg.h>
 // include unistd.h; needed for access
-#ifdef HAVE_UNISTD_H
-#include <unistd.h>
-#elif _MSC_VER
-#include <io.h>
-#endif
+ #ifdef HAVE_UNISTD_H
+  #include <unistd.h>
+ #elif _MSC_VER
+  #include <io.h>
+ #endif
 #endif
 
 #ifdef __OOFEG
-#include "oofeggraphiccontext.h"
+ #include "oofeggraphiccontext.h"
 #endif
 
 #ifdef TIME_REPORT
-#ifndef __MAKEDEPEND
-#include <time.h>
-#endif
+ #ifndef __MAKEDEPEND
+  #include <time.h>
+ #endif
 #endif
 
 #ifdef __PETSC_MODULE
-#ifndef __MAKEDEPEND
-#include "petscvec.h"
-#endif
+ #ifndef __MAKEDEPEND
+  #include "petscvec.h"
+ #endif
 #endif
 
 EngngModel :: EngngModel(int i, EngngModel *_master) : domainNeqs(), domainPrescribedNeqs()
@@ -118,6 +119,7 @@ EngngModel :: EngngModel(int i, EngngModel *_master) : domainNeqs(), domainPresc
     equationNumberingCompleted = 0;
     ndomains = 0;
     nMetaSteps = 0;
+    nxfemman = 0;
 
     //dataInputFileName     = NULL ;
     dataOutputFileName    = new char [ MAX_FILENAME_LENGTH ];
@@ -126,6 +128,7 @@ EngngModel :: EngngModel(int i, EngngModel *_master) : domainNeqs(), domainPresc
 
     domainList            = new AList< Domain >(0);
     metaStepList          = new AList< MetaStep >(0);
+    xfemManagerList       = new AList< XfemManager >(0);
 
     contextOutputMode     =  NOCONTEXT;
     contextOutputStep     = 0;
@@ -171,6 +174,7 @@ EngngModel :: EngngModel(int i, char *s, EngngModel *_master) : domainNeqs(), do
     equationNumberingCompleted = 0;
     ndomains = 0;
     nMetaSteps = 0;
+    nxfemman = 0;
 
     //dataInputFileName = new char[strlen(s)+1] ;
     //strcpy (dataInputFileName,s) ;
@@ -181,6 +185,7 @@ EngngModel :: EngngModel(int i, char *s, EngngModel *_master) : domainNeqs(), do
 
     domainList            = new AList< Domain >(0);
     metaStepList          = new AList< MetaStep >(0);
+    xfemManagerList       = new AList< XfemManager >(0);
 
     exportModuleManager   = new ExportModuleManager(this);
     master                = _master; // master mode by default
@@ -227,13 +232,14 @@ EngngModel ::  ~EngngModel()
     delete[] dataOutputFileName;
     delete domainList;
     delete metaStepList;
+    delete xfemManagerList;
 
 #ifdef __PETSC_MODULE
     delete petscContextList;
 #endif
 
     if ( exportModuleManager ) {
-        delete  exportModuleManager;
+        delete exportModuleManager;
     }
 
     // master deletes the context
@@ -333,6 +339,19 @@ int EngngModel :: instanciateYourself(DataReader *dr, InputRecord *ir, char *dat
 
     exportModuleManager->initialize();
 
+    // instantiate xfemmanager
+    XfemManager *xm;
+    xfemManagerList->growTo(nxfemman);
+    for ( i = 0; i < this->nxfemman; i++ ) {
+        xm =  new XfemManager(this, i + 1);
+        ir = dr->giveInputRecord(DataReader :: IR_xfemManRec, 1);
+        // XfemManager has to be put into xfemManagerList before xm->initializeFrom, otherwise Enrichmentitem cannot access XfemManager
+        // or we have to make a reference from EnrichmentItem also
+        xfemManagerList->put(i + 1, xm);
+        xm->initializeFrom(ir);
+        xm->instanciateYourself(dr);
+    }
+
     // check emodel input record if no default metastep, since all has been read
     if ( inputReaderFinish ) {
         ir->finish();
@@ -362,6 +381,8 @@ EngngModel :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, renumberFlag, IFT_EngngModel_renumberflag, "renumber");                // Macro
     nMetaSteps   = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, nMetaSteps, IFT_EngngModel_nmsteps, "nmsteps");                // Macro
+    nxfemman   = 0;
+    IR_GIVE_OPTIONAL_FIELD(ir, nxfemman, IFT_EngngModel_nxfemman, "nxfemman");          // Macro
 
 #ifdef __PARALLEL_MODE
     IR_GIVE_OPTIONAL_FIELD(ir, parallelFlag, IFT_EngngModel_parallelflag, "parallelflag"); // Macro
@@ -436,7 +457,7 @@ EngngModel :: instanciateDefaultMetaStep(InputRecord *ir)
     // create default meta steps
     this->nMetaSteps = 1;
     metaStepList->growTo(nMetaSteps);
-    mstep =  new MetaStep(1, this, numberOfSteps, * ir);
+    mstep =  new MetaStep(1, this, numberOfSteps, *ir);
     metaStepList->put(1, mstep);
 
     // set meta step bounds
@@ -1283,10 +1304,10 @@ EngngModel :: petsc_assembleVectorFromDofManagers(Vec answer, TimeStep *tStep, E
 {
     int i, ni;
     IntArray loc;
-#ifdef __PARALLEL_MODE
+ #ifdef __PARALLEL_MODE
     IntArray gloc;
     double scale;
-#endif
+ #endif
     FloatArray charVec;
     DofManager *node;
 
@@ -1298,7 +1319,7 @@ EngngModel :: petsc_assembleVectorFromDofManagers(Vec answer, TimeStep *tStep, E
         node->computeLoadVectorAt(charVec, tStep, mode);
         if ( ( ni = charVec.giveSize() ) ) {
             node->giveCompleteLocationArray(loc);
-#ifdef __PARALLEL_MODE
+ #ifdef __PARALLEL_MODE
             if ( node->giveParallelMode() == DofManager_shared ) {
                 scale = 1. / ( node->givePartitionsConnectivitySize() );
                 charVec.times(scale);
@@ -1306,10 +1327,10 @@ EngngModel :: petsc_assembleVectorFromDofManagers(Vec answer, TimeStep *tStep, E
 
             this->givePetscContext(domain->giveNumber(), ut)->giveN2Gmap()->map2New(gloc, loc, 0);
             VecSetValues(answer, ni, gloc.givePointer(), charVec.givePointer(), ADD_VALUES);
-#else
+ #else
             loc.add(-1);
             VecSetValues(answer, ni, loc.givePointer(), charVec.givePointer(), ADD_VALUES);
-#endif
+ #endif
         }
     }
 
@@ -1329,10 +1350,10 @@ EngngModel :: petsc_assemblePrescribedVectorFromDofManagers(Vec answer, TimeStep
 {
     int i, ni;
     IntArray loc;
-#ifdef __PARALLEL_MODE
+ #ifdef __PARALLEL_MODE
     IntArray gloc;
     double scale;
-#endif
+ #endif
     FloatArray charVec;
     DofManager *node;
 
@@ -1344,7 +1365,7 @@ EngngModel :: petsc_assemblePrescribedVectorFromDofManagers(Vec answer, TimeStep
         node->computeLoadVectorAt(charVec, tStep, mode);
         if ( ( ni = charVec.giveSize() ) ) {
             node->giveCompletePrescribedLocationArray(loc);
-#ifdef __PARALLEL_MODE
+ #ifdef __PARALLEL_MODE
             if ( node->giveParallelMode() == DofManager_shared ) {
                 scale = 1. / ( node->givePartitionsConnectivitySize() );
                 charVec.times(scale);
@@ -1352,10 +1373,10 @@ EngngModel :: petsc_assemblePrescribedVectorFromDofManagers(Vec answer, TimeStep
 
             this->givePetscContext(domain->giveNumber(), ut)->giveN2Gmap()->map2New(gloc, loc, 0); // ????
             VecSetValues(answer, ni, gloc.givePointer(), charVec.givePointer(), ADD_VALUES);
-#else
+ #else
             loc.add(-1);
             VecSetValues(answer, ni, loc.givePointer(), charVec.givePointer(), ADD_VALUES);
-#endif
+ #endif
         }
     }
 
@@ -1375,9 +1396,9 @@ EngngModel :: petsc_assembleVectorFromElements(Vec answer, TimeStep *tStep, Equa
 {
     int i, ni;
     IntArray loc;
-#ifdef __PARALLEL_MODE
+ #ifdef __PARALLEL_MODE
     IntArray gloc;
-#endif
+ #endif
     FloatArray charVec;
     Element *element;
 
@@ -1386,7 +1407,7 @@ EngngModel :: petsc_assembleVectorFromElements(Vec answer, TimeStep *tStep, Equa
 
     for ( i = 1; i <= nelem; i++ ) {
         element = domain->giveElement(i);
-#ifdef __PARALLEL_MODE
+ #ifdef __PARALLEL_MODE
         // skip remote elements (these are used as mirrors of remote eleemnts on other domains
         // when nonlocal constitutive models are used. They introduction is necessary to
         // allow local averaging on domains without fine grain communication between domains).
@@ -1394,17 +1415,17 @@ EngngModel :: petsc_assembleVectorFromElements(Vec answer, TimeStep *tStep, Equa
             continue;
         }
 
-#endif
+ #endif
         this->giveElementCharacteristicVector(charVec, i, type, mode, tStep, domain);
         if ( ( ni = charVec.giveSize() ) ) {
             element->giveLocationArray(loc, ut);
-#ifdef __PARALLEL_MODE
+ #ifdef __PARALLEL_MODE
             this->givePetscContext(domain->giveNumber(), ut)->giveN2Gmap()->map2New(gloc, loc, 0);
             VecSetValues(answer, ni, gloc.givePointer(), charVec.givePointer(), ADD_VALUES);
-#else
+ #else
             loc.add(-1);
             VecSetValues(answer, ni, loc.givePointer(), charVec.givePointer(), ADD_VALUES);
-#endif
+ #endif
         }
     }
 
@@ -1424,9 +1445,9 @@ EngngModel :: petsc_assemblePrescribedVectorFromElements(Vec answer, TimeStep *t
 {
     int i, ni;
     IntArray loc;
-#ifdef __PARALLEL_MODE
+ #ifdef __PARALLEL_MODE
     IntArray gloc;
-#endif
+ #endif
     FloatArray charVec;
     Element *element;
 
@@ -1435,7 +1456,7 @@ EngngModel :: petsc_assemblePrescribedVectorFromElements(Vec answer, TimeStep *t
 
     for ( i = 1; i <= nelem; i++ ) {
         element = domain->giveElement(i);
-#ifdef __PARALLEL_MODE
+ #ifdef __PARALLEL_MODE
         // skip remote elements (these are used as mirrors of remote eleemnts on other domains
         // when nonlocal constitutive models are used. They introduction is necessary to
         // allow local averaging on domains without fine grain communication between domains).
@@ -1443,17 +1464,17 @@ EngngModel :: petsc_assemblePrescribedVectorFromElements(Vec answer, TimeStep *t
             continue;
         }
 
-#endif
+ #endif
         this->giveElementCharacteristicVector(charVec, i, type, mode, tStep, domain);
         if ( ( ni = charVec.giveSize() ) ) {
             element->givePrescribedLocationArray(loc, ut);
-#ifdef __PARALLEL_MODE
+ #ifdef __PARALLEL_MODE
             this->givePetscContext(domain->giveNumber(), ut)->giveN2Gmap()->map2New(gloc, loc, 0); // ??
             VecSetValues(answer, ni, gloc.givePointer(), charVec.givePointer(), ADD_VALUES);
-#else
+ #else
             loc.add(-1);
             VecSetValues(answer, ni, loc.givePointer(), charVec.givePointer(), ADD_VALUES);
-#endif
+ #endif
         }
     }
 
@@ -1636,7 +1657,7 @@ contextIOResultType EngngModel :: saveContext(DataStream *stream, ContextMode mo
 
     if ( closeFlag ) {
         fclose(file);
-        delete ( stream );
+        delete(stream);
         stream = NULL;
     }                                                         // ensure consistent records
 
@@ -1709,7 +1730,7 @@ contextIOResultType EngngModel :: restoreContext(DataStream *stream, ContextMode
         delete previousStep;
     }
 
-    previousStep = new TimeStep(istep - 1, this, pmstep, currentStep->giveTime() - currentStep->giveTimeIncrement(),
+    previousStep = new TimeStep(istep - 1, this, pmstep, currentStep->giveTime ( ) - currentStep->giveTimeIncrement(),
                                 currentStep->giveTimeIncrement(), currentStep->giveSolutionStateCounter() - 1);
 
     // restore numberOfEquations and domainNeqs array
@@ -2180,7 +2201,7 @@ EngngModel :: checkProblemConsistency()
 
 
 #ifdef __PARALLEL_MODE
-#ifdef __USE_MPI
+ #ifdef __USE_MPI
 void
 EngngModel :: initParallel()
 {
@@ -2189,12 +2210,12 @@ EngngModel :: initParallel()
     MPI_Get_processor_name(processor_name, & len);
     MPI_Comm_rank(MPI_COMM_WORLD, & this->rank);
     MPI_Comm_size(MPI_COMM_WORLD, & numProcs);
-#ifdef __VERBOSE_PARALLEL
+  #ifdef __VERBOSE_PARALLEL
     OOFEM_LOG_RELEVANT("[%d/%d] Running on %s\n", rank, numProcs, processor_name);
-#endif
+  #endif
 }
 
-#endif
+ #endif
 #endif
 
 #ifdef __OOFEG
@@ -2238,7 +2259,7 @@ EngngModel :: balanceLoad(TimeStep *atTime)
             lb->migrateLoad( this->giveDomain(1) );
             // renumber itself
             this->forceEquationNumbering();
-#ifdef __VERBOSE_PARALLEL
+ #ifdef __VERBOSE_PARALLEL
             // debug print
             int i, j, nnodes = giveDomain(1)->giveNumberOfDofManagers();
             int myrank = this->giveRank();
@@ -2257,7 +2278,7 @@ EngngModel :: balanceLoad(TimeStep *atTime)
                 fprintf(stderr, "\n");
             }
 
-#endif
+ #endif
             // unpack (restore) e-model solution data from dof dictionaries
             this->unpackMigratingData(atTime);
 

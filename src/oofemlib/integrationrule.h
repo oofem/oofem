@@ -41,15 +41,18 @@
 #ifndef integrationrule_h
 #define integrationrule_h
 
-
 #include "femcmpnn.h"
 #include "materialmode.h"
 #include "integrationdomain.h"
 #include "contextioresulttype.h"
 #include "contextmode.h"
+#include "feinterpol.h"
+#include "geometry.h"
+
 
 class GaussPoint;
 class Element;
+class FEInterpolation;
 
 /**
  * Abstract base class representing integration rule. The integration rule is
@@ -104,11 +107,11 @@ class IntegrationRule
      * integration - it just provide way how to set up correct integration points
      * and weights. Integration is performed by elements.
      */
-private:
+protected:
 
     /// number
     int number;
-    /// Pointer to element
+    // pointer to Element
     Element *elem;
 
     /// Array containing integration points
@@ -192,9 +195,12 @@ public:
 
     /** Returns reference to element containing receiver */
     Element *giveElement() { return elem; }
-
+    /** Returns reference to geometry asscoiated with GaussPoint */
+    Geometry *giveGeometry(GaussPoint *gp);
+    /** Returns reference to interpolation asscoiated with GaussPoint */
+    FEInterpolation *giveInterpolation(GaussPoint *gp);
     /**
-     * Abstract service.
+     * Abstract service.`
      * Returns requred number of integration points to exactly integrate
      * polynomial of order approxOrder on given domain.
      * When approxOrder is too large and is not supported by implementation
@@ -237,40 +243,40 @@ protected:
      * Must be overloaded by deived classes.
      * @returns number of integration points.
      */
-    virtual int  SetUpPointsOnLine(int, Element *, MaterialMode, GaussPoint ***) { return 0; }
+    virtual int  SetUpPointsOnLine(int, MaterialMode, GaussPoint ***) { return 0; }
     /**
      * Sets up receiver's  integration points on triangular (area coords) integration domain.
      * Default implementaion does not sets up any integration points and returns 0.
      * Must be overloaded by deived classes.
      * @returns number of integration points.
      */
-    virtual int  SetUpPointsOnTriagle(int, Element *, MaterialMode, GaussPoint ***) { return 0; }
+    virtual int  SetUpPointsOnTriagle(int, MaterialMode, GaussPoint ***) { return 0; }
     /**
      * Sets up receiver's  integration points on unit square integration domain.
      * Default implementaion does not sets up any integration points and returns 0.
      * Must be overloaded by deived classes.
      * @returns number of integration points.
      */
-    virtual int  SetUpPointsOnSquare(int, Element *, MaterialMode, GaussPoint ***) { return 0; }
+    virtual int  SetUpPointsOnSquare(int, MaterialMode, GaussPoint ***) { return 0; }
     /**
      * Sets up receiver's  integration points on unit cube integration domain.
      * Default implementaion does not sets up any integration points and returns 0.
      * Must be overloaded by deived classes.
      * @returns number of integration points.
      */
-    virtual int  SetUpPointsOnCube(int, Element *, MaterialMode, GaussPoint ***) { return 0; }
+    virtual int  SetUpPointsOnCube(int, MaterialMode, GaussPoint ***) { return 0; }
     /**
      * Sets up receiver's  integration points on tetrahedra (volume coords) integration domain.
      * Default implementaion does not sets up any integration points and returns 0.
      * Must be overloaded by deived classes.
      * @returns number of integration points.
      */
-    virtual int  SetUpPointsOnTetrahedra(int, Element *, MaterialMode, GaussPoint ***) { return 0; }
+    virtual int  SetUpPointsOnTetrahedra(int, MaterialMode, GaussPoint ***) { return 0; }
     /**
      * Sets up integration points on 2D embedded line inside 2D volume (the list of local coordinates
      * should be provided).
      */
-    virtual int SetUpPointsOn2DEmbeddedLine(int nPoints, Element *elem, MaterialMode mode, GaussPoint ***,
+    virtual int SetUpPointsOn2DEmbeddedLine(int nPoints, MaterialMode mode, GaussPoint ***,
                                             const FloatArray **coords) { return 0; }
 };
 

@@ -47,14 +47,15 @@
 #include "compiler.h"
 #include "dictionr.h"
 #ifndef __MAKEDEPEND
-#include <stdio.h>
-#include <string.h>
+ #include <stdio.h>
+ #include <string.h>
 #endif
 
 #include "error.h"
+#include "dofmanager.h"
 
 #ifdef __PARALLEL_MODE
-#include "combuff.h"
+ #include "combuff.h"
 #endif
 
 class Domain;
@@ -237,7 +238,7 @@ public:
      * to decide whether bc is active. Use appropriate services instead.
      * @param id of associated initial condition, zero otherwise
      */
-    int giveIcId ();
+    int giveIcId();
 
     /// Prints the receiver state on stdin.
     void                printYourself();
@@ -270,6 +271,9 @@ public:
      * @exception throws an ContextIOERR exception if error encountered.
      */
     contextIOResultType    restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    void setEquationNumber(int equationNumber) { this->equationNumber = equationNumber; } // rch
+    void setUnknowns(Dictionary *unknowns) { this->unknowns = unknowns; } // rch
+    Dictionary *giveUnknowns() { return this->unknowns; } // rch
 
 #ifdef __PARALLEL_MODE
     /**

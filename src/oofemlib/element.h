@@ -55,6 +55,7 @@
 #include "elementextension.h"
 #include "entityrenumberingscheme.h"
 #include "unknowntype.h"
+#include "geometry.h"
 
 class TimeStep;
 class Node;
@@ -143,7 +144,7 @@ enum elementParallelMode {
  * </UL>
  *
  */
-class Element : public FEMComponent
+class Element : public FEMComponent, public ElementGeometry
 {
 protected:
     /// Number of dofmanagers
@@ -375,14 +376,18 @@ public:
      * ElementSide class (check is made).
      */
     virtual ElementSide *giveSide(int i) const;
+    /// Returns reference to the associated geometry of element
+    Geometry *giveGeometry() { return NULL; }
+    /// Returns interpolation of Element
+    FEInterpolation *giveInterpolation() { return NULL; }
     ///Returns reference to the associated material of element.
     Material *giveMaterial();
     ///Returns reference to the associated crossSection of element.
     CrossSection *giveCrossSection();
     ///Sets the material of receiver
-    void setMaterial (int matIndx) {this->material = matIndx;}
+    void setMaterial(int matIndx) { this->material = matIndx; }
     ///Sets the cross section model of receiver
-    void setCrossSection (int csIndx) {this->crossSection = csIndx;}
+    void setCrossSection(int csIndx) { this->crossSection = csIndx; }
 
     ///Returns number of dofmanagers of receiver
     int                   giveNumberOfDofManagers() { return numberOfDofMans; }
@@ -391,8 +396,15 @@ public:
      */
     virtual int                   giveNumberOfNodes() { return numberOfDofMans; }
     /** Sets receiver dofManagers */
-    void setDofManagers (const IntArray& _dmans);
+    void setDofManagers(const IntArray &_dmans);
 
+    /** Sets integration rule */
+    void setIntegrationRule(int n, IntegrationRule *ir); // rch
+    /**
+     * Returns integration domain for receiver, used to initialize
+     * integration point over receiver volume. Must be specialized.
+     */
+    virtual integrationDomain giveIntegrationDomain() { return _Unknown_integrationDomain; }
 
     ///Returns number of sides (which have unknown dofs) of receiver
     //int                   giveNumberOfSides () {return numberOfSides;}
@@ -586,15 +598,19 @@ public:
      * Computes the global coordinates from given element's local coordinates.
      * @returns nonzero if successful; zero otherwise
      */
-    virtual int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords) { answer.resize(0);
-                                                                                          return 0; }
+    virtual int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords) {
+        answer.resize(0);
+        return 0;
+    }
     /**
      * Computes the element local coordinates from given global coordinates.
      * Should compute local coordinates even if point is outside element (for mapping purposes in adaptivity)
      * @returns nonzero if point is inside element; zero otherwise
      */
-    virtual int computeLocalCoordinates(FloatArray &answer, const FloatArray &gcoords) { answer.resize(0);
-                                                                                         return 0; }
+    virtual int computeLocalCoordinates(FloatArray &answer, const FloatArray &gcoords) {
+        answer.resize(0);
+        return 0;
+    }
     // returns a unit vectors of local coordinate system at element
     // stored rowwise (mainly used by some materials with ortho and anisotrophy)
     // if local c.s == global c.s returns NULL
@@ -604,8 +620,10 @@ public:
      * and return zero value.
      * @return nonzero if answer computed, zero value if answer is empty, i.e. no transformation is necessary.
      */
-    virtual int  giveLocalCoordinateSystem(FloatMatrix &answer) { answer.beEmptyMtrx();
-                                                                  return 0; }
+    virtual int  giveLocalCoordinateSystem(FloatMatrix &answer) {
+        answer.beEmptyMtrx();
+        return 0;
+    }
     // mid-plane normal at gaussPoint - for materials with orthotrophy
     // valid only for plane elements in space (3d)  (shells, plates, ....)
     /**
@@ -694,8 +712,10 @@ public:
      */
     virtual int   giveInternalStateAtSide(FloatArray &answer, InternalStateType type, InternalStateMode mode,
                                           int side, TimeStep *atTime)
-    { answer.resize(0);
-      return 0; }
+    {
+        answer.resize(0);
+        return 0;
+    }
 
     /// Shows sparse structure
     virtual void showSparseMtrxStructure(CharType mtrx, oofegGraphicContext &gc, TimeStep *atTime) { }
@@ -713,7 +733,7 @@ public:
      * Sets receiver globally unique number.
      */
     void setGlobalNumber(int num) { globalNumber = num; }
-    
+
     /**
      * Return elementParallelMode of receiver. Defined for __Parallel_Mode only.
      */

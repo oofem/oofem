@@ -58,22 +58,24 @@ typedef char DofID;
  */
 #define DofIDItem_DEF \
     ENUM_ITEM_WITH_VALUE(Undef, 0) /* Erorr value */ \
-    ENUM_ITEM_WITH_VALUE(D_u, 1) /* u-displacement (in direction of x-axis) */   \
-    ENUM_ITEM_WITH_VALUE(D_v, 2) /* v-displacement (in direction of y-axis) */   \
-    ENUM_ITEM_WITH_VALUE(D_w, 3) /* w-displacement (in direction of z-axis) */   \
-    ENUM_ITEM_WITH_VALUE(R_u, 4) /* rotation around x-axis (right hand rule assumed) */   \
-    ENUM_ITEM_WITH_VALUE(R_v, 5) /* rotation around y-axis */   \
-    ENUM_ITEM_WITH_VALUE(R_w, 6) /* rotation around z-axis */   \
+    ENUM_ITEM_WITH_VALUE(D_u, 1) /* u-displacement (in direction of x-axis) */ \
+    ENUM_ITEM_WITH_VALUE(D_v, 2) /* v-displacement (in direction of y-axis) */ \
+    ENUM_ITEM_WITH_VALUE(D_w, 3) /* w-displacement (in direction of z-axis) */ \
+    ENUM_ITEM_WITH_VALUE(R_u, 4) /* rotation around x-axis (right hand rule assumed) */ \
+    ENUM_ITEM_WITH_VALUE(R_v, 5) /* rotation around y-axis */ \
+    ENUM_ITEM_WITH_VALUE(R_w, 6) /* rotation around z-axis */ \
   \
-    ENUM_ITEM_WITH_VALUE(V_u, 7) /* u-velocity (in direction of x-axis) */   \
-    ENUM_ITEM_WITH_VALUE(V_v, 8) /* v-velocity (in direction of y-axis) */   \
-    ENUM_ITEM_WITH_VALUE(V_w, 9) /* w-velocity (in direction of z-axis) */   \
+    ENUM_ITEM_WITH_VALUE(V_u, 7) /* u-velocity (in direction of x-axis) */ \
+    ENUM_ITEM_WITH_VALUE(V_v, 8) /* v-velocity (in direction of y-axis) */ \
+    ENUM_ITEM_WITH_VALUE(V_w, 9) /* w-velocity (in direction of z-axis) */ \
   \
-    ENUM_ITEM_WITH_VALUE(T_f, 10) /* temperature field */  \
-    ENUM_ITEM_WITH_VALUE(P_f, 11) /* pressure field */  \
-    ENUM_ITEM_WITH_VALUE(G_0, 12) /* DOF for gradient formulation no. 0 */  \
-    ENUM_ITEM_WITH_VALUE(G_1, 13) /* DOF for gradient formulation no. 1 */  \
-    ENUM_ITEM_WITH_VALUE(C_1, 14) /* mass concentration of the first constituent */
+    ENUM_ITEM_WITH_VALUE(T_f, 10) /* temperature field */ \
+    ENUM_ITEM_WITH_VALUE(P_f, 11) /* pressure field */ \
+    ENUM_ITEM_WITH_VALUE(G_0, 12) /* DOF for gradient formulation no. 0 */ \
+    ENUM_ITEM_WITH_VALUE(G_1, 13) /* DOF for gradient formulation no. 1 */ \
+    ENUM_ITEM_WITH_VALUE(C_1, 14) /* mass concentration of the first constituent */ \
+    ENUM_ITEM_WITH_VALUE(X_1, 15) /* start of xfemManager xfemdof pool */ \
+    ENUM_ITEM_WITH_VALUE(X_N, 30) /* end of xfemManager xfemdof pool */ \
 
 enum DofIDItem {
     DofIDItem_DEF

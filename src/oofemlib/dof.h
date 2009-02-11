@@ -46,8 +46,8 @@
 #include "compiler.h"
 #include "dictionr.h"
 #ifndef __MAKEDEPEND
-#include <stdio.h>
-#include <string.h>
+ #include <stdio.h>
+ #include <string.h>
 #endif
 
 #include "error.h"
@@ -186,8 +186,10 @@ public:
      * The physical meaning of Bc is determined by corresponding DOF.
      */
     virtual void giveBcValues(FloatArray &masterBcValues, ValueModeType mode, TimeStep *stepN)
-    { masterBcValues.resize(1);
-      masterBcValues.at(1) = this->giveBcValue(mode, stepN); }
+    {
+        masterBcValues.resize(1);
+        masterBcValues.at(1) = this->giveBcValue(mode, stepN);
+    }
 
     //  virtual double  giveBcValue (UnknownType type, ValueModeType mode, TimeStep* tStep) ;
     /**
@@ -212,8 +214,10 @@ public:
      * For slave dofs (dependent on other primary dofs) the array of master equation numbers is returned.
      */
     virtual void giveEquationNumbers(IntArray &masterEqNumbers)
-    { masterEqNumbers.resize(1);
-      masterEqNumbers.at(1) = this->giveEquationNumber(); }
+    {
+        masterEqNumbers.resize(1);
+        masterEqNumbers.at(1) = this->giveEquationNumber();
+    }
 
     /**
      * Returns prescribed equation number of receiver. If Dof has inactive BC,
@@ -242,8 +246,10 @@ public:
      */
 
     virtual void givePrescribedEquationNumbers(IntArray &masterEqNumbers)
-    { masterEqNumbers.resize(1);
-      masterEqNumbers.at(1) = this->givePrescribedEquationNumber(); }
+    {
+        masterEqNumbers.resize(1);
+        masterEqNumbers.at(1) = this->givePrescribedEquationNumber();
+    }
 
     /**
      * Asks EngngModel for new equation number. Necessary for EngngModels supporting
@@ -287,16 +293,20 @@ public:
      * for slave dofs it returns an array of master values (in recursive way).
      */
     virtual void giveUnknowns(FloatArray &masterUnknowns, EquationID type, ValueModeType mode, TimeStep *stepN)
-    { masterUnknowns.resize(1);
-      masterUnknowns.at(1) = this->giveUnknown(type, mode, stepN); }
+    {
+        masterUnknowns.resize(1);
+        masterUnknowns.at(1) = this->giveUnknown(type, mode, stepN);
+    }
     /**
      * The key method of class Dof. Returns the value of the unknown of the receiver
      * at given time step associated to given field. For primary dof it returns is associated unknown value,
      * for slave dofs it returns an array of master values (in recursive way).
      */
     virtual void giveUnknowns(FloatArray &masterUnknowns, PrimaryField &field, ValueModeType mode, TimeStep *stepN)
-    { masterUnknowns.resize(1);
-      masterUnknowns.at(1) = this->giveUnknown(field, mode, stepN); }
+    {
+        masterUnknowns.resize(1);
+        masterUnknowns.at(1) = this->giveUnknown(field, mode, stepN);
+    }
 
     /**
      * Computes dof transformation array, which describes the dependence of receiver value on values of master dofs.
@@ -304,8 +314,10 @@ public:
      * corresponding master DOF values to obtain slave value.
      */
     virtual void computeDofTransformation(FloatArray &masterContribs)
-    { masterContribs.resize(1);
-      masterContribs.at(1) = 1.0; }
+    {
+        masterContribs.resize(1);
+        masterContribs.at(1) = 1.0;
+    }
     /**
      * Returns number of primary dofs, on which receiver value depends on (even recursivelly)
      */
@@ -357,13 +369,13 @@ public:
      * to decide whether bc is active. Use appropriate services instead.
      * @param id of associated Boundary condition, zero otherwise
      */
-    virtual int giveBcId () = 0;
+    virtual int giveBcId() = 0;
     /** Returns the id of associated initial condition, if there is any.
      * Used only for printing purposes. In general, id could not be used
      * to decide whether bc is active. Use appropriate services instead.
      * @param id of associated initial condition, zero otherwise
      */
-    virtual int giveIcId () = 0;
+    virtual int giveIcId() = 0;
 
     /**
      * Returns an array of master DofManagers  to which the recever is linked
@@ -432,6 +444,9 @@ public:
     virtual contextIOResultType    saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
     /// Restores the receiver state previously written in stream.
     virtual contextIOResultType    restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual void setEquationNumber(int equationNumber) {}; // rch
+    virtual void setUnknowns(Dictionary *unknowns) {}; // rch
+    virtual Dictionary *giveUnknowns() { return NULL; } // rch
 
 #ifdef __PARALLEL_MODE
     /**

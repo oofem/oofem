@@ -60,10 +60,11 @@
 #include "sparsemtrxtype.h"
 #include "geneigvalsolvertype.h"
 #include "errorestimatortype.h"
+#include "enrichmentitem.h"
 
 #include "errorestimator.h"
 #ifdef __PARALLEL_MODE
-#include "loadbalancer.h"
+ #include "loadbalancer.h"
 #endif
 
 /**
@@ -226,8 +227,25 @@ MaterialMappingAlgorithm *CreateUsrDefMaterialMappingAlgorithm(MaterialMappingAl
  * @param type id determining the type of new instance
  * @return newly allocated object of requested type, null if keyword not suppported
  */
-MesherInterface *CreateUsrDefMesherInterface(MeshPackageType type, Domain* d);
-
+MesherInterface *CreateUsrDefMesherInterface(MeshPackageType type, Domain *d);
+/**
+ * Creates new instance of enrichment item.
+ * @param type id determining the type of new instance
+ * @return newly allocated object of requested type, null if keyword not suppported
+ */
+EnrichmentItem *CreateUsrDefEnrichmentItem(char *aClass, int num, Domain *d);
+/**
+ * Creates new instance of enrichment function.
+ * @param type id determining the type of new instance
+ * @return newly allocated object of requested type, null if keyword not suppported
+ */
+EnrichmentFunction *CreateUsrDefEnrichmentFunction(char *aClass, int num, Domain *d);
+/**
+ * Creates new instance of geometry.
+ * @param type id determining the type of new instance
+ * @return newly allocated object of requested type, null if keyword not suppported
+ */
+BasicGeometry *CreateUsrDefGeometry(char *aClass);
 #ifdef __PARALLEL_MODE
 /**
  * Creates new instance of load balance monitor corresponding to given keyword.

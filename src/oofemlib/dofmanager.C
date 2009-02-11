@@ -1,4 +1,8 @@
 /* $Header: /home/cvs/bp/oofem/oofemlib/src/dofmanager.C,v 1.18.4.1 2004/04/05 15:19:43 bp Exp $ */
+
+#include "alist.h"
+#include "dofiditem.h"
+
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -57,14 +61,14 @@
 #include "contextioerr.h"
 
 #ifndef __MAKEDEPEND
-#include <stdlib.h>
+ #include <stdlib.h>
 #endif
 
 #ifndef __MAKEDEPEND
-#include <string.h>
-#ifdef HAVE_STRINGS_H
-#include <strings.h>
-#endif
+ #include <string.h>
+ #ifdef HAVE_STRINGS_H
+  #include <strings.h>
+ #endif
 #endif
 
 #ifdef __PARALLEL_MODE
@@ -179,19 +183,54 @@ Dof *DofManager :: giveDofWithID(int dofID) const
     return dofArray [ indx - 1 ];
 }
 
-void 
-DofManager::setDof (int i, Dof* dof)
+void
+DofManager :: setDof(int i, Dof *dof)
 {
-  if (i<=numberOfDofs) {
-    if (dofArray[i-1]) delete dofArray[i-1];
-    dofArray[i-1] = dof;
-  } else {
-    _error("setDof: DOF index out of range");
-  }
+    if ( i <= numberOfDofs ) {
+        if ( dofArray [ i - 1 ] ) {
+            delete dofArray [ i - 1 ];
+        }
 
+        dofArray [ i - 1 ] = dof;
+    } else {
+        _error("setDof: DOF index out of range");
+    }
 }
 
+void
+DofManager :: addDof(int i, Dof *dof)
+// adds a Dof to a position i in dofArray
+// because dofArray is not resizeable, the data need
+// to be copied out of the dofArray, dofArray deleted
+// and again constructed with new Dof
+{
+    if ( i > numberOfDofs ) {
+        AList< Dof >dofArrayCp;
+        for ( int j = 0; j < numberOfDofs; j++ ) {
+            DofIDItem did = dofArray [ j ]->giveDofID();
+            Dof *dofCp = new MasterDof(j + 1, this, dofArray [ j ]->giveBcId(), dofArray [ j ]->giveIcId(), ( DofID ) did);
+            dofCp->setEquationNumber( dofArray [ j ]->giveEquationNumber() );
+            /*
+             *        Dictionary* dn = new Dictionary();
+             *        dofCp->setUnknowns(dn);
+             */
+            dofArrayCp.put(j + 1, dofCp);
+            delete dofArray [ j ];
+        }
 
+        delete [] dofArray;
+        numberOfDofs++;
+        dofArray = new Dof * [ numberOfDofs ];
+        for ( int j = 0; j < numberOfDofs - 1; j++ ) {
+            dofArray [ j ] = dofArrayCp.at(j + 1);
+            dofArrayCp.unlink(j + 1);
+        }
+
+        dofArray [ numberOfDofs - 1 ] = dof;
+    } else {
+        _error("addDof: Overwriting current dof");
+    }
+}
 
 IntArray *DofManager :: giveLoadArray()
 // Returns the list containing the number of every nodal loads that act on
@@ -202,9 +241,9 @@ IntArray *DofManager :: giveLoadArray()
 }
 
 
-void DofManager :: setLoadArray(IntArray& la)
+void DofManager :: setLoadArray(IntArray &la)
 {
-  this->loadArray = la;
+    this->loadArray = la;
 }
 
 void
@@ -241,7 +280,7 @@ DofManager :: giveLocationArray(const IntArray &dofIDArry, IntArray &locationArr
                 this->giveDof(indx)->giveEquationNumbers(mstrEqNmbrs);
                 locationArray.copySubVector(mstrEqNmbrs, k);
                 k += mstrEqNmbrs.giveSize();
-            } else   { // primary DOF
+            } else {   // primary DOF
                 locationArray.at(k++) = this->giveDof(indx)->giveEquationNumber();
             }
         }
@@ -305,7 +344,7 @@ DofManager :: givePrescribedLocationArray(const IntArray &dofIDArry, IntArray &l
                 this->giveDof(indx)->givePrescribedEquationNumbers(mstrEqNmbrs);
                 locationArray.copySubVector(mstrEqNmbrs, k);
                 k += mstrEqNmbrs.giveSize();
-            } else   { // primary DOF
+            } else {   // primary DOF
                 locationArray.at(k++) = this->giveDof(indx)->givePrescribedEquationNumber();
             }
         }
@@ -381,24 +420,28 @@ int DofManager :: giveNumberOfDofs() const
     return numberOfDofs;
 }
 
-void DofManager::setNumberOfDofs(int _ndofs)
+void DofManager :: setNumberOfDofs(int _ndofs)
 {
-  int i;
-  if (_ndofs != this->giveNumberOfDofs()) {
-    if (dofArray) {
-      i = numberOfDofs;
-      if ( numberOfDofs ) {
-        while ( i-- ) {
-	  delete dofArray [ i ];
+    int i;
+    if ( _ndofs != this->giveNumberOfDofs() ) {
+        if ( dofArray ) {
+            i = numberOfDofs;
+            if ( numberOfDofs ) {
+                while ( i-- ) {
+                    delete dofArray [ i ];
+                }
+
+                delete[] dofArray;
+            }
         }
-	
-        delete[] dofArray;
-      }
+
+        dofArray = new Dof * [ _ndofs ];
+        for ( i = 0; i < _ndofs; i++ ) {
+            dofArray [ i ] = NULL;
+        }
+
+        this->numberOfDofs = _ndofs;
     }
-    dofArray = new Dof * [ _ndofs ];
-    for (i=0; i<_ndofs;i++) dofArray[i]=NULL;
-    this->numberOfDofs = _ndofs;
-  }
 }
 
 int
@@ -503,11 +546,11 @@ DofManager :: initializeFrom(InputRecord *ir)
 
     if ( ir->hasField(IFT_DofManager_sharedflag, "shared") ) {
         parallel_mode = DofManager_shared;
-    } else if ( ir->hasField(IFT_DofManager_remoteflag, "remote") )  {
+    } else if ( ir->hasField(IFT_DofManager_remoteflag, "remote") ) {
         parallel_mode = DofManager_remote;
-    } else if ( ir->hasField(IFT_DofManager_nullflag, "null") )                                                                                                       {
+    } else if ( ir->hasField(IFT_DofManager_nullflag, "null") ) {
         parallel_mode = DofManager_null;
-    } else                                                                                                                                                                                                    {
+    } else {
         parallel_mode = DofManager_local;
     }
 
@@ -561,7 +604,7 @@ DofManager :: initializeFrom(InputRecord *ir)
                     dofBc = bc.at(j + 1);
                 }
 
-                dofArray [ j ] = new MasterDof( j + 1, this, dofBc, dofIc, ( DofID ) dofIDArry.at(j + 1) );
+                dofArray [ j ] = new MasterDof( j + 1, this, dofBc, dofIc, ( DofID ) dofIDArry.at ( j + 1 ) );
             } else if ( dtype == DT_simpleSlave ) { // Simple slave dof
                 if ( masterMask.giveSize() == 0 ) {
                     IR_GIVE_FIELD(ir, masterMask, IFT_DofManager_mastermask, "mastermask"); // Macro
@@ -570,9 +613,9 @@ DofManager :: initializeFrom(InputRecord *ir)
                     }
                 }
 
-                dofArray [ j ] = new SimpleSlaveDof( j + 1, this, masterMask.at(j + 1), ( DofID ) dofIDArry.at(j + 1) );
+                dofArray [ j ] = new SimpleSlaveDof( j + 1, this, masterMask.at ( j + 1 ), ( DofID ) dofIDArry.at ( j + 1 ) );
             } else if ( dtype == DT_slave ) { // Slave dof
-                dofArray [ j ] = new SlaveDof( j + 1, this, ( DofID ) dofIDArry.at(j + 1) );
+                dofArray [ j ] = new SlaveDof( j + 1, this, ( DofID ) dofIDArry.at ( j + 1 ) );
             } else {
                 _error2( "initializeFrom: unknown dof type (%s)",  __dofTypeToString(dtype) );
             }
@@ -916,11 +959,11 @@ DofManager *DofManager :: ofType(char *aClass)
 
     if ( !strncasecmp(aClass, "node", 4) ) {
         newDofManager = new Node(number, domain);
-    } else if ( !strncasecmp(aClass, "elementside", 11) )    {
+    } else if ( !strncasecmp(aClass, "elementside", 11) ) {
         newDofManager = new ElementSide(number, domain);
-    } else if ( !strncasecmp(aClass, "rigidarmnode", 12) )    {
+    } else if ( !strncasecmp(aClass, "rigidarmnode", 12) ) {
         newDofManager = new RigidArmNode(number, domain);
-    } else if ( !strncasecmp(aClass, "hangingnode", 11) )    {
+    } else if ( !strncasecmp(aClass, "hangingnode", 11) ) {
         newDofManager = new HangingNode(number, domain);
     } else { // last resort - call aditional user defined subroutine
         newDofManager = :: CreateUsrDefDofManagerOfType(aClass, number, domain);
@@ -965,7 +1008,7 @@ DofManager :: giveUnknownVector(FloatArray &answer, const IntArray &dofMask,
                 this->giveDof(indx)->giveUnknowns(mstrUnknwns, type, mode, stepN);
                 answer.copySubVector(mstrUnknwns, k);
                 k += mstrUnknwns.giveSize();
-            } else   { // primary DOF
+            } else {   // primary DOF
                 answer.at(k++) = this->giveDof(indx)->giveUnknown(type, mode, stepN);
             }
         }
@@ -1005,7 +1048,7 @@ DofManager :: giveUnknownVector(FloatArray &answer, const IntArray &dofMask,
                 this->giveDof(indx)->giveUnknowns(mstrUnknwns, field, mode, stepN);
                 answer.copySubVector(mstrUnknwns, k);
                 k += mstrUnknwns.giveSize();
-            } else   { // primary DOF
+            } else {   // primary DOF
                 answer.at(k++) = this->giveDof(indx)->giveUnknown(field, mode, stepN);
             }
         }
@@ -1051,7 +1094,7 @@ DofManager :: givePrescribedUnknownVector(FloatArray &answer, const IntArray &do
                 this->giveDof(indx)->giveBcValues(mstrBcVlus, mode, stepN);
                 answer.copySubVector(mstrBcVlus, k);
                 k += mstrBcVlus.giveSize();
-            } else   { // primary DOF
+            } else {   // primary DOF
                 dofJ = this->giveDof(indx);
                 if ( dofJ->hasBc(stepN) ) {
                     answer.at(k++) = dofJ->giveBcValue(mode, stepN);
@@ -1160,7 +1203,7 @@ DofManager :: computeSlaveDofTransformation(FloatMatrix &answer, const IntArray 
         for ( i = 1; i <= numberOfDofs; i++ ) {
             dofArray.at(i) = i;
         }
-    } else   {
+    } else {
         this->giveDofArray(* dofMask, dofArray);
     }
 
@@ -1173,7 +1216,7 @@ DofManager :: computeSlaveDofTransformation(FloatMatrix &answer, const IntArray 
             this->giveDof(indx)->computeDofTransformation(mstrContrs);
             answer.copySubVectorRow(mstrContrs, i, k);
             k += mstrContrs.giveSize();
-        } else   { // primary DOF
+        } else {   // primary DOF
             answer.at(i, k++) = 1.0;
         }
     }

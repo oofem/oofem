@@ -42,6 +42,8 @@
 #include "gausspnt.h"
 #include "datastream.h"
 #include "contextioerr.h"
+#include "geometry.h"
+#include "feinterpol.h"
 // initialize class member
 
 IntegrationRule :: IntegrationRule(int n, Element *e, int startIndx, int endIndx, bool dynamic)
@@ -76,7 +78,6 @@ void
 IntegrationRule :: clear()
 {
     int i;
-
     if ( gaussPointArray ) {
         for ( i = 0; i < numberOfIntegrationPoints; i++ ) {
             delete gaussPointArray [ i ];
@@ -88,6 +89,10 @@ IntegrationRule :: clear()
     gaussPointArray = NULL;
     numberOfIntegrationPoints = 0;
 }
+
+Geometry *IntegrationRule :: giveGeometry(GaussPoint *gp) { return elem->giveGeometry(); }
+
+FEInterpolation *IntegrationRule :: giveInterpolation(GaussPoint *gp) { return elem->giveInterpolation(); }
 
 GaussPoint *
 IntegrationRule :: getIntegrationPoint(int i)
@@ -316,19 +321,19 @@ IntegrationRule :: setUpIntegrationPoints(integrationDomain mode, int nPoints,
 {
     switch ( mode ) {
     case _Line:
-        return  ( numberOfIntegrationPoints = this->SetUpPointsOnLine(nPoints, elem, matMode, & gaussPointArray) );
+        return  ( numberOfIntegrationPoints = this->SetUpPointsOnLine(nPoints, matMode, & gaussPointArray) );
 
     case _Triangle:
-        return  ( numberOfIntegrationPoints = this->SetUpPointsOnTriagle(nPoints, elem, matMode, & gaussPointArray) );
+        return  ( numberOfIntegrationPoints = this->SetUpPointsOnTriagle(nPoints, matMode, & gaussPointArray) );
 
     case _Square:
-        return  ( numberOfIntegrationPoints = this->SetUpPointsOnSquare(nPoints, elem, matMode, & gaussPointArray) );
+        return  ( numberOfIntegrationPoints = this->SetUpPointsOnSquare(nPoints, matMode, & gaussPointArray) );
 
     case _Cube:
-        return  ( numberOfIntegrationPoints = this->SetUpPointsOnCube(nPoints, elem, matMode, & gaussPointArray) );
+        return  ( numberOfIntegrationPoints = this->SetUpPointsOnCube(nPoints, matMode, & gaussPointArray) );
 
     case _Tetrahedra:
-        return  ( numberOfIntegrationPoints = this->SetUpPointsOnTetrahedra(nPoints, elem, matMode, & gaussPointArray) );
+        return  ( numberOfIntegrationPoints = this->SetUpPointsOnTetrahedra(nPoints, matMode, & gaussPointArray) );
 
     default:
         OOFEM_ERROR("IntegrationRule::setUpIntegrationPoints - unknown mode");
@@ -343,7 +348,7 @@ IntegrationRule :: setUpEmbeddedIntegrationPoints(integrationDomain mode, int nP
 {
     switch ( mode ) {
     case _Embedded2dLine:
-        return  ( numberOfIntegrationPoints = this->SetUpPointsOn2DEmbeddedLine(nPoints, elem, matMode, & gaussPointArray, coords) );
+        return  ( numberOfIntegrationPoints = this->SetUpPointsOn2DEmbeddedLine(nPoints, matMode, & gaussPointArray, coords) );
 
     default:
         OOFEM_ERROR("IntegrationRule::setUpEmbeddedIntegrationPoints - unknown mode");

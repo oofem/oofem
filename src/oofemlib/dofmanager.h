@@ -42,12 +42,13 @@
 #ifndef dofmanager_h
 #define dofmanager_h
 
+#include "alist.h"
 #include "femcmpnn.h"
 #include "domain.h"
 #include "dof.h"
 
 #ifndef __MAKEDEPEND
-#include <stdio.h>
+ #include <stdio.h>
 #endif
 #include "classtype.h"
 #include "equationid.h"
@@ -328,7 +329,7 @@ public:
     /// Returns the array containing applied loadings of the receiver
     IntArray *giveLoadArray();
     /// Sets the array of applied loadings of the receiver
-    void setLoadArray (IntArray& );
+    void setLoadArray(IntArray &);
     //@}
 
     /**@name Position querry functions */
@@ -350,7 +351,7 @@ public:
 
     // miscellaneous
     bool         isBoundary() { return isBoundaryFlag; }
-    void         setBoundaryFlag (bool _b) {this->isBoundaryFlag = _b;}
+    void         setBoundaryFlag(bool _b) { this->isBoundaryFlag = _b; }
     /// Returns true if receiver contains slave dofs
     virtual int  hasAnySlaveDofs();
     /**
@@ -396,12 +397,13 @@ public:
     /**@name Advanced functions */
     //@{
     /** Sets number of dofs of the receiver; Dealocates existing DOFs;
-	Resizes the dofArray accordingly */
-    void setNumberOfDofs (int _ndofs);
+     *  Resizes the dofArray accordingly */
+    void setNumberOfDofs(int _ndofs);
     /** Sets i-th DOF of receiver to given DOF */
-    void setDof (int i, Dof* dof); 
+    void setDof(int i, Dof *dof);
     //@}
-
+    /** Adds a Dof to i-th position in dofArray */
+    void addDof(int i, Dof *dof);   // rch
 
 #ifdef __OOFEG
     virtual void   drawYourself(oofegGraphicContext &context) { }
@@ -436,10 +438,11 @@ public:
      */
     const IntArray *givePartitionList()  { return & partitions; }
     /** Sets receiver's partition list */
-    void setPartitionList(const IntArray *_p) { partitions = *_p; }
+    void setPartitionList(const IntArray *_p) { partitions = * _p; }
     /// Removes given partition from receiver list
-    void removePartitionFromList(int _part) { int _pos = partitions.findFirstIndexOf(_part);
-                                              if ( _pos ) { partitions.erase(_pos); } }
+    void removePartitionFromList(int _part) {
+        int _pos = partitions.findFirstIndexOf(_part);
+        if ( _pos ) { partitions.erase(_pos); } }
     /// Merges receiver partition list with given lists
     void mergePartitionList(IntArray &_p);
     /**

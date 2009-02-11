@@ -68,25 +68,26 @@
 #include "contextoutputmode.h"
 #include "contextfilemode.h"
 #include "contextioresulttype.h"
+#include "xfemmanager.h"
 
 #ifndef __MAKEDEPEND
-#include <stdio.h>
+ #include <stdio.h>
 
-#ifdef __PARALLEL_MODE
-#include "parallel.h"
-#include "problemcommunicatormode.h"
-#include "loadbalancer.h"
-#endif
+ #ifdef __PARALLEL_MODE
+  #include "parallel.h"
+  #include "problemcommunicatormode.h"
+  #include "loadbalancer.h"
+ #endif
 
-#ifdef __PETSC_MODULE
-#include "petsccontext.h"
-#include "petscordering.h"
-#endif
+ #ifdef __PETSC_MODULE
+  #include "petsccontext.h"
+  #include "petscordering.h"
+ #endif
 #endif
 
 
 #ifdef __OOFEG
-#include "oofeggraphiccontext.h"
+ #include "oofeggraphiccontext.h"
 #endif
 
 class Domain;
@@ -95,6 +96,8 @@ class TimeStep;
 class ErrorEstimator;
 class MetaStep;
 class MaterialInterface;
+class XfemManager;
+
 #ifdef __PARALLEL_MODE
 class ProblemCommunicator;
 #endif
@@ -232,7 +235,7 @@ public:
 
 #ifdef __PARALLEL_MODE
     enum EngngModel_UpdateMode { EngngModel_Unknown_Mode, EngngModel_SUMM_Mode, EngngModel_SET_Mode };
-    enum EngngModelCommType {PC_default, PC_nonlocal};
+    enum EngngModelCommType { PC_default, PC_nonlocal };
 #endif
 
 protected:
@@ -300,6 +303,10 @@ protected:
      * flag indicating that the receiver runs in parallel.
      */
     int parallelFlag;
+    /// list of Xfemmanagers
+    AList< XfemManager > *xfemManagerList;
+    /// number of Xfemmanagers
+    int nxfemman;
 
 
 #ifdef __PARALLEL_MODE
@@ -311,7 +318,7 @@ protected:
     char processor_name [ PROCESSOR_NAME_LENGTH ];
     /// Communicator mode. Determines current strategy used.
     ProblemCommunicatorMode commMode;
-    
+
 
     /**@name Load balancing attributes */
     //@{
@@ -356,7 +363,8 @@ public:
     virtual ErrorEstimator *giveDomainErrorEstimator(int n) { return NULL; }
     /** Returns material interface representation for given domain */
     virtual MaterialInterface *giveMaterialInterface(int n) { return NULL; }
-
+    /** Returns XfemManager at a particular position */
+    XfemManager *giveXfemManager(int n) { return this->xfemManagerList->at(n); }
     // input / output
     /// Returns input file path.
     //char*              giveInputDataFileName () ;
@@ -368,7 +376,7 @@ public:
      *  @param path and base file name will be copied into the array pointed to by  dest
      *  @param not more than n bytes of src  are copied
      */
-    char *giveOutputBaseFileName(char *dest, size_t n) { return strncpy(dest, dataOutputFileName, n-1); }
+    char *giveOutputBaseFileName(char *dest, size_t n) { return strncpy(dest, dataOutputFileName, n - 1); }
 
     //FILE*              giveInputStream () ;
 
@@ -408,8 +416,10 @@ public:
      * @param cStep new context output step
      */
     void               setUDContextOutputMode(int cStep)
-    { contextOutputMode = USERDEFINED;
-      contextOutputStep = cStep; }
+    {
+        contextOutputMode = USERDEFINED;
+        contextOutputStep = cStep;
+    }
     /**
      * Sets domain mode to given mode.
      * @param mode domain mode.
@@ -533,7 +543,7 @@ public:
     virtual void updateUnknownComponent(EquationID, ValueModeType, TimeStep *, int,
                                         double, EngngModel_UpdateMode) { return; }
 
-    virtual ProblemCommunicator* giveProblemCommunicator (EngngModelCommType t) {return  NULL;}
+    virtual ProblemCommunicator *giveProblemCommunicator(EngngModelCommType t) { return NULL; }
 #endif
     /**
      * Initializes whole problem acording to its description stored in inputStream.
@@ -613,7 +623,7 @@ public:
      * like errorestimators, solvers, etc, having domains as attributes.
      */
     virtual void updateDomainLinks() {
-      this->giveExportModuleManager()->initialize(); 
+        this->giveExportModuleManager()->initialize();
     };
     void               resolveCorrespondingStepNumber(int &, int &, void *obj);
     /// Returns current time step.
@@ -994,7 +1004,7 @@ public:
     /// Returns reference to itself -> required by comunicator.h
     EngngModel *giveEngngModel() { return this; }
     // returns Communicator mode. Determines current domain-decomposition strategy used.
-    ProblemCommunicatorMode giveProblemCommMode() {return this->commMode;}
+    ProblemCommunicatorMode giveProblemCommMode() { return this->commMode; }
 #endif
 
 #ifdef __OOFEG

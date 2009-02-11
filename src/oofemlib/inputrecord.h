@@ -49,8 +49,8 @@
 #include "range.h"
 
 #ifndef __MAKEDEPEND
-#include <stdio.h>
-#include <string.h>
+ #include <stdio.h>
+ #include <string.h>
 #endif
 
 /**
@@ -75,6 +75,7 @@ enum InputFieldType {
     IFT_EngngModel_outfile,
     IFT_EngngModel_probname,
     IFT_EngngModel_probdescription,
+    IFT_EngngModel_nxfemman,
 
     IFT_MetaStep_nsteps,
 
@@ -809,9 +810,23 @@ enum InputFieldType {
     IFT_LocalGaussianRandomGenerator_mean,
     IFT_LocalGaussianRandomGenerator_variance,
     IFT_LocalGaussianRandomGenerator_seed,
-    
+
     IFT_RandomMaterialExt_randVariables,
     IFT_RandomMaterialExt_randGen,
+
+    IFT_XfemManager_numberOfGeometryItems,
+    IFT_XfemManager_numberOfEnrichmentItems,
+    IFT_XfemManager_numberOfEnrichmentFunctions,
+    IFT_XfemManager_name,
+
+    IFT_Circle_center,
+    IFT_Circle_radius,
+
+    IFT_Line_start,
+    IFT_Line_end,
+
+    IFT_EnrichmentItem_geometryItemNr,
+    IFT_EnrichmentItem_enrichmentFunctionNr,
 
     IFT_Unknown
 };

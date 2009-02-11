@@ -129,6 +129,7 @@ enum classType {
     TrAxisym1_htClass,
     Brick1_htClass,
     Tetrah1_htClass,
+    PlaneStress2dXfemClass,
 
     InterfaceElem1dClass,
     InterfaceElem2dQuadClass,

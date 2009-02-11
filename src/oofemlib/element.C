@@ -76,8 +76,8 @@
 #include "elementside.h"
 #include "datastream.h"
 #ifndef __MAKEDEPEND
-#include <stdlib.h>
-#include <stdio.h>
+ #include <stdlib.h>
+ #include <stdio.h>
 #endif
 
 #include "errorestimator.h"
@@ -86,7 +86,7 @@
 #include "contextioerr.h"
 
 Element :: Element(int n, Domain *aDomain) :
-    FEMComponent(n, aDomain), dofManArray(), bodyLoadArray(), boundaryLoadArray()
+    FEMComponent(n, aDomain), dofManArray(), bodyLoadArray(), boundaryLoadArray(), ElementGeometry()
     // Constructor. Creates an element with number n, belonging to aDomain.
 {
     material           = 0;
@@ -371,11 +371,20 @@ ElementSide *Element :: giveSide(int i) const
 }
 
 void
-Element::setDofManagers (const IntArray& _dmans)
+Element :: setDofManagers(const IntArray &_dmans)
 {
-  this->dofManArray = _dmans;
+    this->dofManArray = _dmans;
 }
 
+void
+Element :: setIntegrationRule(int n, IntegrationRule *ir)
+{
+    if ( integrationRulesArray ) {
+        delete integrationRulesArray [ n - 1 ];
+    }
+
+    integrationRulesArray [ n - 1 ] = ir;
+}
 
 
 void
@@ -454,9 +463,9 @@ Element :: initializeFrom(InputRecord *ir)
 }
 
 void
-Element::postInitialize() 
+Element :: postInitialize()
 {
-  this->computeGaussPoints();
+    this->computeGaussPoints();
 }
 
 Element *Element :: ofType(char *aClass)
@@ -1085,11 +1094,11 @@ Element :: drawYourself(oofegGraphicContext &gc)
 
     if ( mode == OGC_rawGeometry ) {
         this->drawRawGeometry(gc);
-    } else if ( mode == OGC_deformedGeometry )  {
+    } else if ( mode == OGC_deformedGeometry ) {
         this->drawDeformedGeometry(gc, DisplacementVector);
     } else if ( mode == OGC_eigenVectorGeometry ) {
         this->drawDeformedGeometry(gc, EigenVector);
-    } else if ( mode == OGC_scalarPlot )  {
+    } else if ( mode == OGC_scalarPlot ) {
         this->drawScalar(gc);
     } else if ( mode == OGC_elemSpecial ) {
         this->drawSpecial(gc);
@@ -1126,7 +1135,7 @@ Element :: giveInternalStateAtNode(FloatArray &answer, InternalStateType type, I
             }
 
             return result;
-        } else   {
+        } else {
             return 0;
         }
     }
