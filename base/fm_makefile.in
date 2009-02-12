@@ -71,7 +71,7 @@ fmlib.a:  $(fmLib_objs)
 
 deps:  $(fmLib_deps)
 
-clean: 
+clean::
 	rm -fr *.o *.d *.a
 
 

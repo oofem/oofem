@@ -79,6 +79,8 @@ enum InterfaceType {
 
     LEPlicElementInterfaceType,
     LevelSetPCSElementInterfaceType,
+
+    XfemElementInterfaceType
 };
 
 #endif // interfacetype_h

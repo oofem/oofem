@@ -24,6 +24,6 @@ dsslib.a: $(OBJS)
 deps:
 	@echo
 
-clean:
+clean::
 	rm -f *.o  dsslib.a
 

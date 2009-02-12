@@ -592,13 +592,13 @@ if test x$petsc_module = xyes; then
     done;
   fi
   dnl PETSC_ARCH=`PETSC_DIR=${PETSC_DIR} ${PETSC_DIR}/bin/petscarch`
-  PETSC_MAKE_INCLUDE="include ${PETSC_DIR}/bmake/common/base"
+  PETSC_MAKE_INCLUDE="include ${PETSC_DIR}/conf/base"
   PETSC_INCLUDES="\${PETSC_INCLUDE}"
   AC_MSG_CHECKING(PETSC_ARCH)
-  if test -f ${PETSC_DIR}/lib/$PETSC_ARCH/libpetsc.a; then
+  if test -f ${PETSC_DIR}/$PETSC_ARCH/lib/libpetsc.a; then
     AC_MSG_RESULT(${PETSC_ARCH})
   else
-    while test ! -f ${PETSC_DIR}/lib/$PETSC_ARCH/libpetsc.a; do
+    while test ! -f ${PETSC_DIR}/$PETSC_ARCH/lib/libpetsc.a; do
       echo "PETSC_ARCH ${PETSC_ARCH} does not seem to be available."
       echo "Type in available PETSC_ARCH:"
       read PETSC_ARCH

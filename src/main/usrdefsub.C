@@ -885,6 +885,21 @@ MesherInterface *CreateUsrDefMesherInterface(MeshPackageType type, Domain* d)
   
 }
 
+EnrichmentFunction* CreateUsrDefEnrichmentFunction(char*, int, Domain*)
+{
+  return NULL;
+}
+
+
+BasicGeometry *CreateUsrDefGeometry(char*)
+{
+  return NULL;
+}
+
+EnrichmentItem* CreateUsrDefEnrichmentItem(char*, int, Domain*)
+{
+  return NULL;
+}
 
 #ifdef __PARALLEL_MODE
 LoadBalancerMonitor *CreateUsrDefLoadBalancerMonitorOfType(classType type, EngngModel *e)
@@ -915,3 +930,4 @@ LoadBalancer *CreateUsrDefLoadBalancerOfType(classType type, Domain *d)
     return answer;
 }
 #endif
+

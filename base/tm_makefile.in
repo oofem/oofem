@@ -73,7 +73,7 @@ tmlib.a:  $(tmLib_objs)
 
 deps:	$(tmLib_deps)
 
-clean: 
+clean::
 	rm -fr *.o *.d *.a
 
 

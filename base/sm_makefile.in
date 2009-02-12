@@ -75,7 +75,7 @@ smlib.a:  $(smLib_objs)
 
 deps:	$(smLib_deps)
 
-clean: 
+clean::
 	rm -fr *.o *.d *.a
 
 

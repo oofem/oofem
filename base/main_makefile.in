@@ -96,5 +96,5 @@ $(INSTALL_DIR)/$(PROG_NAME):  $(all_objs) $(OOFEM_LIBS)
 
 deps:   $(all_deps)
 
-clean:
+clean::
 	rm -fr *.o *.d oofem

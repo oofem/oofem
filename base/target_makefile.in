@@ -27,7 +27,7 @@ deps:
 	cd lib/main;${MAKE} deps
 	cd lib/dss;${MAKE} deps
 
-clean:
+clean::
 	cd lib/oofemlib; ${MAKE} clean
 	cd lib/sm; ${MAKE} clean
 	cd lib/tm; ${MAKE} clean
