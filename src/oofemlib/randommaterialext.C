@@ -39,6 +39,7 @@
 #include "gausspnt.h"
 #include "inputrecord.h"
 #include "domain.h"
+#include "material.h"
 #include "randomfieldgenerator.h"
 #include "randommaterialext.h"
 
@@ -81,8 +82,11 @@ RandomMaterialExtensionInterface::initializeFrom (InputRecord *ir)
 bool
 RandomMaterialExtensionInterface::give (int key, GaussPoint* gp, double& value)
 {
+  MaterialStatus* status=gp->giveMaterialStatus();
+  if (!status) status = gp->giveMaterial()->giveStatus(gp);
+
   RandomMaterialStatusExtensionInterface* interface = (RandomMaterialStatusExtensionInterface*)
-    gp->giveMaterialStatus()->giveInterface(RandomMaterialStatusExtensionInterfaceType);
+    status->giveInterface(RandomMaterialStatusExtensionInterfaceType);
   return interface->_giveProperty(key, value);
 }
 

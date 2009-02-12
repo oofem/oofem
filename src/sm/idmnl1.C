@@ -716,7 +716,7 @@ IDNLMaterialStatus :: giveInterface(InterfaceType type)
     if ( type == NonlocalMaterialStatusExtensionInterfaceType ) {
       return (StructuralNonlocalMaterialStatusExtensionInterface*)this;
     } else {
-        return NULL;
+      return IsotropicDamageMaterial1Status :: giveInterface(type);
     }
 }
 
