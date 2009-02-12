@@ -1316,7 +1316,7 @@ specify the domain numbers to be exported.
 Currently, the supported export modules are following
 \begin{itemize}
 \item vtk \optField{vars}{ia} \optField{primvars}{ia}
-\optField{stype}{in}\\
+\optField{stype}{in} \optfield{regionstoskip}{ia}\\
 The array \param{vars} contains identifiers for those internal
 variables which are to be exported. The id values are defined by
 InternalStateType enumeration, which is defined in include file
@@ -1331,6 +1331,7 @@ supported by particular material model or analysis type.
 The parameter \param{stype} allows to select smoothing procedure for
 internal variables, which is used to compute nodal values from values
 in integration points.
+When vtk is configured to operate in region-by-region mode (the default), then the export is done on region by region basis. In this case, the smoothing is performed only over particular region, where only elements in this region participate. Then the \param{regionstoskip} parameter allows to skip given regions when generating output, so only remaining regions (and corresponding elements and nodes) will be exported.
 \end{itemize}
 
 \section{Domain record(s)}
