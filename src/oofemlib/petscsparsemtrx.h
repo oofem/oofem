@@ -163,7 +163,7 @@ public:
 
     Mat *giveMtrx() { return & this->mtrx; }
     int       giveSymmetryFlag() const { return symmFlag; }
-    int       setOption(MatOption op) { return MatSetOption(this->mtrx, op); }
+    int       setOption(MatOption op, PetscTruth flag) { return MatSetOption(this->mtrx, op, flag); }
     EquationID       giveEquationID() { return ut; }
 
 #ifdef IML_COMPAT

@@ -172,7 +172,7 @@ PetscSparseMtrx :: buildInternalStructure(EngngModel *eModel, int di, EquationID
         MatSetSizes(mtrx, leqs, leqs, geqs, geqs);
         MatSetType(mtrx, MATMPIAIJ);
         // To allow the insertion of values using MatSetValues in column major order
-        MatSetOption(mtrx, MAT_COLUMN_ORIENTED);
+        MatSetOption(mtrx, MAT_ROW_ORIENTED, PETSC_FALSE);
         MatSetFromOptions(mtrx);
         MatMPIAIJSetPreallocation(mtrx, 1, d_nnz.givePointer(), 6, PETSC_NULL);
 
@@ -272,7 +272,7 @@ PetscSparseMtrx :: assemble(const IntArray &rloc, const IntArray &cloc, const Fl
         emodel->givePetscContext(this->di, ut)->giveN2Gmap()->map2New(gcloc, cloc, 0);
 
         // To allow the insertion of values using MatSetValues in column major order
-        MatSetOption(mtrx, MAT_COLUMN_ORIENTED);
+        MatSetOption(mtrx, MAT_ROW_ORIENTED, PETSC_FALSE);
         MatSetValues(this->mtrx, grloc.giveSize(), grloc.givePointer(),
                      gcloc.giveSize(), gcloc.givePointer(), mat.givePointer(), ADD_VALUES);
     } else {
@@ -288,7 +288,7 @@ PetscSparseMtrx :: assemble(const IntArray &rloc, const IntArray &cloc, const Fl
     }
 
     // To allow the insertion of values using MatSetValues in column major order
-    MatSetOption(mtrx, MAT_COLUMN_ORIENTED);
+    MatSetOption(mtrx, MAT_ROW_ORIENTED, PETSC_FALSE);
     MatSetValues(this->mtrx, rsize, grloc.givePointer(),
                  csize, gcloc.givePointer(), mat.givePointer(), ADD_VALUES);
 
@@ -360,7 +360,7 @@ PetscSparseMtrx :: printStatistics() const
 void
 PetscSparseMtrx :: printYourself() const
 {
-    PetscViewerSetFormat(PETSC_VIEWER_STDOUT_SELF, PETSC_VIEWER_ASCII_DEFAULT);
+    PetscViewerSetFormat(PETSC_VIEWER_STDOUT_SELF, PETSC_VIEWER_ASCII_DENSE);
     MatView(this->mtrx, PETSC_VIEWER_STDOUT_SELF);
 }
 
