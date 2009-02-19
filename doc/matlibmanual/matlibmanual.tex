@@ -361,7 +361,7 @@ For a 2D configuration $\mbf{D}=diag\{k_n,k_s\}$. The terms of the elastic stiff
 \begin{equation}
   k_n=\del{E_bE_m}{t_m(E_b-E_m)};\;k_s=\del{G_bG_m}{t_m(G_b-G_m)}
 \end{equation}
-where $E_b$ and $E_m$ are Young's moduli and $G_b$ and $G_m$ shear moduli for brick and mortar. One should note, that there is no contact algorithm assumed between bricks, this means that the overlap of neighboring units will be visible. On the other hand, the interface model includes a compressive cap, where the compressive inelastic behavior of masonry is lumped.
+where $E_b$ and $E_m$ are Young's moduli, $G_b$ and $G_m$ shear moduli for brick and mortar, and $t_m$ is the thickness of joint. One should note, that there is no contact algorithm assumed between bricks, this means that the overlap of neighboring units will be visible. On the other hand, the interface model includes a compressive cap, where the compressive inelastic behavior of masonry is lumped.
 \paragraph{Tension mode}
 In the tension mode, the exponential softening law is assumed (see fig.(\ref{tensfig})). The yield function has the following form
 \begin{equation}
@@ -454,8 +454,8 @@ the input parameters accordingly (one can modify dilatancy angle, for example).
 \hline                                                                          
 Description & Composite plasticity model for masonry\\
 \hline                                                                          
-Record Format & \descitem{Masonry02} \elemparam{num}{in} \elemparam{d}{rn} 
-\elemparam{ft0}{rn} \elemparam{gfi}{rn}
+Record Format & \descitem{Masonry02} \elemparam{num}{in} \elemparam{d}{rn} \elemparam{E}{rn} 
+\elemparam{n}{rn} \elemparam{ft0}{rn} \elemparam{gfi}{rn}
 \elemparam{gfii}{rn}
 \elemparam{kn}{rn} \elemparam{ks}{rn} \elemparam{c0}{rn}
 \elemparam{tanfi0}{rn} \elemparam{tanfir}{rn} \elemparam{tanpsi}{rn}
@@ -464,6 +464,8 @@ Record Format & \descitem{Masonry02} \elemparam{num}{in} \elemparam{d}{rn}
 \elemparam{cnn}{rn} \elemparam{css}{rn} \elemparam{cn}{rn}\\
 Parameters &- \param{num} material model number\\
 &- \param{d} material density\\
+&- \param{E} Young modulus\\
+&- \param{n} Poisson ratio\\
 &- \param{ft0} tensile strength\\
 &- \param{gfi} fracture energy for mode I\\
 &- \param{gfii} fracture energy for mode II\\
