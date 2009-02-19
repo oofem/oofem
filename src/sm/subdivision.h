@@ -54,8 +54,12 @@
 
 #define SHARED_IRREGULAR_DATA_TAG 7654
 #define SUBIVISION_IRREGULAR_REC_TAG 7655
-#define SUBDIVISION_END_DATA 7656
-#define SUBDIVISION_MIGRATE_REMOTE_ELEMENTS_TAG 7657
+#define SUBDIVISION_MIGRATE_REMOTE_ELEMENTS_TAG 7656
+/**
+ * End-of-data marker, used to identify end of data stream received.
+ * The value should not conflict with any tag value used
+ */
+#define SUBDIVISION_END_DATA -1
 
 class TimeStep;
 

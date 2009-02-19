@@ -36,7 +36,12 @@
 
 #ifdef __PARALLEL_MODE
 
-#define NonlocalMaterialWTP_END_DATA -9999
+/**
+ * End-of-data marker, used to identify end of data stream received.
+ * The value should not conflict with any classType value and any possible globnum id.
+ */
+#define NonlocalMaterialWTP_END_DATA -1
+
 #define MIGRATE_NONLOCALDEP_TAG 4008
 #define MIGRATE_REMOTE_ELEMENTS_TAG 4009
 

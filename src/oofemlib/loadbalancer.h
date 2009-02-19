@@ -54,7 +54,11 @@ class ProcessCommunicator;
 class TimeStep;
 
 #define MIGRATE_LOAD_TAG       9998
-#define LOADBALANCER_END_DATA 9999
+/**
+ * End-of-data marker, used to identify end of data stream received.
+ * The value should not conflict with any classType value
+ */
+#define LOADBALANCER_END_DATA -1
 
 /**
  * Abstract base class representing general load balancer monitor. The task of the monitor is to

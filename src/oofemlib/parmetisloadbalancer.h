@@ -44,11 +44,15 @@
 #endif
 #endif
 
-#define PARMETISLB_END_DATA 9999
+/**
+ * End-of-data marker, used to identify end of data stream received.
+ * The value should not conflict with any globnum id
+ */
+#define PARMETISLB_END_DATA -1
 #define SHARED_DOFMAN_PARTITIONS_TAG 9998
 
 /**
- *
+ * ParMetis load balancer.
  */
 class ParmetisLoadBalancer : public LoadBalancer
 {
