@@ -48,6 +48,7 @@
 #include "loadtime.h"
 #include "engngm.h"
 #include "oofem_limits.h"
+#include "entityrenumberingscheme.h"
 
 #ifndef __MAKEDEPEND
 //#include <clock.h>
@@ -1514,13 +1515,17 @@ Domain :: renumberDofManData(DomainTransactionManager *tm) {
     int _i;
     std :: map< int, DofManager * > :: iterator it;
 
+    SpecificEntityRenumberingFunctor<Domain> domainGToLFunctor (this, & Domain :: LB_giveUpdatedGlobalNumber);
+    SpecificEntityRenumberingFunctor<Domain> domainLToLFunctor (this, & Domain :: LB_giveUpdatedLocalNumber);
+    
+
     for ( _i = 0, it = dmanMap.begin(); it != dmanMap.end(); it++ ) {
         if ( tm->dofmanTransactions.find(it->first) != tm->dofmanTransactions.end() ) {
             // received dof manager -> we map global numbers to new local number
-            it->second->updateLocalNumbering(this, & Domain :: LB_giveUpdatedGlobalNumber); // g_to_l
+            it->second->updateLocalNumbering(domainGToLFunctor); // g_to_l
         } else {
             // existing dof manager -> we map old local number to new local number
-            it->second->updateLocalNumbering(this, & Domain :: LB_giveUpdatedLocalNumber); // l_to_l
+            it->second->updateLocalNumbering(domainLToLFunctor); // l_to_l
         }
     }
 }
@@ -1530,13 +1535,17 @@ Domain :: renumberElementData(DomainTransactionManager *tm) {
     int _i;
     std :: map< int, Element * > :: iterator it;
 
+    SpecificEntityRenumberingFunctor<Domain> domainGToLFunctor (this, & Domain :: LB_giveUpdatedGlobalNumber);
+    SpecificEntityRenumberingFunctor<Domain> domainLToLFunctor (this, & Domain :: LB_giveUpdatedLocalNumber);
+
+
     for ( _i = 0, it = elementMap.begin(); it != elementMap.end(); it++ ) {
         if ( tm->elementTransactions.find(it->first) != tm->elementTransactions.end() ) {
             // received dof manager -> we map global numbers to new local number
-            it->second->updateLocalNumbering(this, & Domain :: LB_giveUpdatedGlobalNumber); // g_to_l
+            it->second->updateLocalNumbering(domainGToLFunctor); // g_to_l
         } else {
             // existing dof manager -> we map old local number to new local number
-            it->second->updateLocalNumbering(this, & Domain :: LB_giveUpdatedLocalNumber); // l_to_l
+            it->second->updateLocalNumbering(domainLToLFunctor); // l_to_l
         }
     }
 }

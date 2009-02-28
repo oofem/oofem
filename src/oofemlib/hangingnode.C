@@ -199,19 +199,21 @@ HangingNode :: checkConsistency()
         }
     }
 
-
-#ifdef __PARALLEL_MODE
-    // check if master in same mode
-    if ( parallel_mode != DofManager_local ) {
-        for ( i = 1; i <= countOfMasterNodes; i++ ) {
-            if ( masterNode [ i - 1 ]->giveParallelMode() != parallel_mode ) {
-                _warning2("checkConsistency: mismatch in parallel mode of HangingNode and master", 1);
+    /*
+      #ifdef __PARALLEL_MODE
+       // check if master in same mode
+       if ( parallel_mode != DofManager_local ) {
+         for ( i = 1; i <= countOfMasterNodes; i++ ) {
+           if ( masterNode [ i - 1 ]->giveParallelMode() != parallel_mode ) {
+             _warning2("checkConsistency: mismatch in parallel mode of HangingNode and master", 1);
                 result = 0;
-            }
-        }
-    }
+           }
+         }
+       }
+	    
+      #endif
+    */
 
-#endif
 
     // deallocate auxiliary arrays
     deallocAuxArrays();

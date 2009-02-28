@@ -49,5 +49,39 @@ enum EntityRenumberingScheme {
     ERS_Element
 };
 
+
+class EntityRenumberingFunctor {
+ public:
+  // two possible functions to call member function. virtual cause derived
+  // classes will use a pointer to an object and a pointer to a member function
+  // to make the function call
+  virtual int operator()(int, EntityRenumberingScheme)=0;  // call using operator
+  virtual int call(int, EntityRenumberingScheme)=0;        // call using function
+};
+
+// derived template class
+template <class TClass> class SpecificEntityRenumberingFunctor : public EntityRenumberingFunctor
+{
+ private:
+  int (TClass::*fpt)(int, EntityRenumberingScheme);   // pointer to member function
+  TClass* pt2Object;                                   // pointer to object
+  
+ public:
+  
+  // constructor - takes pointer to an object and pointer to a member and stores
+  // them in two private variables
+  SpecificEntityRenumberingFunctor(TClass* _pt2Object, int (TClass::*_fpt)(int, EntityRenumberingScheme))
+    { pt2Object = _pt2Object;  fpt=_fpt; };
+  
+  // override operator "()"
+  virtual int operator()(int n, EntityRenumberingScheme ers)
+  { return (*pt2Object.*fpt)(n, ers);};              // execute member function
+  
+  // override function "Call"
+  virtual int call(int n, EntityRenumberingScheme ers)
+  { return (*pt2Object.*fpt)(n, ers);};             // execute member function
+};
+
+
 #endif // entityrenumberingscheme_h
 

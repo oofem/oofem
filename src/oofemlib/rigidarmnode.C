@@ -177,7 +177,7 @@ RigidArmNode :: checkConsistency()
         }
     }
 
-
+/*
 #ifdef __PARALLEL_MODE
     // check if master in same mode
     if ( parallel_mode != DofManager_local ) {
@@ -188,6 +188,7 @@ RigidArmNode :: checkConsistency()
     }
 
 #endif
+*/
 
     // deallocate auxiliary arrays
     deallocAuxArrays();

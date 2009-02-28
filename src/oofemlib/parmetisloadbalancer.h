@@ -85,6 +85,7 @@ public:
     virtual int giveElementPartition(int ielem);
 #endif
 protected:
+    void handleMasterSlaveDofManLinks ();
 
 #ifdef __PARMETIS_MODULE
     void initGlobalParmetisElementNumbering();

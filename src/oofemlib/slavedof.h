@@ -30,8 +30,10 @@ protected:
     int countOfMasterDofs;
     /// count of Master DofManagers
     int countOfPrimaryMasterDofs;
-    /// array of pointers on Master Dofs
-    Dof **masterDof;
+    /// array of Masters
+    IntArray masterDofMans;
+    /// array of masterDofMans dofIDs
+    IntArray dofIDs;
     /// vector of master contribution coefficients
     FloatArray masterContribution;
 
@@ -42,7 +44,7 @@ public:
      * @param aNode receiver will belong to aNode dof manager
      * @param id DofID of slave dof
      */
-    SlaveDof(int n, DofManager *aNode, DofID id);
+    SlaveDof(int n, DofManager *aNode, DofID id = Undef);
     /**
      * Destructor.
      */
@@ -125,17 +127,10 @@ public:
      */
     int giveIcId () {return 0;}
 
-    /**
-     * Stores receiver state to output stream.
-     * @exception throws an ContextIOERR exception if error encountered.
-     */
-    contextIOResultType saveContext(FILE *stream, void *obj = NULL) { return CIO_OK; }
-
-    /**
-     * Restores the receiver state previously written in stream.
-     * @exception throws an ContextIOERR exception if error encountered.
-     */
-    contextIOResultType restoreContext(FILE *stream, void *obj = NULL) { return CIO_OK; }
+    /// Stores receiver state to output stream.
+    virtual contextIOResultType    saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    /// Restores the receiver state previously written in stream.
+    virtual contextIOResultType    restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 
     /**
      * Returns class name of the receiver.
@@ -146,7 +141,20 @@ public:
      * Returns classType id of receiver.
      */
     classType giveClassID() const { return SlaveDofClass; }
+
+    /**
+     * Local renumbering support. For some tasks (parallel load balancing, for example) it is necessary to
+     * renumber the entities. The various fem components (such as nodes or elements) typically contain
+     * links to other entities in terms of their local numbers, etc. This service allows to update
+     * these relations to reflext updated numbering. The renumbering funciton is passed, which is supposed
+     * to return an updated number of specified entyty type based on old number.
+     */
+    virtual void updateLocalNumbering( EntityRenumberingFunctor &f );
+
+ protected:
+    inline Dof* giveMasterDof (int i); 
 };
+
 
 
 #endif // slavedof_h

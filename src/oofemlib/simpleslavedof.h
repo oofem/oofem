@@ -136,7 +136,7 @@ public:
      * @param id DofID of master dof (and slave too).
      */
     SimpleSlaveDof(int i, DofManager *aNode, int master, DofID id);  // constructor
-    SimpleSlaveDof(int i, DofManager *aNode, DofID id);   // constructor
+    SimpleSlaveDof(int i, DofManager *aNode, DofID id = Undef);   // constructor
 
     /// Destructor.
     ~SimpleSlaveDof()   { }   // destructor.
@@ -222,6 +222,16 @@ public:
     /// Returns number of master dof in master dofManager.
     int giveMasterDofIndx() const { return masterDofIndx; }
 
+    /**
+     * Local renumbering support. For some tasks (parallel load balancing, for example) it is necessary to
+     * renumber the entities. The various fem components (such as nodes or elements) typically contain
+     * links to other entities in terms of their local numbers, etc. This service allows to update
+     * these relations to reflext updated numbering. The renumbering funciton is passed, which is supposed
+     * to return an updated number of specified entyty type based on old number.
+     */
+    virtual void updateLocalNumbering( EntityRenumberingFunctor &f );
+
+
 private:
     /// returns reference to master dof.
     Dof *giveMasterDof();
@@ -241,5 +251,6 @@ protected:
      */
     InitialCondition *giveIc();
 };
+
 
 #endif // simpleslavedof_h

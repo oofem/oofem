@@ -34,6 +34,8 @@
  */
 #ifdef __PARALLEL_MODE
 
+//#define __VERBOSE_PARALLEL
+
 #include "engngm.h"
 #include "petscordering.h"
 #include "combuff.h"
@@ -269,6 +271,11 @@ PetscNatural2GlobalOrdering :: init(EngngModel *emodel, EquationID ut, int di, E
     for ( p = 0; p < nproc; p++ ) {
         buffs [ p ] = new StaticCommunicationBuffer(MPI_COMM_WORLD, 0);
         buffs [ p ]->resize( buffs [ p ]->givePackSize(MPI_INT, 1) * sizeToSend(p) );
+	
+#if 0
+	OOFEM_LOG_INFO("[%d]PetscN2G:: init: Send buffer[%d] size %d\n", 
+		       myrank, p, sizeToSend(p));
+#endif
     }
 
 
@@ -357,6 +364,10 @@ PetscNatural2GlobalOrdering :: init(EngngModel *emodel, EquationID ut, int di, E
     for ( p = 0; p < nproc; p++ ) {
         rbuffs [ p ] = new StaticCommunicationBuffer(MPI_COMM_WORLD, 0);
         rbuffs [ p ]->resize( rbuffs [ p ]->givePackSize(MPI_INT, 1) * sizeToRecv(p) );
+#if 0
+	OOFEM_LOG_INFO("[%d]PetscN2G:: init: Receive buffer[%d] size %d\n", 
+		       myrank, p, sizeToRecv(p));
+#endif
     }
 
 
@@ -382,6 +393,10 @@ PetscNatural2GlobalOrdering :: init(EngngModel *emodel, EquationID ut, int di, E
                     for ( i = 1; i <= nite; i++ ) {
                         rbuffs [ p ]->unpackInt(shdm);
 
+#if 0
+			OOFEM_LOG_INFO("[%d]PetscN2G:: init: Received shared node [%d] from proc %d\n", 
+				   myrank, shdm, p);
+#endif
 			//
                         // find local guy coorecponding to shdm
 			if (globloc.find(shdm) != globloc.end()) {
@@ -476,7 +491,7 @@ PetscNatural2GlobalOrdering :: init(EngngModel *emodel, EquationID ut, int di, E
     delete[] buffs;
     delete[] leqs;
 
-    //MPI_Barrier (MPI_COMM_WORLD);
+    MPI_Barrier (MPI_COMM_WORLD);
 #ifdef __VERBOSE_PARALLEL
     VERBOSEPARALLEL_PRINT("PetscNatural2GlobalOrdering :: init", "done", myrank);
 #endif

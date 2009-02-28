@@ -208,7 +208,7 @@ LoadBalancer :: packMigratingData(Domain *d, ProcessCommunicator &pc)
             /* this is a potential performance leak, sending shared dofman to a partition,
              * in which is already shared does not require to send context (is already there)
              * here for simplicity it is always send */
-            dofman->saveContext(& pcDataStream, CM_Definition | CM_State | CM_UnknownDictState);
+            dofman->saveContext(& pcDataStream, CM_Definition | CM_DefinitionGlobal | CM_State | CM_UnknownDictState);
             // send list of new partitions
             pcbuff->packIntArray( * ( this->giveDofManPartitions(idofman) ) );
         }
@@ -293,7 +293,7 @@ LoadBalancer :: unpackMigratingData(Domain *d, ProcessCommunicator &pc)
 
             dofman->setGlobalNumber(_globnum);
             // unpack dofman state (this is the local dofman, not available on remote)
-            dofman->restoreContext(& pcDataStream, CM_Definition | CM_State | CM_UnknownDictState);
+            dofman->restoreContext(& pcDataStream, CM_Definition | CM_DefinitionGlobal | CM_State | CM_UnknownDictState);
             // unpack list of new partitions
             pcbuff->unpackIntArray(_partitions);
             dofman->setPartitionList(&_partitions);
@@ -320,7 +320,7 @@ LoadBalancer :: unpackMigratingData(Domain *d, ProcessCommunicator &pc)
 
             dofman->setGlobalNumber(_globnum);
             // unpack dofman state (this is the local dofman, not available on remote)
-            dofman->restoreContext(& pcDataStream, CM_Definition | CM_State | CM_UnknownDictState);
+            dofman->restoreContext(& pcDataStream, CM_Definition | CM_DefinitionGlobal | CM_State | CM_UnknownDictState);
             // unpack list of new partitions
             pcbuff->unpackIntArray(_partitions);
             dofman->setPartitionList(&_partitions);

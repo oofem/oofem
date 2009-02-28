@@ -362,6 +362,7 @@ ParmetisLoadBalancer :: labelDofManagers()
         }
     }
 
+
     /* Exchange new partitions for shared nodes */
     CommunicatorBuff cb(nproc, CBT_dynamic);
     Communicator com(domain->giveEngngModel(), & cb, myrank, nproc, CommMode_Dynamic);
@@ -381,6 +382,10 @@ ParmetisLoadBalancer :: labelDofManagers()
             dofManState.at(idofman) = DM_NULL;
         }
     }
+
+    // handle master slave links between dofmans (master and slave required on same partition)
+    this->handleMasterSlaveDofManLinks ();
+
 
 #ifdef ParmetisLoadBalancer_DEBUG_PRINT
     for ( idofman = 1; idofman <= ndofman; idofman++ ) {
@@ -565,6 +570,90 @@ void ParmetisLoadBalancer :: addSharedDofmanPartitions(int _locnum, IntArray _pa
         dofManPartitions [ _locnum - 1 ].insertOnce( _partitions.at(i) );
     }
 }
+
+void ParmetisLoadBalancer:: handleMasterSlaveDofManLinks ()
+{
+  int idofman, ndofman = domain->giveNumberOfDofManagers();
+  DofManager *dofman;
+  int myrank = domain->giveEngngModel()->giveRank();
+  int __i;
+  bool isSlave;
+  int _master, __j;
+  IntArray slaveMastersDofMans;
+
+
+  // handle master slave links between dofmans (master and slave required on same partition)
+  for ( idofman = 1; idofman <= ndofman; idofman++ ) {
+    dofman = domain->giveDofManager(idofman);
+    isSlave = dofman->hasAnySlaveDofs();
+    if ( isSlave && dofManState.at(idofman) == DM_Local ) {
+      // ok, local slave detected
+      // now ensure that local (or shared) master will be available
+      dofman->giveMasterDofMans(slaveMastersDofMans);
+      for (__i=1; __i <=slaveMastersDofMans.giveSize(); __i++) {
+	// loop over all slave masters
+	_master = slaveMastersDofMans.at(__i);
+	if ((dofManState.at(_master) == DM_Local)) {
+	  // master is local - ok
+	  continue;
+	} else if (dofManState.at(_master) == DM_Shared) {
+	  // ensure that master will be shared also on local partition
+	  dofManPartitions [ _master - 1 ].insertOnce(myrank);
+	} else if (dofManState.at(_master) == DM_Remote) {
+	  // master marked as DM_Remote (the one belonging to remote partition)
+	  // ensure that master will be also on local partition 
+	  // achieved as marking master as DM_Shared
+	  dofManState.at(_master) = DM_Shared;
+	  // dofManPartitions contains only remote partion, add a local one
+	  dofManPartitions [ _master - 1 ].insertOnce(myrank);
+	} else {
+	  // master is marked as NULL ( it has not been Local or Shared - but it shuld be) -> error
+	  OOFEM_ERROR3 ("ParmetisLoadBalancer :: labelDofManagers: master-slave consistency error (master %d, slave %d)", _master, idofman);
+	}
+      }
+    } else if (isSlave && dofManState.at(idofman) == DM_Remote ) {
+      // slave going to be remote - ensure that master will be ready on remote partition as well
+      dofman->giveMasterDofMans(slaveMastersDofMans);
+      for (__i=1; __i <=slaveMastersDofMans.giveSize(); __i++) {
+	// loop over all slave masters
+	_master = slaveMastersDofMans.at(__i);
+	if ((dofManState.at(_master) == DM_Local)) {
+	  // master is local - should become shared with partition that manages idofman
+	  dofManState.at(_master) = DM_Shared;
+	  dofManPartitions [ _master - 1 ].insertOnce(dofManPartitions [idofman-1].at(1));
+	} else if (dofManState.at(_master) == DM_Shared) {
+	    // ensure that master will be shared also on remote partition
+	  dofManPartitions [ idofman - 1 ].insertOnce(dofManPartitions [idofman-1].at(1));
+	} else if (dofManState.at(_master) == DM_Remote) {
+	  // test if remote partitions are the same
+	  if (dofManPartitions [ _master - 1 ].at(1) == dofManPartitions [idofman-1].at(1)) {
+	    continue;
+	    } else {
+	    // master and slave are in different partitions - make master shared
+	    dofManState.at(_master) = DM_Shared;
+	    dofManPartitions [ _master - 1 ].insertOnce(dofManPartitions [idofman-1].at(1));
+	  }
+	} else {
+	  // master is marked as NULL ( it has not been Local or Shared - but it shuld be) -> error
+	  OOFEM_ERROR3 ("ParmetisLoadBalancer :: labelDofManagers: master-slave consistency error (master %d, slave %d)", _master, idofman);
+	}
+      }
+    } else if (isSlave && dofManState.at(idofman) == DM_Shared ) {
+      // slave is shared -> ensure that master will be also shared on the same partitions
+      dofman->giveMasterDofMans(slaveMastersDofMans);
+      for (__i=1; __i <=slaveMastersDofMans.giveSize(); __i++) {
+	  // loop over all slave masters
+	_master = slaveMastersDofMans.at(__i);
+	dofManState.at(_master) = DM_Shared;
+	for (__j=1; __j<=dofManPartitions [idofman-1].giveSize(); __j++) {
+	  dofManPartitions [ idofman - 1 ].insertOnce(dofManPartitions [idofman-1].at(__j));
+	}
+	}
+    }
+  }
+}
+
+
 
 #else //PARMETIS_MODULE
 void ParmetisLoadBalancer :: calculateLoadTransfer() { }

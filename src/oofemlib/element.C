@@ -1015,6 +1015,15 @@ Element :: adaptiveFinish(TimeStep *tStep)
 }
 
 
+void
+Element :: updateLocalNumbering(EntityRenumberingFunctor &f )
+{
+    int i;
+    for ( i = 1; i <= numberOfDofMans; i++ ) {
+        dofManArray.at(i) = f (dofManArray.at(i), ERS_DofManager);
+    }
+}
+
 
 #ifdef __PARALLEL_MODE
 int

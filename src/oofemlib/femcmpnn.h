@@ -136,7 +136,7 @@ public:
      * these relations to reflext updated numbering. The renumbering funciton is passed, which is supposed
      * to return an updated number of specified entyty type based on old number.
      */
-    template< class T > void updateLocalNumbering( T *src, int ( T :: *renumberMethod )( int oldnum, EntityRenumberingScheme scheme ) ) { }
+    virtual void updateLocalNumbering( EntityRenumberingFunctor &f ) { }
     /** Initializes receiver acording to object description stored in input record.
      *  This function is called immediately after creating object using
      * constructor. Input record can be imagined as data record in component database

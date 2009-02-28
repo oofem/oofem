@@ -46,6 +46,8 @@
 #include "dictionr.h"
 
 #include "debug.h"
+#include "datastream.h"
+#include "contextioerr.h"
 
 #ifndef __MAKEDEPEND
 #include <stdlib.h>
@@ -60,8 +62,15 @@ SimpleSlaveDof :: SimpleSlaveDof(int i, DofManager *aNode, int master, DofID id)
 {
     masterDofMngr = master;
     masterDofIndx = -1;
-    /*   unknowns       = new Dictionary() ;           // unknown size ?
-     * pastUnknowns   = NULL ; */
+}
+
+
+SimpleSlaveDof :: SimpleSlaveDof(int i, DofManager *aNode, DofID id) : Dof(i, aNode, id)
+    // Constructor. Creates a new d.o.f., with number i, belonging
+    // to aNode with bc=nbc, ic=nic
+{
+    masterDofMngr = -1;
+    masterDofIndx = -1;
 }
 
 
@@ -180,7 +189,32 @@ contextIOResultType SimpleSlaveDof :: saveContext(DataStream *stream, ContextMod
 // current state)
 //
 {
-    return Dof :: saveContext(stream, mode, obj);
+  contextIOResultType iores;
+  if ( ( iores = Dof :: saveContext(stream, mode, obj) ) != CIO_OK ) {
+        THROW_CIOERR(iores);
+    }
+
+  if ( mode & CM_Definition ) {
+
+#ifdef __PARALLEL_MODE
+    if ( mode & CM_DefinitionGlobal ) {
+      int _masterGlobNum = dofManager->giveDomain()->giveDofManager(masterDofMngr)->giveGlobalNumber();
+      if ( !stream->write(& _masterGlobNum, 1) ) {
+	THROW_CIOERR(CIO_IOERR);
+      }
+    } else {
+      if ( !stream->write(& masterDofMngr, 1) ) {
+	THROW_CIOERR(CIO_IOERR);
+      }
+    }
+#else
+    if ( !stream->write(& masterDofMngr, 1) ) {
+      THROW_CIOERR(CIO_IOERR);
+    }
+#endif
+  }    
+
+  return CIO_OK;
 }
 
 
@@ -190,5 +224,27 @@ contextIOResultType SimpleSlaveDof :: restoreContext(DataStream *stream, Context
 // current state)
 //
 {
-    return Dof :: restoreContext(stream, mode, obj);
+  contextIOResultType iores;
+  
+  if ( ( iores = Dof :: restoreContext(stream, mode, obj) ) != CIO_OK ) {
+    THROW_CIOERR(iores);
+  }
+
+  if ( mode & CM_Definition ) {
+    if ( !stream->read(& masterDofMngr, 1) ) {
+      THROW_CIOERR(CIO_IOERR);
+    }
+  }
+  this->masterDofIndx = -1;
+
+
+  return CIO_OK;
 }
+
+void
+SimpleSlaveDof :: updateLocalNumbering( EntityRenumberingFunctor &f )
+{
+  masterDofMngr = f(masterDofMngr, ERS_DofManager);
+}
+
+

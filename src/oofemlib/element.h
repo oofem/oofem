@@ -659,7 +659,7 @@ public:
      * these relations to reflext updated numbering. The renumbering funciton is passed, which is supposed
      * to return an updated number of specified entyty type based on old number.
      */
-    template< class T > void updateLocalNumbering( T * src, int ( T :: * renumberMethod )( int oldnum, EntityRenumberingScheme scheme ) );
+    virtual void updateLocalNumbering( EntityRenumberingFunctor &f ) ;
 
     /// Integration point evaluator, loops over receiver IP's and calls given function (passed as f parameter) on them. The IP is parameter to function f.
     template< class T > void ipEvaluator( T * src, void ( T :: * f )( GaussPoint * gp ) );
@@ -823,15 +823,6 @@ protected:
      */
     virtual void          computeGaussPoints() { }
 };
-
-template< class T > void
-Element :: updateLocalNumbering( T *src, int ( T :: *renumberMethod )( int oldnum, EntityRenumberingScheme scheme ) )
-{
-    int i;
-    for ( i = 1; i <= numberOfDofMans; i++ ) {
-        dofManArray.at(i) = ( src->*renumberMethod )(dofManArray.at(i), ERS_DofManager);
-    }
-}
 
 template< class T > void
 Element :: ipEvaluator( T *src, void ( T :: *f )( GaussPoint *gp ) )

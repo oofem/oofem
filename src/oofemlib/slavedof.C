@@ -5,6 +5,9 @@
 
 #include "slavedof.h"
 #include "node.h"
+#include "datastream.h"
+#include "contextioerr.h"
+
 
 #ifndef __MAKEDEPEND
 #include <stdlib.h>
@@ -45,16 +48,17 @@ SlaveDof :: initialize(int cntOfMstrDfMngr, Node **mstrNode, const IntArray *mst
     countOfMasterDofs  = cntOfMstrDfMngr;
     masterContribution = * mstrContribution;
 
-    masterDof = new Dof * [ countOfMasterDofs ];
-
+    masterDofMans.resize(countOfMasterDofs);
+    dofIDs.resize(countOfMasterDofs);
+    
     for ( i = 1; i <= countOfMasterDofs; i++ ) {
-        if ( idSame ) {
-            id = this->dofID;
+      if ( idSame ) {
+	  id = this->dofID;
         } else {
-            id = mstrDofID->at(i);
+	  id = mstrDofID->at(i);
         }
-
-        masterDof [ i - 1 ] = mstrNode [ i - 1 ]->giveDofWithID(id);
+	masterDofMans.at(i) = mstrNode [ i - 1 ]->giveNumber();
+	dofIDs.at(i) = id;
     }
 }
 
@@ -72,8 +76,8 @@ SlaveDof :: giveNumberOfPrimaryMasterDofs(void)
 
     long i, c = 0;
     for ( i = 1; i <= countOfMasterDofs; i++ ) {
-        if ( !masterDof [ i - 1 ]->isPrimaryDof() ) {
-            c += masterDof [ i - 1 ]->giveNumberOfPrimaryMasterDofs();
+      if ( !this->giveMasterDof (i)->isPrimaryDof() ) {
+            c += this->giveMasterDof (i)->giveNumberOfPrimaryMasterDofs();
         } else {
             c += 1;
         }
@@ -87,16 +91,18 @@ SlaveDof :: giveUnknowns(FloatArray &masterUnknowns, EquationID type, ValueModeT
 {
     int i, k;
     FloatArray mstrUnknwns;
+    Dof *_md;
 
     masterUnknowns.resize( this->giveNumberOfPrimaryMasterDofs() );
 
     for ( k = 1, i = 1; i <= countOfMasterDofs; i++ ) {
-        if ( !masterDof [ i - 1 ]->isPrimaryDof() ) {
-            masterDof [ i - 1 ]->giveUnknowns(mstrUnknwns, type, mode, stepN);
+      _md = this->giveMasterDof (i);
+        if ( !_md->isPrimaryDof() ) {
+            _md->giveUnknowns(mstrUnknwns, type, mode, stepN);
             masterUnknowns.copySubVector(mstrUnknwns, k);
             k += mstrUnknwns.giveSize();
         } else   {
-            masterUnknowns.at(k++) = masterDof [ i - 1 ]->giveUnknown(type, mode, stepN);
+            masterUnknowns.at(k++) = _md->giveUnknown(type, mode, stepN);
         }
     }
 }
@@ -106,16 +112,18 @@ SlaveDof :: giveUnknowns(FloatArray &masterUnknowns, PrimaryField &field, ValueM
 {
     int i, k;
     FloatArray mstrUnknwns;
+    Dof *_md;
 
     masterUnknowns.resize( this->giveNumberOfPrimaryMasterDofs() );
 
     for ( k = 1, i = 1; i <= countOfMasterDofs; i++ ) {
-        if ( !masterDof [ i - 1 ]->isPrimaryDof() ) {
-            masterDof [ i - 1 ]->giveUnknowns(mstrUnknwns, field, mode, stepN);
+      _md = this->giveMasterDof (i);
+        if ( !_md->isPrimaryDof() ) {
+            _md->giveUnknowns(mstrUnknwns, field, mode, stepN);
             masterUnknowns.copySubVector(mstrUnknwns, k);
             k += mstrUnknwns.giveSize();
         } else   {
-            masterUnknowns.at(k++) = masterDof [ i - 1 ]->giveUnknown(field, mode, stepN);
+            masterUnknowns.at(k++) = _md->giveUnknown(field, mode, stepN);
         }
     }
 }
@@ -125,19 +133,19 @@ SlaveDof :: giveBcValues(FloatArray &masterBcValues, ValueModeType mode, TimeSte
 {
     int i, k;
     FloatArray mstrBcVlus;
-    Dof *dofJ;
+    Dof *idof;
 
     masterBcValues.resize( this->giveNumberOfPrimaryMasterDofs() );
 
     for ( k = 1, i = 1; i <= countOfMasterDofs; i++ ) {
-        if ( !masterDof [ i - 1 ]->isPrimaryDof() ) {
-            masterDof [ i - 1 ]->giveBcValues(mstrBcVlus, mode, stepN);
+      idof = this->giveMasterDof (i);
+        if ( !idof->isPrimaryDof() ) {
+            idof->giveBcValues(mstrBcVlus, mode, stepN);
             masterBcValues.copySubVector(mstrBcVlus, k);
             k += mstrBcVlus.giveSize();
         } else   {
-            dofJ = masterDof [ i - 1 ];
-            if ( dofJ->hasBc(stepN) ) {
-                masterBcValues.at(k++) = dofJ->giveBcValue(mode, stepN);
+            if ( idof->hasBc(stepN) ) {
+                masterBcValues.at(k++) = idof->giveBcValue(mode, stepN);
             } else {
                 masterBcValues.at(k++) = 0.0;
             }
@@ -150,12 +158,14 @@ SlaveDof :: computeDofTransformation(FloatArray &masterContribs)
 {
     int i, k;
     FloatArray mstrContrs;
+    Dof* idof;
 
     masterContribs.resize( this->giveNumberOfPrimaryMasterDofs() );
 
     for ( k = 1, i = 1; i <= countOfMasterDofs; i++ ) {
-        if ( !masterDof [ i - 1 ]->isPrimaryDof() ) {
-            masterDof [ i - 1 ]->computeDofTransformation(mstrContrs);
+      idof = this->giveMasterDof (i);
+        if ( !idof->isPrimaryDof() ) {
+            idof->computeDofTransformation(mstrContrs);
             mstrContrs.times( masterContribution.at(i) );
             masterContribs.copySubVector(mstrContrs, k);
             k += mstrContrs.giveSize();
@@ -170,16 +180,18 @@ SlaveDof :: giveEquationNumbers(IntArray &masterEqNumbers)
 {
     int i, k;
     IntArray mstrEqNmbrs;
+    Dof* idof;
 
     masterEqNumbers.resize( this->giveNumberOfPrimaryMasterDofs() );
 
     for ( k = 1, i = 1; i <= countOfMasterDofs; i++ ) {
-        if ( !masterDof [ i - 1 ]->isPrimaryDof() ) {
-            masterDof [ i - 1 ]->giveEquationNumbers(mstrEqNmbrs);
+      idof = this->giveMasterDof (i);
+        if ( !idof->isPrimaryDof() ) {
+            idof->giveEquationNumbers(mstrEqNmbrs);
             masterEqNumbers.copySubVector(mstrEqNmbrs, k);
             k += mstrEqNmbrs.giveSize();
         } else   {
-            masterEqNumbers.at(k++) = masterDof [ i - 1 ]->giveEquationNumber();
+            masterEqNumbers.at(k++) = idof->giveEquationNumber();
         }
     }
 }
@@ -189,16 +201,18 @@ SlaveDof :: givePrescribedEquationNumbers(IntArray &masterEqNumbers)
 {
     int i, k;
     IntArray mstrEqNmbrs;
+    Dof* idof;
 
     masterEqNumbers.resize( this->giveNumberOfPrimaryMasterDofs() );
 
     for ( k = 1, i = 1; i <= countOfMasterDofs; i++ ) {
-        if ( !masterDof [ i - 1 ]->isPrimaryDof() ) {
-            masterDof [ i - 1 ]->givePrescribedEquationNumbers(mstrEqNmbrs);
+      idof = this->giveMasterDof (i);
+        if ( !idof->isPrimaryDof() ) {
+            idof->givePrescribedEquationNumbers(mstrEqNmbrs);
             masterEqNumbers.copySubVector(mstrEqNmbrs, k);
             k += mstrEqNmbrs.giveSize();
         } else   {
-            masterEqNumbers.at(k++) = masterDof [ i - 1 ]->givePrescribedEquationNumber();
+            masterEqNumbers.at(k++) = idof->givePrescribedEquationNumber();
         }
     }
 }
@@ -224,6 +238,7 @@ double SlaveDof :: giveUnknown(EquationID type, ValueModeType mode, TimeStep *st
 
     return dotProduct( masterUnknowns, t, t.giveSize() );
 }
+
 double SlaveDof :: giveUnknown(PrimaryField &field, ValueModeType mode, TimeStep *stepN)
 {
     FloatArray masterUnknowns, t;
@@ -232,4 +247,109 @@ double SlaveDof :: giveUnknown(PrimaryField &field, ValueModeType mode, TimeStep
     computeDofTransformation(t);
 
     return dotProduct( masterUnknowns, t, t.giveSize() );
+}
+
+
+contextIOResultType SlaveDof :: saveContext(DataStream *stream, ContextMode mode, void *obj)
+{
+  contextIOResultType iores;
+  if ( ( iores = Dof :: saveContext(stream, mode, obj) ) != CIO_OK ) {
+        THROW_CIOERR(iores);
+  }
+  
+  if ( mode & CM_Definition ) {
+
+    if ( !stream->write(& countOfMasterDofs, 1) ) {
+      THROW_CIOERR(CIO_IOERR);
+    }
+
+    if ( !stream->write(& countOfPrimaryMasterDofs, 1) ) {
+      THROW_CIOERR(CIO_IOERR);
+    }
+    
+    if ( ( iores = masterContribution.storeYourself(stream, mode) ) != CIO_OK ) {
+      THROW_CIOERR(iores);
+    }
+
+    int _idof, _idofmanNum, _idofmanDofId;
+    for (_idof=1; _idof <= countOfMasterDofs; _idof++) {
+
+#ifdef __PARALLEL_MODE
+      if ( mode & CM_DefinitionGlobal ) {
+	_idofmanNum = dofManager->giveDomain()->giveDofManager(masterDofMans.at(_idof))->giveGlobalNumber();
+      } else {
+	_idofmanNum = masterDofMans.at(_idof);
+      }
+#else
+      _idofmanNum = masterDofMans.at(_idof);
+#endif
+      
+      if ( !stream->write(&_idofmanNum, 1) ) {
+	THROW_CIOERR(CIO_IOERR);
+      }
+    }      
+
+    if ( ( iores = dofIDs.storeYourself(stream, mode) ) != CIO_OK ) {
+      THROW_CIOERR(iores);
+    }
+
+  } // if ( mode & CM_Definition ) 
+  
+  return CIO_OK;
+}
+
+contextIOResultType SlaveDof :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
+{
+  contextIOResultType iores;
+  if ( ( iores = Dof :: restoreContext(stream, mode, obj) ) != CIO_OK ) {
+    THROW_CIOERR(iores);
+  }
+  
+  if ( mode & CM_Definition ) {
+
+    if ( !stream->read(& countOfMasterDofs, 1) ) {
+      THROW_CIOERR(CIO_IOERR);
+    }
+
+    if ( !stream->read(& countOfPrimaryMasterDofs, 1) ) {
+      THROW_CIOERR(CIO_IOERR);
+    }
+    
+    if ( ( iores = masterContribution.restoreYourself(stream, mode) ) != CIO_OK ) {
+      THROW_CIOERR(iores);
+    }
+
+    int _idof, _idofmanNum, _idofmanDofId;
+
+    masterDofMans.resize(countOfMasterDofs);
+    for (_idof=1; _idof <= countOfMasterDofs; _idof++) {
+      
+      if ( !stream->read(&masterDofMans.at(_idof), 1) ) {
+	THROW_CIOERR(CIO_IOERR);
+      }
+    }
+    
+    if ( ( iores = dofIDs.restoreYourself(stream, mode) ) != CIO_OK ) {
+      THROW_CIOERR(iores);
+    }
+    
+  } // if ( mode & CM_Definition ) 
+  
+  
+  return CIO_OK;
+}
+
+
+inline Dof* 
+SlaveDof:: giveMasterDof (int i) {
+  return dofManager->giveDomain()->giveDofManager(masterDofMans.at(i))->giveDofWithID(dofIDs.at(i));
+}
+
+
+void
+SlaveDof :: updateLocalNumbering( EntityRenumberingFunctor &f )
+{
+  int i;
+  for (i=1; i<=countOfMasterDofs; i++) 
+    masterDofMans.at(i) = f (masterDofMans.at(i), ERS_DofManager);
 }

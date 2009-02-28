@@ -70,7 +70,7 @@ MasterDof :: MasterDof(int i, DofManager *aNode, int nbc, int nic, DofID id) : D
      * pastUnknowns   = NULL ; */
 }
 
-MasterDof :: MasterDof(int i, DofManager *aNode) : Dof(i, aNode, Undef)
+MasterDof :: MasterDof(int i, DofManager *aNode, DofID id) : Dof(i, aNode, id)
 {
     ic = bc = equationNumber = 0;                        // means "uninitialized"
     unknowns       = new Dictionary();

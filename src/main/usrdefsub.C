@@ -246,6 +246,10 @@
 
 // GENERAL
 #include "masterdof.h"
+#include "slavedof.h"
+#include "simpleslavedof.h"
+
+
 #ifdef __PARALLEL_MODE
 #include "loadbalancer.h"
 #include "parmetisloadbalancer.h"
@@ -839,6 +843,10 @@ Dof *CreateUsrDefDofOfType(classType type, int number, DofManager *dman)
     Dof *answer = NULL;
     if  ( type == MasterDofClass ) {
         answer = new MasterDof(number, dman);
+    } else if ( type == SimpleSlaveDofClass ) {
+      answer = new SimpleSlaveDof (number, dman);
+    } else if ( type == SlaveDofClass ) {
+      answer = new SlaveDof (number, dman);
     }
 
     if ( answer == NULL ) {

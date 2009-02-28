@@ -133,7 +133,7 @@ public:
      * @see cltypes.h, DofID type
      */
     MasterDof(int i, DofManager *aNode, int nbc, int nic, DofID id);     // constructor
-    MasterDof(int i, DofManager *aNode);
+    MasterDof(int i, DofManager *aNode, DofID id = Undef);
     /// Destructor.
     ~MasterDof()   { delete unknowns; /*delete unknowns ; delete pastUnknowns ;*/ }      // destructor.
     /// Returns class name of the receiver.

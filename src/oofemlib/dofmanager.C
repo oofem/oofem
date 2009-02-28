@@ -1120,6 +1120,25 @@ DofManager :: hasAnySlaveDofs()
 }
 
 
+bool
+DofManager::giveMasterDofMans (IntArray& masters) {
+  int i,j;
+  IntArray _dof_masters;
+  bool answer = false;
+
+  masters.resize(0);
+  for ( i = 1; i <= numberOfDofs; i++ ) {
+    if ( !this->giveDof(i)->isPrimaryDof() ) {
+      answer=true;
+      this->giveDof(i)->giveMasterDofManArray (_dof_masters);
+      for (j=1; j<=_dof_masters.giveSize(); j++)
+	masters.insertSortedOnce (_dof_masters.at(j),2);
+    }
+  }
+  
+  return answer;
+}
+
 int
 DofManager :: checkConsistency()
 // Checks internal data consistency in node.
@@ -1232,6 +1251,15 @@ DofManager :: giveCompleteGlobalDofIDArray(void) const
     }
 
     return answer;
+}
+
+void 
+DofManager:: updateLocalNumbering( EntityRenumberingFunctor &f ) 
+{
+  int i;
+  for ( i = 1; i <= numberOfDofs; i++ ) {
+    this->giveDof(i)->updateLocalNumbering (f);
+  }
 }
 
 
