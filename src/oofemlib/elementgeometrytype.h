@@ -63,6 +63,7 @@
     ENUM_ITEM(EGT_triangle_1) /* triangle element with three nodes */ \
     ENUM_ITEM(EGT_triangle_2) /* triangle element with 6 nodes */ \
     ENUM_ITEM(EGT_quad_1)   /* quadrialateral with 4 nodes */   \
+    ENUM_ITEM(EGT_quad_2)   /* quadratic quadrialateral with 8 nodes */   \
     ENUM_ITEM(EGT_tetra_1)  /* tetrahedron with 4 nodes */   \
     ENUM_ITEM(EGT_hexa_1)   /* hexahedron with 8 nodes */   \
     ENUM_ITEM(EGT_hexa_2)   /* hexahedron with 20 nodes */   \

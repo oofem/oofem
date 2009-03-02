@@ -41,8 +41,10 @@
 #define qplanstrss_h
 
 #include "structuralelement.h"
+#include "fei2dquadquad.h"
+#include "zznodalrecoverymodel.h"
 
-class QPlaneStress2d : public StructuralElement
+class QPlaneStress2d : public StructuralElement, public ZZNodalRecoveryModelInterface
 {
     /*
      * This class implements an Quadratic isoparametric eight-node quadrilateral plane-
@@ -61,6 +63,7 @@ class QPlaneStress2d : public StructuralElement
 
 protected:
     int numberOfGaussPoints;
+    static FEI2dQuadQuad interpolation;
 public:
     QPlaneStress2d(int, Domain *);                       // constructor
     ~QPlaneStress2d()  { }                               // destructor
@@ -74,13 +77,36 @@ public:
     //
     const char *giveClassName() const { return "QPlaneStress2d"; }
     classType        giveClassID()   const { return QPlaneStress2dClass; }
+    Element_Geometry_Type giveGeometryType() const { return EGT_quad_2; }
     IRResultType initializeFrom(InputRecord *ir);
 
     virtual int testElementExtension(ElementExtension ext) { return 0; }
-    Interface *giveInterface(InterfaceType) { return NULL; }
+    /** Interface requesting service */
+    Interface *giveInterface(InterfaceType);
     //int    hasEdgeLoadSupport () {return 0;}
     double                computeVolumeAround(GaussPoint *);
     virtual int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords);
+
+    /**
+     * @name The element interface required by ZZNodalRecoveryModel
+     */
+    //@{
+    /**
+     * Returns the size of DofManger record required to hold recovered values for given mode.
+     * @param type determines the type of internal variable to be recovered
+     * @return size of DofManger record required to hold recovered values
+     */
+    int ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type);
+    /**
+     * Returns the corresponding element to interface
+     */
+    Element *ZZNodalRecoveryMI_giveElement() { return this; }
+    /**
+     * Evaluates N matrix (interpolation estimated stress matrix).
+     */
+    void ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatMatrix &answer, GaussPoint *aGaussPoint,
+                                                             InternalStateType type);
+    //@}
 
 #ifdef __OOFEG
     void          drawRawGeometry(oofegGraphicContext &);
@@ -95,9 +121,6 @@ protected:
     void             computeGaussPoints();
     integrationDomain  giveIntegrationDomain() { return _Square; }
 
-    FloatArray *GiveDerivativeKsi(double, double);
-    FloatArray *GiveDerivativeEta(double, double);
-    void             computeJacobianMatrixAt(FloatMatrix &answer, GaussPoint *);
 };
 
 #endif // qplanstrss_h

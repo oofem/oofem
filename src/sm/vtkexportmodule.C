@@ -223,17 +223,15 @@ VTKExportModule :: doOutput(TimeStep *tStep)
 
         // output cell types
         int vtkCellType;
-        fprintf(stream, "\nCELL_TYPES %d\n", nelem);
-        for ( ireg = 1; ireg <= nregions; ireg++ ) {
-            for ( ielem = 1; ielem <= nelem; ielem++ ) {
-                elem = d->giveElement(ielem);
-                if ( elem->giveRegionNumber() != ireg ) {
-                    continue;
-                }
+        fprintf(stream, "\nCELL_TYPES %d\n", elemToProcess);
+	for ( ielem = 1; ielem <= nelem; ielem++ ) {
+	  elem = d->giveElement(ielem);
+	  if ( elem->giveRegionNumber() != ireg ) {
+	    continue;
+	  }
 
-                vtkCellType = this->giveCellType(elem);
-                fprintf(stream, "%d\n", vtkCellType);
-            }
+	  vtkCellType = this->giveCellType(elem);
+	  fprintf(stream, "%d\n", vtkCellType);
         }
       }
     }
@@ -302,6 +300,8 @@ VTKExportModule :: giveCellType(Element *elem)
         vtkCellType = 10;
     } else if ( elemGT == EGT_quad_1 ) {
         vtkCellType = 9;
+    } else if ( elemGT == EGT_quad_2 ) {
+        vtkCellType = 23;
     } else if ( elemGT == EGT_hexa_1 ) {
         vtkCellType = 12;
     } else {
@@ -320,7 +320,7 @@ VTKExportModule :: giveNumberOfNodesPerCell(int cellType)
         return 3;
     } else if ( cellType == 9 ) {
         return 4;
-    } else if ( cellType == 12 ) {
+    } else if  ( ( cellType == 12 ) || (cellType == 23) ) {
         return 8;
     } else {
         OOFEM_ERROR("VTKExportModule: unsupported cell type ID");
@@ -336,7 +336,9 @@ VTKExportModule :: giveElementCell(IntArray &answer, Element *elem, int cell)
     Element_Geometry_Type elemGT = elem->giveGeometryType();
     int i, nelemNodes;
 
-    if ( ( elemGT == EGT_triangle_1 ) || ( elemGT == EGT_tetra_1 ) || ( elemGT == EGT_quad_1 ) || ( elemGT == EGT_hexa_1 ) ) {
+    if ( ( elemGT == EGT_triangle_1 ) || ( elemGT == EGT_tetra_1 ) || 
+	 ( elemGT == EGT_quad_1 ) || ( elemGT == EGT_quad_2 ) || 
+	 ( elemGT == EGT_hexa_1 ) ) {
         nelemNodes = elem->giveNumberOfNodes();
         answer.resize(nelemNodes);
         for ( i = 1; i <= nelemNodes; i++ ) {
@@ -355,7 +357,8 @@ VTKExportModule :: giveNumberOfElementCells(Element *elem)
 {
     Element_Geometry_Type elemGT = elem->giveGeometryType();
 
-    if ( ( elemGT == EGT_triangle_1 ) || ( elemGT == EGT_tetra_1 ) || ( elemGT == EGT_quad_1 ) || ( elemGT == EGT_hexa_1 ) ) {
+    if ( ( elemGT == EGT_triangle_1 ) || ( elemGT == EGT_tetra_1 ) || ( elemGT == EGT_quad_1 ) || 
+	 ( elemGT == EGT_quad_2 ) || ( elemGT == EGT_hexa_1 ) ) {
         return 1;
     } else {
         OOFEM_ERROR("VTKExportModule: unsupported element geometry type");
