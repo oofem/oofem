@@ -951,5 +951,22 @@ DruckerPragerPlasticitySM :: CreateStatus(GaussPoint *gp) const
 }
 
 
+#ifdef __PARALLEL_MODE
+double
+DruckerPragerPlasticitySM :: predictRelativeComputationalCost(GaussPoint *gp)
+{
+  //
+  DruckerPragerPlasticitySMStatus *status =
+        ( DruckerPragerPlasticitySMStatus * ) ( giveStatus(gp) );
+  const int state_flag = status->giveStateFlag();
 
+  if ((state_flag == DruckerPragerPlasticitySMStatus :: DP_Vertex) ||
+      (state_flag == DruckerPragerPlasticitySMStatus :: DP_Yielding)) {
+    return 20.;
+  } else {
+    return 1.0;
+  }
 
+}
+
+#endif
