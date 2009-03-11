@@ -2,7 +2,7 @@
 #
 # target oofem makefile
 #
-SHELL      = /bin/bash
+SHELL      = @SHELL@
 TARGET     = @OOFEM_TARGET@
 MODULES    =@MODULE_TOBUILD@
 MODULE_TARGETS := $(foreach obj,$(MODULES),$(obj)_mod)

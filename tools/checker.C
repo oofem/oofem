@@ -40,6 +40,9 @@
 
 
 #include "seek.h"
+#if defined(__NetBSD__) || defined(__FreeBSD__)
+#include <libgen.h>
+#endif
 #include <stdlib.h>
 #include <math.h>
 #include <ctype.h>

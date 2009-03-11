@@ -2,7 +2,7 @@
 # smlib target makefile
 #
 
-SHELL      = /bin/bash
+SHELL      = @SHELL@
 #
 PETSC_DIR  = @PETSC_DIR@
 PETSC_ARCH = @PETSC_ARCH@
