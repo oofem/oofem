@@ -283,13 +283,16 @@ LoadBalancer :: unpackMigratingData(Domain *d, ProcessCommunicator &pc)
         case LoadBalancer :: DM_Remote:
             // receiving new local dofManager
             pcbuff->unpackInt(_globnum);
-
+            /*
             _newentry = false;
             if ( ( dofman = dtm->giveDofManager(_globnum) ) == NULL ) {
                 // data not available -> create a new one
                 _newentry = true;
                 dofman = CreateUsrDefDofManagerOfType(_etype, 0, d);
             }
+            */
+            _newentry = true;
+            dofman = CreateUsrDefDofManagerOfType(_etype, 0, d);
 
             dofman->setGlobalNumber(_globnum);
             // unpack dofman state (this is the local dofman, not available on remote)
@@ -310,13 +313,17 @@ LoadBalancer :: unpackMigratingData(Domain *d, ProcessCommunicator &pc)
             // receiving new shared dofManager, that was local on sending partition
             // should be received only once (from partition where was local)
             pcbuff->unpackInt(_globnum);
-
+            /*
             _newentry = false;
             if ( ( dofman = dtm->giveDofManager(_globnum) ) == NULL ) {
                 // data not available -> mode should be SharedUpdate
                 _newentry = true;
                 dofman = CreateUsrDefDofManagerOfType(_etype, 0, d);
             }
+            */
+            _newentry = true;
+            dofman = CreateUsrDefDofManagerOfType(_etype, 0, d);
+
 
             dofman->setGlobalNumber(_globnum);
             // unpack dofman state (this is the local dofman, not available on remote)
