@@ -52,6 +52,7 @@ public:
 
     void initialize(int cntOfMstrDfMngr, Node **mstrNode, const IntArray *mstrDofID, const FloatArray *mstrContribution);
     int giveNumberOfPrimaryMasterDofs(void);
+    void giveMasterDofManArray (IntArray& answer);
     void giveUnknowns(FloatArray &masterUnknowns, EquationID type, ValueModeType mode, TimeStep *stepN);
     void giveUnknowns(FloatArray &masterUnknowns, PrimaryField &field, ValueModeType mode, TimeStep *stepN);
     void giveBcValues(FloatArray &masterBcValues, ValueModeType mode, TimeStep *stepN);

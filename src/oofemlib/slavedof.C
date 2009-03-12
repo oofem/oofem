@@ -353,3 +353,24 @@ SlaveDof :: updateLocalNumbering( EntityRenumberingFunctor &f )
   for (i=1; i<=countOfMasterDofs; i++) 
     masterDofMans.at(i) = f (masterDofMans.at(i), ERS_DofManager);
 }
+
+
+void
+SlaveDof :: giveMasterDofManArray (IntArray& answer)
+{
+  long i, k;
+  IntArray mstrDofManArry;
+  
+  answer.resize (this->giveNumberOfPrimaryMasterDofs());
+  
+  for (k=1, i=1; i<=countOfMasterDofs; i++) {
+    if (! giveMasterDof(i)->isPrimaryDof()) {
+      this->giveMasterDof(i)->giveMasterDofManArray (mstrDofManArry);
+      answer.copySubVector (mstrDofManArry, k);
+      k += mstrDofManArry.giveSize();
+    }
+    else {
+      answer.at(k++) = this->giveMasterDof(i)->giveDofManNumber();
+    }
+  }
+}

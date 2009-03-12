@@ -498,13 +498,14 @@ IntArray :: insertSorted(int _val, int allocChunk)
         p1 = p2 = values;
     }
 
-    while ( ( i >= 0 ) && values [ i ] > _val ) { // copy values larger than _val into destination
-        p2 [ i + 1 ] = p1 [ i ];
+    while ( ( i > 0 ) && values [ i - 1 ] > _val ) { // copy values larger than _val into destination
+        p2 [ i ] = p1 [ i - 1 ];
         i--;
     }
 
-    pos = i + 1;
+    pos = i ;
     p2 [ pos ] = _val; // insert _val
+    i--;
 
     // if allocated copy smaller values to destination
     if ( newSize > allocatedSize ) {

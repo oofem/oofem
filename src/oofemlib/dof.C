@@ -73,11 +73,11 @@ Dof :: Dof(int i, DofManager *aNode, DofID id)
 }
 
 
-inline int
+int
 Dof :: giveDofManNumber() const { return this->dofManager->giveNumber(); } // termitovo
 
 #ifdef __PARALLEL_MODE
-inline int 
+int 
 Dof :: giveDofManGlobalNumber() const { return this->dofManager->giveGlobalNumber(); }
 #endif
 

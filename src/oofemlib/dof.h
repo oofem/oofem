@@ -168,9 +168,9 @@ public:
     /// Returns receiver number.
     int giveNumber() const { return number; }
 
-    inline int giveDofManNumber() const;
+    int giveDofManNumber() const;
 #ifdef __PARALLEL_MODE
-    inline int giveDofManGlobalNumber() const;
+    int giveDofManGlobalNumber() const;
 #endif
     /**
      * Returns value of boundary condition of dof if it is precsribed.
