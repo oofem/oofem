@@ -329,6 +329,19 @@ MicroplaneMaterial :: initializeFrom(InputRecord *ir)
 }
 
 
+int
+MicroplaneMaterial :: giveInputRecordString(std :: string &str, bool keyword)
+{
+    char buff [ 1024 ];
+
+    StructuralMaterial :: giveInputRecordString(str, keyword);
+    sprintf(buff, " nmp %d", this->numberOfMicroplanes);
+    str += buff;
+
+    return 1;
+}
+
+
 void
 MicroplaneMaterial :: initializeData(int numberOfMicroplanes)
 {

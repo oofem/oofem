@@ -744,7 +744,19 @@ void Node :: drawYourself(oofegGraphicContext &gc)
 #else
         EASValsSetColor( gc.getNodeColor() );
 #endif
-        EASValsSetMSize(8);
+
+				bool ordinary = true;;
+				int idof;
+				for (idof=1; idof<=this->giveNumberOfDofs(); idof++) {
+					if(this->giveDof(1)->giveClassID() == SimpleSlaveDofClass){
+						ordinary=false;
+						break;
+					}
+				}
+
+				if(!ordinary)EASValsSetColor( gc.getBcIcColor() );
+
+				EASValsSetMSize(8);
         go = CreateMarker3D(p);
         EGWithMaskChangeAttributes(COLOR_MASK | LAYER_MASK | MTYPE_MASK | MSIZE_MASK, go);
         EMAddGraphicsToModel(ESIModel(), go);

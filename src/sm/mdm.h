@@ -177,9 +177,9 @@ protected:
     double ParMd; // (m/E*Ep)
     double tempDillatCoeff; // temperature dillatation coeff
 
-    /// Fracture energy (necessary to determine Ep and Efp if not not given)
+    /// Fracture energy (necessary to determine Ep and Efp if not given)
     double Gf;
-    /// Macroscopic tensile strength (necessary to determine Ep and Efp if not not given)
+    /// Macroscopic tensile strength (necessary to determine Ep and Efp if not given)
     double Ft;
 
     MDMFormulatrionType formulation;
@@ -307,10 +307,15 @@ public:
 
     /// Instanciates receiver from input record.
     IRResultType initializeFrom(InputRecord *ir);
+    /** Setups the input record string of receiver
+     * @param str string to be filled by input record
+     * @param keyword print record keyword (default true)
+     */
+    virtual int giveInputRecordString(std :: string &str, bool keyword = true);
 
     // identification and auxiliary functions
     /// Returns class name of the receiver.
-    const char *giveClassName() const { return "MDM (Microplane Damaga Material)"; }
+    const char *giveClassName() const { return "MDM"; }
     /// Returns classType id of receiver.
     classType giveClassID()         const { return MicroplaneDamageMaterialClass; }
 

@@ -195,6 +195,11 @@ public:
 
     /// Instanciates receiver from input record.
     IRResultType initializeFrom(InputRecord *ir);
+    /** Setups the input record string of receiver
+     * @param str string to be filled by input record
+     * @param keyword print record keyword (default true)
+     */
+    virtual int giveInputRecordString(std :: string &str, bool keyword = true);
 
     // identification and auxiliary functions
     /// Returns class name of the receiver.

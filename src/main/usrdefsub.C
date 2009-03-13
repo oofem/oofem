@@ -807,21 +807,23 @@ IntegrationRule *CreateUsrDefIRuleOfType(classType type, int number, Element *e)
 
 Element *CreateUsrDefElementOfType(classType type, int number, Domain *domain)
 {
-    Element *answer = NULL;
-
-    if ( type == PlaneStress2dClass ) {
-        answer = new PlaneStress2d(number, domain);
-    } else if ( type == TrPlaneStress2dClass )  {
-        answer = new TrPlaneStress2d(number, domain);
-    } else if ( type == LTRSpaceClass )                                                                                             {
-        answer = new LTRSpace(number, domain);
-    }
-
-    if ( answer == NULL ) {
-        OOFEM_ERROR2("CreateUsrDefElementOfType: Unknown element type [%d]", type);
-    }
-
-    return answer;
+	Element *answer = NULL;
+	
+	if ( type == PlaneStress2dClass ) {
+		answer = new PlaneStress2d(number, domain);
+	} else if ( type == TrPlaneStress2dClass )  {
+		answer = new TrPlaneStress2d(number, domain);
+	} else if ( type == LTRSpaceClass ) {
+		answer = new LTRSpace(number, domain);
+	} else if ( type == TrPlaneStrainClass ) {
+		answer = new TrPlaneStrain(number, domain);
+	}
+		
+	if ( answer == NULL ) {
+		OOFEM_ERROR2("CreateUsrDefElementOfType: Unknown element type [%d]", type);
+	}
+		
+	return answer;
 }
 
 DofManager *CreateUsrDefDofManagerOfType(classType type, int number, Domain *domain)

@@ -131,6 +131,11 @@ public:
      * to extract particular field from record.
      * @see readInteger, readDouble and similar functions */
     virtual IRResultType initializeFrom(InputRecord *ir);
+    /** Setups the input record string of receiver
+     * @param str string to be filled by input record
+     * @param keyword print record keyword (default true)
+     */
+    virtual int giveInputRecordString(std :: string &str, bool keyword = true);
     /** Returns class name of the receiver */
     const char *giveClassName() const { return "MMALeastSquareProjectionPatchType"; }
 

@@ -147,6 +147,11 @@ public:
      * to extract particular field from record.
      * @see readInteger, readDouble and similar functions */
     virtual IRResultType initializeFrom(InputRecord *ir) { return IRRT_OK; }
+    /** Setups the input record string of receiver
+     * @param str string to be filled by input record
+     * @param keyword print record keyword (default true)
+     */
+    virtual int giveInputRecordString(std :: string &str, bool keyword = true) {return 1;}
     /// Returns class name of the receiver.
     virtual const char *giveClassName() const  = 0;
 
