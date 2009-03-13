@@ -137,8 +137,7 @@ private:
     int allocatedPackets, leasedPackets, freePackets;
 public:
     CommunicationPacketPool() : available_packets(), leased_packets() { allocatedPackets = leasedPackets = freePackets; }
-    ~CommunicationPacketPool() { this->printInfo();
-                                 this->clear(); }
+    ~CommunicationPacketPool() { this->clear(); }
 
     CommunicationPacket *popPacket(MPI_Comm);
     void pushPacket(CommunicationPacket *);
