@@ -266,7 +266,7 @@ LayeredCrossSection :: give2dPlateMaterialStiffnessMatrix(FloatMatrix &answer,
         //
         layerThick = this->layerThicks.at(i);
         layerWidth  = this->layerWidths.at(i);
-        layerZeta   = layerGp->giveCoordinate(1);
+        layerZeta   = layerGp->giveCoordinate(3);
         layerZCoord = 0.5 * ( ( 1. - layerZeta ) * bottom + ( 1. + layerZeta ) * top );
         layerZCoord2 = layerZCoord * layerZCoord;
         //zi = layerZCoord-layerThick/2.;
@@ -366,7 +366,7 @@ LayeredCrossSection :: give3dShellMaterialStiffness(FloatMatrix &answer, MatResp
         //
         layerThick = this->layerThicks.at(i);
         layerWidth  = this->layerWidths.at(i);
-        layerZeta   = layerGp->giveCoordinate(1);
+        layerZeta   = layerGp->giveCoordinate(3);
         layerZCoord = 0.5 * ( ( 1. - layerZeta ) * bottom + ( 1. + layerZeta ) * top );
         layerZCoord2 = layerZCoord * layerZCoord;
         //zi = layerZCoord-layerThick/2.;
@@ -482,7 +482,7 @@ LayeredCrossSection :: give2dBeamMaterialStiffnessMatrix(FloatMatrix &answer,
         //
         layerThick = this->layerThicks.at(i);
         layerWidth  = this->layerWidths.at(i);
-        layerZeta   = layerGp->giveCoordinate(1);
+        layerZeta   = layerGp->giveCoordinate(3);
         layerZCoord = 0.5 * ( ( 1. - layerZeta ) * bottom + ( 1. + layerZeta ) * top );
         layerZCoord2 = layerZCoord * layerZCoord;
         //zi = layerZCoord-layerThick/2.;
@@ -946,7 +946,7 @@ LayeredCrossSection :: giveSlaveGaussPoint(GaussPoint *masterGp, int i)
         // create new slave record in masterGp
         // (requires that this is friend of gp)
         double currentZTopCoord = 0., currentZCoord = 0.,  bottom, top;
-        FloatArray *zCoord;
+        FloatArray *zCoord, *masterCoords = masterGp->giveCoordinates();
         // resolve slave material mode
         MaterialMode slaveMode, masterMode = masterGp->giveMaterialMode();
         slaveMode = this->giveCorrespondingSlaveMaterialMode(masterMode);
@@ -961,8 +961,10 @@ LayeredCrossSection :: giveSlaveGaussPoint(GaussPoint *masterGp, int i)
         for ( int j = 0; j < numberOfLayers; j++ ) {
             currentZTopCoord += this->layerThicks.at(j + 1);
             currentZCoord = currentZTopCoord - this->layerThicks.at(j + 1) / 2.0;
-            zCoord = new FloatArray(1);
-            zCoord->at(1) = ( 2.0 * ( currentZCoord ) - top - bottom ) / ( top - bottom );
+            zCoord = new FloatArray(3);zCoord->zero();
+            if (masterCoords->giveSize() > 0) zCoord->at(1) = masterCoords->at(1);
+            if (masterCoords->giveSize() > 1) zCoord->at(2) = masterCoords->at(2);
+            zCoord->at(3) = ( 2.0 * ( currentZCoord ) - top - bottom ) / ( top - bottom );
             // in gp - is stored isoparametric coordinate (-1,1) of z-coordinate
             masterGp->gaussPointArray [ j ] = new GaussPoint(masterGp->giveIntegrationRule(), j + 1, zCoord, 0., slaveMode);
         }
@@ -1142,7 +1144,7 @@ LayeredCrossSection :: GiveIntegrated3dShellStress(GaussPoint *masterGp)
         //
         layerThick = this->layerThicks.at(i);
         layerWidth  = this->layerWidths.at(i);
-        layerZeta   = layerGp->giveCoordinate(1);
+        layerZeta   = layerGp->giveCoordinate(3);
         layerZCoord = 0.5 * ( ( 1. - layerZeta ) * bottom + ( 1. + layerZeta ) * top );
         //
         // perform integration

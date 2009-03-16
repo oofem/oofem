@@ -267,7 +267,7 @@ LIBeam2d :: computeStrainVectorInLayer(FloatArray &answer, GaussPoint *masterGp,
     this->computeStrainVector(masterGpStrain, masterGp, tStep);
     top    = masterGp->giveElement()->giveCrossSection()->give(TOPZCOORD);
     bottom = masterGp->giveElement()->giveCrossSection()->give(BOTTOMZCOORD);
-    layerZeta = slaveGp->giveCoordinate(1);
+    layerZeta = slaveGp->giveCoordinate(3);
     layerZCoord = 0.5 * ( ( 1. - layerZeta ) * bottom + ( 1. + layerZeta ) * top );
 
     answer.resize(6); // {Exx,Eyy,Ezz,GMyz,GMzx,GMxy}
