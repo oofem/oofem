@@ -56,7 +56,7 @@ cat $jobname.extractor >> $jobname$irun.oofem.in
 gawk --source '/^[^#]/ {ct +=1; if (ct > 3) print $0}'< $jobname$irun.oofem.in > $jobname.out.domain.1.$irun.din
 #gawk '{ct +=1; if (ct > 3) print $0}' < $jobname$irun.oofem.in > $jobname.out.domain.1.$irun.din
 #
-if [ "$step" -gt 0 ]
+if [ "$step" -ge 0 ]
 then 
 echo $OOFEM_BIN_DIR/oofem -f "$jobname"0.oofem.in -rn -ar $step 
 $OOFEM_BIN_DIR/oofem -f "$jobname"0.oofem.in -rn -ar $step 
