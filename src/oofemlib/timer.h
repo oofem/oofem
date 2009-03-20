@@ -96,12 +96,14 @@ public:
             resumeTimer();
         }
 
+#ifndef _MSC_VER
         oofem_timeval etime;
         timersub(& end_wtime, & start_wtime, & etime);
         timeradd(& etime, & elapsedWTime, & elapsedWTime);
 
         timersub(& end_utime, & start_utime, & etime);
         timeradd(& etime, & elapsedUTime, & elapsedUTime);
+#endif
 
         start_utime = end_utime;
         start_wtime = end_wtime;
