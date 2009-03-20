@@ -122,7 +122,7 @@ FEI2dQuadQuad :: global2local(FloatArray &answer, const FloatArray **nc, const F
     FloatArray lc(2);
     FloatArray r(2), n(8), dksi, deta, delta;
     FloatMatrix p(2, 2);
-    double l1, l2, l3, x, y;
+    double x, y;
     int i, nite = 0;
 
     // setup initial guess

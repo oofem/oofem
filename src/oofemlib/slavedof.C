@@ -271,7 +271,7 @@ contextIOResultType SlaveDof :: saveContext(DataStream *stream, ContextMode mode
       THROW_CIOERR(iores);
     }
 
-    int _idof, _idofmanNum, _idofmanDofId;
+    int _idof, _idofmanNum;
     for (_idof=1; _idof <= countOfMasterDofs; _idof++) {
 
 #ifdef __PARALLEL_MODE
@@ -319,7 +319,7 @@ contextIOResultType SlaveDof :: restoreContext(DataStream *stream, ContextMode m
       THROW_CIOERR(iores);
     }
 
-    int _idof, _idofmanNum, _idofmanDofId;
+    int _idof;
 
     masterDofMans.resize(countOfMasterDofs);
     for (_idof=1; _idof <= countOfMasterDofs; _idof++) {

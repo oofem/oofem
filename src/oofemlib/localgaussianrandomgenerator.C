@@ -69,7 +69,8 @@ LocalGaussianRandomGenerator :: initializeFrom(InputRecord *ir)
     int seed = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, seed, IFT_LocalGaussianRandomGenerator_seed, "seed"); // Macro
     if (seed) randomInteger=seed;
-    
+
+    return IRRT_OK;
 }
 
 

@@ -100,7 +100,7 @@ InverseIteration :: solve(SparseMtrx *a, SparseMtrx *b, FloatArray *_eigv, Float
     }
 
     FloatArray w(nc), ww(nc), t(nn), tt(nn), * ptr, * ptr2;
-    FloatArray z [ nc ], zz [ nc ], x [ nc ];
+    FloatArray *z = new FloatArray [ nc ], *zz = new FloatArray [ nc ], *x = new FloatArray [ nc ];
 
     for ( j = 0; j < nc; j++ ) {
         z [ j ].resize(nn);
@@ -209,6 +209,12 @@ InverseIteration :: solve(SparseMtrx *a, SparseMtrx *b, FloatArray *_eigv, Float
     }
 
     solved = 1;
+
+    delete [] z;
+    delete [] zz;
+    delete [] x;
+
+
     return NM_Success;
     ;
 }

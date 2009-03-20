@@ -772,7 +772,7 @@ DruckerPragerPlasticitySM :: giveVertexAlgorithmicStiffMatrix(FloatMatrix &answe
     // elastic constants
     const double eM = LEMaterial->give(Ex,gp);
     const double nu = LEMaterial->give(NYxz,gp);
-    const double gM = eM / ( 2. * ( 1. + nu ) );
+    //const double gM = eM / ( 2. * ( 1. + nu ) );
     const double kM = eM / ( 3. * ( 1. - 2. * nu ) );
 
     if ( deltaKappa <= 0. ) {

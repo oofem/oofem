@@ -1,8 +1,10 @@
 #ifdef __OOFEG
+
+
 #include "oofeggraphiccontext.h"
 #include "mathfem.h"
 #include "oofegutils.h"
-#endif
+
 
 
 void
@@ -200,3 +202,4 @@ oofeg_drawIsoLinesOnQuad(WCRec coords [ 4 ], double s [ 4 ]) {
     }
 }
 
+#endif

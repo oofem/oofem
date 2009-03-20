@@ -78,7 +78,7 @@ T3DInterface :: createInput(Domain *d, TimeStep *stepN) {
             trias++;
             break;
         case EGT_quad_1:
-            //  case EGT_quad_2:
+        case EGT_quad_2:
             quads++;
             break;
         case EGT_tetra_1:
@@ -86,7 +86,7 @@ T3DInterface :: createInput(Domain *d, TimeStep *stepN) {
             tetras++;
             break;
         case EGT_hexa_1:
-            //  case EGT_hexa_2:
+        case EGT_hexa_2:
             hexas++;
             break;
         case EGT_unknown:
@@ -116,7 +116,7 @@ T3DInterface :: createInput(Domain *d, TimeStep *stepN) {
             triaIdArray.at(++trias) = i;
             break;
         case EGT_quad_1:
-            //  case EGT_quad_2:
+        case EGT_quad_2:
             quadIdArray.at(++quads) = i;
             break;
         case EGT_tetra_1:
@@ -124,7 +124,7 @@ T3DInterface :: createInput(Domain *d, TimeStep *stepN) {
             tetraIdArray.at(++tetras) = i;
             break;
         case EGT_hexa_1:
-            //  case EGT_hexa_2:
+        case EGT_hexa_2:
             hexaIdArray.at(++hexas) = i;
             break;
         case EGT_unknown:

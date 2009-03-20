@@ -292,7 +292,7 @@ void SparseGridMtxLU::MultiplyByVector(const LargeVectorAttach& x, LargeVectorAt
 		//BlockArith.MultDiagonalBlockByVector(DiagonalBlocks[bj],x, ref y,block_size,bj*block_size);
 		BlockArith->MultDiagonalBlockByVector(Columns_data+bj*block_storage,px+bj*block_size, py+bj*block_size);
 	}*/
-	x;y;
+	// x;y;
 }//MultiplyByVector
 
 void SparseGridMtxLU::Factorize()

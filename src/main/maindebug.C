@@ -39,6 +39,8 @@
 //  The DEBUG option MUST be used (check in file 'debug.def').
 //  See also file 'main2.c'.
 
+#ifdef __OOFEM_MAINDEBUG
+
 #include "engngm.h"
 #include "freestor.h"
 #include "compiler.h"
@@ -240,3 +242,4 @@ debugProcedure(EngngModel *problem)
 }
 
 
+#endif

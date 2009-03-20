@@ -57,7 +57,6 @@ OrthotropicLinearElasticMaterial :: initializeFrom(InputRecord *ir)
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     double value;
-    double nyzx, nyzy, nyyx;
     int j, size;
     FloatArray triplets;
 

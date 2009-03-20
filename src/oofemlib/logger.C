@@ -35,7 +35,7 @@
 
 #include "logger.h"
 #include "error.h"
-
+#include "oofem_limits.h"
 
 #ifndef __MAKEDEPEND
 #include <stdarg.h>

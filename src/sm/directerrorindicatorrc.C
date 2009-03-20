@@ -56,11 +56,10 @@ DirectErrorIndicatorRC::~DirectErrorIndicatorRC ()
 
 void
 DirectErrorIndicatorRC :: giveNodeChar(int inode, TimeStep *tStep, double &indicatorVal, double &currDensity) {
-  int isize, i;
+  int isize;
   const IntArray *con;
   Domain *d = this->giveDomain();
   ConnectivityTable *ct = d->giveConnectivityTable();
-  DirectErrorIndicatorRCInterface *interface;
   
   con = ct->giveDofManConnectivityArray(inode);
   isize = con->giveSize();

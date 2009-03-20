@@ -144,8 +144,9 @@ public:
     /**
      * Initialize receiver data structure if not done previously
      * If force is set to true, the initialization is enforced (useful if domain geometry has changed)
+     * Returns nonzero if successful.
      */
-    virtual int init(bool force = false) {} 
+    virtual int init(bool force = false) {return 1;} 
 
     /** Initializes receiver acording to object description stored in input record.
      * This function is called immediately after creating object using

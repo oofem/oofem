@@ -2076,12 +2076,13 @@ EngngModel :: giveOutputStream()
 // Returns an output stream on the data file of the receiver.
 {
     if ( !outputStream ) {
-        /*
-         * char* tmp = tmpnam (NULL);
-         * _warning2 ("giveOutputStream: using default output stream %s",tmp);
-         * outputStream = fopen (tmp,"w") ;
-         *
-         */
+#ifdef _MSC_VER
+
+      char* tmp = tmpnam (NULL);
+      _warning2 ("giveOutputStream: using default output stream %s",tmp);
+      outputStream = fopen (tmp,"w") ;
+#else
+         
         char sfn[] = "oofem.out.XXXXXX";
         int fd = -1;
         FILE *sfp;
@@ -2098,6 +2099,7 @@ EngngModel :: giveOutputStream()
         }
 
         outputStream = sfp;
+#endif
     }
 
     return outputStream;

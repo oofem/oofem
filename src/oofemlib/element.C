@@ -86,7 +86,7 @@
 #include "contextioerr.h"
 
 Element :: Element(int n, Domain *aDomain) :
-    FEMComponent(n, aDomain), dofManArray(), bodyLoadArray(), boundaryLoadArray(), ElementGeometry()
+  FEMComponent(n, aDomain), ElementGeometry(), dofManArray(), bodyLoadArray(), boundaryLoadArray()
     // Constructor. Creates an element with number n, belonging to aDomain.
 {
     material           = 0;
@@ -917,13 +917,13 @@ Element :: giveSpatialDimension(void)
     case EGT_triangle_1:
     case EGT_triangle_2:
     case EGT_quad_1:
-        // case EGT_quad_2:
+    case EGT_quad_2:
         return 2;
 
     case EGT_tetra_1:
-        //  case EGT_tetra_2:
+    //  case EGT_tetra_2:
     case EGT_hexa_1:
-        // case EGT_hexa_2:
+    case EGT_hexa_2:
         return 3;
 
     case EGT_unknown:
@@ -948,7 +948,7 @@ Element :: giveNumberOfBoundarySides(void)
         return 3;
 
     case EGT_quad_1:
-        // case EGT_quad_2:
+    case EGT_quad_2:
         return 4;
 
     case EGT_tetra_1:
@@ -956,7 +956,7 @@ Element :: giveNumberOfBoundarySides(void)
         return 4;
 
     case EGT_hexa_1:
-        // case EGT_hexa_2:
+    case EGT_hexa_2:
         return 6;
 
     case EGT_unknown:

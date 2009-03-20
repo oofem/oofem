@@ -180,7 +180,7 @@ class Subdivision : public MesherInterface
 		int giveIrregular(int iedge) {return irregular_nodes.at(iedge);}
 		void setIrregular (int iedge, int ir) {this->irregular_nodes.at(iedge) = ir;}
 
-		virtual int evaluateLongestEdge() {}
+		virtual int evaluateLongestEdge() =0;
     virtual void bisect(std::queue<int> &subdivqueue, std::list<int> &sharedIrregularsQueue) {}
     virtual void generate () {}
     virtual void update_neighbours() {}

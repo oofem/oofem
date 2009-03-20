@@ -62,7 +62,6 @@ void EnrichmentItem::setEnrichmentFunction(EnrichmentFunction *ef) {
 
 bool EnrichmentItem::isDofManEnriched(int nodeNumber) {
     bool ret = false;
-    int intersectionCount = 0;
     // gets neighbouring elements of a node
     const IntArray *neighbours = domain->giveConnectivityTable()->giveDofManConnectivityArray(nodeNumber);
     for (int i = 1; i <= neighbours->giveSize(); i++) {
