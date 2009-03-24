@@ -2844,6 +2844,7 @@ Subdivision :: exchangeSharedIrregulars () {
     com.packAllData(this, this, &Subdivision::packSharedIrregulars);
     com.initExchange(SHARED_IRREGULAR_DATA_TAG);
     com.unpackAllData(this, this, &Subdivision::unpackSharedIrregulars);
+    com.finishExchange();
     
     this->sharedIrregularsQueue.clear();
     return false;
@@ -3120,7 +3121,7 @@ Subdivision :: assignGlobalNumbersToSharedIrregulars () {
   com.packAllData(this, this, &Subdivision::packIrregularSharedGlobnums);
   com.initExchange(SHARED_IRREGULAR_DATA_TAG);
   com.unpackAllData(this, this, &Subdivision::unpackIrregularSharedGlobnums);
-  
+  com.finishExchange();
 }  
 
 int
@@ -3329,6 +3330,7 @@ Subdivision::exchangeRemoteElements (Domain* d, IntArray& parentMap)
 
   // receive remote data
   com.unpackAllData(this, d, & Subdivision :: unpackRemoteElements);
+  com.finishExchange();
 }
 
 int

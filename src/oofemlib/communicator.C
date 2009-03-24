@@ -122,6 +122,19 @@ Communicator :: initExchange(int tag)
 }
 
 int
+Communicator :: finishExchange()
+{
+    int i, result = 1;
+    for  ( i = 0; i < size; i++ ) {
+        result &= this->giveProcessCommunicator(i)->finishExchange();
+    }
+
+    return result;
+}
+
+
+
+int
 Communicator :: initSend(int tag)
 {
     int i, result = 1;

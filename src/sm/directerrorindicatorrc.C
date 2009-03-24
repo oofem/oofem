@@ -323,6 +323,7 @@ DirectErrorIndicatorRC :: exchangeDofManDensities ()
       communicator->packAllData( this, &DirectErrorIndicatorRC::packSharedDofManLocalDensities );
       communicator->initExchange(999);
       communicator->unpackAllData( this, &DirectErrorIndicatorRC::unpackSharedDofManLocalDensities );
+      communicator->finishExchange();
     }
     
     this->dofManDensityExchangeFlag = false;
@@ -391,6 +392,7 @@ DirectErrorIndicatorRC :: exchangeDofManIndicatorVals (TimeStep* tStep)
     communicator->packAllData( this, &DirectErrorIndicatorRC::packSharedDofManLocalIndicatorVals );
     communicator->initExchange(999);
     communicator->unpackAllData( this, &DirectErrorIndicatorRC::unpackSharedDofManLocalIndicatorVals );
+    communicator->finishExchange();
   }
     
 }

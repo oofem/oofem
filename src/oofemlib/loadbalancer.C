@@ -127,6 +127,8 @@ LoadBalancer :: migrateLoad(Domain *d)
 
     d->commitTransactions( d->giveTransactionManager() );
 
+    com.finishExchange();
+
 #if LoadBalancer_debug_print
     // debug print
     int j, nnodes = d->giveNumberOfDofManagers(), nelems = d->giveNumberOfElements();

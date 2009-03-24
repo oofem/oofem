@@ -700,6 +700,7 @@ PNlDEIDynamic :: computeLoadVector(FloatArray &answer, ValueModeType mode, TimeS
 #endif
 
     communicator->unpackAllData( ( StructuralEngngModel * ) this, & answer, & StructuralEngngModel :: unpackLoad );
+    communicator->finishExchange();
 #endif
 }
 
@@ -764,6 +765,7 @@ PNlDEIDynamic :: giveInternalForces(FloatArray &answer, TimeStep *stepN)
 #endif
 
     communicator->unpackAllData( ( StructuralEngngModel * ) this, & answer, & StructuralEngngModel :: unpackInternalForces );
+    communicator->finishExchange();
     // }
 #endif
 
@@ -932,6 +934,7 @@ PNlDEIDynamic :: computeMassMtrx(FloatArray &massMatrix, double &maxOm, TimeStep
     if ( !communicator->unpackAllData(this, & PNlDEIDynamic :: unpackMasses) ) {
         _error("PNlDEIDynamic :: computeMassMtrx: Receiveng and Unpacking masses failed");
     }
+    communicator->finishExchange();
 
     // }
 
@@ -1280,7 +1283,7 @@ int PNlDEIDynamic :: exchangeRemoteElementData()
         }
 
         // }
-
+        result &= nonlocCommunicator->finishExchange();
         return result;
     } // if (nonlocalext)
 

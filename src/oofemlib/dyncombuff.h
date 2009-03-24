@@ -115,6 +115,16 @@ public:
      * is set to MPI_REQUEST_NULL. Otherwise call returns flag=false.
      * @return true if operation complete, false otherwise.
      */
+    virtual int testCompletion() ;
+    /**
+     * Waits until a completion of a nonblocking communication. The completion of a send operation indicates that the sender is 
+     * now free to update the locations in the send buffer, the completion of a receive operation indicates that the
+     * receive buffer contains the received message, the receiver is now free to access it, and that the status object is set. 
+     * If the communication object associated with this request was created (nonblocking send or receive call),
+     * then the object is deallocated by the call to MPI_WAIT and the request handle is set to MPI_REQUEST_NULL. 
+     *
+     */
+    virtual int waitCompletion();
 #endif
     //@}
 
@@ -161,6 +171,8 @@ protected:
     int active_tag, active_rank;
     int number_of_packets;
 
+    // receiver mode 
+    enum DCB_Mode {DCB_null, DCB_send, DCB_receive} mode;
     // static packet pool
     static CommunicationPacketPool packetPool;
 public:
@@ -206,14 +218,35 @@ public:
     virtual int iRecv(int source, int tag, int count = 0);
     virtual int bcast(int root);
 
-    virtual int sendCompleted();
-    virtual int receiveCompleted();
+    /**
+     * Tests if the operation identified by this->request is complete.
+     * In such case, true is returned and
+     * if communication was initiated by nonblocking send/receive, then request handle
+     * is set to MPI_REQUEST_NULL. Otherwise call returns flag=false.
+     * @param source contain the source tag
+     * @param tag contain the tag of received message
+     * @return true if operation complete, false otherwise.
+     */
+    int testCompletion();
+    /**
+     * Waits until a completion of a nonblocking communication. The completion of a send operation indicates that the sender is 
+     * now free to update the locations in the send buffer, the completion of a receive operation indicates that the
+     * receive buffer contains the received message, the receiver is now free to access it, and that the status object is set. 
+     * If the communication object associated with this request was created (nonblocking send or receive call),
+     * then the object is deallocated by the call to MPI_WAIT and the request handle is set to MPI_REQUEST_NULL. 
+     *
+     */
+    virtual int waitCompletion();
+
 
     static void printInfo() { packetPool.printInfo(); }
 
 protected:
     CommunicationPacket *allocateNewPacket(int);
     void freePacket(CommunicationPacket *);
+
+    int receiveCompleted();
+    int sendCompleted();
 
     void popNewRecvPacket();
     void pushNewRecvPacket(CommunicationPacket *);

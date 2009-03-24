@@ -385,7 +385,7 @@ PetscNatural2GlobalOrdering :: init(EngngModel *emodel, EquationID ut, int di, E
     do {
         for ( p = 0; p < nproc; p++ ) {
             if ( finished.at(p + 1) == 0 ) {
-                if ( rbuffs [ p ]->receiveCompleted() ) {
+                if ( rbuffs [ p ]->testCompletion() ) {
                     // data are here
                     // unpack them
                     int nite = nrecToReceive(p);

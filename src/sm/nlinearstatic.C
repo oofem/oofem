@@ -471,6 +471,7 @@ NonLinearStatic :: giveInternalForces(FloatArray &answer, const FloatArray &Delt
 #endif
 
         communicator->unpackAllData( ( StructuralEngngModel * ) this, & answer, & StructuralEngngModel :: unpackInternalForces );
+        communicator->finishExchange();
     }
 
 #endif
@@ -1195,6 +1196,7 @@ NonLinearStatic :: assembleIncrementalReferenceLoadVectors(FloatArray &_incremen
 #endif
 
         communicator->unpackAllData( ( StructuralEngngModel * ) this, & _incrementalLoadVector, & StructuralEngngModel :: unpackLoad );
+        communicator->finishExchange();
     }
 
 #endif
@@ -1225,6 +1227,8 @@ int NonLinearStatic :: exchangeRemoteElementData()
         if ( !( result &= nonlocCommunicator->unpackAllData( ( StructuralEngngModel * ) this, & StructuralEngngModel :: unpackRemoteElementData ) ) ) {
             _error("NonLinearStatic :: exchangeRemoteElementData: Receiveng and Unpacking remote element data");
         }
+        
+        result &= nonlocCommunicator->finishExchange();
 
         // }
 

@@ -111,6 +111,11 @@ ProcessCommunicator :: initExchange(int tag)
     return result;
 }
 
+int
+ProcessCommunicator :: finishExchange()
+{
+  return waitCompletion();
+}
 
 void
 ProcessCommunicator :: clearBuffers()

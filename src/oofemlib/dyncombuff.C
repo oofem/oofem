@@ -104,6 +104,24 @@ CommunicationPacket :: iRecv(MPI_Comm communicator, int source, int tag, int cou
 
 
 int
+CommunicationPacket :: testCompletion () {
+    int flag;
+    MPI_Status status;
+
+    MPI_Test(& this->request, & flag, & status);
+    return flag;
+}
+
+int
+CommunicationPacket :: waitCompletion()
+{
+    MPI_Status status;
+
+    return (MPI_Wait(& this->request, & status) == MPI_SUCCESS );
+}
+
+
+int
 CommunicationPacket :: packHeader(MPI_Comm comm)
 {
     int _arry [ 2 ];
@@ -140,6 +158,7 @@ DynamicCommunicationBuffer :: DynamicCommunicationBuffer(MPI_Comm comm, int size
     CommunicationBuffer(comm, size, dynamic), packet_list()
 {
     number_of_packets = 0;
+    mode = DCB_null;
     /*
      * // alocate first send/receive packet
      * active_packet = this->allocateNewPacket (++number_of_packets);
@@ -152,6 +171,7 @@ DynamicCommunicationBuffer :: DynamicCommunicationBuffer(MPI_Comm comm, bool dyn
     CommunicationBuffer(comm, dynamic), packet_list()
 {
     number_of_packets = 0;
+    mode = DCB_null;
     /*
      * // alocate first send/receive packet
      * active_packet = this->allocateNewPacket (++number_of_packets);
@@ -180,6 +200,7 @@ DynamicCommunicationBuffer :: initForPacking()
         active_packet = this->allocateNewPacket(++number_of_packets);
         packet_list.push_back(active_packet);
     }
+    mode = DCB_send;
 }
 
 void
@@ -187,6 +208,7 @@ DynamicCommunicationBuffer :: initForUnpacking()
 {
     recvIt = packet_list.begin();
     this->popNewRecvPacket();
+    mode = DCB_receive;
 }
 
 /*
@@ -320,6 +342,25 @@ int DynamicCommunicationBuffer :: sendCompleted()
 
     return result;
 }
+
+int 
+DynamicCommunicationBuffer :: testCompletion ()
+{
+  if (mode == DCB_send) return this->sendCompleted();
+  else if (mode == DCB_receive) return this->receiveCompleted();
+  else return 1;
+}
+
+int 
+DynamicCommunicationBuffer:: waitCompletion ()
+{
+  if (mode == DCB_send) {
+    while (this->sendCompleted());
+  } else if (mode == DCB_receive) {
+    while (this->receiveCompleted());
+  } else return 1;
+}
+
 
 int
 DynamicCommunicationBuffer :: giveFitSize(MPI_Datatype type, int availableSpace, int arrySize)

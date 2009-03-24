@@ -205,6 +205,15 @@ MPIBuffer :: testCompletion(int &source, int &tag)
 }
 
 int
+MPIBuffer :: waitCompletion()
+{
+    MPI_Status status;
+
+    return (MPI_Wait(& this->request, & status) == MPI_SUCCESS );
+}
+    
+
+int
 MPIBuffer :: bcast(MPI_Comm communicator, int root)
 {
     return MPI_Bcast(this->buff, this->size, MPI_PACKED, root, communicator);

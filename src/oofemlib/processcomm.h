@@ -233,8 +233,10 @@ public:
 
     /**@name Methods for manipulating/testing receiver state */
     //@{
-    int sendCompleted() { return send_buff->sendCompleted(); }
-    int receiveCompleted() { return recv_buff->receiveCompleted(); }
+    int sendCompleted() { return send_buff->testCompletion(); }
+    int receiveCompleted() { return recv_buff->testCompletion(); }
+    int testCompletion () {return (send_buff->testCompletion() && recv_buff->testCompletion());}
+    int waitCompletion () {return (send_buff->waitCompletion() && recv_buff->waitCompletion());}
     //@}
 
     /**
@@ -407,11 +409,20 @@ public:
      * @return nonzero if success
      */
     int initReceive(int tag);
-
+    /*
+     * Finishes the exchange. After this call all communication buffers can be reused.
+     *
+     */
+    int finishExchange ();
+    
+    
     /**@name Methods for manipulating/testing receiver state */
     //@{
     int sendCompleted() { return giveProcessCommunicatorBuff()->sendCompleted(); }
     int receiveCompleted() { return giveProcessCommunicatorBuff()->receiveCompleted(); }
+    int testCompletion() {return giveProcessCommunicatorBuff()->testCompletion();}
+    int waitCompletion() {return giveProcessCommunicatorBuff()->waitCompletion();}
+
     //@}
     /**
      * Clears all buffer contens.

@@ -131,6 +131,7 @@ NonlocalMaterialWTP :: init(Domain *domain)
     com.packAllData(this, domain, & NonlocalMaterialWTP :: packMigratingElementDependencies);
     com.initExchange(MIGRATE_NONLOCALDEP_TAG);
     com.unpackAllData(this, domain, & NonlocalMaterialWTP :: unpackMigratingElementDependencies);
+    com.finishExchange();
 }
 
 
@@ -281,6 +282,7 @@ NonlocalMaterialWTP :: migrate()
     com.unpackAllData(this, domain, & NonlocalMaterialWTP :: unpackRemoteElements);
 
     domain->commitTransactions( domain->giveTransactionManager() );
+    com.finishExchange();
 #ifdef __VERBOSE_PARALLEL
     VERBOSEPARALLEL_PRINT("NonlocalMaterialWTP::migrate", "Finished migrating remote elements", myrank);
 #endif

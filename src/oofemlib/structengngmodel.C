@@ -126,6 +126,7 @@ StructuralEngngModel :: printReactionForces(TimeStep *tStep, int di)
 #endif
 
         communicator->unpackAllData( ( StructuralEngngModel * ) this, & reactions, & StructuralEngngModel :: unpackReactions );
+        communicator->finishExchange();
     }
 
 #endif

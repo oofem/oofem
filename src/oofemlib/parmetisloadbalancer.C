@@ -372,6 +372,7 @@ ParmetisLoadBalancer :: labelDofManagers()
     com.packAllData(this, & ParmetisLoadBalancer :: packSharedDmanPartitions);
     com.initExchange(SHARED_DOFMAN_PARTITIONS_TAG);
     com.unpackAllData(this, & ParmetisLoadBalancer :: unpackSharedDmanPartitions);
+    com.finishExchange();
 
     /* label dof managers */
     for ( idofman = 1; idofman <= ndofman; idofman++ ) {

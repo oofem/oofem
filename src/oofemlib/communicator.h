@@ -186,6 +186,11 @@ public:
      * @param tag message tag
      */
     int initReceive(int tag);
+    /*
+     * Finishes the exchange. After this call all communication buffers can be reused.
+     *
+     */
+    int finishExchange ();
 
     /**
      * Clears all buffer contens.
