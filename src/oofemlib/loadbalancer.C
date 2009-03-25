@@ -568,6 +568,7 @@ WallClockLoadBalancerMonitor :: decide(TimeStep *atTime)
     nelem = d->giveNumberOfElements();
     neqelems = 0.0;
     for ( ie = 1; ie <= nelem; ie++ ) {
+	if(d->giveElement(ie)->giveParallelMode() == Element_remote)continue;
         neqelems += d->giveElement(ie)->predictRelativeComputationalCost();
     }
 

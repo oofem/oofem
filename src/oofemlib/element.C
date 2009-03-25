@@ -1088,7 +1088,7 @@ Element :: predictRelativeComputationalCost()
         wgt += this->giveCrossSection()->predictRelativeComputationalCost( iRule->getIntegrationPoint(j) );
     }
 
-    return ( this->giveRelativeSelfComputationalCost() * wgt / nip );
+    return ( this->giveRelativeSelfComputationalCost() * wgt);
 }
 
 #endif
