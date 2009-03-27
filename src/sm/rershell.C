@@ -464,46 +464,70 @@ RerShell :: giveLocalCoordinateSystem(FloatMatrix &answer)
     return 1;
 }
 
+
+//converts global coordinates to local planar area coordinates, does not return a coordinate in the thickness direction, but
+//does check that the point is in the element thickness
 #define POINT_TOL 1.e-3
-int RerShell :: computeLocalCoordinates(FloatArray &answer, const FloatArray &coords)
+int RerShell :: computeLocalCoordinates (FloatArray& answer, const FloatArray& coords)
 {
-    FloatArray nodeCoords;
-    double area, x1, x2, x3, y1, y2, y3;
-
-    this->giveLocalCoordinates( nodeCoords, * ( this->giveNode(1)->giveCoordinates() ) );
-    x1 = nodeCoords.at(1);
-    y1 = nodeCoords.at(2);
-
-    this->giveLocalCoordinates( nodeCoords, * ( this->giveNode(2)->giveCoordinates() ) );
-    x2 = nodeCoords.at(1);
-    y2 = nodeCoords.at(2);
-
-    this->giveLocalCoordinates( nodeCoords, * ( this->giveNode(3)->giveCoordinates() ) );
-    x3 = nodeCoords.at(1);
-    y3 = nodeCoords.at(2);
-
-    area = 0.5 * ( x2 * y3 + x1 * y2 + y1 * x3 - x2 * y1 - x3 * y2 - x1 * y3 );
-
+    //set size of return value to 3 area coordinates
     answer.resize(3);
 
-    answer.at(1) = ( ( x2 * y3 - x3 * y2 ) + ( y2 - y3 ) * coords.at(1) + ( x3 - x2 ) * coords.at(2) ) / 2. / area;
-    answer.at(2) = ( ( x3 * y1 - x1 * y3 ) + ( y3 - y1 ) * coords.at(1) + ( x1 - x3 ) * coords.at(2) ) / 2. / area;
-    answer.at(3) = ( ( x1 * y2 - x2 * y1 ) + ( y1 - y2 ) * coords.at(1) + ( x2 - x1 ) * coords.at(2) ) / 2. / area;
+    //rotate the input point Coordinate System into the element CS
+    FloatArray inputCoords_ElCS;
+    this->giveLocalCoordinates(inputCoords_ElCS, const_cast<FloatArray&>(coords));
 
+    //Nodes are defined in the global CS, so they also need to be rotated into the element CS, therefore get the node points and 
+    //rotate them into the element CS 
+    FloatArray nodeCoords;
+    double  x1,x2,x3,y1,y2,y3,z1,z2,z3;
 
-    for ( int i = 1; i <= 3; i++ ) {
-        if ( answer.at(i) < ( 0. - POINT_TOL ) ) {
-            return 0;
-        }
+    this->giveLocalCoordinates (nodeCoords, *(this -> giveNode(1)->giveCoordinates()));
+    x1 = nodeCoords.at(1);
+    y1 = nodeCoords.at(2);
+    z1 = nodeCoords.at(3);
 
-        if ( answer.at(i) > ( 1. + POINT_TOL ) ) {
-            return 0;
-        }
+    this->giveLocalCoordinates (nodeCoords, *(this -> giveNode(2)->giveCoordinates()));
+    x2 = nodeCoords.at(1);
+    y2 = nodeCoords.at(2);
+    z2 = nodeCoords.at(3);
+
+    this->giveLocalCoordinates (nodeCoords, *(this -> giveNode(3)->giveCoordinates()));
+    x3 = nodeCoords.at(1);
+    y3 = nodeCoords.at(2);
+    z3 = nodeCoords.at(3);
+
+    //Compute the area coordinates corresponding to this point
+    double  area;
+    area = 0.5*(x2*y3+x1*y2+y1*x3-x2*y1-x3*y2-x1*y3);
+
+    answer.at(1) = ((x2*y3-x3*y2) + (y2-y3)*inputCoords_ElCS.at(1) + (x3-x2)*inputCoords_ElCS.at(2))/2./area;
+    answer.at(2) = ((x3*y1-x1*y3) + (y3-y1)*inputCoords_ElCS.at(1) + (x1-x3)*inputCoords_ElCS.at(2))/2./area;
+    answer.at(3) = ((x1*y2-x2*y1) + (y1-y2)*inputCoords_ElCS.at(1) + (x2-x1)*inputCoords_ElCS.at(2))/2./area;
+
+    //get midplane location at this point 
+    double midplZ;
+    midplZ = z1*answer.at(1) + z2*answer.at(2) + z3*answer.at(3);
+
+    //check that the z is within the element
+    StructuralCrossSection* cs;
+    double elthick;
+
+    cs = (StructuralCrossSection*) this->giveCrossSection();
+    elthick = cs->give(THICKNESS);
+
+    if (elthick/2.0+midplZ - fabs(inputCoords_ElCS.at(3)) < -POINT_TOL){
+        answer.zero();
+        return 0;
     }
 
+    //check that the point is in the element and set flag
+    for (int i=1; i<=3; i++) {
+        if (answer.at(i)<(0.-POINT_TOL)) return 0;
+        if (answer.at(i)>(1.+POINT_TOL)) return 0;
+    }
     return 1;
 }
-
 
 
 
