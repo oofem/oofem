@@ -93,6 +93,13 @@ public:
      * @param radius radius of bounding sphere
      */
     void giveAllElementsWithIpWithinBox(elementContainerType &elemSet, const FloatArray &coords, const double radius);
+    /**
+     * Returns container (list) of all domain nodes within given box.
+     * @param NODESet answer containing the list of nodes meeting the criteria
+     * @param coords center of box of interest
+     * @param radius radius of bounding sphere
+     */
+    void giveAllNodesWithinBox(nodeContainerType &nodeList, const FloatArray &coords, const double radius);
 
     /// Returns class name of the receiver.
     const char *giveClassName() const { return "DummySpatialLocalizer"; }

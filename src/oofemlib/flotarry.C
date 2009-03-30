@@ -847,7 +847,7 @@ double  dotProduct(double *P1, double *P2, register int i)
 
 
 double
-FloatArray :: distance(FloatArray *from)
+FloatArray :: distance(const FloatArray *from) const
 //
 // returns distance between receiver and from from
 // computed using generalized pythagora formulae

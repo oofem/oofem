@@ -162,3 +162,21 @@ DummySpatialLocalizer :: giveAllElementsWithIpWithinBox(elementContainerType &el
     } // end element loop
 
 }
+
+void
+DummySpatialLocalizer :: giveAllNodesWithinBox(nodeContainerType &nodeSet, const FloatArray &coords, const double radius) 
+{
+  int i, nnode;
+  DofManager* idofman;
+  Node* inode;
+
+  nnode = this->giveDomain()->giveNumberOfDofManagers();
+  for ( i = 1; i <= nnode; i++ ) {
+    idofman = this->giveDomain()->giveDofManager(i);
+    if ((inode = dynamic_cast <Node*> (idofman)) != NULL) {
+      if (coords.distance(inode->giveCoordinates()) <= radius) {
+        nodeSet.push_back(i);
+      }
+    }
+  }
+}

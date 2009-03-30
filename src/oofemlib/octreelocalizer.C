@@ -1169,13 +1169,16 @@ OctreeSpatialLocalizer :: giveElementsWithIPWithinBox(elementContainerType &elem
 void
 OctreeSpatialLocalizer :: giveAllNodesWithinBox(nodeContainerType &nodeSet, const FloatArray &coords, const double radius)
 {
+    this->init();
     // found terminal octant containing point
     oofemOctantRec *currCell = this->findTerminalContaining(rootCell, coords);
     // go up, until cell containing bbox is found
-    while ( currCell->testBoundingBox(coords, radius) != oofemOctantRec :: BBS_INSIDECELL ) {
-        currCell = currCell->giveParent();
-        if ( currCell == rootCell ) {
-            break;
+    if ( currCell != rootCell ) {
+        while ( currCell->testBoundingBox(coords, radius) != oofemOctantRec :: BBS_INSIDECELL ) {
+            currCell = currCell->giveParent();
+            if ( currCell == rootCell ) {
+                break;
+            }
         }
     }
 

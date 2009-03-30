@@ -34,6 +34,7 @@
  */
 
 #include "spatiallocalizer.h"
+#include "conTable.h"
 #include "element.h"
 #include "node.h"
 #include "mathfem.h"
@@ -99,4 +100,23 @@ SpatialLocalizerInterface :: SpatialLocalizerI_BBoxContainsPoint(const FloatArra
 
 
 
+void 
+SpatialLocalizer::giveAllElementsWithNodesWithinBox(elementContainerType &elemSet, const FloatArray &coords,
+                                                    const double radius)
+{
+  nodeContainerType nodesWithinBox;
+  nodeContainerType::iterator it;
+  const IntArray* dofmanConnectivity;
+  int i;
 
+  elemSet.clear();
+
+  ConnectivityTable* ct = domain->giveConnectivityTable();
+
+  this->giveAllNodesWithinBox (nodesWithinBox, coords, radius);
+  
+  for (it=nodesWithinBox.begin(); it != nodesWithinBox.end(); ++it) {
+   dofmanConnectivity = ct->giveDofManConnectivityArray (*it);
+   for (i=1; i<=dofmanConnectivity->giveSize(); i++) elemSet.insert(dofmanConnectivity->at(i));
+  }
+}

@@ -139,7 +139,22 @@ public:
      */
     virtual void giveAllElementsWithIpWithinBox(elementContainerType &elemSet, const FloatArray &coords,
                                                 const double radius) = 0;
+    /**
+     * Returns container (set) of all domain elements having node within given box.
+     * @param elemSet answer containing the list of elements meeting the criteria
+     * @param coords center of box of interest
+     * @param radius radius of bounding sphere
+     */
+    virtual void giveAllElementsWithNodesWithinBox(elementContainerType &elemSet, const FloatArray &coords,
+                                                   const double radius);
 
+    /**
+     * Returns container (list) of all domain nodes within given box.
+     * @param NODESet answer containing the list of nodes meeting the criteria
+     * @param coords center of box of interest
+     * @param radius radius of bounding sphere
+     */
+    virtual void giveAllNodesWithinBox(nodeContainerType &nodeList, const FloatArray &coords, const double radius) = 0;
 
     /**
      * Initialize receiver data structure if not done previously

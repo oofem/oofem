@@ -326,7 +326,7 @@ public:
     FloatArray *rotatedWith(FloatMatrix *r, char mode);
     FloatArray *times(double);
     FloatArray *Times(double) const;
-    double       distance(FloatArray *);
+    double       distance(const FloatArray *) const;
     FloatArray *VectorProduct(FloatArray *);
     /**
      * Normalizes receiver. Eucleidian norm is used, after operation receiver
