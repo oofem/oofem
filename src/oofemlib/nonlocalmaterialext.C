@@ -58,7 +58,7 @@
 // flag forcing the inclusion of all elements with volume inside support of weight function.
 // This forces inclusion of all integration points of these elements, even if weight is zero
 // If not defined (default) only integration points with nonzero weight are included.
-#define NMEI_USE_ALL_ELEMENTS_IN_SUPPORT 
+// #define NMEI_USE_ALL_ELEMENTS_IN_SUPPORT 
 
 
 #define NonlocalMaterialZeroWeight 1.e-10
@@ -141,7 +141,7 @@ NonlocalMaterialExtensionInterface :: buildNonlocalPointTable(GaussPoint *gp)
     this->giveSupportRadius(radius);
     // ask domain spatial localizer for list of elements with IP within this zone
 #ifdef NMEI_USE_ALL_ELEMENTS_IN_SUPPORT
-    this->giveDomain()->giveSpatialLocalizer()->giveAllElementsWithNodesWithinBox(elemSet, gpCoords, radius+40.0);
+    this->giveDomain()->giveSpatialLocalizer()->giveAllElementsWithNodesWithinBox(elemSet, gpCoords, radius);
     // insert element containing given gp
     elemSet.insert(gp->giveElement()->giveNumber());
 #else
