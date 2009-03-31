@@ -137,9 +137,9 @@ ParmetisLoadBalancer :: calculateLoadTransfer()
     numflag = 0;
     ncommonnodes = 2;
     ParMETIS_V3_Mesh2Dual(elmdist, eptr, eind, & numflag, & ncommonnodes, & xadj, & adjncy, & communicator);
-    int myrank = domain->giveEngngModel()->giveRank();
 
 #ifdef ParmetisLoadBalancer_DEBUG_PRINT
+    int myrank = domain->giveEngngModel()->giveRank();
     // DEBUG PRINT
     fprintf(stderr, "[%d] xadj:", myrank);
     for ( i = 0; i <= nlocalelems; i++ ) {
@@ -576,7 +576,7 @@ void ParmetisLoadBalancer:: handleMasterSlaveDofManLinks ()
 {
   int idofman, ndofman = domain->giveNumberOfDofManagers();
   DofManager *dofman, *_masterPtr;
-  int myrank = domain->giveEngngModel()->giveRank();
+  //int myrank = domain->giveEngngModel()->giveRank();
   int __i, __j, __partition, _master;
   bool isSlave;
   IntArray slaveMastersDofMans;

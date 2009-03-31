@@ -175,6 +175,8 @@ protected:
     enum DCB_Mode {DCB_null, DCB_send, DCB_receive} mode;
     // static packet pool
     static CommunicationPacketPool packetPool;
+    // communication completion flag
+    bool completed;
 public:
     /// Constructor. Creeates buffer of given size, using given communicator for packing
     DynamicCommunicationBuffer(MPI_Comm comm, int size, bool dynamic = 0);

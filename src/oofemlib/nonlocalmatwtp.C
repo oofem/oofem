@@ -280,9 +280,10 @@ NonlocalMaterialWTP :: migrate()
     com.packAllData(this, domain, & NonlocalMaterialWTP :: packRemoteElements);
     com.initExchange(MIGRATE_REMOTE_ELEMENTS_TAG);
     com.unpackAllData(this, domain, & NonlocalMaterialWTP :: unpackRemoteElements);
+    com.finishExchange();
 
     domain->commitTransactions( domain->giveTransactionManager() );
-    com.finishExchange();
+
 #ifdef __VERBOSE_PARALLEL
     VERBOSEPARALLEL_PRINT("NonlocalMaterialWTP::migrate", "Finished migrating remote elements", myrank);
 #endif

@@ -124,10 +124,10 @@ LoadBalancer :: migrateLoad(Domain *d)
 
     // receive remote data
     com.unpackAllData(this, d, & LoadBalancer :: unpackMigratingData);
+    com.finishExchange();
 
     d->commitTransactions( d->giveTransactionManager() );
 
-    com.finishExchange();
 
 #if LoadBalancer_debug_print
     // debug print

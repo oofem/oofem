@@ -159,6 +159,7 @@ DynamicCommunicationBuffer :: DynamicCommunicationBuffer(MPI_Comm comm, int size
 {
     number_of_packets = 0;
     mode = DCB_null;
+    completed = false;
     /*
      * // alocate first send/receive packet
      * active_packet = this->allocateNewPacket (++number_of_packets);
@@ -172,6 +173,7 @@ DynamicCommunicationBuffer :: DynamicCommunicationBuffer(MPI_Comm comm, bool dyn
 {
     number_of_packets = 0;
     mode = DCB_null;
+    completed = false;
     /*
      * // alocate first send/receive packet
      * active_packet = this->allocateNewPacket (++number_of_packets);
@@ -188,6 +190,7 @@ DynamicCommunicationBuffer :: ~DynamicCommunicationBuffer()
 void
 DynamicCommunicationBuffer :: init()
 {
+    completed = false;
     this->clear();
 }
 
@@ -200,7 +203,6 @@ DynamicCommunicationBuffer :: initForPacking()
         active_packet = this->allocateNewPacket(++number_of_packets);
         packet_list.push_back(active_packet);
     }
-    mode = DCB_send;
 }
 
 void
@@ -208,7 +210,6 @@ DynamicCommunicationBuffer :: initForUnpacking()
 {
     recvIt = packet_list.begin();
     this->popNewRecvPacket();
-    mode = DCB_receive;
 }
 
 /*
@@ -276,7 +277,8 @@ DynamicCommunicationBuffer :: iSend(int dest, int tag)
      * fprintf (stderr,"[%d] sending to [%d] %d packets for tag %d\n", _myrank, dest, number_of_packets, tag);
      * (*(packet_list.begin()))->dump();
      */
-
+    mode = DCB_send;
+    completed = false;
     return result;
 }
 
@@ -292,6 +294,8 @@ DynamicCommunicationBuffer :: iRecv(int source, int tag, int count)
     active_packet = this->allocateNewPacket(++number_of_packets);
     active_rank = source;
     active_tag = tag;
+    mode = DCB_receive;
+    completed = false;
     return active_packet->iRecv(communicator, source, tag);
 }
 
@@ -301,6 +305,7 @@ int DynamicCommunicationBuffer :: receiveCompleted()
      * int _myrank;
      * MPI_Comm_rank (communicator, &_myrank);
      */
+    if (completed) return 1;
 
     if ( active_packet->testCompletion() ) {
         // active packet received, add it to the pool and unpach header info
@@ -315,7 +320,7 @@ int DynamicCommunicationBuffer :: receiveCompleted()
 
             //fprintf (stderr,"[%d] received from [%d] %d packets for tag %d\n", _myrank, active_rank, number_of_packets, active_tag);
             //active_packet->dump();
-
+            completed = true;
             return 1;
         } else {
             // received next packet, but it is not the last one
@@ -334,12 +339,13 @@ int DynamicCommunicationBuffer :: sendCompleted()
 {
     int result = 1;
 
+    if (completed) return 1;
     std :: list< CommunicationPacket * > :: const_iterator it;
 
     for ( it = packet_list.begin(); it != packet_list.end(); ++it ) {
         result &= ( * it )->testCompletion();
     }
-
+    completed = result;
     return result;
 }
 
@@ -348,17 +354,20 @@ DynamicCommunicationBuffer :: testCompletion ()
 {
   if (mode == DCB_send) return this->sendCompleted();
   else if (mode == DCB_receive) return this->receiveCompleted();
-  else return 1;
+  else return 0;
 }
 
 int 
 DynamicCommunicationBuffer:: waitCompletion ()
 {
   if (mode == DCB_send) {
-    while (this->sendCompleted());
+    while (!this->sendCompleted()) {};
+    return 1;
   } else if (mode == DCB_receive) {
-    while (this->receiveCompleted());
-  } else return 1;
+    while (!this->receiveCompleted()) {};
+    return 1;
+  } 
+  return 0;
 }
 
 
@@ -418,7 +427,7 @@ DynamicCommunicationBuffer :: popNewRecvPacket()
         OOFEM_ERROR("DynamicCommunicationBuffer::popNewRecvPacket: no more packets received");
     }
 
-    active_packet->init(communicator);
+    //active_packet->init(communicator);
 }
 
 void

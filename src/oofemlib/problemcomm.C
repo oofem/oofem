@@ -438,7 +438,7 @@ ProblemCommunicator :: setUpCommunicationMapsForRemoteElementMode(EngngModel *pm
             delete maps [ i ];
         }
 
-        delete maps;
+        delete [] maps;
 
         // to assemble send maps, we must analyze broadcasted remote domain send lists
         // and we must also broadcast our send list.

@@ -1375,7 +1375,7 @@ NonLinearStatic :: unpackMigratingData(TimeStep *atTime)
 {
     Domain *domain = this->giveDomain(1);
     int ndofman =  domain->giveNumberOfDofManagers(), ndofs, idofman, idof, _eq;
-    int myrank = this->giveRank();
+    //int myrank = this->giveRank();
     DofManager *_dm;
     Dof *_dof;
 

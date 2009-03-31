@@ -335,7 +335,7 @@ int
 DirectErrorIndicatorRC :: packSharedDofManLocalDensities (ProcessCommunicator &processComm)
 {
   int result = 1, i, size;
-  Domain *d = this->giveDomain();
+  //Domain *d = this->giveDomain();
   ProcessCommunicatorBuff *pcbuff = processComm.giveProcessCommunicatorBuff();
   IntArray const *toSendMap = processComm.giveToSendMap();
   
@@ -401,7 +401,7 @@ int
 DirectErrorIndicatorRC :: packSharedDofManLocalIndicatorVals (ProcessCommunicator &processComm)
 {
   int result = 1, i, size;
-  Domain *d = this->giveDomain();
+  //Domain *d = this->giveDomain();
   ProcessCommunicatorBuff *pcbuff = processComm.giveProcessCommunicatorBuff();
   IntArray const *toSendMap = processComm.giveToSendMap();
   
