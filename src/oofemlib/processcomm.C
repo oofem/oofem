@@ -123,5 +123,35 @@ ProcessCommunicator :: clearBuffers()
     giveProcessCommunicatorBuff()->init();
 }
 
+int
+ProcessCommunicator :: sendCompleted() 
+{ 
+  if ( !toSend.isEmpty() || ( this->mode == CommMode_Dynamic ) ) {
+    return giveProcessCommunicatorBuff()->sendCompleted(); 
+  } else return 1;
+}
+
+int 
+ProcessCommunicator :: receiveCompleted() 
+{ 
+  if ( !toReceive.isEmpty() || ( this->mode == CommMode_Dynamic ) ) {
+    return giveProcessCommunicatorBuff()->receiveCompleted(); 
+  } else return 1;
+}
+
+int 
+ProcessCommunicator :: testCompletion () 
+{
+  return (sendCompleted() && receiveCompleted());
+}
+
+int 
+ProcessCommunicator :: waitCompletion () 
+{
+  while (!testCompletion());
+  return 1;
+}
+
+
 
 #endif

@@ -418,10 +418,10 @@ public:
     
     /**@name Methods for manipulating/testing receiver state */
     //@{
-    int sendCompleted() { return giveProcessCommunicatorBuff()->sendCompleted(); }
-    int receiveCompleted() { return giveProcessCommunicatorBuff()->receiveCompleted(); }
-    int testCompletion() {return giveProcessCommunicatorBuff()->testCompletion();}
-    int waitCompletion() {return giveProcessCommunicatorBuff()->waitCompletion();}
+    int sendCompleted();
+    int receiveCompleted();
+    int testCompletion();
+    int waitCompletion(); 
 
     //@}
     /**

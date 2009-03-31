@@ -58,10 +58,10 @@
 // flag forcing the inclusion of all elements with volume inside support of weight function.
 // This forces inclusion of all integration points of these elements, even if weight is zero
 // If not defined (default) only integration points with nonzero weight are included.
-// #define NMEI_USE_ALL_ELEMENTS_IN_SUPPORT 
+#define NMEI_USE_ALL_ELEMENTS_IN_SUPPORT 
 
 
-#define NonlocalMaterialZeroWeight 1.e-3
+#define NonlocalMaterialZeroWeight 1.e-10
 
 // initialize class variable
 // StateCounterType NonlocalMaterialExtensionInterface :: lastUpdatedStateCounter = 0;
@@ -141,7 +141,7 @@ NonlocalMaterialExtensionInterface :: buildNonlocalPointTable(GaussPoint *gp)
     this->giveSupportRadius(radius);
     // ask domain spatial localizer for list of elements with IP within this zone
 #ifdef NMEI_USE_ALL_ELEMENTS_IN_SUPPORT
-    this->giveDomain()->giveSpatialLocalizer()->giveAllElementsWithNodesWithinBox(elemSet, gpCoords, radius);
+    this->giveDomain()->giveSpatialLocalizer()->giveAllElementsWithNodesWithinBox(elemSet, gpCoords, radius+40.0);
     // insert element containing given gp
     elemSet.insert(gp->giveElement()->giveNumber());
 #else
@@ -269,7 +269,11 @@ NonlocalMaterialExtensionInterface :: rebuildNonlocalPointTable(GaussPoint *gp, 
                         weight = this->computeWeightFunction(gpCoords, jGpCoords);
 
                         this->applyBarrierConstraints(gpCoords, jGpCoords, weight);
+#ifdef NMEI_USE_ALL_ELEMENTS_IN_SUPPORT
+                    if (1) {
+#else
                         if ( weight > NonlocalMaterialZeroWeight ) {
+#endif
                             localIntegrationRecord ir;
                             ir.nearGp = jGp;     // store gp
                             elemVolume = weight * jGp->giveElement()->computeVolumeAround(jGp);
