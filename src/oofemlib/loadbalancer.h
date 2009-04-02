@@ -72,6 +72,7 @@ class LoadBalancerMonitor
 protected:
     EngngModel *emodel;
     FloatArray nodeWeights;
+    bool staticNodeWeightFlag;
 public:
     enum LoadBalancerDecisionType { LBD_CONTINUE, LBD_RECOVER };
 
