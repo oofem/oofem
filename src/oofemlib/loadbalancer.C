@@ -638,7 +638,7 @@ LoadBalancerMonitor :: initializeFrom(InputRecord *ir)
     
     nodeWeights.resize(nproc);
     for ( i = 0; i < nproc; i++ ) 
-      nodeWeights(i) = 1.0;
+      nodeWeights(i) = 1.0/nproc;
     
     IR_GIVE_OPTIONAL_FIELD(ir, nodeWeightMode, IFT_LoadBalancerMonitor_nodeWeightMode, "nodeweightmode"); // Macro
     if (nodeWeightMode == 0) { // default, dynamic weights
