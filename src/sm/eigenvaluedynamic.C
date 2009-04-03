@@ -269,10 +269,13 @@ void EigenValueDynamic :: solveYourselfAt(TimeStep *tStep) {
 
     //nMethod -> solveYourselfAt(tStep);
     nMethod->solve(stiffnessMatrix, massMatrix, & eigVal, & eigVec, rtolv, numberOfRequiredEigenValues);
+
+    /*
     // compute eigen frequencies
     for ( i = 1; i <= numberOfRequiredEigenValues; i++ ) {
         eigVal.at(i) = sqrt( eigVal.at(i) );
     }
+    */
 
     delete  stiffnessMatrix;
     delete  massMatrix;
@@ -299,7 +302,7 @@ void EigenValueDynamic :: terminate(TimeStep *stepN)
     // print loadcase header
     fprintf(outputStream, "\nOutput for time % .3e \n\n", 1.0);
     // print eigen values on output
-    fprintf(outputStream, "\n\nEigen Values are:\n-----------------\n");
+    fprintf(outputStream, "\n\nEigen Values (Omega^2) are:\n-----------------\n");
     //this->giveNumericalMethod(stepN)->giveFloatArrayComponent(EigenValues,&eigv);
 
     for ( i = 1; i <= numberOfRequiredEigenValues; i++ ) {
