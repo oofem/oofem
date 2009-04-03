@@ -10,8 +10,10 @@ dnl   --enable-tm            --disable-tm
 dnl   --enable-fm            --disable-fm
 dnl   --enable-spooles       --disable-spooles
 dnl   --enable-petsc         --disable-petsc
+dnl   --enable-slepc         --disable-slepc
 dnl   --with-PETSCDIR[=PETSC_DIR]
-dnl   --with-PETCS-ARCH=PETSC_ARCH
+dnl   --with-PETCSARCH=PETSC_ARCH
+dnl   --with-SLEPCDIR[=SLEPC_DIR]
 dnl   --enable-dss           --disble-dss
 dnl   --enable-parmetis      --disable-parmetis
 dnl   --with-PARMETISDIR[=PARMETIS_DIR]
@@ -37,6 +39,7 @@ fm_module=yes
 iml_module=no
 spooles_module=no
 petsc_module=no
+slepc_module=no
 dss_module=no
 parmetis_module=no
 
@@ -371,6 +374,26 @@ AC_ARG_WITH(PETSCARCH, [  --with-PETSCARCH=val allows to specify PETSC_ARCH] ,
  ]
 )
 
+dnl --------------------------------------------------------------------
+dnl Check for slepc module
+dnl --------------------------------------------------------------------
+AC_ARG_ENABLE(slepc, [  --enable-slepc       adds SLEPc module support],
+ [
+  		slepc_module=$enableval
+ ],                  
+ [
+	  slepc_module=no
+ ]
+)
+
+AC_ARG_WITH(SLEPCDIR, [  --with-SLEPCDIR=dir  allows to specify SLEPC_DIR] , 
+ [
+dnl   if test -d $withval
+dnl   then
+     SLEPC_DIR=$withval
+dnl   fi
+ ]
+)
 
 dnl --------------------------------------------------------------------
 dnl Check for parmetis module
@@ -607,6 +630,40 @@ if test x$petsc_module = xyes; then
   fi
 fi
 
+
+dnl --------------------------------------------------------------------
+dnl Search for slepc module
+dnl --------------------------------------------------------------------
+if test x$slepc_module = xyes; then
+
+  AC_MSG_CHECKING(SLEPc module location)
+  
+ dnl set SLEPC_DIR if not set before
+ dnl : ${SLEPC_DIR=$PWD/../slepc} 
+  if test -f ${SLEPC_DIR}/include/slepceps.h; then
+    AC_MSG_RESULT(${SLEPC_DIR})
+  else
+    while test ! -f ${SLEPC_DIR}/include/slepceps.h; do
+      echo "Directory ${SLEPC_DIR} does not seem to be SLEPc dir."
+      echo "Type in directory (use absolute path):"
+      read SLEPC_DIR
+    done;
+  fi
+
+  AC_MSG_CHECKING(SLEPc module PETSc configuration)
+  SLEPC_MAKE_INCLUDE="include ${SLEPC_DIR}/conf/slepc_common_variables"
+  SLEPC_INCLUDES="\${SLEPC_INCLUDE}"
+  if test -f ${SLEPC_DIR}/$PETSC_ARCH/lib/libslepc.a; then
+    AC_MSG_RESULT(${PETSC_ARCH})
+  else
+    while test ! -f ${SLEPC_DIR}/$PETSC_ARCH/lib/libslepc.a; do
+      echo "SLEPc does not seem to be configured with ${PETSC_ARCH}"
+      echo "Type in available PETSC_ARCH:"
+      read PETSC_ARCH
+    done;
+    AC_MSG_RESULT(${PETSC_ARCH})
+  fi
+fi
 
 
 dnl --------------------------------------------------------------------
@@ -926,6 +983,12 @@ if test x$petsc_module = xyes; then
 	LOCAL_LIBS="$LOCAL_LIBS \${PETSC_C_SH_LIB_PATH} \${PETSC_LIB}"
 fi
 
+if test x$slepc_module = xyes; then
+	MODULE_LIST="$MODULE_LIST slepc"
+	MODULE_SYMBOLS="$MODULE_SYMBOLS -D__SLEPC_MODULE"
+	MODULE_INCLUDES="$MODULE_INCLUDES \${SLEPC_INCLUDE}"
+	LOCAL_LIBS="$LOCAL_LIBS \${SLEPC_C_SH_LIB_PATH} \${SLEPC_LIB}"
+fi
 
 if test x$parmetis_module = xyes; then
 	MODULE_LIST="$MODULE_LIST parmetis"
@@ -1004,6 +1067,10 @@ AC_SUBST(PETSC_ARCH)
 AC_SUBST(PETSC_MAKE_INCLUDE)
 AC_SUBST(PETSC_INCLUDES)
 AC_SUBST(PETSC_BOPT)
+
+AC_SUBST(SLEPC_DIR)
+AC_SUBST(SLEPC_MAKE_INCLUDE)
+AC_SUBST(SLEPC_INCLUDES)
 
 AC_SUBST(SPOOLES_DIR)
 

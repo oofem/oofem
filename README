@@ -163,6 +163,10 @@ Detailed Installation instructions for UNIX:
       configure PETSC support (dir is the path to PETSC installation
       directory - use absolute path, arch is PETSC architecture. 
       See PETSC installation manual for details.)
+   o) If you want to use SLEPc library use "--enable-slepc" together with
+      "--with-SLEPCDIR=dir" option to configure SLEPc support (dir is the path
+      to SLEPc installation directory - use absolute path.
+      See SLEPc installation manual for details.)
    o) If you want to use ParMETIS, use "--enable-parmetis" with 
       "--with-PARMETISDIR=dir" to set up ParMETIS installation directory,
        again use absolute path.

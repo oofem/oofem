@@ -41,7 +41,8 @@
 
 enum GenEigvalSolverType {
     GES_SubspaceIt,
-    GES_InverseIt
+    GES_InverseIt,
+    GES_SLEPc
 };
 
 #endif // geneigvalsolvertype_h

@@ -131,6 +131,7 @@ enum InputFieldType {
     IFT_EigenValueDynamic_nroot,
     IFT_EigenValueDynamic_rtolv,
     IFT_EigenValueDynamic_stype,
+    IFT_EigenValueDynamic_smtype,
 
     IFT_LinearStability_nroot,
     IFT_LinearStability_rtolv,

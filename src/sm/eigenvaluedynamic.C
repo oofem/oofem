@@ -105,7 +105,10 @@ EigenValueDynamic :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_EigenValueDynamic_stype, "stype"); // Macro
     solverType = ( GenEigvalSolverType ) val;
 
-
+    val = 0; //Default Skyline
+    IR_GIVE_OPTIONAL_FIELD (ir, val, IFT_EigenValueDynamic_smtype, "smtype"); // Macro
+    sparseMtrxType = (SparseMtrxType) val;
+    
     return IRRT_OK;
 }
 
@@ -216,9 +219,13 @@ void EigenValueDynamic :: solveYourselfAt(TimeStep *tStep) {
          * massMatrix ->  checkSizeTowardsBanWidth (mht) ;
          * delete mht;
          */
-        stiffnessMatrix = new Skyline();
+
+        stiffnessMatrix = ::CreateUsrDefSparseMtrx(sparseMtrxType);
         stiffnessMatrix->buildInternalStructure(this, 1, EID_MomentumBalance);
-        massMatrix = stiffnessMatrix->GiveCopy();
+
+        //massMatrix = stiffnessMatrix->GiveCopy();
+	massMatrix = ::CreateUsrDefSparseMtrx(sparseMtrxType);
+        massMatrix->buildInternalStructure(this, 1, EID_MomentumBalance);
 
         this->assemble( stiffnessMatrix, tStep, EID_MomentumBalance, StiffnessMatrix, this->giveDomain(1) );
         this->assemble( massMatrix, tStep, EID_MomentumBalance, MassMatrix, this->giveDomain(1) );
@@ -473,3 +480,19 @@ EigenValueDynamic :: printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *atTime)
 {
     iDof->printSingleOutputAt(stream, atTime, 'd', EID_MomentumBalance, VM_Total);
 }
+
+#ifdef __SLEPC_MODULE
+void 
+EigenValueDynamic::initPetscContexts ()
+{
+  PetscContext *petscContext;
+  
+  int i;
+  petscContextList -> growTo(ndomains) ;
+  for (i=0; i < this->ndomains ; i++) {
+    petscContext =  new PetscContext (this, EID_MomentumBalance);
+    petscContextList->put(i+1,petscContext) ;
+    
+  }
+}
+#endif

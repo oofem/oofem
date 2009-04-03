@@ -62,6 +62,12 @@
 #endif
 #endif
 
+#ifdef __SLEPC_MODULE
+#ifndef __MAKEDEPEND
+#include "slepceps.h"
+#endif
+#endif
+
 #ifndef __MAKEDEPEND
 #include <stdio.h>
 #include <string.h>
@@ -110,6 +116,10 @@ int main(int argc, char *argv[])
 
 #ifdef __PETSC_MODULE
     PetscInitialize(& argc, & argv, PETSC_NULL, PETSC_NULL);
+#endif
+
+#ifdef __SLEPC_MODULE
+    SlepcInitialize(&argc, &argv, PETSC_NULL, PETSC_NULL);
 #endif
 
     //
@@ -233,6 +243,11 @@ int main(int argc, char *argv[])
 #ifdef __PETSC_MODULE
         PetscFinalize();
 #endif
+
+#ifdef __SLEPC_MODULE
+        SlepcFinalize();
+#endif
+
 #ifdef __PARALLEL_MODE
         MPI_Finalize();
 #endif
@@ -250,6 +265,11 @@ int main(int argc, char *argv[])
 #ifdef __PETSC_MODULE
     PetscFinalize();
 #endif
+
+#ifdef __SLEPC_MODULE
+        SlepcFinalize();
+#endif
+
 #ifdef __PARALLEL_MODE
     MPI_Finalize();
 #endif

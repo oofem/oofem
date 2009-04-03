@@ -172,6 +172,7 @@ enum classType {
     IMLSolverClass,
     SpoolesSolverClass,
     PetscSolverClass,
+    SlepcSolverClass,
 
     MaterialClass,
     StructuralMaterialClass,

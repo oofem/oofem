@@ -67,6 +67,7 @@ class EigenValueDynamic : public EngngModel
 private:
     SparseMtrx *stiffnessMatrix;
     SparseMtrx *massMatrix;
+    SparseMtrxType sparseMtrxType;
     FloatMatrix eigVec;
     FloatArray eigVal;
     int numberOfRequiredEigenValues;
@@ -110,6 +111,14 @@ public:
     void   setActiveVector(int i) { activeVector = i; }
     int resolveCorrespondingEigenStepNumber(void *obj);
 
+#ifdef __SLEPC_MODULE
+    /*
+      Creates Petsc contexts. Must be implemented by derived classes since the governing equation type is reqired 
+      for context creation.
+    */
+    virtual void initPetscContexts ();
+#endif
+    
     /** DOF printing routine. Called by DofManagers to print Dof specific part.
      * Dof class provides component printing routines, but emodel is responsible
      * for what will be printed at DOF level.

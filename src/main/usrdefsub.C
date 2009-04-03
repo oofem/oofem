@@ -64,6 +64,7 @@
 #include "imlsolver.h"
 #include "spoolessolver.h"
 #include "petscsolver.h"
+#include "slepcsolver.h"
 #include "dsssolver.h"
 #ifdef __PARALLEL_MODE
 #include "fetisolver.h"
@@ -706,6 +707,9 @@ SparseGeneralEigenValueSystemNM *CreateUsrDefGeneralizedEigenValueSolver(GenEigv
         return nm;
     } else if ( st == GES_InverseIt ) {
         nm = ( SparseGeneralEigenValueSystemNM * ) new InverseIteration(i, d, m);
+        return nm;
+    } else if ( st == GES_SLEPc ) {
+        nm = ( SparseGeneralEigenValueSystemNM * ) new SLEPcSolver(i, d, m);
         return nm;
     } else {
         fprintf(stderr, "CreateUsrDefGeneralizedEigenValueSolver: Unknown solver type\n");
