@@ -424,6 +424,12 @@ int Domain :: instanciateYourself(DataReader *dr)
     NonlocalBarrier *barrier;
     RandomFieldGenerator *rfg;
 
+#ifdef __ENABLE_COMPONENT_LABELS
+    // mapping from label to local numbers for dofmans and elements
+    std :: map< int, int> dofManLabelMap, elemLabelMap;
+#endif
+
+
     FILE *outputStream = this->giveEngngModel()->giveOutputStream();
 
     // read type of Domain to be solved
@@ -477,6 +483,22 @@ int Domain :: instanciateYourself(DataReader *dr)
         //__keyword = NULL; result = ir->giveField(name, MAX_NAME_LENGTH, __keyword);
         IR_GIVE_RECORD_KEYWORD_FIELD(ir, name, num, MAX_NAME_LENGTH);
 
+#ifdef __ENABLE_COMPONENT_LABELS
+	// assign component number according to record order
+	// component number (as given in input record) becomes label
+        ( node = ( DofManager * )
+	  ( DofManager(i+1, this).ofType(name) ) )->initializeFrom(ir);
+	if ( dofManLabelMap.find(num) == dofManLabelMap.end() ) {
+	  // label does not exist yet
+	  dofManLabelMap[num]=i+1;
+	} else {
+	  _error2("instanciateYourself: Dofmanager entry already exist (label=%d)", num);
+	}
+	  
+	node -> setGlobalNumber (num); // set label
+	dofManagerList->put(i+1, node);
+#else
+	// component numbers as given in input record
         ( node = ( DofManager * )
                  ( DofManager(num, this).ofType(name) ) )->initializeFrom(ir);
 
@@ -490,6 +512,7 @@ int Domain :: instanciateYourself(DataReader *dr)
         } else {
             _error2("instanciateYourself: Dofmanager entry already exist (num=%d)", num);
         }
+#endif
 
         //dofManagerList->put(i+1,node) ;
         ir->finish();
@@ -507,6 +530,20 @@ int Domain :: instanciateYourself(DataReader *dr)
         //__keyword = NULL; result = ir->giveField(name, MAX_NAME_LENGTH, __keyword);
         IR_GIVE_RECORD_KEYWORD_FIELD(ir, name, num, MAX_NAME_LENGTH);
 
+#ifdef __ENABLE_COMPONENT_LABELS
+        ( elem = ( Element * )
+                 ( Element(i+1, this).ofType(name) ) )->initializeFrom(ir);
+
+	if ( elemLabelMap.find(num) == elemLabelMap.end() ) {
+	  // label does not exist yet
+	  elemLabelMap[num]=i+1;
+	} else {
+	  _error2("instanciateYourself: Element entry already exist (label=%d)", num);
+	}
+
+	elem->setGlobalNumber(num);
+	elementList->put(i+1, elem);
+#else
         ( elem = ( Element * )
                  ( Element(num, this).ofType(name) ) )->initializeFrom(ir);
 
@@ -520,7 +557,7 @@ int Domain :: instanciateYourself(DataReader *dr)
         } else {
             _error2("instanciateYourself: element entry already exist (num=%d)", num);
         }
-
+#endif
         //elementList->put(i+1,elem) ;
         ir->finish();
     }
@@ -746,6 +783,15 @@ int Domain :: instanciateYourself(DataReader *dr)
 #  ifdef VERBOSE
     VERBOSE_PRINT0("Instanciated load-time fncts ", nloadtimefunc)
 #  endif
+      
+      
+#ifdef __ENABLE_COMPONENT_LABELS
+      // change internal component references from labels to assigned local numbers
+      MapBasedEntityRenumberingFunctor labelToLocNumFunctor (dofManLabelMap, elemLabelMap);
+    for (i=1;i<=nnode;i++) this->giveDofManager(i)->updateLocalNumbering(labelToLocNumFunctor); 
+    for (i=1;i<=nelem;i++) this->giveElement(i)->updateLocalNumbering(labelToLocNumFunctor); 
+			     
+#endif
 
     return 1;
 }

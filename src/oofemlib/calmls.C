@@ -1098,26 +1098,34 @@ void CylindricalALM  :: convertHPCMap()
     int size, i;
     int inode, idof;
 
-#ifdef __PARALLEL_MODE
+#if defined(__PARALLEL_MODE) || defined(__ENABLE_COMPONENT_LABELS)
 #ifdef __PETSC_MODULE
     int j, jglobnum, count = 0, ndofman = domain->giveNumberOfDofManagers();
     size = calm_HPCDmanDofSrcArray.giveSize() / 2;
     indirectMap.resize(size);
     for ( j = 1; j <= ndofman; j++ ) {
-        jglobnum = domain->giveNode(j)->giveGlobalNumber();
+        jglobnum = domain->giveNode(j)->giveLabel();
         for ( i = 1; i <= size; i++ ) {
             inode = calm_HPCDmanDofSrcArray.at(2 * i - 1);
             idof  = calm_HPCDmanDofSrcArray.at(2 * i);
             if ( inode == jglobnum ) {
+#if defined(__PARALLEL_MODE) && defined (__PETSC_MODULE)
                 // HUHU hard wired domain no 1
                 if ( engngModel->givePetscContext(1, ut)->giveN2Gmap()->isLocal( domain->giveNode(j) ) ) {
                     indirectMap.at(++count) = domain->giveNode(j)->giveDof(idof)->giveEquationNumber();
                 }
+#else
+		indirectMap.at(++count) = domain->giveNode(j)->giveDof(idof)->giveEquationNumber();
+#endif
 
                 continue;
             }
         }
     }
+
+#ifndef __PARALLEL_MODE
+    if (count != size) OOFEM_WARNING ("CylindricalALM  :: convertHPCMap: some dofmans/Dofs in HPCarray not recognized");
+#endif
 
     calm_HPCIndirectDofMask.resize(count);
     for ( i = 1; i <= count; i++ ) {

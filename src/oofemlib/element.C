@@ -523,8 +523,8 @@ void Element :: printOutputAt(FILE *file, TimeStep *stepN)
 {
     int i;
 
-#ifdef __PARALLEL_MODE
-    fprintf( file, "element %d [%8d] :\n", this->giveNumber(), this->giveGlobalNumber() );
+#if defined(__PARALLEL_MODE) || defined(__ENABLE_COMPONENT_LABELS)
+    fprintf( file, "element %d (%8d) :\n", this->giveLabel(), this->giveNumber() );
 #else
     fprintf(file, "element %d :\n", number);
 #endif

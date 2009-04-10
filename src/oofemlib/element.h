@@ -174,13 +174,16 @@ protected:
     IntegrationRule **integrationRulesArray;
     /// Array of code numbers of element.
     IntArray *locationArray;
-#ifdef __PARALLEL_MODE
+
+#if defined(__PARALLEL_MODE) || defined(__ENABLE_COMPONENT_LABELS)
     /**
      * In parallel mode, globalNumber contains globally unique DoFManager number.
      * The component number, inherited from FEMComponent class contains
      * local domain number.
      */
     int globalNumber;
+#endif
+#ifdef __PARALLEL_MODE
     elementParallelMode parallel_mode;
     /**
      * List of partition sharing the shared eleemnt or
@@ -724,7 +727,11 @@ public:
 
 #endif
 
-#ifdef __PARALLEL_MODE
+#if defined(__PARALLEL_MODE) || defined(__ENABLE_COMPONENT_LABELS)
+    /**
+     * Returns receiver globally unique number (label).
+     */
+    int giveLabel() const { return globalNumber; }
     /**
      * Returns receiver globally unique number.
      */
@@ -733,7 +740,8 @@ public:
      * Sets receiver globally unique number.
      */
     void setGlobalNumber(int num) { globalNumber = num; }
-
+#endif
+#ifdef __PARALLEL_MODE
     /**
      * Return elementParallelMode of receiver. Defined for __Parallel_Mode only.
      */

@@ -743,8 +743,8 @@ void DofManager :: printOutputAt(FILE *stream, TimeStep *stepN)
     EngngModel *emodel = this->giveDomain()->giveEngngModel();
     int i;
 
-#ifdef __PARALLEL_MODE
-    fprintf( stream, "%-8s%8d [%8d]:\n", this->giveClassName(), this->giveNumber(), this->giveGlobalNumber() );
+#if defined(__PARALLEL_MODE) || defined(__ENABLE_COMPONENT_LABELS)
+    fprintf( stream, "%-8s%8d (%8d):\n", this->giveClassName(), this->giveLabel(), this->giveNumber() );
 #else
     fprintf( stream, "%-8s%8d:\n", this->giveClassName(), this->giveNumber() );
 #endif

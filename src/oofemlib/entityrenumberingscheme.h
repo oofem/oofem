@@ -39,6 +39,9 @@
 #ifndef entityrenumberingscheme_h
 #define entityrenumberingscheme_h
 
+#ifndef __MAKEDEPEND
+#include <map>
+#endif 
 /**
  * Type allowing to specify the required renumbering scheme;
  * One can have a renumbering scheme for dof managers
@@ -82,6 +85,37 @@ template <class TClass> class SpecificEntityRenumberingFunctor : public EntityRe
   { return (*pt2Object.*fpt)(n, ers);};             // execute member function
 };
 
+
+// renumbering functor based on provided maps
+class MapBasedEntityRenumberingFunctor : public EntityRenumberingFunctor
+{
+ private:
+  std::map<int,int> &dofmanMap, &elemMap;
+
+ public:
+  MapBasedEntityRenumberingFunctor (std::map<int,int> &_dofmanMap, std::map<int,int> &_elemMap) : 
+  dofmanMap(_dofmanMap), elemMap(_elemMap)
+  {}
+
+  // override operator "()"
+  virtual int operator()(int n, EntityRenumberingScheme ers)
+  { 
+    std::map<int,int> :: const_iterator it;
+    if (ers == ERS_DofManager) {
+      if ((it = dofmanMap.find (n)) != dofmanMap.end()) return it->second;
+    } else if (ers == ERS_Element) {
+      if ((it = elemMap.find (n)) != elemMap.end()) return it->second;
+    } else OOFEM_ERROR ("MapBasedEntityRenumberingFunctor: unsupported EntityRenumberingScheme");
+
+    OOFEM_ERROR2 ("MapBasedEntityRenumberingFunctor: component label %d not found", n);
+    return 0;
+  }
+  
+  // override function "Call"
+  virtual int call(int n, EntityRenumberingScheme ers)
+  { return this->operator()(n, ers);};             // execute member function
+  
+};
 
 #endif // entityrenumberingscheme_h
 

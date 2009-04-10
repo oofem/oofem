@@ -135,13 +135,15 @@ protected:
     bool isBoundaryFlag;
     /// flag indicating whether receiver has slave dofs
     bool hasSlaveDofs;
-#ifdef __PARALLEL_MODE
+#if defined(__PARALLEL_MODE) || defined(__ENABLE_COMPONENT_LABELS)
     /**
      * In parallel mode, globalNumber contains globally unique DoFManager number.
      * The component number, inherited from FEMComponent class contains
      * local domain number.
      */
     int globalNumber;
+#endif
+#ifdef __PARALLEL_MODE
     dofManagerParallelMode parallel_mode;
     /**
      * List of partition sharing the shared dof manager or
@@ -424,13 +426,17 @@ public:
 #ifdef __OOFEG
     virtual void   drawYourself(oofegGraphicContext &context) { }
 #endif
-#ifdef __PARALLEL_MODE
+
+#if defined(__PARALLEL_MODE) || defined(__ENABLE_COMPONENT_LABELS)
     /**
      * Returns receiver globally unique number.
      */
     int giveGlobalNumber() const { return globalNumber; }
+    int giveLabel() const {return globalNumber;}
     /** sets receiver global number */
     void setGlobalNumber(int _number) { globalNumber = _number; }
+#endif
+#ifdef __PARALLEL_MODE
     /**
      * Return dofManagerParallelMode of receiver. Defined for __Parallel_Mode only.
      */
