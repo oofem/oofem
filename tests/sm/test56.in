@@ -49,9 +49,9 @@ ConstantFunction 1 f(t) 1.
 #
 #%BEGIN_CHECK% tolerance 1.e-2
 ## check eigen values
-#EIGVAL tStep 1 EigNum 1 value 3.57840183e+01
-#EIGVAL tStep 1 EigNum 2 value 5.34208560e+01
-#EIGVAL tStep 1 EigNum 3 value 1.45184586e+02
+#EIGVAL tStep 1 EigNum 1 value 1.28049596e+03
+#EIGVAL tStep 1 EigNum 2 value 2.85378786e+03
+#EIGVAL tStep 1 EigNum 3 value 2.10785640e+04
 #%END_CHECK%
 
 

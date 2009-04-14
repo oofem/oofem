@@ -1165,11 +1165,11 @@ ConstantFunction 1 f(t) 1.0
 #
 #%BEGIN_CHECK% tolerance 1.e-4
 ## check eigen values
-#EIGVAL tStep 1 EigNum 1 value 9.87097621e-01
-#EIGVAL tStep 1 EigNum 2 value 3.94992819e+00
-#EIGVAL tStep 1 EigNum 3 value 8.89238648e+00
-#EIGVAL tStep 1 EigNum 4 value 1.37791541e+01
-#EIGVAL tStep 1 EigNum 5 value 1.58190679e+01
+#EIGVAL tStep 1 EigNum 1 value 9.74361712e-01
+#EIGVAL tStep 1 EigNum 2 value 1.56019327e+01
+#EIGVAL tStep 1 EigNum 3 value 7.90745373e+01
+#EIGVAL tStep 1 EigNum 4 value 1.89865089e+02
+#EIGVAL tStep 1 EigNum 5 value 2.50242909e+02
 ##
 ## check some nodal values
 #%END_CHECK%
