@@ -131,6 +131,7 @@ public:
 
     /// Returns receiver's number
     int giveNumber() { return number; }
+    void setNumber(int i) {number=i;}
     /// Returns receiver's version
     int giveVersion() { return version; }
     /// Returns receiver's meta step number

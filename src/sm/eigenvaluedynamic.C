@@ -354,6 +354,13 @@ void EigenValueDynamic :: terminate(TimeStep *stepN)
      * in GaussPoints - it not necesarry now - so I omit this part of code
      */
 
+    for ( i = 1; i <=  numberOfRequiredEigenValues; i++ ) {
+      // export using export manager
+      stepN->setTime( ( double ) i ); // we use time as intrinsic eigen value index
+      stepN->setNumber(i);
+      exportModuleManager->doOutput(stepN);
+    }
+      
     this->saveStepContext(stepN);
 }
 

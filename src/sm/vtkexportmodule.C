@@ -838,7 +838,7 @@ VTKExportModule :: exportPrimVarAs(UnknownType valID, FILE *stream, TimeStep *tS
     InternalStateValueType type = ISVT_UNDEFINED;
     int nScalarComp = 1;
 
-    if ( ( valID == DisplacementVector ) || ( valID == VelocityVector ) ) {
+    if ( ( valID == DisplacementVector ) || ( valID == EigenVector ) || ( valID == VelocityVector ) ) {
         type = ISVT_VECTOR;
     } else if ( ( valID == FluxVector ) || ( valID == PressureVector ) || ( valID == TemperatureVector ) ) {
         type = ISVT_SCALAR;
@@ -870,7 +870,7 @@ VTKExportModule :: exportPrimVarAs(UnknownType valID, FILE *stream, TimeStep *tS
         dman = d->giveNode(inode);
         numberOfDofs = dman->giveNumberOfDofs();
 
-        if ( ( valID == DisplacementVector ) || ( valID == VelocityVector ) ) {
+        if ( ( valID == DisplacementVector ) || ( valID == EigenVector ) || ( valID == VelocityVector ) ) {
             iVal.resize(3);
             iVal.zero();
 
@@ -952,7 +952,7 @@ VTKExportModule :: exportPrimVarAs(UnknownType valID, FILE *stream, TimeStep *tS
             dman = d->giveNode( regionNodalNumbers.at(inode) );
             numberOfDofs = dman->giveNumberOfDofs();
 
-            if ( ( valID == DisplacementVector ) || ( valID == VelocityVector ) ) {
+            if ( ( valID == DisplacementVector ) || ( valID == EigenVector ) ||( valID == VelocityVector ) ) {
                 iVal.resize(3);
                 iVal.zero();
 
