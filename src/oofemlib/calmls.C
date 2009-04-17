@@ -1115,7 +1115,7 @@ void CylindricalALM  :: convertHPCMap()
                     indirectMap.at(++count) = domain->giveNode(j)->giveDof(idof)->giveEquationNumber();
                 }
 #else
-		indirectMap.at(++count) = domain->giveNode(j)->giveDof(idof)->giveEquationNumber();
+                indirectMap.at(++count) = domain->giveNode(j)->giveDof(idof)->giveEquationNumber();
 #endif
 
                 continue;
@@ -1132,7 +1132,7 @@ void CylindricalALM  :: convertHPCMap()
         calm_HPCIndirectDofMask.at(i) = indirectMap.at(i);
     }
 
-#endif
+#endif  //__PETSC_MODULE
 #else
     size = calm_HPCDmanDofSrcArray.giveSize() / 2;
     indirectMap.resize(size);

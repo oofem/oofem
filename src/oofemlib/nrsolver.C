@@ -532,7 +532,7 @@ NRSolver :: giveLineSearchSolver()
 void
 NRSolver :: initPrescribedEqs()
 {
-#ifdef __PARALLEL_MODE
+#if defined(__PARALLEL_MODE) || defined(__ENABLE_COMPONENT_LABELS)
 #ifdef __PETSC_MODULE
     PetscNatural2GlobalOrdering *n2lpm = engngModel->givePetscContext(1, ut)->giveN2Gmap();
     int jglobnum, count = 0, ndofman = domain->giveNumberOfDofManagers();
@@ -544,10 +544,14 @@ NRSolver :: initPrescribedEqs()
             inode = prescribedDofs.at(2 * i - 1);
             idof  = prescribedDofs.at(2 * i);
             if ( inode == jglobnum ) {
+#if defined(__PARALLEL_MODE) && defined (__PETSC_MODULE)
                 // HUHU hard wired domain no 1
                 if ( n2lpm->isLocal( domain->giveNode(j) ) ) {
                     localPrescribedEqs.at(++count) = domain->giveNode(j)->giveDof(idof)->giveEquationNumber();
                 }
+#else
+                localPrescribedEqs.at(++count) = domain->giveNode(j)->giveDof(idof)->giveEquationNumber();
+#endif
 
                 continue;
             }
@@ -560,7 +564,7 @@ NRSolver :: initPrescribedEqs()
     }
 
     numberOfPrescribedDofs = count;
-#endif
+#endif //__PETSC_MODULE
 #else
     int i, inode, idof;
     prescribedEqs.resize(numberOfPrescribedDofs);
