@@ -280,7 +280,11 @@ VTKExportModule :: giveOutputStream(TimeStep *tStep)
     FILE *answer;
 
     emodel->giveOutputBaseFileName(baseFileName, MAX_FILENAME_LENGTH);
+#ifdef __PARALLEL_MODE
+    sprintf( fileName, "%s_%03d.%d.vtk", baseFileName, emodel->giveRank(),tStep->giveNumber() );
+#else
     sprintf( fileName, "%s.%d.vtk", baseFileName, tStep->giveNumber() );
+#endif
     if ( ( answer = fopen(fileName, "w") ) == NULL ) {
         OOFEM_ERROR2("VTKExportModule::giveOutputStream: failed to open file %s", fileName);
     }
