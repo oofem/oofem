@@ -801,6 +801,7 @@ enum InputFieldType {
     IFT_LSPCS_ci2,
 
     IFT_LoadBalancer_wtp,
+    IFT_LoadBalancerMonitor_nodeWeightMode,
     IFT_LoadBalancerMonitor_initialnodeweights,
     IFT_WallClockLoadBalancerMonitor_relwct,
     IFT_WallClockLoadBalancerMonitor_abswct,
@@ -828,7 +829,6 @@ enum InputFieldType {
 
     IFT_EnrichmentItem_geometryItemNr,
     IFT_EnrichmentItem_enrichmentFunctionNr,
-    IFT_EnrichmentItem_materialNr,
 
     IFT_Unknown
 };

@@ -727,6 +727,7 @@ EngngModel :: solveYourself()
 
             this->solveYourselfAt( this->giveCurrentStep() );
             this->terminate( this->giveCurrentStep() );
+
             //#ifdef TIME_REPORT
             this->timer.stopTimer(EngngModelTimer :: EMTT_SolutionStepTimer);
             //this->timer.stopTimer(EngngModelTimer::EMTT_NetComputationalStepTimer);
@@ -743,7 +744,7 @@ EngngModel :: solveYourself()
                 this->balanceLoad( this->giveCurrentStep() );
             }
 
-#endif */
+#endif
         }
     }
 }
@@ -975,7 +976,7 @@ void EngngModel :: assemble(SparseMtrx *answer, TimeStep *tStep, EquationID ut, 
     this->timer.pauseTimer(EngngModelTimer :: EMTT_NetComputationalStepTimer);
 
     answer->assembleBegin();
-    answer->assembleEnd(); 
+    answer->assembleEnd();
 }
 
 void EngngModel :: assemble(SparseMtrx *answer, TimeStep *tStep, EquationID r_id, EquationID c_id, CharType type, Domain *domain)
@@ -986,7 +987,7 @@ void EngngModel :: assemble(SparseMtrx *answer, TimeStep *tStep, EquationID r_id
 // and assembling every contribution to answer
 //
 //
-{ 
+{
     int ielem;
     IntArray r_loc, c_loc;
     FloatMatrix mat;
@@ -2075,12 +2076,13 @@ EngngModel :: giveOutputStream()
 // Returns an output stream on the data file of the receiver.
 {
     if ( !outputStream ) {
-        /*
-         * char* tmp = tmpnam (NULL);
-         * _warning2 ("giveOutputStream: using default output stream %s",tmp);
-         * outputStream = fopen (tmp,"w") ;
-         *
-         */
+#ifdef _MSC_VER
+
+      char* tmp = tmpnam (NULL);
+      _warning2 ("giveOutputStream: using default output stream %s",tmp);
+      outputStream = fopen (tmp,"w") ;
+#else
+         
         char sfn[] = "oofem.out.XXXXXX";
         int fd = -1;
         FILE *sfp;
@@ -2097,6 +2099,7 @@ EngngModel :: giveOutputStream()
         }
 
         outputStream = sfp;
+#endif
     }
 
     return outputStream;

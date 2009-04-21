@@ -532,8 +532,6 @@ public:
      */
     virtual double    giveUnknownComponent(EquationID, ValueModeType, TimeStep *, Domain *, Dof *) { return 0.0; }
     virtual double    giveUnknownComponent(UnknownType, ValueModeType, TimeStep *, Domain *, Dof *) { return 0.0; }
-    void setNumberOfEquations(int id, int neq) { numberOfEquations = neq;
-    domainNeqs.at(id) = neq; }
 
 #ifdef __PARALLEL_MODE
     /**
@@ -786,7 +784,7 @@ public:
      * @param domain source domain
      */
     virtual void giveElementCharacteristicMatrix(FloatMatrix &answer, int num, CharType type, TimeStep *tStep, Domain *domain)
-    {  domain->giveElement(num)->giveCharacteristicMatrix(answer, type, tStep); }
+    { domain->giveElement(num)->giveCharacteristicMatrix(answer, type, tStep); }
     /**
      * Returns characteristic vector of element. The Element::GiveCharacteristicVector function
      * should not be called directly, because EngngModel may require some special modification

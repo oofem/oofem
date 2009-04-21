@@ -76,6 +76,10 @@ Dof :: Dof(int i, DofManager *aNode, DofID id)
 int
 Dof :: giveDofManNumber() const { return this->dofManager->giveNumber(); } // termitovo
 
+#ifdef __PARALLEL_MODE
+int 
+Dof :: giveDofManGlobalNumber() const { return this->dofManager->giveGlobalNumber(); }
+#endif
 
 void Dof :: printSingleOutputAt(FILE *File, TimeStep *stepN, char ch,
                                 EquationID type, ValueModeType mode, double scale)

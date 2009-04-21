@@ -23,7 +23,7 @@ class EnrichmentItem : public FEMComponent
          /// Constructor
          EnrichmentItem (int n,Domain* aDomain);
          /// initializes EnrichmentItem from InputRecord
-         virtual IRResultType initializeFrom (InputRecord* ir);
+         IRResultType initializeFrom (InputRecord* ir);
          /// returns class name
          const char* giveClassName () const { return "EnrichmentItem" ; }
          /// Accessor
@@ -46,9 +46,6 @@ class EnrichmentItem : public FEMComponent
          IntArray* getDofIdArray(){ return &dofsId; }
          /// Finds out whether a DofManager is enriched
          bool isDofManEnriched(int nodeNumber);
-         /// Checks whether a Geometry is inside or outside
-         bool isOutside(BasicGeometry *bg);
-         virtual Material * giveMaterial() { return NULL; }
 
     protected:
          /// Geometry associated with EnrichmentItem
@@ -63,25 +60,12 @@ class EnrichmentItem : public FEMComponent
 class CrackTip : public EnrichmentItem {
     public:
         CrackTip (int n,Domain* aDomain) : EnrichmentItem(n, aDomain) {}
-        const char* giveClassName () const { return "CrackTip" ; }
 };
 
 /** Concrete representation of EnrichmentItem */
 class CrackInterior : public EnrichmentItem {
     public:
         CrackInterior (int n,Domain* aDomain) : EnrichmentItem(n, aDomain) {}
-        const char* giveClassName () const { return "CrackInterior" ; }
-};
-
-/** Concrete representation of EnrichmentItem */
-class Inclusion : public EnrichmentItem {
-    protected:
-        Material *mat;
-    public:
-        Inclusion (int n,Domain* aDomain) : EnrichmentItem(n, aDomain) {}
-        const char* giveClassName () const { return "Inclusion" ; }
-        IRResultType initializeFrom(InputRecord* ir);
-        Material * giveMaterial() {return mat;}
 
 };
 #endif	/* _ENRICHMENTITEM_H */

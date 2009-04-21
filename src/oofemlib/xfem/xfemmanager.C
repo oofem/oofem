@@ -23,8 +23,6 @@
 #include "oofem_limits.h"
 #include "usrdefsub.h"
 #include "masterdof.h"
-#include "xfem/xfemmanager.h"
-#include "patchintegrationrule.h"
 
 XfemManager :: XfemManager(EngngModel *emodel, int domainIndex) {
     this->emodel = emodel;
@@ -32,7 +30,6 @@ XfemManager :: XfemManager(EngngModel *emodel, int domainIndex) {
     this->enrichmentFunctionList = new AList< EnrichmentFunction >(0);
     this->enrichmentItemList = new AList< EnrichmentItem >(0);
     this->geometryList = new AList< BasicGeometry >(0);
-    this->fictPosition = new AList<IntArray>();
     numberOfEnrichmentItems = 0;
     numberOfEnrichmentFunctions = 0;
     numberOfGeometryItems = 0;
@@ -43,7 +40,6 @@ XfemManager :: ~XfemManager() {
     delete enrichmentItemList;
     delete geometryList;
     delete enrichmentFunctionList;
-    delete fictPosition;
 }
 Domain *XfemManager :: giveDomain() { return emodel->giveDomain(domainIndex); }
 
@@ -104,34 +100,22 @@ EnrichmentFunction *XfemManager :: giveEnrichmentFunction(int n)
     return NULL;
 }
 
-int XfemManager :: computeFictPosition() {
-  
+void XfemManager :: computeFictPosition() {
     // gives for a particular node position of its fictitious node
     // it is supposed that the fictitious nodes are at the very end
     // this is supposed to be used for creation of locationArray for a dofmanager
-    // the function returns simultaneously the last dof
     int nrNodes = emodel->giveDomain(1)->giveNumberOfDofManagers();
-    int count = this->giveDomain()->giveEngngModel()->giveNumberOfEquations(EID_MomentumBalance);
-    IntArray edofs;
-    for ( int j = 1; j <= nrNodes; j++ ) {
-      IntArray *dofs = new IntArray();
-
-      for(int i = 1; i <= this->enrichmentItemList->giveSize(); i++){
-
-        int dofSize = enrichmentItemList->at(i)->getDofIdArray()->giveSize();
-	if(enrichmentItemList->at(i)->isDofManEnriched(j)){
-	  edofs.resize(dofSize);
-	  for(int k = 1; k <= dofSize; k++){
-	    count++;
-	    edofs.at(k) = count;
-	  }               
-	  dofs->followedBy(edofs);
-	}
-      }
-      fictPosition->put(j,dofs);
+    this->fictPosition.resize(nrNodes);
+    int count = 0;
+    for ( int i = 1; i <= nrNodes; i++ ) {
+        int enr = this->computeNodeEnrichmentType(i);
+        if ( enr > 0 ) {
+            int sz = fictPosition.giveSize();
+            fictPosition.resize(sz + 1);
+            fictPosition.at(i) = nrNodes + count + 1;
+            count = count + enr;
+        }
     }
-    return count;
-    
 }
 
 bool XfemManager :: isEnriched(int nodeNumber) {
@@ -166,7 +150,28 @@ XfemManager :: XfemType XfemManager :: computeNodeEnrichmentType(int nodeNumber)
     }
 
     return ret;
-} 
+}
+
+void XfemManager :: addDofsOnDofManagers() {
+    int numberOfDofManagers = this->giveDomain()->giveNumberOfDofManagers();
+    int n = this->giveDomain()->giveDofManager(numberOfDofManagers)->giveNumberOfDofs();
+    int count = this->giveDomain()->giveDofManager(numberOfDofManagers)->giveDof(n)->giveEquationNumber();
+    for ( int i = 1; i <= numberOfDofManagers; i++ ) {
+        DofManager *dm = this->emodel->giveDomain(domainIndex)->giveDofManager(i);
+        for ( int j = 1; j <= enrichmentItemList->giveSize(); j++ ) {
+            if ( enrichmentItemList->at(j)->isDofManEnriched( dm->giveNumber() ) ) {
+                count++;
+                IntArray *dofIds = enrichmentItemList->at(j)->getDofIdArray();
+                for ( int k = 1; k <= enrichmentItemList->at(j)->giveNumberOfDofs(); k++ ) {
+                    int dofmanNr = dm->giveNumberOfDofs();
+                    Dof *df = new MasterDof( dofmanNr + 1, dm, 0, 0, dofIds->at ( k ) );
+                    // here we need to set equation number i guess
+                    dm->addDof(dofmanNr + 1, df);
+                }
+            }
+        }
+    }
+}
 
 IRResultType
 XfemManager :: initializeFrom(InputRecord *ir) {
@@ -273,12 +278,23 @@ DofID XfemManager :: allocateNewDofID() {
     return answer;
 }
 
-
 void XfemManager :: updateIntegrationRule() {
     for ( int i = 1; i <= this->giveDomain()->giveNumberOfElements(); i++ ) {
         Element *el = this->giveDomain()->giveElement(i);
         XfemElementInterface *xei = ( XfemElementInterface * ) el->giveInterface(XfemElementInterfaceType);
         xei->XfemElementInterface_updateIntegrationRule();
+    }
+}
+
+void XfemManager :: createEnrMatrices() {
+    for ( int i = 1; i <= this->giveDomain()->giveNumberOfElements(); i++ ) {
+        Element *el = this->giveDomain()->giveElement(i);
+        XfemElementInterface *xei = ( XfemElementInterface * ) el->giveInterface(XfemElementInterfaceType);
+        for ( int j = 1; j <= el->giveDefaultIntegrationRulePtr()->getNumberOfIntegrationPoints(); i++ ) {
+            GaussPoint *gp = el->giveDefaultIntegrationRulePtr()->getIntegrationPoint(j);
+            FloatMatrix answer;
+            xei->XfemElementInterface_createEnrBmatrixAt(gp, answer);
+        }
     }
 }
 
