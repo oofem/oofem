@@ -27,5 +27,6 @@ public:
     void computeGpsForPatch(Patch *patch, AList< GaussPoint > *answer, MaterialMode matMode);
     /// Wrap up function for computeGps
     int SetUpPointsOnSquare(int, MaterialMode matMode, GaussPoint ***);
+    int giveNumberOfPatches() { return patchSet->giveSize(); }
 };
 #endif

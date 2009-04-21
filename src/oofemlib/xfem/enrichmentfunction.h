@@ -9,6 +9,7 @@
 #define _ENRICHMENTFUNCTION_H
 
 #include "femcmpnn.h"
+#include "gausspnt.h"
 
 class EnrichmentItem;
 class BasicGeometry;
@@ -30,6 +31,10 @@ public:
     virtual void evaluateFunctionAt(FloatArray &answer, FloatArray *point) = 0;
     /// Evaluates a function derivative at a particular point
     virtual void evaluateDerivativeAt(FloatMatrix &answer, FloatArray *point) = 0;
+    /// Evaluates a function at a particular point
+    virtual void evaluateFunctionAt(FloatArray &answer, GaussPoint *gp) { }
+    /// Evaluates a function derivative at a particular point
+    virtual void evaluateDerivativeAt(FloatMatrix &answer, GaussPoint *gp) { }
     /// Accessor
     BasicGeometry *giveGeometry();
     /// Inserts EnrichmentItem into associatedEnrItem array
@@ -76,6 +81,20 @@ public:
     }
     virtual void evaluateFunctionAt(FloatArray &answer, FloatArray *point);
     virtual void evaluateDerivativeAt(FloatMatrix &answer, FloatArray *point);
+};
+
+/** Class representing bimaterial interface */
+class RampFunction : public EnrichmentFunction
+{
+public:
+
+    RampFunction(int n, Domain *aDomain) : EnrichmentFunction(n, aDomain) {
+        this->numberOfDofs = 2;
+    }
+    void evaluateFunctionAt(FloatArray &answer, FloatArray *point);
+    void evaluateDerivativeAt(FloatMatrix &answer, FloatArray *point);
+    void evaluateFunctionAt(FloatArray &answer, GaussPoint *gp);
+    void evaluateDerivativeAt(FloatMatrix &answer, GaussPoint *gp);
 };
 
 #endif  /* _ENRICHMENTFUNCTION_H */

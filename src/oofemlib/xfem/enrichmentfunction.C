@@ -30,6 +30,68 @@ void DiscontinuousFunction :: evaluateDerivativeAt(FloatMatrix &answer, FloatArr
     answer.zero();
 }
 
+void RampFunction :: evaluateFunctionAt(FloatArray &answer, FloatArray *point) {
+    answer.resize(2);
+    double dist = activeEnrItem->giveGeometry()->computeDistanceTo(point);
+    double absDist;
+    if (dist < 0.0000) absDist = (-1)*dist;
+    else absDist = dist;
+    answer.at(1) = answer.at(2) = absDist;
+}
+
+void RampFunction :: evaluateDerivativeAt(FloatMatrix &answer, FloatArray *point) {
+    double dist = activeEnrItem->giveGeometry()->computeDistanceTo(point);
+    double absDist;
+    if (dist < 0.0000) absDist = (-1)*dist;
+    else absDist = dist;
+    answer.resize(3, 2);
+    answer.zero();
+    answer.at(1,1) = answer.at(2,2) = answer.at(3,1) = answer.at(3,2) = absDist / dist;
+}
+
+void RampFunction :: evaluateFunctionAt(FloatArray &answer, GaussPoint *gp){
+  FloatArray N;
+  Element *el = gp->giveElement();
+  el->giveInterpolation()->evalN(N, * gp->giveCoordinates(), 0.0);
+  double dist = 0;
+  double absMember = 0;
+  double member = 0;
+  for(int i = 1; i <= el->giveNumberOfDofManagers(); i++){
+      dist = activeEnrItem->giveGeometry()->computeDistanceTo(el->giveDofManager(i)->giveCoordinates());
+      member += N.at(i)*dist;
+  }
+  if (member < 0.0000) absMember = (-1)*member;
+    else absMember = member;
+  answer.resize(2);
+  answer.at(1) = answer.at(2) = absMember;
+}
+
+void RampFunction :: evaluateDerivativeAt(FloatMatrix &answer, GaussPoint *gp){
+  FloatArray N;
+  Element *el = gp->giveElement();
+  el->giveInterpolation()->evalN(N, * gp->giveCoordinates(), 0.0);
+  IntArray dofManArray(el->giveNumberOfDofManagers());
+  for(int i = 1; i <= el->giveNumberOfDofManagers(); i++){
+      dofManArray.at(i) = el->giveDofManagerNumber(i);
+  }
+  FloatMatrix dNdx;
+  el->giveInterpolation()->evaldNdx(dNdx, el->giveDomain(), dofManArray, * gp->giveCoordinates(), 0.0);
+  double dist = 0;
+  double dfdx = 0;
+  double dfdy = 0;
+  double phi = 0;
+  for(int i = 1; i <= el->giveNumberOfDofManagers(); i++){
+      dist = activeEnrItem->giveGeometry()->computeDistanceTo(el->giveDofManager(i)->giveCoordinates());
+      phi += N.at(i)*dist;
+      dfdx += dNdx.at(i,1)*dist;
+      dfdy += dNdx.at(i,2)*dist;
+  }
+  answer.resize(3,2);
+  answer.zero();
+  answer.at(1,1) = answer.at(3,2) = dfdx*sgn(phi);
+  answer.at(2,2) = answer.at(3,1) = dfdy*sgn(phi);
+}
+
 // to change
 void BranchFunction :: evaluateFunctionAt(FloatArray &answer, FloatArray *point) {
     /*

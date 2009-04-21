@@ -274,6 +274,7 @@ public:
     void setEquationNumber(int equationNumber) { this->equationNumber = equationNumber; } // rch
     void setUnknowns(Dictionary *unknowns) { this->unknowns = unknowns; } // rch
     Dictionary *giveUnknowns() { return this->unknowns; } // rch
+    int giveEqn() {return equationNumber;}
 
 #ifdef __PARALLEL_MODE
     /**

@@ -829,6 +829,7 @@ enum InputFieldType {
 
     IFT_EnrichmentItem_geometryItemNr,
     IFT_EnrichmentItem_enrichmentFunctionNr,
+    IFT_EnrichmentItem_materialNr,
 
     IFT_Unknown
 };

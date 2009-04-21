@@ -209,7 +209,8 @@ DofManager :: addDof(int i, Dof *dof)
         for ( int j = 0; j < numberOfDofs; j++ ) {
             DofIDItem did = dofArray [ j ]->giveDofID();
             Dof *dofCp = new MasterDof(j + 1, this, dofArray [ j ]->giveBcId(), dofArray [ j ]->giveIcId(), ( DofID ) did);
-            dofCp->setEquationNumber( dofArray [ j ]->giveEquationNumber() );
+            int eqN = dofArray [ j ]->giveEqn() ;
+            dofCp->setEquationNumber(eqN);
             /*
              *        Dictionary* dn = new Dictionary();
              *        dofCp->setUnknowns(dn);
@@ -230,6 +231,18 @@ DofManager :: addDof(int i, Dof *dof)
     } else {
         _error("addDof: Overwriting current dof");
     }
+}
+
+bool DofManager :: hasDofID(int id) 
+{
+       int count = 0;
+       for(int l = 1; l <= giveNumberOfDofs(); l++){
+		if(dofArray[l-1]->giveDofID() != id) {
+                        count++;
+		}
+       }
+       if(count == giveNumberOfDofs()) return false;
+       else return true;
 }
 
 IntArray *DofManager :: giveLoadArray()

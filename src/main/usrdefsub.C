@@ -899,20 +899,41 @@ MesherInterface *CreateUsrDefMesherInterface(MeshPackageType type, Domain* d)
   
 }
 
-EnrichmentFunction* CreateUsrDefEnrichmentFunction(char*, int, Domain*)
-{
-  return NULL;
+EnrichmentItem *CreateUsrDefEnrichmentItem(char *aClass, int num, Domain *d) {
+    EnrichmentItem *answer = NULL;
+    if ( !strncasecmp(aClass, "cracktip", 8) ) {
+        answer = new CrackTip(num, d);
+    } else if ( !strncasecmp(aClass, "crackinterior", 13) )    {
+        answer = new CrackInterior(num, d);
+    } else if ( !strncasecmp(aClass, "inclusion", 9) )    {
+        answer = new Inclusion(num, d);
+    }
+    return answer;
 }
 
+EnrichmentFunction *CreateUsrDefEnrichmentFunction(char *aClass, int num, Domain *d) {
+    EnrichmentFunction *answer = NULL;
+    if ( !strncasecmp(aClass, "discontinuousfunction", 21) ) {
+        answer = new DiscontinuousFunction(num, d);
+    } else if ( !strncasecmp(aClass, "branchfunction", 14) )    {
+        answer = new BranchFunction(num, d);
+    }
+    else if ( !strncasecmp(aClass, "rampfunction", 14) )    {
+        answer = new RampFunction(num, d);
+    }
 
-BasicGeometry *CreateUsrDefGeometry(char*)
-{
-  return NULL;
+    return answer;
 }
 
-EnrichmentItem* CreateUsrDefEnrichmentItem(char*, int, Domain*)
-{
-  return NULL;
+BasicGeometry *CreateUsrDefGeometry(char *aClass) {
+    BasicGeometry *answer = NULL;
+    if ( !strncasecmp(aClass, "line", 4) ) {
+        answer = new Line();
+    } else if ( !strncasecmp(aClass, "circle", 6) )    {
+        answer = new Circle();
+    }
+
+    return answer;
 }
 
 #ifdef __PARALLEL_MODE

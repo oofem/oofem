@@ -365,6 +365,8 @@ public:
     virtual MaterialInterface *giveMaterialInterface(int n) { return NULL; }
     /** Returns XfemManager at a particular position */
     XfemManager *giveXfemManager(int n) { return this->xfemManagerList->at(n); }
+    void setNumberOfEquations(int id, int neq) { numberOfEquations = neq;
+    domainNeqs.at(id) = neq; }
     // input / output
     /// Returns input file path.
     //char*              giveInputDataFileName () ;

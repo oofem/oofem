@@ -458,6 +458,7 @@ public:
     virtual void setEquationNumber(int equationNumber) {}; // rch
     virtual void setUnknowns(Dictionary *unknowns) {}; // rch
     virtual Dictionary *giveUnknowns() { return NULL; } // rch
+    virtual int giveEqn() {return 0;}
 
 #ifdef __PARALLEL_MODE
     /**

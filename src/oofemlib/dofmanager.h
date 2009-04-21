@@ -422,6 +422,7 @@ public:
     //@}
     /** Adds a Dof to i-th position in dofArray */
     void addDof(int i, Dof *dof);   // rch
+    bool hasDofID(int id); // rch
 
 #ifdef __OOFEG
     virtual void   drawYourself(oofegGraphicContext &context) { }

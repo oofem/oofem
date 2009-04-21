@@ -46,6 +46,9 @@ class EnrichmentItem : public FEMComponent
          IntArray* getDofIdArray(){ return &dofsId; }
          /// Finds out whether a DofManager is enriched
          bool isDofManEnriched(int nodeNumber);
+         /// Checks whether a Geometry is inside or outside
+         bool isOutside(BasicGeometry *bg);
+         virtual Material * giveMaterial() { return NULL; }
 
     protected:
          /// Geometry associated with EnrichmentItem
@@ -66,6 +69,18 @@ class CrackTip : public EnrichmentItem {
 class CrackInterior : public EnrichmentItem {
     public:
         CrackInterior (int n,Domain* aDomain) : EnrichmentItem(n, aDomain) {}
+
+};
+
+/** Concrete representation of EnrichmentItem */
+class Inclusion : public EnrichmentItem {
+    protected:
+        Material *mat;
+    public:
+        Inclusion (int n,Domain* aDomain) : EnrichmentItem(n, aDomain) {}
+        const char* giveClassName () const { return "Inclusion" ; }
+        IRResultType initializeFrom(InputRecord* ir);
+        Material * giveMaterial() {return mat;}
 
 };
 #endif	/* _ENRICHMENTITEM_H */

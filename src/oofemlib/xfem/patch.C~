@@ -1,76 +1,73 @@
 #include "flotarry.h"
 #include "gausspnt.h"
 #include "integrationrule.h"
-#include "patch.C"
+#include "patch.h"
 #include "gaussintegrationrule.h"
 #include "delaunay.h"
 #include <math.h>
 #include "fei2dtrlin.h"
-#include <iostream>
-// it should be more abstract than a triangle
+#include "crosssection.h"
+#include "xfem/enrichmentitem.h"
 
-FEI2dTrLin Patch::interpolation(1, 2);
-
-Patch::Patch(int n, Domain *aDomain, Triangle* shape, Element *parent) : Element(n, aDomain) {
-    this->shape = shape;
+Patch :: Patch(Element *parent) : BasicGeometry() {
     this->parent = parent;
+    this->gps = new AList<GaussPoint>();
 }
 
-void Patch::setIntegrationRule() {
-    this->numberOfIntegrationRules = 1;
-    this->integrationRulesArray = new IntegrationRule*[1];
-    this->integrationRulesArray[0] = new GaussIntegrationRule(1, this);
-    int nPoints = 3;
-    this->integrationRulesArray[0]->setUpIntegrationPoints(_Triangle, nPoints, _PlaneStress);
+Patch::Patch(Element *parent, AList<FloatArray> *vertices) : BasicGeometry() {
+    this->parent = parent;
+    this->vertices = vertices;
+    this->gps = new AList<GaussPoint>();
 }
 
-double Patch::computeVolumeAround(GaussPoint* gp) {
-    double determinant, weight, thickness, volume;
-    const FloatArray ** coords = new const FloatArray*[3];
-    for(int j = 0; j < this->getShape()->getVertices()->giveSize(); j++){
-        coords[j] = this->getShape()->getVertices()->at(j + 1);
+Patch::~Patch(){
+    for(int i = 1; i <= gps->giveSize(); i++){
+       gps->unlink(i);
     }
-    determinant = fabs(this->interpolation.giveTransformationJacobian(coords, *gp->giveCoordinates(), 0.0));
+    delete gps;
+}
+
+void Patch::computeMaterial(){
+    XfemManager *xf = parent->giveDomain()->giveEngngModel()->giveXfemManager(1);
+    EnrichmentItem *er = xf->giveEnrichmentItem(1);
+    if(er->isOutside(this)) this->mat = parent->giveMaterial();
+    else {
+        this->mat = er->giveMaterial();
+    }
+}
+
+void Patch::addGps(GaussPoint *gp){
+    int sz = gps->giveSize();
+    gps->put(sz + 1, gp);
+}
+
+bool Patch::hasGaussPoint(GaussPoint *gp){
+    bool ret = false;
+    for(int i = 1; i <= gps->giveSize(); i++){
+       if(gp == gps->at(i)){
+          ret = true;
+          break;
+       }
+    }
+    return ret;
+}
+
+FEI2dTrLin TrianglePatch :: interpolation(1, 2);
+
+void TrianglePatch :: convertGPIntoParental(GaussPoint *gp) {
+    FloatArray global;
+    const FloatArray ** coords = new const FloatArray*[this->giveNrVertices()];
+    // this we should put into the function before
+    for(int i = 1; i <= this->giveNrVertices(); i++){
+        coords[i-1] = new FloatArray(*this->giveVertex(i));
+    }
+    this->interpolation.local2global(global, coords, *gp->giveCoordinates(), 1.0);
+    for(int i = 1; i <= this->giveNrVertices(); i++){
+        delete coords[i-1];
+    }
     delete [] coords;
-    weight = gp->giveWeight();
-    //    thickness = this -> giveCrossSection() -> give('t'); // we have to check the cross section
-    thickness = 1.0;
-    volume = determinant * weight * thickness;
-    return volume;
+    FloatArray local;
+    parent->computeLocalCoordinates(local, global);
+    gp->setCoordinates(local);
 }
 
-double Patch::computeVolume() {
-    double volume = 0;
-    for (int j = 0; j < integrationRulesArray[0]->getNumberOfIntegrationPoints(); j++) {
-          this->computeVolumeAround(integrationRulesArray[0]->getIntegrationPoint(j));
-    }
-    return volume;
-}
-
-void Patch::convertGPIntoParental(GaussPoint *gp){
-    FloatArray N;
-    this->interpolation.evalN(N, *gp->giveCoordinates(), 1.0);
-    double weight = 2 * gp->giveWeight()*this->computeVolume();
-    FloatArray lCoor;
-    FloatArray xcoor(3);
-    FloatArray ycoor(3);
-    for(int i = 1; i <= 3; i++){
-         FloatArray *point = this->getShape()->getVertices()->at(i);
-         this->parent->computeLocalCoordinates(lCoor, *point);
-         xcoor.at(i) = lCoor.at(1);
-         ycoor.at(i) = lCoor.at(2);
-    }
-    FloatArray gpCoorInParental(2);
-    gpCoorInParental.at(1) = dotProduct(N,xcoor,3);
-    gpCoorInParental.at(2) = dotProduct(N,ycoor,3);
-    gpCoorInParental.printYourself();
-    gp->setCoordinates(gpCoorInParental);
-    gp->setWeight(2 * this->computeVolume() * gp->giveWeight());
-}
-
-void Patch::convertIntoParental() {
-    for (int j = 0; j < integrationRulesArray[0]->getNumberOfIntegrationPoints(); j++) {
-        GaussPoint *gp = integrationRulesArray[0]->getIntegrationPoint(j);
-        this->convertGPIntoParental(gp);
-    }
-}

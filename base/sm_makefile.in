@@ -40,12 +40,14 @@ srcs6=  beam2d.C beam3d.C rcsd.C rcsde.C rcsdnl.C linearstability.C pnldeidynami
 srcs7=  microplane.C microplanematerial.C microplanematerial_bazant.C m4.C libeam2dnl.C libeam3dnl.C truss3d.C trplanestrain.C libeam3dnl2.C libeam3d.C libeam3d2.C  
 srcs8=  isodamagemodel.C idm1.C idmnl1.C mazarsmodel.C mazarsmodelnl.C usrdeftempfield.C tf1.C fiberedcs.C linearstatic.C truss1d.C vtkexportmodule.C polylinenonlocalbarrier.C druckerPragerPlasticitySM.C mplasticmaterial2.C masonry02.C interfaceelem2dquad.C isointerfacedamage01.C j2mat.C symmetrybarrier.C interfaceelement1d.C  mat_cebfip90.C hellmat.C hydram.C
 srcs9= scalarerrorindicator.C directerrorindicatorrc.C t3dinterface.C adaptnlinearstatic.C eleminterpunknownmapper.C mmaclosestiptransfer.C targe2interface.C freeminterface.C zzerrorestimator.C adaptlinearstatic.C combinedzzsiee.C mdm.C mmashapefunctprojection.C mmaleastsquareprojection.C huertaerrorestimator.C refinedelement.C refinedmesh.C poiexportmodule.C subdivision.C mmacontainingelementprojection.C
+#xfem
+srcs10 = planstrssxfem.C
 #OBSOLETE stuff
-srcs99= steel1.C plasticmaterial.C perfectlyplasticmaterial.C j2plasticmaterial.C mplasticmaterial.C j2mplasticmaterial.C rankinepm.C
+srcs99= steel1.C plasticmaterial.C perfectlyplasticmaterial.C j2plasticmaterial.C mplasticmaterial.C j2mplasticmaterial.C rankinepm.C 
 #parallel stuff
 psrc1=  feticommunicator.C fetiboundarydofman.C fetisolver.C plinearstatic.C
 
-all_src = $(srcs0) $(srcs1) $(srcs2) $(srcs3) $(srcs4) $(srcs5) $(srcs6) $(srcs7) $(srcs8) $(srcs9) $(srcs99) $(psrc1)
+all_src = $(srcs0) $(srcs1) $(srcs2) $(srcs3) $(srcs4) $(srcs5) $(srcs6) $(srcs7) $(srcs8) $(srcs9) $(srcs10) $(srcs99) $(psrc1)
 
 ## object files
 smLib_objs := $(all_src:.C=.o)
