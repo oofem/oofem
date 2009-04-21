@@ -10,33 +10,63 @@
 
 Patch :: Patch(Element *parent) : BasicGeometry() {
     this->parent = parent;
+    this->gps = new AList<GaussPoint>();
 }
+
+Patch::Patch(Element *parent, AList<FloatArray> *vertices) : BasicGeometry() {
+    this->parent = parent;
+    this->vertices = vertices;
+    this->gps = new AList<GaussPoint>();
+}
+
+Patch::~Patch(){
+    for(int i = 1; i <= gps->giveSize(); i++){
+       gps->unlink(i);
+    }
+    delete gps;
+}
+
+void Patch::computeMaterial(){
+    XfemManager *xf = parent->giveDomain()->giveEngngModel()->giveXfemManager(1);
+    EnrichmentItem *er = xf->giveEnrichmentItem(1);
+    if(er->isOutside(this)) this->mat = parent->giveMaterial();
+    else {
+        this->mat = er->giveMaterial();
+    }
+}
+
+void Patch::addGps(GaussPoint *gp){
+    int sz = gps->giveSize();
+    gps->put(sz + 1, gp);
+}
+
+bool Patch::hasGaussPoint(GaussPoint *gp){
+    bool ret = false;
+    for(int i = 1; i <= gps->giveSize(); i++){
+       if(gp == gps->at(i)){
+          ret = true;
+          break;
+       }
+    }
+    return ret;
+}
+
 
 FEI2dTrLin TrianglePatch :: interpolation(1, 2);
 
 void TrianglePatch :: convertGPIntoParental(GaussPoint *gp) {
-    Triangle *tr = ( Triangle * ) this;
-    int nrVertices = this->giveNrVertices();
-    FloatArray N;
-    this->interpolation.evalN(N, * gp->giveCoordinates(), 1.0);
-    // stores the parental coordinates of one of the vertices
-    FloatArray lCoor;
-    FloatArray xcoor(nrVertices);
-    FloatArray ycoor(nrVertices);
-
-    for ( int i = 1; i <= nrVertices; i++ ) {
-        FloatArray *point = tr->giveVertex(i);
-        this->parent->computeLocalCoordinates(lCoor, * point);
-        xcoor.at(i) = lCoor.at(1);
-        ycoor.at(i) = lCoor.at(2);
+    FloatArray global;
+    const FloatArray ** coords = new const FloatArray*[this->giveNrVertices()];
+    // this we should put into the function before
+    for(int i = 1; i <= this->giveNrVertices(); i++){
+        coords[i-1] = new FloatArray(*this->giveVertex(i));
     }
-
-    // stores the parental coordinates of the Gauss Points
-    FloatArray gpCoorInParental(2);
-    gpCoorInParental.at(1) = dotProduct(N, xcoor, nrVertices);
-    gpCoorInParental.at(2) = dotProduct(N, ycoor, nrVertices);
-    gp->setCoordinates(gpCoorInParental);
-    // this has to change, the computation works only in this particular case
-    gp->setWeight( 2 * tr->getArea() * gp->giveWeight() );
+    this->interpolation.local2global(global, coords, *gp->giveCoordinates(), 1.0);
+    for(int i = 1; i <= this->giveNrVertices(); i++){
+        delete coords[i-1];
+    }
+    delete [] coords;
+    FloatArray local;
+    parent->computeLocalCoordinates(local, global);
+    gp->setCoordinates(local);
 }
-

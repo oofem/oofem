@@ -17,14 +17,19 @@ public:
     ~PlaneStress2dXfem() {};
     /** Interface requesting service */
     Interface *giveInterface(InterfaceType);
-    /** function implementing the interface service
-     * computes enriched part of the strain displacement matrix
-     */
-    void XfemElementInterface_createEnrBmatrixAt(GaussPoint *gp, FloatMatrix &answer);
+    
     /// computes the enriched part of the location array
-    void giveLocationArray(IntArray &locationArray, EquationID);
+    void giveLocationArray(IntArray & locationArray, EquationID) const;
     const char *giveClassName() const { return "PlaneStress2dXfem"; }
     classType giveClassID() const { return PlaneStress2dXfemClass; }
+    int computeNumberOfDofs(EquationID ut);
+    void  computeBmatrixAt(GaussPoint *, FloatMatrix &answer,
+                                   int lowerIndx = 1, int upperIndx = ALL_STRAINS);
+    void giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const;
+    void computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *, TimeStep *tStep);
+    double computeVolumeAround(GaussPoint *);
+    void computeVectorOf(EquationID type, ValueModeType u, TimeStep *stepN, FloatArray &answer);
+    void computeStressVector(FloatArray &answer, GaussPoint *gp, TimeStep *stepN);
 };
 
 #endif

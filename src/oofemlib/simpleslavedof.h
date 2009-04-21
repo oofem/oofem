@@ -56,6 +56,7 @@ class DofManager;
 class TimeStep;
 class BoundaryCondition;
 class InitialCondition;
+class EntityRenumberingFunctor;
 
 /**
  * Class representing "slave" degree of freedom. Slave dof is linked to some master dof

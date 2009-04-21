@@ -133,7 +133,7 @@ public:
      * @see cltypes.h, DofID type
      */
     MasterDof(int i, DofManager *aNode, int nbc, int nic, DofID id);     // constructor
-    MasterDof(int i, DofManager *aNode, DofID id = Undef);
+    MasterDof(int i, DofManager *aNode);
     /// Destructor.
     ~MasterDof()   { delete unknowns; /*delete unknowns ; delete pastUnknowns ;*/ }      // destructor.
     /// Returns class name of the receiver.
@@ -274,6 +274,7 @@ public:
     void setEquationNumber(int equationNumber) { this->equationNumber = equationNumber; } // rch
     void setUnknowns(Dictionary *unknowns) { this->unknowns = unknowns; } // rch
     Dictionary *giveUnknowns() { return this->unknowns; } // rch
+    int giveEqn() {return equationNumber;}
 
 #ifdef __PARALLEL_MODE
     /**

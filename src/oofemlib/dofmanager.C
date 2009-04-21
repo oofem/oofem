@@ -209,7 +209,8 @@ DofManager :: addDof(int i, Dof *dof)
         for ( int j = 0; j < numberOfDofs; j++ ) {
             DofIDItem did = dofArray [ j ]->giveDofID();
             Dof *dofCp = new MasterDof(j + 1, this, dofArray [ j ]->giveBcId(), dofArray [ j ]->giveIcId(), ( DofID ) did);
-            dofCp->setEquationNumber( dofArray [ j ]->giveEquationNumber() );
+            int eqN = dofArray [ j ]->giveEqn() ;
+            dofCp->setEquationNumber(eqN);
             /*
              *        Dictionary* dn = new Dictionary();
              *        dofCp->setUnknowns(dn);
@@ -244,6 +245,18 @@ IntArray *DofManager :: giveLoadArray()
 void DofManager :: setLoadArray(IntArray &la)
 {
     this->loadArray = la;
+}
+
+bool DofManager :: hasDofID(int id) 
+{
+       int count = 0;
+       for(int l = 1; l <= giveNumberOfDofs(); l++){
+		if(dofArray[l-1]->giveDofID() != id) {
+                        count++;
+		}
+       }
+       if(count == giveNumberOfDofs()) return false;
+       else return true;
 }
 
 void
@@ -743,8 +756,8 @@ void DofManager :: printOutputAt(FILE *stream, TimeStep *stepN)
     EngngModel *emodel = this->giveDomain()->giveEngngModel();
     int i;
 
-#if defined(__PARALLEL_MODE) || defined(__ENABLE_COMPONENT_LABELS)
-    fprintf( stream, "%-8s%8d (%8d):\n", this->giveClassName(), this->giveLabel(), this->giveNumber() );
+#ifdef __PARALLEL_MODE
+    fprintf( stream, "%-8s%8d [%8d]:\n", this->giveClassName(), this->giveNumber(), this->giveGlobalNumber() );
 #else
     fprintf( stream, "%-8s%8d:\n", this->giveClassName(), this->giveNumber() );
 #endif
@@ -778,7 +791,6 @@ void DofManager :: updateYourself(TimeStep *tStep)
 // Updates the receiver at end of step.
 {
     int i;
-
     for ( i = 1; i <= numberOfDofs; i++ ) {
         this->giveDof(i)->updateYourself(tStep);
     }
@@ -1059,6 +1071,7 @@ void
 DofManager :: givePrescribedUnknownVector(FloatArray &answer, const IntArray &dofMask,
                                           ValueModeType mode, TimeStep *stepN)
 {
+    // std::cout << "DofManager::givePrescribedUnknownVector" << std::endl;
     if ( !hasSlaveDofs ) {
         int j, size;
         IntArray dofArray;
@@ -1104,6 +1117,8 @@ DofManager :: givePrescribedUnknownVector(FloatArray &answer, const IntArray &do
             }
         }
     }
+    // if (answer.giveSize() == 0) std::cout << "DofManager::givePrescribedUnknownVector-no reply" << std::endl;
+    // else answer.printYourself();
 }
 
 int
@@ -1119,25 +1134,6 @@ DofManager :: hasAnySlaveDofs()
     return 0;
 }
 
-
-bool
-DofManager::giveMasterDofMans (IntArray& masters) {
-  int i,j;
-  IntArray _dof_masters;
-  bool answer = false;
-
-  masters.resize(0);
-  for ( i = 1; i <= numberOfDofs; i++ ) {
-    if ( !this->giveDof(i)->isPrimaryDof() ) {
-      answer=true;
-      this->giveDof(i)->giveMasterDofManArray (_dof_masters);
-      for (j=1; j<=_dof_masters.giveSize(); j++)
-	masters.insertSortedOnce (_dof_masters.at(j),2);
-    }
-  }
-  
-  return answer;
-}
 
 int
 DofManager :: checkConsistency()
@@ -1251,15 +1247,6 @@ DofManager :: giveCompleteGlobalDofIDArray(void) const
     }
 
     return answer;
-}
-
-void 
-DofManager:: updateLocalNumbering( EntityRenumberingFunctor &f ) 
-{
-  int i;
-  for ( i = 1; i <= numberOfDofs; i++ ) {
-    this->giveDof(i)->updateLocalNumbering (f);
-  }
 }
 
 

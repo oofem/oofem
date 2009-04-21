@@ -11,9 +11,10 @@ PatchIntegrationRule :: PatchIntegrationRule(int n, Element *e, AList< Triangle 
         Patch *patch = new TrianglePatch(elem);
         for ( int j = 1; j <= triangles->at(i)->giveVertices()->giveSize(); j++ ) {
             FloatArray *nCopy = new FloatArray( *triangles->at ( i )->giveVertex ( j ) );
-            patch->setVertex(nCopy);
+            patch->setVertex(nCopy);     
         }
-
+        // this can be done only after you know the vertices
+        patch->computeMaterial();
         this->patchSet->put(i, patch);
     }
 }
@@ -35,6 +36,7 @@ void PatchIntegrationRule :: computeGpsForPatch(Patch *patch, AList< GaussPoint 
         cp->setCoordinates(* gpCoor);
         cp->setWeight( gp->giveWeight() );
         gps->put(j + 1, cp);
+        patch->addGps(cp);
     }
 }
 
@@ -58,10 +60,11 @@ void PatchIntegrationRule :: computeGps(MaterialMode matMode) {
     for ( int i = 0; i < count; i++ ) {
         this->gaussPointArray [ i ] = nGparray.at(i + 1);
         nGparray.unlink(i + 1);
-    }
+    } 
 }
 
 int PatchIntegrationRule :: SetUpPointsOnSquare(int nPoints, MaterialMode matMode, GaussPoint ***gps) {
     this->computeGps(matMode);
     return nPoints;
 }
+

@@ -57,6 +57,7 @@
 #include "dofmantransftype.h"
 #include "dofiditem.h"
 #include "contextioresulttype.h"
+#include <iostream>
 
 #ifdef __PARALLEL_MODE
 class CommunicationBuffer;
@@ -135,15 +136,13 @@ protected:
     bool isBoundaryFlag;
     /// flag indicating whether receiver has slave dofs
     bool hasSlaveDofs;
-#if defined(__PARALLEL_MODE) || defined(__ENABLE_COMPONENT_LABELS)
+#ifdef __PARALLEL_MODE
     /**
      * In parallel mode, globalNumber contains globally unique DoFManager number.
      * The component number, inherited from FEMComponent class contains
      * local domain number.
      */
     int globalNumber;
-#endif
-#ifdef __PARALLEL_MODE
     dofManagerParallelMode parallel_mode;
     /**
      * List of partition sharing the shared dof manager or
@@ -357,14 +356,6 @@ public:
     /// Returns true if receiver contains slave dofs
     virtual int  hasAnySlaveDofs();
     /**
-     * Returns true if the receiver is linked (its slave DOFs depend on master values) to some other dof managers.
-     * In this case, the masters array should contain the list of masters. 
-     * In both serial and parallel modes, local numbers are be provided. 
-     * If the receiver contains only primary DOFs, false is returned.
-     */
-    virtual bool giveMasterDofMans (IntArray& masters);
-
-    /**
      * Returns a newly allocated DofManager, with type depending on parameter.
      * Creates new object for following classes Node, ElementSide, RigidArmNode otherwise
      * calls global function CreateUsrDefDofManagerOfType for creating appropriate
@@ -403,14 +394,6 @@ public:
      * @return nonzero if receiver check is o.k.
      */
     virtual int    checkConsistency();
-    /**
-     * Local renumbering support. For some tasks (parallel load balancing, for example) it is necessary to
-     * renumber the entities. The various fem components (such as nodes or elements) typically contain
-     * links to other entities in terms of their local numbers, etc. This service allows to update
-     * these relations to reflext updated numbering. The renumbering funciton is passed, which is supposed
-     * to return an updated number of specified entyty type based on old number.
-     */
-    virtual void updateLocalNumbering( EntityRenumberingFunctor &f ) ;
 
     /**@name Advanced functions */
     //@{
@@ -422,21 +405,18 @@ public:
     //@}
     /** Adds a Dof to i-th position in dofArray */
     void addDof(int i, Dof *dof);   // rch
+    bool hasDofID(int id); // rch
 
 #ifdef __OOFEG
     virtual void   drawYourself(oofegGraphicContext &context) { }
 #endif
-
-#if defined(__PARALLEL_MODE) || defined(__ENABLE_COMPONENT_LABELS)
+#ifdef __PARALLEL_MODE
     /**
      * Returns receiver globally unique number.
      */
     int giveGlobalNumber() const { return globalNumber; }
-    int giveLabel() const {return globalNumber;}
     /** sets receiver global number */
     void setGlobalNumber(int _number) { globalNumber = _number; }
-#endif
-#ifdef __PARALLEL_MODE
     /**
      * Return dofManagerParallelMode of receiver. Defined for __Parallel_Mode only.
      */
@@ -483,7 +463,6 @@ protected:
     void computeSlaveDofTransformation(FloatMatrix &answer, const IntArray *dofMask, DofManTransfType mode);
     IntArray *giveCompleteGlobalDofIDArray(void) const;
 };
-
 
 #endif // dofmanager_h
 

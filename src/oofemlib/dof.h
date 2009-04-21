@@ -58,7 +58,7 @@
 #include "valuemodetype.h"
 #include "dofiditem.h"
 #include "contextioresulttype.h"
-#include "entityrenumberingscheme.h"
+#include <iostream>
 
 #ifdef __PARALLEL_MODE
 class CommunicationBuffer;
@@ -156,7 +156,7 @@ public:
      * @param id Physical meaning type.
      * @see cltypes.h, DofID type
      */
-    Dof(int i, DofManager *aNode, DofID id = Undef);   // constructor
+    Dof(int i, DofManager *aNode, DofID id);   // constructor
     /// Destructor.
     virtual ~Dof()   { }  // destructor.
 
@@ -168,10 +168,8 @@ public:
     /// Returns receiver number.
     int giveNumber() const { return number; }
 
-    int giveDofManNumber() const;
-#ifdef __PARALLEL_MODE
-    int giveDofManGlobalNumber() const;
-#endif
+    int giveDofManNumber() const; // termitovo
+
     /**
      * Returns value of boundary condition of dof if it is precsribed.
      * Use hasBc service to determine, if boundary condition is active.
@@ -384,14 +382,6 @@ public:
      * Returns an array of master DofManagers  to which the recever is linked
      */
     virtual void giveMasterDofManArray(IntArray &answer) { answer.resize(0); } // termitovo
-    /**
-     * Local renumbering support. For some tasks (parallel load balancing, for example) it is necessary to
-     * renumber the entities. The various fem components (such as nodes or elements) typically contain
-     * links to other entities in terms of their local numbers, etc. This service allows to update
-     * these relations to reflext updated numbering. The renumbering funciton is passed, which is supposed
-     * to return an updated number of specified entyty type based on old number.
-     */
-    virtual void updateLocalNumbering( EntityRenumberingFunctor &f ) {}
 
     /**
      * Prints Dof output (it prints value of unknown related to dof at given timeStep).
@@ -458,6 +448,7 @@ public:
     virtual void setEquationNumber(int equationNumber) {}; // rch
     virtual void setUnknowns(Dictionary *unknowns) {}; // rch
     virtual Dictionary *giveUnknowns() { return NULL; } // rch
+    virtual int giveEqn() {return 0;}
 
 #ifdef __PARALLEL_MODE
     /**

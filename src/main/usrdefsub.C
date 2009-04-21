@@ -64,7 +64,6 @@
 #include "imlsolver.h"
 #include "spoolessolver.h"
 #include "petscsolver.h"
-#include "slepcsolver.h"
 #include "dsssolver.h"
 #ifdef __PARALLEL_MODE
 #include "fetisolver.h"
@@ -108,6 +107,7 @@
 #include "interfaceelem2dquad.h"
 #include "interfaceelement1d.h"
 #include "interfaceelem3dtrlin.h"
+#include "planstrssxfem.h"
 
 // Emodels of SM module
 #include "nlinearstatic.h"
@@ -247,10 +247,6 @@
 
 // GENERAL
 #include "masterdof.h"
-#include "slavedof.h"
-#include "simpleslavedof.h"
-
-
 #ifdef __PARALLEL_MODE
 #include "loadbalancer.h"
 #include "parmetisloadbalancer.h"
@@ -260,10 +256,12 @@ Element *CreateUsrDefElementOfType(char *aClass, int number, Domain *domain)
 {
     Element *newElement = NULL;
 #ifdef __SM_MODULE
-    if ( !strncasecmp(aClass, "planestress2d", 12) ) {
+    if ( !strncasecmp(aClass, "planestress2dxfem", 16) ) {
+        newElement = new PlaneStress2dXfem(number, domain);
+    }
+    else if ( !strncasecmp(aClass, "planestress2d", 12) ) {
         newElement = new PlaneStress2d(number, domain);
     }
-
     if ( !strncasecmp(aClass, "quad1planestrain", 16) ) {
         newElement = new Quad1PlaneStrain(number, domain);
     } else if ( !strncasecmp(aClass, "trplanestress2d", 12) )   {
@@ -708,9 +706,6 @@ SparseGeneralEigenValueSystemNM *CreateUsrDefGeneralizedEigenValueSolver(GenEigv
     } else if ( st == GES_InverseIt ) {
         nm = ( SparseGeneralEigenValueSystemNM * ) new InverseIteration(i, d, m);
         return nm;
-    } else if ( st == GES_SLEPc ) {
-        nm = ( SparseGeneralEigenValueSystemNM * ) new SLEPcSolver(i, d, m);
-        return nm;
     } else {
         fprintf(stderr, "CreateUsrDefGeneralizedEigenValueSolver: Unknown solver type\n");
         exit(1);
@@ -811,23 +806,21 @@ IntegrationRule *CreateUsrDefIRuleOfType(classType type, int number, Element *e)
 
 Element *CreateUsrDefElementOfType(classType type, int number, Domain *domain)
 {
-	Element *answer = NULL;
-	
-	if ( type == PlaneStress2dClass ) {
-		answer = new PlaneStress2d(number, domain);
-	} else if ( type == TrPlaneStress2dClass )  {
-		answer = new TrPlaneStress2d(number, domain);
-	} else if ( type == LTRSpaceClass ) {
-		answer = new LTRSpace(number, domain);
-	} else if ( type == TrPlaneStrainClass ) {
-		answer = new TrPlaneStrain(number, domain);
-	}
-		
-	if ( answer == NULL ) {
-		OOFEM_ERROR2("CreateUsrDefElementOfType: Unknown element type [%d]", type);
-	}
-		
-	return answer;
+    Element *answer = NULL;
+
+    if ( type == PlaneStress2dClass ) {
+        answer = new PlaneStress2d(number, domain);
+    } else if ( type == TrPlaneStress2dClass )  {
+        answer = new TrPlaneStress2d(number, domain);
+    } else if ( type == LTRSpaceClass )                                                                                             {
+        answer = new LTRSpace(number, domain);
+    }
+
+    if ( answer == NULL ) {
+        OOFEM_ERROR2("CreateUsrDefElementOfType: Unknown element type [%d]", type);
+    }
+
+    return answer;
 }
 
 DofManager *CreateUsrDefDofManagerOfType(classType type, int number, Domain *domain)
@@ -849,10 +842,6 @@ Dof *CreateUsrDefDofOfType(classType type, int number, DofManager *dman)
     Dof *answer = NULL;
     if  ( type == MasterDofClass ) {
         answer = new MasterDof(number, dman);
-    } else if ( type == SimpleSlaveDofClass ) {
-      answer = new SimpleSlaveDof (number, dman);
-    } else if ( type == SlaveDofClass ) {
-      answer = new SlaveDof (number, dman);
     }
 
     if ( answer == NULL ) {
@@ -899,20 +888,41 @@ MesherInterface *CreateUsrDefMesherInterface(MeshPackageType type, Domain* d)
   
 }
 
-EnrichmentFunction* CreateUsrDefEnrichmentFunction(char*, int, Domain*)
-{
-  return NULL;
+EnrichmentItem *CreateUsrDefEnrichmentItem(char *aClass, int num, Domain *d) {
+    EnrichmentItem *answer = NULL;
+    if ( !strncasecmp(aClass, "cracktip", 8) ) {
+        answer = new CrackTip(num, d);
+    } else if ( !strncasecmp(aClass, "crackinterior", 13) )    {
+        answer = new CrackInterior(num, d);
+    } else if ( !strncasecmp(aClass, "inclusion", 9) )    {
+        answer = new Inclusion(num, d);
+    }
+    return answer;
 }
 
+EnrichmentFunction *CreateUsrDefEnrichmentFunction(char *aClass, int num, Domain *d) {
+    EnrichmentFunction *answer = NULL;
+    if ( !strncasecmp(aClass, "discontinuousfunction", 21) ) {
+        answer = new DiscontinuousFunction(num, d);
+    } else if ( !strncasecmp(aClass, "branchfunction", 14) )    {
+        answer = new BranchFunction(num, d);
+    }
+    else if ( !strncasecmp(aClass, "rampfunction", 14) )    {
+        answer = new RampFunction(num, d);
+    }
 
-BasicGeometry *CreateUsrDefGeometry(char*)
-{
-  return NULL;
+    return answer;
 }
 
-EnrichmentItem* CreateUsrDefEnrichmentItem(char*, int, Domain*)
-{
-  return NULL;
+BasicGeometry *CreateUsrDefGeometry(char *aClass) {
+    BasicGeometry *answer = NULL;
+    if ( !strncasecmp(aClass, "line", 4) ) {
+        answer = new Line();
+    } else if ( !strncasecmp(aClass, "circle", 6) )    {
+        answer = new Circle();
+    }
+
+    return answer;
 }
 
 #ifdef __PARALLEL_MODE

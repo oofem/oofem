@@ -14,6 +14,8 @@
 #include "delaunay.h"
 #include "gausspnt.h"
 #include "engngm.h"
+#include "appordering.h"
+#include "patch.h"
 
 /* this class manages the xfem part as well as takes over some functions which would appear
  * in the Domain and Node class */
@@ -30,13 +32,14 @@ protected:
     AList< BasicGeometry > *geometryList;
     /// Enrichment function list
     AList< EnrichmentFunction > *enrichmentFunctionList;
-    /// map giving for a node a position of its fictitious node
-    IntArray fictPosition;
+    /// map giving for a node a position of its fictitious dofs
+    AList<IntArray>* fictPosition;
     /// index of next available dofId from pool
     int dofIdPos;
     int numberOfEnrichmentItems;
     int numberOfEnrichmentFunctions;
     int numberOfGeometryItems;
+    // AList<Dof>* additionalDofs;
 
 public:
     enum XfemType {
@@ -61,7 +64,7 @@ public:
     EnrichmentFunction *giveEnrichmentFunction(int n);
     int giveNumberOfEnrichmentItems() { return enrichmentItemList->giveSize(); }
     /// computes for each node position of its fictitious node
-    void computeFictPosition();
+    int computeFictPosition();
     /// computes the type of node enrichment, returns zero if the node is not enriched
     XfemType computeNodeEnrichmentType(int nodeNumber);
     /// Initializes receiver acording to object description stored in input record.
@@ -72,12 +75,14 @@ public:
     const char *giveInputRecordName() const { return "XfemManager"; }
     /// wrapper for updating the integration rule
     void updateIntegrationRule();
-    /// wrapper for creation of the enriched part of the strain-displacement matrix
-    void createEnrMatrices();
     /// adds Dofs on enriched DofManagers
-    void addDofsOnDofManagers();
+    /// void addDofsOnDofManagers();
     /// gives Domain
     Domain *giveDomain();
+    /// accessor
+    IntArray* giveFictPosition(int nodeNumber) {return fictPosition->at(nodeNumber);}
+    /// accessor
+    /// Dof* giveDof(int nodeNumber, int k);
 protected:
     // changes dofIdPos to next index
     DofID allocateNewDofID();

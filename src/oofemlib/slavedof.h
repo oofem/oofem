@@ -10,7 +10,7 @@
 #define slavedof_h
 
 #include "dof.h"
-
+#include "entityrenumberingscheme.h"
 #ifndef __MAKEDEPEND
 #include <stdio.h>
 #include <string.h>

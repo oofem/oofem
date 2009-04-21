@@ -37,6 +37,7 @@ IRResultType EnrichmentItem::initializeFrom(InputRecord* ir) {
     BasicGeometry* enrItemGeometry = this->giveDomain()->giveEngngModel()->giveXfemManager(1)->giveGeometry(geometryItemNr);
     EnrichmentFunction* enrItemFunction = this->giveDomain()->giveEngngModel()->giveXfemManager(1)->giveEnrichmentFunction(enrichmentFunctionNr);
     this->geometry = enrItemGeometry;
+    this->geometry->printYourself();
     this->setEnrichmentFunction(enrItemFunction);
     // this should go into enrichmentfunction probably
     enrItemFunction->insertEnrichmentItem(this);
@@ -46,6 +47,10 @@ IRResultType EnrichmentItem::initializeFrom(InputRecord* ir) {
 
 bool EnrichmentItem::interacts(Element* element) {
     return this->geometry->intersects(element);
+}
+
+bool EnrichmentItem::isOutside(BasicGeometry *bg) {
+    return this->geometry->isOutside(bg);
 }
 
 void EnrichmentItem::computeIntersectionPoints(AList<FloatArray>* intersectionPoints, Element *element) {
@@ -62,6 +67,7 @@ void EnrichmentItem::setEnrichmentFunction(EnrichmentFunction *ef) {
 
 bool EnrichmentItem::isDofManEnriched(int nodeNumber) {
     bool ret = false;
+    int intersectionCount = 0;
     // gets neighbouring elements of a node
     const IntArray *neighbours = domain->giveConnectivityTable()->giveDofManConnectivityArray(nodeNumber);
     for (int i = 1; i <= neighbours->giveSize(); i++) {
@@ -72,4 +78,15 @@ bool EnrichmentItem::isDofManEnriched(int nodeNumber) {
         }
     }
     return ret;
+}
+
+
+IRResultType Inclusion::initializeFrom(InputRecord* ir) {
+    EnrichmentItem::initializeFrom(ir);
+    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
+    IRResultType result; // Required by IR_GIVE_FIELD macro
+    int material = 0;
+    IR_GIVE_FIELD(ir, material, IFT_EnrichmentItem_materialNr, "material"); // Macro
+    this->mat = this->giveDomain()->giveMaterial(material);
+    return IRRT_OK;
 }
