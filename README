@@ -137,7 +137,7 @@ Detailed Installation instructions for UNIX:
    (for example by running "gunzip -c oofem-x.y.tar.gz | tar xof - ")
 1) Change the directory to the OOFEM source directory
 2) Optionally download and unpack IML++ distribution 
-   in the oofem source directory under "iml" directory
+   in the oofem directory under "iml" directory
 3) Run the configure script as: ./configure
    o) The configure will set up the default target (named "default"). 
       By default, the solver (oofem) will be build with "-O" optimization
@@ -212,8 +212,12 @@ o) To set up graphical postprocessor (oofeg) with debugging information:
    o) cd tools; make all
 
 6) Optionally to test the oofem package (requires the utilities):
-   a) run: make tests
-   b) examine file test_results (less test_result)
+   a) change to particular target directory:
+      cd targets/target_name
+   b) perform the tests:
+      make tests
+   b) examine file test_results:
+      less test_result
 
 7) Optionally to build reference manuals
 
