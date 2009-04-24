@@ -176,10 +176,16 @@ OOFEMTXTInputRecord :: giveField(char *answer, int maxchar, const InputFieldType
         indx = 1;
     }
 
-    strncpy(answer, tokenizer.giveToken(indx), maxchar-1);
-    answer [ maxchar - 1 ] = '\0';
-    setReadFlag(indx);
-    return IRRT_OK;
+    const char* _token = tokenizer.giveToken(indx);
+    if (_token) {
+      strncpy(answer, tokenizer.giveToken(indx), maxchar-1);
+      answer [ maxchar - 1 ] = '\0';
+      setReadFlag(indx);
+      return IRRT_OK;
+    } else {
+      answer [0]='\0';
+      return IRRT_NOTFOUND;
+    }
 }
 
 IRResultType
