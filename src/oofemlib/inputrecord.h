@@ -92,6 +92,11 @@ enum InputFieldType {
     IFT_VTKExportModule_stype,
     IFT_VTKExportModule_regionstoskip,
 
+    IFT_VTKXMLExportModule_vars,
+    IFT_VTKXMLExportModule_primvars,
+    IFT_VTKXMLExportModule_stype,
+    IFT_VTKXMLExportModule_regionstoskip,
+
     IFT_POIExportModule_vars,
     IFT_POIExportModule_primvars,
     IFT_POIExportModule_mtype,
@@ -333,6 +338,8 @@ enum InputFieldType {
     IFT_Element_globnum,
     IFT_Element_partitions,
     IFT_Element_remote,
+
+    IFT_StructuralElement_activityltf,
 
     IFT_CBSElement_bsides,
     IFT_CBSElement_bcodes,

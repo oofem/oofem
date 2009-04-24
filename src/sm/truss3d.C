@@ -170,10 +170,12 @@ Truss3d :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep)
     double halfMass;
     GaussPoint* gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
 
-    mat        = this->giveMaterial();
-    halfMass   = mat->give('d',gp) * this->giveCrossSection()->give('A') * this->giveLength() / 2.;
     answer.resize(6, 6);
     answer.zero();
+    if (!this->isActivated(tStep)) return; 
+
+    mat        = this->giveMaterial();
+    halfMass   = mat->give('d',gp) * this->giveCrossSection()->give('A') * this->giveLength() / 2.;
     answer.at(1, 1) = halfMass;
     answer.at(2, 2) = halfMass;
     answer.at(3, 3) = halfMass;

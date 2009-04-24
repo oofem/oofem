@@ -120,12 +120,19 @@ NLStructuralElement :: computeStrainVector(FloatArray &answer, GaussPoint *gp, T
     FloatMatrix b, A;
     FloatArray u, help;
 
+    if (!this->isActivated(stepN)) {
+      answer.resize(this->giveCrossSection()->giveIPValueSize(IST_StrainTensor, gp));
+      answer.zero();
+      return;}
+
     rot     = this->updateRotationMatrix();
     fMode mode = domain->giveEngngModel()->giveFormulation();
     if ( mode == TL ) { // Total Lagrange formulation
         //b       = this -> ComputeBmatrixAt(gp) ;
         this->computeBmatrixAt(gp, b);
         this->computeVectorOf(EID_MomentumBalance, VM_Total, stepN, u);
+	// substract initial displacements, if defined
+	if (initialDisplacements) u.substract(initialDisplacements);
 
         if ( rot ) {
             u.rotatedWith(this->rotationMatrix, 'n');
@@ -214,7 +221,9 @@ NLStructuralElement :: giveInternalForcesVector(FloatArray &answer,
     int i, j, k, rot;
     double dV;
 
-    answer.resize(0);
+    answer.resize(computeNumberOfDofs(EID_MomentumBalance));
+    answer.zero();
+
     rot = this->updateRotationMatrix();
 
     if ( nlGeometry ) {
@@ -291,6 +300,13 @@ NLStructuralElement :: giveInternalForcesVector(FloatArray &answer,
     if ( nlGeometry ) {
         delete ut;
     }
+    
+    // if inactive update fields; but do not contribute to structure
+    if (!this->isActivated(tStep)) {
+      answer.zero();
+      return;
+    }
+
 
     return;
 }
@@ -313,11 +329,12 @@ NLStructuralElement :: computeStiffnessMatrix(FloatMatrix &answer,
     GaussPoint *gp;
     IntegrationRule *iRule;
 
-    Material *mat = this->giveMaterial();
-    rot = this->updateRotationMatrix();
-
     answer.resize( computeNumberOfDofs(EID_MomentumBalance), computeNumberOfDofs(EID_MomentumBalance) );
     answer.zero();
+    if (!this->isActivated(tStep)) return;
+
+    Material *mat = this->giveMaterial();
+    rot = this->updateRotationMatrix();
 
     if ( nlGeometry ) {
         this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);

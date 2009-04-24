@@ -78,7 +78,7 @@
 #include "materialmapperinterface.h"
 
 StructuralElement :: StructuralElement(int n, Domain *aDomain) :
-    Element(n, aDomain)
+  Element(n, aDomain)
     // Constructor. Creates an element with number n, belonging to aDomain.
 {
     //   constitutiveMatrix = NULL ;
@@ -86,17 +86,19 @@ StructuralElement :: StructuralElement(int n, Domain *aDomain) :
     //   stiffnessMatrix    = NULL ;
     rotationMatrix     = NULL;
     rotationMatrixDefined = 0;
+    activityLtf = 0;
+    initialDisplacements = NULL;
 }
 
 
 StructuralElement :: ~StructuralElement()
 // Destructor.
 {
-    //   delete massMatrix ;
-    //   delete stiffnessMatrix ;
-    delete rotationMatrix;
-
-    //   delete constitutiveMatrix ;
+  //   delete massMatrix ;
+  //   delete stiffnessMatrix ;
+  if (rotationMatrix) delete rotationMatrix;
+  if (initialDisplacements) delete initialDisplacements;
+  //   delete constitutiveMatrix ;
 }
 
 
@@ -144,9 +146,11 @@ StructuralElement :: computeBcLoadVectorAt(FloatArray &answer, TimeStep *stepN, 
     // delete d ;
 
     // if engngmodel supports dynamic change of static system
-    // we must test if there was previous BC on some DOF and now it is released.
+    // we must test if element has not been removed in previous step 
+    // if not, we must also test if there was previous BC on some DOF and now it is released.
     // if was, it is necessary to load it by reaction force.
     if ( domain->giveEngngModel()->requiresUnknownsDictionaryUpdate() ) {
+
         FloatArray prevInternalForces;
         IntArray elementNodeMask, dofMask;
         DofManager *nodeI;
@@ -154,39 +158,38 @@ StructuralElement :: computeBcLoadVectorAt(FloatArray &answer, TimeStep *stepN, 
         int nDofs, i, j, k = 0;
 
         if ( ( mode == VM_Incremental ) && ( !stepN->isTheFirstStep() ) ) {
-            for ( i = 1; i <= numberOfDofMans; i++ ) {
-                nodeI = this->giveDofManager(i);
-                this->giveDofManDofIDMask(i, EID_MomentumBalance, elementNodeMask);
-                nodeI->giveDofArray(elementNodeMask, dofMask);
-                nDofs = dofMask.giveSize();
-                for ( j = 1; j <= nDofs; j++ ) {
-                    dofJ = nodeI->giveDof( dofMask.at(j) );
-                    k++;
-                    if ( !dofJ->hasBc(stepN) && dofJ->hasBc( stepN->givePreviousStep() ) ) {
-                        if ( prevInternalForces.giveSize() == 0 ) {
-                            // allocate and compute only if needed
-                            // use updated gp record
-                            this->giveInternalForcesVector(prevInternalForces,
-                                                           stepN->givePreviousStep(), 1);
-                        }
 
-                        // check for allocated answer
-                        if ( answer.giveSize() == 0 ) {
-                            answer.resize( this->computeNumberOfDofs(EID_MomentumBalance) );
-                            answer.zero();
-                        }
-
-                        // add element part of reaction  to load vector
-                        answer.at(k) -= prevInternalForces.at(k);
-                    }
-                }
-
-                //delete elementNodeMask;
-                // delete dofMask;
-            }
+	  for ( i = 1; i <= numberOfDofMans; i++ ) {
+	    nodeI = this->giveDofManager(i);
+	    this->giveDofManDofIDMask(i, EID_MomentumBalance, elementNodeMask);
+	    nodeI->giveDofArray(elementNodeMask, dofMask);
+	    nDofs = dofMask.giveSize();
+	    for ( j = 1; j <= nDofs; j++ ) {
+	      dofJ = nodeI->giveDof( dofMask.at(j) );
+	      k++;
+	      if ( !dofJ->hasBc(stepN) && dofJ->hasBc( stepN->givePreviousStep() ) ) {
+		if ( prevInternalForces.giveSize() == 0 ) {
+		  // allocate and compute only if needed
+		  // use updated gp record
+		  this->giveInternalForcesVector(prevInternalForces,
+						 stepN->givePreviousStep(), 1);
+		}
+		
+		// check for allocated answer
+		if ( answer.giveSize() == 0 ) {
+		  answer.resize( this->computeNumberOfDofs(EID_MomentumBalance) );
+		  answer.zero();
+		}
+		
+		// add element part of reaction  to load vector
+		answer.at(k) -= prevInternalForces.at(k);
+	      }
+	    }
+	    
+	    //delete elementNodeMask;
+	    // delete dofMask;
+	  }
         }
-
-        //if (prevInternalForces != NULL) delete prevInternalForces;
     }
 
     return;
@@ -565,6 +568,10 @@ StructuralElement :: computeConsistentMassMatrix(FloatMatrix &answer, TimeStep *
     GaussIntegrationRule iRule(1, this, 1, 1);
     IntArray mask;
 
+    answer.resize(ndofs, ndofs);
+    answer.zero();
+    if (!this->isActivated(tStep)) return;
+
     if ( ( nip = this->giveNumberOfIPForMassMtrxIntegration() ) == 0 ) {
         _error("computeConsistentMassMatrix no integration points available");
     }
@@ -572,8 +579,6 @@ StructuralElement :: computeConsistentMassMatrix(FloatMatrix &answer, TimeStep *
     iRule.setUpIntegrationPoints(this->giveIntegrationDomain(),
                                  nip, _Unknown);
 
-    answer.resize(ndofs, ndofs);
-    answer.zero();
     this->giveMassMtrxIntegrationgMask(mask);
 
     //density = this->giveMaterial()->give('d');
@@ -724,17 +729,26 @@ StructuralElement :: computeNonForceLoadVector(FloatArray &answer, TimeStep *ste
 
     answer.resize(0);
 
+    // test for deactivation of receiver
+    if ( ( mode == VM_Incremental ) && ( !stepN->isTheFirstStep() ) ) {
+      if (isActivated(stepN->givePreviousStep()) && !isActivated(stepN)) {
+	// use updated gp record
+	this->giveInternalForcesVector(answer, stepN->givePreviousStep(), 1);
+      }
+    }
+    if (!this->isActivated(stepN)) return;
+    
     this->computePrescribedStrainLoadVectorAt(helpLoadVector, stepN, mode);
     if ( helpLoadVector.giveSize() ) {
-        answer.add(helpLoadVector);
+      answer.add(helpLoadVector);
     }
-
-
+    
+    
     this->computeBcLoadVectorAt(helpLoadVector, stepN, mode);
     if ( helpLoadVector.giveSize() ) {
-        answer.add(helpLoadVector);
+      answer.add(helpLoadVector);
     }
-
+    
     return;
 }
 
@@ -769,6 +783,13 @@ StructuralElement :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tSte
     IntArray nodalArray;
     int i, j, indx = 0, k, ldofs, dim;
     double summ;
+
+    if (!this->isActivated(tStep)) {
+      int ndofs = computeNumberOfDofs(EID_MomentumBalance);
+      answer.resize(ndofs, ndofs);
+      answer.zero();
+      return;
+    }
 
     this->computeConsistentMassMatrix(answer, tStep, mass);
     ldofs = answer.giveNumberOfRows();
@@ -904,6 +925,7 @@ StructuralElement :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode
 
     answer.resize( computeNumberOfDofs(EID_MomentumBalance), computeNumberOfDofs(EID_MomentumBalance) );
     answer.zero();
+    if (!this->isActivated(tStep)) return;
 
     if ( numberOfIntegrationRules > 1 ) {
         for ( i = 0; i < numberOfIntegrationRules; i++ ) {
@@ -988,8 +1010,17 @@ StructuralElement :: computeStrainVector(FloatArray &answer, GaussPoint *gp, Tim
     FloatMatrix b;
     FloatArray u;
 
+    if (!this->isActivated(stepN)) {
+      answer.resize(this->giveCrossSection()->giveIPValueSize(IST_StrainTensor, gp));
+      answer.zero();
+      return;}
+
     this->computeBmatrixAt(gp, b);
     this->computeVectorOf(EID_MomentumBalance, VM_Total, stepN, u);
+
+    // substract initial displacements, if defined
+    if (initialDisplacements) u.substract(initialDisplacements);
+
     if ( this->updateRotationMatrix() ) {
         u.rotatedWith(this->rotationMatrix, 'n');
     }
@@ -1051,7 +1082,8 @@ StructuralElement :: giveInternalForcesVector(FloatArray &answer,
     FloatArray bs, TotalStressVector;
     double dV;
 
-    answer.resize(0);
+    answer.resize(computeNumberOfDofs(EID_MomentumBalance));
+    answer.zero();
 
     Rflag = this->computeGtoLRotationMatrix(R);
     GNTflag = this->computeGNLoadRotationMatrix(GNT, _toNodalCS);
@@ -1099,6 +1131,13 @@ StructuralElement :: giveInternalForcesVector(FloatArray &answer,
         //delete bt;
         //delete TotalStressVector;
     }
+
+    // if inactive update state, but no contribution to global system
+    if (!this->isActivated(tStep)) {
+      answer.zero();
+      return;
+    }
+
 
     return;
 }
@@ -1174,6 +1213,19 @@ StructuralElement ::  giveCharacteristicVector(FloatArray &answer, CharType mtrx
 
     return;
 }
+
+void
+StructuralElement::updateYourself(TimeStep *tStep)
+{
+  Element::updateYourself(tStep);
+  
+  // record initial displacement if element not active
+  if (activityLtf && !isActivated (tStep)) {
+    if (!initialDisplacements) initialDisplacements = new FloatArray(); 
+    this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, *initialDisplacements);
+  }
+}
+
 
 void
 StructuralElement :: updateInternalState(TimeStep *stepN)
@@ -1571,6 +1623,9 @@ StructuralElement :: addNonlocalStiffnessContributions(SparseMtrx &dest, TimeSte
      * take into account cross section model (slaves)
      */
     NonlocalMaterialStiffnessInterface *interface;
+
+    if (!this->isActivated(atTime)) return; 
+
     // test for material model interface
     interface = ( NonlocalMaterialStiffnessInterface * )
                 this->giveMaterial()->giveInterface(NonlocalMaterialStiffnessInterfaceType);
@@ -1610,6 +1665,20 @@ StructuralElement :: adaptiveUpdate(TimeStep *tStep)
 
     return result;
 }
+
+IRResultType
+StructuralElement :: initializeFrom(InputRecord *ir)
+{
+  const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
+  IRResultType result;                            // Required by IR_GIVE_FIELD macro
+  
+  result = Element::initializeFrom (ir);
+
+  activityLtf = 0;
+  IR_GIVE_OPTIONAL_FIELD(ir, activityLtf, IFT_StructuralElement_activityltf, "activityltf"); // Macro
+  return result;
+}
+
 
 
 #ifdef __OOFEG

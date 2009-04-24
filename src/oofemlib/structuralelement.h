@@ -46,6 +46,7 @@
 #include "femcmpnn.h"
 #include "domain.h"
 #include "flotmtrx.h"
+#include "loadtime.h"
 
 #include "matresponseform.h"
 #include "matresponsemode.h"
@@ -117,7 +118,10 @@ protected:
     /// Flag indicating if tranformation matrix has been already computed
     int rotationMatrixDefined;
     //     FloatMatrix* constitutiveMatrix;
-
+    /// element activity ltf, if defined, nonzero value indicates active receiver, zero value inactive element
+    int activityLtf;
+    /// initial displacement vector, describes the initial nodal displacements when element has been casted
+    FloatArray* initialDisplacements;
 public:
     /**
      * Constructor. Creates structural element with given number, belonging to given domain.
@@ -350,6 +354,19 @@ public:
      * @param tStep finished time step
      */
     void                  updateInternalState(TimeStep *);
+    /**
+     * Updates element state after equlibrium in time step has been reached.
+     * Default implementation updates all integration rules defined by
+     * integrationRulesArray member variable. Doing this, all integration points
+     * and their material statuses are updated also. All temporary history variables,
+     * which now describe equlibrium state are copied into equilibrium ones.
+     * The existing internal state is used for update.
+     * @see Material::updateYourself
+     * @see IntegrationRule::updateYourself
+     * @see gaussPoint::updateYourself
+     * @see Element::updateInternalState
+     */
+    virtual void          updateYourself(TimeStep *tStep);
 
     // consistency check
     /**
@@ -359,7 +376,21 @@ public:
      * @return nonzero if consistency check is o.k.
      */
     virtual int    checkConsistency();
+    /**
+     * Returns true, if receiver is activated for given solution step
+     */
+    bool   isActivated(TimeStep *atTime) 
+    { 
+      if (activityLtf) {
+	if (atTime) return (domain->giveLoadTimeFunction(activityLtf)->evaluate(atTime, VM_Total) > 1.e-3);
+	else return 0.0;
+      } else {
+	return 1.0;
+      }
+    }
 
+    ///Initializes receiver acording to object description stored in input record.
+    IRResultType initializeFrom(InputRecord *ir);
     /// Returns class name of the receiver.
     const char *giveClassName() const { return "StructuralElement"; }
     /// Returns classType id of receiver.
