@@ -58,6 +58,8 @@ ParmetisLoadBalancer :: ParmetisLoadBalancer(Domain *d) : LoadBalancer(d)
 #ifdef __PARMETIS_MODULE
     elmdist = NULL;
     tpwgts  = NULL;
+#else
+    OOFEM_ERROR ("ParMETIS support not compiled");
 #endif
 }
 
