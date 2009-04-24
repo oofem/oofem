@@ -6,11 +6,12 @@ BUILD_DIR_LATEX = latex
 INST_DIR = oofemrefman
 DOCXX      = doxygen
 RCP = scp
+ROBOT = /home/bp/oofem-doc/www/robot2.pl
 
 all: www-doc 
 
 www-doc:
-	$(ROBOT) < footer.shtml > footer.html
+	if [ -x $(ROBOT) ] ; then $(ROBOT) < footer.shtml > footer.html; fi
 	$(DOCXX) doxygen.cfg
 
 ps-doc: www-doc
