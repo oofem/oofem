@@ -167,6 +167,26 @@ LoadBalancer :: migrateLoad(Domain *d)
     for ( i = 1; i <= wtpList.giveSize(); i++ ) {
         wtpList.at(i)->update();
     }
+
+    // print some local statistics
+    int nelem = domain->giveNumberOfElements();
+    int nnode = domain->giveNumberOfDofManagers();
+    int lnode = 0, lelem = 0;
+    
+    for ( i = 1; i <= nnode; i++ ) {
+      if ( domain->giveDofManager(i)->giveParallelMode() == DofManager_local ) {
+        lnode++;
+      }
+    }
+    
+    for ( i = 1; i <= nelem; i++ ) {
+      if ( domain->giveElement(i)->giveParallelMode() == Element_local ) {
+        lelem++;
+      }
+    }
+    OOFEM_LOG_RELEVANT("[%d] LB Statistics:  local elem=%d local node=%d\n", myrank, lelem, lnode);
+
+
 }
 
 int
@@ -619,7 +639,9 @@ WallClockLoadBalancerMonitor :: decide(TimeStep *atTime)
     delete[] node_equivelements;
 
     // decide
-    if ( ( atTime->giveNumber() % this->lbstep == 0 ) && ( ( absWallClockImbalance > this->absWallClockImbalanceTreshold ) || ( relWallClockImbalance > this->relWallClockImbalanceTreshold ) ) ) {
+    if ( ( atTime->giveNumber() % this->lbstep == 0 ) && 
+         ( ( absWallClockImbalance > this->absWallClockImbalanceTreshold ) || 
+           ( ( relWallClockImbalance > this->relWallClockImbalanceTreshold ) && ( absWallClockImbalance > this->minAbsWallClockImbalanceTreshold ) ) ) ) {
         OOFEM_LOG_RELEVANT("[%d] LoadBalancer: wall clock imbalance rel=%.2f\%,abs=%.2fs, recovering load\n", myrank, 100 * relWallClockImbalance, absWallClockImbalance);
         return LBD_RECOVER;
     } else {
@@ -671,6 +693,7 @@ WallClockLoadBalancerMonitor :: initializeFrom(InputRecord *ir)
 
     IR_GIVE_OPTIONAL_FIELD(ir, relWallClockImbalanceTreshold, IFT_WallClockLoadBalancerMonitor_relwct, "relwct"); // Macro
     IR_GIVE_OPTIONAL_FIELD(ir, absWallClockImbalanceTreshold, IFT_WallClockLoadBalancerMonitor_abswct, "abswct"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, minAbsWallClockImbalanceTreshold, IFT_WallClockLoadBalancerMonitor_minwct, "minwct"); // Macro
     IR_GIVE_OPTIONAL_FIELD(ir, lbstep, IFT_WallClockLoadBalancerMonitor_lbstep, "lbstep"); // Macro
 
 #ifdef __LB_DEBUG

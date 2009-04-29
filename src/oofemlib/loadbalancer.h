@@ -103,7 +103,8 @@ public:
 class WallClockLoadBalancerMonitor : public LoadBalancerMonitor
 {
 protected:
-    double relWallClockImbalanceTreshold, absWallClockImbalanceTreshold;
+  /// minAbsWallClockImbalanceTreshold declares min abs imbalance to perform relative imbalance check
+  double relWallClockImbalanceTreshold, absWallClockImbalanceTreshold, minAbsWallClockImbalanceTreshold;
     /// the rebalancing done every lbstep
     int lbstep;
 #ifdef __LB_DEBUG
@@ -116,6 +117,7 @@ public:
     WallClockLoadBalancerMonitor(EngngModel *em) : LoadBalancerMonitor(em) {
         relWallClockImbalanceTreshold = 0.1;
         absWallClockImbalanceTreshold = 10.0;
+        minAbsWallClockImbalanceTreshold = 0.0;
         lbstep = 5;
     }
     LoadBalancerDecisionType decide(TimeStep *);
