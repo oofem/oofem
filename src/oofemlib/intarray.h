@@ -166,6 +166,12 @@ public:
      * @param allocChunk if reallocation needed, an aditional space for allocChunk values will be allocated
      */
     void       resize(int n, int allocChunk = 0);
+    /** Preallocates receiver to given futureSize if larger then allocatedSize.
+     * Warning: after this operation array values are in undefined state, programmer should
+     * zero receiver
+     * @param futureSize size to be allocated
+     */
+    void       preallocate(int futureSize);
     /**
      * Appends array b at the end of receiver.
      * @param b array to be appended at the end of receiver
@@ -211,9 +217,21 @@ public:
      *  @return index of inserted (or existing) value
      */
     int insertSortedOnce(int value, int allocChunk = 0);
-
-
-
+		/** 
+     * Erase the element of given value.
+     * If the value is found on position _pos receiver will shrink accordingly, 
+		 * the values at positions (_pos+1,...,size) will be moved to positions (_pos,...,size-1)
+		*/
+		void eraseSorted(int value);
+		/** Extracts common values in receiver and iarray.
+		 *  Assumes that receiver as well as iarray are sorted.	
+		 *  The size of array common is changed accordingly.
+		 *  @param iarray array to search for values common with receiver
+		 *  @param common array of common values
+		 *  @param allocChunk if reallocation needed, an aditional space for allocChunk values will be allocated
+		 *  @return size of array common
+		 */
+		int findCommonValuesSorted(const IntArray &iarray, IntArray &common, int allocChunk = 0) const;
 
     /**
      * Finds index of first occurence of given value in array. If such value is not presented,

@@ -205,6 +205,30 @@ IntArray :: resize(int n, int allocChunk)
 }
 
 
+void IntArray :: preallocate(int futureSize)
+{
+    int *p1, *p2, *newValues, i;
+
+    if ( allocatedSize >= futureSize ) return;
+
+    newValues = allocInt(futureSize);
+
+    p1 = values;
+    p2 = newValues;
+    i  = size;
+    while ( i-- ) {
+        * p2++ = * p1++;
+    }
+
+    if ( values ) {
+        freeInt(values);
+    }
+
+    values = newValues;
+    allocatedSize = futureSize;
+}
+
+
 void IntArray :: followedBy(const IntArray &b, int allocChunk)
 // Appends the array 'b' the receiver. Returns the receiver.
 {
@@ -539,6 +563,41 @@ IntArray :: insertSortedOnce(int _val, int allocChunk)
 
     return insertSorted(_val, allocChunk);
 }
+
+
+void IntArray :: eraseSorted(int value)
+{
+	int pos;
+
+	if(pos = findSorted(value)){
+		erase(pos);
+	}
+}
+
+
+int
+IntArray :: findCommonValuesSorted(const IntArray &iarray, IntArray &common, int allocChunk) const
+{
+	int i = 0, j, val;
+
+	for(j=1;j<=iarray.giveSize();j++){
+		val = iarray.at(j);
+		
+		while(i<size){
+			if(values[i] == val){
+				common.followedBy(val, allocChunk);
+				i++;
+				break;
+			}
+			if(values[i] > val)break;
+			i++;
+		}
+		if(i == size)break;
+	}
+
+	return(common.giveSize());
+}
+
 
 int
 IntArray :: insertOnce(int _p)
