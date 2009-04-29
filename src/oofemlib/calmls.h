@@ -154,6 +154,8 @@ protected:
     IntArray calm_HPCIndirectDofMask;
     // input array containing dofmanagers and corresponding dof numbers under indirect controll
     IntArray calm_HPCDmanDofSrcArray;
+    // input arry of dofman weights (for hpcmode 2)
+    FloatArray calm_HPCDmanWeightSrcArray;
 
     // linear system solver
     SparseLinearSystemNM *linSolver;

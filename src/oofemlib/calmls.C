@@ -995,8 +995,8 @@ CylindricalALM :: initializeFrom(InputRecord *ir)
     calm_HPCDmanDofSrcArray.resize(0);
     IR_GIVE_OPTIONAL_FIELD(ir, calm_HPCDmanDofSrcArray, IFT_CylindricalALM_hpc, "hpc"); // Macro
 
-    calm_HPCWeights.resize(0);
-    IR_GIVE_OPTIONAL_FIELD(ir, calm_HPCWeights, IFT_CylindricalALM_hpcw, "hpcw"); // Macro
+    calm_HPCDmanWeightSrcArray.resize(0);
+    IR_GIVE_OPTIONAL_FIELD(ir, calm_HPCDmanWeightSrcArray, IFT_CylindricalALM_hpcw, "hpcw"); // Macro
     // in calm_HPCIndirectDofMask are stored pairs with following meaning:
     // inode idof
     // example HPC 4 1 2 6 1
@@ -1095,6 +1095,7 @@ void CylindricalALM  :: convertHPCMap()
 //
 {
     IntArray indirectMap;
+    FloatArray weights;
     int size, i;
     int inode, idof;
 
@@ -1103,6 +1104,7 @@ void CylindricalALM  :: convertHPCMap()
     int j, jglobnum, count = 0, ndofman = domain->giveNumberOfDofManagers();
     size = calm_HPCDmanDofSrcArray.giveSize() / 2;
     indirectMap.resize(size);
+    weights.resize(size);
     for ( j = 1; j <= ndofman; j++ ) {
         jglobnum = domain->giveNode(j)->giveLabel();
         for ( i = 1; i <= size; i++ ) {
@@ -1113,9 +1115,11 @@ void CylindricalALM  :: convertHPCMap()
                 // HUHU hard wired domain no 1
                 if ( engngModel->givePetscContext(1, ut)->giveN2Gmap()->isLocal( domain->giveNode(j) ) ) {
                     indirectMap.at(++count) = domain->giveNode(j)->giveDof(idof)->giveEquationNumber();
+                    weights.at(count) = calm_HPCDmanWeightSrcArray.at(i);
                 }
 #else
                 indirectMap.at(++count) = domain->giveNode(j)->giveDof(idof)->giveEquationNumber();
+                weights.at(count) = calm_HPCDmanWeightSrcArray.at(i);
 #endif
 
                 continue;
@@ -1128,21 +1132,24 @@ void CylindricalALM  :: convertHPCMap()
 #endif
 
     calm_HPCIndirectDofMask.resize(count);
+    calm_HPCWeights.resize(count);
     for ( i = 1; i <= count; i++ ) {
         calm_HPCIndirectDofMask.at(i) = indirectMap.at(i);
+        calm_HPCWeights.at(i) = weights.at(i);
     }
 
 #endif  //__PETSC_MODULE
 #else
     size = calm_HPCDmanDofSrcArray.giveSize() / 2;
-    indirectMap.resize(size);
+    calm_HPCIndirectDofMask.resize(size);
+    calm_HPCWeights.resize(size);
     for ( i = 1; i <= size; i++ ) {
         inode = calm_HPCDmanDofSrcArray.at(2 * i - 1);
         idof  = calm_HPCDmanDofSrcArray.at(2 * i);
-        indirectMap.at(i) = domain->giveNode(inode)->giveDof(idof)->giveEquationNumber();
+        calm_HPCIndirectDofMask.at(i) = domain->giveNode(inode)->giveDof(idof)->giveEquationNumber();
+        calm_HPCWeights.at(i)=calm_HPCDmanWeightSrcArray.at(i);
+        
     }
-
-    calm_HPCIndirectDofMask = indirectMap;
 #endif
 }
 
