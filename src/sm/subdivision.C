@@ -59,6 +59,8 @@
 #endif
 
 
+// define KOKO to be deleted
+
 #ifdef __PARALLEL_MODE
 #include "parallel.h"
 #include "communicator.h"
@@ -67,7 +69,7 @@
 #endif
 
 
-//#define __VERBOSE_PARALLEL
+#define __VERBOSE_PARALLEL
 
 #define DEBUG_CHECK
 //#define DEBUG_INFO
@@ -85,58 +87,253 @@
 
 //#define QUICK_HACK
 
-
-//#define NM   // Nooru Mohamed
-#define BRAZIL_2D   // splitting brazil test
-//#define TREEPBT_3D   // 3pbt
-
 #ifdef __OOFEG
-void Subdivision::RS_Node::drawGeometry()
-//
-// draws graphics representation of receiver
-//
-{
-    GraphicObj *go;
-
-    WCRec p [ 1 ]; /* point */
-    p [ 0 ].x = ( FPNum ) this->giveCoordinate(1);
-    p [ 0 ].y = ( FPNum ) this->giveCoordinate(2);
-    p [ 0 ].z = ( FPNum ) this->giveCoordinate(3);
-    
-    EASValsSetMType(FILLED_CIRCLE_MARKER);
-    //EASValsSetColor( gc.getNodeColor() );
-    EASValsSetLayer(OOFEG_RAW_GEOMETRY_LAYER);
-    EASValsSetMSize(8);
-    go = CreateMarker3D(p);
-    EGWithMaskChangeAttributes(LAYER_MASK | MTYPE_MASK | MSIZE_MASK, go);
-    EMAddGraphicsToModel(ESIModel(), go);
-
-    char num [ 6 ];
-    //EASValsSetColor( gc.getNodeColor() );
-    EASValsSetLayer(OOFEG_RAW_GEOMETRY_LAYER);
-    p [ 0 ].x = ( FPNum ) this->giveCoordinate(1);
-    p [ 0 ].y = ( FPNum ) this->giveCoordinate(2);
-    p [ 0 ].z = ( FPNum ) this->giveCoordinate(3);
-    sprintf( num, "%d", this->number );
-    go = CreateAnnText3D(p, num);
-    EGWithMaskChangeAttributes(COLOR_MASK | LAYER_MASK, go);
-    EMAddGraphicsToModel(ESIModel(), go);
-}
-
+#define DRAW_IRREGULAR_NODES
+#define DRAW_REMOTE_ELEMENTS
+//#define DRAW_MESH_BEFORE_BISECTION
+//#define DRAW_MESH_AFTER_BISECTION
+#define DRAW_MESH_AFTER_EACH_BISECTION_LEVEL
 #endif
 
 
-void
-Subdivision::RS_Triangle::addIrregular (int neighborElement, int node)
+
+//#define NM   // Nooru Mohamed
+//#define BRAZIL_2D   // splitting brazil test
+#define THREEPBT_3D   // 3pbt
+
+
+
+
+/* builds connectivity of top level node only however at any level of the subdivision */
+
+int Subdivision::RS_Node::buildTopLevelNodeConnectivity(ConnectivityTable* ct)
 {
-  int ind;
-  if ((ind = neghbours_base_elements.findFirstIndexOf(neighborElement))) {
-    irregular_nodes.at(ind) = node;
-  } else {
-    OOFEM_ERROR4("Subdivision::RS_Triangle::addIrregular: element %d is not neighbor %d of element %d", 
-								 neighborElement, neighborElement, this->number);
-  }
+	IntArray me(1), connElems;
+	int i, el;
+	me.at(1) = this->giveNumber();
+
+	ct->giveNodeNeighbourList(connElems, me);
+	this->connectedElements.preallocate(connElems.giveSize());  // estimate size of the list
+
+	for (i=1; i<=connElems.giveSize(); i++) {
+		el = connElems.at(i);
+
+#ifdef __PARALLEL_MODE
+		if(this->mesh->giveElement(el)->giveParallelMode() != Element_local)continue;
+#endif
+		// use nonzero chunk, the estimated size may be not large enough
+		this->mesh->giveElement(el)->buildTopLevelNodeConnectivity(this);
+	}
+		
+	return(connectedElements.giveSize());
 }
+
+
+void Subdivision::RS_Element::buildTopLevelNodeConnectivity(Subdivision::RS_Node *node)
+{
+	int el, i;
+	Subdivision::RS_Element *elem;
+
+	if(this->isTerminal()){
+		node->insertConnectedElement(this->giveNumber());
+		return;
+	}
+
+	for(el=1;el<=this->giveChildren()->giveSize();el++){
+		elem=mesh->giveElement(this->giveChildren()->at(el));
+		for(i=1;i<=elem->giveNodes()->giveSize();i++){
+			if(elem->giveNode(i) == node->giveNumber()){
+				elem->buildTopLevelNodeConnectivity(node);
+				break;
+			}
+		}
+	}
+}
+
+
+#ifdef __PARALLEL_MODE
+
+int 
+Subdivision::RS_Node::importConnectivity(ConnectivityTable* ct)
+{
+	IntArray me(1), connElems;
+	int i, el, cnt = 0;
+	me.at(1) = this->giveNumber();
+
+	ct->giveNodeNeighbourList(connElems, me);
+	this->connectedElements.preallocate(connElems.giveSize());  // estimate size of the list
+
+	for (i=1; i<=connElems.giveSize(); i++) {
+		el = connElems.at(i);
+		if(this->mesh->giveElement(el)->giveParallelMode() != Element_local)continue;
+		// use zero chunk, the array is large enough
+		this->connectedElements.insertSorted(el, 0);
+		cnt++;
+	}
+		
+	return(cnt);
+}
+
+
+
+void 
+Subdivision::RS_Node::numberSharedEdges()
+{
+	int ie, num=this->giveNumber();
+	IntArray connNodes;
+	const IntArray *connElems = this->giveConnectedElements();
+
+	for(ie=1; ie<=connElems->giveSize(); ie++){
+		this->mesh->giveElement(connElems->at(ie))->numberSharedEdges(num, connNodes);
+	}
+}
+
+
+void
+Subdivision::RS_Triangle::numberSharedEdges (int iNode, IntArray &connNodes)
+{
+	int eIndex, jnode, jNode, eNum=this->mesh->giveNumberOfEdges();
+	Subdivision::RS_SharedEdge *_edge;
+
+	for(jnode=1;jnode<=3;jnode++){
+		jNode=nodes.at(jnode);
+		if(jNode == iNode)continue;
+
+		if(this->mesh->giveNode(jNode)->giveParallelMode() != DofManager_shared)continue;
+		// potential shared edge
+
+		if(connNodes.contains(jNode))continue;  // edge already processed (from iNode)
+		connNodes.followedBy(jNode,10);
+
+		eIndex = giveEdgeIndex(iNode, jNode);
+		
+		if(shared_edges.giveSize()){
+			if(shared_edges.at(eIndex))continue;  // edge already processed (from jNode)
+		}
+		
+		// create edge (even if it might not be shared)
+		_edge = new Subdivision::RS_SharedEdge(this->mesh);
+		_edge->setEdgeNodes(iNode, jNode);
+		
+		this->mesh->addEdge(++eNum, _edge);
+
+		// get the tentative partitions
+		// they must be confirmed via mutual communication
+		IntArray partitions;
+		if(_edge->giveSharedPartitions(partitions)){
+			_edge->setPartitions(partitions);
+
+			// I do rely on the fact that in 2D shared edge can be incident only to one element !!!
+			if(!shared_edges.giveSize()){
+				makeSharedEdges();
+			}
+			shared_edges.at(eIndex) = eNum;
+		}
+	}
+}
+
+
+void
+Subdivision::RS_Tetra::numberSharedEdges (int iNode, IntArray &connNodes)
+{
+	int ie, elems, eIndex, jnode, jNode, eNum=this->mesh->giveNumberOfEdges();
+	Subdivision::RS_SharedEdge *_edge;
+	Subdivision::RS_Element *elem;
+
+	for(jnode=1;jnode<=4;jnode++){
+		jNode=nodes.at(jnode);
+		if(jNode == iNode)continue;
+
+		if(this->mesh->giveNode(jNode)->giveParallelMode() != DofManager_shared)continue;
+		// potential shared edge
+
+		if(connNodes.contains(jNode))continue;  // edge already processed (from iNode)
+		connNodes.followedBy(jNode,20);
+
+		eIndex = giveEdgeIndex(iNode, jNode);
+
+		if(shared_edges.giveSize()){
+			if(shared_edges.at(eIndex))continue;  // edge already processed (from jNode)
+		}
+		
+		// create edge (even if it might not be shared)
+		_edge = new Subdivision::RS_SharedEdge(this->mesh);
+		_edge->setEdgeNodes(iNode, jNode);
+		
+		this->mesh->addEdge(++eNum, _edge);
+
+		// get the tentative partitions
+		// they must be confirmed via mutual communication
+		IntArray partitions;
+		if(_edge->giveSharedPartitions(partitions)){
+			_edge->setPartitions(partitions);
+			if(!this->giveSharedEdges()->giveSize()){
+				this->makeSharedEdges();
+			}
+			shared_edges.at(eIndex) = eNum;
+
+			// put edge on all elements sharing it
+			const IntArray *iElems, *jElems;
+
+			iElems=mesh->giveNode(iNode)->giveConnectedElements();
+			jElems=mesh->giveNode(jNode)->giveConnectedElements();
+
+			IntArray common;
+			if(iElems->giveSize() <= jElems->giveSize()){
+				common.preallocate(iElems->giveSize());
+			}
+			else{
+				common.preallocate(jElems->giveSize());
+			}
+			// I do rely on the fact that the arrays are ordered !!!
+			// I am using zero chunk because common is large enough
+			elems=iElems->findCommonValuesSorted(*jElems, common, 0);
+#ifdef DEBUG_CHECK
+			if(!elems){
+				OOFEM_ERROR2("Subdivision::RS_Tetra::numberSharedEdges - potentionally shared edge %d is not shared by common elements", eNum);
+			}
+#endif
+			for(ie=1;ie<=elems;ie++){
+				elem=mesh->giveElement(common.at(ie));
+				if(elem == this)continue;
+				eIndex = elem->giveEdgeIndex(iNode, jNode);
+				if(!elem->giveSharedEdges()->giveSize()){
+					elem->makeSharedEdges();
+				}
+				elem->setSharedEdge(eIndex, eNum);
+			}
+		}
+	}
+}
+
+
+// CAUTION: gives the tentative partitions;
+// they must be confirmed via mutual communication
+
+int
+Subdivision::RS_SharedEdge::giveSharedPartitions(IntArray& partitions)
+{
+  int count=0;
+	int myrank=this->mesh->giveSubdivision()->giveRank();
+	const IntArray *iPartitions = mesh->giveNode(iNode)->givePartitions();
+	const IntArray *jPartitions = mesh->giveNode(jNode)->givePartitions();
+
+	// find common partitions;
+	// this could be done more efficiently (using method findCommonValuesSorted)
+	// if array iPartitions and jPartitions were sorted;
+	// however they are not sorted in current version
+	int i, ipsize = iPartitions->giveSize();
+	for (i=1; i<=ipsize; i++) {
+		if (jPartitions->contains (iPartitions->at(i)) && (iPartitions->at(i) != myrank)) {
+			partitions.followedBy(iPartitions->at(i),2);
+			count++;
+		}
+	}
+
+  return count;
+}
+
+#endif
 
 
 double
@@ -164,18 +361,28 @@ Subdivision::RS_Element::giveTopParent()
 Subdivision::RS_Triangle::RS_Triangle (int number, RS_Mesh* mesh, int parent, IntArray& nodes) : 
   Subdivision::RS_Element (number, mesh, parent, nodes) {
 
-  irregular_nodes.resize(3); irregular_nodes.zero();
+  irregular_nodes.resize(3); 
+	irregular_nodes.zero();
   neghbours_base_elements.resize(3); 
   neghbours_base_elements.zero();
+
+#ifdef DEBUG_CHECK
+	if(nodes.findFirstIndexOf(0)){
+		OOFEM_ERROR2("Subdivision::RS_Triangle::RS_Triangle: 0 node of element %d", this->number);
+  }
+#endif
+
 }
 
 
 Subdivision::RS_Tetra::RS_Tetra (int number, RS_Mesh* mesh, int parent, IntArray& nodes) : 
   Subdivision::RS_Element (number, mesh, parent, nodes) {
 
-  irregular_nodes.resize(6); irregular_nodes.zero();
-	side_leIndex.resize(4); side_leIndex.zero();
-  neghbours_base_elements.resize(6); 
+  irregular_nodes.resize(6); 
+	irregular_nodes.zero();
+	side_leIndex.resize(4); 
+	side_leIndex.zero();
+  neghbours_base_elements.resize(4); 
   neghbours_base_elements.zero();
 
 #ifdef DEBUG_CHECK
@@ -271,19 +478,21 @@ Subdivision::RS_Tetra::evaluateLongestEdge()
 			}
 		}
 
+		// assign edge indices from smallest node id !!!
+		ind[0] = ed[nd[0]][nd[1]];
+		ind[1] = ed[nd[0]][nd[2]];
+		ind[2] = ed[nd[0]][nd[3]];
+		ind[3] = ed[nd[1]][nd[2]];
+		ind[4] = ed[nd[1]][nd[3]];
+		ind[5] = ed[nd[2]][nd[3]];
+
 		// evaluate edge lengths from smallest node id !!!
 		elength[0] = mesh->giveNode(l_nd[0])->giveCoordinates()->distance_square(*(mesh->giveNode(l_nd[1])->giveCoordinates()));
-		ind[0] = ed[nd[0]][nd[1]];
 		elength[1] = mesh->giveNode(l_nd[0])->giveCoordinates()->distance_square(*(mesh->giveNode(l_nd[2])->giveCoordinates()));
-		ind[1] = ed[nd[0]][nd[2]];
 		elength[2] = mesh->giveNode(l_nd[0])->giveCoordinates()->distance_square(*(mesh->giveNode(l_nd[3])->giveCoordinates()));
-		ind[2] = ed[nd[0]][nd[3]];
 		elength[3] = mesh->giveNode(l_nd[1])->giveCoordinates()->distance_square(*(mesh->giveNode(l_nd[2])->giveCoordinates()));
-		ind[3] = ed[nd[1]][nd[2]];
 		elength[4] = mesh->giveNode(l_nd[1])->giveCoordinates()->distance_square(*(mesh->giveNode(l_nd[3])->giveCoordinates()));
-		ind[4] = ed[nd[1]][nd[3]];
 		elength[5] = mesh->giveNode(l_nd[2])->giveCoordinates()->distance_square(*(mesh->giveNode(l_nd[3])->giveCoordinates()));
-		ind[5] = ed[nd[2]][nd[3]];
 		
 		// get absolutely largest edge and the largest edge on individual sides
 		// process edges in the same order in which their length was evaluated !!!
@@ -321,7 +530,11 @@ Subdivision::RS_Triangle::giveEdgeIndex(int iNode, int jNode) {
 		if(nodes.at(k)==jNode)jn=k;
 	}
 
-	if(in==0 || jn==0)return 0;
+	if(in==0 || jn==0){
+		OOFEM_ERROR4("Subdivision::RS_Triangle::giveEdgeIndex - there is no edge connecting %d and %d on element %d",
+								 iNode, jNode, this->giveNumber());
+		return 0;
+	}
 
 	if(in < jn){
 		if(jn == in+1)return(in);
@@ -344,7 +557,11 @@ Subdivision::RS_Tetra::giveEdgeIndex(int iNode, int jNode) {
 		if(nodes.at(k)==jNode)jn=k;
 	}
 
-	if(in==0 || jn==0)return 0;
+	if(in==0 || jn==0){
+		OOFEM_ERROR4("Subdivision::RS_Tetra::giveEdgeIndex - there is no edge connecting %d and %d on element %d",
+								 iNode, jNode, this->giveNumber());
+		return 0;
+	}
 
 	if(in < jn){
 		if(jn==4)return(in+3);
@@ -361,14 +578,16 @@ Subdivision::RS_Tetra::giveEdgeIndex(int iNode, int jNode) {
 void
 Subdivision::RS_Triangle::bisect(std::queue<int> &subdivqueue, std::list<int> &sharedIrregularsQueue) {
   /* this is symbolic bisection - no new elements are added, only irregular nodes are introduced */
-  int inode, jnode, iNode, jNode;
+  int inode, jnode, iNode, jNode, iNum, eInd;
   double density;
 	bool boundary=false;
   FloatArray coords;
-  Subdivision::RS_Triangle* triangleElem;
+	Subdivision::RS_Element *elem;
+#ifdef __PARALLEL_MODE
+  Subdivision::RS_SharedEdge *edge;
+#endif
 
   if (!irregular_nodes.at(leIndex)) {
-    int iNum;
     RS_IrregularNode* irregular;
     // irregular on the longest edge does not exist
     // introduce new irregular node on the longest edge
@@ -384,85 +603,87 @@ Subdivision::RS_Triangle::bisect(std::queue<int> &subdivqueue, std::list<int> &s
     // compute required density of a new node
     density = 0.5*(mesh->giveNode(iNode)->giveRequiredDensity()+
 									 mesh->giveNode(jNode)->giveRequiredDensity());
+		// create new irregular
+    iNum = mesh->giveNumberOfNodes() + 1;
+    irregular = new Subdivision::RS_IrregularNode (iNum, mesh, 0, coords, density, boundary);
+    mesh->addNode (iNum, irregular);
+    // add irregular to receiver
+    this->irregular_nodes.at(leIndex) = iNum;
+
+#ifdef __OOFEG
+#ifdef DRAW_IRREGULAR_NODES
+		irregular->drawGeometry();
+#endif
+#endif
+		
+#ifdef __PARALLEL_MODE
+#ifdef __VERBOSE_PARALLEL
+		OOFEM_LOG_INFO ("[%d] RS_Triangle::bisecting %d nodes %d %d %d, leIndex %d, new irregular %d\n",mesh->giveSubdivision()->giveRank(),this->number, nodes.at(1), nodes.at(2), nodes.at(3), leIndex, iNum);
+#endif
+#else
+		//OOFEM_LOG_INFO ("RS_Triangle::bisecting %d, new irregular %d\n",this->number, iNum);
+#endif
 
 #ifdef QUICK_HACK
 		if(mesh->giveNode(iNode)->isBoundary() && mesh->giveNode(jNode)->isBoundary())boundary=true;
 #else
 		// check whether new node is boundary
 		if(this->neghbours_base_elements.at(leIndex)){
-#ifdef __PARALLEL_MODE
-			if(mesh->giveElement(this->neghbours_base_elements.at(leIndex))->giveParallelMode() == Element_local){
-#endif
-        Domain *dorig = mesh->giveSubdivision()->giveDomain();
-				if(mesh->giveNode(iNode)->isBoundary() || mesh->giveNode(jNode)->isBoundary()){
-					if(dorig->giveElement(this->giveTopParent())->giveRegionNumber() != dorig->giveElement(mesh->giveElement(this->neghbours_base_elements.at(leIndex))->giveTopParent())->giveRegionNumber()) boundary=true;
-				} 
-#ifdef __PARALLEL_MODE
-			} else {
-				boundary=true;
-			}
-#endif
+			Domain *dorig = mesh->giveSubdivision()->giveDomain();
+			// I rely on tha fact that nodes on intermaterial interface are marked as boundary
+			// however this might not be true
+			// therefore in smoothing the boundary flag is setuped again if not set boundary from here
+			if(mesh->giveNode(iNode)->isBoundary() || mesh->giveNode(jNode)->isBoundary()){
+				if(dorig->giveElement(this->giveTopParent())->giveRegionNumber() != dorig->giveElement(mesh->giveElement(this->neghbours_base_elements.at(leIndex))->giveTopParent())->giveRegionNumber()) boundary=true;
+			} 
 		} else {
 			boundary=true;
 		}
 #endif
 
-    // add irregular to receiver and its neighbour
-    iNum = mesh->giveNumberOfNodes() + 1;
-    irregular = new Subdivision::RS_IrregularNode (iNum, 0, coords, density, boundary);
-    mesh->addNode (iNum, irregular);
-
-#ifdef __PARALLEL_MODE
-#ifdef __VERBOSE_PARALLEL
-		OOFEM_LOG_INFO ("[%d] RS_Triangle::bisecting %d[%d] nodes %d %d %d, lindex %d, new irregular %d\n",mesh->giveSubdivision()->giveRank(),this->number, this->giveGlobalNumber(),nodes.at(1), nodes.at(2), nodes.at(3), leIndex, iNum);
-#endif
-#else
-		//OOFEM_LOG_INFO ("RS_Triangle::bisecting %d, new irregular %d\n",this->number, iNum);
-#endif
-
-#ifdef __OOFEG
-		//irregular->drawGeometry();
-#endif
-
-    this->irregular_nodes.at(leIndex) = iNum;
     if (this->neghbours_base_elements.at(leIndex)) {
-#ifdef __PARALLEL_MODE
-			if (mesh->giveElement(this->neghbours_base_elements.at(leIndex))->giveParallelMode() == Element_local){
-#endif
-        Subdivision::RS_Triangle* triangleElem;
-        triangleElem = dynamic_cast< Subdivision::RS_Triangle*> (mesh->giveElement(this->neghbours_base_elements.at(leIndex)));
-        if (triangleElem) {
-          triangleElem ->addIrregular(this->number, iNum);
-        } else {
-          OOFEM_ERROR2 ("RS_Triangle::bisect: dynamic cast failed on %d element", this->neghbours_base_elements.at(leIndex));
-        }
-				if(!triangleElem->giveQueueFlag()){
-					// add neighbour to list of elements for subdivision
-					subdivqueue.push(this->neghbours_base_elements.at(leIndex));
-					triangleElem->setQueueFlag(true);
-				}
-#ifdef __PARALLEL_MODE
+			// add irregular to neighbour
+			elem=mesh->giveElement(this->neghbours_base_elements.at(leIndex));
+			eInd=elem->giveEdgeIndex(iNode,jNode);
+			elem->setIrregular(eInd, iNum);
+			
+			if(!elem->giveQueueFlag()){
+				// add neighbour to list of elements for subdivision
+				subdivqueue.push(this->neghbours_base_elements.at(leIndex));
+				elem->setQueueFlag(true);
 			}
-#endif
 		}
-
 #ifdef __PARALLEL_MODE
-    IntArray partitions;
-    // test if new node is on shared interpartition boundary
-    if (this->giveIrregularSharedPartitions (leIndex, iNode, jNode, partitions)) {
-      // mark irregular as shared (can be shared by only one partition (in 2D))
-      irregular->setParallelMode (DofManager_shared);
-      irregular->setPartition (partitions.at(1));
-      // and put its number into queue of shared irregulars that is later used to inform remote partition about this fact
-      irregular->setEdgeNodes(iNode, jNode);
-      sharedIrregularsQueue.push_back(iNum);
+		else{
+			// check if there are (potentionally) shared edges
+			if(shared_edges.giveSize()){
+				// check if the edge is (really) shared
+				if(shared_edges.at(leIndex)){
+					edge = mesh->giveEdge(shared_edges.at(leIndex));
+
+#ifdef DEBUG_CHECK
+					if(!edge->givePartitions()->giveSize()){
+						OOFEM_ERROR3("Subdivision::RS_Triangle::bisect - unshared edge %d of elements %d is marked as shared",
+												 shared_edges.at(leIndex), this->giveNumber());
+					}
+#endif
+
+					// new node is on shared interpartition boundary
+					irregular->setParallelMode (DofManager_shared);
+					// partitions are inherited from shared edge
+					irregular->setPartitions (*(edge->givePartitions()));
+					irregular->setEdgeNodes(iNode, jNode);
+					// put its number into queue of shared irregulars that is later used to inform remote partitions about this fact
+					sharedIrregularsQueue.push_back(iNum);
 #ifdef __VERBOSE_PARALLEL
-      OOFEM_LOG_INFO("RS_Triangle::bisect: Shared Irregular detected, number %d [%d[%d] %d[%d]], elem %d, partition %d\n", iNum, iNode, mesh->giveNode(iNode)->giveGlobalNumber(), jNode, mesh->giveNode(jNode)->giveGlobalNumber(), this->number, partitions.at(1));
+					OOFEM_LOG_INFO("RS_Triangle::bisect: Shared irregular detected, number %d nodes %d %d [%d %d], elem %d\n", iNum, iNode, jNode, mesh->giveNode(iNode)->giveGlobalNumber(), mesh->giveNode(jNode)->giveGlobalNumber(), this->number);
 #endif
-    }
+				}
+			}
+		}
 #endif
-		
   }
+
 	this->setQueueFlag(false);
 }
 
@@ -470,24 +691,49 @@ Subdivision::RS_Triangle::bisect(std::queue<int> &subdivqueue, std::list<int> &s
 void
 Subdivision::RS_Tetra::bisect(std::queue<int> &subdivqueue, std::list<int> &sharedIrregularsQueue) {
   /* this is symbolic bisection - no new elements are added, only irregular nodes are introduced */
-  int i, j, inode, jnode, iNode, jNode, ngb1, ngb2, eIndex, eInd, reg, iNum, side, cnt=0;
+  int i, j, inode, jnode, iNode, jNode, ngb, eIndex, eInd, reg, iNum, side, cnt=0, elems;
 	// array ed_side contains face numbers NOT shared by the edge (indexing from 1)
-	int ed_side[6][2] = {{3, 4}, {4, 2}, {2, 3}, {1, 3}, {1, 4}, {1, 2}}, ed[4] = {0, 0, 0, 0};
+	int ed_side[6][2] = {{3, 4}, {4, 2}, {2, 3}, {1, 3}, {1, 4}, {1, 2}}, ed[4] = {0, 0, 0, 0}, opp_ed[6] = {6, 4, 5, 2, 3, 1};
 	// array side_ed contains edge numbers bounding faces (indexing from 1)
  	int side_ed[4][3] = {{1, 2, 3}, {1, 5, 4}, {2, 6, 5}, {3, 4, 6}};
   double density;
-	bool boundary=false, iboundary, jboundary;
-	Subdivision::RS_Element *elem1, *elem2;
+	bool shared, boundary, iboundary, jboundary, opposite=false;
+	Subdivision::RS_Element *elem1, *elem2, *elem;
   FloatArray coords;
   Domain *dorig;
 	RS_IrregularNode* irregular;
+	const IntArray *iElems, *jElems;
+#ifdef __PARALLEL_MODE
+  Subdivision::RS_SharedEdge *edge;
+#endif
 
 	dorig = mesh->giveSubdivision()->giveDomain();
 	reg=dorig->giveElement(this->giveTopParent())->giveRegionNumber();
 
+	// first resolve whether there will be inserted irregular on the edge opposite to longest edge
+	// this will happen if the opposite edge is longest for a side not shared by the longest edge
+	// and simultaneously there is already an irregular on that side
+	if(!irregular_nodes.at(opp_ed[leIndex-1])){
+		for(i=0;i < 2;i++){
+			// get side not incident to leIndex edge
+			side=ed_side[leIndex-1][i];
+			// check whether the longest edge of that side is opposite edge
+			if(side_leIndex.at(side)!=opp_ed[leIndex-1])continue;
+			for(j=0;j<3;j++){
+				// check for irregulars on that side
+				if(irregular_nodes.at(side_ed[side-1][j])){
+					opposite=true;
+					irregular_nodes.at(opp_ed[leIndex-1])=-1;       // fictitious irregular
+					break;
+				}
+			}
+			if(opposite)break;
+		}
+	}
+
 	// insert irregular on absolutely longest edge first;
 	// this controls the primary bisection;
-	// if there is an irregular on side not shared by longest edge
+	// if there is an irregular (including a fictitious one) on side not shared by longest edge
 	// insert irregular on longest edge of that side;
 	ed[cnt++]=leIndex;
 	for(i=0;i < 2;i++){
@@ -501,28 +747,42 @@ Subdivision::RS_Tetra::bisect(std::queue<int> &subdivqueue, std::list<int> &shar
 			}
 		}
 	}
+
+	// remove fictitious irregular
+	if(opposite){
+		irregular_nodes.at(opp_ed[leIndex-1])=0;
+	}
+	 
 	// check for the case when longest edge of the sides not shared by the absolutely longest edge is the same 
 	// (it is opposite to absolutely longest edge)
 	if(cnt == 3){
-		if(ed[1] == ed[2])cnt=2;
+		if(ed[1] == ed[2]){
+			cnt=2;
+#ifdef DEBUG_CHECK
+			if(ed[1] != opp_ed[leIndex-1]){
+				OOFEM_ERROR2("Subdivision::RS_Tetra::bisect - unexpected situation on element %d", this->giveNumber());
+			}
+#endif
+		}
 	}
+
 	// insert all relevant irregulars
 	for(i=0;i<cnt;i++){
 		eIndex=ed[i];
 		if (!irregular_nodes.at(eIndex)) {
-			// irregular on the longest edge does not exist
-			// introduce new irregular node on the longest edge
+			// irregular on this edge does not exist;
+			// introduce new irregular node on this edge on this element and on all local elements sharing that edge;
+			// if the edge is local, neigbours are processed;
+			// if the edge is shared, elements sharing simultaneously both end nodes are processed;
 			if(eIndex <= 3){
 				inode = eIndex;
 				jnode = (eIndex<3)?inode+1:1;
-				ngb1 = 1;
-				ngb2 = inode+1;
+				ngb = 1;
 			}
 			else{
 				inode = eIndex-3;
 				jnode = 4;
-				ngb1 = inode+1;
-				ngb2 = (inode>1)?inode:4;
+				ngb = inode+1;
 			}
 
 			iNode=nodes.at(inode);
@@ -534,388 +794,313 @@ Subdivision::RS_Tetra::bisect(std::queue<int> &subdivqueue, std::list<int> &shar
 			// compute required density of a new node
 			density = 0.5*(mesh->giveNode(iNode)->giveRequiredDensity()+
 										 mesh->giveNode(jNode)->giveRequiredDensity());
-			// add irregular to receiver and its neighbour
+			// create new irregular
 			iNum = mesh->giveNumberOfNodes() + 1;
-			irregular = new Subdivision::RS_IrregularNode (iNum, 0, coords, density, boundary);
+			irregular = new Subdivision::RS_IrregularNode (iNum, mesh, 0, coords, density, boundary);
 			mesh->addNode (iNum, irregular);
-#ifdef __OOFEG
-			//irregular->drawGeometry();
-#endif
-
+			// add irregular to receiver
 			this->irregular_nodes.at(eIndex) = iNum;
 
-#ifdef DEBUG_INFO
-			fprintf(stderr, "Irregular %d added on side %d of %d (edge %d, nodes %d %d, nds %d %d %d %d, ngbs %d %d %d %d, irr %d %d %d %d %d %d)\n",
-							iNum, this->number, i, eIndex, iNode, jNode, 
-							nodes.at(1), nodes.at(2), nodes.at(3), nodes.at(4), 
-							neghbours_base_elements.at(1), neghbours_base_elements.at(2), 
-							neghbours_base_elements.at(3), neghbours_base_elements.at(4),
-							irregular_nodes.at(1), irregular_nodes.at(2), irregular_nodes.at(3), 
-							irregular_nodes.at(4), irregular_nodes.at(5), irregular_nodes.at(6));
+#ifdef __OOFEG
+#ifdef DRAW_IRREGULAR_NODES
+			irregular->drawGeometry();
+#endif
 #endif
 
-			iboundary=mesh->giveNode(iNode)->isBoundary();
-			jboundary=mesh->giveNode(jNode)->isBoundary();
-			boundary=false;
-			// traverse neighbours in one direction
-			elem1=this;
-			while(elem1->giveNeighbor(ngb1)){
-				elem2=mesh->giveElement(elem1->giveNeighbor(ngb1));
-				if(elem2==this){
-					ngb2=0; // there is no need to traverse in the other direction (loop was completed)
-					break;
-				}
-				eInd=elem2->giveEdgeIndex(iNode,jNode);
-				// do not stop traversal if the neighbour is remote
-				// there still may be local elements further
+#ifdef DEBUG_INFO
 #ifdef __PARALLEL_MODE
-				if(elem2->giveParallelMode() == Element_local){
+			// do not print global numbers of elements because they are not available (they are assigned at once after bisection);
+			// do not print global numbers of irregulars as these may not be available yet
+			OOFEM_LOG_INFO("[%d] Irregular %d added on %d (edge %d, nodes %d %d [%d %d], nds %d %d %d %d [%d %d %d %d], ngbs %d %d %d %d, irr %d %d %d %d %d %d)\n",
+										 mesh->giveSubdivision()->giveRank(), iNum, this->number, eIndex, iNode, jNode, 
+										 mesh->giveNode(iNode)->giveGlobalNumber(), mesh->giveNode(jNode)->giveGlobalNumber(), 
+										 nodes.at(1), nodes.at(2), nodes.at(3), nodes.at(4), 
+										 mesh->giveNode(nodes.at(1))->giveGlobalNumber(), mesh->giveNode(nodes.at(2))->giveGlobalNumber(), 
+										 mesh->giveNode(nodes.at(3))->giveGlobalNumber(), mesh->giveNode(nodes.at(4))->giveGlobalNumber(), 
+										 neghbours_base_elements.at(1), neghbours_base_elements.at(2), 
+										 neghbours_base_elements.at(3), neghbours_base_elements.at(4),
+										 irregular_nodes.at(1), irregular_nodes.at(2), irregular_nodes.at(3), 
+										 irregular_nodes.at(4), irregular_nodes.at(5), irregular_nodes.at(6));
+#else
+			OOFEM_LOG_INFO("Irregular %d added on %d (edge %d, nodes %d %d, nds %d %d %d %d, ngbs %d %d %d %d, irr %d %d %d %d %d %d)\n",
+										 iNum, this->number, eIndex, iNode, jNode, 
+										 nodes.at(1), nodes.at(2), nodes.at(3), nodes.at(4), 
+										 neghbours_base_elements.at(1), neghbours_base_elements.at(2), 
+										 neghbours_base_elements.at(3), neghbours_base_elements.at(4),
+										 irregular_nodes.at(1), irregular_nodes.at(2), irregular_nodes.at(3), 
+										 irregular_nodes.at(4), irregular_nodes.at(5), irregular_nodes.at(6));
 #endif
+#endif
+
+			shared = boundary = false;
+
+#ifdef __PARALLEL_MODE
+			// check if there are (potentionally) shared edges
+			if(shared_edges.giveSize()){
+				// check if the edge is (really) shared
+				if(shared_edges.at(eIndex)){
+					edge = mesh->giveEdge(shared_edges.at(eIndex));
+
+#ifdef DEBUG_CHECK
+					if(!edge->givePartitions()->giveSize()){
+						OOFEM_ERROR3("Subdivision::RS_Tetra::bisect - unshared edge %d of elements %d is marked as shared",
+												 shared_edges.at(eIndex), this->giveNumber());
+					}
+#endif
+
+					shared = boundary = true;
+					// new node is on shared interpartition boundary
+					irregular->setParallelMode (DofManager_shared);
+					irregular->setPartitions (*(edge->givePartitions()));
+					irregular->setEdgeNodes(iNode, jNode);
+					// put its number into queue of shared irregulars that is later used to inform remote partitions about this fact
+					sharedIrregularsQueue.push_back(iNum);
+#ifdef __VERBOSE_PARALLEL
+					OOFEM_LOG_INFO("RS_Tetra::bisect: Shared irregular detected, number %d nodes %d %d [%d %d], elem %d\n", iNum, iNode, jNode, mesh->giveNode(iNode)->giveGlobalNumber(), mesh->giveNode(jNode)->giveGlobalNumber(), this->number);
+#endif
+
+					iElems=mesh->giveNode(iNode)->giveConnectedElements();
+					jElems=mesh->giveNode(jNode)->giveConnectedElements();
+
+					IntArray common;
+					if(iElems->giveSize() <= jElems->giveSize()){
+						common.preallocate(iElems->giveSize());
+					}
+					else{
+						common.preallocate(jElems->giveSize());
+					}
+					// I do rely on the fact that the arrays are ordered !!!
+					// I am using zero chunk because common is large enough
+					elems=iElems->findCommonValuesSorted(*jElems, common, 0);
+#ifdef DEBUG_CHECK
+					if(!elems){
+						OOFEM_ERROR2("Subdivision::RS_Tetra::bisect - shared edge %d is not shared by common elements", 
+												 shared_edges.at(eIndex));
+					}
+#endif
+					// after subdivision there will be twice as much of connected local elements
+					irregular->preallocateConnectedElements(elems * 2);
+					// put the new node on appropriate edge of all local elements (except "this") sharing both nodes
+					for(j=1;j<=elems;j++){
+						elem=mesh->giveElement(common.at(j));
+						if(elem == this)continue;
+#ifdef DEBUG_CHECK
+						if(!elem->giveSharedEdges()->giveSize()){
+							OOFEM_ERROR3("Subdivision::RS_Tetra::bisect - element %d incident to shared edge %d does not have shared edges",
+													common.at(j), shared_edges.at(eIndex));
+						}
+#endif
+
+						eInd=elem->giveEdgeIndex(iNode,jNode);
+						elem->setIrregular(eInd, iNum);
+
+						if(!elem->giveQueueFlag()){
+							// add elem to list of elements for subdivision
+							subdivqueue.push(elem->giveNumber());
+							elem->setQueueFlag(true);
+						}
+
+#ifdef DEBUG_INFO
+#ifdef __PARALLEL_MODE
+						// do not print global numbers of elements because they are not available (they are assigned at once after bisection);
+						// do not print global numbers of irregulars as these may not be available yet
+						OOFEM_LOG_INFO("[%d] Irregular %d added on %d (edge %d, nodes %d %d [%d %d], nds %d %d %d %d [%d %d %d %d], ngbs %d %d %d %d, irr %d %d %d %d %d %d)\n",
+													 mesh->giveSubdivision()->giveRank(), iNum, 
+													 elem->giveNumber(), eInd, iNode, jNode, 
+													 mesh->giveNode(iNode)->giveGlobalNumber(), mesh->giveNode(jNode)->giveGlobalNumber(), 
+													 elem->giveNode(1), elem->giveNode(2), elem->giveNode(3), elem->giveNode(4), 
+													 mesh->giveNode(elem->giveNode(1))->giveGlobalNumber(), 
+													 mesh->giveNode(elem->giveNode(2))->giveGlobalNumber(), 
+													 mesh->giveNode(elem->giveNode(3))->giveGlobalNumber(), 
+													 mesh->giveNode(elem->giveNode(4))->giveGlobalNumber(), 
+													 elem->giveNeighbor(1), elem->giveNeighbor(2), elem->giveNeighbor(3), elem->giveNeighbor(4),
+													 elem->giveIrregular(1), elem->giveIrregular(2), elem->giveIrregular(3), 
+													 elem->giveIrregular(4), elem->giveIrregular(5), elem->giveIrregular(6));
+#else
+						OOFEM_LOG_INFO("Irregular %d added on %d (edge %d, nodes %d %d, nds %d %d %d %d, ngbs %d %d %d %d, irr %d %d %d %d %d %d)\n",
+													 iNum, elem->giveNumber(), eInd, iNode, jNode, 
+													 elem->giveNode(1), elem->giveNode(2), elem->giveNode(3), elem->giveNode(4), 
+													 elem->giveNeighbor(1), elem->giveNeighbor(2), elem->giveNeighbor(3), elem->giveNeighbor(4),
+													 elem->giveIrregular(1), elem->giveIrregular(2), elem->giveIrregular(3), 
+													 elem->giveIrregular(4), elem->giveIrregular(5), elem->giveIrregular(6));
+#endif
+#endif
+						
+					}
+				}
+			}
+#endif
+
+			if(!shared){
+				iboundary=mesh->giveNode(iNode)->isBoundary();
+				jboundary=mesh->giveNode(jNode)->isBoundary();
+
+				// traverse neighbours
+				elem1=this;
+				elem2=NULL;
+				while(elem1->giveNeighbor(ngb)){
+					elem2=mesh->giveElement(elem1->giveNeighbor(ngb));
+					if(elem2==this){
+						break;
+					}
+					eInd=elem2->giveEdgeIndex(iNode,jNode);
 					elem2->setIrregular(eInd, iNum);
+
 					if(!elem2->giveQueueFlag()){
 						// add neighbour to list of elements for subdivision
 						subdivqueue.push(elem2->giveNumber());
 						elem2->setQueueFlag(true);
 					}
 
-#ifdef DEBUG_INFO
-					fprintf(stderr, "Irregular %d added on (ngb1) %d (edge %d, nodes %d %d, nds %d %d %d %d, ngbs %d %d %d %d, irr %d %d %d %d %d %d)\n",
-									iNum, elem2->giveNumber(), eInd, iNode, jNode, 
-									elem2->giveNode(1), elem2->giveNode(2), elem2->giveNode(3), elem2->giveNode(4), 
-									elem2->giveNeighbor(1), elem2->giveNeighbor(2), elem2->giveNeighbor(3), elem2->giveNeighbor(4),
-									elem2->giveIrregular(1), elem2->giveIrregular(2), elem2->giveIrregular(3), 
-									elem2->giveIrregular(4), elem2->giveIrregular(5), elem2->giveIrregular(6));
-#endif
-
 					if(!boundary){
+						// I rely on the fact that nodes on intermaterial interface are marked as boundary
+						// however this might not be true
+						// therefore in smoothing the boundary flag is setuped again if not set boundary from here
 						if(iboundary == true || jboundary == true){
 							if(dorig->giveElement(elem2->giveTopParent())->giveRegionNumber()!=reg)boundary=true;
 						}
 					}
-#ifdef __PARALLEL_MODE
-				} else {
-					boundary=true;
-				}
-#endif
-
-				if(eInd <= 3){
-					if(elem2->giveNeighbor(1)==elem1->giveNumber())
-						ngb1=eInd+1;
-					else
-						ngb1=1;
-				}
-				else{
-					if(elem2->giveNeighbor(eInd-2)==elem1->giveNumber())
-						ngb1=(eInd>4)?eInd-3:4;
-					else
-						ngb1=eInd-2;
-				}
-				elem1=elem2;
-			}
-
-			if(ngb2){
-				boundary=true;
-				// traverse neighbours in other direction
-				elem1=this;
-				while(elem1->giveNeighbor(ngb2)){
-					elem2=mesh->giveElement(elem1->giveNeighbor(ngb2));
-					eInd=elem2->giveEdgeIndex(iNode,jNode);
-					// do not stop traversal if the neighbour is remote
-					// there still may be local elements further
-#ifdef __PARALLEL_MODE
-					if(elem2->giveParallelMode() == Element_local){
-#endif
-						elem2->setIrregular(eInd, iNum);
-						if(!elem2->giveQueueFlag()){
-							// add neighbour to list of elements for subdivision
-							subdivqueue.push(elem2->giveNumber());
-							elem2->setQueueFlag(true);
-						}
 
 #ifdef DEBUG_INFO
-						fprintf(stderr, "Irregular %d added on (ngb2) %d (edge %d, nodes %d %d, nds %d %d %d %d, ngbs %d %d %d %d, irr %d %d %d %d %d %d)\n",
-										iNum, elem2->giveNumber(), eInd, iNode, jNode, 
-										elem2->giveNode(1), elem2->giveNode(2), elem2->giveNode(3), elem2->giveNode(4), 
-										elem2->giveNeighbor(1), elem2->giveNeighbor(2), elem2->giveNeighbor(3), elem2->giveNeighbor(4),
-										elem2->giveIrregular(1), elem2->giveIrregular(2), elem2->giveIrregular(3), 
-										elem2->giveIrregular(4), elem2->giveIrregular(5), elem2->giveIrregular(6));
-#endif
-
 #ifdef __PARALLEL_MODE
-					}
+					// do not print global numbers of elements because they are not available (they are assigned at once after bisection);
+					// do not print global numbers of irregulars as these may not be available yet
+					OOFEM_LOG_INFO("[%d] Irregular %d added on %d (edge %d, nodes %d %d [%d %d], nds %d %d %d %d [%d %d %d %d], ngbs %d %d %d %d, irr %d %d %d %d %d %d)\n",
+												 mesh->giveSubdivision()->giveRank(), iNum, 
+												 elem2->giveNumber(), eInd, iNode, jNode, 
+												 mesh->giveNode(iNode)->giveGlobalNumber(), mesh->giveNode(jNode)->giveGlobalNumber(), 
+												 elem2->giveNode(1), elem2->giveNode(2), elem2->giveNode(3), elem2->giveNode(4), 
+												 mesh->giveNode(elem2->giveNode(1))->giveGlobalNumber(), 
+												 mesh->giveNode(elem2->giveNode(2))->giveGlobalNumber(), 
+												 mesh->giveNode(elem2->giveNode(3))->giveGlobalNumber(), 
+												 mesh->giveNode(elem2->giveNode(4))->giveGlobalNumber(), 
+												 elem2->giveNeighbor(1), elem2->giveNeighbor(2), elem2->giveNeighbor(3), elem2->giveNeighbor(4),
+												 elem2->giveIrregular(1), elem2->giveIrregular(2), elem2->giveIrregular(3), 
+												 elem2->giveIrregular(4), elem2->giveIrregular(5), elem2->giveIrregular(6));
+#else
+					OOFEM_LOG_INFO("Irregular %d added on %d (edge %d, nodes %d %d, nds %d %d %d %d, ngbs %d %d %d %d, irr %d %d %d %d %d %d)\n",
+												 iNum, elem2->giveNumber(), eInd, iNode, jNode, 
+												 elem2->giveNode(1), elem2->giveNode(2), elem2->giveNode(3), elem2->giveNode(4), 
+												 elem2->giveNeighbor(1), elem2->giveNeighbor(2), elem2->giveNeighbor(3), elem2->giveNeighbor(4),
+												 elem2->giveIrregular(1), elem2->giveIrregular(2), elem2->giveIrregular(3), 
+												 elem2->giveIrregular(4), elem2->giveIrregular(5), elem2->giveIrregular(6));
 #endif
-				
+#endif
+					
 					if(eInd <= 3){
 						if(elem2->giveNeighbor(1)==elem1->giveNumber())
-							ngb2=eInd+1;
+							ngb=eInd+1;
 						else
-							ngb2=1;
+							ngb=1;
 					}
 					else{
 						if(elem2->giveNeighbor(eInd-2)==elem1->giveNumber())
-							ngb2=(eInd>4)?eInd-3:4;
+							ngb=(eInd>4)?eInd-3:4;
 						else
-							ngb2=eInd-2;
+							ngb=eInd-2;
 					}
 					elem1=elem2;
 				}
-			}
-			if(boundary)irregular->setBoundary(boundary);
-			
+
+				if(elem2 != this){
+#ifdef DEBUG_CHECK
+#ifdef THREEPBT_3D
+					if(coords.at(1) > 0.000001 && coords.at(1) < 1999.99999 &&
+						 coords.at(2) > 0.000001 && coords.at(2) < 249.99999 &&
+						 coords.at(3) > 0.000001 && coords.at(3) < 499.99999){
+						if(987.5 - coords.at(1) > 0.000001 || coords.at(1) - 1012.5 > 0.000001 || 300.0 - coords.at(3) > 0.000001){
+							OOFEM_ERROR4("Subdivision::RS_Tetra::bisect Irregular %d [%d %d] not on boundary", iNum, iNode, jNode);
+						}
+					}
+#endif
+#endif
+					boundary = true;
+					// edge is on outer boundary
+
+					// I do rely on the fact that if the list of connected elements is not availale
+					// then the node is on top level
+					iElems=mesh->giveNode(iNode)->giveConnectedElements();
+					if(!iElems->giveSize()){
+						mesh->giveNode(iNode)->buildTopLevelNodeConnectivity(mesh->giveSubdivision()->giveDomain()->giveConnectivityTable());
+					}
+					jElems=mesh->giveNode(jNode)->giveConnectedElements();
+					if(!jElems->giveSize()){
+						mesh->giveNode(jNode)->buildTopLevelNodeConnectivity(mesh->giveSubdivision()->giveDomain()->giveConnectivityTable());
+					}
+
+					IntArray common;
+					if(iElems->giveSize() <= jElems->giveSize()){
+						common.preallocate(iElems->giveSize());
+					}
+					else{
+						common.preallocate(jElems->giveSize());
+					}
+					// I do rely on the fact that the arrays are ordered !!!
+					// I am using zero chunk because common is large enough
+					elems=iElems->findCommonValuesSorted(*jElems, common, 0);
+#ifdef DEBUG_CHECK
+					if(!elems){
+						OOFEM_ERROR3("Subdivision::RS_Tetra::bisect - local outer edge %d %d is not shared by common elements", 
+												 iNode, jNode);
+					}
+#endif
+					// after subdivision there will be twice as much of connected local elements
+					irregular->preallocateConnectedElements(elems * 2);
+					irregular->setNumber(-iNum);                             // mark local unshared irregular for connectivity setup
+					// put the new node on appropriate edge of all local elements sharing both nodes 
+					// (if not yet done during neighbour traversal)
+					for(j=1;j<=elems;j++){
+						elem=mesh->giveElement(common.at(j));
+						if(elem == this)continue;
+						eInd=elem->giveEdgeIndex(iNode,jNode);
+						if(!elem->giveIrregular(eInd)){
+							elem->setIrregular(eInd, iNum);
+
+#ifdef DEBUG_INFO
 #ifdef __PARALLEL_MODE
-			IntArray partitions;
-			// test if new node is on shared interpartition boundary
-			if (this->giveIrregularSharedPartitions (eIndex, iNode, jNode, partitions)) {
-				// mark irregular as shared (can be shared by only more partitions (in 3D))
-				irregular->setParallelMode (DofManager_shared);
-				irregular->setPartitions (partitions);
-				// and put its number into queue of shared irregulars that is later used to inform remote partition about this fact
-				irregular->setEdgeNodes(iNode, jNode);
-				sharedIrregularsQueue.push_back(iNum);
-#ifdef __VERBOSE_PARALLEL
-				char buffer[1024];
-				int ip, len=0;
-				for(ip=1;ip<=partitions.giveSize();ip++){
-					sprintf(buffer+len, " %d", partitions.at(ip));
-					len=strlen(buffer);
-					if(len>=1024)OOFEM_ERROR ("Subdivision::RS_Tetra::bisect: too small buffer");
+							// do not print global numbers of elements because they are not available (they are assigned at once after bisection);
+							// do not print global numbers of irregulars as these may not be available yet
+							OOFEM_LOG_INFO("[%d] Irregular %d added on %d (edge %d, nodes %d %d [%d %d], nds %d %d %d %d [%d %d %d %d], ngbs %d %d %d %d, irr %d %d %d %d %d %d)\n",
+														 mesh->giveSubdivision()->giveRank(), iNum, 
+														 elem->giveNumber(), eInd, iNode, jNode, 
+														 mesh->giveNode(iNode)->giveGlobalNumber(), mesh->giveNode(jNode)->giveGlobalNumber(), 
+														 elem->giveNode(1), elem->giveNode(2), elem->giveNode(3), elem->giveNode(4), 
+														 mesh->giveNode(elem->giveNode(1))->giveGlobalNumber(), 
+														 mesh->giveNode(elem->giveNode(2))->giveGlobalNumber(), 
+														 mesh->giveNode(elem->giveNode(3))->giveGlobalNumber(), 
+														 mesh->giveNode(elem->giveNode(4))->giveGlobalNumber(), 
+														 elem->giveNeighbor(1), elem->giveNeighbor(2), elem->giveNeighbor(3), elem->giveNeighbor(4),
+														 elem->giveIrregular(1), elem->giveIrregular(2), elem->giveIrregular(3), 
+														 elem->giveIrregular(4), elem->giveIrregular(5), elem->giveIrregular(6));
+#else
+							OOFEM_LOG_INFO("Irregular %d added on %d (edge %d, nodes %d %d, nds %d %d %d %d, ngbs %d %d %d %d, irr %d %d %d %d %d %d)\n",
+														 iNum, elem->giveNumber(), eInd, iNode, jNode, 
+														 elem->giveNode(1), elem->giveNode(2), elem->giveNode(3), elem->giveNode(4), 
+														 elem->giveNeighbor(1), elem->giveNeighbor(2), elem->giveNeighbor(3), elem->giveNeighbor(4),
+														 elem->giveIrregular(1), elem->giveIrregular(2), elem->giveIrregular(3), 
+														 elem->giveIrregular(4), elem->giveIrregular(5), elem->giveIrregular(6));
+#endif
+#endif
+
+							if(!elem->giveQueueFlag()){
+								// add elem to list of elements for subdivision
+								subdivqueue.push(elem->giveNumber());
+								elem->setQueueFlag(true);
+							}
+						}
+					}
 				}
-				OOFEM_LOG_INFO("RS_Tetra::bisect: Shared Irregular detected, number %d [%d[%d] %d[%d]], elem %d, partitions%s\n", iNum, iNode, mesh->giveNode(iNode)->giveGlobalNumber(), jNode, mesh->giveNode(jNode)->giveGlobalNumber(), this->number, buffer);
-#endif
 			}
-#endif
-			
+
+			if(boundary)irregular->setBoundary(boundary);
 		}
 	}
 	this->setQueueFlag(false);
 }
 
 
-
 void
-Subdivision::RS_Element::addIrregularOn (int iNum, const IntArray& bEntity)
-{
-  if (bEntity.giveSize() != 2) OOFEM_ERROR ("Subdivision::RS_Element::addIrregularOn: bEntity size mismatch");
-	int eIndex;
-
-	eIndex=this->giveEdgeIndex(bEntity.at(1),bEntity.at(2));
-	if(!eIndex)OOFEM_ERROR4 ("Subdivision::RS_Element::addIrregularOn: no bEntity connecting nodes %d and %d found on elem %d", 
-													 bEntity.at(1), bEntity.at(2), this->number);
-	this->irregular_nodes.at(eIndex) = iNum;
-}
-
-
-int
-Subdivision::RS_Element::giveIrregularOn (const IntArray& bEntity)
-{
-  if (bEntity.giveSize() != 2) OOFEM_ERROR ("Subdivision::RS_Element::giveIrregularOn: bEntity size mismatch");
-	int eIndex;
-
-	eIndex=this->giveEdgeIndex(bEntity.at(1),bEntity.at(2));
-	if(eIndex)return this->irregular_nodes.at(eIndex);
-  return 0;
-}
-
-
-
-#ifdef __PARALLEL_MODE
-
-// HUHU methods giveIrregularSharedPartitions work properly for nonlocal models only !!!
-// the problem of local model is that elements have no neighbor (locally marked as remote)
-// over shared boundary;
-// this implies that such a boundary cannot be distiguished from unshared boundary !!!
-
-// for example the following case is handled differently in local and nonlocal models
-//
-//       /   \   \   / e \   /   /   \
-//      /  1  \   \ /  2  \ /   /  3  \
-//     s-------s   s---i---s   s-------s       s - shared 
-//                                             i - irregular introduced on e
-//     s-------s   s-------s   s-------s       1,2,3,4,5,6 - partitions
-//      \  4  / \   \  5  /   / \  6  /
-//       \   /   \   \   /   /   \   /
-//
-// local model: element e has no remote neighbour ==> i is identified as not shared (but it is shared !!!)
-// nonlocal model: element e has remote neighbour ==> i is identified as shared
-
-// HUHU must be solved (for local model only) by exchanging element neighbour information
-// on shared interpartition boundary 
-
-int
-Subdivision::RS_Triangle::giveIrregularSharedPartitions(int eIndex, int iNode, int jNode, IntArray& partitions)
-{
-  int count=0;
-  if ((mesh->giveNode(iNode)->giveParallelMode() == DofManager_shared) &&
-      (mesh->giveNode(jNode)->giveParallelMode() == DofManager_shared)) {
-    // test if neigbor element exist (if yes and is remote then the edge is shared)
-    bool has_remote_neighbor = false;
-    int base_neighbor = this->neghbours_base_elements.at(eIndex);
-    if (base_neighbor) {
-      if (mesh->giveElement(base_neighbor)->giveParallelMode() == Element_remote) has_remote_neighbor = true;
-    }
-    if (has_remote_neighbor) { 
-      // test if parent vertex nodes are shared by the same partition
-      const IntArray *ipartitions = mesh->giveNode(iNode)->givePartitions();
-      const IntArray *jpartitions = mesh->giveNode(jNode)->givePartitions();
-      // find common partitions 
-      int i, ipsize = ipartitions->giveSize();
-      for (i=1; i<=ipsize; i++) {
-        if (jpartitions->contains (ipartitions->at(i)) &&
-            (ipartitions->at(i) != this->mesh->giveSubdivision()->giveRank())) { //
-          partitions.followedBy(ipartitions->at(i),2);
-					count++;
-				}
-			}
-			if(count==0)OOFEM_ERROR ("Subdivision::RS_Triangle::giveIrregularPartitions: topology error");
-		}
-	}
-  return count;
-}
-
-
-/* can be deleted
-int
-Subdivision::RS_Element::giveIrregularSharedPartitions(int leIndex, int inode, int jnode, IntArray& partitions)
-{
-  int j=0;
-  if ((mesh->giveNode(nodes.at(inode))->giveParallelMode() == DofManager_shared) &&
-      (mesh->giveNode(nodes.at(jnode))->giveParallelMode() == DofManager_shared)) {
-    // test if neigbor element exist (if yes and is local then the edge is not shared
-    bool has_local_neighbor = false;
-    int base_neighbor = this->neghbours_base_elements.at(leIndex);
-    if (base_neighbor) {
-      if (mesh->giveElement(base_neighbor)->giveParallelMode() == Element_local) has_local_neighbor = true;
-    }
-    if (!has_local_neighbor) { 
-      // test if parent vertex nodes are shared by the same partition
-      const IntArray *ipartitions = mesh->giveNode(nodes.at(inode))->givePartitions();
-      const IntArray *jpartitions = mesh->giveNode(nodes.at(jnode))->givePartitions();
-      // find common partitions 
-      int i, ipsize = ipartitions->giveSize();
-      for (i=1; i<=ipsize; i++) {
-        if (jpartitions->contains (ipartitions->at(i)) &&
-            (ipartitions->at(i) != this->mesh->giveSubdivision()->giveRank())) { //
-          partitions.followedBy(ipartitions->at(i),2);
-	  j++;
-	}
-      }
-      if(j==0)OOFEM_ERROR ("Subdivision::RS_Element::giveIrregularPartitions: topology error");
-    }
-  }
-  return j;
-}
-*/
-
-
-
-int
-Subdivision::RS_Tetra::giveIrregularSharedPartitions(int eIndex, int iNode, int jNode, IntArray& partitions)
-{
-  int count=0;
-  if ((mesh->giveNode(iNode)->giveParallelMode() == DofManager_shared) &&
-      (mesh->giveNode(jNode)->giveParallelMode() == DofManager_shared)) {
-    // test if neigbor element (sharing eIndex edge) exist (if yes and is remote then the edge is shared)
-    bool has_remote_neighbor = false;
-		int ngb1, ngb2, eInd;
-		Subdivision::RS_Element *elem1, *elem2;
-		if(eIndex <= 3){
-			ngb1 = 1;
-			ngb2 = eIndex+1;
-		}
-		else{
-			ngb1 = eIndex-2;
-			ngb2 = (eIndex>4)?eIndex-3:4;
-		}
-
-		elem1=this;
-		while(elem1->giveNeighbor(ngb1)){
-			elem2=mesh->giveElement(elem1->giveNeighbor(ngb1));
-			if(elem2==this){
-				ngb2=0; // there is no need to traverse in the other direction (loop was completed)
-				break;
-			}
-			if(elem2->giveParallelMode() == Element_remote){
-				has_remote_neighbor=true;
-				ngb2=0; // there is no need to traverse in the other direction (remote neighbor just identified)
-				break;
-			}
-			eInd=elem2->giveEdgeIndex(iNode,jNode);
-			if(eInd <= 3){
-				if(elem2->giveNeighbor(1)==elem1->giveNumber())
-					ngb1=eInd+1;
-				else
-					ngb1=1;
-			}
-			else{
-				if(elem2->giveNeighbor(eInd-2)==elem1->giveNumber())
-					ngb1=(eInd>4)?eInd-3:4;
-				else
-					ngb1=eInd-2;
-			}
-			elem1=elem2;
-		}
-
-		if(ngb2){
-			// traverse neighbours in other direction
-			elem1=this;
-			while(elem1->giveNeighbor(ngb2)){
-				elem2=mesh->giveElement(elem1->giveNeighbor(ngb2));
-				if(elem2->giveParallelMode() == Element_remote){
-					has_remote_neighbor=true;
-					break;
-				}
-				eInd=elem2->giveEdgeIndex(iNode,jNode);
-				if(eInd <= 3){
-					if(elem2->giveNeighbor(1)==elem1->giveNumber())
-						ngb2=eInd+1;
-					else
-						ngb2=1;
-				}
-				else{
-					if(elem2->giveNeighbor(eInd-2)==elem1->giveNumber())
-						ngb2=(eInd>4)?eInd-3:4;
-					else
-						ngb2=eInd-2;
-				}
-				elem1=elem2;
-			}
-		}
-    if (has_remote_neighbor) { 
-      // test if parent vertex nodes are shared by the same partition
-      const IntArray *ipartitions = mesh->giveNode(iNode)->givePartitions();
-      const IntArray *jpartitions = mesh->giveNode(jNode)->givePartitions();
-      // find common partitions 
-      int i, ipsize = ipartitions->giveSize();
-      for (i=1; i<=ipsize; i++) {
-        if (jpartitions->contains (ipartitions->at(i)) &&
-            (ipartitions->at(i) != this->mesh->giveSubdivision()->giveRank())) { //
-          partitions.followedBy(ipartitions->at(i),2);
-					count++;
-				}
-			}
-			if(count==0)OOFEM_ERROR ("Subdivision::RS_Tetra::giveIrregularPartitions: topology error");
-		}
-	}
-  return count;
-}
-
-
-
-int
-Subdivision::RS_Element::containsGlobalNode (int gnum)
-{
-  int in, nnodes = nodes.giveSize();
-  for (in=1; in<=nnodes; in++) {
-    if (this->mesh->giveNode(nodes.at(in))->giveGlobalNumber() == gnum) return in;
-  }
-  return 0;
-}
-#endif
-
-
-
-void
-Subdivision::RS_Triangle::generate()
+Subdivision::RS_Triangle::generate(std::list<int> &sharedEdgesQueue)
 {
 
 #ifdef DEBUG_CHECK
@@ -924,8 +1109,8 @@ Subdivision::RS_Triangle::generate()
 		}
 #endif
 
-  /* generates the children elements of already bisected element and adds them into mesh.
-     Also children array of receiver is update to contain children numbers */
+  /* generates the children elements of already bisected element and adds them into mesh;
+     also children array of receiver is updated to contain children numbers */
   if (irregular_nodes.containsOnlyZeroes()) {
     // no subdivision of receiver required 
     children.resize(0);
@@ -935,6 +1120,9 @@ Subdivision::RS_Triangle::generate()
     IntArray _nodes(3);
     Subdivision::RS_Triangle *child;
 		Subdivision::RS_Element *ngb;
+#ifdef __PARALLEL_MODE
+		bool ishared=false, jshared=false, kshared=false;
+#endif
     
     for (i=1; i<=irregular_nodes.giveSize(); i++) if (irregular_nodes.at(i)) nIrregulars++;
     this->children.resize(nIrregulars+1);
@@ -960,6 +1148,14 @@ Subdivision::RS_Triangle::generate()
     jnode = (inode<3)?inode+1:1;
     knode = (jnode<3)?jnode+1:1;
     
+#ifdef __PARALLEL_MODE
+		if(shared_edges.giveSize()){
+			if(shared_edges.at(iedge))ishared=true;
+			if(shared_edges.at(jedge))jshared=true;
+			if(shared_edges.at(kedge))kshared=true;
+		}
+#endif
+
     if (irregular_nodes.at(iedge) && irregular_nodes.at(jedge) && irregular_nodes.at(kedge)) {
       _nodes.at(1)=nodes.at(inode); _nodes.at(2)=irregular_nodes.at(kedge); _nodes.at(3)=irregular_nodes.at(iedge);
       childNum = mesh->giveNumberOfElements() + 1;
@@ -970,6 +1166,13 @@ Subdivision::RS_Triangle::generate()
       child->setNeighbor(1,-this->giveNeighbor(kedge));
       child->setNeighbor(2, childNum+2);
       child->setNeighbor(3, childNum+1);
+#ifdef __PARALLEL_MODE
+			// set shared info
+			if(kshared){
+				child->makeSharedEdges();
+				child->setSharedEdge(1, shared_edges.at(kedge));
+			}
+#endif
 
       _nodes.at(1)=nodes.at(inode); _nodes.at(2)=irregular_nodes.at(iedge); _nodes.at(3)=irregular_nodes.at(jedge);
       childNum = mesh->giveNumberOfElements() + 1;
@@ -980,6 +1183,13 @@ Subdivision::RS_Triangle::generate()
       child->setNeighbor(1, childNum-1);
       child->setNeighbor(2, childNum+2);
       child->setNeighbor(3,-this->giveNeighbor(jedge));
+#ifdef __PARALLEL_MODE
+			// set shared info
+			if(jshared){
+				child->makeSharedEdges();
+				child->setSharedEdge(3, shared_edges.at(jedge));
+			}
+#endif
 
       _nodes.at(1)=nodes.at(jnode); _nodes.at(2)=irregular_nodes.at(iedge); _nodes.at(3)=irregular_nodes.at(kedge);
       childNum = mesh->giveNumberOfElements() + 1;
@@ -990,6 +1200,14 @@ Subdivision::RS_Triangle::generate()
       child->setNeighbor(1,-this->giveNeighbor(iedge));
       child->setNeighbor(2, childNum-2);
       child->setNeighbor(3,-this->giveNeighbor(kedge));
+#ifdef __PARALLEL_MODE
+			// set shared info
+			if(ishared || kshared){
+				child->makeSharedEdges();
+				if(ishared)child->setSharedEdge(1, shared_edges.at(iedge));
+				if(kshared)child->setSharedEdge(3, shared_edges.at(kedge));
+			}
+#endif
 
       _nodes.at(1)=nodes.at(knode); _nodes.at(2)=irregular_nodes.at(jedge); _nodes.at(3)=irregular_nodes.at(iedge);
       childNum = mesh->giveNumberOfElements() + 1;
@@ -1001,6 +1219,45 @@ Subdivision::RS_Triangle::generate()
       child->setNeighbor(2, childNum-2);
       child->setNeighbor(3,-this->giveNeighbor(iedge));      
 
+#ifdef __PARALLEL_MODE
+			// set shared info
+			if(ishared || jshared){
+				child->makeSharedEdges();
+				if(ishared)child->setSharedEdge(3, shared_edges.at(iedge));
+				if(jshared)child->setSharedEdge(1, shared_edges.at(jedge));
+			}
+#endif
+
+#ifdef __PARALLEL_MODE
+			// set connected elements
+			if(mesh->giveNode(nodes.at(inode))->giveParallelMode() == DofManager_shared){
+				mesh->giveNode(nodes.at(inode))->eraseConnectedElement(this->giveNumber());
+				mesh->giveNode(nodes.at(inode))->insertConnectedElement(childNum-2);
+				mesh->giveNode(nodes.at(inode))->insertConnectedElement(childNum-3);
+			}
+			if(mesh->giveNode(nodes.at(jnode))->giveParallelMode() == DofManager_shared){
+				mesh->giveNode(nodes.at(jnode))->eraseConnectedElement(this->giveNumber());
+				mesh->giveNode(nodes.at(jnode))->insertConnectedElement(childNum-1);
+			}
+			if(mesh->giveNode(nodes.at(knode))->giveParallelMode() == DofManager_shared){
+				mesh->giveNode(nodes.at(knode))->eraseConnectedElement(this->giveNumber());
+				mesh->giveNode(nodes.at(knode))->insertConnectedElement(childNum);
+			}
+			if(ishared){
+				mesh->giveNode(irregular_nodes.at(iedge))->insertConnectedElement(childNum);
+				mesh->giveNode(irregular_nodes.at(iedge))->insertConnectedElement(childNum-1);
+				mesh->giveNode(irregular_nodes.at(iedge))->insertConnectedElement(childNum-2);
+				mesh->giveNode(irregular_nodes.at(iedge))->insertConnectedElement(childNum-3);
+			}
+			if(jshared){
+				mesh->giveNode(irregular_nodes.at(jedge))->insertConnectedElement(childNum);
+				mesh->giveNode(irregular_nodes.at(jedge))->insertConnectedElement(childNum-2);
+			}
+			if(kshared){
+				mesh->giveNode(irregular_nodes.at(kedge))->insertConnectedElement(childNum-1);
+				mesh->giveNode(irregular_nodes.at(kedge))->insertConnectedElement(childNum-3);
+			}
+#endif
     } else if (irregular_nodes.at(iedge) && irregular_nodes.at(jedge)) {
       _nodes.at(1)=nodes.at(inode); _nodes.at(2)=nodes.at(jnode); _nodes.at(3)=irregular_nodes.at(iedge);
       childNum = mesh->giveNumberOfElements() + 1;
@@ -1011,6 +1268,14 @@ Subdivision::RS_Triangle::generate()
       child->setNeighbor(1,-this->giveNeighbor(kedge)); 
       child->setNeighbor(2,-this->giveNeighbor(iedge));
       child->setNeighbor(3, childNum+1);
+#ifdef __PARALLEL_MODE
+			// set shared info
+			if(ishared || kshared){
+				child->makeSharedEdges();
+				if(ishared)child->setSharedEdge(2, shared_edges.at(iedge));
+				if(kshared)child->setSharedEdge(1, shared_edges.at(kedge));
+			}
+#endif
 
       _nodes.at(1)=nodes.at(inode); _nodes.at(2)=irregular_nodes.at(iedge); _nodes.at(3)=irregular_nodes.at(jedge);
       childNum = mesh->giveNumberOfElements() + 1;
@@ -1021,6 +1286,13 @@ Subdivision::RS_Triangle::generate()
       child->setNeighbor(1, childNum-1);
       child->setNeighbor(2, childNum+1);
       child->setNeighbor(3,-this->giveNeighbor(jedge));      
+#ifdef __PARALLEL_MODE
+			// set shared info
+			if(jshared){
+				child->makeSharedEdges();
+				child->setSharedEdge(3, shared_edges.at(jedge));
+			}
+#endif
 
       _nodes.at(1)=nodes.at(knode); _nodes.at(2)=irregular_nodes.at(jedge); _nodes.at(3)=irregular_nodes.at(iedge);
       childNum = mesh->giveNumberOfElements() + 1;
@@ -1031,7 +1303,40 @@ Subdivision::RS_Triangle::generate()
       child->setNeighbor(1,-this->giveNeighbor(jedge)); 
       child->setNeighbor(2, childNum-1);
       child->setNeighbor(3,-this->giveNeighbor(iedge));      
+#ifdef __PARALLEL_MODE
+			// set shared info
+			if(ishared || jshared){
+				child->makeSharedEdges();
+				if(ishared)child->setSharedEdge(3, shared_edges.at(iedge));
+				if(jshared)child->setSharedEdge(1, shared_edges.at(jedge));
+			}
+#endif
 
+#ifdef __PARALLEL_MODE
+			// set connected elements
+			if(mesh->giveNode(nodes.at(inode))->giveParallelMode() == DofManager_shared){
+				mesh->giveNode(nodes.at(inode))->eraseConnectedElement(this->giveNumber());
+				mesh->giveNode(nodes.at(inode))->insertConnectedElement(childNum-1);
+				mesh->giveNode(nodes.at(inode))->insertConnectedElement(childNum-2);
+			}
+			if(mesh->giveNode(nodes.at(jnode))->giveParallelMode() == DofManager_shared){
+				mesh->giveNode(nodes.at(jnode))->eraseConnectedElement(this->giveNumber());
+				mesh->giveNode(nodes.at(jnode))->insertConnectedElement(childNum-2);
+			}
+			if(mesh->giveNode(nodes.at(knode))->giveParallelMode() == DofManager_shared){
+				mesh->giveNode(nodes.at(knode))->eraseConnectedElement(this->giveNumber());
+				mesh->giveNode(nodes.at(knode))->insertConnectedElement(childNum);
+			}
+			if(ishared){
+				mesh->giveNode(irregular_nodes.at(iedge))->insertConnectedElement(childNum);
+				mesh->giveNode(irregular_nodes.at(iedge))->insertConnectedElement(childNum-1);
+				mesh->giveNode(irregular_nodes.at(iedge))->insertConnectedElement(childNum-2);
+			}
+			if(jshared){
+				mesh->giveNode(irregular_nodes.at(jedge))->insertConnectedElement(childNum);
+				mesh->giveNode(irregular_nodes.at(jedge))->insertConnectedElement(childNum-1);
+			}
+#endif
     } else if (irregular_nodes.at(iedge) && irregular_nodes.at(kedge)) {
       _nodes.at(1)=nodes.at(inode); _nodes.at(2)=irregular_nodes.at(kedge); _nodes.at(3)=irregular_nodes.at(iedge);
       childNum = mesh->giveNumberOfElements() + 1;
@@ -1042,6 +1347,13 @@ Subdivision::RS_Triangle::generate()
       child->setNeighbor(1,-this->giveNeighbor(kedge)); 
       child->setNeighbor(2, childNum+1);
       child->setNeighbor(3, childNum+2);
+#ifdef __PARALLEL_MODE
+			// set shared info
+			if(kshared){
+				child->makeSharedEdges();
+				child->setSharedEdge(1, shared_edges.at(kedge));
+			}
+#endif
 
       _nodes.at(1)=nodes.at(jnode); _nodes.at(2)=irregular_nodes.at(iedge); _nodes.at(3)=irregular_nodes.at(kedge);
       childNum = mesh->giveNumberOfElements() + 1;
@@ -1052,6 +1364,14 @@ Subdivision::RS_Triangle::generate()
       child->setNeighbor(1,-this->giveNeighbor(iedge)); 
       child->setNeighbor(2, childNum-1);
       child->setNeighbor(3,-this->giveNeighbor(kedge));      
+#ifdef __PARALLEL_MODE
+			// set shared info
+			if(ishared || kshared){
+				child->makeSharedEdges();
+				if(ishared)child->setSharedEdge(1, shared_edges.at(iedge));
+				if(kshared)child->setSharedEdge(3, shared_edges.at(kedge));
+			}
+#endif
 
       _nodes.at(1)=nodes.at(inode); _nodes.at(2)=irregular_nodes.at(iedge); _nodes.at(3)=nodes.at(knode);
       childNum = mesh->giveNumberOfElements() + 1;
@@ -1062,7 +1382,40 @@ Subdivision::RS_Triangle::generate()
       child->setNeighbor(1, childNum-2);
       child->setNeighbor(2,-this->giveNeighbor(iedge));
       child->setNeighbor(3,-this->giveNeighbor(jedge));      
+#ifdef __PARALLEL_MODE
+			// set shared info
+			if(ishared || jshared){
+				child->makeSharedEdges();
+				if(ishared)child->setSharedEdge(2, shared_edges.at(iedge));
+				if(jshared)child->setSharedEdge(3, shared_edges.at(jedge));
+			}
+#endif
 
+#ifdef __PARALLEL_MODE
+			// set connected elements
+			if(mesh->giveNode(nodes.at(inode))->giveParallelMode() == DofManager_shared){
+				mesh->giveNode(nodes.at(inode))->eraseConnectedElement(this->giveNumber());
+				mesh->giveNode(nodes.at(inode))->insertConnectedElement(childNum);
+				mesh->giveNode(nodes.at(inode))->insertConnectedElement(childNum-2);
+			}
+			if(mesh->giveNode(nodes.at(jnode))->giveParallelMode() == DofManager_shared){
+				mesh->giveNode(nodes.at(jnode))->eraseConnectedElement(this->giveNumber());
+				mesh->giveNode(nodes.at(jnode))->insertConnectedElement(childNum-1);
+			}
+			if(mesh->giveNode(nodes.at(knode))->giveParallelMode() == DofManager_shared){
+				mesh->giveNode(nodes.at(knode))->eraseConnectedElement(this->giveNumber());
+				mesh->giveNode(nodes.at(knode))->insertConnectedElement(childNum);
+			}
+			if(ishared){
+				mesh->giveNode(irregular_nodes.at(iedge))->insertConnectedElement(childNum);
+				mesh->giveNode(irregular_nodes.at(iedge))->insertConnectedElement(childNum-1);
+				mesh->giveNode(irregular_nodes.at(iedge))->insertConnectedElement(childNum-2);
+			}
+			if(kshared){
+				mesh->giveNode(irregular_nodes.at(kedge))->insertConnectedElement(childNum-1);
+				mesh->giveNode(irregular_nodes.at(kedge))->insertConnectedElement(childNum-2);
+			}
+#endif
     } else if (irregular_nodes.at(iedge)) {
       _nodes.at(1)=nodes.at(inode); _nodes.at(2)=nodes.at(jnode); _nodes.at(3)=irregular_nodes.at(iedge);
       childNum = mesh->giveNumberOfElements() + 1;
@@ -1073,6 +1426,14 @@ Subdivision::RS_Triangle::generate()
       child->setNeighbor(1,-this->giveNeighbor(kedge));
       child->setNeighbor(2,-this->giveNeighbor(iedge));
       child->setNeighbor(3, childNum+1);
+#ifdef __PARALLEL_MODE
+			// set shared info
+			if(ishared || kshared){
+				child->makeSharedEdges();
+				if(ishared)child->setSharedEdge(2, shared_edges.at(iedge));
+				if(kshared)child->setSharedEdge(1, shared_edges.at(kedge));
+			}
+#endif
 
       _nodes.at(1)=nodes.at(inode); _nodes.at(2)=irregular_nodes.at(iedge); _nodes.at(3)=nodes.at(knode);
       childNum = mesh->giveNumberOfElements() + 1;
@@ -1083,12 +1444,40 @@ Subdivision::RS_Triangle::generate()
       child->setNeighbor(1, childNum-1);
       child->setNeighbor(2,-this->giveNeighbor(iedge));
       child->setNeighbor(3,-this->giveNeighbor(jedge));
-     
+#ifdef __PARALLEL_MODE
+			// set shared info
+			if(ishared || jshared){
+				child->makeSharedEdges();
+				if(ishared)child->setSharedEdge(2, shared_edges.at(iedge));
+				if(jshared)child->setSharedEdge(3, shared_edges.at(jedge));
+			}
+#endif
+
+#ifdef __PARALLEL_MODE
+			// set connected elements
+			if(mesh->giveNode(nodes.at(inode))->giveParallelMode() == DofManager_shared){
+				mesh->giveNode(nodes.at(inode))->eraseConnectedElement(this->giveNumber());
+				mesh->giveNode(nodes.at(inode))->insertConnectedElement(childNum);
+				mesh->giveNode(nodes.at(inode))->insertConnectedElement(childNum-1);
+			}
+			if(mesh->giveNode(nodes.at(jnode))->giveParallelMode() == DofManager_shared){
+				mesh->giveNode(nodes.at(jnode))->eraseConnectedElement(this->giveNumber());
+				mesh->giveNode(nodes.at(jnode))->insertConnectedElement(childNum-1);
+			}
+			if(mesh->giveNode(nodes.at(knode))->giveParallelMode() == DofManager_shared){
+				mesh->giveNode(nodes.at(knode))->eraseConnectedElement(this->giveNumber());
+				mesh->giveNode(nodes.at(knode))->insertConnectedElement(childNum);
+			}
+			if(ishared){
+				mesh->giveNode(irregular_nodes.at(iedge))->insertConnectedElement(childNum);
+				mesh->giveNode(irregular_nodes.at(iedge))->insertConnectedElement(childNum-1);
+			}
+#endif
     } else {
       OOFEM_ERROR2("Subdivision::RS_Triangle::generate - element %d internal data inconsistency", this->number);
     }
 
-		// if there is neighbor (of "this") not designated for bisection
+		// if there is neighbor of "this" not designated for bisection
 		// its neihgbor corresponding to "this" must be made negative to enforce update_neighbors
 		for(i=1;i<=3;i++){
 			if(this->neghbours_base_elements.at(i)){
@@ -1100,16 +1489,10 @@ Subdivision::RS_Triangle::generate()
 #endif
 
 				ngb=mesh->giveElement(this->neghbours_base_elements.at(i));
-#ifdef __PARALLEL_MODE
-				if(ngb->giveParallelMode() == Element_local){
-#endif
-					if (!ngb->hasIrregulars()) {
-						ind=ngb->giveNeighbors()->findFirstIndexOf(this->number);
-						if(ind)ngb->setNeighbor(ind, -this->number);
-					}
-#ifdef __PARALLEL_MODE
+				if (!ngb->hasIrregulars()) {
+					ind=ngb->giveNeighbors()->findFirstIndexOf(this->number);
+					if(ind)ngb->setNeighbor(ind, -this->number);
 				}
-#endif
 			}
 		}
   }
@@ -1117,7 +1500,7 @@ Subdivision::RS_Triangle::generate()
 
 
 void
-Subdivision::RS_Tetra::generate()
+Subdivision::RS_Tetra::generate(std::list<int> &sharedEdgesQueue)
 {
 
 #ifdef DEBUG_CHECK
@@ -1126,24 +1509,28 @@ Subdivision::RS_Tetra::generate()
 	}
 #endif
 
-  /* generates the children elements of already bisected element and adds them into mesh.
-		 This is done recursively.
-     Also children array of receiver is updated to contain children numbers */
-
-	if(this->number < 0)return;    // skip tmp tetras in bisection loop 2 and more
+  /* generates the children elements of already bisected element and adds them into mesh;
+		 this is done recursively;
+     also children array of receiver is updated to contain children numbers */
 
   if (irregular_nodes.containsOnlyZeroes()) {
     // no subdivision of receiver required 
     children.resize(0);
   } else {
 		int irregulars1 = 0, irregulars2 = 0;
-		double maxlength, elength;
     int childNum, iedge, jedge, kedge, iiedge, jjedge, kkedge, inode, jnode, knode, nnode, iside, jside, kside, nside;
 		int i, ind, leIndex1 = 0, leIndex2 = 0;
     IntArray _nodes(4);
     Subdivision::RS_Tetra *child;
 		Subdivision::RS_Element *ngb;
+#ifdef __PARALLEL_MODE
+		int eNum=this->mesh->giveNumberOfEdges();
+		Subdivision::RS_SharedEdge *_edge;
+		bool ishared=false, jshared=false, kshared=false;
+		bool iishared=false, jjshared=false, kkshared=false;
+#endif
     
+   
     // leIndex determines primary edge to be subdivided
 		// it is identified either with iedge or iiedge
     /*
@@ -1187,20 +1574,23 @@ Subdivision::RS_Tetra::generate()
 		kside = kedge+1;
 		nside = 1;
 
-#ifdef DEBUG_CHECK
-		// check neighbours
-		for(i=1;i<=4;i++){
-			if(this->neghbours_base_elements.at(i) < 0){
-				OOFEM_ERROR2("Subdivision::RS_Tetra::generate - negative neighbor of %d not expected", this->number);
-			}
+		this->children.resize(2);
+
+#ifdef __PARALLEL_MODE
+		if(shared_edges.giveSize()){
+			if(shared_edges.at(iedge))ishared=true;
+			if(shared_edges.at(jedge))jshared=true;
+			if(shared_edges.at(kedge))kshared=true;
+			if(shared_edges.at(iiedge))iishared=true;
+			if(shared_edges.at(jjedge))jjshared=true;
+			if(shared_edges.at(kkedge))kkshared=true;
 		}
 #endif
 
-		this->children.resize(2);
-
 		if(leIndex <=3){
 			// count number of irregulars on each child;
-			// if there is one irregular only, leIndex is set
+			// if there is one irregular only, the set leIndex is valid
+			// otherwise it is corrected later
 			if(irregular_nodes.at(iiedge)){
 				irregulars1++;
 				irregulars2++;
@@ -1247,6 +1637,51 @@ Subdivision::RS_Tetra::generate()
 				}
 			}
 
+#ifdef __PARALLEL_MODE
+			int i_shared_id=0, n_shared_id=0;
+
+			// check whether new edges are potentially shared
+			if(ishared){
+				if(mesh->giveNode(nodes.at(inode))->giveParallelMode() == DofManager_shared){
+					if(!this->giveNeighbor(nside)){
+						_edge = new Subdivision::RS_SharedEdge(this->mesh);
+						_edge->setEdgeNodes(irregular_nodes.at(iedge), nodes.at(inode));
+					
+						this->mesh->addEdge(++eNum, _edge);
+						i_shared_id = eNum;
+
+						// get the tentative partitions
+						// they must be confirmed via mutual communication
+						IntArray partitions;
+						if(_edge->giveSharedPartitions(partitions)){
+							_edge->setPartitions(partitions);
+							// put edge number into queue of shared edges to resolve remote partitions
+							sharedEdgesQueue.push_back(eNum);
+						}
+					}
+				}
+
+				if(mesh->giveNode(nodes.at(nnode))->giveParallelMode() == DofManager_shared){
+					if(!this->giveNeighbor(iside)){
+						_edge = new Subdivision::RS_SharedEdge(this->mesh);
+						_edge->setEdgeNodes(irregular_nodes.at(iedge), nodes.at(nnode));
+					
+						this->mesh->addEdge(++eNum, _edge);
+						n_shared_id = eNum;
+
+						// get the tentative partitions
+						// they must be confirmed via mutual communication
+						IntArray partitions;
+						if(_edge->giveSharedPartitions(partitions)){
+							_edge->setPartitions(partitions);
+							// put edge number into queue of shared edges to resolve remote partitions
+							sharedEdgesQueue.push_back(eNum);
+						}
+					}
+				}
+			}
+#endif			
+
 			_nodes.at(1)=nodes.at(inode); _nodes.at(2)=nodes.at(jnode); 
 			_nodes.at(3)=irregular_nodes.at(iedge); _nodes.at(4)=nodes.at(nnode); 
 			childNum = mesh->giveNumberOfElements() + 1;
@@ -1272,12 +1707,45 @@ Subdivision::RS_Tetra::generate()
 			// neihgbor4 of child1 is changed to negative during subdivision (if any) of child2
 			child->setNeighbor(4, childNum+1);
 
+#ifdef __PARALLEL_MODE
+			// set shared info
+			if(ishared || kshared || iishared || jjshared){
+				child->makeSharedEdges();
+				if(ishared)child->setSharedEdge(2, shared_edges.at(iedge));
+				if(kshared)child->setSharedEdge(1, shared_edges.at(kedge));
+				if(iishared)child->setSharedEdge(4, shared_edges.at(iiedge));
+				if(jjshared)child->setSharedEdge(5, shared_edges.at(jjedge));
+				child->setSharedEdge(3, i_shared_id);
+				child->setSharedEdge(6, n_shared_id);
+			}
+#endif
+
 #ifdef DEBUG_INFO
-			fprintf(stderr, "Child %d generated on parent %d (leIndex %d, nds %d %d %d %d, ngbs %d %d %d %d, irr %d %d %d %d %d %d)\n",
-							childNum, this->number, this->leIndex, _nodes.at(1), _nodes.at(2), _nodes.at(3), _nodes.at(4),
-							child->giveNeighbor(1), child->giveNeighbor(2), child->giveNeighbor(3), child->giveNeighbor(4),
-							child->giveIrregular(1), child->giveIrregular(2), child->giveIrregular(3), 
-							child->giveIrregular(4), child->giveIrregular(5), child->giveIrregular(6));
+#ifdef __PARALLEL_MODE
+			OOFEM_LOG_INFO("[%d] Child %d generated on parent %d (leIndex %d, nds %d %d %d %d [%d %d %d %d], ngbs %d %d %d %d, irr %d %d %d %d %d %d [%d %d %d %d %d %d])\n",
+										 mesh->giveSubdivision()->giveRank(), childNum, 
+										 this->number, this->leIndex, 
+										 _nodes.at(1), _nodes.at(2), _nodes.at(3), _nodes.at(4),
+										 mesh->giveNode(_nodes.at(1))->giveGlobalNumber(), 
+										 mesh->giveNode(_nodes.at(2))->giveGlobalNumber(), 
+										 mesh->giveNode(_nodes.at(3))->giveGlobalNumber(), 
+										 mesh->giveNode(_nodes.at(4))->giveGlobalNumber(), 
+										 child->giveNeighbor(1), child->giveNeighbor(2), child->giveNeighbor(3), child->giveNeighbor(4),
+										 child->giveIrregular(1), child->giveIrregular(2), child->giveIrregular(3), 
+										 child->giveIrregular(4), child->giveIrregular(5), child->giveIrregular(6),
+										 (child->giveIrregular(1)) ? mesh->giveNode(child->giveIrregular(1))->giveGlobalNumber() : 0, 
+										 (child->giveIrregular(2)) ? mesh->giveNode(child->giveIrregular(2))->giveGlobalNumber() : 0, 
+										 (child->giveIrregular(3)) ? mesh->giveNode(child->giveIrregular(3))->giveGlobalNumber() : 0, 
+										 (child->giveIrregular(4)) ? mesh->giveNode(child->giveIrregular(4))->giveGlobalNumber() : 0, 
+										 (child->giveIrregular(5)) ? mesh->giveNode(child->giveIrregular(5))->giveGlobalNumber() : 0, 
+										 (child->giveIrregular(6)) ? mesh->giveNode(child->giveIrregular(6))->giveGlobalNumber() : 0);
+#else
+			OOFEM_LOG_INFO("Child %d generated on parent %d (leIndex %d, nds %d %d %d %d, ngbs %d %d %d %d, irr %d %d %d %d %d %d)\n",
+										 childNum, this->number, this->leIndex, _nodes.at(1), _nodes.at(2), _nodes.at(3), _nodes.at(4),
+										 child->giveNeighbor(1), child->giveNeighbor(2), child->giveNeighbor(3), child->giveNeighbor(4),
+										 child->giveIrregular(1), child->giveIrregular(2), child->giveIrregular(3), 
+										 child->giveIrregular(4), child->giveIrregular(5), child->giveIrregular(6));
+#endif
 #endif
 
 			_nodes.at(1)=nodes.at(inode); _nodes.at(2)=irregular_nodes.at(iedge); 
@@ -1286,6 +1754,7 @@ Subdivision::RS_Tetra::generate()
 			child = new Subdivision::RS_Tetra (childNum, mesh, this->number, _nodes); // number, parent, coords
 			mesh->addElement (childNum, child);
 			children.at(2) = childNum;
+
 			// set neigbour info
 			if(irregulars2){
 				child->setNeighbor(1, this->giveNeighbor(nside));
@@ -1303,18 +1772,142 @@ Subdivision::RS_Tetra::generate()
 			}
 			// neihgbor2 of child2 is changed to negative during subdivision (if any) of child1
 			child->setNeighbor(2, childNum-1);
-
-#ifdef DEBUG_INFO
-			fprintf(stderr, "Child %d generated on parent %d (leIndex %d, nds %d %d %d %d, ngbs %d %d %d %d, irr %d %d %d %d %d %d)\n",
-							childNum, this->number, this->leIndex, _nodes.at(1), _nodes.at(2), _nodes.at(3), _nodes.at(4),
-							child->giveNeighbor(1), child->giveNeighbor(2), child->giveNeighbor(3), child->giveNeighbor(4),
-							child->giveIrregular(1), child->giveIrregular(2), child->giveIrregular(3), 
-							child->giveIrregular(4), child->giveIrregular(5), child->giveIrregular(6));
+#ifdef __PARALLEL_MODE
+			// set shared info
+			if(ishared || jshared || iishared || kkshared){
+				child->makeSharedEdges();
+				if(ishared)child->setSharedEdge(2, shared_edges.at(iedge));
+				if(jshared)child->setSharedEdge(3, shared_edges.at(jedge));
+				if(iishared)child->setSharedEdge(4, shared_edges.at(iiedge));
+				if(kkshared)child->setSharedEdge(6, shared_edges.at(kkedge));
+				child->setSharedEdge(1, i_shared_id);
+				child->setSharedEdge(5, n_shared_id);
+			}
 #endif
 
+#ifdef __PARALLEL_MODE
+			// set connected elements
+			if(mesh->giveNode(nodes.at(inode))->giveParallelMode() == DofManager_shared){
+				mesh->giveNode(nodes.at(inode))->eraseConnectedElement(this->giveNumber());
+				mesh->giveNode(nodes.at(inode))->insertConnectedElement(childNum);
+				mesh->giveNode(nodes.at(inode))->insertConnectedElement(childNum-1);
+			}
+			if(mesh->giveNode(nodes.at(nnode))->giveParallelMode() == DofManager_shared){
+				mesh->giveNode(nodes.at(nnode))->eraseConnectedElement(this->giveNumber());
+				mesh->giveNode(nodes.at(nnode))->insertConnectedElement(childNum);
+				mesh->giveNode(nodes.at(nnode))->insertConnectedElement(childNum-1);
+			}
+			if(mesh->giveNode(nodes.at(jnode))->giveParallelMode() == DofManager_shared){
+				mesh->giveNode(nodes.at(jnode))->eraseConnectedElement(this->giveNumber());
+				mesh->giveNode(nodes.at(jnode))->insertConnectedElement(childNum-1);
+			}
+			if(mesh->giveNode(nodes.at(knode))->giveParallelMode() == DofManager_shared){
+				mesh->giveNode(nodes.at(knode))->eraseConnectedElement(this->giveNumber());
+				mesh->giveNode(nodes.at(knode))->insertConnectedElement(childNum);
+			}
+			if(ishared){
+				mesh->giveNode(irregular_nodes.at(iedge))->insertConnectedElement(childNum);
+				mesh->giveNode(irregular_nodes.at(iedge))->insertConnectedElement(childNum-1);
+			}
+#endif
+
+#ifdef DEBUG_INFO
+#ifdef __PARALLEL_MODE
+			OOFEM_LOG_INFO("[%d] Child %d generated on parent %d (leIndex %d, nds %d %d %d %d [%d %d %d %d], ngbs %d %d %d %d, irr %d %d %d %d %d %d [%d %d %d %d %d %d])\n",
+										 mesh->giveSubdivision()->giveRank(), childNum, 
+										 this->number, this->leIndex, 
+										 _nodes.at(1), _nodes.at(2), _nodes.at(3), _nodes.at(4),
+										 mesh->giveNode(_nodes.at(1))->giveGlobalNumber(), 
+										 mesh->giveNode(_nodes.at(2))->giveGlobalNumber(), 
+										 mesh->giveNode(_nodes.at(3))->giveGlobalNumber(), 
+										 mesh->giveNode(_nodes.at(4))->giveGlobalNumber(), 
+										 child->giveNeighbor(1), child->giveNeighbor(2), child->giveNeighbor(3), child->giveNeighbor(4),
+										 child->giveIrregular(1), child->giveIrregular(2), child->giveIrregular(3), 
+										 child->giveIrregular(4), child->giveIrregular(5), child->giveIrregular(6),
+										 (child->giveIrregular(1)) ? mesh->giveNode(child->giveIrregular(1))->giveGlobalNumber() : 0, 
+										 (child->giveIrregular(2)) ? mesh->giveNode(child->giveIrregular(2))->giveGlobalNumber() : 0, 
+										 (child->giveIrregular(3)) ? mesh->giveNode(child->giveIrregular(3))->giveGlobalNumber() : 0, 
+										 (child->giveIrregular(4)) ? mesh->giveNode(child->giveIrregular(4))->giveGlobalNumber() : 0, 
+										 (child->giveIrregular(5)) ? mesh->giveNode(child->giveIrregular(5))->giveGlobalNumber() : 0, 
+										 (child->giveIrregular(6)) ? mesh->giveNode(child->giveIrregular(6))->giveGlobalNumber() : 0);
+#else
+			OOFEM_LOG_INFO("Child %d generated on parent %d (leIndex %d, nds %d %d %d %d, ngbs %d %d %d %d, irr %d %d %d %d %d %d)\n",
+										 childNum, this->number, this->leIndex, _nodes.at(1), _nodes.at(2), _nodes.at(3), _nodes.at(4),
+										 child->giveNeighbor(1), child->giveNeighbor(2), child->giveNeighbor(3), child->giveNeighbor(4),
+										 child->giveIrregular(1), child->giveIrregular(2), child->giveIrregular(3), 
+										 child->giveIrregular(4), child->giveIrregular(5), child->giveIrregular(6));
+#endif
+#endif
+
+			// set connected elements to nonshared nodes on outer boundary
+#ifdef __PARALLEL_MODE
+			if(!ishared){
+#endif
+				if(mesh->giveNode(irregular_nodes.at(iedge))->giveNumber() < 0){     // check for marked local irregular
+					// irregular node on outer boundary
+					// insert connected elements
+					mesh->giveNode(irregular_nodes.at(iedge))->insertConnectedElement(childNum);
+					mesh->giveNode(irregular_nodes.at(iedge))->insertConnectedElement(childNum-1);
+				}
+				// update connectivity of both end nodes of iedge if not shared
+				// and ONLY if there is already list of connected elements
+#ifdef __PARALLEL_MODE
+				if(mesh->giveNode(nodes.at(jnode))->giveParallelMode() != DofManager_shared){  // update already done
+#endif
+					if(mesh->giveNode(nodes.at(jnode))->giveConnectedElements()->giveSize()){
+						mesh->giveNode(nodes.at(jnode))->eraseConnectedElement(this->giveNumber());
+						mesh->giveNode(nodes.at(jnode))->insertConnectedElement(childNum-1);
+					}
+#ifdef __PARALLEL_MODE
+				}
+#endif
+#ifdef __PARALLEL_MODE
+				if(mesh->giveNode(nodes.at(knode))->giveParallelMode() != DofManager_shared){  // update already done
+#endif
+					if(mesh->giveNode(nodes.at(knode))->giveConnectedElements()->giveSize()){
+						mesh->giveNode(nodes.at(knode))->eraseConnectedElement(this->giveNumber());
+						mesh->giveNode(nodes.at(knode))->insertConnectedElement(childNum);
+					}
+#ifdef __PARALLEL_MODE
+				}
+#endif
+#ifdef __PARALLEL_MODE
+			}
+#endif
+#ifdef __PARALLEL_MODE
+			if(!iishared){
+#endif
+				// update connectivity of both end nodes of iiedge if not shared
+				// and ONLY if there is already list of connected elements
+#ifdef __PARALLEL_MODE
+				if(mesh->giveNode(nodes.at(inode))->giveParallelMode() != DofManager_shared){  // update already done
+#endif
+					if(mesh->giveNode(nodes.at(inode))->giveConnectedElements()->giveSize()){
+						mesh->giveNode(nodes.at(inode))->eraseConnectedElement(this->giveNumber());
+						mesh->giveNode(nodes.at(inode))->insertConnectedElement(childNum);
+						mesh->giveNode(nodes.at(inode))->insertConnectedElement(childNum-1);
+					}
+#ifdef __PARALLEL_MODE
+				}
+#endif
+#ifdef __PARALLEL_MODE
+				if(mesh->giveNode(nodes.at(nnode))->giveParallelMode() != DofManager_shared){  // update already done
+#endif
+					if(mesh->giveNode(nodes.at(nnode))->giveConnectedElements()->giveSize()){
+						mesh->giveNode(nodes.at(nnode))->eraseConnectedElement(this->giveNumber());
+						mesh->giveNode(nodes.at(nnode))->insertConnectedElement(childNum);
+						mesh->giveNode(nodes.at(nnode))->insertConnectedElement(childNum-1);
+					}
+#ifdef __PARALLEL_MODE
+				}
+#endif
+#ifdef __PARALLEL_MODE
+			}
+#endif
 		} else {
 			// count number of irregulars on each child;
-			// if there is one irregular only, leIndex is set
+			// if there is one irregular only, the set leIndex is valid
+			// otherwise it is corrected later
 			if(irregular_nodes.at(iedge)){
 				irregulars1++;
 				irregulars2++;
@@ -1361,6 +1954,51 @@ Subdivision::RS_Tetra::generate()
 				}
 			}
 
+#ifdef __PARALLEL_MODE
+			int j_shared_id=0, k_shared_id=0;
+
+			// check whether new edges are potentially shared
+			if(iishared){
+				if(mesh->giveNode(nodes.at(jnode))->giveParallelMode() == DofManager_shared){
+					if(!this->giveNeighbor(kside)){
+						_edge = new Subdivision::RS_SharedEdge(this->mesh);
+						_edge->setEdgeNodes(irregular_nodes.at(iiedge), nodes.at(jnode));
+					
+						this->mesh->addEdge(++eNum, _edge);
+						j_shared_id = eNum;
+
+						// get the tentative partitions
+						// they must be confirmed via mutual communication
+						IntArray partitions;
+						if(_edge->giveSharedPartitions(partitions)){
+							_edge->setPartitions(partitions);
+							// put edge number into queue of shared edges to resolve remote partitions
+							sharedEdgesQueue.push_back(eNum);
+						}
+					}
+				}
+
+				if(mesh->giveNode(nodes.at(knode))->giveParallelMode() == DofManager_shared){
+					if(!this->giveNeighbor(jside)){
+						_edge = new Subdivision::RS_SharedEdge(this->mesh);
+						_edge->setEdgeNodes(irregular_nodes.at(iiedge), nodes.at(knode));
+					
+						this->mesh->addEdge(++eNum, _edge);
+						k_shared_id = eNum;
+
+						// get the tentative partitions
+						// they must be confirmed via mutual communication
+						IntArray partitions;
+						if(_edge->giveSharedPartitions(partitions)){
+							_edge->setPartitions(partitions);
+							// put edge number into queue of shared edges to resolve remote partitions
+							sharedEdgesQueue.push_back(eNum);
+						}
+					}
+				}
+			}
+#endif			
+
 			_nodes.at(1)=nodes.at(inode); _nodes.at(2)=nodes.at(jnode); 
 			_nodes.at(3)=nodes.at(knode); _nodes.at(4)=irregular_nodes.at(iiedge); 
 			childNum = mesh->giveNumberOfElements() + 1;
@@ -1384,13 +2022,45 @@ Subdivision::RS_Tetra::generate()
 			}
 			// neihgbor3 of child1 is changed to negative during subdivision (if any) of child2
 			child->setNeighbor(3, childNum+1);
+#ifdef __PARALLEL_MODE
+			// set shared info
+			if(ishared || jshared || kshared || iishared){
+				child->makeSharedEdges();
+				if(ishared)child->setSharedEdge(2, shared_edges.at(iedge));
+				if(jshared)child->setSharedEdge(3, shared_edges.at(jedge));
+				if(kshared)child->setSharedEdge(1, shared_edges.at(kedge));
+				if(iishared)child->setSharedEdge(4, shared_edges.at(iiedge));
+				child->setSharedEdge(5, j_shared_id);
+				child->setSharedEdge(6, k_shared_id);
+			}
+#endif
 
 #ifdef DEBUG_INFO
-			fprintf(stderr, "Child %d generated on parent %d (leIndex %d, nds %d %d %d %d, ngbs %d %d %d %d, irr %d %d %d %d %d %d)\n",
-							childNum, this->number, this->leIndex, _nodes.at(1), _nodes.at(2), _nodes.at(3), _nodes.at(4),
-							child->giveNeighbor(1), child->giveNeighbor(2), child->giveNeighbor(3), child->giveNeighbor(4),
-							child->giveIrregular(1), child->giveIrregular(2), child->giveIrregular(3), 
-							child->giveIrregular(4), child->giveIrregular(5), child->giveIrregular(6));
+#ifdef __PARALLEL_MODE
+			OOFEM_LOG_INFO("[%d] Child %d generated on parent %d (leIndex %d, nds %d %d %d %d [%d %d %d %d], ngbs %d %d %d %d, irr %d %d %d %d %d %d [%d %d %d %d %d %d])\n",
+										 mesh->giveSubdivision()->giveRank(), childNum, 
+										 this->number, this->leIndex, 
+										 _nodes.at(1), _nodes.at(2), _nodes.at(3), _nodes.at(4),
+										 mesh->giveNode(_nodes.at(1))->giveGlobalNumber(), 
+										 mesh->giveNode(_nodes.at(2))->giveGlobalNumber(), 
+										 mesh->giveNode(_nodes.at(3))->giveGlobalNumber(), 
+										 mesh->giveNode(_nodes.at(4))->giveGlobalNumber(), 
+										 child->giveNeighbor(1), child->giveNeighbor(2), child->giveNeighbor(3), child->giveNeighbor(4),
+										 child->giveIrregular(1), child->giveIrregular(2), child->giveIrregular(3), 
+										 child->giveIrregular(4), child->giveIrregular(5), child->giveIrregular(6),
+										 (child->giveIrregular(1)) ? mesh->giveNode(child->giveIrregular(1))->giveGlobalNumber() : 0, 
+										 (child->giveIrregular(2)) ? mesh->giveNode(child->giveIrregular(2))->giveGlobalNumber() : 0, 
+										 (child->giveIrregular(3)) ? mesh->giveNode(child->giveIrregular(3))->giveGlobalNumber() : 0, 
+										 (child->giveIrregular(4)) ? mesh->giveNode(child->giveIrregular(4))->giveGlobalNumber() : 0, 
+										 (child->giveIrregular(5)) ? mesh->giveNode(child->giveIrregular(5))->giveGlobalNumber() : 0, 
+										 (child->giveIrregular(6)) ? mesh->giveNode(child->giveIrregular(6))->giveGlobalNumber() : 0);
+#else
+			OOFEM_LOG_INFO("Child %d generated on parent %d (leIndex %d, nds %d %d %d %d, ngbs %d %d %d %d, irr %d %d %d %d %d %d)\n",
+										 childNum, this->number, this->leIndex, _nodes.at(1), _nodes.at(2), _nodes.at(3), _nodes.at(4),
+										 child->giveNeighbor(1), child->giveNeighbor(2), child->giveNeighbor(3), child->giveNeighbor(4),
+										 child->giveIrregular(1), child->giveIrregular(2), child->giveIrregular(3), 
+										 child->giveIrregular(4), child->giveIrregular(5), child->giveIrregular(6));
+#endif
 #endif
 
 			_nodes.at(1)=irregular_nodes.at(iiedge); _nodes.at(2)=nodes.at(jnode); 
@@ -1399,6 +2069,7 @@ Subdivision::RS_Tetra::generate()
 			child = new Subdivision::RS_Tetra (childNum, mesh, this->number, _nodes); // number, parent, coords
 			mesh->addElement (childNum, child);
 			children.at(2) = childNum;
+
 			// set neigbour info
 			if(irregulars2){
 				child->setNeighbor(2, this->giveNeighbor(kside));
@@ -1416,16 +2087,141 @@ Subdivision::RS_Tetra::generate()
 			}
 			// neihgbor1 of child2 is changed to negative during subdivision (if any) of child1
 			child->setNeighbor(1, childNum-1);
-
-#ifdef DEBUG_INFO
-			fprintf(stderr, "Child %d generated on parent %d (leIndex %d, nds %d %d %d %d, ngbs %d %d %d %d, irr %d %d %d %d %d %d)\n",
-							childNum, this->number, this->leIndex, _nodes.at(1), _nodes.at(2), _nodes.at(3), _nodes.at(4),
-							child->giveNeighbor(1), child->giveNeighbor(2), child->giveNeighbor(3), child->giveNeighbor(4),
-							child->giveIrregular(1), child->giveIrregular(2), child->giveIrregular(3), 
-							child->giveIrregular(4), child->giveIrregular(5), child->giveIrregular(6));
+#ifdef __PARALLEL_MODE
+			// set shared info
+			if(ishared || jjshared || kkshared || iishared){
+				child->makeSharedEdges();
+				if(ishared)child->setSharedEdge(2, shared_edges.at(iedge));
+				if(jjshared)child->setSharedEdge(5, shared_edges.at(jjedge));
+				if(kkshared)child->setSharedEdge(6, shared_edges.at(kkedge));
+				if(iishared)child->setSharedEdge(4, shared_edges.at(iiedge));
+				child->setSharedEdge(1, j_shared_id);
+				child->setSharedEdge(3, k_shared_id);
+			}
 #endif
 
+#ifdef __PARALLEL_MODE
+			// set connected elements
+			if(mesh->giveNode(nodes.at(jnode))->giveParallelMode() == DofManager_shared){
+				mesh->giveNode(nodes.at(jnode))->eraseConnectedElement(this->giveNumber());
+				mesh->giveNode(nodes.at(jnode))->insertConnectedElement(childNum);
+				mesh->giveNode(nodes.at(jnode))->insertConnectedElement(childNum-1);
+			}
+			if(mesh->giveNode(nodes.at(knode))->giveParallelMode() == DofManager_shared){
+				mesh->giveNode(nodes.at(knode))->eraseConnectedElement(this->giveNumber());
+				mesh->giveNode(nodes.at(knode))->insertConnectedElement(childNum);
+				mesh->giveNode(nodes.at(knode))->insertConnectedElement(childNum-1);
+			}
+			if(mesh->giveNode(nodes.at(inode))->giveParallelMode() == DofManager_shared){
+				mesh->giveNode(nodes.at(inode))->eraseConnectedElement(this->giveNumber());
+				mesh->giveNode(nodes.at(inode))->insertConnectedElement(childNum-1);
+			}
+			if(mesh->giveNode(nodes.at(nnode))->giveParallelMode() == DofManager_shared){
+				mesh->giveNode(nodes.at(nnode))->eraseConnectedElement(this->giveNumber());
+				mesh->giveNode(nodes.at(nnode))->insertConnectedElement(childNum);
+			}
+			if(iishared){
+				mesh->giveNode(irregular_nodes.at(iiedge))->insertConnectedElement(childNum);
+				mesh->giveNode(irregular_nodes.at(iiedge))->insertConnectedElement(childNum-1);
+			}
+#endif
+
+#ifdef DEBUG_INFO
+#ifdef __PARALLEL_MODE
+			OOFEM_LOG_INFO("[%d] Child %d generated on parent %d (leIndex %d, nds %d %d %d %d [%d %d %d %d], ngbs %d %d %d %d, irr %d %d %d %d %d %d [%d %d %d %d %d %d])\n",
+										 mesh->giveSubdivision()->giveRank(), childNum, 
+										 this->number, this->leIndex, 
+										 _nodes.at(1), _nodes.at(2), _nodes.at(3), _nodes.at(4),
+										 mesh->giveNode(_nodes.at(1))->giveGlobalNumber(), 
+										 mesh->giveNode(_nodes.at(2))->giveGlobalNumber(), 
+										 mesh->giveNode(_nodes.at(3))->giveGlobalNumber(), 
+										 mesh->giveNode(_nodes.at(4))->giveGlobalNumber(), 
+										 child->giveNeighbor(1), child->giveNeighbor(2), child->giveNeighbor(3), child->giveNeighbor(4),
+										 child->giveIrregular(1), child->giveIrregular(2), child->giveIrregular(3), 
+										 child->giveIrregular(4), child->giveIrregular(5), child->giveIrregular(6),
+										 (child->giveIrregular(1)) ? mesh->giveNode(child->giveIrregular(1))->giveGlobalNumber() : 0, 
+										 (child->giveIrregular(2)) ? mesh->giveNode(child->giveIrregular(2))->giveGlobalNumber() : 0, 
+										 (child->giveIrregular(3)) ? mesh->giveNode(child->giveIrregular(3))->giveGlobalNumber() : 0, 
+										 (child->giveIrregular(4)) ? mesh->giveNode(child->giveIrregular(4))->giveGlobalNumber() : 0, 
+										 (child->giveIrregular(5)) ? mesh->giveNode(child->giveIrregular(5))->giveGlobalNumber() : 0, 
+										 (child->giveIrregular(6)) ? mesh->giveNode(child->giveIrregular(6))->giveGlobalNumber() : 0);
+#else
+			OOFEM_LOG_INFO("Child %d generated on parent %d (leIndex %d, nds %d %d %d %d, ngbs %d %d %d %d, irr %d %d %d %d %d %d)\n",
+										 childNum, this->number, this->leIndex, _nodes.at(1), _nodes.at(2), _nodes.at(3), _nodes.at(4),
+										 child->giveNeighbor(1), child->giveNeighbor(2), child->giveNeighbor(3), child->giveNeighbor(4),
+										 child->giveIrregular(1), child->giveIrregular(2), child->giveIrregular(3), 
+										 child->giveIrregular(4), child->giveIrregular(5), child->giveIrregular(6));
+#endif
+#endif
+
+			// set connected elements to nonshared nodes on outer boundary
+#ifdef __PARALLEL_MODE
+			if(!iishared){
+#endif
+				if(mesh->giveNode(irregular_nodes.at(iiedge))->giveNumber() < 0){     // check for marked local irregular
+					// irregular node on outer boundary
+					// insert connected elements
+					mesh->giveNode(irregular_nodes.at(iiedge))->insertConnectedElement(childNum);
+					mesh->giveNode(irregular_nodes.at(iiedge))->insertConnectedElement(childNum-1);
+				}
+					
+				// update connectivity of both end nodes of iiedge if not shared
+				// and ONLY if there is already list of connected elements
+#ifdef __PARALLEL_MODE
+				if(mesh->giveNode(nodes.at(inode))->giveParallelMode() != DofManager_shared){  // update already done
+#endif
+					if(mesh->giveNode(nodes.at(inode))->giveConnectedElements()->giveSize()){
+						mesh->giveNode(nodes.at(inode))->eraseConnectedElement(this->giveNumber());
+						mesh->giveNode(nodes.at(inode))->insertConnectedElement(childNum-1);
+					}
+#ifdef __PARALLEL_MODE
+				}
+#endif
+#ifdef __PARALLEL_MODE
+				if(mesh->giveNode(nodes.at(nnode))->giveParallelMode() != DofManager_shared){  // update already done
+#endif
+					if(mesh->giveNode(nodes.at(nnode))->giveConnectedElements()->giveSize()){
+						mesh->giveNode(nodes.at(nnode))->eraseConnectedElement(this->giveNumber());
+						mesh->giveNode(nodes.at(nnode))->insertConnectedElement(childNum);
+					}
+#ifdef __PARALLEL_MODE
+				}
+#endif
+#ifdef __PARALLEL_MODE
+			}
+#endif
+#ifdef __PARALLEL_MODE
+			if(!ishared){
+#endif
+				// update connectivity of both end nodes of iedge if not shared
+				// and ONLY if there is already list of connected elements
+#ifdef __PARALLEL_MODE
+				if(mesh->giveNode(nodes.at(jnode))->giveParallelMode() != DofManager_shared){  // update already done
+#endif
+					if(mesh->giveNode(nodes.at(jnode))->giveConnectedElements()->giveSize()){
+						mesh->giveNode(nodes.at(jnode))->eraseConnectedElement(this->giveNumber());
+						mesh->giveNode(nodes.at(jnode))->insertConnectedElement(childNum);
+						mesh->giveNode(nodes.at(jnode))->insertConnectedElement(childNum-1);
+					}
+#ifdef __PARALLEL_MODE
+				}
+#endif
+#ifdef __PARALLEL_MODE
+				if(mesh->giveNode(nodes.at(knode))->giveParallelMode() != DofManager_shared){  // update already done
+#endif
+					if(mesh->giveNode(nodes.at(knode))->giveConnectedElements()->giveSize()){
+						mesh->giveNode(nodes.at(knode))->eraseConnectedElement(this->giveNumber());
+						mesh->giveNode(nodes.at(knode))->insertConnectedElement(childNum);
+						mesh->giveNode(nodes.at(knode))->insertConnectedElement(childNum-1);
+					}
+#ifdef __PARALLEL_MODE
+				}
+#endif
+#ifdef __PARALLEL_MODE
+			}
+#endif
 		}
+
 		if(irregulars1){
 #ifdef DEBUG_CHECK
 			if(!mesh->giveElement(children.at(1))->giveIrregular(leIndex1)){
@@ -1433,8 +2229,7 @@ Subdivision::RS_Tetra::generate()
 			}
 #endif
 			mesh->giveElement(children.at(1))->setLeIndex(leIndex1);   
-			mesh->giveElement(children.at(1))->generate();
-			mesh->giveElement(children.at(1))->setNumber(-children.at(1));            // mark tmp tetra
+			mesh->giveElement(children.at(1))->generate(sharedEdgesQueue);
 		}
 		if(irregulars2){
 #ifdef DEBUG_CHECK
@@ -1443,10 +2238,10 @@ Subdivision::RS_Tetra::generate()
 			}
 #endif
 			mesh->giveElement(children.at(2))->setLeIndex(leIndex2);
-			mesh->giveElement(children.at(2))->generate();
-			mesh->giveElement(children.at(2))->setNumber(-children.at(2));            // mark tmp tetra
+			mesh->giveElement(children.at(2))->generate(sharedEdgesQueue);
 		}
-		// if there is neighbor (of "this") not designated for bisection
+
+		// if there is neighbor of "this" (local or remote)  not designated for bisection
 		// its neihgbor corresponding to "this" must be made negative to enforce update_neighbors
 		for(i=1;i<=4;i++){
 			if(this->neghbours_base_elements.at(i)){
@@ -1458,16 +2253,10 @@ Subdivision::RS_Tetra::generate()
 #endif
 
 				ngb=mesh->giveElement(this->neghbours_base_elements.at(i));
-#ifdef __PARALLEL_MODE
-				if(ngb->giveParallelMode() == Element_local){
-#endif
-					if (!ngb->hasIrregulars()) {
-						ind=ngb->giveNeighbors()->findFirstIndexOf(this->number);
-						if(ind)ngb->setNeighbor(ind, -this->number);
-					}
-#ifdef __PARALLEL_MODE
+				if (!ngb->hasIrregulars()) {
+					ind=ngb->giveNeighbors()->findFirstIndexOf(this->number);
+					if(ind)ngb->setNeighbor(ind, -this->number);
 				}
-#endif
 			}
 		}
   }
@@ -1480,7 +2269,7 @@ Subdivision::RS_Triangle::update_neighbours()
 {
   bool found;
   int i, iside,parentNeighbor;
-  IntArray ca;
+  const IntArray *ca;
 
   /*
     neghbours_base_elements pre-set in generate using this rule:
@@ -1489,27 +2278,18 @@ Subdivision::RS_Triangle::update_neighbours()
     value < 0 .. neighbour set to parent element, actual neighbour has to be determined from parent children 
                  or if no child exists then to parent new counterpart.
    */
-#ifdef __PARALLEL_MODE
-  if (this->giveParallelMode() == Element_remote) return;
-#endif
 
-  //this->neghbours_base_elements.resize(3);
   for (iside=1; iside<=3; iside++) {
     if (this->neghbours_base_elements.at(iside) < 0) {
       parentNeighbor = -this->neghbours_base_elements.at(iside);
       // test if parentNeighbor has been subdivided
-#ifdef __PARALLEL_MODE
-      if ((mesh->giveElement(parentNeighbor)->giveParallelMode() == Element_local) &&
-          (mesh->giveElement(parentNeighbor)->hasIrregulars())) {      // HUHU replace by !isTerminal
-#else
 			if (mesh->giveElement(parentNeighbor)->hasIrregulars()) {        // HUHU replace by !isTerminal
-#endif
         // old neighbour bisected -> we loop over its children to find an appropriate new neighbor
-        mesh->giveElement(parentNeighbor)->giveChildren(ca);
+        ca = mesh->giveElement(parentNeighbor)->giveChildren();
         found = false;
-        for (i=1; i<=ca.giveSize(); i++) {
-          if (this->isNeighborOf(mesh->giveElement(ca.at(i)))) {
-            this->neghbours_base_elements.at(iside) = ca.at(i);
+        for (i=1; i<=ca->giveSize(); i++) {
+          if (this->isNeighborOf(mesh->giveElement(ca->at(i)))) {
+            this->neghbours_base_elements.at(iside) = ca->at(i);
             found = true;
             break;
           }
@@ -1518,10 +2298,9 @@ Subdivision::RS_Triangle::update_neighbours()
           OOFEM_ERROR2 ("Subdivision::RS_Triangle::update_neighbours failed for element %d", this->number);
         }
       } else {
-          // parent neighbour remains actual neighbour
-          this->neghbours_base_elements.at(iside) = parentNeighbor;
+				// parent neighbour remains actual neighbour
+				this->neghbours_base_elements.at(iside) = parentNeighbor;
       }
-
     } else if (this->neghbours_base_elements.at(iside) > 0) {
       // neighbor element already set
     }
@@ -1534,9 +2313,7 @@ Subdivision::RS_Tetra::update_neighbours()
 {
   bool found;
   int i, j, k, iside,parentNeighbor;
-  IntArray ca1, ca2, ca3;
-
-	if(this->number < 0)return;    // skip tmp tetras in bisection pass 2 and more
+  const IntArray *ca1, *ca2, *ca3;
 
   /*
     neghbours_base_elements pre-set in generate using this rule:
@@ -1546,48 +2323,37 @@ Subdivision::RS_Tetra::update_neighbours()
                  or if no child exists then to parent new counterpart.
    */
 
-  //this->neghbours_base_elements.resize(4);
-
-#ifdef __PARALLEL_MODE
-  if (this->giveParallelMode() == Element_remote) return;
-#endif
-
   for (iside=1; iside<=4; iside++) {
     if (this->neghbours_base_elements.at(iside) < 0) {
       parentNeighbor = -this->neghbours_base_elements.at(iside);
       // test if parentNeighbor has been subdivided
-#ifdef __PARALLEL_MODE
-      if ((mesh->giveElement(parentNeighbor)->giveParallelMode() == Element_local) &&
-					(mesh->giveElement(parentNeighbor)->hasIrregulars())) {      // HUHU replace by !isTerminal
-#else
 			if (mesh->giveElement(parentNeighbor)->hasIrregulars()) {      // HUHU replace by !isTerminal
-#endif
-				// old neighbour bisected -> we loop over its terminal children to find an appropriate new neighbor
+				// old neighbour bisected -> we loop over its terminal children to find an appropriate new neighbor;
 				// there may be at maximum 3 levels of parent tetra subdivision
-				mesh->giveElement(parentNeighbor)->giveChildren(ca1);
+				ca1 = mesh->giveElement(parentNeighbor)->giveChildren();
 				found = false;
-				for (i=1; i<=ca1.giveSize(); i++) {
-					if(mesh->giveElement(ca1.at(i))->isTerminal()){
-						if (this->isNeighborOf(mesh->giveElement(ca1.at(i)))) {
-							this->neghbours_base_elements.at(iside) = ca1.at(i);
+				for (i=1; i<=ca1->giveSize(); i++) {
+					if(mesh->giveElement(ca1->at(i))->isTerminal()){
+						if (this->isNeighborOf(mesh->giveElement(ca1->at(i)))) {
+							this->neghbours_base_elements.at(iside) = ca1->at(i);
 							found = true;
 							break;
 						}
 					} else{
-						mesh->giveElement(ca1.at(i))->giveChildren(ca2);
-						for (j=1; j<=ca2.giveSize(); j++) {
-							if(mesh->giveElement(ca2.at(j))->isTerminal()){
-								if (this->isNeighborOf(mesh->giveElement(ca2.at(j)))) {
-									this->neghbours_base_elements.at(iside) = ca2.at(j);
+						ca2 = mesh->giveElement(ca1->at(i))->giveChildren();
+						for (j=1; j<=ca2->giveSize(); j++) {
+							if(mesh->giveElement(ca2->at(j))->isTerminal()){
+								if (this->isNeighborOf(mesh->giveElement(ca2->at(j)))) {
+									this->neghbours_base_elements.at(iside) = ca2->at(j);
 									found = true;
 									break;
 								}
 							} else{
-								mesh->giveElement(ca2.at(j))->giveChildren(ca3);
-								for (k=1; k<=ca3.giveSize(); k++) {
-									if(mesh->giveElement(ca3.at(k))->isTerminal()){
-										if (this->isNeighborOf(mesh->giveElement(ca3.at(k)))) {
-											this->neghbours_base_elements.at(iside) = ca3.at(k);
+								ca3 = mesh->giveElement(ca2->at(j))->giveChildren();
+								for (k=1; k<=ca3->giveSize(); k++) {
+									if(mesh->giveElement(ca3->at(k))->isTerminal()){
+										if (this->isNeighborOf(mesh->giveElement(ca3->at(k)))) {
+											this->neghbours_base_elements.at(iside) = ca3->at(k);
 											found = true;
 											break;
 										}
@@ -1606,7 +2372,7 @@ Subdivision::RS_Tetra::update_neighbours()
 				}
 				if (!found) {
 					OOFEM_ERROR4 ("Subdivision::RS_Tetra::update_neighbours failed for element %d (side %d, elem %d)", 
-												this->number, iside, -this->neghbours_base_elements.at(iside));
+												this->number, iside, parentNeighbor);
 				}
 			} else {
 				// parent neighbour remains actual neighbour
@@ -1779,103 +2545,253 @@ Subdivision::RS_Tetra::giveDensity()
 
 
 void
-Subdivision::RS_Triangle::importConnectivities(ConnectivityTable* ct)
+Subdivision::RS_Triangle::importConnectivity(ConnectivityTable* ct)
 {
   IntArray me(1), conn;
-  int iside, inode, jnode, el, i;
+  int iside, iNode, jNode, el, i;
   me.at(1) = this->number;
+
+	// KOKO old version
 
   neghbours_base_elements.resize(3);
   neghbours_base_elements.zero();             // initialized to have no neighbour
   ct->giveElementNeighbourList(conn, me);
 
-	// HUHU is conn ordered? if yes, function can be optimized
-
   for (iside=1; iside<=3; iside++) {
-    inode=nodes.at(iside);
-    jnode=nodes.at((iside==3)?1:iside+1);
+    iNode=nodes.at(iside);
+    jNode=nodes.at((iside==3)?1:iside+1);
 
     // select right neighbour
     for (i=1; i<=conn.giveSize(); i++) {
       el = conn.at(i);
-      if (el != this->number) {
-        if (mesh->giveElement(el)->containsNode(inode) &&
-            mesh->giveElement(el)->containsNode(jnode)) {
-          neghbours_base_elements.at(iside) = el;
-					break;
-        }
+      if (el == this->number)continue;
+#ifdef __PARALLEL_MODE
+			if(mesh->giveElement(el)->giveParallelMode() != Element_local)continue;
+#endif
+			if (mesh->giveElement(el)->containsNode(iNode) &&
+					mesh->giveElement(el)->containsNode(jNode)) {
+				neghbours_base_elements.at(iside) = el;
+				break;
       }
     }
   }
+
+#if 0   // HUHU new version
+	me.at(1) = nodes.at(3);
+	ct->giveNodeNeighbourList(conn, me);
+	iNode = nodes.at(1);
+	jNode = nodes.at(2);
+
+	// select right neighbour
+	for (i=1; i<=conn.giveSize(); i++) {
+		el = conn.at(i);
+		if (el == this->number)continue;
+#ifdef __PARALLEL_MODE
+		if(mesh->giveElement(el)->giveParallelMode() != Element_local)continue;
+#endif
+
+		if(mesh->giveElement(el)->containsNode(iNode)){
+			neghbours_base_elements.at(3) = el;
+			break;
+		}
+	}
+	for (i=1; i<=conn.giveSize(); i++) {
+		el = conn.at(i);
+		if (el == this->number)continue;
+#ifdef __PARALLEL_MODE
+		if(mesh->giveElement(el)->giveParallelMode() != Element_local)continue;
+#endif
+
+		if(mesh->giveElement(el)->containsNode(jNode)){
+			neghbours_base_elements.at(2) = el;
+			break;
+		}
+	}
+
+	me.at(1) = iNode;
+	ct->giveNodeNeighbourList(conn, me);
+
+	// select right neighbour
+	for (i=1; i<=conn.giveSize(); i++) {
+		el = conn.at(i);
+		if (el == this->number)continue;
+#ifdef __PARALLEL_MODE
+		if(mesh->giveElement(el)->giveParallelMode() != Element_local)continue;
+#endif
+
+		if (mesh->giveElement(el)->containsNode(jNode)){
+			neghbours_base_elements.at(1) = el;
+			break;
+		}
+	}
+#endif
+
 }
 
 
 void
-Subdivision::RS_Tetra::importConnectivities(ConnectivityTable* ct)
+Subdivision::RS_Tetra::importConnectivity(ConnectivityTable* ct)
 {
   IntArray me(1), conn;
-  int iside, inode, jnode, knode, el, i;
+  int iside, iNode, jNode, kNode, el, i;
   me.at(1) = this->number;
+
+	// KOKO old version
 
   neghbours_base_elements.resize(4);
   neghbours_base_elements.zero();             // initialized to have no neighbour
   ct->giveElementNeighbourList(conn, me);
 
-	// HUHU is conn ordered? if yes, function can be optimized
-
-	inode=nodes.at(1);
-	jnode=nodes.at(2);
-	knode=nodes.at(3);
+	iNode=nodes.at(1);
+	jNode=nodes.at(2);
+	kNode=nodes.at(3);
 
 	// select right base neighbour
 	for (i=1; i<=conn.giveSize(); i++) {
 		el = conn.at(i);
-		if (el != this->number) {
-			if (mesh->giveElement(el)->containsNode(inode) &&
-					mesh->giveElement(el)->containsNode(jnode) &&
-					mesh->giveElement(el)->containsNode(knode)) {
-				neghbours_base_elements.at(1) = el;
-				break;
-			}
+		if (el == this->number)continue;
+#ifdef __PARALLEL_MODE
+		if(mesh->giveElement(el)->giveParallelMode() != Element_local)continue;
+#endif
+		if (mesh->giveElement(el)->containsNode(iNode) &&
+				mesh->giveElement(el)->containsNode(jNode) &&
+				mesh->giveElement(el)->containsNode(kNode)) {
+			neghbours_base_elements.at(1) = el;
+			break;
 		}
 	}
 
-	knode=nodes.at(4);
+	kNode=nodes.at(4);
   for (iside=1; iside<=3; iside++) {
-    inode=nodes.at(iside);
-    jnode=nodes.at((iside==3)?1:iside+1);
+    iNode=nodes.at(iside);
+    jNode=nodes.at((iside==3)?1:iside+1);
 
     // select right side neighbour
     for (i=1; i<=conn.giveSize(); i++) {
       el = conn.at(i);
-      if (el != this->number) {
-				if (mesh->giveElement(el)->containsNode(inode) &&
-						mesh->giveElement(el)->containsNode(jnode) &&
-						mesh->giveElement(el)->containsNode(knode)) {
-					neghbours_base_elements.at(iside+1) = el;
-					break;
-				}
+      if (el == this->number)continue;
+#ifdef __PARALLEL_MODE
+			if(mesh->giveElement(el)->giveParallelMode() != Element_local)continue;
+#endif
+			if (mesh->giveElement(el)->containsNode(iNode) &&
+					mesh->giveElement(el)->containsNode(jNode) &&
+					mesh->giveElement(el)->containsNode(kNode)) {
+				neghbours_base_elements.at(iside+1) = el;
+				break;
       }
     }
   }
 
-#ifdef DEBUG_INFO
-	fprintf(stderr, "Elem %d connectivity imported (nds %d %d %d %d ngbs %d %d %d %d)\n", this->number, 
-					nodes.at(1), nodes.at(2), nodes.at(3), nodes.at(4),
-					neghbours_base_elements.at(1), neghbours_base_elements.at(2), 
-					neghbours_base_elements.at(3), neghbours_base_elements.at(4));
+#if 0  // HUHU new version
+	bool has_i, has_j, has_k;
+
+	me.at(1) = nodes.at(4);
+	ct->giveNodeNeighbourList(conn, me);
+	iNode = nodes.at(1);
+	jNode = nodes.at(2);
+	kNode = nodes.at(3);
+
+	// select right neighbour
+	for (i=1; i<=conn.giveSize(); i++) {
+		el = conn.at(i);
+		if (el == this->number)continue;
+#ifdef __PARALLEL_MODE
+		if(mesh->giveElement(el)->giveParallelMode() != Element_local)continue;
 #endif
+
+		has_i = mesh->giveElement(el)->containsNode(iNode);
+		has_j = mesh->giveElement(el)->containsNode(jNode);
+		has_k = mesh->giveElement(el)->containsNode(kNode);
+
+		if(has_i && has_j)neghbours_base_elements.at(2) = el;
+		if(has_j && has_k)neghbours_base_elements.at(3) = el;
+		if(has_k && has_i)neghbours_base_elements.at(4) = el;
+	}
+
+	me.at(1) = iNode;
+	ct->giveNodeNeighbourList(conn, me);
+
+	// select right neighbour
+	for (i=1; i<=conn.giveSize(); i++) {
+		el = conn.at(i);
+		if (el == this->number)continue;
+#ifdef __PARALLEL_MODE
+		if(mesh->giveElement(el)->giveParallelMode() != Element_local)continue;
+#endif
+
+		if (mesh->giveElement(el)->containsNode(jNode) &&
+				mesh->giveElement(el)->containsNode(kNode)){
+			neghbours_base_elements.at(1) = el;
+			break;
+		}
+	}
+#endif
+
+	/*
+#ifdef DEBUG_INFO
+	OOFEM_LOG_INFO("Elem %d connectivity imported (nds %d %d %d %d ngbs %d %d %d %d)\n", this->number, 
+								 nodes.at(1), nodes.at(2), nodes.at(3), nodes.at(4),
+								 neghbours_base_elements.at(1), neghbours_base_elements.at(2), 
+								 neghbours_base_elements.at(3), neghbours_base_elements.at(4));
+#endif
+	*/
 }
 
 
 #ifdef __OOFEG
+void 
+Subdivision::RS_Node::drawGeometry()
+//
+// draws graphics representation of receiver
+//
+{
+    GraphicObj *go;
+		EPixel color;
+		BOOLEAN suc;
+
+    WCRec p [ 1 ]; /* point */
+    p [ 0 ].x = ( FPNum ) this->giveCoordinate(1);
+    p [ 0 ].y = ( FPNum ) this->giveCoordinate(2);
+    p [ 0 ].z = ( FPNum ) this->giveCoordinate(3);
+    
+    EASValsSetMType(FILLED_CIRCLE_MARKER);
+		color = ColorGetPixelFromString("orange", & suc);
+		EASValsSetColor(color);
+    //EASValsSetColor( gc.getNodeColor() );
+    EASValsSetLayer(OOFEG_RAW_GEOMETRY_LAYER);
+    EASValsSetMSize(8);
+    go = CreateMarker3D(p);
+    EGWithMaskChangeAttributes(COLOR_MASK | LAYER_MASK | MTYPE_MASK | MSIZE_MASK, go);
+    EMAddGraphicsToModel(ESIModel(), go);
+
+    char num [ 6 ];
+		color = ColorGetPixelFromString("black", & suc);
+		EASValsSetColor(color);
+     //EASValsSetColor( gc.getNodeColor() );
+    EASValsSetLayer(OOFEG_RAW_GEOMETRY_LAYER);
+    p [ 0 ].x = ( FPNum ) this->giveCoordinate(1);
+    p [ 0 ].y = ( FPNum ) this->giveCoordinate(2);
+    p [ 0 ].z = ( FPNum ) this->giveCoordinate(3);
+    sprintf( num, "%d", this->number );
+    go = CreateAnnText3D(p, num);
+    EGWithMaskChangeAttributes(COLOR_MASK | LAYER_MASK, go);
+    EMAddGraphicsToModel(ESIModel(), go);
+}
+
+
 void
 Subdivision::RS_Triangle::drawGeometry()
 {
     WCRec p [ 3 ];
     GraphicObj *go;
+		EPixel color;
+		BOOLEAN suc;
 
     EASValsSetLineWidth(OOFEG_RAW_GEOMETRY_WIDTH);
+		color = ColorGetPixelFromString("DodgerBlue", & suc);
+		EASValsSetColor(color);
+		color = ColorGetPixelFromString("black", & suc);
+		EASValsSetEdgeColor(color);
     //EASValsSetColor( gc.getElementColor() );
     //EASValsSetEdgeColor( gc.getElementEdgeColor() );
     EASValsSetEdgeFlag(TRUE);
@@ -1893,7 +2809,7 @@ Subdivision::RS_Triangle::drawGeometry()
 
     go =  CreateTriangle3D(p);
     //EGWithMaskChangeAttributes(WIDTH_MASK | COLOR_MASK | SHRINK_MASK | EDGE_COLOR_MASK | EDGE_FLAG_MASK | LAYER_MASK, go);
-    EGWithMaskChangeAttributes(WIDTH_MASK | EDGE_FLAG_MASK | LAYER_MASK, go);
+    EGWithMaskChangeAttributes(WIDTH_MASK | COLOR_MASK | EDGE_COLOR_MASK | EDGE_FLAG_MASK | LAYER_MASK, go);
     EGAttachObject(go, ( EObjectP ) this);
     EMAddGraphicsToModel(ESIModel(), go);
 }
@@ -1904,13 +2820,19 @@ Subdivision::RS_Tetra::drawGeometry()
 {
     WCRec p [ 4 ];
     GraphicObj *go;
+		EPixel color;
+		BOOLEAN suc;
 
     EASValsSetLineWidth(OOFEG_RAW_GEOMETRY_WIDTH);
+		color = ColorGetPixelFromString("DodgerBlue", & suc);
+		EASValsSetColor(color);
+		color = ColorGetPixelFromString("black", & suc);
+		EASValsSetEdgeColor(color);
     //EASValsSetColor( gc.getElementColor() );
     //EASValsSetEdgeColor( gc.getElementEdgeColor() );
     EASValsSetEdgeFlag(TRUE);
     EASValsSetLayer(OOFEG_RAW_GEOMETRY_LAYER);
-		//EASValsSetFillStyle(FILL_SOLID);
+		EASValsSetFillStyle(FILL_SOLID);
 		//EASValsSetShrink(0.8);
     p [ 0 ].x = ( FPNum ) mesh->giveNode(nodes.at(1))->giveCoordinate(1);
     p [ 0 ].y = ( FPNum ) mesh->giveNode(nodes.at(1))->giveCoordinate(2);
@@ -1927,40 +2849,522 @@ Subdivision::RS_Tetra::drawGeometry()
 
     go =  CreateTetra(p);
     //EGWithMaskChangeAttributes(WIDTH_MASK | COLOR_MASK | SHRINK_MASK | EDGE_COLOR_MASK | EDGE_FLAG_MASK | LAYER_MASK | FILL_MASK, go);
-    EGWithMaskChangeAttributes(WIDTH_MASK | EDGE_FLAG_MASK | LAYER_MASK, go);
+    EGWithMaskChangeAttributes(WIDTH_MASK | COLOR_MASK | EDGE_COLOR_MASK | EDGE_FLAG_MASK | LAYER_MASK | FILL_MASK, go);
     EGAttachObject(go, ( EObjectP ) this);
     EMAddGraphicsToModel(ESIModel(), go);
 }
 #endif
 
 
+MesherInterface::returnCode
+Subdivision :: createMesh(TimeStep *stepN, int domainNumber, int domainSerNum, Domain** dNew)
+{
+  // import data from old domain
+  int i, j, parent, nnodes = domain->giveNumberOfDofManagers(), nelems=domain->giveNumberOfElements();
+  int inode, idof, ielem, ndofs, num;
+  IntArray enodes;
+  Subdivision::RS_Node *_node;
+  Subdivision::RS_Element *_element;
+  IRResultType result;                            // Required by IR_GIVE_FIELD macro
+
+  oofem_timeval st, dt;
+  ::getUtime(st);
+
+  if (this->mesh) delete mesh;
+  mesh = new Subdivision::RS_Mesh(this);
+
+  // import nodes
+	// all nodes (including remote which are not needed) are imported to ensure consistency between 
+	// node number (in the mesh) and its parent number (in the domain) because the domain is used to import connectivities
+  for (i=1; i<=nnodes; i++) {
+    _node = new Subdivision::RS_Node(i, mesh, i, *(domain->giveNode(i)->giveCoordinates()), 
+                                     domain->giveErrorEstimator()->giveRemeshingCrit()->giveRequiredDofManDensity(i, stepN),
+                                     domain->giveNode(i)->isBoundary());
+#ifdef __PARALLEL_MODE
+    _node->setGlobalNumber(domain->giveNode(i)->giveGlobalNumber());
+    _node->setParallelMode(domain->giveNode(i)->giveParallelMode());
+    _node->setPartitions (*domain->giveNode(i)->givePartitionList());
+#endif
+    this->mesh->addNode (i, _node);
+  }
+  
+  // import elements
+	// all elements (including remote which are not needed) are imported to ensure consistency between 
+	// element number (in the mesh) and its parent number (in the domain) because the domain is used to import connectivities
+  for (i=1; i<=nelems; i++) {
+    if (domain->giveElement(i)->giveGeometryType() == EGT_triangle_1) {
+      enodes.resize(3);
+      for (j=1; j<=3; j++) enodes.at(j)=domain->giveElement(i)->giveDofManagerNumber(j);
+      _element = new Subdivision::RS_Triangle (i,mesh,i,enodes);
+      this->mesh->addElement (i, _element);
+		} else if (domain->giveElement(i)->giveGeometryType() == EGT_tetra_1) {
+      enodes.resize(4);
+      for (j=1; j<=4; j++) enodes.at(j)=domain->giveElement(i)->giveDofManagerNumber(j);
+      _element = new Subdivision::RS_Tetra (i,mesh,i,enodes);
+      this->mesh->addElement (i, _element);
+    } else {
+      OOFEM_ERROR2 ("Subdivision::createMesh: Unsupported element geometry (element %d)", i);
+    }
+#ifdef __PARALLEL_MODE
+    _element->setGlobalNumber(domain->giveElement(i)->giveGlobalNumber());
+    _element->setParallelMode(domain->giveElement(i)->giveParallelMode());
+#endif
+  }
+
+  // import connectivities for local elements only
+  for (i=1; i<=nelems; i++) {
+#ifdef __PARALLEL_MODE
+		if(this->mesh->giveElement(i)->giveParallelMode() != Element_local)continue;
+#endif
+		this->mesh->giveElement(i)->importConnectivity(domain->giveConnectivityTable());
+  }
+
+#ifdef __PARALLEL_MODE
+  // import connectivities for shared nodes only
+	// build global shared node map (for top level only)
+	this->mesh->initGlobalSharedNodeMap();
+  for (i=1; i<=nnodes; i++) {
+		_node = this->mesh->giveNode(i);
+		if(_node->giveParallelMode() != DofManager_shared)continue;
+		_node->importConnectivity(domain->giveConnectivityTable());
+		this->mesh->insertGlobalSharedNodeMap(_node);
+	}
+	// build array of shared edges (for top level only)
+	// this can be done after connectivity is available for all shared nodes
+  for (i=1; i<=nnodes; i++) {
+		_node = this->mesh->giveNode(i);
+		if(_node->giveParallelMode() != DofManager_shared)continue;
+		_node->numberSharedEdges();
+	}
+	// initiate queue for shared edge exchange
+	for(i=1; i<=mesh->giveNumberOfEdges(); i++){
+		if(mesh->giveEdge(i)->givePartitions()->giveSize()){
+			sharedEdgesQueue.push_back(i);
+		}
+	}
+	// exchange shared edges (on top level)
+	this->exchangeSharedEdges();
+#endif
+
+#ifdef __OOFEG
+#ifdef DRAW_MESH_BEFORE_BISECTION
+  nelems=mesh->giveNumberOfElements();
+  for (i=1; i<=nelems; i++) {
+#ifdef __PARALLEL_MODE
+		if(this->mesh->giveElement(i)->giveParallelMode() != Element_local)continue;
+#endif
+    mesh->giveElement(i)->drawGeometry();
+  }
+  ESIEventLoop (YES, "Before bisection; Press Ctrl-p to continue"); 
+#endif
+#endif
+
+  // bisect mesh
+  this->bisectMesh();
+	// smooth mesh
+  if (smoothingFlag){
+		// smooth only if there are new irregulars;
+		// this is reasonable only if the smoothing is done locally !!!
+		if(nnodes != mesh->giveNumberOfNodes()){
+			this->smoothMesh();
+		}
+	}
+
+#ifdef __OOFEG
+#ifdef DRAW_MESH_AFTER_BISECTION
+  nelems=mesh->giveNumberOfElements();
+  for (i=1; i<=nelems; i++) {
+    if (!mesh->giveElement(i)->isTerminal())continue;
+#ifdef __PARALLEL_MODE
+		if(this->mesh->giveElement(i)->giveParallelMode() != Element_local)continue;
+#endif
+		mesh->giveElement(i)->drawGeometry();
+  }
+  ESIEventLoop (YES, "After bisection; Press Ctrl-p to continue");
+#endif
+#endif
+
+  Dof *idofPtr, *dof;
+  DofManager *parentNodePtr, *node;
+  Element *parentElementPtr, *elem;
+  CrossSection* crossSection;
+  Material* mat;
+  NonlocalBarrier* barrier;
+  GeneralBoundaryCondition *bc;
+  InitialCondition *ic;
+  LoadTimeFunction *ltf;
+  char name [ MAX_NAME_LENGTH ];
+  const char *__proc = "createMesh"; // Required by IR_GIVE_FIELD macro
+  
+  // create new mesh (missing param for new mesh!)
+  nnodes = mesh->giveNumberOfNodes();
+  (*dNew) = new Domain (2, domain->giveSerialNumber()+1, domain->giveEngngModel());
+  (*dNew)->setDomainType (domain->giveDomainType());
+  
+  // copy dof managers
+  (*dNew) -> resizeDofManagers (nnodes);
+  const IntArray dofIDArrayPtr = domain->giveDefaultNodeDofIDArry();
+  for (inode=1; inode<=nnodes; inode++) {
+    parent = mesh->giveNode(inode)->giveParent();
+    if (parent) {
+      parentNodePtr = domain->giveNode(parent);
+      // inherit all data from parent (bc, ic, load, etc.)
+      node = ::CreateUsrDefDofManagerOfType (parentNodePtr->giveClassID(), inode, *dNew);
+      ndofs = parentNodePtr->giveNumberOfDofs();
+      node->setNumberOfDofs (ndofs);
+      node->setLoadArray (*parentNodePtr->giveLoadArray());
+      // create individual DOFs
+      for (idof=1; idof<=ndofs; idof++) {
+        idofPtr = parentNodePtr->giveDof(idof);
+        if (idofPtr->giveClassID() == MasterDofClass) {
+          dof = new MasterDof (idof, node, idofPtr->giveBcId(), idofPtr->giveIcId(), idofPtr->giveDofID());
+				} else if (idofPtr->giveClassID() == SimpleSlaveDofClass) {   // HUHU
+					SimpleSlaveDof *simpleSlaveDofPtr;
+					simpleSlaveDofPtr = dynamic_cast< SimpleSlaveDof*> (idofPtr);
+					// giveMasterDofManArray ???? dof.h
+					if(simpleSlaveDofPtr) {
+						dof = new SimpleSlaveDof (idof, node, simpleSlaveDofPtr->giveMasterDofManagerNum(), idofPtr->giveDofID());
+					} else {
+						OOFEM_ERROR3 ("Subdivision::createMesh: dynamic cast failed for dof %d of node %d", idof, inode);
+					}						
+        } else OOFEM_ERROR ("Subdivision :: createMesh: unsupported DOF type");
+        node->setDof (idof, dof);
+      }
+#ifdef __PARALLEL_MODE
+      node->setGlobalNumber(parentNodePtr->giveGlobalNumber());
+      node->setParallelMode(parentNodePtr->giveParallelMode());
+      node->setPartitionList (parentNodePtr->givePartitionList());
+#endif      
+    } else {
+      // newly created node (irregular)
+      node = ::CreateUsrDefDofManagerOfType (NodeClass, inode, *dNew);
+      //create new node with default DOFs 
+      ndofs = dofIDArrayPtr.giveSize();
+      node->setNumberOfDofs (ndofs);
+      
+			// HUHU slave dofs must be handled
+
+      // create individual DOFs
+      for (idof=1; idof<=ndofs; idof++) {
+#ifdef NM
+				// HUHU add handling of slave dofs
+				dof=NULL;
+				FloatArray *coords = mesh->giveNode(inode)->giveCoordinates();
+				if(!dof){
+					if(fabs(coords ->at(1) - 200.0) < 0.000001){
+						if(coords -> at(2) > -0.000001 && coords -> at(2) < 97.500001){
+							dof = new MasterDof (idof, node, 1, 0, dofIDArrayPtr.at(idof));
+						}
+					}
+				}
+				if(!dof){
+					if(fabs(coords -> at(2)) < 0.000001){
+						dof = new MasterDof (idof, node, 1, 0, dofIDArrayPtr.at(idof));
+					}
+				}
+				if(!dof){
+					if(fabs(coords -> at(1)) < 0.000001){
+						if(coords -> at(2) > 102.4999999 && coords -> at(2) < 199.9999999){
+							dof = new SimpleSlaveDof( idof, node, 5, ( DofID ) dofIDArrayPtr.at(idof));
+						}
+					}
+				}
+				if(!dof){
+					if(fabs(coords -> at(2) - 200.0) < 0.000001){
+						if(coords -> at(1) > 0.000001 && coords -> at(1) < 99.9999999){
+							dof = new SimpleSlaveDof( idof, node, 6, ( DofID ) dofIDArrayPtr.at(idof));
+						} else if(coords -> at(1) > 100.000001 && coords -> at(1) < 200.000001){
+							dof = new SimpleSlaveDof( idof, node, 6, ( DofID ) dofIDArrayPtr.at(idof));
+						}
+					}
+				}
+				if(!dof)dof = new MasterDof (idof, node, 0, 0, dofIDArrayPtr.at(idof));
+#else
+#ifdef BRAZIL_2D
+				dof=NULL;
+				FloatArray *coords = mesh->giveNode(inode)->giveCoordinates();
+				if(!dof){
+					if(fabs(coords ->at(1)) < 0.000001){
+						if(coords -> at(2) > 0.000001){
+							if(idof == 1){
+								dof = new MasterDof (idof, node, 1, 0, dofIDArrayPtr.at(idof));
+							}
+						}
+					}
+				}
+				if(!dof){
+					if(fabs(coords ->at(2)) < 0.000001){
+						if(coords -> at(1) > 0.000001){
+							if(idof == 2){
+								dof = new MasterDof (idof, node, 1, 0, dofIDArrayPtr.at(idof));
+							}
+						}
+					}
+				}
+				if(!dof)dof = new MasterDof (idof, node, 0, 0, dofIDArrayPtr.at(idof));
+#else
+#ifdef THREEPBT_3D
+				dof=NULL;
+				FloatArray *coords = mesh->giveNode(inode)->giveCoordinates();
+				if(!dof){
+					if(fabs(coords -> at(1)) < 0.000001){
+						if(coords -> at(2) > 0.000001){
+							if(coords -> at(3) > 499.999999){
+								if(idof == 1 || idof == 3){
+									dof = new MasterDof (idof, node, 1, 0, dofIDArrayPtr.at(idof));
+								}
+							}
+						}
+					}
+				}
+        if(!dof){
+          if(coords -> at(1) > 1999.999999){
+            if(coords -> at(2) > 0.000001){
+							if(coords -> at(3) > 499.999999){
+								if(idof == 3){
+									dof = new MasterDof (idof, node, 1, 0, dofIDArrayPtr.at(idof));
+								}
+							}
+						}
+					}
+				}
+				if(!dof)dof = new MasterDof (idof, node, 0, 0, dofIDArrayPtr.at(idof));
+#else
+        dof = new MasterDof (idof, node, 0, 0, dofIDArrayPtr.at(idof));
+#endif
+#endif
+#endif
+        node->setDof (idof, dof);
+      }
+
+#ifdef __PARALLEL_MODE
+      node->setParallelMode(mesh->giveNode(inode)->giveParallelMode());
+      node->setGlobalNumber(mesh->giveNode(inode)->giveGlobalNumber());
+      node->setPartitionList (mesh->giveNode(inode)->givePartitions());
+#endif      
+      
+    }
+    // set node coordinates
+    ((Node*) node)->setCoordinates(*mesh->giveNode(inode)->giveCoordinates());
+		node->setBoundaryFlag (mesh->giveNode(inode)->isBoundary());
+    (*dNew) -> setDofManager (inode, node);
+  } // end creating dof managers
+
+  // create elements
+  // count number of local terminal elements first
+  int nterminals = 0;
+  nelems=mesh->giveNumberOfElements();
+  for (ielem=1; ielem<=nelems; ielem++) {
+#ifdef __PARALLEL_MODE
+    if (mesh->giveElement(ielem)->giveParallelMode() != Element_local)continue;
+#endif
+    if (mesh->giveElement(ielem)->isTerminal()) nterminals++;
+  }
+
+#ifdef __PARALLEL_MODE
+  IntArray parentElemMap(nterminals);
+#endif
+  (*dNew) -> resizeElements (nterminals);
+  int eNum = 0;
+  for (ielem=1; ielem<=nelems; ielem++) {
+#ifdef __PARALLEL_MODE
+    if (mesh->giveElement(ielem)->giveParallelMode() != Element_local)continue;
+#endif
+    if (!mesh->giveElement(ielem)->isTerminal()) continue;
+    eNum ++;
+    parent = mesh->giveElement(ielem)->giveTopParent();
+#ifdef __PARALLEL_MODE
+    parentElemMap.at(eNum) = parent;
+#endif
+    if (parent) {
+      parentElementPtr = domain->giveElement(parent);
+      elem = ::CreateUsrDefElementOfType (parentElementPtr->giveClassID(), eNum, *dNew);
+      (*dNew)->setElement (eNum, elem);
+      elem->setDofManagers(*mesh->giveElement(ielem)->giveNodes());
+      elem->setMaterial (parentElementPtr->giveMaterial()->giveNumber());
+      elem->setCrossSection(parentElementPtr->giveCrossSection()->giveNumber());
+#ifdef __PARALLEL_MODE
+      elem->setParallelMode(Element_local);
+			// not subdivided elements inherit globNum, subdivided give -1
+      elem->setGlobalNumber(mesh->giveElement(ielem)->giveGlobalNumber());
+			// local elements have array partitions empty !
+#endif
+      elem->postInitialize();
+    } else OOFEM_ERROR ("Subdivision :: createMesh: parent element missing");
+  } // end loop over elements
+  OOFEMTXTInputRecord _ir, *irPtr = &_ir;
+  std::string irString;
+  // create the rest of the model description (BCs, CrossSections, Materials, etc)
+  // cross sections
+  int ncrosssect = domain->giveNumberOfCrossSectionModels();
+  (*dNew) -> resizeCrossSectionModels(ncrosssect);
+  for (i=1; i<=ncrosssect; i++) {
+    domain->giveCrossSection(i)->giveInputRecordString (irString);
+    irPtr->setRecordString (irString.c_str());
+    IR_GIVE_RECORD_KEYWORD_FIELD(irPtr, name, num, MAX_NAME_LENGTH);
+    
+    ( crossSection  = ( CrossSection * )
+      ( CrossSection(i, *dNew).ofType(name) ) )->initializeFrom(irPtr);
+    (*dNew) -> setCrossSection (i, crossSection);
+  }
+  // materials
+  int nmat = domain->giveNumberOfMaterialModels();
+  (*dNew) -> resizeMaterials(nmat);
+  for (i=1; i<=nmat; i++) {
+    domain->giveMaterial(i)->giveInputRecordString (irString);
+    irPtr->setRecordString (irString.c_str());
+    IR_GIVE_RECORD_KEYWORD_FIELD(irPtr, name, num, MAX_NAME_LENGTH);
+    
+    ( mat  = ( Material * )
+      ( Material(i, *dNew).ofType(name) ) )->initializeFrom(irPtr);
+    (*dNew) -> setMaterial (i, mat);
+  }
+  // barriers
+  int nbarriers = domain->giveNumberOfNonlocalBarriers();
+  (*dNew) -> resizeNonlocalBarriers(nbarriers);
+  for (i=1; i<=nbarriers; i++) {
+    domain->giveNonlocalBarrier(i)->giveInputRecordString (irString);
+    irPtr->setRecordString (irString.c_str());
+    IR_GIVE_RECORD_KEYWORD_FIELD(irPtr, name, num, MAX_NAME_LENGTH);
+    
+    barrier = CreateUsrDefNonlocalBarrierOfType(name, i, *dNew);
+    barrier->initializeFrom(irPtr);
+    (*dNew) -> setNonlocalBarrier (i, barrier);
+  }
+  // boundary conditions
+  int nbc = domain->giveNumberOfBoundaryConditions();
+  (*dNew) -> resizeBoundaryConditions(nbc);
+  for (i=1; i<=nbc; i++) {
+    domain->giveBc(i)->giveInputRecordString (irString);
+    irPtr->setRecordString (irString.c_str());
+    IR_GIVE_RECORD_KEYWORD_FIELD(irPtr, name, num, MAX_NAME_LENGTH);
+    
+    ( bc = ( GeneralBoundaryCondition * )
+      ( GeneralBoundaryCondition(i, *dNew).ofType(name) ) )->initializeFrom(irPtr);
+    (*dNew) -> setBoundaryCondition (i, bc);
+  }
+  // initial conditions
+  int nic = domain->giveNumberOfInitialConditions();
+  (*dNew) -> resizeInitialConditions(nic);
+  for (i=1; i<=nic; i++) {
+    domain->giveIc(i)->giveInputRecordString (irString);
+    irPtr->setRecordString (irString.c_str());
+    IR_GIVE_RECORD_KEYWORD_FIELD(irPtr, name, num, MAX_NAME_LENGTH);
+    
+    ic = new InitialCondition(i, *dNew);
+    ic->initializeFrom(irPtr);
+    (*dNew) -> setInitialCondition (i, ic);
+  }
+  // load time functions
+  int nltf = domain->giveNumberOfLoadTimeFunctions();
+  (*dNew) -> resizeLoadTimeFunctions(nltf);
+  for (i=1; i<=nltf; i++) {
+    domain->giveLoadTimeFunction(i)->giveInputRecordString (irString);
+    irPtr->setRecordString (irString.c_str());
+    IR_GIVE_RECORD_KEYWORD_FIELD(irPtr, name, num, MAX_NAME_LENGTH);
+    
+    ( ltf  = ( LoadTimeFunction * )
+      ( LoadTimeFunction(i, *dNew).ofType(name) ) )->initializeFrom(irPtr);
+    (*dNew) -> setLoadTimeFunction (i, ltf);
+  }
+  // copy output manager settings
+  (*dNew)->giveOutputManager()->beCopyOf (domain->giveOutputManager());
+  :: getRelativeUtime(dt, st);
+#ifdef __PARALLEL_MODE
+	OOFEM_LOG_INFO( "[%d] Subdivision: created new mesh (%d nodes and %d elements) in %.2fs\n",
+									( * dNew )->giveEngngModel()->giveRank(), nnodes, eNum, ( double ) ( dt.tv_sec + dt.tv_usec / ( double ) OOFEM_USEC_LIM ) );
+#else
+  OOFEM_LOG_INFO( "Subdivision: created new mesh (%d nodes and %d elements) in %.2fs\n",
+                  nnodes, eNum, (double)(dt.tv_sec+dt.tv_usec/(double)OOFEM_USEC_LIM));
+#endif
+  
+#ifdef __PARALLEL_MODE
+#ifdef __VERBOSE_PARALLEL
+  nnodes = (*dNew)->giveNumberOfDofManagers();
+  for (inode=1; inode<=nnodes; inode++) {
+    if ((*dNew)->giveDofManager(inode)->giveParallelMode()==DofManager_shared) {
+      //OOFEM_LOG_INFO ("[%d] Shared Node %d[%d]\n", this->giveRank(), inode, (*dNew)->giveDofManager(inode)->giveGlobalNumber());
+    }
+  }
+#endif
+  
+	// we need to assign global numbers to newly generated elements 
+	this->assignGlobalNumbersToElements(*dNew);
+
+	int im;
+	bool nonloc = false;
+	nmat = (*dNew)->giveNumberOfMaterialModels();
+	for (im=1; im<=nmat; im++)
+		if ((*dNew)->giveMaterial(im)->giveInterface(NonlocalMaterialExtensionInterfaceType)) nonloc=true;
+
+	if (nonloc) {
+		exchangeRemoteElements (*dNew, parentElemMap);
+	}
+	
+	(*dNew)->commitTransactions( (*dNew)->giveTransactionManager() );
+	
+	// print some statistics
+	nelems=(*dNew)->giveNumberOfElements();
+	int localVals[2], globalVals[2];
+	for (localVals[0] = 0, ielem=1; ielem<=nelems; ielem++) {
+		if ((*dNew)->giveElement(ielem)->giveParallelMode() == Element_local) localVals[0]++ ;
+	}
+	
+	nnodes = (*dNew)->giveNumberOfDofManagers();
+	for (localVals[1]=0, inode=1; inode<=nnodes; inode++) {
+		if ((*dNew)->giveDofManager(inode)->isLocal()) localVals[1]++;
+	}
+	MPI_Reduce(localVals, globalVals, 2, MPI_INT, MPI_SUM, 0, MPI_COMM_WORLD);
+	if (this->giveRank()==0) {
+		OOFEM_LOG_INFO("Subdivision: new mesh info: %d nodes, %d elements in total\n", globalVals[1], globalVals[0]);
+	}
+#endif
+    
+	return MI_OK;
+}
+
+
 void
 Subdivision::bisectMesh () {
   
-  int ie, in, nelems = mesh->giveNumberOfElements(), nelems_old=0, terminal_local_elems = nelems;
+  int ie, nelems = mesh->giveNumberOfElements(), nelems_old=0, terminal_local_elems = nelems;
+	int nnodes = mesh->giveNumberOfNodes(), nnodes_old;
   double iedensity, rdensity;
-	int repeat=1, loop=0, max_loop=0;
+	int repeat=1, loop=0, max_loop=0;       // max_loop != 0 use only for debugging
 	RS_Element *elem;
   //std::queue<int> subdivqueue;
 #ifdef __PARALLEL_MODE
-	int nnodes, remote_elems=0;
+	RS_Node *node;
+	int in, remote_elems=0;
   int myrank=this->giveRank();
   int problem_size=this->giveNumberOfProcesses();
 #endif
-  // first select all candidates for local bisection based on required mesh density
+
+#ifdef __PARALLEL_MODE
+	// get the max globnum on the initial mesh
+	// determine max global number of local nodes
+	int maxlocalglobal = 0, maxglobalnumber;
+	for (in=1; in<=nnodes; in++) {
+		maxlocalglobal = max (maxlocalglobal, mesh->giveNode(in)->giveGlobalNumber());
+	}
+	// determine max global number on all partitions
+	MPI_Allreduce (&maxlocalglobal, &maxglobalnumber, 1, MPI_INT, MPI_MAX, MPI_COMM_WORLD);
+#endif
 
 	// repeat bisection until no new element is created
 	while(repeat && (loop < max_loop || max_loop == 0)){
+		nnodes_old = nnodes;
 #ifdef __PARALLEL_MODE
     OOFEM_LOG_INFO ("[%d] Subdivision::bisectMesh: entering bisection loop %d\n", myrank, ++loop);
 #else
     OOFEM_LOG_INFO ("Subdivision::bisectMesh: entering bisection loop %d\n", ++loop);
 #endif
     repeat = 0;
+		// process only newly created elements in pass 2 and more
 		for (ie=nelems_old+1; ie<=nelems; ie++) {
 			elem = mesh->giveElement(ie);
 #ifdef __PARALLEL_MODE
-			// skip bisection of remote elements (in first pass only);
+			// skip bisection of remote elements (in first pass only (nelems_old = 0));
 			// in pass 2 and more there should be no remote elements because
 			// only newly created elements are processed
 			if(nelems_old == 0){
@@ -1973,6 +3377,11 @@ Subdivision::bisectMesh () {
 #endif
 			if (!elem->isTerminal()) continue;
 
+#ifdef __PARALLEL_MODE
+			// bisect local elements only 
+			if (elem->giveParallelMode() != Element_local)continue;
+#endif
+
 #ifdef DEBUG_CHECK
 			if(elem->giveQueueFlag()){
 				OOFEM_ERROR2("Subdivision::bisectMesh - unexpected queue flag of %d ", ie);
@@ -1982,10 +3391,13 @@ Subdivision::bisectMesh () {
 			iedensity = elem->giveDensity();
 			rdensity = elem->giveRequiredDensity();
 			
+			// first select all candidates for local bisection based on required mesh density
 			if (rdensity < iedensity) {
 				subdivqueue.push(ie);
 				elem->setQueueFlag(true);
-        repeat = 1;
+#ifndef __PARALLEL_MODE
+        repeat = 1;                        // force repetition in seqeuntial run
+#endif
 				/*
 #ifdef __PARALLEL_MODE
 				OOFEM_LOG_INFO("[%d] Subdivision: scheduling element %d[%d] for bisection, dens=%lf rdens=%lf\n", myrank, ie, elem->giveGlobalNumber(), iedensity, rdensity);
@@ -1997,9 +3409,9 @@ Subdivision::bisectMesh () {
 		}
 #ifdef DEBUG_INFO
 #ifdef __PARALLEL_MODE
-    OOFEM_LOG_INFO ("[%d] (with %d nodes and %d elems)\n", myrank, mesh->giveNumberOfNodes(), terminal_local_elems + remote_elems);
+    OOFEM_LOG_INFO ("[%d] (with %d nodes and %d elems)\n", myrank, nnodes_old, terminal_local_elems + remote_elems);
 #else
-    OOFEM_LOG_INFO ("(with %d nodes and %d elems)\n", mesh->giveNumberOfNodes(), terminal_local_elems);
+    OOFEM_LOG_INFO ("(with %d nodes and %d elems)\n", nnodes_old, terminal_local_elems);
 #endif
 #endif
 
@@ -2009,8 +3421,12 @@ Subdivision::bisectMesh () {
 			// loop over subdivision queue to bisect all local elements there
 			while( !subdivqueue.empty() ) {
 				elem=mesh->giveElement(subdivqueue.front());
+#ifdef DEBUG_CHECK
 #ifdef __PARALLEL_MODE
-				if (elem->giveParallelMode() != Element_local) continue;
+				if (elem->giveParallelMode() != Element_local){
+					OOFEM_ERROR2("Subdivision::bisectMesh - nonlocal element %d not expected for bisection", elem->giveNumber());
+				}
+#endif
 #endif
 				elem->evaluateLongestEdge();
 				elem->bisect(subdivqueue, sharedIrregularsQueue);
@@ -2021,83 +3437,110 @@ Subdivision::bisectMesh () {
 			// in parallel communicate with neighbours the irregular nodes on shared bondary
 		} while (!exchangeSharedIrregulars ());
 #endif
+
+		int in;
+    nnodes=mesh->giveNumberOfNodes();
+
 #ifdef __PARALLEL_MODE
     // assign global numbers to newly introduced irregulars while
     // keeping global numbering of existing (master) nodes
-    
     // idea: first determine the max globnum already assigned
     // and start global numbering of new nodes from this value up
-    // 1. determine max global number of local nodes
-    int maxlocalglobal = 0, maxglobalnumber;
-    int localIrregulars = 0;
-    nnodes=mesh->giveNumberOfNodes();
-    for (in=1; in<=nnodes; in++) {
-      maxlocalglobal = max (maxlocalglobal, mesh->giveNode(in)->giveGlobalNumber());
-    }
-    // determine max global number on all partitions
-    MPI_Allreduce (&maxlocalglobal, &maxglobalnumber, 1, MPI_INT, MPI_MAX, MPI_COMM_WORLD);
+
     // determine number of local irregulars
     // this is needed to determine offsets on each partition to start global numbering
-    // the numbering of irregulars starts on rank 0 partition by numbering subsequntly all its irregulars
+    // the numbering of irregulars starts on rank 0 partition by numbering subseqeuntly all its irregulars
     // then we proceed with rank 1, etc. 
-    // The shared irregulars receive their number from partition with the lowest rank.
+    // the shared irregulars receive their number from partition with the lowest rank.
     
-    // ok. count local irregulars that receive their global number from this partition
-    for (in=1; in<=nnodes; in++) {
+    // count local irregulars that receive their global number from this partition
+    int localIrregulars = 0, globalIrregulars = 0;
+    for (in=nnodes_old; in<=nnodes; in++) {
       if (this->isNodeLocalIrregular(mesh->giveNode(in), myrank) && (mesh->giveNode(in)->giveGlobalNumber() == 0)) 
-        localIrregulars ++;
+        localIrregulars++;
     }
-    
 #ifdef __VERBOSE_PARALLEL
     OOFEM_LOG_INFO ("[%d] Subdivision::bisectMesh: number of new local irregulars is %d\n", myrank, localIrregulars);
 #endif
-    int irank, localOffset, gnum, partitionsIrregulars[problem_size];
+    int irank, localOffset = 0, gnum, partitionsIrregulars[problem_size];
     // gather number of local irregulars from all partitions
     MPI_Allgather (&localIrregulars, 1, MPI_INT, partitionsIrregulars, 1, MPI_INT, MPI_COMM_WORLD);
     // compute local offset
-    for (localOffset=0, irank=0; irank <myrank; irank++) localOffset += partitionsIrregulars[irank];
+    for (irank=0; irank < myrank; irank++) localOffset += partitionsIrregulars[irank];
+
     // start to assign global numbers to local irregulars
     int availGlobNum = maxglobalnumber+localOffset;
-    for (in=1; in<=nnodes; in++) {
-      if (this->isNodeLocalIrregular(mesh->giveNode(in), myrank) && (mesh->giveNode(in)->giveGlobalNumber() == 0))
-        // set negative glognum to mark newly assigned nodes with glognum to participate in mutual globnum data exchange 
-        mesh->giveNode(in)->setGlobalNumber(-(++availGlobNum));
+    for (in=nnodes_old; in<=nnodes; in++) {
+			node = mesh->giveNode(in);
+      if (this->isNodeLocalIrregular(node, myrank) && (node->giveGlobalNumber() == 0)){
+        // set negative globnum to mark newly assigned nodes with globnum to participate in shared globnum data exchange 
+        node->setGlobalNumber(-(++availGlobNum));
+#ifdef __VERBOSE_PARALLEL
+				//OOFEM_LOG_INFO ("[%d] %d --> [%d]\n", myrank, in, availGlobNum);
+#endif
+			}
     }
     // finally, communicate global numbers assigned to shared irregulars
     this->assignGlobalNumbersToSharedIrregulars();
-    for (in=1; in<=nnodes; in++) {
-      gnum = mesh->giveNode(in)->giveGlobalNumber();
+    for (in=nnodes_old; in<=nnodes; in++) {
+			node = mesh->giveNode(in);
+      gnum = node->giveGlobalNumber();
       if (gnum < 0) {
         // turn all globnums to positive
-        mesh->giveNode(in)->setGlobalNumber(abs(mesh->giveNode(in)->giveGlobalNumber()));
+        node->setGlobalNumber(-gnum);
+				// update global shared node map (for refined level)
+				// this must be done after globnum is made positive
+				this->mesh->insertGlobalSharedNodeMap(node);
       } else if (gnum == 0) {
         OOFEM_ERROR3 ("[%d] Subdivision::bisectMesh: zero globnum identified on node %d", myrank, in);
       }
     }
-    
+
+		// update max globnum
+    for (irank=0; irank < problem_size; irank++) globalIrregulars += partitionsIrregulars[irank];
+
+		if(globalIrregulars){
+			maxglobalnumber += globalIrregulars;
+			// exchange shared edges
+			// this must be done after globnums are assigned to new shared irregulars
+			this->exchangeSharedEdges();
+			repeat = 1;                        // force repetition in parallel run
+		}
 #endif
-		// symbolic bisection is finished. Now we need to create new mesh. Also there is a need to update 
-		// element connectivities
+
+		// symbolic bisection is finished;
+		// now we need to create new mesh;
+		// also there is a need to update element connectivities
 		for (ie=1; ie<=nelems; ie++) { 
 			elem = mesh->giveElement(ie);
-#ifdef __PARALLEL_MODE
-			if (elem->giveParallelMode() != Element_local) continue;
-#endif
 			if (!elem->isTerminal()) continue;
-			elem->generate ();                      
+#ifdef __PARALLEL_MODE
+			if (elem->giveParallelMode() != Element_local)continue;
+#endif
+			elem->generate(sharedEdgesQueue);                      
 		}
+
+		// unmark local unshared irregulars marked for connectivity setup
+		// important this may be not done before generate !!!
+    for (in=nnodes_old; in<=nnodes; in++) {
+			if(mesh->giveNode(in)->giveNumber() < 0){
+				mesh->giveNode(in)->setNumber(-mesh->giveNode(in)->giveNumber());
+			}
+		}
+
 		nelems_old=nelems;
 		nelems = mesh->giveNumberOfElements();
 		terminal_local_elems = 0;
 		for (ie=1; ie<=nelems; ie++) {
 			elem = mesh->giveElement(ie);
-#ifdef __PARALLEL_MODE
-			if (elem->giveParallelMode() != Element_local) continue;
-#endif
 			if (!elem->isTerminal()) continue;
+#ifdef __PARALLEL_MODE
+			if (elem->giveParallelMode() != Element_local)continue;
+#endif
 			elem->update_neighbours();
 			terminal_local_elems++;
 		}
+#if 0
 #ifdef __PARALLEL_MODE
 		int global_repeat=0;
 
@@ -2105,18 +3548,17 @@ Subdivision::bisectMesh () {
 		MPI_Allreduce (&repeat, &global_repeat, 1, MPI_INT, MPI_LOR, MPI_COMM_WORLD);  
 		repeat=global_repeat;
 #endif
-    // start debug only
-    // repeat = 0;
-		/*
+#endif
+
 #ifdef __OOFEG
+#ifdef DRAW_MESH_AFTER_EACH_BISECTION_LEVEL
 		for (ie=1; ie<=nelems; ie++) {
 			if (!mesh->giveElement(ie)->isTerminal()) continue;
 			mesh->giveElement(ie)->drawGeometry();
 		}
 		ESIEventLoop (YES, "Subdivision Bisection; Press Ctrl-p to continue");
 #endif
-		*/
-		// end debug only
+#endif
 	}
 }
 
@@ -2153,7 +3595,7 @@ Subdivision::smoothMesh ()
 		elem=mesh->giveElement(ie);
 		if (!elem->isTerminal()) continue;
 #ifdef __PARALLEL_MODE
-    if(elem->giveParallelMode() == Element_remote)continue;
+    if(elem->giveParallelMode() != Element_local)continue;
 #endif
 
 		for(i=1;i<=elem->giveNodes()->giveSize();i++)node_num_elems.at(elem->giveNode(i))++;
@@ -2175,7 +3617,7 @@ Subdivision::smoothMesh ()
 		elem=mesh->giveElement(ie);
 		if (!elem->isTerminal()) continue;
 #ifdef __PARALLEL_MODE
-    if(elem->giveParallelMode() == Element_remote)continue;
+    if(elem->giveParallelMode() != Element_local)continue;
 #endif
 
 		for(i=1;i<=elem->giveNodes()->giveSize();i++)node_con_elems.at(node_num_elems.at(elem->giveNode(i))++)=ie;
@@ -2294,10 +3736,12 @@ Subdivision::smoothMesh ()
 	// identify fixed nodes which should not be subjected to smoothing;
 	// these are nodes on boundary (geometrical or material);
 	// note that some of these node may be already marked as boundary if this flag was available on input
+	// or when processed during bisection or when processed (and assigned) during previous smoothing;
+	// the last case is applicable only if node's method storeYourself packs the boundary flag;
 	bool fixed;
 	for(in=1;in<=nnodes;in++){
-		if(mesh->giveNode(in)->isBoundary())continue;             // skip boundary node
-		if(node_num_elems.at(in) == node_num_elems.at(in+1))continue;   // skip isolated node
+		if(mesh->giveNode(in)->isBoundary())continue;                     // skip boundary node
+		if(node_num_elems.at(in) == node_num_elems.at(in+1))continue;     // skip isolated node
 		fixed=false;
 		elem=mesh->giveElement(node_con_elems.at(node_num_elems.at(in)));
 		// check for geometrical boundary
@@ -2305,7 +3749,7 @@ Subdivision::smoothMesh ()
 			if(elem->giveNeighbor(j)==0){
 				elem->giveSideNodes(j,snodes);
 				if(snodes.findFirstIndexOf(in)!=0){
-					mesh->giveNode(in)->setNumber(-in);     // mark fixed node
+					mesh->giveNode(in)->setNumber(-in);                         // mark fixed node on geometrical boundary
 					fixed=true;
 					break;
 				}
@@ -2317,7 +3761,7 @@ Subdivision::smoothMesh ()
 				elem=mesh->giveElement(node_con_elems.at(i));
 				// check for material boundary
 				if(domain->giveElement(elem->giveTopParent())->giveRegionNumber() != reg){
-					mesh->giveNode(in)->setNumber(-in);      //mark fixed node
+					mesh->giveNode(in)->setNumber(-in);                         //mark fixed node on material boundary
 					fixed=true;
 					break;
 				}
@@ -2326,7 +3770,7 @@ Subdivision::smoothMesh ()
 					if(elem->giveNeighbor(j)==0){
 						elem->giveSideNodes(j,snodes);
 						if(snodes.findFirstIndexOf(in)!=0){
-							mesh->giveNode(in)->setNumber(-in);      //mark fixed node
+							mesh->giveNode(in)->setNumber(-in);                     //mark fixed node on geometrical boundary
 							fixed=true;
 							break;
 						}
@@ -2357,8 +3801,8 @@ Subdivision::smoothMesh ()
       if((mesh->giveNode(in)->giveParallelMode() == DofManager_shared) || 
 				 (mesh->giveNode(in)->giveParallelMode() == DofManager_null))continue;    // skip shared and remote node
 #endif
-			if(mesh->giveNode(in)->giveNumber() < 0)continue;         // skip fixed node
-			if(mesh->giveNode(in)->isBoundary())continue;             // skip boundary node
+			if(mesh->giveNode(in)->giveNumber() < 0)continue;                           // skip fixed node
+			if(mesh->giveNode(in)->isBoundary())continue;                               // skip boundary node
 			coords = mesh->giveNode(in)->giveCoordinates();
 
 #ifdef DEBUG_CHECK
@@ -2395,442 +3839,35 @@ Subdivision::smoothMesh ()
 		}
 	}
 			
-	// unmark fixed nodes (and marked them as boundary ???)
+	// unmark fixed nodes and marked them as boundary
 	for(in=1;in<=nnodes;in++){
-		// should fixed nodes be marked as boundary ???  // HUHU
-		//mesh->giveNode(in)->setBoundary(true);
-		if(mesh->giveNode(in)->giveNumber() < 0)mesh->giveNode(in)->setNumber(in);
+		if(mesh->giveNode(in)->giveNumber() < 0){
+			mesh->giveNode(in)->setNumber(in);
+
+			// it is not clear what boundary flag may cause
+			// therefore it is not set in current version
+			//mesh->giveNode(in)->setBoundary(true);
+		}
 	}
-}
-
-
-MesherInterface::returnCode
-Subdivision :: createMesh(TimeStep *stepN, int domainNumber, int domainSerNum, Domain** dNew)
-{
-  // import data from old domain
-  int i, j, parent, nnodes = domain->giveNumberOfDofManagers(), nelems=domain->giveNumberOfElements();
-  int inode, idof, ielem, ndofs, num;
-  IntArray enodes;
-  Subdivision::RS_Node *_node;
-  Subdivision::RS_Element *_element;
-  IRResultType result;                            // Required by IR_GIVE_FIELD macro
-
-  oofem_timeval st, dt;
-  ::getUtime(st);
-
-  if (this->mesh) delete mesh;
-  mesh = new Subdivision::RS_Mesh(this);
-
-  // import nodes
-  for (i=1; i<=nnodes; i++) {
-    _node = new Subdivision::RS_Node(i, i, *(domain->giveNode(i)->giveCoordinates()), 
-                                     domain->giveErrorEstimator()->giveRemeshingCrit()->giveRequiredDofManDensity(i, stepN),
-                                     domain->giveNode(i)->isBoundary());
-#ifdef __PARALLEL_MODE
-    _node->setGlobalNumber(domain->giveNode(i)->giveGlobalNumber());
-    _node->setParallelMode(domain->giveNode(i)->giveParallelMode());
-    _node->setPartitions (*domain->giveNode(i)->givePartitionList());
-#endif
-    this->mesh->addNode (i, _node);
-  }
-  
-  // import elements
-  for (i=1; i<=nelems; i++) {
-    if (domain->giveElement(i)->giveGeometryType() == EGT_triangle_1) {
-      enodes.resize(3);
-      for (j=1; j<=3; j++) enodes.at(j)=domain->giveElement(i)->giveDofManagerNumber(j);
-      _element = new Subdivision::RS_Triangle (i,mesh,i,enodes);
-      this->mesh->addElement (i, _element);
-		} else if (domain->giveElement(i)->giveGeometryType() == EGT_tetra_1) {
-      enodes.resize(4);
-      for (j=1; j<=4; j++) enodes.at(j)=domain->giveElement(i)->giveDofManagerNumber(j);
-      _element = new Subdivision::RS_Tetra (i,mesh,i,enodes);
-      this->mesh->addElement (i, _element);
-    } else {
-      OOFEM_ERROR2 ("Subdivision::createMesh: Unsupported element geometry (element %d)", i);
-    }
-#ifdef __PARALLEL_MODE
-    _element->setGlobalNumber(domain->giveElement(i)->giveGlobalNumber());
-    _element->setParallelMode(domain->giveElement(i)->giveParallelMode());
-#endif
-  }
-  // import connectivities
-  for (i=1; i<=nelems; i++) {
-    this->mesh->giveElement(i)->importConnectivities(domain->giveConnectivityTable());
-  }
-  
-	/*
-#ifdef __OOFEG
-  nelems=oldMesh->giveNumberOfElements();
-  for (i=1; i<=nelems; i++) {
-    oldMesh->giveElement(i)->drawGeometry();
-  }
-  ESIEventLoop (YES, "Subdivision Bisection Finished; Press Ctrl-p to continue"); 
-#endif
-	*/
-
-  // bisect mesh
-  this->bisectMesh();
-	// smooth mesh
-  if (smoothingFlag) this->smoothMesh();
-
-	/*
-#ifdef __OOFEG
-  nelems=mesh->giveNumberOfElements();
-  for (i=1; i<=nelems; i++) {
-    if (mesh->giveElement(i)->isTerminal()) mesh->giveElement(i)->drawGeometry();
-  }
-  ESIEventLoop (YES, "Subdivision Bisection & Smoothing Finished; Press Ctrl-p to continue");
-#endif
-	*/
-
-  Dof *idofPtr, *dof;
-  DofManager *parentNodePtr, *node;
-  Element *parentElementPtr, *elem;
-  CrossSection* crossSection;
-  Material* mat;
-  NonlocalBarrier* barrier;
-  GeneralBoundaryCondition *bc;
-  InitialCondition *ic;
-  LoadTimeFunction *ltf;
-  char name [ MAX_NAME_LENGTH ];
-  const char *__proc = "createMesh"; // Required by IR_GIVE_FIELD macro
-  
-  // create new mesh (missing param for new mesh!)
-  nnodes = mesh->giveNumberOfNodes();
-  (*dNew) = new Domain (2, domain->giveSerialNumber()+1, domain->giveEngngModel());
-  (*dNew)->setDomainType (domain->giveDomainType());
-  
-  // copy dof managers
-  (*dNew) -> resizeDofManagers (nnodes);
-  const IntArray dofIDArrayPtr = domain->giveDefaultNodeDofIDArry();
-  for (inode=1; inode<=nnodes; inode++) {
-    parent = mesh->giveNode(inode)->giveParent();
-    if (parent) {
-      parentNodePtr = domain->giveNode(parent);
-      // inherit all data from parent (bc, ic, load, etc.)
-      node = ::CreateUsrDefDofManagerOfType (parentNodePtr->giveClassID(), inode, *dNew);
-      ndofs = parentNodePtr->giveNumberOfDofs();
-      node->setNumberOfDofs (ndofs);
-      node->setLoadArray (*parentNodePtr->giveLoadArray());
-      // create individual DOFs
-      for (idof=1; idof<=ndofs; idof++) {
-        idofPtr = parentNodePtr->giveDof(idof);
-        if (idofPtr->giveClassID() == MasterDofClass) {
-          dof = new MasterDof (idof, node, idofPtr->giveBcId(), idofPtr->giveIcId(), idofPtr->giveDofID());
-				} else if (idofPtr->giveClassID() == SimpleSlaveDofClass) {   // HUHU
-					SimpleSlaveDof *simpleSlaveDofPtr;
-					simpleSlaveDofPtr = dynamic_cast< SimpleSlaveDof*> (idofPtr);
-					// giveMasterDofManArray ???? dof.h
-					if(simpleSlaveDofPtr) {
-						dof = new SimpleSlaveDof (idof, node, simpleSlaveDofPtr->giveMasterDofManagerNum(), idofPtr->giveDofID());
-					} else {
-						OOFEM_ERROR3 ("Subdivision::createMesh: dynamic cast failed for dof %d of node %d", idof, inode);
-					}						
-        } else OOFEM_ERROR ("Subdivision :: createMesh: unsupported DOF type");
-        node->setDof (idof, dof);
-      }
-#ifdef __PARALLEL_MODE
-      node->setGlobalNumber(parentNodePtr->giveGlobalNumber());
-      node->setParallelMode(parentNodePtr->giveParallelMode());
-      node->setPartitionList (parentNodePtr->givePartitionList());
-#endif      
-    } else {
-      // newly created "bisected" node
-      node = ::CreateUsrDefDofManagerOfType (NodeClass, inode, *dNew);
-      //create new node with default DOFs 
-
-      ndofs = dofIDArrayPtr.giveSize();
-      node->setNumberOfDofs (ndofs);
-      
-      // create individual DOFs
-      for (idof=1; idof<=ndofs; idof++) {
-#ifdef NM
-				dof=NULL;
-				FloatArray *coords = mesh->giveNode(inode)->giveCoordinates();
-				if(!dof){
-					if(fabs(coords ->at(1) - 200.0) < 0.000001){
-						if(coords -> at(2) > -0.000001 && coords -> at(2) < 97.500001){
-							dof = new MasterDof (idof, node, 1, 0, dofIDArrayPtr.at(idof));
-						}
-					}
-				}
-				if(!dof){
-					if(fabs(coords -> at(2)) < 0.000001){
-						dof = new MasterDof (idof, node, 1, 0, dofIDArrayPtr.at(idof));
-					}
-				}
-				if(!dof){
-					if(fabs(coords -> at(1)) < 0.000001){
-						if(coords -> at(2) > 102.4999999 && coords -> at(2) < 199.9999999){
-							dof = new SimpleSlaveDof( idof, node, 5, ( DofID ) dofIDArrayPtr.at(idof));
-						}
-					}
-				}
-				if(!dof){
-					if(fabs(coords -> at(2) - 200.0) < 0.000001){
-						if(coords -> at(1) > 0.000001 && coords -> at(1) < 99.9999999){
-							dof = new SimpleSlaveDof( idof, node, 6, ( DofID ) dofIDArrayPtr.at(idof));
-						} else if(coords -> at(1) > 100.000001 && coords -> at(1) < 200.000001){
-							dof = new SimpleSlaveDof( idof, node, 6, ( DofID ) dofIDArrayPtr.at(idof));
-						}
-					}
-				}
-				if(!dof)dof = new MasterDof (idof, node, 0, 0, dofIDArrayPtr.at(idof));
-#else
-#ifdef BRAZIL_2D
-				dof=NULL;
-				FloatArray *coords = mesh->giveNode(inode)->giveCoordinates();
-				if(!dof){
-					if(fabs(coords -> at(1)) < 0.000001){
-						if(coords -> at(2) > 0.000001){
-							if(idof == 1)
-								dof = new MasterDof (idof, node, 1, 0, dofIDArrayPtr.at(idof));
-						}
-					}
-				}
-				if(!dof){
-					if(fabs(coords -> at(2)) < 0.000001){
-						if(coords -> at(1) > 0.000001){
-							if(idof == 2)
-								dof = new MasterDof (idof, node, 1, 0, dofIDArrayPtr.at(idof));
-						}
-					}
-				}
-				if(!dof)dof = new MasterDof (idof, node, 0, 0, dofIDArrayPtr.at(idof));
-#else
-#ifdef THREEPBT_3D
-				dof=NULL;
-				FloatArray *coords = mesh->giveNode(inode)->giveCoordinates();
-				if(!dof){
-					if(fabs(coords -> at(1)) < 0.000001){
-						if(ccords -> at(2) > 0.000001){
-							if(coords -> at(3) > 499.999999){
-								if(idof == 1 || idof == 3)
-									dof = new MasterDof (idof, node, 1, 0, dofIDArrayPtr.at(idof));
-							}
-						}
-					}
-				}
-        if(!dof){
-          if(coords -> at(1) > 1999.999999){
-            if(ccords -> at(2) > 0.000001){
-							if(coords -> at(3) > 499.999999){
-								if(idof == 3)
-									dof = new MasterDof (idof, node, 1, 0, dofIDArrayPtr.at(idof));
-							}
-						}
-					}
-				}
-				if(!dof)dof = new MasterDof (idof, node, 0, 0, dofIDArrayPtr.at(idof));
-#else
-        dof = new MasterDof (idof, node, 0, 0, dofIDArrayPtr.at(idof));
-#endif
-#endif
-#endif
-        node->setDof (idof, dof);
-      }
-
-#ifdef __PARALLEL_MODE
-      // ?????   node->setGlobalNumber(parentPtr->giveGlobalNumber());
-      node->setParallelMode(mesh->giveNode(inode)->giveParallelMode());
-      node->setGlobalNumber(mesh->giveNode(inode)->giveGlobalNumber());
-      node->setPartitionList (mesh->giveNode(inode)->givePartitions());
-#endif      
-      
-    }
-    // set node coordinates
-    ((Node*) node)->setCoordinates(*mesh->giveNode(inode)->giveCoordinates());
-		node->setBoundaryFlag (mesh->giveNode(inode)->isBoundary());
-    (*dNew) -> setDofManager (inode, node);
-  } // end creating dof managers
-
-  // create elements
-  // count number of local terminal elements first
-  int count, nterminals = 0;
-  nelems=mesh->giveNumberOfElements();
-  for (ielem=1; ielem<=nelems; ielem++) {
-#ifdef __PARALLEL_MODE
-    if (mesh->giveElement(ielem)->giveParallelMode()==Element_remote) continue;
-#endif
-    if (mesh->giveElement(ielem)->isTerminal()) nterminals++;
-  }
-
-#ifdef __PARALLEL_MODE
-  IntArray parentElemMap(nterminals); // ----
-#endif
-  (*dNew) -> resizeElements (nterminals);
-  int eNum = 0;
-  for (ielem=1; ielem<=nelems; ielem++) {
-#ifdef __PARALLEL_MODE
-    if (mesh->giveElement(ielem)->giveParallelMode()==Element_remote) continue;
-#endif
-    if (!mesh->giveElement(ielem)->isTerminal()) continue;
-    eNum ++;
-    parent = mesh->giveElement(ielem)->giveTopParent();
-#ifdef __PARALLEL_MODE
-    parentElemMap.at(eNum) = parent; // ----
-#endif
-    if (parent) {
-      parentElementPtr = domain->giveElement(parent);
-      elem = ::CreateUsrDefElementOfType (parentElementPtr->giveClassID(), eNum, *dNew);
-      (*dNew)->setElement (eNum, elem);
-      elem->setDofManagers(*mesh->giveElement(ielem)->giveNodes());
-      elem->setMaterial (parentElementPtr->giveMaterial()->giveNumber());
-      elem->setCrossSection(parentElementPtr->giveCrossSection()->giveNumber());
-#ifdef __PARALLEL_MODE
-      elem->setParallelMode(parentElementPtr->giveParallelMode());
-      elem->setGlobalNumber(mesh->giveElement(ielem)->giveGlobalNumber());
-#endif
-      elem->postInitialize();
-    } else OOFEM_ERROR ("Subdivision :: createMesh: parent element missing");
-  } // end loop over elements
-  OOFEMTXTInputRecord _ir, *irPtr = &_ir;
-  std::string irString;
-  // create the rest of the model description (BCs, CrossSections, Materials, etc)
-  // Cross sections
-  int ncrosssect = domain->giveNumberOfCrossSectionModels();
-  (*dNew) -> resizeCrossSectionModels(ncrosssect);
-  for (i=1; i<=ncrosssect; i++) {
-    domain->giveCrossSection(i)->giveInputRecordString (irString);
-    irPtr->setRecordString (irString.c_str());
-    IR_GIVE_RECORD_KEYWORD_FIELD(irPtr, name, num, MAX_NAME_LENGTH);
-    
-    ( crossSection  = ( CrossSection * )
-      ( CrossSection(i, *dNew).ofType(name) ) )->initializeFrom(irPtr);
-    (*dNew) -> setCrossSection (i, crossSection);
-  }
-  // materials
-  int nmat = domain->giveNumberOfMaterialModels();
-  (*dNew) -> resizeMaterials(nmat);
-  for (i=1; i<=nmat; i++) {
-    domain->giveMaterial(i)->giveInputRecordString (irString);
-    irPtr->setRecordString (irString.c_str());
-    IR_GIVE_RECORD_KEYWORD_FIELD(irPtr, name, num, MAX_NAME_LENGTH);
-    
-    ( mat  = ( Material * )
-      ( Material(i, *dNew).ofType(name) ) )->initializeFrom(irPtr);
-    (*dNew) -> setMaterial (i, mat);
-  }
-  // barriers
-  int nbarriers = domain->giveNumberOfNonlocalBarriers();
-  (*dNew) -> resizeNonlocalBarriers(nbarriers);
-  for (i=1; i<=nbarriers; i++) {
-    domain->giveNonlocalBarrier(i)->giveInputRecordString (irString);
-    irPtr->setRecordString (irString.c_str());
-    IR_GIVE_RECORD_KEYWORD_FIELD(irPtr, name, num, MAX_NAME_LENGTH);
-    
-    barrier = CreateUsrDefNonlocalBarrierOfType(name, i, *dNew);
-    barrier->initializeFrom(irPtr);
-    (*dNew) -> setNonlocalBarrier (i, barrier);
-  }
-  // boundary conditions
-  int nbc = domain->giveNumberOfBoundaryConditions();
-  (*dNew) -> resizeBoundaryConditions(nbc);
-  for (i=1; i<=nbc; i++) {
-    domain->giveBc(i)->giveInputRecordString (irString);
-    irPtr->setRecordString (irString.c_str());
-    IR_GIVE_RECORD_KEYWORD_FIELD(irPtr, name, num, MAX_NAME_LENGTH);
-    
-    ( bc = ( GeneralBoundaryCondition * )
-      ( GeneralBoundaryCondition(i, *dNew).ofType(name) ) )->initializeFrom(irPtr);
-    (*dNew) -> setBoundaryCondition (i, bc);
-  }
-  
-  // initial conditions
-  int nic = domain->giveNumberOfInitialConditions();
-  (*dNew) -> resizeInitialConditions(nic);
-  for (i=1; i<=nic; i++) {
-    domain->giveIc(i)->giveInputRecordString (irString);
-    irPtr->setRecordString (irString.c_str());
-    IR_GIVE_RECORD_KEYWORD_FIELD(irPtr, name, num, MAX_NAME_LENGTH);
-    
-    ic = new InitialCondition(i, *dNew);
-    ic->initializeFrom(irPtr);
-    (*dNew) -> setInitialCondition (i, ic);
-  }
-  // load time functions
-  int nltf = domain->giveNumberOfLoadTimeFunctions();
-  (*dNew) -> resizeLoadTimeFunctions(nltf);
-  for (i=1; i<=nltf; i++) {
-    domain->giveLoadTimeFunction(i)->giveInputRecordString (irString);
-    irPtr->setRecordString (irString.c_str());
-    IR_GIVE_RECORD_KEYWORD_FIELD(irPtr, name, num, MAX_NAME_LENGTH);
-    
-    ( ltf  = ( LoadTimeFunction * )
-      ( LoadTimeFunction(i, *dNew).ofType(name) ) )->initializeFrom(irPtr);
-    (*dNew) -> setLoadTimeFunction (i, ltf);
-  }
-  
-  // copy output manager settings
-  (*dNew)->giveOutputManager()->beCopyOf (domain->giveOutputManager());
-  :: getRelativeUtime(dt, st);
-#ifdef __PARALLEL_MODE
-	OOFEM_LOG_INFO( "[%d] Subdivision: created new mesh (%d nodes and %d elements) in %.2fs\n",
-									( * dNew )->giveEngngModel()->giveRank(), nnodes, eNum, ( double ) ( dt.tv_sec + dt.tv_usec / ( double ) OOFEM_USEC_LIM ) );
-#else
-  OOFEM_LOG_INFO( "Subdivision: created new mesh (%d nodes and %d elements) in %.2fs\n",
-                  nnodes, eNum, (double)(dt.tv_sec+dt.tv_usec/(double)OOFEM_USEC_LIM));
-#endif
-  
-#ifdef __PARALLEL_MODE
-#ifdef __VERBOSE_PARALLEL
-  nnodes = (*dNew)->giveNumberOfDofManagers();
-  for (inode=1; inode<=nnodes; inode++) {
-    if ((*dNew)->giveDofManager(inode)->giveParallelMode()==DofManager_shared) {
-      OOFEM_LOG_INFO ("[%d] Shared Node %d[%d]\n", this->giveRank(), inode, (*dNew)->giveDofManager(inode)->giveGlobalNumber());
-    }
-  }
-#endif
-  
-	// we need to assign global numbers to newly generated elements 
-	this->assignGlobalNumbersToElements(*dNew);
-
-	int im;
-	bool nonloc = false;
-	nmat = (*dNew)->giveNumberOfMaterialModels();
-	for (im=1; im<=nmat; im++)
-		if ((*dNew)->giveMaterial(im)->giveInterface(NonlocalMaterialExtensionInterfaceType)) nonloc=true;
-	if (nonloc) exchangeRemoteElements (*dNew, parentElemMap); // ----
-	
-	
-	(*dNew)->commitTransactions( (*dNew)->giveTransactionManager() );
-	
-	// print some statistics
-	nelems=(*dNew)->giveNumberOfElements();
-	int localVals[2], globalVals[2];
-	for (localVals[0] = 0, ielem=1; ielem<=nelems; ielem++) {
-		if ((*dNew)->giveElement(ielem)->giveParallelMode() == Element_local) localVals[0]++ ;
-	}
-	nnodes = (*dNew)->giveNumberOfDofManagers();
-	for (localVals[1]=0, inode=1; inode<=nnodes; inode++) {
-		if ((*dNew)->giveDofManager(inode)->isLocal()) localVals[1]++;
-	}
-	MPI_Reduce(localVals, globalVals, 2, MPI_INT, MPI_SUM, 0, MPI_COMM_WORLD);
-	if (this->giveRank()==0) {
-		OOFEM_LOG_INFO("Subdivision: new mesh info: %d nodes, %d elements in total\n", globalVals[1], globalVals[0]);
-	}
-#endif
-    
-	return MI_OK;
 }
 
 
 #ifdef __PARALLEL_MODE
 bool
-Subdivision :: exchangeSharedIrregulars () {
-  // loop over local sharedIrregularQueue 
-  int globalIrregularQueueEmpty, localSharedIrregularQueueEmpty = this->sharedIrregularsQueue.empty();
+Subdivision :: exchangeSharedIrregulars () 
+{
+  // loop over local sharedIrregularsQueue 
+  int globalSharedIrregularsQueueEmpty, localSharedIrregularsQueueEmpty = this->sharedIrregularsQueue.empty();
 #ifdef __VERBOSE_PARALLEL
-  OOFEM_LOG_INFO ("[%d] Subdivision :: exchangeSharedIrregulars: localSharedIrregularQueueEmpty %d\n",
-                  this->giveRank(), localSharedIrregularQueueEmpty);
+  OOFEM_LOG_INFO ("[%d] Subdivision :: exchangeSharedIrregulars: localSharedIrregularsQueueEmpty %d\n",
+                  this->giveRank(), localSharedIrregularsQueueEmpty);
 #endif
-  MPI_Allreduce (&localSharedIrregularQueueEmpty, &globalIrregularQueueEmpty, 1, MPI_INT, MPI_LAND, MPI_COMM_WORLD); 
+  MPI_Allreduce (&localSharedIrregularsQueueEmpty, &globalSharedIrregularsQueueEmpty, 1, MPI_INT, MPI_LAND, MPI_COMM_WORLD); 
 #ifdef __VERBOSE_PARALLEL
-  OOFEM_LOG_INFO ("[%d] Subdivision :: exchangeSharedIrregulars:  globalIrregularQueueEmpty %d\n",
-                  this->giveRank(), globalIrregularQueueEmpty);
+  OOFEM_LOG_INFO ("[%d] Subdivision :: exchangeSharedIrregulars: globalSharedIrregularsQueueEmpty %d\n",
+                  this->giveRank(), globalSharedIrregularsQueueEmpty);
 #endif
-  if (globalIrregularQueueEmpty) {
+  if (globalSharedIrregularsQueueEmpty) {
     return true; 
   } else {
 #ifdef __VERBOSE_PARALLEL
@@ -2845,8 +3882,8 @@ Subdivision :: exchangeSharedIrregulars () {
     com.initExchange(SHARED_IRREGULAR_DATA_TAG);
     com.unpackAllData(this, this, &Subdivision::unpackSharedIrregulars);
     com.finishExchange();
-    
     this->sharedIrregularsQueue.clear();
+
     return false;
   }
 }
@@ -2860,6 +3897,7 @@ Subdivision::packSharedIrregulars (Subdivision *s, ProcessCommunicator &pc)
   const IntArray *sharedPartitions;
   std::list<int>::const_iterator sharedIrregQueueIter;
   IntArray edgeInfo (2);
+
   if ( rproc == myrank ) return 1; // skip local partition
 
   // query process communicator to use
@@ -2871,39 +3909,40 @@ Subdivision::packSharedIrregulars (Subdivision *s, ProcessCommunicator &pc)
     sharedPartitions = this->mesh->giveNode(pi)->givePartitions();
     if (sharedPartitions->contains(rproc)) {
       // the info about new local shared irregular node needs to be sent to remote partition
-      // the new ireegular on remote partition is identified using two nodes defining 
+      // the new irregular on remote partition is identified using two nodes (glonums) defining 
       // an edge on which irregular node is introduced
       ((RS_IrregularNode*)this->mesh->giveNode(pi))->giveEdgeNodes(iNode, jNode);
       edgeInfo.at(1) = this->mesh->giveNode(iNode)->giveGlobalNumber();
       edgeInfo.at(2) = this->mesh->giveNode(jNode)->giveGlobalNumber();
-      pcbuff->packInt (SUBIVISION_IRREGULAR_REC_TAG);
+      pcbuff->packInt (SUBDIVISION_SHARED_IRREGULAR_REC_TAG);
       pcbuff->packIntArray (edgeInfo);
 #ifdef __VERBOSE_PARALLEL
-      OOFEM_LOG_INFO("[%d] Subdivision::packSharedIrregulars: packing shared node %d [%d %d]\n",
-                     myrank,pi, edgeInfo.at(1), edgeInfo.at(2));
+      OOFEM_LOG_INFO("[%d] Subdivision::packSharedIrregulars: packing shared node %d [%d %d] for %d\n",
+                     myrank, pi, edgeInfo.at(1), edgeInfo.at(2), rproc);
 #endif
     }
   }
   pcbuff->packInt (SUBDIVISION_END_DATA);
+
+	return 1;
 }
 
 int 
 Subdivision::unpackSharedIrregulars (Subdivision *s, ProcessCommunicator &pc)
 {
   int myrank = this->giveRank();
-  int ie, _type, inode, jnode, iNode, jNode, iNum, iproc = pc.giveRank();
-  int nelems=mesh->giveNumberOfElements();
+  int ie, _type, iNum, iproc = pc.giveRank();
+  int iNode, jNode, elems;
   double density;
   IntArray edgeInfo(2);
+	const IntArray *iElems, *jElems;
   FloatArray coords;
-  RS_Element *elem,  *elem1, *elem2;
-  RS_IrregularNode *irregular;
-  bool found = false;
-	int eIndex, ngb1, ngb2;
+  Subdivision::RS_SharedEdge *edge;
+  Subdivision::RS_Element *elem;
+  Subdivision::RS_IrregularNode *irregular;
+	int eIndex;
 
-  if ( iproc == myrank ) {
-    return 1;                // skip local partition
-  }
+  if ( iproc == myrank ) return 1;                // skip local partition
   
   // query process communicator to use
   ProcessCommunicatorBuff *pcbuff = pc.giveProcessCommunicatorBuff();
@@ -2911,204 +3950,134 @@ Subdivision::unpackSharedIrregulars (Subdivision *s, ProcessCommunicator &pc)
   pcbuff->unpackInt(_type);
   // unpack dofman data
   while ( _type != SUBDIVISION_END_DATA ) {
-    if (_type == SUBIVISION_IRREGULAR_REC_TAG) {
+    if (_type == SUBDIVISION_SHARED_IRREGULAR_REC_TAG) {
       pcbuff->unpackIntArray (edgeInfo);
 #ifdef __VERBOSE_PARALLEL
-      OOFEM_LOG_INFO("[%d] Subdivision::unpackSharedIrregulars: received shared node record [%d %d]...",
-                     myrank, edgeInfo.at(1), edgeInfo.at(2));
+      OOFEM_LOG_INFO("[%d] Subdivision::unpackSharedIrregulars: received shared node record [%d %d] from %d ...\n",
+                     myrank, edgeInfo.at(1), edgeInfo.at(2), iproc);
 #endif
-      // look for local element containing an edge identical to the one just received
-			// HUHU do not search over all elements, use connectivity if available
-      for (found=false, ie=1; ie<=nelems; ie++) { 
-        elem = mesh->giveElement(ie);
-        if (elem->giveParallelMode() == Element_remote) continue;
-        if (!elem->isTerminal()) continue;
-        if ((inode=elem->containsGlobalNode(edgeInfo.at(1))) &&
-            (jnode=elem->containsGlobalNode(edgeInfo.at(2)))) {
 
-          /* first check if Irregular is already there
-             this can happen, when both partitions introduce locally shared node on the same edge
-             and this infor is broadcasted mutually between them
-          */
-          iNode = elem->giveNode(inode); 
-					jNode = elem->giveNode(jnode);
+			iNode = mesh->sharedNodeGlobal2Local(edgeInfo.at(1));
+			jNode = mesh->sharedNodeGlobal2Local(edgeInfo.at(2));
+
+			// get elements incident simultaneiusly to iNode and jNode
+			iElems=mesh->giveNode(iNode)->giveConnectedElements();
+			jElems=mesh->giveNode(jNode)->giveConnectedElements();
+
+			IntArray common;
+			if(iElems->giveSize() <= jElems->giveSize()){
+				common.preallocate(iElems->giveSize());
+			}
+			else{
+				common.preallocate(jElems->giveSize());
+			}
+			// I do rely on the fact that the arrays are ordered !!!
+			// I am using zero chunk because array common is large enough
+			elems=iElems->findCommonValuesSorted(*jElems, common, 0);
+			if(!elems){
+				OOFEM_ERROR3("Subdivision::unpackSharedIrregulars - no element found sharing nodes %d and %d",
+										 iNode, jNode);
+			}
+
+			// check on the first element whether irregular exists
+			elem = mesh->giveElement(common.at(1));
+			eIndex = elem->giveEdgeIndex(iNode, jNode);
+#ifdef DEBUG_CHECK
+			if(!elem->giveSharedEdges()->giveSize()){
+				OOFEM_ERROR4("Subdivision::unpackSharedIrregulars - element %d sharing nodes %d %d has no shared edges",
+										 elem->giveNumber(), iNode, jNode);
+			}
+			if(!elem->giveSharedEdge(eIndex)){
+				OOFEM_ERROR5("Subdivision::unpackSharedIrregulars - element %d sharing nodes %d and %d has no shared edge %d",
+										 elem->giveNumber(), iNode, jNode, eIndex);
+			}
+#endif
+			if(elem->giveIrregular(eIndex)){
+				// irregular already exists 
+#ifdef __VERBOSE_PARALLEL
+				OOFEM_LOG_INFO ("...already exists as %d on element %d\n", elem->giveIrregular(eIndex), elem->giveNumber());
+#endif
+			}
+			else{
+				// irregular does not exist:
+				// compute coordinates of new irregular
+				coords = *(mesh->giveNode(iNode)->giveCoordinates());
+				coords.add (mesh->giveNode(jNode)->giveCoordinates());
+				coords.times(0.5);
+				// compute required density of a new node
+				density = 0.5*(mesh->giveNode(iNode)->giveRequiredDensity()+
+											 mesh->giveNode(jNode)->giveRequiredDensity());
+				// create new irregular to receiver 
+				iNum = mesh->giveNumberOfNodes() + 1;
+				irregular = new Subdivision::RS_IrregularNode (iNum, mesh, 0, coords, density, true);
+				irregular->setParallelMode(DofManager_shared);
+				irregular->setEdgeNodes(iNode, jNode);
+				mesh->addNode (iNum, irregular);
+
+#ifdef __OOFEG
+#ifdef DRAW_IRREGULAR_NODES
+				irregular->drawGeometry();
+#endif
+#endif
+
+				// partitions are inherited from shared edge
+				edge = mesh->giveEdge(elem->giveSharedEdge(eIndex));
+				irregular->setPartitions(*(edge->givePartitions()));
+				// add irregular to all relevant elements
+				for(ie=1;ie<=common.giveSize();ie++){
+					elem = mesh->giveElement(common.at(ie));
 					eIndex = elem->giveEdgeIndex(iNode, jNode);
-					found=true;
+#ifdef DEBUG_CHECK
+					if(!elem->giveSharedEdges()->giveSize()){
+						OOFEM_ERROR4("Subdivision::unpackSharedIrregulars - element %d sharing nodes %d %d has no shared edges",
+												 elem->giveNumber(), iNode, jNode);
+					}
+					if(!elem->giveSharedEdge(eIndex)){
+						OOFEM_ERROR5("Subdivision::unpackSharedIrregulars - element %d sharing nodes %d and %d has no shared edge %d",
+												 elem->giveNumber(), iNode, jNode, eIndex);
+					}
 					if(elem->giveIrregular(eIndex)){
-            // entry already exists 
-#ifdef __VERBOSE_PARALLEL
-            OOFEM_LOG_INFO ("already exists as %d on %d elem\n", elem->giveIrregular(eIndex), ie);
+						OOFEM_ERROR4("Subdivision::unpackSharedIrregulars - element %d sharing nodes %d %d already has irregular",
+												 elem->giveNumber(), iNode, jNode);
+					}
 #endif
-						// search over remaining local elements can be safely skipped
-            break;
-          } else { 
-            // irregular does not exist:
-            // element found => introduce new Irregular node there
-            // compute coordinates of new irregular
-            coords = *(mesh->giveNode(iNode)->giveCoordinates());
-            coords.add (mesh->giveNode(jNode)->giveCoordinates());
-            coords.times(0.5);
-            // compute required density of a new node
-            density = 0.5*(mesh->giveNode(iNode)->giveRequiredDensity()+
-                           mesh->giveNode(jNode)->giveRequiredDensity());
-            // add irregular to receiver 
-            iNum = mesh->giveNumberOfNodes() + 1;
-            irregular = new Subdivision::RS_IrregularNode (iNum, 0, coords, density, true);
-            irregular->setPartition (iproc);
-            irregular->setParallelMode(DofManager_shared);
-            irregular->setEdgeNodes(iNode, jNode);
-            mesh->addNode (iNum, irregular);
-						// simplified implementation (either purely 2D or 3D mesh assumed)   // HUHU
-						if (domain->giveElement(elem->giveTopParent())->giveGeometryType() == EGT_triangle_1) {
-							// there may be only one local element to add irregular on
-							elem->setIrregular(eIndex, iNum);
-							if(!elem->giveQueueFlag()){
-								// schedule elem for bisection
-								subdivqueue.push(ie);
-								elem->setQueueFlag(true);
-							}
+					elem->setIrregular(eIndex, iNum);
+					if(!elem->giveQueueFlag()){
+						// schedule elem for bisection
+						subdivqueue.push(elem->giveNumber());
+						elem->setQueueFlag(true);
+					}
 #ifdef __VERBOSE_PARALLEL
-							OOFEM_LOG_INFO ("added as %d on %d elem\n", iNum, ie);
+					OOFEM_LOG_INFO ("...added as %d on element %d\n", iNum, elem->giveNumber());
 #endif
-						} else if (domain->giveElement(elem->giveTopParent())->giveGeometryType() == EGT_tetra_1) {
-							// add iregular to all local elements sharing iNode and jNode edge
-							elem->setIrregular(eIndex, iNum);
-							if(!elem->giveQueueFlag()){
-								// schedule elem for bisection
-								subdivqueue.push(ie);
-								elem->setQueueFlag(true);
-							}
-#ifdef __VERBOSE_PARALLEL
-							OOFEM_LOG_INFO ("added as %d on elems: %d", iNum, ie);
-#endif
-							eIndex = elem->giveEdgeIndex(iNode, jNode);
-							if(eIndex <= 3){
-								ngb1 = 1;
-								ngb2 = eIndex+1;
-							}
-							else{
-								ngb1 = eIndex-2;
-								ngb2 = (eIndex>4)?eIndex-3:4;
-							}
-
 #ifdef DEBUG_INFO
-							fprintf(stderr, "[%d] Irregular %d added on %d (edge %d, nodes %d %d, nds %d %d %d %d, ngbs %d %d %d %d, irr %d %d %d %d %d %d)\n",
-											myrank, iNum, elem->giveNumber(), eIndex, iNode, jNode, 
-											elem->giveNode(1), elem->giveNode(2), elem->giveNode(3), elem->giveNode(4), 
-											elem->giveNeighbor(1), elem->giveNeighbor(2), elem->giveNeighbor(3), elem->giveNeighbor(4),
-											elem->giveIrregular(1), elem->giveIrregular(2), elem->giveIrregular(3), 
-											elem->giveIrregular(4), elem->giveIrregular(5), elem->giveIrregular(6));
+					if(domain->giveElement(elem->giveTopParent())->giveGeometryType() == EGT_tetra_1){
+						// do not print global numbers of elements because they are not available (they are assigned at once after bisection);
+						// do not print global numbers of irregulars as these may not be available yet
+						OOFEM_LOG_INFO("[%d] Shared irregular %d added on %d (edge %d, nodes %d %d [%d %d], nds %d %d %d %d [%d %d %d %d], ngbs %d %d %d %d, irr %d %d %d %d %d %d)\n",
+													 myrank, iNum, 
+													 elem->giveNumber(), eIndex, iNode, jNode, 
+													 mesh->giveNode(iNode)->giveGlobalNumber(), mesh->giveNode(jNode)->giveGlobalNumber(), 
+													 elem->giveNode(1), elem->giveNode(2), elem->giveNode(3), elem->giveNode(4), 
+													 mesh->giveNode(elem->giveNode(1))->giveGlobalNumber(),
+													 mesh->giveNode(elem->giveNode(2))->giveGlobalNumber(),
+													 mesh->giveNode(elem->giveNode(3))->giveGlobalNumber(),
+													 mesh->giveNode(elem->giveNode(4))->giveGlobalNumber(),
+													 elem->giveNeighbor(1), elem->giveNeighbor(2), elem->giveNeighbor(3), elem->giveNeighbor(4),
+													 elem->giveIrregular(1), elem->giveIrregular(2), elem->giveIrregular(3), 
+													 elem->giveIrregular(4), elem->giveIrregular(5), elem->giveIrregular(6));
+					}
 #endif
-
-							elem1=elem;
-							while(elem1->giveNeighbors()->at(ngb1)){
-								elem2=mesh->giveElement(elem1->giveNeighbors()->at(ngb1));
-								if(elem2==elem){
-									ngb2=0; // there is no need to traverse in the other direction (loop was completed)
-									break;
-								}
-								// do not stop traversal if the neighbour is remote
-								// there still may be local elements further
-								if(elem2->giveParallelMode() == Element_local){
-									eIndex=elem2->giveEdgeIndex(iNode,jNode);
-									elem2->setIrregular(eIndex, iNum);
-									if(!elem2->giveQueueFlag()){
-										// add neighbour to list of elements for subdivision
-										subdivqueue.push(elem2->giveNumber());
-										elem2->setQueueFlag(true);
-									}
-#ifdef __VERBOSE_PARALLEL
-									OOFEM_LOG_INFO (" %d", elem2->giveNumber());
-#endif
-
-#ifdef DEBUG_INFO
-									fprintf(stderr, "[%d] Irregular %d added on (ngb1) %d (edge %d, nodes %d %d, nds %d %d %d %d, ngbs %d %d %d %d, irr %d %d %d %d %d %d)\n",
-													myrank, iNum, elem2->giveNumber(), eIndex, iNode, jNode, 
-													elem2->giveNode(1), elem2->giveNode(2), elem2->giveNode(3), elem2->giveNode(4), 
-													elem2->giveNeighbor(1), elem2->giveNeighbor(2), elem2->giveNeighbor(3), elem2->giveNeighbor(4),
-													elem2->giveIrregular(1), elem2->giveIrregular(2), elem2->giveIrregular(3), 
-													elem2->giveIrregular(4), elem2->giveIrregular(5), elem2->giveIrregular(6));
-#endif
-
-								}
-								if(eIndex <= 3){
-									if(elem2->giveNeighbor(1)==elem1->giveNumber())
-										ngb1=eIndex+1;
-									else
-										ngb1=1;
-								}
-								else{
-									if(elem2->giveNeighbor(eIndex-2)==elem1->giveNumber())
-										ngb1=(eIndex>4)?eIndex-3:4;
-									else
-										ngb1=eIndex-2;
-								}
-								elem1=elem2;
-							}
-
-							if(ngb2){
-								// traverse neighbours in other direction
-								elem1=elem;
-								while(elem1->giveNeighbor(ngb2)){
-									elem2=mesh->giveElement(elem1->giveNeighbor(ngb2));
-									// do not stop traversal if the neighbour is remote
-									// there still may be local elements further
-									if(elem2->giveParallelMode() == Element_local){
-										eIndex=elem2->giveEdgeIndex(iNode,jNode);
-										elem2->setIrregular(eIndex, iNum);
-										if(!elem2->giveQueueFlag()){
-											// add neighbour to list of elements for subdivision
-											subdivqueue.push(elem2->giveNumber());
-											elem2->setQueueFlag(true);
-										}
-#ifdef __VERBOSE_PARALLEL
-										OOFEM_LOG_INFO (" %d", elem2->giveNumber());
-#endif
-
-#ifdef DEBUG_INFO
-										fprintf(stderr, "[%d] Irregular %d added on (ngb2) %d (edge %d, nodes %d %d, nds %d %d %d %d, ngbs %d %d %d %d, irr %d %d %d %d %d %d)\n",
-														myrank, iNum, elem2->giveNumber(), eIndex, iNode, jNode, 
-														elem2->giveNode(1), elem2->giveNode(2), elem2->giveNode(3), elem2->giveNode(4), 
-														elem2->giveNeighbor(1), elem2->giveNeighbor(2), elem2->giveNeighbor(3), elem2->giveNeighbor(4),
-														elem2->giveIrregular(1), elem2->giveIrregular(2), elem2->giveIrregular(3), 
-														elem2->giveIrregular(4), elem2->giveIrregular(5), elem2->giveIrregular(6));
-#endif
-
-									}
-									if(eIndex <= 3){
-										if(elem2->giveNeighbor(1)==elem1->giveNumber())
-											ngb2=eIndex+1;
-										else
-											ngb2=1;
-									}
-									else{
-										if(elem2->giveNeighbor(eIndex-2)==elem1->giveNumber())
-											ngb2=(eIndex>4)?eIndex-3:4;
-										else
-											ngb2=eIndex-2;
-									}
-									elem1=elem2;
-								}
-							}
-#ifdef __VERBOSE_PARALLEL
-							OOFEM_LOG_INFO ("\n");
-#endif
- 						} else {
-							OOFEM_ERROR2 ("Subdivision::unpackSharedIrregulars: Unsupported element geometry (element %d)", ie);
-						}
-						// search over remaining local elements can be safely skipped
-            break;
-          } 
-        }
-      }
-      if (!found) OOFEM_ERROR ("Subdivision::unpackSharedIrregulars: no element found\n");
+				}
+			}
     } else {
       OOFEM_ERROR ("Subdivision::unpackSharedIrregulars: unknown tag received");
     }
     // get type of the next record
     pcbuff->unpackInt(_type);
   }; // while (_type != LOADBALANCER_END_DATA);
-  
+	
+	return 1;
 }
 
 void
@@ -3121,42 +4090,47 @@ Subdivision :: assignGlobalNumbersToSharedIrregulars () {
   com.packAllData(this, this, &Subdivision::packIrregularSharedGlobnums);
   com.initExchange(SHARED_IRREGULAR_DATA_TAG);
   com.unpackAllData(this, this, &Subdivision::unpackIrregularSharedGlobnums);
-  com.finishExchange();
+	com.finishExchange();
+  
 }  
 
 int
 Subdivision::packIrregularSharedGlobnums (Subdivision *s, ProcessCommunicator &pc)
 {
   int rproc = pc.giveRank();
-  int i, iNode, jNode, nnodes=mesh->giveNumberOfNodes();
+  int in, iNode, jNode, nnodes = mesh->giveNumberOfNodes();
   int myrank = this->giveRank();
   IntArray edgeInfo(3);
   const IntArray *sharedPartitions;
+
   if ( rproc == myrank ) return 1; // skip local partition
   
   // query process communicator to use
   ProcessCommunicatorBuff *pcbuff = pc.giveProcessCommunicatorBuff();
-  for (i=1; i<=nnodes; i++) {
-    if (this->isNodeLocalSharedIrregular(mesh->giveNode(i), myrank) && (mesh->giveNode(i)->giveGlobalNumber() < 0) ) {
-      sharedPartitions = this->mesh->giveNode(i)->givePartitions();
+  for (in=1; in<=nnodes; in++) {
+    if (this->isNodeLocalSharedIrregular(mesh->giveNode(in), myrank) && (mesh->giveNode(in)->giveGlobalNumber() < 0) ) {
+      sharedPartitions = this->mesh->giveNode(in)->givePartitions();
       if (sharedPartitions->contains(rproc)) {
         
         // the info about new local shared irregular node needs to be sent to remote partition
-        // the new ireegular on remote partition is identified using two nodes defining 
+        // the new irregular on remote partition is identified using two nodes defining 
         // an edge on which irregular node is introduced
-        ((RS_IrregularNode*)this->mesh->giveNode(i))->giveEdgeNodes(iNode,jNode);
-        edgeInfo.at(1) = this->mesh->giveNode(i)->giveGlobalNumber();
-        edgeInfo.at(2) = this->mesh->giveNode(iNode)->giveGlobalNumber();
-        edgeInfo.at(3) = this->mesh->giveNode(jNode)->giveGlobalNumber();
+        ((RS_IrregularNode*)this->mesh->giveNode(in))->giveEdgeNodes(iNode,jNode);
+        edgeInfo.at(1) = this->mesh->giveNode(iNode)->giveGlobalNumber();
+        edgeInfo.at(2) = this->mesh->giveNode(jNode)->giveGlobalNumber();
+        edgeInfo.at(3) = this->mesh->giveNode(in)->giveGlobalNumber();                 // keep negative
 #ifdef __VERBOSE_PARALLEL
-        OOFEM_LOG_INFO("[%d] packIrregularSharedGlobnums: sending [%d][%d %d]\n",myrank, edgeInfo.at(1), edgeInfo.at(2), edgeInfo.at(3) );
+        OOFEM_LOG_INFO("[%d] packIrregularSharedGlobnums: sending %d [%d] - [%d %d] to %d\n",
+											 myrank, in, -edgeInfo.at(3), edgeInfo.at(1), edgeInfo.at(2), rproc);
 #endif
-        pcbuff->packInt (SUBIVISION_IRREGULAR_REC_TAG);
+        pcbuff->packInt (SUBDIVISION_SHARED_IRREGULAR_REC_TAG);       // KOKO asi zbytecne
         pcbuff->packIntArray (edgeInfo);
       }
     }
   }
   pcbuff->packInt (SUBDIVISION_END_DATA);
+
+	return 1;
 }
 
 
@@ -3166,14 +4140,15 @@ Subdivision::unpackIrregularSharedGlobnums (Subdivision *s, ProcessCommunicator 
   bool found;
   int myrank = this->giveRank();
   int ie, _type, iproc = pc.giveRank();
-  int inode, jnode, irregNum, nelems=mesh->giveNumberOfElements();
-  IntArray edgeInfo(3), be(2);
+  int iNode, jNode, iNum, elems;
+  IntArray edgeInfo(3);
+	const IntArray *iElems, *jElems;
+  Subdivision::RS_SharedEdge *edge;
   RS_Element *elem;
   RS_Node *node;
+	int eIndex;
 
-  if ( iproc == myrank ) {
-    return 1;                // skip local partition
-  }
+  if ( iproc == myrank ) return 1;                // skip local partition
   
   // query process communicator to use
   ProcessCommunicatorBuff *pcbuff = pc.giveProcessCommunicatorBuff();
@@ -3181,46 +4156,68 @@ Subdivision::unpackIrregularSharedGlobnums (Subdivision *s, ProcessCommunicator 
   pcbuff->unpackInt(_type);
   // unpack dofman data
   while ( _type != SUBDIVISION_END_DATA ) {
-    if (_type == SUBIVISION_IRREGULAR_REC_TAG) {
+    if (_type == SUBDIVISION_SHARED_IRREGULAR_REC_TAG) {         // KOKO asi zbytecne
       pcbuff->unpackIntArray (edgeInfo);
-      
-      // look for local element containing an edge identical to the one just received
-			// HUHU do not search over all elements, use connectivity if available
-      for (found = false, ie=1; ie<=nelems; ie++) { 
-        elem = mesh->giveElement(ie);
-        if (elem->giveParallelMode() == Element_remote) continue;
-        if (!elem->isTerminal()) continue;
-        if ((inode=elem->containsGlobalNode(edgeInfo.at(2))) &&
-            (jnode=elem->containsGlobalNode(edgeInfo.at(3)))) {
-          // element found => set globnum to corresponding irregular
-          be.at(1) = elem->giveNode(inode); be.at(2) = elem->giveNode(jnode);
-          irregNum = elem->giveIrregularOn (be);
-          if (irregNum) {
-            node = mesh->giveNode(irregNum);
-            node->setGlobalNumber(edgeInfo.at(1));
-#ifdef __VERBOSE_PARALLEL
-            OOFEM_LOG_INFO("[%d] unpackIrregularSharedGlobnums: received [%d][%d %d] as %d\n",myrank, edgeInfo.at(1), edgeInfo.at(2), edgeInfo.at(3), irregNum);
-#endif
-            found = true;
-            break;
-          } else {
-            OOFEM_ERROR ("unpackIrregularSharedGlobnums: internal inconsistency, element irregular not found\n");
-          }
-        }
-      }
-      if (!found) {
-        char buff[1024];
-        sprintf (buff, "[%d] unpackIrregularSharedGlobnums: nonmatching record received %d [%d %d]", myrank, edgeInfo.at(1), edgeInfo.at(2), edgeInfo.at(3));
-        OOFEM_ERROR (buff);
-      }
 
+			iNode = mesh->sharedNodeGlobal2Local(edgeInfo.at(1));
+			jNode = mesh->sharedNodeGlobal2Local(edgeInfo.at(2));
+
+			// get elements incident simultaneiusly to iNode and jNode
+			iElems=mesh->giveNode(iNode)->giveConnectedElements();
+			jElems=mesh->giveNode(jNode)->giveConnectedElements();
+
+			IntArray common;
+			if(iElems->giveSize() <= jElems->giveSize()){
+				common.preallocate(iElems->giveSize());
+			}
+			else{
+				common.preallocate(jElems->giveSize());
+			}
+			// I do rely on the fact that the arrays are ordered !!!
+			// I am using zero chunk because array common is large enough
+			elems=iElems->findCommonValuesSorted(*jElems, common, 0);
+			if(!elems){
+				OOFEM_ERROR3("Subdivision::unpackIrregularSharedGlobnums - no element found sharing nodes %d and %d",
+										 iNode, jNode);
+			}
+
+			// assign globnum to appropriate edge on the first element
+			elem = mesh->giveElement(common.at(1));
+			eIndex = elem->giveEdgeIndex(iNode, jNode);
+			iNum = elem->giveIrregular(eIndex);
+#ifdef DEBUG_CHECK
+			if(!elem->giveSharedEdges()->giveSize()){
+				OOFEM_ERROR4("Subdivision::unpackIrregularSharedGlobnums - element %d sharing nodes %d %d has no shared edges",
+										 elem->giveNumber(), iNode, jNode);
+			}
+			if(!elem->giveSharedEdge(eIndex)){
+				OOFEM_ERROR5("Subdivision::unpackIrregularSharedGlobnums - element %d sharing nodes %d and %d has no shared edge %d",
+										 elem->giveNumber(), iNode, jNode, eIndex);
+			}
+			if(!iNum){
+				OOFEM_ERROR4("Subdivision::unpackIrregularSharedGlobnums - element %d sharing nodes %d %d does not have irregular",
+										 elem->giveNumber(), iNode, jNode);
+			}
+#endif
+			node = mesh->giveNode(iNum);
+			node->setGlobalNumber(edgeInfo.at(3));          // keep negative
+			// update global shared node map (for refined level)
+			this->mesh->insertGlobalSharedNodeMap(node);
+
+#ifdef __VERBOSE_PARALLEL
+			OOFEM_LOG_INFO("[%d] Subdivision::unpackIrregularSharedGlobnums: received %d [%d] - [%d %d] from %d\n",
+										 myrank, iNum, -edgeInfo.at(3), edgeInfo.at(1), edgeInfo.at(2), iproc);
+#endif
     } else {
       OOFEM_ERROR ("Subdivision::unpackIrregularSharedGlobnums: unknown tag received");
     }
     pcbuff->unpackInt(_type);
   }
+
+	return 1;
 }
  
+
 bool
 Subdivision::isNodeLocalSharedIrregular (Subdivision::RS_Node* node, int myrank) {
   if (node->isIrregular()) {
@@ -3327,10 +4324,9 @@ Subdivision::exchangeRemoteElements (Domain* d, IntArray& parentMap)
     }
   }
 
-
   // receive remote data
   com.unpackAllData(this, d, & Subdivision :: unpackRemoteElements);
-  com.finishExchange();
+	com.finishExchange();
 }
 
 int
@@ -3359,21 +4355,27 @@ Subdivision::packRemoteElements (RS_packRemoteElemsStruct *s, ProcessCommunicato
   // comMap refers to original (parent) elements
   const IntArray* comMap = emodel->giveProblemCommunicator(EngngModel::PC_nonlocal)->giveProcessCommunicator(rproc)->giveToSendMap();
 #ifdef __OOFEG
+#ifdef DRAW_REMOTE_ELEMENTS
   oofegGraphicContext gc; EPixel geocolor = gc.getElementColor ();
   gc.setElementColor (gc.getActiveCrackColor());
+#endif
 #endif
   for (i=1; i<=d->giveNumberOfElements(); i++) {
     // remote parent skipped - parentElemMap has zero value for them 
     if (comMap->contains(s->parentElemMap->at(i))) {
       remoteElements.insert(i);
 #ifdef __OOFEG
+#ifdef DRAW_REMOTE_ELEMENTS
       d->giveElement(i)->drawRawGeometry(gc);
+#endif
 #endif
     }
   }
 #ifdef __OOFEG
+#ifdef DRAW_REMOTE_ELEMENTS
   ESIEventLoop (YES, "Remote element packing ; Press Ctrl-p to continue");
   gc.setElementColor (geocolor);
+#endif
 #endif
 
   // now the list of elements to became remote on given remote partition is in remoteElements set
@@ -3391,13 +4393,11 @@ Subdivision::packRemoteElements (RS_packRemoteElemsStruct *s, ProcessCommunicato
       if ((d->giveDofManager(inode)->giveParallelMode() == DofManager_local)||
 					(d->giveDofManager(inode)->giveParallelMode() == DofManager_shared) &&
 					(!d->giveDofManager(inode)->givePartitionList()->contains(rproc))) {
-				
-		//if ((d->giveDofManager(inode)->giveParallelMode() == DofManager_local)) {
+				// nodesToSend is set, therefore duplicity is avoided
         nodesToSend.insert(inode);
       }
     }
   }
-
 
   //-----------------end here-------------------
 
@@ -3416,7 +4416,6 @@ Subdivision::packRemoteElements (RS_packRemoteElemsStruct *s, ProcessCommunicato
 
   // pack end-of-element-record
   pcbuff->packInt(SUBDIVISION_END_DATA);
-
 
   // send elements
   for (si=remoteElements.begin(); si != remoteElements.end(); si++) {
@@ -3447,9 +4446,7 @@ Subdivision::unpackRemoteElements (Domain *d, ProcessCommunicator &pc)
   DofManager *dofman;
   DomainTransactionManager *dtm = d->giveTransactionManager();
 
-  if ( iproc == myrank ) {
-    return 1;                // skip local partition
-  }
+  if ( iproc == myrank ) return 1;                // skip local partition
   
   // query process communicator to use
   ProcessCommunicatorBuff *pcbuff = pc.giveProcessCommunicatorBuff();
@@ -3497,7 +4494,7 @@ Subdivision::unpackRemoteElements (Domain *d, ProcessCommunicator &pc)
     elem->setPartitionList (elemPartitions);
     dtm->addTransaction(DomainTransactionManager :: DTT_ADD, DomainTransactionManager :: DCT_Element, elem->giveGlobalNumber(), elem);
     nrecv++;
-    //OOFEM_LOG_INFO ("[%d] Received Remote elem [%d] to rank %d\n", myrank, elem->giveGlobalNumber(), iproc );
+    //OOFEM_LOG_INFO ("[%d] Received Remote elem [%d] from rank %d\n", myrank, elem->giveGlobalNumber(), iproc );
     //recvElemList.push_back(elem);
   } while ( 1 );
 
@@ -3517,10 +4514,12 @@ Subdivision::assignGlobalNumbersToElements (Domain *d)
   nelems=d->giveNumberOfElements();
   for (i=1; i<=nelems; i++) {
     localMaxGlobnum = max (localMaxGlobnum, d->giveElement(i)->giveGlobalNumber());
-    if ((d->giveElement(i)->giveParallelMode() == Element_local) &&
-        (d->giveElement(i)->giveGlobalNumber() <= 0)) {
-      numberOfLocalElementsToNumber++;
-    }
+#ifdef DEBUG_CHECK
+		if(d->giveElement(i)->giveParallelMode() == Element_remote){
+			OOFEM_ERROR2("Subdivision::assignGlobalNumbersToElements - unexpected remote element %d ", i);
+		}
+#endif
+		if (d->giveElement(i)->giveGlobalNumber() <= 0)numberOfLocalElementsToNumber++;
   }
   // determine number of elements across all partitions
   MPI_Allgather (&numberOfLocalElementsToNumber, 1, MPI_INT, 
@@ -3533,24 +4532,263 @@ Subdivision::assignGlobalNumbersToElements (Domain *d)
   // compute local offset
   int startOffset = globalMaxGlobnum, availGlobNum;
   for (i=0; i<myrank; i++) startOffset+= partitionNumberOfElements[i];
-  // ok. lets assign global numbers on each partition to local elements
+  // lets assign global numbers on each partition to local elements
   availGlobNum = startOffset;
   for (i=1; i<=nelems; i++) {
-    if ((d->giveElement(i)->giveParallelMode() == Element_local) && 
-        (d->giveElement(i)->giveGlobalNumber() <= 0)) {
-      d->giveElement(i)->setGlobalNumber (++availGlobNum);
-    }
+    if (d->giveElement(i)->giveGlobalNumber() <= 0)d->giveElement(i)->setGlobalNumber (++availGlobNum);
   }
 
 #ifdef __VERBOSE_PARALLEL
-  char *elemmode[] = {"local", "remote"};
+	/*
   for (i=1; i<=nelems; i++) {
-    OOFEM_LOG_INFO ("[%d] Element %d[%d], %s\n", myrank, i,d->giveElement(i)->giveGlobalNumber(),  elemmode[(int) d->giveElement(i)->giveParallelMode()]);
+    OOFEM_LOG_INFO ("[%d] Element %d[%d]\n", myrank, i,d->giveElement(i)->giveGlobalNumber());
   }
+	*/
 #endif
 }
 
+
+
+/* CAUTION: the exchange can be done only for not subdivided edges !
+	 subdivide edges inherit partitions from parent edge */
+
+void
+Subdivision::exchangeSharedEdges ()
+{
+  int i, pi, iNode, jNode, elems;
+  std::list<int>::const_iterator sharedEdgeQueueIter;
+  Subdivision::RS_SharedEdge *edge;
+	Subdivision::RS_Element *elem;
+	const IntArray *iElems, *jElems;
+
+  // loop over local sharedEdgessQueue 
+  int globalSharedEdgesQueueEmpty, localSharedEdgesQueueEmpty = this->sharedEdgesQueue.empty();
+#ifdef __VERBOSE_PARALLEL
+  OOFEM_LOG_INFO ("[%d] Subdivision :: exchangeSharedEdges: localSharedEdgesQueueEmpty %d\n",
+                  this->giveRank(), localSharedEdgesQueueEmpty);
 #endif
+  MPI_Allreduce (&localSharedEdgesQueueEmpty, &globalSharedEdgesQueueEmpty, 1, MPI_INT, MPI_LAND, MPI_COMM_WORLD); 
+#ifdef __VERBOSE_PARALLEL
+  OOFEM_LOG_INFO ("[%d] Subdivision :: exchangeSharedEdges: globalSharedEdgesQueueEmpty %d\n",
+                  this->giveRank(), globalSharedEdgesQueueEmpty);
+#endif
+  if (!globalSharedEdgesQueueEmpty) {
+#ifdef __VERBOSE_PARALLEL
+    OOFEM_LOG_INFO ("[%d] Subdivision :: exchangeSharedEdges: started\n", this->giveRank());
+#endif
+    
+    // there are some shared edges -> data exchange
+
+		CommunicatorBuff cb(this->giveNumberOfProcesses(), CBT_dynamic);
+		Communicator com(domain->giveEngngModel(), &cb, this->giveRank(), this->giveNumberOfProcesses(), CommMode_Dynamic);
+  
+		com.packAllData(this, this, &Subdivision::packSharedEdges);
+
+		// remove all tentative partitions on queued shared edges after packing relevant data
+		for (sharedEdgeQueueIter = sharedEdgesQueue.begin(); 
+				 sharedEdgeQueueIter != sharedEdgesQueue.end(); 
+				 sharedEdgeQueueIter++) {
+			pi = (*sharedEdgeQueueIter);
+
+			edge = mesh->giveEdge(pi);
+			edge->removePartitions();
+		}
+
+		com.initExchange(SHARED_EDGE_DATA_TAG);
+		com.unpackAllData(this, this, &Subdivision::unpackSharedEdges);
+		com.finishExchange();
+
+		// unmark unshared edges from elements after unpacking data and before clearing the queue
+		for (sharedEdgeQueueIter = sharedEdgesQueue.begin(); 
+				 sharedEdgeQueueIter != sharedEdgesQueue.end(); 
+				 sharedEdgeQueueIter++) {
+			pi = (*sharedEdgeQueueIter);
+
+			edge = mesh->giveEdge(pi);
+			if(edge->givePartitions()->giveSize())continue;
+
+			edge->giveEdgeNodes(iNode,jNode);
+#ifdef __VERBOSE_PARALLEL
+			//OOFEM_LOG_INFO("edge %d %d [%d %d] not shared\n", iNode, jNode,
+			//							 mesh->giveNode(iNode)->giveGlobalNumber(), mesh->giveNode(jNode)->giveGlobalNumber());
+#endif		
+			iElems=mesh->giveNode(iNode)->giveConnectedElements();
+			jElems=mesh->giveNode(jNode)->giveConnectedElements();
+
+			IntArray common;
+			if(iElems->giveSize() <= jElems->giveSize()){
+				common.preallocate(iElems->giveSize());
+			}
+			else{
+				common.preallocate(jElems->giveSize());
+			}
+			// I do rely on the fact that the arrays are ordered !!!
+			// I am using zero chunk because array common is large enough
+			elems=iElems->findCommonValuesSorted(*jElems, common, 0);
+#ifdef DEBUG_CHECK
+			if(!elems){
+				OOFEM_ERROR4("Subdivision::exchangeSharedEdges - no element found sharing nodes %d and %d corresponding to edge %d",
+										 iNode, jNode, pi);
+			}
+#endif
+			for(i=1;i<=elems;i++){
+				elem=mesh->giveElement(common.at(i));
+#ifdef DEBUG_CHECK
+				if(!elem->giveSharedEdges()->giveSize()){
+					OOFEM_ERROR4("Subdivision::exchangeSharedEdges - element %d sharing nodes %d %d has no shared edges",
+											 elem->giveNumber(), iNode, jNode);
+				}
+#endif
+				elem->setSharedEdge(elem->giveEdgeIndex(iNode,jNode), 0);
+			}
+		}
+
+		this->sharedEdgesQueue.clear();
+	}
+}
+
+
+
+int
+Subdivision::packSharedEdges (Subdivision *s, ProcessCommunicator &pc)
+{
+  int pi, iNode, jNode, rproc = pc.giveRank();
+  int myrank = this->giveRank();
+	const IntArray *sharedPartitions;
+  std::list<int>::const_iterator sharedEdgeQueueIter;
+	IntArray edgeInfo(2);
+
+  if ( rproc == myrank ) return 1; // skip local partition
+  
+  // query process communicator to use
+  ProcessCommunicatorBuff *pcbuff = pc.giveProcessCommunicatorBuff();
+  for (sharedEdgeQueueIter = sharedEdgesQueue.begin(); 
+       sharedEdgeQueueIter != sharedEdgesQueue.end(); 
+       sharedEdgeQueueIter++) {
+    pi = (*sharedEdgeQueueIter);
+
+		sharedPartitions = this->mesh->giveEdge(pi)->givePartitions();
+		if (sharedPartitions->contains(rproc)) {
+			this->mesh->giveEdge(pi)->giveEdgeNodes(iNode,jNode);
+			edgeInfo.at(1) = this->mesh->giveNode(iNode)->giveGlobalNumber();
+			edgeInfo.at(2) = this->mesh->giveNode(jNode)->giveGlobalNumber();
+#ifdef __VERBOSE_PARALLEL
+			OOFEM_LOG_INFO("[%d] Subdivision::packSharedEdges: sending [%d %d] to %d\n", myrank, edgeInfo.at(1), edgeInfo.at(2), rproc);
+#endif
+			pcbuff->packInt (SUBDIVISION_SHARED_EDGE_REC_TAG);   // KOKO zbytecne
+			pcbuff->packIntArray (edgeInfo);
+    }
+  }
+  pcbuff->packInt (SUBDIVISION_END_DATA);
+
+	return 1;
+}
+
+
+int 
+Subdivision::unpackSharedEdges (Subdivision *s, ProcessCommunicator &pc)
+{
+  bool found;
+  int myrank = this->giveRank();
+  int pi, ie, _type, iproc = pc.giveRank();
+  int iNode, jNode, elems;
+  IntArray edgeInfo(2);
+	const IntArray *iElems, *jElems;
+  std::list<int>::const_iterator sharedEdgeQueueIter;
+  Subdivision::RS_SharedEdge *edge;
+	Subdivision::RS_Element *elem;
+	int eIndex;
+
+  if ( iproc == myrank ) return 1;                // skip local partition
+  
+  // query process communicator to use
+  ProcessCommunicatorBuff *pcbuff = pc.giveProcessCommunicatorBuff();
+
+  pcbuff->unpackInt(_type);
+  // unpack dofman data
+  while ( _type != SUBDIVISION_END_DATA ) {
+    if (_type == SUBDIVISION_SHARED_EDGE_REC_TAG) {         // KOKO zbytecne
+      pcbuff->unpackIntArray (edgeInfo);
+
+#ifdef __VERBOSE_PARALLEL
+			OOFEM_LOG_INFO("[%d] Subdivision::unpackSharedEdges: receiving [%d %d] from %d\n", 
+										 myrank, edgeInfo.at(1), edgeInfo.at(2), iproc);
+#endif
+      
+			iNode = mesh->sharedNodeGlobal2Local(edgeInfo.at(1));
+			jNode = mesh->sharedNodeGlobal2Local(edgeInfo.at(2));
+
+			// get elements incident simultaneiusly to iNode and jNode
+			iElems=mesh->giveNode(iNode)->giveConnectedElements();
+			jElems=mesh->giveNode(jNode)->giveConnectedElements();
+
+			IntArray common;
+			if(iElems->giveSize() <= jElems->giveSize()){
+				common.preallocate(iElems->giveSize());
+			}
+			else{
+				common.preallocate(jElems->giveSize());
+			}
+			// I do rely on the fact that the arrays are ordered !!!
+			// I am using zero chunk because array common is large enough
+			elems=iElems->findCommonValuesSorted(*jElems, common, 0);
+			if(elems){
+				// find the relevant edge on the first element
+				elem = mesh->giveElement(common.at(1));
+				eIndex = elem->giveEdgeIndex(iNode, jNode);
+#ifdef DEBUG_CHECK
+				if(!elem->giveSharedEdges()->giveSize()){
+					OOFEM_ERROR4("Subdivision::unpackSharedEdges - element %d sharing nodes %d %d has no shared edges",
+											 elem->giveNumber(), iNode, jNode);
+				}
+				if(!elem->giveSharedEdge(eIndex)){
+					OOFEM_ERROR5("Subdivision::unpackSharedEdges - element %d sharing nodes %d and %d has no shared edge %d",
+											 elem->giveNumber(), iNode, jNode, eIndex);
+				}
+#endif
+				edge = mesh->giveEdge(elem->giveSharedEdge(eIndex));
+				// use zero chunk; the array is large enough from tentative set of partitions
+				edge->addPartition(iproc, 0);
+
+#ifdef __VERBOSE_PARALLEL
+				OOFEM_LOG_INFO("[%d] Partition %d added to shared edge %d (%d %d) [%d %d]\n", 
+											 myrank, iproc, elem->giveSharedEdge(eIndex), iNode, jNode, edgeInfo.at(1), edgeInfo.at(2));
+#endif
+
+			}
+    } else {
+      OOFEM_ERROR ("Subdivision::unpackSharedEdges: unknown tag received");
+    }
+    pcbuff->unpackInt(_type);
+  }
+
+	return 1;
+}
+
+
+
+void
+Subdivision::RS_Mesh::insertGlobalSharedNodeMap(Subdivision::RS_Node *node)
+{
+  int key;
+  key = node->giveGlobalNumber();
+  sharedNodeMap [ key ] = node;
+}
+
+
+int
+Subdivision::RS_Mesh::sharedNodeGlobal2Local(int _globnum)
+{
+	if ( sharedNodeMap.find(_globnum) != sharedNodeMap.end() ) {
+		// node is already available -> update only
+		return ( sharedNodeMap [ _globnum ]->giveNumber() );
+	} else {
+		return 0;
+	}
+}
+
+#endif
+
 
 
 int 
@@ -3578,3 +4816,125 @@ Subdivision::RS_CompareNodePositions::operator() (int i, int j)
 	
 	return 0;
 }
+
+
+
+
+
+#if 0
+		/** Extracts common values in receiver and iarray.
+		 *  Assumes that receiver as well as iarray are sorted.	
+		 *  The size of array common is changed accordingly.
+		 *  @param iarray array to search for values common with receiver
+		 *  @param common array of common values
+		 *  @param allocChunk if reallocation needed, an aditional space for allocChunk values will be allocated
+		 *  @return size of array common
+		 */
+		int findCommonValuesSorted(const IntArray &iarray, IntArray &common, int allocChunk = 0);
+
+#define FORCE_CHECK
+
+int
+IntArray :: findCommonValuesSorted(const IntArray &iarray, IntArray &common, int allocChunk)
+{
+	int i = 0, j, val;
+
+	for(j=1;j<=iarray.giveSize();j++){
+		val = iarray.at(j);
+		
+		while(i<size){
+			if(values[i] == val){
+				common.followedBy(val, allocChunk);
+				i++;
+				break;
+			}
+			if(values[i] > val)break;
+			i++;
+		}
+		if(i == size)break;
+	}
+
+#ifdef FORCE_CHECK
+	int count = 0;
+	for(i=0;i<size;i++){
+		if(iarray.findSorted(values[i])){
+			count++;
+			if(!common.findSorted(values[i])){
+				 OOFEM_ERROR2("IntArray::findCommonValuesSorted: common value %d not found", values[i]);
+			}
+		}
+	}
+	if(common.giveSize()!=count){
+		OOFEM_ERROR("IntArray::findCommonValuesSorted: redundant value(s) found");
+	}
+#endif
+
+	return(common.giveSize());
+}
+
+void 
+IntArray :: eraseSorted(int value)
+{
+	int pos;
+
+	if(pos = findSorted(value)){
+		erase(pos);
+	}
+}
+
+void
+ConnectivityTable :: giveNodeNeighbourList(IntArray &answer, IntArray &nodeList)
+{
+    int i, k, inode, nnode = nodeList.giveSize();
+    if ( nodalConnectivityFlag == 0 ) {
+        this->instanciateConnectivityTable();
+    }
+
+    std :: set< int >neighbours;
+
+    for ( i = 1; i <= nnode; i++ ) {
+			inode = nodeList.at(i);
+			for ( k = 1; k <= this->nodalConnectivity.at(inode)->giveSize(); k++ ) {
+				neighbours.insert( this->nodalConnectivity.at(inode)->at(k) );
+			}
+		}
+
+    answer.resize( neighbours.size() );
+    std :: set< int > :: iterator pos;
+    for ( pos = neighbours.begin(), i = 1; pos != neighbours.end(); ++pos, i++ ) {
+        answer.at(i) = * pos;
+    }
+}
+
+    /** Preallocates receiver to given futureSize if larger then allocatedSize.
+     * Warning: after this operation array values are in undefined state, programmer should
+     * zero receiver
+     * @param futureSize size to be allocated
+     */
+    void       preallocate(int futureSize);
+
+void IntArray :: preallocate(int futureSize)
+{
+    int *p1, *p2, *newValues, i;
+
+    if ( allocatedSize >= futureSize ) return;
+
+    newValues = allocInt(futureSize);
+
+    p1 = values;
+    p2 = newValues;
+    i  = size;
+    while ( i-- ) {
+        * p2++ = * p1++;
+    }
+
+    if ( values ) {
+        freeInt(values);
+    }
+
+    values = newValues;
+    allocatedSize = futureSize;
+}
+	
+
+#endif
