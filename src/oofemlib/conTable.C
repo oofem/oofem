@@ -553,7 +553,7 @@ ConnectivityTable :: giveDofManConnectivityArray(int dofman)
 void
 ConnectivityTable :: giveElementNeighbourList(IntArray &answer, IntArray &elemList)
 {
-    int i, j, k, nnode, jnode, nelem = elemList.giveSize();
+    int i, j, k, nnode, jnode, nelems = elemList.giveSize();
     Element *ielem;
     if ( nodalConnectivityFlag == 0 ) {
         this->instanciateConnectivityTable();
@@ -561,7 +561,7 @@ ConnectivityTable :: giveElementNeighbourList(IntArray &answer, IntArray &elemLi
 
     std :: set< int >neighbours;
 
-    for ( i = 1; i <= nelem; i++ ) {
+    for ( i = 1; i <= nelems; i++ ) {
         ielem = domain->giveElement( elemList.at(i) );
         nnode = ielem->giveNumberOfDofManagers();
         for ( j = 1; j <= nnode; j++ ) {
@@ -578,3 +578,29 @@ ConnectivityTable :: giveElementNeighbourList(IntArray &answer, IntArray &elemLi
         answer.at(i) = * pos;
     }
 }
+
+
+void
+ConnectivityTable :: giveNodeNeighbourList(IntArray &answer, IntArray &nodeList)
+{
+    int i, k, inode, nnodes = nodeList.giveSize();
+    if ( nodalConnectivityFlag == 0 ) {
+        this->instanciateConnectivityTable();
+    }
+
+    std :: set< int >neighbours;
+
+    for ( i = 1; i <= nnodes; i++ ) {
+			inode = nodeList.at(i);
+			for ( k = 1; k <= this->nodalConnectivity.at(inode)->giveSize(); k++ ) {
+				neighbours.insert( this->nodalConnectivity.at(inode)->at(k) );
+			}
+		}
+
+    answer.resize( neighbours.size() );
+    std :: set< int > :: iterator pos;
+    for ( pos = neighbours.begin(), i = 1; pos != neighbours.end(); ++pos, i++ ) {
+        answer.at(i) = * pos;
+    }
+}
+

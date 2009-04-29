@@ -131,7 +131,7 @@ public:
      * Builds connectivity table. This table contatins for each dofManager the list of
      * elements sharing it.
      */
-    void               instanciateConnectivityTable();
+    void instanciateConnectivityTable();
     /**
      * Returns connectivity array for given DofManger.
      * @param dofman DofManger number
@@ -141,13 +141,19 @@ public:
      * Returns list of neighboring elements to given elements (they are included too).
      * Neighbour is defined as element sharing the given element node.
      * @param answer list of neighbours + given elements, every element contained only once.
-     * @param list of elements, which neighborhood is searched.
+     * @param elemList list of elements, which neighborhood is searched.
      */
-    void         giveElementNeighbourList(IntArray &answer, IntArray &elemList);
+    void giveElementNeighbourList(IntArray &answer, IntArray &elemList);
+    /**
+     * Returns list of elements sharing given nodes.
+     * @param answer list of elements, every element contained only once.
+     * @param nodeList list of nodes, which neighborhood is searched.
+     */
+    void giveNodeNeighbourList(IntArray &answer, IntArray &nodeList);
 
 
     /// Prints receiver contens on output.
-    void               printYourself();
+    void printYourself();
 };
 
 #endif // conTable_h
