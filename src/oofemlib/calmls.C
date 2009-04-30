@@ -1115,11 +1115,11 @@ void CylindricalALM  :: convertHPCMap()
                 // HUHU hard wired domain no 1
                 if ( engngModel->givePetscContext(1, ut)->giveN2Gmap()->isLocal( domain->giveNode(j) ) ) {
                     indirectMap.at(++count) = domain->giveNode(j)->giveDof(idof)->giveEquationNumber();
-                    weights.at(count) = calm_HPCDmanWeightSrcArray.at(i);
+                    if ( calm_Controll == calml_hpc ) weights.at(count) = calm_HPCDmanWeightSrcArray.at(i);
                 }
 #else
                 indirectMap.at(++count) = domain->giveNode(j)->giveDof(idof)->giveEquationNumber();
-                weights.at(count) = calm_HPCDmanWeightSrcArray.at(i);
+		if ( calm_Controll == calml_hpc ) weights.at(count) = calm_HPCDmanWeightSrcArray.at(i);
 #endif
 
                 continue;
@@ -1132,7 +1132,7 @@ void CylindricalALM  :: convertHPCMap()
 #endif
 
     calm_HPCIndirectDofMask.resize(count);
-    calm_HPCWeights.resize(count);
+    if ( calm_Controll == calml_hpc ) calm_HPCWeights.resize(count);
     for ( i = 1; i <= count; i++ ) {
         calm_HPCIndirectDofMask.at(i) = indirectMap.at(i);
         calm_HPCWeights.at(i) = weights.at(i);
@@ -1142,12 +1142,12 @@ void CylindricalALM  :: convertHPCMap()
 #else
     size = calm_HPCDmanDofSrcArray.giveSize() / 2;
     calm_HPCIndirectDofMask.resize(size);
-    calm_HPCWeights.resize(size);
+    if ( calm_Controll == calml_hpc ) calm_HPCWeights.resize(size);
     for ( i = 1; i <= size; i++ ) {
         inode = calm_HPCDmanDofSrcArray.at(2 * i - 1);
         idof  = calm_HPCDmanDofSrcArray.at(2 * i);
         calm_HPCIndirectDofMask.at(i) = domain->giveNode(inode)->giveDof(idof)->giveEquationNumber();
-        calm_HPCWeights.at(i)=calm_HPCDmanWeightSrcArray.at(i);
+        if ( calm_Controll == calml_hpc ) calm_HPCWeights.at(i)=calm_HPCDmanWeightSrcArray.at(i);
         
     }
 #endif
