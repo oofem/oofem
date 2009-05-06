@@ -343,7 +343,7 @@ void LinearStability :: solveYourselfAt(TimeStep *tStep) {
     //
     // create resulting objects eigVec and eigVal
     //
-    eigVec.resize(stiffnessMatrix->giveNumberOfColumns(), numberOfRequiredEigenValues);
+    eigVec.resize(this->giveNumberOfEquations(EID_MomentumBalance), numberOfRequiredEigenValues);
     eigVal.resize(numberOfRequiredEigenValues);
     eigVec.zero();
     eigVal.zero();

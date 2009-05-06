@@ -232,7 +232,7 @@ void EigenValueDynamic :: solveYourselfAt(TimeStep *tStep) {
         //
         // create resulting objects eigVec and eigVal
         //
-        eigVec.resize(stiffnessMatrix->giveNumberOfColumns(), numberOfRequiredEigenValues);
+        eigVec.resize(this->giveNumberOfEquations(EID_MomentumBalance), numberOfRequiredEigenValues);
         eigVec.zero();
         eigVal.resize(numberOfRequiredEigenValues);
         eigVal.zero();
