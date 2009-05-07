@@ -788,6 +788,10 @@ StructuralElement :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tSte
       int ndofs = computeNumberOfDofs(EID_MomentumBalance);
       answer.resize(ndofs, ndofs);
       answer.zero();
+
+      if ( this->updateRotationMatrix() ) {
+        answer.rotatedWith(* this->rotationMatrix);
+      }
       return;
     }
 
@@ -1082,8 +1086,10 @@ StructuralElement :: giveInternalForcesVector(FloatArray &answer,
     FloatArray bs, TotalStressVector;
     double dV;
 
-    answer.resize(computeNumberOfDofs(EID_MomentumBalance));
-    answer.zero();
+    // do not resize answer to computeNumberOfDofs(EID_MomentumBalance)
+    // as this is valid only if receiver has no nodes with slaves
+    // zero answer will resize accordingly when adding first contribution
+    answer.resize(0);
 
     Rflag = this->computeGtoLRotationMatrix(R);
     GNTflag = this->computeGNLoadRotationMatrix(GNT, _toNodalCS);

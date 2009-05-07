@@ -221,8 +221,10 @@ NLStructuralElement :: giveInternalForcesVector(FloatArray &answer,
     int i, j, k, rot;
     double dV;
 
-    answer.resize(computeNumberOfDofs(EID_MomentumBalance));
-    answer.zero();
+    // do not resize answer to computeNumberOfDofs(EID_MomentumBalance)
+    // as this is valid only if receiver has no nodes with slaves
+    // zero answer will resize accordingly when adding first contribution
+    answer.resize(0);
 
     rot = this->updateRotationMatrix();
 
