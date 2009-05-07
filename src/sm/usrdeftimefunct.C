@@ -108,6 +108,8 @@ UserDefinedLoadTimeFunction :: initializeFrom(InputRecord *ir)
     const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
+    LoadTimeFunction::initializeFrom(ir);
+
     result = ir->giveField(ftExpression, UserDefinedLoadTimeFunction_MAX_EXPR_LENGTH, IFT_UserDefinedLoadTimeFunction_ft, "f(t)");
     if ( result != IRRT_OK ) {
         IR_IOERR(giveClassName(), __proc, IFT_UserDefinedLoadTimeFunction_ft, "f(t)", ir, result);

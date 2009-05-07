@@ -141,6 +141,8 @@ PiecewiseLinFunction :: initializeFrom(InputRecord *ir)
     const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
+    LoadTimeFunction::initializeFrom(ir);
+    
     IR_GIVE_FIELD(ir, numberOfPoints, IFT_PiecewiseLinFunction_npoints, "npoints"); // Macro
 
     IR_GIVE_FIELD(ir, dates, IFT_PiecewiseLinFunction_t, "t"); // Macro

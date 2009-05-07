@@ -71,6 +71,7 @@ PeakFunction :: initializeFrom(InputRecord *ir)
     const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
+    LoadTimeFunction::initializeFrom(ir);
     IR_GIVE_FIELD(ir, t, IFT_PeakFunction_t, "t"); // Macro
     IR_GIVE_FIELD(ir, value, IFT_PeakFunction_ft, "f(t)"); // Macro
 

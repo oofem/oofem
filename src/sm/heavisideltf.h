@@ -62,6 +62,8 @@ public:
 
     //      void    getPoints () ;
     IRResultType initializeFrom(InputRecord *ir);
+    int giveInputRecordString(std :: string &str, bool keyword = true);
+    
     classType    giveClassID() const { return HeavisideLTFClass; }
     const char *giveClassName() const { return "HeavisideLTF"; }
 

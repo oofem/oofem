@@ -54,6 +54,7 @@ ConstantFunction :: initializeFrom(InputRecord *ir)
     const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
+    LoadTimeFunction::initializeFrom(ir);
     IR_GIVE_FIELD(ir, value, IFT_LoadTimeFunction_ft, "f(t)"); // Macro
 
     return IRRT_OK;

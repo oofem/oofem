@@ -64,21 +64,24 @@
 double
 LoadTimeFunction :: evaluate(TimeStep *atTime, ValueModeType mode)
 {
-    if ( mode == VM_Total ) {
-        return this->__at( atTime->giveTime() );
-    } else if ( mode == VM_Velocity )  {
-        return this->__derAt( atTime->giveTime() );
-    } else if ( mode == VM_Acceleration )                                                                                 {
-        return this->__accelAt( atTime->giveTime() );
-    } else if ( mode == VM_Incremental )                                                                                                                                                                      {
-        if ( atTime->isTheFirstStep() ) {
-            return this->__at( atTime->giveTime() );
-        } else {
-            return this->__at( atTime->giveTime() ) - this->__at( atTime->giveTime() - atTime->giveTimeIncrement() );
-        }
-    } else {
-        _error2("LoadTimeFunction:: evaluate: unsupported mode(%d)", mode);
-    }
+  if ( mode == VM_Total ) {
+    return this->__at( atTime->giveTime() );
+  } else if ( mode == VM_Velocity )  {
+    return this->__derAt( atTime->giveTime() );
+  } else if ( mode == VM_Acceleration ) {
+    return this->__accelAt( atTime->giveTime() );
+  } else if ( mode == VM_Incremental )  {
+    
+    //return this->__at( atTime->giveTime() ) - this->__at( atTime->giveTime() - atTime->giveTimeIncrement() );
+    
+      if ( atTime->isTheFirstStep() ) {
+      return this->__at( atTime->giveTime() - this->initialValue );
+      } else {
+      return this->__at( atTime->giveTime() ) - this->__at( atTime->giveTime() - atTime->giveTimeIncrement() );
+      }
+  } else {
+    _error2("LoadTimeFunction:: evaluate: unsupported mode(%d)", mode);
+  }
 
     return 0.;
 }
@@ -113,7 +116,31 @@ LoadTimeFunction *LoadTimeFunction :: ofType(char *aClass)
 }
 
 
+IRResultType
+LoadTimeFunction :: initializeFrom(InputRecord *ir)
+{
+  //
+  // instanciates receiver according to input record
+  //
+  const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
+  IRResultType result;                // Required by IR_GIVE_FIELD macro
+  
+  
+  IR_GIVE_OPTIONAL_FIELD(ir, initialValue, IFT_LoadTimeFunction_initialvalue, "initialvalue"); // Macro
+  
+  return IRRT_OK;
+}
 
+int
+LoadTimeFunction :: giveInputRecordString(std :: string &str, bool keyword)
+{
+    char buff [ 1024 ];
+
+    sprintf(buff, " initialvalue %e", this->initialValue);
+    str += buff;
+
+    return 1;
+}
 
 
 

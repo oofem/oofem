@@ -281,6 +281,8 @@ enum InputFieldType {
     IFT_PointLoad_cstype,
 
     IFT_InitialCondition_conditions,
+
+    IFT_LoadTimeFunction_initialvalue,
     IFT_LoadTimeFunction_ft,
     IFT_Domain_type,
     IFT_Domain_ndofman,

@@ -64,9 +64,21 @@ HeavisideLTF :: initializeFrom(InputRecord *ir)
     const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
-
+    LoadTimeFunction::initializeFrom(ir);
     IR_GIVE_FIELD(ir, origin, IFT_HeavisideLTF_origin, "origin"); // Macro
     IR_GIVE_FIELD(ir, value, IFT_HeavisideLTF_value, "value"); // Macro
 
     return IRRT_OK;
+}
+
+int
+HeavisideLTF :: giveInputRecordString(std :: string &str, bool keyword)
+{
+    char buff [ 1024 ];
+
+    LoadTimeFunction :: giveInputRecordString(str, keyword);
+    sprintf(buff, " origin %e value %e", this->origin, this->value);
+    str += buff;
+
+    return 1;
 }

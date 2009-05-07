@@ -73,14 +73,26 @@ class LoadTimeFunction : public FEMComponent
      * Returning the value 'y' at any abscissa 't'.
      */
 
-public:
+ protected:
+  /**
+     By default, the increment of receiver is computed as a difference between values  evaluated at given solution step and in previous step.
+     However, if the solution step is the first step, the difference is typically set to the total value of receiver at the first step. 
+     This is quite natural, as a loading with constant time function is expected to be applied at first step.
+     In certain cases, this default behavior has to be changed. The initial value (set by default to zero) 
+     allows to set initial value of receiver. This initial value is used only when the increment of receiver is evaluated at first step,
+     when result is defined as value of receiver at given step minus the initial value.
+     This allows to correctly handle temperature loading, that is specified with respect to some reference temperature.
+     In this case, the initial value should be set to the reference temperature, allowing to obtain correct temperate increment in first step.
+   */
+  double initialValue;
+ public:
 
     /**
      * Constructor. Creates load time function with given number, belonging to given domain.
      * @param n load time function number
      * @param d domain to which new object will belongs.
      */
-    LoadTimeFunction(int i, Domain *d) : FEMComponent(i, d) { }
+    LoadTimeFunction(int i, Domain *d) : FEMComponent(i, d) { initialValue = 0.0;}
     /// Destructor
     virtual ~LoadTimeFunction()  { }
 
@@ -113,7 +125,12 @@ public:
      * Initializes receiver acording to object description stored in input record.
      * Must be implemented in derived classes
      */
-    IRResultType initializeFrom(InputRecord *ir) { return IRRT_OK; }
+    IRResultType initializeFrom(InputRecord *ir);
+    /** Setups the input record string of receiver
+     *  @param str string to be filled by input record
+     *  @param keyword print record keyword (default true)
+     */
+    virtual int giveInputRecordString(std :: string &str, bool keyword = true);
 
 
     /**
