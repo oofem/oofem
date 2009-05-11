@@ -162,9 +162,9 @@ Beam3d :: computeNmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
     answer.at(1, 1) = 1. - ksi;
     answer.at(1, 7) = ksi;
     answer.at(2, 2) = ( ( 1. + 2. * kappaz ) - 2. * kappaz * ksi - 3. * ksi2 + 2. * ksi3 ) / c1z;
-    answer.at(2, 6) = l * ( -( 1. + kappaz ) * ksi + ( 2. + kappaz ) * ksi2 - ksi3 ) / c1z;
+    answer.at(2, 6) =-l * ( -( 1. + kappaz ) * ksi + ( 2. + kappaz ) * ksi2 - ksi3 ) / c1z;
     answer.at(2, 8) = ( 2. * kappaz * ksi + 3. * ksi2 - 2. * ksi3 ) / c1z;
-    answer.at(2, 12) = l * ( kappaz * ksi + ( 1. - kappaz ) * ksi2 - ksi3 ) / c1z;
+    answer.at(2, 12) =-l * ( kappaz * ksi + ( 1. - kappaz ) * ksi2 - ksi3 ) / c1z;
     answer.at(3, 3) = ( ( 1. + 2. * kappay ) - 2. * kappay * ksi - 3. * ksi2 + 2. * ksi3 ) / c1y;
     answer.at(3, 5) = l * ( -( 1. + kappay ) * ksi + ( 2. + kappay ) * ksi2 - ksi3 ) / c1y;
     answer.at(3, 9) = ( 2. * kappay * ksi + 3. * ksi2 - 2. * ksi3 ) / c1y;
@@ -175,11 +175,11 @@ Beam3d :: computeNmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
     answer.at(4, 10) = ksi;
     answer.at(5, 3) = ( 6. * ksi - 6. * ksi2 ) / ( l * c1y );
     answer.at(5, 5) = ( ( 1. + 2. * kappay ) - 2. * ( 2. + kappay ) * ksi + 3. * ksi2 ) / c1y;
-    answer.at(5, 9) = ( -6. * ksi + 6. * ksi2 ) / ( l * c1y );
+    answer.at(5, 9) =-( 6. * ksi + 6. * ksi2 ) / ( l * c1y );
     answer.at(5, 11) = ( -2. * ( 1. - kappay ) * ksi + 3. * ksi2 ) / c1y;
-    answer.at(6, 2) = ( 6. * ksi - 6. * ksi2 ) / ( l * c1z );
+    answer.at(6, 2) =-( 6. * ksi - 6. * ksi2 ) / ( l * c1z );
     answer.at(6, 6) = ( ( 1. + 2. * kappaz ) - 2. * ( 2. + kappaz ) * ksi + 3. * ksi2 ) / c1z;
-    answer.at(6, 8) = ( -6. * ksi + 6. * ksi2 ) / ( l * c1z );
+    answer.at(6, 8) = ( 6. * ksi + 6. * ksi2 ) / ( l * c1z );
     answer.at(6, 12) = ( -2. * ( 1. - kappaz ) * ksi + 3. * ksi2 ) / c1z;
 
     return;
