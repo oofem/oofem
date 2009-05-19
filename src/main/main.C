@@ -311,9 +311,13 @@ oofem_print_epilog() {
 
 #ifndef __MAKEDEPEND
 #include "loadbalancer.h"
+#include "iga.h"
 #endif
 void oofem_debug(EngngModel *emodel)
 {
+  FloatMatrix k;
+  ((BsplinePlaneStressElement*)emodel->giveDomain(1)->giveElement(1))->giveCharacteristicMatrix(k, StiffnessMatrix, NULL);
+
 #ifdef __PARALLEL_MODE
     //LoadBalancer* lb = emodel->giveDomain(1)->giveLoadBalancer();
     //lb->calculateLoadTransfer();

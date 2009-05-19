@@ -145,12 +145,12 @@ public:
     /**
      * Returns number of integration points of receiver.
      */
-    int getNumberOfIntegrationPoints() { return numberOfIntegrationPoints; }
+    int getNumberOfIntegrationPoints() const { return numberOfIntegrationPoints; }
     /**
      * Access particular integration point of receiver.
      * @param n integration point number (should be in range 0,.., getNumberOfIntegrationPoints()-1).
      */
-    GaussPoint *getIntegrationPoint(int n);
+    GaussPoint *getIntegrationPoint(int n) ;
     /**
      * Returns starting component index, for which receiver applies.
      */
@@ -235,7 +235,8 @@ public:
     /// Returns class name of the receiver.
     virtual const char *giveClassName() const { return "IntegrationRule"; }
     virtual IRResultType initializeFrom(InputRecord *ir) { return IRRT_OK; }
-
+    /// Returns receiver sub patch idices (if apply)
+    const IntArray* giveKnotSpan () {return NULL;} 
 protected:
     /**
      * Sets up receiver's  integration points on unit line integration domain.

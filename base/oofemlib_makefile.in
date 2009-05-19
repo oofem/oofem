@@ -27,7 +27,7 @@ CC         = @CXX@
 AR         = ar -r
 RM         = rm -f
 
-VPATH=@OOFEM_DIR@/src/oofemlib @OOFEM_DIR@/src/oofemlib/xfem 
+VPATH=@OOFEM_DIR@/src/oofemlib @OOFEM_DIR@/src/oofemlib/xfem @OOFEM_DIR@/src/oofemlib/iga
 
 
 ## sources
@@ -44,13 +44,14 @@ srcs9=geotoolbox.C dss.C dsssolver.C intvarfield.C localgaussianrandomgenerator.
 
 xfemsrc=delaunay.C xfemelementinterface.C enrichmentfunction.C patch.C xfemmanager.C enrichmentitem.C patchintegrationrule.C
 
+igasrc=iga.C
 
 #obsolete 
 srcs99=
 #parallel
 psrcs1=communicator.C processcomm.C problemcomm.C combuff.C petscordering.C dyncombuff.C loadbalancer.C parmetisloadbalancer.C nonlocalmatwtp.C
 
-all_src = $(srcs0) $(srcs1) $(srcs2) $(srcs3) $(srcs4) $(srcs5) $(srcs6) $(srcs7) $(srcs8) $(srcs9) $(xfemsrc) $(psrcs1)
+all_src = $(srcs0) $(srcs1) $(srcs2) $(srcs3) $(srcs4) $(srcs5) $(srcs6) $(srcs7) $(srcs8) $(srcs9) $(xfemsrc) $(igasrc) $(psrcs1)
 
 ## object files
 oofemLib_objs := $(all_src:.C=.o)

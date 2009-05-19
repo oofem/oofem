@@ -71,6 +71,14 @@ public:
      */
     virtual void evalN(FloatArray &answer, const FloatArray &lcoords, double time) = 0;
     /**
+     * Evaluates the array of interpolation functions (shape functions) at given point.
+     * @param answer contains resulting array of evaluated interpolation functions
+     * @param lcoords array containing (local) coordinates
+     * @param time time
+     */
+    virtual void evalN(FloatArray &answer, const FloatArray &lcoords, const IntArray *knotSpan, double time) 
+    {this->evalN (answer, lcoords, time);}
+    /**
      * Evaluates the matrix of derivatives of interpolation functions (shape functions) at given point.
      * These derivatives are in global coordinate system (where the nodal coordinates are defined)
      * @param matrix contains resulting matrix of derivatives, the member at i,j position contains value of dNi/dxj
@@ -79,6 +87,8 @@ public:
      * @param time time
      */
     virtual void evaldNdx(FloatMatrix &answer, Domain *d, IntArray &nodes, const FloatArray &lcoords, double time) = 0;
+    virtual void evaldNdx(FloatMatrix &answer, Domain *d, IntArray &nodes, const FloatArray &lcoords, const IntArray* knotSpan, double time) {
+      evaldNdx (answer, d, nodes, lcoords, time);}
     /**
      * Evaluates the matrix of derivatives of interpolation functions (shape functions) at given point.
      * These derivatives are in global coordinate system (where the nodal coordinates are defined)
@@ -88,6 +98,8 @@ public:
      * @param time time
      */
     virtual void evaldNdx(FloatMatrix &answer, const FloatArray **coords, const FloatArray &lcoords, double time) = 0;
+    virtual void evaldNdx(FloatMatrix &answer, const FloatArray **coords, const FloatArray &lcoords, const IntArray* knotSpan, double time) {
+      evaldNdx (answer, coords, lcoords, time);}
     /**
      * Evaluates global coordinates from given local ones
      * These derivatives are in global coordinate system (where the nodal coordinates are defined)
@@ -132,10 +144,15 @@ public:
      * Evaluates the jacobian of transformation between local and global coordinates.
      */
     virtual double giveTransformationJacobian(const FloatArray **coords, const FloatArray &lcoords, double time) = 0;
+    virtual double giveTransformationJacobian(const FloatArray **coords, const FloatArray &lcoords, const IntArray* span, double time) {
+      return giveTransformationJacobian (coords, lcoords, time);}
     /**
      * Evaluates the jacobian of transformation between local and global coordinates.
      */
     virtual double giveTransformationJacobian(Domain *d, IntArray &nodes, const FloatArray &lcoords, double time) = 0;
+    virtual double giveTransformationJacobian(Domain *d, IntArray &nodes, const FloatArray &lcoords, const IntArray* span, double time) {
+      return giveTransformationJacobian (d, nodes, lcoords, time);}
+      
     /**
      * Sets up the node coordinates based on given node numbers
      * @param nodes array of node numbers
@@ -143,6 +160,37 @@ public:
      * @param n number of nodal records
      */
     void nodes2coords(Domain *d, IntArray &nodes, const FloatArray **c, int n);
+    /**
+       Returns indices (zero based) of nonzero basis functions for given knot span 
+       The knot span identifies the sub-region of the finite element
+       @returns nonzero if mask is provided, zero otherwise meaning that all 
+       basis functions are generally nonzero
+    */
+    ///Initializes receiver acording to object description stored in input record.
+    IRResultType initializeFrom(InputRecord *ir) {return IRRT_OK;}
+
+    /**@name Methods to support interpolation defined on patch by patch basis*/
+    //@{
+    virtual int giveKnotBasisFuncMask (const IntArray& knotSpan, IntArray& mask) {return 0;}
+    /** Returns the number of nonzero basis functions at individual knot span,
+        @param returns zero in case of all basis functions generally nonzero, answer otherwise */
+    virtual int  giveNumberOfKnotBasisFunctions () {return 0;}
+    /**
+       Returns true, if receiver is formulated on sub-patch basis
+     */
+    virtual bool hasSubPatchFormulation() {return false;}
+    /**
+     * 
+     * Returns the subdivision of patch parametric space
+     */
+    virtual double** const giveKnotVector() {return NULL;}
+    /**
+     * Returns the number of knot spans of the receiver
+     */
+    virtual int giveNumberOfKnotSpans(int dim) {return 0;}
+
+    //@}
+
 };
 
 

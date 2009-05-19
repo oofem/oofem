@@ -367,6 +367,8 @@ public:
     // data management
     ///Returns (global) number of i-th dofmanager of element
     int                    giveDofManagerNumber(int i) const { return dofManArray.at(i); }
+    ///Returns receiver list of dof managers
+    IntArray&        giveDofManArray () {return dofManArray;} // HUHU const
     ///Rerurns reference to the i-th dofmanager of element.
     DofManager *giveDofManager(int i) const;
     /**Returns reference to the i-th node of element.
@@ -530,6 +532,8 @@ public:
      */
     virtual int giveDefaultIntegrationRule() { return 0; }
     IntegrationRule *giveDefaultIntegrationRulePtr() { return integrationRulesArray [ giveDefaultIntegrationRule() ]; }
+    int giveNumberOfIntegrationRules() {return this->numberOfIntegrationRules;}
+    IntegrationRule *giveIntegrationRule(int i) { return integrationRulesArray [ i ]; }
     /**
      * Tests if the element implements required extension. ElementExtension type defines
      * the list of all available element extensions.

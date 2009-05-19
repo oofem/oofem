@@ -108,6 +108,8 @@
 #include "interfaceelem2dquad.h"
 #include "interfaceelement1d.h"
 #include "interfaceelem3dtrlin.h"
+// iga elements
+#include "iga.h"
 
 // Emodels of SM module
 #include "nlinearstatic.h"
@@ -325,6 +327,8 @@ Element *CreateUsrDefElementOfType(char *aClass, int number, Domain *domain)
         newElement = new InterfaceElement3dTrLin(number, domain);
     } else if ( !strncasecmp(aClass, "interface1d", 11) )   {
         newElement = new InterfaceElem1d(number, domain);
+    } else if ( !strncasecmp(aClass, "bsplineplanestresselement", 25)  ) {
+      newElement = new BsplinePlaneStressElement(number, domain);
     }
 
 #endif //__SM_MODULE
