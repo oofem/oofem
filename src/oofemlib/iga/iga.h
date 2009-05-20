@@ -71,7 +71,7 @@ class BSplineInterpolation : public FEInterpolation
 protected:
 	/// number of spatial directions
 	int nsd;        
-	/// order in each direction 
+	/// degree in each direction 
 	int *degree;                               // eg. 2
 	/// numberOfControllPoints[nsd]
 	int *numberOfControllPoints; 
@@ -82,11 +82,13 @@ protected:
 	/// knot multiplicity
 	int ** knotMultiplicity;                   // eg. 3 1 1 1 2 3
 public:
-  BSplineInterpolation () : FEInterpolation (0) {}
+  BSplineInterpolation (int nsd) : FEInterpolation (0) {this->nsd=nsd;}
+  ~BSplineInterpolation();
 
   IRResultType initializeFrom(InputRecord *ir);                   
   virtual int giveNumberOfKnotSpans(int dim) {return numberOfKnotSpans[dim-1];}
   virtual double ** const  giveKnotVector() {return this->knotVector;}
+  virtual int** const giveKnotMultiplicity() {return this->knotMultiplicity;}
   /**
    * Evaluates the array of interpolation functions (shape functions) at given point.
    * @param answer contains resulting array of evaluated interpolation functions
@@ -145,6 +147,9 @@ public:
   int giveKnotBasisFuncMask (const IntArray& knotSpan, IntArray& mask) ;
   /** Returns the number of nonzero basis functions at individual knot span */
   int  giveNumberOfKnotBasisFunctions () ;
+
+  /// Returns class name of the receiver.
+  const char *giveClassName() const { return "BSplineInterpolation"; }
 
 protected:
   /**
@@ -209,7 +214,8 @@ public:
 	IGA_IntegrationElement (int _n, Element* _e, IntArray& _knotSpan) : 
   GaussIntegrationRule (_n, _e, 0, 0, false), 
     knotSpan (_knotSpan) {}
-  const IntArray* giveKnotSpan () {return &this->knotSpan;} 
+  const IntArray* giveKnotSpan () {return &this->knotSpan;}
+  void setKnotSpan(IntArray& src) {this->knotSpan=src;}
 };
 
 

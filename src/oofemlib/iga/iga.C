@@ -65,6 +65,116 @@
 #include "mathfem.h"
 #include "iga.h"
 
+BSplineInterpolation::~BSplineInterpolation() {
+  delete [] degree;
+  delete [] numberOfControllPoints;
+  delete [] numberOfKnotSpans;
+  // delete also knotVector and knotMultiplicity (huhu)
+}
+
+IRResultType 
+BSplineInterpolation::initializeFrom(InputRecord *ir) {
+  const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
+  IRResultType result;                            // Required by IR_GIVE_FIELD macro
+
+  IntArray degree_tmp, knotMultiplicity_tmp;
+  FloatArray knotVector_tmp;
+  double *knotVec, knotVal;
+  int i, j, n, sum, pos, *knotMul;
+  const char *IFT_knotVectorString[3] = {"knotvectoru", "knotvectorv", "knotvectorw"};
+  InputFieldType IFT_knotVectorType[3] = {IFT_BSplineInterpolation_knotVectorU, 
+                                          IFT_BSplineInterpolation_knotVectorV, 
+                                          IFT_BSplineInterpolation_knotVectorW};
+  const char *IFT_knotMultiplicityString[3] = {"knotmultiplicityu", "knotmultiplicityv", "knotmultiplicityw"};
+  InputFieldType IFT_knotMultiplicityType[3] = {IFT_BSplineInterpolation_knotMultiplicityU, 
+                                                IFT_BSplineInterpolation_knotMultiplicityV, 
+                                                IFT_BSplineInterpolation_knotMultiplicityW};
+
+  degree = new int [ nsd ];
+  knotVector = new double * [ nsd ];
+  numberOfKnotSpans = new int [ nsd ];
+  knotMultiplicity = new int * [ nsd ];
+  numberOfControllPoints = new int  [ nsd ];
+
+  IR_GIVE_FIELD(ir, degree_tmp, IFT_BSplineInterpolation_degree, "degree"); // Macro
+  if(degree_tmp.giveSize() != nsd){
+    OOFEM_ERROR("BSplineInterpolation::initializeFrom - degree size mismatch");
+  }
+  for(i=0; i<nsd; i++)degree[i] = degree_tmp.at(i+1);
+
+  for(n=0; n<nsd; n++){
+    knotVector_tmp.resize(0);
+    IR_GIVE_FIELD(ir, knotVector_tmp, IFT_knotVectorType[n], IFT_knotVectorString[n]); // Macro
+    if(knotVector_tmp.giveSize() < 2){
+      OOFEM_ERROR2("BSplineInterpolation::initializeFrom - invalid size of knot vector %s", IFT_knotVectorString[n]);
+    }
+
+    // check for monotonicity of knot vector without multiplicity
+    knotVal = knotVector_tmp.at(1);
+    for(i=1; i<knotVector_tmp.giveSize(); i++){
+      if(knotVector_tmp.at(i+1) <= knotVal){
+        OOFEM_ERROR2("BSplineInterpolation::initializeFrom - knot vector %s is not monotonic", IFT_knotVectorString[n]);
+      }
+      knotVal = knotVector_tmp.at(i+1);
+    }
+
+    numberOfKnotSpans[n] = knotVector_tmp.giveSize() - 1;
+
+    knotMul = knotMultiplicity[n] = new int [ knotVector_tmp.giveSize() ];
+
+    knotMultiplicity_tmp.resize(0);
+    IR_GIVE_OPTIONAL_FIELD(ir, knotMultiplicity_tmp, IFT_knotMultiplicityType[n], IFT_knotMultiplicityString[n]); // Macro
+    if(knotMultiplicity_tmp.giveSize() == 0){
+      // default multiplicity
+      for(i=1; i<knotVector_tmp.giveSize()-1; i++)knotMul[i] = 1;
+      knotMultiplicity_tmp.resize(nsd);
+    }
+    else{
+      if(knotMultiplicity_tmp.giveSize() != knotVector_tmp.giveSize()){
+        OOFEM_ERROR2("BSplineInterpolation::initializeFrom - knot multiplicity %s size mismatch", IFT_knotMultiplicityString[n]);
+      }
+      knotMul[0] = knotMultiplicity_tmp.at(1);
+      knotMul[knotVector_tmp.giveSize()-1] = knotMultiplicity_tmp.at(knotVector_tmp.giveSize());
+      for(i=1; i<knotMultiplicity_tmp.giveSize()-1; i++){
+        knotMul[i] = knotMultiplicity_tmp.at(i+1);
+        // check for multiplicity range
+        if(knotMul[i] < 1 || knotMul[i] > degree[n]){
+          OOFEM_ERROR3("BSplineInterpolation::initializeFrom - knot multiplicity %s out of range - value %d", 
+                       IFT_knotMultiplicityString[n], knotMul[i]);
+        }
+      }
+      if(knotMul[0] != degree[n] + 1){
+        OOFEM_LOG_RELEVANT("Multiplicity of the first knot in knot vector %s changed to %d\n", IFT_knotVectorString[n], degree[n] + 1);
+      }
+      if(knotMul[knotVector_tmp.giveSize()-1] != degree[n] + 1){
+        OOFEM_LOG_RELEVANT("Multiplicity of the last knot in knot vector %s changed to %d\n", IFT_knotVectorString[n], degree[n] + 1);
+      }
+    }
+
+    // multiplicity of the 1st and last knot set to degree + 1
+    knotMul[0] = knotMul[knotVector_tmp.giveSize()-1] = degree[n]+1;
+
+    // sum the size of knot vector with multiplicity values
+    sum = 0;
+    for(i=0; i<knotVector_tmp.giveSize(); i++)sum+=knotMultiplicity_tmp.at(i+1);
+			
+    knotVec = knotVector[n] = new double [ sum ];
+
+    // fill knot vector including multiplicity values
+    pos = 0;
+    for(i=0; i<knotVector_tmp.giveSize(); i++){
+      for(j=0; j<knotMul[i]; j++){
+        knotVec[pos++] = knotVector_tmp.at(i+1);
+      }
+    }
+
+    numberOfControllPoints[n] = sum - degree[n] - 1;
+  }
+  return IRRT_OK;
+}
+
+
+
 void BSplineInterpolation::evalN(FloatArray &answer, const FloatArray &lcoords, const IntArray *span,  double time) {
   int i, l,k,c;
   FloatArray N[nsd];
@@ -416,23 +526,29 @@ int BSplineInterpolation::findSpan(int n, int p, double u, const double* U) cons
 }
 
 IRResultType IGAElement::initializeFrom(InputRecord *ir) {
+  const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
+  IRResultType result;                            // Required by IR_GIVE_FIELD macro
+
+
+  int indx, ui,vi, i, numberOfGaussPoints=1;
+  double du,dv;
+  const FloatArray *gpcoords;
+  FloatArray newgpcoords;
 
   Element::initializeFrom (ir); // read nodes , material, cross section
   this->giveInterpolation()->initializeFrom (ir); // read geometry
-  
-  int indx, ui,vi, i, numberOfGaussPoints; // HUHU
-  int **knotMultiplicity; // HUHU
-  double du,dv;
+
+  int ** const knotMultiplicity = this->giveInterpolation()->giveKnotMultiplicity(); 
   double ** const knotVector = this->giveInterpolation()->giveKnotVector();
-  const FloatArray *gpcoords;
-  FloatArray newgpcoords;
+  IR_GIVE_OPTIONAL_FIELD(ir, numberOfGaussPoints, IFT_IGAElement_NIP, "nip"); // Macro
   
   // generate individual IntegrationElements; one for each nonzero knot span
   if (this->giveNsd() == 2) {
     // HUHU mame pristup na numberOfKnotSpans[]?
     this->numberOfIntegrationRules = this->giveInterpolation()->giveNumberOfKnotSpans(1)*this->giveInterpolation()->giveNumberOfKnotSpans(2);
     integrationRulesArray = new IntegrationRule * [ numberOfIntegrationRules ];
-    indx = 0; 
+    newgpcoords.resize(2);
+    indx = -1; 
     IntArray knotSpan(2); 
     knotSpan.at(1) = -1; 
     for (ui=0; ui<this->giveInterpolation()->giveNumberOfKnotSpans(1); ui++) {
@@ -448,10 +564,11 @@ IRResultType IGAElement::initializeFrom(InputRecord *ir) {
           gpcoords = integrationRulesArray [ indx ]->getIntegrationPoint(i)->giveCoordinates();
           du = knotVector[0][knotSpan.at(1)+1]-knotVector[0][knotSpan.at(1)];
           dv = knotVector[1][knotSpan.at(2)+1]-knotVector[1][knotSpan.at(2)];
-          newgpcoords.at(1) = knotVector[0][knotSpan.at(1)]+du*gpcoords->at(1)/2.0;
-          newgpcoords.at(2) = knotVector[1][knotSpan.at(1)]+dv*gpcoords->at(2)/2.0;
+          newgpcoords.at(1) = knotVector[0][knotSpan.at(1)]+du*(gpcoords->at(1)/2.0+0.5);
+          newgpcoords.at(2) = knotVector[1][knotSpan.at(1)]+dv*(gpcoords->at(2)/2.0+0.5);
           integrationRulesArray [ indx ]->getIntegrationPoint(i)->setCoordinates(newgpcoords);
           integrationRulesArray [ indx ]->getIntegrationPoint(i)->setWeight(integrationRulesArray [ indx ]->getIntegrationPoint(i)->giveWeight()/4.0*du*dv);
+          
         }
       }
     }
@@ -617,4 +734,4 @@ double PlaneStressStructuralElementEvaluator::computeVolumeAround(GaussPoint *gp
   return volume;
 }
 
-BsplinePlaneStressElement::BsplinePlaneStressElement (int n, Domain *aDomain) : IGAElement (n, aDomain), PlaneStressStructuralElementEvaluator(), interpolation() {}
+BsplinePlaneStressElement::BsplinePlaneStressElement (int n, Domain *aDomain) : IGAElement (n, aDomain), PlaneStressStructuralElementEvaluator(), interpolation(2) {}

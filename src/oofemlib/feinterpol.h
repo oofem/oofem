@@ -167,7 +167,7 @@ public:
        basis functions are generally nonzero
     */
     ///Initializes receiver acording to object description stored in input record.
-    IRResultType initializeFrom(InputRecord *ir) {return IRRT_OK;}
+    virtual IRResultType initializeFrom(InputRecord *ir) {return IRRT_OK;}
 
     /**@name Methods to support interpolation defined on patch by patch basis*/
     //@{
@@ -188,6 +188,10 @@ public:
      * Returns the number of knot spans of the receiver
      */
     virtual int giveNumberOfKnotSpans(int dim) {return 0;}
+    /**
+     * Returns the knot multiplicity of the receiver
+     */
+    virtual int** const giveKnotMultiplicity() {return NULL;}
 
     //@}
 

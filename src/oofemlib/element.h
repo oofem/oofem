@@ -384,7 +384,7 @@ public:
     /// Returns reference to the associated geometry of element
     Geometry *giveGeometry() { return NULL; }
     /// Returns interpolation of Element
-    FEInterpolation *giveInterpolation() { return NULL; }
+    virtual FEInterpolation *giveInterpolation() { return NULL; }
     ///Returns reference to the associated material of element.
     Material *giveMaterial();
     ///Returns reference to the associated crossSection of element.

@@ -236,7 +236,7 @@ public:
     virtual const char *giveClassName() const { return "IntegrationRule"; }
     virtual IRResultType initializeFrom(InputRecord *ir) { return IRRT_OK; }
     /// Returns receiver sub patch idices (if apply)
-    const IntArray* giveKnotSpan () {return NULL;} 
+    virtual const IntArray* giveKnotSpan () {return NULL;} 
 protected:
     /**
      * Sets up receiver's  integration points on unit line integration domain.
