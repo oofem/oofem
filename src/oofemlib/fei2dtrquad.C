@@ -41,7 +41,7 @@
 #include "mathfem.h"
 
 void
-FEI2dTrQuad :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEIElementGeometry& cellgeo, double time)
+FEI2dTrQuad :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry& cellgeo, double time)
 {
     double l1 = 0.0, l2 = 0.0, l3 = 0.0;
     answer.resize(6);
@@ -57,7 +57,7 @@ FEI2dTrQuad :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEIEle
 }
 
 void
-FEI2dTrQuad :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEIElementGeometry& cellgeo, double time)
+FEI2dTrQuad :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry& cellgeo, double time)
 {
     answer.resize(6, 2);
     int i;
@@ -77,7 +77,7 @@ FEI2dTrQuad :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FE
 }
 
 void
-FEI2dTrQuad :: local2global(FloatArray &answer, const FloatArray &lcoords, const FEIElementGeometry& cellgeo, double time)
+FEI2dTrQuad :: local2global(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry& cellgeo, double time)
 {
     int i;
     FloatArray n(6);
@@ -95,7 +95,7 @@ FEI2dTrQuad :: local2global(FloatArray &answer, const FloatArray &lcoords, const
 #define POINT_TOL 1.e-3
 
 int
-FEI2dTrQuad :: global2local(FloatArray &answer, const FloatArray &coords, const FEIElementGeometry& cellgeo, double time)
+FEI2dTrQuad :: global2local(FloatArray &answer, const FloatArray &coords, const FEICellGeometry& cellgeo, double time)
 {
     FloatArray lc(2);
     FloatArray r(2), n(6), dksi, deta, delta;
@@ -179,7 +179,7 @@ FEI2dTrQuad :: global2local(FloatArray &answer, const FloatArray &coords, const 
 
 
 double
-FEI2dTrQuad :: giveTransformationJacobian(const FloatArray &lcoords, const FEIElementGeometry& cellgeo, double time)
+FEI2dTrQuad :: giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry& cellgeo, double time)
 {
     FloatMatrix jacobianMatrix(2, 2);
 
@@ -189,7 +189,7 @@ FEI2dTrQuad :: giveTransformationJacobian(const FloatArray &lcoords, const FEIEl
 
 
 void
-FEI2dTrQuad :: edgeEvalN(FloatArray &answer, const FloatArray &lcoords, const FEIElementGeometry& cellgeo, double time)
+FEI2dTrQuad :: edgeEvalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry& cellgeo, double time)
 {
     double n3, ksi = lcoords.at(1);
     answer.resize(3);
@@ -202,14 +202,14 @@ FEI2dTrQuad :: edgeEvalN(FloatArray &answer, const FloatArray &lcoords, const FE
 
 void
 FEI2dTrQuad :: edgeEvaldNdx(FloatMatrix &answer, int iedge,
-                            const FloatArray &lcoords, const FEIElementGeometry& cellgeo, double time)
+                            const FloatArray &lcoords, const FEICellGeometry& cellgeo, double time)
 {
     OOFEM_ERROR("FEI2dTrQuad :: edgeEvaldNdx: not implemented");
 }
 
 void
 FEI2dTrQuad :: edgeLocal2global(FloatArray &answer, int iedge,
-                                const FloatArray &lcoords, const FEIElementGeometry& cellgeo, double time)
+                                const FloatArray &lcoords, const FEICellGeometry& cellgeo, double time)
 {
     IntArray edgeNodes;
     FloatArray n;
@@ -254,7 +254,7 @@ FEI2dTrQuad :: computeLocalEdgeMapping(IntArray &edgeNodes, int iedge)
 }
 
 double
-FEI2dTrQuad :: edgeGiveTransformationJacobian(int iedge, const FloatArray &lcoords, const FEIElementGeometry& cellgeo, double time)
+FEI2dTrQuad :: edgeGiveTransformationJacobian(int iedge, const FloatArray &lcoords, const FEICellGeometry& cellgeo, double time)
 {
     OOFEM_ERROR("FEI2dTrQuad :: edgeGiveTransformationJacobian: not implemented");
     return 0.0;
@@ -263,7 +263,7 @@ FEI2dTrQuad :: edgeGiveTransformationJacobian(int iedge, const FloatArray &lcoor
 
 
 void
-FEI2dTrQuad :: giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatArray &lcoords, const FEIElementGeometry& cellgeo)
+FEI2dTrQuad :: giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatArray &lcoords, const FEICellGeometry& cellgeo)
 // Returns the jacobian matrix  J (x,y)/(ksi,eta)  of the receiver.
 // Computes it if it does not exist yet.
 {

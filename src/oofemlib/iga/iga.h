@@ -66,6 +66,22 @@
 #include "structuralcrosssection.h"
 #include "mathfem.h"
 
+class FEIIGAElementGeometryWrapper : public FEICellGeometry {
+ public:
+  const IntArray *knotSpan;
+  Element* elem;
+ public:
+  FEIIGAElementGeometryWrapper (Element* _elem, const IntArray* _knotSpan) : FEICellGeometry() {
+    this->elem = _elem; this->knotSpan = _knotSpan; }
+  FEIIGAElementGeometryWrapper (Element* _elem) : FEICellGeometry() {
+    this->elem = _elem; this->knotSpan = NULL; }
+
+  int giveNumberOfVertices () const {return elem->giveNumberOfNodes();}
+  const FloatArray* giveVertexCoordinates(int i) const {return elem->giveNode(i)->giveCoordinates();}
+};
+
+
+
 class BSplineInterpolation : public FEInterpolation  
 {
 protected:
@@ -93,54 +109,39 @@ public:
    * Evaluates the array of interpolation functions (shape functions) at given point.
    * @param answer contains resulting array of evaluated interpolation functions
    * @param lcoords array containing (local) coordinates
-   * @param span identifies local sub-patch id (span coordinates)
+   * @param cellgeo underlying cell geometry
    * @param time time
    *
    * see also giveNonzeroBasisFunctMask method
    */
-  virtual void evalN(FloatArray &answer, const FloatArray &lcoords, const IntArray *span,  double time) ;
-  virtual void evalN(FloatArray &answer, const FloatArray &lcoords, double time) ;
-	/**
-	 * Evaluates the matrix of derivatives of interpolation functions (shape functions) at given point.
-	 * These derivatives are in global coordinate system (where the nodal coordinates are defined)
-	 * @param answer contains resulting matrix of derivatives, the member at i,j position contains value of dNi/dxj
-	 * @param coords coordinates of nodes defining the interpolation geometry
-	 * @param lcoords array containing (local) coordinates
-	 * @param time time
-	 */
-  virtual void evaldNdx(FloatMatrix &answer, const FloatArray **coords, const FloatArray &lcoords, const IntArray* knotSpan, double time) ;
-  virtual void evaldNdx(FloatMatrix &answer, const FloatArray **coords, const FloatArray &lcoords, double time) ;
-	virtual void evaldNdx(FloatMatrix &answer, Domain *d, IntArray &nodes, const FloatArray &lcoords, const IntArray* span, double time) ;
-	virtual void evaldNdx(FloatMatrix &answer, Domain *d, IntArray &nodes, const FloatArray &lcoords, double time) ;
+  virtual void evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry& cellgeo, double time) ;
+  /**
+   * Evaluates the matrix of derivatives of interpolation functions (shape functions) at given point.
+   * These derivatives are in global coordinate system (where the nodal coordinates are defined)
+   * @param answer contains resulting matrix of derivatives, the member at i,j position contains value of dNi/dxj
+   * @param lcoords array containing (local) coordinates
+   * @param cellgeo underlying cell geometry
+   * @param time time
+   */
+  virtual void evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry& cellgeo, double time) ;
   /**
    * Evaluates global coordinates from given local ones
    * @param answer contains resulting global coordinates
-   * @param nodes array of node numbers defining the interpolation geometry
    * @param lcoords array containing (local) coordinates
+   * @param cellgeo underlying cell geometry
    * @param time time
    */
-  virtual void local2global(FloatArray &answer, Domain *d, IntArray &nodes, const FloatArray &lcoords, double time) ;
-  virtual void local2global(FloatArray &answer, const FloatArray**, const FloatArray &lcoords, double time) {
-    OOFEM_ERROR ("Not yet inplemented, contact lazy dr for implementation");
-  }
-  virtual int  global2local(FloatArray &answer, Domain *d, IntArray &nodes, const FloatArray &lcoords, double time) {
-    OOFEM_ERROR ("Not yet inplemented, contact lazy dr for implementation");
-    return 0;
-  }
-  virtual int  global2local(FloatArray &answer, const FloatArray **coords, const FloatArray &lcoords, double time) {
+  virtual void local2global(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry& cellgeo, double time) ;
+  virtual int  global2local(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry& cellgeo, double time) {
     OOFEM_ERROR ("Not yet inplemented, contact lazy dr for implementation");
     return 0;
   }
   /**
    * Evaluates the jacobian of transformation between local and global coordinates.
    */
-  virtual double giveTransformationJacobian(const FloatArray **coords, const FloatArray &lcoords, double time) {
-    OOFEM_ERROR ("Not yet inplemented, contact lazy dr for implementation");
-    return 0.0;
-  }
-    
-  virtual double giveTransformationJacobian(Domain *d, IntArray &nodes, const FloatArray &lcoords, const IntArray* span, double time) ;
-  virtual double giveTransformationJacobian(Domain *d, IntArray &nodes, const FloatArray &lcoords, double time) ;  
+  virtual double giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry& cellgeo, double time) ;
+
+
   /**
      Returns indices (zero based) of nonzero basis functions for given knot span 
   */

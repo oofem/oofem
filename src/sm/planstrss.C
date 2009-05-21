@@ -93,7 +93,7 @@ PlaneStress2d :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, 
     FloatArray coord;
 #endif
 
-    this->interpolation.evaldNdx(dnx, this->giveDomain(), dofManArray, * aGaussPoint->giveCoordinates(), 0.0);
+    this->interpolation.evaldNdx(dnx, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0);
 
     answer.resize(3, 8);
     answer.zero();
@@ -141,7 +141,7 @@ PlaneStress2d :: computeNmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
 
     answer.resize(2, 8);
     answer.zero();
-    this->interpolation.evalN(n, * aGaussPoint->giveCoordinates(), 0.0);
+    this->interpolation.evalN(n, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0);
 
     for ( i = 1; i <= 4; i++ ) {
         answer.at(1, 2 * i - 1) = n.at(i);
@@ -171,7 +171,7 @@ PlaneStress2d :: computeEgdeNMatrixAt(FloatMatrix &answer, GaussPoint *aGaussPoi
      */
 
     FloatArray n(2);
-    this->interpolation.edgeEvalN(n, * aGaussPoint->giveCoordinates(), 0.0);
+    this->interpolation.edgeEvalN(n, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0);
 
     answer.resize(2, 4);
     answer.zero();
@@ -222,15 +222,15 @@ PlaneStress2d :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
 double
 PlaneStress2d ::   computeEdgeVolumeAround(GaussPoint *aGaussPoint, int iEdge)
 {
-    double result = this->interpolation.edgeGiveTransformationJacobian(iEdge, domain, dofManArray,
-                                                                       * aGaussPoint->giveCoordinates(), 0.0);
+    double result = this->interpolation.edgeGiveTransformationJacobian(iEdge, * aGaussPoint->giveCoordinates(), 
+								       FEIElementGeometryWrapper(this), 0.0);
     return result *aGaussPoint->giveWeight();
 }
 
 void
 PlaneStress2d :: computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge)
 {
-    this->interpolation.edgeLocal2global(answer, iEdge, domain, dofManArray, * gp->giveCoordinates(), 0.0);
+  this->interpolation.edgeLocal2global(answer, iEdge, * gp->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0);
 }
 
 
@@ -276,8 +276,8 @@ PlaneStress2d :: computeVolumeAround(GaussPoint *aGaussPoint)
 // Returns the portion of the receiver which is attached to aGaussPoint.
 {
     double determinant, weight, thickness, volume;
-    determinant = fabs( this->interpolation.giveTransformationJacobian(domain, dofManArray,
-                                                                       * aGaussPoint->giveCoordinates(), 0.0) );
+    determinant = fabs( this->interpolation.giveTransformationJacobian(* aGaussPoint->giveCoordinates(),
+								       FEIElementGeometryWrapper(this), 0.0) );
 
 
     weight      = aGaussPoint->giveWeight();
@@ -375,7 +375,7 @@ PlaneStress2d ::   giveDofManDofIDMask(int inode, EquationID, IntArray &answer) 
 int
 PlaneStress2d :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords)
 {
-    this->interpolation.local2global(answer, domain, dofManArray, lcoords, 0.0);
+  this->interpolation.local2global(answer, lcoords, FEIElementGeometryWrapper(this), 0.0);
     return 1;
 }
 
@@ -422,7 +422,7 @@ PlaneStress2d :: ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatMatrix
     // N(nsigma, nsigma*nnodes)
     // Definition : sigmaVector = N * nodalSigmaVector
     FloatArray n;
-    this->interpolation.evalN(n, * aGaussPoint->giveCoordinates(), 0.0);
+    this->interpolation.evalN(n, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0);
 
     if ( this->giveIPValueSize(type, aGaussPoint) ) {
         answer.resize(1, 4);
@@ -1141,7 +1141,7 @@ PlaneStress2d :: SPRNodalRecoveryMI_givePatchType()
 int
 PlaneStress2d :: computeLocalCoordinates(FloatArray &answer, const FloatArray &coords)
 {
-    return this->interpolation.global2local(answer, domain, dofManArray, coords, 0.0);
+  return this->interpolation.global2local(answer, coords, FEIElementGeometryWrapper(this), 0.0);
 }
 
 int
@@ -1211,7 +1211,7 @@ PlaneStress2d :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAt(ValueModeType 
 
     result = this->computeLocalCoordinates(lcoords, coords);
 
-    this->interpolation.evalN(ni, lcoords, 0.0);
+    this->interpolation.evalN(ni, lcoords, FEIElementGeometryWrapper(this), 0.0);
 
     n.resize(2, 8);
     n.zero();

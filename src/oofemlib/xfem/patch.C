@@ -61,7 +61,8 @@ void TrianglePatch :: convertGPIntoParental(GaussPoint *gp) {
     for(int i = 1; i <= this->giveNrVertices(); i++){
         coords[i-1] = new FloatArray(*this->giveVertex(i));
     }
-    this->interpolation.local2global(global, coords, *gp->giveCoordinates(), 1.0);
+    this->interpolation.local2global(global, *gp->giveCoordinates(), 
+				     FEIVertexListGeometryWrapper(this->giveNrVertices(), coords), 1.0);
     for(int i = 1; i <= this->giveNrVertices(); i++){
         delete coords[i-1];
     }

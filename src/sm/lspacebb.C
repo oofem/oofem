@@ -77,8 +77,8 @@ LSpaceBB :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int l
     coord.zero();
 
 
-    LSpace :: interpolation.evaldNdx(dnx, this->giveDomain(), dofManArray, * aGaussPoint->giveCoordinates(), 0.0);
-    LSpace :: interpolation.evaldNdx(dnx0, this->giveDomain(), dofManArray, coord, 0.0);
+    LSpace :: interpolation.evaldNdx(dnx, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0);
+    LSpace :: interpolation.evaldNdx(dnx0, coord, FEIElementGeometryWrapper(this), 0.0);
 
     // deviatoric part fully integrated, volumetric part in one point
     // here we follow BBar approach

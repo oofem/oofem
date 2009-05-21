@@ -64,7 +64,7 @@ public:
      * @param cellgeo underlying cell geometry
      * @param time time
      */
-    virtual void edgeEvalN(FloatArray &answer, const FloatArray &lcoords, const FEIElementGeometry& cellgeo, double time) = 0;
+    virtual void edgeEvalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry& cellgeo, double time) = 0;
     /**
      * Evaluates the matrix of derivatives of edge interpolation functions (shape functions) at given point.
      * These derivatives are in global coordinate system (where the nodal coordinates are defined)
@@ -75,7 +75,7 @@ public:
      * @param time time
      */
     virtual void edgeEvaldNdx(FloatMatrix &answer, int iedge,
-                              const FloatArray &lcoords, const FEIElementGeometry& cellgeo, double time) = 0;
+                              const FloatArray &lcoords, const FEICellGeometry& cellgeo, double time) = 0;
     /**
      * Evaluates edge global coordinates from given local ones
      * These derivatives are in global coordinate system (where the nodal coordinates are defined)
@@ -86,13 +86,13 @@ public:
      * @param time time
      */
     virtual void edgeLocal2global(FloatArray &answer, int iedge,
-                                  const FloatArray &lcoords, const FEIElementGeometry& cellgeo, double time) = 0;
+                                  const FloatArray &lcoords, const FEICellGeometry& cellgeo, double time) = 0;
     /**
      * Evaluates the edge jacobian of transformation between local and global coordinates.
      */
     virtual double edgeGiveTransformationJacobian(int iedge, 
                                                   const FloatArray &lcoords, 
-                                                  const FEIElementGeometry& cellgeo, 
+                                                  const FEICellGeometry& cellgeo, 
                                                   double time) = 0;
     
 
@@ -116,7 +116,7 @@ public:
      * @param cellgeo underlying cell geometry
      * @param time time
      */
-    virtual void surfaceEvalN(FloatArray &answer, const FloatArray &lcoords, const FEIElementGeometry& cellgeo, double time) = 0;
+    virtual void surfaceEvalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry& cellgeo, double time) = 0;
     /**
      * Evaluates the matrix of derivatives of edge interpolation functions (shape functions) at given point.
      * These derivatives are in global coordinate system (where the nodal coordinates are defined)
@@ -127,7 +127,7 @@ public:
      * @param time time
      */
     //virtual void surfaceEvaldNdx (FloatMatrix&answer, int iedge,
-    //               const FloatArray& lcoords, const FEIElementGeometry& cellgeo, double time) = 0;
+    //               const FloatArray& lcoords, const FEICellGeometry& cellgeo, double time) = 0;
     /**
      * Evaluates edge global coordinates from given local ones
      * These derivatives are in global coordinate system (where the nodal coordinates are defined)
@@ -138,12 +138,12 @@ public:
      * @param time time
      */
     virtual void surfaceLocal2global(FloatArray &answer, int iedge,
-                                     const FloatArray &lcoords, const FEIElementGeometry& cellgeo, double time) = 0;
+                                     const FloatArray &lcoords, const FEICellGeometry& cellgeo, double time) = 0;
     /**
      * Evaluates the edge jacobian of transformation between local and global coordinates.
      */
     virtual double surfaceGiveTransformationJacobian(int isurf, const FloatArray &lcoords,
-                                                     const FEIElementGeometry& cellgeo, double time) = 0;
+                                                     const FEICellGeometry& cellgeo, double time) = 0;
     virtual void computeLocalSurfaceMapping(IntArray &edgeNodes, int iedge) = 0;
     void computeSurfaceMapping(IntArray &edgeNodes, IntArray &elemNodes, int iedge) {
         int i, size;

@@ -56,22 +56,36 @@ class Element;
  */
 class FEICellGeometry {
  public:
+  FEICellGeometry() {}
   virtual int giveNumberOfVertices () const = 0;
   virtual const FloatArray* giveVertexCoordinates(int i) const = 0;
 };
 
 /**
- * wrapper aroun element definition to provide FEICellGeometry interface
+ * wrapper around element definition to provide FEICellGeometry interface
  */
-class FEIElementGeometry : public FEICellGeometry {
+class FEIElementGeometryWrapper : public FEICellGeometry {
  protected:
   Element* elem;
  public:
-  FEIElementGeometry (Element* elem) {this->elem = elem;}
+  FEIElementGeometryWrapper (Element* elem) : FEICellGeometry() {this->elem = elem;}
   int giveNumberOfVertices () const;
   const FloatArray* giveVertexCoordinates(int i) const;
 };
 
+/**
+ * Wrapper around cell with vertex coordinates stored in FloatArray**
+ */
+class FEIVertexListGeometryWrapper : public FEICellGeometry {
+ protected:
+  const FloatArray **coords;
+  int nvertices;
+ public:
+  FEIVertexListGeometryWrapper (int nvertices, const FloatArray** coords) : FEICellGeometry()
+    {this->nvertices = nvertices; this->coords = coords;}
+  int giveNumberOfVertices () const {return this->nvertices;}
+  const FloatArray* giveVertexCoordinates(int i) const {return this->coords[i-1];}
+};
 
 /**
  * Class representing a general abstraction for finite element interpolation class.
@@ -95,7 +109,7 @@ public:
      * @param cellgeo underlying cell geometry
      * @param time time
      */
-    virtual void evalN(FloatArray &answer, const FloatArray &lcoords, const FEIElementGeometry& cellgeo, double time) = 0;
+    virtual void evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry& cellgeo, double time) = 0;
     /**
      * Evaluates the matrix of derivatives of interpolation functions (shape functions) at given point.
      * These derivatives are in global coordinate system (where the nodal coordinates are defined)
@@ -104,7 +118,7 @@ public:
      * @param cellgeo underlying cell geometry
      * @param time time
      */
-    virtual void evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEIElementGeometry& cellgeo, double time) = 0;
+    virtual void evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry& cellgeo, double time) = 0;
     /**
      * Evaluates global coordinates from given local ones
      * These derivatives are in global coordinate system (where the nodal coordinates are defined)
@@ -113,7 +127,7 @@ public:
      * @param cellgeo underlying cell geometry
      * @param time time
      */
-    virtual void local2global(FloatArray &answer, const FloatArray &lcoords, const FEIElementGeometry& cellgeo, double time) = 0;
+    virtual void local2global(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry& cellgeo, double time) = 0;
     /**
      * Evaluates local coordinates from given global ones. Returns nonzero if local coordinates are interpolating,
      * zero if extrapolating (nonzero is returned if point is within the element geometry, zero otherwise).
@@ -124,11 +138,11 @@ public:
      * @param time time
      * @return nonzero is returned if point is within the element geometry, zero otherwise
      */
-    virtual int  global2local(FloatArray &answer, const FloatArray &lcoords, const FEIElementGeometry& cellgeo, double time) = 0;
+    virtual int  global2local(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry& cellgeo, double time) = 0;
     /**
      * Evaluates the jacobian of transformation between local and global coordinates.
      */
-    virtual double giveTransformationJacobian(const FloatArray &lcoords, const FEIElementGeometry& cellgeo, double time) = 0;
+    virtual double giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry& cellgeo, double time) = 0;
     /**
        Returns indices (zero based) of nonzero basis functions for given knot span 
        The knot span identifies the sub-region of the finite element

@@ -48,7 +48,7 @@
 
 
 void
-FEI3dHexaQuad :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEIElementGeometry& cellgeo, double time)
+FEI3dHexaQuad :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry& cellgeo, double time)
 {
     double u, v, w;
     answer.resize(20);
@@ -109,7 +109,7 @@ FEI3dHexaQuad :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEIE
 }
 
 void
-FEI3dHexaQuad :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEIElementGeometry& cellgeo, double time)
+FEI3dHexaQuad :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry& cellgeo, double time)
 {
     int i;
     FloatMatrix jacobianMatrix(3, 3), inv(3, 3);
@@ -137,7 +137,7 @@ FEI3dHexaQuad :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const 
 }
 
 void
-FEI3dHexaQuad :: local2global(FloatArray &answer, const FloatArray &lcoords, const FEIElementGeometry& cellgeo, double time)
+FEI3dHexaQuad :: local2global(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry& cellgeo, double time)
 {
     int i;
     FloatArray n(20);
@@ -157,14 +157,14 @@ FEI3dHexaQuad :: local2global(FloatArray &answer, const FloatArray &lcoords, con
 // #define POINT_TOL 1.e-3
 //
 int
-FEI3dHexaQuad :: global2local(FloatArray &answer, const FloatArray &lcoords, const FEIElementGeometry& cellgeo, double time)
+FEI3dHexaQuad :: global2local(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry& cellgeo, double time)
 { 
   OOFEM_ERROR("FEI3dHexaQuad :: global2local not implemented");
   return 1; 
 }
 
 double
-FEI3dHexaQuad :: giveTransformationJacobian(const FloatArray &lcoords, const FEIElementGeometry& cellgeo, double time)
+FEI3dHexaQuad :: giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry& cellgeo, double time)
 {
     FloatMatrix jacobianMatrix(3, 3);
 
@@ -172,13 +172,13 @@ FEI3dHexaQuad :: giveTransformationJacobian(const FloatArray &lcoords, const FEI
     return jacobianMatrix.giveDeterminant();
 }
 
-void FEI3dHexaQuad :: edgeEvalN(FloatArray &answer, const FloatArray &lcoords, const FEIElementGeometry& cellgeo, double time)
+void FEI3dHexaQuad :: edgeEvalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry& cellgeo, double time)
 { OOFEM_ERROR("FEI3dHexaQuad :: edgeEvalN not implemented"); }
-void FEI3dHexaQuad :: edgeEvaldNdx(FloatMatrix &answer, int iedge, const FloatArray &lcoords, const FEIElementGeometry& cellgeo, double time)
+void FEI3dHexaQuad :: edgeEvaldNdx(FloatMatrix &answer, int iedge, const FloatArray &lcoords, const FEICellGeometry& cellgeo, double time)
 { OOFEM_ERROR("FEI3dHexaQuad :: edgeEvaldNdx not implemented"); }
-void FEI3dHexaQuad :: edgeLocal2global(FloatArray &answer, int iedge, const FloatArray &lcoords, const FEIElementGeometry& cellgeo, double time)
+void FEI3dHexaQuad :: edgeLocal2global(FloatArray &answer, int iedge, const FloatArray &lcoords, const FEICellGeometry& cellgeo, double time)
 { OOFEM_ERROR("FEI3dHexaQuad :: edgeLocal2global not implemented"); }
-double FEI3dHexaQuad :: edgeGiveTransformationJacobian(int iedge, const FloatArray &lcoords, const FEIElementGeometry& cellgeo, double time)
+double FEI3dHexaQuad :: edgeGiveTransformationJacobian(int iedge, const FloatArray &lcoords, const FEICellGeometry& cellgeo, double time)
 { OOFEM_ERROR("FEI3dHexaQuad :: edgeGiveTransformationJacobian not implemented");
   return 0.0; }
 
@@ -187,7 +187,7 @@ FEI3dHexaQuad :: computeLocalEdgeMapping(IntArray &edgeNodes, int iedge)
 { OOFEM_ERROR("FEI3dHexaQuad :: computeLocalEdgeMapping not implemented"); }
 
 void
-FEI3dHexaQuad :: surfaceEvalN(FloatArray &answer, const FloatArray &lcoords, const FEIElementGeometry& cellgeo, double time)
+FEI3dHexaQuad :: surfaceEvalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry& cellgeo, double time)
 {
     double ksi, eta;
     answer.resize(8);
@@ -210,7 +210,7 @@ FEI3dHexaQuad :: surfaceEvalN(FloatArray &answer, const FloatArray &lcoords, con
 
 void
 FEI3dHexaQuad :: surfaceLocal2global(FloatArray &answer, int isurf,
-                                     const FloatArray &lcoords, const FEIElementGeometry& cellgeo, double time)
+                                     const FloatArray &lcoords, const FEICellGeometry& cellgeo, double time)
 {
     IntArray nodes(8);
     FloatArray n;
@@ -233,7 +233,7 @@ FEI3dHexaQuad :: surfaceLocal2global(FloatArray &answer, int isurf,
 
 double
 FEI3dHexaQuad :: surfaceGiveTransformationJacobian(int isurf, const FloatArray &lcoords,
-                                                   const FEIElementGeometry& cellgeo, double time)
+                                                   const FEICellGeometry& cellgeo, double time)
 {
     // only plane surface is supported !!!
 
@@ -501,7 +501,7 @@ FEI3dHexaQuad :: computeGlobalSurfaceMapping(IntArray &surfNodes, IntArray &elem
 
 
 void
-FEI3dHexaQuad :: giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatArray &lcoords, const FEIElementGeometry& cellgeo)
+FEI3dHexaQuad :: giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatArray &lcoords, const FEICellGeometry& cellgeo)
 // Returns the jacobian matrix  J (x,y,z)/(ksi,eta,dzeta)  of the receiver.
 // Computes it if it does not exist yet.
 {

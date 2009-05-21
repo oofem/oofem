@@ -26,9 +26,9 @@ void PlaneStress2dXfem::computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer,
     int start = simple->giveNumberOfColumns();
     // evaluation of N,dNdx
     FloatMatrix dNdx;
-    interpolation.evaldNdx(dNdx, domain, dofManArray, * gp->giveCoordinates(), 0.0);
+    interpolation.evaldNdx(dNdx, * gp->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0);
     FloatArray N;
-    interpolation.evalN(N, * gp->giveCoordinates(), 0.0);
+    interpolation.evalN(N, * gp->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0);
     XfemManager *xf = this->giveDomain()->giveEngngModel()->giveXfemManager(1);
     int counter = 0;
     AList<FloatMatrix> additionals;

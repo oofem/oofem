@@ -102,7 +102,7 @@ LSpace :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int li,
     int i;
     FloatMatrix dnx;
 
-    this->interpolation.evaldNdx(dnx, this->giveDomain(), dofManArray, * aGaussPoint->giveCoordinates(), 0.0);
+    this->interpolation.evaldNdx(dnx, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0);
 
     answer.resize(6, 24);
     answer.zero();
@@ -151,7 +151,7 @@ LSpace :: computeNmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
 
     answer.resize(3, 24);
     answer.zero();
-    this->interpolation.evalN(n, * aGaussPoint->giveCoordinates(), 0.0);
+    this->interpolation.evalN(n, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0);
 
     for ( i = 1; i <= 8; i++ ) {
         answer.at(1, 3 * i - 2) = n.at(i);
@@ -167,8 +167,8 @@ double LSpace :: computeVolumeAround(GaussPoint *aGaussPoint)
 // Returns the portion of the receiver which is attached to aGaussPoint.
 {
     double determinant, weight, volume;
-    determinant = fabs( this->interpolation.giveTransformationJacobian(domain, dofManArray,
-                                                                       * aGaussPoint->giveCoordinates(), 0.0) );
+    determinant = fabs( this->interpolation.giveTransformationJacobian(* aGaussPoint->giveCoordinates(), 
+								       FEIElementGeometryWrapper(this), 0.0) );
 
 
     weight      = aGaussPoint->giveWeight();
@@ -243,7 +243,7 @@ LSpace :: giveCharacteristicLenght(GaussPoint *gp, const FloatArray &normalToCra
 int
 LSpace :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords)
 {
-    this->interpolation.local2global(answer, domain, dofManArray, lcoords, 0.0);
+  this->interpolation.local2global(answer, lcoords, FEIElementGeometryWrapper(this), 0.0);
     return 1;
 }
 
@@ -268,7 +268,7 @@ LSpace :: ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatMatrix &answe
     // N(nsigma, nsigma*nnodes)
     // Definition : sigmaVector = N * nodalSigmaVector
     FloatArray n;
-    this->interpolation.evalN(n, * aGaussPoint->giveCoordinates(), 0.0);
+    this->interpolation.evalN(n, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0);
 
     ////if (type == StressVector) answer.resize(6,48) ;
     if ( this->giveIPValueSize(type, aGaussPoint) ) {
@@ -469,7 +469,7 @@ LSpace :: NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side
 int
 LSpace :: computeLocalCoordinates(FloatArray &answer, const FloatArray &coords)
 {
-    return this->interpolation.global2local(answer, domain, dofManArray, coords, 0.0);
+  return this->interpolation.global2local(answer, coords, FEIElementGeometryWrapper(this), 0.0);
 }
 
 
@@ -520,7 +520,7 @@ LSpace :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAt(ValueModeType mode,
 
     result = this->computeLocalCoordinates(lcoords, coords);
 
-    this->interpolation.evalN(ni, lcoords, 0.0);
+    this->interpolation.evalN(ni, lcoords, FEIElementGeometryWrapper(this), 0.0);
 
     n.resize(3, 24);
     n.zero();
@@ -991,7 +991,7 @@ LSpace :: computeEgdeNMatrixAt(FloatMatrix &answer, GaussPoint *aGaussPoint)
      */
 
     FloatArray n(2);
-    this->interpolation.edgeEvalN(n, * aGaussPoint->giveCoordinates(), 0.0);
+    this->interpolation.edgeEvalN(n, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0);
 
     answer.resize(3, 6);
     answer.zero();
@@ -1109,8 +1109,8 @@ LSpace :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
 double
 LSpace ::   computeEdgeVolumeAround(GaussPoint *aGaussPoint, int iEdge)
 {
-    double result = this->interpolation.edgeGiveTransformationJacobian(iEdge, domain, dofManArray,
-                                                                       * aGaussPoint->giveCoordinates(), 0.0);
+    double result = this->interpolation.edgeGiveTransformationJacobian(iEdge, * aGaussPoint->giveCoordinates(), 
+								       FEIElementGeometryWrapper(this), 0.0);
     return result *aGaussPoint->giveWeight();
 }
 
@@ -1118,7 +1118,7 @@ LSpace ::   computeEdgeVolumeAround(GaussPoint *aGaussPoint, int iEdge)
 void
 LSpace ::   computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge)
 {
-    this->interpolation.edgeLocal2global(answer, iEdge, domain, dofManArray, * gp->giveCoordinates(), 0.0);
+  this->interpolation.edgeLocal2global(answer, iEdge, * gp->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0);
 }
 
 
@@ -1140,7 +1140,7 @@ void
 LSpace :: computeSurfaceNMatrixAt(FloatMatrix &answer, GaussPoint *sgp)
 {
     FloatArray n(4);
-    interpolation.surfaceEvalN(n, * sgp->giveCoordinates(), 0.0);
+    interpolation.surfaceEvalN(n, * sgp->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0);
 
     answer.resize(3, 12);
     answer.zero();
@@ -1279,7 +1279,7 @@ double
 LSpace :: computeSurfaceVolumeAround(GaussPoint *gp, int iSurf)
 {
     double determinant, weight, volume;
-    determinant = fabs( interpolation.surfaceGiveTransformationJacobian(iSurf, domain, dofManArray, * gp->giveCoordinates(), 0.0) );
+    determinant = fabs( interpolation.surfaceGiveTransformationJacobian(iSurf, * gp->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0) );
 
     weight      = gp->giveWeight();
     volume      = determinant * weight;
@@ -1290,7 +1290,7 @@ LSpace :: computeSurfaceVolumeAround(GaussPoint *gp, int iSurf)
 void
 LSpace :: computeSurfIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int isurf)
 {
-    interpolation.surfaceLocal2global(answer, isurf, domain, dofManArray, * gp->giveCoordinates(), 0.0);
+  interpolation.surfaceLocal2global(answer, isurf, * gp->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0);
 }
 
 

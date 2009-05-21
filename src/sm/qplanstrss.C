@@ -80,7 +80,7 @@ QPlaneStress2d :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer,
     int i;
     FloatMatrix dnx;
 
-    this->interpolation.evaldNdx(dnx, this->giveDomain(), dofManArray, * aGaussPoint->giveCoordinates(), 0.0);
+    this->interpolation.evaldNdx(dnx, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0);
 
     answer.resize(3, 16);
     answer.zero();
@@ -107,7 +107,7 @@ QPlaneStress2d :: computeNmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
     answer.resize(2, 16);
     answer.zero();
 
-    this->interpolation.evalN(n, * aGaussPoint->giveCoordinates(), 0.0);
+    this->interpolation.evalN(n, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0);
 
     for ( i = 1; i <= 8; i++ ) {
         answer.at(1, 2 * i - 1) = n.at(i);
@@ -155,8 +155,8 @@ QPlaneStress2d :: computeVolumeAround(GaussPoint *aGaussPoint)
 // Returns the portion of the receiver which is attached to aGaussPoint.
 {
     double determinant, weight, thickness, volume;
-    determinant = fabs( this->interpolation.giveTransformationJacobian(domain, dofManArray,
-                                                                       * aGaussPoint->giveCoordinates(), 0.0) );
+    determinant = fabs( this->interpolation.giveTransformationJacobian(* aGaussPoint->giveCoordinates(), 
+								       FEIElementGeometryWrapper(this), 0.0) );
     weight      = aGaussPoint->giveWeight();
     thickness   = this->giveCrossSection()->give('t');
     volume      = determinant * weight * thickness;
@@ -184,7 +184,7 @@ QPlaneStress2d ::   giveDofManDofIDMask(int inode, EquationID, IntArray &answer)
 int
 QPlaneStress2d :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords)
 {
-    this->interpolation.local2global(answer, domain, dofManArray, lcoords, 0.0);
+  this->interpolation.local2global(answer, lcoords, FEIElementGeometryWrapper(this), 0.0);
     return 1;
 }
 
@@ -217,7 +217,7 @@ QPlaneStress2d :: ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatMatri
     }
 
     FloatArray n;
-    this->interpolation.evalN(n, * aGaussPoint->giveCoordinates(), 0.0);
+    this->interpolation.evalN(n, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0);
     
     for (i=1; i<=8;i++) answer.at(1,i)=n.at(i);
     return;

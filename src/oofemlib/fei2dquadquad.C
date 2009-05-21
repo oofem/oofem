@@ -41,7 +41,7 @@
 #include "mathfem.h"
 
 void
-FEI2dQuadQuad :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEIElementGeometry& cellgeo, double time)
+FEI2dQuadQuad :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry& cellgeo, double time)
 {
 
   /* Local Node Numbering
@@ -79,7 +79,7 @@ FEI2dQuadQuad :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEIE
 }
 
 void
-FEI2dQuadQuad :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEIElementGeometry& cellgeo, double time)
+FEI2dQuadQuad :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry& cellgeo, double time)
 {
     answer.resize(8, 2);
     int i;
@@ -99,7 +99,7 @@ FEI2dQuadQuad :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const 
 }
 
 void
-FEI2dQuadQuad :: local2global(FloatArray &answer, const FloatArray &lcoords,  const FEIElementGeometry& cellgeo, double time)
+FEI2dQuadQuad :: local2global(FloatArray &answer, const FloatArray &lcoords,  const FEICellGeometry& cellgeo, double time)
 {
     int i;
     FloatArray n(8);
@@ -117,7 +117,7 @@ FEI2dQuadQuad :: local2global(FloatArray &answer, const FloatArray &lcoords,  co
 #define POINT_TOL 1.e-3
 
 int
-FEI2dQuadQuad :: global2local(FloatArray &answer, const FloatArray &coords, const FEIElementGeometry& cellgeo, double time)
+FEI2dQuadQuad :: global2local(FloatArray &answer, const FloatArray &coords, const FEICellGeometry& cellgeo, double time)
 {
     FloatArray lc(2);
     FloatArray r(2), n(8), dksi, deta, delta;
@@ -183,7 +183,7 @@ FEI2dQuadQuad :: global2local(FloatArray &answer, const FloatArray &coords, cons
 
 
 double
-FEI2dQuadQuad :: giveTransformationJacobian(const FloatArray &lcoords, const FEIElementGeometry& cellgeo, double time)
+FEI2dQuadQuad :: giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry& cellgeo, double time)
 {
     FloatMatrix jacobianMatrix(2, 2);
 
@@ -193,7 +193,7 @@ FEI2dQuadQuad :: giveTransformationJacobian(const FloatArray &lcoords, const FEI
 
 
 void
-FEI2dQuadQuad :: edgeEvalN(FloatArray &answer, const FloatArray &lcoords, const FEIElementGeometry& cellgeo, double time)
+FEI2dQuadQuad :: edgeEvalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry& cellgeo, double time)
 {
   /*
        1-------3-------2
@@ -210,14 +210,14 @@ FEI2dQuadQuad :: edgeEvalN(FloatArray &answer, const FloatArray &lcoords, const 
 
 void
 FEI2dQuadQuad :: edgeEvaldNdx(FloatMatrix &answer, int iedge,
-                              const FloatArray &lcoords, const FEIElementGeometry& cellgeo, double time)
+                              const FloatArray &lcoords, const FEICellGeometry& cellgeo, double time)
 {
   OOFEM_ERROR("FEI2dQuadQuad :: edgeEvaldNdx: not implemented");
 }
 
 void
 FEI2dQuadQuad :: edgeLocal2global(FloatArray &answer, int iedge,
-                                  const FloatArray &lcoords, const FEIElementGeometry& cellgeo, double time)
+                                  const FloatArray &lcoords, const FEICellGeometry& cellgeo, double time)
 {
   IntArray edgeNodes;
   FloatArray n;
@@ -266,7 +266,7 @@ FEI2dQuadQuad :: computeLocalEdgeMapping(IntArray &edgeNodes, int iedge)
 }
 
 double
-FEI2dQuadQuad :: edgeGiveTransformationJacobian(int iedge, const FloatArray &lcoords, const FEIElementGeometry& cellgeo, double time)
+FEI2dQuadQuad :: edgeGiveTransformationJacobian(int iedge, const FloatArray &lcoords, const FEICellGeometry& cellgeo, double time)
 {
     OOFEM_ERROR("FEI2dQuadQuad :: edgeGiveTransformationJacobian: not implemented");
     return 0.0;
@@ -275,7 +275,7 @@ FEI2dQuadQuad :: edgeGiveTransformationJacobian(int iedge, const FloatArray &lco
 
 
 void
-FEI2dQuadQuad :: giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatArray &lcoords, const FEIElementGeometry& cellgeo)
+FEI2dQuadQuad :: giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatArray &lcoords, const FEICellGeometry& cellgeo)
 // Returns the jacobian matrix  J (x,y)/(ksi,eta)  of the receiver.
 // Computes it if it does not exist yet.
 {

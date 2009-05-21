@@ -52,7 +52,7 @@ void RampFunction :: evaluateDerivativeAt(FloatMatrix &answer, FloatArray *point
 void RampFunction :: evaluateFunctionAt(FloatArray &answer, GaussPoint *gp){
   FloatArray N;
   Element *el = gp->giveElement();
-  el->giveInterpolation()->evalN(N, * gp->giveCoordinates(), FEIElementGeometry(el), 0.0);
+  el->giveInterpolation()->evalN(N, * gp->giveCoordinates(), FEIElementGeometryWrapper(el), 0.0);
   double dist = 0;
   double absMember = 0;
   double member = 0;
@@ -69,13 +69,13 @@ void RampFunction :: evaluateFunctionAt(FloatArray &answer, GaussPoint *gp){
 void RampFunction :: evaluateDerivativeAt(FloatMatrix &answer, GaussPoint *gp){
   FloatArray N;
   Element *el = gp->giveElement();
-  el->giveInterpolation()->evalN(N, * gp->giveCoordinates(), FEIElementGeometry(el), 0.0);
+  el->giveInterpolation()->evalN(N, * gp->giveCoordinates(), FEIElementGeometryWrapper(el), 0.0);
   IntArray dofManArray(el->giveNumberOfDofManagers());
   for(int i = 1; i <= el->giveNumberOfDofManagers(); i++){
       dofManArray.at(i) = el->giveDofManagerNumber(i);
   }
   FloatMatrix dNdx;
-  el->giveInterpolation()->evaldNdx(dNdx, * gp->giveCoordinates(), FEIElementGeometry(el), 0.0);
+  el->giveInterpolation()->evaldNdx(dNdx, * gp->giveCoordinates(), FEIElementGeometryWrapper(el), 0.0);
   double dist = 0;
   double dfdx = 0;
   double dfdy = 0;

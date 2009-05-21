@@ -175,13 +175,24 @@ BSplineInterpolation::initializeFrom(InputRecord *ir) {
 
 
 
-void BSplineInterpolation::evalN(FloatArray &answer, const FloatArray &lcoords, const IntArray *span,  double time) {
+void BSplineInterpolation::evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry& cellgeo, double time){
+  FEIIGAElementGeometryWrapper* gw = (FEIIGAElementGeometryWrapper*) &cellgeo;
+
   int i, l,k,c;
   FloatArray N[nsd];
+  IntArray span(nsd);
+
+  if (gw->knotSpan) {
+    span = *gw->knotSpan;
+  } else {
+    for (i=0; i< nsd; i++) {
+      span(i) = this->findSpan (numberOfControllPoints[i], degree[i], lcoords(i), knotVector[i]);
+    }
+  } 
   
   for (i=0; i< nsd; i++) {
     //span(i) = this->findSpan (numberOfControllPoints[i], degree[i], lcoords(i), knotVector[i]);
-    this->basisFuns (N[i], span->at(i+1), lcoords(i), degree[i], knotVector[i]);
+    this->basisFuns (N[i], span.at(i+1), lcoords(i), degree[i], knotVector[i]);
   }
   
   if (nsd == 2) {
@@ -198,55 +209,51 @@ void BSplineInterpolation::evalN(FloatArray &answer, const FloatArray &lcoords, 
 }
 
 
-void BSplineInterpolation::evalN(FloatArray &answer, const FloatArray &lcoords, double time) {
-  int i;
-  IntArray span(nsd);
-  
-  for (i=0; i< nsd; i++) {
-    span(i) = this->findSpan (numberOfControllPoints[i], degree[i], lcoords(i), knotVector[i]);
-  }
-  this->evalN (answer, lcoords, &span, time);
-}
+void BSplineInterpolation::evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry& cellgeo, double time) {
 
-void BSplineInterpolation::evaldNdx(FloatMatrix &answer, const FloatArray **coords, const FloatArray &lcoords, const IntArray* knotSpan, double time) {
-  OOFEM_ERROR ("Not yet inplemented, contact lazy dr for implementation");
-}
+  FEIIGAElementGeometryWrapper* gw = (FEIIGAElementGeometryWrapper*) &cellgeo;
 
-void BSplineInterpolation::evaldNdx(FloatMatrix &answer, const FloatArray **coords, const FloatArray &lcoords, double time) {
-  OOFEM_ERROR ("Not yet inplemented, contact lazy dr for implementation");
-}
-
-void BSplineInterpolation::evaldNdx(FloatMatrix &answer, Domain *d, IntArray &nodes, const FloatArray &lcoords, const IntArray* span, double time) {
   FloatMatrix jacobian(nsd,nsd);
   FloatMatrix ders[nsd];
   FloatArray temp(nsd);
   double Jacob;
   int count = 1, cnt, i, l, k, uind, vind;
+  IntArray span(nsd);
+
+  if (gw->knotSpan) {
+    span = *gw->knotSpan;
+  } else {
+    for (i=0; i< nsd; i++) {
+      span(i) = this->findSpan (numberOfControllPoints[i], degree[i], lcoords(i), knotVector[i]);
+    }
+  } 
+
+
   for (i=0; i< nsd; i++) {
-    this->DersBasisFuns(1, lcoords(i), span->at(i+1), degree[i], knotVector[i], ders[i]);
+    this->DersBasisFuns(1, lcoords(i), span.at(i+1), degree[i], knotVector[i], ders[i]);
     count *=giveNumberOfKnotBasisFunctions ();
   }
   jacobian.zero();
   answer.resize(count, nsd);
   answer.zero();
   if (nsd == 2) {
-    uind = span->at(1)-degree[0];
+    uind = span.at(1)-degree[0];
     for (l=0;l<=degree[1]; l++) {
       temp.zero();
-      vind = span->at(2)-degree[1]+1;
+      vind = span.at(2)-degree[1]+1;
       for (k=0; k<=degree[0]; k++) {
-        temp(0) += ders[0](1,k)*d->giveNode(nodes.at((uind+k)*numberOfControllPoints[1]+vind+1))->giveCoordinate(1);  // HAHA see local2global
-        temp(1) += ders[0](1,k)*d->giveNode(nodes.at((uind+k)*numberOfControllPoints[1]+vind+1))->giveCoordinate(2);  // HAHA coords
+        temp(0) += ders[0](1,k)*cellgeo.giveVertexCoordinates((uind+k)*numberOfControllPoints[1]+vind+1)->at(1);  // HAHA see local2global
+        temp(1) += ders[0](1,k)*cellgeo.giveVertexCoordinates((uind+k)*numberOfControllPoints[1]+vind+1)->at(2);  // HAHA coords
       }
       jacobian(0,0) += ders[1](0,l)*temp(0);
       jacobian(0,1) += ders[1](0,l)*temp(1);
     }
     for (l=0;l<=degree[1]; l++) {
       temp.zero();
-      vind = span->at(2)-degree[1]+1;
+      vind = span.at(2)-degree[1]+1;
       for (k=0; k<=degree[0]; k++) {
-        temp(0) += ders[0](0,k)*d->giveNode(nodes.at((uind+k)*numberOfControllPoints[1]+vind+1))->giveCoordinate(1);  // HAHA see local2global
-        temp(1) += ders[0](0,k)*d->giveNode(nodes.at((uind+k)*numberOfControllPoints[1]+vind+1))->giveCoordinate(2);  // HAHA coords
+        temp(0) += ders[0](0,k)*cellgeo.giveVertexCoordinates((uind+k)*numberOfControllPoints[1]+vind+1)->at(1);  // HAHA see local2global
+        temp(1) += ders[0](0,k)*cellgeo.giveVertexCoordinates((uind+k)*numberOfControllPoints[1]+vind+1)->at(2);  // HAHA coords
       }
       jacobian(1,0) += ders[1](1,l)*temp(0);
       jacobian(1,1) += ders[1](1,l)*temp(1);
@@ -273,25 +280,26 @@ void BSplineInterpolation::evaldNdx(FloatMatrix &answer, Domain *d, IntArray &no
   }
 }
 
-void BSplineInterpolation::evaldNdx(FloatMatrix &answer, Domain *d, IntArray &nodes, const FloatArray &lcoords, double time) {
-  IntArray span(nsd);
-  int i;
-  for (i=0; i< nsd; i++) {
-    span(i) = this->findSpan (numberOfControllPoints[i], degree[i], lcoords(i), knotVector[i]);
-  } 
-  evaldNdx (answer, d, nodes, lcoords, &span, time);
-}
-
-void BSplineInterpolation::local2global(FloatArray &answer, Domain *d, IntArray &nodes, const FloatArray &lcoords, double time) {
+void BSplineInterpolation::local2global(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry& cellgeo, double time) {
   /* Based on SurfacePoint A3.5 implementation*/
+  FEIIGAElementGeometryWrapper* gw = (FEIIGAElementGeometryWrapper*) &cellgeo;
   int i,l,k;
-  IntArray span(nsd);
   FloatArray temp(nsd);
   FloatArray N[nsd];
   answer.resize(nsd);
   
+  IntArray span(nsd);
+
+  if (gw->knotSpan) {
+    span = *gw->knotSpan;
+  } else {
+    for (i=0; i< nsd; i++) {
+      span(i) = this->findSpan (numberOfControllPoints[i], degree[i], lcoords(i), knotVector[i]);
+    }
+  } 
+
+
   for (i=0; i< nsd; i++) {
-    span(i) = this->findSpan (numberOfControllPoints[i], degree[i], lcoords(i), knotVector[i]);
     this->basisFuns (N[i], span(i), lcoords(i), degree[i], knotVector[i]); 
   }
   if (nsd == 2) {
@@ -305,8 +313,8 @@ void BSplineInterpolation::local2global(FloatArray &answer, Domain *d, IntArray 
       for (k=0; k<=degree[0]; k++) {
         //temp(0) = temp(0) + N[0][k]*d->giveNode(nodes.at((uind+k)*numberOfControllPoints[0]+vind))->giveCoordinate(1);
         //temp(1) = temp(1) + N[0][k]*d->giveNode(nodes.at((uind+k)*numberOfControllPoints[0]+vind))->giveCoordinate(2);
-        temp(0) += N[0](k)*d->giveNode(nodes.at((uind+k)*numberOfControllPoints[0]+vind+1))->giveCoordinate(1);
-        temp(1) += N[0](k)*d->giveNode(nodes.at((uind+k)*numberOfControllPoints[0]+vind+1))->giveCoordinate(2);
+        temp(0) += N[0](k)*cellgeo.giveVertexCoordinates((uind+k)*numberOfControllPoints[0]+vind+1)->at(1);
+        temp(1) += N[0](k)*cellgeo.giveVertexCoordinates((uind+k)*numberOfControllPoints[0]+vind+1)->at(2);
       }
       answer(0) += N[1](l)*temp(0);
       answer(1) += N[1](l)*temp(1);
@@ -316,35 +324,48 @@ void BSplineInterpolation::local2global(FloatArray &answer, Domain *d, IntArray 
   }
 }
 
-double BSplineInterpolation::giveTransformationJacobian(Domain *d, IntArray &nodes, const FloatArray &lcoords, const IntArray* span, double time) {
+double BSplineInterpolation::giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry& cellgeo, double time) {
+
+  FEIIGAElementGeometryWrapper* gw = (FEIIGAElementGeometryWrapper*) &cellgeo;
   FloatMatrix jacobian(nsd,nsd);
   FloatMatrix ders[nsd];
   FloatArray temp(nsd);
   double Jacob;
   int count = 1, i, l, k, uind, vind;
+
+  IntArray span(nsd);
+
+  if (gw->knotSpan) {
+    span = *gw->knotSpan;
+  } else {
+    for (i=0; i< nsd; i++) {
+      span(i) = this->findSpan (numberOfControllPoints[i], degree[i], lcoords(i), knotVector[i]);
+    }
+  } 
+
   for (i=0; i< nsd; i++) {
-    this->DersBasisFuns(1, lcoords(i), span->at(i+1), degree[i], knotVector[i], ders[i]);
+    this->DersBasisFuns(1, lcoords(i), span.at(i+1), degree[i], knotVector[i], ders[i]);
     count *=giveNumberOfKnotBasisFunctions ();
   }
   jacobian.zero();
   if (nsd == 2) {
-    uind = span->at(1)-degree[0];
+    uind = span.at(1)-degree[0];
     for (l=0;l<=degree[1]; l++) {
       temp.zero();
-      vind = span->at(2)-degree[1]+1;
+      vind = span.at(2)-degree[1]+1;
       for (k=0; k<=degree[0]; k++) {
-        temp(0) += ders[0](1,k)*d->giveNode(nodes.at((uind+k)*numberOfControllPoints[1]+vind+1))->giveCoordinate(1);  // HAHA see local2global
-        temp(1) += ders[0](1,k)*d->giveNode(nodes.at((uind+k)*numberOfControllPoints[1]+vind+1))->giveCoordinate(2);  // HAHA coords
+        temp(0) += ders[0](1,k)*cellgeo.giveVertexCoordinates((uind+k)*numberOfControllPoints[1]+vind+1)->at(1);  // HAHA see local2global
+        temp(1) += ders[0](1,k)*cellgeo.giveVertexCoordinates((uind+k)*numberOfControllPoints[1]+vind+1)->at(2);  // HAHA coords
       }
       jacobian(0,0) += ders[1](0,l)*temp(0);
       jacobian(0,1) += ders[1](0,l)*temp(1);
     }
     for (l=0;l<=degree[1]; l++) {
       temp.zero();
-      vind = span->at(2)-degree[1]+1;
+      vind = span.at(2)-degree[1]+1;
       for (k=0; k<=degree[0]; k++) {
-        temp(0) += ders[0](0,k)*d->giveNode(nodes.at((uind+k)*numberOfControllPoints[1]+vind+1))->giveCoordinate(1);  // HAHA see local2global
-        temp(1) += ders[0](0,k)*d->giveNode(nodes.at((uind+k)*numberOfControllPoints[1]+vind+1))->giveCoordinate(2);  // HAHA coords
+        temp(0) += ders[0](0,k)*cellgeo.giveVertexCoordinates((uind+k)*numberOfControllPoints[1]+vind+1)->at(1);  // HAHA see local2global
+        temp(1) += ders[0](0,k)*cellgeo.giveVertexCoordinates((uind+k)*numberOfControllPoints[1]+vind+1)->at(2);  // HAHA coords
       }
       jacobian(1,0) += ders[1](1,l)*temp(0);
       jacobian(1,1) += ders[1](1,l)*temp(1);
@@ -360,15 +381,6 @@ double BSplineInterpolation::giveTransformationJacobian(Domain *d, IntArray &nod
     OOFEM_ERROR2 ("evaldNdx not implemented for nsd = %d", nsd);
   }
   return Jacob;
-}
-
-double BSplineInterpolation::giveTransformationJacobian(Domain *d, IntArray &nodes, const FloatArray &lcoords, double time) {
-  IntArray span(nsd);
-  int i;
-  for (i=0; i< nsd; i++) {
-    span(i) = this->findSpan (numberOfControllPoints[i], degree[i], lcoords(i), knotVector[i]);
-  } 
-  return giveTransformationJacobian (d, nodes, lcoords, &span, time);
 }
 
 int BSplineInterpolation::giveKnotBasisFuncMask (const IntArray& knotSpan, IntArray& mask) {
@@ -610,7 +622,7 @@ void PlaneStressStructuralElementEvaluator::computeNMatrixAt (FloatMatrix& answe
   FloatArray N;
   FEInterpolation* interp = gp->giveElement()->giveInterpolation();
   
-  interp->evalN (N, *gp->giveCoordinates(), gp->giveIntegrationRule()->giveKnotSpan(), 0.0);
+  interp->evalN (N, *gp->giveCoordinates(), FEIIGAElementGeometryWrapper(gp->giveElement(), gp->giveIntegrationRule()->giveKnotSpan()), 0.0);
   
   if ((nDofMan = interp->giveNumberOfKnotBasisFunctions()) == 0)
     nDofMan = gp->giveElement()->giveNumberOfDofManagers();
@@ -632,8 +644,8 @@ void PlaneStressStructuralElementEvaluator::computeBMatrixAt (FloatMatrix& answe
   
   FEInterpolation* interp = gp->giveElement()->giveInterpolation();
   // this uses FEIInterpolation::nodes2coords - quite inefficient in this case (large num of dofmans)
-  interp->evaldNdx (d, gp->giveElement()->giveDomain(), gp->giveElement()->giveDofManArray(), 
-                    *gp->giveCoordinates(), gp->giveIntegrationRule()->giveKnotSpan(), 0.0);
+  interp->evaldNdx (d, *gp->giveCoordinates(), 
+		    FEIIGAElementGeometryWrapper(gp->giveElement(), gp->giveIntegrationRule()->giveKnotSpan()), 0.0);
   
   if ((nDofMan = interp->giveNumberOfKnotBasisFunctions ()) == 0)
     nDofMan = gp->giveElement()->giveNumberOfDofManagers();
@@ -725,8 +737,10 @@ void StructuralElementEvaluator::computeStiffnessMatrix (FloatMatrix& answer, Ma
 double PlaneStressStructuralElementEvaluator::computeVolumeAround(GaussPoint *gp) { 
   double determinant, weight, thickness, volume;
   determinant = fabs( this->giveElement()->giveInterpolation()
-                      ->giveTransformationJacobian(gp->giveElement()->giveDomain(), gp->giveElement()->giveDofManArray(), 
-                                                   *gp->giveCoordinates(), 0.0) );
+                      ->giveTransformationJacobian(*gp->giveCoordinates(), 
+						   FEIIGAElementGeometryWrapper(this->giveElement(), 
+										gp->giveIntegrationRule()->giveKnotSpan()),
+						   0.0) );
   weight      = gp->giveWeight();
   thickness   = this->giveElement()->giveCrossSection()->give('t');
   volume      = determinant * weight * thickness;

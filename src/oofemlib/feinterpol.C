@@ -36,5 +36,5 @@
 #include "feinterpol.h"
 #include "element.h"
 
-int FEIElementGeometry::giveNumberOfVertices () const {return elem->giveNumberOfNodes();}
-const FloatArray* FEIElementGeometry::giveVertexCoordinates(int i) const {return elem->giveNode(i)->giveCoordinates();}
+int FEIElementGeometryWrapper::giveNumberOfVertices () const {return elem->giveNumberOfNodes();}
+const FloatArray* FEIElementGeometryWrapper::giveVertexCoordinates(int i) const {return elem->giveNode(i)->giveCoordinates();}
