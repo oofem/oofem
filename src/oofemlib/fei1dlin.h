@@ -56,94 +56,46 @@ public:
      * Evaluates the array of interpolation functions (shape functions) at given point.
      * @param answer contains resulting array of evaluated interpolation functions
      * @param lcoords array containing (local) coordinates
+     * @param cellgeo underlying cell geometry
      * @param time time
      */
-    virtual void evalN(FloatArray &answer, const FloatArray &lcoords, double time);
+    virtual void evalN(FloatArray &answer, const FloatArray &lcoords, const FEIElementGeometry& cellgeo, double time);
     /**
      * Evaluates the matrix of derivatives of interpolation functions (shape functions) at given point.
      * These derivatives are in global coordinate system (where the nodal coordinates are defined)
      * @param matrix contains resulting matrix of derivatives, the member at i,j position contains value of dNi/dxj
-     * @param coords coordinates of nodes defining the interpolation geometry
      * @param lcoords array containing (local) coordinates
+     * @param cellgeo underlying cell geometry
      * @param time time
      */
-    virtual void evaldNdx(FloatMatrix &answer, const FloatArray **coords, const FloatArray &lcoords, double time);
-    /**
-     * Evaluates the matrix of derivatives of interpolation functions (shape functions) at given point.
-     * These derivatives are in global coordinate system (where the nodal coordinates are defined)
-     * @param matrix contains resulting matrix of derivatives, the member at i,j position contains value of dNj/dxi
-     * @param nodes array of node numbers defining the interpolation geometry
-     * @param lcoords array containing (local) coordinates
-     * @param time time
-     */
-    virtual void evaldNdx(FloatMatrix &answer, Domain *d, IntArray &nodes, const FloatArray &lcoords, double time) {
-        const FloatArray *c [ 2 ];
-        nodes2coords(d, nodes, c, 2);
-        this->evaldNdx(answer, c, lcoords, time);
-    }
+    virtual void evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEIElementGeometry& cellgeo, double time);
     /**
      * Evaluates global coordinates from given local ones
      * These derivatives are in global coordinate system (where the nodal coordinates are defined)
      * @param answer contains resulting global coordinates
-     * @param coords coordinates of nodes defining the interpolation geometry
      * @param lcoords array containing (local) coordinates
+     * @param cellgeo underlying cell geometry
      * @param time time
      */
-    virtual void local2global(FloatArray &answer, const FloatArray **coords, const FloatArray &lcoords, double time);
-    /**
-     * Evaluates global coordinates from given local ones
-     * These derivatives are in global coordinate system (where the nodal coordinates are defined)
-     * @param answer contains resulting global coordinates
-     * @param nodes array of node numbers defining the interpolation geometry
-     * @param lcoords array containing (local) coordinates
-     * @param time time
-     */
-    virtual void local2global(FloatArray &answer, Domain *d, IntArray &nodes, const FloatArray &lcoords, double time) {
-        const FloatArray *c [ 2 ];
-        nodes2coords(d, nodes, c, 2);
-        this->local2global(answer, c, lcoords, time);
-    }
+    virtual void local2global(FloatArray &answer, const FloatArray &lcoords, const FEIElementGeometry& cellgeo, double time);
     /**
      * Evaluates local coordinates from given global ones. Returns nonzero if local coordinates are interpolating,
      * zero if extrapolating (nonzero is returned if point is within the element geometry, zero otherwise).
      * These derivatives are in global coordinate system (where the nodal coordinates are defined)
      * @param answer contains evaluated local coordinates
-     * @param coords coordinates of nodes defining the interpolation geometry
      * @param lcoords array containing (local) coordinates
      * @param time time
+     * @param cellgeo underlying cell geometry
      * @return nonzero is returned if point is within the element geometry, zero otherwise
      */
-    virtual int  global2local(FloatArray &answer, const FloatArray **coords, const FloatArray &lcoords, double time);
-    /**
-     * Evaluates local coordinates from given global ones. Returns nonzero if local coordinates are interpolating,
-     * zero if extrapolating (nonzero is returned if point is within the element geometry, zero otherwise).
-     * These derivatives are in global coordinate system (where the nodal coordinates are defined)
-     * @param answer contains evaluated local coordinates
-     * @param nodes array of node numbers defining the interpolation geometry
-     * @param lcoords array containing (local) coordinates
-     * @param time time
-     * @return nonzero is returned if point is within the element geometry, zero otherwise
-     */
-    virtual int  global2local(FloatArray &answer, Domain *d, IntArray &nodes, const FloatArray &lcoords, double time) {
-        const FloatArray *c [ 2 ];
-        nodes2coords(d, nodes, c, 2);
-        return this->global2local(answer, c, lcoords, time);
-    }
+    virtual int  global2local(FloatArray &answer, const FloatArray &lcoords, const FEIElementGeometry& cellgeo, double time);
     /**
      * Evaluates the jacobian of transformation between local and global coordinates.
      */
-    virtual double giveTransformationJacobian(const FloatArray **coords, const FloatArray &lcoords, double time);
-    /**
-     * Evaluates the jacobian of transformation between local and global coordinates.
-     */
-    virtual double giveTransformationJacobian(Domain *d, IntArray &nodes, const FloatArray &lcoords, double time) {
-        const FloatArray *c [ 2 ];
-        nodes2coords(d, nodes, c, 2);
-        return this->giveTransformationJacobian(c, lcoords, time);
-    }
+    virtual double giveTransformationJacobian(const FloatArray &lcoords, const FEIElementGeometry& cellgeo, double time);
 
 protected:
-    double computeLength(const FloatArray **coords);
+    double computeLength(const FEIElementGeometry& cellgeo);
 };
 
 

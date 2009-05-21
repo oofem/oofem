@@ -45,7 +45,32 @@
 #include "intarray.h"
 #include "domain.h"
 
+class Element;
+/**
+ * Class representing a general abstraction for cell geometry.
+ * The motivation for this class is that the interpolation classes require to pass underlying cell geometry.
+ * The aim here is to hide and encapsulate as much as possible from actual cell geometry specification,
+ * elements describe its geometry using nodes, which are independent objects, some cells may be
+ * directly specified using vertices, etc.
+ * 
+ */
+class FEICellGeometry {
+ public:
+  virtual int giveNumberOfVertices () const = 0;
+  virtual const FloatArray* giveVertexCoordinates(int i) const = 0;
+};
 
+/**
+ * wrapper aroun element definition to provide FEICellGeometry interface
+ */
+class FEIElementGeometry : public FEICellGeometry {
+ protected:
+  Element* elem;
+ public:
+  FEIElementGeometry (Element* elem) {this->elem = elem;}
+  int giveNumberOfVertices () const;
+  const FloatArray* giveVertexCoordinates(int i) const;
+};
 
 
 /**
@@ -67,99 +92,43 @@ public:
      * Evaluates the array of interpolation functions (shape functions) at given point.
      * @param answer contains resulting array of evaluated interpolation functions
      * @param lcoords array containing (local) coordinates
+     * @param cellgeo underlying cell geometry
      * @param time time
      */
-    virtual void evalN(FloatArray &answer, const FloatArray &lcoords, double time) = 0;
-    /**
-     * Evaluates the array of interpolation functions (shape functions) at given point.
-     * @param answer contains resulting array of evaluated interpolation functions
-     * @param lcoords array containing (local) coordinates
-     * @param time time
-     */
-    virtual void evalN(FloatArray &answer, const FloatArray &lcoords, const IntArray *knotSpan, double time) 
-    {this->evalN (answer, lcoords, time);}
+    virtual void evalN(FloatArray &answer, const FloatArray &lcoords, const FEIElementGeometry& cellgeo, double time) = 0;
     /**
      * Evaluates the matrix of derivatives of interpolation functions (shape functions) at given point.
      * These derivatives are in global coordinate system (where the nodal coordinates are defined)
      * @param matrix contains resulting matrix of derivatives, the member at i,j position contains value of dNi/dxj
-     * @param nodes array of node numbers defining the interpolation geometry
      * @param lcoords array containing (local) coordinates
+     * @param cellgeo underlying cell geometry
      * @param time time
      */
-    virtual void evaldNdx(FloatMatrix &answer, Domain *d, IntArray &nodes, const FloatArray &lcoords, double time) = 0;
-    virtual void evaldNdx(FloatMatrix &answer, Domain *d, IntArray &nodes, const FloatArray &lcoords, const IntArray* knotSpan, double time) {
-      evaldNdx (answer, d, nodes, lcoords, time);}
-    /**
-     * Evaluates the matrix of derivatives of interpolation functions (shape functions) at given point.
-     * These derivatives are in global coordinate system (where the nodal coordinates are defined)
-     * @param matrix contains resulting matrix of derivatives, the member at i,j position contains value of dNi/dxj
-     * @param coords coordinates of nodes defining the interpolation geometry
-     * @param lcoords array containing (local) coordinates
-     * @param time time
-     */
-    virtual void evaldNdx(FloatMatrix &answer, const FloatArray **coords, const FloatArray &lcoords, double time) = 0;
-    virtual void evaldNdx(FloatMatrix &answer, const FloatArray **coords, const FloatArray &lcoords, const IntArray* knotSpan, double time) {
-      evaldNdx (answer, coords, lcoords, time);}
+    virtual void evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEIElementGeometry& cellgeo, double time) = 0;
     /**
      * Evaluates global coordinates from given local ones
      * These derivatives are in global coordinate system (where the nodal coordinates are defined)
      * @param answer contains resulting global coordinates
-     * @param nodes array of node numbers defining the interpolation geometry
      * @param lcoords array containing (local) coordinates
+     * @param cellgeo underlying cell geometry
      * @param time time
      */
-    virtual void local2global(FloatArray &answer, Domain *d, IntArray &nodes, const FloatArray &lcoords, double time) = 0;
-    /**
-     * Evaluates global coordinates from given local ones
-     * These derivatives are in global coordinate system (where the nodal coordinates are defined)
-     * @param answer contains resulting global coordinates
-     * @param coords coordinates of nodes defining the interpolation geometry
-     * @param lcoords array containing (local) coordinates
-     * @param time time
-     */
-    virtual void local2global(FloatArray &answer, const FloatArray **coords, const FloatArray &lcoords, double time) = 0;
+    virtual void local2global(FloatArray &answer, const FloatArray &lcoords, const FEIElementGeometry& cellgeo, double time) = 0;
     /**
      * Evaluates local coordinates from given global ones. Returns nonzero if local coordinates are interpolating,
      * zero if extrapolating (nonzero is returned if point is within the element geometry, zero otherwise).
      * These derivatives are in global coordinate system (where the nodal coordinates are defined)
      * @param answer contains evaluated local coordinates
-     * @param nodes array of node numbers defining the interpolation geometry
      * @param lcoords array containing (local) coordinates
+     * @param cellgeo underlying cell geometry
      * @param time time
      * @return nonzero is returned if point is within the element geometry, zero otherwise
      */
-    virtual int  global2local(FloatArray &answer, Domain *d, IntArray &nodes, const FloatArray &lcoords, double time) = 0;
-    /**
-     * Evaluates local coordinates from given global ones. Returns nonzero if local coordinates are interpolating,
-     * zero if extrapolating (nonzero is returned if point is within the element geometry, zero otherwise).
-     * These derivatives are in global coordinate system (where the nodal coordinates are defined)
-     * @param answer contains evaluated local coordinates
-     * @param coords coordinates of nodes defining the interpolation geometry
-     * @param lcoords array containing (local) coordinates
-     * @param time time
-     * @return nonzero is returned if point is within the element geometry, zero otherwise
-     */
-    virtual int  global2local(FloatArray &answer, const FloatArray **coords, const FloatArray &lcoords, double time) = 0;
+    virtual int  global2local(FloatArray &answer, const FloatArray &lcoords, const FEIElementGeometry& cellgeo, double time) = 0;
     /**
      * Evaluates the jacobian of transformation between local and global coordinates.
      */
-    virtual double giveTransformationJacobian(const FloatArray **coords, const FloatArray &lcoords, double time) = 0;
-    virtual double giveTransformationJacobian(const FloatArray **coords, const FloatArray &lcoords, const IntArray* span, double time) {
-      return giveTransformationJacobian (coords, lcoords, time);}
-    /**
-     * Evaluates the jacobian of transformation between local and global coordinates.
-     */
-    virtual double giveTransformationJacobian(Domain *d, IntArray &nodes, const FloatArray &lcoords, double time) = 0;
-    virtual double giveTransformationJacobian(Domain *d, IntArray &nodes, const FloatArray &lcoords, const IntArray* span, double time) {
-      return giveTransformationJacobian (d, nodes, lcoords, time);}
-      
-    /**
-     * Sets up the node coordinates based on given node numbers
-     * @param nodes array of node numbers
-     * @param coords coordinates of nodes, should be properly sized (out)
-     * @param n number of nodal records
-     */
-    void nodes2coords(Domain *d, IntArray &nodes, const FloatArray **c, int n);
+    virtual double giveTransformationJacobian(const FloatArray &lcoords, const FEIElementGeometry& cellgeo, double time) = 0;
     /**
        Returns indices (zero based) of nonzero basis functions for given knot span 
        The knot span identifies the sub-region of the finite element
@@ -198,6 +167,7 @@ public:
 };
 
 
+  
 
 
 #endif // feinterpol_h

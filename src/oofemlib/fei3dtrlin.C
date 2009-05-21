@@ -41,7 +41,7 @@
 #include "mathfem.h"
 
 void
-FEI3dTrLin :: evalN(FloatArray &answer, const FloatArray &lcoords, double time)
+FEI3dTrLin :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEIElementGeometry& cellgeo, double time)
 {
     answer.resize(4);
 
@@ -54,25 +54,25 @@ FEI3dTrLin :: evalN(FloatArray &answer, const FloatArray &lcoords, double time)
 }
 
 void
-FEI3dTrLin :: evaldNdx(FloatMatrix &answer, const FloatArray **coords, const FloatArray &lcoords, double time)
+FEI3dTrLin :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEIElementGeometry& cellgeo, double time)
 {
     double x1, x2, x3, x4, y1, y2, y3, y4, z1, z2, z3, z4, vol;
     answer.resize(4, 3);
 
-    x1 = coords [ 0 ]->at(1);
-    x2 = coords [ 1 ]->at(1);
-    x3 = coords [ 2 ]->at(1);
-    x4 = coords [ 3 ]->at(1);
+    x1 = cellgeo.giveVertexCoordinates(1)->at(1);
+    x2 = cellgeo.giveVertexCoordinates(2)->at(1);
+    x3 = cellgeo.giveVertexCoordinates(3)->at(1);
+    x4 = cellgeo.giveVertexCoordinates(4)->at(1);
 
-    y1 = coords [ 0 ]->at(2);
-    y2 = coords [ 1 ]->at(2);
-    y3 = coords [ 2 ]->at(2);
-    y4 = coords [ 3 ]->at(2);
+    y1 = cellgeo.giveVertexCoordinates(1)->at(2);
+    y2 = cellgeo.giveVertexCoordinates(2)->at(2);
+    y3 = cellgeo.giveVertexCoordinates(3)->at(2);
+    y4 = cellgeo.giveVertexCoordinates(4)->at(2);
 
-    z1 = coords [ 0 ]->at(3);
-    z2 = coords [ 1 ]->at(3);
-    z3 = coords [ 2 ]->at(3);
-    z4 = coords [ 3 ]->at(3);
+    z1 = cellgeo.giveVertexCoordinates(1)->at(3);
+    z2 = cellgeo.giveVertexCoordinates(2)->at(3);
+    z3 = cellgeo.giveVertexCoordinates(3)->at(3);
+    z4 = cellgeo.giveVertexCoordinates(4)->at(3);
 
     vol = ( ( x4 - x1 ) * ( y2 - y1 ) * ( z3 - z1 ) - ( x4 - x1 ) * ( y3 - y1 ) * ( z2 - z1 ) +
            ( x3 - x1 ) * ( y4 - y1 ) * ( z2 - z1 ) - ( x2 - x1 ) * ( y4 - y1 ) * ( z3 - z1 ) +
@@ -101,7 +101,7 @@ FEI3dTrLin :: evaldNdx(FloatMatrix &answer, const FloatArray **coords, const Flo
 }
 
 void
-FEI3dTrLin :: local2global(FloatArray &answer, const FloatArray **coords, const FloatArray &lcoords, double time)
+FEI3dTrLin :: local2global(FloatArray &answer, const FloatArray &lcoords, const FEIElementGeometry& cellgeo, double time)
 {
     int i;
     FloatArray l(4);
@@ -114,34 +114,34 @@ FEI3dTrLin :: local2global(FloatArray &answer, const FloatArray **coords, const 
     l.at(4) = 1.0 - l.at(1) - l.at(2) - l.at(3);
 
     for ( i = 1; i <= 4; i++ ) {
-        answer.at(1) += l.at(i) * coords [ i - 1 ]->at(1);
-        answer.at(2) += l.at(i) * coords [ i - 1 ]->at(2);
-        answer.at(3) += l.at(i) * coords [ i - 1 ]->at(3);
+      answer.at(1) += l.at(i) * cellgeo.giveVertexCoordinates(i)->at(1);
+      answer.at(2) += l.at(i) * cellgeo.giveVertexCoordinates(i)->at(2);
+      answer.at(3) += l.at(i) * cellgeo.giveVertexCoordinates(i)->at(3);
     }
 }
 
 #define POINT_TOL 1.e-3
 
 int
-FEI3dTrLin :: global2local(FloatArray &answer, const FloatArray **nc, const FloatArray &coords, double time)
+FEI3dTrLin :: global2local(FloatArray &answer, const FloatArray &coords, const FEIElementGeometry& cellgeo, double time)
 {
     double x1, x2, x3, x4, y1, y2, y3, y4, z1, z2, z3, z4, xp, yp, zp, volume;
     answer.resize(4);
 
-    x1 = nc [ 0 ]->at(1);
-    x2 = nc [ 1 ]->at(1);
-    x3 = nc [ 2 ]->at(1);
-    x4 = nc [ 3 ]->at(1);
+    x1 = cellgeo.giveVertexCoordinates(1)->at(1);
+    x2 = cellgeo.giveVertexCoordinates(2)->at(1);
+    x3 = cellgeo.giveVertexCoordinates(3)->at(1);
+    x4 = cellgeo.giveVertexCoordinates(4)->at(1);
 
-    y1 = nc [ 0 ]->at(2);
-    y2 = nc [ 1 ]->at(2);
-    y3 = nc [ 2 ]->at(2);
-    y4 = nc [ 3 ]->at(2);
+    y1 = cellgeo.giveVertexCoordinates(1)->at(2);
+    y2 = cellgeo.giveVertexCoordinates(2)->at(2);
+    y3 = cellgeo.giveVertexCoordinates(3)->at(2);
+    y4 = cellgeo.giveVertexCoordinates(4)->at(2);
 
-    z1 = nc [ 0 ]->at(3);
-    z2 = nc [ 1 ]->at(3);
-    z3 = nc [ 2 ]->at(3);
-    z4 = nc [ 3 ]->at(3);
+    z1 = cellgeo.giveVertexCoordinates(1)->at(3);
+    z2 = cellgeo.giveVertexCoordinates(2)->at(3);
+    z3 = cellgeo.giveVertexCoordinates(3)->at(3);
+    z4 = cellgeo.giveVertexCoordinates(4)->at(3);
 
     xp = coords.at(1);
     yp = coords.at(2);
@@ -183,24 +183,24 @@ FEI3dTrLin :: global2local(FloatArray &answer, const FloatArray **nc, const Floa
 
 
 double
-FEI3dTrLin :: giveTransformationJacobian(const FloatArray **coords, const FloatArray &lcoords, double time)
+FEI3dTrLin :: giveTransformationJacobian(const FloatArray &lcoords, const FEIElementGeometry& cellgeo, double time)
 {
     double volume, x1, x2, x3, x4, y1, y2, y3, y4, z1, z2, z3, z4;
 
-    x1 = coords [ 0 ]->at(1);
-    x2 = coords [ 1 ]->at(1);
-    x3 = coords [ 2 ]->at(1);
-    x4 = coords [ 3 ]->at(1);
+    x1 = cellgeo.giveVertexCoordinates(1)->at(1);
+    x2 = cellgeo.giveVertexCoordinates(2)->at(1);
+    x3 = cellgeo.giveVertexCoordinates(3)->at(1);
+    x4 = cellgeo.giveVertexCoordinates(4)->at(1);
 
-    y1 = coords [ 0 ]->at(2);
-    y2 = coords [ 1 ]->at(2);
-    y3 = coords [ 2 ]->at(2);
-    y4 = coords [ 3 ]->at(2);
+    y1 = cellgeo.giveVertexCoordinates(1)->at(2);
+    y2 = cellgeo.giveVertexCoordinates(2)->at(2);
+    y3 = cellgeo.giveVertexCoordinates(3)->at(2);
+    y4 = cellgeo.giveVertexCoordinates(4)->at(2);
 
-    z1 = coords [ 0 ]->at(3);
-    z2 = coords [ 1 ]->at(3);
-    z3 = coords [ 2 ]->at(3);
-    z4 = coords [ 3 ]->at(3);
+    z1 = cellgeo.giveVertexCoordinates(1)->at(3);
+    z2 = cellgeo.giveVertexCoordinates(2)->at(3);
+    z3 = cellgeo.giveVertexCoordinates(3)->at(3);
+    z4 = cellgeo.giveVertexCoordinates(4)->at(3);
 
     volume = ( ( x4 - x1 ) * ( y2 - y1 ) * ( z3 - z1 ) - ( x4 - x1 ) * ( y3 - y1 ) * ( z2 - z1 ) +
               ( x3 - x1 ) * ( y4 - y1 ) * ( z2 - z1 ) - ( x2 - x1 ) * ( y4 - y1 ) * ( z3 - z1 ) +
@@ -215,7 +215,7 @@ FEI3dTrLin :: giveTransformationJacobian(const FloatArray **coords, const FloatA
 
 
 void
-FEI3dTrLin :: edgeEvalN(FloatArray &answer, const FloatArray &lcoords, double time)
+FEI3dTrLin :: edgeEvalN(FloatArray &answer, const FloatArray &lcoords, const FEIElementGeometry& cellgeo, double time)
 {
     double ksi = lcoords.at(1);
     answer.resize(2);
@@ -226,20 +226,20 @@ FEI3dTrLin :: edgeEvalN(FloatArray &answer, const FloatArray &lcoords, double ti
 
 void
 FEI3dTrLin :: edgeEvaldNdx(FloatMatrix &answer, int iedge,
-                           const FloatArray **nc, const FloatArray &lcoords, double time)
+                           const FloatArray &lcoords, const FEIElementGeometry& cellgeo, double time)
 {
     double coeff, l, x1, x2, y1, y2, z1, z2;
     IntArray edgeNodes;
     this->computeLocalEdgeMapping(edgeNodes, iedge);
-    l = this->edgeComputeLength(edgeNodes, nc);
+    l = this->edgeComputeLength(edgeNodes, cellgeo);
     coeff = 1.0 / l / l;
 
-    x1 = nc [ edgeNodes.at(1) - 1 ]->at(1);
-    y1 = nc [ edgeNodes.at(1) - 1 ]->at(2);
-    z1 = nc [ edgeNodes.at(1) - 1 ]->at(3);
-    x2 = nc [ edgeNodes.at(2) - 1 ]->at(1);
-    y2 = nc [ edgeNodes.at(2) - 1 ]->at(2);
-    z2 = nc [ edgeNodes.at(2) - 1 ]->at(3);
+    x1 = cellgeo.giveVertexCoordinates(edgeNodes.at(1))->at(1);
+    y1 = cellgeo.giveVertexCoordinates(edgeNodes.at(1))->at(2);
+    z1 = cellgeo.giveVertexCoordinates(edgeNodes.at(1))->at(3);
+    x2 = cellgeo.giveVertexCoordinates(edgeNodes.at(2))->at(1);
+    y2 = cellgeo.giveVertexCoordinates(edgeNodes.at(2))->at(2);
+    z2 = cellgeo.giveVertexCoordinates(edgeNodes.at(2))->at(3);
 
     answer.resize(2, 3);
     answer.at(1, 1) = ( x1 - x2 ) * coeff;
@@ -253,29 +253,29 @@ FEI3dTrLin :: edgeEvaldNdx(FloatMatrix &answer, int iedge,
 
 void
 FEI3dTrLin :: edgeLocal2global(FloatArray &answer, int iedge,
-                               const FloatArray **nc, const FloatArray &lcoords, double time)
+                               const FloatArray &lcoords, const FEIElementGeometry& cellgeo, double time)
 {
     IntArray edgeNodes;
     FloatArray n;
     this->computeLocalEdgeMapping(edgeNodes, iedge);
-    this->edgeEvalN(n, lcoords, time);
+    this->edgeEvalN(n, lcoords, cellgeo, time);
 
     answer.resize(3);
-    answer.at(1) = ( n.at(1) * nc [ edgeNodes.at(1) - 1 ]->at(1) +
-                    n.at(2) * nc [ edgeNodes.at(2) - 1 ]->at(1) );
-    answer.at(2) = ( n.at(1) * nc [ edgeNodes.at(1) - 1 ]->at(2) +
-                    n.at(2) * nc [ edgeNodes.at(2) - 1 ]->at(2) );
-    answer.at(3) = ( n.at(1) * nc [ edgeNodes.at(1) - 1 ]->at(3) +
-                    n.at(2) * nc [ edgeNodes.at(2) - 1 ]->at(3) );
+    answer.at(1) = ( n.at(1) * cellgeo.giveVertexCoordinates(edgeNodes.at(1))->at(1) +
+                     n.at(2) * cellgeo.giveVertexCoordinates(edgeNodes.at(2))->at(1) );
+    answer.at(2) = ( n.at(1) * cellgeo.giveVertexCoordinates(edgeNodes.at(1))->at(2) +
+                     n.at(2) * cellgeo.giveVertexCoordinates(edgeNodes.at(2))->at(2) );
+    answer.at(3) = ( n.at(1) * cellgeo.giveVertexCoordinates(edgeNodes.at(1))->at(3) +
+                     n.at(2) * cellgeo.giveVertexCoordinates(edgeNodes.at(2))->at(3) );
 }
 
 
 double
-FEI3dTrLin :: edgeGiveTransformationJacobian(int iedge, const FloatArray **nc, const FloatArray &lcoords, double time)
+FEI3dTrLin :: edgeGiveTransformationJacobian(int iedge, const FloatArray &lcoords, const FEIElementGeometry& cellgeo, double time)
 {
     IntArray edgeNodes;
     this->computeLocalEdgeMapping(edgeNodes, iedge);
-    return 0.5 * this->edgeComputeLength(edgeNodes, nc);
+    return 0.5 * this->edgeComputeLength(edgeNodes, cellgeo);
 }
 
 
@@ -312,22 +312,22 @@ FEI3dTrLin :: computeLocalEdgeMapping(IntArray &edgeNodes, int iedge)
 }
 
 double
-FEI3dTrLin :: edgeComputeLength(IntArray &edgeNodes, const FloatArray **nc)
+FEI3dTrLin :: edgeComputeLength(IntArray &edgeNodes, const FEIElementGeometry& cellgeo)
 {
     double dx, dy, dz;
     int nodeA, nodeB;
 
-    nodeA   = ( edgeNodes.at(1) - 1 );
-    nodeB   = ( edgeNodes.at(2) - 1 );
+    nodeA   = ( edgeNodes.at(1) );
+    nodeB   = ( edgeNodes.at(2) );
 
-    dx      = nc [ nodeB ]->at(1) - nc [ nodeA ]->at(1);
-    dy      = nc [ nodeB ]->at(2) - nc [ nodeA ]->at(2);
-    dz      = nc [ nodeB ]->at(3) - nc [ nodeA ]->at(3);
+    dx      = cellgeo.giveVertexCoordinates(nodeB)->at(1) - cellgeo.giveVertexCoordinates(nodeA)->at(1);
+    dy      = cellgeo.giveVertexCoordinates(nodeB)->at(2) - cellgeo.giveVertexCoordinates(nodeA)->at(2);
+    dz      = cellgeo.giveVertexCoordinates(nodeB)->at(3) - cellgeo.giveVertexCoordinates(nodeA)->at(3);
     return ( sqrt(dx * dx + dy * dy + dz * dz) );
 }
 
 void
-FEI3dTrLin :: surfaceEvalN(FloatArray &answer, const FloatArray &lcoords, double time)
+FEI3dTrLin :: surfaceEvalN(FloatArray &answer, const FloatArray &lcoords, const FEIElementGeometry& cellgeo, double time)
 {
     answer.resize(3);
 
@@ -340,7 +340,7 @@ FEI3dTrLin :: surfaceEvalN(FloatArray &answer, const FloatArray &lcoords, double
 
 void
 FEI3dTrLin :: surfaceLocal2global(FloatArray &answer, int iedge,
-                                  const FloatArray **nc, const FloatArray &lcoords, double time)
+                                  const FloatArray &lcoords, const FEIElementGeometry& cellgeo, double time)
 {
     double l1, l2, l3;
     answer.resize(3);
@@ -352,33 +352,33 @@ FEI3dTrLin :: surfaceLocal2global(FloatArray &answer, int iedge,
     l2 = lcoords.at(2);
     l3 = 1.0 - l1 - l2;
 
-    answer.at(1) = ( l1 * nc [ nodes.at(1) - 1 ]->at(1) +
-                    l2 * nc [ nodes.at(2) - 1 ]->at(1) +
-                    l3 * nc [ nodes.at(3) - 1 ]->at(1) );
-    answer.at(2) = ( l1 * nc [ nodes.at(1) - 1 ]->at(2) +
-                    l2 * nc [ nodes.at(2) - 1 ]->at(2) +
-                    l3 * nc [ nodes.at(3) - 1 ]->at(2) );
-    answer.at(3) = ( l1 * nc [ nodes.at(1) - 1 ]->at(3) +
-                    l2 * nc [ nodes.at(2) - 1 ]->at(3) +
-                    l3 * nc [ nodes.at(3) - 1 ]->at(3) );
+    answer.at(1) = ( l1 * cellgeo.giveVertexCoordinates(nodes.at(1))->at(1) +
+                     l2 * cellgeo.giveVertexCoordinates(nodes.at(2))->at(1) +
+                     l3 * cellgeo.giveVertexCoordinates(nodes.at(3))->at(1) );
+    answer.at(2) = ( l1 * cellgeo.giveVertexCoordinates(nodes.at(1))->at(2) +
+                     l2 * cellgeo.giveVertexCoordinates(nodes.at(2))->at(2) +
+                     l3 * cellgeo.giveVertexCoordinates(nodes.at(3))->at(2) );
+    answer.at(3) = ( l1 * cellgeo.giveVertexCoordinates(nodes.at(1))->at(3) +
+                     l2 * cellgeo.giveVertexCoordinates(nodes.at(2))->at(3) +
+                     l3 * cellgeo.giveVertexCoordinates(nodes.at(3))->at(3) );
 }
 
 double
-FEI3dTrLin :: surfaceGiveTransformationJacobian(int isurf, const FloatArray **nc, const FloatArray &lcoords,
-                                                double time)
+FEI3dTrLin :: surfaceGiveTransformationJacobian(int isurf, const FloatArray &lcoords,
+                                                const FEIElementGeometry& cellgeo, double time)
 {
     int n1, n2, n3;
     IntArray snodes(3);
     this->computeLocalSurfaceMapping(snodes, isurf);
 
-    n1 = ( snodes.at(1) - 1 );
-    n2 = ( snodes.at(2) - 1 );
-    n3 = ( snodes.at(3) - 1 );
+    n1 = ( snodes.at(1) );
+    n2 = ( snodes.at(2) );
+    n3 = ( snodes.at(3) );
 
     FloatArray a(3), b(3), c(3);
     for ( int i = 1; i <= 3; i++ ) {
-        a.at(i) = nc [ n2 ]->at(i) - nc [ n1 ]->at(i);
-        b.at(i) = nc [ n3 ]->at(i) - nc [ n1 ]->at(i);
+      a.at(i) = cellgeo.giveVertexCoordinates(n2)->at(i) - cellgeo.giveVertexCoordinates(n1)->at(i);
+      b.at(i) = cellgeo.giveVertexCoordinates(n3)->at(i) - cellgeo.giveVertexCoordinates(n1)->at(i);
     }
 
     c.beVectorProductOf(a, b);

@@ -230,21 +230,40 @@ HangingNode :: computeMasterContribution()
     }
 
     switch ( typeOfContrib ) {
-    case 211: {
-        FEI1dLin(0).evalN(* masterContribution, * locoords, 0.0);
-        break;
-    }                                                                               // linear truss
-    case 312: {
-        FEI2dTrLin(0, 0).evalN(* masterContribution, * locoords, 0.0);
-        break;
-    }                                                                               // linear triangle
-    case 412: {
-        FEI2dQuadLin(0, 0).evalN(* masterContribution, * locoords, 0.0);
-        break;
+    case 211: {                                                                     // linear truss
+      masterContribution->resize(2);
+      masterContribution->at(1) = ( 1. - locoords->at(1) ) * 0.5;
+      masterContribution->at(1) = ( 1. + locoords->at(1) ) * 0.5;
+      break;
+    }                                                                       
+    case 312: {                                                                     // linear triangle
+      masterContribution->resize(3);
+      masterContribution->at(1) = locoords->at(1);
+      masterContribution->at(2) = locoords->at(2);
+      masterContribution->at(3) = 1.0-locoords->at(1)-locoords->at(2);
+      break;
+    }          
+    case 412: {                                                                     // linear rectangle
+      masterContribution->resize(4);
+      masterContribution->at(1) = ( 1. + locoords->at(1) ) * ( 1. + locoords->at(2) ) * 0.25;
+      masterContribution->at(2) = ( 1. - locoords->at(1) ) * ( 1. + locoords->at(2) ) * 0.25;
+      masterContribution->at(3) = ( 1. - locoords->at(1) ) * ( 1. - locoords->at(2) ) * 0.25;
+      masterContribution->at(4) = ( 1. + locoords->at(1) ) * ( 1. - locoords->at(2) ) * 0.25;
+      break;
     }                                                                               // linear rectangle
     case 813: {
-        FEI3dHexaLin().evalN(* masterContribution, * locoords, 0.0);
-        break;
+      double x = locoords->at(1), y = locoords->at(2), z = locoords->at(3);
+
+      masterContribution->resize(8);
+      masterContribution->at(1)  = 0.125 * ( 1. - x ) * ( 1. - y ) * ( 1. + z );
+      masterContribution->at(2)  = 0.125 * ( 1. - x ) * ( 1. + y ) * ( 1. + z );
+      masterContribution->at(3)  = 0.125 * ( 1. + x ) * ( 1. + y ) * ( 1. + z );
+      masterContribution->at(4)  = 0.125 * ( 1. + x ) * ( 1. - y ) * ( 1. + z );
+      masterContribution->at(5)  = 0.125 * ( 1. - x ) * ( 1. - y ) * ( 1. - z );
+      masterContribution->at(6)  = 0.125 * ( 1. - x ) * ( 1. + y ) * ( 1. - z );
+      masterContribution->at(7)  = 0.125 * ( 1. + x ) * ( 1. + y ) * ( 1. - z );
+      masterContribution->at(8)  = 0.125 * ( 1. + x ) * ( 1. - y ) * ( 1. - z );
+      break;
     }                                                                               // linear hexahedron
     case 321: {
         masterContribution->resize(3);
