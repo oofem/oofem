@@ -236,9 +236,11 @@ FloatArray :: beSubArrayOf(const FloatArray &src, const IntArray &indx)
 
     n = indx.giveSize();
 
+    /*
     if ( src.size != n ) {
         OOFEM_ERROR("FloatArray :: beSubArrayOf - size mismatch");
     }
+    */
 
     for ( isize = 0, i = 1; i <= n; i++ ) {
         if ( indx.at(i) > isize ) {

@@ -127,7 +127,7 @@ BSplineInterpolation::initializeFrom(InputRecord *ir) {
     if(knotMultiplicity_tmp.giveSize() == 0){
       // default multiplicity
       for(i=1; i<knotVector_tmp.giveSize()-1; i++)knotMul[i] = 1;
-      knotMultiplicity_tmp.resize(nsd);
+      knotMultiplicity_tmp.resize(knotVector_tmp.giveSize());
     }
     else{
       if(knotMultiplicity_tmp.giveSize() != knotVector_tmp.giveSize()){
@@ -156,7 +156,7 @@ BSplineInterpolation::initializeFrom(InputRecord *ir) {
 
     // sum the size of knot vector with multiplicity values
     sum = 0;
-    for(i=0; i<knotVector_tmp.giveSize(); i++)sum+=knotMultiplicity_tmp.at(i+1);
+    for(i=0; i<knotVector_tmp.giveSize(); i++)sum+=knotMul[i];
 			
     knotVec = knotVector[n] = new double [ sum ];
 
@@ -208,7 +208,7 @@ void BSplineInterpolation::evalN(FloatArray &answer, const FloatArray &lcoords, 
   }
 }
 
-
+ 
 void BSplineInterpolation::evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry& cellgeo, double time) {
 
   FEIIGAElementGeometryWrapper* gw = (FEIIGAElementGeometryWrapper*) &cellgeo;
@@ -231,29 +231,30 @@ void BSplineInterpolation::evaldNdx(FloatMatrix &answer, const FloatArray &lcoor
 
   for (i=0; i< nsd; i++) {
     this->DersBasisFuns(1, lcoords(i), span.at(i+1), degree[i], knotVector[i], ders[i]);
-    count *=giveNumberOfKnotBasisFunctions ();
   }
+  count =giveNumberOfKnotBasisFunctions ();
+
   jacobian.zero();
   answer.resize(count, nsd);
-  answer.zero();
+  //answer.zero();
   if (nsd == 2) {
     uind = span.at(1)-degree[0];
     for (l=0;l<=degree[1]; l++) {
       temp.zero();
-      vind = span.at(2)-degree[1]+1;
+      vind = span.at(2)-degree[1]+l;
       for (k=0; k<=degree[0]; k++) {
-        temp(0) += ders[0](1,k)*cellgeo.giveVertexCoordinates((uind+k)*numberOfControllPoints[1]+vind+1)->at(1);  // HAHA see local2global
-        temp(1) += ders[0](1,k)*cellgeo.giveVertexCoordinates((uind+k)*numberOfControllPoints[1]+vind+1)->at(2);  // HAHA coords
+        temp(0) += ders[0](1,k)*cellgeo.giveVertexCoordinates((vind)*numberOfControllPoints[0]+uind+k+1)->at(1);  // HAHA see local2global
+        temp(1) += ders[0](1,k)*cellgeo.giveVertexCoordinates((vind)*numberOfControllPoints[0]+uind+k+1)->at(2);  // HAHA coords
       }
       jacobian(0,0) += ders[1](0,l)*temp(0);
       jacobian(0,1) += ders[1](0,l)*temp(1);
     }
     for (l=0;l<=degree[1]; l++) {
       temp.zero();
-      vind = span.at(2)-degree[1]+1;
+      vind = span.at(2)-degree[1]+l;
       for (k=0; k<=degree[0]; k++) {
-        temp(0) += ders[0](0,k)*cellgeo.giveVertexCoordinates((uind+k)*numberOfControllPoints[1]+vind+1)->at(1);  // HAHA see local2global
-        temp(1) += ders[0](0,k)*cellgeo.giveVertexCoordinates((uind+k)*numberOfControllPoints[1]+vind+1)->at(2);  // HAHA coords
+        temp(0) += ders[0](0,k)*cellgeo.giveVertexCoordinates((vind)*numberOfControllPoints[0]+uind+k+1)->at(1);  // HAHA see local2global
+        temp(1) += ders[0](0,k)*cellgeo.giveVertexCoordinates((vind)*numberOfControllPoints[0]+uind+k+1)->at(2);  // HAHA coords
       }
       jacobian(1,0) += ders[1](1,l)*temp(0);
       jacobian(1,1) += ders[1](1,l)*temp(1);
@@ -265,13 +266,13 @@ void BSplineInterpolation::evaldNdx(FloatMatrix &answer, const FloatArray &lcoor
     }
 		
     cnt=0;
-    // HAHA ordering ??? 
-    for (k=0; k<=degree[0]; k++) {
-      for (l=0;l<=degree[1]; l++) {
+    for (l=0;l<=degree[1]; l++) {
+      for (k=0; k<=degree[0]; k++) {
         temp(0) = ders[0](1,k)*ders[1](0,l);
-        temp(1) = ders[0](0,k)*ders[1](1,0);
-        answer(cnt,0) += (jacobian(1,1)*temp(0)-jacobian(0,1)*temp(1)) / Jacob;
-        answer(cnt,1) += (-jacobian(1,0)*temp(0)+jacobian(0,0)*temp(1)) / Jacob;
+        temp(1) = ders[0](0,k)*ders[1](1,l);
+        answer(cnt,0) = (jacobian(1,1)*temp(0)-jacobian(0,1)*temp(1)) / Jacob;
+        answer(cnt,1) = (-jacobian(1,0)*temp(0)+jacobian(0,0)*temp(1)) / Jacob;
+        cnt++;
       }
     }
   }
@@ -309,12 +310,12 @@ void BSplineInterpolation::local2global(FloatArray &answer, const FloatArray &lc
     answer.zero();
     for (l=0;l<=degree[1]; l++) {
       temp.zero();
-      vind = span(1)-degree[1]+1;  
+      vind = span(1)-degree[1]+l;  
       for (k=0; k<=degree[0]; k++) {
         //temp(0) = temp(0) + N[0][k]*d->giveNode(nodes.at((uind+k)*numberOfControllPoints[0]+vind))->giveCoordinate(1);
         //temp(1) = temp(1) + N[0][k]*d->giveNode(nodes.at((uind+k)*numberOfControllPoints[0]+vind))->giveCoordinate(2);
-        temp(0) += N[0](k)*cellgeo.giveVertexCoordinates((uind+k)*numberOfControllPoints[0]+vind+1)->at(1);
-        temp(1) += N[0](k)*cellgeo.giveVertexCoordinates((uind+k)*numberOfControllPoints[0]+vind+1)->at(2);
+        temp(0) += N[0](k)*cellgeo.giveVertexCoordinates((vind)*numberOfControllPoints[0]+uind+k+1)->at(1);
+        temp(1) += N[0](k)*cellgeo.giveVertexCoordinates((vind)*numberOfControllPoints[0]+uind+k+1)->at(2);
       }
       answer(0) += N[1](l)*temp(0);
       answer(1) += N[1](l)*temp(1);
@@ -331,7 +332,7 @@ double BSplineInterpolation::giveTransformationJacobian(const FloatArray &lcoord
   FloatMatrix ders[nsd];
   FloatArray temp(nsd);
   double Jacob;
-  int count = 1, i, l, k, uind, vind;
+  int i, l, k, uind, vind;
 
   IntArray span(nsd);
 
@@ -345,27 +346,27 @@ double BSplineInterpolation::giveTransformationJacobian(const FloatArray &lcoord
 
   for (i=0; i< nsd; i++) {
     this->DersBasisFuns(1, lcoords(i), span.at(i+1), degree[i], knotVector[i], ders[i]);
-    count *=giveNumberOfKnotBasisFunctions ();
   }
+
   jacobian.zero();
   if (nsd == 2) {
     uind = span.at(1)-degree[0];
     for (l=0;l<=degree[1]; l++) {
       temp.zero();
-      vind = span.at(2)-degree[1]+1;
+      vind = span.at(2)-degree[1]+l;
       for (k=0; k<=degree[0]; k++) {
-        temp(0) += ders[0](1,k)*cellgeo.giveVertexCoordinates((uind+k)*numberOfControllPoints[1]+vind+1)->at(1);  // HAHA see local2global
-        temp(1) += ders[0](1,k)*cellgeo.giveVertexCoordinates((uind+k)*numberOfControllPoints[1]+vind+1)->at(2);  // HAHA coords
+        temp(0) += ders[0](1,k)*cellgeo.giveVertexCoordinates((vind)*numberOfControllPoints[0]+uind+k+1)->at(1);  // HAHA see local2global
+        temp(1) += ders[0](1,k)*cellgeo.giveVertexCoordinates((vind)*numberOfControllPoints[0]+uind+k+1)->at(2);  // HAHA coords
       }
       jacobian(0,0) += ders[1](0,l)*temp(0);
       jacobian(0,1) += ders[1](0,l)*temp(1);
     }
     for (l=0;l<=degree[1]; l++) {
       temp.zero();
-      vind = span.at(2)-degree[1]+1;
+      vind = span.at(2)-degree[1]+l;
       for (k=0; k<=degree[0]; k++) {
-        temp(0) += ders[0](0,k)*cellgeo.giveVertexCoordinates((uind+k)*numberOfControllPoints[1]+vind+1)->at(1);  // HAHA see local2global
-        temp(1) += ders[0](0,k)*cellgeo.giveVertexCoordinates((uind+k)*numberOfControllPoints[1]+vind+1)->at(2);  // HAHA coords
+        temp(0) += ders[0](0,k)*cellgeo.giveVertexCoordinates((vind)*numberOfControllPoints[0]+uind+k+1)->at(1);  // HAHA see local2global
+        temp(1) += ders[0](0,k)*cellgeo.giveVertexCoordinates((vind)*numberOfControllPoints[0]+uind+k+1)->at(2);  // HAHA coords
       }
       jacobian(1,0) += ders[1](1,l)*temp(0);
       jacobian(1,1) += ders[1](1,l)*temp(1);
@@ -375,9 +376,8 @@ double BSplineInterpolation::giveTransformationJacobian(const FloatArray &lcoord
     if(fabs(Jacob) < 1.0e-10){
       OOFEM_ERROR ("evaldNdx - zero Jacobian");
     }
-		
-  }
-  else {
+    
+  } else {
     OOFEM_ERROR2 ("evaldNdx not implemented for nsd = %d", nsd);
   }
   return Jacob;
@@ -389,11 +389,11 @@ int BSplineInterpolation::giveKnotBasisFuncMask (const IntArray& knotSpan, IntAr
   if (nsd == 2) {
     mask.resize((degree[0]+1)*(degree[1]+1));
     c=1;
-    for (_i=0; _i<=degree[0]; _i++) {
-      _iindx = (_i+knotSpan(0)-degree[0]);
-      for (_j=0; _j<=degree[1]; _j++) {
-        _jindx = (_j+knotSpan(1)-degree[1]);
-        mask.at(c++) = _iindx+(_jindx)*numberOfControllPoints[0];
+    for (_i=0; _i<=degree[1]; _i++) {
+      _iindx = (_i+knotSpan(1)-degree[1]);
+      for (_j=0; _j<=degree[0]; _j++) {
+        _jindx = (_j+knotSpan(0)-degree[0]);
+        mask.at(c++) = _jindx+(_iindx)*numberOfControllPoints[0]+1;
       }
     }          
   } else {
@@ -548,6 +548,8 @@ IRResultType IGAElement::initializeFrom(InputRecord *ir) {
   FloatArray newgpcoords;
 
   Element::initializeFrom (ir); // read nodes , material, cross section
+  // set number of dofmanagers
+  this->numberOfDofMans = dofManArray.giveSize();
   this->giveInterpolation()->initializeFrom (ir); // read geometry
 
   int ** const knotMultiplicity = this->giveInterpolation()->giveKnotMultiplicity(); 
@@ -562,13 +564,13 @@ IRResultType IGAElement::initializeFrom(InputRecord *ir) {
     newgpcoords.resize(2);
     indx = -1; 
     IntArray knotSpan(2); 
-    knotSpan.at(1) = -1; 
-    for (ui=0; ui<this->giveInterpolation()->giveNumberOfKnotSpans(1); ui++) {
-      knotSpan.at(1) += knotMultiplicity[0][ui];
-      knotSpan.at(2) = -1;
-      for (vi=0; vi<this->giveInterpolation()->giveNumberOfKnotSpans(2); vi++) {
+    knotSpan.at(2) = -1; 
+    for (vi=0; vi<this->giveInterpolation()->giveNumberOfKnotSpans(2); vi++) {
+      knotSpan.at(2) += knotMultiplicity[1][vi];
+      knotSpan.at(1) = -1;
+      for (ui=0; ui<this->giveInterpolation()->giveNumberOfKnotSpans(1); ui++) {
         indx++;
-        knotSpan.at(2)+=knotMultiplicity[1][vi];
+        knotSpan.at(1)+=knotMultiplicity[0][ui];
         integrationRulesArray [ indx ] = new IGA_IntegrationElement (indx, this, knotSpan);
         integrationRulesArray [ indx ] ->setUpIntegrationPoints(_Square, numberOfGaussPoints, _PlaneStress); // HUHU _PlaneStress
         // remap local subelement gp coordinates into knot span coordinates and update integration weight 
@@ -577,7 +579,7 @@ IRResultType IGAElement::initializeFrom(InputRecord *ir) {
           du = knotVector[0][knotSpan.at(1)+1]-knotVector[0][knotSpan.at(1)];
           dv = knotVector[1][knotSpan.at(2)+1]-knotVector[1][knotSpan.at(2)];
           newgpcoords.at(1) = knotVector[0][knotSpan.at(1)]+du*(gpcoords->at(1)/2.0+0.5);
-          newgpcoords.at(2) = knotVector[1][knotSpan.at(1)]+dv*(gpcoords->at(2)/2.0+0.5);
+          newgpcoords.at(2) = knotVector[1][knotSpan.at(2)]+dv*(gpcoords->at(2)/2.0+0.5);
           integrationRulesArray [ indx ]->getIntegrationPoint(i)->setCoordinates(newgpcoords);
           integrationRulesArray [ indx ]->getIntegrationPoint(i)->setWeight(integrationRulesArray [ indx ]->getIntegrationPoint(i)->giveWeight()/4.0*du*dv);
           
@@ -589,6 +591,8 @@ IRResultType IGAElement::initializeFrom(InputRecord *ir) {
   }
   return IRRT_OK; 
 }
+
+
 
 StructuralElementEvaluator::StructuralElementEvaluator() {
   this->rotationMatrix=NULL;
@@ -606,7 +610,7 @@ int StructuralElementEvaluator::giveIntegrationElementCodeNumbers (IntArray& ans
     answer.resize(0);
     for (i=1; i<=mask.giveSize(); i++) {
       elem->giveDofManDofIDMask (mask.at(i), ut, nodeDofIDMask);
-      elem->giveDofManager(i)->giveLocationArray(nodeDofIDMask, nodalArray);
+      elem->giveDofManager(mask.at(i))->giveLocationArray(nodeDofIDMask, nodalArray);
       answer.followedBy(nodalArray);
     }
     return 1;
@@ -615,6 +619,35 @@ int StructuralElementEvaluator::giveIntegrationElementCodeNumbers (IntArray& ans
   }
 }
 
+int StructuralElementEvaluator::giveIntegrationElementLocalCodeNumbers (IntArray& answer, Element* elem, 
+                                                                        IntegrationRule* ie, EquationID ut) {
+  int i;
+  IntArray mask, nodeDofIDMask, nodalArray;
+  int dofmandof ;
+
+  // get number of dofs in node
+  elem->giveDofManDofIDMask (1, ut, nodeDofIDMask);
+  dofmandof=nodeDofIDMask.giveSize();
+
+  // first evaluate nonzero basis function mask
+
+
+  if (elem->giveInterpolation()->hasSubPatchFormulation()) {
+    IGA_IntegrationElement *ee = (IGA_IntegrationElement *)ie;
+    elem->giveInterpolation()->giveKnotBasisFuncMask (*ee->giveKnotSpan(), mask) ;
+    // loop over nonzero shape functions and assemble localization array
+    answer.resize(0);
+    for (i=1; i<=mask.giveSize(); i++) {
+      nodalArray.resize(nodeDofIDMask.giveSize());
+      nodalArray.at(1) = dofmandof*(mask.at(i)-1)+1;
+      nodalArray.at(2) = dofmandof*(mask.at(i)-1)+2;
+      answer.followedBy(nodalArray);
+    }
+    return 1;
+  } else {
+    return 0;
+  }
+}
 
 void PlaneStressStructuralElementEvaluator::computeNMatrixAt (FloatMatrix& answer, GaussPoint* gp) {
   
@@ -678,6 +711,208 @@ StructuralElementEvaluator ::  giveCharacteristicMatrix(FloatMatrix &answer,
   
   return;
 }
+
+void
+StructuralElementEvaluator :: computeBcLoadVectorAt(FloatArray &answer, TimeStep *stepN, ValueModeType mode)
+// Computes the load vector due to the boundary conditions acting on the
+// receiver's nodes, at stepN. Returns NULL if this array contains only
+// zeroes.
+{
+    FloatArray d, dp;
+    FloatMatrix s;
+    Element* elem = this->giveElement();
+    int numberOfDofMans = elem->giveNumberOfDofManagers();
+    /*
+     * this -> computeVectorOfPrescribed(DisplacementVector,TotalMode,stepN, d) ;
+     * if ((stepN->giveLoadResponseMode()==IncrementOfLoad) && (!stepN->isTheFirstStep())) {
+     * this -> computeVectorOfPrescribed(DisplacementVector,TotalMode,stepN->givePreviousStep(), dp);
+     * d.substract (dp);
+     * //delete dp;
+     * }
+     */
+    this->computeVectorOfPrescribed(EID_MomentumBalance, mode, stepN, d);
+    //this -> computeVectorOfPrescribed(DisplacementVector,umode,stepN, d) ;
+
+    if ( d.containsOnlyZeroes() ) {
+        answer.resize(0);
+    } else {
+        this->computeStiffnessMatrix(s, TangentStiffness, stepN);
+        answer.beProductOf(s, d);
+        answer.negated();
+    }
+
+    // delete d ;
+
+    // if engngmodel supports dynamic change of static system
+    // we must test if element has not been removed in previous step 
+    // if not, we must also test if there was previous BC on some DOF and now it is released.
+    // if was, it is necessary to load it by reaction force.
+    if ( elem->giveDomain()->giveEngngModel()->requiresUnknownsDictionaryUpdate() ) {
+
+        FloatArray prevInternalForces;
+        IntArray elementNodeMask, dofMask;
+        DofManager *nodeI;
+        Dof *dofJ;
+        int nDofs, i, j, k = 0;
+
+        if ( ( mode == VM_Incremental ) && ( !stepN->isTheFirstStep() ) ) {
+
+          for ( i = 1; i <= numberOfDofMans; i++ ) {
+            nodeI = elem->giveDofManager(i);
+            elem->giveDofManDofIDMask(i, EID_MomentumBalance, elementNodeMask);
+            nodeI->giveDofArray(elementNodeMask, dofMask);
+            nDofs = dofMask.giveSize();
+            for ( j = 1; j <= nDofs; j++ ) {
+              dofJ = nodeI->giveDof( dofMask.at(j) );
+              k++;
+              if ( !dofJ->hasBc(stepN) && dofJ->hasBc( stepN->givePreviousStep() ) ) {
+                if ( prevInternalForces.giveSize() == 0 ) {
+                  // allocate and compute only if needed
+                  // use updated gp record
+                  this->giveInternalForcesVector(prevInternalForces,
+                                                 stepN->givePreviousStep(), 1);
+                }
+                
+                // check for allocated answer
+                if ( answer.giveSize() == 0 ) {
+                  answer.resize( elem->computeNumberOfDofs(EID_MomentumBalance) );
+                  answer.zero();
+                }
+                
+                // add element part of reaction  to load vector
+                answer.at(k) -= prevInternalForces.at(k);
+              }
+            }
+            
+            //delete elementNodeMask;
+            // delete dofMask;
+          }
+        }
+    }
+    
+    return;
+}
+
+
+void
+StructuralElementEvaluator :: computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *stepN)
+// Computes the vector containing the strains at the Gauss point gp of
+// the receiver, at time step stepN. The nature of these strains depends
+// on the element's type.
+{
+  int i;
+    FloatMatrix b;
+    FloatArray u, ur;
+    Element* elem=this->giveElement();
+
+    if (!this->isActivated(stepN)) {
+      answer.resize(elem->giveCrossSection()->giveIPValueSize(IST_StrainTensor, gp));
+      answer.zero();
+      return;}
+
+    this->computeBMatrixAt(b, gp);
+    elem->computeVectorOf(EID_MomentumBalance, VM_Total, stepN, u);
+
+    /*
+    // substract initial displacements, if defined
+    if (initialDisplacements) u.substract(initialDisplacements);
+    */
+    if ( this->updateRotationMatrix() ) {
+        u.rotatedWith(this->rotationMatrix, 'n');
+    }
+
+    // get local code numbers corresponding to ir
+    IntArray lc;
+    this->giveIntegrationElementLocalCodeNumbers (lc, elem, gp->giveIntegrationRule(), EID_MomentumBalance);
+    ur.resize(b.giveNumberOfColumns());
+    for (i=1; i<=lc.giveSize(); i++) ur.at(i) = u.at(lc.at(i));
+
+    answer.beProductOf(b, ur);
+    return;
+}
+
+
+void
+StructuralElementEvaluator :: computeStressVector(FloatArray &answer, GaussPoint *gp, TimeStep *stepN)
+// Computes the vector containing the stresses at the Gauss point gp of
+// the receiver, at time step stepN. The nature of these stresses depends
+// on the element's type.
+// this version assumes TOTAL LAGRANGE APPROACH
+{
+    /*
+     * StructuralCrossSection* cs = (StructuralCrossSection*) this->giveCrossSection();
+     * FloatArray totalEpsilon;
+     * // FloatArray *help;
+     *
+     *
+     * this->computeStrainVector(totalEpsilon, gp,stepN) ;
+     * cs->giveRealStresses (answer, ReducedForm, gp,totalEpsilon,stepN);
+     *
+     * return ;
+     */
+    FloatArray Epsilon;
+    Element* elem=this->giveElement();
+    StructuralCrossSection *cs = ( StructuralCrossSection * ) elem->giveCrossSection();
+
+    this->computeStrainVector(Epsilon, gp, stepN);
+    cs->giveRealStresses(answer, ReducedForm, gp, Epsilon, stepN);
+
+    return;
+}
+
+void
+StructuralElementEvaluator :: updateInternalState(TimeStep *stepN)
+// Updates the receiver at end of step.
+{
+    int i, j;
+    IntegrationRule *iRule;
+    FloatArray stress;
+    Element *elem = this->giveElement();
+    
+    // force updating strains & stresses
+    for ( i = 0; i < elem->giveNumberOfIntegrationRules(); i++ ) {
+      iRule = elem->giveIntegrationRule(i);
+        for ( j = 0; j < iRule->getNumberOfIntegrationPoints(); j++ ) {
+          computeStressVector(stress, iRule->getIntegrationPoint(j), stepN);
+        }
+    }
+}
+
+
+
+
+void
+StructuralElementEvaluator :: computeNonForceLoadVector(FloatArray &answer, TimeStep *stepN, ValueModeType mode)
+// Computes the load vector of the receiver, at stepN.
+{
+    FloatArray helpLoadVector;
+
+    answer.resize(0);
+
+    // test for deactivation of receiver
+    if ( ( mode == VM_Incremental ) && ( !stepN->isTheFirstStep() ) ) {
+      if (isActivated(stepN->givePreviousStep()) && !isActivated(stepN)) {
+        // use updated gp record
+        this->giveInternalForcesVector(answer, stepN->givePreviousStep(), 1);
+      }
+    }
+    if (!this->isActivated(stepN)) return;
+    
+    /*
+    this->computePrescribedStrainLoadVectorAt(helpLoadVector, stepN, mode);
+    if ( helpLoadVector.giveSize() ) {
+      answer.add(helpLoadVector);
+    }
+    */
+    
+    this->computeBcLoadVectorAt(helpLoadVector, stepN, mode);
+    if ( helpLoadVector.giveSize() ) {
+      answer.add(helpLoadVector);
+    }
+    
+    return;
+}
+
  
 void StructuralElementEvaluator::computeStiffnessMatrix (FloatMatrix& answer, MatResponseMode rMode, TimeStep *tStep) {
   
@@ -694,13 +929,13 @@ void StructuralElementEvaluator::computeStiffnessMatrix (FloatMatrix& answer, Ma
   answer.resize( ndofs, ndofs );
   answer.zero();	  
   
-  FloatMatrix &m = answer;
-  if (elem->giveInterpolation()->hasSubPatchFormulation()) m = temp;
+  FloatMatrix *m = &answer;
+  if (elem->giveInterpolation()->hasSubPatchFormulation()) m = &temp;
   
   numberOfIntegrationRules = elem->giveNumberOfIntegrationRules();
   // loop over individual integration rules
   for (ir=0; ir < numberOfIntegrationRules; ir++) {
-    m.resize(0,0);
+    m->resize(0,0);
     iRule = elem->giveIntegrationRule(ir);
     // loop over individual integration points
     for ( j = 0; j < iRule->getNumberOfIntegrationPoints(); j++ ) {
@@ -713,18 +948,18 @@ void StructuralElementEvaluator::computeStiffnessMatrix (FloatMatrix& answer, Ma
       dV = this->computeVolumeAround(gp);
       dbj.beProductOf(d, bj);
       if ( matStiffSymmFlag ) {
-        m.plusProductSymmUpper(bj, dbj, dV);
+        m->plusProductSymmUpper(bj, dbj, dV);
       } else {
-        m.plusProductUnsym(bj, dbj, dV);
+        m->plusProductUnsym(bj, dbj, dV);
       }
     }
     
     if ( matStiffSymmFlag ) {
-      m.symmetrized();
+      m->symmetrized();
     }
     // localize irule contribution into element matrix
-    if (this->giveIntegrationElementCodeNumbers (irlocnum, elem, iRule, EID_MomentumBalance)) 
-      answer.assemble (m, irlocnum);
+    if (this->giveIntegrationElementLocalCodeNumbers (irlocnum, elem, iRule, EID_MomentumBalance)) 
+      answer.assemble (*m, irlocnum);
     
   } // end loop over irules
   
@@ -749,3 +984,5 @@ double PlaneStressStructuralElementEvaluator::computeVolumeAround(GaussPoint *gp
 }
 
 BsplinePlaneStressElement::BsplinePlaneStressElement (int n, Domain *aDomain) : IGAElement (n, aDomain), PlaneStressStructuralElementEvaluator(), interpolation(2) {}
+
+

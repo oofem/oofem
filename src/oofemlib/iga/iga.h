@@ -151,7 +151,7 @@ public:
 
   /// Returns class name of the receiver.
   const char *giveClassName() const { return "BSplineInterpolation"; }
-
+  virtual bool hasSubPatchFormulation() {return true;}
 protected:
   /**
      Evaluates the nonvanishing basis functions of 1d BSpline (algorithm A2.2 from NURBS book) 
@@ -233,6 +233,7 @@ public:
   IGAElement(int n, Domain *aDomain) : Element (n, aDomain) {}
 
   IRResultType initializeFrom(InputRecord *ir);
+
 protected:
   virtual int giveNsd() = 0;
 };
@@ -249,6 +250,13 @@ class StructuralElementEvaluator {
  public:
   StructuralElementEvaluator ();
   virtual void     giveCharacteristicMatrix(FloatMatrix &answer, CharType mtrx, TimeStep *tStep);
+  virtual void  giveCharacteristicVector(FloatArray &answer, CharType type, ValueModeType mode, TimeStep *tStep) {
+    if ( type == ElementNonForceLoadVector )  {
+        this->computeNonForceLoadVector(answer, tStep, mode);
+    } else {
+      answer.resize(0);
+    }
+  }
 
  protected:
   virtual Element* giveElement()=0;
@@ -256,6 +264,25 @@ class StructuralElementEvaluator {
   virtual void computeBMatrixAt (FloatMatrix& answer, GaussPoint* gp)=0;
   virtual void computeStiffnessMatrix (FloatMatrix& answer, MatResponseMode rMode, TimeStep *tStep);
   virtual double computeVolumeAround(GaussPoint *gp) { return 0.; }
+  void  computeNonForceLoadVector(FloatArray &answer, TimeStep *stepN, ValueModeType mode);
+  void                  computeBcLoadVectorAt(FloatArray &answer, TimeStep *, ValueModeType mode);
+  virtual void giveInternalForcesVector(FloatArray &answer,
+                                        TimeStep *, int useUpdatedGpRecord = 0) {
+    answer.resize(0);
+  }
+  void          computeVectorOf(EquationID type, ValueModeType u,
+                                TimeStep *stepN, FloatArray &answer) {
+    this->giveElement()->computeVectorOf(type, u, stepN, answer);}
+  void          computeVectorOf(PrimaryField &field, ValueModeType u, TimeStep *stepN, FloatArray &answer) {
+    this->giveElement()->computeVectorOf(field, u, stepN, answer);}
+  void                  computeVectorOfPrescribed(EquationID ut, ValueModeType type, TimeStep *stepN, FloatArray &answer) {
+    this->giveElement()->computeVectorOfPrescribed (ut, type, stepN, answer);
+  }
+  bool   isActivated(TimeStep *atTime) {return true;}
+  void   updateInternalState(TimeStep *stepN);
+  void   computeStressVector(FloatArray &answer, GaussPoint *gp, TimeStep *stepN);
+  void   computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *stepN);
+
   /**
    * Updates rotation matrix r(l)=T r(g*) between  local and global coordinate system
    * taking into account also possible local - coordinate system in some elements
@@ -276,8 +303,17 @@ class StructuralElementEvaluator {
    */
   virtual int giveIntegrationElementCodeNumbers (IntArray& answer, Element* elem, 
                                                  IntegrationRule* ie, EquationID ut) ;
-};
 
+  /**
+   * Assembles the local element code numbers of given integration element (sub-patch)
+   * This is done by obtaining list of nonzero shape functions and
+   * by collecting the code numbers of nodes corresponding to these 
+   * shape functions
+   * @returns returns nonzero if integration rule code numbers differ from element code numbers
+   */
+  virtual int giveIntegrationElementLocalCodeNumbers (IntArray& answer, Element* elem, 
+                                                      IntegrationRule* ie, EquationID ut) ;
+};
 
 /**
  * general purpose Plane stress structural element evaluator
@@ -300,6 +336,12 @@ protected:
    */ 
   void computeBMatrixAt (FloatMatrix& answer, GaussPoint* gp) ;
   double computeVolumeAround(GaussPoint *gp) ;
+  void giveDofManDofIDMask(int inode, EquationID u, IntArray &answer) const {
+    answer.resize(2);
+    answer.at(1) = D_u;
+    answer.at(2) = D_v;
+  }
+
 }; // end of PlaneStressStructuralElementEvaluator definition
 
 
@@ -318,10 +360,17 @@ public:
   }
   void     giveCharacteristicMatrix(FloatMatrix &answer, CharType mtrx, TimeStep *tStep) {
     PlaneStressStructuralElementEvaluator::giveCharacteristicMatrix (answer, mtrx, tStep);}
-
+  virtual void  giveCharacteristicVector(FloatArray &answer, CharType type, ValueModeType mode, TimeStep *t) {
+    PlaneStressStructuralElementEvaluator::giveCharacteristicVector(answer, type, mode, t);}
   
   FEInterpolation *giveInterpolation() {return &this->interpolation;}
   virtual Element* giveElement() {return this;}
+  void giveDofManDofIDMask(int inode, EquationID u, IntArray &answer) const {
+    PlaneStressStructuralElementEvaluator::giveDofManDofIDMask(inode, u, answer);
+  }
+  virtual int            computeNumberOfDofs(EquationID ut) { return numberOfDofMans*2; }
+  void   updateInternalState(TimeStep *stepN) {PlaneStressStructuralElementEvaluator::updateInternalState (stepN);}
+
 protected:
   virtual int giveNsd() {return 2;}
   

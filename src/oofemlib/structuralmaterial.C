@@ -2528,14 +2528,16 @@ StructuralMaterial :: computeStressIndependentStrainVector(FloatArray &answer,
     FloatArray fullAnswer, et, e0;
     MaterialMode matmode = gp->giveMaterialMode();
     StructuralCrossSection *crossSection =  dynamic_cast< StructuralCrossSection * >( gp->giveCrossSection() );
-    StructuralElement *elem = ( StructuralElement * ) gp->giveElement();
+    Element *elem = gp->giveElement();
+    StructuralElement *selem = dynamic_cast< StructuralElement * >( gp->giveElement() );
+    
 
     if ( stepN->giveTime() < this->castingTime ) {
         answer.zero();
         return;
     }
 
-    elem->computeResultingIPTemperatureAt(et, stepN, gp, mode);
+    if (selem) selem->computeResultingIPTemperatureAt(et, stepN, gp, mode); // HUHU
 
 
     /* add external source, if provided */
