@@ -54,6 +54,7 @@
 #include "iml.h"
 #include "contextioresulttype.h"
 #include "contextmode.h"
+#include "error.h"
 
 #ifndef __MAKEDEPEND
 #include <stdlib.h>
@@ -150,9 +151,12 @@ public:
      */
     double &operator()(int i)
     {
-#       ifdef DEBUG
-        assert(i < size);
-#       endif
+#ifdef DEBUG
+      if ( i >= size ) {
+        OOFEM_ERROR2("FloatArray :: operator() : array error on index : %d <= 0 \n", i);
+      }
+      // assert(i < size);
+#endif
         return values [ i ];
     }
     /**
@@ -162,9 +166,12 @@ public:
      */
     const double &operator()(int i) const
     {
-#       ifdef DEBUG
-        assert(i < size);
-#       endif
+#ifdef DEBUG
+      if ( i >= size ) {
+        OOFEM_ERROR2("FloatArray :: operator() : array error on index : %d <= 0 \n", i);
+      }
+      //assert(i < size);
+#endif
         return values [ i ];
     }
 

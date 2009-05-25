@@ -234,6 +234,14 @@ public:
 
   IRResultType initializeFrom(InputRecord *ir);
 
+#ifdef __OOFEG
+    //
+    // Graphics output
+    //
+  virtual void  drawRawGeometry(oofegGraphicContext &mode);
+#endif
+
+
 protected:
   virtual int giveNsd() = 0;
 };
@@ -370,6 +378,12 @@ public:
   }
   virtual int            computeNumberOfDofs(EquationID ut) { return numberOfDofMans*2; }
   void   updateInternalState(TimeStep *stepN) {PlaneStressStructuralElementEvaluator::updateInternalState (stepN);}
+#ifdef __OOFEG
+    //
+    // Graphics output
+    //
+  virtual void  drawScalar(oofegGraphicContext &context);
+#endif
 
 protected:
   virtual int giveNsd() {return 2;}

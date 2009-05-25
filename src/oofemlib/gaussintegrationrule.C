@@ -455,6 +455,45 @@ GaussIntegrationRule :: SetUpPointsOnSquare(int nPoints,
         delete w;
         break;
 
+    case 64:
+
+        c = new FloatArray(8);
+        w = new FloatArray(8);
+
+        c->at(1) = -0.960289856497536;
+        c->at(2) = -0.796666477413627;
+        c->at(3) = -0.525532409916329;
+        c->at(4) = -0.183434642495650;
+        c->at(5) = 0.183434642495650;
+        c->at(6) = 0.525532409916329;
+        c->at(7) = 0.796666477413627;
+        c->at(8) = 0.96028985649753;
+
+        w->at(1) = 0.101228536290375;
+        w->at(2) = 0.222381034453374;
+        w->at(3) = 0.313706645877887;
+        w->at(4) = 0.362683783378362;
+        w->at(5) = 0.362683783378362;
+        w->at(6) = 0.313706645877887;
+        w->at(7) = 0.222381034453374;
+        w->at(8) = 0.10122853629037;
+
+        * arry = new GaussPoint * [ nPoints ];
+
+        for ( i = 0; i < 8; i++ ) {
+            for ( j = 0; j < 8; j++ ) {
+                coord  = new FloatArray(2);
+                coord->at(1) = c->at(i + 1);
+                coord->at(2) = c->at(j + 1);
+                weight = w->at(i + 1) * w->at(j + 1);
+                ( * arry ) [ 8 * i + j ] = new GaussPoint(this, 8 *i + j + 1, coord, weight, mode);
+            }
+        }
+
+        delete c;
+        delete w;
+        break;
+
     default:
         OOFEM_ERROR2("SetUpPointsOnSquare: unsupported number of IPs (%d)", nPoints);
     }
