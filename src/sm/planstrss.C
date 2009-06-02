@@ -106,7 +106,7 @@ PlaneStress2d :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, 
 #ifdef  PlaneStress2d_reducedShearIntegration
     coord.resize(2);
     coord.zero();
-    this->interoplation.evaldNdx(dnx, this->giveDomain(), nodeArray, coord, 0.0);
+    this->interpolation.evaldNdx(dnx, this->giveDomain(), dofManArray, coord, 0.0);
 #endif
 
     for ( i = 1; i <= 4; i++ ) {

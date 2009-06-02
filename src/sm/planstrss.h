@@ -52,7 +52,7 @@
 
 
 /// Comment or uncomment the following line to force full or reduced integration
-//#define PlaneStress2d_reducedShearIntegration
+#define PlaneStress2d_reducedShearIntegration
 
 class PlaneStress2d : public NLStructuralElement, public ZZNodalRecoveryModelInterface, public SPRNodalRecoveryModelInterface,
     public SpatialLocalizerInterface
