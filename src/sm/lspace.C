@@ -61,7 +61,7 @@
 
 FEI3dHexaLin LSpace :: interpolation;
 
-LSpace :: LSpace(int n, Domain *aDomain) : StructuralElement(n, aDomain), ZZNodalRecoveryModelInterface(),
+LSpace :: LSpace(int n, Domain *aDomain) : NLStructuralElement(n, aDomain), ZZNodalRecoveryModelInterface(),
     SPRNodalRecoveryModelInterface(), SpatialLocalizerInterface()
     , EIPrimaryUnknownMapperInterface(), HuertaErrorEstimatorInterface(), HuertaRemeshingCriteriaInterface()
     // Constructor.
@@ -127,6 +127,50 @@ LSpace :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int li,
     return;
 }
 
+void
+LSpace :: computeNLBMatrixAt ( FloatMatrix& answer, GaussPoint *aGaussPoint, int i)
+//
+// Returns the [24x24] nonlinear part of strain-displacement matrix {B} of the receiver,
+// evaluated at aGaussPoint
+ 
+{
+  int j, k, l;
+  FloatMatrix  dnx ;
+
+  // compute the derivatives of shape functions
+  this->interpolation.evaldNdx (dnx, this->giveDomain(), dofManArray, *aGaussPoint->giveCoordinates(), 0.0);
+  
+  answer.resize (24,24);
+  answer.zero();
+
+  // put the products of derivatives of shape functions into the "nonlinear B matrix",
+  // depending on parameter i, which is the number of the strain component
+  if(i<=3){
+    for(k=0;k<8;k++)
+      for(l=0;l<3;l++)
+	for(j=1;j<=24;j+=3)
+	  answer.at(k*3+l+1,l+j) = dnx.at(k+1,i) * dnx.at((j-1)/3+1,i);
+  }
+  else if(i==4){
+    for(k=0;k<8;k++)
+      for(l=0;l<3;l++)
+	for(j=1;j<=24;j+=3)
+	  answer.at(k*3+l+1,l+j) = dnx.at(k+1,2) * dnx.at((j-1)/3+1,3) + dnx.at(k+1,3) * dnx.at((j-1)/3+1,2);
+  }
+  else if(i==5){
+    for(k=0;k<8;k++)
+      for(l=0;l<3;l++)
+	for(j=1;j<=24;j+=3)
+	  answer.at(k*3+l+1,l+j) = dnx.at(k+1,1) * dnx.at((j-1)/3+1,3) + dnx.at(k+1,3) * dnx.at((j-1)/3+1,1);
+  }
+  else if(i==6){
+    for(k=0;k<8;k++)
+      for(l=0;l<3;l++)
+	for(j=1;j<=24;j+=3)
+	  answer.at(k*3+l+1,l+j) = dnx.at(k+1,1) * dnx.at((j-1)/3+1,2) + dnx.at(k+1,2) * dnx.at((j-1)/3+1,1);
+  }  
+  return;
+}
 
 
 void LSpace :: computeGaussPoints()
@@ -184,7 +228,7 @@ LSpace :: initializeFrom(InputRecord *ir)
     const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
-    this->StructuralElement :: initializeFrom(ir);
+    this->NLStructuralElement :: initializeFrom(ir);
     numberOfGaussPoints = 8;
     IR_GIVE_OPTIONAL_FIELD(ir, numberOfGaussPoints, IFT_LSpace_nip, "nip"); // Macro
 
@@ -192,7 +236,7 @@ LSpace :: initializeFrom(InputRecord *ir)
         numberOfGaussPoints = 8;
     }
 
-    // set - up Gaussian integration points
+    // set up Gaussian integration points
     this->computeGaussPoints();
 
     return IRRT_OK;

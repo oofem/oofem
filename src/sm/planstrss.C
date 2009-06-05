@@ -117,7 +117,140 @@ PlaneStress2d :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, 
     return;
 }
 
+void
+PlaneStress2d :: computeNLBMatrixAt ( FloatMatrix &answer, GaussPoint *aGaussPoint, int i)
+//
+// Returns the [8x8] nonlinear part of strain-displacement matrix {B} of the receiver,
+// evaluated at aGaussPoint
+{
+  double       b1,b2,b3,b4,c1,c2,c3,c4;
+  FloatMatrix  dnx ;
+#ifdef  PlaneStress2d_reducedShearIntegration
+  FloatArray  coord;
+#endif
 
+  // compute the derivatives of shape functions
+  this->interpolation.evaldNdx (dnx, this->giveDomain(), dofManArray, *aGaussPoint->giveCoordinates(), 0.0);
+
+  b1 = dnx.at(1,1);
+  b2 = dnx.at(2,1);
+  b3 = dnx.at(3,1);
+  b4 = dnx.at(4,1);
+  
+  c1 = dnx.at(1,2);
+  c2 = dnx.at(2,2);
+  c3 = dnx.at(3,2);
+  c4 = dnx.at(4,2);
+ 
+  answer.resize(8,8);
+  answer.zero();
+
+ // put the products of derivatives of shape functions into the "nonlinear B matrix",
+ // depending on parameter i, which is the number of the strain component
+ if (i==1){
+  answer.at(1,1)=b1*b1;
+  answer.at(1,3)=b1*b2;
+  answer.at(1,5)=b1*b3;
+  answer.at(1,7)=b1*b4;
+  answer.at(2,2)=b1*b1;
+  answer.at(2,4)=b1*b2;
+  answer.at(2,6)=b1*b3;
+  answer.at(2,8)=b1*b4;
+  answer.at(3,1)=b2*b1;
+  answer.at(3,3)=b2*b2;
+  answer.at(3,5)=b2*b3;
+  answer.at(3,7)=b2*b4;
+  answer.at(4,2)=b2*b1;
+  answer.at(4,4)=b2*b2;
+  answer.at(4,6)=b2*b3;
+  answer.at(4,8)=b2*b4;
+  answer.at(5,1)=b3*b1;
+  answer.at(5,3)=b3*b2;
+  answer.at(5,5)=b3*b3;
+  answer.at(5,7)=b3*b4;
+  answer.at(6,2)=b3*b1;
+  answer.at(6,4)=b3*b2;
+  answer.at(6,6)=b3*b3;
+  answer.at(6,8)=b3*b4;
+  answer.at(7,1)=b4*b1;
+  answer.at(7,3)=b4*b2;
+  answer.at(7,5)=b4*b3;
+  answer.at(7,7)=b4*b4;
+  answer.at(8,2)=b4*b1;
+  answer.at(8,4)=b4*b2;
+  answer.at(8,6)=b4*b3;
+  answer.at(8,8)=b4*b4;
+ }
+ else if (i==2){
+  answer.at(1,1)=c1*c1;
+  answer.at(1,3)=c1*c2;
+  answer.at(1,5)=c1*c3;
+  answer.at(1,7)=c1*c4;
+  answer.at(2,2)=c1*c1;
+  answer.at(2,4)=c1*c2;
+  answer.at(2,6)=c1*c3;
+  answer.at(2,8)=c1*c4;
+  answer.at(3,1)=c2*c1;
+  answer.at(3,3)=c2*c2;
+  answer.at(3,5)=c2*c3;
+  answer.at(3,7)=c2*c4;
+  answer.at(4,2)=c2*c1;
+  answer.at(4,4)=c2*c2;
+  answer.at(4,6)=c2*c3;
+  answer.at(4,8)=c2*c4;
+  answer.at(5,1)=c3*c1;
+  answer.at(5,3)=c3*c2;
+  answer.at(5,5)=c3*c3;
+  answer.at(5,7)=c3*c4;
+  answer.at(6,2)=c3*c1;
+  answer.at(6,4)=c3*c2;
+  answer.at(6,6)=c3*c3;
+  answer.at(6,8)=c3*c4;
+  answer.at(7,1)=c4*c1;
+  answer.at(7,3)=c4*c2;
+  answer.at(7,5)=c4*c3;
+  answer.at(7,7)=c4*c4;
+  answer.at(8,2)=c4*c1;
+  answer.at(8,4)=c4*c2;
+  answer.at(8,6)=c4*c3;
+  answer.at(8,8)=c4*c4;
+ }
+ else if (i==3){
+  answer.at(1,1)=b1*c1+b1*c1;
+  answer.at(1,3)=b1*c2+b2*c1;
+  answer.at(1,5)=b1*c3+b3*c1;
+  answer.at(1,7)=b1*c4+b4*c1;
+  answer.at(2,2)=b1*c1+b1*c1;
+  answer.at(2,4)=b1*c2+b2*c1;
+  answer.at(2,6)=b1*c3+b3*c1;
+  answer.at(2,8)=b1*c4+b4*c1;
+  answer.at(3,1)=b2*c1+b1*c2;
+  answer.at(3,3)=b2*c2+b2*c2;
+  answer.at(3,5)=b2*c3+b3*c2;
+  answer.at(3,7)=b2*c4+b4*c2;
+  answer.at(4,2)=b2*c1+b1*c2;
+  answer.at(4,4)=b2*c2+b2*c2;
+  answer.at(4,6)=b2*c3+b3*c2;
+  answer.at(4,8)=b2*c4+b4*c2;
+  answer.at(5,1)=b3*c1+b1*c3;
+  answer.at(5,3)=b3*c2+b2*c3;
+  answer.at(5,5)=b3*c3+b3*c3;
+  answer.at(5,7)=b3*c4+b4*c3;
+  answer.at(6,2)=b3*c1+b1*c3;
+  answer.at(6,4)=b3*c2+b2*c3;
+  answer.at(6,6)=b3*c3+b3*c3;
+  answer.at(6,8)=b3*c4+b4*c3;
+  answer.at(7,1)=b4*c1+b1*c4;
+  answer.at(7,3)=b4*c2+b2*c4;
+  answer.at(7,5)=b4*c3+b3*c4;
+  answer.at(7,7)=b4*c4+b4*c4;
+  answer.at(8,2)=b4*c1+b1*c4;
+  answer.at(8,4)=b4*c2+b2*c4;
+  answer.at(8,6)=b4*c3+b3*c4;
+  answer.at(8,8)=b4*c4+b4*c4;
+ }
+ return ;
+}
 
 void
 PlaneStress2d :: computeGaussPoints()
@@ -293,7 +426,7 @@ PlaneStress2d :: initializeFrom(InputRecord *ir)
     const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
-    this->StructuralElement :: initializeFrom(ir);
+    this->NLStructuralElement :: initializeFrom(ir);
     numberOfGaussPoints = 4;
     IR_GIVE_OPTIONAL_FIELD(ir, numberOfGaussPoints, IFT_PlaneStress2d_nip, "nip"); // Macro
 

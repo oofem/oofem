@@ -233,6 +233,7 @@ protected:
     int   computeLoadLEToLRotationMatrix(FloatMatrix &answer, int, GaussPoint *);
 
     void                  computeBmatrixAt(GaussPoint *, FloatMatrix &, int = 1, int = ALL_STRAINS);
+    void                  computeNLBMatrixAt(FloatMatrix &, GaussPoint *, int i);
     void                  computeNmatrixAt(GaussPoint *, FloatMatrix &);
     // give Transformation matrix from global coord. syst. to local coordinate system in nodes.
     // i.e. r(n)=T r(g)

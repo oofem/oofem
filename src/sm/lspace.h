@@ -40,7 +40,7 @@
 #ifndef lspace_h
 #define lspace_h
 
-#include "structuralelement.h"
+#include "nlstructuralelement.h"
 #include "fei3dhexalin.h"
 #include "zznodalrecoverymodel.h"
 #include "sprnodalrecoverymodel.h"
@@ -50,15 +50,15 @@
 #include "huertaerrorestimator.h"
 
 
-class LSpace  : public StructuralElement, public ZZNodalRecoveryModelInterface,
+class LSpace  : public NLStructuralElement, public ZZNodalRecoveryModelInterface,
     public SPRNodalRecoveryModelInterface, public NodalAveragingRecoveryModelInterface,
     public SpatialLocalizerInterface
     , public EIPrimaryUnknownMapperInterface,
     public HuertaErrorEstimatorInterface, public HuertaRemeshingCriteriaInterface
 {
     /*
-     * This class implements an Linear 3d  8 - node
-     * elasticity finite element. Each node has 3 degrees of freedom.
+     * This class implements a Linear 3d 8-node finite element for stress analysis.
+     * Each node has 3 degrees of freedom.
      * DESCRIPTION :
      * One single additional attribute is needed for Gauss integration purpose :
      * 'jacobianMatrix'. This 3x3 matrix contains polynomials.
@@ -242,6 +242,7 @@ public:
 
 protected:
     void               computeBmatrixAt(GaussPoint *, FloatMatrix &, int = 1, int = ALL_STRAINS);
+    void               computeNLBMatrixAt(FloatMatrix &, GaussPoint *, int i);
     void               computeNmatrixAt(GaussPoint *, FloatMatrix &);
     void       computeGaussPoints();
     integrationDomain  giveIntegrationDomain() { return _Cube; }
