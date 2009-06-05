@@ -255,7 +255,7 @@ NLStructuralElement :: giveInternalForcesVector(FloatArray &answer,
                     //delete A;
                     for ( k = 1; k <= b.giveNumberOfColumns(); k++ ) {
                         // add nonlinear contribution to each component
-                        b.at(j, k) += b2->at(k, 1);
+		      b.at(j, k) += b2->at(1, k); //mj
                     }
 
                     delete b2;
@@ -386,7 +386,7 @@ NLStructuralElement :: computeStiffnessMatrix(FloatMatrix &answer,
                                 //delete A;
                                 for ( m = 1; m <= bi.giveNumberOfColumns(); m++ ) {
                                     // add nonlinear contribution to each component
-                                    bi.at(l + 1, m) += b2.at(m, 1);
+				  bi.at(l + 1, m) += b2.at(1, m); //mj
                                 }
 
                                 // delete b2;
@@ -403,7 +403,7 @@ NLStructuralElement :: computeStiffnessMatrix(FloatMatrix &answer,
                                 //delete A;
                                 for ( m = 1; m <= bj.giveNumberOfColumns(); m++ ) {
                                     // add nonlinear contribution to each component
-                                    bj.at(l + 1, m) += b2.at(m, 1);
+				  bj.at(l + 1, m) += b2.at(1, m); //mj
                                 }
 
                                 // delete b2;
@@ -436,7 +436,7 @@ NLStructuralElement :: computeStiffnessMatrix(FloatMatrix &answer,
                         //delete A;
                         for ( k = 1; k <= bj.giveNumberOfColumns(); k++ ) {
                             // add nonlinear contribution to each component
-                            bj.at(l, k) += b2.at(k, 1);
+			  bj.at(l, k) += b2.at(1, k); //mj
                         }
 
                         //delete b2;
