@@ -39,7 +39,7 @@
 #ifndef ltrspace_h
 #define ltrspace_h
 
-#include "structuralelement.h"
+#include "nlstructuralelement.h"
 #include "fei3dtrlin.h"
 #include "zznodalrecoverymodel.h"
 #include "nodalaveragingrecoverymodel.h"
@@ -52,7 +52,7 @@
 #include "huertaerrorestimator.h"
 
 
-class LTRSpace : public StructuralElement, public ZZNodalRecoveryModelInterface,
+class LTRSpace : public NLStructuralElement, public ZZNodalRecoveryModelInterface,
     public NodalAveragingRecoveryModelInterface, public SPRNodalRecoveryModelInterface,
     public SpatialLocalizerInterface
     , public DirectErrorIndicatorRCInterface, public EIPrimaryUnknownMapperInterface,
@@ -60,7 +60,7 @@ class LTRSpace : public StructuralElement, public ZZNodalRecoveryModelInterface,
     public HuertaErrorEstimatorInterface, public HuertaRemeshingCriteriaInterface
 {
     /*
-     * This class implements an tetrahedra four-node  elasticity finite element.
+     * This class implements a tetrahedral four-node finite element for stress analysis.
      * Each node has 3 degrees of freedom.
      *
      * DESCRIPTION :
@@ -301,6 +301,7 @@ public:
 protected:
     void               computeBmatrixAt(GaussPoint *, FloatMatrix &, int = 1, int = ALL_STRAINS);
     void               computeNmatrixAt(GaussPoint *, FloatMatrix &);
+    void               computeNLBMatrixAt(FloatMatrix & answer, GaussPoint *, int i);
     void       computeGaussPoints();
     integrationDomain  giveIntegrationDomain() { return _Tetrahedra; }
 

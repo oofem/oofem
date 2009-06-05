@@ -66,7 +66,7 @@
 FEI3dTrLin LTRSpace :: interpolation;
 
 LTRSpace :: LTRSpace(int n, Domain *aDomain) :
-    StructuralElement(n, aDomain), ZZNodalRecoveryModelInterface(), NodalAveragingRecoveryModelInterface(),
+    NLStructuralElement(n, aDomain), ZZNodalRecoveryModelInterface(), NodalAveragingRecoveryModelInterface(),
     SPRNodalRecoveryModelInterface(), SpatialLocalizerInterface()
     , DirectErrorIndicatorRCInterface(),
     EIPrimaryUnknownMapperInterface(), ZZErrorEstimatorInterface(), ZZRemeshingCriteriaInterface(),
@@ -162,6 +162,47 @@ LTRSpace :: computeNmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
     return;
 }
 
+void
+LTRSpace :: computeNLBMatrixAt(FloatMatrix &answer, GaussPoint *aGaussPoint, int i)
+//
+// Returns the [12x12] nonlinear part of the strain-displacement matrix {B} of the receiver,
+// evaluated at aGaussPoint
+{
+  int j, k, l;
+   FloatMatrix dnx;
+
+   interpolation.evaldNdx(dnx, domain, dofManArray, *aGaussPoint->giveCoordinates(), 0.0);
+  
+   answer.resize(12,12);
+   answer.zero();
+
+   if (i<=3){
+     for (k=0;k<4;k++)
+       for (l=0;l<3;l++)
+	 for (j=1;j<=12;j+=3)
+	   answer.at(k*3+l+1,l+j) = dnx.at(k+1,i) * dnx.at((j-1)/3+1,i);
+   }
+   else if (i==4){
+     for (k=0;k<4;k++)
+       for (l=0;l<3;l++)
+	 for (j=1;j<=12;j+=3)
+	   answer.at(k*3+l+1,l+j) = dnx.at(k+1,2) * dnx.at((j-1)/3+1,3) + dnx.at(k+1,3) * dnx.at((j-1)/3+1,2);
+   }
+   else if(i==5){
+     for (k=0;k<4;k++)
+       for (l=0;l<3;l++)
+	 for (j=1;j<=12;j+=3)
+	   answer.at(k*3+l+1,l+j) = dnx.at(k+1,1) * dnx.at((j-1)/3+1,3) + dnx.at(k+1,3) * dnx.at((j-1)/3+1,1);
+   }
+   else if (i==6){
+     for (k=0;k<4;k++)
+       for (l=0;l<3;l++)
+	 for (j=1;j<=12;j+=3)
+	   answer.at(k*3+l+1,l+j) = dnx.at(k+1,1) * dnx.at((j-1)/3+1,2) + dnx.at(k+1,2) * dnx.at((j-1)/3+1,1);
+   }
+   return;
+}
+
 double LTRSpace :: computeVolumeAround(GaussPoint *aGaussPoint)
 // Returns the portion of the receiver which is attached to aGaussPoint.
 {
@@ -179,19 +220,10 @@ LTRSpace :: initializeFrom(InputRecord *ir)
     const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                            // Required by IR_GIVE_FIELD macro
 
-    this->StructuralElement :: initializeFrom(ir);
+    this->NLStructuralElement :: initializeFrom(ir);
     numberOfGaussPoints = 1;
-    IR_GIVE_OPTIONAL_FIELD(ir, numberOfGaussPoints, IFT_LTRSpace_nip, "nip"); // Macro
 
-    if ( ( numberOfGaussPoints <= 1 ) ||  ( numberOfGaussPoints > 3 ) ) {
-        numberOfGaussPoints = 1;
-    }
-
-    if ( numberOfGaussPoints == 0 ) {
-        numberOfGaussPoints = 1;
-    }
-
-    // set - up Gaussian integration points
+    // set up Gaussian integration points
     this->computeGaussPoints();
 
     return IRRT_OK;
