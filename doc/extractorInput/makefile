@@ -3,14 +3,14 @@ BACKUP_FILES = *.tex makefile
 RCP = scp
 
 www-doc: ps-doc
-	$(ROBOT) < latex2html-init.shtml > .latex2html-init
+	if [ x$(ROBOT) != "x" ]; then $(ROBOT) < include.src.tex > include.tex; fi
 	latex2html extractorInput
 	mv extractorInput.ps extractorInput
 
 ps-doc:
-	$(ROBOT) < include.src.tex > include.tex
-	latex extractorInput
-	latex extractorInput
+	if [ x$(ROBOT) != "x" ]; then $(ROBOT) < include.src.tex > include.tex; fi
+	latex \\nonstopmode\\input extractorInput
+	latex \\nonstopmode\\input extractorInput
 	dvips -o extractorInput.ps extractorInput
 
 www-install: www-doc

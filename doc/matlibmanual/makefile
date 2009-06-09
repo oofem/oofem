@@ -3,14 +3,14 @@ BACKUP_FILES = *.tex makefile
 RCP = scp
 
 www-doc: ps-doc
-	$(ROBOT) < latex2html-init.shtml > .latex2html-init
+	if [ x$(ROBOT) != "x" ]; then $(ROBOT) < include.src.tex > include.tex; fi
 	latex2html matlibmanual
 	mv matlibmanual.ps matlibmanual
 
 ps-doc:
-	$(ROBOT) < include.src.tex > include.tex
-	latex matlibmanual
-	latex matlibmanual
+	if [ x$(ROBOT) != "x" ]; then $(ROBOT) < include.src.tex > include.tex; fi
+	latex \\nonstopmode\\input matlibmanual
+	latex \\nonstopmode\\input matlibmanual
 	dvips -o 	matlibmanual.ps matlibmanual
 
 www-install: www-doc

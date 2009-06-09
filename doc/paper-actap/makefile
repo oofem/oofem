@@ -3,14 +3,14 @@ BACKUP_FILES = *.tex *.eps *.sty makefile
 RCP = scp
 
 www-doc: ps-doc
-	$(ROBOT) < latex2html-init.shtml > .latex2html-init
+	if [ x$(ROBOT) != "x" ]; then $(ROBOT) < include.src.tex > include.tex; fi
 	latex2html paper-actap
 	mv paper-actap.ps paper-actap
 
 ps-doc:
-	$(ROBOT) < include.src.tex > include.tex
-	latex paper-actap
-	latex paper-actap
+	if [ x$(ROBOT) != "x" ]; then $(ROBOT) < include.src.tex > include.tex; fi
+	latex \\nonstopmode\\input paper-actap
+	latex \\nonstopmode\\input paper-actap
 	dvips -o 	paper-actap.ps paper-actap
 
 www-install: www-doc

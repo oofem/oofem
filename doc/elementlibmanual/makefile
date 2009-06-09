@@ -3,14 +3,14 @@ BACKUP_FILES = *.tex *.fig *.eps makefile
 RCP = scp
 
 www-doc: ps-doc
-	$(ROBOT) < latex2html-init.shtml > .latex2html-init
+	if [ x$(ROBOT) != "x" ]; then $(ROBOT) < include.src.tex > include.tex; fi
 	latex2html elementlibmanual
 	mv elementlibmanual.ps elementlibmanual
 
 ps-doc:
-	$(ROBOT) < include.src.tex > include.tex
-	latex elementlibmanual
-	latex elementlibmanual
+	if [ x$(ROBOT) != "x" ]; then $(ROBOT) < include.src.tex > include.tex; fi
+	latex \\nonstopmode\\input elementlibmanual
+	latex \\nonstopmode\\input elementlibmanual
 	dvips -o 	elementlibmanual.ps elementlibmanual
 
 www-install: www-doc
