@@ -55,6 +55,7 @@
 VTKExportModule :: VTKExportModule(EngngModel *e) : ExportModule(e), internalVarsToExport(), primaryVarsToExport()
 {
   this->mode = rbrmode;
+  //this->mode = wdmode; //preserves node numbering
   this->outMode = rbrmode; //applies only when mode == rbrmode
   smoother = NULL;
 }
@@ -108,7 +109,7 @@ VTKExportModule :: doOutput(TimeStep *tStep)
 
     Domain *d  = emodel->giveDomain(1);
     FloatArray *coords;
-    int i, inode, nnodes = d->giveNumberOfDofManagers();
+    int i, j, inode, nnodes = d->giveNumberOfDofManagers();
     // output points
 
     if ((this->mode == wdmode) || ((this->mode == rbrmode)&&(this->outMode == wdmode))) {
@@ -165,24 +166,32 @@ VTKExportModule :: doOutput(TimeStep *tStep)
     }
 
     int nelemNodes;
+    int HexaQuadNodeMapping [] = {5,8,7,6,1,4,3,2,16,15,14,13,12,11,10,9,17,20,19,18};
     Element *elem;
+    int vtkCellType;
     // output cells
     fprintf(stream, "\nCELLS %d %d\n", elemToProcess, celllistsize);
 
     if ((this->mode == wdmode) || ((this->mode == rbrmode)&&(this->outMode == wdmode))) {
       for ( ielem = 1; ielem <= nelem; ielem++ ) {
         elem = d->giveElement(ielem);
+        vtkCellType = this->giveCellType (elem);
         nelemNodes = elem->giveNumberOfNodes();
         fprintf(stream, "%d ", nelemNodes);
         for ( i = 1; i <= nelemNodes; i++ ) {
-          fprintf(stream, "%d ", elem->giveNode(i)->giveNumber() - 1);
+          if(vtkCellType==25){
+            j=HexaQuadNodeMapping[i-1];
+          }
+          else {
+            j=i;
+          }
+          fprintf(stream, "%d ", elem->giveNode(j)->giveNumber() - 1);
         }
         
         fprintf(stream, "\n");
       }
       
       // output cell types
-      int vtkCellType;
       fprintf(stream, "\nCELL_TYPES %d\n", elemToProcess);
       for ( ielem = 1; ielem <= nelem; ielem++ ) {
         elem = d->giveElement(ielem);
@@ -203,6 +212,7 @@ VTKExportModule :: doOutput(TimeStep *tStep)
         offset += regionDofMans;
         for ( ielem = 1; ielem <= nelem; ielem++ ) {
             elem = d->giveElement(ielem);
+            vtkCellType = this->giveCellType (elem);
             if ( elem->giveRegionNumber() != ireg ) {
                 continue;
             }
@@ -210,7 +220,13 @@ VTKExportModule :: doOutput(TimeStep *tStep)
             nelemNodes = elem->giveNumberOfNodes();
             fprintf(stream, "%d ", nelemNodes);
             for ( i = 1; i <= nelemNodes; i++ ) {
-                fprintf(stream, "%d ", regionNodalNumbers.at( elem->giveNode(i)->giveNumber() ) - 1);
+              if(vtkCellType==25){
+                j=HexaQuadNodeMapping[i-1];
+              }
+              else {
+                j=i;
+              }
+              fprintf(stream, "%d ", regionNodalNumbers.at( elem->giveNode(j)->giveNumber() ) - 1);
             }
 
             fprintf(stream, "\n");
@@ -297,8 +313,9 @@ VTKExportModule :: giveCellType(Element *elem)
 {
     Element_Geometry_Type elemGT = elem->giveGeometryType();
     int vtkCellType = 0;
-
-    if ( elemGT == EGT_triangle_1 ) {
+    if (elemGT == EGT_line_1){
+      vtkCellType = 3;
+    } else if ( elemGT == EGT_triangle_1 ) {
         vtkCellType = 5;
     } else if ( elemGT == EGT_tetra_1 ) {
         vtkCellType = 10;
@@ -308,6 +325,8 @@ VTKExportModule :: giveCellType(Element *elem)
         vtkCellType = 23;
     } else if ( elemGT == EGT_hexa_1 ) {
         vtkCellType = 12;
+    } else if (elemGT == EGT_hexa_2){
+        vtkCellType = 25; 
     } else {
         OOFEM_ERROR("VTKExportModule: unsupported element gemetry type");
     }
@@ -318,14 +337,18 @@ VTKExportModule :: giveCellType(Element *elem)
 int
 VTKExportModule :: giveNumberOfNodesPerCell(int cellType)
 {
-    if ( cellType == 10 ) {
-        return 4;
+    if (cellType == 3) {
+        return 2;
     } else if ( cellType == 5 ) {
         return 3;
     } else if ( cellType == 9 ) {
         return 4;
+    } else if ( cellType == 10 ) {
+        return 4;
     } else if  ( ( cellType == 12 ) || (cellType == 23) ) {
         return 8;
+    } else if ( cellType == 25 ) {
+        return 20;
     } else {
         OOFEM_ERROR("VTKExportModule: unsupported cell type ID");
     }
@@ -340,9 +363,9 @@ VTKExportModule :: giveElementCell(IntArray &answer, Element *elem, int cell)
     Element_Geometry_Type elemGT = elem->giveGeometryType();
     int i, nelemNodes;
 
-    if ( ( elemGT == EGT_triangle_1 ) || ( elemGT == EGT_tetra_1 ) || 
+    if ( ( elemGT == EGT_line_1 ) || ( elemGT == EGT_triangle_1 ) || ( elemGT == EGT_tetra_1 ) || 
 	 ( elemGT == EGT_quad_1 ) || ( elemGT == EGT_quad_2 ) || 
-	 ( elemGT == EGT_hexa_1 ) ) {
+	 ( elemGT == EGT_hexa_1 ) || ( elemGT == EGT_hexa_2 ) ) {
         nelemNodes = elem->giveNumberOfNodes();
         answer.resize(nelemNodes);
         for ( i = 1; i <= nelemNodes; i++ ) {
@@ -361,8 +384,7 @@ VTKExportModule :: giveNumberOfElementCells(Element *elem)
 {
     Element_Geometry_Type elemGT = elem->giveGeometryType();
 
-    if ( ( elemGT == EGT_triangle_1 ) || ( elemGT == EGT_tetra_1 ) || ( elemGT == EGT_quad_1 ) || 
-	 ( elemGT == EGT_quad_2 ) || ( elemGT == EGT_hexa_1 ) ) {
+    if ( ( elemGT == EGT_line_1 ) || ( elemGT == EGT_triangle_1 ) || ( elemGT == EGT_tetra_1 ) || ( elemGT == EGT_quad_1 ) || ( elemGT == EGT_quad_2 ) || ( elemGT == EGT_hexa_1 ) || ( elemGT == EGT_hexa_2 ) ) {
         return 1;
     } else {
         OOFEM_ERROR("VTKExportModule: unsupported element geometry type");

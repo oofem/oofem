@@ -108,7 +108,8 @@ public:
     const char *giveClassName() const { return "Truss2d"; }
     classType            giveClassID() const { return Truss2dClass; }
     IRResultType initializeFrom(InputRecord *ir);
-
+    Element_Geometry_Type giveGeometryType() const {return EGT_line_1;}
+    
 protected:
     // edge load support
     void resolveCoordIndices(int &c1, int &c2);

@@ -118,7 +118,7 @@ class MazarsMaterial : public IsotropicDamageMaterial1
      * in Gausspoint.
      * - Returning a material property (method 'give'). Only for non-standard elements.
      * - Returning real stress state vector(tensor) at gauss point for 3d - case.
-     * - Storing & restoring Material Staus sored in gp matStatusDictionary.
+     * - Storing & restoring Material Status sored in gp matStatusDictionary.
      */
 
 protected:

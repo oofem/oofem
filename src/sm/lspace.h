@@ -149,7 +149,7 @@ public:
     /**
      * Computes the element value in given side.
      * @param answer contains the result
-     * @param node element side number
+     * @param side element side number
      * @param type determines the type of internal variable to be recovered
      * @param tStep time step
      */

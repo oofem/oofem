@@ -185,7 +185,7 @@ class IsotropicDamageMaterial1 : public IsotropicDamageMaterial, public RandomMa
      * in Gausspoint.
      * - Returning a material property (method 'give'). Only for non-standard elements.
      * - Returning real stress state vector(tensor) at gauss point for 3d - case.
-     * - Storing & restoring Material Staus sored in gp matStatusDictionary.
+     * - Storing & restoring Material Status sored in gp matStatusDictionary.
      */
 
 protected:
@@ -292,7 +292,7 @@ public:
     MaterialStatus *CreateStatus(GaussPoint *gp) const;
     /**
      * Returns material status of receiver in given integration point.
-     * If status doe not exist yet, it is created using CreateStatus  member function.
+     * If status does not exist yet, it is created using CreateStatus  member function.
      * @param gp Returns reference to material status belonging to integration
      * point gp.
      * @return material status associated with given integration point.

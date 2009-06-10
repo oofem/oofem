@@ -39,7 +39,6 @@
 //  recast by L. Svoboda
 //
 
-#include "structuralelement.h"
 #include "qspace.h"
 #include "node.h"
 #include "material.h"
@@ -324,4 +323,58 @@ QSpace :: computeLoadLSToLRotationMatrix (FloatMatrix& answer, int iSurf, GaussP
   for (i=1; i<=3; i++) answer.at(i,2) = h2.at(i);
 
   return 1;
+}
+
+Interface* 
+QSpace :: giveInterface (InterfaceType interface)
+{
+ if (interface == ZZNodalRecoveryModelInterfaceType) return (ZZNodalRecoveryModelInterface*) this;
+ else if (interface == NodalAveragingRecoveryModelInterfaceType) return (NodalAveragingRecoveryModelInterface*) this;
+
+ OOFEM_LOG_INFO("Interface on Qspace element not supported");
+ return NULL;
+}
+
+int
+QSpace :: ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type)
+{
+ if ((type == IST_StressTensor) || (type == IST_StrainTensor)) return 6;
+
+ GaussPoint *gp = integrationRulesArray[0]-> getIntegrationPoint(0) ;
+ return this->giveIPValueSize (type, gp);
+}
+
+void
+QSpace :: ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx
+  (FloatMatrix& answer, GaussPoint* aGaussPoint, InternalStateType type)
+{
+  int i;
+  FloatArray n;
+  this->interpolation.evalN(n, * aGaussPoint->giveCoordinates(), 0.0);
+
+  if ( this->giveIPValueSize(type, aGaussPoint) ) {
+    answer.resize(1, 20);
+  } else {
+    return;
+  }
+  
+  for (i=1;i<=20;i++)
+    answer.at(1, i)  = n.at(i);
+  
+  return;
+}
+
+void
+QSpace::NodalAveragingRecoveryMI_computeNodalValue (FloatArray& answer, int node, InternalStateType type, TimeStep* tStep)
+{
+  int size = NodalAveragingRecoveryMI_giveDofManRecordSize(type);
+  answer.resize(size);
+  answer.zero();
+  _warning("Qspace element: IP values will not be transferred to nodes. Use ZZNodalRecovery instead (parameter stype 1)");
+}
+
+void
+QSpace::NodalAveragingRecoveryMI_computeSideValue (FloatArray& answer, int side, InternalStateType type, TimeStep* tStep)
+{
+ answer.resize(0);
 }

@@ -76,10 +76,68 @@ Truss3d :: giveInterface(InterfaceType interface)
 {
     if ( interface == DirectErrorIndicatorRCInterfaceType ) {
         return ( DirectErrorIndicatorRCInterface * ) this;
+    } else if (interface == ZZNodalRecoveryModelInterfaceType) {
+      return (ZZNodalRecoveryModelInterface*) this;
+    } else if (interface == NodalAveragingRecoveryModelInterfaceType) {
+      return (NodalAveragingRecoveryModelInterface*) this;
     }
-
+     
+    OOFEM_LOG_INFO("Interface on Truss3d element not supported");
     return NULL;
 }
+
+//all tensor values appear as the first tensor component
+int
+Truss3d :: ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type)
+{
+ if ((type == IST_StressTensor) || (type == IST_StrainTensor)) return 1;
+
+ GaussPoint *gp = integrationRulesArray[0]-> getIntegrationPoint(0) ;
+ return this->giveIPValueSize (type, gp);
+}
+
+void
+Truss3d :: ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx
+  (FloatMatrix& answer, GaussPoint* aGaussPoint, InternalStateType type)
+{
+  int i;
+  double ksi;
+  FloatArray n(2);
+  
+  ksi = aGaussPoint->giveCoordinate(1);
+  n.at(1)  = ( 1. - ksi ) * 0.5;
+  n.at(2)  = ( 1. + ksi ) * 0.5;
+  
+  if ( this->giveIPValueSize(type, aGaussPoint) ) {
+    answer.resize(1, 2);
+  } else {
+    return;
+  }
+  
+  for (i=1;i<=2;i++)
+    answer.at(1, i)  = n.at(i);
+  
+  return;
+}
+
+void
+Truss3d::NodalAveragingRecoveryMI_computeNodalValue (FloatArray& answer, int node, InternalStateType type, TimeStep* tStep)
+{
+  int size = NodalAveragingRecoveryMI_giveDofManRecordSize(type);
+  answer.resize(size);
+  answer.zero();
+  _warning("Truss3d element: IP values will not be transferred to nodes. Use ZZNodalRecovery instead (parameter stype 1)");
+}
+
+void
+Truss3d::NodalAveragingRecoveryMI_computeSideValue (FloatArray& answer, int side, InternalStateType type, TimeStep* tStep)
+{
+ answer.resize(0);
+}
+
+
+
+
 
 void
 Truss3d :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int li, int ui)

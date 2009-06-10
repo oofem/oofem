@@ -170,7 +170,7 @@ public:
     // store & restore context functions
     /**
      * Stores context of receiver into given stream. This method is called from
-     * integration point saveContext function, to store material related staus in
+     * integration point saveContext function, to store material related status in
      * integration point. Integration point passes itself as obj parameter, when
      * invokes this method. This implementation loops over all slaves ip (microplanes)
      * and saves their satuses as wel as status of master is saved.
@@ -182,7 +182,7 @@ public:
     contextIOResultType    saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
     /**
      * Restores context of receiver from given stream. This method is called from
-     * integration point restoeContext function, to restore material related staus in
+     * integration point restoeContext function, to restore material related status in
      * integration point. Integration point passes itself as obj parameter, when
      * invokes this method. This implementation loops over all slaves ip (microplanes)
      * and loads their satuses as wel as status of master is loaded.

@@ -46,13 +46,11 @@
 #include "structuralelement.h"
 #include "fei3dhexaquad.h"
 #include "zznodalrecoverymodel.h"
-#include "sprnodalrecoverymodel.h"
 #include "nodalaveragingrecoverymodel.h"
-#include "spatiallocalizer.h"
+#include "eleminterpmapperinterface.h"
+#include "huertaerrorestimator.h"
 
-
-class QSpace : public StructuralElement
-
+class QSpace : public StructuralElement, public ZZNodalRecoveryModelInterface, public NodalAveragingRecoveryModelInterface
 
 {
   /*
@@ -77,21 +75,75 @@ class QSpace : public StructuralElement
   IRResultType initializeFrom (InputRecord* ir);
   virtual void giveDofManDofIDMask (int inode, EquationID ut, IntArray& answer) const;
   double       computeVolumeAround (GaussPoint*) ;
+  
+  /**
+   Computes the global coordinates from given element's local coordinates.
+   Required by nonlocal material models.
+   @returns nonzero if successful
+  */
   virtual int  computeGlobalCoordinates (FloatArray& answer, const FloatArray& lcoords) ;
+  
+  /// characteristic length in gp (for some material models)
   double       giveCharacteristicLenght (GaussPoint* gp, const FloatArray &normalToCrackPlane);
   
-  /** Interface requesting service */
-  Interface*  giveInterface (InterfaceType) { return NULL; }
-  virtual int testElementExtension (ElementExtension ext) 
-  {return ((ext==Element_SurfaceLoadSupport)?1:0);}
+  /// Interface requesting service
+  Interface*  giveInterface (InterfaceType);
+  virtual int testElementExtension (ElementExtension ext) {return ((ext==Element_SurfaceLoadSupport)?1:0);}
+  /**
+  @name The element interface required by ZZNodalRecoveryModel
+  */
+  //@{
+  /**
+   Returns the size of DofManger record required to hold recovered values for given mode.
+   @param type determines the type of internal variable to be recovered
+   @return size of DofManger record required to hold recovered values
+  */
+  int ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type);
   
-  virtual int  computeNumberOfDofs () {return 60;}
+  /// Returns the corresponding element to interface
+  Element *ZZNodalRecoveryMI_giveElement() { return this; }
+  
+  /// Evaluates N matrix (interpolation estimated stress matrix).
+  void ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx (FloatMatrix& answer, GaussPoint* aGaussPoint, InternalStateType type);
+  //@}
+  /**
+  @name The element interface required by NodalAveragingRecoveryModel
+  */
+  //@{
+  /**
+   Computes the element value in given node.
+   @param answer contains the result
+   @param node element node number
+   @param type determines the type of internal variable to be recovered
+   @param tStep time step
+  */
+  void NodalAveragingRecoveryMI_computeNodalValue (FloatArray& answer, int node, InternalStateType type, TimeStep* tStep);
+  
+  /**
+   Computes the element value in given side.
+   @param answer contains the result
+   @param side element side number
+   @param type determines the type of internal variable to be recovered
+   @param tStep time step
+  */
+  void NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side, InternalStateType type, TimeStep *tStep);
+  
+  /**
+   Returns the size of DofManger record required to hold recovered values for given mode.
+   @param type determines the type of internal variable to be recovered
+   @return size of DofManger record required to hold recovered values
+  */
+  virtual int NodalAveragingRecoveryMI_giveDofManRecordSize(InternalStateType type)
+    { return ZZNodalRecoveryMI_giveDofManRecordSize(type); }
+  //@}
+  
   //
   // definition & identification
   //
   const char* giveClassName () const { return "QSpace"; }
   classType   giveClassID   () const { return QSpaceClass; }
   Element_Geometry_Type giveGeometryType() const {return EGT_hexa_2;}
+  virtual int  computeNumberOfDofs () {return 60;}
   
  protected:
   void computeGaussPoints ();
