@@ -326,9 +326,9 @@ FloatArray *Skyline :: backSubstitutionWith(FloatArray &y) const
     //solution = new FloatArray (y.giveSize());
 
 
-    /*****************************/
-    /*  modifikace prave strany  */
-    /*****************************/
+    /************************************/
+    /*  modification of right hand side */
+    /************************************/
     n = size;
     for ( k = 2; k <= n; k++ ) {
         ack = adr->at(k);
@@ -479,9 +479,9 @@ SparseMtrx *Skyline :: factorized()
 #endif
 
 
-    /**********************/
-    /*  eliminace matice  */
-    /**********************/
+    /************************/
+    /*  matrix elimination  */
+    /************************/
     if ( isFactorized ) {
         return this;
     }

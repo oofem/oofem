@@ -175,6 +175,12 @@ protected:
     /// Array of code numbers of element.
     IntArray *locationArray;
 
+    /**
+    Transformation material matrix, used in orthotropic and anisotropic materials, global->local transformation
+    */
+    FloatMatrix matLocalCS;
+
+
 #if defined(__PARALLEL_MODE) || defined(__ENABLE_COMPONENT_LABELS)
     /**
      * In parallel mode, globalNumber contains globally unique DoFManager number.
@@ -280,6 +286,13 @@ public:
      */
     //virtual MaterialMode          giveMaterialMode() {return _Unknown;}
     // vector of nodal unknowns
+
+    /**
+    Gives transformation matrix Global=T*Local for material orientation on element. Only if defined by mlcs on element
+    @param answer transformation matrix 3x3
+    */
+    virtual void giveMatLocalCS(FloatMatrix &answer);
+
 
     /**@name General element functions */
     //@{
@@ -619,7 +632,7 @@ public:
     // if local c.s == global c.s returns NULL
     /**
      * Returns local coordinate system of receiver. Required by material models with
-     * ortho and anisotrophy). If local system is equal to global one, can set answer to empty mtrx
+     * ortho and anisotrophy. If local system is equal to global one, can set answer to empty mtrx
      * and return zero value.
      * @return nonzero if answer computed, zero value if answer is empty, i.e. no transformation is necessary.
      */

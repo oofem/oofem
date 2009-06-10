@@ -81,7 +81,7 @@ class GaussPoint;
  * unique copy of its associated status in each integration point.
  * Because integration point is parameter of all mesages to material model
  * class, material model therefore can easily access  all history variables it needs.
- * @see MaterialStaus class
+ * @see MaterialStatus class
  * @see GaussPoint class
  */
 class Material : public FEMComponent
@@ -275,7 +275,7 @@ public:
     // store & restore context functions
     /**
      * Stores context of receiver into given stream. This method is called from
-     * integration point saveContext function, to store material related staus in
+     * integration point saveContext function, to store material related status in
      * integration point. Integration point passes itself as obj parameter, when
      * invokes this method. Default implementation simply retypes obj parameter
      * (which is void*) to integration point pointer, requests material status, and
@@ -289,7 +289,7 @@ public:
     contextIOResultType    saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
     /**
      * Restores context of receiver from given stream. This method is called from
-     * integration point restoeContext function, to restore material related staus in
+     * integration point restoeContext function, to restore material related status in
      * integration point. Integration point passes itself as obj parameter, when
      * invokes this method. Default implementation simply retypes obj parameter
      * (which is void*) to integration point pointer, requests material status, and
@@ -312,7 +312,7 @@ public:
     virtual void initGpForNewStep(GaussPoint *gp);
     /**
      * Returns material status of receiver in given integration point.
-     * If status doe not exist yet, it is created using CreateStatus  member function.
+     * If status does not exist yet, it is created using CreateStatus  member function.
      * @param gp Returns reference to material status belonging to integration
      * point gp.
      * @return material status associated with given integration point.

@@ -97,7 +97,7 @@ class NonlocalMaterialStatusExtension;
  * The temp and non-temp history variables allow simple iteration restart within one step.
  * The restarts to previous steps are supported, but context for these steps must be stored.
  *
- * The general services for staus initialization and update, as well as services for
+ * The general services for status initialization and update, as well as services for
  * storing and restoring status context are declared. The implementation is left on derived
  * classes.
  *

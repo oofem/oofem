@@ -173,6 +173,7 @@
 #include "mat_cebfip90.h"
 #include "hellmat.h"
 #include "mdm.h"
+#include "compodamagemat.h"
 
 #include "scalarerrorindicator.h"
 #include "zzerrorestimator.h"
@@ -182,7 +183,7 @@
 // export modules
 #include "vtkexportmodule.h"
 #include "poiexportmodule.h"
-
+#include "homexportmodule.h"
 
 // nonlocal barriers
 #include "polylinenonlocalbarrier.h"
@@ -576,14 +577,13 @@ Material *CreateUsrDefMaterialOfType(char *aClass, int number, Domain *domain)
         newMaterial = new J2Mat(number, domain);
     } else if ( !strncasecmp(aClass, "cebfipslip90", 12) ) {
         newMaterial = new CebFipSlip90Material(number, domain);
-    }
-    //modified_zh 7.6.2004
-    else if ( !strncmp(aClass, "hellmat", 7) ) {
+    } else if ( !strncmp(aClass, "hellmat", 7) ) {
         newMaterial = new HellmichMaterial(number, domain);
     } else if ( !strncasecmp(aClass, "mdm", 3) ) {
         newMaterial = new MDM(number, domain);
+    } else if (! strncasecmp(aClass,"compdammat",10) ) {
+      newMaterial = new CompoDamageMat (number,domain);
     }
-
 #endif //__SM_MODULE
 
 #ifdef __TM_MODULE
@@ -756,8 +756,9 @@ ExportModule *CreateUsrDefExportModuleOfType(char *aClass, EngngModel *emodel)
         answer = new VTKExportModule(emodel);
     } else if ( !strncasecmp(aClass, "poi", 3) ) {
         answer = new POIExportModule(emodel);
+    } else if ( !strncasecmp(aClass, "hom", 3) ) {
+        answer = new HOMExportModule(emodel);
     }
-
 #endif //__SM_MODULE
 
     return answer;

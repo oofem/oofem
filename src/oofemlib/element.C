@@ -76,8 +76,9 @@
 #include "elementside.h"
 #include "datastream.h"
 #ifndef __MAKEDEPEND
- #include <stdlib.h>
- #include <stdio.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <math.h>
 #endif
 
 #include "errorestimator.h"
@@ -421,29 +422,68 @@ double Element ::  giveCharacteristicValue(CharType mtrx, TimeStep *tStep)
     return 0.;
 }
 
+void Element :: giveMatLocalCS(FloatMatrix &answer){
+ int i,j;
+ answer.resize(3,3); answer.zero();
+ if((this->matLocalCS).isNotEmpty ()){
+  for (i=1 ; i<=3 ; i++)
+   for (j=1 ; j<=3 ; j++)
+    answer.at(i,j) = this->matLocalCS.at(i,j);
+ }
+ else
+  answer.beUnitMatrix ();
+}
+
+
+
 IRResultType
 Element :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
-    IRResultType result;                            // Required by IR_GIVE_FIELD macro
+  const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
+  IRResultType result;                            // Required by IR_GIVE_FIELD macro
 
 #  ifdef VERBOSE
-    // VERBOSE_PRINT1("Instanciating element ",number);
+  // VERBOSE_PRINT1("Instanciating element ",number);
 #  endif
-    IR_GIVE_FIELD(ir, material, IFT_Element_mat, "mat"); // Macro
+  IR_GIVE_FIELD(ir, material, IFT_Element_mat, "mat"); // Macro
 
-    IR_GIVE_FIELD(ir, crossSection, IFT_Element_crosssect, "crosssect"); // Macro
+  IR_GIVE_FIELD(ir, crossSection, IFT_Element_crosssect, "crosssect"); // Macro
 
-    IR_GIVE_FIELD(ir, dofManArray, IFT_Element_nodes, "nodes"); // Macro
+  IR_GIVE_FIELD(ir, dofManArray, IFT_Element_nodes, "nodes"); // Macro
 
-    //sideArray.resize(0);
-    //IR_GIVE_OPTIONAL_FIELD (ir, sideArray, IFT_Element_sides, "sides"); // Macro
+  //sideArray.resize(0);
+  //IR_GIVE_OPTIONAL_FIELD (ir, sideArray, IFT_Element_sides, "sides"); // Macro
 
-    bodyLoadArray.resize(0);
-    IR_GIVE_OPTIONAL_FIELD(ir, bodyLoadArray, IFT_Element_bodyload, "bodyloads"); // Macro
+  bodyLoadArray.resize(0);
+  IR_GIVE_OPTIONAL_FIELD(ir, bodyLoadArray, IFT_Element_bodyload, "bodyloads"); // Macro
 
-    boundaryLoadArray.resize(0);
-    IR_GIVE_OPTIONAL_FIELD(ir, boundaryLoadArray, IFT_Element_boundaryload, "boundaryloads"); // Macro
+  boundaryLoadArray.resize(0);
+  IR_GIVE_OPTIONAL_FIELD(ir, boundaryLoadArray, IFT_Element_boundaryload, "boundaryloads"); // Macro
+
+  if (ir->hasField(IFT_Element_mlcs, "mlcs")){//material local coordination system
+    double n1=0.0, n2=0.0;
+    int j;
+    FloatArray triplets;
+    triplets.resize(0);
+    IR_GIVE_OPTIONAL_FIELD (ir, triplets, IFT_Element_mlcs, "mlcs");
+    matLocalCS.resize(3,3);
+    for (j=1; j<=3; j++) {
+       matLocalCS.at(j,1) = triplets.at(j);
+      n1 += triplets.at(j)*triplets.at(j);
+       matLocalCS.at(j,2) = triplets.at(j+3);
+      n2 += triplets.at(j+3)*triplets.at(j+3);
+    }
+    n1 = sqrt(n1); n2 = sqrt(n2);
+    for (j=1; j<= 3; j++) { // normalize e1' e2'
+      matLocalCS.at(j,1) /= n1;
+      matLocalCS.at(j,2) /= n2;
+    }
+    // vector e3' computed from vector product of e1', e2'
+    matLocalCS.at(1,3) = (matLocalCS.at(2,1)*matLocalCS.at(3,2) - matLocalCS.at(3,1)*matLocalCS.at(2,2)) ;
+    matLocalCS.at(2,3) = (matLocalCS.at(3,1)*matLocalCS.at(1,2) - matLocalCS.at(1,1)*matLocalCS.at(3,2)) ;
+    matLocalCS.at(3,3) = (matLocalCS.at(1,1)*matLocalCS.at(2,2) - matLocalCS.at(2,1)*matLocalCS.at(1,2)) ;
+    //matLocalCS.printYourself();
+  }
 
 #ifdef __PARALLEL_MODE
     globalNumber = 0;

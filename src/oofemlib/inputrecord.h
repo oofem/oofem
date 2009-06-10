@@ -102,6 +102,8 @@ enum InputFieldType {
     IFT_POIExportModule_mtype,
     IFT_POIExportModule_poifilename,
 
+    IFT_HOMExportModule_scale,
+
     IFT_IncrementalLinearStatic_endoftimeofinterest,
     IFT_IncrementalLinearStatic_prescribedtimes,
     IFT_IncrementalLinearStatic_lstype,
@@ -337,6 +339,7 @@ enum InputFieldType {
     IFT_Element_sides,
     IFT_Element_bodyload,
     IFT_Element_boundaryload,
+    IFT_Element_mlcs,
     IFT_Element_globnum,
     IFT_Element_partitions,
     IFT_Element_remote,
@@ -549,6 +552,13 @@ enum InputFieldType {
     IFT_IsotropicDamageMaterial1_e0,
     IFT_IsotropicDamageMaterial1_ef,
     IFT_IsotropicDamageMaterial1_equivstraintype,
+
+    IFT_CompoDamageMat_ex,
+    IFT_CompoDamageMat_ez,
+    IFT_CompoDamageMat_nyxy,
+    IFT_CompoDamageMat_nyyz,
+    IFT_CompoDamageMat_Gxy,
+    IFT_CompoDamageMat_components,
 
     IFT_IDNLMaterial_r,
 
