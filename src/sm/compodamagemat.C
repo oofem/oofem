@@ -74,13 +74,13 @@ IRResultType CompoDamageMat :: initializeFrom (InputRecord* ir)
  IR_GIVE_FIELD (ir, value, IFT_CompoDamageMat_ez, "eyyezz");
  propertyDictionary -> add(Ey,value);
  propertyDictionary -> add(Ez,value);
- IR_GIVE_FIELD (ir, value, IFT_CompoDamageMat_nyxy, "nyxynuxz");
+ IR_GIVE_FIELD (ir, value, IFT_CompoDamageMat_nyxy, "nuxynuxz");
  propertyDictionary -> add(NYxy,value);
  propertyDictionary -> add(NYxz,value);
- IR_GIVE_FIELD (ir, value, IFT_CompoDamageMat_nyyz, "nyyz");
+ IR_GIVE_FIELD (ir, value, IFT_CompoDamageMat_nyyz, "nuyz");
  propertyDictionary -> add(NYyz,value);
  propertyDictionary -> add(NYzy,value);
- IR_GIVE_FIELD (ir, value, IFT_CompoDamageMat_Gxy, "gxyxz");
+ IR_GIVE_FIELD (ir, value, IFT_CompoDamageMat_Gxy, "gxygxz");
  propertyDictionary -> add(Gxy,value);
  propertyDictionary -> add(Gxz,value);
 
@@ -127,7 +127,7 @@ void  CompoDamageMat :: give3dMaterialStiffnessMatrix (FloatMatrix& answer, MatR
  //already with reduced components
  this->giveUnrotated3dMaterialStiffnessMatrix (answer, gp);
  rotationMatrix = this->giveMatStiffRotationMatrix(gp);
- (*rotationMatrix).printYourself();
+ //(*rotationMatrix).printYourself();
  answer.rotatedWith (*rotationMatrix);
  //answer.printYourself();
  delete rotationMatrix;
@@ -382,7 +382,7 @@ FloatMatrix* CompoDamageMat :: giveMatStiffRotationMatrix(GaussPoint *gp){
  StructuralElement* element = (StructuralElement*) gp-> giveElement();
 
  element -> giveMatLocalCS(t);//if mlcs undefined, returns unix matrix
- t.printYourself();
+ //t.printYourself();
  
  //rotate from unrotated (base) c.s. to local material c.s.
  this -> giveStrainVectorTranformationMtrx (answer, t);

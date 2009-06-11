@@ -47,7 +47,7 @@
 /**
  * Class representing Gaussian-quadrature integration rule.
  * The number of integration points and their coordinates and integration weights depends on
- * integration rule type (rule for intagration in 1d, 2d, 3d) and required  acurracy.
+ * integration rule type (rule for integration in 1d, 2d, 3d) and required  acurracy.
  */
 class GaussIntegrationRule : public IntegrationRule
 {

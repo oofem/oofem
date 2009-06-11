@@ -107,7 +107,7 @@ class NonlocalMaterialStatusExtension;
 class MaterialStatus : public FEMComponent
 {
 protected:
-    /// Associated intagration point.
+    /// Associated integration point.
     GaussPoint *gp;
 public:
 

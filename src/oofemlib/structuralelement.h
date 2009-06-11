@@ -645,7 +645,7 @@ protected:
 
     /**
      * Computes load vector due to prescribed strains. The load vector is obtained using numerical integration
-     * (using default intagration rule of element) over
+     * (using default integration rule of element) over
      * element volume \f$f=\int_V B^T D \varepsilon dV\f$, where \f$\varepsilon\f$ is stress independent strain vector
      * in particular untegration point, obtained using computeStressIndependentStrainVector service.
      * The load mode (Incremental or Total Load form) is  passed as parameter.

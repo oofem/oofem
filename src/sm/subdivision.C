@@ -4285,7 +4285,7 @@ Subdivision::giveNumberOfProcesses()
 
     This is an aproximate algrithm, that works correctly for reasonably shaped grids,
     for grids with badly shaped elements, some interactions can be neglected, due to the fact
-    that real distances between intagration points are not considered directly.
+    that real distances between integration points are not considered directly.
 
     This algorithm failes if the mirror zone propagates to partition not adjacent to current partition.
     Therefore the algorithm has been abandaned and replaced by that which mirrors children

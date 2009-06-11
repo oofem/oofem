@@ -58,7 +58,7 @@ class FEInterpolation;
  * Abstract base class representing integration rule. The integration rule is
  * a collection of integration points used to  numerically integrate some formula.
  * The number of integration points and their coordinates and integration weights depends on
- * integration rule type (rule for intagration in 1d, 2d, 3d) and required  acurracy.
+ * integration rule type (rule for integration in 1d, 2d, 3d) and required  acurracy.
  * General services for inicialization are declared. Services for integration point retrieval are provided.
  *
  * In general, finite elements can have multiple integration rules, for diferrent tasks or
@@ -120,7 +120,7 @@ protected:
     int numberOfIntegrationPoints;
     /**
      * firstLocalStrainIndx and lastLocalStrainIndx indexes describe range of components (strains for example)
-     * for which receiver intagration points apply.
+     * for which receiver integration points apply.
      */
     int firstLocalStrainIndx, lastLocalStrainIndx;
 
@@ -163,7 +163,7 @@ public:
      * Initializes the receiver. Receiver integration points are created acording to given parameters.
      * @param mode describes integration domain
      * @param nPoints required number of integration points of receiver
-     * @param matMode material mode of receiver's intagration points
+     * @param matMode material mode of receiver's integration points
      * @return nPoints
      */
     int setUpIntegrationPoints(integrationDomain mode, int nPoints, MaterialMode matMode);
@@ -171,7 +171,7 @@ public:
      * Initializes the receiver. Receiver integration points are created acording to given parameters.
      * @param mode describes integration domain
      * @param nPoints required number of integration points of receiver
-     * @param matMode material mode of receiver's intagration points
+     * @param matMode material mode of receiver's integration points
      * @return nPoints
      */
     int setUpEmbeddedIntegrationPoints(integrationDomain mode, int nPoints, MaterialMode matMode,
