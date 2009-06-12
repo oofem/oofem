@@ -54,8 +54,8 @@
 
 VTKExportModule :: VTKExportModule(EngngModel *e) : ExportModule(e), internalVarsToExport(), primaryVarsToExport()
 {
-  this->mode = rbrmode;
-  //this->mode = wdmode; //preserves node numbering
+  //this->mode = rbrmode;
+  this->mode = wdmode; //preserves node numbering
   this->outMode = rbrmode; //applies only when mode == rbrmode
   smoother = NULL;
 }
@@ -545,7 +545,6 @@ VTKExportModule :: exportIntVarAs(InternalStateType valID, InternalStateValueTyp
     FloatMatrix t(3, 3);
     const FloatArray *val;
     IntArray regionVarMap;
-    double factor = 0.0;
 
     this->giveSmoother();
 
@@ -640,53 +639,43 @@ VTKExportModule :: exportIntVarAs(InternalStateType valID, InternalStateValueTyp
                 for ( j = jsize + 1; j <= 3; j++ ) {
                     fprintf(stream, "0.0 ");
                 }
-            } else if ( ( type == ISVT_TENSOR_S3 ) || ( type == ISVT_TENSOR_S3 ) ) {
-                if ( regionVarMap.giveSize() != 6 ) {
-                    OOFEM_ERROR("VTKExportModule::exportIntVars: internal error: incompatible map of symetric 3x3 tensor");
-                }
+            } else if ( ( type == ISVT_TENSOR_S3 )) {
+              int ii, jj, iii;
+              t.zero();
+              for ( ii = 1; ii <= regionVarMap.giveSize(); ii++ ) {
+                iii = regionVarMap.at(ii);
 
-                if ( type == ISVT_TENSOR_S3 ) {
-                    factor = 1.0;
-                } else if ( type == ISVT_TENSOR_S3E ) {
-                    factor = 0.5;                    // engineering notation
+                /* The ordering of symmetrical tensor values is:
+                   t = [1 6 5;
+                        6 2 4;
+                        5 4 3]
+                */
+                if ( ( ii == 1 ) && iii ) {
+                  t.at(1, 1) = val->at(iii);
+                } else if ( ( ii == 2 ) && iii ) {
+                  t.at(2, 2) = val->at( regionVarMap.at(2) );
+                } else if ( ( ii == 3 ) && iii ) {
+                  t.at(3, 3) = val->at( regionVarMap.at(3) );
+                } else if ( ( ii == 4 ) && iii )                                                                                                                                                             {
+                  t.at(2, 3) = val->at( regionVarMap.at(4) );
+                  t.at(3, 2) = val->at( regionVarMap.at(4) );
+                } else if ( ( ii == 5 ) && iii ) {
+                  t.at(1, 3) = val->at( regionVarMap.at(5) );
+                  t.at(3, 1) = val->at( regionVarMap.at(5) );
+                } else if ( ( ii == 6 ) && iii )  {
+                  t.at(1, 2) = val->at( regionVarMap.at(6) );
+                  t.at(2, 1) = val->at( regionVarMap.at(6) );
                 }
-
-                t.zero();
-                if ( regionVarMap.at(1) ) {
-                    t.at(1, 1) = val->at( regionVarMap.at(1) );
+              }
+              
+              for ( ii = 1; ii <= 3; ii++ ) {
+                for ( jj = 1; jj <= 3; jj++ ) {
+                  fprintf( stream, "%e ", t.at(ii, jj) );
                 }
+                
+                fprintf(stream, "\n");
+              }
 
-                if ( regionVarMap.at(2) ) {
-                    t.at(2, 2) = val->at( regionVarMap.at(2) );
-                }
-
-                if ( regionVarMap.at(3) ) {
-                    t.at(3, 3) = val->at( regionVarMap.at(3) );
-                }
-
-                if ( regionVarMap.at(4) ) {
-                    t.at(2, 3) = factor * val->at( regionVarMap.at(4) );
-                    t.at(3, 2) = factor * val->at( regionVarMap.at(4) );
-                }
-
-                if ( regionVarMap.at(5) ) {
-                    t.at(1, 3) = factor * val->at( regionVarMap.at(5) );
-                    t.at(3, 1) = factor * val->at( regionVarMap.at(5) );
-                }
-
-                if ( regionVarMap.at(6) ) {
-                    t.at(1, 2) = factor * val->at( regionVarMap.at(6) );
-                    t.at(2, 1) = factor * val->at( regionVarMap.at(6) );
-                }
-
-                int ii, jj;
-                for ( ii = 1; ii <= 3; ii++ ) {
-                    for ( jj = 1; jj <= 3; jj++ ) {
-                        fprintf( stream, "%e ", t.at(ii, jj) );
-                    }
-
-                    fprintf(stream, "\n");
-                }
             } else if ( type == ISVT_TENSOR_G ) { // export general tensor values as scalars
                 if ( ( indx > 0 ) && ( indx <= regionVarMap.giveSize() ) ) {
                     mapindx = regionVarMap.at(indx);
