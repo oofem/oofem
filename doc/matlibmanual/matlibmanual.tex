@@ -1,7 +1,7 @@
 \documentclass[a4paper]{article}
 \usepackage{html}
-\usepackage[pdftex]{graphicx}
-\usepackage[pdftex]{hyperref}
+\usepackage{graphicx}
+\usepackage{ifpdf}
 \input{include.tex}
 
 \renewcommand{\topfraction}{0.99}	% 99% of page top can be a float
@@ -57,6 +57,8 @@
 
 
 \begin{document}
+
+
 %begin{latexonly}
 \title{\oofem Material Model Library Manual}
 \author{\bp \\ \\
@@ -360,7 +362,16 @@ hardening\\
 Masonry is a composite material made of bricks and mortar. Nonlinear behavior of both components should be considered to obtain a realistic model able to describe cracking, slip, and crushing of the material. The model is based on paper by Lourenco and Rots \cite{Rots}. It is formulated on the basis of softening plasticity for tension, shear, and compression (see fig.(\ref{compyieldsurffig})). Numerical implementation is based on modern algorithmic concepts such as implicit integration of the rate equations and consistent tangent stiffness matrices. 
 
 \begin{figure}[!htb]
-  \centerline{\includegraphics[width=0.7\textwidth]{constmodel.pdf}}
+\begin{htmlonly}
+  \centerline{\includegraphics[width=0.7\textwidth]{constmodel.eps}}
+\end{htmlonly}
+%begin{latexonly}
+\ifpdf
+\centerline{\includegraphics[width=0.7\textwidth]{constmodel.pdf}}
+\else
+\centerline{\includegraphics[width=0.7\textwidth]{constmodel.eps}}
+\fi
+%end{latexonly}
   \caption{Composite yield surface model for masonry}
   \label{compyieldsurffig}
 \end{figure}
@@ -368,7 +379,16 @@ Masonry is a composite material made of bricks and mortar. Nonlinear behavior of
 
 The approach used in this work is based on idea of concentrating all the damage in the relatively weak joints and, if necessary, in potential tension cracks in the bricks. The joint interface constitutive model should include all important damage mechanisms. Here, the  concept of interface elements is used. An interface element allows to incorporate discontinuities in the displacement field and its behavior is described in terms of a relation between the tractions and relative displacement across the interface. In the present work, these quantities will be denoted as $\sig$, generalized stress, and $\e$, generalized strain. For 2D configuration, $\sig=\{\sigma, \tau\}^T$ and $\e=\{u_n, u_s\}^T$, where $\sigma$ and $\tau$ are the normal and shear components of the traction interface vector and  $n$ and $s$ subscripts distinguish between normal and shear components of displacement vector.
 \begin{figure}[!htb]
-  \centerline{\includegraphics[width=0.7\textwidth]{mmodel.pdf}}
+\begin{htmlonly}
+  \centerline{\includegraphics[width=0.7\textwidth]{mmodel.eps}}
+\end{htmlonly}
+%begin{latexonly}
+\ifpdf
+ \centerline{\includegraphics[width=0.7\textwidth]{mmodel.pdf}}
+\else
+ \centerline{\includegraphics[width=0.7\textwidth]{mmodel.eps}}
+\fi
+%end{latexonly}
   \caption{Modeling strategy for masonry}
 \end{figure}
 The elastic response is characterized in terms of elastic constitutive matrix $\mbf{D}$ as
@@ -391,7 +411,16 @@ where the yield value $f_t$ is defined as
   f_t=f_{t0}\exp\left(-\del{f_{t0}}{G^I_f}\kappa_1\right)
 \end{equation}
 \begin{figure}[!htb]
-  \centerline{\includegraphics[width=0.7\textwidth]{tension.pdf}}
+\begin{htmlonly}
+  \centerline{\includegraphics[width=0.7\textwidth]{tension.eps}}
+\end{htmlonly}
+%begin{latexonly}
+\ifpdf
+ \centerline{\includegraphics[width=0.7\textwidth]{tension.pdf}}
+\else
+ \centerline{\includegraphics[width=0.7\textwidth]{tension.eps}}
+\fi
+%end{latexonly}
   \caption{Tensile behavior of proposed model ($f_t=0.2\ \rm{MPa},\ G_f^I=0.018\ \rm{N/mm}$)}
   \label{tensfig}
 \end{figure}
@@ -414,7 +443,16 @@ where $c_0$ is initial cohesion of joint, $\phi_0$ initial friction angle, $\phi
   g_2=\vert\tau\vert+\sigma\tan\Phi-c
 \end{equation}
 \begin{figure}[!htb]
-  \centerline{\includegraphics[width=0.7\textwidth]{shearconf.pdf}}
+\begin{htmlonly}
+  \centerline{\includegraphics[width=0.7\textwidth]{shearconf.eps}}
+\end{htmlonly}
+%begin{latexonly}
+\ifpdf
+ \centerline{\includegraphics[width=0.7\textwidth]{shearconf.pdf}}
+\else
+ \centerline{\includegraphics[width=0.7\textwidth]{shearconf.eps}}
+\fi
+%end{latexonly}
   \caption{Shear behavior of proposed model for different confinement levels in MPa ($c_0=0.8\ \rm{MPa},\ \tan\phi_0=1.0,\ \tan\phi_r=0.75,{\rm and}\ G_f^{II}=0.05\ {N/mm}$)}
 \end{figure}
 
@@ -453,7 +491,16 @@ An associated flow and strain hardening hypothesis are being considered. This yi
   \dot\kappa_3=\lambda_3\sqrt{(2C_{nn}\sigma+C_n)*(2C_{nn}\sigma+C_n) + (2C_{ss}\tau)*(2C_{ss}\tau)}
 \end{equation}
 \begin{figure}[!htb]
-  \centerline{\includegraphics[width=0.7\textwidth]{capmode.pdf}}
+\begin{htmlonly}
+  \centerline{\includegraphics[width=0.7\textwidth]{capmode.eps}}
+\end{htmlonly}
+%begin{latexonly}
+\ifpdf
+\centerline{\includegraphics[width=0.7\textwidth]{capmode.pdf}}
+\else
+\centerline{\includegraphics[width=0.7\textwidth]{capmode.eps}}
+\fi
+%end{latexonly}
 \caption{Hardening/softening law for cap mode}
 \label{hs3fig}
 \end{figure}
@@ -1010,9 +1057,18 @@ $\veps = \displaystyle\frac{3}{2\pi}\int_\Omega (\ve\otimes\mbf{n})\sym\dO$
 \end{table}
 
 \begin{figure}[!htb]
-  \centerline{\includegraphics[width=0.8\textwidth]{dm_comp.pdf}}
-  \caption{Structure of microplane-based anisotropic damage model}
-  \label{ff4}
+\begin{htmlonly}
+  \centerline{\includegraphics[width=0.8\textwidth]{dm_comp.eps}}
+\end{htmlonly}
+%begin{latexonly}
+\ifpdf
+ \centerline{\includegraphics[width=0.7\textwidth]{dm_comp.pdf}}
+\else
+ \centerline{\includegraphics[width=0.7\textwidth]{dm_comp.eps}}
+\fi
+%end{latexonly}
+\caption{Structure of microplane-based anisotropic damage model}
+\label{ff4}
 \end{figure}
 
 Combining the basic equations, it is possible to show that the 
@@ -1485,7 +1541,16 @@ where first three numbers represent directional vector of local $x$-axis, and ne
 The linear softening occurs after reaching a critical stress $f_t$ in mode I, see Fig. \ref{comp_softening}. Orientation of cracks is assumed to be orthogonal and aligned with orientation of material axis \cite[pp.236]{Bazant:98}. The transverse isotropy is generally lost upon fracture, material becomes orthotropic and six damage parameters $d_1, d_2, \ldots d_6$ are introduced.
 
 \begin{figure}[!htb]
-  \centerline{\includegraphics[width=0.7\textwidth]{Compodamagemat_diag.pdf}}
+\begin{htmlonly}
+  \centerline{\includegraphics[width=0.7\textwidth]{Compodamagemat_diag.eps}}
+\end{htmlonly}
+%begin{latexonly}
+\ifpdf
+ \centerline{\includegraphics[width=0.7\textwidth]{Compodamagemat_diag.pdf}}
+\else
+ \centerline{\includegraphics[width=0.7\textwidth]{Compodamagemat_diag.eps}}
+\fi
+%end{latexonly}
   \caption{Implemented stress-strain evolution with damage for 1D case. Tension and compression are separated, but sharing the same damage parameter.}
   \label{comp_softening}
 \end{figure}
@@ -1513,7 +1578,16 @@ d_i &=& 1-\frac{\sigs_i}{E_i\epss_i}\\
 where $\epss_{0,i}$ is strain at zero stress, $f_{0,i}$ is maximum given stress, $\epss_{E,i}$ is strain at maximum stress, $G_{f,i}$ is fracture energy disregarding the characteristic size of finite element, $l_i$ is the characteristic length associated with element size and interpolation order. The solution is similar to section~\label{IsoDamMod} and proceeds in total strain and strees formulation. Fig.~\ref{comp_performance} shows a typical performance for damage in one direction.
 
 \begin{figure}[!htb]
+\begin{htmlonly}
   \centerline{\includegraphics[width=0.7\textwidth]{Compodamagemat_test.png}}
+\end{htmlonly}
+%begin{latexonly}
+\ifpdf
+\centerline{\includegraphics[width=0.7\textwidth]{Compodamagemat_test.png}}
+\else
+\centerline{\includegraphics[width=0.7\textwidth]{Compodamagemat_test.eps}}
+\fi
+%end{latexonly}
   \caption{Typical loading/unloading material performance for homogenized stress and strain in direction$_{11}$. Note that damage parameter is common for tension and compression.}
   \label{comp_performance}
 \end{figure}
