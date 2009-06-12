@@ -120,6 +120,7 @@ EngngModel :: EngngModel(int i, EngngModel *_master) : domainNeqs(), domainPresc
     ndomains = 0;
     nMetaSteps = 0;
     nxfemman = 0;
+    nonLinFormulation = UNKNOWN;
 
     //dataInputFileName     = NULL ;
     dataOutputFileName    = new char [ MAX_FILENAME_LENGTH ];
@@ -383,13 +384,16 @@ EngngModel :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, nMetaSteps, IFT_EngngModel_nmsteps, "nmsteps");                // Macro
     nxfemman   = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, nxfemman, IFT_EngngModel_nxfemman, "nxfemman");          // Macro
+    int _val = 1;
+    IR_GIVE_OPTIONAL_FIELD(ir, _val, IFT_EngngModel_nonLinFormulation, "nonlinform");
+    nonLinFormulation = (fMode) _val;
 
 #ifdef __PARALLEL_MODE
     IR_GIVE_OPTIONAL_FIELD(ir, parallelFlag, IFT_EngngModel_parallelflag, "parallelflag"); // Macro
     // fprintf (stderr, "Parallel mode is %d\n", parallelFlag);
 
     /* Load balancing support */
-    int _val = 0;
+    _val = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, _val, IFT_NonLinearStatic_loadBalancingFlag, "lbflag"); // Macro
     loadBalancingFlag = _val;
 
@@ -800,6 +804,7 @@ EngngModel :: updateYourself(TimeStep *stepN)
         nnodes = domain->giveNumberOfDofManagers();
         for ( j = 1; j <= nnodes; j++ ) {
             domain->giveDofManager(j)->updateYourself(stepN);
+            domain->giveNode(j)->updateYourself(stepN);
             //domain->giveDofManager(j)->printOutputAt(File, stepN);
         }
 

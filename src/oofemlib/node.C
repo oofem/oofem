@@ -251,7 +251,7 @@ void Node :: updateYourself(TimeStep *tStep)
 
     fMode mode = domain->giveEngngModel()->giveFormulation();
 
-    DofManager :: updateYourself(tStep);
+    //DofManager :: updateYourself(tStep);
 
     for ( i = 1; i <= numberOfDofs; i++ ) {
         if ( mode == AL ) { // updated Lagrange

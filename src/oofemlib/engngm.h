@@ -307,7 +307,8 @@ protected:
     AList< XfemManager > *xfemManagerList;
     /// number of Xfemmanagers
     int nxfemman;
-
+    /// type of non linear formulation (total or updated formulation)
+    enum fMode nonLinFormulation;
 
 #ifdef __PARALLEL_MODE
     /// domain rank in a group of colaborating processes (0..groupSize-1)

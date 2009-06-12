@@ -80,7 +80,7 @@ public:
     // identification
     const char *giveClassName() const { return "NLTransientTransportProblem"; }
     classType giveClassID()      const { return NLTransientTransportProblemClass; }
-    fMode giveFormulation() { return TL; }
+    fMode giveFormulation() { return nonLinFormulation; }
 
 protected:
     /**

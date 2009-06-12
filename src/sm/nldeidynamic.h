@@ -140,7 +140,7 @@ public:
     // identification
     const char *giveClassName() const { return "NlDEIDynamic"; }
     classType giveClassID() const { return NlDEIDynamicClass; }
-    fMode giveFormulation() { return TL; }
+    fMode giveFormulation() { return nonLinFormulation; }
 
     virtual int        giveNumberOfFirstStep() { return 0; }
     virtual int        giveNumberOfTimeStepWhenIcApply() { return 0; }

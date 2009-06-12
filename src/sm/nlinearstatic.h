@@ -189,7 +189,7 @@ public:
     const char *giveClassName() const { return "NonLinearStatic"; }
     classType giveClassID() const { return NonLinearStaticClass; }
     int isIncremental() { return 1; }
-    fMode giveFormulation() { return TL; }
+    fMode giveFormulation() { return nonLinFormulation; }
     /// Returns nonzero if nonlocal stiffness option activated.
     virtual int useNonlocalStiffnessOption() { return this->nonlocalStiffnessFlag; }
     /// For load balancing purposes we store all values with same EquationID; so hash is computed from mode value only
