@@ -1,9 +1,17 @@
-\documentclass[draft]{article}
-
-\usepackage{graphics}
+\documentclass[a4paper]{article}
 \usepackage{epsf}
 \usepackage{html}
+\usepackage[pdftex]{graphicx}
+\usepackage[pdftex]{hyperref}
+
 \input{include.tex}
+
+\renewcommand{\topfraction}{1.99}	% 99% of page top can be a float
+\renewcommand{\bottomfraction}{0.99}	% 99% of page bottom can be a float
+\renewcommand{\textfraction}{0.01}	% only 1% of page must to be the text
+\renewcommand{\floatpagefraction}{0.99} % 99% of whole page can be a float
+\setcounter{totalnumber}{5} %maximum floating objects on one page
+
 \newcommand{\mbf}[1]{\mbox{\boldmath$#1$}}
 \newcommand{\grad}{\nabla}
 %% Definitions for PostScript output
@@ -481,7 +489,9 @@ following format:
 %%\item[0]
 \entKeywordInst{NonLinearStatic} \optField{nmsteps}{in} \field{nsteps}{in} \optField{renumber}{in}\\
 \optField{contextOutputStep}{in}
-\optField{sparselinsolverparams}{string}\\
+\optField{sparselinsolverparams}{string}
+\optField{nonlinform}{in}
+\\
 \PoptField{nonlocstiff}{in} \PoptField{nonlocalext}{} \PoptField{loadballancing}{}.\\
 This is immediately followed by metastep records with the following format:
 %%\item[1]
@@ -499,11 +509,12 @@ The analysis parameters have following meaning
 equation renumbering to optimize the profile of characteristic matrix
 (uses Sloan algorithm). By default, profile optimization is not
 performed. It will not work in parallel mode.
-\item \param{contextOutputStep} - Causes the context file to be
+\item \param{contextOutputStep} - causes the context file to be
 created for every con\-text\-Out\-put\-Step-th step and when needed. Useful for
 postprocessing.
 \item The  \param{sparselinsolverparams} parameter describes the sparse
 linear solver attributes and is explained in section \ref{sparselinsolver}.
+\item \param{nonlinform} - formulation of non-linear problem. If == 1 (default), total Lagrangian formulation in undeformed original shape is used (first-order theory). If == 2, the equlibrated displacements are added to original ones and updated in each time step (second-order theory).
 \item \Pmode{\param{nonlocstiff} - determines whether the tangent stiffness
 extension for nonlocal models is activated. If == 0 (default) this
 option is not active. If == 1 the support for nonlocal tangent
@@ -681,8 +692,8 @@ all solution steps required. Then the meta step attributes are
 specified within analysis record. The format of analysis record is
 then following\\
 \entKeywordInst{NonLinearStatic} \field{nsteps}{in}
-\optField{nonlocstiff}{in}\\
- \optField{contextOutputStep}{in} \optField{controllmode}{in} \optField{deltat}{rn}\\
+\optField{nonlocstiff}{in} \optField{nonlinform}{in}\\
+\optField{contextOutputStep}{in} \optField{controllmode}{in} \optField{deltat}{rn}\\
 \field{rtolv}{rn} \optField{stiffmode}{in} \field{lstype}{in}
 \field{smtype}{in} \field{solverParams}{}\\
 \PoptField{nonlocstiff}{in} \PoptField{nonlocalext}{} \PoptField{loadballancing}{}.\\ The
@@ -1316,7 +1327,7 @@ specify the domain numbers to be exported.
 Currently, the supported export modules are following
 \begin{itemize}
 \item vtk \optField{vars}{ia} \optField{primvars}{ia}
-\optField{stype}{in} \optfield{regionstoskip}{ia}\\
+\optField{stype}{in} \optField{regionstoskip}{ia}\\
 The array \param{vars} contains identifiers for those internal
 variables which are to be exported. The id values are defined by
 InternalStateType enumeration, which is defined in include file
@@ -1976,11 +1987,10 @@ shown in fig. (\ref{ex01}). The linear static analysis is required,
 the influence of shear is neglected. Please note that one input line
 which is too long to fit to page, is separated into two lines using
 backslash '$\backslash$' character, but OOFEM requires that it must be typed as one single line.
-\begin{figure}[tb]
-\epsfbox{ex01.eps}
-\caption{Example 1}
-\label{ex01}
-
+\begin{figure}[!htb]
+  \centerline{\includegraphics[width=0.99\textwidth]{ex01.pdf}}
+  \caption{Beam structure example.}
+  \label{ex01}
 \end{figure}
 {\small\begin{verbatim}
 test41.out
@@ -2015,10 +2025,10 @@ PeakFunction 2 t 2.0 f(t) 1.
 PeakFunction 3 t 3.0 f(t) 1.
 \end{verbatim}}
 \subsection {Plane stress example}
-\begin{figure}[tb]
-\epsfbox{ex02.eps}
-\caption{Example 2}
-\label{ex02}
+\begin{figure}[!htb]
+  \centerline{\includegraphics[width=0.99\textwidth]{ex02.pdf}}
+  \caption{Plane stress example.}
+  \label{ex02}
 \end{figure}
 {\small\begin{verbatim}
 patch100.out
@@ -2061,11 +2071,10 @@ The geometry and partitioning is sketched in
 fig. \ref{nodecut-ex01}. The local entity numbers on each partitions
 are followed with global numbers (in parenthesis).
 
-\begin{figure}[htb]
-\epsfbox{poofem_ex01.eps}
-\caption{Node-cut partitioning example: (a) whole geometry,
-(a) partition 0, (c) partition 1.}
-\label{nodecut-ex01}
+\begin{figure}[!htb]
+  \centerline{\includegraphics[width=0.99\textwidth]{poofem_ex01.pdf}}
+  \caption{Node-cut partitioning example: (a) whole geometry, (a) partition 0, (c) partition 1}
+  \label{nodecut-ex01}
 \end{figure}
 
 \begin{verbatim}
@@ -2118,11 +2127,10 @@ simple structure with two DOFs. The geometry and partitioning is sketched in
 fig. \ref{nodecut-ex01}. The local entity numbers on each partitions
 are followed with global numbers (in parenthesis).
 
-\begin{figure}[htb]
-\epsfbox{poofem_ex02.eps}
-\caption{Element-cut partitioning example: (a) whole geometry,
-(a) partition 0, (c) partition 1.}
-\label{elmentcut-ex02}
+\begin{figure}[!htb]
+  \centerline{\includegraphics[width=0.99\textwidth]{poofem_ex02.pdf}}
+  \caption{Element-cut partitioning example: (a) whole geometry, (a) partition 0, (c) partition 1.}
+  \label{elmentcut-ex02}
 \end{figure}
 
 \begin{verbatim}
@@ -2176,39 +2184,36 @@ ConstantFunction 1 f(t) 1.0
 \section{Figures}
 %\subsection {Node cut mode}
 
-\begin{figure}[htb]
-\centerline{\epsfbox{nodecut0cb.eps}}
-\caption{Node-cut partitioning.}
-\label{nodecut}
+\begin{figure}[!htb]
+  \centerline{\includegraphics[width=0.7\textwidth]{nodecut0cb.pdf}}
+  \caption{Node-cut partitioning.}
+  \label{nodecut}
 \end{figure}
 
-\begin{figure}[htb]
-\centerline{\epsfbox{nodecut1cb.eps}}
-\caption{Node-cut partitioning - local constitutive mode.}
-\label{nodecut-lm}
+\begin{figure}[!htb]
+  \centerline{\includegraphics[width=0.7\textwidth]{nodecut1cb.pdf}}
+  \caption{Node-cut partitioning - local constitutive mode.}
+  \label{nodecut-lm}
 \end{figure}
 
-\begin{figure}[htb]
-\centerline{\epsfbox{nodecutnonloc1.eps}}
-\caption{Node-cut partitioning - nonlocal constitutive mode.}
-\label{nodecut-nlm}
+\begin{figure}[!htb]
+  \centerline{\includegraphics[width=0.7\textwidth]{nodecutnonloc1.pdf}}
+  \caption{Node-cut partitioning - nonlocal constitutive mode.}
+  \label{nodecut-nlm}
 \end{figure}
 
 %\subsection {Element cut mode}
 
-\begin{figure}[htb]
-\centerline{\epsfbox{elementcut0.eps}}
-\caption{Element-cut partitioning.}
-\label{elmentcut}
+\begin{figure}[!htb]
+  \centerline{\includegraphics[width=0.7\textwidth]{elementcut0.pdf}}
+  \caption{Element-cut partitioning.}
+  \label{elmentcut}
 \end{figure}
 
-\begin{figure}[htb]
-\centerline{\epsfbox{elementcut1.eps}}
-\caption{Element-cut partitioning, local constitutive mode.}
-\label{elmentcut-lm}
+\begin{figure}[!htb]
+  \centerline{\includegraphics[width=0.7\textwidth]{elementcut1.pdf}}
+  \caption{Element-cut partitioning, local constitutive mode.}
+  \label{elmentcut-lm}
 \end{figure}
 
 \end{document}
-
-
-

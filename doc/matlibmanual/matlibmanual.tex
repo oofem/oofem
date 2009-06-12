@@ -1,5 +1,4 @@
-\documentclass[epsf,a4paper]{article}
-%\usepackage{html, graphics}
+\documentclass[a4paper]{article}
 \usepackage{html}
 \usepackage[pdftex]{graphicx}
 \usepackage[pdftex]{hyperref}
@@ -7,9 +6,9 @@
 
 \renewcommand{\topfraction}{0.99}	% 99% of page top can be a float
 \renewcommand{\bottomfraction}{0.99}	% 99% of page bottom can be a float
-\renewcommand{\textfraction}{0.01}	% only 1% of page must to be text
-\renewcommand{\floatpagefraction}{0.99}
-\setcounter{totalnumber}{5}
+\renewcommand{\textfraction}{0.01}	% only 1% of page must to be the text
+\renewcommand{\floatpagefraction}{0.99} % 99% of whole page can be a float
+\setcounter{totalnumber}{5} %maximum floating objects on one page
 
 \newcommand{\mbf}[1]{\mbox{\boldmath$#1$}}
 \newcommand{\descitem}[1]{{\noindent \bf #1}}
@@ -361,7 +360,7 @@ hardening\\
 Masonry is a composite material made of bricks and mortar. Nonlinear behavior of both components should be considered to obtain a realistic model able to describe cracking, slip, and crushing of the material. The model is based on paper by Lourenco and Rots \cite{Rots}. It is formulated on the basis of softening plasticity for tension, shear, and compression (see fig.(\ref{compyieldsurffig})). Numerical implementation is based on modern algorithmic concepts such as implicit integration of the rate equations and consistent tangent stiffness matrices. 
 
 \begin{figure}[!htb]
-  \centerline{\scalebox{0.5}{\includegraphics{constmodel.pdf}}}
+  \centerline{\includegraphics[width=0.7\textwidth]{constmodel.pdf}}
   \caption{Composite yield surface model for masonry}
   \label{compyieldsurffig}
 \end{figure}
@@ -369,7 +368,7 @@ Masonry is a composite material made of bricks and mortar. Nonlinear behavior of
 
 The approach used in this work is based on idea of concentrating all the damage in the relatively weak joints and, if necessary, in potential tension cracks in the bricks. The joint interface constitutive model should include all important damage mechanisms. Here, the  concept of interface elements is used. An interface element allows to incorporate discontinuities in the displacement field and its behavior is described in terms of a relation between the tractions and relative displacement across the interface. In the present work, these quantities will be denoted as $\sig$, generalized stress, and $\e$, generalized strain. For 2D configuration, $\sig=\{\sigma, \tau\}^T$ and $\e=\{u_n, u_s\}^T$, where $\sigma$ and $\tau$ are the normal and shear components of the traction interface vector and  $n$ and $s$ subscripts distinguish between normal and shear components of displacement vector.
 \begin{figure}[!htb]
-  \centerline{\scalebox{0.5}{\includegraphics{mmodel.pdf}}}
+  \centerline{\includegraphics[width=0.7\textwidth]{mmodel.pdf}}
   \caption{Modeling strategy for masonry}
 \end{figure}
 The elastic response is characterized in terms of elastic constitutive matrix $\mbf{D}$ as
@@ -392,7 +391,7 @@ where the yield value $f_t$ is defined as
   f_t=f_{t0}\exp\left(-\del{f_{t0}}{G^I_f}\kappa_1\right)
 \end{equation}
 \begin{figure}[!htb]
-  \centerline{\scalebox{0.5}{\includegraphics{tension.pdf}}}
+  \centerline{\includegraphics[width=0.7\textwidth]{tension.pdf}}
   \caption{Tensile behavior of proposed model ($f_t=0.2\ \rm{MPa},\ G_f^I=0.018\ \rm{N/mm}$)}
   \label{tensfig}
 \end{figure}
@@ -415,7 +414,7 @@ where $c_0$ is initial cohesion of joint, $\phi_0$ initial friction angle, $\phi
   g_2=\vert\tau\vert+\sigma\tan\Phi-c
 \end{equation}
 \begin{figure}[!htb]
-  \centerline{\scalebox{0.5}{\includegraphics{shearconf.pdf}}}
+  \centerline{\includegraphics[width=0.7\textwidth]{shearconf.pdf}}
   \caption{Shear behavior of proposed model for different confinement levels in MPa ($c_0=0.8\ \rm{MPa},\ \tan\phi_0=1.0,\ \tan\phi_r=0.75,{\rm and}\ G_f^{II}=0.05\ {N/mm}$)}
 \end{figure}
 
@@ -454,7 +453,7 @@ An associated flow and strain hardening hypothesis are being considered. This yi
   \dot\kappa_3=\lambda_3\sqrt{(2C_{nn}\sigma+C_n)*(2C_{nn}\sigma+C_n) + (2C_{ss}\tau)*(2C_{ss}\tau)}
 \end{equation}
 \begin{figure}[!htb]
-  \centerline{\scalebox{0.5}{\includegraphics{capmode.pdf}}}
+  \centerline{\includegraphics[width=0.7\textwidth]{capmode.pdf}}
 \caption{Hardening/softening law for cap mode}
 \label{hs3fig}
 \end{figure}
@@ -1011,12 +1010,9 @@ $\veps = \displaystyle\frac{3}{2\pi}\int_\Omega (\ve\otimes\mbf{n})\sym\dO$
 \end{table}
 
 \begin{figure}[!htb]
-%\begin{center}
-%\includegraphics[width=10cm]{dm_comp.pdf}
-\centerline{\scalebox{0.8}{\includegraphics{dm_comp.pdf}}}
-%\end{center}
-\caption{Structure of microplane-based anisotropic damage model}
-\label{ff4}
+  \centerline{\includegraphics[width=0.8\textwidth]{dm_comp.pdf}}
+  \caption{Structure of microplane-based anisotropic damage model}
+  \label{ff4}
 \end{figure}
 
 Combining the basic equations, it is possible to show that the 
