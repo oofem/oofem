@@ -2,7 +2,7 @@ SHELL = /bin/sh
 BACKUP_FILES = *.tex makefile
 RCP = scp
 
-www: ps-doc
+www: ps
 	if [ x$(ROBOT) != "x" ]; then $(ROBOT) < include.src.tex > include.tex; fi
 	latex2html matlibmanual
 	mv matlibmanual.ps matlibmanual
