@@ -19,7 +19,7 @@ pdf:
 	pdflatex matlibmanual
 
 
-www-install: www-doc
+www-install: www
 ifdef INSTALLDIR
 	$(RCP) -r matlibmanual $(INSTALLDIR)/resources/doc
 else
