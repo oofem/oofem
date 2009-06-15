@@ -551,8 +551,10 @@ DofManager :: initializeFrom(InputRecord *ir)
 
 
 #ifdef __PARALLEL_MODE
+#ifndef __ENABLE_COMPONENT_LABELS
     globalNumber = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, globalNumber, IFT_DofManager_globnum, "globnum"); // Macro
+#endif
 
     partitions.resize(0);
     IR_GIVE_OPTIONAL_FIELD(ir, partitions, IFT_DofManager_partitions, "partitions"); // Macro

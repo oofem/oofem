@@ -59,6 +59,7 @@
 #ifdef __PETSC_MODULE
 #include "petscsolver.h"
 #include "petscsparsemtrx.h"
+#include "petscordering.h"
 #endif
 
 
@@ -534,7 +535,9 @@ NRSolver :: initPrescribedEqs()
 {
 #if defined(__PARALLEL_MODE) || defined(__ENABLE_COMPONENT_LABELS)
 #ifdef __PETSC_MODULE
+#if defined(__PARALLEL_MODE) && defined (__PETSC_MODULE)
     PetscNatural2GlobalOrdering *n2lpm = engngModel->givePetscContext(1, ut)->giveN2Gmap();
+#endif
     int jglobnum, count = 0, ndofman = domain->giveNumberOfDofManagers();
     int i, j, inode, idof;
     IntArray localPrescribedEqs(numberOfPrescribedDofs);
