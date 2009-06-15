@@ -1,19 +1,32 @@
-\documentclass[12pt,dvips]{article}
-\usepackage{epsfig}
+\documentclass[a4paper]{article}
 \usepackage{html}
+\usepackage{graphicx}
+\usepackage{ifpdf}
 \input{include.tex}
+
+\renewcommand{\topfraction}{0.99}	% 99% of page top can be a float
+\renewcommand{\bottomfraction}{0.99}	% 99% of page bottom can be a float
+\renewcommand{\textfraction}{0.01}	% only 1% of page must to be the text
+\renewcommand{\floatpagefraction}{0.99} % 99% of whole page can be a float
+\setcounter{totalnumber}{5} %maximum floating objects on one page
+
 \newcommand{\mbf}[1]{\mbox{\boldmath$#1$}}
 \newcommand{\descitem}[1]{{\noindent \bf #1}:}
-\newcommand{\elemkeyword}[1]{\descitem{Keyword}~{\em #1}}
-\newcommand{\elemparam}[2]{{{#1\tiny (#2)}~~\#}}
+\newcommand{\elemkeyword}[1]{\descitem{Keyword}~{\bf \texttt{#1}}}
+\newcommand{\elemparam}[2]{{{\texttt{#1}\tiny (#2)}~~\#}}
 \newcommand{\optelemparam}[2]{{[~\elemparam{#1}{#2}]}}
-\newcommand{\param}[1]{{\it #1}}
-
+\newcommand{\param}[1]{{\texttt{#1}}}
 
 
 \begin{document}
 %begin{latexonly}
-\title{\oofem Element Library Manual}
+\title{
+\ifpdf
+\oofemlnk{\centerline{\includegraphics[width=0.7\textwidth]{oofem-logo-contour.pdf}}}
+\else
+\oofemlnk{\centerline{\includegraphics[width=0.7\textwidth]{oofem-logo-contour.eps}}}
+\fi
+Element Library Manual}
 \author{\bp \\ \\
 Czech Technical University\\
 Faculty of Civil Engineering\\
@@ -24,7 +37,8 @@ Th\'akurova 7, 166 29 Prague, Czech Republic
 %end{latexonly}
 \begin{htmlonly}
 \begin{center}
-{\Large \oofem Element Library Manual}
+\oofemlnk{\centerline{\includegraphics[width=0.7\textwidth]{oofem-logo-contour.eps}}}
+{\Large Element Library Manual}\\
 {\bp \\ \\
 Czech Technical University\\
 Faculty of Civil Engineering\\
@@ -34,6 +48,7 @@ Th\'akurova 7, 166 29 Prague, Czech Republic
 \end{htmlonly}
 \newpage
 \tableofcontents
+\newpage
 \listoffigures
 
 \section{Introduction}
@@ -52,14 +67,14 @@ information about the types of loadings supported by particular elements.
 
 
 
-\section{Elements for Structural Analysis (SM Module)}
+\section{Elements for Structural Analysis\\(SM Module)}
 \subsection{Truss Elements}
 
-\subsubsection{Truss 1d element}
+\subsubsection{Truss 1D element}
 \label{Truss1d}
 
-Represents linear isoparametric truss element in 1d. The elements are
-assumed to be located along x-axis. Reqiures cross section area to be
+Represents linear isoparametric truss element in 1D. The elements are
+assumed to be located along the x-axis. Reqiures cross section area to be
 specified.
 
 \elemkeyword{truss1d}\\
@@ -67,7 +82,7 @@ specified.
 \descitem{Unknowns}
 Single dof (u-displacement) is required in each node .
 
-\descitem{Approximation} Linear approximation of displacement (u) and geometry.
+\descitem{Approximation} Linear approximation of displacement and geometry.
 
 \descitem{Integration} Exact.
 
@@ -81,13 +96,22 @@ not supported in current implementation.
 
 \descitem{Status} Reliable
 
-\subsubsection{Truss 2d element}
+\subsubsection{Truss 2D element}
 \label{Truss2d}
 
-Two node linear isoparametric truss element for 2d analysis. The
+Two node linear isoparametric truss element for 2D analysis. The
 element geometry can be specified in (x,z), (x,y), or (y,z) plane. 
 \begin{figure}[tb]
-\centerline{\epsfbox{truss2d.eps}}
+\begin{htmlonly}
+  \centerline{\includegraphics[width=0.7\textwidth]{truss2d.eps}}
+\end{htmlonly}
+%begin{latexonly}
+\ifpdf
+\centerline{\includegraphics[width=0.7\textwidth]{truss2d.pdf}}
+\else
+\centerline{\includegraphics[width=0.7\textwidth]{truss2d.eps}}
+\fi
+%end{latexonly}
 \caption{Truss2d element in (x,z) plane.}
 \end{figure}
 
@@ -119,22 +143,31 @@ to 1.
 
 \subsection{Beam Elements}
 \subsubsection{Beam2d element}
-Beam element for 2d analysis, based on Timoshenko hypothesis. Structure should be defined in x,z
+Beam element for 2D analysis, based on Timoshenko hypothesis. Structure should be defined in x,z
 plane. The internal condensation
 of arbitrary DOF is supported and is performed in local coordinate
 system. On output, the local end displacement and local end forces are
 printed. 
 
 \begin{figure}[tb]
-\begin{center}\epsfig{file=beam2d.eps,width=120mm}\end{center}
+\begin{htmlonly}
+  \centerline{\includegraphics[width=0.7\textwidth]{beam2d.eps}}
+\end{htmlonly}
+%begin{latexonly}
+\ifpdf
+\centerline{\includegraphics[width=0.7\textwidth]{beam2d.pdf}}
+\else
+\centerline{\includegraphics[width=0.7\textwidth]{beam2d.eps}}
+\fi
+%end{latexonly}
 \caption{Beam2d element. Definition of local c.s.(a)  and definition of
 local end forces and local element dofs (b).}
 \label{beam2dfig}
 \end{figure}
 
 \elemkeyword{beam2d}\\
-\descitem{Parameters} \optelemparam{dofstocondense}{ia}. The
-\param{dofstocondense} parameter allows to specify local element dofs that
+\descitem{Parameters} \optelemparam{dofstocondense}{ia}\\
+The \param{dofstocondense} parameter allows to specify local element dofs that
 will be condensed. The numbering of local element dofs is shown in
 fig.~\ref{beam2dfig}. The size of this array should be equal to
 number of local element dofs (6) and nonzero value indicates the
@@ -162,7 +195,7 @@ section model is defined.
 \descitem{Status} Reliable.
 
 \subsubsection{Beam3d element}
-Beam element for 3d {\bf linear} analysis, based on Timoshenko hypothesis. The internal condensation
+Beam element for 3D {\bf linear} analysis, based on Timoshenko hypothesis. The internal condensation
 of arbitrary DOF is supported and is performed in local coordinate
 system. On output, the local end-displacement and local end-forces are
 printed. Requires the local coordinate system to be chosen according
@@ -181,7 +214,16 @@ x-axis direction vector ($\mbf{a_1}$) by vector $(x_k-x_i, y_k-y_i, z_k-z_i)$,
 z-axis direction vector by local x-axis direction vector. 
 \end{enumerate}
 \begin{figure}[tb]
-\begin{center}\epsfbox{beam3d.eps}\end{center}
+\begin{htmlonly}
+  \centerline{\includegraphics[width=0.7\textwidth]{beam3d.eps}}
+\end{htmlonly}
+%begin{latexonly}
+\ifpdf
+\centerline{\includegraphics[width=0.7\textwidth]{beam3d.pdf}}
+\else
+\centerline{\includegraphics[width=0.7\textwidth]{beam3d.eps}}
+\fi
+%end{latexonly}
 \caption{Beam3d element. Definition of local c.s., local end forces
 and local element dofs numbering.}
 \label{beam3dfig}
@@ -189,7 +231,8 @@ and local element dofs numbering.}
 
 \elemkeyword{beam3d}\\
 \descitem{Parameters} \elemparam{refnode}{in}
-\optelemparam{dofstocondense}{ia}. The \param{refnode} parameter
+\optelemparam{dofstocondense}{ia}\\
+The \param{refnode} parameter
 determines the reference node. It determines the local coordinate
 system of beam element. The \param{dofstocondense} parameter allows to
 specify local element dofs that will be condensed. The numbering of
@@ -230,7 +273,16 @@ The nodes should be numbered anti-clockwise (positive rotation around
 z-axis). 
 
 \begin{figure}[tb]
-\begin{center}\epsfbox{planestress2d.eps}\end{center}
+\begin{htmlonly}
+  \centerline{\includegraphics[width=0.7\textwidth]{planestress2d.eps}}
+\end{htmlonly}
+%begin{latexonly}
+\ifpdf
+\centerline{\includegraphics[width=0.7\textwidth]{planestress2d.pdf}}
+\else
+\centerline{\includegraphics[width=0.7\textwidth]{planestress2d.eps}}
+\fi
+%end{latexonly}
 \caption{PlaneStress2d element. Node numbering, Side numbering and
 definition of local edge c.s.(a).}
 \label{Planestress2dfig}
@@ -273,7 +325,16 @@ The node numbering is anti-clockwise and is explained in fig. (\ref
 {qplanstrssfig}).
 
 \begin{figure}[htb]
-\begin{center}\epsfbox{qplanstrss.eps}\end{center}
+\begin{htmlonly}
+  \centerline{\includegraphics[width=0.7\textwidth]{qplanstrss.eps}}
+\end{htmlonly}
+%begin{latexonly}
+\ifpdf
+\centerline{\includegraphics[width=0.7\textwidth]{qplanstrss.pdf}}
+\else
+\centerline{\includegraphics[width=0.7\textwidth]{qplanstrss.eps}}
+\fi
+%end{latexonly}
 \caption{QPlaneStress element - node numbering.}
 \label{qplanstrssfig}
 \end{figure}
@@ -306,7 +367,16 @@ finite element. Each node has 2 degrees of freedom.
 The node numbering is anti-clockwise
 
 \begin{figure}[htb]
-\begin{center}\epsfbox{trplanstrss.eps}\end{center}
+\begin{htmlonly}
+  \centerline{\includegraphics[width=0.7\textwidth]{trplanstrss.eps}}
+\end{htmlonly}
+%begin{latexonly}
+\ifpdf
+\centerline{\includegraphics[width=0.7\textwidth]{trplanstrss.pdf}}
+\else
+\centerline{\includegraphics[width=0.7\textwidth]{trplanstrss.eps}}
+\fi
+%end{latexonly}
 \caption{TrPlaneStress element - node and side numbering.}
 \label{TrPlanestressfig}
 \end{figure}
@@ -343,13 +413,22 @@ element. Each node has 2 degrees of freedom. Node numbering is
 anti-clockwise and is shown in fig. (\ref{qtrplanstressfig}).
 
 \begin{figure}[htb]
-\begin{center}\epsfbox{qtrplanstrss.eps}\end{center}
+\begin{htmlonly}
+  \centerline{\includegraphics[width=0.7\textwidth]{qtrplanstrss.eps}}
+\end{htmlonly}
+%begin{latexonly}
+\ifpdf
+\centerline{\includegraphics[width=0.7\textwidth]{qtrplanstrss.pdf}}
+\else
+\centerline{\includegraphics[width=0.7\textwidth]{qtrplanstrss.eps}}
+\fi
+%end{latexonly}
 \caption{TrPlaneStress element - node and side numbering.}
 \label{qtrplanstressfig}
 \end{figure}
 
 \elemkeyword{qtrplstr}\\
-\descitem{Parameters} \optelemparam{NIP}{in}.\\
+\descitem{Parameters} \optelemparam{NIP}{in}\\
 \descitem{Unknowns}
 Two dofs (u-displacement, v-displacement) are required in each node.
 
@@ -374,7 +453,7 @@ finite element with independent rotation field.
 Each node has 3 degrees of freedom.
 
 \elemkeyword{trplanestrrot}\\
-\descitem{Parameters} \optelemparam{NIP}{in} \optelemparam{NIPRot}{in}.\\
+\descitem{Parameters} \optelemparam{NIP}{in} \optelemparam{NIPRot}{in}\\
 \descitem{Unknowns}
 Three dofs (u-displacement, v-displacement, z-rotation) are required in each node.
 
@@ -403,7 +482,16 @@ The nodes should be numbered anti-clockwise (positive rotation around
 z-axis). 
 
 \begin{figure}[tb]
-\begin{center}\epsfbox{planestress2d.eps}\end{center}
+\begin{htmlonly}
+  \centerline{\includegraphics[width=0.7\textwidth]{planestress2d.eps}}
+\end{htmlonly}
+%begin{latexonly}
+\ifpdf
+\centerline{\includegraphics[width=0.7\textwidth]{planestress2d.pdf}}
+\else
+\centerline{\includegraphics[width=0.7\textwidth]{planestress2d.eps}}
+\fi
+%end{latexonly}
 \caption{Quad1PlaneStrain element. Node numbering, Side numbering and
 definition of local edge c.s.(a).}
 \label{Quad1PlaneStrainfig}
@@ -445,7 +533,16 @@ finite element. Each node has 2 degrees of freedom.
 The node numbering is anti-clockwise
 
 \begin{figure}[htb]
-\begin{center}\epsfbox{trplanstrain.eps}\end{center}
+\begin{htmlonly}
+  \centerline{\includegraphics[width=0.7\textwidth]{trplanstrain.eps}}
+\end{htmlonly}
+%begin{latexonly}
+\ifpdf
+\centerline{\includegraphics[width=0.7\textwidth]{trplanstrain.pdf}}
+\else
+\centerline{\includegraphics[width=0.7\textwidth]{trplanstrain.eps}}
+\fi
+%end{latexonly}
 \caption{TrplaneStrain element - node and side numbering.}
 \label{TrplaneStrain}
 \end{figure}
@@ -521,13 +618,13 @@ not supported now.\\
 \subsection{Axisymmetric Elements}
 \subsubsection{Axisymm3d element}
 Implementation of triangular three-node finite element 
-for axisymmetric continuum. Each node has 2 degrees of freedom.
+for axisymmetric continuum. Each node has 2 degrees of freedom.\\
 \elemkeyword{axisymm3d}\\
-\descitem{Parameters} \optelemparam{NIP}{in} \optelemparam{NIPfish}{in}.\\
+\descitem{Parameters} \optelemparam{NIP}{in} \optelemparam{NIPfish}{in}\\
 \descitem{Unknowns}
-Two dofs (u-displacement, v-displacement) are required in each node.
+Two dofs (u-displacement, v-displacement) are required in each node.\\
 \descitem{Approximation} Linear approximation of displacement and
-geometry.
+geometry.\\
 \descitem{Integration}
 The integration of $\varepsilon_x$ and $\varepsilon_y$ strains can be altered using
 \param{NIP} parameter (possible completions are 1 (default), 4 and 7
@@ -544,11 +641,11 @@ finite element for axisimmetric 3d continuum.
 Each node has 2 degrees of freedom.
 
 \elemkeyword{q4axisymm}\\
-\descitem{Parameters} \optelemparam{NIP}{in} \optelemparam{NIPfish}{in}.\\
+\descitem{Parameters} \optelemparam{NIP}{in} \optelemparam{NIPfish}{in}\\
 \descitem{Unknowns}
-Two dofs (u-displacement, v-displacement) are required in each node.
+Two dofs (u-displacement, v-displacement) are required in each node.\\
 \descitem{Approximation} Quadratic approximation of displacements and
-geometry.
+geometry.\\
 \descitem{Integration}
 The integration of $\varepsilon_x$ and $\varepsilon_y$ strains can be altered using
 \param{NIP} parameter (possible completions are 1 (default), 4, 9 and 16
@@ -564,11 +661,11 @@ Implementation of isoparametric four-node quadrilateral axisymmetric
 finite element. Each node has 2 degrees of freedom.
 
 \elemkeyword{l4axisymm}\\
-\descitem{Parameters} \optelemparam{NIP}{in}. \\
+\descitem{Parameters} \optelemparam{NIP}{in}\\
 \descitem{Unknowns}
-Two dofs (u-displacement, v-displacement) are required in each node.
+Two dofs (u-displacement, v-displacement) are required in each node.\\
 \descitem{Approximation} Linear approximation of displacements and
-geometry.
+geometry.\\
 \descitem{Integration}
 The integration of $\varepsilon_x$ and $\varepsilon_y$ strains can be altered using
 \param{NIP} parameter (possible completions are 1 (default), 4, 9 and 16
@@ -584,13 +681,22 @@ $\gamma_rz$) are integrated using one point integration formula.\\
 Implementation of Linear 3d  eight - node 
 finite element. Each node has 3 degrees of freedom.
 \begin{figure}[tb]
-  \centerline{\epsfbox{hexa_lin.eps}}
+\begin{htmlonly}
+  \centerline{\includegraphics[width=0.7\textwidth]{hexa_lin.eps}}
+\end{htmlonly}
+%begin{latexonly}
+\ifpdf
+ \centerline{\includegraphics[width=0.7\textwidth]{hexa_lin.pdf}}
+\else
+ \centerline{\includegraphics[width=0.7\textwidth]{hexa_lin.eps}}
+\fi
+%end{latexonly}
 \caption{lspace element (Node numbers in black, side numbers in blue,
 and surface numbers in red).}
 \end{figure}
 
 \elemkeyword{lspace}\\
-\descitem{Parameters} \optelemparam{NIP}{in}. \\
+\descitem{Parameters} \optelemparam{NIP}{in}\\
 \descitem{Unknowns}
 Three dofs (u-displacement, v-displacement, w-displacement) are required in each node.
 \descitem{Approximation} Linear approximation of displacements and
@@ -611,16 +717,25 @@ linear approximation element with selective integration of deviatoric and volume
 Implementation of quadratic 3d  20-node 
 finite element. Each node has 3 degrees of freedom.
 \begin{figure}[tb]
-\centerline{\epsfbox{hexa_lin.eps}}
+\begin{htmlonly}
+  \centerline{\includegraphics[width=0.7\textwidth]{hexa_quad.eps}}
+\end{htmlonly}
+%begin{latexonly}
+\ifpdf
+ \centerline{\includegraphics[width=0.7\textwidth]{hexa_quad.pdf}}
+\else
+ \centerline{\includegraphics[width=0.7\textwidth]{hexa_quad.eps}}
+\fi
+%end{latexonly}
 \caption{qspace element.}
 \end{figure}
 
 \elemkeyword{qspace}\\
-\descitem{Parameters} \optelemparam{NIP}{in}. \\
+\descitem{Parameters} \optelemparam{NIP}{in}\\
 \descitem{Unknowns}
-Three dofs (u-displacement, v-displacement, w-displacement) are required in each node.
+Three dofs (u-displacement, v-displacement, w-displacement) are required in each node.\\
 \descitem{Approximation} Quadratic approximation of displacements and
-geometry.
+geometry.\\
 \descitem{Integration}
 Full integration of all strain components.
 \param{NIP} parameter (possible completions are 8 (default) and 27)
@@ -640,7 +755,16 @@ Following node numbering convention is adopted (see also Fig.~\ref{lintetrahedro
 \end{itemize}
  
 \begin{figure}[tb]
-\begin{center}\epsfig{file=tetrahedra_lin.eps,width=120mm}\end{center}
+\begin{htmlonly}
+  \centerline{\includegraphics[width=0.7\textwidth]{tetrahedra_lin.eps}}
+\end{htmlonly}
+%begin{latexonly}
+\ifpdf
+ \centerline{\includegraphics[width=0.7\textwidth]{tetrahedra_lin.pdf}}
+\else
+ \centerline{\includegraphics[width=0.7\textwidth]{tetrahedra_lin.eps}}
+\fi
+%end{latexonly}
 \caption{Linear terahedra element. Definition and node numbering convention}
 \label{lintetrahedron_fig}
 \end{figure}
@@ -650,9 +774,9 @@ Following node numbering convention is adopted (see also Fig.~\ref{lintetrahedro
 \descitem{Unknowns}
 Three dofs (displacement in x,y, and z axis directions) are required in each node.\\
 \descitem{Approximation} Linear approximation of displacements and
-geometry using linear volume coordinates.
+geometry using linear volume coordinates.\\
 \descitem{Integration}
-Full integration of all strain components using four point Gauss integration formula.
+Full integration of all strain components using four point Gauss integration formula.\\
 \descitem{Features} Adaptivity support, Geometric nonlinearity support.\\
 \descitem{Loads} Surface and Edge loadings supported.\\
 \descitem{Status} 
@@ -663,7 +787,16 @@ Implementation of a two dimensional interface element with quadratic
 approximation of displacement field. Can be used to glue together two elements with quadratic displacement approximation along the shared edge. Note, that the nodes along the interface are doubled, each couple with identical coordinates. Nodes on the negative side are numbered first, followed by nodes on the positive part. Requires material model with \_2dInterface support. 
 
 \begin{figure}[tb]
-\begin{center}\epsfig{file=interf2d_quad.eps}\end{center}
+\begin{htmlonly}
+  \centerline{\includegraphics[width=0.7\textwidth]{interf2d_quad.eps}}
+\end{htmlonly}
+%begin{latexonly}
+\ifpdf
+ \centerline{\includegraphics[width=0.7\textwidth]{interf2d_quad.pdf}}
+\else
+ \centerline{\includegraphics[width=0.7\textwidth]{interf2d_quad.eps}}
+\fi
+%end{latexonly}
 \caption{2D interface element with quadratic interpolation. Definition and node numbering convention}
 \label{interf2d_quad_fig}
 \end{figure}
@@ -685,7 +818,16 @@ Implementation of a three dimensional interface element with linear
 approximation of displacement field. Can be used to glue together two elements with linear displacement approximation along the shared tringular surface. Note, that the nodes along the interface are doubled, each couple with identical coordinates. Nodes on the negative surface are numbered first, followed by nodes on the positive part. The numbering of surface nodes on interface determines the positive normal (right hand rule). The surface in the direction of positive normal is the positive surface. Requires material model with \_3dInterface support.
 
 \begin{figure}[tb]
-\begin{center}\epsfig{file=interf3d_lin.eps}\end{center}
+\begin{htmlonly}
+  \centerline{\includegraphics[width=0.7\textwidth]{interf3d_lin.eps}}
+\end{htmlonly}
+%begin{latexonly}
+\ifpdf
+ \centerline{\includegraphics[width=0.7\textwidth]{interf3d_lin.pdf}}
+\else
+ \centerline{\includegraphics[width=0.7\textwidth]{interf3d_lin.eps}}
+\fi
+%end{latexonly}
 \caption{3D interface element with linear interpolation. Definition and node numbering convention}
 \label{interf3d_lin_fig}
 \end{figure}
@@ -695,7 +837,7 @@ approximation of displacement field. Can be used to glue together two elements w
 \descitem{Unknowns}
 Two dofs (u-displacement, v-displacement, w-displacement) are required in each node.\\
 \descitem{Approximation} Linear approximation of displacements and
-geometry.
+geometry.\\
 \descitem{Integration}
 Full integration of all components using one point integration formula.
 \descitem{Features} None.\\
@@ -711,7 +853,7 @@ these nodes depending on their relative displacement. This element can
 be applied in 1D, 2D, and 3D settings (default).
 
 \elemkeyword{Interface1d}\\
-\descitem{Parameters} \elemparam{refnode}{in}.\\
+\descitem{Parameters} \elemparam{refnode}{in}\\
 The \param{refnode} determines the refence node, which is used to
 specify a reference direction (the direction vector is obtained by
 substracting coordinates of first node from refenence node).
@@ -731,7 +873,7 @@ w-displacement) are required in each node, according to element mode.\\
 
 
 
-\section{Elements for Transport problems (TM Module)}
+\section{Elements for Transport problems\\(TM Module)}
 \subsection{2D Elements}
 \subsubsection{Quad1ht element}
 \label{Quad1ht}
@@ -743,7 +885,16 @@ The nodes should be numbered anti-clockwise (positive rotation around
 z-axis). 
 
 \begin{figure}[tb]
-\begin{center}\epsfbox{planestress2d.eps}\end{center}
+\begin{htmlonly}
+  \centerline{\includegraphics[width=0.7\textwidth]{planestress2d.eps}}
+\end{htmlonly}
+%begin{latexonly}
+\ifpdf
+ \centerline{\includegraphics[width=0.7\textwidth]{planestress2d.pdf}}
+\else
+ \centerline{\includegraphics[width=0.7\textwidth]{planestress2d.eps}}
+\fi
+%end{latexonly}
 \caption{Quad1ht element. Node numbering, Side numbering and
 definition of local edge c.s.(a).}
 \label{Quad1htfig}
@@ -783,7 +934,16 @@ The cross section thickness property is requested form cross section model.
 The node numbering is anti-clockwise
 
 \begin{figure}[htb]
-\begin{center}\epsfbox{trplanstrss.eps}\end{center}
+\begin{htmlonly}
+  \centerline{\includegraphics[width=0.7\textwidth]{trplanstrss.eps}}
+\end{htmlonly}
+%begin{latexonly}
+\ifpdf
+ \centerline{\includegraphics[width=0.7\textwidth]{trplanstrss.pdf}}
+\else
+ \centerline{\includegraphics[width=0.7\textwidth]{trplanstrss.eps}}
+\fi
+%end{latexonly}
 \caption{TrPlaneStress element - node and side numbering.}
 \label{Tr1htfig}
 \end{figure}
@@ -826,7 +986,16 @@ similar to Tr1ht element, see section \ref{Tr1ht}.
 Represents isoparametric eight-node brick/hexahedron finite element for
 heat transfer problems. Each node has 1 degrees of freedom.
 \begin{figure}[tb]
-\centerline{\epsfbox{hexa_lin.eps}}
+\begin{htmlonly}
+  \centerline{\includegraphics[width=0.7\textwidth]{hexa_lin.eps}}
+\end{htmlonly}
+%begin{latexonly}
+\ifpdf
+ \centerline{\includegraphics[width=0.7\textwidth]{hexa_lin.pdf}}
+\else
+ \centerline{\includegraphics[width=0.7\textwidth]{hexa_lin.eps}}
+\fi
+%end{latexonly}
 \caption{brick element (Node numbers in black, side numbers in blue,
 and surface numbers in red).}
 \label{Brick1htfig}
@@ -856,7 +1025,7 @@ each node. Linear approximation of temperature and mass concentration.
 Other features are simmilar to Brick1 element, see section \ref{Brick1ht}.
 %\subsection{Other Elements}
 
-\section{Elements for Fluid Dynamics problems (FM Module)}
+\section{Elements for Fluid Dynamics problems\\(FM Module)}
 \subsection{2D CBS Elements}
 \subsubsection{Tr1CBS element}
 \label{Tr1CBS}
@@ -867,7 +1036,16 @@ of freedoms (two components of velocity and pressure).
 The node numbering is anti-clockwise
 
 \begin{figure}[tb]
-\begin{center}\epsfbox{trplanstrss.eps}\end{center}
+\begin{htmlonly}
+  \centerline{\includegraphics[width=0.7\textwidth]{trplanstrss.eps}}
+\end{htmlonly}
+%begin{latexonly}
+\ifpdf
+ \centerline{\includegraphics[width=0.7\textwidth]{trplanstrss.pdf}}
+\else
+ \centerline{\includegraphics[width=0.7\textwidth]{trplanstrss.eps}}
+\fi
+%end{latexonly}
 \caption{Tr1CBS element. Node numbering, Side numbering and
 definition of local edge c.s.(a).}
 \label{Tr1CBSfig}
@@ -914,7 +1092,16 @@ of freedoms (two components of velocity and pressure).
 The node numbering is anti-clockwise
 
 \begin{figure}[tb]
-\begin{center}\epsfbox{trplanstrss.eps}\end{center}
+\begin{htmlonly}
+  \centerline{\includegraphics[width=0.7\textwidth]{trplanstrss.eps}}
+\end{htmlonly}
+%begin{latexonly}
+\ifpdf
+ \centerline{\includegraphics[width=0.7\textwidth]{trplanstrss.pdf}}
+\else
+ \centerline{\includegraphics[width=0.7\textwidth]{trplanstrss.eps}}
+\fi
+%end{latexonly}
 \caption{Tr1SUPG element. Node numbering, Side numbering and
 definition of local edge c.s.(a).}
 \label{Tr1SUPG2fig}
@@ -955,7 +1142,16 @@ of freedoms (two components of velocity and pressure). The y-axis is
 axis of ratational symmetry. The node numbering is anti-clockwise
 
 \begin{figure}[tb]
-\begin{center}\epsfbox{trplanstrss.eps}\end{center}
+\begin{htmlonly}
+  \centerline{\includegraphics[width=0.7\textwidth]{trplanstrss.eps}}
+\end{htmlonly}
+%begin{latexonly}
+\ifpdf
+ \centerline{\includegraphics[width=0.7\textwidth]{trplanstrss.pdf}}
+\else
+ \centerline{\includegraphics[width=0.7\textwidth]{trplanstrss.eps}}
+\fi
+%end{latexonly}
 \caption{Tr1SUPGAxi element. Node numbering, Side numbering and
 definition of local edge c.s.(a).}
 \label{Tr1SUPGAxifig}

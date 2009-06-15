@@ -2,24 +2,31 @@ SHELL = /bin/sh
 BACKUP_FILES = *.tex *.fig *.eps makefile
 RCP = scp
 
-www-doc: ps-doc
+html: ps
 	if [ x$(ROBOT) != "x" ]; then $(ROBOT) < include.src.tex > include.tex; fi
-	latex2html oofemInput
-	mv oofemInput.ps oofemInput
+	latex2html -dir html -mkdir oofemInput
 
-ps-doc:
+ps:
 	if [ x$(ROBOT) != "x" ]; then $(ROBOT) < include.src.tex > include.tex; fi
+	rm -f *.toc *.lot *.aux
 	latex \\nonstopmode\\input oofemInput
 	latex \\nonstopmode\\input oofemInput
 	dvips -o 	oofemInput.ps oofemInput
 
-www-install: www-doc
+pdf:
+	if [ x$(ROBOT) != "x" ]; then $(ROBOT) < include.src.tex > include.tex; fi
+	rm -f *.toc *.lot *.aux
+	pdflatex oofemInput
+	pdflatex oofemInput
+
+
+www-install: html
 ifdef INSTALLDIR
-	$(RCP) -r oofemInput $(INSTALLDIR)/resources/doc
+	$(RCP) -r html $(INSTALLDIR)/resources/doc/oofemInput
 else
 	echo "INSTALLDIR not defined"
 endif
 
 clean:
-	rm -fr oofemInput
+	rm -fr html
 	rm -f *.aux *.dvi *.lof *.log *.toc

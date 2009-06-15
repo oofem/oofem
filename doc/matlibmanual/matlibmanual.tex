@@ -60,7 +60,13 @@
 
 
 %begin{latexonly}
-\title{\oofem Material Model Library Manual}
+\title{
+\ifpdf
+\oofemlnk{\centerline{\includegraphics[width=0.7\textwidth]{oofem-logo-contour.pdf}}}
+\else
+\oofemlnk{\centerline{\includegraphics[width=0.7\textwidth]{oofem-logo-contour.eps}}}
+\fi
+Material Model Library Manual}
 \author{\bp \\ \\
 Czech Technical University\\
 Faculty of Civil Engineering\\
@@ -71,7 +77,8 @@ Th\'akurova 7, 166 29 Prague, Czech Republic
 %end{latexonly}
 \begin{htmlonly}
 \begin{center}
-{\Large \oofem Material Model Library Manual}\\ \\
+\oofemlnk{\centerline{\includegraphics[width=0.7\textwidth]{oofem-logo-contour.eps}}}
+{\Large Material Model Library Manual}\\ \\
 {\bp \\ 
 Czech Technical University\\
 Faculty of Civil Engineering\\
@@ -367,9 +374,9 @@ Masonry is a composite material made of bricks and mortar. Nonlinear behavior of
 \end{htmlonly}
 %begin{latexonly}
 \ifpdf
-\centerline{\includegraphics[width=0.7\textwidth]{constmodel.pdf}}
+ \centerline{\includegraphics[width=0.7\textwidth]{constmodel.pdf}}
 \else
-\centerline{\includegraphics[width=0.7\textwidth]{constmodel.eps}}
+ \centerline{\includegraphics[width=0.7\textwidth]{constmodel.eps}}
 \fi
 %end{latexonly}
   \caption{Composite yield surface model for masonry}

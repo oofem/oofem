@@ -2,24 +2,31 @@ SHELL = /bin/sh
 BACKUP_FILES = *.tex *.fig *.eps makefile
 RCP = scp
 
-www-doc: ps-doc
+html: ps
 	if [ x$(ROBOT) != "x" ]; then $(ROBOT) < include.src.tex > include.tex; fi
-	latex2html elementlibmanual
-	mv elementlibmanual.ps elementlibmanual
+	latex2html -dir html -mkdir elementlibmanual
 
-ps-doc:
+ps:
 	if [ x$(ROBOT) != "x" ]; then $(ROBOT) < include.src.tex > include.tex; fi
+	rm -f *.toc *.lot *.aux
 	latex \\nonstopmode\\input elementlibmanual
 	latex \\nonstopmode\\input elementlibmanual
 	dvips -o 	elementlibmanual.ps elementlibmanual
 
-www-install: www-doc
+pdf:
+	if [ x$(ROBOT) != "x" ]; then $(ROBOT) < include.src.tex > include.tex; fi
+	rm -f *.toc *.lot *.aux
+	pdflatex elementlibmanual
+	pdflatex elementlibmanual
+
+
+www-install: html
 ifdef INSTALLDIR
-	$(RCP) -r elementlibmanual $(INSTALLDIR)/resources/doc
+	$(RCP) -r html $(INSTALLDIR)/resources/doc/elementlibmanual
 else
 	echo "INSTALLDIR not defined"
 endif
 
 clean:
-	rm -fr elementlibmanual
+	rm -fr html
 	rm -f *.aux *.dvi *.lof *.log *.toc
