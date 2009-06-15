@@ -182,6 +182,7 @@
 
 // export modules
 #include "vtkexportmodule.h"
+#include "vtkxmlexportmodule.h"
 #include "poiexportmodule.h"
 #include "homexportmodule.h"
 
@@ -752,7 +753,9 @@ ExportModule *CreateUsrDefExportModuleOfType(char *aClass, EngngModel *emodel)
     ExportModule *answer = NULL;
 
 #ifdef __SM_MODULE
-    if ( !strncasecmp(aClass, "vtk", 3) ) {
+    if ( !strncasecmp(aClass, "vtkxml", 6) ) {
+        answer = new VTKXMLExportModule(emodel);
+    } else if ( !strncasecmp(aClass, "vtk", 3) ) {
         answer = new VTKExportModule(emodel);
     } else if ( !strncasecmp(aClass, "poi", 3) ) {
         answer = new POIExportModule(emodel);
