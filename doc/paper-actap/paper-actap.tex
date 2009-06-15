@@ -1,7 +1,16 @@
-\documentstyle[12pt,epsf,html,a4]{article}
-%\pagestyle{page}
-%\usepackage{html}
+\documentclass[a4paper]{article}
+\usepackage{html}
+\usepackage{graphicx}
+\usepackage{ifpdf}
 \input{include.tex}
+
+\renewcommand{\topfraction}{0.99}	% 99% of page top can be a float
+\renewcommand{\bottomfraction}{0.99}	% 99% of page bottom can be a float
+\renewcommand{\textfraction}{0.01}	% only 1% of page must to be the text
+\renewcommand{\floatpagefraction}{0.99} % 99% of whole page can be a float
+\setcounter{totalnumber}{5} %maximum floating objects on one page
+
+
 \newcommand{\class}[1]{{\bf #1}}
 \newcommand{\service}[1]{{\em #1}}
 \begin{document}
@@ -28,6 +37,7 @@ Faculty of Civil Engineering\\
 Department of Structural Mechanics\\
 Th\'akurova 7, 166 29 Prague, Czech Republic\\ \\
 }
+\end{htmlonly}
 
 \noindent{{\bf Key words:} Finite Element Modeling, Object Oriented Analysis}
 
@@ -575,26 +585,52 @@ the code.
 \section{Figures}
 \end{htmlonly}
 
-\vspace*{-10mm}
 \begin{figure}[ht]
-\htmlimage{thumbnail=0.9,flip=r270}
-\begin{center}\epsfbox{coyo.eps}\end{center}
+\begin{htmlonly}
+  \htmlimage{thumbnail=0.9,flip=r270}
+  \centerline{\includegraphics[width=0.7\textwidth]{coyo.eps}}
+\end{htmlonly}
+%begin{latexonly}
+\ifpdf
+\centerline{\includegraphics[width=0.7\textwidth]{coyo.pdf}}
+\else
+\centerline{\includegraphics[width=0.7\textwidth]{coyo.eps}}
+\fi
+%end{latexonly}
 \caption{Coad Yourdon methodology.}
 \label{coyo}
 \end{figure}
 
 
 \begin{figure}[tb]
-\htmlimage{thumbnail=0.9,flip=r270}
-\begin{center}\epsfbox{general.eps}\end{center}
+\begin{htmlonly}
+  \htmlimage{thumbnail=0.9,flip=r270}
+  \centerline{\includegraphics[width=0.7\textwidth]{general.eps}}
+\end{htmlonly}
+%begin{latexonly}
+\ifpdf
+\centerline{\includegraphics[width=0.7\textwidth]{general.pdf}}
+\else
+\centerline{\includegraphics[width=0.7\textwidth]{general.eps}}
+\fi
+%end{latexonly}
 \caption{General Structure.}
 \label{genstructfig}
 \end{figure}
 
 
 \begin{figure}[tb]
-\htmlimage{thumbnail=0.9,flip=r270}
-\begin{center}\epsfbox{struct2.eps}\end{center}
+\begin{htmlonly}
+  \htmlimage{thumbnail=0.9,flip=r270}
+  \centerline{\includegraphics[width=0.7\textwidth]{struct2.eps}}
+\end{htmlonly}
+%begin{latexonly}
+\ifpdf
+\centerline{\includegraphics[width=0.7\textwidth]{struct2.pdf}}
+\else
+\centerline{\includegraphics[width=0.7\textwidth]{struct2.eps}}
+\fi
+%end{latexonly}
 \caption{Engng model - Numerical method Interface.}
 \label{engngNummet1fig}
 \end{figure}
@@ -602,8 +638,17 @@ the code.
 
 
 \begin{figure}[tb]
-\htmlimage{thumbnail=0.9,flip=r270}
-\begin{center}\epsfbox{engng.eps}\end{center}
+\begin{htmlonly}
+  \htmlimage{thumbnail=0.9,flip=r270}
+  \centerline{\includegraphics[width=0.7\textwidth]{engng.eps}}
+\end{htmlonly}
+%begin{latexonly}
+\ifpdf
+\centerline{\includegraphics[width=0.7\textwidth]{engng.pdf}}
+\else
+\centerline{\includegraphics[width=0.7\textwidth]{engng.eps}}
+\fi
+%end{latexonly}
 \caption{Engng model - Numerical method Interface.}
 \label{engngNummet2fig}
 \end{figure}
@@ -611,15 +656,33 @@ the code.
 
 
 \begin{figure}[tb]
-\htmlimage{thumbnail=0.9,flip=r270}
-\begin{center}\epsfbox{struct1.eps}\end{center}
+\begin{htmlonly}
+  \htmlimage{thumbnail=0.9,flip=r270}
+  \centerline{\includegraphics[width=0.7\textwidth]{struct1.eps}}
+\end{htmlonly}
+%begin{latexonly}
+\ifpdf
+\centerline{\includegraphics[width=0.7\textwidth]{struct1.pdf}}
+\else
+\centerline{\includegraphics[width=0.7\textwidth]{struct1.eps}}
+\fi
+%end{latexonly}
 \caption{Element-material frame  structure.}
 \label{materelementFrame1}
 \end{figure}
 
 \begin{figure}[tb]
-\htmlimage{thumbnail=0.9,flip=r270}
-\begin{center}\epsfbox{microp.eps}\end{center}
+\begin{htmlonly}
+  \htmlimage{thumbnail=0.9,flip=r270}
+  \centerline{\includegraphics[width=0.7\textwidth]{microp.eps}}
+\end{htmlonly}
+%begin{latexonly}
+\ifpdf
+\centerline{\includegraphics[width=0.7\textwidth]{microp.pdf}}
+\else
+\centerline{\includegraphics[width=0.7\textwidth]{microp.eps}}
+\fi
+%end{latexonly}
 \caption{Example - Microplane model implementation.}
 \label{microplaneFig}
 \end{figure}

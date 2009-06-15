@@ -2,20 +2,26 @@ SHELL = /bin/sh
 BACKUP_FILES = *.tex *.eps *.sty makefile
 RCP = scp
 
-www-doc: ps-doc
+html: ps
 	if [ x$(ROBOT) != "x" ]; then $(ROBOT) < include.src.tex > include.tex; fi
-	latex2html paper-actap
-	mv paper-actap.ps paper-actap
+	latex2html -dir html -mkdir paper-actap
 
-ps-doc:
+ps:
 	if [ x$(ROBOT) != "x" ]; then $(ROBOT) < include.src.tex > include.tex; fi
+	rm -f *.toc *.lot *.aux
 	latex \\nonstopmode\\input paper-actap
 	latex \\nonstopmode\\input paper-actap
 	dvips -o 	paper-actap.ps paper-actap
 
-www-install: www-doc
+pdf:
+	if [ x$(ROBOT) != "x" ]; then $(ROBOT) < include.src.tex > include.tex; fi
+	rm -f *.toc *.lot *.aux
+	pdflatex paper-actap
+	pdflatex paper-actap
+
+www-install: html
 ifdef INSTALLDIR
-	$(RCP) -r paper-actap $(INSTALLDIR)/resources/doc
+	$(RCP) -r html $(INSTALLDIR)/resources/doc/paper-actap
 else
 	echo "INSTALLDIR not defined"
 endif
