@@ -19,18 +19,18 @@ ConstantFunction 1 f(t) 1.0
 #
 #%BEGIN_CHECK% tolerance 1.e-4
 ## check reactions 
-#REACTION tStep 1 comNumber 1 dof 1 value -4.7254e+00
-#REACTION tStep 1 comNumber 1 dof 2 value -1.1180e+01
-#REACTION tStep 1 comNumber 2 dof 2 value 1.2910e+01
+#REACTION tStep 1 number 1 dof 1 value -4.7254e+00
+#REACTION tStep 1 number 1 dof 2 value -1.1180e+01
+#REACTION tStep 1 number 2 dof 2 value 1.2910e+01
 ## check all nodes
 ## check element  strain vector
-#ELEMENT tStep 1 number 1 gp 1 record 0 component 1  value 4.7254e+01
-#ELEMENT tStep 1 number 2 gp 1 record 0 component 1  value  1.1180e+02
-#ELEMENT tStep 1 number 3 gp 1 record 0 component 1  value -1.2500e+02
+#ELEMENT tStep 1 number 1 gp 1 keyword "strains" component 1  value 4.7254e+01
+#ELEMENT tStep 1 number 2 gp 1 keyword "strains" component 1  value  1.1180e+02
+#ELEMENT tStep 1 number 3 gp 1 keyword "strains" component 1  value -1.2500e+02
 ## check element stress vector
-#ELEMENT tStep 1 number 1 gp 1 record 1 component 1  value 4.7254e+01
-#ELEMENT tStep 1 number 2 gp 1 record 1 component 1  value 1.1180e+02
-#ELEMENT tStep 1 number 3 gp 1 record 1 component 1  value -1.2500e+02
+#ELEMENT tStep 1 number 1 gp 1 keyword "stresses" component 1  value 4.7254e+01
+#ELEMENT tStep 1 number 2 gp 1 keyword "stresses" component 1  value 1.1180e+02
+#ELEMENT tStep 1 number 3 gp 1 keyword "stresses" component 1  value -1.2500e+02
 #%END_CHECK%
 #
 # EXACT RESULTS:

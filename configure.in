@@ -51,7 +51,7 @@ LOCAL_LIBS=""
 
 
 
-AC_INIT(tools/checker.C)
+AC_INIT(src/oofemlib/element.h)
 
 dnl --------------------------------------------------------------------
 dnl check if PWD variable is defined

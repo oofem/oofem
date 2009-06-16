@@ -1280,5 +1280,5 @@ PiecewiseLinFunction 2 nPoints 2 t 2 0.0 200.0 f(t) 2 1.0 201.0
 #
 #%BEGIN_CHECK% tolerance 1.e-3
 #NODE tStep 19 number 1 dof 2 unknown d value -5.00000000e-01
-#REACTION tStep 19 comNumber 12 dof 2 value 1.6156e+01
+#REACTION tStep 19 number 12 dof 2 value 1.6156e+01
 #%END_CHECK%

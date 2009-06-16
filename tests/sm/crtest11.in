@@ -29,9 +29,9 @@ HeavisideLTF 2 origin 400. value 1.0
 #NODE tStep 1000. number 2 dof 2 unknown d value 1.00000000e-03
 #NODE tStep 1000. number 3 dof 2 unknown d value 2.00000000e-03
 ## check element no. 1 strain vector
-#ELEMENT tStep 1000.  number 1 gp 1 record 0 component 1  value 1.0000e-03
-#ELEMENT tStep 1000.  number 1 gp 1 record 1 component 1  value 1.1057e+01
-#ELEMENT tStep 1000.  number 2 gp 1 record 0 component 1  value 1.0000e-03
-#ELEMENT tStep 1000.  number 2 gp 1 record 1 component 1  value 1.1057e+01
+#ELEMENT tStep 1000.  number 1 gp 1 keyword "strains" component 1  value 1.0000e-03
+#ELEMENT tStep 1000.  number 1 gp 1 keyword "stresses" component 1  value 1.1057e+01
+#ELEMENT tStep 1000.  number 2 gp 1 keyword "strains" component 1  value 1.0000e-03
+#ELEMENT tStep 1000.  number 2 gp 1 keyword "stresses" component 1  value 1.1057e+01
 #%END_CHECK%
 #

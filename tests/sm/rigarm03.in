@@ -22,9 +22,9 @@ ConstantFunction 1 f(t) 1.
 #
 #%BEGIN_CHECK% tolerance 1.e-4
 ## check reactions 
-#REACTION tStep 1 comNumber 1 dof 1 value -2.71132
-#REACTION tStep 1 comNumber 1 dof 2 value  0.5
-#REACTION tStep 1 comNumber 3 dof 2 value -0.57735
+#REACTION tStep 1 number 1 dof 1 value -2.71132
+#REACTION tStep 1 number 1 dof 2 value  0.5
+#REACTION tStep 1 number 3 dof 2 value -0.57735
 ##
 ## check all nodes
 #NODE tStep 1 number 1 dof 1 unknown d value 0.0
@@ -33,10 +33,10 @@ ConstantFunction 1 f(t) 1.
 #NODE tStep 1 number 3 dof 1 unknown d value 4.6961439
 #NODE tStep 1 number 3 dof 2 unknown d value 0.0
 ## check element no. 3 force vector
-#BEAM_ELEMENT tStep 1 number 1  record 1 component 1  value -2.71132
-#BEAM_ELEMENT tStep 1 number 1  record 1 component 2  value  0.5
-#BEAM_ELEMENT tStep 1 number 1  record 1 component 3  value  0.0
-#BEAM_ELEMENT tStep 1 number 2  record 1 component 4  value  2.71132
-#BEAM_ELEMENT tStep 1 number 2  record 1 component 5  value -0.5
-#BEAM_ELEMENT tStep 1 number 2  record 1 component 6  value -1.5
+#BEAM_ELEMENT tStep 1 number 1  keyword "forces" component 1  value -2.71132
+#BEAM_ELEMENT tStep 1 number 1  keyword "forces" component 2  value  0.5
+#BEAM_ELEMENT tStep 1 number 1  keyword "forces" component 3  value  0.0
+#BEAM_ELEMENT tStep 1 number 2  keyword "forces" component 4  value  2.71132
+#BEAM_ELEMENT tStep 1 number 2  keyword "forces" component 5  value -0.5
+#BEAM_ELEMENT tStep 1 number 2  keyword "forces" component 6  value -1.5
 #%END_CHECK%

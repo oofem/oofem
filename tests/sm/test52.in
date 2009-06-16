@@ -23,22 +23,22 @@ ConstantFunction 1 f(t) 1.
 #
 #%BEGIN_CHECK% tolerance 1.e-8
 ## check reactions 
-#REACTION tStep 1 comNumber 1 dof 1 value 2.0145e+00
-#REACTION tStep 1 comNumber 1 dof 2 value -6.5108e+00
-#REACTION tStep 1 comNumber 4 dof 2 value -4.0289e+00
+#REACTION tStep 1 number 1 dof 1 value 2.0145e+00
+#REACTION tStep 1 number 1 dof 2 value -6.5108e+00
+#REACTION tStep 1 number 4 dof 2 value -4.0289e+00
 ##
 ## check all nodes
 ## check element no. 3 force vector
-#BEAM_ELEMENT tStep 1 number 3  record 1 component 1  value 2.0145e+00
-#BEAM_ELEMENT tStep 1 number 3  record 1 component 2  value 3.4892e+00
-#BEAM_ELEMENT tStep 1 number 3  record 1 component 3  value 0.0
-#BEAM_ELEMENT tStep 1 number 3  record 1 component 4  value 0.0
-#BEAM_ELEMENT tStep 1 number 3  record 1 component 5  value 0.0
-#BEAM_ELEMENT tStep 1 number 3  record 1 component 6  value  6.9783e+00
-#BEAM_ELEMENT tStep 1 number 3  record 1 component 7  value -2.0145e+00
-#BEAM_ELEMENT tStep 1 number 3  record 1 component 8  value -3.4892e+00
-#BEAM_ELEMENT tStep 1 number 3  record 1 component 9  value 0.0
-#BEAM_ELEMENT tStep 1 number 3  record 1 component 10 value 0.0
-#BEAM_ELEMENT tStep 1 number 3  record 1 component 11 value 0.0
-#BEAM_ELEMENT tStep 1 number 3  record 1 component 12 value 0.0
+#BEAM_ELEMENT tStep 1 number 3  keyword "forces" component 1  value 2.0145e+00
+#BEAM_ELEMENT tStep 1 number 3  keyword "forces" component 2  value 3.4892e+00
+#BEAM_ELEMENT tStep 1 number 3  keyword "forces" component 3  value 0.0
+#BEAM_ELEMENT tStep 1 number 3  keyword "forces" component 4  value 0.0
+#BEAM_ELEMENT tStep 1 number 3  keyword "forces" component 5  value 0.0
+#BEAM_ELEMENT tStep 1 number 3  keyword "forces" component 6  value  6.9783e+00
+#BEAM_ELEMENT tStep 1 number 3  keyword "forces" component 7  value -2.0145e+00
+#BEAM_ELEMENT tStep 1 number 3  keyword "forces" component 8  value -3.4892e+00
+#BEAM_ELEMENT tStep 1 number 3  keyword "forces" component 9  value 0.0
+#BEAM_ELEMENT tStep 1 number 3  keyword "forces" component 10 value 0.0
+#BEAM_ELEMENT tStep 1 number 3  keyword "forces" component 11 value 0.0
+#BEAM_ELEMENT tStep 1 number 3  keyword "forces" component 12 value 0.0
 #%END_CHECK%

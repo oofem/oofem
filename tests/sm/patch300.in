@@ -26,9 +26,9 @@ ConstantFunction 1 f(t) 1.0
 ## Note: this is the exact solution
 ##
 ## check reactions 
-#REACTION tStep 1 comNumber 1 dof 3 value 1.5
-#REACTION tStep 1 comNumber 2 dof 3 value 1.5
-#REACTION tStep 1 comNumber 3 dof 3 value 1.5
+#REACTION tStep 1 number 1 dof 3 value 1.5
+#REACTION tStep 1 number 2 dof 3 value 1.5
+#REACTION tStep 1 number 3 dof 3 value 1.5
 ## check all nodes
 #NODE tStep 1 number 4 dof 1 unknown d value 0.0
 #NODE tStep 1 number 4 dof 2 unknown d value 0.0
@@ -40,46 +40,46 @@ ConstantFunction 1 f(t) 1.0
 #NODE tStep 1 number 6 dof 2 unknown d value 0.0
 #NODE tStep 1 number 6 dof 3 unknown d value -0.333333333
 ## check element's stress & strain vectors
-#ELEMENT tStep 1 number 1 gp 1 record 0 component 1  value 0.0
-#ELEMENT tStep 1 number 1 gp 1 record 0 component 2  value 0.0
-#ELEMENT tStep 1 number 1 gp 1 record 0 component 3  value -0.05555555
-#ELEMENT tStep 1 number 1 gp 1 record 0 component 4  value 0.0
-#ELEMENT tStep 1 number 1 gp 1 record 0 component 5  value 0.0
-#ELEMENT tStep 1 number 1 gp 1 record 0 component 6  value 0.0
+#ELEMENT tStep 1 number 1 gp 1 keyword "strains" component 1  value 0.0
+#ELEMENT tStep 1 number 1 gp 1 keyword "strains" component 2  value 0.0
+#ELEMENT tStep 1 number 1 gp 1 keyword "strains" component 3  value -0.05555555
+#ELEMENT tStep 1 number 1 gp 1 keyword "strains" component 4  value 0.0
+#ELEMENT tStep 1 number 1 gp 1 keyword "strains" component 5  value 0.0
+#ELEMENT tStep 1 number 1 gp 1 keyword "strains" component 6  value 0.0
 ##
-#ELEMENT tStep 1 number 1 gp 1 record 1 component 1  value -0.33333333
-#ELEMENT tStep 1 number 1 gp 1 record 1 component 2  value -0.33333333
-#ELEMENT tStep 1 number 1 gp 1 record 1 component 3  value -1.0
-#ELEMENT tStep 1 number 1 gp 1 record 1 component 4  value 0.0
-#ELEMENT tStep 1 number 1 gp 1 record 1 component 5  value 0.0
-#ELEMENT tStep 1 number 1 gp 1 record 1 component 6  value 0.0
+#ELEMENT tStep 1 number 1 gp 1 keyword "stresses" component 1  value -0.33333333
+#ELEMENT tStep 1 number 1 gp 1 keyword "stresses" component 2  value -0.33333333
+#ELEMENT tStep 1 number 1 gp 1 keyword "stresses" component 3  value -1.0
+#ELEMENT tStep 1 number 1 gp 1 keyword "stresses" component 4  value 0.0
+#ELEMENT tStep 1 number 1 gp 1 keyword "stresses" component 5  value 0.0
+#ELEMENT tStep 1 number 1 gp 1 keyword "stresses" component 6  value 0.0
 ##
-#ELEMENT tStep 1 number 2 gp 1 record 0 component 1  value 0.0
-#ELEMENT tStep 1 number 2 gp 1 record 0 component 2  value 0.0
-#ELEMENT tStep 1 number 2 gp 1 record 0 component 3  value -0.05555555
-#ELEMENT tStep 1 number 2 gp 1 record 0 component 4  value 0.0
-#ELEMENT tStep 1 number 2 gp 1 record 0 component 5  value 0.0
-#ELEMENT tStep 1 number 2 gp 1 record 0 component 6  value 0.0
+#ELEMENT tStep 1 number 2 gp 1 keyword "strains" component 1  value 0.0
+#ELEMENT tStep 1 number 2 gp 1 keyword "strains" component 2  value 0.0
+#ELEMENT tStep 1 number 2 gp 1 keyword "strains" component 3  value -0.05555555
+#ELEMENT tStep 1 number 2 gp 1 keyword "strains" component 4  value 0.0
+#ELEMENT tStep 1 number 2 gp 1 keyword "strains" component 5  value 0.0
+#ELEMENT tStep 1 number 2 gp 1 keyword "strains" component 6  value 0.0
 ##
-#ELEMENT tStep 1 number 2 gp 1 record 1 component 1  value -0.33333333
-#ELEMENT tStep 1 number 2 gp 1 record 1 component 2  value -0.33333333
-#ELEMENT tStep 1 number 2 gp 1 record 1 component 3  value -1.0
-#ELEMENT tStep 1 number 2 gp 1 record 1 component 4  value 0.0
-#ELEMENT tStep 1 number 2 gp 1 record 1 component 5  value 0.0
-#ELEMENT tStep 1 number 2 gp 1 record 1 component 6  value 0.0
+#ELEMENT tStep 1 number 2 gp 1 keyword "stresses" component 1  value -0.33333333
+#ELEMENT tStep 1 number 2 gp 1 keyword "stresses" component 2  value -0.33333333
+#ELEMENT tStep 1 number 2 gp 1 keyword "stresses" component 3  value -1.0
+#ELEMENT tStep 1 number 2 gp 1 keyword "stresses" component 4  value 0.0
+#ELEMENT tStep 1 number 2 gp 1 keyword "stresses" component 5  value 0.0
+#ELEMENT tStep 1 number 2 gp 1 keyword "stresses" component 6  value 0.0
 ##
-#ELEMENT tStep 1 number 3 gp 1 record 0 component 1  value 0.0
-#ELEMENT tStep 1 number 3 gp 1 record 0 component 2  value 0.0
-#ELEMENT tStep 1 number 3 gp 1 record 0 component 3  value -0.05555555
-#ELEMENT tStep 1 number 3 gp 1 record 0 component 4  value 0.0
-#ELEMENT tStep 1 number 3 gp 1 record 0 component 5  value 0.0
-#ELEMENT tStep 1 number 3 gp 1 record 0 component 6  value 0.0
+#ELEMENT tStep 1 number 3 gp 1 keyword "strains" component 1  value 0.0
+#ELEMENT tStep 1 number 3 gp 1 keyword "strains" component 2  value 0.0
+#ELEMENT tStep 1 number 3 gp 1 keyword "strains" component 3  value -0.05555555
+#ELEMENT tStep 1 number 3 gp 1 keyword "strains" component 4  value 0.0
+#ELEMENT tStep 1 number 3 gp 1 keyword "strains" component 5  value 0.0
+#ELEMENT tStep 1 number 3 gp 1 keyword "strains" component 6  value 0.0
 ##
-#ELEMENT tStep 1 number 3 gp 1 record 1 component 1  value -0.33333333
-#ELEMENT tStep 1 number 3 gp 1 record 1 component 2  value -0.33333333
-#ELEMENT tStep 1 number 3 gp 1 record 1 component 3  value -1.0
-#ELEMENT tStep 1 number 3 gp 1 record 1 component 4  value 0.0
-#ELEMENT tStep 1 number 3 gp 1 record 1 component 5  value 0.0
-#ELEMENT tStep 1 number 3 gp 1 record 1 component 6  value 0.0
+#ELEMENT tStep 1 number 3 gp 1 keyword "stresses" component 1  value -0.33333333
+#ELEMENT tStep 1 number 3 gp 1 keyword "stresses" component 2  value -0.33333333
+#ELEMENT tStep 1 number 3 gp 1 keyword "stresses" component 3  value -1.0
+#ELEMENT tStep 1 number 3 gp 1 keyword "stresses" component 4  value 0.0
+#ELEMENT tStep 1 number 3 gp 1 keyword "stresses" component 5  value 0.0
+#ELEMENT tStep 1 number 3 gp 1 keyword "stresses" component 6  value 0.0
 ##
 #%END_CHECK%

@@ -120,7 +120,7 @@ from the sources the latex and latex2html packages are required.
 The compiled Reference Manual itself is not included in release 
 due to its size. It can be accessed online from oofem home page.
 
-
+To test oofem instalation, Python is required.
 
 
 [3] Installation
@@ -211,11 +211,7 @@ o) To set up graphical postprocessor (oofeg) with debugging information:
 
    The target executable will be created in target_name/bin directory
 
-5) To build the utilities do the following:
-
-   o) cd tools; make all
-
-6) Optionally to test the oofem package (requires the utilities):
+5) Optionally to test the oofem package (requires Python):
    a) change to particular target directory:
       cd targets/target_name
    b) perform the tests:
@@ -223,7 +219,7 @@ o) To set up graphical postprocessor (oofeg) with debugging information:
    b) examine file test_results:
       less test_result
 
-7) Optionally to build reference manuals
+6) Optionally to build reference manuals
    (requires latex and latex2html to be installed)
 
    o) OOFEMlib reference manual:

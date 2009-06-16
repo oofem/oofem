@@ -717,7 +717,7 @@ void Beam3d :: printOutputAt(FILE *File, TimeStep *stepN)
     FloatArray rg, rl, Fg, Fl;
     FloatMatrix T;
 
-    fprintf(File, "element %d :\n", number);
+    fprintf(File, "beam element %d :\n", number);
 
     //   for (i=0 ; i < numberOfIntegrationRules ; i++)
     //   integrationRulesArray[i]->printOutputAt(file,stepN);

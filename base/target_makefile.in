@@ -13,7 +13,8 @@ OOFEM_DIR  = @OOFEM_DIR@
 
 # for testing
 OOFEM=@OOFEM_DIR@/targets/@OOFEM_TARGET@/bin/oofem
-CHECKER=@OOFEM_DIR@/tools/checker
+CHECKER=@OOFEM_DIR@/tools/extractor.py
+CHECKER_PARAMS=-c
 RESULT=@OOFEM_DIR@/targets/@OOFEM_TARGET@/test_results
 
 all: $(MODULE_TARGETS)
@@ -54,7 +55,7 @@ tests:
 		echo $${ib};\
 		echo;\
 		${OOFEM} -f $$i -l 2;\
-		${CHECKER} -f $$i    >> ${RESULT};\
+		${CHECKER} ${CHECKER_PARAMS} -f $$i    >> ${RESULT};\
 		rm $${ib%.in}.out;\
 	    done;\
 	  done;\

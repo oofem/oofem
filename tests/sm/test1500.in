@@ -480,7 +480,7 @@ ConstantFunction 1 f(t) 1.0
 #NODE tStep 7 number 2 dof 1 unknown d value -2.82627572e-06
 #NODE tStep 7 number 2 dof 2 unknown d value 1.40448131e-05
 ## check some arbitrary element
-#ELEMENT tStep 7 number 144 gp 1 record 1 component 1  value -1.0852e+01
-#ELEMENT tStep 7 number 144 gp 1 record 1 component 2  value -9.2804e+00
-#ELEMENT tStep 7 number 144 gp 1 record 1 component 6  value  2.1700e-01
+#ELEMENT tStep 7 number 144 gp 1 keyword "stresses" component 1  value -1.0852e+01
+#ELEMENT tStep 7 number 144 gp 1 keyword "stresses" component 2  value -9.2804e+00
+#ELEMENT tStep 7 number 144 gp 1 keyword "stresses" component 6  value  2.1700e-01
 #%END_CHECK%

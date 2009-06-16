@@ -39,39 +39,39 @@ HeavisideLTF 5 origin 4.5 value 1.0
 #NODE tStep 1. number 2 dof 1 unknown d value 4.0
 #NODE tStep 1. number 3 dof 1 unknown d value 8.0
 #NODE tStep 1. number 4 dof 1 unknown d value 12.0
-#ELEMENT tStep 1.  number 1 gp 1 record 1 component 1  value 1.0
-#ELEMENT tStep 1.  number 2 gp 1 record 1 component 1  value 1.0
-#ELEMENT tStep 1.  number 3 gp 1 record 1 component 1  value 1.0
+#ELEMENT tStep 1.  number 1 gp 1 keyword "stresses" component 1  value 1.0
+#ELEMENT tStep 1.  number 2 gp 1 keyword "stresses" component 1  value 1.0
+#ELEMENT tStep 1.  number 3 gp 1 keyword "stresses" component 1  value 1.0
 ## step 2
 #NODE tStep 2. number 1 dof 1 unknown d value 0.0
 #NODE tStep 2. number 2 dof 1 unknown d value 4.0
 #NODE tStep 2. number 3 dof 1 unknown d value 8.0
 #NODE tStep 2. number 4 dof 1 unknown d value 16.0
-#ELEMENT tStep 2.  number 1 gp 1 record 1 component 1  value 1.0
-#ELEMENT tStep 2.  number 2 gp 1 record 1 component 1  value 1.0
-#ELEMENT tStep 2.  number 3 gp 1 record 1 component 1  value 2.0
+#ELEMENT tStep 2.  number 1 gp 1 keyword "stresses" component 1  value 1.0
+#ELEMENT tStep 2.  number 2 gp 1 keyword "stresses" component 1  value 1.0
+#ELEMENT tStep 2.  number 3 gp 1 keyword "stresses" component 1  value 2.0
 ## step 3
 #NODE tStep 3. number 1 dof 1 unknown d value 0.0
 #NODE tStep 3. number 2 dof 1 unknown d value 8.0
 #NODE tStep 3. number 3 dof 1 unknown d value 16.0
 #NODE tStep 3. number 4 dof 1 unknown d value 24.0
-#ELEMENT tStep 3.  number 1 gp 1 record 1 component 1  value 2.0
-#ELEMENT tStep 3.  number 2 gp 1 record 1 component 1  value 2.0
-#ELEMENT tStep 3.  number 3 gp 1 record 1 component 1  value 2.0
+#ELEMENT tStep 3.  number 1 gp 1 keyword "stresses" component 1  value 2.0
+#ELEMENT tStep 3.  number 2 gp 1 keyword "stresses" component 1  value 2.0
+#ELEMENT tStep 3.  number 3 gp 1 keyword "stresses" component 1  value 2.0
 ## step 4
 #NODE tStep 4. number 1 dof 1 unknown d value 0.0
 #NODE tStep 4. number 2 dof 1 unknown d value 9.0
 #NODE tStep 4. number 3 dof 1 unknown d value 17.0
 #NODE tStep 4. number 4 dof 1 unknown d value 25.0
-#ELEMENT tStep 4.  number 1 gp 1 record 1 component 1  value 2.25
-#ELEMENT tStep 4.  number 2 gp 1 record 1 component 1  value 2.0
-#ELEMENT tStep 4.  number 3 gp 1 record 1 component 1  value 2.0
+#ELEMENT tStep 4.  number 1 gp 1 keyword "stresses" component 1  value 2.25
+#ELEMENT tStep 4.  number 2 gp 1 keyword "stresses" component 1  value 2.0
+#ELEMENT tStep 4.  number 3 gp 1 keyword "stresses" component 1  value 2.0
 ## step 5
 #NODE tStep 5. number 1 dof 1 unknown d value 0.0
 #NODE tStep 5. number 2 dof 1 unknown d value 9.0
 #NODE tStep 5. number 3 dof 1 unknown d value 13.0
 #NODE tStep 5. number 4 dof 1 unknown d value 17.0
-#ELEMENT tStep 5.  number 1 gp 1 record 1 component 1  value 2.25
-#ELEMENT tStep 5.  number 2 gp 1 record 1 component 1  value 1.0
-#ELEMENT tStep 5.  number 3 gp 1 record 1 component 1  value 1.0
+#ELEMENT tStep 5.  number 1 gp 1 keyword "stresses" component 1  value 2.25
+#ELEMENT tStep 5.  number 2 gp 1 keyword "stresses" component 1  value 1.0
+#ELEMENT tStep 5.  number 3 gp 1 keyword "stresses" component 1  value 1.0
 #%END_CHECK%
