@@ -1,5 +1,7 @@
-\documentstyle[epsf,a4,html]{article}
+\documentclass[a4paper]{article}
+\usepackage{html}
 \input{include.tex}
+
 \newcommand{\mbf}[1]{\mbox{\boldmath$#1$}}
 \newcommand{\excommand}[1]{#1}
 \begin{document}
@@ -26,162 +28,128 @@ Th\'akurova 7, 166 29 Prague, Czech Republic\\ \\
 \end{htmlonly}
 
 
-``Extractor'' is a package for automatic extraction of user-defined
-values from OOFEM output file. The user-defined values are defined in
-extractor input file. For each solution step, the Extractor finds
-corresponding values. The nature of solution step is problem
-dependent, it may represent load case, time step or one of eigen
-values of problem.
-The output is printed to stdout, one row per each solution step.
-In particular columns are printed the extracted values, preserving
-their order in input file. The implementation of extractor is
-efficient, all values are extracted using single pass through source
-output file.
+``Extractor.py'' is a package for automatic extraction (and checking) of user-defined
+values from OOFEM output file. The values to be extracted are defined in
+extractor input file. The tool can operate in two modes:
+\begin{itemize}
+\item
+Extraction mode, where for each solution step, the tool finds
+specific values and prints them on output, one row per each solution step.
+In particular columns are the extracted values, preserving
+their order as specified in input file.
+\item
+Checking mode, where the specific  values are located in oofem output file and are compared to the values given.
+It the difference is larger than given tolerance, an error is issued.
+\end{itemize}
 
-The program should be executed in following way
+The program parameters are following
 \begin{verbatim}
-extractor -f inputFileNamePath
+extractor [-c] -f inputFileNamePath
 \end{verbatim}
-The {\em inputFileNamePath} is input file name path, containing description of
-user-defined extracted values. The {\bf-f} option is compulsory. If not
-supplied, the program prints usage information and exits. The format
-of Extractor {\bf input file} has two compulsory sections, the {\bf source file
-section} and {\bf section describing extracted values}.
+The {\em inputFileNamePath} is the path to input file, containing description of
+user-defined values to be extracted or checked. The {\bf-f} option is compulsory. If not
+supplied, the program prints usage information and exits. 
+The {\bf-c} flag turn on the checking mode. If not set, the extraction mode is used by default.
 
-The source file section should be at first line of input file and
-contains operating system valid path to OOFEM output file, from which
-data will be extracted.
+The format
+of extractor input file consists of two compulsory sections, the {\bf source file
+section}, followed by the {\bf value records section}, that determines the values to be extracted or checked.
 
-The format of section describing extracted values is following:
+\paragraph{Source file section} should be the first line of input file and
+should contains valid path to OOFEM output file, from which
+the data will be extracted.
+
+Any lines between {\bf source file
+section} and {\bf value records section} are
+ignored. As the {\bf source file
+section} is common for both oofem and extractor input files and all remaining extractor records start with '\#' (considered as comment in oofem input file) the oofem and extractor  input files can be merged together.
+
+
+\paragraph{Value records section} describes the values to be extracted or checked. The general format of this section is following:
 \begin{verbatim}
-#%BEGIN_CHECK%
-[#NODE number # dof # unknown #]
-[#SIDE number # dof # unknown #]
-[#EIG_NODE number # dof # unknown #]
-[#EIG_SIDE number # dof # unknown #]
-[#ELEMENT number # gp # record # component # [keyword #] ]
-[#EIG_ELEMENT number # gp # record # component #]
-[#BEAM_ELEMENT number # record # component #]
-[#EIG_BEAM_ELEMENT number # record # component #]
-[#REACTION comNumber # dof # ]
-[#EIGVAL]
-[#LOADLEVEL]
-[#TIME]
-[#NITE]
-[#UTIME]s
+#%BEGIN_CHECK% [tolerance #]
+#(DOFMAN|NODE)  {tStep #} number # dof # unknown [dtfpva] {value #}
+#ELEMENT   {tStep #} number # gp # keyword # component # {value #}
+#BEAM_ELEMENT   {tStep #} number # keyword # component # {value #}
+#REACTION  {tStep #} number # dof # {value #}
+#LOADLEVEL {tStep #} {value #}
 #%END_CHECK%
 \end{verbatim}
 The \#\%\excommand{BEGIN\_CHECK}\% and \#\%\excommand{END\_CHECK}\% records are compulsory.
-The records in [ ] are optional, and can be used once or more
-times. Their order is optional, but extracted values are printed in
+The records in ``[ ]'' are optional. The notation (a$|$b) means ``a'' or ``b''.
+The records in ``{}'' are required only when in checker mode.
+
+The order of records is optional, but extracted values are printed in
 columns according to their order in input file. The stand-alone \#
-after {\em keyword} indicates the value to be substituted for this
-keyword. The line beginning with \#\# characters is skipped and can be
-used as comment. Generally expected values are integer values, except {\em
-unknown} keyword, after which single char value is expected. The
-particular records describe different types of characteristic value,
-which can be extracted. Their meaning is following
+after {\em keyword} indicates the int or float value to be substituted, depending on the context. The value of {\em
+unknown} parameter is a single char, determining the physical mode (and type) of extracted value.
+For example, in structural analysis 'd' stands for displacement, 'v' for velocity, and 'a' for acceleration.
+Value parameter defines the value to which the extracted one is compared.  
+The meaning of individual records is following:
 \begin{itemize}
 \item[-]
 \begin{verbatim}
-[#NODE number # dof # unknown #]
-[#SIDE number # dof # unknown #]
+#(DOFMAN|NODE) {tStep #} number # dof # unknown [dtfpva] {value #}
 \end{verbatim}
-These records allow extraction of arbitrary unknown associated with
-some DOF in particular node or element side (if has it's own DOFs).
-The {\em number} value represent node or element side number, the {\em
-dof} value the particular DOF number. The DOF numbering is determined
+This records allow extraction of arbitrary unknown associated with
+a Degree of freedom (DOF) in a particular node or dof manager.
+The {\em number} value represent node number, the {\em
+dof} value is the DOF number. The DOF numbering is determined
 by domain type or by user defined DOF ordering in specific
 DofManager (see OOFEM Input format specification). The {\em unknown} value
 is represented by single character, which determine the mode of the
-extracted value. Currently supported substitutions are 'd' for displacement, 'v' for velocity,
-and 'a' for acceleration.
+extracted value. In checker mode, the {\em tStep} parameter determines the solution time (float value) and {\em value} parameter defines the expected value for given DOF at given time.
+
+
 \item[-]
 \begin{verbatim}
-[#EIG_NODE number # dof # unknown #]
-[#EIG_SIDE number # dof # unknown #]
+#ELEMENT   {tStep #} number # gp # keyword # component # {value #}
 \end{verbatim}
-Represent the eigen value of particular DOF associated to certain
-node or side. The {\em number} value represent node or element side number, the {\em
-dof} value the particular DOF number. The DOF numbering is determined
-by domain type or by user defined DOF ordering in specific
-DofManager (see OOFEM Input format specification). The {\em unknown} value
-is represented by single character, which determine the mode of the
-extracted value. Currently supported substitutions are 'd' for displacement, 'v' for velocity,
-and 'a' for acceleration.
-\item[-]
-\begin{verbatim}
-[#ELEMENT number # gp # record # component # [keyword #] ]
-[#EIG_ELEMENT number # gp # record # component #]
-\end{verbatim}
-Records represent the unknowns associated to integration point of
-particular element. Use \#\excommand{EIG\_ELEMENT} keyword  to extract eigen
-values. The {\em number} value determines the element number, the {\em
-gp} determines particular integration point number of element. 
-Generally, with each integration point there are associated many
-records (typically strain and stress records for structural
+Record representing the value associated to an integration point of
+an element. The {\em number} value determines the element number, the {\em
+gp} determines the integration point number of the element. 
+Generally, there are many values associated with each integration point 
+(for example, strain and stress vectors for structural
 analysis). Their order depends on problem being solved and
-constitutive model used. The {\em record} determines the integration
-point record order (typically 0 for strain record, 1 for stress
-record). The particular record may contain several values, based upon
-record nature (scalar, vector, tensorial character of record value).
-The {\em  component} value represent value at corresponding position
-in record. 
-
-The {\em keyword} is used only when status records are requested,
-i.e., when 'record' is equal to 2. The {\em keyword} is followed by a quoted string, that determines the name of status variable, values of which are requested.The element integration point status record is assumed to have the following form:
-status {name1 val1 val2 ....  name2 val1 val2 ....  }
-Each variable is assumed to be followed by array of values, and the value of {\em  component} value can be used to extract the value at corresponding position.
-
+constitutive model used. Each value is characterized by its keyword and index, 
+that determines its position in an array associated to this keyword.
+The {\em keyword} parameter is a string, that determines the actual keyword
+and {\em component} parameter determines the position of extracted value in an 
+array of values associated to given keyword.
 
 \item[-]
 \begin{verbatim}
-[#BEAM_ELEMENT number # record # component #]
-[#EIG_BEAM_ELEMENT number # record # component #]
+#BEAM_ELEMENT {tStep #} number # keyword # component # {value #}
 \end{verbatim}
-Records representing the unknown associated to certain exact-family beam
+Records representing the unknown associated to a certain beam
 element (beam elements formulated without integration points, with
 exact analytical integration, the unknowns are provided as end forces
 and and-displacements. Currently Beam2d and Beam3d elements). 
 
-Use \#\excommand{EIG\_BEAM\_ELEMENT} keyword  to extract eigen
-values. The {\em number} value determines the element number.
-Generally, there are several records associated with such element
-(typically end-displacements  and end-forces vectors). 
-The {\em record} determines the record order (typically 0 for end-displacement record, 1 for end-forces
-record). The particular record may contain several values, based upon
-record nature. The {\em  component} value represent value at corresponding position
-in record. 
 \item[-]
 \begin{verbatim}
-[#REACTION comNumber # dof # ]
+#REACTION {tStep #} number # dof # {value #}
 \end{verbatim}
-Represent reaction force associated with some boundary condition
-prescribed in specific DofManager's DOF. The DofManger is determined
-using {\em comNumber} value and its particular DOF using {\em dof} value.
+Represent reaction force associated to certain DOF subjected to Dirichlet boundary condition.
+The DOF of interest is determined by number of its DofManger 
+using {\em number} value and its number, using {\em dof} value.
+
 \item[-]
 \begin{verbatim}
-[#LOADLEVEL]
+#LOADLEVEL {tStep #} {value #}
 \end{verbatim}
 Represent reached load level in particular solution step.
-\item[-]
-\begin{verbatim}
-[#TIME]
-\end{verbatim}
-Represent time associated with solution step.
-\item[-]
-\begin{verbatim}
-[#NITE]
-\end{verbatim}
-Number of iterations required to reach equalibrium in solution
-step. May not be available for all problems.
-\item[-]
-\begin{verbatim}
-[#UTIME]
-\end{verbatim}
-User time needed to solve the solution step. 
 \end{itemize}
-Any lines between first line (source file section) and the beginning
-of section describing extracted values (\#\%\excommand{BEGIN\_CHECK}\% record) are
-skipped. 
+
+\paragraph{Example (for checker mode):}
+\begin{verbatim}
+patch100.out
+#%BEGIN_CHECK% tolerance 1.e-4
+#ELEMENT tStep 1 number 1 gp 1 component 1 keyword "stresses" value -8.3333e+00
+#ELEMENT tStep 1 number 1 gp 1 component 1 keyword "strains"  value -5.2083e-01
+#DOFMAN  tStep 1 number 4 dof 1 type d value -1.5625
+#%END_CHECK%
+\end{verbatim}
+
+
 \end{document}
