@@ -1829,6 +1829,7 @@ general format is following:
   \recentry{\entKeyword{ElementType}}{\fieldVal{num}{in}}
   \recentry{}{\field{mat}{in} \field{crossSect}{in} \field{nodes}{ia}}
   \recentry{}{\optField{bodyLoads}{ia} \optField{boundaryLoads}{ia}}
+  \recentry{}{\optField{activityltf}{in}}
   \recentry{}{\PentKeyword{ElementType} \PoptField{partitions}{ia} \PoptField{remote}{}}
 \end{record}
 
@@ -1856,6 +1857,8 @@ is corresponding entity number, to which load is applied (for example
 side or surface number). The entity numbering is element dependent and
 is described in element specific sections. The applied loads must be
 of proper type (boundary load type), otherwise error is generated. 
+
+The support for element insertion and removal during the analysis is provided. One can specify optional time function (identified by its id using \param{activityltf} parameter). The nonzero value of this time function indicates, whether the element is active (nonzero value, the dafault) or inactive (zero value) at particulat solution step. Currently available only for structural elements.
 
 \Pmode{
 The \param{remote} forces the element to be remote element. Remote
