@@ -534,7 +534,6 @@ void
 NRSolver :: initPrescribedEqs()
 {
 #if defined(__PARALLEL_MODE) || defined(__ENABLE_COMPONENT_LABELS)
-#ifdef __PETSC_MODULE
 #if defined(__PARALLEL_MODE) && defined (__PETSC_MODULE)
     PetscNatural2GlobalOrdering *n2lpm = engngModel->givePetscContext(1, ut)->giveN2Gmap();
 #endif
@@ -567,7 +566,6 @@ NRSolver :: initPrescribedEqs()
     }
 
     numberOfPrescribedDofs = count;
-#endif //__PETSC_MODULE
 #else
     int i, inode, idof;
     prescribedEqs.resize(numberOfPrescribedDofs);

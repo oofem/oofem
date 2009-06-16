@@ -1100,7 +1100,6 @@ void CylindricalALM  :: convertHPCMap()
     int inode, idof;
 
 #if defined(__PARALLEL_MODE) || defined(__ENABLE_COMPONENT_LABELS)
-#ifdef __PETSC_MODULE
     int j, jglobnum, count = 0, ndofman = domain->giveNumberOfDofManagers();
     size = calm_HPCDmanDofSrcArray.giveSize() / 2;
     indirectMap.resize(size);
@@ -1138,7 +1137,6 @@ void CylindricalALM  :: convertHPCMap()
         calm_HPCWeights.at(i) = weights.at(i);
     }
 
-#endif  //__PETSC_MODULE
 #else
     size = calm_HPCDmanDofSrcArray.giveSize() / 2;
     calm_HPCIndirectDofMask.resize(size);
