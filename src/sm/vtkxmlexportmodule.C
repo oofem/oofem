@@ -33,7 +33,7 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include "vtkxmlexportmodule2.h"
+#include "vtkxmlexportmodule.h"
 #include "timestep.h"
 #include "engngm.h"
 #include "strreader.h"
