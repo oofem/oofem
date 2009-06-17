@@ -1,23 +1,30 @@
 SHELL = /bin/sh
 export ROBOT = /usr/bin/perl -I/home/bp/oofem-doc/www/en /home/bp/oofem-doc/www/robot.pl
 
-www-doc: 
-	cd elementlibmanual; make www-doc
-	cd oofemInput; make www-doc
-	cd paper-actap; make www-doc
-	cd extractorInput; make www-doc
-	cd matlibmanual; make www-doc
-	cd programmer; make www-doc
-	cd refman; make www-doc
+html: 
+	cd elementlibmanual; make html
+	cd oofemInput; make html
+	cd paper-actap; make html
+	cd extractorInput; make html
+	cd matlibmanual; make html
+	cd programmer; make html
+	cd refman; make html
 
-ps-doc:
-	cd elementlibmanual; make ps-doc
-	cd oofemInput; make ps-doc
-	cd paper-actap; make ps-doc
-	cd extractorInput; make ps-doc
-	cd matlibmanual; make ps-doc
-	cd programmer; make ps-doc
+ps:
+	cd elementlibmanual; make ps
+	cd oofemInput; make ps
+	cd paper-actap; make ps
+	cd extractorInput; make ps
+	cd matlibmanual; make ps
+	cd programmer; make ps
 
+pdf:
+	cd elementlibmanual; make pdf
+	cd oofemInput; make pdf
+	cd paper-actap; make pdf
+	cd extractorInput; make pdf
+	cd matlibmanual; make pdf
+	cd programmer; make pdf
 
 www-install:
 ifdef INSTALLDIR
