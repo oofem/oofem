@@ -1,9 +1,8 @@
-\documentclass[12pt,draft]{article}
+\documentclass[a4paper]{article}
 %\pagestyle{page}
 \usepackage{graphicx}
 \usepackage{html}
-\usepackage{epsf}
-\usepackage{a4}
+\usepackage{ifpdf}
 \usepackage{fancyhdr}
 \input{include.tex}
 
@@ -11,6 +10,12 @@
 \evensidemargin -10mm
 \textwidth 180mm
 \parindent 0mm
+
+\renewcommand{\topfraction}{0.99}	% 99% of page top can be a float
+\renewcommand{\bottomfraction}{0.99}	% 99% of page bottom can be a float
+\renewcommand{\textfraction}{0.01}	% only 1% of page must to be the text
+\renewcommand{\floatpagefraction}{0.99} % 99% of whole page can be a float
+\setcounter{totalnumber}{5} %maximum floating objects on one page
 
 \newcommand{\class}[1]{{\bf #1}}
 \newcommand{\service}[1]{{\em #1}}
@@ -31,7 +36,13 @@
 
 \begin{document}
 %begin{latexonly}
-\title{\oofem Programmers's manual}
+\title{
+\ifpdf
+\oofemlnk{\centerline{\includegraphics[width=0.7\textwidth]{oofem-logo-contour.pdf}}}
+\else
+\oofemlnk{\centerline{\includegraphics[width=0.7\textwidth]{oofem-logo-contour.eps}}}
+\fi
+Programmers's manual}
 \author{\bp \\ \\
 Czech Technical University\\
 Faculty of Civil Engineering\\
@@ -42,7 +53,8 @@ Th\'akurova 7, 166 29 Prague, Czech Republic
 %end{latexonly}
 \begin{htmlonly}
 \begin{center}
-{\Large \oofem Programmers's manual}\\ \\
+\oofemlnk{\centerline{\includegraphics[width=0.7\textwidth]{oofem-logo-contour.eps}}}
+{\Large Programmers's manual}\\ \\
 {\bp \\ 
 Czech Technical University\\
 Faculty of Civil Engineering\\
@@ -800,7 +812,8 @@ protected:
    @param type characterisctic components of type type are requsted from elements and assembled.
    @param domain source domain
   */
-  virtual void       assemble (SparseMtrx *answer, TimeStep* tStep, EquationID ut, CharType type, Domain* domain)  ;
+  virtual void       assemble (SparseMtrx *answer, TimeStep* tStep, EquationID ut, 
+                               CharType type, Domain* domain)  ;
   /**
    Assembles characteristic matrix of required type into given sparse matrix.
    @param answer assembled matrix
@@ -829,7 +842,8 @@ protected:
    from dofManagers and assembled using code numbers.
   */
    virtual void assembleVectorFromDofManagers (FloatArray&, TimeStep*, EquationID ut, 
-           CharType type, ValueModeType mode, Domain* domain) ;
+                                               CharType type, ValueModeType mode, 
+                                               Domain* domain) ;
 
    /** Assembles prescribed characteristic vector of required type
    from dofManagers into given vector.
@@ -840,7 +854,8 @@ protected:
    from dofManagers and assembled using prescribed eqn numbers.
   */
    void assemblePrescribedVectorFromDofManagers (FloatArray&, TimeStep*, EquationID, 
-        CharType type, ValueModeType mode, Domain* domain) ;
+                                                 CharType type, ValueModeType mode, 
+                                                 Domain* domain) ;
    /**
    Assembles characteristic vector of required type from elements into given vector.
    @param answer assembled vector
@@ -848,7 +863,9 @@ protected:
    @param type characterisctic components of type type are requsted 
    from elements and assembled using  using code numbers.
   */
-   void assembleVectorFromElements (FloatArray&, TimeStep*, EquationID, CharType type, ValueModeType mode, Domain* domain) ;
+   void assembleVectorFromElements (FloatArray&, TimeStep*, EquationID, 
+                                    CharType type, ValueModeType mode, 
+                                    Domain* domain) ;
    /**
    Assembles prescribed characteristic vector of required type from 
    elements into given vector.
@@ -1121,7 +1138,8 @@ contribution) and then to perform corresponding loop.
 
 
 {\small\begin{verbatim}
-void EngngModel :: assemble (SparseMtrx* answer, TimeStep* tStep, EquationID ut, CharType type, Domain* domain) 
+void EngngModel :: assemble (SparseMtrx* answer, TimeStep* tStep, EquationID ut, 
+                             CharType type, Domain* domain) 
 //
 // assembles matrix answer by  calling  
 // element(i) -> giveCharacteristicMatrix ( type, tStep );
@@ -1720,9 +1738,15 @@ void  LinearStatic :: solveYourselfAt (TimeStep* tStep) {
 #ifdef __PETSC_MODULE
   // direct interface to PETSC
   if (solverType == ST_Petsc) {
-    this->petsc_assembleVectorFromElements(_loadVec, tStep, EID_MomentumBalance, ElementForceLoadVector, VM_Total, this->giveDomain(1));
-    this->petsc_assembleVectorFromElements(_loadVec, tStep, EID_MomentumBalance, ElementNonForceLoadVector, VM_Total, this->giveDomain(1));
-    this->petsc_assembleVectorFromDofManagers(_loadVec, tStep, EID_MomentumBalance, NodalLoadVector, VM_Total, this->giveDomain(1)) ;
+    this->petsc_assembleVectorFromElements(_loadVec, tStep, EID_MomentumBalance, 
+                                           ElementForceLoadVector, VM_Total, 
+                                           this->giveDomain(1));
+    this->petsc_assembleVectorFromElements(_loadVec, tStep, EID_MomentumBalance, 
+                                           ElementNonForceLoadVector, VM_Total, 
+                                           this->giveDomain(1));
+    this->petsc_assembleVectorFromDofManagers(_loadVec, tStep, EID_MomentumBalance, 
+                                              NodalLoadVector, VM_Total, 
+                                              this->giveDomain(1)) ;
     VecAssemblyBegin(_loadVec);
     VecAssemblyEnd (_loadVec);
    this->giveNumericalMethod(tStep);
@@ -1746,13 +1770,16 @@ void  LinearStatic :: solveYourselfAt (TimeStep* tStep) {
     loadVector.resize (this->giveNumberOfEquations(EID_MomentumBalance)); 
     loadVector.zero();
     
-    this->assembleVectorFromElements(loadVector, tStep, EID_MomentumBalance, ElementForceLoadVector, VM_Total, this->giveDomain(1));
-    this->assembleVectorFromElements(loadVector, tStep, EID_MomentumBalance, ElementNonForceLoadVector, VM_Total, this->giveDomain(1));
+    this->assembleVectorFromElements(loadVector, tStep, EID_MomentumBalance, 
+                                     ElementForceLoadVector, VM_Total, this->giveDomain(1));
+    this->assembleVectorFromElements(loadVector, tStep, EID_MomentumBalance, 
+                                     ElementNonForceLoadVector, VM_Total, this->giveDomain(1));
     
     // 
     // assembling the nodal part of load vector
     //
-    this->assembleVectorFromDofManagers(loadVector, tStep, EID_MomentumBalance, NodalLoadVector, VM_Total, this->giveDomain(1)) ;
+    this->assembleVectorFromDofManagers(loadVector, tStep, EID_MomentumBalance, 
+                                        NodalLoadVector, VM_Total, this->giveDomain(1)) ;
     
     //
     // set-up numerical model
@@ -4120,31 +4147,56 @@ some interface and returns pointer to corresponding interface. This
 service then provides general way, how to
 access particular interface of given class. 
 	
-\begin{htmlonly}
 \section{Figures}
-\end{htmlonly}
 \addcontentsline{toc}{section}{Figures}
 
 \vspace*{-10mm}
 \begin{figure}[tb]
-\htmlimage{thumbnail=0.9,flip=r270}
-\begin{center}\epsfbox{coyo.eps}\end{center}
+\begin{htmlonly}
+  \htmlimage{thumbnail=0.9,flip=r270}
+  \centerline{\includegraphics[width=0.7\textwidth]{coyo.eps}}
+\end{htmlonly}
+%begin{latexonly}
+\ifpdf
+ \centerline{\includegraphics[width=0.7\textwidth]{coyo.pdf}}
+\else
+ \centerline{\includegraphics[width=0.7\textwidth]{coyo.eps}}
+\fi
+%end{latexonly}
 \caption{Coad Yourdon methodology.}
 \label{coyo}
 \end{figure}
 
 
 \begin{figure}[tb]
-\htmlimage{thumbnail=0.9,flip=r270}
-\begin{center}\scalebox{0.9}{\epsfbox{general.ps}}\end{center}
+\begin{htmlonly}
+  \htmlimage{thumbnail=0.9,flip=r270}
+  \centerline{\includegraphics[width=0.7\textwidth]{general.eps}}
+\end{htmlonly}
+%begin{latexonly}
+\ifpdf
+\centerline{\includegraphics[width=0.7\textwidth]{general.pdf}}
+\else
+\centerline{\includegraphics[width=0.7\textwidth]{general.eps}}
+\fi
+%end{latexonly}
 \caption{General Structure.}
 \label{genstructfig}
 \end{figure}
 
 
 \begin{figure}[tb]
-\htmlimage{thumbnail=0.9,flip=r270}
-\begin{center}\epsfbox{struct2.eps}\end{center}
+\begin{htmlonly}
+  \htmlimage{thumbnail=0.9,flip=r270}
+  \centerline{\includegraphics[width=0.7\textwidth]{struct2.eps}}
+\end{htmlonly}
+%begin{latexonly}
+\ifpdf
+\centerline{\includegraphics[width=0.7\textwidth]{struct2.pdf}}
+\else
+\centerline{\includegraphics[width=0.7\textwidth]{struct2.eps}}
+\fi
+%end{latexonly}
 \caption{Engng model - Numerical method Interface.}
 \label{engngNummet1fig}
 \end{figure}
@@ -4152,8 +4204,17 @@ access particular interface of given class.
 
 
 \begin{figure}[tb]
-\htmlimage{thumbnail=0.9,flip=r270}
-\begin{center}\epsfbox{engng.eps}\end{center}
+\begin{htmlonly}
+  \htmlimage{thumbnail=0.9,flip=r270}
+  \centerline{\includegraphics[width=0.7\textwidth]{engng.eps}}
+\end{htmlonly}
+%begin{latexonly}
+\ifpdf
+\centerline{\includegraphics[width=0.7\textwidth]{engng.pdf}}
+\else
+\centerline{\includegraphics[width=0.7\textwidth]{engng.eps}}
+\fi
+%end{latexonly}
 \caption{Engng model - Numerical method Interface.}
 \label{engngNummet2fig}
 \end{figure}
@@ -4161,15 +4222,33 @@ access particular interface of given class.
 
 
 \begin{figure}[tb]
-\htmlimage{thumbnail=0.9,flip=r270}
-\begin{center}\epsfbox{struct1.eps}\end{center}
+\begin{htmlonly}
+  \htmlimage{thumbnail=0.9,flip=r270}
+  \centerline{\includegraphics[width=0.7\textwidth]{struct1.eps}}
+\end{htmlonly}
+%begin{latexonly}
+\ifpdf
+\centerline{\includegraphics[width=0.7\textwidth]{struct1.pdf}}
+\else
+\centerline{\includegraphics[width=0.7\textwidth]{struct1.eps}}
+\fi
+%end{latexonly}
 \caption{Element-material frame  structure.}
 \label{materelementFrame1}
 \end{figure}
 
 \begin{figure}[tb]
-\htmlimage{thumbnail=0.9,flip=r270}
-\begin{center}\epsfbox{microp.eps}\end{center}
+\begin{htmlonly}
+  \htmlimage{thumbnail=0.9,flip=r270}
+  \centerline{\includegraphics[width=0.7\textwidth]{microp.eps}}
+\end{htmlonly}
+%begin{latexonly}
+\ifpdf
+\centerline{\includegraphics[width=0.7\textwidth]{microp.pdf}}
+\else
+\centerline{\includegraphics[width=0.7\textwidth]{microp.eps}}
+\fi
+%end{latexonly}
 \caption{Example - Microplane model implementation.}
 \label{microplaneFig}
 \end{figure}
