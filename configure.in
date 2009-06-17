@@ -1083,8 +1083,8 @@ AC_SUBST(PROG_NAME)
 
 AC_CONFIG_HEADER(targets/$OOFEM_TARGET/include/oofemcfg.h)
 dnl AC_CONFIG_FILES(dss/src/makefile)
-dnl AC_OUTPUT(oofemlib/src/makefile sm/src/makefile tm/src/makefile main/src/makefile tools/makefile makefile hmworks/makefile)
-AC_OUTPUT(makefile targets/$OOFEM_TARGET/include/oofemdef.h targets/$OOFEM_TARGET/makefile targets/$OOFEM_TARGET/lib/oofemlib/makefile targets/$OOFEM_TARGET/lib/sm/makefile targets/$OOFEM_TARGET/lib/tm/makefile targets/$OOFEM_TARGET/lib/fm/makefile targets/$OOFEM_TARGET/lib/dss/makefile targets/$OOFEM_TARGET/lib/main/makefile tools/makefile)
+dnl AC_OUTPUT(oofemlib/src/makefile sm/src/makefile tm/src/makefile main/src/makefile makefile hmworks/makefile)
+AC_OUTPUT(makefile targets/$OOFEM_TARGET/include/oofemdef.h targets/$OOFEM_TARGET/makefile targets/$OOFEM_TARGET/lib/oofemlib/makefile targets/$OOFEM_TARGET/lib/sm/makefile targets/$OOFEM_TARGET/lib/tm/makefile targets/$OOFEM_TARGET/lib/fm/makefile targets/$OOFEM_TARGET/lib/dss/makefile targets/$OOFEM_TARGET/lib/main/makefile)
 
 echo
 echo Modules to be included: $MODULE_LIST
