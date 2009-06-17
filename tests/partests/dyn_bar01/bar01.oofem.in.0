@@ -10,8 +10,8 @@ domain 2dTruss
 OutputManager tstep_all dofman_all element_all
 ndofman 2 nelem 1 ncrosssect 1 nmat 1 nbc 2 nic 0 nltf 1
 #
-Node 1 coords 3 0. 0. 0. bc 2 1 1 globNum 1 
-Node 2 coords 3 0. 0. 2. bc 2 1 0 globNum 2 Shared partitions 1 1
+Node 1 coords 3 0. 0. 0. bc 2 1 1  
+Node 2 coords 3 0. 0. 2. bc 2 1 0  Shared partitions 1 1
 Truss2d 1 nodes 2 1 2 mat 1 crossSect 1
 SimpleCS 1 thick 0.1 width 10.0
 IsoLE 1  tAlpha 0.000012  d 10.0  E 1.0  n 0.2  

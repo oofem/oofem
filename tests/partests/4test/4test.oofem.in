@@ -34,20 +34,20 @@ ConstantEdgeLoad 2 loadTimeFunction 1 components 2 1.0 0.0 ndofs 2 loadtype 3
 ConstantFunction 1 f(t) 1.0
 #%BEGIN_CHECK% tolerance 2.e-6
 ## check reactions 
-#REACTION tStep 1 comNumber 1 dof 1 value -0.5
-#REACTION tStep 1 comNumber 4 dof 1 value -1.0
-#REACTION tStep 1 comNumber 7 dof 1 value -0.5
+#REACTION tStep 1 number 1 dof 1 value -0.5
+#REACTION tStep 1 number 4 dof 1 value -1.0
+#REACTION tStep 1 number 7 dof 1 value -0.5
 ## check all nodes
 #NODE tStep 1 number 3 dof 1 unknown d value  3.33333333e-05
 #NODE tStep 1 number 6 dof 1 unknown d value  3.33333333e-05
 #NODE tStep 1 number 9 dof 1 unknown d value  3.33333333e-05
 ## check element strain vector
-#ELEMENT tStep 1 number 1 gp 1 record 0 component 1  value 3.3333e-06
-#ELEMENT tStep 1 number 1 gp 1 record 0 component 2  value -6.6667e-07
-#ELEMENT tStep 1 number 1 gp 1 record 0 component 6  value 0.0
+#ELEMENT tStep 1 number 1 gp 1 keyword "strains" component 1  value 3.3333e-06
+#ELEMENT tStep 1 number 1 gp 1 keyword "strains" component 2  value -6.6667e-07
+#ELEMENT tStep 1 number 1 gp 1 keyword "strains" component 6  value 0.0
 ## check element stress vector
-#ELEMENT tStep 1 number 1 gp 1 record 1 component 1  value 1.0
-#ELEMENT tStep 1 number 1 gp 1 record 1 component 2  value 0.0
-#ELEMENT tStep 1 number 1 gp 1 record 1 component 6  value 0.0
+#ELEMENT tStep 1 number 1 gp 1 keyword "stresses" component 1  value 1.0
+#ELEMENT tStep 1 number 1 gp 1 keyword "stresses" component 2  value 0.0
+#ELEMENT tStep 1 number 1 gp 1 keyword "stresses" component 6  value 0.0
 ##
 #%END_CHECK%

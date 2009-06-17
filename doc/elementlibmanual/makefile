@@ -20,9 +20,12 @@ pdf:
 	pdflatex elementlibmanual
 
 
-www-install: html
+www-install: html pdf
 ifdef INSTALLDIR
 	$(RCP) -r html $(INSTALLDIR)/resources/doc/elementlibmanual
+	$(RCP) -r elementlibmanual.ps $(INSTALLDIR)/resources/doc/elementlibmanual
+	$(RCP) -r elementlibmanual.pdf $(INSTALLDIR)/resources/doc/elementlibmanual
+	
 else
 	echo "INSTALLDIR not defined"
 endif

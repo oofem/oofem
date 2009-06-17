@@ -35,9 +35,9 @@ ln -s $1/bin/oofem  ./oofem
 ln -s $1/bin/poofem ./poofem
 
 ./oofem -f brazil_3d_nl.oofem.in
-../../../tools/checker -f brazil_3d_nl.oofem.in >> ${RESULT}
+../../../tools/extractor.py -c -f brazil_3d_nl.oofem.in >> ${RESULT}
 mpirun -np 8 ./poofem -f brazil_3d_nl.oofem.in -ksp_rtol 1.e-15 -ksp_type cg
-for i in brazil_3d_nl.oofem.in??; do ../../../tools/checker -f $i; done >> ${RESULT}
+for i in brazil_3d_nl.oofem.in??; do ../../../tools/extractor.py -c -f $i; done >> ${RESULT}
 
 rm *.oofem.out
 rm *.oofem.out.*

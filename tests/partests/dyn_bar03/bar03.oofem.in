@@ -19,6 +19,6 @@ ConstantFunction 1 f(t) 1.0
 #%BEGIN_CHECK%
 #NODE tStep 9.990e+00 number 2 dof 1 unknown d value 6.64668000e-02
 #NODE tStep 9.990e+00 number 2 dof 1 unknown v value 9.98999000e-03
-#ELEMENT tStep 9.990e+00 number 1 gp 1 record 1 component 1  value 6.3281e-02
+#ELEMENT tStep 9.990e+00 number 1 gp 1 keyword "stresses" component 1  value 6.3281e-02
 #%END_CHECK%
 

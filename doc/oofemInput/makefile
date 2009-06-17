@@ -20,9 +20,11 @@ pdf:
 	pdflatex oofemInput
 
 
-www-install: html
+www-install: html pdf
 ifdef INSTALLDIR
 	$(RCP) -r html $(INSTALLDIR)/resources/doc/oofemInput
+	$(RCP) -r oofemInput.ps $(INSTALLDIR)/resources/doc/oofemInput
+	$(RCP) -r oofemInput.pdf $(INSTALLDIR)/resources/doc/oofemInput
 else
 	echo "INSTALLDIR not defined"
 endif

@@ -22,9 +22,9 @@ pdf:
 
 www-install: html pdf
 ifdef INSTALLDIR
-	$(RCP) -r html $(INSTALLDIR)/resources/doc
-	$(RCP) -r programmer.ps $(INSTALLDIR)/resources/doc/elementlibmanual
-	$(RCP) -r programmer.pdf $(INSTALLDIR)/resources/doc/elementlibmanual
+	$(RCP) -r html $(INSTALLDIR)/resources/doc/programmer
+	$(RCP) -r programmer.ps $(INSTALLDIR)/resources/doc/programmer
+	$(RCP) -r programmer.pdf $(INSTALLDIR)/resources/doc/programmer
 else
 	echo "INSTALLDIR not defined"
 endif

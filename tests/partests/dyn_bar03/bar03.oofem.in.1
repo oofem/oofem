@@ -4,7 +4,7 @@ pnldeidynamic nsteps 1000 deltat 0.01 dumpcoef 0.0 drflag 1 tau 10.0 py 0.066666
 domain 3d
 OutputManager tstep_all dofman_all element_all
 ndofman 1 nelem 0 ncrosssect 1 nmat 1 nbc 2 nic 0 nltf 1
-node 1 coords 3 1.000000e+00 0.000000e+00 0.000000e+00 ndofs 1 DofIDMask 1 1 load 1 2 globnum 2 Shared partitions 1 0
+node 2 coords 3 1.000000e+00 0.000000e+00 0.000000e+00 ndofs 1 DofIDMask 1 1 load 1 2  Shared partitions 1 0
 SimpleCS 1 area 1.0
 #IsoLE 1  E 15. n 0.2  d 1.0 talpha 0.0
 idm1 1 d 1.0 E 15.0 n 0.2 e0 0.02 ef 0.04 tAlpha 0.0 equivstraintype 0 
@@ -13,7 +13,7 @@ NodalLoad 2 loadTimeFunction 1 components 1 1.0
 ConstantFunction 1 f(t) 1.0 
 
 #%BEGIN_CHECK%
-#NODE tStep 9.990e+00 number 1 dof 1 unknown d value 6.64668000e-02
-#NODE tStep 9.990e+00 number 1 dof 1 unknown v value 9.98999000e-03
+#NODE tStep 9.990e+00 number 2 dof 1 unknown d value 6.64668000e-02
+#NODE tStep 9.990e+00 number 2 dof 1 unknown v value 9.98999000e-03
 #%END_CHECK%
 

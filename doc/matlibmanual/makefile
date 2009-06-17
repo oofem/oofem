@@ -20,9 +20,11 @@ pdf:
 	pdflatex matlibmanual
 
 
-www-install: html
+www-install: html pdf
 ifdef INSTALLDIR
 	$(RCP) -r html $(INSTALLDIR)/resources/doc/matlibmanual
+	$(RCP) -r matlibmanual.ps $(INSTALLDIR)/resources/doc/matlibmanual
+	$(RCP) -r matlibmanual.pdf $(INSTALLDIR)/resources/doc/matlibmanual
 else
 	echo "INSTALLDIR not defined"
 endif

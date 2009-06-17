@@ -19,9 +19,11 @@ pdf:
 	pdflatex paper-actap
 	pdflatex paper-actap
 
-www-install: html
+www-install: html pdf
 ifdef INSTALLDIR
 	$(RCP) -r html $(INSTALLDIR)/resources/doc/paper-actap
+	$(RCP) -r paper-actap.ps $(INSTALLDIR)/resources/doc/paper-actap
+	$(RCP) -r paper-actap.pdf $(INSTALLDIR)/resources/doc/paper-actap
 else
 	echo "INSTALLDIR not defined"
 endif

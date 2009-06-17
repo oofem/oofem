@@ -20,9 +20,11 @@ pdf:
 	pdflatex extractorInput
 
 
-www-install: html
+www-install: html pdf
 ifdef INSTALLDIR
 	$(RCP) -r html $(INSTALLDIR)/resources/doc/extractorInput
+	$(RCP) -r extractorInput.ps $(INSTALLDIR)/resources/doc/extractorInput
+	$(RCP) -r extractorInput.pdf $(INSTALLDIR)/resources/doc/extractorInput
 else
 	echo "INSTALLDIR not defined"
 endif

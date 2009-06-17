@@ -41,9 +41,9 @@ PiecewiseLinFunction 2 nPoints 2 t 2 0.0 1000.0 f(t) 2 1.0 1001.0
 
 #%BEGIN_CHECK% tolerance 1.e-5
 #NODE tStep 14 number 2 dof 1 unknown d value  15.0
-#REACTION tStep 14 comNumber 1 dof 1 value -5.4439e-02
-#ELEMENT tStep 14 number 2 gp 1 record 0 component 1  value 5.4439e-02
-#ELEMENT tStep 14 number 2 gp 1 record 1 component 1  value 5.4439e-02
-#ELEMENT tStep 14 number 3 gp 1 record 0 component 1  value 1.4456e+01
-#ELEMENT tStep 14 number 3 gp 1 record 1 component 1  value 5.4438e-02
+#REACTION tStep 14 number 1 dof 1 value -5.4439e-02
+#ELEMENT tStep 14 number 2 gp 1 keyword "strains" component 1  value 5.4439e-02
+#ELEMENT tStep 14 number 2 gp 1 keyword "stresses" component 1  value 5.4439e-02
+#ELEMENT tStep 14 number 3 gp 1 keyword "strains" component 1  value 1.4456e+01
+#ELEMENT tStep 14 number 3 gp 1 keyword "stresses" component 1  value 5.4438e-02
 #%END_CHECK%

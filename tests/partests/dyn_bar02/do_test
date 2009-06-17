@@ -35,9 +35,9 @@ ln -s $1/bin/oofem  ./oofem
 ln -s $1/bin/poofem ./poofem
 
 #./oofem -f bar01.oofem.in -ksp_rtol 1.e-15
-#../../../tools/checker -f bar02.oofem.in >> ${RESULT}
+#../../../tools/extractor.py -c -f bar02.oofem.in >> ${RESULT}
 mpirun -np 2 ./poofem -f bar02.oofem.in -ksp_rtol 1.e-15
-for i in *.in??; do ../../../tools/checker -f $i; done >> ${RESULT}
+for i in *.in??; do ../../../tools/extractor.py -c -f $i; done >> ${RESULT}
 
 #rm *.oofem.out
 rm *.oofem.out.*

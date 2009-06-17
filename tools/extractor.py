@@ -74,9 +74,11 @@ dof_re    = re.compile(r"""
                 ^                   # beginning of line
                 \s*dof\s*           # char string
                 (\d+)               # dof number
-                \s*([dtfpva])\s*    # dof_type [dtf]
-                ([-]*\d+\.\d+(e[+-]\d+)*) # dof value
                 """,re.X)                
+
+doftypes_re = re.compile(r"""
+                (?:([dvatfp])\s+([-]?\d+\.\d+(?:e[+-]\d+)*))+  #dof types and values on one line
+                """, re.X)
 
 element_re = re.compile(r"""
                 ^                   # begining of line
@@ -230,13 +232,15 @@ def parse_input_rec (recline):
 
 		
 # extract dofman record if apply for actual record
-def check_node_rec (time, node, dof, type, value):
+def check_node_rec (time, node, dof, typesandvalues):
 	global recVal, mode
 	for irec, rec in enumerate(userrec):
 		if (mode == 'e'): timeflag = 1
 		else: timeflag = (rec[1] == time)
-		if ((rec[0]=='nr') and timeflag and (node == rec[2]) and (dof == rec[3]) and (type == rec[4])):
-			recVal[irec]=value;
+                for tv in typesandvalues: # loop over list of dof values and their types 
+                        (type,value) = tv
+                        if ((rec[0]=='nr') and timeflag and (node == rec[2]) and (dof == rec[3]) and (type == rec[4])):
+                                recVal[irec]=value;
 
 #extract element record
 def check_element_rec (time, elem, gp, kwd, value, line):
@@ -299,14 +303,14 @@ def match_primary_rec (line):
 			firstTimeStepFlag = 0
 		# print parsed record values from previous step
 		elif mode == 'e': print_step_results()
-		return
+		return None
 	match=loadlevel_re.search(line)
 	if match:
 		rectype = rt_loadlevel
 		recvalue= float(match.group(1))
 		if debug: print "found load level ",recvalue
 		check_loadlevel_rec (rectime, recvalue)
-		return
+		return None
 	
 
 	match=dofMan_re.search(line)
@@ -315,7 +319,7 @@ def match_primary_rec (line):
 		recnumber= int(match.group(1))
 		if debug: print "found  node",recnumber
 		nline = match_dofrec()
-		match_primary_rec (nline)
+		return nline
 
 	match=element_re.search(line)
 	if match:
@@ -323,7 +327,7 @@ def match_primary_rec (line):
 		recnumber = int(match.group(1))
 		if debug: print "found element", recnumber
 		nline = match_gprec()
-		match_primary_rec (nline)
+		return nline
 
 	match=beamelement_re.search(line)
 	if match:
@@ -331,7 +335,7 @@ def match_primary_rec (line):
 		recnumber = int(match.group(1))
 		if debug: print "found element", recnumber
 		nline = match_beamrec()
-		match_primary_rec (nline)
+		return nline
 
 	match=reaction_re.search(line)
 	if match:
@@ -341,7 +345,7 @@ def match_primary_rec (line):
 		recdofnum = int(match.group(3))
 		recvalue  = float(match.group(4))
 		check_reaction_rec (rectime, recnumber, recdofnum, recvalue)
-
+                return None
 
 def match_dofrec ():
 	global rectime, recnumber, recdofnum, recvalue, debug
@@ -352,9 +356,11 @@ def match_dofrec ():
 		if match:
 			rectype = rt_dof
 			recdofnum= int(match.group(1))
-			rectype  = match.group(2)
-			recvalue = float(match.group(3))
-			check_node_rec (rectime, recnumber, recdofnum, rectype, recvalue);
+                        match=doftypes_re.findall(line)
+                        rectypesvalues = match
+			#rectype  = match.group(2)
+			#recvalue = float(match.group(3))
+			check_node_rec (rectime, recnumber, recdofnum, rectypesvalues);
 			if debug: print "         dof", recdofnum
 			continue
 		else:
@@ -437,7 +443,7 @@ def check_results ():
 			err = (float(rec[-1])-float(recVal[irec]))
 		except ValueError:
 			err = float(rec[-1])
-		if (abs(err) > tolerance):
+		if (abs(err) > float(tolerance)):
 			print "\tError when checking rule ",irec,": err = ",err
 			success = 0
 	print "Checker.py:%55s   "%os.path.basename(infilename),
@@ -554,7 +560,7 @@ def main():
 				break
 
 	if begin==0:
-		print "No beging record found"
+		print "No extrator records found"
 		exit (1)
 				
 	end=0
@@ -583,7 +589,8 @@ def main():
               
 	#parse output file 
 	for line in infile:
-		match_primary_rec (line)
+                while (line):
+                        line = match_primary_rec (line)
 
 
 #print records
