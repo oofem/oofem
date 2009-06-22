@@ -134,6 +134,7 @@ EngngModel :: EngngModel(int i, EngngModel *_master) : domainNeqs(), domainPresc
     contextOutputMode     =  NOCONTEXT;
     contextOutputStep     = 0;
     pMode                 = _processor;  // for giveContextFile()
+    pScale                = macroScale;
 
     exportModuleManager   = new ExportModuleManager(this);
     master                = _master; // master mode by default
@@ -424,7 +425,7 @@ EngngModel :: instanciateMetaSteps(DataReader *dr)
     int i, result = 1;
     MetaStep *mstep;
 
-    // creat meta steps
+    // create meta steps
     metaStepList->growTo(nMetaSteps);
     for ( i = 0; i < this->nMetaSteps; i++ ) {
         mstep =  new MetaStep(i + 1, this);
@@ -697,7 +698,7 @@ EngngModel :: forceEquationNumbering()
 void
 EngngModel :: solveYourself()
 {
-    int imstep, jstep;
+    int imstep, jstep, nTimeSteps;
     int smstep = 1, sjstep = 1;
     MetaStep *activeMStep;
     FILE *out = this->giveOutputStream();
@@ -710,16 +711,27 @@ EngngModel :: solveYourself()
         sjstep = this->giveMetaStep(smstep)->giveStepRelativeNumber( this->currentStep->giveNumber() ) + 1;
     }
 
+   
+    //call only one meta step in multiscale simulation on microscale
+    if (giveProblemScale() == microScale){ 
+      nMetaSteps = 1;
+    }
 
-    for ( imstep = smstep; imstep <= nMetaSteps; imstep++, sjstep = 1 ) {
+    for ( imstep = smstep; imstep <= nMetaSteps; imstep++, sjstep = 1 ) {//loop over meta steps
         activeMStep = this->giveMetaStep(imstep);
-        for ( jstep = sjstep; jstep <= activeMStep->giveNumberOfSteps(); jstep++ ) {
+        nTimeSteps = activeMStep->giveNumberOfSteps();
+                
+        if (giveProblemScale() == microScale){//on microscale assign only one time step 
+         nTimeSteps = 1;
+        }
+        
+        for ( jstep = sjstep; jstep <= nTimeSteps; jstep++ ) {//loop over time steps
             //#ifdef TIME_REPORT
             this->timer.startTimer(EngngModelTimer :: EMTT_SolutionStepTimer);
             this->timer.initTimer(EngngModelTimer :: EMTT_NetComputationalStepTimer);
             //#endif
             this->giveNextStep();
-            // update state ccording to new meta step
+            // update state according to new meta step
             if ( jstep == sjstep ) {
                 this->initMetaStepAttributes( this->giveCurrentStep() );
             }

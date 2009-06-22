@@ -108,6 +108,7 @@
 #include "interfaceelem2dquad.h"
 #include "interfaceelement1d.h"
 #include "interfaceelem3dtrlin.h"
+#include "macrolspace.h"
 
 // Emodels of SM module
 #include "nlinearstatic.h"
@@ -174,6 +175,7 @@
 #include "hellmat.h"
 #include "mdm.h"
 #include "compodamagemat.h"
+#include "micromaterial.h"
 
 #include "scalarerrorindicator.h"
 #include "zzerrorestimator.h"
@@ -327,6 +329,8 @@ Element *CreateUsrDefElementOfType(char *aClass, int number, Domain *domain)
         newElement = new InterfaceElement3dTrLin(number, domain);
     } else if ( !strncasecmp(aClass, "interface1d", 11) )   {
         newElement = new InterfaceElem1d(number, domain);
+    } else if ( !strncasecmp(aClass, "macrolspace", 11) )   {
+        newElement = new MacroLSpace(number, domain);
     }
 
 #endif //__SM_MODULE
@@ -584,6 +588,8 @@ Material *CreateUsrDefMaterialOfType(char *aClass, int number, Domain *domain)
         newMaterial = new MDM(number, domain);
     } else if (! strncasecmp(aClass,"compdammat",10) ) {
       newMaterial = new CompoDamageMat (number,domain);
+    } else if (! strncasecmp(aClass,"micromat",8) ) {
+      newMaterial = new MicroMaterial (number,domain);
     }
 #endif //__SM_MODULE
 

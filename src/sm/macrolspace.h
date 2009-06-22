@@ -1,3 +1,4 @@
+/* $Header: /home/cvs/bp/oofem/sm/src/lspace.h,v 1.6 2003/05/19 13:04:00 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -32,24 +33,37 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-//
-// FILE: problemmode.h
-//
 
-#ifndef problemmode_h
-#define problemmode_h
+//   ***************************************
+//   *** Macro Linear Hexahedral element ***
+//   ***************************************
 
-enum problemMode {
-    _processor,
-    _postProcessor
+#ifndef macrolspace_h
+#define macrolspace_h
+
+#include "lspace.h"
+//#include "nlstructuralelement.h"
+//#include "fei3dhexalin.h"
+
+class MacroLSpace : public LSpace
+{
+/*
+This class implements a macroelement. It is derived from eight-node brick element. The stiffness matrix is computed from underlying RVE and is condensed to 24 DoFs to corner nodes.
+*/
+
+protected:
+
+public:
+ MacroLSpace (int,Domain*) ;                      // constructor
+ ~MacroLSpace ()  {} ;                            // destructor
+
+ const char* giveClassName () const { return "MacroLSpace" ;}
+
+ virtual void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep);
+
 };
 
 
-///corresponds to macro and microproblem in multiscale simulations
-enum problemScale {
-    macroScale,
-    microScale
-};
 
 
-#endif // problemmode_h
+#endif //macrolspace_h

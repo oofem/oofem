@@ -55,7 +55,7 @@ class GaussPoint;
 class IsotropicLinearElasticMaterial : public LinearElasticMaterial
 {
     /*
-     * This class implements a isotropic linear elastic material in a finite
+     * This class implements an isotropic linear elastic material in a finite
      * element problem. A material
      * is an attribute of a domain. It is usually also attribute of many elements.
      *

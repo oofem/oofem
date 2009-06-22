@@ -131,6 +131,9 @@ enum classType {
     Tetrah1_htClass,
     PlaneStress2dXfemClass,
 
+    MacroLSpaceClass,
+    MicroMaterialClass,
+
     InterfaceElem1dClass,
     InterfaceElem2dQuadClass,
     InterfaceElement3dTrLinClass,

@@ -561,6 +561,8 @@ enum InputFieldType {
     IFT_CompoDamageMat_Gxy,
     IFT_CompoDamageMat_components,
 
+    IFT_MicroMaterial_tmp,
+
     IFT_IDNLMaterial_r,
 
     IFT_MazarsMaterial_version,

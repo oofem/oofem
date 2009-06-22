@@ -83,14 +83,28 @@ OOFEMTXTDataReader :: giveLineFromInput(char *line)
 {
     //
     // reads one line from inputStream - for private use only.
-    //
+    // if " detected, start/stop changing to lower case characters 
     char *ptr;
+    bool flag=false;//0-tolower, 1-remain with capitals
 
     giveRawLineFromInput(line);
-    // convert line to lowercase
-    for ( ptr = line; ( * ptr = tolower(* ptr) ); ptr++ ) {
-        ;
+    
+    for (ptr = line; *ptr != '\0'; ptr++){
+      if(*ptr == '"'){//change quotation mark to space
+        *ptr = ' ';
+        if(flag)//switch flag
+          flag=false;
+        else
+          flag=true;
+      }
+
+      if(!flag)
+        *ptr = tolower(* ptr);// convert line to lowercase
     }
+
+//     for ( ptr = line; ( * ptr = tolower(* ptr) ); ptr++ ) {
+//         ;
+//     }
 }
 
 void

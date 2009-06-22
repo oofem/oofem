@@ -198,7 +198,7 @@ class EngngModel
      *
      * if updating of DOFs uknowns dictionary is necessary the funcion
      * requiresNodeUnknowsDictionaryUpdate() returns nonzero. This may be used
-     * for models, which supports dyynamic changes of static system, where renumbering
+     * for models, which supports dynamic changes of static system, where renumbering
      * of equatins is necessary. Then is necessary to overload
      * updateDofUnknownsDictionary() function to update DOF unknowns dictionary, where
      * unknowns are hold instead of keeping them in global unknowns vectors in engng instancies.
@@ -224,7 +224,7 @@ class EngngModel
      *   yes for my type of problem A is mass matrix and B is stiffness matrix.
      * - returning end of time of interest (usefull for some time depeemndent models).
      * - assembling governing equations by summing contributions from nodes and elements
-     * - if updaating of DOFs uknowns dictionary is necessary the funcion
+     * - if updating of DOFs uknowns dictionary is necessary the funcion
      * requiresNodeUnknowsDictionaryUpdate() returns nonzero, and is necessary to overload
      * updateDofUnknownsDictionary() function to update this map;
      * - initializing state variables stored in elements gp's acording to
@@ -288,6 +288,8 @@ protected:
 
     /// Domain mode
     problemMode pMode;
+    /// Multiscale mode
+    problemScale pScale;
     /// solution start time
     time_t startTime;
     // initial value of processor time used by program
@@ -430,6 +432,13 @@ public:
     void               setProblemMode(problemMode mode) { pMode = mode; }
     /// Returns domain mode.
     problemMode         giveProblemMode()        { return pMode; }
+    /**
+     * Sets scale in multiscale simulation.
+     * @param mode scale mode.
+     */
+    void               setProblemScale(problemScale mode) { pScale = mode; }
+    /// Returns scale in multiscale simulation
+    problemScale  giveProblemScale() { return pScale; }
     /// Sets the renumber flag to TRUE
     virtual void                setRenumberFlag() { this->renumberFlag = 1; }
     /// Sets the renumber flag to FALSE

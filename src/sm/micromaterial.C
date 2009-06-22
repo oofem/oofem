@@ -1,3 +1,4 @@
+/* $Header: /home/cvs/bp/oofem/oofemlib/src/isolinearelasticmaterial.C,v 1.8 2003/04/06 14:08:24 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -32,24 +33,46 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
+#include "micromaterial.h"
+#include "material.h"
+#include "oofemtxtdatareader.h"
+#include "util.h"
+#include "structuralmaterial.h"
+#include "domain.h"
+#include "flotmtrx.h"
+
+#ifndef __MAKEDEPEND
+#include <stdlib.h>
+#endif
+
+MicroMaterial :: MicroMaterial(int n, Domain *d) : StructuralMaterial(n, d)
+{
+ /// Constructor
+}
+
+
+IRResultType MicroMaterial :: initializeFrom(InputRecord *ir)
+{
+    int i;
+    double value;
+    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
+    IRResultType result;                // Required by IR_GIVE_FIELD macro
+
+  
+  IR_GIVE_FIELD2(ir, inputFileNameMicro, IFT_MicroMaterial_tmp, "file", MAX_FILENAME_LENGTH);
+  
+  OOFEM_LOG_INFO( "** Instanciating microproblem from file %s\n", inputFileNameMicro);
+  OOFEMTXTDataReader drMicro(inputFileNameMicro);
+  problemMicro = :: InstanciateProblem(& drMicro, _processor, 0);
+  drMicro.finish();
+  problemMicro->checkProblemConsistency();
+  OOFEM_LOG_INFO( "** Microproblem at address %p instanciated\n", problemMicro);
+}
+
+
+
+
+//pure virtual function has to be declared here
+void MicroMaterial :: giveRealStressVector (FloatArray& answer,  MatResponseForm, GaussPoint*, const FloatArray&, TimeStep*){
 //
-// FILE: problemmode.h
-//
-
-#ifndef problemmode_h
-#define problemmode_h
-
-enum problemMode {
-    _processor,
-    _postProcessor
-};
-
-
-///corresponds to macro and microproblem in multiscale simulations
-enum problemScale {
-    macroScale,
-    microScale
-};
-
-
-#endif // problemmode_h
+}
