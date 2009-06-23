@@ -248,6 +248,7 @@ enum classType {
     MicroplaneDamageMaterialStatusClass,
     DruckerPragerPlasticitySMStatusClass,
     MPlasticMaterialStatusClass,
+    MicroMaterialStatusClass,
 
     FluidDynamicMaterialClass,
     FluidDynamicMaterialStatusClass,

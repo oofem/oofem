@@ -42,6 +42,8 @@
 #define macrolspace_h
 
 #include "lspace.h"
+#include "sparsemtrx.h"
+#include "engngm.h"
 //#include "nlstructuralelement.h"
 //#include "fei3dhexalin.h"
 
@@ -60,7 +62,14 @@ public:
  const char* giveClassName () const { return "MacroLSpace" ;}
 
  virtual void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep);
+ //friend class EngngModel;//access to assemble()
+ 
 
+
+
+protected:
+  SparseMtrx *stiffnessMatrixMicro;
+  
 };
 
 

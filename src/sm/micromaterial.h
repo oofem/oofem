@@ -42,21 +42,48 @@
 #define micromaterial_h
 
 #include "structuralmaterial.h"
+#include "structuralms.h"
+#include "gausspnt.h"
+#include "timestep.h"
 #include "oofem_limits.h"
 #include "dictionr.h"
 #include "flotarry.h"
 #include "flotmtrx.h"
+#include "datastream.h"
+#include "contextioerr.h"
+
+class MicroMaterialStatus : public StructuralMaterialStatus {
+
+public:
+/// constructor
+    MicroMaterialStatus(int, Domain *d, GaussPoint *gp);
+
+/// destructor
+~MicroMaterialStatus();
+void  initTempStatus();
+void  updateYourself(TimeStep *atTime);
+void  printOutputAt(FILE *file, TimeStep *tStep);
+
+const char *giveClassName() const { return "MicroMaterialStatus"; }
+classType  giveClassID() const  { return MicroMaterialStatusClass; }
+
+
+contextIOResultType  saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    
+contextIOResultType  restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+
+protected:
+};
 
 
 /**
- * This class is an abstract base class for microproblem. The microproblem represents itself a problem which is solved separately from the macroproblem with appropriate boundary conditions. Stiffness matrix of microproblem is condensed to provide stiffness matrix for macroelement.
+ * This class is an base class for microproblem. The microproblem represents itself a problem which is solved separately from the macroproblem with appropriate boundary conditions. Stiffness matrix of microproblem is condensed to provide stiffness matrix for macroelement.
 Also general implementation of giveRealStressVector service is provided,
 computing the stress increment vector from strain increment multiplied by
 stiffness.
  */
 class MicroMaterial : public StructuralMaterial
 {
-    
 public:
     /// Constructor
     MicroMaterial(int n, Domain *d);
@@ -71,9 +98,13 @@ public:
 
 const char *giveClassName() const { return "MicroMaterial"; }
 
+
 void giveRealStressVector (FloatArray& answer,  MatResponseForm, GaussPoint*, const FloatArray&, TimeStep*);
 
 
+MaterialStatus *CreateStatus(GaussPoint *gp) const;
+
+///pointer to the underlying micro problem
 EngngModel *problemMicro;
 
 protected:

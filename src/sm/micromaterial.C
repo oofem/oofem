@@ -38,12 +38,51 @@
 #include "oofemtxtdatareader.h"
 #include "util.h"
 #include "structuralmaterial.h"
+#include "structuralms.h"
+#include "gausspnt.h"
 #include "domain.h"
 #include "flotmtrx.h"
 
 #ifndef __MAKEDEPEND
 #include <stdlib.h>
 #endif
+
+// constructor
+//strainVector, tempStrainVector, stressVector, tempStressVector are defined on StructuralMaterialStatus
+
+MicroMaterialStatus :: MicroMaterialStatus(int n, Domain *d, GaussPoint *gp) : StructuralMaterialStatus(n, d, gp){
+
+}
+
+MicroMaterialStatus :: ~MicroMaterialStatus(){
+
+}
+
+void MicroMaterialStatus :: initTempStatus()
+{
+  StructuralMaterialStatus :: initTempStatus();
+}
+
+void MicroMaterialStatus :: updateYourself(TimeStep *atTime)
+{
+  StructuralMaterialStatus :: updateYourself(atTime);
+}
+
+void MicroMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)
+{
+
+}
+
+contextIOResultType MicroMaterialStatus :: saveContext(DataStream *stream, ContextMode mode, void *obj)
+{
+
+}
+
+contextIOResultType MicroMaterialStatus :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
+{
+
+}
+
 
 MicroMaterial :: MicroMaterial(int n, Domain *d) : StructuralMaterial(n, d)
 {
@@ -72,7 +111,66 @@ IRResultType MicroMaterial :: initializeFrom(InputRecord *ir)
 
 
 
-//pure virtual function has to be declared here
-void MicroMaterial :: giveRealStressVector (FloatArray& answer,  MatResponseForm, GaussPoint*, const FloatArray&, TimeStep*){
-//
+//original pure virtual function has to be redeclared here
+void MicroMaterial :: giveRealStressVector (FloatArray& answer, MatResponseForm form, GaussPoint* gp, const FloatArray &totalStrain, TimeStep *atTime){
+//perform average over microproblem
+int i, j, index, ielem;
+Element *elem;
+double dV, VolTot = 0.;
+double scale = 1.;
+FloatArray VecStrain, VecStress, SumStrain(6), SumStress(6);
+IntArray Mask;
+GaussPoint *gpL;
+IntegrationRule *iRule;
+Domain *microDomain = problemMicro->giveDomain(1);//from engngm.h
+
+int nelem = microDomain->giveNumberOfElements();
+int nnodes = microDomain->giveNumberOfDofManagers();
+
+for ( ielem = 1; ielem <= nelem; ielem++ ) {
+        elem = microDomain->giveElement(ielem);
+        iRule = elem->giveDefaultIntegrationRulePtr();
+        for ( int i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
+            gpL  = iRule->getIntegrationPoint(i);
+            gpL->giveCoordinate(1);
+            dV  = elem->computeVolumeAround(gpL);
+            VolTot += dV;
+            //OOFEM_LOG_INFO("Element %d GP %d Vol %f\n", elem->giveNumber(), gp->giveNumber(), dV);
+            //fprintf(this->stream, "Element %d GP %d stress %f\n", elem->giveNumber(), gp->giveNumber(), 0.0);
+            //((StructuralCrossSection*) gp->giveCrossSection())->giveFullCharacteristicVector(helpVec, gp, strainVector);
+            elem->giveIPValue(VecStrain, gpL, IST_StrainTensor, atTime);
+            elem->giveIPValue(VecStress, gpL, IST_StressTensor, atTime);
+            elem->giveIntVarCompFullIndx(Mask, IST_StrainTensor);
+
+            VecStrain.times(dV);
+            VecStress.times(dV);
+
+            for ( j = 0; j < 6; j++ ) {
+                index = Mask(j); //indexes in Mask from 1
+                if ( index ) {
+                    SumStrain(j) += VecStrain(index - 1);
+                    SumStress(j) += VecStress(index - 1);
+                }
+            }
+
+            //VecStrain.printYourself();
+            //SumStrain.printYourself();
+        }
+    }
+
+    //average
+    SumStrain.times(1. / VolTot * scale);
+    SumStress.times(1. / VolTot * scale);
+    //SumStrain.printYourself();
+    //SumStress.printYourself();
+    answer.resize(6);
+    answer = SumStress;
+}
+
+MaterialStatus *
+MicroMaterial :: CreateStatus(GaussPoint *gp) const
+{
+    MicroMaterialStatus *status =
+        new  MicroMaterialStatus(1, StructuralMaterial :: giveDomain(), gp);
+    return status;
 }

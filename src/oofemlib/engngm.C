@@ -711,19 +711,9 @@ EngngModel :: solveYourself()
         sjstep = this->giveMetaStep(smstep)->giveStepRelativeNumber( this->currentStep->giveNumber() ) + 1;
     }
 
-   
-    //call only one meta step in multiscale simulation on microscale
-    if (giveProblemScale() == microScale){ 
-      nMetaSteps = 1;
-    }
-
     for ( imstep = smstep; imstep <= nMetaSteps; imstep++, sjstep = 1 ) {//loop over meta steps
         activeMStep = this->giveMetaStep(imstep);
         nTimeSteps = activeMStep->giveNumberOfSteps();
-                
-        if (giveProblemScale() == microScale){//on microscale assign only one time step 
-         nTimeSteps = 1;
-        }
         
         for ( jstep = sjstep; jstep <= nTimeSteps; jstep++ ) {//loop over time steps
             //#ifdef TIME_REPORT
