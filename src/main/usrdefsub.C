@@ -109,6 +109,7 @@
 #include "interfaceelement1d.h"
 #include "interfaceelem3dtrlin.h"
 #include "macrolspace.h"
+#include "planstrssxfem.h"
 
 // Emodels of SM module
 #include "nlinearstatic.h"
@@ -264,7 +265,10 @@ Element *CreateUsrDefElementOfType(char *aClass, int number, Domain *domain)
 {
     Element *newElement = NULL;
 #ifdef __SM_MODULE
-    if ( !strncasecmp(aClass, "planestress2d", 12) ) {
+    if ( !strncasecmp(aClass, "planestress2dxfem", 16) ) {
+        newElement = new PlaneStress2dXfem(number, domain);
+    }
+    else if ( !strncasecmp(aClass, "planestress2d", 12) ) {
         newElement = new PlaneStress2d(number, domain);
     }
 

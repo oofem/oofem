@@ -5,6 +5,7 @@
 #include <math.h>
 #include "geometry.h"
 #include "node.h"
+#include <map>
 
 bool Delaunay :: colinear(FloatArray *p1, FloatArray *p2, FloatArray *p3) {
     double dist = p1->at(1) * ( p2->at(2) - p3->at(2) ) + p2->at(1) * ( p3->at(2) - p1->at(2) ) +
@@ -40,11 +41,21 @@ bool Delaunay :: isInsideCC(FloatArray *p, FloatArray *p1,  FloatArray *p2,  Flo
     }
 }
 
-void Delaunay :: triangulate(AList< FloatArray > *vertices, AList< Triangle > *triangles) {
+void Delaunay :: triangulate(AList< FloatArray > *overtices, AList< Triangle > *triangles) {
     /// 4th order algorithm - four loops, only for testing puropses
-    int n = vertices->giveSize();
+    int n = overtices->giveSize();
     int count = 0;
-    /// small shift of vertices
+    /// copy of vertices, since they will be shifted
+    AList<FloatArray>* vertices = new AList<FloatArray>();
+    std::map<FloatArray*, FloatArray*> backToOld; // map for putting the shifted vertices into the old position
+    for ( int i = 1; i <= overtices->giveSize(); i++ ) {
+	    FloatArray *ip = overtices->at(i);
+            FloatArray *ipCopy = new FloatArray(*ip);
+            vertices->put(i, ipCopy);   
+	    backToOld[ipCopy] = ip;
+    }
+    
+    // small shift of vertices
     for ( int i = 1; i <= n; i++ ) {
         vertices->at(i)->at(1) += vertices->at(i)->at(1) * 0.000001 * double ( rand() ) / RAND_MAX;
         vertices->at(i)->at(2) += vertices->at(i)->at(2) * 0.000001 * double ( rand() ) / RAND_MAX;
@@ -72,22 +83,23 @@ void Delaunay :: triangulate(AList< FloatArray > *vertices, AList< Triangle > *t
 
                 if ( isTriangle ) {
                     count++;
+                    // here we switch to old vertices
                     FloatArray *p1 = new FloatArray();
-                    * p1 = * vertices->at(i);
+                    * p1 = * (backToOld[vertices->at(i)]);
                     FloatArray *p2 = new FloatArray();
-                    * p2 = * vertices->at(j);
+                    * p2 = * (backToOld[vertices->at(j)]);
                     FloatArray *p3 = new FloatArray();
-                    * p3 = * vertices->at(k);
+                    * p3 = * (backToOld[vertices->at(k)]);
                     Triangle *triangle = new Triangle(p1, p2, p3);
                     if ( !triangle->isOrientedAnticlockwise() ) {
                         triangle->changeToAnticlockwise();
                     }
-
                     triangles->put(count, triangle);
                 }
             }
         }
     }
+    delete vertices;
 }
 
 

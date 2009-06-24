@@ -22,7 +22,7 @@ public:
     bool colinear(FloatArray *p1, FloatArray *p2, FloatArray *p3);
     void printTriangles(AList< Triangle > *triangles);
     bool isInsideCC(FloatArray *p, FloatArray *p1, FloatArray *p2, FloatArray *p3);
-    void triangulate(AList< FloatArray > *vertices, AList< Triangle > *triangles);
+    void triangulate(AList< FloatArray > *overtices, AList< Triangle > *triangles);
 };
 
 

@@ -218,7 +218,7 @@ public:
      * can be numbered separately. The default implementation assumes that location array will be assembled only for
      * one UnknownType value, and this array is cached on element level.
      */
-    void giveLocationArray(IntArray & locationArray, EquationID) const;
+    virtual void giveLocationArray(IntArray & locationArray, EquationID) const;
     /**
      * Returns the array of prescribed equation numbers  (array of code numbers) of receiver.
      * Results are not cached at receiver level.
@@ -393,9 +393,9 @@ public:
      */
     virtual ElementSide *giveSide(int i) const;
     /// Returns reference to the associated geometry of element
-    Geometry *giveGeometry() { return NULL; }
+    Geometry *giveGeometry() { return NULL; } // rch
     /// Returns interpolation of Element
-    FEInterpolation *giveInterpolation() { return NULL; }
+    virtual FEInterpolation *giveInterpolation() { return NULL; } // rch
     ///Returns reference to the associated material of element.
     Material *giveMaterial();
     ///Returns reference to the associated crossSection of element.
@@ -414,8 +414,8 @@ public:
     /** Sets receiver dofManagers */
     void setDofManagers(const IntArray &_dmans);
 
-    /** Sets integration rule */
-    void setIntegrationRule(int n, IntegrationRule *ir); // rch
+    /** Sets integration rules */
+    void setIntegrationRules(AList<IntegrationRule> *irlist); // rch
     /**
      * Returns integration domain for receiver, used to initialize
      * integration point over receiver volume. Must be specialized.

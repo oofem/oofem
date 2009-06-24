@@ -21,8 +21,9 @@ PlaneStress2dXfem::giveInterface(InterfaceType interface) {
 
 void PlaneStress2dXfem::computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer,
                                    int li, int ui){
+    
     FloatMatrix* simple = new FloatMatrix();
-    PlaneStress2d::computeBmatrixAt(gp, *simple);
+    PlaneStress2d::computeBmatrixAt(gp, *simple);    
     int start = simple->giveNumberOfColumns();
     // evaluation of N,dNdx
     FloatMatrix dNdx;
@@ -155,21 +156,15 @@ PlaneStress2dXfem::giveDofManDofIDMask(int inode, EquationID, IntArray &answer) 
     return;
 } 
 
-
 void PlaneStress2dXfem::computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep){
      XfemManager *xf = this->giveDomain()->giveEngngModel()->giveXfemManager(1);
      if(xf->isInteracted(this)){
-           PatchIntegrationRule *pir = (PatchIntegrationRule*) gp->giveIntegrationRule();
-           Patch *p = NULL;
-           for(int i = 1; i <= pir->giveNumberOfPatches(); i++){
-               if(pir->givePatch(i)->hasGaussPoint(gp)) p = pir->givePatch(i);
-           }
-           StructuralMaterial * sm = (StructuralMaterial*) p->giveMaterial();
-           sm->giveCharacteristicMatrix(answer, ReducedForm, rMode, gp, tStep);
+       PatchIntegrationRule *pir = (PatchIntegrationRule*) gp->giveIntegrationRule();
+       StructuralMaterial * sm = (StructuralMaterial*) this->giveDomain()->giveMaterial(pir->giveMaterial());
+       sm->giveCharacteristicMatrix(answer, ReducedForm, rMode, gp, tStep);
      }
      else PlaneStress2d::computeConstitutiveMatrixAt(answer, rMode, gp, tStep);
 }
-
 
 
 double
@@ -177,22 +172,9 @@ PlaneStress2dXfem :: computeVolumeAround(GaussPoint *aGaussPoint)
 // Returns the portion of the receiver which is attached to aGaussPoint.
 {
     double volume = 0;
-    XfemManager *xf = this->giveDomain()->giveEngngModel()->giveXfemManager(1);
-     if(xf->isInteracted(this)){
-           PatchIntegrationRule *pir = (PatchIntegrationRule*) aGaussPoint->giveIntegrationRule();
-           Patch *p = NULL;
-           for(int i = 1; i <= pir->giveNumberOfPatches(); i++){
-               if(pir->givePatch(i)->hasGaussPoint(aGaussPoint)) p = pir->givePatch(i);
-           }
-           double weight  = aGaussPoint->giveWeight();
-           Triangle *tr = (Triangle *) p;
-           volume = 2*weight * tr->getArea();
-     }
-     else volume = PlaneStress2d::computeVolumeAround(aGaussPoint);
-     return volume;
+    volume = PlaneStress2d::computeVolumeAround(aGaussPoint);
+    return volume;
 }
-
-
 
 void
 PlaneStress2dXfem :: computeVectorOf(EquationID type, ValueModeType u, TimeStep *stepN, FloatArray &answer)
@@ -229,6 +211,7 @@ PlaneStress2dXfem :: computeVectorOf(EquationID type, ValueModeType u, TimeStep 
     return;
 }
 
+
 void
 PlaneStress2dXfem :: computeStressVector(FloatArray &answer, GaussPoint *gp, TimeStep *stepN)
 {
@@ -237,11 +220,7 @@ PlaneStress2dXfem :: computeStressVector(FloatArray &answer, GaussPoint *gp, Tim
      XfemManager *xf = this->giveDomain()->giveEngngModel()->giveXfemManager(1);
      if(xf->isInteracted(this)){
            PatchIntegrationRule *pir = (PatchIntegrationRule*) gp->giveIntegrationRule();
-           Patch *p = NULL;
-           for(int i = 1; i <= pir->giveNumberOfPatches(); i++){
-               if(pir->givePatch(i)->hasGaussPoint(gp)) p = pir->givePatch(i);
-           }
-           StructuralMaterial * sm = (StructuralMaterial*) p->giveMaterial();
+           StructuralMaterial * sm = (StructuralMaterial*) this->giveDomain()->giveMaterial(pir->giveMaterial());
            sm->giveRealStressVector(answer, ReducedForm, gp, Epsilon, stepN);
      }
      else {

@@ -103,7 +103,8 @@ public:
      * @returns nonzero if successful (point inside); zero otherwise
      */
     virtual int computeLocalCoordinates(FloatArray &answer, const FloatArray &gcoords);
-
+    // returns interpolation type
+    FEInterpolation* giveInterpolation() { return &interpolation; } // rch
     /**
      * @name The element interface required by ZZNodalRecoveryModel
      */

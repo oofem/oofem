@@ -85,7 +85,7 @@ public:
     GaussIntegrationRule(int, Element *, int, int, bool dynamic = false);
     GaussIntegrationRule(int, Element *);
     /// Destructor
-    ~GaussIntegrationRule();
+    virtual ~GaussIntegrationRule();
 
     ///Returns classType id of receiver.
     classType giveClassID() const { return GaussIntegrationRuleClass; }
@@ -111,7 +111,7 @@ protected:
      * Sets up receiver's  integration points on triangular (area coords) integration domain.
      * @returns number of integration points.
      */
-    int SetUpPointsOnTriagle(int, MaterialMode, GaussPoint * * *);
+    virtual int SetUpPointsOnTriagle(int, MaterialMode, GaussPoint * * *);
     /**
      * Sets up receiver's  integration points on unit square integration domain.
      * @returns number of integration points.

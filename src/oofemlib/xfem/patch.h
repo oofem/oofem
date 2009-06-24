@@ -13,9 +13,11 @@
 #include "element.h"
 #include "fei2dtrlin.h"
 #include "node.h"
+#include <iostream>
+
 
 /** abstract representation of a part of element after subdivision  */
-class Patch : public BasicGeometry
+/*class Patch : public BasicGeometry
 {
 protected:
     /// parental element
@@ -34,13 +36,42 @@ public:
     GaussPoint *giveGaussPoint(int n) {return gps->at(n);}
     bool hasGaussPoint(GaussPoint *gp);
     Material * giveMaterial() {return this->mat; }
+};*/
+
+
+/*class TrianglePatch : public Patch
+{
+public:
+    TrianglePatch(Element *e) : Patch(e) {}
+    TrianglePatch(Element *e, AList<FloatArray> *vertices) : Patch(e, vertices) {}
+    // interpolation
+    static FEI2dTrLin interpolation;
+    void convertGPIntoParental(GaussPoint *gp);
+};*/
+
+/** abstract representation of a part of element after subdivision  */
+class Patch : public BasicGeometry
+{
+protected:
+    /// parental element
+    Element *parent;
+    /// Material of the patch
+    int material;
+public:
+    Patch(Element *parent, int material);
+    Patch(Element *parent, AList<FloatArray> *vertices);
+    virtual ~Patch(){}
+    /// converts the GP into the parental system of an element
+    virtual void convertGPIntoParental(GaussPoint *gp) = 0;
+    int giveMaterial(){return this->material;}
 };
 
 class TrianglePatch : public Patch
 {
 public:
-    TrianglePatch(Element *e) : Patch(e) {}
-    TrianglePatch(Element *e, AList<FloatArray> *vertices) : Patch(e, vertices) {}
+    TrianglePatch(Element *parent, int material) : Patch(parent, material) {}
+    TrianglePatch(Element *parent, AList<FloatArray> *vertices) : Patch(parent, vertices) {}
+    ~TrianglePatch(){}
     // interpolation
     static FEI2dTrLin interpolation;
     void convertGPIntoParental(GaussPoint *gp);

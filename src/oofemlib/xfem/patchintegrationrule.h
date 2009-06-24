@@ -4,11 +4,13 @@
 #include "integrationrule.h"
 #include "patch.h"
 #include "alist.h"
+#include "gaussintegrationrule.h"
 
 /** represents an IntegrationRule for an interacted element
  * the standard integration is replaced by an integration over a
  * patchset
  */
+/*
 class PatchIntegrationRule : public IntegrationRule
 {
 protected:
@@ -28,5 +30,21 @@ public:
     /// Wrap up function for computeGps
     int SetUpPointsOnSquare(int, MaterialMode matMode, GaussPoint ***);
     int giveNumberOfPatches() { return patchSet->giveSize(); }
+};*/
+
+class PatchIntegrationRule : public GaussIntegrationRule
+{
+protected:
+    /// patch
+    Patch* patch;
+    
+public:
+    /// Constructor
+    PatchIntegrationRule(int n, Element *e, Patch *p); // HUHU
+    /// Destructor
+    ~PatchIntegrationRule();
+    int SetUpPointsOnTriagle(int, MaterialMode, GaussPoint ***);
+    int giveMaterial () {return this->patch->giveMaterial();} // HUHU
 };
+
 #endif

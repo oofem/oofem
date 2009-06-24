@@ -86,6 +86,7 @@
 #include "materialmapperinterface.h"
 #include "contextioerr.h"
 
+
 Element :: Element(int n, Domain *aDomain) :
   FEMComponent(n, aDomain), ElementGeometry(), dofManArray(), bodyLoadArray(), boundaryLoadArray()
     // Constructor. Creates an element with number n, belonging to aDomain.
@@ -378,13 +379,22 @@ Element :: setDofManagers(const IntArray &_dmans)
 }
 
 void
-Element :: setIntegrationRule(int n, IntegrationRule *ir)
+Element :: setIntegrationRules(AList<IntegrationRule> *irlist)
 {
     if ( integrationRulesArray ) {
-        delete integrationRulesArray [ n - 1 ];
-    }
+        for ( int i = 0; i < numberOfIntegrationRules; i++ ) {
+            delete integrationRulesArray [ i ];
+        }
 
-    integrationRulesArray [ n - 1 ] = ir;
+        delete[] integrationRulesArray;
+    }
+    numberOfIntegrationRules = irlist->giveSize();
+    integrationRulesArray = new IntegrationRule * [irlist->giveSize()];
+  
+    for ( int j = 0; j < irlist->giveSize(); j++ ) {
+            integrationRulesArray[j] =  irlist->at(j + 1);
+            irlist->unlink(j + 1);
+     }
 }
 
 
