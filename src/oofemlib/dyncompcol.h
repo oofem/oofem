@@ -103,7 +103,7 @@ public:
      */
     virtual void times(double x);
     /// Builds internal structure of receiver
-    int buildInternalStructure(EngngModel *, int, EquationID);
+    int buildInternalStructure(EngngModel *, int, EquationID, const UnknownNumberingScheme&);
     /** Assembles receiver from local element contributions.
      * @param loc location array. The values corresponding to zero loc array value are not assembled.
      * @param mat contribution to be assembled using loc array.

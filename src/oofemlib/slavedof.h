@@ -57,8 +57,7 @@ public:
     void giveUnknowns(FloatArray &masterUnknowns, PrimaryField &field, ValueModeType mode, TimeStep *stepN);
     void giveBcValues(FloatArray &masterBcValues, ValueModeType mode, TimeStep *stepN);
     void computeDofTransformation(FloatArray &masterContribs);
-    void giveEquationNumbers(IntArray &masterEqNumbers);
-    void givePrescribedEquationNumbers(IntArray &masterEqNumbers);
+    void giveEquationNumbers(IntArray &masterEqNumbers, const UnknownNumberingScheme& s);
 
     double giveUnknown(EquationID type, ValueModeType mode, TimeStep *stepN);
     double giveUnknown(PrimaryField &field, ValueModeType mode, TimeStep *stepN);
@@ -78,8 +77,8 @@ public:
      * contributing to several master dofs (diplacement to displacement and rotations in master).
      * @return prints error msg and exits.
      */
-    int giveEquationNumber(void) { _error("giveEquationNumber: undefined");
-                                   return 0; }
+    int __giveEquationNumber(void) { _error("giveEquationNumber: undefined");
+      return 0; }
 
     /**
      * Returns equation number corresponding to receiver.
@@ -88,7 +87,7 @@ public:
      * contributing to several master dofs (diplacement to displacement and rotations in master).
      * @return prints error msg and exits.
      */
-    int givePrescribedEquationNumber(void) { _error("givePrescribedEquationNumber: undefined");
+    int __givePrescribedEquationNumber(void) { _error("givePrescribedEquationNumber: undefined");
                                              return 0; }
     /**
      * Asks new equation number. Empty function (master is assumed to receive same message).

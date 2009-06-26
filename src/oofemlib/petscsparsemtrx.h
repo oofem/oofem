@@ -103,7 +103,7 @@ public:
      * @param eModel pointer to corresponding engineering model
      * @param di domain index specify which domain to use
      */
-    virtual int buildInternalStructure(EngngModel * eModel, int di, EquationID);
+    virtual int buildInternalStructure(EngngModel * eModel, int di, EquationID, const UnknownNumberingScheme&s);
     // virtual int assemble (FloatMatrix*, IntArray*) = 0;
     /**
      * Assembles sparse matrix from contribution of local elements. This method for

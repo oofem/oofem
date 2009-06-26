@@ -68,7 +68,7 @@ PetscSparseMtrx :: times(double x)
 }
 
 int
-PetscSparseMtrx :: buildInternalStructure(EngngModel *eModel, int di, EquationID ut)
+PetscSparseMtrx :: buildInternalStructure(EngngModel *eModel, int di, EquationID ut, const UnknownNumberingScheme&s)
 {
     IntArray loc;
     Domain *domain = eModel->giveDomain(di);
@@ -134,7 +134,7 @@ PetscSparseMtrx :: buildInternalStructure(EngngModel *eModel, int di, EquationID
         for ( n = 1; n <= nelem; n++ ) {
             //fprintf (stderr, "(elem %d) ", n);
             elem = domain->giveElement(n);
-            elem->giveLocationArray(loc, ut);
+            elem->giveLocationArray(loc, ut,s);
             n2l.map2New(lloc, loc, 0); // translate natural->local numbering
             for ( i = 1; i <= lloc.giveSize(); i++ ) {
                 if ( ( ii = lloc.at(i) ) ) {
@@ -192,7 +192,7 @@ PetscSparseMtrx :: buildInternalStructure(EngngModel *eModel, int di, EquationID
     nelem = domain->giveNumberOfElements();
     for ( n = 1; n <= nelem; n++ ) {
         elem = domain->giveElement(n);
-        elem->giveLocationArray(loc, ut);
+        elem->giveLocationArray(loc, ut,s);
         for ( i = 1; i <= loc.giveSize(); i++ ) {
             if ( ( ii = loc.at(i) ) ) {
                 for ( j = 1; j <= loc.giveSize(); j++ ) {

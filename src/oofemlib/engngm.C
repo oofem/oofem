@@ -939,7 +939,8 @@ void EngngModel :: printYourself()
  */
 
 
-void EngngModel :: assemble(SparseMtrx *answer, TimeStep *tStep, EquationID ut, CharType type, Domain *domain)
+void EngngModel :: assemble(SparseMtrx *answer, TimeStep *tStep, EquationID ut, 
+			    CharType type, const UnknownNumberingScheme& s, Domain *domain)
 //
 // assembles matrix answer by  calling
 // element(i) -> giveCharacteristicMatrix ( type, tStep );
@@ -970,7 +971,7 @@ void EngngModel :: assemble(SparseMtrx *answer, TimeStep *tStep, EquationID ut, 
         }
 
 #endif
-        element->giveLocationArray(loc, ut);
+        element->giveLocationArray(loc, ut, s);
         this->giveElementCharacteristicMatrix(mat, ielem, type, tStep, domain);
 
         if ( mat.isNotEmpty() ) {
@@ -986,7 +987,9 @@ void EngngModel :: assemble(SparseMtrx *answer, TimeStep *tStep, EquationID ut, 
     answer->assembleEnd();
 }
 
-void EngngModel :: assemble(SparseMtrx *answer, TimeStep *tStep, EquationID r_id, EquationID c_id, CharType type, Domain *domain)
+void EngngModel :: assemble(SparseMtrx *answer, TimeStep *tStep, EquationID r_id, EquationID c_id, 
+			    CharType type, const UnknownNumberingScheme& ns, 
+			    Domain *domain)
 //
 // assembles matrix answer by  calling
 // element(i) -> giveCharacteristicMatrix ( type, tStep );
@@ -1017,8 +1020,8 @@ void EngngModel :: assemble(SparseMtrx *answer, TimeStep *tStep, EquationID r_id
         }
 
 #endif
-        element->giveLocationArray(r_loc, r_id);
-        element->giveLocationArray(c_loc, c_id);
+        element->giveLocationArray(r_loc, r_id, ns);
+        element->giveLocationArray(c_loc, c_id, ns);
 
         this->giveElementCharacteristicMatrix(mat, ielem, type, tStep, domain);
 
@@ -1134,7 +1137,8 @@ void EngngModel :: assemble(SparseMtrx *answer, TimeStep *tStep, EquationID r_id
  */
 
 void EngngModel :: assembleVectorFromDofManagers(FloatArray &answer, TimeStep *tStep, EquationID ut,
-                                                 CharType type, ValueModeType mode, Domain *domain)
+                                                 CharType type, ValueModeType mode, 
+						 const UnknownNumberingScheme& s, Domain *domain)
 //
 // assembles matrix answer by  calling
 // node(i) -> computeLoadVectorAt (tStep);
@@ -1164,7 +1168,7 @@ void EngngModel :: assembleVectorFromDofManagers(FloatArray &answer, TimeStep *t
 
 #endif
         if ( charVec.giveSize() ) {
-            node->giveCompleteLocationArray(loc);
+	  node->giveCompleteLocationArray(loc, s);
             answer.assemble(charVec, loc);
         }
     }
@@ -1172,7 +1176,7 @@ void EngngModel :: assembleVectorFromDofManagers(FloatArray &answer, TimeStep *t
     this->timer.pauseTimer(EngngModelTimer :: EMTT_NetComputationalStepTimer);
 }
 
-
+/* huhu
 void EngngModel :: assemblePrescribedVectorFromDofManagers(FloatArray &answer, TimeStep *tStep, EquationID ut,
                                                            CharType type, ValueModeType mode, Domain *domain)
 //
@@ -1211,9 +1215,10 @@ void EngngModel :: assemblePrescribedVectorFromDofManagers(FloatArray &answer, T
 
     this->timer.pauseTimer(EngngModelTimer :: EMTT_NetComputationalStepTimer);
 }
-
+*/
 void EngngModel :: assembleVectorFromElements(FloatArray &answer, TimeStep *tStep, EquationID ut,
-                                              CharType type, ValueModeType mode, Domain *domain)
+                                              CharType type, ValueModeType mode, 
+					      const UnknownNumberingScheme& s, Domain *domain)
 //
 // assembles matrix answer by  calling
 // element(i) -> giveCharacteristicMatrix ( type, tStep );
@@ -1241,7 +1246,7 @@ void EngngModel :: assembleVectorFromElements(FloatArray &answer, TimeStep *tSte
         }
 
 #endif
-        element->giveLocationArray(loc, ut);
+        element->giveLocationArray(loc, ut, s);
         this->giveElementCharacteristicVector(charVec, i, type, mode, tStep, domain);
         if ( charVec.giveSize() ) {
             answer.assemble(charVec, loc);
@@ -1265,6 +1270,7 @@ void EngngModel :: assemblePrescribedVectorFromElements(FloatArray &answer, Time
     IntArray loc;
     FloatArray charVec;
     Element *element;
+    EModelDefaultPrescribedEquationNumbering dpn;
 
     int nelem = domain->giveNumberOfElements();
 
@@ -1280,7 +1286,7 @@ void EngngModel :: assemblePrescribedVectorFromElements(FloatArray &answer, Time
         }
 
 #endif
-        element->givePrescribedLocationArray(loc, ut);
+        element->giveLocationArray(loc, ut, dpn);
         if ( loc.containsOnlyZeroes() ) {
             continue;
         }
@@ -1317,6 +1323,7 @@ EngngModel :: petsc_assembleVectorFromDofManagers(Vec answer, TimeStep *tStep, E
  #endif
     FloatArray charVec;
     DofManager *node;
+    EModelDefaultEquationNumbering dn;
 
     int nnode = domain->giveNumberOfDofManagers();
 
@@ -1325,7 +1332,7 @@ EngngModel :: petsc_assembleVectorFromDofManagers(Vec answer, TimeStep *tStep, E
         node = domain->giveDofManager(i);
         node->computeLoadVectorAt(charVec, tStep, mode);
         if ( ( ni = charVec.giveSize() ) ) {
-            node->giveCompleteLocationArray(loc);
+	  node->giveCompleteLocationArray(loc, dn);
  #ifdef __PARALLEL_MODE
             if ( node->giveParallelMode() == DofManager_shared ) {
                 scale = 1. / ( node->givePartitionsConnectivitySize() );
@@ -1363,6 +1370,7 @@ EngngModel :: petsc_assemblePrescribedVectorFromDofManagers(Vec answer, TimeStep
  #endif
     FloatArray charVec;
     DofManager *node;
+    EModelDefaultPrescribedEquationNumbering dpn;
 
     int nnode = domain->giveNumberOfDofManagers();
     this->timer.resumeTimer(EngngModelTimer :: EMTT_NetComputationalStepTimer);
@@ -1371,7 +1379,7 @@ EngngModel :: petsc_assemblePrescribedVectorFromDofManagers(Vec answer, TimeStep
         node = domain->giveDofManager(i);
         node->computeLoadVectorAt(charVec, tStep, mode);
         if ( ( ni = charVec.giveSize() ) ) {
-            node->giveCompletePrescribedLocationArray(loc);
+	  node->giveCompleteLocationArray(loc, dpn);
  #ifdef __PARALLEL_MODE
             if ( node->giveParallelMode() == DofManager_shared ) {
                 scale = 1. / ( node->givePartitionsConnectivitySize() );
@@ -1408,6 +1416,7 @@ EngngModel :: petsc_assembleVectorFromElements(Vec answer, TimeStep *tStep, Equa
  #endif
     FloatArray charVec;
     Element *element;
+    EModelDefaultEquationNumbering dn;
 
     int nelem = domain->giveNumberOfElements();
     this->timer.resumeTimer(EngngModelTimer :: EMTT_NetComputationalStepTimer);
@@ -1425,7 +1434,7 @@ EngngModel :: petsc_assembleVectorFromElements(Vec answer, TimeStep *tStep, Equa
  #endif
         this->giveElementCharacteristicVector(charVec, i, type, mode, tStep, domain);
         if ( ( ni = charVec.giveSize() ) ) {
-            element->giveLocationArray(loc, ut);
+	  element->giveLocationArray(loc, ut, dn);
  #ifdef __PARALLEL_MODE
             this->givePetscContext(domain->giveNumber(), ut)->giveN2Gmap()->map2New(gloc, loc, 0);
             VecSetValues(answer, ni, gloc.givePointer(), charVec.givePointer(), ADD_VALUES);
@@ -1457,6 +1466,7 @@ EngngModel :: petsc_assemblePrescribedVectorFromElements(Vec answer, TimeStep *t
  #endif
     FloatArray charVec;
     Element *element;
+    EModelDefaultPrescribedEquationNumbering dpn;
 
     int nelem = domain->giveNumberOfElements();
     this->timer.resumeTimer(EngngModelTimer :: EMTT_NetComputationalStepTimer);
@@ -1474,7 +1484,7 @@ EngngModel :: petsc_assemblePrescribedVectorFromElements(Vec answer, TimeStep *t
  #endif
         this->giveElementCharacteristicVector(charVec, i, type, mode, tStep, domain);
         if ( ( ni = charVec.giveSize() ) ) {
-            element->givePrescribedLocationArray(loc, ut);
+	  element->giveLocationArray(loc, ut, dpn);
  #ifdef __PARALLEL_MODE
             this->givePetscContext(domain->giveNumber(), ut)->giveN2Gmap()->map2New(gloc, loc, 0); // ??
             VecSetValues(answer, ni, gloc.givePointer(), charVec.givePointer(), ADD_VALUES);
@@ -2250,6 +2260,7 @@ EngngModel :: balanceLoad(TimeStep *atTime)
     LoadBalancerMonitor :: LoadBalancerDecisionType _d;
     this->giveLoadBalancerMonitor();
     this->giveLoadBalancer();
+    EModelDefaultEquationNumbering dn;
 
     //print statistics for current step
     lb->printStatistics();
@@ -2281,7 +2292,7 @@ EngngModel :: balanceLoad(TimeStep *atTime)
                 }
 
                 for ( j = 1; j <= giveDomain(1)->giveDofManager(i)->giveNumberOfDofs(); j++ ) {
-                    fprintf( stderr, "(%d)", giveDomain(1)->giveDofManager(i)->giveDof(j)->giveEquationNumber() );
+                    fprintf( stderr, "(%d)", giveDomain(1)->giveDofManager(i)->giveDof(j)->giveEquationNumber(dn) );
                 }
 
                 fprintf(stderr, "\n");

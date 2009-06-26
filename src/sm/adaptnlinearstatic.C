@@ -216,7 +216,7 @@ double AdaptiveNonLinearStatic ::  giveUnknownComponent(EquationID chc, ValueMod
 // returns unknown quantity like displacement, velocity of equation eq
 // This function translates this request to numerical method language
 {
-    int eq = dof->giveEquationNumber();
+    int eq = dof->__giveEquationNumber();
     if ( eq == 0 ) {
         _error("giveUnknownComponent: invalid equation number");
     }
@@ -389,9 +389,10 @@ AdaptiveNonLinearStatic :: initializeAdaptiveFrom(EngngModel *sourceProblem)
                 }
             }
 
-            stiffnessMatrix->buildInternalStructure(this, 1, EID_MomentumBalance);
+            stiffnessMatrix->buildInternalStructure(this, 1, EID_MomentumBalance, EModelDefaultEquationNumbering());
             stiffnessMatrix->zero(); // zero stiffness matrix
-            this->assemble( stiffnessMatrix, this->giveCurrentStep(), EID_MomentumBalance, SecantStiffnessMatrix, this->giveDomain(1) );
+            this->assemble( stiffnessMatrix, this->giveCurrentStep(), EID_MomentumBalance, SecantStiffnessMatrix, 
+			    EModelDefaultEquationNumbering(), this->giveDomain(1) );
             initFlag = 0;
         }
 
@@ -731,9 +732,10 @@ AdaptiveNonLinearStatic :: adaptiveRemap(Domain* dNew)
 	    }
 	  }
 
-	  stiffnessMatrix->buildInternalStructure(this, 1, EID_MomentumBalance);
+	  stiffnessMatrix->buildInternalStructure(this, 1, EID_MomentumBalance, EModelDefaultEquationNumbering());
 	  stiffnessMatrix->zero(); // zero stiffness matrix
-	  this->assemble( stiffnessMatrix, this->giveCurrentStep(), EID_MomentumBalance, SecantStiffnessMatrix, this->giveDomain(1) );
+	  this->assemble( stiffnessMatrix, this->giveCurrentStep(), EID_MomentumBalance, SecantStiffnessMatrix, 
+			  EModelDefaultEquationNumbering(), this->giveDomain(1) );
 	  initFlag = 0;
         }
 

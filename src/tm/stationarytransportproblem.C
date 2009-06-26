@@ -117,7 +117,7 @@ double StationaryTransportProblem ::  giveUnknownComponent(EquationID chc, Value
 // returns unknown quantity like displaacement, velocity of equation eq
 // This function translates this request to numerical method language
 {
-    int eq = dof->giveEquationNumber();
+    int eq = dof->__giveEquationNumber();
     if ( eq == 0 ) {
         _error("giveUnknownComponent: invalid equation number");
     }
@@ -188,10 +188,12 @@ void StationaryTransportProblem :: solveYourselfAt(TimeStep *tStep) {
             _error("solveYourselfAt: sparse matrix creation failed");
         }
 
-        conductivityMatrix->buildInternalStructure(this, 1, EID_ConservationEquation);
+        conductivityMatrix->buildInternalStructure(this, 1, EID_ConservationEquation, EModelDefaultEquationNumbering());
 
-        this->assemble( conductivityMatrix, tStep, EID_ConservationEquation, ConductivityMatrix, this->giveDomain(1) );
-        this->assemble( conductivityMatrix, tStep, EID_ConservationEquation, LHSBCMatrix, this->giveDomain(1) );
+        this->assemble( conductivityMatrix, tStep, EID_ConservationEquation, ConductivityMatrix, 
+			EModelDefaultEquationNumbering(), this->giveDomain(1) );
+        this->assemble( conductivityMatrix, tStep, EID_ConservationEquation, LHSBCMatrix, 
+			EModelDefaultEquationNumbering(), this->giveDomain(1) );
     }
 
 #ifdef VERBOSE
@@ -204,13 +206,17 @@ void StationaryTransportProblem :: solveYourselfAt(TimeStep *tStep) {
     rhsVector.resize( this->giveNumberOfEquations(EID_ConservationEquation) );
     rhsVector.zero();
 
-    this->assembleVectorFromElements( rhsVector, tStep, EID_ConservationEquation, ElementInternalSourceVector, VM_Total, this->giveDomain(1) );
-    this->assembleVectorFromElements( rhsVector, tStep, EID_ConservationEquation, ElementBCTransportVector, VM_Total, this->giveDomain(1) );
-    this->assembleDirichletBcRhsVector( rhsVector, tStep, EID_ConservationEquation, VM_Total, ConductivityMatrix, this->giveDomain(1) );
+    this->assembleVectorFromElements( rhsVector, tStep, EID_ConservationEquation, ElementInternalSourceVector, VM_Total, 
+				      EModelDefaultEquationNumbering(), this->giveDomain(1) );
+    this->assembleVectorFromElements( rhsVector, tStep, EID_ConservationEquation, ElementBCTransportVector, VM_Total, 
+				      EModelDefaultEquationNumbering(), this->giveDomain(1) );
+    this->assembleDirichletBcRhsVector( rhsVector, tStep, EID_ConservationEquation, VM_Total, ConductivityMatrix, 
+					EModelDefaultEquationNumbering(), this->giveDomain(1) );
     //
     // assembling the nodal part of load vector
     //
-    this->assembleVectorFromDofManagers( rhsVector, tStep, EID_ConservationEquation, NodalLoadVector, VM_Total, this->giveDomain(1) );
+    this->assembleVectorFromDofManagers( rhsVector, tStep, EID_ConservationEquation, NodalLoadVector, VM_Total, 
+					 EModelDefaultEquationNumbering(), this->giveDomain(1) );
 
     //
     // set-up numerical model
@@ -366,7 +372,7 @@ StationaryTransportProblem :: printDofOutputAt(FILE *stream, Dof *iDof, TimeStep
 void
 StationaryTransportProblem :: assembleDirichletBcRhsVector(FloatArray &answer, TimeStep *tStep, EquationID ut,
                                                            ValueModeType mode, CharType lhsType,
-                                                           Domain *d)
+                                                           const UnknownNumberingScheme& ns, Domain *d)
 {
     int ielem;
     IntArray loc;
@@ -387,7 +393,7 @@ StationaryTransportProblem :: assembleDirichletBcRhsVector(FloatArray &answer, T
             charVec.beProductOf(s, rp);
             charVec.negated();
 
-            element->giveLocationArray(loc, ut);
+            element->giveLocationArray(loc, ut, ns);
             answer.assemble(charVec, loc);
         }
     } // end element loop

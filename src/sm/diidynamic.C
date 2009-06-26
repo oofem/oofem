@@ -99,7 +99,7 @@ double DIIDynamic ::  giveUnknownComponent(EquationID chc, ValueModeType mode,
 // returns unknown quantity like displaacement, velocity of equation eq
 // This function translates this request to numerical method language
 {
-    int eq = dof->giveEquationNumber();
+    int eq = dof->__giveEquationNumber();
     if ( eq == 0 ) {
         _error("giveUnknownComponent: invalid equation number");
     }
@@ -181,10 +181,10 @@ void DIIDynamic :: solveYourselfAt(TimeStep *tStep) {
          * delete mht;
          */
         stiffnessMatrix = new Skyline();
-        stiffnessMatrix->buildInternalStructure(this, 1, EID_MomentumBalance);
+        stiffnessMatrix->buildInternalStructure(this, 1, EID_MomentumBalance, EModelDefaultEquationNumbering());
         massMatrix = stiffnessMatrix->GiveCopy();
 
-        this->assemble(massMatrix, tStep, EID_MomentumBalance, MassMatrix, domain);
+        this->assemble(massMatrix, tStep, EID_MomentumBalance, MassMatrix, EModelDefaultEquationNumbering(), domain);
 
         //
         // determining starting displacemnts, velocities, accelerations
@@ -219,7 +219,7 @@ void DIIDynamic :: solveYourselfAt(TimeStep *tStep) {
                     continue;
                 }
 
-                jj = iDof->giveEquationNumber();
+                jj = iDof->__giveEquationNumber();
                 if ( jj ) {
                     displacementVector.at(jj) = iDof->giveUnknown(EID_MomentumBalance, VM_Total, stepWhenIcApply);
                     velocityVector.at(jj)     = iDof->giveUnknown(EID_MomentumBalance, VM_Velocity, stepWhenIcApply);
@@ -268,7 +268,8 @@ void DIIDynamic :: solveYourselfAt(TimeStep *tStep) {
         // assemble LHS of problem ( K* = K + a0*M)
         //
 
-        this->assemble(stiffnessMatrix, tStep, EID_MomentumBalance, DIIModifiedStiffnessMatrix, domain);
+        this->assemble(stiffnessMatrix, tStep, EID_MomentumBalance, DIIModifiedStiffnessMatrix, 
+		       EModelDefaultEquationNumbering(), domain);
         /*
          *  Element* element;
          *  IntArray* loc ;
@@ -301,12 +302,14 @@ void DIIDynamic :: solveYourselfAt(TimeStep *tStep) {
     loadVector.resize( this->giveNumberOfEquations(EID_MomentumBalance) );
     loadVector.zero();
 
-    this->assembleVectorFromElements(loadVector, tStep, EID_MomentumBalance, ElementForceLoadVector, VM_Total, domain);
+    this->assembleVectorFromElements(loadVector, tStep, EID_MomentumBalance, ElementForceLoadVector, 
+				     VM_Total, EModelDefaultEquationNumbering(), domain);
 
     //
     // assembling the nodal part of load vector
     //
-    this->assembleVectorFromDofManagers(loadVector, tStep, EID_MomentumBalance, NodalLoadVector, VM_Total, domain);
+    this->assembleVectorFromDofManagers(loadVector, tStep, EID_MomentumBalance, NodalLoadVector, 
+					VM_Total, EModelDefaultEquationNumbering(), domain);
 
     //
     // assembling modified load vector

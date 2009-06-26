@@ -146,7 +146,7 @@ double LinearStatic ::  giveUnknownComponent(EquationID chc, ValueModeType mode,
 // returns unknown quantity like displaacement, velocity of equation eq
 // This function translates this request to numerical method language
 {
-    int eq = dof->giveEquationNumber();
+    int eq = dof->__giveEquationNumber();
     if ( eq == 0 ) {
         _error("giveUnknownComponent: invalid equation number");
     }
@@ -250,9 +250,10 @@ void LinearStatic :: solveYourselfAt(TimeStep *tStep) {
         //stiffnessMatrix = new DynCompCol ();
         //stiffnessMatrix = new CompCol ();
 
-        stiffnessMatrix->buildInternalStructure(this, 1, EID_MomentumBalance);
+        stiffnessMatrix->buildInternalStructure(this, 1, EID_MomentumBalance, EModelDefaultEquationNumbering());
 
-        this->assemble( stiffnessMatrix, tStep, EID_MomentumBalance, StiffnessMatrix, this->giveDomain(1) );
+        this->assemble( stiffnessMatrix, tStep, EID_MomentumBalance, StiffnessMatrix, 
+			EModelDefaultEquationNumbering(), this->giveDomain(1) );
 
         //
         // alocate space for displacementVector
@@ -305,13 +306,16 @@ void LinearStatic :: solveYourselfAt(TimeStep *tStep) {
         loadVector.resize( this->giveNumberOfEquations(EID_MomentumBalance) );
         loadVector.zero();
 
-        this->assembleVectorFromElements( loadVector, tStep, EID_MomentumBalance, ElementForceLoadVector, VM_Total, this->giveDomain(1) );
-        this->assembleVectorFromElements( loadVector, tStep, EID_MomentumBalance, ElementNonForceLoadVector, VM_Total, this->giveDomain(1) );
+        this->assembleVectorFromElements( loadVector, tStep, EID_MomentumBalance, ElementForceLoadVector, VM_Total, 
+					  EModelDefaultEquationNumbering(), this->giveDomain(1) );
+        this->assembleVectorFromElements( loadVector, tStep, EID_MomentumBalance, ElementNonForceLoadVector, VM_Total, 
+					  EModelDefaultEquationNumbering(), this->giveDomain(1) );
 
         //
         // assembling the nodal part of load vector
         //
-        this->assembleVectorFromDofManagers( loadVector, tStep, EID_MomentumBalance, NodalLoadVector, VM_Total, this->giveDomain(1) );
+        this->assembleVectorFromDofManagers( loadVector, tStep, EID_MomentumBalance, NodalLoadVector, VM_Total, 
+					     EModelDefaultEquationNumbering(), this->giveDomain(1) );
 
         //
         // set-up numerical model
@@ -503,7 +507,7 @@ LinearStatic :: estimateMaxPackSize(IntArray &commMap, CommunicationBuffer &buff
             ndofs = ( dman = domain->giveDofManager( commMap.at(i) ) )->giveNumberOfDofs();
             for ( j = 1; j <= ndofs; j++ ) {
                 jdof = dman->giveDof(j);
-                if ( jdof->isPrimaryDof() && ( jdof->giveEquationNumber() ) ) {
+                if ( jdof->isPrimaryDof() && ( jdof->__giveEquationNumber() ) ) {
                     count++;
                 } else {
                     pcount++;

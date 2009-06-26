@@ -234,7 +234,8 @@ public:
 #endif
 
 protected:
-    void       assemble(SparseMtrx *answer, TimeStep *tStep, EquationID ut, CharType type, Domain *domain);
+    void       assemble(SparseMtrx *answer, TimeStep *tStep, EquationID ut, CharType type, 
+			const UnknownNumberingScheme& , Domain *domain);
     void giveInternalForces(FloatArray &answer, const FloatArray &DeltaR, Domain *d, TimeStep *);
     void proceedStep(int di, TimeStep *);
     void updateLoadVectors(TimeStep *tStep);

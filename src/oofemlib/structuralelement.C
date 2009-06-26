@@ -800,7 +800,7 @@ StructuralElement :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tSte
 
     for ( i = 1; i <= numberOfDofMans; i++ ) {
         this->giveDofManDofIDMask(i, EID_MomentumBalance, nodeDofIDMask);
-        this->giveDofManager(i)->giveLocationArray(nodeDofIDMask, nodalArray);
+        //this->giveDofManager(i)->giveLocationArray(nodeDofIDMask, nodalArray);
         for ( j = 1; j <= nodeDofIDMask.giveSize(); j++ ) {
             indx++;
             // zero all off-diagonal terms
@@ -1057,6 +1057,7 @@ void StructuralElement::computeStiffnessMatrix_withIRulesAsSubcells (FloatMatrix
   }
   return;
 }
+
 
 void
 StructuralElement :: computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *stepN)
@@ -1542,12 +1543,11 @@ StructuralElement :: computeGNDofRotationMatrix(FloatMatrix &answer, DofManTrans
     }
 
     // initialize answer
-    IntArray loc;
-    giveLocationArray(loc, EID_MomentumBalance);
+    int gsize = this->computeGlobalNumberOfDofs(EID_MomentumBalance);
     if ( mode == _toGlobalCS ) {
-        answer.resize( this->computeNumberOfDofs(EID_MomentumBalance), loc.giveSize() );
+        answer.resize( this->computeNumberOfDofs(EID_MomentumBalance), gsize);
     } else if ( mode == _toNodalCS ) {
-        answer.resize( loc.giveSize(), this->computeNumberOfDofs(EID_MomentumBalance) );
+        answer.resize( gsize, this->computeNumberOfDofs(EID_MomentumBalance) );
     } else {
         _error("computeGNDofRotationMatrix: unsupported DofManTrasfType value");
     }
@@ -1595,12 +1595,11 @@ StructuralElement :: computeGNLoadRotationMatrix(FloatMatrix &answer, DofManTran
     }
 
     // initialize answer
-    IntArray loc;
-    giveLocationArray(loc, EID_MomentumBalance);
+    int gsize = this->computeGlobalNumberOfDofs(EID_MomentumBalance);
     if ( mode == _toGlobalCS ) {
-        answer.resize( this->computeNumberOfDofs(EID_MomentumBalance), loc.giveSize() );
+        answer.resize( this->computeNumberOfDofs(EID_MomentumBalance), gsize );
     } else if ( mode == _toNodalCS ) {
-        answer.resize( loc.giveSize(), this->computeNumberOfDofs(EID_MomentumBalance) );
+        answer.resize( gsize, this->computeNumberOfDofs(EID_MomentumBalance) );
     } else {
         _error("computeGNDofRotationMatrix: unsupported DofManTrasfType value");
     }
@@ -1639,7 +1638,7 @@ StructuralElement :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, In
 
 
 void
-StructuralElement :: giveNonlocalLocationArray(IntArray &locationArray)
+StructuralElement :: giveNonlocalLocationArray(IntArray &locationArray, const UnknownNumberingScheme&s)
 {
     NonlocalMaterialStiffnessInterface *interface;
     // test for material model interface
@@ -1662,7 +1661,7 @@ StructuralElement :: giveNonlocalLocationArray(IntArray &locationArray)
                                     NonlocalMaterialStiffnessInterface_giveIntegrationDomainList( iRule->getIntegrationPoint(i) );
             // loop over IP influencing IPs, extract corresponding element numbers and their code numbers
             for ( pos = integrationDomainList->begin(); pos != integrationDomainList->end(); ++pos ) {
-                ( * pos ).nearGp->giveElement()->giveLocationArray(elemLocArry, EID_MomentumBalance);
+	      ( * pos ).nearGp->giveElement()->giveLocationArray(elemLocArry, EID_MomentumBalance, s);
                 /*
                  * Currently no care given to multiple occurences of code number in locationArray.
                  */

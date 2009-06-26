@@ -98,7 +98,7 @@ EIPrimaryUnknownMapper :: mapAndUpdate(FloatArray &answer, ValueModeType mode, E
             // should be there, but newNode can accomodate only certain dofs.
             //
             //
-            newd->giveNode(inode)->giveLocationArray(dofMask, locationArray);
+	  newd->giveNode(inode)->giveLocationArray(dofMask, locationArray, EModelDefaultEquationNumbering());
             if ( newd->giveNode(inode)->hasAnySlaveDofs() ) {
                 for ( int ii = 1; ii <= dofMask.giveSize(); ii++ ) {
                     // exclude slaves; they are determined from masters

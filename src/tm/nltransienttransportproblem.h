@@ -91,7 +91,8 @@ protected:
      */
     void updateInternalState(TimeStep *);
     void applyIC(TimeStep *);
-    void assembleAlgorithmicPartOfRhs(FloatArray &rhs, EquationID ut, TimeStep *tStep, int nite);
+    void assembleAlgorithmicPartOfRhs(FloatArray &rhs, EquationID ut, 
+				      const UnknownNumberingScheme& s, TimeStep *tStep, int nite);
 };
 
 #endif // nltransienttransportproblem_h

@@ -68,7 +68,7 @@ PrimaryField :: ~PrimaryField()
 double
 PrimaryField :: giveUnknownValue(Dof *dof, ValueModeType mode, TimeStep *atTime)
 {
-    int eq = dof->giveEquationNumber();
+    int eq = dof->__giveEquationNumber();
     if ( eq == 0 ) {
         _error("giveUnknownValue: invalid equation number");
     }

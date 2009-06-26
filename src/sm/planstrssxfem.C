@@ -89,7 +89,7 @@ void PlaneStress2dXfem::computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer,
     }
 } 
 
-void PlaneStress2dXfem::giveLocationArray(IntArray &locationArray, EquationID) const {
+void PlaneStress2dXfem::giveLocationArray(IntArray &locationArray, EquationID, const UnknownNumberingScheme& s) const {
     IntArray interactedEI;
     XfemManager *xf = this->giveDomain()->giveEngngModel()->giveXfemManager(1);
     xf->getInteractedEI(interactedEI, const_cast<PlaneStress2dXfem *> (this));
@@ -119,7 +119,7 @@ void PlaneStress2dXfem::giveLocationArray(IntArray &locationArray, EquationID) c
     for(int i = 1; i <= (const_cast<PlaneStress2dXfem *> (this))->giveNumberOfDofManagers(); i++){
        DofManager *dm = (const_cast<PlaneStress2dXfem *> (this))->giveDomain()->giveDofManager(dofManArray.at(i));
        for(int j = 1; j <= dm->giveNumberOfDofs(); j++){
-		int eqN = dm->giveDof(j)->giveEquationNumber();
+		int eqN = dm->giveDof(j)->giveEquationNumber(s);
        		if(j <= 2) locationArray.followedBy(eqN);
        		else enriched.followedBy(eqN);
        }

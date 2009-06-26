@@ -94,7 +94,7 @@ double DEIDynamic ::  giveUnknownComponent(EquationID chc, ValueModeType mode,
 // in time t
 // This function translates this request to numerical method language
 {
-    int eq = dof->giveEquationNumber();
+    int eq = dof->__giveEquationNumber();
     if ( eq == 0 ) {
         _error("giveUnknownComponent: invalid equation number");
     }
@@ -187,9 +187,10 @@ void DEIDynamic :: solveYourselfAt(TimeStep *tStep) {
 
         massMatrix.resize(neq);
         massMatrix.zero();
+	EModelDefaultEquationNumbering dn;
         for ( i = 1; i <= nelem; i++ ) {
             element = domain->giveElement(i);
-            element->giveLocationArray(loc, EID_MomentumBalance);
+            element->giveLocationArray(loc, EID_MomentumBalance, dn);
             element->giveCharacteristicMatrix(charMtrx,  LumpedMassMatrix, tStep);
             // charMtrx.beLumpedOf(fullCharMtrx);
             element->giveCharacteristicMatrix(charMtrx2, StiffnessMatrix, tStep);
@@ -271,7 +272,7 @@ void DEIDynamic :: solveYourselfAt(TimeStep *tStep) {
                     continue;
                 }
 
-                jj = iDof->giveEquationNumber();
+                jj = iDof->__giveEquationNumber();
                 if ( jj ) {
                     nextDisplacementVector.at(jj) = iDof->giveUnknown(EID_MomentumBalance, VM_Total, tStep);
                     // become displacementVector after init
@@ -307,16 +308,18 @@ void DEIDynamic :: solveYourselfAt(TimeStep *tStep) {
     //loadVector = new FloatArray (this->giveNumberOfEquations());
     loadVector.resize( this->giveNumberOfEquations(EID_MomentumBalance) );
     loadVector.zero();
-    this->assembleVectorFromElements(loadVector, tStep, EID_MomentumBalance, ElementForceLoadVector, VM_Total, domain);
-    this->assembleVectorFromDofManagers(loadVector, tStep, EID_MomentumBalance, NodalLoadVector, VM_Total, domain);
+    this->assembleVectorFromElements(loadVector, tStep, EID_MomentumBalance, ElementForceLoadVector, 
+				     VM_Total, EModelDefaultEquationNumbering(), domain);
+    this->assembleVectorFromDofManagers(loadVector, tStep, EID_MomentumBalance, NodalLoadVector, 
+					VM_Total, EModelDefaultEquationNumbering(), domain);
 
     //
     // assembling additional parts of right hand side
     //
-
+    EModelDefaultEquationNumbering dn;
     for ( i = 1; i <= nelem; i++ ) {
         element = domain->giveElement(i);
-        element->giveLocationArray(loc, EID_MomentumBalance);
+        element->giveLocationArray(loc, EID_MomentumBalance, dn);
         element->giveCharacteristicMatrix(charMtrx, StiffnessMatrix, tStep);
         n = loc.giveSize();
         for ( j = 1; j <= n; j++ ) {

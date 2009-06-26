@@ -148,7 +148,7 @@ double LinearStability ::  giveUnknownComponent(EquationID chc, ValueModeType mo
 // returns unknown quantity like displaacement, eigen value.
 // This function translates this request to numerical method language
 {
-    int eq = dof->giveEquationNumber();
+    int eq = dof->__giveEquationNumber();
     if ( eq == 0 ) {
         _error("giveUnknownComponent: invalid equation number");
     }
@@ -176,7 +176,7 @@ double LinearStability ::  giveUnknownComponent(UnknownType chc, ValueModeType m
 // returns unknown quantity like displaacement, eigen value.
 // This function translates this request to numerical method language
 {
-    int eq = dof->giveEquationNumber();
+    int eq = dof->__giveEquationNumber();
     if ( eq == 0 ) {
         _error("giveUnknownComponent: invalid equation number");
     }
@@ -261,7 +261,7 @@ void LinearStability :: solveYourselfAt(TimeStep *tStep) {
         // first step - slove linear static problem
         //
         stiffnessMatrix = new Skyline();
-        stiffnessMatrix->buildInternalStructure(this, 1, EID_MomentumBalance);
+        stiffnessMatrix->buildInternalStructure(this, 1, EID_MomentumBalance, EModelDefaultEquationNumbering());
 
         //
         // alocate space for displacementVector
@@ -278,7 +278,8 @@ void LinearStability :: solveYourselfAt(TimeStep *tStep) {
     OOFEM_LOG_INFO("Assembling stiffness matrix\n");
 #endif
     stiffnessMatrix->zero();
-    this->assemble( stiffnessMatrix, tStep, EID_MomentumBalance, StiffnessMatrix, this->giveDomain(1) );
+    this->assemble( stiffnessMatrix, tStep, EID_MomentumBalance, StiffnessMatrix, 
+		    EModelDefaultEquationNumbering(), this->giveDomain(1) );
 #endif
 
 
@@ -289,13 +290,16 @@ void LinearStability :: solveYourselfAt(TimeStep *tStep) {
     displacementVector.zero();
     loadVector.zero();
 
-    this->assembleVectorFromElements( loadVector, tStep, EID_MomentumBalance, ElementForceLoadVector, VM_Total, this->giveDomain(1) );
-    this->assembleVectorFromElements( loadVector, tStep, EID_MomentumBalance, ElementNonForceLoadVector, VM_Total, this->giveDomain(1) );
+    this->assembleVectorFromElements( loadVector, tStep, EID_MomentumBalance, ElementForceLoadVector, VM_Total, 
+				      EModelDefaultEquationNumbering(), this->giveDomain(1) );
+    this->assembleVectorFromElements( loadVector, tStep, EID_MomentumBalance, ElementNonForceLoadVector, VM_Total, 
+				      EModelDefaultEquationNumbering(), this->giveDomain(1) );
 
     //
     // assembling the nodal part of load vector
     //
-    this->assembleVectorFromDofManagers( loadVector, tStep, EID_MomentumBalance, NodalLoadVector, VM_Total, this->giveDomain(1) );
+    this->assembleVectorFromDofManagers( loadVector, tStep, EID_MomentumBalance, NodalLoadVector, VM_Total, 
+					 EModelDefaultEquationNumbering(), this->giveDomain(1) );
 
     //
     // set-up numerical model
@@ -330,11 +334,13 @@ void LinearStability :: solveYourselfAt(TimeStep *tStep) {
 #ifdef VERBOSE
     OOFEM_LOG_INFO("Assembling stiffness  matrix\n");
 #endif
-    this->assemble( stiffnessMatrix, tStep, EID_MomentumBalance, StiffnessMatrix, this->giveDomain(1) );
+    this->assemble( stiffnessMatrix, tStep, EID_MomentumBalance, StiffnessMatrix, 
+		    EModelDefaultEquationNumbering(), this->giveDomain(1) );
 #ifdef VERBOSE
     OOFEM_LOG_INFO("Assembling  initial stress matrix\n");
 #endif
-    this->assemble( initialStressMatrix, tStep, EID_MomentumBalance, InitialStressMatrix, this->giveDomain(1) );
+    this->assemble( initialStressMatrix, tStep, EID_MomentumBalance, InitialStressMatrix, 
+		    EModelDefaultEquationNumbering(), this->giveDomain(1) );
     initialStressMatrix->times(-1.0);
 
     //  stiffnessMatrix->printYourself();

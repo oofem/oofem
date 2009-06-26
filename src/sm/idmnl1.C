@@ -415,7 +415,7 @@ IDNLMaterial :: giveLocalNonlocalStiffnessContribution(GaussPoint *gp, IntArray 
          * else printf ("O");
          * status->lst = IDNLMaterialStatus::LST_loading;
          */
-        elem->giveLocationArray(loc, EID_MomentumBalance);
+
         // no support for reduced integration now
         elem->computeBmatrixAt(gp, b);
 
@@ -454,7 +454,7 @@ IDNLMaterial :: giveRemoteNonlocalStiffnessContribution(GaussPoint *gp, IntArray
     FloatMatrix b, de, den, princDir(3, 3), t;
     FloatArray stress, fullStress, strain, principalStress, help, nu;
 
-    elem->giveLocationArray(rloc, EID_MomentumBalance);
+    // elem->giveLocationArray(rloc, EID_MomentumBalance);
     // no support for reduced integration now
     elem->computeBmatrixAt(gp, b);
 

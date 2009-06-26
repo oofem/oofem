@@ -220,9 +220,18 @@ Element :: computeGlobalNumberOfDofs(EquationID ut)
     if ( this->locationArray ) {
         return this->locationArray->giveSize();
     } else {
-        IntArray loc;
-        this->giveLocationArray(loc, ut);
-        return loc.giveSize();
+      //IntArray loc;
+      //this->giveLocationArray(loc, ut);
+      //return loc.giveSize();
+      int i, answer = 0;
+      IntArray nodeDofIDMask, dofMask;
+
+      for ( i = 1; i <= numberOfDofMans; i++ ) {
+	this->giveDofManDofIDMask(i, ut, nodeDofIDMask);
+	this->giveDofManager(i)->giveDofArray(nodeDofIDMask, dofMask);
+	answer+=this->giveDofManager(i)->giveNumberOfPrimaryMasterDofs(dofMask);
+      }	
+      return answer;
     }
 }
 
@@ -242,7 +251,7 @@ IntArray *Element :: giveBoundaryLoadArray()
 }
 
 
-void Element :: giveLocationArray(IntArray &locationArray, EquationID ut) const
+void Element :: giveLocationArray(IntArray &locationArray, EquationID ut, const UnknownNumberingScheme& s) const
 // Returns the location array of the receiver. This array is obtained by
 // simply appending the location array of every node of the receiver.
 {
@@ -250,35 +259,17 @@ void Element :: giveLocationArray(IntArray &locationArray, EquationID ut) const
     IntArray nodalArray;
     int i;
 
-    if ( this->locationArray ) {
+    if ( s.isDefault() && this->locationArray ) {
         locationArray = * this->locationArray;
         return;
     } else {
         locationArray.resize(0);
         for ( i = 1; i <= numberOfDofMans; i++ ) {
             this->giveDofManDofIDMask(i, ut, nodeDofIDMask);
-            this->giveDofManager(i)->giveLocationArray(nodeDofIDMask, nodalArray);
+            this->giveDofManager(i)->giveLocationArray(nodeDofIDMask, nodalArray, s);
             locationArray.followedBy(nodalArray);
             // delete nodeDofIDMask;
         }
-    }
-
-    return;
-}
-
-void Element :: givePrescribedLocationArray(IntArray &locationArray, EquationID ut) const
-// Returns the location array of the receiver. This array is obtained by
-// simply appending the location array of every node of the receiver.
-{
-    IntArray nodeDofIDMask;
-    IntArray nodalArray;
-    int i;
-
-    locationArray.resize(0);
-    for ( i = 1; i <= numberOfDofMans; i++ ) {
-        this->giveDofManDofIDMask(i, ut, nodeDofIDMask);
-        this->giveDofManager(i)->givePrescribedLocationArray(nodeDofIDMask, nodalArray);
-        locationArray.followedBy(nodalArray);
     }
 
     return;

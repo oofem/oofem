@@ -176,7 +176,7 @@ SlaveDof :: computeDofTransformation(FloatArray &masterContribs)
 }
 
 void
-SlaveDof :: giveEquationNumbers(IntArray &masterEqNumbers)
+SlaveDof :: giveEquationNumbers(IntArray &masterEqNumbers, const UnknownNumberingScheme& s)
 {
     int i, k;
     IntArray mstrEqNmbrs;
@@ -187,32 +187,11 @@ SlaveDof :: giveEquationNumbers(IntArray &masterEqNumbers)
     for ( k = 1, i = 1; i <= countOfMasterDofs; i++ ) {
       idof = this->giveMasterDof (i);
         if ( !idof->isPrimaryDof() ) {
-            idof->giveEquationNumbers(mstrEqNmbrs);
+	  idof->giveEquationNumbers(mstrEqNmbrs,s );
             masterEqNumbers.copySubVector(mstrEqNmbrs, k);
             k += mstrEqNmbrs.giveSize();
         } else   {
-            masterEqNumbers.at(k++) = idof->giveEquationNumber();
-        }
-    }
-}
-
-void
-SlaveDof :: givePrescribedEquationNumbers(IntArray &masterEqNumbers)
-{
-    int i, k;
-    IntArray mstrEqNmbrs;
-    Dof* idof;
-
-    masterEqNumbers.resize( this->giveNumberOfPrimaryMasterDofs() );
-
-    for ( k = 1, i = 1; i <= countOfMasterDofs; i++ ) {
-      idof = this->giveMasterDof (i);
-        if ( !idof->isPrimaryDof() ) {
-            idof->givePrescribedEquationNumbers(mstrEqNmbrs);
-            masterEqNumbers.copySubVector(mstrEqNmbrs, k);
-            k += mstrEqNmbrs.giveSize();
-        } else   {
-            masterEqNumbers.at(k++) = idof->givePrescribedEquationNumber();
+            masterEqNumbers.at(k++) = idof->giveEquationNumber(s);
         }
     }
 }

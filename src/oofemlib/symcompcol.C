@@ -102,7 +102,7 @@ SparseMtrx *SymCompCol :: GiveCopy() const
 
 #define MAP(i, j) map [ ( j ) * neq - ( j ) * ( ( j ) + 1 ) / 2 + ( i ) ]
 
-int SymCompCol :: buildInternalStructure(EngngModel *eModel, int di, EquationID ut)
+int SymCompCol :: buildInternalStructure(EngngModel *eModel, int di, EquationID ut, const UnknownNumberingScheme& s)
 {
     /*
      * IntArray  loc;
@@ -191,7 +191,7 @@ int SymCompCol :: buildInternalStructure(EngngModel *eModel, int di, EquationID 
 
     for ( n = 1; n <= nelem; n++ ) {
         elem = domain->giveElement(n);
-        elem->giveLocationArray(loc, ut);
+        elem->giveLocationArray(loc, ut, s);
 
         for ( i = 1; i <= loc.giveSize(); i++ ) {
             if ( ( ii = loc.at(i) ) ) {

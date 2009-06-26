@@ -96,7 +96,7 @@ void NLTransientTransportProblem :: solveYourselfAt(TimeStep *tStep) {
             _error("solveYourselfAt: sparse matrix creation failed");
         }
 
-        lhs->buildInternalStructure(this, 1, EID_ConservationEquation);
+        lhs->buildInternalStructure(this, 1, EID_ConservationEquation, EModelDefaultEquationNumbering());
 
         rhs.resize(neq);
         initFlag = 0;
@@ -138,10 +138,13 @@ void NLTransientTransportProblem :: solveYourselfAt(TimeStep *tStep) {
 
         if ( ( nite == 1 ) || ( NR_Mode == nrsolverFullNRM ) || ( ( NR_Mode == nrsolverAccelNRM ) && ( nite % MANRMSteps == 0 ) ) ) {
             lhs->zero();
-            this->assemble( lhs, & TauStep, EID_ConservationEquation, LHSBCMatrix, this->giveDomain(1) );
-            this->assemble( lhs, & TauStep, EID_ConservationEquation, IntSourceLHSMatrix, this->giveDomain(1) );
+            this->assemble( lhs, & TauStep, EID_ConservationEquation, LHSBCMatrix, 
+			    EModelDefaultEquationNumbering(), this->giveDomain(1) );
+            this->assemble( lhs, & TauStep, EID_ConservationEquation, IntSourceLHSMatrix, 
+			    EModelDefaultEquationNumbering(), this->giveDomain(1) );
             lhs->times(alpha);
-            this->assemble( lhs, & TauStep, EID_ConservationEquation, NSTP_MidpointLhs, this->giveDomain(1) );
+            this->assemble( lhs, & TauStep, EID_ConservationEquation, NSTP_MidpointLhs, 
+			    EModelDefaultEquationNumbering(), this->giveDomain(1) );
         }
 
 #ifdef VERBOSE
@@ -152,17 +155,20 @@ void NLTransientTransportProblem :: solveYourselfAt(TimeStep *tStep) {
         // assembling the element part of load vector
         //
         rhs.zero();
-        this->assembleVectorFromElements( rhs, & TauStep, EID_ConservationEquation, ElementBCTransportVector, VM_Total, this->giveDomain(1) );
+        this->assembleVectorFromElements( rhs, & TauStep, EID_ConservationEquation, ElementBCTransportVector, VM_Total, 
+					  EModelDefaultEquationNumbering(), this->giveDomain(1) );
         // this->assembleDirichletBcRhsVector (rhs, &TauStep, VM_Total, NSTP_MidpointLhs, this->giveDomain(1));
-        this->assembleVectorFromElements( rhs, & TauStep, EID_ConservationEquation, ElementInternalSourceVector, VM_Total, this->giveDomain(1) );
+        this->assembleVectorFromElements( rhs, & TauStep, EID_ConservationEquation, ElementInternalSourceVector, VM_Total,
+					  EModelDefaultEquationNumbering(), this->giveDomain(1) );
         //
         // assembling the nodal part of load vector
         //
-        this->assembleVectorFromDofManagers( rhs, & TauStep, EID_ConservationEquation, NodalLoadVector, VM_Total, this->giveDomain(1) );
+        this->assembleVectorFromDofManagers( rhs, & TauStep, EID_ConservationEquation, NodalLoadVector, VM_Total, 
+					     EModelDefaultEquationNumbering(), this->giveDomain(1) );
         //
         // add the rhs part depending on previous solution
         //
-        assembleAlgorithmicPartOfRhs(rhs, EID_ConservationEquation, & TauStep, nite);
+        assembleAlgorithmicPartOfRhs(rhs, EID_ConservationEquation, EModelDefaultEquationNumbering(), &TauStep, nite);
         //
         // set-up numerical model
         //
@@ -207,7 +213,7 @@ double NLTransientTransportProblem ::  giveUnknownComponent(EquationID chc, Valu
 // returns unknown quantity like displaacement, velocity of equation eq
 // This function translates this request to numerical method language
 {
-    int eq = dof->giveEquationNumber();
+    int eq = dof->__giveEquationNumber();
     double t = tStep->giveTime();
 
     TimeStep *previousStep = this->givePreviousStep(), *currentStep = this->giveCurrentStep();
@@ -294,7 +300,8 @@ NLTransientTransportProblem :: updateInternalState(TimeStep *stepN)
 
 
 void
-NLTransientTransportProblem :: assembleAlgorithmicPartOfRhs(FloatArray &answer, EquationID ut, TimeStep *tStep, int nite)
+NLTransientTransportProblem :: assembleAlgorithmicPartOfRhs(FloatArray &answer, EquationID ut, 
+							    const UnknownNumberingScheme& ns, TimeStep *tStep, int nite)
 {
     //
     // computes the real nodal fluxes on elements
@@ -321,7 +328,7 @@ NLTransientTransportProblem :: assembleAlgorithmicPartOfRhs(FloatArray &answer, 
         }
 
 #endif
-        element->giveLocationArray(loc, ut);
+        element->giveLocationArray(loc, ut, ns);
 
         element->giveCharacteristicMatrix(charMtrx, ConductivityMatrix, tStep);
         element->giveCharacteristicMatrix(bcMtrx, LHSBCMatrix, tStep);

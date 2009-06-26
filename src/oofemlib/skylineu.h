@@ -89,7 +89,7 @@ public:
      */
     virtual void times(double x);
     /// Builds internal structure of receiver
-    int buildInternalStructure(EngngModel *, int, EquationID);
+    int buildInternalStructure(EngngModel *, int, EquationID, const UnknownNumberingScheme& s);
     /**
      * allocates and built structure according to given
      * array of maximal column heights

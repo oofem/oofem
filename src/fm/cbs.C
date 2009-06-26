@@ -147,7 +147,7 @@ CBS ::  giveUnknownComponent(EquationID chc, ValueModeType mode,
 // returns unknown quantity like displaacement, velocity of equation eq
 // This function translates this request to numerical method language
 {
-    int eq = dof->giveEquationNumber();
+    int eq = dof->__giveEquationNumber();
     if ( eq == 0 ) {
         _error("giveUnknownComponent: invalid equation number");
     }
@@ -197,7 +197,7 @@ CBS ::  giveUnknownComponent(UnknownType chc, ValueModeType mode,
         return this->theta [ 1 ];
     } else if ( chc == PrescribedTractionPressure )                                                                                                                       {
         if ( mode == VM_Total ) {
-            int eq = dof->givePrescribedEquationNumber();
+            int eq = dof->__givePrescribedEquationNumber();
             if ( eq ) {
                 return prescribedTractionPressure.at(eq);
             } else {
@@ -300,9 +300,10 @@ CBS :: solveYourselfAt(TimeStep *tStep)
             _error("solveYourselfAt: sparse matrix creation failed");
         }
 
-        lhs->buildInternalStructure(this, 1, EID_ConservationEquation);
+        lhs->buildInternalStructure(this, 1, EID_ConservationEquation, EModelDefaultEquationNumbering());
 
-        this->assemble( lhs, stepWhenIcApply, EID_ConservationEquation, PressureLhs, this->giveDomain(1) );
+        this->assemble( lhs, stepWhenIcApply, EID_ConservationEquation, PressureLhs, 
+			EModelDefaultEquationNumbering(), this->giveDomain(1) );
         lhs->times(deltaT * theta [ 0 ] * theta [ 1 ]);
 
         if ( consistentMassFlag ) {
@@ -311,12 +312,14 @@ CBS :: solveYourselfAt(TimeStep *tStep)
                 _error("solveYourselfAt: sparse matrix creation failed");
             }
 
-            mss->buildInternalStructure(this, 1, EID_MomentumBalance);
-            this->assemble( mss, stepWhenIcApply, EID_MomentumBalance, MassMatrix, this->giveDomain(1) );
+            mss->buildInternalStructure(this, 1, EID_MomentumBalance, EModelDefaultEquationNumbering());
+            this->assemble( mss, stepWhenIcApply, EID_MomentumBalance, MassMatrix, 
+			    EModelDefaultEquationNumbering(), this->giveDomain(1) );
         } else {
             mm.resize(momneq);
             mm.zero();
-            this->assembleVectorFromElements( mm, tStep, EID_MomentumBalance, LumpedMassMatrix, VM_Total, this->giveDomain(1) );
+            this->assembleVectorFromElements( mm, tStep, EID_MomentumBalance, LumpedMassMatrix, VM_Total, 
+					      EModelDefaultEquationNumbering(), this->giveDomain(1) );
         }
 
         //<RESTRICTED_SECTION>
@@ -331,15 +334,18 @@ CBS :: solveYourselfAt(TimeStep *tStep)
     //<RESTRICTED_SECTION>
     else if ( materialInterface ) {
         lhs->zero();
-        this->assemble( lhs, stepWhenIcApply, EID_ConservationEquation, PressureLhs, this->giveDomain(1) );
+        this->assemble( lhs, stepWhenIcApply, EID_ConservationEquation, PressureLhs, 
+			EModelDefaultEquationNumbering(), this->giveDomain(1) );
         lhs->times(deltaT * theta [ 0 ] * theta [ 1 ]);
 
         if ( consistentMassFlag ) {
             mss->zero();
-            this->assemble( mss, stepWhenIcApply, EID_MomentumBalance, MassMatrix, this->giveDomain(1) );
+            this->assemble( mss, stepWhenIcApply, EID_MomentumBalance, MassMatrix, 
+			    EModelDefaultEquationNumbering(), this->giveDomain(1) );
         } else {
             mm.zero();
-            this->assembleVectorFromElements( mm, tStep, EID_MomentumBalance, LumpedMassMatrix, VM_Total, this->giveDomain(1) );
+            this->assembleVectorFromElements( mm, tStep, EID_MomentumBalance, LumpedMassMatrix, VM_Total, 
+					      EModelDefaultEquationNumbering(), this->giveDomain(1) );
         }
     }
 
@@ -358,13 +364,16 @@ CBS :: solveYourselfAt(TimeStep *tStep)
 
     /* STEP 1 - calculates auxiliary velocities*/
     rhs.zero();
-    this->assembleVectorFromElements( rhs, tStep, EID_AuxMomentumBalance, IntermediateConvectionTerm, VM_Total, this->giveDomain(1) );
-    this->assembleVectorFromElements( rhs, tStep, EID_AuxMomentumBalance, IntermediateDiffusionTerm, VM_Total, this->giveDomain(1) );
+    this->assembleVectorFromElements( rhs, tStep, EID_AuxMomentumBalance, IntermediateConvectionTerm, VM_Total, 
+				      EModelDefaultEquationNumbering(), this->giveDomain(1) );
+    this->assembleVectorFromElements( rhs, tStep, EID_AuxMomentumBalance, IntermediateDiffusionTerm, VM_Total, 
+				      EModelDefaultEquationNumbering(), this->giveDomain(1) );
     //this->assembleVectorFromElements(mm, tStep, EID_AuxMomentumBalance, LumpedMassMatrix, VM_Total, this->giveDomain(1));
 
     if ( consistentMassFlag ) {
         rhs.times(deltaT);
-        this->assembleVectorFromElements( rhs, tStep, EID_AuxMomentumBalance, PrescribedVelocityRhsVector, VM_Incremental, this->giveDomain(1) );
+        this->assembleVectorFromElements( rhs, tStep, EID_AuxMomentumBalance, PrescribedVelocityRhsVector, VM_Incremental, 
+					  EModelDefaultEquationNumbering(), this->giveDomain(1) );
         nMethod->solve(mss, & rhs, & deltaAuxVelocity);
     } else {
         for ( i = 1; i <= momneq; i++ ) {
@@ -382,8 +391,10 @@ CBS :: solveYourselfAt(TimeStep *tStep)
     }
 
     //prescribedTractionPressure.printYourself();
-    this->assembleVectorFromElements( rhs, tStep, EID_ConservationEquation, DensityRhsVelocityTerms, VM_Total, this->giveDomain(1) );
-    this->assembleVectorFromElements( rhs, tStep, EID_ConservationEquation, DensityRhsPressureTerms, VM_Total, this->giveDomain(1) );
+    this->assembleVectorFromElements( rhs, tStep, EID_ConservationEquation, DensityRhsVelocityTerms, VM_Total, 
+				      EModelDefaultEquationNumbering(), this->giveDomain(1) );
+    this->assembleVectorFromElements( rhs, tStep, EID_ConservationEquation, DensityRhsPressureTerms, VM_Total, 
+				      EModelDefaultEquationNumbering(), this->giveDomain(1) );
     this->giveNumericalMethod(tStep);
     pressureVector->resize(presneq);
     nMethod->solve(lhs, & rhs, pressureVector);
@@ -394,7 +405,8 @@ CBS :: solveYourselfAt(TimeStep *tStep)
     rhs.resize(momneq);
     rhs.zero();
     velocityVector->resize(momneq);
-    this->assembleVectorFromElements( rhs, tStep, EID_MomentumBalance, CorrectionRhs, VM_Total, this->giveDomain(1) );
+    this->assembleVectorFromElements( rhs, tStep, EID_MomentumBalance, CorrectionRhs, VM_Total, 
+				      EModelDefaultEquationNumbering(), this->giveDomain(1) );
     if ( consistentMassFlag ) {
         rhs.times(deltaT);
         //this->assembleVectorFromElements(rhs, tStep, EID_MomentumBalance, PrescribedRhsVector, VM_Incremental, this->giveDomain(1));
@@ -690,7 +702,7 @@ CBS :: applyIC(TimeStep *stepWhenIcApply)
                 continue;
             }
 
-            jj = iDof->giveEquationNumber();
+            jj = iDof->__giveEquationNumber();
             type = iDof->giveDofID();
 
             if ( jj ) {

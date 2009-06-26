@@ -133,7 +133,7 @@ protected:
      * @param d domain
      */
     void assembleDirichletBcRhsVector(FloatArray &answer, TimeStep *tStep, EquationID ut, ValueModeType mode,
-                                      CharType lhsType, Domain *d);
+                                      CharType lhsType, const UnknownNumberingScheme& s, Domain *d);
 };
 
 #endif // stationarytransportproblem_h

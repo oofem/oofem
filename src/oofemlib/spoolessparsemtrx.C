@@ -82,7 +82,7 @@ SpoolesSparseMtrx :: times(double x)
 }
 
 int
-SpoolesSparseMtrx :: buildInternalStructure(EngngModel *eModel, int di)
+SpoolesSparseMtrx :: buildInternalStructure(EngngModel *eModel, int di, const UnknownNumberingScheme&s)
 {
     // detrmine number of equations and estimate number of nonzero entries
     int neq = eModel->giveNumberOfDomainEquations(di);

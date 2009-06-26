@@ -68,6 +68,7 @@ FETICommunicator :: setUpCommunicationMaps(EngngModel *pm)
     int source, tag;
     IntArray numberOfPartitionBoundaryDofMans(size);
     StaticCommunicationBuffer commBuff(MPI_COMM_WORLD);
+    EModelDefaultEquationNumbering dn;
     // FETIBoundaryDofManager *dofmanrec;
     // Map containing boundary dof managers records, the key is corresponding global number
     // value is corresponding local master dof manager number
@@ -149,7 +150,7 @@ FETICommunicator :: setUpCommunicationMaps(EngngModel *pm)
         }
 
         globaldofmannum = domain->giveDofManager(i)->giveGlobalNumber();
-        domain->giveDofManager(i)->giveCompleteLocationArray(locNum);
+        domain->giveDofManager(i)->giveCompleteLocationArray(locNum, dn);
         ndofs = 0;
         for ( l = 1; l <= locNum.giveSize(); l++ ) {
             if ( locNum.at(l) ) {

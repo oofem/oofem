@@ -205,7 +205,8 @@ public:
      * Computes numerically stiffness matrix of receiver. Default implementation computes element stiffness using
      \f$K=\int_v B^T D B dV\f$ formulae, where \f$B\f$ is element geometric matrix and \f$D\f$ is material stiffness matrix.
      * No geometrical nonlinearity is taken into account. NUmerical integration procedure uses integrationRulesArray
-     * for numrical integration. Support for reduced or selected integration is implemented.
+     * for numrical integration. Support for reduced or selected integration is implemented. The individual integration
+     * rules are assumed to correspond to different terms from which the overall matrix is assembled.
      * If numberOfIntegrationRules is equal to
      * 1, the full integration of all coefficients is performed. Otherwise, integration is performed using following rules.
      * Each integration rule can specify start and end strain index of strain vector components for which is valid.
@@ -341,7 +342,7 @@ public:
      * other IP (generally belonging to different elements) and as a consequence leads to
      * increase of stifness matrix profile, to take into account this "remote" dependency.
      */
-    virtual void giveNonlocalLocationArray(IntArray &locationArray);
+    virtual void giveNonlocalLocationArray(IntArray &locationArray, const UnknownNumberingScheme&);
     /**
      * Adds the "nonlocal" contribution to stiffness matrix, to account for nonlocality of
      * material model. Typically, this contribution is obtained by summing up mutual IP contributions.

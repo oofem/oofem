@@ -71,6 +71,7 @@ FETISolver :: estimateMaxPackSize(IntArray &map, CommunicationBuffer &buff, int 
     int mapSize = map.giveSize();
     int i, j, eqNum, ndofs, count = 0;
     IntArray locationArray;
+    EModelDefaultEquationNumbering dn;
 
     if ( rank == 0 ) {
         // master comm maps contain boundary dof managers
@@ -79,7 +80,7 @@ FETISolver :: estimateMaxPackSize(IntArray &map, CommunicationBuffer &buff, int 
         }
     } else {
         for ( i = 1; i <= mapSize; i++ ) {
-            domain->giveDofManager( map.at(i) )->giveCompleteLocationArray(locationArray);
+	  domain->giveDofManager( map.at(i) )->giveCompleteLocationArray(locationArray,dn);
             ndofs = locationArray.giveSize();
             for ( j = 1; j <= ndofs; j++ ) {
                 if ( ( eqNum = locationArray.at(j) ) ) {
@@ -127,6 +128,7 @@ void FETISolver :: setUpCommunicationMaps()
     int i, j, indx = 1, neq;
     StaticCommunicationBuffer commBuff(MPI_COMM_WORLD);
     IntArray commMap;
+    EModelDefaultEquationNumbering dn;
 
     // determine the total number of boundary dof managers
     for ( i = 1; i <= nnodes; i++ ) {
@@ -171,7 +173,7 @@ void FETISolver :: setUpCommunicationMaps()
                 // remember comm map entry
                 commMap.at(indx++) = i;
                 // determine number of DOFs
-                domain->giveDofManager(i)->giveCompleteLocationArray(locNum);
+                domain->giveDofManager(i)->giveCompleteLocationArray(locNum,dn);
                 neq = 0;
                 for ( j = 1; j <= locNum.giveSize(); j++ ) {
                     if ( locNum.at(j) ) {
@@ -258,11 +260,11 @@ FETISolver :: packRBM(ProcessCommunicator &processComm)
     IntArray const *toSendMap = processComm.giveToSendMap();
     CommunicationBuffer *send_buff = processComm.giveProcessCommunicatorBuff()->giveSendBuff();
     IntArray locationArray;
-
+    EModelDefaultEquationNumbering dn;
 
     size = toSendMap->giveSize();
     for ( i = 1; i <= size; i++ ) {
-        domain->giveDofManager( toSendMap->at(i) )->giveCompleteLocationArray(locationArray);
+      domain->giveDofManager( toSendMap->at(i) )->giveCompleteLocationArray(locationArray,dn);
         ndofs = locationArray.giveSize();
         for ( j = 1; j <= ndofs; j++ ) {
             if ( ( eqNum = locationArray.at(j) ) ) {
@@ -339,6 +341,8 @@ FETISolver :: masterMapRBM()
     int size = masterCommMap.giveSize();
     // master will map its own values directly
     int locpos;
+    EModelDefaultEquationNumbering dn;
+
     for ( irbm = 1; irbm <= nsem.at(1); irbm++ ) {
         for ( i = 1; i <= size; i++ ) {
             to = masterCommunicator->giveMasterCommMapPtr()->at(i);
@@ -346,7 +350,7 @@ FETISolver :: masterMapRBM()
             // itself any data. Note, however, that send and receive maps are same.
             from = masterCommMap.at(i);
 
-            domain->giveDofManager(from)->giveCompleteLocationArray(locationArray);
+            domain->giveDofManager(from)->giveCompleteLocationArray(locationArray,dn);
             locpos = 1;
             //
             //   ndofs = locationArray.giveSize(); // including supported
@@ -508,6 +512,7 @@ FETISolver :: unpackSolution(ProcessCommunicator &processComm)
     IntArray const *toRecvMap = processComm.giveToRecvMap();
     CommunicationBuffer *recv_buff = processComm.giveProcessCommunicatorBuff()->giveRecvBuff();
     IntArray locationArray;
+    EModelDefaultEquationNumbering dn;
 
     receivedRank = processComm.giveRank();
 
@@ -515,7 +520,7 @@ FETISolver :: unpackSolution(ProcessCommunicator &processComm)
     // if (receivedRank != 0) {
     for ( i = 1; i <= size; i++ ) {
         to = toRecvMap->at(i);
-        domain->giveDofManager(to)->giveCompleteLocationArray(locationArray);
+        domain->giveDofManager(to)->giveCompleteLocationArray(locationArray,dn);
         ndofs = locationArray.giveSize();
         for ( j = 1; j <= ndofs; j++ ) {
             if ( ( eqNum = locationArray.at(j) ) ) {
@@ -542,6 +547,7 @@ FETISolver :: masterMapSolution()
     IntArray locationArray;
     double value;
     int size = masterCommMap.giveSize();
+    EModelDefaultEquationNumbering dn;
 
     for ( i = 1; i <= size; i++ ) {
         from = masterCommunicator->giveMasterCommMapPtr()->at(i);
@@ -549,7 +555,7 @@ FETISolver :: masterMapSolution()
         // itself any data. Note, however, that send and receive maps are same.
         to = masterCommMap.at(i);
 
-        domain->giveDofManager(to)->giveCompleteLocationArray(locationArray);
+        domain->giveDofManager(to)->giveCompleteLocationArray(locationArray,dn);
         locpos = 1;
         //
         // loop over all dofs
@@ -605,11 +611,11 @@ FETISolver :: packResiduals(ProcessCommunicator &processComm)
     IntArray const *toSendMap = processComm.giveToSendMap();
     CommunicationBuffer *send_buff = processComm.giveProcessCommunicatorBuff()->giveSendBuff();
     IntArray locationArray;
-
+    EModelDefaultEquationNumbering dn;
 
     size = toSendMap->giveSize();
     for ( i = 1; i <= size; i++ ) {
-        domain->giveDofManager( toSendMap->at(i) )->giveCompleteLocationArray(locationArray);
+      domain->giveDofManager( toSendMap->at(i) )->giveCompleteLocationArray(locationArray,dn);
         ndofs = locationArray.giveSize();
         for ( j = 1; j <= ndofs; j++ ) {
             if ( ( eqNum = locationArray.at(j) ) ) {
@@ -678,6 +684,7 @@ FETISolver :: masterMapResiduals()
     IntArray locationArray;
     double value;
     int size = masterCommMap.giveSize();
+    EModelDefaultEquationNumbering dn;
 
     for ( i = 1; i <= size; i++ ) {
         to = masterCommunicator->giveMasterCommMapPtr()->at(i);
@@ -685,7 +692,7 @@ FETISolver :: masterMapResiduals()
         // itself any data. Note, however, that send and receive maps are same.
         from = masterCommMap.at(i);
 
-        domain->giveDofManager(from)->giveCompleteLocationArray(locationArray);
+        domain->giveDofManager(from)->giveCompleteLocationArray(locationArray,dn);
         locpos = 1;
         //
         //   ndofs = locationArray.giveSize(); // including supported
@@ -794,11 +801,12 @@ FETISolver :: unpackDirectionVector(ProcessCommunicator &processComm)
     CommunicationBuffer *recv_buff = processComm.giveProcessCommunicatorBuff()->giveRecvBuff();
     IntArray locationArray;
     // int receivedRank = domainComm.giveRank();
+    EModelDefaultEquationNumbering dn;
 
     size = toRecvMap->giveSize();
     // if (receivedRank != 0) {
     for ( i = 1; i <= size; i++ ) {
-        domain->giveDofManager( toRecvMap->at(i) )->giveCompleteLocationArray(locationArray);
+      domain->giveDofManager( toRecvMap->at(i) )->giveCompleteLocationArray(locationArray,dn);
         ndofs = locationArray.giveSize();
         for ( j = 1; j <= ndofs; j++ ) {
             if ( ( eqNum = locationArray.at(j) ) ) {
@@ -819,6 +827,7 @@ FETISolver :: masterMapDirectionVector()
     IntArray locationArray;
     double value;
     int size = masterCommMap.giveSize();
+    EModelDefaultEquationNumbering dn;
 
     for ( i = 1; i <= size; i++ ) {
         from = masterCommunicator->giveMasterCommMapPtr()->at(i);
@@ -826,7 +835,7 @@ FETISolver :: masterMapDirectionVector()
         // itself any data. Note, however, that send and receive maps are same.
         to = masterCommMap.at(i);
 
-        domain->giveDofManager(to)->giveCompleteLocationArray(locationArray);
+        domain->giveDofManager(to)->giveCompleteLocationArray(locationArray,dn);
         locpos = 1;
         //
         // loop over all dofs
@@ -881,11 +890,11 @@ FETISolver :: packPPVector(ProcessCommunicator &processComm)
     IntArray const *toSendMap = processComm.giveToSendMap();
     CommunicationBuffer *send_buff = processComm.giveProcessCommunicatorBuff()->giveSendBuff();
     IntArray locationArray;
-
+    EModelDefaultEquationNumbering dn;
 
     size = toSendMap->giveSize();
     for ( i = 1; i <= size; i++ ) {
-        domain->giveDofManager( toSendMap->at(i) )->giveCompleteLocationArray(locationArray);
+      domain->giveDofManager( toSendMap->at(i) )->giveCompleteLocationArray(locationArray,dn);
         ndofs = locationArray.giveSize();
         for ( j = 1; j <= ndofs; j++ ) {
             if ( ( eqNum = locationArray.at(j) ) ) {
@@ -954,6 +963,7 @@ FETISolver :: masterMapPPVector()
     IntArray locationArray;
     double value;
     int size = masterCommMap.giveSize();
+    EModelDefaultEquationNumbering dn;
 
     for ( i = 1; i <= size; i++ ) {
         to = masterCommunicator->giveMasterCommMapPtr()->at(i);
@@ -961,7 +971,7 @@ FETISolver :: masterMapPPVector()
         // itself any data. Note, however, that send and receive maps are same.
         from = masterCommMap.at(i);
 
-        domain->giveDofManager(from)->giveCompleteLocationArray(locationArray);
+        domain->giveDofManager(from)->giveCompleteLocationArray(locationArray,dn);
         locpos = 1;
         //
         //   ndofs = locationArray.giveSize(); // including supported

@@ -69,6 +69,7 @@
 #include "contextfilemode.h"
 #include "contextioresulttype.h"
 #include "xfemmanager.h"
+#include "unknownnumberingscheme.h"
 
 #ifndef __MAKEDEPEND
  #include <stdio.h>
@@ -831,20 +832,24 @@ protected:
      * @param answer assembled matrix
      * @param tStep time step, when answer is assembled.
      * @param ut determines type of equation and corresponding element code numbers
+     * @param s determines the equation numbering scheme
      * @param type characterisctic components of type type are requsted from elements and assembled.
      * @param domain source domain
      */
-    virtual void       assemble(SparseMtrx *answer, TimeStep *tStep, EquationID ut, CharType type, Domain *domain);
+    virtual void       assemble(SparseMtrx *answer, TimeStep *tStep, EquationID ut, 
+				CharType type, const UnknownNumberingScheme& s, Domain *domain);
     /**
      * Assembles characteristic matrix of required type into given sparse matrix.
      * @param answer assembled matrix
      * @param tStep time step, when answer is assembled.
      * @param r_id determines type of equation and corresponding element code numbers for matrix rows
      * @param c_id determines type of equation and corresponding element code numbers for matrix columns
+     * @param s determines the equation numbering scheme
      * @param type characterisctic components of type type are requsted from elements and assembled.
      * @param domain source domain
      */
-    virtual void       assemble(SparseMtrx *answer, TimeStep *tStep, EquationID r_id, EquationID c_id, CharType type, Domain *domain);
+    virtual void       assemble(SparseMtrx *answer, TimeStep *tStep, EquationID r_id, EquationID c_id, 
+				CharType type, const UnknownNumberingScheme& s, Domain *domain);
     /**
      * Assembles characteristic vector of required type into given vector.
      * @param answer assembled vector
@@ -858,9 +863,12 @@ protected:
      * @param answer assembled vector
      * @param tStep time step, when answer is assembled.
      * @param type characterisctic components of type type are requsted
+     * @param s determines the equation numbering scheme
      * from dofManagers and assembled using code numbers.
      */
-    virtual void assembleVectorFromDofManagers(FloatArray &, TimeStep *, EquationID ut, CharType type, ValueModeType mode, Domain *domain);
+    virtual void assembleVectorFromDofManagers(FloatArray &, TimeStep *, EquationID ut, 
+					       CharType type, ValueModeType mode, 
+					       const UnknownNumberingScheme& s, Domain *domain);
     /**
      * Assembles prescribed characteristic vector of required type from dofManagers into given vector.
      * @param answer assembled vector
@@ -868,15 +876,18 @@ protected:
      * @param type characterisctic components of type type are requsted
      * from dofManagers and assembled using prescribed eqn numbers.
      */
-    void assemblePrescribedVectorFromDofManagers(FloatArray &, TimeStep *, EquationID, CharType type, ValueModeType mode, Domain * domain);
+    // void assemblePrescribedVectorFromDofManagers(FloatArray &, TimeStep *, EquationID, CharType type, ValueModeType mode, Domain * domain);
     /**
      * Assembles characteristic vector of required type from elements into given vector.
      * @param answer assembled vector
      * @param tStep time step, when answer is assembled.
      * @param type characterisctic components of type type are requsted
+     * @param s determines the equation numbering scheme
      * from elements and assembled using  using code numbers.
      */
-    void assembleVectorFromElements(FloatArray &, TimeStep *, EquationID, CharType type, ValueModeType mode, Domain * domain);
+    void assembleVectorFromElements(FloatArray &, TimeStep *, EquationID, 
+				    CharType type, ValueModeType mode,
+				    const UnknownNumberingScheme& s, Domain * domain);
     /**
      * Assembles prescribed characteristic vector of required type from elements into given vector.
      * @param answer assembled vector

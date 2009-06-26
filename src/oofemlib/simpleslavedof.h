@@ -150,13 +150,13 @@ public:
      * Slave simply forwards this mesage to master.
      * @return equation number, if active BC exists, returns zero
      */
-    int                 giveEquationNumber();
+    int                 __giveEquationNumber();
     /**
      * Returns prescribed equation number corresponding to receiver.
      * Slave simply forwards this mesage to master.
      * @return prescribed equation number, if active BC exists, returns zero
      */
-    int                 givePrescribedEquationNumber();
+    int                 __givePrescribedEquationNumber();
     /**
      * Asks new equation number. Empty function (master is assumed to receive same message).
      */

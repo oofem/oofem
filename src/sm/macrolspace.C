@@ -113,7 +113,8 @@ void MacroLSpace :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode 
    }
    
   stiffnessMatrixMicro->zero();
-  stiffnessMatrixMicro->buildInternalStructure(microEngngModel, 1, EID_MomentumBalance);
+  // bp: replace EModelDefaultEquationNumberingby by customized classs 
+  stiffnessMatrixMicro->buildInternalStructure(microEngngModel, 1, EID_MomentumBalance, EModelDefaultEquationNumbering());
   
   OOFEM_LOG_INFO("Assembling tangent stiffness matrix of microproblem at address %p\n", microMat->problemMicro);
   //microEngngModel->assemble( stiffnessMatrixMicro, tStep, EID_MomentumBalance, TangentStiffnessMatrix, microDomain );

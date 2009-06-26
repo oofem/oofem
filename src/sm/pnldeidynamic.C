@@ -160,7 +160,7 @@ double PNlDEIDynamic ::  giveUnknownComponent(EquationID chc, ValueModeType mode
 // returns unknown quantity like displaacement, velocity of equation eq
 // This function translates this request to numerical method language
 {
-    int eq = dof->giveEquationNumber();
+    int eq = dof->__giveEquationNumber();
     if ( eq == 0 ) {
         _error("giveUnknownComponent: invalid equation number");
     }
@@ -307,7 +307,7 @@ void PNlDEIDynamic :: solveYourselfAt(TimeStep *tStep) {
                 // for shared nodes we add locally an average= 1/givePartitionsConnectivitySize()*contribution
                 for ( j = 1; j <= ndofs; j++ ) {
                     jdof = dman->giveDof(j);
-                    if ( jdof->isPrimaryDof() && ( eqNum = jdof->giveEquationNumber() ) ) {
+                    if ( jdof->isPrimaryDof() && ( eqNum = jdof->__giveEquationNumber() ) ) {
                         my_pMp += coeff * loadRefVector.at(eqNum) * loadRefVector.at(eqNum) / massMatrix.at(eqNum);
                     }
                 }
@@ -363,7 +363,7 @@ void PNlDEIDynamic :: solveYourselfAt(TimeStep *tStep) {
                     continue;
                 }
 
-                jj = iDof->giveEquationNumber();
+                jj = iDof->__giveEquationNumber();
                 if ( jj ) {
                     displacementVector.at(jj) = iDof->giveUnknown(EID_MomentumBalance, VM_Total, tStep);
                     velocityVector.at(jj)     = iDof->giveUnknown(EID_MomentumBalance, VM_Velocity, tStep);
@@ -466,7 +466,7 @@ void PNlDEIDynamic :: solveYourselfAt(TimeStep *tStep) {
             // for shared nodes we add locally an average= 1/givePartitionsConnectivitySize()*contribution
             for ( j = 1; j <= ndofs; j++ ) {
                 jdof = dman->giveDof(j);
-                if ( jdof->isPrimaryDof() && ( eqNum = jdof->giveEquationNumber() ) ) {
+                if ( jdof->isPrimaryDof() && ( eqNum = jdof->__giveEquationNumber() ) ) {
                     my_pt += coeff * internalForces.at(eqNum) * loadRefVector.at(eqNum) / massMatrix.at(eqNum);
                 }
             }
@@ -515,7 +515,7 @@ void PNlDEIDynamic :: solveYourselfAt(TimeStep *tStep) {
             // for shared nodes we add locally an average= 1/givePartitionsConnectivitySize()*contribution
             for ( j = 1; j <= ndofs; j++ ) {
                 jdof = dman->giveDof(j);
-                if ( jdof->isPrimaryDof() && ( eqNum = jdof->giveEquationNumber() ) ) {
+                if ( jdof->isPrimaryDof() && ( eqNum = jdof->__giveEquationNumber() ) ) {
                     my_err += coeff * loadVector.at(eqNum) * loadVector.at(eqNum) / massMatrix.at(eqNum);
                 }
             }
@@ -646,7 +646,8 @@ PNlDEIDynamic :: computeLoadVector(FloatArray &answer, ValueModeType mode, TimeS
     //
     // assembling the nodal part of load vector
     //
-    this->assembleVectorFromDofManagers(answer, stepN, EID_MomentumBalance, NodalLoadVector, mode, domain);
+    this->assembleVectorFromDofManagers(answer, stepN, EID_MomentumBalance, NodalLoadVector, mode, 
+					EModelDefaultEquationNumbering(), domain);
 
 
     /*
@@ -679,7 +680,8 @@ PNlDEIDynamic :: computeLoadVector(FloatArray &answer, ValueModeType mode, TimeS
     //
     // assembling the element part of load vector
     //
-    this->assembleVectorFromElements(answer, stepN, EID_MomentumBalance, ElementForceLoadVector, mode, domain);
+    this->assembleVectorFromElements(answer, stepN, EID_MomentumBalance, ElementForceLoadVector, mode, 
+				     EModelDefaultEquationNumbering(), domain);
 
 
     // exchange contributions
@@ -716,6 +718,7 @@ PNlDEIDynamic :: giveInternalForces(FloatArray &answer, TimeStep *stepN)
     FloatArray charVec;
     //FloatArray* answer = new FloatArray(displacementVector->giveSize());
     int nelems;
+    EModelDefaultEquationNumbering en;
 
     answer.resize( displacementVector.giveSize() );
     answer.zero();
@@ -736,7 +739,7 @@ PNlDEIDynamic :: giveInternalForces(FloatArray &answer, TimeStep *stepN)
         // if (!element -> hasNLCapability ()) {
         //   error ("giveInternalForces: element with no non-linear capability encountered\n");
         // }
-        element->giveLocationArray(loc, EID_MomentumBalance);
+        element->giveLocationArray(loc, EID_MomentumBalance, en);
         element->giveCharacteristicVector(charVec, NodalInternalForcesVector, VM_Total, stepN);
         if ( charVec.containsOnlyZeroes() ) {
             continue;
@@ -785,6 +788,7 @@ PNlDEIDynamic :: computeMassMtrx(FloatArray &massMatrix, double &maxOm, TimeStep
     //FloatArray diagonalStiffMtrx;
     IntArray loc;
     Element *element;
+    EModelDefaultEquationNumbering en;
 #ifdef __PARALLEL_MODE
     int result;
 #endif
@@ -804,7 +808,7 @@ PNlDEIDynamic :: computeMassMtrx(FloatArray &massMatrix, double &maxOm, TimeStep
         }
 
 #endif
-        element->giveLocationArray(loc, EID_MomentumBalance);
+        element->giveLocationArray(loc, EID_MomentumBalance, en);
         element->giveCharacteristicMatrix(charMtrx, LumpedMassMatrix, tStep);
         //charMtrx.beLumpedOf (fullCharMtrx);
 
@@ -1017,7 +1021,7 @@ PNlDEIDynamic :: packMasses(ProcessCommunicator &processComm)
         ndofs = dman->giveNumberOfDofs();
         for ( j = 1; j <= ndofs; j++ ) {
             jdof = dman->giveDof(j);
-            if ( jdof->isPrimaryDof() && ( eqNum = jdof->giveEquationNumber() ) ) {
+            if ( jdof->isPrimaryDof() && ( eqNum = jdof->__giveEquationNumber() ) ) {
                 result &= send_buff->packDouble( massMatrix.at(eqNum) );
             }
         }
@@ -1048,7 +1052,7 @@ PNlDEIDynamic :: unpackMasses(ProcessCommunicator &processComm)
         dofmanmode = dman->giveParallelMode();
         for ( j = 1; j <= ndofs; j++ ) {
             jdof = dman->giveDof(j);
-            if ( jdof->isPrimaryDof() && ( eqNum = jdof->giveEquationNumber() ) ) {
+            if ( jdof->isPrimaryDof() && ( eqNum = jdof->__giveEquationNumber() ) ) {
                 result &= recv_buff->unpackDouble(value);
                 if ( dofmanmode == DofManager_shared ) {
                     massMatrix.at(eqNum) += value;
@@ -1162,7 +1166,7 @@ PNlDEIDynamic :: estimateMaxPackSize(IntArray &commMap, CommunicationBuffer &buf
             ndofs = ( dman = domain->giveDofManager( commMap.at(i) ) )->giveNumberOfDofs();
             for ( j = 1; j <= ndofs; j++ ) {
                 jdof = dman->giveDof(j);
-                if ( jdof->isPrimaryDof() && ( jdof->giveEquationNumber() ) ) {
+                if ( jdof->isPrimaryDof() && ( jdof->__giveEquationNumber() ) ) {
                     count++;
                 } else {
                     pcount++;

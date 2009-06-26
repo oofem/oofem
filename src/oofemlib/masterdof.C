@@ -91,7 +91,7 @@ BoundaryCondition *MasterDof :: giveBc()
 }
 
 
-int MasterDof :: giveEquationNumber()
+int MasterDof :: __giveEquationNumber()
 // Returns the number of the equation in the governing system of equations that corres-
 // ponds to the receiver. The equationNumber is <0 if the receiver is
 // subjected to a boundary condition and then the equationNumber is a Prescribed equation number
@@ -103,7 +103,7 @@ int MasterDof :: giveEquationNumber()
     return ( equationNumber > 0 ) ? equationNumber : 0;
 }
 
-int MasterDof :: givePrescribedEquationNumber()
+int MasterDof :: __givePrescribedEquationNumber()
 // Returns the number of the equation in the governing system of equations that corres-
 // ponds to the receiver. The equationNumber is <0 if the receiver is
 // subjected to a boundary condition and then the equationNumber is a Prescribed equation number
@@ -491,7 +491,7 @@ MasterDof :: unpackAndUpdateUnknown(CommunicationBuffer &buff, EquationID type,
 
     result = buff.unpackDouble(value);
     dofManager->giveDomain()->giveEngngModel()->
-    updateUnknownComponent(type, mode, stepN, this->giveEquationNumber(),
+    updateUnknownComponent(type, mode, stepN, this->__giveEquationNumber(),
                            value, __umode);
     return result;
 }

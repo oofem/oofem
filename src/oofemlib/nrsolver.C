@@ -540,6 +540,8 @@ NRSolver :: initPrescribedEqs()
     int jglobnum, count = 0, ndofman = domain->giveNumberOfDofManagers();
     int i, j, inode, idof;
     IntArray localPrescribedEqs(numberOfPrescribedDofs);
+    EModelDefaultEquationNumbering dn;
+
     for ( j = 1; j <= ndofman; j++ ) {
         jglobnum = domain->giveNode(j)->giveGlobalNumber();
         for ( i = 1; i <= numberOfPrescribedDofs; i++ ) {
@@ -549,10 +551,10 @@ NRSolver :: initPrescribedEqs()
 #if defined(__PARALLEL_MODE) && defined (__PETSC_MODULE)
                 // HUHU hard wired domain no 1
                 if ( n2lpm->isLocal( domain->giveNode(j) ) ) {
-                    localPrescribedEqs.at(++count) = domain->giveNode(j)->giveDof(idof)->giveEquationNumber();
+                    localPrescribedEqs.at(++count) = domain->giveNode(j)->giveDof(idof)->giveEquationNumber(dn);
                 }
 #else
-                localPrescribedEqs.at(++count) = domain->giveNode(j)->giveDof(idof)->giveEquationNumber();
+                localPrescribedEqs.at(++count) = domain->giveNode(j)->giveDof(idof)->giveEquationNumber(dn);
 #endif
 
                 continue;
@@ -572,7 +574,7 @@ NRSolver :: initPrescribedEqs()
     for ( i = 1; i <= numberOfPrescribedDofs; i++ ) {
         inode = prescribedDofs.at(2 * i - 1);
         idof  = prescribedDofs.at(2 * i);
-        prescribedEqs.at(i) = domain->giveNode(inode)->giveDof(idof)->giveEquationNumber();
+        prescribedEqs.at(i) = domain->giveNode(inode)->giveDof(idof)->giveEquationNumber(dn);
     }
 
 #endif

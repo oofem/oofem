@@ -52,6 +52,7 @@
 #include "datastream.h"
 #include "oofem_limits.h"
 #include "contextioerr.h"
+#include "unknownnumberingscheme.h"
 
 #ifndef __MAKEDEPEND
 #include <string.h>
@@ -70,6 +71,16 @@ Dof :: Dof(int i, DofManager *aNode, DofID id)
     dofManager     = aNode;
     dofID          = ( DofIDItem ) id;
     ;
+}
+
+int Dof::giveEquationNumber(const UnknownNumberingScheme& s) {
+  return s.giveDofEquationNumber (this);
+}
+
+void Dof::giveEquationNumbers(IntArray &masterEqNumbers, const UnknownNumberingScheme& s)
+{
+  masterEqNumbers.resize(1);
+  masterEqNumbers.at(1) = s.giveDofEquationNumber(this);
 }
 
 

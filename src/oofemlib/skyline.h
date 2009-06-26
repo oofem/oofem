@@ -113,7 +113,7 @@ public:
      */
     virtual void times(double x);
     /// Builds internal structure of receiver
-    int buildInternalStructure(EngngModel *, int, EquationID);
+    int buildInternalStructure(EngngModel *, int, EquationID, const UnknownNumberingScheme&);
     /**
      * Allocates and builds internal structure according to given
      * array holding adresses of diagonal members values (addr).

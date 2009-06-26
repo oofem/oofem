@@ -69,7 +69,9 @@ PLinearStatic :: initializeFrom(InputRecord *ir)
 
 
 void PLinearStatic :: assembleVectorFromDofManagers(FloatArray &answer, TimeStep *tStep, EquationID ut,
-                                                    CharType type, ValueModeType mode, Domain *domain)
+                                                    CharType type, ValueModeType mode, 
+						    const UnknownNumberingScheme& s,
+						    Domain *domain)
 {
     /*
      * Assembles characteristic vector of required type into given vector.
@@ -90,7 +92,7 @@ void PLinearStatic :: assembleVectorFromDofManagers(FloatArray &answer, TimeStep
         DofManager *node;
         for ( i = 1; i <= nnode; i++ ) {
             node = domain->giveDofManager(i);
-            node->giveCompleteLocationArray(loc);
+            node->giveCompleteLocationArray(loc,s);
             node->computeLoadVectorAt(charVec, tStep, mode);
             if ( node->giveParallelMode() == DofManager_shared ) {
                 scale = 1. / ( node->givePartitionList()->giveSize() + 1 );
@@ -102,7 +104,7 @@ void PLinearStatic :: assembleVectorFromDofManagers(FloatArray &answer, TimeStep
             }
         }
     } else {
-        EngngModel :: assembleVectorFromDofManagers(answer, tStep, EID_MomentumBalance, type, mode, domain);
+      EngngModel :: assembleVectorFromDofManagers(answer, tStep, EID_MomentumBalance, type, mode, s, domain);
     }
 }
 #endif

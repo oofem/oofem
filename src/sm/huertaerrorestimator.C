@@ -3139,7 +3139,7 @@ HuertaErrorEstimator :: solveRefinedElementProblem(int elemId, IntArray &localNo
         for ( idof = 1; idof <= dofs; idof++, pos++ ) {
             nodeDof = node->giveDof(idof);
             if ( nodeDof->hasBc(refinedTStep) == 0 ) {
-                coarseSol = uCoarse.at( nodeDof->giveEquationNumber() );
+                coarseSol = uCoarse.at( nodeDof->__giveEquationNumber() );
             } else {
                 // coarse solution is identical with fine solution at BC
                 coarseSol = nodeSolution.at(idof);
@@ -3941,7 +3941,7 @@ HuertaErrorEstimator :: solveRefinedWholeProblem(IntArray &localNodeIdArray, Int
             fineSolution.at(pos) = nodeSolution.at(idof);
             nodeDof = node->giveDof(idof);
             if ( nodeDof->hasBc(refinedTStep) == 0 ) {
-                coarseSolution.at(pos) = uCoarse.at( nodeDof->giveEquationNumber() );
+                coarseSolution.at(pos) = uCoarse.at( nodeDof->__giveEquationNumber() );
             } else {
                 // coarse solution is identical with fine solution at BC
                 coarseSolution.at(pos) = nodeSolution.at(idof);

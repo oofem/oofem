@@ -157,7 +157,8 @@ public:
 
 
 protected:
-    virtual void assembleAlgorithmicPartOfRhs(FloatArray &rhs, EquationID ut, TimeStep *tStep);
+    virtual void assembleAlgorithmicPartOfRhs(FloatArray &rhs, EquationID ut, 
+					      const UnknownNumberingScheme&s, TimeStep *tStep);
     virtual void applyIC(TimeStep *);
     /**
      * Assembles part of rhs due to Dirichlet boundary conditions.
@@ -169,7 +170,7 @@ protected:
      * @param d domain
      */
     virtual void assembleDirichletBcRhsVector(FloatArray &answer, TimeStep *tStep, EquationID ut, ValueModeType mode,
-                                              CharType lhsType, Domain *d);
+                                              CharType lhsType, const UnknownNumberingScheme& s, Domain *d);
 };
 
 #endif // nonstationarytransportproblem_h

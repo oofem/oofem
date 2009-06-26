@@ -56,6 +56,7 @@
 #include "entityrenumberingscheme.h"
 #include "unknowntype.h"
 #include "geometry.h"
+#include "unknownnumberingscheme.h"
 
 class TimeStep;
 class Node;
@@ -212,20 +213,13 @@ public:
     /**@name Methods refering to code numbers */
     //@{
     /**
-     * Returns the location array (array of code numbers) of receiver.
-     * Results are cached at receiver in locationArray attribute.
+     * Returns the location array (array of code numbers) of receiver for given numbering scheme.
+     * Results are cached at receiver for default scheme in locationArray attribute.
      * The UnknownType parameter allows to distinguis between several possible governing equations, that
      * can be numbered separately. The default implementation assumes that location array will be assembled only for
      * one UnknownType value, and this array is cached on element level.
      */
-    virtual void giveLocationArray(IntArray & locationArray, EquationID) const;
-    /**
-     * Returns the array of prescribed equation numbers  (array of code numbers) of receiver.
-     * Results are not cached at receiver level.
-     * The UnknownType parameter allows to distinguis between several possible governing equations, that
-     * can be numbered separately.
-     */
-    void givePrescribedLocationArray(IntArray & locationArray, EquationID) const;
+    void giveLocationArray(IntArray & locationArray, EquationID, const UnknownNumberingScheme& s) const;
     /**
      * Invalidates location array in receiver. Each element stores its copy of location array(s), in order
      * to avoid time consuming assembly of code numbers every time when requested. Some enginnering models

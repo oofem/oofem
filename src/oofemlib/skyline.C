@@ -386,7 +386,7 @@ int Skyline :: setInternalStructure(IntArray *a)
     return TRUE;
 }
 
-int Skyline :: buildInternalStructure(EngngModel *eModel, int di, EquationID ut)
+int Skyline :: buildInternalStructure(EngngModel *eModel, int di, EquationID ut, const UnknownNumberingScheme& s)
 {
     // first create array of
     // maximal column height for assembled characteristics matrix
@@ -408,7 +408,7 @@ int Skyline :: buildInternalStructure(EngngModel *eModel, int di, EquationID ut)
 
     // loop over elements code numbers
     for ( i = 1; i <= nelem; i++ ) {
-        domain->giveElement(i)->giveLocationArray(loc, ut);
+      domain->giveElement(i)->giveLocationArray(loc, ut, s);
         js = loc.giveSize();
         maxle = INT_MAX;
         for ( j = 1; j <= js; j++ ) {

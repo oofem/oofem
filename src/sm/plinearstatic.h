@@ -89,7 +89,8 @@ public:
      * from dofManagers/elements and assembled.
      */
     virtual void               assembleVectorFromDofManagers(FloatArray &, TimeStep *, EquationID ut,
-                                                             CharType type, ValueModeType mode, Domain *domain);
+                                                             CharType type, ValueModeType mode, 
+							     const UnknownNumberingScheme& s, Domain *domain);
 };
 
 #endif

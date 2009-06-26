@@ -19,7 +19,7 @@ public:
     Interface *giveInterface(InterfaceType);
     
     /// computes the enriched part of the location array
-    void giveLocationArray(IntArray & locationArray, EquationID) const;
+    void giveLocationArray(IntArray & locationArray, EquationID, const UnknownNumberingScheme& s) const;
     const char *giveClassName() const { return "PlaneStress2dXfem"; }
     classType giveClassID() const { return PlaneStress2dXfemClass; }
     int computeNumberOfDofs(EquationID ut);

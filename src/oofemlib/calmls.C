@@ -1098,6 +1098,7 @@ void CylindricalALM  :: convertHPCMap()
     FloatArray weights;
     int size, i;
     int inode, idof;
+    EModelDefaultEquationNumbering dn;
 
 #if defined(__PARALLEL_MODE) || defined(__ENABLE_COMPONENT_LABELS)
     int j, jglobnum, count = 0, ndofman = domain->giveNumberOfDofManagers();
@@ -1113,11 +1114,11 @@ void CylindricalALM  :: convertHPCMap()
 #if defined(__PARALLEL_MODE) && defined (__PETSC_MODULE)
                 // HUHU hard wired domain no 1
                 if ( engngModel->givePetscContext(1, ut)->giveN2Gmap()->isLocal( domain->giveNode(j) ) ) {
-                    indirectMap.at(++count) = domain->giveNode(j)->giveDof(idof)->giveEquationNumber();
+                    indirectMap.at(++count) = domain->giveNode(j)->giveDof(idof)->giveEquationNumber(dn);
                     if ( calm_Controll == calml_hpc ) weights.at(count) = calm_HPCDmanWeightSrcArray.at(i);
                 }
 #else
-                indirectMap.at(++count) = domain->giveNode(j)->giveDof(idof)->giveEquationNumber();
+                indirectMap.at(++count) = domain->giveNode(j)->giveDof(idof)->giveEquationNumber(dn);
 		if ( calm_Controll == calml_hpc ) weights.at(count) = calm_HPCDmanWeightSrcArray.at(i);
 #endif
 
@@ -1144,7 +1145,7 @@ void CylindricalALM  :: convertHPCMap()
     for ( i = 1; i <= size; i++ ) {
         inode = calm_HPCDmanDofSrcArray.at(2 * i - 1);
         idof  = calm_HPCDmanDofSrcArray.at(2 * i);
-        calm_HPCIndirectDofMask.at(i) = domain->giveNode(inode)->giveDof(idof)->giveEquationNumber();
+        calm_HPCIndirectDofMask.at(i) = domain->giveNode(inode)->giveDof(idof)->giveEquationNumber(dn);
         if ( calm_Controll == calml_hpc ) calm_HPCWeights.at(i)=calm_HPCDmanWeightSrcArray.at(i);
         
     }

@@ -99,7 +99,7 @@ double NlDEIDynamic ::  giveUnknownComponent(EquationID chc, ValueModeType mode,
 // returns unknown quantity like displaacement, velocity of equation eq
 // This function translates this request to numerical method language
 {
-    int eq = dof->giveEquationNumber();
+    int eq = dof->__giveEquationNumber();
     if ( eq == 0 ) {
         _error("giveUnknownComponent: invalid equation number");
     }
@@ -189,12 +189,12 @@ void NlDEIDynamic :: solveYourselfAt(TimeStep *tStep) {
         // first step  assemble mass Matrix
         //
         FloatMatrix charMtrx, charMtrx2;
-
+	EModelDefaultEquationNumbering en;
         massMatrix.resize(neq);
         massMatrix.zero();
         for ( i = 1; i <= nelem; i++ ) {
             element = domain->giveElement(i);
-            element->giveLocationArray(loc, EID_MomentumBalance);
+            element->giveLocationArray(loc, EID_MomentumBalance, en);
             element->giveCharacteristicMatrix(charMtrx, LumpedMassMatrix, tStep);
 
 #ifdef LOCAL_ZERO_MASS_REPLACEMENT
@@ -310,8 +310,10 @@ void NlDEIDynamic :: solveYourselfAt(TimeStep *tStep) {
             loadRefVector.resize(neq);
             loadRefVector.zero();
 
-            this->assembleVectorFromElements(loadRefVector, tStep, EID_MomentumBalance, ElementForceLoadVector, VM_Total, domain);
-            this->assembleVectorFromDofManagers(loadRefVector, tStep, EID_MomentumBalance, NodalLoadVector, VM_Total, domain);
+            this->assembleVectorFromElements(loadRefVector, tStep, EID_MomentumBalance, ElementForceLoadVector, VM_Total,
+					     EModelDefaultEquationNumbering(), domain);
+            this->assembleVectorFromDofManagers(loadRefVector, tStep, EID_MomentumBalance, NodalLoadVector, VM_Total,
+						EModelDefaultEquationNumbering(), domain);
 
             // compute the load vector norm pMp
             this->pMp = 0.0;
@@ -361,7 +363,7 @@ void NlDEIDynamic :: solveYourselfAt(TimeStep *tStep) {
                     continue;
                 }
 
-                jj = iDof->giveEquationNumber();
+                jj = iDof->__giveEquationNumber();
                 if ( jj ) {
                     displacementVector.at(jj) = iDof->giveUnknown(EID_MomentumBalance, VM_Total, tStep);
                     velocityVector.at(jj)     = iDof->giveUnknown(EID_MomentumBalance, VM_Velocity, tStep);
@@ -415,8 +417,10 @@ void NlDEIDynamic :: solveYourselfAt(TimeStep *tStep) {
         loadVector.resize( this->giveNumberOfEquations(EID_MomentumBalance) );
         loadVector.zero();
 
-        this->assembleVectorFromElements(loadVector, tStep, EID_MomentumBalance, ElementForceLoadVector, VM_Total, domain);
-        this->assembleVectorFromDofManagers(loadVector, tStep, EID_MomentumBalance, NodalLoadVector, VM_Total, domain);
+        this->assembleVectorFromElements(loadVector, tStep, EID_MomentumBalance, ElementForceLoadVector, VM_Total,
+					 EModelDefaultEquationNumbering(), domain);
+        this->assembleVectorFromDofManagers(loadVector, tStep, EID_MomentumBalance, NodalLoadVector, VM_Total,
+					    EModelDefaultEquationNumbering(), domain);
         //
         // assembling additional parts of right hand side
         //
@@ -514,6 +518,7 @@ NlDEIDynamic :: giveInternalForces(FloatArray &answer, TimeStep *stepN)
     FloatArray charVec;
     Domain *domain = this->giveDomain(1);
     int nelems;
+    EModelDefaultEquationNumbering en;
 
     answer.resize( displacementVector.giveSize() );
     answer.zero();
@@ -521,7 +526,7 @@ NlDEIDynamic :: giveInternalForces(FloatArray &answer, TimeStep *stepN)
     nelems = domain->giveNumberOfElements();
     for ( int i = 1; i <= nelems; i++ ) {
         element = ( NLStructuralElement * ) domain->giveElement(i);
-        element->giveLocationArray(loc, EID_MomentumBalance);
+        element->giveLocationArray(loc, EID_MomentumBalance, en);
         element->giveCharacteristicVector(charVec, NodalInternalForcesVector, VM_Total, stepN);
         if ( charVec.containsOnlyZeroes() ) {
             continue;

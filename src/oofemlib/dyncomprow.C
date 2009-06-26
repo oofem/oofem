@@ -215,7 +215,7 @@ void DynCompRow :: times(double x)
     this->version++;
 }
 
-int DynCompRow :: buildInternalStructure(EngngModel *eModel, int di, EquationID ut)
+int DynCompRow :: buildInternalStructure(EngngModel *eModel, int di, EquationID ut, const UnknownNumberingScheme& s)
 {
     /*
      * int neq = eModel -> giveNumberOfDomainEquations (di);
@@ -340,7 +340,7 @@ int DynCompRow :: buildInternalStructure(EngngModel *eModel, int di, EquationID 
 
     for ( n = 1; n <= nelem; n++ ) {
         elem = domain->giveElement(n);
-        elem->giveLocationArray(loc, ut);
+        elem->giveLocationArray(loc, ut, s);
 
         for ( i = 1; i <= loc.giveSize(); i++ ) { // row indx
             if ( ( ii = loc.at(i) ) ) {

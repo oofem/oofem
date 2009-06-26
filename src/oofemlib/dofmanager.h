@@ -57,6 +57,7 @@
 #include "dofmantransftype.h"
 #include "dofiditem.h"
 #include "contextioresulttype.h"
+#include "unknownnumberingscheme.h"
 
 #ifdef __PARALLEL_MODE
 class CommunicationBuffer;
@@ -180,39 +181,25 @@ public:
      */
     int giveNumberOfPrimaryMasterDofs(IntArray &dofArray) const;
     //virtual int          giveNumberOfDofs () const;
-    /** Returns location array (array containing for each requested dof related equation number)
-     * of receiver. Equation number of dof with active boundary condition is zero.
+    /** Returns location array (array containing for each requested dof related equation number) for
+     * given numbering scheme. 
      * @param dofIDArry array containing dof mask. This mask containing DofIDItem values
      * (they describe physical meaning of dofs, see cltypes.h) is used to extract only
      * required values. If dof with requested physical meaning dos not exist in receiver,
      * an error is generated and execution exits.
      * @param locationArray - return parameter containing required equation numbers.
+     * @param s determines the equation numbering scheme
      * @see Element::giveDofManDofIDMask function.
      */
-    virtual void         giveLocationArray(const IntArray &dofIDArry, IntArray &locationArray) const;
-    /** Returns prescribed equations location  array
-     * (array containing for each requested dof related equation number)
-     * of receiver. Equation number of dof with inactive or no boundary condition is zero.
-     * @param dofIDArry array containing dof mask. This mask containing DofIDItem values
-     * (they describe physical meaning of dofs, see cltypes.h) is used to extract only
-     * required values. If dof with requested physical meaning dos not exist in receiver,
-     * an error is generated and execution exits.
-     * @param locationArray - return parameter containing required equation numbers.
-     * @see Element::giveDofManDofIDMask function.
-     */
-    virtual void         givePrescribedLocationArray(const IntArray &dofIDArry, IntArray &locationArray) const;
+    virtual void         giveLocationArray(const IntArray &dofIDArry, IntArray &locationArray,
+					   const UnknownNumberingScheme& s) const;
     /** Returns full location array of receiver containing equation numbers of all dofs
      * of receiver. Their order is specific to every DofManager. Mainly used at EngngModel level
      * to assemble DofManager contribution (typically load vector).
      * @param locationArray complete location array of receiver.
+     * @param s determines the equation numbering scheme
      */
-    virtual void         giveCompleteLocationArray(IntArray &locationArray) const;
-    /** Returns full location array of prescribed equations of receiver containing equation
-     * numbers of all dofs of receiver. Their order is specific to every DofManager.
-     * Mainly used at EngngModel level to assemble DofManager contribution (typically load vector).
-     * @param locationArray complete location array of receiver.
-     */
-    virtual void         giveCompletePrescribedLocationArray(IntArray &locationArray) const;
+    virtual void         giveCompleteLocationArray(IntArray &locationArray, const UnknownNumberingScheme& s) const;
     /** Returns DOFs numbers of receiver with required physical meaning.
      * @param dofIDArry array containing DofIDItem-type values (this is enumeration
      * identifying physical meaning of particular DOF, see cltypes.h).

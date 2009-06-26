@@ -285,7 +285,7 @@ IncrementalLinearStatic :: solveYourselfAt(TimeStep *tStep) {
         _error("solveYourselfAt: sparse matrix creation failed");
     }
 
-    stiffnessMatrix->buildInternalStructure(this, 1, EID_MomentumBalance);
+    stiffnessMatrix->buildInternalStructure(this, 1, EID_MomentumBalance, EModelDefaultEquationNumbering());
 
     //if (totalDisplacementVector) delete totalDisplacementVector;
     //totalDisplacementVector = new FloatArray (this->giveNumberOfEquations());
@@ -295,7 +295,8 @@ IncrementalLinearStatic :: solveYourselfAt(TimeStep *tStep) {
     OOFEM_LOG_INFO("Assembling stiffness matrix\n");
 #endif
     stiffnessMatrix->zero();     // zero stiffness matrix
-    this->assemble( stiffnessMatrix, tStep, EID_MomentumBalance, StiffnessMatrix, this->giveDomain(1) );
+    this->assemble( stiffnessMatrix, tStep, EID_MomentumBalance, StiffnessMatrix, 
+		    EModelDefaultEquationNumbering(), this->giveDomain(1) );
     //
     // alocate space for displacementVector
     //
@@ -312,13 +313,16 @@ IncrementalLinearStatic :: solveYourselfAt(TimeStep *tStep) {
     //incrementOfLoadVector = new FloatArray (this->giveNumberOfEquations());
     incrementOfLoadVector.resize( this->giveNumberOfEquations(EID_MomentumBalance) );
     incrementOfLoadVector.zero();
-    this->assembleVectorFromElements( incrementOfLoadVector, tStep, EID_MomentumBalance, ElementForceLoadVector, VM_Incremental, this->giveDomain(1) );
-    this->assembleVectorFromElements( incrementOfLoadVector, tStep, EID_MomentumBalance, ElementNonForceLoadVector, VM_Incremental, this->giveDomain(1) );
+    this->assembleVectorFromElements( incrementOfLoadVector, tStep, EID_MomentumBalance, ElementForceLoadVector, 
+				      VM_Incremental, EModelDefaultEquationNumbering(), this->giveDomain(1) );
+    this->assembleVectorFromElements( incrementOfLoadVector, tStep, EID_MomentumBalance, ElementNonForceLoadVector, 
+				      VM_Incremental, EModelDefaultEquationNumbering(), this->giveDomain(1) );
 
     //
     // assembling the nodal part of load vector
     //
-    this->assembleVectorFromDofManagers( incrementOfLoadVector, tStep, EID_MomentumBalance, NodalLoadVector, VM_Incremental, this->giveDomain(1) );
+    this->assembleVectorFromDofManagers( incrementOfLoadVector, tStep, EID_MomentumBalance, NodalLoadVector, 
+					 VM_Incremental, EModelDefaultEquationNumbering(), this->giveDomain(1) );
 
     //
     // set-up numerical model
@@ -452,7 +456,7 @@ IncrementalLinearStatic :: updateDofUnknownsDictionary(DofManager *inode, TimeSt
                 // val = iDof -> giveBcValue() -> give(DisplacementVector,IncrementalMode,tStep) ;
                 val = iDof->giveBcValue(VM_Incremental, tStep);
             } else {
-                val = this->incrementOfDisplacementVector.at( iDof->giveEquationNumber() );
+                val = this->incrementOfDisplacementVector.at( iDof->__giveEquationNumber() );
             }
 
             iDof->updateUnknownsDictionary(tStep, EID_MomentumBalance, VM_Incremental, val);
@@ -465,7 +469,7 @@ IncrementalLinearStatic :: updateDofUnknownsDictionary(DofManager *inode, TimeSt
                 //val = iDof -> giveBcValue() -> give(DisplacementVector,IncrementalMode,tStep) ;
                 val = iDof->giveBcValue(VM_Incremental, tStep);
             } else {
-                val = this->incrementOfDisplacementVector.at( iDof->giveEquationNumber() );
+                val = this->incrementOfDisplacementVector.at( iDof->__giveEquationNumber() );
             }
 
             iDof->updateUnknownsDictionary(tStep, EID_MomentumBalance, VM_Incremental, val);

@@ -108,22 +108,22 @@ BoundaryCondition *SimpleSlaveDof :: giveBc()
 }
 
 
-int SimpleSlaveDof :: giveEquationNumber()
+int SimpleSlaveDof :: __giveEquationNumber()
 // Returns the number of the equation in the governing system of equations that corres-
 // ponds to the receiver. The equation number is 0 if the receiver is
 // subjected to a boundary condition, else it is n+1, where n is the
 // equation number of the most recently numbered degree of freedom.
 {
-    return this->giveMasterDof()->giveEquationNumber();
+    return this->giveMasterDof()->__giveEquationNumber();
 }
 
-int SimpleSlaveDof :: givePrescribedEquationNumber()
+int SimpleSlaveDof :: __givePrescribedEquationNumber()
 // Returns the number of the equation in the governing system of equations that corres-
 // ponds to the receiver. The equation number is 0 if the receiver is
 // subjected to a boundary condition, else it is n+1, where n is the
 // equation number of the most recently numbered degree of freedom.
 {
-    return this->giveMasterDof()->givePrescribedEquationNumber();
+    return this->giveMasterDof()->__givePrescribedEquationNumber();
 }
 
 InitialCondition *SimpleSlaveDof :: giveIc()

@@ -207,9 +207,6 @@ bool Line::isPointInside(FloatArray *point) {
         return true;
     else return false;
 /*
-/*
-/*
-/*
     if ((point->at(2) > vertices->at(1)->at(2) && point->at(2) < vertices->at(2)->at(2)) ||
             (point->at(2) < vertices->at(1)->at(2) && point->at(2) > vertices->at(2)->at(2)))
         return true;
@@ -426,7 +423,7 @@ bool Circle::isOutside(BasicGeometry *bg){
 
 
 void Circle::printYourself(){
-    printf("Circle: ", "\n" );
+    printf("Circle: ");
     vertices->at(1)->printYourself();
     printf("\n" );
     

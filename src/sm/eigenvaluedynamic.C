@@ -121,7 +121,7 @@ double EigenValueDynamic ::  giveUnknownComponent(EquationID chc, ValueModeType 
 // returns unknown quantity like displaacement, eigen value.
 // This function translates this request to numerical method language
 {
-    int eq = dof->giveEquationNumber();
+    int eq = dof->__giveEquationNumber();
     if ( eq == 0 ) {
         _error("giveUnknownComponent: invalid equation number");
     }
@@ -149,7 +149,7 @@ double EigenValueDynamic ::  giveUnknownComponent(UnknownType chc, ValueModeType
 // returns unknown quantity like displaacement, eigen value.
 // This function translates this request to numerical method language
 {
-    int eq = dof->giveEquationNumber();
+    int eq = dof->__giveEquationNumber();
     if ( eq == 0 ) {
         _error("giveUnknownComponent: invalid equation number");
     }
@@ -221,14 +221,16 @@ void EigenValueDynamic :: solveYourselfAt(TimeStep *tStep) {
          */
 
         stiffnessMatrix = ::CreateUsrDefSparseMtrx(sparseMtrxType);
-        stiffnessMatrix->buildInternalStructure(this, 1, EID_MomentumBalance);
+        stiffnessMatrix->buildInternalStructure(this, 1, EID_MomentumBalance, EModelDefaultEquationNumbering());
 
         //massMatrix = stiffnessMatrix->GiveCopy();
 	massMatrix = ::CreateUsrDefSparseMtrx(sparseMtrxType);
-        massMatrix->buildInternalStructure(this, 1, EID_MomentumBalance);
+        massMatrix->buildInternalStructure(this, 1, EID_MomentumBalance, EModelDefaultEquationNumbering());
 
-        this->assemble( stiffnessMatrix, tStep, EID_MomentumBalance, StiffnessMatrix, this->giveDomain(1) );
-        this->assemble( massMatrix, tStep, EID_MomentumBalance, MassMatrix, this->giveDomain(1) );
+        this->assemble( stiffnessMatrix, tStep, EID_MomentumBalance, StiffnessMatrix, 
+			EModelDefaultEquationNumbering(), this->giveDomain(1) );
+        this->assemble( massMatrix, tStep, EID_MomentumBalance, MassMatrix, 
+			EModelDefaultEquationNumbering(), this->giveDomain(1) );
         //
         // create resulting objects eigVec and eigVal
         //

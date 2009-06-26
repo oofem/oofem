@@ -49,6 +49,7 @@
 #include "dof.h"
 #include "datastream.h"
 #include "contextioerr.h"
+#include "unknownnumberingscheme.h"
 
 #ifndef __MAKEDEPEND
 #include <stdio.h>
@@ -80,7 +81,7 @@ double StationaryFlow ::  giveUnknownComponent(EquationID chc, ValueModeType mod
 // returns unknown quantity like displaacement, velocity of equation eq
 // This function translates this request to numerical method language
 {
-    int eq = dof->giveEquationNumber();
+    int eq = dof->__giveEquationNumber();
     if ( eq == 0 ) {
         _error("giveUnknownComponent: invalid equation number");
     }
@@ -152,10 +153,12 @@ void StationaryFlow :: solveYourselfAt(TimeStep *tStep) {
          */
 
         conductivityMatrix = new Skyline();
-        conductivityMatrix->buildInternalStructure(this, 1, EID_ConservationEquation);
+        conductivityMatrix->buildInternalStructure(this, 1, EID_ConservationEquation, EModelDefaultEquationNumbering());
 
-        this->assemble( conductivityMatrix, tStep, EID_ConservationEquation, ConductivityMatrix, this->giveDomain(1) );
-        this->assemble( conductivityMatrix, tStep, EID_ConservationEquation, BcLhsDueToConvection, this->giveDomain(1) );
+        this->assemble( conductivityMatrix, tStep, EID_ConservationEquation, ConductivityMatrix, 
+			EModelDefaultEquationNumbering(), this->giveDomain(1) );
+        this->assemble( conductivityMatrix, tStep, EID_ConservationEquation, BcLhsDueToConvection, 
+			EModelDefaultEquationNumbering(), this->giveDomain(1) );
         //
         // alocate space for fluxVector
         //
@@ -174,12 +177,14 @@ void StationaryFlow :: solveYourselfAt(TimeStep *tStep) {
     //loadVector = new FloatArray (this->giveNumberOfEquations());
     loadVector.resize( this->giveNumberOfEquations(EID_ConservationEquation) );
     loadVector.zero();
-    this->assembleVectorFromElements( loadVector, tStep, EID_ConservationEquation, ElementPPDELoadVector, VM_Total, this->giveDomain(1) );
+    this->assembleVectorFromElements( loadVector, tStep, EID_ConservationEquation, ElementPPDELoadVector, VM_Total, 
+				      EModelDefaultEquationNumbering(), this->giveDomain(1) );
 
     //
     // assembling the nodal part of load vector
     //
-    this->assembleVectorFromDofManagers( loadVector, tStep, EID_ConservationEquation, NodalLoadVector, VM_Total, this->giveDomain(1) );
+    this->assembleVectorFromDofManagers( loadVector, tStep, EID_ConservationEquation, NodalLoadVector, VM_Total, 
+					 EModelDefaultEquationNumbering(), this->giveDomain(1) );
 
     //
     // set-up numerical model

@@ -60,6 +60,7 @@
 #include "contextioresulttype.h"
 #include "entityrenumberingscheme.h"
 
+
 #ifdef __PARALLEL_MODE
 class CommunicationBuffer;
 #endif
@@ -69,13 +70,17 @@ class DofManager;
 class TimeStep;
 class BoundaryCondition;
 class InitialCondition;
+class UnknownNumberingScheme;
 
 /**
  * Abstract class Dof represents Degree Of Freedom in finite element mesh.
  * DOFs are possesed by DofManagers (i.e, nodes, sides or whatever) and
  * one DOF belongs to only one DofManager.
- * Dof maintain its related equation or prescribed equation number,
- * physical meaning and reference to
+ * Dof maintain its related equation or prescribed equation number. 
+ * This equation number is usually assigned by Engng Model, hovewer, several
+ * numbering schemes can exists (see giveEquationNumber and similar services).
+ * 
+ * It maintains also its physical meaning and reference to
  * related DofManager (reference to DofManager which possess particular DOF).
  * To describe physical meaning of particular Dof, special enum type "DofId" has
  * been introduced (see cltypes.h). This type is more descriptive than
@@ -196,7 +201,12 @@ public:
 
     //  virtual double  giveBcValue (UnknownType type, ValueModeType mode, TimeStep* tStep) ;
     /**
-     * Returns equation number of receiver. If Dof has active BC, returned equation number
+     * Returns equation number of receiver for given eqution numbering scheme. 
+     */
+    int                 giveEquationNumber(const UnknownNumberingScheme& s);
+    /**
+     * Returns equation number of receiver, usually assigned by emodel. 
+     * If Dof has active BC, returned equation number
      * is zero. After initializing Dof by calling constructor, Dof has no equation
      * number assigned. When firstly invoked, this function asks EngngModel object
      * for next equation prescribed equation number (this will increase also total number of equation
@@ -204,7 +214,7 @@ public:
      * when initializing code numbers in EngngMode, designer should alter equation
      * numbering strategy.
      */
-    virtual int                 giveEquationNumber()   = 0;
+    virtual int                 __giveEquationNumber()   = 0;
     /**
      * Returns equation number of receiver. If Dof has active BC, returned equation number
      * is zero. After initializing Dof by calling constructor, Dof has no equation
@@ -216,11 +226,7 @@ public:
      *
      * For slave dofs (dependent on other primary dofs) the array of master equation numbers is returned.
      */
-    virtual void giveEquationNumbers(IntArray &masterEqNumbers)
-    {
-        masterEqNumbers.resize(1);
-        masterEqNumbers.at(1) = this->giveEquationNumber();
-    }
+    virtual void giveEquationNumbers(IntArray &masterEqNumbers, const UnknownNumberingScheme& s);
 
     /**
      * Returns prescribed equation number of receiver. If Dof has inactive BC,
@@ -233,26 +239,7 @@ public:
      * when initializing code numbers in EngngMode, designer should alter equation
      * numbering strategy.
      */
-    virtual int                 givePrescribedEquationNumber()   = 0;
-    /**
-     * Returns prescribed equation number of receiver. If Dof has inactive BC,
-     * returned prescribed equation number is zero.
-     * If Dof has active BC, then the corresponding  prescribed equation number is returned.
-     * is zero. After initializing Dof by calling constructor, Dof has no prescribed equation
-     * number assigned. When firstly invoked, this function asks EngngModel object
-     * for next equation or prescribed equation number (this will increase also total number of equation
-     * at EngngModel level). Note: By asking nodal code numbers or element code numbers
-     * when initializing code numbers in EngngMode, designer should alter equation
-     * numbering strategy.
-     *
-     * For slave dofs (dependent on other primary dofs) the array of master equation numbers is returned.
-     */
-
-    virtual void givePrescribedEquationNumbers(IntArray &masterEqNumbers)
-    {
-        masterEqNumbers.resize(1);
-        masterEqNumbers.at(1) = this->givePrescribedEquationNumber();
-    }
+    virtual int                 __givePrescribedEquationNumber() = 0;
 
     /**
      * Asks EngngModel for new equation number. Necessary for EngngModels supporting

@@ -260,7 +260,7 @@ void DofManager :: setLoadArray(IntArray &la)
 }
 
 void
-DofManager :: giveLocationArray(const IntArray &dofIDArry, IntArray &locationArray) const
+DofManager :: giveLocationArray(const IntArray &dofIDArry, IntArray &locationArray, const UnknownNumberingScheme& s) const
 // Returns the location array of the receiver. Creates this array if it
 // does not exist yet. The location array contains the equation number of
 // every  requested degree of freedom of the receiver.
@@ -278,7 +278,7 @@ DofManager :: giveLocationArray(const IntArray &dofIDArry, IntArray &locationArr
                 _error("giveLocationArray: incompatible dof requested");
             }
 
-            locationArray.at(i) = this->giveDof(indx)->giveEquationNumber();
+            locationArray.at(i) = s.giveDofEquationNumber(this->giveDof(indx));
         }
     } else {
         int i, k, indx;
@@ -290,11 +290,11 @@ DofManager :: giveLocationArray(const IntArray &dofIDArry, IntArray &locationArr
         for ( k = 1, i = 1; i <= dofArray.giveSize(); i++ ) {
             indx = dofArray.at(i);
             if ( !this->giveDof(indx)->isPrimaryDof() ) { // slave DOF
-                this->giveDof(indx)->giveEquationNumbers(mstrEqNmbrs);
+	      this->giveDof(indx)->giveEquationNumbers(mstrEqNmbrs, s);
                 locationArray.copySubVector(mstrEqNmbrs, k);
                 k += mstrEqNmbrs.giveSize();
             } else {   // primary DOF
-                locationArray.at(k++) = this->giveDof(indx)->giveEquationNumber();
+	      locationArray.at(k++) = s.giveDofEquationNumber(this->giveDof(indx));
             }
         }
     }
@@ -304,7 +304,7 @@ DofManager :: giveLocationArray(const IntArray &dofIDArry, IntArray &locationArr
 
 
 
-void DofManager :: giveCompleteLocationArray(IntArray &locationArray) const
+void DofManager :: giveCompleteLocationArray(IntArray &locationArray, const UnknownNumberingScheme& s) const
 // Returns the complete location array of the receiver.
 // including all available dofs
 {
@@ -314,76 +314,14 @@ void DofManager :: giveCompleteLocationArray(IntArray &locationArray) const
         // different number of dofs
         locationArray.resize(numberOfDofs);
         for ( i = 1; i <= numberOfDofs; i++ ) {
-            locationArray.at(i) = this->giveDof(i)->giveEquationNumber();
+	  locationArray.at(i) = s.giveDofEquationNumber(this->giveDof(i));
         }
     } else {
-        giveLocationArray(* giveCompleteGlobalDofIDArray(), locationArray);
+      giveLocationArray(* giveCompleteGlobalDofIDArray(), locationArray, s);
     }
 
     return;
 }
-
-void
-DofManager :: givePrescribedLocationArray(const IntArray &dofIDArry, IntArray &locationArray) const
-// Returns the prescribed equation location array of the receiver. Creates this array if it
-// does not exist yet. The location array contains the prescribed equation number of
-// every  requested degree of freedom of the receiver.
-// In dofIDArray are stored DofID's of requsted DOFs in receiver.
-// The DofID's are determining the physical meaning of particular DOFs
-{
-    if ( !hasSlaveDofs ) {
-        int i, size, indx;
-        // prevents some size problem when connecting different elements with
-        // different number of dofs
-        size = dofIDArry.giveSize();
-        locationArray.resize(size);
-        for ( i = 1; i <= size; i++ ) {
-            if ( ( indx = this->findDofWithDofId( ( DofID ) dofIDArry.at(i) ) ) == 0 ) {
-                _error("givePrescribedLocationArray: incompatible dof requested");
-            }
-
-            locationArray.at(i) = this->giveDof(indx)->givePrescribedEquationNumber();
-        }
-    } else {
-        int i, k, indx;
-        IntArray dofArray, mstrEqNmbrs;
-
-        this->giveDofArray(dofIDArry, dofArray);
-        locationArray.resize( giveNumberOfPrimaryMasterDofs(dofArray) );
-
-        for ( k = 1, i = 1; i <= dofArray.giveSize(); i++ ) {
-            indx = dofArray.at(i);
-            if ( !this->giveDof(indx)->isPrimaryDof() ) { // slave DOF
-                this->giveDof(indx)->givePrescribedEquationNumbers(mstrEqNmbrs);
-                locationArray.copySubVector(mstrEqNmbrs, k);
-                k += mstrEqNmbrs.giveSize();
-            } else {   // primary DOF
-                locationArray.at(k++) = this->giveDof(indx)->givePrescribedEquationNumber();
-            }
-        }
-    }
-
-    return;
-}
-
-
-void DofManager :: giveCompletePrescribedLocationArray(IntArray &locationArray) const
-// Returns the complete location array of the receiver.
-// including all available dofs
-{
-    if ( !hasSlaveDofs ) {
-        int i;
-        // prevents some size problem when connecting different elements with
-        // different number of dofs
-        locationArray.resize(numberOfDofs);
-        for ( i = 1; i <= numberOfDofs; i++ ) {
-            locationArray.at(i) = this->giveDof(i)->givePrescribedEquationNumber();
-        }
-    } else {
-        givePrescribedLocationArray(* giveCompleteGlobalDofIDArray(), locationArray);
-    }
-}
-
 
 void
 DofManager :: giveDofArray(const IntArray &dofIDArry, IntArray &answer) const
@@ -461,7 +399,7 @@ int
 DofManager :: giveNumberOfPrimaryMasterDofs(IntArray &dofArray) const
 {
     if ( !hasSlaveDofs ) {
-        return this->giveNumberOfDofs();
+      return dofArray.giveSize();
     }
 
     int i, answer = 0;

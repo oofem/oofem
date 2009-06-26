@@ -56,6 +56,7 @@
 #include "iml.h"
 #include "equationid.h"
 #include "sparsemtrxtype.h"
+#include "unknownnumberingscheme.h"
 
 
 class EngngModel;
@@ -140,9 +141,10 @@ public:
      * can be numbered separately.
      * @param eModel pointer to corresponding engineering model
      * @param di domain index specify which domain to use
+     * @param s determines unknown numbering scheme
      * @param ut unknown type
      */
-    virtual int buildInternalStructure(EngngModel *eModel, int di, EquationID ut) = 0;
+    virtual int buildInternalStructure(EngngModel *eModel, int di, EquationID ut, const UnknownNumberingScheme&s) = 0;
     // virtual int assemble (FloatMatrix*, IntArray*) = 0;
     /**
      * Assembles sparse matrix from contribution of local elements. This method for

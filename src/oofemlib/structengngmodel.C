@@ -194,7 +194,8 @@ StructuralEngngModel :: computeNodalLoadReactionContribution(FloatArray &reactio
 {
     reactions.resize( this->giveNumberOfPrescribedDomainEquations(di, EID_MomentumBalance) );
     reactions.zero();
-    assemblePrescribedVectorFromDofManagers( reactions, tStep, EID_MomentumBalance, NodalLoadVector, VM_Total, this->giveDomain(di) );
+    assembleVectorFromDofManagers( reactions, tStep, EID_MomentumBalance, NodalLoadVector, VM_Total, 
+				   EModelDefaultPrescribedEquationNumbering(), this->giveDomain(di) );
 }
 
 #else
@@ -640,7 +641,7 @@ StructuralEngngModel :: buildReactionTable(IntArray &restrDofMans, IntArray &res
         for ( j = 1; j <= indofs; j++ ) {
             jdof = inode->giveDof(j);
             if ( ( jdof->giveClassID() != SimpleSlaveDofClass ) && ( jdof->hasBc(tStep) ) ) { // skip slave dofs
-                rindex = jdof->givePrescribedEquationNumber();
+                rindex = jdof->__givePrescribedEquationNumber();
                 if ( rindex ) {
                     count++;
                     restrDofMans.at(count) = i;
@@ -678,7 +679,7 @@ StructuralEngngModel :: packInternalForces(FloatArray *src, ProcessCommunicator 
         ndofs = dman->giveNumberOfDofs();
         for ( j = 1; j <= ndofs; j++ ) {
             jdof = dman->giveDof(j);
-            if ( jdof->isPrimaryDof() && ( eqNum = jdof->giveEquationNumber() ) ) {
+            if ( jdof->isPrimaryDof() && ( eqNum = jdof->__giveEquationNumber() ) ) {
                 //fprintf (stderr, "[%d->%d] %d:%d -> %lf\n", rank,  processComm.giveRank(), toSendMap->at(i), j, src->at(eqNum));
                 result &= pcbuff->packDouble( src->at(eqNum) );
             }
@@ -711,7 +712,7 @@ StructuralEngngModel :: unpackInternalForces(FloatArray *dest, ProcessCommunicat
         dofmanmode = dman->giveParallelMode();
         for ( j = 1; j <= ndofs; j++ ) {
             jdof = dman->giveDof(j);
-            if ( jdof->isPrimaryDof() && ( eqNum = jdof->giveEquationNumber() ) ) {
+            if ( jdof->isPrimaryDof() && ( eqNum = jdof->__giveEquationNumber() ) ) {
                 result &= pcbuff->unpackDouble(value);
                 //fprintf (stderr, "[%d->%d] %d:%d <- %lf\n", rank,  processComm.giveRank(), toRecvMap->at(i), j, value);
                 if ( dofmanmode == DofManager_shared ) {
@@ -746,7 +747,7 @@ StructuralEngngModel :: packLoad(FloatArray *src, ProcessCommunicator &processCo
         ndofs = dman->giveNumberOfDofs();
         for ( j = 1; j <= ndofs; j++ ) {
             jdof = dman->giveDof(j);
-            if ( jdof->isPrimaryDof() && ( eqNum = jdof->giveEquationNumber() ) ) {
+            if ( jdof->isPrimaryDof() && ( eqNum = jdof->__giveEquationNumber() ) ) {
                 result &= pcbuff->packDouble( src->at(eqNum) );
             }
         }
@@ -778,7 +779,7 @@ StructuralEngngModel :: unpackLoad(FloatArray *dest, ProcessCommunicator &proces
         dofmanmode = dman->giveParallelMode();
         for ( j = 1; j <= ndofs; j++ ) {
             jdof = dman->giveDof(j);
-            if ( jdof->isPrimaryDof() && ( eqNum = jdof->giveEquationNumber() ) ) {
+            if ( jdof->isPrimaryDof() && ( eqNum = jdof->__giveEquationNumber() ) ) {
                 result &= pcbuff->unpackDouble(value);
                 if ( dofmanmode == DofManager_shared ) {
                     dest->at(eqNum) += value;
@@ -856,7 +857,7 @@ StructuralEngngModel :: packReactions(FloatArray *src, ProcessCommunicator &proc
         ndofs = dman->giveNumberOfDofs();
         for ( j = 1; j <= ndofs; j++ ) {
             jdof = dman->giveDof(j);
-            if ( jdof->isPrimaryDof() && ( eqNum = jdof->givePrescribedEquationNumber() ) ) {
+            if ( jdof->isPrimaryDof() && ( eqNum = jdof->__givePrescribedEquationNumber() ) ) {
                 result &= pcbuff->packDouble( src->at(eqNum) );
             }
         }
@@ -889,7 +890,7 @@ StructuralEngngModel :: unpackReactions(FloatArray *dest, ProcessCommunicator &p
         dofmanmode = dman->giveParallelMode();
         for ( j = 1; j <= ndofs; j++ ) {
             jdof = dman->giveDof(j);
-            if ( jdof->isPrimaryDof() && ( eqNum = jdof->givePrescribedEquationNumber() ) ) {
+            if ( jdof->isPrimaryDof() && ( eqNum = jdof->__givePrescribedEquationNumber() ) ) {
                 result &= pcbuff->unpackDouble(value);
                 if ( dofmanmode == DofManager_shared ) {
                     dest->at(eqNum) += value;

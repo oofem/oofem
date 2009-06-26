@@ -265,7 +265,7 @@ SkylineUnsym :: checkSizeTowards(const IntArray &rloc, const IntArray &cloc)
 
 
 int
-SkylineUnsym :: buildInternalStructure(EngngModel *eModel, int di, EquationID ut)
+SkylineUnsym :: buildInternalStructure(EngngModel *eModel, int di, EquationID ut, const UnknownNumberingScheme& s)
 {
     // Instanciates the profile of the receiver and initializes all coeffi-
     // cients to zero.
@@ -309,11 +309,11 @@ SkylineUnsym :: buildInternalStructure(EngngModel *eModel, int di, EquationID ut
         //elem -> giveLocationArray (loc) ;
 
         if ( !nonlocal ) {
-            elem->giveLocationArray(loc, ut);
+	  elem->giveLocationArray(loc, ut, s);
         }
         //else ((StructuralElement*)elem) -> giveNonlocalLocationArray(loc) ;
         else {
-            elem->giveLocationArray(loc, ut);
+	  elem->giveLocationArray(loc, ut, s);
         }
 
         //    Find 'first', the smallest positive number in LocArray

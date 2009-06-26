@@ -618,7 +618,6 @@ NLStructuralElement :: computeStiffnessMatrix_withIRulesAsSubcells(FloatMatrix &
 }
 
 
-
 /*
  * void   NLStructuralElement :: updateYourself (TimeStep* stepN)
  * // Updates the receiver at end of step.

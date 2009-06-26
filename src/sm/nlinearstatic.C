@@ -276,7 +276,7 @@ double NonLinearStatic ::  giveUnknownComponent(EquationID chc, ValueModeType mo
 // returns unknown quantity like displacement, velocity of equation eq
 // This function translates this request to numerical method language
 {
-    int eq = dof->giveEquationNumber();
+    int eq = dof->__giveEquationNumber();
     if ( eq == 0 ) {
         _error("giveUnknownComponent: invalid equation number");
     }
@@ -322,7 +322,7 @@ double NonLinearStatic ::  giveUnknownComponent(UnknownType chc, ValueModeType m
 // returns unknown quantity like displacement, velocity of equation eq
 // This function translates this request to numerical method language
 {
-    int eq = dof->giveEquationNumber();
+    int eq = dof->__giveEquationNumber();
     if ( eq == 0 ) {
         _error("giveUnknownComponent: invalid equation number");
     }
@@ -387,6 +387,7 @@ NonLinearStatic :: giveInternalForces(FloatArray &answer, const FloatArray &Delt
     FloatArray charVec;
     //FloatArray* answer = new FloatArray(DeltaR->giveSize());
     int nelems;
+    EModelDefaultEquationNumbering en;
 
     answer.resize( DeltaR.giveSize() );
     answer.zero();
@@ -419,7 +420,7 @@ NonLinearStatic :: giveInternalForces(FloatArray &answer, const FloatArray &Delt
         }
 
 #endif
-        element->giveLocationArray(loc, EID_MomentumBalance);
+        element->giveLocationArray(loc, EID_MomentumBalance, en);
         element->giveCharacteristicVector(charVec, NodalInternalForcesVector, VM_Total, stepN);
         // if (charVec->containsOnlyZeroes ()) continue;
         answer.assemble(charVec, loc);
@@ -634,7 +635,7 @@ NonLinearStatic :: proceedStep(int di, TimeStep *tStep)
             }
         }
 
-        stiffnessMatrix->buildInternalStructure(this, di, EID_MomentumBalance);
+        stiffnessMatrix->buildInternalStructure(this, di, EID_MomentumBalance, EModelDefaultEquationNumbering());
     }
 
     /*
@@ -670,7 +671,7 @@ NonLinearStatic :: proceedStep(int di, TimeStep *tStep)
             incrementalBCLoadVector.resize( this->giveNumberOfEquations(EID_MomentumBalance) );
             incrementalBCLoadVector.zero();
             this->assembleVectorFromElements( incrementalBCLoadVector, tStep, EID_MomentumBalance, ElementNonForceLoadVector,
-                                             VM_Incremental, this->giveDomain(di) );
+					      VM_Incremental, EModelDefaultEquationNumbering(), this->giveDomain(di) );
         } else {
             incrementalBCLoadVector.resize(0);
             incrementalBCLoadVector.resize(0);
@@ -704,19 +705,22 @@ NonLinearStatic :: proceedStep(int di, TimeStep *tStep)
             OOFEM_LOG_INFO("Assembling secant stiffness matrix\n");
 #endif
             stiffnessMatrix->zero(); // zero stiffness matrix
-            this->assemble( stiffnessMatrix, tStep, EID_MomentumBalance, SecantStiffnessMatrix, this->giveDomain(di) );
+            this->assemble( stiffnessMatrix, tStep, EID_MomentumBalance, SecantStiffnessMatrix, 
+			    EModelDefaultEquationNumbering(), this->giveDomain(di) );
         } else if ( stiffMode == nls_tangentStiffness ) {
 #ifdef VERBOSE
             OOFEM_LOG_INFO("Assembling tangent stiffness matrix\n");
 #endif
             stiffnessMatrix->zero(); // zero stiffness matrix
-            this->assemble( stiffnessMatrix, tStep, EID_MomentumBalance, TangentStiffnessMatrix, this->giveDomain(di) );
+            this->assemble( stiffnessMatrix, tStep, EID_MomentumBalance, TangentStiffnessMatrix, 
+			    EModelDefaultEquationNumbering(), this->giveDomain(di) );
         } else if ( ( stiffMode == nls_elasticStiffness ) && ( initFlag || ( mstep->giveFirstStepNumber() == tStep->giveNumber() ) ) ) {
 #ifdef VERBOSE
             OOFEM_LOG_INFO("Assembling elastic stiffness matrix\n");
 #endif
             stiffnessMatrix->zero(); // zero stiffness matrix
-            this->assemble( stiffnessMatrix, tStep, EID_MomentumBalance, ElasticStiffnessMatrix, this->giveDomain(di) );
+            this->assemble( stiffnessMatrix, tStep, EID_MomentumBalance, ElasticStiffnessMatrix, 
+			    EModelDefaultEquationNumbering(), this->giveDomain(di) );
         }
     }
 
@@ -806,13 +810,15 @@ void NonLinearStatic ::  updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Do
 #ifdef VERBOSE
             OOFEM_LOG_INFO("Assembling tangent stiffness matrix\n");
 #endif
-            this->assemble(stiffnessMatrix, tStep, EID_MomentumBalance, TangentStiffnessMatrix, d);
+            this->assemble(stiffnessMatrix, tStep, EID_MomentumBalance, TangentStiffnessMatrix, 
+			   EModelDefaultEquationNumbering(), d);
         } else  if ( stiffMode == nls_secantStiffness ) {
 #ifdef VERBOSE
             OOFEM_LOG_INFO("Assembling secant stiffness matrix\n");
 #endif
             stiffnessMatrix->zero(); // zero stiffness matrix
-            this->assemble(stiffnessMatrix, tStep, EID_MomentumBalance, SecantStiffnessMatrix, d);
+            this->assemble(stiffnessMatrix, tStep, EID_MomentumBalance, SecantStiffnessMatrix, 
+			   EModelDefaultEquationNumbering(), d);
         } else {
             // currently no action , this method is mainly intended to
             // assemble new tangent stiffness after each iteration
@@ -1071,14 +1077,15 @@ NonLinearStatic :: updateDomainLinks() {
 
 
 void
-NonLinearStatic :: assemble(SparseMtrx *answer, TimeStep *tStep, EquationID ut, CharType type, Domain *domain)
+NonLinearStatic :: assemble(SparseMtrx *answer, TimeStep *tStep, EquationID ut, CharType type, 
+			    const UnknownNumberingScheme& s, Domain *domain)
 {
 #ifdef TIME_REPORT
     oofem_timeval tstart;
     :: getUtime(tstart);
 #endif
 
-    LinearStatic :: assemble(answer, tStep, ut, type, domain);
+    LinearStatic :: assemble(answer, tStep, ut, type, s, domain);
 
     if ( ( nonlocalStiffnessFlag ) && ( type == TangentStiffnessMatrix ) ) {
         // add nonlocal contribution
@@ -1152,31 +1159,35 @@ NonLinearStatic :: assembleIncrementalReferenceLoadVectors(FloatArray &_incremen
                                                            SparseNonLinearSystemNM :: referenceLoadInputModeType _refMode,
                                                            Domain *sourceDomain, EquationID ut, TimeStep *tStep)
 {
+  EModelDefaultEquationNumbering en;
+  
     _incrementalLoadVector.resize( sourceDomain->giveEngngModel()->giveNumberOfEquations(EID_MomentumBalance) );
     _incrementalLoadVector.zero();
     _incrementalLoadVectorOfPrescribed.resize( sourceDomain->giveEngngModel()->giveNumberOfPrescribedEquations(EID_MomentumBalance) );
     _incrementalLoadVectorOfPrescribed.zero();
 
     if ( _refMode == SparseNonLinearSystemNM :: rlm_inceremental ) {
-        this->assembleVectorFromElements(_incrementalLoadVector, tStep, ut,
-                                         ElementForceLoadVector, VM_Incremental, sourceDomain);
+        this->assembleVectorFromElements(_incrementalLoadVector, tStep, ut, ElementForceLoadVector, 
+					 VM_Incremental, en, sourceDomain);
         this->assembleVectorFromDofManagers(_incrementalLoadVector, tStep, ut,
-                                            NodalLoadVector, VM_Incremental, sourceDomain);
+                                            NodalLoadVector, VM_Incremental, en, sourceDomain);
 
         this->assemblePrescribedVectorFromElements(_incrementalLoadVector, tStep, ut,
                                                    ElementForceLoadVector, VM_Incremental, sourceDomain);
-        this->assemblePrescribedVectorFromDofManagers(_incrementalLoadVector, tStep, ut,
-                                                      NodalLoadVector, VM_Incremental, sourceDomain);
+        this->assembleVectorFromDofManagers(_incrementalLoadVector, tStep, ut,
+					    NodalLoadVector, VM_Incremental, 
+					    EModelDefaultPrescribedEquationNumbering(), sourceDomain);
     } else {
         this->assembleVectorFromElements(_incrementalLoadVector, tStep, ut,
-                                         ElementForceLoadVector, VM_Total, sourceDomain);
+                                         ElementForceLoadVector, VM_Total, en, sourceDomain);
         this->assembleVectorFromDofManagers(_incrementalLoadVector, tStep, ut,
-                                            NodalLoadVector, VM_Total, sourceDomain);
+                                            NodalLoadVector, VM_Total, en, sourceDomain);
 
         this->assemblePrescribedVectorFromElements(_incrementalLoadVectorOfPrescribed, tStep, ut,
                                                    ElementForceLoadVector, VM_Total, sourceDomain);
-        this->assemblePrescribedVectorFromDofManagers(_incrementalLoadVectorOfPrescribed, tStep, ut,
-                                                      NodalLoadVector, VM_Total, sourceDomain);
+        this->assembleVectorFromDofManagers(_incrementalLoadVectorOfPrescribed, tStep, ut,
+					    NodalLoadVector, VM_Total, 
+					    EModelDefaultPrescribedEquationNumbering(), sourceDomain);
     }
 
 #ifdef __PARALLEL_MODE
@@ -1261,7 +1272,7 @@ NonLinearStatic :: estimateMaxPackSize(IntArray &commMap, CommunicationBuffer &b
             ndofs = ( dman = domain->giveDofManager( commMap.at(i) ) )->giveNumberOfDofs();
             for ( j = 1; j <= ndofs; j++ ) {
                 jdof = dman->giveDof(j);
-                if ( jdof->isPrimaryDof() && ( jdof->giveEquationNumber() ) ) {
+                if ( jdof->isPrimaryDof() && ( jdof->__giveEquationNumber() ) ) {
                     count++;
                 } else {
                     pcount++;
@@ -1342,7 +1353,7 @@ NonLinearStatic :: packMigratingData(TimeStep *atTime)
         for ( idof = 1; idof <= ndofs; idof++ ) {
             _dof = _dm->giveDof(idof);
             if ( _dof->isPrimaryDof() ) {
-                if ( ( _eq = _dof->giveEquationNumber() ) ) {
+                if ( ( _eq = _dof->__giveEquationNumber() ) ) {
                     // pack values in solution vectors
                     _dof->updateUnknownsDictionary( atTime, EID_MomentumBalance, VM_Total, totalDisplacement.at(_eq) );
                     if ( initialLoadVectorEmpty ) {
@@ -1352,7 +1363,7 @@ NonLinearStatic :: packMigratingData(TimeStep *atTime)
                     }
 
                     _dof->updateUnknownsDictionary( atTime, EID_MomentumBalance, VM_RhsIncremental, incrementalLoadVector.at(_eq) );
-                } else if ( ( _eq = _dof->givePrescribedEquationNumber() ) ) {
+                } else if ( ( _eq = _dof->__givePrescribedEquationNumber() ) ) {
                     // pack values in prescribed solution vectors
                     if ( initialLoadVectorOfPrescribedEmpty ) {
                         _dof->updateUnknownsDictionary(atTime, EID_MomentumBalance, VM_RhsInitial, 0.0);
@@ -1394,7 +1405,7 @@ NonLinearStatic :: unpackMigratingData(TimeStep *atTime)
         for ( idof = 1; idof <= ndofs; idof++ ) {
             _dof = _dm->giveDof(idof);
             if ( _dof->isPrimaryDof() ) {
-                if ( ( _eq = _dof->giveEquationNumber() ) ) {
+                if ( ( _eq = _dof->__giveEquationNumber() ) ) {
                     // pack values in solution vectors
                     _dof->giveUnknownsDictionaryValue( atTime, EID_MomentumBalance, VM_Total, totalDisplacement.at(_eq) );
                     _dof->giveUnknownsDictionaryValue( atTime, EID_MomentumBalance, VM_RhsInitial, initialLoadVector.at(_eq) );
@@ -1409,7 +1420,7 @@ NonLinearStatic :: unpackMigratingData(TimeStep *atTime)
                     }
 
 #endif
-                } else if ( ( _eq = _dof->givePrescribedEquationNumber() ) ) {
+                } else if ( ( _eq = _dof->__givePrescribedEquationNumber() ) ) {
                     // pack values in prescribed solution vectors
                     _dof->giveUnknownsDictionaryValue( atTime, EID_MomentumBalance, VM_RhsInitial, initialLoadVectorOfPrescribed.at(_eq) );
                     _dof->giveUnknownsDictionaryValue( atTime, EID_MomentumBalance, VM_RhsIncremental, incrementalLoadVectorOfPrescribed.at(_eq) );

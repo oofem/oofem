@@ -135,7 +135,7 @@ void DSSMatrix :: times(double x)
     return;
 }
 
-int DSSMatrix :: buildInternalStructure(EngngModel *eModel, int di, EquationID ut)
+int DSSMatrix :: buildInternalStructure(EngngModel *eModel, int di, EquationID ut, const UnknownNumberingScheme& s)
 {
     IntArray loc;
     Domain *domain = eModel->giveDomain(di);
@@ -151,7 +151,7 @@ int DSSMatrix :: buildInternalStructure(EngngModel *eModel, int di, EquationID u
 
     for ( n = 1; n <= nelem; n++ ) {
         elem = domain->giveElement(n);
-        elem->giveLocationArray(loc, ut);
+        elem->giveLocationArray(loc, ut, s);
 
         for ( i = 1; i <= loc.giveSize(); i++ ) {
             if ( ( ii = loc.at(i) ) ) {
@@ -215,7 +215,7 @@ int DSSMatrix :: buildInternalStructure(EngngModel *eModel, int di, EquationID u
       }
       for (i=1; i<=_ndofs; i++) {
 	if (dman->giveDof(i)->isPrimaryDof()) {
-	  _neq = dman->giveDof(i)->giveEquationNumber();
+	  _neq = dman->giveDof(i)->giveEquationNumber(s);
 	  if (_neq > 0) {
 	    mcn[_c++] = _neq-1;
 	  } else {
@@ -415,7 +415,7 @@ SparseMtrx *DSSMatrix :: GiveCopy() const {
 
 void DSSMatrix :: times(const FloatArray &x, FloatArray &answer) const { }
 void DSSMatrix :: times(double x) { }
-int DSSMatrix :: buildInternalStructure(EngngModel *, int, EquationID) { return 0; }
+int DSSMatrix :: buildInternalStructure(EngngModel *, int, EquationID, const UnknownNumberingScheme&s) { return 0; }
 int DSSMatrix :: assemble(const IntArray &loc, const FloatMatrix &mat) { return 0; }
 int DSSMatrix :: assemble(const IntArray &rloc, const IntArray &cloc, const FloatMatrix &mat) { return 0; }
 SparseMtrx *DSSMatrix :: factorized() { return NULL; }

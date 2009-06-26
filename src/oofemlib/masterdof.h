@@ -141,7 +141,7 @@ public:
     /// Returns classType id of receiver.
     classType           giveClassID() const { return MasterDofClass; }
     /**
-     * Returns equation number of receiver. If Dof has active BC, returned equation number
+     * Returns assigned equation number of receiver. If Dof has active BC, returned equation number
      * is zero. After initializing Dof by calling constructor, Dof has no equation
      * number assigned. When firstly invoked, this function asks EngngModel object
      * for next equation prescribed equation number (this will increase also total number of equation
@@ -149,7 +149,7 @@ public:
      * when initializing code numbers in EngngMode, designer should alter equation
      * numbering strategy.
      */
-    virtual int                 giveEquationNumber();
+    virtual int                 __giveEquationNumber();
     /**
      * Returns prescribed equation number of receiver. If Dof has inactive BC,
      * returned prescribed equation number is zero.
@@ -161,7 +161,7 @@ public:
      * when initializing code numbers in EngngMode, designer should alter equation
      * numbering strategy.
      */
-    virtual int                 givePrescribedEquationNumber();
+    virtual int                 __givePrescribedEquationNumber();
     /**
      * Asks EngngModel for new equation number. Necessary for EngngModels supporting
      * changes of static system during solution. Then it is necessary to force

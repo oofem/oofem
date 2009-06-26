@@ -244,7 +244,7 @@ SUPG ::  giveUnknownComponent(EquationID chc, ValueModeType mode,
 // returns unknown quantity like displaacement, velocity of equation eq
 // This function translates this request to numerical method language
 {
-    int eq = dof->giveEquationNumber();
+    int eq = dof->__giveEquationNumber();
     if ( eq == 0 ) {
         _error("giveUnknownComponent: invalid equation number");
     }
@@ -409,7 +409,7 @@ SUPG :: solveYourselfAt(TimeStep *tStep)
             _error("solveYourselfAt: sparse matrix creation failed");
         }
 
-        lhs->buildInternalStructure(this, 1, EID_MomentumBalance_ConservationEquation);
+        lhs->buildInternalStructure(this, 1, EID_MomentumBalance_ConservationEquation, EModelDefaultEquationNumbering());
 
         if ( materialInterface ) {
             this->updateElementsForNewInterfacePosition(tStep);
@@ -419,7 +419,7 @@ SUPG :: solveYourselfAt(TimeStep *tStep)
     } else if ( requiresUnknownsDictionaryUpdate() ) {
         // rebuild lhs structure and resize solution vector
         incrementalSolutionVector.resize(neq);
-        lhs->buildInternalStructure(this, 1, EID_MomentumBalance_ConservationEquation);
+        lhs->buildInternalStructure(this, 1, EID_MomentumBalance_ConservationEquation, EModelDefaultEquationNumbering());
     }
 
 
@@ -453,7 +453,7 @@ SUPG :: solveYourselfAt(TimeStep *tStep)
                     continue;
                 }
 
-                jj = iDof->giveEquationNumber();
+                jj = iDof->__giveEquationNumber();
                 type = iDof->giveDofID();
 
                 if ( jj ) {
@@ -494,11 +494,15 @@ SUPG :: solveYourselfAt(TimeStep *tStep)
     // assemble rhs (residual)
     //
     rhs.zero();
-    this->assembleVectorFromElements( rhs, tStep, EID_MomentumBalance, BCRhsTerm_MB, VM_Total, this->giveDomain(1) );
-    this->assembleVectorFromElements( rhs, tStep, EID_ConservationEquation, BCRhsTerm_MC, VM_Total, this->giveDomain(1) );
+    this->assembleVectorFromElements( rhs, tStep, EID_MomentumBalance, BCRhsTerm_MB, VM_Total, 
+				      EModelDefaultEquationNumbering(), this->giveDomain(1) );
+    this->assembleVectorFromElements( rhs, tStep, EID_ConservationEquation, BCRhsTerm_MC, VM_Total, 
+				      EModelDefaultEquationNumbering(), this->giveDomain(1) );
     // algoritmic rhs part (assembled by e-model (in giveCharComponent service) from various element contribs)
-    this->assembleVectorFromElements( rhs, tStep, EID_MomentumBalance, AlgorithmicRhsTerm_MB, VM_Total, this->giveDomain(1) );
-    this->assembleVectorFromElements( rhs, tStep, EID_ConservationEquation, AlgorithmicRhsTerm_MC, VM_Total, this->giveDomain(1) );
+    this->assembleVectorFromElements( rhs, tStep, EID_MomentumBalance, AlgorithmicRhsTerm_MB, VM_Total, 
+				      EModelDefaultEquationNumbering(), this->giveDomain(1) );
+    this->assembleVectorFromElements( rhs, tStep, EID_ConservationEquation, AlgorithmicRhsTerm_MC, VM_Total, 
+				      EModelDefaultEquationNumbering(), this->giveDomain(1) );
 
     //
     // corrector
@@ -513,22 +517,33 @@ SUPG :: solveYourselfAt(TimeStep *tStep)
         {
             // momentum balance part
             lhs->zero();
-            this->assemble( lhs, tStep, EID_MomentumBalance, AccelerationTerm_MB, this->giveDomain(1) );
-            this->assemble( lhs, tStep, EID_MomentumBalance, AdvectionDerivativeTerm_MB, this->giveDomain(1) );
+            this->assemble( lhs, tStep, EID_MomentumBalance, AccelerationTerm_MB, 
+			    EModelDefaultEquationNumbering(), this->giveDomain(1) );
+            this->assemble( lhs, tStep, EID_MomentumBalance, AdvectionDerivativeTerm_MB, 
+			    EModelDefaultEquationNumbering(), this->giveDomain(1) );
             if ( 1 ) { //if ((nite > 5)) // && (rnorm < 1.e4))
-                this->assemble( lhs, tStep, EID_MomentumBalance, TangentDiffusionDerivativeTerm_MB, this->giveDomain(1) );
+                this->assemble( lhs, tStep, EID_MomentumBalance, TangentDiffusionDerivativeTerm_MB, 
+				EModelDefaultEquationNumbering(), this->giveDomain(1) );
             } else {
-                this->assemble( lhs, tStep, EID_MomentumBalance, SecantDiffusionDerivativeTerm_MB, this->giveDomain(1) );
+                this->assemble( lhs, tStep, EID_MomentumBalance, SecantDiffusionDerivativeTerm_MB, 
+				EModelDefaultEquationNumbering(), this->giveDomain(1) );
             }
 
-            this->assemble( lhs, tStep, EID_MomentumBalance, EID_ConservationEquation, PressureTerm_MB, this->giveDomain(1) );
-            this->assemble( lhs, tStep, EID_MomentumBalance, LSICStabilizationTerm_MB, this->giveDomain(1) );
+            this->assemble( lhs, tStep, EID_MomentumBalance, EID_ConservationEquation, PressureTerm_MB, 
+			    EModelDefaultEquationNumbering(), this->giveDomain(1) );
+            this->assemble( lhs, tStep, EID_MomentumBalance, LSICStabilizationTerm_MB, 
+			    EModelDefaultEquationNumbering(), this->giveDomain(1) );
             // conservation eq part
-            this->assemble( lhs, tStep, EID_ConservationEquation, EID_MomentumBalance, LinearAdvectionTerm_MC, this->giveDomain(1) );
-            this->assemble( lhs, tStep, EID_ConservationEquation, EID_MomentumBalance, AdvectionDerivativeTerm_MC, this->giveDomain(1) );
-            this->assemble( lhs, tStep, EID_ConservationEquation, EID_MomentumBalance, AccelerationTerm_MC, this->giveDomain(1) );
-            this->assemble( lhs, tStep, EID_ConservationEquation, EID_MomentumBalance, DiffusionDerivativeTerm_MC, this->giveDomain(1) );
-            this->assemble( lhs, tStep, EID_ConservationEquation, EID_ConservationEquation, PressureTerm_MC, this->giveDomain(1) );
+            this->assemble( lhs, tStep, EID_ConservationEquation, EID_MomentumBalance, LinearAdvectionTerm_MC, 
+			    EModelDefaultEquationNumbering(), this->giveDomain(1) );
+            this->assemble( lhs, tStep, EID_ConservationEquation, EID_MomentumBalance, AdvectionDerivativeTerm_MC, 
+			    EModelDefaultEquationNumbering(), this->giveDomain(1) );
+            this->assemble( lhs, tStep, EID_ConservationEquation, EID_MomentumBalance, AccelerationTerm_MC, 
+			    EModelDefaultEquationNumbering(), this->giveDomain(1) );
+            this->assemble( lhs, tStep, EID_ConservationEquation, EID_MomentumBalance, DiffusionDerivativeTerm_MC, 
+			    EModelDefaultEquationNumbering(), this->giveDomain(1) );
+            this->assemble( lhs, tStep, EID_ConservationEquation, EID_ConservationEquation, PressureTerm_MC, 
+			    EModelDefaultEquationNumbering(), this->giveDomain(1) );
         }
         //if (this->fsflag) this->imposeAmbientPressureInOuterNodes(lhs,&rhs,tStep);
 
@@ -578,7 +593,7 @@ SUPG :: solveYourselfAt(TimeStep *tStep)
                         continue;
                     }
 
-                    jj = iDof->giveEquationNumber();
+                    jj = iDof->__giveEquationNumber();
                     type = iDof->giveDofID();
 
                     if ( jj ) {
@@ -630,11 +645,15 @@ SUPG :: solveYourselfAt(TimeStep *tStep)
         // assemble rhs (residual)
         //
         rhs.zero();
-        this->assembleVectorFromElements( rhs, tStep, EID_MomentumBalance, BCRhsTerm_MB, VM_Total, this->giveDomain(1) );
-        this->assembleVectorFromElements( rhs, tStep, EID_ConservationEquation, BCRhsTerm_MC, VM_Total, this->giveDomain(1) );
+        this->assembleVectorFromElements( rhs, tStep, EID_MomentumBalance, BCRhsTerm_MB, VM_Total, 
+					  EModelDefaultEquationNumbering(), this->giveDomain(1) );
+        this->assembleVectorFromElements( rhs, tStep, EID_ConservationEquation, BCRhsTerm_MC, VM_Total, 
+					  EModelDefaultEquationNumbering(), this->giveDomain(1) );
         // algoritmic rhs part (assembled by e-model (in giveCharComponent service) from various element contribs)
-        this->assembleVectorFromElements( rhs, tStep, EID_MomentumBalance, AlgorithmicRhsTerm_MB, VM_Total, this->giveDomain(1) );
-        this->assembleVectorFromElements( rhs, tStep, EID_ConservationEquation, AlgorithmicRhsTerm_MC, VM_Total, this->giveDomain(1) );
+        this->assembleVectorFromElements( rhs, tStep, EID_MomentumBalance, AlgorithmicRhsTerm_MB, VM_Total, 
+					  EModelDefaultEquationNumbering(), this->giveDomain(1) );
+        this->assembleVectorFromElements( rhs, tStep, EID_ConservationEquation, AlgorithmicRhsTerm_MC, VM_Total, 
+					  EModelDefaultEquationNumbering(), this->giveDomain(1) );
 
         rnorm = sqrt( dotProduct(rhs, rhs, neq) );
 
@@ -656,11 +675,15 @@ SUPG :: solveYourselfAt(TimeStep *tStep)
             // assemble rhs (residual)
             //
             rhs.zero();
-            this->assembleVectorFromElements( rhs, tStep, EID_MomentumBalance, BCRhsTerm_MB, VM_Total, this->giveDomain(1) );
-            this->assembleVectorFromElements( rhs, tStep, EID_ConservationEquation, BCRhsTerm_MC, VM_Total, this->giveDomain(1) );
+            this->assembleVectorFromElements( rhs, tStep, EID_MomentumBalance, BCRhsTerm_MB, VM_Total, 
+					      EModelDefaultEquationNumbering(), this->giveDomain(1) );
+            this->assembleVectorFromElements( rhs, tStep, EID_ConservationEquation, BCRhsTerm_MC, VM_Total, 
+					      EModelDefaultEquationNumbering(), this->giveDomain(1) );
             // algoritmic rhs part (assembled by e-model (in giveCharComponent service) from various element contribs)
-            this->assembleVectorFromElements( rhs, tStep, EID_MomentumBalance, AlgorithmicRhsTerm_MB, VM_Total, this->giveDomain(1) );
-            this->assembleVectorFromElements( rhs, tStep, EID_ConservationEquation, AlgorithmicRhsTerm_MC, VM_Total, this->giveDomain(1) );
+            this->assembleVectorFromElements( rhs, tStep, EID_MomentumBalance, AlgorithmicRhsTerm_MB, VM_Total, 
+					      EModelDefaultEquationNumbering(), this->giveDomain(1) );
+            this->assembleVectorFromElements( rhs, tStep, EID_ConservationEquation, AlgorithmicRhsTerm_MC, VM_Total, 
+					      EModelDefaultEquationNumbering(), this->giveDomain(1) );
         }
     } while ( ( rnorm > rtolv ) && ( _absErrResid > atolv ) && ( nite <= maxiter ) );
 
@@ -959,7 +982,7 @@ SUPG :: applyIC(TimeStep *stepWhenIcApply)
                     continue;
                 }
 
-                jj = iDof->giveEquationNumber();
+                jj = iDof->__giveEquationNumber();
                 type = iDof->giveDofID();
                 if ( jj ) {
                     if ( ( type == V_u ) || ( type == V_v ) || ( type == V_w ) ) {
@@ -1338,15 +1361,15 @@ SUPG :: updateDofUnknownsDictionary_corrector(TimeStep *tStep)
                 if ( !iDof->hasBc(tStep) ) {
                     prev_val = iDof->giveUnknown(EID_MomentumBalance_ConservationEquation, VM_Total, tStep);
                     if ( ( type == V_u ) || ( type == V_v ) || ( type == V_w ) ) {
-                        val = prev_val +  deltaT *alpha *incrementalSolutionVector.at( iDof->giveEquationNumber() );
+                        val = prev_val +  deltaT *alpha *incrementalSolutionVector.at( iDof->__giveEquationNumber() );
                     } else {
-                        val = prev_val +  incrementalSolutionVector.at( iDof->giveEquationNumber() );
+                        val = prev_val +  incrementalSolutionVector.at( iDof->__giveEquationNumber() );
                     }
 
                     iDof->updateUnknownsDictionary(tStep, EID_MomentumBalance_ConservationEquation, VM_Total, val); // velocity
 
                     prev_val = iDof->giveUnknown(EID_MomentumBalance_ConservationEquation, VM_Acceleration, tStep);
-                    val = prev_val +  incrementalSolutionVector.at( iDof->giveEquationNumber() );
+                    val = prev_val +  incrementalSolutionVector.at( iDof->__giveEquationNumber() );
                     iDof->updateUnknownsDictionary(tStep, EID_MomentumBalance_ConservationEquation, VM_Acceleration, val); // acceleration
                 }
             }
