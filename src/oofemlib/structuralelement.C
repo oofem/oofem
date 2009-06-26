@@ -1004,6 +1004,59 @@ StructuralElement :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode
     return;
 }
 
+void StructuralElement::computeStiffnessMatrix_withIRulesAsSubcells (FloatMatrix& answer, 
+								     MatResponseMode rMode, TimeStep *tStep) {
+  
+  int ir, j;
+  FloatMatrix temp, bj, d, dbj;
+  IntegrationRule* iRule;
+  GaussPoint* gp;
+  int ndofs = this->computeNumberOfDofs(EID_MomentumBalance);
+  bool matStiffSymmFlag = this->giveCrossSection()->isCharacteristicMtrxSymmetric(rMode, this->giveMaterial()->giveNumber());
+  IntArray irlocnum;
+  double dV;
+  
+  answer.resize( ndofs, ndofs );
+  answer.zero();  
+  
+  FloatMatrix *m = &answer;
+  if (this->giveInterpolation() && this->giveInterpolation()->hasSubPatchFormulation()) m = &temp;
+  
+  // loop over individual integration rules
+  for (ir=0; ir < numberOfIntegrationRules; ir++) {
+    m->resize(0,0);
+    iRule = integrationRulesArray [ ir ];
+    // loop over individual integration points
+    for ( j = 0; j < iRule->getNumberOfIntegrationPoints(); j++ ) {
+      gp = iRule->getIntegrationPoint(j);
+      this->computeBmatrixAt(gp, bj);
+      //elem->computeConstitutiveMatrixAt(d, rMode, gp, tStep);
+      ( ( StructuralCrossSection * ) this->giveCrossSection() )
+        ->giveCharMaterialStiffnessMatrix(d, rMode, gp, tStep);
+      
+      dV = this->computeVolumeAround(gp);
+      dbj.beProductOf(d, bj);
+      if ( matStiffSymmFlag ) {
+        m->plusProductSymmUpper(bj, dbj, dV);
+      } else {
+        m->plusProductUnsym(bj, dbj, dV);
+      }
+    }
+    
+    if ( matStiffSymmFlag ) {
+      m->symmetrized();
+    }
+    // localize irule contribution into element matrix
+    if (this->giveIntegrationRuleLocalCodeNumbers (irlocnum, iRule, EID_MomentumBalance)) 
+      answer.assemble (*m, irlocnum);
+    
+  } // end loop over irules
+  
+  if ( this->updateRotationMatrix() ) {
+    answer.rotatedWith(* this->rotationMatrix);
+  }
+  return;
+}
 
 void
 StructuralElement :: computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *stepN)

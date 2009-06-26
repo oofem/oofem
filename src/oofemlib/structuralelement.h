@@ -226,6 +226,22 @@ public:
      */
     virtual void          computeStiffnessMatrix(FloatMatrix &answer,
                                                  MatResponseMode rMode, TimeStep *tStep);
+    /**
+     * Computes numerically stiffness matrix of receiver. Default implementation computes element stiffness using
+     * \f$K=\int_v B^T D B dV\f$ formulae, where \f$B\f$ is element geometric matrix 
+     * and \f$D\f$ is material stiffness matrix.
+     * No geometrical nonlinearity is taken into account. NUmerical integration procedure uses integrationRulesArray
+     * for numrical integration. This implementation regards element integration rules as that they represent sub-cells 
+     * so that the integration is performed over all subcells for all terms.
+     * For higher numerical performance, only one half of stiffness matrix is computed and answer is then symmetrized.
+     * Therefore, if element matrix will be generally nonsymmetric, one must specialize this method.
+     * Finaly, the result is transformed into global coordinate system (or nodal coordinate system, if it is defined).
+     * @param answer computed stiffness matrix (symmetric)
+     * @param rMode response mode
+     * @param tStep time step
+     */
+    void          computeStiffnessMatrix_withIRulesAsSubcells(FloatMatrix &answer,
+							      MatResponseMode rMode, TimeStep *tStep);
 
     /**
      * Computes initial stress matrix for linear stability problem.

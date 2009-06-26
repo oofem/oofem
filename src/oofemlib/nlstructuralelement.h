@@ -118,6 +118,25 @@ public:
     virtual void  computeStiffnessMatrix(FloatMatrix &answer,
                                          MatResponseMode rMode, TimeStep *tStep);
 
+    /**
+     * Computes numerically stiffness matrix of receiver. The response is evaluated 
+     * using \f$\int (B_1+B_2(r))^TD(B_1+B_2(r)) dv\f$, where
+     * \f$B_2\f$ is nonlinear contribution evaluated using computeNLBMatrixAt service for each strain component
+     * (\f$B_2(i) = \Delta r^T A(i)\f$).
+     * Numerical integration procedure uses integrationRulesArray
+     * for numrical integration. This implementation regards element integration rules as that they represent sub-cells 
+     * so that the integration is performed over all subcells for all terms.
+     * For higher numerical performance, only one half of stiffness matrix is computed and answer is then symmetrized.
+     * Therefore, if element matrix will be generally nonsymmetric, one must specialize this method.
+     * Finaly, the result is transformed into global coordinate system (or nodal coordinate system, if it is defined).
+     * @param answer computed stiffness matrix (symmetric)
+     * @param rMode response mode
+     * @param tStep time step
+     */
+    void          computeStiffnessMatrix_withIRulesAsSubcells(FloatMatrix &answer,
+							      MatResponseMode rMode, TimeStep *tStep);
+
+
     // stress equivalent vector (vector of internal forces) - for nonLinear Analysis.
     /**
      * Evaluates nodal representation of real internal forces.

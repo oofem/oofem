@@ -421,6 +421,15 @@ public:
      * integration point over receiver volume. Must be specialized.
      */
     virtual integrationDomain giveIntegrationDomain() { return _Unknown_integrationDomain; }
+    /**
+     * Assembles the code numbers of given integration element (sub-patch)
+     * This is done by obtaining list of nonzero shape functions and
+     * by collecting the code numbers of nodes corresponding to these 
+     * shape functions
+     * @returns returns nonzero if integration rule code numbers differ from element code numbers
+     */
+    virtual int giveIntegrationRuleLocalCodeNumbers (IntArray& answer, IntegrationRule* ie, EquationID ut) 
+    {return 0;}
 
     ///Returns number of sides (which have unknown dofs) of receiver
     //int                   giveNumberOfSides () {return numberOfSides;}

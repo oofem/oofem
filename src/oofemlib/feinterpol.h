@@ -143,6 +143,10 @@ public:
      * @param n number of nodal records
      */
     void nodes2coords(Domain *d, IntArray &nodes, const FloatArray **c, int n);
+    /**
+       Returns true, if receiver is formulated on sub-patch basis
+     */
+    virtual bool hasSubPatchFormulation() {return false;}
 };
 
 
