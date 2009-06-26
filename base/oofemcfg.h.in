@@ -43,6 +43,6 @@
 #undef HAVE_MACRO_VA_ARGS
 
 /* Define to support arbitrary compoment labels */
-#undef __ENABLE_COMPONENT_LABELS
+#define __ENABLE_COMPONENT_LABELS
 
 #endif // oofemcfg_h
