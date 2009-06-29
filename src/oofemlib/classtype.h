@@ -213,6 +213,7 @@ enum classType {
     DruckerPragerPlasticitySMClass,
     MPlasticMaterialClass,
     J2MatClass,
+    HyperElasticMaterialClass,
 
     TransportMaterialClass,
     IsotropicHeatTransferMaterialClass,
@@ -249,6 +250,7 @@ enum classType {
     DruckerPragerPlasticitySMStatusClass,
     MPlasticMaterialStatusClass,
     MicroMaterialStatusClass,
+    HyperElasticMaterialStatusClass,
 
     FluidDynamicMaterialClass,
     FluidDynamicMaterialStatusClass,
