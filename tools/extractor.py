@@ -149,7 +149,7 @@ loadlevel_re = re.compile (r"""
 # returns the value corresponding to given keyword and record
 def getKeywordValue (record, kwd, optional = None):
 	global infilename
-	match = re.search (kwd+'\s+\"*([\.\+\-,:\w]+)\"*', record)
+	match = re.search (kwd+'\s+\"*([\\\.\+\-,:\w]+)\"*', record)
 	if match:
 		return match.group(1)
 	else:
@@ -187,6 +187,7 @@ def parse_input_rec (recline):
 			cmpn  = int(getKeywordValue(recline, 'component'))
 			value = float(getKeywordValue(recline, 'value', 0.0))
 			return ('er', tstep, number, gp, kwd, cmpn, value)
+                
 		except ValueError:
 			print "Input error on\n",recline
 			return None
@@ -251,9 +252,11 @@ def check_element_rec (time, elem, gp, kwd, value, line):
 		
 		if ((rec[0]=='er') and timeflag and (elem == rec[2]) and (gp == rec[3])):
 #			print "Found er: looking for ",rec[5],"in ", line
-			match=re.search(rec[4]+'\s*(([-]*\d+(\.\d+)?(e[+-]\d+)?)\s*)+', line)
+			match=re.search(rec[4]+'\s*((([-]*\d+(\.\d+)?(e[+-]\d+)?)\s*)+)', line)
 			if match:
-				recVal[irec]=re.split('\s+',match.group(0))[rec[5]]
+                                # print "match: ",match.group(1)
+				recVal[irec]=re.split('\s+',match.group(1))[rec[5]-1]
+                                # print "found: ",recVal[irec]
 
 
 #extract element record
@@ -445,6 +448,7 @@ def check_results ():
 			err = float(rec[-1])
 		if (abs(err) > float(tolerance)):
 			print "\tError when checking rule ",irec,": err = ",err
+                        # print rec, recVal
 			success = 0
 	print "Checker.py:%55s   "%os.path.basename(infilename),
 	if success:
