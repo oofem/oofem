@@ -1024,15 +1024,13 @@ void StructuralElement::computeStiffnessMatrix_withIRulesAsSubcells (FloatMatrix
   
   // loop over individual integration rules
   for (ir=0; ir < numberOfIntegrationRules; ir++) {
-    m->resize(0,0);
+
     iRule = integrationRulesArray [ ir ];
     // loop over individual integration points
     for ( j = 0; j < iRule->getNumberOfIntegrationPoints(); j++ ) {
       gp = iRule->getIntegrationPoint(j);
       this->computeBmatrixAt(gp, bj);
-      //elem->computeConstitutiveMatrixAt(d, rMode, gp, tStep);
-      ( ( StructuralCrossSection * ) this->giveCrossSection() )
-        ->giveCharMaterialStiffnessMatrix(d, rMode, gp, tStep);
+      this->computeConstitutiveMatrixAt(d, rMode, gp, tStep);
       
       dV = this->computeVolumeAround(gp);
       dbj.beProductOf(d, bj);
@@ -1043,14 +1041,17 @@ void StructuralElement::computeStiffnessMatrix_withIRulesAsSubcells (FloatMatrix
       }
     }
     
-    if ( matStiffSymmFlag ) {
-      m->symmetrized();
-    }
     // localize irule contribution into element matrix
-    if (this->giveIntegrationRuleLocalCodeNumbers (irlocnum, iRule, EID_MomentumBalance)) 
+    if (this->giveIntegrationRuleLocalCodeNumbers (irlocnum, iRule, EID_MomentumBalance)) {
       answer.assemble (*m, irlocnum);
+      m->resize(0,0);
+    }
     
   } // end loop over irules
+  
+  if ( matStiffSymmFlag ) {
+    answer.symmetrized();
+  }
   
   if ( this->updateRotationMatrix() ) {
     answer.rotatedWith(* this->rotationMatrix);

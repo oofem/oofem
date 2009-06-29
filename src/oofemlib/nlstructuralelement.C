@@ -533,29 +533,29 @@ NLStructuralElement :: computeStiffnessMatrix_withIRulesAsSubcells(FloatMatrix &
 
   FloatMatrix *m = &answer;
   if (this->giveInterpolation() && this->giveInterpolation()->hasSubPatchFormulation()) m = &temp;
-    
+  
   // loop over individual integration rules
   for (ir=0; ir < numberOfIntegrationRules; ir++) {
-
+    
     iRule = integrationRulesArray [ ir ];
     for ( j = 0; j < iRule->getNumberOfIntegrationPoints(); j++ ) {
       gp = iRule->getIntegrationPoint(j);
       this->computeBmatrixAt(gp, bj);
       if ( nlGeometry ) {
-	for ( l = 1; l <=  bj.giveNumberOfRows(); l++ ) {
-	  // loop over each component of strain vector
-	  this->computeNLBMatrixAt(A, gp, l);
-	  if ( ( A.isNotEmpty() ) && ( ut != NULL ) ) {
-	    b2.beProductOf(* ut, A);
-	    //delete A;
-	    for ( k = 1; k <= bj.giveNumberOfColumns(); k++ ) {
-	      // add nonlinear contribution to each component
-	      bj.at(l, k) += b2.at(1, k); //mj
-	    }
+        for ( l = 1; l <=  bj.giveNumberOfRows(); l++ ) {
+          // loop over each component of strain vector
+          this->computeNLBMatrixAt(A, gp, l);
+          if ( ( A.isNotEmpty() ) && ( ut != NULL ) ) {
+            b2.beProductOf(* ut, A);
+            //delete A;
+            for ( k = 1; k <= bj.giveNumberOfColumns(); k++ ) {
+              // add nonlinear contribution to each component
+              bj.at(l, k) += b2.at(1, k); //mj
+            }
 	          
-	    //delete b2;
-	  }
-	}
+            //delete b2;
+          }
+        }
       } // end nlGeometry
       
       //      d  = this -> giveConstitutiveMatrix() ;
@@ -569,51 +569,55 @@ NLStructuralElement :: computeStiffnessMatrix_withIRulesAsSubcells(FloatMatrix &
     if ( nlGeometry ) {
       delete ut;
     }
-    m->symmetrized();
+
     // localize irule contribution into element matrix
-    if (this->giveIntegrationRuleLocalCodeNumbers (irlocnum, iRule, EID_MomentumBalance)) 
+    if (this->giveIntegrationRuleLocalCodeNumbers (irlocnum, iRule, EID_MomentumBalance)) {
       answer.assemble (*m, irlocnum);
-      
+      m->resize(0,0);
+    }
   }
 
 
+  if ( nlGeometry ) {
     
-
-  for (ir=0; ir < numberOfIntegrationRules; ir++) {
-    m->resize(0,0);
-    iRule = integrationRulesArray [ ir ];
-     
-    if ( nlGeometry ) {
+    for (ir=0; ir < numberOfIntegrationRules; ir++) {
+      m->resize(0,0);
+      iRule = integrationRulesArray [ ir ];
+      
       // assemble initial stress matrix
       for ( i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
-	gp = iRule->getIntegrationPoint(i);
-	dV = this->computeVolumeAround(gp);
-	stress = ( ( StructuralMaterialStatus * ) mat->giveStatus(gp) )->giveStressVector();
-	n = stress.giveSize();
-	if ( n ) {
-	  for ( j = 1; j <= n; j++ ) {
-	    // loop over each component of strain vector
-	    this->computeNLBMatrixAt(A, gp, j);
-	    if ( A.isNotEmpty() ) {
-	      A.times(stress.at(j) * dV);
-	      m->plus(A);
-	    }
+        gp = iRule->getIntegrationPoint(i);
+        dV = this->computeVolumeAround(gp);
+        stress = ( ( StructuralMaterialStatus * ) mat->giveStatus(gp) )->giveStressVector();
+        n = stress.giveSize();
+        if ( n ) {
+          for ( j = 1; j <= n; j++ ) {
+            // loop over each component of strain vector
+            this->computeNLBMatrixAt(A, gp, j);
+            if ( A.isNotEmpty() ) {
+              A.times(stress.at(j) * dV);
+              m->plus(A);
+            }
 	          
-	    //delete A;
-	  }
-	}
+            //delete A;
+          }
+        }
       }
-    } // end nlGeometry
+
       // localize irule contribution into element matrix
-    m->symmetrized();
-    if (this->giveIntegrationRuleLocalCodeNumbers (irlocnum, iRule, EID_MomentumBalance)) 
-      answer.assemble (*m, irlocnum);
-  }
-    
+      if (this->giveIntegrationRuleLocalCodeNumbers (irlocnum, iRule, EID_MomentumBalance)) {
+        answer.assemble (*m, irlocnum);
+        m->resize(0,0);
+      }
+    }
+
+  } // ens nlGeometry
+
+  answer.symmetrized();
   if ( rot ) {
     answer.rotatedWith(* this->rotationMatrix);
   }
-    
+  
   return;
 }
 
