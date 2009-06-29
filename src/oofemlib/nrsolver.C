@@ -533,6 +533,7 @@ NRSolver :: giveLineSearchSolver()
 void
 NRSolver :: initPrescribedEqs()
 {
+    EModelDefaultEquationNumbering dn;
 #if defined(__PARALLEL_MODE) || defined(__ENABLE_COMPONENT_LABELS)
 #if defined(__PARALLEL_MODE) && defined (__PETSC_MODULE)
     PetscNatural2GlobalOrdering *n2lpm = engngModel->givePetscContext(1, ut)->giveN2Gmap();
@@ -540,7 +541,6 @@ NRSolver :: initPrescribedEqs()
     int jglobnum, count = 0, ndofman = domain->giveNumberOfDofManagers();
     int i, j, inode, idof;
     IntArray localPrescribedEqs(numberOfPrescribedDofs);
-    EModelDefaultEquationNumbering dn;
 
     for ( j = 1; j <= ndofman; j++ ) {
         jglobnum = domain->giveNode(j)->giveGlobalNumber();
