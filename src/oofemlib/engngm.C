@@ -352,6 +352,9 @@ int EngngModel :: instanciateYourself(DataReader *dr, InputRecord *ir, char *dat
         xfemManagerList->put(i + 1, xm);
         xm->initializeFrom(ir);
         xm->instanciateYourself(dr);
+        int last = xm->computeFictPosition();
+        this->setNumberOfEquations(1, last);
+        xm->updateIntegrationRule();
     }
 
     // check emodel input record if no default metastep, since all has been read

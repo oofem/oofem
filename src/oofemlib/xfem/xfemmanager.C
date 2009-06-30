@@ -25,10 +25,8 @@
 #include "masterdof.h"
 #include "xfem/xfemmanager.h"
 #include "patchintegrationrule.h"
-#include <iostream>
 
 XfemManager :: XfemManager(EngngModel *emodel, int domainIndex) {
-  std::cout << "xfemmanager initiated" << std::endl;
     this->emodel = emodel;
     this->domainIndex = domainIndex;
     this->enrichmentFunctionList = new AList< EnrichmentFunction >(0);
@@ -276,12 +274,10 @@ DofID XfemManager :: allocateNewDofID() {
 
 
 void XfemManager :: updateIntegrationRule() {
-  std::cout << "updating integration rule" << std::endl;
     for ( int i = 1; i <= this->giveDomain()->giveNumberOfElements(); i++ ) {
         Element *el = this->giveDomain()->giveElement(i);
         XfemElementInterface *xei = ( XfemElementInterface * ) el->giveInterface(XfemElementInterfaceType);
         xei->XfemElementInterface_updateIntegrationRule();
     }
-   std::cout << "irule updated" << std::endl;  
 }
 

@@ -24,9 +24,10 @@ PatchIntegrationRule :: SetUpPointsOnTriagle(int nPoints, MaterialMode mode, Gau
   for ( int j = 0; j <  numberOfIntegrationPoints; j++ ) {
       GaussPoint *gp = (*arry)[j];
       patch->convertGPIntoParental(gp); // convert coordinates into parental
+      ElementGeometry * elg = (ElementGeometry *) patch->giveParent();
+      double parentArea = elg->giveArea();
       Triangle * tr = (Triangle*) patch;
-      // here to get the area of the whole element
-      gp->setWeight(gp->giveWeight()/tr->getArea()); // update integration weight 
+      gp->setWeight(8.0*gp->giveWeight()*tr->getArea()/parentArea); // update integration weight 
   } 
   return numberOfIntegrationPoints;
 }

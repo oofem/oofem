@@ -219,7 +219,7 @@ public:
      * can be numbered separately. The default implementation assumes that location array will be assembled only for
      * one UnknownType value, and this array is cached on element level.
      */
-    void giveLocationArray(IntArray & locationArray, EquationID, const UnknownNumberingScheme& s) const;
+    virtual void giveLocationArray(IntArray & locationArray, EquationID, const UnknownNumberingScheme& s) const;
     /**
      * Invalidates location array in receiver. Each element stores its copy of location array(s), in order
      * to avoid time consuming assembly of code numbers every time when requested. Some enginnering models

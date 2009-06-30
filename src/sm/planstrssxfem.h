@@ -27,9 +27,10 @@ public:
                                    int lowerIndx = 1, int upperIndx = ALL_STRAINS);
     void giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const;
     void computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *, TimeStep *tStep);
-    double computeVolumeAround(GaussPoint *);
     void computeVectorOf(EquationID type, ValueModeType u, TimeStep *stepN, FloatArray &answer);
     void computeStressVector(FloatArray &answer, GaussPoint *gp, TimeStep *stepN);
+    void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep);
+    double giveArea();
 };
 
 #endif

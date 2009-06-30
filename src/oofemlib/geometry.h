@@ -39,6 +39,7 @@ protected:
     IntArray nodeNumbers;
 public:
     ElementGeometry() : Geometry() {}
+    virtual double giveArea() {return 0;}
 };
 
 /** Concrete representation of Geometry

@@ -23,7 +23,7 @@ void PlaneStress2dXfem::computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer,
                                    int li, int ui){
     
     FloatMatrix* simple = new FloatMatrix();
-    PlaneStress2d::computeBmatrixAt(gp, *simple);    
+    PlaneStress2d::computeBmatrixAt(gp, *simple);   
     int start = simple->giveNumberOfColumns();
     // evaluation of N,dNdx
     FloatMatrix dNdx;
@@ -167,15 +167,6 @@ void PlaneStress2dXfem::computeConstitutiveMatrixAt(FloatMatrix &answer, MatResp
 }
 
 
-double
-PlaneStress2dXfem :: computeVolumeAround(GaussPoint *aGaussPoint)
-// Returns the portion of the receiver which is attached to aGaussPoint.
-{
-    double volume = 0;
-    volume = PlaneStress2d::computeVolumeAround(aGaussPoint);
-    return volume;
-}
-
 void
 PlaneStress2dXfem :: computeVectorOf(EquationID type, ValueModeType u, TimeStep *stepN, FloatArray &answer)
 // Forms the vector containing the values of the unknown 'u' (e.g., the
@@ -227,5 +218,18 @@ PlaneStress2dXfem :: computeStressVector(FloatArray &answer, GaussPoint *gp, Tim
           StructuralCrossSection *cs = ( StructuralCrossSection * ) this->giveCrossSection();
           cs->giveRealStresses(answer, ReducedForm, gp, Epsilon, stepN);
      }
+}
+
+void PlaneStress2dXfem :: computeStiffnessMatrix (FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep){
+     this->computeStiffnessMatrix_withIRulesAsSubcells (answer, rMode, tStep);
+}
+
+double PlaneStress2dXfem :: giveArea(){
+     FloatArray *node1 = this->giveDofManager(1)->giveCoordinates();
+     FloatArray *node2 = this->giveDofManager(2)->giveCoordinates();
+     FloatArray *node3 = this->giveDofManager(3)->giveCoordinates();
+     double a = node1->distance(node2);
+     double b = node2->distance(node3);
+     return a*b; 
 }
 
