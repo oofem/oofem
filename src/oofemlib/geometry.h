@@ -20,14 +20,17 @@ class Geometry
 {
 public:
     /// Constructor
-    Geometry() {};
+    Geometry() { };
     /// Destructor
-    ~Geometry() {};
+    ~Geometry() { };
     /// returns number of nodes
     virtual int giveNumberOfNodes() { return 0; }
     /// returns coordinates at a position n
     virtual FloatArray *giveCoordinates(int n) { return NULL; }
-    virtual void printYourself() {}
+    virtual void printYourself() { }
+#ifdef __OOFEG
+    virtual void          draw(oofegGraphicContext &gc) { }
+#endif
 };
 
 /** Concrete representation of Geometry
@@ -38,8 +41,8 @@ class ElementGeometry : public Geometry
 protected:
     IntArray nodeNumbers;
 public:
-    ElementGeometry() : Geometry() {}
-    virtual double giveArea() {return 0;}
+    ElementGeometry() : Geometry() { }
+    virtual double giveArea() { return 0; }
 };
 
 /** Concrete representation of Geometry
@@ -58,11 +61,11 @@ public:
     /// computes normal signed distance between this object and a point
     virtual double computeDistanceTo(FloatArray *point) { return 0; }
     /// checks whether an element is interacted, Element reference will be later replaced by Geometry
-    virtual bool intersects(Element *element) {return NULL;};
+    virtual bool intersects(Element *element) { return NULL; };
     /// gives number of intersection points of Geometry entity with an element, Element reference will be later replaced by Geometry
     virtual int computeNumberOfIntersectionPoints(Element *element) { return 0; }
     // gives intersection points between this Geometry and Element
-    virtual void computeIntersectionPoints(Element *element, AList< FloatArray > *intersecPoints) {}
+    virtual void computeIntersectionPoints(Element *element, AList< FloatArray > *intersecPoints) { }
     /// Accessor
     FloatArray *giveVertex(int n);
     /// Modifier
@@ -75,14 +78,14 @@ public:
     virtual const char *giveClassName() const { return NULL; }
     /// returns number of Geometry vertices
     int giveNrVertices() { return this->vertices->giveSize(); }
-    virtual bool isOutside(BasicGeometry *bg) {return NULL; }
+    virtual bool isOutside(BasicGeometry *bg) { return NULL; }
 };
 
 class Line : public BasicGeometry
 {
 public:
-    Line() : BasicGeometry() {}
-    ~Line() {}
+    Line() : BasicGeometry() { }
+    ~Line() { }
     Line(FloatArray *pointA, FloatArray *pointB);
     /// computes normal distance to a point
     double computeDistanceTo(FloatArray *point);
@@ -119,8 +122,8 @@ class Circle : public BasicGeometry
 protected:
     double radius;
 public:
-    Circle() : BasicGeometry() {}
-    ~Circle() {}
+    Circle() : BasicGeometry() { }
+    ~Circle() { }
     Circle(FloatArray *center, double radius);
     // normal distance to the surface not to the centre
     double computeDistanceTo(FloatArray *point);

@@ -56,7 +56,7 @@ EPixel oofegGraphicContext :: crackPatternColor;
 EPixel oofegGraphicContext :: activeCrackColor;
 EPixel oofegGraphicContext :: yieldPlotColors [ OOFEG_YIELD_STEPS ];
 EPixel oofegGraphicContext :: standardSparseProfileColor, oofegGraphicContext :: extendedSparseProfileColor;
-
+EPixel oofegGraphicContext :: geometryColor;
 int oofegGraphicContext :: activeStep = -1;
 int oofegGraphicContext :: activeStepVersion = 0;
 double oofegGraphicContext :: defScale = 1.0;
@@ -103,6 +103,7 @@ oofegGraphicContext :: init(EngngModel *d) {
         activeCrackColor  = ColorGetPixelFromString("red2", & suc);
         standardSparseProfileColor  = ColorGetPixelFromString("blue", & suc);
         extendedSparseProfileColor  = ColorGetPixelFromString("red", & suc);
+        geometryColor = ColorGetPixelFromString("yellow", & suc);
 
         yieldPlotColors [ 0 ] = ColorGetPixelFromString("pink", & suc);
         yieldPlotColors [ 1 ] = ColorGetPixelFromString("PaleVioletRed", & suc);

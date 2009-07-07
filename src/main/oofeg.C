@@ -125,6 +125,7 @@ void  defAutoScale(Widget wid, XtPointer cl, XtPointer cd);
 void  setNumerOfContours(Widget wid, XtPointer cl, XtPointer cd);
 void eigVecPlot(Widget wid, XtPointer cl, XtPointer cd);
 void nodeAnnPlot(Widget wid, XtPointer cl, XtPointer cd);
+void elementAnnPlot(Widget wid, XtPointer cl, XtPointer cd);
 void nodePlot(Widget wid, XtPointer cl, XtPointer cd);
 void bcPlot(Widget wid, XtPointer cl, XtPointer cd);
 //void stressPlot (int);
@@ -209,7 +210,7 @@ void updateISA(oofegGraphicContext *context);
 void updateGraphics();
 
 static char *OOFEG_layer_names[] = {
-    "GEOMETRY LAYER", "DEFORMED GEOMETRY", "NODE ANNOTATION", "VARPLOT CONTOURS", "CRACK PATTERNS", "IC-BC ANNOTATIONS", "NATURAL_BC", "SPARSE PROFILE LAYER", "DEBUG LAYER"
+    "GEOMETRY LAYER", "DEFORMED GEOMETRY", "NODE ANNOTATION", "ELEMENT ANNOTATION", "VARPLOT CONTOURS", "CRACK PATTERNS", "IC-BC ANNOTATIONS", "NATURAL_BC", "SPARSE PROFILE LAYER", "DEBUG LAYER"
 };
 
 
@@ -283,10 +284,10 @@ main(int argc, char *argv[])
 #ifdef __PARALLEL_MODE
     char fileName [ MAX_FILENAME_LENGTH ];
     int rank = 0;
-#ifdef __USE_MPI
+ #ifdef __USE_MPI
     MPI_Init(& argc, & argv);
     MPI_Comm_rank(MPI_COMM_WORLD, & rank);
-#endif
+ #endif
 #endif
 
 #ifdef __PETSC_MODULE
@@ -390,10 +391,10 @@ main(int argc, char *argv[])
     ESIPopupAndRun();
 
 #ifdef __PETSC_MODULE
-        PetscFinalize();
+    PetscFinalize();
 #endif
 #ifdef __PARALLEL_MODE
-        MPI_Finalize();
+    MPI_Finalize();
 #endif
 
     return 0;
@@ -667,6 +668,7 @@ void ESICustomize(Widget parent_pane)
         oofeg_add_palette("< DofMan Plot >", plot_palette, & dofman_menu);
         oofeg_add_button("DOFMAN_PLOT", "Node Geometry", commandWidgetClass, dofman_menu, nodePlot, NULL);
         oofeg_add_button("DOFMANNUM_PLOT", "DofMan Numbers", commandWidgetClass, dofman_menu, nodeAnnPlot, NULL);
+        oofeg_add_button("ELEMNUM_PLOT", "Element Numbers", commandWidgetClass, dofman_menu, elementAnnPlot, NULL);
 
         oofeg_add_button( "BCE_PLOT", "essential BC", commandWidgetClass, dofman_menu, bcPlot, ( XtPointer ) ( vectorAddr + 0 ) );
         oofeg_add_button( "BCN_PLOT", "natural   BC", commandWidgetClass, dofman_menu, bcPlot, ( XtPointer ) ( vectorAddr + 1 ) );
@@ -1226,6 +1228,12 @@ void nodeAnnPlot(Widget wid, XtPointer cl, XtPointer cd)
     drawData(gc [ OOFEG_NODE_ANNOTATION_LAYER ]);
 }
 
+void elementAnnPlot(Widget wid, XtPointer cl, XtPointer cd)
+{
+    gc [ OOFEG_ELEMENT_ANNOTATION_LAYER ].setPlotMode(OGC_elementAnnotation);
+    drawData(gc [ OOFEG_ELEMENT_ANNOTATION_LAYER ]);
+}
+
 void bcPlot(Widget wid, XtPointer cl, XtPointer cd)
 {
     int mode = * ( ( int * ) cl );
@@ -1618,7 +1626,7 @@ void varPlot(Widget w, XtPointer ptr, XtPointer call_data)
             setupData(gc [ OOFEG_VARPLOT_PATTERN_LAYER ]);
             drawData(gc [ OOFEG_VARPLOT_PATTERN_LAYER ]);
         }
-    } else if ( mode == relativeMeshSizeDensity )     {
+    } else if ( mode == relativeMeshSizeDensity ) {
         //deleteLayerGraphics(OOFEG_VARPLOT_PATTERN_LAYER);
         gc [ OOFEG_VARPLOT_PATTERN_LAYER ].setInternalStateType(IST_RelMeshDensity);
         gc [ OOFEG_VARPLOT_PATTERN_LAYER ].setIntVarIndx(1);
@@ -2241,6 +2249,9 @@ deleteGraphics(oofegGraphicContext &gc)
     case OGC_nodeGeometry:
         deleteLayerGraphics(OOFEG_NODE_ANNOTATION_LAYER);
         break;
+    case OGC_elementAnnotation:
+        deleteLayerGraphics(OOFEG_ELEMENT_ANNOTATION_LAYER);
+        break;
     case OGC_essentialBC:
         deleteLayerGraphics(OOFEG_BCIC_ANNOTATION_LAYER);
         break;
@@ -2646,12 +2657,12 @@ void debug_run(Widget w, XtPointer ptr, XtPointer call_data)
         problem->solveYourself();
     } catch ( OOFEM_Terminate &c ) {
         delete problem;
-#ifdef __PETSC_MODULE
+ #ifdef __PETSC_MODULE
         PetscFinalize();
-#endif
-#ifdef __PARALLEL_MODE
+ #endif
+ #ifdef __PARALLEL_MODE
         MPI_Finalize();
-#endif
+ #endif
     }
 }
 #endif

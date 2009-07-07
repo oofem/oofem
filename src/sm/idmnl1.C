@@ -310,7 +310,7 @@ IDNLMaterial :: NonlocalMaterialStiffnessInterface_showSparseMtrxStructure(Gauss
     WCRec p [ 4 ];
     GraphicObj *go;
 
-    gp->giveElement()->giveLocationArray(loc, EID_MomentumBalance);
+    gp->giveElement()->giveLocationArray(loc, EID_MomentumBalance, EModelDefaultEquationNumbering() );
 
     int n, m, i, j;
     dynaList< localIntegrationRecord > *list = status->giveIntegrationDomainList();
@@ -318,7 +318,7 @@ IDNLMaterial :: NonlocalMaterialStiffnessInterface_showSparseMtrxStructure(Gauss
     for ( pos = list->begin(); pos != list->end(); ++pos ) {
         rmat = ( IDNLMaterial * ) ( ( * pos ).nearGp )->giveMaterial();
         if ( rmat->giveClassID() == this->giveClassID() ) {
-            ( ( * pos ).nearGp )->giveElement()->giveLocationArray(rloc, EID_MomentumBalance);
+	  ( ( * pos ).nearGp )->giveElement()->giveLocationArray(rloc, EID_MomentumBalance, EModelDefaultEquationNumbering());
         }
 
         n = loc.giveSize();

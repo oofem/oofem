@@ -65,20 +65,20 @@
 #include "nonlocmatstiffinterface.h"
 #include "mathfem.h"
 #ifndef __MAKEDEPEND
-#include <stdlib.h>
-#include <stdio.h>
-#include <math.h>
+ #include <stdlib.h>
+ #include <stdio.h>
+ #include <math.h>
 #endif
 
 #ifdef __OOFEG
-#include "oofeggraphiccontext.h"
-#include "conTable.h"
+ #include "oofeggraphiccontext.h"
+ #include "conTable.h"
 #endif
 
 #include "materialmapperinterface.h"
 
 StructuralElement :: StructuralElement(int n, Domain *aDomain) :
-  Element(n, aDomain)
+    Element(n, aDomain)
     // Constructor. Creates an element with number n, belonging to aDomain.
 {
     //   constitutiveMatrix = NULL ;
@@ -94,11 +94,17 @@ StructuralElement :: StructuralElement(int n, Domain *aDomain) :
 StructuralElement :: ~StructuralElement()
 // Destructor.
 {
-  //   delete massMatrix ;
-  //   delete stiffnessMatrix ;
-  if (rotationMatrix) delete rotationMatrix;
-  if (initialDisplacements) delete initialDisplacements;
-  //   delete constitutiveMatrix ;
+    //   delete massMatrix ;
+    //   delete stiffnessMatrix ;
+    if ( rotationMatrix ) {
+        delete rotationMatrix;
+    }
+
+    if ( initialDisplacements ) {
+        delete initialDisplacements;
+    }
+
+    //   delete constitutiveMatrix ;
 }
 
 
@@ -146,11 +152,10 @@ StructuralElement :: computeBcLoadVectorAt(FloatArray &answer, TimeStep *stepN, 
     // delete d ;
 
     // if engngmodel supports dynamic change of static system
-    // we must test if element has not been removed in previous step 
+    // we must test if element has not been removed in previous step
     // if not, we must also test if there was previous BC on some DOF and now it is released.
     // if was, it is necessary to load it by reaction force.
     if ( domain->giveEngngModel()->requiresUnknownsDictionaryUpdate() ) {
-
         FloatArray prevInternalForces;
         IntArray elementNodeMask, dofMask;
         DofManager *nodeI;
@@ -158,37 +163,36 @@ StructuralElement :: computeBcLoadVectorAt(FloatArray &answer, TimeStep *stepN, 
         int nDofs, i, j, k = 0;
 
         if ( ( mode == VM_Incremental ) && ( !stepN->isTheFirstStep() ) ) {
+            for ( i = 1; i <= numberOfDofMans; i++ ) {
+                nodeI = this->giveDofManager(i);
+                this->giveDofManDofIDMask(i, EID_MomentumBalance, elementNodeMask);
+                nodeI->giveDofArray(elementNodeMask, dofMask);
+                nDofs = dofMask.giveSize();
+                for ( j = 1; j <= nDofs; j++ ) {
+                    dofJ = nodeI->giveDof( dofMask.at(j) );
+                    k++;
+                    if ( !dofJ->hasBc(stepN) && dofJ->hasBc( stepN->givePreviousStep() ) ) {
+                        if ( prevInternalForces.giveSize() == 0 ) {
+                            // allocate and compute only if needed
+                            // use updated gp record
+                            this->giveInternalForcesVector(prevInternalForces,
+                                                           stepN->givePreviousStep(), 1);
+                        }
 
-	  for ( i = 1; i <= numberOfDofMans; i++ ) {
-	    nodeI = this->giveDofManager(i);
-	    this->giveDofManDofIDMask(i, EID_MomentumBalance, elementNodeMask);
-	    nodeI->giveDofArray(elementNodeMask, dofMask);
-	    nDofs = dofMask.giveSize();
-	    for ( j = 1; j <= nDofs; j++ ) {
-	      dofJ = nodeI->giveDof( dofMask.at(j) );
-	      k++;
-	      if ( !dofJ->hasBc(stepN) && dofJ->hasBc( stepN->givePreviousStep() ) ) {
-		if ( prevInternalForces.giveSize() == 0 ) {
-		  // allocate and compute only if needed
-		  // use updated gp record
-		  this->giveInternalForcesVector(prevInternalForces,
-						 stepN->givePreviousStep(), 1);
-		}
-		
-		// check for allocated answer
-		if ( answer.giveSize() == 0 ) {
-		  answer.resize( this->computeNumberOfDofs(EID_MomentumBalance) );
-		  answer.zero();
-		}
-		
-		// add element part of reaction  to load vector
-		answer.at(k) -= prevInternalForces.at(k);
-	      }
-	    }
-	    
-	    //delete elementNodeMask;
-	    // delete dofMask;
-	  }
+                        // check for allocated answer
+                        if ( answer.giveSize() == 0 ) {
+                            answer.resize( this->computeNumberOfDofs(EID_MomentumBalance) );
+                            answer.zero();
+                        }
+
+                        // add element part of reaction  to load vector
+                        answer.at(k) -= prevInternalForces.at(k);
+                    }
+                }
+
+                //delete elementNodeMask;
+                // delete dofMask;
+            }
         }
     }
 
@@ -227,10 +231,10 @@ StructuralElement :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, 
             gp  = iRule->getIntegrationPoint(i);
             this->computeNmatrixAt(gp, n);
             dV  = this->computeVolumeAround(gp);
-	    dens= this->giveMaterial()->give('d',gp);
+            dens = this->giveMaterial()->give('d', gp);
             nt.beTranspositionOf(n);
             ntf.beProductOf(nt, force);
-            ntf.times(dV*dens);
+            ntf.times(dV * dens);
             answer.add(ntf);
         }
     } else {
@@ -570,7 +574,9 @@ StructuralElement :: computeConsistentMassMatrix(FloatMatrix &answer, TimeStep *
 
     answer.resize(ndofs, ndofs);
     answer.zero();
-    if (!this->isActivated(tStep)) return;
+    if ( !this->isActivated(tStep) ) {
+        return;
+    }
 
     if ( ( nip = this->giveNumberOfIPForMassMtrxIntegration() ) == 0 ) {
         _error("computeConsistentMassMatrix no integration points available");
@@ -587,7 +593,7 @@ StructuralElement :: computeConsistentMassMatrix(FloatMatrix &answer, TimeStep *
     for ( i = 0; i < iRule.getNumberOfIntegrationPoints(); i++ ) {
         gp      = iRule.getIntegrationPoint(i);
         this->computeNmatrixAt(gp, n);
-	density = this->giveMaterial()->give('d',gp);
+        density = this->giveMaterial()->give('d', gp);
         dV      = this->computeVolumeAround(gp);
         mass   += density * dV;
 
@@ -731,24 +737,27 @@ StructuralElement :: computeNonForceLoadVector(FloatArray &answer, TimeStep *ste
 
     // test for deactivation of receiver
     if ( ( mode == VM_Incremental ) && ( !stepN->isTheFirstStep() ) ) {
-      if (isActivated(stepN->givePreviousStep()) && !isActivated(stepN)) {
-	// use updated gp record
-	this->giveInternalForcesVector(answer, stepN->givePreviousStep(), 1);
-      }
+        if ( isActivated( stepN->givePreviousStep() ) && !isActivated(stepN) ) {
+            // use updated gp record
+            this->giveInternalForcesVector(answer, stepN->givePreviousStep(), 1);
+        }
     }
-    if (!this->isActivated(stepN)) return;
-    
+
+    if ( !this->isActivated(stepN) ) {
+        return;
+    }
+
     this->computePrescribedStrainLoadVectorAt(helpLoadVector, stepN, mode);
     if ( helpLoadVector.giveSize() ) {
-      answer.add(helpLoadVector);
+        answer.add(helpLoadVector);
     }
-    
-    
+
+
     this->computeBcLoadVectorAt(helpLoadVector, stepN, mode);
     if ( helpLoadVector.giveSize() ) {
-      answer.add(helpLoadVector);
+        answer.add(helpLoadVector);
     }
-    
+
     return;
 }
 
@@ -784,15 +793,16 @@ StructuralElement :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tSte
     int i, j, indx = 0, k, ldofs, dim;
     double summ;
 
-    if (!this->isActivated(tStep)) {
-      int ndofs = computeNumberOfDofs(EID_MomentumBalance);
-      answer.resize(ndofs, ndofs);
-      answer.zero();
+    if ( !this->isActivated(tStep) ) {
+        int ndofs = computeNumberOfDofs(EID_MomentumBalance);
+        answer.resize(ndofs, ndofs);
+        answer.zero();
 
-      if ( this->updateRotationMatrix() ) {
-        answer.rotatedWith(* this->rotationMatrix);
-      }
-      return;
+        if ( this->updateRotationMatrix() ) {
+            answer.rotatedWith(* this->rotationMatrix);
+        }
+
+        return;
     }
 
     this->computeConsistentMassMatrix(answer, tStep, mass);
@@ -818,7 +828,7 @@ StructuralElement :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tSte
                 dimFlag.at(1) = 1;
             } else if ( nodeDofIDMask.at(j) == D_v ) {
                 dimFlag.at(2) = 1;
-            } else if ( nodeDofIDMask.at(j) == D_w )                                                               {
+            } else if ( nodeDofIDMask.at(j) == D_w ) {
                 dimFlag.at(3) = 1;
             }
         }
@@ -929,7 +939,9 @@ StructuralElement :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode
 
     answer.resize( computeNumberOfDofs(EID_MomentumBalance), computeNumberOfDofs(EID_MomentumBalance) );
     answer.zero();
-    if (!this->isActivated(tStep)) return;
+    if ( !this->isActivated(tStep) ) {
+        return;
+    }
 
     if ( numberOfIntegrationRules > 1 ) {
         for ( i = 0; i < numberOfIntegrationRules; i++ ) {
@@ -940,9 +952,9 @@ StructuralElement :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode
                 jEndIndx   = integrationRulesArray [ j ]->getEndIndexOfLocalStrainWhereApply();
                 if ( i == j ) {
                     iRule = integrationRulesArray [ i ];
-                } else if ( integrationRulesArray [ i ]->getNumberOfIntegrationPoints() < integrationRulesArray [ j ]->getNumberOfIntegrationPoints() )     {
+                } else if ( integrationRulesArray [ i ]->getNumberOfIntegrationPoints() < integrationRulesArray [ j ]->getNumberOfIntegrationPoints() ) {
                     iRule = integrationRulesArray [ i ];
-                } else                                                                                                                                                                            {
+                } else {
                     iRule = integrationRulesArray [ j ];
                 }
 
@@ -1004,59 +1016,59 @@ StructuralElement :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode
     return;
 }
 
-void StructuralElement::computeStiffnessMatrix_withIRulesAsSubcells (FloatMatrix& answer, 
-								     MatResponseMode rMode, TimeStep *tStep) {
-  
-  int ir, j;
-  FloatMatrix temp, bj, d, dbj;
-  IntegrationRule* iRule;
-  GaussPoint* gp;
-  int ndofs = this->computeNumberOfDofs(EID_MomentumBalance);
-  bool matStiffSymmFlag = this->giveCrossSection()->isCharacteristicMtrxSymmetric(rMode, this->giveMaterial()->giveNumber());
-  IntArray irlocnum;
-  double dV;
-  
-  answer.resize( ndofs, ndofs );
-  answer.zero();  
-  
-  FloatMatrix *m = &answer;
-  if (this->giveInterpolation() && this->giveInterpolation()->hasSubPatchFormulation()) m = &temp;
-  
-  // loop over individual integration rules
-  for (ir=0; ir < numberOfIntegrationRules; ir++) {
+void StructuralElement :: computeStiffnessMatrix_withIRulesAsSubcells(FloatMatrix &answer,
+                                                                      MatResponseMode rMode, TimeStep *tStep) {
+    int ir, j;
+    FloatMatrix temp, bj, d, dbj;
+    IntegrationRule *iRule;
+    GaussPoint *gp;
+    int ndofs = this->computeNumberOfDofs(EID_MomentumBalance);
+    bool matStiffSymmFlag = this->giveCrossSection()->isCharacteristicMtrxSymmetric( rMode, this->giveMaterial()->giveNumber() );
+    IntArray irlocnum;
+    double dV;
 
-    iRule = integrationRulesArray [ ir ];
-    // loop over individual integration points
-    for ( j = 0; j < iRule->getNumberOfIntegrationPoints(); j++ ) {
-      gp = iRule->getIntegrationPoint(j);
-      this->computeBmatrixAt(gp, bj);
-      this->computeConstitutiveMatrixAt(d, rMode, gp, tStep);
-      
-      dV = this->computeVolumeAround(gp);
-      dbj.beProductOf(d, bj);
-      if ( matStiffSymmFlag ) {
-        m->plusProductSymmUpper(bj, dbj, dV);
-      } else {
-        m->plusProductUnsym(bj, dbj, dV);
-      }
+    answer.resize(ndofs, ndofs);
+    answer.zero();
+
+    FloatMatrix *m = & answer;
+    if ( this->giveInterpolation() && this->giveInterpolation()->hasSubPatchFormulation() ) {
+        m = & temp;
     }
-    
-    // localize irule contribution into element matrix
-    if (this->giveIntegrationRuleLocalCodeNumbers (irlocnum, iRule, EID_MomentumBalance)) {
-      answer.assemble (*m, irlocnum);
-      m->resize(0,0);
+
+    // loop over individual integration rules
+    for ( ir = 0; ir < numberOfIntegrationRules; ir++ ) {
+        iRule = integrationRulesArray [ ir ];
+        // loop over individual integration points
+        for ( j = 0; j < iRule->getNumberOfIntegrationPoints(); j++ ) {
+            gp = iRule->getIntegrationPoint(j);
+            this->computeBmatrixAt(gp, bj);
+            this->computeConstitutiveMatrixAt(d, rMode, gp, tStep);
+
+            dV = this->computeVolumeAround(gp);
+            dbj.beProductOf(d, bj);
+            if ( matStiffSymmFlag ) {
+                m->plusProductSymmUpper(bj, dbj, dV);
+            } else {
+                m->plusProductUnsym(bj, dbj, dV);
+            }
+        }
+
+        // localize irule contribution into element matrix
+        if ( this->giveIntegrationRuleLocalCodeNumbers(irlocnum, iRule, EID_MomentumBalance) ) {
+            answer.assemble(* m, irlocnum);
+            m->resize(0, 0);
+        }
+    } // end loop over irules
+
+    if ( matStiffSymmFlag ) {
+        answer.symmetrized();
     }
-    
-  } // end loop over irules
-  
-  if ( matStiffSymmFlag ) {
-    answer.symmetrized();
-  }
-  
-  if ( this->updateRotationMatrix() ) {
-    answer.rotatedWith(* this->rotationMatrix);
-  }
-  return;
+
+    if ( this->updateRotationMatrix() ) {
+        answer.rotatedWith(* this->rotationMatrix);
+    }
+
+    return;
 }
 
 
@@ -1069,16 +1081,19 @@ StructuralElement :: computeStrainVector(FloatArray &answer, GaussPoint *gp, Tim
     FloatMatrix b;
     FloatArray u;
 
-    if (!this->isActivated(stepN)) {
-      answer.resize(this->giveCrossSection()->giveIPValueSize(IST_StrainTensor, gp));
-      answer.zero();
-      return;}
+    if ( !this->isActivated(stepN) ) {
+        answer.resize( this->giveCrossSection()->giveIPValueSize(IST_StrainTensor, gp) );
+        answer.zero();
+        return;
+    }
 
     this->computeBmatrixAt(gp, b);
     this->computeVectorOf(EID_MomentumBalance, VM_Total, stepN, u);
 
     // substract initial displacements, if defined
-    if (initialDisplacements) u.substract(initialDisplacements);
+    if ( initialDisplacements ) {
+        u.substract(initialDisplacements);
+    }
 
     if ( this->updateRotationMatrix() ) {
         u.rotatedWith(this->rotationMatrix, 'n');
@@ -1194,9 +1209,9 @@ StructuralElement :: giveInternalForcesVector(FloatArray &answer,
     }
 
     // if inactive update state, but no contribution to global system
-    if (!this->isActivated(tStep)) {
-      answer.zero();
-      return;
+    if ( !this->isActivated(tStep) ) {
+        answer.zero();
+        return;
     }
 
 
@@ -1229,15 +1244,15 @@ StructuralElement ::  giveCharacteristicMatrix(FloatMatrix &answer,
 {
     if ( mtrx == StiffnessMatrix ) {
         this->computeStiffnessMatrix(answer, TangentStiffness, tStep);
-    } else if ( mtrx == TangentStiffnessMatrix )  {
+    } else if ( mtrx == TangentStiffnessMatrix ) {
         this->computeStiffnessMatrix(answer, TangentStiffness, tStep);
-    } else if ( mtrx == SecantStiffnessMatrix )  {
+    } else if ( mtrx == SecantStiffnessMatrix ) {
         this->computeStiffnessMatrix(answer, SecantStiffness, tStep);
-    } else if ( mtrx == ElasticStiffnessMatrix )  {
+    } else if ( mtrx == ElasticStiffnessMatrix ) {
         this->computeStiffnessMatrix(answer, ElasticStiffness, tStep);
-    } else if ( mtrx == MassMatrix )  {
+    } else if ( mtrx == MassMatrix ) {
         this->computeMassMatrix(answer, tStep);
-    } else if ( mtrx == LumpedMassMatrix )  {
+    } else if ( mtrx == LumpedMassMatrix ) {
         this->computeLumpedMassMatrix(answer, tStep);
     } else if ( mtrx == InitialStressMatrix ) {
         this->computeInitialStressMatrix(answer, tStep);
@@ -1259,11 +1274,11 @@ StructuralElement ::  giveCharacteristicVector(FloatArray &answer, CharType mtrx
 {
     if ( mtrx == ElementForceLoadVector ) {
         this->computeForceLoadVector(answer, tStep, mode);
-    } else if ( mtrx == ElementNonForceLoadVector )  {
+    } else if ( mtrx == ElementNonForceLoadVector ) {
         this->computeNonForceLoadVector(answer, tStep, mode);
-    } else if ( ( mtrx == NodalInternalForcesVector ) && ( mode == VM_Total ) )                                                                                                              {
+    } else if ( ( mtrx == NodalInternalForcesVector ) && ( mode == VM_Total ) ) {
         this->giveInternalForcesVector(answer, tStep);
-    } else if ( ( mtrx == LastEquilibratedNodalInternalForcesVector ) && ( mode == VM_Total ) )      {
+    } else if ( ( mtrx == LastEquilibratedNodalInternalForcesVector ) && ( mode == VM_Total ) ) {
         /* here tstep is not relevant, we set useUpdatedGpRecord = 1
          * and this will sause to integrate internal forces using existing (nontemp, equlibrated) stresses in
          * statuses. Mainly used to compute reaction forces */
@@ -1276,15 +1291,18 @@ StructuralElement ::  giveCharacteristicVector(FloatArray &answer, CharType mtrx
 }
 
 void
-StructuralElement::updateYourself(TimeStep *tStep)
+StructuralElement :: updateYourself(TimeStep *tStep)
 {
-  Element::updateYourself(tStep);
-  
-  // record initial displacement if element not active
-  if (activityLtf && !isActivated (tStep)) {
-    if (!initialDisplacements) initialDisplacements = new FloatArray(); 
-    this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, *initialDisplacements);
-  }
+    Element :: updateYourself(tStep);
+
+    // record initial displacement if element not active
+    if ( activityLtf && !isActivated(tStep) ) {
+        if ( !initialDisplacements ) {
+            initialDisplacements = new FloatArray();
+        }
+
+        this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, * initialDisplacements);
+    }
 }
 
 
@@ -1546,7 +1564,7 @@ StructuralElement :: computeGNDofRotationMatrix(FloatMatrix &answer, DofManTrans
     // initialize answer
     int gsize = this->computeGlobalNumberOfDofs(EID_MomentumBalance);
     if ( mode == _toGlobalCS ) {
-        answer.resize( this->computeNumberOfDofs(EID_MomentumBalance), gsize);
+        answer.resize(this->computeNumberOfDofs(EID_MomentumBalance), gsize);
     } else if ( mode == _toNodalCS ) {
         answer.resize( gsize, this->computeNumberOfDofs(EID_MomentumBalance) );
     } else {
@@ -1598,7 +1616,7 @@ StructuralElement :: computeGNLoadRotationMatrix(FloatMatrix &answer, DofManTran
     // initialize answer
     int gsize = this->computeGlobalNumberOfDofs(EID_MomentumBalance);
     if ( mode == _toGlobalCS ) {
-        answer.resize( this->computeNumberOfDofs(EID_MomentumBalance), gsize );
+        answer.resize(this->computeNumberOfDofs(EID_MomentumBalance), gsize);
     } else if ( mode == _toNodalCS ) {
         answer.resize( gsize, this->computeNumberOfDofs(EID_MomentumBalance) );
     } else {
@@ -1639,7 +1657,7 @@ StructuralElement :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, In
 
 
 void
-StructuralElement :: giveNonlocalLocationArray(IntArray &locationArray, const UnknownNumberingScheme&s)
+StructuralElement :: giveNonlocalLocationArray(IntArray &locationArray, const UnknownNumberingScheme &s)
 {
     NonlocalMaterialStiffnessInterface *interface;
     // test for material model interface
@@ -1662,7 +1680,7 @@ StructuralElement :: giveNonlocalLocationArray(IntArray &locationArray, const Un
                                     NonlocalMaterialStiffnessInterface_giveIntegrationDomainList( iRule->getIntegrationPoint(i) );
             // loop over IP influencing IPs, extract corresponding element numbers and their code numbers
             for ( pos = integrationDomainList->begin(); pos != integrationDomainList->end(); ++pos ) {
-	      ( * pos ).nearGp->giveElement()->giveLocationArray(elemLocArry, EID_MomentumBalance, s);
+                ( * pos ).nearGp->giveElement()->giveLocationArray(elemLocArry, EID_MomentumBalance, s);
                 /*
                  * Currently no care given to multiple occurences of code number in locationArray.
                  */
@@ -1683,7 +1701,9 @@ StructuralElement :: addNonlocalStiffnessContributions(SparseMtrx &dest, TimeSte
      */
     NonlocalMaterialStiffnessInterface *interface;
 
-    if (!this->isActivated(atTime)) return; 
+    if ( !this->isActivated(atTime) ) {
+        return;
+    }
 
     // test for material model interface
     interface = ( NonlocalMaterialStiffnessInterface * )
@@ -1728,14 +1748,14 @@ StructuralElement :: adaptiveUpdate(TimeStep *tStep)
 IRResultType
 StructuralElement :: initializeFrom(InputRecord *ir)
 {
-  const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
-  IRResultType result;                            // Required by IR_GIVE_FIELD macro
-  
-  result = Element::initializeFrom (ir);
+    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
+    IRResultType result;                          // Required by IR_GIVE_FIELD macro
 
-  activityLtf = 0;
-  IR_GIVE_OPTIONAL_FIELD(ir, activityLtf, IFT_StructuralElement_activityltf, "activityltf"); // Macro
-  return result;
+    result = Element :: initializeFrom(ir);
+
+    activityLtf = 0;
+    IR_GIVE_OPTIONAL_FIELD(ir, activityLtf, IFT_StructuralElement_activityltf, "activityltf"); // Macro
+    return result;
 }
 
 
@@ -1768,7 +1788,7 @@ StructuralElement :: showSparseMtrxStructure(CharType mtrx, oofegGraphicContext 
         ( mtrx == SecantStiffnessMatrix ) || ( mtrx == ElasticStiffnessMatrix ) ) {
         int i, j, n;
         IntArray loc;
-        this->giveLocationArray(loc, EID_MomentumBalance);
+        this->giveLocationArray( loc, EID_MomentumBalance, EModelDefaultEquationNumbering() );
 
         WCRec p [ 4 ];
         GraphicObj *go;

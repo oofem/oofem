@@ -40,38 +40,38 @@
 #ifdef __OOFEG
 
 
-#include "intarray.h"
-#include "dynalist.h"
-#include "nodalrecoverymodel.h"
-#include "internalstatemode.h"
+ #include "intarray.h"
+ #include "dynalist.h"
+ #include "nodalrecoverymodel.h"
+ #include "internalstatemode.h"
 //
 // for c++ compiler to be succesfull on some c files
 //
 
 extern "C" {
-#define new __new
-#define class __class
-#define inline __inline
-#define min __min
-#define max __max
-#define sgn __sgn
-#define macbra __macbra
-#define Status __Status
-#define Request __Request
-#ifndef __MAKEDEPEND
-#include "Esimple.h"
-#endif
+ #define new __new
+ #define class __class
+ #define inline __inline
+ #define min __min
+ #define max __max
+ #define sgn __sgn
+ #define macbra __macbra
+ #define Status __Status
+ #define Request __Request
+ #ifndef __MAKEDEPEND
+  #include "Esimple.h"
+ #endif
 
-#undef new
-#undef class
-#undef inline
-#undef min
-#undef max
-#undef sgn
-#undef macbra
-#undef Status
-#undef Request
-#undef None
+ #undef new
+ #undef class
+ #undef inline
+ #undef min
+ #undef max
+ #undef sgn
+ #undef macbra
+ #undef Status
+ #undef Request
+ #undef None
 };
 
 
@@ -84,30 +84,31 @@ extern "C" {
 
 
 // width definition variables
-#define OOFEG_RAW_GEOMETRY_WIDTH 0
-#define OOFEG_DEFORMED_GEOMETRY_WIDTH 0
-#define OOFEG_CRACK_PATTERN_WIDTH 2
-#define OOFEG_ISO_LINE_WIDTH 4
-#define OOFEG_SPARSE_PROFILE_WIDTH 0
+ #define OOFEG_RAW_GEOMETRY_WIDTH 0
+ #define OOFEG_DEFORMED_GEOMETRY_WIDTH 0
+ #define OOFEG_CRACK_PATTERN_WIDTH 2
+ #define OOFEG_ISO_LINE_WIDTH 4
+ #define OOFEG_SPARSE_PROFILE_WIDTH 0
 
 // layer definition variables
-#define OOFEG_RAW_GEOMETRY_LAYER      0
-#define OOFEG_DEFORMED_GEOMETRY_LAYER 1
-#define OOFEG_NODE_ANNOTATION_LAYER   2
-#define OOFEG_VARPLOT_PATTERN_LAYER   3
-#define OOFEG_CRACK_PATTERN_LAYER     4
-#define OOFEG_BCIC_ANNOTATION_LAYER   5
-#define OOFEG_NATURALBC_LAYER         6
-#define OOFEG_SPARSE_PROFILE_LAYER    7
-#define OOFEG_DEBUG_LAYER             8
-#define OOFEG_LAST_LAYER              9
+ #define OOFEG_RAW_GEOMETRY_LAYER         0
+ #define OOFEG_DEFORMED_GEOMETRY_LAYER    1
+ #define OOFEG_NODE_ANNOTATION_LAYER      2
+ #define OOFEG_ELEMENT_ANNOTATION_LAYER   3
+ #define OOFEG_VARPLOT_PATTERN_LAYER      4
+ #define OOFEG_CRACK_PATTERN_LAYER        5
+ #define OOFEG_BCIC_ANNOTATION_LAYER      6
+ #define OOFEG_NATURALBC_LAYER            7
+ #define OOFEG_SPARSE_PROFILE_LAYER       8
+ #define OOFEG_DEBUG_LAYER                9
+ #define OOFEG_LAST_LAYER                10
 class EngngModel;
 class Element;
 class Range;
 
 enum OGC_PlotModeType {
     OGC_unknown, OGC_rawGeometry, OGC_deformedGeometry, OGC_eigenVectorGeometry,
-    OGC_nodeGeometry, OGC_nodeAnnotation, OGC_essentialBC, OGC_naturalBC,
+    OGC_nodeGeometry, OGC_nodeAnnotation, OGC_elementAnnotation, OGC_essentialBC, OGC_naturalBC,
     OGC_nodeScalarPlot, OGC_nodeVectorPlot,
     OGC_scalarPlot, OGC_vectorPlot, OGC_tensorPlot,
     OGC_elemSpecial
@@ -118,7 +119,7 @@ enum ScalarAlgorithmType { SA_ISO_SURF, SA_ISO_LINE, SA_ZPROFILE, SA_COLORZPROFI
 enum SmootherType { Smother_NA, Smoother_ZZ, Smoother_SPR };
 enum ScaleMode { SM_Autoscale, SM_UserDefined };
 
-#define OOFEG_YIELD_STEPS 3
+ #define OOFEG_YIELD_STEPS 3
 
 class oofegGraphicContext
 {
@@ -140,6 +141,7 @@ protected:
     static EPixel activeCrackColor;
     static EPixel yieldPlotColors [ OOFEG_YIELD_STEPS ];
     static EPixel standardSparseProfileColor, extendedSparseProfileColor;
+    static EPixel geometryColor;
 
     static int activeStep, activeStepVersion;
     static double defScale;
@@ -209,6 +211,7 @@ public:
     { return this->GR_giveColorFromUserColorTable(yieldPlotColors, OOFEG_YIELD_STEPS, ratio); }
     EPixel getStandardSparseProfileColor() { return standardSparseProfileColor; }
     EPixel getExtendedSparseProfileColor() { return extendedSparseProfileColor; }
+    EPixel getGeometryColor() { return geometryColor; }
     int    getSparseProfileMode() { return sparseProfileMode; }
 
 
@@ -232,6 +235,7 @@ public:
     void setDeformedElementColor(EPixel color) { deformedElementColor = color; }
     void setCrackPatternColor(EPixel color) { crackPatternColor = color; }
     void setActiveCrackColor(EPixel color) { activeCrackColor  = color; }
+    void setGeometryColor(EPixel color) { geometryColor = color; }
     void setActiveStep(int n) { activeStep = n; }
     void setActiveStepVersion(int n) { activeStepVersion = n; }
     void setDefScale(double n)   { defScale = n; }
@@ -240,8 +244,10 @@ public:
     void setActiveYieldStep(int n) { activeYieldStep = n; }
     void setInternalVarsDefGeoFlag(int n) { intVarDefGeoFlag = n; }
     void setSparseProfileMode(int n) { sparseProfileMode = n; }
-    int  setActiveDomain(int a) { activeDomain = a;
-                                  return activeDomain; }
+    int  setActiveDomain(int a) {
+        activeDomain = a;
+        return activeDomain;
+    }
     int  setActiveProblem(int a);
 
     void setPlotMode(OGC_PlotModeType mode) { plotMode = mode; }
@@ -263,11 +269,17 @@ public:
     void      setScaleMode(ScaleMode s) { smode = s; }
     double    getScaleMin() { return emin; }
     double    getScaleMax() { return emax; }
-    void      setScaleVals(double smin, double smax) { emin = smin;
-                                                       emax = smax; }
-    void      resetScaleVals() { if ( smode == SM_Autoscale ) { scaleInitFlag = 1;
-                                                                emin = 1.0;
-                                                                emax = -1.0; } }
+    void      setScaleVals(double smin, double smax) {
+        emin = smin;
+        emax = smax;
+    }
+    void      resetScaleVals() {
+        if ( smode == SM_Autoscale ) {
+            scaleInitFlag = 1;
+            emin = 1.0;
+            emax = -1.0;
+        }
+    }
     void      updateFringeTableMinMax(double *s, int size);
 
     // component filters

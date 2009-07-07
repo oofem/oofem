@@ -76,9 +76,9 @@
 #include "elementside.h"
 #include "datastream.h"
 #ifndef __MAKEDEPEND
-#include <stdlib.h>
-#include <stdio.h>
-#include <math.h>
+ #include <stdlib.h>
+ #include <stdio.h>
+ #include <math.h>
 #endif
 
 #include "errorestimator.h"
@@ -88,7 +88,7 @@
 
 
 Element :: Element(int n, Domain *aDomain) :
-  FEMComponent(n, aDomain), ElementGeometry(), dofManArray(), bodyLoadArray(), boundaryLoadArray()
+    FEMComponent(n, aDomain), ElementGeometry(), dofManArray(), bodyLoadArray(), boundaryLoadArray()
     // Constructor. Creates an element with number n, belonging to aDomain.
 {
     material           = 0;
@@ -220,18 +220,19 @@ Element :: computeGlobalNumberOfDofs(EquationID ut)
     if ( this->locationArray ) {
         return this->locationArray->giveSize();
     } else {
-      //IntArray loc;
-      //this->giveLocationArray(loc, ut);
-      //return loc.giveSize();
-      int i, answer = 0;
-      IntArray nodeDofIDMask, dofMask;
+        //IntArray loc;
+        //this->giveLocationArray(loc, ut);
+        //return loc.giveSize();
+        int i, answer = 0;
+        IntArray nodeDofIDMask, dofMask;
 
-      for ( i = 1; i <= numberOfDofMans; i++ ) {
-	this->giveDofManDofIDMask(i, ut, nodeDofIDMask);
-	this->giveDofManager(i)->giveDofArray(nodeDofIDMask, dofMask);
-	answer+=this->giveDofManager(i)->giveNumberOfPrimaryMasterDofs(dofMask);
-      }	
-      return answer;
+        for ( i = 1; i <= numberOfDofMans; i++ ) {
+            this->giveDofManDofIDMask(i, ut, nodeDofIDMask);
+            this->giveDofManager(i)->giveDofArray(nodeDofIDMask, dofMask);
+            answer += this->giveDofManager(i)->giveNumberOfPrimaryMasterDofs(dofMask);
+        }
+
+        return answer;
     }
 }
 
@@ -251,7 +252,7 @@ IntArray *Element :: giveBoundaryLoadArray()
 }
 
 
-void Element :: giveLocationArray(IntArray &locationArray, EquationID ut, const UnknownNumberingScheme& s) const
+void Element :: giveLocationArray(IntArray &locationArray, EquationID ut, const UnknownNumberingScheme &s) const
 // Returns the location array of the receiver. This array is obtained by
 // simply appending the location array of every node of the receiver.
 {
@@ -370,7 +371,7 @@ Element :: setDofManagers(const IntArray &_dmans)
 }
 
 void
-Element :: setIntegrationRules(AList<IntegrationRule> *irlist)
+Element :: setIntegrationRules(AList< IntegrationRule > *irlist)
 {
     if ( integrationRulesArray ) {
         for ( int i = 0; i < numberOfIntegrationRules; i++ ) {
@@ -379,13 +380,14 @@ Element :: setIntegrationRules(AList<IntegrationRule> *irlist)
 
         delete[] integrationRulesArray;
     }
+
     numberOfIntegrationRules = irlist->giveSize();
-    integrationRulesArray = new IntegrationRule * [irlist->giveSize()];
-  
+    integrationRulesArray = new IntegrationRule * [ irlist->giveSize() ];
+
     for ( int j = 0; j < irlist->giveSize(); j++ ) {
-            integrationRulesArray[j] =  irlist->at(j + 1);
-            irlist->unlink(j + 1);
-     }
+        integrationRulesArray [ j ] =  irlist->at(j + 1);
+        irlist->unlink(j + 1);
+    }
 }
 
 
@@ -423,16 +425,19 @@ double Element ::  giveCharacteristicValue(CharType mtrx, TimeStep *tStep)
     return 0.;
 }
 
-void Element :: giveMatLocalCS(FloatMatrix &answer){
- int i,j;
- answer.resize(3,3); answer.zero();
- if((this->matLocalCS).isNotEmpty ()){
-  for (i=1 ; i<=3 ; i++)
-   for (j=1 ; j<=3 ; j++)
-    answer.at(i,j) = this->matLocalCS.at(i,j);
- }
- else
-  answer.beUnitMatrix ();
+void Element :: giveMatLocalCS(FloatMatrix &answer) {
+    int i, j;
+    answer.resize(3, 3);
+    answer.zero();
+    if ( ( this->matLocalCS ).isNotEmpty() ) {
+        for ( i = 1; i <= 3; i++ ) {
+            for ( j = 1; j <= 3; j++ ) {
+                answer.at(i, j) = this->matLocalCS.at(i, j);
+            }
+        }
+    } else   {
+        answer.beUnitMatrix();
+    }
 }
 
 
@@ -440,57 +445,60 @@ void Element :: giveMatLocalCS(FloatMatrix &answer){
 IRResultType
 Element :: initializeFrom(InputRecord *ir)
 {
-  const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
-  IRResultType result;                            // Required by IR_GIVE_FIELD macro
+    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
+    IRResultType result;                          // Required by IR_GIVE_FIELD macro
 
 #  ifdef VERBOSE
-  // VERBOSE_PRINT1("Instanciating element ",number);
+    // VERBOSE_PRINT1("Instanciating element ",number);
 #  endif
-  IR_GIVE_FIELD(ir, material, IFT_Element_mat, "mat"); // Macro
+    IR_GIVE_FIELD(ir, material, IFT_Element_mat, "mat"); // Macro
 
-  IR_GIVE_FIELD(ir, crossSection, IFT_Element_crosssect, "crosssect"); // Macro
+    IR_GIVE_FIELD(ir, crossSection, IFT_Element_crosssect, "crosssect"); // Macro
 
-  IR_GIVE_FIELD(ir, dofManArray, IFT_Element_nodes, "nodes"); // Macro
+    IR_GIVE_FIELD(ir, dofManArray, IFT_Element_nodes, "nodes"); // Macro
 
-  //sideArray.resize(0);
-  //IR_GIVE_OPTIONAL_FIELD (ir, sideArray, IFT_Element_sides, "sides"); // Macro
+    //sideArray.resize(0);
+    //IR_GIVE_OPTIONAL_FIELD (ir, sideArray, IFT_Element_sides, "sides"); // Macro
 
-  bodyLoadArray.resize(0);
-  IR_GIVE_OPTIONAL_FIELD(ir, bodyLoadArray, IFT_Element_bodyload, "bodyloads"); // Macro
+    bodyLoadArray.resize(0);
+    IR_GIVE_OPTIONAL_FIELD(ir, bodyLoadArray, IFT_Element_bodyload, "bodyloads"); // Macro
 
-  boundaryLoadArray.resize(0);
-  IR_GIVE_OPTIONAL_FIELD(ir, boundaryLoadArray, IFT_Element_boundaryload, "boundaryloads"); // Macro
+    boundaryLoadArray.resize(0);
+    IR_GIVE_OPTIONAL_FIELD(ir, boundaryLoadArray, IFT_Element_boundaryload, "boundaryloads"); // Macro
 
-  if (ir->hasField(IFT_Element_mlcs, "mlcs")){//material local coordination system
-    double n1=0.0, n2=0.0;
-    int j;
-    FloatArray triplets;
-    triplets.resize(0);
-    IR_GIVE_OPTIONAL_FIELD (ir, triplets, IFT_Element_mlcs, "mlcs");
-    matLocalCS.resize(3,3);
-    for (j=1; j<=3; j++) {
-       matLocalCS.at(j,1) = triplets.at(j);
-      n1 += triplets.at(j)*triplets.at(j);
-       matLocalCS.at(j,2) = triplets.at(j+3);
-      n2 += triplets.at(j+3)*triplets.at(j+3);
+    if ( ir->hasField(IFT_Element_mlcs, "mlcs") ) { //material local coordination system
+        double n1 = 0.0, n2 = 0.0;
+        int j;
+        FloatArray triplets;
+        triplets.resize(0);
+        IR_GIVE_OPTIONAL_FIELD(ir, triplets, IFT_Element_mlcs, "mlcs");
+        matLocalCS.resize(3, 3);
+        for ( j = 1; j <= 3; j++ ) {
+            matLocalCS.at(j, 1) = triplets.at(j);
+            n1 += triplets.at(j) * triplets.at(j);
+            matLocalCS.at(j, 2) = triplets.at(j + 3);
+            n2 += triplets.at(j + 3) * triplets.at(j + 3);
+        }
+
+        n1 = sqrt(n1);
+        n2 = sqrt(n2);
+        for ( j = 1; j <= 3; j++ ) { // normalize e1' e2'
+            matLocalCS.at(j, 1) /= n1;
+            matLocalCS.at(j, 2) /= n2;
+        }
+
+        // vector e3' computed from vector product of e1', e2'
+        matLocalCS.at(1, 3) = ( matLocalCS.at(2, 1) * matLocalCS.at(3, 2) - matLocalCS.at(3, 1) * matLocalCS.at(2, 2) );
+        matLocalCS.at(2, 3) = ( matLocalCS.at(3, 1) * matLocalCS.at(1, 2) - matLocalCS.at(1, 1) * matLocalCS.at(3, 2) );
+        matLocalCS.at(3, 3) = ( matLocalCS.at(1, 1) * matLocalCS.at(2, 2) - matLocalCS.at(2, 1) * matLocalCS.at(1, 2) );
+        //matLocalCS.printYourself();
     }
-    n1 = sqrt(n1); n2 = sqrt(n2);
-    for (j=1; j<= 3; j++) { // normalize e1' e2'
-      matLocalCS.at(j,1) /= n1;
-      matLocalCS.at(j,2) /= n2;
-    }
-    // vector e3' computed from vector product of e1', e2'
-    matLocalCS.at(1,3) = (matLocalCS.at(2,1)*matLocalCS.at(3,2) - matLocalCS.at(3,1)*matLocalCS.at(2,2)) ;
-    matLocalCS.at(2,3) = (matLocalCS.at(3,1)*matLocalCS.at(1,2) - matLocalCS.at(1,1)*matLocalCS.at(3,2)) ;
-    matLocalCS.at(3,3) = (matLocalCS.at(1,1)*matLocalCS.at(2,2) - matLocalCS.at(2,1)*matLocalCS.at(1,2)) ;
-    //matLocalCS.printYourself();
-  }
 
 #ifdef __PARALLEL_MODE
-#ifndef __ENABLE_COMPONENT_LABELS
+ #ifndef __ENABLE_COMPONENT_LABELS
     globalNumber = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, globalNumber, IFT_Element_globnum, "globnum"); // Macro
-#endif
+ #endif
     partitions.resize(0);
     IR_GIVE_OPTIONAL_FIELD(ir, partitions, IFT_Element_partitions, "partitions"); // Macro
     // if (hasString (initString, "shared")) parallel_mode = Element_shared;
@@ -566,7 +574,7 @@ void Element :: printOutputAt(FILE *file, TimeStep *stepN)
 {
     int i;
 
-#if defined(__PARALLEL_MODE) || defined(__ENABLE_COMPONENT_LABELS)
+#if defined ( __PARALLEL_MODE ) || defined ( __ENABLE_COMPONENT_LABELS )
     fprintf( file, "element %d (%8d) :\n", this->giveLabel(), this->giveNumber() );
 #else
     fprintf(file, "element %d :\n", number);
@@ -964,7 +972,7 @@ Element :: giveSpatialDimension(void)
         return 2;
 
     case EGT_tetra_1:
-    //  case EGT_tetra_2:
+        //  case EGT_tetra_2:
     case EGT_hexa_1:
     case EGT_hexa_2:
         return 3;
@@ -1059,11 +1067,11 @@ Element :: adaptiveFinish(TimeStep *tStep)
 
 
 void
-Element :: updateLocalNumbering(EntityRenumberingFunctor &f )
+Element :: updateLocalNumbering(EntityRenumberingFunctor &f)
 {
     int i;
     for ( i = 1; i <= numberOfDofMans; i++ ) {
-        dofManArray.at(i) = f (dofManArray.at(i), ERS_DofManager);
+        dofManArray.at(i) = f(dofManArray.at(i), ERS_DofManager);
     }
 }
 
@@ -1131,7 +1139,7 @@ Element :: predictRelativeComputationalCost()
         wgt += this->giveCrossSection()->predictRelativeComputationalCost( iRule->getIntegrationPoint(j) );
     }
 
-    return ( this->giveRelativeSelfComputationalCost() * wgt);
+    return ( this->giveRelativeSelfComputationalCost() * wgt );
 }
 
 #endif
@@ -1146,6 +1154,8 @@ Element :: drawYourself(oofegGraphicContext &gc)
 
     if ( mode == OGC_rawGeometry ) {
         this->drawRawGeometry(gc);
+    } else if ( mode == OGC_elementAnnotation ) {
+        this->drawAnnotation(gc);
     } else if ( mode == OGC_deformedGeometry ) {
         this->drawDeformedGeometry(gc, DisplacementVector);
     } else if ( mode == OGC_eigenVectorGeometry ) {
@@ -1157,6 +1167,42 @@ Element :: drawYourself(oofegGraphicContext &gc)
     } else {
         _error("drawYourself : unsupported mode");
     }
+}
+
+void
+Element :: drawAnnotation(oofegGraphicContext &gc)
+{
+    int i, count = 0;
+    Node *node;
+    WCRec p [ 1 ]; /* point */
+    GraphicObj *go;
+    char num [ 30 ];
+
+    p [ 0 ].x = p [ 0 ].y = p [ 0 ].z = 0.0;
+    // compute element center
+    for ( i = 1; i <= numberOfDofMans; i++ ) {
+        if ( ( node = this->giveNode(i) ) ) {
+            p [ 0 ].x += node->giveCoordinate(1);
+            p [ 0 ].y += node->giveCoordinate(2);
+            p [ 0 ].z += node->giveCoordinate(3);
+            count++;
+        }
+    }
+
+    p [ 0 ].x /= count;
+    p [ 0 ].y /= count;
+    p [ 0 ].z /= count;
+
+    EASValsSetLayer(OOFEG_ELEMENT_ANNOTATION_LAYER);
+    EASValsSetColor( gc.getElementColor() );
+ #ifdef __PARALLEL_MODE
+    sprintf( num, "%d(%d)", this->giveNumber(), this->giveGlobalNumber() );
+ #else
+    sprintf( num, "%d", this->giveNumber() );
+ #endif
+    go = CreateAnnText3D(p, num);
+    EGWithMaskChangeAttributes(COLOR_MASK | LAYER_MASK, go);
+    EMAddGraphicsToModel(ESIModel(), go);
 }
 
 

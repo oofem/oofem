@@ -14,7 +14,11 @@
 class EnrichmentItem;
 class BasicGeometry;
 
-/** Abstract class representing EnrichmentItem */
+/** Abstract class representing global shape function
+ *  Base class declares abstract interface common to all enrichment functions.
+ *  Particularly, evaluateAt() and evaluateDerivativeAt() services are declared
+ *  to evaluate the value and spatial derivatives at a given point of the receiver.
+ */
 class EnrichmentFunction : public FEMComponent
 {
 public:
@@ -24,9 +28,9 @@ public:
      * @param n number associated with receiver
      * @param aDomain reference to domain.
      */
-    EnrichmentFunction(int n, Domain *aDomain) : FEMComponent(n, aDomain) {}
+    EnrichmentFunction(int n, Domain *aDomain) : FEMComponent(n, aDomain) { }
     /// Destructor
-    ~EnrichmentFunction() {};
+    ~EnrichmentFunction() { };
     /// Evaluates a function at a particular point
     virtual void evaluateFunctionAt(FloatArray &answer, FloatArray *point) = 0;
     /// Evaluates a function derivative at a particular point
