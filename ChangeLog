@@ -1,3 +1,59 @@
+2009-06-20  Borek Patzak  <Borek.Patzak@fsv.cvut.cz>
+
+	* Added support fo adaptive, parallel jobs with dynamic load
+	balancing.
+
+	* New subdivision algorithm for serial and parallel remeshing of
+	tetrahedral and tringular meshes.
+
+	* Added general xfem support. Introduced new classes representing
+	global enrichment functions, their geometry description,
+	integration rules, etc. New xfem manager class managing ang
+	wrapping xfem stuff.
+
+	* Added support for element insertion/removal during
+	analysis. This option allows to activate/deactivate any element at
+	any solution step, based on the value of load time function, that
+	can be specified for every element. Very useful tool to model
+	construction process, excavation, and similar processes. Enabled
+	only for structural elements.
+
+	* Support for arbitrary component numbering. Dof managers (nodes)
+	and elements can have arbitrary, noncontinuous numbering.
+
+	* Introduced new concept of random field geneartors. They are part
+	of the domain and can be used to generate random field
+	distributions. Also introduced random material interface, allowing
+	to maintain a unique copy of any material parameter in every
+	integration point. This allows to avoid a large number of material
+	models, that are needed otherwise. These values can be generated
+	by random or other generators, that are now attributes of a domain
+
+	* Enabled vtk export on quadratic quad plane stress element. Added
+	support for region-by region export. New xml based vtk export
+	module.
+
+	* Added geometric nonlinearity to ltrspace, lspace and
+	planestress2d elements. New 3d interface element with linear
+	approximation. New FEI interpolation classes (FEI2dTrQuad,
+	FEI3dhexaquad, FEI2dquadquad)
+
+	* Load balancing engine - many improvements and several bug fixes.
+
+	* Added interface to SLEPc, the Scalable Library for Eigenvalue
+	Problem Computations.
+
+	* Updated to the latest release of DSS solver, fixed block
+	handling issues leading to better performance.
+
+	* Updated to new PETSc 3.0 release.
+
+	* Updated documentation. Documentation now available in html,ps,
+	and pdf formats.
+
+	* Many, many enhancements and bug-fixes.
+
+	
 2008-03-02  Borek Patzak  <Borek.Patzak@fsv.cvut.cz>
 
 	* New installation and compilation procedure implemented. Now uses
