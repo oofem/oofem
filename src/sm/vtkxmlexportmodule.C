@@ -151,7 +151,9 @@ VTKXMLExportModule :: doOutput(TimeStep *tStep)
 	for ( ielem = 1; ielem <= nelem; ielem++ ) {
 	  elem = d->giveElement(ielem);
 	  if ((ireg>0) && (elem->giveRegionNumber() != ireg)) continue;
-	  
+#ifdef __PARALLEL_MODE
+    if (elem->giveParallelMode() != Element_local) continue;
+#endif	  
 	  nelemNodes = elem->giveNumberOfNodes();
 	  for ( i = 1; i <= nelemNodes; i++ ) {
 	    fprintf(stream, "%d ", mapG2L.at( elem->giveNode(i)->giveNumber()) - 1);
@@ -164,6 +166,9 @@ VTKXMLExportModule :: doOutput(TimeStep *tStep)
 	for ( ielem = 1; ielem <= nelem; ielem++ ) {
 	  elem = d->giveElement(ielem);
 	  if ((ireg>0) && (elem->giveRegionNumber() != ireg)) continue;
+#ifdef __PARALLEL_MODE
+    if (elem->giveParallelMode() != Element_local) continue;
+#endif	  
 	  offset+= elem->giveNumberOfNodes();
 	  fprintf(stream, "%d ", offset);
 	}
@@ -174,6 +179,9 @@ VTKXMLExportModule :: doOutput(TimeStep *tStep)
 	for ( ielem = 1; ielem <= nelem; ielem++ ) {
 	  elem = d->giveElement(ielem);
 	  if ((ireg>0) && (elem->giveRegionNumber() != ireg)) continue;
+#ifdef __PARALLEL_MODE
+    if (elem->giveParallelMode() != Element_local) continue;
+#endif	
 	  vtkCellType = this->giveCellType(elem);
 	  fprintf(stream, "%d ", vtkCellType);
 	}
@@ -197,6 +205,9 @@ VTKXMLExportModule :: doOutput(TimeStep *tStep)
 	elem = d->giveElement(ielem);
 	
 	if ((reg>0) && (element->giveRegionNumber() != reg)) continue;
+#ifdef __PARALLEL_MODE
+  if (element->giveParallelMode() != Element_local) continue;
+#endif
 	if (this->isElementComposite(element)) {
 	  // multi cell (composite) elements should support vtkxmlexportmoduleinterface
 	  // and are exported as individual pieces (see VTKXMLExportModuleElementInterface) 
@@ -448,7 +459,9 @@ VTKXMLExportModule :: initRegionNodeNumbering(IntArray &regionG2LNodalNumbers,
         element = domain->giveElement(ielem);
 	if ((reg>0) && (element->giveRegionNumber() != reg)) continue;
 	if (this->isElementComposite(element)) continue; // composite cells exported individually
-
+#ifdef __PARALLEL_MODE
+  if (element->giveParallelMode() != Element_local) continue;
+#endif
 	regionSingleCells++;
         elemNodes = element->giveNumberOfNodes();
         //  elemSides = element->giveNumberOfSides();

@@ -94,29 +94,38 @@ VTKExportModule :: initializeFrom(InputRecord *ir)
 void
 VTKExportModule :: doOutput(TimeStep *tStep)
 {
-    if ( !testTimeStepOutput(tStep) ) {
-        return;
-    }
+  if ( !testTimeStepOutput(tStep) ) {
+    return;
+  }
+  
+  FILE *stream = this->giveOutputStream(tStep);
+  
+  fprintf(stream, "# vtk DataFile Version 2.0\n");
+  fprintf( stream, "Output for time %f\n", tStep->giveTime() );
+  fprintf(stream, "ASCII\n");
+  
+  fprintf(stream, "DATASET UNSTRUCTURED_GRID\n");
+  
+  
+  Domain *d  = emodel->giveDomain(1);
+  FloatArray *coords;
+  int i, j, inode, nnodes = d->giveNumberOfDofManagers();
+  // output points
+  
+  if ((this->mode == wdmode) || ((this->mode == rbrmode)&&(this->outMode == wdmode))) {
+    
+      int nnodes = this->giveTotalRBRNumberOfNodes(d);
+      fprintf(stream, "POINTS %d float\n", nnodes);
+      int ireg=-1;
+      int regionDofMans;
+      IntArray map( d->giveNumberOfDofManagers() );
+      
+      // asemble local->global region map
+      this->initRegionNodeNumbering(map, regionDofMans, 0, d, ireg, 1);
 
-    FILE *stream = this->giveOutputStream(tStep);
-
-    fprintf(stream, "# vtk DataFile Version 2.0\n");
-    fprintf( stream, "Output for time %f\n", tStep->giveTime() );
-    fprintf(stream, "ASCII\n");
-
-    fprintf(stream, "DATASET UNSTRUCTURED_GRID\n");
-
-
-    Domain *d  = emodel->giveDomain(1);
-    FloatArray *coords;
-    int i, j, inode, nnodes = d->giveNumberOfDofManagers();
-    // output points
-
-    if ((this->mode == wdmode) || ((this->mode == rbrmode)&&(this->outMode == wdmode))) {
-
-      fprintf(stream, "POINTS %d double\n", nnodes);
-      for ( inode = 1; inode <= nnodes; inode++ ) {
-        coords = d->giveNode(inode)->giveCoordinates();
+      printf ("vktexportModule: %d %d\n", nnodes, regionDofMans);
+      for ( inode = 1; inode <= regionDofMans; inode++ ) {
+        coords = d->giveNode( map.at(inode) )->giveCoordinates();
         for ( i = 1; i <= coords->giveSize(); i++ ) {
           fprintf( stream, "%e ", coords->at(i) );
         }
@@ -127,55 +136,159 @@ VTKExportModule :: doOutput(TimeStep *tStep)
         
         fprintf(stream, "\n");
       }
-    } else {  // outMode = rbrmode (Region By Region)
-      // output nodes Region By Region
-      int nnodes = this->giveTotalRBRNumberOfNodes(d);
-      fprintf(stream, "POINTS %d float\n", nnodes);
-      int ireg, nregions = d->giveNumberOfRegions();
-      int regionDofMans;
-      IntArray map( d->giveNumberOfDofManagers() );
-      for ( ireg = 1; ireg <= nregions; ireg++ ) {
-
-        if (this->regionsToSkip.contains(ireg)) continue;
-        // asemble local->global region map
-        this->initRegionNodeNumbering(map, regionDofMans, 0, d, ireg, 1);
-        
-        for ( inode = 1; inode <= regionDofMans; inode++ ) {
-            coords = d->giveNode( map.at(inode) )->giveCoordinates();
-            for ( i = 1; i <= coords->giveSize(); i++ ) {
-                fprintf( stream, "%e ", coords->at(i) );
-            }
-
-            for ( i = coords->giveSize() + 1; i <= 3; i++ ) {
-                fprintf(stream, "%e ", 0.0);
-            }
-
-            fprintf(stream, "\n");
+      /*      
+      fprintf(stream, "POINTS %d double\n", nnodes);
+      for ( inode = 1; inode <= nnodes; inode++ ) {
+      coords = d->giveNode(inode)->giveCoordinates();
+      for ( i = 1; i <= coords->giveSize(); i++ ) {
+      fprintf( stream, "%e ", coords->at(i) );
+      }
+      
+      for ( i = coords->giveSize() + 1; i <= 3; i++ ) {
+      fprintf(stream, "%e ", 0.0);
+      }
+      
+      fprintf(stream, "\n");
+      }
+      */
+  } else {  // outMode = rbrmode (Region By Region)
+    // output nodes Region By Region
+    int nnodes = this->giveTotalRBRNumberOfNodes(d);
+    fprintf(stream, "POINTS %d float\n", nnodes);
+    int ireg, nregions = d->giveNumberOfRegions();
+    int regionDofMans;
+    IntArray map( d->giveNumberOfDofManagers() );
+    for ( ireg = 1; ireg <= nregions; ireg++ ) {
+      
+      if (this->regionsToSkip.contains(ireg)) continue;
+      // asemble local->global region map
+      this->initRegionNodeNumbering(map, regionDofMans, 0, d, ireg, 1);
+      
+      for ( inode = 1; inode <= regionDofMans; inode++ ) {
+        coords = d->giveNode( map.at(inode) )->giveCoordinates();
+        for ( i = 1; i <= coords->giveSize(); i++ ) {
+          fprintf( stream, "%e ", coords->at(i) );
         }
+        
+        for ( i = coords->giveSize() + 1; i <= 3; i++ ) {
+          fprintf(stream, "%e ", 0.0);
+        }
+        
+        fprintf(stream, "\n");
       }
     }
+  }
 
-    int ielem, nelem = d->giveNumberOfElements(), elemToProcess = 0;
-    int ncells, celllistsize = 0;
+  int ielem, nelem = d->giveNumberOfElements(), elemToProcess = 0;
+  int ncells, celllistsize = 0;
+  for ( ielem = 1; ielem <= nelem; ielem++ ) {
+    if ((this->mode == rbrmode)&&(this->regionsToSkip.contains(d->giveElement(ielem)->giveRegionNumber()))) continue;
+#ifdef __PARALLEL_MODE
+    if (d->giveElement(ielem)->giveParallelMode() != Element_local) continue;
+#endif
+    elemToProcess++;
+    // element composed from same-type cells asumed
+    ncells = this->giveNumberOfElementCells( d->giveElement(ielem) );
+    celllistsize += ncells + ncells * this->giveNumberOfNodesPerCell( this->giveCellType( d->giveElement(ielem) ) );
+  }
+  
+  int nelemNodes;
+  int HexaQuadNodeMapping [] = {5,8,7,6,1,4,3,2,16,15,14,13,12,11,10,9,17,20,19,18};
+  Element *elem;
+  int vtkCellType;
+  // output cells
+  fprintf(stream, "\nCELLS %d %d\n", elemToProcess, celllistsize);
+  
+  if ((this->mode == wdmode) || ((this->mode == rbrmode)&&(this->outMode == wdmode))) {
+    IntArray regionNodalNumbers(nnodes);
+    int regionDofMans = 0, offset = 0;
+    int ireg=-1;
+    
+    // assemble global->local map
+    this->initRegionNodeNumbering(regionNodalNumbers, regionDofMans, offset, d, ireg, 0);
+    offset += regionDofMans;
     for ( ielem = 1; ielem <= nelem; ielem++ ) {
-      if ((this->mode == rbrmode)&&(this->regionsToSkip.contains(d->giveElement(ielem)->giveRegionNumber()))) continue;
-      elemToProcess++;
-      // element composed from same-type cells asumed
-      ncells = this->giveNumberOfElementCells( d->giveElement(ielem) );
-      celllistsize += ncells + ncells * this->giveNumberOfNodesPerCell( this->giveCellType( d->giveElement(ielem) ) );
+      elem = d->giveElement(ielem);
+#ifdef __PARALLEL_MODE
+      if (elem->giveParallelMode() != Element_local) continue;
+#endif
+      vtkCellType = this->giveCellType (elem);
+      
+      nelemNodes = elem->giveNumberOfNodes();
+      fprintf(stream, "%d ", nelemNodes);
+      for ( i = 1; i <= nelemNodes; i++ ) {
+        if(vtkCellType==25){
+          j=HexaQuadNodeMapping[i-1];
+        }
+        else {
+          j=i;
+        }
+        fprintf(stream, "%d ", regionNodalNumbers.at( elem->giveNode(j)->giveNumber() ) - 1);
+      }
+      
+      fprintf(stream, "\n");
     }
-
-    int nelemNodes;
-    int HexaQuadNodeMapping [] = {5,8,7,6,1,4,3,2,16,15,14,13,12,11,10,9,17,20,19,18};
-    Element *elem;
+    
+    // output cell types
     int vtkCellType;
-    // output cells
-    fprintf(stream, "\nCELLS %d %d\n", elemToProcess, celllistsize);
+    fprintf(stream, "\nCELL_TYPES %d\n", elemToProcess);
+    for ( ielem = 1; ielem <= nelem; ielem++ ) {
+      elem = d->giveElement(ielem);
+#ifdef __PARALLEL_MODE
+      if (elem->giveParallelMode() != Element_local) continue;
+#endif
+      vtkCellType = this->giveCellType(elem);
+      fprintf(stream, "%d\n", vtkCellType);
+    }
+  
+  /*
+    for ( ielem = 1; ielem <= nelem; ielem++ ) {
+    elem = d->giveElement(ielem);
+    vtkCellType = this->giveCellType (elem);
+    nelemNodes = elem->giveNumberOfNodes();
+    fprintf(stream, "%d ", nelemNodes);
+    for ( i = 1; i <= nelemNodes; i++ ) {
+    if(vtkCellType==25){
+    j=HexaQuadNodeMapping[i-1];
+    }
+    else {
+    j=i;
+    }
+    fprintf(stream, "%d ", elem->giveNode(j)->giveNumber() - 1);
+    }
+    
+    fprintf(stream, "\n");
+    }
+    
+    // output cell types
+    fprintf(stream, "\nCELL_TYPES %d\n", elemToProcess);
+    for ( ielem = 1; ielem <= nelem; ielem++ ) {
+    elem = d->giveElement(ielem);
+    vtkCellType = this->giveCellType(elem);
+    fprintf(stream, "%d\n", vtkCellType);
+    }
+  */
+  } else {  // rbr mode
+    IntArray regionNodalNumbers(nnodes);
+    int regionDofMans = 0, offset = 0;
+    int ireg, nregions = d->giveNumberOfRegions();
+    for ( ireg = 1; ireg <= nregions; ireg++ ) {
 
-    if ((this->mode == wdmode) || ((this->mode == rbrmode)&&(this->outMode == wdmode))) {
+      if (this->regionsToSkip.contains(ireg)) continue;
+      
+      // assemble global->local map
+      this->initRegionNodeNumbering(regionNodalNumbers, regionDofMans, offset, d, ireg, 0);
+      offset += regionDofMans;
       for ( ielem = 1; ielem <= nelem; ielem++ ) {
         elem = d->giveElement(ielem);
         vtkCellType = this->giveCellType (elem);
+#ifdef __PARALLEL_MODE
+        if (elem->giveParallelMode() != Element_local) continue;
+#endif
+        if ( elem->giveRegionNumber() != ireg ) {
+          continue;
+        }
+        
         nelemNodes = elem->giveNumberOfNodes();
         fprintf(stream, "%d ", nelemNodes);
         for ( i = 1; i <= nelemNodes; i++ ) {
@@ -185,90 +298,43 @@ VTKExportModule :: doOutput(TimeStep *tStep)
           else {
             j=i;
           }
-          fprintf(stream, "%d ", elem->giveNode(j)->giveNumber() - 1);
+          fprintf(stream, "%d ", regionNodalNumbers.at( elem->giveNode(j)->giveNumber() ) - 1);
         }
         
         fprintf(stream, "\n");
       }
+    }
+    
+    for ( ireg = 1; ireg <= nregions; ireg++ ) {
+      
+      if (this->regionsToSkip.contains(ireg)) continue;
       
       // output cell types
+      int vtkCellType;
       fprintf(stream, "\nCELL_TYPES %d\n", elemToProcess);
       for ( ielem = 1; ielem <= nelem; ielem++ ) {
         elem = d->giveElement(ielem);
+        if ( elem->giveRegionNumber() != ireg ) {
+          continue;
+        }
+#ifdef __PARALLEL_MODE
+        if (elem->giveParallelMode() != Element_local) continue;
+#endif
+        
         vtkCellType = this->giveCellType(elem);
         fprintf(stream, "%d\n", vtkCellType);
       }
-
-    } else {  // rbr mode
-      IntArray regionNodalNumbers(nnodes);
-      int regionDofMans = 0, offset = 0;
-      int ireg, nregions = d->giveNumberOfRegions();
-      for ( ireg = 1; ireg <= nregions; ireg++ ) {
-
-        if (this->regionsToSkip.contains(ireg)) continue;
-
-        // assemble global->local map
-        this->initRegionNodeNumbering(regionNodalNumbers, regionDofMans, offset, d, ireg, 0);
-        offset += regionDofMans;
-        for ( ielem = 1; ielem <= nelem; ielem++ ) {
-            elem = d->giveElement(ielem);
-            vtkCellType = this->giveCellType (elem);
-            if ( elem->giveRegionNumber() != ireg ) {
-                continue;
-            }
-
-            nelemNodes = elem->giveNumberOfNodes();
-            fprintf(stream, "%d ", nelemNodes);
-            for ( i = 1; i <= nelemNodes; i++ ) {
-              if(vtkCellType==25){
-                j=HexaQuadNodeMapping[i-1];
-              }
-              else {
-                j=i;
-              }
-              fprintf(stream, "%d ", regionNodalNumbers.at( elem->giveNode(j)->giveNumber() ) - 1);
-            }
-
-            fprintf(stream, "\n");
-        }
-      }
-
-      for ( ireg = 1; ireg <= nregions; ireg++ ) {
-
-        if (this->regionsToSkip.contains(ireg)) continue;
-
-        // output cell types
-        int vtkCellType;
-        fprintf(stream, "\nCELL_TYPES %d\n", elemToProcess);
-	for ( ielem = 1; ielem <= nelem; ielem++ ) {
-	  elem = d->giveElement(ielem);
-	  if ( elem->giveRegionNumber() != ireg ) {
-	    continue;
-	  }
-
-	  vtkCellType = this->giveCellType(elem);
-	  fprintf(stream, "%d\n", vtkCellType);
-        }
-      }
     }
-
-    if ( primaryVarsToExport.giveSize() || internalVarsToExport.giveSize() ) {
-
-      if (this->mode == rbrmode) {
-        if ( outMode == wdmode ) {
-          fprintf(stream, "\n\nPOINT_DATA %d\n", nnodes);
-        } else {
-          fprintf( stream, "\n\nPOINT_DATA %d\n", this->giveTotalRBRNumberOfNodes(d) );
-        }
-      } else {
-        fprintf(stream, "\n\nPOINT_DATA %d\n", nnodes);
-      }
-    }
-    
-    this->exportPrimaryVars(stream, tStep);
-    this->exportIntVars(stream, tStep);
-    
-    fclose(stream);
+  }
+  
+  if ( primaryVarsToExport.giveSize() || internalVarsToExport.giveSize() ) {
+    fprintf( stream, "\n\nPOINT_DATA %d\n", this->giveTotalRBRNumberOfNodes(d) );
+  }
+  
+  this->exportPrimaryVars(stream, tStep);
+  this->exportIntVars(stream, tStep);
+  
+  fclose(stream);
     
 }
 
@@ -445,26 +511,49 @@ VTKExportModule :: giveTotalRBRNumberOfNodes(Domain *d)
     int i, j, nregions = d->giveNumberOfRegions();
     int elemnodes, ielemnode;
 
-    for ( i = 1; i <= nregions; i++ ) {
+    if ((this->mode == wdmode) || ((this->mode == rbrmode)&&(this->outMode == wdmode))) {
+        for ( j = 0; j < nnodes; j++ ) map [ j ] = 0;
+        for ( j = 1; j <= nelems; j++ ) {
+          elem  = d->giveElement(j);
+#ifdef __PARALLEL_MODE
+          if (d->giveElement(j)->giveParallelMode() != Element_local) continue;
+#endif
+          elemnodes = elem->giveNumberOfNodes();
+          for ( ielemnode = 1; ielemnode <= elemnodes; ielemnode++ ) {
+            map [ elem->giveNode(ielemnode)->giveNumber() - 1 ] = 1;
+          }
+        }
+        
+        for ( j = 0; j < nnodes; j++ ) {
+          rbrnodes += map [ j ];
+        }
+
+    } else {
+      for ( i = 1; i <= nregions; i++ ) {
 
         if (this->regionsToSkip.contains(i)) continue;
-
+        
         for ( j = 0; j < nnodes; j++ ) {
-            map [ j ] = 0;
+          map [ j ] = 0;
         }
-
+        
         for ( j = 1; j <= nelems; j++ ) {
-            if ( ( elem  = d->giveElement(j) )->giveRegionNumber() == i ) {
-                elemnodes = elem->giveNumberOfNodes();
-                for ( ielemnode = 1; ielemnode <= elemnodes; ielemnode++ ) {
-                    map [ elem->giveNode(ielemnode)->giveNumber() - 1 ] = 1;
-                }
+#ifdef __PARALLEL_MODE
+          if (d->giveElement(j)->giveParallelMode() != Element_local) continue;
+#endif
+          if ( ( elem  = d->giveElement(j) )->giveRegionNumber() == i ) {
+            elemnodes = elem->giveNumberOfNodes();
+            for ( ielemnode = 1; ielemnode <= elemnodes; ielemnode++ ) {
+              map [ elem->giveNode(ielemnode)->giveNumber() - 1 ] = 1;
             }
+          }
         }
 
+
         for ( j = 0; j < nnodes; j++ ) {
-            rbrnodes += map [ j ];
+          rbrnodes += map [ j ];
         }
+      }
     }
 
     return rbrnodes;
@@ -495,9 +584,10 @@ VTKExportModule :: initRegionNodeNumbering(IntArray &regionNodalNumbers, int &re
 
     for ( ielem = 1; ielem <= nelem; ielem++ ) {
         element = domain->giveElement(ielem);
-        if ( element->giveRegionNumber() != reg ) {
-            continue;
-        }
+        if ((reg>0) && (element->giveRegionNumber() != reg)) continue;
+#ifdef __PARALLEL_MODE
+        if (element->giveParallelMode() != Element_local) continue;
+#endif
 
         elemNodes = element->giveNumberOfNodes();
         //  elemSides = element->giveNumberOfSides();
@@ -540,7 +630,7 @@ VTKExportModule :: exportIntVarAs(InternalStateType valID, InternalStateValueTyp
     Domain *d = emodel->giveDomain(1);
     int ireg, nregions = d->giveNumberOfRegions();
     int nnodes = d->giveNumberOfDofManagers(), inode;
-    int j, jsize, mapindx;
+    int i, j, jsize, mapindx;
     FloatArray iVal(3);
     FloatMatrix t(3, 3);
     const FloatArray *val;
@@ -577,92 +667,74 @@ VTKExportModule :: exportIntVarAs(InternalStateType valID, InternalStateValueTyp
         }
 
         if ( this->mode == wdmode ) { // (Whole Domain)
-          this->smoother->giveRegionRecordMap(regionVarMap, 1, valID);
-          for ( inode = 1; inode <= nnodes; inode++ ) {
+
+          IntArray regionNodalNumbers(nnodes);
+          int regionDofMans = 0, offset = 0;
+          ireg = -1;
+
+          // assemble local->global map
+          this->initRegionNodeNumbering(regionNodalNumbers, regionDofMans, offset, d, ireg, 1);
+          this->smoother->giveRegionRecordMap(regionVarMap, ireg, valID);
+
+          for ( inode = 1; inode <= regionDofMans; inode++ ) {
             if ( valID == IST_DisplacementVector ) {
-                iVal.resize(3);
-                val = & iVal;
-                for ( j = 1; j <= 3; j++ ) {
-                    iVal.at(j) = d->giveNode(inode)->giveUpdatedCoordinate(j, tStep, EID_MomentumBalance, 1.0) -
-                    d->giveNode(inode)->giveCoordinate(j);
-                }
-
-                /*
-                 * } else if (valID == IST_Velocity) {
-                 * iVal.resize(3); iVal.zero();
-                 * val = &iVal;
-                 * DofManager* dman = d->giveNode(inode);
-                 * int numberOfDofs = dman->giveNumberOfDofs();
-                 *
-                 * for (j=1 ; j<=numberOfDofs ; j++) {
-                 * if (dman->giveDof(j)->giveDofID() == V_u)
-                 *   iVal.at(1) = dman->giveDof(j)->giveUnknown (EID_MomentumBalance,VM_Total,tStep);
-                 * else if (dman->giveDof(j)->giveDofID() == V_v)
-                 *   iVal.at(2) = dman->giveDof(j)->giveUnknown (EID_MomentumBalance,VM_Total,tStep);
-                 * else if (dman->giveDof(j)->giveDofID() == V_w)
-                 *   iVal.at(3) = dman->giveDof(j)->giveUnknown (EID_MomentumBalance,VM_Total,tStep);
-                 * }
-                 */
+              iVal.resize(3);
+              val = & iVal;
+              for ( j = 1; j <= 3; j++ ) {
+                iVal.at(j) = d->giveNode( regionNodalNumbers.at(inode) )->giveUpdatedCoordinate(j, tStep, EID_MomentumBalance, 1.0) -
+                  d->giveNode( regionNodalNumbers.at(inode) )->giveCoordinate(j);
+              }
             } else if ( valID == IST_MaterialInterfaceVal ) {
-                MaterialInterface *mi = emodel->giveMaterialInterface(1);
-                if ( mi ) {
-                    iVal.resize(1);
-                    val = & iVal;
-                    iVal.at(1) = mi->giveNodalScalarRepresentation(inode);
-                }
+              MaterialInterface *mi = emodel->giveMaterialInterface(1);
+              if ( mi ) {
+                iVal.resize(1);
+                val = & iVal;
+                iVal.at(1) = mi->giveNodalScalarRepresentation( regionNodalNumbers.at(inode) );
+              }
             } else {
-                for ( ireg = 1; ireg <= nregions; ireg++ ) {
-                    this->smoother->giveNodalVector(val, inode, ireg); // only one region assumed
-                    if ( val ) {
-                        break;
-                    }
-                }
-
-                if ( !val ) {
-                    fprintf(stderr, "VTKExportModule::exportIntVars: internal error: node %d not belongs to any region\n", inode);
-                    exit(1);
-                }
+              for ( i = 1; i <= nregions; i++ ) {
+                this->smoother->giveNodalVector(val, regionNodalNumbers.at(inode), i);
+                if (val) break;
+              }
+              
+              if (val==NULL) OOFEM_ERROR ("VTKExportModule::exportIntVars: internal error: invalid dofman data");
             }
-
+            
+            
             if ( type == ISVT_SCALAR ) {
-                if ( val->giveSize() ) {
-                    fprintf( stream, "%e ", val->at(1) );
-                } else {
-                    fprintf(stream, "%e ", 0.0);
-                }
+              if ( val->giveSize() ) {
+                fprintf( stream, "%e ", val->at(1) );
+              } else {
+                fprintf(stream, "%e ", 0.0);
+              }
             } else if ( type == ISVT_VECTOR ) {
-                jsize = min( 3, val->giveSize() );
-                for ( j = 1; j <= jsize; j++ ) {
-                    fprintf( stream, "%e ", val->at(j) );
-                }
-
-                for ( j = jsize + 1; j <= 3; j++ ) {
-                    fprintf(stream, "0.0 ");
-                }
-            } else if ( ( type == ISVT_TENSOR_S3 )) {
+              jsize = min( 3, val->giveSize() );
+              for ( j = 1; j <= jsize; j++ ) {
+                fprintf( stream, "%e ", val->at(j) );
+              }
+              
+              for ( j = jsize + 1; j <= 3; j++ ) {
+                fprintf(stream, "0.0 ");
+              }
+            } else if ( type == ISVT_TENSOR_S3 ) {
               int ii, jj, iii;
               t.zero();
               for ( ii = 1; ii <= regionVarMap.giveSize(); ii++ ) {
                 iii = regionVarMap.at(ii);
-
-                /* The ordering of symmetrical tensor values is:
-                   t = [1 6 5;
-                        6 2 4;
-                        5 4 3]
-                */
+                
                 if ( ( ii == 1 ) && iii ) {
                   t.at(1, 1) = val->at(iii);
                 } else if ( ( ii == 2 ) && iii ) {
                   t.at(2, 2) = val->at( regionVarMap.at(2) );
-                } else if ( ( ii == 3 ) && iii ) {
+                } else if ( ( ii == 3 ) && iii )                                                                               {
                   t.at(3, 3) = val->at( regionVarMap.at(3) );
                 } else if ( ( ii == 4 ) && iii )                                                                                                                                                             {
                   t.at(2, 3) = val->at( regionVarMap.at(4) );
                   t.at(3, 2) = val->at( regionVarMap.at(4) );
-                } else if ( ( ii == 5 ) && iii ) {
+                } else if ( ( ii == 5 ) && iii )                                                                                                                                                                                                                                                                                      {
                   t.at(1, 3) = val->at( regionVarMap.at(5) );
                   t.at(3, 1) = val->at( regionVarMap.at(5) );
-                } else if ( ( ii == 6 ) && iii )  {
+                } else if ( ( ii == 6 ) && iii )                                                                                                                                                                                                                                                                                                                                                                                                               {
                   t.at(1, 2) = val->at( regionVarMap.at(6) );
                   t.at(2, 1) = val->at( regionVarMap.at(6) );
                 }
@@ -675,24 +747,22 @@ VTKExportModule :: exportIntVarAs(InternalStateType valID, InternalStateValueTyp
                 
                 fprintf(stream, "\n");
               }
-
             } else if ( type == ISVT_TENSOR_G ) { // export general tensor values as scalars
-                if ( ( indx > 0 ) && ( indx <= regionVarMap.giveSize() ) ) {
-                    mapindx = regionVarMap.at(indx);
-                } else {
-                    mapindx = 0;
-                }
-
-                if ( ( mapindx > 0 ) && ( mapindx <= val->giveSize() ) ) {
-                    fprintf( stream, "%e ", val->at(indx) );
-                } else {
-                    fprintf(stream, "0.0 ");
-                }
+              if ( ( indx > 0 ) && ( indx <= regionVarMap.giveSize() ) ) {
+                mapindx = regionVarMap.at(indx);
+              } else {
+                mapindx = 0;
+              }
+              
+              if ( ( mapindx > 0 ) && ( mapindx <= val->giveSize() ) ) {
+                fprintf( stream, "%e ", val->at(indx) );
+              } else {
+                fprintf(stream, "0.0 ");
+              }
             }
-
+            
             fprintf(stream, "\n");
           }
-
         } else { // RBR mode
           IntArray regionNodalNumbers(nnodes);
           int regionDofMans = 0, offset = 0;
@@ -881,78 +951,93 @@ VTKExportModule :: exportPrimVarAs(UnknownType valID, FILE *stream, TimeStep *tS
 
     if ( this->mode == wdmode ) { // (Whole Domain)
 
-      for ( inode = 1; inode <= nnodes; inode++ ) {
-        dman = d->giveNode(inode);
+      IntArray regionNodalNumbers(nnodes);
+      int regionDofMans = 0, offset = 0;
+      ireg =-1;
+
+      
+      // assemble local->global map
+      this->initRegionNodeNumbering(regionNodalNumbers, regionDofMans, offset, d, ireg, 1);
+      
+      for ( inode = 1; inode <= regionDofMans; inode++ ) {
+        dman = d->giveNode( regionNodalNumbers.at(inode) );
         numberOfDofs = dman->giveNumberOfDofs();
-
-        if ( ( valID == DisplacementVector ) || ( valID == EigenVector ) || ( valID == VelocityVector ) ) {
-            iVal.resize(3);
-            iVal.zero();
-
-            for ( j = 1; j <= numberOfDofs; j++ ) {
-                id = dman->giveDof(j)->giveDofID();
-                if ( ( id == V_u ) || ( id == D_u ) ) {
-                    iVal.at(1) = dman->giveDof(j)->giveUnknown(EID_MomentumBalance, VM_Total, tStep);
-                } else if ( ( id == V_v ) || ( id == D_v ) ) {
-                    iVal.at(2) = dman->giveDof(j)->giveUnknown(EID_MomentumBalance, VM_Total, tStep);
-                } else if ( ( id == V_w ) || ( id == D_w ) ) {
-                    iVal.at(3) = dman->giveDof(j)->giveUnknown(EID_MomentumBalance, VM_Total, tStep);
-                }
+        
+        if ( ( valID == DisplacementVector ) || ( valID == EigenVector ) ||( valID == VelocityVector ) ) {
+          iVal.resize(3);
+          iVal.zero();
+          
+          for ( j = 1; j <= numberOfDofs; j++ ) {
+            id = dman->giveDof(j)->giveDofID();
+            if ( ( id == V_u ) || ( id == D_u ) ) {
+              iVal.at(1) = dman->giveDof(j)->giveUnknown(EID_MomentumBalance, VM_Total, tStep);
+            } else if ( ( id == V_v ) || ( id == D_v ) ) {
+              iVal.at(2) = dman->giveDof(j)->giveUnknown(EID_MomentumBalance, VM_Total, tStep);
+            } else if ( ( id == V_w ) || ( id == D_w ) ) {
+              iVal.at(3) = dman->giveDof(j)->giveUnknown(EID_MomentumBalance, VM_Total, tStep);
             }
+          }
+          
+          /*
+           * iVal.resize(3);
+           * for (j=1; j<= 3 ; j++) {
+           * iVal.at(j) = d->giveNode(regionNodalNumbers.at(inode))->giveUpdatedCoordinate(j, tStep,EID_MomentumBalance, 1.0) -
+           * d->giveNode(regionNodalNumbers.at(inode))->giveCoordinate(j);
+           * }
+           */
         } else if ( valID == FluxVector ) {
-            iVal.resize(1);
-
-            for ( j = 1; j <= numberOfDofs; j++ ) {
-                id = dman->giveDof(j)->giveDofID();
-                if ( ( id == C_1 ) ) {
-                    iVal.at(1) = dman->giveDof(j)->giveUnknown(EID_ConservationEquation, VM_Total, tStep);
-                }
+          iVal.resize(1);
+          
+          for ( j = 1; j <= numberOfDofs; j++ ) {
+            id = dman->giveDof(j)->giveDofID();
+            if ( id == C_1 ) {
+              iVal.at(1) = dman->giveDof(j)->giveUnknown(EID_ConservationEquation, VM_Total, tStep);
             }
+          }
         } else if ( valID == TemperatureVector ) {
-            iVal.resize(1);
-
-            for ( j = 1; j <= numberOfDofs; j++ ) {
-                id = dman->giveDof(j)->giveDofID();
-                if ( ( id == T_f ) ) {
-                    iVal.at(1) = dman->giveDof(j)->giveUnknown(EID_ConservationEquation, VM_Total, tStep);
-                }
+          iVal.resize(1);
+          
+          for ( j = 1; j <= numberOfDofs; j++ ) {
+            id = dman->giveDof(j)->giveDofID();
+            if ( id == T_f ) {
+              iVal.at(1) = dman->giveDof(j)->giveUnknown(EID_ConservationEquation, VM_Total, tStep);
             }
+          }
         } else if ( valID == PressureVector ) {
-            iVal.resize(1);
-
-            for ( j = 1; j <= numberOfDofs; j++ ) {
-                id = dman->giveDof(j)->giveDofID();
-                if ( ( id == P_f ) ) {
-                    iVal.at(1) = dman->giveDof(j)->giveUnknown(EID_ConservationEquation, VM_Total, tStep);
-                }
-            }
+          iVal.resize(1);
+          
+          for ( j = 1; j <= numberOfDofs; j++ ) {
+            id = dman->giveDof(j)->giveDofID();
+            if ( ( id == P_f ) ) {
+              iVal.at(1) = dman->giveDof(j)->giveUnknown(EID_ConservationEquation, VM_Total, tStep);
+                    }
+          }
         } else {
-            OOFEM_ERROR2( "VTKExportModule: unsupported unknownType (%s)", __UnknownTypeToString(valID) );
-            //d->giveDofManager(inode)->giveUnknownVector(iVal, d->giveDefaultNodeDofIDArry(), valID, VM_Total, tStep);
+          OOFEM_ERROR2( "VTKExportModule: unsupported unknownType (%s)", __UnknownTypeToString(valID) );
+          //d->giveDofManager(regionNodalNumbers.at(inode))->giveUnknownVector(iVal, d->giveDefaultNodeDofIDArry(), valID, VM_Total, tStep);
         }
-
+        
         if ( type == ISVT_SCALAR ) {
-            if ( iVal.giveSize() ) {
-                for ( j = 1; j <= nScalarComp; j++ ) {
-                    fprintf( stream, "%e ", iVal.at(j) );
-                }
-            } else {
-                fprintf(stream, "%e ", 0.0);
+          if ( iVal.giveSize() ) {
+            for ( j = 1; j <= nScalarComp; j++ ) {
+              fprintf( stream, "%e ", iVal.at(j) );
             }
+          } else {
+            fprintf(stream, "%e ", 0.0);
+          }
         } else if ( type == ISVT_VECTOR ) {
-            jsize = min( 3, iVal.giveSize() );
-            for ( j = 1; j <= jsize; j++ ) {
-                fprintf( stream, "%e ", iVal.at(j) );
-            }
-
-            for ( j = jsize + 1; j <= 3; j++ ) {
-                fprintf(stream, "0.0 ");
-            }
+          jsize = min( 3, iVal.giveSize() );
+          for ( j = 1; j <= jsize; j++ ) {
+            fprintf( stream, "%e ", iVal.at(j) );
+          }
+          
+          for ( j = jsize + 1; j <= 3; j++ ) {
+            fprintf(stream, "0.0 ");
+          }
         }
         
         fprintf(stream, "\n");
       }
-      fprintf(stream, "\n");
     } else {  // RBR mode
       IntArray regionNodalNumbers(nnodes);
       int regionDofMans = 0, offset = 0;

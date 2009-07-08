@@ -244,7 +244,7 @@ NodalRecoveryModel :: giveRegionRecordMap(IntArray &answer, int reg, InternalSta
     //Element* element;
 
     for ( ielem = 1; ielem <= nelem; ielem++ ) {
-        if ( domain->giveElement(ielem)->giveRegionNumber() == reg ) {
+      if ( (reg<0) || domain->giveElement(ielem)->giveRegionNumber() == reg ) {
             domain->giveElement(ielem)->giveIntVarCompFullIndx(answer, type);
             return;
         }
