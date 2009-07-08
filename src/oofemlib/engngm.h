@@ -368,7 +368,9 @@ public:
     /** Returns material interface representation for given domain */
     virtual MaterialInterface *giveMaterialInterface(int n) { return NULL; }
     /** Returns XfemManager at a particular position */
-    XfemManager *giveXfemManager(int n) { return this->xfemManagerList->at(n); }
+    XfemManager *giveXfemManager(int n); 
+    /** Return true if XfemManager at a particular position is available */
+    bool hasXfemManager(int n); 
     void setNumberOfEquations(int id, int neq) { numberOfEquations = neq;
     domainNeqs.at(id) = neq; }
     // input / output

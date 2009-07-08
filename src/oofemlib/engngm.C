@@ -2013,6 +2013,23 @@ EngngModel :: giveDomain(int i)
     return NULL;
 }
 
+XfemManager*
+EngngModel :: giveXfemManager (int i)
+{
+  if ( xfemManagerList->includes(i) ) {
+    return this->xfemManagerList->at(i);
+  } else {
+    _error2("giveXfemManager: undefined xfem manager (%d)", i);
+  }
+
+}
+
+bool 
+EngngModel :: hasXfemManager (int i)
+{
+  return xfemManagerList->includes(i);
+}
+
 
 #ifdef __PETSC_MODULE
 PetscContext *
