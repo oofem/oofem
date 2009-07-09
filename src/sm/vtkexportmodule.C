@@ -697,7 +697,11 @@ VTKExportModule :: exportIntVarAs(InternalStateType valID, InternalStateValueTyp
                 if (val) break;
               }
               
-              if (val==NULL) OOFEM_ERROR ("VTKExportModule::exportIntVars: internal error: invalid dofman data");
+              if (val==NULL) {
+                iVal.resize(regionVarMap.giveSize()); iVal.zero();
+                val = & iVal;
+                //OOFEM_ERROR ("VTKExportModule::exportIntVars: internal error: invalid dofman data");
+              }
             }
             
             

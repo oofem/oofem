@@ -47,9 +47,29 @@
 #include <stdio.h>
 #endif
 
+
+NodalRecoveryModel::NodalRecoveryModel(Domain *d) : nodalValList(0)
+{
+  stateCounter = 0;
+  domain = d;
+  this->init();
+
+#ifdef __PARALLEL_MODE
+  communicator = NULL;
+  commBuff = NULL;
+  initCommMap = true;
+#endif
+
+}
+
+
 NodalRecoveryModel :: ~NodalRecoveryModel()
 {
-    //printf ("NodalRecoveryModel::~NodalRecoveryModel()\n");
+  //printf ("NodalRecoveryModel::~NodalRecoveryModel()\n");
+#ifdef __PARALLEL_MODE
+  delete communicator;
+  delete commBuff;
+#endif
 }
 
 

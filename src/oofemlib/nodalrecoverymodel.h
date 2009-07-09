@@ -51,6 +51,10 @@
 #include "internalstatetype.h"
 #include "statecountertype.h"
 
+#ifdef __PARALLEL_MODE
+#include "problemcomm.h"
+#endif
+
 class Domain;
 class Element;
 class CrossSection;
@@ -95,12 +99,19 @@ protected:
      * @see Element::giveIPValue and Element::giveIntVarCompFullIndx methods
      */
     // AList<IntArray> regionValueMaps;
+
+#ifdef __PARALLEL_MODE
+    /// Common Communicator buffer
+    CommunicatorBuff *commBuff;
+    /// Communicator.
+    ProblemCommunicator *communicator;
+    /// communicato init flag
+    bool initCommMap;
+#endif
+
 public:
     /// Constructor
-    NodalRecoveryModel(Domain *d) : nodalValList(0)
-    { stateCounter = 0;
-      domain = d;
-      this->init(); }
+    NodalRecoveryModel(Domain *d);
     /// Destructor
     virtual ~NodalRecoveryModel();
     /** Recovers the nodal values for all regions of given Domain.

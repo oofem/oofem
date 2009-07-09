@@ -58,6 +58,15 @@ class ZZNodalRecoveryModel : public NodalRecoveryModel
 {
 protected:
 
+  /** Helper structure to pass required argumets to packing/unpacking functions
+      needed in parallel mode */
+  struct parallelStruct {
+    FloatArray* lhs;
+    FloatMatrix* rhs;
+    IntArray* regionNodalNumbers;
+    parallelStruct (FloatArray* a, FloatMatrix* b, IntArray* c) {lhs=a; rhs=b; regionNodalNumbers=c;}
+  };
+  
 public:
     /// Constructor
     ZZNodalRecoveryModel(Domain *d);
@@ -78,6 +87,13 @@ private:
      * @param type determines the type of internal variable to be recovered
      */
     void initRegionMap(IntArray &regionMap, IntArray &regionValSize, InternalStateType type);
+
+#ifdef __PARALLEL_MODE
+    void initCommMaps ();
+    void exchangeDofManValues   (int ireg, FloatArray& lhs, FloatMatrix& rhs, IntArray& rn);
+    int  packSharedDofManData   (parallelStruct* s, ProcessCommunicator &processComm);
+    int  unpackSharedDofManData (parallelStruct* s, ProcessCommunicator &processComm);
+#endif
 };
 
 /**
