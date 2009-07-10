@@ -834,6 +834,8 @@ enum InputFieldType {
     IFT_WallClockLoadBalancerMonitor_lbstep,
     IFT_WallClockLoadBalancerMonitor_perturbedsteps,
     IFT_WallClockLoadBalancerMonitor_perturbfactor,
+    IFT_WallClockLoadBalancerMonitor_recoveredsteps,
+    IFT_WallClockLoadBalancerMonitor_processingweights,
 
     IFT_LocalGaussianRandomGenerator_mean,
     IFT_LocalGaussianRandomGenerator_variance,

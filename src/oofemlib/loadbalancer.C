@@ -557,7 +557,6 @@ WallClockLoadBalancerMonitor :: decide(TimeStep *atTime)
         mySolutionTime *= perturbFactor;
         OOFEM_LOG_RELEVANT("[%d] WallClockLoadBalancerMonitor: perturbed solution time by factor=%.2f\n", myrank, perturbFactor);
     }
-
 #endif
 
     // collect wall clock computational time
@@ -569,8 +568,6 @@ WallClockLoadBalancerMonitor :: decide(TimeStep *atTime)
     }
 
     OOFEM_LOG_RELEVANT(")\n");
-
-
 
     // detect imbalance
     min_st = max_st = node_solutiontimes [ 0 ];
@@ -625,11 +622,14 @@ WallClockLoadBalancerMonitor :: decide(TimeStep *atTime)
 
     OOFEM_LOG_RELEVANT("\n");
 
-
     // log processor weights
     OOFEM_LOG_RELEVANT("[%d] LoadBalancer: updated proc weights: ", myrank);
     for ( i = 0; i < nproc; i++ ) {
-        OOFEM_LOG_RELEVANT( "%4.3f ", nodeWeights(i) );
+#ifdef __LB_DEBUG
+        OOFEM_LOG_RELEVANT( "%22.15e ", nodeWeights(i) );
+#else
+	OOFEM_LOG_RELEVANT( "%4.3f ", nodeWeights(i) );
+#endif
     }
 
     OOFEM_LOG_RELEVANT("\n");
@@ -637,6 +637,40 @@ WallClockLoadBalancerMonitor :: decide(TimeStep *atTime)
     delete[] node_solutiontimes;
     delete[] node_relcomppowers;
     delete[] node_equivelements;
+
+#ifdef __LB_DEBUG
+    if(recoveredSteps.giveSize()){
+	// recover lb if requested
+	int pos;
+	if(pos = recoveredSteps.findFirstIndexOf(atTime->giveNumber())){
+	    double procWeight, sumWeight = 0.0, *procWeights = new double [ nproc ];
+
+	    // assign prescribed processing weight
+	    procWeight = processingWeights.at(pos);
+	    OOFEM_LOG_RELEVANT("[%d] WallClockLoadBalancerMonitor: processing weight overriden by value=%e\n", myrank, procWeight);
+	    
+	    // exchange processing weights
+	    MPI_Allgather(& procWeight, 1, MPI_DOUBLE, procWeights, 1, MPI_DOUBLE, MPI_COMM_WORLD);
+	    for ( i = 0; i < nproc; i++ ) {
+		nodeWeights(i) = procWeights [ i ];
+		sumWeight += procWeights [ i ];
+	    }
+
+	    delete[] procWeights;
+
+	    if(fabs(sumWeight - 1.0) > 1.0e-10){
+		OOFEM_ERROR2("[%d] WallClockLoadBalancerMonitor:processing weights do not sum to 1.0 (sum = %e)\n", sumWeight);
+	    }
+
+	    OOFEM_LOG_RELEVANT("[%d] LoadBalancer: wall clock imbalance rel=%.2f\%,abs=%.2fs, recovering load\n", myrank, 100 * relWallClockImbalance, absWallClockImbalance);
+	    return LBD_RECOVER;
+	}
+	else{
+	    OOFEM_LOG_RELEVANT("[%d] LoadBalancer: wall clock imbalance rel=%.2f\%,abs=%.2fs, continuing\n", myrank, 100 * relWallClockImbalance, absWallClockImbalance);
+	    return LBD_CONTINUE;
+	}
+    }
+#endif
 
     // decide
     if ( ( atTime->giveNumber() % this->lbstep == 0 ) && 
@@ -701,6 +735,14 @@ WallClockLoadBalancerMonitor :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, perturbedSteps, IFT_WallClockLoadBalancerMonitor_perturbedsteps, "lbperturbedsteps"); // Macro
     perturbFactor = 1.0;
     IR_GIVE_OPTIONAL_FIELD(ir, perturbFactor, IFT_WallClockLoadBalancerMonitor_perturbfactor, "lbperturbfactor"); // Macro
+
+    recoveredSteps.resize(0);
+    IR_GIVE_OPTIONAL_FIELD(ir, recoveredSteps, IFT_WallClockLoadBalancerMonitor_recoveredsteps, "lbrecoveredsteps"); // Macro
+    processingWeights.resize(0);
+    IR_GIVE_OPTIONAL_FIELD(ir, processingWeights, IFT_WallClockLoadBalancerMonitor_processingweights, "lbprocessingweights"); // Macro
+    if(recoveredSteps.giveSize() != processingWeights.giveSize()){
+	OOFEM_ERROR("WallClockLoadBalancerMonitor::initializeFrom - mismatch size of lbrecoveredsteps and lbprocessingweights");
+    }
 #endif
 
     return result;

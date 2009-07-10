@@ -112,6 +112,10 @@ protected:
     dynaList< Range >perturbedSteps;
     // perturbing factor
     double perturbFactor;
+    // list of step at which to performed lb recovery
+    IntArray recoveredSteps;
+    // processing weights for lb recovery
+    FloatArray processingWeights;
 #endif
 public:
     WallClockLoadBalancerMonitor(EngngModel *em) : LoadBalancerMonitor(em) {
