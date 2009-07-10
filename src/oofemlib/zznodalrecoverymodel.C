@@ -561,8 +561,8 @@ ZZNodalRecoveryModel :: packSharedDofManData (parallelStruct* s, ProcessCommunic
       result &= pcbuff->packInt (1);
       result &= pcbuff->packDouble (s->lhs->at(indx));
       for (j=1; j<=nc; j++) result &= pcbuff->packDouble (s->rhs->at(indx, j));
-      printf("[%d] ZZ: Sending data for shred node %d[%d]\n", domain->giveEngngModel()->giveRank(), 
-             toSendMap->at(i), domain->giveDofManager(toSendMap->at(i))->giveGlobalNumber());
+      //printf("[%d] ZZ: Sending data for shred node %d[%d]\n", domain->giveEngngModel()->giveRank(), 
+      //       toSendMap->at(i), domain->giveDofManager(toSendMap->at(i))->giveGlobalNumber());
     } else {
       // ok shared node is not in active region (determined by s->regionNodalNumbers)
       result &= pcbuff->packInt (0);
@@ -598,8 +598,8 @@ ZZNodalRecoveryModel :: unpackSharedDofManData (parallelStruct* s, ProcessCommun
           result &= pcbuff->unpackDouble(value);
           if (indx) s->rhs->at(indx, j) += value;
         } 
-        if (indx) printf("[%d] ZZ: Receiving data for shred node %d[%d]\n", domain->giveEngngModel()->giveRank(),
-                         toRecvMap->at(i), domain->giveDofManager(toRecvMap->at(i))->giveGlobalNumber());
+        //if (indx) printf("[%d] ZZ: Receiving data for shred node %d[%d]\n", domain->giveEngngModel()->giveRank(),
+        //                 toRecvMap->at(i), domain->giveDofManager(toRecvMap->at(i))->giveGlobalNumber());
         
       } 
     }
