@@ -47,8 +47,6 @@ void PlaneStress2dXfem :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer,
     }
 
 
-    int start = simple->giveNumberOfColumns();
-
     // assemble xfem part of strain-displacement matrix
     XfemManager *xf = this->giveDomain()->giveEngngModel()->giveXfemManager(1);
     int counter = 0;
@@ -60,10 +58,9 @@ void PlaneStress2dXfem :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer,
         EnrichmentItem *er = xf->giveEnrichmentItem(i);
         int erndofs = er->giveNumberOfDofs();
         // enrichment function at the gauss point
-        FloatArray efgp;
-        er->giveEnrichmentFunction()->evaluateFunctionAt(efgp, gp);
+        double efgp = er->giveEnrichmentFunction()->evaluateFunctionAt(gp);
         // derivative of enrichment function at the gauss point
-        FloatMatrix efgpD;
+        FloatArray efgpD;
         er->giveEnrichmentFunction()->evaluateDerivativeAt(efgpD, gp);
         // adds up the number of the dofs from an enrichment item
         // for each node
@@ -71,15 +68,14 @@ void PlaneStress2dXfem :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer,
             if ( er->isDofManEnriched( dofManArray.at(j) ) ) {
                 FloatArray *nodecoords = domain->giveDofManager( dofManArray.at(j) )->giveCoordinates();
                 // ef is a FloatArray containing the value of EnrichmentFunction in a specific for all enriched dofs
-                FloatArray efnode;
-                er->giveEnrichmentFunction()->evaluateFunctionAt(efnode, nodecoords);
+                double efnode = er->giveEnrichmentFunction()->evaluateFunctionAt(nodecoords);
                 // matrix to be added anytime a node is enriched
                 FloatMatrix *toAdd = new FloatMatrix(3, erndofs);
                 toAdd->zero();
                 FloatArray help;
                 help.resize(2);
                 for ( int p = 1; p <= 2; p++ ) {
-                    help.at(p) = dNdx.at(j, p) * ( efgp.at(p) - efnode.at(p) ) + N.at(j) * efgpD.at(p, p);
+                    help.at(p) = dNdx.at(j, p) * ( efgp - efnode ) + N.at(j) * efgpD.at(p);
                 }
 
                 for ( int k = 1; k <= erndofs; k++ ) {
@@ -118,7 +114,7 @@ void PlaneStress2dXfem :: giveLocationArray(IntArray &locationArray, EquationID,
     IntArray interactedEI;
     XfemManager *xf = this->giveDomain()->giveEngngModel()->giveXfemManager(1);
     xf->getInteractedEI( interactedEI, const_cast< PlaneStress2dXfem * >( this ) );
-    int count = 0;
+
     // for all enrichment items which element interacts
     for ( int i = 1; i <= ( const_cast< PlaneStress2dXfem * >( this ) )->giveNumberOfDofManagers(); i++ ) {
         DofManager *dm = this->giveDomain()->giveDofManager( dofManArray.at(i) );

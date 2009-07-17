@@ -19,37 +19,48 @@ IRResultType EnrichmentFunction :: initializeFrom(InputRecord *ir) {
     return IRRT_OK;
 }
 
-void DiscontinuousFunction :: evaluateFunctionAt(FloatArray &answer, FloatArray *point) {
-    answer.resize(2);
-    double dist = activeEnrItem->giveGeometry()->computeDistanceTo(point);
-    answer.at(1) = answer.at(2) = sgn(dist);
+double EnrichmentFunction::evaluateFunctionAt(GaussPoint *gp) {
+  FloatArray gcoords;
+  gp->giveElement()->computeGlobalCoordinates (gcoords, *gp->giveCoordinates());
+  return this->evaluateFunctionAt(&gcoords);
 }
 
-void DiscontinuousFunction :: evaluateDerivativeAt(FloatMatrix &answer, FloatArray *point) {
-    answer.resize(3, 2);
+void EnrichmentFunction::evaluateDerivativeAt(FloatArray &answer, GaussPoint *gp) {
+  FloatArray gc;
+  gp->giveElement()->computeGlobalCoordinates (gc, *gp->giveCoordinates());
+  this->evaluateDerivativeAt(answer, &gc);
+}  
+
+
+double DiscontinuousFunction :: evaluateFunctionAt(FloatArray *point) {
+    double dist = activeEnrItem->giveGeometry()->computeDistanceTo(point);
+    return sgn(dist);
+}
+
+void DiscontinuousFunction :: evaluateDerivativeAt(FloatArray &answer, FloatArray *point) {
+    answer.resize(2);
     answer.zero();
 }
 
-void RampFunction :: evaluateFunctionAt(FloatArray &answer, FloatArray *point) {
-    answer.resize(2);
+double RampFunction :: evaluateFunctionAt(FloatArray *point) {
     double dist = activeEnrItem->giveGeometry()->computeDistanceTo(point);
     double absDist;
     if (dist < 0.0000) absDist = (-1)*dist;
     else absDist = dist;
-    answer.at(1) = answer.at(2) = absDist;
+    return absDist;
 }
 
-void RampFunction :: evaluateDerivativeAt(FloatMatrix &answer, FloatArray *point) {
+void RampFunction :: evaluateDerivativeAt(FloatArray &answer, FloatArray *point) {
     double dist = activeEnrItem->giveGeometry()->computeDistanceTo(point);
     double absDist;
     if (dist < 0.0000) absDist = (-1)*dist;
     else absDist = dist;
-    answer.resize(3, 2);
+    answer.resize(2);
     answer.zero();
-    answer.at(1,1) = answer.at(2,2) = answer.at(3,1) = answer.at(3,2) = absDist / dist;
+    answer.at(1) = answer.at(2) = absDist / dist;
 }
 
-void RampFunction :: evaluateFunctionAt(FloatArray &answer, GaussPoint *gp){
+double RampFunction :: evaluateFunctionAt(GaussPoint *gp){
   FloatArray N;
   Element *el = gp->giveElement();
   el->giveInterpolation()->evalN(N, * gp->giveCoordinates(), 0.0);
@@ -61,12 +72,11 @@ void RampFunction :: evaluateFunctionAt(FloatArray &answer, GaussPoint *gp){
       member += N.at(i)*dist;
   }
   if (member < 0.0000) absMember = (-1)*member;
-    else absMember = member;
-  answer.resize(2);
-  answer.at(1) = answer.at(2) = absMember;
+  else absMember = member;
+  return absMember;
 }
 
-void RampFunction :: evaluateDerivativeAt(FloatMatrix &answer, GaussPoint *gp){
+void RampFunction :: evaluateDerivativeAt(FloatArray &answer, GaussPoint *gp){
   FloatArray N;
   Element *el = gp->giveElement();
   el->giveInterpolation()->evalN(N, * gp->giveCoordinates(), 0.0);
@@ -86,14 +96,14 @@ void RampFunction :: evaluateDerivativeAt(FloatMatrix &answer, GaussPoint *gp){
       dfdx += dNdx.at(i,1)*dist;
       dfdy += dNdx.at(i,2)*dist;
   }
-  answer.resize(3,2);
+  answer.resize(2);
   answer.zero();
-  answer.at(1,1) = answer.at(3,2) = dfdx*sgn(phi);
-  answer.at(2,2) = answer.at(3,1) = dfdy*sgn(phi);
+  answer.at(1) = dfdx*sgn(phi);
+  answer.at(2) = dfdy*sgn(phi);
 }
 
 // to change
-void BranchFunction :: evaluateFunctionAt(FloatArray &answer, FloatArray *point) {
+double BranchFunction :: evaluateFunctionAt(FloatArray *point) {
     /*
      *  double ret = 0;
      *  CrackTip *cr = (CrackTip*) activeEnrItem;
@@ -110,10 +120,11 @@ void BranchFunction :: evaluateFunctionAt(FloatArray &answer, FloatArray *point)
      *  }
      *  return ret;
      */
+  return 0.0;
 }
 
 // to change
-void BranchFunction :: evaluateDerivativeAt(FloatMatrix &answer, FloatArray *point) {
+void BranchFunction :: evaluateDerivativeAt(FloatArray &answer, FloatArray *point) {
     /*
      *  answer.resize(2);
      *  CrackTip *cr = (CrackTip*) activeEnrItem;
