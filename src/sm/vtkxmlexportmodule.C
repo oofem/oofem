@@ -123,10 +123,14 @@ VTKXMLExportModule :: doOutput(TimeStep *tStep)
       this->initRegionNodeNumbering(mapG2L, mapL2G, regionDofMans, totalcells, d, ireg);
 
       /* start default piece containing all single cell elements
-	 the elements with composite geometry are assumet to be exported in individual pieces
+	 the elements with composite geometry are assumed to be exported in individual pieces
 	 after the default one
       */
+#ifndef __PARALLEL_MODE
       if (regionDofMans && totalcells) {
+#else
+      if (1) {
+#endif
 	fprintf(stream, "<Piece NumberOfPoints=\"%d\" NumberOfCells=\"%d\">\n", regionDofMans, totalcells); 
 
 	// export nodes in region as vtk vertices  
@@ -188,7 +192,7 @@ VTKXMLExportModule :: doOutput(TimeStep *tStep)
 	fprintf(stream, "</DataArray>\n");
 	fprintf(stream, "</Cells>\n");
 	
-	
+
 	// export primary and internal varialbles 
 	this->exportPointDataHeader (stream, tStep);
 	this->exportPrimaryVars(stream, mapG2L, mapL2G, regionDofMans, ireg, tStep);
@@ -504,7 +508,6 @@ VTKXMLExportModule :: exportIntVarAs(InternalStateType valID, InternalStateValue
 
     this->giveSmoother();
 
-
     if ( type == ISVT_SCALAR) {
       fprintf(stream, "<DataArray type=\"Float32\" Name=\"%s\" format=\"ascii\"> ",__InternalStateTypeToString(valID));
     } else if ( type == ISVT_VECTOR )  {
@@ -546,8 +549,7 @@ VTKXMLExportModule :: exportIntVarAs(InternalStateType valID, InternalStateValue
 	this->smoother->giveNodalVector(val, mapL2G.at(inode), ireg);
 	if (val==NULL) OOFEM_ERROR ("VTKXMLExportModule::exportIntVars: internal error: invalid dofman data");
       }
-	
-	
+
       if ( type == ISVT_SCALAR ) {
 	if ( val->giveSize() ) {
 	  fprintf( stream, "%e ", val->at(1) );
@@ -694,7 +696,6 @@ VTKXMLExportModule :: exportPrimVarAs(UnknownType valID, IntArray& mapG2L, IntAr
     DofID id;
     int numberOfDofs;
 
-    printf ("ireg %d :ndfofnams huhu %d", ireg, regionDofMans);
     for ( inode = 1; inode <= regionDofMans; inode++ ) {
       dman = d->giveNode( mapL2G.at(inode) );
       numberOfDofs = dman->giveNumberOfDofs();
