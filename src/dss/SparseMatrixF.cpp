@@ -197,6 +197,9 @@ void SparseMatrixF::MulNonsymMatrixByVector(double *b,double *c)
 					}
 			}
 		break;
+	default:
+	  fprintf(stderr,"SparseMatrixF::MulNonsymMatrixByVector: unsupported m_eSparseOrientation value\n");
+	  abort();
 	}
 }
 

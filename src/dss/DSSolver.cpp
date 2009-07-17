@@ -291,7 +291,7 @@ SparseGridMtx* DSSolver::CreateNewSparseGridMtx(IntArrayList* fixed)
 
 	if (fixed!=NULL)
 	{
-		sprintf(str," Schur complement    : %dx%d\n",fixed->Count,fixed->Count);
+		sprintf(str," Schur complement    : %ldx%ld\n",fixed->Count,fixed->Count);
 		eMT->Write(str);
 	}
 
@@ -528,6 +528,8 @@ void DSSolver::StartSolverWriteInfo()
 		case eDSSFactorizationLLTIncomplete:
 			eMT->Writeln("Incomplete matrix LL factorization");
 			break;
+	default:
+	  ;
 	}
 	sprintf(str,"Starting on          : %s",eMT->NowString());
 	eMT->Write(str);
