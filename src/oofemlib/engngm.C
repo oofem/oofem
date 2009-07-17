@@ -2020,6 +2020,7 @@ EngngModel :: giveXfemManager (int i)
     return this->xfemManagerList->at(i);
   } else {
     _error2("giveXfemManager: undefined xfem manager (%d)", i);
+    return NULL; // return NULL to prevent compiler warnings
   }
 
 }
