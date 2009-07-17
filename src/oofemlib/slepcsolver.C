@@ -154,7 +154,7 @@ SLEPcSolver::solve (SparseMtrx* a, SparseMtrx* b, FloatArray* _eigv, FloatMatrix
   if( nconv > 0 ) {
     fprintf(outStream, "SLEPcSolver :: solveYourselfAt: Convergence reached for RTOL=%20.15f", rtol);
     PetscScalar kr, *array;
-    PetscInt vSize;
+    //PetscInt vSize;
     Vec Vr;
 
     ierr = MatGetVecs(*B->giveMtrx(), PETSC_NULL, &Vr);CHKERRQ(ierr);
