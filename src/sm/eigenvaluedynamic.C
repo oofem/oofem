@@ -202,7 +202,6 @@ void EigenValueDynamic :: solveYourselfAt(TimeStep *tStep) {
      * Element* element;
      * Node* node ;
      */
-    int i;
 #ifdef VERBOSE
     OOFEM_LOG_INFO("Assembling stiffness and mass matrices\n");
 #endif

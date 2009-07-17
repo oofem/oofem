@@ -291,7 +291,7 @@ IDNLMaterial :: NonlocalMaterialStiffnessInterface_showSparseMtrxStructure(Gauss
     IDNLMaterial *rmat;
 
     const double e0 = this->give(e0_ID, gp);
-    const double ef = this->give(ef_ID, gp);
+    //const double ef = this->give(ef_ID, gp);
 
     strain = status->giveTempStrainVector();
     // compute equivalent strain
