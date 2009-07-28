@@ -59,4 +59,7 @@ char *giveInputDataFileName(char *dataInputFileName, int maxlen);
 //Instanciates the new problem
 EngngModel *InstanciateProblem(DataReader *dr, problemMode mode, int contextFlag, EngngModel *master = 0);
 
+/// static storage for temporary strings to solve compiler warnings about onversion from string constant to char*
+char* oofem_tmpstr (const char* src);
+
 #endif // util_h

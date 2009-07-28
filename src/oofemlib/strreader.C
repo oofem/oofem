@@ -48,14 +48,14 @@
 #include <ctype.h>
 #endif
 
-char *StringReader :: getPosAfter(char *source, char *idString)
+const char *StringReader :: getPosAfter(const char *source, const char *idString)
 //
 // returns possition of substring idString in source
 // return value pointer at the end of occurence idString in source
 // (idString must be separated from rest by blank or by tabulator
 //
 {
-    char *str1, *helpSource = source;
+    const char *str1, *helpSource = source;
     int len = strlen(idString);
     int whitespaceBefore, whitespaceAfter;
 
@@ -76,7 +76,7 @@ char *StringReader :: getPosAfter(char *source, char *idString)
     return str1 + len;
 }
 
-char *StringReader :: skipNextWord(char *src)
+const char *StringReader :: skipNextWord(const char *src)
 //
 // skips next word in src ; returns pointer after it
 //
@@ -95,7 +95,7 @@ char *StringReader :: skipNextWord(char *src)
 }
 
 
-char *StringReader :: scanInteger(char *source, int *value)
+const char *StringReader :: scanInteger(const char *source, int *value)
 {
     //
     // reads integer value from source, returns pointer to char after this number
@@ -120,7 +120,7 @@ char *StringReader :: scanInteger(char *source, int *value)
 }
 
 
-char *StringReader :: scanDouble(char *source, double *value)
+const char *StringReader :: scanDouble(const char *source, double *value)
 {
     //
     // reads integer value from source, returns pointer to char after this number
@@ -145,9 +145,9 @@ char *StringReader :: scanDouble(char *source, double *value)
 }
 
 
-int StringReader :: readInteger(char *source, char *idString)
+int StringReader :: readInteger(const char *source, const char *idString)
 {
-    char *str = getPosAfter(source, idString);
+    const char *str = getPosAfter(source, idString);
 
 #ifdef __OOFEM_DO_NOT_PARSE_NULL
     if ( str == NULL ) {
@@ -158,9 +158,9 @@ int StringReader :: readInteger(char *source, char *idString)
     return atoi(str);
 }
 
-double StringReader :: readDouble(char *source, char *idString)
+double StringReader :: readDouble(const char *source, const char *idString)
 {
-    char *str = getPosAfter(source, idString);
+    const char *str = getPosAfter(source, idString);
 
 #ifdef __OOFEM_DO_NOT_PARSE_NULL
     if ( str == NULL ) {
@@ -173,19 +173,19 @@ double StringReader :: readDouble(char *source, char *idString)
 }
 
 
-char *StringReader :: readString(char *source, char *idString, char *string, int maxchar)
+const char *StringReader :: readString(const char *source, const char *idString, char *string, int maxchar)
 {
-    char *s;
+    const char *s;
 
     return readSimpleString(getPosAfter(source, idString), string, maxchar, & s);
 }
 
 
-char *
-StringReader :: readQuotedString(char *source, char *idString, char *string, int maxchar)
+const char *
+StringReader :: readQuotedString(const char *source, const char *idString, char *string, int maxchar)
 {
-    char *curr = getPosAfter(source, idString);
-    char *result = string;
+    const char *curr = getPosAfter(source, idString);
+    const char *result = string;
     int len = 0;
 
     if ( !curr ) {
@@ -228,9 +228,9 @@ StringReader :: readQuotedString(char *source, char *idString, char *string, int
 }
 
 
-IntArray *StringReader :: ReadIntArray(char *source, char *idString)
+IntArray *StringReader :: ReadIntArray(const char *source, const char *idString)
 {
-    char *str1 = source;
+    const char *str1 = source;
     int value, size;
     IntArray *arry;
 
@@ -252,9 +252,9 @@ IntArray *StringReader :: ReadIntArray(char *source, char *idString)
 }
 
 
-FloatArray *StringReader :: ReadFloatArray(char *source, char *idString)
+FloatArray *StringReader :: ReadFloatArray(const char *source, const char *idString)
 {
-    char *str1 = source;
+    const char *str1 = source;
     double value;
     int size;
     FloatArray *arry;
@@ -277,9 +277,9 @@ FloatArray *StringReader :: ReadFloatArray(char *source, char *idString)
 
 
 
-Dictionary *StringReader :: ReadDictionary(char *source, char *idString)
+Dictionary *StringReader :: ReadDictionary(const char *source, const char *idString)
 {
-    char *str1 = source;
+    const char *str1 = source;
     double value;
     int size;
     char key [ MAX_NAME_LENGTH + 1 ]; // 'key' is eventually of size 1, but some words that are
@@ -308,14 +308,14 @@ Dictionary *StringReader :: ReadDictionary(char *source, char *idString)
 
 
 
-char *StringReader :: readSimpleString(char *source, char *simpleString, int maxchar, char **remain)
+char *StringReader :: readSimpleString(const char *source, char *simpleString, int maxchar, const char **remain)
 // reads Simple string from source according to following rules:
 // at begining skips whitespace (blank, tab)
 // read string terminated by whitespace or end-of-line
 // remain is unread remain of source string.
 // maximum of maxchar (including terminating '\0') is copyied into simpleString.
 {
-    char *curr = source;
+    const char *curr = source;
     char *ss = simpleString;
     int count = 0;
 
@@ -343,7 +343,7 @@ char *StringReader :: readSimpleString(char *source, char *simpleString, int max
 }
 
 
-char *StringReader :: readKeyAndVal(char *source, char *key, int *val, int maxchar, char **remain)
+const char *StringReader :: readKeyAndVal(const char *source, char *key, int *val, int maxchar, const char **remain)
 //
 //
 //
@@ -354,8 +354,8 @@ char *StringReader :: readKeyAndVal(char *source, char *key, int *val, int maxch
 }
 
 
-char *StringReader ::
-readKeyAndVal(char *source, char *key, double *val, int maxchar, char **remain)
+const char *StringReader ::
+readKeyAndVal(const char *source, char *key, double *val, int maxchar, const char **remain)
 //
 //
 //
@@ -367,10 +367,10 @@ readKeyAndVal(char *source, char *key, double *val, int maxchar, char **remain)
 
 
 int
-StringReader :: hasString(char *source, char *idString)
+StringReader :: hasString(const char *source, const char *idString)
 {
     //returns nonzero if idString is present in source
-    char *str = strstr(source, idString);
+    const char *str = strstr(source, idString);
     if ( str == NULL ) {
         return 0;
     }
@@ -379,10 +379,10 @@ StringReader :: hasString(char *source, char *idString)
 }
 
 void
-StringReader :: readRangeList(dynaList< Range > &list, char *source, char *idString)
+StringReader :: readRangeList(dynaList< Range > &list, const char *source, const char *idString)
 {
     int li, hi;
-    char *str1, *helpSource = source;
+    const char *str1, *helpSource = source;
     // Range* range;
 
     // find first valid occurence of idString
@@ -432,7 +432,7 @@ StringReader :: readRangeList(dynaList< Range > &list, char *source, char *idStr
 
 
 int
-StringReader :: readRange(char **helpSource, int &li, int &hi)
+StringReader :: readRange(const char **helpSource, int &li, int &hi)
 {
     char *endptr;
     // skip whitespaces

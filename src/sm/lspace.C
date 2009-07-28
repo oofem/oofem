@@ -47,6 +47,7 @@
 
 #include "structuralms.h"
 #include "mathfem.h"
+#include "util.h"
 #ifndef __MAKEDEPEND
 #include <stdio.h>
 #endif
@@ -759,6 +760,9 @@ void LSpace :: drawTriad(FloatArray &coords, int isurf)
     IntArray snodes(4);
     FloatArray h1(3), h2(3), nn(3), n(3);
     int j;
+    const char *colors[] = {"red", "green", "blue"};
+    
+
     this->interpolation.computeSurfaceMapping(snodes, dofManArray, isurf);
     for ( i = 1; i <= 4; i++ ) {
         gc.add( domain->giveNode( snodes.at(i) )->giveCoordinates() );
@@ -818,13 +822,7 @@ void LSpace :: drawTriad(FloatArray &coords, int isurf)
         p [ 1 ].y = p [ 0 ].y + coeff *jm.at(2, i);
         p [ 1 ].z = p [ 0 ].z + coeff *jm.at(3, i);
 
-        if ( i == 1 ) {
-            EASValsSetColor( ColorGetPixelFromString("red", & succ) );
-        } else if ( i == 2 )  {
-            EASValsSetColor( ColorGetPixelFromString("green", & succ) );
-        } else                                                                                 {
-            EASValsSetColor( ColorGetPixelFromString("blue", & succ) );
-        }
+        EASValsSetColor( ColorGetPixelFromString(oofem_tmpstr(colors[i-1]), & succ) );
 
         go = CreateLine3D(p);
         EGWithMaskChangeAttributes(WIDTH_MASK | COLOR_MASK | LAYER_MASK, go);

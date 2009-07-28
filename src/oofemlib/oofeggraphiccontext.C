@@ -43,6 +43,7 @@
 // for Range class definition outputmanager.h included
 #include "outputmanager.h"
 #include "strreader.h"
+#include "util.h"
 
 EngngModel *oofegGraphicContext :: emodel = NULL;
 EFringeTable oofegGraphicContext :: ft;
@@ -93,21 +94,21 @@ oofegGraphicContext :: init(EngngModel *d) {
         int i, nmat;
 
         emodel = d;
-        meshFillColor = ColorGetPixelFromString("DodgerBlue", & suc);
-        edgeColor = ColorGetPixelFromString("black", & suc);
-        deformedElementColor = ColorGetPixelFromString("BlueViolet", & suc);
-        nodeColor  = ColorGetPixelFromString("black", & suc);
-        bcicColor  = ColorGetPixelFromString("orange", & suc);
-        bcForceColor  = ColorGetPixelFromString("red", & suc);
-        crackPatternColor = ColorGetPixelFromString("gray66", & suc);
-        activeCrackColor  = ColorGetPixelFromString("red2", & suc);
-        standardSparseProfileColor  = ColorGetPixelFromString("blue", & suc);
-        extendedSparseProfileColor  = ColorGetPixelFromString("red", & suc);
-        geometryColor = ColorGetPixelFromString("yellow", & suc);
+        meshFillColor = ColorGetPixelFromString(oofem_tmpstr("DodgerBlue"), & suc);
+        edgeColor = ColorGetPixelFromString(const_cast<char*>("black"), & suc);
+        deformedElementColor = ColorGetPixelFromString(const_cast<char*>("BlueViolet"), & suc);
+        nodeColor  = ColorGetPixelFromString(const_cast<char*>("black"), & suc);
+        bcicColor  = ColorGetPixelFromString(const_cast<char*>("orange"), & suc);
+        bcForceColor  = ColorGetPixelFromString(const_cast<char*>("red"), & suc);
+        crackPatternColor = ColorGetPixelFromString(const_cast<char*>("gray66"), & suc);
+        activeCrackColor  = ColorGetPixelFromString(const_cast<char*>("red2"), & suc);
+        standardSparseProfileColor  = ColorGetPixelFromString(const_cast<char*>("blue"), & suc);
+        extendedSparseProfileColor  = ColorGetPixelFromString(const_cast<char*>("red"), & suc);
+        geometryColor = ColorGetPixelFromString(const_cast<char*>("yellow"), & suc);
 
-        yieldPlotColors [ 0 ] = ColorGetPixelFromString("pink", & suc);
-        yieldPlotColors [ 1 ] = ColorGetPixelFromString("PaleVioletRed", & suc);
-        yieldPlotColors [ 2 ] = ColorGetPixelFromString("maroon", & suc);
+        yieldPlotColors [ 0 ] = ColorGetPixelFromString(const_cast<char*>("pink"), & suc);
+        yieldPlotColors [ 1 ] = ColorGetPixelFromString(const_cast<char*>("PaleVioletRed"), & suc);
+        yieldPlotColors [ 2 ] = ColorGetPixelFromString(const_cast<char*>("maroon"), & suc);
 
         activeDomain = 1;
 

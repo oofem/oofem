@@ -1030,6 +1030,8 @@ void LIBeam3dNL2 :: drawDeformedGeometry(oofegGraphicContext &gc, UnknownType ty
     double defScale = gc.getDefScale();
     //  if (!go) { // create new one
     WCRec p [ 2 ]; /* poin */
+    char *colors[] = {"red", "green", "blue"};
+
     EASValsSetLineWidth(OOFEG_DEFORMED_GEOMETRY_WIDTH);
     EASValsSetColor( gc.getDeformedElementColor() );
     EASValsSetLayer(OOFEG_DEFORMED_GEOMETRY_LAYER);
@@ -1060,13 +1062,7 @@ void LIBeam3dNL2 :: drawDeformedGeometry(oofegGraphicContext &gc, UnknownType ty
         p [ 1 ].y = p [ 0 ].y + coeff *tc.at(2, i);
         p [ 1 ].z = p [ 0 ].z + coeff *tc.at(3, i);
 
-        if ( i == 1 ) {
-            EASValsSetColor( ColorGetPixelFromString("red", & succ) );
-        } else if ( i == 2 )    {
-            EASValsSetColor( ColorGetPixelFromString("green", & succ) );
-        } else                                                                                   {
-            EASValsSetColor( ColorGetPixelFromString("blue", & succ) );
-        }
+        EASValsSetColor( ColorGetPixelFromString(colors[i-1], & succ) );
 
         go = CreateLine3D(p);
         EGWithMaskChangeAttributes(WIDTH_MASK | COLOR_MASK | LAYER_MASK, go);

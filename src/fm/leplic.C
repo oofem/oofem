@@ -42,6 +42,7 @@
 #include "datastream.h"
 #include "spatiallocalizer.h"
 #include "contextioerr.h"
+#include "util.h"
 
 #define LEPLIC_ZERO_VOF  1.e-12
 #define LEPLIC_BRENT_EPS 1.e-12
@@ -148,7 +149,7 @@ LEPlic :: updatePosition(TimeStep *atTime)
     // to reconstruct interface (normal, constant) on original grid
     this->doInterfaceReconstruction(atTime, false, true);
 #ifdef __OOFEG
-    ESIEventLoop(NO, "doInterfaceReconstruction Finished; Press Ctrl-p to continue");
+    ESIEventLoop(NO, oofem_tmpstr("doInterfaceReconstruction Finished; Press Ctrl-p to continue"));
     //ESIEventLoop (YES, "doInterfaceReconstruction Finished; Press Ctrl-p to continue");
 #endif
 }

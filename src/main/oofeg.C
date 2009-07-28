@@ -184,17 +184,19 @@ int  updateDefPlotFlag();
 void showSparseMtrxStructure(Widget wid, XtPointer cl, XtPointer cd);
 void errorcompPlot(Widget w, XtPointer ptr, XtPointer call_data);
 
-static Widget oofeg_add_palette(char *palette_label, Widget parent, Widget *palette);
-static Widget oofeg_add_palette(char *palette_label, Widget parent, Widget *palette);
-static Widget oofeg_add_popdown_menu(char *menu_label, Widget parent, Widget *palette);
-static Widget oofeg_add_button(char *name, char *button_label, WidgetClass wclass, Widget palette,
+static Widget oofeg_add_palette(const char *palette_label, Widget parent, Widget *palette);
+static Widget oofeg_add_palette(const char *palette_label, Widget parent, Widget *palette);
+static Widget oofeg_add_popdown_menu(const char *menu_label, Widget parent, Widget *palette);
+static Widget oofeg_add_button(const char *name, const char *button_label, WidgetClass wclass, Widget palette,
                                XtCallbackProc action, XtPointer data);
-static Widget oofeg_add_menu_item(char *name, char *item_label, Widget palette,
+static Widget oofeg_add_button(const char *name, const char *button_label, WidgetClass wclass, Widget palette, Arg* arg, int ac, 
+                               XtCallbackProc action, XtPointer data);
+static Widget oofeg_add_menu_item(const char *name, const char *item_label, Widget palette,
                                   XtCallbackProc action, XtPointer data);
-static Widget oofeg_add_dialog(char *name, char *dialog_label, char *prompt, char *init_value, Widget palette,
-                               XtCallbackProc action, char *data, ESIDialogValueType type, ESIVerifyValueProc proc);
+static Widget oofeg_add_dialog(const char *name, const char *dialog_label, const char *prompt, const char *init_value, Widget palette,
+                               XtCallbackProc action, const char *data, ESIDialogValueType type, ESIVerifyValueProc proc);
 
-void oofeg_display_message(char *message);
+void oofeg_display_message(const char *message);
 void oofeg_exit(Widget w, XtPointer ptr, XtPointer call_data);
 void oofeg_quit(XtPointer ptr);
 void oofeg_open_frame(Widget w, XtPointer ptr, XtPointer call_data);
@@ -209,7 +211,7 @@ void oofeg_fit_all_graphics(Widget w, XtPointer ptr, XtPointer call_data);
 void updateISA(oofegGraphicContext *context);
 void updateGraphics();
 
-static char *OOFEG_layer_names[] = {
+static const char *OOFEG_layer_names[] = {
     "GEOMETRY LAYER", "DEFORMED GEOMETRY", "NODE ANNOTATION", "ELEMENT ANNOTATION", "VARPLOT CONTOURS", "CRACK PATTERNS", "IC-BC ANNOTATIONS", "NATURAL_BC", "SPARSE PROFILE LAYER", "DEBUG LAYER"
 };
 
@@ -362,7 +364,8 @@ main(int argc, char *argv[])
 
 
     ESIBuildInterface(mask, argc, argv);
-    myview  =  ElixirNewView(viewTitle, "OOFEG", OOFEG_BACKGROUND_COLOR, OOFEG_DEFAULTDRAW_COLOR, 500, 400);
+    myview  =  ElixirNewView(viewTitle, const_cast<char*>("OOFEG"), const_cast<char*>(OOFEG_BACKGROUND_COLOR), 
+                             const_cast<char*>(OOFEG_DEFAULTDRAW_COLOR), 500, 400);
     EVSetRenderMode(myview, WIRE_RENDERING);
     EMAttachView(age_model, myview);
     gc [ 0 ].init(problem); // init all gcs
@@ -383,7 +386,7 @@ main(int argc, char *argv[])
     }
 
     if ( oofeg_box_setup ) {
-        oofeg_display_message(OOFEG_VERSION);
+      oofeg_display_message(oofem_tmpstr(OOFEG_VERSION));
     }
 
     updateISA(gc);
@@ -476,9 +479,9 @@ void ESICustomize(Widget parent_pane)
                 ac++;
                 XtSetArg(al [ ac ], XtNeditType, XawtextEdit);
                 ac++;
-                greyscale_min = ESIAddButton("greyscale_min_val", "",
-                                             asciiTextWidgetClass, grey_scale_setup_palette,
-                                             al, ac, NULL, NULL);
+                greyscale_min = oofeg_add_button("greyscale_min_val", "",
+                                                 asciiTextWidgetClass, grey_scale_setup_palette,
+                                                 al, ac, NULL, NULL);
                 ac = 0;
                 XtSetArg(al [ ac ], XtNfromHoriz, greyscale_min);
                 ac++;
@@ -490,16 +493,16 @@ void ESICustomize(Widget parent_pane)
                 ac++;
                 XtSetArg(al [ ac ], XtNeditType, XawtextEdit);
                 ac++;
-                greyscale_max = ESIAddButton("greyscale_max_val", "",
-                                             asciiTextWidgetClass, grey_scale_setup_palette,
-                                             al, ac, NULL, NULL);
-
+                greyscale_max = oofeg_add_button("greyscale_max_val", "",
+                                                 asciiTextWidgetClass, grey_scale_setup_palette,
+                                                 al, ac, NULL, NULL);
+                
                 ac = 0;
                 XtSetArg(al [ ac ], XtNfromHoriz, greyscale_max);
                 ac++;
-                scale_setup_ok = ESIAddButton("precinput_xyz_ok", " OK ",
-                                              commandWidgetClass, grey_scale_setup_palette,
-                                              al, ac, pass_setgreyscale_command, ( XtPointer ) 0);
+                scale_setup_ok = oofeg_add_button("precinput_xyz_ok", " OK ",
+                                                  commandWidgetClass, grey_scale_setup_palette,
+                                                  al, ac, pass_setgreyscale_command, ( XtPointer ) 0);
                 XtAppAddActions( XtWidgetToApplicationContext( ESITopLevelWidget() ),
                                 oofeg_remap_return, XtNumber(oofeg_remap_return) );
                 tt1 = XtParseTranslationTable("#override <KeyPress>Return: oofegretActCmd(0)");
@@ -547,9 +550,9 @@ void ESICustomize(Widget parent_pane)
                 ac++;
                 XtSetArg(al [ ac ], XtNeditType, XawtextEdit);
                 ac++;
-                scale_min = ESIAddButton("scale_min_val", "",
-                                         asciiTextWidgetClass, color_scale_setup_palette,
-                                         al, ac, NULL, NULL);
+                scale_min = oofeg_add_button("scale_min_val", "",
+                                             asciiTextWidgetClass, color_scale_setup_palette,
+                                             al, ac, NULL, NULL);
                 ac = 0;
                 XtSetArg(al [ ac ], XtNfromHoriz, scale_min);
                 ac++;
@@ -561,16 +564,16 @@ void ESICustomize(Widget parent_pane)
                 ac++;
                 XtSetArg(al [ ac ], XtNeditType, XawtextEdit);
                 ac++;
-                scale_max = ESIAddButton("scale_max_val", "",
-                                         asciiTextWidgetClass, color_scale_setup_palette,
-                                         al, ac, NULL, NULL);
+                scale_max = oofeg_add_button("scale_max_val", "",
+                                             asciiTextWidgetClass, color_scale_setup_palette,
+                                             al, ac, NULL, NULL);
 
                 ac = 0;
                 XtSetArg(al [ ac ], XtNfromHoriz, scale_max);
                 ac++;
-                scale_setup_ok = ESIAddButton("precinput_xyz_ok", " OK ",
-                                              commandWidgetClass, color_scale_setup_palette,
-                                              al, ac, pass_setscale_command, ( XtPointer ) 0);
+                scale_setup_ok = oofeg_add_button("precinput_xyz_ok", " OK ",
+                                                  commandWidgetClass, color_scale_setup_palette,
+                                                  al, ac, pass_setscale_command, ( XtPointer ) 0);
                 XtAppAddActions( XtWidgetToApplicationContext( ESITopLevelWidget() ),
                                 oofeg_remap_return, XtNumber(oofeg_remap_return) );
                 tt1 = XtParseTranslationTable("#override <KeyPress>Return: oofegretActCmd(0)");
@@ -630,9 +633,9 @@ void ESICustomize(Widget parent_pane)
             ac++;
             XtSetArg(al [ ac ], XtNeditType, XawtextEdit);
             ac++;
-            start_step = ESIAddButton("start_step", "",
-                                      asciiTextWidgetClass, animate_setup_palette,
-                                      al, ac, NULL, NULL);
+            start_step = oofeg_add_button("start_step", "",
+                                          asciiTextWidgetClass, animate_setup_palette,
+                                          al, ac, NULL, NULL);
             ac = 0;
             XtSetArg(al [ ac ], XtNfromHoriz, start_step);
             ac++;
@@ -644,16 +647,16 @@ void ESICustomize(Widget parent_pane)
             ac++;
             XtSetArg(al [ ac ], XtNeditType, XawtextEdit);
             ac++;
-            end_step = ESIAddButton("end_step", "",
-                                    asciiTextWidgetClass, animate_setup_palette,
-                                    al, ac, NULL, NULL);
+            end_step = oofeg_add_button("end_step", "",
+                                        asciiTextWidgetClass, animate_setup_palette,
+                                        al, ac, NULL, NULL);
 
             ac = 0;
             XtSetArg(al [ ac ], XtNfromHoriz, end_step);
             ac++;
-            animate_scale_setup_ok = ESIAddButton("precinput_xyz_ok", " OK ",
-                                                  commandWidgetClass, animate_setup_palette,
-                                                  al, ac, pass_setanimate_command, ( XtPointer ) 0);
+            animate_scale_setup_ok = oofeg_add_button("precinput_xyz_ok", " OK ",
+                                                      commandWidgetClass, animate_setup_palette,
+                                                      al, ac, pass_setanimate_command, ( XtPointer ) 0);
             XtAppAddActions( XtWidgetToApplicationContext( ESITopLevelWidget() ),
                             oofeg_remap_return, XtNumber(oofeg_remap_return) );
             tt1 = XtParseTranslationTable("#override <KeyPress>Return: oofegretActCmd(0)");
@@ -2343,45 +2346,52 @@ void showSparseMtrxStructure(Widget wid, XtPointer cl, XtPointer cd)
 
 
 static Widget
-oofeg_add_palette(char *palette_label, Widget parent, Widget *palette)
+oofeg_add_palette(const char *palette_label, Widget parent, Widget *palette)
 {
     Widget button;
 
     /* create palette with simple palette label and then apply modifications */
 
-    button = ESIAddPalette(OOFEG_PALETTE_BUTTON_RESOURCE, palette_label, parent, NULL, 0, palette);
+    button = ESIAddPalette(const_cast<char*>(OOFEG_PALETTE_BUTTON_RESOURCE), const_cast<char*>(palette_label), parent, NULL, 0, palette);
     return ( button );
 }
 
 static Widget
-oofeg_add_popdown_menu(char *menu_label, Widget parent, Widget *palette)
+oofeg_add_popdown_menu(const char *menu_label, Widget parent, Widget *palette)
 {
-    return ( ESIAddPopdownMenu(OOFEG_MENU_BUTTON_RESOURCE, menu_label, parent, NULL, 0, palette) );
+  return ( ESIAddPopdownMenu(const_cast<char*>(OOFEG_MENU_BUTTON_RESOURCE), const_cast<char*>(menu_label), parent, NULL, 0, palette) );
 }
 
 static Widget
-oofeg_add_button(char *name, char *button_label, WidgetClass wclass, Widget palette,
+oofeg_add_button(const char *name, const char *button_label, WidgetClass wclass, Widget palette,
                  XtCallbackProc action, XtPointer data)
 {
-    return ( ESIAddButton(name, button_label, wclass, palette, NULL, 0, action, data) );
+  return ( ESIAddButton(const_cast<char*>(name), const_cast<char*>(button_label), wclass, palette, NULL, 0, action, data) );
 }
 
+static Widget
+oofeg_add_button(const char *name, const char *button_label, WidgetClass wclass, Widget palette, Arg* arg, int ac, 
+                 XtCallbackProc action, XtPointer data)
+{
+  return ( ESIAddButton(const_cast<char*>(name), const_cast<char*>(button_label), wclass, palette, arg, ac, action, data) );
+}
 
 static Widget
-oofeg_add_menu_item(char *name, char *item_label, Widget palette,
+oofeg_add_menu_item(const char *name, const char *item_label, Widget palette,
                     XtCallbackProc action, XtPointer data)
 {
-    return ( ESIAddMenuItem(name, item_label, palette, NULL, 0, action, data) );
+  return ( ESIAddMenuItem(const_cast<char*>(name), const_cast<char*>(item_label), palette, NULL, 0, action, data) );
 }
 
 
 
 static Widget
-oofeg_add_dialog(char *name, char *dialog_label, char *prompt, char *init_value, Widget palette,
-                 XtCallbackProc action, char *data, ESIDialogValueType type, ESIVerifyValueProc proc)
+oofeg_add_dialog(const char *name, const char *dialog_label, const char *prompt, const char *init_value, Widget palette,
+                 XtCallbackProc action, const char *data, ESIDialogValueType type, ESIVerifyValueProc proc)
 {
     Widget button;
-    button = ESIAddPopupDialog(name, dialog_label, prompt, init_value, palette,
+    button = ESIAddPopupDialog(const_cast<char*>(name), const_cast<char*>(dialog_label), const_cast<char*>(prompt), 
+                               const_cast<char*>(init_value), palette,
                                NULL, 0, action, ( XtPointer ) data, type, proc);
 
     return ( button );
@@ -2389,7 +2399,7 @@ oofeg_add_dialog(char *name, char *dialog_label, char *prompt, char *init_value,
 
 
 void
-oofeg_display_message(char *message)
+oofeg_display_message(const char *message)
 {
     /* setting message to NULL causes display of last previous message */
 
@@ -2399,7 +2409,7 @@ oofeg_display_message(char *message)
 void
 oofeg_exit(Widget w, XtPointer ptr, XtPointer call_data)
 {
-    ESIPopupConfirmDialog( ( Widget ) ptr, "Really exit?", oofeg_quit, ptr, NULL, NULL );
+  ESIPopupConfirmDialog( ( Widget ) ptr, const_cast<char*>("Really exit?"), oofeg_quit, ptr, NULL, NULL );
 }
 
 void
@@ -2413,7 +2423,8 @@ void
 oofeg_open_frame(Widget w, XtPointer ptr, XtPointer call_data)
 {
     EView *view;
-    view = ElixirNewView(viewTitle, "SimpleXF", OOFEG_BACKGROUND_COLOR, OOFEG_DEFAULTDRAW_COLOR, 500, 400);
+    view = ElixirNewView(viewTitle, const_cast<char*>("SimpleXF"), const_cast<char*>(OOFEG_BACKGROUND_COLOR), 
+                         const_cast<char*>(OOFEG_DEFAULTDRAW_COLOR), 500, 400);
 
     EMAttachView(ESIModel(), view);
     EMRegenerateGraphics(ESIModel(), view);
