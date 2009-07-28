@@ -228,9 +228,9 @@ o) To set up graphical postprocessor (oofeg) with debugging information:
 
    o) OOFEM reference manual (including OOFEMlib):
       a) to build html version use:
-         cd doc/refman; make www-doc
+         cd doc/refman; make html
       b) to build PostScript version use:
-         cd doc/refman; make ps-doc
+         cd doc/refman; make ps
 
 
 Hints for Windows:
