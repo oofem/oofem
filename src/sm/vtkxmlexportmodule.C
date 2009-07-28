@@ -123,10 +123,14 @@ VTKXMLExportModule :: doOutput(TimeStep *tStep)
       this->initRegionNodeNumbering(mapG2L, mapL2G, regionDofMans, totalcells, d, ireg);
 
       /* start default piece containing all single cell elements
-	 the elements with composite geometry are assumet to be exported in individual pieces
+	 the elements with composite geometry are assumed to be exported in individual pieces
 	 after the default one
       */
+#ifndef __PARALLEL_MODE
       if (regionDofMans && totalcells) {
+#else
+      if (1) {
+#endif
 	fprintf(stream, "<Piece NumberOfPoints=\"%d\" NumberOfCells=\"%d\">\n", regionDofMans, totalcells); 
 
 	// export nodes in region as vtk vertices  
@@ -151,7 +155,9 @@ VTKXMLExportModule :: doOutput(TimeStep *tStep)
 	for ( ielem = 1; ielem <= nelem; ielem++ ) {
 	  elem = d->giveElement(ielem);
 	  if ((ireg>0) && (elem->giveRegionNumber() != ireg)) continue;
-	  
+#ifdef __PARALLEL_MODE
+    if (elem->giveParallelMode() != Element_local) continue;
+#endif	  
 	  nelemNodes = elem->giveNumberOfNodes();
 	  for ( i = 1; i <= nelemNodes; i++ ) {
 	    fprintf(stream, "%d ", mapG2L.at( elem->giveNode(i)->giveNumber()) - 1);
@@ -164,6 +170,9 @@ VTKXMLExportModule :: doOutput(TimeStep *tStep)
 	for ( ielem = 1; ielem <= nelem; ielem++ ) {
 	  elem = d->giveElement(ielem);
 	  if ((ireg>0) && (elem->giveRegionNumber() != ireg)) continue;
+#ifdef __PARALLEL_MODE
+    if (elem->giveParallelMode() != Element_local) continue;
+#endif	  
 	  offset+= elem->giveNumberOfNodes();
 	  fprintf(stream, "%d ", offset);
 	}
@@ -174,13 +183,16 @@ VTKXMLExportModule :: doOutput(TimeStep *tStep)
 	for ( ielem = 1; ielem <= nelem; ielem++ ) {
 	  elem = d->giveElement(ielem);
 	  if ((ireg>0) && (elem->giveRegionNumber() != ireg)) continue;
+#ifdef __PARALLEL_MODE
+    if (elem->giveParallelMode() != Element_local) continue;
+#endif	
 	  vtkCellType = this->giveCellType(elem);
 	  fprintf(stream, "%d ", vtkCellType);
 	}
 	fprintf(stream, "</DataArray>\n");
 	fprintf(stream, "</Cells>\n");
 	
-	
+
 	// export primary and internal varialbles 
 	this->exportPointDataHeader (stream, tStep);
 	this->exportPrimaryVars(stream, mapG2L, mapL2G, regionDofMans, ireg, tStep);
@@ -197,6 +209,9 @@ VTKXMLExportModule :: doOutput(TimeStep *tStep)
 	elem = d->giveElement(ielem);
 	
 	if ((reg>0) && (element->giveRegionNumber() != reg)) continue;
+#ifdef __PARALLEL_MODE
+  if (element->giveParallelMode() != Element_local) continue;
+#endif
 	if (this->isElementComposite(element)) {
 	  // multi cell (composite) elements should support vtkxmlexportmoduleinterface
 	  // and are exported as individual pieces (see VTKXMLExportModuleElementInterface) 
@@ -448,7 +463,9 @@ VTKXMLExportModule :: initRegionNodeNumbering(IntArray &regionG2LNodalNumbers,
         element = domain->giveElement(ielem);
 	if ((reg>0) && (element->giveRegionNumber() != reg)) continue;
 	if (this->isElementComposite(element)) continue; // composite cells exported individually
-
+#ifdef __PARALLEL_MODE
+  if (element->giveParallelMode() != Element_local) continue;
+#endif
 	regionSingleCells++;
         elemNodes = element->giveNumberOfNodes();
         //  elemSides = element->giveNumberOfSides();
@@ -491,7 +508,6 @@ VTKXMLExportModule :: exportIntVarAs(InternalStateType valID, InternalStateValue
 
     this->giveSmoother();
 
-
     if ( type == ISVT_SCALAR) {
       fprintf(stream, "<DataArray type=\"Float32\" Name=\"%s\" format=\"ascii\"> ",__InternalStateTypeToString(valID));
     } else if ( type == ISVT_VECTOR )  {
@@ -533,8 +549,7 @@ VTKXMLExportModule :: exportIntVarAs(InternalStateType valID, InternalStateValue
 	this->smoother->giveNodalVector(val, mapL2G.at(inode), ireg);
 	if (val==NULL) OOFEM_ERROR ("VTKXMLExportModule::exportIntVars: internal error: invalid dofman data");
       }
-	
-	
+
       if ( type == ISVT_SCALAR ) {
 	if ( val->giveSize() ) {
 	  fprintf( stream, "%e ", val->at(1) );
@@ -681,7 +696,6 @@ VTKXMLExportModule :: exportPrimVarAs(UnknownType valID, IntArray& mapG2L, IntAr
     DofID id;
     int numberOfDofs;
 
-    printf ("ireg %d :ndfofnams huhu %d", ireg, regionDofMans);
     for ( inode = 1; inode <= regionDofMans; inode++ ) {
       dman = d->giveNode( mapL2G.at(inode) );
       numberOfDofs = dman->giveNumberOfDofs();

@@ -7,16 +7,16 @@ INST_DIR = oofemlibrefman
 DOCXX      = doxygen
 RCP = scp
 
-all: www-doc
+all: html
 
-www-doc:
+html:
 	$(DOCXX) doxygen.cfg
 
-ps-doc: www-doc
+ps: html
 	cd $(BUILD_DIR_LATEX); latex refman.tex; latex refman.tex; dvips -o refman.ps refman
 	cp $(BUILD_DIR_LATEX)/refman.ps ..
 
-www-install: www-doc
+www-install: html
 ifdef INSTALLDIR
 	mv $(BUILD_DIR_HTML) $(INST_DIR)
 	$(RCP) -r $(INST_DIR) $(INSTALLDIR)/resources/doc

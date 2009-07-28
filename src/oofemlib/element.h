@@ -177,12 +177,12 @@ protected:
     IntArray *locationArray;
 
     /**
-    Transformation material matrix, used in orthotropic and anisotropic materials, global->local transformation
-    */
+     * Transformation material matrix, used in orthotropic and anisotropic materials, global->local transformation
+     */
     FloatMatrix matLocalCS;
 
 
-#if defined(__PARALLEL_MODE) || defined(__ENABLE_COMPONENT_LABELS)
+#if defined ( __PARALLEL_MODE ) || defined ( __ENABLE_COMPONENT_LABELS )
     /**
      * In parallel mode, globalNumber contains globally unique DoFManager number.
      * The component number, inherited from FEMComponent class contains
@@ -219,7 +219,7 @@ public:
      * can be numbered separately. The default implementation assumes that location array will be assembled only for
      * one UnknownType value, and this array is cached on element level.
      */
-    virtual void giveLocationArray(IntArray & locationArray, EquationID, const UnknownNumberingScheme& s) const;
+    virtual void giveLocationArray(IntArray & locationArray, EquationID, const UnknownNumberingScheme & s) const;
     /**
      * Invalidates location array in receiver. Each element stores its copy of location array(s), in order
      * to avoid time consuming assembly of code numbers every time when requested. Some enginnering models
@@ -282,9 +282,9 @@ public:
     // vector of nodal unknowns
 
     /**
-    Gives transformation matrix Global=T*Local for material orientation on element. Only if defined by mlcs on element
-    @param answer transformation matrix 3x3
-    */
+     * Gives transformation matrix Global=T*Local for material orientation on element. Only if defined by mlcs on element
+     * @param answer transformation matrix 3x3
+     */
     virtual void giveMatLocalCS(FloatMatrix &answer);
 
 
@@ -409,7 +409,7 @@ public:
     void setDofManagers(const IntArray &_dmans);
 
     /** Sets integration rules */
-    void setIntegrationRules(AList<IntegrationRule> *irlist); // rch
+    void setIntegrationRules(AList< IntegrationRule > *irlist); // rch
     /**
      * Returns integration domain for receiver, used to initialize
      * integration point over receiver volume. Must be specialized.
@@ -418,12 +418,12 @@ public:
     /**
      * Assembles the code numbers of given integration element (sub-patch)
      * This is done by obtaining list of nonzero shape functions and
-     * by collecting the code numbers of nodes corresponding to these 
+     * by collecting the code numbers of nodes corresponding to these
      * shape functions
      * @returns returns nonzero if integration rule code numbers differ from element code numbers
      */
-    virtual int giveIntegrationRuleLocalCodeNumbers (IntArray& answer, IntegrationRule* ie, EquationID ut) 
-    {return 0;}
+    virtual int giveIntegrationRuleLocalCodeNumbers(IntArray &answer, IntegrationRule *ie, EquationID ut)
+    { return 0; }
 
     ///Returns number of sides (which have unknown dofs) of receiver
     //int                   giveNumberOfSides () {return numberOfSides;}
@@ -678,7 +678,7 @@ public:
      * these relations to reflext updated numbering. The renumbering funciton is passed, which is supposed
      * to return an updated number of specified entyty type based on old number.
      */
-    virtual void updateLocalNumbering( EntityRenumberingFunctor &f ) ;
+    virtual void updateLocalNumbering(EntityRenumberingFunctor &f);
 
     /// Integration point evaluator, loops over receiver IP's and calls given function (passed as f parameter) on them. The IP is parameter to function f.
     template< class T > void ipEvaluator( T * src, void ( T :: * f )( GaussPoint * gp ) );
@@ -695,6 +695,7 @@ public:
     // Graphics output
     //
     void          drawYourself(oofegGraphicContext &context);
+    virtual void  drawAnnotation(oofegGraphicContext &mode);
     virtual void  drawRawGeometry(oofegGraphicContext &mode) { }
     virtual void  drawDeformedGeometry(oofegGraphicContext &mode, UnknownType) { }
     virtual void  drawScalar(oofegGraphicContext &context) { }
@@ -743,7 +744,7 @@ public:
 
 #endif
 
-#if defined(__PARALLEL_MODE) || defined(__ENABLE_COMPONENT_LABELS)
+#if defined ( __PARALLEL_MODE ) || defined ( __ENABLE_COMPONENT_LABELS )
     /**
      * Returns receiver globally unique number (label).
      */

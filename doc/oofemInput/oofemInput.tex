@@ -180,6 +180,7 @@ compulsory, and is following
   \ref{_LoadBoundaryInitialConditions},
 \item initial conditions record(s), see section \ref{_InitialConditions},
 \item time functions record(s), see section \ref{_TimeFunctionsRecords}.
+\item optional xfem manager and associated record(s), see section \ref{_XFEMManagerRecords}
 \end{enumerate} 
 When line begins with '\#' character, then it is skipped by parser and
 provide a way, how to include comments inside input file.
@@ -289,12 +290,12 @@ performed. The general format of this record can be specified in
 \item ``standard-syntax''\\
   \begin{record}[0.9\textwidth]
     \recentry{\entKeyword{AnalysisType}}{\field{nsteps}{in}} \recentry{}{\optField{renumber}{in}}
-    \recentry{}{\field{attributes}{string}} \recentry{}{\optField{nmodules}{in}}
+    \recentry{}{\field{attributes}{string}} \recentry{}{\optField{nmodules}{in}} \recentry{}{\optField{nxfemman}{in}}
   \end{record}
 \item ``meta step-syntax''\\
   \begin{record}[0.9\textwidth]
     \recentry{\entKeyword{AnalysisType}}{\field{nmsteps}{in}}
-    \recentry{}{\optField{nmodules}{in}}
+    \recentry{}{\optField{nmodules}{in}} \recentry{}{\optField{nxfemman}{in}}
   \end{record}
   immediately followed by \param{nmsteps} meta step records with the following syntax:\\
   \begin{record}[0.9\textwidth]
@@ -322,7 +323,7 @@ after analysis record, if no metasteps are present). Export modules
 allow to export computed data into external software for
 postprocessing. The available export modules are described in section
 \ref{ExportModulesSec}.
-
+\item \param{nxfemman} - number of xfem managers. Xfem managers wrap eXtended Finite Element (xfem) data: they  manage the list of enrichment items and associated enrichment functions, and their geometry representation. The number of xfem managers required is problem dependent, typically a single xfem manager is used. The syntax of xfem manager record and related records is described in section \ref{_XFEMManagerRecords}.
 \end{itemize}
 
 \end{itemize}
@@ -2280,6 +2281,37 @@ The first and second derivatives may be required, this depend on type
 
 Very general, but relatively slow.
 \end{itemize}
+
+\subsection{Xfem manager record and associated records}
+\label{_XFEMManagerRecords}
+This record creates corresponding xfem manager and specifies the number of its components, in terms of number of enrichment functions, enrichment items, and geometry items. The global shape functions are represented by  individual enrichment functions. The enrichment items are abstractions of entities, which are included in the FE model using one or more global functions. Such entity may represent crack, material interface, slipping interface, etc. The particular records will follow immediately in input file. The general format is:\\
+\begin{record}
+\recentry{\keywordnotype{XfemManager}}{\field{numberofenrichmentfunctions}{in}}
+\recentry{}{\field{numberofenrichmentitems}{in}}
+\recentry{}{\field{numberofgeometryitems}{in}}
+\end{record}
+where \param{numberofenrichmentfunctions} represents number of enrichment functions and their associated records, \param{numberofenrichmentitems} 
+represents number of enrichment items and corresponding records, and \param{numberofgeometryitems} represents number of geometry items, that are used to define the geometry of individual enrichment items.
+
+The enrichment function records describe individual enrichment functions. The general format is following:\\
+\noindent
+\begin{record}
+  \recentry{\entKeyword{EntType}}{\fieldVal{num}{in}}
+\end{record}
+
+The geometry item records describe individual geometries of enrichment items. The general format is following:\\
+\noindent
+\begin{record}
+  \recentry{\entKeyword{EntType}}{\fieldVal{num}{in}}
+\end{record}
+
+
+The enrichment item records describe individual enrichment items. The general format is following:\\
+\noindent
+\begin{record}
+  \recentry{\entKeyword{EntType}}{\fieldVal{num}{in}} \recentry{}{\fieldVal{geometryitem}{in}} \recentry{}{\fieldVal{enrichmentfunction}{in}}
+\end{record}
+
 
 \section{Examples}
 \subsection {Beam structure}

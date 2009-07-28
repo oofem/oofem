@@ -61,7 +61,7 @@ OrthotropicLinearElasticMaterial :: initializeFrom(InputRecord *ir)
     FloatArray triplets;
 
 
-    this->Material :: initializeFrom(ir);
+    this->LinearElasticMaterial :: initializeFrom(ir);
 
     IR_GIVE_FIELD(ir, value, IFT_OrthotropicLinearElasticMaterial_ex, "ex"); // Macro
     propertyDictionary->add(Ex, value);
@@ -528,9 +528,9 @@ OrthotropicLinearElasticMaterial :: giveThermalDilatationVector(FloatArray &answ
 {
     FloatMatrix *transf;
     FloatArray help(6);
-    help.at(1) = this->give(tAlpha,gp);
-    help.at(2) = this->give(tAlpha,gp);
-    help.at(3) = this->give(tAlpha,gp);
+    help.at(1) = this->give(tAlphax,gp);
+    help.at(2) = this->give(tAlphay,gp);
+    help.at(3) = this->give(tAlphaz,gp);
 
     transf = this->GiveRotationMatrix(gp);
     answer.beProductOf(* transf, help);

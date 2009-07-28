@@ -9,7 +9,7 @@
 
                OOFEM : Object Oriented Finite Element Code
 
-                 Copyright (C) 1993 - 2008   Borek Patzak
+                 Copyright (C) 1993 - 2009   Borek Patzak
 
          Czech Technical University, Faculty of Civil Engineering,
      Department of Structural Mechanics, 166 29 Prague, Czech Republic
@@ -102,9 +102,13 @@ If you do not have any, we recommend to use Open MPI.
 This is a freely available, high-performance, and portable 
 implementation of MPI (http://www.open-mpi.org/).
 
-If you want to use PETSc toolkit, the PETSc version 2.3.0 or higher is
+If you want to use PETSc toolkit, the PETSc version 3.0.0 or higher is
 required. The toolkit can be downloaded from PETSc project home page 
 (http://www-unix.mcs.anl.gov/petsc/petsc-as/index.html). 
+
+If you want to use SLEPc toolkit, the SLEPc version 3.0.0 or higher is
+required. The toolkit can be downloaded from SLEPc project home page 
+(http://www.grycap.upv.es/slepc). 
 
 The reference manual can be generated automatically from the sources.
 You can use it to generate documentation of your classes, too.
@@ -216,17 +220,17 @@ o) To set up graphical postprocessor (oofeg) with debugging information:
       cd targets/target_name
    b) perform the tests:
       make tests
-   b) examine file test_results:
+   c) examine file test_results:
       less test_result
 
 6) Optionally to build reference manuals
-   (requires latex and latex2html to be installed)
-
-   o) OOFEMlib reference manual:
-      a) cd oofemlib/doc/refman; make htmldoc
+   (requires doxygen, Graph visualization toolkit, latex and latex2html to be installed)
 
    o) OOFEM reference manual (including OOFEMlib):
-      a) cd doc/refman; make htmldoc
+      a) to build html version use:
+         cd doc/refman; make html
+      b) to build PostScript version use:
+         cd doc/refman; make ps
 
 
 Hints for Windows:

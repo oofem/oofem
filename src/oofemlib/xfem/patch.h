@@ -24,23 +24,34 @@ protected:
     int material;
 public:
     Patch(Element *parent, int material);
-    Patch(Element *parent, AList<FloatArray> *vertices);
-    virtual ~Patch(){}
+    Patch(Element *parent, AList< FloatArray > *vertices);
+    virtual ~Patch() { }
     /// converts the GP into the parental system of an element
     virtual void convertGPIntoParental(GaussPoint *gp) = 0;
-    int giveMaterial(){return this->material;}
-    Element * giveParent() {return this->parent; }
+    int giveMaterial() { return this->material; }
+    Element *giveParent() { return this->parent; }
+#ifdef __OOFEG
+    /// draw pure geometry
+    void          draw(oofegGraphicContext &gc) { BasicGeometry :: draw(gc); }
+    /// draw with vertex data
+    virtual void  drawWD(oofegGraphicContext &gc, FloatArray &vd) { };
+#endif
 };
 
 class TrianglePatch : public Patch
 {
 public:
-    TrianglePatch(Element *parent, int material) : Patch(parent, material) {}
-    TrianglePatch(Element *parent, AList<FloatArray> *vertices) : Patch(parent, vertices) {}
-    ~TrianglePatch(){}
+    TrianglePatch(Element *parent, int material) : Patch(parent, material) { }
+    TrianglePatch(Element *parent, AList< FloatArray > *vertices) : Patch(parent, vertices) { }
+    ~TrianglePatch() { }
     // interpolation
     static FEI2dTrLin interpolation;
     void convertGPIntoParental(GaussPoint *gp);
+
+#ifdef __OOFEG
+    void          draw(oofegGraphicContext &gc);
+    void  drawWD(oofegGraphicContext &gc, FloatArray &vd);
+#endif
 };
 
 #endif

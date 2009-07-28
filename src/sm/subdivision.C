@@ -59,8 +59,6 @@
 #endif
 
 
-// define KOKO to be deleted
-
 #ifdef __PARALLEL_MODE
 #include "parallel.h"
 #include "communicator.h"
@@ -69,9 +67,9 @@
 #endif
 
 
-#define __VERBOSE_PARALLEL
+//#define __VERBOSE_PARALLEL
 
-#define DEBUG_CHECK
+//#define DEBUG_CHECK
 //#define DEBUG_INFO
 //#define DEBUG_SMOOTHING
 
@@ -99,8 +97,8 @@
 
 //#define NM   // Nooru Mohamed
 //#define BRAZIL_2D   // splitting brazil test
-#define THREEPBT_3D   // 3pbt
-
+//#define THREEPBT_3D   // 3pbt
+#define HEADEDSTUD    // headed stud
 
 
 
@@ -592,7 +590,7 @@ Subdivision::RS_Triangle::bisect(std::queue<int> &subdivqueue, std::list<int> &s
     // irregular on the longest edge does not exist
     // introduce new irregular node on the longest edge
     inode = leIndex;
-    jnode = (leIndex<3)?inode+1:1;
+    jnode = (inode<3)?inode+1:1;
 
 		iNode=nodes.at(inode);
 		jNode=nodes.at(jnode);
@@ -625,6 +623,10 @@ Subdivision::RS_Triangle::bisect(std::queue<int> &subdivqueue, std::list<int> &s
 #endif
 
 #ifdef QUICK_HACK
+		if(mesh->giveNode(nodes.at(1))->isBoundary() && mesh->giveNode(nodes.at(2))->isBoundary() && mesh->giveNode(nodes.at(3))->isBoundary()){
+			OOFEM_ERROR2("Subdivision::RS_Triangle::bisect - quick hack not applicable due to element %d", this->giveNumber());
+		}
+		
 		if(mesh->giveNode(iNode)->isBoundary() && mesh->giveNode(jNode)->isBoundary())boundary=true;
 #else
 		// check whether new node is boundary
@@ -640,6 +642,8 @@ Subdivision::RS_Triangle::bisect(std::queue<int> &subdivqueue, std::list<int> &s
 			boundary=true;
 		}
 #endif
+
+		if(boundary)irregular->setBoundary(true);
 
     if (this->neghbours_base_elements.at(leIndex)) {
 			// add irregular to neighbour
@@ -663,7 +667,7 @@ Subdivision::RS_Triangle::bisect(std::queue<int> &subdivqueue, std::list<int> &s
 
 #ifdef DEBUG_CHECK
 					if(!edge->givePartitions()->giveSize()){
-						OOFEM_ERROR3("Subdivision::RS_Triangle::bisect - unshared edge %d of elements %d is marked as shared",
+						OOFEM_ERROR3("Subdivision::RS_Triangle::bisect - unshared edge %d of element %d is marked as shared",
 												 shared_edges.at(leIndex), this->giveNumber());
 					}
 #endif
@@ -766,6 +770,13 @@ Subdivision::RS_Tetra::bisect(std::queue<int> &subdivqueue, std::list<int> &shar
 		}
 	}
 
+#ifdef QUICK_HACK
+	if(mesh->giveNode(nodes.at(1))->isBoundary() && mesh->giveNode(nodes.at(2))->isBoundary() &&
+		 mesh->giveNode(nodes.at(3))->isBoundary() && mesh->giveNode(nodes.at(4))->isBoundary()){
+		OOFEM_ERROR2("Subdivision::RS_Tetra::bisect - quick hack not applicable due to element %d", this->giveNumber());
+	}
+#endif
+
 	// insert all relevant irregulars
 	for(i=0;i<cnt;i++){
 		eIndex=ed[i];
@@ -791,12 +802,51 @@ Subdivision::RS_Tetra::bisect(std::queue<int> &subdivqueue, std::list<int> &shar
 			coords = *(mesh->giveNode(iNode)->giveCoordinates());
 			coords.add (mesh->giveNode(jNode)->giveCoordinates());
 			coords.times(0.5);
+#ifdef HEADEDSTUD
+			double dist, rad, rate;
+			FloatArray *c;
+
+			c = mesh->giveNode(iNode)->giveCoordinates();
+			dist = c -> at(1) * c -> at(1) + c -> at(3) * c -> at(3);
+			if(c -> at(2) > 69.9999999){
+				rad = 7.0;
+			} else if(c -> at(2) < 64.5000001){
+				rad = 18.0;
+			} else {
+				rad = 18.0 - 11.0 / 5.5 * (c -> at(2) - 64.5);
+			}
+			if(fabs(dist - rad * rad) < 0.01){    // be very tolerant (geometry is not precise)
+				c = mesh->giveNode(jNode)->giveCoordinates();
+				dist = c -> at(1) * c -> at(1) + c -> at(3) * c -> at(3);
+				if(c -> at(2) > 69.9999999){
+					rad = 7.0;
+				} else if(c -> at(2) < 64.5000001){
+					rad = 18.0;
+				} else {
+					rad = 18.0 - 11.0 / 5.5 * (c -> at(2) - 64.5);
+				}
+				if(fabs(dist - rad * rad) < 0.01){    // be very tolerant (geometry is not precise)
+					dist = coords.at(1) * coords.at(1) + coords.at(3) * coords.at(3);
+					if(coords.at(2) > 69.9999999){
+						rad = 7.0;
+					} else if(coords.at(2) < 64.5000001){
+						rad = 18.0;
+					} else {
+						rad = 18.0 - 11.0 / 5.5 * (coords.at(2) - 64.5);
+					}
+					
+					rate = rad / sqrt(dist);
+					coords.at(1) *= rate;
+					coords.at(3) *= rate;
+				}
+			}
+#endif
 			// compute required density of a new node
 			density = 0.5*(mesh->giveNode(iNode)->giveRequiredDensity()+
 										 mesh->giveNode(jNode)->giveRequiredDensity());
 			// create new irregular
 			iNum = mesh->giveNumberOfNodes() + 1;
-			irregular = new Subdivision::RS_IrregularNode (iNum, mesh, 0, coords, density, boundary);
+			irregular = new Subdivision::RS_IrregularNode (iNum, mesh, 0, coords, density, false);
 			mesh->addNode (iNum, irregular);
 			// add irregular to receiver
 			this->irregular_nodes.at(eIndex) = iNum;
@@ -843,7 +893,7 @@ Subdivision::RS_Tetra::bisect(std::queue<int> &subdivqueue, std::list<int> &shar
 
 #ifdef DEBUG_CHECK
 					if(!edge->givePartitions()->giveSize()){
-						OOFEM_ERROR3("Subdivision::RS_Tetra::bisect - unshared edge %d of elements %d is marked as shared",
+						OOFEM_ERROR3("Subdivision::RS_Tetra::bisect - unshared edge %d of element %d is marked as shared",
 												 shared_edges.at(eIndex), this->giveNumber());
 					}
 #endif
@@ -934,6 +984,9 @@ Subdivision::RS_Tetra::bisect(std::queue<int> &subdivqueue, std::list<int> &shar
 			if(!shared){
 				iboundary=mesh->giveNode(iNode)->isBoundary();
 				jboundary=mesh->giveNode(jNode)->isBoundary();
+#ifdef QUICK_HACK
+				if(iboundary == true && jboundary == true)boundary=true;
+#endif
 
 				// traverse neighbours
 				elem1=this;
@@ -951,7 +1004,7 @@ Subdivision::RS_Tetra::bisect(std::queue<int> &subdivqueue, std::list<int> &shar
 						subdivqueue.push(elem2->giveNumber());
 						elem2->setQueueFlag(true);
 					}
-
+#ifndef QUICK_HACK
 					if(!boundary){
 						// I rely on the fact that nodes on intermaterial interface are marked as boundary
 						// however this might not be true
@@ -960,6 +1013,7 @@ Subdivision::RS_Tetra::bisect(std::queue<int> &subdivqueue, std::list<int> &shar
 							if(dorig->giveElement(elem2->giveTopParent())->giveRegionNumber()!=reg)boundary=true;
 						}
 					}
+#endif
 
 #ifdef DEBUG_INFO
 #ifdef __PARALLEL_MODE
@@ -1014,7 +1068,9 @@ Subdivision::RS_Tetra::bisect(std::queue<int> &subdivqueue, std::list<int> &shar
 					}
 #endif
 #endif
+#ifndef QUICK_HACK
 					boundary = true;
+#endif
 					// edge is on outer boundary
 
 					// I do rely on the fact that if the list of connected elements is not availale
@@ -1092,7 +1148,10 @@ Subdivision::RS_Tetra::bisect(std::queue<int> &subdivqueue, std::list<int> &shar
 				}
 			}
 
-			if(boundary)irregular->setBoundary(boundary);
+			if(boundary){
+				// OOFEM_LOG_INFO("Irregular %d set boundary\n", abs(irregular->giveNumber()));
+				irregular->setBoundary(true);
+			}
 		}
 	}
 	this->setQueueFlag(false);
@@ -1530,7 +1589,6 @@ Subdivision::RS_Tetra::generate(std::list<int> &sharedEdgesQueue)
 		bool iishared=false, jjshared=false, kkshared=false;
 #endif
     
-   
     // leIndex determines primary edge to be subdivided
 		// it is identified either with iedge or iiedge
     /*
@@ -1648,12 +1706,12 @@ Subdivision::RS_Tetra::generate(std::list<int> &sharedEdgesQueue)
 						_edge->setEdgeNodes(irregular_nodes.at(iedge), nodes.at(inode));
 					
 						this->mesh->addEdge(++eNum, _edge);
-						i_shared_id = eNum;
 
 						// get the tentative partitions
 						// they must be confirmed via mutual communication
 						IntArray partitions;
 						if(_edge->giveSharedPartitions(partitions)){
+							i_shared_id = eNum;
 							_edge->setPartitions(partitions);
 							// put edge number into queue of shared edges to resolve remote partitions
 							sharedEdgesQueue.push_back(eNum);
@@ -1667,12 +1725,12 @@ Subdivision::RS_Tetra::generate(std::list<int> &sharedEdgesQueue)
 						_edge->setEdgeNodes(irregular_nodes.at(iedge), nodes.at(nnode));
 					
 						this->mesh->addEdge(++eNum, _edge);
-						n_shared_id = eNum;
 
 						// get the tentative partitions
 						// they must be confirmed via mutual communication
 						IntArray partitions;
 						if(_edge->giveSharedPartitions(partitions)){
+							n_shared_id = eNum;
 							_edge->setPartitions(partitions);
 							// put edge number into queue of shared edges to resolve remote partitions
 							sharedEdgesQueue.push_back(eNum);
@@ -1965,12 +2023,12 @@ Subdivision::RS_Tetra::generate(std::list<int> &sharedEdgesQueue)
 						_edge->setEdgeNodes(irregular_nodes.at(iiedge), nodes.at(jnode));
 					
 						this->mesh->addEdge(++eNum, _edge);
-						j_shared_id = eNum;
 
 						// get the tentative partitions
 						// they must be confirmed via mutual communication
 						IntArray partitions;
 						if(_edge->giveSharedPartitions(partitions)){
+							j_shared_id = eNum;
 							_edge->setPartitions(partitions);
 							// put edge number into queue of shared edges to resolve remote partitions
 							sharedEdgesQueue.push_back(eNum);
@@ -1984,12 +2042,12 @@ Subdivision::RS_Tetra::generate(std::list<int> &sharedEdgesQueue)
 						_edge->setEdgeNodes(irregular_nodes.at(iiedge), nodes.at(knode));
 					
 						this->mesh->addEdge(++eNum, _edge);
-						k_shared_id = eNum;
 
 						// get the tentative partitions
 						// they must be confirmed via mutual communication
 						IntArray partitions;
 						if(_edge->giveSharedPartitions(partitions)){
+							k_shared_id = eNum;
 							_edge->setPartitions(partitions);
 							// put edge number into queue of shared edges to resolve remote partitions
 							sharedEdgesQueue.push_back(eNum);
@@ -2548,15 +2606,16 @@ void
 Subdivision::RS_Triangle::importConnectivity(ConnectivityTable* ct)
 {
   IntArray me(1), conn;
-  int iside, iNode, jNode, el, i;
-  me.at(1) = this->number;
-
-	// KOKO old version
+  int iNode, jNode, el, i;
 
   neghbours_base_elements.resize(3);
   neghbours_base_elements.zero();             // initialized to have no neighbour
+
+#if 0 	// old version
+  me.at(1) = this->number;
   ct->giveElementNeighbourList(conn, me);
 
+	int iside;
   for (iside=1; iside<=3; iside++) {
     iNode=nodes.at(iside);
     jNode=nodes.at((iside==3)?1:iside+1);
@@ -2575,8 +2634,8 @@ Subdivision::RS_Triangle::importConnectivity(ConnectivityTable* ct)
       }
     }
   }
+#endif
 
-#if 0   // HUHU new version
 	me.at(1) = nodes.at(3);
 	ct->giveNodeNeighbourList(conn, me);
 	iNode = nodes.at(1);
@@ -2624,8 +2683,6 @@ Subdivision::RS_Triangle::importConnectivity(ConnectivityTable* ct)
 			break;
 		}
 	}
-#endif
-
 }
 
 
@@ -2633,13 +2690,13 @@ void
 Subdivision::RS_Tetra::importConnectivity(ConnectivityTable* ct)
 {
   IntArray me(1), conn;
-  int iside, iNode, jNode, kNode, el, i;
-  me.at(1) = this->number;
-
-	// KOKO old version
+  int iNode, jNode, kNode, el, i;
 
   neghbours_base_elements.resize(4);
   neghbours_base_elements.zero();             // initialized to have no neighbour
+
+#if 0 	// old version
+  me.at(1) = this->number;
   ct->giveElementNeighbourList(conn, me);
 
 	iNode=nodes.at(1);
@@ -2662,6 +2719,7 @@ Subdivision::RS_Tetra::importConnectivity(ConnectivityTable* ct)
 	}
 
 	kNode=nodes.at(4);
+	int iside;
   for (iside=1; iside<=3; iside++) {
     iNode=nodes.at(iside);
     jNode=nodes.at((iside==3)?1:iside+1);
@@ -2681,8 +2739,8 @@ Subdivision::RS_Tetra::importConnectivity(ConnectivityTable* ct)
       }
     }
   }
+#endif
 
-#if 0  // HUHU new version
 	bool has_i, has_j, has_k;
 
 	me.at(1) = nodes.at(4);
@@ -2725,7 +2783,6 @@ Subdivision::RS_Tetra::importConnectivity(ConnectivityTable* ct)
 			break;
 		}
 	}
-#endif
 
 	/*
 #ifdef DEBUG_INFO
@@ -3018,10 +3075,10 @@ Subdivision :: createMesh(TimeStep *stepN, int domainNumber, int domainSerNum, D
         idofPtr = parentNodePtr->giveDof(idof);
         if (idofPtr->giveClassID() == MasterDofClass) {
           dof = new MasterDof (idof, node, idofPtr->giveBcId(), idofPtr->giveIcId(), idofPtr->giveDofID());
-				} else if (idofPtr->giveClassID() == SimpleSlaveDofClass) {   // HUHU
+				} else if (idofPtr->giveClassID() == SimpleSlaveDofClass) {
 					SimpleSlaveDof *simpleSlaveDofPtr;
 					simpleSlaveDofPtr = dynamic_cast< SimpleSlaveDof*> (idofPtr);
-					// giveMasterDofManArray ???? dof.h
+					// giveMasterDofManArray ???? dof.h   // HUHU
 					if(simpleSlaveDofPtr) {
 						dof = new SimpleSlaveDof (idof, node, simpleSlaveDofPtr->giveMasterDofManagerNum(), idofPtr->giveDofID());
 					} else {
@@ -3042,12 +3099,9 @@ Subdivision :: createMesh(TimeStep *stepN, int domainNumber, int domainSerNum, D
       ndofs = dofIDArrayPtr.giveSize();
       node->setNumberOfDofs (ndofs);
       
-			// HUHU slave dofs must be handled
-
       // create individual DOFs
       for (idof=1; idof<=ndofs; idof++) {
 #ifdef NM
-				// HUHU add handling of slave dofs
 				dof=NULL;
 				FloatArray *coords = mesh->giveNode(inode)->giveCoordinates();
 				if(!dof){
@@ -3065,16 +3119,14 @@ Subdivision :: createMesh(TimeStep *stepN, int domainNumber, int domainSerNum, D
 				if(!dof){
 					if(fabs(coords -> at(1)) < 0.000001){
 						if(coords -> at(2) > 102.4999999 && coords -> at(2) < 199.9999999){
-							dof = new SimpleSlaveDof( idof, node, 5, ( DofID ) dofIDArrayPtr.at(idof));
+							dof = new SimpleSlaveDof( idof, node, 5, ( DofID ) dofIDArrayPtr.at(idof));     // HUHU
 						}
 					}
 				}
 				if(!dof){
 					if(fabs(coords -> at(2) - 200.0) < 0.000001){
-						if(coords -> at(1) > 0.000001 && coords -> at(1) < 99.9999999){
-							dof = new SimpleSlaveDof( idof, node, 6, ( DofID ) dofIDArrayPtr.at(idof));
-						} else if(coords -> at(1) > 100.000001 && coords -> at(1) < 200.000001){
-							dof = new SimpleSlaveDof( idof, node, 6, ( DofID ) dofIDArrayPtr.at(idof));
+						if(coords -> at(1) > 0.000001 && coords -> at(1) < 200.000001){
+							dof = new SimpleSlaveDof( idof, node, 6, ( DofID ) dofIDArrayPtr.at(idof));       // HUHU
 						}
 					}
 				}
@@ -3130,7 +3182,50 @@ Subdivision :: createMesh(TimeStep *stepN, int domainNumber, int domainSerNum, D
 				}
 				if(!dof)dof = new MasterDof (idof, node, 0, 0, dofIDArrayPtr.at(idof));
 #else
+#ifdef HEADEDSTUD
+				double dist, rad;
+				FloatArray *coords = mesh->giveNode(inode)->giveCoordinates();
+
+				dof=NULL;
+				if(!dof){
+					dist = coords -> at(1) * coords -> at(1) + coords -> at(3) * coords -> at(3);
+					if(coords -> at(2) < 88.000001){
+						if(coords -> at(2) > 70.000001){
+							if(fabs(dist - 7.0 * 7.0) < 0.01){    // be very tolerant (geometry is not precise)
+								if(idof == 1 || idof == 3){
+									dof = new MasterDof (idof, node, 1, 0, dofIDArrayPtr.at(idof));
+								}
+							}
+						}
+						else if(coords -> at(2) > 67.9999999){
+							rad = 18.0 - 11.0 / 5.5 * (coords -> at(2) - 64.5);
+							if(fabs(dist - rad * rad) < 0.01){    // be very tolerant (geometry is not precise)
+								if(idof == 1 || idof == 3){
+									dof = new MasterDof (idof, node, 1, 0, dofIDArrayPtr.at(idof));
+								}
+								if(idof == 2){
+									dof = new MasterDof (idof, node, 2, 0, dofIDArrayPtr.at(idof));
+								}
+							}
+						}
+					}
+				}
+				if(!dof){
+					if(coords -> at(1) > 299.999999 || coords -> at(3) > 299.999999){
+						dof = new MasterDof (idof, node, 1, 0, dofIDArrayPtr.at(idof));
+					}
+				}
+				if(!dof){
+					if(coords -> at(1) < 0.00000001){
+						if(idof == 1){
+							dof = new MasterDof (idof, node, 1, 0, dofIDArrayPtr.at(idof));
+						}
+					}
+				}
+				if(!dof)dof = new MasterDof (idof, node, 0, 0, dofIDArrayPtr.at(idof));
+#else
         dof = new MasterDof (idof, node, 0, 0, dofIDArrayPtr.at(idof));
+#endif
 #endif
 #endif
 #endif
@@ -3637,7 +3732,7 @@ Subdivision::smoothMesh ()
 #else
 	OOFEM_LOG_INFO("Subdivision::smoothMesh: connectivity node_id: elem_ids\n");
 #endif
-	for(in=1;in<=nodes;in++){
+	for(in=1;in<=nnodes;in++){
 		len=0;
 		for(i=node_num_elems.at(in);i<node_num_elems.at(in+1);i++){
 			sprintf(buffer+len, " %d", node_con_elems.at(i));
@@ -3722,7 +3817,7 @@ Subdivision::smoothMesh ()
 #else
 	OOFEM_LOG_INFO("Subdivision::smoothMesh: connectivity node_id: node_ids\n");
 #endif
-	for(in=1;in<=nodes;in++){
+	for(in=1;in<=nnodes;in++){
 		len=0;
 		for(i=node_num_nodes.at(in);i<node_num_nodes.at(in+1);i++){
 			sprintf(buffer+len, " %d", node_con_nodes.at(i));
@@ -3838,15 +3933,17 @@ Subdivision::smoothMesh ()
 
 		}
 	}
-			
+
 	// unmark fixed nodes and marked them as boundary
 	for(in=1;in<=nnodes;in++){
 		if(mesh->giveNode(in)->giveNumber() < 0){
 			mesh->giveNode(in)->setNumber(in);
 
+#ifndef QUICK_HACK
 			// it is not clear what boundary flag may cause
 			// therefore it is not set in current version
 			//mesh->giveNode(in)->setBoundary(true);
+#endif
 		}
 	}
 }
@@ -4004,6 +4101,45 @@ Subdivision::unpackSharedIrregulars (Subdivision *s, ProcessCommunicator &pc)
 				coords = *(mesh->giveNode(iNode)->giveCoordinates());
 				coords.add (mesh->giveNode(jNode)->giveCoordinates());
 				coords.times(0.5);
+#ifdef HEADEDSTUD
+				double dist, rad, rate;
+				FloatArray *c;
+
+				c = mesh->giveNode(iNode)->giveCoordinates();
+				dist = c -> at(1) * c -> at(1) + c -> at(3) * c -> at(3);
+				if(c -> at(2) > 69.9999999){
+					rad = 7.0;
+				} else if(c -> at(2) < 64.5000001){
+					rad = 18.0;
+				} else {
+					rad = 18.0 - 11.0 / 5.5 * (c -> at(2) - 64.5);
+				}
+				if(fabs(dist - rad * rad) < 0.01){    // be very tolerant (geometry is not precise)
+					c = mesh->giveNode(jNode)->giveCoordinates();
+					dist = c -> at(1) * c -> at(1) + c -> at(3) * c -> at(3);
+					if(c -> at(2) > 69.9999999){
+						rad = 7.0;
+					} else if(c -> at(2) < 64.5000001){
+						rad = 18.0;
+					} else {
+						rad = 18.0 - 11.0 / 5.5 * (c -> at(2) - 64.5);
+					}
+					if(fabs(dist - rad * rad) < 0.01){    // be very tolerant (geometry is not precise)
+						dist = coords.at(1) * coords.at(1) + coords.at(3) * coords.at(3);
+						if(coords.at(2) > 69.9999999){
+							rad = 7.0;
+						} else if(coords.at(2) < 64.5000001){
+							rad = 18.0;
+						} else {
+							rad = 18.0 - 11.0 / 5.5 * (coords.at(2) - 64.5);
+						}
+						
+						rate = rad / sqrt(dist);
+						coords.at(1) *= rate;
+						coords.at(3) *= rate;
+					}
+				}
+#endif
 				// compute required density of a new node
 				density = 0.5*(mesh->giveNode(iNode)->giveRequiredDensity()+
 											 mesh->giveNode(jNode)->giveRequiredDensity());
@@ -4137,13 +4273,11 @@ Subdivision::packIrregularSharedGlobnums (Subdivision *s, ProcessCommunicator &p
 int 
 Subdivision::unpackIrregularSharedGlobnums (Subdivision *s, ProcessCommunicator &pc)
 {
-  bool found;
   int myrank = this->giveRank();
-  int ie, _type, iproc = pc.giveRank();
+  int _type, iproc = pc.giveRank();
   int iNode, jNode, iNum, elems;
   IntArray edgeInfo(3);
 	const IntArray *iElems, *jElems;
-  Subdivision::RS_SharedEdge *edge;
   RS_Element *elem;
   RS_Node *node;
 	int eIndex;
@@ -4285,7 +4419,7 @@ Subdivision::giveNumberOfProcesses()
 
     This is an aproximate algrithm, that works correctly for reasonably shaped grids,
     for grids with badly shaped elements, some interactions can be neglected, due to the fact
-    that real distances between integration points are not considered directly.
+    that real distances between intagration points are not considered directly.
 
     This algorithm failes if the mirror zone propagates to partition not adjacent to current partition.
     Therefore the algorithm has been abandaned and replaced by that which mirrors children
@@ -4334,17 +4468,12 @@ Subdivision::packRemoteElements (RS_packRemoteElemsStruct *s, ProcessCommunicato
 {
   Domain *d = s->d;
   int rproc = pc.giveRank();
-  int i, inode, ec, elem, nnodes=d->giveNumberOfDofManagers();
-  int j, elemNodes, nn, in, nmat;
+  int i, inode;
+  int nn, in;
   int myrank = this->giveRank();
-  bool nonlocal = false;
-  double radius, _radius, dist;
   classType dtype;
-  ConnectivityTable *ct = d->giveConnectivityTable();
-  DofManager *jnodePtr, *inodePtr;
+  DofManager *inodePtr;
   Element *elemPtr, *relemPtr;
-  NonlocalMaterialExtensionInterface *itrfc;
-  const IntArray *inodeConnectivity, *jnodeConnectivity;
   std::queue<int> elemCandidates;
   std::set<int> remoteElements, processedElements, nodesToSend;
   std::set<int>::const_iterator si;
@@ -4550,7 +4679,7 @@ Subdivision::assignGlobalNumbersToElements (Domain *d)
 
 
 /* CAUTION: the exchange can be done only for not subdivided edges !
-	 subdivide edges inherit partitions from parent edge */
+	 subdivided edges inherit partitions from parent edge (in ::generate) */
 
 void
 Subdivision::exchangeSharedEdges ()
@@ -4688,9 +4817,8 @@ Subdivision::packSharedEdges (Subdivision *s, ProcessCommunicator &pc)
 int 
 Subdivision::unpackSharedEdges (Subdivision *s, ProcessCommunicator &pc)
 {
-  bool found;
   int myrank = this->giveRank();
-  int pi, ie, _type, iproc = pc.giveRank();
+  int _type, iproc = pc.giveRank();
   int iNode, jNode, elems;
   IntArray edgeInfo(2);
 	const IntArray *iElems, *jElems;

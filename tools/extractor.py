@@ -25,7 +25,7 @@ global tolerance
 
 #record tuple format
 #('nr', solution_step, node_id, dof_id, type, value) - dof manager record
-#('er', solution_step, elem_id, gp_id, 'keyword', keyword_indx, value) - element record
+#('er', solution_step, elem_id, ir_id, gp_id, 'keyword', keyword_indx, value) - element record
 #('ber', solution_step, elem_id, 'keyword', keyword_indx, value) - beam element record
 #('rr', solution_step, node_id, dof_id, value) - reaction 
 #('llr',solution_step, value) - load level record
@@ -96,6 +96,8 @@ beamelement_re = re.compile(r"""
 gp_re = re.compile(r"""
                 ^                   # begining of line
                 \s*GP\s*            # gp string
+                (\d+)               # irule number
+                \.
                 (\d+)               # gp number
                 \s*:.*              # eat some chars
                 """,re.X)
@@ -181,12 +183,13 @@ def parse_input_rec (recline):
 		else: tstep = 0
 		try:
 			number= int(getKeywordValue(recline, 'number'))
+			irule = int(getKeywordValue(recline, 'irule', 1))
 			gp    = int(getKeywordValue(recline, 'gp'))
      		        #gprec = int(getKeywordValue(recline, 'record'))
 			kwd   = getKeywordValue(recline, 'keyword')
 			cmpn  = int(getKeywordValue(recline, 'component'))
 			value = float(getKeywordValue(recline, 'value', 0.0))
-			return ('er', tstep, number, gp, kwd, cmpn, value)
+			return ('er', tstep, number, irule, gp, kwd, cmpn, value)
                 
 		except ValueError:
 			print "Input error on\n",recline
@@ -244,18 +247,19 @@ def check_node_rec (time, node, dof, typesandvalues):
                                 recVal[irec]=value;
 
 #extract element record
-def check_element_rec (time, elem, gp, kwd, value, line):
+def check_element_rec (time, elem, irule, gp, kwd, value, line):
 	global recVal
 	for irec,rec in enumerate(userrec):
 		if (mode == 'e'): timeflag = 1
 		else: timeflag = (rec[1] == time)
 		
-		if ((rec[0]=='er') and timeflag and (elem == rec[2]) and (gp == rec[3])):
+		if ((rec[0]=='er') and timeflag and (elem == rec[2]) and 
+		    (irule==rec[3]) and (gp == rec[4])):
 #			print "Found er: looking for ",rec[5],"in ", line
-			match=re.search(rec[4]+'\s*((([-]*\d+(\.\d+)?(e[+-]\d+)?)\s*)+)', line)
+			match=re.search(rec[5]+'\s*((([-]*\d+(\.\d+)?(e[+-]\d+)?)\s*)+)', line)
 			if match:
                                 # print "match: ",match.group(1)
-				recVal[irec]=re.split('\s+',match.group(1))[rec[5]-1]
+				recVal[irec]=re.split('\s+',match.group(1))[rec[6]-1]
                                 # print "found: ",recVal[irec]
 
 
@@ -371,29 +375,30 @@ def match_dofrec ():
 
 
 def match_gpsubrec (aline):
-	global rectime, recnumber, recgpnum, debug
+	global rectime, recnumber, recirule, recgpnum, debug
 	pmatch=gpstress_re.search(aline)
 	if pmatch:
-		check_element_rec (rectime, recnumber, recgpnum, 'stresses', 0.0, aline)
+		check_element_rec (rectime, recnumber, recirule, recgpnum, 'stresses', 0.0, aline)
 		if debug: print "     stress rec"
 		return 1
 	ppmatch = gpstrain_re.search(aline)
 	if ppmatch:
-		check_element_rec (rectime, recnumber, recgpnum, 'strains', 0.0, aline)
+		check_element_rec (rectime, recnumber, recirule, recgpnum, 'strains', 0.0, aline)
 		if debug: print "     strain rec"
 		return 1
 	ppmatch = gpstatus_re.search(aline)
 	if ppmatch:
-		check_element_rec (rectime, recnumber, recgpnum, 'status', 0.0, aline)
+		check_element_rec (rectime, recnumber, recirule, recgpnum, 'status', 0.0, aline)
 		if debug: print "     status rec"
 		return 1
 	return 0
 
 def match_singlegprec (line):
-	global rectime, recnumber, recgpnum, debug
+	global rectime, recnumber, recirule, recgpnum, debug
 	match=gp_re.search(line)
 	if match:
-		recgpnum=int(match.group(1))
+		recirule=int(match.group(1))
+		recgpnum=int(match.group(2))
 		if debug: print "  gp", recgpnum
 		match_gpsubrec (line)
 		for line in infile:
@@ -485,13 +490,14 @@ oofem_output_file_name
 ....
 #%BEGIN_CHECK% [tolerance #]
 #DOFMAN    {tStep #} number # dof # type [dtfva] {value #}
-#ELEMENT   {tStep #} number # gp # keyword # component # {value #}
+#ELEMENT   {tStep #} number # [irule #] gp # keyword # component # {value #}
 #REACTION  {tStep #} number # dof # {value #}
 #LOADLEVEL {tStep #} {value #}
 #%END_CHECK%
 ------END-----------
 Other lines not matching the syntax are ignored.
-The records in {} are required only when in checker mode.
+The records in {} are required only when in checker mode, 
+the records in [] are optional.
 The type value is a single character determining the type of dof 
 value, where 'd' stands for displavement, 'v' for velocity,
 'a' for acceleration, 't' for temperature, and 'f' for flux.

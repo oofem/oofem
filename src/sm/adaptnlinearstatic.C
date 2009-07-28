@@ -1,4 +1,3 @@
-
 /* $Header: /home/cvs/bp/oofem/sm/src/adaptnlinearstatic.C,v 1.15.4.2 2004/04/09 12:01:10 bp Exp $ */
 /*
  *
@@ -48,6 +47,7 @@
 #include "element.h"
 #include "node.h"
 #include "elementside.h"
+#include "util.h"
 #ifndef __MAKEDEPEND
 #include <stdio.h>
 #endif
@@ -134,7 +134,7 @@ AdaptiveNonLinearStatic :: solveYourselfAt(TimeStep *tStep) {
     this->updateYourself(tStep);
 
 #ifdef __OOFEG
-    ESIEventLoop (YES, "AdaptiveNonLinearStatic: Solution finished; Press Ctrl-p to continue");
+    ESIEventLoop (YES, oofem_tmpstr("AdaptiveNonLinearStatic: Solution finished; Press Ctrl-p to continue"));
 #endif
 
     this->terminate( this->giveCurrentStep() );
@@ -704,7 +704,7 @@ AdaptiveNonLinearStatic :: adaptiveRemap(Domain* dNew)
      *************/
 
 #ifdef __OOFEG
-    ESIEventLoop (YES, "AdaptiveRemap: Press Ctrl-p to continue");
+    ESIEventLoop (YES, oofem_tmpstr("AdaptiveRemap: Press Ctrl-p to continue"));
 #endif
 
     //

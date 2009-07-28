@@ -73,9 +73,9 @@ public:
     ~StringReader() { }
 
 
-    int readInteger(char *source, char *idString);
-    double readDouble(char *source, char *idString);
-    char *readString(char *source, char *idString, char *string, int maxchar);
+    int readInteger(const char *source, const char *idString);
+    double readDouble(const char *source, const char *idString);
+    const char *readString(const char *source, const char *idString, char *string, int maxchar);
     /**
      * Reads quoted string identified by keyword.
      * The read string must be bounded by " characters.
@@ -85,14 +85,14 @@ public:
      * @param maxchar maximum character to be read.
      * @return pointer to string parameter.
      */
-    char *readQuotedString(char *source, char *idString, char *string, int maxchar);
-    IntArray *ReadIntArray(char *source, char *idString);
-    FloatArray *ReadFloatArray(char *source, char *idString);
-    Dictionary *ReadDictionary(char *source, char *idString);
-    char *readSimpleString(char *source, char *simpleString, int maxchar, char **remain);
-    char *readKeyAndVal(char *source, char *key, int *val, int maxchar, char **remain);
-    char *readKeyAndVal(char *source, char *key, double *val, int maxchar, char **remain);
-    int    hasString(char *source, char *idString);
+    const char *readQuotedString(const char *source, const char *idString, char *string, int maxchar);
+    IntArray *ReadIntArray(const char *source, const char *idString);
+    FloatArray *ReadFloatArray(const char *source, const char *idString);
+    Dictionary *ReadDictionary(const char *source, const char *idString);
+    char *readSimpleString(const char *source, char *simpleString, int maxchar, const char **remain);
+    const char *readKeyAndVal(const char *source, char *key, int *val, int maxchar, const char **remain);
+    const char *readKeyAndVal(const char *source, char *key, double *val, int maxchar, const char **remain);
+    int    hasString(const char *source, const char *idString);
 
     /**
      * Reads range list. The range syntax is "range_list_name { number, (start end) }",
@@ -103,7 +103,7 @@ public:
      * @param source source string with corresponding record.
      * @param idString string containing range_list_name.
      */
-    void   readRangeList(dynaList< Range > &list, char *source, char *idString);
+    void   readRangeList(dynaList< Range > &list, const char *source, const char *idString);
     /**
      * Reads single range record from input record represented by *helpSource  string.
      * @param helpSource pointer to current string possition, on return helpSource points
@@ -112,7 +112,7 @@ public:
      * @param hi end range index
      * @return on success nonzero valur returned
      */
-    int    readRange(char **helpSource, int &li, int &hi);
+    int    readRange(const char **helpSource, int &li, int &hi);
 
     //
 private:
@@ -120,10 +120,10 @@ private:
     // I don't expect, that You will use following functions
     //
 
-    char *getPosAfter(char *, char *);
-    char *scanInteger(char *source, int *value);
-    char *scanDouble(char *source, double *value);
-    char *skipNextWord(char *src);
+    const char *getPosAfter(const char *, const char *);
+    const char *scanInteger(const char *source, int *value);
+    const char *scanDouble(const char *source, double *value);
+    const char *skipNextWord(const char *src);
 };
 
 #endif // strreader_h

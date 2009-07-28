@@ -96,7 +96,7 @@ void StructuralMaterialStatus :: printOutputAt(FILE *File, TimeStep *tNow)
 
     // delete helpVec;
 
-    fprintf(File, "\n          stresses");
+    fprintf(File, "\n              stresses");
     ( ( StructuralCrossSection * )
      gp->giveCrossSection() )->giveFullCharacteristicVector(helpVec, gp, stressVector);
 

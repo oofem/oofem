@@ -102,10 +102,11 @@ void GaussPoint :: printOutputAt(FILE *File, TimeStep *stepN)
 // Prints the strains and stresses on the data file.
 {
     int i;
-    // int n;
+    int iruleNumber=0;
 
+    if (irule) iruleNumber = irule->giveNumber(); 
 
-    fprintf(File, "  GP %d :", number);
+    fprintf(File, "  GP %2d.%-2d :", iruleNumber, number);
     /*
      * n = strainVector -> giveSize() ;
      * for (i=1 ; i<=n ; i++)

@@ -44,90 +44,84 @@
 #include "flotmtrx.h"
 
 #ifndef __MAKEDEPEND
-#include <stdlib.h>
+ #include <stdlib.h>
 #endif
 
 // constructor
 //strainVector, tempStrainVector, stressVector, tempStressVector are defined on StructuralMaterialStatus
 
-MicroMaterialStatus :: MicroMaterialStatus(int n, Domain *d, GaussPoint *gp) : StructuralMaterialStatus(n, d, gp){
+MicroMaterialStatus :: MicroMaterialStatus(int n, Domain *d, GaussPoint *gp) : StructuralMaterialStatus(n, d, gp) { }
 
-}
-
-MicroMaterialStatus :: ~MicroMaterialStatus(){
-
-}
+MicroMaterialStatus :: ~MicroMaterialStatus() { }
 
 void MicroMaterialStatus :: initTempStatus()
 {
-  StructuralMaterialStatus :: initTempStatus();
+    StructuralMaterialStatus :: initTempStatus();
 }
 
 void MicroMaterialStatus :: updateYourself(TimeStep *atTime)
 {
-  StructuralMaterialStatus :: updateYourself(atTime);
+    StructuralMaterialStatus :: updateYourself(atTime);
 }
 
 void MicroMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)
-{
-
-}
+{ }
 
 contextIOResultType MicroMaterialStatus :: saveContext(DataStream *stream, ContextMode mode, void *obj)
 {
-
+    return CIO_OK;
 }
 
 contextIOResultType MicroMaterialStatus :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
 {
-
+    return CIO_OK;
 }
 
 
 MicroMaterial :: MicroMaterial(int n, Domain *d) : StructuralMaterial(n, d)
 {
- /// Constructor
+    /// Constructor
 }
 
 
 IRResultType MicroMaterial :: initializeFrom(InputRecord *ir)
 {
-    int i;
-    double value;
     const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
-  
-  IR_GIVE_FIELD2(ir, inputFileNameMicro, IFT_MicroMaterial_tmp, "file", MAX_FILENAME_LENGTH);
-  
-  OOFEM_LOG_INFO( "** Instanciating microproblem from file %s\n", inputFileNameMicro);
-  OOFEMTXTDataReader drMicro(inputFileNameMicro);
-  problemMicro = :: InstanciateProblem(& drMicro, _processor, 0);
-  drMicro.finish();
-  problemMicro->checkProblemConsistency();
-  OOFEM_LOG_INFO( "** Microproblem at address %p instanciated\n", problemMicro);
+
+    IR_GIVE_FIELD2(ir, inputFileNameMicro, IFT_MicroMaterial_tmp, "file", MAX_FILENAME_LENGTH);
+
+    OOFEM_LOG_INFO("** Instanciating microproblem from file %s\n", inputFileNameMicro);
+    OOFEMTXTDataReader drMicro(inputFileNameMicro);
+    problemMicro = :: InstanciateProblem(& drMicro, _processor, 0);
+    drMicro.finish();
+    problemMicro->checkProblemConsistency();
+    OOFEM_LOG_INFO("** Microproblem at address %p instanciated\n", problemMicro);
+
+    return IRRT_OK;
 }
 
 
 
 
 //original pure virtual function has to be redeclared here
-void MicroMaterial :: giveRealStressVector (FloatArray& answer, MatResponseForm form, GaussPoint* gp, const FloatArray &totalStrain, TimeStep *atTime){
-//perform average over microproblem
-int i, j, index, ielem;
-Element *elem;
-double dV, VolTot = 0.;
-double scale = 1.;
-FloatArray VecStrain, VecStress, SumStrain(6), SumStress(6);
-IntArray Mask;
-GaussPoint *gpL;
-IntegrationRule *iRule;
-Domain *microDomain = problemMicro->giveDomain(1);//from engngm.h
+void MicroMaterial :: giveRealStressVector(FloatArray &answer, MatResponseForm form, GaussPoint *gp, const FloatArray &totalStrain, TimeStep *atTime) {
+    //perform average over microproblem
+    int j, index, ielem;
+    Element *elem;
+    double dV, VolTot = 0.;
+    double scale = 1.;
+    FloatArray VecStrain, VecStress, SumStrain(6), SumStress(6);
+    IntArray Mask;
+    GaussPoint *gpL;
+    IntegrationRule *iRule;
+    Domain *microDomain = problemMicro->giveDomain(1); //from engngm.h
 
-int nelem = microDomain->giveNumberOfElements();
-int nnodes = microDomain->giveNumberOfDofManagers();
+    int nelem = microDomain->giveNumberOfElements();
+    //int nnodes = microDomain->giveNumberOfDofManagers();
 
-for ( ielem = 1; ielem <= nelem; ielem++ ) {
+    for ( ielem = 1; ielem <= nelem; ielem++ ) {
         elem = microDomain->giveElement(ielem);
         iRule = elem->giveDefaultIntegrationRulePtr();
         for ( int i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {

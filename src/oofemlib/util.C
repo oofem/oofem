@@ -150,3 +150,11 @@ EngngModel *InstanciateProblem(DataReader *dr, problemMode mode, int contextFlag
 
     return problem;
 }
+
+#define oofem_tmpstring_len 1024
+static char oofem_tmpstring[oofem_tmpstring_len - 1];
+
+char* oofem_tmpstr (const char* src) {
+  strncpy (oofem_tmpstring, src, oofem_tmpstring_len);
+  return oofem_tmpstring;
+}

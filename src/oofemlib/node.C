@@ -57,12 +57,12 @@
 #include "contextioerr.h"
 
 #ifndef __MAKEDEPEND
-#include <math.h>
-#include <stdlib.h>
+ #include <math.h>
+ #include <stdlib.h>
 #endif
 
 #ifdef __OOFEG
-#include "oofeggraphiccontext.h"
+ #include "oofeggraphiccontext.h"
 #endif
 
 Node :: Node(int n, Domain *aDomain) :
@@ -375,7 +375,7 @@ Node :: checkConsistency() {
                 if ( !masterNode ) {
                     _warning2("checkConsistency: master dofManager is not compatible", 1);
                     result = 0;
-                } else if ( !this->hasSameLCS(masterNode) )    {
+                } else if ( !this->hasSameLCS(masterNode) ) {
                     _warning2("checkConsistency: different lcs for master/slave nodes", 1);
                     result = 0;
                 }
@@ -475,9 +475,9 @@ Node :: computeLoadTransformation(FloatMatrix &answer, const IntArray *dofMask, 
 
     if ( mode == _toNodalCS ) {
         computeDofTransformation(t, dofMask, _toGlobalCS);
-    } else if ( mode == _toGlobalCS )  {
+    } else if ( mode == _toGlobalCS ) {
         computeDofTransformation(t, dofMask, _toNodalCS);
-    } else                                                                                      {
+    } else {
         _error("computeLoadTransformation: unsupported mode");
     }
 
@@ -734,29 +734,47 @@ void Node :: drawYourself(oofegGraphicContext &gc)
 
         EASValsSetLayer(OOFEG_NODE_ANNOTATION_LAYER);
         EASValsSetMType(FILLED_CIRCLE_MARKER);
-#ifdef __PARALLEL_MODE
-	if (this->giveParallelMode() == DofManager_local)
-	  EASValsSetColor( gc.getNodeColor() );
-	else if (this->giveParallelMode() == DofManager_shared)
-	  EASValsSetColor( gc.getDeformedElementColor());
-	else 
-	  EASValsSetColor( gc.getCrackPatternColor());
-#else
+ #if 1
+        if (this->giveDomain()->giveEngngModel()->hasXfemManager(1)) {
+          XfemManager *xf = this->giveDomain()->giveEngngModel()->giveXfemManager(1);
+          int i;
+          for ( i = 1; i <= xf->giveNumberOfEnrichmentItems(); i++ ) {
+            if ( xf->giveEnrichmentItem(i)->isDofManEnriched(this->number) ) {
+              EASValsSetMType(SQUARE_MARKER);
+            }
+          }
+        }
+
+ #endif
+
+ #ifdef __PARALLEL_MODE
+        if ( this->giveParallelMode() == DofManager_local ) {
+            EASValsSetColor( gc.getNodeColor() );
+        } else if ( this->giveParallelMode() == DofManager_shared ) {
+            EASValsSetColor( gc.getDeformedElementColor() );
+        } else {
+            EASValsSetColor( gc.getCrackPatternColor() );
+        }
+
+ #else
         EASValsSetColor( gc.getNodeColor() );
-#endif
+ #endif
 
-				bool ordinary = true;;
-				int idof;
-				for (idof=1; idof<=this->giveNumberOfDofs(); idof++) {
-					if(this->giveDof(1)->giveClassID() == SimpleSlaveDofClass){
-						ordinary=false;
-						break;
-					}
-				}
+        bool ordinary = true;
+        ;
+        int idof;
+        for ( idof = 1; idof <= this->giveNumberOfDofs(); idof++ ) {
+            if ( this->giveDof(1)->giveClassID() == SimpleSlaveDofClass ) {
+                ordinary = false;
+                break;
+            }
+        }
 
-				if(!ordinary)EASValsSetColor( gc.getBcIcColor() );
+        if ( !ordinary ) {
+            EASValsSetColor( gc.getBcIcColor() );
+        }
 
-				EASValsSetMSize(8);
+        EASValsSetMSize(8);
         go = CreateMarker3D(p);
         EGWithMaskChangeAttributes(COLOR_MASK | LAYER_MASK | MTYPE_MASK | MSIZE_MASK, go);
         EMAddGraphicsToModel(ESIModel(), go);
@@ -770,11 +788,11 @@ void Node :: drawYourself(oofegGraphicContext &gc)
         p [ 0 ].x = ( FPNum ) this->giveCoordinate(1);
         p [ 0 ].y = ( FPNum ) this->giveCoordinate(2);
         p [ 0 ].z = ( FPNum ) this->giveCoordinate(3);
-#ifdef __PARALLEL_MODE
-	sprintf( num, "%d(%d)", this->giveNumber(), this->giveGlobalNumber());
-#else
+ #ifdef __PARALLEL_MODE
+        sprintf( num, "%d(%d)", this->giveNumber(), this->giveGlobalNumber() );
+ #else
         sprintf( num, "%d", this->giveNumber() );
-#endif
+ #endif
         go = CreateAnnText3D(p, num);
         EGWithMaskChangeAttributes(COLOR_MASK | LAYER_MASK, go);
         EMAddGraphicsToModel(ESIModel(), go);

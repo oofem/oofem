@@ -3,18 +3,18 @@ BACKUP_FILES = *.tex *.fig *.eps makefile
 RCP = scp
 
 html: ps
-	if [ x$(ROBOT) != "x" ]; then $(ROBOT) < include.src.tex > include.tex; fi
+	if [ x"$(ROBOT)" != "x" ]; then $(ROBOT) < include.src.tex > include.tex; fi
 	latex2html -dir html -mkdir oofemInput
 
 ps:
-	if [ x$(ROBOT) != "x" ]; then $(ROBOT) < include.src.tex > include.tex; fi
+	if [ x"$(ROBOT)" != "x" ]; then $(ROBOT) < include.src.tex > include.tex; fi
 	rm -f *.toc *.lot *.aux
 	latex \\nonstopmode\\input oofemInput
 	latex \\nonstopmode\\input oofemInput
 	dvips -o 	oofemInput.ps oofemInput
 
 pdf:
-	if [ x$(ROBOT) != "x" ]; then $(ROBOT) < include.src.tex > include.tex; fi
+	if [ x"$(ROBOT)" != "x" ]; then $(ROBOT) < include.src.tex > include.tex; fi
 	rm -f *.toc *.lot *.aux
 	pdflatex oofemInput
 	pdflatex oofemInput

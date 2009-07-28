@@ -3,18 +3,18 @@ BACKUP_FILES = *.tex makefile
 RCP = scp
 
 html: ps
-	if [ x$(ROBOT) != "x" ]; then $(ROBOT) < include.src.tex > include.tex; fi
+	if [ x"$(ROBOT)" != "x" ]; then $(ROBOT) < include.src.tex > include.tex; fi
 	latex2html -dir html -mkdir matlibmanual
 
 ps:
-	if [ x$(ROBOT) != "x" ]; then $(ROBOT) < include.src.tex > include.tex; fi
+	if [ x"$(ROBOT)" != "x" ]; then $(ROBOT) < include.src.tex > include.tex; fi
 	rm -f *.toc *.lot *.aux
 	latex \\nonstopmode\\input matlibmanual
 	latex \\nonstopmode\\input matlibmanual
 	dvips -o 	matlibmanual.ps matlibmanual
 
 pdf:
-	if [ x$(ROBOT) != "x" ]; then $(ROBOT) < include.src.tex > include.tex; fi
+	if [ x"$(ROBOT)" != "x" ]; then $(ROBOT) < include.src.tex > include.tex; fi
 	rm -f *.toc *.lot *.aux
 	pdflatex matlibmanual
 	pdflatex matlibmanual

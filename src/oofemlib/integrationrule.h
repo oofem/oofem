@@ -199,6 +199,8 @@ public:
     Geometry *giveGeometry(GaussPoint *gp);
     /** Returns reference to interpolation asscoiated with GaussPoint */
     FEInterpolation *giveInterpolation(GaussPoint *gp);
+    /** Returns the receiver number */
+    int giveNumber() {return this->number;}
     /**
      * Abstract service.`
      * Returns requred number of integration points to exactly integrate

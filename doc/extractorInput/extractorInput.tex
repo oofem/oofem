@@ -69,7 +69,7 @@ section} is common for both oofem and extractor input files and all remaining ex
 \begin{verbatim}
 #%BEGIN_CHECK% [tolerance #]
 #(DOFMAN|NODE)  {tStep #} number # dof # unknown [dtfpva] {value #}
-#ELEMENT   {tStep #} number # gp # keyword # component # {value #}
+#ELEMENT   {tStep #} number # [irule #] gp # keyword # component # {value #}
 #BEAM_ELEMENT   {tStep #} number # keyword # component # {value #}
 #REACTION  {tStep #} number # dof # {value #}
 #LOADLEVEL {tStep #} {value #}
@@ -103,11 +103,11 @@ extracted value. In checker mode, the {\em tStep} parameter determines the solut
 
 \item[-]
 \begin{verbatim}
-#ELEMENT   {tStep #} number # gp # keyword # component # {value #}
+#ELEMENT   {tStep #} number # [irule #] gp # keyword # component # {value #}
 \end{verbatim}
 Record representing the value associated to an integration point of
 an element. The {\em number} value determines the element number, the {\em
-gp} determines the integration point number of the element. 
+gp} determines the integration point number of the element. The {\em irule} allows to determine the integration rule, if not specified, the ``1'' is substituted by default, which uses the first intergartion rule on element.
 Generally, there are many values associated with each integration point 
 (for example, strain and stress vectors for structural
 analysis). Their order depends on problem being solved and

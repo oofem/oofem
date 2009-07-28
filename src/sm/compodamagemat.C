@@ -120,13 +120,14 @@ IRResultType CompoDamageMat :: initializeFrom(InputRecord *ir)
 
 //used in debugging only ?
 int CompoDamageMat :: giveInputRecordString(std :: string &str, bool keyword)
-{ }
+{ 
+  return 1;
+}
 
 //called at the beginning of each time increment (not iteration), no influence of parameter
 void CompoDamageMat :: give3dMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime)
 {
     FloatMatrix *rotationMatrix;
-    StructuralElement *element = ( StructuralElement * ) gp->giveElement();
 
     //already with reduced components
     this->giveUnrotated3dMaterialStiffnessMatrix(answer, gp);
@@ -140,7 +141,7 @@ void CompoDamageMat :: give3dMaterialStiffnessMatrix(FloatMatrix &answer, MatRes
 //called in each iteration, support for 3D and 1D material mode
 void CompoDamageMat :: giveRealStressVector(FloatArray &answer,  MatResponseForm form, GaussPoint *gp, const FloatArray &totalStrain, TimeStep *atTime)
 {
-    int i, i_max, s, tensCompr;
+    int i, i_max, s;
     double delta, sigma, charLen, tmp;
     CompoDamageMatStatus *st = ( CompoDamageMatStatus * ) this->giveStatus(gp);
     Element *element = gp->giveElement();
@@ -203,20 +204,23 @@ void CompoDamageMat :: giveRealStressVector(FloatArray &answer,  MatResponseForm
 
         if ( fabs( tempStressVectorL.at(i) ) > fabs( ( * stressLimit ).at(2 * i - 1) ) && st->strainAtMaxStress.at(i + s) == 0. ) { //damage starts now, can be replaced for more advanced initiation criteria, e.g. Hill's maximum combination of stresses
             //equilibrated strain and stress from the last time step, transform to local c.s.
-            switch ( mMode ) {
-            case _3dMat: {
-                ans = st->giveStrainVector();
-                this->transformStrainVectorTo(equilStrainVectorL, elementCs, ans, 0);
-                ans = st->giveStressVector();
-                this->transformStressVectorTo(equilStressVectorL, elementCs, ans, 0);
-                break;
-            }
-            case _1dMat: {
-                equilStrainVectorL = st->giveStrainVector();
-                equilStressVectorL = st->giveStressVector();
-                break;
-            }
-            }
+	  switch ( mMode ) {
+	  case _3dMat:
+	    ans = st->giveStrainVector();
+	    this->transformStrainVectorTo(equilStrainVectorL, elementCs, ans, 0);
+	    ans = st->giveStressVector();
+	    this->transformStressVectorTo(equilStressVectorL, elementCs, ans, 0);
+	    break;
+	  
+	  case _1dMat: 
+	    equilStrainVectorL = st->giveStrainVector();
+	    equilStressVectorL = st->giveStressVector();
+	    break;
+	    
+	  default:
+	    // should never go here, handled by similar switch before
+	    ;
+	  }
 
             //subdivide last increment, interpolate, delta in range <0;1>
             delta = ( ( * stressLimit ).at(2 * i - 1) - equilStressVectorL.at(i) ) / ( tempStressVectorL.at(i) - equilStressVectorL.at(i) );
@@ -295,6 +299,9 @@ void CompoDamageMat :: giveRealStressVector(FloatArray &answer,  MatResponseForm
         answer.at(1) = ( 1 - st->tempOmega.at(1) ) * this->give(Ex, NULL) * strainVectorL.at(1); //tempStress
         break;
     }
+    default:
+      // should newer go here, handled by similar switch before
+      ;
     }
 
     st->letTempStressVectorBe(answer); //needed in global c.s for 3D
@@ -349,7 +356,6 @@ CompoDamageMat :: giveIntVarCompFullIndx(IntArray &answer, InternalStateType typ
 
 
 void CompoDamageMat :: giveUnrotated3dMaterialStiffnessMatrix(FloatMatrix &answer, GaussPoint *gp) {
-    double i;
     double denom;
     double ex, ey, ez, nxy, nxz, nyz, gyz, gzx, gxy;
     double a, b, c, d, e, f;
@@ -397,7 +403,6 @@ void CompoDamageMat :: giveUnrotated3dMaterialStiffnessMatrix(FloatMatrix &answe
 //returns material rotation stiffness matrix [6x6]
 FloatMatrix *CompoDamageMat :: giveMatStiffRotationMatrix(GaussPoint *gp) {
     FloatMatrix t(3, 3), answer, elementCs;
-    int elementCsFlag;
     StructuralElement *element = ( StructuralElement * ) gp->giveElement();
 
     element->giveMatLocalCS(t); //if mlcs undefined, returns unix matrix

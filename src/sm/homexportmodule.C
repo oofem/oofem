@@ -87,8 +87,7 @@ HOMExportModule :: doOutput(TimeStep *tStep)
 
     Domain *d  = emodel->giveDomain(1);
     int nelem = d->giveNumberOfElements();
-    int nnodes = d->giveNumberOfDofManagers();
-    int defIntRule;
+    //int nnodes = d->giveNumberOfDofManagers();
     double dV, VolTot = 0.;
     FloatArray VecStrain, VecStress, SumStrain(6), SumStress(6);
     IntArray Mask;
@@ -102,7 +101,7 @@ HOMExportModule :: doOutput(TimeStep *tStep)
     for ( ielem = 1; ielem <= nelem; ielem++ ) {
         elem = d->giveElement(ielem);
         iRule = elem->giveDefaultIntegrationRulePtr();
-        for ( int i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
+        for ( i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
             gp  = iRule->getIntegrationPoint(i);
             gp->giveCoordinate(1);
             dV  = elem->computeVolumeAround(gp);
