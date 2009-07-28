@@ -1,5 +1,5 @@
 BACKUP_NAME=oofem.tar.gz
-DOC_RELEASE_FILES="elementlibmanual/elementlibmanual.ps paper-actap/paper-actap.ps extractorInput/extractorInput.ps matlibmanual/matlibmanual.ps oofemInput/oofemInput.ps programmer/programmer.ps"
+DOC_RELEASE_FILES="elementlibmanual/elementlibmanual.pdf paper-actap/paper-actap.pdf extractorInput/extractorInput.pdf matlibmanual/matlibmanual.pdf oofemInput/oofemInput.pdf programmer/programmer.pdf"
 DOC_DIRS="doc/elementlibmanual doc/paper-actap doc/extractorInput doc/matlibmanual doc/oofemInput doc/programmer"
 
 if [ -z $1 ]
@@ -61,7 +61,7 @@ fi
 #
 echo building documentation
 cd doc
-make ps-doc
+make pdf
 # copy doc files to top doc directory
 for i in $DOC_RELEASE_FILES
 do
@@ -73,14 +73,14 @@ fi
 cp $i .
 done
 # generate reference manual
-# cd refman; make htmldoc; cd ..
+# cd refman; make html; cd ..
 #
 cd ..
 #remove doc sources
 rm -fr $DOC_DIRS
 #
 # generate refman of OOFEMlib
-# cd oofemlib/doc/refman; pwd; make htmldoc; cd ../../..
+# cd oofemlib/doc/refman; pwd; make html; cd ../../..
 cd ..
 #
 #
