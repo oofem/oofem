@@ -1,5 +1,7 @@
-2009-06-20  Borek Patzak  <Borek.Patzak@fsv.cvut.cz>
+2009-07-28  Borek Patzak  <Borek.Patzak@fsv.cvut.cz>
 
+	* OOFEM 1.9 released
+	
 	* Added support fo adaptive, parallel jobs with dynamic load
 	balancing.
 
