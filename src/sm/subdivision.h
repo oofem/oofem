@@ -369,7 +369,7 @@ class Subdivision : public MesherInterface
 
  public:
   /// Constructor
-  Subdivision(Domain* d) : MesherInterface(d) {mesh=0; smoothingFlag=true;}
+  Subdivision(Domain* d) : MesherInterface(d) {mesh=0; smoothingFlag=false;}
   ~Subdivision() {if (mesh) delete mesh;}
   
   /// Runs the mesh generation, mesh will be written to corresponding domain din file
