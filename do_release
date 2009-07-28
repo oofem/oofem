@@ -62,6 +62,8 @@ fi
 echo building documentation
 cd doc
 make pdf
+# do not include doc/makefile in release
+rm makefile
 # copy doc files to top doc directory
 for i in $DOC_RELEASE_FILES
 do
