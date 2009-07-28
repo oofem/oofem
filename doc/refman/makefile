@@ -11,7 +11,7 @@ ROBOT = /home/bp/oofem-doc/www/robot2.pl
 all: www-doc 
 
 www-doc:
-	if [ -x $(ROBOT) ] ; then $(ROBOT) < footer.shtml > footer.html; fi
+	if [ -x "$(ROBOT)" ] ; then $(ROBOT) < footer.shtml > footer.html; fi
 	$(DOCXX) doxygen.cfg
 
 ps-doc: www-doc
