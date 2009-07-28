@@ -857,13 +857,13 @@ RampFunction 1
 Circle 1 center 2 30.0 30.0 radius 12.5
 Inclusion 1 geometryitem 1 enrichmentfunction 1 material 2
 #%BEGIN_CHECK% tolerance 1.e-8
-#NODE tStep 1 number 304 dof 1 unknown d value -3.78917387e-03
+##NODE tStep 1 number 304 dof 1 unknown d value -3.78917387e-03
 #NODE tStep 1 number 304 dof 2 unknown d value  9.53932214e-03
-#NODE tStep 1 number 306 dof 1 unknown d value -4.43097051e-03
+##NODE tStep 1 number 306 dof 1 unknown d value -4.43097051e-03
 #NODE tStep 1 number 306 dof 2 unknown d value  9.53932214e-03
-#NODE tStep 1 number 217 dof 1 unknown d value -2.33292464e-03
+##NODE tStep 1 number 217 dof 1 unknown d value -2.33292464e-03
 #NODE tStep 1 number 217 dof 2 unknown d value  5.00000000e-03
-#NODE tStep 1 number 225 dof 1 unknown d value -5.88721974e-03
+##NODE tStep 1 number 225 dof 1 unknown d value -5.88721974e-03
 #NODE tStep 1 number 225 dof 2 unknown d value  5.00000000e-03
 #### element 289
 #ELEMENT tStep 1 number 289 irule 1 gp 1 keyword "strains" component 1  value -3.8526e-05
