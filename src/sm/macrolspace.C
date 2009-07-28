@@ -45,97 +45,95 @@
 #include "oofem_terminate.h"
 
 #ifndef __MAKEDEPEND
-#include <stdio.h>
+ #include <stdio.h>
 #endif
 
 #ifdef __OOFEG
-#include "engngm.h"
-#include "metastep.h"
-#include "oofeggraphiccontext.h"
-#include "oofegutils.h"
-#include "conTable.h"
+ #include "engngm.h"
+ #include "metastep.h"
+ #include "oofeggraphiccontext.h"
+ #include "oofegutils.h"
+ #include "conTable.h"
 #endif
 
 
 MacroLSpace :: MacroLSpace(int n, Domain *aDomain) : LSpace(n, aDomain)
 {
-stiffnessMatrixMicro = NULL;//full stiffness matrix of microproblem
+    stiffnessMatrixMicro = NULL; //full stiffness matrix of microproblem
 }
 
 
 //stiffness matrix [24x24] the rows (columns) go in order: from node 1 (u,v,w) to node 2 (u,v,w) ... 8 (u,v,w) in global coordinates
 
-void MacroLSpace :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep){
-     int i,j;
-     GaussPoint *gp;
-     double dV;
-     FloatMatrix bj,d,dbj;
-     IntegrationRule *iRule;
-     //pointer to microproblem
-     MicroMaterial *microMat = ( MicroMaterial * ) this->giveMaterial();//from element.h
-     Domain *microDomain = microMat->problemMicro->giveDomain(1);//from engngm.h
-     EngngModel *microEngngModel = microDomain->giveEngngModel ();
-     SparseMtrxType sparseMtrxType = (SparseMtrxType) 0;//?
-     
-     //stiffness matrix is done separately from another scale
-     //if(strstr(this->giveClassName (),"Macro")) {
-     //this->GiveStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep);
-      MetaStep *activeMStep;
+void MacroLSpace :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep) {
+    FloatMatrix bj, d, dbj;
+    //pointer to microproblem
+    MicroMaterial *microMat = ( MicroMaterial * ) this->giveMaterial(); //from element.h
+    Domain *microDomain = microMat->problemMicro->giveDomain(1); //from engngm.h
+    EngngModel *microEngngModel = microDomain->giveEngngModel();
+    SparseMtrxType sparseMtrxType = ( SparseMtrxType ) 0; //?
 
-  answer.resize( computeNumberOfDofs(EID_MomentumBalance), computeNumberOfDofs(EID_MomentumBalance) );
-  answer.zero();
-  
-  if (!this->isActivated(tStep)) return;
-  //answer.printYourself();
-  
-  //call microproblem
-  //pointer to engngm (microMat->problemMicro->)
-  microMat->problemMicro->setProblemScale(microScale);//set microScale attribute
-  //activeMStep = microMat->problemMicro->giveMetaStep(1);//->setNumberOfSteps(1);
-  //activeMStep->giveMetaStepNumber();
-  //microEngngModel->timer.startTimer(EngngModelTimer :: EMTT_AnalysisTimer);
-  //microproblem must have the same time increment
-  microEngngModel->giveNextStep();
-  microEngngModel->initMetaStepAttributes(microEngngModel->giveCurrentStep());
-  microEngngModel->solveYourselfAt(microEngngModel->giveCurrentStep());
-  
-//   try {
-      //microEngngModel->solveYourself();
-//   } catch ( OOFEM_Terminate &c ) {
-//         delete microMat->problemMicro;
-//   }
-  
-  //sparseMtrxType = microMat->problemMicro->giveSparseMtrxType();
-  
-  
-   if ( !stiffnessMatrixMicro ) {
-             stiffnessMatrixMicro = :: CreateUsrDefSparseMtrx(sparseMtrxType);
-   }
-   
-  stiffnessMatrixMicro->zero();
-  // bp: replace EModelDefaultEquationNumberingby by customized classs 
-  stiffnessMatrixMicro->buildInternalStructure(microEngngModel, 1, EID_MomentumBalance, EModelDefaultEquationNumbering());
-  
-  OOFEM_LOG_INFO("Assembling tangent stiffness matrix of microproblem at address %p\n", microMat->problemMicro);
-  //microEngngModel->assemble( stiffnessMatrixMicro, tStep, EID_MomentumBalance, TangentStiffnessMatrix, microDomain );
-  //stiffnessMatrixMicro.printYourself();
-  //printf("%d",this->giveDomain()->giveEngngModel()->ndomains);
-  //microMat->giveClassName();
-  
-  
-//   iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
-//   for ( j = 0; j <iRule->getNumberOfIntegrationPoints(); j++){
-//   gp = iRule->getIntegrationPoint(j);
-//   this->computeBmatrixAt(gp, bj);//returns with Jacobian in global c.s.
-//   this->computeConstitutiveMatrixAt(d, rMode, gp, tStep);//in global c.s.
-//   dV = this->computeVolumeAround(gp);
-//   dbj.beProductOf(d, bj);
-//   answer.plusProductSymmUpper(bj, dbj, dV);
-//   }
-  //stiffnessMatrixMicro.resize(24,24);
-  
-  answer.symmetrized();
-  answer.resize(24,24);
-  answer.beUnitMatrix();
+    //stiffness matrix is done separately from another scale
+    //if(strstr(this->giveClassName (),"Macro")) {
+    //this->GiveStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep);
+
+    answer.resize( computeNumberOfDofs(EID_MomentumBalance), computeNumberOfDofs(EID_MomentumBalance) );
+    answer.zero();
+
+    if ( !this->isActivated(tStep) ) {
+        return;
+    }
+
+    //answer.printYourself();
+
+    //call microproblem
+    //pointer to engngm (microMat->problemMicro->)
+    microMat->problemMicro->setProblemScale(microScale); //set microScale attribute
+    //activeMStep = microMat->problemMicro->giveMetaStep(1);//->setNumberOfSteps(1);
+    //activeMStep->giveMetaStepNumber();
+    //microEngngModel->timer.startTimer(EngngModelTimer :: EMTT_AnalysisTimer);
+    //microproblem must have the same time increment
+    microEngngModel->giveNextStep();
+    microEngngModel->initMetaStepAttributes( microEngngModel->giveCurrentStep() );
+    microEngngModel->solveYourselfAt( microEngngModel->giveCurrentStep() );
+
+    //   try {
+    //microEngngModel->solveYourself();
+    //   } catch ( OOFEM_Terminate &c ) {
+    //         delete microMat->problemMicro;
+    //   }
+
+    //sparseMtrxType = microMat->problemMicro->giveSparseMtrxType();
+
+
+    if ( !stiffnessMatrixMicro ) {
+        stiffnessMatrixMicro = :: CreateUsrDefSparseMtrx(sparseMtrxType);
+    }
+
+    stiffnessMatrixMicro->zero();
+    // bp: replace EModelDefaultEquationNumberingby by customized classs
+    stiffnessMatrixMicro->buildInternalStructure( microEngngModel, 1, EID_MomentumBalance, EModelDefaultEquationNumbering() );
+
+    OOFEM_LOG_INFO("Assembling tangent stiffness matrix of microproblem at address %p\n", microMat->problemMicro);
+    //microEngngModel->assemble( stiffnessMatrixMicro, tStep, EID_MomentumBalance, TangentStiffnessMatrix, microDomain );
+    //stiffnessMatrixMicro.printYourself();
+    //printf("%d",this->giveDomain()->giveEngngModel()->ndomains);
+    //microMat->giveClassName();
+
+
+    //   iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
+    //   for ( j = 0; j <iRule->getNumberOfIntegrationPoints(); j++){
+    //   gp = iRule->getIntegrationPoint(j);
+    //   this->computeBmatrixAt(gp, bj);//returns with Jacobian in global c.s.
+    //   this->computeConstitutiveMatrixAt(d, rMode, gp, tStep);//in global c.s.
+    //   dV = this->computeVolumeAround(gp);
+    //   dbj.beProductOf(d, bj);
+    //   answer.plusProductSymmUpper(bj, dbj, dV);
+    //   }
+    //stiffnessMatrixMicro.resize(24,24);
+
+    answer.symmetrized();
+    answer.resize(24, 24);
+    answer.beUnitMatrix();
 }
 
