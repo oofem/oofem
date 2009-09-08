@@ -29,6 +29,7 @@ global tolerance
 #('ber', solution_step, elem_id, 'keyword', keyword_indx, value) - beam element record
 #('rr', solution_step, node_id, dof_id, value) - reaction 
 #('llr',solution_step, value) - load level record
+#('time') - time, only extractor mode
 
 #set default tolerance
 tolerance = 1.0e-4
@@ -230,6 +231,8 @@ def parse_input_rec (recline):
 		except ValueError:
 			print "Input error on\n",recline
 			return None
+        elif (mode == 'e') and re.search('^#TIME',recline):
+                return ('time', 0.0, 0.0)
 
 	else:
 		return None
@@ -298,6 +301,16 @@ def check_loadlevel_rec (time, value):
 		if ((rec[0] == 'llr') and timeflag):
 			recVal[irec]=value
 
+#check time rec
+def check_time_rec (time):
+        global recVal
+	for irec,rec in enumerate(userrec):
+
+		if (mode == 'e') and (rec[0] == 'time'):
+			recVal[irec]=time
+        
+
+
 def match_primary_rec (line):
 	global rectime, recnumber, recdofnum, recvalue, mode, firstTimeStepFlag, debug
 
@@ -310,6 +323,7 @@ def match_primary_rec (line):
 			firstTimeStepFlag = 0
 		# print parsed record values from previous step
 		elif mode == 'e': print_step_results()
+                check_time_rec (rectime)
 		return None
 	match=loadlevel_re.search(line)
 	if match:
@@ -493,11 +507,14 @@ oofem_output_file_name
 #ELEMENT   {tStep #} number # [irule #] gp # keyword # component # {value #}
 #REACTION  {tStep #} number # dof # {value #}
 #LOADLEVEL {tStep #} {value #}
+<#TIME>
 #%END_CHECK%
 ------END-----------
 Other lines not matching the syntax are ignored.
 The records in {} are required only when in checker mode, 
+records in <> are available only in extractor mode.
 the records in [] are optional.
+
 The type value is a single character determining the type of dof 
 value, where 'd' stands for displavement, 'v' for velocity,
 'a' for acceleration, 't' for temperature, and 'f' for flux.
