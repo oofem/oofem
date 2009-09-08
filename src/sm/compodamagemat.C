@@ -56,9 +56,6 @@ CompoDamageMat :: ~CompoDamageMat()
     /// destructor
 }
 
-CompoDamageMat :: ~CompoDamageMat();
-
-
 
 IRResultType CompoDamageMat :: initializeFrom(InputRecord *ir)
 {
