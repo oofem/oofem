@@ -281,13 +281,15 @@ VTKExportModule :: doOutput(TimeStep *tStep)
       offset += regionDofMans;
       for ( ielem = 1; ielem <= nelem; ielem++ ) {
         elem = d->giveElement(ielem);
+
+        if ( elem->giveRegionNumber() != ireg ) {
+          continue;
+        }
+
         vtkCellType = this->giveCellType (elem);
 #ifdef __PARALLEL_MODE
         if (elem->giveParallelMode() != Element_local) continue;
 #endif
-        if ( elem->giveRegionNumber() != ireg ) {
-          continue;
-        }
         
         nelemNodes = elem->giveNumberOfNodes();
         fprintf(stream, "%d ", nelemNodes);
