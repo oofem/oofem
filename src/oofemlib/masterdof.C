@@ -477,7 +477,7 @@ MasterDof :: unpackAndUpdateUnknown(CommunicationBuffer &buff, EquationID type,
     double value;
     int result = 0;
     // if dof belonging to shared or remote DofManager, engng model unknowns are updated
-    // to accomodate remote contribution or "prescribed" remote values.
+    // to accommodate remote contribution or "prescribed" remote values.
     // The unknown dictionary is not updated, it is engng model job to update
     // all unknowns dictionaries.
 

@@ -74,7 +74,7 @@ template< class T > class AList
      * 'size'.
      * TASKS :
      * - storing (method 'put') and returning (method 'at') component ;
-     * - expanding itself, in order to accomodate more components.
+     * - expanding itself, in order to accommodate more components.
      */
 
 
@@ -98,8 +98,7 @@ public:
     T *at(int i)           { return values [ i - 1 ]; }
     int             giveSize()          { return size; }
     /**
-     * Expands the receiver from its current size to newSize, in order to acco-
-     * modate new entries.
+     * Expands the receiver from its current size to newSize, in order to accommodate new entries.
      */
     void            growTo(int newSize);
     /**

@@ -394,7 +394,14 @@ int Skyline :: buildInternalStructure(EngngModel *eModel, int di, EquationID ut,
 
     int j, js, ieq, maxle;
     int i, ac1;
-    int neq = eModel->giveNumberOfDomainEquations(di, ut);
+    int neq;
+    if (s.isDefault())
+      neq = eModel->giveNumberOfDomainEquations(di, ut);
+    else{
+      neq = s.giveRequiredNumberOfDomainEquation();
+      if ( neq == 0 )
+        OOFEM_ERROR("Undefined Required number of domain equations");
+    } 
 
     IntArray loc;
     IntArray *mht = new IntArray(neq);

@@ -95,7 +95,7 @@ EIPrimaryUnknownMapper :: mapAndUpdate(FloatArray &answer, ValueModeType mode, E
             //  WARNING !! LIMITED IMPLEMENTATION HERE !!
             //
             // possible source of error -> general service allowing to request all DOFs interpolated by element
-            // should be there, but newNode can accomodate only certain dofs.
+            // should be there, but newNode can accommodate only certain dofs.
             //
             //
 	  newd->giveNode(inode)->giveLocationArray(dofMask, locationArray, EModelDefaultEquationNumbering());

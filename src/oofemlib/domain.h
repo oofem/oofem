@@ -375,42 +375,44 @@ public:
      *@name Advanced domain manipulation methods.
      */
     //@{
-    /// Resizes the internal data structure to accomodate space for _newSize dofManagers
+    /// Resizes the internal data structure to accommodate space for _newSize dofManagers
     void resizeDofManagers (int _newSize);
-    /// Resizes the internal data structure to accomodate space for _newSize elements
+    /// Resizes the internal data structure to accommodate space for _newSize elements
     void resizeElements (int _newSize);
-    /// Resizes the internal data structure to accomodate space for _newSize cross section models
+    /// Resizes the internal data structure to accommodate space for _newSize cross section models
     void resizeCrossSectionModels (int _newSize);
-    /// Resizes the internal data structure to accomodate space for _newSize materials
+    /// Resizes the internal data structure to accommodate space for _newSize materials
     void resizeMaterials (int _newSize);
-    /// Resizes the internal data structure to accomodate space for _newSize nonlocal barriers
+    /// Resizes the internal data structure to accommodate space for _newSize nonlocal barriers
     void resizeNonlocalBarriers (int _newSize);
-    /// Resizes the internal data structure to accomodate space for _newSize boundary conditions
+    /// Resizes the internal data structure to accommodate space for _newSize boundary conditions
     void resizeBoundaryConditions (int _newSize);
-    /// Resizes the internal data structure to accomodate space for _newSize initial conditions
+    /// Resizes the internal data structure to accommodate space for _newSize initial conditions
     void resizeInitialConditions (int _newSize);
-    /// Resizes the internal data structure to accomodate space for _newSize load time functions
+    /// Resizes the internal data structure to accommodate space for _newSize load time functions
     void resizeLoadTimeFunctions (int _newSize);
 
-    /// Sets i-th componet. The component will be futher managed and maintained by domain object. 
+    /// Sets i-th component. The component will be futher managed and maintained by domain object. 
     void setDofManager (int i, DofManager* obj);
-    /// Sets i-th componet. The component will be futher managed and maintained by domain object. 
+    /// Sets i-th component. The component will be futher managed and maintained by domain object. 
     void setElement (int i, Element* obj);
-    /// Sets i-th componet. The component will be futher managed and maintained by domain object. 
+    /// Sets i-th component. The component will be futher managed and maintained by domain object. 
     void setCrossSection (int i, CrossSection* obj);
-    /// Sets i-th componet. The component will be futher managed and maintained by domain object. 
+    /// Sets i-th component. The component will be futher managed and maintained by domain object. 
     void setMaterial (int i, Material* obj);
-     /// Sets i-th componet. The component will be futher managed and maintained by domain object. 
+     /// Sets i-th component. The component will be futher managed and maintained by domain object. 
     void setNonlocalBarrier (int i, NonlocalBarrier* obj);
-    /// Sets i-th componet. The component will be futher managed and maintained by domain object. 
+    /// Sets i-th component. The component will be futher managed and maintained by domain object. 
     void setBoundaryCondition (int i, GeneralBoundaryCondition* obj);
-    /// Sets i-th componet. The component will be futher managed and maintained by domain object. 
+    /// Sets i-th component. The component will be futher managed and maintained by domain object. 
     void setInitialCondition (int i, InitialCondition* obj);
-    /// Sets i-th componet. The component will be futher managed and maintained by domain object. 
+    /// Sets i-th component. The component will be futher managed and maintained by domain object. 
     void setLoadTimeFunction (int i, LoadTimeFunction* obj);
     /// Temporary function, sets xfemManager
     void               setXfemManager(XfemManager* xfemManager);
 
+    /// clear all boundary conditions
+    void clearBoundaryConditions ();
 
     //@}
     /**

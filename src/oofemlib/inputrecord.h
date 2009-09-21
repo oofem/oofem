@@ -562,6 +562,8 @@ enum InputFieldType {
     IFT_CompoDamageMat_components,
 
     IFT_MicroMaterial_tmp,
+    IFT_MacroLspace_microMasterNodes,
+    IFT_MacroLspace_microBoundaryNodes,
 
     IFT_IDNLMaterial_r,
 

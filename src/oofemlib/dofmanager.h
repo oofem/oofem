@@ -91,7 +91,7 @@ class FloatArray;
 class IntArray;
 
 /**
- * Base class for dof managers. Dof manager is an abstraction for object possessing degrees of
+ * Base class for dof managers. Dof manager is an abstraction for object posessing degrees of
  * freedom. Dof managers (respectively derived clases like nodes or sides) are usually atributes of
  * elements and are maintained by domain. Degrees of freedom belonging to dof manager are
  * stored in 'dofArray'. Dof manager also
@@ -103,7 +103,7 @@ class IntArray;
 class DofManager : public FEMComponent
 {
     /*
-     * This class implements absstract clas - a  dof manager in a finite element mesh.
+     * This class implements abstract clas - a  dof manager in a finite element mesh.
      * It is a base class for FEM nodes and element sides, having dofs.
      * A dof manager  and its children (nodes, element sides) are
      * attributes of a domain.

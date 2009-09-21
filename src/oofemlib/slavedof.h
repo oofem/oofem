@@ -95,14 +95,14 @@ public:
     int askNewEquationNumber(TimeStep *tStep) { return 1; }
 
     /**
-     * Returns boundary condition of dof if it is precsribed.
+     * Returns boundary condition of dof if it is prescribed.
      * HangingDof can not be subjected to bc, it is only mapping to master
      * @return returns NULL if no BC applied, otherwise pointer to correcpondig BC.
      */
     int hasBc(TimeStep *tStep) { return 0; }
 
     /**
-     * Returns initial condition of dof if it is precsribed.
+     * Returns initial condition of dof if it is prescribed.
      * HangingDof can not be subjected to ic, it is only mapping to master
      * @see MasterDof::hasIc
      */

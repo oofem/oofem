@@ -340,7 +340,7 @@ public:
      * Returns the "nonlocal" location array of receiver. This is necessary, when stiffness matrix
      * of nonlocal model is assembled. Since model is nonlocal, the value at given IP depends on
      * other IP (generally belonging to different elements) and as a consequence leads to
-     * increase of stifness matrix profile, to take into account this "remote" dependency.
+     * increase of stiffness matrix profile, to take into account this "remote" dependency.
      */
     virtual void giveNonlocalLocationArray(IntArray &locationArray, const UnknownNumberingScheme&);
     /**
@@ -455,7 +455,7 @@ protected:
      * Computes load vector of receiver due to the prescribed displacements of receiver nodes.
      * Implementation supports the changes of static system (must be also supported by
      * engineering model).
-     * @param answer load vector due to precsribed b.c., zero sized answer if load vector is zero.
+     * @param answer load vector due to prescribed b.c., zero sized answer if load vector is zero.
      * @param tStep time step, vhen load vector is assembled
      * @param mode determines response mode
      */
@@ -770,11 +770,11 @@ protected:
     /**
      * General service for condenstaion of stiffness and optionally load vector and mass or initial stress matrices
      * of receiver.
-     * @param stiff stifness matrix to be condensed. Must be specified.
-     * @param mass mass or initial stress maatrix. If parameter is NULL, only stifness and/or load is condensed.
+     * @param stiff stiffness matrix to be condensed. Must be specified.
+     * @param mass mass or initial stress matrix. If parameter is NULL, only stiffness and/or load is condensed.
      * @param load load vector of receiver. If specified then it is condensed. If no load vector condensation is necessary
      * set parameter to NULL pointer.
-     * @param what integar array. If at i-th position is nonzero, then i-th comoponet is condensed.
+     * @param what integer array. If at i-th position is nonzero, then i-th component is condensed.
      */
     void condense(FloatMatrix *stiff, FloatMatrix *mass, FloatArray *load, IntArray *what);
 

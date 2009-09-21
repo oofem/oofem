@@ -702,7 +702,7 @@ StructuralElement :: computeForceLoadVector(FloatArray &answer, TimeStep *stepN,
 // on element volume (surface).
 // Why is this function taken separately ?
 // When reactions forces are computed, thea are computed from element::GiveRealStressVector
-// in this vector a real forces are stored (temprature part is substracted).
+// in this vector a real forces are stored (temperature part is substracted).
 // so we need further sobstract part corresponding to non-nodeal loading.
 {
     FloatMatrix T;
@@ -1280,7 +1280,7 @@ StructuralElement ::  giveCharacteristicVector(FloatArray &answer, CharType mtrx
         this->giveInternalForcesVector(answer, tStep);
     } else if ( ( mtrx == LastEquilibratedNodalInternalForcesVector ) && ( mode == VM_Total ) ) {
         /* here tstep is not relevant, we set useUpdatedGpRecord = 1
-         * and this will sause to integrate internal forces using existing (nontemp, equlibrated) stresses in
+         * and this will cause to integrate internal forces using existing (nontemp, equlibrated) stresses in
          * statuses. Mainly used to compute reaction forces */
         this->giveInternalForcesVector(answer, tStep, 1);
     } else {
@@ -1447,8 +1447,8 @@ StructuralElement :: checkConsistency()
 void
 StructuralElement :: condense(FloatMatrix *stiff, FloatMatrix *mass, FloatArray *load, IntArray *what) {
     /*
-     * function for condensation of stiffness matrix and if requeted of load vector and
-     * initial stress or mass matrices (if mass and load aruments are nonzero (not NULL) then
+     * function for condensation of stiffness matrix and if requested of load vector and
+     * initial stress or mass matrices (if mass and load arguments are nonzero (not NULL) then
      * their condensation is done).
      * Based on Rayleigh-Ritz method
      */

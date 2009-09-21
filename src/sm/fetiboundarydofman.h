@@ -116,7 +116,7 @@ public:
      */
     void addPartition(int partitionNumber);
     /**
-     * Associates the eqution numbers to particular DOFs.
+     * Associates the equation numbers to particular DOFs.
      * @param equationCounter current equation counter, updated
      * @return new value of equationCounter
      */

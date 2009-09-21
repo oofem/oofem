@@ -1,4 +1,4 @@
-/* $Header: /home/cvs/bp/oofem/sm/src/lspace.h,v 1.6 2003/05/19 13:04:00 bp Exp $ */
+/* $Header: /home/cvs/bp/oofem/sm/src/macrolspace.h,v 1.9 2009/09/20 13:04:00 vs Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -44,32 +44,51 @@
 #include "lspace.h"
 #include "sparsemtrx.h"
 #include "engngm.h"
+//#include "micromaterial.h"
+#include "metastep.h"
 //#include "nlstructuralelement.h"
 //#include "fei3dhexalin.h"
 
+class MicroMaterial;
+
 class MacroLSpace : public LSpace
 {
-/*
-This class implements a macroelement. It is derived from eight-node brick element. The stiffness matrix is computed from underlying RVE and is condensed to 24 DoFs to corner nodes.
-*/
-
-protected:
+    /*
+     * This class implements a macroelement. It is derived from eight-node brick element. The stiffness matrix is computed from underlying RVE and is condensed to 24 DoFs to corner nodes.
+     */
 
 public:
- MacroLSpace (int,Domain*) ;                      // constructor
- ~MacroLSpace ()  {} ;                            // destructor
+    MacroLSpace(int, Domain *);                   // constructor
+    ~MacroLSpace();                               // destructor
 
- const char* giveClassName () const { return "MacroLSpace" ;}
+    const char *giveClassName() const { return "MacroLSpace"; }
 
- virtual void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep);
- //friend class EngngModel;//access to assemble()
- 
+    IRResultType initializeFrom(InputRecord *ir);
 
+    virtual void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep);
 
+    ///related to setting the boundary conditions of micro problem
+    virtual void changeMicroBoundaryConditions(TimeStep *tStep);
 
+    /**
+     * Evaluates nodal representation of real internal forces obtained from microProblem
+     * @param answer equivalent nodal forces vector
+     * @param tStep time step
+     * @param useUpdatedGpRecord if equal to zero, the stresses in integration points are computed (slow but safe), else if
+     */
+
+    virtual void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord = 0);
+
+    virtual void updateYourself(TimeStep *tStep);
 protected:
-  SparseMtrx *stiffnessMatrixMicro;
-  
+    ///Array containing the node mapping from microscale (which microMasterNodes corresponds to which macroNode)
+    IntArray microMasterNodes;
+    IntArray microBoundaryNodes;
+    IntArray microDOFs;
+    bool firstCall;
+    MicroMaterial *microMaterial;
+    Domain *microDomain;
+    EngngModel *microEngngModel;
 };
 
 

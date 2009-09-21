@@ -43,7 +43,6 @@
 #include "loadtime.h"
 #include "verbose.h"
 
-
 /*
  * double  BoundaryCondition :: give (char u, TimeStep* stepN)
  * // Returns the value at stepN of the prescribed value of the kinematic
@@ -79,8 +78,8 @@ double BoundaryCondition :: give(Dof *dof, ValueModeType mode, TimeStep *stepN)
      * //factor -= this->giveLoadTimeFunction()->at(stepN->givePreviousStep()->giveTime()) ;
      * factor -= this->giveLoadTimeFunction()->at(stepN->giveTime()-stepN->giveTimeIncrement());
      */
-    factor = this->giveLoadTimeFunction()->evaluate(stepN, mode);
-    return prescribedValue * factor;
+      factor = this->giveLoadTimeFunction()->evaluate(stepN, mode);
+      return prescribedValue * factor;
 
     /*
      * double value,factor ;

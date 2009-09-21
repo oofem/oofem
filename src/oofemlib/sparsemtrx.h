@@ -72,8 +72,7 @@ class TimeStep;
 class SparseMtrx : public Matrix
 {
     /*
-     * This class implem
-     * ents a base class for sparse matrices containing
+     * This class implements a base class for sparse matrices containing
      * floating point numbers.
      * DESCRIPTION :
      * The sparse matrix contains contributions (local matrices) from FE element.
@@ -81,10 +80,10 @@ class SparseMtrx : public Matrix
      * by code number array of each particular element.
      * TASKS :
      * - building its internal storage structure (method 'buildInternalStructure')
-     * - store and localize local mtrices (method 'localize')
+     * - store and localize local matrices (method 'localize')
      * - performing standard operations : multiplication by array (method 'times')
      * - possible factorization and backSubstitution (recognized by nonzero result of
-     *  canBeFactorized) (methods 'factorize' and 'bacSobstitution')
+     *  canBeFactorized) (methods 'factorize' and 'backSubstitution')
      * - setting all coefficients to zero (method 'zero')
      */
 public:

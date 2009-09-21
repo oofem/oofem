@@ -307,7 +307,7 @@ DruckerPragerPlasticitySM :: giveRealStressVector(FloatArray &answer,
     initTempStatus(gp);
 
     // substract stress independent part
-    // note: eigenStrains (tepmerature) is not contained in mechanical strain stored in gp
+    // note: eigenStrains (temperature) is not contained in mechanical strain stored in gp
     // therefore it is necessary to substract always the total eigen strain value
     this->giveStressDependentPartOfStrainVector(strainVectorR, gp, totalStrain,
                                                 atTime, VM_Total);
@@ -410,7 +410,7 @@ DruckerPragerPlasticitySM :: checkForVertexCase(const double eM, const double gM
     // of the rate of the plastic multiplier for regular plastic flow
     // and allows to distinguish between regular return and vertex case
     const double deltaLambdaMax = sqrt(trialStressJTwo) / gM;
-    
+
     // vertex case:
     // yield value positive under the assumption of maximum regular plastic flow
     const double volConstant = 3. * kM * alphaPsi;
@@ -439,7 +439,7 @@ DruckerPragerPlasticitySM :: performRegularReturn(double eM, double gM, double k
 
     FloatArray flowDir = stressDeviator;
     flowDir.times( 1. / sqrt(2. * trialStressJTwo) );
-    
+
 
     // some variables needed for iteration
     double yieldValuePrime;
@@ -688,7 +688,7 @@ DruckerPragerPlasticitySM :: giveRegAlgorithmicStiffMatrix(FloatMatrix &answer,
     const double nu = LEMaterial->give(NYxz,gp);
     const double gM = eM / ( 2. * ( 1. + nu ) );
     const double kM = eM / ( 3. * ( 1. - 2. * nu ) );
-    
+
 
 
     FloatArray flowDir = deviatoricStress;

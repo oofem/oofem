@@ -75,8 +75,8 @@ class LoadTimeFunction : public FEMComponent
 
  protected:
   /**
-     By default, the increment of receiver is computed as a difference between values  evaluated at given solution step and in previous step.
-     However, if the solution step is the first step, the difference is typically set to the total value of receiver at the first step. 
+     By default, the increment of receiver is computed as a difference between values evaluated at given solution step and in previous step.
+     However, if the solution step is the first step, the difference is typically set to the total value of receiver at the first step.
      This is quite natural, as a loading with constant time function is expected to be applied at first step.
      In certain cases, this default behavior has to be changed. The initial value (set by default to zero) 
      allows to set initial value of receiver. This initial value is used only when the increment of receiver is evaluated at first step,

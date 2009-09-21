@@ -93,7 +93,7 @@ RCSDEMaterial :: giveRealStressVector(FloatArray &answer, MatResponseForm form, 
     this->initGpForNewStep(gp);
 
     // substract stress independent part
-    // note: eigenStrains (tepmerature) is not contained in mechanical strain stored in gp
+    // note: eigenStrains (temperature) is not contained in mechanical strain stored in gp
     // therefore it is necessary to substract always the total eigen strain value
     this->giveStressDependentPartOfStrainVector(reducedStrainVector, gp, totalStrain,
                                                 atTime, VM_Total);

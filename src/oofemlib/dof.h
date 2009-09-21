@@ -174,11 +174,14 @@ public:
     int giveNumber() const { return number; }
 
     int giveDofManNumber() const;
+
+    /// Returns associated DofManager.
+    DofManager *giveDofManager() const {return dofManager; }
 #ifdef __PARALLEL_MODE
     int giveDofManGlobalNumber() const;
 #endif
     /**
-     * Returns value of boundary condition of dof if it is precsribed.
+     * Returns value of boundary condition of dof if it is prescribed.
      * Use hasBc service to determine, if boundary condition is active.
      * The physical meaning of Bc is determined by corresponding DOF.
      * @param mode unknown char type (if total or incremental value is returned)
@@ -187,7 +190,7 @@ public:
      */
     virtual double  giveBcValue(ValueModeType mode, TimeStep *tStep);
     /**
-     * Returns array with values of boundary condition of dof if it is precsribed.
+     * Returns array with values of boundary condition of dof if it is prescribed.
      * For primary dof it has only one value, for slave dof the value of corresponding
      * masters dofs boundary condition is assembled and returned.
      * Use hasBc service to determine, if boundary condition is active.
@@ -201,7 +204,7 @@ public:
 
     //  virtual double  giveBcValue (UnknownType type, ValueModeType mode, TimeStep* tStep) ;
     /**
-     * Returns equation number of receiver for given eqution numbering scheme. 
+     * Returns equation number of receiver for given equation numbering scheme. 
      */
     int                 giveEquationNumber(const UnknownNumberingScheme& s);
     /**
@@ -442,6 +445,8 @@ public:
     virtual contextIOResultType    saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
     /// Restores the receiver state previously written in stream.
     virtual contextIOResultType    restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    /// Overwrites the boundary condition id (0-inactive bc), intended for specific purposes such as coupling of bc's in multiscale simulations
+    virtual void setBcId(int bcId) {};
     virtual void setEquationNumber(int equationNumber) {}; // rch
     virtual void setUnknowns(Dictionary *unknowns) {}; // rch
     virtual Dictionary *giveUnknowns() { return NULL; } // rch
@@ -486,12 +491,12 @@ public:
 
 protected:
     /**
-     * Returns boundary condition of dof if it is precsribed.
+     * Returns boundary condition of dof if it is prescribed.
      * @return returns NULL if no BC applied, otherwise pointer to correcpondig BC.
      */
     virtual BoundaryCondition *giveBc() { return NULL; }
     /**
-     * Returns initial condition of dof if it is precsribed.
+     * Returns initial condition of dof if it is prescribed.
      * @return returns NULL if no IC applied, otherwise pointer to correcpondig IC.
      */
     virtual InitialCondition *giveIc() { return NULL; }

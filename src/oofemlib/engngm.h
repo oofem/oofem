@@ -507,25 +507,25 @@ public:
     virtual int                initializeAdaptive(int stepNumber) { return 0; }
 
     /**
-     * Returns total number of equations in active (current time steep) time step.
+     * Returns total number of equations in active (current time step) time step.
      * The UnknownType parameter allows to distinguis between several possible governing equations, that
      * can be numbered separately.
      */
     virtual int giveNumberOfEquations(EquationID);
     /**
-     * Returns total number of prescribed equations in active (current time steep) time step.
+     * Returns total number of prescribed equations in active (current time step) time step.
      * The UnknownType parameter allows to distinguis between several possible governing equations, that
      * can be numbered separately.
      */
     virtual int giveNumberOfPrescribedEquations(EquationID);
     /**
-     * Returns number of equations for given domain in active (current time steep) time step.
+     * Returns number of equations for given domain in active (current time step) time step.
      * The UnknownType parameter allows to distinguis between several possible governing equations, that
      * can be numbered separately.
      */
     virtual int giveNumberOfDomainEquations(int, EquationID);
     /**
-     * Returns number of prescribed equations for given domain in active (current time steep) time step.
+     * Returns number of prescribed equations for given domain in active (current time step) time step.
      * The UnknownType parameter allows to distinguis between several possible governing equations, that
      * can be numbered separately.
      */
@@ -827,8 +827,6 @@ public:
     virtual void initPetscContexts();
 #endif
 
-
-protected:
     /**
      * Assembles characteristic matrix of required type into given sparse matrix.
      * @param answer assembled matrix
@@ -860,6 +858,7 @@ protected:
      * from dofManagers/elements and assembled.
      */
     //virtual void       assemble (FloatArray&, TimeStep*, CharType type, Domain* domain) ;
+protected:
     /**
      * Assembles characteristic vector of required type from dofManagers into given vector.
      * @param answer assembled vector

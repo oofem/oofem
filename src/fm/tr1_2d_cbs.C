@@ -476,7 +476,7 @@ TR1_2D_CBS :: computePrescribedTractionPressure(FloatArray &answer, TimeStep *tS
     /*
      * this method computes the prescribed pressure due to applied traction
      * p = tau(i,j)*n(i)*n(j) - traction(i)*n(i)
-     * this pressure is enforced as dirichlet bc in density/pressure eqution
+     * this pressure is enforced as dirichlet bc in density/pressure equation
      */
     FloatArray stress;
     int i, j;
@@ -551,7 +551,7 @@ TR1_2D_CBS :: computeNumberOfNodalPrescribedTractionPressureContributions(FloatA
     /*
      * this method computes the prescribed pressure due to applied traction
      * p = tau(i,j)*n(i)*n(j) - traction(i)*n(i)
-     * this pressure is enforced as dirichlet bc in density/pressure eqution
+     * this pressure is enforced as dirichlet bc in density/pressure equation
      */
     int i, j;
 

@@ -80,7 +80,7 @@ class RowColumn
  *   .any coefficient A(k,i) of the lower part of the matrix (i<k) is acces-
  *    sed through method 'atL(i)'. It belongs to the row of the segment ;
  *   .the coefficient A(k,k) is obtained through method 'atDiag()' ;
- * - enlarging itself in order to accomodate more coefficients (method
+ * - enlarging itself in order to accommodate more coefficients (method
  *   'growTo') ;
  * - resetting to zero all of its coefficients (method 'reinitialized').
  */

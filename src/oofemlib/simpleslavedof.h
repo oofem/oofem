@@ -174,7 +174,7 @@ public:
      */
     double giveUnknown(PrimaryField & field, ValueModeType, TimeStep * stepN);
     /**
-     * Returns boundary condition of dof if it is precsribed.
+     * Returns boundary condition of dof if it is prescribed.
      * Slave simply forwards this message to master.
      * @return returns NULL if no BC applied, otherwise pointer to correcpondig BC.
      */
@@ -240,13 +240,13 @@ private:
 
 protected:
     /**
-     * Returns boundary condition of dof if it is precsribed.
+     * Returns boundary condition of dof if it is prescribed.
      * Slave simply forwards this mesage to master.
      * @return returns NULL if no BC applied, otherwise pointer to correcpondig BC.
      */
     BoundaryCondition *giveBc();
     /**
-     * Returns initial condition of dof if it is precsribed.
+     * Returns initial condition of dof if it is prescribed.
      * Slave forwards this message to master.
      * @return returns NULL if no IC applied, otherwise pointer to correcpondig IC.
      */

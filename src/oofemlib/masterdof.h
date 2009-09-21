@@ -271,6 +271,8 @@ public:
      * @exception throws an ContextIOERR exception if error encountered.
      */
     contextIOResultType    restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    
+    void setBcId(int bcId) { this->bc = bcId; }
     void setEquationNumber(int equationNumber) { this->equationNumber = equationNumber; } // rch
     void setUnknowns(Dictionary *unknowns) { this->unknowns = unknowns; } // rch
     Dictionary *giveUnknowns() { return this->unknowns; } // rch
@@ -296,7 +298,7 @@ public:
      * to which receiver belongs has DofManager_remote dofManagerParallelMode type.
      * There is no reason for invoking this service if  DOFManager has DofManager_local mode.
      * If dof belonging to shared or remote DofManager, engng model unknowns are updated to
-     * accomodate remote contribution or "prescribed" remote values.
+     * accommodate remote contribution or "prescribed" remote values.
      * The unknown dictionary is not updated in this case, even if unknown dictionary should be used,
      * This is engng model job to update all unknowns dictionaries.
      * @param buff buffer containing packed message
@@ -314,12 +316,12 @@ public:
 
 protected:
     /**
-     * Returns boundary condition of dof if it is precsribed.
+     * Returns boundary condition of dof if it is prescribed.
      * @return returns NULL if no BC applied, otherwise pointer to correcpondig BC.
      */
     BoundaryCondition *giveBc();
     /**
-     * Returns initial condition of dof if it is precsribed.
+     * Returns initial condition of dof if it is prescribed.
      * @return returns NULL if no IC applied, otherwise pointer to correcpondig IC.
      */
     InitialCondition *giveIc();

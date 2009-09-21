@@ -337,13 +337,13 @@ public:
     double       computeNorm();
 
     /**
-     * Returns the dot product of the first i coefficienst of the two
+     * Returns the dot product of the first i coefficients of the two
      * arrays p1 and p2.
      * @return value of the dot product
      */
     friend double  dotProduct(double *, double *, int);
     /**
-     * Returns the dot product of the first i coefficienst of the two
+     * Returns the dot product of the first i coefficients of the two
      * arrays p1 and p2.
      * @return value of the dot product
      */
@@ -405,13 +405,13 @@ double dot(const FloatArray &x, const FloatArray &y);
 double norm(const FloatArray &x);
 
 /**
- * Returns the dot product of the first i coefficienst of the two
+ * Returns the dot product of the first i coefficients of the two
  * arrays p1 and p2.
  * @return value of the dot product
  */
 double  dotProduct(double *, double *, int);
 /**
- * Returns the dot product of the first i coefficienst of the two
+ * Returns the dot product of the first i coefficients of the two
  * arrays p1 and p2.
  * @return value of the dot product
  */

@@ -98,7 +98,7 @@ IDNLMaterial :: updateBeforeNonlocAverage(const FloatArray &strainVector, GaussP
     this->initGpForNewStep(gp);
 
     // substract stress independent part
-    // note: eigenStrains (tepmerature) is not contained in mechanical strain stored in gp
+    // note: eigenStrains (temperature) is not contained in mechanical strain stored in gp
     // therefore it is necessary to substract always the total eigen strain value
     this->giveStressDependentPartOfStrainVector(SDstrainVector, gp, strainVector, atTime, VM_Total);
 
@@ -762,12 +762,12 @@ double
 IDNLMaterial :: predictRelativeComputationalCost(GaussPoint *gp)
 {
   //
-  // The values returned come from mesurement 
+  // The values returned come from mesurement
   // do not change them unless you know what are you doing
   //
-  double cost = 1.2; 
+  double cost = 1.2;
 
-  
+
   if (gp -> giveMaterialMode() == _3dMat) cost = 1.5;
 
   IDNLMaterialStatus *status = (IDNLMaterialStatus*) this -> giveStatus (gp);

@@ -47,6 +47,7 @@
 #include "element.h"
 #include "node.h"
 #include "elementside.h"
+#include "error.h"
 #ifndef __MAKEDEPEND
 #include <stdio.h>
 #endif
@@ -54,7 +55,7 @@
 #include "verbose.h"
 #include "calmls.h"
 #include "nrsolver.h"
-#include "nrsolver2.h" // experimental support for direct displacement controll
+#include "nrsolver2.h" // experimental support for direct displacement control
 //#include "calm2.h"
 #include "nlstructuralelement.h"
 //#include "skyline.h"
@@ -350,10 +351,15 @@ TimeStep *NonLinearStatic :: giveNextStep()
     int mstepNum = 1;
     double totalTime = 0.0;
     StateCounterType counter = 1;
+    double deltaTtmp=deltaT;
+    
+    //do not increase deltaT on microproblem
+    if(pScale==microScale)
+      deltaTtmp=0.;
 
     delete previousStep;
     if ( currentStep != NULL ) {
-        totalTime = currentStep->giveTime() + deltaT;
+        totalTime = currentStep->giveTime() + deltaTtmp;
         istep =  currentStep->giveNumber() + 1;
         counter = currentStep->giveSolutionStateCounter() + 1;
         mstepNum = currentStep->giveMetaStepNumber();
@@ -361,13 +367,13 @@ TimeStep *NonLinearStatic :: giveNextStep()
         if ( !this->giveMetaStep(mstepNum)->isStepValid(istep) ) {
             mstepNum++;
             if ( mstepNum > nMetaSteps ) {
-                _error("giveNextStep: no next step available");
+                OOFEM_ERROR3("giveNextStep: no next step available, mstepNum=%d > nMetaSteps=%d", mstepNum, nMetaSteps);
             }
         }
     }
 
     previousStep = currentStep;
-    currentStep = new TimeStep(istep, this, mstepNum, totalTime, deltaT, counter);
+    currentStep = new TimeStep(istep, this, mstepNum, totalTime, deltaTtmp, counter);
     // dt variable are set eq to 0 for staics - has no meaning
 
     return currentStep;
@@ -799,7 +805,7 @@ void NonLinearStatic ::  updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Do
 //
 // updates some componet, which is used by numerical method
 // to newly reached state. used mainly by numerical method
-// when new tangent stiffness is needed during finding
+// when new tanget stiffness is needed during finding
 // of new equlibrium stage.
 //
 {

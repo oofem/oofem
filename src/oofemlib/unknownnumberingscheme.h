@@ -64,12 +64,17 @@ class UnknownNumberingScheme {
      the equation is assigned to the given DOF, zero otherwise.
   */
   virtual int giveDofEquationNumber (Dof* dof) const = 0;
+  
+  /**
+    Returns reqired number of domain equation. Number is always less or equal to the sum of all DOFs gathered from all nodes.
+  */
+  virtual int giveRequiredNumberOfDomainEquation () const {return 0;}
 };
 
 /**
    The representation of EngngModel default unknown numbering. The equation numbers are assigned 
-   by the engng model itself to individual DOFs. Therefore, this scall is a simple shell around
-   DofEquationNumbering interface, forwarding all the reqeests to individual DOFs.
+   by the engng model itself to individual DOFs. Therefore, this call is a simple shell around
+   DofEquationNumbering interface, forwarding all the reqests to individual DOFs.
  */
 class EModelDefaultEquationNumbering : public UnknownNumberingScheme {
  protected:
@@ -88,8 +93,8 @@ class EModelDefaultEquationNumbering : public UnknownNumberingScheme {
 /**
    The representation of EngngModel default prescribed unknown numbering. 
    The equation numbers are assigned by the engng model itself to individual DOFs. 
-   Therefore, this scall is a simple shell around
-   DofEquationNumbering interface, forwarding all the reqeests to individual DOFs.
+   Therefore, this call is a simple shell around
+   DofEquationNumbering interface, forwarding all the reqests to individual DOFs.
  */
 class EModelDefaultPrescribedEquationNumbering : public UnknownNumberingScheme {
  public:

@@ -404,6 +404,8 @@ void Domain::setBoundaryCondition (int i, GeneralBoundaryCondition* obj) {bcList
 void Domain::setInitialCondition (int i, InitialCondition* obj) {icList->put(i,obj);}
 void Domain::setLoadTimeFunction (int i, LoadTimeFunction* obj) {loadTimeFunctionList->put(i,obj);}
 
+void Domain::clearBoundaryConditions () {bcList->clear(true);};
+
 int Domain :: instanciateYourself(DataReader *dr)
 // Creates all objects mentioned in the data file.
 
@@ -450,7 +452,7 @@ int Domain :: instanciateYourself(DataReader *dr)
     fprintf( outputStream, "Domain type: %s, default ndofs per node is %d, per side is %d\n\n\n",
             name, giveNumberOfDefaultNodeDofs(), giveNumberOfDefaultSideDofs() );
 
-    // read otput manager record
+    // read output manager record
     ir = dr->giveInputRecord(DataReader :: IR_outManRec, 1);
     outputManager->initializeFrom(ir);
     ir->finish();

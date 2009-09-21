@@ -355,7 +355,7 @@ void IntArray :: printYourself() const
 {
     printf("IntArray of size : %d\n", size);
     for ( int i = 1; i <= size; ++i ) {
-        if ( i > 15 ) {
+        if ( i > 35 ) {
             printf("   (other components not printed)");
             break;
         } else      {

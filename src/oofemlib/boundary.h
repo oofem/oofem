@@ -158,6 +158,12 @@ public:
      */
     virtual void scale(double s) { prescribedValue *= s; }
 
+    
+    /** Set prescribed value at the input record string of receiver
+     *  @param s prescribed value
+     */
+    virtual void setPrescribedValue(double s) { prescribedValue = s; }
+
     /// Returns class name of the receiver.
     const char *giveClassName() const { return "BoundaryCondition"; }
     /// Returns classType id of receiver.

@@ -404,15 +404,15 @@ protected:
     /**
      * Computes characteristic stiffness matrix corresponding to given material mode
      * (obtained form integration point) by reduction of 3d stiffness matrix.
-     * This is general method, how to obtain stifness matrix corresponding to specific mode
+     * This is general method, how to obtain stiffness matrix corresponding to specific mode
      * from general 3d stiffness. Therefore, it is only necessary to implement algorithm for
      * computing general 3d stiffness. Howewer, this reduction is quite time consuming
      * and if it is possible, it is recomended to provide direct methods for computing
-     * particular stifnesses for supported material modes.
-     * @param answer reduced stifness
+     * particular stiffnesses for supported material modes.
+     * @param answer reduced stiffness
      * @param form material response form
      * @param gp integration point
-     * @param stiffMtrx3d 3d stifness matrix (full form) in given integration point
+     * @param stiffMtrx3d 3d stiffness matrix (full form) in given integration point
      */
     void reduceStiffMtrx3d(FloatMatrix & answer, MatResponseForm, GaussPoint * gp,
                            FloatMatrix & stiffMtrx3d) const;
@@ -432,18 +432,18 @@ protected:
     void reduceComplMtrx3d(FloatMatrix & answer, MatResponseForm, GaussPoint * gp,
                            FloatMatrix & complMtrx3d) const;
     /**
-     * Reduces full 3d stifness matrix to 2d plane stress matrix.
-     * The 3d stifness should be computed for integration point passed as parameter.
+     * Reduces full 3d stiffness matrix to 2d plane stress matrix.
+     * The 3d stiffness should be computed for integration point passed as parameter.
      * @param answer computed 2d plane stress stiffness matrix
      * @param form material response form
      * @param gp integration point
-     * @param stiffMtrx3d 3d stifness matrix (in full form)
+     * @param stiffMtrx3d 3d stiffness matrix (in full form)
      */
     void reduceToPlaneStressStiffMtrx(FloatMatrix & answer, MatResponseForm,
                                       GaussPoint * gp, FloatMatrix & stiffMtrx3d) const;
     /**
-     * Reduces full 3d stifness matrix to 2d plane strain matrix.
-     * The 3d stifness should be computed for integration point passed as parameter.
+     * Reduces full 3d stiffness matrix to 2d plane strain matrix.
+     * The 3d stiffness should be computed for integration point passed as parameter.
      * Note: as already described, if zero strain component is imposed
      * (Plane strain, ..) this condition must be taken into account in geometrical
      * relations, and corresponding component has to be included in reduced vector.
@@ -452,54 +452,54 @@ protected:
      * @param answer computed 2d plane strain stiffness matrix
      * @param form material response form
      * @param gp integration point
-     * @param stiffMtrx3d 3d stifness matrix (in full form)
+     * @param stiffMtrx3d 3d stiffness matrix (in full form)
      */
     void reduceToPlaneStrainStiffMtrx(FloatMatrix & answer, MatResponseForm,
                                       GaussPoint * gp, FloatMatrix & stiffMtrx3d) const;
     /**
-     * Reduces full 3d stifness matrix to 1d matrix
+     * Reduces full 3d stiffness matrix to 1d matrix
      * (1d case ==> sigma_y = sigma_z = tau_yz = tau_zx = tau_xy  = 0.).
-     * The 3d stifness should be computed for integration point passed as parameter.
+     * The 3d stiffness should be computed for integration point passed as parameter.
      * @param answer computed 2d plane strain stiffness matrix
      * @param form material response form
      * @param gp integration point
-     * @param stiffMtrx3d 3d stifness matrix (in full form)
+     * @param stiffMtrx3d 3d stiffness matrix (in full form)
      */
     void reduceTo1dStressStiffMtrx(FloatMatrix & answer, MatResponseForm,
                                    GaussPoint * gp, FloatMatrix & stiffMtrx3d) const;
     /**
-     * Reduces full 3d stifness matrix to 2d beam layer matrix.
+     * Reduces full 3d stiffness matrix to 2d beam layer matrix.
      * (2dbeamLayer sigma_y=sigma_z=tau_zy=tau_xy = 0)
-     * The 3d stifness should be computed for integration point passed as parameter.
+     * The 3d stiffness should be computed for integration point passed as parameter.
      * @param answer computed 2d plane strain stiffness matrix
      * @param form material response form
      * @param gp integration point
-     * @param stiffMtrx3d 3d stifness matrix (in full form)
+     * @param stiffMtrx3d 3d stiffness matrix (in full form)
      */
     void reduceTo2dBeamLayerStiffMtrx(FloatMatrix & answer, MatResponseForm,
                                       GaussPoint * gp, FloatMatrix & stiffMtrx3d) const;
     /**
-     * Reduces full 3d stifness matrix to 2d plate layer stifness matrix.
+     * Reduces full 3d stiffness matrix to 2d plate layer stiffness matrix.
      * (2dplatelayermode assumption sigma_z = 0.)
      * @param answer computed 2d plane strain stiffness matrix
      * @param form material response form
      * @param gp integration point
-     * @param stiffMtrx3d 3d stifness matrix (in full form)
+     * @param stiffMtrx3d 3d stiffness matrix (in full form)
      */
     void reduceTo2dPlateLayerStiffMtrx(FloatMatrix & answer, MatResponseForm,
                                        GaussPoint * gp, FloatMatrix & stiffMtrx3d) const;
     /**
-     * Reduces full 3d stifness matrix to 1d fiber stifness matrix.
+     * Reduces full 3d stiffness matrix to 1d fiber stiffness matrix.
      * (2dplatelayermode assumption sigma_y = sigma_z = tau_yz = 0.)
      * @param answer computed 2d plane strain stiffness matrix
      * @param form material response form
      * @param gp integration point
-     * @param stiffMtrx3d 3d stifness matrix (in full form)
+     * @param stiffMtrx3d 3d stiffness matrix (in full form)
      */
     void reduceTo1dFiberStiffMtrx(FloatMatrix & answer, MatResponseForm,
                                   GaussPoint * gp, FloatMatrix & stiffMtrx3d) const;
     /**
-     * Reduces full 3d stifness matrix to 3d shell layer stifness matrix.
+     * Reduces full 3d stiffness matrix to 3d shell layer stiffness matrix.
      * @see StructuralMaterial::reduceTo2dPlateLayerStiffMtrx for reference.
      */
     void reduceTo3dShellLayerStiffMtrx(FloatMatrix & answer, MatResponseForm,
@@ -578,13 +578,13 @@ protected:
     void reduceTo1dFiberComplMtrx(FloatMatrix & answer, MatResponseForm,
                                   GaussPoint * gp, FloatMatrix & complMtrx3d) const;
     /**
-     * Method for computing plane stress stifness matrix of receiver.
-     * Default implementation computes 3d stifness matrix using give3dMaterialStiffnessMatrix and
+     * Method for computing plane stress stiffness matrix of receiver.
+     * Default implementation computes 3d stiffness matrix using give3dMaterialStiffnessMatrix and
      * reduces it to plane stress stiffness using reduce method described above.
      * Howewer, this reduction is quite time consuming and if it is possible,
      * it is recomended to overload this method and provide direct method for computing
-     * particular stifness matrix.
-     * @param answer stifness matrix
+     * particular stiffness matrix.
+     * @param answer stiffness matrix
      * @param form material response form
      * @param mode material response mode
      * @param gp integration point, which load history is used
@@ -594,18 +594,18 @@ protected:
                                           MatResponseForm, MatResponseMode, GaussPoint * gp,
                                           TimeStep * atTime);
     /**
-     * Method for computing plane strain stifness matrix of receiver.
-     * Default implementation computes 3d stifness matrix using give3dMaterialStiffnessMatrix and
+     * Method for computing plane strain stiffness matrix of receiver.
+     * Default implementation computes 3d stiffness matrix using give3dMaterialStiffnessMatrix and
      * reduces it to plane strain stiffness using reduce method described above.
      * Howewer, this reduction is quite time consuming and if it is possible,
      * it is recomended to overload this method and provide direct method for computing
-     * particular stifness matrix.
+     * particular stiffness matrix.
      * Note: as already described, if zero strain component is imposed
      * (Plane strain, ..) this condition must be taken into account in geometrical
      * relations, and corresponding component has to be included in reduced vector.
      * (So plane strain conditions are eps_z = gamma_xz = gamma_yz = 0, but relations
      * for eps_z and sigma_z are included).
-     * @param answer stifness matrix
+     * @param answer stiffness matrix
      * @param form material response form
      * @param mode material response mode
      * @param gp integration point, which load history is used
@@ -615,13 +615,13 @@ protected:
                                           MatResponseForm, MatResponseMode, GaussPoint * gp,
                                           TimeStep * atTime);
     /**
-     * Method for computing 1d  stifness matrix of receiver.
-     * Default implementation computes 3d stifness matrix using give3dMaterialStiffnessMatrix and
+     * Method for computing 1d  stiffness matrix of receiver.
+     * Default implementation computes 3d stiffness matrix using give3dMaterialStiffnessMatrix and
      * reduces it to 1d stiffness using reduce method described above.
      * Howewer, this reduction is quite time consuming and if it is possible,
      * it is recomended to overload this method and provide direct method for computing
-     * particular stifness matrix.
-     * @param answer stifness matrix
+     * particular stiffness matrix.
+     * @param answer stiffness matrix
      * @param form material response form
      * @param mode material response mode
      * @param gp integration point, which load history is used
@@ -631,13 +631,13 @@ protected:
                                        MatResponseForm, MatResponseMode, GaussPoint * gp,
                                        TimeStep * atTime);
     /**
-     * Method for computing 2d beam layer stifness matrix of receiver.
-     * Default implementation computes 3d stifness matrix using give3dMaterialStiffnessMatrix and
+     * Method for computing 2d beam layer stiffness matrix of receiver.
+     * Default implementation computes 3d stiffness matrix using give3dMaterialStiffnessMatrix and
      * reduces it to 2d beam layer stiffness using reduce method described above.
      * Howewer, this reduction is quite time consuming and if it is possible,
      * it is recomended to overload this method and provide direct method for computing
-     * particular stifness matrix.
-     * @param answer stifness matrix
+     * particular stiffness matrix.
+     * @param answer stiffness matrix
      * @param form material response form
      * @param mode material response mode
      * @param gp integration point, which load history is used
@@ -647,13 +647,13 @@ protected:
                                           MatResponseForm, MatResponseMode, GaussPoint * gp,
                                           TimeStep * atTime);
     /**
-     * Method for computing 2d plate layer stifness matrix of receiver.
-     * Default implementation computes 3d stifness matrix using give3dMaterialStiffnessMatrix and
+     * Method for computing 2d plate layer stiffness matrix of receiver.
+     * Default implementation computes 3d stiffness matrix using give3dMaterialStiffnessMatrix and
      * reduces it to 2d plate layer stiffness using reduce method described above.
      * Howewer, this reduction is quite time consuming and if it is possible,
      * it is recomended to overload this method and provide direct method for computing
-     * particular stifness matrix.
-     * @param answer stifness matrix
+     * particular stiffness matrix.
+     * @param answer stiffness matrix
      * @param form material response form
      * @param mode material response mode
      * @param gp integration point, which load history is used
@@ -663,13 +663,13 @@ protected:
                                            MatResponseForm, MatResponseMode, GaussPoint * gp,
                                            TimeStep * atTime);
     /**
-     * Method for computing 3d shell layer stifness matrix of receiver.
-     * Default implementation computes 3d stifness matrix using give3dMaterialStiffnessMatrix and
+     * Method for computing 3d shell layer stiffness matrix of receiver.
+     * Default implementation computes 3d stiffness matrix using give3dMaterialStiffnessMatrix and
      * reduces it to 3d shell layer stiffness using reduce method described above.
      * Howewer, this reduction is quite time consuming and if it is possible,
      * it is recomended to overload this method and provide direct method for computing
-     * particular stifness matrix.
-     * @param answer stifness matrix
+     * particular stiffness matrix.
+     * @param answer stiffness matrix
      * @param form material response form
      * @param mode material response mode
      * @param gp integration point, which load history is used
@@ -680,13 +680,13 @@ protected:
                                            TimeStep * atTime);
 
     /**
-     * Method for computing 1d fiber stifness matrix of receiver.
-     * Default implementation computes 3d stifness matrix using give3dMaterialStiffnessMatrix and
+     * Method for computing 1d fiber stiffness matrix of receiver.
+     * Default implementation computes 3d stiffness matrix using give3dMaterialStiffnessMatrix and
      * reduces it to 1d fiber stiffness using reduce method described above.
      * Howewer, this reduction is quite time consuming and if it is possible,
      * it is recomended to overload this method and provide direct method for computing
-     * particular stifness matrix.
-     * @param answer stifness matrix
+     * particular stiffness matrix.
+     * @param answer stiffness matrix
      * @param form material response form
      * @param mode material response mode
      * @param gp integration point, which load history is used

@@ -1,4 +1,4 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/linearelasticmaterial.h,v 1.9 2003/04/06 14:08:25 bp Exp $ */
+/* $Header: /home/cvs/bp/oofem/oofemlib/src/micromaterial.h,v 1.9 2009/09/20 14:08:25 vs Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -34,9 +34,9 @@
  */
 
 
-//   **************************************
-//   *** CLASS LINEAR ELACSTIC MATERIAL ***
-//   **************************************
+//   ***************************
+//   *** CLASS MICROMATERIAL ***
+//   ***************************
 
 #ifndef micromaterial_h
 #define micromaterial_h
@@ -49,28 +49,41 @@
 #include "dictionr.h"
 #include "flotarry.h"
 #include "flotmtrx.h"
+#include "sparsemtrx.h"
 #include "datastream.h"
 #include "contextioerr.h"
+#include "unknownnumberingscheme.h"
+#include "boundary.h"
+#include "macrolspace.h"
 
-class MicroMaterialStatus : public StructuralMaterialStatus {
+/**
+ * MacroLspace needs stiffness matrix derived from this microproblem. For this purpose, natural boundary conditions on microproblem have to be excluded. All DoFs have to be included. The static condensation of full microscale matrix follows.
+ */
 
+class UnknownNumberingScheme;
+class MicroMaterial;
+class MacroLSpace;
+
+
+class MicroMaterialStatus : public StructuralMaterialStatus
+{
 public:
-/// constructor
+    /// constructor
     MicroMaterialStatus(int, Domain *d, GaussPoint *gp);
 
-/// destructor
-~MicroMaterialStatus();
-void  initTempStatus();
-void  updateYourself(TimeStep *atTime);
-void  printOutputAt(FILE *file, TimeStep *tStep);
+    /// destructor
+    ~MicroMaterialStatus();
+    void  initTempStatus();
+    void  updateYourself(TimeStep *atTime);
+    void  printOutputAt(FILE *file, TimeStep *tStep);
 
-const char *giveClassName() const { return "MicroMaterialStatus"; }
-classType  giveClassID() const  { return MicroMaterialStatusClass; }
+    const char *giveClassName() const { return "MicroMaterialStatus"; }
+    classType  giveClassID() const { return MicroMaterialStatusClass; }
 
 
-contextIOResultType  saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-    
-contextIOResultType  restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    contextIOResultType  saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+
+    contextIOResultType  restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 
 protected:
 };
@@ -78,38 +91,55 @@ protected:
 
 /**
  * This class is an base class for microproblem. The microproblem represents itself a problem which is solved separately from the macroproblem with appropriate boundary conditions. Stiffness matrix of microproblem is condensed to provide stiffness matrix for macroelement.
-Also general implementation of giveRealStressVector service is provided,
-computing the stress increment vector from strain increment multiplied by
-stiffness.
  */
-class MicroMaterial : public StructuralMaterial
+class MicroMaterial : public StructuralMaterial, public UnknownNumberingScheme
 {
 public:
     /// Constructor
     MicroMaterial(int n, Domain *d);
     /// Destructor
-    ~MicroMaterial() { };
+    ~MicroMaterial();
 
     char inputFileNameMicro [ MAX_FILENAME_LENGTH ];
 
-    IRResultType initializeFrom (InputRecord* ir);
+    IRResultType initializeFrom(InputRecord *ir);
 
     //int MicroMaterial :: hasMaterialModeCapability(MaterialMode mode);
 
-const char *giveClassName() const { return "MicroMaterial"; }
+    const char *giveClassName() const { return "MicroMaterial"; }
 
 
-void giveRealStressVector (FloatArray& answer,  MatResponseForm, GaussPoint*, const FloatArray&, TimeStep*);
+    void giveRealStressVector(FloatArray & answer,  MatResponseForm, GaussPoint *, const FloatArray &, TimeStep *);
 
 
-MaterialStatus *CreateStatus(GaussPoint *gp) const;
+    MaterialStatus *CreateStatus(GaussPoint *gp) const;
 
-///pointer to the underlying micro problem
-EngngModel *problemMicro;
+
+    void giveCondensedStiffnessMatrix(FloatMatrix &answer, TimeStep *tStep, CharType type, IntArray microNodes, IntArray microDOFs);
+
+    void setMacroProperties(Domain *macroDomain, MacroLSpace *macroLSpaceElement);
+
+    ///pointer to the underlying micro problem
+    EngngModel *problemMicro;
+
+    ///pointer to the macroscale domain
+    Domain *macroDomain;
+
+    ///pointer to the macroscale element
+    MacroLSpace *macroLSpaceElement;
+
+    ///related to numbering scheme
+    void init(void);
+    int giveDofEquationNumber(Dof *dof) const;
+    virtual bool isDefault() const { return isDefaultNumbering; }
+    virtual int giveRequiredNumberOfDomainEquation() const;
+    //friend class EngngModel;-not here but define in EngngModel class
 
 protected:
 
-
+    bool isDefaultNumbering;
+    int totalNumberOfDomainEquation;
+    SparseMtrx *stiffnessMatrixMicro;
 };
 
 

@@ -546,7 +546,7 @@ int EngngModel :: giveNumberOfDomainEquations(int id, EquationID) {
     //
     // returns number of equations of current problem
     // this method is implemented here, because some method may add some
-    // conditions in to system and this may results into increased number of
+    // conditions into the system and this may results into increased number of
     // equations.
     //
     if ( equationNumberingCompleted ) {
@@ -1088,7 +1088,7 @@ void EngngModel :: assemble(SparseMtrx *answer, TimeStep *tStep, EquationID r_id
  *  for (i = 1; i <= nelem ; i++ ) {
  *    element = domain -> giveElement(i);
  #ifdef __PARALLEL_MODE
- * // skip remote elements (these are used as mirrors of remote eleemnts on other domains
+ * // skip remote elements (these are used as mirrors of remote elements on other domains
  * // when nonlocal constitutive models are used. They introduction is necessary to
  * // allow local averaging on domains without fine grain communication between domains).
  * if (element->giveParallelMode () == Element_remote) continue;
@@ -1506,7 +1506,7 @@ EngngModel :: petsc_assemblePrescribedVectorFromElements(Vec answer, TimeStep *t
 void
 EngngModel ::  updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Domain *d)
 //
-// updates some componet, which is used by numerical method
+// updates some component, which is used by numerical method
 // to newly reached state
 //
 {

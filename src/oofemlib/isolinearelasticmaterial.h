@@ -179,17 +179,17 @@ public:
 protected:
     /**
      * @name Methods for computing material mode contributions
-     * These general methids are overloaded, because default implementation computes 3d stifness
+     * These general methods are overloaded, because default implementation computes 3d stiffness
      * matrix using give3dMaterialStiffnessMatrix and
      * reduces it to plane stress stiffness using reduce method described above.
      * Howewer, this reduction is quite time consuming and if it is possible,
      * it is recomended to overload this method and provide direct method for computing
-     * particular stifness matrix.
+     * particular stiffness matrix.
      */
     //@{
     /**
-     * Method for computing plane stress stifness matrix of receiver.
-     * @param answer stifness matrix
+     * Method for computing plane stress stiffness matrix of receiver.
+     * @param answer stiffness matrix
      * @param form material response form
      * @param mode material response mode
      * @param gp integration point, which load history is used
@@ -199,13 +199,13 @@ protected:
                                   MatResponseForm, MatResponseMode, GaussPoint * gp,
                                   TimeStep * atTime);
     /**
-     * Method for computing plane strain stifness matrix of receiver.
+     * Method for computing plane strain stiffness matrix of receiver.
      * Note: as already described, if zero strain component is imposed
      * (Plane strain, ..) this condition must be taken into account in geometrical
      * relations, and corresponding component has to be included in reduced vector.
      * (So plane strain conditions are eps_z = gamma_xz = gamma_yz = 0, but relations
      * for eps_z and sigma_z are included).
-     * @param answer stifness matrix
+     * @param answer stiffness matrix
      * @param form material response form
      * @param mode material response mode
      * @param gp integration point, which load history is used
@@ -216,8 +216,8 @@ protected:
                                   TimeStep * atTime);
 
     /**
-     * Method for computing 1d  stifness matrix of receiver.
-     * @param answer stifness matrix
+     * Method for computing 1d  stiffness matrix of receiver.
+     * @param answer stiffness matrix
      * @param form material response form
      * @param mode material response mode
      * @param gp integration point, which load history is used
@@ -228,8 +228,8 @@ protected:
                                TimeStep * atTime);
 
     /**
-     * Method for computing 2d beam layer stifness matrix of receiver.
-     * @param answer stifness matrix
+     * Method for computing 2d beam layer stiffness matrix of receiver.
+     * @param answer stiffness matrix
      * @param form material response form
      * @param mode material response mode
      * @param gp integration point, which load history is used
@@ -241,8 +241,8 @@ protected:
                              TimeStep *tStep);
 
     /**
-     * Method for computing 3d beam layer stifness matrix of receiver.
-     * @param answer stifness matrix
+     * Method for computing 3d beam layer stiffness matrix of receiver.
+     * @param answer stiffness matrix
      * @param form material response form
      * @param mode material response mode
      * @param gp integration point, which load history is used

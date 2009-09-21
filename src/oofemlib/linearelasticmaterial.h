@@ -102,8 +102,8 @@ public:
                                   TimeStep *atTime);
 
     /**
-     * Method for computing 2d plate stifness matrix of receiver using generic givePlaneStressStiffMtrx.
-     * @param answer stifness matrix
+     * Method for computing 2d plate stiffness matrix of receiver using generic givePlaneStressStiffMtrx.
+     * @param answer stiffness matrix
      * @param form material response form
      * @param mode material response mode
      * @param gp integration point, which load history is used
@@ -115,8 +115,8 @@ public:
                               GaussPoint *gp,
                               TimeStep *tStep);
     /**
-     * Method for computing 3d shell stifness matrix of receiver using generic givePlaneStressStiffMtrx.
-     * @param answer stifness matrix
+     * Method for computing 3d shell stiffness matrix of receiver using generic givePlaneStressStiffMtrx.
+     * @param answer stiffness matrix
      * @param form material response form
      * @param mode material response mode
      * @param gp integration point, which load history is used
@@ -130,8 +130,8 @@ public:
                               TimeStep *tStep);
     /**
      * Method for computing 2d plane stress (with rotation field)
-     * stifness matrix of receiver using generic givePlaneStressStiffMtrx.
-     * @param answer stifness matrix
+     * stiffness matrix of receiver using generic givePlaneStressStiffMtrx.
+     * @param answer stiffness matrix
      * @param form material response form
      * @param mode material response mode
      * @param gp integration point, which load history is used
