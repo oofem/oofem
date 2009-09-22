@@ -450,6 +450,7 @@ enum InputFieldType {
     IFT_HeMoTKMaterial_rho_gws,
 
 
+    IFT_B3Material_mode,
     IFT_B3Material_fc,
     IFT_B3Material_cc,
     IFT_B3Material_wc,
@@ -469,6 +470,13 @@ enum InputFieldType {
     IFT_B3Material_hum,
     IFT_B3Material_vs,
     IFT_B3Material_talpha,
+    IFT_B3Material_q1,
+    IFT_B3Material_q2,
+    IFT_B3Material_q3,
+    IFT_B3Material_q4,
+    IFT_B3Material_q5,
+    IFT_B3Material_kt,
+    IFT_B3Material_EpsSinf,
 
     IFT_CebFip78Material_e28,
     IFT_CebFip78Material_fibf,
