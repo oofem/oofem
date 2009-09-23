@@ -43,7 +43,7 @@
 #include "structuralelement.h"
 #include "timestep.h"
 #ifndef __MAKEDEPEND
-#include <stdio.h>
+ #include <stdio.h>
 #endif
 
 #include "verbose.h"
@@ -71,8 +71,7 @@ StructuralEngngModel :: printReactionForces(TimeStep *tStep, int di)
     int i, numRestrDofs = 0;
 
     IntArray ielemDofMask;
-    FloatArray reactions, contribution;
-    FloatArray EquivForces;
+    FloatArray reactions;
     IntArray dofManMap, dofMap, eqnMap;
 
     Domain *domain = this->giveDomain(di);
@@ -93,43 +92,10 @@ StructuralEngngModel :: printReactionForces(TimeStep *tStep, int di)
     //
     fprintf(outputStream, "\n\n\tR E A C T I O N S  O U T P U T:\n\t_______________________________\n\n\n");
 
-    //numRestrDofs = domain -> giveConnectivityTable () -> giveNumRestrDofs();
     numRestrDofs = this->giveNumberOfPrescribedDomainEquations(di, EID_MomentumBalance);
     reactions.resize(numRestrDofs);
-    reactions.zero();
-
-    // Internal forces contribution
-
-    this->computeInternalForceReactionContribution(contribution, tStep, di);
-    reactions.add(contribution);
-    // External loading contribution
-    this->computeExternalLoadReactionContribution(contribution, tStep, di);
-    reactions.substract(contribution);
-
-#ifdef __PARALLEL_MODE
-
-    if ( commMode == ProblemCommMode__NODE_CUT ) {
-#ifdef __VERBOSE_PARALLEL
-        VERBOSEPARALLEL_PRINT( "StructuralEngngModel :: printReactionForces", "Packing reactions", this->giveRank() );
-#endif
-
-        communicator->packAllData( ( StructuralEngngModel * ) this, & reactions, & StructuralEngngModel :: packReactions );
-
-#ifdef __VERBOSE_PARALLEL
-        VERBOSEPARALLEL_PRINT( "StructuralEngngModel :: printReactionForces", "Exchange of reactions started", this->giveRank() );
-#endif
-
-        communicator->initExchange(999);
-
-#ifdef __VERBOSE_PARALLEL
-        VERBOSEPARALLEL_PRINT( "StructuralEngngModel :: printReactionForces", "Receiving and unpacking of reactions started", this->giveRank() );
-#endif
-
-        communicator->unpackAllData( ( StructuralEngngModel * ) this, & reactions, & StructuralEngngModel :: unpackReactions );
-        communicator->finishExchange();
-    }
-
-#endif
+    // compute reaction forces
+    this->computeReactions(reactions, tStep, di);
 
     //
     // loop over reactions and print them
@@ -137,15 +103,15 @@ StructuralEngngModel :: printReactionForces(TimeStep *tStep, int di)
     for ( i = 1; i <= numRestrDofs; i++ ) {
         if ( domain->giveOutputManager()->testDofManOutput(dofManMap.at(i), tStep) ) {
             //fprintf(outputStream,"\tNode %8d iDof %2d reaction % .4e\n",dofManMap.at(i), dofMap.at(i),reactions.at(eqnMap.at(i)));
-#if defined(__PARALLEL_MODE) || defined(__ENABLE_COMPONENT_LABELS)
-	  fprintf( outputStream, "\tNode %8d iDof %2d reaction % .4e    [bc-id: %d]\n", 
-		   domain->giveDofManager( dofManMap.at(i))->giveLabel(), 
-		   dofMap.at(i), reactions.at( eqnMap.at(i) ), 
-		   domain->giveDofManager( dofManMap.at(i) )->giveDof( dofMap.at(i) )->giveBcId() );
+#if defined ( __PARALLEL_MODE ) || defined ( __ENABLE_COMPONENT_LABELS )
+            fprintf( outputStream, "\tNode %8d iDof %2d reaction % .4e    [bc-id: %d]\n",
+                    domain->giveDofManager( dofManMap.at(i) )->giveLabel(),
+                    dofMap.at(i), reactions.at( eqnMap.at(i) ),
+                    domain->giveDofManager( dofManMap.at(i) )->giveDof( dofMap.at(i) )->giveBcId() );
 #else
-            fprintf( outputStream, "\tNode %8d iDof %2d reaction % .4e    [bc-id: %d]\n", 
-		     dofManMap.at(i), dofMap.at(i), reactions.at( eqnMap.at(i) ), 
-		     domain->giveDofManager( dofManMap.at(i) )->giveDof( dofMap.at(i) )->giveBcId() );
+            fprintf( outputStream, "\tNode %8d iDof %2d reaction % .4e    [bc-id: %d]\n",
+                    dofManMap.at(i), dofMap.at(i), reactions.at( eqnMap.at(i) ),
+                    domain->giveDofManager( dofManMap.at(i) )->giveDof( dofMap.at(i) )->giveBcId() );
 #endif
         }
     }
@@ -153,8 +119,51 @@ StructuralEngngModel :: printReactionForces(TimeStep *tStep, int di)
     return;
 }
 
+void
+StructuralEngngModel :: computeReactions(FloatArray &answer, TimeStep *tStep, int di)
+{
+    int numRestrDofs = 0;
+    FloatArray contribution;
+    FloatArray EquivForces;
 
-#if 1
+    numRestrDofs = this->giveNumberOfPrescribedDomainEquations(di, EID_MomentumBalance);
+    answer.resize(numRestrDofs);
+    answer.zero();
+
+    // Internal forces contribution
+
+    this->computeInternalForceReactionContribution(contribution, tStep, di);
+    answer.add(contribution);
+    // External loading contribution
+    this->computeExternalLoadReactionContribution(contribution, tStep, di);
+    answer.substract(contribution);
+
+#ifdef __PARALLEL_MODE
+
+    if ( commMode == ProblemCommMode__NODE_CUT ) {
+ #ifdef __VERBOSE_PARALLEL
+        VERBOSEPARALLEL_PRINT( "StructuralEngngModel :: printReactionForces", "Packing reactions", this->giveRank() );
+ #endif
+
+        communicator->packAllData( ( StructuralEngngModel * ) this, & answer, & StructuralEngngModel :: packReactions );
+
+ #ifdef __VERBOSE_PARALLEL
+        VERBOSEPARALLEL_PRINT( "StructuralEngngModel :: printReactionForces", "Exchange of reactions started", this->giveRank() );
+ #endif
+
+        communicator->initExchange(999);
+
+ #ifdef __VERBOSE_PARALLEL
+        VERBOSEPARALLEL_PRINT( "StructuralEngngModel :: printReactionForces", "Receiving and unpacking of reactions started", this->giveRank() );
+ #endif
+
+        communicator->unpackAllData( ( StructuralEngngModel * ) this, & answer, & StructuralEngngModel :: unpackReactions );
+        communicator->finishExchange();
+    }
+
+#endif
+}
+
 
 void
 StructuralEngngModel :: computeInternalForceReactionContribution(FloatArray &reactions, TimeStep *tStep, int di)
@@ -194,400 +203,10 @@ StructuralEngngModel :: computeNodalLoadReactionContribution(FloatArray &reactio
 {
     reactions.resize( this->giveNumberOfPrescribedDomainEquations(di, EID_MomentumBalance) );
     reactions.zero();
-    assembleVectorFromDofManagers( reactions, tStep, EID_MomentumBalance, NodalLoadVector, VM_Total, 
-				   EModelDefaultPrescribedEquationNumbering(), this->giveDomain(di) );
+    assembleVectorFromDofManagers( reactions, tStep, EID_MomentumBalance, NodalLoadVector, VM_Total,
+                                  EModelDefaultPrescribedEquationNumbering(), this->giveDomain(di) );
 }
 
-#else
-
-void
-StructuralEngngModel :: computeInternalForceReactionContribution(FloatArray &reactions, TimeStep *tStep, int di)
-{
-    int i, j, k, numRestrDofs = 0;
-    int dofNum, elementEquivForcesFlag, knodes, kdofNum, ielemDofManDofs;
-    int reactionIndx;
-    ValueModeType mode = VM_Total;
-
-    DofManager *ielemDofMan, *master;
-    Dof *kDof;
-    Element *ielem;
-
-    IntArray ielemDofMask;
-    FloatArray EquivForces;
-
-    Domain *domain = this->giveDomain(di);
-
-    //numRestrDofs = domain -> giveConnectivityTable () -> giveNumRestrDofs();
-    numRestrDofs = this->giveNumberOfPrescribedDomainEquations(di);
-
-    reactions.resize(numRestrDofs);
-    reactions.zero();
-
-    int nelems = domain->giveNumberOfElements();
-    for ( i = 1; i <= nelems; i++ ) { // loop over elements
-        elementEquivForcesFlag = 0; // indicates that element equiv forces has not been computed
-        ielem = domain->giveElement(i);
-        knodes = ielem->giveNumberOfDofManagers();
-
-        dofNum = 0;
-        for ( j = 1; j <= knodes; j++ ) { // loop over element nodes
-            ielem->giveDofManDofIDMask(j, ielemDofMask);
-            ielemDofMan = ielem->giveDofManager(j);
-            ielemDofManDofs = ielemDofMask.giveSize();
-            if ( ielemDofMan->giveClassID() == RigidArmNodeClass ) {
-                IntArray slaveDofMask;
-
-                master = ( ( RigidArmNode * ) ielemDofMan )->giveMasterDofMngr();
-                ( ( RigidArmNode * ) ielemDofMan )->giveSlaveDofMask(slaveDofMask);
-
-                // rigid arm node contributes to all master dofs
-                // the number of dofs at nodal c.s (in which we are computing reactions)
-                // is not determined by size of ielemDofMask, but by total number of dofs of master
-                // because single local dof can contribute to several DOFS in master.
-                for ( k = 1; k <= ielemDofMan->giveNumberOfDofs(); k++ ) { // loop over element dofManager dofs
-                    dofNum++;
-                    if ( slaveDofMask.at(k) ) {
-                        reactionIndx = master->giveDof(k)->givePrescribedEquationNumber();
-                    } else {
-                        reactionIndx = ielemDofMan->giveDof(k)->givePrescribedEquationNumber();
-                    }
-
-                    // select only dof managers required to do output
-                    if ( domain->giveOutputManager()->testDofManOutput(master->giveNumber(), tStep) ) {
-                        if ( reactionIndx ) { // prescribed
-                            // compute element equivForces if not computed previously
-                            if ( !elementEquivForcesFlag ) {
-                                ( ( StructuralElement * ) ielem )->giveInternalForcesVector(EquivForces, tStep, mode);
-                                elementEquivForcesFlag = 1;
-                            }
-
-                            reactions.at(reactionIndx) +=  EquivForces.at(dofNum);
-                        }
-                    }
-                }
-            } else {
-                for ( k = 1; k <= ielemDofManDofs; k++ ) { // loop over element dofManager dofs
-                    dofNum++;
-                    kdofNum = ielemDofMan->findDofWithDofId( ielemDofMask.at(k) );
-                    if ( kdofNum ) {
-                        kDof = ielemDofMan->giveDof(kdofNum);
-                        /*
-                         *    if (kDof->hasBc(tStep)) { // kDof is supported
-                         *     // find corresponding master dofManager and dof number
-                         *     if (kDof->giveClassID() == SimpleSlaveDofClass) {
-                         *      restrDofManNum = ((SlaveDof*) kDof)->giveMasterDofManagerNum();
-                         *      restrDofNum    = ((SlaveDof*) kDof)->giveMasterDofIndx();
-                         *     } else {
-                         *      restrDofManNum = ielemDofMan->giveNumber();
-                         *      restrDofNum    = kDof->giveNumber();
-                         *     }
-                         *     // select only dof managers required to do output
-                         *     if (domain->giveOutputManager()->testDofManOutput (ielemDofMan->giveNumber(), tStep)) {
-                         *      // find corresponding reaction index
-                         *      reactionIndx = domain->giveConnectivityTable() -> giveReactionIndx (restrDofManNum, restrDofNum);
-                         */
-                        {
-                            if ( domain->giveOutputManager()->testDofManOutput(ielemDofMan->giveNumber(), tStep) ) {
-                                reactionIndx = kDof->givePrescribedEquationNumber();
-                                if ( reactionIndx ) {
-                                    // compute element equivForces if not computed previously
-                                    if ( !elementEquivForcesFlag ) {
-                                        ( ( StructuralElement * ) ielem )->giveInternalForcesVector(EquivForces, tStep, mode);
-                                        elementEquivForcesFlag = 1;
-                                    }
-
-                                    reactions.at(reactionIndx) +=  EquivForces.at(dofNum);
-                                }
-                            }
-                        }
-                    } else {
-                        _error("printReactionForces: element dof not found");
-                    }
-                }
-            }
-        } // end of loop over element nodes
-
-    } // end of loop over elements
-
-}
-
-
-void
-StructuralEngngModel :: computeExternalLoadReactionContribution(FloatArray &reactions, TimeStep *tStep, int di)
-{
-    int numRestrDofs = this->giveNumberOfPrescribedDomainEquations(di);
-    reactions.resize(numRestrDofs);
-    reactions.zero();
-    FloatArray contribution(numRestrDofs);
-
-    this->computeElementLoadReactionContribution(contribution, tStep, di);
-    reactions.add(contribution);
-    this->computeNodalLoadReactionContribution(contribution, tStep, di);
-    reactions.add(contribution);
-}
-
-
-void
-StructuralEngngModel :: computeElementLoadReactionContribution(FloatArray &reactions, TimeStep *tStep, int di)
-{
-    int i, j, k, numRestrDofs;
-    int dofNum, elementEquivForcesFlag, knodes, kdofNum, ielemDofManDofs;
-    int reactionIndx;
-    ValueModeType mode = VM_Total;
-
-    DofManager *ielemDofMan, *master;
-    Dof *kDof;
-    Element *ielem;
-
-    IntArray ielemDofMask;
-    FloatArray EquivForces;
-
-    Domain *domain = this->giveDomain(di);
-
-    //numRestrDofs = domain -> giveConnectivityTable () -> giveNumRestrDofs();
-    numRestrDofs = this->giveNumberOfPrescribedDomainEquations(di);
-    reactions.resize(numRestrDofs);
-    reactions.zero();
-
-    int nelems = domain->giveNumberOfElements();
-    for ( i = 1; i <= nelems; i++ ) { // loop over elements
-        elementEquivForcesFlag = 0; // indicates that element equiv forces has not been computed
-        ielem = domain->giveElement(i);
-        knodes = ielem->giveNumberOfDofManagers();
-
-        dofNum = 0;
-        for ( j = 1; j <= knodes; j++ ) { // loop over element nodes
-            ielem->giveDofManDofIDMask(j, ielemDofMask);
-            ielemDofMan = ielem->giveDofManager(j);
-            ielemDofManDofs = ielemDofMask.giveSize();
-            if ( ielemDofMan->giveClassID() == RigidArmNodeClass ) {
-                IntArray slaveDofMask;
-
-                master = ( ( RigidArmNode * ) ielemDofMan )->giveMasterDofMngr();
-                ( ( RigidArmNode * ) ielemDofMan )->giveSlaveDofMask(slaveDofMask);
-
-                // rigid arm node contributes to all master dofs
-                // the number of dofs at nodal c.s (in which we are computing reactions)
-                // is not determined by size of ielemDofMask, but by total number of dofs of master
-                // because single local dof can contribute to several DOFS in master.
-                for ( k = 1; k <= ielemDofMan->giveNumberOfDofs(); k++ ) { // loop over element dofManager dofs
-                    dofNum++;
-                    if ( slaveDofMask.at(k) ) {
-                        reactionIndx = master->giveDof(k)->givePrescribedEquationNumber();
-                    } else {
-                        reactionIndx = ielemDofMan->giveDof(k)->givePrescribedEquationNumber();
-                    }
-
-                    // select only dof managers required to do output
-                    if ( domain->giveOutputManager()->testDofManOutput(master->giveNumber(), tStep) ) {
-                        if ( domain->giveOutputManager()->testDofManOutput(master->giveNumber(), tStep) ) {
-                            reactionIndx = master->giveDof(k)->givePrescribedEquationNumber();
-                            if ( reactionIndx ) {
-                                // compute element equivForces if not computed previously
-                                if ( !elementEquivForcesFlag ) {
-                                    ( ( StructuralElement * ) ielem )->computeForceLoadVector(EquivForces, tStep, mode);
-                                    elementEquivForcesFlag = 1;
-                                }
-
-                                if ( EquivForces.giveSize() ) {
-                                    reactions.at(reactionIndx) +=  EquivForces.at(dofNum);
-                                }
-                            }
-                        }
-                    }
-                }
-            } else {
-                for ( k = 1; k <= ielemDofManDofs; k++ ) { // loop over element dofManager dofs
-                    dofNum++;
-                    kdofNum = ielemDofMan->findDofWithDofId( ielemDofMask.at(k) );
-                    if ( kdofNum ) {
-                        kDof = ielemDofMan->giveDof(kdofNum);
-                        /*
-                         * if (kDof->hasBc(tStep)) { // kDof is supported
-                         * // find corresponding master dofManager and dof number
-                         * if (kDof->giveClassID() == SimpleSlaveDofClass) {
-                         * restrDofManNum = ((SlaveDof*) kDof)->giveMasterDofManagerNum();
-                         * restrDofNum    = ((SlaveDof*) kDof)->giveMasterDofIndx();
-                         * } else {
-                         * restrDofManNum = ielemDofMan->giveNumber();
-                         * restrDofNum    = kDof->giveNumber();
-                         * }
-                         * // select only dof managers required to do output
-                         * if (domain->giveOutputManager()->testDofManOutput (ielemDofMan->giveNumber(), tStep)) {
-                         * // find corresponding reaction index
-                         * reactionIndx = domain->giveConnectivityTable() -> giveReactionIndx (restrDofManNum, restrDofNum);
-                         */
-                        {
-                            if ( domain->giveOutputManager()->testDofManOutput(ielemDofMan->giveNumber(), tStep) ) {
-                                // find corresponding reaction index
-                                reactionIndx = kDof->givePrescribedEquationNumber();
-                                if ( reactionIndx ) {
-                                    // compute element equivForces if not computed previously
-                                    if ( !elementEquivForcesFlag ) {
-                                        ( ( StructuralElement * ) ielem )->computeForceLoadVector(EquivForces, tStep, mode);
-                                        elementEquivForcesFlag = 1;
-                                    }
-
-                                    if ( EquivForces.giveSize() ) {
-                                        reactions.at(reactionIndx) +=  EquivForces.at(dofNum);
-                                    }
-                                }
-                            }
-                        }
-                    } else {
-                        _error("printReactionForces: element dof not found");
-                    }
-                }
-            }
-        } // end of loop over element nodes
-
-    } // end of loop over elements
-
-}
-
-
-void
-StructuralEngngModel :: computeNodalLoadReactionContribution(FloatArray &reactions, TimeStep *tStep, int di)
-{
-    int i, j, numRestrDofs;
-    int reactionIndx;
-    int nDofMan;
-    ValueModeType mode = VM_Total;
-
-    DofManager *master;
-
-    IntArray ielemDofMask;
-    FloatArray EquivForces;
-    FloatArray nodalLoadVector, nonnodalLoadVector;
-
-    Domain *domain = this->giveDomain(di);
-
-    //numRestrDofs = domain -> giveConnectivityTable () -> giveNumRestrDofs();
-    numRestrDofs = this->giveNumberOfPrescribedDomainEquations(di);
-    reactions.resize(numRestrDofs);
-    reactions.zero();
-
-
-    // loop over dofManagers and find if they are directly loaded
-    DofManager *iDofMan;
-    FloatArray dofManLoad;
-    int hasBc; // dofManNum;
-    nDofMan = domain->giveNumberOfDofManagers();
-    for ( i = 1; i <= nDofMan; i++ ) {
-        iDofMan = domain->giveDofManager(i);
-        if ( iDofMan->giveClassID() == RigidArmNodeClass ) {
-            IntArray slaveDofMask;
-            master = ( ( RigidArmNode * ) iDofMan )->giveMasterDofMngr();
-            ( ( RigidArmNode * ) iDofMan )->giveSlaveDofMask(slaveDofMask);
-            // determine if any BC
-            // loop over linked DOF at master
-            for ( hasBc = 0, j = 1; j <= master->giveNumberOfDofs(); j++ ) {
-                if ( slaveDofMask.at(j) ) {
-                    hasBc += master->giveDof(j)->hasBc(tStep);
-                }
-            }
-
-            // loop over primary dof if any
-            for ( j = 1; j <= iDofMan->giveNumberOfDofs(); j++ ) {
-                if ( slaveDofMask.at(j) == 0 ) {
-                    hasBc += iDofMan->giveDof(j)->hasBc(tStep);
-                }
-            }
-
-            if ( hasBc ) {
-                // rigid Arm node and master has bc
-                iDofMan->computeLoadVectorAt(dofManLoad, tStep, mode);
-                if ( dofManLoad.isEmpty() ) {
-                    continue;
-                }
-
-                // loop over master dofs to find those with bc
-                for ( j = 1; j <= iDofMan->giveNumberOfDofs(); j++ ) {
-                    if ( slaveDofMask.at(j) ) { // slave linked
-                        if ( master->giveDof(j)->hasBc(tStep) ) {
-                            // reactionIndx = domain->giveConnectivityTable() -> giveReactionIndx (master->giveNumber(),
-                            //                                       master->giveDof(j)->giveNumber());
-                            reactionIndx = master->giveDof(j)->givePrescribedEquationNumber();
-                        } else {
-                            continue;
-                        }
-                    } else { // primary dof
-                        if ( iDofMan->giveDof(j)->hasBc(tStep) ) {
-                            //       reactionIndx = domain->giveConnectivityTable() -> giveReactionIndx (dofManNum,
-                            //                                                                           iDofMan->giveDof(j)->giveNumber());
-                            reactionIndx = iDofMan->giveDof(j)->givePrescribedEquationNumber();
-                        } else {
-                            continue;
-                        }
-                    }
-
-                    if ( reactionIndx ) {
-                        reactions.at(reactionIndx) = dofManLoad.at(j);
-                    }
-                }
-            }
-        } else { // end rigid arm node
-            for ( hasBc = 0, j = 1; j <= iDofMan->giveNumberOfDofs(); j++ ) {
-                hasBc += iDofMan->giveDof(j)->hasBc(tStep);
-            }
-
-            if ( hasBc ) {
-                iDofMan->computeLoadVectorAt(dofManLoad, tStep, mode);
-                if ( dofManLoad.isEmpty() ) {
-                    continue;
-                }
-
-                // loop over  dofs to find those with bc
-                for ( j = 1; j <= iDofMan->giveNumberOfDofs(); j++ ) {
-                    if ( iDofMan->giveDof(j)->hasBc(tStep) ) {
-                        /*
-                         *    if (iDofMan->giveDof(j)->isPrimaryDof()) {
-                         *     dofManNum = iDofMan->giveNumber();
-                         *    } else if (iDofMan->giveDof(j)->giveClassID() == SimpleSlaveDofClass) {
-                         *     dofManNum = ((SlaveDof*)iDofMan->giveDof(j))->giveMasterDofManagerNum();
-                         *    } else {
-                         *     _error ("printReactionForces: unknown non-primary dof type");
-                         *    }
-                         */
-                        //      reactionIndx = domain->giveConnectivityTable() -> giveReactionIndx (dofManNum,
-                        //                                        iDofMan->giveDof(j)->giveNumber());
-                        reactionIndx = iDofMan->giveDof(j)->givePrescribedEquationNumber();
-                        if ( reactionIndx ) {
-                            reactions.at(reactionIndx) = dofManLoad.at(j);
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
-
-
-#endif
-
-/*
- * void
- * StructuralEngngModel:: computeElementEquivForces (FloatArray& answer, TimeStep *tStep, StructuralElement* ielem, ValueModeType mode) const
- * {
- * FloatArray nonnodalLoadVector  ;
- *
- * // compute element equivForces
- *
- * // use updated gp record
- * ((StructuralElement*)ielem)-> giveInternalForcesVector (answer, tStep,1);
- * //
- * // substract part corresponding to non-nodal loading.
- * // (temperature substracted in giveInternalForcesVector)
- * //
- * ((StructuralElement*)ielem)->
- * computeForceLoadVector(nonnodalLoadVector, tStep, mode) ;
- * if (nonnodalLoadVector.giveSize()) {
- * nonnodalLoadVector.negated();
- * answer.add (nonnodalLoadVector) ;
- * }
- *
- * }
- */
 
 void
 StructuralEngngModel :: updateInternalState(TimeStep *stepN)
@@ -786,7 +405,7 @@ StructuralEngngModel :: unpackLoad(FloatArray *dest, ProcessCommunicator &proces
                 } else if ( dofmanmode == DofManager_remote ) {
                     dest->at(eqNum)  = value;
                 } else {
-		  _error3("unpackLoad: DofMamager %d[%d]: unknown parallel mode", dman->giveNumber(), dman->giveGlobalNumber());
+                    _error3( "unpackLoad: DofMamager %d[%d]: unknown parallel mode", dman->giveNumber(), dman->giveGlobalNumber() );
                 }
             }
         }

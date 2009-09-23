@@ -41,14 +41,14 @@
 #define structengngmodel_h
 
 #ifndef __MAKEDEPEND
-#include <stdio.h>
+ #include <stdio.h>
 #endif
 
 #include "engngm.h"
 
 #ifdef __PARALLEL_MODE
-#include "problemcomm.h"
-#include "processcomm.h"
+ #include "problemcomm.h"
+ #include "processcomm.h"
 #endif
 
 class StructuralElement;
@@ -113,7 +113,7 @@ protected:
 
     /**
      * Computes the contribution of internal element forces to reaction forces in given domain.
-     * @param reactions contains the comuted contributions
+     * @param reactions contains the computed contributions
      * @param tStep solution step
      * @param domian number
      */
@@ -171,6 +171,17 @@ public:
     /// Returns StructuralEngngModelClass - classType id of receiver.
     classType giveClassID()      const { return StructuralEngngModelClass; }
 
+    /*
+     * Computes reaction forces. The implementation assumes, that real
+     * stresses corresponding to reached state are already computed (uses giveInternalForcesVector
+     * structural element service with useUpdatedGpRecord = 1 parameter).
+     * To be safe, this method should be called after convergence has been reached, eq.,
+     * after engngModel->updateYourself() has been called.
+     * @param answer reactions, the ordering of individual values follows numbering of  prescribed equations.
+     * @param tStep time step
+     * @param di domain number
+     */
+    void computeReactions(FloatArray &answer, TimeStep *tStep, int di);
 #ifdef __PARALLEL_MODE
     /**
      * Packing function for internal forces of DofManagers. Pascks internal forces of shared DofManagers
@@ -245,10 +256,8 @@ public:
      */
     int unpackRemoteElementData(ProcessCommunicator &processComm);
 
-    ProblemCommunicator* giveProblemCommunicator (EngngModelCommType t) {
-      if (t == PC_default) return communicator;
-      else if ( t== PC_nonlocal) return nonlocCommunicator;
-      else return NULL;
+    ProblemCommunicator *giveProblemCommunicator(EngngModelCommType t) {
+        if ( t == PC_default ) { return communicator; } else if ( t == PC_nonlocal ) { return nonlocCommunicator; } else { return NULL; }
     }
 
 #endif
