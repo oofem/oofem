@@ -29,7 +29,7 @@ class EnrichmentItem : public FEMComponent
 {
 public:
     /// Constructor
-    EnrichmentItem(int n, Domain *aDomain);
+    EnrichmentItem(int n, XfemManager* xm, Domain *aDomain);
     /// initializes EnrichmentItem from InputRecord
     IRResultType initializeFrom(InputRecord *ir);
     /// returns class name
@@ -43,11 +43,9 @@ public:
     /// Computes number intersection points with Element
     double computeNumberOfIntersectionPoints(Element *element);
     /// Accessor
-    EnrichmentFunction *giveEnrichmentFunction() { return ef; }
-    /// Sets EnrichmentFunction
-    void setEnrichmentFunction(EnrichmentFunction *ef);
+    EnrichmentFunction *giveEnrichmentFunction();
     /// Gives number of dofs
-    int giveNumberOfDofs() { return ef->giveNumberOfDofs(); }
+    int giveNumberOfDofs() { return this->giveEnrichmentFunction()->giveNumberOfDofs(); }
     /** Sets DofId Array of an Enrichment Item */
     void setDofIdArray(IntArray &dofId) { this->dofsId = dofId; }
     /// Accessor
@@ -59,10 +57,12 @@ public:
     virtual Material *giveMaterial() { return NULL; }
 
 protected:
+    /// link to associated xfem manager
+    XfemManager *xmanager;
     /// Geometry associated with EnrichmentItem
-    BasicGeometry *geometry;
+    int geometry;
     /// EnrichmentFunction associated with the EnrichmentItem
-    EnrichmentFunction *ef;
+    int enrichmentFunction;
     /// Additional dofIds from Enrichment
     IntArray dofsId;
 };
@@ -71,14 +71,14 @@ protected:
 class CrackTip : public EnrichmentItem
 {
 public:
-    CrackTip(int n, Domain *aDomain) : EnrichmentItem(n, aDomain) { }
+    CrackTip(int n, XfemManager* xm, Domain *aDomain) : EnrichmentItem(n, xm, aDomain) { }
 };
 
 /** Concrete representation of EnrichmentItem */
 class CrackInterior : public EnrichmentItem
 {
 public:
-    CrackInterior(int n, Domain *aDomain) : EnrichmentItem(n, aDomain) { }
+    CrackInterior(int n, XfemManager* xm, Domain *aDomain) : EnrichmentItem(n, xm, aDomain) { }
 };
 
 /** Concrete representation of EnrichmentItem */
@@ -87,7 +87,7 @@ class Inclusion : public EnrichmentItem
 protected:
     Material *mat;
 public:
-    Inclusion(int n, Domain *aDomain) : EnrichmentItem(n, aDomain) { }
+    Inclusion(int n, XfemManager* xm, Domain *aDomain) : EnrichmentItem(n, xm, aDomain) { }
     const char *giveClassName() const { return "Inclusion"; }
     IRResultType initializeFrom(InputRecord *ir);
     Material *giveMaterial() { return mat; }

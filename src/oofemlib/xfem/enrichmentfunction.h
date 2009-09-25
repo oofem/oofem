@@ -32,19 +32,17 @@ public:
     /// Destructor
     ~EnrichmentFunction() { };
     /// Evaluates a function at a particular point
-    virtual double evaluateFunctionAt(FloatArray *point) = 0;
+    virtual double evaluateFunctionAt(FloatArray *point, EnrichmentItem* ei) = 0;
     /// Evaluates a function derivative at a particular point
-    virtual void evaluateDerivativeAt(FloatArray &answer, FloatArray *point) = 0;
+    virtual void evaluateDerivativeAt(FloatArray &answer, FloatArray *point, EnrichmentItem* ei) = 0;
     /// Evaluates a function at a particular point
-    virtual double evaluateFunctionAt(GaussPoint *gp);
+    virtual double evaluateFunctionAt(GaussPoint *gp, EnrichmentItem* ei);
     /// Evaluates a function derivative at a particular point
-    virtual void evaluateDerivativeAt(FloatArray &answer, GaussPoint *gp);
-    /// Accessor
-    BasicGeometry *giveGeometry();
+    virtual void evaluateDerivativeAt(FloatArray &answer, GaussPoint *gp, EnrichmentItem* ei);
     /// Inserts EnrichmentItem into associatedEnrItem array
-    void insertEnrichmentItem(EnrichmentItem *er);
+    // void insertEnrichmentItem(EnrichmentItem *er);
     /// Sets a particular EnrichmentItem active
-    void setActive(EnrichmentItem *er);
+    // void setActive(EnrichmentItem *er);
     /// Initializes EnrichmentItem from InputRecord
     IRResultType initializeFrom(InputRecord *ir);
 
@@ -71,8 +69,8 @@ public:
     DiscontinuousFunction(int n, Domain *aDomain) : EnrichmentFunction(n, aDomain) {
         this->numberOfDofs = 2;
     }
-    double evaluateFunctionAt(FloatArray *point);
-    void evaluateDerivativeAt(FloatArray &answer, FloatArray *point);
+    double evaluateFunctionAt(FloatArray *point, EnrichmentItem* ei);
+    void evaluateDerivativeAt(FloatArray &answer, FloatArray *point, EnrichmentItem* ei);
 };
 
 /** Class representing Branch EnrichmentFunction */
@@ -83,8 +81,8 @@ public:
     BranchFunction(int n, Domain *aDomain) : EnrichmentFunction(n, aDomain) {
         this->numberOfDofs = 2;
     }
-    double evaluateFunctionAt(FloatArray *point);
-    void evaluateDerivativeAt(FloatArray &answer, FloatArray *point);
+    double evaluateFunctionAt(FloatArray *point, EnrichmentItem* ei);
+    void evaluateDerivativeAt(FloatArray &answer, FloatArray *point, EnrichmentItem* ei);
 };
 
 /** Class representing bimaterial interface */
@@ -95,10 +93,10 @@ public:
     RampFunction(int n, Domain *aDomain) : EnrichmentFunction(n, aDomain) {
         this->numberOfDofs = 2;
     }
-    double evaluateFunctionAt(FloatArray *point);
-    void evaluateDerivativeAt(FloatArray &answer, FloatArray *point);
-    double evaluateFunctionAt(GaussPoint *gp);
-    void evaluateDerivativeAt(FloatArray &answer, GaussPoint *gp);
+    double evaluateFunctionAt(FloatArray *point, EnrichmentItem* ei);
+    void evaluateDerivativeAt(FloatArray &answer, FloatArray *point, EnrichmentItem* ei);
+    double evaluateFunctionAt(GaussPoint *gp, EnrichmentItem* ei);
+    void evaluateDerivativeAt(FloatArray &answer, GaussPoint *gp, EnrichmentItem* ei);
 };
 
 #endif  /* _ENRICHMENTFUNCTION_H */

@@ -16,55 +16,56 @@
 #include "oofem_limits.h"
 #include "usrdefsub.h"
 
-EnrichmentItem::EnrichmentItem(int n, Domain* aDomain) : FEMComponent(n, aDomain) {
-    geometry = NULL;
-    ef = NULL;
+EnrichmentItem::EnrichmentItem(int n, XfemManager*xm, Domain* aDomain) : FEMComponent(n, aDomain) {
+  xmanager = xm;
+  geometry = 0;
+  enrichmentFunction = 0;
 }
 
 BasicGeometry* EnrichmentItem::giveGeometry() {
-    return this->geometry;
+    return xmanager->giveGeometry(this->geometry);
+}
+EnrichmentFunction *EnrichmentItem::giveEnrichmentFunction() {
+    return xmanager->giveEnrichmentFunction (this->enrichmentFunction);
 }
 
 IRResultType EnrichmentItem::initializeFrom(InputRecord* ir) {
     const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result; // Required by IR_GIVE_FIELD macro
 
-    int geometryItemNr = 0;
-    int enrichmentFunctionNr = 0;
+    this->geometry = 0;
+    this->enrichmentFunction = 0;
 
-    IR_GIVE_FIELD(ir, geometryItemNr, IFT_EnrichmentItem_geometryItemNr, "geometryitem"); // Macro
-    IR_GIVE_FIELD(ir, enrichmentFunctionNr, IFT_EnrichmentItem_enrichmentFunctionNr, "enrichmentfunction"); // Macro
-    BasicGeometry* enrItemGeometry = this->giveDomain()->giveEngngModel()->giveXfemManager(1)->giveGeometry(geometryItemNr);
-    EnrichmentFunction* enrItemFunction = this->giveDomain()->giveEngngModel()->giveXfemManager(1)->giveEnrichmentFunction(enrichmentFunctionNr);
-    this->geometry = enrItemGeometry;
-    this->geometry->printYourself();
-    this->setEnrichmentFunction(enrItemFunction);
+    IR_GIVE_FIELD(ir, geometry, IFT_EnrichmentItem_geometryItemNr, "geometryitem"); // Macro
+    IR_GIVE_FIELD(ir, enrichmentFunction, IFT_EnrichmentItem_enrichmentFunctionNr, "enrichmentfunction"); // Macro
+    // this->setEnrichmentFunction(enrItemFunction);
     // this should go into enrichmentfunction probably
-    enrItemFunction->insertEnrichmentItem(this);
-    enrItemFunction->setActive(this);
+    // enrItemFunction->insertEnrichmentItem(this);
+    // enrItemFunction->setActive(this);
     return IRRT_OK;
 }
 
 bool EnrichmentItem::interacts(Element* element) {
-    return this->geometry->intersects(element);
+    return this->giveGeometry()->intersects(element);
 }
 
 bool EnrichmentItem::isOutside(BasicGeometry *bg) {
-    return this->geometry->isOutside(bg);
+    return this->giveGeometry()->isOutside(bg);
 }
 
 void EnrichmentItem::computeIntersectionPoints(AList<FloatArray>* intersectionPoints, Element *element) {
-    geometry->computeIntersectionPoints(element, intersectionPoints);
+    this->giveGeometry()->computeIntersectionPoints(element, intersectionPoints);
 }
 
 double EnrichmentItem::computeNumberOfIntersectionPoints(Element *element) {
-    return geometry->computeNumberOfIntersectionPoints(element);
+    return this->giveGeometry()->computeNumberOfIntersectionPoints(element);
 }
 
+/*
 void EnrichmentItem::setEnrichmentFunction(EnrichmentFunction *ef) {
     this->ef = ef;
 }
-
+*/
 bool EnrichmentItem::isDofManEnriched(int nodeNumber) {
     bool ret = false;
     // gets neighbouring elements of a node

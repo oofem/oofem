@@ -238,7 +238,7 @@ XfemManager :: instanciateYourself(DataReader *dr) {
             IR_IOERR(giveClassName(), __proc, IFT_RecordIDField, "", mir, result);
         }
 
-        ei = :: CreateUsrDefEnrichmentItem( name, i + 1, emodel->giveDomain(1) );
+        ei = :: CreateUsrDefEnrichmentItem( name, i + 1, this, emodel->giveDomain(1) );
 
         if ( ei == NULL ) {
             OOFEM_ERROR2("XfemManager::instanciateYourself: unknown enrichment item (%s)", name);

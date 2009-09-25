@@ -45,6 +45,7 @@
 #include "element.h"
 #include "crosssection.h"
 #include "engngm.h"
+#include "xfemmanager.h"
 #include "load.h"
 #include "loadtime.h"
 #include "material.h"
@@ -233,7 +234,7 @@ MesherInterface *CreateUsrDefMesherInterface(MeshPackageType type, Domain *d);
  * @param type id determining the type of new instance
  * @return newly allocated object of requested type, null if keyword not suppported
  */
-EnrichmentItem *CreateUsrDefEnrichmentItem(char *aClass, int num, Domain *d);
+EnrichmentItem *CreateUsrDefEnrichmentItem(char *aClass, int num, XfemManager* xm, Domain *d);
 /**
  * Creates new instance of enrichment function.
  * @param type id determining the type of new instance

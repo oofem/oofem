@@ -58,17 +58,17 @@ void PlaneStress2dXfem :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer,
         EnrichmentItem *er = xf->giveEnrichmentItem(i);
         int erndofs = er->giveNumberOfDofs();
         // enrichment function at the gauss point
-        double efgp = er->giveEnrichmentFunction()->evaluateFunctionAt(gp);
+        double efgp = er->giveEnrichmentFunction()->evaluateFunctionAt(gp, er);
         // derivative of enrichment function at the gauss point
         FloatArray efgpD;
-        er->giveEnrichmentFunction()->evaluateDerivativeAt(efgpD, gp);
+        er->giveEnrichmentFunction()->evaluateDerivativeAt(efgpD, gp, er);
         // adds up the number of the dofs from an enrichment item
         // for each node
         for ( int j = 1; j <= this->giveNumberOfDofManagers(); j++ ) {
             if ( er->isDofManEnriched( dofManArray.at(j) ) ) {
                 FloatArray *nodecoords = domain->giveDofManager( dofManArray.at(j) )->giveCoordinates();
                 // ef is a FloatArray containing the value of EnrichmentFunction in a specific for all enriched dofs
-                double efnode = er->giveEnrichmentFunction()->evaluateFunctionAt(nodecoords);
+                double efnode = er->giveEnrichmentFunction()->evaluateFunctionAt(nodecoords, er);
                 // matrix to be added anytime a node is enriched
                 FloatMatrix *toAdd = new FloatMatrix(3, erndofs);
                 toAdd->zero();

@@ -46,6 +46,7 @@
 #include "node.h"
 #include "element.h"
 #include "engngm.h"
+#include "xfemmanager.h"
 #include "load.h"
 #include "loadtime.h"
 #include "material.h"
@@ -916,14 +917,14 @@ MesherInterface *CreateUsrDefMesherInterface(MeshPackageType type, Domain* d)
   
 }
 
-EnrichmentItem *CreateUsrDefEnrichmentItem(char *aClass, int num, Domain *d) {
+EnrichmentItem *CreateUsrDefEnrichmentItem(char *aClass, int num, XfemManager* xm, Domain *d) {
     EnrichmentItem *answer = NULL;
     if ( !strncasecmp(aClass, "cracktip", 8) ) {
-        answer = new CrackTip(num, d);
+      answer = new CrackTip(num, xm, d);
     } else if ( !strncasecmp(aClass, "crackinterior", 13) )    {
-        answer = new CrackInterior(num, d);
+      answer = new CrackInterior(num, xm, d);
     } else if ( !strncasecmp(aClass, "inclusion", 9) )    {
-        answer = new Inclusion(num, d);
+      answer = new Inclusion(num, xm, d);
     }
     return answer;
 }

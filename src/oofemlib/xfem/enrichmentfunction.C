@@ -5,6 +5,7 @@
 #include "xfemmanager.h"
 #include "mathfem.h"
 
+/*
 void EnrichmentFunction :: insertEnrichmentItem(EnrichmentItem *er) {
     int sz = assocEnrItemArray.giveSize();
     assocEnrItemArray.resize(sz + 1);
@@ -14,44 +15,44 @@ void EnrichmentFunction :: insertEnrichmentItem(EnrichmentItem *er) {
 void EnrichmentFunction :: setActive(EnrichmentItem *er) {
     this->activeEnrItem = er;
 }
-
+*/
 IRResultType EnrichmentFunction :: initializeFrom(InputRecord *ir) {
     return IRRT_OK;
 }
 
-double EnrichmentFunction::evaluateFunctionAt(GaussPoint *gp) {
+double EnrichmentFunction::evaluateFunctionAt(GaussPoint *gp, EnrichmentItem* ei) {
   FloatArray gcoords;
   gp->giveElement()->computeGlobalCoordinates (gcoords, *gp->giveCoordinates());
-  return this->evaluateFunctionAt(&gcoords);
+  return this->evaluateFunctionAt(&gcoords, ei);
 }
 
-void EnrichmentFunction::evaluateDerivativeAt(FloatArray &answer, GaussPoint *gp) {
+void EnrichmentFunction::evaluateDerivativeAt(FloatArray &answer, GaussPoint *gp, EnrichmentItem* ei) {
   FloatArray gc;
   gp->giveElement()->computeGlobalCoordinates (gc, *gp->giveCoordinates());
-  this->evaluateDerivativeAt(answer, &gc);
+  this->evaluateDerivativeAt(answer, &gc, ei);
 }  
 
 
-double DiscontinuousFunction :: evaluateFunctionAt(FloatArray *point) {
-    double dist = activeEnrItem->giveGeometry()->computeDistanceTo(point);
+double DiscontinuousFunction :: evaluateFunctionAt(FloatArray *point, EnrichmentItem* ei) {
+    double dist = ei->giveGeometry()->computeDistanceTo(point);
     return sgn(dist);
 }
 
-void DiscontinuousFunction :: evaluateDerivativeAt(FloatArray &answer, FloatArray *point) {
+void DiscontinuousFunction :: evaluateDerivativeAt(FloatArray &answer, FloatArray *point, EnrichmentItem* ei) {
     answer.resize(2);
     answer.zero();
 }
 
-double RampFunction :: evaluateFunctionAt(FloatArray *point) {
-    double dist = activeEnrItem->giveGeometry()->computeDistanceTo(point);
+double RampFunction :: evaluateFunctionAt(FloatArray *point, EnrichmentItem* ei) {
+    double dist = ei->giveGeometry()->computeDistanceTo(point);
     double absDist;
     if (dist < 0.0000) absDist = (-1)*dist;
     else absDist = dist;
     return absDist;
 }
 
-void RampFunction :: evaluateDerivativeAt(FloatArray &answer, FloatArray *point) {
-    double dist = activeEnrItem->giveGeometry()->computeDistanceTo(point);
+void RampFunction :: evaluateDerivativeAt(FloatArray &answer, FloatArray *point, EnrichmentItem* ei) {
+    double dist = ei->giveGeometry()->computeDistanceTo(point);
     double absDist;
     if (dist < 0.0000) absDist = (-1)*dist;
     else absDist = dist;
@@ -60,7 +61,7 @@ void RampFunction :: evaluateDerivativeAt(FloatArray &answer, FloatArray *point)
     answer.at(1) = answer.at(2) = absDist / dist;
 }
 
-double RampFunction :: evaluateFunctionAt(GaussPoint *gp){
+double RampFunction :: evaluateFunctionAt(GaussPoint *gp, EnrichmentItem* ei){
   FloatArray N;
   Element *el = gp->giveElement();
   el->giveInterpolation()->evalN(N, * gp->giveCoordinates(), 0.0);
@@ -68,7 +69,7 @@ double RampFunction :: evaluateFunctionAt(GaussPoint *gp){
   double absMember = 0;
   double member = 0;
   for(int i = 1; i <= el->giveNumberOfDofManagers(); i++){
-      dist = activeEnrItem->giveGeometry()->computeDistanceTo(el->giveDofManager(i)->giveCoordinates());
+      dist = ei->giveGeometry()->computeDistanceTo(el->giveDofManager(i)->giveCoordinates());
       member += N.at(i)*dist;
   }
   if (member < 0.0000) absMember = (-1)*member;
@@ -76,7 +77,7 @@ double RampFunction :: evaluateFunctionAt(GaussPoint *gp){
   return absMember;
 }
 
-void RampFunction :: evaluateDerivativeAt(FloatArray &answer, GaussPoint *gp){
+void RampFunction :: evaluateDerivativeAt(FloatArray &answer, GaussPoint *gp, EnrichmentItem* ei){
   FloatArray N;
   Element *el = gp->giveElement();
   el->giveInterpolation()->evalN(N, * gp->giveCoordinates(), 0.0);
@@ -91,7 +92,7 @@ void RampFunction :: evaluateDerivativeAt(FloatArray &answer, GaussPoint *gp){
   double dfdy = 0;
   double phi = 0;
   for(int i = 1; i <= el->giveNumberOfDofManagers(); i++){
-      dist = activeEnrItem->giveGeometry()->computeDistanceTo(el->giveDofManager(i)->giveCoordinates());
+      dist = ei->giveGeometry()->computeDistanceTo(el->giveDofManager(i)->giveCoordinates());
       phi += N.at(i)*dist;
       dfdx += dNdx.at(i,1)*dist;
       dfdy += dNdx.at(i,2)*dist;
@@ -103,7 +104,7 @@ void RampFunction :: evaluateDerivativeAt(FloatArray &answer, GaussPoint *gp){
 }
 
 // to change
-double BranchFunction :: evaluateFunctionAt(FloatArray *point) {
+double BranchFunction :: evaluateFunctionAt(FloatArray *point, EnrichmentItem* ei) {
     /*
      *  double ret = 0;
      *  CrackTip *cr = (CrackTip*) activeEnrItem;
@@ -124,7 +125,7 @@ double BranchFunction :: evaluateFunctionAt(FloatArray *point) {
 }
 
 // to change
-void BranchFunction :: evaluateDerivativeAt(FloatArray &answer, FloatArray *point) {
+void BranchFunction :: evaluateDerivativeAt(FloatArray &answer, FloatArray *point, EnrichmentItem* ei) {
     /*
      *  answer.resize(2);
      *  CrackTip *cr = (CrackTip*) activeEnrItem;
