@@ -751,18 +751,20 @@ contextIOResultType DofManager :: saveContext(DataStream *stream, ContextMode mo
         THROW_CIOERR(iores);
     }
 
-    if ( mode & CM_Definition ) {
-        if ( !stream->write(& numberOfDofs, 1) ) {
-            THROW_CIOERR(CIO_IOERR);
-        }
 
-        // store dof types
-        for ( i = 1; i <= numberOfDofs; i++ ) {
-            _val =  this->giveDof(i)->giveClassID();
-            if ( !stream->write(& _val, 1) ) {
-                THROW_CIOERR(CIO_IOERR);
-            }
-        }
+    if ( !stream->write(& numberOfDofs, 1) ) {
+      THROW_CIOERR(CIO_IOERR);
+    }
+
+    // store dof types
+    for ( i = 1; i <= numberOfDofs; i++ ) {
+      _val =  this->giveDof(i)->giveClassID();
+      if ( !stream->write(& _val, 1) ) {
+        THROW_CIOERR(CIO_IOERR);
+      }
+    }
+
+    if ( mode & CM_Definition ) {
 
         if ( ( iores = loadArray.storeYourself(stream, mode) ) != CIO_OK ) {
             THROW_CIOERR(iores);
@@ -818,50 +820,51 @@ contextIOResultType DofManager :: restoreContext(DataStream *stream, ContextMode
         THROW_CIOERR(iores);
     }
 
+    int _numberOfDofs;
+    if ( !stream->read(& _numberOfDofs, 1) ) {
+      THROW_CIOERR(CIO_IOERR);
+    }
+
+    IntArray dtypes(_numberOfDofs);
+    // restore dof types
+    for ( i = 1; i <= _numberOfDofs; i++ ) {
+      if ( !stream->read(& dtypes.at(i), 1) ) {
+        THROW_CIOERR(CIO_IOERR);
+      }
+    }
+
+    // create new dofs if necessary
+    bool samedofs = ( numberOfDofs == _numberOfDofs );
+    if ( samedofs ) {
+      // if size match, check types
+      for ( i = 1; i <= _numberOfDofs; i++ ) {
+        if ( this->giveDof(i)->giveClassID() != dtypes.at(i) ) {
+          samedofs = false;
+          break;
+        }
+      }
+    }
+    
+    if ( !samedofs ) {
+      // delete old dofs
+      if ( numberOfDofs ) {
+        while ( i-- ) {
+          delete dofArray [ i ];
+        }
+        
+        delete[] dofArray;
+      }
+
+      // allocate new ones
+      dofArray = new Dof * [ _numberOfDofs ];
+      for ( i = 0; i < _numberOfDofs; i++ ) {
+        dofArray [ i ] = CreateUsrDefDofOfType( ( classType ) dtypes(i), i + 1, this );
+      }
+      
+      numberOfDofs = _numberOfDofs;
+    }
+
     if ( mode & CM_Definition ) {
-        int _numberOfDofs;
-        if ( !stream->read(& _numberOfDofs, 1) ) {
-            THROW_CIOERR(CIO_IOERR);
-        }
-
-        IntArray dtypes(_numberOfDofs);
-        // restore dof types
-        for ( i = 1; i <= _numberOfDofs; i++ ) {
-            if ( !stream->read(& dtypes.at(i), 1) ) {
-                THROW_CIOERR(CIO_IOERR);
-            }
-        }
-
-        // create new dofs if necessary
-        bool samedofs = ( numberOfDofs == _numberOfDofs );
-        if ( samedofs ) {
-            // if size match, check types
-            for ( i = 1; i <= _numberOfDofs; i++ ) {
-                if ( this->giveDof(i)->giveClassID() != dtypes.at(i) ) {
-                    samedofs = false;
-                    break;
-                }
-            }
-        }
-
-        if ( !samedofs ) {
-            // delete old dofs
-            if ( numberOfDofs ) {
-                while ( i-- ) {
-                    delete dofArray [ i ];
-                }
-
-                delete[] dofArray;
-            }
-
-            // allocate new ones
-            dofArray = new Dof * [ _numberOfDofs ];
-            for ( i = 0; i < _numberOfDofs; i++ ) {
-                dofArray [ i ] = CreateUsrDefDofOfType( ( classType ) dtypes(i), i + 1, this );
-            }
-
-            numberOfDofs = _numberOfDofs;
-        }
 
         if ( ( iores = loadArray.restoreYourself(stream, mode) ) != CIO_OK ) {
             THROW_CIOERR(iores);
