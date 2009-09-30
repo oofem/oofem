@@ -289,7 +289,7 @@ HydrationModel :: dksidh(double ksi, double T, double h, double dt)
            ( 1 - aux * dAdksi(ksi) * ( 1 + h * h ) / 2 );
 }
 
-HydrationModelStatus *
+MaterialStatus *
 HydrationModel :: giveStatus(GaussPoint *gp) const
 /**
  * Returns the hydration model status obtained from gp associated material status or from model associated status in case of isothermal analysis
@@ -431,7 +431,7 @@ double
 HydrationModel :: giveHydrationDegree(GaussPoint *gp, TimeStep *atTime, ValueModeType mode)
 // returns the hydration degree in integration point gp
 {
-    HydrationModelStatus *status = giveStatus(gp);
+  HydrationModelStatus *status = (HydrationModelStatus*) giveStatus(gp);
     double ksi = status->giveTempHydrationDegree();
     if ( mode == VM_Incremental ) {
         ksi -= status->giveHydrationDegree();
@@ -449,7 +449,7 @@ HydrationModel :: updateInternalState(const FloatArray &vec, GaussPoint *gp, Tim
 {
     double ksi, dksi, T = 0., h = 1., dt;
     // get hydration model status associated with integration point
-    HydrationModelStatus *status = giveStatus(gp);
+    HydrationModelStatus *status = (HydrationModelStatus*) giveStatus(gp);
 
     if ( vec.giveSize() ) {
         T = vec(0);

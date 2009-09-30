@@ -254,7 +254,7 @@ public:
      * point gp.
      * @return hydration model status associated with given integration point.
      */
-    virtual HydrationModelStatus *giveStatus(GaussPoint *gp) const;
+    virtual MaterialStatus *giveStatus(GaussPoint *gp) const;
 
     /// Returns generated heat for given gp [kJ/m3], eventually water consumption
     void computeInternalSourceVector(FloatArray &val, GaussPoint *gp, TimeStep *atTime, ValueModeType mode);
