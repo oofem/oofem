@@ -352,7 +352,7 @@ TimeStep *NonLinearStatic :: giveNextStep()
     double totalTime = 0.0;
     StateCounterType counter = 1;
     double deltaTtmp=deltaT;
-    
+
     //do not increase deltaT on microproblem
     if(pScale==microScale)
       deltaTtmp=0.;
@@ -711,21 +711,21 @@ NonLinearStatic :: proceedStep(int di, TimeStep *tStep)
             OOFEM_LOG_INFO("Assembling secant stiffness matrix\n");
 #endif
             stiffnessMatrix->zero(); // zero stiffness matrix
-            this->assemble( stiffnessMatrix, tStep, EID_MomentumBalance, SecantStiffnessMatrix, 
+            this->assemble( stiffnessMatrix, tStep, EID_MomentumBalance, SecantStiffnessMatrix,
 			    EModelDefaultEquationNumbering(), this->giveDomain(di) );
         } else if ( stiffMode == nls_tangentStiffness ) {
 #ifdef VERBOSE
             OOFEM_LOG_INFO("Assembling tangent stiffness matrix\n");
 #endif
             stiffnessMatrix->zero(); // zero stiffness matrix
-            this->assemble( stiffnessMatrix, tStep, EID_MomentumBalance, TangentStiffnessMatrix, 
+            this->assemble( stiffnessMatrix, tStep, EID_MomentumBalance, TangentStiffnessMatrix,
 			    EModelDefaultEquationNumbering(), this->giveDomain(di) );
         } else if ( ( stiffMode == nls_elasticStiffness ) && ( initFlag || ( mstep->giveFirstStepNumber() == tStep->giveNumber() ) ) ) {
 #ifdef VERBOSE
             OOFEM_LOG_INFO("Assembling elastic stiffness matrix\n");
 #endif
             stiffnessMatrix->zero(); // zero stiffness matrix
-            this->assemble( stiffnessMatrix, tStep, EID_MomentumBalance, ElasticStiffnessMatrix, 
+            this->assemble( stiffnessMatrix, tStep, EID_MomentumBalance, ElasticStiffnessMatrix,
 			    EModelDefaultEquationNumbering(), this->giveDomain(di) );
         }
     }
@@ -816,14 +816,14 @@ void NonLinearStatic ::  updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Do
 #ifdef VERBOSE
             OOFEM_LOG_INFO("Assembling tangent stiffness matrix\n");
 #endif
-            this->assemble(stiffnessMatrix, tStep, EID_MomentumBalance, TangentStiffnessMatrix, 
+            this->assemble(stiffnessMatrix, tStep, EID_MomentumBalance, TangentStiffnessMatrix,
 			   EModelDefaultEquationNumbering(), d);
         } else  if ( stiffMode == nls_secantStiffness ) {
 #ifdef VERBOSE
             OOFEM_LOG_INFO("Assembling secant stiffness matrix\n");
 #endif
             stiffnessMatrix->zero(); // zero stiffness matrix
-            this->assemble(stiffnessMatrix, tStep, EID_MomentumBalance, SecantStiffnessMatrix, 
+            this->assemble(stiffnessMatrix, tStep, EID_MomentumBalance, SecantStiffnessMatrix,
 			   EModelDefaultEquationNumbering(), d);
         } else {
             // currently no action , this method is mainly intended to
@@ -1083,7 +1083,7 @@ NonLinearStatic :: updateDomainLinks() {
 
 
 void
-NonLinearStatic :: assemble(SparseMtrx *answer, TimeStep *tStep, EquationID ut, CharType type, 
+NonLinearStatic :: assemble(SparseMtrx *answer, TimeStep *tStep, EquationID ut, CharType type,
 			    const UnknownNumberingScheme& s, Domain *domain)
 {
 #ifdef TIME_REPORT
@@ -1166,14 +1166,14 @@ NonLinearStatic :: assembleIncrementalReferenceLoadVectors(FloatArray &_incremen
                                                            Domain *sourceDomain, EquationID ut, TimeStep *tStep)
 {
   EModelDefaultEquationNumbering en;
-  
+
     _incrementalLoadVector.resize( sourceDomain->giveEngngModel()->giveNumberOfEquations(EID_MomentumBalance) );
     _incrementalLoadVector.zero();
     _incrementalLoadVectorOfPrescribed.resize( sourceDomain->giveEngngModel()->giveNumberOfPrescribedEquations(EID_MomentumBalance) );
     _incrementalLoadVectorOfPrescribed.zero();
 
     if ( _refMode == SparseNonLinearSystemNM :: rlm_inceremental ) {
-        this->assembleVectorFromElements(_incrementalLoadVector, tStep, ut, ElementForceLoadVector, 
+        this->assembleVectorFromElements(_incrementalLoadVector, tStep, ut, ElementForceLoadVector,
 					 VM_Incremental, en, sourceDomain);
         this->assembleVectorFromDofManagers(_incrementalLoadVector, tStep, ut,
                                             NodalLoadVector, VM_Incremental, en, sourceDomain);
@@ -1181,7 +1181,7 @@ NonLinearStatic :: assembleIncrementalReferenceLoadVectors(FloatArray &_incremen
         this->assemblePrescribedVectorFromElements(_incrementalLoadVector, tStep, ut,
                                                    ElementForceLoadVector, VM_Incremental, sourceDomain);
         this->assembleVectorFromDofManagers(_incrementalLoadVector, tStep, ut,
-					    NodalLoadVector, VM_Incremental, 
+					    NodalLoadVector, VM_Incremental,
 					    EModelDefaultPrescribedEquationNumbering(), sourceDomain);
     } else {
         this->assembleVectorFromElements(_incrementalLoadVector, tStep, ut,
@@ -1192,7 +1192,7 @@ NonLinearStatic :: assembleIncrementalReferenceLoadVectors(FloatArray &_incremen
         this->assemblePrescribedVectorFromElements(_incrementalLoadVectorOfPrescribed, tStep, ut,
                                                    ElementForceLoadVector, VM_Total, sourceDomain);
         this->assembleVectorFromDofManagers(_incrementalLoadVectorOfPrescribed, tStep, ut,
-					    NodalLoadVector, VM_Total, 
+					    NodalLoadVector, VM_Total,
 					    EModelDefaultPrescribedEquationNumbering(), sourceDomain);
     }
 
@@ -1244,7 +1244,7 @@ int NonLinearStatic :: exchangeRemoteElementData()
         if ( !( result &= nonlocCommunicator->unpackAllData( ( StructuralEngngModel * ) this, & StructuralEngngModel :: unpackRemoteElementData ) ) ) {
             _error("NonLinearStatic :: exchangeRemoteElementData: Receiveng and Unpacking remote element data");
         }
-        
+
         result &= nonlocCommunicator->finishExchange();
 
         // }
@@ -1445,7 +1445,7 @@ NonLinearStatic :: unpackMigratingData(TimeStep *atTime)
     this->initializeCommMaps(true);
     nMethod->reinitialize();
     // reinitialize error estimator (if any)
-    if (this->giveDomainErrorEstimator(1)) this->giveDomainErrorEstimator(1)->reinitialize(); 
+    if (this->giveDomainErrorEstimator(1)) this->giveDomainErrorEstimator(1)->reinitialize();
 
     initFlag = true;
 }

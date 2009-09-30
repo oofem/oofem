@@ -177,14 +177,14 @@ public:
      * structural element service with useUpdatedGpRecord = 1 parameter).
      * To be safe, this method should be called after convergence has been reached, eq.,
      * after engngModel->updateYourself() has been called.
-     * @param answer reactions, the ordering of individual values follows numbering of  prescribed equations.
+     * @param answer reactions, the ordering of individual values follows numbering of prescribed equations.
      * @param tStep time step
      * @param di domain number
      */
     void computeReactions(FloatArray &answer, TimeStep *tStep, int di);
 #ifdef __PARALLEL_MODE
     /**
-     * Packing function for internal forces of DofManagers. Pascks internal forces of shared DofManagers
+     * Packing function for internal forces of DofManagers. Packs internal forces of shared DofManagers
      * into send communication buffer of given process communicator.
      * @param processComm task communicator for which to pack forces
      * @src source vector
@@ -193,7 +193,7 @@ public:
     int packInternalForces(FloatArray *src, ProcessCommunicator &processComm);
     /**
      * Unpacking function for internal forces of DofManagers . Unpacks internal forces of shared DofManagers
-     * from  receive communication buffer of given process communicator.
+     * from receive communication buffer of given process communicator.
      * @param processComm task communicator for which to unpack forces
      * @dest destination vector
      * @return nonzero if successfull.

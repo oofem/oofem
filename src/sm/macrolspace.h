@@ -44,6 +44,7 @@
 #include "lspace.h"
 #include "sparsemtrx.h"
 #include "engngm.h"
+#include "structengngmodel.h"
 //#include "micromaterial.h"
 #include "metastep.h"
 //#include "nlstructuralelement.h"
@@ -76,10 +77,18 @@ public:
      * @param tStep time step
      * @param useUpdatedGpRecord if equal to zero, the stresses in integration points are computed (slow but safe), else if
      */
-
     virtual void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord = 0);
 
+    /**
+     * Evaluates shape function at a given pointnodal representation of real internal forces obtained from microProblem
+     * @param answer array of shape function values at given node
+     * @param coords coordinates of nodes defining the interpolation geometry
+     * @param gcoords global coordinates of point of interest
+     */
+    virtual void evalInterpolation(FloatArray &answer, const FloatArray **coords, const FloatArray &gcoords);
+
     virtual void updateYourself(TimeStep *tStep);
+
 protected:
     ///Array containing the node mapping from microscale (which microMasterNodes corresponds to which macroNode)
     IntArray microMasterNodes;
@@ -89,9 +98,9 @@ protected:
     MicroMaterial *microMaterial;
     Domain *microDomain;
     EngngModel *microEngngModel;
+    ///Information of iteration number
+    int iteration;
 };
-
-
 
 
 #endif //macrolspace_h

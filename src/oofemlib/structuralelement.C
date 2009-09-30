@@ -1239,7 +1239,7 @@ void
 StructuralElement ::  giveCharacteristicMatrix(FloatMatrix &answer,
                                                CharType mtrx, TimeStep *tStep)
 //
-// returns characteristics matrix of receiver accordind to mtrx
+// returns characteristics matrix of receiver according to mtrx
 //
 {
     if ( mtrx == StiffnessMatrix ) {
@@ -1269,7 +1269,7 @@ void
 StructuralElement ::  giveCharacteristicVector(FloatArray &answer, CharType mtrx, ValueModeType mode,
                                                TimeStep *tStep)
 //
-// returns characteristics vector of receiver accordind to mtrx
+// returns characteristics vector of receiver according to mtrx
 //
 {
     if ( mtrx == ElementForceLoadVector ) {

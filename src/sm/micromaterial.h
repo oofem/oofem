@@ -55,6 +55,7 @@
 #include "unknownnumberingscheme.h"
 #include "boundary.h"
 #include "macrolspace.h"
+#include "error.h"
 
 /**
  * MacroLspace needs stiffness matrix derived from this microproblem. For this purpose, natural boundary conditions on microproblem have to be excluded. All DoFs have to be included. The static condensation of full microscale matrix follows.
@@ -115,9 +116,9 @@ public:
     MaterialStatus *CreateStatus(GaussPoint *gp) const;
 
 
-    void giveCondensedStiffnessMatrix(FloatMatrix &answer, TimeStep *tStep, CharType type, IntArray microNodes, IntArray microDOFs);
+    void giveMacroStiffnessMatrix(FloatMatrix &answer, TimeStep *tStep, CharType type, const IntArray &microMasterNodes, const IntArray &microBoundaryNodes);
 
-    void setMacroProperties(Domain *macroDomain, MacroLSpace *macroLSpaceElement);
+    void setMacroProperties(Domain *macroDomain, MacroLSpace *macroLSpaceElement, const IntArray &microMasterNodes, const IntArray &microBoundaryNodes);
 
     ///pointer to the underlying micro problem
     EngngModel *problemMicro;
@@ -134,9 +135,11 @@ public:
     virtual bool isDefault() const { return isDefaultNumbering; }
     virtual int giveRequiredNumberOfDomainEquation() const;
     //friend class EngngModel;-not here but define in EngngModel class
-
+    ///Array containing coordinates of 8 master nodes of microproblem
+    const FloatArray *microMasterCoords [ 8 ];
+    ///Array containing DofManager number of boundary nodes
+    IntArray microBoundaryDofManager;
 protected:
-
     bool isDefaultNumbering;
     int totalNumberOfDomainEquation;
     SparseMtrx *stiffnessMatrixMicro;

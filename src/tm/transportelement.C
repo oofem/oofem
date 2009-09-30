@@ -99,7 +99,7 @@ void
 TransportElement ::  giveCharacteristicMatrix(FloatMatrix &answer,
                                               CharType mtrx, TimeStep *tStep)
 //
-// returns characteristics matrix of receiver accordind to mtrx
+// returns characteristics matrix of receiver according to mtrx
 //
 {
     if ( mtrx == ConductivityMatrix ) {

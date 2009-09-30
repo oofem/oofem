@@ -217,14 +217,14 @@ public:
      *  @return index of inserted (or existing) value
      */
     int insertSortedOnce(int value, int allocChunk = 0);
-		/** 
+		/**
      * Erase the element of given value.
-     * If the value is found on position _pos receiver will shrink accordingly, 
+     * If the value is found on position _pos receiver will shrink accordingly,
 		 * the values at positions (_pos+1,...,size) will be moved to positions (_pos,...,size-1)
 		*/
 		void eraseSorted(int value);
 		/** Extracts common values in receiver and iarray.
-		 *  Assumes that receiver as well as iarray are sorted.	
+		 *  Assumes that receiver as well as iarray are sorted.
 		 *  The size of array common is changed accordingly.
 		 *  @param iarray array to search for values common with receiver
 		 *  @param common array of common values
@@ -355,7 +355,7 @@ template< class operation > void quickSort(IntArray &arry, int l, int r, operati
 
 
 /**
- * Sorts the receiver using quiksort algorithm.
+ * Sorts the receiver using quicksort algorithm.
  * @param op is Function object, required to have member function int class::operator() (int, int),
  * must return a negative value if first argument is less than the second,
  * zero if the arguments are equal, and a positive number otherwise.

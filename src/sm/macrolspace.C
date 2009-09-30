@@ -11,7 +11,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2008   Vit Smilauer
  *
  *
  *
@@ -62,19 +62,22 @@
 //derived from linear brick element
 MacroLSpace :: MacroLSpace(int n, Domain *aDomain) : LSpace(n, aDomain)
 {
-    this->microDOFs.resize(0);
-    this->firstCall = true;
-    microMaterial = NULL;
-    microDomain = NULL;
-    microEngngModel = NULL;
+  this->microMasterNodes.resize(0);
+  this->microBoundaryNodes.resize(0);
+  this->firstCall = true;
+  microMaterial = NULL;
+  microDomain = NULL;
+  microEngngModel = NULL;
+  this->iteration = 1;
 }
 
-MacroLSpace :: ~MacroLSpace() { }
+MacroLSpace :: ~MacroLSpace() {
+
+}
 
 
 IRResultType MacroLSpace :: initializeFrom(InputRecord *ir)
 {
-    int i, j;
     const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;              // Required by IR_GIVE_FIELD macro
 
@@ -82,15 +85,8 @@ IRResultType MacroLSpace :: initializeFrom(InputRecord *ir)
 
     IR_GIVE_FIELD(ir, this->microMasterNodes, IFT_MacroLspace_microMasterNodes, "micromasternodes");
 
-    //each node has three DOFs so the array microDOFs must be expanded
-    for ( i = 1; i <= this->microMasterNodes.giveSize(); i++ ) {
-        for ( j = 1; j <= 3; j++ ) {
-            this->microDOFs.followedBy( ( this->microMasterNodes.at(i) - 1 ) * 3 + j );
-        }
-    }
-
-    if ( microDOFs.giveSize() != 24 || microMasterNodes.giveSize() != 8 ) {
-        OOFEM_ERROR("Need 8 nodes and 24 DOFs defined on macroLspace element\n");
+    if ( this->microMasterNodes.giveSize() != 8 ) {
+      OOFEM_ERROR("Need 8 master nodes from the microproblem defined on macroLspace element\n");
     }
 
     IR_GIVE_FIELD(ir, this->microBoundaryNodes, IFT_MacroLspace_microBoundaryNodes, "microboundarynodes");
@@ -100,29 +96,14 @@ IRResultType MacroLSpace :: initializeFrom(InputRecord *ir)
 
 
 
-//stiffness matrix [24x24] the rows (columns) goes in order: from node 1 (u,v,w) to node 2 (u,v,w) ... 8 (u,v,w), displacements are in global coordinates
-//need to solve microproblem and then to assemble full stiffness matrix for static condensation
+/*Stiffness matrix is taken from the microproblem. No GPs are presented here on macroscale.
+Stiffness matrix (24,24) goes in order node 1 (u,v,w) to node 2 (u,v,w) ... 8 (u,v,w). Displacements are in global coordinates.
+*/
 void MacroLSpace :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep) {
-    //int i, j;
-    //GaussPoint *gp;
-    //double dV;
-    FloatMatrix bj, d, dbj;
-    //IntegrationRule *iRule;
-    //pointer to microproblem
-
-    //Domain *domain = this->giveDomain();
-    //MetaStep *activeMStep;
-    IntArray condenseWhat;
-
-
-    //answer.resize( computeNumberOfDofs(EID_MomentumBalance), computeNumberOfDofs(EID_MomentumBalance) );
-    //answer.zero();
-
+//MatResponseMode rMode specifies tangent, secant, or initial matrix
     if ( !this->isActivated(tStep) ) {
         return;
     }
-
-    //answer.printYourself();
 
     //called the first time and initiates the microproblem
     if ( this->firstCall ) {
@@ -136,45 +117,28 @@ void MacroLSpace :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode 
         this->microEngngModel->setProblemScale(microScale); //set microScale attribute
         this->microEngngModel->checkProblemConsistency();
         this->microMaterial->init();//from UnknownNumberingScheme(), obtain all DOFs and set totalNumberOfDomainEquation
-        this->microMaterial->setMacroProperties(this->giveDomain(), this);
+        this->microMaterial->setMacroProperties(this->giveDomain(), this, this->microMasterNodes, this->microBoundaryNodes);
         this->firstCall = false;
     }
-
-
 
     //call microproblem
     //activeMStep = microMat->problemMicro->giveMetaStep(1);//->setNumberOfSteps(1);
     //activeMStep->giveMetaStepNumber();
     //microEngngModel->timer.startTimer(EngngModelTimer :: EMTT_AnalysisTimer);
     //microproblem must have the same actual time and zero time increment
-    this->microEngngModel->giveNextStep();
+
     this->microEngngModel->giveCurrentStep()->setTime( tStep->giveTime() ); //adjust total time
     this->microEngngModel->giveCurrentStep()->setTimeIncrement(0.); //no time increment
+    this->microEngngModel->initMetaStepAttributes( microEngngModel->giveCurrentStep() );//updates numerical method
 
-    OOFEM_LOG_INFO( "\n** Solving microproblem %p on macroElement %d, step %d, time %f\n", this->microMaterial->problemMicro, this->giveNumber(), this->microEngngModel->giveCurrentStep()->giveNumber(), this->microEngngModel->giveCurrentStep()->giveTime() );
+    OOFEM_LOG_INFO( "\n** Assembling stiffness matrix of microproblem %p on macroElement %d, timestep %d, time %f\n", this->microMaterial->problemMicro, this->giveNumber(), this->microEngngModel->giveCurrentStep()->giveNumber(), this->microEngngModel->giveCurrentStep()->giveTime() );
 
-    this->microEngngModel->initMetaStepAttributes( microEngngModel->giveCurrentStep() );
-
-    //this->changeMicroBoundaryConditions(tStep);
     //this->microEngngModel->solveYourselfAt( microEngngModel->giveCurrentStep() );
     //this->microEngngModel->terminate( microEngngModel->giveCurrentStep() );
 
-    this->microMaterial->giveCondensedStiffnessMatrix(answer, this->microEngngModel->giveCurrentStep(), SecantStiffnessMatrix, this->microMasterNodes, this->microDOFs);
+    this->microMaterial->giveMacroStiffnessMatrix(answer, this->microEngngModel->giveCurrentStep(), SecantStiffnessMatrix, this->microMasterNodes, this->microBoundaryNodes);
 
-    //   iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
-    //   for ( j = 0; j <iRule->getNumberOfIntegrationPoints(); j++){
-    //   gp = iRule->getIntegrationPoint(j);
-    //   this->computeBmatrixAt(gp, bj);//returns with Jacobian in global c.s.
-    //   this->computeConstitutiveMatrixAt(d, rMode, gp, tStep);//in global c.s.
-    //   dV = this->computeVolumeAround(gp);
-    //   dbj.beProductOf(d, bj);
-    //   answer.plusProductSymmUpper(bj, dbj, dV);
-    //   }
-
-    //answer is already symmetrized and resized from micromaterial model
-    //   answer.symmetrized();
-    //   answer.resize(24,24);
-    OOFEM_LOG_INFO("** Microproblem %p solved with condensed secant stiffness matrix\n\n", this->microMaterial->problemMicro);
+    OOFEM_LOG_INFO("** Assembled\n\n");
 }
 
 
@@ -182,14 +146,14 @@ void MacroLSpace :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode 
 void MacroLSpace :: changeMicroBoundaryConditions(TimeStep *tStep) {
     //Domain *microDomain = problemMicro->giveDomain(1);
     //EngngModel *microEngngModel = microDomain->giveEngngModel();
-    Domain *domain = this->giveDomain();
+    //Domain *domain = this->giveDomain();
     DofManager *DofMan;
     GeneralBoundaryCondition *GeneralBoundaryCond;
+    LoadTimeFunction *LoadTimeFunct;
     OOFEMTXTInputRecord *ir = new OOFEMTXTInputRecord();
     FloatArray n(8), answer, localCoords;
     //intArray microDofManArray(8);
-    const FloatArray *globalPointCoords [ 8 ];
-    char str [ 255 ];
+    char str [ OOFEM_MAX_LINE_LENGTH ];
     double displ;
     FloatArray displ_x(8), displ_y(8), displ_z(8);
     int i, j;
@@ -197,20 +161,31 @@ void MacroLSpace :: changeMicroBoundaryConditions(TimeStep *tStep) {
 
     //dofManArray has the node order as specified in input file
     for ( i = 1; i <= this->giveNumberOfNodes(); i++ ) { //8 nodes
-        DofMan = microDomain->giveDofManager(i);
-        //global displacements
-        displ_x.at(i) = this->giveNode(i)->giveDof(1)->giveUnknown(EID_MomentumBalance, VM_Total, tStep);
-        displ_y.at(i) = this->giveNode(i)->giveDof(2)->giveUnknown(EID_MomentumBalance, VM_Total, tStep);
-        displ_z.at(i) = this->giveNode(i)->giveDof(3)->giveUnknown(EID_MomentumBalance, VM_Total, tStep);
-        //globalPointCoords[i-1] = new const FloatArray(*this->giveNode(i)->giveCoordinates());
-        j = this->microMasterNodes.at(i);
-        globalPointCoords [ i - 1 ] = new const FloatArray( * this->microDomain->giveNode(j)->giveCoordinates() );
-        //(*globalPointCoords[i-1]).printYourself();
+      DofMan = microDomain->giveDofManager(i);
+      //global displacements
+      displ_x.at(i) = this->giveNode(i)->giveDof(1)->giveUnknown(EID_MomentumBalance, VM_Total, tStep);
+      displ_y.at(i) = this->giveNode(i)->giveDof(2)->giveUnknown(EID_MomentumBalance, VM_Total, tStep);
+      displ_z.at(i) = this->giveNode(i)->giveDof(3)->giveUnknown(EID_MomentumBalance, VM_Total, tStep);
     }
 
+    if ( this->updateRotationMatrix() ) {
+      (*this->rotationMatrix).printYourself();
+      OOFEM_ERROR("Not implemented\n");
+    }
+
+
     //displ_x.printYourself();
-    //this->interpolation.global2local(answer, globalPointCoords, *this->giveNode(i)->giveCoordinates(), 0.0);
-    //answer.printYourself();
+
+    //overrides the first load-time function to be a constant
+    if(!microDomain->giveNumberOfLoadTimeFunctions())
+      microDomain->resizeLoadTimeFunctions(1);
+
+    sprintf(str, "ConstantFunction 1 f(t) 1.0");
+    ir->setRecordString(str);
+    LoadTimeFunct = ( LoadTimeFunction * ) ( LoadTimeFunction(1, microDomain).ofType((char*)"constantfunction"));
+    LoadTimeFunct->initializeFrom(ir);
+    microDomain->setLoadTimeFunction(1, LoadTimeFunct);
+
 
     /*assign to each boundary node the form "bc 3 # # #", set 0s on free nodes
      * modify bcList = corresponds to "nbc"
@@ -221,69 +196,95 @@ void MacroLSpace :: changeMicroBoundaryConditions(TimeStep *tStep) {
     counter = 1;
     for ( i = 1; i <= microDomain->giveNumberOfDofManagers(); i++ ) { //go through all nodes on microDomain
         DofMan = microDomain->giveDofManager(i);
-        //         for ( j = 1; j <= DofMan->giveNumberOfDofs(); j++ ) { //j must be 1,2,3 - checked previously
-        //             //if(DofMan->giveDof(j)->hasBc(tStep) != 0)
-        //             //OOFEM_WARNING3("Deleting all boundary conditions from node %d component %d", i, j);
-        //         }
-
-        if ( microBoundaryNodes.contains( DofMan->giveGlobalNumber() ) ) { //if the node number is present in the microBoundaryNodes
-            this->interpolation.global2local(localCoords, globalPointCoords, * DofMan->giveCoordinates(), 0.0);
-            this->interpolation.evalN(n, localCoords, 0.0);
-            //n.printYourself();
+        if ( microBoundaryNodes.contains( DofMan->giveGlobalNumber() ) ) { //if the node number is on boundary
+          this->evalInterpolation(n, microMaterial->microMasterCoords, *DofMan->giveCoordinates());
+          //n.printYourself();
 
             for ( j = 1; j <= 3; j++ ) {
+              this->microMaterial->microBoundaryDofManager.at(counter) = DofMan->giveGlobalNumber();
                 DofMan->giveDof(j)->setBcId(counter);
                 displ = dotProduct(n, j == 1 ? displ_x : ( j == 2 ? displ_y : displ_z ), 8);
                 sprintf(str, "boundarycondition %d loadtimefunction 1 prescribedvalue %f", counter, displ);
-                //printf("%s\n", str);
                 ir->setRecordString(str);
-                GeneralBoundaryCond = ( GeneralBoundaryCondition * ) ( GeneralBoundaryCondition(counter, microDomain).ofType("boundarycondition") );
+                GeneralBoundaryCond = ( GeneralBoundaryCondition * ) ( GeneralBoundaryCondition(counter, microDomain).ofType((char*)"boundarycondition"));
                 GeneralBoundaryCond->initializeFrom(ir);
                 microDomain->setBoundaryCondition(counter, GeneralBoundaryCond);
                 counter++;
             }
-        } else {
-            for ( j = 1; j <= 3; j++ ) {
-                DofMan->giveDof(j)->setBcId(0);
-            }
+        }
+        else {
+          for ( j = 1; j <= 3; j++ ) {
+              DofMan->giveDof(j)->setBcId(0);
+          }
         }
     }
 
-
-
-
-
     delete ir;
-
-    for ( i = 1; i <= this->giveNumberOfNodes(); i++ ) { //8 nodes
-      delete globalPointCoords[i-1];
-    }
-
-
-    //   for(i=1; i<=microDomain->giveNumberOfDofManagers(); i++){
-    //     DofMan=microDomain->giveDofManager(i);
-    //     if(DofMan->giveNumberOfDofs() != 3)
-    //       OOFEM_ERROR("Need 3 DoFs in each node\n");
-    //     for(j=1; j<=3;j++){
-    //       //DofMan->giveDof(j)->setPrescribedValue(1.1);
-    //     }
-    //   }
-    //
 }
 
 //obtain nodal forces from underlying microScale
-//everything is in the default element local coodrinates
+//node numbering on element is in the same order as in the input file
 void MacroLSpace :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord) {
-    OOFEM_LOG_INFO( "\n*** giveInternalForcesVector microproblem %p on macroElement %d, step %d, time %f\n", this->microMaterial->problemMicro, this->giveNumber(), this->microEngngModel->giveCurrentStep()->giveNumber(), this->microEngngModel->giveCurrentStep()->giveTime() );
+  int i,j,k;
+  //StructuralEngngModel *microStructuralEngngModel;
+  FloatArray reactions, localCoords, n(8);
+  DofManager *DofMan;
+  double reactionForce;
 
+  if(!useUpdatedGpRecord){
+
+
+    OOFEM_LOG_INFO( "\n*** Solving microproblem %p on macroElement %d, timestep %d, iteration %d, time %f\n", this->microMaterial->problemMicro, this->giveNumber(), this->microEngngModel->giveCurrentStep()->giveNumber(), this->iteration, this->microEngngModel->giveCurrentStep()->giveTime() );
+
+    this->iteration++;
     this->changeMicroBoundaryConditions(tStep);
     this->microEngngModel->solveYourselfAt( this->microEngngModel->giveCurrentStep() );
     this->microEngngModel->terminate( this->microEngngModel->giveCurrentStep() );
+    //microStructuralEngngModel = ( StructuralEngngModel * ) &this->microEngngModel;
+    StructuralEngngModel *microStructuralEngngModel = dynamic_cast<StructuralEngngModel *>(this->microEngngModel);
+
+    //reaction vector contains contributions from unknownNumberingScheme
+    microStructuralEngngModel->computeReactions(reactions, this->microEngngModel->giveCurrentStep(), 1);
+    //reactions.printYourself();
+    answer.resize(24);
+    answer.zero();
+    /*for ( i = 1; i <= this->giveNumberOfNodes(); i++ ) { //8 nodes
+      DofMan = microDomain->giveDofManager(i);
+    */
+
+    for(i = 1; i <= microMaterial->microBoundaryDofManager.giveSize()/3; i++){//Number of DoFManagers stored in triplets
+      DofMan = microDomain->giveDofManager(microMaterial->microBoundaryDofManager.at(3*i-2));
+      this->evalInterpolation(n, microMaterial->microMasterCoords, *DofMan->giveCoordinates());
+      for ( j = 1; j <= DofMan->giveNumberOfDofs(); j++ ) {//3
+        reactionForce = reactions.at(3*i+j-3);
+        for( k = 1 ; k <= 8 ; k++ ){
+          answer.at(3*k+j-3) += reactionForce * n.at(k);
+        }
+      }
+    }
+
+  //   for(i = 1; i <= microDomain->giveNumberOfDofManagers(); i++){//12
+  //     DofMan = microDomain->giveDofManager(i);
+  //     this->evalInterpolation(n, microMaterial->microMasterCoords, *DofMan->giveCoordinates());
+  //
+  //     for ( j = 1; j <= 3; j++ ) {
+  //       reactionForce = reactions.at(3*i+j-3);
+  //       for( k=1;k<=8;k++){
+  //         answer.at(3*k+j-3) += reactionForce * n.at(k);
+  //       }
+  //     }
+  //   }
 
 
+    OOFEM_LOG_INFO("\n*** Solving done\n", this->microMaterial->problemMicro);
+  }
+}
 
+void MacroLSpace :: evalInterpolation(FloatArray &answer, const FloatArray **coords, const FloatArray &gcoords){
+  FloatArray localCoords;
 
-    OOFEM_LOG_INFO("\n*** giveInternalForcesVector microproblem %p done\n", this->microMaterial->problemMicro);
+  this->interpolation.global2local(localCoords, coords, gcoords, 0.0);
+  this->interpolation.evalN(answer, localCoords, 0.0);
 }
 
 
@@ -294,8 +295,10 @@ void MacroLSpace :: updateYourself(TimeStep *tStep)
     for ( i = 0; i < numberOfIntegrationRules; i++ ) {
         integrationRulesArray [ i ]->updateYourself(tStep);
     }
-
+    OOFEM_LOG_INFO("***\n");
     //set number of timestep so the microproblem counts from 1 to nsteps in each iteration but not totally
-    this->microEngngModel->giveCurrentStep()->setNumber(1);
+    //this->microEngngModel->giveCurrentStep()->setNumber(1);
+    this->iteration = 1;
+    this->microEngngModel->giveNextStep();//time step used in ouput file name
 }
 

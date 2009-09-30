@@ -103,6 +103,8 @@ public:
     IRResultType initializeFrom(InputRecord *ir);
     /// Sets the receiver bounds according to given solution step number, returns end index
     int setStepBounds(int startStepNumber);
+    /// Sets the number of steps (keyword nsteps in input file)
+    void setNumberOfSteps(int numberOfSteps);
     /// Tests if step number is maintained by receiver
     int isStepValid(int solStepNumber);
     /// Returns the step relative number  to receiver

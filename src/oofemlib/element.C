@@ -395,7 +395,7 @@ void
 Element ::  giveCharacteristicMatrix(FloatMatrix &answer,
                                      CharType mtrx, TimeStep *tStep)
 //
-// returns characteristics matrix of receiver accordind to mtrx
+// returns characteristics matrix of receiver according to mtrx
 //
 {
     _error("giveCharacteristicMatrix: Unknown Type of characteristic mtrx.");
@@ -407,7 +407,7 @@ Element ::  giveCharacteristicMatrix(FloatMatrix &answer,
 void
 Element ::  giveCharacteristicVector(FloatArray &answer, CharType type, ValueModeType mode, TimeStep *tStep)
 //
-// returns characteristics vector of receiver accordind to mtrx
+// returns characteristics vector of receiver according to mtrx
 //
 {
     _error("giveCharacteristicVector: Unknown Type of characteristic mtrx.");
@@ -418,7 +418,7 @@ Element ::  giveCharacteristicVector(FloatArray &answer, CharType type, ValueMod
 
 double Element ::  giveCharacteristicValue(CharType mtrx, TimeStep *tStep)
 //
-// returns characteristics value of receiver accordind to CharType
+// returns characteristics value of receiver according to CharType
 //
 {
     _error("giveCharacteristicValue: Unknown Type of characteristic mtrx.");

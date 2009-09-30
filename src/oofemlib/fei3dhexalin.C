@@ -125,7 +125,7 @@ FEI3dHexaLin :: local2global(FloatArray &answer, const FloatArray **coords, cons
 #define POINT_TOL 1.e-3
 
 int
-FEI3dHexaLin :: global2local(FloatArray &answer, const FloatArray **nc, const FloatArray &coords, double time)
+FEI3dHexaLin :: global2local(FloatArray &answer, const FloatArray **nc, const FloatArray &gcoords, double time)
 {
     double x1, x2, x3, x4, x5, x6, x7, x8, a1, a2, a3, a4, a5, a6, a7, a8;
     double y1, y2, y3, y4, y5, y6, y7, y8, b1, b2, b3, b4, b5, b6, b7, b8;
@@ -162,9 +162,9 @@ FEI3dHexaLin :: global2local(FloatArray &answer, const FloatArray **nc, const Fl
     z7 = nc [ 6 ]->at(3);
     z8 = nc [ 7 ]->at(3);
 
-    xp = coords.at(1);
-    yp = coords.at(2);
-    zp = coords.at(3);
+    xp = gcoords.at(1);
+    yp = gcoords.at(2);
+    zp = gcoords.at(3);
 
     a1 =  x1 + x2 + x3 + x4 + x5 + x6 + x7 + x8;
     a2 = -x1 - x2 + x3 + x4 - x5 - x6 + x7 + x8;

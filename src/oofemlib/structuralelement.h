@@ -420,7 +420,7 @@ public:
     /**
      * Returns internal state variable (like stress,strain) at node of element in Reduced form,
      * the way how is obtained is dependent on InternalValueType.
-     * The value may be local, or smoothed useing some recovery technigue/
+     * The value may be local, or smoothed using some recovery technic /
      * returns zero if element is unable to respont to request.
      * @param answer contains result, zero sized if not supported
      * @param type determines the internal variable requested (physical meaning)
@@ -723,7 +723,7 @@ protected:
     // i.e. r(l)=T r(h), if no trasformation necessary set anser to empty mtrx
     /**
      * Returns  transformation matrix from global coord. system to local element
-     * coordinate system ( i.e. r(l)=T r(g)). if no trasformation is necessary
+     * coordinate system ( i.e. r(l)=T r(g)). If no trasformation is necessary
      * then answer is empty mtrx and zero value is returned.
      * @return nonzero if transformation is necessary, zero otherwise.
      */

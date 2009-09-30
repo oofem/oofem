@@ -83,6 +83,12 @@ MetaStep :: setStepBounds(int startStepNumber)
     return sindex + numberOfSteps;
 }
 
+void
+MetaStep :: setNumberOfSteps(int numberOfSteps)
+{
+  this->numberOfSteps = numberOfSteps;
+}
+
 int
 MetaStep :: isStepValid(int solStepNumber)
 {
