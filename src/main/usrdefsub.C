@@ -179,6 +179,7 @@
 #include "compodamagemat.h"
 #include "micromaterial.h"
 #include "hyperelasticmaterial.h"
+#include "misesmat.h"
 
 #include "scalarerrorindicator.h"
 #include "zzerrorestimator.h"
@@ -598,6 +599,8 @@ Material *CreateUsrDefMaterialOfType(char *aClass, int number, Domain *domain)
       newMaterial = new MicroMaterial (number,domain);
     } else if ( !strncmp(aClass, "hyperelmat", 10) ) {
         newMaterial = new HyperElasticMaterial(number, domain);
+    } else if ( !strncmp(aClass, "misesmat", 8) ) {
+        newMaterial = new MisesMat(number, domain);
     }
 #endif //__SM_MODULE
 

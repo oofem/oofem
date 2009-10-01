@@ -214,6 +214,7 @@ enum classType {
     MPlasticMaterialClass,
     J2MatClass,
     HyperElasticMaterialClass,
+    MisesMatClass,
 
     TransportMaterialClass,
     IsotropicHeatTransferMaterialClass,
@@ -251,6 +252,7 @@ enum classType {
     MPlasticMaterialStatusClass,
     MicroMaterialStatusClass,
     HyperElasticMaterialStatusClass,
+    MisesMatStatusClass,
 
     FluidDynamicMaterialClass,
     FluidDynamicMaterialStatusClass,
