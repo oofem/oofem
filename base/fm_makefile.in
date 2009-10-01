@@ -25,7 +25,7 @@ CC         = @CXX@
 AR         = ar -r
 RM         = rm -f
 
-VPATH=@OOFEM_DIR@/src/fm
+VPATH=@OOFEM_DIR@/src/fm @OOFEM_DIR@/src/fm/pfem
 
 ## source files
 srcs0= cbselement.C fluiddynamicmaterial.C cbs.C tr1_2d_cbs.C newtonianfluid.C tractionpressurebc.C fmelement.C
