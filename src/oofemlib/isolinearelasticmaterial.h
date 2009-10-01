@@ -154,6 +154,15 @@ public:
      */
     double   give(int, GaussPoint*);
 
+    /// returns the shear elastic modulus G = E / (2*(1+nu))
+    double giveShearModulus()
+    {return G;}
+
+    /// returns the bulk elastic modulus K = E / (3*(1-2*nu))
+    double giveBulkModulus()
+    {return E/(3.*(1.-2.*nu));}
+
+
     /**
      * Computes full 3d material stiffness matrix at given integration point, time, respecting load history
      * in integration point.

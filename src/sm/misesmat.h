@@ -67,6 +67,12 @@ protected:
     /// reference to the basic elastic material
     LinearElasticMaterial *linearElasticMaterial;
 
+    /// elastic shear modulus
+    double G;
+
+    /// elastic bulk modulus
+    double K;
+
     /// hardening modulus
     double H;   
  

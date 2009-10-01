@@ -40,18 +40,21 @@
 #include "flotmtrx.h"
 #include "flotarry.h"
 #include "intarray.h"
+#include "stressvector.h"
+#include "strainvector.h"
 
 #include "structuralcrosssection.h"
 #include "mathfem.h"
-//#include "datastream.h"
 #include "contextioerr.h"
 
 // constructor
 MisesMat :: MisesMat(int n, Domain *d) : StructuralMaterial(n, d)
 {    
+    linearElasticMaterial = new IsotropicLinearElasticMaterial(n, d);
     H = 0.;
     sig0 = 0.;
-    linearElasticMaterial = new IsotropicLinearElasticMaterial(n, d);
+    G = 0.;
+    K = 0.;
 }
 
 // destructor
@@ -91,6 +94,8 @@ MisesMat :: initializeFrom(InputRecord *ir)
 
     StructuralMaterial :: initializeFrom(ir);
     linearElasticMaterial->initializeFrom(ir); // takes care of elastic constants
+    G = ((IsotropicLinearElasticMaterial*) linearElasticMaterial) -> giveShearModulus();
+    K = ((IsotropicLinearElasticMaterial*) linearElasticMaterial) -> giveBulkModulus();
 
     IR_GIVE_FIELD(ir, sig0, IFT_MisesMat_sig0, "sig0"); // uniaxial yield stress
 
@@ -157,10 +162,10 @@ MisesMat :: giveRealStressVector(FloatArray &answer,
                                           const FloatArray &totalStrain,
                                           TimeStep *atTime)
 {
-    double kappa, yieldValue;
-    FloatArray fullStressVector, reducedStressVector;
-    FloatArray strainVectorR, elasticStrainVectorR, plasticStrainVectorR;
-    FloatMatrix elasticStiffness, elasticCompliance;
+  double kappa, yieldValue, dKappa;
+    FloatArray reducedStress;
+    FloatArray strain, plStrain;
+    //    FloatMatrix elasticStiffness, elasticCompliance;
     StructuralCrossSection *crossSection = ( StructuralCrossSection * )
                                            ( gp->giveElement()->giveCrossSection() );
     MisesMatStatus *status = ( MisesMatStatus * ) this->giveStatus(gp);
@@ -169,54 +174,68 @@ MisesMat :: giveRealStressVector(FloatArray &answer,
     this->initGpForNewStep(gp);
 
     // substract stress-independent part of strain (e.g. thermal strain)
-    this->giveStressDependentPartOfStrainVector(strainVectorR, gp, totalStrain,
+    this->giveStressDependentPartOfStrainVector(strain, gp, totalStrain,
                                                 atTime, VM_Total);
 
     // prepare the elastic stiffness and its inverse
 
-    this->giveLinearElasticMaterial()->giveCharacteristicMatrix(elasticStiffness, ReducedForm, ElasticStiffness, gp, atTime);
-    elasticCompliance.beInverseOf(elasticStiffness);
+    //    this->giveLinearElasticMaterial()->giveCharacteristicMatrix(elasticStiffness, ReducedForm, ElasticStiffness, gp, atTime);
+    //    elasticCompliance.beInverseOf(elasticStiffness);
 
     // === radial return algorithm ===
 
     // get the initial plastic strain and initial kappa from the status
-    status->givePlasticStrainVector(plasticStrainVectorR);
+    status->givePlasticStrainVector(plStrain);
     status->giveCumulativePlasticStrain(kappa);
     
     // elastic predictor
-    elasticStrainVectorR = totalStrain;
-    elasticStrainVectorR.substract(plasticStrainVectorR);
+    StrainVector elStrain(totalStrain,_3dMat);
+    elStrain.substract(plStrain);
+    StrainVector elStrainDev(_3dMat);
+    double elStrainVol;
+    elStrain.computeDeviatoricVolumetricSplit(elStrainDev,elStrainVol);
+    StressVector trialStressDev(_3dMat);
+    elStrainDev.applyDeviatoricElasticStiffness(trialStressDev, G);
 
-    reducedStressVector.beProductOf(elasticStiffness, elasticStrainVectorR);
-    crossSection->giveFullCharacteristicVector(fullStressVector, gp, reducedStressVector);
+    //    reducedStressVector.beProductOf(elasticStiffness, elasticStrainVectorR);
+    //    crossSection->giveFullCharacteristicVector(fullStressVector, gp, reducedStressVector);
 
     // check the yield condition at the trial state
-    yieldValue = this->computeYieldValueAt(gp, fullStressVector, kappa);
+    //    yieldValue = this->computeYieldValueAt(gp, fullStressVector, kappa);
+    double trialS = trialStressDev.computeNorm(); 
+    double sigmaY = sig0 + H*kappa;
+    yieldValue = sqrt(3./2.)*trialS - sigmaY;
     if ( yieldValue > 0. ){
-
-      // plastic return to the yield surface
-
+      // radial return to the yield surface
+      dKappa = yieldValue / (H+3.*G);
+      StrainVector dPlStrain(_3dMat);
+      trialStressDev.applyDeviatoricElasticCompliance(dPlStrain,1.);
+      dPlStrain.times(sqrt(3./2.)*dKappa/trialS);
+      plStrain.add(dPlStrain);
+      trialStressDev.times(1.-sqrt(6.)*G*dKappa/trialS);
     }
+
+    StressVector fullStress(_3dMat);
+    double stressVol = 3.*K*elStrainVol;
+    trialStressDev.computeDeviatoricVolumetricSum(fullStress, stressVol);
 
     // store the total strain in status
     status->letTempStrainVectorBe(totalStrain);
 
     // reduce the stress vector and store it in status
-    crossSection->giveReducedCharacteristicVector(reducedStressVector, gp, fullStressVector);
-    status->letTempStressVectorBe(reducedStressVector);
+    crossSection->giveReducedCharacteristicVector(reducedStress, gp, fullStress);
+    status->letTempStressVectorBe(reducedStress);
 
     // store the plastic strain and cumulative plastic strain
-    status->letTempPlasticStrainVectorBe(plasticStrainVectorR);
+    status->letTempPlasticStrainVectorBe(plStrain);
     status->setTempCumulativePlasticStrain(kappa);
 
     // reduce the stress vector (if required) and return it
-    if ( form == FullForm ) {
-        answer = fullStressVector;
-        return;
-    } else                                                             {
-        crossSection->giveReducedCharacteristicVector(answer, gp, fullStressVector);
-        return;
-    }
+    if ( form == FullForm ) 
+      answer = fullStress;
+    else                                                             
+      answer = reducedStress;
+    return;
 }
 
 // returns the consistent (algorithmic) tangent stiffness matrix
