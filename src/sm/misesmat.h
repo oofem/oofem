@@ -132,13 +132,6 @@ public:
      * @returns nonzero if ok or error is generated for unknown mat mode.
      */
     //    int giveIntVarCompFullIndx(IntArray &answer, InternalStateType type, MaterialMode mmode);
-
-protected:
-    /// computes the value of the yield function
-    double computeYieldValueAt(GaussPoint *gp, const FloatArray &stressVector, double kap);
-
-    // computes the J2 invariant
-    double      computeJ2InvariantAt(const FloatArray &);
 };
 
 //=============================================================================

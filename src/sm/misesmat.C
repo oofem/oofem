@@ -114,44 +114,6 @@ MisesMat :: CreateStatus(GaussPoint *gp) const
     return status;
 }
 
-// computes the value of the yield function
-double
-MisesMat :: computeYieldValueAt(GaussPoint *gp, const FloatArray &stressVector, double kap)
-{
-    double f;
-
-    // compute the square root of 3 times J2
-    if ( stressVector.isNotEmpty() ) 
-      f = sqrt(3. * this->computeJ2InvariantAt(stressVector) );
-    else
-      f = 0.;
-
-    // subtract the current yield stress (given by the linear hardening rule)
-    f -= (sig0 + H*kap);
-    return f;
-}
-
-// computes the J2 invariant
-double
-MisesMat :: computeJ2InvariantAt(const FloatArray &stressVector)
-{
-    double answer;
-    double v1, v2, v3;
-
-    if ( stressVector.isEmpty() ) {
-        return 0.0;
-    }
-
-    v1 = ( ( stressVector.at(1) - stressVector.at(2) ) * ( stressVector.at(1) - stressVector.at(2) ) );
-    v2 = ( ( stressVector.at(2) - stressVector.at(3) ) * ( stressVector.at(2) - stressVector.at(3) ) );
-    v3 = ( ( stressVector.at(3) - stressVector.at(1) ) * ( stressVector.at(3) - stressVector.at(1) ) );
-
-    answer = ( 1. / 6. ) * ( v1 + v2 + v3 ) + stressVector.at(4) * stressVector.at(4) +
-    stressVector.at(5) * stressVector.at(5) + stressVector.at(6) * stressVector.at(6);
-
-    return answer;
-}
-
 
 // returns the stress vector in 3d stress space
 // computed from the previous stress and current strain
@@ -201,15 +163,15 @@ MisesMat :: giveRealStressVector(FloatArray &answer,
     //    crossSection->giveFullCharacteristicVector(fullStressVector, gp, reducedStressVector);
 
     // check the yield condition at the trial state
-    //    yieldValue = this->computeYieldValueAt(gp, fullStressVector, kappa);
     double trialS = trialStressDev.computeNorm(); 
     double sigmaY = sig0 + H*kappa;
     yieldValue = sqrt(3./2.)*trialS - sigmaY;
     if ( yieldValue > 0. ){
       // radial return to the yield surface
       dKappa = yieldValue / (H+3.*G);
+      kappa += dKappa;
       StrainVector dPlStrain(_3dMat);
-      trialStressDev.applyDeviatoricElasticCompliance(dPlStrain,1.);
+      trialStressDev.applyDeviatoricElasticCompliance(dPlStrain,0.5);
       dPlStrain.times(sqrt(3./2.)*dKappa/trialS);
       plStrain.add(dPlStrain);
       trialStressDev.times(1.-sqrt(6.)*G*dKappa/trialS);
