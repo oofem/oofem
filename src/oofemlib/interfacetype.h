@@ -80,7 +80,9 @@ enum InterfaceType {
     LEPlicElementInterfaceType,
     LevelSetPCSElementInterfaceType,
 
-    XfemElementInterfaceType
+    XfemElementInterfaceType,
+    VTKXMLExportModuleElementInterfaceType
+    
 };
 
 #endif // interfacetype_h

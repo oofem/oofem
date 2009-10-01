@@ -48,6 +48,7 @@
 #include "engngm.h"
 #include "intarray.h"
 #include "nodalrecoverymodel.h"
+#include "interface.h"
 
 /**
  * Represents VTK (Visualization Toolkit) export module. It uses vtk file format, Unstructured grid dataset.
@@ -162,6 +163,19 @@ protected:
 
     /// Returns true if element geometry type is composite (not a single cell)
     bool isElementComposite(Element* elem);
+};
+
+/**
+   Elements with geometry defined as EGT_Composite are exported using individual pieces.
+   The VTKXMLExportModuleElementInterface serves for this purpose, defining abstract
+   export method, responsible for exporting individual element piece in xml vtk syntax.
+   Elements with geometry defined as EGT_Composite should implement this interface.
+ */
+class VTKXMLExportModuleElementInterface : public Interface {
+ public:
+  VTKXMLExportModuleElementInterface () : Interface() {}
+  const char *giveClassName() const { return "VTKXMLExportModuleElementInterface"; }
+  virtual void _export (FILE * stream, VTKXMLExportModule* m, IntArray& primaryVarsToExport, IntArray& internalVarsToExport, TimeStep* tStep ) = 0;
 };
 
 #endif // vtkxmlexportmodule_h

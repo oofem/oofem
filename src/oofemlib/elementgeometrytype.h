@@ -67,6 +67,7 @@
     ENUM_ITEM(EGT_tetra_1)  /* tetrahedron with 4 nodes */   \
     ENUM_ITEM(EGT_hexa_1)   /* hexahedron with 8 nodes */   \
     ENUM_ITEM(EGT_hexa_2)   /* hexahedron with 20 nodes */   \
+    ENUM_ITEM(EGT_Composite)/* Composite geometry, vtk export supported by individual elements */ \
     ENUM_ITEM(EGT_unknown)  /* unknown element geometry type */
 
 enum Element_Geometry_Type {

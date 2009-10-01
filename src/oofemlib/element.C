@@ -977,6 +977,7 @@ Element :: giveSpatialDimension(void)
     case EGT_hexa_2:
         return 3;
 
+    case EGT_Composite:
     case EGT_unknown:
         break;
     }
@@ -1010,6 +1011,7 @@ Element :: giveNumberOfBoundarySides(void)
     case EGT_hexa_2:
         return 6;
 
+    case EGT_Composite:
     case EGT_unknown:
         break;
     }

@@ -161,6 +161,10 @@ VTKXMLExportModule :: doOutput(TimeStep *tStep)
                     continue;
                 }
 
+                if ( this->isElementComposite(elem) ) {
+                  continue;                                    // composite cells exported individually
+                }
+
 #ifdef __PARALLEL_MODE
                 if ( elem->giveParallelMode() != Element_local ) {
                     continue;
@@ -203,6 +207,10 @@ VTKXMLExportModule :: doOutput(TimeStep *tStep)
                     continue;
                 }
 
+                if ( this->isElementComposite(elem) ) {
+                  continue;                                    // composite cells exported individually
+                }
+
 #ifdef __PARALLEL_MODE
                 if ( elem->giveParallelMode() != Element_local ) {
                     continue;
@@ -227,28 +235,29 @@ VTKXMLExportModule :: doOutput(TimeStep *tStep)
             fprintf(stream, "</Piece>\n");
         } // end of default piece for simple geometry elements
 
-#if 0
+#if 1
         // loop over region elements with multi-cell geometry
         for ( ielem = 1; ielem <= nelem; ielem++ ) {
             elem = d->giveElement(ielem);
 
-            if ( ( reg > 0 ) && ( element->giveRegionNumber() != reg ) ) {
-                continue;
+            if (this->regionsToSkip.contains(elem->giveRegionNumber())) {
+              continue;
             }
 
  #ifdef __PARALLEL_MODE
-            if ( element->giveParallelMode() != Element_local ) {
+            if ( elem->giveParallelMode() != Element_local ) {
                 continue;
             }
 
  #endif
-            if ( this->isElementComposite(element) ) {
+            if ( this->isElementComposite(elem) ) {
                 // multi cell (composite) elements should support vtkxmlexportmoduleinterface
                 // and are exported as individual pieces (see VTKXMLExportModuleElementInterface)
-                interface =  ( VTKXMLExportModuleElementInterface * ) elem->giveInterface(VTKXMLExportModuleElementInterfaceType);
+                VTKXMLExportModuleElementInterface* interface =  
+                  ( VTKXMLExportModuleElementInterface * ) elem->giveInterface(VTKXMLExportModuleElementInterfaceType);
                 if ( interface ) {
                     // passing this to access general piece related methoods like exportPointDataHeader, etc.
-                    interface->export ( stream, this, primaryVarsToExport, internalVarsToExport, tStep );
+                    interface->_export ( stream, this, primaryVarsToExport, internalVarsToExport, tStep );
                 }
             }
         } // end loop over multi-cell elements
@@ -363,8 +372,8 @@ VTKXMLExportModule :: giveElementCell(IntArray &answer, Element *elem, int cell)
 bool
 VTKXMLExportModule :: isElementComposite(Element *elem)
 {
-    return false;
-    //return (elem->giveGeometryType() == EGT_Composite);
+  //return false;
+  return (elem->giveGeometryType() == EGT_Composite);
 }
 
 
