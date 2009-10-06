@@ -146,7 +146,7 @@ void FETISolver :: setUpCommunicationMaps()
                         this->giveEngngModel()->giveRank(),
                         "FETISolver :: setUpCommunicationMaps : send number of boundary dofMans", boundaryDofManNum);
 #endif
-        commBuff.iSend(0, FETICommunicator :: NumberOfBounadryDofManagersMsg);
+        commBuff.iSend(0, FETICommunicator :: NumberOfBoundaryDofManagersMsg);
 
         MPI_Barrier(MPI_COMM_WORLD);
     }

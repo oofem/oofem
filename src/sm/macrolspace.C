@@ -69,6 +69,7 @@ MacroLSpace :: MacroLSpace(int n, Domain *aDomain) : LSpace(n, aDomain)
   microDomain = NULL;
   microEngngModel = NULL;
   this->iteration = 1;
+  this->hasStiffMatrix = 0;
 }
 
 MacroLSpace :: ~MacroLSpace() {
@@ -90,6 +91,8 @@ IRResultType MacroLSpace :: initializeFrom(InputRecord *ir)
     }
 
     IR_GIVE_FIELD(ir, this->microBoundaryNodes, IFT_MacroLspace_microBoundaryNodes, "microboundarynodes");
+
+    microBoundaryDofManager.resize( 3*microBoundaryNodes.giveSize() );
 
     return IRRT_OK;
 }
@@ -136,7 +139,14 @@ void MacroLSpace :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode 
     //this->microEngngModel->solveYourselfAt( microEngngModel->giveCurrentStep() );
     //this->microEngngModel->terminate( microEngngModel->giveCurrentStep() );
 
-    this->microMaterial->giveMacroStiffnessMatrix(answer, this->microEngngModel->giveCurrentStep(), SecantStiffnessMatrix, this->microMasterNodes, this->microBoundaryNodes);
+    if(!this->hasStiffMatrix){
+      this->microMaterial->giveMacroStiffnessMatrix(answer, this->microEngngModel->giveCurrentStep(), SecantStiffnessMatrix, this->microMasterNodes, this->microBoundaryNodes);
+      this->hasStiffMatrix = 1;
+      this->stiffMatrix = answer;
+    }
+    else {
+      answer=this->stiffMatrix;
+    }
 
     OOFEM_LOG_INFO("** Assembled\n\n");
 }
@@ -201,7 +211,7 @@ void MacroLSpace :: changeMicroBoundaryConditions(TimeStep *tStep) {
           //n.printYourself();
 
             for ( j = 1; j <= 3; j++ ) {
-              this->microMaterial->microBoundaryDofManager.at(counter) = DofMan->giveGlobalNumber();
+              this->microBoundaryDofManager.at(counter) = DofMan->giveGlobalNumber();
                 DofMan->giveDof(j)->setBcId(counter);
                 displ = dotProduct(n, j == 1 ? displ_x : ( j == 2 ? displ_y : displ_z ), 8);
                 sprintf(str, "boundarycondition %d loadtimefunction 1 prescribedvalue %f", counter, displ);
@@ -234,7 +244,7 @@ void MacroLSpace :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep
   if(!useUpdatedGpRecord){
 
 
-    OOFEM_LOG_INFO( "\n*** Solving microproblem %p on macroElement %d, timestep %d, iteration %d, time %f\n", this->microMaterial->problemMicro, this->giveNumber(), this->microEngngModel->giveCurrentStep()->giveNumber(), this->iteration, this->microEngngModel->giveCurrentStep()->giveTime() );
+    OOFEM_LOG_INFO( "\n*** Solving microproblem %p on macroElement %d, micTimeStep %d, macIteration %d, time %f\n", this->microMaterial->problemMicro, this->giveNumber(), this->microEngngModel->giveCurrentStep()->giveNumber(), this->iteration, this->microEngngModel->giveCurrentStep()->giveTime() );
 
     this->iteration++;
     this->changeMicroBoundaryConditions(tStep);
@@ -252,8 +262,8 @@ void MacroLSpace :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep
       DofMan = microDomain->giveDofManager(i);
     */
 
-    for(i = 1; i <= microMaterial->microBoundaryDofManager.giveSize()/3; i++){//Number of DoFManagers stored in triplets
-      DofMan = microDomain->giveDofManager(microMaterial->microBoundaryDofManager.at(3*i-2));
+    for(i = 1; i <= this->microBoundaryDofManager.giveSize()/3; i++){//Number of DoFManagers stored in triplets
+      DofMan = microDomain->giveDofManager(this->microBoundaryDofManager.at(3*i-2));
       this->evalInterpolation(n, microMaterial->microMasterCoords, *DofMan->giveCoordinates());
       for ( j = 1; j <= DofMan->giveNumberOfDofs(); j++ ) {//3
         reactionForce = reactions.at(3*i+j-3);
@@ -283,7 +293,7 @@ void MacroLSpace :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep
 void MacroLSpace :: evalInterpolation(FloatArray &answer, const FloatArray **coords, const FloatArray &gcoords){
   FloatArray localCoords;
 
-  this->interpolation.global2local(localCoords, coords, gcoords, 0.0);
+  this->interpolation.global2local(localCoords, coords, gcoords, 0.0);//returns even outside the element boundaries
   this->interpolation.evalN(answer, localCoords, 0.0);
 }
 

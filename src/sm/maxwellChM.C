@@ -898,7 +898,7 @@ MaxwellChainMaterial :: initializeFrom(InputRecord *ir)
     IR_GIVE_FIELD(ir, relMatAge, IFT_MaxwellChainMaterial_relmatage, "relmatage"); // Macro
     this->endOfTimeOfInterest = -1.0;
     IR_GIVE_OPTIONAL_FIELD(ir, endOfTimeOfInterest, IFT_MaxwellChainMaterial_endoftimeofinterest, "endoftimeofinterest"); // Macro
-    IR_GIVE_FIELD(ir, timeFactor, IFT_MaxwellChainMaterial_timefactor, "timefactor"); // solution time/timeFactor should give time in reqired scale
+    IR_GIVE_FIELD(ir, timeFactor, IFT_MaxwellChainMaterial_timefactor, "timefactor"); // solution time/timeFactor should give time in required scale
 
 
     //nChainUnits = readInteger (initString,"nChainUnits");

@@ -100,6 +100,10 @@ protected:
     EngngModel *microEngngModel;
     ///Information of iteration number
     int iteration;
+    ///stores node number on the boundary in the triplets - TODO
+    IntArray microBoundaryDofManager;
+    FloatMatrix stiffMatrix;
+    bool hasStiffMatrix;
 };
 
 

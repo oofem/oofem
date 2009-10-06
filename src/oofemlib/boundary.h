@@ -139,7 +139,7 @@ public:
      */
     int     isImposed(TimeStep *);
     /**
-     * Returns receiver load type. It distinguish particular bounadry conditions according to
+     * Returns receiver load type. It distinguish particular boundary conditions according to
      * their "physical" meaning (like StructuralTemperatureLoadLT, StructuralLoadLT).
      * @return returns BoundaryConditionLT value.
      */
@@ -158,7 +158,7 @@ public:
      */
     virtual void scale(double s) { prescribedValue *= s; }
 
-    
+
     /** Set prescribed value at the input record string of receiver
      *  @param s prescribed value
      */

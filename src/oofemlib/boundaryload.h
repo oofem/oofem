@@ -208,7 +208,7 @@ public:
      */
     virtual int giveInputRecordString(std :: string &str, bool keyword = true);
     /**
-     * Returns receiver load type. It distinguish particular bounadry conditions according to
+     * Returns receiver load type. It distinguish particular boundary conditions according to
      * their "physical" meaning (like StructuralTemperatureLoadLT, StructuralLoadLT).
      * Derived classes should always overload, default implementation returns value
      * specified on input by user.

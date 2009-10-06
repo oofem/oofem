@@ -113,12 +113,12 @@ public:
 
 #ifdef __SLEPC_MODULE
     /*
-      Creates Petsc contexts. Must be implemented by derived classes since the governing equation type is reqired 
+      Creates Petsc contexts. Must be implemented by derived classes since the governing equation type is required
       for context creation.
     */
     virtual void initPetscContexts ();
 #endif
-    
+
     /** DOF printing routine. Called by DofManagers to print Dof specific part.
      * Dof class provides component printing routines, but emodel is responsible
      * for what will be printed at DOF level.

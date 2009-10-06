@@ -47,8 +47,8 @@
  * Class implementing sparse matrix stored in skyline form. This class
  * assumes symmetric form of matrix to be stored, i.e., only upper half
  * part is therefore stored. Coefficients are stored in one dimensional
- * float array, containing for each column the values from the diagonal 
- * to the last nonzero entry. 
+ * float array, containing for each column the values from the diagonal
+ * to the last nonzero entry.
  * This requires to remember the adresses of diagonal members in such
  * array (addr attribute)
  * @see SparseMtrx class
@@ -177,6 +177,8 @@ public:
     double &at(int, int);
     /// Returns coefficient at position (i,j).
     double at(int i, int j) const;
+    /// Returns 0 if the memory is not allocated at position (i,j).
+    int isAllocatedAt(int i, int j) const;
 
     void toFloatMatrix(FloatMatrix &answer) const;
     /// Prints receiver to stdout.

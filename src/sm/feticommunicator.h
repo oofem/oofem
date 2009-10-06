@@ -59,7 +59,7 @@ class FETICommunicator : public Communicator
 {
 public:
     /// Enumeration used to define necessary communication tags, used to identify different messages send/received
-    enum { FETICommunicatorZeroTag, NumberOfBounadryDofManagersMsg, BoundaryDofManagersRecMsg };
+    enum { FETICommunicatorZeroTag, NumberOfBoundaryDofManagersMsg, BoundaryDofManagersRecMsg };
 
 protected:
     /// Number of equations at master level (determined form boundary nodes)

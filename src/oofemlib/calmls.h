@@ -129,9 +129,9 @@ class CylindricalALM : public SparseNonLinearSystemNM
      */
 protected:
     /**
-     * CALM mode type; determines the calm step length controll.
-     * calm_hpc_off - full ALM with kvadratic constrain and all dofs
-     * calm_hpc_on  - full ALM with kvadratic constrain, taking into account only selected dofs
+     * CALM mode type; determines the calm step length control.
+     * calm_hpc_off - full ALM with quadratic constrain and all dofs
+     * calm_hpc_on  - full ALM with quadratic constrain, taking into account only selected dofs
      * calml_hpc - linearized ALM (only displacements), taking into account only selected dofs with given weight
      */
     enum    calm_ControllType { calm_hpc_off = 0, calm_hpc_on, calml_hpc };

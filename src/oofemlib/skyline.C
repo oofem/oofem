@@ -173,6 +173,24 @@ Skyline ::   at(int i, int j) const
 }
 
 
+int
+Skyline :: isAllocatedAt(int i, int j) const
+{
+  int k, answer = 1;
+
+  if ( j < i ) {
+    k = i;
+    i = j;
+    j = k;
+  }
+
+  if ( ( adr->at(j + 1) - adr->at(j) ) <= ( j - i ) )
+    answer = 0;
+
+  return answer;
+}
+
+
 void
 Skyline :: toFloatMatrix(FloatMatrix &answer) const
 {
@@ -315,7 +333,7 @@ int Skyline :: assemble(const IntArray &rloc, const IntArray &cloc, const FloatM
 
 FloatArray *Skyline :: backSubstitutionWith(FloatArray &y) const
 // Returns the solution x of the system U.x = y , where U is the receiver.
-// nota : x overwrites y
+// note : x overwrites y
 {
     // allocation of answer
     FloatArray solution( y.giveSize() );
@@ -401,7 +419,7 @@ int Skyline :: buildInternalStructure(EngngModel *eModel, int di, EquationID ut,
       neq = s.giveRequiredNumberOfDomainEquation();
       if ( neq == 0 )
         OOFEM_ERROR("Undefined Required number of domain equations");
-    } 
+    }
 
     IntArray loc;
     IntArray *mht = new IntArray(neq);

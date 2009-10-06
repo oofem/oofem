@@ -136,7 +136,7 @@ public:
      * using one (or more) loop over local code numbers of elements.
      * This method must be called before any operation, like assembly, zeroing,
      * or multiplication.
-     * The UnknownType parameter allows to distinguis between several possible governing equations, that
+     * The UnknownType parameter allows to distinguish between several possible governing equations, that
      * can be numbered separately.
      * @param eModel pointer to corresponding engineering model
      * @param di domain index specify which domain to use
@@ -190,6 +190,8 @@ public:
     virtual double &at(int i, int j) = 0;
     /// Returns coefficient at position (i,j).
     virtual double at(int i, int j) const = 0;
+    ///Checks whether memory is allocated at position (i,j).
+    virtual int isAllocatedAt(int i, int j) const { return 0; }
     virtual void toFloatMatrix(FloatMatrix &answer) const = 0;
     /// Prints the receiver statistics (one-line) to stdout.
     virtual void printStatistics() const { }

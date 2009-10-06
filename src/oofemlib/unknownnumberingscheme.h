@@ -1,23 +1,23 @@
 /* $Id$ */
 /*
 
-                   *****    *****   ******  ******  ***   ***                            
-                 **   **  **   **  **      **      ** *** **                             
-                **   **  **   **  ****    ****    **  *  **                              
-               **   **  **   **  **      **      **     **                               
-              **   **  **   **  **      **      **     **                                
-              *****    *****   **      ******  **     **         
-            
-                                                                   
-               OOFEM : Object Oriented Finite Element Code                 
-                    
-                 Copyright (C) 1993 - 2002   Borek Patzak                                       
+                   *****    *****   ******  ******  ***   ***
+                 **   **  **   **  **      **      ** *** **
+                **   **  **   **  ****    ****    **  *  **
+               **   **  **   **  **      **      **     **
+              **   **  **   **  **      **      **     **
+              *****    *****   **      ******  **     **
+
+
+               OOFEM : Object Oriented Finite Element Code
+
+                 Copyright (C) 1993 - 2002   Borek Patzak
 
 
 
          Czech Technical University, Faculty of Civil Engineering,
      Department of Structural Mechanics, 166 29 Prague, Czech Republic
-                                                                               
+
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation; either version 2 of the License, or
@@ -30,7 +30,7 @@
 
     You should have received a copy of the GNU General Public License
     along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.                                                                              
+    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
 #ifndef unknownnumberingscheme_h
@@ -48,7 +48,7 @@ class UnknownNumberingScheme {
  public:
   UnknownNumberingScheme (void) {};
   virtual ~UnknownNumberingScheme () {}
-  
+
   /**
      Initializes the receiver, if necessary
   */
@@ -64,24 +64,24 @@ class UnknownNumberingScheme {
      the equation is assigned to the given DOF, zero otherwise.
   */
   virtual int giveDofEquationNumber (Dof* dof) const = 0;
-  
+
   /**
-    Returns reqired number of domain equation. Number is always less or equal to the sum of all DOFs gathered from all nodes.
+    Returns required number of domain equation. Number is always less or equal to the sum of all DOFs gathered from all nodes.
   */
   virtual int giveRequiredNumberOfDomainEquation () const {return 0;}
 };
 
 /**
-   The representation of EngngModel default unknown numbering. The equation numbers are assigned 
+   The representation of EngngModel default unknown numbering. The equation numbers are assigned
    by the engng model itself to individual DOFs. Therefore, this call is a simple shell around
    DofEquationNumbering interface, forwarding all the reqests to individual DOFs.
  */
 class EModelDefaultEquationNumbering : public UnknownNumberingScheme {
  protected:
  public:
-  
+
   EModelDefaultEquationNumbering (void) : UnknownNumberingScheme () {}
-  
+
   virtual void init () {}
   virtual bool isDefault() const {return true;}
   virtual int giveDofEquationNumber (Dof* dof) const {
@@ -91,21 +91,21 @@ class EModelDefaultEquationNumbering : public UnknownNumberingScheme {
 
 
 /**
-   The representation of EngngModel default prescribed unknown numbering. 
-   The equation numbers are assigned by the engng model itself to individual DOFs. 
+   The representation of EngngModel default prescribed unknown numbering.
+   The equation numbers are assigned by the engng model itself to individual DOFs.
    Therefore, this call is a simple shell around
    DofEquationNumbering interface, forwarding all the reqests to individual DOFs.
  */
 class EModelDefaultPrescribedEquationNumbering : public UnknownNumberingScheme {
  public:
-  
+
   EModelDefaultPrescribedEquationNumbering (void) : UnknownNumberingScheme () {}
-  
+
   virtual void init () {}
   virtual int giveDofEquationNumber (Dof* dof) const {
     return dof->__givePrescribedEquationNumber();
   }
 };
- 
+
 
 #endif // unknownnumberingscheme_h

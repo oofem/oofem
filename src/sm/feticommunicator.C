@@ -91,7 +91,7 @@ FETICommunicator :: setUpCommunicationMaps(EngngModel *pm)
     // receive data
     //
     for ( i = 1; i < size; i++ ) {
-        commBuff.iRecv(MPI_ANY_SOURCE, FETICommunicator :: NumberOfBounadryDofManagersMsg);
+        commBuff.iRecv(MPI_ANY_SOURCE, FETICommunicator :: NumberOfBoundaryDofManagersMsg);
         while ( !commBuff.testCompletion(source, tag) ) {
             ;
         }

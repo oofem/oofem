@@ -96,7 +96,7 @@ public:
      */
     NodalLoad(int i, Domain *d) : Load(i, d) { }      // constructor
     /**
-     * Returns receiver bc type. It distinguish particular bounadry conditions according to
+     * Returns receiver bc type. It distinguish particular boundary conditions according to
      * their "physical" meaning (like StructuralTemperatureLoadLT, StructuralLoadLT).
      * @return returns DofManagerLoadLT value.
      */

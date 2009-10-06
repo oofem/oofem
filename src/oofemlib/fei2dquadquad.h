@@ -51,7 +51,7 @@ class FEI2dQuadQuad : public FEInterpolation2d
 
 
 public:
-    FEI2dQuadQuad(int ind1, int ind2) : FEInterpolation2d(2) { 
+    FEI2dQuadQuad(int ind1, int ind2) : FEInterpolation2d(2) {
       xind = ind1;
       yind = ind2; }
 
@@ -114,25 +114,25 @@ public:
      * These derivatives are in global coordinate system (where the nodal coordinates are defined)
      * @param answer contains evaluated local coordinates
      * @param coords coordinates of nodes defining the interpolation geometry
-     * @param lcoords array containing (local) coordinates
+     * @param gcoords array containing global coordinates
      * @param time time
      * @return nonzero is returned if point is within the element geometry, zero otherwise
      */
-    virtual int  global2local(FloatArray &answer, const FloatArray **coords, const FloatArray &lcoords, double time);
+    virtual int  global2local(FloatArray &answer, const FloatArray **coords, const FloatArray &gcoords, double time);
     /**
      * Evaluates local coordinates from given global ones. Returns nonzero if local coordinates are interpolating,
      * zero if extrapolating (nonzero is returned if point is within the element geometry, zero otherwise).
      * These derivatives are in global coordinate system (where the nodal coordinates are defined)
      * @param answer contains evaluated local coordinates
      * @param nodes array of node numbers defining the interpolation geometry
-     * @param lcoords array containing (local) coordinates
+     * @param gcoords array containing global coordinates
      * @param time time
      * @return nonzero is returned if point is within the element geometry, zero otherwise
      */
-    virtual int  global2local(FloatArray &answer, Domain *d, IntArray &nodes, const FloatArray &lcoords, double time) {
+    virtual int  global2local(FloatArray &answer, Domain *d, IntArray &nodes, const FloatArray &gcoords, double time) {
         const FloatArray *c [ 8 ];
         nodes2coords(d, nodes, c, 8);
-        return this->global2local(answer, c, lcoords, time);
+        return this->global2local(answer, c, gcoords, time);
     }
 
     /**

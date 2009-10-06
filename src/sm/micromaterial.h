@@ -137,12 +137,30 @@ public:
     //friend class EngngModel;-not here but define in EngngModel class
     ///Array containing coordinates of 8 master nodes of microproblem
     const FloatArray *microMasterCoords [ 8 ];
-    ///Array containing DofManager number of boundary nodes
-    IntArray microBoundaryDofManager;
+    ///Array containing equation numbers for boundary nodes [DofManagerNumber][DOF]
+    int **microBoundaryDofs;
+     ///Array of equation numbers associated to boundary nodes
+    IntArray microBoundaryDofsArr;
+    ///Array containing equation numbers for internal nodes to be condensed out [DofManagerNumber][DOF]
+    int **microInternalDofs;
+    ///Array of equation numbers associated to internal nodes
+    IntArray microInternalDofsArr;
+    ///Array containing default equation numbers for all nodes [DofManagerNumber][DOF]
+    int **microDefaultDofs;
+
+
 protected:
     bool isDefaultNumbering;
-    int totalNumberOfDomainEquation;
-    SparseMtrx *stiffnessMatrixMicro;
+    ///The maximum DOFs corresponding to released all of the boudary conditions
+    int maxNumberOfDomainEquation;
+    ///required number of domain equations
+    int reqNumberOfDomainEquation;
+    enum EquationNumbering {AllNodes, BoundaryNodes, InteriorNodes};
+    EquationNumbering DofEquationNumbering;
+    ///number of equations associated with boundary nodes
+    int totalBoundaryDofs;
+    ///number of equations associated with boundary nodes
+    int totalInternalDofs;
 };
 
 

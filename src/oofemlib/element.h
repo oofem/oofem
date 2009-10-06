@@ -215,7 +215,7 @@ public:
     /**
      * Returns the location array (array of code numbers) of receiver for given numbering scheme.
      * Results are cached at receiver for default scheme in locationArray attribute.
-     * The UnknownType parameter allows to distinguis between several possible governing equations, that
+     * The UnknownType parameter allows to distinguish between several possible governing equations, that
      * can be numbered separately. The default implementation assumes that location array will be assembled only for
      * one UnknownType value, and this array is cached on element level.
      */

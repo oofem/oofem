@@ -114,14 +114,14 @@ public:
      * These derivatives are in global coordinate system (where the nodal coordinates are defined)
      * @param answer contains evaluated local coordinates
      * @param nodes array of node numbers defining the interpolation geometry
-     * @param lcoords array containing (local) coordinates
+     * @param gcoords array containing global coordinates
      * @param time time
      * @return nonzero is returned if point is within the element geometry, zero otherwise
      */
-    virtual int  global2local(FloatArray &answer, Domain *d, IntArray &nodes, const FloatArray &lcoords, double time) {
+    virtual int  global2local(FloatArray &answer, Domain *d, IntArray &nodes, const FloatArray &gcoords, double time) {
         const FloatArray *c [ 4 ];
         nodes2coords(d, nodes, c, 4);
-        return this->global2local(answer, c, lcoords, time);
+        return this->global2local(answer, c, gcoords, time);
     }
 
     /**
@@ -130,11 +130,11 @@ public:
      * These derivatives are in global coordinate system (where the nodal coordinates are defined)
      * @param answer contains evaluated local coordinates
      * @param coords coordinates of nodes defining the interpolation geometry
-     * @param lcoords array containing (local) coordinates
+     * @param gcoords array containing global coordinates
      * @param time time
      * @return nonzero is returned if point is within the element geometry, zero otherwise
      */
-    virtual int  global2local(FloatArray &answer, const FloatArray **coords, const FloatArray &lcoords, double time);
+    virtual int  global2local(FloatArray &answer, const FloatArray **coords, const FloatArray &gcoords, double time);
     /**
      * Evaluates the jacobian of transformation between local and global coordinates.
      */

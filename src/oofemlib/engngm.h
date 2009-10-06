@@ -368,9 +368,9 @@ public:
     /** Returns material interface representation for given domain */
     virtual MaterialInterface *giveMaterialInterface(int n) { return NULL; }
     /** Returns XfemManager at a particular position */
-    XfemManager *giveXfemManager(int n); 
+    XfemManager *giveXfemManager(int n);
     /** Return true if XfemManager at a particular position is available */
-    bool hasXfemManager(int n); 
+    bool hasXfemManager(int n);
     void setNumberOfEquations(int id, int neq) { numberOfEquations = neq;
     domainNeqs.at(id) = neq; }
     // input / output
@@ -508,25 +508,25 @@ public:
 
     /**
      * Returns total number of equations in active (current time step) time step.
-     * The UnknownType parameter allows to distinguis between several possible governing equations, that
+     * The UnknownType parameter allows to distinguish between several possible governing equations, that
      * can be numbered separately.
      */
     virtual int giveNumberOfEquations(EquationID);
     /**
      * Returns total number of prescribed equations in active (current time step) time step.
-     * The UnknownType parameter allows to distinguis between several possible governing equations, that
+     * The UnknownType parameter allows to distinguish between several possible governing equations, that
      * can be numbered separately.
      */
     virtual int giveNumberOfPrescribedEquations(EquationID);
     /**
      * Returns number of equations for given domain in active (current time step) time step.
-     * The UnknownType parameter allows to distinguis between several possible governing equations, that
+     * The UnknownType parameter allows to distinguish between several possible governing equations, that
      * can be numbered separately.
      */
     virtual int giveNumberOfDomainEquations(int, EquationID);
     /**
      * Returns number of prescribed equations for given domain in active (current time step) time step.
-     * The UnknownType parameter allows to distinguis between several possible governing equations, that
+     * The UnknownType parameter allows to distinguish between several possible governing equations, that
      * can be numbered separately.
      */
     virtual int giveNumberOfPrescribedDomainEquations(int, EquationID);
@@ -673,7 +673,7 @@ public:
      * Increases number of equations of receiver's domain and returns newly created equation number.
      * Used mainly by DofManagers to allocate their corresponding equation number if it
      * is not currently allocated.
-     * The DofIDItem parameter allows to distinguis between several possible governing equations, that
+     * The DofIDItem parameter allows to distinguish between several possible governing equations, that
      * can be numbered separately.
      */
     virtual int      giveNewEquationNumber(int domain, DofIDItem) { return ++domainNeqs.at(domain); }
@@ -681,7 +681,7 @@ public:
      * Increases number of prescribed equations of receiver's domain and returns newly created equation number.
      * Used mainly by DofManagers to allocate their corresponding equation number if it
      * is not currently allocated.
-     * The DofIDItem parameter allows to distinguis between several possible governing equations, that
+     * The DofIDItem parameter allows to distinguish between several possible governing equations, that
      * can be numbered separately.
      */
     virtual int      giveNewPrescribedEquationNumber(int domain, DofIDItem) { return ++domainPrescribedNeqs.at(domain); }
@@ -836,7 +836,7 @@ public:
      * @param type characterisctic components of type type are requsted from elements and assembled.
      * @param domain source domain
      */
-    virtual void       assemble(SparseMtrx *answer, TimeStep *tStep, EquationID ut, 
+    virtual void       assemble(SparseMtrx *answer, TimeStep *tStep, EquationID ut,
 				CharType type, const UnknownNumberingScheme& s, Domain *domain);
     /**
      * Assembles characteristic matrix of required type into given sparse matrix.
@@ -848,7 +848,7 @@ public:
      * @param type characterisctic components of type type are requsted from elements and assembled.
      * @param domain source domain
      */
-    virtual void       assemble(SparseMtrx *answer, TimeStep *tStep, EquationID r_id, EquationID c_id, 
+    virtual void       assemble(SparseMtrx *answer, TimeStep *tStep, EquationID r_id, EquationID c_id,
 				CharType type, const UnknownNumberingScheme& s, Domain *domain);
     /**
      * Assembles characteristic vector of required type into given vector.
@@ -867,8 +867,8 @@ protected:
      * @param s determines the equation numbering scheme
      * from dofManagers and assembled using code numbers.
      */
-    virtual void assembleVectorFromDofManagers(FloatArray &, TimeStep *, EquationID ut, 
-					       CharType type, ValueModeType mode, 
+    virtual void assembleVectorFromDofManagers(FloatArray &, TimeStep *, EquationID ut,
+					       CharType type, ValueModeType mode,
 					       const UnknownNumberingScheme& s, Domain *domain);
     /**
      * Assembles prescribed characteristic vector of required type from dofManagers into given vector.
@@ -886,7 +886,7 @@ protected:
      * @param s determines the equation numbering scheme
      * from elements and assembled using  using code numbers.
      */
-    void assembleVectorFromElements(FloatArray &, TimeStep *, EquationID, 
+    void assembleVectorFromElements(FloatArray &, TimeStep *, EquationID,
 				    CharType type, ValueModeType mode,
 				    const UnknownNumberingScheme& s, Domain * domain);
     /**
