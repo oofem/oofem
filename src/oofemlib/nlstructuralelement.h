@@ -200,6 +200,18 @@ protected:
         answer.resize(0, 0);
         return;
     }
+    /**
+     * Computes a matrix which, multiplied by the column matrix of nodal displacements,
+     * gives the displacement gradient stored by columns.
+     * The components of this matrix are derivatives of the shape functions,
+     * but they are arranged in a somwhat different way from the usual B matrix.
+     * @param gp integration point
+     * @param answer BF matrix at this point
+     */
+    virtual void computeBFmatrixAt(GaussPoint *gp, FloatMatrix &answer) {
+        OOFEM_ERROR("NLStructuralElement::computeBFMatrixAt : method not implemented for this element");
+        return;
+    }
 };
 
 

@@ -47,6 +47,7 @@
 #define MaterialMode_DEF \
     ENUM_ITEM(_Unknown)   \
     ENUM_ITEM(_3dMat) \
+    ENUM_ITEM(_3dMat_F)  /* 3d deformation gradient */ \
     ENUM_ITEM(_PlaneStress) \
     ENUM_ITEM(_PlaneStrain) \
     ENUM_ITEM(_2dPlate) \

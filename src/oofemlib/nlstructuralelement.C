@@ -127,41 +127,56 @@ NLStructuralElement :: computeStrainVector(FloatArray &answer, GaussPoint *gp, T
 
     rot     = this->updateRotationMatrix();
     fMode mode = domain->giveEngngModel()->giveFormulation();
-    if ( mode == TL ) { // Total Lagrange formulation
-        //b       = this -> ComputeBmatrixAt(gp) ;
-        this->computeBmatrixAt(gp, b);
-        this->computeVectorOf(EID_MomentumBalance, VM_Total, stepN, u);
-	// substract initial displacements, if defined
-	if (initialDisplacements) u.substract(initialDisplacements);
 
-        if ( rot ) {
-            u.rotatedWith(this->rotationMatrix, 'n');
-        }
+    // === total Lagrangean formulation ===
+    if ( mode == TL ) { 
+      // get the displacements
+      this->computeVectorOf(EID_MomentumBalance, VM_Total, stepN, u);
+      // subtract the initial displacements, if defined
+      if (initialDisplacements) u.substract(initialDisplacements);
+      // rotate the coordinate system, if required
+      if ( rot ) {
+	u.rotatedWith(this->rotationMatrix, 'n');
+      }
 
-        // linear part of strain tensor (in vector form)
+      if ( nlGeometry<2 ){ 
+	// strain will be used as input for stress evaluation        
+	this->computeBmatrixAt(gp, b);
+ 
+        // small strain tensor (in vector form)
         answer.beProductOf(b, u);
-        //
-        // nonlin part of strain vector
-        // loop over all component of strain vector
-        if ( nlGeometry ) {
+        
+        // Green-Lagrange strain tensor (in vector form)
+        // loop over all components of strain vector
+        if ( nlGeometry==1 ) { 
             n = answer.giveSize();
             for ( i = 1; i <= n; i++ ) {
-                // nonlin part of strain vector
+                // nonlinear part of the strain-displacement relation
                 this->computeNLBMatrixAt(A, gp, i);
                 if ( A.isNotEmpty() ) {
                     help.beProductOf(A, u);
                     answer.at(i) += 0.5 * dotProduct( u, help, u.giveSize() );
-                    // delete help;
-                    // delete A;
                 }
             }
-        }
-    } else if ( mode == AL ) { // actualized Lagrange formulation
+	}
+      } // end of nlGeometry = 0 or 1
+
+      else{ // nlGeometry = 2
+	// deformation gradient will be used instead of strain
+	this->computeBFmatrixAt(gp, b);
+	answer.beProductOf(b, u); // this gives the displacement gradient
+	// unit matrix needs to be added 
+	// (needs to be adjusted if the mode is not 3d) 
+	answer.at(1) += 1.;
+	answer.at(5) += 1.;
+	answer.at(9) += 1.;
+      } 
+    } // end of total Lagrangean formulation 
+
+    else if ( mode == AL ) { // updated Lagrangean formulation
         _error("computeStrainVector : AL mode not supported now");
     }
 
-    //delete b ;
-    //delete u ;
     return;
 }
 

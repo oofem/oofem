@@ -132,6 +132,20 @@ public:
      * @returns nonzero if ok or error is generated for unknown mat mode.
      */
     //    int giveIntVarCompFullIndx(IntArray &answer, InternalStateType type, MaterialMode mmode);
+
+ protected:
+
+    /// evaluates the stress from strain E
+    void giveRealStressVectorComputedFromStrain(FloatArray & answer,  MatResponseForm, GaussPoint *,
+                              const FloatArray & E, TimeStep *);
+
+    /// evaluates the stress from deformation gradient F
+    void giveRealStressVectorComputedFromDefGrad(FloatArray & answer,  MatResponseForm, GaussPoint *,
+                              const FloatArray & F, TimeStep *);
+
+    /// converts the deformation gradient F into the Green-Lagrange strain E 
+    void convertDefGradToGLStrain(const FloatArray & F, FloatArray & E);
+
 };
 
 //=============================================================================
@@ -140,26 +154,42 @@ public:
 class MisesMatStatus : public StructuralMaterialStatus
 {
 protected:
-    /// plastic strain vector
-    FloatArray plasticStrainVector;
-    FloatArray tempPlasticStrainVector;
+    /// plastic strain (initial)
+    FloatArray plasticStrain;
 
-    /// cumulative plastic strain (hardening variable)
+    /// plastic strain (final)
+    FloatArray tempPlasticStrain;
+
+    /// deviatoric trial stress - needed for tangent stiffness
+    FloatArray trialStress;
+
+    /// cumulative plastic strain (initial)
     double kappa;
+
+    /// cumulative plastic strain (final)
     double tempKappa;
 
 public:
     MisesMatStatus(int n, Domain *d, GaussPoint *g);
     ~MisesMatStatus();
 
-    void givePlasticStrainVector(FloatArray& answer)
-    {answer = plasticStrainVector;}
+    void givePlasticStrain(FloatArray& answer)
+    {answer = plasticStrain;}
 
-    void giveCumulativePlasticStrain(double& answer)
-    {answer = kappa;}
+    void giveTrialStressDev(FloatArray& answer)
+    {answer = trialStress;}
 
-    void letTempPlasticStrainVectorBe(FloatArray values)
-    {tempPlasticStrainVector = values;}
+    double giveCumulativePlasticStrain()
+    {return kappa;}
+
+    double giveTempCumulativePlasticStrain()
+    {return tempKappa;}
+
+    void letTempPlasticStrainBe(FloatArray values)
+    {tempPlasticStrain = values;}
+
+    void letTrialStressDevBe(FloatArray values)
+    {trialStress = values;}
 
     void setTempCumulativePlasticStrain(double value)
     {tempKappa = value;}

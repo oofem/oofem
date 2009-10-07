@@ -69,7 +69,6 @@ LSpace :: LSpace(int n, Domain *aDomain) : NLStructuralElement(n, aDomain), ZZNo
 {
     numberOfDofMans  = 8;
     numberOfGaussPoints = 8;
-    // this -> computeGaussPoints() ; => moved to instanciateYourself();
 }
 
 Interface *
@@ -129,6 +128,29 @@ LSpace :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int li,
 }
 
 void
+LSpace :: computeBFmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
+// Returns the [9x24] defgrad-displacement matrix {BF} of the receiver, 
+// evaluated at aGaussPoint.
+// BF matrix  -  9 rows : du/dx, dv/dx, dw/dx, du/dy, dv/dy, dw/dy, du/dz, dv/dz, dw/dz
+{
+  int i,j;
+    FloatMatrix dnx;
+
+    this->interpolation.evaldNdx(dnx, this->giveDomain(), dofManArray, * aGaussPoint->giveCoordinates(), 0.0);
+
+    answer.resize(9, 24);
+    answer.zero();
+
+    for ( i = 1; i <= 3; i++ ) { // 3 spatial dimensions
+      for ( j = 1; j <= 8; j++ ) { // 8 nodes
+        answer.at(3*i-2, 3*j-2) = 
+        answer.at(3*i-1, 3*j-1) = 
+	answer.at(3*i  , 3*j  ) = dnx.at(j, i); // derivative of Nj wrt Xi
+      }
+    }
+}
+
+void
 LSpace :: computeNLBMatrixAt ( FloatMatrix& answer, GaussPoint *aGaussPoint, int i)
 //
 // Returns the [24x24] nonlinear part of strain-displacement matrix {B} of the receiver,
@@ -181,7 +203,10 @@ void LSpace :: computeGaussPoints()
     numberOfIntegrationRules = 1;
     integrationRulesArray = new IntegrationRule * [ 1 ];
     integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 6);
-    integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Cube, numberOfGaussPoints, _3dMat);
+    MaterialMode mode = _3dMat; // material model is based on strain (standard approach)
+    if (nlGeometry>1)
+      mode = _3dMat_F; // material model is based on deformation gradient, not on strain
+    integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Cube, numberOfGaussPoints, mode);
   }
 }
 

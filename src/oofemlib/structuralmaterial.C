@@ -84,6 +84,7 @@ StructuralMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
     MaterialMode mMode = gp->giveMaterialMode();
     switch ( mMode ) {
     case _3dMat:
+    case _3dMat_F: // even if material uses deformation gradient, stiffness is computed in the usual way
         give3dMaterialStiffnessMatrix(answer, form, rMode, gp, atTime);
         break;
     case _PlaneStress:
@@ -262,6 +263,7 @@ StructuralMaterial :: giveSizeOfReducedStressStrainVector(MaterialMode mode)
 {
     switch ( mode ) {
     case _3dMat:
+    case _3dMat_F:
         return 6;
 
     case _PlaneStress:
@@ -579,12 +581,11 @@ StructuralMaterial :: giveStressStrainMask(IntArray &answer, MatResponseForm for
 //
 {
     int i;
-    //IntArray *indx;
 
     if ( form == ReducedForm ) {
         switch ( mmode ) {
         case _3dMat:
-            //indx = new IntArray (6);
+        case _3dMat_F:
             answer.resize(6);
             for ( i = 1; i <= 6; i++ ) {
                 answer.at(i) = i;
@@ -592,14 +593,12 @@ StructuralMaterial :: giveStressStrainMask(IntArray &answer, MatResponseForm for
 
             break;
         case _PlaneStress:
-            //indx = new IntArray (3);
             answer.resize(3);
             answer.at(1) = 1;
             answer.at(2) = 2;
             answer.at(3) = 6;
             break;
         case _PlaneStrain:
-            //indx = new IntArray (4);
             answer.resize(4);
             answer.at(1) = 1;
             answer.at(2) = 2;
@@ -607,13 +606,11 @@ StructuralMaterial :: giveStressStrainMask(IntArray &answer, MatResponseForm for
             answer.at(4) = 6;
             break;
         case _1dMat:
-            //indx = new IntArray (1);
             answer.resize(1);
             answer.at(1) = 1;
             break;
         case _2dPlateLayer:
         case _3dShellLayer:
-            //indx = new IntArray (5);
             answer.resize(5);
             answer.at(1) = 1;
             answer.at(2) = 2;
@@ -622,13 +619,11 @@ StructuralMaterial :: giveStressStrainMask(IntArray &answer, MatResponseForm for
             answer.at(5) = 6;
             break;
         case _2dBeamLayer:
-            //indx = new IntArray (2);
             answer.resize(2);
             answer.at(1) = 1;
             answer.at(2) = 5;
             break;
         case _2dPlate:
-            //indx = new IntArray (5);
             answer.resize(5);
             answer.at(1) = 7;
             answer.at(2) = 8;
@@ -637,14 +632,12 @@ StructuralMaterial :: giveStressStrainMask(IntArray &answer, MatResponseForm for
             answer.at(5) = 4;
             break;
         case _2dBeam:
-            //indx = new IntArray (3);
             answer.resize(3);
             answer.at(1) = 1;
             answer.at(2) = 8;
             answer.at(3) = 5;
             break;
         case _3dBeam:
-            //indx = new IntArray (3);
             answer.resize(6);
             answer.at(1) = 1;
             answer.at(2) = 5;
@@ -654,14 +647,12 @@ StructuralMaterial :: giveStressStrainMask(IntArray &answer, MatResponseForm for
             answer.at(6) = 9;
             break;
         case _1dFiber:
-            //indx = new IntArray (3);
             answer.resize(3);
             answer.at(1) = 1;
             answer.at(2) = 5;
             answer.at(3) = 6;
             break;
         case _3dShell:
-            //indx = new IntArray (8);
             answer.resize(8);
             answer.at(1) = 1;
             answer.at(2) = 2;
@@ -678,7 +669,6 @@ StructuralMaterial :: giveStressStrainMask(IntArray &answer, MatResponseForm for
     } else if ( form == FullForm ) {
         switch ( mmode ) {
         case _3dMat:
-            //indx = new IntArray (6);
             answer.resize(6);
             answer.zero();
             for ( i = 1; i <= 6; i++ ) {
@@ -687,7 +677,6 @@ StructuralMaterial :: giveStressStrainMask(IntArray &answer, MatResponseForm for
 
             break;
         case _PlaneStress:
-            //indx = new IntArray (6);
             answer.resize(6);
             answer.zero();
             answer.at(1) = 1;
@@ -695,7 +684,6 @@ StructuralMaterial :: giveStressStrainMask(IntArray &answer, MatResponseForm for
             answer.at(6) = 3;
             break;
         case _PlaneStrain:
-            //indx = new IntArray (6);
             answer.resize(6);
             answer.zero();
             answer.at(1) = 1;
@@ -704,14 +692,12 @@ StructuralMaterial :: giveStressStrainMask(IntArray &answer, MatResponseForm for
             answer.at(6) = 4;
             break;
         case _1dMat:
-            //indx = new IntArray (6);
             answer.resize(6);
             answer.zero();
             answer.at(1) = 1;
             break;
         case _2dPlateLayer:
         case _3dShellLayer:
-            //indx = new IntArray (6);
             answer.resize(6);
             answer.zero();
             answer.at(1) = 1;
@@ -721,14 +707,12 @@ StructuralMaterial :: giveStressStrainMask(IntArray &answer, MatResponseForm for
             answer.at(6) = 5;
             break;
         case _2dBeamLayer:
-            //indx = new IntArray (6);
             answer.resize(6);
             answer.zero();
             answer.at(1) = 1;
             answer.at(5) = 2;
             break;
         case _2dPlate:
-            //indx = new IntArray (8);
             answer.resize(12);
             answer.zero();
             answer.at(7) = 1;
@@ -738,7 +722,6 @@ StructuralMaterial :: giveStressStrainMask(IntArray &answer, MatResponseForm for
             answer.at(4) = 5;
             break;
         case _2dBeam:
-            //indx = new IntArray (8);
             answer.resize(12);
             answer.zero();
             answer.at(1) = 1;
@@ -746,7 +729,6 @@ StructuralMaterial :: giveStressStrainMask(IntArray &answer, MatResponseForm for
             answer.at(5) = 3;
             break;
         case _3dBeam:
-            //indx = new IntArray (3);
             answer.resize(6);
             answer.at(1) = 1;
             answer.at(5) = 2;
@@ -756,7 +738,6 @@ StructuralMaterial :: giveStressStrainMask(IntArray &answer, MatResponseForm for
             answer.at(9) = 6;
             break;
         case _1dFiber:
-            //indx = new IntArray (8);
             answer.resize(6);
             answer.zero();
             answer.at(1) = 1;
@@ -764,7 +745,6 @@ StructuralMaterial :: giveStressStrainMask(IntArray &answer, MatResponseForm for
             answer.at(6) = 3;
             break;
         case _3dShell:
-            //indx = new IntArray (8);
             answer.resize(12);
             answer.zero();
             answer.at(1) = 1;

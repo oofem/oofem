@@ -282,6 +282,19 @@ FloatMatrix :: beProductOf(const FloatMatrix &aMatrix, const FloatMatrix &bMatri
     return;
 }
 
+void        
+FloatMatrix :: beDyadicProductOf(const FloatArray &vec1, const FloatArray &vec2)
+// Receiver = vec1 * vec2^T
+{
+  int i,j;
+  int n1 = vec1.giveSize();
+  int n2 = vec2.giveSize();
+  this->resize(n1,n2);
+  for ( i = 1; i <= n1; i++ ) 
+    for ( j = 1; j <= n2; j++ ) 
+      this->at(i,j) = vec1.at(i) * vec2.at(j);
+  return;
+}
 
 
 void
@@ -1127,30 +1140,17 @@ void FloatMatrix :: beUnitMatrix()
     }
 }
 
-
-/*
- * FloatMatrix*  FloatMatrix :: beCopyOf (FloatMatrix* mtrx)
- * // sets the receiver to be be a copy of mtrx
- * {
- * // FloatMatrix *answer ;
- * double      *P1,*P2 ;
- * int         i ;
- *
- * if ((nRows != mtrx->giveNumberOfRows()) ||
- * (nColumns != mtrx->giveNumberOfColumns())) {
- * freeDouble(values);
- * nRows = mtrx->giveNumberOfRows();
- * nColumns = mtrx->giveNumberOfColumns();
- * values = allocDouble(nRows*nColumns);
- * }
- *
- * P1 = values;
- * P2 = mtrx->values;
- * for (i=0;i<nRows*nColumns;i++) P1[i] = P2[i];
- *
- * return this ;
- * }
- */
+// this matrix is the product of the 6x6 deviatoric projection matrix ID
+// and the inverse scaling matrix Pinv
+void FloatMatrix :: bePinvID()
+{
+    int i;
+    this->resize(6,6);
+    this->zero();
+    values[0] = values[7] = values[14] = 2./3.;
+    values[1] = values[6] = values[8] = values[12] = values[13] = -1./3.;
+    values[21] = values[28] = values[35] = 0.5;
+}
 
 void
 FloatMatrix :: resize(int rows, int columns, int allocChunk)
@@ -1176,27 +1176,6 @@ FloatMatrix :: resize(int rows, int columns, int allocChunk)
 
     this->nRows = rows;
     this->nColumns = columns;
-
-    /*
-     * FloatMatrix *old = this->GiveCopy();
-     * int ii,jj,i,j;
-     * // delete previously allocated space
-     * if (values) freeDouble(values);
-     * // alocate newly required space
-     * values = allocDouble(rows*columns);
-     *
-     *
-     * ii = min (rows,nRows);
-     * jj = min (columns, nColumns);
-     * // update size
-     * nRows = rows;
-     * nColumns = columns;
-     * // copy old values if possible
-     * for (i=1; i<= ii; i++)
-     * for (j=1; j<= jj; j++)
-     * this->at(i,j) = old->at(i,j);
-     * delete old;
-     */
 }
 
 void

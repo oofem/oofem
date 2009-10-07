@@ -199,6 +199,8 @@ public:
     void          zero() const;
     /// sets receiver to unity matrix.
     void beUnitMatrix();
+    /// sets receiver to the inverse of scaling matrix P multiplied by the deviatoric projector ID 
+    void bePinvID();
 
     /** Assigns to the receiver the tharansposition of parameter.
      * Grows or shrinks if necessary */
@@ -212,6 +214,9 @@ public:
     /** Assigns to the receiver product of aMatrix * bMatrix^T.
      * Grows or shrinks if necessary */
     void          beProductTOf(const FloatMatrix &aMatrix, const FloatMatrix &bMatrix);
+    /** Assigns to the receiver the dyadic product vec1 * vec2^T.
+     * Grows or shrinks if necessary */
+    void          beDyadicProductOf(const FloatArray &vec1, const FloatArray &vec2);
     /**
      * Adds the given matrix as sub-matrix to receiver. The sub-matrix values will be added to receivers
      * corresponding receiver's values at positions (ri...ri+src.nrows, ci....ci+src.ncolumns).

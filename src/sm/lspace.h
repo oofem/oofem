@@ -242,6 +242,7 @@ public:
 
 protected:
     void               computeBmatrixAt(GaussPoint *, FloatMatrix &, int = 1, int = ALL_STRAINS);
+    void               computeBFmatrixAt(GaussPoint *, FloatMatrix &);
     void               computeNLBMatrixAt(FloatMatrix &, GaussPoint *, int i);
     void               computeNmatrixAt(GaussPoint *, FloatMatrix &);
     void       computeGaussPoints();
