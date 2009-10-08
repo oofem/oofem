@@ -596,7 +596,8 @@ public:
     virtual double        giveLenghtInDir(const FloatArray &normalToCrackPlane);
     /**
      * Returns characteristic length of element in given integration point and in
-     * given direction.
+     * given direction. Required by material models relying on crack-band approach to achieve
+     * objectivity with respect to mesh size
      */
     virtual double        giveCharacteristicLenght(GaussPoint *gp, const FloatArray &normalToCrackPlane)
     { return 0.; }

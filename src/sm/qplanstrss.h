@@ -43,6 +43,7 @@
 #include "structuralelement.h"
 #include "fei2dquadquad.h"
 #include "zznodalrecoverymodel.h"
+#include "mathfem.h"
 
 class QPlaneStress2d : public StructuralElement, public ZZNodalRecoveryModelInterface
 {
@@ -86,6 +87,14 @@ public:
     //int    hasEdgeLoadSupport () {return 0;}
     double                computeVolumeAround(GaussPoint *);
     virtual int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords);
+    /**
+     * Returns characteristic length of element in given integration point and in
+     * given direction. Required by material models relying on crack-band approach to achieve
+     * objectivity with respect to mesh size
+     */
+    double        giveCharacteristicLenght(GaussPoint *gp, const FloatArray &normalToCrackPlane) {
+        return this->giveLenghtInDir(normalToCrackPlane) / sqrt( ( double ) this->numberOfGaussPoints );
+    }
 
     /**
      * @name The element interface required by ZZNodalRecoveryModel
