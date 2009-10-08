@@ -123,7 +123,7 @@ IRResultType MicroMaterial :: initializeFrom(InputRecord *ir)
     IRResultType result;              // Required by IR_GIVE_FIELD macro
 
 
-    IR_GIVE_FIELD2(ir, inputFileNameMicro, IFT_MicroMaterial_tmp, "file", MAX_FILENAME_LENGTH);
+    IR_GIVE_FIELD2(ir, this->inputFileNameMicro, IFT_MicroMaterialFileName, "file", MAX_FILENAME_LENGTH);
 
     OOFEM_LOG_INFO("** Instanciating microproblem with BC from file %s\n", inputFileNameMicro);
     OOFEMTXTDataReader drMicro(inputFileNameMicro);

@@ -66,7 +66,7 @@ QSpace :: QSpace (int n, Domain* aDomain) : StructuralElement (n,aDomain)
   numberOfDofMans = 20 ;
   //nn = numberOfDofMans; // number of nodes
   //nnsurf = 8;           // number of nodes on surface
-  //ndofsn = 3;           // number of DOFs on node 
+  //ndofsn = 3;           // number of DOFs on node
 }
 
 
@@ -75,15 +75,15 @@ QSpace :: initializeFrom (InputRecord* ir)
 {
   const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
   IRResultType result;                   // Required by IR_GIVE_FIELD macro
-  
+
   this->StructuralElement :: initializeFrom (ir);
   IR_GIVE_OPTIONAL_FIELD (ir, numberOfGaussPoints, IFT_QSpace_nip, "nip"); // Macro
-  
+
   if ((numberOfGaussPoints != 8) && (numberOfGaussPoints != 14) && (numberOfGaussPoints != 27) && (numberOfGaussPoints != 64)) numberOfGaussPoints = 27;
-  
+
   // set - up Gaussian integration points
   this -> computeGaussPoints();
-  
+
   return IRRT_OK;
 }
 
@@ -96,11 +96,11 @@ QSpace :: giveDofManDofIDMask (int inode, EquationID ut, IntArray& answer) const
   // describing physical meaning of particular DOFs.
 {
   answer.resize (3);
-  
+
   answer.at(1) = D_u;
   answer.at(2) = D_v;
   answer.at(3) = D_w;
-  
+
   return ;
 }
 
@@ -111,20 +111,20 @@ QSpace :: computeVolumeAround (GaussPoint* aGaussPoint)
 {
   double determinant = this->interpolation.giveTransformationJacobian (domain, dofManArray, *aGaussPoint->giveCoordinates(), 0.0);
   double weight      = aGaussPoint -> giveWeight();
-  
+
   return (determinant * weight);
 }
 
 
 int
-QSpace :: computeGlobalCoordinates (FloatArray& answer, const FloatArray& lcoords) 
+QSpace :: computeGlobalCoordinates (FloatArray& answer, const FloatArray& lcoords)
 {
-  this->interpolation.local2global (answer, domain, dofManArray, lcoords, 0.0); 
+  this->interpolation.local2global (answer, domain, dofManArray, lcoords, 0.0);
   return 1;
 }
 
 double
-QSpace::giveCharacteristicLenght(GaussPoint* gp, const FloatArray &normalToCrackPlane) 
+QSpace::giveCharacteristicLenght(GaussPoint* gp, const FloatArray &normalToCrackPlane)
 {
   double factor = __OOFEM_POW((double)this->numberOfGaussPoints, 1./3.);
   return this -> giveLenghtInDir (normalToCrackPlane)/factor;
@@ -149,18 +149,18 @@ QSpace :: computeNmatrixAt (GaussPoint* aGaussPoint, FloatMatrix& answer)
 {
   int i;
   FloatArray n(20);
-  
+
   answer.resize(3,60);
   answer.zero();
-  
-  this->interpolation.evalN (n, *aGaussPoint->giveCoordinates(), 0.0); 
-  
+
+  this->interpolation.evalN (n, *aGaussPoint->giveCoordinates(), 0.0);
+
   for (i=1;i<=20;i++){
     answer.at(1,3*i-2) = n.at(i);
     answer.at(2,3*i-1) = n.at(i);
     answer.at(3,3*i-0) = n.at(i);
   }
-  
+
   return ;
 }
 
@@ -173,27 +173,27 @@ QSpace :: computeBmatrixAt (GaussPoint *aGaussPoint, FloatMatrix& answer, int li
 {
   int i;
   FloatMatrix dnx;
-  
+
   this->interpolation.evaldNdx (dnx, this->giveDomain(), dofManArray, *aGaussPoint->giveCoordinates(), 0.0);
-  
+
   answer.resize(6,60);
   answer.zero();
-  
+
   for (i=1;i<=20;i++){
     answer.at(1,3*i-2) = dnx.at(i,1);
     answer.at(2,3*i-1) = dnx.at(i,2);
     answer.at(3,3*i-0) = dnx.at(i,3);
-    
+
     answer.at(4,3*i-1) = dnx.at(i,3);
     answer.at(4,3*i-0) = dnx.at(i,2);
-    
+
     answer.at(5,3*i-2) = dnx.at(i,3);
     answer.at(5,3*i-0) = dnx.at(i,1);
-    
+
     answer.at(6,3*i-2) = dnx.at(i,2);
     answer.at(6,3*i-1) = dnx.at(i,1);
   }
-  
+
   return ;
 }
 
@@ -201,7 +201,7 @@ QSpace :: computeBmatrixAt (GaussPoint *aGaussPoint, FloatMatrix& answer, int li
 // ***  Surface load support  ***
 // ******************************
 
-IntegrationRule* 
+IntegrationRule*
 QSpace :: GetSurfaceIntegrationRule (int approxOrder)
 {
   IntegrationRule* iRule = new GaussIntegrationRule (1,this, 1, 1);
@@ -210,19 +210,19 @@ QSpace :: GetSurfaceIntegrationRule (int approxOrder)
   return iRule;
 }
 
-void 
+void
 QSpace :: computeSurfaceNMatrixAt (FloatMatrix& answer, GaussPoint* sgp)
 {
   FloatArray n(8);
   interpolation.surfaceEvalN (n, *sgp->giveCoordinates(), 0.0);
-  
+
   answer.resize (3,24);
   answer.zero();
-  
+
   for (int i=0 ; i<8 ; i++) // loop over surfaces
     for (int j=0 ; j<3 ; j++) // loop over DOFs
       answer(j,j+i*3) = n(i);
-  
+
 }
 
 void
@@ -230,11 +230,11 @@ QSpace :: giveSurfaceDofMapping (IntArray& answer, int iSurf) const
 {
   IntArray nodes;
   const int ndofsn = 3;
-  
+
   interpolation.computeLocalSurfaceMapping (nodes, iSurf);
-  
+
   answer.resize (24);
-  
+
   for (int i=1; i<=8 ; i++) {
     answer.at(i*ndofsn-2) = nodes.at(i)*ndofsn-2;
     answer.at(i*ndofsn-1) = nodes.at(i)*ndofsn-1;
@@ -243,19 +243,19 @@ QSpace :: giveSurfaceDofMapping (IntArray& answer, int iSurf) const
 }
 
 double
-QSpace :: computeSurfaceVolumeAround (GaussPoint* gp, int iSurf) 
+QSpace :: computeSurfaceVolumeAround (GaussPoint* gp, int iSurf)
 {
   double       determinant,weight,volume;
   determinant = fabs(interpolation.surfaceGiveTransformationJacobian (iSurf, domain, dofManArray, *gp->giveCoordinates(), 0.0));
-  
+
   weight      = gp -> giveWeight();
   volume      = determinant * weight;
-  
+
   return volume;
 }
 
 void
-QSpace :: computeSurfIpGlobalCoords (FloatArray& answer, GaussPoint* gp, int iSurf) 
+QSpace :: computeSurfIpGlobalCoords (FloatArray& answer, GaussPoint* gp, int iSurf)
 {
   interpolation.surfaceLocal2global (answer, iSurf, domain, dofManArray, *gp->giveCoordinates(), 0.0);
 }
@@ -266,15 +266,15 @@ QSpace :: computeLoadLSToLRotationMatrix (FloatMatrix& answer, int iSurf, GaussP
   // returns transformation matrix from
   // surface local coordinate system
   // to element local c.s
-  // (same as global c.s in this case) 
+  // (same as global c.s in this case)
   //
   // i.e. f(element local) = T * f(edge local)
-  
+
   // definition of local c.s on surface:
-  // local z axis - perpendicular to surface, pointing outwards from element 
+  // local z axis - perpendicular to surface, pointing outwards from element
   // local x axis - is in global xy plane (perpendicular to global z axis)
   // local y axis - completes the righ hand side cs.
-  
+
   /*
      _error ("computeLoadLSToLRotationMatrix: surface local coordinate system not supported");
      return 1;
@@ -300,7 +300,7 @@ QSpace :: computeLoadLSToLRotationMatrix (FloatMatrix& answer, int iSurf, GaussP
     if (dotProduct(n,n,3) > 1.e-6) n.normalize();
     nn.add(n);
   }
-  nn.times(1./4.); 
+  nn.times(1./4.);
   if (dotProduct(nn,nn,3) < 1.e-6) {
     answer.zero();
     return 1;
@@ -325,7 +325,7 @@ QSpace :: computeLoadLSToLRotationMatrix (FloatMatrix& answer, int iSurf, GaussP
   return 1;
 }
 
-Interface* 
+Interface*
 QSpace :: giveInterface (InterfaceType interface)
 {
  if (interface == ZZNodalRecoveryModelInterfaceType) return (ZZNodalRecoveryModelInterface*) this;
@@ -338,7 +338,7 @@ QSpace :: giveInterface (InterfaceType interface)
 int
 QSpace :: ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type)
 {
- if ((type == IST_StressTensor) || (type == IST_StrainTensor)) return 6;
+  if ((type == IST_StressTensor) || (type == IST_StrainTensor) || (type == IST_DamageTensor)) return 6;
 
  GaussPoint *gp = integrationRulesArray[0]-> getIntegrationPoint(0) ;
  return this->giveIPValueSize (type, gp);
@@ -357,10 +357,10 @@ QSpace :: ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx
   } else {
     return;
   }
-  
+
   for (i=1;i<=20;i++)
     answer.at(1, i)  = n.at(i);
-  
+
   return;
 }
 

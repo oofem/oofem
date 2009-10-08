@@ -46,13 +46,14 @@
 #include "domain.h"
 #include "engngm.h"
 #include "intarray.h"
+#include "linearelasticmaterial.h"
 
 
 /**
  * Represents HOM (Homogenization) export module. It averages strain and stress tensors over the whole domain
  * and all elements in global coordinate system. The strain and stress tensor (reduced to six components) is used through whole procedure. Appropriate element strain and stress components are placed using the mask of tensor indexes. Thus various element types (beam, plane element, brick) can be combined and will give correct macroscopic response.
  */
-class HOMExportModule : public ExportModule
+class HOMExportModule : public ExportModule, public LinearElasticMaterial
 {
 protected:
 

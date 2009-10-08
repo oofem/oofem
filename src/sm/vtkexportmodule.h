@@ -64,6 +64,8 @@ protected:
     IntArray internalVarsToExport;
     /// list of primary unknowns to export
     IntArray primaryVarsToExport;
+    /// list of cell data to export
+    IntArray cellVarsToExport;
 
     enum modeType { wdmode, rbrmode }; // WholeDomain or RegionByRegion output
     modeType outMode;
@@ -142,6 +144,8 @@ protected:
     void exportIntVarAs(InternalStateType valID, InternalStateValueType type, FILE *stream, TimeStep *tStep);
     /** exports single variable */
     void exportPrimVarAs(UnknownType valID, FILE *stream, TimeStep *tStep);
+    /** export variables defined on cells */
+    void exportCellVars(FILE *stream, int elemToProcess, TimeStep *tStep);
 
     /**
      * Assembles the region node map. Also computes the total number of nodes in region.

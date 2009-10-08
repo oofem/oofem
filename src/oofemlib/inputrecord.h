@@ -88,6 +88,7 @@ enum InputFieldType {
     IFT_ExportModule_domainall,
     IFT_ExportModule_domainmask,
 
+    IFT_VTKExportModule_cellvars,
     IFT_VTKExportModule_vars,
     IFT_VTKExportModule_primvars,
     IFT_VTKExportModule_stype,
@@ -569,9 +570,10 @@ enum InputFieldType {
     IFT_CompoDamageMat_Gxy,
     IFT_CompoDamageMat_components,
 
-    IFT_MicroMaterial_tmp,
+    IFT_MicroMaterialFileName,
     IFT_MacroLspace_microMasterNodes,
     IFT_MacroLspace_microBoundaryNodes,
+    IFT_MacroLspace_stiffMatrxFileName,
 
     IFT_IDNLMaterial_r,
 

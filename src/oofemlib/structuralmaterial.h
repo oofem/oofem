@@ -711,7 +711,7 @@ protected:
     /**
      * Tranforms 3d stress vector into another coordinate system.
      * @param answer transformed stress vector
-     * @param base Transformation matrix.  There are on each column stored unit vectors of
+     * @param base Transformation matrix. There are on each column stored unit vectors of
      * coordinate system (so called base vectors) to which we do transformation. These vectors must
      * be expressed in the same coordinate system as source stressVector.
      * @param strainVector transformed 3d strain

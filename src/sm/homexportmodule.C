@@ -50,8 +50,8 @@
 #endif
 
 
-
-HOMExportModule :: HOMExportModule(EngngModel *e) : ExportModule(e)
+//inherit LinearElasticMaterial for accessing stress/strain transformation functions
+HOMExportModule :: HOMExportModule(EngngModel *e) : ExportModule(e), LinearElasticMaterial(0, NULL)
 { }
 
 
@@ -89,7 +89,8 @@ HOMExportModule :: doOutput(TimeStep *tStep)
     int nelem = d->giveNumberOfElements();
     //int nnodes = d->giveNumberOfDofManagers();
     double dV, VolTot = 0.;
-    FloatArray VecStrain, VecStress, SumStrain(6), SumStress(6);
+    FloatArray VecStrain, VecStress, SumStrain(6), SumStress(6), tempFloatAr;
+    FloatMatrix baseGCS;
     IntArray Mask;
     GaussPoint *gp;
     IntegrationRule *iRule;
@@ -112,6 +113,23 @@ HOMExportModule :: doOutput(TimeStep *tStep)
             elem->giveIPValue(VecStrain, gp, IST_StrainTensor, tStep);
             elem->giveIPValue(VecStress, gp, IST_StressTensor, tStep);
             elem->giveIntVarCompFullIndx(Mask, IST_StrainTensor);
+
+            //truss element has strains and stresses in the first array so transform them to global coordinates
+            if(elem->giveClassID() == Truss3dClass){
+              elem->giveLocalCoordinateSystem(baseGCS);
+              //this->giveStressVectorTranformationMtrx(transfMatrix,baseGCS,1);//from structuralMaterial
+              //baseGCS.printYourself();
+              VecStress.resize(6);
+              VecStrain.resize(6);
+              this->transformStressVectorTo( tempFloatAr, baseGCS, VecStress, 0);
+              VecStress = tempFloatAr;
+              this->transformStrainVectorTo( tempFloatAr, baseGCS, VecStrain, 0);
+              VecStrain = tempFloatAr;
+              for(j=1; j<=6; j++)
+                Mask.at(j)=j;
+              //VecStrain.printYourself();
+              //VecStress.printYourself();
+            }
 
             VecStrain.times(dV);
             VecStress.times(dV);
@@ -145,6 +163,7 @@ HOMExportModule :: doOutput(TimeStep *tStep)
     }
 
     fprintf(this->stream, "\n");
+    fflush(this->stream);
 }
 
 void

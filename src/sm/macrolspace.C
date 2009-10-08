@@ -70,10 +70,14 @@ MacroLSpace :: MacroLSpace(int n, Domain *aDomain) : LSpace(n, aDomain)
   microEngngModel = NULL;
   this->iteration = 1;
   this->hasStiffMatrix = 0;
+  this->stiffMatrxFile = NULL;
+  this->stiffMatrxFileNoneReadingWriting = 0;
 }
 
 MacroLSpace :: ~MacroLSpace() {
 
+  if(this->stiffMatrxFile)
+    fclose(this->stiffMatrxFile);
 }
 
 
@@ -81,6 +85,7 @@ IRResultType MacroLSpace :: initializeFrom(InputRecord *ir)
 {
     const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;              // Required by IR_GIVE_FIELD macro
+    IRResultType val;
 
     this->LSpace :: initializeFrom(ir);
 
@@ -94,6 +99,19 @@ IRResultType MacroLSpace :: initializeFrom(InputRecord *ir)
 
     microBoundaryDofManager.resize( 3*microBoundaryNodes.giveSize() );
 
+    val = IR_GIVE_OPTIONAL_FIELD2(ir, this->stiffMatrxFileName, IFT_MacroLspace_stiffMatrxFileName, "stiffmatrxfilename", MAX_FILENAME_LENGTH); //Macro
+
+    if( ir->hasField(IFT_MacroLspace_stiffMatrxFileName, "stiffmatrxfilename")){
+      if (fopen(this->stiffMatrxFileName,"r") != NULL){//if the file exist
+        stiffMatrxFile = fopen(this->stiffMatrxFileName,"r");
+        this->stiffMatrxFileNoneReadingWriting=1;
+      }
+      else {//or create a new one
+        if((stiffMatrxFile = fopen(this->stiffMatrxFileName,"w")) == NULL)
+          OOFEM_ERROR2("Can not create a new file %s\n", this->stiffMatrxFileName);
+        this->stiffMatrxFileNoneReadingWriting=2;
+      }
+    }
     return IRRT_OK;
 }
 
@@ -107,6 +125,7 @@ void MacroLSpace :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode 
     if ( !this->isActivated(tStep) ) {
         return;
     }
+
 
     //called the first time and initiates the microproblem
     if ( this->firstCall ) {
@@ -134,19 +153,19 @@ void MacroLSpace :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode 
     this->microEngngModel->giveCurrentStep()->setTimeIncrement(0.); //no time increment
     this->microEngngModel->initMetaStepAttributes( microEngngModel->giveCurrentStep() );//updates numerical method
 
-    OOFEM_LOG_INFO( "\n** Assembling stiffness matrix of microproblem %p on macroElement %d, timestep %d, time %f\n", this->microMaterial->problemMicro, this->giveNumber(), this->microEngngModel->giveCurrentStep()->giveNumber(), this->microEngngModel->giveCurrentStep()->giveTime() );
+    OOFEM_LOG_INFO( "\n** Assembling stiffness matrix of microproblem %p on macroElement %d, micTimeStep %d, micTime %f\n", this->microMaterial->problemMicro, this->giveNumber(), this->microEngngModel->giveCurrentStep()->giveNumber(), this->microEngngModel->giveCurrentStep()->giveTime() );
 
     //this->microEngngModel->solveYourselfAt( microEngngModel->giveCurrentStep() );
     //this->microEngngModel->terminate( microEngngModel->giveCurrentStep() );
 
-    if(!this->hasStiffMatrix){
+    //if(!this->hasStiffMatrix){
       this->microMaterial->giveMacroStiffnessMatrix(answer, this->microEngngModel->giveCurrentStep(), SecantStiffnessMatrix, this->microMasterNodes, this->microBoundaryNodes);
       this->hasStiffMatrix = 1;
       this->stiffMatrix = answer;
-    }
-    else {
-      answer=this->stiffMatrix;
-    }
+//     }
+//     else {
+//       answer=this->stiffMatrix;
+//     }
 
     OOFEM_LOG_INFO("** Assembled\n\n");
 }
@@ -244,7 +263,7 @@ void MacroLSpace :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep
   if(!useUpdatedGpRecord){
 
 
-    OOFEM_LOG_INFO( "\n*** Solving microproblem %p on macroElement %d, micTimeStep %d, macIteration %d, time %f\n", this->microMaterial->problemMicro, this->giveNumber(), this->microEngngModel->giveCurrentStep()->giveNumber(), this->iteration, this->microEngngModel->giveCurrentStep()->giveTime() );
+    OOFEM_LOG_INFO( "\n*** Solving microproblem %p on macroElement %d, micTimeStep %d, macIteration %d, micTime %f\n", this->microMaterial->problemMicro, this->giveNumber(), this->microEngngModel->giveCurrentStep()->giveNumber(), this->iteration, this->microEngngModel->giveCurrentStep()->giveTime() );
 
     this->iteration++;
     this->changeMicroBoundaryConditions(tStep);

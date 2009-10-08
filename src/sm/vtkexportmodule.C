@@ -45,6 +45,7 @@
 #include "mathfem.h"
 #include "oofem_limits.h"
 #include "cltypes.h"
+#include "material.h"
 
 #ifndef __MAKEDEPEND
  #include <vector>
@@ -77,6 +78,7 @@ VTKExportModule :: initializeFrom(InputRecord *ir)
     int val;
 
     ExportModule :: initializeFrom(ir);
+    IR_GIVE_OPTIONAL_FIELD(ir, cellVarsToExport, IFT_VTKExportModule_cellvars, "cellvars"); // Macro
     IR_GIVE_OPTIONAL_FIELD(ir, internalVarsToExport, IFT_VTKExportModule_vars, "vars"); // Macro
     IR_GIVE_OPTIONAL_FIELD(ir, primaryVarsToExport, IFT_VTKExportModule_primvars, "primvars"); // Macro
 
@@ -257,6 +259,8 @@ VTKExportModule :: doOutput(TimeStep *tStep)
             fprintf(stream, "%d\n", vtkCellType);
         }
 
+        // output cell data (Material ID ...)
+        exportCellVars(stream, elemToProcess, tStep);
         /*
          * for ( ielem = 1; ielem <= nelem; ielem++ ) {
          * elem = d->giveElement(ielem);
@@ -351,6 +355,8 @@ VTKExportModule :: doOutput(TimeStep *tStep)
                 vtkCellType = this->giveCellType(elem);
                 fprintf(stream, "%d\n", vtkCellType);
             }
+
+            exportCellVars(stream, elemToProcess, tStep);
         }
     }
 
@@ -516,6 +522,39 @@ VTKExportModule :: exportIntVars(FILE *stream, TimeStep *tStep)
         InternalStateValueType iType = :: giveInternalStateValueType(type);
         this->exportIntVarAs(type, iType, stream, tStep);
     }
+}
+
+void
+    VTKExportModule :: exportCellVars(FILE *stream, int elemToProcess, TimeStep *tStep){
+  int i, ielem;
+  InternalStateType type;
+  Element *elem;
+  Domain *d  = emodel->giveDomain(1);
+  int nelem = d->giveNumberOfElements();
+
+  for (i=1; i<=cellVarsToExport.giveSize(); i++){
+    type = ( InternalStateType ) cellVarsToExport.at(i);
+    InternalStateValueType iType = :: giveInternalStateValueType(type);
+    if(type == IST_MaterialNumber){
+      fprintf(stream, "\nCELL_DATA %d\nSCALARS %s int\nLOOKUP_TABLE default\n", elemToProcess, __InternalStateTypeToString(type) );
+      for ( ielem = 1; ielem <= nelem; ielem++ ) {
+        elem = d->giveElement(ielem);
+#ifdef __PARALLEL_MODE
+        if ( elem->giveParallelMode() != Element_local ) {
+        continue;
+        }
+#endif
+        fprintf(stream, "%d\n", elem->giveMaterial()->giveNumber());
+      }
+    }
+  }
+
+
+
+//
+//
+
+
 }
 
 
@@ -1191,5 +1230,6 @@ VTKExportModule :: exportPrimVarAs(UnknownType valID, FILE *stream, TimeStep *tS
 
         fprintf(stream, "\n");
     }
+    fprintf(stream, "\n");
 }
 

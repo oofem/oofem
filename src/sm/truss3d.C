@@ -81,7 +81,7 @@ Truss3d :: giveInterface(InterfaceType interface)
     } else if (interface == NodalAveragingRecoveryModelInterfaceType) {
       return (NodalAveragingRecoveryModelInterface*) this;
     }
-     
+
     OOFEM_LOG_INFO("Interface on Truss3d element not supported");
     return NULL;
 }
@@ -90,7 +90,8 @@ Truss3d :: giveInterface(InterfaceType interface)
 int
 Truss3d :: ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type)
 {
- if ((type == IST_StressTensor) || (type == IST_StrainTensor)) return 1;
+  //needs 6 components for VTK export module in order not to skip the region
+ if ((type == IST_StressTensor) || (type == IST_StrainTensor) || (type == IST_DamageTensor)) return 6;
 
  GaussPoint *gp = integrationRulesArray[0]-> getIntegrationPoint(0) ;
  return this->giveIPValueSize (type, gp);
@@ -103,20 +104,20 @@ Truss3d :: ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx
   int i;
   double ksi;
   FloatArray n(2);
-  
+
   ksi = aGaussPoint->giveCoordinate(1);
   n.at(1)  = ( 1. - ksi ) * 0.5;
   n.at(2)  = ( 1. + ksi ) * 0.5;
-  
+
   if ( this->giveIPValueSize(type, aGaussPoint) ) {
     answer.resize(1, 2);
   } else {
     return;
   }
-  
+
   for (i=1;i<=2;i++)
     answer.at(1, i)  = n.at(i);
-  
+
   return;
 }
 
@@ -230,7 +231,7 @@ Truss3d :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep)
 
     answer.resize(6, 6);
     answer.zero();
-    if (!this->isActivated(tStep)) return; 
+    if (!this->isActivated(tStep)) return;
 
     mat        = this->giveMaterial();
     halfMass   = mat->give('d',gp) * this->giveCrossSection()->give('A') * this->giveLength() / 2.;

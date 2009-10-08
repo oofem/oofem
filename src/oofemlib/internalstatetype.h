@@ -55,7 +55,7 @@
  * Values of this type are used, when these internal variables are requested.
  */
 #define InternalStateType_DEF \
-    ENUM_ITEM_WITH_VALUE(IST_Undedfined, 0) \
+    ENUM_ITEM_WITH_VALUE(IST_Undefined, 0) \
     ENUM_ITEM_WITH_VALUE(IST_StressTensor, 1) \
     ENUM_ITEM_WITH_VALUE(IST_PrincipalStressTensor, 2) \
     ENUM_ITEM_WITH_VALUE(IST_PrincipalStressTempTensor, 3) \
@@ -101,6 +101,7 @@
     ENUM_ITEM_WITH_VALUE(IST_VOFFraction, 43) \
     ENUM_ITEM_WITH_VALUE(IST_Density, 44) \
     ENUM_ITEM_WITH_VALUE(IST_MaterialInterfaceVal, 45) \
+    ENUM_ITEM_WITH_VALUE(IST_MaterialNumber, 46) \
   \
     ENUM_ITEM(CrackStatuses) \
     ENUM_ITEM(CrackedFlag) \

@@ -47,6 +47,7 @@
 #include "structengngmodel.h"
 //#include "micromaterial.h"
 #include "metastep.h"
+#include "oofem_limits.h"
 //#include "nlstructuralelement.h"
 //#include "fei3dhexalin.h"
 
@@ -100,10 +101,14 @@ protected:
     EngngModel *microEngngModel;
     ///Information of iteration number
     int iteration;
-    ///stores node number on the boundary in the triplets - TODO
+    ///stores node number on the boundary in the triplets
     IntArray microBoundaryDofManager;
     FloatMatrix stiffMatrix;
     bool hasStiffMatrix;
+    char stiffMatrxFileName[MAX_FILENAME_LENGTH];
+    FILE *stiffMatrxFile;
+    ///process with external file for the storage of stiffness matrix 0-None, 1-read, 2-write
+    int stiffMatrxFileNoneReadingWriting;
 };
 
 
