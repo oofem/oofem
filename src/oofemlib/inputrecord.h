@@ -512,10 +512,10 @@ enum InputFieldType {
     IFT_DoublePowerLawMaterial_n,
     IFT_DoublePowerLawMaterial_alpha,
 
-    IFT_MaxwellChainMaterial_n,
-    IFT_MaxwellChainMaterial_relmatage,
-    IFT_MaxwellChainMaterial_endoftimeofinterest,
-    IFT_MaxwellChainMaterial_timefactor,
+    IFT_RheoChainMaterial_n,
+    IFT_RheoChainMaterial_relmatage,
+    IFT_RheoChainMaterial_endoftimeofinterest,
+    IFT_RheoChainMaterial_timefactor,
 
     IFT_OrthotropicLinearElasticMaterial_ex,
     IFT_OrthotropicLinearElasticMaterial_ey,

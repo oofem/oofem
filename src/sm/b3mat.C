@@ -33,9 +33,9 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-//   *********************************************
-//   *** CLASS RHEOLOGIC B3  Material
-//   *********************************************
+//   ****************************************************
+//   *** CLASS B3 Material (concrete creep and shrinkage)
+//   ****************************************************
 #ifndef __MAKEDEPEND
 #include <math.h>
 #endif

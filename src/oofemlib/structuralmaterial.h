@@ -755,7 +755,8 @@ protected:
     friend class StructuralCrossSection;
     friend class SimpleCrossSection;
     friend class LayeredCrossSection;
-    friend class MaxwellChainMaterial;
+    //friend class MaxwellChainMaterial;
+    friend class RheoChainMaterial;
 };
 
 

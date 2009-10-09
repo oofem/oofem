@@ -45,8 +45,7 @@
 class B3Material : public MaxwellChainMaterial
 {
     /*
-     * This class implements a rheologic Maxwelll chain model in a finite
-     * element problem.
+     * This class implements the B3 model for concrete creep and shrinkage. 
      *
      * DESCRIPTION
      * TASK

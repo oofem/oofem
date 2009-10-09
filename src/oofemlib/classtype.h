@@ -188,7 +188,7 @@ enum classType {
     PlasticSmearedCrackingMaterialClass,
     RCMMaterialClass,
     Concrete1Class,
-    MaxwelllChainMaterialClass,
+    MaxwellChainMaterialClass,
     CebFip78MaterialClass,
     DoublePowerLawMaterialClass,
     B3MaterialClass,
@@ -215,6 +215,7 @@ enum classType {
     J2MatClass,
     HyperElasticMaterialClass,
     MisesMatClass,
+    RheoChainMaterialClass,
 
     TransportMaterialClass,
     IsotropicHeatTransferMaterialClass,
@@ -253,6 +254,7 @@ enum classType {
     MicroMaterialStatusClass,
     HyperElasticMaterialStatusClass,
     MisesMatStatusClass,
+    RheoChainMaterialStatusClass,
 
     FluidDynamicMaterialClass,
     FluidDynamicMaterialStatusClass,
