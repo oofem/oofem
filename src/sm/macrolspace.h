@@ -104,11 +104,10 @@ protected:
     ///stores node number on the boundary in the triplets
     IntArray microBoundaryDofManager;
     FloatMatrix stiffMatrix;
-    bool hasStiffMatrix;
-    char stiffMatrxFileName[MAX_FILENAME_LENGTH];
-    FILE *stiffMatrxFile;
     ///process with external file for the storage of stiffness matrix 0-None, 1-read, 2-write
     int stiffMatrxFileNoneReadingWriting;
+    ///last time step when stiffness matrix was assembled
+    TimeStep *lastStiffMatrixTimeStep;
 };
 
 

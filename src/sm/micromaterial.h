@@ -147,7 +147,8 @@ public:
     IntArray microInternalDofsArr;
     ///Array containing default equation numbers for all nodes [DofManagerNumber][DOF]
     int **microDefaultDofs;
-
+    ///Array containg force vector from nodes
+    FloatArray internalMacroForcesVector;
 
 protected:
     bool isDefaultNumbering;
@@ -155,6 +156,8 @@ protected:
     int maxNumberOfDomainEquation;
     ///required number of domain equations
     int reqNumberOfDomainEquation;
+    ///number of DOF Managers
+    int NumberOfDofManagers;
     enum EquationNumbering {AllNodes, BoundaryNodes, InteriorNodes};
     EquationNumbering DofEquationNumbering;
     ///number of equations associated with boundary nodes

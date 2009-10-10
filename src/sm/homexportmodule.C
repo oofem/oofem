@@ -127,6 +127,7 @@ HOMExportModule :: doOutput(TimeStep *tStep)
               VecStrain = tempFloatAr;
               for(j=1; j<=6; j++)
                 Mask.at(j)=j;
+              //continue;
               //VecStrain.printYourself();
               //VecStress.printYourself();
             }

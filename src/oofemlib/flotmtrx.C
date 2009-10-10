@@ -282,7 +282,7 @@ FloatMatrix :: beProductOf(const FloatMatrix &aMatrix, const FloatMatrix &bMatri
     return;
 }
 
-void        
+void
 FloatMatrix :: beDyadicProductOf(const FloatArray &vec1, const FloatArray &vec2)
 // Receiver = vec1 * vec2^T
 {
@@ -290,8 +290,8 @@ FloatMatrix :: beDyadicProductOf(const FloatArray &vec1, const FloatArray &vec2)
   int n1 = vec1.giveSize();
   int n2 = vec2.giveSize();
   this->resize(n1,n2);
-  for ( i = 1; i <= n1; i++ ) 
-    for ( j = 1; j <= n2; j++ ) 
+  for ( i = 1; i <= n1; i++ )
+    for ( j = 1; j <= n2; j++ )
       this->at(i,j) = vec1.at(i) * vec2.at(j);
   return;
 }
@@ -1144,7 +1144,6 @@ void FloatMatrix :: beUnitMatrix()
 // and the inverse scaling matrix Pinv
 void FloatMatrix :: bePinvID()
 {
-    int i;
     this->resize(6,6);
     this->zero();
     values[0] = values[7] = values[14] = 2./3.;

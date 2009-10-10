@@ -129,7 +129,7 @@ NLStructuralElement :: computeStrainVector(FloatArray &answer, GaussPoint *gp, T
     fMode mode = domain->giveEngngModel()->giveFormulation();
 
     // === total Lagrangean formulation ===
-    if ( mode == TL ) { 
+    if ( mode == TL ) {
       // get the displacements
       this->computeVectorOf(EID_MomentumBalance, VM_Total, stepN, u);
       // subtract the initial displacements, if defined
@@ -139,16 +139,16 @@ NLStructuralElement :: computeStrainVector(FloatArray &answer, GaussPoint *gp, T
 	u.rotatedWith(this->rotationMatrix, 'n');
       }
 
-      if ( nlGeometry<2 ){ 
-	// strain will be used as input for stress evaluation        
+      if ( nlGeometry<2 ){
+	// strain will be used as input for stress evaluation
 	this->computeBmatrixAt(gp, b);
- 
+
         // small strain tensor (in vector form)
         answer.beProductOf(b, u);
-        
+
         // Green-Lagrange strain tensor (in vector form)
         // loop over all components of strain vector
-        if ( nlGeometry==1 ) { 
+        if ( nlGeometry==1 ) {
             n = answer.giveSize();
             for ( i = 1; i <= n; i++ ) {
                 // nonlinear part of the strain-displacement relation
@@ -165,13 +165,13 @@ NLStructuralElement :: computeStrainVector(FloatArray &answer, GaussPoint *gp, T
 	// deformation gradient will be used instead of strain
 	this->computeBFmatrixAt(gp, b);
 	answer.beProductOf(b, u); // this gives the displacement gradient
-	// unit matrix needs to be added 
-	// (needs to be adjusted if the mode is not 3d) 
+	// unit matrix needs to be added
+	// (needs to be adjusted if the mode is not 3d)
 	answer.at(1) += 1.;
 	answer.at(5) += 1.;
 	answer.at(9) += 1.;
-      } 
-    } // end of total Lagrangean formulation 
+      }
+    } // end of total Lagrangean formulation
 
     else if ( mode == AL ) { // updated Lagrangean formulation
         _error("computeStrainVector : AL mode not supported now");
@@ -317,13 +317,12 @@ NLStructuralElement :: giveInternalForcesVector(FloatArray &answer,
     if ( nlGeometry ) {
         delete ut;
     }
-    
+
     // if inactive update fields; but do not contribute to structure
     if (!this->isActivated(tStep)) {
       answer.zero();
       return;
     }
-
 
     return;
 }
@@ -548,10 +547,10 @@ NLStructuralElement :: computeStiffnessMatrix_withIRulesAsSubcells(FloatMatrix &
 
   FloatMatrix *m = &answer;
   if (this->giveInterpolation() && this->giveInterpolation()->hasSubPatchFormulation()) m = &temp;
-  
+
   // loop over individual integration rules
   for (ir=0; ir < numberOfIntegrationRules; ir++) {
-    
+
     iRule = integrationRulesArray [ ir ];
     for ( j = 0; j < iRule->getNumberOfIntegrationPoints(); j++ ) {
       gp = iRule->getIntegrationPoint(j);
@@ -567,20 +566,20 @@ NLStructuralElement :: computeStiffnessMatrix_withIRulesAsSubcells(FloatMatrix &
               // add nonlinear contribution to each component
               bj.at(l, k) += b2.at(1, k); //mj
             }
-	          
+
             //delete b2;
           }
         }
       } // end nlGeometry
-      
+
       //      d  = this -> giveConstitutiveMatrix() ;
       this->computeConstitutiveMatrixAt(d, rMode, gp, tStep);
       dV = this->computeVolumeAround(gp);
       dbj.beProductOf(d, bj);
       m->plusProductSymmUpper(bj, dbj, dV);
-      
+
     }
-      
+
     if ( nlGeometry ) {
       delete ut;
     }
@@ -594,11 +593,11 @@ NLStructuralElement :: computeStiffnessMatrix_withIRulesAsSubcells(FloatMatrix &
 
 
   if ( nlGeometry ) {
-    
+
     for (ir=0; ir < numberOfIntegrationRules; ir++) {
       m->resize(0,0);
       iRule = integrationRulesArray [ ir ];
-      
+
       // assemble initial stress matrix
       for ( i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
         gp = iRule->getIntegrationPoint(i);
@@ -613,7 +612,7 @@ NLStructuralElement :: computeStiffnessMatrix_withIRulesAsSubcells(FloatMatrix &
               A.times(stress.at(j) * dV);
               m->plus(A);
             }
-	          
+
             //delete A;
           }
         }
@@ -632,7 +631,7 @@ NLStructuralElement :: computeStiffnessMatrix_withIRulesAsSubcells(FloatMatrix &
   if ( rot ) {
     answer.rotatedWith(* this->rotationMatrix);
   }
-  
+
   return;
 }
 

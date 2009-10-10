@@ -1214,7 +1214,6 @@ StructuralElement :: giveInternalForcesVector(FloatArray &answer,
         return;
     }
 
-
     return;
 }
 

@@ -124,7 +124,7 @@ public:
      * @param d domain to which new material will belong
      */
     Material(int n, Domain *d) : FEMComponent(n, d)
-    { propertyDictionary = new Dictionary(); }
+    { propertyDictionary = new Dictionary(); this->castingTime=-1; }
     /// Destructor.
     ~Material()                { delete propertyDictionary; }
 
@@ -176,7 +176,7 @@ public:
      * by unique int id. Intgeration point also passed to allow for materials with spatially
      * varying properties
      * @param aProperty id of peroperty requested
-     * @param gp intgration point, 
+     * @param gp intgration point,
      * @return property value
      */
     virtual double   give(int aProperty, GaussPoint* gp);

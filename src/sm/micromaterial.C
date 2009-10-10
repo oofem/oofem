@@ -50,6 +50,20 @@
 
 //valgrind --leak-check=full --show-reachable=no -v --log-file=valgr.txt ./oofem -f Macrolspace_1.in
 
+//     FloatArray A;
+//     FloatMatrix K, B;
+//     stiffnessMatrix->toFloatMatrix(K);
+//     K.symmetrized();
+//     K.printYourself();
+//     displacementVector.printYourself();
+//     A.beProductOf(K, displacementVector);
+//     A.printYourself();
+//
+//     B.beInverseOf(K);
+//     A.beProductOf(B, displacementVector);
+//     A.printYourself();
+
+
 // constructor
 //strainVector, tempStrainVector, stressVector, tempStressVector are defined on StructuralMaterialStatus
 MicroMaterialStatus :: MicroMaterialStatus(int n, Domain *d, GaussPoint *gp) : StructuralMaterialStatus(n, d, gp) { }
@@ -84,14 +98,15 @@ contextIOResultType MicroMaterialStatus :: restoreContext(DataStream *stream, Co
 /// Constructor
 MicroMaterial :: MicroMaterial(int n, Domain *d) : StructuralMaterial(n, d), UnknownNumberingScheme()
 {
-    this->isDefaultNumbering = true;
-    //full stiffness matrix of microproblem
-    this->DofEquationNumbering = AllNodes;
-    this->microBoundaryDofs = NULL;
-    this->microInternalDofs = NULL;
-    this->microDefaultDofs = NULL;
-    this->microBoundaryDofsArr.resize(0);
-    this->microInternalDofsArr.resize(0);
+  this->problemMicro = NULL;
+  this->isDefaultNumbering = true;
+  this->DofEquationNumbering = AllNodes;
+  this->microBoundaryDofs = NULL;
+  this->microInternalDofs = NULL;
+  this->microDefaultDofs = NULL;
+  this->microBoundaryDofsArr.resize(0);
+  this->microInternalDofsArr.resize(0);
+  this->internalMacroForcesVector.resize(24);
 }
 
 ///destructor
@@ -105,15 +120,21 @@ MicroMaterial :: ~MicroMaterial() {
     if(this->microMasterCoords[i-1] != NULL)
       delete this->microMasterCoords[i-1];
 
+  for ( i = 0; i < this->NumberOfDofManagers; i++ ){
+    if(this->microBoundaryDofs)
+      delete [] microBoundaryDofs[i];
+    if(this->microInternalDofs)
+      delete [] microInternalDofs[i];
+    if(this->microDefaultDofs)
+      delete [] microDefaultDofs[i];
+  }
+
   if(this->microBoundaryDofs)
-    delete microBoundaryDofs;
-
+    delete [] microBoundaryDofs;
   if(this->microInternalDofs)
-    delete microInternalDofs;
-
+    delete [] microInternalDofs;
   if(this->microDefaultDofs)
-    delete microDefaultDofs;
-
+    delete [] microDefaultDofs;
 
 }
 
@@ -251,7 +272,7 @@ void MicroMaterial :: giveMacroStiffnessMatrix(FloatMatrix &answer, TimeStep *tS
     //assemble sparse matrix K_ii of DOFS of internal nodes to be condensed out
     //K_ii is generally large, inversion of FloatMatrix consumes a lot of time and memory, sparse matrix is used
     this->reqNumberOfDomainEquation = totalInternalDofs;
-    printf("ReqNum %d\n", this->giveRequiredNumberOfDomainEquation());
+    printf("Internal DOFs %d\n", this->giveRequiredNumberOfDomainEquation());
     this->DofEquationNumbering = InteriorNodes;
     if(totalInternalDofs){
       Kbi = new FloatMatrix (totalBoundaryDofs, totalInternalDofs);
@@ -314,7 +335,7 @@ void MicroMaterial :: giveMacroStiffnessMatrix(FloatMatrix &answer, TimeStep *tS
           }
           Kii1KbiT->at(i,b) = tmpDouble;
         }
-        OOFEM_LOG_INFO("%d ", i);
+        //OOFEM_LOG_INFO("%d ", i);
       }
       OOFEM_LOG_INFO("\n");
 
@@ -492,7 +513,7 @@ void MicroMaterial :: setMacroProperties(Domain *macroDomain, MacroLSpace *macro
 
   //char str [ OOFEM_MAX_LINE_LENGTH ];
   int i,j;
-  int numDofs, numDofMan, totNumDofMan;
+  int numDofs, numDofMan;
   int counterDefault=1, counterBoundary=1, counterInternal=1;
 
   this->macroDomain = macroDomain;
@@ -510,11 +531,11 @@ void MicroMaterial :: setMacroProperties(Domain *macroDomain, MacroLSpace *macro
 
 
   //separate DOFs into boundary and internal
-  totNumDofMan = microDomain->giveNumberOfDofManagers();
-  microBoundaryDofs = new int* [totNumDofMan];
-  microInternalDofs = new int* [totNumDofMan];
-  microDefaultDofs  = new int* [totNumDofMan];
-  for ( i = 0; i < totNumDofMan; i++ ){
+  this->NumberOfDofManagers = microDomain->giveNumberOfDofManagers();
+  microBoundaryDofs = new int* [this->NumberOfDofManagers];
+  microInternalDofs = new int* [this->NumberOfDofManagers];
+  microDefaultDofs  = new int* [this->NumberOfDofManagers];
+  for ( i = 0; i < this->NumberOfDofManagers; i++ ){
     microBoundaryDofs[i] = new int [3];
     microInternalDofs[i] = new int [3];
     microDefaultDofs[i] =  new int [3];
@@ -523,7 +544,7 @@ void MicroMaterial :: setMacroProperties(Domain *macroDomain, MacroLSpace *macro
     microDefaultDofs[i][0]  = microDefaultDofs[i][1]  = microDefaultDofs[i][2]  = 0;
   }
 
-  for ( i = 0; i < totNumDofMan; i++ ){
+  for ( i = 0; i < this->NumberOfDofManagers; i++ ){
     DofMan = microDomain->giveDofManager(i+1);
     numDofMan = DofMan->giveGlobalNumber();
     numDofs = DofMan->giveNumberOfDofs();

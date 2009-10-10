@@ -69,15 +69,11 @@ MacroLSpace :: MacroLSpace(int n, Domain *aDomain) : LSpace(n, aDomain)
   microDomain = NULL;
   microEngngModel = NULL;
   this->iteration = 1;
-  this->hasStiffMatrix = 0;
-  this->stiffMatrxFile = NULL;
-  this->stiffMatrxFileNoneReadingWriting = 0;
+  this->lastStiffMatrixTimeStep=NULL;
 }
 
 MacroLSpace :: ~MacroLSpace() {
 
-  if(this->stiffMatrxFile)
-    fclose(this->stiffMatrxFile);
 }
 
 
@@ -85,7 +81,7 @@ IRResultType MacroLSpace :: initializeFrom(InputRecord *ir)
 {
     const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;              // Required by IR_GIVE_FIELD macro
-    IRResultType val;
+    //IRResultType val;
 
     this->LSpace :: initializeFrom(ir);
 
@@ -99,19 +95,19 @@ IRResultType MacroLSpace :: initializeFrom(InputRecord *ir)
 
     microBoundaryDofManager.resize( 3*microBoundaryNodes.giveSize() );
 
-    val = IR_GIVE_OPTIONAL_FIELD2(ir, this->stiffMatrxFileName, IFT_MacroLspace_stiffMatrxFileName, "stiffmatrxfilename", MAX_FILENAME_LENGTH); //Macro
+    //val = IR_GIVE_OPTIONAL_FIELD2(ir, this->stiffMatrxFileName, IFT_MacroLspace_stiffMatrxFileName, "stiffmatrxfilename", MAX_FILENAME_LENGTH); //Macro
 
-    if( ir->hasField(IFT_MacroLspace_stiffMatrxFileName, "stiffmatrxfilename")){
-      if (fopen(this->stiffMatrxFileName,"r") != NULL){//if the file exist
-        stiffMatrxFile = fopen(this->stiffMatrxFileName,"r");
-        this->stiffMatrxFileNoneReadingWriting=1;
-      }
-      else {//or create a new one
-        if((stiffMatrxFile = fopen(this->stiffMatrxFileName,"w")) == NULL)
-          OOFEM_ERROR2("Can not create a new file %s\n", this->stiffMatrxFileName);
-        this->stiffMatrxFileNoneReadingWriting=2;
-      }
-    }
+//     if( ir->hasField(IFT_MacroLspace_stiffMatrxFileName, "stiffmatrxfilename")){
+//       if (fopen(this->stiffMatrxFileName,"r") != NULL){//if the file exist
+//         stiffMatrxFile = fopen(this->stiffMatrxFileName,"r");
+//         this->stiffMatrxFileNoneReadingWriting=1;
+//       }
+//       else {//or create a new one
+//         if((stiffMatrxFile = fopen(this->stiffMatrxFileName,"w")) == NULL)
+//           OOFEM_ERROR2("Can not create a new file %s\n", this->stiffMatrxFileName);
+//         this->stiffMatrxFileNoneReadingWriting=2;
+//       }
+//     }
     return IRRT_OK;
 }
 
@@ -153,21 +149,21 @@ void MacroLSpace :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode 
     this->microEngngModel->giveCurrentStep()->setTimeIncrement(0.); //no time increment
     this->microEngngModel->initMetaStepAttributes( microEngngModel->giveCurrentStep() );//updates numerical method
 
-    OOFEM_LOG_INFO( "\n** Assembling stiffness matrix of microproblem %p on macroElement %d, micTimeStep %d, micTime %f\n", this->microMaterial->problemMicro, this->giveNumber(), this->microEngngModel->giveCurrentStep()->giveNumber(), this->microEngngModel->giveCurrentStep()->giveTime() );
+    OOFEM_LOG_INFO( "\n** Assembling secant stiffness matrix of microproblem %p on macroElement %d, micTimeStep %d, micTime %f\n", this->microMaterial->problemMicro, this->giveNumber(), this->microEngngModel->giveCurrentStep()->giveNumber(), this->microEngngModel->giveCurrentStep()->giveTime() );
 
     //this->microEngngModel->solveYourselfAt( microEngngModel->giveCurrentStep() );
     //this->microEngngModel->terminate( microEngngModel->giveCurrentStep() );
 
-    //if(!this->hasStiffMatrix){
+    if(tStep != this->lastStiffMatrixTimeStep){
       this->microMaterial->giveMacroStiffnessMatrix(answer, this->microEngngModel->giveCurrentStep(), SecantStiffnessMatrix, this->microMasterNodes, this->microBoundaryNodes);
-      this->hasStiffMatrix = 1;
       this->stiffMatrix = answer;
-//     }
-//     else {
-//       answer=this->stiffMatrix;
-//     }
-
-    OOFEM_LOG_INFO("** Assembled\n\n");
+      this->lastStiffMatrixTimeStep = tStep;
+      OOFEM_LOG_INFO("** Assembled now\n\n");
+    }
+    else {
+      answer=this->stiffMatrix;
+      OOFEM_LOG_INFO("** Assembled previously in this time step\n\n");
+    }
 }
 
 
@@ -190,6 +186,7 @@ void MacroLSpace :: changeMicroBoundaryConditions(TimeStep *tStep) {
 
     //dofManArray has the node order as specified in input file
     for ( i = 1; i <= this->giveNumberOfNodes(); i++ ) { //8 nodes
+
       DofMan = microDomain->giveDofManager(i);
       //global displacements
       displ_x.at(i) = this->giveNode(i)->giveDof(1)->giveUnknown(EID_MomentumBalance, VM_Total, tStep);
@@ -233,7 +230,8 @@ void MacroLSpace :: changeMicroBoundaryConditions(TimeStep *tStep) {
               this->microBoundaryDofManager.at(counter) = DofMan->giveGlobalNumber();
                 DofMan->giveDof(j)->setBcId(counter);
                 displ = dotProduct(n, j == 1 ? displ_x : ( j == 2 ? displ_y : displ_z ), 8);
-                sprintf(str, "boundarycondition %d loadtimefunction 1 prescribedvalue %f", counter, displ);
+                sprintf(str, "boundarycondition %d loadtimefunction 1 prescribedvalue %e", counter, displ);
+                //OOFEM_LOG_INFO("%s\n", str);
                 ir->setRecordString(str);
                 GeneralBoundaryCond = ( GeneralBoundaryCondition * ) ( GeneralBoundaryCondition(counter, microDomain).ofType((char*)"boundarycondition"));
                 GeneralBoundaryCond->initializeFrom(ir);
@@ -249,10 +247,12 @@ void MacroLSpace :: changeMicroBoundaryConditions(TimeStep *tStep) {
     }
 
     delete ir;
+
 }
 
 //obtain nodal forces from underlying microScale
 //node numbering on element is in the same order as in the input file
+//useUpdatedGpRecord=1 is used for printing of reactions
 void MacroLSpace :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord) {
   int i,j,k;
   //StructuralEngngModel *microStructuralEngngModel;
@@ -260,17 +260,25 @@ void MacroLSpace :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep
   DofManager *DofMan;
   double reactionForce;
 
-  if(!useUpdatedGpRecord){
+  this->microEngngModel->giveCurrentStep()->setTime( tStep->giveTime() ); //adjust total time
+  this->microEngngModel->giveCurrentStep()->setTimeIncrement(0.); //no time increment
 
+  //OOFEM_LOG_INFO("*** useUpdatedGpRecord %d\n", useUpdatedGpRecord);
 
-    OOFEM_LOG_INFO( "\n*** Solving microproblem %p on macroElement %d, micTimeStep %d, macIteration %d, micTime %f\n", this->microMaterial->problemMicro, this->giveNumber(), this->microEngngModel->giveCurrentStep()->giveNumber(), this->iteration, this->microEngngModel->giveCurrentStep()->giveTime() );
+   if(useUpdatedGpRecord){//printing of data
+     answer = microMaterial->internalMacroForcesVector;
+   }
+  else {
+    OOFEM_LOG_INFO( "\n*** Solving reactions %p of macroElement %d, micTimeStep %d, macIteration %d, micTime %f\n", this->microMaterial->problemMicro, this->giveNumber(), this->microEngngModel->giveCurrentStep()->giveNumber(), this->iteration, this->microEngngModel->giveCurrentStep()->giveTime() );
 
     this->iteration++;
     this->changeMicroBoundaryConditions(tStep);
+
     this->microEngngModel->solveYourselfAt( this->microEngngModel->giveCurrentStep() );
-    this->microEngngModel->terminate( this->microEngngModel->giveCurrentStep() );
+    //this->microEngngModel->terminate( this->microEngngModel->giveCurrentStep() );
     //microStructuralEngngModel = ( StructuralEngngModel * ) &this->microEngngModel;
     StructuralEngngModel *microStructuralEngngModel = dynamic_cast<StructuralEngngModel *>(this->microEngngModel);
+
 
     //reaction vector contains contributions from unknownNumberingScheme
     microStructuralEngngModel->computeReactions(reactions, this->microEngngModel->giveCurrentStep(), 1);
@@ -292,21 +300,12 @@ void MacroLSpace :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep
       }
     }
 
-  //   for(i = 1; i <= microDomain->giveNumberOfDofManagers(); i++){//12
-  //     DofMan = microDomain->giveDofManager(i);
-  //     this->evalInterpolation(n, microMaterial->microMasterCoords, *DofMan->giveCoordinates());
-  //
-  //     for ( j = 1; j <= 3; j++ ) {
-  //       reactionForce = reactions.at(3*i+j-3);
-  //       for( k=1;k<=8;k++){
-  //         answer.at(3*k+j-3) += reactionForce * n.at(k);
-  //       }
-  //     }
-  //   }
-
-
-    OOFEM_LOG_INFO("\n*** Solving done\n", this->microMaterial->problemMicro);
+    microMaterial->internalMacroForcesVector = answer;
+    OOFEM_LOG_INFO("*** Reactions done\n", this->microMaterial->problemMicro);
   }
+  //answer.printYourself();
+  //OOFEM_ERROR("STOP");
+
 }
 
 void MacroLSpace :: evalInterpolation(FloatArray &answer, const FloatArray **coords, const FloatArray &gcoords){
@@ -321,12 +320,18 @@ void MacroLSpace :: evalInterpolation(FloatArray &answer, const FloatArray **coo
 void MacroLSpace :: updateYourself(TimeStep *tStep)
 {
     int i;
+    FloatArray answer;
+
     for ( i = 0; i < numberOfIntegrationRules; i++ ) {
         integrationRulesArray [ i ]->updateYourself(tStep);
     }
-    OOFEM_LOG_INFO("***\n");
+    OOFEM_LOG_INFO("*** Updating macroelement\n");
     //set number of timestep so the microproblem counts from 1 to nsteps in each iteration but not totally
     //this->microEngngModel->giveCurrentStep()->setNumber(1);
+    //recalculate microproblem
+    //this->giveInternalForcesVector(answer, tStep, 0);
+
+    this->microEngngModel->terminate( this->microEngngModel->giveCurrentStep() );//perform output, VTK
     this->iteration = 1;
     this->microEngngModel->giveNextStep();//time step used in ouput file name
 }

@@ -252,7 +252,7 @@ void LinearStatic :: solveYourselfAt(TimeStep *tStep) {
 
         stiffnessMatrix->buildInternalStructure(this, 1, EID_MomentumBalance, EModelDefaultEquationNumbering());
 
-        this->assemble( stiffnessMatrix, tStep, EID_MomentumBalance, StiffnessMatrix, 
+        this->assemble( stiffnessMatrix, tStep, EID_MomentumBalance, StiffnessMatrix,
 			EModelDefaultEquationNumbering(), this->giveDomain(1) );
 
         //
@@ -306,15 +306,15 @@ void LinearStatic :: solveYourselfAt(TimeStep *tStep) {
         loadVector.resize( this->giveNumberOfEquations(EID_MomentumBalance) );
         loadVector.zero();
 
-        this->assembleVectorFromElements( loadVector, tStep, EID_MomentumBalance, ElementForceLoadVector, VM_Total, 
+        this->assembleVectorFromElements( loadVector, tStep, EID_MomentumBalance, ElementForceLoadVector, VM_Total,
 					  EModelDefaultEquationNumbering(), this->giveDomain(1) );
-        this->assembleVectorFromElements( loadVector, tStep, EID_MomentumBalance, ElementNonForceLoadVector, VM_Total, 
+        this->assembleVectorFromElements( loadVector, tStep, EID_MomentumBalance, ElementNonForceLoadVector, VM_Total,
 					  EModelDefaultEquationNumbering(), this->giveDomain(1) );
 
         //
         // assembling the nodal part of load vector
         //
-        this->assembleVectorFromDofManagers( loadVector, tStep, EID_MomentumBalance, NodalLoadVector, VM_Total, 
+        this->assembleVectorFromDofManagers( loadVector, tStep, EID_MomentumBalance, NodalLoadVector, VM_Total,
 					     EModelDefaultEquationNumbering(), this->giveDomain(1) );
 
         //

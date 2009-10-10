@@ -329,7 +329,7 @@ DofManager *Element :: giveDofManager(int i) const
 {
     int n;
     if ( ( i <= 0 ) || ( i > dofManArray.giveSize() ) ) {
-        _error("giveNode: Node is not defined");
+        OOFEM_ERROR2("giveNode: Node %i is not defined", i);
     }
 
     n = dofManArray.at(i);

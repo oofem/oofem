@@ -656,7 +656,7 @@ NonLinearStatic :: proceedStep(int di, TimeStep *tStep)
      * }
      */
 
-    if ( loadInitFlag || ( controllMode == nls_directControll ) || ( controllMode == nls_directControll2 ) ) {
+    if ( loadInitFlag || ( controllMode == nls_directControll ) || ( controllMode == nls_directControll2 )) {
 #ifdef VERBOSE
         OOFEM_LOG_INFO("Assembling load\n");
 #endif
@@ -732,7 +732,6 @@ NonLinearStatic :: proceedStep(int di, TimeStep *tStep)
 
     // set initflag to zero;
     initFlag = 0;
-
 
     //
     // set-up numerical model

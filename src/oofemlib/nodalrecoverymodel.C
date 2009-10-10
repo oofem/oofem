@@ -160,6 +160,7 @@ NodalRecoveryModel :: init()
     }
 
     this->stateCounter = 0;
+    this->valType = IST_Undefined;
     //
     return 1;
 }
