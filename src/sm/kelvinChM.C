@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/sm/src/maxwellChM.C,v 1.5.4.1 2004/04/05 15:19:47 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -33,13 +32,13 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-// file: MaxwellChM.C
+// file: KelvinChM.C
 
 #ifndef __MAKEDEPEND
 #include <math.h>
 #endif
 #include "mathfem.h"
-#include "maxwellChM.h"
+#include "kelvinChM.h"
 #include "material.h"
 #include "isolinearelasticmaterial.h"
 #include "flotarry.h"
@@ -52,69 +51,58 @@
 #include "contextioerr.h"
 
 
-MaxwellChainMaterial :: MaxwellChainMaterial(int n, Domain *d) : RheoChainMaterial(n, d)
+KelvinChainMaterial :: KelvinChainMaterial(int n, Domain *d) : RheoChainMaterial(n, d)
 {
 }
 
-
 void
-MaxwellChainMaterial :: computeCharCoefficients(FloatArray &answer, GaussPoint *gp,
+KelvinChainMaterial :: computeCharCoefficients(FloatArray &answer, GaussPoint *gp,
                                                double atTime)
 {
     /*
-     * This function computes the moduli of individual Maxwell units 
+     * This function computes the moduli of individual Kelvin units 
      * such that the corresponding Dirichlet series gives the best
-     * approximation of the actual relaxation function.
+     * approximation of the actual compliance function J(t,t0) with t0 fixed.
      *
-     * The optimal moduli are obtained using the least-square method, 
-     * i.e. by minimizing the following functional (atTime = t_0):
-     *
-     * $$ F=\sum^{k}_{r=1} \left[ \sum^{N}_{\mju=1} E_m(t_0) \exp^{-(t_r-t_0)/\tau_{\mju}
-     *  - \bar{R}(t_r, t_0) \right]^2 = min $$
-     *
+     * The optimal moduli are obtained using the least-square method. 
      *
      * INPUTS:
-     * atTime = age of material when load is applied ???
+     * atTime = age of material when load is applied
      */
     int i, j, r, rSize;
     double taui, tauj, sum, tti, ttj, sumRhs;
-    FloatArray rhs(this->nUnits), discreteRelaxFunctionVal;
+    FloatArray rhs(this->nUnits), discreteComplianceFunctionVal;
     FloatMatrix A(this->nUnits, this->nUnits);
 
     const FloatArray &rTimes = this->giveDiscreteTimes();
     rSize = rTimes.giveSize();
 
-    // compute discrete values of the relaxation function at times rTimes
-    // from the creep function (by numerically solving integral equations)
-    //
-    // a direct call to the relaxation function could be used, if available
-    this->computeDiscreteRelaxationFunction(discreteRelaxFunctionVal,
-                                            gp, rTimes,
-                                            atTime,
-                                            atTime);
+    // compute values of the compliance function at specified times rTimes
+    // (can be done directly, since the compliance function is available)
+    for ( i = 1; i<= rSize; j++)
+      discreteComplianceFunctionVal.at(i) = this->computeCreepFunction(gp, atTime + rTimes.at(i), atTime);
 
     // assemble the matrix of the set of linear equations
-    // for computing the optimal moduli
+    // for computing the optimal compliances
+    // !!! chartime exponents are assumed to be equal to 1 !!!
     for ( i = 1; i <= this->nUnits; i++ ) {
         taui = this->giveCharTime(i);
         for ( j = 1; j <= this->nUnits; j++ ) {
             tauj = this->giveCharTime(j);
             for ( sum = 0., r = 1; r <= rSize; r++ ) {
-                tti = __OOFEM_POW( ( atTime + rTimes.at(r) ) / taui, giveCharTimeExponent(i) ) -
-                __OOFEM_POW( atTime / taui, giveCharTimeExponent(i) );
-                ttj = __OOFEM_POW( ( atTime + rTimes.at(r) ) / tauj, giveCharTimeExponent(j) ) -
-                __OOFEM_POW( atTime / tauj, giveCharTimeExponent(j) );
-                sum += exp(-tti - ttj);
+                tti = rTimes.at(r) / taui;
+                ttj = rTimes.at(r) / tauj;
+                sum += (1.-exp(-tti)) * (1.-exp(-ttj));
             }
 
             A.at(i, j) = sum;
         }
 
         // assemble rhs
+	// !!! chartime exponents are assumed to be equal to 1 !!!
         for ( sumRhs = 0., r = 1; r <= rSize; r++ ) {
-            tti = __OOFEM_POW( ( atTime + rTimes.at(r) ) / taui, giveCharTimeExponent(i) ) -
-            __OOFEM_POW( atTime / taui, giveCharTimeExponent(i) );
-            sumRhs += exp(-tti) * discreteRelaxFunctionVal.at(r);
+            tti = rTimes.at(r) / taui;
+            sumRhs += (1.-exp(-tti)) * discreteComplianceFunctionVal.at(r);
         }
 
         rhs.at(i) = sumRhs;
@@ -123,13 +111,17 @@ MaxwellChainMaterial :: computeCharCoefficients(FloatArray &answer, GaussPoint *
     // solve the linear system
     A.solveForRhs(rhs, answer);
 
+    // convert compliances into moduli
+    for ( i = 1; i <= this->nUnits; i++ )
+      answer.at(i) = 1./answer.at(i);
+
     return;
 }
 
 
 
 double
-MaxwellChainMaterial :: giveEModulus(GaussPoint *gp, TimeStep *atTime)
+KelvinChainMaterial :: giveEModulus(GaussPoint *gp, TimeStep *atTime)
 {
     /*
      * This function returns the incremental modulus for the given time increment.
@@ -143,6 +135,8 @@ MaxwellChainMaterial :: giveEModulus(GaussPoint *gp, TimeStep *atTime)
     double lambdaMu, Emu, deltaYmu;
     double E = 0.0;
 
+    // !!! this should be replaced by the expression valid for the Kelvin chain !!!
+    // !!! chartime exponents are assumed to be equal to 1 !!!
     this->updateEparModuli(gp, relMatAge + ( atTime->giveTime() - 0.5 * atTime->giveTimeIncrement() ) / timeFactor);
     for ( mu = 1; mu <= nUnits; mu++ ) {
         deltaYmu = atTime->giveTimeIncrement() / timeFactor / this->giveCharTime(mu);
@@ -166,7 +160,7 @@ MaxwellChainMaterial :: giveEModulus(GaussPoint *gp, TimeStep *atTime)
 
 
 void
-MaxwellChainMaterial :: giveEigenStrainVector(FloatArray &answer, MatResponseForm form,
+KelvinChainMaterial :: giveEigenStrainVector(FloatArray &answer, MatResponseForm form,
                                               GaussPoint *gp, TimeStep *atTime, ValueModeType mode)
 //
 // computes the strain due to creep at constant stress during the increment
@@ -178,8 +172,10 @@ MaxwellChainMaterial :: giveEigenStrainVector(FloatArray &answer, MatResponseFor
     double deltaYmu;
     FloatArray *sigmaMu, help, reducedAnswer;
     FloatMatrix B;
-    MaxwellChainMaterialStatus *status = ( MaxwellChainMaterialStatus * ) this->giveStatus(gp);
+    KelvinChainMaterialStatus *status = ( KelvinChainMaterialStatus * ) this->giveStatus(gp);
 
+    // !!! this should be replaced by the expression valid for the Kelvin chain !!!
+    // !!! chartime exponents are assumed to be equal to 1 !!!
     if ( mode == VM_Incremental ) {
         this->giveUnitComplianceMatrix(B, ReducedForm, gp, atTime);
         reducedAnswer.resize( B.giveNumberOfRows() );
@@ -215,24 +211,20 @@ MaxwellChainMaterial :: giveEigenStrainVector(FloatArray &answer, MatResponseFor
 }
 
 
-
-
-
-
 void
-MaxwellChainMaterial :: updateYourself(GaussPoint *gp, TimeStep *tNow)
+KelvinChainMaterial :: updateYourself(GaussPoint *gp, TimeStep *tNow)
 {
     /*
      * Updates hidden variables used to effectively trace the load history
      */
-
-
+    // !!! this should be replaced by the expression valid for the Kelvin chain !!!
+    // !!! chartime exponents are assumed to be equal to 1 !!!
     int mu;
     double deltaYmu, Emu, lambdaMu;
     FloatArray help, *muthHiddenVarsVector, deltaEps0, help1;
     FloatMatrix Binv;
-    MaxwellChainMaterialStatus *status =
-        ( MaxwellChainMaterialStatus * ) this->giveStatus(gp);
+    KelvinChainMaterialStatus *status =
+        ( KelvinChainMaterialStatus * ) this->giveStatus(gp);
 
     this->giveUnitStiffnessMatrix(Binv, ReducedForm, gp, tNow);
     help = status->giveTempStrainVector();
@@ -266,24 +258,24 @@ MaxwellChainMaterial :: updateYourself(GaussPoint *gp, TimeStep *tNow)
         }
     }
 
-    // now we call MaxwellChainMaterialStatus->updateYourself()
+    // now we call KelvinChainMaterialStatus->updateYourself()
     status->updateYourself(tNow);
 }
 
 
 
 MaterialStatus *
-MaxwellChainMaterial :: CreateStatus(GaussPoint *gp) const
+KelvinChainMaterial :: CreateStatus(GaussPoint *gp) const
 /*
  * creates a new material status corresponding to this class
  */
 {
-    return new MaxwellChainMaterialStatus(1, this->giveDomain(), gp, nUnits);
+    return new KelvinChainMaterialStatus(1, this->giveDomain(), gp, nUnits);
 }
 
 
 IRResultType
-MaxwellChainMaterial :: initializeFrom(InputRecord *ir)
+KelvinChainMaterial :: initializeFrom(InputRecord *ir)
 {
     const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
@@ -294,7 +286,7 @@ MaxwellChainMaterial :: initializeFrom(InputRecord *ir)
 }
 
 contextIOResultType
-MaxwellChainMaterial :: saveContext(DataStream *stream, ContextMode mode, void *obj)
+KelvinChainMaterial :: saveContext(DataStream *stream, ContextMode mode, void *obj)
 {
     contextIOResultType iores;
 
@@ -307,7 +299,7 @@ MaxwellChainMaterial :: saveContext(DataStream *stream, ContextMode mode, void *
 
 
 contextIOResultType
-MaxwellChainMaterial :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
+KelvinChainMaterial :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
 {
     contextIOResultType iores;
 
@@ -322,39 +314,34 @@ MaxwellChainMaterial :: restoreContext(DataStream *stream, ContextMode mode, voi
 
 /****************************************************************************************/
 
-MaxwellChainMaterialStatus :: MaxwellChainMaterialStatus(int n, Domain *d,
+KelvinChainMaterialStatus :: KelvinChainMaterialStatus(int n, Domain *d,
                                                          GaussPoint *g, int nunits) :
   RheoChainMaterialStatus(n, d, g, nunits) {
 }
 
-
 void
-MaxwellChainMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)
+KelvinChainMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)
 {
     RheoChainMaterialStatus :: printOutputAt(file, tStep);
 }
 
 
 void
-MaxwellChainMaterialStatus :: updateYourself(TimeStep *tStep)
+KelvinChainMaterialStatus :: updateYourself(TimeStep *tStep)
 {
     RheoChainMaterialStatus :: updateYourself(tStep);
 }
 
 void
-MaxwellChainMaterialStatus :: initTempStatus()
+KelvinChainMaterialStatus :: initTempStatus()
 {
     RheoChainMaterialStatus :: initTempStatus();
 }
 
 contextIOResultType
-MaxwellChainMaterialStatus :: saveContext(DataStream *stream, ContextMode mode, void *obj)
+KelvinChainMaterialStatus :: saveContext(DataStream *stream, ContextMode mode, void *obj)
 {
     contextIOResultType iores;
-
-    if ( stream == NULL ) {
-        _error("saveContext : can't write into NULL stream");
-    }
 
     if ( ( iores = RheoChainMaterialStatus :: saveContext(stream, mode, obj) ) != CIO_OK ) {
         THROW_CIOERR(iores);
@@ -364,7 +351,7 @@ MaxwellChainMaterialStatus :: saveContext(DataStream *stream, ContextMode mode, 
 
 
 contextIOResultType
-MaxwellChainMaterialStatus :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
+KelvinChainMaterialStatus :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
 {
     int i;
     contextIOResultType iores;

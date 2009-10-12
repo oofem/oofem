@@ -52,13 +52,13 @@
 
 
 RheoChainMaterial :: RheoChainMaterial(int n, Domain *d) : StructuralMaterial(n, d),
-    EmuVal(), charTimes(), discreteTimeScale()
+    EparVal(), charTimes(), discreteTimeScale()
 {
     nUnits = 0;
     relMatAge = 0.0;
     linearElasticMaterial = NULL;
-    Eval = 0.;
-    EmuValTime = -1.0;
+    Einc = 0.;
+    EparValTime = -1.0;
 }
 
 
@@ -211,6 +211,8 @@ RheoChainMaterial :: computeDiscreteRelaxationFunction(FloatArray &answer,
     for ( k = si; k <= nsteps; k++ ) {
         for ( sum = 0., i = si; i <= k - 1; i++ ) {
             if ( i == 1 ) {
+  // ??? it seems that tr plays no role because si=2 and the case
+  // i=1 or k=1 can never occur
                 taui = 0.5 * ( t0 + atTimes.at(i) + tr );
             } else                                                  {
                 taui = t0 + 0.5 * ( atTimes.at(i) + atTimes.at(i - 1) );
@@ -220,6 +222,8 @@ RheoChainMaterial :: computeDiscreteRelaxationFunction(FloatArray &answer,
         }
 
         if ( k == 1 ) {
+  // ??? it seems that tr plays no role because si=2 and the case
+  // i=1 or k=1 can never occur
             tauk = 0.5 * ( t0 + atTimes.at(k) + tr );
         } else                                                  {
             tauk = t0 + 0.5 * ( atTimes.at(k) + atTimes.at(k - 1) );
@@ -344,17 +348,17 @@ RheoChainMaterial :: giveUnitComplianceMatrix(FloatMatrix &answer,
 
 
 double
-RheoChainMaterial :: giveEmuModulus(int iChain)
+RheoChainMaterial :: giveEparModulus(int iChain)
 {
     /* returns the modulus of unit number iChain, 
-     * previously computed by updateEmuModuli() function
+     * previously computed by updateEparModuli() function
      */
-    return EmuVal.at(iChain);
+    return EparVal.at(iChain);
 }
 
 
 void
-RheoChainMaterial :: updateEmuModuli(GaussPoint *gp, double atTime)
+RheoChainMaterial :: updateEparModuli(GaussPoint *gp, double atTime)
 {
     /*
      * Computes moduli of individual units in the chain that provide
@@ -368,19 +372,19 @@ RheoChainMaterial :: updateEmuModuli(GaussPoint *gp, double atTime)
      * DESCRIPTION:
      * We store the computed values because they will be used by other material points in subsequent
      * calculations. Their computation is very costly.
-     * For a given active time step, there should be requests only for Emu values at time
+     * For a given active time step, there should be requests only for Epar values at time
      * (currentTime+prevTime)*0.5. The previous values are not needed.
      *
      */
     // compute new values and store them in a temporary array for further use
-    if ( fabs(atTime - EmuValTime) > TIME_DIFF ) {
+    if ( fabs(atTime - EparValTime) > TIME_DIFF ) {
         if ( atTime < 0 ) {
-            this->computeCharCoefficients(EmuVal, gp, 1.e-3);
+            this->computeCharCoefficients(EparVal, gp, 1.e-3);
         } else {
-            this->computeCharCoefficients(EmuVal, gp, atTime);
+            this->computeCharCoefficients(EparVal, gp, atTime);
         }
 
-        EmuValTime = atTime;
+        EparValTime = atTime;
     }
 }
 

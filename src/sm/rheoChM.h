@@ -70,24 +70,18 @@ class RheoChainMaterialStatus : public StructuralMaterialStatus
      * (now decribed by temp variables) we copy temp-var into non-temp ones
      * (see function updateYourself).
      *
-     * variables description:
-     *
-     *
-     * TASK:
-     *
      */
 
 protected:
-  //FloatArray **hiddenStreses;
-  //int nMaxwellUnits;
-    /// hidden (internal) variables, the meaning of which depends on the type of chain
-    FloatArray **hiddenVars;
     /// number of units in the chain 
     int nUnits;
-    /* total values of shrinkage strain 
-       (needed only when the shrinkage evolution is described in the incremental form)
+    /// hidden (internal) variables, the meaning of which depends on the type of chain
+    FloatArray **hiddenVars;
+    /* total shrinkage strain (needed only when the shrinkage evolution 
+       is described in the incremental form)
     */
     FloatArray shrinkageStrain;
+
 public:
     RheoChainMaterialStatus(int n, Domain *d, GaussPoint *g, int nunits);
     ~RheoChainMaterialStatus();
@@ -123,10 +117,8 @@ class RheoChainMaterial : public StructuralMaterial
     /*
      * This class implements a rheologic chain model 
      * describing a viscoelastic material.
-     * It is the parent class for Maxwell and Kelvin chains.
+     * It serves as the parent class for Maxwell and Kelvin chains.
      *
-     * DESCRIPTION
-     * TASK
      */
 
 protected:
@@ -135,19 +127,19 @@ protected:
     int nUnits;
     /// physical age of the material at simulation time = 0
     double relMatAge;
-    /// Poisson's ratio (assumed to be constant)
+    /// Poisson's ratio (assumed to be constant, unaffected by creep)
     double nu;
-    /// incremental modulus
-    double Eval;
-    /// time for which the moduli of individual units have been evaluated
-    double EmuValTime;
+    /// incremental modulus (links the stress increment to the strain increment)
+    double Einc;
+    /// time for which the partial moduli of individual units have been evaluated
+    double EparValTime;
 
     /// time (age???) up to which the model should give a good approximation 
     double endOfTimeOfInterest; // local one or taken from e-model
     // associated linearElasticMaterial, with E = 1;
     LinearElasticMaterial *linearElasticMaterial;
-    /// moduli of individual units
-    FloatArray EmuVal;
+    /// partial moduli of individual units
+    FloatArray EparVal;
     //FloatArray relaxationTimes;
     /// characteristic times of individual units (relaxation or retardation times)
     FloatArray charTimes;
@@ -164,13 +156,14 @@ public:
     RheoChainMaterial(int n, Domain *d);
     ~RheoChainMaterial();
 
-    // standard material stiffness matrices
+    /// evaluation of standard material stiffness matrices
     virtual void  giveCharacteristicMatrix(FloatMatrix &answer,
                                            MatResponseForm form,
                                            MatResponseMode mode,
                                            GaussPoint *gp,
                                            TimeStep *atTime);
 
+    /// evaluation of stress from a given strain and internal variables
     virtual void giveRealStressVector(FloatArray & answer,  MatResponseForm, GaussPoint *,
                                       const FloatArray &, TimeStep *);
 
@@ -180,13 +173,13 @@ public:
     virtual void giveThermalDilatationVector(FloatArray &answer, GaussPoint *, TimeStep *)
     { answer.resize(0); }
 
-    // evaluate the incremental modulus
+    /// evaluation of the incremental modulus
     virtual double giveEModulus(GaussPoint *gp, TimeStep *atTime){return 0.0;}
 
-    // evaluate the moduli of individual units
+    /// evaluation of the moduli of individual units
     virtual void computeCharCoefficients(FloatArray &answer, GaussPoint *gp, double){};
 
-    // updates MatStatus to the newly reached (equilibrium) state
+    /// update of MatStatus to the newly reached (equilibrium) state
     virtual void updateYourself(GaussPoint *gp, TimeStep *){};
 
     // identification and auxiliary functions
@@ -202,6 +195,7 @@ public:
     contextIOResultType    restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 
 
+    /// evaluation of material stiffness matrix in 3D
     virtual void give3dMaterialStiffnessMatrix(FloatMatrix & answer,
                                                MatResponseForm, MatResponseMode,
                                                GaussPoint * gp,
@@ -266,25 +260,39 @@ protected:
                                       int fromIncluded = 0);
     const FloatArray &giveDiscreteTimes();
     /// evaluation of the creep compliance function
-    virtual double  computeCreepFunction(GaussPoint *gp, double ofAge, double atTime) = 0;
-    void         computeDiscreteRelaxationFunction(FloatArray &answer, GaussPoint *gp,
+    virtual double computeCreepFunction(GaussPoint *gp, double ofAge, double atTime) = 0;
+
+    /// evaluation of the relaxation function at given times
+    void computeDiscreteRelaxationFunction(FloatArray &answer, GaussPoint *gp,
                                                    const FloatArray &atTimes,
                                                    double t0, double tr);
-    //void giveGeneralizationBMatrix(FloatMatrix & answer, MatResponseForm,
-    //GaussPoint * gp, TimeStep * tStep);
+
+    /// evaluation of elastic compliance matrix for unit Young's modulus
     void giveUnitComplianceMatrix(FloatMatrix & answer, MatResponseForm,
                                    GaussPoint * gp, TimeStep * tStep);
-    //void giveGeneralizationBInvMatrix(FloatMatrix & answer,
-    //MatResponseForm, GaussPoint * gp, TimeStep * tStep);
+    /// evaluation of elastic stiffness matrix for unit Young's modulus
     void giveUnitStiffnessMatrix(FloatMatrix & answer,
                                       MatResponseForm, GaussPoint * gp, TimeStep * tStep);
-    void         updateEmuModuli(GaussPoint *gp, double atTime);
-    double       giveEmuModulus(int iChain);
+
+    /// update of partial moduli of individual chain units
+    void         updateEparModuli(GaussPoint *gp, double atTime);
+
+    /// access to partial modulus of a given unit
+    double       giveEparModulus(int iChain);
+
+    /// evaluation of characteristic times
     void         computeCharTimes();
+
+    /// access to the characteristic time of a given unit
     double       giveCharTime(int);
+
+    /// exponent to be used with the char time of a given unit, usually = 1.0
     virtual double giveCharTimeExponent(int i) { return 1.0; }
+
+    /// access to the underlying linear elastic material with unit Young's modulus
     LinearElasticMaterial *giveLinearElasticMaterial();
 
+    /// access to the time up to which the response should be accurate
     double giveEndOfTimeOfInterest();
 
     virtual void givePlaneStressStiffMtrx(FloatMatrix & answer,

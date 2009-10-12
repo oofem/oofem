@@ -158,6 +158,7 @@
 #include "cebfip78.h"
 #include "doublepowerlaw.h"
 #include "b3mat.h"
+#include "b3solidmat.h"
 #include "j2plasticmaterial.h"
 #include "rcsd.h"
 #include "rcsde.h"
@@ -557,6 +558,8 @@ Material *CreateUsrDefMaterialOfType(char *aClass, int number, Domain *domain)
         newMaterial = new DoublePowerLawMaterial(number, domain);
     } else if ( !strncasecmp(aClass, "b3mat", 5) )    {
         newMaterial = new B3Material(number, domain);
+    } else if ( !strncasecmp(aClass, "b3solidmat", 10) )    {
+        newMaterial = new B3SolidMaterial(number, domain);
     } else if ( !strncasecmp(aClass, "j2mat", 5) )    {
         newMaterial = new J2plasticMaterial(number, domain);
     } else if ( !strncasecmp(aClass, "rcsdnl", 6) )    {

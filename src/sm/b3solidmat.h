@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/sm/src/b3mat.h,v 1.4 2003/04/06 14:08:30 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -34,21 +33,21 @@
  */
 
 //   *********************************************
-//   *** CLASS RHEOLOGIC B3 Material Model
+//   *** CLASS B3 Solidification Material Model **
 //   *********************************************
-#ifndef b3mat_h
-#define b3mat_h
 
+#ifndef b3solidmat_h
+#define b3solidmat_h
 
-#include "maxwellChM.h"
+#include "kelvinChM.h"
 
-class B3Material : public MaxwellChainMaterial
+class B3SolidMaterial : public KelvinChainMaterial
 {
     /*
-     * This class implements the B3 model for concrete creep and shrinkage. 
+     * This class implements the B3 model for concrete creep and shrinkage
+     * based on the solidification theory.
+     * The implementation exploits a solidifying Kelvin chain.
      *
-     * DESCRIPTION
-     * TASK
      */
 protected:
     double t0;
@@ -64,15 +63,15 @@ protected:
     double a;         //constant (obtained from experiments) A [Pedersen, 1990]
     double talpha;   // thermal dilatation coeff.
 public:
-    B3Material(int n, Domain *d) : MaxwellChainMaterial(n, d) { shMode = B3_NoShrinkage; }
-    ~B3Material() { }
+    B3SolidMaterial(int n, Domain *d) : KelvinChainMaterial(n, d) { shMode = B3_NoShrinkage; }
+    ~B3SolidMaterial() { }
 
 
     virtual void giveShrinkageStrainVector(FloatArray &answer, MatResponseForm form,
                                            GaussPoint *gp, TimeStep *atTime, ValueModeType mode);
 
-    const char *giveClassName()  const { return "B3Material"; }
-    classType giveClassID()          const { return B3MaterialClass; }
+    const char *giveClassName()  const { return "B3SolidMaterial"; }
+    classType giveClassID()          const { return B3SolidMaterialClass; }
     IRResultType initializeFrom(InputRecord *ir);
 
     /**
@@ -95,10 +94,19 @@ protected:
     void computeShrinkageStrainVector(FloatArray &answer, MatResponseForm form,
                                       GaussPoint *gp, TimeStep *atTime, ValueModeType mode);
     void  predictParametersFrom(double, double, double, double, double, double, double);
+
+    /// evaluation of the compliance function of the non-aging solidifying constituent
+    double computeNonAgingCreepFunction(GaussPoint *gp, double loadDuration);
+
+    /// evaluation of the relative volume of the solidified material
+    double computeSolidifiedVolume(GaussPoint *gp, double atAge);
+
+    /// evaluation of the compliance function
     virtual double  computeCreepFunction(GaussPoint *gp, double atTime, double ofAge);
 
     double inverse_sorption_isotherm(double w);
 };
 
+// Note: There is no associated material status - everything is handled by KelvinChainMaterialStatus
 
-#endif // b3mat_h
+#endif // b3solidmat_h

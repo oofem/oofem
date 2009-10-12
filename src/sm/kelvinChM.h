@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/sm/src/maxwellChM.h,v 1.6 2003/04/06 14:08:31 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -33,19 +32,19 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-//   *********************************
-//   *** CLASS Maxwell Chain Model ***
-//   *********************************
+//   ********************************
+//   *** CLASS Kelvin Chain Model ***
+//   ********************************
 
-#ifndef maxwellchm_h
-#define maxwellchm_h
+#ifndef kelvinchm_h
+#define kelvinchm_h
 
 #include "rheoChM.h"
 
-class MaxwellChainMaterialStatus : public RheoChainMaterialStatus
+class KelvinChainMaterialStatus : public RheoChainMaterialStatus
 {
     /*
-     * This class implements associated Material Status to MaxwellChainMaterial.
+     * This class implements associated Material Status to KelvinChainMaterial.
      * It is an attribute of matStatusDictionary at every GaussPoint 
      * for which this material
      * DESCRIPTION:
@@ -68,8 +67,8 @@ class MaxwellChainMaterialStatus : public RheoChainMaterialStatus
 protected:
 
 public:
-    MaxwellChainMaterialStatus(int n, Domain *d, GaussPoint *g, int nunits);
-    ~MaxwellChainMaterialStatus(){}
+    KelvinChainMaterialStatus(int n, Domain *d, GaussPoint *g, int nunits);
+    ~KelvinChainMaterialStatus(){}
     void printOutputAt(FILE *file, TimeStep *tStep);
 
     /// initialize the status
@@ -83,9 +82,9 @@ public:
     contextIOResultType    restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 
     // definition
-    const char *giveClassName() const { return "MaxwellChainMaterialStatus"; }
+    const char *giveClassName() const { return "KelvinChainMaterialStatus"; }
     classType             giveClassID() const
-    { return MaxwellChainMaterialStatusClass; }
+    { return KelvinChainMaterialStatusClass; }
 };
 
 
@@ -93,10 +92,10 @@ public:
 //=================================================================================
 
 
-class MaxwellChainMaterial : public RheoChainMaterial
+class KelvinChainMaterial : public RheoChainMaterial
 {
     /*
-     * This class implements an aging Maxwell chain model 
+     * This class implements a solidifying Kelvin chain model 
      * describing a viscoelastic material.
      *
      * DESCRIPTION
@@ -106,17 +105,16 @@ class MaxwellChainMaterial : public RheoChainMaterial
 protected:
 
 public:
-    MaxwellChainMaterial(int n, Domain *d);
-    ~MaxwellChainMaterial(){}
+    KelvinChainMaterial(int n, Domain *d);
+    ~KelvinChainMaterial(){}
 
     // updates MatStatus to the newly reached (equilibrium) state
     virtual void updateYourself(GaussPoint *gp, TimeStep *);
 
     // identification and auxiliary functions
     virtual int hasNonLinearBehaviour()   { return 0; }
-    //virtual int hasMaterialModeCapability(MaterialMode mode);
-    const char *giveClassName() const { return "MaxwellChainMaterial"; }
-    classType giveClassID()         const { return MaxwellChainMaterialClass; }
+    const char *giveClassName() const { return "KelvinChainMaterial"; }
+    classType giveClassID()         const { return KelvinChainMaterialClass; }
     IRResultType initializeFrom(InputRecord *ir);
     void     printYourself();
 
@@ -154,11 +152,7 @@ public:
     virtual void  giveEigenStrainVector(FloatArray &answer, MatResponseForm form,
                                         GaussPoint *gp, TimeStep *atTime, ValueModeType mode);
 
-#ifdef __OOFEG
-#endif
-
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
-
 
 
 protected:
@@ -171,10 +165,11 @@ protected:
     virtual double  computeCreepFunction(GaussPoint *gp, double ofAge, double atTime) = 0;
     void         computeCharCoefficients(FloatArray &answer, GaussPoint *gp, double);
 
+    /// evaluation of the incremental modulus
     double       giveEModulus(GaussPoint *gp, TimeStep *atTime);
-    //virtual double giveRelaxationTimeExponent(int i);
+
     LinearElasticMaterial *giveLinearElasticMaterial();
 };
 
 
-#endif // maxwellchm_h
+#endif // kelvinchm_h
