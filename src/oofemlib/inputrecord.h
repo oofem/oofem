@@ -127,7 +127,6 @@ enum InputFieldType {
 
     IFT_NonLinearStatic_controllmode,
     IFT_NonLinearStatic_deltat,
-    IFT_NonLinearStatic_rtolv,
     IFT_NonLinearStatic_stiffmode,
     IFT_NonLinearStatic_refloadmode,
     IFT_NonLinearStatic_keepll,
@@ -238,6 +237,10 @@ enum InputFieldType {
     IFT_CylindricalALM_lsearchtol,
     IFT_CylindricalALM_lsearchamp,
     IFT_CylindricalALM_lsearchmaxeta,
+    IFT_CylindricalALM_nccdg,
+    IFT_CylindricalALM_ccdg,
+    IFT_CylindricalALM_rtolv,
+
 
     IFT_NRSolver_maxiter,
     IFT_NRSolver_minsteplength,
@@ -247,6 +250,7 @@ enum InputFieldType {
     IFT_NRSolver_ddv,
     IFT_NRSolver_ddltf,
     IFT_NRSolver_linesearch,
+    IFT_NRSolver_rtolv,
 
     IFT_LineSearchNM_lsearchtol,
     IFT_LineSearchNM_lsearchamp,

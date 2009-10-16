@@ -95,7 +95,7 @@ NRSolver2 ::  ~NRSolver2() {
 NM_Status
 NRSolver2 :: solve(SparseMtrx *k, FloatArray *R, FloatArray *R0,
                    FloatArray *Rr, FloatArray *r, FloatArray *DeltaR, FloatArray *F,
-                   double &l, double rtol, referenceLoadInputModeType rlm,
+                   double &l, referenceLoadInputModeType rlm,
                    int &nite, TimeStep *tNow)
 //
 // this function solve the problem of the unbalanced equilibrium
@@ -323,6 +323,9 @@ NRSolver2 :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, _val, IFT_NRSolver_lstype, "lstype"); // Macro
     solverType = ( LinSystSolverType ) _val;
     this->giveLinearSolver()->initializeFrom(ir);
+
+    // read relative error tolerances of the solver fo each cc
+    IR_GIVE_FIELD(ir, rtol, IFT_NRSolver_rtolv, "rtolv"); // Macro
 
     this->lsFlag = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, lsFlag, IFT_NRSolver_linesearch, "linesearch"); // Macro

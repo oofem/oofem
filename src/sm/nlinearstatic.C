@@ -210,7 +210,6 @@ NonLinearStatic :: updateAttributes(TimeStep *atTime)
         _error("updateAttributes: deltaT < 0");
     }
 
-    IR_GIVE_FIELD(ir, rtolv, IFT_NonLinearStatic_rtolv, "rtolv"); // Macro
     _val = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, _val, IFT_NonLinearStatic_stiffmode, "stiffmode"); // Macro
     stiffMode = ( NonLinearStatic_stifnessMode ) _val;
@@ -228,13 +227,6 @@ NonLinearStatic :: updateAttributes(TimeStep *atTime)
     // called just to mart filed as recognized, used later
     ir->hasField(IFT_NonLinearStatic_donotfixload, "donotfixload");
 
-    if ( rtolv < 1.E-16 ) {
-        rtolv = 1.e-16;
-    }
-
-    if ( rtolv > 0.2 ) {
-        rtolv = 0.2;
-    }
 }
 
 IRResultType
@@ -765,11 +757,11 @@ NonLinearStatic :: proceedStep(int di, TimeStep *tStep)
     if ( initialLoadVector.isNotEmpty() ) {
         numMetStatus = nMethod->solve(stiffnessMatrix, & incrementalLoadVector, & initialLoadVector,
                                       & incrementalBCLoadVector, & totalDisplacement, & incrementOfDisplacement, & internalForces,
-                                      loadLevel, rtolv, refLoadInputMode, currentIterations, tStep);
+                                      loadLevel, refLoadInputMode, currentIterations, tStep);
     } else {
         numMetStatus = nMethod->solve(stiffnessMatrix, & incrementalLoadVector, NULL,
                                       & incrementalBCLoadVector, & totalDisplacement, & incrementOfDisplacement, & internalForces,
-                                      loadLevel, rtolv, refLoadInputMode, currentIterations, tStep);
+                                      loadLevel, refLoadInputMode, currentIterations, tStep);
     }
 
     //

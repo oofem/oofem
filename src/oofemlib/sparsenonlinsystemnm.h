@@ -108,7 +108,6 @@ public:
      * @param r  total solution (total displacement)
      * @param dr increment of solution (incremental displacaments)
      * @param l  Rhs scale factor (load level)
-     * @param rtol prescribed tolerance (g residual and iterative r change;)
      * @param F  InternalRhs (real internal forces)
      * @param nite - number of iterations needed
      * @param rlm - reference load mode
@@ -116,7 +115,7 @@ public:
      */
     virtual NM_Status solve(SparseMtrx *K, FloatArray *R, FloatArray *R0,
                             FloatArray *Rr, FloatArray *r, FloatArray *dr, FloatArray *F,
-                            double &l, double rtol, referenceLoadInputModeType rlm,
+                            double &l, referenceLoadInputModeType rlm,
                             int &nite, TimeStep *) = 0;
 
     virtual double giveCurrentStepLength() = 0;

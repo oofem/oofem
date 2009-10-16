@@ -599,8 +599,7 @@ The metastep record has following general syntax:\\
 \begin{record}
 \recentry{\hspace{10mm}}{\field{nsteps}{in}}
 \recentry{}{\optField{controllmode}{in}}
-\recentry{}{\optField{deltat}{rn}}
-\recentry{}{\field{rtolv}{rn}} \recentry{}{\optField{stiffmode}{in}}
+\recentry{}{\optField{deltat}{rn}} \recentry{}{\optField{stiffmode}{in}}
 \recentry{}{\optField{refloadmode}{in}} \recentry{}{\field{solverParams}{}}
 \recentry{}{\optField{sparselinsolverparams}{string}} \recentry{}{\optField{donotfixload}{}}
 \end{record}
@@ -617,8 +616,6 @@ control displacements.
 set equal to 1,0. Each solution step has associated the corresponding
 intrinsic time, at which the loading is generated. The \param{deltaT}
 determines the spacing between solution steps on time scale.
-\item[-] \param{rtolv} - determines relative convergence norm (both for displacement
-iterative change vector and for residual unbalanced force vector).
 \item[-] \param{stiffMode} - If == 0 (default) then tangent stiffness will be used
 at new step beginning and whenever numerical method will ask for
 stiffness update. If == 1 the use of secant tangent will be forced.
@@ -664,6 +661,7 @@ time, where the equilibrium has been found. The solver parameters (\param{solver
 load-control are:\\
 \begin{record}
 \recentry{\hspace{10mm}}{\field{maxiter}{in}}
+\recentry{}{\optField{rtolv}{rn}}
 \recentry{}{\optField{minsteplength}{in}}
 \recentry{}{\optField{manrmsteps}{in}}
 \recentry{}{\optField{ddm}{ia} \optField{ddv}{ra} \optField{ddltf}{in}}
@@ -675,6 +673,8 @@ where
 \item \param{maxiter} determines the maximum
 number of iterations allowed to reach equilibrium. If equilibrium is
 not reached, the step length (corresponding to time) is reduced.
+\item \param{rtolv} - determines relative convergence norm (both for displacement
+iterative change vector and for residual unbalanced force vector).
 \item \param{minsteplength} parameter is the minimum step length
 allowed.
 \item If \param{manrmsteps} parameter is nonzero, then the modified
@@ -712,12 +712,15 @@ The corresponding meta step solver parameters (\param{solverParams} are:\\
 \begin{record}
 \recentry{\hspace{10mm}}{\field{Psi}{rn}}
 \recentry{}{\field{MaxIter}{in}}
+\recentry{}{\field{rtolv}{#}}
 \recentry{}{\optField{min\-Step\-Le\-ngth}{in}}
 \recentry{}{\field{stepLength}{rn}} \recentry{}{\field{reqIterations}{in}}
 \recentry{}{\optField{manrmsteps}{in}}
 \recentry{}{\optField{hpcmode}{in} \optField{hpc}{ia} \optField{hpcw}{ia}}
 \recentry{}{\optField{linesearch}{in} \optField{lsearchamp}{rn}}
 \recentry{}{\optField{lsearchmaxeta}{rn} \optField{lsearchtol}{rn}}
+\recentry{}{[\field{nccdg}{in} \field{ccdg1}{ia} ... \field{ccdgN}{ia}]}
+
 \end{record}
 where
 \begin{itemize}
@@ -728,6 +731,9 @@ load control apply.
 \item \param{MaxIter} - determines the maximum number of iteration allowed to
 reach equilibrium state. If this limit is reached, restart follows
 with smaller step length.
+\item \param{rtolv} - determines relative convergence norm (both for displacement
+iterative change vector and for residual unbalanced force vector). If the defailt convergence criteria is used,
+the \param{rtolv} is real value. If the convergence criteria DOF groups are used (see bellow the description of \param{nccdg} parameter) then \param{rtolv} is an real valued array of \param{nccdg} size, and its values define relative convergence norm for individual criteria.
 \item \param{min\-Step\-Le\-ngth} - minimum step length. The step length will never be
 smaller. If convergence problems are encountered and step length cannot
 be decreased, computation terminates.
@@ -754,12 +760,13 @@ corresponding DOF number.
 \item \param{hpcw} - Array of dof weights in linear constraint. The
 dof ordering is determined by \param{hpc} param, size of array should
 be N.
-\item \param {linesearch} nonzero value turns on line search
+\item \param{linesearch} nonzero value turns on line search
   algorithm. The \param{lsearchtol} defines tolerance, amplification
   factor can be specified using \param{lsearchamp} parameter (should
   be in interval $(1,10)$), and parameter \param{lsearchmaxeta}
   defines maximum limit on the length of iterative step (allowed range
   is $(1.5,15)$).
+\item \param{nccdg} allows to define one or more DOF groups, that are used for evaluation of convergence criteria. Each DOF is checked if it is a member of particular group and in this case its contribution is taken into account when evaluating the convergence criteria for that group. By default, if \param{nccdg} is not specified, one group containing all DOF types is created. The value of \param{nccdg} parameter defines the number of DOF type groups. For each group, the corresponding DOF types need to be specified using \param{ccdg#} parameter, where '#' should be replaced by group number (numbering starts from 1). This array contains the DofIDItem values, that identify the physical meaning of DOFs in the group. The values and their physical meaning is defined by DofIDItem enum type (see src/oofemlib/dofiditem.h for reference).
 \end{itemize}
 
 \subsubsection{Standard syntax}

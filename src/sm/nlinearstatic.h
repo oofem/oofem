@@ -110,7 +110,7 @@ protected:
     FloatArray incrementalLoadVectorOfPrescribed;
 
     FloatArray incrementalBCLoadVector; // for direct controll
-    double loadLevel, cumulatedLoadLevel, rtolv;
+    double loadLevel, cumulatedLoadLevel;
     bool mstepCumulateLoadLevelFlag;
     int currentIterations;
     NonLinearStatic_stifnessMode stiffMode;

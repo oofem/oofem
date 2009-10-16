@@ -43,6 +43,8 @@
 
 #ifndef __MAKEDEPEND
 #include <stdio.h>
+#include <set>
+#include <vector>
 #endif
 #include "sparselinsystemnm.h"
 #include "sparsenonlinsystemnm.h"
@@ -129,13 +131,15 @@ class CylindricalALM : public SparseNonLinearSystemNM
      */
 protected:
     /**
-     * CALM mode type; determines the calm step length control.
-     * calm_hpc_off - full ALM with quadratic constrain and all dofs
-     * calm_hpc_on  - full ALM with quadratic constrain, taking into account only selected dofs
+     * CALM mode type; determines the calm step length controll.
+     * calm_hpc_off - full ALM with kvadratic constrain and all dofs
+     * calm_hpc_on  - full ALM with kvadratic constrain, taking into account only selected dofs
      * calml_hpc - linearized ALM (only displacements), taking into account only selected dofs with given weight
      */
     enum    calm_ControllType { calm_hpc_off = 0, calm_hpc_on, calml_hpc };
     enum    calm_NR_ModeType { calm_modifiedNRM, calm_fullNRM, calm_accelNRM };
+
+    typedef std::set<DofID> __DofIDSet;
 
     //FloatArray     *F;
     int nsmax;
@@ -171,6 +175,16 @@ protected:
     /// line search parameters (limits)
     double maxEta, minEta;
 
+    // solver relative error tolarances (for each convergence criteria)
+    FloatArray rtol;
+
+    /** Support for evaluation of error norms for user defined dof-groups. */
+    /// number of convergence criteria dof groups
+    int nccdg;
+    /// convergence criteria dof groups
+    std::vector<__DofIDSet> ccDofGroups;
+
+
 public:
     CylindricalALM(int i, Domain *d, EngngModel *m, EquationID ut);
     // constructor
@@ -187,14 +201,13 @@ public:
      * @param r  total solution (total displacement)
      * @param dr increment of solution (incremental displacaments)
      * @param l  Rhs scale factor (load level)
-     * @param rtol prescribed tolerance (g residual and iterative r change;)
      * @param F  InternalRhs (real internal forces)
      * @param rlm - reference load mode
      * @return NM_Status value
      */
     virtual NM_Status solve(SparseMtrx *k, FloatArray *Ri, FloatArray *R0,
                             FloatArray *Rr, FloatArray *r, FloatArray *DeltaR, FloatArray *F,
-                            double &ReachedLambda, double rtol, referenceLoadInputModeType rlm,
+                            double &ReachedLambda, referenceLoadInputModeType rlm,
                             int &nite, TimeStep *);
 
     virtual double giveCurrentStepLength() { return deltaL; }
@@ -234,6 +247,19 @@ protected:
 
     void search(int istep, FloatArray &prod, FloatArray &eta, double amp,
                 double maxeta, double mineta, int &status);
+
+    /// evaluates the convergence criteria.  
+    bool checkConvergence(FloatArray&R, FloatArray* R0, FloatArray& F, 
+			  FloatArray&r, FloatArray& rIterIncr,
+			  double Lambda, double RR0, double RR, double drProduct,
+			  int nite, bool& errorOutOfRange);
+
+    /// Perform line search optimization of step length
+    void do_lineSearch (FloatArray& r, FloatArray& rInitial, FloatArray& deltaR_, FloatArray& deltaRt, 
+			FloatArray& DeltaRm1, FloatArray& DeltaR, FloatArray& deltaR,
+			FloatArray &R, FloatArray* R0, FloatArray& F,
+			double& DeltaLambda, double& DeltaLambdam1, double& deltaLambda,
+			double& Lambda, double& ReachedLambda, double RR, double& drProduct, TimeStep* tNow) ;
 };
 
 #endif // calmls_h

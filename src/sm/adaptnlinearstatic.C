@@ -421,11 +421,11 @@ AdaptiveNonLinearStatic :: initializeAdaptiveFrom(EngngModel *sourceProblem)
         if ( initialLoadVector.isNotEmpty() ) {
             numMetStatus = nMethod->solve( stiffnessMatrix, & incrementalLoadVector, & initialLoadVector,
                                           & ibcLoadVector, & totalDisplacement, & incrementOfDisplacement, & internalForces,
-                                          loadLevel, rtolv, refLoadInputMode, currentIterations, this->giveCurrentStep() );
+                                          loadLevel, refLoadInputMode, currentIterations, this->giveCurrentStep() );
         } else {
             numMetStatus = nMethod->solve( stiffnessMatrix, & incrementalLoadVector, NULL,
                                           & ibcLoadVector, & totalDisplacement, & incrementOfDisplacement, & internalForces,
-                                          loadLevel, rtolv, refLoadInputMode, currentIterations, this->giveCurrentStep() );
+                                          loadLevel, refLoadInputMode, currentIterations, this->giveCurrentStep() );
         }
 
 
@@ -762,11 +762,11 @@ AdaptiveNonLinearStatic :: adaptiveRemap(Domain* dNew)
         if ( initialLoadVector.isNotEmpty() ) {
             numMetStatus = nMethod->solve( stiffnessMatrix, & incrementalLoadVector, & initialLoadVector,
                                           & ibcLoadVector, & totalDisplacement, & incrementOfDisplacement, & internalForces,
-                                          loadLevel, rtolv, refLoadInputMode, currentIterations, this->giveCurrentStep() );
+                                          loadLevel, refLoadInputMode, currentIterations, this->giveCurrentStep() );
         } else {
             numMetStatus = nMethod->solve( stiffnessMatrix, & incrementalLoadVector, NULL,
                                           & ibcLoadVector, & totalDisplacement, & incrementOfDisplacement, & internalForces,
-                                          loadLevel, rtolv, refLoadInputMode, currentIterations, this->giveCurrentStep() );
+                                          loadLevel, refLoadInputMode, currentIterations, this->giveCurrentStep() );
         }
 
 

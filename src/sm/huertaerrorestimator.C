@@ -4175,8 +4175,6 @@ HuertaErrorEstimator :: setupRefinedProblemProlog(const char *problemName, int p
         nmstep = tStep->giveMetaStepNumber();
         ir = problem->giveMetaStep(nmstep)->giveAttributesRecord();
 
-        IR_GIVE_FIELD(ir, rtolv, IFT_NonLinearStatic_rtolv, "rtolv"); //macro
-
         IR_GIVE_OPTIONAL_FIELD(ir, stiffMode, IFT_NonLinearStatic_stiffmode, "stiffmode"); //macro
         IR_GIVE_OPTIONAL_FIELD(ir, controlMode, IFT_NonLinearStatic_controllmode, "controllmode"); //macro
 
@@ -4196,6 +4194,7 @@ HuertaErrorEstimator :: setupRefinedProblemProlog(const char *problemName, int p
 
             IR_GIVE_OPTIONAL_FIELD(ir, hpc, IFT_CylindricalALM_hpc, "hpc"); // Macro
             IR_GIVE_OPTIONAL_FIELD(ir, hpcw, IFT_CylindricalALM_hpcw, "hpcw"); // Macro
+	    IR_GIVE_FIELD(ir, rtolv, IFT_CylindricalALM_rtolv, "rtolv"); //macro
 
             hpcSize = hpc.giveSize();
             hpcwSize = hpcw.giveSize();
@@ -4208,6 +4207,7 @@ HuertaErrorEstimator :: setupRefinedProblemProlog(const char *problemName, int p
             IR_GIVE_OPTIONAL_FIELD(ir, ddm, IFT_NRSolver_ddm, "ddm"); // Macro
             IR_GIVE_OPTIONAL_FIELD(ir, ddv, IFT_NRSolver_ddv, "ddv"); // Macro
             IR_GIVE_OPTIONAL_FIELD(ir, ddltf, IFT_NRSolver_ddltf, "ddltf"); // Macro
+	    IR_GIVE_FIELD(ir, rtolv, IFT_NRSolver_rtolv, "rtolv"); //macro
 
             ddmSize = ddm.giveSize();
             ddvSize = ddv.giveSize();
