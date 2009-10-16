@@ -532,28 +532,25 @@ void
   Domain *d  = emodel->giveDomain(1);
   int nelem = d->giveNumberOfElements();
 
+  fprintf(stream, "\nCELL_DATA %d\n", elemToProcess);
   for (i=1; i<=cellVarsToExport.giveSize(); i++){
     type = ( InternalStateType ) cellVarsToExport.at(i);
-    InternalStateValueType iType = :: giveInternalStateValueType(type);
-    if(type == IST_MaterialNumber){
-      fprintf(stream, "\nCELL_DATA %d\nSCALARS %s int\nLOOKUP_TABLE default\n", elemToProcess, __InternalStateTypeToString(type) );
-      for ( ielem = 1; ielem <= nelem; ielem++ ) {
-        elem = d->giveElement(ielem);
+    if((type == IST_MaterialNumber) || (type == IST_ElementNumber))
+      fprintf(stream, "SCALARS %s int\nLOOKUP_TABLE default\n", __InternalStateTypeToString(type) );
+    for ( ielem = 1; ielem <= nelem; ielem++ ) {
+      elem = d->giveElement(ielem);
 #ifdef __PARALLEL_MODE
-        if ( elem->giveParallelMode() != Element_local ) {
-        continue;
-        }
-#endif
-        fprintf(stream, "%d\n", elem->giveMaterial()->giveNumber());
+      if ( elem->giveParallelMode() != Element_local ) {
+      continue;
       }
+#endif
+      if(type == IST_MaterialNumber)
+        fprintf(stream, "%d\n", elem->giveMaterial()->giveNumber());
+      if(type == IST_ElementNumber)
+          fprintf(stream, "%d\n", elem->giveNumber());
     }
+    fprintf(stream, "\n\n");
   }
-
-
-
-//
-//
-
 
 }
 

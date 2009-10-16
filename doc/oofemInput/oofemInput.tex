@@ -644,8 +644,8 @@ fixed, however, the new reference loading vector will be assembled for
 the new metastep.
 \end{itemize}
 
-If \param{controllmode} corresponds to direct control, the
-Newton-Raphson solver is used. Under direct control, the total load
+The direct solver corresponds to \param{controllmode}=1 and Newton-Raphson solver is used.
+Under the direct control, the total load
 vector assembled for specific solution step represents the load level,
 where equilibrium is searched. The implementation supports also
 displacement control -  it is possible to prescribe one or more
@@ -657,12 +657,13 @@ documentation). Therefore it is possible to combine
 direct displacement control with direct load control or indirect
 control.}
 The load level then represents the
-time, where the equilibrium has been found. The solver parameters (\param{solverParams} for
+time, where the equilibrium has been found. The solver parameters (\param{solverParams}) for
 load-control are:\\
 \begin{record}
 \recentry{\hspace{10mm}}{\field{maxiter}{in}}
 \recentry{}{\optField{rtolv}{rn}}
 \recentry{}{\optField{minsteplength}{in}}
+\recentry{}{\optField{reqIterations}{in}}
 \recentry{}{\optField{manrmsteps}{in}}
 \recentry{}{\optField{ddm}{ia} \optField{ddv}{ra} \optField{ddltf}{in}}
 \recentry{}{\optField{linesearch}{in} \optField{lsearchamp}{rn}}
@@ -677,6 +678,7 @@ not reached, the step length (corresponding to time) is reduced.
 iterative change vector and for residual unbalanced force vector).
 \item \param{minsteplength} parameter is the minimum step length
 allowed.
+\item \param{reqIterations} - number of required iterations during the iterative solution.
 \item If \param{manrmsteps} parameter is nonzero, then the modified
 N-R scheme is used, with the stiffness updated after
 \param{manrmsteps} steps.
@@ -702,7 +704,7 @@ evaluate the actual displacements of controlled dofs.
   is $(1.5,15)$).
 \end{itemize}
 
-if \param{controllmode} corresponds to indirect control, then CALM
+The indirect solver corresponds to \param{controllmode}=0 and the CALM
 solver is used. The value of reference load vector is determined by
 \param{refloadmode} parameter mentioned above at the first step of
 each metastep. {\em However, the user must ensure, that the same value of
@@ -712,15 +714,15 @@ The corresponding meta step solver parameters (\param{solverParams} are:\\
 \begin{record}
 \recentry{\hspace{10mm}}{\field{Psi}{rn}}
 \recentry{}{\field{MaxIter}{in}}
-\recentry{}{\field{rtolv}{#}}
+\recentry{}{\field{rtolv}{\#}}
 \recentry{}{\optField{min\-Step\-Le\-ngth}{in}}
-\recentry{}{\field{stepLength}{rn}} \recentry{}{\field{reqIterations}{in}}
+\recentry{}{\field{stepLength}{rn}}
+\recentry{}{\optField{reqIterations}{in}}
 \recentry{}{\optField{manrmsteps}{in}}
 \recentry{}{\optField{hpcmode}{in} \optField{hpc}{ia} \optField{hpcw}{ia}}
 \recentry{}{\optField{linesearch}{in} \optField{lsearchamp}{rn}}
 \recentry{}{\optField{lsearchmaxeta}{rn} \optField{lsearchtol}{rn}}
 \recentry{}{[\field{nccdg}{in} \field{ccdg1}{ia} ... \field{ccdgN}{ia}]}
-
 \end{record}
 where
 \begin{itemize}
@@ -738,7 +740,7 @@ the \param{rtolv} is real value. If the convergence criteria DOF groups are used
 smaller. If convergence problems are encountered and step length cannot
 be decreased, computation terminates.
 \item \param{stepLength} - initial step length (the arc-length).
-\item \param{reqIterations} - number of required iteration during iterative solution.
+\item \param{reqIterations} - number of required iterations during the iterative solution.
 \item \param{manrmsteps} - Forces the use of accelerated
 Newton Raphson met\-hod, where stiffness is updated after
 \param{manrmsteps} steps. By default, the modified NR
@@ -766,7 +768,7 @@ be N.
   be in interval $(1,10)$), and parameter \param{lsearchmaxeta}
   defines maximum limit on the length of iterative step (allowed range
   is $(1.5,15)$).
-\item \param{nccdg} allows to define one or more DOF groups, that are used for evaluation of convergence criteria. Each DOF is checked if it is a member of particular group and in this case its contribution is taken into account when evaluating the convergence criteria for that group. By default, if \param{nccdg} is not specified, one group containing all DOF types is created. The value of \param{nccdg} parameter defines the number of DOF type groups. For each group, the corresponding DOF types need to be specified using \param{ccdg#} parameter, where '#' should be replaced by group number (numbering starts from 1). This array contains the DofIDItem values, that identify the physical meaning of DOFs in the group. The values and their physical meaning is defined by DofIDItem enum type (see src/oofemlib/dofiditem.h for reference).
+\item \param{nccdg} allows to define one or more DOF groups, that are used for evaluation of convergence criteria. Each DOF is checked if it is a member of particular group and in this case its contribution is taken into account when evaluating the convergence criteria for that group. By default, if \param{nccdg} is not specified, one group containing all DOF types is created. The value of \param{nccdg} parameter defines the number of DOF type groups. For each group, the corresponding DOF types need to be specified using \param{ccdg\#} parameter, where '\#' should be replaced by group number (numbering starts from 1). This array contains the DofIDItem values, that identify the physical meaning of DOFs in the group. The values and their physical meaning is defined by DofIDItem enum type (see src/oofemlib/dofiditem.h for reference).
 \end{itemize}
 
 \subsubsection{Standard syntax}

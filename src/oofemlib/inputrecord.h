@@ -243,6 +243,7 @@ enum InputFieldType {
 
 
     IFT_NRSolver_maxiter,
+    IFT_NRSolver_numberOfRequiredIterations,
     IFT_NRSolver_minsteplength,
     IFT_NRSolver_manrmsteps,
     IFT_NRSolver_lstype,
@@ -573,6 +574,7 @@ enum InputFieldType {
     IFT_CompoDamageMat_nyyz,
     IFT_CompoDamageMat_Gxy,
     IFT_CompoDamageMat_components,
+    IFT_CompoDamageMat_afteriter,
 
     IFT_MicroMaterialFileName,
     IFT_MacroLspace_microMasterNodes,

@@ -138,7 +138,7 @@ IsotropicDamageMaterial :: giveRealStressVector(FloatArray &answer, MatResponseF
         f = equivStrain - status->giveKappa();
 
         if ( f <= 0.0 ) {
-            // damage do not grow
+            // damage does not grow
             tempKappa = status->giveKappa();
             omega     = status->giveDamage();
         } else {

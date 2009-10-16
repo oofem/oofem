@@ -102,6 +102,7 @@
     ENUM_ITEM_WITH_VALUE(IST_Density, 44) \
     ENUM_ITEM_WITH_VALUE(IST_MaterialInterfaceVal, 45) \
     ENUM_ITEM_WITH_VALUE(IST_MaterialNumber, 46) \
+    ENUM_ITEM_WITH_VALUE(IST_ElementNumber, 47) \
   \
     ENUM_ITEM(CrackStatuses) \
     ENUM_ITEM(CrackedFlag) \

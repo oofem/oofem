@@ -372,7 +372,7 @@ restart:
         }
 
         OOFEM_LOG_INFO("%-10d %-15d %-15e %-15e\n", ( int ) tNow->giveTime(), nite, forceErr, dispErr);
-    } while ( ( fabs(forceErr) > rtol ) || ( fabs(dispErr) > rtol ) );
+    } while ( ( fabs(forceErr) > rtol ) || ( fabs(dispErr) > rtol ) || ( nite < numberOfRequiredIterations ) );
 
     //delete F;
     //
@@ -443,6 +443,11 @@ NRSolver :: initializeFrom(InputRecord *ir)
     if ( nsmax < 30 ) {
         nsmax = 30;
     }
+
+    numberOfRequiredIterations = 0;
+    IR_GIVE_OPTIONAL_FIELD(ir, numberOfRequiredIterations, IFT_NRSolver_numberOfRequiredIterations, "reqiterations"); // Macro
+
+
 
     minStepLength = 0.0;
     IR_GIVE_OPTIONAL_FIELD(ir, minStepLength, IFT_NRSolver_minsteplength, "minsteplength"); // Macro

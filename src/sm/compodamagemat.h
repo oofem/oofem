@@ -86,6 +86,9 @@ public:
     /// Highest damage ever reached in all previous equilibrated steps at IP [6 for tension and compression]
     FloatArray omega;
 
+    ///Iteration in the time step
+    int Iteration;
+
     /// Stress at which damage starts. For uniaxial loading is equal to given maximum stress in the input. The stress is linearly interpolated between increments at IP [6 tension, 6 compression]
     FloatArray initDamageStress;
     /// Strain when damage is initiated at IP. In literature denoted eps_0 [6 tension, 6 compression]
@@ -203,6 +206,9 @@ public:
      * @returns var size, zero if var not supported
      */
     virtual int giveIPValueSize(InternalStateType type, GaussPoint *aGaussPoint);
+
+    ///Optional parameter determining after how many iterations within the time step the damage is calculated. This is important for stress evaluation which is unequilibrated in the beginning. Variables strainAtMaxStress, initDamageStress, maxStrainAtZeroStress are evaluated afterIter.
+    int afterIter;
 
 protected:
     /**

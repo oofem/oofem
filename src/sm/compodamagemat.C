@@ -110,6 +110,10 @@ IRResultType CompoDamageMat :: initializeFrom(InputRecord *ir)
         }
     }
 
+    this->afterIter = 0;
+    IR_GIVE_OPTIONAL_FIELD(ir, this->afterIter, IFT_CompoDamageMat_afteriter, "afteriter"); // Macro
+
+
     //
     //OOFEM_LOG_INFO("READ \n");
     return IRRT_OK;
@@ -117,7 +121,7 @@ IRResultType CompoDamageMat :: initializeFrom(InputRecord *ir)
 
 //used in debugging only ?
 int CompoDamageMat :: giveInputRecordString(std :: string &str, bool keyword)
-{ 
+{
   return 1;
 }
 
@@ -142,10 +146,12 @@ void CompoDamageMat :: giveRealStressVector(FloatArray &answer,  MatResponseForm
     double delta, sigma, charLen, tmp;
     CompoDamageMatStatus *st = ( CompoDamageMatStatus * ) this->giveStatus(gp);
     Element *element = gp->giveElement();
-    FloatArray strainVectorL(6), stressVectorL(6), tempStressVectorL(6),  reducedTotalStrainVector(6), tempKappaL(12), ans, equilStressVectorL(6), equilStrainVectorL(6);
+    FloatArray strainVectorL(6), stressVectorL(6), tempStressVectorL(6),  reducedTotalStrainVector(6), ans, equilStressVectorL(6), equilStrainVectorL(6);
     FloatArray *stressLimit;
     FloatMatrix de, elementCs;
     MaterialMode mMode = gp->giveMaterialMode();
+
+    st->Iteration++;//increase the call number at IP
 
     //substract strain independent part - temperature, creep ..., in global c.s.
     this->giveStressDependentPartOfStrainVector(reducedTotalStrainVector, gp, totalStrain, atTime, VM_Total);
@@ -194,30 +200,30 @@ void CompoDamageMat :: giveRealStressVector(FloatArray &answer,  MatResponseForm
         if ( tempStressVectorL.at(i) >= 0. ) { //unequilibrated stress, tension
             stressLimit = & inputTension; //contains pairs (stress - fracture energy)
             s = 0;
-        } else { //compression
+        } else { //unequilibrated stress, compression
             stressLimit = & inputCompression;
             s = 6;
         }
 
-        if ( fabs( tempStressVectorL.at(i) ) > fabs( ( * stressLimit ).at(2 * i - 1) ) && st->strainAtMaxStress.at(i + s) == 0. ) { //damage starts now, can be replaced for more advanced initiation criteria, e.g. Hill's maximum combination of stresses
+        if ( fabs( tempStressVectorL.at(i) ) > fabs( ( *stressLimit ).at(2 * i - 1) ) && st->strainAtMaxStress.at(i + s) == 0. && st->Iteration > this->afterIter) { //damage starts now, can be replaced for more advanced initiation criteria, e.g. Hill's maximum combination of stresses
             //equilibrated strain and stress from the last time step, transform to local c.s.
-	  switch ( mMode ) {
-	  case _3dMat:
-	    ans = st->giveStrainVector();
-	    this->transformStrainVectorTo(equilStrainVectorL, elementCs, ans, 0);
-	    ans = st->giveStressVector();
-	    this->transformStressVectorTo(equilStressVectorL, elementCs, ans, 0);
-	    break;
-	  
-	  case _1dMat: 
-	    equilStrainVectorL = st->giveStrainVector();
-	    equilStressVectorL = st->giveStressVector();
-	    break;
-	    
-	  default:
-	    // should never go here, handled by similar switch before
-	    ;
-	  }
+            switch ( mMode ) {
+            case _3dMat:
+              ans = st->giveStrainVector();
+              this->transformStrainVectorTo(equilStrainVectorL, elementCs, ans, 0);
+              ans = st->giveStressVector();
+              this->transformStressVectorTo(equilStressVectorL, elementCs, ans, 0);
+              break;
+
+            case _1dMat:
+              equilStrainVectorL = st->giveStrainVector();
+              equilStressVectorL = st->giveStressVector();
+              break;
+
+            default:
+              // should never go here, handled by similar switch before
+              ;
+            }
 
             //subdivide last increment, interpolate, delta in range <0;1>
             delta = ( ( * stressLimit ).at(2 * i - 1) - equilStressVectorL.at(i) ) / ( tempStressVectorL.at(i) - equilStressVectorL.at(i) );
@@ -247,6 +253,7 @@ void CompoDamageMat :: giveRealStressVector(FloatArray &answer,  MatResponseForm
         }
 
         if ( st->strainAtMaxStress.at(i + s) != 0. && fabs( strainVectorL.at(i) ) > fabs( st->kappa.at(i + s) ) ) { //damage started and grows
+          //OOFEM_LOG_INFO("Damage at strain %f and stress %f (i=%d, s=%d) in GP %d element %d\n", st->strainAtMaxStress.at(i + s), tempStressVectorL.at(i), i, s,gp->giveNumber(), gp->giveElement()->giveNumber() );
             //desired stress
             sigma = st->initDamageStress.at(i + s) * ( st->maxStrainAtZeroStress.at(i + s) - strainVectorL.at(i) ) / ( st->maxStrainAtZeroStress.at(i + s) - st->strainAtMaxStress.at(i + s) );
 
@@ -332,8 +339,8 @@ InternalStateValueType CompoDamageMat :: giveIPValueType(InternalStateType type)
 
 int CompoDamageMat :: giveIPValueSize(InternalStateType type, GaussPoint *aGaussPoint)
 {
-    if ( type == IST_DamageTensor ) {
-        return 1;
+    if ( type == IST_DamageTensor ) {//if defined, output is in the local material coordinates
+        return 6;
     } else {
         return StructuralMaterial :: giveIPValueSize(type, aGaussPoint);
     }
@@ -344,7 +351,12 @@ CompoDamageMat :: giveIntVarCompFullIndx(IntArray &answer, InternalStateType typ
 {
     if ( type == IST_DamageTensor ) {
         answer.resize(9);
-        answer.at(1) = 1;
+        answer.at(1) = 1;//xx
+        answer.at(2) = 2;//yy
+        answer.at(3) = 3;//zz
+        answer.at(4) = 4;//yz
+        answer.at(5) = 5;//zx
+        answer.at(6) = 6;//xy
         return 1;
     } else {
         return StructuralMaterial :: giveIntVarCompFullIndx(answer, type, mmode);
@@ -374,7 +386,7 @@ void CompoDamageMat :: giveUnrotated3dMaterialStiffnessMatrix(FloatMatrix &answe
     gxy = this->give(Gxy, NULL);
 
     //xx, yy, zz, yz, zx, xy
-    //assebmle stiffness matrix for transversely orthotropic material with reduced moduli, derived from compliance matrix with only reduced diagonal terms. Procedure can be used for fully orthotropic stiffness matrix as well
+    //assemble stiffness matrix for transversely orthotropic material with reduced moduli, derived from compliance matrix with only reduced diagonal terms. Procedure can be used for fully orthotropic stiffness matrix as well
     a = 1. - st->tempOmega.at(1);
     b = 1. - st->tempOmega.at(2);
     c = 1. - st->tempOmega.at(3);
@@ -456,6 +468,8 @@ CompoDamageMatStatus :: CompoDamageMatStatus(int n, Domain *d, GaussPoint *g) : 
 
     this->elemCharLength.resize(3);
     this->elemCharLength.zero();
+
+    this->Iteration = 0;
 }
 
 // destructor
@@ -499,6 +513,7 @@ void CompoDamageMatStatus :: updateYourself(TimeStep *atTime)
     StructuralMaterialStatus :: updateYourself(atTime); //MaterialStatus::updateYourself, i.e. stressVector = tempStressVector; strainVector = tempStrainVector;
     this->kappa = this->tempKappa;
     this->omega = this->tempOmega;
+    this->Iteration = 0;
 }
 
 

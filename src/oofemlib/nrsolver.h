@@ -135,7 +135,7 @@ private:
     enum    nrsolver_ModeType { nrsolverModifiedNRM, nrsolverFullNRM, nrsolverAccelNRM };
 
 
-    int nite, nsmax;
+    int nite, nsmax, numberOfRequiredIterations;
     double rtol, deltaL;
     double minStepLength;
     int solved;
