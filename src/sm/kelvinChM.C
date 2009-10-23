@@ -79,7 +79,7 @@ KelvinChainMaterial :: computeCharCoefficients(FloatArray &answer, GaussPoint *g
 
     // compute values of the compliance function at specified times rTimes
     // (can be done directly, since the compliance function is available)
-    for ( i = 1; i<= rSize; j++)
+    for ( i = 1; i<= rSize; i++)
       discreteComplianceFunctionVal.at(i) = this->computeCreepFunction(gp, atTime + rTimes.at(i), atTime);
 
     // assemble the matrix of the set of linear equations
