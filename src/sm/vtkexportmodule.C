@@ -1013,7 +1013,7 @@ VTKExportModule :: exportPrimVarAs(UnknownType valID, FILE *stream, TimeStep *tS
     int ireg, nregions = d->giveNumberOfRegions();
     int nnodes = d->giveNumberOfDofManagers(), inode;
     int j, jsize;
-    FloatArray iVal;
+    FloatArray iVal, iValLCS;
     FloatMatrix t(3, 3);
     IntArray regionVarMap;
     InternalStateValueType type = ISVT_UNDEFINED;
@@ -1122,6 +1122,12 @@ VTKExportModule :: exportPrimVarAs(UnknownType valID, FILE *stream, TimeStep *tS
                 }
             } else if ( type == ISVT_VECTOR ) {
                 jsize = min( 3, iVal.giveSize() );
+                //rotate back from nodal CS to global CS if applies
+                if(d->giveNode(dman->giveNumber())->hasLocalCS()){
+                  iVal.resize(3);
+                  iValLCS = iVal;
+                  iVal.beTProductOf(*d->giveNode(dman->giveNumber())->giveLocalCoordinateTriplet(), iValLCS);
+                }
                 for ( j = 1; j <= jsize; j++ ) {
                     fprintf( stream, "%e ", iVal.at(j) );
                 }

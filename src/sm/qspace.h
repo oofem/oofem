@@ -54,7 +54,7 @@ class QSpace : public StructuralElement, public ZZNodalRecoveryModelInterface, p
 
 {
   /*
-    This class implements an Quadratic 3d  20 - node 
+    This class implements an Quadratic 3d  20 - node
     elasticity finite element. Each node has 3 degrees of freedom.
     DESCRIPTION :
     One single additional attribute is needed for Gauss integration purpose :
@@ -63,29 +63,29 @@ class QSpace : public StructuralElement, public ZZNodalRecoveryModelInterface, p
     - calculating its Gauss points ;
     - calculating its B,D,N matrices and dV.
   */
-  
+
  protected:
   int numberOfGaussPoints;
   static FEI3dHexaQuad interpolation;
-  
+
  public:
   QSpace (int,Domain*) ;     // constructor
   ~QSpace ()  {}             // destructor
-  
+
   IRResultType initializeFrom (InputRecord* ir);
   virtual void giveDofManDofIDMask (int inode, EquationID ut, IntArray& answer) const;
   double       computeVolumeAround (GaussPoint*) ;
-  
+
   /**
    Computes the global coordinates from given element's local coordinates.
    Required by nonlocal material models.
    @returns nonzero if successful
   */
   virtual int  computeGlobalCoordinates (FloatArray& answer, const FloatArray& lcoords) ;
-  
+
   /// characteristic length in gp (for some material models)
   double       giveCharacteristicLenght (GaussPoint* gp, const FloatArray &normalToCrackPlane);
-  
+
   /// Interface requesting service
   Interface*  giveInterface (InterfaceType);
   virtual int testElementExtension (ElementExtension ext) {return ((ext==Element_SurfaceLoadSupport)?1:0);}
@@ -99,10 +99,10 @@ class QSpace : public StructuralElement, public ZZNodalRecoveryModelInterface, p
    @return size of DofManger record required to hold recovered values
   */
   int ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type);
-  
+
   /// Returns the corresponding element to interface
   Element *ZZNodalRecoveryMI_giveElement() { return this; }
-  
+
   /// Evaluates N matrix (interpolation estimated stress matrix).
   void ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx (FloatMatrix& answer, GaussPoint* aGaussPoint, InternalStateType type);
   //@}
@@ -118,7 +118,7 @@ class QSpace : public StructuralElement, public ZZNodalRecoveryModelInterface, p
    @param tStep time step
   */
   void NodalAveragingRecoveryMI_computeNodalValue (FloatArray& answer, int node, InternalStateType type, TimeStep* tStep);
-  
+
   /**
    Computes the element value in given side.
    @param answer contains the result
@@ -127,7 +127,7 @@ class QSpace : public StructuralElement, public ZZNodalRecoveryModelInterface, p
    @param tStep time step
   */
   void NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side, InternalStateType type, TimeStep *tStep);
-  
+
   /**
    Returns the size of DofManger record required to hold recovered values for given mode.
    @param type determines the type of internal variable to be recovered
@@ -136,24 +136,24 @@ class QSpace : public StructuralElement, public ZZNodalRecoveryModelInterface, p
   virtual int NodalAveragingRecoveryMI_giveDofManRecordSize(InternalStateType type)
     { return ZZNodalRecoveryMI_giveDofManRecordSize(type); }
   //@}
-  
+
   //
   // definition & identification
   //
   const char* giveClassName () const { return "QSpace"; }
   classType   giveClassID   () const { return QSpaceClass; }
   Element_Geometry_Type giveGeometryType() const {return EGT_hexa_2;}
-  virtual int  computeNumberOfDofs () {return 60;}
-  
+  virtual int  computeNumberOfDofs (EquationID ut) {return 60;}
+
  protected:
   void computeGaussPoints ();
   void computeNmatrixAt (GaussPoint* ,FloatMatrix& );
   void computeBmatrixAt (GaussPoint* ,FloatMatrix& ,int=1,int=ALL_STRAINS);
-  
+
   integrationDomain  giveIntegrationDomain () {return _Cube;}
   int giveApproxOrder () {return 2;}
   int giveNumberOfIPForMassMtrxIntegration () {return 27;}
-  
+
   //@}
   /**
      @name Surface load support

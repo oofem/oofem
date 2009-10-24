@@ -110,6 +110,8 @@ CylindricalALM :: CylindricalALM(int i, Domain *d, EngngModel *m, EquationID ut)
 
     // number of convergence_criteria dof groups, set to 0 (default behaviour)
     nccdg = 0;
+
+    minIterations = 0;
 }
 
 CylindricalALM ::  ~CylindricalALM() {
@@ -155,7 +157,7 @@ CylindricalALM :: solve(SparseMtrx *k, FloatArray *Ri, FloatArray *R0,
       for (i=1; i<=nccdg; i++) OOFEM_LOG_INFO("ForceError(%02d)  DisplError(%02d)  ", i,i);
       OOFEM_LOG_INFO("\n__________________________________________________________\n");
     }
-      
+
     //
     // Now smarter method is default:
     // after convergence troubles for (calm_NR_ModeTick subsequent
@@ -341,7 +343,7 @@ restart:
     rR = dotProduct(deltaRt.givePointer(), R->givePointer(), neq);
 #endif
     /* rR is unscaled Bergan's param of current stiffness rR = deltaRt^T k deltaRt
-     * this is used to test vhether k has negatine or positive slope */
+     * this is used to test whether k has negative or positive slope */
 
     Lambda = ReachedLambda;
     DeltaLambda = deltaLambda = sgn(rR) * deltaL / p;
@@ -476,15 +478,15 @@ restart:
         // B.4.+ B.5.
         //
 
-	
+
         if ( this->lsFlag && ( nite != 1 ) ) {
 	  //
 	  //  LINE SEARCH
 	  //
-	  this->do_lineSearch (*r, rInitial, deltaR_, deltaRt, 
+	  this->do_lineSearch (*r, rInitial, deltaR_, deltaRt,
 			       DeltaRm1, *DeltaR, deltaR,
 			       *R, R0, *F,
-			       DeltaLambda, DeltaLambdam1, deltaLambda, Lambda, ReachedLambda, 
+			       DeltaLambda, DeltaLambdam1, deltaLambda, Lambda, ReachedLambda,
 			       RR, drProduct, tNow);
 
 
@@ -543,6 +545,7 @@ restart:
 
 	converged = this->checkConvergence (*R, R0, *F, *r, deltaR, Lambda, RR0, RR, drProduct,
 					    nite, errorOutOfRangeFlag);
+
 	if ( ( nite >= nsmax ) || errorOutOfRangeFlag) {
 	  irest++;
 	  if ( irest <= CALM_MAX_RESTARTS ) {
@@ -554,7 +557,7 @@ restart:
 	    if ( deltaL < minStepLength ) {
 	      deltaL = minStepLength;
 	    }
-	    
+
 	    // restore previous total displacement vector
 	    r->operator=(rInitial);
 	    // reset all changes fro previous equilibrium state
@@ -563,9 +566,9 @@ restart:
 	    // restore initial stiffness
 	    engngModel->updateComponent(tNow, NonLinearLhs, domain);
 	    //delete F; F = NULL;
-	    
+
 	    OOFEM_LOG_INFO("calm iteration Reset ...\n");
-	    
+
 	    calm_NR_OldMode  = calm_NR_Mode;
 	    calm_NR_Mode     = calm_fullNRM;
 	    calm_NR_ModeTick = CALM_DEFAULT_NRM_TICKS;
@@ -578,7 +581,7 @@ restart:
 	  }
 	}
 
-    } while ( !converged );
+    } while ( !converged || (nite < minIterations) );
 
     //
     // update dofs,nodes,Elemms and print result
@@ -654,7 +657,7 @@ restart:
 
 
 bool
-CylindricalALM :: checkConvergence(FloatArray&R, FloatArray* R0, FloatArray& F, 
+CylindricalALM :: checkConvergence(FloatArray&R, FloatArray* R0, FloatArray& F,
 				   FloatArray&r, FloatArray& rIterIncr,
 				   double Lambda, double RR0, double RR, double drProduct,
 				   int nite, bool& errorOutOfRange)
@@ -705,7 +708,7 @@ CylindricalALM :: checkConvergence(FloatArray&R, FloatArray* R0, FloatArray& F,
 #ifdef __PARALLEL_MODE
       if (!_idofmanptr->isLocal()) continue;
 #endif
-      
+
       _ndof = _idofmanptr->giveNumberOfDofs();
       // loop over individual dofs
       for (_idof = 1; _idof<=_ndof; _idof++) {
@@ -718,7 +721,7 @@ CylindricalALM :: checkConvergence(FloatArray&R, FloatArray* R0, FloatArray& F,
 
 	    if (_eq) {
 #if ( defined(__PARALLEL_MODE) && defined(__PETSC_MODULE) )
-	      if ( ! n2l->giveNewEq(_eq) ) continue; 
+	      if ( ! n2l->giveNewEq(_eq) ) continue;
 #endif
 
 	      _val = rhs.at(_eq);
@@ -752,7 +755,7 @@ CylindricalALM :: checkConvergence(FloatArray&R, FloatArray* R0, FloatArray& F,
     MPI_Allreduce(dg_totalDisp.givePointer(), collectiveErr.givePointer(), _ng, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
     dg_totalDisp = collectiveErr;
 #endif
-    
+
     OOFEM_LOG_INFO("%-5d %-15e ", nite, Lambda);
     // loop over dof groups
     for (_dg=1; _dg<= _ng; _dg++) {
@@ -762,7 +765,7 @@ CylindricalALM :: checkConvergence(FloatArray&R, FloatArray* R0, FloatArray& F,
       } else {
 	dg_forceErr.at(_dg) = sqrt( dg_forceErr.at(_dg) / dg_totalLoadLevel.at(_dg));
       }
-      
+
       //
       // compute displacement error
       //
@@ -774,20 +777,20 @@ CylindricalALM :: checkConvergence(FloatArray&R, FloatArray* R0, FloatArray& F,
 
       if (( fabs(dg_forceErr.at(_dg)) > rtol.at(_dg) * CALM_MAX_REL_ERROR_BOUND ) ||
 	  ( fabs(dg_dispErr.at(_dg))  > rtol.at(_dg) * CALM_MAX_REL_ERROR_BOUND ) ) errorOutOfRange = true;
-      
-      if (( fabs(dg_forceErr.at(_dg)) > rtol.at(_dg) ) || ( fabs(dg_dispErr.at(_dg)) > rtol.at(_dg) )) answer = false; 
-	  
+
+      if (( fabs(dg_forceErr.at(_dg)) > rtol.at(_dg) ) || ( fabs(dg_dispErr.at(_dg)) > rtol.at(_dg) )) answer = false;
+
 
       OOFEM_LOG_INFO("%-15e %-15e ", dg_forceErr.at(_dg), dg_dispErr.at(_dg));
     }
     OOFEM_LOG_INFO("\n");
 
-  } else {  
+  } else {
 
-    // 
+    //
     // _ng==0 (errors computed for all dofs - this is the default)
     //
-  
+
     //
     // compute force error(s)
     //
@@ -835,9 +838,9 @@ CylindricalALM :: checkConvergence(FloatArray&R, FloatArray* R0, FloatArray& F,
 
 	if (( fabs(forceErr) > rtol.at(1) * CALM_MAX_REL_ERROR_BOUND ) ||
 	    ( fabs(dispErr)  > rtol.at(1) * CALM_MAX_REL_ERROR_BOUND ) ) errorOutOfRange = true;
-      
-	if (( fabs(forceErr) > rtol.at(1) ) || ( fabs(dispErr) > rtol.at(1) )) answer = false; 
-      
+
+	if (( fabs(forceErr) > rtol.at(1) ) || ( fabs(dispErr) > rtol.at(1) )) answer = false;
+
 	OOFEM_LOG_INFO("%-5d %-15e %-15e %-15e\n", nite, Lambda, forceErr, dispErr);
   } // end default case (all dofs conributing)
 
@@ -853,11 +856,12 @@ CylindricalALM :: initializeFrom(InputRecord *ir)
 //
 {
     const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
+    IRResultType result;                   // Required by IR_GIVE_FIELD macro
 
-    double oldPsi =  Psi; // defaul from constructor
+    double oldPsi =  Psi; // default from constructor
     double initialStepLength;
     int hpcMode;
+    IRResultType val;
 
     IR_GIVE_OPTIONAL_FIELD(ir, Psi, IFT_CylindricalALM_psi, "psi"); // Macro
     if ( Psi < 0. ) {
@@ -896,6 +900,15 @@ CylindricalALM :: initializeFrom(InputRecord *ir)
 
     if ( numberOfRequiredIterations > 1000 ) {
         numberOfRequiredIterations = 1000;
+    }
+
+    val = IR_GIVE_OPTIONAL_FIELD(ir, minIterations, IFT_CylindricalALM_miniterations, "miniter"); // Macro
+    if ( val == IRRT_OK ) {
+      if(minIterations > 3 && minIterations < 1000)
+        numberOfRequiredIterations = minIterations;
+
+      if(nsmax <= minIterations)
+        nsmax = minIterations+1;
     }
 
     // read if MANRM method is used
@@ -1006,14 +1019,14 @@ CylindricalALM :: initializeFrom(InputRecord *ir)
 	// read dof group as int array under ccdg# keyword
 	IR_GIVE_FIELD(ir, _val, IFT_CylindricalALM_ccdg, name); // Macro
 	// convert aray into set
-	for (_j=1; _j<=_val.giveSize(); _j++) 
+	for (_j=1; _j<=_val.giveSize(); _j++)
 	  ccDofGroups.at(_i).insert(_val.at(_j));
       }
       // read relative error tolerances of the solver fo each cc
       IR_GIVE_FIELD(ir, rtol, IFT_CylindricalALM_rtolv, "rtolv"); // Macro
-      if (rtol.giveSize() != nccdg) 
+      if (rtol.giveSize() != nccdg)
 	_error2 ("INcompatible size of rtolv param, expected size %d (nccdg)", nccdg);
-      
+
     } else {
       nccdg = 0;
       double _rtol;
@@ -1097,7 +1110,7 @@ void CylindricalALM  :: convertHPCMap()
         idof  = calm_HPCDmanDofSrcArray.at(2 * i);
         calm_HPCIndirectDofMask.at(i) = domain->giveNode(inode)->giveDof(idof)->giveEquationNumber(dn);
         if ( calm_Controll == calml_hpc ) calm_HPCWeights.at(i)=calm_HPCDmanWeightSrcArray.at(i);
-        
+
     }
 #endif
 }
@@ -1444,29 +1457,29 @@ CylindricalALM :: search(int istep, FloatArray &prod, FloatArray &eta, double am
 }
 
 void
-CylindricalALM :: do_lineSearch (FloatArray& r, FloatArray& rInitial, FloatArray& deltaR_, FloatArray& deltaRt, 
+CylindricalALM :: do_lineSearch (FloatArray& r, FloatArray& rInitial, FloatArray& deltaR_, FloatArray& deltaRt,
 				 FloatArray& DeltaRm1, FloatArray& DeltaR, FloatArray& deltaR,
 				 FloatArray &R, FloatArray* R0, FloatArray& F,
 				 double& DeltaLambda, double& DeltaLambdam1, double& deltaLambda,
-				 double& Lambda, double& ReachedLambda, double RR, double& drProduct, TimeStep* tNow) 
+				 double& Lambda, double& ReachedLambda, double RR, double& drProduct, TimeStep* tNow)
 {
   //
   //  LINE SEARCH
   //
-  
+
   int i, neq = r.giveSize();
   int ls_failed, dl_failed = 0;
   int _iter = 0;
   int ico;
   int ls_maxiter = 10;
   double __rIterIncr;
-  
+
   DeltaLambda = DeltaLambdam1 + deltaLambda;
   Lambda = ReachedLambda + DeltaLambda;
   double deltaLambdaForEta1 = deltaLambda;
-  
+
   double d6, d7, d8, d9;
-  
+
 #ifdef __PARALLEL_MODE
 #ifdef __PETSC_MODULE
 
@@ -1483,7 +1496,7 @@ CylindricalALM :: do_lineSearch (FloatArray& r, FloatArray& rInitial, FloatArray
       myd [ 3 ] += deltaRt.at(i) * R.at(i);
     }
   }
-  
+
   MPI_Allreduce(myd, cold, 4, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
   d6 = cold [ 0 ];
   d7 = cold [ 1 ];
@@ -1499,10 +1512,10 @@ CylindricalALM :: do_lineSearch (FloatArray& r, FloatArray& rInitial, FloatArray
   double e1, e2, d10 = 0.0, d11 = 0.0;
   double s0, si;
   double prevEta, currEta;
-    
+
   FloatArray eta(ls_maxiter + 1), prod(ls_maxiter + 1);
-  
-  
+
+
   if ( R0 ) {
 #ifdef __PARALLEL_MODE
 #ifdef __PETSC_MODULE
@@ -1515,7 +1528,7 @@ CylindricalALM :: do_lineSearch (FloatArray& r, FloatArray& rInitial, FloatArray
 	myd [ 1 ] += deltaRt.at(i) * R0->at(i);
       }
     }
-    
+
     MPI_Allreduce(myd, cold, 2, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
     d10 = -1.0 * cold [ 0 ];
     d11 = -1.0 * cold [ 1 ];
@@ -1525,14 +1538,14 @@ CylindricalALM :: do_lineSearch (FloatArray& r, FloatArray& rInitial, FloatArray
     d11 = -1.0 * dotProduct(deltaRt, * R0, neq);
 #endif
   }
-  
+
   // prepare starting product ratios and step lengths
   prod.at(1) = 1.0;
   eta.at(1) = 0.0;
   currEta = eta.at(2) = 1.0;
   // following counter shows how many times the max or min step length has been reached
   ico = 0;
-  
+
   //
   // begin line search loop
   //
@@ -1552,7 +1565,7 @@ CylindricalALM :: do_lineSearch (FloatArray& r, FloatArray& rInitial, FloatArray
 	my_drProduct += __rIterIncr * __rIterIncr;
       }
     }
-    
+
     MPI_Allreduce(& my_drProduct, & drProduct, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
 #endif
 #else
@@ -1565,13 +1578,13 @@ CylindricalALM :: do_lineSearch (FloatArray& r, FloatArray& rInitial, FloatArray
       //r.at(i) = rInitial.at(i) + DeltaRm1.at(i) + eta.at(ils)*(deltaLambda*deltaRt.at(i) + deltaR_.at(i));
       //DeltaR.at(i) = DeltaRm1.at(i) + eta.at(ils)*(deltaLambda*deltaRt.at(i) + deltaR_.at(i));
     }
-    
+
 #endif
-    
+
     tNow->incrementStateCounter();  // update solution state counter
     // update internal forces according to new state
     engngModel->updateComponent(tNow, InternalRhs, domain);
-    
+
 #ifdef __PARALLEL_MODE
 #ifdef __PETSC_MODULE
     double mye [ 2 ] = {
@@ -1583,7 +1596,7 @@ CylindricalALM :: do_lineSearch (FloatArray& r, FloatArray& rInitial, FloatArray
 	mye [ 1 ] += deltaRt.at(i) * F.at(i);
       }
     }
-    
+
     MPI_Allreduce(mye, cole, 2, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
     e1 = cole [ 0 ];
     e2 = cole [ 1 ];
@@ -1592,11 +1605,11 @@ CylindricalALM :: do_lineSearch (FloatArray& r, FloatArray& rInitial, FloatArray
     e1 = dotProduct(deltaR_, F, neq);
     e2 = dotProduct(deltaRt, F, neq);
 #endif
-    
+
     s0 = d6 + deltaLambda * d7 + Lambda * d8 + deltaLambda * Lambda * d9 + d10 + deltaLambda * d11;
     si = e1 + deltaLambda * e2 + Lambda * d8 + deltaLambda * Lambda * d9 + d10 + deltaLambda * d11;
     prod.at(ils) = si / s0;
-    
+
     //printf ("\ns0=%e, si=%e, prod=%e", s0, si, prod.at(ils));
     if ( s0 >= 0.0 ) {
       //printf ("solve starting inner product uphill, val=%e",s0);
@@ -1604,15 +1617,15 @@ CylindricalALM :: do_lineSearch (FloatArray& r, FloatArray& rInitial, FloatArray
       currEta = 1.0;
       break;
     }
-    
+
     if ( fabs(si / s0) < ls_tolerance ) {
       ls_failed = 0;
       currEta = eta.at(ils);
       break;
     }
-    
+
     _iter = 0;
-    
+
     currEta = eta.at(ils);
     //printf ("\n_ite=%d, deltaLambda=%e, eta=%e", _iter, deltaLambda, currEta);
     do { // solve simultaneously the equations for eta and lambda
@@ -1621,14 +1634,14 @@ CylindricalALM :: do_lineSearch (FloatArray& r, FloatArray& rInitial, FloatArray
       s0 = d6 + deltaLambda * d7 + Lambda * d8 + deltaLambda * Lambda * d9 + d10 + deltaLambda * d11;
       si = e1 + deltaLambda * e2 + Lambda * d8 + deltaLambda * Lambda * d9 + d10 + deltaLambda * d11;
       prod.at(ils) = si / s0;
-      
+
       // call line-search routine to get new estimate of eta.at(ils+1)
       this->search(ils, prod, eta, amplifFactor, maxEta, minEta, ico);
       if ( ico == 2 ) {
 	ls_failed = 2;
 	break; // exit the loop
       }
-      
+
       currEta = eta.at(ils + 1);
       // solve for deltaLambda
       dl_failed = this->computeDeltaLambda(deltaLambda, DeltaRm1, deltaRt, deltaR_, R, RR, currEta, deltaL, DeltaLambdam1, neq);
@@ -1637,26 +1650,26 @@ CylindricalALM :: do_lineSearch (FloatArray& r, FloatArray& rInitial, FloatArray
 	deltaLambda = deltaLambdaForEta1;
 	break;
       }
-      
+
       DeltaLambda = DeltaLambdam1 + deltaLambda;
       Lambda = ReachedLambda + DeltaLambda;
       //printf ("\n_ite=%d, deltaLambda=%e, eta=%e", _iter, deltaLambda, currEta);
     } while ( ( _iter < 10 ) && ( fabs( ( currEta - prevEta ) / prevEta ) > 0.01 ) );
-    
+
     if ( ( ls_failed > 1 ) || dl_failed ) {
       break;
     }
-    
+
     //printf ("\ncalm ls...");
     //printf ("eta = %e, err=%d, ", currEta,ls_failed);
     //printf ("dLambda=%e, lerr=%d ", deltaLambda, dl_failed);
   } // end of line search loop
-  
+
   if ( ls_failed || dl_failed ) {
     // last resort
     deltaLambda = deltaLambdaForEta1;
     drProduct = 0.0; // dotproduct of iterative displacement increment vector
-    
+
 #ifdef __PARALLEL_MODE
 #ifdef __PETSC_MODULE
     double my_drProduct = 0.0;
@@ -1669,7 +1682,7 @@ CylindricalALM :: do_lineSearch (FloatArray& r, FloatArray& rInitial, FloatArray
 	my_drProduct += __rIterIncr * __rIterIncr;
       }
     }
-    
+
     MPI_Allreduce(& my_drProduct, & drProduct, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
 #endif
 #else
@@ -1680,13 +1693,13 @@ CylindricalALM :: do_lineSearch (FloatArray& r, FloatArray& rInitial, FloatArray
       deltaR.at(i) = __rIterIncr;
       drProduct += __rIterIncr * __rIterIncr;
     }
-    
+
 #endif
     tNow->incrementStateCounter();  // update solution state counter
     engngModel->updateComponent(tNow, InternalRhs, domain);
     DeltaLambda = DeltaLambdam1 + deltaLambda;
     Lambda = ReachedLambda + DeltaLambda;
-    
+
     //printf ("\ncalm fi...eta = %e, err=%d, ", 1.0,ls_failed);
     //printf ("dLambda=%e, lerr=%d", deltaLambda, dl_failed);
     OOFEM_LOG_INFO("LS: err_id=%d, eta=%e, dlambda=%e\n", ls_failed, 1.0, deltaLambda);

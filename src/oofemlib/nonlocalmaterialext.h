@@ -52,7 +52,7 @@
 // using domain decomposition.
 //
 /**
- * Structure containing reference to integration point and its cooresponding nonlocal integration weight.
+ * Structure containing reference to integration point and its corresponding nonlocal integration weight.
  * Used by nonlocal constitutive models based on integral averaging procedure, where in each integration
  * point the corresponding list of influencing integration points is kept, together with their weights.
  * This structure encapsulates the reference to influencing integration point and its corresponding weight.
@@ -221,7 +221,7 @@ public:
 
     /**
      * Determines the number of material regions of domain.
-     * In the current iimplementation the region is associated with cross section model.
+     * In the current implementation the region is associated with cross section model.
      */
     int giveNumberOfRegions();
     /**

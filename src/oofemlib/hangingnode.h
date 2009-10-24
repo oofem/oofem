@@ -59,7 +59,7 @@ class IntArray;
  * The local coordinate system in slave is not supported in current implementation, the global lcs applies.
  * On the other hand, hanging node can be loaded independently of master.
  *
- * To do: Implement evaluation of natural coordinates using Interpaolation classes, instead of
+ * To do: Implement evaluation of natural coordinates using Interpolation classes, instead of
  * using local formulas or supplying then on input.
  *
  * !!!  Pri pouziti slavemask je treba si to dobre rozmyslet, aby nevznikaly nejake nespojitosti.
@@ -93,6 +93,8 @@ protected:
 private:
     void allocAuxArrays(void);
     void deallocAuxArrays(void);
+    //get natural coordinates from the hanging node coordinates
+    int computeNaturalCoordinates(void);
 
 public:
     /**

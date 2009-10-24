@@ -228,6 +228,7 @@ enum InputFieldType {
     IFT_CylindricalALM_steplength,
     IFT_CylindricalALM_initialsteplength,
     IFT_CylindricalALM_reqiterations,
+    IFT_CylindricalALM_miniterations,
     IFT_CylindricalALM_manrmsteps,
     IFT_CylindricalALM_hpcmode,
     IFT_CylindricalALM_hpc,
@@ -243,7 +244,7 @@ enum InputFieldType {
 
 
     IFT_NRSolver_maxiter,
-    IFT_NRSolver_numberOfRequiredIterations,
+    IFT_NRSolver_miniterations,
     IFT_NRSolver_minsteplength,
     IFT_NRSolver_manrmsteps,
     IFT_NRSolver_lstype,

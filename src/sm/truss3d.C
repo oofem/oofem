@@ -349,7 +349,7 @@ Truss3d :: giveLocalCoordinateSystem(FloatMatrix &answer)
 
     int minIndx = 1;
     for ( i = 2; i <= 3; i++ ) {
-        if ( lx.at(i) < lx.at(minIndx) ) {
+        if ( lx.at(i) < abs(lx.at(minIndx)) ) {
             minIndx = i;
         }
     }

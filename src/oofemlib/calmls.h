@@ -150,6 +150,9 @@ protected:
     int calm_NR_ModeTick;
     int calm_MANRMSteps;
 
+    ///minimum hard number of iterations
+    int minIterations;
+
     // variables for HyperPlaneControll
     int calm_hpc_init;
     calm_ControllType calm_Controll;
@@ -248,14 +251,14 @@ protected:
     void search(int istep, FloatArray &prod, FloatArray &eta, double amp,
                 double maxeta, double mineta, int &status);
 
-    /// evaluates the convergence criteria.  
-    bool checkConvergence(FloatArray&R, FloatArray* R0, FloatArray& F, 
+    /// evaluates the convergence criteria.
+    bool checkConvergence(FloatArray&R, FloatArray* R0, FloatArray& F,
 			  FloatArray&r, FloatArray& rIterIncr,
 			  double Lambda, double RR0, double RR, double drProduct,
 			  int nite, bool& errorOutOfRange);
 
     /// Perform line search optimization of step length
-    void do_lineSearch (FloatArray& r, FloatArray& rInitial, FloatArray& deltaR_, FloatArray& deltaRt, 
+    void do_lineSearch (FloatArray& r, FloatArray& rInitial, FloatArray& deltaR_, FloatArray& deltaRt,
 			FloatArray& DeltaRm1, FloatArray& DeltaR, FloatArray& deltaR,
 			FloatArray &R, FloatArray* R0, FloatArray& F,
 			double& DeltaLambda, double& DeltaLambdam1, double& deltaLambda,

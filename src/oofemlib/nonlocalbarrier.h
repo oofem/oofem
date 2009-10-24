@@ -52,7 +52,7 @@
  * Usually, the given remote integration point influences to the source point
  * nonlocal average if the averaging function at source point and evaluated for
  * remote point has nonzero value. The barrier allows to exclude additional points,
- * which may be close enough, but dou to several reasons there is no influence
+ * which may be close enough, but due to several reasons there is no influence
  * between these points (for example, they can be  separated by a notch).
  *
  * @see NonlocalMaterialStatusExtensionInterface class.

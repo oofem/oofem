@@ -123,6 +123,7 @@ RigidArmNode :: initializeFrom(InputRecord *ir)
  * Checks internal data consistency in node.
  * Current implementation checks (when receiver has slave dofs) if receiver has the same
  * coordinate system as master dofManager of slave dof.
+ * If requested, computes natural coordinates on element-like masternodes
  */
 int
 RigidArmNode :: checkConsistency()
