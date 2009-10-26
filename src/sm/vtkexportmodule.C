@@ -260,7 +260,8 @@ VTKExportModule :: doOutput(TimeStep *tStep)
         }
 
         // output cell data (Material ID ...)
-        exportCellVars(stream, elemToProcess, tStep);
+        if(cellVarsToExport.giveSize())
+          exportCellVars(stream, elemToProcess, tStep);
         /*
          * for ( ielem = 1; ielem <= nelem; ielem++ ) {
          * elem = d->giveElement(ielem);
@@ -356,7 +357,8 @@ VTKExportModule :: doOutput(TimeStep *tStep)
                 fprintf(stream, "%d\n", vtkCellType);
             }
 
-            exportCellVars(stream, elemToProcess, tStep);
+            if(cellVarsToExport.giveSize())
+              exportCellVars(stream, elemToProcess, tStep);
         }
     }
 
