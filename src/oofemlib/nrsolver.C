@@ -39,8 +39,8 @@
 
 #include "nrsolver.h"
 #ifndef __MAKEDEPEND
-#include <stdio.h>
-#include <math.h>
+ #include <stdio.h>
+ #include <math.h>
 #endif
 
 #include "verbose.h"
@@ -52,14 +52,15 @@
 #include "mathfem.h"
 // includes for ddc - not very clean (NumMethod knows what is "node" and "dof")
 #include "node.h"
+#include "element.h"
 #include "dof.h"
 #include "loadtime.h"
 #include "linesearch.h"
 #include "usrdefsub.h"
 #ifdef __PETSC_MODULE
-#include "petscsolver.h"
-#include "petscsparsemtrx.h"
-#include "petscordering.h"
+ #include "petscsolver.h"
+ #include "petscsparsemtrx.h"
+ #include "petscordering.h"
 #endif
 
 
@@ -76,7 +77,6 @@ NRSolver :: NRSolver(int i, Domain *d, EngngModel *m, EquationID ut) :
     // constructor
     //
     nsmax  = 60;     // default maximum number of sweeps allowed
-    rtol   = 10.E-3; // convergence tolerance
     //Psi    = 0.1;       // displacement control on
     deltaL = 1.0;
     solved = 0;
@@ -109,12 +109,12 @@ NRSolver ::  ~NRSolver() {
     }
 
 #ifdef __PETSC_MODULE
-#ifdef __PARALLEL_MODE
+ #ifdef __PARALLEL_MODE
     if ( prescribedEgsIS_defined ) {
         ISDestroy(prescribedEgsIS);
     }
 
-#endif
+ #endif
 #endif
 }
 
@@ -133,18 +133,17 @@ NRSolver :: solve(SparseMtrx *k, FloatArray *R, FloatArray *R0,
     FloatArray rhs, deltaR, RT;
     FloatArray rInitial;
     //FloatArray F;
-    double RRT, forceErr, dispErr = 0.;
-    double drr, drdr;
+    double RRT;
     int neq = r->giveSize();
     int irest = 0;
     NM_Status status;
-
+    bool converged, errorOutOfRangeFlag;
 #ifdef __PARALLEL_MODE
-#ifdef __PETSC_MODULE
+ #ifdef __PETSC_MODULE
     // HUHU hard wired domain no 1
     int i;
     PetscNatural2LocalOrdering *n2l = engngModel->givePetscContext(1, ut)->giveN2Lmap();
-#endif
+ #endif
 #endif
 
     OOFEM_LOG_INFO("Time       Iteration       ForceError      DisplError\n__________________________________________________________\n");
@@ -185,7 +184,7 @@ restart:
     //engngModel->updateComponent (tNow, NonLinearRhs_Total);
 
 #ifdef __PARALLEL_MODE
-#ifdef __PETSC_MODULE
+ #ifdef __PETSC_MODULE
     double myRRT = 0.0;
     for ( i = 1; i <= neq; i++ ) {
         if ( n2l->giveNewEq(i) ) {
@@ -194,7 +193,7 @@ restart:
     }
 
     MPI_Allreduce(& myRRT, & RRT, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
-#endif
+ #endif
 #else
     RRT = dotProduct(RT.givePointer(), RT.givePointer(), neq);
 #endif
@@ -263,9 +262,10 @@ restart:
             //F->negated();
         }
 
+        //
+        // convergency check
+        //
         rhs = RT;
-        //if (R0) rhs.add(*R0);
-        //rhs.add(F);
         rhs.substract(F);
 
         //
@@ -277,57 +277,11 @@ restart:
             rhs.at( prescribedEqs.at(ii) ) = 0.0;
         }
 
-#ifdef __PARALLEL_MODE
-#ifdef __PETSC_MODULE
-        double myerr [ 3 ] = {
-            0., 0., 0.
-        }, colerr [ 3 ];
-        for ( i = 1; i <= neq; i++ ) {
-            if ( n2l->giveNewEq(i) ) {
-                myerr [ 0 ] += rhs.at(i) * rhs.at(i);
-                myerr [ 1 ] += r->at(i) * r->at(i);
-                myerr [ 2 ] += deltaR.at(i) * deltaR.at(i);
-            }
-        }
 
-        MPI_Allreduce(myerr, colerr, 3, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
-        forceErr = colerr [ 0 ];
-        drr = colerr [ 1 ];
-        drdr = colerr [ 2 ];
-#endif
-#else
-        forceErr = dotProduct(rhs.givePointer(), rhs.givePointer(), neq);
-        drr = dotProduct(r->givePointer(), r->givePointer(), neq);
-        drdr = dotProduct(deltaR.givePointer(), deltaR.givePointer(), neq);
-#endif
+        converged = this->checkConvergence(RT, rhs, deltaR, * r, RRT, nite, errorOutOfRangeFlag, tNow);
 
-        // we compute a relative error norm
-        if ( ( RRT ) > nrsolver_ERROR_NORM_SMALL_NUM ) {
-            forceErr = sqrt( forceErr / ( RRT ) );
-        } else {
-            forceErr = sqrt(forceErr); // absolute norm
-        }
 
-        //
-        // compute displacement error
-        //
-        // err is relative displacement change
-        if ( drr < nrsolver_ERROR_NORM_SMALL_NUM ) {
-            dispErr = drdr;
-            dispErr = sqrt(dispErr);
-        } else {
-            dispErr = drdr / drr;
-            dispErr = sqrt(dispErr);
-        }
-
-        //
-        // Restart if nite >= nsmax of if force or displacement error is bigger
-        // than allowed limit (rtol * CALM_MAX_REL_ERROR_BOUND)
-        //
-        if ( ( nite >= nsmax ) ||
-            ( fabs(forceErr) > rtol * NRSOLVER_MAX_REL_ERROR_BOUND ) ||
-            ( fabs(dispErr)  > rtol * NRSOLVER_MAX_REL_ERROR_BOUND ) ) {
-            irest++;
+        if ( ( nite >= nsmax ) || errorOutOfRangeFlag ) {
             if ( irest <= NRSOLVER_MAX_RESTARTS ) {
                 // convergence problems
                 // there must be step restart followed by decrease of step length
@@ -370,11 +324,8 @@ restart:
                 break;
             }
         }
+    } while ( ( !converged ) || ( nite < minIterations ) );
 
-        OOFEM_LOG_INFO("%-10d %-15d %-15e %-15e\n", ( int ) tNow->giveTime(), nite, forceErr, dispErr);
-    } while ( ( fabs(forceErr) > rtol ) || ( fabs(dispErr) > rtol ) || ( nite < minIterations ) );
-
-    //delete F;
     //
     // end of iteration
     //
@@ -494,6 +445,55 @@ NRSolver :: initializeFrom(InputRecord *ir)
         this->giveLineSearchSolver()->initializeFrom(ir);
     }
 
+    /** initialize optional dof groups for convergence criteria evaluation */
+    this->nccdg = 0; // default, no dof cc group, all norms evaluated for all dofs
+    IR_GIVE_OPTIONAL_FIELD(ir, nccdg, IFT_NRSolver_nccdg, "nccdg"); // Macro
+    if ( nccdg >= 1 ) {
+        int _i, _j;
+        IntArray _val;
+        char name [ 12 ];
+        // create an empty set
+        __DofIDSet _set;
+        // resize gof group vector
+        this->ccDofGroups.resize(nccdg, _set);
+        for ( _i = 0; _i < nccdg; _i++ ) {
+            sprintf(name, "ccdg%d", _i + 1);
+            // read dof group as int array under ccdg# keyword
+            IR_GIVE_FIELD(ir, _val, IFT_NRSolver_ccdg, name); // Macro
+            // convert aray into set
+            for ( _j = 1; _j <= _val.giveSize(); _j++ ) {
+                ccDofGroups.at(_i).insert( _val.at(_j) );
+            }
+        }
+
+        // read relative error tolerances of the solver fo each cc
+        // if common rtolv provided, set to this tolerace both rtolf and rtold
+        IR_GIVE_OPTIONAL_FIELD(ir, rtolf, IFT_NRSolver_rtolv, "rtolv"); // Macro
+        rtold = rtolf;
+        // read optional force and displacement tolerances
+        IR_GIVE_OPTIONAL_FIELD(ir, rtolf, IFT_NRSolver_rtolf, "rtolf"); // Macro
+        IR_GIVE_OPTIONAL_FIELD(ir, rtold, IFT_NRSolver_rtold, "rtold"); // Macro
+
+        if ( ( rtolf.giveSize() != nccdg ) || ( rtold.giveSize() != nccdg ) ) {
+            _error2("Incompatible size of rtolf or rtold params, expected size %d (nccdg)", nccdg);
+        }
+    } else {
+        nccdg = 0;
+        double _rtol = 1.e-3; // default tolerance
+        rtolf.resize(1);
+        rtold.resize(1);
+        // read relative error tolerances of the solver
+        // if common rtolv provided, set to this tolerace both rtolf and rtold
+        IR_GIVE_OPTIONAL_FIELD(ir, _rtol, IFT_NRSolver_rtolf, "rtolv"); // Macro
+        rtolf.at(1) = rtold.at(1) = _rtol;
+        IR_GIVE_OPTIONAL_FIELD(ir, _rtol, IFT_NRSolver_rtolf, "rtolf"); // Macro
+        rtolf.at(1) = _rtol;
+        IR_GIVE_OPTIONAL_FIELD(ir, _rtol, IFT_NRSolver_rtold, "rtold"); // Macro
+        rtold.at(1) = _rtol;
+    }
+
+
+
     return IRRT_OK;
 }
 
@@ -542,10 +542,10 @@ void
 NRSolver :: initPrescribedEqs()
 {
     EModelDefaultEquationNumbering dn;
-#if defined(__PARALLEL_MODE) || defined(__ENABLE_COMPONENT_LABELS)
-#if defined(__PARALLEL_MODE) && defined (__PETSC_MODULE)
+#if defined ( __PARALLEL_MODE ) || defined ( __ENABLE_COMPONENT_LABELS )
+ #if defined ( __PARALLEL_MODE ) && defined ( __PETSC_MODULE )
     PetscNatural2GlobalOrdering *n2lpm = engngModel->givePetscContext(1, ut)->giveN2Gmap();
-#endif
+ #endif
     int jglobnum, count = 0, ndofman = domain->giveNumberOfDofManagers();
     int i, j, inode, idof;
     IntArray localPrescribedEqs(numberOfPrescribedDofs);
@@ -556,14 +556,15 @@ NRSolver :: initPrescribedEqs()
             inode = prescribedDofs.at(2 * i - 1);
             idof  = prescribedDofs.at(2 * i);
             if ( inode == jglobnum ) {
-#if defined(__PARALLEL_MODE) && defined (__PETSC_MODULE)
+ #if defined ( __PARALLEL_MODE ) && defined ( __PETSC_MODULE )
                 // HUHU hard wired domain no 1
                 if ( n2lpm->isLocal( domain->giveNode(j) ) ) {
                     localPrescribedEqs.at(++count) = domain->giveNode(j)->giveDof(idof)->giveEquationNumber(dn);
                 }
-#else
+
+ #else
                 localPrescribedEqs.at(++count) = domain->giveNode(j)->giveDof(idof)->giveEquationNumber(dn);
-#endif
+ #endif
 
                 continue;
             }
@@ -617,7 +618,7 @@ NRSolver :: applyConstraintsToStiffness(SparseMtrx *k)
     }
 
 #if 0
-#ifdef __PETSC_MODULE
+ #ifdef __PETSC_MODULE
     if ( solverType == ST_Petsc ) {
         PetscScalar diagVal = 1.0;
         if ( k->giveType() != SMT_PetscMtrx ) {
@@ -628,7 +629,7 @@ NRSolver :: applyConstraintsToStiffness(SparseMtrx *k)
 
         if ( !prescribedEgsIS_defined ) {
             IntArray eqs;
-#ifdef __PARALLEL_MODE
+  #ifdef __PARALLEL_MODE
             PetscNatural2GlobalOrdering *n2lpm = engngModel->givePetscContext(1)->giveN2Gmap();
             int s = prescribedEqs.giveSize();
             eqs.resize(s);
@@ -638,7 +639,7 @@ NRSolver :: applyConstraintsToStiffness(SparseMtrx *k)
 
             ISCreateGeneral(PETSC_COMM_WORLD, s, eqs.givePointer(), & prescribedEgsIS);
             //ISView(prescribedEgsIS,PETSC_VIEWER_STDOUT_WORLD);
-#else
+  #else
             eqs.resize(numberOfPrescribedDofs);
             for ( i = 1; i <= numberOfPrescribedDofs; i++ ) {
                 eqs.at(i) = prescribedEqs.at(i) - 1;
@@ -646,7 +647,7 @@ NRSolver :: applyConstraintsToStiffness(SparseMtrx *k)
 
             ISCreateGeneral(PETSC_COMM_SELF, numberOfPrescribedDofs, eqs.givePointer(), & prescribedEgsIS);
             //ISView(prescribedEgsIS,PETSC_VIEWER_STDOUT_SELF);
-#endif
+  #endif
             prescribedEgsIS_defined = true;
         }
 
@@ -660,9 +661,9 @@ NRSolver :: applyConstraintsToStiffness(SparseMtrx *k)
         return;
     }
 
-#endif // __PETSC_MODULE
+ #endif // __PETSC_MODULE
 #else
-#ifdef __PETSC_MODULE
+ #ifdef __PETSC_MODULE
     if ( solverType == ST_Petsc ) {
         if ( k->giveType() != SMT_PetscMtrx ) {
             _error("applyConstraintsToStiffness: PetscSparseMtrx Expected");
@@ -693,7 +694,7 @@ NRSolver :: applyConstraintsToStiffness(SparseMtrx *k)
         return;
     }
 
-#endif // __PETSC_MODULE
+ #endif // __PETSC_MODULE
 #endif
     for ( i = 1; i <= numberOfPrescribedDofs; i++ ) {
         k->at( prescribedEqs.at(i), prescribedEqs.at(i) ) *= 1.e6;
@@ -720,9 +721,9 @@ NRSolver :: applyConstraintsToLoadIncrement(int nite, const SparseMtrx *k, Float
 
     if ( nite == 1 ) {
 #if 0
-#ifdef __PETSC_MODULE
+ #ifdef __PETSC_MODULE
         if ( solverType == ST_Petsc ) {
-#ifdef __PARALLEL_MODE
+  #ifdef __PARALLEL_MODE
             //PetscNatural2LocalOrdering* n2lpm = engngModel->givePetscContext(1)->giveN2Lmap();
             //IntArray* map = n2lpm->giveN2Lmap();
             for ( i = 1; i <= prescribedEqs.giveSize(); i++ ) {
@@ -732,7 +733,7 @@ NRSolver :: applyConstraintsToLoadIncrement(int nite, const SparseMtrx *k, Float
 
             return;
 
-#else // PETSC_SERIAL
+  #else // PETSC_SERIAL
             for ( i = 1; i <= numberOfPrescribedDofs; i++ ) {
                 eq = prescribedEqs.at(i);
                 R.at(eq) = prescribedDofsValues.at(i) * factor;
@@ -740,12 +741,12 @@ NRSolver :: applyConstraintsToLoadIncrement(int nite, const SparseMtrx *k, Float
 
             return;
 
-#endif
+  #endif
         }
 
-#endif
+ #endif
 #else
-#ifdef __PETSC_MODULE
+ #ifdef __PETSC_MODULE
         if ( solverType == ST_Petsc ) {
             if ( k->giveType() != SMT_PetscMtrx ) {
                 _error("applyConstraintsToStiffness: PetscSparseMtrx Expected");
@@ -771,7 +772,7 @@ NRSolver :: applyConstraintsToLoadIncrement(int nite, const SparseMtrx *k, Float
             VecDestroy(diag);
         }
 
-#endif
+ #endif
 #endif
         for ( i = 1; i <= numberOfPrescribedDofs; i++ ) {
             eq = prescribedEqs.at(i);
@@ -812,3 +813,233 @@ NRSolver :: printState(FILE *outputStream)
 }
 
 
+#if 1
+bool
+NRSolver :: checkConvergence(FloatArray &RT, FloatArray &rhs, FloatArray &deltaR, FloatArray &r,
+                             double RRT, int nite, bool &errorOutOfRange, TimeStep *tNow)
+{
+    int _dg, _idofman, _ielem, _idof, _eq, _ndof, _ng = nccdg;
+    int ndofman = domain->giveNumberOfDofManagers();
+    int nelem = domain->giveNumberOfElements();
+    double forceErr, dispErr, _val;
+    DofManager *_idofmanptr;
+    Element *_ielemptr;
+    Dof *_idofptr;
+    FloatArray dg_forceErr(nccdg), dg_dispErr(nccdg), dg_totalLoadLevel(nccdg), dg_totalDisp(nccdg);
+    bool answer;
+    EModelDefaultEquationNumbering dn;
+ #ifdef __PARALLEL_MODE
+  #ifdef __PETSC_MODULE
+    int i;
+    // HUHU hard wired domain no 1
+    PetscNatural2LocalOrdering *n2l = engngModel->givePetscContext(1, ut)->giveN2Lmap();
+  #endif
+ #endif
+
+    answer = true;
+    errorOutOfRange = false;
+
+
+    if ( _ng > 0 ) {
+        // zero error norms per group
+        dg_forceErr.zero();
+        dg_dispErr.zero();
+        dg_totalLoadLevel.zero();
+        dg_totalDisp.zero();
+        // loop over dof managers
+        for ( _idofman = 1; _idofman <= ndofman; _idofman++ ) {
+            _idofmanptr = domain->giveDofManager(_idofman);
+ #ifdef __PARALLEL_MODE
+            if ( !_idofmanptr->isLocal() ) {
+                continue;
+            }
+
+ #endif
+
+            _ndof = _idofmanptr->giveNumberOfDofs();
+            // loop over individual dofs
+            for ( _idof = 1; _idof <= _ndof; _idof++ ) {
+                _idofptr = _idofmanptr->giveDof(_idof);
+                // loop over dof groups
+                for ( _dg = 1; _dg <= _ng; _dg++ ) {
+                    // test if dof ID is in active set
+                    if ( ccDofGroups.at(_dg - 1).find( _idofptr->giveDofID() ) != ccDofGroups.at(_dg - 1).end() ) {
+                        _eq = _idofptr->giveEquationNumber(dn);
+
+                        if ( _eq ) {
+ #if ( defined ( __PARALLEL_MODE ) && defined ( __PETSC_MODULE ) )
+                            if ( !n2l->giveNewEq(_eq) ) {
+                                continue;
+                            }
+
+ #endif
+
+                            _val = rhs.at(_eq);
+                            dg_forceErr.at(_dg) += _val * _val;
+                            _val = deltaR.at(_eq);
+                            dg_dispErr.at(_dg)  += _val * _val;
+                            // missing - compute norms of total displacement and load vectors (but only for selected dofs)!
+                            _val = RT.at(_eq);
+                            dg_totalLoadLevel.at(_dg) += _val * _val;
+                            _val = r.at(_eq);
+                            dg_totalDisp.at(_dg) += _val * _val;
+                        }
+                    }
+                } // end loop over dof groups
+
+            } // end loop over DOFs
+
+        } // end loop over dof managers
+
+        // loop over elements and their DOFs
+        for ( _ielem = 1; _ielem <= nelem; _ielem++ ) {
+            _ielemptr = domain->giveElement(_ielem);
+ #ifdef __PARALLEL_MODE
+            if ( _ielemptr->giveParallelMode() != Element_local ) {
+                continue;
+            }
+
+ #endif
+
+            _ndof = _ielemptr->giveNumberOfDofs();
+            // loop over individual dofs
+            for ( _idof = 1; _idof <= _ndof; _idof++ ) {
+                _idofptr = _ielemptr->giveDof(_idof);
+                // loop over dof groups
+                for ( _dg = 1; _dg <= _ng; _dg++ ) {
+                    // test if dof ID is in active set
+                    if ( ccDofGroups.at(_dg - 1).find( _idofptr->giveDofID() ) != ccDofGroups.at(_dg - 1).end() ) {
+                        _eq = _idofptr->giveEquationNumber(dn);
+
+                        if ( _eq ) {
+ #if ( defined ( __PARALLEL_MODE ) && defined ( __PETSC_MODULE ) )
+                            if ( !n2l->giveNewEq(_eq) ) {
+                                continue;
+                            }
+
+ #endif
+
+                            _val = rhs.at(_eq);
+                            dg_forceErr.at(_dg) += _val * _val;
+                            _val = deltaR.at(_eq);
+                            dg_dispErr.at(_dg)  += _val * _val;
+                            // missing - compute norms of total displacement and load vectors (but only for selected dofs)!
+                            _val = RT.at(_eq);
+                            dg_totalLoadLevel.at(_dg) += _val * _val;
+                            _val = r.at(_eq);
+                            dg_totalDisp.at(_dg) += _val * _val;
+                        }
+                    }
+                } // end loop over dof groups
+
+            } // end loop over DOFs
+
+        } // end loop over dof managers
+
+ #ifdef __PARALLEL_MODE
+        // exchange individual partition contributions (simultaneously for all groups)
+        FloatArray collectiveErr(_ng);
+        MPI_Allreduce(dg_forceErr.givePointer(), collectiveErr.givePointer(), _ng, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
+        dg_forceErr = collectiveErr;
+        MPI_Allreduce(dg_dispErr.givePointer(), collectiveErr.givePointer(), _ng, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
+        dg_dispErr = collectiveErr;
+        MPI_Allreduce(dg_totalLoadLevel.givePointer(), collectiveErr.givePointer(), _ng, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
+        dg_totalLoadLevel = collectiveErr;
+        MPI_Allreduce(dg_totalDisp.givePointer(), collectiveErr.givePointer(), _ng, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
+        dg_totalDisp = collectiveErr;
+ #endif
+
+        OOFEM_LOG_INFO("%-5d %-15e ", ( int ) tNow->giveTime(), nite);
+        // loop over dof groups
+        for ( _dg = 1; _dg <= _ng; _dg++ ) {
+            //  compute a relative error norm
+            if ( ( dg_totalLoadLevel.at(_dg) ) < nrsolver_ERROR_NORM_SMALL_NUM ) {
+                dg_forceErr.at(_dg) = sqrt( dg_forceErr.at(_dg) );
+            } else {
+                dg_forceErr.at(_dg) = sqrt( dg_forceErr.at(_dg) / dg_totalLoadLevel.at(_dg) );
+            }
+
+            //
+            // compute displacement error
+            //
+            if ( dg_totalDisp.at(_dg) <  nrsolver_ERROR_NORM_SMALL_NUM ) {
+                dg_dispErr.at(_dg) = sqrt( dg_dispErr.at(_dg) );
+            } else {
+                dg_dispErr.at(_dg) = sqrt( dg_dispErr.at(_dg) / dg_totalDisp.at(_dg) );
+            }
+
+            if ( ( fabs( dg_forceErr.at(_dg) ) > rtolf.at(_dg) * NRSOLVER_MAX_REL_ERROR_BOUND ) ||
+                ( fabs( dg_dispErr.at(_dg) )  > rtold.at(_dg) * NRSOLVER_MAX_REL_ERROR_BOUND ) ) {
+                errorOutOfRange = true;
+            }
+
+            if ( ( fabs( dg_forceErr.at(_dg) ) > rtolf.at(_dg) ) || ( fabs( dg_dispErr.at(_dg) ) > rtold.at(_dg) ) ) {
+                answer = false;
+            }
+
+
+            OOFEM_LOG_INFO( "%-15e %-15e ", dg_forceErr.at(_dg), dg_dispErr.at(_dg) );
+        }
+
+        OOFEM_LOG_INFO("\n");
+    } else { // nccdg == 0 -> all dofs included
+        double drr, drdr;
+ #ifdef __PARALLEL_MODE
+  #ifdef __PETSC_MODULE
+        int neq = r.giveSize();
+        double myerr [ 3 ] = {
+            0., 0., 0.
+        }, colerr [ 3 ];
+        for ( i = 1; i <= neq; i++ ) {
+            if ( n2l->giveNewEq(i) ) {
+                myerr [ 0 ] += rhs.at(i) * rhs.at(i);
+                myerr [ 1 ] += r.at(i) * r.at(i);
+                myerr [ 2 ] += deltaR.at(i) * deltaR.at(i);
+            }
+        }
+
+        MPI_Allreduce(myerr, colerr, 3, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
+        forceErr = colerr [ 0 ];
+        drr = colerr [ 1 ];
+        drdr = colerr [ 2 ];
+  #endif
+ #else
+        forceErr = dotProduct( rhs.givePointer(), rhs.givePointer(), rhs.giveSize() );
+        drr = dotProduct( r.givePointer(), r.givePointer(), r.giveSize() );
+        drdr = dotProduct( deltaR.givePointer(), deltaR.givePointer(), deltaR.giveSize() );
+ #endif
+
+        // we compute a relative error norm
+        if ( ( RRT ) > nrsolver_ERROR_NORM_SMALL_NUM ) {
+            forceErr = sqrt( forceErr / ( RRT ) );
+        } else {
+            forceErr = sqrt(forceErr); // absolute norm
+        }
+
+        //
+        // compute displacement error
+        //
+        // err is relative displacement change
+        if ( drr < nrsolver_ERROR_NORM_SMALL_NUM ) {
+            dispErr = drdr;
+            dispErr = sqrt(dispErr);
+        } else {
+            dispErr = drdr / drr;
+            dispErr = sqrt(dispErr);
+        }
+
+        if ( ( fabs(forceErr) > rtolf.at(1) * NRSOLVER_MAX_REL_ERROR_BOUND ) ||
+            ( fabs(dispErr)  > rtold.at(1) * NRSOLVER_MAX_REL_ERROR_BOUND ) ) {
+            errorOutOfRange = true;
+        }
+
+        if ( ( fabs(forceErr) > rtolf.at(1) ) || ( fabs(dispErr) > rtold.at(1) ) ) {
+            answer = false;
+        }
+
+        OOFEM_LOG_INFO("%-10d %-15d %-15e %-15e\n", ( int ) tNow->giveTime(), nite, forceErr, dispErr);
+    } // end default case (all dofs conributing)
+
+    return answer;
+}
+#endif

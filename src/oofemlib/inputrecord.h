@@ -241,6 +241,8 @@ enum InputFieldType {
     IFT_CylindricalALM_nccdg,
     IFT_CylindricalALM_ccdg,
     IFT_CylindricalALM_rtolv,
+    IFT_CylindricalALM_rtolf,
+    IFT_CylindricalALM_rtold,
 
 
     IFT_NRSolver_maxiter,
@@ -252,7 +254,11 @@ enum InputFieldType {
     IFT_NRSolver_ddv,
     IFT_NRSolver_ddltf,
     IFT_NRSolver_linesearch,
+    IFT_NRSolver_nccdg,
+    IFT_NRSolver_ccdg,
     IFT_NRSolver_rtolv,
+    IFT_NRSolver_rtolf,
+    IFT_NRSolver_rtold,
 
     IFT_LineSearchNM_lsearchtol,
     IFT_LineSearchNM_lsearchamp,

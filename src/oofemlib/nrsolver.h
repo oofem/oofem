@@ -42,7 +42,9 @@
 #define nrsolver_h
 
 #ifndef __MAKEDEPEND
-#include <stdio.h>
+ #include <stdio.h>
+ #include <set>
+ #include <vector>
 #endif
 #include "sparselinsystemnm.h"
 #include "sparsenonlinsystemnm.h"
@@ -51,9 +53,9 @@
 
 #include "linesearch.h"
 #ifdef __PETSC_MODULE
-#ifndef __MAKEDEPEND
-#include "petscksp.h"
-#endif
+ #ifndef __MAKEDEPEND
+  #include "petscksp.h"
+ #endif
 #endif
 
 
@@ -133,6 +135,7 @@ class NRSolver : public SparseNonLinearSystemNM
 private:
 
     enum    nrsolver_ModeType { nrsolverModifiedNRM, nrsolverFullNRM, nrsolverAccelNRM };
+    typedef std :: set< DofID > __DofIDSet;
 
 
     int nite, nsmax, minIterations;
@@ -178,8 +181,19 @@ private:
 #endif
 
 
+    /** Support for evaluation of error norms for user defined dof-groups. */
+    /// number of convergence criteria dof groups
+    int nccdg;
+    /// convergence criteria dof groups
+    std :: vector< __DofIDSet >ccDofGroups;
+    /// Relative unbalanced force tolerance for each group
+    FloatArray rtolf;
+    /// Relative iterative displacement change tolerance for each group
+    FloatArray rtold;
+
+
 public:
-    NRSolver(int i, Domain *d, EngngModel *m, EquationID ut);
+    NRSolver(int i, Domain * d, EngngModel * m, EquationID ut);
     // constructor
     ~NRSolver();              // destructor
 
@@ -233,11 +247,19 @@ public:
     /// sets associated Domain
     virtual void         setDomain(Domain *d) {
         this->domain = d;
-        if ( linSolver ) { linSolver->setDomain(d); }
+        if ( linSolver ) {
+            linSolver->setDomain(d);
+        }
 
-        if ( linesearchSolver ) { linesearchSolver->setDomain(d); } }
+        if ( linesearchSolver ) {
+            linesearchSolver->setDomain(d);
+        }
+    }
     /// This method clears receiver cached data dependent on topology, when it changes.
-    virtual void reinitialize() { if ( linSolver ) { linSolver->reinitialize(); } }
+    virtual void reinitialize() { if ( linSolver ) {
+                                      linSolver->reinitialize();
+                                  }
+    }
 protected:
 
     SparseLinearSystemNM *giveLinearSolver();
@@ -247,6 +269,8 @@ protected:
     void applyConstraintsToStiffness(SparseMtrx *k);
     void applyConstraintsToLoadIncrement(int nite, const SparseMtrx *k, FloatArray &R,
                                          referenceLoadInputModeType rlm, TimeStep *atTime);
+    bool checkConvergence(FloatArray &RT, FloatArray &F, FloatArray &deltaR, FloatArray &r,
+                          double RRT, int nite, bool &errorOutOfRange, TimeStep *tNow);
 };
 
 #endif // nrsolver_h

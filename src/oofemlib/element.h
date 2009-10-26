@@ -205,7 +205,7 @@ public:
      * @param n Element's number
      * @param aDomain Pointer to the domain to which element belongs.
      */
-    Element(int n, Domain *aDomain);   // constructors
+    Element(int n, Domain * aDomain);   // constructors
     /// Virtual destructor.
     virtual ~Element();                // destructor
 
@@ -219,7 +219,7 @@ public:
      * can be numbered separately. The default implementation assumes that location array will be assembled only for
      * one UnknownType value, and this array is cached on element level.
      */
-    virtual void giveLocationArray(IntArray & locationArray, EquationID, const UnknownNumberingScheme & s) const;
+    virtual void giveLocationArray(IntArray &locationArray, EquationID, const UnknownNumberingScheme &s) const;
     /**
      * Invalidates location array in receiver. Each element stores its copy of location array(s), in order
      * to avoid time consuming assembly of code numbers every time when requested. Some enginnering models
@@ -231,6 +231,17 @@ public:
      * newly assembled).
      */
     void                  invalidateLocationArray();
+    /**
+     *  Returns the number of internal element dofs
+     **/
+    virtual int giveNumberOfDofs() { return 0; }
+    /**
+     * Returns i-th DOF of the receiver
+     **/
+    virtual Dof *giveDof(int i) {
+        _error2("No such DOF available on Element %d", number);
+        return NULL;
+    }
     //@}
     /**@name General methods for obtaining element contributions
      * Note: These member functions have to  be overloaded by derived analysis-specific
@@ -682,9 +693,9 @@ public:
     virtual void updateLocalNumbering(EntityRenumberingFunctor &f);
 
     /// Integration point evaluator, loops over receiver IP's and calls given function (passed as f parameter) on them. The IP is parameter to function f.
-    template< class T > void ipEvaluator( T * src, void ( T :: * f )( GaussPoint * gp ) );
+    template< class T > void ipEvaluator( T *src, void ( T :: *f )( GaussPoint *gp ) );
     /// Integration point evaluator, loops over receiver IP's and calls given function (passed as f parameter) on them. The IP is parameter to function f as well as additional array.
-    template< class T, class S > void ipEvaluator(T * src, void ( T :: * f )( GaussPoint *, S & ), S & _val);
+    template< class T, class S > void ipEvaluator(T *src, void ( T :: *f )( GaussPoint *, S & ), S &_val);
 
 
 

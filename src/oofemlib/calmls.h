@@ -42,9 +42,9 @@
 #define calmls_h
 
 #ifndef __MAKEDEPEND
-#include <stdio.h>
-#include <set>
-#include <vector>
+ #include <stdio.h>
+ #include <set>
+ #include <vector>
 #endif
 #include "sparselinsystemnm.h"
 #include "sparsenonlinsystemnm.h"
@@ -139,7 +139,7 @@ protected:
     enum    calm_ControllType { calm_hpc_off = 0, calm_hpc_on, calml_hpc };
     enum    calm_NR_ModeType { calm_modifiedNRM, calm_fullNRM, calm_accelNRM };
 
-    typedef std::set<DofID> __DofIDSet;
+    typedef std :: set< DofID > __DofIDSet;
 
     //FloatArray     *F;
     int nsmax;
@@ -178,18 +178,19 @@ protected:
     /// line search parameters (limits)
     double maxEta, minEta;
 
-    // solver relative error tolarances (for each convergence criteria)
-    FloatArray rtol;
-
     /** Support for evaluation of error norms for user defined dof-groups. */
     /// number of convergence criteria dof groups
     int nccdg;
     /// convergence criteria dof groups
-    std::vector<__DofIDSet> ccDofGroups;
+    std :: vector< __DofIDSet >ccDofGroups;
+    /// Relative unbalanced force tolerance for each group
+    FloatArray rtolf;
+    /// Relative iterative displacement change tolerance for each group
+    FloatArray rtold;
 
 
 public:
-    CylindricalALM(int i, Domain *d, EngngModel *m, EquationID ut);
+    CylindricalALM(int i, Domain * d, EngngModel * m, EquationID ut);
     // constructor
     ~CylindricalALM();              // destructor
 
@@ -236,11 +237,19 @@ public:
     const char *giveClassName() const { return "CylindricalALM"; }
     classType giveClassID() const { return CylindricalALMSolverClass; }
     /// sets associated Domain
-    virtual void         setDomain(Domain *d) { this->domain = d;
-                                                if ( linSolver ) { linSolver->setDomain(d); } }
+    virtual void         setDomain(Domain *d) {
+        this->domain = d;
+        if ( linSolver ) {
+            linSolver->setDomain(d);
+        }
+    }
     /// This method clears receiver cached data dependent on topology, when it changes.
-    virtual void reinitialize() { calm_hpc_init = 1;
-                                  if ( linSolver ) { linSolver->reinitialize(); } }
+    virtual void reinitialize() {
+        calm_hpc_init = 1;
+        if ( linSolver ) {
+            linSolver->reinitialize();
+        }
+    }
 protected:
     void convertHPCMap();
     SparseLinearSystemNM *giveLinearSolver();
@@ -252,17 +261,17 @@ protected:
                 double maxeta, double mineta, int &status);
 
     /// evaluates the convergence criteria.
-    bool checkConvergence(FloatArray&R, FloatArray* R0, FloatArray& F,
-			  FloatArray&r, FloatArray& rIterIncr,
-			  double Lambda, double RR0, double RR, double drProduct,
-			  int nite, bool& errorOutOfRange);
+    bool checkConvergence(FloatArray &R, FloatArray *R0, FloatArray &F,
+                          FloatArray &r, FloatArray &rIterIncr,
+                          double Lambda, double RR0, double RR, double drProduct,
+                          int nite, bool &errorOutOfRange);
 
     /// Perform line search optimization of step length
-    void do_lineSearch (FloatArray& r, FloatArray& rInitial, FloatArray& deltaR_, FloatArray& deltaRt,
-			FloatArray& DeltaRm1, FloatArray& DeltaR, FloatArray& deltaR,
-			FloatArray &R, FloatArray* R0, FloatArray& F,
-			double& DeltaLambda, double& DeltaLambdam1, double& deltaLambda,
-			double& Lambda, double& ReachedLambda, double RR, double& drProduct, TimeStep* tNow) ;
+    void do_lineSearch(FloatArray &r, FloatArray &rInitial, FloatArray &deltaR_, FloatArray &deltaRt,
+                       FloatArray &DeltaRm1, FloatArray &DeltaR, FloatArray &deltaR,
+                       FloatArray &R, FloatArray *R0, FloatArray &F,
+                       double &DeltaLambda, double &DeltaLambdam1, double &deltaLambda,
+                       double &Lambda, double &ReachedLambda, double RR, double &drProduct, TimeStep *tNow);
 };
 
 #endif // calmls_h
