@@ -298,6 +298,24 @@ public:
                                           TimeStep *, int useUpdatedGpRecord = 0);
 
     /**
+     * Returns equivalent nodal forces vectors. Usefull for nonlinear analysis.
+     * Default implementation computes result as \f$F=\int_v B^T \sigma dV\f$, where \f$\sigma\f$ is the
+     * real element stress vector obtained using computeStressVector service (if useUpdatedGpRecord=0) or
+     * (if useUpdatedGpRecord=1) from integration point status.
+     * The geometric matrix is obtained using computeBmatrixAt service.
+     * Numerical integration procedure uses integrationRulesArray
+     * for numerical integration. This implementation regards element integration rules as that they represent sub-cells 
+     * so that the integration is performed over all subcells for all terms.
+     * @param answer equivalent nodal forces vector
+     * @param tStep time step
+     * @param useUpdatedGpRecord if equal to zero, the stresses in integration points are computed (slow but safe), else if
+     * nonzero the stresses are taken directly from integration point status (should be derived from StructuralMaterialStatus)
+     * (fast, but engineering model must ensure valid status data in each integration point).
+     */
+    virtual void giveInternalForcesVector_withIRulesAsSubcells(FloatArray &answer,
+							       TimeStep *, int useUpdatedGpRecord = 0);
+
+    /**
      * Compute strain vector of receiver evaluated at given integration point at time
      * step stepN from element displacement vector.
      * The nature of strain vector depends on the element type.

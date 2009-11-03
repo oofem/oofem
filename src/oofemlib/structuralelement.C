@@ -1219,6 +1219,101 @@ StructuralElement :: giveInternalForcesVector(FloatArray &answer,
 
 
 
+void
+StructuralElement :: giveInternalForcesVector_withIRulesAsSubcells(FloatArray &answer,
+								   TimeStep *tStep, int useUpdatedGpRecord)
+//
+// returns nodal representation of real internal forces - necessary only for
+// non-linear analysis.
+// if useGpRecord == 1 then data stored in gp->giveStressVector() are used
+// instead computing stressVector through this->ComputeStressVector();
+// this must be done after you want internal forces after element->updateYourself()
+// has been called for the same time step.
+//
+{
+    GaussPoint *gp;
+    Material *mat = this->giveMaterial();
+    IntegrationRule *iRule;
+
+    FloatMatrix b, bt, R, GNT;
+    int ir, Rflag, GNTflag;
+    FloatArray temp, bs, TotalStressVector;
+    IntArray irlocnum;
+    double dV;
+
+    // do not resize answer to computeNumberOfDofs(EID_MomentumBalance)
+    // as this is valid only if receiver has no nodes with slaves
+    // zero answer will resize accordingly when adding first contribution
+    answer.resize(0);
+
+    Rflag = this->computeGtoLRotationMatrix(R);
+    GNTflag = this->computeGNLoadRotationMatrix(GNT, _toNodalCS);
+
+    FloatArray *m = &answer;
+    if (this->giveInterpolation() && this->giveInterpolation()->hasSubPatchFormulation()) m = &temp;
+
+    // loop over individual integration rules
+    for (ir=0; ir < numberOfIntegrationRules; ir++) {
+      iRule = integrationRulesArray [ ir ];
+
+      for ( int i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
+        gp = iRule->getIntegrationPoint(i);
+        this->computeBmatrixAt(gp, b);
+        bt.beTranspositionOf(b);
+        // TotalStressVector = gp->giveStressVector() ;
+        if ( useUpdatedGpRecord == 1 ) {
+            TotalStressVector = ( ( StructuralMaterialStatus * ) mat->giveStatus(gp) )
+                                ->giveStressVector();
+        } else {
+            this->computeStressVector(TotalStressVector, gp, tStep);
+        }
+
+        //
+        // updates gp stress and strain record  acording to current
+        // increment of displacement
+        //
+        if ( TotalStressVector.giveSize() == 0 ) {
+            break;
+        }
+
+        //
+        // now every gauss point has real stress vector
+        //
+        // compute nodal representation of internal forces using f = B^T*Sigma dV
+        //
+        dV  = this->computeVolumeAround(gp);
+        bs.beProductOf(bt, TotalStressVector);
+        bs.times(dV);
+
+        if ( Rflag ) {
+            bs.rotatedWith(R, 't');
+        }
+
+        if ( GNTflag ) {
+            bs.rotatedWith(GNT, 'n');
+        }
+
+        m->add(bs);
+
+	// localize irule contribution into element matrix
+	if (this->giveIntegrationRuleLocalCodeNumbers (irlocnum, iRule, EID_MomentumBalance)) {
+	  answer.assemble (*m, irlocnum);
+	  m->resize(0,0);
+	}
+      }
+    }
+
+    // if inactive update state, but no contribution to global system
+    if ( !this->isActivated(tStep) ) {
+        answer.zero();
+        return;
+    }
+
+    return;
+}
+
+
+
 
 /*
  * FloatMatrix*  StructuralElement :: giveConstitutiveMatrix ()

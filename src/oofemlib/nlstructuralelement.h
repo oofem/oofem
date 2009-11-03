@@ -150,6 +150,21 @@ public:
      */
     virtual void giveInternalForcesVector(FloatArray &answer,
                                           TimeStep *, int useUpdatedGpRecord = 0);
+    /**
+     * Evaluates nodal representation of real internal forces.
+     * The response is evaluated using $F = \int (B+B_2)^T\sigma dV$ formula, where
+     * B is linear strain-displacement contribution, $B_2$ is nonlinear contribution evaluated using
+     * computeNLBMatrixAt service for each strain component ($B_2(i) = \Delta r^T A(i)$).
+     * Numerical integration procedure uses integrationRulesArray
+     * for numrical integration. This implementation regards element integration rules as that they represent sub-cells 
+     * so that the integration is performed over all subcells for all terms.
+     * Necessary transformations are taken into account.
+     * @param answer equivalent nodal forces vector
+     * @param tStep time step
+     * @param useUpdatedGpRecord if equal to zero, the stresses in integration points are computed (slow but safe), else if
+     */
+    void giveInternalForcesVector_withIRulesAsSubcells(FloatArray &answer,
+						       TimeStep *, int useUpdatedGpRecord = 0);
 
     /**
      * Compute strain vector of receiver evaluated at given integration point at time

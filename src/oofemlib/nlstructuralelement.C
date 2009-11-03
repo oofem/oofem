@@ -328,6 +328,131 @@ NLStructuralElement :: giveInternalForcesVector(FloatArray &answer,
 }
 
 
+void
+NLStructuralElement :: giveInternalForcesVector_withIRulesAsSubcells(FloatArray &answer,
+								     TimeStep *tStep, int useUpdatedGpRecord)
+//
+// returns nodal representation of real internal forces - necessary only for
+// non-linear analysis.
+// if useGpRecord == 1 then data stored in gp->giveStressVector() are used
+// instead computing stressVector through this->ComputeStressVector();
+// this must be done after you want internal forces after element->updateYourself()
+// has been called for the same time step.
+//
+{
+    GaussPoint *gp;
+    Material *mat = this->giveMaterial();
+    IntegrationRule *iRule;
+
+    FloatMatrix b, bt, A, *ut = NULL, *b2;
+    FloatArray temp, bs, TotalStressVector, u;
+    IntArray irlocnum;
+    int ir, i, j, k, rot;
+    double dV;
+
+    // do not resize answer to computeNumberOfDofs(EID_MomentumBalance)
+    // as this is valid only if receiver has no nodes with slaves
+    // zero answer will resize accordingly when adding first contribution
+    answer.resize(0);
+
+    rot = this->updateRotationMatrix();
+
+    if ( nlGeometry ) {
+        this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
+
+        if ( rot ) {
+            u.rotatedWith(this->rotationMatrix, 'n');
+        }
+
+        if ( u.giveSize() ) {
+            ut = new FloatMatrix(& u, 1);
+            //delete u;
+        } else {
+            ut = NULL;
+        }
+    }
+
+    FloatArray *m = &answer;
+    if (this->giveInterpolation() && this->giveInterpolation()->hasSubPatchFormulation()) m = &temp;
+
+    // loop over individual integration rules
+    for (ir=0; ir < numberOfIntegrationRules; ir++) {
+      iRule = integrationRulesArray [ ir ];
+
+      for ( i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
+        gp = iRule->getIntegrationPoint(i);
+        this->computeBmatrixAt(gp, b);
+        if ( nlGeometry ) {
+	  for ( j = 1; j <= b.giveNumberOfRows(); j++ ) {
+	    // loop over each component of strain vector
+	    this->computeNLBMatrixAt(A, gp, j);
+	    if ( ( A.isNotEmpty() ) && ( ut != NULL ) ) {
+	      b2 = ut->Times(& A);
+	      //delete A;
+	      for ( k = 1; k <= b.giveNumberOfColumns(); k++ ) {
+		// add nonlinear contribution to each component
+		b.at(j, k) += b2->at(1, k); //mj
+	      }
+	      
+	      delete b2;
+	    }
+	  }
+        } // end nlGeometry
+
+        bt.beTranspositionOf(b);
+        // TotalStressVector = gp->giveStressVector() ;
+        if ( useUpdatedGpRecord == 1 ) {
+	  TotalStressVector = ( ( StructuralMaterialStatus * ) mat->giveStatus(gp) )
+	    ->giveStressVector();
+        } else {
+	  this->computeStressVector(TotalStressVector, gp, tStep);
+        }
+	
+        //
+        // updates gp stress and strain record  acording to current
+        // increment of displacement
+        //
+        if ( TotalStressVector.giveSize() == 0 ) {
+	  break;
+        }
+
+        //
+        // now every gauss point has real stress vector
+        //
+        // compute nodal representation of internal forces using f = B^T*Sigma dV
+        //
+        dV  = this->computeVolumeAround(gp);
+        bs.beProductOf(bt, TotalStressVector);
+        bs.times(dV);
+        if ( rot ) {
+	  bs.rotatedWith(this->rotationMatrix, 't');
+        }
+	
+        m->add(bs);
+
+	// localize irule contribution into element matrix
+	if (this->giveIntegrationRuleLocalCodeNumbers (irlocnum, iRule, EID_MomentumBalance)) {
+	  answer.assemble (*m, irlocnum);
+	  m->resize(0,0);
+	}
+      }
+    } // end loop over irules
+
+    if ( nlGeometry ) {
+        delete ut;
+    }
+
+    // if inactive update fields; but do not contribute to structure
+    if (!this->isActivated(tStep)) {
+      answer.zero();
+      return;
+    }
+
+    return;
+}
+
+
+
 
 void
 NLStructuralElement :: computeStiffnessMatrix(FloatMatrix &answer,

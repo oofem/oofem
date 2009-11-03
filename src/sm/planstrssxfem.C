@@ -253,6 +253,13 @@ void PlaneStress2dXfem :: computeStiffnessMatrix(FloatMatrix &answer, MatRespons
     this->computeStiffnessMatrix_withIRulesAsSubcells(answer, rMode, tStep);
 }
 
+void
+PlaneStress2dXfem :: giveInternalForcesVector(FloatArray &answer,
+					      TimeStep *tStep, int useUpdatedGpRecord) {
+  this->giveInternalForcesVector_withIRulesAsSubcells(answer, tStep, useUpdatedGpRecord);
+}
+
+
 double PlaneStress2dXfem :: giveArea() {
     FloatArray *node1 = this->giveDofManager(1)->giveCoordinates();
     FloatArray *node2 = this->giveDofManager(2)->giveCoordinates();

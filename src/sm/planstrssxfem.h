@@ -31,6 +31,7 @@ public:
     void computeVectorOf(EquationID type, ValueModeType u, TimeStep *stepN, FloatArray &answer);
     void computeStressVector(FloatArray &answer, GaussPoint *gp, TimeStep *stepN);
     void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep);
+    void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord);
     double giveArea();
 
 #ifdef __OOFEG
