@@ -218,6 +218,9 @@ enum classType {
     HyperElasticMaterialClass,
     MisesMatClass,
     RheoChainMaterialClass,
+    TrabBoneMaterialClass,
+    TrabBone3DClass,
+    TrabBoneEmbedClass,
 
     TransportMaterialClass,
     IsotropicHeatTransferMaterialClass,
@@ -258,6 +261,9 @@ enum classType {
     HyperElasticMaterialStatusClass,
     MisesMatStatusClass,
     RheoChainMaterialStatusClass,
+    TrabBoneMaterialStatusClass,
+    TrabBone3DStatusClass,
+    TrabBoneEmbedStatusClass,
 
     FluidDynamicMaterialClass,
     FluidDynamicMaterialStatusClass,

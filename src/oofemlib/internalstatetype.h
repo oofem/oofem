@@ -103,6 +103,11 @@
     ENUM_ITEM_WITH_VALUE(IST_MaterialInterfaceVal, 45) \
     ENUM_ITEM_WITH_VALUE(IST_MaterialNumber, 46) \
     ENUM_ITEM_WITH_VALUE(IST_ElementNumber, 47) \
+    ENUM_ITEM_WITH_VALUE(IST_BoneVolumeFraction, 48) \
+    ENUM_ITEM_WITH_VALUE(IST_PlasStrainEnerDens, 49) \
+    ENUM_ITEM_WITH_VALUE(IST_ElasStrainEnerDens, 50) \
+    ENUM_ITEM_WITH_VALUE(IST_TotalStrainEnerDens, 51) \
+    ENUM_ITEM_WITH_VALUE(IST_DamageScalar, 52) \
   \
     ENUM_ITEM(CrackStatuses) \
     ENUM_ITEM(CrackedFlag) \

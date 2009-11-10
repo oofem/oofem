@@ -205,7 +205,7 @@ public:
      * Computes numerically stiffness matrix of receiver. Default implementation computes element stiffness using
      \f$K=\int_v B^T D B dV\f$ formulae, where \f$B\f$ is element geometric matrix and \f$D\f$ is material stiffness matrix.
      * No geometrical nonlinearity is taken into account. NUmerical integration procedure uses integrationRulesArray
-     * for numrical integration. Support for reduced or selected integration is implemented. The individual integration
+     * for numerical integration. Support for reduced or selected integration is implemented. The individual integration
      * rules are assumed to correspond to different terms from which the overall matrix is assembled.
      * If numberOfIntegrationRules is equal to
      * 1, the full integration of all coefficients is performed. Otherwise, integration is performed using following rules.
@@ -231,8 +231,8 @@ public:
      * Computes numerically stiffness matrix of receiver. Default implementation computes element stiffness using
      * \f$K=\int_v B^T D B dV\f$ formulae, where \f$B\f$ is element geometric matrix 
      * and \f$D\f$ is material stiffness matrix.
-     * No geometrical nonlinearity is taken into account. NUmerical integration procedure uses integrationRulesArray
-     * for numrical integration. This implementation regards element integration rules as that they represent sub-cells 
+     * No geometrical nonlinearity is taken into account. Numerical integration procedure uses integrationRulesArray
+     * for numerical integration. This implementation regards element integration rules as that they represent sub-cells 
      * so that the integration is performed over all subcells for all terms.
      * For higher numerical performance, only one half of stiffness matrix is computed and answer is then symmetrized.
      * Therefore, if element matrix will be generally nonsymmetric, one must specialize this method.
@@ -438,7 +438,7 @@ public:
     /**
      * Returns internal state variable (like stress,strain) at node of element in Reduced form,
      * the way how is obtained is dependent on InternalValueType.
-     * The value may be local, or smoothed using some recovery technic /
+     * The value may be local, or smoothed using some recovery technique /
      * returns zero if element is unable to respont to request.
      * @param answer contains result, zero sized if not supported
      * @param type determines the internal variable requested (physical meaning)
@@ -798,6 +798,7 @@ protected:
 
 
     friend  class IDNLMaterial;
+    friend  class TrabBoneNL3D;
 };
 
 #endif // structuralelement_h

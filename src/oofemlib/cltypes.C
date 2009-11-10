@@ -147,6 +147,19 @@ InternalStateValueType giveInternalStateValueType(InternalStateType type)
         return ISVT_SCALAR;
 
         //break;
+    case IST_DamageScalar:
+    case IST_MaxEquivalentStrainLevel:
+      return ISVT_SCALAR;
+    case IST_BoneVolumeFraction:
+      return ISVT_SCALAR;
+    case IST_PlasStrainEnerDens:
+      return ISVT_SCALAR;
+    case IST_ElasStrainEnerDens:
+      return ISVT_SCALAR;
+    case IST_TotalStrainEnerDens:
+      return ISVT_SCALAR;
+
+        //break;
     default:
         return ISVT_UNDEFINED;
     }

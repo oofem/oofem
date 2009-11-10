@@ -127,6 +127,7 @@ enum InputFieldType {
 
     IFT_NonLinearStatic_controllmode,
     IFT_NonLinearStatic_deltat,
+    IFT_NonLinearStatic_rtolv,
     IFT_NonLinearStatic_stiffmode,
     IFT_NonLinearStatic_refloadmode,
     IFT_NonLinearStatic_keepll,
@@ -745,7 +746,58 @@ enum InputFieldType {
     IFT_HydrationModelInterface_hydration,
     IFT_HydrationModelInterface_castAt,
 
+    IFT_TrabBoneMaterial_E0,
+    IFT_TrabBoneMaterial_Eil,
+    IFT_TrabBoneMaterial_Eie,
+    IFT_TrabBoneMaterial_kie,
+    IFT_TrabBoneMaterial_Ek,
+    IFT_TrabBoneMaterial_Cc,
+    IFT_TrabBoneMaterial_Cc2,
+    IFT_TrabBoneMaterial_EpsC,
+    IFT_TrabBoneMaterial_SigYp,
+    IFT_TrabBoneMaterial_SigYn,
+    IFT_TrabBoneMaterial_adam,
 
+    IFT_TrabBoneNL_r,
+    IFT_TrabBoneNL_m,
+
+    IFT_TrabBone3D_eps0,
+    IFT_TrabBone3D_nu0,
+    IFT_TrabBone3D_mu0,
+    IFT_TrabBone3D_expk,
+    IFT_TrabBone3D_expl,
+
+    IFT_TrabBone3D_m1,
+    IFT_TrabBone3D_m2,
+    IFT_TrabBone3D_rho,
+    
+    IFT_TrabBone3D_sig0Pos,
+    IFT_TrabBone3D_sig0Neg,
+    IFT_TrabBone3D_chi0Pos,
+    IFT_TrabBone3D_chi0Neg,
+    IFT_TrabBone3D_tau0,
+    IFT_TrabBone3D_expq,
+    IFT_TrabBone3D_plasHardFactor,
+    IFT_TrabBone3D_expPlasHard,
+    
+    IFT_TrabBone3D_expDam,
+    IFT_TrabBone3D_critDam,
+    
+    IFT_TrabBone3D_gamDens,
+    IFT_TrabBone3D_tDens,
+    IFT_TrabBone3D_JCrit,
+    
+    IFT_TrabBoneNL3D_r,
+    IFT_TrabBoneNL3D_m,
+    
+    IFT_TrabBoneEmbed_eps0,
+    IFT_TrabBoneEmbed_nu0,
+    IFT_TrabBoneEmbed_mu0,
+    IFT_TrabBoneEmbed_rho,
+    
+    IFT_TrabBoneNLEmbed_r,
+    IFT_TrabBoneNLEmbed_m,
+ 
     IFT_NewtonianFluidMaterial_mu,
 
     IFT_BinghamFluidMaterial_mu0,

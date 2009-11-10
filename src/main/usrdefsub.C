@@ -181,6 +181,12 @@
 #include "micromaterial.h"
 #include "hyperelasticmaterial.h"
 #include "misesmat.h"
+#include "trabbonematerial.h"
+#include "trabbonenl.h"
+#include "trabbone3d.h"
+#include "trabboneembed.h"
+#include "trabbonenlembed.h"
+#include "trabbonenl3d.h"
 
 #include "scalarerrorindicator.h"
 #include "zzerrorestimator.h"
@@ -604,6 +610,18 @@ Material *CreateUsrDefMaterialOfType(char *aClass, int number, Domain *domain)
         newMaterial = new HyperElasticMaterial(number, domain);
     } else if ( !strncmp(aClass, "misesmat", 8) ) {
         newMaterial = new MisesMat(number, domain);
+    } else if (! strncasecmp(aClass,"trabbonenl3d",12)) {
+      newMaterial = new TrabBoneNL3D (number,domain);
+    } else if (! strncasecmp(aClass,"trabboneembed",13)) {
+      newMaterial = new TrabBoneEmbed (number,domain);
+    } else if (! strncasecmp(aClass,"trabbonenlembed",15)) {
+      newMaterial = new TrabBoneNLEmbed (number,domain);
+    } else if (! strncasecmp(aClass,"trabbonenl",10)) {
+      newMaterial = new TrabBoneNL (number,domain);
+    } else if (! strncasecmp(aClass,"trabbone3d",10)) {
+      newMaterial = new TrabBone3D (number,domain);
+    } else if (! strncasecmp(aClass,"trabbone",8)) {
+      newMaterial = new TrabBoneMaterial (number,domain);
     }
 #endif //__SM_MODULE
 
