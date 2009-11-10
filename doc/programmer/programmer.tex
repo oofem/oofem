@@ -1040,7 +1040,7 @@ finishing the solution,
 the \service{updateYourself} service for updating solution state and
 then \service{terminate} method (for updating nodal and element
 values) should be called to consistently update the state of all
-components. The implementation should be provided be derived classes
+components. The implementation should be provided by derived classes
 (see section \ref{Engngmodelexample} for an example).
 
 The implementation of \service{updateYourself} service loops over all
@@ -1351,7 +1351,7 @@ It should be pointed out, that all numerical methods solving the same
 numerical problem use the same genaral interface (same mapping) - this is
 enforced by using the same base problem-specific class. 
 It is therefore possible to use any suitable
-instance of the Numerical method class to the solve problem, and leave the  whole engineering model code,
+instance of the Numerical method class to solve the problem, and leave the  whole engineering model code,
 including mapping, unchanged, because all instances of the Numerical
 method class provide the common interface.
 
