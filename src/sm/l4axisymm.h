@@ -105,6 +105,7 @@ public:
     classType     giveClassID() const { return L4AxisymmClass; }
     virtual int testElementExtension(ElementExtension ext) { return ( ( ext == Element_EdgeLoadSupport ) ? 1 : 0 ); }
     IRResultType initializeFrom(InputRecord *ir);
+    Element_Geometry_Type giveGeometryType() const { return EGT_quad_1; }
 
     /**
      * @name The element interface required by ZZNodalRecoveryModel
