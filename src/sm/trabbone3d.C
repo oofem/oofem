@@ -470,12 +470,11 @@ void TrabBone3D::computeCumPlastStrain (double& tempKappa, GaussPoint* gp, TimeS
 
 void TrabBone3D::computeDensificationStress (FloatArray& answer, GaussPoint* gp, const FloatArray& totalStrain, TimeStep* atTime)
 {
-  TrabBone3DStatus *status = (TrabBone3DStatus*) this -> giveStatus (gp);
   double J;
   FloatArray Id(6);
   FloatMatrix C(3,3), invC(3,3), U(3,3), invU(3,3);
 
-// The following developement is valid only with the nonlinear geometries (Green-Lagrange: E=0.5(C-I))
+// The following development is valid only with the nonlinear geometries (Green-Lagrange: E=0.5(C-I))
   C.at(1,1) = 1. + 2.*totalStrain.at(1); 
   C.at(2,2) = 1. + 2.*totalStrain.at(2); 
   C.at(3,3) = 1. + 2.*totalStrain.at(3); 
@@ -519,7 +518,7 @@ TrabBone3D :: giveRealStressVector (FloatArray& answer, MatResponseForm form, Ga
   this->initGpForNewStep(gp);
 
   int i;
-  double tempDam, dt = atTime ->  giveTimeIncrement();
+  double tempDam;
   FloatArray totalStress, effStress, densStress;
 
   performPlasticityReturn(gp, totalStrain);
@@ -563,8 +562,6 @@ TrabBone3D :: giveRealStressVector (FloatArray& answer, MatResponseForm form, Ga
 void
 TrabBone3D :: constructAnisoComplTensor (FloatMatrix& answer, const double m1, const  double m2, const  double m3, const  double rho, const  double eps0, const  double nu0, const  double mu0, const  double expk, const  double expl)
 {
-   int i, j;
-
   answer.resize (6,6);
 
   answer.at(1,1)=1/(eps0*pow(rho,expk)*pow(m1,2*expl));
@@ -586,8 +583,6 @@ TrabBone3D :: constructAnisoComplTensor (FloatMatrix& answer, const double m1, c
 void
 TrabBone3D :: constructAnisoFabricTensor (FloatMatrix& answer, const double m1, const  double m2, const  double m3, const  double rho, const  double sig0, const  double chi0, const  double tau0, const  double expp, const  double expq)
 {
-   int i, j;
-
   answer.resize (6,6);
 
   answer.at(1,1)=1/pow(sig0*pow(rho,expp)*pow(m1,2*expq),2);

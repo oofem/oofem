@@ -135,7 +135,6 @@ TrabBoneNL::giveRealStressVector(FloatArray& answer,
   double elasStrain = strainVector.at(1) -plasStrain;
   double effStress = E0 * elasStrain;
   double sigc = nlStatus -> giveSigC();
-  double dt = atTime ->  giveTimeIncrement();
 
   answer.resize(1);
   answer.at(1) = (1. - tempDamage )*effStress + sigc;

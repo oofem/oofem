@@ -171,7 +171,7 @@ void
 TrabBoneMaterial :: performPlasticityReturn(GaussPoint* gp, const FloatArray& totalStrain)
 {
   double epsnew,epsold;
-  double epsp,epspold,depsp;
+  double epsp,depsp;
   double alpha;
   double sig,sigp,sigY;
   double gNewton,dgNewton;

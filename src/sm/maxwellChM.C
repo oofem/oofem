@@ -32,7 +32,7 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-
+ 
 // file: MaxwellChM.C
 
 #ifndef __MAKEDEPEND
@@ -285,11 +285,7 @@ MaxwellChainMaterial :: CreateStatus(GaussPoint *gp) const
 IRResultType
 MaxwellChainMaterial :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
-
     RheoChainMaterial :: initializeFrom(ir);
-
     return IRRT_OK;
 }
 
@@ -366,10 +362,9 @@ MaxwellChainMaterialStatus :: saveContext(DataStream *stream, ContextMode mode, 
 contextIOResultType
 MaxwellChainMaterialStatus :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
 {
-    int i;
-    contextIOResultType iores;
+    contextIOResultType iores = RheoChainMaterialStatus :: restoreContext(stream, mode, obj);
 
-    if ( ( iores = RheoChainMaterialStatus :: restoreContext(stream, mode, obj) ) != CIO_OK ) {
+    if ( iores != CIO_OK ) {
         THROW_CIOERR(iores);
     }
     return CIO_OK;

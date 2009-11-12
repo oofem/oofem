@@ -277,11 +277,7 @@ KelvinChainMaterial :: CreateStatus(GaussPoint *gp) const
 IRResultType
 KelvinChainMaterial :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
-
     RheoChainMaterial :: initializeFrom(ir);
-
     return IRRT_OK;
 }
 
@@ -353,10 +349,9 @@ KelvinChainMaterialStatus :: saveContext(DataStream *stream, ContextMode mode, v
 contextIOResultType
 KelvinChainMaterialStatus :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
 {
-    int i;
-    contextIOResultType iores;
+    contextIOResultType iores = RheoChainMaterialStatus :: restoreContext(stream, mode, obj) ;
 
-    if ( ( iores = RheoChainMaterialStatus :: restoreContext(stream, mode, obj) ) != CIO_OK ) {
+    if ( iores != CIO_OK ) {
         THROW_CIOERR(iores);
     }
     return CIO_OK;

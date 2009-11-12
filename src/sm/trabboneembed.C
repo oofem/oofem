@@ -250,8 +250,7 @@ TrabBoneEmbed :: giveRealStressVector (FloatArray& answer, MatResponseForm form,
 void
 TrabBoneEmbed :: constructIsoComplTensor (FloatMatrix& answer, const  double eps0, const  double nu0)
 {
-   int i, j;
-   double mu0 = eps0/(2*(1+nu0));
+  double mu0 = eps0/(2*(1+nu0));
 
   answer.resize (6,6);
   answer.at(1,1) = answer.at(2,2) = answer.at(3,3) = 1/eps0;

@@ -135,8 +135,6 @@ TrabBoneNLEmbed::giveRealStressVector(FloatArray& answer,
   FloatArray plasDef, totalStress;
   FloatMatrix compliance, elasticity;
 
-  double dt = atTime ->  giveTimeIncrement();
-
   compliance.resize(6,6);
   this->constructIsoComplTensor(compliance, eps0, nu0);
   elasticity.beInverseOf(compliance);
@@ -188,7 +186,7 @@ TrabBoneNLEmbed :: computeCumPlastStrain (double& alpha, GaussPoint* gp, TimeSte
 
   nonlocalCumPlastStrain *= 1./status->giveIntegrationScale();
 
-  double localCumPlastStrain = status->giveLocalCumPlastStrainForAverage();
+//  double localCumPlastStrain = status->giveLocalCumPlastStrainForAverage();
 //  alpha = mParam*nonlocalCumPlastStrain +(1-mParam)*localCumPlastStrain ;
   alpha = 0.;
 }

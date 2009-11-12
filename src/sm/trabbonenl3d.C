@@ -369,7 +369,7 @@ TrabBoneNL3D::giveRealStressVector(FloatArray& answer, MatResponseForm form, Gau
   this->initGpForNewStep(gp);
 
   int i;
-  double tempDam, dt = atTime ->  giveTimeIncrement();
+  double tempDam;
   FloatArray effStress, totalStress, densStress;
 
   performPlasticityReturn(gp, totalStrain);
