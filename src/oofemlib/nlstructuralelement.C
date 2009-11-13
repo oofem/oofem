@@ -469,6 +469,7 @@ NLStructuralElement :: computeStiffnessMatrix(FloatMatrix &answer,
     FloatArray u, stress;
     GaussPoint *gp;
     IntegrationRule *iRule;
+    bool matStiffSymmFlag = this->giveCrossSection()->isCharacteristicMtrxSymmetric(rMode, this->material);
 
     answer.resize( computeNumberOfDofs(EID_MomentumBalance), computeNumberOfDofs(EID_MomentumBalance) );
     answer.zero();
@@ -554,7 +555,12 @@ NLStructuralElement :: computeStiffnessMatrix(FloatMatrix &answer,
                     dij.beSubMatrixOf(d, iStartIndx, iEndIndx, jStartIndx, jEndIndx);
                     dV  = this->computeVolumeAround(gp);
                     dbj.beProductOf(dij, bj);
-                    answer.plusProductSymmUpper(bi, dbj, dV);
+                    if ( matStiffSymmFlag ) {
+                        answer.plusProductSymmUpper(bi, dbj, dV);
+                    } else {
+                        answer.plusProductUnsym(bi, dbj, dV);
+                    }
+
                     // delete bi; delete d; delete dij; delete dbj;
                     // delete d;
                     // if (i!=j) delete bj;
@@ -587,8 +593,11 @@ NLStructuralElement :: computeStiffnessMatrix(FloatMatrix &answer,
             this->computeConstitutiveMatrixAt(d, rMode, gp, tStep);
             dV = this->computeVolumeAround(gp);
             dbj.beProductOf(d, bj);
-            answer.plusProductSymmUpper(bj, dbj, dV);
-
+            if ( matStiffSymmFlag ) {
+              answer.plusProductSymmUpper(bj, dbj, dV);
+            } else {
+              answer.plusProductUnsym(bj, dbj, dV);
+            }
             // delete bj ;
             // delete dbj ;
             // delete d ;
