@@ -465,6 +465,7 @@ enum InputFieldType {
 
 
     IFT_B3Material_mode,
+    IFT_B3Material_emodulimode,
     IFT_B3Material_fc,
     IFT_B3Material_cc,
     IFT_B3Material_wc,
@@ -527,6 +528,7 @@ enum InputFieldType {
 
     IFT_RheoChainMaterial_n,
     IFT_RheoChainMaterial_relmatage,
+    IFT_RheoChainMaterial_begoftimeofinterest,
     IFT_RheoChainMaterial_endoftimeofinterest,
     IFT_RheoChainMaterial_timefactor,
 

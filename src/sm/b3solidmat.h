@@ -62,10 +62,12 @@ protected:
     double n;         //constant-exponent (obtained from experiments) n [Pedersen, 1990]
     double a;         //constant (obtained from experiments) A [Pedersen, 1990]
     double talpha;   // thermal dilatation coeff.
+    double EspringVal; // elastic modulus of the aging spring (first member of Kelvin chain if retardation spectrum is used)
+    int EmoduliMode;  // 0 = analysis of retardation spectrum is used for evaluation of Kelvin units moduli (default)
+					// 1 = least-squares method is used for evaluation of Kelvin units moduli
 public:
     B3SolidMaterial(int n, Domain *d) : KelvinChainMaterial(n, d) { shMode = B3_NoShrinkage; }
     ~B3SolidMaterial() { }
-
 
     virtual void giveShrinkageStrainVector(FloatArray &answer, MatResponseForm form,
                                            GaussPoint *gp, TimeStep *atTime, ValueModeType mode);
@@ -105,6 +107,29 @@ protected:
     virtual double  computeCreepFunction(GaussPoint *gp, double atTime, double ofAge);
 
     double inverse_sorption_isotherm(double w);
+
+    /// evaluation of characteristic moduli of the non-aging Kelvin chain
+    virtual void         computeCharCoefficients(FloatArray &answer, GaussPoint *gp, double);
+
+    /// evaluation of characteristic times
+    virtual void    computeCharTimes();
+
+    /// evaluation of the incremental modulus
+    virtual double       giveEModulus(GaussPoint *gp, TimeStep *atTime);
+
+    /**
+     * Computes, for the given integration point,
+     * the strain vector induced by the stress history (typically creep strain)
+     * @param answer computed strains
+     * @param form material response form
+     * @param gp integration point
+     * @param atTime time step (most models are able to respond only when atTime is the current time step)
+     * @param mode determines response mode
+     */
+    virtual void  giveEigenStrainVector(FloatArray &answer, MatResponseForm form,
+                                        GaussPoint *gp, TimeStep *atTime, ValueModeType mode);
+
+    void computeMicroPrestress(GaussPoint *gp, TimeStep *atTime); //PH docasna fce na vyzkouseni nacitani vlhkosti a teploty
 };
 
 // Note: There is no associated material status - everything is handled by KelvinChainMaterialStatus

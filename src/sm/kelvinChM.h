@@ -109,7 +109,7 @@ public:
     ~KelvinChainMaterial(){}
 
     // updates MatStatus to the newly reached (equilibrium) state
-    virtual void updateYourself(GaussPoint *gp, TimeStep *);
+    void updateYourself(GaussPoint *gp, TimeStep *);
 
     // identification and auxiliary functions
     virtual int hasNonLinearBehaviour()   { return 0; }
@@ -163,10 +163,11 @@ protected:
 
     /// evaluation of the creep compliance function
     virtual double  computeCreepFunction(GaussPoint *gp, double ofAge, double atTime) = 0;
-    void         computeCharCoefficients(FloatArray &answer, GaussPoint *gp, double);
+
+    virtual void         computeCharCoefficients(FloatArray &answer, GaussPoint *gp, double);
 
     /// evaluation of the incremental modulus
-    double       giveEModulus(GaussPoint *gp, TimeStep *atTime);
+    virtual double       giveEModulus(GaussPoint *gp, TimeStep *atTime);
 
     LinearElasticMaterial *giveLinearElasticMaterial();
 };

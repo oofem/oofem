@@ -134,6 +134,8 @@ protected:
     /// time for which the partial moduli of individual units have been evaluated
     double EparValTime;
 
+    /// time from which the model should give a good approximation. Optional field. Default value is 0.1 [day].
+    double begOfTimeOfInterest; // local one or taken from e-model
     /// time (age???) up to which the model should give a good approximation 
     double endOfTimeOfInterest; // local one or taken from e-model
     // associated linearElasticMaterial, with E = 1;
@@ -281,7 +283,7 @@ protected:
     double       giveEparModulus(int iChain);
 
     /// evaluation of characteristic times
-    void         computeCharTimes();
+    virtual void    computeCharTimes();
 
     /// access to the characteristic time of a given unit
     double       giveCharTime(int);

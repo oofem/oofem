@@ -55,14 +55,20 @@ B3SolidMaterial :: initializeFrom(InputRecord *ir)
     // NOTE
     //
     // this material model is unit-dependent!
-    // units must be in MPa, m???, MN.
+    // units must be in MPa, m, MN.
     //
     
     double fc, c, wc, ac, alpha1 = 1.0, alpha2 = 1.0;
+
+    // EmoduliMode has to be set first because characteristic times are computed from RheoChM initialization
+    this->EmoduliMode = 0;
+        IR_GIVE_OPTIONAL_FIELD(ir, EmoduliMode, IFT_B3Material_emodulimode, "emodulimode"); // retardation spectrum or least square method is used
+
     KelvinChainMaterial :: initializeFrom(ir);
 
     int mode = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, mode, IFT_B3Material_mode, "mode");
+
     if (mode == 0) { // default - estimate model parameters q1,..,q5 from composition
       IR_GIVE_FIELD(ir, fc, IFT_B3Material_fc, "fc");  // 28-day standard cylinder compression strength [MPa]
       IR_GIVE_FIELD(ir,  c, IFT_B3Material_cc, "cc");  // cement content of concrete [kg/m^3]
@@ -124,26 +130,6 @@ B3SolidMaterial :: initializeFrom(InputRecord *ir)
 }
 
 void
-B3SolidMaterial :: giveThermalDilatationVector(FloatArray &answer,
-                                          GaussPoint *gp,  TimeStep *tStep)
-//
-// returns a FloatArray(6) of initial strain vector
-// eps_0 = {exx_0, eyy_0, ezz_0, gyz_0, gxz_0, gxy_0}^T
-// caused by unit temperature in direction of
-// gp (element) local axes
-//
-{
-    answer.resize(6);
-    answer.zero();
-    answer.at(1) = ( talpha );
-    answer.at(2) = ( talpha );
-    answer.at(3) = ( talpha );
-
-    return;
-}
-
-
-void
 B3SolidMaterial :: predictParametersFrom(double fc, double c, double wc, double ac,
                                     double t0, double alpha1, double alpha2)
 {
@@ -181,7 +167,7 @@ B3SolidMaterial :: predictParametersFrom(double fc, double c, double wc, double 
     // Basic creep parameters
 
     // q1  = 0.6e6 / E28; // replaced by the formula dependent on fc
-    q1  = 127. / sqrt(fc);
+    q1  = 126.74271 / sqrt(fc);
     q2  = 185.4 * __OOFEM_POW(c, 0.5) * __OOFEM_POW(fc, -0.9); // [1/TPa]
     q3  = 0.29 * __OOFEM_POW(wc, 4.) * q2;
     q4  = 20.3 * __OOFEM_POW(ac, -0.7);
@@ -189,35 +175,228 @@ B3SolidMaterial :: predictParametersFrom(double fc, double c, double wc, double 
     // Shrinkage parameters
 
     if ( this->shMode == B3_AverageShrinkage ) {
-      kt = 85220 * __OOFEM_POW(t0, -0.08) * __OOFEM_POW(fc, -0.25); // 85000??, result in [days/cm^2]
-        EpsSinf = alpha1 * alpha2 * ( 1.9e-2 * __OOFEM_POW(w, 2.1) * __OOFEM_POW(fc, -0.28) + 270. ); // exponent corrected: -0.25 -> -0.28
+    	kt = 85000 * __OOFEM_POW(t0, -0.08) * __OOFEM_POW(fc, -0.25); // 85000-> result in [days/m^2] or 8.5-> result in [days/cm^2]
+    	EpsSinf = alpha1 * alpha2 * ( 1.9e-2 * __OOFEM_POW(w, 2.1) * __OOFEM_POW(fc, -0.28) + 270. ); // exponent corrected: -0.25 -> -0.28
 
         // Drying creep parameter 
-
         q5 = 7.57e5 * ( 1. / fc ) * __OOFEM_POW(EpsSinf, -0.6);
     }
 
     char buff[1024];
     sprintf (buff, "q1=%lf q2=%lf q3=%lf q4=%lf q5=%lf kt=%lf EpsSinf=%lf", q1,q2,q3,q4,q5,kt,EpsSinf);
     OOFEM_LOG_DEBUG ("B3mat[%d]: estimated params: %s\n", this->number, buff);
+    OOFEM_LOG_INFO(buff);
     return;
 }
 
-// !!! new function !!!
+void
+B3SolidMaterial :: giveThermalDilatationVector(FloatArray &answer,
+                                          GaussPoint *gp,  TimeStep *tStep)
+//
+// returns a FloatArray(6) of initial strain vector
+// eps_0 = {exx_0, eyy_0, ezz_0, gyz_0, gxz_0, gxy_0}^T
+// caused by unit temperature in direction of
+// gp (element) local axes
+//
+{
+    answer.resize(6);
+    answer.zero();
+    answer.at(1) = ( talpha );
+    answer.at(2) = ( talpha );
+    answer.at(3) = ( talpha );
+
+    return;
+}
+
+double
+B3SolidMaterial :: giveEModulus(GaussPoint *gp, TimeStep *atTime)
+{
+    /*
+     * This function returns the incremental modulus for the given time increment.
+     * The modulus may also depend on the specimen geometry (gp - dependence).
+     *
+     * It is stored as "Einc" for further expected requests from other gaussPoints that correspond to the same material.
+     *
+     * Note: time -1 refers to the previous time.
+     */
+
+    // !!! chartime exponents are assumed to be equal to 1 !!!
+
+    double v, eta;
+    double sum = 0.0; //return value
+    double t_halfstep;
+
+    t_halfstep = relMatAge + ( atTime->giveTime() - 0.5 * atTime->giveTimeIncrement() ) / timeFactor;
+    v = computeSolidifiedVolume(gp, t_halfstep);
+	eta = 1.e6*t_halfstep/q4;
+
+	if(EparVal.giveSize()==0)
+	this->updateEparModuli(gp, relMatAge + ( atTime->giveTime() - 0.5 * atTime->giveTimeIncrement() ) / timeFactor);
+
+	if (this->EmoduliMode==0){ //retardation spectrum used
+		// first Kelvin units of the Kelvin chain will be computed
+		sum = KelvinChainMaterial :: giveEModulus(gp, atTime);
+		// the first aging elastic spring must be added
+		sum += 1/EspringVal;
+	}
+	else { //least-squares method used
+		sum = KelvinChainMaterial :: giveEModulus(gp, atTime);
+	}
+
+    Einc = 1 / ( q1*1.e-6 + sum / v + 0.5*(atTime->giveTimeIncrement())/eta );
+    //Einc = 1 / ( sum );
+    //PH OOFEM_LOG_INFO( "E_k  %20.20g \n", Einc);
+
+    //testovací pro vlhkost a teplotu
+    //this->computeMicroPrestress(gp, atTime);
+
+    return Einc;
+}
+
+void
+B3SolidMaterial :: computeCharTimes()
+{
+    /*
+     * This function generates discrete characteristic times
+     * according to rules which guarantee a good approximation
+     * of the relaxation or creep function by the Dirichlet series
+     */
+
+	int mu;
+	double Tau1;
+	int j;
+
+	if (this->begOfTimeOfInterest == -1) {
+		this->begOfTimeOfInterest = 0.1; //default value
+	}
+
+	// perhaps different values should be used for moduli computed by the least-squares method
+	// this gives really big mistakes for times near the interest boundary
+
+	//first retardation time found in given by formula 0.3 * begOfTimeOfInterest
+	Tau1 = 0.3 * this->begOfTimeOfInterest;
+
+	//last retardation time has to be bigger than 0.5 * endOfTimeOfInterest
+	this->endOfTimeOfInterest = RheoChainMaterial :: giveEndOfTimeOfInterest();
+
+	j = 1;
+	while ( 0.5 * this->endOfTimeOfInterest >= Tau1 * pow10(j) ) {
+		j++;
+	}
+
+	this->nUnits = j;
+
+	this->charTimes.resize(this->nUnits);
+
+	for ( mu = 1; mu <= this->nUnits; mu++ ) {
+		charTimes.at(mu) = Tau1 * __OOFEM_POW( 10, mu-1 );
+	}
+
+	return;
+}
+
+
+void
+B3SolidMaterial :: computeCharCoefficients(FloatArray &answer, GaussPoint *gp, double atTime)
+{
+	/*
+	 * If EmoduliMode == 0 then analysis of continuous retardation spectrum is used for
+	 * computing characteristic coefficients (moduli) of Kelvin chain
+	 * Else least-squares method is used
+	 */
+	if (this->EmoduliMode==0) {
+	    int mu;
+	    double tau0, tauMu;
+	    // constant "lambda0" is assumed to be equal to 1 day (typical value)
+	    // constant "n" is assumed to be equal to 0.1 (typical value)
+
+	    // modulus of elasticity of the first unit of Kelvin chain.
+	    // (aging elastic spring with retardation time = 0)
+	    tau0 = __OOFEM_POW( 2*this->giveCharTime(1)/sqrt(10), 0.1);
+	    EspringVal= 1.e6/( q2*log(1.0+tau0) - q2*tau0/(10.0+10.0*tau0) );
+	    OOFEM_LOG_INFO( "Tuhost_pruziny %12.12g \n", EspringVal);
+
+	    // evaluation of moduli of elasticity for the remaining units
+	    // (aging kelvin units with retardation time tauMu)
+	    answer.resize(nUnits);
+	    for (mu = 1; mu <= this->nUnits; mu++) {
+	    	tauMu = __OOFEM_POW( 2*this->giveCharTime(mu), 0.1);
+	    	answer.at(mu) = 10.e6*__OOFEM_POW(1+tauMu, 2) / ( log(10)*q2*tauMu*(0.9+tauMu));
+	    	this->charTimes.at(mu)*=1.35;
+
+	    	OOFEM_LOG_INFO( "Char. cas %d %15.15g \n",mu, giveCharTime(mu));
+	    	//PH OOFEM_LOG_INFO( "tauMu %d %15.15g \n",mu, tauMu);
+	    	OOFEM_LOG_INFO( "Modul %d %15.15g \n",mu, answer.at(mu));
+	    	//PH OOFEM_LOG_INFO( "Char. cas %d %15.15g \n",mu, this->charTimes.at(mu));
+	    }
+	    answer.at(nUnits)/=1.2; //last unit moduli reduction
+	    OOFEM_LOG_INFO( "Posledni upraveny modul %d %15.15g \n",nUnits, answer.at(nUnits));
+	}
+
+	else {// moduli computed using the least-squares method
+		int i, j, r, rSize;
+		double taui, tauj, sum, tti, ttj, sumRhs;
+		FloatArray rhs(this->nUnits);
+		FloatMatrix A(this->nUnits, this->nUnits);
+
+		const FloatArray &rTimes = this->giveDiscreteTimes();
+		rSize = rTimes.giveSize();
+		FloatArray discreteComplianceFunctionVal(rSize);
+
+		// compute values of the compliance function at specified times rTimes
+		// (can be done directly, since the compliance function is available)
+
+		for ( i = 1; i<= rSize; i++)
+			discreteComplianceFunctionVal.at(i) = this->computeNonAgingCreepFunction(gp, rTimes.at(i));
+
+		// assemble the matrix of the set of linear equations
+		// for computing the optimal compliances
+		// !!! chartime exponents are assumed to be equal to 1 !!!
+		for ( i = 1; i <= this->nUnits; i++ ) {
+			taui = this->giveCharTime(i);
+			for ( j = 1; j <= this->nUnits; j++ ) {
+				tauj = this->giveCharTime(j);
+				for ( sum = 0., r = 1; r <= rSize; r++ ) {
+					tti = rTimes.at(r) / taui;
+					ttj = rTimes.at(r) / tauj;
+					sum += (1.-exp(-tti)) * (1.-exp(-ttj));
+				}
+				A.at(i, j) = sum;
+			}
+
+			// assemble rhs
+		// !!! chartime exponents are assumed to be equal to 1 !!!
+			for ( sumRhs = 0., r = 1; r <= rSize; r++ ) {
+				tti = rTimes.at(r) / taui;
+				sumRhs += (1.-exp(-tti)) * discreteComplianceFunctionVal.at(r);
+			}
+
+			rhs.at(i) = sumRhs;
+		}
+
+		// solve the linear system
+		A.solveForRhs(rhs, answer);
+
+		// convert compliances into moduli
+		for ( i = 1; i <= this->nUnits; i++ )
+		  answer.at(i) = 1.e6/answer.at(i);
+	}
+    return;
+}
+
 double
 B3SolidMaterial :: computeNonAgingCreepFunction(GaussPoint *gp, double loadDuration)
 // compute the value of the creep function of the non-aging solidifying constituent
 // corresponding to the given load duration (in days)
-{
-  return 1.0;
-}
 
-// !!! new function !!!
-double
-B3SolidMaterial :: computeSolidifiedVolume(GaussPoint *gp, double atAge)
-// compute the relative volume of the solidified material at given age (in days)
 {
-  return 1.0;
+	double Phi; //return value
+	double lambda0 = 1.0; // standard value [day]
+	double n = 0.1; // standard value
+
+	Phi = q2 * log( 1 + __OOFEM_POW(loadDuration/lambda0, n) );
+
+	return Phi;
 }
 
 double
@@ -235,7 +414,6 @@ B3SolidMaterial :: computeCreepFunction(GaussPoint *gp, double atTime, double of
     n = 0.1;
 
     // basic creep - approximation of the exact B3 model by closed-form functions
-
     Qf = 1. / ( 0.086 * __OOFEM_POW(ofAge, 2. / 9.) + 1.21 * __OOFEM_POW(ofAge, 4. / 9.) );
     Z  = __OOFEM_POW(ofAge, -m) * log( 1. + __OOFEM_POW(atTime - ofAge, n) );
     r  = 1.7 * __OOFEM_POW(ofAge, 0.12) + 8.0;
@@ -268,7 +446,6 @@ B3SolidMaterial :: computeCreepFunction(GaussPoint *gp, double atTime, double of
 
     return 1.e-6 * ( q1 + C0 + Cd );
 }
-
 
 
 void
@@ -344,13 +521,14 @@ B3SolidMaterial :: computeTotalAverageShrinkageStrainVector(FloatArray &answer, 
         kh = -0.2;              // swelling in water
     } else                                    {
         // linear interpolation for 0.98 <= h <= 1.
-        help = 1. - __OOFEM_POW(hum, 3);
+        help = 1. - __OOFEM_POW(0.98, 3); //PH fixed bug - error in linear interpolation
         kh = help + ( -0.2 - help ) / ( 1. - 0.98 ) * ( hum - 0.98 );
     }
 
     // time dependence of ultimate shrinkage
     E607 = E28 * __OOFEM_POW(607 / ( 4. + 0.85 * 607 ), 0.5);
     Et0Tau = E28 * __OOFEM_POW( ( t0 + TauSh ) / ( 4. + 0.85 * ( t0 + TauSh ) ), 0.5 );
+
     EpsShInf = EpsSinf * E607 / Et0Tau;
     // mean shrinkage in the cross section:
     EpsSh = -EpsShInf * kh * St;
@@ -364,6 +542,76 @@ B3SolidMaterial :: computeTotalAverageShrinkageStrainVector(FloatArray &answer, 
 
     ( ( StructuralCrossSection * ) gp->giveCrossSection() )->
     giveReducedCharacteristicVector(answer, gp, fullAnswer);
+}
+
+double
+B3SolidMaterial :: computeSolidifiedVolume(GaussPoint *gp, double atAge)
+// compute the relative volume of the solidified material at given age (in days)
+{
+	double m, lambda0, alpha;
+	double v; //return value
+
+	// standard values of exponents - empirical constants
+	m = 0.5;
+	lambda0 = 1; //[day]
+	alpha = q3/q2;
+
+	v = 1 / (alpha + __OOFEM_POW(lambda0/atAge, m));
+	//v = 1.;//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+	return v;
+}
+
+void
+B3SolidMaterial :: giveEigenStrainVector(FloatArray &answer, MatResponseForm form,
+                                              GaussPoint *gp, TimeStep *atTime, ValueModeType mode)
+//
+// computes the strain due to creep at constant stress during the increment
+// (in fact, the INCREMENT of creep strain is computed for mode == VM_Incremental)
+//
+{
+	double v, eta, t_halfstep;
+	FloatArray help, reducedAnswer, sigma;
+	FloatMatrix C;
+	KelvinChainMaterialStatus *status = ( KelvinChainMaterialStatus * ) this->giveStatus(gp);
+
+	// !!! chartime exponents are assumed to be equal to 1 !!!
+	if ( mode == VM_Incremental ) {
+
+		t_halfstep = relMatAge + ( atTime->giveTime() - 0.5 * atTime->giveTimeIncrement() ) / timeFactor;
+		v = computeSolidifiedVolume(gp, t_halfstep);
+		eta = 1.e6*t_halfstep/q4;
+
+		sigma = status->giveStressVector(); //stress vector at the beginning of time-step
+		this->giveUnitComplianceMatrix(C, ReducedForm, gp, atTime);
+		reducedAnswer.resize( C.giveNumberOfRows() );
+
+		reducedAnswer.beProductOf(C, sigma);
+		reducedAnswer.times(atTime->giveTimeIncrement() / (timeFactor*eta));
+
+		//reducedAnswer.zero(); //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+		//computes non-aging creep component of the Kelvin Chain
+		KelvinChainMaterial::giveEigenStrainVector(help, ReducedForm, gp, atTime, mode);
+
+		help.times(1/v);
+		reducedAnswer.add(help);
+
+		OOFEM_LOG_INFO( "eps_creep %14.14g \n", reducedAnswer.at(1));
+
+		if ( form == ReducedForm ) {
+			answer =  reducedAnswer;
+			return;
+		}
+		// expand the strain to full form if requested
+		( ( StructuralCrossSection * ) gp->giveCrossSection() )->
+		giveFullCharacteristicVector(answer, gp, reducedAnswer);
+	} else {
+		/* error - total mode not implemented yet */
+		_error("giveEigenStrainVector - mode is not supported");
+	}
+
+	return;
 }
 
 void
@@ -512,3 +760,53 @@ B3SolidMaterial :: inverse_sorption_isotherm(double w)
 
     return phi;
 }
+
+//PH docasna fce na vyzkouseni nacitani vlhkosti a teploty
+void
+B3SolidMaterial :: computeMicroPrestress(GaussPoint *gp, TimeStep *atTime)
+{
+    // free shrinkage at material point, requires staggered analaysis
+    double wrate = 0.0, trate = 0.0;
+    int err, tflag = 0, wflag = 0;
+
+    /* ask for humidity and temperature from external sources, if provided */
+    FieldManager *fm = domain->giveEngngModel()->giveContext()->giveFieldManager();
+    Field *tf;
+    FloatArray gcoords, et2, ei2, stressVector, fullStressVector;
+    IntArray dofid(1);
+
+    if ( ( tf = fm->giveField(FT_Temperature) ) ) {
+        // temperature field registered
+        dofid.at(1) = ( int ) T_f;
+        gp->giveElement()->computeGlobalCoordinates( gcoords, * gp->giveCoordinates() );
+        if ( ( err = tf->evaluateAt(et2, gcoords, dofid, VM_Incremental, atTime) ) ) {
+            _error2("computeShrinkageStrainVector: tf->evaluateAt failed, error value %d", err);
+        }
+
+        trate = et2.at(1);
+        tflag = 1;
+    }
+
+    if ( ( tf = fm->giveField(FT_HumidityConcentration) ) ) {
+        // temperature field registered
+        dofid.at(1) = ( int ) C_1;
+        gp->giveElement()->computeGlobalCoordinates( gcoords, * gp->giveCoordinates() );
+        if ( ( err = tf->evaluateAt(et2, gcoords, dofid, VM_Total, atTime) ) ) {
+            _error2("computeShrinkageStrainVector: tf->evaluateAt failed, error value %d", err);
+        }
+
+        if ( ( err = tf->evaluateAt(ei2, gcoords, dofid, VM_Incremental, atTime) ) ) {
+            _error2("computeShrinkageStrainVector: tf->evaluateAt failed, error value %d", err);
+        }
+
+        // convert water mass to relative humidity
+        wrate = this->inverse_sorption_isotherm( et2.at(1) ) - this->inverse_sorption_isotherm( et2.at(1) - ei2.at(1) );
+        wflag = 1;
+    }
+
+    if ( ( tflag == 0 ) || ( wflag == 0 ) ) {
+        _error("computeTotalShrinkageStrainVector: external fields not found");
+    }
+    return;
+}
+

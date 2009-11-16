@@ -453,16 +453,16 @@ RheoChainMaterial :: computeCharTimes()
 {
     /*
      * This function generates discrete characteristic times
-     * according to rules which guarantee a good aproximation
+     * according to rules which guarantee a good approximation
      * of the relaxation or creep function by the Dirichlet series
      *
-     * The first relaxation time Tau(1) is chosen to be equal to 0.1 day.
+     * Default value of the first relaxation time Tau(1) is chosen to be equal to 0.1 day.
      * The last relaxation time Tau(n) is chosen as 1.0e30
      * (to approximate very long processes).
      * The second largest time Tau(n-1) is chosen as 0.75 tmax 
      * where tmax is the lifetime of structure or the end of the time of interest.
      * Times  Tau(2) .. Tau(n-2) are defined by uniform division to n-2 steps in the
-     * log scale. It is necesary to check the condition a <= 10, where Tau(k) = a Tau(k-1)
+     * log scale. It is necessary to check the condition a <= 10, where Tau(k) = a Tau(k-1)
      *
      *
      */
@@ -473,7 +473,15 @@ RheoChainMaterial :: computeCharTimes()
 
     endTime = this->giveEndOfTimeOfInterest() + relMatAge;
     Taun1 = 0.75 * endTime;
-    Tau1  = 0.1;
+
+	if (this->begOfTimeOfInterest == -1) {
+		this->begOfTimeOfInterest = 0.1; //default value
+	}
+	Tau1  = begOfTimeOfInterest;
+
+	if (Tau1<=0)
+		_error("begOfTimeOfInterest must be a positive number");
+
     nsteps = ( int ) ( ( log(Taun1) - log(Tau1) ) / log(a) + 1. );
     if ( nsteps < 8 ) {
         nsteps = 8;
@@ -634,6 +642,8 @@ RheoChainMaterial :: initializeFrom(InputRecord *ir)
     StructuralMaterial :: initializeFrom(ir);
     IR_GIVE_FIELD(ir, nu, IFT_RheoChainMaterial_n, "n"); // Macro
     IR_GIVE_FIELD(ir, relMatAge, IFT_RheoChainMaterial_relmatage, "relmatage"); // Macro
+    this->begOfTimeOfInterest = -1.0;
+    IR_GIVE_OPTIONAL_FIELD(ir, begOfTimeOfInterest, IFT_RheoChainMaterial_begoftimeofinterest, "begoftimeofinterest"); // Macro
     this->endOfTimeOfInterest = -1.0;
     IR_GIVE_OPTIONAL_FIELD(ir, endOfTimeOfInterest, IFT_RheoChainMaterial_endoftimeofinterest, "endoftimeofinterest"); // Macro
     IR_GIVE_FIELD(ir, timeFactor, IFT_RheoChainMaterial_timefactor, "timefactor"); // solution time/timeFactor should give time in days
@@ -778,7 +788,7 @@ RheoChainMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)
     StructuralMaterialStatus :: printOutputAt(file, tStep);
 
     fprintf(file, "{hidden variables: ");
-    for ( i = 1; i < nUnits; i++ ) {
+    for ( i = 0; i < nUnits; i++ ) {
         ( ( StructuralCrossSection * )
          gp->giveCrossSection() )->giveFullCharacteristicVector( helpVec, gp, * ( hiddenVars [ i ] ) );
         fprintf(file, "{ ");
