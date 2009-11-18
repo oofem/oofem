@@ -187,6 +187,7 @@
 #include "trabboneembed.h"
 #include "trabbonenlembed.h"
 #include "trabbonenl3d.h"
+#include "concretedpm.h"
 
 #include "scalarerrorindicator.h"
 #include "zzerrorestimator.h"
@@ -622,6 +623,11 @@ Material *CreateUsrDefMaterialOfType(char *aClass, int number, Domain *domain)
       newMaterial = new TrabBone3D (number,domain);
     } else if (! strncasecmp(aClass,"trabbone",8)) {
       newMaterial = new TrabBoneMaterial (number,domain);
+    } else if (! strncasecmp(aClass,"concretedpm",11)) {
+      newMaterial = new ConcreteDPM(number,domain);
+    } else if (! strncasecmp(aClass,"concreteidm",11)) {
+      // for compatibility with old input files
+      newMaterial = new ConcreteDPM(number,domain);
     }
 #endif //__SM_MODULE
 

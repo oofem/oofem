@@ -799,6 +799,29 @@ enum InputFieldType {
     
     IFT_TrabBoneNLEmbed_r,
     IFT_TrabBoneNLEmbed_m,
+
+    IFT_ConcreteDPM_fc,
+    IFT_ConcreteDPM_ft,
+    IFT_ConcreteDPM_ecc,
+    IFT_ConcreteDPM_kinit,
+    IFT_ConcreteDPM_ahard,
+    IFT_ConcreteDPM_bhard,
+    IFT_ConcreteDPM_chard,
+    IFT_ConcreteDPM_dhard,
+    IFT_ConcreteDPM_asoft,
+    IFT_ConcreteDPM_bsoft,
+    IFT_ConcreteDPM_dilation,
+    IFT_ConcreteDPM_yieldtol,
+    IFT_ConcreteDPM_newtoniter,
+    IFT_ConcreteDPM_ef,
+    IFT_ConcreteDPM_cycmode,
+    IFT_ConcreteDPM_cycpar,
+    IFT_ConcreteDPM_reltime,
+    IFT_ConcreteDPM_rateexp,
+    IFT_ConcreteDPM_href,
+
+    IFT_ConcreteDPMnlMaterial_r,
+    IFT_ConcreteDPMnlMaterial_m,
  
     IFT_NewtonianFluidMaterial_mu,
 

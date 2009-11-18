@@ -221,6 +221,7 @@ enum classType {
     TrabBoneMaterialClass,
     TrabBone3DClass,
     TrabBoneEmbedClass,
+    ConcreteDPMClass,
 
     TransportMaterialClass,
     IsotropicHeatTransferMaterialClass,
@@ -264,6 +265,7 @@ enum classType {
     TrabBoneMaterialStatusClass,
     TrabBone3DStatusClass,
     TrabBoneEmbedStatusClass,
+    ConcreteDPMStatusClass,
 
     FluidDynamicMaterialClass,
     FluidDynamicMaterialStatusClass,
