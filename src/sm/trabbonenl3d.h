@@ -171,7 +171,7 @@ public NonlocalMaterialStiffnessInterface
 
   #ifdef __OOFEG
   // Plots the sparse structure of stiffness contribution.
-    virtual void NonlocalMaterialStiffnessInterface_showSparseMtrxStructure(GaussPoint* gp, oofegGraphicContext& gc, TimeStep* atTime);
+  //  virtual void NonlocalMaterialStiffnessInterface_showSparseMtrxStructure(GaussPoint* gp, oofegGraphicContext& gc, TimeStep* atTime);
   #endif
 
   // @name Services required by NonlocalMaterialStiffnessInterface and related ones to support Nonlocal Stiffness*/
