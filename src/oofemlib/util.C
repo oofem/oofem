@@ -152,9 +152,10 @@ EngngModel *InstanciateProblem(DataReader *dr, problemMode mode, int contextFlag
 }
 
 #define oofem_tmpstring_len 1024
-static char oofem_tmpstring[oofem_tmpstring_len - 1];
+static char oofem_tmpstring[oofem_tmpstring_len + 1];
 
 char* oofem_tmpstr (const char* src) {
   strncpy (oofem_tmpstring, src, oofem_tmpstring_len);
-  return oofem_tmpstring;
+  oofem_tmpstring[oofem_tmpstring_len]='\0';
+  return oofem_tmpstring; 
 }
