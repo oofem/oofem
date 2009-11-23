@@ -123,13 +123,13 @@ class MazarsMaterial : public IsotropicDamageMaterial1
 
 protected:
 
-    /// Model parametr's related to the shape of uniaxial stress-strain diagrams
+    /// Elastic parameters
+  double E, nu;
+    /// Model parameters related to the shape of uniaxial stress-strain diagrams
     double At, Bt, Ac, Bc;
-    /// Strain at the onset of non-linearity
-    double eps_0;
-    /// Refernce elem-length for objectivity
+    /// Reference elem-length for objectivity
     double hReft, hRefc;
-    /// Beta coefficient reducing the effect of shear; defaul val = 1.06
+    /// Beta coefficient reducing the effect of shear; default val = 1.06
     double beta;
     /// Model variants
     enum mazarsModelVariant { maz_original, maz_modTension } modelVersion;
@@ -186,9 +186,18 @@ protected:
      * @param gp integration point
      * @param atTime time step
      */
-    void giveNormalElasticStiffnessMatrix(FloatMatrix &answer,
+    
+    /*
+void giveNormalElasticStiffnessMatrix(FloatMatrix &answer,
                                           MatResponseMode rMode,
                                           GaussPoint *gp, TimeStep *atTime);
+    */
+
+    int giveNumberOfSpatialDimensions(GaussPoint *gp);    
+    void giveNormalBlockOfElasticCompliance(FloatMatrix &answer, GaussPoint *gp);
+    double computeGt(double kappa, GaussPoint* gp);
+    double computeGc(double kappa, GaussPoint* gp);
+
 };
 
 #endif // mazarsmodel_h

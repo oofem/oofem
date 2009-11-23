@@ -47,7 +47,8 @@
 #include "datastream.h"
 #include "contextioerr.h"
 
-#define _MAZAR_MODEL_ITER_TOL 1.e-15
+#define _MAZARS_MODEL_ITER_TOL 1.e-15
+#define _MAZARS_MODEL_MAX_ITER 400.
 
 MazarsMaterial :: MazarsMaterial(int n, Domain *d) : IsotropicDamageMaterial1(n, d)
     //
@@ -72,9 +73,22 @@ MazarsMaterial :: initializeFrom(InputRecord *ir)
     IRResultType result;                // Required by IR_GIVE_FIELD macro
     int ver;
 
-    IsotropicDamageMaterial1 :: initializeFrom(ir);
+    // Note: IsotropicDamageMaterial1 :: initializeFrom is not activated 
+    // because we do not always read ef and the equivalent strain type 
+    // cannot be selected
+    // IsotropicDamageMaterial1 :: initializeFrom(ir);
 
-    ver         = 0;
+    this->equivStrainType = EST_Mazars;
+
+    IsotropicDamageMaterial :: initializeFrom(ir);
+    RandomMaterialExtensionInterface :: initializeFrom(ir);
+    
+    linearElasticMaterial->initializeFrom(ir);
+    // E and nu are made available for direct access
+    IR_GIVE_FIELD(ir, E, IFT_IsotropicLinearElasticMaterial_e, "e"); 
+    IR_GIVE_FIELD(ir, nu, IFT_IsotropicLinearElasticMaterial_n, "n"); 
+
+    ver = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, ver, IFT_MazarsMaterial_version, "version"); // Macro
     if ( ver == 1 ) {
         this->modelVersion = maz_modTension;
@@ -84,37 +98,30 @@ MazarsMaterial :: initializeFrom(InputRecord *ir)
         _error("instanciateFrom: unknown version");
     }
 
-    IR_GIVE_FIELD(ir, this->eps_0, IFT_MazarsMaterial_e0, "e0"); // Macro
-    IR_GIVE_FIELD(ir, this->Ac, IFT_MazarsMaterial_ac, "ac"); // Macro
-    IR_GIVE_FIELD(ir, this->Bc, IFT_MazarsMaterial_bc, "bc"); // this->Bc = (Ac-1.0)/(Ac*eps_0)
+    IR_GIVE_FIELD(ir, this->e0, IFT_MazarsMaterial_e0, "e0"); 
+    IR_GIVE_FIELD(ir, this->Ac, IFT_MazarsMaterial_ac, "ac");
+ 
+    this->Bc = (Ac-1.0)/(Ac*e0); // default value, ensures smooth curve 
+    IR_GIVE_OPTIONAL_FIELD(ir, this->Bc, IFT_MazarsMaterial_bc, "bc"); 
 
     beta = 1.06;
-    IR_GIVE_OPTIONAL_FIELD(ir, beta, IFT_MazarsMaterial_beta, "beta"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, beta, IFT_MazarsMaterial_beta, "beta"); 
 
     if ( this->modelVersion == maz_original ) {
-        IR_GIVE_FIELD(ir, this->At, IFT_MazarsMaterial_at, "at"); // Macro
-        IR_GIVE_FIELD(ir, this->Bt, IFT_MazarsMaterial_bt, "bt"); // Macro
+        IR_GIVE_FIELD(ir, this->At, IFT_MazarsMaterial_at, "at"); 
+        IR_GIVE_FIELD(ir, this->Bt, IFT_MazarsMaterial_bt, "bt"); 
     } else if ( this->modelVersion == maz_modTension ) {
-        // in case of modified model store ef to At
-        IR_GIVE_FIELD(ir, this->At, IFT_MazarsMaterial_ef, "ef"); // Macro
+        // in case of modified model read ef instead of At, Bt 
+        IR_GIVE_FIELD(ir, this->ef, IFT_MazarsMaterial_ef, "ef"); 
     }
 
-    if ( ir->hasField(IFT_MazarsMaterial_r, "r") ) { // nonlocal version
-        // ask for compulsory "reference length"
-        IR_GIVE_FIELD(ir, this->hReft, IFT_MazarsMaterial_hreft, "hreft"); // Macro
-        IR_GIVE_FIELD(ir, this->hRefc, IFT_MazarsMaterial_hrefc, "hrefc"); // Macro
-    }
+    // ask for optional "reference length"
+    hReft = hRefc = 0.; // default values 0 => no adjustment for element size is used
+    IR_GIVE_OPTIONAL_FIELD(ir, this->hReft, IFT_MazarsMaterial_hreft, "hreft"); 
+    IR_GIVE_OPTIONAL_FIELD(ir, this->hRefc, IFT_MazarsMaterial_hrefc, "hrefc"); 
 
-    /*
-     * double gt, gc;
-     *
-     * gt   = this->readDouble(initString,"gt");
-     * gc   = this->readDouble(initString,"gc");
-     *
-     * // determine hRef (diffrenet for compression and tension?)
-     * hReft = gt/(eps_0*eps_0*linearElasticMaterial->give('E'));
-     * hRefc = gc/(eps_0*eps_0*linearElasticMaterial->give('E'));
-     */
+    this->mapper.initializeFrom(ir);
+
     return IRRT_OK;
 }
 
@@ -123,7 +130,6 @@ void
 MazarsMaterial :: computeEquivalentStrain(double &kappa, const FloatArray &strain, GaussPoint *gp, TimeStep *atTime)
 {
     int i;
-    LinearElasticMaterial *lmat = this->giveLinearElasticMaterial();
     double posNorm = 0.0;
     FloatArray principalStrains, strainb;
     StructuralCrossSection *crossSection = ( StructuralCrossSection * ) gp->giveElement()->giveCrossSection();
@@ -135,22 +141,21 @@ MazarsMaterial :: computeEquivalentStrain(double &kappa, const FloatArray &strai
 
     crossSection->giveFullCharacteristicVector(strainb, gp, strain);
     // if plane stress mode -> compute strain in z-direction from condition of zero stress in corresponding direction
-    if ( gp->giveMaterialMode() == _PlaneStress ) {
-      double nu = lmat->give(NYxz,gp);
+    int ndim = giveNumberOfSpatialDimensions(gp);
+    if ( ndim == 2 ) {
         strainb.at(3) = -nu * ( strainb.at(1) + strainb.at(2) ) / ( 1. - nu );
-    } else if ( gp->giveMaterialMode() == _1dMat ) {
-      double nu = lmat->give(NYxz,gp);
+    } else if ( ndim == 1 ) {
         strainb.at(2) = -nu *strainb.at(1);
         strainb.at(3) = -nu *strainb.at(1);
     }
 
-    if ( gp->giveMaterialMode() == _1dMat ) {
-        principalStrains.resize(3);
-        for ( i = 1; i <= 3; i++ ) {
-            principalStrains.at(i) = strainb.at(i);
-        }
+    if ( ndim == 1 ) {
+      principalStrains.resize(3);
+      for ( i = 1; i <= 3; i++ ) {
+	principalStrains.at(i) = strainb.at(i);
+      }
     } else {
-        this->computePrincipalValues(principalStrains, strainb, principal_strain);
+      this->computePrincipalValues(principalStrains, strainb, principal_strain);
     }
 
     /*
@@ -173,7 +178,7 @@ MazarsMaterial :: computeEquivalentStrain(double &kappa, const FloatArray &strai
     kappa = sqrt(posNorm);
 }
 
-
+/*
 void
 MazarsMaterial :: giveNormalElasticStiffnessMatrix(FloatMatrix &answer,
                                                    MatResponseMode rMode,
@@ -195,77 +200,86 @@ MazarsMaterial :: giveNormalElasticStiffnessMatrix(FloatMatrix &answer,
         }
     }
 }
+*/
 
+int 
+MazarsMaterial :: giveNumberOfSpatialDimensions(GaussPoint *gp)
+{
+  if ( gp->giveMaterialMode() == _1dMat ) 
+    return 1;
+  else if ( gp->giveMaterialMode() == _PlaneStress ) 
+    return 2;
+  else
+    return 3;
+}
 
+void
+MazarsMaterial :: giveNormalBlockOfElasticCompliance(FloatMatrix &answer, GaussPoint *gp)
+{
+  int ndim = giveNumberOfSpatialDimensions(gp);
+  answer.resize(ndim,ndim);
+  for (int i=1; i<=ndim; i++)
+    for (int j=1; j<=ndim; j++)
+      if (i==j)	answer.at(i,j) = 1./E;
+      else answer.at(i,j) = -nu/E;
+}
 
 void
 MazarsMaterial :: computeDamageParam(double &omega, double kappa, const FloatArray &strain, GaussPoint *gp)
 {
-    int i, positive_flag = 0, negat_count = 0, nite;
-    FloatMatrix de, ce;
-    FloatArray strainb, sigp, epsti, epsi, epst, sigppos(3);
-    double gt, gc, alpha_t, alpha_c, help, kappaRefT, kappaRefC, gtCurr, gcCurr, hCurrt, hCurrc, R, dgt, dgc, equivStrain;
-    LinearElasticMaterial *lmat = this->giveLinearElasticMaterial();
-    StructuralCrossSection *crossSection = ( StructuralCrossSection * ) gp->giveElement()->giveCrossSection();
+  int i; // positive_flag = 0, negat_count = 0;
+  FloatMatrix de, ce;
+  FloatArray sigp, epsti, epsi;
+  double gt, gc, alpha_t, alpha_c, alpha, eqStrain2;
 
+  if ( kappa <= this->e0 ){ // strain below damage threshold
+    omega = 0.0;
+    return;
+  }
 
-    if ( kappa > this->eps_0 ) {
-        // omega = 1.0-(this->e0/kappa)*exp(-(kappa-this->e0)/(this->ef-this->e0));
-        MazarsMaterialStatus *status = ( MazarsMaterialStatus * ) this->giveStatus(gp);
-        // do not change passed parameter
-        crossSection->giveFullCharacteristicVector(strainb, gp, strain);
+  // strain above damage threshold
 
-        // compute principal strains due to positive stresses
-        if ( gp->giveMaterialMode() == _PlaneStress ) {
-	  double nu = lmat->give(NYxz,gp);
-            strainb.at(3) = -nu * ( strainb.at(1) + strainb.at(2) ) / ( 1. - nu );
-        } else if ( gp->giveMaterialMode() == _1dMat ) {
-	  double nu = lmat->give(NYxz,gp);
-            strainb.at(2) = -nu *strainb.at(1);
-            strainb.at(3) = -nu *strainb.at(1);
-        }
+  int ndim = giveNumberOfSpatialDimensions(gp);
+  if ( !strain.isEmpty() ) {
+    this->computePrincipalValues(epsi, strain, principal_strain);
+  } else {
+    epsi.resize(ndim);
+    epsi.zero();
+  }
 
-        this->giveNormalElasticStiffnessMatrix( de, TangentStiffness, gp, domain->giveEngngModel()->giveCurrentStep() );
-        if ( !strainb.isEmpty() ) {
-            this->computePrincipalValues(epsi, strainb, principal_strain);
-        } else {
-            epsi.resize(3);
-            epsi.zero();
-        }
+  // construct the normal block of elastic compliance matrix 
+  giveNormalBlockOfElasticCompliance(ce, gp);
+  // compute the normal block of elastic stiffness matrix 
+  de.beInverseOf(ce);
+	
+  // compute principal stresses
+  sigp.beProductOf(de, epsi);
+  // take positive part
+  for ( i = 1; i <= ndim; i++ ) 
+    if (sigp.at(i) < 0.)
+      sigp.at(i) = 0.;
 
-        // compute actual (local) equivStrain
-        equivStrain = 0.0;
-        for ( i = 1; i <= 3; i++ ) {
-            if ( epsi.at(i) > 0.0 ) {
-                equivStrain += epsi.at(i) * epsi.at(i);
-            }
-        }
+  // compute principal strains due to positive stresses
+  epsti.beProductOf(ce, sigp);
 
-        equivStrain = sqrt(equivStrain);
+  // extend strains to 3 dimensions
+  if ( ndim == 2 ) {
+    epsi.resize(3);
+    epsti.resize(3);
+    epsi.at(3) = -nu * ( epsi.at(1) + epsi.at(2) ) / ( 1. - nu );
+    epsti.at(3) = -nu * ( epsti.at(1) + epsti.at(2) ) / ( 1. - nu );
+  } else if ( ndim == 1 ) {
+    epsi.resize(3);
+    epsti.resize(3);
+    epsi.at(2) = epsi.at(3) = -nu *epsi.at(1);
+    epsti.at(2) = epsti.at(3) = -nu *epsti.at(1);           
+  }
 
-        /*
-         *
-         * if (gp->giveMaterialMode() == _PlaneStress) {
-         * FloatArray help;
-         * this->computePrincipalValues (help, strain, principal_strain);
-         * epsi.resize(3);
-         * epsi.at(1) = help.at(1); epsi.at(2)=help.at(2);
-         * }
-         *
-         */
-
-        // compute principal stresses
-        sigp.beProductOf(de, epsi);
-        // take positive part
-        for ( i = 1; i <= 3; i++ ) {
-            sigppos.at(i) = macbra( sigp.at(i) );
-        }
-
-        // compute principal strains due to positive stresses
-        ce.beInverseOf(de);
-        epsti.beProductOf(ce, sigppos);
-
-        positive_flag = negat_count = 0;
+  /* the following section "improves" biaxial compression 
+  // but it may lead to convergence problems, probably due to the condition > 1.e-6 
+  // therefore it was commented out by Milan Jirasek on 22 Nov 2009
+  
+  positive_flag = negat_count = 0;
         for ( i = 1; i <= 3; i++ ) {
             if ( sigp.at(i) > 1.e-6 ) {
                 positive_flag = 1;
@@ -290,118 +304,130 @@ MazarsMaterial :: computeDamageParam(double &omega, double kappa, const FloatArr
         }
 
         // test adjusted kappa
-        if ( kappa < this->eps_0 ) {
+        if ( kappa < this->e0 ) {
             omega = 0.0;
             return;
         }
+	// end of section that improves biaxial compression
+	*/
 
-        /*
-         * gt = 1.0-(1.0-this->At)*this->eps_0/kappa - this->At*exp(-this->Bt*(kappa-this->eps_0));
-         * gc = 1.0-(1.0-this->Ac)*this->eps_0/kappa - this->Ac*exp(-this->Bc*(kappa-this->eps_0));
-         * if (gc > 1.0) gc = 1.0;
-         */
+  // evaluation of damage functions
+  gt = computeGt(kappa,gp);
+  gc = computeGc(kappa,gp);
 
-
-        //objectivity
-        nite = 0;
-        hCurrt = status->giveLe();
-        hCurrc = status->giveLec();
-        kappaRefT = kappaRefC = kappa; // this->eps_0;
-
-        // tension objectivity
-        do {
-            nite++;
-            if ( this->modelVersion == maz_modTension ) {
-                gt = 1.0 - ( this->eps_0 / kappaRefT ) * exp( ( this->eps_0 - kappaRefT ) / this->At );
-                dgt = this->eps_0 / kappaRefT / kappaRefT + this->eps_0 / kappaRefT / this->At;
-                dgt *= exp( ( this->eps_0 - kappaRefT ) / this->At );
-            } else { // maz_original
-                gt   = 1.0 - ( 1.0 - this->At ) * this->eps_0 / kappaRefT - this->At *exp( -this->Bt * ( kappaRefT - this->eps_0 ) );
-                dgt  = ( 1.0 - this->At ) * this->eps_0 / kappaRefT / kappaRefT + this->At *exp( -this->Bt * ( kappaRefT - this->eps_0 ) ) * this->Bt;
-            }
-
-            help = 1 + gt * ( hReft / hCurrt - 1.0 );
-            R    = kappaRefT * help - kappa;
-            if ( fabs(R) <= _MAZAR_MODEL_ITER_TOL ) {
-                break;
-            }
-
-            if ( nite > 400 ) {
-                _error("computeDamageParam: tension objectivity iteration internal error - no convergence");
-            }
-
-            help += dgt * kappaRefT * ( hReft / hCurrt - 1.0 );
-            kappaRefT += -R / help;
-        } while ( 1 );
-
-        nite = 0;
-        // compression objectivity
-        do {
-            nite++;
-            gc   = 1.0 - ( 1.0 - this->Ac ) * this->eps_0 / kappaRefC - this->Ac *exp( -this->Bc * ( kappaRefC - this->eps_0 ) );
-            help = 1 + gc * ( hRefc / hCurrc - 1.0 );
-            R    = kappaRefC * help - kappa;
-            if ( fabs(R) <= _MAZAR_MODEL_ITER_TOL ) {
-                break;
-            }
-
-            if ( nite > 400 ) {
-                _error("computeDamageParam: comression objectivity iteration internal error - no convergence");
-            }
-
-            dgc  = ( 1.0 - this->Ac ) * this->eps_0 / kappaRefC / kappaRefC + this->Ac *exp( -this->Bc * ( kappaRefC - this->eps_0 ) ) * this->Bc;
-            help += dgc * kappaRefC * ( hRefc / hCurrc - 1.0 );
-            kappaRefC += -R / help;
-        } while ( 1 );
-
-
-        gtCurr = gt * ( hReft * kappaRefT ) / ( hCurrt * kappa );
-        gcCurr = gc * ( hRefc * kappaRefC ) / ( hCurrc * kappa );
-
-        if ( ( gt < 0. ) || ( gt > 1.0 ) ) {
-            _error("computeDamageParam: gt out of range ");
-        }
-
-        //if (gcCurr > 1.0)
-        // _warning ("computeDamageParam: gc out of range ");
-        // if (gcCurr > 1.0) gcCurr = 1.0;
-
-
-        help = 0.0;
-        for ( i = 1; i <= 3; i++ ) {
-            if ( epsi.at(i) > 0. ) {
-                help += epsti.at(i) * epsi.at(i);
-            }
-        }
-
-        help /= equivStrain * equivStrain;
-        if ( help > 1.0 ) {
-            help = 1.0;
-        }
-
-        alpha_t = __OOFEM_POW(help, this->beta);
-        alpha_c = __OOFEM_POW( ( 1. - help ), this->beta );
-
-        if ( ( alpha_t < 0. ) || ( alpha_t > 1.0 ) ) {
-            _error("computeDamageParam: apha_t out of range");
-        }
-
-        if ( ( alpha_c < 0. ) || ( alpha_c > 1.0 ) ) {
-            _error("computeDamageParam: apha_t out of range");
-        }
-
-        omega = alpha_t * gtCurr + alpha_c * gcCurr;
-        if ( omega > 1.0 ) {
-            omega = 1.0;
-        }
-
-        //  if ((omega <0.) || (omega > 1.0))
-        //   _error ("computeDamageParam: omega out of range");
-    } else {
-        omega = 0.0;
+  // evaluation of factors alpha_t and alpha_c
+  alpha = 0.0;
+  eqStrain2 = 0.0;
+  for ( i = 1; i <= 3; i++ ) {
+    if ( epsi.at(i) > 0.0 ){
+      eqStrain2 += epsi.at(i) * epsi.at(i);
+      alpha += epsti.at(i) * epsi.at(i);
     }
+  }
+
+  if ( eqStrain2 > 0. )
+    alpha /= eqStrain2;
+  if ( alpha > 1. ) {
+    alpha = 1.;
+  } else if ( alpha < 0. ) {
+    alpha = 0.;
+  }
+  if (this->beta == 1.){
+    alpha_t = alpha;
+    alpha_c = 1.-alpha;
+  }
+  else if ( alpha <= 0. ){
+    alpha_t = 0.;
+    alpha_c = 1.;
+  } else if ( alpha < 1. ){
+    alpha_t = __OOFEM_POW(alpha, this->beta);
+    alpha_c = __OOFEM_POW( ( 1. - alpha ), this->beta );
+  }
+  else {
+    alpha_t = 1.;
+    alpha_c = 0.;
+  }
+  
+  omega = alpha_t * gt + alpha_c * gc;
+  if ( omega > 1.0 ) {
+    omega = 1.0;
+  }
 }
 
+// evaluation of tensile damage
+double MazarsMaterial :: computeGt(double kappa, GaussPoint* gp)
+{
+  double gt;
+  if (hReft <= 0.){ // material law considered as independent of element size
+    if ( this->modelVersion == maz_modTension ) // exponential softening
+      gt = 1.0 - ( this->e0 / kappa ) * exp( ( this->e0 - kappa ) / this->ef );
+    else // maz_original
+      gt = 1.0 - ( 1.0 - this->At ) * this->e0 / kappa - this->At *exp( -this->Bt * ( kappa - this->e0 ) );
+    return gt;
+  }
+
+  // tension objectivity (material law dependent on element size)
+  int nite = 0;
+  double aux, hCurrt, kappaRefT, dgt, R;
+  MazarsMaterialStatus *status = ( MazarsMaterialStatus * ) this->giveStatus(gp);
+  hCurrt = status->giveLe();
+  kappaRefT = kappa; 
+  do {
+      if ( this->modelVersion == maz_modTension ) {
+	gt = 1.0 - ( this->e0 / kappaRefT ) * exp( ( this->e0 - kappaRefT ) / this->ef );
+	dgt = this->e0 / kappaRefT / kappaRefT + this->e0 / kappaRefT / this->ef;
+	dgt *= exp( ( this->e0 - kappaRefT ) / this->ef );
+      } else { // maz_original
+	gt   = 1.0 - ( 1.0 - this->At ) * this->e0 / kappaRefT - this->At *exp( -this->Bt * ( kappaRefT - this->e0 ) );
+	dgt  = ( 1.0 - this->At ) * this->e0 / kappaRefT / kappaRefT + this->At *exp( -this->Bt * ( kappaRefT - this->e0 ) ) * this->Bt;
+      }
+      
+      aux = 1 + gt * ( hReft / hCurrt - 1.0 );
+      R   = kappaRefT * aux - kappa;
+      if ( fabs(R) <= _MAZARS_MODEL_ITER_TOL ) {
+	if ( ( gt < 0. ) || ( gt > 1.0 ) ) {
+	  _error("computeDamageParam: gt out of range ");
+        }
+	return gt * ( hReft * kappaRefT ) / ( hCurrt * kappa );
+      }
+      aux += dgt * kappaRefT * ( hReft / hCurrt - 1.0 );
+      kappaRefT += -R / aux;
+    } while ( nite++ < _MAZARS_MODEL_MAX_ITER);
+        
+  _error("computeDamageParam: tension objectivity iteration internal error - no convergence");
+  return 0.; // just to make the compiler happy
+}
+
+// evaluation of compression damage
+double MazarsMaterial :: computeGc(double kappa, GaussPoint* gp)
+{
+  double gc;
+  if (hRefc<=0.){ // material law considered as independent of element size
+    gc = 1.0 - ( 1.0 - this->Ac ) * this->e0 / kappa - this->Ac *exp( -this->Bc * ( kappa - this->e0 ) );	
+    return gc;
+  }
+
+  // compression objectivity (material law dependent on element size)
+  int nite = 0;
+  double aux, hCurrc, kappaRefC, dgc, R;
+  MazarsMaterialStatus *status = ( MazarsMaterialStatus * ) this->giveStatus(gp);
+  hCurrc = status->giveLec();
+  kappaRefC = kappa; 
+  do {
+      gc   = 1.0 - ( 1.0 - this->Ac ) * this->e0 / kappaRefC - this->Ac *exp( -this->Bc * ( kappaRefC - this->e0 ) );
+      aux = 1 + gc * ( hRefc / hCurrc - 1.0 );
+      R   = kappaRefC * aux - kappa;
+      if ( fabs(R) <= _MAZARS_MODEL_ITER_TOL ) {
+	return gc * ( hRefc * kappaRefC ) / ( hCurrc * kappa );
+      }
+      dgc  = ( 1.0 - this->Ac ) * this->e0 / kappaRefC / kappaRefC + this->Ac *exp( -this->Bc * ( kappaRefC - this->e0 ) ) * this->Bc;
+      aux += dgc * kappaRefC * ( hRefc / hCurrc - 1.0 );
+      kappaRefC += -R / aux;
+    } while ( nite++ < _MAZARS_MODEL_MAX_ITER ) ;
+
+  _error("computeDamageParam: compression objectivity iteration internal error - no convergence");
+  return 0.; // just to make the compiler happy
+}
 
 void
 MazarsMaterial :: initDamaged(double kappa, FloatArray &totalStrainVector, GaussPoint *gp)
