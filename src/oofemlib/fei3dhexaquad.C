@@ -62,9 +62,9 @@ FEI3dHexaQuad :: evalN(FloatArray &answer, const FloatArray &lcoords, double tim
      *
      *             dzeta
      *        1      ^  9         2
-     *         +-----|--+--------+                	   +-----------------+
-     *        /|     |          /|                	  /|                /|
-     *       / |     |         / |                	 / |               / |
+     *         +-----|--+--------+                     +-----------------+
+     *        /|     |          /|                    /|                /|
+     *       / |     |         / |                   / |               / |
      *    12+  |     o      10+  |                  /  |     1        /  |
      *     /   |     |       /   |                 /   |             /   |
      *  4 /  17+  11 |    3 /    +18              /    |        3   /    |
@@ -81,29 +81,29 @@ FEI3dHexaQuad :: evalN(FloatArray &answer, const FloatArray &lcoords, double tim
      *   +--------+--------+                     +-----------------+
      *  8         15        7
      */
-    answer.at(1)  = 0.125 * ( 1.0 - u ) * ( 1.0 - v ) * ( 1.0 + w ) * ( -u - v + w - 2.0 ); 
-    answer.at(2)  = 0.125 * ( 1.0 - u ) * ( 1.0 + v ) * ( 1.0 + w ) * ( -u + v + w - 2.0 ); 
-    answer.at(3)  = 0.125 * ( 1.0 + u ) * ( 1.0 + v ) * ( 1.0 + w ) * ( u + v + w - 2.0 ); 
-    answer.at(4)  = 0.125 * ( 1.0 + u ) * ( 1.0 - v ) * ( 1.0 + w ) * ( u - v + w - 2.0 ); 
-    answer.at(5)  = 0.125 * ( 1.0 - u ) * ( 1.0 - v ) * ( 1.0 - w ) * ( -u - v - w - 2.0 ); 
-    answer.at(6)  = 0.125 * ( 1.0 - u ) * ( 1.0 + v ) * ( 1.0 - w ) * ( -u + v - w - 2.0 ); 
-    answer.at(7)  = 0.125 * ( 1.0 + u ) * ( 1.0 + v ) * ( 1.0 - w ) * ( u + v - w - 2.0 ); 
-    answer.at(8)  = 0.125 * ( 1.0 + u ) * ( 1.0 - v ) * ( 1.0 - w ) * ( u - v - w - 2.0 ); 
+    answer.at(1)  = 0.125 * ( 1.0 - u ) * ( 1.0 - v ) * ( 1.0 + w ) * ( -u - v + w - 2.0 );
+    answer.at(2)  = 0.125 * ( 1.0 - u ) * ( 1.0 + v ) * ( 1.0 + w ) * ( -u + v + w - 2.0 );
+    answer.at(3)  = 0.125 * ( 1.0 + u ) * ( 1.0 + v ) * ( 1.0 + w ) * ( u + v + w - 2.0 );
+    answer.at(4)  = 0.125 * ( 1.0 + u ) * ( 1.0 - v ) * ( 1.0 + w ) * ( u - v + w - 2.0 );
+    answer.at(5)  = 0.125 * ( 1.0 - u ) * ( 1.0 - v ) * ( 1.0 - w ) * ( -u - v - w - 2.0 );
+    answer.at(6)  = 0.125 * ( 1.0 - u ) * ( 1.0 + v ) * ( 1.0 - w ) * ( -u + v - w - 2.0 );
+    answer.at(7)  = 0.125 * ( 1.0 + u ) * ( 1.0 + v ) * ( 1.0 - w ) * ( u + v - w - 2.0 );
+    answer.at(8)  = 0.125 * ( 1.0 + u ) * ( 1.0 - v ) * ( 1.0 - w ) * ( u - v - w - 2.0 );
 
-    answer.at(9)  = 0.25 * ( 1.0 - v * v ) * ( 1.0 - u ) * ( 1.0 + w ); 
-    answer.at(10)  = 0.25 * ( 1.0 - u * u ) * ( 1.0 + v ) * ( 1.0 + w ); 
-    answer.at(11)  = 0.25 * ( 1.0 - v * v ) * ( 1.0 + u ) * ( 1.0 + w ); 
-    answer.at(12)  = 0.25 * ( 1.0 - u * u ) * ( 1.0 - v ) * ( 1.0 + w ); 
+    answer.at(9)  = 0.25 * ( 1.0 - v * v ) * ( 1.0 - u ) * ( 1.0 + w );
+    answer.at(10)  = 0.25 * ( 1.0 - u * u ) * ( 1.0 + v ) * ( 1.0 + w );
+    answer.at(11)  = 0.25 * ( 1.0 - v * v ) * ( 1.0 + u ) * ( 1.0 + w );
+    answer.at(12)  = 0.25 * ( 1.0 - u * u ) * ( 1.0 - v ) * ( 1.0 + w );
 
-    answer.at(13)  = 0.25 * ( 1.0 - v * v ) * ( 1.0 - u ) * ( 1.0 - w ); 
-    answer.at(14)  = 0.25 * ( 1.0 - u * u ) * ( 1.0 + v ) * ( 1.0 - w ); 
-    answer.at(15)  = 0.25 * ( 1.0 - v * v ) * ( 1.0 + u ) * ( 1.0 - w ); 
-    answer.at(16)  = 0.25 * ( 1.0 - u * u ) * ( 1.0 - v ) * ( 1.0 - w ); 
+    answer.at(13)  = 0.25 * ( 1.0 - v * v ) * ( 1.0 - u ) * ( 1.0 - w );
+    answer.at(14)  = 0.25 * ( 1.0 - u * u ) * ( 1.0 + v ) * ( 1.0 - w );
+    answer.at(15)  = 0.25 * ( 1.0 - v * v ) * ( 1.0 + u ) * ( 1.0 - w );
+    answer.at(16)  = 0.25 * ( 1.0 - u * u ) * ( 1.0 - v ) * ( 1.0 - w );
 
-    answer.at(17)  = 0.25 * ( 1.0 - u ) * ( 1.0 - v ) * ( 1.0 - w * w ); 
-    answer.at(18)  = 0.25 * ( 1.0 - u ) * ( 1.0 + v ) * ( 1.0 - w * w ); 
-    answer.at(19)  = 0.25 * ( 1.0 + u ) * ( 1.0 + v ) * ( 1.0 - w * w ); 
-    answer.at(20)  = 0.25 * ( 1.0 + u ) * ( 1.0 - v ) * ( 1.0 - w * w ); 
+    answer.at(17)  = 0.25 * ( 1.0 - u ) * ( 1.0 - v ) * ( 1.0 - w * w );
+    answer.at(18)  = 0.25 * ( 1.0 - u ) * ( 1.0 + v ) * ( 1.0 - w * w );
+    answer.at(19)  = 0.25 * ( 1.0 + u ) * ( 1.0 + v ) * ( 1.0 - w * w );
+    answer.at(20)  = 0.25 * ( 1.0 + u ) * ( 1.0 - v ) * ( 1.0 - w * w );
 
     return;
 }
@@ -158,9 +158,9 @@ FEI3dHexaQuad :: local2global(FloatArray &answer, const FloatArray **coords, con
 //
 int
 FEI3dHexaQuad :: global2local(FloatArray &answer, const FloatArray **coords, const FloatArray &lcoords, double time)
-{ 
+{
   OOFEM_ERROR("FEI3dHexaQuad :: global2local not implemented");
-  return 1; 
+  return 1;
 }
 
 double
@@ -237,20 +237,21 @@ FEI3dHexaQuad :: surfaceGiveTransformationJacobian(int isurf, const FloatArray *
 {
     // only plane surface is supported !!!
 
-    // FEI2dQuadLin cannot be used without modifying coordinates of surface nodes
-    // therefore local calculation is done without using FEI2dQuadLin :: giveJacobianMatrixAt
+    // FEI3dHexaQuad cannot be used without modifying coordinates of surface nodes
+    // therefore local calculation is done without using FEI3dHexaQuad :: giveJacobianMatrixAt
 
     int n1, n2, n3, n4, n;
     IntArray snodes;
     FloatMatrix jacobianMatrix(2, 2);
     FloatArray sn [ 4 ];
-    FloatArray const *nod1, *nod, *nod2;
-    double length, k;
-    int i;
+    FloatArray const *nod1, *midnod, *nod2;
+    double length, k, dist1, dist2;
+    int i, j;
 
     this->computeLocalSurfaceMapping(snodes, isurf);
 
     // check whether all surface nodes are in plane
+    //corner nodes
     n1 = snodes.at(1) - 1;
     n2 = snodes.at(2) - 1;
     n3 = snodes.at(3) - 1;
@@ -259,18 +260,18 @@ FEI3dHexaQuad :: surfaceGiveTransformationJacobian(int isurf, const FloatArray *
     // get the normal using nodes 1 2 3
     FloatArray a(3), b(3), c(3);
     for ( i = 1; i <= 3; i++ ) {
-        b.at(i) = coords [ n2 ]->at(i) - coords [ n1 ]->at(i);
-        a.at(i) = coords [ n3 ]->at(i) - coords [ n1 ]->at(i);
+        b.at(i) = coords [ n2 ]->at(i) - coords [ n1 ]->at(i);//vector (n1;n2)
+        a.at(i) = coords [ n3 ]->at(i) - coords [ n1 ]->at(i);//vector (n1;n3)
     }
 
     n = n4;
     c.beVectorProductOf(b, a);
     length = sqrt( dotProduct(c, c, 3) );
 
+    // if normal not found, try other nodes 1 3 4
     if ( length < 1.0e-10 ) {
-        // try nodes 1 3 4
         for ( i = 1; i <= 3; i++ ) {
-            b.at(i) = coords [ n4 ]->at(i) - coords [ n1 ]->at(i);
+          b.at(i) = coords [ n4 ]->at(i) - coords [ n1 ]->at(i);//vector (n1;n4)
         }
 
         n = n2;
@@ -282,28 +283,47 @@ FEI3dHexaQuad :: surfaceGiveTransformationJacobian(int isurf, const FloatArray *
         }
     }
 
-    // c is normed vector
+    // c is normed vector of a surface (side)
+    //check that all nodes are on planar surface
     c.times(1.0 / length);
-    for ( i = 1; i <= 3; i++ ) {
-        b.at(i) = coords [ n ]->at(i) - coords [ n1 ]->at(i);
+    for ( i = 1; i <= 8; i++ ) {
+      for ( j= 1; j<=3; j++){
+        b.at(j) = coords [ n ]->at(j) - coords [ snodes.at(i)-1]->at(j);
+      }
+      // check distance of all nodes to the reference node
+      if ( fabs( dotProduct(b, c, 3) ) > 1.0e-6 ) {
+        OOFEM_ERROR2("FEI3dHexaQuad :: surfaceGiveTransformationJacobian: not planar surface, local node %d failed", snodes.at(i));
+      }
     }
 
-    // check distance of the 4th node n
-    if ( fabs( dotProduct(b, c, 3) ) > 1.0e-6 ) {
-        OOFEM_ERROR("FEI3dHexaQuad :: surfaceGiveTransformationJacobian: not planar surface");
-    }
 
-    // check whether edges are direct
+    // ensure that all edges are straight
     for ( i = 1; i <= 4; i++ ) {
         nod1 = coords [ snodes.at(i) - 1 ];
         nod2 = coords [ snodes.at(i % 4 + 1) - 1 ];
-        nod  = coords [ snodes.at(i + 4) - 1 ];
+        midnod  = coords [ snodes.at(i + 4) - 1 ];
 
-        k =           ( nod2->at(1) - nod1->at(1) ) / ( nod->at(1) - nod1->at(1) );
-        if ( fabs( k - ( nod2->at(2) - nod1->at(2) ) / ( nod->at(2) - nod1->at(2) ) ) > 1.0e-6 ||
-             fabs( k - ( nod2->at(3) - nod1->at(3) ) / ( nod->at(3) - nod1->at(3) ) ) > 1.0e-6    ) {
-            OOFEM_ERROR("surfaceGiveTransformationJacobian: not direct edge");
+        //distance of nod1 nod2
+        dist1 = sqrt( (nod2->at(1)-nod1->at(1))*(nod2->at(1)-nod1->at(1)) + (nod2->at(2)-nod1->at(2))*(nod2->at(2)-nod1->at(2)) + (nod2->at(3)-nod1->at(3))*(nod2->at(3)-nod1->at(3)) );
+        //distance of nod1 midnod
+        dist2 = sqrt( (midnod->at(1)-nod1->at(1))*(midnod->at(1)-nod1->at(1)) + (midnod->at(2)-nod1->at(2))*(midnod->at(2)-nod1->at(2)) + (midnod->at(3)-nod1->at(3))*(midnod->at(3)-nod1->at(3)) );
+        k = dist2/dist1;
+
+        if(k>1){
+          OOFEM_ERROR2("surfaceGiveTransformationJacobian: midside node %d lays outside associated corner nodes", i);
         }
+
+        if ( ( fabs(midnod->at(1)-nod1->at(1)) - k*fabs(nod2->at(1)-nod1->at(1)) ) > 1.0e-4 || ( fabs(midnod->at(2)-nod1->at(2)) - k*fabs(nod2->at(2)-nod1->at(2)) ) > 1.0e-4 || ( fabs(midnod->at(3)-nod1->at(3)) - k*fabs(nod2->at(3)-nod1->at(3)) ) > 1.0e-4)
+        {
+          OOFEM_ERROR2("surfaceGiveTransformationJacobian: not a straight edge. Edge number %d", i);
+        }
+//         //can be zero division
+//         k = ( nod2->at(1) - nod1->at(1) ) / ( midnod->at(1) - nod1->at(1) );
+//         dif1 = k - ( nod2->at(2) - nod1->at(2) ) / ( midnod->at(2) - nod1->at(2) );
+//         dif2 = k - ( nod2->at(3) - nod1->at(3) ) / ( midnod->at(3) - nod1->at(3) );
+//         if ( fabs( dif1 ) > 1.0e-6 || fabs( dif2 ) > 1.0e-6 ) {
+//           OOFEM_ERROR2("surfaceGiveTransformationJacobian: not a straight edge number %d", i);
+//         }
     }
 
     // map nodes to the surface (x,y) plane

@@ -233,7 +233,7 @@ protected:
     void updateStirrups(GaussPoint *gp, FloatArray *strainIncrement);
 public:
 
-    // non-standart
+    // non-standard
     double   give(int, GaussPoint*);
 
     // identification and auxiliary functions

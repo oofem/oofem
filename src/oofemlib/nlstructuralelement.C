@@ -136,12 +136,12 @@ NLStructuralElement :: computeStrainVector(FloatArray &answer, GaussPoint *gp, T
       if (initialDisplacements) u.substract(initialDisplacements);
       // rotate the coordinate system, if required
       if ( rot ) {
-	u.rotatedWith(this->rotationMatrix, 'n');
+        u.rotatedWith(this->rotationMatrix, 'n');
       }
 
       if ( nlGeometry<2 ){
-	// strain will be used as input for stress evaluation
-	this->computeBmatrixAt(gp, b);
+  // strain will be used as input for stress evaluation
+        this->computeBmatrixAt(gp, b);
 
         // small strain tensor (in vector form)
         answer.beProductOf(b, u);
@@ -158,23 +158,23 @@ NLStructuralElement :: computeStrainVector(FloatArray &answer, GaussPoint *gp, T
                     answer.at(i) += 0.5 * dotProduct( u, help, u.giveSize() );
                 }
             }
-	}
+        }
       } // end of nlGeometry = 0 or 1
 
       else{ // nlGeometry = 2
-	// deformation gradient will be used instead of strain
-	this->computeBFmatrixAt(gp, b);
-	answer.beProductOf(b, u); // this gives the displacement gradient
-	// unit matrix needs to be added
-	// (needs to be adjusted if the mode is not 3d)
-	answer.at(1) += 1.;
-	answer.at(5) += 1.;
-	answer.at(9) += 1.;
+        // deformation gradient will be used instead of strain
+        this->computeBFmatrixAt(gp, b);
+        answer.beProductOf(b, u); // this gives the displacement gradient
+        // unit matrix needs to be added
+        // (needs to be adjusted if the mode is not 3d)
+        answer.at(1) += 1.;
+        answer.at(5) += 1.;
+        answer.at(9) += 1.;
       }
     } // end of total Lagrangean formulation
 
     else if ( mode == AL ) { // updated Lagrangean formulation
-        _error("computeStrainVector : AL mode not supported now");
+      OOFEM_ERROR("computeStrainVector : AL mode not supported now");
     }
 
     return;
@@ -270,7 +270,7 @@ NLStructuralElement :: giveInternalForcesVector(FloatArray &answer,
                     //delete A;
                     for ( k = 1; k <= b.giveNumberOfColumns(); k++ ) {
                         // add nonlinear contribution to each component
-		      b.at(j, k) += b2->at(1, k); //mj
+                        b.at(j, k) += b2->at(1, k); //mj
                     }
 
                     delete b2;

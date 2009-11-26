@@ -105,6 +105,7 @@ enum InputFieldType {
     IFT_POIExportModule_poifilename,
 
     IFT_HOMExportModule_scale,
+    IFT_HOMExportModule_matnum,
 
     IFT_IncrementalLinearStatic_endoftimeofinterest,
     IFT_IncrementalLinearStatic_prescribedtimes,

@@ -668,7 +668,7 @@ load-control are:\\
 \recentry{}{\optField{linesearch}{in} \optField{lsearchamp}{rn}}
 \recentry{}{\optField{lsearchmaxeta}{rn} \optField{lsearchtol}{rn}}
 \recentry{}{[\field{nccdg}{in} \field{ccdg1}{ia} ... \field{ccdgN}{ia}  ]}
-\recentry{}{\field{rtolv}{}} [\field{rtolf}{}} \field{rtold}{} ]}
+\recentry{}{\field{rtolv}{} [\field{rtolf}{} \field{rtold}{} ]}
 \end{record}
 where
 \begin{itemize}
@@ -701,9 +701,9 @@ evaluate the actual displacements of controlled dofs.
   be in interval $(1,10)$), and parameter \param{lsearchmaxeta}
   defines maximum limit on the length of iterative step (allowed range
   is $(1.5,15)$).
-\item \param{nccdg} allows to define one or more DOF groups, that are used for evaluation of convergence criteria. Each DOF is checked if it is a member of particular group and in this case its contribution is taken into account when evaluating the convergence criteria for that group. By default, if \param{nccdg} is not specified, one group containing all DOF types is created. The value of \param{nccdg} parameter defines the number of DOF type groups. For each group, the corresponding DOF types need to be specified using \param{ccdg\#} parameter, where '\#' should be replaced by group number (numbering starts from 1). This array contains the DofIDItem values, that identify the physical meaning of DOFs in the group. The values and their physical meaning is defined by DofIDItem enum type (see src/oofemlib/dofiditem.h for reference). 
+\item \param{nccdg} allows to define one or more DOF groups, that are used for evaluation of convergence criteria. Each DOF is checked if it is a member of particular group and in this case its contribution is taken into account when evaluating the convergence criteria for that group. By default, if \param{nccdg} is not specified, one group containing all DOF types is created. The value of \param{nccdg} parameter defines the number of DOF type groups. For each group, the corresponding DOF types need to be specified using \param{ccdg\#} parameter, where '\#' should be replaced by group number (numbering starts from 1). This array contains the DofIDItem values, that identify the physical meaning of DOFs in the group. The values and their physical meaning is defined by DofIDItem enum type (see src/oofemlib/dofiditem.h for reference).
 \item \param{rtolv} determines relative convergence norm (both for displacement
-iterative change vector and for residual unbalanced force vector). Optionally, the \param{rtolf} and \param{rtold} parameters can be used to define 
+iterative change vector and for residual unbalanced force vector). Optionally, the \param{rtolf} and \param{rtold} parameters can be used to define
 independent relative convergence crteria for unbalanced forces and displacement
 iterative change. If the default convergence criteria is used,
 the parameters \param{rtolv},\param{rtolf}, and \param{rtold} are real values. If the convergence criteria DOF groups are used (see bellow the description of \param{nccdg} parameter) then they should be specified as real valued arrays of \param{nccdg} size, and individual values define relative convergence criteria for each individual dof group.
@@ -728,7 +728,7 @@ The corresponding meta step solver parameters (\param{solverParams} are:\\
 \recentry{}{\optField{linesearch}{in} \optField{lsearchamp}{rn}}
 \recentry{}{\optField{lsearchmaxeta}{rn} \optField{lsearchtol}{rn}}
 \recentry{}{[\field{nccdg}{in} \field{ccdg1}{ia} ... \field{ccdgN}{ia}]}
-\recentry{}{\field{rtolv}{}} [\field{rtolf}{}} \field{rtold}{} ]}
+\recentry{}{\field{rtolv}{} [\field{rtolf}{} \field{rtold}{} ]}
 \end{record}
 where
 \begin{itemize}
@@ -774,7 +774,7 @@ be N.
   is $(1.5,15)$).
 \item \param{nccdg} allows to define one or more DOF groups, that are used for evaluation of convergence criteria. Each DOF is checked if it is a member of particular group and in this case its contribution is taken into account when evaluating the convergence criteria for that group. By default, if \param{nccdg} is not specified, one group containing all DOF types is created. The value of \param{nccdg} parameter defines the number of DOF type groups. For each group, the corresponding DOF types need to be specified using \param{ccdg\#} parameter, where '\#' should be replaced by group number (numbering starts from 1). This array contains the DofIDItem values, that identify the physical meaning of DOFs in the group. The values and their physical meaning is defined by DofIDItem enum type (see src/oofemlib/dofiditem.h for reference).
 \item \param{rtolv} determines relative convergence norm (both for displacement
-iterative change vector and for residual unbalanced force vector). Optionally, the \param{rtolf} and \param{rtold} parameters can be used to define 
+iterative change vector and for residual unbalanced force vector). Optionally, the \param{rtolf} and \param{rtold} parameters can be used to define
 independent relative convergence crteria for unbalanced forces and displacement
 iterative change. If the default convergence criteria is used,
 the parameters \param{rtolv},\param{rtolf}, and \param{rtold} are real values. If the convergence criteria DOF groups are used (see bellow the description of \param{nccdg} parameter) then they should be specified as real valued arrays of \param{nccdg} size, and individual values define relative convergence criteria for each individual dof group.
@@ -1513,12 +1513,12 @@ Currently, the supported export modules are following
 \begin{itemize}
 \item VTK export
 
-  \begin{record}[0.9\textwidth]
+\begin{record}[0.9\textwidth]
     \recentry{vtk}{\optField{vars}{ia}} \recentry{}{\optField{primvars}{ia}}\recentry{}{\optField{cellvars}{ia}}
     \recentry{}{\optField{stype}{in}} \recentry{}{\optField{regionstoskip}{ia}}
   \end{record}
-
 \begin{itemize}
+
 \item The array \param{vars} contains identifiers for those internal
 variables which are to be exported. The id values are defined by
 InternalStateType enumeration, which is defined in include file
@@ -1540,10 +1540,21 @@ on an element (cell), e.g. a material number. Identifier numbers are specified i
 internal variables, which is used to compute nodal values from values
 in integration points.
 \end{itemize}
-\end{itemize}
 
 When vtk is configured to operate in region-by-region mode (the default), then the export is done on region by region basis. In this case, the smoothing is performed only over particular region, where only elements in this region participate. Then the \param{regionstoskip} parameter allows to skip given regions when generating output, so only remaining regions (and corresponding elements and nodes) will be exported.
 
+\item Homogenization of stresses and strains in the global coordinate system. Corresponding stress and strain components are summed and averaged over the volume. It is possible to select material numbers from which the averaging occurs. The averaging works for 3D domains with an extension to trusses. A truss is considered as a volume element with oriented stress and strain components along the truss axis. The transformation to global components occurs before averaging.
+
+\begin{record}[0.9\textwidth]
+    \recentry{hom}{\optField{scale}{rn}} \recentry{}{\optField{MatNum}{ia}}
+\end{record}
+\begin{itemize}
+
+\item The parameter \param{scale} multiplies all averaged stresses and strains. \param{scale}=1 by default.
+
+\item An integer array \param{MatNum} specifies which material numbers are taken into account. All material numbers are averaged by default.
+\end{itemize}
+\end{itemize}
 
 \section{Domain record(s)}
 \label{_DomainRecord}

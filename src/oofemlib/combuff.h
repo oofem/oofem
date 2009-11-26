@@ -136,7 +136,7 @@ public:
     /**@name Services for buffer sending/receiving */
     //@{
     /**
-     * Starts standart mode, nonblocking send.
+     * Starts standard mode, nonblocking send.
      * @param dest rank of destination
      * @param tag message tag
      * @param communicator (handle)
@@ -144,7 +144,7 @@ public:
      */
     virtual int iSend(MPI_Comm communicator, int dest, int tag);
     /**
-     * Starts standart mode, nonblocking receive. The buffer must be large enough to receive all data.
+     * Starts standard mode, nonblocking receive. The buffer must be large enough to receive all data.
      * @param source rank of source
      * @param tag message tag
      * @param count number of elements to receive (bytes). Causes receive buffer to resize to count elements.
@@ -172,11 +172,11 @@ public:
      */
     int testCompletion(int &source, int &tag);
     /**
-     * Waits until a completion of a nonblocking communication. The completion of a send operation indicates that the sender is 
+     * Waits until a completion of a nonblocking communication. The completion of a send operation indicates that the sender is
      * now free to update the locations in the send buffer, the completion of a receive operation indicates that the
-     * receive buffer contains the received message, the receiver is now free to access it, and that the status object is set. 
+     * receive buffer contains the received message, the receiver is now free to access it, and that the status object is set.
      * If the communication object associated with this request was created (nonblocking send or receive call),
-     * then the object is deallocated by the call to MPI_WAIT and the request handle is set to MPI_REQUEST_NULL. 
+     * then the object is deallocated by the call to MPI_WAIT and the request handle is set to MPI_REQUEST_NULL.
      *
      */
     virtual int waitCompletion();
@@ -345,7 +345,7 @@ public:
     /**@name Services for buffer sending/receiving */
     //@{
     /**
-     * Starts standart mode, nonblocking send.
+     * Starts standard mode, nonblocking send.
      * @param dest rank of destination
      * @param tag message tag
      * @param communicator (handle)
@@ -353,7 +353,7 @@ public:
      */
     virtual int iSend(int dest, int tag) = 0;
     /**
-     * Starts standart mode, nonblocking receive. The buffer must be large enough to receive all data.
+     * Starts standard mode, nonblocking receive. The buffer must be large enough to receive all data.
      * @param source rank of source
      * @param tag message tag
      * @param count number of elements to receive (bytes). Causes receive buffer to resize to count elements.
@@ -371,11 +371,11 @@ public:
      */
     virtual int testCompletion() = 0;
     /**
-     * Waits until a completion of a nonblocking communication. The completion of a send operation indicates that the sender is 
+     * Waits until a completion of a nonblocking communication. The completion of a send operation indicates that the sender is
      * now free to update the locations in the send buffer, the completion of a receive operation indicates that the
-     * receive buffer contains the received message, the receiver is now free to access it, and that the status object is set. 
+     * receive buffer contains the received message, the receiver is now free to access it, and that the status object is set.
      * If the communication object associated with this request was created (nonblocking send or receive call),
-     * then the object is deallocated by the call to MPI_WAIT and the request handle is set to MPI_REQUEST_NULL. 
+     * then the object is deallocated by the call to MPI_WAIT and the request handle is set to MPI_REQUEST_NULL.
      *
      */
     virtual int waitCompletion() = 0;
@@ -469,7 +469,7 @@ public:
     /**@name Services for buffer sending/receiving */
     //@{
     /**
-     * Starts standart mode, nonblocking send.
+     * Starts standard mode, nonblocking send.
      * @param dest rank of destination
      * @param tag message tag
      * @param communicator (handle)
@@ -477,7 +477,7 @@ public:
      */
     virtual int iSend(int dest, int tag) { return MPIBuffer :: iSend(this->communicator, dest, tag); }
     /**
-     * Starts standart mode, nonblocking receive. The buffer must be large enough to receive all data.
+     * Starts standard mode, nonblocking receive. The buffer must be large enough to receive all data.
      * @param source rank of source
      * @param tag message tag
      * @param count number of elements to receive (bytes). Causes receive buffer to resize to count elements.
@@ -506,11 +506,11 @@ public:
     int testCompletion(int &source, int &tag) {return MPIBuffer :: testCompletion(source, tag); }
 
     /**
-     * Waits until a completion of a nonblocking communication. The completion of a send operation indicates that the sender is 
+     * Waits until a completion of a nonblocking communication. The completion of a send operation indicates that the sender is
      * now free to update the locations in the send buffer, the completion of a receive operation indicates that the
-     * receive buffer contains the received message, the receiver is now free to access it, and that the status object is set. 
+     * receive buffer contains the received message, the receiver is now free to access it, and that the status object is set.
      * If the communication object associated with this request was created (nonblocking send or receive call),
-     * then the object is deallocated by the call to MPI_WAIT and the request handle is set to MPI_REQUEST_NULL. 
+     * then the object is deallocated by the call to MPI_WAIT and the request handle is set to MPI_REQUEST_NULL.
      *
      */
     virtual int waitCompletion() {return MPIBuffer :: waitCompletion(); };

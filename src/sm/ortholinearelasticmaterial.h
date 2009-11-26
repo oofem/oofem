@@ -112,7 +112,7 @@ public:
     classType giveClassID()         const { return OrthotropicLinearElasticMaterialClass; }
     IRResultType initializeFrom(InputRecord *ir);
 
-    // non-standart - returns time independent material constant
+    // non-standard - returns time independent material constant
     double   give(int, GaussPoint*);
 
     void give3dMaterialStiffnessMatrix(FloatMatrix & answer,

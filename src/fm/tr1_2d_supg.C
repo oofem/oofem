@@ -238,7 +238,7 @@ TR1_2D_SUPG :: computeAdvectionTerm_MB(FloatArray &answer, TimeStep *atTime)
     vsum = un.at(2) + un.at(4) + un.at(6);
     coeff = rho * area / 12.0;
 
-    // standart galerkin term
+    // standard galerkin term
     answer.at(1) = coeff * ( dudx * ( usum + un.at(1) ) + dudy * ( vsum + un.at(2) ) );
     answer.at(3) = coeff * ( dudx * ( usum + un.at(3) ) + dudy * ( vsum + un.at(4) ) );
     answer.at(5) = coeff * ( dudx * ( usum + un.at(5) ) + dudy * ( vsum + un.at(6) ) );
@@ -794,7 +794,7 @@ TR1_2D_SUPG :: updateStabilizationCoeffs(TimeStep *atTime)
     __tmpvec.beProductOf(__tmp, a);
     __betav_norm = __tmpvec.computeNorm();
     // compute c mtrx (advection term of momentum balance)
-    // standart galerkin term
+    // standard galerkin term
     __tmp.resize(6, 6);
     __tmp.zero();
 
@@ -2022,7 +2022,7 @@ TR1_2D_SUPG :: LS_PCS_computeVOFFractions(FloatArray &answer, FloatArray &fi)
             if ( fabs(__area) / area > 1.00001 ) {
                 OOFEM_ERROR("TR1_2D_SUPG::LS_PCS_computeVOFFractions: internal consistency error");
             }
-	    // prevent some roundoff errors 
+	    // prevent some roundoff errors
 	    if ( fabs(__area) > area ) __area = sgn(__area)*area;
 
             if ( pos > neg ) {

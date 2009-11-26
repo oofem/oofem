@@ -95,6 +95,8 @@ public:
 protected:
     /// stream for file
     FILE *stream;
+    ///Material numbers over which averaging is performed
+    IntArray matnum;
 };
 
 #define homexportmodule_h

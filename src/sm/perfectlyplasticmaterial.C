@@ -746,7 +746,7 @@ PerfectlyPlasticMaterial :: givePlaneStressStiffMtrx(FloatMatrix &answer,
 // returns receiver's 2dPlaneStressMtrx
 // (2dPlaneStres ==> sigma_z = tau_xz = tau_yz = 0.)
 //
-// standart method from Material Class overloaded, because no inversion is needed.
+// standard method from Material Class overloaded, because no inversion is needed.
 // the reduction from 3d case will not work
 // this implementation should be faster.
 {
@@ -845,7 +845,7 @@ PerfectlyPlasticMaterial :: give2dBeamLayerStiffMtrx(FloatMatrix &answer,
 // returns receiver's 2dBeamLayerStiffMtrx.
 // (2dPlaneStres ==> sigma_z = tau_xz = tau_yz = 0.)
 //
-// standart method from Material Class overloaded, because no inversion is needed.
+// standard method from Material Class overloaded, because no inversion is needed.
 // the reduction from 3d case will not work
 // this implementation should be faster.
 {
@@ -880,7 +880,7 @@ PerfectlyPlasticMaterial :: give2dPlateLayerStiffMtrx(FloatMatrix &answer,
 // returns receiver's 2dPlateLayerMtrx
 // (2dPlaneStres ==> sigma_z = tau_xz = tau_yz = 0.)
 //
-// standart method from Material Class overloaded, because no inversion is needed.
+// standard method from Material Class overloaded, because no inversion is needed.
 // the reduction from 3d case will not work
 // this implementation should be faster.
 {
@@ -917,7 +917,7 @@ PerfectlyPlasticMaterial :: give3dShellLayerStiffMtrx(FloatMatrix &answer,
 // general 3dMatrialStiffnessMatrix
 // (2dPlaneStres ==> sigma_z = tau_xz = tau_yz = 0.)
 //
-// standart method from Material Class overloaded, because no inversion is needed.
+// standard method from Material Class overloaded, because no inversion is needed.
 // the reduction from 3d case will not work
 // this implementation should be faster.
 {

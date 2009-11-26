@@ -35,7 +35,7 @@ void PlaneStress2dXfem :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer,
     FloatMatrix *simple = new FloatMatrix(3, 8);
     simple->zero();
 
-    // assemble standart FEM part of strain-displacement matrix
+    // assemble standard FEM part of strain-displacement matrix
     for ( i = 1; i <= 4; i++ ) {
         simple->at(1, 2 * i - 1) = dNdx.at(i, 1);
         simple->at(2, 2 * i - 0) = dNdx.at(i, 2);

@@ -339,7 +339,7 @@ TR1_2D_SUPG2 :: computeAdvectionTerm_MB(FloatArray &answer, TimeStep *atTime)
     dvdx = b [ 0 ] * u.at(2) + b [ 1 ] * u.at(4) + b [ 2 ] * u.at(6);
     dvdy = c [ 0 ] * u.at(2) + c [ 1 ] * u.at(4) + c [ 2 ] * u.at(6);
 
-    // standart galerkin term
+    // standard galerkin term
     for ( ifluid = 0; ifluid < 2; ifluid++ ) {
         for ( ip = 0; ip < integrationRulesArray [ ifluid ]->getNumberOfIntegrationPoints(); ip++ ) {
             gp = integrationRulesArray [ ifluid ]->getIntegrationPoint(ip);
@@ -965,7 +965,7 @@ TR1_2D_SUPG2 :: updateStabilizationCoeffs(TimeStep *atTime)
     __tmpvec.beProductOf(__tmp, a);
     __betav_norm = __tmpvec.computeNorm();
     // compute c mtrx (advection term of momentum balance)
-    // standart galerkin term
+    // standard galerkin term
     __tmp.resize(6, 6);
     __tmp.zero();
     for ( ifluid = 0; ifluid < 2; ifluid++ ) {

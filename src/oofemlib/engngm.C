@@ -2004,7 +2004,7 @@ void EngngModel :: warning(const char *file, int line, const char *format, ...) 
 //
 // this function handles error reporting
 // prints errorMsg enriched by ClasName and Number
-// to the standart error stream
+// to the standard error stream
 {
     char buffer [ MAX_ERROR_MSG_LENGTH ];
     va_list args;

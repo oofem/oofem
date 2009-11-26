@@ -166,6 +166,12 @@ QSpace :: computeNmatrixAt (GaussPoint* aGaussPoint, FloatMatrix& answer)
 
 
 void
+QSpace :: computeNLBMatrixAt(FloatMatrix& answer, GaussPoint *aGaussPoint, int i){
+  OOFEM_ERROR("NLBmatrix not implemented");
+}
+
+
+void
 QSpace :: computeBmatrixAt (GaussPoint *aGaussPoint, FloatMatrix& answer, int li, int ui)
   // Returns the [6x60] strain-displacement matrix {B} of the receiver, eva-
   // luated at aGaussPoint.
@@ -196,6 +202,13 @@ QSpace :: computeBmatrixAt (GaussPoint *aGaussPoint, FloatMatrix& answer, int li
 
   return ;
 }
+
+
+void
+QSpace :: computeBFmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer){
+  OOFEM_ERROR("BFmatrix not implemented");
+}
+
 
 // ******************************
 // ***  Surface load support  ***

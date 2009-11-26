@@ -184,7 +184,7 @@ public:
      */
     bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) { return true; }
 
-    // non-standart - returns time independent material constant
+    // non-standard - returns time independent material constant
     // double   give (int) ;
 
     virtual void give3dMaterialStiffnessMatrix(FloatMatrix & answer,

@@ -414,8 +414,8 @@ public:
     /**
      * Returns true, if receiver is activated for given solution step
      */
-    bool   isActivated(TimeStep *atTime) 
-    { 
+    bool   isActivated(TimeStep *atTime)
+    {
       if (activityLtf) {
 	if (atTime) return (domain->giveLoadTimeFunction(activityLtf)->evaluate(atTime, VM_Total) > 1.e-3);
 	else return 0.0;
@@ -516,7 +516,7 @@ protected:
      * GiveEdgeDofMapping - returns integer array specifying local dof edge mapping to "global" element dofs.</LI>
      * </UL>
      * Integration rule is set up automatically, based on element interpolation order and load approximation.
-     * Integration points are set-up using standart integration rule services (setUpIntegrationPoints method).
+     * Integration points are set-up using standard integration rule services (setUpIntegrationPoints method).
      * Gauss integration rule is used.
      * If derived class overrides this default implementation somehow, the above services
      * must not be implemented.
@@ -545,7 +545,7 @@ protected:
      * GiveSurfaceDofMapping - returns integer array specifying local dof surface mapping to "global" element dofs.</LI>
      * </UL>
      * Integration rule is set up automatically, based on element interpolation order and load approximation.
-     * Integration points are set-up using standart integration rule services (setUpIntegrationPoints method).
+     * Integration points are set-up using standard integration rule services (setUpIntegrationPoints method).
      * Gauss integration rule is used.
      * If derived class overrides this default implementation somehow, the above services
      * must not be implemented.

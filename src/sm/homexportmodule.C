@@ -52,7 +52,9 @@
 
 //inherit LinearElasticMaterial for accessing stress/strain transformation functions
 HOMExportModule :: HOMExportModule(EngngModel *e) : ExportModule(e), LinearElasticMaterial(0, NULL)
-{ }
+{
+  this->matnum.resize(0);
+}
 
 
 HOMExportModule :: ~HOMExportModule()
@@ -71,7 +73,7 @@ HOMExportModule :: initializeFrom(InputRecord *ir)
         this->scale = 1.;
     }
 
-    //OOFEM_LOG_INFO("SCALE %f\n", this->scale);
+    val = IR_GIVE_OPTIONAL_FIELD(ir, this->matnum, IFT_HOMExportModule_matnum, "matnum"); // Macro
     return IRRT_OK;
 }
 
@@ -101,50 +103,51 @@ HOMExportModule :: doOutput(TimeStep *tStep)
 
     for ( ielem = 1; ielem <= nelem; ielem++ ) {
         elem = d->giveElement(ielem);
-        iRule = elem->giveDefaultIntegrationRulePtr();
-        for ( i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
-            gp  = iRule->getIntegrationPoint(i);
-            gp->giveCoordinate(1);
-            dV  = elem->computeVolumeAround(gp);
-            VolTot += dV;
-            //OOFEM_LOG_INFO("Element %d GP %d Vol %f\n", elem->giveNumber(), gp->giveNumber(), dV);
-            //fprintf(this->stream, "Element %d GP %d stress %f\n", elem->giveNumber(), gp->giveNumber(), 0.0);
-            //((StructuralCrossSection*) gp->giveCrossSection())->giveFullCharacteristicVector(helpVec, gp, strainVector);
-            elem->giveIPValue(VecStrain, gp, IST_StrainTensor, tStep);
-            elem->giveIPValue(VecStress, gp, IST_StressTensor, tStep);
-            elem->giveIntVarCompFullIndx(Mask, IST_StrainTensor);
+        if( this->matnum.giveSize() == 0 || this->matnum.contains(elem->giveMaterial()->giveNumber()) ){
+            iRule = elem->giveDefaultIntegrationRulePtr();
+            for ( i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
+                gp  = iRule->getIntegrationPoint(i);
+                //gp->giveCoordinate(1);
+                dV  = elem->computeVolumeAround(gp);
+                //OOFEM_LOG_INFO("Element %d GP %d Vol %f\n", elem->giveNumber(), gp->giveNumber(), dV);
+                //fprintf(this->stream, "Element %d GP %d stress %f\n", elem->giveNumber(), gp->giveNumber(), 0.0);
+                //((StructuralCrossSection*) gp->giveCrossSection())->giveFullCharacteristicVector(helpVec, gp, strainVector);
+                elem->giveIPValue(VecStrain, gp, IST_StrainTensor, tStep);
+                elem->giveIPValue(VecStress, gp, IST_StressTensor, tStep);
+                elem->giveIntVarCompFullIndx(Mask, IST_StrainTensor);
 
-            //truss element has strains and stresses in the first array so transform them to global coordinates
-            if(elem->giveClassID() == Truss3dClass){
-              elem->giveLocalCoordinateSystem(baseGCS);
-              //this->giveStressVectorTranformationMtrx(transfMatrix,baseGCS,1);//from structuralMaterial
-              //baseGCS.printYourself();
-              VecStress.resize(6);
-              VecStrain.resize(6);
-              this->transformStressVectorTo( tempFloatAr, baseGCS, VecStress, 0);
-              VecStress = tempFloatAr;
-              this->transformStrainVectorTo( tempFloatAr, baseGCS, VecStrain, 0);
-              VecStrain = tempFloatAr;
-              for(j=1; j<=6; j++)
-                Mask.at(j)=j;
-              //continue;
-              //VecStrain.printYourself();
-              //VecStress.printYourself();
-            }
-
-            VecStrain.times(dV);
-            VecStress.times(dV);
-
-            for ( j = 0; j < 6; j++ ) {
-                index = Mask(j); //indexes in Mask from 1
-                if ( index ) {
-                    SumStrain(j) += VecStrain(index - 1);
-                    SumStress(j) += VecStress(index - 1);
+                //truss element has strains and stresses in the first array so transform them to global coordinates
+                if(elem->giveClassID() == Truss3dClass){
+                  elem->giveLocalCoordinateSystem(baseGCS);
+                  //this->giveStressVectorTranformationMtrx(transfMatrix,baseGCS,1);//from structuralMaterial
+                  //baseGCS.printYourself();
+                  VecStress.resize(6);
+                  VecStrain.resize(6);
+                  this->transformStressVectorTo( tempFloatAr, baseGCS, VecStress, 0);
+                  VecStress = tempFloatAr;
+                  this->transformStrainVectorTo( tempFloatAr, baseGCS, VecStrain, 0);
+                  VecStrain = tempFloatAr;
+                  for(j=1; j<=6; j++)
+                    Mask.at(j)=j;
+                  //continue;
+                  //VecStrain.printYourself();
+                  //VecStress.printYourself();
                 }
-            }
+                VolTot += dV;
+                VecStrain.times(dV);
+                VecStress.times(dV);
 
-            //VecStrain.printYourself();
-            //SumStrain.printYourself();
+                for ( j = 0; j < 6; j++ ) {
+                    index = Mask(j); //indexes in Mask from 1
+                    if ( index ) {
+                        SumStrain(j) += VecStrain(index - 1);
+                        SumStress(j) += VecStress(index - 1);
+                    }
+                }
+
+                //VecStrain.printYourself();
+                //SumStrain.printYourself();
+            }
         }
     }
 
@@ -155,14 +158,15 @@ HOMExportModule :: doOutput(TimeStep *tStep)
     //SumStress.printYourself();
     fprintf( this->stream, "%f   ", tStep->giveTime() );
     for ( j = 0; j < 6; j++ ) { //strain
-        fprintf( this->stream, "% 06.5e ", SumStrain(j) );
+        fprintf( this->stream, "%06.5e ", SumStrain(j) );
     }
 
     fprintf(this->stream, "  ");
     for ( j = 0; j < 6; j++ ) { //stress
-        fprintf( this->stream, "% 06.5e ", SumStress(j) );
+        fprintf( this->stream, "%06.5e ", SumStress(j) );
     }
 
+    fprintf( this->stream, "Vol %06.5e ", VolTot );
     fprintf(this->stream, "\n");
     fflush(this->stream);
 }

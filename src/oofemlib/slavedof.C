@@ -50,7 +50,7 @@ SlaveDof :: initialize(int cntOfMstrDfMngr, Node **mstrNode, const IntArray *mst
 
     masterDofMans.resize(countOfMasterDofs);
     dofIDs.resize(countOfMasterDofs);
-    
+
     for ( i = 1; i <= countOfMasterDofs; i++ ) {
       if ( idSame ) {
 	  id = this->dofID;
@@ -200,7 +200,7 @@ SlaveDof :: giveEquationNumbers(IntArray &masterEqNumbers, const UnknownNumberin
 /**
  * Returns the value of the unknown associated with the receiver at given time step.
  * Slave simply asks vector of corresponding master dofs and own transformation
- * vector and returns result as dot product of these vectors. Standart element
+ * vector and returns result as dot product of these vectors. Standard element
  * services have to transform global unknown vector transform into their local c.s
  * before using it (when computing strain vector by \eps=Br, for example,
  * where B is element geometrical matrix). This transformation should contain also
@@ -235,7 +235,7 @@ contextIOResultType SlaveDof :: saveContext(DataStream *stream, ContextMode mode
   if ( ( iores = Dof :: saveContext(stream, mode, obj) ) != CIO_OK ) {
         THROW_CIOERR(iores);
   }
-  
+
   if ( mode & CM_Definition ) {
 
     if ( !stream->write(& countOfMasterDofs, 1) ) {
@@ -245,7 +245,7 @@ contextIOResultType SlaveDof :: saveContext(DataStream *stream, ContextMode mode
     if ( !stream->write(& countOfPrimaryMasterDofs, 1) ) {
       THROW_CIOERR(CIO_IOERR);
     }
-    
+
     if ( ( iores = masterContribution.storeYourself(stream, mode) ) != CIO_OK ) {
       THROW_CIOERR(iores);
     }
@@ -262,18 +262,18 @@ contextIOResultType SlaveDof :: saveContext(DataStream *stream, ContextMode mode
 #else
       _idofmanNum = masterDofMans.at(_idof);
 #endif
-      
+
       if ( !stream->write(&_idofmanNum, 1) ) {
 	THROW_CIOERR(CIO_IOERR);
       }
-    }      
+    }
 
     if ( ( iores = dofIDs.storeYourself(stream, mode) ) != CIO_OK ) {
       THROW_CIOERR(iores);
     }
 
-  } // if ( mode & CM_Definition ) 
-  
+  } // if ( mode & CM_Definition )
+
   return CIO_OK;
 }
 
@@ -283,7 +283,7 @@ contextIOResultType SlaveDof :: restoreContext(DataStream *stream, ContextMode m
   if ( ( iores = Dof :: restoreContext(stream, mode, obj) ) != CIO_OK ) {
     THROW_CIOERR(iores);
   }
-  
+
   if ( mode & CM_Definition ) {
 
     if ( !stream->read(& countOfMasterDofs, 1) ) {
@@ -293,7 +293,7 @@ contextIOResultType SlaveDof :: restoreContext(DataStream *stream, ContextMode m
     if ( !stream->read(& countOfPrimaryMasterDofs, 1) ) {
       THROW_CIOERR(CIO_IOERR);
     }
-    
+
     if ( ( iores = masterContribution.restoreYourself(stream, mode) ) != CIO_OK ) {
       THROW_CIOERR(iores);
     }
@@ -302,24 +302,24 @@ contextIOResultType SlaveDof :: restoreContext(DataStream *stream, ContextMode m
 
     masterDofMans.resize(countOfMasterDofs);
     for (_idof=1; _idof <= countOfMasterDofs; _idof++) {
-      
+
       if ( !stream->read(&masterDofMans.at(_idof), 1) ) {
 	THROW_CIOERR(CIO_IOERR);
       }
     }
-    
+
     if ( ( iores = dofIDs.restoreYourself(stream, mode) ) != CIO_OK ) {
       THROW_CIOERR(iores);
     }
-    
-  } // if ( mode & CM_Definition ) 
-  
-  
+
+  } // if ( mode & CM_Definition )
+
+
   return CIO_OK;
 }
 
 
-inline Dof* 
+inline Dof*
 SlaveDof:: giveMasterDof (int i) {
   return dofManager->giveDomain()->giveDofManager(masterDofMans.at(i))->giveDofWithID(dofIDs.at(i));
 }
@@ -329,7 +329,7 @@ void
 SlaveDof :: updateLocalNumbering( EntityRenumberingFunctor &f )
 {
   int i;
-  for (i=1; i<=countOfMasterDofs; i++) 
+  for (i=1; i<=countOfMasterDofs; i++)
     masterDofMans.at(i) = f (masterDofMans.at(i), ERS_DofManager);
 }
 
@@ -339,9 +339,9 @@ SlaveDof :: giveMasterDofManArray (IntArray& answer)
 {
   long i, k;
   IntArray mstrDofManArry;
-  
+
   answer.resize (this->giveNumberOfPrimaryMasterDofs());
-  
+
   for (k=1, i=1; i<=countOfMasterDofs; i++) {
     if (! giveMasterDof(i)->isPrimaryDof()) {
       this->giveMasterDof(i)->giveMasterDofManArray (mstrDofManArry);

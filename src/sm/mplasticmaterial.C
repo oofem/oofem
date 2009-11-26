@@ -1313,7 +1313,7 @@ MPlasticMaterial :: givePlaneStressStiffMtrx(FloatMatrix &answer, MatResponseFor
 // returns receiver's 2dPlaneStressMtrx
 // (2dPlaneStres ==> sigma_z = tau_xz = tau_yz = 0.)
 //
-// standart method from Material Class overloaded, because no inversion is needed.
+// standard method from Material Class overloaded, because no inversion is needed.
 // the reduction from 3d case will not work
 // this implementation should be faster.
 {
@@ -1388,7 +1388,7 @@ MPlasticMaterial :: give2dBeamLayerStiffMtrx(FloatMatrix &answer, MatResponseFor
 // returns receiver's 2dBeamLayerStiffMtrx.
 // (2dPlaneStres ==> sigma_z = tau_xz = tau_yz = 0.)
 //
-// standart method from Material Class overloaded, because no inversion is needed.
+// standard method from Material Class overloaded, because no inversion is needed.
 // the reduction from 3d case will not work
 // this implementation should be faster.
 {
@@ -1416,7 +1416,7 @@ MPlasticMaterial :: give2dPlateLayerStiffMtrx(FloatMatrix &answer,
 // returns receiver's 2dPlateLayerMtrx
 // (2dPlaneStres ==> sigma_z = tau_xz = tau_yz = 0.)
 //
-// standart method from Material Class overloaded, because no inversion is needed.
+// standard method from Material Class overloaded, because no inversion is needed.
 // the reduction from 3d case will not work
 // this implementation should be faster.
 {
@@ -1442,7 +1442,7 @@ MPlasticMaterial :: give1dFiberStiffMtrx(FloatMatrix &answer,
 // returns receiver's 1dFiber
 // (1dFiber ==> sigma_y = sigma_z = tau_yz = 0.)
 //
-// standart method from Material Class overloaded, because no inversion is needed.
+// standard method from Material Class overloaded, because no inversion is needed.
 // the reduction from 3d case will not work
 // this implementation should be faster.
 {
@@ -1469,7 +1469,7 @@ MPlasticMaterial :: give3dShellLayerStiffMtrx(FloatMatrix &answer, MatResponseFo
 // general 3dMatrialStiffnessMatrix
 // (2dPlaneStres ==> sigma_z = tau_xz = tau_yz = 0.)
 //
-// standart method from Material Class overloaded, because no inversion is needed.
+// standard method from Material Class overloaded, because no inversion is needed.
 // the reduction from 3d case will not work
 // this implementation should be faster.
 {

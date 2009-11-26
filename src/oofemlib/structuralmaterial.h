@@ -155,7 +155,7 @@ public:
     /// Destructor.
     ~StructuralMaterial()                { }
 
-    // standart matrial stiffness matrices
+    // standard matrial stiffness matrices
     /**
      * Computes the stiffness matrix of receiver in given integration point, respecting its history.
      * The algorithm should use temporary or equlibrium  history variables stored in integration point status
@@ -172,7 +172,7 @@ public:
                                            GaussPoint *gp,
                                            TimeStep *atTime);
 
-    // standart matrial compliance matrices
+    // standard matrial compliance matrices
     /**
      * Computes conpliance matrix of receiver in given integration point.
      * @param answer contains result
@@ -720,7 +720,7 @@ protected:
     void transformStressVectorTo(FloatArray &answer, const FloatMatrix &base,
                                  const FloatArray &stressVector, int transpose = 0) const;
     /**
-     * Computes 3d strain vector transformation matrix from standart vector transormation matrix.
+     * Computes 3d strain vector transformation matrix from standard vector transformation matrix.
      * @param answer transformation matrix for strain vector
      * @param base (3,3) matrix, where on each column are stored unit direction vectors of
      * local coordinate axes to which we do transformation.
@@ -729,7 +729,7 @@ protected:
     void giveStrainVectorTranformationMtrx(FloatMatrix &answer, const FloatMatrix &base,
                                            int transpose = 0) const;
     /**
-     * Computes 3d stress vector transformation matrix from standart vector transormation matrix.
+     * Computes 3d stress vector transformation matrix from standard vector transformation matrix.
      * @param answer transformation matrix for stress vector
      * @param base (3,3) matrix, where on each column are stored unit direction vectors of
      * local coordinate axes to which we do transformation.

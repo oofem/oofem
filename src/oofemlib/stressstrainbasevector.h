@@ -151,7 +151,7 @@ protected:
      */
     void giveStressStrainMask(IntArray &answer, MatResponseForm form, MaterialMode mmode) const;
     /**
-     * Computes 3d transformation matrix from standart vector transormation matrix.
+     * Computes 3d transformation matrix from standard vector transformation matrix.
      * @param answer transformation matrix for strain vector
      * @param base (3,3) matrix, where on each column are stored unit direction vectors of
      * local coordinate axes to which we do transformation.

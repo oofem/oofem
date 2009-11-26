@@ -128,7 +128,7 @@ public:
     /// Destructor.
     ~Material()                { delete propertyDictionary; }
 
-    // standart material stiffness matrices
+    // standard material stiffness matrices
     /**
      * Computes characteristic matrix of receiver in given integration point.
      * @param answer contains result
@@ -170,7 +170,7 @@ public:
      */
     virtual void updateYourself(GaussPoint *gp, TimeStep *atTime);
 
-    // non-standart - returns time independent material constant
+//     // non-standard - returns time independent material constant
     /**
      * Returns the value of material property 'aProperty'. Property must be identified
      * by unique int id. Intgeration point also passed to allow for materials with spatially

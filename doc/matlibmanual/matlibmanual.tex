@@ -1535,7 +1535,7 @@ Supported modes& 3dMat\\
 
 \subsection{Material model for composite brittle damage}
 
-The model is designed for transversely isotropic elastic material defined by five elastic material constants. Axis $1$ represents the principal direction. The relation to orthotropic material reads
+The model is designed for transversely isotropic elastic material defined by five elastic material constants. Typical example is a carbon fiber tow. Axis $1$ represents the material principal direction. The orthotropic material constants are defined as
 \begin{eqnarray}
 \nu_{12}=\nu_{13},~\nu_{21}=\nu_{31},~\nu_{23}=\nu_{32},~E_{22}=E_{33}\\
 G_{12}=G_{13}=G_{21}=G_{31},G_{23}=G_{32}\\
@@ -1543,9 +1543,9 @@ G_{12}=G_{13}=G_{21}=G_{31},G_{23}=G_{32}\\
 \end{eqnarray}
 
 Material orientation on finite element can be specified with {\it mlcs} optional parameter. If unspecified, material orientation is the same as the global coordinate system. This array contains six numbers,
-where first three numbers represent directional vector of local $x$-axis, and next three numbers represent directional vector of local $y$-axis with the reference to the global coordinate system. The composite material is extended to 1d and is suitable for trusses. In such particular case, only $xx$ components are considered from material definition.
+where first three numbers represent directional vector of the local $x$-axis, and next three numbers represent directional vector of the local $y$-axis with the reference to the global coordinate system. The composite material is extended to 1D and is also suitable for trusses. In such particular case, only the $xx$ components are considered.
 
-The linear softening occurs after reaching a critical stress $f_t$ in mode I, see Fig. \ref{comp_softening}. Orientation of cracks is assumed to be orthogonal and aligned with orientation of material axis \cite[pp.236]{Bazant:98}. The transverse isotropy is generally lost upon fracture, material becomes orthotropic and six damage parameters $d_1, d_2, \ldots d_6$ are introduced.
+The index $p,~p\in\{11,22,33,23,31,12\}$ symbolizes six components of stress or strain vectors. The linear softening occurs after reaching a critical stress $f_{p,0}$, see Fig. \ref{comp_softening}. Orientation of cracks is assumed to be orthogonal and aligned with an orientation of material axes \cite[pp.236]{Bazant:98}. The transverse isotropy is generally lost upon fracture, material becomes orthotropic and six damage parameters $d_p$ are introduced.
 
 \begin{figure}[!htb]
 \begin{htmlonly}
@@ -1562,35 +1562,53 @@ The linear softening occurs after reaching a critical stress $f_t$ in mode I, se
   \label{comp_softening}
 \end{figure}
 
-The compliance matrix, in the secant form and including damage parameters, reads
-
+The compliance material matrix $\mathbf{H}$, in the secant form and including damage parameters, reads
+\footnotesize
 \begin{eqnarray}
 \left[ \begin{array}{cccccc}
-\frac{1-d_1}{E_{11}} & -\frac{\nu_{21}}{E_{22}} & -\frac{\nu_{31}}{E_{33}} &0 &0 & 0\\
--\frac{\nu_{12}}{E_{11}} & \frac{1-d_2}{E_{22}} & -\frac{\nu_{32}}{E_{33}} &0& 0&0\\
--\frac{\nu_{13}}{E_{11}} & -\frac{\nu_{23}}{E_{22}} & \frac{1-d_3}{E_{33}} &0 &0 &0 \\
- 0&0 &0 & \frac{(1-d_4)(1+\nu_{12})}{E_{22}} & 0&0 \\
- 0& 0& 0& 0& \frac{1-d_5}{G_{31}} & 0\\
- 0& 0&0 &0& 0& \frac{1-d_6}{G_{12}}
-\end{array} \right]
+\frac{1}{(1-d_{11})E_{11}} & -\frac{\nu_{21}}{E_{22}} & -\frac{\nu_{31}}{E_{33}} &0 &0 & 0\\
+-\frac{\nu_{12}}{E_{11}} & \frac{1}{(1-d_{22})E_{22}} & -\frac{\nu_{32}}{E_{33}} &0& 0&0\\
+-\frac{\nu_{13}}{E_{11}} & -\frac{\nu_{23}}{E_{22}} & \frac{1}{(1-d_{33})E_{33}} &0 &0 &0 \\
+ 0&0 &0 & \frac{1}{(1-d_{23})G_{23}} & 0&0 \\
+ 0& 0& 0& 0& \frac{1}{(1-d_{31})G_{31}} & 0\\
+ 0& 0&0 &0& 0& \frac{1}{(1-d_{12})G_{12}}
+\end{array} \right]\label{comp_eq_H}
+\end{eqnarray}
+\normalsize
+
+Damage occurs when any out of six stress tensor components exceeds a given strength $f_{p,0}$
+\begin{eqnarray}
+|\sigma_p| \geq |f_{p,0}|
+\end{eqnarray}
+Positive and negative ultimate strengths can be generally different but share the same damage variable.
+At the point of damage initiation, see Fig. \ref{comp_softening}, one evaluates $\varepsilon_{p,E}$ and characteristic element length $l_p$, generally different for each damage mode. Given the fracture energy $G_{F,p}$, the maximum strain at zero stress $\varepsilon_{p,0}$ is computed
+\begin{eqnarray}
+\varepsilon_{p,0} = \varepsilon_{p,E} + \frac{2G_{F,p}}{f_{p,0} l_p}
 \end{eqnarray}
 
-The evolution of damage in 3D space is based on the evolution of strain in corresponding 1D direction according to \ref{comp_softening} and expressed as
+The point of damage initiation is never reached exactly, one needs to interpolate between the previous equilibrated step and current step to achieve objectivity.
+
+The evolution of damage $d_p$ is based on the evolution of corresponding strain $\varepsilon_p$. A maximum achieved strain is stored in the variable $\kappa_p$. If $\varepsilon_p > \kappa_p$ the damage may grow so the corresponding damage variable $d_p$ may increase. Desired stress $\sigma'_p$ is evaluated from the actual strain $\varepsilon_p$
 \begin{eqnarray}
-(1-d_i)E_i&=&\frac{\sigs_i}{\eps_i}\\
-d_i &=& 1-\frac{\sigs_i}{E_i\epss_i}\\
-\epss_{0,i} - \epss_{E,i} &=& \frac{2G_{f,i}}{f_{0,i} l_i}\\
-\sigs_i&=&\frac{f_{0,i}(\epss_{0,i}-\epss_i)}{(\epss_{0,i}-\epss_{E,i})} = f_{0,i} - \frac{f_{0,i}^2l_i}{2G_{f,i}}(\epss_i-\epss_{E,i})
+\sigma'_p = f_{p,0} \frac{\varepsilon_{p,0} - \varepsilon_p}{\varepsilon_{p,0}-\varepsilon_{p,E}}
 \end{eqnarray}
-where $\epss_{0,i}$ is strain at zero stress, $f_{0,i}$ is maximum given stress, $\epss_{E,i}$ is strain at maximum stress, $G_{f,i}$ is fracture energy disregarding the characteristic size of finite element, $l_i$ is the characteristic length associated with element size and interpolation order. The solution is similar to section~\label{IsoDamMod} and proceeds in total strain and strees formulation. Fig.~\ref{comp_performance} shows a typical performance for damage in one direction.
+and the calculation of damage variables $d_p$ stems from Eq.~\ref{comp_eq_H}, for example
+\begin{eqnarray}
+d_{11} &=& 1 - \frac{\sigma'_{11}}{E_{11}\left(\varepsilon_{11}+\frac{\nu_{21}}{E_{22}}\sigma_{22}+ \frac{\nu_{31}}{E_{33}}\sigma_{33} \right)}\\
+d_{12} &=& 1 - \frac{\sigma'_{12}}{G_{12}\varepsilon_{12}}
+\end{eqnarray}
+Damage is always controled not to decrease. Fig.~\ref{comp_performance} shows a typical performance for this damage model in one direction.
+
+The damage initiation is based on a trial stress. It becomes necessary for  higher precision to skip a few first iteration, typically 5, and then to introduce damage. A parameter \param{afterIter} is designed for this purpose and \param{MinIter} forces a solver always to proceed certain amount of iterations.
+
 
 \begin{figure}[!htb]
 \begin{htmlonly}
-  \centerline{\includegraphics[width=0.7\textwidth]{Compodamagemat_test.png}}
+  \centerline{\includegraphics[width=0.7\textwidth]{Compodamagemat_test.eps}}
 \end{htmlonly}
 %begin{latexonly}
 \ifpdf
-\centerline{\includegraphics[width=0.7\textwidth]{Compodamagemat_test.png}}
+\centerline{\includegraphics[width=0.7\textwidth]{Compodamagemat_test.pdf}}
 \else
 \centerline{\includegraphics[width=0.7\textwidth]{Compodamagemat_test.eps}}
 \fi
@@ -1619,7 +1637,7 @@ Parameters
 &- \param{Tension\_f0\_Gf} array with six pairs of positive numbers. Each pair desribes maximum stress in tension and fracture energy for each direction ($xx$, $yy$, $zz$, $yz$, $zx$, $xy$)\\
 &- \param{Compres\_f0\_Gf} array with six pairs of numbers. Each pair desribes maximum stress in compression (given as a negative number) and positive fracture energy for each direction ($xx$, $yy$, $zz$, $yz$, $zx$, $xy$)\\
 Supported modes& 3dMat, 1dMat\\
-&- \param {afterIter} how many iterations must pass until damage is computed from strains. User must ensure that the solver proceeds the minimum number of iterations.\\
+&- \param {afterIter} how many iterations must pass until damage is computed from strains, zero is default. User must ensure that the solver proceeds the minimum number of iterations.\\
 \hline
 \end{tabular}
 \caption{Brittle damage for composites - summary.}

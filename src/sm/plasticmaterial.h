@@ -191,7 +191,7 @@ public:
     /// Returns reference to undamaged (bulk) material
     LinearElasticMaterial *giveLinearElasticMaterial() { return linearElasticMaterial; }
 
-    // non-standart - returns time independent material constant
+    // non-standard - returns time independent material constant
     // double   give (int) ;
 
     virtual void give3dMaterialStiffnessMatrix(FloatMatrix & answer,

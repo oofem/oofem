@@ -265,6 +265,7 @@ void CompoDamageMat :: giveRealStressVector(FloatArray &answer,  MatResponseForm
             }
 
             switch ( i ) { //need to substract contributions from strains
+            //in equations we use nu12 = E11/E22*nu21, nu13 = E11/E33*nu31, nu23 = E22/E33*nu32
             case 1: tmp = 1. - sigma / ( this->give(Ex, NULL) * strainVectorL.at(i) + this->give(NYxy, NULL) * tempStressVectorL.at(2) + this->give(NYxz, NULL) * tempStressVectorL.at(3) );
                 break;
             case 2: tmp = 1. - sigma / ( this->give(Ey, NULL) * strainVectorL.at(i) + this->give(NYyx, NULL) * tempStressVectorL.at(1) + this->give(NYyz, NULL) * tempStressVectorL.at(3) );
@@ -295,17 +296,18 @@ void CompoDamageMat :: giveRealStressVector(FloatArray &answer,  MatResponseForm
         stressVectorL.beProductOf(de, strainVectorL);
         //stressVectorL.printYourself();
         //transform local c.s to global c.s.
+        st->tempStressMLCS = stressVectorL;
         this->transformStressVectorTo(answer, elementCs, stressVectorL, 1);
         break;
     }
     case _1dMat: {
         answer.resize(1);
         answer.at(1) = ( 1 - st->tempOmega.at(1) ) * this->give(Ex, NULL) * strainVectorL.at(1); //tempStress
+        st->tempStressMLCS.at(1) = answer.at(1);
         break;
     }
     default:
-      // should newer go here, handled by similar switch before
-      ;
+      OOFEM_ERROR("Material mode not supported");
     }
 
     st->letTempStressVectorBe(answer); //needed in global c.s for 3D
@@ -466,6 +468,9 @@ CompoDamageMatStatus :: CompoDamageMatStatus(int n, Domain *d, GaussPoint *g) : 
     this->strainAtMaxStress.resize(12);
     this->strainAtMaxStress.zero();
 
+    this->tempStressMLCS.resize(6);
+    this->tempStressMLCS.zero();
+
     this->elemCharLength.resize(3);
     this->elemCharLength.zero();
 
@@ -480,20 +485,42 @@ CompoDamageMatStatus :: ~CompoDamageMatStatus()
 /// Prints the receiver state to stream
 void CompoDamageMatStatus :: printOutputAt(FILE *file, TimeStep *tStep)
 {
-    int i;
+    int i, j, maxComponents;
     StructuralMaterialStatus :: printOutputAt(file, tStep);
     fprintf(file, "status {");
+    switch ( gp->giveMaterialMode() ) {
+      case _3dMat: {
+        maxComponents = 6;
+        break;
+      }
+      case _1dMat: {
+        maxComponents = 1;
+        break;
+      }
+      default:
+        OOFEM_ERROR("Material mode not supported");
+    }
+
     if ( !this->omega.containsOnlyZeroes() ) {
         fprintf(file, " omega ");
-        for ( i = 1; i <= 6; i++ ) {
+        for ( i = 1; i <= maxComponents; i++ ) {
             fprintf( file, "%.4f ", this->omega.at(i) );
         }
     }
 
-    fprintf(file, " kappa ");
-    for ( i = 1; i <= 12; i++ ) {
-        fprintf( file, "%.4f ", this->kappa.at(i) );
+    fprintf(file, " Local_stress ");
+    for ( i = 1; i <= maxComponents; i++ ) {
+      fprintf( file, "%.2e ", this->tempStressMLCS.at(i) );
     }
+
+    fprintf(file, " kappa ");//prints pairs tension-compression
+    for ( i = 1; i <= maxComponents; i++ ) {
+      for ( j = 0; j < 2; j++ ) {
+        fprintf( file, "%.2e ", this->kappa.at(6*j+i) );
+      }
+    }
+
+    fprintf(file, " MatNum %d", gp->giveMaterial()->giveNumber() );
 
     fprintf(file, "}\n");
 }

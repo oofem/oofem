@@ -67,7 +67,7 @@ MMAShapeFunctProjection IsotropicDamageMaterial1 :: mapper;
 MMALeastSquareProjection IsotropicDamageMaterial1 :: mapper;
 #endif
 
-IsotropicDamageMaterial1 :: IsotropicDamageMaterial1(int n, Domain *d) : IsotropicDamageMaterial(n, d), 
+IsotropicDamageMaterial1 :: IsotropicDamageMaterial1(int n, Domain *d) : IsotropicDamageMaterial(n, d),
 									 RandomMaterialExtensionInterface()
     //
     // constructor
@@ -216,7 +216,7 @@ IsotropicDamageMaterial1 :: computeDamageParam(double &omega, double kappa, cons
         //
         // iteration to achieve objectivity
         // we are finding state, where elastic stress is equal to
-        // stress from crack-opening relation (ef = wf characterizes the carc opening diagram)
+        // stress from crack-opening relation (ef = wf characterizes the crack opening diagram)
 
         omega = 0.0;
         E = this->giveLinearElasticMaterial()->give('E',gp);
@@ -310,9 +310,9 @@ IsotropicDamageMaterial1 :: giveInterface(InterfaceType type)
 
 
 MaterialStatus*
-IsotropicDamageMaterial1::CreateStatus(GaussPoint *gp) const 
+IsotropicDamageMaterial1::CreateStatus(GaussPoint *gp) const
 {
-  IsotropicDamageMaterial1Status* answer = new IsotropicDamageMaterial1Status(1, IsotropicDamageMaterial1 :: domain, gp); 
+  IsotropicDamageMaterial1Status* answer = new IsotropicDamageMaterial1Status(1, IsotropicDamageMaterial1 :: domain, gp);
   return answer;
 }
 
@@ -331,9 +331,9 @@ IsotropicDamageMaterial1 :: giveStatus(GaussPoint *gp) const
 	    this->_generateStatusVariables (gp);
         }
     }
-    
+
     return status;
-}  
+}
 
 
 int

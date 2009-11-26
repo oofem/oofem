@@ -479,7 +479,7 @@ SUPGElement2 :: computePressureTerm_MB(FloatMatrix &answer, TimeStep *atTime)
         this->computeDivUMatrix(gu, gp);
         this->computeNpMatrix(np, gp);
 
-        /* standart term */
+        /* standard term */
         answer.plusProductUnsym(gu, np, ( -1.0 ) * dV);
     }
 
@@ -538,7 +538,7 @@ SUPGElement2 :: computeLinearAdvectionTerm_MC(FloatMatrix &answer, TimeStep *atT
         this->computeDivUMatrix(gu, gp);
         this->computeNpMatrix(np, gp);
 
-        /* standart term */
+        /* standard term */
         answer.plusProductUnsym(np, gu, dV);
     }
 }

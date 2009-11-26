@@ -91,7 +91,7 @@ class IntegrationRule
      * -  returning number of integration points used
      * -  returning requested integration point - method getIntegrationPoint
      * -  returning inteval of components (i.e.of local strain vector), where apply
-     * -   returning array of gauss points, acording to specific
+     * -   returning array of gauss points, according to specific
      *   integration rule (Gauss -rule, Newton-Cortes rule ...).
      *   integration points and corresponding weights are stored in
      *   Gauss point class.
@@ -160,7 +160,7 @@ public:
      */
     int getEndIndexOfLocalStrainWhereApply() { return lastLocalStrainIndx; }
     /**
-     * Initializes the receiver. Receiver integration points are created acording to given parameters.
+     * Initializes the receiver. Receiver integration points are created according to given parameters.
      * @param mode describes integration domain
      * @param nPoints required number of integration points of receiver
      * @param matMode material mode of receiver's integration points
@@ -168,7 +168,7 @@ public:
      */
     int setUpIntegrationPoints(integrationDomain mode, int nPoints, MaterialMode matMode);
     /**
-     * Initializes the receiver. Receiver integration points are created acording to given parameters.
+     * Initializes the receiver. Receiver integration points are created according to given parameters.
      * @param mode describes integration domain
      * @param nPoints required number of integration points of receiver
      * @param matMode material mode of receiver's integration points

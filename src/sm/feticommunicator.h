@@ -126,7 +126,7 @@ private:
 
     /**
      * Sorts given communication map, containing local DofManager numbers acording to their
-     * corresponding global numbers. It could not be sorted by standart techniques, because
+     * corresponding global numbers. It could not be sorted by standard techniques, because
      * it is necessary to ask DofMAnager form domain and determine its global Number.
      * @param cmp comparison function must return a negative value if first argument is less than the second,
      * zero if the arguments are equal, and a positive number otherwise.

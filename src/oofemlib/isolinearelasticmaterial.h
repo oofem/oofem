@@ -144,7 +144,7 @@ public:
      */
     virtual int giveInputRecordString(std :: string &str, bool keyword = true);
 
-    // non-standart - returns time independent material constant
+    // non-standard - returns time independent material constant
     /**
      * Returns the value of material property 'aProperty'. Property must be identified
      * by unique int id.

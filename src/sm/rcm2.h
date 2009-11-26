@@ -247,7 +247,7 @@ public:
     contextIOResultType    saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
     contextIOResultType    restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 
-    // non-standart - returns time independent material constant
+    // non-standard - returns time independent material constant
     double   give(int, GaussPoint*);
 
     LinearElasticMaterial *giveLinearElasticMaterial() { return linearElasticMaterial; }

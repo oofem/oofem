@@ -89,7 +89,7 @@ public:
 
     IRResultType initializeFrom(InputRecord *ir);
 
-    // non-standart - returns time independent material constant
+    // non-standard - returns time independent material constant
     double   give(int, GaussPoint*);
 
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const { return NULL; }

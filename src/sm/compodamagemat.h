@@ -50,7 +50,7 @@
  *
  * The model is aimed for 3D problems but extension for 1D truss works. In this particular case, only the first array component is used in all involved variables.
  *
- * Prefix temp* refers to unequilibrated values, e.g. tempOmega[] is temporal damage array
+ * Prefix temp* refers to unequilibrated values, e.g. tempOmega[] is a temporal damage array
  */
 
 
@@ -95,6 +95,9 @@ public:
     FloatArray strainAtMaxStress;
     /// Maximum strain when stress becomes zero due to complete damage (omega = 1) at IP. Determined from fracture energy and characteristic length. Derived for mode I only on the uniaxial loading case. In literature denoted often eps_f [6 tension, 6 compression]
     FloatArray maxStrainAtZeroStress;
+
+    /// only for printing purposes in CompoDamageMatStatus
+    FloatArray tempStressMLCS;
 
     /// Characteristic element length at IP in three perpendicular planes aligned with material orientation
     FloatArray elemCharLength;

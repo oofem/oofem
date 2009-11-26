@@ -58,7 +58,7 @@
 // flag forcing the inclusion of all elements with volume inside support of weight function.
 // This forces inclusion of all integration points of these elements, even if weight is zero
 // If not defined (default) only integration points with nonzero weight are included.
-// #define NMEI_USE_ALL_ELEMENTS_IN_SUPPORT 
+// #define NMEI_USE_ALL_ELEMENTS_IN_SUPPORT
 
 
 #define NonlocalMaterialZeroWeight 1.e-10
@@ -69,7 +69,7 @@
 
 NonlocalMaterialExtensionInterface::NonlocalMaterialExtensionInterface(Domain *d)  : Interface()
 { domain = d;
-  regionMap.resize( d->giveNumberOfRegions() ); /*lastUpdatedStateCounter = 0;*/ 
+  regionMap.resize( d->giveNumberOfRegions() ); /*lastUpdatedStateCounter = 0;*/
   if (this->hasBoundedSupport()) permanentNonlocTableFlag=true; else permanentNonlocTableFlag = false;
 }
 
@@ -246,7 +246,7 @@ NonlocalMaterialExtensionInterface :: rebuildNonlocalPointTable(GaussPoint *gp, 
     iList->clear();
 
     if ( contributingElems == NULL ) {
-        // no element table provided, use standart method
+        // no element table provided, use standard method
         this->buildNonlocalPointTable(gp);
     } else {
         FloatArray gpCoords, jGpCoords;
@@ -310,29 +310,29 @@ NonlocalMaterialExtensionInterface :: giveIPIntegrationList(GaussPoint *gp)
   NonlocalMaterialStatusExtensionInterface *statusExt =
     ( NonlocalMaterialStatusExtensionInterface * ) gp->giveMaterialStatus()->
     giveInterface(NonlocalMaterialStatusExtensionInterfaceType);
-  
+
   if ( !statusExt ) {
     OOFEM_ERROR("NonlocalMaterialExtensionInterface::givIPIntegrationList : local material status encountered");
   }
-  
+
   if ( statusExt->giveIntegrationDomainList()->isEmpty() ) {
     this->buildNonlocalPointTable(gp);
   }
-  
+
   return statusExt->giveIntegrationDomainList();
 }
-    
+
 void
 NonlocalMaterialExtensionInterface :: endIPNonlocalAverage(GaussPoint *gp)
 {
   NonlocalMaterialStatusExtensionInterface *statusExt =
     ( NonlocalMaterialStatusExtensionInterface * ) gp->giveMaterialStatus()->
     giveInterface(NonlocalMaterialStatusExtensionInterfaceType);
-  
+
   if ( !statusExt ) {
     OOFEM_ERROR("NonlocalMaterialExtensionInterface::givIPIntegrationList : local material status encountered");
   }
-  
+
   if ( (!this->hasBoundedSupport()) || (!permanentNonlocTableFlag)) {
     statusExt->clear();
   }
@@ -354,9 +354,9 @@ NonlocalMaterialExtensionInterface :: initializeFrom(InputRecord *ir)
     } else {
         regionMap.zero();
     }
-    
+
     int _permanentNonlocTableFlag = this->permanentNonlocTableFlag;
-    IR_GIVE_OPTIONAL_FIELD (ir, _permanentNonlocTableFlag, 
+    IR_GIVE_OPTIONAL_FIELD (ir, _permanentNonlocTableFlag,
 			    IFT_NonlocalMaterialExtensionInterface_permanentNonlocTableFlag,
 			    "permanentnonloctableflag");
     this->permanentNonlocTableFlag = _permanentNonlocTableFlag;

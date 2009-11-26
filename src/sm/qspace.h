@@ -146,9 +146,15 @@ class QSpace : public StructuralElement, public ZZNodalRecoveryModelInterface, p
   virtual int  computeNumberOfDofs (EquationID ut) {return 60;}
 
  protected:
-  void computeGaussPoints ();
-  void computeNmatrixAt (GaussPoint* ,FloatMatrix& );
-  void computeBmatrixAt (GaussPoint* ,FloatMatrix& ,int=1,int=ALL_STRAINS);
+   void computeGaussPoints ();
+   void computeNmatrixAt (GaussPoint* ,FloatMatrix& );
+   void computeNLBMatrixAt(FloatMatrix &, GaussPoint *, int i);
+   void computeBmatrixAt (GaussPoint* ,FloatMatrix& ,int=1,int=ALL_STRAINS);
+   void computeBFmatrixAt(GaussPoint *, FloatMatrix &);
+
+
+
+
 
   integrationDomain  giveIntegrationDomain () {return _Cube;}
   int giveApproxOrder () {return 2;}
