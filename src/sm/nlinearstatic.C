@@ -969,16 +969,15 @@ contextIOResultType NonLinearStatic :: saveContext(DataStream *stream, ContextMo
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( this->nMetaSteps > 1 ) {
-        // store InitialLoadVector
-        if ( ( iores = initialLoadVector.storeYourself(stream, mode) ) != CIO_OK ) {
-            THROW_CIOERR(iores);
-        }
-
-        if ( ( iores = initialLoadVectorOfPrescribed.storeYourself(stream, mode) ) != CIO_OK ) {
-            THROW_CIOERR(iores);
-        }
+    // store InitialLoadVector
+    if ( ( iores = initialLoadVector.storeYourself(stream, mode) ) != CIO_OK ) {
+      THROW_CIOERR(iores);
     }
+    
+    if ( ( iores = initialLoadVectorOfPrescribed.storeYourself(stream, mode) ) != CIO_OK ) {
+      THROW_CIOERR(iores);
+    }
+
 
     if ( closeFlag ) {
         fclose(file);
@@ -1041,15 +1040,13 @@ contextIOResultType NonLinearStatic :: restoreContext(DataStream *stream, Contex
     }
 
 
-    if ( this->nMetaSteps > 1 ) {
-        // store InitialLoadVector
-        if ( ( iores = initialLoadVector.restoreYourself(stream, mode) ) != CIO_OK ) {
-            THROW_CIOERR(iores);
-        }
-
-        if ( ( iores = initialLoadVectorOfPrescribed.restoreYourself(stream, mode) ) != CIO_OK ) {
-            THROW_CIOERR(iores);
-        }
+    // store InitialLoadVector
+    if ( ( iores = initialLoadVector.restoreYourself(stream, mode) ) != CIO_OK ) {
+      THROW_CIOERR(iores);
+    }
+    
+    if ( ( iores = initialLoadVectorOfPrescribed.restoreYourself(stream, mode) ) != CIO_OK ) {
+      THROW_CIOERR(iores);
     }
 
     if ( closeFlag ) {
