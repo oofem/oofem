@@ -50,6 +50,11 @@
 #include <math.h>
 #endif
 
+#ifdef __PARALLEL_MODE
+#include "idmnl1.h"
+#include "combuff.h"
+#endif
+
 #ifdef __OOFEG
 #include "oofeggraphiccontext.h"
 #include "conTable.h"
@@ -653,19 +658,24 @@ TrabBoneNL3DStatus::giveInterface (InterfaceType type)
 
 #ifdef __PARALLEL_MODE
 int
-IDNLMaterial::packUnknowns (CommunicationBuffer& buff, TimeStep* stepN, GaussPoint* ip)
+TrabBoneNL3D::packUnknowns (CommunicationBuffer& buff, TimeStep* stepN, GaussPoint* ip)
 {
+	abort();
+#if 0
   IDNLMaterialStatus *nlStatus = (IDNLMaterialStatus*) this -> giveStatus (ip);
 
   this->buildNonlocalPointTable(ip);
   this->updateDomainBeforeNonlocAverage(stepN);
 
   return buff.packDouble (nlStatus->giveLocalEquivalentStrainForAverage());
+#endif
 }
 
 int 
-IDNLMaterial::unpackAndUpdateUnknowns (CommunicationBuffer& buff, TimeStep* stepN, GaussPoint* ip)
+TrabBoneNL3D::unpackAndUpdateUnknowns (CommunicationBuffer& buff, TimeStep* stepN, GaussPoint* ip)
 {
+	abort();
+#if 0
   int result ;
   IDNLMaterialStatus *nlStatus = (IDNLMaterialStatus*) this -> giveStatus (ip);
   double localEquivalentStrainForAverage;
@@ -673,14 +683,18 @@ IDNLMaterial::unpackAndUpdateUnknowns (CommunicationBuffer& buff, TimeStep* step
   result = buff.unpackDouble (localEquivalentStrainForAverage);
   nlStatus->setLocalEquivalentStrainForAverage (localEquivalentStrainForAverage);
   return result;
+#endif
 }
 
 int 
-IDNLMaterial::estimatePackSize (CommunicationBuffer& buff, GaussPoint* ip)
-{ 
+TrabBoneNL3D::estimatePackSize (CommunicationBuffer& buff, GaussPoint* ip)
+{
+	abort();
+#if 0
   // Note: nlStatus localStrainVectorForAverage memeber must be properly sized!
   // IDNLMaterialStatus *nlStatus = (IDNLMaterialStatus*) this -> giveStatus (ip);
-  return buff.giveDoubleVecPackSize (1);
+  return buff.givePackSize(MPI_DOUBLE,1);
+#endif
 }
 #endif
 
