@@ -539,7 +539,7 @@ if test x$spooles_module = xyes; then
 		AC_DEFINE(HAVE_LIBSPOOLES)
 	],
 	[
-		dir=$PWD/../spooles
+		dir=$SPOOLES_DIR
 		AC_MSG_CHECKING(guess of spooles.a location)
 		if test -f $dir/spooles.a; then
 			AC_MSG_RESULT($dir)
