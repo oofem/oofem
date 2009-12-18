@@ -60,6 +60,7 @@
 #include "conTable.h"
 #ifndef __MAKEDEPEND
 #include "Etetrawd.h"
+#include "rcm2.h"
 #endif
 #endif
 
@@ -542,7 +543,6 @@ LTRSpace :: HuertaErrorEstimatorI_setupRefinedElementProblem(RefinedElement *ref
 }
 
 #ifdef __OOFEG
-#include "rcm2.h"
 #define TR_LENGHT_REDUCT 0.3333
 
 void LTRSpace :: drawRawGeometry(oofegGraphicContext &gc)

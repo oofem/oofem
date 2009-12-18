@@ -58,6 +58,7 @@
 #include "oofeggraphiccontext.h"
 #include "oofegutils.h"
 #include "conTable.h"
+#include "rcm2.h"
 #endif
 
 namespace oofem {
@@ -632,7 +633,6 @@ PlaneStress2d :: HuertaErrorEstimatorI_setupRefinedElementProblem(RefinedElement
 
 
 #ifdef __OOFEG
-#include "rcm2.h"
 #define TR_LENGHT_REDUCT 0.3333
 
 void PlaneStress2d :: drawRawGeometry(oofegGraphicContext &gc)

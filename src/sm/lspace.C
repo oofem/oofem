@@ -57,6 +57,7 @@
 #include "oofeggraphiccontext.h"
 #include "oofegutils.h"
 #include "conTable.h"
+#include "rcm2.h"
 #endif
 
 namespace oofem {
@@ -716,7 +717,6 @@ LSpace :: HuertaRemeshingCriteriaI_giveCharacteristicSize() {
 
 
 #ifdef __OOFEG
-#include "rcm2.h"
 #define TR_LENGHT_REDUCT 0.3333
 
 void LSpace :: drawRawGeometry(oofegGraphicContext &gc)

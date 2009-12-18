@@ -266,8 +266,8 @@ oofegGraphicContext gc [ OOFEG_LAST_LAYER ];
 EView *myview;
 
 /* Defaul oofem loggers */
-Logger oofem_logger(Logger :: LOG_LEVEL_INFO, stdout);
-Logger oofem_errLogger(Logger :: LOG_LEVEL_WARNING, stderr);
+Logger oofem::oofem_logger(Logger :: LOG_LEVEL_INFO, stdout);
+Logger oofem::oofem_errLogger(Logger :: LOG_LEVEL_WARNING, stderr);
 
 
 int

@@ -55,6 +55,7 @@
 #include "oofeggraphiccontext.h"
 #include "oofegutils.h"
 #include "conTable.h"
+#include "rcm2.h"
 #endif
 
 namespace oofem {
@@ -674,7 +675,6 @@ Quad1PlaneStrain :: HuertaErrorEstimatorI_setupRefinedElementProblem(RefinedElem
 
 
 #ifdef __OOFEG
-#include "rcm2.h"
 #define TR_LENGHT_REDUCT 0.3333
 
 void Quad1PlaneStrain :: drawRawGeometry(oofegGraphicContext &gc)

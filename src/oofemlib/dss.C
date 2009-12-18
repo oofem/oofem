@@ -391,7 +391,11 @@ double &DSSMatrix :: operator()(int i, int j)
     return _dss->ElementAt(i, j);
 }
 
+
+} // end namespace oofem
 #else // ifndef __DSS_MODULE
+
+namespace oofem {
 
 double DSS__zero;
 
@@ -428,7 +432,8 @@ double DSSMatrix :: at(int i, int j) const { return 0.; }
 double DSSMatrix :: operator()(int i, int j) const { return 0.; };
 double &DSSMatrix :: operator()(int i, int j) { return DSS__zero; }
 
+} // end namespace oofem
 #endif
 
 
-} // end namespace oofem
+

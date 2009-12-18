@@ -56,6 +56,7 @@
 #include "oofeggraphiccontext.h"
 #include "conTable.h"
 #include "oofegutils.h"
+#include "rcm2.h"
 #endif
 
 namespace oofem {
@@ -321,7 +322,6 @@ QTrPlaneStress2d :: SpatialLocalizerI_giveDistanceFromParametricCenter(const Flo
 
 
 #ifdef __OOFEG
-#include "rcm2.h"
 #define TR_LENGHT_REDUCT 0.3333
 
 void QTrPlaneStress2d :: drawRawGeometry(oofegGraphicContext &gc)

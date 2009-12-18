@@ -48,8 +48,6 @@
 // for c++ compiler to be succesfull on some c files
 //
 
-namespace oofem {
-
 extern "C" {
  #define new __new
  #define class __class
@@ -83,6 +81,8 @@ extern "C" {
 extern "C" {
     void EVFastRedraw(EView * v_p);
 };
+
+namespace oofem {
 
 
 // width definition variables
@@ -316,13 +316,14 @@ protected:
     // void GR_setupUserColors ();
     // void GR_deleteUserColorTables();
 };
+} // end namespace oofem
 
-extern oofegGraphicContext gc [ OOFEG_LAST_LAYER ];
+/* these reside in global name space */
+extern oofem::oofegGraphicContext gc [ OOFEG_LAST_LAYER ];
 extern EView *myview;
 extern void deleteLayerGraphics(int iLayer);
 
 
-} // end namespace oofem
 #endif
 #endif // oofeggraphiccontext_h
 

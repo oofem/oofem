@@ -1528,9 +1528,9 @@ TR1_2D_SUPG2_AXI :: truncateMatVolume(const Polygon &matvolpoly, double &volume)
     this->formMyVolumePoly(me, NULL, false);
     g.clip(clip, me, matvolpoly);
 #ifdef __OOFEG
-    EASValsSetColor( :: gc [ 0 ].getActiveCrackColor() );
+    EASValsSetColor(gc [ 0 ].getActiveCrackColor() );
     //GraphicObj *go = clip.draw(::gc[OOFEG_DEBUG_LAYER],true);
-    clip.draw(:: gc [ OOFEG_DEBUG_LAYER ], true);
+    clip.draw(gc [ OOFEG_DEBUG_LAYER ], true);
     //EVFastRedraw(myview);
 #endif
     volume = clip.computeVolume();
