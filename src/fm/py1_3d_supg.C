@@ -61,6 +61,8 @@
 #include "conTable.h"
 #endif
 
+namespace oofem {
+
 FEI3dTrLin PY1_3D_SUPG :: interpolation;
 
 PY1_3D_SUPG :: PY1_3D_SUPG(int n, Domain *aDomain) :
@@ -599,3 +601,4 @@ PY1_3D_SUPG :: LS_PCS_computeVOFFractions(FloatArray &answer, FloatArray &fi)
     }
 }
 
+} // end namespace oofem

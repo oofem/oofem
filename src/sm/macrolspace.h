@@ -51,6 +51,8 @@
 //#include "nlstructuralelement.h"
 //#include "fei3dhexalin.h"
 
+namespace oofem {
+
 class MicroMaterial;
 
 class MacroLSpace : public LSpace
@@ -110,5 +112,5 @@ protected:
     TimeStep *lastStiffMatrixTimeStep;
 };
 
-
+} // end namespace oofem
 #endif //macrolspace_h

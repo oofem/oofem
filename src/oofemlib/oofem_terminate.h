@@ -39,8 +39,9 @@
 #ifndef oofem_terminate_h
 #define oofem_terminate_h
 
-/// oofem terminate exception class
+namespace oofem {
 
+/// oofem terminate exception class
 class OOFEM_Terminate
 {
 public:
@@ -53,4 +54,6 @@ public:
     OOFEM_Terminate(OOFEM_exit_status s = ES_OK) { status = s; }
 };
 
+
+} // end namespace oofem
 #endif // oofem_terminate_h

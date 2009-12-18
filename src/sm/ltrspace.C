@@ -63,6 +63,8 @@
 #endif
 #endif
 
+namespace oofem {
+
 FEI3dTrLin LTRSpace :: interpolation;
 
 LTRSpace :: LTRSpace(int n, Domain *aDomain) :
@@ -1143,3 +1145,5 @@ LTRSpace :: computeLoadLSToLRotationMatrix(FloatMatrix &answer, int, GaussPoint 
     _error("computeLoadLSToLRotationMatrix: surface local coordinate system not supported");
     return 1;
 }
+
+} // end namespace oofem

@@ -42,6 +42,8 @@
 #include "flotarry.h"
 #include "loadtime.h"
 
+namespace oofem {
+
 class HeavisideLTF : public LoadTimeFunction
 {
     /*
@@ -70,4 +72,5 @@ public:
     double  __at(double);
 };
 
+} // end namespace oofem
 #endif // heavisideltf_h

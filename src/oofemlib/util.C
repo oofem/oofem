@@ -45,6 +45,7 @@
 #include "inputrecord.h"
 #include "oofem_limits.h"
 
+namespace oofem {
 
 char *giveLineFromInput(FILE *inputStream, char *line, int len)
 //
@@ -159,3 +160,5 @@ char* oofem_tmpstr (const char* src) {
   oofem_tmpstring[oofem_tmpstring_len]='\0';
   return oofem_tmpstring; 
 }
+
+} // end namespace oofem

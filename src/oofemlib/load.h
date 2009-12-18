@@ -48,6 +48,8 @@
 #include "dictionr.h"
 #include "valuemodetype.h"
 
+namespace oofem {
+
 /**
  * Load is base abstract class for all loads.
  * Load is an aribute of the domain (it belongs to).
@@ -143,5 +145,6 @@ protected:
     FloatArray &giveComponentArray();
 };
 
+} // end namespace oofem
 #endif // load_h
 

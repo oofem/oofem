@@ -45,7 +45,7 @@
 #include "intarray.h"
 #include "domain.h"
 
-
+namespace oofem {
 
 
 /**
@@ -151,7 +151,7 @@ public:
 
 
 
-
+} // end namespace oofem
 #endif // feinterpol_h
 
 

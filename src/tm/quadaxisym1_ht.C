@@ -57,6 +57,7 @@
 #include "conTable.h"
 #endif
 
+namespace oofem {
 
 QuadAxisym1_ht :: QuadAxisym1_ht(int n, Domain *aDomain, ElementMode em) :
     Quad1_ht(n, aDomain, em)
@@ -131,3 +132,5 @@ QuadAxisym1_ht :: computeRadiusAt(GaussPoint *gp)
 
     return r;
 }
+
+} // end namespace oofem

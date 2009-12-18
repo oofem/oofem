@@ -44,6 +44,7 @@
 #include "interface.h"
 #include "internalstatetype.h"
 
+namespace oofem {
 
 #define ZZErrorEstimator_ElementResultCashed
 
@@ -270,6 +271,5 @@ public:
 
 
 
-
+} // end namespace oofem
 #endif // zzerrorestimator_h
-

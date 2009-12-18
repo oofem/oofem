@@ -43,6 +43,8 @@
 #include "mesherinterface.h"
 #include "flotarry.h"
 
+namespace oofem {
+
 class TimeStep;
 
 /**
@@ -71,4 +73,5 @@ protected:
     void smoothNodalDensities(Domain *d,  FloatArray &nodalDensities, TimeStep *stepN);
 };
 
+} // end namespace oofem
 #endif // freeminterface_h

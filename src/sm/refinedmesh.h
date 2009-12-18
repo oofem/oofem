@@ -40,6 +40,7 @@
 
 #include "alist.h"
 
+namespace oofem {
 
 //#define DEBUG                      /* debug prints and checks */
 
@@ -162,4 +163,5 @@ public:
     int refineMeshGlobally(Domain *d, int level, AList< RefinedElement > &refinedElementList);
 };
 
+} // end namespace oofem
 #endif // refinedmesh_h

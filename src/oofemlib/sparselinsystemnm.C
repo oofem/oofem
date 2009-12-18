@@ -35,6 +35,8 @@
 
 #include "sparselinsystemnm.h"
 
+namespace oofem {
+
 SparseLinearSystemNM :: SparseLinearSystemNM(int i, Domain *d, EngngModel *m) : NumericalMethod(i, d, m)
 { }
 
@@ -42,3 +44,4 @@ SparseLinearSystemNM :: ~SparseLinearSystemNM()
 { }
 
 
+} // end namespace oofem

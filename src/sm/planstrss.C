@@ -60,6 +60,7 @@
 #include "conTable.h"
 #endif
 
+namespace oofem {
 
 FEI2dQuadLin PlaneStress2d :: interpolation(1, 2);
 
@@ -1367,3 +1368,4 @@ PlaneStress2d :: EIPrimaryUnknownMI_givePrimaryUnknownVectorDofID(IntArray &answ
     giveDofManDofIDMask(1, EID_MomentumBalance, answer);
 }
 
+} // end namespace oofem

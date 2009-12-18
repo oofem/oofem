@@ -40,6 +40,8 @@
 #include "node.h"
 #include "mathfem.h"
 
+namespace oofem {
+
 void
 FEI3dTrLin :: evalN(FloatArray &answer, const FloatArray &lcoords, double time)
 {
@@ -417,4 +419,4 @@ FEI3dTrLin :: computeLocalSurfaceMapping(IntArray &surfNodes, int isurf)
 }
 
 
-
+} // end namespace oofem

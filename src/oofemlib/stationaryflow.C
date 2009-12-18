@@ -59,6 +59,8 @@
 #include "conTable.h"
 #include "skyline.h"
 
+namespace oofem {
+
 NumericalMethod *StationaryFlow :: giveNumericalMethod(TimeStep *tStep)
 // only one has reason for StationaryFlow
 //     - SolutionOfLinearEquations
@@ -299,3 +301,5 @@ StationaryFlow :: printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *atTime)
 {
     iDof->printSingleOutputAt(stream, atTime, 'f', EID_ConservationEquation, VM_Total);
 }
+
+} // end namespace oofem

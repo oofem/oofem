@@ -61,6 +61,8 @@
 #include "oofegutils.h"
 #endif
 
+namespace oofem {
+
 TrPlaneStress2d :: TrPlaneStress2d(int n, Domain *aDomain) :
     NLStructuralElement(n, aDomain), ZZNodalRecoveryModelInterface(), NodalAveragingRecoveryModelInterface(),
     SPRNodalRecoveryModelInterface(), SpatialLocalizerInterface()
@@ -1505,3 +1507,4 @@ TrPlaneStress2d :: MMAShapeFunctProjectionInterface_interpolateIntVarAt(FloatArr
     return;
 }
 
+} // end namespace oofem

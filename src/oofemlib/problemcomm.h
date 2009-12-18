@@ -46,6 +46,8 @@
 #include "communicator.h"
 #include "error.h"
 
+namespace oofem {
+
 /**
  * Class representing communicator for engng model.
  * It is assumed to be an attribute of  Engng model.
@@ -138,13 +140,6 @@ private:
     void setUpCommunicationMapsForRemoteElementMode(EngngModel *domain, bool excludeSelfCommFlag);
 };
 
-
+} // end namespace oofem
 #endif
 #endif // problemcomm_h
-
-
-
-
-
-
-

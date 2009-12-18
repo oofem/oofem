@@ -35,6 +35,7 @@
 #define nonlocalmatwtp_h
 
 #ifdef __PARALLEL_MODE
+namespace oofem {
 
 /**
  * End-of-data marker, used to identify end of data stream received.
@@ -118,6 +119,7 @@ protected:
     void fastElementIPNonlocTableUpdater(GaussPoint *gp, IntArray &map);
 };
 
+} // end namespace oofem
 #endif
 #endif // nonlocalmatwtp_h
 

@@ -36,6 +36,8 @@
 #ifndef __SPOOLES_MODULE
 #include "spoolessolver.h"
 
+namespace oofem {
+
 SpoolesSolver :: SpoolesSolver(int i, Domain *d, EngngModel *m) : SparseLinearSystemNM(i, d, m)
 {
     _error("IMLSolver: can't create, SPOOLES support not compiled");
@@ -48,6 +50,8 @@ SpoolesSolver :: initializeFrom(InputRecord *ir) { return IRRT_OK; }
 
 NM_Status
 SpoolesSolver :: solve(SparseMtrx *A, FloatArray *b, FloatArray *x) { return NM_NoSuccess; }
+
+} // end namespace oofem
 #endif
 
 #ifdef __SPOOLES_MODULE
@@ -57,6 +61,7 @@ SpoolesSolver :: solve(SparseMtrx *A, FloatArray *b, FloatArray *x) { return NM_
 #include "spoolessparsemtrx.h"
 #include "flotarry.h"
 #include "verbose.h"
+#include "oofem_limits.h"
 
 // Spooles includes
 #include "spoolesinterface.h"
@@ -67,6 +72,8 @@ SpoolesSolver :: solve(SparseMtrx *A, FloatArray *b, FloatArray *x) { return NM_
 #endif
 #include "clock.h"
 #endif
+
+namespace oofem {
 
 SpoolesSolver :: SpoolesSolver(int i, Domain *d, EngngModel *m) : SparseLinearSystemNM(i, d, m)
 {
@@ -189,7 +196,7 @@ SpoolesSolver :: solve(SparseMtrx *A, FloatArray *b, FloatArray *x)
 #ifdef TIME_REPORT
     //clock_t tstart = clock();
     oofem_timeval tstart;
-    :: getUtime(tstart);
+    getUtime(tstart);
 #endif
 
     if ( A->giveType() != SMT_SpoolesMtrx ) {
@@ -419,7 +426,7 @@ SpoolesSolver :: solve(SparseMtrx *A, FloatArray *b, FloatArray *x)
 
 #ifdef TIME_REPORT
     oofem_timeval ut;
-    :: getRelativeUtime(ut, tstart);
+    getRelativeUtime(ut, tstart);
     OOFEM_LOG_DEBUG( "SpoolesSolver info: user time consumed by solution: %.2fs\n", ( double ) ( ut.tv_sec + ut.tv_usec / ( double ) OOFEM_USEC_LIM ) );
 #endif
 
@@ -493,4 +500,6 @@ SpoolesSolver :: solve(SparseMtrx *A, FloatArray *b, FloatArray *x)
  * return NM_Success;
  * }
  */
+
+} // end namespace oofem
 #endif //ifdef __SPOOLES_MODULE

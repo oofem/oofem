@@ -66,6 +66,8 @@
 #endif
 #include "contextioerr.h"
 
+namespace oofem {
+
 NumericalMethod *CBS :: giveNumericalMethod(TimeStep *atTime)
 // only one has reason for LinearStatic
 //     - SolutionOfLinearEquations
@@ -295,7 +297,7 @@ CBS :: solveYourselfAt(TimeStep *tStep)
                                                    NumberOfNodalPrescribedTractionPressureContributions, VM_Total, this->giveDomain(1) );
 
 
-        lhs = :: CreateUsrDefSparseMtrx(sparseMtrxType);
+        lhs = CreateUsrDefSparseMtrx(sparseMtrxType);
         if ( lhs == NULL ) {
             _error("solveYourselfAt: sparse matrix creation failed");
         }
@@ -307,7 +309,7 @@ CBS :: solveYourselfAt(TimeStep *tStep)
         lhs->times(deltaT * theta [ 0 ] * theta [ 1 ]);
 
         if ( consistentMassFlag ) {
-            mss = :: CreateUsrDefSparseMtrx(sparseMtrxType);
+            mss = CreateUsrDefSparseMtrx(sparseMtrxType);
             if ( mss == NULL ) {
                 _error("solveYourselfAt: sparse matrix creation failed");
             }
@@ -426,12 +428,12 @@ CBS :: solveYourselfAt(TimeStep *tStep)
     if ( materialInterface ) {
 #ifdef TIME_REPORT
         oofem_timeval tstart;
-        :: getUtime(tstart);
+        getUtime(tstart);
 #endif
         materialInterface->updatePosition( this->giveCurrentStep() );
 #ifdef TIME_REPORT
         oofem_timeval ut;
-        :: getRelativeUtime(ut, tstart);
+        getRelativeUtime(ut, tstart);
         OOFEM_LOG_INFO( "CBS info: user time consumed by updating interfaces: %.2fs\n", ( double ) ( ut.tv_sec + ut.tv_usec / ( double ) OOFEM_USEC_LIM ) );
 #endif
     }
@@ -891,3 +893,5 @@ double CBS :: giveVariableScale(VarScaleType varID)
  * }
  *
  */
+
+} // end namespace oofem

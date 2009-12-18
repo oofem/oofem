@@ -60,6 +60,8 @@
 #include "contextioresulttype.h"
 #include "contextmode.h"
 
+namespace oofem {
+
 #define STRAIN_STEPS 10.0
 
 class GaussPoint;
@@ -394,5 +396,5 @@ protected:
     virtual void initTempStatus(GaussPoint *gp);
 };
 
-
+} // end namespace oofem
 #endif // material_h

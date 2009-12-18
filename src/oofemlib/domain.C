@@ -87,6 +87,8 @@
 #include <ctype.h>
 #endif
 
+namespace oofem {
+
 Domain :: Domain(int n, int serNum, EngngModel *pm) : defaultNodeDofIDArry(), defaultSideDofIDArry()
     // Constructor. Creates a new domain.
 {
@@ -1690,3 +1692,4 @@ Domain::setXfemManager(XfemManager *xfemManager)
 
  
 #endif
+} // end namespace oofem

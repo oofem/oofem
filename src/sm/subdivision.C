@@ -66,6 +66,7 @@
 #include "domaintransactionmanager.h"
 #endif
 
+namespace oofem {
 
 //#define __VERBOSE_PARALLEL
 
@@ -2925,7 +2926,7 @@ Subdivision :: createMesh(TimeStep *stepN, int domainNumber, int domainSerNum, D
   IRResultType result;                            // Required by IR_GIVE_FIELD macro
 
   oofem_timeval st, dt;
-  ::getUtime(st);
+  getUtime(st);
 
   if (this->mesh) delete mesh;
   mesh = new Subdivision::RS_Mesh(this);
@@ -3066,7 +3067,7 @@ Subdivision :: createMesh(TimeStep *stepN, int domainNumber, int domainSerNum, D
     if (parent) {
       parentNodePtr = domain->giveNode(parent);
       // inherit all data from parent (bc, ic, load, etc.)
-      node = ::CreateUsrDefDofManagerOfType (parentNodePtr->giveClassID(), inode, *dNew);
+      node = CreateUsrDefDofManagerOfType (parentNodePtr->giveClassID(), inode, *dNew);
       ndofs = parentNodePtr->giveNumberOfDofs();
       node->setNumberOfDofs (ndofs);
       node->setLoadArray (*parentNodePtr->giveLoadArray());
@@ -3094,7 +3095,7 @@ Subdivision :: createMesh(TimeStep *stepN, int domainNumber, int domainSerNum, D
 #endif      
     } else {
       // newly created node (irregular)
-      node = ::CreateUsrDefDofManagerOfType (NodeClass, inode, *dNew);
+      node = CreateUsrDefDofManagerOfType (NodeClass, inode, *dNew);
       //create new node with default DOFs 
       ndofs = dofIDArrayPtr.giveSize();
       node->setNumberOfDofs (ndofs);
@@ -3273,7 +3274,7 @@ Subdivision :: createMesh(TimeStep *stepN, int domainNumber, int domainSerNum, D
 #endif
     if (parent) {
       parentElementPtr = domain->giveElement(parent);
-      elem = ::CreateUsrDefElementOfType (parentElementPtr->giveClassID(), eNum, *dNew);
+      elem = CreateUsrDefElementOfType (parentElementPtr->giveClassID(), eNum, *dNew);
       (*dNew)->setElement (eNum, elem);
       elem->setDofManagers(*mesh->giveElement(ielem)->giveNodes());
       elem->setMaterial (parentElementPtr->giveMaterial()->giveNumber());
@@ -3364,7 +3365,7 @@ Subdivision :: createMesh(TimeStep *stepN, int domainNumber, int domainSerNum, D
   }
   // copy output manager settings
   (*dNew)->giveOutputManager()->beCopyOf (domain->giveOutputManager());
-  :: getRelativeUtime(dt, st);
+  getRelativeUtime(dt, st);
 #ifdef __PARALLEL_MODE
 	OOFEM_LOG_INFO( "[%d] Subdivision: created new mesh (%d nodes and %d elements) in %.2fs\n",
 									( * dNew )->giveEngngModel()->giveRank(), nnodes, eNum, ( double ) ( dt.tv_sec + dt.tv_usec / ( double ) OOFEM_USEC_LIM ) );
@@ -5066,3 +5067,5 @@ void IntArray :: preallocate(int futureSize)
 	
 
 #endif
+
+} // end namespace oofem

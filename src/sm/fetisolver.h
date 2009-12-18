@@ -56,6 +56,8 @@
 #include <stdio.h>
 #endif
 
+namespace oofem {
+
 class Domain;
 class EngngModel;
 
@@ -167,13 +169,6 @@ public:
     enum { FETISolverZeroTag, NumberOfRBMMsg, RBMMessage, QQMessage, SolutionMessage, ResidualMessage, DirectionVectorMessage, PPVectorMessage, GammasMessage, FETISolverIterationContinue, FETISolverIterationBreak };
 };
 
+} // end namespace oofem
 #endif
 #endif // fetisolver_h
-
-
-
-
-
-
-
-

@@ -50,6 +50,9 @@
 #include "nodalrecoverymodel.h"
 #include "interface.h"
 
+
+namespace oofem {
+
 /**
  * Represents VTK (Visualization Toolkit) export module. It uses vtk file format, Unstructured grid dataset.
  * The export of data is done on Region By Region basis, possibly taking care about possible nonsmooth character of
@@ -178,4 +181,5 @@ class VTKXMLExportModuleElementInterface : public Interface {
   virtual void _export (FILE * stream, VTKXMLExportModule* m, IntArray& primaryVarsToExport, IntArray& internalVarsToExport, TimeStep* tStep ) = 0;
 };
 
+} // end namespace oofem
 #endif // vtkxmlexportmodule_h

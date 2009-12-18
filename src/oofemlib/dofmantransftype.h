@@ -39,6 +39,7 @@
 #ifndef dofmantransftype_h
 #define dofmantransftype_h
 
+namespace oofem {
 /**
  * Enumerative type, used to specify type of trasformation required from dofManager (node).
  * The _toGlobalCS value requires transformation from node-depenedent coordinate system
@@ -53,4 +54,5 @@ enum DofManTransfType {
     _toNodalCS
 };
 
+} // end namespace oofem
 #endif // dofmantransftype_h

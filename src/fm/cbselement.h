@@ -48,6 +48,7 @@
 
 #include "primaryfield.h"
 
+namespace oofem {
 
 class TimeStep;
 class Node;
@@ -152,11 +153,5 @@ protected:
     virtual void computeDeviatoricStress(FloatArray &answer, GaussPoint *gp, TimeStep *) = 0;
 };
 
+} // end namespace oofem
 #endif // cbselement_h
-
-
-
-
-
-
-

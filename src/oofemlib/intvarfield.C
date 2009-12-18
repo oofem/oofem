@@ -36,11 +36,13 @@
 #include "intvarfield.h"
 #include "usrdefsub.h"
 
+namespace oofem {
+
 InternalVariableField :: InternalVariableField(InternalStateType ist, FieldBaseID ft, MaterialMappingAlgorithmType mma_type, Domain *d) :
     Field(ft)
 {
     this->type = ist;
-    this->mma = :: CreateUsrDefMaterialMappingAlgorithm(mma_type);
+    this->mma = CreateUsrDefMaterialMappingAlgorithm(mma_type);
     this->domain = d;
 }
 
@@ -88,3 +90,4 @@ InternalVariableField :: restoreContext(DataStream *stream, ContextMode mode)
     return CIO_OK;
 }
 
+} // end namespace oofem

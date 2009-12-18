@@ -45,6 +45,8 @@
 #include "conTable.h"
 #include "strreader.h"
 
+namespace oofem {
+
 MMALeastSquareProjection :: MMALeastSquareProjection() : MaterialMappingAlgorithm()
 {
     this->stateFilter = 0;
@@ -444,3 +446,5 @@ MMALeastSquareProjection :: giveInputRecordString(std :: string &str, bool keywo
 
     return 1;
 }
+
+} // end namespace oofem

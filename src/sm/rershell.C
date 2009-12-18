@@ -60,6 +60,8 @@
 #include "conTable.h"
 #endif
 
+namespace oofem {
+
 RerShell :: RerShell(int n, Domain *aDomain) :
     CCTPlate(n, aDomain)
     // Constructor.
@@ -1107,3 +1109,4 @@ RerShell :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalSta
  * }
  */
 #endif
+} // end namespace oofem

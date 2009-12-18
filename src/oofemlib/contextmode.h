@@ -39,6 +39,8 @@
 #ifndef contextmode_h
 #define contextmode_h
 
+namespace oofem {
+
 /**
  * Context mode (mask), defining the type of information written/read to/from context
  */
@@ -51,4 +53,5 @@ typedef long ContextMode;
 #define CM_DefinitionGlobal ( 1L << 3 )
 #define CM_UnknownDictState ( 1L << 4 )
 
+} // end namespace oofem
 #endif // contextmode_h

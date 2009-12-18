@@ -49,6 +49,7 @@
 #include "domaintransactionmanager.h"
 #include "nonlocalmatwtp.h"
 
+namespace oofem {
 
 #define LoadBalancer_debug_print 0
 
@@ -770,4 +771,5 @@ LoadBalancer :: WorkTransferPlugin :: WorkTransferPlugin(LoadBalancer *_lb) {
 }
 LoadBalancer :: WorkTransferPlugin :: ~WorkTransferPlugin() { }
 
+} // end namespace oofem
 #endif

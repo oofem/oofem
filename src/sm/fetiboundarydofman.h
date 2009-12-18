@@ -43,6 +43,8 @@
 #endif
 using namespace std;
 
+namespace oofem {
+
 /**
  * Represent the abstraction for dof manager. This dof manager is on partition boudary and
  * influences to master equations. It is typically shared by two or more partitions.
@@ -124,4 +126,5 @@ public:
 };
 
 #endif
+} // end namespace oofem
 #endif // fetiboundarydofman_h

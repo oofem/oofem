@@ -59,6 +59,8 @@
 #include "clock.h"
 #endif
 
+namespace oofem {
+
 Skyline :: Skyline(int n) : SparseMtrx(n, n)
 {
     // constructor
@@ -500,7 +502,7 @@ SparseMtrx *Skyline :: factorized()
 #ifdef TIME_REPORT
     //clock_t tstart = clock();
     oofem_timeval tstart;
-    :: getUtime(tstart);
+    getUtime(tstart);
 #endif
 
 
@@ -562,7 +564,7 @@ SparseMtrx *Skyline :: factorized()
 #ifdef TIME_REPORT
     //printf ("Skyline info: user time consumed by factorization: %.2lfs\n", (clock()-tstart)/(double)CLOCKS_PER_SEC);
     oofem_timeval ut;
-    :: getRelativeUtime(ut, tstart);
+    getRelativeUtime(ut, tstart);
     OOFEM_LOG_INFO( "Skyline info: user time consumed by factorization: %.2fs\n", ( double ) ( ut.tv_sec + ut.tv_usec / ( double ) OOFEM_USEC_LIM ) );
 #endif
 
@@ -958,5 +960,4 @@ void Skyline :: ldl_feti_sky(FloatArray &x, FloatArray &y,
 }
 
 
-
-
+} // end namespace oofem

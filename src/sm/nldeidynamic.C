@@ -56,6 +56,8 @@
 #include "datastream.h"
 #include "contextioerr.h"
 
+namespace oofem {
+
 #define ZERO_REL_MASS  1.E-6
 
 
@@ -666,3 +668,5 @@ NlDEIDynamic :: terminate(TimeStep *tStep)
     StructuralEngngModel :: terminate(tStep);
     this->printReactionForces(tStep, 1);
 }
+
+} // end namespace oofem

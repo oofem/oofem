@@ -42,6 +42,8 @@
 
 #include "matconst.h"
 
+namespace oofem {
+
 class GaussPoint;
 
 /**
@@ -186,5 +188,5 @@ protected:
 #endif
 };
 
-
+} // end namespace oofem
 #endif // hemotkmat_h

@@ -12,7 +12,7 @@
 #include "alist.h"
 #include "geometry.h"
 
-
+namespace oofem {
 
 // O(n4) algorithm, only for testing purposes
 
@@ -25,6 +25,6 @@ public:
     void triangulate(AList< FloatArray > *overtices, AList< Triangle > *triangles);
 };
 
-
+} // end namespace oofem
 #endif  /* _DELAUNAY_H */
 

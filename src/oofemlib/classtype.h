@@ -39,6 +39,8 @@
 #ifndef classtype_h
 #define classtype_h
 
+namespace oofem {
+
 /**
  * Type introduced to distinguish between classes. Intended for run-time
  * type checking. Every derived class from FemComponent base class should
@@ -325,4 +327,5 @@ enum classType {
     ParmetisLoadBalancerClass
 };
 
+} // end namespace oofem
 #endif // classtype_h

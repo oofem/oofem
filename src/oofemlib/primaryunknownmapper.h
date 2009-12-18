@@ -51,6 +51,8 @@
 #include <stdio.h>
 #endif
 
+namespace oofem {
+
 class Domain;
 class Element;
 class TimeStep;
@@ -111,10 +113,5 @@ protected:
     void warning(const char *file, int line, const char *format, ...) const;
 };
 
+} // end namespace oofem
 #endif // primaryunknownmapper_h
-
-
-
-
-
-

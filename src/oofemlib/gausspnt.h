@@ -53,6 +53,8 @@
 #include "element.h"
 #include "materialmode.h"
 
+namespace oofem {
+
 class Material;
 class LayeredCrossSection;
 class MicroplaneMaterial;
@@ -290,7 +292,7 @@ public:
      * friend LayeredMaterial ; */
 };
 
-
+} // end namespace oofem
 #endif // gausspnt_h
 
 

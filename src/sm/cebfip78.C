@@ -44,6 +44,8 @@
 #include "gausspnt.h"
 #include "crosssection.h"
 
+namespace oofem {
+
 IRResultType
 CebFip78Material :: initializeFrom(InputRecord *ir)
 {
@@ -114,3 +116,4 @@ CebFip78Material :: computeCreepFunction(GaussPoint *gp, double atTime, double o
 
 
 
+} // end namespace oofem

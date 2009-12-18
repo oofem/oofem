@@ -25,8 +25,8 @@
 //   *** CLASS CONCRETE DAMAGE-PLASTIC MATERIAL MODEL STATUS  ***
 //   ************************************************************
 
-#ifndef ConcreteDPMStatus_h
-#define ConcreteDPMStatus_h
+#ifndef ConcreteDPM_h
+#define ConcreteDPM_h
 
 #include "structuralmaterial.h"
 #include "flotarry.h"
@@ -35,8 +35,10 @@
 #include "structuralms.h"
 #include "strainvector.h"
 #include "stressvector.h"
+#include "isolinearelasticmaterial.h"
 
 
+namespace oofem {
 
 class ConcreteDPMStatus : public StructuralMaterialStatus 
 {
@@ -342,22 +344,11 @@ public:
   { temp_state_flag = v ; }
 
 };
-#endif
 
 
 //   ********************************************************************
 //   *** CLASS CONCRETE PLASTICITY ISOTROPIC DAMAGE MATERIAL STATUS   ***
 //   ********************************************************************
-#ifndef ConcreteDPM_h
-#define ConcreteDPM_h
-
-#include "flotarry.h"
-#include "flotmtrx.h"
-#include "cltypes.h"
-#include "structuralmaterial.h"
-#include "isolinearelasticmaterial.h"
-#include "strainvector.h"
-#include "stressvector.h"
 
 /**
 This class contains the combination of a local plasticity model for concrete with a local isotropic damage model. The yield surface of the plasticity model is based on the extension of the Menetrey and Willam yield criterion. The flow rule is nonassociated. The evolution laws of the hardening variables depend on the stress state. The plasticity model describes only hardening and perfect plasticity. It is based on h eeffective stress. The damage parameter of the isotropic damage model is based on the total volumetric strain. An exponential softening law is implemented.
@@ -783,11 +774,5 @@ protected:
   MaterialStatus*  CreateStatus (GaussPoint* gp) const ;
 } ;
 
+} // end namespace oofem
 #endif
-
- 
-
-
-
-
-

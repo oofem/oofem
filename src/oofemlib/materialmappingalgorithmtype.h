@@ -41,6 +41,8 @@
 
 #include "enumitem.h"
 
+namespace oofem {
+
 /**
  * Enumerative type used to classify supported
  * MaterialMappingAlgorithms
@@ -61,11 +63,5 @@ enum MaterialMappingAlgorithmType {
 
 const char *__MaterialMappingAlgorithmTypeToString(MaterialMappingAlgorithmType _value);
 
-
+} // end namespace oofem
 #endif // materialmappingalgorithmtype_h
-
-
-
-
-
-

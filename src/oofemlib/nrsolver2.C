@@ -52,6 +52,7 @@
 #include "mathfem.h"
 #include "usrdefsub.h"
 
+namespace oofem {
 
 #define nrsolver_SMALL_NUM 1.e-20
 #define NRSOLVER_MAX_REL_ERROR_BOUND 1.e10
@@ -361,7 +362,7 @@ NRSolver2 :: giveLinearSolver() {
         }
     }
 
-    linSolver = :: CreateUsrDefSparseLinSolver(solverType, 1, domain, engngModel);
+    linSolver = CreateUsrDefSparseLinSolver(solverType, 1, domain, engngModel);
     if ( linSolver == NULL ) {
         _error("giveLinearSolver: linear solver creation failed");
     }
@@ -378,3 +379,5 @@ NRSolver2 :: giveLineSearchSolver()
 
     return linesearchSolver;
 }
+
+} // end namespace oofem

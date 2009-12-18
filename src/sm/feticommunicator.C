@@ -46,6 +46,8 @@
 #endif
 #endif
 
+namespace oofem {
+
 FETICommunicator :: FETICommunicator(EngngModel *emodel, CommunicatorBuff *b, int rank, int size) :
     Communicator(emodel, b, rank, size)
 {
@@ -338,4 +340,6 @@ FETICommunicator :: setUpCommunicationMaps(EngngModel *pm)
  *   engngModel->giveDomain()->giveElement(j)->giveGlobalNumber());
  * }
  */
+
+} // end namespace oofem
 #endif

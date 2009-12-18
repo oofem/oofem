@@ -48,6 +48,9 @@
 #endif
 #include "contextioerr.h"
 
+
+namespace oofem {
+
 #define BINGHAM_ALT 1
 //#define BINGHAM_STRESS_GROWTH_RATE 4000.0
 //#define BINGHAM_MIN_SHEAR_RATE     1.e-12
@@ -661,3 +664,5 @@ BinghamFluidMaterial2 :: __debug(GaussPoint *gp, TimeStep *atTime)
         tau_p = tau_t;
     }
 }
+
+} // end namespace oofem

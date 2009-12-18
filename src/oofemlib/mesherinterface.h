@@ -42,6 +42,8 @@
 
 #include "inputrecord.h"
 
+namespace oofem {
+
 class Domain;
 class TimeStep;
 
@@ -80,4 +82,5 @@ class MesherInterface
     virtual IRResultType initializeFrom(InputRecord *ir) {return IRRT_OK;}
 };
 
+} // end namespace oofem
 #endif // mesherinterface_h

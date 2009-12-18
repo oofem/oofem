@@ -50,6 +50,8 @@
 #include "primaryfield.h"
 #include "matresponsemode.h"
 
+namespace oofem {
+
 class TimeStep;
 class Node;
 class Material;
@@ -267,4 +269,5 @@ protected:
     void assembleLocalContribution(FloatArray &answer, FloatArray &src, int ndofs, int rdof, double coeff);
 };
 
+} // end namespace oofem
 #endif // transportelement_h

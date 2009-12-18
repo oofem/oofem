@@ -36,13 +36,14 @@
 #include "petscsolver.h"
 
 #ifdef __PETSC_MODULE
-#define TIME_REPORT
-
-
 #include "petscsparsemtrx.h"
 #include "engngm.h"
 #include "flotarry.h"
 #include "verbose.h"
+
+namespace oofem {
+
+#define TIME_REPORT
 
 #ifdef TIME_REPORT
 #ifndef __MAKEDEPEND
@@ -160,7 +161,7 @@ PetscSolver :: petsc_solve(PetscSparseMtrx *Lhs, Vec b, Vec x)
 #ifdef TIME_REPORT
     //clock_t tstart = clock();
     oofem_timeval tstart;
-    :: getUtime(tstart);
+    getUtime(tstart);
 #endif
 
     /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -219,7 +220,7 @@ PetscSolver :: petsc_solve(PetscSparseMtrx *Lhs, Vec b, Vec x)
 
 #ifdef TIME_REPORT
     oofem_timeval ut;
-    :: getRelativeUtime(ut, tstart);
+    getRelativeUtime(ut, tstart);
     OOFEM_LOG_INFO( "PetscSolver info: user time consumed by solution: %.2fs\n", ( double ) ( ut.tv_sec + ut.tv_usec / ( double ) OOFEM_USEC_LIM ) );
 #endif
 
@@ -236,13 +237,11 @@ PetscSolver :: reinitialize()
     kspInit = false;
 }
 
-
-
-
-
+} // end namespace oofem
 #endif //ifdef __PETSC_MODULE
 
 #ifndef __PETSC_MODULE
+namespace oofem {
 
 PetscSolver :: PetscSolver(int i, Domain *d, EngngModel *m) : SparseLinearSystemNM(i, d, m)
 {
@@ -261,4 +260,5 @@ void
 PetscSolver :: reinitialize()
 { }
 
+} // end namespace oofem
 #endif

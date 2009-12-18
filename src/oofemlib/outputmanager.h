@@ -49,6 +49,7 @@
 #include "dynalist.h"
 #include "range.h"
 
+namespace oofem {
 
 /**
  * Represents output manager. It controls and manages the time step output.
@@ -161,8 +162,5 @@ protected:
 
 };
 
-
+} // end namespace oofem
 #endif // outputmanager_h
-
-
-

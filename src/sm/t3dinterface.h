@@ -42,6 +42,8 @@
 
 #include "mesherinterface.h"
 
+namespace oofem {
+
 #define BMF_FILENAME    "t3d.bmf"
 
 class TimeStep;
@@ -70,4 +72,5 @@ protected:
     int createInput(Domain *d, TimeStep *stepN);
 };
 
+} // end namespace oofem
 #endif // t3dinterface_h

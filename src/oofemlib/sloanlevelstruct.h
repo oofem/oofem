@@ -48,6 +48,8 @@
 #include "alist.h"
 #include "intarray.h"
 
+namespace oofem {
+
 class SloanGraph;
 
 /**
@@ -116,4 +118,5 @@ private:
     void  computeWidth();
 };
 
+} // end namespace oofem
 #endif // sloanlevelstruct_h

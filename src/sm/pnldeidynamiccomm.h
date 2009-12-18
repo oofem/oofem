@@ -46,6 +46,8 @@
 #include "pnldeidynamic.h"
 #include "error.h"
 
+namespace oofem {
+
 /**
  * Class representing communicator for PNlDEIDynamic engng model.
  * It is attribute of pnlDeiDynamic Engng model.
@@ -133,13 +135,6 @@ private:
 };
 
 
-
+} // end namespace oofem
 #endif
 #endif // pnldeidynamiccomm_h
-
-
-
-
-
-
-

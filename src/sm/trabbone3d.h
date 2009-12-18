@@ -54,6 +54,8 @@
 #include "structuralms.h"
 #include "cltypes.h"
 
+namespace oofem {
+
 /*
  This class implements associated Material Status to TrabBone3D.
  It is atribute of matStatusDictionary at every GaussPoint, for which this material 
@@ -327,5 +329,6 @@ class TrabBone3D : public StructuralMaterial
  virtual int giveIPValueSize (InternalStateType type, GaussPoint* aGaussPoint) ;
 };
 
+} // end namespace oofem
 #define trabbone3d_h
 #endif

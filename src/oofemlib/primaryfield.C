@@ -42,6 +42,8 @@
 #include "datastream.h"
 #include "contextioerr.h"
 
+namespace oofem {
+
 PrimaryField :: PrimaryField(EngngModel *a, int idomain,
                              FieldBaseID ft, EquationID ut, int nHist) : Field(ft), solutionVectors(nHist + 1), solStepList(nHist + 1)
 {
@@ -260,3 +262,4 @@ PrimaryField :: restoreContext(DataStream *stream, ContextMode mode)
     return CIO_OK;
 }
 
+} // end namespace oofem

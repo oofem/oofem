@@ -47,6 +47,8 @@
 #include <vector>
 #endif
 
+namespace oofem {
+
 class GaussPoint;
 
 /**
@@ -335,6 +337,5 @@ protected:
                                            TimeStep * atTime);
 };
 
-
+} // end namespace oofem
 #endif // mplasticmaterial_h
-

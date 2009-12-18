@@ -42,6 +42,8 @@
 #include <stdarg.h>
 #endif
 
+namespace oofem {
+
 void Field :: error(const char *file, int line, const char *format, ...) const
 {
     char buffer [ MAX_ERROR_MSG_LENGTH ];
@@ -66,3 +68,5 @@ void Field :: warning(const char *file, int line, const char *format, ...) const
 
     __OOFEM_WARNING3(file, line, "Class: %s\n%s", giveClassName(), buffer);
 }
+
+} // end namespace oofem

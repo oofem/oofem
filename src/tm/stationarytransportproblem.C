@@ -54,6 +54,8 @@
 #endif
 #include "contextioerr.h"
 
+namespace oofem {
+
 NumericalMethod *StationaryTransportProblem :: giveNumericalMethod(TimeStep *atTime)
 // only one has reason for LinearStatic
 //     - SolutionOfLinearEquations
@@ -183,7 +185,7 @@ void StationaryTransportProblem :: solveYourselfAt(TimeStep *tStep) {
         solutionVector->resize( this->giveNumberOfEquations(EID_ConservationEquation) );
         solutionVector->zero();
 
-        conductivityMatrix = :: CreateUsrDefSparseMtrx(sparseMtrxType);
+        conductivityMatrix = CreateUsrDefSparseMtrx(sparseMtrxType);
         if ( conductivityMatrix == NULL ) {
             _error("solveYourselfAt: sparse matrix creation failed");
         }
@@ -415,3 +417,5 @@ StationaryTransportProblem :: initPetscContexts()
     }
 }
 #endif
+
+} // end namespace oofem

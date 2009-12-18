@@ -41,6 +41,8 @@
 
 #include "rheoChM.h"
 
+namespace oofem {
+
 class KelvinChainMaterialStatus : public RheoChainMaterialStatus
 {
     /*
@@ -172,5 +174,5 @@ protected:
     LinearElasticMaterial *giveLinearElasticMaterial();
 };
 
-
+} // end namespace oofem
 #endif // kelvinchm_h

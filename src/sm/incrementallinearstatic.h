@@ -47,6 +47,7 @@
 #include "sparselinsystemnm.h"
 #include "sparselinsystemnm.h"
 
+namespace oofem {
 
 /**
  * This class implements Incremental LinearStatic Engineering problem.
@@ -138,4 +139,5 @@ public:
     { return ( int ) mode; }
 };
 
+} // end namespace oofem
 #endif // incrementallinearstatic_h

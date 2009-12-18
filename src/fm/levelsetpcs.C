@@ -45,6 +45,8 @@
 #include "error.h"
 #include "contextioerr.h"
 
+namespace oofem {
+
 void
 LevelSetPCS :: initialize()
 {
@@ -648,3 +650,5 @@ LevelSetPCS :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
 
     return CIO_OK;
 }
+
+} // end namespace oofem

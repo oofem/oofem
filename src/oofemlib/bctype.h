@@ -39,6 +39,8 @@
 #ifndef bctype_h
 #define bctype_h
 
+namespace oofem {
+
 /**Type representing the type of bc.*/
 enum bcType {
     UnknownBT,
@@ -47,5 +49,6 @@ enum bcType {
     ConvectionBC  // Newton type
 };
 
+} // end namespace oofem
 #endif // bctype_h
 

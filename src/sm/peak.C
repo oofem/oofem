@@ -41,6 +41,8 @@
 #include <math.h>
 #endif
 
+namespace oofem {
+
 double PeakFunction :: __at(double time)
 // Returns the value of the receiver at time 'time'.
 {
@@ -78,3 +80,4 @@ PeakFunction :: initializeFrom(InputRecord *ir)
     return IRRT_OK;
 }
 
+} // end namespace oofem

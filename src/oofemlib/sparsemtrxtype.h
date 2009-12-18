@@ -39,6 +39,8 @@
 #ifndef sparsematrixtype_h
 #define sparsematrixtype_h
 
+namespace oofem {
+
 /**
  * Enumerative type used to identify the sparse matrix type
  */
@@ -56,4 +58,5 @@ enum SparseMtrxType {
     SMT_DSS_unsym_LU // Richard Vondracek's sparse direct solver
 };
 
+} // end namespace oofem
 #endif // sparsematrixtype_h

@@ -14,7 +14,7 @@
 #include <ctype.h>
 #endif
 
-
+namespace oofem {
 
 /**
  */
@@ -353,3 +353,5 @@ SlaveDof :: giveMasterDofManArray (IntArray& answer)
     }
   }
 }
+
+} // end namespace oofem

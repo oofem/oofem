@@ -43,6 +43,8 @@
 #include "nlstructuralelement.h"
 #include "layeredcrosssection.h"
 
+namespace oofem {
+
 class LIBeam2dNL : public NLStructuralElement, public LayeredCrossSectionInterface
 {
     /*
@@ -117,4 +119,5 @@ protected:
     double        givePitch();
 };
 
+} // end namespace oofem
 #endif // libeam2dnl_h

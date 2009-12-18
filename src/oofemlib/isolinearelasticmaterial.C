@@ -48,6 +48,8 @@
 #include <stdlib.h>
 #endif
 
+namespace oofem {
+
 IsotropicLinearElasticMaterial :: IsotropicLinearElasticMaterial(int n, Domain *d,
                                                                  double _E, double _nu) :
     LinearElasticMaterial(n, d)
@@ -477,5 +479,4 @@ IsotropicLinearElasticMaterial :: CreateStatus(GaussPoint *gp) const
 }
 
 
-
-
+} // end namespace oofem

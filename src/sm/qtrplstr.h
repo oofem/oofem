@@ -52,6 +52,8 @@
 
 #include "mathfem.h"
 
+namespace oofem {
+
 class QTrPlaneStress2d : public StructuralElement, public SpatialLocalizerInterface,
     public SPRNodalRecoveryModelInterface // , public ZZNodalRecoveryModelInterface
     , public DirectErrorIndicatorRCInterface, public EIPrimaryUnknownMapperInterface
@@ -214,4 +216,5 @@ protected:
     void            computeJacobianMatrixAt(FloatMatrix &, GaussPoint *);
 };
 
+} // end namespace oofem
 #endif // qtrplstr_h

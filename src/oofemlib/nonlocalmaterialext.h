@@ -46,6 +46,9 @@
 #include "matstatus.h"
 #include "dynalist.h"
 #include "interface.h"
+
+namespace oofem {
+
 //
 // local integration record - stores pointer to gp and its integration weight
 // Also remote integration record should be defined in case of parallel scheme
@@ -277,6 +280,5 @@ protected:
     void applyBarrierConstraints(const FloatArray &gpCoords, const FloatArray &jGpCoords, double &weight);
 };
 
+} // end namespace oofem
 #endif // nonlocalmaterialext_h
-
-

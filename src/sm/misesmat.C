@@ -48,6 +48,8 @@
 #include "contextioerr.h"
 #include "datastream.h"
 
+namespace oofem {
+
 // constructor
 MisesMat :: MisesMat(int n, Domain *d) : StructuralMaterial(n, d)
 {    
@@ -262,7 +264,7 @@ MisesMat :: give3dMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseForm f
     return;
 
   MisesMatStatus *status = ( MisesMatStatus * ) this->giveStatus(gp);
-  StructuralCrossSection *crossSection = ( StructuralCrossSection * ) ( gp->giveElement()->giveCrossSection() );
+  //StructuralCrossSection *crossSection = ( StructuralCrossSection * ) ( gp->giveElement()->giveCrossSection() );
   double kappa = status->giveCumulativePlasticStrain();
   // increment of cumulative plastic strain as an indicator of plastic loading
   double dKappa = status->giveTempCumulativePlasticStrain() - kappa;
@@ -421,3 +423,4 @@ MisesMatStatus :: restoreContext(DataStream *stream, ContextMode mode, void *obj
     return CIO_OK; // return succes
 }
 
+} // end namespace oofem

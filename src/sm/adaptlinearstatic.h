@@ -46,6 +46,8 @@
 #include "linearstatic.h"
 #include "meshpackagetype.h"
 
+namespace oofem {
+
 class AdaptiveLinearStatic : public LinearStatic
 {
     /*
@@ -91,4 +93,5 @@ public:
     classType giveClassID()      const { return AdaptiveLinearStaticClass; }
 };
 
+} // end namespace oofem
 #endif // adaptlinearstatic_h

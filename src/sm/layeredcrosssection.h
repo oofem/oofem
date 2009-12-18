@@ -48,6 +48,7 @@
 #include "flotmtrx.h"
 #include "interface.h"
 
+namespace oofem {
 
 class GaussPoint;
 class LayeredCrossSectionModelInterface;
@@ -265,7 +266,5 @@ public:
                                             GaussPoint *slaveGp, TimeStep *tStep) = 0;
 };
 
-
+} // end namespace oofem
 #endif // layeredcrosssection_h
-
-

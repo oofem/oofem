@@ -104,6 +104,8 @@
  #endif
 #endif
 
+namespace oofem {
+
 EngngModel :: EngngModel(int i, EngngModel *_master) : domainNeqs(), domainPrescribedNeqs()
     // constructor
 {
@@ -291,7 +293,7 @@ int EngngModel :: instanciateYourself(DataReader *dr, InputRecord *ir, char *dat
     ;
 
     fprintf(outputStream, "%s", PRG_HEADER);
-    this->startTime = :: getTime();
+    this->startTime = getTime();
     //this->startClock= this-> getClock();
     fprintf( outputStream, "\nStarting analysis on: %s\n", ctime(& this->startTime) );
 
@@ -616,7 +618,7 @@ EngngModel :: forceEquationNumbering(int id)
         int initialProfile, optimalProfile;
         //clock_t time_0 = this->getClock(), time_1;
         oofem_timeval tstart;
-        :: getUtime(tstart);
+        getUtime(tstart);
         OOFEM_LOG_INFO("Renumbering ... ");
 
         SloanGraph graph(domain);
@@ -635,7 +637,7 @@ EngngModel :: forceEquationNumbering(int id)
         //long nsec = (time_1 - time_0) / CLOCKS_PER_SEC;
 
         oofem_timeval ut;
-        :: getRelativeUtime(ut, tstart);
+        getRelativeUtime(ut, tstart);
 
         OOFEM_LOG_INFO( "done in %.2fs\n", ( double ) ( ut.tv_sec + ut.tv_usec / ( double ) OOFEM_USEC_LIM ) );
         OOFEM_LOG_INFO("Nominal profile %d (old) %d (new)\n", initialProfile, optimalProfile);
@@ -2207,7 +2209,7 @@ EngngModel :: terminateAnalysis()
     double tsec;
     int nsec = 0, nmin = 0, nhrs = 0;
     FILE *out = this->giveOutputStream();
-    time_t endTime = :: getTime();
+    time_t endTime = getTime();
     this->timer.stopTimer(EngngModelTimer :: EMTT_AnalysisTimer);
 
 
@@ -2348,3 +2350,5 @@ EngngModel :: balanceLoad(TimeStep *atTime)
     }
 }
 #endif
+
+} // end namespace oofem

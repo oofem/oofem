@@ -54,6 +54,8 @@
 #endif
 #endif
 
+namespace oofem {
+
 CompRow_ILUPreconditioner ::
 CompRow_ILUPreconditioner(const SparseMtrx &A, InputRecord &attributes) : Preconditioner(A, attributes)
 { }
@@ -100,3 +102,4 @@ CompRow_ILUPreconditioner :: trans_solve(const FloatArray &x, FloatArray &y) con
     A.ILUPtrans_solve(x, y);
 }
 
+} // end namespace oofem

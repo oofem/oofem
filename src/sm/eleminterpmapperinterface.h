@@ -42,6 +42,8 @@
 #include "flotarry.h"
 #include "intarray.h"
 
+namespace oofem {
+
 /**
  * The element interface class related to Element Interpolation Mappers.
  */
@@ -70,11 +72,5 @@ public:
     virtual void EIPrimaryUnknownMI_givePrimaryUnknownVectorDofID(IntArray &answer) = 0;
 };
 
-
+} // end namespace oofem
 #endif // eleminterpmapperinterface_h
-
-
-
-
-
-

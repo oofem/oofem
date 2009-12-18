@@ -3,6 +3,7 @@
 #include "patch.h"
 #include "patchintegrationrule.h"
 
+namespace oofem {
 
 void XfemElementInterface :: XfemElementInterface_partitionElement(AList< Triangle > *answer, AList< FloatArray > *together) {
     Delaunay dl;
@@ -101,3 +102,4 @@ void XfemElementInterface :: XfemElementInterface_prepareNodesForDelaunay(AList<
     } 
 }
 
+} // end namespace oofem

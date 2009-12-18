@@ -37,6 +37,8 @@
 
 #include "precond.h"
 
+namespace oofem {
+
 Preconditioner :: Preconditioner(const SparseMtrx &a, InputRecord &attributes)
 {
     this->initializeFrom(& attributes);
@@ -44,3 +46,4 @@ Preconditioner :: Preconditioner(const SparseMtrx &a, InputRecord &attributes)
 };
 
 
+} // end namespace oofem

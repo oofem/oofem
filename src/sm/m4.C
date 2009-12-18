@@ -41,6 +41,8 @@
 #include "structuralcrosssection.h"
 #include "mathfem.h"
 
+namespace oofem {
+
 M4Material :: M4Material(int n, Domain *d) :
     MicroplaneMaterial_Bazant(n, d)
 { }
@@ -381,3 +383,4 @@ M4MaterialStatus :: restoreContext(DataStream *stream, ContextMode mode, void *o
     return StructuralMaterialStatus :: restoreContext(stream, mode, obj);
 }
 
+} // end namespace oofem

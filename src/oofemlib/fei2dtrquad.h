@@ -41,6 +41,8 @@
 #include "domain.h"
 #include "feinterpol2d.h"
 
+namespace oofem {
+
 /**
  * Class representing a 2d triangular linear interpolation based on area coordinates.
  */
@@ -234,6 +236,7 @@ protected:
     void   giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatArray **coords, const FloatArray &lcoords);
 };
 
+} // end namespace oofem
 #endif // fei2dtrquad_h
 
 

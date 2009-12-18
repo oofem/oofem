@@ -60,6 +60,7 @@
 #endif
 #endif
 
+namespace oofem {
 
 double
 LoadTimeFunction :: evaluate(TimeStep *atTime, ValueModeType mode)
@@ -105,7 +106,7 @@ LoadTimeFunction *LoadTimeFunction :: ofType(char *aClass)
      *    newLTF = new HeavisideLTF(number,domain) ;    */
     else {
         // last resort - call aditional user defined subroutine
-        newLTF = :: CreateUsrDefLoadTimeFunctionOfType(aClass, number, domain);
+        newLTF = CreateUsrDefLoadTimeFunctionOfType(aClass, number, domain);
         if ( newLTF == NULL ) {
             _error2("ofType: unknown type of load-time function (%s)", aClass);
             exit(0);
@@ -142,13 +143,4 @@ LoadTimeFunction :: giveInputRecordString(std :: string &str, bool keyword)
     return 1;
 }
 
-
-
-
-
-
-
-
-
-
-
+} // end namespace oofem

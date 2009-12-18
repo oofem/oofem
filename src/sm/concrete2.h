@@ -51,6 +51,8 @@
 
 #include "structuralms.h"
 
+namespace oofem {
+
 #define c2_SCCC  300
 #define c2_SCCT  301
 #define c2_EPP   302
@@ -245,11 +247,5 @@ public:
     //      void     printYourself () ;
 };
 
-
+} // end namespace oofem
 #endif // concrete2_h
-
-
-
-
-
-

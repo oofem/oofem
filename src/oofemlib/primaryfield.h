@@ -49,6 +49,8 @@
 #include <vector>
 #endif
 
+namespace oofem {
+
 class PrimaryField;
 class Dof;
 
@@ -143,5 +145,5 @@ protected:
     virtual FloatArray *giveSolutionVector(int);
 };
 
-
+} // end namespace oofem
 #endif // primaryfield_h

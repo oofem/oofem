@@ -49,6 +49,7 @@
 #include "eleminterpmapperinterface.h"
 #include "huertaerrorestimator.h"
 
+namespace oofem {
 
 class LSpace  : public NLStructuralElement, public ZZNodalRecoveryModelInterface,
     public SPRNodalRecoveryModelInterface, public NodalAveragingRecoveryModelInterface,
@@ -274,4 +275,5 @@ protected:
     //@}
 };
 
+} // end namespace oofem
 #endif // lspace_h

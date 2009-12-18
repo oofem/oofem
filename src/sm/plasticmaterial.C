@@ -49,6 +49,8 @@
 #endif
 #include "contextioerr.h"
 
+namespace oofem {
+
 #define YIELD_TOL 1.e-5
 #define RES_TOL   1.e-5
 #define PLASTIC_MATERIAL_MAX_ITERATIONS 40
@@ -1116,3 +1118,4 @@ PlasticMaterialStatus :: restoreContext(DataStream *stream, ContextMode mode, vo
 
 
 
+} // end namespace oofem

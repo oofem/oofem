@@ -41,7 +41,6 @@
 #ifndef idm1_h
 #define idm1_h
 
-
 /**
  * Select the mapping algorithm. The IDM_USE_MMAShapeFunctProjection does not work, since
  * this mapper does not preserve the max. property of damage and equivalent strain.
@@ -83,6 +82,7 @@
 #include "mmaleastsquareprojection.h"
 #endif
 
+namespace oofem {
 
 // material contant's keys for give()
 #define IDM1_ITERATION_LIMIT 1.e-8
@@ -320,6 +320,6 @@ protected:
     void initDamaged(double kappa, FloatArray &totalStrainVector, GaussPoint *gp);
 };
 
-
+} // end namespace oofem
 #endif // idm1_h
 

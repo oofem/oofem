@@ -57,6 +57,8 @@
 #include "crosssectextension.h"
 #include "contextioresulttype.h"
 
+namespace oofem {
+
 #define THICKNESS 400
 #define WIDTH     401
 #define BEAM_SHEAR_COEFF 402
@@ -301,6 +303,6 @@ public:
     friend class Material;
 };
 
-
+} // end namespace oofem
 #endif // crosssection_h
 

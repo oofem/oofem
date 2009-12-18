@@ -45,6 +45,7 @@
 #include "structuralmaterial.h"
 #include "structuralms.h"
 
+namespace oofem {
 
 // material contant's keys for give()
 class GaussPoint;
@@ -292,6 +293,5 @@ protected:
                                                 GaussPoint *gp, TimeStep *atTime);
 };
 
-
+} // end namespace oofem
 #endif // mat_cebfip90_h
-

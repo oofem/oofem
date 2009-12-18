@@ -47,6 +47,8 @@
 #include "datastream.h"
 #include "contextioerr.h"
 
+namespace oofem {
+
 #define _MAZARS_MODEL_ITER_TOL 1.e-15
 #define _MAZARS_MODEL_MAX_ITER 400.
 
@@ -557,3 +559,4 @@ MazarsMaterialStatus :: restoreContext(DataStream *stream, ContextMode mode, voi
     return CIO_OK;
 }
 
+} // end namespace oofem

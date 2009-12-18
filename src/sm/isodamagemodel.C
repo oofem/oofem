@@ -45,6 +45,8 @@
 #include "datastream.h"
 #include "contextioerr.h"
 
+namespace oofem {
+
 IsotropicDamageMaterial :: IsotropicDamageMaterial(int n, Domain *d) : StructuralMaterial(n, d)
     //
     // constructor
@@ -436,3 +438,4 @@ IsotropicDamageMaterialStatus :: restoreContext(DataStream *stream, ContextMode 
 }
 
 
+} // end namespace oofem

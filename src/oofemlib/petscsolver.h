@@ -49,6 +49,8 @@
 #endif
 #endif
 
+namespace oofem {
+
 class Domain;
 class EngngModel;
 class FloatMatrix;
@@ -110,6 +112,5 @@ public:
     LinSystSolverType giveLinSystSolverType() const { return ST_Petsc; }
 };
 
-
+} // end namespace oofem
 #endif // petscsolver_h
-

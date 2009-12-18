@@ -61,6 +61,8 @@
 #include "oofegutils.h"
 #endif
 
+namespace oofem {
+
 TrPlaneStrain :: TrPlaneStrain(int n, Domain *aDomain) :
     StructuralElement(n, aDomain), ZZNodalRecoveryModelInterface(), NodalAveragingRecoveryModelInterface(),
     SPRNodalRecoveryModelInterface(), SpatialLocalizerInterface()
@@ -1281,3 +1283,4 @@ void TrPlaneStrain :: drawScalar(oofegGraphicContext &context)
 
 #endif
 
+} // end namespace oofem

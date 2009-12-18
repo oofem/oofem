@@ -39,10 +39,13 @@
 #ifndef geneigvalsolvertype_h
 #define geneigvalsolvertype_h
 
+namespace oofem {
+
 enum GenEigvalSolverType {
     GES_SubspaceIt,
     GES_InverseIt,
     GES_SLEPc
 };
 
+} // end namespace oofem
 #endif // geneigvalsolvertype_h

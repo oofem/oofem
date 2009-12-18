@@ -44,6 +44,8 @@
 #include "microplanematerial.h"
 
 
+namespace oofem {
+
 /**
  * Abstract base class for all microplane models according to Bazant's approach.
  * Micro strains on microplane are described using magnitude of normal strain,
@@ -91,4 +93,5 @@ public:
 protected:
 };
 
+} // end namespace oofem
 #endif // microplanematerial_bazant_h

@@ -45,6 +45,8 @@
 #endif
 #endif
 
+namespace oofem {
+
 PNlDEIDynamicComunicator :: PNlDEIDynamicComunicator(PNlDEIDynamic *emodel, int rank, int size,
                                                      PNlDEIDynamicComunicatorMode mode) :
     Communicator< PNlDEIDynamic >(emodel, rank, size)
@@ -992,4 +994,5 @@ PNlDEIDynamicComunicator :: ElemCmp(int i, int j)
             engngModel->giveDomain(1)->giveElement(j)->giveGlobalNumber() );
 }
 
+} // end namespace oofem
 #endif

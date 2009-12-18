@@ -45,6 +45,8 @@
 #include "nodalrecoverymodel.h"
 #include "interface.h"
 
+namespace oofem {
+
 class GaussPoint;
 class SPRNodalRecoveryModelInterface;
 
@@ -133,11 +135,5 @@ public:
     virtual SPRPatchType SPRNodalRecoveryMI_givePatchType() = 0;
 };
 
-
+} // end namespace oofem
 #endif // sprnodalrecoverymodel_h
-
-
-
-
-
-

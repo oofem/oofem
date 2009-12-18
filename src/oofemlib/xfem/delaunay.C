@@ -7,6 +7,8 @@
 #include "node.h"
 #include <map>
 
+namespace oofem {
+
 bool Delaunay :: colinear(FloatArray *p1, FloatArray *p2, FloatArray *p3) {
     double dist = p1->at(1) * ( p2->at(2) - p3->at(2) ) + p2->at(1) * ( p3->at(2) - p1->at(2) ) +
     p3->at(1) * ( p1->at(2) - p2->at(2) );
@@ -103,3 +105,4 @@ void Delaunay :: triangulate(AList< FloatArray > *overtices, AList< Triangle > *
 }
 
 
+} // end namespace oofem

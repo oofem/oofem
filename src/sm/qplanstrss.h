@@ -45,6 +45,8 @@
 #include "zznodalrecoverymodel.h"
 #include "mathfem.h"
 
+namespace oofem {
+
 class QPlaneStress2d : public StructuralElement, public ZZNodalRecoveryModelInterface
 {
     /*
@@ -132,4 +134,5 @@ protected:
 
 };
 
+} // end namespace oofem
 #endif // qplanstrss_h

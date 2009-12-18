@@ -48,6 +48,7 @@
 
 #include "primaryfield.h"
 
+namespace oofem {
 
 // declaration of basic boundary codes
 #define FMElement_PrescribedTractionBC ( 1 << 0 )
@@ -89,11 +90,5 @@ public:
     classType                giveClassID() const { return FMElementClass; }
 };
 
+} // end namespace oofem
 #endif // fmelement_h
-
-
-
-
-
-
-

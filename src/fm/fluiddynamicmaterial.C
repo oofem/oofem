@@ -54,6 +54,7 @@
 #endif
 #include "contextioerr.h"
 
+namespace oofem {
 
 void
 FluidDynamicMaterial :: updateInternalState(const FloatArray &vec, GaussPoint *gp, TimeStep *)
@@ -147,3 +148,4 @@ FluidDynamicMaterialStatus :: restoreContext(DataStream *stream, ContextMode mod
 
 
 
+} // end namespace oofem

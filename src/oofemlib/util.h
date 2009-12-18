@@ -41,6 +41,9 @@
 #include <stdio.h>
 #endif
 #include "problemmode.h"
+
+namespace oofem {
+
 class DataReader;
 class EngngModel;
 
@@ -62,4 +65,5 @@ EngngModel *InstanciateProblem(DataReader *dr, problemMode mode, int contextFlag
 /// static storage for temporary strings to solve compiler warnings about onversion from string constant to char*
 char* oofem_tmpstr (const char* src);
 
+} // end namespace oofem
 #endif // util_h

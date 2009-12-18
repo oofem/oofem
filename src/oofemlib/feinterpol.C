@@ -38,6 +38,8 @@
 #include "domain.h"
 #include "node.h"
 
+namespace oofem {
+
 void
 FEInterpolation :: nodes2coords(Domain *d, IntArray &nodes, const FloatArray **c, int n)
 {
@@ -51,3 +53,4 @@ FEInterpolation :: nodes2coords(Domain *d, IntArray &nodes, const FloatArray **c
     }
 }
 
+} // end namespace oofem

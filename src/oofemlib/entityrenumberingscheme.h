@@ -42,6 +42,10 @@
 #ifndef __MAKEDEPEND
 #include <map>
 #endif 
+
+
+namespace oofem {
+
 /**
  * Type allowing to specify the required renumbering scheme;
  * One can have a renumbering scheme for dof managers
@@ -117,5 +121,6 @@ class MapBasedEntityRenumberingFunctor : public EntityRenumberingFunctor
   
 };
 
+} // end namespace oofem
 #endif // entityrenumberingscheme_h
 

@@ -44,7 +44,7 @@
 #include "sparsemtrx.h"
 #include "intarray.h"
 
-
+namespace oofem {
 
 // alloc chunk for columns
 #define DynCompCol_CHUNK 8
@@ -176,6 +176,6 @@ protected:
     void          growTo(int);
 };
 
-
+} // end namespace oofem
 #endif // dyncompcol_h
 

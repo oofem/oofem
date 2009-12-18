@@ -50,6 +50,8 @@
 #include "gaussintegrationrule.h"
 #include "gausspnt.h"
 
+namespace oofem {
+
 /**
  * This class implements a two-node truss bar element for two-dimensional
  * analysis.
@@ -131,4 +133,5 @@ protected:
     int           giveApproxOrder() { return 1; }
 };
 
+} // end namespace oofem
 #endif // truss2d_h

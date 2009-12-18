@@ -53,7 +53,7 @@
 #include "fei3dhexalin.h"
 #include "mathfem.h"
 
-
+namespace oofem {
 
 /**
  * Constructor. Creates a hanging node with number n, belonging to aDomain.
@@ -331,3 +331,5 @@ HangingNode :: computeNaturalCoordinates(){
     delete masterCoords[i-1];
   return 1;
 }
+
+} // end namespace oofem

@@ -49,6 +49,8 @@
 #include "primaryfield.h"
 #include "fluiddynamicmaterial.h"
 
+namespace oofem {
+
 class TimeStep;
 class Node;
 class Material;
@@ -210,11 +212,5 @@ protected:
     virtual void computeSurfaceLoadVector_MC(FloatArray &answer, Load *load, int id, TimeStep *stepN);
 };
 
+} // end namespace oofem
 #endif // supgelement2_h
-
-
-
-
-
-
-

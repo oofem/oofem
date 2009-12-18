@@ -41,6 +41,8 @@
 #include <math.h>
 #endif
 
+namespace oofem {
+
 double PiecewiseLinFunction :: __at(double time)
 // Returns the value of the receiver at time 'time'. 'time' should be
 // one of the dates of the receiver (currently there is no interpola-
@@ -177,3 +179,5 @@ PiecewiseLinFunction :: giveInputRecordString(std :: string &str, bool keyword)
 
     return 1;
 }
+
+} // end namespace oofem

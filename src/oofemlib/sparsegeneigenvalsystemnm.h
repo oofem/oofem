@@ -52,6 +52,8 @@
 #include <stdio.h>
 #endif
 
+namespace oofem {
+
 class EngngModel;
 class SparseMtrx;
 class FloatArray;
@@ -100,13 +102,5 @@ public:
 public:
 };
 
+} // end namespace oofem
 #endif // sparsegeneigenvalsystemnm_h
-
-
-
-
-
-
-
-
-

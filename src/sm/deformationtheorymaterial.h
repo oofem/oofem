@@ -44,6 +44,8 @@
 
 #include "structuralmaterial.h"
 
+namespace oofem {
+
 class DeformationTheoryMaterial : public StructuralMaterial
 {
     /*
@@ -83,5 +85,5 @@ public:
     classType giveClassID()          const { return DeformationTheoryMaterialClass; }
 };
 
-
+} // end namespace oofem
 #endif // deformationtheorymaterial_h

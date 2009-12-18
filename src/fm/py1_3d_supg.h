@@ -53,7 +53,7 @@
 #include "levelsetpcs.h"
 #include "fei3dtrlin.h"
 
-
+namespace oofem {
 
 class TimeStep;
 class Node;
@@ -123,11 +123,5 @@ protected:
     virtual int  giveNumberOfSpatialDimensions();
 };
 
+} // end namespace oofem
 #endif // py1_3d_supg_h
-
-
-
-
-
-
-

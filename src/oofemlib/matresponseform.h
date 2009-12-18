@@ -39,6 +39,8 @@
 #ifndef matesponseform_h
 #define matesponseform_h
 
+namespace oofem {
+
 /**
  * Type representing the form of returned characteristic value (for cross section and material models).
  * The response can be returned in so called full or reduced form.
@@ -54,5 +56,6 @@ enum MatResponseForm {
     FullForm  // all component of 3d stresses are available, even if they eq 0.
 };
 
+} // end namespace oofem
 #endif // matesponseform_h
 

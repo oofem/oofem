@@ -45,6 +45,8 @@
 #include <map>
 #endif
 
+namespace oofem {
+
 class PetscOrdering_Base : public ApplicationOrdering
 {
 protected:
@@ -112,5 +114,6 @@ public:
     IntArray *giveN2Lmap() { return & n2l; }
 };
 
+} // end namespace oofem
 #endif
 #endif // petscordering_h

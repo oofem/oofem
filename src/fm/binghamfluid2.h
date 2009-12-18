@@ -44,6 +44,8 @@
 #include "structuralelement.h"
 #include "matstatus.h"
 
+namespace oofem {
+
 class GaussPoint;
 
 /**
@@ -244,10 +246,5 @@ protected:
     void    __debug(GaussPoint *gp, TimeStep *atTime);
 };
 
-
+} // end namespace oofem
 #endif // binghamfluid2_h
-
-
-
-
-

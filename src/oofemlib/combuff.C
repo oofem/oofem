@@ -48,6 +48,8 @@
 #include "flotmtrx.h"
 #include "error.h"
 
+namespace oofem {
+
 #ifdef __USE_MPI
 MPIBuffer :: MPIBuffer(int size, bool dynamic)
 {
@@ -270,5 +272,5 @@ CommunicationBuffer :: unpackFloatMatrix(FloatMatrix &mtrx)
 { return mtrx.unpackFromCommBuffer(* this); }
 
 #endif
-
+} // end namespace oofem
 #endif

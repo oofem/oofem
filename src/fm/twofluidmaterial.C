@@ -47,6 +47,8 @@
 #include <stdlib.h>
 #endif
 
+namespace oofem {
+
 int
 TwoFluidMaterial :: checkConsistency()
 {
@@ -228,3 +230,5 @@ TwoFluidMaterial :: giveTempVOF(GaussPoint *gp)
         return 0.0;
     }
 }
+
+} // end namespace oofem

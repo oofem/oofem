@@ -52,6 +52,8 @@
 #include "processcomm.h"
 #endif
 
+namespace oofem {
+
 /**
  * Type determing the stiffness mode
  * nls_tangentStiffness - the tangent stiffness is used and updated whenever requsted
@@ -269,4 +271,5 @@ protected:
 #endif
 };
 
+} // end namespace oofem
 #endif // nlinearstatic_h

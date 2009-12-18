@@ -48,6 +48,7 @@
 #endif
 #endif
 
+namespace oofem {
 
 ProcessCommunicatorBuff :: ProcessCommunicatorBuff(CommBuffType t)
 {
@@ -153,5 +154,5 @@ ProcessCommunicator :: waitCompletion ()
 }
 
 
-
+} // end namespace oofem
 #endif

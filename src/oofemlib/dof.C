@@ -61,7 +61,7 @@
 #include <stdarg.h>
 #endif
 
-
+namespace oofem {
 
 Dof :: Dof(int i, DofManager *aNode, DofID id)
 // Constructor. Creates a new d.o.f., with number i, belonging
@@ -274,3 +274,5 @@ Dof :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
 
 #ifdef __PARALLEL_MODE
 #endif
+
+} // end namespace oofem

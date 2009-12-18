@@ -39,6 +39,8 @@
 #ifndef bcvaltype_h
 #define bcvaltype_h
 
+namespace oofem {
+
 /**
  * Type determining the type of general boundary condition.
  */
@@ -53,5 +55,6 @@ enum bcValType {
     DisplacementBVT
 };
 
+} // end namespace oofem
 #endif // bcvaltype_h
 

@@ -16,6 +16,8 @@
 #include "oofem_limits.h"
 #include "usrdefsub.h"
 
+namespace oofem {
+
 EnrichmentItem::EnrichmentItem(int n, XfemManager*xm, Domain* aDomain) : FEMComponent(n, aDomain) {
   xmanager = xm;
   geometry = 0;
@@ -89,3 +91,5 @@ IRResultType Inclusion::initializeFrom(InputRecord* ir) {
     this->mat = this->giveDomain()->giveMaterial(material);
     return IRRT_OK;
 }
+
+} // end namespace oofem

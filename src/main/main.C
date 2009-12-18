@@ -74,6 +74,7 @@
 #include <new>
 #endif
 
+using namespace oofem;
 
 // debug
 void oofem_debug(EngngModel *emodel);
@@ -84,9 +85,9 @@ void oofem_print_help();
 void oofem_print_version();
 void oofem_print_epilog();
 
-/* Defaul oofem loggers */
-Logger oofem_logger(Logger :: LOG_LEVEL_INFO, stdout);
-Logger oofem_errLogger(Logger :: LOG_LEVEL_WARNING, stderr);
+/* Default oofem loggers */
+Logger oofem::oofem_logger(Logger :: LOG_LEVEL_INFO, stdout);
+Logger oofem::oofem_errLogger(Logger :: LOG_LEVEL_WARNING, stderr);
 
 
 int main(int argc, char *argv[])

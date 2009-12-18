@@ -48,6 +48,8 @@
 #include <string.h>
 #endif
 
+namespace oofem {
+
 /**
  * Abstract class for IML++ compatible preconditioner.
  * Each preconditioner provides solve() and transpose_solve() functionality,
@@ -99,4 +101,5 @@ public:
     virtual IRResultType initializeFrom(InputRecord *ir) { return IRRT_OK; }
 };
 
+} // end namespace oofem
 #endif // precond_h

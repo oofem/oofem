@@ -58,6 +58,8 @@
 #include "oofeggraphiccontext.h"
 #endif
 
+namespace oofem {
+
 Beam2d :: Beam2d(int n, Domain *aDomain) : StructuralElement(n, aDomain), LayeredCrossSectionInterface()
     // Constructor.
 {
@@ -1006,3 +1008,4 @@ void Beam2d :: drawDeformedGeometry(oofegGraphicContext &gc, UnknownType type)
     EMAddGraphicsToModel(ESIModel(), go);
 }
 #endif
+} // end namespace oofem

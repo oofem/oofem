@@ -44,6 +44,8 @@
 #include "materialmode.h"
 #include "matresponseform.h"
 
+namespace oofem {
+
 StressStrainBaseVector :: StressStrainBaseVector(MaterialMode m) : FloatArray()
 {
     this->resize( this->giveReducedSize(m) );
@@ -335,3 +337,5 @@ StressStrainBaseVector :: transformTo(StressStrainBaseVector &answer, const Floa
     // convert back to reduced form
     answer.convertFromFullForm( fullAnswer, this->giveStressStrainMode() );
 }
+
+} // end namespace oofem

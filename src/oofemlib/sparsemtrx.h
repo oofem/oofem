@@ -58,6 +58,7 @@
 #include "sparsemtrxtype.h"
 #include "unknownnumberingscheme.h"
 
+namespace oofem {
 
 class EngngModel;
 class TimeStep;
@@ -218,5 +219,5 @@ public:
 #endif
 };
 
+} // end namespace oofem
 #endif // sparsemtrx_h
-

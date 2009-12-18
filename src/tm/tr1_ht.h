@@ -43,6 +43,8 @@
 #include "transportelement.h"
 #include "spatiallocalizer.h"
 
+namespace oofem {
+
 class Tr1_ht : public TransportElement, public SpatialLocalizerInterface
 {
 protected:
@@ -123,4 +125,5 @@ protected:
     int giveApproxOrder(int unknownIndx) { return 1; }
 };
 
+} // end namespace oofem
 #endif // tr1_ht_h

@@ -42,6 +42,7 @@
 
 #include "loadtime.h"
 
+namespace oofem {
 /**
  * Class implementing time function y=f(t) that is constant in time.
  */
@@ -99,4 +100,5 @@ public:
     virtual double     __at(double)            { return this->giveValue(); }
 };
 
+} // end namespace oofem
 #endif // constant_h

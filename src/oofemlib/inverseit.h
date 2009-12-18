@@ -47,6 +47,7 @@
 #include "skyline.h"
 #include "flotarry.h"
 
+namespace oofem {
 
 class Domain;
 class EngngModel;
@@ -122,14 +123,5 @@ public:
 protected:
 };
 
+} // end namespace oofem
 #endif // inverseit_h
-
-
-
-
-
-
-
-
-
-

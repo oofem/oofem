@@ -39,6 +39,8 @@
 #ifndef materialextension_h
 #define materialextension_h
 
+namespace oofem {
+
 /**
  * Type representing material model extension.
  */
@@ -50,5 +52,6 @@ enum MaterialExtension {
     Material_FluidDynamicsCapability
 };
 
+} // end namespace oofem
 #endif // materialextension_h
 

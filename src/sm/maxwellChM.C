@@ -51,6 +51,7 @@
 #include "timestep.h"
 #include "contextioerr.h"
 
+namespace oofem {
 
 MaxwellChainMaterial :: MaxwellChainMaterial(int n, Domain *d) : RheoChainMaterial(n, d)
 {
@@ -370,3 +371,4 @@ MaxwellChainMaterialStatus :: restoreContext(DataStream *stream, ContextMode mod
     return CIO_OK;
 }
 
+} // end namespace oofem

@@ -34,6 +34,8 @@
 #endif
 #include "contextioerr.h"
 
+namespace oofem {
+
 // ======= class HydrationModelStatus implementation =======
 HydrationModelStatus :: HydrationModelStatus(int n, Domain *d, GaussPoint *g) : MaterialStatus(n, d, g)
 {
@@ -678,3 +680,5 @@ HydrationModelInterface :: giveHydrationDegree(GaussPoint *gp, TimeStep *atTime,
         return constantHydrationDegree;
     }
 }
+
+} // end namespace oofem

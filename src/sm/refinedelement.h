@@ -40,6 +40,8 @@
 #include "intarray.h"
 #include "valuemodetype.h"
 
+namespace oofem {
+
 class Domain;
 class Element;
 class TimeStep;
@@ -90,11 +92,5 @@ protected:
     void error(const char *file, int line, const char *format, ...) const;
 };
 
+} // end namespace oofem
 #endif // refinedelement_h
-
-
-
-
-
-
-

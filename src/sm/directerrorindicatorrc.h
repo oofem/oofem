@@ -45,6 +45,8 @@
 #include "interface.h"
 #include "remeshingcrit.h"
 
+namespace oofem {
+
 class Domain;
 class Element;
 class TimeStep;
@@ -165,10 +167,5 @@ public:
 #endif
 };
 
+} // end namespace oofem
 #endif // directerrorindicatorrc_h
-
-
-
-
-
-

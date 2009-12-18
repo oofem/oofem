@@ -48,6 +48,8 @@
 #include <math.h>
 #endif
 
+namespace oofem {
+
 #define ZERO_LENGTH 1.e-6
 
 IRResultType
@@ -550,3 +552,4 @@ OrthotropicLinearElasticMaterial :: CreateStatus(GaussPoint *gp) const
     return new StructuralMaterialStatus(1, this->giveDomain(), gp);
 }
 
+} // end namespace oofem

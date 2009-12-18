@@ -39,8 +39,11 @@
 #ifndef enumitem_h
 #define enumitem_h
 
+namespace oofem {
+
 #define ENUM_ITEM(element) element,
 #define ENUM_ITEM_WITH_VALUE(element, val) element = val,
 
+} // end namespace oofem
 #endif // enumitem_h
 

@@ -40,6 +40,8 @@
 #include "gaussintegrationrule.h"
 #include "fei2dtrlin.h"
 
+namespace oofem {
+
 /*
  * This class implements 3d triangular surface interface element with linear interpolation.
  */
@@ -107,12 +109,5 @@ protected:
     void         computeLCS(FloatMatrix &answer);
 };
 
+} // end namespace oofem
 #endif // interfaceelem3dtrlin_h
-
-
-
-
-
-
-
-

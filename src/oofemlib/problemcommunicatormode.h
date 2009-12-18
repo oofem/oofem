@@ -42,6 +42,8 @@
 
 #ifdef __PARALLEL_MODE
 
+namespace oofem {
+
 /**
  * ProblemCommunicatorMode determines the valid mode.
  * The mode is used to set up communication pattern, which differ for
@@ -54,5 +56,6 @@ enum ProblemCommunicatorMode {
   ProblemCommMode__ELEMENT_CUT, ProblemCommMode__REMOTE_ELEMENT_MODE
 };
 
+} // end namespace oofem
 #endif
 #endif // problemcommunicatormode_h

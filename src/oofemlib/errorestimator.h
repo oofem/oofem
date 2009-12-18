@@ -49,6 +49,8 @@
 #include "classtype.h"
 #include "errorestimatortype.h"
 
+namespace oofem {
+
 class Domain;
 class Element;
 class TimeStep;
@@ -147,7 +149,7 @@ public:
 protected:
 };
 
-
+} // end namespace oofem
 #endif // errorestimator_h
 
 

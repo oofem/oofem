@@ -40,6 +40,8 @@
 #include "sparsemtrx.h"
 #include "spoolesinterface.h"
 
+namespace oofem {
+
 /**
  * This class provides an sparse matrix interface to SPOOLES InpMtrx
  */
@@ -87,7 +89,7 @@ public:
      * @param eModel pointer to corresponding engineering model
      * @param di domain index specify which domain to use
      */
-    virtual int buildInternalStructure(EngngModel * eModel, int di, UnknownType, const UnknownNumberingScheme&s);
+    virtual int buildInternalStructure (EngngModel *eModel, int di, EquationID ut, const UnknownNumberingScheme&s) ;
     // virtual int assemble (FloatMatrix*, IntArray*) = 0;
     /**
      * Assembles sparse matrix from contribution of local elements. This method for
@@ -161,5 +163,6 @@ public:
 #endif
 };
 
+} // end namespace oofem
 #endif
 #endif // spoolessparsemtrx_h

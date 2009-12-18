@@ -46,6 +46,8 @@
 #include "feinterpol.h"
 // initialize class member
 
+namespace oofem {
+
 IntegrationRule :: IntegrationRule(int n, Element *e, int startIndx, int endIndx, bool dynamic)
 {
     number = n;
@@ -358,3 +360,4 @@ IntegrationRule :: setUpEmbeddedIntegrationPoints(integrationDomain mode, int nP
 }
 
 
+} // end namespace oofem

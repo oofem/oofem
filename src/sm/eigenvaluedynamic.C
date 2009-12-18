@@ -63,13 +63,15 @@
 #include "oofeggraphiccontext.h"
 #endif
 
+namespace oofem {
+
 NumericalMethod *EigenValueDynamic :: giveNumericalMethod(TimeStep *)
 {
     if ( nMethod ) {
         return nMethod;
     }
 
-    nMethod = :: CreateUsrDefGeneralizedEigenValueSolver(solverType, 1, this->giveDomain(1), this);
+    nMethod = CreateUsrDefGeneralizedEigenValueSolver(solverType, 1, this->giveDomain(1), this);
     if ( nMethod == NULL ) {
         _error("giveNumericalMethod:  solver creation failed");
     }
@@ -219,11 +221,11 @@ void EigenValueDynamic :: solveYourselfAt(TimeStep *tStep) {
          * delete mht;
          */
 
-        stiffnessMatrix = ::CreateUsrDefSparseMtrx(sparseMtrxType);
+        stiffnessMatrix = CreateUsrDefSparseMtrx(sparseMtrxType);
         stiffnessMatrix->buildInternalStructure(this, 1, EID_MomentumBalance, EModelDefaultEquationNumbering());
 
         //massMatrix = stiffnessMatrix->GiveCopy();
-	massMatrix = ::CreateUsrDefSparseMtrx(sparseMtrxType);
+        massMatrix = CreateUsrDefSparseMtrx(sparseMtrxType);
         massMatrix->buildInternalStructure(this, 1, EID_MomentumBalance, EModelDefaultEquationNumbering());
 
         this->assemble( stiffnessMatrix, tStep, EID_MomentumBalance, StiffnessMatrix, 
@@ -507,3 +509,4 @@ EigenValueDynamic::initPetscContexts ()
   }
 }
 #endif
+} // end namespace oofem

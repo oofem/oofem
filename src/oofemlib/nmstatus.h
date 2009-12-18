@@ -39,6 +39,7 @@
 #ifndef nmstatus_h
 #define nmstatus_h
 
+namespace oofem {
 /* mask defing NumMetod Status; which can be asked after
  * finishing computation by Numerical Method.
  * this mask should report some sitiuation, for
@@ -67,4 +68,5 @@ typedef unsigned long NM_Status;
 #define NM_KeepTangent  ( 1L << 3 )
 #define NM_ForceRestart ( 1L << 4 )
 
+} // end namespace oofem
 #endif // nmstatus_h

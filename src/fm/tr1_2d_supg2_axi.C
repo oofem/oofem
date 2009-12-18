@@ -64,6 +64,10 @@
 #include "timestep.h"
 #include "boundaryload.h"
 
+#include "fei2dtrlin.h"
+#include "fei2dquadlin.h"
+#include "geotoolbox.h"
+
 #ifndef __MAKEDEPEND
 #include <math.h>
 #include <stdio.h>
@@ -74,6 +78,7 @@
 #include "conTable.h"
 #endif
 
+namespace oofem {
 
 #define TRSUPG_ZERO_VOF 1.e-8
 #define POINT_TOL 1.e-8
@@ -1597,10 +1602,6 @@ TR1_2D_SUPG2_AXI :: giveElementCenter(LEPlic *mat_interface, FloatArray &center,
     center.times(1. / 3.);
 }
 
-#include "fei2dtrlin.h"
-#include "fei2dquadlin.h"
-#include "geotoolbox.h"
-
 void
 TR1_2D_SUPG2_AXI :: updateIntegrationRules()
 {
@@ -2115,3 +2116,4 @@ void TR1_2D_SUPG2_AXI :: drawScalar(oofegGraphicContext &context)
 
 
 #endif
+} // end namespace oofem

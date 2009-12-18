@@ -46,6 +46,9 @@
 #include "flotarry.h"
 #include "loadtime.h"
 
+
+namespace oofem {
+
 class PiecewiseLinFunction : public LoadTimeFunction
 {
     /*
@@ -101,5 +104,5 @@ public:
                                           return 0.; }
 };
 
+} // end namespace oofem
 #endif // piecewis_h
-

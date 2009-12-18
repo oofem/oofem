@@ -43,6 +43,8 @@
 #include <ctype.h>
 #endif
 
+namespace oofem {
+
 OOFEMTXTInputRecord :: OOFEMTXTInputRecord() : InputRecord(), tokenizer() {
     record [ 0 ] = '\0';
 }
@@ -818,3 +820,5 @@ OOFEMTXTInputRecord :: readMatrix(const char *helpSource, int r, int c, FloatMat
 
     return 0;
 }
+
+} // end namespace oofem

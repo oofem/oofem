@@ -49,6 +49,8 @@
 #include <stdio.h>
 #endif
 
+namespace oofem {
+
 class Dof;
 class NodalLoad;
 class TimeStep;
@@ -128,7 +130,7 @@ public:
     virtual bool isDofTypeCompatible(dofType type) const { return ( type == DT_master || type == DT_simpleSlave ); }
 };
 
-
+} // end namespace oofem
 #endif // elementside_h
 
 

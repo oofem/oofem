@@ -46,6 +46,9 @@
 #ifndef matconst_h
 #define matconst_h
 
+
+namespace oofem {
+
 /* poiss coeficients */
 #define NYxz 300
 #define NYyz 301
@@ -79,4 +82,5 @@
 #define Viscosity 500
 #define YieldStress 501
 
+} // end namespace oofem
 #endif // matconst_h

@@ -38,6 +38,8 @@
 #include "symcompcol.h"
 #include "mathfem.h"
 
+namespace oofem {
+
 CompCol_ICPreconditioner :: CompCol_ICPreconditioner(const SparseMtrx &A, InputRecord &attributes) :
     Preconditioner(A, attributes)
 { }
@@ -246,3 +248,5 @@ CompCol_ICPreconditioner :: qsortRowPartition(IntArray &src, FloatArray &val, in
 
     return i;
 }
+
+} // end namespace oofem

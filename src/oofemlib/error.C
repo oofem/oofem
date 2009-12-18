@@ -39,6 +39,9 @@
 #ifndef __MAKEDEPEND
 #include <stdlib.h>
 #endif
+
+namespace oofem {
+
 /**
  * Global variable containing warning level, should be in interval (0,3).
  * Zero level supress all warning messafes, level 3 causes to report all
@@ -124,3 +127,5 @@ void oofem_exit(int code) {
  *
  #endif
  */
+
+} // end namespace oofem

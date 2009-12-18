@@ -41,6 +41,7 @@
 #include <stdio.h>
 #endif
 
+namespace oofem {
 
 class Logger
 {
@@ -183,5 +184,5 @@ void OOFEM_LOG_DEBUG(const char *format, ...);
 
 #endif
 
-
+} // end namespace oofem
 #endif // logger_h

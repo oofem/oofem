@@ -51,6 +51,7 @@
 #include "mmashapefunctprojection.h"
 #include "huertaerrorestimator.h"
 
+namespace oofem {
 
 class LTRSpace : public NLStructuralElement, public ZZNodalRecoveryModelInterface,
     public NodalAveragingRecoveryModelInterface, public SPRNodalRecoveryModelInterface,
@@ -329,12 +330,5 @@ protected:
     //@}
 };
 
+} // end namespace oofem
 #endif // ltrspace_h
-
-
-
-
-
-
-
-

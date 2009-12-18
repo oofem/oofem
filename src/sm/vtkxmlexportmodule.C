@@ -51,6 +51,7 @@
  #include <string>
 #endif
 
+namespace oofem {
 
 
 VTKXMLExportModule :: VTKXMLExportModule(EngngModel *e) : ExportModule(e), internalVarsToExport(), primaryVarsToExport()
@@ -425,7 +426,7 @@ VTKXMLExportModule :: exportPointDataHeader(FILE *stream, TimeStep *tStep)
     // prepare header
     for ( i = 1; i <= n; i++ ) {
         isttype = ( InternalStateType ) internalVarsToExport.at(i);
-        vtype = :: giveInternalStateValueType(isttype);
+        vtype = giveInternalStateValueType(isttype);
 
         if ( vtype == ISVT_SCALAR ) {
             scalars += __InternalStateTypeToString(isttype);
@@ -465,7 +466,7 @@ VTKXMLExportModule :: exportIntVars(FILE *stream, IntArray &mapG2L, IntArray &ma
     // should be performed over regions
     for ( i = 1; i <= n; i++ ) {
         isttype = ( InternalStateType ) internalVarsToExport.at(i);
-        vtype = :: giveInternalStateValueType(isttype);
+        vtype = giveInternalStateValueType(isttype);
         this->exportIntVarAs(isttype, vtype, mapG2L, mapL2G, regionDofMans, region, stream, tStep);
     }
 }
@@ -821,3 +822,4 @@ VTKXMLExportModule :: exportPrimVarAs(UnknownType valID, IntArray &mapG2L, IntAr
     fprintf(stream, "</DataArray>\n");
 }
 
+} // end namespace oofem

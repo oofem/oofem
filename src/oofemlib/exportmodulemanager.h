@@ -51,6 +51,8 @@
 #include <time.h>
 #endif
 
+namespace oofem {
+
 class EngngModel;
 
 /**
@@ -111,5 +113,5 @@ protected:
     ExportModule *giveExportModule(int num);
 };
 
-
+} // end namespace oofem
 #endif // exportmodulemanager_h

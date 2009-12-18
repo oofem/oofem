@@ -50,6 +50,7 @@
 #include <math.h>
 #endif
 
+namespace oofem {
 
 #ifdef IDM_USE_MMAClosestIPTransfer
 MMAClosestIPTransfer IsotropicDamageMaterial1 :: mapper;
@@ -483,3 +484,4 @@ IsotropicDamageMaterial1Status :: restoreContext(DataStream *stream, ContextMode
     return CIO_OK;
 }
 
+} // end namespace oofem

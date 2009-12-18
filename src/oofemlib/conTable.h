@@ -45,6 +45,7 @@
 #include "node.h"
 #include "element.h"
 
+namespace oofem {
 
 /**
  * Class representing connectivity table. Usually attribute of domain. Provides
@@ -156,4 +157,5 @@ public:
     void printYourself();
 };
 
+} // end namespace oofem
 #endif // conTable_h

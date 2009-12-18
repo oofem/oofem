@@ -54,6 +54,8 @@
 #include <stdio.h>
 #endif
 
+namespace oofem {
+
 IRResultType
 NLTransientTransportProblem :: initializeFrom(InputRecord *ir)
 {
@@ -91,7 +93,7 @@ void NLTransientTransportProblem :: solveYourselfAt(TimeStep *tStep) {
     int neq =  this->giveNumberOfEquations(EID_ConservationEquation);
 
     if ( initFlag ) {
-        lhs = :: CreateUsrDefSparseMtrx(sparseMtrxType);
+        lhs = CreateUsrDefSparseMtrx(sparseMtrxType);
         if ( lhs == NULL ) {
             _error("solveYourselfAt: sparse matrix creation failed");
         }
@@ -384,3 +386,4 @@ NLTransientTransportProblem :: assembleAlgorithmicPartOfRhs(FloatArray &answer, 
     }
 }
 
+} // end namespace oofem

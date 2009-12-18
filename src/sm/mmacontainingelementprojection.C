@@ -40,6 +40,8 @@
 #include "integrationrule.h"
 #include "gausspnt.h"
 
+namespace oofem {
+
 MMAContainingElementProjection :: MMAContainingElementProjection() : MaterialMappingAlgorithm()
 { }
 
@@ -93,14 +95,4 @@ MMAContainingElementProjection :: __mapVariable(FloatArray &answer, FloatArray &
 }
 
 
-
-
-
-
-
-
-
-
-
-
-
+} // end namespace oofem

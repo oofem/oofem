@@ -50,6 +50,7 @@
 #include "flotarry.h"
 #include "flotmtrx.h"
 
+namespace oofem {
 
 /**
  * Empty cross section model, passes all requests to material driver
@@ -87,6 +88,6 @@ public:
     classType giveClassID()         const { return EmptyCrossSectionClass; }
 };
 
-
+} // end namespace oofem
 #endif // emptycs_h
 

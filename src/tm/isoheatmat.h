@@ -46,6 +46,7 @@
 #include "flotarry.h"
 #include "flotmtrx.h"
 
+namespace oofem {
 
 class GaussPoint;
 
@@ -97,5 +98,5 @@ public:
 protected:
 };
 
-
+} // end namespace oofem
 #endif // isoheatmat_h

@@ -44,6 +44,8 @@
 #include "gausspnt.h"
 #include "dictionr.h"
 
+namespace oofem {
+
 class TimeStep;
 
 /**
@@ -248,7 +250,7 @@ protected:
     void                 computeComponentArrayAt(FloatArray &answer, TimeStep *, ValueModeType mode);
 };
 
-
+} // end namespace oofem
 #endif // boundaryload_h
 
 

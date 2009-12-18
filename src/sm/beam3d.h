@@ -43,6 +43,8 @@
 #include "structuralelement.h"
 #include "fiberedcs.h"
 
+namespace oofem {
+
 class Beam3d : public StructuralElement, public FiberedCrossSectionInterface
 {
     /*
@@ -135,4 +137,5 @@ protected:
     virtual int  giveNumberOfIPForMassMtrxIntegration() { return 4; }
 };
 
+} // end namespace oofem
 #endif // beam3d_h

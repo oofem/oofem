@@ -44,7 +44,7 @@
 #include "sparsemtrx.h"
 #include "intarray.h"
 
-
+namespace oofem {
 
 // alloc chunk for columns
 #define DynCompRow_CHUNK 8
@@ -170,6 +170,6 @@ protected:
     int qsortRowPartition(IntArray &ind, IntArray &ir, FloatArray &val, int l, int r);
 };
 
-
+} // end namespace oofem
 #endif // dyncomprow_h
 

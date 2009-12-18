@@ -52,6 +52,8 @@
 #include "classtype.h"
 #include "valuemodetype.h"
 
+namespace oofem {
+
 /**
  * Abstract base class representing load time function. Classes derived from Load class typically
  * describe load from spatial point of view. The purpose of introducing load time function is to express
@@ -156,14 +158,5 @@ class LoadTimeFunction : public FEMComponent
     virtual double    __accelAt(double) { return 0.; }
 };
 
-
+} // end namespace oofem
 #endif // loadtime_h
-
-
-
-
-
-
-
-
-

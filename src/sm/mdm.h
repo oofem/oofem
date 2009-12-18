@@ -77,6 +77,9 @@
 #include "mmashapefunctprojection.h"
 #include "mmaleastsquareprojection.h"
 
+
+namespace oofem {
+
 class Microplane;
 
 /**
@@ -501,5 +504,5 @@ protected:
     void   giveRawMDMParameters(double &Efp, double &Ep, const FloatArray &reducedStrain, GaussPoint *gp);
 };
 
-
+} // end namespace oofem
 #endif // mdm_h

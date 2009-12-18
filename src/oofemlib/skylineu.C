@@ -61,6 +61,8 @@
 #include "clock.h"
 #endif
 
+namespace oofem {
+
 SkylineUnsym :: SkylineUnsym(int n) : SparseMtrx(n, n)
     // Constructor. Creates an empty skyline unsymmetric.
 
@@ -446,7 +448,7 @@ SkylineUnsym :: factorized()
 #ifdef TIME_REPORT
     //clock_t tstart = clock();
     oofem_timeval tstart;
-    :: getUtime(tstart);
+    getUtime(tstart);
 #endif
 
     if ( isFactorized ) {
@@ -503,7 +505,7 @@ SkylineUnsym :: factorized()
 #ifdef TIME_REPORT
     //printf ("\nSkylineU info: user time consumed by factorization: %.2gs", (clock()-tstart)/(double)CLOCKS_PER_SEC);
     oofem_timeval ut;
-    :: getRelativeUtime(ut, tstart);
+    getRelativeUtime(ut, tstart);
     OOFEM_LOG_DEBUG( "SkylineU info: user time consumed by factorization: %.2fs\n", ( double ) ( ut.tv_sec + ut.tv_usec / ( double ) OOFEM_USEC_LIM ) );
 #endif
     // increment version
@@ -803,3 +805,5 @@ FloatArray SkylineUnsym :: trans_mult(const FloatArray &x) const
     return answer;
 }
 #endif
+
+} // end namespace oofem

@@ -58,6 +58,7 @@
 #include "conTable.h"
 #endif
 
+namespace oofem {
 
 Quad1_ht :: Quad1_ht(int n, Domain *aDomain, ElementMode em) :
     TransportElement(n, aDomain, em)
@@ -808,3 +809,4 @@ void Quad1_ht :: drawScalar(oofegGraphicContext &context)
 
 
 #endif
+} // end namespace oofem

@@ -49,6 +49,7 @@
 #include "nonlocalmaterialext.h"
 #include "contextioerr.h"
 
+namespace oofem {
 
 RCSDNLMaterial :: RCSDNLMaterial(int n, Domain *d) : RCSDEMaterial(n, d), StructuralNonlocalMaterialExtensionInterface(d)
     //
@@ -670,3 +671,4 @@ RCSDNLMaterial :: estimatePackSize(CommunicationBuffer &buff, GaussPoint *ip)
 }
 
 #endif
+} // end namespace oofem

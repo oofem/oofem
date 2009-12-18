@@ -56,6 +56,7 @@
 #include "conTable.h"
 #endif
 
+namespace oofem {
 
 TrAxisym1_ht :: TrAxisym1_ht(int n, Domain *aDomain, ElementMode em) :
     Tr1_ht(n, aDomain, em)
@@ -124,3 +125,6 @@ TrAxisym1_ht :: computeRadiusAt(GaussPoint *gp)
 
     return r;
 }
+
+
+} // end namespace oofem

@@ -39,6 +39,7 @@
 #ifndef linsystsolvertype_h
 #define linsystsolvertype_h
 
+namespace oofem {
 /*
  * The values of this type should be related not to specific solvers,
  * but more to specific packages that provide linear solver interface
@@ -56,4 +57,5 @@ enum LinSystSolverType {
     ST_Feti   = 5
 };
 
+} // end namespace oofem
 #endif // linsystsolvertype_h

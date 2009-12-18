@@ -43,6 +43,8 @@
 #include "structuralelement.h"
 #include "layeredcrosssection.h"
 
+namespace oofem {
+
 class Beam2d : public StructuralElement, public LayeredCrossSectionInterface
 {
     /*
@@ -152,4 +154,5 @@ protected:
     virtual int  giveNumberOfIPForMassMtrxIntegration() { return 4; }
 };
 
+} // end namespace oofem
 #endif // beam2d_h

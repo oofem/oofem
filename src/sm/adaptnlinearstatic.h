@@ -48,6 +48,8 @@
 #include "errorestimator.h"
 #include "meshpackagetype.h"
 
+namespace oofem {
+
 class AdaptiveNonLinearStatic : public NonLinearStatic
 {
     /*
@@ -166,4 +168,5 @@ protected:
      */
 };
 
+} // end namespace oofem
 #endif // adaptnlinearstatic_h

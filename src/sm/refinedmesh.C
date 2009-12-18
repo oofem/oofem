@@ -39,7 +39,7 @@
 #include "node.h"
 #include "refinedelement.h"
 
-
+namespace oofem {
 
 #define EDGE_ELEM          1
 #define FACE_ELEM          2
@@ -3076,5 +3076,4 @@ RefinedMesh :: refineMeshGlobally(Domain *d, int level, AList< RefinedElement > 
 }
 
 
-
-
+} // end namespace oofem

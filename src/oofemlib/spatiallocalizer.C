@@ -40,6 +40,7 @@
 #include "mathfem.h"
 #include "error.h"
 
+namespace oofem {
 
 #define POINT_TOL 1.e-6
 
@@ -120,3 +121,5 @@ SpatialLocalizer::giveAllElementsWithNodesWithinBox(elementContainerType &elemSe
    for (i=1; i<=dofmanConnectivity->giveSize(); i++) elemSet.insert(dofmanConnectivity->at(i));
   }
 }
+
+} // end namespace oofem

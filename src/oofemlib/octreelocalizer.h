@@ -48,6 +48,8 @@
 #include <list>
 #endif
 
+namespace oofem {
+
 class Domain;
 class Element;
 class TimeStep;
@@ -354,10 +356,5 @@ protected:
                                               const double radius, oofemOctantRec *currentCell);
 };
 
+} // end namespace oofem
 #endif // octreelocalizer_h
-
-
-
-
-
-

@@ -63,6 +63,8 @@
 #include "conTable.h"
 #endif
 
+namespace oofem {
+
 LIBeam3d2 :: LIBeam3d2(int n, Domain *aDomain) : NLStructuralElement(n, aDomain), tc(), tempTc()
     // Constructor.
 {
@@ -969,3 +971,4 @@ LIBeam3d2 :: drawScalar(oofegGraphicContext &context)
 
 
 #endif
+} // end namespace oofem

@@ -42,6 +42,8 @@
 
 #include "lspace.h"
 
+namespace oofem {
+
 /**
  * Three dimensional brick with linear approximation, suitable for incompressible settings
  * This is achieved by selective integration of deviatoric (full integration) and
@@ -61,4 +63,5 @@ protected:
     void               computeBmatrixAt(GaussPoint *, FloatMatrix &, int = 1, int = ALL_STRAINS);
 };
 
+} // end namespace oofem
 #endif // lspacebb_h

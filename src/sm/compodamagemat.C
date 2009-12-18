@@ -46,6 +46,8 @@
 #include "mathfem.h"
 #include "contextioerr.h"
 
+namespace oofem {
+
 CompoDamageMat :: CompoDamageMat(int n, Domain *d) : StructuralMaterial(n, d)
 {
     /// Constructor
@@ -565,3 +567,4 @@ contextIOResultType CompoDamageMatStatus :: restoreContext(DataStream *stream, C
     return CIO_OK;
 }
 
+} // end namespace oofem

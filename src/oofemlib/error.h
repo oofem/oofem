@@ -46,6 +46,9 @@
 #ifndef __MAKEDEPEND
 #include <stdlib.h>
 #endif
+
+namespace oofem {
+
 /** cause oofem  program termination by calling exit */
 void oofem_exit(int code);
 
@@ -163,5 +166,5 @@ void oofem_exit(int code);
 #define __OOFEM_WARNING(_file, _line, _1) __OOFEM_WARNING1(_file, _line, _1)
 //@}
 
-
+} // end namespace oofem
 #endif // error_h

@@ -50,6 +50,8 @@
 #include "dictionr.h"
 #include "dynalist.h"
 
+namespace oofem {
+
 class Range;
 
 class StringReader
@@ -126,12 +128,5 @@ private:
     const char *skipNextWord(const char *src);
 };
 
+} // end namespace oofem
 #endif // strreader_h
-
-
-
-
-
-
-
-

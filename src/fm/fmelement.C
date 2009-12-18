@@ -55,6 +55,8 @@
 #include <stdio.h>
 #endif
 
+namespace oofem {
+
 FMElement :: FMElement(int n, Domain *aDomain) :
     Element(n, aDomain)
     // Constructor. Creates an element with number n, belonging to aDomain.
@@ -81,3 +83,4 @@ FMElement :: initializeFrom(InputRecord *ir)
     return IRRT_OK;
 }
 
+} // end namespace oofem

@@ -57,7 +57,7 @@
 #include <stdarg.h>
 #endif
 
-
+namespace oofem {
 
 contextIOResultType
 FEMComponent :: saveContext(DataStream *stream, ContextMode mode, void *obj)
@@ -157,3 +157,4 @@ FEMComponent :: warning(const char *file, int line, const char *format, ...) con
  * // end of typeInfo section
  */
 
+} // end namespace oofem

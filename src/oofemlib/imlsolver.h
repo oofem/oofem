@@ -50,6 +50,8 @@
 
 #include "precond.h"
 
+namespace oofem {
+
 class Domain;
 class EngngModel;
 class FloatMatrix;
@@ -116,13 +118,5 @@ public:
     LinSystSolverType giveLinSystSolverType() const { return ST_IML; }
 };
 
+} // end namespace oofem
 #endif // imlsolver_h
-
-
-
-
-
-
-
-
-

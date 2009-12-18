@@ -50,10 +50,11 @@
 #include "randomfieldgenerator.h"
 #include "gausspnt.h"
 
+namespace oofem {
+
 /** 
     This class implements a local (no spatial correlation) random generator using Guassian distribution. 
 */
-
 class LocalGaussianRandomGenerator: public RandomFieldGenerator
 {
 
@@ -110,5 +111,6 @@ protected:
   double dpolyValue(int n,double a[],double x);
 };
 
+} // end namespace oofem
 #endif
 

@@ -48,6 +48,8 @@
 #include <ctype.h>
 #endif
 
+namespace oofem {
+
 const char *StringReader :: getPosAfter(const char *source, const char *idString)
 //
 // returns possition of substring idString in source
@@ -478,3 +480,5 @@ StringReader :: readRange(const char **helpSource, int &li, int &hi)
 
     return 0;
 }
+
+} // end namespace oofem

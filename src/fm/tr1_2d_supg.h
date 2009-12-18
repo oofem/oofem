@@ -54,6 +54,7 @@
 #include "leplic.h"
 #include "levelsetpcs.h"
 
+namespace oofem {
 
 class TimeStep;
 class Node;
@@ -369,11 +370,5 @@ protected:
     virtual void initGeometry();
 };
 
+} // end namespace oofem
 #endif // tr1_2d_supg_h
-
-
-
-
-
-
-

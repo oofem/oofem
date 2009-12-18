@@ -64,6 +64,10 @@
 #include "timestep.h"
 #include "boundaryload.h"
 
+#include "fei2dtrlin.h"
+#include "fei2dquadlin.h"
+#include "geotoolbox.h"
+
 #ifndef __MAKEDEPEND
 #include <math.h>
 #include <stdio.h>
@@ -75,6 +79,7 @@
 #include "conTable.h"
 #endif
 
+namespace oofem {
 
 #define TRSUPG_ZERO_VOF 1.e-8
 #define POINT_TOL 1.e-8
@@ -1722,10 +1727,6 @@ TR1_2D_SUPG2 :: EIPrimaryFieldI_evaluateFieldVectorAt(FloatArray &answer, Primar
     }
 }
 
-#include "fei2dtrlin.h"
-#include "fei2dquadlin.h"
-#include "geotoolbox.h"
-
 void
 TR1_2D_SUPG2 :: updateYourself(TimeStep *tStep)
 {
@@ -2262,3 +2263,4 @@ void TR1_2D_SUPG2 :: drawScalar(oofegGraphicContext &context)
 
 
 #endif
+} // end namespace oofem

@@ -36,6 +36,8 @@
 #include "petsccontext.h"
 #include "engngm.h"
 
+namespace oofem {
+
 //#define PetscContext_debug_print
 
 PetscContext :: PetscContext(EngngModel *e, EquationID ut)
@@ -307,4 +309,5 @@ PetscContext :: createVecGlobal(Vec *answer)
 #endif
 }
 
+} // end namespace oofem
 #endif

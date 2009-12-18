@@ -42,6 +42,8 @@
 #include <stdlib.h>
 #endif
 
+namespace oofem {
+
 int
 HeMoTKMaterial :: hasMaterialModeCapability(MaterialMode mode)
 {
@@ -587,3 +589,5 @@ HeMoTKMaterial :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, Inter
         return TransportMaterial :: giveIPValue(answer, aGaussPoint, type, atTime);
     }
 }
+
+} // end namespace oofem

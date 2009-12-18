@@ -67,6 +67,8 @@
 #include "oofeggraphiccontext.h"
 #endif
 
+namespace oofem {
+
 class DataStream;
 /**
  * The top abstract class of all classes constituting the finite element mesh.
@@ -199,6 +201,7 @@ public:
 #endif
 };
 
+} // end namespace oofem
 #endif // femcmpnn_h
 
 

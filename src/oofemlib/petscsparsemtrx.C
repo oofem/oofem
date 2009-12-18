@@ -47,6 +47,8 @@
 #include "petscksp.h"
 #endif
 
+namespace oofem {
+
 SparseMtrx *
 PetscSparseMtrx :: GiveCopy() const
 {
@@ -171,8 +173,6 @@ PetscSparseMtrx :: buildInternalStructure(EngngModel *eModel, int di, EquationID
         MatCreate(PETSC_COMM_WORLD, & mtrx);
         MatSetSizes(mtrx, leqs, leqs, geqs, geqs);
         MatSetType(mtrx, MATMPIAIJ);
-        // To allow the insertion of values using MatSetValues in column major order
-        MatSetOption(mtrx, MAT_ROW_ORIENTED, PETSC_FALSE);
         MatSetFromOptions(mtrx);
         MatMPIAIJSetPreallocation(mtrx, 1, d_nnz.givePointer(), 6, PETSC_NULL);
 
@@ -241,6 +241,8 @@ PetscSparseMtrx :: assemble(const IntArray &loc, const FloatMatrix &mat)
         //fprintf (stderr, "[?] gloc=");
         //for (int i=1; i<=ndofe; i++) fprintf (stderr, "%d ", gloc.at(i));
 
+        // To allow the insertion of values using MatSetValues in column major order
+        MatSetOption(mtrx, MAT_ROW_ORIENTED, PETSC_FALSE);
         MatSetValues(this->mtrx, ndofe, gloc.givePointer(), ndofe, gloc.givePointer(), mat.givePointer(), ADD_VALUES);
     } else {
 #endif
@@ -249,6 +251,8 @@ PetscSparseMtrx :: assemble(const IntArray &loc, const FloatMatrix &mat)
         gloc.at(i) = loc.at(i) - 1;
     }
 
+    // To allow the insertion of values using MatSetValues in column major order
+    MatSetOption(mtrx, MAT_ROW_ORIENTED, PETSC_FALSE);
     MatSetValues(this->mtrx, ndofe, gloc.givePointer(), ndofe, gloc.givePointer(), mat.givePointer(), ADD_VALUES);
 
     //mat.printYourself();
@@ -371,6 +375,7 @@ PetscSparseMtrx :: trans_mult(const FloatArray &x) const
     return x; // to supress compiler warning
 }
 
+} // end namespace oofem
 #endif //ifdef __PETSC_MODULE
 
 

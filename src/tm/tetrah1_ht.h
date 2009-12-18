@@ -44,6 +44,8 @@
 #include "spatiallocalizer.h"
 #include "fei3dtrlin.h"
 
+namespace oofem {
+
 class Tetrah1_ht : public TransportElement, public SpatialLocalizerInterface
 {
 public:
@@ -133,4 +135,5 @@ protected:
     int giveApproxOrder(int unknownIndx) { return 1; }
 };
 
+} // end namespace oofem
 #endif // tetrah1_ht_h

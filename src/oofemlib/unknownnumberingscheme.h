@@ -38,6 +38,8 @@
 
 #include "dof.h"
 
+namespace oofem {
+
 /**
    Abstract base class allowing to controll the way, how equations are assigned to individual DOFs.
    The instances are typically used in EngngModel to asseble characteristic contributions and they
@@ -107,5 +109,5 @@ class EModelDefaultPrescribedEquationNumbering : public UnknownNumberingScheme {
   }
 };
 
-
+} // end namespace oofem
 #endif // unknownnumberingscheme_h

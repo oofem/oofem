@@ -46,6 +46,8 @@
 #include <stdio.h>
 #endif
 
+namespace oofem {
+
 /**
  * This class implements key/value associations - the key and its associated value.
  * An instance of Pair is used as an entry in a dictionary.
@@ -92,5 +94,5 @@ public:
     void     printYourself() { printf("   Pair (%d,%f)\n", key, value); }
 };
 
-
+} // end namespace oofem
 #endif // pair_h

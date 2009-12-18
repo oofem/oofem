@@ -43,6 +43,7 @@
 #include "randomfieldgenerator.h"
 #include "randommaterialext.h"
 
+namespace oofem {
 
 bool
 RandomMaterialStatusExtensionInterface::_giveProperty (int key, double& value) 
@@ -104,3 +105,5 @@ RandomMaterialExtensionInterface::_generateStatusVariables (GaussPoint* gp) cons
     status->_setProperty (randVariables.at(i), value);
   }
 }
+
+} // end namespace oofem

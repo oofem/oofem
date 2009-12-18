@@ -47,6 +47,8 @@
 #include <string.h>
 #endif
 
+namespace oofem {
+
 /**
  * Class implementing prescribed pressure bc due to prescribed tractions (Dirichlet boundary condition on DOF).
  * This boundary condition is usually attribute of one or more degrees of freedom (DOF).
@@ -89,6 +91,5 @@ public:
     virtual void scale(double s) { }
 };
 
-
+} // end namespace oofem
 #endif // tractionpressurebc_h
-

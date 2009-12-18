@@ -46,6 +46,8 @@
 #include <stdlib.h>
 #endif
 
+namespace oofem {
+
 RowColumn :: RowColumn(int n, int st)
 // Constructor. Creates a row-column with number n, starting at index st.
 {
@@ -297,3 +299,5 @@ RowColumn :: RowColumn(int inumber, int istart, double *irow, double *icol, doub
     this->column = icol;
     this->diag   = idiag;
 }
+
+} // end namespace oofem

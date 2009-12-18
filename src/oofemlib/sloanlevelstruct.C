@@ -42,6 +42,7 @@
 #include "intarray.h"
 #include "domain.h"
 
+namespace oofem {
 
 #define LEVEL_LIST_GROW_CHUNK 50
 
@@ -146,3 +147,4 @@ SloanLevelStructure :: giveLevel(int num)
 
 
 
+} // end namespace oofem

@@ -66,6 +66,8 @@
 #endif
 #include "contextioerr.h"
 
+namespace oofem {
+
 /* define if implicit interface update required */
 //#define SUPG_IMPLICIT_INTERFACE
 
@@ -79,7 +81,7 @@ NumericalMethod *SUPG :: giveNumericalMethod(TimeStep *atTime)
         return nMethod;
     }
 
-    nMethod = :: CreateUsrDefSparseLinSolver(solverType, 1, this->giveDomain(1), this);
+    nMethod = CreateUsrDefSparseLinSolver(solverType, 1, this->giveDomain(1), this);
     if ( nMethod == NULL ) {
         _error("giveNumericalMethod: linear solver creation failed");
     }
@@ -404,7 +406,7 @@ SUPG :: solveYourselfAt(TimeStep *tStep)
 
         incrementalSolutionVector.resize(neq);
 
-        lhs = :: CreateUsrDefSparseMtrx(sparseMtrxType);
+        lhs = CreateUsrDefSparseMtrx(sparseMtrxType);
         if ( lhs == NULL ) {
             _error("solveYourselfAt: sparse matrix creation failed");
         }
@@ -700,13 +702,13 @@ SUPG :: solveYourselfAt(TimeStep *tStep)
     if ( materialInterface ) {
 #ifdef TIME_REPORT
         oofem_timeval tstart;
-        :: getUtime(tstart);
+        getUtime(tstart);
 #endif
         materialInterface->updatePosition( this->giveCurrentStep() );
         updateElementsForNewInterfacePosition(tStep);
 #ifdef TIME_REPORT
         oofem_timeval ut;
-        :: getRelativeUtime(ut, tstart);
+        getRelativeUtime(ut, tstart);
         OOFEM_LOG_INFO( "SUPG info: user time consumed by updating interfaces: %.2fs\n", ( double ) ( ut.tv_sec + ut.tv_usec / ( double ) OOFEM_USEC_LIM ) );
 #endif
         //if (this->fsflag) this->updateDofManActivityMap(tStep);
@@ -1584,3 +1586,5 @@ SUPG :: giveUnknownDictHashIndx(EquationID type, ValueModeType mode, TimeStep *s
  * }
  *
  */
+
+} // end namespace oofem

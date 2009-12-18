@@ -75,6 +75,7 @@
 #include "petsccontext.h"
 #endif
 
+namespace oofem {
 
 AdaptiveNonLinearStatic :: AdaptiveNonLinearStatic(int i, EngngModel *_master) : NonLinearStatic(i, _master),
     d2_totalDisplacement(), d2_incrementOfDisplacement(), timeStepLoadLevels() {
@@ -112,7 +113,7 @@ AdaptiveNonLinearStatic :: initializeFrom(InputRecord *ir)
     _val = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, _val, IFT_AdaptiveNonLinearStatic_eetype, "eetype"); // Macro
     ErrorEstimatorType eeType = ( ErrorEstimatorType ) _val;
-    this->ee = :: CreateUsrDefErrorEstimator( eeType, 1, this->giveDomain(1) );
+    this->ee = CreateUsrDefErrorEstimator( eeType, 1, this->giveDomain(1) );
 
     ee->initializeFrom(ir);
     int meshPackageId = 0;
@@ -157,7 +158,7 @@ AdaptiveNonLinearStatic :: solveYourselfAt(TimeStep *tStep) {
     } else  if ( ( strategy == RemeshingFromCurrentState_RS ) || ( strategy == RemeshingFromPreviousState_RS ) ) {
 
         // do remeshing
-        MesherInterface *mesher = ::CreateUsrDefMesherInterface(meshPackage, this->giveDomain(1));
+        MesherInterface *mesher = CreateUsrDefMesherInterface(meshPackage, this->giveDomain(1));
 
 	Domain *newDomain;
 	MesherInterface::returnCode result = mesher->createMesh(this->giveCurrentStep(), 1, 
@@ -270,7 +271,7 @@ AdaptiveNonLinearStatic :: initializeAdaptiveFrom(EngngModel *sourceProblem)
     //clock_t sc = this->getClock();
     //clock_t mc, mc2, ec ;
     oofem_timeval st, st1, st2, mc1, mc2, mc3, ec;
-    :: getUtime(st);
+    getUtime(st);
 
     if ( sourceProblem->giveClassID() != AdaptiveNonLinearStaticClass ) {
         _error("sory");
@@ -296,8 +297,8 @@ AdaptiveNonLinearStatic :: initializeAdaptiveFrom(EngngModel *sourceProblem)
                                   sourceProblem->giveDomain(1), this->giveDomain(1), sourceProblem->giveCurrentStep() );
 
     //mc = this->getClock();
-    :: getRelativeUtime(mc1, st);
-    :: getUtime(st1);
+    getRelativeUtime(mc1, st);
+    getUtime(st1);
 
     // map internal ip state
     nelem = this->giveDomain(1)->giveNumberOfElements();
@@ -307,8 +308,8 @@ AdaptiveNonLinearStatic :: initializeAdaptiveFrom(EngngModel *sourceProblem)
     }
 
     //mc2 = this->getClock();
-    :: getRelativeUtime(mc2, st1);
-    :: getUtime(st2);
+    getRelativeUtime(mc2, st1);
+    getUtime(st2);
 
     // computes the stresses and calls updateYourself to mapped state
     for ( ielem = 1; ielem <= nelem; ielem++ ) {
@@ -355,8 +356,8 @@ AdaptiveNonLinearStatic :: initializeAdaptiveFrom(EngngModel *sourceProblem)
     // set bcloadVector to zero (no increment within same step)
 
     //ec = this->getClock();
-    :: getRelativeUtime(mc3, st2);
-    :: getRelativeUtime(ec, st);
+    getRelativeUtime(mc3, st2);
+    getRelativeUtime(ec, st);
 
     // compute processor time used by the program
     OOFEM_LOG_INFO( "user time consumed by primary mapping: %.2fs\n", ( double ) ( mc1.tv_sec + mc1.tv_usec / ( double ) OOFEM_USEC_LIM ) );
@@ -377,7 +378,7 @@ AdaptiveNonLinearStatic :: initializeAdaptiveFrom(EngngModel *sourceProblem)
 
 
         if ( initFlag ) {
-            stiffnessMatrix = :: CreateUsrDefSparseMtrx(sparseMtrxType);
+            stiffnessMatrix = CreateUsrDefSparseMtrx(sparseMtrxType);
             if ( stiffnessMatrix == NULL ) {
                 _error("proceedStep: sparse matrix creation failed");
             }
@@ -511,7 +512,7 @@ AdaptiveNonLinearStatic :: adaptiveRemap(Domain* dNew)
     //clock_t sc = this->getClock();
     //clock_t mc, mc2, ec ;
     oofem_timeval st, st1, st2, mc1, mc2, mc3, ec;
-    :: getUtime(st);
+    getUtime(st);
 
 
     // map primary unknowns
@@ -529,8 +530,8 @@ AdaptiveNonLinearStatic :: adaptiveRemap(Domain* dNew)
                                   this->giveDomain(1), this->giveDomain(2), this->giveCurrentStep() );
 
     //mc = this->getClock();
-    :: getRelativeUtime(mc1, st);
-    :: getUtime(st1);
+    getRelativeUtime(mc1, st);
+    getUtime(st1);
 
     // map internal ip state
     nelem = this->giveDomain(2)->giveNumberOfElements();
@@ -585,8 +586,8 @@ AdaptiveNonLinearStatic :: adaptiveRemap(Domain* dNew)
 #endif
 
     //mc2 = this->getClock();
-    :: getRelativeUtime(mc2, st1);
-    :: getUtime(st2);
+    getRelativeUtime(mc2, st1);
+    getUtime(st2);
 
     // computes the stresses and calls updateYourself to mapped state
     for ( ielem = 1; ielem <= nelem; ielem++ ) {
@@ -654,8 +655,8 @@ AdaptiveNonLinearStatic :: adaptiveRemap(Domain* dNew)
     // set bcloadVector to zero (no increment within same step)
 
     //ec = this->getClock();
-    :: getRelativeUtime(mc3, st2);
-    :: getRelativeUtime(ec, st);
+    getRelativeUtime(mc3, st2);
+    getRelativeUtime(ec, st);
 
     // compute processor time used by the program
     OOFEM_LOG_INFO( "user time consumed by primary mapping: %.2fs\n", ( double ) ( mc1.tv_sec + mc1.tv_usec / ( double ) OOFEM_USEC_LIM ) );
@@ -719,7 +720,7 @@ AdaptiveNonLinearStatic :: adaptiveRemap(Domain* dNew)
 
         if ( initFlag ) {
 	  if (!stiffnessMatrix) {
-	    stiffnessMatrix = :: CreateUsrDefSparseMtrx(sparseMtrxType);
+	    stiffnessMatrix = CreateUsrDefSparseMtrx(sparseMtrxType);
 	    if ( stiffnessMatrix == NULL ) {
 	      _error("proceedStep: sparse matrix creation failed");
 	    }
@@ -1091,3 +1092,5 @@ AdaptiveNonLinearStatic :: giveLoadBalancerMonitor()
     }
 }
 #endif
+
+} // end namespace oofem

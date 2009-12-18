@@ -25,6 +25,8 @@
 #include "datastream.h"
 #include "contextioerr.h"
 
+namespace oofem {
+
 // --------- class AgingIsoLEMaterial implementation---------
 AgingIsoLEMaterial :: AgingIsoLEMaterial(int n, Domain *d, double E, double nu) : IsotropicLinearElasticMaterial(n, d, E, nu) { }
 void AgingIsoLEMaterial :: setE(double newE) { E = newE;
@@ -3371,3 +3373,5 @@ HellmichMaterial::HellmichMaterial(int n, Domain *d) : StructuralMaterial (n,d) 
   _error ("Can't create instance of this class, TM module required");
 }
 #endif
+
+} // end namespace oofem

@@ -58,6 +58,8 @@
 #include "oofegutils.h"
 #endif
 
+namespace oofem {
+
 FEI2dTrQuad QTrPlaneStress2d :: interpolation(1, 2);
 
 QTrPlaneStress2d :: QTrPlaneStress2d(int n, Domain *aDomain) :
@@ -661,3 +663,4 @@ QTrPlaneStress2d :: EIPrimaryUnknownMI_givePrimaryUnknownVectorDofID(IntArray &a
 }
 
 
+} // end namespace oofem

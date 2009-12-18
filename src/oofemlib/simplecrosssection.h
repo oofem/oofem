@@ -47,6 +47,7 @@
 #include "flotarry.h"
 #include "flotmtrx.h"
 
+namespace oofem {
 
 class GaussPoint;
 
@@ -246,6 +247,5 @@ protected:
 };
 
 
+} // end namespace oofem
 #endif // simplecrosssection_h
-
-

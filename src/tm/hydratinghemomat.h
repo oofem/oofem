@@ -48,6 +48,7 @@
 #include "flotarry.h"
 #include "flotmtrx.h"
 
+namespace oofem {
 
 class GaussPoint;
 
@@ -121,5 +122,5 @@ protected:
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
 };
 
-
+} // end namespace oofem
 #endif // hydratinghemomat_h

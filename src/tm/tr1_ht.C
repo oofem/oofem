@@ -57,6 +57,7 @@
 #include "conTable.h"
 #endif
 
+namespace oofem {
 
 Tr1_ht :: Tr1_ht(int n, Domain *aDomain, ElementMode em) :
     TransportElement(n, aDomain, em)
@@ -442,3 +443,5 @@ Tr1_ht :: computeLocalCoordinates(FloatArray &answer, const FloatArray &coords)
 
     return 1;
 }
+
+} // end namespace oofem

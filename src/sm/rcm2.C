@@ -48,6 +48,8 @@
 #include <math.h>
 #endif
 
+namespace oofem {
+
 #define rcm_STRESSRELERROR 1.e-5
 #define rcm_RESIDUALSTIFFFACTOR 1.e-3
 
@@ -1541,3 +1543,4 @@ RCM2MaterialStatus :: restoreContext(DataStream *stream, ContextMode mode, void 
 }
 
 
+} // end namespace oofem

@@ -48,6 +48,8 @@
 #endif
 #endif
 
+namespace oofem {
+
 CommunicatorBuff :: CommunicatorBuff(int s, CommBuffType t)
 {
     int i;
@@ -177,4 +179,6 @@ Communicator :: error(const char *file, int line, const char *format, ...) const
 
     __OOFEM_ERROR3(file, line, "Class: Communicator, Rank: %d\n%s", rank, buffer);
 }
+
+} // end namespace oofem
 #endif

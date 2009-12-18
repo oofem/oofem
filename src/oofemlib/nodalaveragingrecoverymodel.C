@@ -46,6 +46,8 @@
 #include <stdio.h>
 #endif
 
+namespace oofem {
+
 NodalAveragingRecoveryModel :: NodalAveragingRecoveryModel(Domain *d) : NodalRecoveryModel(d)
 { }
 
@@ -328,3 +330,4 @@ NodalAveragingRecoveryModel :: unpackSharedDofManData (parallelStruct* s, Proces
 
 #endif
 
+} // end namespace oofem

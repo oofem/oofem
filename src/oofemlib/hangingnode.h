@@ -42,6 +42,7 @@
 #include <stdio.h>
 #endif
 
+namespace oofem {
 
 class FloatArray;
 class IntArray;
@@ -135,5 +136,5 @@ public:
     bool isDofTypeCompatible(dofType type) const { return ( type == DT_master || type == DT_slave ); } // termitovo
 };
 
-
+} // end namespace oofem
 #endif // hangingnode_h

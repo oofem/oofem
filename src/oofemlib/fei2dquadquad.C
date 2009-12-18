@@ -40,6 +40,8 @@
 #include "node.h"
 #include "mathfem.h"
 
+namespace oofem {
+
 void
 FEI2dQuadQuad :: evalN(FloatArray &answer, const FloatArray &lcoords, double time)
 {
@@ -336,3 +338,5 @@ FEI2dQuadQuad :: giveDerivativeEta(FloatArray &n, const FloatArray &lc)
     n.at(8) = -eta * ( 1. + ksi );
 
 }
+
+} // end namespace oofem

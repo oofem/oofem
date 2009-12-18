@@ -46,6 +46,8 @@
 #include "flotarry.h"
 #include "flotmtrx.h"
 
+namespace oofem {
+
 class GaussPoint;
 class Domain;
 
@@ -217,4 +219,5 @@ public:
     { return MisesMatStatusClass; }
 };
 
+} // end namespace oofem
 #endif // misesmat_h

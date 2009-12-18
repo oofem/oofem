@@ -40,6 +40,8 @@
 #include "node.h"
 #include "mathfem.h"
 
+namespace oofem {
+
 void
 FEI2dTrLin :: evalN(FloatArray &answer, const FloatArray &lcoords, double time)
 {
@@ -239,3 +241,5 @@ FEI2dTrLin :: edgeComputeLength(IntArray &edgeNodes, const FloatArray **coords)
     dy      = coords [ nodeB ]->at(yind) - coords [ nodeA ]->at(yind);
     return ( sqrt(dx * dx + dy * dy) );
 }
+
+} // end namespace oofem

@@ -48,6 +48,8 @@
 #include "elementside.h"
 #include "conTable.h"
 
+namespace oofem {
+
 ConnectivityTable :: ~ConnectivityTable()
 // destructor
 {
@@ -604,3 +606,4 @@ ConnectivityTable :: giveNodeNeighbourList(IntArray &answer, IntArray &nodeList)
     }
 }
 
+} // end namespace oofem

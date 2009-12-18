@@ -47,6 +47,8 @@
 #include "domain.h"
 #include "feinterpol3d.h"
 
+namespace oofem {
+
 /**
  * Class representing implementation of linar hexahedra interpolation class.
  */
@@ -302,7 +304,7 @@ public:
 
 
 
-
+} // end namespace oofem
 #endif //  fei3dhexalin_h
 
 

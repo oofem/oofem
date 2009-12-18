@@ -43,6 +43,7 @@
 #include <stdio.h>
 #endif
 
+namespace oofem {
 
 LDLTFactorization :: LDLTFactorization(int i, Domain *d, EngngModel *m) :
     SparseLinearSystemNM(i, d, m) {
@@ -115,3 +116,4 @@ LDLTFactorization :: initializeFrom(InputRecord *ir)
     return IRRT_OK;
 }
 
+} // end namespace oofem

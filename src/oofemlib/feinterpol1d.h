@@ -46,6 +46,8 @@
 #include "intarray.h"
 #include "domain.h"
 
+namespace oofem {
+
 /**
  * Class representing a general abstraction for finite element interpolation class.
  */
@@ -58,7 +60,7 @@ public:
 };
 
 
-
+} // end namespace oofem
 #endif // feinterpol1d_h
 
 

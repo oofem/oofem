@@ -33,6 +33,7 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.                                                                              
 */
 #ifndef slepcsolver_h
+#define slepcsolver_h
 
 #ifndef __MAKEDEPEND
 #include <stdio.h>
@@ -54,6 +55,7 @@
 #endif
 #endif
 
+namespace oofem {
 
 class Domain; class EngngModel; class FloatMatrix;
 
@@ -97,6 +99,5 @@ public:
  classType giveClassID () const { return  SlepcSolverClass ;}
 };
 
-#define slepcsolver_h
-#endif
-
+} // end namespace oofem
+#endif // slepcsolver_h

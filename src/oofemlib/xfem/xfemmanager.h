@@ -16,6 +16,8 @@
 #include "engngm.h"
 #include "patch.h"
 
+namespace oofem {
+
 /* this class manages the xfem part as well as takes over some functions which would appear
  * in the Domain and Node class */
 class XfemManager
@@ -83,6 +85,7 @@ protected:
     DofID allocateNewDofID();
 };
 
+} // end namespace oofem
 #endif  /* _XFEMMANAGER_H */
 
 

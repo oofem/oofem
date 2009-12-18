@@ -41,9 +41,12 @@
 #include "sparsemtrx.h"
 #include "intarray.h"
 
-
+/** Dss module lives in global namespace, not in oofem namespace */
 class DSSolver;
 class SparseMatrixF;
+
+namespace oofem {
+
 
 /**
  * Interface to Direct Sparse Solver written by R.Vonracek.
@@ -162,5 +165,6 @@ protected:
 };
 
 
+} // end namespace oofem
 #endif // dss_h
 

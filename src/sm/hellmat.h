@@ -30,6 +30,8 @@
 #include "../tm/hemotkmat.h"      // for inverse sorption isotherm function
 #include "hydram.h"                      // hydration model
 
+namespace oofem {
+
 class GaussPoint;
 
 // Output of all key functions
@@ -818,5 +820,5 @@ class HellmichMaterial : public StructuralMaterial
 #endif
 
 
-
+} // end namespace oofem
 #endif // hellmat_h

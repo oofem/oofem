@@ -36,6 +36,8 @@
 #include "usrdeftimefunct.h"
 #include <math.h>
 
+namespace oofem {
+
 double UserDefinedLoadTimeFunction :: __at(double time)
 // Returns the value of the receiver at time 'time'. 'time' should be
 // one of the dates of the receiver (currently there is no interpola-
@@ -122,3 +124,5 @@ UserDefinedLoadTimeFunction :: initializeFrom(InputRecord *ir)
 
     return IRRT_OK;
 }
+
+} // end namespace oofem

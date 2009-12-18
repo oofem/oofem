@@ -41,6 +41,8 @@
 
 #include "kelvinChM.h"
 
+namespace oofem {
+
 class B3SolidMaterial : public KelvinChainMaterial
 {
     /*
@@ -134,4 +136,5 @@ protected:
 
 // Note: There is no associated material status - everything is handled by KelvinChainMaterialStatus
 
+} // end namespace oofem
 #endif // b3solidmat_h

@@ -43,6 +43,7 @@
 
 #include "rcm2.h"
 
+namespace oofem {
 
 #define rcsd_Omega 300
 #define pscm_SDTransitionCoeff 306
@@ -193,9 +194,5 @@ protected:
     ////
 };
 
-
+} // end namespace oofem
 #endif // rcsde_h
-
-
-
-

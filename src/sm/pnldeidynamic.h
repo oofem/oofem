@@ -49,9 +49,12 @@
 #include "flotarry.h"
 #include "flotmtrx.h"
 
+namespace oofem {
+
 #ifdef __PARALLEL_MODE
 #include "problemcomm.h"
 #include "processcomm.h"
+
 
 class PNlDEIDynamic;
 class ProblemCommunicator;
@@ -339,4 +342,5 @@ public:
 #endif
 };
 
+} // end namespace oofem
 #endif // pnldeidynamic_h

@@ -43,6 +43,8 @@
 #include "structuralelement.h"
 #include "layeredcrosssection.h"
 
+namespace oofem {
+
 class LIBeam2d : public StructuralElement, public LayeredCrossSectionInterface
 {
     /*
@@ -108,4 +110,5 @@ protected:
     double        givePitch();
 };
 
+} // end namespace oofem
 #endif // libeam2d_h

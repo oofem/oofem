@@ -1,8 +1,4 @@
 /* $Header: /home/cvs/bp/oofem/oofemlib/src/dofmanager.C,v 1.18.4.1 2004/04/05 15:19:43 bp Exp $ */
-
-#include "alist.h"
-#include "dofiditem.h"
-
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -76,6 +72,8 @@
 //#include "sharedmasterdof.h"
 //#include "nulldof.h"
 #endif
+
+namespace oofem {
 
 DofManager :: DofManager(int n, Domain *aDomain) :
     FEMComponent(n, aDomain), loadArray()
@@ -922,7 +920,7 @@ DofManager *DofManager :: ofType(char *aClass)
     } else if ( !strncasecmp(aClass, "hangingnode", 11) ) {
         newDofManager = new HangingNode(number, domain);
     } else { // last resort - call aditional user defined subroutine
-        newDofManager = :: CreateUsrDefDofManagerOfType(aClass, number, domain);
+        newDofManager = CreateUsrDefDofManagerOfType(aClass, number, domain);
         if ( newDofManager == NULL ) {
             _error2("ofType: unknown DofManager type (%s)", aClass);
         }
@@ -1282,3 +1280,5 @@ DofManager :: givePartitionsConnectivitySize()
 }
 
 #endif
+
+} // end namespace oofem

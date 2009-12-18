@@ -40,6 +40,8 @@
 #include "structuralelement.h"
 #include "gaussintegrationrule.h"
 
+namespace oofem {
+
 class InterfaceElem2dQuad : public StructuralElement
 {
     /*
@@ -108,12 +110,5 @@ protected:
     int          computeGtoLRotationMatrix(FloatMatrix &answer);
 };
 
+} // end namespace oofem
 #endif // interfaceelem2dquad_h
-
-
-
-
-
-
-
-

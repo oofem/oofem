@@ -40,6 +40,8 @@
 #include <math.h>
 #endif
 
+namespace oofem {
+
 double
 HeavisideLTF :: __at(double time)
 // Returns the value of the receiver at time 'time'. 'time' should be
@@ -82,3 +84,5 @@ HeavisideLTF :: giveInputRecordString(std :: string &str, bool keyword)
 
     return 1;
 }
+
+} // end namespace oofem

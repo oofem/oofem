@@ -45,7 +45,7 @@
 #include "debug.h"
 #include "error.h"
 
-
+namespace oofem {
 
 #ifdef DEBUG
 double &Column :: at(int i)
@@ -133,3 +133,4 @@ Column *Column :: GiveCopy()
 }
 
 
+} // end namespace oofem

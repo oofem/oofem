@@ -44,6 +44,7 @@
 
 #include "matstatus.h"
 
+namespace oofem {
 
 /**
  * Base class for all nonlocal structural material statuses.
@@ -102,6 +103,5 @@ public:
     virtual void updateBeforeNonlocAverage(const FloatArray &strainVector, GaussPoint *gp, TimeStep *atTime) = 0;
 };
 
+} // end namespace oofem
 #endif // structuralnonlocalmaterialext_h
-
-

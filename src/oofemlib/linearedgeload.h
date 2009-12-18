@@ -44,6 +44,8 @@
 #include "gausspnt.h"
 #include "flotarry.h"
 
+namespace oofem {
+
 class TimeStep;
 
 
@@ -94,11 +96,5 @@ protected:
     void computeNArray(FloatArray &answer, FloatArray &coords) const;
 };
 
-
+} // end namespace oofem
 #endif // linearedgeload_h
-
-
-
-
-
-

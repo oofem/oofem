@@ -46,6 +46,8 @@
 #include "verbose.h"
 #include "contextioerr.h"
 
+namespace oofem {
+
 void
 FiberedCrossSection ::  giveRealStresses(FloatArray &answer, MatResponseForm form,
                                          GaussPoint *gp,
@@ -812,3 +814,5 @@ FiberedCrossSection :: computeStressIndependentStrainVector(FloatArray &answer,
         _error("computeStressIndependentStrainVector: temperature loading not supported");
     }
 }
+
+} // end namespace oofem

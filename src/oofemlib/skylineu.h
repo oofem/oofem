@@ -43,6 +43,7 @@
 #include "sparsemtrx.h"
 #include "rowcol.h"
 
+namespace oofem {
 
 /// "zero" pivot for SkylineUnsym class
 #define SkylineUnsym_TINY_PIVOT 1.e-30
@@ -172,5 +173,5 @@ protected:
 };
 
 
+} // end namespace oofem
 #endif // skylineu_h
-

@@ -60,6 +60,8 @@
 #include <stdlib.h>
 #endif
 
+namespace oofem {
+
 class FloatArray;
 class DiagonalMatrix;
 class IntArray;
@@ -403,5 +405,6 @@ public:
 protected:
 };
 
+} // end namespace oofem
 #endif // flotmtrx_h
 

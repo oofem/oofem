@@ -64,6 +64,8 @@
 #include "conTable.h"
 #endif
 
+namespace oofem {
+
 FEI2dTrLin Axisymm3d :: interpolation(1, 2);
 
 Axisymm3d :: Axisymm3d(int n, Domain *aDomain) :
@@ -990,3 +992,5 @@ Axisymm3d :: drawScalar(oofegGraphicContext &context)
  */
 
 #endif
+
+} // end namespace oofem

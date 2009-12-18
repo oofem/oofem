@@ -41,6 +41,8 @@
 #include <math.h>
 #endif
 
+namespace oofem {
+
 #define Parser_CMD_LENGTH 1024
 #define Parser_TBLSZ 23
 
@@ -83,5 +85,5 @@ private:
     Token_value get_token();
 };
 
-
+} // end namespace oofem
 #endif // parser_h

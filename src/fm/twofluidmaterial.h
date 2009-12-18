@@ -44,6 +44,8 @@
 #include "structuralelement.h"
 #include "matstatus.h"
 
+namespace oofem {
+
 class GaussPoint;
 
 /**
@@ -156,9 +158,5 @@ protected:
 };
 
 
+} // end namespace oofem
 #endif // twofluidmaterial_h
-
-
-
-
-

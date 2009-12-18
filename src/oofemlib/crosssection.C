@@ -54,6 +54,8 @@
 #endif
 #endif
 
+namespace oofem {
+
 IRResultType
 CrossSection :: initializeFrom(InputRecord *ir)
 //
@@ -132,7 +134,7 @@ CrossSection :: ofType(char *aClass)
         newCrossSection = new EmptyCS(number, domain);
     } else {
         // last resort - call aditional user defined subroutine
-        newCrossSection = :: CreateUsrDefCrossSectionOfType(aClass, number, domain);
+        newCrossSection = CreateUsrDefCrossSectionOfType(aClass, number, domain);
         if ( newCrossSection == NULL ) {
             _error2("ofType:  unknown cross section type (%s)\n", aClass);
             exit(0);
@@ -171,3 +173,5 @@ CrossSection :: predictRelativeComputationalCost(GaussPoint *gp)
     return this->giveRelativeSelfComputationalCost() * gp->giveMaterial()->predictRelativeComputationalCost(gp);
 }
 #endif
+
+} // end namespace oofem

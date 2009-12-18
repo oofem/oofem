@@ -49,6 +49,7 @@
 #include "timestep.h"
 #include "contextioerr.h"
 
+namespace oofem {
 
 KelvinChainMaterial :: KelvinChainMaterial(int n, Domain *d) : RheoChainMaterial(n, d)
 {
@@ -380,3 +381,4 @@ KelvinChainMaterialStatus :: restoreContext(DataStream *stream, ContextMode mode
     return CIO_OK;
 }
 
+} // end namespace oofem

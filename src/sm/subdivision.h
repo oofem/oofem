@@ -50,6 +50,8 @@
 #include <list>
 #endif
 
+namespace oofem {
+
 // increase the number of at once allocated fields if the fine (multilevel) subdivision 
 // with many new nodes and elements is too slow
 
@@ -410,4 +412,5 @@ class Subdivision : public MesherInterface
 #endif
 };
 
+} // end namespace oofem
 #endif // subdivision_h

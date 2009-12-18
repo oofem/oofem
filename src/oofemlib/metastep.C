@@ -39,6 +39,8 @@
 
 #include "metastep.h"
 
+namespace oofem {
+
 MetaStep :: MetaStep(int n, EngngModel *e)
 {
     this->number = n;
@@ -99,3 +101,5 @@ MetaStep :: isStepValid(int solStepNumber)
 
     return 0;
 }
+
+} // end namespace oofem

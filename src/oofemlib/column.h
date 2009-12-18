@@ -46,6 +46,7 @@ class IntArray;
 class FloatMatrix;
 class Skyline;
 
+namespace oofem {
 
 class Column : public FloatArray
 {
@@ -88,4 +89,5 @@ protected:
     void     resize(int i) { FloatArray :: resize(i); }
 };
 
+} // end namespace oofem
 #endif // column_h

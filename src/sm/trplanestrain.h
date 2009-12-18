@@ -52,6 +52,7 @@
 #include "mmashapefunctprojection.h"
 #include "huertaerrorestimator.h"
 
+namespace oofem {
 
 class TrPlaneStrain : public StructuralElement, public ZZNodalRecoveryModelInterface,
     public NodalAveragingRecoveryModelInterface, public SPRNodalRecoveryModelInterface,
@@ -305,4 +306,5 @@ protected:
     int  giveNumberOfIPForMassMtrxIntegration() { return 1; }
 };
 
+} // end namespace oofem
 #endif // trplanstrain_h

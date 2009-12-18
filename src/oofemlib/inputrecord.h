@@ -53,6 +53,8 @@
  #include <string.h>
 #endif
 
+namespace oofem {
+
 /**
  * Type defining the return values of InputRecord reading operations.
  * IRRT_OK the corresponding value to given keyword was successfully read.
@@ -1115,4 +1117,5 @@ public:
     virtual void finish(bool wrn = true) = 0;
 };
 
+} // end namespace oofem
 #endif // inputrecord_h

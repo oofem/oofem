@@ -60,6 +60,8 @@
 #include "conTable.h"
 #endif
 
+namespace oofem {
+
 #define TRSUPG_ZERO_VOF 1.e-8
 
 
@@ -1498,3 +1500,4 @@ void TR1_2D_CBS :: drawScalar(oofegGraphicContext &context)
 
 
 #endif
+} // end namespace oofem

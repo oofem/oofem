@@ -39,6 +39,7 @@
 #ifndef numericalcmpn_h
 #define numericalcmpn_h
 
+namespace oofem {
 /**
  * Type representing numerical component. The components of characteristic equations are mapped
  * to their corresponding numrical counterparts using these common component types.
@@ -71,5 +72,5 @@ enum NumericalCmpn {
     InternalState
 };
 
+} // end namespace oofem
 #endif // numericalcmpn_h
-

@@ -50,6 +50,7 @@
 #include "timestep.h"
 #include "contextioerr.h"
 
+namespace oofem {
 
 RheoChainMaterial :: RheoChainMaterial(int n, Domain *d) : StructuralMaterial(n, d),
     EparVal(), charTimes(), discreteTimeScale()
@@ -891,3 +892,4 @@ RheoChainMaterialStatus :: restoreContext(DataStream *stream, ContextMode mode, 
     return CIO_OK;
 }
 
+} // end namespace oofem

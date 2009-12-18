@@ -39,6 +39,7 @@
 #ifndef communicatormode_h
 #define communicatormode_h
 
+namespace oofem {
 /**
  * The communicator mode determines the communication:
  *
@@ -55,4 +56,5 @@ enum CommunicatorMode {
     CommMode_Dynamic
 };
 
+} // end namespace oofem
 #endif // communicatormode_h

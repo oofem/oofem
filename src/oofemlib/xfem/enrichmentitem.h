@@ -14,6 +14,8 @@
 #include "flotmtrx.h"
 #include "enrichmentfunction.h"
 
+namespace oofem {
+
 class Geometry;
 
 /**
@@ -92,4 +94,6 @@ public:
     IRResultType initializeFrom(InputRecord *ir);
     Material *giveMaterial() { return mat; }
 };
+
+} // end namespace oofem
 #endif  /* _ENRICHMENTITEM_H */

@@ -53,6 +53,8 @@
 #include "gjacobi.h"
 #include "mathfem.h"
 
+namespace oofem {
+
 SubspaceIteration ::  SubspaceIteration(int i, Domain *d, EngngModel *m) :
     SparseGeneralEigenValueSystemNM(i, d, m) {
     //
@@ -510,3 +512,4 @@ SubspaceIteration :: initializeFrom(InputRecord *ir)
 
 
 
+} // end namespace oofem

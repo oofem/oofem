@@ -45,6 +45,7 @@
 #include "mathfem.h"
 #include "error.h"
 
+namespace oofem {
 
 CommunicationPacket :: CommunicationPacket(MPI_Comm comm, int size, int num) : MPIBuffer(max(size, __CommunicationPacket_DEFAULT_SIZE), false)
 {
@@ -519,4 +520,6 @@ CommunicationPacketPool :: printInfo()
     OOFEM_LOG_INFO("CommunicationPacketPool: allocated %d packets\n(packet size: %d, %d leased, %d free)\n",
                    allocatedPackets,  __CommunicationPacket_DEFAULT_SIZE, leasedPackets, freePackets);
 }
+
+} // end namespace oofem
 #endif

@@ -53,6 +53,8 @@
 
 #include "structuralms.h"
 
+namespace oofem {
+
 /**
  This class implements associated Material Status to MyMaterial.
  It is atribute of matStatusDictionary at every GaussPoint, for which this material 
@@ -179,4 +181,5 @@ MaterialStatus* CreateStatus (GaussPoint* gp) const ;
  IRResultType initializeFrom (InputRecord* ir);
  };
 
+} // end namespace oofem
 #endif

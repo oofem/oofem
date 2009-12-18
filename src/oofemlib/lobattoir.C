@@ -42,6 +42,8 @@
 #include <stdio.h>
 #endif
 
+namespace oofem {
+
 // initialize class member
 
 LobattoIntegrationRule :: LobattoIntegrationRule(int n, Element *e,
@@ -296,3 +298,5 @@ LobattoIntegrationRule :: getRequiredNumberOfIntegrationPoints(integrationDomain
 
     return -1;
 }
+
+} // end namespace oofem

@@ -45,6 +45,7 @@
 #include "structuralmaterial.h"
 #include "structuralms.h"
 
+namespace oofem {
 
 // material contant's keys for give()
 #define pscm_Ee 300
@@ -367,6 +368,5 @@ protected:
                                    TimeStep * atTime);
 };
 
-
+} // end namespace oofem
 #endif // rcm2_h
-

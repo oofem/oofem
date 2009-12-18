@@ -43,6 +43,8 @@
 #include <stdarg.h>
 #endif
 
+namespace oofem {
+
 ExportModule :: ExportModule(EngngModel *e) : tsteps_out(), domainMask()
 {
     emodel = e;
@@ -125,3 +127,4 @@ void ExportModule :: error(const char *file, int line, const char *format, ...) 
     __OOFEM_ERROR3(file, line, "Class: %s\n%s", this->giveClassName(), buffer);
 }
 
+} // end namespace oofem

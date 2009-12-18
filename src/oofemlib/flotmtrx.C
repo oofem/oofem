@@ -57,6 +57,7 @@
 #include "combuff.h"
 #endif
 
+namespace oofem {
 
 FloatMatrix :: FloatMatrix(FloatArray *vector, int transpose)
 //
@@ -2236,3 +2237,4 @@ FloatMatrix :: givePackSize(CommunicationBuffer &buff)
 
 
 #endif
+} // end namespace oofem

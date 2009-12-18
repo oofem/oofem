@@ -56,6 +56,8 @@
 #include "oofeggraphiccontext.h"
 #endif
 
+namespace oofem {
+
 Truss1d :: Truss1d(int n, Domain *aDomain) :
     StructuralElement(n, aDomain),
     ZZNodalRecoveryModelInterface(), NodalAveragingRecoveryModelInterface(),
@@ -649,3 +651,4 @@ Truss1d :: MMAShapeFunctProjectionInterface_interpolateIntVarAt(FloatArray &answ
     return;
 }
 
+} // end namespace oofem

@@ -59,6 +59,8 @@
 #include "contextioresulttype.h"
 #include "unknownnumberingscheme.h"
 
+namespace oofem {
+
 #ifdef __PARALLEL_MODE
 class CommunicationBuffer;
 /**
@@ -472,7 +474,7 @@ protected:
     IntArray *giveCompleteGlobalDofIDArray(void) const;
 };
 
-
+} // end namespace oofem
 #endif // dofmanager_h
 
 

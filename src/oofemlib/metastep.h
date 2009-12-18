@@ -48,6 +48,7 @@
 #include <stdio.h>
 #endif
 
+namespace oofem {
 
 /**
  * Class representing meta step. The meta step instance represent sequence of
@@ -121,4 +122,5 @@ public:
 protected:
 };
 
+} // end namespace oofem
 #endif // metastep_h

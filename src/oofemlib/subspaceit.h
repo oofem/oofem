@@ -48,6 +48,7 @@
 #include "sparsemtrx.h"
 #include "flotarry.h"
 
+namespace oofem {
 
 class Domain;
 class EngngModel;
@@ -135,13 +136,5 @@ public:
 protected:
 };
 
+} // end namespace oofem
 #endif // subspaceit_h
-
-
-
-
-
-
-
-
-

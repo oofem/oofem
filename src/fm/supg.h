@@ -45,6 +45,8 @@
 #include <stdio.h>
 #endif
 
+namespace oofem {
+
 /**
  * This class represents transient incopressible flow problem. Solution is based on
  * algorithm with SUPG/PSPG stabilization.
@@ -256,4 +258,5 @@ protected:
     //void    __debug  (TimeStep* atTime);
 };
 
+} // end namespace oofem
 #endif // supg_h

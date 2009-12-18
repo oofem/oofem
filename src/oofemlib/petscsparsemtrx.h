@@ -43,6 +43,8 @@
 #include "petscksp.h"
 #endif
 
+namespace oofem {
+
 /**
  * This class provides an sparse matrix interface to PETSc Matrices
  */
@@ -185,5 +187,6 @@ public:
     int giveDomainIndex() { return di; }
 };
 
+} // end namespace oofem
 #endif
 #endif // petscsparsemtrx_h

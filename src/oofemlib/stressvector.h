@@ -38,6 +38,8 @@
 
 #include "stressstrainbasevector.h"
 
+namespace oofem {
+
 class StrainVector;
 class FloatArray;
 class FloatMatrix;
@@ -154,7 +156,5 @@ protected:
                                int transpose = 0) const;
 };
 
+} // end namespace oofem
 #endif // stressvector_h
-
-
-

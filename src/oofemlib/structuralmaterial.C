@@ -57,6 +57,8 @@
 #include <math.h>
 #endif
 
+namespace oofem {
+
 int
 StructuralMaterial :: hasMaterialModeCapability(MaterialMode mode)
 //
@@ -2739,3 +2741,5 @@ StructuralMaterial :: giveInputRecordString(std :: string &str, bool keyword)
 
     return 1;
 }
+
+} // end namespace oofem

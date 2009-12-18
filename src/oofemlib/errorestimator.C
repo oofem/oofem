@@ -36,6 +36,8 @@
 #include "compiler.h"
 #include "errorestimator.h"
 
+namespace oofem {
+
 void
 ErrorEstimator :: setDomain(Domain *d) {
     FEMComponent :: setDomain(d);
@@ -53,3 +55,5 @@ ErrorEstimator :: initializeFrom(InputRecord *ir)
 
     return IRRT_OK;
 }
+
+} // end namespace oofem

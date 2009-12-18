@@ -40,6 +40,8 @@
 #include "flotmtrx.h"
 #include "error.h"
 
+namespace oofem {
+
 StrainVector :: StrainVector(MaterialMode m) : StressStrainBaseVector(m)
 { }
 
@@ -549,3 +551,4 @@ StrainVector :: giveTranformationMtrx(FloatMatrix &answer,
 }
 
 
+} // end namespace oofem

@@ -60,6 +60,8 @@
 #endif
 #endif
 
+namespace oofem {
+
 InterfaceElem2dQuad :: InterfaceElem2dQuad(int n, Domain *aDomain) :
     StructuralElement(n, aDomain)
 {
@@ -376,3 +378,4 @@ void InterfaceElem2dQuad :: drawScalar(oofegGraphicContext &context)
 }
 
 #endif
+} // end namespace oofem

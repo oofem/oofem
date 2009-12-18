@@ -39,6 +39,8 @@
 #ifndef elementextension_h
 #define elementextension_h
 
+namespace oofem {
+
 /**
  * Type representing element extension.
  */
@@ -48,5 +50,6 @@ enum ElementExtension {
     Element_EdgeLoadSupport
 };
 
+} // end namespace oofem
 #endif // elementextension_h
 

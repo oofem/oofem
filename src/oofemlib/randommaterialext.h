@@ -45,6 +45,8 @@
 #include "dictionr.h"
 #include "interface.h"
 
+namespace oofem {
+
 /**
  * Abstract base class for all random constitutive model statuses. 
  * Random materials can have some their constitutive constants 
@@ -131,6 +133,5 @@ protected:
     void _generateStatusVariables (GaussPoint*) const;
 };
 
+} // end namespace oofem
 #endif // randommaterialext_h
-
-

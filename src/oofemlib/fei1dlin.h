@@ -41,6 +41,8 @@
 #include "intarray.h"
 #include "domain.h"
 
+namespace oofem {
+
 /**
  * Class representing a 1d linear isparametric interpolation.
  */
@@ -148,7 +150,7 @@ protected:
 
 
 
-
+} // end namespace oofem
 #endif // fei1dlin_h
 
 

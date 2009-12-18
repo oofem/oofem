@@ -48,6 +48,7 @@
 #include <stdio.h>
 #endif
 
+namespace oofem {
 
 SPRNodalRecoveryModel :: SPRNodalRecoveryModel(Domain *d) : NodalRecoveryModel(d)
 { }
@@ -772,3 +773,4 @@ SPRNodalRecoveryModel :: unpackSharedDofManData (parallelStruct* s, ProcessCommu
 }
 
 #endif
+} // end namespace oofem

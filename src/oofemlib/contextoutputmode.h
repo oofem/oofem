@@ -39,6 +39,8 @@
 #ifndef contextoutputmode_h
 #define contextoutputmode_h
 
+namespace oofem {
+
 enum ContextOutputMode {
     NOCONTEXT,
     ALWAYS,       // enable for post-processing
@@ -46,5 +48,6 @@ enum ContextOutputMode {
     USERDEFINED   // input attribute of domain (each n-th step)
 };
 
+} // end namespace oofem
 #endif // contextoutputmode_h
 

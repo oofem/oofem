@@ -44,6 +44,8 @@
 #include "gausspnt.h"
 #include "crosssection.h"
 
+namespace oofem {
+
 IRResultType
 DoublePowerLawMaterial :: initializeFrom(InputRecord *ir)
 {
@@ -82,5 +84,4 @@ DoublePowerLawMaterial :: computeCreepFunction(GaussPoint *gp, double atTime, do
 }
 
 
-
-
+} // end namespace oofem

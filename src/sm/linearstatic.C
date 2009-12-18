@@ -63,6 +63,7 @@
 #include "petscsolver.h"
 #endif
 
+namespace oofem {
 
 LinearStatic :: LinearStatic(int i, EngngModel *_master) : StructuralEngngModel(i, _master), loadVector(), displacementVector()
 {
@@ -99,7 +100,7 @@ NumericalMethod *LinearStatic :: giveNumericalMethod(TimeStep *atTime)
         return nMethod;
     }
 
-    nMethod = :: CreateUsrDefSparseLinSolver(solverType, 1, this->giveDomain(1), this);
+    nMethod = CreateUsrDefSparseLinSolver(solverType, 1, this->giveDomain(1), this);
     if ( nMethod == NULL ) {
         _error("giveNumericalMethod: linear solver creation failed");
     }
@@ -242,7 +243,7 @@ void LinearStatic :: solveYourselfAt(TimeStep *tStep) {
          * stiffnessMatrix ->  checkSizeTowardsBanWidth (mht) ;
          * delete mht;
          */
-        stiffnessMatrix = :: CreateUsrDefSparseMtrx(sparseMtrxType); // new Skyline ();
+        stiffnessMatrix = CreateUsrDefSparseMtrx(sparseMtrxType); // new Skyline ();
         if ( stiffnessMatrix == NULL ) {
             _error("solveYourselfAt: sparse matrix creation failed");
         }
@@ -531,3 +532,5 @@ LinearStatic :: estimateMaxPackSize(IntArray &commMap, CommunicationBuffer &buff
     return 0;
 }
 #endif
+
+} // end namespace oofem

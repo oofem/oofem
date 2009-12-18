@@ -77,6 +77,8 @@
 #include <set>
 #endif
 
+namespace oofem {
+
 SymCompCol :: SymCompCol(void) : CompCol()
 { }
 
@@ -455,8 +457,4 @@ double &SymCompCol :: operator()(int i, int j)
 }
 
 
-
-
-
-
-
+} // end namespace oofem

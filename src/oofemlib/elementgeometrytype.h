@@ -41,6 +41,8 @@
 
 #include "enumitem.h"
 
+namespace oofem {
+
 /**
  * Enumerative type used to classify element geometry
  * Poosible values are:
@@ -81,6 +83,6 @@ enum Element_Geometry_Type {
 
 const char *__Element_Geometry_TypeToString(Element_Geometry_Type _value);
 
-
+} // end namespace oofem
 #endif // elementgeometrytype_h
 

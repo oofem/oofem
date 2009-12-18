@@ -51,6 +51,8 @@
 #include <stdio.h>
 #endif
 
+namespace oofem {
+
 FEI2dQuadQuad QPlaneStress2d :: interpolation(1, 2);
 
 QPlaneStress2d :: QPlaneStress2d(int n, Domain *aDomain) :
@@ -298,3 +300,4 @@ void QPlaneStress2d :: drawDeformedGeometry(oofegGraphicContext &gc, UnknownType
 }
 
 #endif
+} // end namespace oofem

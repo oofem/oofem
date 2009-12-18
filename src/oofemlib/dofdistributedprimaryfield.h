@@ -43,6 +43,8 @@
 #include <vector>
 #endif
 
+namespace oofem {
+
 class PrimaryField;
 class Dof;
 
@@ -95,5 +97,5 @@ public:
 protected:
 };
 
-
+} // end namespace oofem
 #endif // dofdistributedprimaryfield_h

@@ -45,6 +45,7 @@
 #include <math.h>
 #endif
 
+namespace oofem {
 
 Concrete3 :: Concrete3(int n, Domain *d) : RCM2Material(n, d)
     //
@@ -476,4 +477,4 @@ Concrete3 :: initializeFrom(InputRecord *ir)
 }
 
 
-
+} // end namespace oofem

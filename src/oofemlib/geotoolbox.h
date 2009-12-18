@@ -37,12 +37,15 @@
 #define geotoolbox_h
 
 #ifndef __MAKEDEPEND
-#include <list>
+ #include <list>
 #endif
 #ifdef __OOFEG
-#include "oofeggraphiccontext.h"
+ #include "oofeggraphiccontext.h"
 #endif
 #include "flotarry.h"
+
+
+namespace oofem {
 
 #define GT_EPS 1.e-12
 // zero for parallel lines test
@@ -58,15 +61,23 @@ class Vertex
 {
 public:
     FloatArray coords;
-    Vertex(double x = 0, double y = 0) : coords(2) { coords(0) = x;
-                                                     coords(1) = y; }
-    Vertex(double c [ 2 ]) : coords(2) { coords(0) = c [ 0 ];
-                                         coords(1) = c [ 1 ]; }
+    Vertex(double x = 0, double y = 0) : coords(2) {
+        coords(0) = x;
+        coords(1) = y;
+    }
+    Vertex(double c [ 2 ]) : coords(2) {
+        coords(0) = c [ 0 ];
+        coords(1) = c [ 1 ];
+    }
     Vertex(const Vertex &src) { coords = src.coords; }
-    Vertex &operator=(const Vertex &src) { coords = src.coords;
-                                           return * this; }
-    void setCoords(double x, double y) { coords(0) = x;
-                                         coords(1) = y; }
+    Vertex &operator=(const Vertex &src) {
+        coords = src.coords;
+        return * this;
+    }
+    void setCoords(double x, double y) {
+        coords(0) = x;
+        coords(1) = y;
+    }
     const FloatArray *getCoords() const { return & coords; }
 };
 
@@ -100,9 +111,12 @@ public:
 public:
         PolygonEdgeIterator(const Polygon *p) : iter() {
             iter = p->vertices.begin();
-            if ( iter == p->vertices.end() ) { last = true; } else { curr = ( * iter );
-                                                                     ptr = p;
-                                                                     last = false; } }
+            if ( iter == p->vertices.end() ) { last = true; } else {
+                curr = ( * iter );
+                ptr = p;
+                last = false;
+            }
+        }
         int giveNext(Vertex &p1, Vertex &p2) {
             Vertex next;
             if ( last ) { return 0; } else {
@@ -128,18 +142,26 @@ public:
         const Polygon *ptr;
         std :: list< Vertex > :: const_iterator iter;
 public:
-        PolygonVertexIterator(const Polygon *p) : iter() { iter = p->vertices.begin();
-                                                           ptr = p; }
-        void init(const Polygon *p) { iter = p->vertices.begin();
-                                      ptr = p; }
-        int giveNext(Vertex &p1) { if ( iter == ptr->vertices.end() ) { return 0; } else { p1 = ( * iter ); }
+        PolygonVertexIterator(const Polygon *p) : iter() {
+            iter = p->vertices.begin();
+            ptr = p;
+        }
+        void init(const Polygon *p) {
+            iter = p->vertices.begin();
+            ptr = p;
+        }
+        int giveNext(Vertex &p1) {
+            if ( iter == ptr->vertices.end() ) { return 0; } else { p1 = ( * iter ); }
 
-                                   ++iter;
-                                   return 1; }
-        int giveNext(const Vertex **p1) { if ( iter == ptr->vertices.end() ) { return 0; } else { * p1 = iter.operator->(); }
+            ++iter;
+            return 1;
+        }
+        int giveNext(const Vertex **p1) {
+            if ( iter == ptr->vertices.end() ) { return 0; } else { * p1 = iter.operator->(); }
 
-                                          ++iter;
-                                          return 1; }
+            ++iter;
+            return 1;
+        }
     };
 };
 
@@ -163,8 +185,8 @@ protected:
         double x, y;
         struct node *next;
         struct node *prev;
-        struct node *nextPoly; /* pointer to the next polygon */
-        struct node *neighbor; /* the coresponding intersection point */
+        struct node *nextPoly;     /* pointer to the next polygon */
+        struct node *neighbor;     /* the coresponding intersection point */
         //int intersect;            /* 1 if an intersection point, 0 otherwise */
         nodeStatus status;
         int entry;            /* 1 if entry point (edge starting at this node is inside), -1 boundary edge, 0 otherwise */
@@ -179,13 +201,13 @@ public:
 
     void clip(Polygon &result, const Polygon &a, const Polygon &b);
 protected:
-    void insert(node *ins, node *first, node *last); // insert node in graph
+    void insert(node *ins, node *first, node *last);     // insert node in graph
     /** Create new node struct */
     node *createNode(double x, double y, node *next, node *prev, node *nextPoly,
                      node *neighbor, nodeStatus st, int entry, int visited, double alpha);
-    node *next_node(node *p); // return next node in graph
-    node *prev_node(node *p); // return prev node in graph
-    node *last_node(node *p); // returns last node in graph
+    node *next_node(node *p);     // return next node in graph
+    node *prev_node(node *p);     // return prev node in graph
+    node *last_node(node *p);     // returns last node in graph
     node *first(node *p);
     void  remove(node *n);
     double dist(double x1, double y1, double x2, double y2);
@@ -216,12 +238,16 @@ class GT_Exception
 
 public:
 
-    GT_Exception(const char *file, int line) { this->file = file;
-                                               this->line = line;
-                                               this->msg = NULL; }
-    GT_Exception(const char *msg, const char *file, int line) { this->file = file;
-                                                                this->line = line;
-                                                                this->msg = msg; }
+    GT_Exception(const char *file, int line) {
+        this->file = file;
+        this->line = line;
+        this->msg = NULL;
+    }
+    GT_Exception(const char *msg, const char *file, int line) {
+        this->file = file;
+        this->line = line;
+        this->msg = msg;
+    }
     ~GT_Exception() { }
 
     void print();
@@ -230,6 +256,5 @@ public:
 #define THROW_GT_EXCEPTION() throw GT_Exception(__FILE__, __LINE__);
 #define THROW_GT_EXCEPTIONM(m) throw GT_Exception(m, __FILE__, __LINE__);
 
-
-
+} // end namespace oofem
 #endif // geotoolbox_h

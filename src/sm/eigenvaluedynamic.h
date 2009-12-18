@@ -50,6 +50,8 @@
 #include "flotarry.h"
 #include "geneigvalsolvertype.h"
 
+namespace oofem {
+
 class EigenValueDynamic : public EngngModel
 {
     /*
@@ -133,4 +135,5 @@ public:
     classType giveClassID()      const { return EigenValueDynamicClass; }
 };
 
+} // end namespace oofem
 #endif // eigenvaluedynamic_h

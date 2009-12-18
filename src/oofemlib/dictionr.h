@@ -54,6 +54,8 @@
 #include <string>
 #endif
 
+namespace oofem {
+
 class DataStream;
 
 /**
@@ -134,6 +136,7 @@ public:
     contextIOResultType    restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 };
 
+} // end namespace oofem
 #endif // dictionr_h
 
 

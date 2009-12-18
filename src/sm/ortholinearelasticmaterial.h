@@ -48,6 +48,8 @@
 #include "matconst.h"
 #include "element.h"
 
+namespace oofem {
+
 class GaussPoint;
 
 
@@ -143,6 +145,5 @@ protected:
     friend class CrossSection;
 };
 
-
+} // end namespace oofem
 #endif // ortholinearelasticmaterial_h
-

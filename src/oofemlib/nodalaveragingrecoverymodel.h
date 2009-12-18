@@ -40,6 +40,8 @@
 #include "nodalrecoverymodel.h"
 #include "interface.h"
 
+namespace oofem {
+
 class GaussPoint;
 
 /**
@@ -127,10 +129,5 @@ public:
 };
 
 
+} // end namespace oofem
 #endif // nodalaveragingrecoverymodel_h
-
-
-
-
-
-

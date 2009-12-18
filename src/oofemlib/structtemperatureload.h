@@ -45,6 +45,7 @@
 
 #include "load.h"
 
+namespace oofem {
 
 class Element;
 class TimeStep;
@@ -82,12 +83,5 @@ public:
     const char *giveClassName() const { return "StructuralTemperatureLoad"; }
 };
 
+} // end namespace oofem
 #endif // structtemperatureload_h
-
-
-
-
-
-
-
-

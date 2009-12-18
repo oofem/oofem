@@ -60,6 +60,7 @@
 #include "contextioresulttype.h"
 #include "entityrenumberingscheme.h"
 
+namespace oofem {
 
 #ifdef __PARALLEL_MODE
 class CommunicationBuffer;
@@ -504,4 +505,5 @@ protected:
     friend class SimpleSlaveDof;
 };
 
+} // end namespace oofem
 #endif // dof_h

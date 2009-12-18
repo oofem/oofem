@@ -39,6 +39,8 @@
 #include "dofmanager.h"
 #include "node.h"
 
+namespace oofem {
+
 void
 FEI1dLin :: evalN(FloatArray &answer, const FloatArray &lcoords, double time)
 {
@@ -98,3 +100,5 @@ FEI1dLin :: computeLength(const FloatArray **nc)
 {
     return ( nc [ 1 ]->at(cindx) - nc [ 0 ]->at(cindx) );
 }
+
+} // end namespace oofem

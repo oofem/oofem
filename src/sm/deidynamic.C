@@ -53,6 +53,8 @@
 
 #include "verbose.h"
 
+namespace oofem {
+
 #define ZERO_MASS  1.E-10   // unit dependent !!!!
 
 DEIDynamic :: ~DEIDynamic()  { }
@@ -400,3 +402,5 @@ DEIDynamic :: printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *atTime)
 
     iDof->printMultipleOutputAt(stream, atTime, dofchar, EID_MomentumBalance, dofmodes, 3);
 }
+
+} // end namespace oofem

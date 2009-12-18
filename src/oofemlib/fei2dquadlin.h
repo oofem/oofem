@@ -42,6 +42,8 @@
 #include "feinterpol2d.h"
 #include "fei1dlin.h"
 
+namespace oofem {
+
 /**
  * Class representing a 2d isoparametric linear interpolation based on natural coordinates.
  */
@@ -238,7 +240,7 @@ protected:
 
 
 
-
+} // end namespace oofem
 #endif // fei2dquadlin_h
 
 

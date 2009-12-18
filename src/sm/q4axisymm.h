@@ -42,6 +42,8 @@
 
 #include "structuralelement.h"
 
+namespace oofem {
+
 class Q4Axisymm : public StructuralElement
 {
     /*
@@ -99,5 +101,6 @@ protected:
     //
 };
 
+} // end namespace oofem
 #endif // q4axisymm_h
 

@@ -10,6 +10,8 @@
 #include "xfemelementinterface.h"
 #include "structuralcrosssection.h"
 
+namespace oofem {
+
 Interface *
 PlaneStress2dXfem :: giveInterface(InterfaceType interface) {
     if ( interface != XfemElementInterfaceType ) {
@@ -343,3 +345,5 @@ void PlaneStress2dXfem :: drawScalar(oofegGraphicContext &context)
     }
 }
 #endif
+
+} // end namespace oofem

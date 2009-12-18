@@ -51,6 +51,8 @@
 
 #include "linesearch.h"
 
+namespace oofem {
+
 class Domain;
 class EngngModel;
 
@@ -202,13 +204,5 @@ protected:
     LineSearchNM *giveLineSearchSolver();
 };
 
+} // end namespace oofem
 #endif // nrsolver2_h
-
-
-
-
-
-
-
-
-

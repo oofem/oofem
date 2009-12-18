@@ -42,6 +42,8 @@
 #include "domain.h"
 #include "mathfem.h"
 
+namespace oofem {
+
 DynCompCol :: DynCompCol(void) : SparseMtrx(), base_(0)
 {
 #ifndef DynCompCol_USE_STL_SETS
@@ -1053,3 +1055,4 @@ DynCompCol :: insertRowInColumn(int col, int row)
 }
 
 #endif
+} // end namespace oofem

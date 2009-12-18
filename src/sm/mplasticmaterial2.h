@@ -48,6 +48,8 @@
 #include <set>
 #endif
 
+namespace oofem {
+
 class GaussPoint;
 
 /**
@@ -416,6 +418,5 @@ protected:
     int getNewPopulation(IntArray &result, IntArray &candidateMask, int degree, int size);
 };
 
-
+} // end namespace oofem
 #endif // mplasticmaterial2_h
-

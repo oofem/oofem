@@ -49,6 +49,7 @@
 #include "sparsemtrx.h"
 #include "flotarry.h"
 
+namespace oofem {
 
 class Domain;
 class EngngModel;
@@ -91,7 +92,7 @@ public:
     LinSystSolverType giveLinSystSolverType() const { return ST_DSS; }
 };
 
-
+} // end namespace oofem
 #endif // dsssolver_h
 
 

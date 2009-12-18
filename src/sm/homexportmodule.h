@@ -48,6 +48,7 @@
 #include "intarray.h"
 #include "linearelasticmaterial.h"
 
+namespace oofem {
 
 /**
  * Represents HOM (Homogenization) export module. It averages strain and stress tensors over the whole domain
@@ -99,5 +100,6 @@ protected:
     IntArray matnum;
 };
 
+} // end namespace oofem
 #define homexportmodule_h
 #endif

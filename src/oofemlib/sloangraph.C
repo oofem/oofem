@@ -50,6 +50,8 @@
 #include <set>
 #endif
 
+namespace oofem {
+
 SloanGraph :: SloanGraph(Domain *d)  : nodes(0), queue(), OptimalRenumberingTable()
 {
     //NumberOfNodes = 0;
@@ -676,3 +678,4 @@ SloanGraph ::  giveFullProfileSize()
     return n * ( n + 1 );
 }
 
+} // end namespace oofem

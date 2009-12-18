@@ -58,6 +58,8 @@
  #include "combuff.h"
 #endif
 
+namespace oofem {
+
 class Domain;
 class DofManager;
 class TimeStep;
@@ -327,4 +329,5 @@ protected:
     InitialCondition *giveIc();
 };
 
+} // end namespace oofem
 #endif // masterdof_h

@@ -43,6 +43,8 @@
 #include "boundaryload.h"
 #include "gausspnt.h"
 
+namespace oofem {
+
 class TimeStep;
 
 
@@ -84,6 +86,7 @@ private:
 };
 
 
+} // end namespace oofem
 #endif // constantedgeload_h
 
 

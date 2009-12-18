@@ -43,6 +43,8 @@
 #include "femcmpnn.h"
 #include "classtype.h"
 
+namespace oofem {
+
 /*
  * This class implements a material status information. It is atribute of
  * gaussPoint. This is only an abstract class, for every instance of material class
@@ -157,8 +159,5 @@ public:
     IRResultType initializeFrom(InputRecord *ir) { return IRRT_OK; }
 };
 
+} // end namespace oofem
 #endif // matstatus_h
-
-
-
-

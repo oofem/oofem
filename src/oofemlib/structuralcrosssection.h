@@ -51,6 +51,7 @@
 #include "flotarry.h"
 #include "flotmtrx.h"
 
+namespace oofem {
 
 /**
  * Abstract base class for all structural cross section models. It declares commons services provided by all
@@ -345,6 +346,6 @@ protected:
     //   friend class PerfectlyPlasticMaterial;
 };
 
-
+} // end namespace oofem
 #endif // structuralcrosssection_h
 

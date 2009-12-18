@@ -45,6 +45,8 @@
 #include "errorestimator.h"
 #include "internalstatetype.h"
 
+namespace oofem {
+
 class Domain;
 class Element;
 class TimeStep;
@@ -101,4 +103,5 @@ public:
 protected:
 };
 
+} // end namespace oofem
 #endif // scalarerrorindicator_h

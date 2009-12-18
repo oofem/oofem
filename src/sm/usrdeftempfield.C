@@ -39,6 +39,8 @@
 #include <math.h>
 #endif
 
+namespace oofem {
+
 void
 UserDefinedTemperatureField :: computeValueAt(FloatArray &answer, TimeStep *stepN, FloatArray &coords, ValueModeType mode)
 // Returns the value of the receiver at time and given position respecting the mode.
@@ -123,3 +125,4 @@ UserDefinedTemperatureField :: initializeFrom(InputRecord *ir)
 
 
 
+} // end namespace oofem

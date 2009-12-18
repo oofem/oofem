@@ -44,6 +44,9 @@
 #include "domain.h"
 
 #include "flotarry.h"
+
+namespace oofem {
+
 /**
  * Implemantation of polyline nonlocal barier.
  * It is a composite one-dimensional cell consisting of one or more connected lines.
@@ -114,5 +117,5 @@ public:
     classType                giveClassID() const { return PolylineNonlocalBarrierClass; }
 };
 
+} // end namespace oofem
 #endif // polylinenonlocalbarrier_h
-

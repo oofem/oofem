@@ -40,6 +40,8 @@
 #include "buffereddatareader.h"
 #include "dynalist.h"
 
+namespace oofem {
+
 BufferedDataReader :: BufferedDataReader()
 { }
 
@@ -179,3 +181,4 @@ BufferedDataReader :: giveRawLineFromInput(char *line)
 }
 
 
+} // end namespace oofem

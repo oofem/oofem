@@ -43,6 +43,8 @@
 
 #include "integrationrule.h"
 
+namespace oofem {
+
 /**
  * Class representing Lobatto-quadrature integration rule.
  * The number of integration points and their coordinates and integration weights depends on
@@ -127,4 +129,5 @@ protected:
     int SetUpPointsOnTetrahedra(int, Element *, MaterialMode, GaussPoint * * *);
 };
 
+} // end namespace oofem
 #endif // lobattoir_h

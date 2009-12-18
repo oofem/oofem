@@ -46,6 +46,8 @@
 #include <stdarg.h>
 #endif
 
+namespace oofem {
+
 RefinedElement :: RefinedElement(Domain *d, int elem, int level) : fineNodeList(0), boundaryFlag()
     // Construktor
 {
@@ -694,3 +696,4 @@ void RefinedElement :: error(const char *file, int line, const char *format, ...
 }
 
 
+} // end namespace oofem

@@ -44,6 +44,7 @@
 #include <stdlib.h>
 #endif
 
+namespace oofem {
 
 double *allocDouble(int n)
 // Allocates and returns an array of n doubles. Issues an error message if
@@ -115,3 +116,5 @@ void  freeInt(int *a)
     free(a);
     //#endif
 }
+
+} // end namespace oofem

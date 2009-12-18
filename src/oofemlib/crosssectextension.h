@@ -39,6 +39,8 @@
 #ifndef crosssectextension_h
 #define crosssectextension_h
 
+namespace oofem {
+
 /**
  * Type representing cross section extension.
  */
@@ -48,5 +50,6 @@ enum CrossSectExtension {
     CS_HeatCapability
 };
 
+} // end namespace oofem
 #endif // crosssectextension_h
 

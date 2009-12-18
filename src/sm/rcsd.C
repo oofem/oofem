@@ -50,6 +50,7 @@
 #include <math.h>
 #endif
 
+namespace oofem {
 
 RCSDMaterial :: RCSDMaterial(int n, Domain *d) : RCM2Material(n, d)
     //
@@ -712,3 +713,4 @@ RCSDMaterialStatus :: restoreContext(DataStream *stream, ContextMode mode, void 
     return CIO_OK; // return succes
 }
 
+} // end namespace oofem

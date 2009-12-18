@@ -46,6 +46,7 @@
 #include "flotarry.h"
 #include "flotmtrx.h"
 
+namespace oofem {
 
 class GaussPoint;
 
@@ -265,5 +266,5 @@ protected:
     friend class CrossSection;
 };
 
-
+} // end namespace oofem
 #endif // isolinearelasticmaterial_h

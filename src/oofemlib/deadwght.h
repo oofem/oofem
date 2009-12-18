@@ -45,6 +45,7 @@
 #include "bcgeomtype.h"
 #include "valuemodetype.h"
 
+namespace oofem {
 /**
  * This class implements a gravity-like load.
  * The inheritted attribute 'componentArray' contains the components of an
@@ -75,7 +76,7 @@ public:
     const char *giveInputRecordName() const { return "DeadWeight"; }
 };
 
-
+} // end namespace oofem
 #endif // deadwght_h
 
 

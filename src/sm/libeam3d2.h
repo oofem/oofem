@@ -43,6 +43,8 @@
 #include "nlstructuralelement.h"
 #include "fiberedcs.h"
 
+namespace oofem {
+
 class LIBeam3d2 : public NLStructuralElement, public FiberedCrossSectionInterface
 {
     /*
@@ -155,7 +157,5 @@ protected:
     int           updateRotationMatrix();
 };
 
+} // end namespace oofem
 #endif // libeam3d2_h
-
-
-

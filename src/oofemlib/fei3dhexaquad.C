@@ -46,6 +46,7 @@
 #include "mathfem.h"
 #include "fei2dquadlin.h"
 
+namespace oofem {
 
 void
 FEI3dHexaQuad :: evalN(FloatArray &answer, const FloatArray &lcoords, double time)
@@ -641,3 +642,5 @@ FEI3dHexaQuad :: giveDerivativeDzeta(FloatArray &dz, double u, double v, double 
     dz.at(19)  =  -0.5 * ( 1.0 + u ) * ( 1.0 + v ) * w;
     dz.at(20)  =  -0.5 * ( 1.0 + u ) * ( 1.0 - v ) * w;
 }
+
+} // end namespace oofem

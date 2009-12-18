@@ -43,6 +43,7 @@
 #ifndef freestor_h
 #define freestor_h
 
+namespace oofem {
 
 /*
  * This file does not define a class. Rather, it provides a few procedures
@@ -75,7 +76,7 @@ void     freeInt(int *);
  */
 void     freeDouble(double *);
 
-
+} // end namespace oofem
 #endif // freestor_h
 
 

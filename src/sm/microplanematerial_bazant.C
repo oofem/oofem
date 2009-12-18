@@ -46,6 +46,8 @@
 #include <math.h>
 #endif
 
+namespace oofem {
+
 MicroplaneMaterial_Bazant :: MicroplaneMaterial_Bazant(int n, Domain *d) : MicroplaneMaterial(n, d)
 { }
 
@@ -162,5 +164,4 @@ MicroplaneMaterial_Bazant :: giveRealStressVector(FloatArray &answer, MatRespons
 }
 
 
-
-
+} // end namespace oofem

@@ -47,6 +47,8 @@
 #include "domain.h"
 #include "feinterpol.h"
 
+namespace oofem {
+
 /*
  * Class representing a general abstraction for surface finite element interpolation class.
  */
@@ -133,7 +135,7 @@ public:
 
 
 
-
+} // end namespace oofem
 #endif // feinterpol2d_h
 
 

@@ -41,6 +41,8 @@
 #include "structuralmaterial.h"
 #include "flotarry.h"
 
+namespace oofem {
+
 void
 SimpleCrossSection ::  giveRealStresses(FloatArray &answer, MatResponseForm form, GaussPoint *gp,
                                         const FloatArray &totalStrain, TimeStep *tStep)
@@ -404,3 +406,4 @@ SimpleCrossSection :: computeStressIndependentStrainVector(FloatArray &answer,
     mat->computeStressIndependentStrainVector(answer, gp, stepN, mode);
 }
 
+} // end namespace oofem

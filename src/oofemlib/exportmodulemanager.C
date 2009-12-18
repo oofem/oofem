@@ -47,6 +47,8 @@
 #include <time.h>
 #endif
 
+namespace oofem {
+
 ExportModuleManager :: ExportModuleManager(EngngModel *emodel)
 {
     this->emodel = emodel;
@@ -98,7 +100,7 @@ ExportModuleManager :: instanciateYourself(DataReader *dr, InputRecord *ir)
         }
 
         // read type of module
-        module = :: CreateUsrDefExportModuleOfType(name, emodel);
+        module = CreateUsrDefExportModuleOfType(name, emodel);
         if ( module == NULL ) {
             OOFEM_ERROR2("ExportModuleManager::instanciateYourself: unknown module (%s)", name);
         }
@@ -157,3 +159,4 @@ ExportModuleManager :: terminate()
     }
 }
 
+} // end namespace oofem

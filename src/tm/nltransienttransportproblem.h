@@ -47,6 +47,8 @@
 #include <stdio.h>
 #endif
 
+namespace oofem {
+
 /**
  * This class represents nonlinear transient transport problem.
  */
@@ -95,4 +97,5 @@ protected:
 				      const UnknownNumberingScheme& s, TimeStep *tStep, int nite);
 };
 
+} // end namespace oofem
 #endif // nltransienttransportproblem_h

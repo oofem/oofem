@@ -34,6 +34,17 @@
 #include "datastream.h"
 #include "contextioerr.h"
 
+#include "timestep.h"
+#include "integrationrule.h"
+#include "structuralmaterial.h"
+#include "isolinearelasticmaterial.h"
+#include "structuralcrosssection.h"
+#include <math.h>
+
+
+
+namespace oofem {
+
 ConcreteDPMStatus::ConcreteDPMStatus (int n, Domain* d, GaussPoint* gp)
   : StructuralMaterialStatus(n, d, gp),
     plasticStrain(gp -> giveMaterialMode()), 
@@ -231,13 +242,6 @@ ConcreteDPMStatus::restoreContext (DataStream* stream, ContextMode mode, void *o
 //   ******************************************************
 //   *** CLASS CONCRETE DAMAGE-PLASTIC MATERIAL MODEL   ***
 //   ******************************************************
-
-#include "timestep.h"
-#include "integrationrule.h"
-#include "structuralmaterial.h"
-#include "isolinearelasticmaterial.h"
-#include "structuralcrosssection.h"
-#include <math.h>
 
 //#define DPM_ITERATION_LIMIT 1.e-8
 
@@ -1808,4 +1812,4 @@ ConcreteDPM::CreateStatus (GaussPoint* gp) const
 
 
 
-
+} // end namespace oofem

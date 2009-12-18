@@ -45,6 +45,8 @@
 #include "strreader.h"
 #include "util.h"
 
+namespace oofem {
+
 EngngModel *oofegGraphicContext :: emodel = NULL;
 EFringeTable oofegGraphicContext :: ft;
 EPixel oofegGraphicContext :: meshFillColor;
@@ -262,6 +264,6 @@ oofegGraphicContext :: updateFringeTableMinMax(double *s, int size)
 
 
 
-
+} // end namespace oofem
 #endif
 

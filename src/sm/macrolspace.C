@@ -59,6 +59,8 @@
  #include "conTable.h"
 #endif
 
+namespace oofem {
+
 //derived from linear brick element
 MacroLSpace :: MacroLSpace(int n, Domain *aDomain) : LSpace(n, aDomain)
 {
@@ -336,3 +338,4 @@ void MacroLSpace :: updateYourself(TimeStep *tStep)
     this->microEngngModel->giveNextStep();//time step used in ouput file name
 }
 
+} // end namespace oofem

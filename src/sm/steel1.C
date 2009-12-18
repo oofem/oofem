@@ -44,6 +44,8 @@
 #include <math.h>
 #endif
 
+namespace oofem {
+
 Steel1 :: Steel1(int n, Domain *d) : PerfectlyPlasticMaterial(n, d)
     // constructor
 {
@@ -191,5 +193,4 @@ Steel1 :: initializeFrom(InputRecord *ir)
     return IRRT_OK;
 }
 
-
-
+} // end namespace oofem

@@ -44,6 +44,8 @@
 #include "dof.h"
 #include "conTable.h"
 
+namespace oofem {
+
 EIPrimaryUnknownMapper :: EIPrimaryUnknownMapper() : PrimaryUnknownMapper()
 { }
 
@@ -154,3 +156,5 @@ EIPrimaryUnknownMapper :: evaluateAt(FloatArray &answer, IntArray &dofMask, Equa
 
     return 1;
 }
+
+} // end namespace oofem

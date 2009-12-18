@@ -41,6 +41,8 @@
 #include <string.h>
 #endif
 
+namespace oofem {
+
 /**
  * Implemantation of ILU (Incomplete LU) Preconditioner.
  * No fill-up - ILU(0).
@@ -94,4 +96,5 @@ protected:
     int  qsortRowPartition(IntArray &, FloatArray &, int l, int r);
 };
 
+} // end namespace oofem
 #endif // iluprecond_h

@@ -38,6 +38,8 @@
 #include "fetisolver.h"
 #include "usrdefsub.h"
 
+namespace oofem {
+
 NumericalMethod *PLinearStatic :: giveNumericalMethod(TimeStep *atTime)
 // only one has reason for LinearStatic
 //     - SolutionOfLinearEquations
@@ -107,4 +109,6 @@ void PLinearStatic :: assembleVectorFromDofManagers(FloatArray &answer, TimeStep
       EngngModel :: assembleVectorFromDofManagers(answer, tStep, EID_MomentumBalance, type, mode, s, domain);
     }
 }
+
+} // end namespace oofem
 #endif

@@ -41,6 +41,8 @@
 
 #include "loadtime.h"
 
+namespace oofem {
+
 class PeakFunction : public LoadTimeFunction
 {
     /*
@@ -70,10 +72,5 @@ public:
     double  __at(double);
 };
 
-
+} // end namespace oofem
 #endif // peak_h
-
-
-
-
-

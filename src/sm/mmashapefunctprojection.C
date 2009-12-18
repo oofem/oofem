@@ -44,6 +44,8 @@
 #include "zznodalrecoverymodel.h"
 #include "nodalaveragingrecoverymodel.h"
 
+namespace oofem {
+
 MMAShapeFunctProjection :: MMAShapeFunctProjection() : MaterialMappingAlgorithm()
 {
     stateCounter = 0;
@@ -165,8 +167,4 @@ MMAShapeFunctProjection :: __mapVariable(FloatArray &answer, FloatArray &coords,
 }
 
 
-
-
-
-
-
+} // end namespace oofem

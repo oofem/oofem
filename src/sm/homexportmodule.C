@@ -49,6 +49,7 @@
  #include <vector>
 #endif
 
+namespace oofem {
 
 //inherit LinearElasticMaterial for accessing stress/strain transformation functions
 HOMExportModule :: HOMExportModule(EngngModel *e) : ExportModule(e), LinearElasticMaterial(0, NULL)
@@ -193,3 +194,4 @@ HOMExportModule :: terminate()
     fclose(this->stream);
 }
 
+} // end namespace oofem

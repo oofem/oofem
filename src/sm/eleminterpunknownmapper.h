@@ -43,6 +43,7 @@
 #include "primaryunknownmapper.h"
 #include "compiler.h"
 
+namespace oofem {
 
 class Domain;
 class Element;
@@ -99,10 +100,5 @@ public:
 protected:
 };
 
+} // end namespace oofem
 #endif // eleminterpunknownmapper_h
-
-
-
-
-
-

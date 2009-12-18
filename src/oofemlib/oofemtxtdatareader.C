@@ -39,6 +39,8 @@
 #endif
 #include "oofemtxtdatareader.h"
 
+namespace oofem {
+
 OOFEMTXTDataReader :: OOFEMTXTDataReader(char *inputfilename) : DataReader(), ir()
 {
     if ( ( inputStream = fopen(inputfilename, "r") ) == NULL ) {
@@ -123,3 +125,5 @@ OOFEMTXTDataReader :: giveRawLineFromInput(char *line)
     } while ( * line == '#' ); // skip comments
 
 }
+
+} // end namespace oofem

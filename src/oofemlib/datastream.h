@@ -43,6 +43,8 @@
 #include <stdio.h>
 #endif
 
+
+namespace oofem {
 /**
  * The purpose of DataStream abstract class is to allow to store/restore context to different streams,
  * including file, communication buffers, etc., using the same routine.
@@ -232,4 +234,5 @@ public:
 };
 
 #endif
+} // end namespace oofem
 #endif // datastream_h

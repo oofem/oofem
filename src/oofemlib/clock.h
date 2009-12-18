@@ -88,6 +88,8 @@ struct timeval
 
 #endif // end of _MSC_VER
 
+namespace oofem {
+
 typedef timeval oofem_timeval;
 
 /**
@@ -120,5 +122,6 @@ void getRelativeUtime(oofem_timeval &answer, oofem_timeval &from, oofem_timeval 
 void convertTS2HMS(int &nhrs, int &nmin, int &nsec, long int tsec);
 void convertTS2HMS(int &nhrs, int &nmin, int &nsec, double tsec);
 
+} // end namespace oofem
 #endif // clock_h
 

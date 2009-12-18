@@ -44,6 +44,7 @@
 #include "idm1.h"
 #include "structuralms.h"
 
+namespace oofem {
 
 /**
  * This class implements associated Material Status to MazarsMaterial.
@@ -200,5 +201,5 @@ void giveNormalElasticStiffnessMatrix(FloatMatrix &answer,
 
 };
 
+} // end namespace oofem
 #endif // mazarsmodel_h
-

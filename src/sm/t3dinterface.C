@@ -43,6 +43,7 @@
 #include <stdio.h>
 #endif
 
+namespace oofem {
 
 MesherInterface::returnCode
 T3DInterface :: createMesh(TimeStep *stepN, int domainNumber, int domainSerNum, Domain** dNew)
@@ -255,3 +256,4 @@ T3DInterface :: createInput(Domain *d, TimeStep *stepN) {
     return 1;
 }
 
+} // end namespace oofem

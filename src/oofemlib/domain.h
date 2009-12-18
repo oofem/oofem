@@ -61,6 +61,8 @@
 #include "oofeggraphiccontext.h"
 #endif
 
+namespace oofem {
+
 class Element;
 class Node;
 class Material;
@@ -541,6 +543,7 @@ private:
     void warning(const char *file, int line, const char *format, ...);
 };
 
+} // end namespace oofem
 #endif // domain_h
 
 

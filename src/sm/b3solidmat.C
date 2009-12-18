@@ -45,6 +45,8 @@
 #include "structuralcrosssection.h"
 #include "timestep.h"
 
+namespace oofem {
+
 IRResultType
 B3SolidMaterial :: initializeFrom(InputRecord *ir)
 {
@@ -810,3 +812,4 @@ B3SolidMaterial :: computeMicroPrestress(GaussPoint *gp, TimeStep *atTime)
     return;
 }
 
+} // end namespace oofem

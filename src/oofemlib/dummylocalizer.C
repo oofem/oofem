@@ -39,6 +39,8 @@
 #include "integrationrule.h"
 #include "gausspnt.h"
 
+namespace oofem {
+
 Element *
 DummySpatialLocalizer :: giveElementContainingPoint(const FloatArray &coords, const IntArray *regionList)
 {
@@ -180,3 +182,5 @@ DummySpatialLocalizer :: giveAllNodesWithinBox(nodeContainerType &nodeSet, const
     }
   }
 }
+
+} // end namespace oofem

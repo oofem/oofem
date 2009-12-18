@@ -69,6 +69,8 @@
 #include "structuralmaterial.h"
 #include "mathfem.h"
 
+using namespace oofem;
+
 /* Defaul oofem loggers */
 Logger oofem_logger(Logger :: LOG_LEVEL_INFO, stdout);
 Logger oofem_errLogger(Logger :: LOG_LEVEL_WARNING, stderr);

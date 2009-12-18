@@ -44,8 +44,12 @@
 #include "contextioerr.h"
 #include "util.h"
 
+namespace oofem {
+
 #define LEPLIC_ZERO_VOF  1.e-12
 #define LEPLIC_BRENT_EPS 1.e-12
+
+
 
 bool
 LEPlicElementInterface :: isBoundary()
@@ -743,3 +747,5 @@ LEPlic :: giveNodalScalarRepresentation(int inode)
         return vofsum / shelem->giveSize();
     }
 }
+
+} // end namespace oofem

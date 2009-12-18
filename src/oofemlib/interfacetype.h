@@ -39,6 +39,8 @@
 #ifndef interfacetype_h
 #define interfacetype_h
 
+
+namespace oofem {
 /**
  * Enumerative type, used to identify interface type.
  * @see Interface class for details
@@ -85,4 +87,5 @@ enum InterfaceType {
     
 };
 
+} // end namespace oofem
 #endif // interfacetype_h

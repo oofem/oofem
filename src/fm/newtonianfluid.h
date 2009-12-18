@@ -44,6 +44,8 @@
 #include "structuralelement.h"
 #include "matstatus.h"
 
+namespace oofem {
+
 class GaussPoint;
 
 /**
@@ -150,10 +152,5 @@ public:
 protected:
 };
 
-
+} // end namespace oofem
 #endif // newtonianfluid_h
-
-
-
-
-

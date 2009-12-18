@@ -46,6 +46,7 @@
 #include "structengngmodel.h"
 #include "skyline.h"
 
+namespace oofem {
 
 class DEIDynamic : public StructuralEngngModel
 {
@@ -124,4 +125,5 @@ public:
     virtual int        giveNumberOfTimeStepWhenIcApply() { return 0; }
 };
 
+} // end namespace oofem
 #endif // deidynamic_h

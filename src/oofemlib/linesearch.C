@@ -49,6 +49,8 @@
 #include "mathfem.h"
 #include "nmstatus.h"
 
+namespace oofem {
+
 LineSearchNM :: LineSearchNM(int i, Domain *d, EngngModel *m) :
     NumericalMethod(i, d, m)
 {
@@ -300,3 +302,5 @@ LineSearchNM :: initializeFrom(InputRecord *ir)
 
     return IRRT_OK;
 }
+
+} // end namespace oofem

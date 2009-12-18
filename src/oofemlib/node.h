@@ -54,6 +54,8 @@
 #include <stdio.h>
 #endif
 
+namespace oofem {
+
 class Dof;
 class NodalLoad;
 class TimeStep;
@@ -251,11 +253,5 @@ public:
 #endif
 };
 
-
+} // end namespace oofem
 #endif // node_h
-
-
-
-
-
-

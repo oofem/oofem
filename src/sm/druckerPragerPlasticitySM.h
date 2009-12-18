@@ -53,6 +53,7 @@
 #include "structuralmaterial.h"
 #include "isolinearelasticmaterial.h"
 
+namespace oofem {
 
 class DruckerPragerPlasticitySMStatus : public StructuralMaterialStatus
 {
@@ -458,5 +459,5 @@ public:
 protected:
 };
 
+} // end namespace oofem
 #endif // druckerpragerplasticitysm_h
-

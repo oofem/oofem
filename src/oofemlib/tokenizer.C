@@ -39,6 +39,8 @@
 #include <ctype.h>
 #endif
 
+namespace oofem {
+
 Tokenizer :: Tokenizer(char separator)
 {
     this->separator = separator;
@@ -189,5 +191,4 @@ const char *Tokenizer :: giveToken(int i)
 
 
 
-
-
+} // end namespace oofem

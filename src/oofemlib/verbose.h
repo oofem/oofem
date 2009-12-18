@@ -50,6 +50,8 @@
 #ifndef verbose_h
 #define verbose_h
 
+namespace oofem {
+
 #define VERBOSE             // please activate or de-activate this line
 
 
@@ -66,6 +68,7 @@
 #define TIME_REPORT        // please activate or de-activate this line
 #endif
 
+} // end namespace oofem
 #endif // verbose_h
 
 

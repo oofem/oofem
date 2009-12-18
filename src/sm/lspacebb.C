@@ -58,6 +58,7 @@
 #include "conTable.h"
 #endif
 
+namespace oofem {
 
 LSpaceBB :: LSpaceBB(int n, Domain *aDomain) : LSpace(n, aDomain)
 { }
@@ -118,3 +119,4 @@ LSpaceBB :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int l
 }
 
 
+} // end namespace oofem

@@ -52,6 +52,8 @@
 #include <vector>
 #endif
 
+namespace oofem {
+
 #ifdef EXPERIMENT
 FloatArray sNorms;
 #endif
@@ -522,3 +524,6 @@ ZZRemeshingCriteria :: giveDofManDensity(int num)
 
     return density;
 }
+
+
+} // end namespace oofem

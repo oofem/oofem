@@ -55,6 +55,7 @@
 #include <math.h>
 #endif
 
+namespace oofem {
 
 MazarsNLMaterial :: MazarsNLMaterial(int n, Domain *d) : MazarsMaterial(n, d), StructuralNonlocalMaterialExtensionInterface(d)
     //
@@ -334,3 +335,4 @@ MazarsNLMaterial :: estimatePackSize(CommunicationBuffer &buff, GaussPoint *ip)
 
 
 
+} // end namespace oofem

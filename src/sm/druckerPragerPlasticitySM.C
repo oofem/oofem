@@ -59,6 +59,7 @@
 #include <math.h>
 #endif
 
+namespace oofem {
 
 DruckerPragerPlasticitySMStatus :: DruckerPragerPlasticitySMStatus(int n, Domain *d, GaussPoint *gp) :
     StructuralMaterialStatus(n, d, gp),
@@ -970,3 +971,4 @@ DruckerPragerPlasticitySM :: predictRelativeComputationalCost(GaussPoint *gp)
 }
 
 #endif
+} // end namespace oofem

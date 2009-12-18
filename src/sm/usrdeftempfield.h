@@ -45,6 +45,8 @@
 #include "domain.h"
 #include "parser.h"
 
+namespace oofem {
+
 #define UserDefinedTemperatureField_MAX_EXPR_LENGTH 200
 
 /**
@@ -99,4 +101,5 @@ public:
     IRResultType initializeFrom(InputRecord *ir);
 };
 
+} // end namespace oofem
 #endif // usrdeftempfield_h

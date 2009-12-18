@@ -42,6 +42,8 @@
 
 #include "oofem_limits.h"
 
+namespace oofem {
+
 /**
  * Tokenizer class. This class splits given record (represented as string) to
  * particular tokens, which are usually seperated by white spaces (but other separators
@@ -103,5 +105,5 @@ protected:
     void  readStringToken(int &bpos, const char * &line, char * &token);
 };
 
-
+} // end namespace oofem
 #endif // tokenizer_h

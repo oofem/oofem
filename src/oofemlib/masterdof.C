@@ -57,6 +57,7 @@
 #include <string.h>
 #endif
 
+namespace oofem {
 
 MasterDof :: MasterDof(int i, DofManager *aNode, int nbc, int nic, DofID id) : Dof(i, aNode, id)
     // Constructor. Creates a new d.o.f., with number i, belonging
@@ -498,3 +499,4 @@ MasterDof :: unpackAndUpdateUnknown(CommunicationBuffer &buff, EquationID type,
 
 #endif
 
+} // end namespace oofem

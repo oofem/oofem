@@ -41,6 +41,8 @@
 #include <stdarg.h>
 #endif
 
+namespace oofem {
+
 #define LOG_ERR_HEADER "_______________________________________________________"
 #define LOG_ERR_TAIL   "_______________________________________________________\a\n"
 
@@ -229,3 +231,4 @@ void OOFEM_LOG_DEBUG(const char *format, ...)
 
 
 #endif
+} // end namespace oofem

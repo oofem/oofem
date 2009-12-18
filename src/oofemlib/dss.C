@@ -46,6 +46,8 @@
 #include <set>
 #endif
 
+namespace oofem {
+
 DSSMatrix :: DSSMatrix(dssType _t) : SparseMtrx()
 {
     eDSSolverType _st = eDSSFactorizationLDLT;
@@ -429,3 +431,4 @@ double &DSSMatrix :: operator()(int i, int j) { return DSS__zero; }
 #endif
 
 
+} // end namespace oofem

@@ -60,6 +60,8 @@
 #include "conTable.h"
 #endif
 
+namespace oofem {
+
 SUPGElement :: SUPGElement(int n, Domain *aDomain) :
     FMElement(n, aDomain)
     // Constructor. Creates an element with number n, belonging to aDomain.
@@ -307,3 +309,5 @@ SUPGElement :: giveIntVarCompFullIndx(IntArray &answer, InternalStateType type)
  * }
  * }
  */
+
+} // end namespace oofem

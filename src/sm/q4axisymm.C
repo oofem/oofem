@@ -53,6 +53,8 @@
 #include <stdio.h>
 #endif
 
+namespace oofem {
+
 Q4Axisymm :: Q4Axisymm(int n, Domain *aDomain) :
     StructuralElement(n, aDomain)
     // Constructor.
@@ -479,3 +481,5 @@ Q4Axisymm :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoo
 
     return 1;
 }
+
+} // end namespace oofem

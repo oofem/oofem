@@ -53,6 +53,8 @@
 #include "mmashapefunctprojection.h"
 #include "huertaerrorestimator.h"
 
+namespace oofem {
+
 class Truss1d : public StructuralElement, public ZZNodalRecoveryModelInterface,
     public NodalAveragingRecoveryModelInterface, public SpatialLocalizerInterface,
     public DirectErrorIndicatorRCInterface,
@@ -298,4 +300,5 @@ protected:
     int           giveApproxOrder() { return 1; }
 };
 
+} // end namespace oofem
 #endif // truss1d_h

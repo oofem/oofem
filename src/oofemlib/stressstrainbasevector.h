@@ -40,6 +40,8 @@
 #include "materialmode.h"
 #include "matresponseform.h"
 
+namespace oofem {
+
 typedef char StressStrainMatMode;
 /**
  * Base class for stress/strain vector representations. It is derived from FloatArray class, which is used
@@ -161,4 +163,5 @@ protected:
                                        int transpose = 0) const = 0;
 };
 
+} // end namespace oofem
 #endif // stressstrainbasevector_h

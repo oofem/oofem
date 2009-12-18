@@ -41,6 +41,8 @@
 #ifndef interface_h
 #define interface_h
 
+
+namespace oofem {
 /**
  * Class Interface. Interface class is abstract base class.
  * Its role is to provide a base class for all interfaces.
@@ -90,5 +92,5 @@ public:
     virtual const char *giveClassName() const  = 0;
 };
 
-
+} // end namespace oofem
 #endif // interface_h

@@ -43,6 +43,7 @@
 #endif
 #include "contextioerr.h"
 
+namespace oofem {
 
 IRResultType
 HydratingIsoHeatMaterial :: initializeFrom(InputRecord *ir)
@@ -326,3 +327,5 @@ HydratingTransportMaterialStatus :: giveInterface(InterfaceType type)
         return NULL;
     }
 }
+
+} // end namespace oofem

@@ -48,6 +48,8 @@
  #include <stdlib.h>
 #endif
 
+namespace oofem {
+
 //valgrind --leak-check=full --show-reachable=no -v --log-file=valgr.txt ./oofem -f Macrolspace_1.in
 
 //     FloatArray A;
@@ -148,7 +150,7 @@ IRResultType MicroMaterial :: initializeFrom(InputRecord *ir)
 
     OOFEM_LOG_INFO("** Instanciating microproblem with BC from file %s\n", inputFileNameMicro);
     OOFEMTXTDataReader drMicro(inputFileNameMicro);
-    this->problemMicro = :: InstanciateProblem(& drMicro, _processor, 0); //0=contextFlag-store/resore
+    this->problemMicro = InstanciateProblem(& drMicro, _processor, 0); //0=contextFlag-store/resore
     drMicro.finish();
     OOFEM_LOG_INFO("** Microproblem %p instanciated\n\n", problemMicro);
 
@@ -279,7 +281,7 @@ void MicroMaterial :: giveMacroStiffnessMatrix(FloatMatrix &answer, TimeStep *tS
       Kbi->zero();
       Kii1KbiT = new FloatMatrix(totalInternalDofs,totalBoundaryDofs);
       Kii1KbiT->zero();
-      Kii = :: CreateUsrDefSparseMtrx(sparseMtrxType);
+      Kii = CreateUsrDefSparseMtrx(sparseMtrxType);
       Kii->buildInternalStructure(microEngngModel, 1, EID_MomentumBalance, *this);
       Kii->zero();
       microEngngModel->assemble(Kii, tStep, EID_MomentumBalance, type, *this, microDomain);
@@ -291,7 +293,7 @@ void MicroMaterial :: giveMacroStiffnessMatrix(FloatMatrix &answer, TimeStep *tS
     this->reqNumberOfDomainEquation = this->maxNumberOfDomainEquation;
     this->DofEquationNumbering = AllNodes;
 
-    stiffnessMatrixMicro = :: CreateUsrDefSparseMtrx(sparseMtrxType);
+    stiffnessMatrixMicro = CreateUsrDefSparseMtrx(sparseMtrxType);
     stiffnessMatrixMicro->zero();
     stiffnessMatrixMicro->buildInternalStructure(microEngngModel, 1, EID_MomentumBalance, *this);
     stiffnessMatrixMicro->zero();
@@ -636,3 +638,5 @@ int MicroMaterial :: giveDofEquationNumber(Dof *dof) const {
 int MicroMaterial :: giveRequiredNumberOfDomainEquation() const {
   return this->reqNumberOfDomainEquation;
 }
+
+} // end namespace oofem

@@ -41,6 +41,8 @@
 #include "sloangraph.h"
 #include "mathfem.h"
 
+namespace oofem {
+
 SloanGraphNode :: SloanGraphNode(SloanGraph *graph, int numOld) : neighborList()
 {
     this->graph = graph;
@@ -84,3 +86,4 @@ int SloanGraphNode :: computeProfileHeight()
 }
 
 
+} // end namespace oofem

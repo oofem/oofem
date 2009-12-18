@@ -55,6 +55,8 @@
 #include "problemcomm.h"
 #endif
 
+namespace oofem {
+
 class Domain;
 class Element;
 class CrossSection;
@@ -200,10 +202,5 @@ protected:
                                     int regionValSize, const FloatArray &rhs);
 };
 
+} // end namespace oofem
 #endif // nodalrecoverymodel_h
-
-
-
-
-
-

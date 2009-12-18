@@ -272,6 +272,8 @@
 #include "parmetisloadbalancer.h"
 #endif
 
+namespace oofem {
+
 Element *CreateUsrDefElementOfType(char *aClass, int number, Domain *domain)
 {
     Element *newElement = NULL;
@@ -1014,3 +1016,4 @@ LoadBalancer *CreateUsrDefLoadBalancerOfType(classType type, Domain *d)
 }
 #endif
 
+} // end namespace oofem

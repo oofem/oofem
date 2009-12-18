@@ -6,6 +6,8 @@
 #include "element.h"
 #include "dofmanager.h"
 
+namespace oofem {
+
 BasicGeometry::BasicGeometry() : Geometry() {
     this->vertices = new AList< FloatArray > (0);
 }
@@ -430,3 +432,4 @@ void Circle::printYourself(){
 }
 
 
+} // end namespace oofem

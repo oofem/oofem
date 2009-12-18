@@ -53,6 +53,8 @@
 #endif
 #include "contextioerr.h"
 
+namespace oofem {
+
 int
 PerfectlyPlasticMaterial :: hasMaterialModeCapability(MaterialMode mode)
 //
@@ -1373,3 +1375,5 @@ PerfectlyPlasticMaterialStatus :: updateYourself(TimeStep *tNow)
 
     yield_flag = temp_yield_flag;
 }
+
+} // end namespace oofem

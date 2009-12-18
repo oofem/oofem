@@ -5,6 +5,8 @@
 #include "xfemelementinterface.h"
 #include "usrdefsub.h"
 
+namespace oofem {
+
 /** temporary class for testing
  * in the usual case instead of PlaneStress2dXfem
  * there will be the standard PlaneStress2d
@@ -43,4 +45,5 @@ public:
 #endif
 };
 
+} // end namespace oofem
 #endif

@@ -42,6 +42,8 @@
 #include "flotarry.h"
 #include "piecewis.h"
 
+namespace oofem {
+
 class PeriodicPiecewiseLinFunction : public PiecewiseLinFunction
 {
     /*
@@ -95,4 +97,5 @@ public:
     virtual double    __derAt(double);
 };
 
+} // end namespace oofem
 #endif // piecewisper_h

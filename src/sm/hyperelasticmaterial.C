@@ -40,6 +40,8 @@
 #include "structuralcrosssection.h"
 #include "mathfem.h"
 
+namespace oofem {
+
 HyperElasticMaterial :: HyperElasticMaterial (int n, Domain *d) : StructuralMaterial (n,d)
 //
 // constructor
@@ -273,3 +275,4 @@ HyperElasticMaterialStatus::restoreContext(FILE* stream, void *obj)
 }*/
 
 
+} // end namespace oofem

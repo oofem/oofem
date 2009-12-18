@@ -45,6 +45,8 @@
 #include "nodalrecoverymodel.h"
 #include "interface.h"
 
+namespace oofem {
+
 class GaussPoint;
 class ZZNodalRecoveryModelInterface;
 
@@ -139,11 +141,5 @@ public:
                                                                      InternalStateType type) = 0;
 };
 
-
+} // end namespace oofem
 #endif // zznodalrecoverymodel_h
-
-
-
-
-
-

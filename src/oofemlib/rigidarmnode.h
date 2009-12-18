@@ -43,6 +43,7 @@
 #include <stdio.h>
 #endif
 
+namespace oofem {
 
 class FloatArray;
 class IntArray;
@@ -129,5 +130,5 @@ public:
     Node *giveMasterDofMngr() const { return * masterNode; }
 };
 
-
+} // end namespace oofem
 #endif // rigidarmnode_h

@@ -45,6 +45,7 @@
 #endif
 
 using namespace std;
+namespace oofem {
 
 class FETISolver;
 
@@ -159,6 +160,7 @@ private:
     //void setUpCommunicationMapsForRemoteElementMode (Domain* domain);
 };
 
+} // end namespace oofem
 #endif
 #endif // feticommunicator_h
 

@@ -61,6 +61,7 @@
 #include <assert.h>
 #endif
 
+namespace oofem {
 
 class IntArray;
 class FloatMatrix;
@@ -420,6 +421,7 @@ double  dotProduct(const FloatArray &p1, const FloatArray &p2, int i);
 
 #endif
 
+} // end namespace oofem
 #endif // flotarry_h
 
 

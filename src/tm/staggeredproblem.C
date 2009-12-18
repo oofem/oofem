@@ -63,6 +63,8 @@
 #endif
 #endif
 
+namespace oofem {
+
 StaggeredProblem :: StaggeredProblem(int i, EngngModel *_master) : EngngModel(i, _master)
     // constructor
 {
@@ -110,7 +112,7 @@ StaggeredProblem :: instanciateSlaveProblems()
 
     for ( i = 1; i <= nModels; i++ ) {
         OOFEMTXTDataReader dr(inputStreamNames [ i - 1 ]);
-        slaveProb = :: InstanciateProblem(& dr, this->pMode, this->contextOutputMode, this);
+        slaveProb = InstanciateProblem(& dr, this->pMode, this->contextOutputMode, this);
         emodelList->put(i, slaveProb);
     }
 
@@ -388,3 +390,5 @@ void StaggeredProblem :: drawNodes(oofegGraphicContext &context) {
     }
 }
 #endif
+
+} // end namespace oofem

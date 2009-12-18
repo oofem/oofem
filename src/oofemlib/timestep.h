@@ -57,6 +57,7 @@
 #include <stdio.h>
 #endif
 
+namespace oofem {
 
 /**
  * Class representing solution step. The Solution step instance may represent either
@@ -204,4 +205,5 @@ public:
     contextIOResultType    restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 };
 
+} // end namespace oofem
 #endif // timestep_h

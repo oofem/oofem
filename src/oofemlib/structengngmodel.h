@@ -51,6 +51,8 @@
  #include "processcomm.h"
 #endif
 
+namespace oofem {
+
 class StructuralElement;
 
 /**
@@ -277,4 +279,5 @@ public:
 #endif
 };
 
+} // end namespace oofem
 #endif // structengngmodel_h

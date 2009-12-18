@@ -47,6 +47,8 @@
 #include <set>
 #endif
 
+namespace oofem {
+
 #define NonlocalMaterialWTP_DEBUG_PRINT 0
 
 /*
@@ -540,5 +542,6 @@ NonlocalMaterialWTP :: fastElementIPNonlocTableUpdater(GaussPoint *gp, IntArray 
     }
 }
 
-
+} // end namespace oofem
 #endif
+

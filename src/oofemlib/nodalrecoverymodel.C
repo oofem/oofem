@@ -47,6 +47,7 @@
 #include <stdio.h>
 #endif
 
+namespace oofem {
 
 NodalRecoveryModel::NodalRecoveryModel(Domain *d) : nodalValList(0)
 {
@@ -274,3 +275,5 @@ NodalRecoveryModel :: giveRegionRecordMap(IntArray &answer, int reg, InternalSta
     OOFEM_WARNING2("NodalRecoveryModel::giveRegionRecordMap: bad region number (%d) or no element in given region\n", reg);
     answer.resize(0);
 }
+
+} // end namespace oofem

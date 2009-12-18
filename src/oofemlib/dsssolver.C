@@ -47,6 +47,7 @@
 #include <stdio.h>
 #endif
 
+namespace oofem {
 
 DSSSolver :: DSSSolver(int i, Domain *d, EngngModel *m) :
     SparseLinearSystemNM(i, d, m) { }
@@ -90,9 +91,11 @@ DSSSolver :: initializeFrom(InputRecord *ir)
     return IRRT_OK;
 }
 
+} // end namespace oofem
 
 #else // __DSS_MODULE
 
+namespace oofem {
 
 DSSSolver :: DSSSolver(int i, Domain *d, EngngModel *m) : SparseLinearSystemNM(i, d, m)
 {
@@ -107,4 +110,5 @@ DSSSolver :: initializeFrom(InputRecord *ir) { return IRRT_OK; }
 NM_Status
 DSSSolver :: solve(SparseMtrx *A, FloatArray *b, FloatArray *x) { return NM_NoSuccess; }
 
+} // end namespace oofem
 #endif

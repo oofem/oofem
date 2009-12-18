@@ -55,6 +55,8 @@
 #include "oofeggraphiccontext.h"
 #endif
 
+namespace oofem {
+
 LIBeam2dNL :: LIBeam2dNL(int n, Domain *aDomain) : NLStructuralElement(n, aDomain), LayeredCrossSectionInterface()
     // Constructor.
 {
@@ -711,6 +713,4 @@ void LIBeam2dNL :: drawDeformedGeometry(oofegGraphicContext &gc, UnknownType typ
 }
 #endif
 
-
-
-
+} // end namespace oofem

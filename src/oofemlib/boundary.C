@@ -43,6 +43,8 @@
 #include "loadtime.h"
 #include "verbose.h"
 
+namespace oofem {
+
 /*
  * double  BoundaryCondition :: give (char u, TimeStep* stepN)
  * // Returns the value at stepN of the prescribed value of the kinematic
@@ -169,3 +171,4 @@ BoundaryCondition :: giveInputRecordString(std :: string &str, bool keyword)
     return 1;
 }
 
+} // end namespace oofem

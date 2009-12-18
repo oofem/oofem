@@ -50,6 +50,8 @@
 #include "matstatus.h"
 #include "stressstrainprincmode.h"
 
+namespace oofem {
+
 #define STRAIN_STEPS 10.0
 
 class GaussPoint;
@@ -759,10 +761,5 @@ protected:
     friend class RheoChainMaterial;
 };
 
-
+} // end namespace oofem
 #endif // structuralmaterial_h
-
-
-
-
-

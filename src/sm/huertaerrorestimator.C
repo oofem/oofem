@@ -61,6 +61,7 @@
 #endif
 #include "contextioerr.h"
 
+namespace oofem {
 
 //#define STIFFNESS_TYPE       TangentStiffnessMatrix
 #define STIFFNESS_TYPE       ElasticStiffnessMatrix
@@ -3078,7 +3079,7 @@ HuertaErrorEstimator :: solveRefinedElementProblem(int elemId, IntArray &localNo
     :: getUtime(st_init);
 #endif
     refinedReader.rewind();
-    refinedProblem = :: InstanciateProblem(& refinedReader, _processor, contextFlag);
+    refinedProblem = InstanciateProblem(& refinedReader, _processor, contextFlag);
     refinedReader.finish();
 #ifdef TIME_INFO
     :: getRelativeUtime(et_init, st_init);
@@ -3662,7 +3663,7 @@ HuertaErrorEstimator :: solveRefinedPatchProblem(int nodeId, IntArray &localNode
     :: getUtime(st_init);
 #endif
     refinedReader.rewind();
-    refinedProblem = :: InstanciateProblem(& refinedReader, _processor, contextFlag);
+    refinedProblem = InstanciateProblem(& refinedReader, _processor, contextFlag);
     refinedReader.finish();
 #ifdef TIME_INFO
     :: getRelativeUtime(et_init, st_init);
@@ -3890,7 +3891,7 @@ HuertaErrorEstimator :: solveRefinedWholeProblem(IntArray &localNodeIdArray, Int
     :: getUtime(st_init);
 #endif
     refinedReader.rewind();
-    refinedProblem = :: InstanciateProblem(& refinedReader, _processor, contextFlag);
+    refinedProblem = InstanciateProblem(& refinedReader, _processor, contextFlag);
     refinedReader.finish();
 #ifdef TIME_INFO
     :: getRelativeUtime(et_init, st_init);
@@ -4495,3 +4496,4 @@ HuertaErrorEstimator :: setupRefinedProblemEpilog2(int ltfuncs)
 
 
 
+} // end namespace oofem

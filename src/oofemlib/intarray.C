@@ -56,6 +56,8 @@
 #include "combuff.h"
 #endif
 
+namespace oofem {
+
 IntArray :: IntArray(int n)
 // Constructor : creates an array of size n (filled with garbage).
 {
@@ -641,3 +643,5 @@ IntArray :: givePackSize(CommunicationBuffer &buff)
     return buff.givePackSize(MPI_INT, 1) + buff.givePackSize(MPI_INT, this->size);
 }
 #endif
+
+} // end namespace oofem

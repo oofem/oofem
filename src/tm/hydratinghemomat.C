@@ -42,6 +42,8 @@
 #endif
 #include "contextioerr.h"
 
+namespace oofem {
+
 #define PRECAST_CAPACITY_COEFF 1e-2 // coefficient for obtaining capacity before cast of the material : 1e-4, tried 1e-2 for jete (no convergency with 1e-4)
 
 IRResultType
@@ -335,3 +337,5 @@ HydratingHeMoMaterial :: CreateStatus(GaussPoint *gp) const
 {
     return new HydratingTransportMaterialStatus(1, domain, gp);
 }
+
+} // end namespace oofem

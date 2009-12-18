@@ -54,6 +54,8 @@
 #include "structuralms.h"
 #include "cltypes.h"
 
+namespace oofem {
+
 /*
  This class implements associated Material Status to TrabBoneMaterial.
  It is atribute of matStatusDictionary at every GaussPoint, for which this material 
@@ -275,5 +277,6 @@ class TrabBoneMaterial : public StructuralMaterial
 
 };
 
+} // end namespace oofem
 #define trabbonematerial_h
 #endif

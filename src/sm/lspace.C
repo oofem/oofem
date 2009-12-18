@@ -59,6 +59,7 @@
 #include "conTable.h"
 #endif
 
+namespace oofem {
 
 FEI3dHexaLin LSpace :: interpolation;
 
@@ -1439,3 +1440,5 @@ LSpace :: computeLoadLSToLRotationMatrix(FloatMatrix &answer, int isurf, GaussPo
 
     return 1;
 }
+
+} // end namespace oofem

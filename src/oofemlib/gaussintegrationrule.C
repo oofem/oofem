@@ -44,6 +44,8 @@
  #include <stdio.h>
 #endif
 
+namespace oofem {
+
 // initialize class member
 
 GaussIntegrationRule :: GaussIntegrationRule(int n, Element *e,
@@ -879,3 +881,5 @@ GaussIntegrationRule :: SetUpPointsOn2DEmbeddedLine(int nPoints, MaterialMode mo
 
     return nPoints;
 }
+
+} // end namespace oofem

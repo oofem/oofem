@@ -47,6 +47,8 @@
 #include "matstatus.h"
 #include "tdictionary.h"
 
+namespace oofem {
+
 class Element;
 class Material;
 class LayeredCrossSection;
@@ -112,9 +114,5 @@ public:
     IRResultType initializeFrom(InputRecord *ir) { return IRRT_OK; }
 };
 
+} // end namespace oofem
 #endif // microplane_h
-
-
-
-
-

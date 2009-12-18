@@ -46,6 +46,8 @@
 #include <string.h>
 #endif
 
+namespace oofem {
+
 GaussPoint :: GaussPoint(IntegrationRule *ir, int n, FloatArray *a, double w, MaterialMode mode)
 // Constructor. Creates a Gauss point belonging to element e, with number
 // n, with coordinates a, with weight w.
@@ -260,3 +262,4 @@ void GaussPoint :: updateYourself(TimeStep *tStep)
  */
 
 
+} // end namespace oofem

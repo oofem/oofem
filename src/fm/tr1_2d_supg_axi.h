@@ -39,6 +39,8 @@
 
 #include "tr1_2d_supg.h"
 
+namespace oofem {
+
 /**
  * Class representing 2d linear axisymmetric triangular element
  * for solving incompressible fluid with SUPG solver
@@ -134,11 +136,5 @@ protected:
     void   computeNVector(FloatArray &answer, GaussPoint *gp);
 };
 
+} // end namespace oofem
 #endif // tr1_2d_supg_axi_h
-
-
-
-
-
-
-

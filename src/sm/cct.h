@@ -47,6 +47,8 @@
 #include "nodalaveragingrecoverymodel.h"
 #include "sprnodalrecoverymodel.h"
 
+namespace oofem {
+
 class CCTPlate : public NLStructuralElement, public LayeredCrossSectionInterface, public ZZNodalRecoveryModelInterface,
     public NodalAveragingRecoveryModelInterface, public SPRNodalRecoveryModelInterface
 {
@@ -208,12 +210,5 @@ protected:
     virtual double     giveArea();
 };
 
-
+} // end namespace oofem
 #endif // cct_h
-
-
-
-
-
-
-

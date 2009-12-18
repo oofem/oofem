@@ -40,6 +40,9 @@
 #ifndef iml_h
 #define iml_h
 
+namespace oofem {
+
 #define IML_COMPAT
 
+} // end namespace oofem
 #endif // iml_h

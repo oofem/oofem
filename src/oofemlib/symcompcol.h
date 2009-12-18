@@ -74,6 +74,8 @@
 
 #include "compcol.h"
 
+namespace oofem {
+
 /**
  * Implementation of symmetric sparse matrix stored using compressed column/row storage.
  * Only the lower part is stored.
@@ -179,6 +181,5 @@ protected:
 #endif
 };
 
-
+} // end namespace oofem
 #endif // symcompcol_h
-

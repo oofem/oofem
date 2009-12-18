@@ -45,6 +45,7 @@
 #include "structuralmaterial.h"
 #include "structuralms.h"
 
+namespace oofem {
 
 // material contant's keys for give()
 class GaussPoint;
@@ -315,6 +316,5 @@ protected:
                                                 GaussPoint *gp, TimeStep *atTime);
 };
 
-
+} // end namespace oofem
 #endif // isointerfacedamage01_h
-

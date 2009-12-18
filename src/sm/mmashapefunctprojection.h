@@ -46,7 +46,7 @@
 #include "interface.h"
 #include "compiler.h"
 
-
+namespace oofem {
 
 class Domain;
 class Element;
@@ -173,10 +173,5 @@ public:
 protected:
 };
 
+} // end namespace oofem
 #endif // mmashapefunctprojection_h
-
-
-
-
-
-

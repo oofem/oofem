@@ -45,6 +45,8 @@
 #include "flotarry.h"
 #include "verbose.h"
 
+namespace oofem {
+
 void
 StructuralCrossSection ::  giveRealStresses(FloatArray &answer, MatResponseForm form,
                                             GaussPoint *gp,
@@ -387,3 +389,4 @@ StructuralCrossSection :: computeStressIndependentStrainVector(FloatArray &answe
     mat->computeStressIndependentStrainVector(answer, gp, stepN, mode);
 }
 
+} // end namespace oofem

@@ -41,6 +41,8 @@
 #include "domain.h"
 #include "feinterpol2d.h"
 
+namespace oofem {
+
 /**
  * Class representing a 2d triangular linear interpolation based on area coordinates.
  */
@@ -231,6 +233,7 @@ protected:
     double edgeComputeLength(IntArray &edgeNodes, const FloatArray **coords);
 };
 
+} // end namespace oofem
 #endif // fei2dtrlin_h
 
 

@@ -63,6 +63,7 @@
  #include "petscordering.h"
 #endif
 
+namespace oofem {
 
 #define nrsolver_ERROR_NORM_SMALL_NUM 1.e-6
 #define NRSOLVER_MAX_REL_ERROR_BOUND 1.e10
@@ -518,7 +519,7 @@ NRSolver :: giveLinearSolver() {
         }
     }
 
-    linSolver = :: CreateUsrDefSparseLinSolver(solverType, 1, domain, engngModel);
+    linSolver = CreateUsrDefSparseLinSolver(solverType, 1, domain, engngModel);
     if ( linSolver == NULL ) {
         _error("giveLinearSolver: linear solver creation failed");
     }
@@ -949,7 +950,7 @@ NRSolver :: checkConvergence(FloatArray &RT, FloatArray &rhs, FloatArray &deltaR
         dg_totalDisp = collectiveErr;
  #endif
 
-        OOFEM_LOG_INFO("%-5d %-15e ", ( int ) tNow->giveTime(), nite);
+        OOFEM_LOG_INFO("%-5d %-5d ", ( int ) tNow->giveTime(), nite);
         // loop over dof groups
         for ( _dg = 1; _dg <= _ng; _dg++ ) {
             //  compute a relative error norm
@@ -1042,4 +1043,6 @@ NRSolver :: checkConvergence(FloatArray &RT, FloatArray &rhs, FloatArray &deltaR
 
     return answer;
 }
+
 #endif
+} // end namespace oofem

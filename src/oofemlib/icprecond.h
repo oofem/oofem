@@ -40,6 +40,8 @@
 #include <string.h>
 #endif
 
+namespace oofem {
+
 /**
  * Incomplete Cholesky IC(0) (no fill - up) preconditioner for
  * symmetric, positive definite matrices
@@ -88,4 +90,5 @@ protected:
     void ICFactor();
 };
 
+} // end namespace oofem
 #endif // icprecond_h

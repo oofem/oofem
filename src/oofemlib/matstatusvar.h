@@ -39,6 +39,8 @@
 #ifndef matstatusvar_h
 #define matstatusvar_h
 
+namespace oofem {
+
 enum MatStatusVar {
     ms_unknown,
     ms_yield_flag,
@@ -48,4 +50,5 @@ enum MatStatusVar {
     ms_damage_flag
 };
 
+} // end namespace oofem
 #endif // matstatusvar_h

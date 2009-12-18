@@ -50,6 +50,8 @@
 #include "materialmappingalgorithm.h"
 #include "dynalist.h"
 
+namespace oofem {
+
 /**
  * Represents POI (Point Of Interest) export module.
  * It is able to perform output on given points, which are inside domain but can have arbitrary position.
@@ -123,7 +125,5 @@ protected:
     MaterialMappingAlgorithm *giveMapper();
 };
 
+} // end namespace oofem
 #endif // poiexportmodule_h
-
-
-

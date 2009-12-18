@@ -52,6 +52,8 @@
 #endif
 #endif
 
+namespace oofem {
+
 CompCol_ILUPreconditioner ::
 CompCol_ILUPreconditioner(const SparseMtrx &A, InputRecord &attributes) : Preconditioner(A, attributes)
 { }
@@ -70,7 +72,7 @@ CompCol_ILUPreconditioner :: init(const SparseMtrx &A)
 #ifdef TIME_REPORT
     //clock_t tstart = clock();
     oofem_timeval tstart;
-    :: getUtime(tstart);
+    getUtime(tstart);
 #endif
 
     if ( A.giveType() == SMT_CompCol ) {
@@ -83,7 +85,7 @@ CompCol_ILUPreconditioner :: init(const SparseMtrx &A)
 
 #ifdef TIME_REPORT
     oofem_timeval ut;
-    :: getRelativeUtime(ut, tstart);
+    getRelativeUtime(ut, tstart);
     OOFEM_LOG_INFO( "ILUP: user time consumed by factorization: %.2fs\n", ( double ) ( ut.tv_sec + ut.tv_usec / ( double ) OOFEM_USEC_LIM ) );
 #endif
 }
@@ -441,3 +443,5 @@ CompCol_ILUPreconditioner :: qsortRowPartition(IntArray &src, FloatArray &val, i
 
     return i;
 }
+
+} // end namespace oofem

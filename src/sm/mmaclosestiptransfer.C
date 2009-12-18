@@ -39,6 +39,8 @@
 #include "material.h"
 #include "gausspnt.h"
 
+namespace oofem {
+
 /*
  * MMAClosestIPTransfer::MMAClosestIPTransfer(GaussPoint* gp, Domain* oldd) : MaterialMappingAlgorithm ()
  * {
@@ -90,15 +92,4 @@ MMAClosestIPTransfer :: __mapVariable(FloatArray &answer, FloatArray &coords,
     return 0;
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
+} // end namespace oofem

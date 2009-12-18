@@ -57,6 +57,8 @@
 #include "conTable.h"
 #endif
 
+namespace oofem {
+
 TR1_2D_SUPG_AXI :: TR1_2D_SUPG_AXI(int n, Domain *aDomain) : TR1_2D_SUPG(n, aDomain)
     // Constructor.
 { }
@@ -962,3 +964,5 @@ TR1_2D_SUPG_AXI :: updateStabilizationCoeffs(TimeStep *atTime)
 
     //this->t_lsic = 0.0;
 }
+
+} // end namespace oofem

@@ -70,6 +70,7 @@
 
 //#define OOFEG_DEVEL
 
+using namespace oofem;
 
 #define OOFEG_BACKGROUND_COLOR "WhiteSmoke"
 #define OOFEG_DEFAULTDRAW_COLOR "black"

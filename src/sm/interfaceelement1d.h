@@ -40,6 +40,8 @@
 #include "structuralelement.h"
 #include "gaussintegrationrule.h"
 
+namespace oofem {
+
 class InterfaceElem1d : public StructuralElement
 {
     /*
@@ -114,12 +116,5 @@ protected:
     cmode giveCoordMode() const { return this->mode; }
 };
 
+} // end namespace oofem
 #endif // interfaceelement1d_h
-
-
-
-
-
-
-
-

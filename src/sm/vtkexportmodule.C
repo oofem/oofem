@@ -51,7 +51,7 @@
  #include <vector>
 #endif
 
-
+namespace oofem {
 
 VTKExportModule :: VTKExportModule(EngngModel *e) : ExportModule(e), internalVarsToExport(), primaryVarsToExport()
 {
@@ -521,7 +521,7 @@ VTKExportModule :: exportIntVars(FILE *stream, TimeStep *tStep)
 
     for ( i = 1; i <= n; i++ ) {
         type = ( InternalStateType ) internalVarsToExport.at(i);
-        InternalStateValueType iType = :: giveInternalStateValueType(type);
+        InternalStateValueType iType = giveInternalStateValueType(type);
         this->exportIntVarAs(type, iType, stream, tStep);
     }
 }
@@ -1238,3 +1238,4 @@ VTKExportModule :: exportPrimVarAs(UnknownType valID, FILE *stream, TimeStep *tS
     fprintf(stream, "\n");
 }
 
+} // end namespace oofem

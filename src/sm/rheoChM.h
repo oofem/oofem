@@ -49,6 +49,8 @@
 #include "structuralelement.h"
 #include "structuralms.h"
 
+namespace oofem {
+
 #define MNC_NPOINTS 30
 #define TIME_DIFF   1.e-10
 
@@ -335,5 +337,5 @@ protected:
                                                   TimeStep *stepN, ValueModeType mode);
 };
 
-
+} // end namespace oofem
 #endif // rheochm_h

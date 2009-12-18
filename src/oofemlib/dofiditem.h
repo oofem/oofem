@@ -41,7 +41,7 @@
 
 #include "enumitem.h"
 
-
+namespace oofem {
 /* mask definning the physical meaning of particular DOF in node.
  * mask array are also used in elements, where these arrays
  * are determining required DOFs needed by element and which are then
@@ -92,4 +92,5 @@ const char *__DofIDItemToString(DofIDItem _value);
 // see Dof::giveDofIDName function
 #define DofIdNameMaxLength 5
 
+} // end namespace oofem
 #endif // dofiditem_h

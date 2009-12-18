@@ -45,6 +45,7 @@
 #include <stdio.h>
 #endif
 
+namespace oofem {
 
 MesherInterface::returnCode
 FreemInterface :: createMesh(TimeStep *stepN, int domainNumber, int domainSerNum, Domain** dNew)
@@ -187,3 +188,5 @@ FreemInterface :: smoothNodalDensities(Domain *d,  FloatArray &nodalDensities, T
 
     }
 }
+
+} // end namespace oofem

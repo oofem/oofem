@@ -49,6 +49,7 @@
 #include "processcomm.h"
 #include "communicator.h"
 
+namespace oofem {
 
 //#define ParmetisLoadBalancer_DEBUG_PRINT
 
@@ -633,6 +634,8 @@ int
 ParmetisLoadBalancer :: giveElementPartition(int ielem)
 { return 0; }
 #endif
+
+} // end namespace oofem
 #endif
 
 

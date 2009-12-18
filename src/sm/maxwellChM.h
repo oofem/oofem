@@ -42,6 +42,8 @@
 
 #include "rheoChM.h"
 
+namespace oofem {
+
 class MaxwellChainMaterialStatus : public RheoChainMaterialStatus
 {
     /*
@@ -176,5 +178,5 @@ protected:
     LinearElasticMaterial *giveLinearElasticMaterial();
 };
 
-
+} // end namespace oofem
 #endif // maxwellchm_h

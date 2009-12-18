@@ -5,6 +5,8 @@
 #include "xfemmanager.h"
 #include "mathfem.h"
 
+namespace oofem {
+
 /*
 void EnrichmentFunction :: insertEnrichmentItem(EnrichmentItem *er) {
     int sz = assocEnrItemArray.giveSize();
@@ -165,3 +167,4 @@ void BranchFunction :: evaluateDerivativeAt(FloatArray &answer, FloatArray *poin
      */
 }
 
+} // end namespace oofem

@@ -42,6 +42,7 @@
 #include <stdio.h>
 #endif
 
+namespace oofem {
 
 MesherInterface::returnCode
 Targe2Interface :: createMesh(TimeStep *stepN, int domainNumber, int domainSerNum, Domain** dNew)
@@ -79,3 +80,4 @@ Targe2Interface :: createInput(Domain *d, TimeStep *stepN) {
     return 1;
 }
 
+} // end namespace oofem

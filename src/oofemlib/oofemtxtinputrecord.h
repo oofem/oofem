@@ -48,6 +48,9 @@
 #include "dictionr.h"
 #include "dynalist.h"
 #include "range.h"
+#include "tokenizer.h"
+
+namespace oofem {
 
 #define IR_MAX_ERROR_LENGTH 100
 
@@ -55,10 +58,6 @@
  *  This also enables to perform additional check for input records, since
  *  unread fields can be detected
  */
-#include "tokenizer.h"
-
-
-
 
 /**
  * Class representing the Input Record for OOFEM txt input file format. The input record is represented as string consisting of several fields.
@@ -194,4 +193,5 @@ protected:
     int    readMatrix(const char *helpSource, int r, int c, FloatMatrix &ans);
 };
 
+} // end namespace oofem
 #endif // oofemtxtinputrecord_h

@@ -57,6 +57,7 @@
 #include <stdio.h>
 #endif
 
+namespace oofem {
 
 FEI3dHexaQuad QSpace :: interpolation;
 
@@ -391,3 +392,5 @@ QSpace::NodalAveragingRecoveryMI_computeSideValue (FloatArray& answer, int side,
 {
  answer.resize(0);
 }
+
+} // end namespace oofem

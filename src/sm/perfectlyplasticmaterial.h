@@ -48,6 +48,8 @@
 
 #include "structuralms.h"
 
+namespace oofem {
+
 class GaussPoint;
 
 
@@ -295,5 +297,5 @@ protected:
     // virtual int  updateYieldStatus (GaussPoint* gp, FloatArray* strainIncrementIn3d);
 };
 
-
+} // end namespace oofem
 #endif // perfectlyplasticmaterial_h

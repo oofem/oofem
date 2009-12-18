@@ -5,7 +5,7 @@
 #include "mathfem.h"
 #include "oofegutils.h"
 
-
+namespace oofem {
 
 void
 oofeg_drawIsoLinesOnTriangle(WCRec coords [ 3 ], double s [ 3 ]) {
@@ -202,4 +202,5 @@ oofeg_drawIsoLinesOnQuad(WCRec coords [ 4 ], double s [ 4 ]) {
     }
 }
 
+} // end namespace oofem
 #endif

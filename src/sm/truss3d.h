@@ -49,6 +49,7 @@
 #include "zznodalrecoverymodel.h"
 #include "nodalaveragingrecoverymodel.h"
 
+namespace oofem {
 
 class Truss3d : public NLStructuralElement, public DirectErrorIndicatorRCInterface, public ZZNodalRecoveryModelInterface, public NodalAveragingRecoveryModelInterface
 {
@@ -185,4 +186,5 @@ protected:
     int           giveApproxOrder() { return 1; }
 };
 
+} // end namespace oofem
 #endif // truss3d_h

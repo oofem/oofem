@@ -41,6 +41,7 @@
 #include "sparsemtrx.h"
 #include "precond.h"
 
+namespace oofem {
 
 /**
  * Class implementing void preconditioner.
@@ -67,4 +68,5 @@ public:
     virtual const char *giveClassName() const { return "VoidPreconditioner"; }
 };
 
+} // end namespace oofem
 #endif // voidprecond_h

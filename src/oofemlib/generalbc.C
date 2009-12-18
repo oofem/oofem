@@ -54,7 +54,7 @@
 #endif
 #endif
 
-
+namespace oofem {
 
 GeneralBoundaryCondition :: GeneralBoundaryCondition(int n, Domain *d) : FEMComponent(n, d)
 {
@@ -95,7 +95,7 @@ GeneralBoundaryCondition *GeneralBoundaryCondition :: ofType(char *aClass)
     //  newBC = new TemperatureLoad(number,domain) ;
     else {
         // last resort - call aditional user defined subroutine
-        newBC = :: CreateUsrDefBoundaryConditionOfType(aClass, number, domain);
+        newBC = CreateUsrDefBoundaryConditionOfType(aClass, number, domain);
         if ( newBC == NULL ) {
             _error2("ofType:  unknown bc type (%s)", aClass);
             exit(0);
@@ -136,3 +136,5 @@ GeneralBoundaryCondition :: giveInputRecordString(std :: string &str, bool keywo
 
     return 1;
 }
+
+} // end namespace oofem

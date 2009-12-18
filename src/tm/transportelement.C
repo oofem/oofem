@@ -63,6 +63,8 @@
 #include "conTable.h"
 #endif
 
+namespace oofem {
+
 TransportElement :: TransportElement(int n, Domain *aDomain, ElementMode em) :
     Element(n, aDomain)
     // Constructor. Creates an element with number n, belonging to aDomain.
@@ -862,3 +864,6 @@ TransportElement :: giveIntVarCompFullIndx(IntArray &answer, InternalStateType t
         return Element :: giveIntVarCompFullIndx(answer, type);
     }
 }
+
+
+} // end namespace oofem

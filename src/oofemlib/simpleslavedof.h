@@ -51,6 +51,8 @@
 
 #include "error.h"
 
+namespace oofem {
+
 class Domain;
 class DofManager;
 class TimeStep;
@@ -253,5 +255,5 @@ protected:
     InitialCondition *giveIc();
 };
 
-
+} // end namespace oofem
 #endif // simpleslavedof_h

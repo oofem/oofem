@@ -44,6 +44,8 @@
 #include "gausspnt.h"
 #include "dictionr.h"
 
+namespace oofem {
+
 class TimeStep;
 
 /**
@@ -165,11 +167,5 @@ public:
 protected:
 };
 
-
+} // end namespace oofem
 #endif // pointload_h
-
-
-
-
-
-

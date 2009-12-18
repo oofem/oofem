@@ -46,6 +46,8 @@
 #include <stdlib.h>
 #endif
 
+namespace oofem {
+
 int
 NewtonianFluidMaterial :: hasMaterialModeCapability(MaterialMode mode)
 //
@@ -231,3 +233,5 @@ NewtonianFluidMaterial :: checkConsistency()
 
     return 1;
 }
+
+} // end namespace oofem

@@ -56,6 +56,7 @@
 #include "oofeggraphiccontext.h"
 #endif
 
+namespace oofem {
 
 //
 // upravit teplota u geom. nelinearity
@@ -631,3 +632,4 @@ void Truss2d :: drawDeformedGeometry(oofegGraphicContext &gc, UnknownType type)
 
 
 
+} // end namespace oofem

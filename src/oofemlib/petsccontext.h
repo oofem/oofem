@@ -44,6 +44,8 @@
 
 #include "equationid.h"
 
+namespace oofem {
+
 class EngngModel;
 class FloatArray;
 
@@ -99,5 +101,6 @@ public:
 #endif
 };
 
+} // end namespace oofem
 #endif
 #endif // petscscontext_h

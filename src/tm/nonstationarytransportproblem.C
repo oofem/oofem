@@ -55,6 +55,8 @@
 #endif
 #include "contextioerr.h"
 
+namespace oofem {
+
 
 NumericalMethod *NonStationaryTransportProblem :: giveNumericalMethod(TimeStep *atTime)
 // only one has reason for LinearStatic
@@ -226,7 +228,7 @@ void NonStationaryTransportProblem :: solveYourselfAt(TimeStep *tStep) {
     int neq =  this->giveNumberOfEquations(EID_ConservationEquation);
 
     if ( initFlag ) {
-        lhs = :: CreateUsrDefSparseMtrx(sparseMtrxType);
+        lhs = CreateUsrDefSparseMtrx(sparseMtrxType);
         if ( lhs == NULL ) {
             _error("solveYourselfAt: sparse matrix creation failed");
         }
@@ -641,3 +643,5 @@ NonStationaryTransportProblem :: initPetscContexts()
     }
 }
 #endif
+
+} // end namespace oofem

@@ -52,6 +52,8 @@
 #include "conTable.h"
 #endif
 
+namespace oofem {
+
 class GaussPoint ;
 
 
@@ -259,9 +261,6 @@ public NonlocalMaterialStiffnessInterface
 
 };
 
+} // end namespace oofem
 #define trabonenl3d_h
 #endif
-
-
-
-

@@ -41,6 +41,8 @@
 
 #include "enumitem.h"
 
+namespace oofem {
+
 /**
  * Type representing particular unknown (its physical meaning).
  */
@@ -72,6 +74,5 @@ enum UnknownType {
 
 const char *__UnknownTypeToString(UnknownType _value);
 
-
+} // end namespace oofem
 #endif // unknowntype_h
-

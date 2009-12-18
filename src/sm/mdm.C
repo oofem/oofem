@@ -45,6 +45,8 @@
 #include "nonlocalmaterialext.h"
 #include "contextioerr.h"
 
+namespace oofem {
+
 #ifndef MDM_MAPPING_DEBUG
 
 #ifdef MDM_USE_MMAClosestIPTransfer
@@ -1646,3 +1648,5 @@ MDMStatus :: giveInterface(InterfaceType type)
         return NULL;
     }
 }
+
+} // end namespace oofem

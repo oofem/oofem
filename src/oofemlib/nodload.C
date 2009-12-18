@@ -41,7 +41,7 @@
 #include "flotarry.h"
 #include "timestep.h"
 
-
+namespace oofem {
 
 
 IRResultType
@@ -73,4 +73,4 @@ NodalLoad :: giveInputRecordString(std :: string &str, bool keyword)
 }
 
 
-
+} // end namespace oofem

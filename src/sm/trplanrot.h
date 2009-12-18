@@ -44,6 +44,8 @@
 
 #include "trplanstrss.h"
 
+namespace oofem {
+
 class TrPlaneStrRot : public TrPlaneStress2d
 {
     /*
@@ -99,4 +101,5 @@ protected:
     integrationDomain  giveIntegrationDomain() { return _Triangle; }
 };
 
+} // end namespace oofem
 #endif //  trplanrot_h

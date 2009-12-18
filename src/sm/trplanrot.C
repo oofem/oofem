@@ -64,6 +64,8 @@
 #include "conTable.h"
 #endif
 
+namespace oofem {
+
 TrPlaneStrRot :: TrPlaneStrRot(int n, Domain *aDomain) :
     TrPlaneStress2d(n, aDomain)
     // Constructor.
@@ -583,3 +585,4 @@ TrPlaneStrRot ::   giveDofManDofIDMask(int inode, EquationID, IntArray &answer) 
 }
 
 
+} // end namespace oofem

@@ -37,8 +37,6 @@
 // file subspaceit.cc
 //
 
-#define DETAILED_REPORT
-
 #include "inverseit.h"
 #include "engngm.h"
 #ifndef __MAKEDEPEND
@@ -52,6 +50,10 @@
 #include "flotarry.h"
 #include "gjacobi.h"
 #include "mathfem.h"
+
+namespace oofem {
+
+#define DETAILED_REPORT
 
 InverseIteration ::  InverseIteration(int i, Domain *d, EngngModel *m) :
     SparseGeneralEigenValueSystemNM(i, d, m) {
@@ -229,4 +231,4 @@ InverseIteration :: initializeFrom(InputRecord *ir)
 }
 
 
-
+} // end namespace oofem

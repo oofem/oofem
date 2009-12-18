@@ -47,6 +47,8 @@
 #include "sparselinsystemnm.h"
 #include "sparsemtrx.h"
 
+namespace oofem {
+
 class LinearStatic : public StructuralEngngModel
 {
     /*
@@ -137,4 +139,5 @@ public:
 #endif
 };
 
+} // end namespace oofem
 #endif // linearstatic_h

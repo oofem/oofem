@@ -26,6 +26,8 @@
 #include "xfem/xfemmanager.h"
 #include "patchintegrationrule.h"
 
+namespace oofem {
+
 XfemManager :: XfemManager(EngngModel *emodel, int domainIndex) {
     this->emodel = emodel;
     this->domainIndex = domainIndex;
@@ -202,7 +204,7 @@ XfemManager :: instanciateYourself(DataReader *dr) {
             IR_IOERR(giveClassName(), __proc, IFT_RecordIDField, "", mir, result);
         }
 
-        ef = :: CreateUsrDefEnrichmentFunction( name, i + 1, emodel->giveDomain(1) );
+        ef = CreateUsrDefEnrichmentFunction( name, i + 1, emodel->giveDomain(1) );
         if ( ef == NULL ) {
             OOFEM_ERROR2("XfemManager::instanciateYourself: unknown enrichment function (%s)", name);
         }
@@ -219,7 +221,7 @@ XfemManager :: instanciateYourself(DataReader *dr) {
             IR_IOERR(giveClassName(), __proc, IFT_RecordIDField, "", mir, result);
         }
 
-        ge = :: CreateUsrDefGeometry(name);
+        ge = CreateUsrDefGeometry(name);
 
         if ( ge == NULL ) {
             OOFEM_ERROR2("XfemManager::instanciateYourself: unknown geometry (%s)", name);
@@ -238,7 +240,7 @@ XfemManager :: instanciateYourself(DataReader *dr) {
             IR_IOERR(giveClassName(), __proc, IFT_RecordIDField, "", mir, result);
         }
 
-        ei = :: CreateUsrDefEnrichmentItem( name, i + 1, this, emodel->giveDomain(1) );
+        ei = CreateUsrDefEnrichmentItem( name, i + 1, this, emodel->giveDomain(1) );
 
         if ( ei == NULL ) {
             OOFEM_ERROR2("XfemManager::instanciateYourself: unknown enrichment item (%s)", name);
@@ -281,3 +283,4 @@ void XfemManager :: updateIntegrationRule() {
     }
 }
 
+} // end namespace oofem

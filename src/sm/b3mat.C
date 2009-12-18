@@ -45,6 +45,8 @@
 #include "structuralcrosssection.h"
 #include "timestep.h"
 
+namespace oofem {
+
 IRResultType
 B3Material :: initializeFrom(InputRecord *ir)
 {
@@ -503,3 +505,5 @@ B3Material :: inverse_sorption_isotherm(double w)
 
     return phi;
 }
+
+} // end namespace oofem

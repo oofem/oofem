@@ -39,6 +39,8 @@
 #ifndef contextioresulttype_h
 #define contextioresulttype_h
 
+namespace oofem {
+
 enum contextIOResultType {
     CIO_OK = 0,     // ok
     CIO_BADVERSION, // incompatible context file
@@ -46,5 +48,6 @@ enum contextIOResultType {
     CIO_IOERR       // general io error
 };
 
+} // end namespace oofem
 #endif // contextioresulttype_h
 

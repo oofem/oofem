@@ -42,6 +42,8 @@
 
 #include "maxwellChM.h"
 
+namespace oofem {
+
 class B3Material : public MaxwellChainMaterial
 {
     /*
@@ -100,5 +102,5 @@ protected:
     double inverse_sorption_isotherm(double w);
 };
 
-
+} // end namespace oofem
 #endif // b3mat_h

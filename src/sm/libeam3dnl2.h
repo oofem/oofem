@@ -43,6 +43,8 @@
 #include "nlstructuralelement.h"
 #include "gausspnt.h"
 
+namespace oofem {
+
 class LIBeam3dNL2 : public NLStructuralElement
 {
     /*
@@ -188,4 +190,5 @@ protected:
     void          computeXdVector(FloatArray &answer, TimeStep *tStep);
 };
 
+} // end namespace oofem
 #endif // libeam3dnl2_h

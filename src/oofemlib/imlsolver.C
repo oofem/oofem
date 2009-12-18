@@ -35,6 +35,8 @@
 #ifndef __IML_MODULE
 #include "imlsolver.h"
 
+namespace oofem {
+
 IMLSolver :: IMLSolver(int i, Domain *d, EngngModel *m) : SparseLinearSystemNM(i, d, m)
 {
     _error("IMLSolver: can't create, IML support not compiled");
@@ -47,6 +49,8 @@ IMLSolver :: initializeFrom(InputRecord *ir) { return IRRT_OK; }
 
 NM_Status
 IMLSolver :: solve(SparseMtrx *A, FloatArray *b, FloatArray *x) { return NM_NoSuccess; }
+
+} // end namespace oofem
 #endif
 
 #ifdef __IML_MODULE
@@ -70,6 +74,8 @@ IMLSolver :: solve(SparseMtrx *A, FloatArray *b, FloatArray *x) { return NM_NoSu
 #endif
 #include "clock.h"
 #endif
+
+namespace oofem {
 
 IMLSolver :: IMLSolver(int i, Domain *d, EngngModel *m) : SparseLinearSystemNM(i, d, m)
 {
@@ -172,7 +178,7 @@ IMLSolver :: solve(SparseMtrx *A, FloatArray *b, FloatArray *x)
 #ifdef TIME_REPORT
     //clock_t tstart = clock();
     oofem_timeval tstart;
-    :: getUtime(tstart);
+    getUtime(tstart);
 #endif
 
 
@@ -193,7 +199,7 @@ IMLSolver :: solve(SparseMtrx *A, FloatArray *b, FloatArray *x)
 
 #ifdef TIME_REPORT
     oofem_timeval ut;
-    :: getRelativeUtime(ut, tstart);
+    getRelativeUtime(ut, tstart);
     OOFEM_LOG_INFO( "IMLSolver info: user time consumed by solution: %.2fs\n", ( double ) ( ut.tv_sec + ut.tv_usec / ( double ) OOFEM_USEC_LIM ) );
 #endif
 
@@ -202,4 +208,5 @@ IMLSolver :: solve(SparseMtrx *A, FloatArray *b, FloatArray *x)
     return NM_Success;
 }
 
+} // end namespace oofem
 #endif //ifdef __IML_MODULE

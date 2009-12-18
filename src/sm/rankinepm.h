@@ -42,6 +42,8 @@
 
 #include "mplasticmaterial.h"
 
+namespace oofem {
+
 class Domain;
 
 /**
@@ -94,4 +96,5 @@ protected:
                                          const FloatArray &strainSpaceHardeningVariables);
 };
 
+} // end namespace oofem
 #endif // rankinepm_h

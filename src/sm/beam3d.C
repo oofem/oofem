@@ -58,6 +58,8 @@
 #include "oofeggraphiccontext.h"
 #endif
 
+namespace oofem {
+
 Beam3d :: Beam3d(int n, Domain *aDomain) : StructuralElement(n, aDomain)
     // Constructor.
 {
@@ -1216,3 +1218,4 @@ void Beam3d :: drawDeformedGeometry(oofegGraphicContext &gc, UnknownType type)
     EMAddGraphicsToModel(ESIModel(), go);
 }
 #endif
+} // end namespace oofem

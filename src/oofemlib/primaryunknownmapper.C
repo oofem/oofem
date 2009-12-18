@@ -44,6 +44,7 @@
 #include <stdarg.h>
 #endif
 
+namespace oofem {
 
 void PrimaryUnknownMapper :: error(const char *file, int line, const char *format, ...) const
 {
@@ -70,3 +71,4 @@ void PrimaryUnknownMapper :: warning(const char *file, int line, const char *for
 }
 
 
+} // end namespace oofem

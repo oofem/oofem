@@ -47,6 +47,7 @@
 #include "domain.h"
 #include "flotmtrx.h"
 
+namespace oofem {
 
 class TimeStep;
 class Node;
@@ -230,12 +231,5 @@ protected:
 };
 
 
+} // end namespace oofem
 #endif // nlstructuralelement_h
-
-
-
-
-
-
-
-

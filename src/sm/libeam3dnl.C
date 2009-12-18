@@ -56,6 +56,8 @@
 #include "oofeggraphiccontext.h"
 #endif
 
+namespace oofem {
+
 LIBeam3dNL :: LIBeam3dNL(int n, Domain *aDomain) : NLStructuralElement(n, aDomain), tc(3, 3), tempTc(3, 3) //, kappa (3)
     // Constructor.
 {
@@ -857,3 +859,4 @@ void LIBeam3dNL :: drawDeformedGeometry(oofegGraphicContext &gc, UnknownType typ
     EMAddGraphicsToModel(ESIModel(), go);
 }
 #endif
+} // end namespace oofem

@@ -47,6 +47,7 @@
 #include <stdio.h>
 #endif
 
+namespace oofem {
 
 PolylineNonlocalBarrier :: PolylineNonlocalBarrier(int n, Domain *aDomain) :
     NonlocalBarrier(n, aDomain), vertexNodes()
@@ -147,3 +148,5 @@ PolylineNonlocalBarrier :: initializeFrom(InputRecord *ir)
 
     return IRRT_OK;
 }
+
+} // end namespace oofem

@@ -51,6 +51,8 @@
 #include "communicator.h"
 #endif
 
+namespace oofem {
+
 ZZNodalRecoveryModel :: ZZNodalRecoveryModel(Domain *d) : NodalRecoveryModel(d)
 { }
 
@@ -607,3 +609,4 @@ ZZNodalRecoveryModel :: unpackSharedDofManData (parallelStruct* s, ProcessCommun
 }
 
 #endif
+} // end namespace oofem

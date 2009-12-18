@@ -58,6 +58,8 @@
 #include "geometry.h"
 #include "unknownnumberingscheme.h"
 
+namespace oofem {
+
 class TimeStep;
 class Node;
 class Material;
@@ -891,7 +893,7 @@ Element :: ipEvaluator(T *src, void ( T :: *f )( GaussPoint *, S & ), S &_val)
     }
 }
 
-
+} // end namespace oofem
 #endif //element_h
 
 

@@ -42,6 +42,8 @@
 
 #include "plasticmaterial.h"
 
+namespace oofem {
+
 class Domain;
 
 class J2plasticMaterial : public PlasticMaterial
@@ -115,4 +117,5 @@ protected:
                                      const FloatArray &stressSpaceHardeningVars);
 };
 
+} // end namespace oofem
 #endif // j2plasticmaterial_h

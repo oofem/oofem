@@ -47,6 +47,8 @@
 #include "datastream.h"
 #include "contextioerr.h"
 
+namespace oofem {
+
 #define YIELD_TOL 1.e-6
 #define YIELD_TOL_SECONDARY 1.e-4
 #define RES_TOL   1.e-8
@@ -2455,3 +2457,4 @@ MPlasticMaterial2Status :: restoreContext(DataStream *stream, ContextMode mode, 
 
 
 
+} // end namespace oofem

@@ -51,7 +51,7 @@
 #endif
 #endif
 
-
+namespace oofem {
 /**
  * The Communicator and corresponding buffers (represented by this class)
  * are separated in order to allow share the same buffer by several communicators.
@@ -418,6 +418,6 @@ Communicator :: unpackAllData( T *ptr, P *dest, int ( T :: *unpackFunc )( P *, P
     return result;
 }
 
-
+} // end namespace oofem
 #endif
 #endif // communicator_h

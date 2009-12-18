@@ -39,6 +39,8 @@
 #endif
 #include "mathfem.h"
 
+namespace oofem {
+
 // measure dependent constant
 #define CUBIC_ZERO 1.0e-100
 
@@ -299,3 +301,5 @@ int iperm(int val, int rank)
  * }
  * }
  */
+
+} // end namespace oofem

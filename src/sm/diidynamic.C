@@ -52,6 +52,8 @@
 #include "verbose.h"
 #include "skyline.h"
 
+namespace oofem {
+
 NumericalMethod *DIIDynamic :: giveNumericalMethod(TimeStep *)
 // only one has reason for DIIDynamic
 //     - SolutionOfLinearEquations
@@ -411,3 +413,5 @@ DIIDynamic :: printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *atTime)
 
     iDof->printMultipleOutputAt(stream, atTime, dofchar, EID_MomentumBalance, dofmodes, 3);
 }
+
+} // end namespace oofem

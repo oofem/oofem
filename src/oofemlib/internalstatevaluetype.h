@@ -39,6 +39,8 @@
 #ifndef internalstatevaluetype_h
 #define internalstatevaluetype_h
 
+namespace oofem {
+
 /// enum determining the type of internal variable
 enum InternalStateValueType {
     ISVT_UNDEFINED,
@@ -50,5 +52,6 @@ enum InternalStateValueType {
     ISVT_TENSOR_G // general tensor
 };
 
+} // end namespace oofem
 #endif // internalstatevaluetype_h
 

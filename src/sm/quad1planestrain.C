@@ -57,6 +57,7 @@
 #include "conTable.h"
 #endif
 
+namespace oofem {
 
 Quad1PlaneStrain :: Quad1PlaneStrain(int n, Domain *aDomain) :
     StructuralElement(n, aDomain), ZZNodalRecoveryModelInterface(), SPRNodalRecoveryModelInterface(),
@@ -1309,3 +1310,4 @@ Quad1PlaneStrain :: EIPrimaryUnknownMI_givePrimaryUnknownVectorDofID(IntArray &a
     giveDofManDofIDMask(1, EID_MomentumBalance, answer);
 }
 
+} // end namespace oofem

@@ -41,6 +41,7 @@
 #include "combuff.h"
 #include "mathfem.h"
 
+namespace oofem {
 
 bool
 PetscOrdering_Base :: isLocal(DofManager *dman) {
@@ -634,5 +635,5 @@ PetscNatural2LocalOrdering :: map2Old(IntArray &answer, const IntArray &src, int
 }
 
 
-
+} // end namespace oofem
 #endif

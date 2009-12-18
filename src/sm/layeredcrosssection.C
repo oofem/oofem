@@ -46,6 +46,8 @@
 #include "verbose.h"
 #include "contextioerr.h"
 
+namespace oofem {
+
 void
 LayeredCrossSection ::  giveRealStresses(FloatArray &answer, MatResponseForm form,
                                          GaussPoint *gp,
@@ -1237,3 +1239,5 @@ LayeredCrossSection :: computeStressIndependentStrainVector(FloatArray &answer,
         _error("computeStressIndependentStrainVector: temperature loading not supported");
     }
 }
+
+} // end namespace oofem

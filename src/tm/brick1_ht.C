@@ -58,6 +58,8 @@
 #include "conTable.h"
 #endif
 
+namespace oofem {
+
 FEI3dHexaLin Brick1_ht :: interpolation;
 
 Brick1_ht :: Brick1_ht(int n, Domain *aDomain, ElementMode em) :
@@ -532,3 +534,4 @@ void Brick1_ht :: drawScalar(oofegGraphicContext &context)
 }
 
 #endif
+} // end namespace oofem

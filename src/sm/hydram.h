@@ -80,6 +80,8 @@
 #include "structuralms.h"
 #include "structuralmaterial.h"
 
+namespace oofem {
+
 #define ROOT_PRECISION_DKSI 1e-14
 #define BINARY_TREE_STEPS 2
 
@@ -339,4 +341,5 @@ public:
     ~HydrationModelInterface() { delete hydrationModel; }
 };
 
+} // end namespace oofem
 #endif // hydram_h

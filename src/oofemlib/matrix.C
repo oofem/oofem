@@ -48,6 +48,7 @@
 #include <stdlib.h>
 #endif
 
+namespace oofem {
 
 void Matrix :: checkBounds(int i, int j) const
 // Checks that the receiver includes a position (i,j).
@@ -70,3 +71,4 @@ void Matrix :: checkBounds(int i, int j) const
 }
 
 
+} // end namespace oofem

@@ -53,6 +53,8 @@
 #include <stdio.h>
 #endif
 
+namespace oofem {
+
 Concrete2 :: Concrete2(int n, Domain *d) : DeformationTheoryMaterial(n, d)
     //
     // constructor
@@ -1523,3 +1525,4 @@ Concrete2MaterialStatus :: updateYourself(TimeStep *atTime)
     plasticStrainVector = plasticStrainIncrementVector;
 }
 
+} // end namespace oofem

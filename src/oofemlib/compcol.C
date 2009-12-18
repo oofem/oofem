@@ -77,6 +77,8 @@
 #include <set>
 #endif
 
+namespace oofem {
+
 CompCol :: CompCol(void) : SparseMtrx(), val_(0), rowind_(0), colptr_(0), base_(0), nz_(0)
 {
     dim_ [ 0 ] = 0;
@@ -528,3 +530,4 @@ FloatArray CompCol :: trans_mult(const FloatArray &x) const
 
 
 
+} // end namespace oofem

@@ -58,6 +58,8 @@
 #include "conTable.h"
 #endif
 
+namespace oofem {
+
 FEI3dTrLin Tetrah1_ht :: interpolation;
 
 Tetrah1_ht :: Tetrah1_ht(int n, Domain *aDomain, ElementMode em) :
@@ -518,3 +520,4 @@ Tetrah1_ht :: drawScalar(oofegGraphicContext &context)
 #endif
 
 
+} // end namespace oofem

@@ -41,6 +41,8 @@
 #include "timestep.h"
 #include "mathfem.h"
 
+namespace oofem {
+
 IRResultType
 LinearEdgeLoad :: initializeFrom(InputRecord *ir)
 {
@@ -150,3 +152,4 @@ LinearEdgeLoad :: computeNArray(FloatArray &answer, FloatArray &coords) const
 
 
 
+} // end namespace oofem

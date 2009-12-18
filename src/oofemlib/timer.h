@@ -37,6 +37,8 @@
 
 #include "clock.h"
 
+namespace oofem {
+
 /**
  * Class implementing single timer, providing wall clock and user time capabilities.
  */
@@ -54,17 +56,17 @@ class Timer
 public:
     Timer() { initTimer(); }
     void startTimer() { this->initTimer();
-                        :: getTime(start_wtime);
-                        :: getUtime(start_utime);
+                        oofem :: getTime(start_wtime);
+                        oofem :: getUtime(start_utime);
                         running = true; }
     void stopTimer() { this->pauseTimer();
                        running = false; }
-    void pauseTimer() { :: getTime(end_wtime);
-                        :: getUtime(end_utime);
+    void pauseTimer() { oofem :: getTime(end_wtime);
+                        oofem :: getUtime(end_utime);
                         running = false;
                         this->updateElapsedTime(); }
-    void resumeTimer() { :: getTime(start_wtime);
-                         :: getUtime(start_utime);
+    void resumeTimer() { oofem :: getTime(start_wtime);
+                         oofem :: getUtime(start_utime);
                          running = true; }
     void initTimer() { elapsedWTime.tv_sec = elapsedWTime.tv_usec = elapsedUTime.tv_sec = elapsedUTime.tv_usec = 0;
                        running = false; }
@@ -82,9 +84,9 @@ public:
     }
 
     // converts total seconds into hours, mins, and seconds
-    void convert2HMS(int &nhrs, int &nmin, int &nsec, long int tsec) const { :: convertTS2HMS(nhrs, nmin, nsec, tsec); }
+    void convert2HMS(int &nhrs, int &nmin, int &nsec, long int tsec) const { oofem :: convertTS2HMS(nhrs, nmin, nsec, tsec); }
     // converts total seconds into hours, mins, and seconds
-    void convert2HMS(int &nhrs, int &nmin, int &nsec, double tsec) const { :: convertTS2HMS(nhrs, nmin, nsec, tsec); }
+    void convert2HMS(int &nhrs, int &nmin, int &nsec, double tsec) const { oofem :: convertTS2HMS(nhrs, nmin, nsec, tsec); }
 
 
 
@@ -156,11 +158,12 @@ public:
     /// Returns pointer to timer determined by EngngModelTimerType
     const Timer *getTimer(EngngModelTimerType t)  { return timers + t; }
     /// converts total seconds into hours, mins, and seconds
-    void convert2HMS(int &nhrs, int &nmin, int &nsec, long int tsec) const { :: convertTS2HMS(nhrs, nmin, nsec, tsec); }
-    void convert2HMS(int &nhrs, int &nmin, int &nsec, double tsec) const { :: convertTS2HMS(nhrs, nmin, nsec, tsec); }
+    void convert2HMS(int &nhrs, int &nmin, int &nsec, long int tsec) const { oofem :: convertTS2HMS(nhrs, nmin, nsec, tsec); }
+    void convert2HMS(int &nhrs, int &nmin, int &nsec, double tsec) const { oofem :: convertTS2HMS(nhrs, nmin, nsec, tsec); }
     /// printing & formatting
     void toString(EngngModelTimerType t, char *buff) { return timers [ t ].toString(buff); }
     //@}
 };
 
+} // end namespace oofem
 #endif // timer_h

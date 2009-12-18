@@ -40,6 +40,8 @@
 #include "mathfem.h"
 #include "timestep.h"
 
+namespace oofem {
+
 DirectErrorIndicatorRC::DirectErrorIndicatorRC(int n, ErrorEstimator *e) : RemeshingCriteria(n, e) 
 {
   stateCounter=-1; 
@@ -435,6 +437,4 @@ DirectErrorIndicatorRC :: unpackSharedDofManLocalIndicatorVals (ProcessCommunica
 
 
 #endif
-
-
-
+} // end namespace oofem

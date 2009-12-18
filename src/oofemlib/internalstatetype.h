@@ -41,6 +41,7 @@
 
 #include "enumitem.h"
 
+namespace oofem {
 //
 // following type determine the mode of some value.
 // which can be requested from various specialized methods.
@@ -124,6 +125,6 @@ enum InternalStateType {
 
 const char *__InternalStateTypeToString(InternalStateType _value);
 
-
+} // end namespace oofem
 #endif // internalstatetype_h
 

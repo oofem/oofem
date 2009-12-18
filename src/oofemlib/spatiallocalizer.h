@@ -52,6 +52,8 @@
 #include <list>
 #endif
 
+namespace oofem {
+
 class Domain;
 class Element;
 class TimeStep;
@@ -180,10 +182,5 @@ public:
 protected:
 };
 
+} // end namespace oofem
 #endif // spatiallocalizer_h
-
-
-
-
-
-

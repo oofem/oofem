@@ -42,6 +42,7 @@
 #include "contextioerr.h"
 #include "mathfem.h"
 
+namespace oofem {
 
 /////////////////////////////////////////////////////////////////
 ////////////////TRABECULAR BONE MATERIAL/////////////////////////
@@ -627,3 +628,4 @@ MaterialStatus *TrabBoneMaterial::CreateStatus (GaussPoint* gp) const
 // END: CREATE STATUS
 /////////////////////////////////////////////////////////////////
 
+} // end namespace oofem

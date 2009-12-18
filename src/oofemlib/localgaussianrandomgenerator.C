@@ -45,6 +45,8 @@
 #include "math.h"
 #include "domain.h"
 
+namespace oofem {
+
 LocalGaussianRandomGenerator :: LocalGaussianRandomGenerator(int num, Domain *d): RandomFieldGenerator(num, d)
 {}
 
@@ -226,3 +228,4 @@ double LocalGaussianRandomGenerator::dpolyValue(int n,double a[],double x)
   return value;
 }
 
+} // end namespace oofem

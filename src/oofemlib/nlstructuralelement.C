@@ -60,6 +60,7 @@
 #include <stdio.h>
 #endif
 
+namespace oofem {
 
 NLStructuralElement :: NLStructuralElement(int n, Domain *aDomain) :
     StructuralElement(n, aDomain)
@@ -794,3 +795,4 @@ NLStructuralElement :: initializeFrom(InputRecord *ir)
     return IRRT_OK;
 }
 
+} // end namespace oofem

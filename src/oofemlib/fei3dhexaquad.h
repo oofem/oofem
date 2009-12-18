@@ -48,6 +48,8 @@
 #include "domain.h"
 #include "feinterpol3d.h"
 
+namespace oofem {
+
 /**
  * Class representing implementation of quadratic hexahedra interpolation class.
  */
@@ -305,4 +307,5 @@ public:
     void   giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatArray **coords, const FloatArray &lcoords);
 };
 
+} // end namespace oofem
 #endif

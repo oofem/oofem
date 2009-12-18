@@ -38,6 +38,8 @@
 #include "error.h"
 #include "femcmpnn.h"
 
+namespace oofem {
+
 DomainTransactionManager :: DomainTransactionManager(Domain *d)
 {
     this->domain = d;
@@ -119,5 +121,5 @@ DomainTransactionManager :: commitTransactions()
     return domain->commitTransactions(this);
 }
 
-
+} // end namespace oofem
 #endif

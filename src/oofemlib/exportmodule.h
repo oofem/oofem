@@ -49,6 +49,8 @@
 #include "range.h"
 #include "inputrecord.h"
 
+namespace oofem {
+
 class EngngModel;
 class TimeStep;
 
@@ -127,7 +129,7 @@ protected:
 protected:
 };
 
-
+} // end namespace oofem
 #endif // exportmodule_h
 
 

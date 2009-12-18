@@ -51,6 +51,8 @@
 #include <stdio.h>
 #endif
 
+namespace oofem {
+
 /**
  * This class represents CBS algorithm for solving incompressible Navier-Stokes equations
  */
@@ -191,4 +193,5 @@ protected:
     void assembleAlgorithmicPartOfRhs(FloatArray &rhs, EquationID ut, TimeStep *tStep, int nite);
 };
 
+} // end namespace oofem
 #endif // cbs_h

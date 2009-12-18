@@ -54,6 +54,8 @@
 #include "integrationdomain.h"
 #include "dofmantransftype.h"
 
+namespace oofem {
+
 #define ALL_STRAINS -1
 
 class TimeStep;
@@ -801,12 +803,5 @@ protected:
     friend  class TrabBoneNL3D;
 };
 
+} // end namespace oofem
 #endif // structuralelement_h
-
-
-
-
-
-
-
-

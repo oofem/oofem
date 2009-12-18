@@ -36,6 +36,8 @@
 #include "transportmaterial.h"
 #include "contextioerr.h"
 
+namespace oofem {
+
 void
 TransportMaterial :: updateInternalState(const FloatArray &vec, GaussPoint *gp, TimeStep *)
 {
@@ -187,3 +189,6 @@ TransportMaterial :: giveIPValueSize(InternalStateType type, GaussPoint *aGaussP
         return Material :: giveIPValueSize(type, aGaussPoint);
     }
 }
+
+
+} // end namespace oofem

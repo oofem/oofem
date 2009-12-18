@@ -41,6 +41,8 @@
 
 #include "contextioresulttype.h"
 
+namespace oofem {
+
 /// context io exception class
 class ContextIOERR
 {
@@ -60,5 +62,6 @@ public:
 #define THROW_CIOERR(e) throw ContextIOERR(e, __FILE__, __LINE__);
 #define THROW_CIOERRM(e, m) throw ContextIOERR(e, m, __FILE__, __LINE__);
 
+} // end namespace oofem
 #endif // contextioerr_h
 

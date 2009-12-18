@@ -47,6 +47,8 @@
 #include "domain.h"
 #include "feinterpol3d.h"
 
+namespace oofem {
+
 /**
  * Class representing implementation of linar tetrahedra interpolation class.
  */
@@ -298,7 +300,7 @@ protected:
 };
 
 
-
+} // end namespace oofem
 #endif // fei3dtrlin_h
 
 

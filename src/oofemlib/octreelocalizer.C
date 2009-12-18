@@ -46,6 +46,8 @@
 #include <time.h>
 #endif
 
+namespace oofem {
+
 oofemOctantRec :: oofemOctantRec(OctreeSpatialLocalizer *loc, oofemOctantRec *parent, FloatArray &origin, double size)
 {
     int i, j, k;
@@ -1287,3 +1289,5 @@ OctreeSpatialLocalizer::init(bool force)
   }
   if ( !rootCell ) { return this->buildOctreeDataStructure(); } else { return 0; } 
 }
+
+} // end namespace oofem

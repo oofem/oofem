@@ -43,6 +43,8 @@
 #endif
 #include "compiler.h"
 
+namespace oofem {
+
 double Parser :: expr(int get)
 {
     // get indicates whether there is need to to call get_token() to get next token.
@@ -390,3 +392,5 @@ void Parser :: reset() {
         }
     }
 }
+
+} // end namespace oofem

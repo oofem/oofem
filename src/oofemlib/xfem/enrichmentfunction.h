@@ -11,6 +11,8 @@
 #include "femcmpnn.h"
 #include "gausspnt.h"
 
+namespace oofem {
+
 class EnrichmentItem;
 class BasicGeometry;
 
@@ -99,6 +101,5 @@ public:
     void evaluateDerivativeAt(FloatArray &answer, GaussPoint *gp, EnrichmentItem* ei);
 };
 
+} // end namespace oofem
 #endif  /* _ENRICHMENTFUNCTION_H */
-
-

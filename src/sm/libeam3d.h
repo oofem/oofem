@@ -43,6 +43,8 @@
 #include "structuralelement.h"
 #include "fiberedcs.h"
 
+namespace oofem {
+
 class LIBeam3d : public StructuralElement, public FiberedCrossSectionInterface
 {
     /*
@@ -118,7 +120,5 @@ protected:
     double        giveLength();
 };
 
+} // end namespace oofem
 #endif // libeam3d_h
-
-
-

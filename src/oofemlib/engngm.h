@@ -91,6 +91,8 @@
  #include "oofeggraphiccontext.h"
 #endif
 
+namespace oofem {
+
 class Domain;
 class NumericalMethod;
 class TimeStep;
@@ -1062,6 +1064,7 @@ public:
 
 typedef EngngModel Problem;
 
+} // end namespace oofem
 #endif // engngm_h
 
 

@@ -48,6 +48,8 @@
 #include "sparselinsystemnm.h"
 #include "sparsemtrx.h"
 
+namespace oofem {
+
 class StationaryFlow : public EngngModel
 {
     /*
@@ -106,4 +108,5 @@ public:
     fMode giveFormulation() { return TL; }
 };
 
+} // end namespace oofem
 #endif // stationaryflow_h

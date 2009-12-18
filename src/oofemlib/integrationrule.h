@@ -49,6 +49,7 @@
 #include "feinterpol.h"
 #include "geometry.h"
 
+namespace oofem {
 
 class GaussPoint;
 class Element;
@@ -282,4 +283,5 @@ protected:
                                             const FloatArray **coords) { return 0; }
 };
 
+} // end namespace oofem
 #endif // integrationrule_h

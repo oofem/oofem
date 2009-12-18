@@ -43,6 +43,8 @@
 #include "structuralcrosssection.h"
 #include "mathfem.h"
 
+namespace oofem {
+
 Masonry02 ::     Masonry02(int n, Domain *d) : MPlasticMaterial2(n, d)
 {
     //
@@ -792,3 +794,4 @@ Masonry02 :: computeF3HardeningGradient(double k)
 }
 
 
+} // end namespace oofem

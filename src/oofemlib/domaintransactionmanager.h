@@ -39,6 +39,8 @@
 #include <map>
 #endif
 
+namespace oofem {
+
 class FEMComponent;
 class Domain;
 class DofManager;
@@ -107,8 +109,9 @@ public:
 
     friend class Domain;
 };
-#endif
 
+} // end namespace oofem
+#endif
 #endif // domaintransactionmanager_h
 
 

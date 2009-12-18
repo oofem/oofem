@@ -49,6 +49,7 @@
 #include "flotmtrx.h"
 #include "interface.h"
 
+namespace oofem {
 
 class GaussPoint;
 class FiberedCrossSectionModelInterface;
@@ -247,7 +248,5 @@ public:
                                                                          GaussPoint *slaveGp, TimeStep *tStep) = 0;
 };
 
-
+} // end namespace oofem
 #endif // fiberedcs_h
-
-

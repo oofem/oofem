@@ -54,6 +54,8 @@
 #include "leplic.h"
 #include "gaussintegrationrule.h"
 
+namespace oofem {
+
 class TimeStep;
 class Node;
 class Material;
@@ -361,11 +363,5 @@ protected:
     Material *_giveMaterial(int indx) { return domain->giveMaterial(mat [ indx ]); }
 };
 
+} // end namespace oofem
 #endif // tr1_2d_supg2_h
-
-
-
-
-
-
-

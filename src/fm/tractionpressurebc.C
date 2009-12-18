@@ -43,6 +43,7 @@
 #include "loadtime.h"
 #include "verbose.h"
 
+namespace oofem {
 
 double TractionPressureBC :: give(Dof *dof, ValueModeType mode, TimeStep *stepN)
 // Returns the value at stepN of the prescribed value of the kinematic
@@ -80,3 +81,4 @@ TractionPressureBC :: giveInputRecordString(std :: string &str, bool keyword)
     return 1;
 }
 
+} // end namespace oofem

@@ -57,6 +57,8 @@
 #include "combuff.h"
 #endif
 
+namespace oofem {
+
 FloatArray :: FloatArray(int n)
 // Constructor : creates an array of size n (filled with garbage).
 {
@@ -1186,10 +1188,11 @@ double dot(const FloatArray &x, const FloatArray &y)
 
 double norm(const FloatArray &x)
 {
-    double temp = dot(x, x);
+    double temp = oofem::dot(x, x);
     return sqrt(temp);
 }
 
 #endif
 
 
+} // end namespace oofem

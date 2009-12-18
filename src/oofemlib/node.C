@@ -65,6 +65,8 @@
  #include "oofeggraphiccontext.h"
 #endif
 
+namespace oofem {
+
 Node :: Node(int n, Domain *aDomain) :
     DofManager(n, aDomain), coordinates()
     // Constructor. Creates a node with number n, belonging to aDomain.
@@ -986,3 +988,4 @@ void Node :: drawYourself(oofegGraphicContext &gc)
 }
 
 #endif
+} // end namespace oofem

@@ -46,6 +46,8 @@
 #include <stdio.h>
 #endif
 
+namespace oofem {
+
 /**
  * Implementation of general sequence (staggered) problem. The problem consists in sequence of
  * low level problems (slaves) which are executed sequentially and where the results
@@ -307,4 +309,5 @@ protected:
     int instanciateSlaveProblems();
 };
 
+} // end namespace oofem
 #endif // staggeredproblem_h

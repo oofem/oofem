@@ -38,6 +38,7 @@
 
 #include "femcmpnn.h"
 
+namespace oofem {
 
 /**
  * Abstract base class representing (moving) material interfaces.
@@ -90,4 +91,5 @@ public:
     virtual double giveNodalScalarRepresentation(int) = 0;
 };
 
+} // end namespace oofem
 #endif // materialinterface_h

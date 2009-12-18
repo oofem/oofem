@@ -50,6 +50,8 @@
 #include "conTable.h"
 #include "outputmanager.h"
 
+namespace oofem {
+
 StructuralEngngModel :: ~StructuralEngngModel()
 {
 #ifdef __PARALLEL_MODE
@@ -566,3 +568,4 @@ StructuralEngngModel :: showSparseMtrxStructure(int type, oofegGraphicContext &c
 }
 
 #endif
+} // end namespace oofem

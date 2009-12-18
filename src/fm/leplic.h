@@ -40,6 +40,8 @@
 #include "geotoolbox.h"
 #include "mathfem.h"
 
+namespace oofem {
+
 class LEPlic;
 
 /**
@@ -212,4 +214,5 @@ public:
     };
 };
 
+} // end namespace oofem
 #endif // leplic_h

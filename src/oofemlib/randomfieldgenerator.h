@@ -38,6 +38,8 @@
 #include "gausspnt.h"
 #include "flotarry.h"
 
+namespace oofem {
+
 class RandomFieldGenerator
 {
 protected:
@@ -65,4 +67,5 @@ public:
  
 };
 
+} // end namespace oofem
 #endif

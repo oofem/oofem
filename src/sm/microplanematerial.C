@@ -48,6 +48,8 @@
 #include <math.h>
 #endif
 
+namespace oofem {
+
 Microplane *
 MicroplaneMaterial :: giveMicroplane(int i, GaussPoint *masterGp)
 {
@@ -729,3 +731,4 @@ MicroplaneMaterial :: initializeData(int numberOfMicroplanes)
     return;
 }
 
+} // end namespace oofem

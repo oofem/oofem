@@ -45,6 +45,8 @@
 #include "structuralcrosssection.h"
 #include "mathfem.h"
 
+namespace oofem {
+
 J2MPlasticMaterial :: J2MPlasticMaterial(int n, Domain *d) : MPlasticMaterial(n, d)
 {
     //
@@ -525,3 +527,5 @@ J2MPlasticMaterial :: giveIsotropicHardeningVar(const FloatArray &stressSpaceHar
 
     return 0.;
 }
+
+} // end namespace oofem

@@ -63,6 +63,7 @@
 //#include "domaincomm.h"
 #endif
 
+namespace oofem {
 
 #define ZERO_REL_MASS  1.E-6
 
@@ -1447,3 +1448,5 @@ PNlDEIDynamic :: printOutputAt(FILE *File, TimeStep *stepN)
     this->giveDomain(1)->giveOutputManager()->doDofManOutput(File, stepN);
     this->giveDomain(1)->giveOutputManager()->doElementOutput(File, stepN);
 }
+
+} // end namespace oofem

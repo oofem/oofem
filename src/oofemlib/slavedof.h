@@ -16,6 +16,7 @@
 #include <string.h>
 #endif
 
+namespace oofem {
 
 /**
  * Class representing "slave" degree of freedom. This dof is generally linked to some master dofs
@@ -156,5 +157,5 @@ public:
 };
 
 
-
+} // end namespace oofem
 #endif // slavedof_h

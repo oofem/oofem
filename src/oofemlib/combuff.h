@@ -48,6 +48,8 @@ class IntArray;
 class FloatArray;
 class FloatMatrix;
 
+namespace oofem {
+
 #define __CommunicationBuffer_ALLOC_CHUNK 1024
 /**
  * Type with size equal to one byte (sizeof (ComBuff_BYTE_TYPE) should be 1).
@@ -525,7 +527,7 @@ public:
     //@}
 };
 
-
+} // end namespace oofem
 #endif
 #endif // combuff_h
 

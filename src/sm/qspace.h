@@ -50,6 +50,8 @@
 #include "eleminterpmapperinterface.h"
 #include "huertaerrorestimator.h"
 
+namespace oofem {
+
 class QSpace : public StructuralElement, public ZZNodalRecoveryModelInterface, public NodalAveragingRecoveryModelInterface
 
 {
@@ -174,4 +176,5 @@ class QSpace : public StructuralElement, public ZZNodalRecoveryModelInterface, p
   //@}
 } ;
 
+} // end namespace oofem
 #endif

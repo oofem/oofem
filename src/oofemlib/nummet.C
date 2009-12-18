@@ -43,6 +43,7 @@
 #endif
 #include "ldltfact.h"
 
+namespace oofem {
 
 /*
  * NumericalMethod* NumericalMethod :: ofType (char* aClass)
@@ -63,3 +64,5 @@
  * }
  *
  */
+
+} // end namespace oofem

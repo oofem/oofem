@@ -43,6 +43,8 @@
 #include <string.h>
 #endif
 
+namespace oofem {
+
 Microplane :: Microplane(IntegrationRule *ir, int n, MaterialMode mode) :
     GaussPoint(ir, n, NULL, 0., mode)
 
@@ -82,7 +84,4 @@ Microplane :: printOutputAt(FILE *File, TimeStep *stepN)
 }
 
 
-
-
-
-
+} // end namespace oofem

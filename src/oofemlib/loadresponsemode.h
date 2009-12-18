@@ -39,6 +39,7 @@
 #ifndef loadresponsemode_h
 #define loadresponsemode_h
 
+namespace oofem {
 /**
  * Type representing the required character of load vector.
  */
@@ -47,5 +48,6 @@ enum LoadResponseMode {
     IncrementOfLoad
 };
 
+} // end namespace oofem
 #endif // loadresponsemode_h
 

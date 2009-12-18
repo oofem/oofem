@@ -73,6 +73,8 @@
 #endif
 #endif
 
+namespace oofem {
+
 NonLinearStatic :: NonLinearStatic(int i, EngngModel *_master) : LinearStatic(i, _master),
     totalDisplacement(), incrementOfDisplacement(), internalForces(), initialLoadVector(), incrementalLoadVector(),
     initialLoadVectorOfPrescribed(), incrementalLoadVectorOfPrescribed(), incrementalBCLoadVector() {
@@ -619,7 +621,7 @@ NonLinearStatic :: proceedStep(int di, TimeStep *tStep)
          */
 
         if ( !stiffnessMatrix ) {
-            stiffnessMatrix = :: CreateUsrDefSparseMtrx(sparseMtrxType);
+            stiffnessMatrix = CreateUsrDefSparseMtrx(sparseMtrxType);
         }
 
         if ( stiffnessMatrix == NULL ) {
@@ -1076,7 +1078,7 @@ NonLinearStatic :: assemble(SparseMtrx *answer, TimeStep *tStep, EquationID ut, 
 {
 #ifdef TIME_REPORT
     oofem_timeval tstart;
-    :: getUtime(tstart);
+    getUtime(tstart);
 #endif
 
     LinearStatic :: assemble(answer, tStep, ut, type, s, domain);
@@ -1094,7 +1096,7 @@ NonLinearStatic :: assemble(SparseMtrx *answer, TimeStep *tStep, EquationID ut, 
 
 #ifdef TIME_REPORT
     oofem_timeval tfin;
-    :: getRelativeUtime(tfin, tstart);
+    getRelativeUtime(tfin, tstart);
     OOFEM_LOG_INFO( "NonLinearStatic info: user time consumed by assembly: %.2fs\n",
                    ( double ) ( tfin.tv_sec + tfin.tv_usec / ( double ) OOFEM_USEC_LIM ) );
 #endif
@@ -1438,3 +1440,4 @@ NonLinearStatic :: unpackMigratingData(TimeStep *atTime)
     initFlag = true;
 }
 #endif
+} // end namespace oofem

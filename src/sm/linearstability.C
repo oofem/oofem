@@ -79,7 +79,7 @@
 #endif
 
 //#include "gjacobi.h"
-
+namespace oofem {
 
 NumericalMethod *LinearStability :: giveNumericalMethod(TimeStep *stepN)
 // only one is awailable now
@@ -90,7 +90,7 @@ NumericalMethod *LinearStability :: giveNumericalMethod(TimeStep *stepN)
         return nMethod;
     }
 
-    nMethod = :: CreateUsrDefGeneralizedEigenValueSolver(solverType, 1, this->giveDomain(1), this);
+    nMethod = CreateUsrDefGeneralizedEigenValueSolver(solverType, 1, this->giveDomain(1), this);
     if ( nMethod == NULL ) {
         _error("giveNumericalMethod:  solver creation failed");
     }
@@ -633,3 +633,5 @@ LinearStability :: printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *atTime)
 {
     iDof->printSingleOutputAt(stream, atTime, 'd', EID_MomentumBalance, VM_Total);
 }
+
+} // end namespace oofem

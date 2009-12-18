@@ -36,6 +36,7 @@
 #include "sparsemtrx.h"
 #include "precond.h"
 
+namespace oofem {
 
 /**
  * Implementation of diagonal preconditioner
@@ -69,4 +70,5 @@ public:
     double &diag(int i) { return diag_(i); }
 };
 
+} // end namespace oofem
 #endif // diagpre_h

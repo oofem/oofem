@@ -44,6 +44,8 @@
 #include "spatiallocalizer.h"
 #include "fei3dhexalin.h"
 
+namespace oofem {
+
 class Brick1_ht : public TransportElement, public SpatialLocalizerInterface
 {
 public:
@@ -134,4 +136,5 @@ protected:
     int giveApproxOrder(int unknownIndx) { return 1; }
 };
 
+} // end namespace oofem
 #endif // brick1_ht_h

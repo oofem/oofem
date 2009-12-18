@@ -47,6 +47,8 @@
 #include "util.h"
 #include "oofem_limits.h"
 
+namespace oofem {
+
 POIExportModule :: POIExportModule(EngngModel *e) : ExportModule(e), internalVarsToExport(), primaryVarsToExport(), POIList()
 {
     mapper = NULL;
@@ -94,12 +96,12 @@ POIExportModule :: readPOIFile(char *poiFileName)
         OOFEM_ERROR2("POIExportModule::readPOIFile: failed to open input file %s", poiFileName);
     }
 
-    :: giveLineFromInput(in, line, OOFEM_MAX_LINE_LENGTH);
+    giveLineFromInput(in, line, OOFEM_MAX_LINE_LENGTH);
     sscanf(line, "%d", & nPOI);
 
     // read POIs
     for ( i = 0; i < nPOI; i++ ) {
-        :: giveLineFromInput(in, line, OOFEM_MAX_LINE_LENGTH);
+        giveLineFromInput(in, line, OOFEM_MAX_LINE_LENGTH);
         sscanf(line, "%d %lf %lf %lf %d", & poi.id, & poi.x, & poi.y, & poi.z, & poi.region);
         POIList.pushBack(poi);
     }
@@ -318,3 +320,4 @@ POIExportModule :: exportPrimVarAs(UnknownType valID, FILE *stream, TimeStep *tS
     }
 }
 
+} // end namespace oofem

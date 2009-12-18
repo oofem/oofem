@@ -52,6 +52,8 @@
 #include <math.h>
 #endif
 
+namespace oofem {
+
 LIBeam3d :: LIBeam3d(int n, Domain *aDomain) : StructuralElement(n, aDomain)
     // Constructor.
 {
@@ -582,3 +584,4 @@ LIBeam3d :: drawDeformedGeometry(oofegGraphicContext &gc, UnknownType type)
     EMAddGraphicsToModel(ESIModel(), go);
 }
 #endif
+} // end namespace oofem

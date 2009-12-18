@@ -43,6 +43,8 @@
 
 #include "sparsemtrx.h"
 
+namespace oofem {
+
 /**
  * Class implementing sparse matrix stored in skyline form. This class
  * assumes symmetric form of matrix to be stored, i.e., only upper half
@@ -206,5 +208,5 @@ protected:
     Skyline(int, int, double *, IntArray *);
 };
 
+} // end namespace oofem
 #endif // skyline_h
-

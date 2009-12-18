@@ -44,6 +44,8 @@
 #include "matstatus.h"
 #include "gausspnt.h"
 
+namespace oofem {
+
 /*
  * This class implements a structural material status information. It is atribute of
  * gaussPoint. This is only an abstract class, for every instance of material class
@@ -167,8 +169,5 @@ public:
     { return StructuralMaterialStatusClass; }
 };
 
+} // end namespace oofem
 #endif // structuralms_h
-
-
-
-

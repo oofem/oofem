@@ -46,6 +46,7 @@
 #include "refinedmesh.h"
 #include "alist.h"
 
+namespace oofem {
 
 class Element;
 class GaussPoint;
@@ -378,6 +379,5 @@ public:
 
 
 
-
+} // end namespace oofem
 #endif // huertaerrorestimator_h
-

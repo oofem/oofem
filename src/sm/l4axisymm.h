@@ -47,6 +47,8 @@
 #include "sprnodalrecoverymodel.h"
 #include "spatiallocalizer.h"
 
+namespace oofem {
+
 class L4Axisymm : public NLStructuralElement, public ZZNodalRecoveryModelInterface, public SPRNodalRecoveryModelInterface,
     public SpatialLocalizerInterface
 {
@@ -172,4 +174,5 @@ protected:
     int   computeLoadLEToLRotationMatrix(FloatMatrix &answer, int, GaussPoint *);
 };
 
+} // end namespace oofem
 #endif // l4axisymm_h

@@ -55,6 +55,8 @@
 #include <math.h>
 #endif
 
+namespace oofem {
+
 // flag forcing the inclusion of all elements with volume inside support of weight function.
 // This forces inclusion of all integration points of these elements, even if weight is zero
 // If not defined (default) only integration points with nonzero weight are included.
@@ -436,3 +438,4 @@ NonlocalMaterialStatusExtensionInterface :: ~NonlocalMaterialStatusExtensionInte
     ;
 }
 
+} // end namespace oofem

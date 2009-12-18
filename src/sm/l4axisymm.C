@@ -60,6 +60,8 @@
 #include "conTable.h"
 #endif
 
+namespace oofem {
+
 FEI2dQuadLin L4Axisymm :: interpolation(1, 2);
 
 L4Axisymm :: L4Axisymm(int n, Domain *aDomain) :
@@ -863,3 +865,4 @@ void L4Axisymm :: drawScalar(oofegGraphicContext &context)
 
 
 #endif
+} // end namespace oofem

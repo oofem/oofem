@@ -61,6 +61,8 @@
 #include "conTable.h"
 #endif
 
+namespace oofem {
+
 CCTPlate :: CCTPlate(int n, Domain *aDomain) :
     NLStructuralElement(n, aDomain), LayeredCrossSectionInterface(), ZZNodalRecoveryModelInterface(),
     NodalAveragingRecoveryModelInterface(), SPRNodalRecoveryModelInterface()
@@ -905,3 +907,4 @@ CCTPlate  :: drawScalar(oofegGraphicContext &context)
 
 
 #endif
+} // end namespace oofem

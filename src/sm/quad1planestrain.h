@@ -44,6 +44,8 @@
 #include "eleminterpmapperinterface.h"
 #include "huertaerrorestimator.h"
 
+namespace oofem {
+
 /// Comment or uncomment the following line to force full or reduced integration
 //#define Quad1PlaneStrain_reducedShearIntegration
 
@@ -238,4 +240,5 @@ protected:
     int           giveNumberOfIPForMassMtrxIntegration() { return 4; }
 };
 
+} // end namespace oofem
 #endif // quad1planestrain_h

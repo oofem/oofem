@@ -49,6 +49,8 @@
 #include "datareader.h"
 #include "oofemtxtinputrecord.h"
 
+namespace oofem {
+
 /**
  * Class representing the implemantaion of plain text date reader.
  * It reads a sequentional seqence of input records from data file
@@ -89,4 +91,5 @@ protected:
     void giveLineFromInput(char *line);
 };
 
+} // end namespace oofem
 #endif // buffereddatareader_h

@@ -55,6 +55,8 @@
 #include "datastream.h"
 #include "contextioerr.h"
 
+namespace oofem {
+
 IncrementalLinearStatic :: IncrementalLinearStatic(int i, EngngModel *_master) : StructuralEngngModel(i, _master),
     incrementOfLoadVector(), incrementOfDisplacementVector(), totalDisplacementVector(), discreteTimes()
 {
@@ -88,7 +90,7 @@ IncrementalLinearStatic :: giveNumericalMethod(TimeStep *)
         return nMethod;
     }
 
-    nMethod = :: CreateUsrDefSparseLinSolver(solverType, 1, this->giveDomain(1), this);
+    nMethod = CreateUsrDefSparseLinSolver(solverType, 1, this->giveDomain(1), this);
     if ( nMethod == NULL ) {
         _error("giveNumericalMethod: linear solver creation failed");
     }
@@ -280,7 +282,7 @@ IncrementalLinearStatic :: solveYourselfAt(TimeStep *tStep) {
         delete stiffnessMatrix;
     }
 
-    stiffnessMatrix = :: CreateUsrDefSparseMtrx(sparseMtrxType); // new Skyline ();
+    stiffnessMatrix = CreateUsrDefSparseMtrx(sparseMtrxType); // new Skyline ();
     if ( stiffnessMatrix == NULL ) {
         _error("solveYourselfAt: sparse matrix creation failed");
     }
@@ -487,3 +489,5 @@ IncrementalLinearStatic :: printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *a
 {
     iDof->printSingleOutputAt(stream, atTime, 'd', EID_MomentumBalance, VM_Total);
 }
+
+} // end namespace oofem

@@ -40,6 +40,8 @@
 #include "flotarry.h"
 #include "timestep.h"
 
+namespace oofem {
+
 IRResultType
 ConstantEdgeLoad :: initializeFrom(InputRecord *ir)
 {
@@ -76,7 +78,4 @@ ConstantEdgeLoad :: computeValueAt(FloatArray &answer, TimeStep *stepN, FloatArr
     return;
 }
 
-
-
-
-
+} // end namespace oofem

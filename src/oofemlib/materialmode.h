@@ -41,6 +41,8 @@
 
 #include "enumitem.h"
 
+namespace oofem {
+
 /**
  * Type representing material mode of integration point.
  */
@@ -88,6 +90,5 @@ enum MaterialMode {
 
 const char *__MaterialModeToString(MaterialMode _value);
 
-
+} // end namespace oofem
 #endif // materialmode_h
-

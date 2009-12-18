@@ -53,6 +53,8 @@
 #endif
 #include "classtype.h"
 
+namespace oofem {
+
 class TimeStep;
 class Dictionary;
 
@@ -170,6 +172,6 @@ public:
     classType giveClassID() const { return BoundaryConditionClass; }
 };
 
-
+} // end namespace oofem
 #endif // boudary_h
 

@@ -52,6 +52,8 @@
 #include <stdio.h>
 #endif
 
+namespace oofem {
+
 class EngngModel;
 
 /**
@@ -122,14 +124,5 @@ public:
 public:
 };
 
-
+} // end namespace oofem
 #endif // nummet_h
-
-
-
-
-
-
-
-
-

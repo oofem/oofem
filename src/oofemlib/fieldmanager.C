@@ -35,6 +35,8 @@
 
 #include "fieldmanager.h"
 
+namespace oofem {
+
 void
 FieldManager :: registerField(Field *eField, FieldType key)
 {
@@ -76,3 +78,5 @@ FieldManager :: unregisterField(FieldType key)
     delete ( * i ).second;
     this->externalFields.erase(i);
 }
+
+} // end namespace oofem

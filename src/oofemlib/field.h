@@ -41,6 +41,7 @@
 #include "contextioresulttype.h"
 #include "contextmode.h"
 
+namespace oofem {
 
 enum FieldType {
     FT_Unknown,
@@ -123,5 +124,5 @@ public:
     //@}
 };
 
-
+} // end namespace oofem
 #endif // field_h

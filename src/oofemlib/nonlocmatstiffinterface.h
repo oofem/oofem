@@ -55,6 +55,8 @@
 #include "conTable.h"
 #endif
 
+namespace oofem {
+
 class SparseMtrx;
 class GaussPoint;
 class TimeStep;
@@ -82,6 +84,5 @@ public:
 #endif
 };
 
+} // end namespace oofem
 #endif // nonlocmatstiffinterface_h
-
-

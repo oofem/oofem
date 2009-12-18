@@ -44,6 +44,8 @@
 #include "integrationrule.h"
 #include "element.h"
 
+namespace oofem {
+
 /**
  * Class representing Gaussian-quadrature integration rule.
  * The number of integration points and their coordinates and integration weights depends on
@@ -135,4 +137,5 @@ protected:
                                     const FloatArray **coords);
 };
 
+} // end namespace oofem
 #endif // gaussintegrationrule_h

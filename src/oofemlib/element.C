@@ -86,6 +86,7 @@
 #include "materialmapperinterface.h"
 #include "contextioerr.h"
 
+namespace oofem {
 
 Element :: Element(int n, Domain *aDomain) :
     FEMComponent(n, aDomain), ElementGeometry(), dofManArray(), bodyLoadArray(), boundaryLoadArray()
@@ -559,7 +560,7 @@ Element *Element :: ofType(char *aClass)
      *   newElement = new LTrElementPPDE(number,domain) ;
      */if ( 0 ) { } else {
         // last resort - call aditional user defined subroutine
-        newElement = :: CreateUsrDefElementOfType(aClass, number, domain);
+        newElement = CreateUsrDefElementOfType(aClass, number, domain);
         if ( newElement == NULL ) {
             _error2("ofType : unknown element type (%s)", aClass);
         }
@@ -1244,3 +1245,4 @@ Element :: giveInternalStateAtNode(FloatArray &answer, InternalStateType type, I
 
 
 #endif
+} // end namespace oofem

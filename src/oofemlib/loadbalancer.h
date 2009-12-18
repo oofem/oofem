@@ -41,12 +41,14 @@
 #include "clock.h"
 #include "alist.h"
 
-#define __LB_DEBUG
-
 #ifdef __LB_DEBUG
 #include "dynalist.h"
 #include "range.h"
 #endif
+
+namespace oofem {
+
+#define __LB_DEBUG
 
 class Domain;
 class EngngModel;
@@ -266,5 +268,6 @@ public:
     virtual double predictRelativeComputationalCost();
 };
 
+} // end namespace oofem
 #endif
 #endif // loadbalancer_h

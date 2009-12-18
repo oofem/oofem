@@ -56,6 +56,8 @@
 #endif
 #endif
 
+namespace oofem {
+
 void getUtime(oofem_timeval &answer)
 {
     struct rusage rsg;
@@ -79,9 +81,9 @@ void getRelativeUtime(oofem_timeval &answer, oofem_timeval &from, oofem_timeval 
 void getRelativeUtime(oofem_timeval &answer, oofem_timeval &from)
 {
     oofem_timeval to;
-    :: getUtime(to);
+    getUtime(to);
 
-    :: getRelativeUtime(answer, from, to);
+    getRelativeUtime(answer, from, to);
 }
 
 void getTime(oofem_timeval &answer)
@@ -169,3 +171,5 @@ void convertTS2HMS(int &nhrs, int &nmin, int &nsec, double tsec)
 
     nsec = _nsec;
 }
+
+} // end namespace oofem

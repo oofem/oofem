@@ -44,6 +44,7 @@
 #include "spatiallocalizer.h"
 #include "compiler.h"
 
+namespace oofem {
 
 class Domain;
 class Element;
@@ -111,7 +112,7 @@ public:
 protected:
 };
 
-
+} // end namespace oofem
 #endif // dummylocalizer_h
 
 

@@ -46,7 +46,7 @@
 #include "nodalaveragingrecoverymodel.h"
 #include "sprnodalrecoverymodel.h"
 
-
+namespace oofem {
 
 class Axisymm3d : public NLStructuralElement, public ZZNodalRecoveryModelInterface,
     public NodalAveragingRecoveryModelInterface, public SPRNodalRecoveryModelInterface
@@ -185,4 +185,5 @@ protected:
     int   computeLoadLEToLRotationMatrix(FloatMatrix &, int, GaussPoint *);
 };
 
+} // end namespace oofem
 #endif // axisymm3d_h

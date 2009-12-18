@@ -51,6 +51,7 @@
 #include "sparsemtrx.h"
 #include "flotarry.h"
 
+namespace oofem {
 
 class Domain;
 class EngngModel;
@@ -274,6 +275,7 @@ protected:
                        double &Lambda, double &ReachedLambda, double RR, double &drProduct, TimeStep *tNow);
 };
 
+} // end namespace oofem
 #endif // calmls_h
 
 

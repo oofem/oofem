@@ -47,6 +47,8 @@
 #include <stdlib.h> // for NULL
 #endif
 
+namespace oofem {
+
 template< class Key, class T > class TDictionaryIterator;
 template< class Key, class T > class TDictionary;
 
@@ -238,7 +240,5 @@ template< class Key, class T > T *TDictionaryIterator< Key, T > :: next() {
 
 
 
-
+} // end namespace oofem
 #endif // tdictionary_h
-
-

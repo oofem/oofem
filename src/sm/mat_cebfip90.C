@@ -45,6 +45,8 @@
 #include "datastream.h"
 #include "contextioerr.h"
 
+namespace oofem {
+
 CebFipSlip90Material :: CebFipSlip90Material(int n, Domain *d) : StructuralMaterial(n, d)
     //
     // constructor
@@ -474,3 +476,4 @@ CebFipSlip90MaterialStatus :: restoreContext(DataStream *stream, ContextMode mod
 }
 
 
+} // end namespace oofem

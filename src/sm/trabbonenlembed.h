@@ -52,6 +52,8 @@
 #include "conTable.h"
 #endif
 
+namespace oofem {
+
 class GaussPoint ;
 
 
@@ -248,10 +250,6 @@ class TrabBoneNLEmbed : public TrabBoneEmbed, public StructuralNonlocalMaterialE
 
 } ;
 
-
+} // end namespace oofem
 #define trabonenl3d_h
 #endif
-
-
-
-

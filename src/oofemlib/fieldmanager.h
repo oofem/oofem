@@ -41,6 +41,8 @@
 #include <map>
 #endif
 
+namespace oofem {
+
 /**
  */
 class FieldManager
@@ -74,4 +76,5 @@ public:
     void unregisterField(FieldType key);
 };
 
+} // end namespace oofem
 #endif // fieldmanager_h

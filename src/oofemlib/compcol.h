@@ -76,6 +76,7 @@
 #include "sparsemtrx.h"
 #include "intarray.h"
 
+namespace oofem {
 /**
  * Implementation of sparse matrix stored in compressed column storage.
  */
@@ -187,6 +188,6 @@ protected:
 #endif
 };
 
-
+} // end namespace oofem
 #endif // compcol_h
 

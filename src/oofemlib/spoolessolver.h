@@ -44,6 +44,8 @@
 
 #include "spoolesinterface.h"
 
+namespace oofem {
+
 class Domain;
 class EngngModel;
 class FloatMatrix;
@@ -102,14 +104,5 @@ public:
     LinSystSolverType giveLinSystSolverType() const { return ST_Spooles; }
 };
 
-
+} // end namespace oofem
 #endif // spoolessolver_h
-
-
-
-
-
-
-
-
-

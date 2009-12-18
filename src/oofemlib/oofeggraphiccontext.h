@@ -48,6 +48,8 @@
 // for c++ compiler to be succesfull on some c files
 //
 
+namespace oofem {
+
 extern "C" {
  #define new __new
  #define class __class
@@ -320,6 +322,7 @@ extern EView *myview;
 extern void deleteLayerGraphics(int iLayer);
 
 
+} // end namespace oofem
 #endif
 #endif // oofeggraphiccontext_h
 

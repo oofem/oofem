@@ -42,6 +42,8 @@
 
 #include "mesherinterface.h"
 
+namespace oofem {
+
 class TimeStep;
 
 /**
@@ -68,4 +70,5 @@ protected:
     int createInput(Domain *d, TimeStep *stepN);
 };
 
+} // end namespace oofem
 #endif // targe2interface_h

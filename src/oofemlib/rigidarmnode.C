@@ -47,7 +47,7 @@
 #include <stdlib.h>
 #endif
 
-
+namespace oofem {
 
 /**
  * Constructor. Creates a rigid arm node with number n, belonging to aDomain.
@@ -276,3 +276,5 @@ RigidArmNode :: computeMasterContribution()
 
     return 1;
 }
+
+} // end namespace oofem

@@ -68,6 +68,7 @@
  #include "loadbalancer.h"
 #endif
 
+namespace oofem {
 /**
  * Creates new instance of element corresponding to given element keyword.
  * @param name element keyword string determining the type of new instance
@@ -263,4 +264,5 @@ LoadBalancerMonitor *CreateUsrDefLoadBalancerMonitorOfType(classType type, Engng
  */
 LoadBalancer *CreateUsrDefLoadBalancerOfType(classType type, Domain *);
 #endif
+} // end namespace oofem
 #endif // usrdefsub_h

@@ -12,6 +12,8 @@
 #include "flotarry.h"
 #include "node.h"
 
+namespace oofem {
+
 /** Abstract representation for Geometry
  *  gives basic virtual methods for accessing the nodes
  */
@@ -135,6 +137,8 @@ public:
     bool isOutside(BasicGeometry *bg);
     void printYourself();
 };
+
+} // end namespace oofem
 #endif  /* _GEOMETRY_H */
 
 

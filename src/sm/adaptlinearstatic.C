@@ -52,6 +52,8 @@
 #include "usrdefsub.h"
 #include "contextioerr.h"
 
+namespace oofem {
+
 void
 AdaptiveLinearStatic :: solveYourselfAt(TimeStep *tStep)
 {
@@ -67,7 +69,7 @@ AdaptiveLinearStatic :: solveYourselfAt(TimeStep *tStep)
         return;
     } else {
         // do remeshing
-      MesherInterface *mesher = ::CreateUsrDefMesherInterface(meshPackage, this->giveDomain(1));
+      MesherInterface *mesher = CreateUsrDefMesherInterface(meshPackage, this->giveDomain(1));
       Domain *newDomain;
 
       MesherInterface::returnCode result = 
@@ -152,7 +154,7 @@ AdaptiveLinearStatic :: initializeFrom(InputRecord *ir)
     int eeTypeId = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, eeTypeId, IFT_AdaptiveLinearStatic_eetype, "eetype"); // Macro
     eeType = ( ErrorEstimatorType ) eeTypeId;
-    this->ee = :: CreateUsrDefErrorEstimator( eeType, 1, this->giveDomain(1) );
+    this->ee = CreateUsrDefErrorEstimator( eeType, 1, this->giveDomain(1) );
 
     ee->initializeFrom(ir);
 
@@ -178,3 +180,5 @@ AdaptiveLinearStatic :: updateDomainLinks()
     // associate ee to possibly newly restored mesh
     this->ee->setDomain( this->giveDomain(1) );
 }
+
+} // end namespace oofem

@@ -41,6 +41,8 @@
 #include <stdlib.h>
 #endif
 
+namespace oofem {
+
 IRResultType
 IsotropicHeatTransferMaterial :: initializeFrom(InputRecord *ir)
 {
@@ -119,3 +121,5 @@ IsotropicHeatTransferMaterial :: giveCharacteristicValue(MatResponseMode mode,
 
     return 0; // to make compiler happy
 }
+
+} // end namespace oofem

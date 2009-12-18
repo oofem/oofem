@@ -51,6 +51,8 @@
 #include <math.h>
 #endif
 
+namespace oofem {
+
 LIBeam2d :: LIBeam2d(int n, Domain *aDomain) : StructuralElement(n, aDomain), LayeredCrossSectionInterface()
     // Constructor.
 {
@@ -484,3 +486,4 @@ LIBeam2d :: computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, Gauss
 }
 
 
+} // end namespace oofem

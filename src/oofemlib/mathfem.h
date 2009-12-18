@@ -48,6 +48,8 @@
 #endif
 #include "compiler.h"
 
+namespace oofem {
+
 #ifndef HAVE_M_PI
 #define M_PI 3.1415926535897932384626433832795029L /* pi */
 #endif
@@ -322,4 +324,5 @@ template< class T > double brent(double ax, double bx, double cx, const T &f,
     return fx;
 }
 
+} // end namespace oofem
 #endif // mathfem_h

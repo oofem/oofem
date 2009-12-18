@@ -49,6 +49,8 @@
 #include "flotarry.h"
 #include "flotmtrx.h"
 
+namespace oofem {
+
 #define LOCAL_ZERO_MASS_REPLACEMENT 1
 
 class NlDEIDynamic : public StructuralEngngModel
@@ -146,4 +148,5 @@ public:
     virtual int        giveNumberOfTimeStepWhenIcApply() { return 0; }
 };
 
+} // end namespace oofem
 #endif // nldeidynamic_h

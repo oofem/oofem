@@ -48,6 +48,8 @@
 #include <stdio.h>
 #endif
 
+namespace oofem {
+
 /**
  * This class represents linear nonstationary transport problem.
  */
@@ -173,4 +175,5 @@ protected:
                                               CharType lhsType, const UnknownNumberingScheme& s, Domain *d);
 };
 
+} // end namespace oofem
 #endif // nonstationarytransportproblem_h

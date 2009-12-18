@@ -41,6 +41,8 @@
 #include "simplecrosssection.h"
 #include "structuralms.h"
 
+namespace oofem {
+
 int
 LinearElasticMaterial :: hasMaterialModeCapability(MaterialMode mode)
 //
@@ -406,3 +408,4 @@ LinearElasticMaterial :: giveStressStrainMask(IntArray &answer, MatResponseForm 
     return;
 }
 
+} // end namespace oofem

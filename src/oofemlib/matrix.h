@@ -47,6 +47,8 @@
 #ifndef matrix_h
 #define matrix_h
 
+namespace oofem {
+
 /* class FloatMatrix ; class IntArray ; */
 
 /** Abstract root class  for matrices. Matrix is characterized by its size.
@@ -100,10 +102,5 @@ public:
     virtual void  printYourself() const { }
 };
 
+} // end namespace oofem
 #endif // matrix_h
-
-
-
-
-
-

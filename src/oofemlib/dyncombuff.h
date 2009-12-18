@@ -48,6 +48,8 @@
 #include <list>
 #endif
 
+namespace oofem {
+
 class IntArray;
 class FloatArray;
 class FloatMatrix;
@@ -311,6 +313,6 @@ protected:
 };
 
 
-
+} // end namespace oofem
 #endif
 #endif // dyncombuff_h

@@ -42,6 +42,8 @@
 #include "cct.h"
 #include "layeredcrosssection.h"
 
+namespace oofem {
+
 enum CharTensor {
     LocalStrainTensor,
     GlobalStrainTensor,
@@ -196,5 +198,5 @@ protected:
     double             giveArea();
 };
 
-
+} // end namespace oofem
 #endif // rershell_h

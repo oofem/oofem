@@ -40,15 +40,19 @@
 #ifndef cltypes2_h
 #define cltypes2_h
 
+#include "internalstatetype.h"
+#include "internalstatevaluetype.h"
+
+namespace oofem {
+
 //char   cltypesGiveUnknownTypeKey (UnknownType type);
 char   cltypesGiveUnknownTypeModeKey(ValueModeType mode);
 int isUnknownTypeModeIncremental(ValueModeType);
 
-#include "internalstatetype.h"
-#include "internalstatevaluetype.h"
 //enum InternalStateValueType;
 /// Returns the value type of corresponding InternalStateType
 InternalStateValueType giveInternalStateValueType(InternalStateType type);
 
+} // end namespace oofem
 #endif // cltypes2_h
 

@@ -57,6 +57,8 @@
 #include "macrolspace.h"
 #include "error.h"
 
+namespace oofem {
+
 /**
  * MacroLspace needs stiffness matrix derived from this microproblem. For this purpose, natural boundary conditions on microproblem have to be excluded. All DoFs have to be included. The static condensation of full microscale matrix follows.
  */
@@ -166,5 +168,5 @@ protected:
     int totalInternalDofs;
 };
 
-
+} // end namespace oofem
 #endif // micromaterial_h

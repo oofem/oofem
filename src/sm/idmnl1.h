@@ -53,6 +53,8 @@
 #include "conTable.h"
 #endif
 
+namespace oofem {
+
 class GaussPoint;
 
 /**
@@ -308,9 +310,5 @@ protected:
     virtual void initDamaged(double kappa, FloatArray &totalStrainVector, GaussPoint *gp) { }
 };
 
-
+} // end namespace oofem
 #endif // idmnl1_h
-
-
-
-

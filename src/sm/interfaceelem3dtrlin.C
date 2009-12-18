@@ -58,6 +58,8 @@
 #endif
 #endif
 
+namespace oofem {
+
 FEI2dTrLin InterfaceElement3dTrLin :: interpolation(1, 2);
 
 InterfaceElement3dTrLin :: InterfaceElement3dTrLin(int n, Domain *aDomain) :
@@ -291,3 +293,4 @@ void InterfaceElement3dTrLin :: drawScalar(oofegGraphicContext &context)
 { }
 
 #endif
+} // end namespace oofem

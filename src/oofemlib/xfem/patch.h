@@ -14,6 +14,8 @@
 #include "fei2dtrlin.h"
 #include "node.h"
 
+namespace oofem {
+
 /** abstract representation of a part of element after subdivision  */
 class Patch : public BasicGeometry
 {
@@ -54,5 +56,5 @@ public:
 #endif
 };
 
+} // end namespace oofem
 #endif
-

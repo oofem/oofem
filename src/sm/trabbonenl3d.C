@@ -60,6 +60,7 @@
 #include "conTable.h"
 #endif
 
+namespace oofem {
 
 /////////////////////////////////////////////////////////////////
 ////////////TRABECULAR BONE NONLOCAL MATERIAL////////////////////
@@ -702,3 +703,4 @@ TrabBoneNL3D::estimatePackSize (CommunicationBuffer& buff, GaussPoint* ip)
 // END: PARALLEL MODE OPTION
 /////////////////////////////////////////////////////////////////
 
+} // end namespace oofem

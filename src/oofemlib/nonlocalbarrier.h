@@ -46,6 +46,8 @@
 #include "flotarry.h"
 #include "nonlocalmaterialext.h"
 
+namespace oofem {
+
 /**
  * Abstract base class for all nonlocal barriers. The purpose of this class is to
  * model barrier for nonlocal averaging process (visibility criterion, symmetry condition).
@@ -99,5 +101,6 @@ public:
     classType                giveClassID() const { return NonlocalBarrierClass; }
 };
 
+} // end namespace oofem
 #endif // nonlocalbarrier_h
 

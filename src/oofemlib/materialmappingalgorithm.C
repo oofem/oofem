@@ -37,6 +37,8 @@
 #include "gausspnt.h"
 #include "element.h"
 
+namespace oofem {
+
 void
 MaterialMappingAlgorithm :: init(Domain *dold, IntArray &type, GaussPoint *gp, TimeStep *tStep)
 {
@@ -58,3 +60,5 @@ MaterialMappingAlgorithm :: mapVariable(FloatArray &answer, GaussPoint *gp, Inte
 
     return this->__mapVariable(answer, coords, type, tStep);
 }
+
+} // end namespace oofem

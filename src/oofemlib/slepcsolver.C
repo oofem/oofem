@@ -52,6 +52,8 @@
 #include "clock.h"
 #endif
 
+namespace oofem {
+
 SLEPcSolver::SLEPcSolver (int i, Domain* d,EngngModel* m) : SparseGeneralEigenValueSystemNM(i,d,m)
 {
   A = B = NULL;
@@ -205,9 +207,11 @@ SLEPcSolver::solve (SparseMtrx* a, SparseMtrx* b, FloatArray* _eigv, FloatMatrix
   return NM_Success;
 }
 
+} // end namespace oofem
 #endif //ifdef __SLEPC_MODULE
 
 #ifndef __SLEPC_MODULE
+namespace oofem {
 
 SLEPcSolver::SLEPcSolver (int i, Domain* d,EngngModel* m) : SparseGeneralEigenValueSystemNM (i,d,m)
 { 
@@ -222,10 +226,15 @@ SLEPcSolver::solve (SparseMtrx* a, SparseMtrx* b, FloatArray* _eigv, FloatMatrix
   return NM_NoSuccess;
 }
 
+} // end namespace oofem
 #endif
+
+namespace oofem {
 
 IRResultType
 SLEPcSolver :: initializeFrom (InputRecord* ir)
 {
   return IRRT_OK;
 }
+
+} // end namespace oofem

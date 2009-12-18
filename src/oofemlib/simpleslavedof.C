@@ -55,6 +55,7 @@
 #include <string.h>
 #endif
 
+namespace oofem {
 
 SimpleSlaveDof :: SimpleSlaveDof(int i, DofManager *aNode, int master, DofID id) : Dof(i, aNode, id)
     // Constructor. Creates a new d.o.f., with number i, belonging
@@ -248,3 +249,4 @@ SimpleSlaveDof :: updateLocalNumbering( EntityRenumberingFunctor &f )
 }
 
 
+} // end namespace oofem

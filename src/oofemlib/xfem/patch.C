@@ -9,6 +9,8 @@
 #include "crosssection.h"
 #include "enrichmentitem.h"
 
+namespace oofem {
+
 Patch :: Patch(Element *parent, int material) : BasicGeometry() {
     this->parent = parent;
     this->material = material;
@@ -106,3 +108,4 @@ TrianglePatch :: drawWD(oofegGraphicContext &gc, FloatArray &vd)
 #endif
 
 
+} // end namespace oofem

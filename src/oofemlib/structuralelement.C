@@ -77,6 +77,8 @@
 
 #include "materialmapperinterface.h"
 
+namespace oofem {
+
 StructuralElement :: StructuralElement(int n, Domain *aDomain) :
     Element(n, aDomain)
     // Constructor. Creates an element with number n, belonging to aDomain.
@@ -1978,4 +1980,6 @@ StructuralElement :: showExtendedSparseMtrxStructure(CharType mtrx, oofegGraphic
         }
     }
 }
+
 #endif
+} // end namespace oofem

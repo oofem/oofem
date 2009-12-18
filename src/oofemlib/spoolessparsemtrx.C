@@ -43,6 +43,8 @@
 #include <stdio.h>
 #endif
 
+namespace oofem {
+
 SparseMtrx *
 SpoolesSparseMtrx :: GiveCopy() const
 {
@@ -82,10 +84,10 @@ SpoolesSparseMtrx :: times(double x)
 }
 
 int
-SpoolesSparseMtrx :: buildInternalStructure(EngngModel *eModel, int di, const UnknownNumberingScheme&s)
+SpoolesSparseMtrx :: buildInternalStructure(EngngModel *eModel, int di, EquationID ut, const UnknownNumberingScheme&s)
 {
     // detrmine number of equations and estimate number of nonzero entries
-    int neq = eModel->giveNumberOfDomainEquations(di);
+    int neq = eModel->giveNumberOfDomainEquations(di, ut);
     int nent = neq * 5;
 
 
@@ -163,12 +165,14 @@ double &
 SpoolesSparseMtrx :: at(int i, int j)
 {
     OOFEM_ERROR("SpoolesSparseMtrx::at(i,j) - unsupported");
+    abort();
 }
 
 double
 SpoolesSparseMtrx :: at(int i, int j) const
 {
     OOFEM_ERROR("SpoolesSparseMtrx::at(i,j) - unsupported");
+    return 0.0;
 }
 
 void
@@ -206,10 +210,11 @@ SpoolesSparseMtrx :: trans_mult(const FloatArray &x) const
     }
 
     if ( result != 1 ) {
-        OOFEM_ERROR("SpoolesSparseMtrx::trans_mult: error code from InpMtx_(non)sym_gmvm %d", result);
+        OOFEM_ERROR2("SpoolesSparseMtrx::trans_mult: error code from InpMtx_(non)sym_gmvm %d", result);
     }
 
     return answer;
 }
 
+} // end namespace oofem
 #endif //ifdef __SPOOLES_MODULE

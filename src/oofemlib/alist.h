@@ -47,6 +47,8 @@
 #include <stdlib.h> // for NULL
 #endif
 
+namespace oofem {
+
 class FEMComponent;
 
 /**
@@ -298,7 +300,7 @@ template< class T > T *AList< T > :: unlink(int i)
     return answer;
 }
 
-
+} // end namespace oofem
 #endif // alist_h
 
 

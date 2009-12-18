@@ -5,6 +5,8 @@
 #include "gaussintegrationrule.h"
 #include "geometry.h"
 
+namespace oofem {
+
 PatchIntegrationRule :: PatchIntegrationRule(int n, Element *e, Patch *patch) : GaussIntegrationRule(n, e) {
     this->patch = patch;
 }
@@ -32,3 +34,5 @@ PatchIntegrationRule :: SetUpPointsOnTriagle(int nPoints, MaterialMode mode, Gau
 
     return numberOfIntegrationPoints;
 }
+
+} // end namespace oofem

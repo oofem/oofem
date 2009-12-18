@@ -40,6 +40,8 @@
 #include "oofeggraphiccontext.h"
 #endif
 
+namespace oofem {
+
 //#define GRAPH_DEBUG_PRINT
 #define GRAPH_LENGTH_FRAC 1.e-4
 
@@ -1824,3 +1826,5 @@ GT_Exception :: print()
         fprintf(stderr, "msg: %s\n", msg);
     }
 }
+
+} // end namespace oofem

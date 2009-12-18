@@ -45,6 +45,9 @@
 #include <list>
 #include <queue>
 #endif
+
+namespace oofem {
+
 /**
  * Fast Marching Method for unstructured grids.
  * Used to solve Eikonal equation and especially to construct
@@ -130,4 +133,5 @@ protected:
     int  getSmallestTrialDofMan();
 };
 
+} // end namespace oofem
 #endif // fastmarchingmethod_h

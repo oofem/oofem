@@ -64,6 +64,8 @@
 #include "conTable.h"
 #endif
 
+namespace oofem {
+
 IDNLMaterial :: IDNLMaterial(int n, Domain *d) : IsotropicDamageMaterial1(n, d), StructuralNonlocalMaterialExtensionInterface(d), NonlocalMaterialStiffnessInterface()
     //
     // constructor
@@ -780,6 +782,4 @@ IDNLMaterial :: predictRelativeComputationalCost(GaussPoint *gp)
 }
 
 #endif
-
-
-
+} // end namespace oofem

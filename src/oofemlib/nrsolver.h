@@ -58,6 +58,7 @@
  #endif
 #endif
 
+namespace oofem {
 
 class Domain;
 class EngngModel;
@@ -273,13 +274,5 @@ protected:
                           double RRT, int nite, bool &errorOutOfRange, TimeStep *tNow);
 };
 
+} // end namespace oofem
 #endif // nrsolver_h
-
-
-
-
-
-
-
-
-

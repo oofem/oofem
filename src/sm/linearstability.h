@@ -51,6 +51,9 @@
 #include "flotmtrx.h"
 #include "flotarry.h"
 #include "nummet.h"
+
+namespace oofem {
+
 class LinearStability : public StructuralEngngModel
 {
     /*
@@ -138,4 +141,5 @@ public:
     fMode giveFormulation() { return TL; }
 };
 
+} // end namespace oofem
 #endif // linearstability_h

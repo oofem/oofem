@@ -48,6 +48,8 @@
 #include "dyncomprow.h"
 #include "precond.h"
 
+namespace oofem {
+
 class CompRow_ILUPreconditioner : public Preconditioner
 {
 private:
@@ -89,4 +91,5 @@ protected:
     int  qsortColPartition(IntArray &, FloatArray &, int l, int r);
 };
 
+} // end namespace oofem
 #endif // ilucomprowprecond_h

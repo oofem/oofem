@@ -44,6 +44,8 @@
 #endif
 #endif
 
+namespace oofem {
+
 /**
  * End-of-data marker, used to identify end of data stream received.
  * The value should not conflict with any globnum id
@@ -109,5 +111,6 @@ protected:
 };
 
 
+} // end namespace oofem
 #endif
 #endif // parmetisloadbalancer_h

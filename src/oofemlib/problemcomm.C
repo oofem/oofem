@@ -45,6 +45,8 @@
 #endif
 #endif
 
+namespace oofem {
+
 ProblemCommunicator :: ProblemCommunicator(EngngModel *emodel, CommunicatorBuff *b, int rank, int size,
                                            ProblemCommunicatorMode mode) :
     Communicator(emodel, b, rank, size)
@@ -1013,4 +1015,5 @@ ProblemCommunicator :: ElemCmp(int i, int j)
             engngModel->giveDomain(1)->giveElement(j)->giveGlobalNumber() );
 }
 
+} // end namespace oofem
 #endif

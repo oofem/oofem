@@ -50,6 +50,8 @@
 
 #include "nmstatus.h"
 
+namespace oofem {
+
 class Domain;
 class EngngModel;
 
@@ -129,6 +131,7 @@ public:
 protected:
 };
 
+} // end namespace oofem
 #endif // gjacobi_h
 
 

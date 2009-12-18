@@ -39,6 +39,8 @@
 #include "conTable.h"
 #include "error.h"
 
+namespace oofem {
+
 void
 FastMarchingMethod :: solve(FloatArray &dmanValues,
                             const std :: list< int > &bcDofMans,
@@ -271,3 +273,4 @@ FastMarchingMethod :: getSmallestTrialDofMan()
     return answer;
 }
 
+} // end namespace oofem

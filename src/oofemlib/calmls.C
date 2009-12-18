@@ -61,6 +61,7 @@
  #endif
 #endif
 
+namespace oofem {
 
 #define CALM_RESET_STEP_REDUCE 0.25
 #define CALM_MAX_RESTARTS 4
@@ -1251,7 +1252,7 @@ CylindricalALM :: giveLinearSolver() {
         }
     }
 
-    linSolver = :: CreateUsrDefSparseLinSolver(solverType, 1, domain, engngModel);
+    linSolver = CreateUsrDefSparseLinSolver(solverType, 1, domain, engngModel);
     if ( linSolver == NULL ) {
         _error("giveLinearSolver: linear solver creation failed");
     }
@@ -1814,3 +1815,5 @@ CylindricalALM :: do_lineSearch(FloatArray &r, FloatArray &rInitial, FloatArray 
         OOFEM_LOG_INFO("LS: err_id=%d, eta=%e, dlambda=%e\n", ls_failed, currEta, deltaLambda);
     }
 }
+
+} // end namespace oofem

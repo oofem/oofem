@@ -49,6 +49,7 @@
 #include "mpi.h"
 #endif
 
+namespace oofem {
 
 /**
  * The ProcessCommunicator and corresponding buffers (represented by this class)
@@ -497,6 +498,7 @@ ProcessCommunicator :: resizeRecvBuff(T *emodel, int packUnpackType)
     return 1;
 }
 
+} // end namespace oofem
 #endif
 #endif // processcomm_h
 

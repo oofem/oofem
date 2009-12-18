@@ -51,6 +51,8 @@
 #include "clock.h"
 #endif
 
+namespace oofem {
+
 DynCompRow :: DynCompRow(void) : SparseMtrx(), base_(0)
 {
     rows_ = NULL;
@@ -306,7 +308,7 @@ int DynCompRow :: buildInternalStructure(EngngModel *eModel, int di, EquationID 
 #ifdef TIME_REPORT
     //clock_t tstart = clock();
     oofem_timeval tstart;
-    :: getUtime(tstart);
+    getUtime(tstart);
 #endif
 
     nColumns = nRows = neq;
@@ -364,7 +366,7 @@ int DynCompRow :: buildInternalStructure(EngngModel *eModel, int di, EquationID 
     this->version++;
 #ifdef TIME_REPORT
     oofem_timeval tfin;
-    :: getRelativeUtime(tfin, tstart);
+    getRelativeUtime(tfin, tstart);
     OOFEM_LOG_DEBUG( "DynCompRow::buildInternalStructure: user time consumed: %.2fs\n",
                     ( double ) ( tfin.tv_sec + tfin.tv_usec / ( double ) OOFEM_USEC_LIM ) );
 #endif
@@ -834,7 +836,7 @@ DynCompRow :: ILUPYourself(int part_fill, double drop_tol)
 #ifdef TIME_REPORT
     //clock_t tstart = clock();
     oofem_timeval tstart;
-    :: getUtime(tstart);
+    getUtime(tstart);
 #endif
 
     for ( i = 0; i < nRows; i++ ) { // row loop
@@ -1056,7 +1058,7 @@ DynCompRow :: ILUPYourself(int part_fill, double drop_tol)
 
 #ifdef TIME_REPORT
     oofem_timeval ut;
-    :: getRelativeUtime(ut, tstart);
+    getRelativeUtime(ut, tstart);
     OOFEM_LOG_DEBUG( "\nILUT(%d,%e): user time consumed by factorization: %.2fs\n", part_fill, drop_tol, ( double ) ( ut.tv_sec + ut.tv_usec / ( double ) OOFEM_USEC_LIM ) );
 #endif
 
@@ -1228,3 +1230,4 @@ DynCompRow :: qsortRowPartition(IntArray &ind, IntArray &ir, FloatArray &val, in
     return i;
 }
 
+} // end namespace oofem

@@ -47,6 +47,8 @@
 #include "sparselinsystemnm.h"
 #include "sparsemtrx.h"
 
+namespace oofem {
+
 class DIIDynamic : public StructuralEngngModel
 {
     /*
@@ -122,4 +124,5 @@ public:
 protected:
 };
 
+} // end namespace oofem
 #endif // diidynamic_h

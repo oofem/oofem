@@ -60,6 +60,8 @@
 #include <stdlib.h>
 #endif
 
+namespace oofem {
+
 /*
  * Function used only by BoundaryCondition and InitialCondition in order to
  * store informations in convinient form for debugging.
@@ -264,3 +266,5 @@ const char *__MeshPackageTypeToString(MeshPackageType _value) {
 #undef ENUM_ITEM
 #undef ENUM_ITEM_WITH_VALUE
 #undef TO_STRING_BODY
+
+} // end namespace oofem

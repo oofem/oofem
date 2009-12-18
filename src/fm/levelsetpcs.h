@@ -43,6 +43,8 @@
 #include <vector>
 #endif
 
+namespace oofem {
+
 #define LevelSetPCS_CACHE_ELEMENT_VOF 0
 
 class LevelSetPCS;
@@ -192,4 +194,5 @@ protected:
     //@}
 };
 
+} // end namespace oofem
 #endif // levelsetpcs_h

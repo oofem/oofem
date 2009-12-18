@@ -47,6 +47,8 @@
 #include "linearstatic.h"
 #include "sparsemtrx.h"
 
+namespace oofem {
+
 class PLinearStatic : public LinearStatic
 {
     /*
@@ -93,5 +95,6 @@ public:
 							     const UnknownNumberingScheme& s, Domain *domain);
 };
 
+} // end namespace oofem
 #endif
 #endif // plinearstatic_h

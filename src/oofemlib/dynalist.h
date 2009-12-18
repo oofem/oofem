@@ -43,6 +43,7 @@
 
 #include "compiler.h"
 
+namespace oofem {
 
 template< class T > class dynaList;
 template< class T > class dynaListIterator;
@@ -239,5 +240,5 @@ dynaList< T > :: erase(iterator position)
 }
 
 
-
+} // end namespace oofem
 #endif // dynalist_h

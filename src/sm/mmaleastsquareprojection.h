@@ -49,6 +49,8 @@
 
 #include "dynalist.h"
 
+namespace oofem {
+
 class Domain;
 class Element;
 class TimeStep;
@@ -146,10 +148,5 @@ protected:
     int  giveNumberOfUnknownPolynomialCoefficients(MMALeastSquareProjectionPatchType regType);
 };
 
+} // end namespace oofem
 #endif // mmaleastsquareprojection_h
-
-
-
-
-
-

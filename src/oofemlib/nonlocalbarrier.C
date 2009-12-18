@@ -38,6 +38,10 @@
 
 #include "nonlocalbarrier.h"
 
+namespace oofem {
+
 NonlocalBarrier :: NonlocalBarrier(int n, Domain *aDomain) :
     FEMComponent(n, aDomain)
 { }
+
+} // end namespace oofem

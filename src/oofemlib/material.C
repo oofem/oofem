@@ -68,6 +68,7 @@
 #endif
 #endif
 
+namespace oofem {
 
 void
 Material :: giveCharacteristicMatrix(FloatMatrix &answer,
@@ -181,7 +182,7 @@ Material :: ofType(char *aClass)
         newMaterial = new IsotropicLinearElasticMaterial(this->giveNumber(), domain);
     } else {
         // last resort - call aditional user defined subroutine
-        newMaterial = :: CreateUsrDefMaterialOfType(aClass, number, domain);
+        newMaterial = CreateUsrDefMaterialOfType(aClass, number, domain);
         if ( newMaterial == NULL ) {
             _error2("ofType:  unknown material (%s)\n", aClass);
             exit(0);
@@ -347,4 +348,4 @@ Material :: updateYourself(GaussPoint *gp, TimeStep *atTime)
 }
 
 
-
+} // end namespace oofem

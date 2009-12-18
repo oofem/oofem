@@ -40,6 +40,8 @@
 #include "engngm.h"
 #include "logger.h"
 
+namespace oofem {
+
 OutputManager :: OutputManager(Domain *d) : dofman_out(), dofman_except(), element_out(), element_except()
 {
     domain = d;
@@ -291,3 +293,4 @@ OutputManager :: testElementOutput(int num, TimeStep *tStep)
     return 0;
 }
 
+} // end namespace oofem

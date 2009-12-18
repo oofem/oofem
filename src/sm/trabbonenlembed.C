@@ -55,6 +55,7 @@
 #include "conTable.h"
 #endif
 
+namespace oofem {
 
 /////////////////////////////////////////////////////////////////
 ////////////TRABECULAR BONE NONLOCAL MATERIAL////////////////////
@@ -421,3 +422,5 @@ TrabBoneNLEmbedStatus::giveInterface (InterfaceType type)
 //
 // END: INTERFACE ???????????????
 /////////////////////////////////////////////////////////////////
+
+} // end namespace oofem
