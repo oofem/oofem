@@ -647,7 +647,7 @@ PNlDEIDynamic :: computeLoadVector(FloatArray &answer, ValueModeType mode, TimeS
     //
     // assembling the nodal part of load vector
     //
-    this->assembleVectorFromDofManagers(answer, stepN, EID_MomentumBalance, NodalLoadVector, mode, 
+    this->assembleVectorFromDofManagers(answer, stepN, EID_MomentumBalance, NodalLoadVector, mode,
 					EModelDefaultEquationNumbering(), domain);
 
 
@@ -681,7 +681,7 @@ PNlDEIDynamic :: computeLoadVector(FloatArray &answer, ValueModeType mode, TimeS
     //
     // assembling the element part of load vector
     //
-    this->assembleVectorFromElements(answer, stepN, EID_MomentumBalance, ElementForceLoadVector, mode, 
+    this->assembleVectorFromElements(answer, stepN, EID_MomentumBalance, ElementForceLoadVector, mode,
 				     EModelDefaultEquationNumbering(), domain);
 
 
@@ -729,7 +729,7 @@ PNlDEIDynamic :: giveInternalForces(FloatArray &answer, TimeStep *stepN)
         element = ( NLStructuralElement * ) domain->giveElement(i);
 
 #ifdef __PARALLEL_MODE
-        // skip remote elements (these are used as mirrors of remote eleemnts on other domains
+        // skip remote elements (these are used as mirrors of remote elements on other domains
         // when nonlocal constitutive models are used. Their introduction is necessary to
         // allow local averaging on domains without fine grain communication between domains).
         if ( element->giveParallelMode() == Element_remote ) {
@@ -801,7 +801,7 @@ PNlDEIDynamic :: computeMassMtrx(FloatArray &massMatrix, double &maxOm, TimeStep
     for ( i = 1; i <= nelem; i++ ) {
         element = domain->giveElement(i);
 #ifdef __PARALLEL_MODE
-        // skip remote elements (these are used as mirrors of remote eleemnts on other domains
+        // skip remote elements (these are used as mirrors of remote elements on other domains
         // when nonlocal constitutive models are used. They introduction is necessary to
         // allow local averaging on domains without fine grain communication between domains).
         if ( element->giveParallelMode() == Element_remote ) {

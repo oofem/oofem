@@ -5,6 +5,8 @@
 \usepackage{ifpdf}
 \usepackage{ifthen}
 \input{include.tex}
+\usepackage{amsmath}
+
 
 \renewcommand{\topfraction}{1.99}	% 99% of page top can be a float
 \renewcommand{\bottomfraction}{0.99}	% 99% of page bottom can be a float
@@ -14,6 +16,11 @@
 
 \newcommand{\mbf}[1]{\mbox{\boldmath$#1$}}
 \newcommand{\grad}{\nabla}
+\newcommand{\vect}[1]{\mathbf{#1}} % not for Greek letters
+\newcommand{\tens}[1]{\pmb{#1}} % A second-order tensor
+
+\newcommand{\strain}{\varepsilon}
+\newcommand{\stress}{\sigma}
 %% Definitions for PostScript output
 %\newcommand{\param}[1]{mbox{\texttt{#1}}}
 %\newcommand{\fieldVal}[2]{${\mbox{\#\rm\it #1}}_{\rm #2}$}
@@ -2153,13 +2160,27 @@ corresponding volume and i-th member of \param{Components} array.
 
 \noindent
 \begin{record}[0.9\textwidth]
-  \recentry{}{\entKeywordInst{TemperatureLoad}}{\field{Components}{ra}}
+  \recentry{}{\entKeywordInst{StructTemperatureLoad}~}{\field{Components}{ra}}
 \end{record}
 
 Represents temperature loading imposed to some elements. The members of
 \param{Components} array represent the change of temperature (or change
 of temperature gradient) corresponding to
 specific element strain components. See element library manual for details.
+
+\item Structural eigenstrain load
+
+\noindent
+\begin{record}[0.9\textwidth]
+  \recentry{}{\entKeywordInst{StructEigenstrainLoad}~}{\field{Components}{ra}}
+\end{record}
+Prescribes eigenstrain (or stress-free strain) to a structural element. The array of \param{Components} is defined in the global coordinate system. The number of components corresponds to a material mode, e.g. plane stress has three components and 3D six. Periodic boundary conditions can be imposed using eigenstrains and master-slave nodes. Consider decomposition of strain into average and fluctuating part
+\begin{equation}
+\tens{\strain}(\vect{x}) = \langle \tens{\strain} \rangle + \tens{\strain}^*(\vect{x})
+\end{equation}
+where $\langle \tens{\strain} \rangle$ can be imposed as eigenstrain over the domain and the solution gives the fluctuating part $\tens{\strain}^*(\vect{x})$. Master-slave nodes have to interconnect opposing boundary nodes of a unit cell.
+
+
 \end{itemize}
 \paragraph{Boundary loads}
 \begin{itemize}
@@ -2177,7 +2198,7 @@ specific element strain components. See element library manual for details.
     \recentry{}{\field{Components}{ra}} \recentry{}{\optField{dofexcludemask}{ia}}
     \recentry{}{\optField{csType}{in}} \recentry{}{\optField{properties}{dc}}
   \end{record}
-  Represent constant edge/surface loads or boundary conditions. The \param{ndofs} parameter must be set
+Represent constant edge/surface loads or boundary conditions. The \param{ndofs} parameter must be set
 equal to element's number of unknowns. Parameter \param{loadType}
 distinguishes the type of boundary condition (supported values are:
 2 - prescribed flux input (Neumann boundary condition), 3 - convection bc (Newton boundary condition)).

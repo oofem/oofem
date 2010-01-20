@@ -81,7 +81,7 @@ class CommunicationBuffer;
  * Element_local mode - Element is local, there are no contribution from other domains to this Element.</LI>
  * <LI>
  * Element_shared mode - Element is shared by neighbouring partitions - not implemented.
- * In the case of eleemnt cut mode, the cutted element is local on all partitions sharing it.
+ * In the case of element cut mode, the cutted element is local on all partitions sharing it.
  * Some of such element  nodes are local and some are remote. The local nodes are completely
  * surronded by local element on particular partition.</LI>
  * <LI>
@@ -122,7 +122,7 @@ enum elementParallelMode {
  * to build internal profile of such sparse matrix. Engineering model then typically calls
  * buildInternalStructure member function of sparse matrix. This method then requests element code
  * numbers from elements and builds its internal profile. This could look strange, because
- * class sparse matrix should know "something about eleemnts", but only sparse matrix knows, how
+ * class sparse matrix should know "something about elements", but only sparse matrix knows, how
  * to build its internal structure (this may require one or more loops over elements code number).</LI>
  * <LI>
  * When element computes its contribution, then it comunicates with its cross-section (and cross
@@ -195,7 +195,7 @@ protected:
 #ifdef __PARALLEL_MODE
     elementParallelMode parallel_mode;
     /**
-     * List of partition sharing the shared eleemnt or
+     * List of partition sharing the shared element or
      * remote partion containing remote element counterpart.
      */
     IntArray partitions;

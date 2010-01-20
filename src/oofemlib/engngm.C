@@ -844,7 +844,7 @@ EngngModel :: updateYourself(TimeStep *stepN)
         for ( j = 1; j <= nelem; j++ ) {
             elem = domain->giveElement(j);
 #ifdef __PARALLEL_MODE
-            // skip remote elements (these are used as mirrors of remote eleemnts on other domains
+            // skip remote elements (these are used as mirrors of remote elements on other domains
             // when nonlocal constitutive models are used. They introduction is necessary to
             // allow local averaging on domains without fine grain communication between domains).
             if ( elem->giveParallelMode() == Element_remote ) {
@@ -986,7 +986,7 @@ void EngngModel :: assemble(SparseMtrx *answer, TimeStep *tStep, EquationID ut,
     for ( ielem = 1; ielem <= nelem; ielem++ ) {
         element = domain->giveElement(ielem);
 #ifdef __PARALLEL_MODE
-        // skip remote elements (these are used as mirrors of remote eleemnts on other domains
+        // skip remote elements (these are used as mirrors of remote elements on other domains
         // when nonlocal constitutive models are used. They introduction is necessary to
         // allow local averaging on domains without fine grain communication between domains).
         if ( element->giveParallelMode() == Element_remote ) {
@@ -1035,7 +1035,7 @@ void EngngModel :: assemble(SparseMtrx *answer, TimeStep *tStep, EquationID r_id
     for ( ielem = 1; ielem <= nelem; ielem++ ) {
         element = domain->giveElement(ielem);
 #ifdef __PARALLEL_MODE
-        // skip remote elements (these are used as mirrors of remote eleemnts on other domains
+        // skip remote elements (these are used as mirrors of remote elements on other domains
         // when nonlocal constitutive models are used. They introduction is necessary to
         // allow local averaging on domains without fine grain communication between domains).
         if ( element->giveParallelMode() == Element_remote ) {
@@ -1129,7 +1129,7 @@ void EngngModel :: assemble(SparseMtrx *answer, TimeStep *tStep, EquationID r_id
  * for (i=1; i<= nelem; i++) {
  *    element = domain -> giveElement(i);
  #ifdef __PARALLEL_MODE
- * // skip remote elements (these are used as mirrors of remote eleemnts on other domains
+ * // skip remote elements (these are used as mirrors of remote elements on other domains
  * // when nonlocal constitutive models are used. They introduction is necessary to
  * // allow local averaging on domains without fine grain communication between domains).
  * if (element->giveParallelMode () == Element_remote) continue;
@@ -1261,7 +1261,7 @@ void EngngModel :: assembleVectorFromElements(FloatArray &answer, TimeStep *tSte
     for ( i = 1; i <= nelem; i++ ) {
         element = domain->giveElement(i);
 #ifdef __PARALLEL_MODE
-        // skip remote elements (these are used as mirrors of remote eleemnts on other domains
+        // skip remote elements (these are used as mirrors of remote elements on other domains
         // when nonlocal constitutive models are used. They introduction is necessary to
         // allow local averaging on domains without fine grain communication between domains).
         if ( element->giveParallelMode() == Element_remote ) {
@@ -1301,7 +1301,7 @@ void EngngModel :: assemblePrescribedVectorFromElements(FloatArray &answer, Time
     for ( i = 1; i <= nelem; i++ ) {
         element = domain->giveElement(i);
 #ifdef __PARALLEL_MODE
-        // skip remote elements (these are used as mirrors of remote eleemnts on other domains
+        // skip remote elements (these are used as mirrors of remote elements on other domains
         // when nonlocal constitutive models are used. They introduction is necessary to
         // allow local averaging on domains without fine grain communication between domains).
         if ( element->giveParallelMode() == Element_remote ) {
@@ -1447,7 +1447,7 @@ EngngModel :: petsc_assembleVectorFromElements(Vec answer, TimeStep *tStep, Equa
     for ( i = 1; i <= nelem; i++ ) {
         element = domain->giveElement(i);
  #ifdef __PARALLEL_MODE
-        // skip remote elements (these are used as mirrors of remote eleemnts on other domains
+        // skip remote elements (these are used as mirrors of remote elements on other domains
         // when nonlocal constitutive models are used. They introduction is necessary to
         // allow local averaging on domains without fine grain communication between domains).
         if ( element->giveParallelMode() == Element_remote ) {
@@ -1497,7 +1497,7 @@ EngngModel :: petsc_assemblePrescribedVectorFromElements(Vec answer, TimeStep *t
     for ( i = 1; i <= nelem; i++ ) {
         element = domain->giveElement(i);
  #ifdef __PARALLEL_MODE
-        // skip remote elements (these are used as mirrors of remote eleemnts on other domains
+        // skip remote elements (these are used as mirrors of remote elements on other domains
         // when nonlocal constitutive models are used. They introduction is necessary to
         // allow local averaging on domains without fine grain communication between domains).
         if ( element->giveParallelMode() == Element_remote ) {
@@ -1555,7 +1555,7 @@ EngngModel :: initStepIncrements()
         for ( j = 1; j <= nelem; j++ ) {
             elem = domain->giveElement(j);
 #ifdef __PARALLEL_MODE
-            // skip remote elements (these are used as mirrors of remote eleemnts on other domains
+            // skip remote elements (these are used as mirrors of remote elements on other domains
             // when nonlocal constitutive models are used. They introduction is necessary to
             // allow local averaging on domains without fine grain communication between domains).
             if ( elem->giveParallelMode() == Element_remote ) {
@@ -1663,7 +1663,7 @@ contextIOResultType EngngModel :: saveContext(DataStream *stream, ContextMode mo
         for ( i = 1; i <= nelem; i++ ) {
             element = domain->giveElement(i);
 #ifdef __PARALLEL_MODE
-            // skip remote elements (these are used as mirrors of remote eleemnts on other domains
+            // skip remote elements (these are used as mirrors of remote elements on other domains
             // when nonlocal constitutive models are used. They introduction is necessary to
             // allow local averaging on domains without fine grain communication between domains).
             if ( element->giveParallelMode() == Element_remote ) {
@@ -1838,7 +1838,7 @@ contextIOResultType EngngModel :: restoreContext(DataStream *stream, ContextMode
         for ( i = 1; i <= nelem; i++ ) {
             element = domain->giveElement(i);
 #ifdef __PARALLEL_MODE
-            // skip remote elements (these are used as mirrors of remote eleemnts on other domains
+            // skip remote elements (these are used as mirrors of remote elements on other domains
             // when nonlocal constitutive models are used. They introduction is necessary to
             // allow local averaging on domains without fine grain communication between domains).
             if ( element->giveParallelMode() == Element_remote ) {

@@ -101,7 +101,7 @@ class ProblemCommunicator;
  *
  * WARNING - FloatMatrix::Lumped() works only for elements with Linear displacement filed !
  *
- * Current implementation supports parallel processing. Both node- and eleemnt cut strategies can
+ * Current implementation supports parallel processing. Both node- and element cut strategies can
  * be used.
  \begin{itemize}
  \item
@@ -111,7 +111,7 @@ class ProblemCommunicator;
  * sharing this node. Particullary, masses and real nodal forces have to be exchaneged for shared
  * nodes.
  \item
- * In element cut strategy, partitions are divided using cut running through elements. The cutted eleemnts are
+ * In element cut strategy, partitions are divided using cut running through elements. The cutted elements are
  * replicated on neighbouring partitions. The nodes belonging to  replicated elements belonging to
  * remote partitions are called remote nodes. The are mirrors or remote copies of cooresponding
  * nodes on neighbouring partition.

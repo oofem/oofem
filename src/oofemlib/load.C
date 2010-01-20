@@ -61,7 +61,7 @@ Load :: Load(int i, Domain *aDomain) :
 
 
 FloatArray &Load :: giveComponentArray()
-// Returns the array that contains the components of the receivert. If
+// Returns the array that contains the components of the receiver. If
 // this array does not exist yet, forms it by reading its values in the
 // data file.
 {

@@ -20,14 +20,14 @@ global tolerance
 # TODO:
 # - add reading of userrec from file
 # - add support for extractor/checker mode (or split into separate scripts)
-# - add support for additional records - 
+# - add support for additional records -
 
 
 #record tuple format
 #('nr', solution_step, node_id, dof_id, type, value) - dof manager record
 #('er', solution_step, elem_id, ir_id, gp_id, 'keyword', keyword_indx, value) - element record
 #('ber', solution_step, elem_id, 'keyword', keyword_indx, value) - beam element record
-#('rr', solution_step, node_id, dof_id, value) - reaction 
+#('rr', solution_step, node_id, dof_id, value) - reaction
 #('llr',solution_step, value) - load level record
 #('time') - time, only extractor mode
 
@@ -43,7 +43,7 @@ mode='e'
 
 #list of record tuples
 userrec = []
-#parsed values 
+#parsed values
 recVal = {}
 
 #flag indication that the first time step encountered
@@ -75,7 +75,7 @@ dof_re    = re.compile(r"""
                 ^                   # beginning of line
                 \s*dof\s*           # char string
                 (\d+)               # dof number
-                """,re.X)                
+                """,re.X)
 
 doftypes_re = re.compile(r"""
                 (?:([dvatfp])\s+([-]?\d+\.\d+(?:e[+-]\d+)*))+  #dof types and values on one line
@@ -141,12 +141,12 @@ reaction_re = re.compile (r"""
                 \s+(\d+)\s+
                 reaction\s+
                 ([-]*\d+\.\d+(e[+-]\d+)?) # value
-                """,re.X)                
+                """,re.X)
 
 loadlevel_re = re.compile (r"""
                 load\ level\s+:\s+
                 ([-]*\d+\.\d+(e[+-]\d+)?) # value
-                """,re.X)                
+                """,re.X)
 
 
 # returns the value corresponding to given keyword and record
@@ -167,7 +167,7 @@ def getKeywordValue (record, kwd, optional = None):
 # parses the extractor/checker input record
 def parse_input_rec (recline):
 	if re.search('^#(DOFMAN|NODE)', recline):
-		if (mode == 'c'): tstep = float(getKeywordValue(recline, 'tStep')) 
+		if (mode == 'c'): tstep = float(getKeywordValue(recline, 'tStep'))
 		else: tstep = 0
 		try:
 			number= int(getKeywordValue(recline, 'number'))
@@ -180,7 +180,7 @@ def parse_input_rec (recline):
 			print "Input error on\n",recline
 			return None
 	elif re.search('^#ELEMENT', recline):
-		if (mode == 'c'): tstep = float(getKeywordValue(recline, 'tStep')) 
+		if (mode == 'c'): tstep = float(getKeywordValue(recline, 'tStep'))
 		else: tstep = 0
 		try:
 			number= int(getKeywordValue(recline, 'number'))
@@ -191,13 +191,13 @@ def parse_input_rec (recline):
 			cmpn  = int(getKeywordValue(recline, 'component'))
 			value = float(getKeywordValue(recline, 'value', 0.0))
 			return ('er', tstep, number, irule, gp, kwd, cmpn, value)
-                
+
 		except ValueError:
 			print "Input error on\n",recline
 			return None
 
 	elif re.search('^#BEAM_ELEMENT', recline):
-		if (mode == 'c'): tstep = float(getKeywordValue(recline, 'tStep')) 
+		if (mode == 'c'): tstep = float(getKeywordValue(recline, 'tStep'))
 		else: tstep = 0
 		try:
 			number= int(getKeywordValue(recline, 'number'))
@@ -209,9 +209,9 @@ def parse_input_rec (recline):
 		except ValueError:
 			print "Input error on\n",recline
 			return None
-			
+
 	elif re.search('^#REACTION',recline):
-		if (mode == 'c'): tstep = float(getKeywordValue(recline, 'tStep')) 
+		if (mode == 'c'): tstep = float(getKeywordValue(recline, 'tStep'))
 		else: tstep = 0
 		try:
 			number= int(getKeywordValue(recline, 'number'))
@@ -221,9 +221,9 @@ def parse_input_rec (recline):
 		except ValueError:
 			print "Input error on\n",recline
 			return None
-		
+
 	elif re.search('^#LOADLEVEL',recline):
-		if (mode == 'c'): tstep = float(getKeywordValue(recline, 'tStep')) 
+		if (mode == 'c'): tstep = float(getKeywordValue(recline, 'tStep'))
 		else: tstep = 0
 		try:
 			value = float(getKeywordValue(recline, 'value', 0.0))
@@ -237,14 +237,14 @@ def parse_input_rec (recline):
 	else:
 		return None
 
-		
+
 # extract dofman record if apply for actual record
 def check_node_rec (time, node, dof, typesandvalues):
 	global recVal, mode
 	for irec, rec in enumerate(userrec):
 		if (mode == 'e'): timeflag = 1
 		else: timeflag = (rec[1] == time)
-                for tv in typesandvalues: # loop over list of dof values and their types 
+                for tv in typesandvalues: # loop over list of dof values and their types
                         (type,value) = tv
                         if ((rec[0]=='nr') and timeflag and (node == rec[2]) and (dof == rec[3]) and (type == rec[4])):
                                 recVal[irec]=value;
@@ -255,8 +255,8 @@ def check_element_rec (time, elem, irule, gp, kwd, value, line):
 	for irec,rec in enumerate(userrec):
 		if (mode == 'e'): timeflag = 1
 		else: timeflag = (rec[1] == time)
-		
-		if ((rec[0]=='er') and timeflag and (elem == rec[2]) and 
+
+		if ((rec[0]=='er') and timeflag and (elem == rec[2]) and
 		    (irule==rec[3]) and (gp == rec[4])):
 #			print "Found er: looking for ",rec[5],"in ", line
 			match=re.search(rec[5]+'\s*((([-]*\d+(\.\d+)?(e[+-]\d+)?)\s*)+)', line)
@@ -272,14 +272,14 @@ def check_beam_rec (time, elem, kwd, value, line):
 	for irec,rec in enumerate(userrec):
 		if (mode == 'e'): timeflag = 1
 		else: timeflag = (rec[1] == time)
-		
+
 		if ((rec[0]=='ber') and timeflag and (elem == rec[2])):
 #			print "Found ber: looking for ",rec[3],"in ", line
 			match=re.search(rec[3]+'\s*(([-]*\d+(\.\d+)?(e[+-]\d+)?)\s*)+', line)
 			if match:
 				recVal[irec]=re.split('\s+',match.group(0))[rec[4]]
 #				print "found\n"
-	
+
 #extract reaction record
 def check_reaction_rec (time, dofman, idof, value):
 	global recVal
@@ -308,7 +308,7 @@ def check_time_rec (time):
 
 		if (mode == 'e') and (rec[0] == 'time'):
 			recVal[irec]=time
-        
+
 
 
 def match_primary_rec (line):
@@ -332,7 +332,7 @@ def match_primary_rec (line):
 		if debug: print "found load level ",recvalue
 		check_loadlevel_rec (rectime, recvalue)
 		return None
-	
+
 
 	match=dofMan_re.search(line)
 	if match:
@@ -431,7 +431,7 @@ def match_gprec ():
 		while (match):
 			line = match_singlegprec (line)
 			match=gp_re.search(line)
-                        
+
 		else:
 			return line
 
@@ -448,7 +448,7 @@ def match_beamrec ():
 			check_beam_rec (rectime, recnumber, 'forces', 0.0, line)
 			if debug: print "     local forces rec"
 			continue
-			
+
 		return line
 
 
@@ -489,14 +489,14 @@ def print_step_results ():
 
 
 def usage():
-# prints usage 
+# prints usage
 	print """
 Checker (c) 2009 Borek Patzak
 
 Usage: extractor.py -f input_file.in [-c]
 
 Where: input_file.in is extractor input file
-       -c turns on the checker mode 
+       -c turns on the checker mode
 
 The syntax of extractor input file is following:
 ------BEGIN---------
@@ -511,11 +511,11 @@ oofem_output_file_name
 #%END_CHECK%
 ------END-----------
 Other lines not matching the syntax are ignored.
-The records in {} are required only when in checker mode, 
+The records in {} are required only when in checker mode,
 records in <> are available only in extractor mode.
 the records in [] are optional.
 
-The type value is a single character determining the type of dof 
+The type value is a single character determining the type of dof
 value, where 'd' stands for displavement, 'v' for velocity,
 'a' for acceleration, 't' for temperature, and 'f' for flux.
 The output is printed to stdout, one row per each solution step,
@@ -538,7 +538,7 @@ patch100.out
 def main():
 	global userrec, recval, infile, infilename, mode, tolerance
 	try:
-		# options expecting value followed by ':', see also Unix getopt 
+		# options expecting value followed by ':', see also Unix getopt
 		opts, args = getopt.getopt (sys.argv[1:],'cf:')
 	except getopt.GetoptError, err:
 		print str(err)
@@ -567,7 +567,7 @@ def main():
 	if debug: print "Opening oofem input file:", sys.argv[1]
 	infile=open(infilename)
 
-#read output file record 
+#read output file record
 	for line in infile:
 		if line[0] != '#':
 			oofemoutfilename = line
@@ -589,7 +589,7 @@ def main():
 	if begin==0:
 		print "No extrator records found"
 		exit (1)
-				
+
 	end=0
 	userrec = []
 	for line in infile:
@@ -610,11 +610,11 @@ def main():
 #process oofem output file
 	if debug: print "Opening oofem output file:", oofemoutfilename[:-1]
 	infile = open(oofemoutfilename[:-1])
-		
+
 	for i in range(len(userrec)):
 		recVal[i]='--'
-              
-	#parse output file 
+
+	#parse output file
 	for line in infile:
                 while (line):
                         line = match_primary_rec (line)

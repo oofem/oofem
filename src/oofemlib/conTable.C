@@ -413,7 +413,7 @@ ConnectivityTable :: reset()
  * int
  * ConnectivityTable :: giveNumOfSharedElements (int inode)
  * //
- * // returns number of shared eleemnts for restrained node inode
+ * // returns number of shared elements for restrained node inode
  * //
  * {
  * if (numOfSharedElements)

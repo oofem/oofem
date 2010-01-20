@@ -90,17 +90,19 @@ HOMExportModule :: doOutput(TimeStep *tStep)
 
     Domain *d  = emodel->giveDomain(1);
     int nelem = d->giveNumberOfElements();
+    StructuralElement *structElem;
     //int nnodes = d->giveNumberOfDofManagers();
     double dV, VolTot = 0.;
-    FloatArray VecStrain, VecStress, SumStrain(6), SumStress(6), tempFloatAr;
+    FloatArray VecStrain, VecStress, VecEigStrain, SumStrain(6), SumStress(6), SumEigStrain(6), tempFloatAr;
     FloatMatrix baseGCS;
     IntArray Mask;
     GaussPoint *gp;
     IntegrationRule *iRule;
 
-    //stress and strain vectors are always in global coordinates
+    //stress and strain vectors are always in global c.s.
     SumStrain.zero(); //xx, yy, zz, yz, zx, xy
     SumStress.zero();
+    SumEigStrain.zero();
 
     for ( ielem = 1; ielem <= nelem; ielem++ ) {
         elem = d->giveElement(ielem);
@@ -108,6 +110,8 @@ HOMExportModule :: doOutput(TimeStep *tStep)
             iRule = elem->giveDefaultIntegrationRulePtr();
             for ( i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
                 gp  = iRule->getIntegrationPoint(i);
+                structElem = ( StructuralElement * ) gp->giveElement();
+                structElem->computeResultingIPEigenstrainAt(VecEigStrain, tStep, gp, VM_Incremental);
                 //gp->giveCoordinate(1);
                 dV  = elem->computeVolumeAround(gp);
                 //OOFEM_LOG_INFO("Element %d GP %d Vol %f\n", elem->giveNumber(), gp->giveNumber(), dV);
@@ -124,29 +128,38 @@ HOMExportModule :: doOutput(TimeStep *tStep)
                   //baseGCS.printYourself();
                   VecStress.resize(6);
                   VecStrain.resize(6);
+                  VecEigStrain.resize(6);
                   this->transformStressVectorTo( tempFloatAr, baseGCS, VecStress, 0);
                   VecStress = tempFloatAr;
                   this->transformStrainVectorTo( tempFloatAr, baseGCS, VecStrain, 0);
                   VecStrain = tempFloatAr;
+                  tempFloatAr = VecEigStrain;
+                  VecEigStrain = tempFloatAr;
+
                   for(j=1; j<=6; j++)
-                    Mask.at(j)=j;
-                  //continue;
+                        Mask.at(j)=j;
                   //VecStrain.printYourself();
+                  //VecEigStrain.printYourself();
                   //VecStress.printYourself();
                 }
+
                 VolTot += dV;
                 VecStrain.times(dV);
                 VecStress.times(dV);
+                VecEigStrain.times(dV);
 
                 for ( j = 0; j < 6; j++ ) {
                     index = Mask(j); //indexes in Mask from 1
                     if ( index ) {
                         SumStrain(j) += VecStrain(index - 1);
+                        if(VecEigStrain.giveSize())
+                          SumEigStrain(j) += VecEigStrain(index - 1);
                         SumStress(j) += VecStress(index - 1);
                     }
                 }
 
                 //VecStrain.printYourself();
+                //VecEigStrain.printYourself();
                 //SumStrain.printYourself();
             }
         }
@@ -154,17 +167,24 @@ HOMExportModule :: doOutput(TimeStep *tStep)
 
     //average
     SumStrain.times(1. / VolTot * this->scale);
+    SumEigStrain.times(1. / VolTot * this->scale);
     SumStress.times(1. / VolTot * this->scale);
     //SumStrain.printYourself();
+    //SumEigStrain.printYourself();
     //SumStress.printYourself();
     fprintf( this->stream, "%f   ", tStep->giveTime() );
     for ( j = 0; j < 6; j++ ) { //strain
         fprintf( this->stream, "%06.5e ", SumStrain(j) );
     }
 
-    fprintf(this->stream, "  ");
+    fprintf(this->stream, "    ");
     for ( j = 0; j < 6; j++ ) { //stress
         fprintf( this->stream, "%06.5e ", SumStress(j) );
+    }
+
+    fprintf(this->stream, "    ");
+    for ( j = 0; j < 6; j++ ) { //eigenstrain
+        fprintf( this->stream, "%06.5e ", SumEigStrain(j) );
     }
 
     fprintf( this->stream, "Vol %06.5e ", VolTot );
@@ -184,7 +204,7 @@ HOMExportModule :: initialize()
         OOFEM_ERROR2("HOMExportModule::giveOutputStream: failed to open file %s", fileName);
     }
 
-    fprintf(this->stream, "#Time       Strain (xx, yy, zz, yz, zx, xy)                                                 Stress (xx, yy, zz, yz, zx, xy)\n");
+    fprintf(this->stream, "#Time      Strain (xx, yy, zz, yz, zx, xy)                                              Stress (xx, yy, zz, yz, zx, xy)                                                Eigenstrain (xx, yy, zz, yz, zx, xy)\n");
 }
 
 

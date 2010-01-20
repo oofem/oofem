@@ -1,3 +1,4 @@
+/* v 1.9 2010/01/05 vs */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -10,7 +11,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 2009   Vit Smilauer
  *
  *
  *
@@ -32,30 +33,10 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-//
-// FILE: bcvaltype.h
-//
 
-#ifndef bcvaltype_h
-#define bcvaltype_h
-
-namespace oofem {
-
-/**
- * Type determining the type of general boundary condition.
- */
-enum bcValType {
-    // to identify load type
-    UnknownBVT,
-    TemperatureBVT,
-    EigenstrainBVT,
-    ForceLoadBVT,
-    PressureBVT,
-    HumidityBVT,
-    VelocityBVT,
-    DisplacementBVT
-};
-
-} // end namespace oofem
-#endif // bcvaltype_h
-
+#include "structeigenstrainload.h"
+#include "element.h"
+#include "timestep.h"
+#include "loadtime.h"
+#include "material.h"
+#include "flotarry.h"

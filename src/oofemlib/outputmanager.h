@@ -93,7 +93,7 @@ protected:
     /// List of dofmanager numbers or their ranges being excluded
     dynaList< Range >dofman_except;
 
-    /// Indicates all eleemnts are selected
+    /// Indicates all elements are selected
     int element_all_out_flag;
     /// List of element numbers or their ranges being selected
     dynaList< Range >element_out;

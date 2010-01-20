@@ -50,6 +50,7 @@
 #include "boundaryload.h"
 #include "pointload.h"
 #include "structtemperatureload.h"
+#include "structeigenstrainload.h"
 #include "gausspnt.h"
 #include "gaussintegrationrule.h"
 #include "intarray.h"
@@ -487,10 +488,8 @@ StructuralElement :: computeSurfaceLoadVectorAt(FloatArray &answer, Load *load,
 void
 StructuralElement :: computePrescribedStrainLocalLoadVectorAt(FloatArray &answer, TimeStep *tStep, ValueModeType mode)
 //
-// Computes numerically temperature load vector
-// Assumes that temperature is constant over the
-// whole element
-//
+// Computes numerically temperature and eigenstrain load vector
+// Assumes that temperature is constant over the whole element
 {
     int i;
     // TemperatureLoad   *load;
@@ -633,9 +632,9 @@ StructuralElement :: computeLocalForceLoadVector(FloatArray &answer, TimeStep *s
 // computes the part of load vector, which is imposed by force loads acting
 // on element volume (surface).
 // Why is this function taken separately ?
-// When reactions forces are computed, thea are computed from element::GiveRealStressVector
-// in this vector a real forces are stored (temprature part is substracted).
-// so we need further sobstract part corresponding to non-nodeal loading.
+// When reactions forces are computed, they are computed from element::GiveRealStressVector
+// in this vector a real forces are stored (temperature part is substracted).
+// so we need further substract part corresponding to non-nodal loading.
 {
     int i, n, id, nLoads;
     bcGeomType ltype;
@@ -656,8 +655,8 @@ StructuralElement :: computeLocalForceLoadVector(FloatArray &answer, TimeStep *s
                 answer.add(helpLoadVector);
             }
         } else {
-            if ( load->giveBCValType() != TemperatureBVT ) {
-                // temperature is handled separately at computeLoadVectorAt subroutine
+          if ( load->giveBCValType() != TemperatureBVT && load->giveBCValType() != EigenstrainBVT) {
+                // temperature and eigenstrain is handled separately at computeLoadVectorAt subroutine
                 _error("computeForceLoadVector : unsupported load type class");
                 exit(1);
             }
@@ -703,7 +702,7 @@ StructuralElement :: computeForceLoadVector(FloatArray &answer, TimeStep *stepN,
 // computes the part of load vector, which is imposed by force loads acting
 // on element volume (surface).
 // Why is this function taken separately ?
-// When reactions forces are computed, thea are computed from element::GiveRealStressVector
+// When reactions forces are computed, they are computed from element::GiveRealStressVector
 // in this vector a real forces are stored (temperature part is substracted).
 // so we need further sobstract part corresponding to non-nodeal loading.
 {
@@ -919,6 +918,32 @@ StructuralElement :: computeResultingIPTemperatureAt(FloatArray &answer, TimeSte
             load->computeValueAt(temperature, stepN, gCoords, mode);
             answer.add(temperature);
             //delete temperature ;
+        }
+    }
+
+    return;
+}
+
+void
+StructuralElement :: computeResultingIPEigenstrainAt(FloatArray &answer, TimeStep *stepN, GaussPoint *gp, ValueModeType mode)
+// Computes at stepN all eigenstrains that act on the receiver. Eigenstrains are used by the element for computing its body load vector.
+{
+    int i, n, nLoads;
+    StructuralEigenstrainLoad *load;
+    FloatArray gCoords, eigenstrain;
+
+    if ( this->computeGlobalCoordinates( gCoords, * ( gp->giveCoordinates() ) ) == 0 ) {
+        _error("computeResultingIPTemperatureAt: computeGlobalCoordinates failed");
+    }
+
+    answer.resize(0);
+    nLoads    = this->giveBodyLoadArray()->giveSize();
+    for ( i = 1; i <= nLoads; i++ ) {
+        n     = bodyLoadArray.at(i);
+        load  = ( StructuralEigenstrainLoad * ) domain->giveLoad(n);
+        if ( load->giveBCValType() == EigenstrainBVT ) {
+            load->computeValueAt(eigenstrain, stepN, gCoords, mode);
+            answer.add(eigenstrain);
         }
     }
 

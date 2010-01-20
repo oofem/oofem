@@ -55,7 +55,7 @@ class LIBeam3d2 : public NLStructuralElement, public FiberedCrossSectionInterfac
      * is updated using average increment of rotational pseudovector (same as in Simo -Qu Voc element).
      * Nonlinearity in geometric equations is not taken into account,
      * the only nonlinearity accounted is due to rotation of local (corotational) frame.
-     * Increments of eleemnt's strains are computed using increment of displacements in
+     * Increments of element's strains are computed using increment of displacements in
      * updated local system and total strain by adding this increnet to stored total deformation.
      * The local stiffness or nodal forces are transformed using updated centre triad to global system.
      */

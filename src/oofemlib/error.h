@@ -77,11 +77,13 @@ void oofem_exit(int code);
 #define OOFEM_CLASS_ERROR2(_1, _2) error(__FILE__, __LINE__, _1, _2);
 #define OOFEM_CLASS_ERROR3(_1, _2, _3) error(__FILE__, __LINE__, _1, _2, _3);
 #define OOFEM_CLASS_ERROR4(_1, _2, _3, _4) error(__FILE__, __LINE__, _1, _2, _3, _4);
+#define OOFEM_CLASS_ERROR5(_1, _2, _3, _4, _5) error(__FILE__, __LINE__, _1, _2, _3, _4, _5);
 
 #define _error1(_1) OOFEM_CLASS_ERROR1(_1)
 #define _error2(_1, _2) OOFEM_CLASS_ERROR2(_1, _2)
 #define _error3(_1, _2, _3) OOFEM_CLASS_ERROR3(_1, _2, _3)
 #define _error4(_1, _2, _3, _4) OOFEM_CLASS_ERROR4(_1, _2, _3, _4)
+#define _error5(_1, _2, _3, _4, _5) OOFEM_CLASS_ERROR5(_1, _2, _3, _4, _5)
 
 #define OOFEM_CLASS_WARNING1(_1) warning(__FILE__, __LINE__, _1);
 #define OOFEM_CLASS_WARNING2(_1, _2) warning(__FILE__, __LINE__, _1, _2);

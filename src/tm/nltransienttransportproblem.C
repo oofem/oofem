@@ -140,12 +140,12 @@ void NLTransientTransportProblem :: solveYourselfAt(TimeStep *tStep) {
 
         if ( ( nite == 1 ) || ( NR_Mode == nrsolverFullNRM ) || ( ( NR_Mode == nrsolverAccelNRM ) && ( nite % MANRMSteps == 0 ) ) ) {
             lhs->zero();
-            this->assemble( lhs, & TauStep, EID_ConservationEquation, LHSBCMatrix, 
+            this->assemble( lhs, & TauStep, EID_ConservationEquation, LHSBCMatrix,
 			    EModelDefaultEquationNumbering(), this->giveDomain(1) );
-            this->assemble( lhs, & TauStep, EID_ConservationEquation, IntSourceLHSMatrix, 
+            this->assemble( lhs, & TauStep, EID_ConservationEquation, IntSourceLHSMatrix,
 			    EModelDefaultEquationNumbering(), this->giveDomain(1) );
             lhs->times(alpha);
-            this->assemble( lhs, & TauStep, EID_ConservationEquation, NSTP_MidpointLhs, 
+            this->assemble( lhs, & TauStep, EID_ConservationEquation, NSTP_MidpointLhs,
 			    EModelDefaultEquationNumbering(), this->giveDomain(1) );
         }
 
@@ -157,7 +157,7 @@ void NLTransientTransportProblem :: solveYourselfAt(TimeStep *tStep) {
         // assembling the element part of load vector
         //
         rhs.zero();
-        this->assembleVectorFromElements( rhs, & TauStep, EID_ConservationEquation, ElementBCTransportVector, VM_Total, 
+        this->assembleVectorFromElements( rhs, & TauStep, EID_ConservationEquation, ElementBCTransportVector, VM_Total,
 					  EModelDefaultEquationNumbering(), this->giveDomain(1) );
         // this->assembleDirichletBcRhsVector (rhs, &TauStep, VM_Total, NSTP_MidpointLhs, this->giveDomain(1));
         this->assembleVectorFromElements( rhs, & TauStep, EID_ConservationEquation, ElementInternalSourceVector, VM_Total,
@@ -165,7 +165,7 @@ void NLTransientTransportProblem :: solveYourselfAt(TimeStep *tStep) {
         //
         // assembling the nodal part of load vector
         //
-        this->assembleVectorFromDofManagers( rhs, & TauStep, EID_ConservationEquation, NodalLoadVector, VM_Total, 
+        this->assembleVectorFromDofManagers( rhs, & TauStep, EID_ConservationEquation, NodalLoadVector, VM_Total,
 					     EModelDefaultEquationNumbering(), this->giveDomain(1) );
         //
         // add the rhs part depending on previous solution
@@ -302,7 +302,7 @@ NLTransientTransportProblem :: updateInternalState(TimeStep *stepN)
 
 
 void
-NLTransientTransportProblem :: assembleAlgorithmicPartOfRhs(FloatArray &answer, EquationID ut, 
+NLTransientTransportProblem :: assembleAlgorithmicPartOfRhs(FloatArray &answer, EquationID ut,
 							    const UnknownNumberingScheme& ns, TimeStep *tStep, int nite)
 {
     //
@@ -322,7 +322,7 @@ NLTransientTransportProblem :: assembleAlgorithmicPartOfRhs(FloatArray &answer, 
     for ( i = 1; i <= nelem; i++ ) {
         element = domain->giveElement(i);
 #ifdef __PARALLEL_MODE
-        // skip remote elements (these are used as mirrors of remote eleemnts on other domains
+        // skip remote elements (these are used as mirrors of remote elements on other domains
         // when nonlocal constitutive models are used. They introduction is necessary to
         // allow local averaging on domains without fine grain communication between domains).
         if ( element->giveParallelMode() == Element_remote ) {

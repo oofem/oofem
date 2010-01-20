@@ -568,7 +568,7 @@ StructuralMaterial :: giveStressStrainMask(IntArray &answer, MatResponseForm for
 // this function returns mask of reduced(if form == ReducedForm)
 // or Full(if form==FullForm) stressStrain vector in full or
 // reduced StressStrainVector
-// acording to stressStrain mode of given gp.
+// according to stressStrain mode of given gp.
 //
 //
 // mask has size of reduced or full StressStrain Vector and  i-th component
@@ -2507,18 +2507,27 @@ void
 StructuralMaterial :: computeStressIndependentStrainVector(FloatArray &answer,
                                                            GaussPoint *gp, TimeStep *stepN, ValueModeType mode)
 {
-    FloatArray fullAnswer, et, e0;
+    FloatArray fullAnswer, et, e0, eigenstrain, answerTemper, answerEigenstrain;
+    FloatMatrix GCS;
     MaterialMode matmode = gp->giveMaterialMode();
     StructuralCrossSection *crossSection =  dynamic_cast< StructuralCrossSection * >( gp->giveCrossSection() );
     StructuralElement *elem = ( StructuralElement * ) gp->giveElement();
+
+    answer.resize(0);
+    answerTemper.resize(0);
+    answerEigenstrain.resize(0);
 
     if ( stepN->giveTime() < this->castingTime ) {
         answer.zero();
         return;
     }
 
+    //sum up all prescribed temperatures over an element
     elem->computeResultingIPTemperatureAt(et, stepN, gp, mode);
-
+    //sum up all prescribed eigenstrain over an element
+    elem->computeResultingIPEigenstrainAt(eigenstrain, stepN, gp, mode);
+    if(eigenstrain.giveSize()!=0 && eigenstrain.giveSize()!=giveSizeOfReducedStressStrainVector(matmode))
+        _error5( "Number of given eigenstrain components %d is different than required %d by material mode %s, element %d", eigenstrain.giveSize(), giveSizeOfReducedStressStrainVector(matmode), __MaterialModeToString(matmode), elem->giveNumber() );
 
     /* add external source, if provided */
     FieldManager *fm = domain->giveEngngModel()->giveContext()->giveFieldManager();
@@ -2544,79 +2553,110 @@ StructuralMaterial :: computeStressIndependentStrainVector(FloatArray &answer,
     }
 
 
-    if ( et.giveSize() == 0 ) {
-        answer.resize(0);
-        return;
-    }
+    if ( et.giveSize() ) {//found temperature boundary conditions or prescribed field
+        double thick, width;
 
-    if ( et.giveSize() < 1 ) {
-        _error("computeStressIndependentStrainVector - Bad format of TemperatureLoad");
-        exit(1);
-    }
+        this->giveThermalDilatationVector(e0, gp, stepN);
 
-    this->giveThermalDilatationVector(e0, gp, stepN);
-
-    if ( ( matmode == _2dBeam ) || ( matmode == _3dBeam ) || ( matmode == _3dShell ) || ( matmode == _2dPlate ) ) {
-        double thick = crossSection->give(THICKNESS);
-        if ( matmode == _2dBeam ) {
-            answer.resize(3);
-            answer.zero();
-            answer.at(1) = e0.at(1) * ( et.at(1) - this->giveReferenceTemperature() );
-            if ( et.giveSize() > 1 ) {
-                answer.at(2) = e0.at(1) * et.at(2) / thick; // kappa_x
-            }
-        } else if ( matmode == _3dBeam ) {
-            answer.resize(6);
-            answer.zero();
-            double width = crossSection->give(WIDTH);
-            answer.at(1) = e0.at(1) * ( et.at(1) - this->giveReferenceTemperature() );
-            if ( et.giveSize() > 1 ) {
-                answer.at(5) = e0.at(1) * et.at(2) / thick; // kappa_y
-                if ( et.giveSize() > 2 ) {
-                    answer.at(6) = e0.at(1) * et.at(3) / width; // kappa_z
-                }
-            }
-        } else if ( matmode == _2dPlate ) {
-            if ( et.giveSize() > 1 ) {
-                answer.resize(5);
-                answer.zero();
-
+        switch ( matmode ) {
+            case _2dBeam:
+                thick = crossSection->give(THICKNESS);
+                answerTemper.resize(3);
+                answerTemper.zero();
+                answerTemper.at(1) = e0.at(1) * ( et.at(1) - this->giveReferenceTemperature() );
                 if ( et.giveSize() > 1 ) {
-                    answer.at(1) = e0.at(1) * et.at(2) / thick; // kappa_x
-                    answer.at(2) = e0.at(2) * et.at(2) / thick; // kappa_y
+                    answerTemper.at(2) = e0.at(1) * et.at(2) / thick; // kappa_x
                 }
-            }
-        } else if ( matmode == _3dShell ) {
-            answer.resize(8);
-            answer.zero();
+                break;
+            case _3dBeam:
+                thick = crossSection->give(THICKNESS);
+                width = crossSection->give(WIDTH);
+                answerTemper.resize(6);
+                answerTemper.zero();
+                answerTemper.at(1) = e0.at(1) * ( et.at(1) - this->giveReferenceTemperature() );
+                if ( et.giveSize() > 1 ) {
+                    answerTemper.at(5) = e0.at(1) * et.at(2) / thick; // kappa_y
+                    if ( et.giveSize() > 2 ) {
+                        answerTemper.at(6) = e0.at(1) * et.at(3) / width; // kappa_z
+                    }
+                }
+                break;
+            case _2dPlate:
+                thick = crossSection->give(THICKNESS);
+                if ( et.giveSize() > 1 ) {
+                    answerTemper.resize(5);
+                    answerTemper.zero();
 
-            answer.at(1) = e0.at(1) * ( et.at(1) - this->giveReferenceTemperature() );
-            answer.at(2) = e0.at(2) * ( et.at(1) - this->giveReferenceTemperature() );
-            if ( et.giveSize() > 1 ) {
-                answer.at(4) = e0.at(1) * et.at(2) / thick; // kappa_x
-                answer.at(5) = e0.at(2) * et.at(2) / thick; // kappa_y
-            }
+                    if ( et.giveSize() > 1 ) {
+                        answerTemper.at(1) = e0.at(1) * et.at(2) / thick; // kappa_x
+                        answerTemper.at(2) = e0.at(2) * et.at(2) / thick; // kappa_y
+                    }
+                }
+                break;
+            case _3dShell:
+                thick = crossSection->give(THICKNESS);
+                answerTemper.resize(8);
+                answerTemper.zero();
+
+                answerTemper.at(1) = e0.at(1) * ( et.at(1) - this->giveReferenceTemperature() );
+                answerTemper.at(2) = e0.at(2) * ( et.at(1) - this->giveReferenceTemperature() );
+                if ( et.giveSize() > 1 ) {
+                    answerTemper.at(4) = e0.at(1) * et.at(2) / thick; // kappa_x
+                    answerTemper.at(5) = e0.at(2) * et.at(2) / thick; // kappa_y
+                }
+                break;
+            default:
+                if ( e0.giveSize() ) {
+                    fullAnswer = e0;
+                    if ( mode == VM_Total ) {
+                        fullAnswer.times(et.at(1) - this->referenceTemperature);
+                    } else {
+                        fullAnswer.times( et.at(1) );
+                    }
+
+                    this->giveReducedCharacteristicVector(answerTemper, gp, fullAnswer);
+                }
         }
-
-        return;
-    } else {
-        if ( e0.giveSize() ) {
-            fullAnswer = e0;
-            if ( mode == VM_Total ) {
-                fullAnswer.times(et.at(1) - this->referenceTemperature);
-            } else {
-                fullAnswer.times( et.at(1) );
-            }
-        }
-
-        if ( fullAnswer.giveSize() ) {
-            this->giveReducedCharacteristicVector(answer, gp, fullAnswer);
-            return;
-        }
-
-        answer.resize(0);
-        return;
     }
+
+    if( eigenstrain.giveSize() ){//found prescribed eigenstrain
+
+        switch ( matmode ) {
+            case _1dMat:
+            case _3dMat:
+            case _3dMat_F:
+            case _PlaneStress:
+            case _PlaneStrain:
+            case _3dRotContinuum:
+            case _3dMicroplane:
+                fullAnswer = eigenstrain;
+                break;
+
+            default:
+                _error2("Material mode %s for eigenstrains not supported", __MaterialModeToString(matmode));
+        }
+
+        answerEigenstrain = fullAnswer;
+        //this->giveReducedCharacteristicVector(answerEigenstrain, gp, fullAnswer);
+    }
+
+    //join temperature and eigenstrain vectors, compare vector sizes
+    if ( answerTemper.giveSize() ){
+        answer = answerTemper;
+        if ( answerEigenstrain.giveSize() ){
+            if (answerTemper.giveSize() != answerEigenstrain.giveSize() ){
+                _error4("Vector of temperature strains has the size %d which is different with the size of eigenstrain vector %d, element %d", answerTemper.giveSize(), answerEigenstrain.giveSize(), elem->giveNumber() );
+            }
+            answer.add(answerEigenstrain);
+        }
+    }
+    else {
+        if ( answerEigenstrain.giveSize() ){
+            answer = answerEigenstrain;
+        }
+    }
+
+
 }
 
 

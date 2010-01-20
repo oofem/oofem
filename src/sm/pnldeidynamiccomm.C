@@ -96,7 +96,7 @@ PNlDEIDynamicComunicator :: setUpCommunicationMapsForNodeCut(EngngModel *pm)
 
 
     for ( i = 1; i <= nnodes; i++ ) {
-        // if combination node & eleemnt cut can occur, test for shared DofMan mode
+        // if combination node & element cut can occur, test for shared DofMan mode
         partitionList = domain->giveDofManager(i)->givePartitionList();
         if ( domain->giveDofManager(i)->giveParallelMode() == DofManager_shared ) {
             for ( j = 1; j <= partitionList->giveSize(); j++ ) {
@@ -627,7 +627,7 @@ PNlDEIDynamicComunicator :: setUpCommunicationMaps(EngngModel *pm)
  *
  *
  * for (i=1; i<= nnodes; i++) {
- * // if combination node & eleemnt cut can occur, test for shared DofMan mode
+ * // if combination node & element cut can occur, test for shared DofMan mode
  * partitionList = domain->giveDofManager (i) -> givePartitionList();
  * if (domain->giveDofManager (i)->giveParallelMode () == DofManager_shared) {
  *  for (j=1; j<=partitionList->giveSize(); j++) {

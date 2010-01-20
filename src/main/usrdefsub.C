@@ -130,6 +130,7 @@
 
 // loads of SM module
 #include "structtemperatureload.h"
+#include "structeigenstrainload.h"
 #include "linearedgeload.h"
 #include "constantedgeload.h"
 #include "constantsurfaceload.h"
@@ -500,8 +501,10 @@ GeneralBoundaryCondition *CreateUsrDefBoundaryConditionOfType(char *aClass, int 
     GeneralBoundaryCondition *newBc = NULL;
 
 #ifdef __SM_MODULE
-    if ( !strncasecmp(aClass, "structtemperatureload", 18) ) {
+    if ( !strncasecmp(aClass, "structtemperatureload", 21) ) {
         newBc = new StructuralTemperatureLoad(number, domain);
+    } else if ( !strncasecmp(aClass, "structeigenstrainload", 21) )     {
+      newBc = new StructuralEigenstrainLoad(number, domain);
     } else if ( !strncasecmp(aClass, "linearedgeload", 14) )     {
         newBc = new LinearEdgeLoad(number, domain);
     } else if ( !strncasecmp(aClass, "constantedgeload", 16) )     {
@@ -862,7 +865,7 @@ IntegrationRule *CreateUsrDefIRuleOfType(classType type, int number, Element *e)
 Element *CreateUsrDefElementOfType(classType type, int number, Domain *domain)
 {
 	Element *answer = NULL;
-	
+
 	if ( type == PlaneStress2dClass ) {
 		answer = new PlaneStress2d(number, domain);
 	} else if ( type == TrPlaneStress2dClass )  {
@@ -872,11 +875,11 @@ Element *CreateUsrDefElementOfType(classType type, int number, Domain *domain)
 	} else if ( type == TrPlaneStrainClass ) {
 		answer = new TrPlaneStrain(number, domain);
 	}
-		
+
 	if ( answer == NULL ) {
 		OOFEM_ERROR2("CreateUsrDefElementOfType: Unknown element type [%d]", type);
 	}
-		
+
 	return answer;
 }
 
@@ -946,7 +949,7 @@ MesherInterface *CreateUsrDefMesherInterface(MeshPackageType type, Domain* d)
   }
 
   return answer;
-  
+
 }
 
 EnrichmentItem *CreateUsrDefEnrichmentItem(char *aClass, int num, XfemManager* xm, Domain *d) {

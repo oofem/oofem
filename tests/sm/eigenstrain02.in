@@ -1,0 +1,42 @@
+eigenstrain02.out
+Eigenstrain test of PlaneStress2d elements -> imposed shear with horizontal strain
+LinearStatic nsteps 1
+#LinearStatic nsteps 1 nmodules 2
+#vtk tstep_all domain_all primvars 1 1 vars 2 1 4 stype 1
+#hom tstep_all
+domain 2dPlaneStress
+OutputManager tstep_all dofman_all element_all
+ndofman 6 nelem 2 ncrosssect  1 nmat 1 nbc 2 nic 0 nltf 1
+node 1 coords 3  0.0   0.0   0.0  bc 2 1 1
+node 2 coords 3  4.0   0.0   0.0  bc 2 1 1
+node 3 coords 3  6.0   0.0   0.0  bc 2 0 0
+node 4 coords 3  6.0   2.0   0.0  bc 2 0 0
+node 5 coords 3  4.0   2.0   0.0  bc 2 1 1
+node 6 coords 3  0.0   2.0   0.0  bc 2 1 1
+PlaneStress2d 1 nodes 4 1 2 5 6  crossSect 1 mat 1 bodyLoads 1 2
+PlaneStress2d 2 nodes 4 2 3 4 5  crossSect 1 mat 1 bodyLoads 1 2
+SimpleCS 1 thick 0.15 width 1.0
+IsoLE 1 d 0. E 12.0 n 0.25  tAlpha 0.000012
+BoundaryCondition  1 loadTimeFunction 1 prescribedvalue 0.0
+StructEigenstrainLoad 2 loadTimeFunction 1 Components 3 0.1 0.0 0.2
+ConstantFunction 1 f(t) 1.0
+#
+#
+#%BEGIN_CHECK% tolerance 1.e-8
+## check selected nodes
+#NODE tStep 1 number 3 dof 1 unknown d value 2.00000000e-01
+#NODE tStep 1 number 3 dof 2 unknown d value 4.00000000e-01
+#NODE tStep 1 number 4 dof 1 unknown d value 2.00000000e-01
+#NODE tStep 1 number 4 dof 2 unknown d value 4.00000000e-01
+##
+## check element strain vector
+#ELEMENT tStep 1 number 1 gp 1 keyword "strains" component 1  value 0.0000e+00
+#ELEMENT tStep 1 number 2 gp 1 keyword "strains" component 1  value 1.0000e-01
+#ELEMENT tStep 1 number 2 gp 1 keyword "strains" component 6  value 2.0000e-01
+## check element stress vector
+#ELEMENT tStep 1 number 1 gp 1 keyword "stresses" component 1  value -1.2800e+00
+#ELEMENT tStep 1 number 1 gp 1 keyword "stresses" component 2  value -3.2000e-01
+#ELEMENT tStep 1 number 1 gp 1 keyword "stresses" component 6  value -9.6000e-01
+#ELEMENT tStep 1 number 2 gp 1 keyword "stresses" component 1  value 0.0000e+00
+##
+#%END_CHECK%

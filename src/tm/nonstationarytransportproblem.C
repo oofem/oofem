@@ -245,23 +245,23 @@ void NonStationaryTransportProblem :: solveYourselfAt(TimeStep *tStep) {
 
         this->applyIC(stepWhenIcApply);
 
-        this->assembleVectorFromElements( bcRhs, stepWhenIcApply, EID_ConservationEquation, ElementBCTransportVector, 
+        this->assembleVectorFromElements( bcRhs, stepWhenIcApply, EID_ConservationEquation, ElementBCTransportVector,
 					  VM_Total, EModelDefaultEquationNumbering(), this->giveDomain(1) );
-        this->assembleDirichletBcRhsVector( bcRhs, stepWhenIcApply, EID_ConservationEquation, VM_Total, 
+        this->assembleDirichletBcRhsVector( bcRhs, stepWhenIcApply, EID_ConservationEquation, VM_Total,
 					    NSTP_MidpointLhs, EModelDefaultEquationNumbering(), this->giveDomain(1) );
-        this->assembleVectorFromElements( bcRhs, stepWhenIcApply, EID_ConservationEquation, ElementInternalSourceVector, 
+        this->assembleVectorFromElements( bcRhs, stepWhenIcApply, EID_ConservationEquation, ElementInternalSourceVector,
 					  VM_Total, EModelDefaultEquationNumbering(), this->giveDomain(1) );
-        this->assembleVectorFromDofManagers( bcRhs, stepWhenIcApply, EID_ConservationEquation, NodalLoadVector, 
+        this->assembleVectorFromDofManagers( bcRhs, stepWhenIcApply, EID_ConservationEquation, NodalLoadVector,
 					     VM_Total, EModelDefaultEquationNumbering(), this->giveDomain(1) );
 
 #ifdef VERBOSE
         OOFEM_LOG_INFO("Assembling conductivity and capacity matrices\n");
 #endif
 
-        this->assemble( lhs, stepWhenIcApply, EID_ConservationEquation, LHSBCMatrix, 
+        this->assemble( lhs, stepWhenIcApply, EID_ConservationEquation, LHSBCMatrix,
 			EModelDefaultEquationNumbering(), this->giveDomain(1) );
         lhs->times(alpha);
-        this->assemble( lhs, stepWhenIcApply, EID_ConservationEquation, NSTP_MidpointLhs, 
+        this->assemble( lhs, stepWhenIcApply, EID_ConservationEquation, NSTP_MidpointLhs,
 			EModelDefaultEquationNumbering(), this->giveDomain(1) );
     }
 
@@ -281,16 +281,16 @@ void NonStationaryTransportProblem :: solveYourselfAt(TimeStep *tStep) {
     rhs.times(1. - alpha);
     bcRhs.zero();
 
-    this->assembleVectorFromElements( bcRhs, tStep, EID_ConservationEquation, ElementBCTransportVector, 
+    this->assembleVectorFromElements( bcRhs, tStep, EID_ConservationEquation, ElementBCTransportVector,
 				      VM_Total, EModelDefaultEquationNumbering(), this->giveDomain(1) );
-    this->assembleDirichletBcRhsVector( bcRhs, tStep, EID_ConservationEquation, VM_Total, NSTP_MidpointLhs, 
+    this->assembleDirichletBcRhsVector( bcRhs, tStep, EID_ConservationEquation, VM_Total, NSTP_MidpointLhs,
 					EModelDefaultEquationNumbering(), this->giveDomain(1) );
-    this->assembleVectorFromElements( bcRhs, tStep, EID_ConservationEquation, ElementInternalSourceVector, 
+    this->assembleVectorFromElements( bcRhs, tStep, EID_ConservationEquation, ElementInternalSourceVector,
 				      VM_Total, EModelDefaultEquationNumbering(), this->giveDomain(1) );
     //
     // assembling the nodal part of load vector
     //
-    this->assembleVectorFromDofManagers( bcRhs, tStep, EID_ConservationEquation, NodalLoadVector, VM_Total, 
+    this->assembleVectorFromDofManagers( bcRhs, tStep, EID_ConservationEquation, NodalLoadVector, VM_Total,
 					 EModelDefaultEquationNumbering(), this->giveDomain(1) );
     for ( int i = 1; i <= neq; i++ ) {
         rhs.at(i) += bcRhs.at(i) * alpha;
@@ -299,7 +299,7 @@ void NonStationaryTransportProblem :: solveYourselfAt(TimeStep *tStep) {
     //
     // add the rhs part depending on previous solution
     //
-    assembleAlgorithmicPartOfRhs( rhs, EID_ConservationEquation, 
+    assembleAlgorithmicPartOfRhs( rhs, EID_ConservationEquation,
 				  EModelDefaultEquationNumbering(), tStep->givePreviousStep() );
     //
     // set-up numerical model
@@ -495,7 +495,7 @@ NonStationaryTransportProblem :: giveElementCharacteristicMatrix(FloatMatrix &an
 
 
 void
-NonStationaryTransportProblem :: assembleAlgorithmicPartOfRhs(FloatArray &answer, EquationID ut, 
+NonStationaryTransportProblem :: assembleAlgorithmicPartOfRhs(FloatArray &answer, EquationID ut,
 							      const UnknownNumberingScheme& s, TimeStep *tStep)
 {
     int i;
@@ -510,7 +510,7 @@ NonStationaryTransportProblem :: assembleAlgorithmicPartOfRhs(FloatArray &answer
     for ( i = 1; i <= nelem; i++ ) {
         element = domain->giveElement(i);
 #ifdef __PARALLEL_MODE
-        // skip remote elements (these are used as mirrors of remote eleemnts on other domains
+        // skip remote elements (these are used as mirrors of remote elements on other domains
         // when nonlocal constitutive models are used. They introduction is necessary to
         // allow local averaging on domains without fine grain communication between domains).
         if ( element->giveParallelMode() == Element_remote ) {
@@ -598,7 +598,7 @@ NonStationaryTransportProblem :: applyIC(TimeStep *stepWhenIcApply)
 
 void
 NonStationaryTransportProblem :: assembleDirichletBcRhsVector(FloatArray &answer, TimeStep *tStep, EquationID ut,
-                                                              ValueModeType mode, CharType lhsType, 
+                                                              ValueModeType mode, CharType lhsType,
 							      const UnknownNumberingScheme& ns, Domain *d)
 {
     int ielem;

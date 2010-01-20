@@ -77,7 +77,7 @@ class Load : public GeneralBoundaryCondition
 protected:
     /// Components of boundary condition
     FloatArray componentArray;
-    /** The load is pecified for all dofs of object to which is associated.
+    /** The load is specified for all dofs of object to which is associated.
      * For some types of boundary conditions the zero value of load does not mean
      * that the load is not applied (newton's type of bc, for example). Then
      * some mask, which allows to exclude specific dofs is necessary.

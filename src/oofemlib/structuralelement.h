@@ -231,10 +231,10 @@ public:
                                                  MatResponseMode rMode, TimeStep *tStep);
     /**
      * Computes numerically stiffness matrix of receiver. Default implementation computes element stiffness using
-     * \f$K=\int_v B^T D B dV\f$ formulae, where \f$B\f$ is element geometric matrix 
+     * \f$K=\int_v B^T D B dV\f$ formulae, where \f$B\f$ is element geometric matrix
      * and \f$D\f$ is material stiffness matrix.
      * No geometrical nonlinearity is taken into account. Numerical integration procedure uses integrationRulesArray
-     * for numerical integration. This implementation regards element integration rules as that they represent sub-cells 
+     * for numerical integration. This implementation regards element integration rules as that they represent sub-cells
      * so that the integration is performed over all subcells for all terms.
      * For higher numerical performance, only one half of stiffness matrix is computed and answer is then symmetrized.
      * Therefore, if element matrix will be generally nonsymmetric, one must specialize this method.
@@ -271,7 +271,7 @@ public:
     void                  computeNonForceLoadVector(FloatArray &answer, TimeStep *, ValueModeType mode);
     /**
      * Computes force dependent part of load vector. It is load vector induced by applied force loading.
-     * Element body load and eleemnt boundary load (edge and surface load) is included.
+     * Element body load and element boundary load (edge and surface load) is included.
      * (precisely result is summation of computeBodyLoadVectorAt, computeEdgeLoadVectorAt and
      * computeSurfaceLoadVectorAt service results contributions)
      * @param answer computed load vector
@@ -306,7 +306,7 @@ public:
      * (if useUpdatedGpRecord=1) from integration point status.
      * The geometric matrix is obtained using computeBmatrixAt service.
      * Numerical integration procedure uses integrationRulesArray
-     * for numerical integration. This implementation regards element integration rules as that they represent sub-cells 
+     * for numerical integration. This implementation regards element integration rules as that they represent sub-cells
      * so that the integration is performed over all subcells for all terms.
      * @param answer equivalent nodal forces vector
      * @param tStep time step
@@ -342,7 +342,14 @@ public:
      * @param mode determines response mode.
      */
     virtual void  computeResultingIPTemperatureAt(FloatArray &answer, TimeStep *, GaussPoint *gp, ValueModeType mode);
-
+    /**
+     * Computes at given time (stepN) the the resulting eigenstrain component array.
+     * This is summation of all eigenstrains imposed on the element.
+     * @param answer resulting eigenstrain components of receiver
+     * @param stepN time step
+     * @param mode determines response mode.
+     */
+    virtual void  computeResultingIPEigenstrainAt(FloatArray &answer, TimeStep *stepN, GaussPoint *gp, ValueModeType mode);
     /**@name Methods related to nonlocal models */
     //@{
     /**
@@ -684,7 +691,7 @@ protected:
      * Computes load vector due to prescribed strains. The load vector is obtained using numerical integration
      * (using default integration rule of element) over
      * element volume \f$f=\int_V B^T D \varepsilon dV\f$, where \f$\varepsilon\f$ is stress independent strain vector
-     * in particular untegration point, obtained using computeStressIndependentStrainVector service.
+     * in particular integration point (temperature, eigenstrain), obtained using computeStressIndependentStrainVector service.
      * The load mode (Incremental or Total Load form) is  passed as parameter.
      * @param answer computed load vector contribution
      * @param tStep time step

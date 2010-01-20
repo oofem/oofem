@@ -1,0 +1,32 @@
+eigenstrain01.out
+Test of Truss1d elements with prescribed eigenstrain load
+LinearStatic nsteps 1
+domain 1dtruss
+OutputManager tstep_all dofman_all element_all
+ndofman 3 nelem 2 ncrosssect  1 nmat 1 nbc 2 nic 0 nltf 1
+Node 1 coords 1  0.  bc 1 1
+Node 2 coords 1  2.  bc 1 1
+Node 3 coords 1  4.  bc 1 0
+Truss1d 1 nodes 2 1 2 mat 1 bodyLoads 1 2 crossSect 1
+Truss1d 2 nodes 2 2 3 mat 1 bodyLoads 1 2 crossSect 1
+SimpleCS 1 thick 0.1 width 10.0
+IsoLE 1  tAlpha 0.000012  d 1.0  E 2.0  n 0.2
+BoundaryCondition  1 loadTimeFunction 1 prescribedvalue 0.0
+StructEigenstrainLoad 2 loadTimeFunction 1 Components 1 0.1
+ConstantFunction 1 f(t) 1.0
+#
+#
+#%BEGIN_CHECK% tolerance 1.e-8
+## check all nodes
+#NODE tStep 1 number 1 dof 1 unknown d value 0.00000000e+00
+#NODE tStep 1 number 2 dof 1 unknown d value 0.00000000e+00
+#NODE tStep 1 number 3 dof 1 unknown d value 2.00000000e-01
+##
+## check element strain vector
+#ELEMENT tStep 1 number 1 gp 1 keyword "strains" component 1  value 0.0000e+00
+#ELEMENT tStep 1 number 2 gp 1 keyword "strains" component 1  value 1.0000e-01
+## check element stress vector
+#ELEMENT tStep 1 number 1 gp 1 keyword "stresses" component 1  value -2.0000e-01
+#ELEMENT tStep 1 number 2 gp 1 keyword "stresses" component 1  value 0.0000e+00
+##
+#%END_CHECK%

@@ -278,7 +278,7 @@ void LinearStability :: solveYourselfAt(TimeStep *tStep) {
     OOFEM_LOG_INFO("Assembling stiffness matrix\n");
 #endif
     stiffnessMatrix->zero();
-    this->assemble( stiffnessMatrix, tStep, EID_MomentumBalance, StiffnessMatrix, 
+    this->assemble( stiffnessMatrix, tStep, EID_MomentumBalance, StiffnessMatrix,
 		    EModelDefaultEquationNumbering(), this->giveDomain(1) );
 #endif
 
@@ -290,15 +290,15 @@ void LinearStability :: solveYourselfAt(TimeStep *tStep) {
     displacementVector.zero();
     loadVector.zero();
 
-    this->assembleVectorFromElements( loadVector, tStep, EID_MomentumBalance, ElementForceLoadVector, VM_Total, 
+    this->assembleVectorFromElements( loadVector, tStep, EID_MomentumBalance, ElementForceLoadVector, VM_Total,
 				      EModelDefaultEquationNumbering(), this->giveDomain(1) );
-    this->assembleVectorFromElements( loadVector, tStep, EID_MomentumBalance, ElementNonForceLoadVector, VM_Total, 
+    this->assembleVectorFromElements( loadVector, tStep, EID_MomentumBalance, ElementNonForceLoadVector, VM_Total,
 				      EModelDefaultEquationNumbering(), this->giveDomain(1) );
 
     //
     // assembling the nodal part of load vector
     //
-    this->assembleVectorFromDofManagers( loadVector, tStep, EID_MomentumBalance, NodalLoadVector, VM_Total, 
+    this->assembleVectorFromDofManagers( loadVector, tStep, EID_MomentumBalance, NodalLoadVector, VM_Total,
 					 EModelDefaultEquationNumbering(), this->giveDomain(1) );
 
     //
@@ -318,7 +318,7 @@ void LinearStability :: solveYourselfAt(TimeStep *tStep) {
 
     //nMethodLS -> solveYourselfAt(tStep);
     nMethodLS->solve(stiffnessMatrix, & loadVector, & displacementVector);
-    // terminate linear static computation (necessery, in order to compute stresses in eleemnts).
+    // terminate linear static computation (necessary, in order to compute stresses in elements).
     this->terminateLinStatic( this->giveCurrentStep() );
     /*
      * Normal forces already known, proceed with linear stability
@@ -334,12 +334,12 @@ void LinearStability :: solveYourselfAt(TimeStep *tStep) {
 #ifdef VERBOSE
     OOFEM_LOG_INFO("Assembling stiffness  matrix\n");
 #endif
-    this->assemble( stiffnessMatrix, tStep, EID_MomentumBalance, StiffnessMatrix, 
+    this->assemble( stiffnessMatrix, tStep, EID_MomentumBalance, StiffnessMatrix,
 		    EModelDefaultEquationNumbering(), this->giveDomain(1) );
 #ifdef VERBOSE
     OOFEM_LOG_INFO("Assembling  initial stress matrix\n");
 #endif
-    this->assemble( initialStressMatrix, tStep, EID_MomentumBalance, InitialStressMatrix, 
+    this->assemble( initialStressMatrix, tStep, EID_MomentumBalance, InitialStressMatrix,
 		    EModelDefaultEquationNumbering(), this->giveDomain(1) );
     initialStressMatrix->times(-1.0);
 

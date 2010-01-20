@@ -412,7 +412,7 @@ NonLinearStatic :: giveInternalForces(FloatArray &answer, const FloatArray &Delt
         //   error ("giveInternalForces: element with no non-linear capability encountered\n");
         // }
 #ifdef __PARALLEL_MODE
-        // skip remote elements (these are used as mirrors of remote eleemnts on other domains
+        // skip remote elements (these are used as mirrors of remote elements on other domains
         // when nonlocal constitutive models are used. Their introduction is necessary to
         // allow local averaging on domains without fine grain communication between domains).
         if ( element->giveParallelMode() == Element_remote ) {
@@ -975,7 +975,7 @@ contextIOResultType NonLinearStatic :: saveContext(DataStream *stream, ContextMo
     if ( ( iores = initialLoadVector.storeYourself(stream, mode) ) != CIO_OK ) {
       THROW_CIOERR(iores);
     }
-    
+
     if ( ( iores = initialLoadVectorOfPrescribed.storeYourself(stream, mode) ) != CIO_OK ) {
       THROW_CIOERR(iores);
     }
@@ -1046,7 +1046,7 @@ contextIOResultType NonLinearStatic :: restoreContext(DataStream *stream, Contex
     if ( ( iores = initialLoadVector.restoreYourself(stream, mode) ) != CIO_OK ) {
       THROW_CIOERR(iores);
     }
-    
+
     if ( ( iores = initialLoadVectorOfPrescribed.restoreYourself(stream, mode) ) != CIO_OK ) {
       THROW_CIOERR(iores);
     }

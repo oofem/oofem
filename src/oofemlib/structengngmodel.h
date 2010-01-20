@@ -246,7 +246,7 @@ public:
      */
     int packRemoteElementData(ProcessCommunicator &processComm);
     /**
-     * Unpacks data for remote eleemnts (which are mirrors of remote partition's local elements).
+     * Unpacks data for remote elements (which are mirrors of remote partition's local elements).
      * Remote elements are introduced when nonlocal constitutive models are used, in order to
      * allow local averaging procedure (remote elements, which are involved in averaging on local partition are
      * mirrored on this local partition) instead of implementing inefficient fine-grain communication.

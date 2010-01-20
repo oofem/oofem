@@ -58,6 +58,7 @@ enum classType {
     DeadWeightClass,
     BodyLoadClass,
     StructuralTemperatureLoadClass,
+    StructuralEigenstrainLoadClass,
     BoundaryLoadClass,
     LinearEdgeLoadClass,
     ConstantEdgeLoadClass,

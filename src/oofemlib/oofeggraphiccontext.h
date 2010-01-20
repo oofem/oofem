@@ -300,7 +300,7 @@ public:
      */
     void setMaterialModelFilterState(int i, int state);
     /**
-     * Sets the state of eleemnt filter for particular model
+     * Sets the state of element filter for particular model
      * @param initstring string containing valid range string representation, with element_filter keyword
      */
     void setElementFilterState(char *initString);

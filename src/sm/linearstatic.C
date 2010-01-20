@@ -309,6 +309,7 @@ void LinearStatic :: solveYourselfAt(TimeStep *tStep) {
 
         this->assembleVectorFromElements( loadVector, tStep, EID_MomentumBalance, ElementForceLoadVector, VM_Total,
 					  EModelDefaultEquationNumbering(), this->giveDomain(1) );
+
         this->assembleVectorFromElements( loadVector, tStep, EID_MomentumBalance, ElementNonForceLoadVector, VM_Total,
 					  EModelDefaultEquationNumbering(), this->giveDomain(1) );
 
