@@ -615,8 +615,8 @@ where
 \begin{itemize}
 \item[-] \param{controllmode} - determines the type of solution
 control used for corresponding meta step. if == 0 then indirect
-control will be used to control solution process (default). if == 1
-then direct displacement or load control will be used. In the later
+control will be used to control solution process (arc-length method, default). if == 1
+then direct displacement or load control will be used (Newton-Raphson solver). In the later
 mode, one can apply the prescribed load increments as well as
 control displacements.
 \item[-] \param{deltaT} - is time step length. If not specified, it is
@@ -651,7 +651,7 @@ fixed, however, the new reference loading vector will be assembled for
 the new metastep.
 \end{itemize}
 
-The direct solver corresponds to \param{controllmode}=1 and Newton-Raphson solver is used.
+The direct solver corresponds to \param{controllmode}=1 and the Newton-Raphson solver is used.
 Under the direct control, the total load
 vector assembled for specific solution step represents the load level,
 where equilibrium is searched. The implementation supports also
@@ -664,7 +664,7 @@ documentation). Therefore it is possible to combine
 direct displacement control with direct load control or indirect
 control.}
 The load level then represents the
-time, where the equilibrium has been found. The solver parameters (\param{solverParams}) for
+time, where the equilibrium has been found. The Newton-Raphson solver parameters (\param{solverParams}) for
 load-control are:\\
 \begin{record}
 \recentry{\hspace{10mm}}{\field{maxiter}{in}}
@@ -722,7 +722,7 @@ solver is used. The value of reference load vector is determined by
 each metastep. {\em However, the user must ensure, that the same value of
 reference load vector could be obtained for all solution steps of
 particular metastep (this is necessary for restart and adaptivity to work)}.
-The corresponding meta step solver parameters (\param{solverParams} are:\\
+The corresponding meta step solver parameters (\param{solverParams}) are:\\
 \begin{record}
 \recentry{\hspace{10mm}}{\field{Psi}{rn}}
 \recentry{}{\field{MaxIter}{in}}

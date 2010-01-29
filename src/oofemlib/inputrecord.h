@@ -588,6 +588,7 @@ enum InputFieldType {
     IFT_CompoDamageMat_Gxy,
     IFT_CompoDamageMat_components,
     IFT_CompoDamageMat_afteriter,
+    IFT_CompoDamageMat_allowSnapBack,
 
     IFT_MicroMaterialFileName,
     IFT_MacroLspace_microMasterNodes,
@@ -775,7 +776,7 @@ enum InputFieldType {
     IFT_TrabBone3D_m1,
     IFT_TrabBone3D_m2,
     IFT_TrabBone3D_rho,
-    
+
     IFT_TrabBone3D_sig0Pos,
     IFT_TrabBone3D_sig0Neg,
     IFT_TrabBone3D_chi0Pos,
@@ -784,22 +785,22 @@ enum InputFieldType {
     IFT_TrabBone3D_expq,
     IFT_TrabBone3D_plasHardFactor,
     IFT_TrabBone3D_expPlasHard,
-    
+
     IFT_TrabBone3D_expDam,
     IFT_TrabBone3D_critDam,
-    
+
     IFT_TrabBone3D_gamDens,
     IFT_TrabBone3D_tDens,
     IFT_TrabBone3D_JCrit,
-    
+
     IFT_TrabBoneNL3D_r,
     IFT_TrabBoneNL3D_m,
-    
+
     IFT_TrabBoneEmbed_eps0,
     IFT_TrabBoneEmbed_nu0,
     IFT_TrabBoneEmbed_mu0,
     IFT_TrabBoneEmbed_rho,
-    
+
     IFT_TrabBoneNLEmbed_r,
     IFT_TrabBoneNLEmbed_m,
 
@@ -825,7 +826,7 @@ enum InputFieldType {
 
     IFT_ConcreteDPMnlMaterial_r,
     IFT_ConcreteDPMnlMaterial_m,
- 
+
     IFT_NewtonianFluidMaterial_mu,
 
     IFT_BinghamFluidMaterial_mu0,

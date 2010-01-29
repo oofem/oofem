@@ -115,6 +115,8 @@ IRResultType CompoDamageMat :: initializeFrom(InputRecord *ir)
     this->afterIter = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, this->afterIter, IFT_CompoDamageMat_afteriter, "afteriter"); // Macro
 
+    this->afterIter = 0;
+    IR_GIVE_OPTIONAL_FIELD(ir, this->allowSnapBack, IFT_CompoDamageMat_allowSnapBack, "allowsnapback"); // Macro
 
     //
     //OOFEM_LOG_INFO("READ \n");
@@ -145,11 +147,11 @@ void CompoDamageMat :: give3dMaterialStiffnessMatrix(FloatMatrix &answer, MatRes
 void CompoDamageMat :: giveRealStressVector(FloatArray &answer,  MatResponseForm form, GaussPoint *gp, const FloatArray &totalStrain, TimeStep *atTime)
 {
     int i, i_max, s;
-    double delta, sigma, charLen, tmp;
+    double delta, sigma, charLen, tmp, Gf_tmp;
     CompoDamageMatStatus *st = ( CompoDamageMatStatus * ) this->giveStatus(gp);
     Element *element = gp->giveElement();
-    FloatArray strainVectorL(6), stressVectorL(6), tempStressVectorL(6),  reducedTotalStrainVector(6), ans, equilStressVectorL(6), equilStrainVectorL(6);
-    FloatArray *stressLimit;
+    FloatArray strainVectorL(6), stressVectorL(6), tempStressVectorL(6), reducedTotalStrainVector(6), ans, equilStressVectorL(6), equilStrainVectorL(6), charLenModes(6);
+    FloatArray *inputFGf;
     FloatMatrix de, elementCs;
     MaterialMode mMode = gp->giveMaterialMode();
 
@@ -164,9 +166,12 @@ void CompoDamageMat :: giveRealStressVector(FloatArray &answer,  MatResponseForm
     {
         element->giveMatLocalCS(elementCs); //if mlcs undefined, returns unix matrix
 
-        //first run (can be called somewhere better ?)
+        //first run
         if ( st->elemCharLength.at(1) == 0. ) {
             this->giveCharLength(st, gp, elementCs);
+            //check that no snap-back occurs due to large element characteristic length (fixed-crack orientation)
+            //see Bazant, Planas: Fracture and Size Effect, pp. 251
+            this->checkSnapBack(gp, mMode);
         }
 
         //transform strain to local c.s.
@@ -184,7 +189,8 @@ void CompoDamageMat :: giveRealStressVector(FloatArray &answer,  MatResponseForm
     case _1dMat:
     { //applies only for 1D, strain vectors are already in local c.s.
         if ( st->elemCharLength.at(1) == 0. ) {
-            st->elemCharLength.at(1) = gp->giveElement()->giveCharacteristicLenght(gp, NULL);
+            st->elemCharLength.at(1) = gp->giveElement()->giveCharacteristicLenght(gp, NULL);//truss length
+            this->checkSnapBack(gp, mMode);
         }
 
         strainVectorL.at(1) = reducedTotalStrainVector.at(1);
@@ -193,21 +199,21 @@ void CompoDamageMat :: giveRealStressVector(FloatArray &answer,  MatResponseForm
         i_max = 1;
         break;
     }
-    default: _error("Compodamagemat: unsupported material mode, accept only 3D and 1D mode");
+    default: OOFEM_ERROR2("Material mode %s not supported", __MaterialModeToString(mMode));
     }
 
     //proceed 6 components for 3D or 1 component for 1D, damage evolution is based on the evolution of strains
     //xx, yy, zz, yz, zx, xy
     for ( i = 1; i <= i_max; i++ ) {
         if ( tempStressVectorL.at(i) >= 0. ) { //unequilibrated stress, tension
-            stressLimit = & inputTension; //contains pairs (stress - fracture energy)
+            inputFGf = & inputTension; //contains pairs (stress - fracture energy)
             s = 0;
         } else { //unequilibrated stress, compression
-            stressLimit = & inputCompression;
+            inputFGf = & inputCompression;
             s = 6;
         }
 
-        if ( fabs( tempStressVectorL.at(i) ) > fabs( ( *stressLimit ).at(2 * i - 1) ) && st->strainAtMaxStress.at(i + s) == 0. && st->Iteration > this->afterIter) { //damage starts now, can be replaced for more advanced initiation criteria, e.g. Hill's maximum combination of stresses
+        if ( (fabs( tempStressVectorL.at(i) ) > fabs( ( *inputFGf ).at(2 * i - 1) )) && (st->strainAtMaxStress.at(i + s) == 0.) && (st->Iteration > this->afterIter) ) { //damage initiated now, can be replaced for more advanced initiation criteria, e.g. Hill's maximum combination of stresses
             //equilibrated strain and stress from the last time step, transform to local c.s.
             switch ( mMode ) {
             case _3dMat:
@@ -223,35 +229,51 @@ void CompoDamageMat :: giveRealStressVector(FloatArray &answer,  MatResponseForm
               break;
 
             default:
-              // should never go here, handled by similar switch before
-              ;
+                OOFEM_ERROR2("Material mode %s not supported", __MaterialModeToString(mMode));
             }
 
             //subdivide last increment, interpolate, delta in range <0;1>
-            delta = ( ( * stressLimit ).at(2 * i - 1) - equilStressVectorL.at(i) ) / ( tempStressVectorL.at(i) - equilStressVectorL.at(i) );
+            delta = ( ( * inputFGf ).at(2 * i - 1) - equilStressVectorL.at(i) ) / ( tempStressVectorL.at(i) - equilStressVectorL.at(i) );
             delta = min(delta, 1.);
-            delta = max(delta, 0.);               //stabilize transition from tensile to compression (denom -> 0)
+            delta = max(delta, 0.);//stabilize transition from tensile to compression (denom -> 0)
 
             st->strainAtMaxStress.at(i + s) = equilStrainVectorL.at(i) + delta * ( strainVectorL.at(i) - equilStrainVectorL.at(i) );
 
             st->initDamageStress.at(i + s) = equilStressVectorL.at(i) + delta * ( tempStressVectorL.at(i) - equilStressVectorL.at(i) );
 
             //determine characteristic length for six stresses/strains
+            this->giveCharLengthForModes(charLenModes, gp);
+            charLen = charLenModes.at(i);
+
+            //determine maximum strain at zero stress based on fracture energy - mode I, linear softening
+            //st->maxStrainAtZeroStress.at(i + s) = st->strainAtMaxStress.at(i + s) + 2 * fabs( ( * inputFGf ).at(2 * i) ) / charLen / st->initDamageStress.at(i + s); //Gf scaled for characteristic size
+            //st->maxStrainAtZeroStress.at(i + s) = 2 * fabs( ( * inputFGf ).at(2 * i) ) / charLen / st->initDamageStress.at(i + s); //Gf scaled for characteristic size
+            //st->maxStrainAtZeroStress.at(i + s) = 2 * fabs( ( * inputFGf ).at(2 * i) ) / charLen / st->initDamageStress.at(i + s);
+
             switch ( i ) {
-            case 1:
-            case 2:
-            case 3:
-                charLen = st->elemCharLength.at(i);
-                break;
-            case 4: charLen = ( st->elemCharLength.at(2) + st->elemCharLength.at(3) ) / 2.;
-                break;                                                           //average two directions
-            case 5: charLen = ( st->elemCharLength.at(3) + st->elemCharLength.at(1) ) / 2.;
-                break;                                                           //average two directions
-            case 6: charLen = ( st->elemCharLength.at(1) + st->elemCharLength.at(2) ) / 2.;
-                break;                                                           //average two directions
+                case 1: tmp = this->give(Ex, NULL); break;
+                case 2: tmp = this->give(Ey, NULL); break;
+                case 3: tmp = this->give(Ez, NULL); break;
+                case 4: tmp = this->give(Gyz, NULL); break;
+                case 5: tmp = this->give(Gxz, NULL); break;
+                case 6: tmp = this->give(Gxy, NULL); break;
             }
 
-            st->maxStrainAtZeroStress.at(i + s) = st->strainAtMaxStress.at(i + s) + 2 * fabs( ( * stressLimit ).at(2 * i) ) / charLen / st->initDamageStress.at(i + s); //Gf scaled for characteristic size
+            //remaining fracture energy for the softening part in [N/m], calculated as a 1D case
+            Gf_tmp = ( * inputFGf ).at(2 * i) - st->initDamageStress.at(i + s) * st->initDamageStress.at(i + s) * charLen / 2. / tmp;
+
+            if(Gf_tmp<0.){
+                OOFEM_WARNING6("Too large initiation trial stress in element %d, component %d, |%f| < |%f|=f_t, negative remaining Gf=%f, treated as a snap-back", gp->giveElement()->giveNumber(), s==0?i:-i, st->initDamageStress.at(i + s), tempStressVectorL.at(i), Gf_tmp);
+                st->hasSnapBack.at(i) = 1;
+            }
+
+            st->maxStrainAtZeroStress.at(i + s) = st->strainAtMaxStress.at(i + s) + 2 * Gf_tmp / charLen / st->initDamageStress.at(i + s);//scaled for element's characteristic size
+
+            //check the snap-back
+            if( fabs(st->maxStrainAtZeroStress.at(i + s)) < fabs(st->strainAtMaxStress.at(i + s)) && st->hasSnapBack.at(i)==0 ){
+                OOFEM_WARNING5("Snap-back occured in element %d, component %d, |elastic strain=%f| > |fracturing strain %f|", gp->giveElement()->giveNumber(), s==0?i:-i, st->strainAtMaxStress.at(i + s), st->maxStrainAtZeroStress.at(i + s) );
+                st->hasSnapBack.at(i) = 1;
+            }
         }
 
         if ( st->strainAtMaxStress.at(i + s) != 0. && fabs( strainVectorL.at(i) ) > fabs( st->kappa.at(i + s) ) ) { //damage started and grows
@@ -283,9 +305,13 @@ void CompoDamageMat :: giveRealStressVector(FloatArray &answer,  MatResponseForm
             }
 
             st->tempOmega.at(i) = max( tmp, st->omega.at(i) ); //damage can only grow, interval <0;1>
-            st->tempOmega.at(i) = min(st->tempOmega.at(i), 0.999999);
-            st->tempOmega.at(i) = max(st->tempOmega.at(i), 0.0);
+            st->tempOmega.at(i) = min(st->tempOmega.at(i), 0.9999);
+            st->tempOmega.at(i) = max(st->tempOmega.at(i), 0.0000);
             st->tempKappa.at(i + s) = strainVectorL.at(i);
+
+            if(st->hasSnapBack.at(i) == 1){
+                st->tempOmega.at(i) = 0.9999;
+            }
         }
     }
 
@@ -446,7 +472,88 @@ CompoDamageMat :: giveCharLength(CompoDamageMatStatus *status, GaussPoint *gp, F
     }
 }
 
+//determine characteristic length for six stresses/strains in their modes
+void
+CompoDamageMat :: giveCharLengthForModes(FloatArray &charLenModes, GaussPoint *gp){
+    CompoDamageMatStatus *st = ( CompoDamageMatStatus * ) this->giveStatus(gp);
 
+    charLenModes.resize(6);
+    charLenModes.at(1) = st->elemCharLength.at(1);
+    charLenModes.at(2) = st->elemCharLength.at(2);
+    charLenModes.at(3) = st->elemCharLength.at(3);
+    charLenModes.at(4) = ( st->elemCharLength.at(2) + st->elemCharLength.at(3) ) / 2.;//average two directions
+    charLenModes.at(5) = ( st->elemCharLength.at(3) + st->elemCharLength.at(1) ) / 2.;//average two directions
+    charLenModes.at(6) = ( st->elemCharLength.at(1) + st->elemCharLength.at(2) ) / 2.;//average two directions
+}
+
+
+//check that elemnt is small enough to prevent snap-back
+void CompoDamageMat :: checkSnapBack(GaussPoint *gp, MaterialMode mMode){
+    CompoDamageMatStatus *st = ( CompoDamageMatStatus * ) this->giveStatus(gp);
+    FloatArray charLenModes(6);
+    FloatArray *inputFGf;
+    double l_ch, ft, Gf, elem_h, modulus;
+    int i, j;
+
+    for(j=0;j<=1;j++){
+        if(j==0){
+            inputFGf = &inputTension;
+        } else{
+            inputFGf = &inputCompression;
+        }
+        switch(mMode){
+            case _3dMat:
+                this->giveCharLengthForModes(charLenModes, gp);
+                for(i=1; i<=6; i++){
+                    ft = fabs( ( *inputFGf ).at(2*i-1) );
+                    Gf = ( *inputFGf ).at(2*i);
+                    switch (i){
+                        case 1:
+                            modulus = this->give(Ex, NULL); break;
+                        case 2:
+                            modulus = this->give(Ey, NULL); break;
+                        case 3:
+                            modulus = this->give(Ez, NULL); break;
+                        case 4:
+                            modulus = this->give(Gyz, NULL); break;
+                        case 5:
+                            modulus = this->give(Gxz, NULL); break;
+                        case 6:
+                            modulus = this->give(Gxy, NULL); break;
+                    }
+                    l_ch = modulus*Gf/ft/ft;
+                    elem_h = charLenModes.at(i);
+                    if(elem_h > 2*l_ch){
+                        if (this->allowSnapBack.contains(i+6*j)){
+                            OOFEM_LOG_INFO("Allowed snapback of 3D element %d GP %d Gf(%d)=%f, would need Gf>%f\n", gp->giveElement()->giveNumber(), gp->giveNumber(), j==0?i:-i, Gf, ft*ft*elem_h/2/modulus);
+                        }
+                        else{
+                            OOFEM_ERROR5("Decrease size of 3D element %d or increase Gf(%d)=%f to Gf>%f, possible snap-back problems", gp->giveElement()->giveNumber(), j==0?i:-i, Gf, ft*ft*elem_h/2/modulus);
+                        }
+                    }
+                }
+                break;
+            case _1dMat:
+                ft = fabs( ( *inputFGf ).at(1) );
+                Gf = ( *inputFGf ).at(2);
+                modulus = this->give(Ex, NULL);
+                l_ch = modulus*Gf/ft/ft;
+                elem_h = st->elemCharLength.at(1);
+                if(elem_h > 2*l_ch){
+                    if (this->allowSnapBack.contains(i+6*j)){
+                        OOFEM_LOG_INFO("Allowed snapback of 1D element %d GP %d Gf(%d)=%f, would need Gf>%f\n", gp->giveElement()->giveNumber(), gp->giveNumber(), j==0?i:-i, Gf, ft*ft*elem_h/2/modulus);
+                    }
+                    else{
+                        OOFEM_ERROR5("Decrease size of 1D element %d or increase Gf(%d)=%f to Gf>%f, possible snap-back problems", gp->giveElement()->giveNumber(), j==0?1:-1, Gf, ft*ft*elem_h/2/modulus);
+                    }
+                }
+                break;
+            default:
+                OOFEM_ERROR2("Material mode %s not supported", __MaterialModeToString(mMode));
+        }
+    }
+
+}
 
 // constructor
 CompoDamageMatStatus :: CompoDamageMatStatus(int n, Domain *d, GaussPoint *g) : StructuralMaterialStatus(n, d, g)
@@ -462,6 +569,8 @@ CompoDamageMatStatus :: CompoDamageMatStatus(int n, Domain *d, GaussPoint *g) : 
     this->omega.zero();
     this->tempOmega.resize(6);
     this->tempOmega.zero();
+    this->hasSnapBack.resize(6);
+    this->hasSnapBack.zero();
 
     this->initDamageStress.resize(12);
     this->initDamageStress.zero();
@@ -515,7 +624,7 @@ void CompoDamageMatStatus :: printOutputAt(FILE *file, TimeStep *tStep)
       fprintf( file, "%.2e ", this->tempStressMLCS.at(i) );
     }
 
-    fprintf(file, " kappa ");//prints pairs tension-compression
+    fprintf(file, " kappa ");//print pairs tension-compression
     for ( i = 1; i <= maxComponents; i++ ) {
       for ( j = 0; j < 2; j++ ) {
         fprintf( file, "%.2e ", this->kappa.at(6*j+i) );
@@ -559,7 +668,7 @@ contextIOResultType CompoDamageMatStatus :: saveContext(DataStream *stream, Cont
 
 contextIOResultType CompoDamageMatStatus :: restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL) {
     contextIOResultType iores;
-    // read parent class status ?
+    // read parent class status
     if ( ( iores = StructuralMaterialStatus :: restoreContext(stream, mode, obj) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }

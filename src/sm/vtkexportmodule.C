@@ -33,6 +33,21 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
+/* COMPONENTS in TENSORS like stress or strain
+*    x  y  z
+* x  1  6  5
+* y  6  2  4
+* z  5  4  3
+*
+*  PARAVIEW - stresses and strains in global c.s., damage tensor in local c.s.
+*    x  y  z
+* x  0  1  2
+* y  3  4  5
+* z  6  7  8
+*
+*/
+
+
 #include "vtkexportmodule.h"
 #include "timestep.h"
 #include "engngm.h"

@@ -86,6 +86,9 @@ public:
     /// Highest damage ever reached at IP. Can be unequilibrated from last iterations [6 for tension and compression]
     FloatArray tempOmega;
 
+    /// Checks whether snapback occured at IP.
+    IntArray hasSnapBack;
+
     /// Highest damage ever reached in all previous equilibrated steps at IP [6 for tension and compression]
     FloatArray omega;
 
@@ -234,13 +237,28 @@ protected:
     FloatArray inputTension;
     /// Six stress components of compression components read from the input file
     FloatArray inputCompression;
+
+    /// Stress components which are allowed for snap back [6 tension, 6 compression]
+    IntArray allowSnapBack;
+
     /**
      * Fills array elemCharLength with characteristic length related to three perpendicular planes. The planes are of the same orientation as material.
      * @param status pointer to integration point's status
      * @param gp integration point
-     * @param elementCs material orinetation matrix
+     * @param elementCs material orientation matrix
      */
     void giveCharLength(CompoDamageMatStatus *status, GaussPoint *gp, FloatMatrix &elementCs);
+    /**
+     * Computes characteristic length for fixed planes of material orientation.
+     * @param charLenModes returns six lengths
+     * @param gp integration point
+     */
+    void giveCharLengthForModes(FloatArray &charLenModes, GaussPoint *gp);
+    /**
+    * Check that elemnt is small or Gf large enough to prevent snap-back
+    * @param gp integration point
+    */
+    void checkSnapBack(GaussPoint *gp, MaterialMode mMode);
 };
 
 } // end namespace oofem
