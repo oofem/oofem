@@ -44,6 +44,7 @@
 #endif
 
 #include "node.h"
+#include "particle.h"
 #include "element.h"
 #include "engngm.h"
 #include "xfemmanager.h"
@@ -111,6 +112,7 @@
 #include "interfaceelem3dtrlin.h"
 #include "macrolspace.h"
 #include "planstrssxfem.h"
+#include "cohsur3d.h"
 
 // Emodels of SM module
 #include "nlinearstatic.h"
@@ -189,6 +191,7 @@
 #include "trabbonenlembed.h"
 #include "trabbonenl3d.h"
 #include "concretedpm.h"
+#include "cohint.h"
 
 #include "scalarerrorindicator.h"
 #include "zzerrorestimator.h"
@@ -200,6 +203,7 @@
 #include "vtkxmlexportmodule.h"
 #include "poiexportmodule.h"
 #include "homexportmodule.h"
+#include "dmexportmodule.h"
 
 // nonlocal barriers
 #include "polylinenonlocalbarrier.h"
@@ -373,6 +377,8 @@ Element *CreateUsrDefElementOfType(char *aClass, int number, Domain *domain)
         newElement = new Tetrah1_ht(number, domain);
     } else if ( !strncasecmp(aClass, "tetrah1hmt", 10) )    {
         newElement = new Tetrah1_ht(number, domain, Tetrah1_ht :: HeatMass1TransferEM);
+    } else if (! strncasecmp(aClass,"cohsur3d",8)) {
+     newElement = new CohesiveSurface3d (number,domain);
     }
 
 #endif //__TM_MODULE
@@ -403,10 +409,9 @@ Element *CreateUsrDefElementOfType(char *aClass, int number, Domain *domain)
 DofManager *CreateUsrDefDofManagerOfType(char *aClass, int number, Domain *domain)
 {
     DofManager *newDofManager = NULL;
-    /*
-     * if (! strncasecmp(aClass,"planestress2d",12))
-     * newDofManager = new PlaneStress2d(number,domain) ;
-     */
+    if (! strncasecmp(aClass,"particle",8)) {
+        newDofManager = new Particle(number, domain);
+    }
     return newDofManager;
 }
 
@@ -633,6 +638,8 @@ Material *CreateUsrDefMaterialOfType(char *aClass, int number, Domain *domain)
     } else if (! strncasecmp(aClass,"concreteidm",11)) {
       // for compatibility with old input files
       newMaterial = new ConcreteDPM(number,domain);
+    } else if (! strncasecmp(aClass,"cohint",6)) {
+    newMaterial = new CohesiveInterfaceMaterial(number,domain);
     }
 #endif //__SM_MODULE
 
@@ -810,6 +817,8 @@ ExportModule *CreateUsrDefExportModuleOfType(char *aClass, EngngModel *emodel)
         answer = new POIExportModule(emodel);
     } else if ( !strncasecmp(aClass, "hom", 3) ) {
         answer = new HOMExportModule(emodel);
+    } else if (! strncasecmp(aClass,"dm",2)) {
+   	answer = new DofManExportModule(emodel);    
     }
 #endif //__SM_MODULE
 

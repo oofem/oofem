@@ -275,7 +275,7 @@ Node *Domain :: giveNode(int n)
 
     if ( dofManagerList->includes(n) ) {
         node = dofManagerList->at(n);
-        if ( ( node->giveClassID() != NodeClass ) && ( node->giveClassID() != RigidArmNodeClass ) && ( node->giveClassID() != HangingNodeClass ) ) {
+        if ( ( node->giveClassID() != NodeClass ) && ( node->giveClassID() != RigidArmNodeClass ) && ( node->giveClassID() != HangingNodeClass ) && (node->giveClassID() != ParticleClass) ) {
             _error2("giveNode: incompatible type of dofManager %d, can not convert", n);
         }
     } else {

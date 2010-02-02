@@ -331,6 +331,7 @@ enum InputFieldType {
 
     IFT_Node_coords,
     IFT_Node_lcs,
+    IFT_Particle_rad,
     IFT_RigidArmNode_coords,
     IFT_RigidArmNode_master,
     IFT_RigidArmNode_load,
