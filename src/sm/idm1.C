@@ -99,7 +99,6 @@ IsotropicDamageMaterial1 :: initializeFrom(InputRecord *ir)
     IR_GIVE_FIELD(ir, e0, IFT_IsotropicDamageMaterial1_e0, "e0"); // Macro
     // in ef variable the wf (crack opening) is stored.
     IR_GIVE_FIELD(ir, ef, IFT_IsotropicDamageMaterial1_ef, "ef"); // Macro
-    //if (e0 >= ef/le) _warning2 ("instanciateFrom: suspicious e0>=ef/le", 1);
 
     equivStrainType = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, equivStrainType, IFT_IsotropicDamageMaterial1_equivstraintype, "equivstraintype"); // Macro
@@ -231,12 +230,12 @@ IsotropicDamageMaterial1 :: computeDamageParam(double &omega, double kappa, cons
             omega += R / Lhs;
             // printf ("\n%d: R=%f, omega=%f",nite, R, omega);
             if ( nite > 40 ) {
-                _error("computeDamageParam: algorithm not converging");
+                _error("computeDamageParam: algorithm for the crack-opening objectivity not converging");
             }
         } while ( fabs(R) >= IDM1_ITERATION_LIMIT );
 
         if ( ( omega > 1.0 ) || ( omega < 0.0 ) ) {
-            _error("computeDamageParam: internal error");
+            _error("Damage parameter out of range <0.0;1.0>");
         }
     } else {
         omega = 0.0;
@@ -262,7 +261,7 @@ IsotropicDamageMaterial1 :: initDamaged(double kappa, FloatArray &strainVector, 
 
     if ( ( kappa > e0 ) && ( status->giveDamage() == 0. ) ) {
         this->computePrincipalValDir(principalStrains, principalDir, fullstrain, principal_strain);
-        // finfd index of max positive principal strain
+        // find index of max positive principal strain
         for ( i = 2; i <= 3; i++ ) {
             if ( principalStrains.at(i) > principalStrains.at(indx) ) {
                 indx = i;
@@ -274,11 +273,11 @@ IsotropicDamageMaterial1 :: initDamaged(double kappa, FloatArray &strainVector, 
         }
 
         le = gp->giveElement()->giveCharacteristicLenght(gp, crackPlaneNormal);
-        // remember le in cooresponding status
+        // remember le in corresponding status
         status->setLe(le);
 
         if ( e0 >= ef / le ) {
-            _warning2("instanciateFrom: suspicious e0>=ef/le", 1);
+            _warning4("Fracturing strain ef/le=%f is lower than the elastic strain e0=%f, possible snap-back. Increase crack opening ef to %f", ef / le, e0, e0 * le);
         }
     }
 }
