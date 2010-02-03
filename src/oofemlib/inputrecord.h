@@ -358,7 +358,7 @@ enum InputFieldType {
     IFT_Element_sides,
     IFT_Element_bodyload,
     IFT_Element_boundaryload,
-    IFT_Element_mlcs,
+    IFT_Element_lcs,
     IFT_Element_globnum,
     IFT_Element_partitions,
     IFT_Element_remote,

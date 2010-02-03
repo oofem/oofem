@@ -1,1060 +1,293 @@
-%!PS-Adobe-2.0
-%%Title: Stress_strain_damage.eps
-%%Creator: gnuplot 4.2 patchlevel 2 
-%%CreationDate: Thu Nov 26 14:43:01 2009
-%%DocumentFonts: (atend)
-%%BoundingBox: 50 50 302 230
-%%Orientation: Portrait
-%%Pages: (atend)
+%!PS-Adobe-2.0 EPSF-2.0
+%%BoundingBox: 15 3 179 147
+%%HiResBoundingBox: 15.500000 3.500000 179.000000 146.500000
+%.......................................
+%%Creator: GPL Ghostscript 861 (pswrite)
+%%CreationDate: 2010/02/02 20:55:19
+%%DocumentData: Clean7Bit
+%%LanguageLevel: 2
 %%EndComments
+% EPSF created by ps2eps 1.64
 %%BeginProlog
-/gnudict 256 dict def
-gnudict begin
-%
-% The following 6 true/false flags may be edited by hand if required
-% The unit line width may also be changed
-%
-/Color true def
-/Blacktext false def
-/Solid false def
-/Dashlength 1 def
-/Landscape false def
-/Level1 false def
-/Rounded false def
-/TransparentPatterns false def
-/gnulinewidth 5.000 def
-/userlinewidth gnulinewidth def
-%
-/vshift -33 def
-/dl1 {
-  10.0 Dashlength mul mul
-  Rounded { currentlinewidth 0.75 mul sub dup 0 le { pop 0.01 } if } if
-} def
-/dl2 {
-  10.0 Dashlength mul mul
-  Rounded { currentlinewidth 0.75 mul add } if
-} def
-/hpt_ 31.5 def
-/vpt_ 31.5 def
-/hpt hpt_ def
-/vpt vpt_ def
-Level1 {} {
-/SDict 10 dict def
-systemdict /pdfmark known not {
-  userdict /pdfmark systemdict /cleartomark get put
-} if
-SDict begin [
-  /Title (Stress_strain_damage.eps)
-  /Subject (gnuplot plot)
-  /Creator (gnuplot 4.2 patchlevel 2 )
-  /Author (smilauer,,,)
-%  /Producer (gnuplot)
-%  /Keywords ()
-  /CreationDate (Thu Nov 26 14:43:01 2009)
-  /DOCINFO pdfmark
-end
-} ifelse
-%
-% Gnuplot Prolog Version 4.2 (August 2006)
-%
-/M {moveto} bind def
-/L {lineto} bind def
-/R {rmoveto} bind def
-/V {rlineto} bind def
-/N {newpath moveto} bind def
-/Z {closepath} bind def
-/C {setrgbcolor} bind def
-/f {rlineto fill} bind def
-/vpt2 vpt 2 mul def
-/hpt2 hpt 2 mul def
-/Lshow {currentpoint stroke M 0 vshift R 
-	Blacktext {gsave 0 setgray show grestore} {show} ifelse} def
-/Rshow {currentpoint stroke M dup stringwidth pop neg vshift R
-	Blacktext {gsave 0 setgray show grestore} {show} ifelse} def
-/Cshow {currentpoint stroke M dup stringwidth pop -2 div vshift R 
-	Blacktext {gsave 0 setgray show grestore} {show} ifelse} def
-/UP {dup vpt_ mul /vpt exch def hpt_ mul /hpt exch def
-  /hpt2 hpt 2 mul def /vpt2 vpt 2 mul def} def
-/DL {Color {setrgbcolor Solid {pop []} if 0 setdash}
- {pop pop pop 0 setgray Solid {pop []} if 0 setdash} ifelse} def
-/BL {stroke userlinewidth 2 mul setlinewidth
-	Rounded {1 setlinejoin 1 setlinecap} if} def
-/AL {stroke userlinewidth 2 div setlinewidth
-	Rounded {1 setlinejoin 1 setlinecap} if} def
-/UL {dup gnulinewidth mul /userlinewidth exch def
-	dup 1 lt {pop 1} if 10 mul /udl exch def} def
-/PL {stroke userlinewidth setlinewidth
-	Rounded {1 setlinejoin 1 setlinecap} if} def
-% Default Line colors
-/LCw {1 1 1} def
-/LCb {0 0 0} def
-/LCa {0 0 0} def
-/LC0 {1 0 0} def
-/LC1 {0 1 0} def
-/LC2 {0 0 1} def
-/LC3 {1 0 1} def
-/LC4 {0 1 1} def
-/LC5 {1 1 0} def
-/LC6 {0 0 0} def
-/LC7 {1 0.3 0} def
-/LC8 {0.5 0.5 0.5} def
-% Default Line Types
-/LTw {PL [] 1 setgray} def
-/LTb {BL [] LCb DL} def
-/LTa {AL [1 udl mul 2 udl mul] 0 setdash LCa setrgbcolor} def
-/LT0 {PL [] LC0 DL} def
-/LT1 {PL [4 dl1 2 dl2] LC1 DL} def
-/LT2 {PL [2 dl1 3 dl2] LC2 DL} def
-/LT3 {PL [1 dl1 1.5 dl2] LC3 DL} def
-/LT4 {PL [6 dl1 2 dl2 1 dl1 2 dl2] LC4 DL} def
-/LT5 {PL [3 dl1 3 dl2 1 dl1 3 dl2] LC5 DL} def
-/LT6 {PL [2 dl1 2 dl2 2 dl1 6 dl2] LC6 DL} def
-/LT7 {PL [1 dl1 2 dl2 6 dl1 2 dl2 1 dl1 2 dl2] LC7 DL} def
-/LT8 {PL [2 dl1 2 dl2 2 dl1 2 dl2 2 dl1 2 dl2 2 dl1 4 dl2] LC8 DL} def
-/Pnt {stroke [] 0 setdash gsave 1 setlinecap M 0 0 V stroke grestore} def
-/Dia {stroke [] 0 setdash 2 copy vpt add M
-  hpt neg vpt neg V hpt vpt neg V
-  hpt vpt V hpt neg vpt V closepath stroke
-  Pnt} def
-/Pls {stroke [] 0 setdash vpt sub M 0 vpt2 V
-  currentpoint stroke M
-  hpt neg vpt neg R hpt2 0 V stroke
- } def
-/Box {stroke [] 0 setdash 2 copy exch hpt sub exch vpt add M
-  0 vpt2 neg V hpt2 0 V 0 vpt2 V
-  hpt2 neg 0 V closepath stroke
-  Pnt} def
-/Crs {stroke [] 0 setdash exch hpt sub exch vpt add M
-  hpt2 vpt2 neg V currentpoint stroke M
-  hpt2 neg 0 R hpt2 vpt2 V stroke} def
-/TriU {stroke [] 0 setdash 2 copy vpt 1.12 mul add M
-  hpt neg vpt -1.62 mul V
-  hpt 2 mul 0 V
-  hpt neg vpt 1.62 mul V closepath stroke
-  Pnt} def
-/Star {2 copy Pls Crs} def
-/BoxF {stroke [] 0 setdash exch hpt sub exch vpt add M
-  0 vpt2 neg V hpt2 0 V 0 vpt2 V
-  hpt2 neg 0 V closepath fill} def
-/TriUF {stroke [] 0 setdash vpt 1.12 mul add M
-  hpt neg vpt -1.62 mul V
-  hpt 2 mul 0 V
-  hpt neg vpt 1.62 mul V closepath fill} def
-/TriD {stroke [] 0 setdash 2 copy vpt 1.12 mul sub M
-  hpt neg vpt 1.62 mul V
-  hpt 2 mul 0 V
-  hpt neg vpt -1.62 mul V closepath stroke
-  Pnt} def
-/TriDF {stroke [] 0 setdash vpt 1.12 mul sub M
-  hpt neg vpt 1.62 mul V
-  hpt 2 mul 0 V
-  hpt neg vpt -1.62 mul V closepath fill} def
-/DiaF {stroke [] 0 setdash vpt add M
-  hpt neg vpt neg V hpt vpt neg V
-  hpt vpt V hpt neg vpt V closepath fill} def
-/Pent {stroke [] 0 setdash 2 copy gsave
-  translate 0 hpt M 4 {72 rotate 0 hpt L} repeat
-  closepath stroke grestore Pnt} def
-/PentF {stroke [] 0 setdash gsave
-  translate 0 hpt M 4 {72 rotate 0 hpt L} repeat
-  closepath fill grestore} def
-/Circle {stroke [] 0 setdash 2 copy
-  hpt 0 360 arc stroke Pnt} def
-/CircleF {stroke [] 0 setdash hpt 0 360 arc fill} def
-/C0 {BL [] 0 setdash 2 copy moveto vpt 90 450 arc} bind def
-/C1 {BL [] 0 setdash 2 copy moveto
-	2 copy vpt 0 90 arc closepath fill
-	vpt 0 360 arc closepath} bind def
-/C2 {BL [] 0 setdash 2 copy moveto
-	2 copy vpt 90 180 arc closepath fill
-	vpt 0 360 arc closepath} bind def
-/C3 {BL [] 0 setdash 2 copy moveto
-	2 copy vpt 0 180 arc closepath fill
-	vpt 0 360 arc closepath} bind def
-/C4 {BL [] 0 setdash 2 copy moveto
-	2 copy vpt 180 270 arc closepath fill
-	vpt 0 360 arc closepath} bind def
-/C5 {BL [] 0 setdash 2 copy moveto
-	2 copy vpt 0 90 arc
-	2 copy moveto
-	2 copy vpt 180 270 arc closepath fill
-	vpt 0 360 arc} bind def
-/C6 {BL [] 0 setdash 2 copy moveto
-	2 copy vpt 90 270 arc closepath fill
-	vpt 0 360 arc closepath} bind def
-/C7 {BL [] 0 setdash 2 copy moveto
-	2 copy vpt 0 270 arc closepath fill
-	vpt 0 360 arc closepath} bind def
-/C8 {BL [] 0 setdash 2 copy moveto
-	2 copy vpt 270 360 arc closepath fill
-	vpt 0 360 arc closepath} bind def
-/C9 {BL [] 0 setdash 2 copy moveto
-	2 copy vpt 270 450 arc closepath fill
-	vpt 0 360 arc closepath} bind def
-/C10 {BL [] 0 setdash 2 copy 2 copy moveto vpt 270 360 arc closepath fill
-	2 copy moveto
-	2 copy vpt 90 180 arc closepath fill
-	vpt 0 360 arc closepath} bind def
-/C11 {BL [] 0 setdash 2 copy moveto
-	2 copy vpt 0 180 arc closepath fill
-	2 copy moveto
-	2 copy vpt 270 360 arc closepath fill
-	vpt 0 360 arc closepath} bind def
-/C12 {BL [] 0 setdash 2 copy moveto
-	2 copy vpt 180 360 arc closepath fill
-	vpt 0 360 arc closepath} bind def
-/C13 {BL [] 0 setdash 2 copy moveto
-	2 copy vpt 0 90 arc closepath fill
-	2 copy moveto
-	2 copy vpt 180 360 arc closepath fill
-	vpt 0 360 arc closepath} bind def
-/C14 {BL [] 0 setdash 2 copy moveto
-	2 copy vpt 90 360 arc closepath fill
-	vpt 0 360 arc} bind def
-/C15 {BL [] 0 setdash 2 copy vpt 0 360 arc closepath fill
-	vpt 0 360 arc closepath} bind def
-/Rec {newpath 4 2 roll moveto 1 index 0 rlineto 0 exch rlineto
-	neg 0 rlineto closepath} bind def
-/Square {dup Rec} bind def
-/Bsquare {vpt sub exch vpt sub exch vpt2 Square} bind def
-/S0 {BL [] 0 setdash 2 copy moveto 0 vpt rlineto BL Bsquare} bind def
-/S1 {BL [] 0 setdash 2 copy vpt Square fill Bsquare} bind def
-/S2 {BL [] 0 setdash 2 copy exch vpt sub exch vpt Square fill Bsquare} bind def
-/S3 {BL [] 0 setdash 2 copy exch vpt sub exch vpt2 vpt Rec fill Bsquare} bind def
-/S4 {BL [] 0 setdash 2 copy exch vpt sub exch vpt sub vpt Square fill Bsquare} bind def
-/S5 {BL [] 0 setdash 2 copy 2 copy vpt Square fill
-	exch vpt sub exch vpt sub vpt Square fill Bsquare} bind def
-/S6 {BL [] 0 setdash 2 copy exch vpt sub exch vpt sub vpt vpt2 Rec fill Bsquare} bind def
-/S7 {BL [] 0 setdash 2 copy exch vpt sub exch vpt sub vpt vpt2 Rec fill
-	2 copy vpt Square fill Bsquare} bind def
-/S8 {BL [] 0 setdash 2 copy vpt sub vpt Square fill Bsquare} bind def
-/S9 {BL [] 0 setdash 2 copy vpt sub vpt vpt2 Rec fill Bsquare} bind def
-/S10 {BL [] 0 setdash 2 copy vpt sub vpt Square fill 2 copy exch vpt sub exch vpt Square fill
-	Bsquare} bind def
-/S11 {BL [] 0 setdash 2 copy vpt sub vpt Square fill 2 copy exch vpt sub exch vpt2 vpt Rec fill
-	Bsquare} bind def
-/S12 {BL [] 0 setdash 2 copy exch vpt sub exch vpt sub vpt2 vpt Rec fill Bsquare} bind def
-/S13 {BL [] 0 setdash 2 copy exch vpt sub exch vpt sub vpt2 vpt Rec fill
-	2 copy vpt Square fill Bsquare} bind def
-/S14 {BL [] 0 setdash 2 copy exch vpt sub exch vpt sub vpt2 vpt Rec fill
-	2 copy exch vpt sub exch vpt Square fill Bsquare} bind def
-/S15 {BL [] 0 setdash 2 copy Bsquare fill Bsquare} bind def
-/D0 {gsave translate 45 rotate 0 0 S0 stroke grestore} bind def
-/D1 {gsave translate 45 rotate 0 0 S1 stroke grestore} bind def
-/D2 {gsave translate 45 rotate 0 0 S2 stroke grestore} bind def
-/D3 {gsave translate 45 rotate 0 0 S3 stroke grestore} bind def
-/D4 {gsave translate 45 rotate 0 0 S4 stroke grestore} bind def
-/D5 {gsave translate 45 rotate 0 0 S5 stroke grestore} bind def
-/D6 {gsave translate 45 rotate 0 0 S6 stroke grestore} bind def
-/D7 {gsave translate 45 rotate 0 0 S7 stroke grestore} bind def
-/D8 {gsave translate 45 rotate 0 0 S8 stroke grestore} bind def
-/D9 {gsave translate 45 rotate 0 0 S9 stroke grestore} bind def
-/D10 {gsave translate 45 rotate 0 0 S10 stroke grestore} bind def
-/D11 {gsave translate 45 rotate 0 0 S11 stroke grestore} bind def
-/D12 {gsave translate 45 rotate 0 0 S12 stroke grestore} bind def
-/D13 {gsave translate 45 rotate 0 0 S13 stroke grestore} bind def
-/D14 {gsave translate 45 rotate 0 0 S14 stroke grestore} bind def
-/D15 {gsave translate 45 rotate 0 0 S15 stroke grestore} bind def
-/DiaE {stroke [] 0 setdash vpt add M
-  hpt neg vpt neg V hpt vpt neg V
-  hpt vpt V hpt neg vpt V closepath stroke} def
-/BoxE {stroke [] 0 setdash exch hpt sub exch vpt add M
-  0 vpt2 neg V hpt2 0 V 0 vpt2 V
-  hpt2 neg 0 V closepath stroke} def
-/TriUE {stroke [] 0 setdash vpt 1.12 mul add M
-  hpt neg vpt -1.62 mul V
-  hpt 2 mul 0 V
-  hpt neg vpt 1.62 mul V closepath stroke} def
-/TriDE {stroke [] 0 setdash vpt 1.12 mul sub M
-  hpt neg vpt 1.62 mul V
-  hpt 2 mul 0 V
-  hpt neg vpt -1.62 mul V closepath stroke} def
-/PentE {stroke [] 0 setdash gsave
-  translate 0 hpt M 4 {72 rotate 0 hpt L} repeat
-  closepath stroke grestore} def
-/CircE {stroke [] 0 setdash 
-  hpt 0 360 arc stroke} def
-/Opaque {gsave closepath 1 setgray fill grestore 0 setgray closepath} def
-/DiaW {stroke [] 0 setdash vpt add M
-  hpt neg vpt neg V hpt vpt neg V
-  hpt vpt V hpt neg vpt V Opaque stroke} def
-/BoxW {stroke [] 0 setdash exch hpt sub exch vpt add M
-  0 vpt2 neg V hpt2 0 V 0 vpt2 V
-  hpt2 neg 0 V Opaque stroke} def
-/TriUW {stroke [] 0 setdash vpt 1.12 mul add M
-  hpt neg vpt -1.62 mul V
-  hpt 2 mul 0 V
-  hpt neg vpt 1.62 mul V Opaque stroke} def
-/TriDW {stroke [] 0 setdash vpt 1.12 mul sub M
-  hpt neg vpt 1.62 mul V
-  hpt 2 mul 0 V
-  hpt neg vpt -1.62 mul V Opaque stroke} def
-/PentW {stroke [] 0 setdash gsave
-  translate 0 hpt M 4 {72 rotate 0 hpt L} repeat
-  Opaque stroke grestore} def
-/CircW {stroke [] 0 setdash 
-  hpt 0 360 arc Opaque stroke} def
-/BoxFill {gsave Rec 1 setgray fill grestore} def
-/Density {
-  /Fillden exch def
-  currentrgbcolor
-  /ColB exch def /ColG exch def /ColR exch def
-  /ColR ColR Fillden mul Fillden sub 1 add def
-  /ColG ColG Fillden mul Fillden sub 1 add def
-  /ColB ColB Fillden mul Fillden sub 1 add def
-  ColR ColG ColB setrgbcolor} def
-/BoxColFill {gsave Rec PolyFill} def
-/PolyFill {gsave Density fill grestore grestore} def
-/h {rlineto rlineto rlineto gsave fill grestore} bind def
-%
-% PostScript Level 1 Pattern Fill routine for rectangles
-% Usage: x y w h s a XX PatternFill
-%	x,y = lower left corner of box to be filled
-%	w,h = width and height of box
-%	  a = angle in degrees between lines and x-axis
-%	 XX = 0/1 for no/yes cross-hatch
-%
-/PatternFill {gsave /PFa [ 9 2 roll ] def
-  PFa 0 get PFa 2 get 2 div add PFa 1 get PFa 3 get 2 div add translate
-  PFa 2 get -2 div PFa 3 get -2 div PFa 2 get PFa 3 get Rec
-  gsave 1 setgray fill grestore clip
-  currentlinewidth 0.5 mul setlinewidth
-  /PFs PFa 2 get dup mul PFa 3 get dup mul add sqrt def
-  0 0 M PFa 5 get rotate PFs -2 div dup translate
-  0 1 PFs PFa 4 get div 1 add floor cvi
-	{PFa 4 get mul 0 M 0 PFs V} for
-  0 PFa 6 get ne {
-	0 1 PFs PFa 4 get div 1 add floor cvi
-	{PFa 4 get mul 0 2 1 roll M PFs 0 V} for
- } if
-  stroke grestore} def
-%
-/languagelevel where
- {pop languagelevel} {1} ifelse
- 2 lt
-	{/InterpretLevel1 true def}
-	{/InterpretLevel1 Level1 def}
- ifelse
-%
-% PostScript level 2 pattern fill definitions
-%
-/Level2PatternFill {
-/Tile8x8 {/PaintType 2 /PatternType 1 /TilingType 1 /BBox [0 0 8 8] /XStep 8 /YStep 8}
-	bind def
-/KeepColor {currentrgbcolor [/Pattern /DeviceRGB] setcolorspace} bind def
-<< Tile8x8
- /PaintProc {0.5 setlinewidth pop 0 0 M 8 8 L 0 8 M 8 0 L stroke} 
->> matrix makepattern
-/Pat1 exch def
-<< Tile8x8
- /PaintProc {0.5 setlinewidth pop 0 0 M 8 8 L 0 8 M 8 0 L stroke
-	0 4 M 4 8 L 8 4 L 4 0 L 0 4 L stroke}
->> matrix makepattern
-/Pat2 exch def
-<< Tile8x8
- /PaintProc {0.5 setlinewidth pop 0 0 M 0 8 L
-	8 8 L 8 0 L 0 0 L fill}
->> matrix makepattern
-/Pat3 exch def
-<< Tile8x8
- /PaintProc {0.5 setlinewidth pop -4 8 M 8 -4 L
-	0 12 M 12 0 L stroke}
->> matrix makepattern
-/Pat4 exch def
-<< Tile8x8
- /PaintProc {0.5 setlinewidth pop -4 0 M 8 12 L
-	0 -4 M 12 8 L stroke}
->> matrix makepattern
-/Pat5 exch def
-<< Tile8x8
- /PaintProc {0.5 setlinewidth pop -2 8 M 4 -4 L
-	0 12 M 8 -4 L 4 12 M 10 0 L stroke}
->> matrix makepattern
-/Pat6 exch def
-<< Tile8x8
- /PaintProc {0.5 setlinewidth pop -2 0 M 4 12 L
-	0 -4 M 8 12 L 4 -4 M 10 8 L stroke}
->> matrix makepattern
-/Pat7 exch def
-<< Tile8x8
- /PaintProc {0.5 setlinewidth pop 8 -2 M -4 4 L
-	12 0 M -4 8 L 12 4 M 0 10 L stroke}
->> matrix makepattern
-/Pat8 exch def
-<< Tile8x8
- /PaintProc {0.5 setlinewidth pop 0 -2 M 12 4 L
-	-4 0 M 12 8 L -4 4 M 8 10 L stroke}
->> matrix makepattern
-/Pat9 exch def
-/Pattern1 {PatternBgnd KeepColor Pat1 setpattern} bind def
-/Pattern2 {PatternBgnd KeepColor Pat2 setpattern} bind def
-/Pattern3 {PatternBgnd KeepColor Pat3 setpattern} bind def
-/Pattern4 {PatternBgnd KeepColor Landscape {Pat5} {Pat4} ifelse setpattern} bind def
-/Pattern5 {PatternBgnd KeepColor Landscape {Pat4} {Pat5} ifelse setpattern} bind def
-/Pattern6 {PatternBgnd KeepColor Landscape {Pat9} {Pat6} ifelse setpattern} bind def
-/Pattern7 {PatternBgnd KeepColor Landscape {Pat8} {Pat7} ifelse setpattern} bind def
-} def
-%
-%
-%End of PostScript Level 2 code
-%
-/PatternBgnd {
-  TransparentPatterns {} {gsave 1 setgray fill grestore} ifelse
-} def
-%
-% Substitute for Level 2 pattern fill codes with
-% grayscale if Level 2 support is not selected.
-%
-/Level1PatternFill {
-/Pattern1 {0.250 Density} bind def
-/Pattern2 {0.500 Density} bind def
-/Pattern3 {0.750 Density} bind def
-/Pattern4 {0.125 Density} bind def
-/Pattern5 {0.375 Density} bind def
-/Pattern6 {0.625 Density} bind def
-/Pattern7 {0.875 Density} bind def
-} def
-%
-% Now test for support of Level 2 code
-%
-Level1 {Level1PatternFill} {Level2PatternFill} ifelse
-%
-/Symbol-Oblique /Symbol findfont [1 0 .167 1 0 0] makefont
-dup length dict begin {1 index /FID eq {pop pop} {def} ifelse} forall
-currentdict end definefont pop
-/MFshow {
-   { dup 5 get 3 ge
-     { 5 get 3 eq {gsave} {grestore} ifelse }
-     {dup dup 0 get findfont exch 1 get scalefont setfont
-     [ currentpoint ] exch dup 2 get 0 exch R dup 5 get 2 ne {dup dup 6
-     get exch 4 get {show} {stringwidth pop 0 R} ifelse }if dup 5 get 0 eq
-     {dup 3 get {2 get neg 0 exch R pop} {pop aload pop M} ifelse} {dup 5
-     get 1 eq {dup 2 get exch dup 3 get exch 6 get stringwidth pop -2 div
-     dup 0 R} {dup 6 get stringwidth pop -2 div 0 R 6 get
-     show 2 index {aload pop M neg 3 -1 roll neg R pop pop} {pop pop pop
-     pop aload pop M} ifelse }ifelse }ifelse }
-     ifelse }
-   forall} bind def
-/MFwidth {0 exch { dup 5 get 3 ge { 5 get 3 eq { 0 } { pop } ifelse }
- {dup 3 get{dup dup 0 get findfont exch 1 get scalefont setfont
-     6 get stringwidth pop add} {pop} ifelse} ifelse} forall} bind def
-/MLshow { currentpoint stroke M
-  0 exch R
-  Blacktext {gsave 0 setgray MFshow grestore} {MFshow} ifelse } bind def
-/MRshow { currentpoint stroke M
-  exch dup MFwidth neg 3 -1 roll R
-  Blacktext {gsave 0 setgray MFshow grestore} {MFshow} ifelse } bind def
-/MCshow { currentpoint stroke M
-  exch dup MFwidth -2 div 3 -1 roll R
-  Blacktext {gsave 0 setgray MFshow grestore} {MFshow} ifelse } bind def
-/XYsave    { [( ) 1 2 true false 3 ()] } bind def
-/XYrestore { [( ) 1 2 true false 4 ()] } bind def
-end
+save
+countdictstack
+mark
+newpath
+/showpage {} def
+/setpagedevice {pop} def
+%%EndProlog
+%%Page 1 1
+%%BeginProlog
+% This copyright applies to everything between here and the %%EndProlog:
+% Copyright (C) 2007 Artifex Software, Inc.  All rights reserved.
+%%BeginResource: procset GS_pswrite_2_0_1001 1.001 0
+/GS_pswrite_2_0_1001 80 dict dup begin
+/PageSize 2 array def/setpagesize{ PageSize aload pop 3 index eq exch
+4 index eq and{ pop pop pop}{ PageSize dup  1
+5 -1 roll put 0 4 -1 roll put dup null eq {false} {dup where} ifelse{ exch get exec}
+{ pop/setpagedevice where
+{ pop 1 dict dup /PageSize PageSize put setpagedevice}
+{ /setpage where{ pop PageSize aload pop pageparams 3 {exch pop} repeat
+setpage}if}ifelse}ifelse}ifelse} bind def
+/!{bind def}bind def/#{load def}!/N/counttomark #
+/rG{3{3 -1 roll 255 div}repeat setrgbcolor}!/G{255 div setgray}!/K{0 G}!
+/r6{dup 3 -1 roll rG}!/r5{dup 3 1 roll rG}!/r3{dup rG}!
+/w/setlinewidth #/J/setlinecap #
+/j/setlinejoin #/M/setmiterlimit #/d/setdash #/i/setflat #
+/m/moveto #/l/lineto #/c/rcurveto #
+/p{N 2 idiv{N -2 roll rlineto}repeat}!
+/P{N 0 gt{N -2 roll moveto p}if}!
+/h{p closepath}!/H{P closepath}!
+/lx{0 rlineto}!/ly{0 exch rlineto}!/v{0 0 6 2 roll c}!/y{2 copy c}!
+/re{4 -2 roll m exch dup lx exch ly neg lx h}!
+/^{3 index neg 3 index neg}!
+/f{P fill}!/f*{P eofill}!/s{H stroke}!/S{P stroke}!
+/q/gsave #/Q/grestore #/rf{re fill}!
+/Y{P clip newpath}!/Y*{P eoclip newpath}!/rY{re Y}!
+/|={pop exch 4 1 roll 1 array astore cvx 3 array astore cvx exch 1 index def exec}!
+/|{exch string readstring |=}!
+/+{dup type/nametype eq{2 index 7 add -3 bitshift 2 index mul}if}!
+/@/currentfile #/${+ @ |}!
+/B{{2 copy string{readstring pop}aload pop 4 array astore cvx
+3 1 roll}repeat pop pop true}!
+/Ix{[1 0 0 1 11 -2 roll exch neg exch neg]exch}!
+/,{true exch Ix imagemask}!/If{false exch Ix imagemask}!/I{exch Ix image}!
+/Ic{exch Ix false 3 colorimage}!
+/F{/Columns counttomark 3 add -2 roll/Rows exch/K -1/BlackIs1 true>>
+/CCITTFaxDecode filter}!/FX{<</EndOfBlock false F}!
+/X{/ASCII85Decode filter}!/@X{@ X}!/&2{2 index 2 index}!
+/@F{@ &2<<F}!/@C{@X &2 FX}!
+/$X{+ @X |}!/&4{4 index 4 index}!/$F{+ @ &4<<F |}!/$C{+ @X &4 FX |}!
+/IC{3 1 roll 10 dict begin 1{/ImageType/Interpolate/Decode/DataSource
+/ImageMatrix/BitsPerComponent/Height/Width}{exch def}forall
+currentdict end image}!
+/~{@ read {pop} if}!
+end def
+%%EndResource
+/pagesave null def
 %%EndProlog
 %%Page: 1 1
-gnudict begin
-gsave
-50 50 translate
-0.100 0.100 scale
-0 setgray
-newpath
-(Helvetica) findfont 100 scalefont setfont
-gsave % colour palette begin
-/maxcolors 0 def
-/HSV2RGB {  exch dup 0.0 eq {pop exch pop dup dup} % achromatic gray
-  { /HSVs exch def /HSVv exch def 6.0 mul dup floor dup 3 1 roll sub
-     /HSVf exch def /HSVi exch cvi def /HSVp HSVv 1.0 HSVs sub mul def
-	 /HSVq HSVv 1.0 HSVs HSVf mul sub mul def 
-	 /HSVt HSVv 1.0 HSVs 1.0 HSVf sub mul sub mul def
-	 /HSVi HSVi 6 mod def 0 HSVi eq {HSVv HSVt HSVp}
-	 {1 HSVi eq {HSVq HSVv HSVp}{2 HSVi eq {HSVp HSVv HSVt}
-	 {3 HSVi eq {HSVp HSVq HSVv}{4 HSVi eq {HSVt HSVp HSVv}
-	 {HSVv HSVp HSVq} ifelse} ifelse} ifelse} ifelse} ifelse
-  } ifelse} def
-/Constrain {
-  dup 0 lt {0 exch pop}{dup 1 gt {1 exch pop} if} ifelse} def
-/YIQ2RGB {
-  3 copy -1.702 mul exch -1.105 mul add add Constrain 4 1 roll
-  3 copy -0.647 mul exch -0.272 mul add add Constrain 5 1 roll
-  0.621 mul exch -0.956 mul add add Constrain 3 1 roll } def
-/CMY2RGB {  1 exch sub exch 1 exch sub 3 2 roll 1 exch sub 3 1 roll exch } def
-/XYZ2RGB {  3 copy -0.9017 mul exch -0.1187 mul add exch 0.0585 mul exch add
-  Constrain 4 1 roll 3 copy -0.0279 mul exch 1.999 mul add exch
-  -0.9844 mul add Constrain 5 1 roll -0.2891 mul exch -0.5338 mul add
-  exch 1.91 mul exch add Constrain 3 1 roll} def
-/SelectSpace {ColorSpace (HSV) eq {HSV2RGB}{ColorSpace (XYZ) eq {
-  XYZ2RGB}{ColorSpace (CMY) eq {CMY2RGB}{ColorSpace (YIQ) eq {YIQ2RGB}
-  if} ifelse} ifelse} ifelse} def
-/InterpolatedColor false def
-/cF7 {sqrt} bind def	% sqrt(x)
-/cF5 {dup dup mul mul} bind def	% x^3
-/cF15 {360 mul sin} bind def	% sin(360x)
-/pm3dround {maxcolors 0 gt {dup 1 ge
-	{pop 1} {maxcolors mul floor maxcolors 1 sub div} ifelse} if} def
-/pm3dGamma 1.0 1.5 div def
-/ColorSpace (RGB) def
-Color true and { % COLOUR vs. GRAY map
-  InterpolatedColor { %% Interpolation vs. RGB-Formula
-    /g {stroke pm3dround /grayv exch def interpolate
-        SelectSpace setrgbcolor} bind def
-  }{
-  /g {stroke pm3dround dup cF7 Constrain exch dup cF5 Constrain exch cF15 Constrain 
-       SelectSpace setrgbcolor} bind def
-  } ifelse
-}{
-  /g {stroke pm3dround pm3dGamma exp setgray} bind def
-} ifelse
-1.000 UL
-LTb
-350 817 M
--37 0 V
-stroke
-290 817 M
-[ [(Symbol) 100.0 0.0 true true 0 (s)]
-[(Helvetica) 100.0 0.0 true true 0 (')]
-[(Helvetica) 80.0 -30.0 true true 0 (p)]
-] -23.3 MRshow
-1.000 UL
-LTb
-350 1433 M
--37 0 V
-stroke
-290 1433 M
-[ [(Helvetica) 100.0 0.0 true true 0 (f)]
-[(Helvetica) 80.0 -30.0 true true 0 (p,0)]
-] -23.3 MRshow
-1.000 UL
-LTb
-850 200 M
-0 -37 V
-stroke
-850 100 M
-[ [(Symbol) 100.0 0.0 true true 0 (e)]
-[(Helvetica) 80.0 -30.0 true true 0 (p,E)]
-] -23.3 MCshow
-1.000 UL
-LTb
-1350 200 M
-0 -37 V
-stroke
-1350 100 M
-[ [(Symbol) 100.0 0.0 true true 0 (e)]
-[(Helvetica) 80.0 -30.0 true true 0 (p)]
-] -23.3 MCshow
-1.000 UL
-LTb
-1850 200 M
-0 -37 V
-stroke
-1850 100 M
-[ [(Symbol) 100.0 0.0 true true 0 (e)]
-[(Helvetica) 80.0 -30.0 true true 0 (p,0)]
-] -23.3 MCshow
-1.000 UL
-LTb
-1.000 UL
-LTb
-350 1680 M
-350 200 L
-2000 0 V
-0 1480 R
--2000 0 R
-0.700 UP
-stroke
-2350 101 M
-[ [(Symbol) 160.0 0.0 true true 0 (e)]
-] -53.3 MLshow
-175 1680 M
-[ [(Symbol) 160.0 0.0 true true 0 (s)]
-] -53.3 MLshow
-1.000 UL
-LTb
-2229 168 M
-121 32 V
--121 32 V
-350 200 M
-2000 0 V
-stroke
-gsave [] 0 setdash
-2229 168 M
-121 32 V
--121 32 V
-stroke
-grestore
-1.000 UL
-LTb
-382 1559 M
--32 121 V
-318 1559 L
-350 200 M
-0 1480 V
-stroke
-gsave [] 0 setdash
-382 1559 M
--32 121 V
-318 1559 L
-stroke
-grestore
-1.000 UL
-LTb
-2.000 UL
-LT0
-LC0 setrgbcolor
-350 200 M
-5 12 V
-5 13 V
-5 12 V
-5 12 V
-5 13 V
-5 12 V
-5 13 V
-5 12 V
-5 12 V
-5 13 V
-5 12 V
-5 12 V
-5 13 V
-5 12 V
-5 12 V
-5 13 V
-5 12 V
-5 13 V
-5 12 V
-5 12 V
-5 13 V
-5 12 V
-5 12 V
-5 13 V
-5 12 V
-5 12 V
-5 13 V
-5 12 V
-5 13 V
-5 12 V
-5 12 V
-5 13 V
-5 12 V
-5 12 V
-5 13 V
-5 12 V
-5 12 V
-5 13 V
-5 12 V
-6 13 V
-5 12 V
-5 12 V
-5 13 V
-5 12 V
-5 12 V
-5 13 V
-5 12 V
-5 12 V
-5 13 V
-5 12 V
-5 13 V
-5 12 V
-5 12 V
-5 13 V
-5 12 V
-5 12 V
-5 13 V
-5 12 V
-5 12 V
-5 13 V
-5 12 V
-5 13 V
-5 12 V
-5 12 V
-5 13 V
-5 12 V
-5 12 V
-5 13 V
-5 12 V
-5 12 V
-5 13 V
-5 12 V
-5 13 V
-5 12 V
-5 12 V
-5 13 V
-5 12 V
-5 12 V
-5 13 V
-5 12 V
-5 13 V
-5 12 V
-5 12 V
-5 13 V
-5 12 V
-5 12 V
-5 13 V
-5 12 V
-5 12 V
-5 13 V
-5 12 V
-5 13 V
-5 12 V
-5 12 V
-5 13 V
-5 12 V
-5 12 V
-5 13 V
-5 12 V
-5 12 V
-stroke
-LT1
-LC0 setrgbcolor
-gsave 850 200 N 0 0 V 0 1233 V 1000 -1233 V 0.20 PolyFill
-2.000 UL
-LT0
-LC0 setrgbcolor
-851 1432 M
-5 -6 V
-5 -7 V
-5 -6 V
-5 -6 V
-5 -6 V
-5 -6 V
-5 -6 V
-5 -7 V
-5 -6 V
-5 -6 V
-5 -6 V
-5 -6 V
-5 -7 V
-5 -6 V
-5 -6 V
-5 -6 V
-5 -6 V
-5 -6 V
-5 -7 V
-6 -6 V
-5 -6 V
-5 -6 V
-5 -6 V
-5 -7 V
-5 -6 V
-5 -6 V
-5 -6 V
-5 -6 V
-5 -6 V
-5 -7 V
-5 -6 V
-5 -6 V
-5 -6 V
-5 -6 V
-5 -7 V
-5 -6 V
-5 -6 V
-5 -6 V
-5 -6 V
-5 -6 V
-5 -7 V
-5 -6 V
-5 -6 V
-5 -6 V
-5 -6 V
-5 -7 V
-5 -6 V
-5 -6 V
-5 -6 V
-5 -6 V
-5 -7 V
-5 -6 V
-5 -6 V
-5 -6 V
-5 -6 V
-5 -6 V
-5 -7 V
-5 -6 V
-5 -6 V
-5 -6 V
-5 -6 V
-5 -7 V
-5 -6 V
-5 -6 V
-5 -6 V
-5 -6 V
-5 -6 V
-5 -7 V
-5 -6 V
-5 -6 V
-5 -6 V
-5 -6 V
-5 -7 V
-5 -6 V
-5 -6 V
-5 -6 V
-5 -6 V
-5 -6 V
-5 -7 V
-5 -6 V
-5 -6 V
-5 -6 V
-5 -6 V
-5 -7 V
-5 -6 V
-5 -6 V
-5 -6 V
-5 -6 V
-5 -6 V
-5 -7 V
-5 -6 V
-5 -6 V
-5 -6 V
-5 -6 V
-5 -7 V
-5 -6 V
-5 -6 V
-5 -6 V
-5 -6 V
-6 -6 V
-5 -7 V
-5 -6 V
-5 -6 V
-5 -6 V
-1378 783 L
-5 -7 V
-5 -6 V
-5 -6 V
-5 -6 V
-5 -6 V
-5 -6 V
-5 -7 V
-5 -6 V
-5 -6 V
-5 -6 V
-5 -6 V
-5 -7 V
-5 -6 V
-5 -6 V
-5 -6 V
-5 -6 V
-5 -6 V
-5 -7 V
-5 -6 V
-5 -6 V
-5 -6 V
-5 -6 V
-5 -7 V
-5 -6 V
-5 -6 V
-5 -6 V
-5 -6 V
-5 -6 V
-5 -7 V
-5 -6 V
-5 -6 V
-5 -6 V
-5 -6 V
-5 -7 V
-5 -6 V
-5 -6 V
-5 -6 V
-5 -6 V
-5 -6 V
-5 -7 V
-5 -6 V
-5 -6 V
-5 -6 V
-5 -6 V
-5 -7 V
-5 -6 V
-5 -6 V
-5 -6 V
-5 -6 V
-5 -6 V
-5 -7 V
-5 -6 V
-5 -6 V
-5 -6 V
-5 -6 V
-5 -7 V
-5 -6 V
-5 -6 V
-5 -6 V
-5 -6 V
-5 -6 V
-5 -7 V
-5 -6 V
-5 -6 V
-5 -6 V
-5 -6 V
-5 -7 V
-5 -6 V
-5 -6 V
-5 -6 V
-5 -6 V
-5 -6 V
-5 -7 V
-5 -6 V
-6 -6 V
-5 -6 V
-5 -6 V
-5 -7 V
-5 -6 V
-5 -6 V
-5 -6 V
-5 -6 V
-5 -6 V
-5 -7 V
-5 -6 V
-5 -6 V
-5 -6 V
-5 -6 V
-5 -7 V
-5 -6 V
-5 -6 V
-5 -6 V
-5 -6 V
-5 -6 V
-1 -2 V
-stroke
-LT2
-LC0 setrgbcolor
-350 1433 M
-5 0 V
-5 0 V
-5 0 V
-5 0 V
-5 0 V
-5 0 V
-5 0 V
-5 0 V
-5 0 V
-5 0 V
-5 0 V
-5 0 V
-5 0 V
-5 0 V
-5 0 V
-5 0 V
-5 0 V
-5 0 V
-5 0 V
-5 0 V
-5 0 V
-5 0 V
-5 0 V
-5 0 V
-5 0 V
-5 0 V
-5 0 V
-5 0 V
-5 0 V
-5 0 V
-5 0 V
-5 0 V
-5 0 V
-5 0 V
-5 0 V
-5 0 V
-5 0 V
-5 0 V
-5 0 V
-6 0 V
-5 0 V
-5 0 V
-5 0 V
-5 0 V
-5 0 V
-5 0 V
-5 0 V
-5 0 V
-5 0 V
-5 0 V
-5 0 V
-5 0 V
-5 0 V
-5 0 V
-5 0 V
-5 0 V
-5 0 V
-5 0 V
-5 0 V
-5 0 V
-5 0 V
-5 0 V
-5 0 V
-5 0 V
-5 0 V
-5 0 V
-5 0 V
-5 0 V
-5 0 V
-5 0 V
-5 0 V
-5 0 V
-5 0 V
-5 0 V
-5 0 V
-5 0 V
-5 0 V
-5 0 V
-5 0 V
-5 0 V
-5 0 V
-5 0 V
-5 0 V
-5 0 V
-5 0 V
-5 0 V
-5 0 V
-5 0 V
-5 0 V
-5 0 V
-5 0 V
-5 0 V
-5 0 V
-5 0 V
-5 0 V
-5 0 V
-5 0 V
-5 0 V
-5 0 V
-stroke
-LT0
-LC1 setrgbcolor
-350 200 M
-1350 817 L
-stroke
-LT2
-LC1 setrgbcolor
-1350 200 M
-0 617 V
-350 817 L
-stroke
-LT0
-LC6 setrgbcolor
-550 200 M
--5 62 V
--20 49 V
-stroke
-1.000 UL
-LTb
-350 1680 M
-350 200 L
-2000 0 V
-0 1480 R
--2000 0 R
-0.700 UP
-stroke
-575 286 M
-[ [(Helvetica) 70.0 0.0 true true 0 (\(1-d)]
-[(Helvetica) 56.0 -21.0 true true 0 (p)]
-[(Helvetica) 70.0 0.0 true true 0 (\)E)]
-[(Helvetica) 56.0 -21.0 true true 0 (p)]
-] -16.3 MLshow
-1000 447 M
-[ [(Helvetica) 120.0 0.0 true true 0 (G)]
-[(Helvetica) 96.0 -36.0 true true 0 (F,p)]
-] -28.0 MLshow
-1.000 UL
-LTb
-stroke
-grestore
-end
-showpage
+%%BeginPageSetup
+GS_pswrite_2_0_1001 begin
+252 180 null setpagesize
+/pagesave save store 197 dict begin
+0.1 0.1 scale
+%%EndPageSetup
+gsave mark
+Q q
+0 0 2520 0 0 1800 ^ Y
+10 w
+K
+350 817 -37 0 S
+160 793 62 51 /7G
+$C
+,f7A/+LiQX3(+F4TL$.T\d>rBf',,rPCKEYX6T$NqWn1\^Xq*6<pQrkV0'1Ics',r<Z2=]V.)eC
+e_S,u%Ltb?Vu~>
+,
+228 844 11 23 /2T
+$X
+2ul,B56*ou%tFo##J^GW"5j:>"5j:>"5lE%5N"ca5N"ca5N"ca5N"ca5Mu~>
+,
+247 747 41 60 /7M
+$C
+0L,U;s8W+eM8BM7&#[8T(Q`"6+Pq`sI5h*`rBL80s8W-!s4UiZf@JRN95Cbt88quj+)?TICPENj"T~>
+,
+350 1433 -37 0 S
+148 1410 29 73 /2X
+$C
+-klX\s8W-!s8W-!s8W-!s8V6^^]0N)s8W,urJ-JBeb=%@hu~>
+,
+180 1363 7M ,
+224 1368 14 20 /0B
+$X
+"+UL3"7Q<c!-eK'!'C6D!'C6D!'C6D"8i9!"8i9!"8i9!"8i9!~>
+,
+247 1378 39 59 /3B
+$C
+22_SI&9R0cU(a+0H;3Yg2u68KoUGm\s3bics8W-!s8W,R9E5%ZV>o:CqcdcOCbV-3[;+2FTYWk~>
+,
+850 200 0 -37 S
+765 76 46 53 /0F
+$C
++p6(UU(D9rV[.n;F9ii&DNK0GVluueJ,]?=mpXj]Nl3np%grZ"2*h[$<V4&e6g=7>gV;KM<n>/\
+_[?l>[0@<_$_R~>
+,
+813 30 7M ,
+857 35 0B ,
+880 47 48 58 /3F
+$C
+4<%Z*N)TcVs8W-!s5Z&ts87gSs8W-!s8Vm!a8c,~>
+,
+1350 200 0 -37 S
+1303 76 0F ,
+1351 30 7M ,
+1850 200 0 -37 S
+1769 76 0F ,
+1817 30 7M ,
+1862 35 0B ,
+1884 45 3B ,
+350 1680 0 -1480 2000 0 P
+350 1680 S
+0.2 i
+2414.51 68 m
+-3.34 -10.02 -9.21 -14 -20.64 -14 c
+-7.62 0 -13.98 1.89 -18.42 5.67 c
+-3.18 2.84 -4.45 5.99 -4.45 11.04 c
+0 9.3 5.38 15.29 13.76 15.29 c
+1.58 0 3.01 -0.11 4.59 -0.33 c
+2.05 -0.33 3.95 -0.55 5.54 -0.55 c
+4.75 0 8.23 2.24 8.23 5.12 c
+0 2.56 -1.91 3.84 -5.54 3.84 c
+-1.27 0 -2.53 0 -5.38 -0.36 c
+-5.22 -0.54 -6.49 -0.72 -7.91 -0.72 c
+-8.07 0 -13.29 5.54 -13.29 14.07 c
+0 9.33 6.66 16.93 14.91 16.93 c
+5.71 0 9.36 -2.49 11.11 -7.46 c
+0.79 -2.33 1.27 -3.58 1.43 -3.89 c
+1.75 -3.42 4.45 -5.29 7.62 -5.29 c
+4.13 0 7.62 3.51 7.62 7.97 c
+0 8.45 -10.84 14.67 -25.65 14.67 c
+-10.04 0 -17.37 -2.24 -23.58 -7.19 c
+-5.74 -4.47 -8.45 -9.42 -8.45 -15.33 c
+0 -5.27 2.39 -10.06 6.38 -13.09 c
+2.23 -1.44 3.67 -2.24 8.62 -4.63 c
+-6.3 -2.23 -9.29 -3.99 -12.12 -7.19 c
+-2.99 -3.35 -4.88 -8.3 -4.88 -12.93 c
+0 -13.73 13.97 -23.63 33.66 -23.63 c
+17.63 0 27.47 6.54 30.66 20.56 c
+h
+f
+269.08 1693 0 14 -36.25 0 P
+-12.61 0 -21.23 -1.44 -28.57 -4.64 c
+-15.48 -7.03 -24.26 -19.5 -24.26 -34.37 c
+0 -10.39 3.98 -20.94 11.29 -29.25 c
+8.27 -9.59 17.34 -13.75 29.9 -13.75 c
+10.81 0 20.04 3.35 27.35 9.89 c
+7.16 6.54 11.46 15.64 11.46 24.26 c
+0 12.13 -9.18 24.1 -25.96 33.84 c
+h
+226.45 1693 m
+13.54 -14.18 16.55 -20.23 16.55 -33.29 c
+0 -16.56 -7.89 -27.71 -19.54 -27.71 c
+-14.49 0 -26.46 16.09 -26.46 35.67 c
+0 15.29 9.77 25.33 24.57 25.33 c
+h
+f
+1 i
+2229 168 121 32 -121 32 P
+350 200 2000 0 S
+2229 168 121 32 -121 32 S
+382 1559 -32 121 -32 -121 P
+350 200 0 1480 S
+382 1559 -32 121 -32 -121 S
+255 0 r3
+350 200 5 12 5 13 5 12 5 12 5 13 5 12 5 13 
+5 12 5 12 5 13 5 12 5 12 5 13 5 12 5 12 
+5 13 5 12 5 13 5 12 5 12 5 13 5 12 5 12 
+5 13 5 12 5 12 5 13 5 12 5 13 5 12 5 12 
+5 13 5 12 5 12 5 13 5 12 5 12 5 13 5 12 
+6 13 5 12 5 12 5 13 5 12 5 12 5 13 5 12 
+5 12 5 13 5 12 5 13 5 12 5 12 5 13 5 12 
+5 12 5 13 5 12 5 12 5 13 5 12 5 13 5 12 
+5 12 5 13 5 12 5 12 5 13 5 12 5 12 5 13 
+5 12 5 13 5 12 5 12 5 13 5 12 5 12 5 13 
+5 12 5 13 5 12 5 12 5 13 5 12 5 12 5 13 
+5 12 5 12 5 13 5 12 5 13 5 12 5 12 5 13 
+5 12 5 12 5 13 5 12 5 12 S
+255 205 r3
+350 200 500 1233 1000 -1233 f
+255 0 r3
+851 1432 5 -6 5 -7 5 -6 5 -6 5 -6 5 -6 5 -6 
+5 -7 5 -6 5 -6 5 -6 5 -6 5 -7 5 -6 5 -6 
+5 -6 5 -6 5 -6 5 -7 6 -6 5 -6 5 -6 5 -6 
+5 -7 5 -6 5 -6 5 -6 5 -6 5 -6 5 -7 5 -6 
+5 -6 5 -6 5 -6 5 -7 5 -6 5 -6 5 -6 5 -6 
+5 -6 5 -7 5 -6 5 -6 5 -6 5 -6 5 -7 5 -6 
+5 -6 5 -6 5 -6 5 -7 5 -6 5 -6 5 -6 5 -6 
+5 -6 5 -7 5 -6 5 -6 5 -6 5 -6 5 -7 5 -6 
+5 -6 5 -6 5 -6 5 -6 5 -7 5 -6 5 -6 5 -6 
+5 -6 5 -7 5 -6 5 -6 5 -6 5 -6 5 -6 5 -7 
+5 -6 5 -6 5 -6 5 -6 5 -7 5 -6 5 -6 5 -6 
+5 -6 5 -6 5 -7 5 -6 5 -6 5 -6 5 -6 5 -7 
+5 -6 5 -6 5 -6 5 -6 6 -6 5 -7 5 -6 5 -6 
+5 -6 5 -6 5 -7 5 -6 5 -6 5 -6 5 -6 5 -6 
+5 -7 5 -6 5 -6 5 -6 5 -6 5 -7 5 -6 5 -6 
+5 -6 5 -6 5 -6 5 -7 5 -6 5 -6 5 -6 5 -6 
+5 -7 5 -6 5 -6 5 -6 5 -6 5 -6 5 -7 5 -6 
+5 -6 5 -6 5 -6 5 -7 5 -6 5 -6 5 -6 5 -6 
+5 -6 5 -7 5 -6 5 -6 5 -6 5 -6 5 -7 5 -6 
+5 -6 5 -6 5 -6 5 -6 5 -7 5 -6 5 -6 5 -6 
+5 -6 5 -7 5 -6 5 -6 5 -6 5 -6 5 -6 5 -7 
+5 -6 5 -6 5 -6 5 -6 5 -7 5 -6 5 -6 5 -6 
+5 -6 5 -6 5 -7 5 -6 6 -6 5 -6 5 -6 5 -7 
+5 -6 5 -6 5 -6 5 -6 5 -6 5 -7 5 -6 5 -6 
+5 -6 5 -6 5 -7 5 -6 5 -6 5 -6 5 -6 5 -6 
+1 -2 S
+[ 20 30 ] 0 d
+350 1433 496 0 S
+[ ] 0 d
+255 0 r5
+350 200 1000 617 S
+[ 20 30 ] 0 d
+1350 200 0 617 -1000 0 S
+[ ] 0 d
+K
+550 200 -5 62 -20 49 S
+350 1680 0 -1480 2000 0 P
+350 1680 S
+580 242 24 94 /0J
+$C
+.EO/BQ_dth<RlLN9DVu+p%n@Xp&Ftls8W-!s7bFNhgaPPhsUL$pAMaShfmoDqf_qB~>
+,
+613 263 30 71 /3J
+$C
+-,fi`s8W-!s8W-!s8V\@A,dnc#=)N6421Uhhu~>
+,
+661 287 31 7 /0N
+$C
+4pCua~>
+,
+694 261 52 75 /3N
+$C
++Taq3JdhG$GY_+2:QU&E#TX'?krh('o]t!+qG7.ks8W,mYQ*>RC[J7+X(oOS@'"0s5k_XpYen9c
+"q)OQs8W,7~>
+,
+754 216 7M ,
+794 242 29 94 /0R
+$C
+5$%WoIbsP*mec_V^[;!Wn)*U2n,Mjks8W,a^]1>6Y?cJ?qHgc*]e?DNQ_dtcoUl~>
+,
+836 263 56 73 /3R
+$C
+2?]ZPaG$8ds8W-!s8W,i%'fj4q%0n4s8W-!s8W,i$=j,9qu~>
+,
+898 216 7M ,
+792 1032 83 92 /0V
+$C
+,/B@"%H)f"K*WM3:kQUq:JF.uT`OA3E=Y>>oFPkJ"uI!h*@IaVdco<J8cG91Vd@,>qZ$M?ng#-G
+s8W,ph?O#ZhuDI2GN=iLqps?tlIu6k>?bfGp(FgB)HO^U$mf>8XG4S,MR@19:r7r$0Vh5J8@W+~>
+,
+881 999 27 70 /3V
+$C
+-Pug_s8W-!s8W-!s8W-!s7rlrs5`2>s8W&p%j8Ecmd:P~>
+,
+916 985 12 24 /0Z
+$X
+49.SG5Cbu6#J^H"!T3t9!:U!X!:U!X!:U!X5O^o,5O^o,5O^o,5O^o,5O^o,~>
+,
+935 978 52 73 /3Z
+$C
+4tls9s8W-!r1#,;%tl#jn=N#,aCk7!%HoaKds?F$rBIt[s6cNZs8W-!m4\LBs'&jt/[!OUlm7dS
+$mjQ/f5%e3$\f?]Jq*~>
+,
+cleartomark end end pagesave restore
+ showpage
+%%PageTrailer
 %%Trailer
-%%DocumentFonts: Symbol Helvetica
 %%Pages: 1
+%%Trailer
+cleartomark
+countdictstack
+exch sub { end } repeat
+restore
+%%EOF

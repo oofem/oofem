@@ -426,22 +426,6 @@ double Element ::  giveCharacteristicValue(CharType mtrx, TimeStep *tStep)
     return 0.;
 }
 
-void Element :: giveMatLocalCS(FloatMatrix &answer) {
-    int i, j;
-    answer.resize(3, 3);
-    answer.zero();
-    if ( ( this->matLocalCS ).isNotEmpty() ) {
-        for ( i = 1; i <= 3; i++ ) {
-            for ( j = 1; j <= 3; j++ ) {
-                answer.at(i, j) = this->matLocalCS.at(i, j);
-            }
-        }
-    } else   {
-        answer.beUnitMatrix();
-    }
-}
-
-
 
 IRResultType
 Element :: initializeFrom(InputRecord *ir)
@@ -467,12 +451,14 @@ Element :: initializeFrom(InputRecord *ir)
     boundaryLoadArray.resize(0);
     IR_GIVE_OPTIONAL_FIELD(ir, boundaryLoadArray, IFT_Element_boundaryload, "boundaryloads"); // Macro
 
-    if ( ir->hasField(IFT_Element_mlcs, "mlcs") ) { //material local coordination system
+    matLocalCS.resize(0, 0);
+
+    if ( ir->hasField(IFT_Element_lcs, "lcs") ) { //local coordinate system
         double n1 = 0.0, n2 = 0.0;
         int j;
         FloatArray triplets;
         triplets.resize(0);
-        IR_GIVE_OPTIONAL_FIELD(ir, triplets, IFT_Element_mlcs, "mlcs");
+        IR_GIVE_OPTIONAL_FIELD(ir, triplets, IFT_Element_lcs, "lcs");
         matLocalCS.resize(3, 3);
         for ( j = 1; j <= 3; j++ ) {
             matLocalCS.at(j, 1) = triplets.at(j);
@@ -867,6 +853,20 @@ Element :: giveLenghtInDir(const FloatArray &normalToCrackPlane)
 
     return maxDis - minDis;
 }
+
+//local orientation on beams and trusses is overridden by derived classes
+int
+Element :: giveLocalCoordinateSystem(FloatMatrix &answer){
+    if(matLocalCS.isNotEmpty()){
+        answer = matLocalCS;
+        return 1;
+    }
+    else{
+        answer.beEmptyMtrx();
+    }
+    return 0;
+}
+
 
 FloatArray *
 Element :: ComputeMidPlaneNormal(GaussPoint *)

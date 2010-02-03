@@ -132,15 +132,13 @@ int CompoDamageMat :: giveInputRecordString(std :: string &str, bool keyword)
 //called at the beginning of each time increment (not iteration), no influence of parameter
 void CompoDamageMat :: give3dMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime)
 {
-    FloatMatrix *rotationMatrix;
+    FloatMatrix rotationMatrix;
 
     //already with reduced components
     this->giveUnrotated3dMaterialStiffnessMatrix(answer, gp);
-    rotationMatrix = this->giveMatStiffRotationMatrix(gp);
-    //(*rotationMatrix).printYourself();
-    answer.rotatedWith(* rotationMatrix);
-    //answer.printYourself();
-    delete rotationMatrix;
+    if( this->giveMatStiffRotationMatrix(rotationMatrix, gp) ){//material rotation due to lcs
+        answer.rotatedWith(rotationMatrix);
+    }
 }
 
 //called in each iteration, support for 3D and 1D material mode
@@ -152,7 +150,7 @@ void CompoDamageMat :: giveRealStressVector(FloatArray &answer,  MatResponseForm
     Element *element = gp->giveElement();
     FloatArray strainVectorL(6), stressVectorL(6), tempStressVectorL(6), reducedTotalStrainVector(6), ans, equilStressVectorL(6), equilStrainVectorL(6), charLenModes(6);
     FloatArray *inputFGf;
-    FloatMatrix de, elementCs;
+    FloatMatrix de, elementCs(3,3);
     MaterialMode mMode = gp->giveMaterialMode();
 
     st->Iteration++;//increase the call number at IP
@@ -164,7 +162,10 @@ void CompoDamageMat :: giveRealStressVector(FloatArray &answer,  MatResponseForm
     switch ( mMode ) {
     case _3dMat: //applies only for 3D
     {
-        element->giveMatLocalCS(elementCs); //if mlcs undefined, returns unix matrix
+        if ( !element->giveLocalCoordinateSystem(elementCs) ){//lcs undefined
+            elementCs.resize(3,3);
+            elementCs.beUnitMatrix();
+        }
 
         //first run
         if ( st->elemCharLength.at(1) == 0. ) {
@@ -440,16 +441,17 @@ void CompoDamageMat :: giveUnrotated3dMaterialStiffnessMatrix(FloatMatrix &answe
 }
 
 //returns material rotation stiffness matrix [6x6]
-FloatMatrix *CompoDamageMat :: giveMatStiffRotationMatrix(GaussPoint *gp) {
-    FloatMatrix t(3, 3), answer, elementCs;
+int CompoDamageMat :: giveMatStiffRotationMatrix(FloatMatrix &answer, GaussPoint *gp) {
+    FloatMatrix t(3, 3);
     StructuralElement *element = ( StructuralElement * ) gp->giveElement();
 
-    element->giveMatLocalCS(t); //if mlcs undefined, returns unix matrix
-    //t.printYourself();
+    if ( !element->giveLocalCoordinateSystem(t) ) {//lcs not defined on element
+        return 0;
+    }
 
     //rotate from unrotated (base) c.s. to local material c.s.
     this->giveStrainVectorTranformationMtrx(answer, t);
-    return answer.GiveCopy();
+    return 1;
 }
 
 //determine characteristic fracture area for three orthogonal cracks, based on the size of element (crack band model). Since the orientation of cracks is aligned with the orientation of material, determination is based only on the geometry (not on the direction of principal stress etc.). Assumption that fracture localizes into all integration points on element. Material orientation in global c.s. is passed. Called in the first run

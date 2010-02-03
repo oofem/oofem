@@ -231,7 +231,7 @@ protected:
      * @param gp integration point
      * @returns pointer to matrix
      */
-    FloatMatrix *giveMatStiffRotationMatrix(GaussPoint *gp);
+    int giveMatStiffRotationMatrix(FloatMatrix &answer, GaussPoint *gp);
 
     /// Six stress components of tension components read from the input file
     FloatArray inputTension;

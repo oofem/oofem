@@ -9,7 +9,7 @@
 \renewcommand{\textfraction}{0.01}	% only 1% of page must to be the text
 \renewcommand{\floatpagefraction}{0.99} % 99% of whole page can be a float
 \setcounter{totalnumber}{5} %maximum floating objects on one page
-    
+
 \newcommand{\mbf}[1]{\mbox{\boldmath$#1$}}
 \newcommand{\descitem}[1]{{\noindent \bf #1}}
 \newcommand{\elemkeyword}[1]{\descitem{Keyword}~{\em #1}}
@@ -131,9 +131,7 @@ Linear orthotropic, linear elastic  material model. The model parameters are sum
 in table~\ref{OrthoLE_table}.
 Local coordinate system, which determines axes of material orthotrophy
 can by specified using \param{lcs} array. This array contains six numbers,
-where first three numbers represent directional vector of local
-x-axis, and next three numbers represent directional vector of local
-y-axis. The local z-axis is determined using vector product.
+where the first three numbers represent directional vector of a local x-axis, and next three numbers represent directional vector of a local y-axis. The local z-axis is determined using the vector product.
 The right-hand coordinate system is assumed. Local coordinate system
 can also be specified using \param{scs} parameter. Then local coordinate
 system is specified in so called ``shell''
@@ -756,7 +754,8 @@ in table~\ref{rcsd_table}.
 %\begin{center}
 \begin{tabular}{|l|p{9cm}|}
 \hline
-Description & RC-SD model for concrete\\
+Description & Smeared rotating crack model with transition to scalar
+damage - linear softening\\
 \hline
 Record Format & \descitem{RCSD} \elemparam{d}{rn} \elemparam{E}{rn}
 \elemparam{n}{rn} \elemparam{Gf}{rn} \elemparam{Ft}{rn} \elemparam{sdtransitioncoeff}{rn} \elemparam{tAlpha}{rn} \\
@@ -792,7 +791,8 @@ same as for the RC-SD model with linear softening law (see section~\ref{rcsd}).
 %\begin{center}
 \begin{tabular}{|l|p{9cm}|}
 \hline
-Description & RC-SD model for concrete with exponential softening law\\
+Description & Smeared rotating crack model with transition to scalar
+damage - exponential softening\\
 \hline
 Record Format & \descitem{RCSDE} \elemparam{d}{rn} \elemparam{E}{rn}
 \elemparam{n}{rn} \elemparam{Gf}{rn} \elemparam{Ft}{rn} \elemparam{sdtransitioncoeff}{rn} \elemparam{tAlpha}{rn} \\
@@ -842,7 +842,7 @@ in table~\ref{rcsdnl_table}.
 %\begin{center}
 \begin{tabular}{|l|p{9cm}|}
 \hline
-Description & RC-SD-NL model for concrete\\
+Description & Nonlocal smeared rotating crack model with transition to scalar damage for concrete\\
 \hline
 Record Format & \descitem{RCSDNL} \elemparam{d}{rn} \elemparam{E}{rn}
 \elemparam{n}{rn}  \elemparam{Ft}{rn}
@@ -906,7 +906,7 @@ which will otherwise occur to preserve correct amount of dissipated energy for l
 %\begin{center}
 \begin{tabular}{|l|p{9cm}|}
 \hline
-Description & Isotropic damage model  for concrete in tension\\
+Description & Isotropic damage model for concrete in tension\\
 \hline
 Record Format & \descitem{idm1} \elemparam{d}{rn} \elemparam{E}{rn}
 \elemparam{n}{rn}  \elemparam{e0}{rn}
@@ -915,7 +915,7 @@ Parameters &- \param{num} material model number\\
 &- \param{d} material density\\
 &- \param{E} Young modulus\\
 &- \param{n} Poisson ratio\\
-&- \param{ef} crack opening (not strain) when tension stress vanishes\\
+&- \param{ef} crack opening (not strain) when the tension stress vanishes\\
 &- \param{e0} max effective strain at peak\\
 &- \param{tAlpha} thermal dilatation coefficient\\
 &- \param{equivstraintype} Allows to choose from different definitions
@@ -1533,7 +1533,7 @@ Supported modes& 3dMat\\
 
 \clearpage
 
-\subsection{Material model for composite brittle damage}
+\subsection{Orthotropic damage model with fixed crack orientations for composites}
 
 The model is designed for transversely isotropic elastic material defined by five elastic material constants. Typical example is a carbon fiber tow. Axis $1$ represents the material principal direction. The orthotropic material constants are defined as
 \begin{eqnarray}
@@ -1542,7 +1542,7 @@ G_{12}=G_{13}=G_{21}=G_{31},G_{23}=G_{32}\\
 \frac{\nu_{12}=\nu_{13}}{E_{11}} = \frac{\nu_{21}=\nu_{31}}{E_{22}},~\frac{\nu_{31}=\nu_{21}}{E_{33}} = \frac{\nu_{13}=\nu_{12}}{E_{11}}
 \end{eqnarray}
 
-Material orientation on finite element can be specified with {\it mlcs} optional parameter. If unspecified, material orientation is the same as the global coordinate system. This array contains six numbers,
+Material orientation on a finite element can be specified with \param{lcs} optional parameter. If unspecified, material orientation is the same as the global coordinate system. \param{lcs} array contains six numbers,
 where first three numbers represent directional vector of the local $x$-axis, and next three numbers represent directional vector of the local $y$-axis with the reference to the global coordinate system. The composite material is extended to 1D and is also suitable for trusses. In such particular case, only the $xx$ components are considered.
 
 The index $p,~p\in\{11,22,33,23,31,12\}$ symbolizes six components of stress or strain vectors. The linear softening occurs after reaching a critical stress $f_{p,0}$, see Fig. \ref{comp_softening}. Orientation of cracks is assumed to be orthogonal and aligned with an orientation of material axes \cite[pp.236]{Bazant:98}. The transverse isotropy is generally lost upon fracture, material becomes orthotropic and six damage parameters $d_p$ are introduced.
@@ -1601,6 +1601,8 @@ Damage is always controled not to decrease. Fig.~\ref{comp_performance} shows a 
 
 The damage initiation is based on a trial stress. It becomes necessary for  higher precision to skip a few first iteration, typically 5, and then to introduce damage. A parameter \param{afterIter} is designed for this purpose and \param{MinIter} forces a solver always to proceed certain amount of iterations.
 
+\param{allowSnapBack} skips the checking of sufficient fracture energy for each direction. If not specified, all directions are checked to prevent snap-back which dissipates incorrect amount of energy.
+
 
 \begin{figure}[!htb]
 \begin{htmlonly}
@@ -1613,19 +1615,19 @@ The damage initiation is based on a trial stress. It becomes necessary for  high
 \centerline{\includegraphics[width=0.7\textwidth]{Compodamagemat_test.eps}}
 \fi
 %end{latexonly}
-  \caption{Typical loading/unloading material performance for homogenized stress and strain in direction$_{11}$. Note that one damage parameter is common for both tension and compression.}
+  \caption{Typical loading/unloading material performance for homogenized stress and strain in the direction `${2}$'. Note that one damage parameter is common for both tension and compression.}
   \label{comp_performance}
 \end{figure}
 
 \begin{table}[!htb]
 \begin{tabular}{|l|p{9cm}|}
 \hline
-Description & Material for composite brittle damage\\
+Description & Orthotropic damage model with fixed crack orientations for composites\\
 \hline
 Record Format & \descitem{compdammat}  \elemparam{num}{in}
 \elemparam{d}{rn} \elemparam{Exx}{rn} \elemparam{EyyEzz}{rn}
 \elemparam{nuxynuxz}{rn} \elemparam{nuyz}{rn} \elemparam{GxyGxz}{rn}
-[\elemparam{Tension\_f0\_Gf}{rn}] [\elemparam{Compres\_f0\_Gf}{rn}] (\elemparam{afterIter}{in})\\
+\elemparam{Tension\_f0\_Gf}{ra} \elemparam{Compres\_f0\_Gf}{ra} [\elemparam{afterIter}{in}] [\elemparam{allowSnapBack}(ia)]\\
 Parameters
 &- \param{num} material model number\\
 &- \param{d} material density\\
@@ -1638,9 +1640,10 @@ Parameters
 &- \param{Compres\_f0\_Gf} array with six pairs of numbers. Each pair desribes maximum stress in compression (given as a negative number) and positive fracture energy for each direction ($xx$, $yy$, $zz$, $yz$, $zx$, $xy$)\\
 Supported modes& 3dMat, 1dMat\\
 &- \param {afterIter} how many iterations must pass until damage is computed from strains, zero is default. User must ensure that the solver proceeds the minimum number of iterations.\\
+&- \param {allowSnapBack} array to skip checking for snap-back. The array members are 1-6 for tension and 7-12 for compression components.\\
 \hline
 \end{tabular}
-\caption{Brittle damage for composites - summary.}
+\caption{Orthotropic damage model with fixed crack orientations for composites - summary.}
 \label{compdammat_table}
 \end{table}
 

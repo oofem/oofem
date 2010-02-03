@@ -294,13 +294,6 @@ public:
     //virtual MaterialMode          giveMaterialMode() {return _Unknown;}
     // vector of nodal unknowns
 
-    /**
-     * Gives transformation matrix Global=T*Local for material orientation on element. Only if defined by mlcs on element
-     * @param answer transformation matrix 3x3
-     */
-    virtual void giveMatLocalCS(FloatMatrix &answer);
-
-
     /**@name General element functions */
     //@{
     /**
@@ -649,14 +642,12 @@ public:
     // if local c.s == global c.s returns NULL
     /**
      * Returns local coordinate system of receiver. Required by material models with
-     * ortho and anisotrophy. If local system is equal to global one, can set answer to empty mtrx
+     * ortho and anisotrophy. If local system is equal to global one, set answer to empty mtrx
      * and return zero value.
      * @return nonzero if answer computed, zero value if answer is empty, i.e. no transformation is necessary.
      */
-    virtual int  giveLocalCoordinateSystem(FloatMatrix &answer) {
-        answer.beEmptyMtrx();
-        return 0;
-    }
+    virtual int  giveLocalCoordinateSystem(FloatMatrix &answer);
+
     // mid-plane normal at gaussPoint - for materials with orthotrophy
     // valid only for plane elements in space (3d)  (shells, plates, ....)
     /**

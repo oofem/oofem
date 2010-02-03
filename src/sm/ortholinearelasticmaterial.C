@@ -118,8 +118,9 @@ OrthotropicLinearElasticMaterial :: initializeFrom(InputRecord *ir)
 
     // Read local coordinate system of principal axes of ortotrophy
     // in localCoordinateSystem the unity vectors are stored
-    // COLUMWISE (this is exception, but allows faster numerical
+    // COLUMNWISE (this is exception, but allows faster numerical
     // implementation)
+    // if you wish to align local material orientation with element, use "mlcs" keyword as an element parameter
 
     // try to read lcs section
     triplets.resize(0);
@@ -314,7 +315,7 @@ OrthotropicLinearElasticMaterial :: GiveTensorRotationMatrix(GaussPoint *gp)
 
     elementCsFlag = element->giveLocalCoordinateSystem(elementCs);
     //
-    // in localCoordinateSystem the directional cosines are stored columwise(exception)
+    // in localCoordinateSystem the directional cosines are stored columwise (exception)
     // in elementCs rowwise.
     //
     if ( this->cs_type == localCS ) {
@@ -389,7 +390,7 @@ FloatMatrix *
 OrthotropicLinearElasticMaterial :: GiveRotationMatrix(GaussPoint *gp)
 //
 // returns [6,6] rotation matrix from local principal axes of material
-// to local axes used at the gp (element) level
+// to local axes used at the gp (element) level for beams and trusses
 // at element level is implemented next transformation to global cs.
 //
 //
@@ -524,8 +525,8 @@ void
 OrthotropicLinearElasticMaterial :: giveThermalDilatationVector(FloatArray &answer,
                                                                 GaussPoint *gp, TimeStep *tStep)
 //
-// returns a FloatArray(3) of coefficients of thermal dillatation in direction
-// of each (local) axisgiven by element lcs.
+// returns a FloatArray(3) of coefficients of thermal dilatation in direction
+// of each (local) axis given by element lcs.
 //
 {
     FloatMatrix *transf;
