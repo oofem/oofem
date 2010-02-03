@@ -135,7 +135,7 @@ void CompoDamageMat :: give3dMaterialStiffnessMatrix(FloatMatrix &answer, MatRes
     FloatMatrix rotationMatrix;
 
     //already with reduced components
-    this->giveUnrotated3dMaterialStiffnessMatrix(answer, gp);
+    this->giveUnrotated3dMaterialStiffnessMatrix(answer, mode, gp);
     if( this->giveMatStiffRotationMatrix(rotationMatrix, gp) ){//material rotation due to lcs
         answer.rotatedWith(rotationMatrix);
     }
@@ -181,7 +181,7 @@ void CompoDamageMat :: giveRealStressVector(FloatArray &answer,  MatResponseForm
 
         //damage criteria based on stress, assuming same damage parameter for tension/compression
         //determine unequilibrated stress vector
-        this->giveUnrotated3dMaterialStiffnessMatrix(de, gp);
+        this->giveUnrotated3dMaterialStiffnessMatrix(de, SecantStiffness, gp);
         tempStressVectorL.beProductOf(de, strainVectorL);
         i_max = 6;
         break;
@@ -319,7 +319,7 @@ void CompoDamageMat :: giveRealStressVector(FloatArray &answer,  MatResponseForm
     switch ( mMode ) {
     case _3dMat: {
         //already with reduced stiffness components in local c.s.
-        this->giveUnrotated3dMaterialStiffnessMatrix(de, gp);
+        this->giveUnrotated3dMaterialStiffnessMatrix(de, SecantStiffness, gp);
         //de.printYourself();
         //in local c.s.
         stressVectorL.beProductOf(de, strainVectorL);
@@ -395,7 +395,7 @@ CompoDamageMat :: giveIntVarCompFullIndx(IntArray &answer, InternalStateType typ
 }
 
 
-void CompoDamageMat :: giveUnrotated3dMaterialStiffnessMatrix(FloatMatrix &answer, GaussPoint *gp) {
+void CompoDamageMat :: giveUnrotated3dMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp) {
     double denom;
     double ex, ey, ez, nxy, nxz, nyz, gyz, gzx, gxy;
     double a, b, c, d, e, f;
@@ -424,6 +424,10 @@ void CompoDamageMat :: giveUnrotated3dMaterialStiffnessMatrix(FloatMatrix &answe
     d = 1. - st->tempOmega.at(4);
     e = 1. - st->tempOmega.at(5);
     f = 1. - st->tempOmega.at(6);
+
+    if (mode == ElasticStiffness){
+        a=b=c=d=e=f=0.;
+    }
 
     denom = -ey * ex + ex * nyz * nyz * b * c * ez + nxy * nxy * a * b * ey * ey + 2 * nxy * a * b * ey * nxz * nyz * c * ez + nxz * nxz * a * ey * c * ez;
 

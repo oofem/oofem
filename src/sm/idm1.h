@@ -176,7 +176,7 @@ class IsotropicDamageMaterial1 : public IsotropicDamageMaterial, public RandomMa
      * This class implements a simple local isotropic damage model for concrete in tension
      *
      * A model is based on isotropic damage concept, assuming that damage evolution law
-     * is postulated in explicit form, relatin damage parameter (omega) to scalar measure
+     * is postulated in explicit form, relating damage parameter (omega) to scalar measure
      * of the largest strain level ever reached in material (kappa).
      *
      * TASK
@@ -303,7 +303,7 @@ public:
      * by unique int id. Intgeration point also passed to allow for materials with spatially
      * varying properties
      * @param aProperty id of peroperty requested
-     * @param gp intgration point, 
+     * @param gp intgration point,
      * @return property value
      */
     double   give(int aProperty, GaussPoint* gp);

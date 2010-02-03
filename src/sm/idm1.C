@@ -214,9 +214,9 @@ IsotropicDamageMaterial1 :: computeDamageParam(double &omega, double kappa, cons
         double R, Lhs, E, Ft, help;
 
         //
-        // iteration to achieve objectivity
-        // we are finding state, where elastic stress is equal to
-        // stress from crack-opening relation (ef = wf characterizes the crack opening diagram)
+        // iterations with Newton-Raphson method to achieve mesh objectivity
+        // we are finding a state, where the elastic stress is equal to
+        // the stress from crack-opening relation (ef = wf characterizes the crack opening diagram)
 
         omega = 0.0;
         E = this->giveLinearElasticMaterial()->give('E',gp);

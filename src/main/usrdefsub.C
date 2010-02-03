@@ -168,6 +168,7 @@
 #include "rcsdnl.h"
 #include "m4.h"
 #include "idm1.h"
+#include "idm2.h"
 #include "idmnl1.h"
 #include "mazarsmodel.h"
 #include "mazarsmodelnl.h"
@@ -589,6 +590,8 @@ Material *CreateUsrDefMaterialOfType(char *aClass, int number, Domain *domain)
         newMaterial = new M4Material(number, domain);
     } else if ( !strncasecmp(aClass, "idm1", 4) ) {
         newMaterial = new IsotropicDamageMaterial1(number, domain);
+    } else if ( !strncasecmp(aClass, "idm2", 4) ) {
+        newMaterial = new IsotropicDamageMaterial2(number, domain);
     } else if ( !strncasecmp(aClass, "idmnl1", 6) ) {
         newMaterial = new IDNLMaterial(number, domain);
     } else if ( !strncasecmp(aClass, "mazarsmodelnl", 13) ) {
@@ -818,7 +821,7 @@ ExportModule *CreateUsrDefExportModuleOfType(char *aClass, EngngModel *emodel)
     } else if ( !strncasecmp(aClass, "hom", 3) ) {
         answer = new HOMExportModule(emodel);
     } else if (! strncasecmp(aClass,"dm",2)) {
-   	answer = new DofManExportModule(emodel);    
+   	answer = new DofManExportModule(emodel);
     }
 #endif //__SM_MODULE
 

@@ -451,7 +451,7 @@ Element :: initializeFrom(InputRecord *ir)
     boundaryLoadArray.resize(0);
     IR_GIVE_OPTIONAL_FIELD(ir, boundaryLoadArray, IFT_Element_boundaryload, "boundaryloads"); // Macro
 
-    matLocalCS.resize(0, 0);
+    elemLocalCS.resize(0, 0);
 
     if ( ir->hasField(IFT_Element_lcs, "lcs") ) { //local coordinate system
         double n1 = 0.0, n2 = 0.0;
@@ -459,26 +459,26 @@ Element :: initializeFrom(InputRecord *ir)
         FloatArray triplets;
         triplets.resize(0);
         IR_GIVE_OPTIONAL_FIELD(ir, triplets, IFT_Element_lcs, "lcs");
-        matLocalCS.resize(3, 3);
+        elemLocalCS.resize(3, 3);
         for ( j = 1; j <= 3; j++ ) {
-            matLocalCS.at(j, 1) = triplets.at(j);
+            elemLocalCS.at(j, 1) = triplets.at(j);
             n1 += triplets.at(j) * triplets.at(j);
-            matLocalCS.at(j, 2) = triplets.at(j + 3);
+            elemLocalCS.at(j, 2) = triplets.at(j + 3);
             n2 += triplets.at(j + 3) * triplets.at(j + 3);
         }
 
         n1 = sqrt(n1);
         n2 = sqrt(n2);
         for ( j = 1; j <= 3; j++ ) { // normalize e1' e2'
-            matLocalCS.at(j, 1) /= n1;
-            matLocalCS.at(j, 2) /= n2;
+            elemLocalCS.at(j, 1) /= n1;
+            elemLocalCS.at(j, 2) /= n2;
         }
 
         // vector e3' computed from vector product of e1', e2'
-        matLocalCS.at(1, 3) = ( matLocalCS.at(2, 1) * matLocalCS.at(3, 2) - matLocalCS.at(3, 1) * matLocalCS.at(2, 2) );
-        matLocalCS.at(2, 3) = ( matLocalCS.at(3, 1) * matLocalCS.at(1, 2) - matLocalCS.at(1, 1) * matLocalCS.at(3, 2) );
-        matLocalCS.at(3, 3) = ( matLocalCS.at(1, 1) * matLocalCS.at(2, 2) - matLocalCS.at(2, 1) * matLocalCS.at(1, 2) );
-        //matLocalCS.printYourself();
+        elemLocalCS.at(1, 3) = ( elemLocalCS.at(2, 1) * elemLocalCS.at(3, 2) - elemLocalCS.at(3, 1) * elemLocalCS.at(2, 2) );
+        elemLocalCS.at(2, 3) = ( elemLocalCS.at(3, 1) * elemLocalCS.at(1, 2) - elemLocalCS.at(1, 1) * elemLocalCS.at(3, 2) );
+        elemLocalCS.at(3, 3) = ( elemLocalCS.at(1, 1) * elemLocalCS.at(2, 2) - elemLocalCS.at(2, 1) * elemLocalCS.at(1, 2) );
+        //elemLocalCS.printYourself();
     }
 
 #ifdef __PARALLEL_MODE
@@ -857,8 +857,8 @@ Element :: giveLenghtInDir(const FloatArray &normalToCrackPlane)
 //local orientation on beams and trusses is overridden by derived classes
 int
 Element :: giveLocalCoordinateSystem(FloatMatrix &answer){
-    if(matLocalCS.isNotEmpty()){
-        answer = matLocalCS;
+    if(elemLocalCS.isNotEmpty()){
+        answer = elemLocalCS;
         return 1;
     }
     else{

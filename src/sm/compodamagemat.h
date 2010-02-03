@@ -225,11 +225,13 @@ protected:
      * @param answer full symmetric matrix
      * @param gp integration point
      */
-    void giveUnrotated3dMaterialStiffnessMatrix(FloatMatrix &answer, GaussPoint *gp);
+    void giveUnrotated3dMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp);
     /**
-     * Returns [6x6] rotation matrix in global coordinate system. The matrix relates local c.s. to global c.s. Local c.s. can be specified with 'lmcs' flag defined on element.
+     * Returns [6x6] rotation matrix in the global coordinate system. The matrix relates local c.s. to global c.s. Local c.s. can be specified with 'mcs' flag defined on element.
+     * @param answer full symmetric matrix [6x6]
+     * @param mode material mode of stiffness matrix (elastic, secant)
      * @param gp integration point
-     * @returns pointer to matrix
+     * @returns 0 if no lcs is defined on element, 1 if defined
      */
     int giveMatStiffRotationMatrix(FloatMatrix &answer, GaussPoint *gp);
 
@@ -255,8 +257,9 @@ protected:
      */
     void giveCharLengthForModes(FloatArray &charLenModes, GaussPoint *gp);
     /**
-    * Check that elemnt is small or Gf large enough to prevent snap-back
+    * Check that element is small enough or Gf is large enough to prevent the snap-back
     * @param gp integration point
+    * @param mMode type of material (_1dMat, _3dMat supported)
     */
     void checkSnapBack(GaussPoint *gp, MaterialMode mMode);
 };

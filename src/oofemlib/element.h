@@ -181,7 +181,7 @@ protected:
     /**
      * Transformation material matrix, used in orthotropic and anisotropic materials, global->local transformation
      */
-    FloatMatrix matLocalCS;
+    FloatMatrix elemLocalCS;
 
 
 #if defined ( __PARALLEL_MODE ) || defined ( __ENABLE_COMPONENT_LABELS )

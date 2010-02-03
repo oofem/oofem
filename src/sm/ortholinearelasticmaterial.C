@@ -120,7 +120,7 @@ OrthotropicLinearElasticMaterial :: initializeFrom(InputRecord *ir)
     // in localCoordinateSystem the unity vectors are stored
     // COLUMNWISE (this is exception, but allows faster numerical
     // implementation)
-    // if you wish to align local material orientation with element, use "mlcs" keyword as an element parameter
+    // if you wish to align local material orientation with element, use "lcs" keyword as an element parameter
 
     // try to read lcs section
     triplets.resize(0);
