@@ -81,6 +81,9 @@ protected:
     char **inputStreamNames;
     /// Associated time function for time step increment
     int dtTimeFunction;
+    /// Constant multiplier, optional input parameter. This parameter determines the ratio of
+    /// two consecutive time steps. Efficient for creep and relaxation analyses.
+    double stepMultiplier;
 
 public:
     /**

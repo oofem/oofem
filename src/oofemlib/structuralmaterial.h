@@ -333,8 +333,8 @@ public:
     // FloatArray*  ReduceStressStrainVector (MatResponseForm,GaussPoint* gp,
     //              FloatArray* vec);
     /**
-     * Method for sustracting from reduced space strain vector its stress independent parts
-     * (caused by temperature, shrinkage, creep and possibly by other phenomenons).
+     * Method for subtracting from reduced space strain vector its stress-independent parts
+     * (caused by temperature, shrinkage, creep and possibly by other phenomena).
      * Calls StructuralElement::computeStressIndependentStrainVector to obtain stress
      * independent part of strain.
      * @param answer computed strain vector
@@ -388,7 +388,7 @@ public:
     void giveReducedCharacteristicVector(FloatArray &answer, GaussPoint *,
                                          const FloatArray &charVector3d);
     /**
-     * Computes full form of stress/strain from its reduced form, based on stress/strainn mode
+     * Computes full form of stress/strain from its reduced form, based on stress/strain mode
      * stored in given integration point.
      * @param answer full form of stress/strain vector
      * @param gp integration point
@@ -424,7 +424,7 @@ protected:
      * This is general method, how to obtain compliance matrix corresponding to specific mode
      * from general 3d compliance. Therefore, it is only necessary to implement algorithm for
      * computing general 3d compliance. Howewer, this reduction is quite time consuming
-     * and if it is possible, it is recomended to provide direct methods for computing
+     * and if it is possible, it is recommended to provide direct methods for computing
      * particular compilances for supported material modes.
      * @param answer reduced compliance matrix
      * @param form material response form
@@ -757,7 +757,6 @@ protected:
     friend class StructuralCrossSection;
     friend class SimpleCrossSection;
     friend class LayeredCrossSection;
-    //friend class MaxwellChainMaterial;
     friend class RheoChainMaterial;
 };
 

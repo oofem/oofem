@@ -192,6 +192,7 @@ enum InputFieldType {
 
     IFT_StaggeredProblem_deltat,
     IFT_StaggeredProblem_dtf,
+    IFT_StaggeredProblem_stepmultiplier,
     IFT_StaggeredProblem_prob1,
     IFT_StaggeredProblem_prob2,
 
@@ -496,6 +497,13 @@ enum InputFieldType {
     IFT_B3Material_q5,
     IFT_B3Material_kt,
     IFT_B3Material_EpsSinf,
+    IFT_B3Material_microprestress,
+    IFT_B3Material_c0,
+    IFT_B3Material_c1,
+    IFT_B3Material_ksh,
+    IFT_B3Material_ts0,
+    IFT_B3Material_finalhumidity,
+    IFT_B3Material_initialhumidity,
 
     IFT_CebFip78Material_e28,
     IFT_CebFip78Material_fibf,

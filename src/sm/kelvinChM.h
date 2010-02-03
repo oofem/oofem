@@ -172,6 +172,11 @@ protected:
     virtual double       giveEModulus(GaussPoint *gp, TimeStep *atTime);
 
     LinearElasticMaterial *giveLinearElasticMaterial();
+
+    /// this is a modified function from its parent - now it is possible to get a timescale for times < 0.1
+    void         generateLogTimeScale(FloatArray &answer, double from, double to, int nsteps,
+                                      int fromIncluded = 0);
+    const FloatArray &giveDiscreteTimes();
 };
 
 } // end namespace oofem

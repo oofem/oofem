@@ -248,6 +248,7 @@ enum classType {
     Concrete2MaterialStatusClass,
     MaxwellChainMaterialStatusClass,
     KelvinChainMaterialStatusClass,
+    B3SolidMaterialStatusClass,
     RCMMaterialStatusClass,
     RCSDMaterialClass,
     RCSDEMaterialClass,

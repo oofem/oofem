@@ -121,7 +121,7 @@ B3Material :: initializeFrom(InputRecord *ir)
 
 
     w = wc * c;
-    E28 = 4734. * sqrt(fc);
+    E28 = 4734. * sqrt(fc); // or 4733. ?
     if (mode == 0) this->predictParametersFrom(fc, c, wc, ac, t0, alpha1, alpha2);
     return IRRT_OK;
 }
@@ -184,7 +184,8 @@ B3Material :: predictParametersFrom(double fc, double c, double wc, double ac,
 
     // Basic creep parameters
 
-    q1  = 0.6e6 / E28;
+    // q1  = 0.6e6 / E28;
+    q1  = 127*__OOFEM_POW(fc, -0.5);
     q2  = 185.4 * __OOFEM_POW(c, 0.5) * __OOFEM_POW(fc, -0.9);
     q3  = 0.29 * __OOFEM_POW(wc, 4.) * q2;
     q4  = 20.3 * __OOFEM_POW(ac, -0.7);
@@ -192,8 +193,10 @@ B3Material :: predictParametersFrom(double fc, double c, double wc, double ac,
     // Shrinkage
 
     if ( this->shMode == B3_AverageShrinkage ) {
-        kt = 85220 * __OOFEM_POW(t0, -0.08) * __OOFEM_POW(fc, -0.25);
-        EpsSinf = alpha1 * alpha2 * ( 1.9e-2 * __OOFEM_POW(w, 2.1) * __OOFEM_POW(fc, -0.25) + 270. );
+      // the exact value converted from US units would be 85220
+      // but this is the SI formula presented in Inelastic Analysis
+        kt = 85000 * __OOFEM_POW(t0, -0.08) * __OOFEM_POW(fc, -0.25);
+        EpsSinf = alpha1 * alpha2 * ( 1.9e-2 * __OOFEM_POW(w, 2.1) * __OOFEM_POW(fc, -0.28) + 270. );
 
         // Creep at drying
 

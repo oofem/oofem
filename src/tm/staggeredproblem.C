@@ -77,6 +77,7 @@ StaggeredProblem :: StaggeredProblem(int i, EngngModel *_master) : EngngModel(i,
     }
 
     dtTimeFunction = 0;
+    stepMultiplier = 0;
 }
 
 StaggeredProblem ::  ~StaggeredProblem()
@@ -112,7 +113,7 @@ StaggeredProblem :: instanciateSlaveProblems()
 
     for ( i = 1; i <= nModels; i++ ) {
         OOFEMTXTDataReader dr(inputStreamNames [ i - 1 ]);
-        slaveProb = InstanciateProblem(& dr, this->pMode, this->contextOutputMode, this);
+        slaveProb = oofem :: InstanciateProblem(& dr, this->pMode, this->contextOutputMode, this);
         emodelList->put(i, slaveProb);
     }
 
@@ -137,6 +138,9 @@ StaggeredProblem :: initializeFrom(InputRecord *ir)
         ndomains = 0;
     }
 
+    IR_GIVE_OPTIONAL_FIELD(ir, stepMultiplier, IFT_StaggeredProblem_stepmultiplier, "stepmultiplier"); // Macro
+    if (stepMultiplier<=1)
+    	_error("stepMultiplier must be >= 1!")
     IR_GIVE_FIELD2(ir, problem_inputStream, IFT_StaggeredProblem_prob1, "prob1", MAX_FILENAME_LENGTH); // Macro
     strncpy(inputStreamNames [ 0 ], problem_inputStream, MAX_FILENAME_LENGTH);
     IR_GIVE_FIELD2(ir, problem_inputStream, IFT_StaggeredProblem_prob2, "prob2", MAX_FILENAME_LENGTH); // Macro
@@ -196,7 +200,12 @@ StaggeredProblem :: giveDeltaT(int n)
     if ( giveDtTimeFunction() ) {
         return deltaT *giveDtTimeFunction()->__at(n);
     }
-
+    //in the first step the time increment is taken as the initial, user-specified value
+    if (stepMultiplier != 0 && currentStep != NULL) {
+    	if (currentStep->giveNumber()>=2 ){
+    		return (currentStep->giveTime()*(stepMultiplier-1));
+    	}
+    }
     return deltaT;
 }
 

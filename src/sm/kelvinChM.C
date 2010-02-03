@@ -49,6 +49,7 @@
 #include "timestep.h"
 #include "contextioerr.h"
 
+
 namespace oofem {
 
 KelvinChainMaterial :: KelvinChainMaterial(int n, Domain *d) : RheoChainMaterial(n, d)
@@ -121,6 +122,54 @@ KelvinChainMaterial :: computeCharCoefficients(FloatArray &answer, GaussPoint *g
     return;
 }
 
+const FloatArray &
+KelvinChainMaterial :: giveDiscreteTimes()
+{
+    /*
+     * Function returns generated relative time scale (uniformly distributed
+     * in log time scale).
+     * Because of multiple use of these data, once generated, they are
+     * stored
+     */
+    if ( discreteTimeScale.isNotEmpty() ) {
+        return discreteTimeScale;
+    }
+
+    double endTime;
+    endTime = this->giveEndOfTimeOfInterest();
+
+    this->generateLogTimeScale(discreteTimeScale, this->begOfTimeOfInterest, endTime, MNC_NPOINTS - 1, 0);
+    return discreteTimeScale;
+}
+
+
+void
+KelvinChainMaterial :: generateLogTimeScale(FloatArray &answer, double from, double to,
+                                             int nsteps,
+                                             int fromIncluded)
+{
+    /*
+	 * function generates discrete times starting from time "from" to time "to"
+	 * uniformely distributed in log time scale. The time interval (to-from) is
+	 * divided to nsteps intervals. if from is wanted to be included in return
+	 * array fromIncluded must be set to 1, otherwise we return times starting
+	 * from ("from" + first increment);
+	 */
+	int size = nsteps + 1;
+	int i;
+	double help;
+
+	answer.resize(size);
+	answer.zero();
+
+	help = (log10(to) - log10(from)) / (double) (nsteps);
+	for (i = 1; i <= nsteps; i++) {
+		answer.at(i + 1) = __OOFEM_POW( 10., ( i*help+log10(from) ) );
+	}
+	answer.at(1) = from;
+	return;
+}
+
 double
 KelvinChainMaterial :: giveEModulus(GaussPoint *gp, TimeStep *atTime)
 {
@@ -181,20 +230,17 @@ KelvinChainMaterial :: giveEigenStrainVector(FloatArray &answer, MatResponseForm
 				beta = 0;
 			else
 				beta = exp(-(atTime->giveTimeIncrement() / timeFactor )/(this->giveCharTime(mu)));
-			//PH OOFEM_LOG_INFO( " %d beta  %15.15g \n", mu,  beta);
 			gamma =  status->giveHiddenVarsVector(mu);
 			if ( gamma ) {
 				help.zero();
 				help.add(* gamma);
 				help.times(1.0 - beta);
-				//PH OOFEM_LOG_INFO( " %d gamma*(1-beta)  %15.15g \n", mu,  help.at(1));
 				reducedAnswer.add(help);
 			}
 		}
 
 		if ( form == ReducedForm ) {
 			answer =  reducedAnswer;
-			//OOFEM_LOG_INFO( " answer(creep)  %12.12g \n",  reducedAnswer.at(1));
 			return;
 		}
 		// expand the strain to full form if requested
@@ -223,16 +269,10 @@ KelvinChainMaterial :: updateYourself(GaussPoint *gp, TimeStep *tNow)
     double tauMu;
 
     FloatArray help, *muthHiddenVarsVector, deltaEps0, help1;
-    FloatMatrix C;
     KelvinChainMaterialStatus *status = ( KelvinChainMaterialStatus * ) this->giveStatus(gp);
 
-    this->giveUnitComplianceMatrix(C, ReducedForm, gp, tNow);
-
     help = status->giveTempStrainVector(); // gives updated strain vector (at the end of time-step)
-    OOFEM_LOG_INFO( "strain_now  %15.15g \n", help.at(1));
     help.substract( status->giveStrainVector() ); // strain increment in current time-step
-    //PH OOFEM_LOG_INFO( "strain_before  %15.15g \n", status->giveStrainVector().at(1));
-    //PH OOFEM_LOG_INFO( "strain_difference  %15.15g \n", help.at(1));
 
     // Subtract the stress-independent part of strain
     this->computeStressIndependentStrainVector(deltaEps0, gp, tNow, VM_Incremental);
@@ -240,23 +280,19 @@ KelvinChainMaterial :: updateYourself(GaussPoint *gp, TimeStep *tNow)
         help.substract(deltaEps0); // should be equal to zero if there is no stress change during the time-step
     }
 
-    help1.beProductOf(C, help); //= delta_sigma_k/E
-    help1.times(this->giveEModulus(gp, tNow)); // = delta_sigma
+    help.times(this->giveEModulus(gp, tNow)); // = delta_sigma
+    help1 = help;
 
-    deltaT = tNow->giveTimeIncrement();
-    //PH OOFEM_LOG_INFO( " deltaT %15.15g \n", deltaT);
-    //PH OOFEM_LOG_INFO( "delta_sigma  %15.15g \n", help1.at(1));
+    deltaT = tNow->giveTimeIncrement()/ timeFactor;
 
     for (int mu = 1; mu <= nUnits; mu++ ) {
     	help = help1;
     	tauMu = (this->giveCharTime(mu));
 
-     	//OOFEM_LOG_INFO( "tauMu %d %15.15g \n",mu, tauMu);
     	muthHiddenVarsVector = status->giveHiddenVarsVector(mu); //gamma_mu
-    	//OOFEM_LOG_INFO( "% d hiddenVector %12.6g \n", mu,  muthHiddenVarsVector->at(1));
 
 		if (deltaT/tauMu < 1.e-5){
-			betaMu = exp(-(deltaT/ timeFactor )/tauMu);
+			betaMu = exp(-(deltaT)/tauMu);
 			lambdaMu = 1 - 0.5*(deltaT/tauMu) + 1/6*( __OOFEM_POW(deltaT/tauMu, 2) ) - 1/24 * ( __OOFEM_POW(deltaT/tauMu, 3));
 		}
 		else if (deltaT/tauMu > 30){
@@ -264,22 +300,17 @@ KelvinChainMaterial :: updateYourself(GaussPoint *gp, TimeStep *tNow)
 			lambdaMu = tauMu/deltaT;
 		}
 		else {
-			betaMu = exp(-(deltaT/ timeFactor )/tauMu);
+			betaMu = exp(-(deltaT )/tauMu);
 			lambdaMu = ( 1.0 - betaMu) * tauMu/deltaT;
-			//OOFEM_LOG_INFO( " %d beta  %15.15g \n", mu,  betaMu);
 		}
-
-		//PH OOFEM_LOG_INFO( " %d lambda  %15.15g \n",mu,  lambdaMu);
 
     	help.times(lambdaMu / (this->giveEparModulus(mu)));
 
         if ( muthHiddenVarsVector ) {
             muthHiddenVarsVector->times(betaMu);
             muthHiddenVarsVector->add(& help);
-            //PH OOFEM_LOG_INFO( " %d hiddenVector %15.15g \n", mu,  muthHiddenVarsVector->at(1));
         } else {
             status->letHiddenVarsVectorBe( mu, help.GiveCopy() );
-            //PH OOFEM_LOG_INFO( " %d help %15.15g \n", mu,  help.at(1));
         }
     }
     // now we call KelvinChainMaterialStatus->updateYourself()
@@ -301,6 +332,7 @@ IRResultType
 KelvinChainMaterial :: initializeFrom(InputRecord *ir)
 {
     RheoChainMaterial :: initializeFrom(ir);
+
     return IRRT_OK;
 }
 
