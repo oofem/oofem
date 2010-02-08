@@ -131,8 +131,12 @@ Linear orthotropic, linear elastic  material model. The model parameters are sum
 in table~\ref{OrthoLE_table}.
 Local coordinate system, which determines axes of material orthotrophy
 can by specified using \param{lcs} array. This array contains six numbers,
-where the first three numbers represent directional vector of a local x-axis, and next three numbers represent directional vector of a local y-axis. The local z-axis is determined using the vector product.
-The right-hand coordinate system is assumed. Local coordinate system
+where the first three numbers represent directional vector of a local x-axis,
+and next three numbers represent directional vector of a local y-axis.
+The local z-axis is determined using the vector product.
+The right-hand coordinate system is assumed.
+
+Local coordinate system
 can also be specified using \param{scs} parameter. Then local coordinate
 system is specified in so called ``shell''
 coordinate system, which is defined locally on each particular element
@@ -1543,7 +1547,7 @@ G_{12}=G_{13}=G_{21}=G_{31},G_{23}=G_{32}\\
 \end{eqnarray}
 
 Material orientation on a finite element can be specified with \param{lcs} optional parameter. If unspecified, material orientation is the same as the global coordinate system. \param{lcs} array contains six numbers,
-where first three numbers represent directional vector of the local $x$-axis, and next three numbers represent directional vector of the local $y$-axis with the reference to the global coordinate system. The composite material is extended to 1D and is also suitable for trusses. In such particular case, only the $xx$ components are considered.
+where the first three numbers represent a directional vector of the local $x$-axis, and the next three numbers represent a directional vector of the local $y$-axis with the reference to the global coordinate system. The composite material is extended to 1D and is also suitable for beams and trusses. In such particular case, the \param{lcs} has no effect and the 1D element orientation is aligned with the global $xx$ component.
 
 The index $p,~p\in\{11,22,33,23,31,12\}$ symbolizes six components of stress or strain vectors. The linear softening occurs after reaching a critical stress $f_{p,0}$, see Fig. \ref{comp_softening}. Orientation of cracks is assumed to be orthogonal and aligned with an orientation of material axes \cite[pp.236]{Bazant:98}. The transverse isotropy is generally lost upon fracture, material becomes orthotropic and six damage parameters $d_p$ are introduced.
 

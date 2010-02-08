@@ -448,14 +448,23 @@ void CompoDamageMat :: giveUnrotated3dMaterialStiffnessMatrix(FloatMatrix &answe
 int CompoDamageMat :: giveMatStiffRotationMatrix(FloatMatrix &answer, GaussPoint *gp) {
     FloatMatrix t(3, 3);
     StructuralElement *element = ( StructuralElement * ) gp->giveElement();
+    MaterialMode mMode = gp->giveMaterialMode();
 
-    if ( !element->giveLocalCoordinateSystem(t) ) {//lcs not defined on element
-        return 0;
+    switch ( mMode ) {
+        case _1dMat://do not rotate 1D materials on trusses and beams
+            break;
+        case _3dMat:
+            if ( !element->giveLocalCoordinateSystem(t) ) {//lcs not defined on element
+                return 0;
+            }
+            //rotate from unrotated (base) c.s. to local material c.s.
+            this->giveStrainVectorTranformationMtrx(answer, t);
+            return 1;
+            break;
+        default:
+            OOFEM_ERROR2("Material mode %s not supported", __MaterialModeToString(mMode));
     }
-
-    //rotate from unrotated (base) c.s. to local material c.s.
-    this->giveStrainVectorTranformationMtrx(answer, t);
-    return 1;
+    return 0;
 }
 
 //determine characteristic fracture area for three orthogonal cracks, based on the size of element (crack band model). Since the orientation of cracks is aligned with the orientation of material, determination is based only on the geometry (not on the direction of principal stress etc.). Assumption that fracture localizes into all integration points on element. Material orientation in global c.s. is passed. Called in the first run

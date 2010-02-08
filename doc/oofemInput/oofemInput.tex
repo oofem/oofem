@@ -1911,8 +1911,7 @@ The support for element insertion and removal during the analysis is provided. O
 Orientation of local coordinates can be specified using \param{lcs} array. This array contains six numbers,
 where the first three numbers represent a directional vector of local
 x-axis, and the next three numbers represent a directional vector of local
-y-axis. The local z-axis is determined using the vector product. The \param{lcs} array on the element is particularly useful for modeling of orthotropic materials which follow the element orientation.
-
+y-axis. The local z-axis is determined using the vector product. The \param{lcs} array on the element is particularly useful for modeling of orthotropic materials which follow the element orientation. On a beam or truss element, the \param{lcs} array has no effect and the 1D element orientation is aligned with the global $xx$ component.
 
 \Pmode{
 The \param{remote} forces the element to be remote element. Remote

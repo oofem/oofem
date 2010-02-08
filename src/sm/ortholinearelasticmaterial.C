@@ -313,6 +313,12 @@ OrthotropicLinearElasticMaterial :: GiveTensorRotationMatrix(GaussPoint *gp)
     FloatMatrix elementCs, *t = NULL;
     StructuralElement *element = ( StructuralElement * ) gp->giveElement();
 
+    if (gp->giveMaterialMode() == _1dMat){//do not rotate 1D materials on trusses and beams
+        t->resize(3,3);
+        t->beUnitMatrix();
+        return t;
+    }
+
     elementCsFlag = element->giveLocalCoordinateSystem(elementCs);
     //
     // in localCoordinateSystem the directional cosines are stored columwise (exception)
