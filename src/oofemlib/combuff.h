@@ -44,11 +44,12 @@
 
 #include "parallel.h"
 
+namespace oofem {
+
 class IntArray;
 class FloatArray;
 class FloatMatrix;
 
-namespace oofem {
 
 #define __CommunicationBuffer_ALLOC_CHUNK 1024
 /**

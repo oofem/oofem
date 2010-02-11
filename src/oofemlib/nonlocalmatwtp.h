@@ -35,6 +35,15 @@
 #define nonlocalmatwtp_h
 
 #ifdef __PARALLEL_MODE
+
+#include "loadbalancer.h"
+#ifndef __MAKEDEPEND
+#include <map>
+#include <list>
+#include <vector>
+#include <set>
+#endif
+
 namespace oofem {
 
 /**
@@ -46,13 +55,6 @@ namespace oofem {
 #define MIGRATE_NONLOCALDEP_TAG 4008
 #define MIGRATE_REMOTE_ELEMENTS_TAG 4009
 
-#include "loadbalancer.h"
-#ifndef __MAKEDEPEND
-#include <map>
-#include <list>
-#include <vector>
-#include <set>
-#endif
 
 class GaussPoint;
 

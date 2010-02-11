@@ -50,7 +50,7 @@ NumericalMethod *PLinearStatic :: giveNumericalMethod(TimeStep *atTime)
             return nMethod;
         }
 
-        nMethod = :: CreateUsrDefSparseLinSolver(solverType, 1, this->giveDomain(1), this);
+        nMethod = CreateUsrDefSparseLinSolver(solverType, 1, this->giveDomain(1), this);
     }
 
     if ( nMethod == NULL ) {

@@ -1071,7 +1071,7 @@ AdaptiveNonLinearStatic :: giveLoadBalancer()
     }
 
     if ( loadBalancingFlag || preMappingLoadBalancingFlag ) {
-        lb = :: CreateUsrDefLoadBalancerOfType( ParmetisLoadBalancerClass, this->giveDomain(1) );
+        lb = CreateUsrDefLoadBalancerOfType( ParmetisLoadBalancerClass, this->giveDomain(1) );
         return lb;
     } else {
         return NULL;
@@ -1085,7 +1085,7 @@ AdaptiveNonLinearStatic :: giveLoadBalancerMonitor()
     }
 
     if ( loadBalancingFlag || preMappingLoadBalancingFlag ) {
-        lbm = :: CreateUsrDefLoadBalancerMonitorOfType(WallClockLoadBalancerMonitorClass, this);
+        lbm = CreateUsrDefLoadBalancerMonitorOfType(WallClockLoadBalancerMonitorClass, this);
         return lbm;
     } else {
         return NULL;
