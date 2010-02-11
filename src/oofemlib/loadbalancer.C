@@ -643,7 +643,7 @@ WallClockLoadBalancerMonitor :: decide(TimeStep *atTime)
     if(recoveredSteps.giveSize()){
 	// recover lb if requested
 	int pos;
-	if(pos = recoveredSteps.findFirstIndexOf(atTime->giveNumber())){
+	if ((pos = recoveredSteps.findFirstIndexOf(atTime->giveNumber()))) {
 	    double procWeight, sumWeight = 0.0, *procWeights = new double [ nproc ];
 
 	    // assign prescribed processing weight

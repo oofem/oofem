@@ -54,14 +54,7 @@ IsotropicDamageMaterial2 :: ~IsotropicDamageMaterial2()
 IRResultType
         IsotropicDamageMaterial2 :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
-
-    int equivStrainType;
     IsotropicDamageMaterial1 :: initializeFrom(ir);
-    //e0 - maximum elastic strain
-    //ef - maximum
-
     return IRRT_OK;
 }
 
