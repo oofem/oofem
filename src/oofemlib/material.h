@@ -106,8 +106,8 @@ protected:
      * Property dictionary.
      * Can be used to store constant material parameters, which
      * are same for all integration points.
-     * Note: Try to avoid using, more preferably use separate variables to
-     * store marerial params, because of wery slow access to dictionary.
+     * Note: Try to avoid using the dictionary because of a very slow access. Use rather separate variables to
+     * store marerial parameters.
      */
     Dictionary *propertyDictionary;
 
@@ -177,11 +177,18 @@ public:
      * Returns the value of material property 'aProperty'. Property must be identified
      * by unique int id. Intgeration point also passed to allow for materials with spatially
      * varying properties
-     * @param aProperty id of peroperty requested
+     * @param aProperty id of property requested
      * @param gp intgration point,
      * @return property value
      */
     virtual double   give(int aProperty, GaussPoint* gp);
+    /**
+     * Returns true if 'aProperty' exists on material
+     * @param aProperty id of property requested
+     * @param gp intgration point
+     * @return true if 'aProperty' exists
+     */
+    virtual bool   hasProperty(int aProperty, GaussPoint* gp);
     /**
      * Returns casting time of the receiver
      */

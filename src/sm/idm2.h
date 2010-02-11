@@ -11,11 +11,11 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *           Copyright (C) 2010 Christian Hoover, Vit Smilauer
  *
  *
  *
- *       Czech Technical University, Faculty of Civil Engineering,
+ *   Czech Technical University, Faculty of Civil Engineering,
  *   Department of Structural Mechanics, 166 29 Prague, Czech Republic
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -34,7 +34,7 @@
  */
 
 //   ******************************************************************************
-//   *** CLASS NONLOCAL ISOTROPIC DAMAGE MODEL FOR CONCRETE IN TENSION ************
+//   *** CLASS NONLOCAL ISOTROPIC DAMAGE MODEL 2 FOR CONCRETE IN TENSION ************
 //   ******************************************************************************
 
 #ifndef idm2_h
@@ -43,8 +43,6 @@
 #include "idm1.h"
 
 namespace oofem {
-
-
 /**
  * This class implements a simple local isotropic damage model for concrete in tension.
  * The material model operates on an equivalent strain(s) and fracture energy
@@ -53,12 +51,25 @@ namespace oofem {
 
 class IsotropicDamageMaterial2 : public IsotropicDamageMaterial1
 {
-    public:
+protected:
+
+    /// This is a switch that will determine which softenign law to use
+    int SofteningType;
+    /// Max effective strain at peak
+    double eps0;
+    /// Determines the softening -> corresponds to the initial fracture energy. For a linear law, it is the area under the stress/strain curve.  For an exponential law, it is the area bounded by the elastic range and a tangent to the softening part of the curve at the peak stress. For a bilinear law, Gf corresponds to area bounded by elasticity and the first linear softening line projected to zero stress
+    double gf;
+    /// Determines the softening for the bilinear law -> corresponds to the strain at the knee point
+    double epsk;
+    /// Determines the softening for the bilinear law -> corresponds to the total energy
+    double gft;
+
+public:
 
     /// Constructor
-        IsotropicDamageMaterial2(int n, Domain *d);
+    IsotropicDamageMaterial2(int n, Domain * d);
     /// Destructor
-        ~IsotropicDamageMaterial2();
+    ~IsotropicDamageMaterial2();
 
     // identification and auxiliary functions
     const char *giveClassName() const { return "IsotropicDamageMaterial2"; }
@@ -66,13 +77,13 @@ class IsotropicDamageMaterial2 : public IsotropicDamageMaterial1
     /// Returns input record name of the receiver.
     const char *giveInputRecordName() const { return "idm2"; }
 
-     /**
-     * Initializes receiver acording to object description stored in input record..
+    /**
+     * Initializes receiver acording to object description stored in input record.
      * The density of material is read into property dictionary (keyword 'd')
-      */
+     */
     IRResultType initializeFrom(InputRecord *ir);
+    virtual void computeDamageParam(double &omega, double kappa, const FloatArray &strain, GaussPoint *gp);
+    virtual void initDamaged(double kappa, FloatArray &strainVector, GaussPoint *gp);
 };
-
-
 } // end namespace oofem
 #endif // idm2_h

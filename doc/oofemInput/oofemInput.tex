@@ -2029,7 +2029,7 @@ some characteristic volume. The weighted average is computed as a sum
 of a remote value multiplied by weight function value. The weight
 function typically depend on a distance between remote and receiver
 points and decreases with increasing distance. In some cases, it is
-necessary to not consider mutual interaction between some points (for
+necessary to disregard mutual interaction between some points (for
 example if they are on the opposite sides of a thin notch, which
 prevents the nonlocal interactions to take place). The barriers are
 the way how to introduce these constrains. The barrier represent a
@@ -2062,8 +2062,8 @@ are 1 for \param{xcoordindx} and 2 for \param{ycoordindx}, representing barrier 
 \end{record}
 Implementation of symmetry barier, that allows to specify up to three planes (orthogonal ones) of symmetry.
 This barrier allows to  model the symmetry of the averaged field on the boundary without
-the need of moddeling the other part of structure across the plane of symmetry.
-It is based on  modifying the integration weights of source points to take into account
+the need of modeling the other part of structure across the plane of symmetry.
+It is based on modifying the integration weights of source points to take into account
 the symmetry.
 The potential symmetry planes are determined by specifying orthogonal right-handed coordinate system,
 where axes represent the normals of corresponding symmetry planes.

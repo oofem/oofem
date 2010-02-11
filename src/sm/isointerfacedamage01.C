@@ -51,7 +51,9 @@ IsoInterfaceDamageMaterial :: IsoInterfaceDamageMaterial(int n, Domain *d) : Str
     //
     // constructor
     //
-{ }
+{
+    maxOmega = 0.999999;
+}
 
 
 IsoInterfaceDamageMaterial :: ~IsoInterfaceDamageMaterial()
@@ -311,7 +313,7 @@ IsoInterfaceDamageMaterial :: give2dInterfaceMaterialStiffnessMatrix(FloatMatrix
             // Secant stiffness
             om = status->giveTempDamage();
             un = status->giveTempStrainVector().at(1);
-            om = min(om, 0.999999);
+            om = min(om, maxOmega);
             // damage in tension only
             if ( un >= 0 ) {
                 answer.times(1.0 - om);
@@ -326,7 +328,7 @@ IsoInterfaceDamageMaterial :: give2dInterfaceMaterialStiffnessMatrix(FloatMatrix
 
             om = status->giveTempDamage();
             un = status->giveTempStrainVector().at(1);
-            om = min(om, 0.999999);
+            om = min(om, maxOmega);
             // damage in tension only
             if ( un >= 0 ) {
                 answer.times(1.0 - om);
@@ -371,7 +373,7 @@ IsoInterfaceDamageMaterial :: give3dInterfaceMaterialStiffnessMatrix(FloatMatrix
             // Secant stiffness
             om = status->giveTempDamage();
             un = status->giveTempStrainVector().at(1);
-            om = min(om, 0.999999);
+            om = min(om, maxOmega);
             // damage in tension only
             if ( un >= 0 ) {
                 answer.times(1.0 - om);
@@ -386,7 +388,7 @@ IsoInterfaceDamageMaterial :: give3dInterfaceMaterialStiffnessMatrix(FloatMatrix
 
             om = status->giveTempDamage();
             un = status->giveTempStrainVector().at(1);
-            om = min(om, 0.999999);
+            om = min(om, maxOmega);
             // damage in tension only
             if ( un >= 0 ) {
                 answer.times(1.0 - om);
@@ -509,6 +511,11 @@ IsoInterfaceDamageMaterial :: initializeFrom(InputRecord *ir)
     IR_GIVE_FIELD(ir, ft, IFT_IsoInterfaceDamageMaterial_ft, "ft"); // Macro
     IR_GIVE_FIELD(ir, gf, IFT_IsoInterfaceDamageMaterial_gf, "gf"); // Macro
     this->e0 = ft / kn;
+
+    //Set limit on the maximum isotropic damage parameter if needed
+    IR_GIVE_OPTIONAL_FIELD(ir, maxOmega, IFT_IsotropicDamageMaterial_maxOmega, "maxomega"); // Macro
+    maxOmega = min(maxOmega,0.999999);
+    maxOmega = max(maxOmega,0.0);
 
     IR_GIVE_FIELD(ir, tempDillatCoeff, IFT_IsoInterfaceDamageMaterial_talpha, "talpha"); // Macro
     return StructuralMaterial :: initializeFrom(ir);

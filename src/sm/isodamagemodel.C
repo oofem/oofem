@@ -54,6 +54,7 @@ IsotropicDamageMaterial :: IsotropicDamageMaterial(int n, Domain *d) : Structura
 {
     linearElasticMaterial = NULL;
     llcriteria = idm_strainLevelCR;
+    maxOmega = 0.999999;
 }
 
 
@@ -96,7 +97,7 @@ IsotropicDamageMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
         om = 0.0;
     } else {
         om = status->giveTempDamage();
-        om = min(om, 0.999999);
+        om = min(om, maxOmega);
     }
 
     this->giveLinearElasticMaterial()->give3dMaterialStiffnessMatrix(answer, form, mode, gp, atTime);
@@ -187,7 +188,7 @@ void IsotropicDamageMaterial :: givePlaneStressStiffMtrx(FloatMatrix &answer, Ma
         om = 0.0;
     } else {
         om = status->giveTempDamage();
-        om = min(om, 0.999999);
+        om = min(om, maxOmega);
     }
 
     this->giveLinearElasticMaterial()->giveCharacteristicMatrix(answer, form, mode, gp, atTime);
@@ -206,7 +207,7 @@ void IsotropicDamageMaterial :: givePlaneStrainStiffMtrx(FloatMatrix &answer, Ma
         om = 0.0;
     } else {
         om = status->giveTempDamage();
-        om = min(om, 0.999999);
+        om = min(om, maxOmega);
     }
 
     this->giveLinearElasticMaterial()->giveCharacteristicMatrix(answer, form, mode, gp, atTime);
@@ -223,7 +224,7 @@ void IsotropicDamageMaterial :: give1dStressStiffMtrx(FloatMatrix &answer, MatRe
         om = 0.0;
     } else {
         om = status->giveTempDamage();
-        om = min(om, 0.999999);
+        om = min(om, maxOmega);
     }
 
     this->giveLinearElasticMaterial()->giveCharacteristicMatrix(answer, form, mode, gp, atTime);
@@ -333,8 +334,14 @@ IsotropicDamageMaterial :: initializeFrom(InputRecord *ir)
     const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
+    //Set limit on the maximum isotropic damage parameter if needed
+    IR_GIVE_OPTIONAL_FIELD(ir, maxOmega, IFT_IsotropicDamageMaterial_maxOmega, "maxomega"); // Macro
+    maxOmega = min(maxOmega,0.999999);
+    maxOmega = max(maxOmega,0.0);
+
     IR_GIVE_FIELD(ir, tempDillatCoeff, IFT_IsotropicDamageMaterial_talpha, "talpha"); // Macro
     return StructuralMaterial :: initializeFrom(ir);
+
 }
 
 

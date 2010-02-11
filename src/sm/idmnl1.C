@@ -66,6 +66,9 @@
 
 namespace oofem {
 
+//negligible influence radius
+#define R_ZERO 1.0e-10
+
 IDNLMaterial :: IDNLMaterial(int n, Domain *d) : IsotropicDamageMaterial1(n, d), StructuralNonlocalMaterialExtensionInterface(d), NonlocalMaterialStiffnessInterface()
     //
     // constructor
@@ -85,7 +88,7 @@ IDNLMaterial :: ~IDNLMaterial()
 void
 IDNLMaterial :: updateBeforeNonlocAverage(const FloatArray &strainVector, GaussPoint *gp, TimeStep *atTime)
 {
-    /*  Implements the service updating local variables in given integration points,
+    /* Implements the service updating local variables in given integration points,
      * which take part in nonlocal average process. Actually, no update is necessary,
      * because the value used for nonlocal averaging is strain vector used for nonlocal secant stiffness
      * computation. It is therefore necessary only to store local strain in corresponding status.
@@ -101,7 +104,7 @@ IDNLMaterial :: updateBeforeNonlocAverage(const FloatArray &strainVector, GaussP
 
     // substract stress independent part
     // note: eigenStrains (temperature) is not contained in mechanical strain stored in gp
-    // therefore it is necessary to substract always the total eigen strain value
+    // therefore it is necessary to substract always the total eigenstrain value
     this->giveStressDependentPartOfStrainVector(SDstrainVector, gp, strainVector, atTime, VM_Total);
 
     //crossSection->giveFullCharacteristicVector(fullSDStrainVector, gp, SDstrainVector);
@@ -161,6 +164,7 @@ IDNLMaterial :: initializeFrom(InputRecord *ir)
 {
     const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
+    int value;
 
     IsotropicDamageMaterial1 :: initializeFrom(ir);
     StructuralNonlocalMaterialExtensionInterface :: initializeFrom(ir);
@@ -170,9 +174,15 @@ IDNLMaterial :: initializeFrom(InputRecord *ir)
         R = 0.0;
     }
 
+    if ( ir->hasField(IFT_IDNLMaterial_averagingtype, "averagingtype") ) {
+        IR_GIVE_FIELD(ir, value, IFT_IDNLMaterial_averagingtype, "averagingtype"); // Macro
+        if(value==1){
+            R = R_ZERO;//decrease the influence radius so no other IP points are put to the IP list
+        }
+        propertyDictionary->add(AVERAGING_TYPE, value);
+    }
     return IRRT_OK;
 }
-
 
 
 int
@@ -320,7 +330,7 @@ IDNLMaterial :: NonlocalMaterialStiffnessInterface_showSparseMtrxStructure(Gauss
     for ( pos = list->begin(); pos != list->end(); ++pos ) {
         rmat = ( IDNLMaterial * ) ( ( * pos ).nearGp )->giveMaterial();
         if ( rmat->giveClassID() == this->giveClassID() ) {
-	  ( ( * pos ).nearGp )->giveElement()->giveLocationArray(rloc, EID_MomentumBalance, EModelDefaultEquationNumbering());
+            ( ( * pos ).nearGp )->giveElement()->giveLocationArray(rloc, EID_MomentumBalance, EModelDefaultEquationNumbering());
         }
 
         n = loc.giveSize();
@@ -764,7 +774,7 @@ double
 IDNLMaterial :: predictRelativeComputationalCost(GaussPoint *gp)
 {
   //
-  // The values returned come from mesurement
+  // The values returned come from measurement
   // do not change them unless you know what are you doing
   //
   double cost = 1.2;

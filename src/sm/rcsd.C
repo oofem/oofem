@@ -150,7 +150,7 @@ RCSDMaterial :: giveRealStressVector(FloatArray &answer, MatResponseForm form, G
         if ( minSofteningPrincStress <= this->SDTransitionCoeff * CurrFt ) {
             // sd transition takes place
 
-	  E = linearElasticMaterial->give(Ex,gp);
+            E = linearElasticMaterial->give(Ex,gp);
             ep = CurrFt / E;
             ef = this->giveMinCrackStrainsForFullyOpenCrack(gp, ipos);
             dCoeff = ( E / ( princStress.at(ipos) / principalStrain.at(ipos) ) );

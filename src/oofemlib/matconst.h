@@ -49,7 +49,7 @@
 
 namespace oofem {
 
-/* poiss coeficients */
+/* Poissons coeficients */
 #define NYxz 300
 #define NYyz 301
 #define NYxy 302
@@ -57,13 +57,12 @@ namespace oofem {
 #define NYzy 304
 #define NYyx 305
 
-
-/* Ortho Young moduluses */
+/* Ortho Young moduli */
 #define Ex 400
 #define Ey 401
 #define Ez 402
 
-/* thermal dilatation coeffs */
+/* Thermal dilatation coeffs */
 #define tAlphax 403
 #define tAlphay 404
 #define tAlphaz 405
@@ -81,6 +80,9 @@ namespace oofem {
 /* Viscosity */
 #define Viscosity 500
 #define YieldStress 501
+
+/* Nonlocal material extensions */
+#define AVERAGING_TYPE 903
 
 } // end namespace oofem
 #endif // matconst_h

@@ -108,10 +108,22 @@ Material :: give(int aProperty, GaussPoint* gp)
     if ( propertyDictionary->includes(aProperty) ) {
         value = propertyDictionary->at(aProperty);
     } else {
-        _error("give: property not defined");
+        _error3("give: property on element %d and GP %d not defined", gp->giveElement()->giveNumber(), gp->giveNumber() );
     }
 
     return value;
+}
+
+
+bool
+Material :: hasProperty(int aProperty, GaussPoint* gp)
+// Returns TRUE if the aProperty is defined on a material
+{
+    if ( propertyDictionary->includes(aProperty) ) {
+        return true;
+    }
+
+    return false;
 }
 
 

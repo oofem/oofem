@@ -64,7 +64,7 @@ class IsoInterfaceDamageMaterialStatus : public StructuralMaterialStatus
      * DESCRIPTION:
      * Idea used there is that we have variables
      * describing:
-     *   1) state at previous equilibrium state (variables without temp)
+     * 1) state at previous equilibrium state (variables without temp)
      * 2) state during searching new equilibrium (variables with temp)
      * when we start search new state from previous equilibrium one we copy
      * non-tem variables into temp ones. And after we reach new equilibrium
@@ -174,6 +174,8 @@ protected:
     double gf;
     /// limit elastic deformation
     double e0;
+    /// Maximum limit on omega. The purpose is elimination of a too compliant material which may cause convergency problems. Set to something like 0.99 if needed
+    double maxOmega;
 
 public:
     /// Constructor

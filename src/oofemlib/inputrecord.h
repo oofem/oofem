@@ -585,10 +585,17 @@ enum InputFieldType {
     IFT_M4Material_talpha,
 
     IFT_IsotropicDamageMaterial_talpha,
+    IFT_IsotropicDamageMaterial_maxOmega,
 
     IFT_IsotropicDamageMaterial1_e0,
     IFT_IsotropicDamageMaterial1_ef,
     IFT_IsotropicDamageMaterial1_equivstraintype,
+
+    IFT_IsotropicDamageMaterial2_eps0,
+    IFT_IsotropicDamageMaterial2_epsk,
+    IFT_IsotropicDamageMaterial2_gf,
+    IFT_IsotropicDamageMaterial2_gft,
+    IFT_IsotropicDamageMaterial2_softeningtype,
 
     IFT_CompoDamageMat_ex,
     IFT_CompoDamageMat_ez,
@@ -605,6 +612,7 @@ enum InputFieldType {
     IFT_MacroLspace_stiffMatrxFileName,
 
     IFT_IDNLMaterial_r,
+    IFT_IDNLMaterial_averagingtype,
 
     IFT_MazarsMaterial_version,
     IFT_MazarsMaterial_e0,
@@ -655,6 +663,7 @@ enum InputFieldType {
     IFT_IsoInterfaceDamageMaterial_ks,
     IFT_IsoInterfaceDamageMaterial_ft,
     IFT_IsoInterfaceDamageMaterial_gf,
+    IFT_IsoInterfaceDamageMaterial_maxOmega,
     IFT_IsoInterfaceDamageMaterial_talpha,
 
     IFT_CebFipSlip90Material_tmax,
@@ -1035,7 +1044,7 @@ enum InputFieldType {
 
 
 /**
- * Class representing the general Input Record. The input record consis of several fields.
+ * Class representing the general Input Record. The input record consists of several fields.
  * Provides several requesting functions for reading field values. The derived classes of
  * Input record can represent database records or text file records, allowing the transparent
  * input operations.
@@ -1123,7 +1132,7 @@ public:
     void report_error(const char *_class, const char *proc, const InputFieldType fieldID, const char *kwd,
                       IRResultType result, const char *file, int line);
 
-    /** terminates the current record session and if flag is true warnin is printed for unscanned tokens */
+    /** terminates the current record session and if the flag is true, warning is printed for unscanned tokens */
     virtual void finish(bool wrn = true) = 0;
 };
 

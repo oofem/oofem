@@ -55,6 +55,11 @@
 
 namespace oofem {
 
+/* Flag indicating a special averaging on elements:
+ * 0=no special averaging
+ * 1=boundary layer method averages the strains over the whole finite element, the influence radius is close to zero
+ */
+
 class GaussPoint;
 
 /**
@@ -232,7 +237,7 @@ public:
 
     /**@name Services required by NonlocalMaterialStiffnessInterface and related ones to support Nonlocal Stiffness*/
     //@{
-    /// compute ans add IP contributions to destination matrix
+    /// compute and add IP contributions to destination matrix
     virtual void NonlocalMaterialStiffnessInterface_addIPContribution(SparseMtrx &dest, GaussPoint *gp, TimeStep *atTime);
     /**
      * Returns integration list of receiver. Contains localIntegrationRecord structures, containing

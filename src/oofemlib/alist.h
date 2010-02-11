@@ -63,7 +63,7 @@ class FEMComponent;
  * array. This is sometimes called non-intrusive approach. When destructor is called, the pointed object
  * are DELETED.
  * The links to particular objects in array are stored in pointer array, therefore the access to particular
- * component is wery efficient. On the other hand, the resizing of array is relative time expensive (the whole
+ * component is very efficient. On the other hand, the resizing of array is relative time expensive (the whole
  * existing pointer table must be transfered) and is recomended to set size of the array to the final size.
  */
 template< class T > class AList

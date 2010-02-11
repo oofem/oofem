@@ -70,7 +70,7 @@ namespace oofem {
  * Engng model reference for details.
  *
  * Some components (typically integration points real stresses or integration points nonlocal values)
- * are computationally wery demanding. Because in typical code, there are number of requests for same value
+ * are computationally very demanding. Because in typical code, there are number of requests for same value
  * during the computation process, it may be efficient to store these values and compute them only once.
  * The principal problem is to recognize, when is necessary to re-compute these stored values to reflect
  * newly reached state. This cannot be determined form solution step "time", because solution step may

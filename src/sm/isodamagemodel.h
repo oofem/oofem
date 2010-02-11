@@ -176,6 +176,9 @@ protected:
     /// Coefficient of thermal dilatation
     double tempDillatCoeff;
 
+    /// Maximum limit on omega. The purpose is elimination of a too compliant material which may cause convergency problems. Set to something like 0.99 if needed
+    double maxOmega;
+
     /// Reference to bulk (undamaged) material
     LinearElasticMaterial *linearElasticMaterial;
     /**

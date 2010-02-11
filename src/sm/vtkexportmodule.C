@@ -34,18 +34,18 @@
  */
 
 /* COMPONENTS in TENSORS like stress or strain
-*    x  y  z
-* x  1  6  5
-* y  6  2  4
-* z  5  4  3
-*
-*  PARAVIEW - stresses and strains in global c.s., damage tensor in local c.s.
-*    x  y  z
-* x  0  1  2
-* y  3  4  5
-* z  6  7  8
-*
-*/
+ *    x  y  z
+ * x  1  6  5
+ * y  6  2  4
+ * z  5  4  3
+ *
+ *  PARAVIEW - stresses and strains in global c.s., damage tensor in local c.s.
+ *    x  y  z
+ * x  0  1  2
+ * y  3  4  5
+ * z  6  7  8
+ *
+ */
 
 
 #include "vtkexportmodule.h"
@@ -67,7 +67,6 @@
 #endif
 
 namespace oofem {
-
 VTKExportModule :: VTKExportModule(EngngModel *e) : ExportModule(e), internalVarsToExport(), primaryVarsToExport()
 {
     //this->mode = rbrmode;
@@ -214,7 +213,7 @@ VTKExportModule :: doOutput(TimeStep *tStep)
         elemToProcess++;
         // element composed from same-type cells asumed
         ncells = this->giveNumberOfElementCells( d->giveElement(ielem) );
-        celllistsize += ncells + ncells *this->giveNumberOfNodesPerCell( this->giveCellType ( d->giveElement ( ielem ) ) );
+        celllistsize += ncells + ncells *this-> giveNumberOfNodesPerCell( this->giveCellType ( d->giveElement ( ielem ) ) );
     }
 
     int nelemNodes;
@@ -249,7 +248,7 @@ VTKExportModule :: doOutput(TimeStep *tStep)
             for ( i = 1; i <= nelemNodes; i++ ) {
                 if ( vtkCellType == 25 ) {
                     j = HexaQuadNodeMapping [ i - 1 ];
-                } else   {
+                } else {
                     j = i;
                 }
 
@@ -275,8 +274,10 @@ VTKExportModule :: doOutput(TimeStep *tStep)
         }
 
         // output cell data (Material ID ...)
-        if(cellVarsToExport.giveSize())
-          exportCellVars(stream, elemToProcess, tStep);
+        if ( cellVarsToExport.giveSize() ) {
+            exportCellVars(stream, elemToProcess, tStep);
+        }
+
         /*
          * for ( ielem = 1; ielem <= nelem; ielem++ ) {
          * elem = d->giveElement(ielem);
@@ -336,7 +337,7 @@ VTKExportModule :: doOutput(TimeStep *tStep)
                 for ( i = 1; i <= nelemNodes; i++ ) {
                     if ( vtkCellType == 25 ) {
                         j = HexaQuadNodeMapping [ i - 1 ];
-                    } else   {
+                    } else {
                         j = i;
                     }
 
@@ -372,8 +373,9 @@ VTKExportModule :: doOutput(TimeStep *tStep)
                 fprintf(stream, "%d\n", vtkCellType);
             }
 
-            if(cellVarsToExport.giveSize())
-              exportCellVars(stream, elemToProcess, tStep);
+            if ( cellVarsToExport.giveSize() ) {
+                exportCellVars(stream, elemToProcess, tStep);
+            }
         }
     }
 
@@ -542,33 +544,65 @@ VTKExportModule :: exportIntVars(FILE *stream, TimeStep *tStep)
 }
 
 void
-    VTKExportModule :: exportCellVars(FILE *stream, int elemToProcess, TimeStep *tStep){
-  int i, ielem;
-  InternalStateType type;
-  Element *elem;
-  Domain *d  = emodel->giveDomain(1);
-  int nelem = d->giveNumberOfElements();
+VTKExportModule :: exportCellVars(FILE *stream, int elemToProcess, TimeStep *tStep) {
+    int i, ielem, pos;
+    InternalStateType type;
+    Element *elem;
+    Domain *d  = emodel->giveDomain(1);
+    int nelem = d->giveNumberOfElements();
+    FloatMatrix mtrx(3,3);
 
-  fprintf(stream, "\nCELL_DATA %d\n", elemToProcess);
-  for (i=1; i<=cellVarsToExport.giveSize(); i++){
-    type = ( InternalStateType ) cellVarsToExport.at(i);
-    if((type == IST_MaterialNumber) || (type == IST_ElementNumber))
-      fprintf(stream, "SCALARS %s int\nLOOKUP_TABLE default\n", __InternalStateTypeToString(type) );
-    for ( ielem = 1; ielem <= nelem; ielem++ ) {
-      elem = d->giveElement(ielem);
+    fprintf(stream, "\nCELL_DATA %d\n", elemToProcess);
+    for ( i = 1; i <= cellVarsToExport.giveSize(); i++ ) {
+        type = ( InternalStateType ) cellVarsToExport.at(i);
+        switch (type){
+            case IST_MaterialNumber:
+            case IST_ElementNumber:
+            fprintf( stream, "SCALARS %s int\nLOOKUP_TABLE default\n", __InternalStateTypeToString(type) );
+            for ( ielem = 1; ielem <= nelem; ielem++ ) {
+                elem = d->giveElement(ielem);
 #ifdef __PARALLEL_MODE
-      if ( elem->giveParallelMode() != Element_local ) {
-      continue;
-      }
+                if ( elem->giveParallelMode() != Element_local ) {
+                    continue;
+                }
 #endif
-      if(type == IST_MaterialNumber)
-        fprintf(stream, "%d\n", elem->giveMaterial()->giveNumber());
-      if(type == IST_ElementNumber)
-          fprintf(stream, "%d\n", elem->giveNumber());
-    }
-    fprintf(stream, "\n\n");
-  }
+                if ( type == IST_MaterialNumber ) {
+                    fprintf( stream, "%d\n", elem->giveMaterial()->giveNumber() );
+                }
+                if ( type == IST_ElementNumber ) {
+                    fprintf( stream, "%d\n", elem->giveNumber() );
+                }
+            }
+            break;
 
+            case IST_MaterialOrientation_x:
+            case IST_MaterialOrientation_y:
+            case IST_MaterialOrientation_z:
+                if ( type == IST_MaterialOrientation_x){
+                    pos = 1;
+                }
+                if ( type == IST_MaterialOrientation_y){
+                    pos = 2;
+                }
+                if ( type == IST_MaterialOrientation_z){
+                    pos = 3;
+                }
+                fprintf( stream, "VECTORS %s float\n", __InternalStateTypeToString(type) );
+                for ( ielem = 1; ielem <= nelem; ielem++ ) {
+                    if( !d->giveElement(ielem)->giveLocalCoordinateSystem(mtrx) ){
+                        mtrx.resize(3,3);
+                        mtrx.zero();
+                    }
+                    fprintf( stream, "%f %f %f\n", mtrx.at(1,pos), mtrx.at(2,pos), mtrx.at(3,pos) );
+                }
+            break;
+
+            default:
+                OOFEM_ERROR2("Quantity %s not defined on cells", __InternalStateTypeToString(type) );
+        }
+
+        fprintf(stream, "\n\n");
+    }
 }
 
 
@@ -712,9 +746,9 @@ VTKExportModule :: initRegionNodeNumbering(IntArray &regionNodalNumbers, int &re
     } else {
         int i;
         for ( i = 1; i <= nnodes; i++ ) {
-          if ( regionNodalNumbers.at(i) ) {
-            regionNodalNumbers.at(i) = currOffset++;
-          }
+            if ( regionNodalNumbers.at(i) ) {
+                regionNodalNumbers.at(i) = currOffset++;
+            }
         }
     }
 
@@ -785,7 +819,7 @@ VTKExportModule :: exportIntVarAs(InternalStateType valID, InternalStateValueTyp
                     val = & iVal;
                     for ( j = 1; j <= 3; j++ ) {
                         iVal.at(j) = d->giveNode( regionNodalNumbers.at(inode) )->giveUpdatedCoordinate(j, tStep, EID_MomentumBalance, 1.0) -
-                        d->giveNode( regionNodalNumbers.at(inode) )->giveCoordinate(j);
+                                     d->giveNode( regionNodalNumbers.at(inode) )->giveCoordinate(j);
                     }
                 } else if ( valID == IST_MaterialInterfaceVal ) {
                     MaterialInterface *mi = emodel->giveMaterialInterface(1);
@@ -891,7 +925,7 @@ VTKExportModule :: exportIntVarAs(InternalStateType valID, InternalStateValueTyp
                         val = & iVal;
                         for ( j = 1; j <= 3; j++ ) {
                             iVal.at(j) = d->giveNode( regionNodalNumbers.at(inode) )->giveUpdatedCoordinate(j, tStep, EID_MomentumBalance, 1.0) -
-                            d->giveNode( regionNodalNumbers.at(inode) )->giveCoordinate(j);
+                                         d->giveNode( regionNodalNumbers.at(inode) )->giveCoordinate(j);
                         }
                     } else if ( valID == IST_MaterialInterfaceVal ) {
                         MaterialInterface *mi = emodel->giveMaterialInterface(1);
@@ -1140,11 +1174,12 @@ VTKExportModule :: exportPrimVarAs(UnknownType valID, FILE *stream, TimeStep *tS
             } else if ( type == ISVT_VECTOR ) {
                 jsize = min( 3, iVal.giveSize() );
                 //rotate back from nodal CS to global CS if applies
-                if(d->giveNode(dman->giveNumber())->hasLocalCS()){
-                  iVal.resize(3);
-                  iValLCS = iVal;
-                  iVal.beTProductOf(*d->giveNode(dman->giveNumber())->giveLocalCoordinateTriplet(), iValLCS);
+                if ( d->giveNode( dman->giveNumber() )->hasLocalCS() ) {
+                    iVal.resize(3);
+                    iValLCS = iVal;
+                    iVal.beTProductOf(* d->giveNode( dman->giveNumber() )->giveLocalCoordinateTriplet(), iValLCS);
                 }
+
                 for ( j = 1; j <= jsize; j++ ) {
                     fprintf( stream, "%e ", iVal.at(j) );
                 }
@@ -1250,7 +1285,7 @@ VTKExportModule :: exportPrimVarAs(UnknownType valID, FILE *stream, TimeStep *tS
 
         fprintf(stream, "\n");
     }
+
     fprintf(stream, "\n");
 }
-
 } // end namespace oofem

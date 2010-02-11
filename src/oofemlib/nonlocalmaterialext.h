@@ -104,7 +104,7 @@ public:
 
     /**
      * Returns integration list of receiver. Contains localIntegrationRecord structures, containing
-     * references to integration points and their weights that influence to nonlocal average in
+     * references to integration points and their weights that influence the nonlocal average in
      * receiver's associated integration point.
      */
     dynaList< localIntegrationRecord > *giveIntegrationDomainList() { return & integrationDomainList; }
@@ -146,12 +146,12 @@ protected:
      * This implies, that all variables (which undergo averaging) for all material models of the domain
      * should be prepared at the same time in updateDomainBeforeNonlocAverage method.
      * It is believed that this is general enough and can somehow handle even the case of multiple models
-     * with different parameters beeing averaged (but is this realistic?).
+     * with different parameters being averaged (but is this realistic?).
      * If this scheme will not be enough general, then the state counter
      * can be kept as attribute of NonlocalMaterialExtensionInterface, so independently for
      * each material model. Each model will be then updated in separate call. But in the case of
      * several material models of the same type (with diferent params) this will lead to
-     * multiple update, which can not be avoided, althoug it is renundant.
+     * multiple update, which can not be avoided, although it is renundant.
      *
      * StateCounterType lastUpdatedStateCounter;
      */
@@ -272,12 +272,23 @@ protected:
      * Returns true if the barrier is activated
      * by interaction of two given points. In this case the nonlocal influence
      * is not considered. Otherwise returns false.
-     * @param c1 coordinates of first point
-     * @param c2 coordinates of second point
-     * @return true if barrier is activated, false otherwise
+     * @param gpCoords coordinates of first point
+     * @param jGpCoords coordinates of second point
+     * @param weight set to zero if the GP are across the barrier
      */
     //bool isBarrierActivated (const FloatArray& c1, const FloatArray& c2) const;
     void applyBarrierConstraints(const FloatArray &gpCoords, const FloatArray &jGpCoords, double &weight);
+
+    /**
+     * Manipulates weight on integration point in the element.
+     * By default is off, keyword 'averagingtype' specifies various methods.
+     * For example, a boundary layer method averages strains over the whole element without any radius.
+     * @param weight modifies the weight with the jGp-th item
+     * @param gp pointer to the GP owing the PointTable
+     * @param jGp pointer to GP in the PointTable
+     * @return true if barrier is activated, false otherwise
+     */
+    void manipulateWeight(double &weight, GaussPoint *gp, GaussPoint *jGp);
 };
 
 } // end namespace oofem

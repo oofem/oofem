@@ -48,6 +48,7 @@
 #include "spatiallocalizer.h"
 #include "domain.h"
 #include "nonlocalbarrier.h"
+
 #ifdef __PARALLEL_MODE
 #include "parallel.h"
 #endif
@@ -163,6 +164,9 @@ NonlocalMaterialExtensionInterface :: buildNonlocalPointTable(GaussPoint *gp)
                 if ( ielem->computeGlobalCoordinates( jGpCoords, * ( jGp->giveCoordinates() ) ) ) {
                     weight = this->computeWeightFunction(gpCoords, jGpCoords);
 
+                    //manipulate weights for a special averaging of strain (OFF by default)
+                    this->manipulateWeight(weight, gp, jGp);
+
                     /*
                      * if ((weight > NonlocalMaterialZeroWeight) && (!this->isBarrierActivated(gpCoords, jGpCoords))) {
                      */
@@ -270,6 +274,9 @@ NonlocalMaterialExtensionInterface :: rebuildNonlocalPointTable(GaussPoint *gp, 
                     if ( ielem->computeGlobalCoordinates( jGpCoords, * ( jGp->giveCoordinates() ) ) ) {
                         weight = this->computeWeightFunction(gpCoords, jGpCoords);
 
+                        //manipulate weights for a special averaging of strain (OFF by default)
+                        this->manipulateWeight(weight, gp, jGp);
+
                         this->applyBarrierConstraints(gpCoords, jGpCoords, weight);
 #ifdef NMEI_USE_ALL_ELEMENTS_IN_SUPPORT
                     if (1) {
@@ -359,8 +366,7 @@ NonlocalMaterialExtensionInterface :: initializeFrom(InputRecord *ir)
 
     int _permanentNonlocTableFlag = this->permanentNonlocTableFlag;
     IR_GIVE_OPTIONAL_FIELD (ir, _permanentNonlocTableFlag,
-			    IFT_NonlocalMaterialExtensionInterface_permanentNonlocTableFlag,
-			    "permanentnonloctableflag");
+                            IFT_NonlocalMaterialExtensionInterface_permanentNonlocTableFlag, "permanentnonloctableflag");
     this->permanentNonlocTableFlag = _permanentNonlocTableFlag;
 
     return IRRT_OK;
@@ -421,8 +427,18 @@ NonlocalMaterialExtensionInterface :: applyBarrierConstraints(const FloatArray &
     return;
 }
 
+void
+NonlocalMaterialExtensionInterface :: manipulateWeight(double &weight, GaussPoint *gp, GaussPoint *jGp)
+{
+    Element *ielem = jGp->giveElement();
+    IntegrationRule *iRule = ielem->giveDefaultIntegrationRulePtr();
 
-
+    if ( ielem->giveMaterial()->hasProperty(AVERAGING_TYPE,jGp) ){
+        if( ielem->giveMaterial()->give(AVERAGING_TYPE,jGp) == 1){
+            weight = 1./( iRule->getNumberOfIntegrationPoints() );//asign the same weights over the whole element
+        }
+    }
+}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 

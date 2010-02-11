@@ -151,10 +151,10 @@ IsotropicDamageMaterial1 :: computeEquivalentStrain(double &kappa, const FloatAr
 
         // if plane stress mode -> compute strain in z-direction from condition of zero stress in corresponding direction
         if ( gp->giveMaterialMode() == _PlaneStress ) {
-	  double nu = lmat->give(NYxz,gp);
+            double nu = lmat->give(NYxz,gp);
             fullstrain.at(3) = -nu * ( fullstrain.at(1) + fullstrain.at(2) ) / ( 1. - nu );
         } else if ( gp->giveMaterialMode() == _1dMat ) {
-	  double nu = lmat->give(NYxz,gp);
+            double nu = lmat->give(NYxz,gp);
             fullstrain.at(2) = -nu *fullstrain.at(1);
             fullstrain.at(3) = -nu *fullstrain.at(1);
         }

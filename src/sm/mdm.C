@@ -982,7 +982,7 @@ MDM :: giveInputRecordString(std :: string &str, bool keyword)
     if ( this->nonlocal ) {
 			sprintf(buff, " r %e", this->R);
 			str += buff;
-			
+
 			if(this->mdm_Ep >= 0.0 && this->mdm_Efp >= 0.0){
 				sprintf(buff, " efp %e", this->mdm_Efp);
 				str += buff;
@@ -1009,7 +1009,7 @@ MDM :: giveInputRecordString(std :: string &str, bool keyword)
 				}
 			}
 		}
-			
+
 		if(this->formulation){
 			sprintf(buff, " formulation %d", (int)(this->formulation));
 			str += buff;
@@ -1022,7 +1022,7 @@ MDM :: giveInputRecordString(std :: string &str, bool keyword)
 		str += buff;
 #endif
 
-		StructuralNonlocalMaterialExtensionInterface :: giveInputRecordString(str, false);
+    StructuralNonlocalMaterialExtensionInterface :: giveInputRecordString(str, false);
 
 #ifdef MDM_MAPPING_DEBUG
     this->mapperSFT.giveInputRecordString(str, false);
@@ -1467,10 +1467,10 @@ double
 MDM :: predictRelativeComputationalCost(GaussPoint *gp)
 {
   //
-  // The values returned come from mesurement 
+  // The values returned come from mesurement
   // do not change them unless you know what are you doing
   //
-  double cost = 1.5; 
+  double cost = 1.5;
 
   if (nsd == 2) cost = 1.5;
   else if (nsd == 3) cost = 1.8;

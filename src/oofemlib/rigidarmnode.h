@@ -55,7 +55,7 @@ class IntArray;
  * but also some dofs can be primary doofs. Introduced masterDofMask allowing to
  * distinguish between primary and mapped (slave) dofs. The primary DOFs can have their own BCs, ICs.
  *
- * The introduction of rigid arm connected nodes allows to avoid wery stiff elements used
+ * The introduction of rigid arm connected nodes allows to avoid very stiff elements used
  * for modelling the rigid-arm connection. The rigid arm node maps its dofs to master dofs
  * using simple transformations (small rotations are assumed). Therefore, the contribution
  * to rigid arm node are localized directly to master related equations.

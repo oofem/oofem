@@ -109,7 +109,10 @@ namespace oofem {
     ENUM_ITEM_WITH_VALUE(IST_ElasStrainEnerDens, 50) \
     ENUM_ITEM_WITH_VALUE(IST_TotalStrainEnerDens, 51) \
     ENUM_ITEM_WITH_VALUE(IST_DamageScalar, 52) \
-  \
+    ENUM_ITEM_WITH_VALUE(IST_MaterialOrientation_x, 53) \
+    ENUM_ITEM_WITH_VALUE(IST_MaterialOrientation_y, 54) \
+    ENUM_ITEM_WITH_VALUE(IST_MaterialOrientation_z, 55) \
+    \
     ENUM_ITEM(CrackStatuses) \
     ENUM_ITEM(CrackedFlag) \
     ENUM_ITEM(CrackDirs) \
