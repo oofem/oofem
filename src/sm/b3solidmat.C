@@ -323,7 +323,7 @@ B3SolidMaterial :: computeCharTimes()
 	this->endOfTimeOfInterest = RheoChainMaterial :: giveEndOfTimeOfInterest();
 
 	j = 1;
-	while ( 0.5 * this->endOfTimeOfInterest >= Tau1 * pow10(j-1) ) {
+	while ( 0.5 * this->endOfTimeOfInterest >= Tau1 * pow(10., j-1) ) {
 		j++;
 	}
 
@@ -332,7 +332,7 @@ B3SolidMaterial :: computeCharTimes()
 	this->charTimes.resize(this->nUnits);
 
 	for ( mu = 1; mu <= this->nUnits; mu++ ) {
-		charTimes.at(mu) = Tau1 * __OOFEM_POW( 10, mu-1 );
+		charTimes.at(mu) = Tau1 * __OOFEM_POW( 10., mu-1 );
 	}
 
 	return;
@@ -355,7 +355,7 @@ B3SolidMaterial :: computeCharCoefficients(FloatArray &answer, GaussPoint *gp, d
 
 	    // modulus of elasticity of the first unit of Kelvin chain.
 	    // (aging elastic spring with retardation time = 0)
-	    tau0 = __OOFEM_POW( 2*this->giveCharTime(1)/sqrt(10), 0.1);
+	    tau0 = __OOFEM_POW( 2*this->giveCharTime(1)/sqrt(10.0), 0.1);
 	    EspringVal= 1.e6/( q2*log(1.0+tau0) - q2*tau0/(10.0+10.0*tau0) );
 
 	    // evaluation of moduli of elasticity for the remaining units
@@ -363,7 +363,7 @@ B3SolidMaterial :: computeCharCoefficients(FloatArray &answer, GaussPoint *gp, d
 	    answer.resize(nUnits);
 	    for (mu = 1; mu <= this->nUnits; mu++) {
 	    	tauMu = __OOFEM_POW( 2*this->giveCharTime(mu), 0.1);
-	    	answer.at(mu) = 10.e6*__OOFEM_POW(1+tauMu, 2) / ( log(10)*q2*tauMu*(0.9+tauMu));
+	    	answer.at(mu) = 10.e6*__OOFEM_POW(1+tauMu, 2) / ( log(10.0)*q2*tauMu*(0.9+tauMu));
 	    	this->charTimes.at(mu)*=1.35;
 	    }
 	    answer.at(nUnits)/=1.2; //last unit moduli reduction

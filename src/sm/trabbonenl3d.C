@@ -385,7 +385,7 @@ TrabBoneNL3D::giveRealStressVector(FloatArray& answer, MatResponseForm form, Gau
   totalStress = (1-tempDam)*effStress;
 
   for(i=1;i<=6;i++){
-     if (sqrt(totalStress.at(i)*totalStress.at(i))< pow(10,-8))
+     if (sqrt(totalStress.at(i)*totalStress.at(i))< pow(10.0,-8.0))
 	totalStress.at(i)=0.;
     }
 

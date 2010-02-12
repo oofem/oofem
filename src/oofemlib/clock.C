@@ -101,6 +101,8 @@ time_t getTime()
 
 #else // #ifndef _MSC_VER
 
+namespace oofem {
+
 void getUtime(oofem_timeval &answer)
 {
     clock_t utime = clock();
@@ -119,8 +121,8 @@ void getRelativeUtime(oofem_timeval &answer, oofem_timeval &from, oofem_timeval 
 void getRelativeUtime(oofem_timeval &answer, oofem_timeval &from)
 {
     oofem_timeval utime;
-    :: getUtime(utime);
-    :: getRelativeUtime(answer, from, utime);
+    getUtime(utime);
+    getRelativeUtime(answer, from, utime);
 }
 
 void getTime(oofem_timeval &answer)

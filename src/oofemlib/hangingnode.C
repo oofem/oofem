@@ -299,7 +299,8 @@ HangingNode :: computeMasterContribution()
 int
 HangingNode :: computeNaturalCoordinates(){
   int i,j;
-  const FloatArray *masterCoords [ countOfMasterNodes ];
+  //const FloatArray *masterCoords [ countOfMasterNodes ];
+  const FloatArray **masterCoords = new const FloatArray* [ countOfMasterNodes ];
 
   locoords->zero();
 
@@ -320,15 +321,23 @@ HangingNode :: computeNaturalCoordinates(){
     }
     default: {
       _warning("Unknown element-like configuration of master nodes or not implemented element type");
+
+      // clean up
+      for ( i = 1; i <= countOfMasterNodes; i++ )
+        delete masterCoords[i-1];
+      delete [] masterCoords; 
+      
       return 0;
 
       break;
     }
   }
 
-
+  // clean up
   for ( i = 1; i <= countOfMasterNodes; i++ )
     delete masterCoords[i-1];
+  delete [] masterCoords; 
+
   return 1;
 }
 
