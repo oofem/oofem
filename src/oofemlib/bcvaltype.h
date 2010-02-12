@@ -48,12 +48,13 @@ enum bcValType {
     // to identify load type
     UnknownBVT,
     TemperatureBVT,
-    EigenstrainBVT,
+
     ForceLoadBVT,
     PressureBVT,
     HumidityBVT,
     VelocityBVT,
-    DisplacementBVT
+    DisplacementBVT,
+    EigenstrainBVT
 };
 
 } // end namespace oofem
