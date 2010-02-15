@@ -83,19 +83,6 @@ class CohesiveInterfaceMaterialStatus : public StructuralMaterialStatus
 
 */
 
-protected:
- /// scalar measure of the largest equivalent strain ever reached in material
- double kappa;
-  /// non-equilibrated scalar measure of the largest equivalent strain
-  double tempKappa;
-  /// damage variable
- double damage;
-  /// non-equilibrated damage variable
- double tempDamage;
- /// plastic shear strains
- double gam1p, gam2p;
- /// non-equilibrated plastic shear strains
- double tempGam1p, tempGam2p;
 public: 
  /// Constructor
  CohesiveInterfaceMaterialStatus (int n, Domain*d, GaussPoint* g) ;
@@ -104,27 +91,6 @@ public:
 
   /// Prints the receiver state to stream
  void   printOutputAt (FILE *file, TimeStep* tStep) ;
-
-  /// Returns the last equilibrated scalar measure of the largest strain level
-  double giveKappa () {return kappa;}
-  /// Returns the temp. scalar measure of the largest strain level
-  double giveTempKappa () {return tempKappa;}
-  /// Sets the temp scalar measure of the largest strain level to given value
-  void   setTempKappa (double newKappa) { tempKappa = newKappa;}
-  /// Returns the last equilibrated damage level
-  double giveDamage () {return damage;}
-  /// Returns the temp. damage level
-  double giveTempDamage () {return tempDamage;}
-  /// Sets the temp damage level to given value
-  void   setTempDamage (double newDamage) { tempDamage = newDamage;}
-  /// Returns the last equilibrated plastic shear strain component 1
-  double giveGam1p () {return gam1p;}
-  /// Returns the last equilibrated plastic shear strain component 2
-  double giveGam2p () {return gam2p;}
-  /// Sets the temp plastic shear strain component 1 to given value
-  void   setTempGam1p (double gam) {tempGam1p = gam;}
-  /// Sets the temp plastic shear strain component 2 to given value
-  void   setTempGam2p (double gam) {tempGam2p = gam;}
 
  // definition
   const char* giveClassName () const { return "CohesiveInterfaceMaterialStatus" ;}
@@ -177,12 +143,6 @@ class CohesiveInterfaceMaterial : public StructuralMaterial
   double tempDillatCoeff;
   /// elastic properties (normal and shear moduli) 
   double kn, ks;
-  /// parameters controling tensile softening
-  double e0, ef, ksi;
-  /// parameters controling shear (cohesion, friction coefficient)
-  double coh, tanphi;
-  /// parameters for the rate-dependent version
-  double damchartime, damrateexp, plchartime, plrateexp;
 
  public:
   /// Constructor
@@ -191,7 +151,7 @@ class CohesiveInterfaceMaterial : public StructuralMaterial
   ~CohesiveInterfaceMaterial (){};
  
  /// Returns nonzero indicating that receiver is nonlinear
- int hasNonLinearBehaviour ()   {return 1;}
+ int hasNonLinearBehaviour ()   {return 0;}
  /**
   Tests, if material supports material mode.
   @param mode required material mode
@@ -229,18 +189,6 @@ class CohesiveInterfaceMaterial : public StructuralMaterial
  */
 void giveRealStressVector (FloatArray& answer,  MatResponseForm, GaussPoint*, 
                const FloatArray&,TimeStep* );
-  /**
-     Computes the equivalent strain measure from given strain vector (full form).
-     @param strain total strain vector in full form
-  */
-  virtual double computeEquivalentStrain (const FloatArray& strain);
-
-
-  /**
-  computes the value of damage parameter omega, based on given value of equivalent strain
-  @param kappa equivalent strain measure
-  */
-  virtual double computeDamage(double kappa);
  
   virtual void  giveCharacteristicMatrix (FloatMatrix& answer,
                                           MatResponseForm form,
@@ -318,11 +266,7 @@ protected:
  void give3dInterfaceMaterialStiffnessMatrix (FloatMatrix& answer, MatResponseForm form, MatResponseMode rMode,
                                               GaussPoint* gp, TimeStep* atTime);
 
- // Auxiliary functions used by the rate-dependent version
- double computeDamageOverstress(double eps, double& damstrain, double omega, double dt);
- double solveBeta(double c, double N);
- double computeViscoplasticScalingFactor(double tauTrial, double tauYield, double dt);
-} ;
+};
 
 } // namespace oofem
 #endif

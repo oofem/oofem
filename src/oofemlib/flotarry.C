@@ -696,6 +696,18 @@ void FloatArray :: printYourself() const
     printf("\n");
 }
 
+
+void FloatArray :: pY() const
+// Prints the receiver on screen with higher accuracy than printYourself.
+{
+    printf("[");
+    for ( int i = 1; i <= size; ++i ) {
+        printf( "%20.14e; ", this->at(i) );
+    }
+
+    printf("];\n");
+}
+
 FloatArray *FloatArray :: setValuesToZero()
 // zeroes all values to zero
 {

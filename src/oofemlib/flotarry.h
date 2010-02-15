@@ -206,9 +206,13 @@ public:
      */
     FloatArray *negated();
     /**
-     * Print receiver on stdout. Usefull for debugging.
+     * Print receiver on stdout. Useful for debugging.
      */
     virtual void         printYourself() const;
+    /**
+     * Print receiver on stdout with high accuracy.
+     */
+    virtual void         pY() const;
     /// Zeroes all coeficients of receiver.
     void         zero();
     /* new reference like membre functions */

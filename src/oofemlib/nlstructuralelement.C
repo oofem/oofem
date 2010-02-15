@@ -633,12 +633,14 @@ NLStructuralElement :: computeStiffnessMatrix(FloatMatrix &answer,
         }
     } // end nlGeometry
 
+   if ( matStiffSymmFlag ) {
     answer.symmetrized();
-    if ( rot ) {
-        answer.rotatedWith(* this->rotationMatrix);
-    }
+   }
+   if ( rot ) {
+     answer.rotatedWith(* this->rotationMatrix);
+   }
 
-    return;
+   return;
 }
 
 void

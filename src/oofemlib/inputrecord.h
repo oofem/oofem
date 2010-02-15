@@ -749,6 +749,8 @@ enum InputFieldType {
 
     IFT_MisesMat_sig0,
     IFT_MisesMat_h,
+    IFT_MisesMat_omega_crit,
+    IFT_MisesMat_a,
 
     IFT_HydrationModel_hydration,
     IFT_HydrationModel_c60mix,

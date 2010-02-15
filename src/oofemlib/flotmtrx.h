@@ -374,8 +374,9 @@ public:
      */
     int           jaco_(FloatArray &eval, FloatMatrix &v, int nf);
 
-    FloatMatrix *hardResize(int, int); // hard memory realoocation
+    FloatMatrix *hardResize(int, int); // hard memory reallocation
     void          printYourself() const;
+    void          pY() const; // higher accuracy than printYourself
     contextIOResultType           storeYourself(DataStream *stream, ContextMode mode);
     contextIOResultType           restoreYourself(DataStream *stream, ContextMode mode);
 

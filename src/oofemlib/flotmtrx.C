@@ -1571,6 +1571,23 @@ void FloatMatrix :: printYourself() const
     }
 }
 
+void FloatMatrix :: pY() const
+// Prints the receiver on screen with higher accuracy than printYourself.
+{
+    int i, j;
+
+    printf("[");
+        for ( i = 1; i <= nRows; ++i ) {
+            for ( j = 1; j <= nColumns; ++j ) {
+                printf( "%20.15e", this->at(i, j) );
+		if (j<nColumns)
+		  printf(",");
+		else
+		  printf(";");
+	    }
+        }
+	printf("];\n");
+}
 
 void
 FloatMatrix :: rotatedWith(const FloatMatrix &r)

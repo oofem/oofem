@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2010   Borek Patzak
  *
  *
  *
@@ -81,6 +81,10 @@ protected:
     /// initial (uniaxial) yield stress 
     double sig0; 
 
+/*********************************************************/
+    double omega_crit;
+    double a;
+/*************************************************************/
 public:
     MisesMat(int n, Domain *d);
     ~MisesMat();
@@ -102,7 +106,7 @@ public:
     //    virtual int         giveSizeOfFullHardeningVarsVector();
     //    virtual int         giveSizeOfReducedHardeningVarsVector(GaussPoint *);
     /// confirms that the stiffness matrix is symmetric
-    bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) { return true; }
+    bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) { return false; }
 
     /// creates a new material status  corresponding to this class
     MaterialStatus *CreateStatus(GaussPoint *gp) const;
@@ -146,7 +150,9 @@ public:
                               const FloatArray & F, TimeStep *);
 
     /// converts the deformation gradient F into the Green-Lagrange strain E 
-    void convertDefGradToGLStrain(const FloatArray & F, FloatArray & E);
+    void convertDefGradToGLStrain(const FloatMatrix & F, FloatMatrix & E);
+    void computeGLPlasticStrain(const FloatMatrix& F, FloatMatrix& Ep, FloatMatrix b, double J);
+ 
 
 };
 
@@ -163,13 +169,24 @@ protected:
     FloatArray tempPlasticStrain;
 
     /// deviatoric trial stress - needed for tangent stiffness
-    FloatArray trialStress;
+    FloatArray trialStressD;
+    /**************************************************/
+    double  trialStressV;
+    /**************************************************/
 
     /// cumulative plastic strain (initial)
     double kappa;
 
     /// cumulative plastic strain (final)
     double tempKappa;
+
+ /// deformation gradient(final)
+   FloatMatrix tempDefGrad;
+   /************************/
+   double tempDamage;
+   /******************************/
+   /// Left Cauchy-Green deformation gradient(final)
+   FloatMatrix tempLeftCauchyGreen;
 
 public:
     MisesMatStatus(int n, Domain *d, GaussPoint *g);
@@ -179,22 +196,45 @@ public:
     {answer = plasticStrain;}
 
     void giveTrialStressDev(FloatArray& answer)
-    {answer = trialStress;}
+    {answer = trialStressD;}
+
+    /*******************************************/
+    void giveTrialStressVol(double& answer)
+    {answer = trialStressV;}
+    /*******************************************/
 
     double giveCumulativePlasticStrain()
     {return kappa;}
 
     double giveTempCumulativePlasticStrain()
     {return tempKappa;}
+ 
+    void giveTempDefGrad(FloatMatrix& answer)
+    {answer = tempDefGrad;}
+
+    void giveTempLeftCauchyGreen(FloatMatrix& answer)
+    {answer = tempLeftCauchyGreen;}
 
     void letTempPlasticStrainBe(FloatArray values)
     {tempPlasticStrain = values;}
 
     void letTrialStressDevBe(FloatArray values)
-    {trialStress = values;}
+    {trialStressD = values;}
+
+    void setTrialStressVol(double value)
+    {trialStressV = value;}
 
     void setTempCumulativePlasticStrain(double value)
     {tempKappa = value;}
+    /****************************************/
+ void setTempDamage(double value)
+    {tempDamage = value;}
+ /************************************************/
+    void letTempDefGradBe(FloatMatrix values)
+    {tempDefGrad = values;}
+
+    void letTempLeftCauchyGreenBe(FloatMatrix values)
+    {tempLeftCauchyGreen = values;}
 
     /// prints the output variables into the *.out file
     void printOutputAt(FILE *file, TimeStep *tStep);
