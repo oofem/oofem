@@ -49,15 +49,16 @@ tests:
 	  for module in @TEST_TARGETS@;\
 	  do\
 	    echo Running tests for module $$module >> ${RESULT};\
+	    cd @OOFEM_DIR@/tests/$$module;\
 	    for i in @OOFEM_DIR@/tests/$$module/*.in ;\
 	    do\
-		ib=`basename $$i`;\
-		echo;\
-		echo $${ib};\
-		echo;\
-		${OOFEM} -f $$i -l 2;\
-		${PYTHON} ${CHECKER} ${CHECKER_PARAMS} -f $$i    >> ${RESULT};\
-		rm $${ib%.in}.out;\
+	      ib=`basename $$i`;\
+	      echo;\
+	      echo $${ib};\
+	      echo;\
+	      ${OOFEM} -f $$i -l 2;\
+	      ${PYTHON} ${CHECKER} ${CHECKER_PARAMS} -f $$i    >> ${RESULT};\
+	      rm $${ib%.in}.out;\
 	    done;\
 	  done;\
 	  echo finished `date`  >> ${RESULT};\
@@ -70,7 +71,7 @@ tests:
 	  echo "checker executable not found. Have you built tools in ${OOFEM_DIR}/tools?" >> ${RESULT};\
 	  echo "checker executable not found. Have you built tools in ${OOFEM_DIR}/tools?";\
 	fi
-#	cd tests; bash ../do_tests
+#	 cd tests; bash ../do_tests
 
 
 partests:

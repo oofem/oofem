@@ -1,0 +1,34 @@
+idm03.out
+Test of damage law with bilinear softening on a 1D truss element
+NonLinearStatic nsteps 18 rtolv 0.0001 MaxIter 20 stiffMode 1 controllmode 0 psi 0.0 renumber 0 hpcmode 1 hpc 2 2.0 1 stepLength 0.05 minsteplength 0.05 nmodules 0
+#vtk tstep_all domain_all primvars 1 1
+domain 1dtruss
+OutputManager tstep_all dofman_all element_all
+ndofman 2 nelem 1 ncrosssect 1 nmat 1 nbc 2 nltf 1 nic 0
+node 1 coords 3 0.0 0.0 0.0 bc 1 1
+node 2 coords 3 1.0 0.0 0.0 load 1 2
+truss1d 1 nodes 2 1 2 mat 1 crossSect 1
+SimpleCS 1 thick 1.0 width 10.0
+#exponential softening
+#idm2 1 d 1.0  E 10. n 0.2  eps0 0.5 gf 1.8 equivstraintype 0 talpha 0.0 stype 0
+#linear softening
+#idm2 1 d 1.0  E 10.  n 0.2  eps0 0.5 gf 1.8 equivstraintype 0 talpha 0.0 stype 1
+#bilinear softening
+idm2 1 d 1.0  E 10.  n 0.2  eps0 0.5 gf 1.8 gft 2.2 epsk 0.68 equivstraintype 0 talpha 0.0 stype 2
+BoundaryCondition 1 loadTimeFunction 1 prescribedvalue 0.0
+NodalLoad 2 loadTimeFunction 1 components 1 1.0
+ConstantFunction 1 f(t) 1.0
+###
+### Used for Extractor
+###
+#%BEGIN_CHECK% tolerance 1.e-4
+#NODE tStep 10 number 2 dof 1 unknown d value 5.50000000e-01
+#LOADLEVEL tStep 10 value 38.636364
+#LOADLEVEL tStep 11 value 27.272727
+#LOADLEVEL tStep 12 value 15.909091
+#LOADLEVEL tStep 13 value 8.893281
+#LOADLEVEL tStep 14 value 8.399209
+#LOADLEVEL tStep 15 value 7.905138
+#LOADLEVEL tStep 16 value 7.411067
+#LOADLEVEL tStep 17 value 6.916996
+#%END_CHECK%
