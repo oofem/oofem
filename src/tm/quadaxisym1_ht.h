@@ -43,7 +43,6 @@
 #include "quad1_ht.h"
 
 namespace oofem {
-
 class QuadAxisym1_ht : public Quad1_ht
 {
 protected:
@@ -62,6 +61,5 @@ protected:
     double computeEdgeVolumeAround(GaussPoint *gp, int iEdge);
     double computeRadiusAt(GaussPoint *gp);
 };
-
 } // end namespace oofem
 #endif // quadaxisym1_ht_h

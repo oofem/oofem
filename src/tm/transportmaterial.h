@@ -64,10 +64,14 @@ class TransportMaterialStatus : public MaterialStatus
 {
 protected:
 
-    /// Equilibrated state vector in reduced form
-    FloatArray stateVector;  // reduced form
-    /// Temp state vector in reduced form
-    FloatArray tempStateVector; // increments are used mainly in nonlinear analysis
+    /// Equilibrated state vector in reduced form. The physical meaning corresponds to temperature, concentration etc.
+    FloatArray stateVector;
+    /// Temporary state vector in a reduced form, used mainly in a nonlinear analysis
+    FloatArray tempStateVector;
+    /// Equilibrated flow vector in reduced form. The physical meaning corresponds to heat flow, flow of ions etc.
+    FloatArray flowVector;
+    /// Temporary flow vector in a reduced form
+    FloatArray tempFlowVector;
 
 public:
     /// Constructor - creates new TransportMaterialStatus with number n, belonging to domain d and IntegrationPoint g.
@@ -79,9 +83,8 @@ public:
     void   printOutputAt(FILE *, TimeStep *);
 
     /**
-     * Initializes the temporary internal variables (stresss and strains vectors),
-     * describing the current state according to
-     * previously reached equilibrium internal variables.
+     * Initializes temporary internal variables (state and flow vectors).
+     * Assign previously reached equilibrium internal variables to them.
      */
     virtual void initTempStatus();
     /**
@@ -112,13 +115,20 @@ public:
     contextIOResultType    restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
     // saves current context(state) into stream
 
-    /// Returns the const pointer to receiver's stateVector attribute
+    /// Returns the const pointer to receiver's stateVector
     const FloatArray &giveStateVector()         { return stateVector; }
-    /// Returns the const pointer to receiver's tempStrainVector
+    /// Returns the const pointer to receiver's tempStateVector
     const FloatArray &giveTempStateVector()      { return tempStateVector; }
-    /// Assigns tempStressVector to given vector v
+    /// Returns the const pointer to receiver's flowVector
+    const FloatArray &giveFlowVector()         { return flowVector; }
+    /// Returns the const pointer to receiver's flowVector
+    const FloatArray &giveTempFlowVector()         { return tempFlowVector; }
+    /// Assigns tempStateVector to given vector v
     void         letTempStateVectorBe(const FloatArray &v)
     { tempStateVector = v; }
+    /// Assigns tempFlowVector to given vector v
+    void         letTempFlowVectorBe(const FloatArray &v)
+    { tempFlowVector = v; }
 
     /// Returns "TransportMaterialStatus" - class name of the receiver.
     const char *giveClassName() const { return "TransportMaterialStatus"; }
@@ -184,11 +194,12 @@ public:
                                             TimeStep *atTime) = 0;
     /**
      * Updates internal state of material according to new state vector.
-     * @param vec new state vector
+     * @param stateVec new state vector
+     * @param flowVec new flow vector
      * @param gp integration point
      * @param tStep solution step
      */
-    virtual void updateInternalState(const FloatArray &vec, GaussPoint *gp, TimeStep *);
+    virtual void updateInternalState(const FloatArray &stateVec, const FloatArray &flowVec, GaussPoint *gp, TimeStep *);
     /**
      * Returns nonzero if receiver genarets internal source of state variable(s), zero otherwise.
      */

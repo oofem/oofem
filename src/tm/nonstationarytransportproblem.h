@@ -45,11 +45,10 @@
 #include "sparsemtrx.h"
 #include "primaryfield.h"
 #ifndef __MAKEDEPEND
-#include <stdio.h>
+ #include <stdio.h>
 #endif
 
 namespace oofem {
-
 /**
  * This class represents linear nonstationary transport problem.
  */
@@ -82,17 +81,20 @@ protected:
 public:
     NonStationaryTransportProblem(int i, EngngModel *_master = NULL) : EngngModel(i, _master),
         rhs(), bcRhs(), FluxField(this, 1, FBID_FluxField, EID_ConservationEquation, 1)
-    { lhs = NULL;
-      ndomains = 1;
-      nMethod = NULL;
-      lumpedCapacityStab = 0;
-      exportFieldFlag = 0;
-      initFlag = 1;
-      dtTimeFunction = 0; }
+    {
+        lhs = NULL;
+        ndomains = 1;
+        nMethod = NULL;
+        lumpedCapacityStab = 0;
+        exportFieldFlag = 0;
+        initFlag = 1;
+        dtTimeFunction = 0;
+    }
     ~NonStationaryTransportProblem()
-    { if ( lhs ) { delete  lhs; }
+    {
+        if ( lhs ) { delete  lhs; }
 
-      if ( nMethod ) { delete nMethod; } }
+        if ( nMethod ) { delete nMethod; } }
 
     void solveYourselfAt(TimeStep *);
     /**
@@ -101,7 +103,7 @@ public:
      * if model supports changes of static system). The element internal state update is also forced using
      * updateInternalState service.
      */
-    virtual void               updateYourself(TimeStep *);
+    virtual void updateYourself(TimeStep *);
     double giveUnknownComponent(EquationID, ValueModeType, TimeStep *, Domain *, Dof *);
     contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
     contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
@@ -159,8 +161,8 @@ public:
 
 
 protected:
-    virtual void assembleAlgorithmicPartOfRhs(FloatArray &rhs, EquationID ut, 
-					      const UnknownNumberingScheme&s, TimeStep *tStep);
+    virtual void assembleAlgorithmicPartOfRhs(FloatArray &rhs, EquationID ut,
+                                              const UnknownNumberingScheme &s, TimeStep *tStep);
     virtual void applyIC(TimeStep *);
     /**
      * Assembles part of rhs due to Dirichlet boundary conditions.
@@ -172,8 +174,13 @@ protected:
      * @param d domain
      */
     virtual void assembleDirichletBcRhsVector(FloatArray &answer, TimeStep *tStep, EquationID ut, ValueModeType mode,
-                                              CharType lhsType, const UnknownNumberingScheme& s, Domain *d);
-};
+                                              CharType lhsType, const UnknownNumberingScheme &s, Domain *d);
 
+    /**
+     * Updates IP values on elements
+     * @param TimeStep solution step
+     */
+    virtual void updateInternalState(TimeStep *stepN);
+};
 } // end namespace oofem
 #endif // nonstationarytransportproblem_h

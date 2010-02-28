@@ -54,17 +54,16 @@
 #include "elementside.h"
 #include "mathfem.h"
 #ifndef __MAKEDEPEND
-#include <stdlib.h>
-#include <stdio.h>
+ #include <stdlib.h>
+ #include <stdio.h>
 #endif
 
 #ifdef __OOFEG
-#include "oofeggraphiccontext.h"
-#include "conTable.h"
+ #include "oofeggraphiccontext.h"
+ #include "conTable.h"
 #endif
 
 namespace oofem {
-
 TransportElement :: TransportElement(int n, Domain *aDomain, ElementMode em) :
     Element(n, aDomain)
     // Constructor. Creates an element with number n, belonging to aDomain.
@@ -106,11 +105,11 @@ TransportElement ::  giveCharacteristicMatrix(FloatMatrix &answer,
 {
     if ( mtrx == ConductivityMatrix ) {
         this->computeConductivityMatrix(answer, Conductivity, tStep);
-    } else if ( mtrx == CapacityMatrix )  {
+    } else if ( mtrx == CapacityMatrix ) {
         this->computeCapacityMatrix(answer, tStep);
-    } else if ( mtrx == LHSBCMatrix )  {
+    } else if ( mtrx == LHSBCMatrix ) {
         this->computeBCMtrxAt(answer, tStep, VM_Total);
-    } else if ( mtrx == IntSourceLHSMatrix )  {
+    } else if ( mtrx == IntSourceLHSMatrix ) {
         this->computeIntSourceLHSMatrix(answer, tStep);
     } else {
         _error2( "giveCharacteristicMatrix: Unknown Type of characteristic mtrx (%s)", __CharTypeToString(mtrx) );
@@ -128,9 +127,9 @@ TransportElement ::  giveCharacteristicVector(FloatArray &answer, CharType mtrx,
 {
     if ( mtrx == ElementBCTransportVector ) {
         this->computeBCVectorAt(answer, tStep, mode);
-    } else if ( mtrx == ElementInternalSourceVector )  {
+    } else if ( mtrx == ElementInternalSourceVector ) {
         this->computeInternalSourceRhsVectorAt(answer, tStep, mode);
-    } else                                                                                                                 {
+    } else {
         _error2( "giveCharacteristicVector: Unknown Type of characteristic mtrx (%s)",
                 __CharTypeToString(mtrx) );
     }
@@ -509,8 +508,9 @@ TransportElement :: computeBCSubVectorAt(FloatArray &answer, TimeStep *tStep, Va
         }
 
         answer.add(vec);
-    } // end loop over applied bc
+    }
 
+    // end loop over applied bc
 }
 
 void
@@ -523,7 +523,7 @@ TransportElement :: computeEdgeBCSubVectorAt(FloatArray &answer, Load *load, int
     answer.zero();
 
     if ( ( ( load->giveType() == TransmissionBC ) || ( load->giveType() == ConvectionBC ) ) ) {
-        BoundaryLoad *edgeLoad = static_cast< BoundaryLoad * >( load );
+        BoundaryLoad *edgeLoad = static_cast< BoundaryLoad * >(load);
         if ( edgeLoad->isDofExcluded(indx) ) {
             return;
         }
@@ -587,7 +587,7 @@ TransportElement :: computeSurfaceBCSubVectorAt(FloatArray &answer, Load *load,
         _error("computeSurfaceBCSubVectorAt : no surface load support");
     }
 
-    BoundaryLoad *surfLoad = dynamic_cast< BoundaryLoad * >( load );
+    BoundaryLoad *surfLoad = dynamic_cast< BoundaryLoad * >(load);
     if ( surfLoad ) {
         IntegrationRule *iRule;
         GaussPoint *gp;
@@ -666,7 +666,7 @@ TransportElement :: computeBCSubMtrxAt(FloatMatrix &answer, TimeStep *tStep, Val
         if ( ( load->giveType() == ConvectionBC ) ) {
             ltype = load->giveBCGeoType();
             if ( ltype == EdgeLoadBGT ) {
-                BoundaryLoad *edgeLoad = static_cast< BoundaryLoad * >( load );
+                BoundaryLoad *edgeLoad = static_cast< BoundaryLoad * >(load);
                 if ( edgeLoad->isDofExcluded(indx) ) {
                     continue;
                 }
@@ -698,7 +698,7 @@ TransportElement :: computeBCSubMtrxAt(FloatMatrix &answer, TimeStep *tStep, Val
                 IntArray mask;
                 FloatMatrix subAnswer, n;
 
-                BoundaryLoad *surfLoad = static_cast< BoundaryLoad * >( load );
+                BoundaryLoad *surfLoad = static_cast< BoundaryLoad * >(load);
                 if ( surfLoad->isDofExcluded(indx) ) {
                     continue;
                 }
@@ -722,7 +722,9 @@ TransportElement :: computeBCSubMtrxAt(FloatMatrix &answer, TimeStep *tStep, Val
                 _error("computeBCSubMtrxAt : unsupported bc type encountered");
             }
         }
-    } // end loop over applied bc
+    }
+
+    // end loop over applied bc
 
     if ( !defined ) {
         answer.resize(0, 0);
@@ -763,12 +765,12 @@ TransportElement :: assembleLocalContribution(FloatArray &answer, FloatArray &sr
 
 void
 TransportElement :: updateInternalState(TimeStep *stepN)
-// Updates the receiver at end of step.
+// Updates the receiver at the end of solution step
 {
     int i, j;
     IntegrationRule *iRule;
-    FloatArray f, r;
-    FloatMatrix n;
+    FloatArray stateVector, flowVector, r, br;
+    FloatMatrix n, b, d;
     TransportMaterial *mat = ( ( TransportMaterial * ) this->giveMaterial() );
     GaussPoint *gp;
 
@@ -779,8 +781,23 @@ TransportElement :: updateInternalState(TimeStep *stepN)
             gp = iRule->getIntegrationPoint(j);
             this->computeNmatrixAt( n, gp->giveCoordinates() );
             this->computeVectorOf(EID_ConservationEquation, VM_Total, stepN, r);
-            f.beProductOf(n, r);
-            mat->updateInternalState(f, gp, stepN);
+            stateVector.beProductOf(n, r);
+            this->computeGradientMatrixAt(b, gp);
+
+            if ( emode == HeatTransferEM ) {
+                this->computeConstitutiveMatrixAt(d, Conductivity_hh, gp, stepN);
+            } else if ( emode == HeatMass1TransferEM ) {
+                OOFEM_WARNING1("No output of flow for GP - not implemented");
+                mat->updateInternalState(stateVector, NULL, gp, stepN);
+                return;
+            } else {
+                OOFEM_ERROR1("Unknown element mode");
+            }
+
+            br.beProductOf(b, r);
+            flowVector.beProductOf(d, br);
+            flowVector.times(-1.);
+            mat->updateInternalState(stateVector, flowVector, gp, stepN);
         }
     }
 }
@@ -864,6 +881,4 @@ TransportElement :: giveIntVarCompFullIndx(IntArray &answer, InternalStateType t
         return Element :: giveIntVarCompFullIndx(answer, type);
     }
 }
-
-
 } // end namespace oofem

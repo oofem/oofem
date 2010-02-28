@@ -48,17 +48,16 @@
 #include "structuralms.h"
 #include "load.h"
 #ifndef __MAKEDEPEND
-#include <math.h>
-#include <stdio.h>
+ #include <math.h>
+ #include <stdio.h>
 #endif
 
 #ifdef __OOFEG
-#include "oofeggraphiccontext.h"
-#include "conTable.h"
+ #include "oofeggraphiccontext.h"
+ #include "conTable.h"
 #endif
 
 namespace oofem {
-
 QuadAxisym1_ht :: QuadAxisym1_ht(int n, Domain *aDomain, ElementMode em) :
     Quad1_ht(n, aDomain, em)
     // Constructor.
@@ -115,7 +114,7 @@ QuadAxisym1_ht :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
     this->computeEgdeNMatrixAt(n, gp);
     radius = n.at(1, 1) * nodeA->giveCoordinate(1) + n.at(1, 2) * nodeB->giveCoordinate(1);
 
-    return 0.5 *length *gp->giveWeight() * radius;
+    return 0.5 *length *gp-> giveWeight() * radius;
 }
 
 double
@@ -132,5 +131,4 @@ QuadAxisym1_ht :: computeRadiusAt(GaussPoint *gp)
 
     return r;
 }
-
 } // end namespace oofem

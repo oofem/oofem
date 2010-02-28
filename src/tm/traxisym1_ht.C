@@ -48,16 +48,15 @@
 #include "structuralms.h"
 #include "load.h"
 #ifndef __MAKEDEPEND
-#include <stdio.h>
+ #include <stdio.h>
 #endif
 
 #ifdef __OOFEG
-#include "oofeggraphiccontext.h"
-#include "conTable.h"
+ #include "oofeggraphiccontext.h"
+ #include "conTable.h"
 #endif
 
 namespace oofem {
-
 TrAxisym1_ht :: TrAxisym1_ht(int n, Domain *aDomain, ElementMode em) :
     Tr1_ht(n, aDomain, em)
     // Constructor.
@@ -76,7 +75,7 @@ TrAxisym1_ht :: computeVolumeAround(GaussPoint *aGaussPoint)
     weight  = aGaussPoint->giveWeight();
     area    = this->giveArea();
 
-    return 2.0 * area * weight * this->computeRadiusAt(aGaussPoint);
+    return 2.0 *area *weight *this-> computeRadiusAt(aGaussPoint);
 }
 
 double
@@ -108,7 +107,7 @@ TrAxisym1_ht :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
     length = sqrt(dx * dx + dy * dy);
     this->computeEgdeNMatrixAt(n, gp);
     radius = n.at(1, 1) * nodeA->giveCoordinate(1) + n.at(1, 2) * nodeB->giveCoordinate(1);
-    return 0.5 *length *radius *gp->giveWeight();
+    return 0.5 *length *radius *gp-> giveWeight();
 }
 
 double
@@ -125,6 +124,4 @@ TrAxisym1_ht :: computeRadiusAt(GaussPoint *gp)
 
     return r;
 }
-
-
 } // end namespace oofem

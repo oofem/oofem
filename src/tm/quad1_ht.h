@@ -42,10 +42,10 @@
 
 #include "transportelement.h"
 #include "spatiallocalizer.h"
+#include "zznodalrecoverymodel.h"
 
 namespace oofem {
-
-class Quad1_ht : public TransportElement, public SpatialLocalizerInterface
+class Quad1_ht : public TransportElement, public SpatialLocalizerInterface, public ZZNodalRecoveryModelInterface
 {
 public:
 protected:
@@ -87,6 +87,24 @@ public:
     Interface *giveInterface(InterfaceType);
 
     /**
+     * @name The element interface required by ZZNodalRecoveryModel
+     */
+    //@{
+    /**
+     * Returns the size of DofManger record required to hold recovered values for given mode.
+     * @param type determines the type of internal variable to be recovered
+     * @return size of DofManger record required to hold recovered values
+     */
+    int ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type);
+
+    /// Returns the corresponding element to interface
+    Element *ZZNodalRecoveryMI_giveElement() { return this; }
+
+    /// Evaluates N matrix (interpolation estimated matrix).
+    void ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatMatrix &answer, GaussPoint *aGaussPoint, InternalStateType type);
+    //@}
+
+    /**
      * @name The element interface required by SpatialLocalizerInterface
      */
     //@{
@@ -117,8 +135,8 @@ protected:
     /* computes the submatrix of interpolation matrix cooresponding to single unknown.*/
     virtual void  computeNSubMatrixAt(FloatMatrix &n, FloatArray *);
 
-    void giveDerivativeKsi(FloatArray &answer, double);
-    void giveDerivativeEta(FloatArray &answer, double);
+    void giveDerivativeKsi(FloatArray & answer, double);
+    void giveDerivativeEta(FloatArray & answer, double);
     void computeJacobianMatrix(FloatMatrix &answer, GaussPoint *aGaussPoint);
 
     void computeEgdeNMatrixAt(FloatMatrix &n, GaussPoint *gp);
@@ -128,6 +146,5 @@ protected:
 
     int giveApproxOrder(int unknownIndx) { return 1; }
 };
-
 } // end namespace oofem
 #endif // quad1_ht_h

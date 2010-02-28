@@ -84,7 +84,6 @@ enum InterfaceType {
 
     XfemElementInterfaceType,
     VTKXMLExportModuleElementInterfaceType
-    
 };
 
 } // end namespace oofem

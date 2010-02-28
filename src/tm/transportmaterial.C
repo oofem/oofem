@@ -37,13 +37,13 @@
 #include "contextioerr.h"
 
 namespace oofem {
-
 void
-TransportMaterial :: updateInternalState(const FloatArray &vec, GaussPoint *gp, TimeStep *)
+TransportMaterial :: updateInternalState(const FloatArray &stateVec, const FloatArray &flowVec, GaussPoint *gp, TimeStep *)
 {
     TransportMaterialStatus *ms = ( TransportMaterialStatus * ) this->giveStatus(gp);
     if ( ms ) {
-        ms->letTempStateVectorBe(vec);
+        ms->letTempStateVectorBe(stateVec);
+        ms->letTempFlowVectorBe(flowVec);
     }
 }
 
@@ -56,19 +56,23 @@ void TransportMaterialStatus :: printOutputAt(FILE *File, TimeStep *tNow)
 // Prints the strains and stresses on the data file.
 {
     FloatArray helpVec;
-    int i, n;
+    int i;
 
     MaterialStatus :: printOutputAt(File, tNow);
 
-    fprintf(File, "  state vector ");
+    fprintf(File, "  state");
     //((StructuralCrossSection*)
     // gp->giveCrossSection())->giveFullCharacteristicVector(helpVec, gp, strainVector);
     //n = helpVec.giveSize() ;
     //for (i=1 ; i<=n ; i++)
     //  fprintf (File," % .4e",helpVec.at(i)) ;
-    n = stateVector.giveSize();
-    for ( i = 1; i <= n; i++ ) {
+    for ( i = 1; i <= stateVector.giveSize(); i++ ) {
         fprintf( File, " % .4e", stateVector.at(i) );
+    }
+
+    fprintf(File, "   flow");
+    for ( i = 1; i <= flowVector.giveSize(); i++ ) {
+        fprintf( File, " % .4e", flowVector.at(i) );
     }
 
     fprintf(File, "\n");
@@ -77,8 +81,11 @@ void TransportMaterialStatus :: printOutputAt(FILE *File, TimeStep *tNow)
 void TransportMaterialStatus :: updateYourself(TimeStep *tStep)
 // Performs end-of-step updates.
 {
+    //     Material *mat = gp->giveMaterial();
+    //     gp->giveMaterial ()
     MaterialStatus :: updateYourself(tStep);
     stateVector = tempStateVector;
+    flowVector = tempFlowVector;
 }
 
 
@@ -89,8 +96,8 @@ TransportMaterialStatus :: initTempStatus()
 //
 {
     MaterialStatus :: initTempStatus();
-
     tempStateVector = stateVector;
+    tempFlowVector = flowVector;
 }
 
 
@@ -153,6 +160,9 @@ TransportMaterial :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, In
         answer.resize(1);
         answer.at(1) = vec.at( ( type == IST_Temperature ) ? 1 : 2 );
         return 1;
+    } else if ( ( type == IST_TemperatureFlow ) ) {
+        answer = ( ( TransportMaterialStatus * ) this->giveStatus(aGaussPoint) )->giveFlowVector();
+        return 1;
     } else {
         return Material :: giveIPValue(answer, aGaussPoint, type, atTime);
     }
@@ -185,10 +195,10 @@ TransportMaterial :: giveIPValueSize(InternalStateType type, GaussPoint *aGaussP
 {
     if ( ( type == IST_Temperature ) || ( type == IST_MassConcentration_1 ) || ( type == IST_Humidity ) ) {
         return 1;
+    } else if ( ( type == IST_TemperatureFlow ) ) {
+        return 3;
     } else {
         return Material :: giveIPValueSize(type, aGaussPoint);
     }
 }
-
-
 } // end namespace oofem

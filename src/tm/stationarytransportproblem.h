@@ -45,11 +45,10 @@
 #include "sparsemtrx.h"
 #include "primaryfield.h"
 #ifndef __MAKEDEPEND
-#include <stdio.h>
+ #include <stdio.h>
 #endif
 
 namespace oofem {
-
 /**
  * This class represents stationary transport problem.
  */
@@ -72,12 +71,15 @@ protected:
 public:
     StationaryTransportProblem(int i, EngngModel *_master = NULL) : EngngModel(i, _master), rhsVector(),
         FluxField(this, 1, FBID_FluxField, EID_ConservationEquation, 0)
-    { conductivityMatrix = NULL;
-      ndomains = 1;
-      nMethod = NULL; }
+    {
+        conductivityMatrix = NULL;
+        ndomains = 1;
+        nMethod = NULL;
+    }
     ~StationaryTransportProblem()
-    { delete  conductivityMatrix;
-      if ( nMethod ) { delete nMethod; } }
+    {
+        delete  conductivityMatrix;
+        if ( nMethod ) { delete nMethod; } }
 
     void solveYourselfAt(TimeStep *);
     /**
@@ -135,8 +137,13 @@ protected:
      * @param d domain
      */
     void assembleDirichletBcRhsVector(FloatArray &answer, TimeStep *tStep, EquationID ut, ValueModeType mode,
-                                      CharType lhsType, const UnknownNumberingScheme& s, Domain *d);
-};
+                                      CharType lhsType, const UnknownNumberingScheme &s, Domain *d);
 
+    /**
+     * Updates IP values on elements
+     * @param TimeStep solution step
+     */
+    virtual void updateInternalState(TimeStep *stepN);
+};
 } // end namespace oofem
 #endif // stationarytransportproblem_h

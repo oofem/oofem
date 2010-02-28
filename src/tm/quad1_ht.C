@@ -48,18 +48,17 @@
 #include "structuralms.h"
 #include "load.h"
 #ifndef __MAKEDEPEND
-#include <math.h>
-#include <stdio.h>
+ #include <math.h>
+ #include <stdio.h>
 #endif
 
 #ifdef __OOFEG
-#include "oofeggraphiccontext.h"
-#include "oofegutils.h"
-#include "conTable.h"
+ #include "oofeggraphiccontext.h"
+ #include "oofegutils.h"
+ #include "conTable.h"
 #endif
 
 namespace oofem {
-
 Quad1_ht :: Quad1_ht(int n, Domain *aDomain, ElementMode em) :
     TransportElement(n, aDomain, em)
     // Constructor.
@@ -201,12 +200,12 @@ Quad1_ht :: computeGaussPoints()
         mmode = _2dHeMo;
     }
 
-  if (!integrationRulesArray) {
-    numberOfIntegrationRules = 1;
-    integrationRulesArray = new IntegrationRule * [ 1 ];
-    integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3);
-    integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Square, numberOfGaussPoints, mmode);
-  }
+    if ( !integrationRulesArray ) {
+        numberOfIntegrationRules = 1;
+        integrationRulesArray = new IntegrationRule * [ 1 ];
+        integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3);
+        integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Square, numberOfGaussPoints, mmode);
+    }
 }
 
 void
@@ -325,7 +324,7 @@ Quad1_ht :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
     dy      = nodeB->giveCoordinate(2) - nodeA->giveCoordinate(2);
     length = sqrt(dx * dx + dy * dy);
     thick = this->giveCrossSection()->give('t');
-    return 0.5 *length *thick *gp->giveWeight();
+    return 0.5 *length *thick *gp-> giveWeight();
 }
 
 
@@ -387,8 +386,8 @@ Quad1_ht :: computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iE
     nodeB   = this->giveNode(bNode);
 
     answer.resize(2);
-    answer.at(1) = n1 * nodeA->giveCoordinate(1) + n2 *nodeB->giveCoordinate(1);
-    answer.at(2) = n1 * nodeA->giveCoordinate(2) + n2 *nodeB->giveCoordinate(2);
+    answer.at(1) = n1 * nodeA->giveCoordinate(1) + n2 *nodeB-> giveCoordinate(1);
+    answer.at(2) = n1 * nodeA->giveCoordinate(2) + n2 *nodeB-> giveCoordinate(2);
 }
 
 void
@@ -430,10 +429,10 @@ Quad1_ht :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoor
     n4 = ( 1. + ksi ) * ( 1. - eta ) * 0.25;
 
     answer.resize(2);
-    answer.at(1) = n1 * this->giveNode(1)->giveCoordinate(1) + n2 * this->giveNode(2)->giveCoordinate(1) +
-    n3 * this->giveNode(3)->giveCoordinate(1) + n4 * this->giveNode(4)->giveCoordinate(1);
-    answer.at(2) = n1 * this->giveNode(1)->giveCoordinate(2) + n2 * this->giveNode(2)->giveCoordinate(2) +
-    n3 * this->giveNode(3)->giveCoordinate(2) + n4 * this->giveNode(4)->giveCoordinate(2);
+    answer.at(1) = n1 * this->giveNode(1)->giveCoordinate(1) + n2 *this-> giveNode(2)->giveCoordinate(1) +
+                   n3 *this-> giveNode(3)->giveCoordinate(1) + n4 *this-> giveNode(4)->giveCoordinate(1);
+    answer.at(2) = n1 * this->giveNode(1)->giveCoordinate(2) + n2 *this-> giveNode(2)->giveCoordinate(2) +
+                   n3 *this-> giveNode(3)->giveCoordinate(2) + n4 *this-> giveNode(4)->giveCoordinate(2);
 
     return 1;
 }
@@ -446,10 +445,45 @@ Quad1_ht :: giveInterface(InterfaceType interface)
         return ( SpatialLocalizerInterface * ) this;
     } else if ( interface == EIPrimaryFieldInterfaceType ) {
         return ( EIPrimaryFieldInterface * ) this;
+    } else if ( interface == ZZNodalRecoveryModelInterfaceType ) {
+        return ( ZZNodalRecoveryModelInterface * ) this;
     }
 
     return NULL;
 }
+
+int
+Quad1_ht :: ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type)
+{
+    if ( ( type == IST_TemperatureFlow ) ) {
+        return 3;
+    }
+
+    return 0;
+}
+
+void
+Quad1_ht :: ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatMatrix &answer, GaussPoint *aGaussPoint, InternalStateType type)
+{
+    int i;
+    FloatMatrix n;
+    this->computeNmatrixAt( n, aGaussPoint->giveCoordinates() );
+
+    if ( this->giveIPValueSize(type, aGaussPoint) ) {
+        answer.resize(1, 4);
+    } else {
+        return;
+    }
+
+    for ( i = 1; i <= 4; i++ ) {
+        answer.at(1, i)  = n.at(1, i);
+    }
+
+    return;
+}
+
+
+
 
 
 int
@@ -475,7 +509,7 @@ Quad1_ht :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray 
 
     if ( size == gsize ) {
         dist = coords.distance(gcoords);
-    } else   {
+    } else {
         FloatArray helpCoords = coords;
 
         helpCoords.resize(gsize);

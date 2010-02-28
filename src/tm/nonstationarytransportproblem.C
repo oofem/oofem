@@ -51,13 +51,11 @@
 #include "usrdefsub.h"
 #include "datastream.h"
 #ifndef __MAKEDEPEND
-#include <stdio.h>
+ #include <stdio.h>
 #endif
 #include "contextioerr.h"
 
 namespace oofem {
-
-
 NumericalMethod *NonStationaryTransportProblem :: giveNumericalMethod(TimeStep *atTime)
 // only one has reason for LinearStatic
 //     - SolutionOfLinearEquations
@@ -210,11 +208,11 @@ NonStationaryTransportProblem :: giveNextStep()
         counter = currentStep->giveSolutionStateCounter() + 1;
     } else {
         // first step -> generate initial step
-        currentStep = new TimeStep( * giveSolutionStepWhenIcApply() );
+        currentStep = new TimeStep( *giveSolutionStepWhenIcApply() );
     }
 
     previousStep = currentStep;
-    currentStep = new TimeStep(istep, this, 1, totalTime, this->giveDeltaT(istep), counter);
+    currentStep = new TimeStep(istep, this, 1, totalTime, this->giveDeltaT ( istep ), counter);
     // time and dt variables are set eq to 0 for staics - has no meaning
     return currentStep;
 }
@@ -233,7 +231,7 @@ void NonStationaryTransportProblem :: solveYourselfAt(TimeStep *tStep) {
             _error("solveYourselfAt: sparse matrix creation failed");
         }
 
-        lhs->buildInternalStructure(this, 1, EID_ConservationEquation, EModelDefaultEquationNumbering());
+        lhs->buildInternalStructure( this, 1, EID_ConservationEquation, EModelDefaultEquationNumbering() );
 
         bcRhs.resize(neq);
         bcRhs.zero();
@@ -246,23 +244,23 @@ void NonStationaryTransportProblem :: solveYourselfAt(TimeStep *tStep) {
         this->applyIC(stepWhenIcApply);
 
         this->assembleVectorFromElements( bcRhs, stepWhenIcApply, EID_ConservationEquation, ElementBCTransportVector,
-					  VM_Total, EModelDefaultEquationNumbering(), this->giveDomain(1) );
+                                         VM_Total, EModelDefaultEquationNumbering(), this->giveDomain(1) );
         this->assembleDirichletBcRhsVector( bcRhs, stepWhenIcApply, EID_ConservationEquation, VM_Total,
-					    NSTP_MidpointLhs, EModelDefaultEquationNumbering(), this->giveDomain(1) );
+                                           NSTP_MidpointLhs, EModelDefaultEquationNumbering(), this->giveDomain(1) );
         this->assembleVectorFromElements( bcRhs, stepWhenIcApply, EID_ConservationEquation, ElementInternalSourceVector,
-					  VM_Total, EModelDefaultEquationNumbering(), this->giveDomain(1) );
+                                         VM_Total, EModelDefaultEquationNumbering(), this->giveDomain(1) );
         this->assembleVectorFromDofManagers( bcRhs, stepWhenIcApply, EID_ConservationEquation, NodalLoadVector,
-					     VM_Total, EModelDefaultEquationNumbering(), this->giveDomain(1) );
+                                            VM_Total, EModelDefaultEquationNumbering(), this->giveDomain(1) );
 
 #ifdef VERBOSE
         OOFEM_LOG_INFO("Assembling conductivity and capacity matrices\n");
 #endif
 
         this->assemble( lhs, stepWhenIcApply, EID_ConservationEquation, LHSBCMatrix,
-			EModelDefaultEquationNumbering(), this->giveDomain(1) );
+                       EModelDefaultEquationNumbering(), this->giveDomain(1) );
         lhs->times(alpha);
         this->assemble( lhs, stepWhenIcApply, EID_ConservationEquation, NSTP_MidpointLhs,
-			EModelDefaultEquationNumbering(), this->giveDomain(1) );
+                       EModelDefaultEquationNumbering(), this->giveDomain(1) );
     }
 
     FluxField.advanceSolution(tStep);
@@ -282,16 +280,16 @@ void NonStationaryTransportProblem :: solveYourselfAt(TimeStep *tStep) {
     bcRhs.zero();
 
     this->assembleVectorFromElements( bcRhs, tStep, EID_ConservationEquation, ElementBCTransportVector,
-				      VM_Total, EModelDefaultEquationNumbering(), this->giveDomain(1) );
+                                     VM_Total, EModelDefaultEquationNumbering(), this->giveDomain(1) );
     this->assembleDirichletBcRhsVector( bcRhs, tStep, EID_ConservationEquation, VM_Total, NSTP_MidpointLhs,
-					EModelDefaultEquationNumbering(), this->giveDomain(1) );
+                                       EModelDefaultEquationNumbering(), this->giveDomain(1) );
     this->assembleVectorFromElements( bcRhs, tStep, EID_ConservationEquation, ElementInternalSourceVector,
-				      VM_Total, EModelDefaultEquationNumbering(), this->giveDomain(1) );
+                                     VM_Total, EModelDefaultEquationNumbering(), this->giveDomain(1) );
     //
     // assembling the nodal part of load vector
     //
     this->assembleVectorFromDofManagers( bcRhs, tStep, EID_ConservationEquation, NodalLoadVector, VM_Total,
-					 EModelDefaultEquationNumbering(), this->giveDomain(1) );
+                                        EModelDefaultEquationNumbering(), this->giveDomain(1) );
     for ( int i = 1; i <= neq; i++ ) {
         rhs.at(i) += bcRhs.at(i) * alpha;
     }
@@ -300,7 +298,7 @@ void NonStationaryTransportProblem :: solveYourselfAt(TimeStep *tStep) {
     // add the rhs part depending on previous solution
     //
     assembleAlgorithmicPartOfRhs( rhs, EID_ConservationEquation,
-				  EModelDefaultEquationNumbering(), tStep->givePreviousStep() );
+                                 EModelDefaultEquationNumbering(), tStep->givePreviousStep() );
     //
     // set-up numerical model
     //
@@ -326,11 +324,26 @@ void NonStationaryTransportProblem :: solveYourselfAt(TimeStep *tStep) {
 void
 NonStationaryTransportProblem :: updateYourself(TimeStep *stepN)
 {
-    //this->updateInternalState(stepN);
+    this->updateInternalState(stepN);
     EngngModel :: updateYourself(stepN);
     //previousSolutionVector = solutionVector;
 }
 
+
+void
+NonStationaryTransportProblem :: updateInternalState(TimeStep *stepN)
+{
+    int j, idomain, nelem;
+    Domain *domain;
+
+    for ( idomain = 1; idomain <= this->giveNumberOfDomains(); idomain++ ) {
+        domain = this->giveDomain(idomain);
+        nelem = domain->giveNumberOfElements();
+        for ( j = 1; j <= nelem; j++ ) {
+            domain->giveElement(j)->updateInternalState(stepN);
+        }
+    }
+}
 
 contextIOResultType
 NonStationaryTransportProblem :: saveContext(DataStream *stream, ContextMode mode, void *obj)
@@ -364,7 +377,9 @@ NonStationaryTransportProblem :: saveContext(DataStream *stream, ContextMode mod
         fclose(file);
         delete stream;
         stream = NULL;
-    }                                                       // ensure consistent records
+    }
+
+    // ensure consistent records
 
     return CIO_OK;
 }
@@ -405,7 +420,9 @@ NonStationaryTransportProblem :: restoreContext(DataStream *stream, ContextMode 
         fclose(file);
         delete stream;
         stream = NULL;
-    }                                                       // ensure consistent records
+    }
+
+    // ensure consistent records
 
     return CIO_OK;
 }
@@ -426,7 +443,7 @@ NonStationaryTransportProblem :: checkConsistency()
 
     for ( i = 1; i <= nelem; i++ ) {
         ePtr = domain->giveElement(i);
-        sePtr = dynamic_cast< TransportElement * >( ePtr );
+        sePtr = dynamic_cast< TransportElement * >(ePtr);
         if ( sePtr == NULL ) {
             _warning2("Element %d has no TransportElement base", i);
             return 0;
@@ -496,7 +513,7 @@ NonStationaryTransportProblem :: giveElementCharacteristicMatrix(FloatMatrix &an
 
 void
 NonStationaryTransportProblem :: assembleAlgorithmicPartOfRhs(FloatArray &answer, EquationID ut,
-							      const UnknownNumberingScheme& s, TimeStep *tStep)
+                                                              const UnknownNumberingScheme &s, TimeStep *tStep)
 {
     int i;
     IntArray loc;
@@ -599,7 +616,7 @@ NonStationaryTransportProblem :: applyIC(TimeStep *stepWhenIcApply)
 void
 NonStationaryTransportProblem :: assembleDirichletBcRhsVector(FloatArray &answer, TimeStep *tStep, EquationID ut,
                                                               ValueModeType mode, CharType lhsType,
-							      const UnknownNumberingScheme& ns, Domain *d)
+                                                              const UnknownNumberingScheme &ns, Domain *d)
 {
     int ielem;
     IntArray loc;
@@ -625,8 +642,9 @@ NonStationaryTransportProblem :: assembleDirichletBcRhsVector(FloatArray &answer
             element->giveLocationArray(loc, ut, ns);
             answer.assemble(charVec, loc);
         }
-    } // end element loop
+    }
 
+    // end element loop
 }
 
 #ifdef __PETSC_MODULE
@@ -643,5 +661,4 @@ NonStationaryTransportProblem :: initPetscContexts()
     }
 }
 #endif
-
 } // end namespace oofem

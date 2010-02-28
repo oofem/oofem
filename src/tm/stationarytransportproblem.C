@@ -50,12 +50,11 @@
 #include "usrdefsub.h"
 #include "datastream.h"
 #ifndef __MAKEDEPEND
-#include <stdio.h>
+ #include <stdio.h>
 #endif
 #include "contextioerr.h"
 
 namespace oofem {
-
 NumericalMethod *StationaryTransportProblem :: giveNumericalMethod(TimeStep *atTime)
 // only one has reason for LinearStatic
 //     - SolutionOfLinearEquations
@@ -190,12 +189,12 @@ void StationaryTransportProblem :: solveYourselfAt(TimeStep *tStep) {
             _error("solveYourselfAt: sparse matrix creation failed");
         }
 
-        conductivityMatrix->buildInternalStructure(this, 1, EID_ConservationEquation, EModelDefaultEquationNumbering());
+        conductivityMatrix->buildInternalStructure( this, 1, EID_ConservationEquation, EModelDefaultEquationNumbering() );
 
-        this->assemble( conductivityMatrix, tStep, EID_ConservationEquation, ConductivityMatrix, 
-			EModelDefaultEquationNumbering(), this->giveDomain(1) );
-        this->assemble( conductivityMatrix, tStep, EID_ConservationEquation, LHSBCMatrix, 
-			EModelDefaultEquationNumbering(), this->giveDomain(1) );
+        this->assemble( conductivityMatrix, tStep, EID_ConservationEquation, ConductivityMatrix,
+                       EModelDefaultEquationNumbering(), this->giveDomain(1) );
+        this->assemble( conductivityMatrix, tStep, EID_ConservationEquation, LHSBCMatrix,
+                       EModelDefaultEquationNumbering(), this->giveDomain(1) );
     }
 
 #ifdef VERBOSE
@@ -208,17 +207,17 @@ void StationaryTransportProblem :: solveYourselfAt(TimeStep *tStep) {
     rhsVector.resize( this->giveNumberOfEquations(EID_ConservationEquation) );
     rhsVector.zero();
 
-    this->assembleVectorFromElements( rhsVector, tStep, EID_ConservationEquation, ElementInternalSourceVector, VM_Total, 
-				      EModelDefaultEquationNumbering(), this->giveDomain(1) );
-    this->assembleVectorFromElements( rhsVector, tStep, EID_ConservationEquation, ElementBCTransportVector, VM_Total, 
-				      EModelDefaultEquationNumbering(), this->giveDomain(1) );
-    this->assembleDirichletBcRhsVector( rhsVector, tStep, EID_ConservationEquation, VM_Total, ConductivityMatrix, 
-					EModelDefaultEquationNumbering(), this->giveDomain(1) );
+    this->assembleVectorFromElements( rhsVector, tStep, EID_ConservationEquation, ElementInternalSourceVector, VM_Total,
+                                     EModelDefaultEquationNumbering(), this->giveDomain(1) );
+    this->assembleVectorFromElements( rhsVector, tStep, EID_ConservationEquation, ElementBCTransportVector, VM_Total,
+                                     EModelDefaultEquationNumbering(), this->giveDomain(1) );
+    this->assembleDirichletBcRhsVector( rhsVector, tStep, EID_ConservationEquation, VM_Total, ConductivityMatrix,
+                                       EModelDefaultEquationNumbering(), this->giveDomain(1) );
     //
     // assembling the nodal part of load vector
     //
-    this->assembleVectorFromDofManagers( rhsVector, tStep, EID_ConservationEquation, NodalLoadVector, VM_Total, 
-					 EModelDefaultEquationNumbering(), this->giveDomain(1) );
+    this->assembleVectorFromDofManagers( rhsVector, tStep, EID_ConservationEquation, NodalLoadVector, VM_Total,
+                                        EModelDefaultEquationNumbering(), this->giveDomain(1) );
 
     //
     // set-up numerical model
@@ -244,7 +243,7 @@ void StationaryTransportProblem :: solveYourselfAt(TimeStep *tStep) {
 void
 StationaryTransportProblem :: updateYourself(TimeStep *stepN)
 {
-    //this->updateInternalState(stepN);
+    this->updateInternalState(stepN);
     EngngModel :: updateYourself(stepN);
 }
 
@@ -281,7 +280,9 @@ StationaryTransportProblem :: saveContext(DataStream *stream, ContextMode mode, 
         fclose(file);
         delete stream;
         stream = NULL;
-    }                                                       // ensure consistent records
+    }
+
+    // ensure consistent records
 
     return CIO_OK;
 }
@@ -323,7 +324,9 @@ StationaryTransportProblem :: restoreContext(DataStream *stream, ContextMode mod
         fclose(file);
         delete stream;
         stream = NULL;
-    }                                                          // ensure consistent records
+    }
+
+    // ensure consistent records
 
     return CIO_OK;
 }
@@ -344,7 +347,7 @@ StationaryTransportProblem :: checkConsistency()
 
     for ( i = 1; i <= nelem; i++ ) {
         ePtr = domain->giveElement(i);
-        sePtr = dynamic_cast< TransportElement * >( ePtr );
+        sePtr = dynamic_cast< TransportElement * >(ePtr);
         if ( sePtr == NULL ) {
             _warning2("Element %d has no TransportElement base", i);
             return 0;
@@ -374,7 +377,7 @@ StationaryTransportProblem :: printDofOutputAt(FILE *stream, Dof *iDof, TimeStep
 void
 StationaryTransportProblem :: assembleDirichletBcRhsVector(FloatArray &answer, TimeStep *tStep, EquationID ut,
                                                            ValueModeType mode, CharType lhsType,
-                                                           const UnknownNumberingScheme& ns, Domain *d)
+                                                           const UnknownNumberingScheme &ns, Domain *d)
 {
     int ielem;
     IntArray loc;
@@ -398,9 +401,28 @@ StationaryTransportProblem :: assembleDirichletBcRhsVector(FloatArray &answer, T
             element->giveLocationArray(loc, ut, ns);
             answer.assemble(charVec, loc);
         }
-    } // end element loop
+    }
 
+    // end element loop
 }
+
+
+void
+StationaryTransportProblem :: updateInternalState(TimeStep *stepN)
+{
+    int j, idomain, nelem;
+    Domain *domain;
+
+    for ( idomain = 1; idomain <= this->giveNumberOfDomains(); idomain++ ) {
+        domain = this->giveDomain(idomain);
+        nelem = domain->giveNumberOfElements();
+        for ( j = 1; j <= nelem; j++ ) {
+            domain->giveElement(j)->updateInternalState(stepN);
+        }
+    }
+}
+
+
 
 #ifdef __PETSC_MODULE
 void
@@ -417,5 +439,4 @@ StationaryTransportProblem :: initPetscContexts()
     }
 }
 #endif
-
 } // end namespace oofem

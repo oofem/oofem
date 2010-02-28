@@ -93,8 +93,13 @@ public:
     // non-standard - returns time independent material constant
     double   give(int, GaussPoint*);
 
-    virtual MaterialStatus *CreateStatus(GaussPoint *gp) const { return NULL; }
-
+    /**
+     * Creates a new copy of the associated status and inserts it into a given integration point.
+     * @param gp Integration point where newly created status will be stored.
+     * @return reference to new status.
+     */
+    //virtual MaterialStatus *CreateStatus(GaussPoint *gp) const { return NULL; }
+    virtual MaterialStatus *CreateStatus(GaussPoint *gp) const { return new TransportMaterialStatus(1, domain, gp);  }
 protected:
 };
 

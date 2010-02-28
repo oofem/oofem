@@ -48,18 +48,17 @@
 #include "structuralms.h"
 #include "load.h"
 #ifndef __MAKEDEPEND
-#include <math.h>
-#include <stdio.h>
+ #include <math.h>
+ #include <stdio.h>
 #endif
 
 #ifdef __OOFEG
-#include "oofeggraphiccontext.h"
-#include "oofegutils.h"
-#include "conTable.h"
+ #include "oofeggraphiccontext.h"
+ #include "oofegutils.h"
+ #include "conTable.h"
 #endif
 
 namespace oofem {
-
 FEI3dHexaLin Brick1_ht :: interpolation;
 
 Brick1_ht :: Brick1_ht(int n, Domain *aDomain, ElementMode em) :
@@ -131,12 +130,12 @@ Brick1_ht :: computeGaussPoints()
         mmode = _3dHeMo;
     }
 
-  if (!integrationRulesArray) {
-    numberOfIntegrationRules = 1;
-    integrationRulesArray = new IntegrationRule * [ 1 ];
-    integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 2);
-    integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Cube, numberOfGaussPoints, mmode);
-  }
+    if ( !integrationRulesArray ) {
+        numberOfIntegrationRules = 1;
+        integrationRulesArray = new IntegrationRule * [ 1 ];
+        integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 2);
+        integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Cube, numberOfGaussPoints, mmode);
+    }
 }
 
 void
@@ -222,7 +221,7 @@ Brick1_ht :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 {
     double result = this->interpolation.edgeGiveTransformationJacobian(iEdge, domain, dofManArray,
                                                                        * gp->giveCoordinates(), 0.0);
-    return result *gp->giveWeight();
+    return result *gp-> giveWeight();
 }
 
 
@@ -400,11 +399,43 @@ Brick1_ht :: giveInterface(InterfaceType interface)
 {
     if ( interface == SpatialLocalizerInterfaceType ) {
         return ( SpatialLocalizerInterface * ) this;
-    } else if ( interface == EIPrimaryFieldInterfaceType )  {
+    } else if ( interface == EIPrimaryFieldInterfaceType ) {
         return ( EIPrimaryFieldInterface * ) this;
+    } else if ( interface == ZZNodalRecoveryModelInterfaceType ) {
+        return ( ZZNodalRecoveryModelInterface * ) this;
     }
 
     return NULL;
+}
+
+int
+Brick1_ht :: ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type)
+{
+    if ( ( type == IST_TemperatureFlow ) ) {
+        return 3;
+    }
+
+    return 0;
+}
+
+void
+Brick1_ht :: ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatMatrix &answer, GaussPoint *aGaussPoint, InternalStateType type)
+{
+    int i;
+    FloatArray n;
+    this->interpolation.evalN(n, * aGaussPoint->giveCoordinates(), 0.0);
+
+    if ( this->giveIPValueSize(type, aGaussPoint) ) {
+        answer.resize(1, 8);
+    } else {
+        return;
+    }
+
+    for ( i = 1; i <= 8; i++ ) {
+        answer.at(1, i)  = n.at(i);
+    }
+
+    return;
 }
 
 

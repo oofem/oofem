@@ -51,7 +51,6 @@
 #include "matresponsemode.h"
 
 namespace oofem {
-
 class TimeStep;
 class Node;
 class Material;
@@ -100,9 +99,7 @@ public:
 
     // time step termination
     /**
-     * Updates element state corresponding to newly reached solution.
-     * It computes stress vector in each element integration point (to ensure that data in integration point's
-     * statuses are valid).
+     * Computes and updates state vector and flow vector in each integration point of element
      * @param tStep finished time step
      */
     void                  updateInternalState(TimeStep *);
@@ -268,6 +265,5 @@ protected:
      */
     void assembleLocalContribution(FloatArray &answer, FloatArray &src, int ndofs, int rdof, double coeff);
 };
-
 } // end namespace oofem
 #endif // transportelement_h

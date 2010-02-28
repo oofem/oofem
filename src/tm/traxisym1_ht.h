@@ -43,7 +43,6 @@
 #include "tr1_ht.h"
 
 namespace oofem {
-
 class TrAxisym1_ht : public Tr1_ht
 {
 protected:
@@ -62,6 +61,5 @@ protected:
     double computeEdgeVolumeAround(GaussPoint *gp, int iEdge);
     double computeRadiusAt(GaussPoint *gp);
 };
-
 } // end namespace oofem
 #endif // traxisym1_ht_h

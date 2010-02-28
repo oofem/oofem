@@ -34,7 +34,7 @@ global tolerance
 #set default tolerance
 tolerance = 1.0e-4
 
-# debug flag, set to 1 for debugging info beeing printed
+# debug flag, set to 1 for debugging info being printed
 debug=0
 
 #default mode 'e' - Extractor
@@ -121,6 +121,16 @@ gpstrain_re = re.compile (r"""
 gpstatus_re = re.compile (r"""
                 status\s.*
                 """, re.X)
+
+gpstate_re = re.compile (r"""
+                state\s*
+                ([\s+-e\d]+)
+                """,re.X)
+                
+gpflow_re = re.compile (r"""
+                flow\s*
+                ([\s+-e\d]+)
+                """,re.X)
 
 beamrec_re  = re.compile (r"""
                 displacements|forces
@@ -405,7 +415,19 @@ def match_gpsubrec (aline):
 		check_element_rec (rectime, recnumber, recirule, recgpnum, 'status', 0.0, aline)
 		if debug: print "     status rec"
 		return 1
-	return 0
+        #state variables in transport problems
+        ppmatch = gpstate_re.search(aline)
+        if ppmatch:
+                check_element_rec (rectime, recnumber, recirule, recgpnum, 'state', 0.0, aline)
+                if debug: print "     state rec"
+                return 1        
+        #flow vector in transport problems
+        ppmatch = gpflow_re.search(aline)
+        if ppmatch:
+                check_element_rec (rectime, recnumber, recirule, recgpnum, 'flow', 0.0, aline)
+                if debug: print "     flow rec"
+                return 1        
+        return 0
 
 def match_singlegprec (line):
 	global rectime, recnumber, recirule, recgpnum, debug

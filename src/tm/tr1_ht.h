@@ -42,10 +42,10 @@
 
 #include "transportelement.h"
 #include "spatiallocalizer.h"
+#include "zznodalrecoverymodel.h"
 
 namespace oofem {
-
-class Tr1_ht : public TransportElement, public SpatialLocalizerInterface
+class Tr1_ht : public TransportElement, public SpatialLocalizerInterface, public ZZNodalRecoveryModelInterface
 {
 protected:
     int numberOfGaussPoints;
@@ -86,6 +86,24 @@ public:
     Interface *giveInterface(InterfaceType);
 
     /**
+     * @name The element interface required by ZZNodalRecoveryModel
+     */
+    //@{
+    /**
+     * Returns the size of DofManger record required to hold recovered values for given mode.
+     * @param type determines the type of internal variable to be recovered
+     * @return size of DofManger record required to hold recovered values
+     */
+    int ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type);
+
+    /// Returns the corresponding element to interface
+    Element *ZZNodalRecoveryMI_giveElement() { return this; }
+
+    /// Evaluates N matrix (interpolation estimated matrix).
+    void ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatMatrix &answer, GaussPoint *aGaussPoint, InternalStateType type);
+    //@}
+
+    /**
      * @name The element interface required by SpatialLocalizerInterface
      */
     //@{
@@ -124,6 +142,5 @@ protected:
 
     int giveApproxOrder(int unknownIndx) { return 1; }
 };
-
 } // end namespace oofem
 #endif // tr1_ht_h

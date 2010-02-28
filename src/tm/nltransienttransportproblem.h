@@ -86,7 +86,7 @@ public:
 
 protected:
     /**
-     * Updates nodal values
+     * Updates nodal values and IP values on elements
      * (calls also this->updateDofUnknownsDictionary for updating dofs unknowns dictionaries
      * if model supports changes of static system). The element internal state update is also forced using
      * updateInternalState service.

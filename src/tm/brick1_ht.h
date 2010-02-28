@@ -43,10 +43,10 @@
 #include "transportelement.h"
 #include "spatiallocalizer.h"
 #include "fei3dhexalin.h"
+#include "zznodalrecoverymodel.h"
 
 namespace oofem {
-
-class Brick1_ht : public TransportElement, public SpatialLocalizerInterface
+class Brick1_ht : public TransportElement, public SpatialLocalizerInterface, public ZZNodalRecoveryModelInterface
 {
 public:
 protected:
@@ -92,6 +92,24 @@ public:
     { return ( ( ( ext == Element_EdgeLoadSupport ) || ( ext == Element_SurfaceLoadSupport ) ) ? 1 : 0 ); }
 
     /**
+     * @name The element interface required by ZZNodalRecoveryModel
+     */
+    //@{
+    /**
+     * Returns the size of DofManger record required to hold recovered values for given mode.
+     * @param type determines the type of internal variable to be recovered
+     * @return size of DofManger record required to hold recovered values
+     */
+    int ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type);
+
+    /// Returns the corresponding element to interface
+    Element *ZZNodalRecoveryMI_giveElement() { return this; }
+
+    /// Evaluates N matrix (interpolation estimated matrix).
+    void ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatMatrix &answer, GaussPoint *aGaussPoint, InternalStateType type);
+    //@}
+
+    /**
      * @name The element interface required by SpatialLocalizerInterface
      */
     //@{
@@ -135,6 +153,5 @@ protected:
 
     int giveApproxOrder(int unknownIndx) { return 1; }
 };
-
 } // end namespace oofem
 #endif // brick1_ht_h

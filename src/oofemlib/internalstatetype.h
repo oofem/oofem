@@ -112,6 +112,9 @@ namespace oofem {
     ENUM_ITEM_WITH_VALUE(IST_MaterialOrientation_x, 53) \
     ENUM_ITEM_WITH_VALUE(IST_MaterialOrientation_y, 54) \
     ENUM_ITEM_WITH_VALUE(IST_MaterialOrientation_z, 55) \
+    ENUM_ITEM_WITH_VALUE(IST_TemperatureFlow, 56) \
+    ENUM_ITEM_WITH_VALUE(IST_MassConcentrationFlow_1, 57) \
+    ENUM_ITEM_WITH_VALUE(IST_HumidityFlow, 58) \
     \
     ENUM_ITEM(CrackStatuses) \
     ENUM_ITEM(CrackedFlag) \

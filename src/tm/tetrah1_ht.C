@@ -48,18 +48,17 @@
 #include "structuralms.h"
 #include "load.h"
 #ifndef __MAKEDEPEND
-#include <math.h>
-#include <stdio.h>
+ #include <math.h>
+ #include <stdio.h>
 #endif
 
 #ifdef __OOFEG
-#include "oofeggraphiccontext.h"
-#include "oofegutils.h"
-#include "conTable.h"
+ #include "oofeggraphiccontext.h"
+ #include "oofegutils.h"
+ #include "conTable.h"
 #endif
 
 namespace oofem {
-
 FEI3dTrLin Tetrah1_ht :: interpolation;
 
 Tetrah1_ht :: Tetrah1_ht(int n, Domain *aDomain, ElementMode em) :
@@ -131,12 +130,12 @@ Tetrah1_ht :: computeGaussPoints()
         mmode = _3dHeMo;
     }
 
-  if (!integrationRulesArray) {
-    numberOfIntegrationRules = 1;
-    integrationRulesArray = new IntegrationRule * [ 1 ];
-    integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 2);
-    integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Tetrahedra, numberOfGaussPoints, mmode);
-  }
+    if ( !integrationRulesArray ) {
+        numberOfIntegrationRules = 1;
+        integrationRulesArray = new IntegrationRule * [ 1 ];
+        integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 2);
+        integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Tetrahedra, numberOfGaussPoints, mmode);
+    }
 }
 
 void
@@ -225,7 +224,7 @@ Tetrah1_ht :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 {
     double result = this->interpolation.edgeGiveTransformationJacobian(iEdge, domain, dofManArray,
                                                                        * gp->giveCoordinates(), 0.0);
-    return result *gp->giveWeight();
+    return result *gp-> giveWeight();
 }
 
 
@@ -374,11 +373,43 @@ Tetrah1_ht :: giveInterface(InterfaceType interface)
 {
     if ( interface == SpatialLocalizerInterfaceType ) {
         return ( SpatialLocalizerInterface * ) this;
-    } else if ( interface == EIPrimaryFieldInterfaceType )  {
+    } else if ( interface == EIPrimaryFieldInterfaceType ) {
         return ( EIPrimaryFieldInterface * ) this;
+    } else if ( interface == ZZNodalRecoveryModelInterfaceType ) {
+        return ( ZZNodalRecoveryModelInterface * ) this;
     }
 
     return NULL;
+}
+
+int
+Tetrah1_ht :: ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type)
+{
+    if ( ( type == IST_TemperatureFlow ) ) {
+        return 3;
+    }
+
+    return 0;
+}
+
+void
+Tetrah1_ht :: ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatMatrix &answer, GaussPoint *aGaussPoint, InternalStateType type)
+{
+    int i;
+    FloatArray n;
+    this->interpolation.evalN(n, * aGaussPoint->giveCoordinates(), 0.0);
+
+    if ( this->giveIPValueSize(type, aGaussPoint) ) {
+        answer.resize(1, 4);
+    } else {
+        return;
+    }
+
+    for ( i = 1; i <= 4; i++ ) {
+        answer.at(1, i)  = n.at(i);
+    }
+
+    return;
 }
 
 
@@ -426,7 +457,7 @@ Tetrah1_ht :: computeLocalCoordinates(FloatArray &answer, const FloatArray &coor
 
 
 #ifdef __OOFEG
-#define TR_LENGHT_REDUCT 0.3333
+ #define TR_LENGHT_REDUCT 0.3333
 
 void
 Tetrah1_ht :: drawRawGeometry(oofegGraphicContext &gc)
@@ -518,6 +549,4 @@ Tetrah1_ht :: drawScalar(oofegGraphicContext &context)
 }
 
 #endif
-
-
 } // end namespace oofem

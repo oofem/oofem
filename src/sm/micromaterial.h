@@ -93,7 +93,7 @@ protected:
 
 
 /**
- * This class is an base class for microproblem. The microproblem represents itself a problem which is solved separately from the macroproblem with appropriate boundary conditions. Stiffness matrix of microproblem is condensed to provide stiffness matrix for macroelement.
+ * This class is a base class for microproblem. The microproblem represents itself a problem which is solved separately from the macroproblem with appropriate boundary conditions. Stiffness matrix of microproblem is condensed to provide stiffness matrix for macroelement.
  */
 class MicroMaterial : public StructuralMaterial, public UnknownNumberingScheme
 {
