@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2010   Borek Patzak
+ *               Copyright (C) 1993 - 2008   Borek Patzak
  *
  *
  *
@@ -154,6 +154,15 @@ public:
     void computeGLPlasticStrain(const FloatMatrix& F, FloatMatrix& Ep, FloatMatrix b, double J);
  
 
+ void give3dSSMaterialStiffnessMatrix(FloatMatrix & answer,
+                                               MatResponseForm, MatResponseMode,
+                                               GaussPoint * gp,
+                                               TimeStep * atTime);
+ void give3dLSMaterialStiffnessMatrix(FloatMatrix & answer,
+                                               MatResponseForm, MatResponseMode,
+                                               GaussPoint * gp,
+                                               TimeStep * atTime);
+
 };
 
 //=============================================================================
@@ -181,12 +190,12 @@ protected:
     double tempKappa;
 
  /// deformation gradient(final)
-   FloatMatrix tempDefGrad;
+    FloatMatrix tempDefGrad,defGrad;
    /************************/
    double tempDamage;
    /******************************/
    /// Left Cauchy-Green deformation gradient(final)
-   FloatMatrix tempLeftCauchyGreen;
+   FloatMatrix tempLeftCauchyGreen,leftCauchyGreen;
 
 public:
     MisesMatStatus(int n, Domain *d, GaussPoint *g);
@@ -212,8 +221,13 @@ public:
     void giveTempDefGrad(FloatMatrix& answer)
     {answer = tempDefGrad;}
 
+    void giveDefGrad(FloatMatrix& answer)
+    {answer = defGrad;}
+
     void giveTempLeftCauchyGreen(FloatMatrix& answer)
     {answer = tempLeftCauchyGreen;}
+    void giveLeftCauchyGreen(FloatMatrix& answer)
+    {answer = leftCauchyGreen;}
 
     void letTempPlasticStrainBe(FloatArray values)
     {tempPlasticStrain = values;}
@@ -230,14 +244,18 @@ public:
  void setTempDamage(double value)
     {tempDamage = value;}
  /************************************************/
-    void letTempDefGradBe(FloatMatrix values)
-    {tempDefGrad = values;}
+ void letDefGradBe(FloatMatrix values)
+ {defGrad = values;}
+ void letTempDefGradBe(FloatMatrix values)
+ {tempDefGrad = values;}
+ 
+ void letTempLeftCauchyGreenBe(FloatMatrix values)
+ {tempLeftCauchyGreen = values;}
+ void letLeftCauchyGreenBe(FloatMatrix values)
+ {leftCauchyGreen = values;}
 
-    void letTempLeftCauchyGreenBe(FloatMatrix values)
-    {tempLeftCauchyGreen = values;}
-
-    /// prints the output variables into the *.out file
-    void printOutputAt(FILE *file, TimeStep *tStep);
+ /// prints the output variables into the *.out file
+ void printOutputAt(FILE *file, TimeStep *tStep);
 
     /// initializes the temporary status
     virtual void initTempStatus();

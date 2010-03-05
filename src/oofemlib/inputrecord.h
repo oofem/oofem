@@ -752,6 +752,10 @@ enum InputFieldType {
     IFT_MisesMat_omega_crit,
     IFT_MisesMat_a,
 
+    IFT_CohSur3d_kx,
+    IFT_CohSur3d_ky,
+    IFT_CohSur3d_kz,
+
     IFT_HydrationModel_hydration,
     IFT_HydrationModel_c60mix,
     IFT_HydrationModel_timeScale,

@@ -55,13 +55,17 @@ protected:
   FloatArray center; // coordinates of the center of the cohesive surface
   FloatMatrix lcs; // matrix defining the local coordinate system
   
+  // shift constants of periodic particles (near boundary of periodic cell)
+  int kx, ky, kz;
+  double kxa, kyb, kzc;
+
 public:
   CohesiveSurface3d (int,Domain*); // constructor
   ~CohesiveSurface3d () {};        // destructor
 
   void          computeBmatrixAt (GaussPoint* aGaussPoint, FloatMatrix& answer, int li, int ui);
   double        computeVolumeAround (GaussPoint*) ;
-  virtual int   computeNumberOfDofs (EquationID ut) {return 12;}
+  virtual int   computeNumberOfDofs (EquationID ut) {return 6*giveNumberOfNodes();}
   virtual void  giveDofManDofIDMask  (int inode, EquationID, IntArray& ) const;
   double        giveLength ();
   virtual void  computeNmatrixAt(GaussPoint*, FloatMatrix&){};

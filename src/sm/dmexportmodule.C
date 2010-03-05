@@ -85,21 +85,19 @@ DofManExportModule :: doOutput (TimeStep* tStep)
   Domain* d  = emodel->giveDomain(1);
   int ndm = d -> giveNumberOfDofManagers();
 
-  for (idm = 3; idm <= ndm; idm++) { // FIRST TWO NODES IGNORED !!!!!!
+  for (idm = 1; idm <= ndm; idm++) { 
     dm = d->giveDofManager(idm);
     x = dm->giveCoordinate(1);
     y = dm->giveCoordinate(2);
     z = dm->giveCoordinate(3);
-    //if (0.022<x && x<0.055 && 0.022<z && z<0.055 && 0.040<y && y<0.110){
-         fprintf (stream, "%d %g %g %g ",dm->giveNumber(),x,y,z);
-	 ndofs = dm->giveNumberOfDofs();
-	 for (idof=1; idof<=ndofs; idof++){
-	   dof = dm->giveDof(idof);
-	   displacement = dof->giveUnknown(EID_MomentumBalance, VM_Total, tStep);
-	   fprintf (stream, " %g", displacement);
-	 }
-	 fprintf (stream, "\n");
-	 //}
+    fprintf (stream, "%d %g %g %g ",dm->giveNumber(),x,y,z);
+    ndofs = dm->giveNumberOfDofs();
+    for (idof=1; idof<=ndofs; idof++){
+      dof = dm->giveDof(idof);
+      displacement = dof->giveUnknown(EID_MomentumBalance, VM_Total, tStep);
+      fprintf (stream, " %g", displacement);
+    }
+    fprintf (stream, "\n");
   }
  
  fclose (stream);

@@ -55,7 +55,6 @@
 #include "cltypes.h"
 
 namespace oofem {
-
 /*
  This class implements associated Material Status to TrabBone3D.
  It is atribute of matStatusDictionary at every GaussPoint, for which this material 
@@ -78,7 +77,9 @@ class TrabBone3DStatus : public StructuralMaterialStatus
   double kappa, tempKappa, dam, tempDam, tempPSED, tempTSED, tsed, deltaKappa, beta;
   FloatArray densStress, tempPlasDef, plasDef, effectiveStress, tempEffectiveStress, plasFlowDirec;
   FloatMatrix smtrx, tangentMatrix, SSaTensor;
-
+  
+ /// trial stress - needed for tangent stiffness
+    FloatArray trialStress;
   public: 
 
   /////////////////////////////////////////////////////////////////
@@ -115,6 +116,9 @@ class TrabBone3DStatus : public StructuralMaterialStatus
   double giveTempTSED();
   double giveDeltaKappa();
   double giveBeta();
+/*************************************************************************/
+  void giveTrialEffectiveStress(FloatArray& answer){answer = trialStress;}
+/*************************************************************************/
   const FloatArray *givePlasDef();
   const FloatArray *giveTempPlasDef();
   const FloatArray *giveTempEffectiveStress();
@@ -122,7 +126,10 @@ class TrabBone3DStatus : public StructuralMaterialStatus
   const FloatMatrix *giveTangentMatrix();
   const FloatMatrix *giveSmtrx();
   const FloatMatrix *giveSSaTensor();
-	  
+
+/**************************************************************************/
+  void letTrialEffectiveStressBe(FloatArray values){trialStress = values;}
+/**************************************************************************/
   void setTempKappa(double al){tempKappa=al;}
   void setTempDam(double da){tempDam=da;}
   void setTempPSED(double pse){tempPSED=pse;}
@@ -218,7 +225,7 @@ class TrabBone3D : public StructuralMaterial
   /////////////////////////////////////////////////////////////////
   // INITIALIZATION OF FUNCTION/SUBROUTINE
   // 
-
+ bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) { return false; }
   void performPlasticityReturn (GaussPoint* gp, const FloatArray& totalStrain);
 
   double computeDamageParam (double kappa, GaussPoint* gp);
@@ -328,7 +335,6 @@ class TrabBone3D : public StructuralMaterial
   */
  virtual int giveIPValueSize (InternalStateType type, GaussPoint* aGaussPoint) ;
 };
-
-} // end namespace oofem
+}//end namespace oofem
 #define trabbone3d_h
 #endif

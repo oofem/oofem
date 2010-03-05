@@ -96,7 +96,7 @@ oofegGraphicContext :: init(EngngModel *d) {
         int i, nmat;
 
         emodel = d;
-        meshFillColor = ColorGetPixelFromString(oofem_tmpstr("DodgerBlue"), & suc);
+        meshFillColor = ColorGetPixelFromString(oofem_tmpstr("black"), & suc);
         edgeColor = ColorGetPixelFromString(const_cast<char*>("black"), & suc);
         deformedElementColor = ColorGetPixelFromString(const_cast<char*>("BlueViolet"), & suc);
         nodeColor  = ColorGetPixelFromString(const_cast<char*>("black"), & suc);
