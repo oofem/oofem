@@ -41,7 +41,7 @@
 #define vtkexportmodule_h
 
 #ifndef __MAKEDEPEND
-#include <stdio.h>
+ #include <stdio.h>
 #endif
 #include "exportmodule.h"
 #include "domain.h"
@@ -50,7 +50,6 @@
 #include "nodalrecoverymodel.h"
 
 namespace oofem {
-
 /**
  * Represents VTK (Visualization Toolkit) export module. It uses vtk file format, Unstructured grid dataset.
  * There is built in support for Region By Region otput, taking care about possible nonsmooth character of
@@ -165,6 +164,5 @@ protected:
      */
     int giveTotalRBRNumberOfNodes(Domain *d);
 };
-
 } // end namespace oofem
 #endif // vtkexportmodule_h

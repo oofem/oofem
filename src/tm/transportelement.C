@@ -762,14 +762,69 @@ TransportElement :: assembleLocalContribution(FloatArray &answer, FloatArray &sr
     }
 }
 
-
 void
-TransportElement :: updateInternalState(TimeStep *stepN)
-// Updates the receiver at the end of solution step
+TransportElement :: computeFlow(FloatArray &answer, GaussPoint *gp, TimeStep *stepN)
 {
     int i, j;
     IntegrationRule *iRule;
-    FloatArray stateVector, flowVector, r, br;
+    FloatArray r, br;
+    FloatMatrix b, d;
+
+    for ( i = 0; i < numberOfIntegrationRules; i++ ) {
+        iRule = integrationRulesArray [ i ];
+        for ( j = 0; j < iRule->getNumberOfIntegrationPoints(); j++ ) {
+            gp = iRule->getIntegrationPoint(j);
+            this->computeVectorOf(EID_ConservationEquation, VM_Total, stepN, r);
+            this->computeGradientMatrixAt(b, gp);
+
+            if ( emode == HeatTransferEM ) {
+                this->computeConstitutiveMatrixAt(d, Conductivity_hh, gp, stepN);
+                br.beProductOf(b, r);
+                answer.beProductOf(d, br);
+            } else if ( emode == HeatMass1TransferEM ) {
+                FloatArray r_h, r_w;
+                FloatMatrix b_tot, d_hh, d_hw, d_wh, d_ww;
+                r_h.resize(r.giveSize() / 2);
+                r_h.zero();
+                r_w.resize(r.giveSize() / 2);
+                r_w.zero();
+
+                this->computeConstitutiveMatrixAt(d_hh, Conductivity_hh, gp, stepN);
+                this->computeConstitutiveMatrixAt(d_hw, Conductivity_hw, gp, stepN);
+                this->computeConstitutiveMatrixAt(d_wh, Conductivity_wh, gp, stepN);
+                this->computeConstitutiveMatrixAt(d_ww, Conductivity_ww, gp, stepN);
+                d.resize( 2 * d_hh.giveNumberOfRows(), 2 * d_hh.giveNumberOfColumns() );
+                d.zero();
+
+                b_tot.resize( 2 * b.giveNumberOfRows(), 2 * b.giveNumberOfColumns() );
+                b_tot.zero();
+                b_tot.addSubMatrix(b, 1, 1);
+                b_tot.addSubMatrix(b, b.giveNumberOfRows() + 1, b.giveNumberOfColumns() + 1);
+                br.beProductOf(b_tot, r);
+
+                d.addSubMatrix(d_hh, 1, 1);
+                d.addSubMatrix(d_hw, 1, d_hh.giveNumberOfColumns() + 1);
+                d.addSubMatrix(d_wh, d_hh.giveNumberOfRows() + 1, 1);
+                d.addSubMatrix(d_ww, d_hh.giveNumberOfRows() + 1, d_wh.giveNumberOfColumns() + 1);
+
+                answer.beProductOf(d, br);
+            } else {
+                OOFEM_ERROR1("Unknown element mode");
+            }
+
+            answer.times(-1.);
+        }
+    }
+}
+
+
+void
+TransportElement :: updateInternalState(TimeStep *stepN)
+// Updates the receiver at the end of a solution step
+{
+    int i, j;
+    IntegrationRule *iRule;
+    FloatArray stateVector, r, br;
     FloatMatrix n, b, d;
     TransportMaterial *mat = ( ( TransportMaterial * ) this->giveMaterial() );
     GaussPoint *gp;
@@ -782,22 +837,7 @@ TransportElement :: updateInternalState(TimeStep *stepN)
             this->computeNmatrixAt( n, gp->giveCoordinates() );
             this->computeVectorOf(EID_ConservationEquation, VM_Total, stepN, r);
             stateVector.beProductOf(n, r);
-            this->computeGradientMatrixAt(b, gp);
-
-            if ( emode == HeatTransferEM ) {
-                this->computeConstitutiveMatrixAt(d, Conductivity_hh, gp, stepN);
-            } else if ( emode == HeatMass1TransferEM ) {
-                OOFEM_WARNING1("No output of flow for GP - not implemented");
-                mat->updateInternalState(stateVector, NULL, gp, stepN);
-                return;
-            } else {
-                OOFEM_ERROR1("Unknown element mode");
-            }
-
-            br.beProductOf(b, r);
-            flowVector.beProductOf(d, br);
-            flowVector.times(-1.);
-            mat->updateInternalState(stateVector, flowVector, gp, stepN);
+            mat->updateInternalState(stateVector, gp, stepN);
         }
     }
 }

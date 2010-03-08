@@ -550,14 +550,14 @@ VTKExportModule :: exportCellVars(FILE *stream, int elemToProcess, TimeStep *tSt
     Element *elem;
     Domain *d  = emodel->giveDomain(1);
     int nelem = d->giveNumberOfElements();
-    FloatMatrix mtrx(3,3);
+    FloatMatrix mtrx(3, 3);
 
     fprintf(stream, "\nCELL_DATA %d\n", elemToProcess);
     for ( i = 1; i <= cellVarsToExport.giveSize(); i++ ) {
         type = ( InternalStateType ) cellVarsToExport.at(i);
-        switch (type){
-            case IST_MaterialNumber:
-            case IST_ElementNumber:
+        switch ( type ) {
+        case IST_MaterialNumber:
+        case IST_ElementNumber:
             fprintf( stream, "SCALARS %s int\nLOOKUP_TABLE default\n", __InternalStateTypeToString(type) );
             for ( ielem = 1; ielem <= nelem; ielem++ ) {
                 elem = d->giveElement(ielem);
@@ -565,40 +565,48 @@ VTKExportModule :: exportCellVars(FILE *stream, int elemToProcess, TimeStep *tSt
                 if ( elem->giveParallelMode() != Element_local ) {
                     continue;
                 }
+
 #endif
                 if ( type == IST_MaterialNumber ) {
                     fprintf( stream, "%d\n", elem->giveMaterial()->giveNumber() );
                 }
+
                 if ( type == IST_ElementNumber ) {
                     fprintf( stream, "%d\n", elem->giveNumber() );
                 }
             }
+
             break;
 
-            case IST_MaterialOrientation_x:
-            case IST_MaterialOrientation_y:
-            case IST_MaterialOrientation_z:
-                if ( type == IST_MaterialOrientation_x){
-                    pos = 1;
+        case IST_MaterialOrientation_x:
+        case IST_MaterialOrientation_y:
+        case IST_MaterialOrientation_z:
+            if ( type == IST_MaterialOrientation_x ) {
+                pos = 1;
+            }
+
+            if ( type == IST_MaterialOrientation_y ) {
+                pos = 2;
+            }
+
+            if ( type == IST_MaterialOrientation_z ) {
+                pos = 3;
+            }
+
+            fprintf( stream, "VECTORS %s float\n", __InternalStateTypeToString(type) );
+            for ( ielem = 1; ielem <= nelem; ielem++ ) {
+                if ( !d->giveElement(ielem)->giveLocalCoordinateSystem(mtrx) ) {
+                    mtrx.resize(3, 3);
+                    mtrx.zero();
                 }
-                if ( type == IST_MaterialOrientation_y){
-                    pos = 2;
-                }
-                if ( type == IST_MaterialOrientation_z){
-                    pos = 3;
-                }
-                fprintf( stream, "VECTORS %s float\n", __InternalStateTypeToString(type) );
-                for ( ielem = 1; ielem <= nelem; ielem++ ) {
-                    if( !d->giveElement(ielem)->giveLocalCoordinateSystem(mtrx) ){
-                        mtrx.resize(3,3);
-                        mtrx.zero();
-                    }
-                    fprintf( stream, "%f %f %f\n", mtrx.at(1,pos), mtrx.at(2,pos), mtrx.at(3,pos) );
-                }
+
+                fprintf( stream, "%f %f %f\n", mtrx.at(1, pos), mtrx.at(2, pos), mtrx.at(3, pos) );
+            }
+
             break;
 
-            default:
-                OOFEM_ERROR2("Quantity %s not defined on cells", __InternalStateTypeToString(type) );
+        default:
+            OOFEM_ERROR2( "Quantity %s not defined on cells", __InternalStateTypeToString(type) );
         }
 
         fprintf(stream, "\n\n");
@@ -1072,7 +1080,7 @@ VTKExportModule :: exportPrimVarAs(UnknownType valID, FILE *stream, TimeStep *tS
 
     if ( ( valID == DisplacementVector ) || ( valID == EigenVector ) || ( valID == VelocityVector ) ) {
         type = ISVT_VECTOR;
-    } else if ( ( valID == FluxVector ) || ( valID == PressureVector ) || ( valID == TemperatureVector ) ) {
+    } else if ( ( valID == FluxVector ) || ( valID == PressureVector ) || ( valID == TemperatureVector ) || ( valID == TemperatureVector ) ) {
         type = ISVT_SCALAR;
         //nScalarComp = d->giveNumberOfDefaultNodeDofs();
     } else {

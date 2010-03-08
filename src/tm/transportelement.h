@@ -82,24 +82,30 @@ public:
     void giveCharacteristicVector(FloatArray & answer, CharType, ValueModeType, TimeStep *);
 
     /** Computes the capacity matrix of the receiver */
-    virtual void          computeCapacityMatrix(FloatMatrix &answer, TimeStep *);
+    virtual void computeCapacityMatrix(FloatMatrix &answer, TimeStep *);
     /** Computes the conductivity matrix of the receiver */
-    virtual void          computeConductivityMatrix(FloatMatrix &answer,
-                                                    MatResponseMode rMode, TimeStep *tStep);
+    virtual void computeConductivityMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep);
     /** Computes the RHS contribution to balance equation(s) due to boundary conditions */
-    virtual void          computeBCVectorAt(FloatArray &answer, TimeStep *, ValueModeType mode);
+    virtual void computeBCVectorAt(FloatArray &answer, TimeStep *, ValueModeType mode);
     /* Computes the LHS contribution to balance equation(s) due to boundary conditions */
-    virtual void          computeBCMtrxAt(FloatMatrix &answer, TimeStep *, ValueModeType mode);
+    virtual void computeBCMtrxAt(FloatMatrix &answer, TimeStep *, ValueModeType mode);
     /** Computes the contribution to balance equation(s) due to internal sources */
-    virtual void          computeInternalSourceRhsVectorAt(FloatArray &answer, TimeStep *, ValueModeType mode) = 0;
+    virtual void computeInternalSourceRhsVectorAt(FloatArray &answer, TimeStep *, ValueModeType mode) = 0;
     /** Computes the LHS contribution to balance equation(s) due to material internal source */
-    virtual void          computeIntSourceLHSMatrix(FloatMatrix &answer, TimeStep *tStep);
+    virtual void computeIntSourceLHSMatrix(FloatMatrix &answer, TimeStep *tStep);
     /** Computes the part of internal source LHS contribution corresponding to unknown identified by rmode parameter */
-    virtual void          computeIntSourceLHSSubMatrix(FloatMatrix &answer, MatResponseMode rmode, int iri, TimeStep *tStep);
+    virtual void computeIntSourceLHSSubMatrix(FloatMatrix &answer, MatResponseMode rmode, int iri, TimeStep *tStep);
+    /**
+     * Computes a flow vector in an integration point
+     * @param answer flow vector
+     * @param gp integration point
+     * @param stepN time step
+     */
+    virtual void computeFlow(FloatArray &answer, GaussPoint *gp, TimeStep *stepN);
 
     // time step termination
     /**
-     * Computes and updates state vector and flow vector in each integration point of element
+     * Updates a state vector in each integration point of element
      * @param tStep finished time step
      */
     void                  updateInternalState(TimeStep *);

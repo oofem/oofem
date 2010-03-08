@@ -99,8 +99,9 @@ HOMExportModule :: doOutput(TimeStep *tStep)
     FloatMatrix baseGCS;
 
     sumFlow.zero();
+    domainType domType = d->giveDomainType();
 
-    if ( d->giveDomainType() == _HeatTransferMode ) {
+    if ( domType == _HeatTransferMode || domType == _HeatMass1Mode ) {
         TransportElement *transElem;
         for ( ielem = 1; ielem <= nelem; ielem++ ) {
             elem = d->giveElement(ielem);
@@ -233,6 +234,7 @@ HOMExportModule :: initialize()
     char baseFileName [ MAX_FILENAME_LENGTH ];
     char fileName [ MAX_FILENAME_LENGTH ];
     Domain *d  = emodel->giveDomain(1);
+    domainType domType = d->giveDomainType();
 
     emodel->giveOutputBaseFileName(baseFileName, MAX_FILENAME_LENGTH);
     sprintf(fileName, "%s.hom", baseFileName);
@@ -240,7 +242,7 @@ HOMExportModule :: initialize()
         OOFEM_ERROR2("HOMExportModule::giveOutputStream: failed to open file %s", fileName);
     }
 
-    if ( d->giveDomainType() == _HeatTransferMode ) {
+    if ( domType == _HeatTransferMode || domType == _HeatMass1Mode ) {
         fprintf(this->stream, "#Time          AvrState           AvrFlow (xx,yy,zz)\n");
     } else {
         fprintf(this->stream, "#Time   AvrStrain (xx, yy, zz, yz, zx, xy)                                           AvrStress (xx, yy, zz, yz, zx, xy)                                             AvrEigenstrain (xx, yy, zz, yz, zx, xy)\n");

@@ -830,7 +830,7 @@ void Domain :: warning(const char *file, int line, const char *format, ...)
 const IntArray &
 Domain :: giveDefaultNodeDofIDArry()
 {
-    // returns default DofID array, defining physical meaning of partucular DOFs
+    // returns default DofID array, defining physical meaning of particular DOFs
     // in Node Dof collection
     if ( this->defaultNodeDofIDArry.giveSize() ) {
         return defaultNodeDofIDArry;

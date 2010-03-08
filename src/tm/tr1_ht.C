@@ -372,8 +372,8 @@ Tr1_ht :: giveInterface(InterfaceType interface)
 int
 Tr1_ht :: ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type)
 {
-    if ( ( type == IST_TemperatureFlow ) ) {
-        return 3;
+    if ( ( type == IST_TemperatureFlow ) || (type == IST_HumidityFlow) ) {
+        return 2;
     }
 
     return 0;

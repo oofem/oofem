@@ -38,12 +38,11 @@
 
 namespace oofem {
 void
-TransportMaterial :: updateInternalState(const FloatArray &stateVec, const FloatArray &flowVec, GaussPoint *gp, TimeStep *)
+TransportMaterial :: updateInternalState(const FloatArray &stateVec, GaussPoint *gp, TimeStep *)
 {
     TransportMaterialStatus *ms = ( TransportMaterialStatus * ) this->giveStatus(gp);
     if ( ms ) {
         ms->letTempStateVectorBe(stateVec);
-        ms->letTempFlowVectorBe(flowVec);
     }
 }
 
@@ -53,10 +52,11 @@ TransportMaterialStatus :: TransportMaterialStatus(int n, Domain *d, GaussPoint 
 { }
 
 void TransportMaterialStatus :: printOutputAt(FILE *File, TimeStep *tNow)
-// Prints the strains and stresses on the data file.
+// Print the state variable and the flow vector on the data file.
 {
-    FloatArray helpVec;
     int i;
+    FloatArray flowVec;
+    TransportElement *transpElem = ( TransportElement * ) gp->giveElement();
 
     MaterialStatus :: printOutputAt(File, tNow);
 
@@ -70,9 +70,10 @@ void TransportMaterialStatus :: printOutputAt(FILE *File, TimeStep *tNow)
         fprintf( File, " % .4e", stateVector.at(i) );
     }
 
+    transpElem->computeFlow(flowVec, gp, tNow);
     fprintf(File, "   flow");
-    for ( i = 1; i <= flowVector.giveSize(); i++ ) {
-        fprintf( File, " % .4e", flowVector.at(i) );
+    for ( i = 1; i <= flowVec.giveSize(); i++ ) {
+        fprintf( File, " % .4e", flowVec.at(i) );
     }
 
     fprintf(File, "\n");
@@ -85,7 +86,6 @@ void TransportMaterialStatus :: updateYourself(TimeStep *tStep)
     //     gp->giveMaterial ()
     MaterialStatus :: updateYourself(tStep);
     stateVector = tempStateVector;
-    flowVector = tempFlowVector;
 }
 
 
@@ -97,7 +97,6 @@ TransportMaterialStatus :: initTempStatus()
 {
     MaterialStatus :: initTempStatus();
     tempStateVector = stateVector;
-    tempFlowVector = flowVector;
 }
 
 
@@ -154,6 +153,8 @@ TransportMaterialStatus :: restoreContext(DataStream *stream, ContextMode mode, 
 int
 TransportMaterial :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime)
 // IST_Humidity must be overriden!
+
+
 {
     if ( ( type == IST_Temperature ) || ( type == IST_MassConcentration_1 ) || ( type == IST_Humidity ) ) {
         FloatArray vec = ( ( TransportMaterialStatus * ) this->giveStatus(aGaussPoint) )->giveStateVector();
@@ -161,7 +162,8 @@ TransportMaterial :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, In
         answer.at(1) = vec.at( ( type == IST_Temperature ) ? 1 : 2 );
         return 1;
     } else if ( ( type == IST_TemperatureFlow ) ) {
-        answer = ( ( TransportMaterialStatus * ) this->giveStatus(aGaussPoint) )->giveFlowVector();
+        TransportElement *transpElem = ( TransportElement * ) aGaussPoint->giveElement();
+        transpElem->computeFlow(answer, aGaussPoint, atTime);
         return 1;
     } else {
         return Material :: giveIPValue(answer, aGaussPoint, type, atTime);
@@ -193,10 +195,25 @@ TransportMaterial :: giveIntVarCompFullIndx(IntArray &answer, InternalStateType 
 int
 TransportMaterial :: giveIPValueSize(InternalStateType type, GaussPoint *aGaussPoint)
 {
+    int size;
+    MaterialMode mMode = aGaussPoint->giveMaterialMode();
+    switch  ( mMode ) {
+    case _2dHeat:
+    case _2dHeMo:
+        size = 2;
+        break;
+    case _3dHeat:
+    case _3dHeMo:
+        size = 3;
+        break;
+    default:
+        _error2( "Unknown mode (%s)", __MaterialModeToString(mMode) );
+    }
+
     if ( ( type == IST_Temperature ) || ( type == IST_MassConcentration_1 ) || ( type == IST_Humidity ) ) {
         return 1;
     } else if ( ( type == IST_TemperatureFlow ) ) {
-        return 3;
+        return size;
     } else {
         return Material :: giveIPValueSize(type, aGaussPoint);
     }

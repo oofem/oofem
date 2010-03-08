@@ -44,9 +44,9 @@
 #include "matconst.h"
 #include "structuralelement.h"
 #include "matstatus.h"
+#include "transportelement.h"
 
 namespace oofem {
-
 class GaussPoint;
 
 /**
@@ -68,10 +68,6 @@ protected:
     FloatArray stateVector;
     /// Temporary state vector in a reduced form, used mainly in a nonlinear analysis
     FloatArray tempStateVector;
-    /// Equilibrated flow vector in reduced form. The physical meaning corresponds to heat flow, flow of ions etc.
-    FloatArray flowVector;
-    /// Temporary flow vector in a reduced form
-    FloatArray tempFlowVector;
 
 public:
     /// Constructor - creates new TransportMaterialStatus with number n, belonging to domain d and IntegrationPoint g.
@@ -83,7 +79,7 @@ public:
     void   printOutputAt(FILE *, TimeStep *);
 
     /**
-     * Initializes temporary internal variables (state and flow vectors).
+     * Initializes temporary internal variables (state vectors).
      * Assign previously reached equilibrium internal variables to them.
      */
     virtual void initTempStatus();
@@ -95,7 +91,7 @@ public:
 
 
     /**
-     * Stores context of receiver into given stream (the equilibriun stress and strains vectors are stored).
+     * Stores context of receiver into given stream (the equilibrated state variable).
      * Generally, only non-temp internal history variables should be stored.
      * @param stream stream where to write data
      * @param mode determines ammount of info required in stream (state, definition,...)
@@ -105,7 +101,7 @@ public:
      */
     contextIOResultType    saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
     /**
-     * Restores context of receiver from given stream (the equilibriun stress and strains vectors are restored).
+     * Restores context of receiver from given stream (the equilibrated state variable).
      * @param stream stream where to read data
      * @param mode determines ammount of info required in stream (state, definition,...)
      * @param obj pointer to integration point, which invokes this method
@@ -119,16 +115,9 @@ public:
     const FloatArray &giveStateVector()         { return stateVector; }
     /// Returns the const pointer to receiver's tempStateVector
     const FloatArray &giveTempStateVector()      { return tempStateVector; }
-    /// Returns the const pointer to receiver's flowVector
-    const FloatArray &giveFlowVector()         { return flowVector; }
-    /// Returns the const pointer to receiver's flowVector
-    const FloatArray &giveTempFlowVector()         { return tempFlowVector; }
-    /// Assigns tempStateVector to given vector v
+    /// Assigns tempStateVector from a given vector v
     void         letTempStateVectorBe(const FloatArray &v)
     { tempStateVector = v; }
-    /// Assigns tempFlowVector to given vector v
-    void         letTempFlowVectorBe(const FloatArray &v)
-    { tempFlowVector = v; }
 
     /// Returns "TransportMaterialStatus" - class name of the receiver.
     const char *giveClassName() const { return "TransportMaterialStatus"; }
@@ -195,11 +184,10 @@ public:
     /**
      * Updates internal state of material according to new state vector.
      * @param stateVec new state vector
-     * @param flowVec new flow vector
      * @param gp integration point
      * @param tStep solution step
      */
-    virtual void updateInternalState(const FloatArray &stateVec, const FloatArray &flowVec, GaussPoint *gp, TimeStep *);
+    virtual void updateInternalState(const FloatArray &stateVec, GaussPoint *gp, TimeStep *);
     /**
      * Returns nonzero if receiver genarets internal source of state variable(s), zero otherwise.
      */
@@ -238,6 +226,5 @@ public:
 #ifdef __OOFEG
 #endif
 };
-
 } // end namespace oofem
 #endif // transportmaterial_h

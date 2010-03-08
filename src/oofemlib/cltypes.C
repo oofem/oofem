@@ -141,6 +141,7 @@ InternalStateValueType giveInternalStateValueType(InternalStateType type)
     case IST_DisplacementVector:
     case IST_DisplacementVectorTemp:
     case IST_TemperatureFlow:
+    case IST_HumidityFlow:
         return ISVT_VECTOR;
 
         //break;

@@ -521,19 +521,19 @@ DofManager :: initializeFrom(InputRecord *ir)
     // check sizes
     if ( hasBc ) {
         if ( bc.giveSize() != this->giveNumberOfDofs() ) {
-            _error("initializeFrom: bc size mismatch");
+            _error3("initializeFrom: bc size mismatch. Size is %d and need %d", bc.giveSize(), this->giveNumberOfDofs());
         }
     }
 
     if ( hasIc ) {
         if ( ic.giveSize() != this->giveNumberOfDofs() ) {
-            _error("initializeFrom: ic size mismatch");
+            _error3("initializeFrom: ic size mismatch. Size is %d and need %d", ic.giveSize(), this->giveNumberOfDofs());
         }
     }
 
     if ( hasTypeinfo ) {
         if ( dofTypeMask.giveSize() != this->giveNumberOfDofs() ) {
-            _error("initializeFrom: dofTypeMask size mismatch");
+            _error3("initializeFrom: dofTypeMask size mismatch. Size is %d and need %d", dofTypeMask.giveSize(), this->giveNumberOfDofs());
         }
     }
 
