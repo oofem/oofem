@@ -329,6 +329,8 @@ Element *CreateUsrDefElementOfType(char *aClass, int number, Domain *domain)
         newElement = new InterfaceElem1d(number, domain);
     } else if ( !strncasecmp(aClass, "bsplineplanestresselement", 25)  ) {
       newElement = new BsplinePlaneStressElement(number, domain);
+    } else if ( !strncasecmp(aClass, "nurbsplanestresselement", 23)  ) {
+      newElement = new NURBSPlaneStressElement(number, domain);
     }
 
 #endif //__SM_MODULE

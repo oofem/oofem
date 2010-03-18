@@ -70,17 +70,21 @@
 #include "oofegutils.h"
 #endif
 
+
+// BSpline
+
 BSplineInterpolation::~BSplineInterpolation() {
   delete [] degree;
   delete [] numberOfControllPoints;
   delete [] numberOfKnotSpans;
-  // delete also knotVector and knotMultiplicity (huhu)
+  // delete also knotVector and knotMultiplicity HUHU
 }
+
 
 IRResultType 
 BSplineInterpolation::initializeFrom(InputRecord *ir) {
   const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
-  IRResultType result;                            // Required by IR_GIVE_FIELD macro
+  IRResultType result;                   // Required by IR_GIVE_FIELD macro
 
   IntArray degree_tmp, knotMultiplicity_tmp;
   FloatArray knotVector_tmp;
@@ -180,26 +184,27 @@ BSplineInterpolation::initializeFrom(InputRecord *ir) {
 
 
 
-void BSplineInterpolation::evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry& cellgeo, double time){
+void BSplineInterpolation::evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry& cellgeo, double time) {
   FEIIGAElementGeometryWrapper* gw = (FEIIGAElementGeometryWrapper*) &cellgeo;
-
-  int i, l,k,c;
   FloatArray N[nsd];
   IntArray span(nsd);
+  int i,l,k,c, count;
 
   if (gw->knotSpan) {
     span = *gw->knotSpan;
   } else {
-    for (i=0; i< nsd; i++) {
+    for (i=0; i< nsd; i++) {  // HEHE would be enough to pass i to get access to numberOfControllPoints, degree and knotVector
       span(i) = this->findSpan (numberOfControllPoints[i], degree[i], lcoords(i), knotVector[i]);
     }
   } 
   
-  for (i=0; i< nsd; i++) {
-    //span(i) = this->findSpan (numberOfControllPoints[i], degree[i], lcoords(i), knotVector[i]);
-    this->basisFuns (N[i], span.at(i+1), lcoords(i), degree[i], knotVector[i]);
+  for (i=0; i< nsd; i++) {  // HEHE would be enough to pass i to get access to degree and knotVector
+    this->basisFuns (N[i], span(i), lcoords(i), degree[i], knotVector[i]);
   }
   
+  count =giveNumberOfKnotBasisFunctions ();
+  answer.resize(count);
+
   if (nsd == 2) {
     c=0;
     for (l=0;l<=degree[0]; l++) {
@@ -215,55 +220,53 @@ void BSplineInterpolation::evalN(FloatArray &answer, const FloatArray &lcoords, 
 
  
 void BSplineInterpolation::evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry& cellgeo, double time) {
-
   FEIIGAElementGeometryWrapper* gw = (FEIIGAElementGeometryWrapper*) &cellgeo;
-
   FloatMatrix jacobian(nsd,nsd);
   FloatMatrix ders[nsd];
   FloatArray temp(nsd);
-  double Jacob;
-  int count = 1, cnt, i, l, k, uind, vind;
   IntArray span(nsd);
+  double Jacob;
+  int count,cnt,i,l,k,uind,vind;
 
   if (gw->knotSpan) {
     span = *gw->knotSpan;
   } else {
-    for (i=0; i< nsd; i++) {
+    for (i=0; i< nsd; i++) {  // HEHE would be enough to pass i to get access to numberOfControllPoints, degree and knotVector
       span(i) = this->findSpan (numberOfControllPoints[i], degree[i], lcoords(i), knotVector[i]);
     }
   } 
 
-
-  for (i=0; i< nsd; i++) {
-    this->DersBasisFuns(1, lcoords(i), span.at(i+1), degree[i], knotVector[i], ders[i]);
+  for (i=0; i< nsd; i++) {  // HEHE would be enough to pass i to get access to degree and knotVector
+    this->DersBasisFuns(1, lcoords(i), span(i), degree[i], knotVector[i], ders[i]);
   }
+
   count =giveNumberOfKnotBasisFunctions ();
+  answer.resize(count, nsd);
 
   jacobian.zero();
-  answer.resize(count, nsd);
-  //answer.zero();
   if (nsd == 2) {
-    uind = span.at(1)-degree[0];
+    uind = span(0)-degree[0];
     for (l=0;l<=degree[1]; l++) {
       temp.zero();
-      vind = span.at(2)-degree[1]+l;
+      vind = span(1)-degree[1]+l;
       for (k=0; k<=degree[0]; k++) {
-        temp(0) += ders[0](1,k)*cellgeo.giveVertexCoordinates((vind)*numberOfControllPoints[0]+uind+k+1)->at(1);  // HAHA see local2global
-        temp(1) += ders[0](1,k)*cellgeo.giveVertexCoordinates((vind)*numberOfControllPoints[0]+uind+k+1)->at(2);  // HAHA coords
+        temp(0) += ders[0](1,k)*cellgeo.giveVertexCoordinates((vind)*numberOfControllPoints[0]+uind+k+1)->at(1);  // Nv*x
+        temp(1) += ders[0](1,k)*cellgeo.giveVertexCoordinates((vind)*numberOfControllPoints[0]+uind+k+1)->at(2);  // Nv*y
       }
-      jacobian(0,0) += ders[1](0,l)*temp(0);
-      jacobian(0,1) += ders[1](0,l)*temp(1);
+      jacobian(0,0) += ders[1](0,l)*temp(0);  // dx/du=sum dNu/du*Nv*x
+      jacobian(0,1) += ders[1](0,l)*temp(1);  // dy/du=sum dNu/du*Nv*y
     }
     for (l=0;l<=degree[1]; l++) {
       temp.zero();
-      vind = span.at(2)-degree[1]+l;
+      vind = span(1)-degree[1]+l;
       for (k=0; k<=degree[0]; k++) {
-        temp(0) += ders[0](0,k)*cellgeo.giveVertexCoordinates((vind)*numberOfControllPoints[0]+uind+k+1)->at(1);  // HAHA see local2global
-        temp(1) += ders[0](0,k)*cellgeo.giveVertexCoordinates((vind)*numberOfControllPoints[0]+uind+k+1)->at(2);  // HAHA coords
+        temp(0) += ders[0](0,k)*cellgeo.giveVertexCoordinates((vind)*numberOfControllPoints[0]+uind+k+1)->at(1);  // Nu*x
+        temp(1) += ders[0](0,k)*cellgeo.giveVertexCoordinates((vind)*numberOfControllPoints[0]+uind+k+1)->at(2);  // Nu*y
       }
-      jacobian(1,0) += ders[1](1,l)*temp(0);
-      jacobian(1,1) += ders[1](1,l)*temp(1);
+      jacobian(1,0) += ders[1](1,l)*temp(0);  // dx/dv=sum dNv/dv*Nu*x
+      jacobian(1,1) += ders[1](1,l)*temp(1);  // dy/dv=sum dNv/dv*Nu*y
     }
+
     Jacob = jacobian.giveDeterminant();
     
     if(fabs(Jacob) < 1.0e-10){
@@ -273,8 +276,8 @@ void BSplineInterpolation::evaldNdx(FloatMatrix &answer, const FloatArray &lcoor
     cnt=0;
     for (l=0;l<=degree[1]; l++) {
       for (k=0; k<=degree[0]; k++) {
-        temp(0) = ders[0](1,k)*ders[1](0,l);
-        temp(1) = ders[0](0,k)*ders[1](1,l);
+        temp(0) = ders[0](1,k)*ders[1](0,l);   // dN/du=dNu/du*Nv
+        temp(1) = ders[0](0,k)*ders[1](1,l);   // dN/dv=Nu*dNv/dv
         answer(cnt,0) = (jacobian(1,1)*temp(0)-jacobian(0,1)*temp(1)) / Jacob;
         answer(cnt,1) = (-jacobian(1,0)*temp(0)+jacobian(0,0)*temp(1)) / Jacob;
         cnt++;
@@ -286,31 +289,30 @@ void BSplineInterpolation::evaldNdx(FloatMatrix &answer, const FloatArray &lcoor
   }
 }
 
+
 void BSplineInterpolation::local2global(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry& cellgeo, double time) {
   /* Based on SurfacePoint A3.5 implementation*/
   FEIIGAElementGeometryWrapper* gw = (FEIIGAElementGeometryWrapper*) &cellgeo;
-  int i,l,k;
   FloatArray temp(nsd);
   FloatArray N[nsd];
+  IntArray span(nsd);
+  int i,l,k,uind,vind;;
+    
   answer.resize(nsd);
   
-  IntArray span(nsd);
-
   if (gw->knotSpan) {
     span = *gw->knotSpan;
   } else {
-    for (i=0; i< nsd; i++) {
+    for (i=0; i< nsd; i++) {  // HEHE would be enough to pass i to get access to numberOfControllPoints, degree and knotVector
       span(i) = this->findSpan (numberOfControllPoints[i], degree[i], lcoords(i), knotVector[i]);
     }
   } 
 
-
-  for (i=0; i< nsd; i++) {
+  for (i=0; i< nsd; i++) {  // HEHE would be enough to pass i to get access to degree and knotVector
     this->basisFuns (N[i], span(i), lcoords(i), degree[i], knotVector[i]); 
   }
+
   if (nsd == 2) {
-    int uind, vind;
-    
     uind = span(0)-degree[0]; 
     answer.zero();
     for (l=0;l<=degree[1]; l++) {
@@ -330,75 +332,75 @@ void BSplineInterpolation::local2global(FloatArray &answer, const FloatArray &lc
   }
 }
 
-double BSplineInterpolation::giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry& cellgeo, double time) {
 
+double BSplineInterpolation::giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry& cellgeo, double time) {
   FEIIGAElementGeometryWrapper* gw = (FEIIGAElementGeometryWrapper*) &cellgeo;
   FloatMatrix jacobian(nsd,nsd);
   FloatMatrix ders[nsd];
   FloatArray temp(nsd);
-  double Jacob;
-  int i, l, k, uind, vind;
-
   IntArray span(nsd);
+  double Jacob;
+  int i,l,k,uind,vind;
 
   if (gw->knotSpan) {
     span = *gw->knotSpan;
   } else {
-    for (i=0; i< nsd; i++) {
+    for (i=0; i< nsd; i++) {  // HEHE would be enough to pass i to get access to numberOfControllPoints, degree and knotVector
       span(i) = this->findSpan (numberOfControllPoints[i], degree[i], lcoords(i), knotVector[i]);
     }
   } 
 
-  for (i=0; i< nsd; i++) {
-    this->DersBasisFuns(1, lcoords(i), span.at(i+1), degree[i], knotVector[i], ders[i]);
+  for (i=0; i< nsd; i++) {  // HEHE would be enough to pass i to get access to degree and knotVector
+    this->DersBasisFuns(1, lcoords(i), span(i), degree[i], knotVector[i], ders[i]);
   }
 
   jacobian.zero();
   if (nsd == 2) {
-    uind = span.at(1)-degree[0];
+    uind = span(0)-degree[0];
     for (l=0;l<=degree[1]; l++) {
       temp.zero();
-      vind = span.at(2)-degree[1]+l;
+      vind = span(1)-degree[1]+l;
       for (k=0; k<=degree[0]; k++) {
-        temp(0) += ders[0](1,k)*cellgeo.giveVertexCoordinates((vind)*numberOfControllPoints[0]+uind+k+1)->at(1);  // HAHA see local2global
-        temp(1) += ders[0](1,k)*cellgeo.giveVertexCoordinates((vind)*numberOfControllPoints[0]+uind+k+1)->at(2);  // HAHA coords
+        temp(0) += ders[0](1,k)*cellgeo.giveVertexCoordinates((vind)*numberOfControllPoints[0]+uind+k+1)->at(1);
+        temp(1) += ders[0](1,k)*cellgeo.giveVertexCoordinates((vind)*numberOfControllPoints[0]+uind+k+1)->at(2);
       }
       jacobian(0,0) += ders[1](0,l)*temp(0);
       jacobian(0,1) += ders[1](0,l)*temp(1);
     }
     for (l=0;l<=degree[1]; l++) {
       temp.zero();
-      vind = span.at(2)-degree[1]+l;
+      vind = span(1)-degree[1]+l;
       for (k=0; k<=degree[0]; k++) {
-        temp(0) += ders[0](0,k)*cellgeo.giveVertexCoordinates((vind)*numberOfControllPoints[0]+uind+k+1)->at(1);  // HAHA see local2global
-        temp(1) += ders[0](0,k)*cellgeo.giveVertexCoordinates((vind)*numberOfControllPoints[0]+uind+k+1)->at(2);  // HAHA coords
+        temp(0) += ders[0](0,k)*cellgeo.giveVertexCoordinates((vind)*numberOfControllPoints[0]+uind+k+1)->at(1);
+        temp(1) += ders[0](0,k)*cellgeo.giveVertexCoordinates((vind)*numberOfControllPoints[0]+uind+k+1)->at(2);
       }
       jacobian(1,0) += ders[1](1,l)*temp(0);
       jacobian(1,1) += ders[1](1,l)*temp(1);
     }
-    Jacob = jacobian.giveDeterminant();
-    
-    if(fabs(Jacob) < 1.0e-10){
-      OOFEM_ERROR ("evaldNdx - zero Jacobian");
-    }
-    
   } else {
-    OOFEM_ERROR2 ("evaldNdx not implemented for nsd = %d", nsd);
+    OOFEM_ERROR2 ("giveTransformationJacobian not implemented for nsd = %d", nsd);
   }
+
+	Jacob = jacobian.giveDeterminant();
+    
+	if(fabs(Jacob) < 1.0e-10){
+		OOFEM_ERROR ("giveTransformationJacobian - zero Jacobian");
+	}
+    
   return Jacob;
 }
 
 int BSplineInterpolation::giveKnotBasisFuncMask (const IntArray& knotSpan, IntArray& mask) {
-  int c, _i, _j, _iindx, _jindx;
+  int c,i,j,iindx,jindx;
   
   if (nsd == 2) {
     mask.resize((degree[0]+1)*(degree[1]+1));
     c=1;
-    for (_i=0; _i<=degree[1]; _i++) {
-      _iindx = (_i+knotSpan(1)-degree[1]);
-      for (_j=0; _j<=degree[0]; _j++) {
-        _jindx = (_j+knotSpan(0)-degree[0]);
-        mask.at(c++) = _jindx+(_iindx)*numberOfControllPoints[0]+1;
+    for (i=0; i<=degree[1]; i++) {
+      iindx = (i+knotSpan(1)-degree[1]);
+      for (j=0; j<=degree[0]; j++) {
+        jindx = (j+knotSpan(0)-degree[0]);
+        mask.at(c++) = jindx+(iindx)*numberOfControllPoints[0]+1;
       }
     }          
   } else {
@@ -415,21 +417,20 @@ int  BSplineInterpolation::giveNumberOfKnotBasisFunctions () {
 }
 
 
-void BSplineInterpolation::basisFuns (FloatArray &N, int i, double u, int p, const double* U) 
-{
+void BSplineInterpolation::basisFuns (FloatArray &N, int span, double u, int p, const double* U) {
   //
   // Based on Algorithm A2.2 (p. 70)
   //
-  int j, r;
   FloatArray right(p+1);
   FloatArray left(p+1);
-  double saved, temp;
+  double saved,temp;
+  int j,r;
   
   N.resize(p+1);
   N(0) = 1.0;
   for (j=1; j<=p; j++) {
-    left(j)=u-U[i+1-j];
-    right(j)=U[i+j]-u;
+    left(j)=u-U[span+1-j];
+    right(j)=U[span+j]-u;
     saved = 0.0;
     for (r=0; r<j; r++) {
       temp=N(r)/(right(r+1)+left(j-r));
@@ -442,10 +443,11 @@ void BSplineInterpolation::basisFuns (FloatArray &N, int i, double u, int p, con
 
 
 void BSplineInterpolation::DersBasisFuns(int n, double u, int span, int deg, double* const U, FloatMatrix& ders) {
-  
+  //
+  // Based on Algorithm A2.3 (p. 72)
+  //
   FloatArray left(deg+1);
   FloatArray right(deg+1);
-  
   FloatMatrix ndu(deg+1,deg+1) ;
   double saved,temp ;
   int j,r ;
@@ -526,6 +528,7 @@ void BSplineInterpolation::DersBasisFuns(int n, double u, int span, int deg, dou
   }
 }
 
+
 int BSplineInterpolation::findSpan(int n, int p, double u, const double* U) const {
   
   if(u == U[n+1]) return n; 
@@ -538,17 +541,434 @@ int BSplineInterpolation::findSpan(int n, int p, double u, const double* U) cons
     if(u<U[mid])
       high = mid ;
     else
-        low = mid ;
+			low = mid ;
     mid = (low+high)/2 ;
   }
   return mid ;
-  
 }
+
+// NURBS
+
+// jaky je rozdil mezi FloatArray ders[nsd] a FloatArray ders(nsd) ==> prvni je pole (o velikosti nsd) FloatArrays o nulove velikosti
+//                                                                     druhe je FloatArray inicializovane na velikost nsd
+// jaky je rozdil mezi span(0) a spat.at(1) ==> zadny
+// jaky je rozdil mezi span(0) a span[0] ==> prvni implementovano jako C++ objekt Array, druhe jako ceckove pole
+
+
+NURBSInterpolation::~NURBSInterpolation() {
+}
+
+
+void NURBSInterpolation::evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry& cellgeo, double time) {
+  FEIIGAElementGeometryWrapper* gw = (FEIIGAElementGeometryWrapper*) &cellgeo;
+  FloatArray N[nsd];
+  IntArray span(nsd);
+	double sum;
+  int count,i,l,k,c,uind,vind;
+
+  if (gw->knotSpan) {
+    span = *gw->knotSpan;
+  } else {
+    for (i=0; i< nsd; i++) {  // HEHE would be enough to pass i to get access to numberOfControllPoints, degree and knotVector
+      span(i) = this->findSpan (numberOfControllPoints[i], degree[i], lcoords(i), knotVector[i]);
+    }
+  } 
+  
+  for (i=0; i< nsd; i++) {  // HEHE would be enough to pass i to get access to degree and knotVector
+    this->basisFuns (N[i], span(i), lcoords(i), degree[i], knotVector[i]);
+  }
+
+  count =giveNumberOfKnotBasisFunctions ();
+  answer.resize(count);
+
+  if (nsd == 2) {
+		sum = 0.0;
+    uind = span(0)-degree[0];
+    for (l=0;l<=degree[0]; l++) {
+			vind = span(1)-degree[1]+l;
+			for (k=0; k<=degree[1]; k++) {
+				sum += N[0](l)*N[1](k)*cellgeo.giveVertexCoordinates((vind)*numberOfControllPoints[0]+uind+k+1)->at(3);  // Nu*Nv*w
+			}
+		}
+
+		c=0;
+    for (l=0;l<=degree[0]; l++) {
+			vind = span(1)-degree[1]+l;
+			for (k=0; k<=degree[1]; k++) {
+        answer.at(c++) = N[0](l)*N[1](k)*cellgeo.giveVertexCoordinates((vind)*numberOfControllPoints[0]+uind+k+1)->at(3) / sum;
+      }
+    }
+  }
+  else {
+    OOFEM_ERROR2 ("evalN not implemented for nsd = %d", nsd);
+  }
+}
+
+
+
+void NURBSInterpolation::evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry& cellgeo, double time) {
+
+  FEIIGAElementGeometryWrapper* gw = (FEIIGAElementGeometryWrapper*) &cellgeo;
+  FloatMatrix jacobian(nsd,nsd);
+  FloatMatrix ders[nsd];
+  FloatArray temp(nsd+1); // allow for weight
+  FloatArray temp2(nsd);
+	FloatArray sum_der(nsd);
+	IntArray span(nsd);
+  double Jacob,sum_tmp,product;
+  int count,cnt,i,j,l,k,uind,vind;
+	const int d=1;
+ 	/*
+	IntArray Bin(2,2);      // binomial coefficients from 0 to d=1 
+                          // Bin(n,k)=(n above k)=n!/k!(n-k)! for n>=k>=0
+                          // lower triangle corresponds to Pascal triangle
+													// according to A4.4 it seems that only coefficients in lower triangle except the first column are used
+													*/
+
+  if (gw->knotSpan) {
+    span = *gw->knotSpan;
+  } else {
+    for (i=0; i< nsd; i++) {  // HEHE would be enough to pass i to get access to numberOfControllPoints, degree and knotVector
+      span(i) = this->findSpan (numberOfControllPoints[i], degree[i], lcoords(i), knotVector[i]);
+    }
+  } 
+
+  for (i=0; i< nsd; i++) {  // HEHE would be enough to pass i to get access to degree and knotVector
+    this->DersBasisFuns(1, lcoords(i), span(i), degree[i], knotVector[i], ders[i]);
+  }
+
+  count =giveNumberOfKnotBasisFunctions ();
+  answer.resize(count, nsd);
+
+  if (nsd == 2) {
+		FloatMatrix Aders[nsd]; // derivatives in each coordinate direction on BSpline
+		FloatMatrix Sders[nsd]; // derivatives in each coordinate direction on NURBS
+		FloatMatrix wders;      // derivatives in w direction on BSpline
+
+		// resizing to (2,2) has nothing common with nsd
+		// it is related to the fact that 0th and 1st derivatives are computed
+		for(i=0;i<nsd;i++){
+			Aders[i].resize(2,2);
+			Sders[i].resize(2,2);
+		}
+		wders.resize(2,2);
+
+		// calculation of jacobian matrix according to A4.4
+		// calculate values and derivatives of nonrational Bspline surface with weights at first (Aders, wders)
+    uind = span(0)-degree[0];
+    for (l=0;l<=degree[1]; l++) {
+      temp.zero();
+      vind = span(1)-degree[1]+l;
+      for (k=0; k<=degree[0]; k++) {
+        temp(0) += ders[0](0,k)*cellgeo.giveVertexCoordinates((vind)*numberOfControllPoints[0]+uind+k+1)->at(1);  // Nu*x
+        temp(1) += ders[0](0,k)*cellgeo.giveVertexCoordinates((vind)*numberOfControllPoints[0]+uind+k+1)->at(2);  // Nu*y
+        temp(2) += ders[0](0,k)*cellgeo.giveVertexCoordinates((vind)*numberOfControllPoints[0]+uind+k+1)->at(3);  // Nu*w
+      }
+      Aders[0](0,0) += ders[1](0,l)*temp(0);  // x = sum Nv*Nu*x
+      Aders[1](0,0) += ders[1](0,l)*temp(1);  // y = sum Nv*Nu*y
+      wders(0,0)    += ders[1](0,l)*temp(2);  // w = sum Nv*Nu*w
+
+      temp.zero();
+      vind = span(1)-degree[1]+l;
+      for (k=0; k<=degree[0]; k++) {
+        temp(0) += ders[0](1,k)*cellgeo.giveVertexCoordinates((vind)*numberOfControllPoints[0]+uind+k+1)->at(1);  // dNu/du*x
+        temp(1) += ders[0](1,k)*cellgeo.giveVertexCoordinates((vind)*numberOfControllPoints[0]+uind+k+1)->at(2);  // dNu/du*y
+        temp(2) += ders[0](1,k)*cellgeo.giveVertexCoordinates((vind)*numberOfControllPoints[0]+uind+k+1)->at(3);  // dNu/du*w
+      }
+      Aders[0](1,0) += ders[1](0,l)*temp(0);  // dx/du=sum Nv*dNu/du*x
+      Aders[1](1,0) += ders[1](0,l)*temp(1);  // dy/du=sum Nv*dNu/du*y
+			wders(1,0)    += ders[1](0,l)*temp(2);  // dw/du=sum Nv*dNu/du*w
+    }
+    for (l=0;l<=degree[1]; l++) {
+      temp.zero();
+      vind = span(1)-degree[1]+l;
+      for (k=0; k<=degree[0]; k++) {
+        temp(0) += ders[0](0,k)*cellgeo.giveVertexCoordinates((vind)*numberOfControllPoints[0]+uind+k+1)->at(1);  // dNv/v*x
+        temp(1) += ders[0](0,k)*cellgeo.giveVertexCoordinates((vind)*numberOfControllPoints[0]+uind+k+1)->at(2);  // dNv/v*y
+        temp(2) += ders[0](0,k)*cellgeo.giveVertexCoordinates((vind)*numberOfControllPoints[0]+uind+k+1)->at(3);  // dNv/v*w
+      }
+      Aders[0](0,1) += ders[1](1,l)*temp(0);  // dx/dv=sum Nu*dNv/dv*x
+      Aders[1](0,1) += ders[1](1,l)*temp(1);  // dy/dv=sum Nu*dNv/dv*y
+      wders(0,1)    += ders[1](1,l)*temp(2);  // dw/dv=sum Nu*dNv/dv*w
+    }
+		
+#if 1
+		// calculate values and derivatives of NURBS surface (A4.4)
+		// since all entries in Pascal triangle up to d=1 are 1, binomial coefficients are ignored
+		for(k=0;k<=d;k++){
+			for(l=0;l<=d-k;l++){
+				temp(0) = Aders[0](k,l);
+				temp(1) = Aders[1](k,l);
+				for(j=1;j<=l;j++){
+					temp(0) -= wders(0,j)*Sders[0](k,l-j); // *Bin(l,j)
+					temp(1) -= wders(0,j)*Sders[1](k,l-j); // *Bin(l,j)
+				}
+				for(i=1;i<=k;i++){
+					temp(0) -= wders(i,0)*Sders[0](k-i,l); // *Bin(k,i)
+					temp(1) -= wders(i,0)*Sders[1](k-i,l); // *Bin(k,i)
+					temp2.zero();
+					for(j=1;j<=l;j++){
+						temp2(0) += wders(i,j)*Sders[0](k-i,l-j); // *Bin(l,j)
+						temp2(1) += wders(i,j)*Sders[1](k-i,l-j); // *Bin(l,j)
+					}
+					temp(0) -= temp2(0); // *Bin(k,i)
+					temp(1) -= temp2(1); // *Bin(k,i)
+				}
+				Sders[0](k,l) = temp(0) / wders(0,0);
+				Sders[1](k,l) = temp(1) / wders(0,0);
+			}
+		}
+#else
+		// optimized version of A4.4 for d=1, binomial coefficients ignored
+		// k=0 l=0 loop
+		Sders[0](0,0) = Aders[0](0,0) / wders(0,0);
+		Sders[1](0,0) = Aders[1](0,0) / wders(0,0);
+		// k=0 l=1 loop
+		Sders[0](0,1) = (Aders[0](0,1)-wders(0,1)*Sders[0](0,0)) / wders(0,0);
+		Sders[1](0,1) = (Aders[1](0,1)-wders(0,1)*Sders[1](0,0)) / wders(0,0);
+		// k=1 l=0 loop
+		Sders[0](1,0) = (Aders[0](1,0)-wders(1,0)*Sders[0](0,0)) / wders(0,0);
+		Sders[1](1,0) = (Aders[1](1,0)-wders(1,0)*Sders[1](0,0)) / wders(0,0);
+#endif
+
+		jacobian(0,0) = Sders[0](1,0);   // dx/du
+		jacobian(0,1) = Sders[1](1,0);   // dy/du
+		jacobian(1,0) = Sders[0](0,1);   // dx/dv
+		jacobian(1,1) = Sders[1](0,1);   // dy/dv
+
+		Jacob = jacobian.giveDeterminant();
+
+		//calculation of derivatives of NURBS basis functions with respect to local parameter is not covered by NURBS book
+		sum_tmp = 0.0;
+		sum_der.zero();
+    uind = span(0)-degree[0]; 
+    for (l=0;l<=degree[1]; l++) {
+			temp.zero();
+      vind = span(1)-degree[1]+l;  
+      for (k=0; k<=degree[0]; k++) {
+        temp(0) += ders[0](0,k)*cellgeo.giveVertexCoordinates((vind)*numberOfControllPoints[0]+uind+k+1)->at(3);  // Nu*weight
+				temp(1) += ders[0](1,k)*cellgeo.giveVertexCoordinates((vind)*numberOfControllPoints[0]+uind+k+1)->at(3);  // dNu/du*weight
+      }
+			sum_tmp    += ders[1](0,l)*temp(0); // sum Nv*Nu*weigth
+			sum_der(0) += ders[1](0,l)*temp(1); // sum Nv*dNu/du*weigth
+			sum_der(1) += ders[1](1,l)*temp(0); // sum dNv/dv*Nu*weight
+		}
+
+		product = Jacob * sum_tmp * sum_tmp;
+
+    cnt=0;
+    for (l=0;l<=degree[1]; l++) {
+      vind = span(1)-degree[1]+l;  
+      for (k=0; k<=degree[0]; k++) {
+				// dNu/du*Nv*weight - sum dNu/du*Nv*weight
+				temp(0) = ders[0](1,k)*ders[1](0,l)*cellgeo.giveVertexCoordinates((vind)*numberOfControllPoints[0]+uind+k+1)->at(3) - sum_der(0);
+				// Nu*dNv/dv*weight - sum Nu*dNv/dv*weight
+				temp(1) = ders[0](0,k)*ders[1](1,l)*cellgeo.giveVertexCoordinates((vind)*numberOfControllPoints[0]+uind+k+1)->at(3) - sum_der(1);
+        answer(cnt,0) = (jacobian(1,1)*temp(0)-jacobian(0,1)*temp(1)) / product;
+        answer(cnt,1) = (-jacobian(1,0)*temp(0)+jacobian(0,0)*temp(1)) / product;
+        cnt++;
+      }
+    }
+  } else {
+    OOFEM_ERROR2 ("evaldNdx not implemented for nsd = %d", nsd);
+  }
+}	
+
+
+void NURBSInterpolation::local2global(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry& cellgeo, double time) {
+  /* Based on SurfacePoint A4.3 implementation*/
+  FEIIGAElementGeometryWrapper* gw = (FEIIGAElementGeometryWrapper*) &cellgeo;
+  FloatArray temp(nsd+1); // allow for weight
+  FloatArray N[nsd];
+  IntArray span(nsd);
+	double weight = 0.0;
+  int i,l,k,uind,vind;
+
+  answer.resize(nsd);
+  
+  if (gw->knotSpan) {
+    span = *gw->knotSpan;
+  } else {
+    for (i=0; i< nsd; i++) {  // HEHE would be enough to pass i to get access to numberOfControllPoints, degree and knotVector
+      span(i) = this->findSpan (numberOfControllPoints[i], degree[i], lcoords(i), knotVector[i]);
+    }
+  } 
+
+  for (i=0; i< nsd; i++) {  // HEHE would be enough to pass i to get access to degree and knotVector
+    this->basisFuns (N[i], span(i), lcoords(i), degree[i], knotVector[i]);
+  }
+
+  if (nsd == 2) {
+    uind = span(0)-degree[0]; 
+    answer.zero();
+    for (l=0;l<=degree[1]; l++) {
+      temp.zero();
+      vind = span(1)-degree[1]+l;  
+      for (k=0; k<=degree[0]; k++) {
+        //temp(0) = temp(0) + N[0][k]*d->giveNode(nodes.at((uind+k)*numberOfControllPoints[0]+vind))->giveCoordinate(1);
+        //temp(1) = temp(1) + N[0][k]*d->giveNode(nodes.at((uind+k)*numberOfControllPoints[0]+vind))->giveCoordinate(2);
+        //temp(2) = temp(2) + N[0][k]*d->giveNode(nodes.at((uind+k)*numberOfControllPoints[0]+vind))->giveCoordinate(3);  // weight
+        temp(0) += N[0](k)*cellgeo.giveVertexCoordinates((vind)*numberOfControllPoints[0]+uind+k+1)->at(1);  // Nu*x
+        temp(1) += N[0](k)*cellgeo.giveVertexCoordinates((vind)*numberOfControllPoints[0]+uind+k+1)->at(2);  // Nu*x
+        temp(2) += N[0](k)*cellgeo.giveVertexCoordinates((vind)*numberOfControllPoints[0]+uind+k+1)->at(3);  // Nu*weight
+      }
+      answer(0) += N[1](l)*temp(0);  // x = sum Nv*Nu*x
+      answer(1) += N[1](l)*temp(1);  // y = sum Nv*Nu*y
+      weight    += N[1](l)*temp(2);  // w = sum Nv*Nu*weigth
+    }
+  } else {
+    OOFEM_ERROR2 ("local2global not implemented for nsd = %d", nsd);
+  }
+
+	answer.times(1.0/weight);
+}
+
+
+double NURBSInterpolation::giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry& cellgeo, double time) {
+  //
+  // Based on Algorithm A4.4 (p. 137) for d=1
+  //
+  FEIIGAElementGeometryWrapper* gw = (FEIIGAElementGeometryWrapper*) &cellgeo;
+  FloatMatrix jacobian(nsd,nsd);
+  FloatMatrix ders[nsd];
+  FloatArray temp(nsd+1); // allow for weight
+  FloatArray temp2(nsd);
+  IntArray span(nsd);
+  double Jacob;
+  int i,j,l,k,uind,vind;
+	const int d=1;
+	/*
+	IntArray Bin(2,2);      // binomial coefficients from 0 to d=1 
+                          // Bin(n,k)=(n above k)=n!/k!(n-k)! for n>=k>=0
+                          // lower triangle corresponds to Pascal triangle
+													// according to A4.4 it seems that only coefficients in lower triangle except the first column are used
+													*/
+
+  if (gw->knotSpan) {
+    span = *gw->knotSpan;
+  } else {
+    for (i=0; i< nsd; i++) {  // HEHE would be enough to pass i to get access to numberOfControllPoints, degree and knotVector
+      span(i) = this->findSpan (numberOfControllPoints[i], degree[i], lcoords(i), knotVector[i]);
+    }
+  } 
+
+  for (i=0; i< nsd; i++) {  // HEHE would be enough to pass i to get access to degree and knotVector
+    this->DersBasisFuns(1, lcoords(i), span(i), degree[i], knotVector[i], ders[i]);
+  }
+
+  if (nsd == 2) {
+		FloatMatrix Aders[nsd]; // derivatives in each coordinate direction on BSpline
+		FloatMatrix Sders[nsd]; // derivatives in each coordinate direction on NURBS
+		FloatMatrix wders;      // derivatives in w direction on BSpline
+
+		// resizing to (2,2) has nothing common with nsd
+		// it is related to the fact that 0th and 1st derivatives are computed
+		for(i=0;i<nsd;i++){
+			Aders[i].resize(2,2);
+			Sders[i].resize(2,2);
+		}
+		wders.resize(2,2);
+
+		// calculation of jacobian matrix according to A4.4
+		// calculate values and derivatives of nonrational Bspline surface with weights at first (Aders, wders)
+    uind = span(0)-degree[0];
+    for (l=0;l<=degree[1]; l++) {
+      temp.zero();
+      vind = span(1)-degree[1]+l;
+      for (k=0; k<=degree[0]; k++) {
+        temp(0) += ders[0](0,k)*cellgeo.giveVertexCoordinates((vind)*numberOfControllPoints[0]+uind+k+1)->at(1);  // Nu*x
+        temp(1) += ders[0](0,k)*cellgeo.giveVertexCoordinates((vind)*numberOfControllPoints[0]+uind+k+1)->at(2);  // Nu*y
+        temp(2) += ders[0](0,k)*cellgeo.giveVertexCoordinates((vind)*numberOfControllPoints[0]+uind+k+1)->at(3);  // Nu*w
+      }
+      Aders[0](0,0) += ders[1](0,l)*temp(0);  // x = sum Nv*Nu*x
+      Aders[1](0,0) += ders[1](0,l)*temp(1);  // y = sum Nv*Nu*y
+      wders(0,0)   += ders[1](0,l)*temp(2);      // w = sum Nv*Nu*w
+
+      temp.zero();
+      vind = span(1)-degree[1]+l;
+      for (k=0; k<=degree[0]; k++) {
+        temp(0) += ders[0](1,k)*cellgeo.giveVertexCoordinates((vind)*numberOfControllPoints[0]+uind+k+1)->at(1);  // dNu/du*x
+        temp(1) += ders[0](1,k)*cellgeo.giveVertexCoordinates((vind)*numberOfControllPoints[0]+uind+k+1)->at(2);  // dNu/du*y
+        temp(2) += ders[0](1,k)*cellgeo.giveVertexCoordinates((vind)*numberOfControllPoints[0]+uind+k+1)->at(3);  // dNu/du*w
+      }
+      Aders[0](1,0) += ders[1](0,l)*temp(0);  // dx/du=sum Nv*dNu/du*x
+      Aders[1](1,0) += ders[1](0,l)*temp(1);  // dy/du=sum Nv*dNu/du*y
+			wders(1,0)   += ders[1](0,l)*temp(2);      // dw/du=sum Nv*dNu/du*w
+    }
+    for (l=0;l<=degree[1]; l++) {
+      temp.zero();
+      vind = span(1)-degree[1]+l;
+      for (k=0; k<=degree[0]; k++) {
+        temp(0) += ders[0](0,k)*cellgeo.giveVertexCoordinates((vind)*numberOfControllPoints[0]+uind+k+1)->at(1);  // dNv/v*x
+        temp(1) += ders[0](0,k)*cellgeo.giveVertexCoordinates((vind)*numberOfControllPoints[0]+uind+k+1)->at(2);  // dNv/v*y
+        temp(2) += ders[0](0,k)*cellgeo.giveVertexCoordinates((vind)*numberOfControllPoints[0]+uind+k+1)->at(3);  // dNv/v*w
+      }
+      Aders[0](0,1) += ders[1](1,l)*temp(0);  // dx/dv=sum Nu*dNv/dv*x
+      Aders[1](0,1) += ders[1](1,l)*temp(1);  // dy/dv=sum Nu*dNv/dv*y
+      wders(0,1)   += ders[1](1,l)*temp(2);      // dw/dv=sum Nu*dNv/dv*w
+    }
+
+#if 1		
+		// calculate values and derivatives of NURBS surface (A4.4)
+		// since all entries in Pascal triangle up to d=1 are 1, binomial coefficients are ignored
+		for(k=0;k<=d;k++){
+			for(l=0;l<=d-k;l++){
+				temp(0) = Aders[0](k,l);
+				temp(1) = Aders[1](k,l);
+				for(j=1;j<=l;j++){
+					temp(0) -= wders(0,j)*Sders[0](k,l-j); // *Bin(l,j)
+					temp(1) -= wders(0,j)*Sders[1](k,l-j); // *Bin(l,j)
+				}
+				for(i=1;i<=k;i++){
+					temp(0) -= wders(i,0)*Sders[0](k-i,l); // *Bin(k,i)
+					temp(1) -= wders(i,0)*Sders[1](k-i,l); // *Bin(k,i)
+					temp2.zero();
+					for(j=1;j<=l;j++){
+						temp2(0) += wders(i,j)*Sders[0](k-i,l-j); // *Bin(l,j)
+						temp2(1) += wders(i,j)*Sders[1](k-i,l-j); // *Bin(l,j)
+					}
+					temp(0) -= temp2(0); // *Bin(k,i)
+					temp(1) -= temp2(1); // *Bin(k,i)
+				}
+				Sders[0](k,l) = temp(0) / wders(0,0);
+				Sders[1](k,l) = temp(1) / wders(0,0);
+			}
+		}
+#else
+		// optimized version of A4.4 for d=1, binomial coefficients ignored
+		// k=0 l=0 loop
+		Sders[0](0,0) = Aders[0](0,0) / wders(0,0);
+		Sders[1](0,0) = Aders[1](0,0) / wders(0,0);
+		// k=0 l=1 loop
+		Sders[0](0,1) = (Aders[0](0,1)-wders(0,1)*Sders[0](0,0)) / wders(0,0);
+		Sders[1](0,1) = (Aders[1](0,1)-wders(0,1)*Sders[1](0,0)) / wders(0,0);
+		// k=1 l=0 loop
+		Sders[0](1,0) = (Aders[0](1,0)-wders(1,0)*Sders[0](0,0)) / wders(0,0);
+		Sders[1](1,0) = (Aders[1](1,0)-wders(1,0)*Sders[1](0,0)) / wders(0,0);
+#endif
+
+		jacobian(0,0) = Sders[0](1,0);   // dx/du
+		jacobian(0,1) = Sders[1](1,0);   // dy/du
+		jacobian(1,0) = Sders[0](0,1);   // dx/dv
+		jacobian(1,1) = Sders[1](0,1);   // dy/dv
+  } else {
+    OOFEM_ERROR2 ("giveTransformationJacobianMatrix not implemented for nsd = %d", nsd);
+  }
+
+	Jacob = jacobian.giveDeterminant();
+    
+	if(fabs(Jacob) < 1.0e-10){
+		OOFEM_ERROR ("giveTransformationJacobianMatrix - zero Jacobian");
+	}
+    
+  return Jacob;
+}
+
+
 
 IRResultType IGAElement::initializeFrom(InputRecord *ir) {
   const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
-  IRResultType result;                            // Required by IR_GIVE_FIELD macro
-
+  IRResultType result;                   // Required by IR_GIVE_FIELD macro
 
   int indx, ui,vi, i, numberOfGaussPoints=1;
   double du,dv;
@@ -603,81 +1023,6 @@ IRResultType IGAElement::initializeFrom(InputRecord *ir) {
 
 
 
-void
-IGAElement::drawRawGeometry(oofegGraphicContext &gc)
-{
-
-    WCRec p [ 4 ];
-    GraphicObj *go;
-    FEInterpolation* interp = this->giveInterpolation();
-
-    if ( !gc.testElementGraphicActivity(this) ) {
-        return;
-    }
-
-    EASValsSetLineWidth(OOFEG_RAW_GEOMETRY_WIDTH);
-    EASValsSetColor( gc.getElementColor() );
-    EASValsSetEdgeColor( gc.getElementEdgeColor() );
-    EASValsSetEdgeFlag(TRUE);
-    EASValsSetLayer(OOFEG_RAW_GEOMETRY_LAYER);
-    EASValsSetFillStyle(FILL_HOLLOW);
-
-    numberOfIntegrationRules = this->giveNumberOfIntegrationRules();
-    double** const  knotVector = interp->giveKnotVector();
-    const IntArray *span;
-    IntegrationRule* iRule;
-    int ir, j, nsd = this->giveNsd();
-    FloatArray c[4], cg[4];
-
-    if (nsd == 2) {
-      for (j=0; j<4; j++) {
-        c[j].resize(2);
-        cg[j].resize(2);
-      }
-    } else {
-      OOFEM_ERROR2 ("drawRawGeometry: not implemented for nsd = %d", nsd); 
-    }
-
-
-    // loop over individual integration rules (i.e., knot spans)
-    for (ir=0; ir < numberOfIntegrationRules; ir++) {
-      iRule = this->giveIntegrationRule(ir);
-      span = iRule->giveKnotSpan();
-      if (nsd == 2) {
-
-        // divide span locally to get finer geometry rep.
-        int i,j,k, nseg = 4;
-        double du = (knotVector[0][span->at(1)+1] - knotVector[0][span->at(1)])/ nseg;
-        double dv = (knotVector[1][span->at(2)+1] - knotVector[1][span->at(2)])/ nseg;
-        for (i=1; i<=4; i++) {
-          for (j=1; j<=4; j++) {
-
-            c[0].at(1) = knotVector[0][span->at(1)] + du*(i-1);
-            c[0].at(2) = knotVector[1][span->at(2)] + dv*(j-1);
-            c[1].at(1) = knotVector[0][span->at(1)] + du*i;
-            c[1].at(2) = knotVector[1][span->at(2)] + dv*(j-1);
-            c[2].at(1) = knotVector[0][span->at(1)] + du*i;
-            c[2].at(2) = knotVector[1][span->at(2)] + dv*j;
-            c[3].at(1) = knotVector[0][span->at(1)] + du*(i-1);
-            c[3].at(2) = knotVector[1][span->at(2)] + dv*j;
-            
-            for (k=0;k<4; k++) {
-              interp->local2global (cg[k], c[k], FEIIGAElementGeometryWrapper(this, iRule->giveKnotSpan()), 0.0);
-              p [ k ].x = ( FPNum ) cg[k].at(1);
-              p [ k ].y = ( FPNum ) cg[k].at(2);
-              p [ k ].z = 0.;
-            }
-            go =  CreateQuad3D(p);
-            EGWithMaskChangeAttributes(WIDTH_MASK | FILL_MASK | COLOR_MASK | EDGE_COLOR_MASK | EDGE_FLAG_MASK | LAYER_MASK, go);
-            EGAttachObject(go, ( EObjectP ) this);
-            EMAddGraphicsToModel(ESIModel(), go);
-          }
-        }
-      }
-
-    } // end loop over knot spans (irules)
-}
-
 
 
 
@@ -719,7 +1064,6 @@ int StructuralElementEvaluator::giveIntegrationElementLocalCodeNumbers (IntArray
 
   // first evaluate nonzero basis function mask
 
-
   if (elem->giveInterpolation()->hasSubPatchFormulation()) {
     IGA_IntegrationElement *ee = (IGA_IntegrationElement *)ie;
     elem->giveInterpolation()->giveKnotBasisFuncMask (*ee->giveKnotSpan(), mask) ;
@@ -738,7 +1082,6 @@ int StructuralElementEvaluator::giveIntegrationElementLocalCodeNumbers (IntArray
 }
 
 void PlaneStressStructuralElementEvaluator::computeNMatrixAt (FloatMatrix& answer, GaussPoint* gp) {
-  
   int i, nDofMan;
   FloatArray N;
   FEInterpolation* interp = gp->giveElement()->giveInterpolation();
@@ -758,7 +1101,6 @@ void PlaneStressStructuralElementEvaluator::computeNMatrixAt (FloatMatrix& answe
 }
 
 void PlaneStressStructuralElementEvaluator::computeBMatrixAt (FloatMatrix& answer, GaussPoint* gp) {
-  
   int i, nDofMan;
   IntArray dofmanSubElementMask;
   FloatMatrix d;
@@ -785,8 +1127,8 @@ void PlaneStressStructuralElementEvaluator::computeBMatrixAt (FloatMatrix& answe
   
 
 void
-StructuralElementEvaluator ::  giveCharacteristicMatrix(FloatMatrix &answer,
-                                                        CharType mtrx, TimeStep *tStep)
+StructuralElementEvaluator :: giveCharacteristicMatrix(FloatMatrix &answer,
+																											 CharType mtrx, TimeStep *tStep)
 //
 // returns characteristics matrix of receiver accordind to mtrx
 //
@@ -873,7 +1215,7 @@ StructuralElementEvaluator :: computeBcLoadVectorAt(FloatArray &answer, TimeStep
             }
             
             //delete elementNodeMask;
-            // delete dofMask;
+            //delete dofMask;
           }
         }
     }
@@ -1003,7 +1345,6 @@ StructuralElementEvaluator :: computeNonForceLoadVector(FloatArray &answer, Time
 
  
 void StructuralElementEvaluator::computeStiffnessMatrix (FloatMatrix& answer, MatResponseMode rMode, TimeStep *tStep) {
-  
   int ir, j, numberOfIntegrationRules;
   FloatMatrix temp, bj, d, dbj;
   IntegrationRule* iRule;
@@ -1071,11 +1412,91 @@ double PlaneStressStructuralElementEvaluator::computeVolumeAround(GaussPoint *gp
   return volume;
 }
 
+
 BsplinePlaneStressElement::BsplinePlaneStressElement (int n, Domain *aDomain) : IGAElement (n, aDomain), PlaneStressStructuralElementEvaluator(), interpolation(2) {}
 
 
-void BsplinePlaneStressElement :: drawScalar(oofegGraphicContext &context)
-{
+
+NURBSPlaneStressElement::NURBSPlaneStressElement (int n, Domain *aDomain) : IGAElement (n, aDomain), PlaneStressStructuralElementEvaluator(), interpolation(2) {}
+
+
+
+#ifdef __OOFEG
+
+void
+IGAElement::drawRawGeometry(oofegGraphicContext &gc) {
+    WCRec p [ 4 ];
+    GraphicObj *go;
+    FEInterpolation* interp = this->giveInterpolation();
+
+    if ( !gc.testElementGraphicActivity(this) ) {
+        return;
+    }
+
+    EASValsSetLineWidth(OOFEG_RAW_GEOMETRY_WIDTH);
+    EASValsSetColor( gc.getElementColor() );
+    EASValsSetEdgeColor( gc.getElementEdgeColor() );
+    EASValsSetEdgeFlag(TRUE);
+    EASValsSetLayer(OOFEG_RAW_GEOMETRY_LAYER);
+    EASValsSetFillStyle(FILL_HOLLOW);
+
+    numberOfIntegrationRules = this->giveNumberOfIntegrationRules();
+    double** const  knotVector = interp->giveKnotVector();
+    const IntArray *span;
+    IntegrationRule* iRule;
+    int ir, j, nsd = this->giveNsd();
+    FloatArray c[4], cg[4];
+
+    if (nsd == 2) {
+      for (j=0; j<4; j++) {
+        c[j].resize(2);
+        cg[j].resize(2);
+      }
+    } else {
+      OOFEM_ERROR2 ("drawRawGeometry: not implemented for nsd = %d", nsd); 
+    }
+
+    // loop over individual integration rules (i.e., knot spans)
+    for (ir=0; ir < numberOfIntegrationRules; ir++) {
+      iRule = this->giveIntegrationRule(ir);
+      span = iRule->giveKnotSpan();
+      if (nsd == 2) {
+
+        // divide span locally to get finer geometry rep.
+        int i,j,k, nseg = 4;
+        double du = (knotVector[0][span->at(1)+1] - knotVector[0][span->at(1)])/ nseg;
+        double dv = (knotVector[1][span->at(2)+1] - knotVector[1][span->at(2)])/ nseg;
+        for (i=1; i<=4; i++) {
+          for (j=1; j<=4; j++) {
+
+            c[0].at(1) = knotVector[0][span->at(1)] + du*(i-1);
+            c[0].at(2) = knotVector[1][span->at(2)] + dv*(j-1);
+            c[1].at(1) = knotVector[0][span->at(1)] + du*i;
+            c[1].at(2) = knotVector[1][span->at(2)] + dv*(j-1);
+            c[2].at(1) = knotVector[0][span->at(1)] + du*i;
+            c[2].at(2) = knotVector[1][span->at(2)] + dv*j;
+            c[3].at(1) = knotVector[0][span->at(1)] + du*(i-1);
+            c[3].at(2) = knotVector[1][span->at(2)] + dv*j;
+            
+            for (k=0;k<4; k++) {
+              interp->local2global (cg[k], c[k], FEIIGAElementGeometryWrapper(this, iRule->giveKnotSpan()), 0.0);
+              p [ k ].x = ( FPNum ) cg[k].at(1);
+              p [ k ].y = ( FPNum ) cg[k].at(2);
+              p [ k ].z = 0.;
+            }
+            go =  CreateQuad3D(p);
+            EGWithMaskChangeAttributes(WIDTH_MASK | FILL_MASK | COLOR_MASK | EDGE_COLOR_MASK | EDGE_FLAG_MASK | LAYER_MASK, go);
+            EGAttachObject(go, ( EObjectP ) this);
+            EMAddGraphicsToModel(ESIModel(), go);
+          }
+        }
+      }
+    } // end loop over knot spans (irules)
+}
+
+
+
+void BsplinePlaneStressElement :: drawScalar(oofegGraphicContext &context) {
     int indx;
     WCRec p [ 4 ];
     GraphicObj *go;
@@ -1090,6 +1511,7 @@ void BsplinePlaneStressElement :: drawScalar(oofegGraphicContext &context)
     }
 
     EASValsSetLayer(OOFEG_VARPLOT_PATTERN_LAYER);
+    EASValsSetFillStyle(FILL_SOLID);
     numberOfIntegrationRules = this->giveNumberOfIntegrationRules();
     double** const  knotVector = interp->giveKnotVector();
     const IntArray *span;
@@ -1110,7 +1532,6 @@ void BsplinePlaneStressElement :: drawScalar(oofegGraphicContext &context)
     if ( ( indx = map.at( context.giveIntVarIndx() ) ) == 0 ) {
       return;
     }
-
 
     // loop over individual integration rules (i.e., knot spans)
     for (ir=0; ir < numberOfIntegrationRules; ir++) {
@@ -1153,6 +1574,91 @@ void BsplinePlaneStressElement :: drawScalar(oofegGraphicContext &context)
           }
         }
       }
-
     } // end loop over knot spans (irules)
 }
+
+
+void NURBSPlaneStressElement :: drawScalar(oofegGraphicContext &context) {
+    int indx;
+    WCRec p [ 4 ];
+    GraphicObj *go;
+    TimeStep *tStep = this->giveDomain()->giveEngngModel()->giveCurrentStep();
+    double s [ 4 ];
+    IntArray map;
+    FEInterpolation* interp = this->giveInterpolation();
+    FloatArray val;
+
+    if ( !context.testElementGraphicActivity(this) ) {
+        return;
+    }
+
+    EASValsSetLayer(OOFEG_VARPLOT_PATTERN_LAYER);
+    EASValsSetFillStyle(FILL_SOLID);
+    numberOfIntegrationRules = this->giveNumberOfIntegrationRules();
+    double** const  knotVector = interp->giveKnotVector();
+    const IntArray *span;
+    IntegrationRule* iRule;
+    int ir, j, nsd = this->giveNsd();
+    FloatArray c[4], cg[4];
+
+    if (nsd == 2) {
+      for (j=0; j<4; j++) {
+        c[j].resize(2);
+        cg[j].resize(2);
+      }
+    } else {
+      OOFEM_ERROR2 ("drawRawGeometry: not implemented for nsd = %d", nsd); 
+    }
+
+    this->giveIntVarCompFullIndx( map, context.giveIntVarType() );
+    if ( ( indx = map.at( context.giveIntVarIndx() ) ) == 0 ) {
+      return;
+    }
+
+    // loop over individual integration rules (i.e., knot spans)
+    for (ir=0; ir < numberOfIntegrationRules; ir++) {
+      iRule = this->giveIntegrationRule(ir);
+      span = iRule->giveKnotSpan();
+      if (nsd == 2) {
+
+        // divide span locally to get finer geometry rep.
+        int i,j,k, nseg = 4;
+        double du = (knotVector[0][span->at(1)+1] - knotVector[0][span->at(1)])/ nseg;
+        double dv = (knotVector[1][span->at(2)+1] - knotVector[1][span->at(2)])/ nseg;
+        for (i=1; i<=4; i++) {
+          for (j=1; j<=4; j++) {
+
+            c[0].at(1) = knotVector[0][span->at(1)] + du*(i-1);
+            c[0].at(2) = knotVector[1][span->at(2)] + dv*(j-1);
+            c[1].at(1) = knotVector[0][span->at(1)] + du*i;
+            c[1].at(2) = knotVector[1][span->at(2)] + dv*(j-1);
+            c[2].at(1) = knotVector[0][span->at(1)] + du*i;
+            c[2].at(2) = knotVector[1][span->at(2)] + dv*j;
+            c[3].at(1) = knotVector[0][span->at(1)] + du*(i-1);
+            c[3].at(2) = knotVector[1][span->at(2)] + dv*j;
+            
+            for (k=0;k<4; k++) {
+              interp->local2global (cg[k], c[k], FEIIGAElementGeometryWrapper(this, iRule->giveKnotSpan()), 0.0);
+              p [ k ].x = ( FPNum ) cg[k].at(1);
+              p [ k ].y = ( FPNum ) cg[k].at(2);
+              p [ k ].z = 0.;
+              // create a dummy ip's
+              FloatArray *cc = new FloatArray;
+              cc->beCopyOf (&c[k]);
+              GaussPoint gp(iRule, 999, cc, 1.0, _PlaneStress);            
+              this->computeStrainVector (val, &gp, tStep);
+              s[k]=val.at(indx);
+            }
+            go =  CreateQuadWD3D(p, s [ 0 ], s [ 1 ], s [ 2 ], s [ 3 ]);
+            EGWithMaskChangeAttributes(WIDTH_MASK | FILL_MASK | COLOR_MASK | EDGE_COLOR_MASK | EDGE_FLAG_MASK | LAYER_MASK, go);
+            EGAttachObject(go, ( EObjectP ) this);
+            EMAddGraphicsToModel(ESIModel(), go);
+          }
+        }
+      }
+    } // end loop over knot spans (irules)
+}
+
+
+
+#endif

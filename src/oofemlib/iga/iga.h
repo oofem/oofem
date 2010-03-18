@@ -66,11 +66,12 @@
 #include "structuralcrosssection.h"
 #include "mathfem.h"
 
-class FEIIGAElementGeometryWrapper : public FEICellGeometry {
- public:
+class FEIIGAElementGeometryWrapper : public FEICellGeometry 
+{
+public:
   const IntArray *knotSpan;
   Element* elem;
- public:
+public:
   FEIIGAElementGeometryWrapper (Element* _elem, const IntArray* _knotSpan) : FEICellGeometry() {
     this->elem = _elem; this->knotSpan = _knotSpan; }
   FEIIGAElementGeometryWrapper (Element* _elem) : FEICellGeometry() {
@@ -155,26 +156,26 @@ public:
 protected:
   /**
      Evaluates the nonvanishing basis functions of 1d BSpline (algorithm A2.2 from NURBS book) 
-     @param i knot span index (zero based) 
+     @param span knot span index (zero based) 
      @param u value at which to evaluate
      @param p degree
      @param U knot vector
-     @param N computed p nonvanishing functions (N_{i-p,p}-N_{i,p})
+     @param N computed p+1 nonvanishing functions (N_{i-p,p}-N_{i,p})
   */
-  void basisFuns (FloatArray &N, int i, double u, int p, const double* U) ;
+  void basisFuns (FloatArray &N, int span, double u, int p, const double* U) ;
   /*
-    Compute nonzero basis functions and their derivatives at u of the B-SPline curve
+    Compute nonzero basis functions and their derivatives at u
     
     For information on the algorithm, see A2.3 on p72 of 
     the NURBS book. The result is stored in the ders matrix, where 
     ders is of size (n+1,deg+1) and the derivative 
-    C'(u) = ders(1,span-deg+j) where j=0...deg
-		C''(u)= ders(2,span-deg+j) where j=0...deg
+		N(u)  = ders(0,span-deg+j) where j=0...deg 
+    N'(u) = ders(1,span-deg+j) where j=0...deg
+		N''(u)= ders(2,span-deg+j) where j=0...deg
     
     @param n  the degree of the derivation
     @param u  the parametric value
 		@param span knot span index (zero based) 
-    //@param  span  the span for the basis functions
     @param deg  the degree of the curve
     @param U  the knot vector on which the Basis functions must be computed.
     @param ders  A matrix containing the derivatives of the curve.
@@ -187,10 +188,10 @@ protected:
 
     Determines the knot span for which there exists non-zero basis 
     functions. The span is the index  k for which the parameter 
-    u is valid in the [u_k,u_{k+1}] range.
+    u is valid in the (u_k,u_{k+1}] range.
     
-    @param n number of control points // HUHU (n+1)
-    @param u  the parametric value
+    @param n number of control points - 1 (number of ctrl pnts = n + 1)
+    @param u the parametric value
     @param p the degree
     @param U knot vector
     @return the span index at u (zero based)
@@ -201,6 +202,54 @@ protected:
   void giveNonzeroBasisFunctIntervalOnCurve (int i, int p, int &s, int &e) {s=i-p; e=i;}
 
 }; // enf of BSplineInterpolation class definition
+
+
+
+class NURBSInterpolation : public BSplineInterpolation  
+{
+public:
+  NURBSInterpolation (int nsd) : BSplineInterpolation (nsd) {}
+  ~NURBSInterpolation();
+
+  /**
+   * Evaluates the array of interpolation functions (shape functions) at given point.
+   * @param answer contains resulting array of evaluated interpolation functions
+   * @param lcoords array containing (local) coordinates
+   * @param cellgeo underlying cell geometry
+   * @param time time
+   *
+   * see also giveNonzeroBasisFunctMask method of BSplineInterpolation
+   */
+  virtual void evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry& cellgeo, double time) ;
+  /**
+   * Evaluates the matrix of derivatives of interpolation functions (shape functions) at given point.
+   * These derivatives are in global coordinate system (where the nodal coordinates are defined)
+   * @param answer contains resulting matrix of derivatives, the member at i,j position contains value of dNi/dxj
+   * @param lcoords array containing (local) coordinates
+   * @param cellgeo underlying cell geometry
+   * @param time time
+   */
+  virtual void evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry& cellgeo, double time) ;
+  /**
+   * Evaluates global coordinates from given local ones
+   * @param answer contains resulting global coordinates
+   * @param lcoords array containing (local) coordinates
+   * @param cellgeo underlying cell geometry
+   * @param time time
+   */
+  virtual void local2global(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry& cellgeo, double time) ;
+  virtual int  global2local(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry& cellgeo, double time) {
+    OOFEM_ERROR ("Not yet inplemented, contact lazy dr for implementation");
+    return 0;
+  }
+  /**
+   * Evaluates the jacobian of transformation between local and global coordinates.
+   */
+  virtual double giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry& cellgeo, double time) ;
+
+  /// Returns class name of the receiver.
+  const char *giveClassName() const { return "NURBSInterpolation"; }
+}; // end of NURBSInterpolation class definition
 
 
 
@@ -227,9 +276,8 @@ public:
 class IGAElement : public Element {
 protected:
   // FEInterpolation interpolation; 
-  //BSplineInterpolation* interpolation; // HUHU
+  //BSplineInterpolation* interpolation; // HUHU HUHU
 public:
-
   IGAElement(int n, Domain *aDomain) : Element (n, aDomain) {}
 
   IRResultType initializeFrom(InputRecord *ir);
@@ -257,8 +305,8 @@ class StructuralElementEvaluator {
   FloatMatrix* rotationMatrix;
  public:
   StructuralElementEvaluator ();
-  virtual void     giveCharacteristicMatrix(FloatMatrix &answer, CharType mtrx, TimeStep *tStep);
-  virtual void  giveCharacteristicVector(FloatArray &answer, CharType type, ValueModeType mode, TimeStep *tStep) {
+  virtual void giveCharacteristicMatrix(FloatMatrix &answer, CharType mtrx, TimeStep *tStep);
+  virtual void giveCharacteristicVector(FloatArray &answer, CharType type, ValueModeType mode, TimeStep *tStep) {
     if ( type == ElementNonForceLoadVector )  {
         this->computeNonForceLoadVector(answer, tStep, mode);
     } else {
@@ -273,17 +321,17 @@ class StructuralElementEvaluator {
   virtual void computeStiffnessMatrix (FloatMatrix& answer, MatResponseMode rMode, TimeStep *tStep);
   virtual double computeVolumeAround(GaussPoint *gp) { return 0.; }
   void  computeNonForceLoadVector(FloatArray &answer, TimeStep *stepN, ValueModeType mode);
-  void                  computeBcLoadVectorAt(FloatArray &answer, TimeStep *, ValueModeType mode);
+  void  computeBcLoadVectorAt(FloatArray &answer, TimeStep *, ValueModeType mode);
   virtual void giveInternalForcesVector(FloatArray &answer,
                                         TimeStep *, int useUpdatedGpRecord = 0) {
     answer.resize(0);
   }
-  void          computeVectorOf(EquationID type, ValueModeType u,
-                                TimeStep *stepN, FloatArray &answer) {
+  void computeVectorOf(EquationID type, ValueModeType u,
+											 TimeStep *stepN, FloatArray &answer) {
     this->giveElement()->computeVectorOf(type, u, stepN, answer);}
-  void          computeVectorOf(PrimaryField &field, ValueModeType u, TimeStep *stepN, FloatArray &answer) {
+  void computeVectorOf(PrimaryField &field, ValueModeType u, TimeStep *stepN, FloatArray &answer) {
     this->giveElement()->computeVectorOf(field, u, stepN, answer);}
-  void                  computeVectorOfPrescribed(EquationID ut, ValueModeType type, TimeStep *stepN, FloatArray &answer) {
+  void computeVectorOfPrescribed(EquationID ut, ValueModeType type, TimeStep *stepN, FloatArray &answer) {
     this->giveElement()->computeVectorOfPrescribed (ut, type, stepN, answer);
   }
   bool   isActivated(TimeStep *atTime) {return true;}
@@ -301,7 +349,7 @@ class StructuralElementEvaluator {
    * rotationMatrix attribute, so rotation matrix is computed only once.
    * @return nonzero if transformation is necessary.
    */
-  virtual int   updateRotationMatrix() {return 0;}    // to be moved from structural element
+  virtual int updateRotationMatrix() {return 0;}    // to be moved from structural element
   /**
    * Assembles the code numbers of given integration element (sub-patch)
    * This is done by obtaining list of nonzero shape functions and
@@ -334,7 +382,6 @@ protected:
   /// Cached transformation matrix of receiver
   FloatMatrix *rotationMatrix; // to be moved from structural element
 
-
   /** Assemble interpolation matrix at given IP
    *  In case of IGAElements, N is assumed to contain only nonzero interpolation functions
    */
@@ -359,16 +406,15 @@ protected:
   BSplineInterpolation interpolation;
 
 public:
-
   BsplinePlaneStressElement(int n, Domain *aDomain);
   IRResultType initializeFrom(InputRecord *ir) {
     IGAElement::initializeFrom(ir);
     //PlaneStressStructuralElementEvaluator::initializeFrom(ir);
     return IRRT_OK;
   }
-  void     giveCharacteristicMatrix(FloatMatrix &answer, CharType mtrx, TimeStep *tStep) {
+  void giveCharacteristicMatrix(FloatMatrix &answer, CharType mtrx, TimeStep *tStep) {
     PlaneStressStructuralElementEvaluator::giveCharacteristicMatrix (answer, mtrx, tStep);}
-  virtual void  giveCharacteristicVector(FloatArray &answer, CharType type, ValueModeType mode, TimeStep *t) {
+  virtual void giveCharacteristicVector(FloatArray &answer, CharType type, ValueModeType mode, TimeStep *t) {
     PlaneStressStructuralElementEvaluator::giveCharacteristicVector(answer, type, mode, t);}
   
   FEInterpolation *giveInterpolation() {return &this->interpolation;}
@@ -376,8 +422,8 @@ public:
   void giveDofManDofIDMask(int inode, EquationID u, IntArray &answer) const {
     PlaneStressStructuralElementEvaluator::giveDofManDofIDMask(inode, u, answer);
   }
-  virtual int            computeNumberOfDofs(EquationID ut) { return numberOfDofMans*2; }
-  void   updateInternalState(TimeStep *stepN) {PlaneStressStructuralElementEvaluator::updateInternalState (stepN);}
+  virtual int computeNumberOfDofs(EquationID ut) { return numberOfDofMans*2; }
+  void updateInternalState(TimeStep *stepN) {PlaneStressStructuralElementEvaluator::updateInternalState (stepN);}
 #ifdef __OOFEG
     //
     // Graphics output
@@ -387,8 +433,41 @@ public:
 
 protected:
   virtual int giveNsd() {return 2;}
-  
+};
 
+
+class NURBSPlaneStressElement : public IGAElement, public PlaneStressStructuralElementEvaluator {
+protected:
+  NURBSInterpolation interpolation;
+
+public:
+  NURBSPlaneStressElement(int n, Domain *aDomain);
+  IRResultType initializeFrom(InputRecord *ir) {
+    IGAElement::initializeFrom(ir);
+    //PlaneStressStructuralElementEvaluator::initializeFrom(ir);
+    return IRRT_OK;
+  }
+  void giveCharacteristicMatrix(FloatMatrix &answer, CharType mtrx, TimeStep *tStep) {
+    PlaneStressStructuralElementEvaluator::giveCharacteristicMatrix (answer, mtrx, tStep);}
+  virtual void giveCharacteristicVector(FloatArray &answer, CharType type, ValueModeType mode, TimeStep *t) {
+    PlaneStressStructuralElementEvaluator::giveCharacteristicVector(answer, type, mode, t);}
+  
+  FEInterpolation *giveInterpolation() {return &this->interpolation;}
+  virtual Element* giveElement() {return this;}
+  void giveDofManDofIDMask(int inode, EquationID u, IntArray &answer) const {
+    PlaneStressStructuralElementEvaluator::giveDofManDofIDMask(inode, u, answer);
+  }
+  virtual int computeNumberOfDofs(EquationID ut) { return numberOfDofMans*2; }
+  void updateInternalState(TimeStep *stepN) {PlaneStressStructuralElementEvaluator::updateInternalState (stepN);}
+#ifdef __OOFEG
+    //
+    // Graphics output
+    //
+  virtual void  drawScalar(oofegGraphicContext &context);
+#endif
+
+protected:
+  virtual int giveNsd() {return 2;}
 };
 
 #endif //iga_h
