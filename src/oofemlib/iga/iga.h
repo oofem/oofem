@@ -276,7 +276,6 @@ public:
 class IGAElement : public Element {
 protected:
   // FEInterpolation interpolation; 
-  //BSplineInterpolation* interpolation; // HUHU HUHU
 public:
   IGAElement(int n, Domain *aDomain) : Element (n, aDomain) {}
 

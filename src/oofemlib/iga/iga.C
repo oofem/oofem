@@ -221,6 +221,7 @@ void BSplineInterpolation::evalN(FloatArray &answer, const FloatArray &lcoords, 
  
 void BSplineInterpolation::evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry& cellgeo, double time) {
   FEIIGAElementGeometryWrapper* gw = (FEIIGAElementGeometryWrapper*) &cellgeo;
+  const FloatArray *vertexCoordsPtr;
   FloatMatrix jacobian(nsd,nsd);
   FloatMatrix ders[nsd];
   FloatArray temp(nsd);
@@ -250,8 +251,9 @@ void BSplineInterpolation::evaldNdx(FloatMatrix &answer, const FloatArray &lcoor
       temp.zero();
       vind = span(1)-degree[1]+l;
       for (k=0; k<=degree[0]; k++) {
-        temp(0) += ders[0](1,k)*cellgeo.giveVertexCoordinates((vind)*numberOfControllPoints[0]+uind+k+1)->at(1);  // Nv*x
-        temp(1) += ders[0](1,k)*cellgeo.giveVertexCoordinates((vind)*numberOfControllPoints[0]+uind+k+1)->at(2);  // Nv*y
+				vertexCoordsPtr = cellgeo.giveVertexCoordinates((vind)*numberOfControllPoints[0]+uind+k+1);
+				temp(0) += ders[0](1,k)*vertexCoordsPtr->at(1);  // Nv*x
+        temp(1) += ders[0](1,k)*vertexCoordsPtr->at(2);  // Nv*y
       }
       jacobian(0,0) += ders[1](0,l)*temp(0);  // dx/du=sum dNu/du*Nv*x
       jacobian(0,1) += ders[1](0,l)*temp(1);  // dy/du=sum dNu/du*Nv*y
@@ -260,8 +262,9 @@ void BSplineInterpolation::evaldNdx(FloatMatrix &answer, const FloatArray &lcoor
       temp.zero();
       vind = span(1)-degree[1]+l;
       for (k=0; k<=degree[0]; k++) {
-        temp(0) += ders[0](0,k)*cellgeo.giveVertexCoordinates((vind)*numberOfControllPoints[0]+uind+k+1)->at(1);  // Nu*x
-        temp(1) += ders[0](0,k)*cellgeo.giveVertexCoordinates((vind)*numberOfControllPoints[0]+uind+k+1)->at(2);  // Nu*y
+				vertexCoordsPtr = cellgeo.giveVertexCoordinates((vind)*numberOfControllPoints[0]+uind+k+1);
+        temp(0) += ders[0](0,k)*vertexCoordsPtr->at(1);  // Nu*x
+        temp(1) += ders[0](0,k)*vertexCoordsPtr->at(2);  // Nu*y
       }
       jacobian(1,0) += ders[1](1,l)*temp(0);  // dx/dv=sum dNv/dv*Nu*x
       jacobian(1,1) += ders[1](1,l)*temp(1);  // dy/dv=sum dNv/dv*Nu*y
@@ -293,6 +296,7 @@ void BSplineInterpolation::evaldNdx(FloatMatrix &answer, const FloatArray &lcoor
 void BSplineInterpolation::local2global(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry& cellgeo, double time) {
   /* Based on SurfacePoint A3.5 implementation*/
   FEIIGAElementGeometryWrapper* gw = (FEIIGAElementGeometryWrapper*) &cellgeo;
+  const FloatArray *vertexCoordsPtr;
   FloatArray temp(nsd);
   FloatArray N[nsd];
   IntArray span(nsd);
@@ -321,8 +325,9 @@ void BSplineInterpolation::local2global(FloatArray &answer, const FloatArray &lc
       for (k=0; k<=degree[0]; k++) {
         //temp(0) = temp(0) + N[0][k]*d->giveNode(nodes.at((uind+k)*numberOfControllPoints[0]+vind))->giveCoordinate(1);
         //temp(1) = temp(1) + N[0][k]*d->giveNode(nodes.at((uind+k)*numberOfControllPoints[0]+vind))->giveCoordinate(2);
-        temp(0) += N[0](k)*cellgeo.giveVertexCoordinates((vind)*numberOfControllPoints[0]+uind+k+1)->at(1);
-        temp(1) += N[0](k)*cellgeo.giveVertexCoordinates((vind)*numberOfControllPoints[0]+uind+k+1)->at(2);
+				vertexCoordsPtr = cellgeo.giveVertexCoordinates((vind)*numberOfControllPoints[0]+uind+k+1);
+        temp(0) += N[0](k)*vertexCoordsPtr->at(1);
+        temp(1) += N[0](k)*vertexCoordsPtr->at(2);
       }
       answer(0) += N[1](l)*temp(0);
       answer(1) += N[1](l)*temp(1);
@@ -335,6 +340,7 @@ void BSplineInterpolation::local2global(FloatArray &answer, const FloatArray &lc
 
 double BSplineInterpolation::giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry& cellgeo, double time) {
   FEIIGAElementGeometryWrapper* gw = (FEIIGAElementGeometryWrapper*) &cellgeo;
+  const FloatArray *vertexCoordsPtr;
   FloatMatrix jacobian(nsd,nsd);
   FloatMatrix ders[nsd];
   FloatArray temp(nsd);
@@ -361,8 +367,9 @@ double BSplineInterpolation::giveTransformationJacobian(const FloatArray &lcoord
       temp.zero();
       vind = span(1)-degree[1]+l;
       for (k=0; k<=degree[0]; k++) {
-        temp(0) += ders[0](1,k)*cellgeo.giveVertexCoordinates((vind)*numberOfControllPoints[0]+uind+k+1)->at(1);
-        temp(1) += ders[0](1,k)*cellgeo.giveVertexCoordinates((vind)*numberOfControllPoints[0]+uind+k+1)->at(2);
+				vertexCoordsPtr = cellgeo.giveVertexCoordinates((vind)*numberOfControllPoints[0]+uind+k+1);
+        temp(0) += ders[0](1,k)*vertexCoordsPtr->at(1);
+        temp(1) += ders[0](1,k)*vertexCoordsPtr->at(2);
       }
       jacobian(0,0) += ders[1](0,l)*temp(0);
       jacobian(0,1) += ders[1](0,l)*temp(1);
@@ -371,8 +378,9 @@ double BSplineInterpolation::giveTransformationJacobian(const FloatArray &lcoord
       temp.zero();
       vind = span(1)-degree[1]+l;
       for (k=0; k<=degree[0]; k++) {
-        temp(0) += ders[0](0,k)*cellgeo.giveVertexCoordinates((vind)*numberOfControllPoints[0]+uind+k+1)->at(1);
-        temp(1) += ders[0](0,k)*cellgeo.giveVertexCoordinates((vind)*numberOfControllPoints[0]+uind+k+1)->at(2);
+				vertexCoordsPtr = cellgeo.giveVertexCoordinates((vind)*numberOfControllPoints[0]+uind+k+1);
+        temp(0) += ders[0](0,k)*vertexCoordsPtr->at(1);
+        temp(1) += ders[0](0,k)*vertexCoordsPtr->at(2);
       }
       jacobian(1,0) += ders[1](1,l)*temp(0);
       jacobian(1,1) += ders[1](1,l)*temp(1);
@@ -563,7 +571,7 @@ void NURBSInterpolation::evalN(FloatArray &answer, const FloatArray &lcoords, co
   FEIIGAElementGeometryWrapper* gw = (FEIIGAElementGeometryWrapper*) &cellgeo;
   FloatArray N[nsd];
   IntArray span(nsd);
-	double sum;
+	double sum,val;
   int count,i,l,k,c,uind,vind;
 
   if (gw->knotSpan) {
@@ -582,22 +590,18 @@ void NURBSInterpolation::evalN(FloatArray &answer, const FloatArray &lcoords, co
   answer.resize(count);
 
   if (nsd == 2) {
+		c=0;
 		sum = 0.0;
     uind = span(0)-degree[0];
     for (l=0;l<=degree[0]; l++) {
 			vind = span(1)-degree[1]+l;
 			for (k=0; k<=degree[1]; k++) {
-				sum += N[0](l)*N[1](k)*cellgeo.giveVertexCoordinates((vind)*numberOfControllPoints[0]+uind+k+1)->at(3);  // Nu*Nv*w
+        answer.at(c++) = val = N[0](l)*N[1](k)*cellgeo.giveVertexCoordinates((vind)*numberOfControllPoints[0]+uind+k+1)->at(3);  // Nu*Nv*w
+				sum += val;
 			}
 		}
 
-		c=0;
-    for (l=0;l<=degree[0]; l++) {
-			vind = span(1)-degree[1]+l;
-			for (k=0; k<=degree[1]; k++) {
-        answer.at(c++) = N[0](l)*N[1](k)*cellgeo.giveVertexCoordinates((vind)*numberOfControllPoints[0]+uind+k+1)->at(3) / sum;
-      }
-    }
+		while(c--)answer.at(c) /= sum;
   }
   else {
     OOFEM_ERROR2 ("evalN not implemented for nsd = %d", nsd);
@@ -609,15 +613,15 @@ void NURBSInterpolation::evalN(FloatArray &answer, const FloatArray &lcoords, co
 void NURBSInterpolation::evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry& cellgeo, double time) {
 
   FEIIGAElementGeometryWrapper* gw = (FEIIGAElementGeometryWrapper*) &cellgeo;
+  const FloatArray *vertexCoordsPtr;
   FloatMatrix jacobian(nsd,nsd);
   FloatMatrix ders[nsd];
   FloatArray temp(nsd+1); // allow for weight
   FloatArray temp2(nsd);
 	FloatArray sum_der(nsd);
 	IntArray span(nsd);
-  double Jacob,sum_tmp,product;
-  int count,cnt,i,j,l,k,uind,vind;
-	const int d=1;
+  double Jacob,sum_tmp,product,w;
+  int count,cnt,i,l,k,uind,vind;
  	/*
 	IntArray Bin(2,2);      // binomial coefficients from 0 to d=1 
                           // Bin(n,k)=(n above k)=n!/k!(n-k)! for n>=k>=0
@@ -660,39 +664,47 @@ void NURBSInterpolation::evaldNdx(FloatMatrix &answer, const FloatArray &lcoords
       temp.zero();
       vind = span(1)-degree[1]+l;
       for (k=0; k<=degree[0]; k++) {
-        temp(0) += ders[0](0,k)*cellgeo.giveVertexCoordinates((vind)*numberOfControllPoints[0]+uind+k+1)->at(1);  // Nu*x
-        temp(1) += ders[0](0,k)*cellgeo.giveVertexCoordinates((vind)*numberOfControllPoints[0]+uind+k+1)->at(2);  // Nu*y
-        temp(2) += ders[0](0,k)*cellgeo.giveVertexCoordinates((vind)*numberOfControllPoints[0]+uind+k+1)->at(3);  // Nu*w
+				vertexCoordsPtr = cellgeo.giveVertexCoordinates((vind)*numberOfControllPoints[0]+uind+k+1);
+				w = vertexCoordsPtr->at(3);
+        temp(0) += ders[0](0,k)*vertexCoordsPtr->at(1)*w;  // Nu*x*w
+        temp(1) += ders[0](0,k)*vertexCoordsPtr->at(2)*w;  // Nu*y*w
+        temp(2) += ders[0](0,k)*w;                         // Nu*w
       }
-      Aders[0](0,0) += ders[1](0,l)*temp(0);  // x = sum Nv*Nu*x
-      Aders[1](0,0) += ders[1](0,l)*temp(1);  // y = sum Nv*Nu*y
+      Aders[0](0,0) += ders[1](0,l)*temp(0);  // x = sum Nv*Nu*x*w
+      Aders[1](0,0) += ders[1](0,l)*temp(1);  // y = sum Nv*Nu*y*w
       wders(0,0)    += ders[1](0,l)*temp(2);  // w = sum Nv*Nu*w
 
       temp.zero();
       vind = span(1)-degree[1]+l;
       for (k=0; k<=degree[0]; k++) {
-        temp(0) += ders[0](1,k)*cellgeo.giveVertexCoordinates((vind)*numberOfControllPoints[0]+uind+k+1)->at(1);  // dNu/du*x
-        temp(1) += ders[0](1,k)*cellgeo.giveVertexCoordinates((vind)*numberOfControllPoints[0]+uind+k+1)->at(2);  // dNu/du*y
-        temp(2) += ders[0](1,k)*cellgeo.giveVertexCoordinates((vind)*numberOfControllPoints[0]+uind+k+1)->at(3);  // dNu/du*w
+				vertexCoordsPtr = cellgeo.giveVertexCoordinates((vind)*numberOfControllPoints[0]+uind+k+1);
+				w = vertexCoordsPtr->at(3);
+        temp(0) += ders[0](1,k)*vertexCoordsPtr->at(1)*w;  // dNu/du*x*w
+        temp(1) += ders[0](1,k)*vertexCoordsPtr->at(2)*w;  // dNu/du*y*w
+        temp(2) += ders[0](1,k)*w;                         // dNu/du*w
       }
-      Aders[0](1,0) += ders[1](0,l)*temp(0);  // dx/du=sum Nv*dNu/du*x
-      Aders[1](1,0) += ders[1](0,l)*temp(1);  // dy/du=sum Nv*dNu/du*y
+      Aders[0](1,0) += ders[1](0,l)*temp(0);  // dx/du=sum Nv*dNu/du*x*w
+      Aders[1](1,0) += ders[1](0,l)*temp(1);  // dy/du=sum Nv*dNu/du*y*w
 			wders(1,0)    += ders[1](0,l)*temp(2);  // dw/du=sum Nv*dNu/du*w
     }
     for (l=0;l<=degree[1]; l++) {
       temp.zero();
       vind = span(1)-degree[1]+l;
       for (k=0; k<=degree[0]; k++) {
-        temp(0) += ders[0](0,k)*cellgeo.giveVertexCoordinates((vind)*numberOfControllPoints[0]+uind+k+1)->at(1);  // dNv/v*x
-        temp(1) += ders[0](0,k)*cellgeo.giveVertexCoordinates((vind)*numberOfControllPoints[0]+uind+k+1)->at(2);  // dNv/v*y
-        temp(2) += ders[0](0,k)*cellgeo.giveVertexCoordinates((vind)*numberOfControllPoints[0]+uind+k+1)->at(3);  // dNv/v*w
+				vertexCoordsPtr = cellgeo.giveVertexCoordinates((vind)*numberOfControllPoints[0]+uind+k+1);
+				w = vertexCoordsPtr->at(3);
+        temp(0) += ders[0](0,k)*vertexCoordsPtr->at(1)*w;  // dNv/v*x*w
+        temp(1) += ders[0](0,k)*vertexCoordsPtr->at(2)*w;  // dNv/v*y*w
+        temp(2) += ders[0](0,k)*w;                         // dNv/v*w
       }
-      Aders[0](0,1) += ders[1](1,l)*temp(0);  // dx/dv=sum Nu*dNv/dv*x
-      Aders[1](0,1) += ders[1](1,l)*temp(1);  // dy/dv=sum Nu*dNv/dv*y
+      Aders[0](0,1) += ders[1](1,l)*temp(0);  // dx/dv=sum Nu*dNv/dv*x*w
+      Aders[1](0,1) += ders[1](1,l)*temp(1);  // dy/dv=sum Nu*dNv/dv*y*w
       wders(0,1)    += ders[1](1,l)*temp(2);  // dw/dv=sum Nu*dNv/dv*w
     }
 		
 #if 1
+    int j;
+    const int d=1;
 		// calculate values and derivatives of NURBS surface (A4.4)
 		// since all entries in Pascal triangle up to d=1 are 1, binomial coefficients are ignored
 		for(k=0;k<=d;k++){
@@ -746,12 +758,13 @@ void NURBSInterpolation::evaldNdx(FloatMatrix &answer, const FloatArray &lcoords
 			temp.zero();
       vind = span(1)-degree[1]+l;  
       for (k=0; k<=degree[0]; k++) {
-        temp(0) += ders[0](0,k)*cellgeo.giveVertexCoordinates((vind)*numberOfControllPoints[0]+uind+k+1)->at(3);  // Nu*weight
-				temp(1) += ders[0](1,k)*cellgeo.giveVertexCoordinates((vind)*numberOfControllPoints[0]+uind+k+1)->at(3);  // dNu/du*weight
+				w = cellgeo.giveVertexCoordinates((vind)*numberOfControllPoints[0]+uind+k+1)->at(3);
+        temp(0) += ders[0](0,k)*w;  // Nu*w
+				temp(1) += ders[0](1,k)*w;  // dNu/du*w
       }
-			sum_tmp    += ders[1](0,l)*temp(0); // sum Nv*Nu*weigth
-			sum_der(0) += ders[1](0,l)*temp(1); // sum Nv*dNu/du*weigth
-			sum_der(1) += ders[1](1,l)*temp(0); // sum dNv/dv*Nu*weight
+			sum_tmp    += ders[1](0,l)*temp(0); // sum Nv*Nu*w
+			sum_der(0) += ders[1](0,l)*temp(1); // sum Nv*dNu/du*w
+			sum_der(1) += ders[1](1,l)*temp(0); // sum dNv/dv*Nu*w
 		}
 
 		product = Jacob * sum_tmp * sum_tmp;
@@ -760,10 +773,12 @@ void NURBSInterpolation::evaldNdx(FloatMatrix &answer, const FloatArray &lcoords
     for (l=0;l<=degree[1]; l++) {
       vind = span(1)-degree[1]+l;  
       for (k=0; k<=degree[0]; k++) {
-				// dNu/du*Nv*weight - sum dNu/du*Nv*weight
-				temp(0) = ders[0](1,k)*ders[1](0,l)*cellgeo.giveVertexCoordinates((vind)*numberOfControllPoints[0]+uind+k+1)->at(3) - sum_der(0);
-				// Nu*dNv/dv*weight - sum Nu*dNv/dv*weight
-				temp(1) = ders[0](0,k)*ders[1](1,l)*cellgeo.giveVertexCoordinates((vind)*numberOfControllPoints[0]+uind+k+1)->at(3) - sum_der(1);
+				w = cellgeo.giveVertexCoordinates((vind)*numberOfControllPoints[0]+uind+k+1)->at(3);
+        // dNu/du*Nv*w*sum(Nv*Nu*w) - Nu*Nv*w*sum(dNu/du*Nv*w)
+        temp(0) = ders[0](1,k)*ders[1](0,l)*w*sum_tmp - ders[0](0,k)*ders[1](0,l)*w*sum_der(0);   
+        // Nu*dNv/dv*w*sum(Nv*Nu*w) - Nu*Nv*w*sum(Nu*dNv/dv*w)
+        temp(1) = ders[0](0,k)*ders[1](1,l)*w*sum_tmp - ders[0](0,k)*ders[1](0,l)*w*sum_der(1);   
+
         answer(cnt,0) = (jacobian(1,1)*temp(0)-jacobian(0,1)*temp(1)) / product;
         answer(cnt,1) = (-jacobian(1,0)*temp(0)+jacobian(0,0)*temp(1)) / product;
         cnt++;
@@ -778,10 +793,11 @@ void NURBSInterpolation::evaldNdx(FloatMatrix &answer, const FloatArray &lcoords
 void NURBSInterpolation::local2global(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry& cellgeo, double time) {
   /* Based on SurfacePoint A4.3 implementation*/
   FEIIGAElementGeometryWrapper* gw = (FEIIGAElementGeometryWrapper*) &cellgeo;
+  const FloatArray *vertexCoordsPtr;
   FloatArray temp(nsd+1); // allow for weight
   FloatArray N[nsd];
   IntArray span(nsd);
-	double weight = 0.0;
+	double w,weight = 0.0;
   int i,l,k,uind,vind;
 
   answer.resize(nsd);
@@ -805,16 +821,15 @@ void NURBSInterpolation::local2global(FloatArray &answer, const FloatArray &lcoo
       temp.zero();
       vind = span(1)-degree[1]+l;  
       for (k=0; k<=degree[0]; k++) {
-        //temp(0) = temp(0) + N[0][k]*d->giveNode(nodes.at((uind+k)*numberOfControllPoints[0]+vind))->giveCoordinate(1);
-        //temp(1) = temp(1) + N[0][k]*d->giveNode(nodes.at((uind+k)*numberOfControllPoints[0]+vind))->giveCoordinate(2);
-        //temp(2) = temp(2) + N[0][k]*d->giveNode(nodes.at((uind+k)*numberOfControllPoints[0]+vind))->giveCoordinate(3);  // weight
-        temp(0) += N[0](k)*cellgeo.giveVertexCoordinates((vind)*numberOfControllPoints[0]+uind+k+1)->at(1);  // Nu*x
-        temp(1) += N[0](k)*cellgeo.giveVertexCoordinates((vind)*numberOfControllPoints[0]+uind+k+1)->at(2);  // Nu*x
-        temp(2) += N[0](k)*cellgeo.giveVertexCoordinates((vind)*numberOfControllPoints[0]+uind+k+1)->at(3);  // Nu*weight
+        vertexCoordsPtr = cellgeo.giveVertexCoordinates((vind)*numberOfControllPoints[0]+uind+k+1);
+        w = vertexCoordsPtr->at(3);
+        temp(0) += N[0](k)*vertexCoordsPtr->at(1)*w;  // Nu*x*w
+        temp(1) += N[0](k)*vertexCoordsPtr->at(2)*w;  // Nu*y*w
+        temp(2) += N[0](k)*w;                         // Nu*w
       }
-      answer(0) += N[1](l)*temp(0);  // x = sum Nv*Nu*x
-      answer(1) += N[1](l)*temp(1);  // y = sum Nv*Nu*y
-      weight    += N[1](l)*temp(2);  // w = sum Nv*Nu*weigth
+      answer(0) += N[1](l)*temp(0);  // x = sum Nv*Nu*x*w
+      answer(1) += N[1](l)*temp(1);  // y = sum Nv*Nu*y*w
+      weight    += N[1](l)*temp(2);  // w = sum Nv*Nu*w
     }
   } else {
     OOFEM_ERROR2 ("local2global not implemented for nsd = %d", nsd);
@@ -829,14 +844,14 @@ double NURBSInterpolation::giveTransformationJacobian(const FloatArray &lcoords,
   // Based on Algorithm A4.4 (p. 137) for d=1
   //
   FEIIGAElementGeometryWrapper* gw = (FEIIGAElementGeometryWrapper*) &cellgeo;
+  const FloatArray *vertexCoordsPtr;
   FloatMatrix jacobian(nsd,nsd);
   FloatMatrix ders[nsd];
   FloatArray temp(nsd+1); // allow for weight
   FloatArray temp2(nsd);
   IntArray span(nsd);
-  double Jacob;
-  int i,j,l,k,uind,vind;
-	const int d=1;
+  double Jacob,w;
+  int i,l,k,uind,vind;
 	/*
 	IntArray Bin(2,2);      // binomial coefficients from 0 to d=1 
                           // Bin(n,k)=(n above k)=n!/k!(n-k)! for n>=k>=0
@@ -876,39 +891,48 @@ double NURBSInterpolation::giveTransformationJacobian(const FloatArray &lcoords,
       temp.zero();
       vind = span(1)-degree[1]+l;
       for (k=0; k<=degree[0]; k++) {
-        temp(0) += ders[0](0,k)*cellgeo.giveVertexCoordinates((vind)*numberOfControllPoints[0]+uind+k+1)->at(1);  // Nu*x
-        temp(1) += ders[0](0,k)*cellgeo.giveVertexCoordinates((vind)*numberOfControllPoints[0]+uind+k+1)->at(2);  // Nu*y
-        temp(2) += ders[0](0,k)*cellgeo.giveVertexCoordinates((vind)*numberOfControllPoints[0]+uind+k+1)->at(3);  // Nu*w
+				vertexCoordsPtr = cellgeo.giveVertexCoordinates((vind)*numberOfControllPoints[0]+uind+k+1);
+				w = vertexCoordsPtr->at(3);
+        temp(0) += ders[0](0,k)*vertexCoordsPtr->at(1)*w;  // Nu*x*w
+        temp(1) += ders[0](0,k)*vertexCoordsPtr->at(2)*w;  // Nu*y*w
+        temp(2) += ders[0](0,k)*w;                         // Nu*w
       }
-      Aders[0](0,0) += ders[1](0,l)*temp(0);  // x = sum Nv*Nu*x
-      Aders[1](0,0) += ders[1](0,l)*temp(1);  // y = sum Nv*Nu*y
-      wders(0,0)   += ders[1](0,l)*temp(2);      // w = sum Nv*Nu*w
+      Aders[0](0,0) += ders[1](0,l)*temp(0);  // x = sum Nv*Nu*x*w
+      Aders[1](0,0) += ders[1](0,l)*temp(1);  // y = sum Nv*Nu*y*w
+      wders(0,0)    += ders[1](0,l)*temp(2);  // w = sum Nv*Nu*w
 
       temp.zero();
       vind = span(1)-degree[1]+l;
       for (k=0; k<=degree[0]; k++) {
-        temp(0) += ders[0](1,k)*cellgeo.giveVertexCoordinates((vind)*numberOfControllPoints[0]+uind+k+1)->at(1);  // dNu/du*x
-        temp(1) += ders[0](1,k)*cellgeo.giveVertexCoordinates((vind)*numberOfControllPoints[0]+uind+k+1)->at(2);  // dNu/du*y
-        temp(2) += ders[0](1,k)*cellgeo.giveVertexCoordinates((vind)*numberOfControllPoints[0]+uind+k+1)->at(3);  // dNu/du*w
+				vertexCoordsPtr = cellgeo.giveVertexCoordinates((vind)*numberOfControllPoints[0]+uind+k+1);
+				w = vertexCoordsPtr->at(3);
+        temp(0) += ders[0](1,k)*vertexCoordsPtr->at(1)*w;  // dNu/du*x*w
+        temp(1) += ders[0](1,k)*vertexCoordsPtr->at(2)*w;  // dNu/du*y*w
+        temp(2) += ders[0](1,k)*w;                         // dNu/du*w
       }
-      Aders[0](1,0) += ders[1](0,l)*temp(0);  // dx/du=sum Nv*dNu/du*x
-      Aders[1](1,0) += ders[1](0,l)*temp(1);  // dy/du=sum Nv*dNu/du*y
-			wders(1,0)   += ders[1](0,l)*temp(2);      // dw/du=sum Nv*dNu/du*w
+      Aders[0](1,0) += ders[1](0,l)*temp(0);  // dx/du=sum Nv*dNu/du*x*w
+      Aders[1](1,0) += ders[1](0,l)*temp(1);  // dy/du=sum Nv*dNu/du*y*w
+			wders(1,0)    += ders[1](0,l)*temp(2);  // dw/du=sum Nv*dNu/du*w
     }
     for (l=0;l<=degree[1]; l++) {
       temp.zero();
       vind = span(1)-degree[1]+l;
       for (k=0; k<=degree[0]; k++) {
-        temp(0) += ders[0](0,k)*cellgeo.giveVertexCoordinates((vind)*numberOfControllPoints[0]+uind+k+1)->at(1);  // dNv/v*x
-        temp(1) += ders[0](0,k)*cellgeo.giveVertexCoordinates((vind)*numberOfControllPoints[0]+uind+k+1)->at(2);  // dNv/v*y
-        temp(2) += ders[0](0,k)*cellgeo.giveVertexCoordinates((vind)*numberOfControllPoints[0]+uind+k+1)->at(3);  // dNv/v*w
+				vertexCoordsPtr = cellgeo.giveVertexCoordinates((vind)*numberOfControllPoints[0]+uind+k+1);
+				w = vertexCoordsPtr->at(3);
+        temp(0) += ders[0](0,k)*vertexCoordsPtr->at(1)*w;  // dNv/v*x*w
+        temp(1) += ders[0](0,k)*vertexCoordsPtr->at(2)*w;  // dNv/v*y*w
+        temp(2) += ders[0](0,k)*w;                         // dNv/v*w
       }
-      Aders[0](0,1) += ders[1](1,l)*temp(0);  // dx/dv=sum Nu*dNv/dv*x
-      Aders[1](0,1) += ders[1](1,l)*temp(1);  // dy/dv=sum Nu*dNv/dv*y
-      wders(0,1)   += ders[1](1,l)*temp(2);      // dw/dv=sum Nu*dNv/dv*w
+      Aders[0](0,1) += ders[1](1,l)*temp(0);  // dx/dv=sum Nu*dNv/dv*x*w
+      Aders[1](0,1) += ders[1](1,l)*temp(1);  // dy/dv=sum Nu*dNv/dv*y*w
+      wders(0,1)    += ders[1](1,l)*temp(2);  // dw/dv=sum Nu*dNv/dv*w
     }
 
 #if 1		
+    int j;
+    const int d=1;
+
 		// calculate values and derivatives of NURBS surface (A4.4)
 		// since all entries in Pascal triangle up to d=1 are 1, binomial coefficients are ignored
 		for(k=0;k<=d;k++){
@@ -986,7 +1010,6 @@ IRResultType IGAElement::initializeFrom(InputRecord *ir) {
   
   // generate individual IntegrationElements; one for each nonzero knot span
   if (this->giveNsd() == 2) {
-    // HUHU mame pristup na numberOfKnotSpans[]?
     this->numberOfIntegrationRules = this->giveInterpolation()->giveNumberOfKnotSpans(1)*this->giveInterpolation()->giveNumberOfKnotSpans(2);
     integrationRulesArray = new IntegrationRule * [ numberOfIntegrationRules ];
     newgpcoords.resize(2);
@@ -1496,6 +1519,8 @@ IGAElement::drawRawGeometry(oofegGraphicContext &gc) {
 
 
 
+// HUHU should be implemented by IGA element (it is the same for Bspline and NURBS)
+
 void BsplinePlaneStressElement :: drawScalar(oofegGraphicContext &context) {
     int indx;
     WCRec p [ 4 ];
@@ -1625,8 +1650,8 @@ void NURBSPlaneStressElement :: drawScalar(oofegGraphicContext &context) {
         int i,j,k, nseg = 4;
         double du = (knotVector[0][span->at(1)+1] - knotVector[0][span->at(1)])/ nseg;
         double dv = (knotVector[1][span->at(2)+1] - knotVector[1][span->at(2)])/ nseg;
-        for (i=1; i<=4; i++) {
-          for (j=1; j<=4; j++) {
+        for (i=1; i<=nseg; i++) {
+          for (j=1; j<=nseg; j++) {
 
             c[0].at(1) = knotVector[0][span->at(1)] + du*(i-1);
             c[0].at(2) = knotVector[1][span->at(2)] + dv*(j-1);
@@ -1658,7 +1683,5 @@ void NURBSPlaneStressElement :: drawScalar(oofegGraphicContext &context) {
       }
     } // end loop over knot spans (irules)
 }
-
-
 
 #endif
