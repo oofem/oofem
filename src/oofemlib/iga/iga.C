@@ -1247,15 +1247,36 @@ StructuralElementEvaluator :: computeBcLoadVectorAt(FloatArray &answer, TimeStep
 }
 
 
+
+
 void
-StructuralElementEvaluator :: computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *stepN)
+StructuralElementEvaluator :: computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *stepN) 
+{
+  FloatArray u;
+  Element* elem=this->giveElement();
+
+
+  elem->computeVectorOf(EID_MomentumBalance, VM_Total, stepN, u);
+    
+  /*
+  // substract initial displacements, if defined
+  if (initialDisplacements) u.substract(initialDisplacements);
+  */
+  if ( this->updateRotationMatrix() ) {
+    u.rotatedWith(this->rotationMatrix, 'n');
+  }
+  this->computeStrainVector(answer, gp, stepN, u); 
+}
+
+void
+StructuralElementEvaluator :: computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *stepN, FloatArray& u)
 // Computes the vector containing the strains at the Gauss point gp of
 // the receiver, at time step stepN. The nature of these strains depends
 // on the element's type.
 {
   int i;
     FloatMatrix b;
-    FloatArray u, ur;
+    FloatArray ur;
     Element* elem=this->giveElement();
 
     if (!this->isActivated(stepN)) {
@@ -1264,15 +1285,6 @@ StructuralElementEvaluator :: computeStrainVector(FloatArray &answer, GaussPoint
       return;}
 
     this->computeBMatrixAt(b, gp);
-    elem->computeVectorOf(EID_MomentumBalance, VM_Total, stepN, u);
-
-    /*
-    // substract initial displacements, if defined
-    if (initialDisplacements) u.substract(initialDisplacements);
-    */
-    if ( this->updateRotationMatrix() ) {
-        u.rotatedWith(this->rotationMatrix, 'n');
-    }
 
     // get local code numbers corresponding to ir
     IntArray lc;
@@ -1281,6 +1293,10 @@ StructuralElementEvaluator :: computeStrainVector(FloatArray &answer, GaussPoint
     for (i=1; i<=lc.giveSize(); i++) ur.at(i) = u.at(lc.at(i));
 
     answer.beProductOf(b, ur);
+
+    // debug print
+    if ((gp->giveNumber()==1) && (gp->giveIntegrationRule()->giveNumber() == 1)) fprintf (stderr, "+");
+
     return;
 }
 
@@ -1292,31 +1308,73 @@ StructuralElementEvaluator :: computeStressVector(FloatArray &answer, GaussPoint
 // on the element's type.
 // this version assumes TOTAL LAGRANGE APPROACH
 {
-    /*
-     * StructuralCrossSection* cs = (StructuralCrossSection*) this->giveCrossSection();
-     * FloatArray totalEpsilon;
-     * // FloatArray *help;
-     *
-     *
-     * this->computeStrainVector(totalEpsilon, gp,stepN) ;
-     * cs->giveRealStresses (answer, ReducedForm, gp,totalEpsilon,stepN);
-     *
-     * return ;
-     */
-    FloatArray Epsilon;
-    Element* elem=this->giveElement();
-    StructuralCrossSection *cs = ( StructuralCrossSection * ) elem->giveCrossSection();
+  FloatArray Epsilon;
+  Element* elem=this->giveElement();
+  StructuralCrossSection *cs = ( StructuralCrossSection * ) elem->giveCrossSection();
+  
+  this->computeStrainVector(Epsilon, gp, stepN);
+  cs->giveRealStresses(answer, ReducedForm, gp, Epsilon, stepN);
+  // debug print
+  if ((gp->giveNumber()==1) && (gp->giveIntegrationRule()->giveNumber() == 1)) fprintf (stderr, ".");
+  
+  return;
+} 
 
-    this->computeStrainVector(Epsilon, gp, stepN);
-    cs->giveRealStresses(answer, ReducedForm, gp, Epsilon, stepN);
 
-    return;
+void
+  StructuralElementEvaluator :: computeStressVector(FloatArray &answer, GaussPoint *gp, TimeStep *stepN, FloatArray& u)
+// Computes the vector containing the stresses at the Gauss point gp of
+// the receiver, at time step stepN. The nature of these stresses depends
+// on the element's type.
+// this version assumes TOTAL LAGRANGE APPROACH
+{
+  FloatArray Epsilon;
+  Element* elem=this->giveElement();
+  StructuralCrossSection *cs = ( StructuralCrossSection * ) elem->giveCrossSection();
+  
+  this->computeStrainVector(Epsilon, gp, stepN, u);
+  cs->giveRealStresses(answer, ReducedForm, gp, Epsilon, stepN);
+  // debug print
+  if ((gp->giveNumber()==1) && (gp->giveIntegrationRule()->giveNumber() == 1)) fprintf (stderr, ".");
+  
+  return;
 }
 
 void
 StructuralElementEvaluator :: updateInternalState(TimeStep *stepN)
 // Updates the receiver at end of step.
 {
+
+  FloatArray u;
+  Element* elem=this->giveElement();
+
+
+  elem->computeVectorOf(EID_MomentumBalance, VM_Total, stepN, u);
+    
+  /*
+  // substract initial displacements, if defined
+  if (initialDisplacements) u.substract(initialDisplacements);
+  */
+  if ( this->updateRotationMatrix() ) {
+    u.rotatedWith(this->rotationMatrix, 'n');
+  }
+  
+  
+  int i, j;
+  IntegrationRule *iRule;
+  FloatArray stress;
+  
+  // force updating strains & stresses
+  for ( i = 0; i < elem->giveNumberOfIntegrationRules(); i++ ) {
+    iRule = elem->giveIntegrationRule(i);
+    for ( j = 0; j < iRule->getNumberOfIntegrationPoints(); j++ ) {
+      computeStressVector(stress, iRule->getIntegrationPoint(j), stepN, u);
+    }
+  }
+
+
+  /* 
+     // Original unoptimized version
     int i, j;
     IntegrationRule *iRule;
     FloatArray stress;
@@ -1329,6 +1387,7 @@ StructuralElementEvaluator :: updateInternalState(TimeStep *stepN)
           computeStressVector(stress, iRule->getIntegrationPoint(j), stepN);
         }
     }
+  */
 }
 
 
@@ -1489,8 +1548,8 @@ IGAElement::drawRawGeometry(oofegGraphicContext &gc) {
         int i,j,k, nseg = 4;
         double du = (knotVector[0][span->at(1)+1] - knotVector[0][span->at(1)])/ nseg;
         double dv = (knotVector[1][span->at(2)+1] - knotVector[1][span->at(2)])/ nseg;
-        for (i=1; i<=4; i++) {
-          for (j=1; j<=4; j++) {
+        for (i=1; i<=nseg; i++) {
+          for (j=1; j<=nseg; j++) {
 
             c[0].at(1) = knotVector[0][span->at(1)] + du*(i-1);
             c[0].at(2) = knotVector[1][span->at(2)] + dv*(j-1);
@@ -1568,8 +1627,8 @@ void BsplinePlaneStressElement :: drawScalar(oofegGraphicContext &context) {
         int i,j,k, nseg = 4;
         double du = (knotVector[0][span->at(1)+1] - knotVector[0][span->at(1)])/ nseg;
         double dv = (knotVector[1][span->at(2)+1] - knotVector[1][span->at(2)])/ nseg;
-        for (i=1; i<=4; i++) {
-          for (j=1; j<=4; j++) {
+        for (i=1; i<=nseg; i++) {
+          for (j=1; j<=nseg; j++) {
 
             c[0].at(1) = knotVector[0][span->at(1)] + du*(i-1);
             c[0].at(2) = knotVector[1][span->at(2)] + dv*(j-1);
@@ -1619,11 +1678,14 @@ void NURBSPlaneStressElement :: drawScalar(oofegGraphicContext &context) {
 
     EASValsSetLayer(OOFEG_VARPLOT_PATTERN_LAYER);
     EASValsSetFillStyle(FILL_SOLID);
+    EASValsSetEdgeFlag(FALSE);
     numberOfIntegrationRules = this->giveNumberOfIntegrationRules();
     double** const  knotVector = interp->giveKnotVector();
     const IntArray *span;
     IntegrationRule* iRule;
     int ir, j, nsd = this->giveNsd();
+    int numberOfKnotSpans_u = interp->giveNumberOfKnotSpans(1);
+    int numberOfKnotSpans_v = interp->giveNumberOfKnotSpans(2);
     FloatArray c[4], cg[4];
 
     if (nsd == 2) {
@@ -1662,11 +1724,28 @@ void NURBSPlaneStressElement :: drawScalar(oofegGraphicContext &context) {
             c[3].at(1) = knotVector[0][span->at(1)] + du*(i-1);
             c[3].at(2) = knotVector[1][span->at(2)] + dv*j;
             
+
+            /*
+            c[0].at(1) +=du/10.; 
+            c[0].at(2) +=dv/10.; 
+            c[1].at(1) -=du/10.;
+            c[1].at(2) +=dv/10.;
+            c[2].at(1) -= du/10.; 
+            c[2].at(2) -= dv/10.; 
+            c[3].at(1) += du/10.; 
+            c[3].at(2) -= dv/10.; 
+            */
             for (k=0;k<4; k++) {
+
+              // test if sampling gp falls on patch boundary; if yes-> move it slightly inside
+              
               interp->local2global (cg[k], c[k], FEIIGAElementGeometryWrapper(this, iRule->giveKnotSpan()), 0.0);
               p [ k ].x = ( FPNum ) cg[k].at(1);
               p [ k ].y = ( FPNum ) cg[k].at(2);
               p [ k ].z = 0.;
+
+
+
               // create a dummy ip's
               FloatArray *cc = new FloatArray;
               cc->beCopyOf (&c[k]);
@@ -1674,6 +1753,9 @@ void NURBSPlaneStressElement :: drawScalar(oofegGraphicContext &context) {
               this->computeStrainVector (val, &gp, tStep);
               s[k]=val.at(indx);
             }
+            if (  (isnan(s[0])) || (isnan(s[1])) || (isnan(s[2])) || (isnan(s[3]))) continue;
+            if (  (fabs(s[0])>1.e5) || (fabs(s[1])>1.e5) || (fabs(s[2])>1.e5) || (fabs(s[3])>1.e5)) continue;
+            //printf ("QWD: %e %e %e %e\n", s [ 0 ], s [ 1 ], s [ 2 ], s [ 3 ]);
             go =  CreateQuadWD3D(p, s [ 0 ], s [ 1 ], s [ 2 ], s [ 3 ]);
             EGWithMaskChangeAttributes(WIDTH_MASK | FILL_MASK | COLOR_MASK | EDGE_COLOR_MASK | EDGE_FLAG_MASK | LAYER_MASK, go);
             EGAttachObject(go, ( EObjectP ) this);
