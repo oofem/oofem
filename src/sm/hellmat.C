@@ -12,8 +12,6 @@
 #include <string.h>
 #endif
 
-#ifdef __TM_MODULE
-
 #include "gausspnt.h"
 #include "timestep.h"
 #include "loadtime.h"
@@ -26,6 +24,9 @@
 #include "contextioerr.h"
 
 namespace oofem {
+
+
+#ifdef __TM_MODULE
 
 // --------- class AgingIsoLEMaterial implementation---------
 AgingIsoLEMaterial :: AgingIsoLEMaterial(int n, Domain *d, double E, double nu) : IsotropicLinearElasticMaterial(n, d, E, nu) { }

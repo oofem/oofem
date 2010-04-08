@@ -15,22 +15,23 @@
 #include <string.h>
 #endif
 
-
-#ifdef __TM_MODULE
-
 // oofem includes
- // cltypes.h entry: classType HellmichMaterialStatusClass, HellmichMaterialClass
 #include "flotarry.h"
 #include "flotmtrx.h"
 #include "structuralms.h"
 #include "structuralmaterial.h"
 #include "isolinearelasticmaterial.h"
 
+#ifdef __TM_MODULE
 // Hellmat includes
 #include "../tm/hemotkmat.h"      // for inverse sorption isotherm function
 #include "hydram.h"                      // hydration model
+#endif
 
 namespace oofem {
+
+
+#ifdef __TM_MODULE
 
 class GaussPoint;
 
@@ -799,7 +800,6 @@ protected:
 };
 
 #else // #ifdef __TM_MODULE
-#include "structuralmaterial.h"
 
 class HellmichMaterial : public StructuralMaterial
 {
