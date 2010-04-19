@@ -100,8 +100,7 @@ public:
      * @param t time
      * @return load time function value
      */
-    virtual double    __accelAt(double) { _error("accelAt: not supported");
-                                          return 0.; }
+    virtual double    __accelAt(double) { return 0.; }
 };
 
 } // end namespace oofem
