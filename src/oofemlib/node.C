@@ -793,7 +793,7 @@ void Node :: drawYourself(oofegGraphicContext &gc)
  #ifdef __PARALLEL_MODE
         sprintf( num, "%d(%d)", this->giveNumber(), this->giveGlobalNumber() );
  #else
-        sprintf( num, "%d", this->giveNumber() );
+        sprintf( num, "%d", this->giveLabel() );
  #endif
         go = CreateAnnText3D(p, num);
         EGWithMaskChangeAttributes(COLOR_MASK | LAYER_MASK, go);
