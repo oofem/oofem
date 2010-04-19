@@ -49,6 +49,7 @@
 #include "timestep.h"
 #include "flotmtrx.h"
 //#include "nlinearstatic.h"
+#include "structengngmodel.h"
 #include "mathfem.h"
 // includes for ddc - not very clean (NumMethod knows what is "node" and "dof")
 #include "node.h"
@@ -263,23 +264,16 @@ restart:
             //F->negated();
         }
 
-        //
-        // convergency check
-        //
+        // evaluate residual of momentum balance
         rhs = RT;
         rhs.substract(F);
-
-        //
-        // compute forceError
-        //
-        // err is relative error of unbalanced forces
         // account for quasi BC
         for ( int ii = 1; ii <= numberOfPrescribedDofs; ii++ ) {
-            rhs.at( prescribedEqs.at(ii) ) = 0.0;
+          rhs.at( prescribedEqs.at(ii) ) = 0.0;
         }
-
-
-        converged = this->checkConvergence(RT, rhs, deltaR, * r, RRT, nite, errorOutOfRangeFlag, tNow);
+        
+        // convergency check
+        converged = this->checkConvergence(RT, *F, rhs, deltaR, *r, RRT, nite, errorOutOfRangeFlag, tNow);
 
 
         if ( ( nite >= nsmax ) || errorOutOfRangeFlag ) {
@@ -816,7 +810,7 @@ NRSolver :: printState(FILE *outputStream)
 
 #if 1
 bool
-NRSolver :: checkConvergence(FloatArray &RT, FloatArray &rhs, FloatArray &deltaR, FloatArray &r,
+NRSolver :: checkConvergence(FloatArray &RT, FloatArray &F,FloatArray &rhs,  FloatArray &deltaR, FloatArray &r,
                              double RRT, int nite, bool &errorOutOfRange, TimeStep *tNow)
 {
     int _dg, _idofman, _ielem, _idof, _eq, _ndof, _ng = nccdg;
@@ -834,12 +828,22 @@ NRSolver :: checkConvergence(FloatArray &RT, FloatArray &rhs, FloatArray &deltaR
     int i;
     // HUHU hard wired domain no 1
     PetscNatural2LocalOrdering *n2l = engngModel->givePetscContext(1, ut)->giveN2Lmap();
+    PetscNatural2LocalOrdering *n2l_prescribed = engngModel->givePetscContext(1, ut)->giveN2LPrescribedmap();
   #endif
  #endif
 
+    /*
+      The force arrors are (if possible) evaluated as relative errors.
+      If the norm of applied load vector is zero (one may load by temperature, etc)
+      then the norm of reaction forces is used in relative norm evaluation.
+      
+      Note: This is done only when all dofs are included (nccdg = 0). Not implemented if 
+      multiple convergence criteia are used.
+
+    */
+
     answer = true;
     errorOutOfRange = false;
-
 
     if ( _ng > 0 ) {
         // zero error norms per group
@@ -1014,7 +1018,44 @@ NRSolver :: checkConvergence(FloatArray &RT, FloatArray &rhs, FloatArray &deltaR
         if ( ( RRT ) > nrsolver_ERROR_NORM_SMALL_NUM ) {
             forceErr = sqrt( forceErr / ( RRT ) );
         } else {
-            forceErr = sqrt(forceErr); // absolute norm
+          // load vector norm close to zero
+          // try to take norm of reactions instead
+          //
+          FloatArray reactions;
+          int i, di = 1; // hard wired domain index =  1
+          // ask emodel to evaluate reactions
+          ((StructuralEngngModel *)engngModel)->computeReactions(reactions, tNow, di);
+          // compute corresponding norm
+          double RN;
+
+#ifdef __PARALLEL_MODE
+ #ifdef __PETSC_MODULE
+          double myRN = 0.0;
+          for ( i = 1; i <= reactions.giveSize(); i++ ) {
+            if ( n2l_prescribed->giveNewEq(i) ) {
+              myRN += reactions.at(i) * reactions.at(i);
+            }
+          }
+
+          // account for quasi bc reactions
+          for (i = 1; i <= numberOfPrescribedDofs; i++ ) {
+            myRN += F.at(prescribedEqs.at(i)) * F.at(prescribedEqs.at(i));
+          }
+
+          MPI_Allreduce(& myRN, & RN, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
+ #endif
+#else
+          RN = dotProduct(reactions, reactions, reactions.giveSize());
+          // account for quasi bc reactions
+          for (i = 1; i <= numberOfPrescribedDofs; i++ ) {
+            RN+= F.at(prescribedEqs.at(i)) * F.at(prescribedEqs.at(i));
+          }
+#endif
+          if ( RN > nrsolver_ERROR_NORM_SMALL_NUM ) {
+            forceErr = sqrt( forceErr / ( RN ) );
+          } else {
+            forceErr = sqrt(forceErr); // absolute norm as last resort
+          }
         }
 
         //

@@ -64,16 +64,19 @@ class Domain;
 class EngngModel;
 
 /**
- * This class implements the class NumericalMethod instance Newton-Raphson Method
+ * This class implements Newton-Raphson Method, derived from abstract NumericalMethod class
  * for solving non-linear problems.
- * Implements direct displacement controll without requiring BC applied.
- * EXPERIMENTAL!
- * This is achieved by adding a large number alpha to the corresponding
+ * Except the traditional load control, it also provides direct displacement control without
+ * requiring BC applied,
+ * so that the equation renumbering is not required when combining arc-length and Newton-Raphson 
+ * solvers within a simulation.
+ *
+ * The direct displacement control is achieved by adding a large number alpha to the corresponding
  * diagonal member of K and replacing the right-hand side by alpha*prescribed_value.
- * If alpha is very much larger than other stiffness corefficients then this alteration
+ * If alpha is very much larger than other stiffness coefficients then this alteration
  * effectively replaces the corresponding equation by
  * alpha*unknown_value = alpha*prescribed_value
- * that is, the reqyuired condition, but the whole system remains symmetric and minimal
+ * that is, the required condition, but the whole system remains symmetric and minimal
  * changes are necessary in the computational sequence.
  * The above artifice has been introduced by Payne and Irons.
  */
@@ -270,7 +273,7 @@ protected:
     void applyConstraintsToStiffness(SparseMtrx *k);
     void applyConstraintsToLoadIncrement(int nite, const SparseMtrx *k, FloatArray &R,
                                          referenceLoadInputModeType rlm, TimeStep *atTime);
-    bool checkConvergence(FloatArray &RT, FloatArray &F, FloatArray &deltaR, FloatArray &r,
+    bool checkConvergence(FloatArray &RT, FloatArray &F, FloatArray& rhs, FloatArray &deltaR, FloatArray &r,
                           double RRT, int nite, bool &errorOutOfRange, TimeStep *tNow);
 };
 
