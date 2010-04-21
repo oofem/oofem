@@ -233,7 +233,8 @@ IDNLMaterial :: computeDamageParam(double &omega, double kappa, const FloatArray
 
 
 void
-IDNLMaterial :: NonlocalMaterialStiffnessInterface_addIPContribution(SparseMtrx &dest, GaussPoint *gp, TimeStep *atTime)
+IDNLMaterial :: NonlocalMaterialStiffnessInterface_addIPContribution(SparseMtrx &dest, const UnknownNumberingScheme &s, 
+                                                                     GaussPoint *gp, TimeStep *atTime)
 {
     double coeff;
     IDNLMaterialStatus *status = ( IDNLMaterialStatus * ) this->giveStatus(gp);
@@ -245,14 +246,14 @@ IDNLMaterial :: NonlocalMaterialStiffnessInterface_addIPContribution(SparseMtrx 
 
     FloatMatrix contrib;
 
-    if ( this->giveLocalNonlocalStiffnessContribution(gp, loc, lcontrib, atTime) == 0 ) {
+    if ( this->giveLocalNonlocalStiffnessContribution(gp, loc, s, lcontrib, atTime) == 0 ) {
         return;
     }
 
     for ( pos = list->begin(); pos != list->end(); ++pos ) {
         rmat = ( IDNLMaterial * ) ( ( * pos ).nearGp )->giveMaterial();
         if ( rmat->giveClassID() == this->giveClassID() ) {
-            rmat->giveRemoteNonlocalStiffnessContribution( ( * pos ).nearGp, rloc, rcontrib, atTime );
+          rmat->giveRemoteNonlocalStiffnessContribution( ( * pos ).nearGp, rloc, s, rcontrib, atTime );
             coeff = gp->giveElement()->computeVolumeAround(gp) * ( * pos ).weight / status->giveIntegrationScale();
             //   printf ("\nelement %d:", gp->giveElement()->giveNumber());
             //   lcontrib.printYourself();
@@ -381,7 +382,8 @@ IDNLMaterial :: NonlocalMaterialStiffnessInterface_showSparseMtrxStructure(Gauss
 
 
 int
-IDNLMaterial :: giveLocalNonlocalStiffnessContribution(GaussPoint *gp, IntArray &loc, FloatArray &lcontrib, TimeStep *atTime)
+IDNLMaterial :: giveLocalNonlocalStiffnessContribution(GaussPoint *gp, IntArray &loc, const UnknownNumberingScheme &s, 
+                                                       FloatArray &lcontrib, TimeStep *atTime)
 {
     int nrows, nsize, i, j;
     double sum, f, equivStrain;
@@ -451,12 +453,16 @@ IDNLMaterial :: giveLocalNonlocalStiffnessContribution(GaussPoint *gp, IntArray 
         }
     }
 
+    // request element code numbers
+    elem->giveLocationArray(loc, EID_MomentumBalance, s);
+    
     return 1;
 }
 
 
 void
-IDNLMaterial :: giveRemoteNonlocalStiffnessContribution(GaussPoint *gp, IntArray &rloc, FloatArray &rcontrib, TimeStep *atTime)
+IDNLMaterial :: giveRemoteNonlocalStiffnessContribution(GaussPoint *gp, IntArray &rloc, const UnknownNumberingScheme &s, 
+                                                        FloatArray &rcontrib, TimeStep *atTime)
 {
     int ncols, nsize, i, j;
     double coeff = 0.0, sum;
@@ -466,7 +472,7 @@ IDNLMaterial :: giveRemoteNonlocalStiffnessContribution(GaussPoint *gp, IntArray
     FloatMatrix b, de, den, princDir(3, 3), t;
     FloatArray stress, fullStress, strain, principalStress, help, nu;
 
-    // elem->giveLocationArray(rloc, EID_MomentumBalance);
+    elem->giveLocationArray(rloc, EID_MomentumBalance, s);
     // no support for reduced integration now
     elem->computeBmatrixAt(gp, b);
 

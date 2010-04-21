@@ -374,7 +374,7 @@ public:
      * Adds the "nonlocal" contribution to stiffness matrix, to account for nonlocality of
      * material model. Typically, this contribution is obtained by summing up mutual IP contributions.
      */
-    virtual void addNonlocalStiffnessContributions(SparseMtrx &dest, TimeStep *atTime);
+    virtual void addNonlocalStiffnessContributions(SparseMtrx &dest, const UnknownNumberingScheme &s, TimeStep *atTime);
     //@}
 
     /**

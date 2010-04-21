@@ -238,7 +238,8 @@ public:
     /**@name Services required by NonlocalMaterialStiffnessInterface and related ones to support Nonlocal Stiffness*/
     //@{
     /// compute and add IP contributions to destination matrix
-    virtual void NonlocalMaterialStiffnessInterface_addIPContribution(SparseMtrx &dest, GaussPoint *gp, TimeStep *atTime);
+    virtual void NonlocalMaterialStiffnessInterface_addIPContribution(SparseMtrx &dest, const UnknownNumberingScheme &s, 
+                                                                      GaussPoint *gp, TimeStep *atTime);
     /**
      * Returns integration list of receiver. Contains localIntegrationRecord structures, containing
      * references to integration points and their weights that influence to nonlocal average in
@@ -249,17 +250,21 @@ public:
      * Computes the "local" part of nonlocal stiffness contribution assembled for given integration point.
      * @param gp source integration point
      * @param loc local code numbers
+     * @param s determines the equation numbering scheme
      * @param lcontrib "local" contribution
      * @return nonzero if local point contributes (loading) or zero if not (unloading in elastic range, elastic)
      */
-    int     giveLocalNonlocalStiffnessContribution(GaussPoint *gp, IntArray &loc, FloatArray &lcontrib, TimeStep *atTime);
+    int     giveLocalNonlocalStiffnessContribution(GaussPoint *gp, IntArray &loc, const UnknownNumberingScheme &s, 
+                                                   FloatArray &lcontrib, TimeStep *atTime);
     /**
      * Computes the "remote" part of nonlocal stiffness contribution assembled for given integration point.
      * @param gp remote integration point
      * @param loc remote element code numbers
+     * @param s determines the equation numbering scheme
      * @param rcontrib "remote" contribution
      */
-    void     giveRemoteNonlocalStiffnessContribution(GaussPoint *gp, IntArray &rloc, FloatArray &rcontrib, TimeStep *atTime);
+    void     giveRemoteNonlocalStiffnessContribution(GaussPoint *gp, IntArray &rloc, const UnknownNumberingScheme &s, 
+                                                     FloatArray &rcontrib, TimeStep *atTime);
     /**
      * Computes elastic stiffness for normal stress components
      * @param answer result of size (3,3)

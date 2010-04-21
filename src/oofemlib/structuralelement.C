@@ -1814,7 +1814,7 @@ StructuralElement :: giveNonlocalLocationArray(IntArray &locationArray, const Un
 
 
 void
-StructuralElement :: addNonlocalStiffnessContributions(SparseMtrx &dest, TimeStep *atTime)
+StructuralElement :: addNonlocalStiffnessContributions(SparseMtrx &dest, const UnknownNumberingScheme &s, TimeStep *atTime)
 {
     /*
      * TODO:
@@ -1835,7 +1835,7 @@ StructuralElement :: addNonlocalStiffnessContributions(SparseMtrx &dest, TimeSte
         IntegrationRule *iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
         // loop over element IP
         for ( int i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
-            interface->NonlocalMaterialStiffnessInterface_addIPContribution(dest, iRule->getIntegrationPoint(i), atTime);
+          interface->NonlocalMaterialStiffnessInterface_addIPContribution(dest, s, iRule->getIntegrationPoint(i), atTime);
         }
     }
 }

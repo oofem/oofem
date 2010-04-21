@@ -1087,7 +1087,7 @@ NonLinearStatic :: assemble(SparseMtrx *answer, TimeStep *tStep, EquationID ut, 
         // add nonlocal contribution
         int ielem, nelem = domain->giveNumberOfElements();
         for ( ielem = 1; ielem <= nelem; ielem++ ) {
-            ( ( StructuralElement * ) ( domain->giveElement(ielem) ) )->addNonlocalStiffnessContributions(* answer, tStep);
+          ( ( StructuralElement * ) ( domain->giveElement(ielem) ) )->addNonlocalStiffnessContributions(* answer, s, tStep);
         }
 
         // print storage statistics
