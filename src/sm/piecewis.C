@@ -62,7 +62,8 @@ double PiecewiseLinFunction :: __at(double time)
             return values.at(i);
         } else if ( dates.at(i) > time ) {
             if ( i == 1 ) {
-                return 0.;
+              OOFEM_WARNING ("PiecewiseLinFunction :: __at: time out of range, extrapolating value(s)");
+              return 0.;
             }
 
             xa = dates.at(i - 1);
