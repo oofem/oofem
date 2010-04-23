@@ -205,6 +205,7 @@
 #include "poiexportmodule.h"
 #include "homexportmodule.h"
 #include "dmexportmodule.h"
+#include "gpexportmodule.h"
 
 // nonlocal barriers
 #include "polylinenonlocalbarrier.h"
@@ -822,6 +823,8 @@ ExportModule *CreateUsrDefExportModuleOfType(char *aClass, EngngModel *emodel)
         answer = new HOMExportModule(emodel);
     } else if (! strncasecmp(aClass,"dm",2)) {
    	answer = new DofManExportModule(emodel);
+    } else if (! strncasecmp(aClass,"gp",2)) {
+   	answer = new GPExportModule(emodel);
     }
 #endif //__SM_MODULE
 
