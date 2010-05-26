@@ -537,11 +537,11 @@ int EngngModel :: giveNumberOfPrescribedEquations(EquationID) {
     // conditions in to system and this may results into increased number of
     // equations.
     //
-    if ( equationNumberingCompleted ) {
-        return numberOfPrescribedEquations;
+    if ( !equationNumberingCompleted ) {
+      this->forceEquationNumbering();
     }
 
-    return this->forceEquationNumbering();
+    return numberOfPrescribedEquations;
 }
 
 int EngngModel :: giveNumberOfDomainEquations(int id, EquationID) {
@@ -551,11 +551,9 @@ int EngngModel :: giveNumberOfDomainEquations(int id, EquationID) {
     // conditions into the system and this may results into increased number of
     // equations.
     //
-    if ( equationNumberingCompleted ) {
-        return domainNeqs.at(id);
+    if ( !equationNumberingCompleted ) {
+      this->forceEquationNumbering();
     }
-
-    this->forceEquationNumbering();
     return domainNeqs.at(id);
 }
 
