@@ -34,6 +34,7 @@
  */
 
 #include "exportmodulemanager.h"
+#include "modulemanager.h"
 #include "engngm.h"
 #include "exportmodule.h"
 #include "strreader.h"
@@ -49,84 +50,29 @@
 
 namespace oofem {
 
-ExportModuleManager :: ExportModuleManager(EngngModel *emodel)
+  ExportModuleManager :: ExportModuleManager(EngngModel *emodel) : ModuleManager<ExportModule> (emodel)
 {
-    this->emodel = emodel;
-
-    moduleList = new AList< ExportModule >(0);
-    numberOfModules = 0;
 }
 
 ExportModuleManager :: ~ExportModuleManager()
 {
-    delete moduleList;
 }
 
-ExportModule *
-ExportModuleManager :: giveExportModule(int num)
-// Returns the n-th module.
-{
-    ExportModule *elem = NULL;
-
-    if ( moduleList->includes(num) ) {
-        elem = moduleList->at(num);
-    } else {
-        OOFEM_ERROR2("ExportModuleManager::giveOuputModule: No module no. %d defined", num);
-    }
-
-    return elem;
-}
-
-int
-ExportModuleManager :: instanciateYourself(DataReader *dr, InputRecord *ir)
-{
-    const char *__proc = "instanciateYourself"; // Required by IR_GIVE_FIELD macro
-    IRResultType result;                     // Required by IR_GIVE_FIELD macro
-
-    int i;
-    char name [ MAX_NAME_LENGTH ];
-    ExportModule *module;
-    InputRecord *mir;
-
-    //this->initializeFrom (ir);
-
-    // read modules
-    moduleList->growTo(numberOfModules);
-    for ( i = 0; i < numberOfModules; i++ ) {
-        mir = dr->giveInputRecord(DataReader :: IR_expModuleRec, i + 1);
-        result = mir->giveRecordKeywordField(name, MAX_NAME_LENGTH);
-        if ( result != IRRT_OK ) {
-            IR_IOERR(giveClassName(), __proc, IFT_RecordIDField, "", mir, result);
-        }
-
-        // read type of module
-        module = CreateUsrDefExportModuleOfType(name, emodel);
-        if ( module == NULL ) {
-            OOFEM_ERROR2("ExportModuleManager::instanciateYourself: unknown module (%s)", name);
-        }
-
-        module->initializeFrom(mir);
-        moduleList->put(i + 1, module);
-    }
-
-#  ifdef VERBOSE
-    VERBOSE_PRINT0("Instanciated output modules ", nnode)
-#  endif
-    return 1;
+IRResultType 
+ExportModuleManager::initializeFrom(InputRecord *ir) {
+  const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
+  IRResultType result;                // Required by IR_GIVE_FIELD macro
+  
+  this->numberOfModules = 0;
+  IR_GIVE_OPTIONAL_FIELD(ir, numberOfModules, IFT_ExportModuleManager_nmodules, "nmodules"); // Macro
+  return IRRT_OK;
 }
 
 
-IRResultType
-ExportModuleManager ::  initializeFrom(InputRecord *ir)
-{
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
 
-    this->numberOfModules = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, numberOfModules, IFT_ExportModuleManager_nmodules, "nmodules"); // Macro
-    return IRRT_OK;
+ExportModule* ExportModuleManager::CreateModuleOfType (char *name, EngngModel *emodel) {
+   return CreateUsrDefExportModuleOfType(name, emodel); 
 }
-
 
 void
 ExportModuleManager :: doOutput(TimeStep *tStep)
@@ -134,7 +80,7 @@ ExportModuleManager :: doOutput(TimeStep *tStep)
     int i;
 
     for ( i = 1; i <= numberOfModules; i++ ) {
-        this->giveExportModule(i)->doOutput(tStep);
+      ((ExportModule*)this->giveModule(i))->doOutput(tStep);
     }
 }
 
@@ -144,7 +90,7 @@ ExportModuleManager :: initialize()
     int i;
 
     for ( i = 1; i <= numberOfModules; i++ ) {
-        this->giveExportModule(i)->initialize();
+        ((ExportModule*)this->giveModule(i))->initialize();
     }
 }
 
@@ -155,7 +101,7 @@ ExportModuleManager :: terminate()
     int i;
 
     for ( i = 1; i <= numberOfModules; i++ ) {
-        this->giveExportModule(i)->terminate();
+        ((ExportModule*)this->giveModule(i))->terminate();
     }
 }
 

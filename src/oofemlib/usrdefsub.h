@@ -62,6 +62,8 @@
 #include "geneigvalsolvertype.h"
 #include "errorestimatortype.h"
 #include "enrichmentitem.h"
+#include "exportmodule.h"
+#include "initmodule.h"
 
 #include "errorestimator.h"
 #ifdef __PARALLEL_MODE
@@ -167,6 +169,13 @@ ErrorEstimator *CreateUsrDefErrorEstimator(ErrorEstimatorType type, int number, 
  */
 ExportModule *CreateUsrDefExportModuleOfType(char *name, EngngModel *emodel);
 
+/**
+ * Creates new Instance of Initialization Module of given name.
+ * @param name determines Init module type
+ * @param emodel engn model associated to new export module
+ * @return newly allocated object of requested type, null if keyword not suppported
+ */
+InitModule *CreateUsrDefInitModuleOfType(char *name, EngngModel *emodel);
 
 /**
  * Creates new Instance of Nonlocal Barrier class corresponding to given name.

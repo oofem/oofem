@@ -213,6 +213,7 @@ int main(int argc, char *argv[])
     dr.finish();
 
     problem->checkProblemConsistency();
+    problem->init();
 
     if ( renumberFlag ) {
         problem->setRenumberFlag();

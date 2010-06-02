@@ -831,6 +831,15 @@ ExportModule *CreateUsrDefExportModuleOfType(char *aClass, EngngModel *emodel)
     return answer;
 }
 
+InitModule *CreateUsrDefInitModuleOfType(char *aClass, EngngModel *emodel)
+{
+    InitModule *answer = NULL;
+
+#ifdef __SM_MODULE
+#endif //__SM_MODULE
+
+    return answer;
+}
 
 NonlocalBarrier *CreateUsrDefNonlocalBarrierOfType(char *aClass, int num, Domain *d)
 {

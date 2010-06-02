@@ -43,6 +43,7 @@
 #define exportmodulemanager_h
 
 #include "alist.h"
+#include "modulemanager.h"
 #include "exportmodule.h"
 #include "datareader.h"
 
@@ -59,36 +60,22 @@ class EngngModel;
  * Class representing and implementing ExportModuleManager. It is attribute of EngngModel.
  * It manages the export output modules, which perform module - specific output oprations.
  */
-class ExportModuleManager
+class ExportModuleManager : public ModuleManager <ExportModule>
 {
 private:
-    /// module list
-    AList< ExportModule > *moduleList;
-    /// number of modules
-    int numberOfModules;
-    /// Associated Engineering model.
-    EngngModel *emodel;
-
 public:
     ExportModuleManager(EngngModel *emodel);
     ~ExportModuleManager();
-    /**
-     * Reads receiver description from input stream and creates corresponding modules components accordingly.
-     * It scans input file, each line is assumed to be single record describing particular module.
-     * The record line is converted to lowercase letters.
-     * Corresponding component is created using ofType function.
-     * After new output module object is created, its initializeForm member function is
-     * called with its record as parameter.
-     * @param inputStream input stream with domain description
-     * @initString the e-model record containing export module manager record
-     * @return nonzero if o.k.
-     */
-    int                instanciateYourself(DataReader *dr, InputRecord *ir);
+
     /**
      * Instanciates the receiver from input record. Called from instanciateYourself to initialize yourself
      * from corresponding record. Should be caled before instanciateYourself.
      */
     IRResultType initializeFrom(InputRecord *ir);
+
+    /** Creates new instance of module of given name, belonging to given EngngModel */
+    ExportModule* CreateModuleOfType (char *name, EngngModel *emodel);
+    
     /**
      * Writes the output. Loops over all modules and calls corresponding doOutput module service.
      * @param tStep time step.
@@ -102,15 +89,9 @@ public:
      * Terminates the receiver, the corresponding terminate module services are called.
      */
     void              terminate();
-    const char *giveClassName() const { return "IMLSolver"; }
+    const char *giveClassName() const { return "ExportModuleManager"; }
 
 protected:
-
-    /**
-     * Returns the required module.
-     * @param num module number
-     */
-    ExportModule *giveExportModule(int num);
 };
 
 } // end namespace oofem

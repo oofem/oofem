@@ -83,6 +83,7 @@ enum InputFieldType {
     IFT_MetaStep_nsteps,
 
     IFT_ExportModuleManager_nmodules,
+    IFT_InitModuleManager_nmodules,
 
     IFT_ExportModule_tstepall,
     IFT_ExportModule_tstepstep,

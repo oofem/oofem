@@ -139,6 +139,7 @@ EngngModel :: EngngModel(int i, EngngModel *_master) : domainNeqs(), domainPresc
     pScale                = macroScale;
 
     exportModuleManager   = new ExportModuleManager(this);
+    initModuleManager     = new InitModuleManager(this);
     master                = _master; // master mode by default
     // create context if in master mode; otherwise request context from master
     if ( master ) {
@@ -192,6 +193,7 @@ EngngModel :: EngngModel(int i, char *s, EngngModel *_master) : domainNeqs(), do
     xfemManagerList       = new AList< XfemManager >(0);
 
     exportModuleManager   = new ExportModuleManager(this);
+    initModuleManager     = new InitModuleManager(this);
     master                = _master; // master mode by default
     // create context if in master mode; otherwise request context from master
     if ( master ) {
@@ -244,6 +246,10 @@ EngngModel ::  ~EngngModel()
 
     if ( exportModuleManager ) {
         delete exportModuleManager;
+    }
+
+    if ( initModuleManager ) {
+        delete initModuleManager;
     }
 
     // master deletes the context
@@ -329,6 +335,7 @@ int EngngModel :: instanciateYourself(DataReader *dr, InputRecord *ir, char *dat
     // instanciate receiver
     this->initializeFrom(ir);
     exportModuleManager->initializeFrom(ir);
+    initModuleManager->initializeFrom(ir);
 
     if ( this->nMetaSteps == 0 ) {
         inputReaderFinish = false;
@@ -337,6 +344,8 @@ int EngngModel :: instanciateYourself(DataReader *dr, InputRecord *ir, char *dat
         this->instanciateMetaSteps(dr);
     }
 
+    // instanciate initialization module manager
+    initModuleManager->instanciateYourself(dr, ir);
     // instanciate export module manager
     exportModuleManager->instanciateYourself(dr, ir);
     this->instanciateDomains(dr);
@@ -2255,6 +2264,12 @@ EngngModel :: checkProblemConsistency()
     return result;
 }
 
+
+void
+EngngModel::init()
+{
+  initModuleManager->doInit();
+}
 
 
 #ifdef __PARALLEL_MODE

@@ -52,6 +52,7 @@
 #include "element.h"
 #include "dofmanager.h"
 #include "exportmodulemanager.h"
+#include "initmodulemanager.h"
 #include "field.h"
 #include "fieldmanager.h"
 #include "timer.h"
@@ -287,7 +288,8 @@ protected:
 
     ///Export module manager
     ExportModuleManager *exportModuleManager;
-
+    ///Initialization module manager
+    InitModuleManager *initModuleManager;
 
     /// Domain mode
     problemMode pMode;
@@ -929,6 +931,10 @@ public:
     /** Allows programmer to test problem its internal data, before computation begins.
      * @return nonzero if receiver check is o.k. */
     int checkProblemConsistency();      // returns nonzero if o.k.
+    /** Initializes the receiver state. Default implementation calls initModuleManager::doInit service to
+	invoke initialization by individual init modules.
+    */
+    virtual void init();
 
     /**
      * Prints output of receiver to ouput domain stream, for given time step.
