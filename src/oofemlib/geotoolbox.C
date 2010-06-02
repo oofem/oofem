@@ -92,8 +92,8 @@ Polygon :: testPoint(double x, double y) const
         x2 = p2.coords(0);
         y2 = p2.coords(1);
 
-        if ( y1 < y && y2 >= y ||
-             y2 < y && y1 >= y ) {
+        if ( ((y1 < y) && (y2 >= y)) ||
+             ((y2 < y) && (y1 >= y)) ) {
             if ( x1 + ( y - y1 ) / ( y2 - y1 ) * ( x2 - x1 ) < x ) {
                 oddNODES = !oddNODES;
             }
@@ -1765,8 +1765,8 @@ Graph :: testPoint(node *s, double x, double y) const
             x2 = auxs->next->x;
             y2 = auxs->next->y;
 
-            if ( y1 < y && y2 >= y ||
-                 y2 < y && y1 >= y ) {
+            if ( ((y1 < y) && (y2 >= y)) ||
+                 ((y2 < y) && (y1 >= y)) ) {
                 if ( x1 + ( y - y1 ) / ( y2 - y1 ) * ( x2 - x1 ) < x ) {
                     oddNODES = !oddNODES;
                 }

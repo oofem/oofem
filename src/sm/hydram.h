@@ -143,8 +143,8 @@ public:
 
 // =========== Hydration Model class ============
 
-typedef enum FindRootMethod { frRegula = 1, frBinTree = 2, frMixed = 3 };
-typedef enum MixtureType { mtLafarge = 1, mtHuber = 2, mtC60, mtC100 };
+enum FindRootMethod { frRegula = 1, frBinTree = 2, frMixed = 3 };
+enum MixtureType { mtLafarge = 1, mtHuber = 2, mtC60, mtC100 };
 
 // derived from material to use status services
 class HydrationModel : public Material

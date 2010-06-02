@@ -57,7 +57,7 @@ class GaussPoint;
 #define FINDROOT_SMALLNUM 1e-8
 
 // active plastic surface
-typedef enum ActiveSurface { asNone = 0, asDP = 1, asTC = 2, asCorner = 3 };
+enum ActiveSurface { asNone = 0, asDP = 1, asTC = 2, asCorner = 3 };
 // material options mask {
 typedef unsigned int MaterialOptions;
 // options
