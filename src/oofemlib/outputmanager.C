@@ -168,8 +168,9 @@ OutputManager :: _testDofManOutput(int number)
         // test for particular dofman selection
         dynaList< Range > :: iterator dofmanOutIter;
 
+	int _label = domain->giveDofManager(number)->giveLabel();
         for ( dofmanOutIter = dofman_out.begin(); dofmanOutIter != dofman_out.end(); ++dofmanOutIter ) {
-            if ( ( * dofmanOutIter ).test(number) ) {
+            if ( ( * dofmanOutIter ).test(_label) ) {
                 selected  = 1;
                 break;
             }
@@ -184,10 +185,11 @@ OutputManager :: _testDofManOutput(int number)
     // if selected check exclude list
     dynaList< Range > *list2 = & ( this->dofman_except );
     dynaList< Range > :: iterator dofmanExceptIter;
+    int _label = domain->giveDofManager(number)->giveLabel();
 
     for ( dofmanExceptIter = list2->begin(); dofmanExceptIter != list2->end(); ++dofmanExceptIter ) {
         // test if excluded
-        if ( ( * dofmanExceptIter ).test(number) ) {
+        if ( ( * dofmanExceptIter ).test(_label) ) {
             return 0;
         }
     }
@@ -217,9 +219,10 @@ OutputManager :: _testElementOutput(int number)
     } else {
         // test for particular element selection
         dynaList< Range > :: iterator elemOutIter;
+	int _label = domain->giveDofManager(number)->giveLabel();
 
         for ( elemOutIter = element_out.begin(); elemOutIter != element_out.end(); ++elemOutIter ) {
-            if ( ( * elemOutIter ).test(number) ) {
+            if ( ( * elemOutIter ).test(_label) ) {
                 selected  = 1;
                 break;
             }
@@ -233,10 +236,11 @@ OutputManager :: _testElementOutput(int number)
 
     // if selected check exclude list
     dynaList< Range > :: iterator elemExceptIter;
+    int _label = domain->giveDofManager(number)->giveLabel();
 
     for ( elemExceptIter = element_except.begin(); elemExceptIter != element_except.end(); ++elemExceptIter ) {
         // test if excluded
-        if ( ( * elemExceptIter ).test(number) ) {
+        if ( ( * elemExceptIter ).test(_label) ) {
             return 0;
         }
     }
