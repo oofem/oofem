@@ -382,9 +382,9 @@ CohesiveSurface3d :: initializeFrom (InputRecord* ir)
   // evaluate number of Dof Managers
   numberOfDofMans = dofManArray.giveSize();
   if (numberOfDofMans <=0)
-  	OOFEM_ERROR2 ("CohesiveSurface3d :: initializeFrom: unread nodes: Element %d", this->giveNumber())
-  if (numberOfDofMans==3 & kx==0 & ky==0 & kz==0)
-  	OOFEM_ERROR2 ("CohesiveSurface3d :: initializeFrom: no periodic shift defined: Element %d", this->giveNumber())
+    OOFEM_ERROR2 ("CohesiveSurface3d :: initializeFrom: unread nodes: Element %d", this->giveNumber());
+  if ((numberOfDofMans==3) & (kx==0) & (ky==0) & (kz==0))
+    OOFEM_ERROR2 ("CohesiveSurface3d :: initializeFrom: no periodic shift defined: Element %d", this->giveNumber());
 
 
   // shifts of periodic particles
