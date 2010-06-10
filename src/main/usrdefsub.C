@@ -83,6 +83,7 @@
 #include "truss2d.h"
 #include "trplanstrss.h"
 #include "trplanrot.h"
+#include "trplanrot3d.h"
 #include "libeam2d.h"
 #include "planstrss.h"
 #include "quad1planestrain.h"
@@ -106,6 +107,8 @@
 #include "libeam3d2.h"
 #include "truss1d.h"
 #include "cct.h"
+#include "cct3d.h"
+#include "tr_shell01.h"
 #include "rershell.h"
 #include "interfaceelem2dquad.h"
 #include "interfaceelement1d.h"
@@ -296,6 +299,8 @@ Element *CreateUsrDefElementOfType(char *aClass, int number, Domain *domain)
         newElement = new Quad1PlaneStrain(number, domain);
     } else if ( !strncasecmp(aClass, "trplanestress2d", 12) )   {
         newElement = new TrPlaneStress2d(number, domain);
+    } else if ( !strncasecmp(aClass, "trplanestrrot3d", 14) )   {
+        newElement = new TrPlaneStrRot3d(number, domain);
     } else if ( !strncasecmp(aClass, "trplanestrrot", 12) )   {
         newElement = new TrPlaneStrRot(number, domain);
     } else if ( !strncasecmp(aClass, "qplanestress2d", 12) )   {
@@ -314,6 +319,8 @@ Element *CreateUsrDefElementOfType(char *aClass, int number, Domain *domain)
         newElement = new LSpace(number, domain);
     } else if ( !strncasecmp(aClass, "qspace", 6) )   {
         newElement = new QSpace(number, domain);
+    } else if ( !strncasecmp(aClass, "cctplate3d", 10) )   {
+      newElement = new CCTPlate3d(number, domain);
     } else if ( !strncasecmp(aClass, "cctplate", 8) )   {
         newElement = new CCTPlate(number, domain);
     }
@@ -325,6 +332,8 @@ Element *CreateUsrDefElementOfType(char *aClass, int number, Domain *domain)
         newElement = new Truss2d(number, domain);
     } else if ( !strncasecmp(aClass, "rershell", 8) )   {
         newElement = new RerShell(number, domain);
+    } else if ( !strncasecmp(aClass, "tr_shell01", 10) )   {
+        newElement = new TR_SHELL01(number, domain);
     } else if ( !strncasecmp(aClass, "beam2d", 12) )   {
         newElement = new Beam2d(number, domain);
     } else if ( !strncasecmp(aClass, "beam3d", 12) )   {

@@ -1520,7 +1520,8 @@ StructuralElement :: updateRotationMatrix()
 
     if ( isT_NtoG ) {
         if ( ( !T_NtoG.isSquare() ) ||
-            ( T_NtoG.giveNumberOfRows() != this->computeNumberOfDofs(EID_MomentumBalance) ) ) {
+	     //( T_NtoG.giveNumberOfRows() != this->computeNumberOfDofs(EID_MomentumBalance) ) ) {
+	     ( T_NtoG.giveNumberOfRows() != this->computeNumberOfL2GDofs(EID_MomentumBalance) ) ) {  
             _error("StructuralElement :: updateRotationMatrix - T_NtoG transformation matrix size mismatch");
         }
     }
@@ -1685,9 +1686,9 @@ StructuralElement :: computeGNDofRotationMatrix(FloatMatrix &answer, DofManTrans
     // initialize answer
     int gsize = this->computeGlobalNumberOfDofs(EID_MomentumBalance);
     if ( mode == _toGlobalCS ) {
-        answer.resize(this->computeNumberOfDofs(EID_MomentumBalance), gsize);
+        answer.resize(this->computeNumberOfL2GDofs(EID_MomentumBalance), gsize); 
     } else if ( mode == _toNodalCS ) {
-        answer.resize( gsize, this->computeNumberOfDofs(EID_MomentumBalance) );
+        answer.resize( gsize, this->computeNumberOfL2GDofs(EID_MomentumBalance) ); 
     } else {
         _error("computeGNDofRotationMatrix: unsupported DofManTrasfType value");
     }
@@ -1737,9 +1738,9 @@ StructuralElement :: computeGNLoadRotationMatrix(FloatMatrix &answer, DofManTran
     // initialize answer
     int gsize = this->computeGlobalNumberOfDofs(EID_MomentumBalance);
     if ( mode == _toGlobalCS ) {
-        answer.resize(this->computeNumberOfDofs(EID_MomentumBalance), gsize);
+        answer.resize(this->computeNumberOfL2GDofs(EID_MomentumBalance), gsize);
     } else if ( mode == _toNodalCS ) {
-        answer.resize( gsize, this->computeNumberOfDofs(EID_MomentumBalance) );
+        answer.resize( gsize, this->computeNumberOfL2GDofs(EID_MomentumBalance) );
     } else {
         _error("computeGNDofRotationMatrix: unsupported DofManTrasfType value");
     }

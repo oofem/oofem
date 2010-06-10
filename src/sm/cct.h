@@ -1,4 +1,4 @@
-/* $Header: /home/cvs/bp/oofem/sm/src/cct.h,v 1.5 2003/04/06 14:08:30 bp Exp $ */
+/* $Header: /home/cvs/bp/oofem/oofemlib/src/element.h,v 1.27 2003/04/06 14:08:24 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -33,10 +33,9 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-//   **************************
-//   *** CLASS   CCTPlate   ***
-//   **************************
-
+//   **********************
+//   *** CLASS CCTPlate ***
+//   **********************
 
 #ifndef cct_h
 #define cct_h
@@ -48,8 +47,8 @@
 #include "sprnodalrecoverymodel.h"
 
 namespace oofem {
-
-class CCTPlate : public NLStructuralElement, public LayeredCrossSectionInterface, public ZZNodalRecoveryModelInterface,
+class CCTPlate : public NLStructuralElement,
+    public LayeredCrossSectionInterface, public ZZNodalRecoveryModelInterface,
     public NodalAveragingRecoveryModelInterface, public SPRNodalRecoveryModelInterface
 {
     /*
@@ -61,35 +60,51 @@ class CCTPlate : public NLStructuralElement, public LayeredCrossSectionInterface
      *
      * - calculating its B,D,N matrices and dV.
      */
+
 protected:
     double area;
     int numberOfGaussPoints;
 
 public:
-    CCTPlate(int, Domain *);                        // constructor
-    ~CCTPlate()  { }                                // destructor
+    CCTPlate(int, Domain *);                      // constructor
+    ~CCTPlate() { }                               // destructor
 
-    void               computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep);
-    void               computeMassMatrix(FloatMatrix &answer, TimeStep *tStep)
-    { computeLumpedMassMatrix(answer, tStep); }
-    //    FloatMatrix*       giveJacobianMatrixAt (FloatArray*) ;
-    //    void               printOutputAt (TimeStep*) ;
+protected:
+    integrationDomain giveIntegrationDomain() { return _Triangle; }
+    void computeGaussPoints();
+    void computeBodyLoadVectorAt(FloatArray &answer, Load *, TimeStep *, ValueModeType mode);
+    void computeBmatrixAt(GaussPoint *, FloatMatrix &, int = 1, int = ALL_STRAINS);
+    void computeNmatrixAt(GaussPoint *, FloatMatrix &);
+    //int  computeGtoNRotationMatrix (FloatMatrix&);
+    //void computeTemperatureStrainVectorAt (FloatArray& answer, GaussPoint*, TimeStep*, ValueModeType mode);
 
-    virtual int            computeNumberOfDofs(EquationID ut) { return 9; }
+    virtual double giveArea();
+    virtual void   giveNodeCoordinates(double &x1, double &x2, double &x3,
+                                       double &y1, double &y2, double &y3,
+                                       double *z = NULL);
+
+public:
+    //
+    // definition & identification
+    //
+    const char *giveClassName() const { return "CCTPlate"; }
+    classType    giveClassID()   const { return CCTPlateClass; }
+    IRResultType initializeFrom(InputRecord *ir);
+    Element_Geometry_Type giveGeometryType() const { return EGT_triangle_1; }
+
+    virtual int  computeNumberOfDofs(EquationID ut) { return 9; }
     virtual void giveDofManDofIDMask(int inode, EquationID, IntArray &) const;
 
     // midPlaneNormal computation
     virtual FloatArray *ComputeMidPlaneNormal(GaussPoint *);
 
     // characteristic length in gp (for some material models)
-    double        giveCharacteristicLenght(GaussPoint *, const FloatArray &);
-    double             computeVolumeAround(GaussPoint *);
+    double giveCharacteristicLenght(GaussPoint *, const FloatArray &);
+    double computeVolumeAround(GaussPoint *);
 
-    //
-    // layered cross section support functions
-    //
-    void  computeStrainVectorInLayer(FloatArray &answer, GaussPoint *masterGp,
-                                     GaussPoint *slaveGp, TimeStep *tStep);
+    void computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep);
+    void computeMassMatrix(FloatMatrix &answer, TimeStep *tStep)
+    { computeLumpedMassMatrix(answer, tStep); }
 
     /** Interface requesting service */
     Interface *giveInterface(InterfaceType);
@@ -132,9 +147,10 @@ public:
     /**
      * Evaluates N matrix (interpolation estimated stress matrix).
      */
-    void ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatMatrix &answer, GaussPoint *aGaussPoint,
-                                                             InternalStateType type);
+    void ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatMatrix &answer, GaussPoint *aGaussPoint, InternalStateType type);
     //@}
+
+
     /**
      * @name The element interface required by NodalAveragingRecoveryModel
      */
@@ -165,20 +181,27 @@ public:
     virtual int NodalAveragingRecoveryMI_giveDofManRecordSize(InternalStateType type)
     { return ZZNodalRecoveryMI_giveDofManRecordSize(type); }
     //@}
+
+
     /**
      * @name The element interface required by SPRNodalRecoveryModelInterface
      */
     //@{
     void SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap);
     void SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, int pap);
-    int SPRNodalRecoveryMI_giveDofManRecordSize(InternalStateType type)
+    int  SPRNodalRecoveryMI_giveDofManRecordSize(InternalStateType type)
     { return ZZNodalRecoveryMI_giveDofManRecordSize(type); }
-    int SPRNodalRecoveryMI_giveNumberOfIP();
+    int SPRNodalRecoveryMI_giveNumberOfIP() { return 1; }
     //void SPRNodalRecoveryMI_giveIPValue (FloatArray& answer, int ipNum, InternalStateType type);
     void SPRNodalRecoveryMI_computeIPGlobalCoordinates(FloatArray &coords, GaussPoint *gp);
     SPRPatchType SPRNodalRecoveryMI_givePatchType();
     //@}
 
+    //
+    // layered cross section support functions
+    //
+    void computeStrainVectorInLayer(FloatArray &answer, GaussPoint *masterGp,
+                                    GaussPoint *slaveGp, TimeStep *tStep);
 
     //
     // io routines
@@ -189,26 +212,6 @@ public:
     virtual void  drawScalar(oofegGraphicContext &context);
     //void          drawInternalState (oofegGraphicContext&);
 #endif
-    //
-    //
-    // definition & identification
-    //
-    const char *giveClassName() const { return "CCTPlate"; }
-    classType             giveClassID() const { return CCTPlateClass; }
-    IRResultType initializeFrom(InputRecord *ir);
-    Element_Geometry_Type giveGeometryType() const { return EGT_triangle_1; }
-
-protected:
-    void               computeBodyLoadVectorAt(FloatArray &answer, Load *, TimeStep *, ValueModeType mode);
-    //void          computeTemperatureStrainVectorAt (FloatArray& answer, GaussPoint*, TimeStep*, ValueModeType mode);
-    void               computeBmatrixAt(GaussPoint *, FloatMatrix &, int = 1, int = ALL_STRAINS);
-    void               computeNmatrixAt(GaussPoint *, FloatMatrix &);
-    //  int                computeGtoNRotationMatrix (FloatMatrix&);
-    void               computeGaussPoints();
-    integrationDomain  giveIntegrationDomain() { return _Triangle; }
-
-    virtual double     giveArea();
 };
-
 } // end namespace oofem
 #endif // cct_h

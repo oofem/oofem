@@ -1,4 +1,4 @@
-/* $Header: /home/cvs/bp/oofem/sm/src/trplanrot.h,v 1.4 2003/04/06 14:08:32 bp Exp $ */
+/* $Header: /home/cvs/bp/oofem/oofemlib/src/element.h,v 1.27 2003/04/06 14:08:24 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -33,73 +33,70 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-//   *********************************************************
-//   *** CLASS PLANE STRAIN WITH INDEPENDENT ROTATION FIELD***
-//   *********************************************************
-// 5.5.1995
-//
+
+//   **********************************************************
+//   *** CLASS PLANE STRAIN WITH INDEPENDENT ROTATION FIELD ***
+//   **********************************************************
+//   5.5.1995 / 25.5.2010
+
 #ifndef trplanrot_h
 #define trplanrot_h
 
-
 #include "trplanstrss.h"
 
-namespace oofem {
 
+namespace oofem {
+/**
+ * Class implements an triangular three-node  plane-
+ * stress elasticity finite element with independent rotation field.
+ * Each node has 3 degrees of freedom.
+ */
 class TrPlaneStrRot : public TrPlaneStress2d
 {
-    /*
-     * This class implements an triangular three-node  plane-
-     * stress elasticity finite element with independent rotation field.
-     * Each node has 3 degrees of freedom.
-     *
-     * DESCRIPTION :
-     *
-     * TASKS :
-     *
-     * - calculating its B,D,N matrices and dV.
-     */
-
 protected:
-
     int numberOfRotGaussPoints;
 
 public:
+    TrPlaneStrRot(int, Domain *);          // constructor
+    ~TrPlaneStrRot() { }                   // destructor
 
-    TrPlaneStrRot(int, Domain *);            // constructor
-    ~TrPlaneStrRot();                        // destructor
+protected:
+    integrationDomain giveIntegrationDomain() { return _Triangle; }
+    void computeGaussPoints();
+    void computeBmatrixAt(GaussPoint *, FloatMatrix &, int = 1, int = ALL_STRAINS);
+    void computeNmatrixAt(GaussPoint *, FloatMatrix &);
 
+    virtual double giveArea();
+    virtual void giveNodeCoordinates(FloatArray &x, FloatArray &y);
 
+    void computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, TimeStep *stepN, ValueModeType mode);
+
+public:
+    //
+    // definition & identification
+    //
+    const char *giveClassName() const { return "TrPlaneStrRot"; }
+    classType    giveClassID()   const { return TrPlaneStrRotClass; }
+    IRResultType initializeFrom(InputRecord *ir);
+    MaterialMode giveMaterialMode() { return _Unknown; }
+
+    virtual int  computeNumberOfDofs(EquationID ut) { return 9; }
+    virtual void giveDofManDofIDMask(int inode, EquationID, IntArray &) const;
+
+    // characteristic length in gp (for some material models)
+    double giveCharacteristicLenght(GaussPoint *, const FloatArray &) { return 0.; }
+
+    //
     FloatArray *GivePitch();
     FloatArray *GiveDerivativeUX(GaussPoint *);
     FloatArray *GiveDerivativeVX(GaussPoint *);
     FloatArray *GiveDerivativeUY(GaussPoint *);
     FloatArray *GiveDerivativeVY(GaussPoint *);
-    void           computeStrainVector(FloatArray &answer, GaussPoint *, TimeStep *);
+    void computeStrainVector(FloatArray &answer, GaussPoint *, TimeStep *);
 
-    virtual int            computeNumberOfDofs(EquationID ut) { return 9; }
-    virtual void giveDofManDofIDMask(int inode, EquationID, IntArray &) const;
-
-    // characteristic length in gp (for some material models)
-    double        giveCharacteristicLenght(GaussPoint *, const FloatArray &) { return 0.; }
-
+    //
     virtual int testElementExtension(ElementExtension ext) { return 0; }
     //int    hasEdgeLoadSupport () {return 0;}
-
-
-    // definition & identification
-
-    MaterialMode          giveMaterialMode() { return _Unknown; }
-    const char *giveClassName() const { return "TrPlaneStrRot"; }
-    classType      giveClassID() const { return TrPlaneStrRotClass; }
-    IRResultType initializeFrom(InputRecord *ir);
-
-protected:
-    void           computeBmatrixAt(GaussPoint *, FloatMatrix &, int = 1, int = ALL_STRAINS);
-    void           computeNmatrixAt(GaussPoint *, FloatMatrix &);
-    void           computeGaussPoints();
-    integrationDomain  giveIntegrationDomain() { return _Triangle; }
 };
-
 } // end namespace oofem
 #endif //  trplanrot_h

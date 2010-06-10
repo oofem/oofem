@@ -335,15 +335,25 @@ public:
     void                  computeVectorOfPrescribed(EquationID ut, ValueModeType type, TimeStep *stepN, FloatArray &answer);
     //void                  computeVectorOfPrescribed (UnknownType type, ValueModeType u,
     //                         TimeStep* stepN, FloatArray& answer) ;
+
+
     /**
      * Computes or simply returns total number of element's local dofs.
      * Must be defined by particular element.
      */
     virtual int            computeNumberOfDofs(EquationID ut) { return 0; }
     /**
-     * Computes the total number of element's global dofs (the size of global element contribution).
+     * Computes the total number of element's global dofs. This should be the size of global element contribution, 
+     * including the transformation from global coordinate system to nodal one.
+     * The transition from global cs to nodal one can change the value, as rigid arm and other transfromations could
+     * be included.
      */
     virtual int            computeGlobalNumberOfDofs(EquationID ut);
+    /** 
+     * Returns number of DOFs after transformation from local to global coordinate system, before the
+     * transformation to final nodal coordinate system happens.
+     */
+    virtual int            computeNumberOfL2GDofs(EquationID ut) { return this->computeNumberOfDofs(ut); }
     /**
      * Returns dofmanager dof mask for node. This mask defines the dofs which are used by element
      * in node. Mask influences the code number ordering for particular node. Code numbers are

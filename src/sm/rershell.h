@@ -44,6 +44,8 @@
 
 namespace oofem {
 
+#ifndef __CHARTENSOR // termitovo
+#define __CHARTENSOR
 enum CharTensor {
     LocalStrainTensor,
     GlobalStrainTensor,
@@ -55,7 +57,7 @@ enum CharTensor {
     LocalMomentumTensor,
     GlobalMomentumTensor
 };
-
+#endif
 
 class RerShell : public CCTPlate
 {
