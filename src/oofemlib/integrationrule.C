@@ -92,7 +92,6 @@ IntegrationRule :: clear()
     numberOfIntegrationPoints = 0;
 }
 
-Geometry *IntegrationRule :: giveGeometry(GaussPoint *gp) { return elem->giveGeometry(); }
 
 FEInterpolation *IntegrationRule :: giveInterpolation(GaussPoint *gp) { return elem->giveInterpolation(); }
 

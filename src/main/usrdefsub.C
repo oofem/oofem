@@ -1022,6 +1022,17 @@ BasicGeometry *CreateUsrDefGeometry(char *aClass) {
     return answer;
 }
 
+Patch *CreateUsrDefPatch(Patch::PatchType ptype, Element* e) {
+    Patch *answer = NULL;
+    if ( ptype == Patch::PT_TrianglePatch) {
+      answer = new TrianglePatch(e);
+    } else {
+      OOFEM_ERROR2("CreateUsrDefPatch: Unknown PatchType [%d]", ptype);
+    }
+
+    return answer;
+}
+
 #ifdef __PARALLEL_MODE
 LoadBalancerMonitor *CreateUsrDefLoadBalancerMonitorOfType(classType type, EngngModel *e)
 {

@@ -196,8 +196,6 @@ public:
 
     /** Returns reference to element containing receiver */
     Element *giveElement() { return elem; }
-    /** Returns reference to geometry asscoiated with GaussPoint */
-    Geometry *giveGeometry(GaussPoint *gp);
     /** Returns reference to interpolation asscoiated with GaussPoint */
     FEInterpolation *giveInterpolation(GaussPoint *gp);
     /** Returns the receiver number */

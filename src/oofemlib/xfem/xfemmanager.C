@@ -283,4 +283,12 @@ void XfemManager :: updateIntegrationRule() {
     }
 }
 
+void
+XfemManager::updateGeometry(TimeStep *tStep) {
+  for(int i = 1; i <= this->enrichmentItemList->giveSize(); i++){
+    enrichmentItemList->at(i)->updateGeometry(tStep);
+  }
+}
+
+
 } // end namespace oofem

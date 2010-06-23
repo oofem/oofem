@@ -34,7 +34,7 @@ public:
     void computeStressVector(FloatArray &answer, GaussPoint *gp, TimeStep *stepN);
     void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep);
     void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord);
-    double giveArea();
+    double computeVolume();
 
 #ifdef __OOFEG
     void          drawRawGeometry(oofegGraphicContext &);

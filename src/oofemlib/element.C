@@ -89,7 +89,7 @@
 namespace oofem {
 
 Element :: Element(int n, Domain *aDomain) :
-    FEMComponent(n, aDomain), ElementGeometry(), dofManArray(), bodyLoadArray(), boundaryLoadArray()
+    FEMComponent(n, aDomain), dofManArray(), bodyLoadArray(), boundaryLoadArray()
     // Constructor. Creates an element with number n, belonging to aDomain.
 {
     material           = 0;

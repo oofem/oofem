@@ -846,6 +846,7 @@ contextIOResultType DofManager :: restoreContext(DataStream *stream, ContextMode
     if ( !samedofs ) {
       // delete old dofs
       if ( numberOfDofs ) {
+	i = numberOfDofs;
         while ( i-- ) {
           delete dofArray [ i ];
         }

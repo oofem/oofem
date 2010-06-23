@@ -57,7 +57,8 @@ public:
     /// Checks whether a Geometry is inside or outside
     bool isOutside(BasicGeometry *bg);
     virtual Material *giveMaterial() { return NULL; }
-
+    /// updates receiver geometry to the state reached at given time step
+    virtual void updateGeometry (TimeStep* tStep) {}
 protected:
     /// link to associated xfem manager
     XfemManager *xmanager;

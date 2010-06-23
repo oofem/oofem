@@ -291,6 +291,7 @@ enum classType {
     IntegrationRuleClass,
     GaussIntegrationRuleClass,
     LobattoIntegrationRuleClass,
+    PatchIntegrationRuleClass,
     MicroplaneClass,
 
     FloatArrayClass,

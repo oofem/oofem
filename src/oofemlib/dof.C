@@ -233,16 +233,19 @@ Dof :: saveContext(DataStream *stream, ContextMode mode, void *obj)
         THROW_CIOERR(CIO_IOERR);
     }
 
+    // store dofid
+    int _val = dofID;
+    if ( !stream->write(& _val, 1) ) {
+      THROW_CIOERR(CIO_IOERR);
+    }
+    
+
     if ( mode & CM_Definition ) {
-        int _val = dofID;
+      
+      if ( !stream->write(& number, 1) ) {
+	THROW_CIOERR(CIO_IOERR);
+      }
 
-        if ( !stream->write(& number, 1) ) {
-            THROW_CIOERR(CIO_IOERR);
-        }
-
-        if ( !stream->write(& _val, 1) ) {
-            THROW_CIOERR(CIO_IOERR);
-        }
     }
 
     return CIO_OK;
@@ -252,21 +255,24 @@ Dof :: saveContext(DataStream *stream, ContextMode mode, void *obj)
 contextIOResultType
 Dof :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
 {
-    if ( mode & CM_Definition ) {
-        int _val;
 
-        if ( !stream->read(& number, 1) ) {
-            THROW_CIOERR(CIO_IOERR);
-        }
+  // restore dofid
+  int _val;
+  if ( !stream->read(& _val, 1) ) {
+    THROW_CIOERR(CIO_IOERR);
+  }
+  dofID = ( DofIDItem ) _val;
 
-        if ( !stream->read(& _val, 1) ) {
-            THROW_CIOERR(CIO_IOERR);
-        }
 
-        dofID = ( DofIDItem ) _val;
+  if ( mode & CM_Definition ) {
+    
+    if ( !stream->read(& number, 1) ) {
+      THROW_CIOERR(CIO_IOERR);
     }
-
-    return CIO_OK;
+    
+  }
+  
+  return CIO_OK;
 }
 
 

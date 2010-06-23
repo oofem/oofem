@@ -14,43 +14,10 @@
 
 namespace oofem {
 
-/** Abstract representation for Geometry
- *  gives basic virtual methods for accessing the nodes
+/** Abstract representation of Geometry
+ *  Patch inherits from this class
  */
-
-class Geometry
-{
-public:
-    /// Constructor
-    Geometry() { };
-    /// Destructor
-    ~Geometry() { };
-    /// returns number of nodes
-    virtual int giveNumberOfNodes() { return 0; }
-    /// returns coordinates at a position n
-    virtual FloatArray *giveCoordinates(int n) { return NULL; }
-    virtual void printYourself() { }
-#ifdef __OOFEG
-    virtual void          draw(oofegGraphicContext &gc) { }
-#endif
-};
-
-/** Concrete representation of Geometry
- * Element inherits from this class
- */
-class ElementGeometry : public Geometry
-{
-protected:
-    IntArray nodeNumbers;
-public:
-    ElementGeometry() : Geometry() { }
-    virtual double giveArea() { return 0; }
-};
-
-/** Concrete representation of Geometry
- * Patch inherits from this class
- */
-class BasicGeometry : public Geometry
+class BasicGeometry //: public Geometry
 {
 protected:
     /// List of geometry vertices
@@ -81,6 +48,10 @@ public:
     /// returns number of Geometry vertices
     int giveNrVertices() { return this->vertices->giveSize(); }
     virtual bool isOutside(BasicGeometry *bg) { return NULL; }
+    virtual void printYourself() { }
+#ifdef __OOFEG
+    virtual void          draw(oofegGraphicContext &gc) { }
+#endif
 };
 
 class Line : public BasicGeometry

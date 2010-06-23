@@ -8,8 +8,16 @@
 #include "fei2dtrlin.h"
 #include "crosssection.h"
 #include "enrichmentitem.h"
+#include "datastream.h"
+#include "contextioerr.h"
+#include "geometry.h"
 
 namespace oofem {
+
+Patch :: Patch (Element* parent) : BasicGeometry() {
+  this->parent = parent;
+  this->material = -1;
+}
 
 Patch :: Patch(Element *parent, int material) : BasicGeometry() {
     this->parent = parent;
@@ -20,6 +28,70 @@ Patch :: Patch(Element *parent, AList< FloatArray > *vertices) : BasicGeometry()
     this->parent = parent;
     this->vertices = vertices;
 }
+
+contextIOResultType 
+Patch :: saveContext(DataStream *stream, ContextMode mode, void *obj) 
+{
+    contextIOResultType iores;
+
+    if ( stream == NULL ) {
+        OOFEM_ERROR("saveContex : can't write into NULL stream");
+    }
+
+    // save patch material id
+    if ( !stream->write(& material, 1) ) {
+      THROW_CIOERR(CIO_IOERR);
+    }
+    
+    // save patch vertices
+    int i, _nvert=vertices->giveSize();
+    if ( !stream->write(& _nvert, 1) ) {
+      THROW_CIOERR(CIO_IOERR);
+    }
+    for (i=1; i<=_nvert; i++) {
+      if ( ( iores = vertices->at(i)->storeYourself(stream, mode) ) != CIO_OK ) {
+	THROW_CIOERR(iores);
+      }
+    }
+
+    return CIO_OK;
+}
+
+
+contextIOResultType
+Patch::restoreContext(DataStream *stream, ContextMode mode, void *obj)
+{
+  contextIOResultType iores;
+  
+    if ( stream == NULL ) {
+        OOFEM_ERROR("restoreContex : can't write into NULL stream");
+    }
+
+    // read patch material id
+    if ( !stream->read(& material, 1) ) {
+      THROW_CIOERR(CIO_IOERR);
+    }
+    
+    
+    // restore patch vertices
+    int i, _nvert;
+    if ( !stream->read(& _nvert, 1) ) {
+      THROW_CIOERR(CIO_IOERR);
+    }
+    this->vertices->growTo(_nvert);
+    for (i=1; i<=_nvert; i++) {
+      FloatArray* _arry = new FloatArray();
+      if ( ( iores = _arry->restoreYourself(stream, mode) ) != CIO_OK ) {
+	THROW_CIOERR(iores);
+      } else {
+	this->vertices->put(i, _arry);
+      }
+    }
+
+    return CIO_OK;
+}
+
+
 
 FEI2dTrLin TrianglePatch :: interpolation(1, 2);
 

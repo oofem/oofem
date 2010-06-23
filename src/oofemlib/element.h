@@ -55,7 +55,6 @@
 #include "elementextension.h"
 #include "entityrenumberingscheme.h"
 #include "unknowntype.h"
-#include "geometry.h"
 #include "unknownnumberingscheme.h"
 
 namespace oofem {
@@ -147,7 +146,7 @@ enum elementParallelMode {
  * </UL>
  *
  */
-class Element : public FEMComponent, public ElementGeometry
+class Element : public FEMComponent
 {
 protected:
     /// Number of dofmanagers
@@ -386,6 +385,10 @@ public:
      * @see GaussPoint class
      */
     virtual double        computeVolumeAround(GaussPoint *gp) { return 0.; }
+    /**
+     * Computes the overall volume, area, or length (depending on element dimension) 
+     */
+    virtual double        computeVolume () {return 0.0;}
 
     // data management
     ///Returns (global) number of i-th dofmanager of element
@@ -402,8 +405,6 @@ public:
      * ElementSide class (check is made).
      */
     virtual ElementSide *giveSide(int i) const;
-    /// Returns reference to the associated geometry of element
-    Geometry *giveGeometry() { return NULL; } // rch
     /// Returns interpolation of Element
     virtual FEInterpolation *giveInterpolation() { return NULL; } // rch
     ///Returns reference to the associated material of element.

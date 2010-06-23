@@ -64,6 +64,7 @@
 #include "enrichmentitem.h"
 #include "exportmodule.h"
 #include "initmodule.h"
+#include "patch.h"
 
 #include "errorestimator.h"
 #ifdef __PARALLEL_MODE
@@ -257,6 +258,13 @@ EnrichmentFunction *CreateUsrDefEnrichmentFunction(char *aClass, int num, Domain
  * @return newly allocated object of requested type, null if keyword not suppported
  */
 BasicGeometry *CreateUsrDefGeometry(char *aClass);
+/**
+ * Creates new instance of patch.
+ * @param type id determining the type of new instance
+ * @param e parent element 
+ * @return newly allocated object of requested type, null if keyword not suppported
+ */
+ Patch *CreateUsrDefPatch(Patch::PatchType ptype, Element* e);
 #ifdef __PARALLEL_MODE
 /**
  * Creates new instance of load balance monitor corresponding to given keyword.

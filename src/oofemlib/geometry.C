@@ -8,7 +8,7 @@
 
 namespace oofem {
 
-BasicGeometry::BasicGeometry() : Geometry() {
+BasicGeometry::BasicGeometry() {
     this->vertices = new AList< FloatArray > (0);
 }
 

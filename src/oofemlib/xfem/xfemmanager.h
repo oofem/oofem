@@ -79,7 +79,12 @@ public:
     Domain *giveDomain();
     /// accessor
     IntArray* giveFictPosition(int nodeNumber) {return fictPosition->at(nodeNumber);}
-
+    /// Stores receiver state to output stream.
+    contextIOResultType    saveContext(DataStream *stream, ContextMode mode, void *obj = NULL) {return CIO_OK;}
+    /// Restores the receiver state previously written in stream.
+    contextIOResultType    restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL) {return CIO_OK;}
+    /// geometry update; calls individual enrichment item updateGeometry method
+    void updateGeometry(TimeStep *tStep);
 protected:
     // changes dofIdPos to next index
     DofID allocateNewDofID();
