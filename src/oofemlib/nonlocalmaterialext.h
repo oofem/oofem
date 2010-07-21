@@ -77,7 +77,7 @@ struct localIntegrationRecord {
  * services for manipulating and requesting integration volume are provided.
  * Generally speaking, the nonlocal weight function with "bounded" or limited support is assumed.
  * When nonlocal weight function unbounded support is used, then keeping the list of
- * influencing integration points has no sence (because all integration points in domain participate)
+ * influencing integration points has no sense (because all integration points in domain participate)
  * and should be appropriate not to use afore mentioned list and redefine the
  * MaterialStatus::buildNonlocalPointTable sevice to void service.
  *
@@ -160,6 +160,33 @@ protected:
     IntArray regionMap;
     /// flag indicating whether to keep nonlocal interaction tables of integration points cached
     bool permanentNonlocTableFlag;
+
+  /// type characterizing the nonlocal weight function
+    enum WeightFunctionType {WFT_Unknown, WFT_Bell, WFT_Gauss, WFT_Green, WFT_Uniform, WFT_UniformOverElement};
+  /// parameter specifying the type of nonlocal weight function 
+  WeightFunctionType weightFun;
+
+  /// characteristic length of the nonlocal model
+  /// (its interpretation depends on the type of weight function)
+  double cl;
+
+  /// support radius
+  double suprad;
+
+  /// parameter "m" for "undernonlocal" or "overnonlocal" formulation
+  double mm; 
+
+  /// type characterizing the scaling approach
+  enum ScalingType {ST_Unknown, ST_Standard, ST_Noscaling, ST_Borino}; 
+  /// parameter specifying the type of scaling of nonlocal weight function
+  ScalingType scaling;
+
+  /// type characterizing the averaged (nonlocal) variable
+  enum AveragedVarType {AVT_Unknown, AVT_EqStrain, AVT_Compliance};
+  /// parameter specifying the type of averaged (nonlocal) variable
+  AveragedVarType averagedVar;
+
+
 public:
     /**
      * Constructor. Creates material with given number, belonging to given domain.
@@ -214,13 +241,35 @@ public:
      * Rebuilds the IP list by calling  buildNonlocalPointTable(GaussPoint *gp) if not available
      */
     dynaList< localIntegrationRecord > *giveIPIntegrationList(GaussPoint *gp);
+
     /**
-     * Computes the value of nonlocal weight function in given point.
-     * @param src coordinates of source point.
-     * @param coord coordinates of point, where nonlocal weight function is evaluated.
-     * @return value of weight function.
+     * Evaluates the basic nonlocal weight function for a given distance
+     * between interacting points. This function is NOT normalized by the
+     * condition of unit integral.
+     * @param distance distance between interacting points
+     * @return value of weight function
      */
-    virtual double computeWeightFunction(const FloatArray &src, const FloatArray &coord) = 0;
+    virtual double computeWeightFunction(double distance);
+
+    /**
+     * Evaluates the basic nonlocal weight function for two points
+     * with given coordinates. This function is NOT normalized by the
+     * condition of unit integral.
+     * @param src coordinates of source point
+     * @param coord coordinates of receiver point
+     * @return value of weight function
+     */
+    virtual double computeWeightFunction(const FloatArray &src, const FloatArray &coord);
+
+    /**
+     * Provides the integral of the weight function 
+     * over the contributing volume in 1, 2 or 3D
+     */
+    double giveIntegralOfWeightFunction (const int spatial_dimension);
+
+
+    /// Determines the maximum value of the nonlocal weight function
+    virtual double maxValueOfWeightFunction();
 
     /**
      * Determines the number of material regions of domain.
@@ -241,13 +290,15 @@ public:
     /**
      * Determines the width (radius) of limited support of weighting function
      */
-    virtual void giveSupportRadius(double &radius) { radius = 0.0; }
+    /// Determines the radius of support of the nonlocal weight function
+    /// (i.e., the distance at which the interaction weight becomes zero)  
+    virtual double evaluateSupportRadius();
 
     /// returns reference to domain
     Domain *giveDomain() { return this->domain; }
 
     IRResultType initializeFrom(InputRecord *ir);
-    /** Setups the input record string of receiver
+    /** Sets up the input record string of receiver
      * @param str string to be filled by input record
      * @param keyword print record keyword (default true)
      */

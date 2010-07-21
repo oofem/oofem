@@ -35,6 +35,7 @@
 
 #include "gpexportmodule.h"
 #include "gausspnt.h"
+#include "material.h"
 #include "element.h"
 #include "integrationrule.h"
 
@@ -122,7 +123,7 @@ GPExportModule::doOutput (TimeStep* tStep)
       // write data only for Gauss points with nonzero dissipation 
       //if (dissWork > 1.e-6 * freeEnergy)
       {
-	fprintf (stream, "%d %d %f %f %f ",elem->giveNumber(),j+1,x,y,z);
+	fprintf (stream, "%d %d %d %g %g %g ",elem->giveNumber(),elem->giveMaterial()->giveNumber(),j+1,x,y,z);
 	//fprintf (stream, "%f %f %f ",dissWork,freeEnergy,stressWork);
 	// for CST elements write also nodal coordinates
 	/*
@@ -132,17 +133,17 @@ GPExportModule::doOutput (TimeStep* tStep)
 	    fprintf (stream, "%f %f ",elem->giveNode(inod)->giveCoordinate(1),elem->giveNode(inod)->giveCoordinate(2));
 	}
 	*/
-	//StructuralMaterialStatus* stat = (StructuralMaterialStatus*) gp->giveMaterialStatus();
-	//double eps = stat->giveStrainVector().at(1);
+	StructuralMaterialStatus* stat = (StructuralMaterialStatus*) gp->giveMaterialStatus();
+	double eps = stat->giveStrainVector().at(1);
 	//fprintf (stream, "%f %f %f ",eps,intvar3.at(1),intvar4.at(1));
 	double damage = 0., kappa = 0.;
 	if (intvar3.giveSize()>0)
 	  damage = intvar3.at(1);
 	if (intvar4.giveSize()>0)
 	  kappa = intvar4.at(1);
-	fprintf (stream, "%f %f ",damage,kappa);
+	fprintf (stream, "%g %g %g %g ",eps,damage,kappa,1.-damage);
 	fprintf (stream, "\n");
-	// we have written: element_number, gp_number, x_coordinate, y_coordinate, z_coordinate, damage, kappa
+	// we have written: element_number, mat_number, gp_number, x_coordinate, y_coordinate, z_coordinate, strain, damage, kappa
       }
     }
   }

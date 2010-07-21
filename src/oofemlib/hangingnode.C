@@ -170,10 +170,13 @@ HangingNode :: checkConsistency()
     }
 
     suma = masterContribution->sum();
+    // TEMPORARILY TURNED OFF !!!!
+    /*
     if ( nonzero(suma - 1.0, 10e-9) ) {
         _warning2("checkConsistency: sum of coefficients of master contributions(%.12e) != 1.0", suma);
         result = 0;
     }
+    */
 
     // matching of local and global coordinates
     FloatArray **mnc, coords(3);

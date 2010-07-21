@@ -469,7 +469,8 @@ void
 StressVector :: applyElasticCompliance(StrainVector &strain, const double EModulus, const double nu) const
 {
     //
-    // This function applies the elastic compliance to the total strain vector
+    // This function multiplies the receiver by the elastic compliance matrix
+  // and stores the result in strain
     //
     MaterialMode myMode = giveStressStrainMode();
     if ( myMode == _1dMat ) {

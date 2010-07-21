@@ -101,35 +101,36 @@ ConcreteDPMStatus::printOutputAt (FILE *file, TimeStep* tStep)
 
   // print status flag
   switch (state_flag){
-  case ConcreteDPMStatus::ConcreteDPM_Elastic:
-    fprintf(file,"Elastic, ") ;
+  case ConcreteDPMStatus::ConcreteDPM_Elastic: 
+    fprintf(file,"statusflag 0 (Elastic),") ;
     break ;
-  case ConcreteDPMStatus::ConcreteDPM_Unloading:
-    fprintf(file,"Unloading, ") ;
+  case ConcreteDPMStatus::ConcreteDPM_Unloading: 
+    fprintf(file,"statusflag 1 (Unloading),") ;
     break ;
   case ConcreteDPMStatus::ConcreteDPM_Plastic:
-    fprintf(file,"Plastic, ") ;
+    fprintf(file,"statusflag 2 (Plastic),") ;
     break ;
   case ConcreteDPMStatus::ConcreteDPM_Damage:
-    fprintf(file,"Damage, ") ;
+    fprintf(file,"statusflag 3 (Damage),") ;
     break ;
   case ConcreteDPMStatus::ConcreteDPM_PlasticDamage:
-    fprintf(file,"PlasticDamage, ") ;
+    fprintf(file,"statusflag 4 (PlasticDamage),") ;
     break ;
   case ConcreteDPMStatus::ConcreteDPM_VertexCompression:
-    fprintf(file,"VertexCompression, ") ;
+    fprintf(file,"statusflag 5 (VertexCompression),") ;
     break ;
   case ConcreteDPMStatus::ConcreteDPM_VertexTension:
-    fprintf(file,"VertexTension, ") ;
+    fprintf(file,"statusflag 6 (VertexTension),") ;
     break ;
   case ConcreteDPMStatus::ConcreteDPM_VertexCompressionDamage:
-    fprintf(file,"VertexCompressionDamage, ") ;
+    fprintf(file,"statusflag 7 (VertexCompressionDamage),") ;
     break ;
   case ConcreteDPMStatus::ConcreteDPM_VertexTensionDamage:
-    fprintf(file,"VertexTensionDamage, ") ;
+    fprintf(file,"statusflag 8 (VertexTensionDamage),") ;
     break ;
   }
 
+  /*
   // print plastic strain vector
   StrainVector plasticStrainVector( gp->giveMaterialMode() ) ;
   giveFullPlasticStrainVector(plasticStrainVector) ;
@@ -138,21 +139,17 @@ ConcreteDPMStatus::printOutputAt (FILE *file, TimeStep* tStep)
   int n = plasticStrainVector.giveSize() ;
   for (int i=1 ; i<=n ; i++)
     fprintf (file," % .4e", plasticStrainVector.at(i)) ;
+  */
 
+  // print hardening/softening parameters and damage
+
+  //fprintf (file," kappaP % .4e", kappaP ) ;
+  //fprintf (file,", kappaD % .4e", kappaD ) ;
+  fprintf (file,", kappa % .4e % .4e", kappaP, kappaD ) ;
+  fprintf (file,", damage % .4e", damage ) ;
+
+  // end of record
   fprintf (file,"}\n");
-
-  fprintf (file,"\t\tkappaP ") ;
-  // print hardening parameter
-  fprintf ( file," % .4e\n", kappaP ) ;
-
-  fprintf (file,"\t\tkappaD ") ;
-  // print hardening parameter
-  fprintf ( file," % .4e\n", kappaD ) ;
-
-
-  fprintf (file,"\t\tdamage ") ;
-  // print hardening parameter
-  fprintf ( file," % .4e\n", damage ) ;
 
   return ;
 }
@@ -236,7 +233,64 @@ ConcreteDPMStatus::restoreContext (DataStream* stream, ContextMode mode, void *o
 
   return CIO_OK;
 }
+ 
+int 
+ConcreteDPMStatus::setIPValue 
+(const FloatArray value, InternalStateType type)
+{
+  if (type==IST_DamageScalar){
+    damage = value.at(1);
+    return 1;
+  } 
+  if (type==IST_CumPlasticStrain){
+    kappaP = value.at(1); 
+    return 1;
+  } 
+  if (type==IST_CumPlasticStrain_2){
+    kappaD = value.at(1);
+    return 1;
+  }
+  return 0;
+}
+ 
+/*
+void 
+ConcreteDPMStatus::setStatusVariable (int varID, double value)
+{
+ switch (varID){
+ case 1: damage = value; break;
+ case 2: kappaP = value; break;
+ case 3: kappaD = equivStrain = value; break;
+ case 4: stressVector.at(1) = value; break;
+ case 5: stressVector.at(2) = value; break;
+ case 6: stressVector.at(3) = value; break;
+ case 7: stressVector.at(4) = value; break;
+ case 8: stressVector.at(5) = value; break;
+ case 9: stressVector.at(6) = value; break;
+ default: printf("Warning: unknown variable ID %d in ConcreteDPMStatus::setStatusVariable\n",varID);
+ } 
+}
+*/
 
+void 
+ConcreteDPMStatus::restoreConsistency ()
+{ 
+  ConcreteDPM* mat = (ConcreteDPM*) gp -> giveElement() -> giveMaterial();
+
+  // compute kappaD from damage
+  kappaD = mat -> computeInverseDamage(damage, gp);
+  equivStrain = kappaD;
+
+  // compute plastic strain 
+  // such that the given stress is obtained at zero total strain and given damage
+  if (damage<1.){
+    StressVector effectiveStress(stressVector,_3dMat);
+    effectiveStress.times(-1./(1.-damage));
+    double E = mat -> give('E',gp);
+    double nu = mat -> give('n',gp);
+    effectiveStress.applyElasticCompliance(plasticStrain, E, nu);
+  }
+}
 
 
 //   ******************************************************
@@ -255,6 +309,7 @@ ConcreteDPM::ConcreteDPM(int n,Domain* d)
   yieldTol = 0. ;
   newtonIter = 0 ;
   matMode = _Unknown;
+  helem = 0.;
 
   linearElasticMaterial = new IsotropicLinearElasticMaterial(n, d);
 }
@@ -280,6 +335,8 @@ ConcreteDPM::initializeFrom (InputRecord* ir)
   //elastic parameters
   IR_GIVE_FIELD(ir, eM, IFT_IsotropicLinearElasticMaterial_e, "e");
   IR_GIVE_FIELD(ir, nu, IFT_IsotropicLinearElasticMaterial_n, "n");
+  propertyDictionary->add('E', eM);
+  propertyDictionary->add('n', nu);
 
   IR_GIVE_FIELD(ir, value, IFT_IsotropicLinearElasticMaterial_talpha, "talpha");
   propertyDictionary->add(tAlpha, value);
@@ -313,6 +370,8 @@ ConcreteDPM::initializeFrom (InputRecord* ir)
   IR_GIVE_OPTIONAL_FIELD (ir, ASoft,IFT_ConcreteDPM_asoft, "asoft");
   BSoft = 1.;
   IR_GIVE_OPTIONAL_FIELD (ir, BSoft,IFT_ConcreteDPM_bsoft, "bsoft");
+  helem = 0.;
+  IR_GIVE_OPTIONAL_FIELD (ir, helem, IFT_ConcreteDPM_helem, "helem") ;  
 
   //Compute m
   m = 3.*(pow(fc,2.) - pow(ft,2.))/(fc*ft)*ecc/(ecc + 1.);
@@ -465,6 +524,22 @@ ConcreteDPM::computeEquivalentStrain (double& tempEquivStrain, const StrainVecto
 }
 
 double
+ConcreteDPM::computeInverseDamage (double dam, GaussPoint* gp)
+{
+  ConcreteDPMStatus *status = giveStatus (gp) ;
+  double le = status -> giveLe();
+  if (le == 0.){
+    if (helem>0.)
+      le = helem;
+    else
+      le = gp -> giveElement() -> computeMeanSize();
+    status->setLe (helem);
+  }
+  double answer = -(this->ef/le)*log(1.-dam) - dam*ft/eM;
+  return answer;
+}
+
+double
 ConcreteDPM::computeDamageParam (double kappa, GaussPoint* gp)
 {
   double omega = 0.;
@@ -497,12 +572,17 @@ ConcreteDPM::initDamaged(double kappaD,
                          const StrainVector& strain,
                          GaussPoint* gp)
 {
+  if (kappaD <= 0.)
+      return;
+
   int i, indx = 1;
   double le;
   FloatArray principalStrains, crackPlaneNormal(3);
   FloatMatrix principalDir (3,3);
   ConcreteDPMStatus *status = giveStatus (gp) ;
-  if ((kappaD > 0) && (status->giveDamage() == 0.)) {
+  if (helem>0.)
+    status->setLe (helem);
+  else if (status->giveDamage() == 0.) {
     strain.computePrincipalValDir (principalStrains, principalDir);
     // find index of max positive principal strain
     for (i=2; i<=3; i++){
@@ -517,8 +597,14 @@ ConcreteDPM::initDamaged(double kappaD,
 
     // This gives the element size
     le = gp->giveElement()->giveLenghtInDir(crackPlaneNormal);
-
     // remember le in corresponding status
+    status->setLe (le);
+  }
+  // this happens if the status is initialized from a file 
+  // with nonzero damage 
+  else if (status->giveLe()==0.){
+    // le determined as square root of element area or cube root of el. volume
+    le = gp->giveElement()->computeMeanSize();
     status->setLe (le);
   }
 }
@@ -1696,7 +1782,17 @@ ConcreteDPM::computeDRDCosTheta(const double theta, const double ecc) const
   double dRDCostheta = A1Costheta/BCostheta - ACostheta/pow(BCostheta,2.)*B1Costheta;
   return dRDCostheta;
 }
-
+    
+int 
+ConcreteDPM::setIPValue 
+(const FloatArray value, GaussPoint *gp, InternalStateType type)
+{
+  ConcreteDPMStatus* status = giveStatus(gp) ;
+  if (status->setIPValue(value, type))
+    return 1;
+  else
+    return StructuralMaterial::setIPValue (value, gp, type);
+}
 
 int
 ConcreteDPM::giveIPValue (FloatArray& answer,

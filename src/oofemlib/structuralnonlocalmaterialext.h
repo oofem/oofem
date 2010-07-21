@@ -41,7 +41,6 @@
 #define structuralnonlocalmaterialext_h
 
 #include "nonlocalmaterialext.h"
-
 #include "matstatus.h"
 
 namespace oofem {
@@ -63,11 +62,12 @@ public:
 
 
 /**
- * Abstract base class for all nonlocal structural materials. Nonlocal in sence, that response in particular
- * point depends not only on state in that point, but also takes into account state of surrounding
- * points. Response typically depends on some nonlocal quantity obtained as nonlocal average over
+ * Abstract base class for all nonlocal structural materials. Nonlocal in the sense that the response at a particular
+ * point depends not only on the state of that point, but also takes into account the state of surrounding
+ * points. The response typically depends on some nonlocal quantity obtained as weighted average over
  * some characteristic volume.
- * This class declares the necessary interface for all nonlocal structural constitutive  models.
+ * This class declares the necessary interface for all nonlocal structural constitutive  models. 
+ * It also stores the parameters needed for nonlocal averaging and provides services for evaluation of the weight function.
  */
 class StructuralNonlocalMaterialExtensionInterface : public NonlocalMaterialExtensionInterface
 {
@@ -84,8 +84,6 @@ public:
     { }
     /// Destructor.
     ~StructuralNonlocalMaterialExtensionInterface()                { }
-
-
 
     /**
      * Declares the service updating local variables in given integration points,

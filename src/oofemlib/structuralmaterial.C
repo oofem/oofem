@@ -2327,6 +2327,25 @@ StructuralMaterial :: sortPrincDirAndValCloseTo(FloatArray *pVal, FloatMatrix *p
     return;
 }
 
+int
+StructuralMaterial :: setIPValue(const FloatArray value, GaussPoint *aGaussPoint, InternalStateType type)
+{
+  StructuralMaterialStatus *status = ( StructuralMaterialStatus * ) this->giveStatus(aGaussPoint);
+  if ( type == IST_StressTensor ) {
+    status -> letStressVectorBe (value);
+    return 1;
+  } else if ( type == IST_StrainTensor ) {
+    status -> letStrainVectorBe (value);
+    return 1;
+  } else if ( type == IST_StressTensorTemp ) {
+    status -> letTempStressVectorBe (value);
+    return 1;
+  } else if ( type == IST_StrainTensorTemp ) {
+    status -> letTempStrainVectorBe (value);
+    return 1;
+  } else
+    return 0;
+}
 
 int
 StructuralMaterial :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime)

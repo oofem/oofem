@@ -151,9 +151,13 @@ public:
 class IDNLMaterial : public IsotropicDamageMaterial1, public StructuralNonlocalMaterialExtensionInterface,
     public NonlocalMaterialStiffnessInterface
 {
-protected:
-    /// Interaction radius, related to the nonlocal characteristic length of material.
-    double R;
+ protected:
+  /// Final value of interaction radius, for a model with evolving characteristic length
+  double Rf;
+  /// Parameter used as an exponent by models with evolving characteristic length
+  double exponent;
+  /// Parameter specifying how the weight function should be adjusted due to damage
+  int averType;
 
 public:
 
@@ -209,22 +213,8 @@ public:
      */
     virtual void updateBeforeNonlocAverage(const FloatArray &strainVector, GaussPoint *gp, TimeStep *atTime);
 
-    /**
-     * Computes the value of nonlocal weight function in given point.
-     * @param src coordinates of source point.
-     * @param coord coordinates of point, where nonlocal weight function is evaluated.
-     * @return value of weight function.
-     */
-    virtual double computeWeightFunction(const FloatArray &src, const FloatArray &coord);
-    /**
-     * Determines, whether receiver has bounded weighting function (limited support)
-     * @return true if weighting function bounded, zero otherwise
-     */
-    virtual int hasBoundedSupport() { return 1; }
-    /**
-     * Determines the width (radius) of limited support of weighting function
-     */
-    virtual void giveSupportRadius(double &radius) { radius = this->R; }
+    void modifyNonlocalWeightFunctionAround(GaussPoint *gp);
+    double computeDistanceModifier(double damage);
 
 #ifdef __OOFEG
     ///Plots the sparse structure of stiffness contribution.

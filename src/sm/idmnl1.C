@@ -66,16 +66,14 @@
 
 namespace oofem {
 
-//negligible influence radius
-#define R_ZERO 1.0e-10
-
 IDNLMaterial :: IDNLMaterial(int n, Domain *d) : IsotropicDamageMaterial1(n, d), StructuralNonlocalMaterialExtensionInterface(d), NonlocalMaterialStiffnessInterface()
-    //
-    // constructor
-    //
+//
+// constructor
+//
 {
-    //linearElasticMaterial = new IsotropicLinearElasticMaterial (n,d);
-    R = 0.;
+  Rf = 0.;
+  exponent = 1.;
+  averType = 0;
 }
 
 
@@ -97,25 +95,122 @@ IDNLMaterial :: updateBeforeNonlocAverage(const FloatArray &strainVector, GaussP
     FloatArray SDstrainVector, fullSDStrainVector;
     double equivStrain;
     IDNLMaterialStatus *nlstatus = ( IDNLMaterialStatus * ) this->giveStatus(gp);
-    //StructuralCrossSection *crossSection = (StructuralCrossSection*) gp -> giveElement()->giveCrossSection();
 
     this->initTempStatus(gp);
     this->initGpForNewStep(gp);
 
-    // substract stress independent part
+    // subtract stress-independent part
     // note: eigenStrains (temperature) is not contained in mechanical strain stored in gp
-    // therefore it is necessary to substract always the total eigenstrain value
+    // therefore it is necessary to subtract always the total eigenstrain value
     this->giveStressDependentPartOfStrainVector(SDstrainVector, gp, strainVector, atTime, VM_Total);
 
-    //crossSection->giveFullCharacteristicVector(fullSDStrainVector, gp, SDstrainVector);
+    // compute and store the local variable to be averaged
+    // (typically the local equivalent strain)
 
-    // compute equivalent strain
     this->computeLocalEquivalentStrain(equivStrain, SDstrainVector, gp, atTime);
 
-    nlstatus->setLocalEquivalentStrainForAverage(equivStrain);
+    // nonstandard formulation based on averaging of compliance parameter gamma
+    // note: gamma is stored in a variable named localEquivalentStrainForAverage, which can be misleading
+    //       perhaps this variable should later be renamed
+    if (averagedVar==AVT_Compliance){
+      double gamma = complianceFunction (equivStrain,gp);
+      nlstatus->setLocalEquivalentStrainForAverage (gamma);
+    }
+    // standard formulation based on averaging of equivalent strain
+    else
+      nlstatus->setLocalEquivalentStrainForAverage (equivStrain);
+
+    // influence of damage on weight function
+    if( averType >= 2 && averType <= 5 ){
+      this->modifyNonlocalWeightFunctionAround(gp);
+    }
 }
 
+void
+IDNLMaterial :: modifyNonlocalWeightFunctionAround(GaussPoint *gp)
+{
+    IDNLMaterialStatus *nonlocStatus, *status = ( IDNLMaterialStatus * ) this->giveStatus(gp);
+    dynaList< localIntegrationRecord > *list = this->giveIPIntegrationList(gp); 
+    dynaList< localIntegrationRecord > :: iterator pos, postarget;
 
+    // find the current Gauss point (target) in the list of it neighbors
+    for ( pos = list->begin(); pos != list->end(); ++pos ) {
+      if ((*pos).nearGp == gp)
+	postarget = pos;
+    }
+    Element* elem = gp->giveElement();
+    FloatArray coords;
+    elem->computeGlobalCoordinates (coords, *(gp->giveCoordinates()));
+    double xtarget = coords.at(1);
+
+    double w, wsum=0., x, xprev, damage, damageprev; int n;
+    Element* nearElem; 
+
+    // process the list from the target to the end
+    double distance = 0.; // distance modified by damage
+    xprev = xtarget;
+    for ( pos = postarget; pos != list->end(); ++pos ) {
+      nearElem = ((*pos).nearGp)->giveElement();
+      nearElem->computeGlobalCoordinates (coords, *(((*pos).nearGp)->giveCoordinates()));
+      x = coords.at(1);
+      nonlocStatus = ( IDNLMaterialStatus * ) this->giveStatus((*pos).nearGp);
+      damage = nonlocStatus->giveTempDamage();
+      if (pos != postarget){
+	distance += (x-xprev)*0.5*(computeDistanceModifier(damage)+computeDistanceModifier(damageprev));
+      }
+      w = computeWeightFunction(distance) * nearElem->computeVolumeAround((*pos).nearGp);
+      (*pos).weight = w;
+      wsum += w;
+      xprev = x;
+      damageprev = damage;
+    }
+
+    // process the list from the target to the beginning 
+    distance = 0.;
+    for ( pos = postarget; pos != list->begin() ; --pos) {
+      nearElem = ((*pos).nearGp)->giveElement();
+      nearElem->computeGlobalCoordinates (coords, *(((*pos).nearGp)->giveCoordinates()));
+      x = coords.at(1);
+      nonlocStatus = ( IDNLMaterialStatus * ) this->giveStatus((*pos).nearGp);
+      damage = nonlocStatus->giveTempDamage();
+      if (pos != postarget){
+	distance += (xprev-x)*0.5*(computeDistanceModifier(damage)+computeDistanceModifier(damageprev));
+	w = computeWeightFunction(distance) * nearElem->computeVolumeAround((*pos).nearGp);
+	(*pos).weight = w;
+	wsum += w;
+     }
+      xprev = x;
+      damageprev = damage;
+    }
+
+    // the beginning must be treated separately
+    pos = list->begin();
+    if (pos != postarget){
+      nearElem = ((*pos).nearGp)->giveElement();
+      nearElem->computeGlobalCoordinates (coords, *(((*pos).nearGp)->giveCoordinates()));
+      x = coords.at(1);
+      nonlocStatus = ( IDNLMaterialStatus * ) this->giveStatus((*pos).nearGp);
+      damage = nonlocStatus->giveTempDamage();
+      n = ((*pos).nearGp)->giveElement()->giveNumber();
+      distance += (xprev-x)*0.5*(computeDistanceModifier(damage)+computeDistanceModifier(damageprev));
+w = computeWeightFunction(distance) * nearElem->computeVolumeAround((*pos).nearGp);
+      (*pos).weight = w;
+      wsum += w;
+    }
+    status -> setIntegrationScale(wsum);
+}
+
+double
+IDNLMaterial :: computeDistanceModifier(double damage)
+{
+  switch (averType){
+  case 2: return 1./(Rf/cl+(1.-Rf/cl)*pow(1.-damage,exponent));
+  case 3: if (damage==0.) return 1.; else return 1./(1.-(1.-Rf/cl)*pow(damage,exponent));
+  case 4: return 1./pow(Rf/cl,damage);
+  case 5: return (2.*cl)/(cl+Rf+(cl-Rf)*cos(3.1415926*damage));
+  default: return 1.;
+  }
+}
 
 void
 IDNLMaterial :: computeEquivalentStrain(double &kappa, const FloatArray &strain, GaussPoint *gp, TimeStep *atTime)
@@ -126,7 +221,9 @@ IDNLMaterial :: computeEquivalentStrain(double &kappa, const FloatArray &strain,
     this->buildNonlocalPointTable(gp);
     this->updateDomainBeforeNonlocAverage(atTime);
 
-    // compute nonlocal strain increment first
+    // compute nonlocal equivalent strain 
+    // or nonlocal compliance variable gamma (depending on averagedVar)
+
     dynaList< localIntegrationRecord > *list = this->giveIPIntegrationList(gp); // !
     dynaList< localIntegrationRecord > :: iterator pos;
 
@@ -138,8 +235,34 @@ IDNLMaterial :: computeEquivalentStrain(double &kappa, const FloatArray &strain,
         nonlocalEquivalentStrain += nonlocalContribution;
     }
 
-    nonlocalEquivalentStrain *= 1. / status->giveIntegrationScale();
-    this->endIPNonlocalAverage (gp); // !
+    if (scaling==ST_Standard) { // standard rescaling 
+      nonlocalEquivalentStrain *= 1./status->giveIntegrationScale();
+    }
+      else if (scaling==ST_Borino) { // Borino modification
+	double scale = status->giveIntegrationScale();
+	if (scale>1.)
+	  nonlocalEquivalentStrain *= 1./scale;
+	else
+	  nonlocalEquivalentStrain += (1.-scale)*status->giveLocalEquivalentStrainForAverage();
+      }
+
+
+    // undernonlocal or overnonlocal formulation
+    if (mm!=1.){
+      double localEquivalentStrain = status->giveLocalEquivalentStrainForAverage();
+      if (mm>=0.) { // harmonic averaging
+	if (localEquivalentStrain>0. && nonlocalEquivalentStrain>0.){
+	  nonlocalEquivalentStrain = 1./(mm/nonlocalEquivalentStrain + (1.-mm)/localEquivalentStrain);
+	} else {
+	  nonlocalEquivalentStrain = 0.;
+	} 
+      } 
+      else {// arithmetic averaging, -mm is used instead of mm
+	  nonlocalEquivalentStrain = -mm*nonlocalEquivalentStrain + (1.+mm)*localEquivalentStrain;
+	}
+    }
+
+    this->endIPNonlocalAverage (gp); // ???????????????????
 
     kappa = nonlocalEquivalentStrain;
 }
@@ -164,22 +287,23 @@ IDNLMaterial :: initializeFrom(InputRecord *ir)
 {
     const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
-    int value;
 
     IsotropicDamageMaterial1 :: initializeFrom(ir);
     StructuralNonlocalMaterialExtensionInterface :: initializeFrom(ir);
 
-    IR_GIVE_FIELD(ir, R, IFT_IDNLMaterial_r, "r"); // Macro
-    if ( R < 0.0 ) {
-        R = 0.0;
+    averType = 0;
+    IR_GIVE_OPTIONAL_FIELD(ir, averType, IFT_IDNLMaterial_averagingtype, "averagingtype");
+    if (averType==2) {
+      exponent = 0.5; // default value for averaging type 2
     }
-
-    if ( ir->hasField(IFT_IDNLMaterial_averagingtype, "averagingtype") ) {
-        IR_GIVE_FIELD(ir, value, IFT_IDNLMaterial_averagingtype, "averagingtype"); // Macro
-        if(value==1){
-            R = R_ZERO;//decrease the influence radius so no other IP points are put to the IP list
-        }
-        propertyDictionary->add(AVERAGING_TYPE, value);
+    if (averType==3) {
+      exponent = 1.; // default value for averaging type 3
+    }
+    if (averType==2 || averType==3) {
+      IR_GIVE_OPTIONAL_FIELD(ir, exponent, IFT_IDNLMaterial_averagingtype, "exp");
+    }
+    if (averType >=2 && averType <=5) {
+      IR_GIVE_OPTIONAL_FIELD(ir, Rf, IFT_IDNLMaterial_averagingtype, "rf");
     }
     return IRRT_OK;
 }
@@ -192,45 +316,59 @@ IDNLMaterial :: giveInputRecordString(std :: string &str, bool keyword)
 
     IsotropicDamageMaterial1 :: giveInputRecordString(str, keyword);
     StructuralNonlocalMaterialExtensionInterface :: giveInputRecordString(str, false);
-    sprintf(buff, " r %e", this->R);
+    sprintf(buff, " r %e", this->cl);
     str += buff;
 
     return 1;
 }
 
-
-
-double
-IDNLMaterial :: computeWeightFunction(const FloatArray &src, const FloatArray &coord)
-{
-    // Bell shaped function decaying with the distance.
-
-    double dist = src.distance(coord);
-
-    if ( ( dist >= 0. ) && ( dist <= this->R ) ) {
-        double help = ( 1. - dist * dist / ( R * R ) );
-        return help * help;
-    }
-
-    return 0.0;
-}
-
-
-
+/*
+// old implementation - now implemented in local model
 void
 IDNLMaterial :: computeDamageParam(double &omega, double kappa, const FloatArray &strain, GaussPoint *gp)
 {
-    const double e0 = this->give(e0_ID, gp);
-    const double ef = this->give(ef_ID, gp);
+  const double e0 = this->give(e0_ID, gp);
+  if ( kappa <= e0 ) {
+    omega = 0.0;
+    return;
+  }
 
-    if ( kappa > e0 ) {
-        omega = 1.0 - ( e0 / kappa ) * exp( -( kappa - e0 ) / ( ef - e0 ) );
+  double ef;
+  switch(this->softType){
+  case ST_Linear:
+    ef = this->give(ef_ID, gp);
+    if ( kappa >= ef ) {
+      omega = 1.0;
     } else {
-        omega = 0.0;
+      omega = (ef/kappa) * (kappa-e0) / (ef-e0);
     }
+    return;
+  case ST_Exponential:
+    ef = this->give(ef_ID, gp);
+    omega = 1.0 - ( e0 / kappa ) * exp( -( kappa - e0 ) / ( ef - e0 ) );
+    return;
+  case ST_Mazars:
+    //At = this->give(At_ID, gp);
+    //Bt = this->give(Bt_ID, gp);
+    omega = 1.0 - (1.0-At)*e0/kappa - At*exp(-Bt*(kappa-e0));
+    return;
+  default:
+    omega = 0.0;
+    return;
+  }
 }
+*/
 
-
+void 
+IDNLMaterial :: computeDamageParam (double& omega, double kappa, const FloatArray& strain, GaussPoint *g) 
+{
+  if (averagedVar==AVT_Compliance)
+    // formulation based on nonlocal gamma (here formally called kappa)
+    omega = kappa/(1.+kappa);
+  else
+    // formulation based on nonlocal equivalent strain
+    omega = damageFunction(kappa,g);
+}
 
 void
 IDNLMaterial :: NonlocalMaterialStiffnessInterface_addIPContribution(SparseMtrx &dest, const UnknownNumberingScheme &s, 
@@ -658,15 +796,21 @@ IDNLMaterialStatus :: ~IDNLMaterialStatus()
 void
 IDNLMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)
 {
-    StructuralMaterialStatus :: printOutputAt(file, tStep);
-    fprintf(file, "status { ");
-    if ( this->damage > 0.0 ) {
-        fprintf(file, "nonloc-kappa %f, damage %f ", this->kappa, this->damage);
-    }
+  StructuralMaterialStatus :: printOutputAt(file, tStep);
+  fprintf(file, "status { ");
+  if ( this->damage > 0.0 ) {
+    fprintf(file, "nonloc-kappa %f, damage %f ", this->kappa, this->damage);
 
+#ifdef keep_track_of_dissipated_energy
+	fprintf (file,", dissW %f, freeE %f, stressW %f ",this->dissWork,(this->stressWork)-(this->dissWork),this->stressWork);
+    }
+    else {
+      fprintf (file,"stressW %f ",this->stressWork);
+#endif
+
+    }
     fprintf(file, "}\n");
 }
-
 
 void
 IDNLMaterialStatus :: initTempStatus()

@@ -210,6 +210,9 @@
 #include "dmexportmodule.h"
 #include "gpexportmodule.h"
 
+// init modules
+#include "gpinitmodule.h"
+
 // nonlocal barriers
 #include "polylinenonlocalbarrier.h"
 #include "symmetrybarrier.h"
@@ -845,6 +848,9 @@ InitModule *CreateUsrDefInitModuleOfType(char *aClass, EngngModel *emodel)
     InitModule *answer = NULL;
 
 #ifdef __SM_MODULE
+    if ( !strncasecmp(aClass, "gpinitmodule", 12) ) {
+        answer = new GPInitModule(emodel);
+    }
 #endif //__SM_MODULE
 
     return answer;

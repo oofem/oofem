@@ -40,6 +40,11 @@
 #ifndef isodamagemodel_h
 #define isodamagemodel_h
 
+// this turns on or off a bunch of internal variables
+// that allow tracing the distribution of dissipated energy
+// (can be turned off if such information is not needed)
+#define keep_track_of_dissipated_energy
+
 #include "material.h"
 #include "linearelasticmaterial.h"
 #include "structuralmaterial.h"
@@ -87,6 +92,18 @@ protected:
     double damage;
     /// non-equilibrated damage level of material
     double tempDamage;
+
+#ifdef keep_track_of_dissipated_energy
+    /// density of total work done by stresses on strain increments
+    double stressWork; 
+    /// non-equilibrated density of total work done by stresses on strain increments
+    double tempStressWork;
+    /// density of dissipated work 
+    double dissWork;
+    /// non-equilibrated density of dissipated work 
+    double tempDissWork;
+#endif
+
 public:
     /// Constructor
     IsotropicDamageMaterialStatus(int n, Domain *d, GaussPoint *g);
@@ -109,6 +126,22 @@ public:
     /// Sets the temp damage level to given value
     void   setTempDamage(double newDamage) { tempDamage = newDamage; }
 
+#ifdef keep_track_of_dissipated_energy
+    /// Returns the density of total work of stress on strain increments
+    double giveStressWork(){return stressWork;}
+    /// Returns the temp density of total work of stress on strain increments
+    double giveTempStressWork(){return tempStressWork;}
+    /// Sets the density of total work of stress on strain increments to given value
+    void setTempStressWork(double w){tempStressWork = w;}
+    /// Returns the density of dissipated work 
+    double giveDissWork(){return dissWork;}
+    /// Returns the density of temp dissipated work 
+    double giveTempDissWork(){return tempDissWork;}
+    /// Sets the density of dissipated work to given value
+    void setTempDissWork(double w){tempDissWork = w;}
+    /// computes the increment of total stress work and of dissipated work
+    void computeWork(GaussPoint*);
+#endif
 
     // definition
     const char *giveClassName() const { return "IsotropicDamageMaterialModelStatus"; }

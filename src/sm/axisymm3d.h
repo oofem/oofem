@@ -77,8 +77,9 @@ public:
     virtual void giveDofManDofIDMask(int inode, EquationID, IntArray &) const;
 
     // characteristic length in gp (for some material models)
-    double        giveCharacteristicLenght(GaussPoint *, const FloatArray &);
-    double             computeVolumeAround(GaussPoint *);
+    double giveCharacteristicLenght(GaussPoint *, const FloatArray &);
+    double giveArea();
+    double computeVolumeAround(GaussPoint *);
     /**
      * Computes the global coordinates from given element's local coordinates.
      * Required by nonlocal material models.
@@ -168,6 +169,7 @@ public:
     MaterialMode          giveMaterialMode() { return _3dMat; }
     const char *giveClassName() const { return "Axisymm3d"; }
     classType     giveClassID() const { return Axisymm3dClass; }
+    Element_Geometry_Type giveGeometryType() const { return EGT_triangle_1; }
     virtual int testElementExtension(ElementExtension ext) { return ( ( ext == Element_EdgeLoadSupport ) ? 1 : 0 ); }
     IRResultType initializeFrom(InputRecord *ir);
 

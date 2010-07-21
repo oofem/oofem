@@ -77,12 +77,18 @@ namespace oofem {
 #define HeatCapaCoeff 450
 #define Mass1CapaCoeff 451
 
-/* Viscosity */
+/* viscosity */
 #define Viscosity 500
 #define YieldStress 501
 
-/* Nonlocal material extensions */
-#define AVERAGING_TYPE 903
+/* parameters of damage model */
+#define e0_ID  800
+#define ef_ID  801
+
+/* nonlocal material parameters */
+#define AVERAGING_TYPE 901
+#define exponent_ID 902
+#define rf_ID 903
 
 } // end namespace oofem
 #endif // matconst_h

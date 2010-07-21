@@ -547,7 +547,7 @@ public:
      * it is required only for some specialized tasks.
      */
     virtual Element_Geometry_Type giveGeometryType() const { return EGT_unknown; }
-    /** Returns the element spacial dimension irrespectably to its position in space
+    /** Returns the element spatial dimension (1, 2, or 3)
      */
     int giveSpatialDimension(void);
     /** Returns the number of boundaries of dimension equal to element spatial dimension - 1
@@ -605,6 +605,11 @@ public:
      * @returns nonzero if ok or error is generated for unknown mat mode.
      */
     virtual int giveIntVarCompFullIndx(IntArray &answer, InternalStateType type);
+    /// Computes the volume, area or length of the element depending on its spatial dimension
+    double computeVolumeAreaOrLength();
+    /// Computes the size of the element defined as its length, 
+    /// square root of area or cube root of volume (depending on spatial dimension)
+    double computeMeanSize();
 
     // characteristic length in gp (for some material models)
     /** Returns element length in given direction. Default implementation returns length

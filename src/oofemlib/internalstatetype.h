@@ -115,10 +115,14 @@ namespace oofem {
     ENUM_ITEM_WITH_VALUE(IST_TemperatureFlow, 56) \
     ENUM_ITEM_WITH_VALUE(IST_MassConcentrationFlow_1, 57) \
     ENUM_ITEM_WITH_VALUE(IST_HumidityFlow, 58) \
-    \
-    ENUM_ITEM(CrackStatuses) \
-    ENUM_ITEM(CrackedFlag) \
-    ENUM_ITEM(CrackDirs) \
+    ENUM_ITEM_WITH_VALUE(CrackStatuses, 59) \
+    ENUM_ITEM_WITH_VALUE(CrackedFlag, 60) \
+    ENUM_ITEM_WITH_VALUE(CrackDirs, 61)	\
+    ENUM_ITEM_WITH_VALUE(IST_CumPlasticStrain, 62) \
+    ENUM_ITEM_WITH_VALUE(IST_CumPlasticStrain_2, 63) \
+    ENUM_ITEM_WITH_VALUE(IST_StressWorkDensity, 64) \
+    ENUM_ITEM_WITH_VALUE(IST_DissWorkDensity, 65) \
+    ENUM_ITEM_WITH_VALUE(IST_FreeEnergyDensity, 66) \
 
 enum InternalStateType {
     InternalStateType_DEF

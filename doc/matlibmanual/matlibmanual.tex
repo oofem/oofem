@@ -92,8 +92,8 @@ Th\'akurova 7, 166 29 Prague, Czech Republic
 \listoftables
 \newpage
 \section{Material Models for Structural Analysis}
-\subsection{Linear Elastic Materials}
-\subsubsection{Isotropic Linear Elastic Material}
+\subsection{Linear elastic materials}
+\subsubsection{Isotropic linear elastic material}
 \label{IsoLE}
 Linear isotropic material model. The model parameters are summarized
 in table~\ref{IsoLE_table}.
@@ -125,7 +125,7 @@ Features & Adaptivity support\\
 
 
 
-\subsubsection{Orthotropic Linear Elastic Material}
+\subsubsection{Orthotropic linear elastic material}
 \label{OrthoLE}
 Linear orthotropic, linear elastic  material model. The model parameters are summarized
 in table~\ref{OrthoLE_table}.
@@ -226,7 +226,7 @@ Supported modes& 3dMat, PlaneStress, PlaneStrain, 1dMat,
 
 
 
-\subsection{Plasticity Based Material Models}
+\subsection{Plasticity-based material models}
 
 \subsubsection{Drucker-Prager model}
 The Drucker-Prager plasticity model\footnote{Contributed by Simon Rolshoven, LSC, FENAC, EPFL.} is an isotropic elasto-plastic model based
@@ -809,7 +809,7 @@ Record Format & \descitem{RCSDE} \elemparam{d}{rn} \elemparam{E}{rn}
 
 
 
-\subsubsection{Nonlocal Smeared rotating crack model with transition to scalar damage}
+\subsubsection{Nonlocal smeared rotating crack model with transition to scalar damage}
 \label{rcsdnl}
 Implementation of nonlocal version of smeared rotating crack model with transition to
 scalar damage.
@@ -882,126 +882,489 @@ Supported modes& 3dMat, PlaneStress, PlaneStrain, 1dMat,
 
 
 
-\subsubsection{Isotropic damage model in tension}
+\subsubsection{Isotropic damage model for tensile failure}
+\label{sec:idmtf}
 This isotropic damage model assumes that the stiffness degradation is
 isotropic, i.e., stiffness moduli corresponding to different
-directions decrease proportionally and independently of direction of
-loading. The damaged stiffness tensor is expressed as
-$\mbf{D}=(1-\omega)\mbf{D}^e$.
-Damage evolution law is postulated in an explicit form, relating
-damage parameter and scalar measure of largest reached equivalent strain level in
-material, taking into account the principle of preserving of fracture
-energy $G_f$. The equivalent strain, i.e., a scalar measure of the
-strain level is defined as norm from positive principal strains.
-The model description and parameters are summarized
-in table~\ref{id_table}. The material uses crack-band approach to dissipate the
-correct annount of fracture energy by adjusting locally material parameters.
-There is a limit on element size, which can be expressed as
-$$
-e0 \le ef/l_e
-$$
-where $l_e$ is element length in the direction normal to crack plane, e0 is max effective strain at peak load,
-and ef is crack opening (not strain) when tension stress vanishes.
-This condition prevents a local snap-back of stress-strain diagram,
-which would incorectly yield a larger amount of dissipated energy.
+directions decrease proportionally and independently of the loading 
+direction. The damaged stiffness tensor is expressed as
+$\mbf{D}=(1-\omega)\mbf{D}_e$ where $\omega$ is a scalar damage variable
+and $\mbf{D}_e$ is the elastic stiffness tensor.
+The damage evolution law is postulated in an explicit form, relating
+the damage variable $\omega$ to the largest previously reached 
+equivalent strain level, $\kappa$.
 
+The equivalent strain, $\tilde\varepsilon$, is a scalar measure derived from the
+strain tensor. The choice of the specific expression
+for the equivalent strain affects the shape of the elastic domain
+in the strain space and plays a similar role to the choice of a yield
+condition in plasticity.
+The following definitions of equivalent strain are currently supported:
+\begin{itemize}
+\item
+{\bf Mazars} (1984) definition based on norm of positive part of strain:
+$$
+\tilde\varepsilon=\sqrt{\displaystyle{\sum_{I=1}^{3}}\langle\varepsilon_I\rangle^2}
+$$
+where $\langle\varepsilon_I\rangle$ are positive parts of 
+principal values of the strain tensor $\mbf{\varepsilon}$.
+\item
+Definition derived from the {\bf Rankine} criterion of maximum principal stress:
+$$
+\tilde\varepsilon=
+{{1}\over{E}}\sqrt{\displaystyle{\sum_{I=1}^{3}}\langle\bar\sigma_I\rangle^2}$$
+where
+$\langle\bar\sigma_I\rangle$ are the positive parts of principal 
+values of the
+effective stress tensor $\bar\mbf{\sigma} = \mbf{D}_e:\mbf{\varepsilon}$.
+\item
+{\bf Energy} norm scaled by Young's modulus to obtain
+a strain-like quantity:
+$$
+\tilde\varepsilon=\sqrt{{\mbf{\varepsilon}:\mbf{D}_e:\mbf{\varepsilon}}\over{E}}
+$$
+\item
+{\bf Modified Mises} definition, proposed by de Vree et al.~(1995):
+$$
+\tilde\varepsilon=\frac{(k-1)I_{1\varepsilon}}{2k(1-2\nu)} + \frac{1}{2k}\sqrt{\frac{(k-1)^2}{(1-2\nu)^2}I_{1\varepsilon}^2+\frac{12 k J_{2\varepsilon}}{(1+\nu)^2}} 
+$$
+where $$
+I_{1\varepsilon} = \sum_{I=1}^3\varepsilon_I
+$$
+is the first strain invariant (trace of the strain tensor),
+$$
+J_{2\varepsilon} = \frac{1}{2}\sum_{I=1}^3 \varepsilon_I^2-\frac{1}{6}I_{1\varepsilon}^2
+$$  
+is the second deviatoric strain invariant,
+and $k$ is a model parameter that corresponds to the ratio between the uniaxial
+compressive strength $f_c$ and  uniaxial tensile strength $f_t$.
+\end{itemize}
+Note that all these definitions are based on the three-dimensional
+description of strain (and stress). If they are used in a reduced
+problem, the strain components that are not explicitly provided by
+the finite element approximation are computed from the underlying 
+assumptions and used in the evaluation of equivalent strain.
+For instance, in a plane-stress analysis, the out-of-plane component
+of normal strain is calculated from the assumption of zero
+out-of-plane normal stress (using standard Hooke's law).
 
-\begin{table}[!htb]
+Since the growth of damage usually leads to softening and may induce
+localization of the dissipative process, attention should be paid
+to proper regularization. The most efficient approach is based on
+a nonlocal formulation; see Section~\ref{sec:nidm}. 
+If the model is kept local, the damage law
+should be adjusted according to the element size, in the spirit
+of the crack-band approach. When done properly, this ensures
+a correct dissipation of energy in a localized band of cracking
+elements, corresponding to the fracture energy of the material.
+For various numerical studies, it may be useful to specify the
+parameters of the damage law directly, independently of the element size.
+One should be aware that in this case the model would exhibit
+pathological sensitivity to the size of finite elements if the mesh
+is changed. 
+
+The following damage laws are currently implemented:
+\begin{itemize}
+\item
+{\bf Cohesive crack with exponential softening} postulates a relation
+between the normal stress $\sigma$ transmitted by the crack and the
+crack opening $w$ in the form
+$$
+\sigma = f_t\exp\left(-\frac{w}{w_f}\right)
+$$
+Here, $f_t$ is the tensile strength and $w_f$ is a parameter with the dimension
+of length (crack opening), which controls the ductility of the material.
+In fact, $w_f=G_f/f_t$ where $G_f$ is the mode-I fracture energy.
+In the context of the crack-band approach, the crack opening $w$ corresponds
+to the inelastic (cracking) strain $\varepsilon_c$ 
+multiplied by the effective thickness $h$ of the 
+crack band. The effective thickness $h$ is estimated by projecting the finite
+element onto the direction of the maximum principal strain (and stress)
+at the onset of damage. The inelastic strain $\varepsilon_c$
+is the difference between
+the total strain $\varepsilon$ and the elastic strain $\sigma/E$.
+For the damage model we obtain
+$$
+\varepsilon_c = \varepsilon - \frac{\sigma}{E} =
+\varepsilon - (1-\omega)\varepsilon = \omega\varepsilon
+$$
+and thus $w=h\varepsilon_c=h\omega\varepsilon$. Substituting this into
+the cohesive law and combining with the stress-strain law for the damage
+model, we get  a nonlinear equation
+$$
+(1-\omega)E\varepsilon = f_t\exp\left(-\frac{h\omega\varepsilon}{w_f}\right)
+$$
+For a given strain $\varepsilon$, the corresponding damage variable $\omega$
+can be solved from this equation by Newton iterations. 
+It can be shown that the solution exists and is unique for every
+$\varepsilon\ge\varepsilon_0$ provided that the element size $h$ does not
+exceed the limit size $h_{max}=w_f/\varepsilon_0$. For larger elements,
+a local snapback in the stress-strain diagram would occur, which is not
+admissible. In terms of the material properties, $h_{max}$ can be expressed
+as $EG_f/f_t^2$, which is related to Irwin's characteristic length. 
+
+The derivation
+has been performed for monotonic loading and uniaxial tension. Under general
+conditions, $\varepsilon$ is replaced by the internal variable $\kappa$,
+which represents the maximum previously reached level of equivalent strain.
+
+In the list of input variables, the tensile strength $f_t$ is not specified
+directly but through the corresponding strain at peak stress, 
+$\varepsilon_0=f_t/E$, denoted by keyword {\it e0}. Another input parameter
+is the characteristic crack opening $w_f$, denoted by keyword {\it wf}.
+\item
+{\bf Cohesive crack with linear softening} is based on the same correspondence
+between crack opening and inelastic strain, but the cohesive law is assumed
+to have a simpler linear form
+$$
+\sigma = f_t\left(1-\frac{w}{w_f}\right)
+$$
+The relation between damage and strain can then be described explicitly
+by the formula
+$$
+\omega=\frac{1-\displaystyle\frac{\varepsilon_0}{\varepsilon}}{1-\displaystyle\frac{h\varepsilon_0}{w_f}}
+$$
+and no iteration is needed for damage evaluation. Parameter $w_f$,
+denoted again by keyword {\it wf}, has now the meaning of crack opening
+at complete failure (zero cohesive stress) and is related to fracture energy by
+a modified formula $w_f=2G_f/f_t$.
+The expression for maximum element size, $h_{max}=w_f/\varepsilon_0$, remains
+the same as for cohesive law with exponential softening, but in terms
+of the material properties it is now translated as $h_{max}=2EG_f/f_t^2$.
+\item
+{\bf Linear softening stress-strain law} works directly with strain
+and does not make any adjustment for the element size. The specified
+parameters $\varepsilon_0$ and $\varepsilon_f$, denoted by keywords {\it e0}
+and {\it ef}, have the meaning of (equivalent) strain at peak stress and at
+complete failure. The linear relation between stress and strain on the
+softening branch is obtained with the damage law
+$$
+\omega =\frac{\varepsilon_f}{\varepsilon_f-\varepsilon_0}\left(1-\frac{\varepsilon_0}{\varepsilon}\right)
+$$
+Again, to cover general conditions, $\varepsilon$ is replaced by $\kappa$.
+\item
+{\bf Exponential softening stress-strain law} also uses two parameters
+ $\varepsilon_0$ and $\varepsilon_f$, denoted by keywords {\it e0}
+and {\it ef}, but leads to a modified dependence of damage on strain:
+$$
+\omega =1-\frac{\varepsilon_0}{\varepsilon}\exp\left(-\frac{\varepsilon-\varepsilon_0}{\varepsilon_f-\varepsilon_0}\right)
+$$
+\item
+{\bf Mazars stress-strain law} uses three parameters, $\varepsilon_0$,
+$A_t$ and $B_t$, denoted by keywords {\it e0}, {\it At} and {\it Bt}, and the
+dependence of damage on strain is given by
+$$
+\omega =1-\frac{(1-A_t)\varepsilon_0}{\varepsilon}-A_t\exp\left(B_t(\varepsilon-\varepsilon_0)\right)
+$$
+\item
+{\bf Smooth exponential stress-strain law} uses two parameters, $\varepsilon_0$
+and $M_d$, denoted by keywords {\it e0} and {\it md}, and the
+dependence of damage on strain is given by
+$$
+\omega = 1-\exp\left(-\left(\frac{\varepsilon}{\varepsilon_0}\right)^{M_d}\right)
+$$
+This leads to a stress-strain curve that immediately deviates from linearity
+(has no elastic part) and smoothly changes from hardening to softening,
+with tensile strength
+$$
+f_t = E\varepsilon_0\left({\rm e}M_d\right)^{-1/M_d}
+$$
+\end{itemize} 
+Note that parameter {\it damlaw} determines which type of damage law
+should be used, but the adjustment for element size is done only if
+parameter {\it wf} is specified for {\it damlaw}=0 or {\it damlaw}=1. 
+For other values of {\it damlaw}, or if parameter {\it ef} 
+is specified instead of {\it wf}, the stress-strain curve does not depend
+on element size and the model would exhibit pathological sensitivity
+to the mesh size. These cases are intended to be used in combination
+with a nonlocal formulation. 
+
+The model parameters are summarized
+in Table~\ref{id_table}. 
+
+\begin{table}[p]
 %\begin{center}
 \begin{tabular}{|l|p{9cm}|}
 \hline
 Description & Isotropic damage model for concrete in tension\\
 \hline
-Record Format & \descitem{idm1} \elemparam{d}{rn} \elemparam{E}{rn}
-\elemparam{n}{rn}  \elemparam{e0}{rn}
-\elemparam{ef}{rn} [\elemparam{tAlpha}{rn}] [\elemparam{equivstraintype}{in}]
+Record Format & \descitem{idm1} 
+\elemparam{}{in} 
+\elemparam{d}{rn} 
+\elemparam{E}{rn}
+\elemparam{n}{rn} 
+[\elemparam{tAlpha}{rn}] 
+[\elemparam{equivstraintype}{in}] 
+[\elemparam{k}{rn}]
+[\elemparam{damlaw}{in}] 
+\elemparam{e0}{rn}
+[\elemparam{wf}{rn}] 
+[\elemparam{ef}{rn}] 
+[\elemparam{At}{rn}] 
+[\elemparam{Bt}{rn}] 
+[\elemparam{md}{rn}] 
 [\elemparam{maxOmega}{rn}]\\
-Parameters &- \param{num} material model number\\
+Parameters &- \param{} material number\\
 &- \param{d} material density\\
-&- \param{E} Young modulus\\
-&- \param{n} Poisson ratio\\
-&- \param{ef} crack opening (not strain) when the tension stress vanishes\\
-&- \param{e0} max effective strain at peak\\
-&- \param{tAlpha} thermal dilatation coefficient\\
-&- \param{equivstraintype} Allows to choose from different definitions
-of equivalent strain, which is a scalar measure of the strain
-level. The supported values are:
-\begin{itemize}
-\item[0-] Mazar's definition of equivalent
-strain (default one)
-$\tilde\varepsilon=\sqrt{\displaystyle{\sum_{I=1}^{3}}<\varepsilon_I>^2}$,
-where $<\varepsilon_I>$ are positive parts of principal values of
-strain tensor,
-\item[1-] corresponds to Rankine criterion of maximum principal stress and is based on
-the positive part of the  effective stress
-($\tilde\varepsilon={{1}\over{E}}\sqrt{\displaystyle{\sum_{I=1}^{3}}<\bar\sigma_I>^2}$), where
-$<\bar\sigma_I>$ are the positive parts of principal values of the
-effective stress tensor $\bar\sigma = \mbf{D}_e:\varepsilon$,
-\item[2-] equivalent
-strain defined as energy norm normalized by Young's modulus to obtain
-strain-like quantity
-($\tilde\varepsilon=\sqrt{{\varepsilon:\mbf{D}:\varepsilon}\over{E}}$)
+&- \param{E} Young's modulus\\
+&- \param{n} Poisson's ratio\\
+&- \param{tAlpha} thermal expansion coefficient\\
+&- \param{equivstraintype} allows to choose from different definitions
+of equivalent strain:
+\begin{itemize}\setlength{\itemsep}{-3pt}
+\item[0 -] Mazars (default)
+\item[1 -] Rankine 
+\item[2 -] scaled energy norm 
+\item[3 -] modified Mises
 \end{itemize}\\
-&- \param{maxOmega} limit maximum damage, use for convergency improvement\\
+&- \param{k} ratio between uniaxial compressive and tensile strength, needed only if equivstraintype=3, default value 1\\
+&- \param{damlaw} allows to choose from different damage laws:
+\begin{itemize}\setlength{\itemsep}{-3pt}
+\item[0 -] exponential softening (default) with parameters e0 and wf $\vert$ ef
+\item[1 -] linear softening with parameters e0 and wf $\vert$ ef
+\item[2 -] bilinear softening (not implemented yet)
+\item[3 -] Hordijk softening (not implemented yet)
+\item[4 -] Mazars damage law with parameters At and Bt
+\item[5 -] smooth stress-strain curve with parameters e0 and md
+\end{itemize}\\
+&- \param{e0} strain at peak stress (for damage laws 0,1,2,3), limit elastic strain (for damage law 4), characteristic strain (for damage law 5)\\
+&- \param{wf} parameter controling ductility, has the meaning of crack opening (for damage laws 0 and 1)\\
+&- \param{ef} parameter controling ductility, has the meaning of strain (for damage laws 0 and 1)\\
+&- \param{At} parameter of Mazars damage law, used only by law 4\\
+&- \param{Bt} parameter of Mazars damage law, used only by law 4\\
+&- \param{md} exponent, used only by damage law 5, default value 1\\
+&- \param{maxOmega} maximum damage, used for convergence improvement
+(its value is between 0 and 0.999999 (default), and it affects only the secant stiffness
+but not the stress)\\
 Supported modes& 3dMat, PlaneStress, PlaneStrain, 1dMat\\
 Features & Adaptivity support\\
 \hline
 \end{tabular}
-\caption{Isotropic Damage model in tension - summary.}
+\caption{Isotropic damage model for tensile failure -- summary.}
 \label{id_table}
 %\end{center}
 \end{table}
 
 
 
-\subsubsection{Nonlocal isotropic damage model in tension}
-Nonlocal version of isotropic damage model in tension.
+\subsubsection{Nonlocal isotropic damage model for tensile failure}
+\label{sec:nidm}
+Nonlocal version of isotropic damage model from Section~\ref{sec:idmtf}.
 The nonlocal averaging acts as a powerful localization
-limiter. The bell-shaped nonlocal averaging function is used.
-The model description and parameters are summarized
-in table~\ref{idnl_table}.
+limiter. 
+In the standard version of the model, 
+damage is driven by the nonlocal equivalent strain $\bar\varepsilon$, 
+defined as a weighted average of the local equivalent strain:
+$$
+\bar\varepsilon(\mbf{x}) = \int_V\alpha(\mbf{x},\mbf{\xi})\tilde\varepsilon(\mbf{\xi})\;{\rm d}\mbf{\xi}
+$$
+In the ``undernonlocal'' formulation, the damage-driving variable is a 
+combination of local and nonlocal equivalent strain, 
+$m\bar\varepsilon+(1-m)\tilde\varepsilon$, where $m$ is a parameter between
+0 and 1. (If $m>1$, the formulation is called ``overnonlocal''; this case
+is useful for nonlocal plasticity but not for nonlocal damage.) 
+
+Instead
+of averaging the equivalent strain, one can average the compliance variable
+$\gamma$, directly related to damage according to the formula 
+$\gamma=\omega/(1-\omega)$.
+
+The weight function $\alpha$ contains a certain parameter with the dimension
+of length, which is in general called the characteristic length. Its specific
+meaning depends on the type of weight function. The following functions are
+currently supported:
+\begin{itemize}
+\item
+Truncated quartic spline, also called the bell-shaped function,
+$$
+\alpha_0(s) = \left\langle 1-\frac{s^2}{R^2}\right\rangle^2
+$$
+where $R$ is the interaction radius (characteristic length) and 
+$s$ is the distance between the interacting points. This function 
+is exactly zero for $s\ge R$, i.e., it has a bounded support.
+\item
+Gaussian function
+$$
+\alpha_0(s) = \exp\left(-\frac{s^2}{R^2}\right)
+$$
+which is theoretically nonzero for an arbitrary large $s$ and thus
+has an unbounded support. However, in the numerical implementation
+the value of $\alpha_0$ is considered as zero for $s>2.5R$.
+\item
+Exponential function
+$$
+\alpha_0(s) = \exp\left(-\frac{s}{R}\right)
+$$
+which also has an unbounded support, but is considered as zero for $s>6R$.
+This function is sometimes called the Green function, because in 1D it
+corresponds to the Green function of the Helmholtz-like equation used
+by implicit gradient approaches.
+\item
+Piecewise constant function
+$$
+\alpha_0(s) =\left\{\begin{array}{cc} 1 & \mbox{ if } s\le R \\ 0 & \mbox{ if } s> R \end{array}\right.
+$$
+which corresponds to uniform averaging over a segment, disc or ball
+of radius $R$. 
+\item
+Function that is constant over the finite element in which point $\mbf{x}$
+is located, and is zero everywhere else. Of course, this is not a physically
+objective definition of nonlocal averaging, since it depends on the
+discretization. However, this kind of averaging was proposed in a boundary
+layer by Prof.\ Ba\v{z}ant and was implemented into OOFEM for testing purposes.
+\end{itemize}  
+ 
+The above functions depend only on the distance $s$ between the interacting
+points and are not normalized. If the normalizing
+condition
+$$
+\int_{V_\infty} \alpha(\mbf{x},\mbf{\xi})\;{\rm d}\mbf{\xi} = 1
+$$
+is imposed in an infinite body $V_{\infty}$, it is sufficient to scale
+$\alpha_0$ by a constant and set
+$$
+\alpha(\mbf{x},\mbf{\xi})=\frac{\alpha_0(\Vert\mbf{x}-\mbf{\xi}\Vert)}{V_{r\infty}}
+$$
+where
+$$
+V_{r\infty} = \int_{V_\infty} \alpha_0(\Vert\mbf{\xi}\Vert)\;{\rm d}\mbf{\xi} 
+$$
+Constant $V_{r\infty}$ can be computed analytically depending on the specific
+type of weight function and the number of spatial dimensions in which the
+analysis is performed. Since the factor $1/V_{r\infty}$ can be incorporated directly
+in the definition of $\alpha_0$, this case is referred to as ``no scaling''.
+
+If the body of interest is finite (or even semi-infinite), the averaging
+integral can be performed only over
+the domain filled by the body, and the volume contributing to the nonlocal
+average at a point $\mbf{x}$ near the boundary is reduced as compared to 
+points  $\mbf{x}$ far from the boundary or in an infinite body. To make sure
+that the normalizing condition
+$$
+\int_{V} \alpha(\mbf{x},\mbf{\xi})\;{\rm d}\mbf{\xi} = 1
+$$
+holds for the specific domain $V$, different approaches can be used.
+The standard approach defines the nonlocal weight function as  
+$$
+\alpha(\mbf{x},\mbf{\xi})=\frac{\alpha_0(\Vert\mbf{x}-\mbf{\xi}\Vert)}{V_r(\mbf{x})}
+$$
+where
+$$
+V_r(\mbf{x}) = \int_{V} \alpha_0(\Vert\mbf{x}-\mbf{\xi}\Vert)\;{\rm d}\mbf{\xi} 
+$$
+According to the approach suggested by Borino, the weight function is defined as
+$$
+\alpha(\mbf{x},\mbf{\xi})=\frac{\alpha_0(\Vert\mbf{x}-\mbf{\xi}\Vert)}{V_{r\infty}} + \left(1-\frac{V_r(\mbf{x})}{V_{r\infty}}\right)\delta(\mbf{x}-\mbf{\xi})
+$$
+where $\delta$ is the Dirac distribution. One can also say that the
+nonlocal variable is evaluated as
+$$
+\bar\varepsilon(\mbf{x}) = \frac{1}{V_{r\infty}}\int_V\alpha_0(\Vert\mbf{x}-\mbf{\xi}\Vert)\tilde\epsilon(\mbf{\xi})\;{\rm d}\mbf{\xi}+\left(1-\frac{V_r(\mbf{x})}{V_{r\infty}}\right)\tilde\varepsilon(\mbf{x})
+$$
+The term on the right-hand side after the integral is a multiple of the local
+variable, and so it can be referred to as the local complement.  
+
+The model parameters are summarized
+in Tables~\ref{idnl_table} and \ref{idnl_table_cont}.
 
 
 \begin{table}[!htb]
-%\begin{center}
 \begin{tabular}{|l|p{9cm}|}
 \hline
 Description & Nonlocal isotropic damage model for concrete in tension\\
 \hline
-Record Format & \descitem{idmnl1} \elemparam{d}{rn} \elemparam{E}{rn}
-\elemparam{n}{rn}  \elemparam{e0}{rn}
-\elemparam{ef}{rn} \elemparam{tAlpha}{rn} \elemparam{r}{rn}
-\elemparam{tAlpha}{rn} [\elemparam{regionMap}{ia}]
-[\elemparam{equivstraintype}{in}] [\elemparam{maxOmega}{rn}]\\
-Parameters &- \param{num} material model number\\
+Record Format & \descitem{idmnl1} 
+\elemparam{}{in} 
+\elemparam{d}{rn} 
+\elemparam{E}{rn}
+\elemparam{n}{rn}  
+[\elemparam{tAlpha}{rn}]
+[\elemparam{equivstraintype}{in}] 
+[\elemparam{k}{rn}] 
+[\elemparam{damlaw}{in}] 
+\elemparam{e0}{rn}
+[\elemparam{ef}{rn}] 
+[\elemparam{At}{rn}] 
+[\elemparam{Bt}{rn}] 
+[\elemparam{md}{rn}] 
+\elemparam{r}{rn}
+[\elemparam{regionMap}{ia}]
+[\elemparam{wft}{in}]
+[\elemparam{averagingType}{in}]
+[\elemparam{m}{rn}]
+[\elemparam{scaling}{in}]
+[\elemparam{averagedVar}{in}]
+[\elemparam{maxOmega}{rn}]\\
+Parameters &- \param{} material number\\
 &- \param{d} material density\\
-&- \param{E} Young modulus\\
-&- \param{n} Poisson ratio\\
-&- \param{e0} max effective strain at peak\\
-&- \param{ef} $\varepsilon_f$ is a model parameter that controls
-the post-peak slope (the tangent modulus just after the peak is
-$E_t=-f_t/(\varepsilon_f-\varepsilon_0)$)\\
-&- \param{r} nonlocal interaction radius\\
-&- \param{tAlpha} thermal dilatation coefficient\\
+&- \param{E} Young's modulus\\
+&- \param{n} Poisson's ratio\\
+&- \param{tAlpha} thermal expansion coefficient\\
+&- \param{equivstraintype} allows to choose from different definitions
+of equivalent strain, same as for the local model; see Table \ref{id_table}\\
+&- \param{k} ratio between uniaxial compressive and tensile strength, needed only if equivstraintype=3, default value 1\\
+&- \param{damlaw} allows to choose from different damage laws, 
+same as for the local model; see Table \ref{id_table}
+(note that parameter {\it wf} cannot be used for the nonlocal model)\\
+&- \param{e0} strain at peak stress (for damage laws 0,1,2,3), limit elastic strain (for damage law 4), characteristic strain (for damage law 5)\\
+&- \param{ef} strain parameter controling ductility, has the meaning of strain (for damage laws 0 and 1), the tangent modulus just after the peak is
+$E_t=-f_t/(\varepsilon_f-\varepsilon_0)$\\
+&- \param{At} parameter of Mazars damage law, used only by law 4\\
+&- \param{Bt} parameter of Mazars damage law, used only by law 4\\
+&- \param{md} exponent, used only by damage law 5, default value 1\\
+&- \param{r} nonlocal characteristic length $R$; its meaning depends
+on the type of weight function (e.g., interaction radius for the quartic spline)\\
 &- \param{regionMap} map indicating the regions (currently region is
 characterized by cross section number) to skip for nonlocal
 avaraging. The elements and corresponding IP are not taken into
 account in nonlocal averaging process if corresponding regionMap
 value is nonzero.\\
-&- \param{equivstraintype} Allows to choose from different definitions
-of equivalent strain, which is a scalar measure of the strain
-level. For the description, see table \ref{id_table}.\\
-&- \param{maxOmega} limit maximum damage, use for convergency improvement\\
-Supported modes& 3dMat, PlaneStress, PlaneStrain, 1dMat\\
-Features & Adaptivity support\\
+&- \param{wft} selects the type of nonlocal weight function:
+\begin{itemize}\setlength{\itemsep}{-3pt}
+\item[1 -] default, quartic spline (bell-shaped function with bounded support)
+\item[2 -] Gaussian function
+\item[3 -] exponential function (Green function in 1D)
+\item[4 -] uniform averaging up to distance $R$
+\item[5 -] uniform averaging over one finite element
+\end{itemize}\\
+& {\it --- continued in Table \ref{idnl_table_cont} ---} \\
 \hline
 \end{tabular}
-\caption{Nonlocal isotropic Damage model in tension - summary.}
+\caption{Nonlocal isotropic damage model for tensile failure -- summary.}
 \label{idnl_table}
 %\end{center}
 \end{table}
 
 
+\begin{table}[!htb]
+\begin{tabular}{|l|p{9cm}|}
+\hline
+Description & Nonlocal isotropic damage model for concrete in tension\\
+\hline
+&- \param{averagingType} activates a special averaging procedure, default value 0 does not change anything, value 1 means averaging over one finite element 
+(equivalent to {\it wft}=5, but kept here for compatibility with previous version)\\
+&- \param{m} multiplier for overnonlocal or undernonlocal formulation, which use
+{\em m}-times the local variable plus $(1-m)$-times the nonlocal variable, default value 1\\
+&- \param{scaling} selects the type of scaling of the weight function (e.g.\ near a boundary):
+\begin{itemize}\setlength{\itemsep}{-3pt}
+\item[1 -] default, standard scaling with integral of weight function in the denominator
+\item[2 -] no scaling (the weight function normalized in an infinite body is used even near a boundary)
+\item[3 -] Borino scaling (local complement)
+\end{itemize}\\
+&- \param{averagedVar} selects the variable to be averaged, default value 1 corresponds to equivalent strain, value 2 activates averaging of compliance variable\\
+&- \param{maxOmega} maximum damage, used for convergence improvement
+(its value is between 0 and 0.999999 (default), and it affects only the secant stiffness
+but not the stress)\\
+Supported modes& 3dMat, PlaneStress, PlaneStrain, 1dMat\\
+Features & Adaptivity support\\
+\hline
+\end{tabular}
+\caption{Nonlocal isotropic damage model for tensile failure -- continued.}
+\label{idnl_table_cont}
+%\end{center}
+\end{table}
+
+\clearpage
 
 %------------------------------------------------------------------
 \subsubsection{MDM - Anisotropic damage model}
@@ -1437,7 +1800,7 @@ Supported modes& 3dMat, PlaneStress, PlaneStrain, 1dMat,
 
 
 
-\subsubsection{DoublePowerLaw model for concrete aging}
+\subsubsection{Double-power law model for concrete creep with aging}
 Implementation of CebFip78 material model for concrete aging.
 The model description and parameters are summarized
 in table~\ref{doublepowerlaw_table}.
@@ -1665,7 +2028,7 @@ Supported modes& 3dMat, 1dMat\\
 \clearpage
 
 \section{Material Models for Transport Problems}
-\subsection{Isotropic Linear Material}
+\subsection{Isotropic linear material}
 \label{IsoLET}
 Linear isotropic material model for transport problems. The model parameters are summarized
 in table~\ref{Isoheat_table}.
@@ -1742,7 +2105,7 @@ Supported modes& \_2dHeMo\\
 \clearpage
 
 \section{Material Models for Fluid Dynamic}
-\subsection{Newtonian Fluid}
+\subsection{Newtonian fluid}
 \label{NewtonianFluidMaterial}
 Constitutive model of Newtonian fluid. The model parameters are summarized
 in table~\ref{NewtonianFluidMaterial_table}.
@@ -1768,7 +2131,7 @@ Supported modes& \_2dFlow\\
 
 
 
-\subsection{Bingham Fluid}
+\subsection{Bingham fluid}
 \label{BinghamFluidMaterial}
 Constitutive model of Bingham fluid. This is a constitutive model of
 non-Newtonian type. The model parameters are summarized
@@ -1840,7 +2203,7 @@ Supported modes& \_2dFlow\\
 
 
 
-\subsection{Two-Fluid material}
+\subsection{Two-fluid material}
 \label{TwoFluidMaterial}
 Material coupling the behaviour of two particulat materials based on
 rule of mixture. The weighting factor is VOF fraction.
@@ -1869,7 +2232,7 @@ Supported modes& \_2dFlow\\
 
 \clearpage
 
-\section{Material drivers - theory \& application}
+\section{Material Drivers - Theory \& Application}
 The purpose of this section is to present the theoretical backgroung
 of some handy general purpose algorithms, that are provided in oofem in the
 form of general material base classes. They can significantly
@@ -1929,7 +2292,7 @@ where $\mbf{\lambda}$ is the vector of plastic consistency parameters $\lambda_i
 
 
 
-\subsubsection{Closest point return algorithm}
+\subsubsection{Closest-point return algorithm}
 Let us assume, that at time $t_n$ the total and plastic strain vectors and internal variables are known
 $$
 \{\mbf{\varepsilon}_n, \mbf{\varepsilon}^p_n, \mbf{\kappa}_n\}\  {\rm given\ at}\ t_n
@@ -2174,7 +2537,8 @@ documentation of MPlasticMaterial class):
 
 
 
-\subsection{Isotropic Damage Model - IsotropicDamageMaterial class}\ref{IsoDamMod}
+\subsection{Isotropic damage model -- IsotropicDamageMaterial class}
+\label{IsoDamMod}
  In this section, the implementation of an isotropic damage model will be
  described. To cover the various models based on isotropic damage concept,
  a base class IsotropicDamageMaterial is defined first,

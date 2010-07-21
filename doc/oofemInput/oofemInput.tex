@@ -297,12 +297,12 @@ performed. The general format of this record can be specified in
 \item ``standard-syntax''\\
   \begin{record}[0.9\textwidth]
     \recentry{\entKeyword{AnalysisType}}{\field{nsteps}{in}} \recentry{}{\optField{renumber}{in}}
-    \recentry{}{\field{attributes}{string}} \recentry{}{\optField{nmodules}{in}} \recentry{}{\optField{nxfemman}{in}}
+    \recentry{}{\field{attributes}{string}} \recentry{}{\optField{ninitmodules}{in}} \recentry{}{\optField{nmodules}{in}} \recentry{}{\optField{nxfemman}{in}}
   \end{record}
 \item ``meta step-syntax''\\
   \begin{record}[0.9\textwidth]
     \recentry{\entKeyword{AnalysisType}}{\field{nmsteps}{in}}
-    \recentry{}{\optField{nmodules}{in}} \recentry{}{\optField{nxfemman}{in}}
+    \recentry{}{\optField{ninitmodules}{in}} \recentry{}{\optField{nmodules}{in}} \recentry{}{\optField{nxfemman}{in}}
   \end{record}
   immediately followed by \param{nmsteps} meta step records with the following syntax:\\
   \begin{record}[0.9\textwidth]
@@ -324,9 +324,14 @@ performed. It will not work in parallel mode.
 analysis (and solver), which are valid for corresponding solution
 steps within meta step. If used in standard syntax, the attributes are
 valid for all solution step.
+\item \param{ninitmodules} - number of initialization module records for given
+problem. The initialization modules are specified after meta step section (or
+after analysis record, if no metasteps are present). Initialization modules
+allow to initialize the state variables by values previously computed by 
+external software. The available initialization modules are described in section
+\ref{InitModulesSec}.
 \item \param{nmodules} - number of export module records for given
-problem. The export modules are specified after meta step section (or
-after analysis record, if no metasteps are present). Export modules
+problem. The export modules are specified after initialization modules. Export modules
 allow to export computed data into external software for
 postprocessing. The available export modules are described in section
 \ref{ExportModulesSec}.
@@ -1494,13 +1499,63 @@ MPT\_TARGE2:	\param{meshpackage} = 1. Interface to Targe2 2D
 mesh generator.
 \end{itemize}
 %
+\subsection{Initialization modules}
+\label{InitModulesSec}
+Initialization modules allow to initialize the state variables using data 
+previously computed by external software. The number of initialization module records is specified in
+analysis record using \param{ninitmodules} parameter (see the initial part of section \ref{_AnalysisRecord}). The general format
+is the following:\\
+\begin{record}
+\recentry{\entKeyword{EntType}}
+{\field{initfile}{string}}
+\end{record}
+The file name following the keyword ``initfile'' specifies
+the path to the file that contains the initialization data
+and should be given without quotes.
+
+Currently, the only supported initialization module is 
+\begin{itemize}
+\item Gauss point initialization module
+
+\begin{record}[0.9\textwidth]
+    \recentry{GPInitModule}{\field{initfile}{string}}  \end{record}
+\begin{itemize}
+\item
+Each Gauss point is represented by one line in the initialization file.
+\item
+The Gauss points should be given in a specific order, based on the element number and the Gauss point number, in agreement with the mesh specified in later sections.
+\item 
+Each line referring to a Gauss point should contain the following data:
+\begin{record}
+\recentry{\field{elnum}{in}\;\;\;\field{gpnum}{in}\;\;\;\field{coords}{ra}\;\;\;\field{ng}{in}}{}
+\recentry{\field{var\_1\_id}{in}\;\;\;\field{values\_1}{ra}}{}
+\recentry{\;\;\;...}{}
+\recentry{\field{var\_ng\_id}{in}\;\;\;\field{values\_ng}{ra}}{}
+\end{record}
+   \item \param{elnum} is the element number
+   \item \param{gpnum} is the Gauss point number
+   \item \param{coords} are the coordinates of the Gauss point
+   \item \param{ng} is the number of groups of variables that will follow
+   \item   \param{var\_1\_id} is the identification number of variable group number 1 (according to the definitions in internalstatetype.h)
+    \item  \param{values\_1} are the values of variables in group number 1
+   \item   \param{var\_ng\_id} is the identification number of variable group number ng
+    \item  \param{values\_ng} are the values of variables in group number ng
+\item Example:\\ \mbox{``37 4 3 0.02 0.04 0.05 3 52 1 0.23 62 1 0.049 1 6 0 -2.08e+07 0 0 0 0''} means that Gauss point number 4 of element number 37 has coordinates $x=0.02$, $y=0.04$ and $z=0.05$ and the initial values are specified for 3 groups of variables;\\ 
+the first group (variable ID 52) is of type IST\_DamageScalar (see internalstatetype.h) and contains 1 variable (since it is a scalar) with value 0.23;\\
+ the second group (ID 62) is of type IST\_CumPlasticStrain
+and contains 1 variable with value 0.049;\\
+ the third group is of type IST\_StressTensor
+and contains 6 variables (stress components $\sigma_x$, $\sigma_y$, etc.) with values
+0, -2.08e+07, 0, 0, 0, 0
+\end{itemize}
+\end{itemize}
 
 \subsection{Export modules}
 \label{ExportModulesSec}
 Export modules allow to export computed data into external software for
 post-processing. The number of export module records is specified in
-analysis record using \param{nmodules} parameter (see section \ref{_AnalysisRecord}). The general format
-is following\\
+analysis record using \param{nmodules} parameter (see the initial part of section \ref{_AnalysisRecord}). The general format
+is the following:\\
 \begin{record}
 \recentry{\entKeyword{EntType}}{[\keywordnotype{tstep\_all}]}
 \recentry{}{\optField{tstep\_step}{in}} \recentry{}{\optField{tsteps\_out}{rl}}

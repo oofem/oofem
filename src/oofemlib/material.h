@@ -218,12 +218,22 @@ public:
      */
     virtual int hasMaterialModeCapability(MaterialMode mode);
     /**
-     * Returns the integration point corresponding value in Reduced form.
-     * @param answer contain corresponding ip value, zero sized if not available
+     * Sets the value of a certain variable at a given integration point to the given value.
+     * @param value contains the value(s) to be set (in reduced form)
      * @param aGaussPoint integration point
      * @param type determines the type of internal variable
      * @param type determines the type of internal variable
      * @returns nonzero if ok, zero if var not supported
+     */
+    virtual int setIPValue(const FloatArray value, GaussPoint *aGaussPoint, InternalStateType type)
+    { return 0; }
+    /**
+     * Returns the integration point corresponding value in Reduced form.
+     * @param answer contain corresponding ip value, zero sized if not available
+     * @param aGaussPoint integration point to which the value refers
+     * @param type determines the type of internal variable
+     * @param atTime determines the time step
+     * @returns nonzero if the assignment can be done, zero if this type of variable is not supported
      */
     virtual int giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime)
     { answer.resize(0);

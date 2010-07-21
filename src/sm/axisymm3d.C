@@ -200,6 +200,34 @@ Axisymm3d :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int 
     return;
 }
 
+double
+Axisymm3d :: giveArea()
+// returns the area occupied by the receiver
+{
+    if ( area > 0 ) {
+        return area;         // check if previously computed
+    }
+
+    Node *node1, *node2, *node3;
+    double x1, x2, x3, y1, y2, y3;
+
+    node1 = this->giveNode(1);
+    node2 = this->giveNode(2);
+    node3 = this->giveNode(3);
+
+    x1 = node1->giveCoordinate(1);
+    x2 = node2->giveCoordinate(1);
+    x3 = node3->giveCoordinate(1);
+
+    y1 = node1->giveCoordinate(2);
+    y2 = node2->giveCoordinate(2);
+    y3 = node3->giveCoordinate(2);
+
+    area = 0.5 * ( x2 * y3 + x1 * y2 + y1 * x3 - x2 * y1 - x3 * y2 - x1 * y3 );
+    if (area<0.)
+      area = -area;
+    return area;
+}
 
 double
 Axisymm3d :: computeVolumeAround(GaussPoint *aGaussPoint)

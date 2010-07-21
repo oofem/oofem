@@ -818,7 +818,50 @@ contextIOResultType Element :: restoreContext(DataStream *stream, ContextMode mo
     return CIO_OK;
 }
 
+double
+Element :: computeVolumeAreaOrLength()
+// the element computes its volume, area or length 
+// (depending on the spatial dimension of that element) 
+{
+  int i;
+  GaussPoint* gp;
+  double answer = 0.;
+  IntegrationRule *iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
+  if (iRule){
+    for ( i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
+      gp  = iRule->getIntegrationPoint(i);
+      answer += this->computeVolumeAround(gp);
+    }
+    return answer;
+  }
+  return -1.; // means "cannot be evaluated"
+}
 
+double 
+Element :: computeMeanSize()
+// Computes the size of the element defined as its length, 
+// square root of area or cube root of volume (depending on spatial dimension)
+{
+  // if the method "giveArea" is properly implemented 
+  // for the particular type of element, the mean size is the square root of area
+  // 8 July 2010 - does not seem to work any more (Element does not inherit from ElementGeometry)
+  // double area = this->giveArea();
+  // if (area>0.)
+  //  return sqrt(area);
+
+  // if "giveArea" is not implemented (default value 0.), 
+  // then the contributing areas or volumes are collected from Gauss points 
+  double volume = this->computeVolumeAreaOrLength();
+  if (volume<0.)
+    return -1.; // means "cannot be evaluated"
+  int dim = this->giveSpatialDimension();
+  switch (dim){
+  case 1: return volume;
+  case 2: return sqrt(volume);
+  case 3: return pow(volume,1./3.);
+  }
+  return -1.; // means "cannot be evaluated"
+}
 
 double
 Element :: giveLenghtInDir(const FloatArray &normalToCrackPlane)

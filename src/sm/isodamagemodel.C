@@ -175,6 +175,9 @@ IsotropicDamageMaterial :: giveRealStressVector(FloatArray &answer, MatResponseF
     status->letTempStressVectorBe(answer);
     status->setTempKappa(tempKappa);
     status->setTempDamage(omega);
+#ifdef keep_track_of_dissipated_energy
+    status-> computeWork(gp);
+#endif
     return;
 }
 
@@ -254,9 +257,25 @@ IsotropicDamageMaterial :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoi
         answer.resize(1);
         answer.at(1) = status->giveKappa();
         return 1;
+
+#ifdef keep_track_of_dissipated_energy
+    } else if (type == IST_StressWorkDensity) {
+      answer.resize(1);
+      answer.at(1) = status->giveStressWork ();
+      return 1;
+    } else if (type == IST_DissWorkDensity) {
+      answer.resize(1);
+      answer.at(1) = status->giveDissWork ();
+    } else if (type == IST_FreeEnergyDensity) {
+      answer.resize(1);
+      answer.at(1) = status->giveStressWork() - status->giveDissWork();
+      return 1;
+#endif
+
     } else  {
         return StructuralMaterial :: giveIPValue(answer, aGaussPoint, type, atTime);
     }
+    return 1; // to make the compiler happy
 }
 
 
@@ -270,6 +289,16 @@ IsotropicDamageMaterial :: giveIPValueType(InternalStateType type)
         return ISVT_TENSOR_S3;
     } else if ( type == IST_MaxEquivalentStrainLevel ) {
         return ISVT_SCALAR;
+
+#ifdef keep_track_of_dissipated_energy
+    } else if (type == IST_DissWorkDensity) {
+      return ISVT_SCALAR;
+    } else if (type == IST_StressWorkDensity) {
+      return ISVT_SCALAR;
+    } else if (type == IST_FreeEnergyDensity) {
+      return ISVT_SCALAR;
+#endif
+
     } else {
         return StructuralMaterial :: giveIPValueType(type);
     }
@@ -288,6 +317,14 @@ IsotropicDamageMaterial :: giveIntVarCompFullIndx(IntArray &answer, InternalStat
         answer.resize(1);
         answer.at(1) = 1;
         return 1;
+
+#ifdef keep_track_of_dissipated_energy
+    } else if ((type==IST_DissWorkDensity) || (type==IST_StressWorkDensity) || (type==IST_FreeEnergyDensity)) {
+      answer.resize (1);
+      answer.at(1) = 1;
+      return 1;
+#endif
+
     } else {
         return StructuralMaterial :: giveIntVarCompFullIndx(answer, type, mmode);
     }
@@ -301,6 +338,13 @@ IsotropicDamageMaterial :: giveIPValueSize(InternalStateType type, GaussPoint *a
         ( type == IST_PrincipalDamageTensor ) || ( type == IST_PrincipalDamageTempTensor ) ||
         ( type == IST_MaxEquivalentStrainLevel ) ) {
         return 1;
+
+#ifdef keep_track_of_dissipated_energy
+    } else if ((type==IST_StressWorkDensity) || 
+	       (type==IST_DissWorkDensity) || (type==IST_FreeEnergyDensity)) {
+      return 1;
+#endif
+
     } else {
         return StructuralMaterial :: giveIPValueSize(type, aGaussPoint);
     }
@@ -363,6 +407,10 @@ IsotropicDamageMaterialStatus :: IsotropicDamageMaterialStatus(int n, Domain *d,
 {
     kappa = tempKappa = 0.0;
     damage = tempDamage = 0.0;
+#ifdef keep_track_of_dissipated_energy
+    stressWork = tempStressWork = 0.0;
+    dissWork = tempDissWork = 0.0;
+#endif
 }
 
 
@@ -377,8 +425,15 @@ IsotropicDamageMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)
     fprintf(file, "status { ");
     if ( this->damage > 0.0 ) {
         fprintf(file, "kappa %f, damage %f ", this->kappa, this->damage);
-    }
 
+#ifdef keep_track_of_dissipated_energy
+	fprintf (file,", dissW %f, freeE %f, stressW %f ",this->dissWork,(this->stressWork)-(this->dissWork),this->stressWork);
+    }
+    else {
+      fprintf (file,"stressW %f ",this->stressWork);
+#endif
+
+    }
     fprintf(file, "}\n");
 }
 
@@ -388,7 +443,12 @@ IsotropicDamageMaterialStatus :: initTempStatus()
 {
     StructuralMaterialStatus :: initTempStatus();
     this->tempKappa = this->kappa;
-    this->tempDamage = this->damage;
+    //mj 14 July 2010 - should be discussed with Borek !!!
+    //this->tempDamage = this->damage;
+#ifdef keep_track_of_dissipated_energy
+    this->tempStressWork = this->stressWork;
+    this->tempDissWork = this->dissWork;
+#endif
 }
 
 void
@@ -397,6 +457,10 @@ IsotropicDamageMaterialStatus :: updateYourself(TimeStep *atTime)
     StructuralMaterialStatus :: updateYourself(atTime);
     this->kappa = this->tempKappa;
     this->damage = this->tempDamage;
+#ifdef keep_track_of_dissipated_energy
+    this->stressWork = this->tempStressWork;
+    this->dissWork = this->tempDissWork;
+#endif
 }
 
 
@@ -410,7 +474,7 @@ IsotropicDamageMaterialStatus :: saveContext(DataStream *stream, ContextMode mod
         THROW_CIOERR(iores);
     }
 
-    // write a raw data
+    // write raw data
     if ( !stream->write(& kappa, 1) ) {
         THROW_CIOERR(CIO_IOERR);
     }
@@ -418,6 +482,15 @@ IsotropicDamageMaterialStatus :: saveContext(DataStream *stream, ContextMode mod
     if ( !stream->write(& damage, 1) ) {
         THROW_CIOERR(CIO_IOERR);
     }
+
+#ifdef keep_track_of_dissipated_energy
+    if (!stream->write(&stressWork,1)) {
+      THROW_CIOERR(CIO_IOERR);
+    }
+    if (!stream->write(&dissWork,1)) {
+      THROW_CIOERR(CIO_IOERR);
+    }
+#endif
 
     return CIO_OK;
 }
@@ -441,8 +514,37 @@ IsotropicDamageMaterialStatus :: restoreContext(DataStream *stream, ContextMode 
         THROW_CIOERR(CIO_IOERR);
     }
 
+#ifdef keep_track_of_dissipated_energy
+    if (!stream->read (&stressWork,1)) {
+      THROW_CIOERR(CIO_IOERR);
+    }
+    if (!stream->read (&dissWork,1)) {
+      THROW_CIOERR(CIO_IOERR);
+    }
+#endif
+
     return CIO_OK;
 }
 
+#ifdef keep_track_of_dissipated_energy
+void 
+IsotropicDamageMaterialStatus :: computeWork(GaussPoint* gp)
+{
+  // strain increment
+  FloatArray deps = tempStrainVector;
+  deps.substract(strainVector);
+
+  // increment of stress work density
+  int n = deps.giveSize();
+  double dSW = (dotProduct(tempStressVector,deps,n)+dotProduct(stressVector,deps,n))/2.;
+  tempStressWork = stressWork + dSW;
+
+  // elastically stored energy density
+  double We = dotProduct(tempStressVector,tempStrainVector,n)/2.;
+
+  // dissipative work density
+  tempDissWork = tempStressWork - We;
+}
+#endif
 
 } // end namespace oofem

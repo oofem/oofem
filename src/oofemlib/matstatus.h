@@ -149,6 +149,23 @@ public:
      */
      virtual void setMaterialProperty (int propID, double value) {}
 
+     /**
+      * Allows to set the value of a specific variable, identified by varID.
+      * The meaning of varID is defined in each specific implementation
+      * of the method depending on the material model.
+      * This method can be used to set the initial values of internal
+      * variables, stresses, etc., which have been previously determined
+      * by another simulation (e.g. of the manufacturing process).  
+      */
+     virtual void setStatusVariable (int varID, double value) {}
+     /**
+      * Restores consistency of the status, i.e., computes or corrects
+      * the values of certain status variables such that the state is admissible.
+      * For instance, if the initial values of some internal variables 
+      * are read from a file, other internal variables are adjusted accordingly.
+      */ 
+     virtual void restoreConsistency () {}
+
     // definition
     /// Returns class name of the receiver.
     const char *giveClassName() const { return "MaterialStatus"; }

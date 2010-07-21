@@ -616,7 +616,7 @@ NLStructuralElement :: computeStiffnessMatrix(FloatMatrix &answer,
         for ( i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
             gp = iRule->getIntegrationPoint(i);
             dV = this->computeVolumeAround(gp);
-            stress = ( ( StructuralMaterialStatus * ) mat->giveStatus(gp) )->giveStressVector();
+            stress = ( ( StructuralMaterialStatus * ) mat->giveStatus(gp) )->giveTempStressVector();
             n = stress.giveSize();
             if ( n ) {
                 for ( j = 1; j <= n; j++ ) {

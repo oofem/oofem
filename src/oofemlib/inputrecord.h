@@ -91,6 +91,8 @@ enum InputFieldType {
     IFT_ExportModule_domainall,
     IFT_ExportModule_domainmask,
 
+    IFT_InitModule_initfilename,
+
     IFT_VTKExportModule_cellvars,
     IFT_VTKExportModule_vars,
     IFT_VTKExportModule_primvars,
@@ -590,7 +592,20 @@ enum InputFieldType {
 
     IFT_IsotropicDamageMaterial1_e0,
     IFT_IsotropicDamageMaterial1_ef,
+    IFT_IsotropicDamageMaterial1_wf,
     IFT_IsotropicDamageMaterial1_equivstraintype,
+    IFT_IsotropicDamageMaterial1_softeningtype,
+    IFT_IsotropicDamageMaterial1_k,
+    IFT_IsotropicDamageMaterial1_md,
+    IFT_IsotropicDamageMaterial1_At,
+    IFT_IsotropicDamageMaterial1_Bt,
+    IFT_IsotropicDamageMaterial1_ft,
+    IFT_IsotropicDamageMaterial1_w1wf,
+    IFT_IsotropicDamageMaterial1_e1ef,
+    IFT_IsotropicDamageMaterial1_s1ft,
+    IFT_IsotropicDamageMaterial1_s1,
+    IFT_IsotropicDamageMaterial1_w1,
+    IFT_IsotropicDamageMaterial1_e1,
 
     IFT_IsotropicDamageMaterial2_eps0,
     IFT_IsotropicDamageMaterial2_epsk,
@@ -848,6 +863,7 @@ enum InputFieldType {
     IFT_ConcreteDPM_reltime,
     IFT_ConcreteDPM_rateexp,
     IFT_ConcreteDPM_href,
+    IFT_ConcreteDPM_helem,
 
     IFT_ConcreteDPMnlMaterial_r,
     IFT_ConcreteDPMnlMaterial_m,
@@ -865,6 +881,12 @@ enum InputFieldType {
 
     IFT_NonlocalMaterialExtensionInterface_regionmap,
     IFT_NonlocalMaterialExtensionInterface_permanentNonlocTableFlag,
+    IFT_NonlocalMaterialExtensionInterface_r,
+    IFT_NonlocalMaterialExtensionInterface_wft,
+    IFT_NonlocalMaterialExtensionInterface_averagingtype,
+    IFT_NonlocalMaterialExtensionInterface_m,
+    IFT_NonlocalMaterialExtensionInterface_scalingtype,
+    IFT_NonlocalMaterialExtensionInterface_averagedquantity,
 
     IFT_OutputManager_name,
     IFT_OutputManager_tstepall,

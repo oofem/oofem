@@ -11,7 +11,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2010   Borek Patzak
  *
  *
  *
@@ -34,7 +34,7 @@
  */
 
 //
-// class ExportModule
+// class InitModule
 //
 
 #ifndef initmodule_h
@@ -66,6 +66,8 @@ protected:
 
     /// Problem pointer
     EngngModel *emodel;
+    /// Initialization file
+    FILE* initStream;
 public:
 
     /// Constructor. Creates empty Init Module. 
@@ -75,10 +77,9 @@ public:
     /// Initializes receiver acording to object description stored in input record.
     virtual IRResultType initializeFrom(InputRecord *ir) = 0;
     /**
-     * Writes the output. Abstract service.
-     * @param tStep time step.
+     * Reads the input. Abstract service.
      */
-    virtual void                  doInit() = 0;
+    virtual void doInit() = 0;
     /// Returns class name of the receiver.
     virtual const char *giveClassName() const { return "InitModule"; }
 

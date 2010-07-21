@@ -118,6 +118,9 @@ public:
   void  printOutputAt (FILE *file, TimeStep* tStep) ;
   contextIOResultType  saveContext (DataStream*, ContextMode mode, void *obj = NULL) ;
   contextIOResultType  restoreContext (DataStream*, ContextMode mode, void *obj = NULL) ;
+  int setIPValue (const FloatArray value, InternalStateType type);
+  //void setStatusVariable (int varID, double value);
+  void restoreConsistency ();
   const char*  giveClassName () const 
   { return "ConcreteDPMStatus" ; }
   classType  giveClassID () const
@@ -346,9 +349,9 @@ public:
 };
 
 
-//   ********************************************************************
-//   *** CLASS CONCRETE PLASTICITY ISOTROPIC DAMAGE MATERIAL STATUS   ***
-//   ********************************************************************
+//   ***********************************************************
+//   *** CLASS CONCRETE PLASTICITY ISOTROPIC DAMAGE MATERIAL ***
+//   ***********************************************************
 
 /**
 This class contains the combination of a local plasticity model for concrete with a local isotropic damage model. The yield surface of the plasticity model is based on the extension of the Menetrey and Willam yield criterion. The flow rule is nonassociated. The evolution laws of the hardening variables depend on the stress state. The plasticity model describes only hardening and perfect plasticity. It is based on h eeffective stress. The damage parameter of the isotropic damage model is based on the total volumetric strain. An exponential softening law is implemented.
@@ -404,6 +407,8 @@ protected:
   /// the dilation parameter of the plastic potential
   double mQ;
 
+  /// element size (to be used in fracture energy approach (crack band)
+  double helem;
 
   /// pointer for linear elastic material
   //  IsotropicLinearElasticMaterial *ILEMaterial;
@@ -680,8 +685,11 @@ public:
 
 
   /// Compute damage parameter
-virtual  double computeDamageParam (double kappa, GaussPoint* gp);
-    
+  virtual  double computeDamageParam (double kappa, GaussPoint* gp);
+ 
+  /// compute the damage-driving variable from given damage
+  double computeInverseDamage (double dam, GaussPoint* gp);
+   
   /// Compute equivalent strain value
 virtual  void computeEquivalentStrain(double& kappaD, const StrainVector& elasticStrain, GaussPoint* gp, TimeStep* atTime);
 
@@ -729,6 +737,15 @@ virtual  void computeEquivalentStrain(double& kappaD, const StrainVector& elasti
 
   virtual bool isCharacteristicMtrxSymmetric (MatResponseMode rMode) {return false;}
   
+    /**
+     * Sets the value of a certain variable at a given integration point to the given value.
+     * @param value contains the value(s) to be set (in reduced form)
+     * @param aGaussPoint integration point
+     * @param type determines the type of internal variable
+     * @param type determines the type of internal variable
+     * @returns nonzero if ok, zero if var not supported
+     */
+  int setIPValue(const FloatArray value, GaussPoint *aGaussPoint, InternalStateType type);
     /**
        Returns the value of a state variable at the specified integration point in reduced form.
        @param answer contains corresponding ip value, 

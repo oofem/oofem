@@ -346,7 +346,15 @@ public:
     void giveStressDependentPartOfStrainVector(FloatArray &answer, GaussPoint *, const FloatArray &,
                                                TimeStep *, ValueModeType mode);
 
-
+    /**
+     * Sets the value of a certain variable at a given integration point to the given value.
+     * @param value contains the value(s) to be set (in reduced form)
+     * @param aGaussPoint integration point
+     * @param type determines the type of internal variable
+     * @param type determines the type of internal variable
+     * @returns nonzero if ok, zero if var not supported
+     */
+    virtual int setIPValue(const FloatArray value, GaussPoint *aGaussPoint, InternalStateType type);
     /**
      * Returns the integration point corresponding value in Reduced form.
      * @param answer contain corresponding ip value, zero sized if not available
