@@ -404,6 +404,7 @@ IsotropicDamageMaterial1 :: damageFunction(double kappa, GaussPoint* gp)
   default:
     printf("IsotropicDamageMaterial1::damageFunction ... undefined softening type %d\n",softType);
   }
+  return 0.; // to make the compiler happy
 }
 
 double

@@ -14,8 +14,8 @@ node 10 coords 3 8.000000e+00 0.000000e+00 0.000000e+00 Shared partitions 1 1
 truss1d 7 nodes 2 8 9 mat 1 crossSect 1
 truss1d 8 nodes 2 9 10 mat 1 crossSect 1
 SimpleCS 1 thick 1.0 width 1.0
-idm1 1 d 1.0  E 1.0  n 0.2  e0 1.0 ef 5.0 equivstraintype 1 talpha 0.0
-idm1 2 d 1.0  E 1.0  n 0.2  e0 0.97 ef 5.0 equivstraintype 1 talpha 0.0
+idm1 1 d 1.0  E 1.0  n 0.2  e0 1.0 wf 5.0 equivstraintype 1 talpha 0.0
+idm1 2 d 1.0  E 1.0  n 0.2  e0 0.97 wf 5.0 equivstraintype 1 talpha 0.0
 BoundaryCondition 1 loadTimeFunction 1 prescribedvalue 0.0
 NodalLoad 2 loadTimeFunction 1 components 1 1.0
 ConstantFunction 1 f(t) 1.0

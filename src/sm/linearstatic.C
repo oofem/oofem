@@ -203,9 +203,9 @@ TimeStep *LinearStatic :: giveNextStep()
 void LinearStatic :: solveYourself()
 {
 #ifdef __PARALLEL_MODE
+#ifdef __VERBOSE_PARALLEL
     // force equation numbering before setting up comm maps
     int neq = this->giveNumberOfEquations(EID_MomentumBalance);
-#ifdef __VERBOSE_PARALLEL
     OOFEM_LOG_INFO("[process rank %d] neq is %d\n", this->giveRank(), neq);
 #endif
 

@@ -16,8 +16,8 @@ truss1d 9 nodes 2 10 11 mat 1 crossSect 1
 truss1d 10 nodes 2 11 12 mat 1 crossSect 1
 truss1d 11 nodes 2 12 2 mat 1 crossSect 1
 SimpleCS 1 thick 1.0 width 1.0
-idm1 1 d 1.0  E 1.0  n 0.2  e0 1.0 ef 5.0 equivstraintype 1 talpha 0.0
-idm1 2 d 1.0  E 1.0  n 0.2  e0 0.97 ef 5.0 equivstraintype 1 talpha 0.0
+idm1 1 d 1.0  E 1.0  n 0.2  e0 1.0 wf 5.0 equivstraintype 1 talpha 0.0
+idm1 2 d 1.0  E 1.0  n 0.2  e0 0.97 wf 5.0 equivstraintype 1 talpha 0.0
 BoundaryCondition 1 loadTimeFunction 1 prescribedvalue 0.0
 NodalLoad 2 loadTimeFunction 1 components 1 1.0
 ConstantFunction 1 f(t) 1.0

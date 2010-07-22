@@ -487,9 +487,9 @@ NonLinearStatic :: giveInternalForces(FloatArray &answer, const FloatArray &Delt
 void NonLinearStatic :: solveYourself()
 {
 #ifdef __PARALLEL_MODE
+#ifdef __VERBOSE_PARALLEL
     // force equation numbering before setting up comm maps
     int neq = this->giveNumberOfEquations(EID_MomentumBalance);
-#ifdef __VERBOSE_PARALLEL
     OOFEM_LOG_INFO("[process rank %d] neq is %d\n", this->giveRank(), neq);
 #endif
 

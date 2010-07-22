@@ -57,9 +57,6 @@ namespace oofem {
 */
 class GPInitModule : public InitModule
 {
- protected:
-  //  FILE* inputStream;
-
  public:
   /// Constructor. Creates empty GPInitModule. 
   GPInitModule (EngngModel* e);

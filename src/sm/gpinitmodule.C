@@ -75,13 +75,13 @@ GPInitModule :: initializeFrom (InputRecord* ir)
 void    
 GPInitModule :: doInit ()
 {
-  int ielem, igp, nelem, ie, ig, nv, iv, nc, ic, varsize;
+  int ielem, igp, nelem, ie, ig, nv, iv, nc, ic, varsize, vt;
   InternalStateType vartype;
   Element* elem;
   GaussPoint* gp;
   FloatArray value;
 
-  double coords[3], val;
+  double coords[3];
   
   Domain* d = emodel->giveDomain(1);
   nelem = d -> giveNumberOfElements();
@@ -107,7 +107,8 @@ GPInitModule :: doInit ()
       fscanf (initStream,"%d",&nv);
       assert (nv>=0);
       for (iv=1; iv<=nv; iv++){
-	fscanf (initStream,"%d %d",&vartype,&varsize);
+	fscanf (initStream,"%d %d",&vt,&varsize);
+	vartype = (InternalStateType) vt;
 	value.resize(varsize);
 	for (ic=1; ic<=varsize; ic++)
 	  fscanf (initStream,"%lg",&value.at(ic));
