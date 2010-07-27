@@ -197,7 +197,7 @@ void LumpedMassElement :: drawDeformedGeometry(oofegGraphicContext &gc, UnknownT
 }
 
 
-void Truss1d :: drawScalar(oofegGraphicContext &context)
+void LumpedMassElement :: drawScalar(oofegGraphicContext &context)
 {}
 
 
