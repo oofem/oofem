@@ -268,7 +268,7 @@ public:
      * @param stepN time step
      * @param determines response mode
      */
-    void                  computeNonForceLoadVector(FloatArray &answer, TimeStep *, ValueModeType mode);
+    virtual void                  computeNonForceLoadVector(FloatArray &answer, TimeStep *, ValueModeType mode);
     /**
      * Computes force dependent part of load vector. It is load vector induced by applied force loading.
      * Element body load and element boundary load (edge and surface load) is included.
@@ -278,7 +278,7 @@ public:
      * @param tStep time step
      * @param mode determines the response (total, incremental)
      */
-    void computeForceLoadVector(FloatArray & answer, TimeStep *, ValueModeType);
+    virtual void computeForceLoadVector(FloatArray & answer, TimeStep *, ValueModeType);
     virtual void computeLocalForceLoadVector(FloatArray & answer, TimeStep *, ValueModeType);
     // stress equivalent vector in nodes (vector of internal forces)
     // - mainly for nonLinear Analysis.

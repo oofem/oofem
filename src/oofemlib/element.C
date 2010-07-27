@@ -1005,6 +1005,9 @@ int
 Element :: giveSpatialDimension(void)
 {
     switch ( this->giveGeometryType() ) {
+    case EGT_point:
+        return 0;
+
     case EGT_line_1:
     case EGT_line_2:
         return 1;
@@ -1035,6 +1038,9 @@ int
 Element :: giveNumberOfBoundarySides(void)
 {
     switch ( this->giveGeometryType() ) {
+    case EGT_point:
+        return 0;
+
     case EGT_line_1:
     case EGT_line_2:
         return 2;

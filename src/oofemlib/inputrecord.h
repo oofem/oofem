@@ -405,6 +405,7 @@ enum InputFieldType {
     IFT_LIBeam3d_refnode,
     IFT_LIBeam3d2_refnode,
     IFT_Truss2d_cs,
+    IFT_LumpedMassElement_components,
 
     IFT_Quad1_ht_nip,
     IFT_Brick1_ht_nip,

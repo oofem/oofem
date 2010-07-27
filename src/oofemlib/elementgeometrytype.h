@@ -46,6 +46,7 @@ namespace oofem {
 /**
  * Enumerative type used to classify element geometry
  * Poosible values are:
+ * EGT_point  - point in space
  * EGT_line_1 - line elements with two nodes  1-------2
  * EGT_line_2 - line element with three nodes 1---2---3
  * EGT_triangle_1 - triangle element with three nodes
@@ -60,6 +61,7 @@ namespace oofem {
  * EGT_hexa_2  - hexahedron with 20 nodes
  */
 #define Element_Geometry_Type_DEF \
+    ENUM_ITEM(EGT_point) /* point in space */   \
     ENUM_ITEM(EGT_line_1) /* line elements with two nodes  1-------2 */   \
     ENUM_ITEM(EGT_line_2) /* line element with three nodes 1---2---3 */   \
     ENUM_ITEM(EGT_triangle_1) /* triangle element with three nodes */ \

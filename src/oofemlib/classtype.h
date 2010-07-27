@@ -137,6 +137,7 @@ enum classType {
     Brick1_htClass,
     Tetrah1_htClass,
     PlaneStress2dXfemClass,
+    LumpedMassElementClass,
 
     MacroLSpaceClass,
     MicroMaterialClass,

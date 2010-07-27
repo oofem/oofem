@@ -116,6 +116,7 @@
 #include "macrolspace.h"
 #include "planstrssxfem.h"
 #include "cohsur3d.h"
+#include "lumpedmasselement.h"
 
 // Emodels of SM module
 #include "nlinearstatic.h"
@@ -367,6 +368,8 @@ Element *CreateUsrDefElementOfType(char *aClass, int number, Domain *domain)
         newElement = new InterfaceElem1d(number, domain);
     } else if ( !strncasecmp(aClass, "macrolspace", 11) )   {
         newElement = new MacroLSpace(number, domain);
+    } else if ( !strncasecmp(aClass, "lumpedmass", 10) )   {
+        newElement = new LumpedMassElement(number, domain);
     }
 
 #endif //__SM_MODULE

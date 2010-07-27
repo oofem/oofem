@@ -871,6 +871,22 @@ w-displacement) are required in each node, according to element mode.\\
 \descitem{Loads} \\
 \descitem{Status} 
 
+\subsection{Special elements}
+\subsubsection{LumpedMass element}
+This element, defined by a single node, allows to introduce additional concentrated mass and/or rotational inertias in a node.
+A different mass and rotary inertia may be assigned to each coordinate direction. At present, individual mass/inertia components can be specified for  every degree of freedom of element node. Only displacement and rotational degrees od freedom are considered. 
+
+\elemkeyword{LumpedMass}\\
+\descitem{Parameters} \elemparam{components}{ra}\\
+The \param{components} allows to specify additional concentrated mass components (Force*Time$^2$/Length) and rotary inertias (Force*Length*Time$^2$) about the nodal coordinate axes. Only displacement and rotational degrees of freedom are considered. The individual DOFs are ordered according to following rule: first, displacement degrees of freedom in the direction of x,y, and z axes (if any), followed by rotational DOFs around x,y, and z axes (if any).\\
+\descitem{Unknowns}
+Only displacement and roational DOFs are considered ($D_u$, $D_v$, $D_w$, $R_u$, $R_v$, and $R_w$).\\
+\descitem{Approximation} None.\\
+\descitem{Integration}
+None.\\
+\descitem{Features} None.\\
+\descitem{Loads} \\
+\descitem{Status} 
 
 
 \section{Elements for Transport problems\\(TM Module)}

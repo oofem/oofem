@@ -70,6 +70,8 @@ T3DInterface :: createInput(Domain *d, TimeStep *stepN) {
     for ( i = 1; i <= nelem; i++ ) {
         ielem = d->giveElement(i);
         switch ( ielem->giveGeometryType() ) {
+	case EGT_point:
+   	    break;
         case EGT_line_1:
         case EGT_line_2:
             edges++;
@@ -109,6 +111,8 @@ T3DInterface :: createInput(Domain *d, TimeStep *stepN) {
     for ( i = 1; i <= nelem; i++ ) {
         ielem = d->giveElement(i);
         switch ( ielem->giveGeometryType() ) {
+	case EGT_point:
+	    break;
         case EGT_line_1:
         case EGT_line_2:
             edgeIdArray.at(++edges) = i;
