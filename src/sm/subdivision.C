@@ -4521,11 +4521,11 @@ Subdivision::packRemoteElements (RS_packRemoteElemsStruct *s, ProcessCommunicato
     for (in = 1; in <= nn; in ++) {
       inode=relemPtr->giveDofManagerNumber(in);
       if ((d->giveDofManager(inode)->giveParallelMode() == DofManager_local)||
-					(d->giveDofManager(inode)->giveParallelMode() == DofManager_shared) &&
-					(!d->giveDofManager(inode)->givePartitionList()->contains(rproc))) {
-				// nodesToSend is set, therefore duplicity is avoided
-        nodesToSend.insert(inode);
-      }
+	  ((d->giveDofManager(inode)->giveParallelMode() == DofManager_shared) && (!d->giveDofManager(inode)->givePartitionList()->contains(rproc)))) 
+	{
+	  // nodesToSend is set, therefore duplicity is avoided
+	  nodesToSend.insert(inode);
+	}
     }
   }
 
