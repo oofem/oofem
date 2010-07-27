@@ -433,6 +433,10 @@ public:
      */
     virtual integrationDomain giveIntegrationDomain() { return _Unknown_integrationDomain; }
     /**
+     * Returns material mode for receiver integration poits. Should be specialized.
+     */
+    virtual MaterialMode          giveMaterialMode()  {return _Unknown;}
+    /**
      * Assembles the code numbers of given integration element (sub-patch)
      * This is done by obtaining list of nonzero shape functions and
      * by collecting the code numbers of nodes corresponding to these

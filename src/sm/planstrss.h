@@ -225,6 +225,8 @@ public:
     classType             giveClassID()          const { return PlaneStress2dClass; }
     IRResultType initializeFrom(InputRecord *ir);
     Element_Geometry_Type giveGeometryType() const { return EGT_quad_1; }
+    integrationDomain  giveIntegrationDomain() { return _Square; }
+    MaterialMode          giveMaterialMode()  {return _PlaneStress;}
 
 protected:
     // edge load support
@@ -241,7 +243,6 @@ protected:
     // i.e. r(n)=T r(g)
     // int   computeGtoNRotationMatrix (FloatMatrix&);
     void                  computeGaussPoints();
-    integrationDomain  giveIntegrationDomain() { return _Square; }
 
     int           giveApproxOrder() { return 1; }
     int           giveNumberOfIPForMassMtrxIntegration() { return 4; }

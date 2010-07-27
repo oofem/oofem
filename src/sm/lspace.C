@@ -197,6 +197,13 @@ LSpace :: computeNLBMatrixAt ( FloatMatrix& answer, GaussPoint *aGaussPoint, int
   return;
 }
 
+MaterialMode  
+LSpace :: giveMaterialMode()
+{
+  if (nlGeometry>1) 
+    return _3dMat_F; 
+  else return _3dMat;
+}
 
 void LSpace :: computeGaussPoints()
 // Sets up the array containing the four Gauss points of the receiver.

@@ -102,7 +102,6 @@ public:
     //
     /** Interface requesting service */
     Interface *giveInterface(InterfaceType);
-    MaterialMode          giveMaterialMode() { return _3dMat; }
     const char *giveClassName() const { return "L4Axisymm"; }
     classType     giveClassID() const { return L4AxisymmClass; }
     virtual int testElementExtension(ElementExtension ext) { return ( ( ext == Element_EdgeLoadSupport ) ? 1 : 0 ); }
@@ -160,11 +159,13 @@ public:
 
 #endif
 
+    integrationDomain  giveIntegrationDomain() { return _Square; }
+    MaterialMode          giveMaterialMode()  {return _3dMat;}
+
 protected:
     void                  computeBmatrixAt(GaussPoint *, FloatMatrix &, int = 1, int = ALL_STRAINS);
     void                  computeNmatrixAt(GaussPoint *, FloatMatrix &);
     void                  computeGaussPoints();
-    integrationDomain  giveIntegrationDomain() { return _Square; }
 
     // edge load support
     void  computeEgdeNMatrixAt(FloatMatrix &answer, GaussPoint *);

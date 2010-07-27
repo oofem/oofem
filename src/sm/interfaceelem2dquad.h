@@ -93,11 +93,13 @@ public:
     IRResultType initializeFrom(InputRecord *ir);
     Element_Geometry_Type giveGeometryType() const { return EGT_line_2; }
 
+    integrationDomain  giveIntegrationDomain() { return _Line; }
+    MaterialMode          giveMaterialMode()  {return _2dInterface;}
+
 protected:
     void          computeBmatrixAt(GaussPoint *, FloatMatrix &, int = 1, int = ALL_STRAINS);
     void          computeNmatrixAt(GaussPoint *, FloatMatrix &) { }
     void          computeGaussPoints();
-    integrationDomain  giveIntegrationDomain() { return _Line; }
 
     int           giveApproxOrder() { return 1; }
     /*

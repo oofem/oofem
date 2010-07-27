@@ -287,13 +287,14 @@ public:
                                                                       InternalStateType type, TimeStep *tStep);
     //@}
 
+    integrationDomain  giveIntegrationDomain() { return _Line; }
+    MaterialMode          giveMaterialMode()  {return _1dMat;}
 
 protected:
     void          computeBmatrixAt(GaussPoint *, FloatMatrix &, int = 1, int = ALL_STRAINS);
     void          computeNmatrixAt(GaussPoint *, FloatMatrix &);
     //  int           computeGtoNRotationMatrix (FloatMatrix&);
     void          computeGaussPoints();
-    integrationDomain  giveIntegrationDomain() { return _Line; }
 
     double        giveLength();
     double        givePitch();

@@ -147,6 +147,9 @@ class QSpace : public StructuralElement, public ZZNodalRecoveryModelInterface, p
   Element_Geometry_Type giveGeometryType() const {return EGT_hexa_2;}
   virtual int  computeNumberOfDofs (EquationID ut) {return 60;}
 
+  integrationDomain  giveIntegrationDomain () {return _Cube;}
+  MaterialMode          giveMaterialMode()  {return _3dMat;}
+
  protected:
    void computeGaussPoints ();
    void computeNmatrixAt (GaussPoint* ,FloatMatrix& );
@@ -158,7 +161,6 @@ class QSpace : public StructuralElement, public ZZNodalRecoveryModelInterface, p
 
 
 
-  integrationDomain  giveIntegrationDomain () {return _Cube;}
   int giveApproxOrder () {return 2;}
   int giveNumberOfIPForMassMtrxIntegration () {return 27;}
 

@@ -218,6 +218,9 @@ public:
     IRResultType initializeFrom(InputRecord *ir);
     Element_Geometry_Type giveGeometryType() const { return EGT_quad_1; }
 
+    integrationDomain  giveIntegrationDomain() { return _Square; }
+    MaterialMode          giveMaterialMode()  {return _PlaneStrain;}
+
 protected:
     // edge load support
     void  computeEgdeNMatrixAt(FloatMatrix &answer, GaussPoint *);
@@ -231,7 +234,6 @@ protected:
     // i.e. r(n)=T r(g)
     // int   computeGtoNRotationMatrix (FloatMatrix&);
     void                  computeGaussPoints();
-    integrationDomain  giveIntegrationDomain() { return _Square; }
 
     void          giveDerivativeKsi(FloatArray &answer, double);
     void          giveDerivativeEta(FloatArray &answer, double);

@@ -111,6 +111,8 @@ public:
     classType            giveClassID() const { return Truss2dClass; }
     IRResultType initializeFrom(InputRecord *ir);
     Element_Geometry_Type giveGeometryType() const {return EGT_line_1;}
+    integrationDomain  giveIntegrationDomain() { return _Line; }
+    MaterialMode          giveMaterialMode()  {return _1dMat;}
     
 protected:
     // edge load support
@@ -126,7 +128,6 @@ protected:
     void          computeNmatrixAt(GaussPoint *, FloatMatrix &);
     //  int           computeGtoNRotationMatrix (FloatMatrix&);
     void          computeGaussPoints();
-    integrationDomain  giveIntegrationDomain() { return _Line; }
 
     double        giveLength();
     double        givePitch();

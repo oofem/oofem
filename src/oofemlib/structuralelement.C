@@ -584,7 +584,7 @@ StructuralElement :: computeConsistentMassMatrix(FloatMatrix &answer, TimeStep *
     }
 
     iRule.setUpIntegrationPoints(this->giveIntegrationDomain(),
-                                 nip, _Unknown);
+                                 nip, this->giveMaterialMode());
 
     this->giveMassMtrxIntegrationgMask(mask);
 

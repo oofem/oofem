@@ -92,7 +92,9 @@ protected:
   void computeGaussPoints ();
   void evaluateCenter ();
   void evaluateLocalCoordinateSystem ();
+public:
   integrationDomain  giveIntegrationDomain () {return _Line;}
+  MaterialMode          giveMaterialMode()  {return _3dInterface;}
   
 } ;
 } // namespace oofem

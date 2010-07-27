@@ -166,18 +166,19 @@ public:
     //
     // definition & identification
     //
-    MaterialMode          giveMaterialMode() { return _3dMat; }
     const char *giveClassName() const { return "Axisymm3d"; }
     classType     giveClassID() const { return Axisymm3dClass; }
     Element_Geometry_Type giveGeometryType() const { return EGT_triangle_1; }
     virtual int testElementExtension(ElementExtension ext) { return ( ( ext == Element_EdgeLoadSupport ) ? 1 : 0 ); }
     IRResultType initializeFrom(InputRecord *ir);
 
+    integrationDomain  giveIntegrationDomain() { return _Triangle; }
+    MaterialMode          giveMaterialMode()   {return _3dMat;}
+
 protected:
     void               computeBmatrixAt(GaussPoint *, FloatMatrix &, int = 1, int = ALL_STRAINS);
     void               computeNmatrixAt(GaussPoint *, FloatMatrix &);
     void               computeGaussPoints();
-    integrationDomain  giveIntegrationDomain() { return _Triangle; }
 
     // edge load support
     void  computeEgdeNMatrixAt(FloatMatrix &answer, GaussPoint *);

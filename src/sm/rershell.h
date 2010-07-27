@@ -187,6 +187,9 @@ public:
     classType             giveClassID()          const { return RerShellClass; }
     IRResultType initializeFrom(InputRecord *ir);
 
+    integrationDomain  giveIntegrationDomain() { return _Triangle; }
+    MaterialMode          giveMaterialMode()  {return _3dShell;}
+
 protected:
     void               computeBodyLoadVectorAt(FloatArray &answer, Load *, TimeStep *, ValueModeType mode);
     //void               computeTemperatureStrainVectorAt (FloatArray& answer, GaussPoint*, TimeStep*, ValueModeType mode);
@@ -195,7 +198,6 @@ protected:
     int                computeGtoLRotationMatrix(FloatMatrix &); // giveRotationMatrix () ;
     //  int                computeGtoNRotationMatrix (FloatMatrix&);
     void               computeGaussPoints();
-    integrationDomain  giveIntegrationDomain() { return _Triangle; }
 
     double             giveArea();
 };

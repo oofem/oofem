@@ -200,14 +200,14 @@ public:
     virtual void EIPrimaryUnknownMI_givePrimaryUnknownVectorDofID(IntArray &answer);
     //@}
 
-
+    integrationDomain  giveIntegrationDomain() { return _Triangle; }
+    MaterialMode          giveMaterialMode()  {return _PlaneStress;}
 
 
 protected:
     void            computeBmatrixAt(GaussPoint *, FloatMatrix &, int = 1, int = ALL_STRAINS);
     void            computeNmatrixAt(GaussPoint *, FloatMatrix &);
     void               computeGaussPoints();
-    integrationDomain  giveIntegrationDomain() { return _Triangle; }
     int           giveApproxOrder() { return 2; }
     int  giveNumberOfIPForMassMtrxIntegration() { return 4; }
 

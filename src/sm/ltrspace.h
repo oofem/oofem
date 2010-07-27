@@ -115,8 +115,11 @@ public:
     const char *giveClassName() const { return "LTRSpace"; }
     classType     giveClassID()   const { return LTRSpaceClass; }
     IRResultType initializeFrom(InputRecord *ir);
-    MaterialMode          giveMaterialMode() { return _3dMat; }
     Element_Geometry_Type giveGeometryType() const { return EGT_tetra_1; }
+
+    integrationDomain  giveIntegrationDomain() { return _Tetrahedra; }
+    MaterialMode          giveMaterialMode()  {return _3dMat;}
+
 
 #ifdef __OOFEG
     void          drawRawGeometry(oofegGraphicContext &);
@@ -298,13 +301,11 @@ public:
 
     //@}
 
-
 protected:
     void               computeBmatrixAt(GaussPoint *, FloatMatrix &, int = 1, int = ALL_STRAINS);
     void               computeNmatrixAt(GaussPoint *, FloatMatrix &);
     void               computeNLBMatrixAt(FloatMatrix & answer, GaussPoint *, int i);
     void       computeGaussPoints();
-    integrationDomain  giveIntegrationDomain() { return _Tetrahedra; }
 
     /**
      * @name Edge load support

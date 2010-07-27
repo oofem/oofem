@@ -134,6 +134,7 @@ protected:
                                              MatResponseMode rMode, TimeStep *tStep);
     void          computeGaussPoints();
     integrationDomain  giveIntegrationDomain() { return _Line; }
+    MaterialMode          giveMaterialMode()   {return _3dBeam;}
     virtual int  giveNumberOfIPForMassMtrxIntegration() { return 4; }
 };
 

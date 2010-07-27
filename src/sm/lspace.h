@@ -239,7 +239,8 @@ public:
     void           drawTriad(FloatArray &, int isurf);
 #endif
 
-
+    integrationDomain  giveIntegrationDomain() { return _Cube; }
+    MaterialMode          giveMaterialMode() ;
 
 protected:
     void               computeBmatrixAt(GaussPoint *, FloatMatrix &, int = 1, int = ALL_STRAINS);
@@ -247,7 +248,6 @@ protected:
     void               computeNLBMatrixAt(FloatMatrix &, GaussPoint *, int i);
     void               computeNmatrixAt(GaussPoint *, FloatMatrix &);
     void       computeGaussPoints();
-    integrationDomain  giveIntegrationDomain() { return _Cube; }
     int           giveApproxOrder() { return 1; }
     int           giveNumberOfIPForMassMtrxIntegration() { return 8; }
 

@@ -71,6 +71,7 @@ public:
 
 protected:
     integrationDomain giveIntegrationDomain() { return _Triangle; }
+    MaterialMode          giveMaterialMode()  {return _2dPlate;}
     void computeGaussPoints();
     void computeBodyLoadVectorAt(FloatArray &answer, Load *, TimeStep *, ValueModeType mode);
     void computeBmatrixAt(GaussPoint *, FloatMatrix &, int = 1, int = ALL_STRAINS);

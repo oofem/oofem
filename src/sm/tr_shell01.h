@@ -100,6 +100,11 @@ public:
     //void          drawInternalState (oofegGraphicContext&);
 #endif
 
+    integrationDomain giveIntegrationDomain()
+    { return _Triangle;}
+    MaterialMode          giveMaterialMode()  
+    {return _Unknown;}
+
 protected:
     void computeBmatrixAt(GaussPoint *, FloatMatrix &, int = 1, int = ALL_STRAINS)
     { _error("TR_SHELL01 :: computeBmatrixAt: calling of this function is not allowed"); }
@@ -109,8 +114,6 @@ protected:
 
     /// casem smazat
 protected:
-    integrationDomain giveIntegrationDomain()
-    { return _Triangle;}
     void computeGaussPoints()
     { _error("TR_SHELL01 :: computeGaussPoints: calling of this function is not allowed"); }
     void computeStressVector(FloatArray &answer, GaussPoint *gp, TimeStep *stepN)

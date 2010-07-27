@@ -82,17 +82,16 @@ public:
     // definition & identification
     //
     Interface *giveInterface(InterfaceType) { return NULL; }
-    MaterialMode          giveMaterialMode() { return _3dMat; }
     const char *giveClassName() const { return "Q4axisymm"; }
     classType       giveClassID()   const { return Q4AxisymmClass; }
     IRResultType initializeFrom(InputRecord *ir);
-
+    integrationDomain  giveIntegrationDomain() { return _Square; }
+    MaterialMode          giveMaterialMode()  {return _3dMat;}
 
 protected:
     void             computeBmatrixAt(GaussPoint *, FloatMatrix &, int = 1, int = ALL_STRAINS);
     void            computeNmatrixAt(GaussPoint *, FloatMatrix &);
     void            computeGaussPoints();
-    integrationDomain  giveIntegrationDomain() { return _Square; }
 
     FloatArray *GiveDerivativeKsi(double, double);
     FloatArray *GiveDerivativeEta(double, double);

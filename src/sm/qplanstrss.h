@@ -124,13 +124,13 @@ public:
     void drawDeformedGeometry(oofegGraphicContext &, UnknownType);
     //      void          drawInternalState (DrawMode mode);
 #endif
-
+    integrationDomain  giveIntegrationDomain() { return _Square; }
+    MaterialMode          giveMaterialMode()  {return _PlaneStress;}
 
 protected:
     void             computeBmatrixAt(GaussPoint *, FloatMatrix &, int = 1, int = ALL_STRAINS);
     void             computeNmatrixAt(GaussPoint *, FloatMatrix &);
     void             computeGaussPoints();
-    integrationDomain  giveIntegrationDomain() { return _Square; }
 
 };
 

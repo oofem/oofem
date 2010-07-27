@@ -61,7 +61,6 @@ public:
     ~TrPlaneStrRot() { }                   // destructor
 
 protected:
-    integrationDomain giveIntegrationDomain() { return _Triangle; }
     void computeGaussPoints();
     void computeBmatrixAt(GaussPoint *, FloatMatrix &, int = 1, int = ALL_STRAINS);
     void computeNmatrixAt(GaussPoint *, FloatMatrix &);
@@ -78,7 +77,8 @@ public:
     const char *giveClassName() const { return "TrPlaneStrRot"; }
     classType    giveClassID()   const { return TrPlaneStrRotClass; }
     IRResultType initializeFrom(InputRecord *ir);
-    MaterialMode giveMaterialMode() { return _Unknown; }
+    MaterialMode giveMaterialMode() { return _PlaneStressRot; }
+    integrationDomain giveIntegrationDomain() { return _Triangle; }
 
     virtual int  computeNumberOfDofs(EquationID ut) { return 9; }
     virtual void giveDofManDofIDMask(int inode, EquationID, IntArray &) const;

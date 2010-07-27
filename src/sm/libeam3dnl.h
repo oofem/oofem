@@ -108,6 +108,9 @@ public:
     virtual void giveInternalForcesVector(FloatArray &answer,
                                           TimeStep *, int useUpdatedGpRecord = 0);
 
+    integrationDomain  giveIntegrationDomain() { return _Line; }
+    MaterialMode          giveMaterialMode()  {return _3dBeam;}
+
 protected:
     // edge load support
     void  computeEgdeNMatrixAt(FloatMatrix &answer, GaussPoint *);
@@ -128,7 +131,6 @@ protected:
     // void          computeNLBMatrixAt (FloatMatrix& answer, GaussPoint*, int ) ;
     void          computeNmatrixAt(GaussPoint *, FloatMatrix &);
     void          computeGaussPoints();
-    integrationDomain  giveIntegrationDomain() { return _Line; }
     double        giveLength();
     //  double        givePitch () ;
     int           giveLocalCoordinateSystem(FloatMatrix &answer);

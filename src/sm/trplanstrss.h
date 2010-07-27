@@ -288,6 +288,9 @@ public:
                                                                       InternalStateType type, TimeStep *tStep);
     //@}
 
+    integrationDomain  giveIntegrationDomain() { return _Triangle; }
+    MaterialMode          giveMaterialMode()  {return _PlaneStress;}
+
 protected:
     // edge load support
     void  computeEgdeNMatrixAt(FloatMatrix &answer, GaussPoint *);
@@ -303,7 +306,6 @@ protected:
     // i.e. r(n)=T r(g).
     //  int                computeGtoNRotationMatrix (FloatMatrix&);
     void               computeGaussPoints();
-    integrationDomain  giveIntegrationDomain() { return _Triangle; }
 
     virtual double     giveArea();
     virtual FloatArray *GivebCoeff();

@@ -784,11 +784,6 @@ protected:
      */
     virtual int           giveApproxOrder() { return 0; }
     /**
-     * Returns integration domain for receiver, used to initialize
-     * integration point over receiver volume. Must be specialized.
-     */
-    virtual integrationDomain giveIntegrationDomain() { return _Unknown_integrationDomain; }
-    /**
      * Return desired number of integration points for consistent mass matrix
      * computation, if required.
      */

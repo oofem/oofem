@@ -149,6 +149,7 @@ protected:
                                              MatResponseMode rMode, TimeStep *tStep);
     void          computeGaussPoints();
     integrationDomain  giveIntegrationDomain() { return _Line; }
+    MaterialMode          giveMaterialMode()  {return _2dBeam;}
     // return desired number of integration points for consistent mass matrix
     // computation, if required.
     virtual int  giveNumberOfIPForMassMtrxIntegration() { return 4; }

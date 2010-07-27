@@ -276,7 +276,8 @@ public:
     classType            giveClassID() const { return TrPlaneStrainClass; }
     IRResultType initializeFrom(InputRecord *ir);
     Element_Geometry_Type giveGeometryType() const { return EGT_triangle_1; }
-
+    integrationDomain  giveIntegrationDomain() { return _Triangle; }
+    MaterialMode          giveMaterialMode()  {return _PlaneStrain;}
 
 protected:
     // edge load support
@@ -293,7 +294,6 @@ protected:
     // i.e. r(n)=T r(g).
     //  int                computeGtoNRotationMatrix (FloatMatrix&);
     void               computeGaussPoints();
-    integrationDomain  giveIntegrationDomain() { return _Triangle; }
 
     virtual double     giveArea();
     virtual FloatArray *GivebCoeff();

@@ -166,6 +166,9 @@ public:
     virtual double DirectErrorIndicatorRCI_giveCharacteristicSize() { return this->giveLength(); }
     //@}
 
+    integrationDomain  giveIntegrationDomain() { return _Line; }
+    MaterialMode          giveMaterialMode()  {return _1dMat;}
+
 protected:
     // edge load support
     void  computeEgdeNMatrixAt(FloatMatrix &answer, GaussPoint *);
@@ -179,7 +182,6 @@ protected:
     void          computeNmatrixAt(GaussPoint *, FloatMatrix &);
     //  int           computeGtoNRotationMatrix (FloatMatrix&);
     void          computeGaussPoints();
-    integrationDomain  giveIntegrationDomain() { return _Line; }
 
     double        giveLength();
     double        givePitch();

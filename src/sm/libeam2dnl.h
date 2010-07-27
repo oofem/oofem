@@ -98,6 +98,9 @@ public:
     void drawDeformedGeometry(oofegGraphicContext &, UnknownType);
 #endif
 
+    integrationDomain  giveIntegrationDomain() { return _Line; }
+    MaterialMode          giveMaterialMode()  {return _2dBeam;}
+
 protected:
     // edge load support
     void  computeEgdeNMatrixAt(FloatMatrix &answer, GaussPoint *);
@@ -114,7 +117,6 @@ protected:
     void          computeNLBMatrixAt(FloatMatrix &answer, GaussPoint *, int);
     void          computeNmatrixAt(GaussPoint *, FloatMatrix &);
     void          computeGaussPoints();
-    integrationDomain  giveIntegrationDomain() { return _Line; }
     double        giveLength();
     double        givePitch();
 };
