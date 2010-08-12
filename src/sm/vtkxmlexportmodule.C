@@ -751,6 +751,8 @@ VTKXMLExportModule :: exportPrimVarAs(UnknownType valID, IntArray &mapG2L, IntAr
     DofManager *dman;
     DofID id;
     int numberOfDofs;
+    IntArray mask(3);
+    FloatArray dl,dg; 
 
     for ( inode = 1; inode <= regionDofMans; inode++ ) {
         dman = d->giveNode( mapL2G.at(inode) );
@@ -758,6 +760,7 @@ VTKXMLExportModule :: exportPrimVarAs(UnknownType valID, IntArray &mapG2L, IntAr
 
 
         if ( ( valID == DisplacementVector ) || ( valID == EigenVector ) || ( valID == VelocityVector ) ) {
+	  /*
             iVal.resize(3);
             iVal.zero();
 
@@ -770,7 +773,36 @@ VTKXMLExportModule :: exportPrimVarAs(UnknownType valID, IntArray &mapG2L, IntAr
                 } else if ( ( id == V_w ) || ( id == D_w ) ) {
                     iVal.at(3) = dman->giveDof(j)->giveUnknown(EID_MomentumBalance, VM_Total, tStep);
                 }
-            }
+	  */
+	  iVal.resize(3);
+	  iVal.zero();
+	  mask.resize(0);
+
+	  for ( j = 1; j <= numberOfDofs; j++ ) {
+	    id = dman->giveDof(j)->giveDofID();
+	    if ( ( id == V_u ) || ( id == D_u ) || ( id == V_v ) || ( id == D_v ) || ( id == V_w ) || ( id == D_w )) {
+	      mask.followedBy(id);
+	    }
+	  }
+	  if (dman->requiresTransformation() || dman->hasAnySlaveDofs()) {
+	    // handle local coordinate system, slave dofs, etc in node
+	    dman->giveUnknownVector(dl, mask, EID_MomentumBalance, VM_Total, tStep);
+	    dman->computeDofTransformation(t, &mask, _toGlobalCS);
+	    dg.beProductOf(t,dl);
+	  } else {
+	    dman->giveUnknownVector(dg, mask, EID_MomentumBalance, VM_Total, tStep);
+	  }
+	  
+	  for ( j = 1; j <= mask.giveSize(); j++ ) {
+	    id = dman->giveDof(j)->giveDofID();
+	    if ( ( id == V_u ) || ( id == D_u )) {
+	      iVal.at(1) = dg.at(j);
+	    } else if (( id == V_v ) || ( id == D_v )) {
+	      iVal.at(2) = dg.at(j);
+	    } else if (( id == V_w ) || ( id == D_w )) {
+	      iVal.at(3) = dg.at(j);
+	    }
+	  }
         } else if ( valID == FluxVector ) {
             iVal.resize(1);
 
