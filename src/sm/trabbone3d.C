@@ -108,7 +108,7 @@ void TrabBone3D::computePlasStrainEnerDensity (GaussPoint* gp, const FloatArray&
   tempTSED = tsed + dotProduct(0.5*(totalStrain-oldTotalDef),(totalStress+oldStress),6);
   tempPSED = tempTSED - tempESED;
 
-  if (sqrt(tempPSED*tempPSED) < pow(10.,-16))
+  if (sqrt(tempPSED*tempPSED) < pow(10.,-16.0))
     tempPSED = 0.;
 
   status -> setTempTSED(tempTSED);
@@ -222,7 +222,7 @@ TrabBone3D :: performPlasticityReturn(GaussPoint* gp, const FloatArray& totalStr
   int flagLoop = 0, flag0 = 0;
 
   double tempKappa, deltaKappa, kappa, incKappa, halfSpaceCriterion, beta, tempScalar, norm;
-  double plasCriterion, plasModulus, toSolveScalar, err, errTolerance = pow(10.,-15);
+  double plasCriterion, plasModulus, toSolveScalar, err, errTolerance = pow(10.,-15.0);
 
   FloatArray tempPlasDef, tempEffectiveStress, incTempEffectiveStress, trialEffectiveStress, errLoop;
   FloatArray toSolveTensor, plasFlowDirec, yieldDerivative, tempTensor2, tensorFF_S;
@@ -554,7 +554,7 @@ TrabBone3D :: giveRealStressVector (FloatArray& answer, MatResponseForm form, Ga
   totalStress = (1-tempDam)*effStress;
 
   for(i=1;i<=6;i++){
-     if (sqrt(totalStress.at(i)*totalStress.at(i))< pow(10,-16))
+     if (sqrt(totalStress.at(i)*totalStress.at(i))< pow(10.0,-16.0))
 	totalStress.at(i)=0.;
     }
 

@@ -30,7 +30,7 @@
 #include "structuralms.h"
 #include "gausspnt.h"
 #include "intarray.h"
-#include <math.h>
+#include "mathfem.h"
 #include "datastream.h"
 #include "contextioerr.h"
 
@@ -39,7 +39,6 @@
 #include "structuralmaterial.h"
 #include "isolinearelasticmaterial.h"
 #include "structuralcrosssection.h"
-#include <math.h>
 
 
 
