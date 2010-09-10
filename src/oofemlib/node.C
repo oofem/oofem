@@ -477,13 +477,14 @@ Node :: computeLoadTransformation(FloatMatrix &answer, const IntArray *dofMask, 
 
     if ( mode == _toNodalCS ) {
         computeDofTransformation(t, dofMask, _toGlobalCS);
+	answer.beTranspositionOf(t);
     } else if ( mode == _toGlobalCS ) {
-        computeDofTransformation(t, dofMask, _toNodalCS);
+        computeDofTransformation(answer, dofMask, _toGlobalCS);
     } else {
         _error("computeLoadTransformation: unsupported mode");
     }
 
-    answer.beTranspositionOf(t);
+
 
     /*
      * if (!hasSlaveDofs && !hasLocalCS()) {
