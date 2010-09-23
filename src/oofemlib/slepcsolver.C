@@ -108,7 +108,7 @@ SLEPcSolver::solve (SparseMtrx* a, SparseMtrx* b, FloatArray* _eigv, FloatMatrix
 #ifdef TIME_REPORT
   //clock_t tstart = clock();
   oofem_timeval tstart;
-  ::getUtime(tstart);
+  getUtime(tstart);
 #endif
   
   if (!epsInit) {
@@ -129,11 +129,11 @@ SLEPcSolver::solve (SparseMtrx* a, SparseMtrx* b, FloatArray* _eigv, FloatMatrix
   ierr = EPSSetOperators(eps,*A->giveMtrx(),*B->giveMtrx());CHKERRQ(ierr);
   ierr = EPSSetProblemType(eps,EPS_GHEP);CHKERRQ(ierr);
   ierr = EPSGetST(eps,&st);CHKERRQ(ierr);
-  ierr = STSetType(st,STSINV);CHKERRQ(ierr);
+  ierr = STSetType(st,STSINVERT);CHKERRQ(ierr);
   ierr = STSetMatStructure(st,SAME_NONZERO_PATTERN);CHKERRQ(ierr);
   ierr = EPSSetTolerances(eps, (PetscReal)rtol, PETSC_DECIDE);CHKERRQ(ierr);
   ierr = EPSSetDimensions(eps, (PetscInt)nroot, PETSC_DECIDE, PETSC_DECIDE);CHKERRQ(ierr);
-  ierr = EPSSetWhichEigenpairs(eps, EPS_LARGEST_MAGNITUDE);CHKERRQ(ierr);
+  ierr = EPSSetWhichEigenpairs(eps, EPS_SMALLEST_MAGNITUDE);CHKERRQ(ierr);
 
   /*
      Set solver parameters at runtime
@@ -200,7 +200,7 @@ SLEPcSolver::solve (SparseMtrx* a, SparseMtrx* b, FloatArray* _eigv, FloatMatrix
 
 #ifdef TIME_REPORT
   oofem_timeval ut;
-  ::getRelativeUtime (ut, tstart);
+  getRelativeUtime (ut, tstart);
   OOFEM_LOG_INFO ("SLEPcSolver info: user time consumed by solution: %.2fs\n", (double)(ut.tv_sec+ut.tv_usec/(double)OOFEM_USEC_LIM));
 #endif
 

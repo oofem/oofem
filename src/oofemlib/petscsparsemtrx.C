@@ -81,6 +81,10 @@ PetscSparseMtrx :: buildInternalStructure(EngngModel *eModel, int di, EquationID
     }
 
     this->ut = ut;
+    this->emodel = eModel;
+    this->di = di;
+
+
 #ifdef __PARALLEL_MODE
     int rank;
     PetscNatural2GlobalOrdering *n2g = NULL;
@@ -93,9 +97,6 @@ PetscSparseMtrx :: buildInternalStructure(EngngModel *eModel, int di, EquationID
     VERBOSEPARALLEL_PRINT("PetscSparseMtrx:: buildInternalStructure", "", rank);
 #endif
 
-
-    this->emodel = eModel;
-    this->di = di;
 
     // initialize n2l map
     PetscNatural2LocalOrdering n2l;

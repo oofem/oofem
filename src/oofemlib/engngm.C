@@ -2078,7 +2078,7 @@ EngngModel :: givePetscContext(int i, EquationID ut)
 
         return this->petscContextList->at(i);
     } else {
-        _error("givePetscContext: Undefined domain or ");
+      _error2 ("givePetscContext: Undefined domain index %d ", i);
     }
 
     return NULL;
