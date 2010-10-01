@@ -566,6 +566,19 @@ Node :: computeGNDofTransformation(FloatMatrix &answer, const IntArray *dofIDArr
 
                     break;
 
+                case V_u:
+                case V_v:
+                case V_w:
+                    for ( j = 1; j <= numberOfDofs; j++ ) {
+                        id2 = giveDof(j)->giveDofID();
+                        if ( ( id2 == V_u ) || ( id2 == V_v ) || ( id2 == V_w ) ) {
+                            answer.at(i, j) = localCoordinateSystem->at( ( int ) ( id ) - ( int ) ( V_u ) + 1,
+                                                                        ( int ) ( id2 ) - ( int ) ( V_u ) + 1 );
+                        }
+                    }
+
+                    break;
+
                 case R_u:
                 case R_v:
                 case R_w:
@@ -605,6 +618,18 @@ Node :: computeGNDofTransformation(FloatMatrix &answer, const IntArray *dofIDArr
                         id2 = ( DofIDItem ) dofIDArry->at(j);
                         if ( ( id2 == D_u ) || ( id2 == D_v ) || ( id2 == D_w ) ) {
                             answer.at(i, j) = localCoordinateSystem->at( ( int ) ( id ) - ( int ) ( D_u ) + 1, ( int ) ( id2 ) - ( int ) ( D_u ) + 1 );
+                        }
+                    }
+
+                    break;
+
+                case V_u:
+                case V_v:
+                case V_w:
+                    for ( j = 1; j <= size; j++ ) {
+                        id2 = ( DofIDItem ) dofIDArry->at(j);
+                        if ( ( id2 == V_u ) || ( id2 == V_v ) || ( id2 == V_w ) ) {
+                            answer.at(i, j) = localCoordinateSystem->at( ( int ) ( id ) - ( int ) ( V_u ) + 1, ( int ) ( id2 ) - ( int ) ( V_u ) + 1 );
                         }
                     }
 
