@@ -154,10 +154,10 @@ public:
 
     /**@name Methods to support interpolation defined on patch by patch basis*/
     //@{
-    virtual int giveKnotBasisFuncMask (const IntArray& knotSpan, IntArray& mask) {return 0;}
+    virtual int giveKnotSpanBasisFuncMask (const IntArray& knotSpan, IntArray& mask) {return 0;}
     /** Returns the number of nonzero basis functions at individual knot span,
         @param returns zero in case of all basis functions generally nonzero, answer otherwise */
-    virtual int  giveNumberOfKnotBasisFunctions () {return 0;}
+    virtual int giveNumberOfKnotSpanBasisFunctions (const IntArray& knotSpan) {return 0;}
     /**
        Returns true, if receiver is formulated on sub-patch basis
      */
@@ -172,10 +172,18 @@ public:
      */
     virtual int giveNumberOfKnotSpans(int dim) {return 0;}
     /**
+     * Returns the knot values of the receiver
+     */
+    virtual FloatArray* const giveKnotValues(int dim) {return NULL;}
+    /**
      * Returns the knot multiplicity of the receiver
      */
-    virtual int** const giveKnotMultiplicity() {return NULL;}
-
+    virtual IntArray* const giveKnotMultiplicity(int dim) {return NULL;}
+    /**
+     * Returns number of spatial dimensions
+     */
+    virtual int const giveNsd() = 0;
+    
     //@}
 
 };

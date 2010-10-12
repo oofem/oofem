@@ -387,7 +387,11 @@ main(int argc, char *argv[])
 
     updateISA(gc);
 
-    ESIPopupAndRun();
+    //ESIPopupAndRun();
+
+    // this versiont supports keybort shortcuts like Ctrl+A, Ctrl+X etc.
+    ESIPopup();
+    ESIEventLoop(TRUE,NULL);
 
 #ifdef __PETSC_MODULE
         PetscFinalize();

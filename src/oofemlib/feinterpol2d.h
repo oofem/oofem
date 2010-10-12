@@ -55,6 +55,10 @@ class FEInterpolation2d : public FEInterpolation
 protected:
 public:
     FEInterpolation2d(int o) : FEInterpolation(o) { }
+    /**
+     * Returns number of spatial dimensions
+     */
+    int const giveNsd() {return 2;}
 
     /**@name Edge interpolation services */
     //@{

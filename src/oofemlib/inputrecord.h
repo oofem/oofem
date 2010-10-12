@@ -849,6 +849,10 @@ enum InputFieldType {
     IFT_BSplineInterpolation_knotMultiplicityV,
     IFT_BSplineInterpolation_knotMultiplicityW,
 
+    IFT_TSplineInterpolation_localIndexKnotVectorU,
+    IFT_TSplineInterpolation_localIndexKnotVectorV,
+    IFT_TSplineInterpolation_localIndexKnotVectorW,
+
     IFT_IGAElement_NIP,
 
     IFT_Unknown

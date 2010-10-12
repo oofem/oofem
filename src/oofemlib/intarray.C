@@ -569,7 +569,7 @@ void IntArray :: eraseSorted(int value)
 {
 	int pos;
 
-	if(pos = findSorted(value)){
+	if((pos = findSorted(value))){
 		erase(pos);
 	}
 }

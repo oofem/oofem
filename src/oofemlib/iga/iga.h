@@ -37,7 +37,7 @@
 #define iga_h
 
 /*
-  oofem nodes - controll points (coordinates ) + dofs
+  oofem nodes - control points (coordinates ) + dofs
   oofem elements - NURBS patches as well as integration elements
   
   
@@ -66,6 +66,15 @@
 #include "structuralcrosssection.h"
 #include "mathfem.h"
 
+
+#ifdef __OOFEG
+class StructuralElementEvaluator;
+void drawIGAPatchDeformedGeometry(Element* elem, StructuralElementEvaluator* se, oofegGraphicContext &gc, UnknownType);
+#endif
+
+
+
+
 class FEIIGAElementGeometryWrapper : public FEICellGeometry 
 {
 public:
@@ -90,22 +99,31 @@ protected:
 	int nsd;        
 	/// degree in each direction 
 	int *degree;                               // eg. 2
-	/// numberOfControllPoints[nsd]
-	int *numberOfControllPoints; 
-	/// knotVectors[nsd][sd_controll_points]
+	/// knotValues[nsd]
+	FloatArray *knotValues;                    // eg. 0 1 2 3 4 5
+	/// knotMultiplicity[nsd]
+	IntArray *knotMultiplicity;                // eg. 3 1 1 1 2 3
+	/// numberOfControlPoints[nsd]
+	/// for TSpline this is filled by values corresponding to case when there are no T-junctions
+	/// (i.e. TSpline = BSpline)
+	int *numberOfControlPoints; 
+	/// knotVectors[nsd][knot_vector_size]
 	double **knotVector;                       // eg. 0 0 0 1 2 3 4 4 5 5 5
 	/// nonzero spans in each directions[nsd]
 	int *numberOfKnotSpans;                    // eg. 5 (0-1,1-2,2-3,3-4,4-5)
-	/// knot multiplicity
-	int ** knotMultiplicity;                   // eg. 3 1 1 1 2 3
 public:
   BSplineInterpolation (int nsd) : FEInterpolation (0) {this->nsd=nsd;}
   ~BSplineInterpolation();
-
+	/**
+	 * Returns number of spatial dimensions
+	 */
+	int const giveNsd() {return nsd;}
   IRResultType initializeFrom(InputRecord *ir);                   
   virtual int giveNumberOfKnotSpans(int dim) {return numberOfKnotSpans[dim-1];}
-  virtual double ** const  giveKnotVector() {return this->knotVector;}
-  virtual int** const giveKnotMultiplicity() {return this->knotMultiplicity;}
+  virtual int giveNumberOfControlPoints(int dim) {return numberOfControlPoints[dim-1];}
+  virtual double** const giveKnotVector() {return this->knotVector;}
+  virtual IntArray* const giveKnotMultiplicity(int dim) {return &this->knotMultiplicity[dim-1];}
+  virtual FloatArray* const giveKnotValues(int dim) {return &this->knotValues[dim-1];}
   /**
    * Evaluates the array of interpolation functions (shape functions) at given point.
    * @param answer contains resulting array of evaluated interpolation functions
@@ -146,9 +164,9 @@ public:
   /**
      Returns indices (zero based) of nonzero basis functions for given knot span 
   */
-  int giveKnotBasisFuncMask (const IntArray& knotSpan, IntArray& mask) ;
-  /** Returns the number of nonzero basis functions at individual knot span */
-  int  giveNumberOfKnotBasisFunctions () ;
+  int giveKnotSpanBasisFuncMask (const IntArray& knotSpan, IntArray& mask) ;
+  /** Returns the number of nonzero basis functions for given knot span */
+  int giveNumberOfKnotSpanBasisFunctions (const IntArray& knotSpan) ;
 
   /// Returns class name of the receiver.
   const char *giveClassName() const { return "BSplineInterpolation"; }
@@ -160,34 +178,36 @@ protected:
      @param u value at which to evaluate
      @param p degree
      @param U knot vector
-     @param N computed p+1 nonvanishing functions (N_{i-p,p}-N_{i,p})
+     @param N computed p+1 nonvanishing functions (N_{span-p,p}-N_{span,p})
+
+		 @warning u and span must be in a valid range.
   */
   void basisFuns (FloatArray &N, int span, double u, int p, const double* U) ;
-  /*
-    Compute nonzero basis functions and their derivatives at u
+  /**
+    Computes nonzero basis functions and their derivatives at u
     
     For information on the algorithm, see A2.3 on p72 of 
     the NURBS book. The result is stored in the ders matrix, where 
-    ders is of size (n+1,deg+1) and the derivative 
-		N(u)  = ders(0,span-deg+j) where j=0...deg 
-    N'(u) = ders(1,span-deg+j) where j=0...deg
-		N''(u)= ders(2,span-deg+j) where j=0...deg
+    ders is of size (n+1,p+1) and the derivative 
+		N(u)  = ders(0,span-p+j) where j=0...p 
+    N'(u) = ders(1,span-p+j) where j=0...p
+		N''(u)= ders(2,span-p+j) where j=0...p
     
-    @param n  the degree of the derivation
-    @param u  the parametric value
+    @param n the degree of the derivation
+    @param u the parametric value
 		@param span knot span index (zero based) 
-    @param deg  the degree of the curve
-    @param U  the knot vector on which the Basis functions must be computed.
-    @param ders  A matrix containing the derivatives of the curve.
+    @param p the degree
+    @param U knot vector
+    @param ders matrix containing the derivatives of the basis functions.
     
     @warning n, u and span must be in a valid range.
   */
-  void DersBasisFuns(int n, double u, int span, int deg, double* const U, FloatMatrix& ders);
-  /*
+  void dersBasisFuns(int n, double u, int span, int p, double* const U, FloatMatrix& ders);
+  /**
     Determines the knot span index (Algorithm A2.1 from the NURBS book)
 
     Determines the knot span for which there exists non-zero basis 
-    functions. The span is the index  k for which the parameter 
+    functions. The span is the index k for which the parameter 
     u is valid in the (u_k,u_{k+1}] range.
     
     @param n number of control points - 1 (number of ctrl pnts = n + 1)
@@ -198,8 +218,8 @@ protected:
     @warning u must be in a valid range
   */
   int findSpan(int n, int p, double u, const double* U) const;
-  /** Return the range of nonzero basis functions for given knot span i and degree p*/
-  void giveNonzeroBasisFunctIntervalOnCurve (int i, int p, int &s, int &e) {s=i-p; e=i;}
+  /** Return the range of nonzero basis functions for given knot span and given degree */
+  void giveNonzeroBasisFuncInterval (int span, int deg, int &s, int &e) {s=span-deg; e=span;}
 
 }; // enf of BSplineInterpolation class definition
 
@@ -253,15 +273,133 @@ public:
 
 
 
+/* alternatively, it is possible to store for individual control points open local knot vector;
+	 however, this is not enough as I need to know how many knots have been prepended and appended
+	 (see createLocalKnotVector) as these are relevant for finding relevant knot span using BSpline method
+	 (this could be overcome by writing corresponding TSpline method) and for extraction proper
+	 basis function and its derivatives (computed by BSpline methods) */
+
+class TSplineInterpolation : public BSplineInterpolation  
+{
+ protected:
+	/// localIndexKnotVector[number_of_control_points][nsd][degree+2]
+	int ***localIndexKnotVector;
+	int totalNumberOfControlPoints;
+	/// temporary open local knot vector to enable use of BSpline algorithms (common for all directions)
+	/// openLocalKnotVector[3*max_degree+2]
+	double *openLocalKnotVector;
+public:
+  TSplineInterpolation (int nsd) : BSplineInterpolation (nsd) {}
+  ~TSplineInterpolation();
+
+  IRResultType initializeFrom(InputRecord *ir);                   
+	void setNumberOfControlPoints(int num) {this->totalNumberOfControlPoints=num;}
+  /**
+   * Evaluates the array of interpolation functions (shape functions) at given point.
+   * @param answer contains resulting array of evaluated interpolation functions
+   * @param lcoords array containing (local) coordinates
+   * @param cellgeo underlying cell geometry
+   * @param time time
+   *
+   * see also giveNonzeroBasisFunctMask method of TSplineInterpolation
+   */
+  virtual void evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry& cellgeo, double time) ;
+  /**
+   * Evaluates the matrix of derivatives of interpolation functions (shape functions) at given point.
+   * These derivatives are in global coordinate system (where the nodal coordinates are defined)
+   * @param answer contains resulting matrix of derivatives, the member at i,j position contains value of dNi/dxj
+   * @param lcoords array containing (local) coordinates
+   * @param cellgeo underlying cell geometry
+   * @param time time
+   */
+  virtual void evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry& cellgeo, double time) ;
+  /**
+   * Evaluates global coordinates from given local ones
+   * @param answer contains resulting global coordinates
+   * @param lcoords array containing (local) coordinates
+   * @param cellgeo underlying cell geometry
+   * @param time time
+   */
+  virtual void local2global(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry& cellgeo, double time) ;
+  virtual int  global2local(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry& cellgeo, double time) {
+    OOFEM_ERROR ("Not yet inplemented, contact lazy dr for implementation");
+    return 0;
+  }
+  /**
+   * Evaluates the jacobian of transformation between local and global coordinates.
+   */
+  virtual double giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry& cellgeo, double time) ;
+
+  /**
+     Returns indices (zero based) of nonzero basis functions for given knot span 
+  */
+  int giveKnotSpanBasisFuncMask (const IntArray& knotSpan, IntArray& mask) ;
+  /** Returns the number of nonzero basis functions for given knot span */
+  int giveNumberOfKnotSpanBasisFunctions (const IntArray& knotSpan) ;
+
+  /// Returns class name of the receiver.
+  const char *giveClassName() const { return "TSplineInterpolation"; }
+protected:
+  /**
+     Evaluates the middle basis function on local knot vector at u
+     @param u value at which to evaluate
+     @param p degree
+     @param U global knot values
+		 @param I local index knot vector
+     @return N computed middle basis function
+
+		 @warning u must be in a valid range.
+  */
+  double basisFunction (double u, int p, const FloatArray& U, const int* I) ;
+  /*
+    Computes the middle basis function and it derivatives on local knot vector at u
+
+    The result is stored in the ders vector
+		N(u)  = ders(0)
+    N'(u) = ders(1)
+		N''(u)= ders(2)
+    
+    @param n the degree of the derivation
+    @param u the parametric value
+    @param p the degree
+		@param U global knot values
+		@param I local index knot vector
+    @param ders vector containing the derivatives of the middle basis function.
+    
+    @warning n and u must be in a valid range.
+  */
+  void dersBasisFunction(int n, double u, int p, const FloatArray& U, const int* I, FloatArray& ders);
+  /*
+    Creates local open knot vector.
+		This is generally done extracting knot values from global knot vector using the local index knot vector
+		and by prepending p times the first knot and appending p times the last knot.
+		However, existing knot multiplicity at the start and end must be accounted for.
+		
+    @param p the degree
+    @param U global knot values
+    @param I local index knot vector
+    @param prepent number of prepended entries
+		@param append number of appended entries
+  */
+	void createLocalKnotVector(int p, const FloatArray& U, const int* I, int* prepend, int* append);
+  /**
+     Returns indices (zero based) of nonzero basis functions for given knot span interval (from start to end)
+  */
+  int giveKnotSpanBasisFuncMask (const IntArray& startKnotSpan, const IntArray& endKnotSpan, IntArray& mask) ;
+  /** Returns the number of nonzero basis functions at given knot span interval (from start to end) */
+  int  giveNumberOfKnotSpanBasisFunctions (const IntArray& startKnotSpan, const IntArray& endKnotSpan) ;
+}; // end of TSplineInterpolation class definition
+
+
 /**
  * IntegrationElement represent nonzero knot span, derived from Integration Rule;
  * 
  */
-class IGA_IntegrationElement : public GaussIntegrationRule {
+class IGAIntegrationElement : public GaussIntegrationRule {
 protected:
 	IntArray knotSpan; // knot_span(nsd)
 public:
-	IGA_IntegrationElement (int _n, Element* _e, IntArray& _knotSpan) : 
+	IGAIntegrationElement (int _n, Element* _e, IntArray& _knotSpan) : 
   GaussIntegrationRule (_n, _e, 0, 0, false), 
     knotSpan (_knotSpan) {}
   const IntArray* giveKnotSpan () {return &this->knotSpan;}
@@ -272,13 +410,12 @@ public:
 
 /**
    Implements base IGAElement, supposed to be a parent class of all elements with B-spline or NURBS based interpolation.
- */
+*/
 class IGAElement : public Element {
 protected:
   // FEInterpolation interpolation; 
 public:
   IGAElement(int n, Domain *aDomain) : Element (n, aDomain) {}
-
   IRResultType initializeFrom(InputRecord *ir);
 
 #ifdef __OOFEG
@@ -290,9 +427,21 @@ public:
 
 
 protected:
-  virtual int giveNsd() = 0;
+  virtual int giveNsd() = 0;   // this info is available also from interpolation. Do we need it here ???
 };
 
+
+/**
+	 IGATSplineElement setups integration rules differently from IGAElement
+*/
+class IGATSplineElement : public IGAElement {
+public:
+  IGATSplineElement(int n, Domain *aDomain) : IGAElement (n, aDomain) {}
+  IRResultType initializeFrom(InputRecord *ir);
+
+protected:
+  virtual int giveNsd() = 0;
+};
 
         
 /**
@@ -376,6 +525,9 @@ class StructuralElementEvaluator {
    */
   virtual int giveIntegrationElementLocalCodeNumbers (IntArray& answer, Element* elem, 
                                                       IntegrationRule* ie, EquationID ut) ;
+#ifdef __OOFEG
+  friend void drawIGAPatchDeformedGeometry(Element* elem, StructuralElementEvaluator* se, oofegGraphicContext &gc, UnknownType);
+#endif
 };
 
 /**
@@ -407,6 +559,33 @@ protected:
 }; // end of PlaneStressStructuralElementEvaluator definition
 
 
+/**
+ * general purpose 3d structural element evaluator
+ */
+class Space3dStructuralElementEvaluator : public StructuralElementEvaluator {
+public:
+  Space3dStructuralElementEvaluator() : StructuralElementEvaluator() {}
+
+protected:
+
+  /** Assemble interpolation matrix at given IP
+   *  In case of IGAElements, N is assumed to contain only nonzero interpolation functions
+   */
+  void computeNMatrixAt (FloatMatrix& answer, GaussPoint* gp);
+  /** Assembles the strain-displacement matrix of the receiver at given integration point
+   *  In case of IGAElements, B is assumed to contain only contribution from nonzero interpolation functions
+   */ 
+  void computeBMatrixAt (FloatMatrix& answer, GaussPoint* gp) ;
+  double computeVolumeAround(GaussPoint *gp) ;
+  void giveDofManDofIDMask(int inode, EquationID u, IntArray &answer) const {
+    answer.resize(3);
+    answer.at(1) = D_u;
+    answer.at(2) = D_v;
+    answer.at(3) = D_w;
+  }
+
+}; // end of SpaceStructuralElementEvaluator definition
+
 
 class BsplinePlaneStressElement : public IGAElement, public PlaneStressStructuralElementEvaluator {
 protected:
@@ -414,11 +593,8 @@ protected:
 
 public:
   BsplinePlaneStressElement(int n, Domain *aDomain);
-  IRResultType initializeFrom(InputRecord *ir) {
-    IGAElement::initializeFrom(ir);
-    //PlaneStressStructuralElementEvaluator::initializeFrom(ir);
-    return IRRT_OK;
-  }
+  IRResultType initializeFrom(InputRecord *ir);
+
   void giveCharacteristicMatrix(FloatMatrix &answer, CharType mtrx, TimeStep *tStep) {
     PlaneStressStructuralElementEvaluator::giveCharacteristicMatrix (answer, mtrx, tStep);}
   virtual void giveCharacteristicVector(FloatArray &answer, CharType type, ValueModeType mode, TimeStep *t) {
@@ -436,6 +612,9 @@ public:
     // Graphics output
     //
   virtual void  drawScalar(oofegGraphicContext &context);
+	virtual void drawDeformedGeometry(oofegGraphicContext &mode, UnknownType ut) {
+		drawIGAPatchDeformedGeometry(this, this, mode, ut);
+	}
 #endif
 
 protected:
@@ -449,11 +628,49 @@ protected:
 
 public:
   NURBSPlaneStressElement(int n, Domain *aDomain);
-  IRResultType initializeFrom(InputRecord *ir) {
-    IGAElement::initializeFrom(ir);
-    //PlaneStressStructuralElementEvaluator::initializeFrom(ir);
-    return IRRT_OK;
+  IRResultType initializeFrom(InputRecord *ir);
+
+  void giveCharacteristicMatrix(FloatMatrix &answer, CharType mtrx, TimeStep *tStep) {
+    PlaneStressStructuralElementEvaluator::giveCharacteristicMatrix (answer, mtrx, tStep);}
+  virtual void giveCharacteristicVector(FloatArray &answer, CharType type, ValueModeType mode, TimeStep *t) {
+    PlaneStressStructuralElementEvaluator::giveCharacteristicVector(answer, type, mode, t);}
+  
+  FEInterpolation *giveInterpolation() {return &this->interpolation;}
+  virtual Element* giveElement() {return this;}
+  void giveDofManDofIDMask(int inode, EquationID u, IntArray &answer) const {
+    PlaneStressStructuralElementEvaluator::giveDofManDofIDMask(inode, u, answer);
   }
+  virtual int computeNumberOfDofs(EquationID ut) { return numberOfDofMans*2; }
+  void updateInternalState(TimeStep *stepN) {PlaneStressStructuralElementEvaluator::updateInternalState (stepN);}
+#ifdef __OOFEG
+    //
+    // Graphics output
+    //
+  virtual void  drawScalar(oofegGraphicContext &context);
+	virtual void drawDeformedGeometry(oofegGraphicContext &mode, UnknownType ut) {
+		drawIGAPatchDeformedGeometry(this, this, mode, ut);
+	}
+
+#endif
+
+protected:
+  virtual int giveNsd() {return 2;}
+};
+
+
+
+class TSplinePlaneStressElement : public IGATSplineElement, public PlaneStressStructuralElementEvaluator {
+protected:
+  TSplineInterpolation interpolation;
+
+public:
+  TSplinePlaneStressElement(int n, Domain *aDomain);
+  IRResultType initializeFrom(InputRecord *ir) {
+		IGATSplineElement::initializeFrom(ir);
+		//PlaneStressStructuralElementEvaluator::initializeFrom(ir);
+		return IRRT_OK;
+	}
+
   void giveCharacteristicMatrix(FloatMatrix &answer, CharType mtrx, TimeStep *tStep) {
     PlaneStressStructuralElementEvaluator::giveCharacteristicMatrix (answer, mtrx, tStep);}
   virtual void giveCharacteristicVector(FloatArray &answer, CharType type, ValueModeType mode, TimeStep *t) {
@@ -476,5 +693,42 @@ public:
 protected:
   virtual int giveNsd() {return 2;}
 };
+
+
+
+class NURBSSpace3dElement : public IGAElement, public Space3dStructuralElementEvaluator {
+protected:
+  NURBSInterpolation interpolation;
+
+public:
+  NURBSSpace3dElement(int n, Domain *aDomain);
+  IRResultType initializeFrom(InputRecord *ir);
+
+  void giveCharacteristicMatrix(FloatMatrix &answer, CharType mtrx, TimeStep *tStep) {
+    Space3dStructuralElementEvaluator::giveCharacteristicMatrix (answer, mtrx, tStep);}
+  virtual void giveCharacteristicVector(FloatArray &answer, CharType type, ValueModeType mode, TimeStep *t) {
+    Space3dStructuralElementEvaluator::giveCharacteristicVector(answer, type, mode, t);}
+  
+  FEInterpolation *giveInterpolation() {return &this->interpolation;}
+  virtual Element* giveElement() {return this;}
+  void giveDofManDofIDMask(int inode, EquationID u, IntArray &answer) const {
+    Space3dStructuralElementEvaluator::giveDofManDofIDMask(inode, u, answer);
+  }
+  virtual int computeNumberOfDofs(EquationID ut) { return numberOfDofMans*3; }
+  void updateInternalState(TimeStep *stepN) {Space3dStructuralElementEvaluator::updateInternalState (stepN);}
+#ifdef __OOFEG
+    //
+    // Graphics output
+    //
+  virtual void  drawScalar(oofegGraphicContext &context) ;
+	virtual void drawDeformedGeometry(oofegGraphicContext &mode, UnknownType ut) {
+		drawIGAPatchDeformedGeometry(this, this, mode, ut);
+	}
+#endif
+
+protected:
+  virtual int giveNsd() {return 3;}
+};
+
 
 #endif //iga_h

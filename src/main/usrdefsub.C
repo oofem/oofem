@@ -331,6 +331,10 @@ Element *CreateUsrDefElementOfType(char *aClass, int number, Domain *domain)
       newElement = new BsplinePlaneStressElement(number, domain);
     } else if ( !strncasecmp(aClass, "nurbsplanestresselement", 23)  ) {
       newElement = new NURBSPlaneStressElement(number, domain);
+    } else if ( !strncasecmp(aClass, "tsplineplanestresselement", 25)  ) {
+      newElement = new TSplinePlaneStressElement(number, domain);
+    } else if ( !strncasecmp(aClass, "nurbs3delement", 14)  ) {
+      newElement = new NURBSSpace3dElement(number, domain);
     }
 
 #endif //__SM_MODULE

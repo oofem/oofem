@@ -54,7 +54,11 @@ class FEInterpolation1d : public FEInterpolation
 protected:
 
 public:
-    FEInterpolation1d(int o) : FEInterpolation(o) { }
+ FEInterpolation1d(int o) : FEInterpolation(o) { }
+  /**
+   * Returns number of spatial dimensions
+   */
+  int const giveNsd() {return 1;}
 };
 
 
