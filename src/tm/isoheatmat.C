@@ -38,11 +38,10 @@
 #include "flotmtrx.h"
 #include "gausspnt.h"
 #ifndef __MAKEDEPEND
-#include <stdlib.h>
+ #include <stdlib.h>
 #endif
 
 namespace oofem {
-
 IRResultType
 IsotropicHeatTransferMaterial :: initializeFrom(InputRecord *ir)
 {
@@ -52,30 +51,28 @@ IsotropicHeatTransferMaterial :: initializeFrom(InputRecord *ir)
 
     this->Material :: initializeFrom(ir);
 
-    IR_GIVE_FIELD(ir, k, IFT_IsotropicHeatTransferMaterial_k, "k"); // Macro// conductivity
-    IR_GIVE_FIELD(ir, c, IFT_IsotropicHeatTransferMaterial_c, "c"); // Macro// specific heat
+    IR_GIVE_FIELD(ir, conductivity, IFT_IsotropicHeatTransferMaterial_k, "k"); // Macro// conductivity
+    IR_GIVE_FIELD(ir, capacity, IFT_IsotropicHeatTransferMaterial_c, "c"); // Macro// specific heat capacity
 
     return IRRT_OK;
 }
 
-
 double
-IsotropicHeatTransferMaterial :: give(int aProperty, GaussPoint* gp)
+IsotropicHeatTransferMaterial :: give(int aProperty, GaussPoint *gp)
 //
-// Returns the value of the property aProperty (e.g. the Young's modulus
-// 'E') of the receiver.
+// Returns the value of the property aProperty (e.g. 'k' the conductivity of the receiver).
 //
 {
-    if ( ( aProperty == 'k' ) ) {
-        return k;
-    } else if ( ( aProperty == HeatCapaCoeff ) || ( aProperty == 'c' ) ) {
-      return ( c * this->give('d',gp) );
+    if ( aProperty == 'k' ) { //thermal conductivity [J/m/K]
+        return conductivity;
+    } else if ( aProperty == 'c' ) { //mass-specific heat capacity [J/kg]
+        return capacity;
+    } else if ( aProperty == HeatCapaCoeff ) { //volume-specific heat capacity [J/m3]
+        return ( capacity * this->give('d', gp) );
     }
 
-    return this->Material :: give(aProperty,gp);
+    return this->Material :: give(aProperty, gp);
 }
-
-
 
 void
 IsotropicHeatTransferMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
@@ -85,21 +82,24 @@ IsotropicHeatTransferMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
                                                           TimeStep *atTime)
 {
     /*
-     * returns constitutive matrix of receiver
+     * returns constitutive (conductivity) matrix of receiver
      */
     MaterialMode mMode = gp->giveMaterialMode();
     switch  ( mMode ) {
+    case _1dHeat:
+        answer.resize(1, 1);
+        answer.at(1, 1) = conductivity;
     case _2dHeat:
         answer.resize(2, 2);
-        answer.at(1, 1) = k;
-        answer.at(2, 2) = k;
+        answer.at(1, 1) = conductivity;
+        answer.at(2, 2) = conductivity;
         return;
 
     case _3dHeat:
         answer.resize(3, 3);
-        answer.at(1, 1) = k;
-        answer.at(2, 2) = k;
-        answer.at(3, 3) = k;
+        answer.at(1, 1) = conductivity;
+        answer.at(2, 2) = conductivity;
+        answer.at(3, 3) = conductivity;
         return;
 
     default:
@@ -114,12 +114,11 @@ IsotropicHeatTransferMaterial :: giveCharacteristicValue(MatResponseMode mode,
                                                          TimeStep *atTime)
 {
     if ( mode == Capacity ) {
-        return ( c * this->give('d',gp) );
+        return ( capacity * this->give('d', gp) );
     } else {
         _error2( "giveCharacteristicValue : unknown mode (%s)", __MatResponseModeToString(mode) );
     }
 
-    return 0; // to make compiler happy
+    return 0.;
 }
-
 } // end namespace oofem

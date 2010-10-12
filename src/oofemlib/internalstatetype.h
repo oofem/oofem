@@ -115,14 +115,21 @@ namespace oofem {
     ENUM_ITEM_WITH_VALUE(IST_TemperatureFlow, 56) \
     ENUM_ITEM_WITH_VALUE(IST_MassConcentrationFlow_1, 57) \
     ENUM_ITEM_WITH_VALUE(IST_HumidityFlow, 58) \
-    ENUM_ITEM_WITH_VALUE(CrackStatuses, 59) \
-    ENUM_ITEM_WITH_VALUE(CrackedFlag, 60) \
-    ENUM_ITEM_WITH_VALUE(CrackDirs, 61)	\
+    ENUM_ITEM_WITH_VALUE(IST_CrackStatuses, 59) \
+    ENUM_ITEM_WITH_VALUE(IST_CrackedFlag, 60) \
+    ENUM_ITEM_WITH_VALUE(IST_CrackDirs, 61)     \
     ENUM_ITEM_WITH_VALUE(IST_CumPlasticStrain, 62) \
     ENUM_ITEM_WITH_VALUE(IST_CumPlasticStrain_2, 63) \
     ENUM_ITEM_WITH_VALUE(IST_StressWorkDensity, 64) \
     ENUM_ITEM_WITH_VALUE(IST_DissWorkDensity, 65) \
     ENUM_ITEM_WITH_VALUE(IST_FreeEnergyDensity, 66) \
+    ENUM_ITEM_WITH_VALUE(IST_ThermalConductivityIsotropic, 67) \
+    ENUM_ITEM_WITH_VALUE(IST_HeatCapacity, 68) \
+    ENUM_ITEM_WITH_VALUE(IST_AverageTemperature, 69) \
+    ENUM_ITEM_WITH_VALUE(IST_YoungModulusVirginPaste, 70) \
+    ENUM_ITEM_WITH_VALUE(IST_PoissonRatioVirginPaste, 71) \
+    ENUM_ITEM_WITH_VALUE(IST_YoungModulusConcrete, 72) \
+    ENUM_ITEM_WITH_VALUE(IST_PoissonRatioConcrete, 73) \
 
 enum InternalStateType {
     InternalStateType_DEF
@@ -134,7 +141,6 @@ enum InternalStateType {
 
 
 const char *__InternalStateTypeToString(InternalStateType _value);
-
 } // end namespace oofem
 #endif // internalstatetype_h
 

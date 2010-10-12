@@ -209,7 +209,7 @@ Tr1_ht :: computeVolumeAround(GaussPoint *aGaussPoint)
     weight  = aGaussPoint->giveWeight();
     area    = this->giveArea();
 
-    return 2.0 *area *weight *this-> giveCrossSection()->give('t');
+    return 2.0 *area *weight *this->giveCrossSection()->give('t');
 }
 
 void
@@ -271,7 +271,7 @@ Tr1_ht :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
     dy      = nodeB->giveCoordinate(2) - nodeA->giveCoordinate(2);
     length = sqrt(dx * dx + dy * dy);
     thick = this->giveCrossSection()->give('t');
-    return 0.5 *length *thick *gp-> giveWeight();
+    return 0.5 *length *thick *gp->giveWeight();
 }
 
 
@@ -327,8 +327,8 @@ Tr1_ht :: computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdg
     nodeB   = this->giveNode(bNode);
 
     answer.resize(2);
-    answer.at(1) = n1 * nodeA->giveCoordinate(1) + n2 *nodeB-> giveCoordinate(1);
-    answer.at(2) = n1 * nodeA->giveCoordinate(2) + n2 *nodeB-> giveCoordinate(2);
+    answer.at(1) = n1 * nodeA->giveCoordinate(1) + n2 *nodeB->giveCoordinate(1);
+    answer.at(2) = n1 * nodeA->giveCoordinate(2) + n2 *nodeB->giveCoordinate(2);
 }
 
 void
@@ -347,10 +347,10 @@ Tr1_ht :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords
     l3 = 1.0 - l1 - l2;
 
     answer.resize(2);
-    answer.at(1) = l1 * this->giveNode(1)->giveCoordinate(1) + l2 *this-> giveNode(2)->giveCoordinate(1) +
-                   l3 *this-> giveNode(3)->giveCoordinate(1);
-    answer.at(2) = l1 * this->giveNode(1)->giveCoordinate(2) + l2 *this-> giveNode(2)->giveCoordinate(2) +
-                   l3 *this-> giveNode(3)->giveCoordinate(2);
+    answer.at(1) = l1 * this->giveNode(1)->giveCoordinate(1) + l2 *this->giveNode(2)->giveCoordinate(1) +
+                   l3 *this->giveNode(3)->giveCoordinate(1);
+    answer.at(2) = l1 * this->giveNode(1)->giveCoordinate(2) + l2 *this->giveNode(2)->giveCoordinate(2) +
+                   l3 *this->giveNode(3)->giveCoordinate(2);
 
     return 1;
 }
@@ -372,7 +372,9 @@ Tr1_ht :: giveInterface(InterfaceType interface)
 int
 Tr1_ht :: ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type)
 {
-    if ( ( type == IST_TemperatureFlow ) || (type == IST_HumidityFlow) ) {
+    if ( type == IST_Temperature || type == IST_HydrationDegree || type == IST_Density || type == IST_ThermalConductivityIsotropic || type == IST_HeatCapacity || type == IST_AverageTemperature || type == IST_YoungModulusVirginPaste || type == IST_PoissonRatioVirginPaste || type == IST_YoungModulusConcrete || type == IST_PoissonRatioConcrete ) {
+        return 1;
+    } else if ( type == IST_TemperatureFlow || type == IST_HumidityFlow ) {
         return 2;
     }
 

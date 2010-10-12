@@ -78,6 +78,8 @@
 #include "oofem_limits.h"
 #include "contextioerr.h"
 #include "xfemmanager.h"
+#include "material.h"
+#include "cemhydmat.h"
 
 #ifndef __MAKEDEPEND
  #include <limits.h>
@@ -109,7 +111,6 @@
 #endif
 
 namespace oofem {
-
 EngngModel :: EngngModel(int i, EngngModel *_master) : domainNeqs(), domainPrescribedNeqs()
     // constructor
 {
@@ -556,7 +557,7 @@ int EngngModel :: giveNumberOfPrescribedEquations(EquationID) {
     // equations.
     //
     if ( !equationNumberingCompleted ) {
-      this->forceEquationNumbering();
+        this->forceEquationNumbering();
     }
 
     return numberOfPrescribedEquations;
@@ -570,8 +571,9 @@ int EngngModel :: giveNumberOfDomainEquations(int id, EquationID) {
     // equations.
     //
     if ( !equationNumberingCompleted ) {
-      this->forceEquationNumbering();
+        this->forceEquationNumbering();
     }
+
     return domainNeqs.at(id);
 }
 
@@ -870,10 +872,30 @@ EngngModel :: updateYourself(TimeStep *stepN)
 #endif
             elem->updateYourself(stepN);
             //elem -> printOutputAt(File, stepN) ;
+
+            //store temperature and associated volume on earch GP before performing averaging
+            if ( elem->giveMaterial()->giveClassID() == CemhydMatClass ) {
+                TransportElement *element = ( TransportElement * ) elem;
+                CemhydMat *cem = ( CemhydMat * ) element->giveMaterial();
+                cem->clearWeightTemperatureProductVolume(element);
+                cem->storeWeightTemperatureProductVolume(element, stepN);
+            }
         }
 
 #  ifdef VERBOSE
         VERBOSE_PRINT0("Updated Elements ", nelem)
+#  endif
+
+        //perform averaging on each material instance
+        for ( j = 1; j <= domain->giveNumberOfMaterialModels(); j++ ) {
+            if ( domain->giveMaterial(j)->giveClassID() == CemhydMatClass ) {
+                CemhydMat *cem = ( CemhydMat * ) domain->giveMaterial(j);
+                cem->averageTemperature();
+            }
+        }
+
+#  ifdef VERBOSE
+        VERBOSE_PRINT0("Updated Materials ", nelem)
 #  endif
     }
 }
@@ -981,7 +1003,7 @@ void EngngModel :: printYourself()
 void EngngModel :: assemble(SparseMtrx *answer, TimeStep *tStep, EquationID ut,
                             CharType type, const UnknownNumberingScheme &s, Domain *domain)
 //
-// assembles matrix answer by  calling
+// assembles matrix answer by calling
 // element(i) -> giveCharacteristicMatrix ( type, tStep );
 // for each element in domain
 // and assembling every contribution to answer
@@ -1123,12 +1145,12 @@ void EngngModel :: assemble(SparseMtrx *answer, TimeStep *tStep, EquationID r_id
  *
  *  for (i = 1; i <= nelem ; i++ ) {
  *    element = domain -> giveElement(i);
- #ifdef __PARALLEL_MODE
+ *#ifdef __PARALLEL_MODE
  * // skip remote elements (these are used as mirrors of remote elements on other domains
  * // when nonlocal constitutive models are used. They introduction is necessary to
  * // allow local averaging on domains without fine grain communication between domains).
  * if (element->giveParallelMode () == Element_remote) continue;
- #endif
+ *#endif
  *    element -> giveLocationArray (loc);
  *    this -> giveElementCharacteristicVector (charVec, i, type, tStep, domain);
  *    if(charVec.giveSize()) answer.assemble (charVec, loc) ;
@@ -1144,12 +1166,12 @@ void EngngModel :: assemble(SparseMtrx *answer, TimeStep *tStep, EquationID r_id
  *
  * for (i=1; i<= nelem; i++) {
  *    element = domain -> giveElement(i);
- #ifdef __PARALLEL_MODE
+ *#ifdef __PARALLEL_MODE
  * // skip remote elements (these are used as mirrors of remote elements on other domains
  * // when nonlocal constitutive models are used. They introduction is necessary to
  * // allow local averaging on domains without fine grain communication between domains).
  * if (element->giveParallelMode () == Element_remote) continue;
- #endif
+ *#endif
  *    element -> givePrescribedLocationArray (loc);
  *    this -> giveElementCharacteristicVector (charVec, i, mtype, tStep, domain);
  *    if(charVec.giveSize()) answer.assemble (charVec, loc) ;
@@ -1230,22 +1252,22 @@ void EngngModel :: assembleVectorFromDofManagers(FloatArray &answer, TimeStep *t
  *  IntArray loc;
  *  FloatArray charVec;
  *  DofManager *node;
- #ifdef __PARALLEL_MODE
+ *#ifdef __PARALLEL_MODE
  *  double scale;
- #endif
+ *#endif
  *  int nnode = domain->giveNumberOfDofManagers();
  *
  *  this->timer.resumeTimer(EngngModelTimer :: EMTT_NetComputationalStepTimer);
  *  for ( i = 1; i <= nnode; i++ ) {
  *      node = domain->giveDofManager(i);
  *      node->computeLoadVectorAt(charVec, tStep, mode);
- #ifdef __PARALLEL_MODE
+ *#ifdef __PARALLEL_MODE
  *      if ( node->giveParallelMode() == DofManager_shared ) {
  *          scale = 1. / ( node->givePartitionsConnectivitySize() );
  *          charVec.times(scale);
  *      }
  *
- #endif
+ *#endif
  *      if ( charVec.giveSize() ) {
  *          node->giveCompletePrescribedLocationArray(loc);
  *          answer.assemble(charVec, loc);
@@ -1786,7 +1808,7 @@ contextIOResultType EngngModel :: restoreContext(DataStream *stream, ContextMode
         delete previousStep;
     }
 
-    previousStep = new TimeStep(istep - 1, this, pmstep, currentStep->giveTime ( ) - currentStep->giveTimeIncrement(),
+    previousStep = new TimeStep(istep - 1, this, pmstep, currentStep->giveTime() - currentStep->giveTimeIncrement(),
                                 currentStep->giveTimeIncrement(), currentStep->giveSolutionStateCounter() - 1);
 
     // restore numberOfEquations and domainNeqs array
@@ -2078,7 +2100,7 @@ EngngModel :: givePetscContext(int i, EquationID ut)
 
         return this->petscContextList->at(i);
     } else {
-      _error2 ("givePetscContext: Undefined domain index %d ", i);
+        _error2("givePetscContext: Undefined domain index %d ", i);
     }
 
     return NULL;
@@ -2112,13 +2134,13 @@ EngngModel :: giveMetaStep(int i)
  * if (! dataInputFileName) {
  * printf ("please enter the name of the input data file : \n") ;
  * gets (s) ;
- #ifndef __PARALLEL_MODE
+ *#ifndef __PARALLEL_MODE
  * dataInputFileName = new char[strlen(s)+1] ;
  * strcpy (dataInputFileName,s) ;
- #else
+ *#else
  * dataInputFileName = new char[strlen(s)+10] ;
  * sprintf (dataInputFileName, "%s.%d", s, rank);
- #endif
+ *#endif
  * }
  *
  * return dataInputFileName ;
@@ -2275,9 +2297,9 @@ EngngModel :: checkProblemConsistency()
 
 
 void
-EngngModel::init()
+EngngModel :: init()
 {
-  initModuleManager->doInit();
+    initModuleManager->doInit();
 }
 
 
@@ -2372,5 +2394,4 @@ EngngModel :: balanceLoad(TimeStep *atTime)
     }
 }
 #endif
-
 } // end namespace oofem

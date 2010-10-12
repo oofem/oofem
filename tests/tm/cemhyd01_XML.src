@@ -1,0 +1,75 @@
+<?xml version="1.0" ?>
+<!--automatically generated CEMHYD3D XML input file-->
+<!--fineness 380.000000 PSD-Dyckerhoff dihydrate 0.050000  hemihydrate 0.000000  anhydrite 0.000000 AutoCorrFile 16130s1 C3S_mass 0.700000  C2S_mass 0.130000  C3A_mass 0.090000  C4AF_mass 0.080000  totsodium 0.000000  totpotassium 0.000000  rssodium 0.000000  rspotassium 0.000000  wcr 0.400000  satur_sealed 0-->
+<Rand_seed_num key0="100" />
+<Microstructure_size key0="10" />
+<Generate_microstructure key0="2" key1="4" key2="0" dihydrate="0.05" hemihydrate="0" anhydrite="0" key3="1" key4="3" key5="1" key6="2" key7="2" key8="1" key9="2" key10="1" key11="1" key12="60" key13="0" key14="1" key15="1" C3S_unit_frac="0.706058" C2S_unit_frac="0.128327" C3A_unit_frac="0.0961718" C4AF_unit_frac="0.0694431" key16="60" key17="0" key18="0.399102" key19="1" key20="0.286178" key21="2" key22="0.241162" key23="3" key24="0.215826" key25="4" key26="0.201068" key27="5" key28="0.191144" key29="6" key30="0.184427" key31="7" key32="0.179909" key33="8" key34="0.176856" key35="9" key36="0.174323" key37="10" key38="0.172522" key39="11" key40="0.171031" key41="12" key42="0.169673" key43="13" key44="0.16859" key45="14" key46="0.166987" key47="15" key48="0.165772" key49="16" key50="0.16503" key51="17" key52="0.164139" key53="18" key54="0.163064" key55="19" key56="0.16224" key57="20" key58="0.161285" key59="21" key60="0.160338" key61="22" key62="0.159571" key63="23" key64="0.15895" key65="24" key66="0.159032" key67="25" key68="0.159186" key69="26" key70="0.159155" key71="27" key72="0.158841" key73="28" key74="0.158348" key75="29" key76="0.157817" key77="30" key78="0.157547" key79="31" key80="0.15741" key81="32" key82="0.157558" key83="33" key84="0.157642" key85="34" key86="0.157332" key87="35" key88="0.156982" key89="36" key90="0.156963" key91="37" key92="0.157247" key93="38" key94="0.157462" key95="39" key96="0.157313" key97="40" key98="0.15678" key99="41" key100="0.155999" key101="42" key102="0.15557" key103="43" key104="0.154809" key105="44" key106="0.154124" key107="45" key108="0.153528" key109="46" key110="0.153073" key111="47" key112="0.152811" key113="48" key114="0.153074" key115="49" key116="0.153318" key117="50" key118="0.153606" key119="51" key120="0.153813" key121="52" key122="0.153935" key123="53" key124="0.153765" key125="54" key126="0.153514" key127="55" key128="0.153264" key129="56" key130="0.153224" key131="57" key132="0.153356" key133="58" key134="0.153439" key135="59" key136="0.153537" key137="60" key138="0" key139="0.380117" key140="1" key141="0.274355" key142="2" key143="0.229658" key144="3" key145="0.204081" key146="4" key147="0.189174" key148="5" key149="0.179122" key150="6" key151="0.172566" key152="7" key153="0.168099" key154="8" key155="0.164928" key156="9" key157="0.162307" key158="10" key159="0.160478" key160="11" key161="0.158898" key162="12" key163="0.157436" key164="13" key165="0.15612" key166="14" key167="0.154501" key168="15" key169="0.153144" key170="16" key171="0.152169" key172="17" key173="0.151126" key174="18" key175="0.149901" key176="19" key177="0.148864" key178="20" key179="0.147663" key180="21" key181="0.146373" key182="22" key183="0.145395" key184="23" key185="0.144761" key186="24" key187="0.144781" key188="25" key189="0.144801" key190="26" key191="0.144665" key192="27" key193="0.144226" key194="28" key195="0.143542" key196="29" key197="0.142854" key198="30" key199="0.142424" key200="31" key201="0.142214" key202="32" key203="0.142303" key204="33" key205="0.142419" key206="34" key207="0.142087" key208="35" key209="0.141768" key210="36" key211="0.141686" key212="37" key213="0.141769" key214="38" key215="0.141837" key216="39" key217="0.141598" key218="40" key219="0.141063" key220="41" key221="0.140296" key222="42" key223="0.139752" key224="43" key225="0.138966" key226="44" key227="0.138285" key228="45" key229="0.137617" key230="46" key231="0.137071" key232="47" key233="0.136737" key234="48" key235="0.13691" key236="49" key237="0.137063" key238="50" key239="0.137422" key240="51" key241="0.137692" key242="52" key243="0.137705" key244="53" key245="0.137481" key246="54" key247="0.137103" key248="55" key249="0.136726" key250="56" key251="0.1366" key252="57" key253="0.136629" key254="58" key255="0.136559" key256="59" key257="0.136526" key258="60" key259="0" key260="0.041699" key261="1" key262="0.015764" key263="2" key264="0.010158" key265="3" key266="0.007978" key267="4" key268="0.006743" key269="5" key270="0.006063" key271="6" key272="0.005742" key273="7" key274="0.005416" key275="8" key276="0.005162" key277="9" key278="0.004962" key279="10" key280="0.004793" key281="11" key282="0.004593" key283="12" key284="0.004292" key285="13" key286="0.004092" key287="14" key288="0.00385" key289="15" key290="0.003606" key291="16" key292="0.003429" key293="17" key294="0.003306" key295="18" key296="0.003131" key297="19" key298="0.003045" key299="20" key300="0.002885" key301="21" key302="0.002768" key303="22" key304="0.002671" key305="23" key306="0.002518" key307="24" key308="0.002431" key309="25" key310="0.002352" key311="26" key312="0.002237" key313="27" key314="0.002178" key315="28" key316="0.002121" key317="29" key318="0.002057" key319="30" key320="0.001964" key321="31" key322="0.001923" key323="32" key324="0.001863" key325="33" key326="0.001825" key327="34" key328="0.001807" key329="35" key330="0.001792" key331="36" key332="0.001798" key333="37" key334="0.001829" key335="38" key336="0.001856" key337="39" key338="0.001869" key339="40" key340="0.001877" key341="41" key342="0.001852" key343="42" key344="0.001787" key345="43" key346="0.001758" key347="44" key348="0.001747" key349="45" key350="0.001754" key351="46" key352="0.001768" key353="47" key354="0.001776" key355="48" key356="0.001814" key357="49" key358="0.001842" key359="50" key360="0.001852" key361="51" key362="0.001919" key363="52" key364="0.001968" key365="53" key366="0.001985" key367="54" key368="0.001983" key369="55" key370="0.002017" key371="56" key372="0.002023" key373="57" key374="0.002013" key375="58" key376="0.002044" key377="59" key378="0.002055" />
+<Total_sodium key0="0" />
+<Total_potassium key0="0" />
+<Readily_soluble_sodium key0="0" />
+<Readily_soluble_potassium key0="0" />
+<Diffusion_steps_per_cycle key0="500" />
+<CH_nucleation_probability key0="0.0001" />
+<CH_scale_factor key0="9000" />
+<Gypsum_nucleation_probability key0="0.01" />
+<Gypsum_scale_factor key0="9000" />
+<C3AH6_nucleation_probability key0="2e-05" />
+<C3AH6_scale_factor key0="10000" />
+<FH3_nucleation_probability key0="0.002" />
+<FH3_scale_factor key0="2500" />
+<Given_microstructure key0="1" note0="0-not present, 1-present" />
+<Input_id_file key0="cemhyd01_mic.id" />
+<Input_img_file key0="cemhyd01_mic.img" />
+<Output_initial_microstructure key0="0" note0="0-do not output, 1-output" />
+<Output_initial_microstructure_id_file key0="out_mic.id" />
+<Output_initial_microstructure_img_file key0="out_mic.img" />
+<Saturated_sealed key0="0" note0="0-saturated, 1-sealed" />
+<Cycle_freq_perc_pore key0="100" />
+<Cycle_freq_perc_sol key0="50000" />
+<Induction_time key0="0" note0="Extra dormant period" />
+<Beta key0="0.0003" note0="Parameter for time-cycle mapping" />
+<Ea_cement key0="38.3" />
+<Ea_pozz key0="83.14" />
+<Ea_slag key0="80" />
+<Water_cement_ratio key0="0.4" />
+<Mass_tot_concrete key0="2330" />
+<Mass_cement_concrete key0="300" />
+<Mass_cem_frac key0="0.171674" />
+<Mass_water_frac key0="0.0686695" />
+<Mass_SCM_frac key0="0.00858369" />
+<Mass_FA_frac key0="0.472103" />
+<Mass_CA_frac key0="0.193133" />
+<Mass_inert_frac key0="0.0858369" />
+<Mass_SCM_FA_CA_inert_frac key0="0.759657" />
+<Cp_cem key0="840" />
+<Cp_SCM_FA_CA_inert key0="750" />
+<Cp_SCM key0="700" />
+<Cp_FA key0="800" />
+<Cp_CA key0="800" />
+<Cp_inert key0="800" />
+<Adiabatic_conditions key0="0" note0="0-no adiabatic curing, 1-adiabatic curing" />
+<Vol_total key0="1115.74" />
+<Vol_cement_clinker_gypsum key0="126.984" />
+<Vol_cement_SCM key0="9.09091" />
+<Vol_water key0="160" />
+<Vol_FA key0="431.373" />
+<Vol_CA key0="176.471" />
+<Vol_inert_filler key0="181.818" />
+<Vol_entrained_entrapped_air key0="30" />
+<Grain_average_FA key0="2" />
+<Grain_average_CA key0="20" />
+<ITZ_thickness key0="20" />
+<ITZ_Young_red key0="0.5" />
+<Young_SCM key0="20" />
+<Poisson_SCM key0="0.2" />
+<Young_FA key0="55" />
+<Poisson_FA key0="0.2" />
+<Young_CA key0="55" />
+<Poisson_CA key0="0.2" />
+<Young_inert key0="40" />
+<Poisson_inert key0="0.2" />
+<Calculate_elastic_homogenization key0="1" note0="0-do not calculate elastic homogenization, 1-calculate" />
+<Concrete_bulk_density key0="2088.31" note0="[kg/m3]" />
+<Concrete_thermal_conductivity key0="1.7" note0="Thermal conductivity in the beginning of hydration [W/m/K]" />
+<Info_concrete_thermal_capacity_DoH_0 key0="1038.11" note0="Informative heat capacity at DoH=0 [J/kg/K]" />
+<Info_concrete_thermal_capacity_DoH_1 key0="932.157" note0="Informative heat capacity at DoH=1 [J/kg/K]" />

@@ -1020,11 +1020,11 @@ int
 RCM2Material :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime)
 {
     RCM2MaterialStatus *status = ( RCM2MaterialStatus * ) this->giveStatus(aGaussPoint);
-    if ( type == CrackedFlag ) {
+    if ( type == IST_CrackedFlag ) {
         answer.resize(1);
         answer.at(1) =  status->giveAlreadyCrack();
         return 1;
-    } else if ( type == CrackDirs ) {
+    } else if ( type == IST_CrackDirs ) {
         FloatMatrix help;
         status->giveCrackDirs(help);
         answer.resize(9);
@@ -1035,7 +1035,7 @@ RCM2Material :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, Interna
         }
 
         return 1;
-    } else if ( type == CrackStatuses ) {
+    } else if ( type == IST_CrackStatuses ) {
         IntArray crackStatus;
         answer.resize(3);
         status->giveCrackStatus(crackStatus);
@@ -1055,11 +1055,11 @@ RCM2Material :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, Interna
 InternalStateValueType
 RCM2Material :: giveIPValueType(InternalStateType type)
 {
-    if ( type == CrackedFlag ) {
+    if ( type == IST_CrackedFlag ) {
         return ISVT_SCALAR;
-    } else if ( type == CrackDirs ) {
+    } else if ( type == IST_CrackDirs ) {
         return ISVT_VECTOR;
-    } else if ( type == CrackStatuses ) {
+    } else if ( type == IST_CrackStatuses ) {
         return ISVT_VECTOR;
     } else {
         return StructuralMaterial :: giveIPValueType(type);
@@ -1070,18 +1070,18 @@ RCM2Material :: giveIPValueType(InternalStateType type)
 int
 RCM2Material :: giveIntVarCompFullIndx(IntArray &answer, InternalStateType type, MaterialMode mmode)
 {
-    if ( type == CrackedFlag ) {
+    if ( type == IST_CrackedFlag ) {
         answer.resize(1);
         answer.at(1) = 1;
         return 1;
-    } else if ( type ==  CrackDirs ) {
+    } else if ( type ==  IST_CrackDirs ) {
         answer.resize(9);
         for ( int i = 1; i <= 9; i++ ) {
             answer.at(i) = i;
         }
 
         return 1;
-    } else if ( type == CrackStatuses ) {
+    } else if ( type == IST_CrackStatuses ) {
         answer.resize(3);
         for ( int i = 1; i <= 3; i++ ) {
             answer.at(i) = i;
@@ -1097,11 +1097,11 @@ RCM2Material :: giveIntVarCompFullIndx(IntArray &answer, InternalStateType type,
 int
 RCM2Material :: giveIPValueSize(InternalStateType type, GaussPoint *aGaussPoint)
 {
-    if ( type == CrackedFlag ) {
+    if ( type == IST_CrackedFlag ) {
         return 1;
-    } else if ( type == CrackDirs ) {
+    } else if ( type == IST_CrackDirs ) {
         return 9;
-    } else if ( type == CrackStatuses ) {
+    } else if ( type == IST_CrackStatuses ) {
         return 3;
     } else {
         return StructuralMaterial :: giveIPValueSize(type, aGaussPoint);

@@ -116,7 +116,7 @@ public:
     /// Returns the const pointer to receiver's tempStateVector
     const FloatArray &giveTempStateVector()      { return tempStateVector; }
     /// Assigns tempStateVector from a given vector v
-    void         letTempStateVectorBe(const FloatArray &v)
+    void letTempStateVectorBe(const FloatArray &v)
     { tempStateVector = v; }
 
     /// Returns "TransportMaterialStatus" - class name of the receiver.

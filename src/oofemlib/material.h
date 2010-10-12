@@ -93,7 +93,7 @@ class Material : public FEMComponent
      * is an attribute of a domain. It is usually also attribute of many elements.
      * DESCRIPTION
      * The attribute 'propertyDictionary' contains all the properties of a mate-
-     * rial, like its Young modulus, its mass density or poisson ratio.
+     * rial, like its Young modulus, its mass density or Poisson ratio.
      * TASK
      * - indicate, whether there required material mode is valid for receiver
      * (method hasMaterialModeCapability). Note: for some material models and linear materials
@@ -178,17 +178,24 @@ public:
      * by unique int id. Intgeration point also passed to allow for materials with spatially
      * varying properties
      * @param aProperty id of property requested
-     * @param gp intgration point,
+     * @param gp integration point,
      * @return property value
      */
     virtual double   give(int aProperty, GaussPoint* gp);
     /**
      * Returns true if 'aProperty' exists on material
      * @param aProperty id of property requested
-     * @param gp intgration point
+     * @param gp integration point
      * @return true if 'aProperty' exists
      */
     virtual bool   hasProperty(int aProperty, GaussPoint* gp);
+    /**
+     * Modify 'aProperty', which already exists on material. Intended for evolving material properties. 
+     * @param aProperty id of a property requested
+     * @param value assigned value
+     * @param gp integration point
+     */
+    virtual void modifyProperty(int aProperty, double value, GaussPoint* gp);
     /**
      * Returns casting time of the receiver
      */
@@ -235,25 +242,20 @@ public:
      * @param atTime determines the time step
      * @returns nonzero if the assignment can be done, zero if this type of variable is not supported
      */
-    virtual int giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime)
-    { answer.resize(0);
-      return 0; }
+    virtual int giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime);
     /**
-     * Returns the corresponding integration point  value size in Reduced form.
+     * Returns the corresponding integration point value size in Reduced form.
      * @param type determines the type of internal variable
      * @returns var size, zero if var not supported
      */
-    virtual int giveIPValueSize(InternalStateType type, GaussPoint *aGaussPoint)
-    { return 0; }
+    virtual int giveIPValueSize(InternalStateType type, GaussPoint *aGaussPoint);
     /**
      * Returns the mask of reduced indexes of Internal Variable component .
-     * @param answer mask of Full VectorSize, with components beeing the indexes to reduced form vectors.
+     * @param answer mask of Full VectorSize, with components being the indexes to reduced form vectors.
      * @param type determines the internal variable requested (physical meaning)
      * @returns nonzero if ok or error is generated for unknown mat mode.
      */
-    virtual int giveIntVarCompFullIndx(IntArray &answer, InternalStateType type, MaterialMode mmode)
-    { answer.resize(0);
-      return 0; }
+    virtual int giveIntVarCompFullIndx(IntArray &answer, InternalStateType type, MaterialMode mmode);
     /**
      * Returns the type of internal variable (scalar, vector, tensor,...).
      * @param type determines the type of internal variable
@@ -329,6 +331,13 @@ public:
      * @param gp integration point to initialize
      */
     virtual void initGpForNewStep(GaussPoint *gp);
+    /**
+     * Optional function to call specific procedures when initializing a material.
+     * For example, multiscale simulations need to create master and slave material statuses on specific integration points before the computation.
+     @param element pointer to element
+     @return zero on error.
+     */
+    virtual int initMaterial(Element *element);
     /**
      * Returns material status of receiver in given integration point.
      * If status does not exist yet, it is created using CreateStatus  member function.

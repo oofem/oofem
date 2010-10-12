@@ -67,20 +67,21 @@ class IsotropicHeatTransferMaterial : public TransportMaterial
 
 protected:
 
-    double k, c;
+    double conductivity;//conductivity (k in input file)
+    double capacity;//capacity (c in input file)
 
 public:
 
     IsotropicHeatTransferMaterial(int n, Domain *d) : TransportMaterial(n, d) { }
     ~IsotropicHeatTransferMaterial() { }
 
-    void  giveCharacteristicMatrix(FloatMatrix &answer,
+    virtual void  giveCharacteristicMatrix(FloatMatrix &answer,
                                    MatResponseForm form,
                                    MatResponseMode mode,
                                    GaussPoint *gp,
                                    TimeStep *atTime); // identification and auxiliary functions
 
-    virtual double  giveCharacteristicValue(MatResponseMode mode,
+    virtual double giveCharacteristicValue(MatResponseMode mode,
                                             GaussPoint *gp,
                                             TimeStep *atTime);
 
@@ -100,6 +101,7 @@ public:
      */
     //virtual MaterialStatus *CreateStatus(GaussPoint *gp) const { return NULL; }
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const { return new TransportMaterialStatus(1, domain, gp);  }
+
 protected:
 };
 

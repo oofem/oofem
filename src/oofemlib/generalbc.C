@@ -48,14 +48,13 @@
 #include "bcvaltype.h"
 
 #ifndef __MAKEDEPEND
-#include <stdlib.h>
-#ifdef HAVE_STRINGS_H
-#include <strings.h>
-#endif
+ #include <stdlib.h>
+ #ifdef HAVE_STRINGS_H
+  #include <strings.h>
+ #endif
 #endif
 
 namespace oofem {
-
 GeneralBoundaryCondition :: GeneralBoundaryCondition(int n, Domain *d) : FEMComponent(n, d)
 {
     loadTimeFunction = 0;
@@ -81,14 +80,14 @@ GeneralBoundaryCondition *GeneralBoundaryCondition :: ofType(char *aClass)
 {
     GeneralBoundaryCondition *newBC;
 
-    if ( !strncasecmp(aClass, "boundarycondition", 5) ) {
+    if ( !strncasecmp(aClass, "boundarycondition", 17) ) {
         newBC = new BoundaryCondition(number, domain);
-    } else if ( !strncasecmp(aClass, "deadweight", 5) )   {
+    } else if ( !strncasecmp(aClass, "deadweight", 10) ) {
         newBC = new DeadWeight(number, domain);
     }
     //else if (! strncasecmp(aClass,"initialcondition",5))
     //   newBC = new InitialCondition(number,domain) ;
-    else if ( !strncasecmp(aClass, "nodalload", 5) ) {
+    else if ( !strncasecmp(aClass, "nodalload", 9) ) {
         newBC = new NodalLoad(number, domain);
     }
     // else if (!strncasecmp(aClass,"temperatureload",12))
@@ -136,5 +135,4 @@ GeneralBoundaryCondition :: giveInputRecordString(std :: string &str, bool keywo
 
     return 1;
 }
-
 } // end namespace oofem

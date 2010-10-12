@@ -796,7 +796,7 @@ void NonLinearStatic :: updateYourself(TimeStep *stepN)
 
 void NonLinearStatic ::  updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Domain *d)
 //
-// updates some componet, which is used by numerical method
+// updates some component, which is used by numerical method
 // to newly reached state. used mainly by numerical method
 // when new tanget stiffness is needed during finding
 // of new equlibrium stage.

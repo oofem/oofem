@@ -108,8 +108,11 @@ protected:
     FloatMatrix stiffMatrix;
     ///process with external file for the storage of stiffness matrix 0-None, 1-read, 2-write
     int stiffMatrxFileNoneReadingWriting;
+    ///Array containg the force vector from nodes (if condensation is skipped, use this vector)
+    FloatArray internalMacroForcesVector;
     ///last time step when stiffness matrix was assembled
     TimeStep *lastStiffMatrixTimeStep;
+    
 };
 
 } // end namespace oofem

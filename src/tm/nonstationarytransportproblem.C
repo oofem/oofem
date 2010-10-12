@@ -184,7 +184,7 @@ double
 NonStationaryTransportProblem :: giveDeltaT(int n)
 {
     if ( giveDtTimeFunction() ) {
-        return deltaT *giveDtTimeFunction()->__at(n);
+        return deltaT * giveDtTimeFunction()->__at(n);
     }
 
     return deltaT;
@@ -212,7 +212,7 @@ NonStationaryTransportProblem :: giveNextStep()
     }
 
     previousStep = currentStep;
-    currentStep = new TimeStep(istep, this, 1, totalTime, this->giveDeltaT ( istep ), counter);
+    currentStep = new TimeStep(istep, this, 1, totalTime, this->giveDeltaT(istep), counter);
     // time and dt variables are set eq to 0 for staics - has no meaning
     return currentStep;
 }
@@ -599,17 +599,32 @@ NonStationaryTransportProblem :: applyIC(TimeStep *stepWhenIcApply)
         }
     }
 
-    /* Not relevant in linear case
-     * // update element state according to given ic
-     * int nelem = domain -> giveNumberOfElements ();
-     * TransportElement* element;
-     *
-     * for (j = 1; j <= nelem ; j++ ) {
-     * element = (TransportElement*) domain -> giveElement(j);
-     * element -> updateInternalState (stepWhenIcApply);
-     * element -> updateYourself(stepWhenIcApply);
-     * }
-     */
+    // Not relevant in linear case, but needed for CemhydMat for temperature averaging before solver
+    // Update element state according to given ic
+    int nelem = domain->giveNumberOfElements();
+    TransportElement *element;
+    CemhydMat *cem;
+    for ( j = 1; j <= nelem; j++ ) {
+        element = ( TransportElement * ) domain->giveElement(j);
+        //assign status to each integration point on each element
+        if ( element->giveMaterial()->giveClassID() == CemhydMatClass ) {
+            element->giveMaterial()->initMaterial(element); //create microstructures and statuses on specific GPs
+            element->updateInternalState(stepWhenIcApply);   //store temporary unequilibrated temperature
+            element->updateYourself(stepWhenIcApply);   //store equilibrated temperature
+            cem = ( CemhydMat * ) element->giveMaterial();
+            cem->clearWeightTemperatureProductVolume(element);
+            cem->storeWeightTemperatureProductVolume(element, stepWhenIcApply);
+        }
+    }
+
+    //perform averaging on each material instance
+    int nmat = domain->giveNumberOfMaterialModels();
+    for ( j = 1; j <= nmat; j++ ) {
+        if ( domain->giveMaterial(j)->giveClassID() == CemhydMatClass ) {
+            cem = ( CemhydMat * ) domain->giveMaterial(j);
+            cem->averageTemperature();
+        }
+    }
 }
 
 
@@ -646,6 +661,47 @@ NonStationaryTransportProblem :: assembleDirichletBcRhsVector(FloatArray &answer
 
     // end element loop
 }
+
+///needed for CemhydMat
+void
+NonStationaryTransportProblem :: averageOverElements(TimeStep *tStep) {
+    Domain *domain = this->giveDomain(1);
+    int ielem, i;
+    int nelem = domain->giveNumberOfElements();
+    double dV;
+    TransportElement *element;
+    IntegrationRule *iRule;
+    GaussPoint *gp;
+    FloatArray vecTemperature;
+    TransportMaterial *mat;
+
+
+
+
+    for ( ielem = 1; ielem <= nelem; ielem++ ) {
+        element = ( TransportElement * ) domain->giveElement(ielem);
+        mat = ( TransportMaterial * ) element->giveMaterial();
+        if ( mat->giveClassID() == CemhydMatClass ) {
+            iRule = element->giveDefaultIntegrationRulePtr();
+            for ( i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
+                gp  = iRule->getIntegrationPoint(i);
+                dV  = element->computeVolumeAround(gp);
+                element->giveIPValue(vecTemperature, gp, IST_Temperature, tStep);
+                //mat->IP_volume += dV;
+                //mat->average_temp += vecState.at(1) * dV;
+            }
+        }
+    }
+
+    for ( i = 1; i <= domain->giveNumberOfMaterialModels(); i++ ) {
+        mat = ( TransportMaterial * ) domain->giveMaterial(i);
+        if ( mat->giveClassID() == CemhydMatClass ) {
+            //mat->average_temp /= mat->IP_volume;
+        }
+    }
+}
+
+
 
 #ifdef __PETSC_MODULE
 void

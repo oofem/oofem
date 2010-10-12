@@ -243,6 +243,8 @@ enum classType {
     HydrationModelClass,
     HydrationModelStatusClass,
 
+    CemhydMatClass,
+    CemhydMatStatusClass,
 
     MaterialStatusClass,
     StructuralMaterialStatusClass,

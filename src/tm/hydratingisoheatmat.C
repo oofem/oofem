@@ -39,12 +39,11 @@
 #include "gausspnt.h"
 #include "timestep.h"
 #ifndef __MAKEDEPEND
-#include <stdlib.h>
+ #include <stdlib.h>
 #endif
 #include "contextioerr.h"
 
 namespace oofem {
-
 IRResultType
 HydratingIsoHeatMaterial :: initializeFrom(InputRecord *ir)
 {
@@ -131,7 +130,7 @@ HydratingIsoHeatMaterial :: computeInternalSourceVector(FloatArray &val, GaussPo
         if ( hydrationModel ) { //!!! better via HydrationModelInterface
             hydrationModel->computeInternalSourceVector(val, gp, atTime, VM_Incremental); //!!! mode is VM_Total for nltransientstatic
             val.times( 1. / atTime->giveTimeIncrement() ); // /give('d');
-        } else   {
+        } else {
             val.zero();
         }
 
@@ -139,7 +138,7 @@ HydratingIsoHeatMaterial :: computeInternalSourceVector(FloatArray &val, GaussPo
          * printf("HIsoHeatMat: Ksi %.4f, dksi %.4f, heat %g\n",
          * giveHydrationDegree(gp, atTime, VM_Total), giveHydrationDegree(gp, atTime, VM_Incremental), (val.giveSize())?val.at(1):0);
          */
-    } else   {
+    } else {
         val.resize(0);
     }
 }
@@ -174,7 +173,7 @@ HydratingIsoHeatMaterial :: updateInternalState(const FloatArray &vec, GaussPoin
                     aux.zero();
                 }
 
-                aux.times( 1. / give('d',gp) );
+                aux.times( 1. / give('d', gp) );
                 fprintf( vyst, "Elem %.3d krok %.2d: t= %.0f, dt=%.0f, %ld. it, ksi= %.12f, T= %.8f, heat=%.8f\n", gp->giveElement()->giveNumber(), atTime->giveNumber(),
                         atTime->giveTime(), atTime->giveTimeIncrement(), atTime->giveSolutionStateCounter(),
                         giveHydrationDegree(gp, atTime, VM_Total), vec.at(1), aux.at(1) * atTime->giveTimeIncrement() );
@@ -192,9 +191,9 @@ HydratingIsoHeatMaterial :: giveCharacteristicValue(MatResponseMode rmode, Gauss
 
     if ( rmode == Capacity ) {
         if ( castAt && ( atTime->giveTime() < castAt ) ) {
-	  answer = c * this->give('d',gp) / 1000;                               // Zero capacity before cast
-        } else                                                                                   {
-	  answer = c * this->give('d',gp);
+            answer = capacity * this->give('d', gp) / 1000;                            // Zero capacity before cast
+        } else {
+            answer = capacity * this->give('d', gp);
         }
     } else if ( !hydrationLHS ) {
         answer = 0;
@@ -206,7 +205,7 @@ HydratingIsoHeatMaterial :: giveCharacteristicValue(MatResponseMode rmode, Gauss
         }
 
         answer = hydrationModel->giveCharacteristicValue(* vec, rmode, gp, atTime)
-        / atTime->giveTimeIncrement();
+                 / atTime->giveTimeIncrement();
         delete vec;
     } else {
         _error2( "giveCharacteristicValue: unknown MatResponseMode (%s)", __MatResponseModeToString(rmode) );
@@ -327,5 +326,4 @@ HydratingTransportMaterialStatus :: giveInterface(InterfaceType type)
         return NULL;
     }
 }
-
 } // end namespace oofem

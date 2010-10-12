@@ -36,21 +36,3 @@
 //   file DEADWGHT.CC
 
 #include "deadwght.h"
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

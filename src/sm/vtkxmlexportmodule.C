@@ -176,6 +176,7 @@ VTKXMLExportModule :: doOutput(TimeStep *tStep)
                 for ( i = 1; i <= nelemNodes; i++ ) {
                     fprintf(stream, "%d ", mapG2L.at( elem->giveNode(i)->giveNumber() ) - 1);
                 }
+                fprintf( stream, " " );
             }
 
             fprintf(stream, "</DataArray>\n");
@@ -254,7 +255,7 @@ VTKXMLExportModule :: doOutput(TimeStep *tStep)
             if ( this->isElementComposite(elem) ) {
                 // multi cell (composite) elements should support vtkxmlexportmoduleinterface
                 // and are exported as individual pieces (see VTKXMLExportModuleElementInterface)
-                VTKXMLExportModuleElementInterface* interface =  
+                VTKXMLExportModuleElementInterface* interface =
                   ( VTKXMLExportModuleElementInterface * ) elem->giveInterface(VTKXMLExportModuleElementInterfaceType);
                 if ( interface ) {
                     // passing this to access general piece related methoods like exportPointDataHeader, etc.
@@ -325,7 +326,7 @@ VTKXMLExportModule :: giveCellType(Element *elem)
     } else if ( elemGT == EGT_hexa_1 ) {
         vtkCellType = 12;
     } else {
-        OOFEM_ERROR("VTKXMLExportModule: unsupported element gemetry type");
+        OOFEM_ERROR2("VTKXMLExportModule: unsupported element geometry type on element %d", elem->giveNumber() );
     }
 
     return vtkCellType;
@@ -345,7 +346,7 @@ VTKXMLExportModule :: giveNumberOfNodesPerCell(int cellType)
     } else if  ( ( cellType == 12 ) || ( cellType == 23 ) ) {
         return 8;
     } else {
-        OOFEM_ERROR("VTKXMLExportModule: unsupported cell type ID");
+        OOFEM_ERROR2("VTKXMLExportModule: unknown number of nodes of cellType %d\n", cellType);
     }
 
     return 0; // to make compiler happy
@@ -367,7 +368,7 @@ VTKXMLExportModule :: giveElementCell(IntArray &answer, Element *elem, int cell)
             answer.at(i) = elem->giveNode(i)->giveNumber() - 1;
         }
     } else {
-        OOFEM_ERROR("VTKXMLExportModule: unsupported element geometry type");
+        OOFEM_ERROR2("VTKXMLExportModule: unsupported element geometry type on element %d", elem->giveNumber() );
     }
 
     return;
@@ -387,11 +388,11 @@ VTKXMLExportModule :: giveNumberOfElementCells(Element *elem)
 {
     Element_Geometry_Type elemGT = elem->giveGeometryType();
 
-    if ( ( elemGT == EGT_triangle_1 ) || ( elemGT == EGT_triangle_1 ) || ( elemGT == EGT_tetra_1 ) || 
+    if ( ( elemGT == EGT_triangle_1 ) || ( elemGT == EGT_triangle_1 ) || ( elemGT == EGT_tetra_1 ) ||
 	 ( elemGT == EGT_quad_1 ) || ( elemGT == EGT_quad_2 ) || ( elemGT == EGT_hexa_1 ) ) {
         return 1;
     } else {
-        OOFEM_ERROR("VTKXMLExportModule: unsupported element geometry type");
+        OOFEM_ERROR2("VTKXMLExportModule: unsupported element geometry type on element %d", elem->giveNumber() );
     }
 
     return 0;
@@ -417,7 +418,7 @@ VTKXMLExportModule :: exportPointDataHeader(FILE *stream, TimeStep *tStep)
             scalars += __UnknownTypeToString(type);
             scalars.append(" ");
         } else {
-            OOFEM_ERROR2( "VTKXMLExportModule::exportPrimVarAs: unsupported UnknownType (%s)", __UnknownTypeToString(type) );
+            OOFEM_ERROR2( "VTKXMLExportModule::exportPrimVarAs: unsupported UnknownType %s", __UnknownTypeToString(type) );
         }
     }
 
@@ -445,7 +446,7 @@ VTKXMLExportModule :: exportPointDataHeader(FILE *stream, TimeStep *tStep)
             vectors += __InternalStateTypeToString(isttype);
             vectors.append(" ");
         } else {
-            fprintf(stderr, "exportIntVars: unsupported variable type\n");
+            fprintf(stderr, "VTKXMLExportModule::exportIntVars: unsupported variable type %s\n", __InternalStateTypeToString(isttype));
         }
     }
 
@@ -460,6 +461,7 @@ VTKXMLExportModule :: exportPointDataFooter(FILE *stream, TimeStep *tStep)
     fprintf(stream, "</PointData>\n");
 }
 
+//keyword "vars" in OOFEM input file
 void
 VTKXMLExportModule :: exportIntVars(FILE *stream, IntArray &mapG2L, IntArray &mapL2G,
                                     int regionDofMans, int region, TimeStep *tStep)
@@ -548,6 +550,7 @@ VTKXMLExportModule :: initRegionNodeNumbering(IntArray &regionG2LNodalNumbers,
 }
 
 
+//keyword "vars" in OOFEM input file
 void
 VTKXMLExportModule :: exportIntVarAs(InternalStateType valID, InternalStateValueType type,
                                      IntArray &mapG2L, IntArray &mapL2G,
@@ -576,7 +579,7 @@ VTKXMLExportModule :: exportIntVarAs(InternalStateType valID, InternalStateValue
         fprintf( stream, "<DataArray type=\"Float32\" Name=\"%s\" NumberOfComponents=\"9\" format=\"ascii\"> ",
                 __InternalStateTypeToString(valID) );
     } else {
-        fprintf(stderr, "exportIntVarAs: unsupported variable type\n");
+        fprintf(stderr, "VTKXMLExportModule::exportIntVarAs: unsupported variable type %s\n", __InternalStateTypeToString(valID));
     }
 
 
@@ -623,6 +626,7 @@ VTKXMLExportModule :: exportIntVarAs(InternalStateType valID, InternalStateValue
             for ( j = jsize + 1; j <= 3; j++ ) {
                 fprintf(stream, "0.0 ");
             }
+            fprintf( stream, " " );
         } else if ( type == ISVT_TENSOR_S3 ) {
             int ii, jj, iii;
             t.zero();
@@ -652,6 +656,7 @@ VTKXMLExportModule :: exportIntVarAs(InternalStateType valID, InternalStateValue
                     fprintf( stream, "%e ", t.at(ii, jj) );
                 }
             }
+            fprintf( stream, " " );
         } else if ( type == ISVT_TENSOR_G ) { // export general tensor values as scalars
             jsize = min( 9, val->giveSize() );
             for ( j = 1; j <= jsize; j++ ) {
@@ -661,6 +666,7 @@ VTKXMLExportModule :: exportIntVarAs(InternalStateType valID, InternalStateValue
             for ( j = jsize + 1; j <= 9; j++ ) {
                 fprintf(stream, "0.0 ");
             }
+            fprintf( stream, " " );
         }
     } // end loop over dofmans
 
@@ -682,14 +688,14 @@ VTKXMLExportModule :: giveSmoother()
         } else if ( this->stype == VTK_Smoother_SPR ) {
             this->smoother = new SPRNodalRecoveryModel(d);
         } else {
-            OOFEM_ERROR("VTKXMLExportModule: unsupported smoother type ID");
+            OOFEM_ERROR2("VTKXMLExportModule: unsupported smoother type ID %d", this->stype);
         }
     }
 
     return this->smoother;
 }
 
-
+//keyword "primvars" in OOFEM input file
 void
 VTKXMLExportModule :: exportPrimaryVars(FILE *stream, IntArray &mapG2L, IntArray &mapL2G,
                                         int regionDofMans, int region, TimeStep *tStep)
@@ -715,6 +721,7 @@ VTKXMLExportModule :: exportPrimaryVars(FILE *stream, IntArray &mapG2L, IntArray
 }
 
 
+//keyword "primvars" in OOFEM input file
 void
 VTKXMLExportModule :: exportPrimVarAs(UnknownType valID, IntArray &mapG2L, IntArray &mapL2G,
                                       int regionDofMans, int ireg, FILE *stream, TimeStep *tStep)
@@ -734,10 +741,8 @@ VTKXMLExportModule :: exportPrimVarAs(UnknownType valID, IntArray &mapG2L, IntAr
         type = ISVT_SCALAR;
         //nScalarComp = d->giveNumberOfDefaultNodeDofs();
     } else {
-        OOFEM_ERROR2( "VTKXMLExportModule::exportPrimVarAs: unsupported UnknownType (%s)", __UnknownTypeToString(valID) );
+        OOFEM_ERROR2( "VTKXMLExportModule::exportPrimVarAs: unsupported UnknownType %s", __UnknownTypeToString(valID) );
     }
-
-
 
     // print header
     if ( type == ISVT_SCALAR ) {
@@ -745,14 +750,14 @@ VTKXMLExportModule :: exportPrimVarAs(UnknownType valID, IntArray &mapG2L, IntAr
     } else if ( type == ISVT_VECTOR ) {
         fprintf( stream, "<DataArray type=\"Float32\" Name=\"%s\" NumberOfComponents=\"3\" format=\"ascii\"> ", __UnknownTypeToString(valID) );
     } else {
-        fprintf(stderr, "exportPrimVarAs: unsupported variable type\n");
+        fprintf(stderr, "VTKXMLExportModule::exportPrimVarAs: unsupported variable type %s\n", __UnknownTypeToString(valID));
     }
 
     DofManager *dman;
     DofID id;
     int numberOfDofs;
     IntArray mask(3);
-    FloatArray dl,dg; 
+    FloatArray dl,dg;
 
     for ( inode = 1; inode <= regionDofMans; inode++ ) {
         dman = d->giveNode( mapL2G.at(inode) );
@@ -792,7 +797,7 @@ VTKXMLExportModule :: exportPrimVarAs(UnknownType valID, IntArray &mapG2L, IntAr
 	  } else {
 	    dman->giveUnknownVector(dg, mask, EID_MomentumBalance, VM_Total, tStep);
 	  }
-	  
+
 	  for ( j = 1; j <= mask.giveSize(); j++ ) {
 	    id = dman->giveDof(j)->giveDofID();
 	    if ( ( id == V_u ) || ( id == D_u )) {
@@ -831,7 +836,7 @@ VTKXMLExportModule :: exportPrimVarAs(UnknownType valID, IntArray &mapG2L, IntAr
                 }
             }
         } else {
-            OOFEM_ERROR2( "VTKXMLExportModule: unsupported unknownType (%s)", __UnknownTypeToString(valID) );
+            OOFEM_ERROR2( "VTKXMLExportModule: unsupported unknownType %s", __UnknownTypeToString(valID) );
             //d->giveDofManager(regionNodalNumbers.at(inode))->giveUnknownVector(iVal, d->giveDefaultNodeDofIDArry(), valID, VM_Total, tStep);
         }
 
@@ -840,8 +845,10 @@ VTKXMLExportModule :: exportPrimVarAs(UnknownType valID, IntArray &mapG2L, IntAr
                 for ( j = 1; j <= nScalarComp; j++ ) {
                     fprintf( stream, "%e ", iVal.at(j) );
                 }
+                fprintf( stream, " " );
             } else {
                 fprintf(stream, "%e ", 0.0);
+                fprintf( stream, " " );
             }
         } else if ( type == ISVT_VECTOR ) {
             jsize = min( 3, iVal.giveSize() );
@@ -852,6 +859,7 @@ VTKXMLExportModule :: exportPrimVarAs(UnknownType valID, IntArray &mapG2L, IntAr
             for ( j = jsize + 1; j <= 3; j++ ) {
                 fprintf(stream, "0.0 ");
             }
+            fprintf( stream, " " );
         }
     } // end loop over nodes
 

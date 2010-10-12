@@ -93,8 +93,8 @@ VTKExportModule :: initializeFrom(InputRecord *ir)
 
     ExportModule :: initializeFrom(ir);
     IR_GIVE_OPTIONAL_FIELD(ir, cellVarsToExport, IFT_VTKExportModule_cellvars, "cellvars"); // Macro
-    IR_GIVE_OPTIONAL_FIELD(ir, internalVarsToExport, IFT_VTKExportModule_vars, "vars"); // Macro
-    IR_GIVE_OPTIONAL_FIELD(ir, primaryVarsToExport, IFT_VTKExportModule_primvars, "primvars"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, internalVarsToExport, IFT_VTKExportModule_vars, "vars"); // Macro - see internalstatetype.h
+    IR_GIVE_OPTIONAL_FIELD(ir, primaryVarsToExport, IFT_VTKExportModule_primvars, "primvars"); // Macro - see dofiditem.h
 
     val = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_VTKExportModule_stype, "stype"); // Macro
@@ -509,6 +509,7 @@ VTKExportModule :: giveNumberOfElementCells(Element *elem)
     return 0;
 }
 
+//keyword "vars" in OOFEM input file
 void
 VTKExportModule :: exportIntVars(FILE *stream, TimeStep *tStep)
 {
@@ -769,7 +770,7 @@ VTKExportModule :: initRegionNodeNumbering(IntArray &regionNodalNumbers, int &re
     return 1;
 }
 
-
+//keyword "vars" in OOFEM input file
 void
 VTKExportModule :: exportIntVarAs(InternalStateType valID, InternalStateValueType type, FILE *stream, TimeStep *tStep)
 {
@@ -1041,6 +1042,7 @@ VTKExportModule :: giveSmoother()
 }
 
 
+//keyword "primvars" in OOFEM input file
 void
 VTKExportModule :: exportPrimaryVars(FILE *stream, TimeStep *tStep)
 {
@@ -1064,7 +1066,7 @@ VTKExportModule :: exportPrimaryVars(FILE *stream, TimeStep *tStep)
     }
 }
 
-
+//keyword "primvars" in OOFEM input file
 void
 VTKExportModule :: exportPrimVarAs(UnknownType valID, FILE *stream, TimeStep *tStep)
 {

@@ -108,7 +108,7 @@ MicroMaterial :: MicroMaterial(int n, Domain *d) : StructuralMaterial(n, d), Unk
   this->microDefaultDofs = NULL;
   this->microBoundaryDofsArr.resize(0);
   this->microInternalDofsArr.resize(0);
-  this->internalMacroForcesVector.resize(24);
+  this->microMatIsUsed = false;
 }
 
 ///destructor
@@ -245,7 +245,7 @@ MicroMaterial :: CreateStatus(GaussPoint *gp) const
 
 
 //answer must be of size 24x24 (linear brick 3*8=24)
-void MicroMaterial :: giveMacroStiffnessMatrix(FloatMatrix &answer, TimeStep *tStep, CharType type, const IntArray &microMasterNodes, const IntArray &microBoundaryNodes) {
+void MicroMaterial :: giveMacroStiffnessMatrix(FloatMatrix &answer, TimeStep *tStep, MatResponseMode rMode, const IntArray &microMasterNodes, const IntArray &microBoundaryNodes) {
     int b, i, j, k;
     int row, col;
     double tmpDouble;
@@ -253,6 +253,16 @@ void MicroMaterial :: giveMacroStiffnessMatrix(FloatMatrix &answer, TimeStep *tS
     EngngModel *microEngngModel = microDomain->giveEngngModel();
     DofManager *DofMan;
     Dof *dof;
+    CharType type;
+
+    if (rMode == TangentStiffness){
+        type = TangentStiffnessMatrix;
+    } else if (rMode == SecantStiffness){
+        type = SecantStiffnessMatrix;
+    } else if (rMode == ElasticStiffness){
+        type = ElasticStiffnessMatrix;
+    } else
+        OOFEM_ERROR2("Material response mode %s is undefined", __MatResponseModeToString(rMode));
 
     FloatMatrix *Kbb = NULL;//contains reduced problem with boundary nodes and without interior nodes
     FloatMatrix *Kbi = NULL;//can be zero size if no internal DOFs
@@ -289,7 +299,7 @@ void MicroMaterial :: giveMacroStiffnessMatrix(FloatMatrix &answer, TimeStep *tS
 
 
 
-    //build full stiffness matrix for the extraction submatrices of FloatMatrix type
+    //build a full stiffness matrix for the extraction of submatrices
     this->reqNumberOfDomainEquation = this->maxNumberOfDomainEquation;
     this->DofEquationNumbering = AllNodes;
 
@@ -603,7 +613,7 @@ void MicroMaterial :: init(void) {
   if ( this->problemMicro->giveNumberOfDomains() != 1 ) {
     OOFEM_ERROR("Number of domains on microproblem is greater than 1");
   }
-
+  microMatIsUsed = true;
 }
 
 //from class UnknownNumberingScheme

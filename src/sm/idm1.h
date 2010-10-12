@@ -351,7 +351,7 @@ public:
      * by unique int id. Intgeration point also passed to allow for materials with spatially
      * varying properties
      * @param aProperty id of peroperty requested
-     * @param gp intgration point,
+     * @param gp integration point,
      * @return property value
      */
     double   give(int aProperty, GaussPoint* gp);

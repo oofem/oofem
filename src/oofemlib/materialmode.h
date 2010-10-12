@@ -42,7 +42,6 @@
 #include "enumitem.h"
 
 namespace oofem {
-
 /**
  * Type representing material mode of integration point.
  */
@@ -70,6 +69,8 @@ namespace oofem {
     ENUM_ITEM(_2dInterface) \
     ENUM_ITEM(_1dInterface) \
   \
+    ENUM_ITEM(_1dHeat) /* 1d heat */ \
+    ENUM_ITEM(_1dHeMo) /* 1d heat and mass (one component) transfer */ \
     ENUM_ITEM(_2dHeat) /* 2d heat */ \
     ENUM_ITEM(_2dHeMo) /* 2d heat and mass (one component) transfer */ \
     ENUM_ITEM(_3dHeat) \
@@ -89,6 +90,5 @@ enum MaterialMode {
 
 
 const char *__MaterialModeToString(MaterialMode _value);
-
 } // end namespace oofem
 #endif // materialmode_h

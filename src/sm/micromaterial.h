@@ -118,7 +118,7 @@ public:
     MaterialStatus *CreateStatus(GaussPoint *gp) const;
 
 
-    void giveMacroStiffnessMatrix(FloatMatrix &answer, TimeStep *tStep, CharType type, const IntArray &microMasterNodes, const IntArray &microBoundaryNodes);
+    void giveMacroStiffnessMatrix(FloatMatrix &answer, TimeStep *tStep, MatResponseMode rMode, const IntArray &microMasterNodes, const IntArray &microBoundaryNodes);
 
     void setMacroProperties(Domain *macroDomain, MacroLSpace *macroLSpaceElement, const IntArray &microMasterNodes, const IntArray &microBoundaryNodes);
 
@@ -149,8 +149,8 @@ public:
     IntArray microInternalDofsArr;
     ///Array containing default equation numbers for all nodes [DofManagerNumber][DOF]
     int **microDefaultDofs;
-    ///Array containg force vector from nodes
-    FloatArray internalMacroForcesVector;
+    ///Flag signalizing whether micromaterial is used by other element
+    bool microMatIsUsed;
 
 protected:
     bool isDefaultNumbering;

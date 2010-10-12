@@ -60,16 +60,15 @@
 #include "contextioerr.h"
 
 #ifndef __MAKEDEPEND
-#include <stdlib.h>
-#include <math.h>
-#include <string.h>
-#ifdef HAVE_STRINGS_H
-#include <strings.h>
-#endif
+ #include <stdlib.h>
+ #include <math.h>
+ #include <string.h>
+ #ifdef HAVE_STRINGS_H
+  #include <strings.h>
+ #endif
 #endif
 
 namespace oofem {
-
 void
 Material :: giveCharacteristicMatrix(FloatMatrix &answer,
                                      MatResponseForm form, MatResponseMode rMode,
@@ -98,7 +97,7 @@ Material :: giveCharacteristicValue(MatResponseMode rMode,
 
 
 double
-Material :: give(int aProperty, GaussPoint* gp)
+Material :: give(int aProperty, GaussPoint *gp)
 // Returns the value of the property aProperty (e.g. the Young's modulus
 // 'E') of the receiver.
 // atTime allows time dependent behaviour to be taken into account
@@ -108,7 +107,7 @@ Material :: give(int aProperty, GaussPoint* gp)
     if ( propertyDictionary->includes(aProperty) ) {
         value = propertyDictionary->at(aProperty);
     } else {
-        _error3("give: property on element %d and GP %d not defined", gp->giveElement()->giveNumber(), gp->giveNumber() );
+        OOFEM_ERROR4( "give: property #%d on element %d and GP %d not defined", aProperty, gp->giveElement()->giveNumber(), gp->giveNumber() );
     }
 
     return value;
@@ -116,7 +115,7 @@ Material :: give(int aProperty, GaussPoint* gp)
 
 
 bool
-Material :: hasProperty(int aProperty, GaussPoint* gp)
+Material :: hasProperty(int aProperty, GaussPoint *gp)
 // Returns TRUE if the aProperty is defined on a material
 {
     if ( propertyDictionary->includes(aProperty) ) {
@@ -124,6 +123,16 @@ Material :: hasProperty(int aProperty, GaussPoint* gp)
     }
 
     return false;
+}
+
+void
+Material :: modifyProperty(int aProperty, double value, GaussPoint *gp)
+{
+    if ( propertyDictionary->includes(aProperty) ) {
+        propertyDictionary->at(aProperty) = value;
+    } else {
+        OOFEM_ERROR4( "modifyProperty: property #%d on element %d and GP %d not defined", aProperty, gp->giveElement()->giveNumber(), gp->giveNumber() );
+    }
 }
 
 
@@ -171,6 +180,27 @@ Material :: hasMaterialModeCapability(MaterialMode mode)
 {
     return 0;
 }
+
+int
+Material :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime) {
+    answer.resize(0);
+    OOFEM_ERROR4( "Material :: giveIPValue in GP %d on element %d for InternalStateType %s not supported", aGaussPoint->giveNumber(), aGaussPoint->giveElement()->giveNumber(), __InternalStateTypeToString(type) );
+    return 0;
+}
+
+int
+Material :: giveIPValueSize(InternalStateType type, GaussPoint *aGaussPoint) {
+    OOFEM_ERROR4( "Material :: giveIPValueSize in GP %d on element %d for InternalStateType %s not supported", aGaussPoint->giveNumber(), aGaussPoint->giveElement()->giveNumber(), __InternalStateTypeToString(type) );
+    return 0;
+}
+
+int
+Material :: giveIntVarCompFullIndx(IntArray &answer, InternalStateType type, MaterialMode mmode) {
+    answer.resize(0);
+    OOFEM_ERROR3( "Material :: giveIntVarCompFullIndx for InternalStateType %s and MaterialMode %s not supported", __InternalStateTypeToString(type), __MaterialModeToString(mmode) );
+    return 0;
+}
+
 
 
 void
@@ -344,7 +374,10 @@ Material :: initGpForNewStep(GaussPoint *gp)
     this->initTempStatus(gp);
 }
 
-
+int
+Material :: initMaterial(Element *element) {
+    return 0;
+}
 
 void
 Material :: updateYourself(GaussPoint *gp, TimeStep *atTime)
@@ -358,6 +391,4 @@ Material :: updateYourself(GaussPoint *gp, TimeStep *atTime)
         status->updateYourself(atTime);
     }
 }
-
-
 } // end namespace oofem

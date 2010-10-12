@@ -54,7 +54,6 @@
 #endif
 
 namespace oofem {
-
 /**
  * Type defining the return values of InputRecord reading operations.
  * IRRT_OK the corresponding value to given keyword was successfully read.
@@ -472,6 +471,7 @@ enum InputFieldType {
     IFT_HeMoTKMaterial_por,
     IFT_HeMoTKMaterial_rho_gws,
 
+    IFT_CemhydMatInputFileName,
 
     IFT_B3Material_mode,
     IFT_B3Material_emodulimode,
@@ -1093,7 +1093,7 @@ public:
     /// Destructor
     virtual ~InputRecord() { }
     // Assingnment operator
-    InputRecord &operator=(const InputRecord &);
+    InputRecord & operator=(const InputRecord &);
 
     /** Creates a newly allocated copy of the receiver */
     virtual InputRecord *GiveCopy() = 0;
@@ -1165,6 +1165,5 @@ public:
     /** terminates the current record session and if the flag is true, warning is printed for unscanned tokens */
     virtual void finish(bool wrn = true) = 0;
 };
-
 } // end namespace oofem
 #endif // inputrecord_h

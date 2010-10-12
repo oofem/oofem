@@ -25,26 +25,27 @@ CC         = @CXX@
 AR         = ar -r
 RM         = rm -f
 
-VPATH=@OOFEM_DIR@/src/tm
+VPATH=@OOFEM_DIR@/src/tm @OOFEM_DIR@/src/tm/cemhyd @OOFEM_DIR@/src/tm/cemhyd/tinyxml
 
 
 ##
 ## source files
 ##
-srcs0= stationarytransportproblem.C nonstationarytransportproblem.C  nltransienttransportproblem.C staggeredproblem.C
-srcs1= transportelement.C
-srcs2= quad1_ht.C tr1_ht.C quadaxisym1_ht.C traxisym1_ht.C brick1_ht.C tetrah1_ht.C
-srcs3= transportmaterial.C isoheatmat.C hemotkmat.C
-srcs4= hydratingisoheatmat.C hydratinghemomat.C
+srcs0=stationarytransportproblem.C nonstationarytransportproblem.C  nltransienttransportproblem.C staggeredproblem.C
+srcs1=transportelement.C
+srcs2=quad1_ht.C tr1_ht.C quadaxisym1_ht.C traxisym1_ht.C brick1_ht.C tetrah1_ht.C
+srcs3=transportmaterial.C isoheatmat.C hemotkmat.C
+srcs4=hydratingisoheatmat.C hydratinghemomat.C cemhydmat.C
 srcs5= 
 srcs6= 
 srcs7= 
 srcs8= 
 srcs9=
+tinyxmlsrc=tinystr.C tinyxml.C tinyxmlerror.C tinyxmlparser.C
 # parallel sources
 psrc1= 
 
-all_src = $(srcs0) $(srcs1) $(srcs2) $(srcs3) $(srcs4) $(srcs5) $(srcs6) $(srcs7) $(srcs8) $(srcs9) $(psrc1) 
+all_src = $(srcs0) $(srcs1) $(srcs2) $(srcs3) $(srcs4) $(srcs5) $(srcs6) $(srcs7) $(srcs8) $(srcs9) $(psrc1) $(tinyxmlsrc)
 ## object files
 tmLib_objs := $(all_src:.C=.o)
 ## dependency files

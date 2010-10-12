@@ -44,15 +44,14 @@
 #include "elementside.h"
 #include "integrationrule.h"
 #ifndef __MAKEDEPEND
-#include <stdio.h>
+ #include <stdio.h>
 #endif
 
 #ifdef __PARALLEL_MODE
-#include "communicator.h"
+ #include "communicator.h"
 #endif
 
 namespace oofem {
-
 ZZNodalRecoveryModel :: ZZNodalRecoveryModel(Domain *d) : NodalRecoveryModel(d)
 { }
 
@@ -210,7 +209,10 @@ ZZNodalRecoveryModel :: recoverValues(InternalStateType type, TimeStep *tStep)
             element = domain->giveElement(ielem);
 
 #ifdef __PARALLEL_MODE
-            if (element->giveParallelMode() != Element_local) continue;
+            if ( element->giveParallelMode() != Element_local ) {
+                continue;
+            }
+
 #endif
             if ( element->giveRegionNumber() != ireg ) {
                 continue;
@@ -239,7 +241,6 @@ ZZNodalRecoveryModel :: recoverValues(InternalStateType type, TimeStep *tStep)
                 eq++;
             }
         } // end assemble element contributions
-
 
 #ifdef __PARALLEL_MODE
         this->exchangeDofManValues(ireg, lhs, rhs, regionNodalNumbers);
@@ -283,7 +284,10 @@ ZZNodalRecoveryModel :: initRegionMap(IntArray &regionMap, IntArray &regionValSi
     for ( ielem = 1; ielem <= nelem; ielem++ ) {
         element = domain->giveElement(ielem);
 #ifdef __PARALLEL_MODE
-        if (element->giveParallelMode() != Element_local) continue;
+        if ( element->giveParallelMode() != Element_local ) {
+            continue;
+        }
+
 #endif
         if ( ( interface =  ( ZZNodalRecoveryModelInterface * ) element->giveInterface(ZZNodalRecoveryModelInterfaceType) ) == NULL ) {
             /*
@@ -307,13 +311,14 @@ ZZNodalRecoveryModel :: initRegionMap(IntArray &regionMap, IntArray &regionValSi
                 if ( regionValSize.at( element->giveRegionNumber() ) == 0 ) {
                     regionMap.at( element->giveRegionNumber() ) = 1;
                     regionsSkipped = 1;
+                    OOFEM_LOG_RELEVANT( "ZZNodalRecoveryModel :: initRegionMap: unknown size of InternalStateType %s\n", __InternalStateTypeToString(type) );
                 }
             }
         }
     }
 
     if ( regionsSkipped ) {
-        OOFEM_LOG_RELEVANT("NodalRecoveryModel :: initRegionMap: skipping regions ");
+        OOFEM_LOG_RELEVANT( "ZZNodalRecoveryModel :: initRegionMap: skipping regions for InternalStateType %s\n", __InternalStateTypeToString(type) );
         for ( i = 1; i <= nregions; i++ ) {
             if ( regionMap.at(i) ) {
                 OOFEM_LOG_RELEVANT("%d ", i);
@@ -505,77 +510,81 @@ ZZNodalRecoveryModelInterface :: ZZNodalRecoveryMI_computeNNMatrix(FloatArray &a
 #ifdef __PARALLEL_MODE
 
 void
-ZZNodalRecoveryModel :: initCommMaps ()
+ZZNodalRecoveryModel :: initCommMaps()
 {
-#ifdef __PARALLEL_MODE
-  if (initCommMap) {
-    EngngModel *emodel=domain->giveEngngModel();
-    ProblemCommunicatorMode commMode = emodel->giveProblemCommMode();
-    if (commMode == ProblemCommMode__NODE_CUT) {
-      commBuff = new CommunicatorBuff(emodel->giveNumberOfProcesses(), CBT_dynamic);
-      communicator = new ProblemCommunicator(emodel, commBuff, emodel->giveRank(),
-                                             emodel->giveNumberOfProcesses(),
-                                             commMode);
-      communicator->setUpCommunicationMaps(domain->giveEngngModel(), true, true);
-      OOFEM_LOG_INFO ("ZZNodalRecoveryModel :: initCommMaps: initialized comm maps");
-      initCommMap = false;
-    } else {
-      OOFEM_ERROR ("ZZNodalRecoveryModel :: initCommMaps: unsupported comm mode");
+ #ifdef __PARALLEL_MODE
+    if ( initCommMap ) {
+        EngngModel *emodel = domain->giveEngngModel();
+        ProblemCommunicatorMode commMode = emodel->giveProblemCommMode();
+        if ( commMode == ProblemCommMode__NODE_CUT ) {
+            commBuff = new CommunicatorBuff(emodel->giveNumberOfProcesses(), CBT_dynamic);
+            communicator = new ProblemCommunicator(emodel, commBuff, emodel->giveRank(),
+                                                   emodel->giveNumberOfProcesses(),
+                                                   commMode);
+            communicator->setUpCommunicationMaps(domain->giveEngngModel(), true, true);
+            OOFEM_LOG_INFO("ZZNodalRecoveryModel :: initCommMaps: initialized comm maps");
+            initCommMap = false;
+        } else {
+            OOFEM_ERROR("ZZNodalRecoveryModel :: initCommMaps: unsupported comm mode");
+        }
     }
-  }
-#endif
+
+ #endif
 }
 
 void
-ZZNodalRecoveryModel :: exchangeDofManValues (int ireg, FloatArray& lhs, FloatMatrix& rhs, IntArray& rn) 
+ZZNodalRecoveryModel :: exchangeDofManValues(int ireg, FloatArray &lhs, FloatMatrix &rhs, IntArray &rn)
 {
-  EngngModel *emodel = domain->giveEngngModel();
-  ProblemCommunicatorMode commMode = emodel->giveProblemCommMode();
-  
-  if (commMode == ProblemCommMode__NODE_CUT) {
-    parallelStruct ls (&lhs, &rhs, &rn);
-    
-    // exchange data for shared nodes
-    communicator->packAllData( this, &ls, &ZZNodalRecoveryModel::packSharedDofManData );
-    communicator->initExchange(789+ireg);
-    communicator->unpackAllData( this, &ls, &ZZNodalRecoveryModel::unpackSharedDofManData );
-    communicator->finishExchange();
-  } else {
-    OOFEM_ERROR ("ZZNodalRecoveryModel :: exchangeDofManValues: Unsupported commMode");
-  }
+    EngngModel *emodel = domain->giveEngngModel();
+    ProblemCommunicatorMode commMode = emodel->giveProblemCommMode();
+
+    if ( commMode == ProblemCommMode__NODE_CUT ) {
+        parallelStruct ls( &lhs, &rhs, &rn);
+
+        // exchange data for shared nodes
+        communicator->packAllData(this, & ls, & ZZNodalRecoveryModel :: packSharedDofManData);
+        communicator->initExchange(789 + ireg);
+        communicator->unpackAllData(this, & ls, & ZZNodalRecoveryModel :: unpackSharedDofManData);
+        communicator->finishExchange();
+    } else {
+        OOFEM_ERROR("ZZNodalRecoveryModel :: exchangeDofManValues: Unsupported commMode");
+    }
 }
 
 int
-ZZNodalRecoveryModel :: packSharedDofManData (parallelStruct* s, ProcessCommunicator &processComm)
+ZZNodalRecoveryModel :: packSharedDofManData(parallelStruct *s, ProcessCommunicator &processComm)
 {
-  int result = 1, i, j, indx, nc, size;
-  ProcessCommunicatorBuff *pcbuff = processComm.giveProcessCommunicatorBuff();
-  IntArray const *toSendMap = processComm.giveToSendMap();
-  nc = s->rhs->giveNumberOfColumns();
-  
-  size = toSendMap->giveSize();
-  for ( i = 1; i <= size; i++ ) {
-    // toSendMap contains all shared dofmans with remote partition
-    // one has to check, if particular shared node value is available for given region
-    indx = s->regionNodalNumbers->at(toSendMap->at(i));
-    if (indx) {
-      // pack "1" to indicate that for given shared node this is a valid contribution
-      result &= pcbuff->packInt (1);
-      result &= pcbuff->packDouble (s->lhs->at(indx));
-      for (j=1; j<=nc; j++) result &= pcbuff->packDouble (s->rhs->at(indx, j));
-      //printf("[%d] ZZ: Sending data for shred node %d[%d]\n", domain->giveEngngModel()->giveRank(), 
-      //       toSendMap->at(i), domain->giveDofManager(toSendMap->at(i))->giveGlobalNumber());
-    } else {
-      // ok shared node is not in active region (determined by s->regionNodalNumbers)
-      result &= pcbuff->packInt (0);
+    int result = 1, i, j, indx, nc, size;
+    ProcessCommunicatorBuff *pcbuff = processComm.giveProcessCommunicatorBuff();
+    IntArray const *toSendMap = processComm.giveToSendMap();
+    nc = s->rhs->giveNumberOfColumns();
+
+    size = toSendMap->giveSize();
+    for ( i = 1; i <= size; i++ ) {
+        // toSendMap contains all shared dofmans with remote partition
+        // one has to check, if particular shared node value is available for given region
+        indx = s->regionNodalNumbers->at( toSendMap->at(i) );
+        if ( indx ) {
+            // pack "1" to indicate that for given shared node this is a valid contribution
+            result &= pcbuff->packInt(1);
+            result &= pcbuff->packDouble( s->lhs->at(indx) );
+            for ( j = 1; j <= nc; j++ ) {
+                result &= pcbuff->packDouble( s->rhs->at(indx, j) );
+            }
+
+            //printf("[%d] ZZ: Sending data for shred node %d[%d]\n", domain->giveEngngModel()->giveRank(),
+            //       toSendMap->at(i), domain->giveDofManager(toSendMap->at(i))->giveGlobalNumber());
+        } else {
+            // ok shared node is not in active region (determined by s->regionNodalNumbers)
+            result &= pcbuff->packInt(0);
+        }
     }
-  } 
-  return result;
-  
+
+    return result;
 }
 
-int 
-ZZNodalRecoveryModel :: unpackSharedDofManData (parallelStruct* s, ProcessCommunicator &processComm)
+int
+ZZNodalRecoveryModel :: unpackSharedDofManData(parallelStruct *s, ProcessCommunicator &processComm)
 {
     int result = 1;
     int i, j, nc, indx, size, flag;
@@ -586,25 +595,30 @@ ZZNodalRecoveryModel :: unpackSharedDofManData (parallelStruct* s, ProcessCommun
 
     size = toRecvMap->giveSize();
     for ( i = 1; i <= size; i++ ) {
-      indx = s->regionNodalNumbers->at(toRecvMap->at(i));
-      // toRecvMap contains all shared dofmans with remote partition
-      // one has to check, if particular shared node received contribution is available for given region
-      result &= pcbuff->unpackInt (flag);
-      if (flag) {
-        // "1" to indicates that for given shared node this is a valid contribution
-        result &= pcbuff->unpackDouble(value);
-        // now check if we have a valid number
-        if (indx) s->lhs->at(indx) += value;
+        indx = s->regionNodalNumbers->at( toRecvMap->at(i) );
+        // toRecvMap contains all shared dofmans with remote partition
+        // one has to check, if particular shared node received contribution is available for given region
+        result &= pcbuff->unpackInt(flag);
+        if ( flag ) {
+            // "1" to indicates that for given shared node this is a valid contribution
+            result &= pcbuff->unpackDouble(value);
+            // now check if we have a valid number
+            if ( indx ) {
+                s->lhs->at(indx) += value;
+            }
 
-        for (j=1; j<=nc; j++) {
-          result &= pcbuff->unpackDouble(value);
-          if (indx) s->rhs->at(indx, j) += value;
-        } 
-        //if (indx) printf("[%d] ZZ: Receiving data for shred node %d[%d]\n", domain->giveEngngModel()->giveRank(),
-        //                 toRecvMap->at(i), domain->giveDofManager(toRecvMap->at(i))->giveGlobalNumber());
-        
-      } 
+            for ( j = 1; j <= nc; j++ ) {
+                result &= pcbuff->unpackDouble(value);
+                if ( indx ) {
+                    s->rhs->at(indx, j) += value;
+                }
+            }
+
+            //if (indx) printf("[%d] ZZ: Receiving data for shred node %d[%d]\n", domain->giveEngngModel()->giveRank(),
+            //                 toRecvMap->at(i), domain->giveDofManager(toRecvMap->at(i))->giveGlobalNumber());
+        }
     }
+
     return result;
 }
 

@@ -250,6 +250,7 @@
 #include "hemotkmat.h"
 #include "hydratingisoheatmat.h"
 #include "hydratinghemomat.h"
+#include "cemhydmat.h"
 #endif //__TM_MODULE
 
 
@@ -671,6 +672,8 @@ Material *CreateUsrDefMaterialOfType(char *aClass, int number, Domain *domain)
         newMaterial = new HydratingIsoHeatMaterial(number, domain);
     } else if ( !strncmp(aClass, "hhemotk", 7) ) {
         newMaterial = new HydratingHeMoMaterial(number, domain);
+    } else if ( !strncmp(aClass, "cemhydmat", 9) ) {
+        newMaterial = new CemhydMat(number, domain);
     }
 
 #endif //__TM_MODULE

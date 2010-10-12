@@ -221,7 +221,9 @@ QPlaneStress2d :: ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatMatri
     FloatArray n;
     this->interpolation.evalN(n, * aGaussPoint->giveCoordinates(), 0.0);
     
-    for (i=1; i<=8;i++) answer.at(1,i)=n.at(i);
+    for (i=1; i<=8;i++){
+        answer.at(1,i)=n.at(i);
+    }
     return;
 }
 

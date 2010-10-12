@@ -1,6 +1,6 @@
 idm03.out
 Test of damage law with bilinear softening on a 1D truss element
-NonLinearStatic nsteps 18 rtolv 0.0001 MaxIter 20 stiffMode 1 controllmode 0 psi 0.0 renumber 0 hpcmode 1 hpc 2 2.0 1 stepLength 0.05 minsteplength 0.05 nmodules 0
+NonLinearStatic nsteps 18 rtolv 0.0001 MaxIter 20 stiffMode 1 controllmode 0 psi 0.0 renumber 0 hpcmode 1 hpc 2 2 1 stepLength 0.05 minsteplength 0.05 nmodules 0
 #vtk tstep_all domain_all primvars 1 1
 domain 1dtruss
 OutputManager tstep_all dofman_all element_all

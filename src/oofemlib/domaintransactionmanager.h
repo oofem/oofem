@@ -103,7 +103,7 @@ public:
     void initialize();
     int addTransaction(DomainTransactionType, DomainComponentType, int, FEMComponent *);
     DofManager *giveDofManager(int label);
-    Element *giveElement(int labal);
+    Element *giveElement(int label);
     int  commitTransactions();
 
 

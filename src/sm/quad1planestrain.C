@@ -959,7 +959,7 @@ Quad1PlaneStrain :: drawSpecial(oofegGraphicContext &gc)
         for ( igp = 1; igp <= numberOfGaussPoints; igp++ ) {
             gp = integrationRulesArray [ 0 ]->getIntegrationPoint(igp - 1);
 
-            if ( mat->giveIPValue(cf, gp, CrackedFlag, tStep) == 0 ) {
+            if ( mat->giveIPValue(cf, gp, IST_CrackedFlag, tStep) == 0 ) {
                 return;
             }
 
@@ -967,8 +967,8 @@ Quad1PlaneStrain :: drawSpecial(oofegGraphicContext &gc)
                 return;
             }
 
-            if ( mat->giveIPValue(crackDir, gp, CrackDirs, tStep) ) {
-                mat->giveIPValue(crackStatuses, gp, CrackStatuses, tStep);
+            if ( mat->giveIPValue(crackDir, gp, IST_CrackDirs, tStep) ) {
+                mat->giveIPValue(crackStatuses, gp, IST_CrackStatuses, tStep);
                 for ( i = 1; i <= 3; i++ ) {
                     crackStatus = ( int ) crackStatuses.at(i);
                     if ( ( crackStatus != pscm_NONE ) && ( crackStatus != pscm_CLOSED ) ) {

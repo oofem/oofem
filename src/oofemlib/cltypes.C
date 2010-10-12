@@ -55,13 +55,12 @@
 #include "contextioerr.h"
 
 #ifndef __MAKEDEPEND
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
+ #include <stdio.h>
+ #include <string.h>
+ #include <stdlib.h>
 #endif
 
 namespace oofem {
-
 /*
  * Function used only by BoundaryCondition and InitialCondition in order to
  * store informations in convinient form for debugging.
@@ -118,17 +117,29 @@ InternalStateValueType giveInternalStateValueType(InternalStateType type)
     switch ( type ) {
     case IST_StressTensor:
     case IST_PrincipalStressTensor:
+    case IST_PrincipalStressTempTensor:
     case IST_StrainTensor:
     case IST_PrincipalStrainTensor:
-        //case IST_ForceTensor:
-        //case IST_MomentumTensor:
+    case IST_PrincipalStrainTempTensor:
     case IST_CurvatureTensor:
     case IST_DamageTensor:
     case IST_DamageInvTensor:
     case IST_PrincipalDamageTensor:
     case IST_PrincipalDamageTempTensor:
+    case IST_StressTensorTemp:
+    case IST_StrainTensorTemp:
+    case IST_ForceTensorTemp:
+    case IST_MomentumTensorTemp:
+    case IST_CurvatureTensorTemp:
+    case IST_DamageTensorTemp:
+    case IST_DamageInvTensorTemp:
     case IST_PlasticStrainTensor:
     case IST_PrincipalPlasticStrainTensor:
+    case IST_CylindricalStressTensor:
+    case IST_CylindricalStrainTensor:
+    case IST_MaxEquivalentStrainLevel:
+    case IST_CumPlasticStrain:
+    case IST_CumPlasticStrain_2:
         return ISVT_TENSOR_S3;
 
     case IST_BeamForceMomentumTensor:
@@ -137,34 +148,54 @@ InternalStateValueType giveInternalStateValueType(InternalStateType type)
     case IST_ShellStrainCurvatureTensor:
         return ISVT_TENSOR_G;
 
-        //break;
     case IST_DisplacementVector:
     case IST_DisplacementVectorTemp:
+    case IST_CrackState:
+    case IST_CrackStateTemp:
+    case IST_MicroplaneDamageValues:
+    case IST_Velocity:
+    case IST_MaterialOrientation_x:
+    case IST_MaterialOrientation_y:
+    case IST_MaterialOrientation_z:
     case IST_TemperatureFlow:
+    case IST_MassConcentrationFlow_1:
     case IST_HumidityFlow:
+    case IST_CrackDirs:
+    case IST_CrackStatuses:
         return ISVT_VECTOR;
 
-        //break;
+    case IST_ErrorIndicatorLevel:
+    case IST_InternalStressError:
+    case IST_PrimaryUnknownError:
     case IST_RelMeshDensity:
+    case IST_Temperature:
+    case IST_MassConcentration_1:
+    case IST_HydrationDegree:
+    case IST_Humidity:
+    case IST_Pressure:
     case IST_VOFFraction:
     case IST_Density:
     case IST_MaterialInterfaceVal:
+    case IST_MaterialNumber:
+    case IST_ElementNumber:
+    case IST_BoneVolumeFraction:
+    case IST_PlasStrainEnerDens:
+    case IST_ElasStrainEnerDens:
+    case IST_TotalStrainEnerDens:
+    case IST_DamageScalar:
+    case IST_CrackedFlag:
+    case IST_StressWorkDensity:
+    case IST_DissWorkDensity:
+    case IST_FreeEnergyDensity:
+    case IST_ThermalConductivityIsotropic:
+    case IST_HeatCapacity:
+    case IST_AverageTemperature:
+    case IST_YoungModulusVirginPaste:
+    case IST_PoissonRatioVirginPaste:
+    case IST_YoungModulusConcrete:
+    case IST_PoissonRatioConcrete:
         return ISVT_SCALAR;
 
-        //break;
-    case IST_DamageScalar:
-    case IST_MaxEquivalentStrainLevel:
-      return ISVT_SCALAR;
-    case IST_BoneVolumeFraction:
-      return ISVT_SCALAR;
-    case IST_PlasStrainEnerDens:
-      return ISVT_SCALAR;
-    case IST_ElasStrainEnerDens:
-      return ISVT_SCALAR;
-    case IST_TotalStrainEnerDens:
-      return ISVT_SCALAR;
-
-        //break;
     default:
         return ISVT_UNDEFINED;
     }
@@ -207,9 +238,9 @@ ContextIOERR :: print()
  * (http://en.wikipedia.org/wiki/C_preprocessor)
  */
 
-#define ENUM_ITEM(element) case element : return # element;
+#define ENUM_ITEM(element) case element: return # element;
 
-#define ENUM_ITEM_WITH_VALUE(element, val) case element : return # element;
+#define ENUM_ITEM_WITH_VALUE(element, val) case element: return # element;
 
 #define TO_STRING_BODY(enum_def)                        \
     switch ( _value ) { \
@@ -262,11 +293,10 @@ const char *__MaterialMappingAlgorithmTypeToString(MaterialMappingAlgorithmType 
 }
 
 const char *__MeshPackageTypeToString(MeshPackageType _value) {
-  TO_STRING_BODY(MeshPackageType_DEF)
+    TO_STRING_BODY(MeshPackageType_DEF)
 }
 
 #undef ENUM_ITEM
 #undef ENUM_ITEM_WITH_VALUE
 #undef TO_STRING_BODY
-
 } // end namespace oofem

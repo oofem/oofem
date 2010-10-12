@@ -56,19 +56,23 @@ public:
 
     /**
      * Computes components values of eigenstrain field at given point (coordinates given in Global c.s.).
-     * taking into account corresponding load time function value respecting load response mode.
+     * taking into account corresponding load time function value while respecting load response mode.
      * @param answer component values at given point and time
      * @param stepN time step representing time
-     * @param coords gp global coordinates, which are used to evaluate components values.
-     * @param mode determines response mode.
+     * @param coords gp global coordinates, which are used to evaluate components values
+     * @param mode determines response mode
      */
     virtual void         computeValueAt(FloatArray &answer, TimeStep *tStep, FloatArray &coords, ValueModeType mode)
     { this->computeComponentArrayAt(answer, tStep, mode); }
 
-  classType    giveClassID() const { return StructuralEigenstrainLoadClass; }
-  bcValType    giveBCValType() const { return EigenstrainBVT; }
-  bcGeomType   giveBCGeoType() const { return BodyLoadBGT; }
-  const char   *giveClassName() const { return "StructuralEigenstrainLoad"; }
+    ///Returns type of class
+    classType    giveClassID() const { return StructuralEigenstrainLoadClass; }
+    ///Returns name of class
+    const char   *giveClassName() const { return "StructuralEigenstrainLoad"; }
+    ///Returns type of boundary condition
+    bcValType    giveBCValType() const { return EigenstrainBVT; }
+    ///Returns type of load
+    bcGeomType   giveBCGeoType() const { return BodyLoadBGT; }
 };
 
 } // end namespace oofem

@@ -43,9 +43,6 @@
 
 #include "isoheatmat.h"
 #include "../sm/hydram.h"
-#include "dictionr.h"
-#include "flotarry.h"
-#include "flotmtrx.h"
 
 namespace oofem {
 

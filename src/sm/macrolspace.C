@@ -127,16 +127,15 @@ void MacroLSpace :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode 
 
     //called the first time and initiates the microproblem
     if ( this->firstCall ) {
-        if ( this->microMaterial != NULL ) {
-            OOFEM_ERROR("Micromaterial already called on element. Only one micromaterial can be assigned to one macro element\n");
-        }
-
         this->microMaterial = ( MicroMaterial * ) this->giveMaterial(); //from element.h
+        if ( this->microMaterial->microMatIsUsed == true ) {
+            OOFEM_ERROR("Micromaterial is already used on another element. Only one micromaterial can be assigned to one macro element\n");
+        }
         this->microDomain = this->microMaterial->problemMicro->giveDomain(1); //from engngm.h
         this->microEngngModel = this->microDomain->giveEngngModel();
         this->microEngngModel->setProblemScale(microScale); //set microScale attribute
         this->microEngngModel->checkProblemConsistency();
-        this->microMaterial->init();//from UnknownNumberingScheme(), obtain all DOFs and set totalNumberOfDomainEquation
+        this->microMaterial->init();//from UnknownNumberingScheme()
         this->microMaterial->setMacroProperties(this->giveDomain(), this, this->microMasterNodes, this->microBoundaryNodes);
         this->firstCall = false;
     }
@@ -151,13 +150,13 @@ void MacroLSpace :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode 
     this->microEngngModel->giveCurrentStep()->setTimeIncrement(0.); //no time increment
     this->microEngngModel->initMetaStepAttributes( microEngngModel->giveCurrentStep() );//updates numerical method
 
-    OOFEM_LOG_INFO( "\n** Assembling secant stiffness matrix of microproblem %p on macroElement %d, micTimeStep %d, micTime %f\n", this->microMaterial->problemMicro, this->giveNumber(), this->microEngngModel->giveCurrentStep()->giveNumber(), this->microEngngModel->giveCurrentStep()->giveTime() );
+    OOFEM_LOG_INFO( "\n** Assembling %s stiffness matrix of microproblem %p on macroElement %d, micTimeStep %d, micTime %f\n", __MatResponseModeToString(rMode), this->microMaterial->problemMicro, this->giveNumber(), this->microEngngModel->giveCurrentStep()->giveNumber(), this->microEngngModel->giveCurrentStep()->giveTime() );
 
     //this->microEngngModel->solveYourselfAt( microEngngModel->giveCurrentStep() );
     //this->microEngngModel->terminate( microEngngModel->giveCurrentStep() );
 
     if(tStep != this->lastStiffMatrixTimeStep){
-      this->microMaterial->giveMacroStiffnessMatrix(answer, this->microEngngModel->giveCurrentStep(), SecantStiffnessMatrix, this->microMasterNodes, this->microBoundaryNodes);
+        this->microMaterial->giveMacroStiffnessMatrix(answer, this->microEngngModel->giveCurrentStep(), rMode, this->microMasterNodes, this->microBoundaryNodes);
       this->stiffMatrix = answer;
       this->lastStiffMatrixTimeStep = tStep;
       OOFEM_LOG_INFO("** Assembled now\n\n");
@@ -268,7 +267,7 @@ void MacroLSpace :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep
   //OOFEM_LOG_INFO("*** useUpdatedGpRecord %d\n", useUpdatedGpRecord);
 
    if(useUpdatedGpRecord){//printing of data
-     answer = microMaterial->internalMacroForcesVector;
+     answer = this->internalMacroForcesVector;
    }
   else {
     OOFEM_LOG_INFO( "\n*** Solving reactions %p of macroElement %d, micTimeStep %d, macIteration %d, micTime %f\n", this->microMaterial->problemMicro, this->giveNumber(), this->microEngngModel->giveCurrentStep()->giveNumber(), this->iteration, this->microEngngModel->giveCurrentStep()->giveTime() );
@@ -302,7 +301,7 @@ void MacroLSpace :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep
       }
     }
 
-    microMaterial->internalMacroForcesVector = answer;
+    this->internalMacroForcesVector = answer;
     OOFEM_LOG_INFO("*** Reactions done\n", this->microMaterial->problemMicro);
   }
   //answer.printYourself();

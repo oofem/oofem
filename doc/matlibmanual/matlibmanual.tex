@@ -916,7 +916,7 @@ $$
 where
 $\langle\bar\sigma_I\rangle$ are the positive parts of principal 
 values of the
-effective stress tensor $\bar\mbf{\sigma} = \mbf{D}_e:\mbf{\varepsilon}$.
+effective stress tensor $\bar{\mbf{\sigma}} = \mbf{D}_e:\mbf{\varepsilon}$.
 \item
 {\bf Energy} norm scaled by Young's modulus to obtain
 a strain-like quantity:
@@ -2039,12 +2039,12 @@ in table~\ref{Isoheat_table}.
 \hline
 Description & Linear isotropic elastic material\\
 \hline
-Record Format & \descitem{IsoHeat} \elemparam{num}{in}.
+Record Format & \descitem{IsoHeat} \elemparam{num}{in}
 \elemparam{d}{rn} \elemparam{k}{rn} \elemparam{c}{rn}\\
 Parameters &- \param{num} material model number\\
 &- \param{d} material density\\
 &- \param{k} Conductivity\\
-&- \param{n} Specific heat\\
+&- \param{c} Specific heat capacity\\
 Supported modes& \_2dHeat\\
 \hline
 \end{tabular}
@@ -2053,7 +2053,63 @@ Supported modes& \_2dHeat\\
 %\end{center}
 \end{table}
 
+\subsection{Material for cement hydration}
+\label{Cemhyd}
+CemhydMat represents a hydrating material based on CEMHYD3D model version 3.0,
+developed at NIST \cite{NISTIR7232}. The model represents a digital hydrating
+microstructure, driven with cellular automata rules and combined with cement
+chemistry. Ordinary Portland cement is treated without any difficulties, blended
+cements are ususally decomposed into hydrating Portland contribution and intert
+secondary cementitious material. The microstructure size can be from
+$10\times10\times10$ to over $200\times200\times200$~$\mu$m. For standard
+computations the size $50\times50\times50$ suffices.
 
+Each material instance creates an independent microstructure. It is also
+possible to enforce having different microstructures in each integration point.
+The hydrating model is coupled with temperature and averaging over shared
+elements within one material instance occurs during the solution. Such approach
+allows domain partitioning to many CemhydMat instances, depending on expected
+accuracy or computational speed. A more detailed description with engineering
+examples was published \cite{Smilauer:09}.
+
+\begin{table}[!htb]
+%\begin{center}
+\begin{tabular}{|l|p{9cm}|}
+\hline
+Description & Cemhyd hydrating material\\
+\hline
+Record Format & \descitem{CemhydMat} \elemparam{num}{in} \elemparam{d}{rn} \elemparam{k}{rn} \elemparam{c}{rn} \elemparam{file}{s} [\elemparam{eachGP}{in}] [\elemparam{densityType}{in}] [\elemparam{conductivityType}{in}] [\elemparam{capacityType}{in}] [\elemparam{castingtime}{rn}\\
+Parameters &- \param{num} material model number\\
+&- \param{d} material density\\
+&- \param{k} Conductivity\\
+&- \param{c} Specific heat capacity\\
+&- \param{file} XML input file for cement microstructure and concrete composition\\
+&- \param{eachGP} 0 (default) no separate microstructures in each GP, 1 assign separate microstructures to each GP\\
+&- \param{densityType} 0 (default) get density from OOFEM input file, 1 get it from XML input file\\
+&- \param{conductivityType} 0 (default) get constant conductivity from OOFEM input file, 1 compute as $\lambda = \textrm{k} (1.33-0.33\textrm{DoH})$ \cite{Ruiz:01}\\
+&- \param{capacityType} 0 (default) get capacity, 1 according to Bentz, 2 according to XML and CEMHYD3D routines\\
+&- \param{castingtime} optional casting time of concrete, from which hydration takes place\\
+Supported modes& \_2dHeat, \_3dHeat\\
+\hline
+\end{tabular}
+\caption{Cemhydmat - summary.}
+\label{Isoheat_table}
+%\end{center}
+\end{table}
+
+The input XML file specifies the details about cement and concrete composition.
+It is possible to start all simulations from the scratch, i.e. with the
+reconstruction of digital microstructure. Alternatively, the digital
+microstructure can be provided directly in two files; one for chemical phases,
+the second for particle's IDs. The XML input file can be created with the CemPy
+package, obtainable from
+http://mech.fsv.cvut.cz/$\sim$smilauer/index.php?id=software. The CemPy package
+alleviates tedious preparation of particle size distribution etc.
+
+The linear solver (specified as NonStationaryProblem) performs well when the
+time integration step is small enough (order of minutes) and heat capacity,
+conductivity and density remain constant. If not so, use of nonlinear solver is
+strongly suggested (specified as NlTransientTransportProblem).
 
 \subsection{Coupled heat and mass transfer material model}
 Coupled heat and mass transfer material model.
@@ -2637,16 +2693,16 @@ documentation of MPlasticMaterial class):
 
 %\subsection{Other Elements}
 \begin{thebibliography}{99}
-\bibitem{inel} M. Jir\'asek, Z.P. Ba\v zant: Inelastic analysis of structures, John Wiley, 2001.
-\bibitem{mdm}Jir\'{a}sek, M.: Comments on microplane theory, Mechanics of
-Quasi-Brittle Materials and Structures, ed. G. Pijaudier-Cabot,
-Z. Bittnar, and B. G\'{e}rard, Herm\`{e}s Science Publications, Paris, 1999,
-pp. 57-77.
-\bibitem{oofem} B. Patz\'ak: OOFEM home page, http://www.oofem.org, 2003.
-\bibitem{ortiz} M. Ortiz, E.P. Popov: Accuracy and stability of integration algorithms for elasto-plastic constitutive relations, Int. J. Numer. Methods Engrg, 21, 1561-1576, 1985.
-\bibitem{simo}  J.C. Simo, J.G. Kennedy, S. Govindjee: Non-smooth multisurface plasticity and viscoplasticity. Loading/unloading conditions and numerical algorithms, Int. J. Numer. Methods Engrg, 26, 2161-2185, 1988.
-\bibitem{Rots} B.Lourenco, J.G. Rots: Multisurface Interface Model for Analysis of Masonry Structures, Journal of Engng Mech, vol. 123, No. 7, 1997.
 \bibitem{Bazant:98} Z.P. Ba\v{z}ant, J. Planas: Fracture and Size Effect in Concrete and Other Quasibrittle  Materials, CRC Press, 1998.
+\bibitem{NISTIR7232} D.P. Bentz: CEMHYD3D: A Three-Dimensional Cement Hydration and Microstructure Development Modeling Package. Version 3.0., NIST Building and Fire Research Laboratory, Gaithersburg, Maryland, Technical report, 2005.
+\bibitem{inel} M. Jir\'asek, Z.P. Ba\v zant: Inelastic analysis of structures, John Wiley, 2001.
+\bibitem{mdm} M. Jir\'{a}sek: Comments on microplane theory, Mechanics of Quasi-Brittle Materials and Structures, ed. G. Pijaudier-Cabot, Z. Bittnar, and B. G\'{e}rard, Herm\`{e}s Science Publications, Paris, 1999, pp. 57-77.
+\bibitem{Rots} B. Lourenco, J.G. Rots: Multisurface Interface Model for Analysis of Masonry Structures, Journal of Engng Mech, vol. 123, No. 7, 1997.
+\bibitem{ortiz} M. Ortiz, E.P. Popov: Accuracy and stability of integration algorithms for elasto-plastic constitutive relations, Int. J. Numer. Methods Engrg, 21, 1561-1576, 1985.
+\bibitem{oofem} B. Patz\'ak: OOFEM home page, http://www.oofem.org, 2003.
+\bibitem{simo}  J.C. Simo, J.G. Kennedy, S. Govindjee: Non-smooth multisurface plasticity and viscoplasticity. Loading/unloading conditions and numerical algorithms, Int. J. Numer. Methods Engrg, 26, 2161-2185, 1988.
+\bibitem{Smilauer:09} V. \v{S}milauer and T. Krej\v{c}\'i, Multiscale Model for Temperature Distribution in Hydrating Concrete, International Journal for Multiscale Computational Engineering, 7 (2), 135-151, 2009.
+\bibitem{Ruiz:01} J. Ruiz, A. Schindler, R. Rasmussen, P. Kim, G. Chang: Concrete temperature modeling and strength prediction using maturity concepts in the FHWA HIPERPAV software, 7th international conference on concrete pavements, Orlando (FL), USA, 2001.
 \end{thebibliography}
 \end{document}
 

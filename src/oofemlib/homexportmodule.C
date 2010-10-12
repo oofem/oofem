@@ -102,14 +102,12 @@ HOMExportModule :: doOutput(TimeStep *tStep)
     domainType domType = d->giveDomainType();
 
     if ( domType == _HeatTransferMode || domType == _HeatMass1Mode ) {
-        TransportElement *transElem;
         for ( ielem = 1; ielem <= nelem; ielem++ ) {
             elem = d->giveElement(ielem);
             if ( this->matnum.giveSize() == 0 || this->matnum.contains( elem->giveMaterial()->giveNumber() ) ) {
                 iRule = elem->giveDefaultIntegrationRulePtr();
                 for ( i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
                     gp  = iRule->getIntegrationPoint(i);
-                    transElem = ( TransportElement * ) gp->giveElement();
                     dV  = elem->computeVolumeAround(gp);
                     VolTot += dV;
                     elem->giveIPValue(vecState, gp, IST_Temperature, tStep);

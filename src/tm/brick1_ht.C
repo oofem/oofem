@@ -221,7 +221,7 @@ Brick1_ht :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 {
     double result = this->interpolation.edgeGiveTransformationJacobian(iEdge, domain, dofManArray,
                                                                        * gp->giveCoordinates(), 0.0);
-    return result *gp-> giveWeight();
+    return result * gp->giveWeight();
 }
 
 
@@ -411,7 +411,9 @@ Brick1_ht :: giveInterface(InterfaceType interface)
 int
 Brick1_ht :: ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type)
 {
-    if ( ( type == IST_TemperatureFlow ) || (type == IST_HumidityFlow) ) {
+    if ( type == IST_Temperature || type == IST_HydrationDegree || type == IST_Density || type == IST_ThermalConductivityIsotropic || type == IST_HeatCapacity || type == IST_AverageTemperature || type == IST_YoungModulusVirginPaste || type == IST_PoissonRatioVirginPaste || type == IST_YoungModulusConcrete || type == IST_PoissonRatioConcrete ) {
+        return 1;
+    } else if ( type == IST_TemperatureFlow || type == IST_HumidityFlow ) {
         return 3;
     }
 

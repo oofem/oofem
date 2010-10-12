@@ -106,6 +106,7 @@ public:
     const char *giveClassName() const { return "Beam2d"; }
     classType            giveClassID() const { return Beam2dClass; }
     IRResultType initializeFrom(InputRecord *ir);
+    Element_Geometry_Type giveGeometryType() const {return EGT_line_1;}
 
 #ifdef __OOFEG
     void          drawRawGeometry(oofegGraphicContext &);

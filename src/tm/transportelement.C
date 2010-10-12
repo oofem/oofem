@@ -231,7 +231,7 @@ TransportElement :: computeCapacitySubMatrix(FloatMatrix &answer, MatResponseMod
     for ( i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
         gp      = iRule->getIntegrationPoint(i);
         this->computeNSubMatrixAt( n, gp->giveCoordinates() );
-        // ask for capacity coefficient
+        // ask for capacity coefficient. In basic units [J/K/m3]
         c = ( ( TransportMaterial * ) this->giveMaterial() )->giveCharacteristicValue(rmode, gp, tStep);
         dV      = this->computeVolumeAround(gp);
         answer.plusProductSymmUpper(n, n, dV * c);
@@ -271,7 +271,7 @@ TransportElement :: computeInternalSourceRhsSubVectorAt(FloatArray &answer, Time
 {
     // Computes numerically the generator Rhs vector of the receiver due to the generator
     //  at stepN.
-    // // load is firrst transformed to local cs.
+    // // load is first transformed to local cs.
     // // load vector is then transformed to coordinate system in each node.
     // // (should be global coordinate system, but there may be defined
     // //  different coordinate system in each node)
@@ -372,7 +372,7 @@ TransportElement :: computeIntSourceLHSMatrix(FloatMatrix &answer, TimeStep *tSt
 
 void
 TransportElement :: computeIntSourceLHSSubMatrix(FloatMatrix &answer, MatResponseMode rmode, int iri, TimeStep *tStep)
-// computes LHS matrix due to material internal source (dHeat/dT, dWaterSource/dw)
+// computes LHS matrix due to material internal source (dHeat/dTemperature, dWaterSource/dw)
 // IntSource - Heat transfer
 // IntSource_hh - HeMo heat source
 // IntSource_ww - HeMo water content source

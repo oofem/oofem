@@ -173,7 +173,7 @@ TransportMaterial :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, In
 InternalStateValueType
 TransportMaterial :: giveIPValueType(InternalStateType type)
 {
-    if ( ( type == IST_Temperature ) || ( type == IST_MassConcentration_1 ) || ( type == IST_Humidity ) ) {
+    if ( type == IST_Temperature || type == IST_MassConcentration_1 || type == IST_Humidity ) {
         return ISVT_SCALAR;
     } else {
         return Material :: giveIPValueType(type);
@@ -183,9 +183,15 @@ TransportMaterial :: giveIPValueType(InternalStateType type)
 int
 TransportMaterial :: giveIntVarCompFullIndx(IntArray &answer, InternalStateType type, MaterialMode mmode)
 {
-    if ( ( type == IST_Temperature ) || ( type == IST_MassConcentration_1 ) || ( type == IST_Humidity ) ) {
+    if ( type == IST_Temperature || type == IST_MassConcentration_1 || type == IST_Humidity || type == IST_HydrationDegree || type == IST_Density || type == IST_ThermalConductivityIsotropic || type == IST_HeatCapacity || type == IST_AverageTemperature  || type == IST_YoungModulusVirginPaste || type == IST_PoissonRatioVirginPaste || type == IST_YoungModulusConcrete || type == IST_PoissonRatioConcrete ) {
         answer.resize(1);
         answer.at(1) = 1;
+        return 1;
+    } else if ( type == IST_TemperatureFlow || type == IST_MassConcentrationFlow_1 || type == IST_HumidityFlow  ) {
+        answer.resize(3);
+        answer.at(1) = 1;
+        answer.at(2) = 2;
+        answer.at(3) = 3;
         return 1;
     } else {
         return Material :: giveIntVarCompFullIndx(answer, type, mmode);
@@ -210,7 +216,7 @@ TransportMaterial :: giveIPValueSize(InternalStateType type, GaussPoint *aGaussP
         _error2( "Unknown mode (%s)", __MaterialModeToString(mMode) );
     }
 
-    if ( ( type == IST_Temperature ) || ( type == IST_MassConcentration_1 ) || ( type == IST_Humidity ) ) {
+    if ( type == IST_Temperature || type == IST_MassConcentration_1 || type == IST_Humidity || type == IST_Density || type == IST_ThermalConductivityIsotropic || type == IST_HeatCapacity || type == IST_AverageTemperature || type == IST_YoungModulusVirginPaste || type == IST_PoissonRatioVirginPaste || type == IST_YoungModulusConcrete || type == IST_PoissonRatioConcrete ) {
         return 1;
     } else if ( ( type == IST_TemperatureFlow ) ) {
         return size;

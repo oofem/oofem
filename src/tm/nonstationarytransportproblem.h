@@ -44,6 +44,8 @@
 #include "sparselinsystemnm.h"
 #include "sparsemtrx.h"
 #include "primaryfield.h"
+#include "transportmaterial.h"
+#include "cemhydmat.h"
 #ifndef __MAKEDEPEND
  #include <stdio.h>
 #endif
@@ -148,6 +150,9 @@ public:
      * Returns the timestep length for given step number n, initial step is number 0
      */
     double giveDeltaT(int n);
+
+
+    void averageOverElements(TimeStep *tStep);
 
 
 #ifdef __PETSC_MODULE

@@ -973,13 +973,13 @@ LSpace :: drawSpecial(oofegGraphicContext &gc)
     if ( gc.giveIntVarType() == IST_CrackState ) {
         int crackStatus;
         FloatArray gpc;
-	double length;
+        double length;
         FloatArray crackDir;
 
         iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
         for ( igp = 0; igp < iRule->getNumberOfIntegrationPoints(); igp++ ) {
             gp = iRule->getIntegrationPoint(igp);
-            if ( mat->giveIPValue(cf, gp, CrackedFlag, tStep) == 0 ) {
+            if ( mat->giveIPValue(cf, gp, IST_CrackedFlag, tStep) == 0 ) {
                 return;
             }
 
@@ -991,8 +991,8 @@ LSpace :: drawSpecial(oofegGraphicContext &gc)
             // obtain gp global coordinates
 	    this->computeGlobalCoordinates(gpc, * gp->giveCoordinates() );
             length = 0.3333 * __OOFEM_POW(this->computeVolumeAround(gp), 1. / 3.);
-            if ( mat->giveIPValue(crackDir, gp, CrackDirs, tStep) ) {
-                mat->giveIPValue(crackStatuses, gp, CrackStatuses, tStep);
+            if ( mat->giveIPValue(crackDir, gp, IST_CrackDirs, tStep) ) {
+                mat->giveIPValue(crackStatuses, gp, IST_CrackStatuses, tStep);
 
 
                 for ( i = 1; i <= 3; i++ ) {
