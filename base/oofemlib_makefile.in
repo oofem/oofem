@@ -44,7 +44,7 @@ srcs9=geotoolbox.C dss.C dsssolver.C intvarfield.C localgaussianrandomgenerator.
 
 xfemsrc=delaunay.C xfemelementinterface.C enrichmentfunction.C patch.C xfemmanager.C enrichmentitem.C patchintegrationrule.C
 
-igasrc=iga.C
+igasrc=iga.C feibspline.C feinurbs.C feitspline.C structuralelementevaluator.C planestresselementevaluator.C space3delementevaluator.C igaelements.C 
 
 #obsolete 
 srcs99=

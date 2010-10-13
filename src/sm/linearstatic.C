@@ -53,7 +53,7 @@
 #include "conTable.h"
 //#include "skyline.h"
 #include "structuralelement.h"
-#include "iga.h"
+#include "structuralelementevaluator.h"
 #include "usrdefsub.h"
 #include "datastream.h"
 //#include "compcol.h"

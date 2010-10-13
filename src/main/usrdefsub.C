@@ -109,7 +109,7 @@
 #include "interfaceelement1d.h"
 #include "interfaceelem3dtrlin.h"
 // iga elements
-#include "iga.h"
+#include "igaelements.h"
 
 // Emodels of SM module
 #include "nlinearstatic.h"
