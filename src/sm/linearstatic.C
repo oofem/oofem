@@ -53,6 +53,7 @@
 #include "conTable.h"
 //#include "skyline.h"
 #include "structuralelement.h"
+#include "structuralelementevaluator.h"
 #include "usrdefsub.h"
 #include "datastream.h"
 //#include "compcol.h"
@@ -451,6 +452,7 @@ LinearStatic :: checkConsistency()
     int i, nelem;
     Element *ePtr;
     StructuralElement *sePtr;
+    StructuralElementEvaluator *see;
     Domain *domain = this->giveDomain(1);
 
     nelem = domain->giveNumberOfElements();
@@ -459,8 +461,10 @@ LinearStatic :: checkConsistency()
     for ( i = 1; i <= nelem; i++ ) {
         ePtr = domain->giveElement(i);
         sePtr = dynamic_cast< StructuralElement * >( ePtr );
-        if ( sePtr == NULL ) {
-            _warning2("checkConsistency: element %d has no StructuralElement base", i);
+        see   = dynamic_cast< StructuralElementEvaluator * >( ePtr );
+
+        if ( (sePtr == NULL) && (see == NULL) ) {
+            _warning2("checkConsistency: element %d has no Structural support", i);
             return 0;
         }
     }

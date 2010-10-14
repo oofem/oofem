@@ -110,7 +110,7 @@ double
 QSpace :: computeVolumeAround (GaussPoint* aGaussPoint)
   // Returns the portion of the receiver which is attached to aGaussPoint.
 {
-  double determinant = this->interpolation.giveTransformationJacobian (domain, dofManArray, *aGaussPoint->giveCoordinates(), 0.0);
+  double determinant = this->interpolation.giveTransformationJacobian (*aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0);
   double weight      = aGaussPoint -> giveWeight();
 
   return (determinant * weight);
@@ -120,7 +120,7 @@ QSpace :: computeVolumeAround (GaussPoint* aGaussPoint)
 int
 QSpace :: computeGlobalCoordinates (FloatArray& answer, const FloatArray& lcoords)
 {
-  this->interpolation.local2global (answer, domain, dofManArray, lcoords, 0.0);
+  this->interpolation.local2global (answer, lcoords, FEIElementGeometryWrapper(this), 0.0); 
   return 1;
 }
 
@@ -153,9 +153,9 @@ QSpace :: computeNmatrixAt (GaussPoint* aGaussPoint, FloatMatrix& answer)
 
   answer.resize(3,60);
   answer.zero();
-
-  this->interpolation.evalN (n, *aGaussPoint->giveCoordinates(), 0.0);
-
+  
+  this->interpolation.evalN (n, *aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0); 
+  
   for (i=1;i<=20;i++){
     answer.at(1,3*i-2) = n.at(i);
     answer.at(2,3*i-1) = n.at(i);
@@ -181,7 +181,7 @@ QSpace :: computeBmatrixAt (GaussPoint *aGaussPoint, FloatMatrix& answer, int li
   int i;
   FloatMatrix dnx;
 
-  this->interpolation.evaldNdx (dnx, this->giveDomain(), dofManArray, *aGaussPoint->giveCoordinates(), 0.0);
+  this->interpolation.evaldNdx (dnx, *aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0);
 
   answer.resize(6,60);
   answer.zero();
@@ -228,7 +228,7 @@ void
 QSpace :: computeSurfaceNMatrixAt (FloatMatrix& answer, GaussPoint* sgp)
 {
   FloatArray n(8);
-  interpolation.surfaceEvalN (n, *sgp->giveCoordinates(), 0.0);
+  interpolation.surfaceEvalN (n, *sgp->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0);
 
   answer.resize (3,24);
   answer.zero();
@@ -260,7 +260,7 @@ double
 QSpace :: computeSurfaceVolumeAround (GaussPoint* gp, int iSurf)
 {
   double       determinant,weight,volume;
-  determinant = fabs(interpolation.surfaceGiveTransformationJacobian (iSurf, domain, dofManArray, *gp->giveCoordinates(), 0.0));
+  determinant = fabs(interpolation.surfaceGiveTransformationJacobian (iSurf, *gp->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0));
 
   weight      = gp -> giveWeight();
   volume      = determinant * weight;
@@ -271,7 +271,7 @@ QSpace :: computeSurfaceVolumeAround (GaussPoint* gp, int iSurf)
 void
 QSpace :: computeSurfIpGlobalCoords (FloatArray& answer, GaussPoint* gp, int iSurf)
 {
-  interpolation.surfaceLocal2global (answer, iSurf, domain, dofManArray, *gp->giveCoordinates(), 0.0);
+  interpolation.surfaceLocal2global (answer, iSurf, *gp->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0);
 }
 
 int
@@ -364,7 +364,7 @@ QSpace :: ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx
 {
   int i;
   FloatArray n;
-  this->interpolation.evalN(n, * aGaussPoint->giveCoordinates(), 0.0);
+  this->interpolation.evalN(n, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0);
 
   if ( this->giveIPValueSize(type, aGaussPoint) ) {
     answer.resize(1, 20);

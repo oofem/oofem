@@ -117,6 +117,8 @@
 #include "planstrssxfem.h"
 #include "cohsur3d.h"
 #include "lumpedmasselement.h"
+// iga elements
+#include "igaelements.h"
 
 // Emodels of SM module
 #include "nlinearstatic.h"
@@ -371,6 +373,14 @@ Element *CreateUsrDefElementOfType(char *aClass, int number, Domain *domain)
         newElement = new MacroLSpace(number, domain);
     } else if ( !strncasecmp(aClass, "lumpedmass", 10) )   {
         newElement = new LumpedMassElement(number, domain);
+    } else if ( !strncasecmp(aClass, "bsplineplanestresselement", 25)  ) {
+      newElement = new BsplinePlaneStressElement(number, domain);
+    } else if ( !strncasecmp(aClass, "nurbsplanestresselement", 23)  ) {
+      newElement = new NURBSPlaneStressElement(number, domain);
+    } else if ( !strncasecmp(aClass, "tsplineplanestresselement", 25)  ) {
+      newElement = new TSplinePlaneStressElement(number, domain);
+    } else if ( !strncasecmp(aClass, "nurbs3delement", 14)  ) {
+      newElement = new NURBSSpace3dElement(number, domain);
     }
 
 #endif //__SM_MODULE

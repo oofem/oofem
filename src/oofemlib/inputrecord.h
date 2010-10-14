@@ -1016,6 +1016,20 @@ enum InputFieldType {
     IFT_EnrichmentItem_enrichmentFunctionNr,
     IFT_EnrichmentItem_materialNr,
 
+    IFT_BSplineInterpolation_degree,
+    IFT_BSplineInterpolation_knotVectorU,
+    IFT_BSplineInterpolation_knotVectorV,
+    IFT_BSplineInterpolation_knotVectorW,
+    IFT_BSplineInterpolation_knotMultiplicityU,
+    IFT_BSplineInterpolation_knotMultiplicityV,
+    IFT_BSplineInterpolation_knotMultiplicityW,
+
+    IFT_TSplineInterpolation_localIndexKnotVectorU,
+    IFT_TSplineInterpolation_localIndexKnotVectorV,
+    IFT_TSplineInterpolation_localIndexKnotVectorW,
+
+    IFT_IGAElement_NIP,
+
     IFT_Unknown
 };
 

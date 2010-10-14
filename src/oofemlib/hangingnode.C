@@ -241,20 +241,30 @@ HangingNode :: computeMasterContribution()
 
     switch ( abs(typeOfContrib) ) {
       case 211: {// linear truss
-        FEI1dLin(0).evalN(* masterContribution, * locoords, 0.0);
+        FEI1dLin(0).evalN(* masterContribution, * locoords, FEIVoidCellGeometry(), 0.0);
         break;
     }
     case 312: {// linear triangle
-        FEI2dTrLin(0, 0).evalN(* masterContribution, * locoords, 0.0);
+        FEI2dTrLin(0, 0).evalN(* masterContribution, * locoords, FEIVoidCellGeometry(), 0.0);
         break;
     }
     case 412: {// linear rectangle
-        FEI2dQuadLin(0, 0).evalN(* masterContribution, * locoords, 0.0);
+        FEI2dQuadLin(0, 0).evalN(* masterContribution, * locoords, FEIVoidCellGeometry(), 0.0);
         break;
     }
     case 813: {// linear hexahedron
-        FEI3dHexaLin().evalN(* masterContribution, * locoords, 0.0);
-        break;
+      double x = locoords->at(1), y = locoords->at(2), z = locoords->at(3);
+
+      masterContribution->resize(8);
+      masterContribution->at(1)  = 0.125 * ( 1. - x ) * ( 1. - y ) * ( 1. + z );
+      masterContribution->at(2)  = 0.125 * ( 1. - x ) * ( 1. + y ) * ( 1. + z );
+      masterContribution->at(3)  = 0.125 * ( 1. + x ) * ( 1. + y ) * ( 1. + z );
+      masterContribution->at(4)  = 0.125 * ( 1. + x ) * ( 1. - y ) * ( 1. + z );
+      masterContribution->at(5)  = 0.125 * ( 1. - x ) * ( 1. - y ) * ( 1. - z );
+      masterContribution->at(6)  = 0.125 * ( 1. - x ) * ( 1. + y ) * ( 1. - z );
+      masterContribution->at(7)  = 0.125 * ( 1. + x ) * ( 1. + y ) * ( 1. - z );
+      masterContribution->at(8)  = 0.125 * ( 1. + x ) * ( 1. - y ) * ( 1. - z );
+      break;
     }
     case 321: {// quadratic truss
         masterContribution->resize(3);
@@ -315,11 +325,11 @@ HangingNode :: computeNaturalCoordinates(){
   //need to extend to other elements
   switch ( typeOfContrib ) {
     case -412: {// linear rectangle
-      FEI2dQuadLin(1, 2).global2local(*this->locoords, masterCoords, coordinates, 0.0);
+      FEI2dQuadLin(1, 2).global2local(*this->locoords, coordinates, FEIVertexListGeometryWrapper(countOfMasterNodes, masterCoords), 0.0);
       break;
     }
     case -813: {// linear hexahedron
-      FEI3dHexaLin().global2local(*this->locoords, masterCoords, coordinates, 0.0);
+      FEI3dHexaLin().global2local(*this->locoords, coordinates, FEIVertexListGeometryWrapper(countOfMasterNodes, masterCoords), 0.0);
       break;
     }
     default: {

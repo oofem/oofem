@@ -34,12 +34,11 @@
  */
 
 #include "feinterpol.h"
-#include "intarray.h"
-#include "domain.h"
-#include "node.h"
+#include "element.h"
 
 namespace oofem {
 
+/*
 void
 FEInterpolation :: nodes2coords(Domain *d, IntArray &nodes, const FloatArray **c, int n)
 {
@@ -52,5 +51,9 @@ FEInterpolation :: nodes2coords(Domain *d, IntArray &nodes, const FloatArray **c
         c [ i ] = d->giveNode( nodes(i) )->giveCoordinates();
     }
 }
+*/
+
+int FEIElementGeometryWrapper::giveNumberOfVertices () const {return elem->giveNumberOfNodes();}
+const FloatArray* FEIElementGeometryWrapper::giveVertexCoordinates(int i) const {return elem->giveNode(i)->giveCoordinates();}
 
 } // end namespace oofem

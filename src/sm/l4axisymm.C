@@ -105,7 +105,7 @@ L4Axisymm :: computeNmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
 
     answer.resize(2, 8);
     answer.zero();
-    this->interpolation.evalN(n, * aGaussPoint->giveCoordinates(), 0.0);
+    this->interpolation.evalN(n, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0);
 
     for ( i = 1; i <= 4; i++ ) {
         answer.at(1, 2 * i - 1) = n.at(i);
@@ -129,7 +129,7 @@ L4Axisymm :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int 
     int size, ind = 1;
     FloatMatrix dnx;
 
-    this->interpolation.evaldNdx(dnx, this->giveDomain(), dofManArray, * aGaussPoint->giveCoordinates(), 0.0);
+    this->interpolation.evaldNdx(dnx, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0);
 
     if ( ui == ALL_STRAINS ) {
         size = 6;
@@ -164,7 +164,7 @@ L4Axisymm :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int 
 
     if ( ( li <= 3 ) && ( ui >= 3 ) ) {
         FloatArray n(4);
-        this->interpolation.evalN(n, * aGaussPoint->giveCoordinates(), 0.0);
+        this->interpolation.evalN(n, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0);
 
         r = 0.;
         for ( i = 1; i <= numberOfDofMans; i++ ) {
@@ -222,7 +222,7 @@ L4Axisymm :: computeVolumeAround(GaussPoint *aGaussPoint)
     double determinant, weight, volume, r, x;
     FloatArray n(4);
 
-    this->interpolation.evalN(n, * aGaussPoint->giveCoordinates(), 0.0);
+    this->interpolation.evalN(n, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0);
 
     r = 0.;
     for ( i = 1; i <= numberOfDofMans; i++ ) {
@@ -230,8 +230,8 @@ L4Axisymm :: computeVolumeAround(GaussPoint *aGaussPoint)
         r += x * n.at(i);
     }
 
-    determinant = fabs( this->interpolation.giveTransformationJacobian(domain, dofManArray,
-                                                                       * aGaussPoint->giveCoordinates(), 0.0) );
+    determinant = fabs( this->interpolation.giveTransformationJacobian(* aGaussPoint->giveCoordinates(), 
+								       FEIElementGeometryWrapper(this), 0.0) );
 
     weight      = aGaussPoint->giveWeight();
     volume      = determinant * weight * r;
@@ -388,14 +388,14 @@ L4Axisymm ::   giveDofManDofIDMask(int inode, EquationID, IntArray &answer) cons
 int
 L4Axisymm :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords)
 {
-    this->interpolation.local2global(answer, domain, dofManArray, lcoords, 0.0);
-    return 1;
+  this->interpolation.local2global(answer, lcoords, FEIElementGeometryWrapper(this), 0.0);
+  return 1;
 }
 
 int
 L4Axisymm :: computeLocalCoordinates(FloatArray &answer, const FloatArray &coords)
 {
-    return this->interpolation.global2local(answer, domain, dofManArray, coords, 0.0);
+  return this->interpolation.global2local(answer, coords, FEIElementGeometryWrapper(this), 0.0);
 }
 
 void
@@ -472,7 +472,7 @@ L4Axisymm :: ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatMatrix &an
     // N(nsigma, nsigma*nnodes)
     // Definition : sigmaVector = N * nodalSigmaVector
     FloatArray n;
-    this->interpolation.evalN(n, * aGaussPoint->giveCoordinates(), 0.0);
+    this->interpolation.evalN(n, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0);
 
     if ( this->giveIPValueSize(type, aGaussPoint) ) {
         answer.resize(1, 4);
@@ -509,7 +509,7 @@ L4Axisymm :: computeEgdeNMatrixAt(FloatMatrix &answer, GaussPoint *aGaussPoint)
      */
 
     FloatArray n(2);
-    this->interpolation.edgeEvalN(n, * aGaussPoint->giveCoordinates(), 0.0);
+    this->interpolation.edgeEvalN(n, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0);
 
     answer.resize(2, 4);
     answer.zero();
@@ -562,8 +562,8 @@ L4Axisymm ::   computeEdgeVolumeAround(GaussPoint *aGaussPoint, int iEdge)
 {
     FloatArray c(2);
     this->computeEdgeIpGlobalCoords(c, aGaussPoint, iEdge);
-    double result = this->interpolation.edgeGiveTransformationJacobian(iEdge, domain, dofManArray,
-                                                                       * aGaussPoint->giveCoordinates(), 0.0);
+    double result = this->interpolation.edgeGiveTransformationJacobian(iEdge, * aGaussPoint->giveCoordinates(), 
+								       FEIElementGeometryWrapper(this), 0.0);
 
 
     return c.at(1) * result * aGaussPoint->giveWeight();
@@ -572,7 +572,7 @@ L4Axisymm ::   computeEdgeVolumeAround(GaussPoint *aGaussPoint, int iEdge)
 void
 L4Axisymm :: computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge)
 {
-    this->interpolation.edgeLocal2global(answer, iEdge, domain, dofManArray, * gp->giveCoordinates(), 0.0);
+  this->interpolation.edgeLocal2global(answer, iEdge, * gp->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0);
 }
 
 

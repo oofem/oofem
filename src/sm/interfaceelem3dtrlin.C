@@ -77,7 +77,7 @@ InterfaceElement3dTrLin :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix
 //
 {
     FloatArray n(3);
-    this->interpolation.evalN(n, * aGaussPoint->giveCoordinates(), 0.0);
+    this->interpolation.evalN(n, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0);
 
     answer.resize(3, 18);
     answer.zero();
@@ -118,7 +118,7 @@ InterfaceElement3dTrLin :: computeGlobalCoordinates(FloatArray &answer, const Fl
 
     answer.resize(3);
     answer.zero();
-    this->interpolation.evalN(n, lcoords, 0.0);
+    this->interpolation.evalN(n, lcoords, FEIElementGeometryWrapper(this), 0.0);
 
     answer.resize(3);
     answer.zero();
@@ -163,7 +163,7 @@ InterfaceElement3dTrLin :: computeVolumeAround(GaussPoint *aGaussPoint)
         lncp [ i - 1 ] = & lnc [ i - 1 ];
     }
 
-    determinant = fabs( this->interpolation.giveTransformationJacobian(lncp, * aGaussPoint->giveCoordinates(), 0.0) );
+    determinant = fabs( this->interpolation.giveTransformationJacobian(* aGaussPoint->giveCoordinates(), FEIVertexListGeometryWrapper(3, lncp), 0.0) );
     weight      = aGaussPoint->giveWeight();
     thickness   = this->giveCrossSection()->give('t');
     volume      = determinant * weight * thickness;

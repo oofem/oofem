@@ -1,4 +1,4 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/feinterpol1d.h,v 1.1 2003/04/06 14:08:24 bp Exp $ */
+/* $Header: /home/cvs/bp/oofem/oofemlib/src/element.h,v 1.27 2003/04/06 14:08:24 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -33,42 +33,40 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-//   *****************************
-//   *** CLASS FEInterpolation1d ***
-//   *****************************
+#ifndef planestresselementevaluator_h
+#define planestresselementevaluator_h
 
-
-#ifndef feinterpol1d_h
-#define feinterpol1d_h
-
-#include "feinterpol.h"
-#include "flotarry.h"
-#include "intarray.h"
-#include "domain.h"
+#include "structuralelementevaluator.h"
 
 namespace oofem {
 
 /**
- * Class representing a general abstraction for finite element interpolation class.
+ * general purpose Plane stress structural element evaluator
  */
-class FEInterpolation1d : public FEInterpolation
+class PlaneStressStructuralElementEvaluator : public StructuralElementEvaluator
 {
-protected:
-
 public:
- FEInterpolation1d(int o) : FEInterpolation(o) { }
-  /**
-   * Returns number of spatial dimensions
-   */
-  int const giveNsd() {return 1;}
-};
+    PlaneStressStructuralElementEvaluator() : StructuralElementEvaluator() { }
 
+protected:
+    /// Cached transformation matrix of receiver
+    FloatMatrix *rotationMatrix; // to be moved from structural element
+
+    /** Assemble interpolation matrix at given IP
+     *  In case of IGAElements, N is assumed to contain only nonzero interpolation functions
+     */
+    void computeNMatrixAt(FloatMatrix &answer, GaussPoint *gp);
+    /** Assembles the strain-displacement matrix of the receiver at given integration point
+     *  In case of IGAElements, B is assumed to contain only contribution from nonzero interpolation functions
+     */
+    void computeBMatrixAt(FloatMatrix &answer, GaussPoint *gp);
+    double computeVolumeAround(GaussPoint *gp);
+    void giveDofManDofIDMask(int inode, EquationID u, IntArray &answer) const {
+        answer.resize(2);
+        answer.at(1) = D_u;
+        answer.at(2) = D_v;
+    }
+}; // end of PlaneStressStructuralElementEvaluator definition
 
 } // end namespace oofem
-#endif // feinterpol1d_h
-
-
-
-
-
-
+#endif //planestresselementevaluator_h

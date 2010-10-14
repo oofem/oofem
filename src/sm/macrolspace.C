@@ -312,8 +312,10 @@ void MacroLSpace :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep
 void MacroLSpace :: evalInterpolation(FloatArray &answer, const FloatArray **coords, const FloatArray &gcoords){
   FloatArray localCoords;
 
-  this->interpolation.global2local(localCoords, coords, gcoords, 0.0);//returns even outside the element boundaries
-  this->interpolation.evalN(answer, localCoords, 0.0);
+  //this->interpolation.global2local(localCoords, coords, gcoords, 0.0);//returns even outside the element boundaries
+  //this->interpolation.evalN(answer, localCoords, 0.0);
+  this->interpolation.global2local(localCoords, gcoords, FEIVertexListGeometryWrapper(8,coords), 0.0);//returns even outside the element boundaries
+  this->interpolation.evalN(answer, localCoords, FEIVertexListGeometryWrapper(8,coords), 0.0);
 }
 
 

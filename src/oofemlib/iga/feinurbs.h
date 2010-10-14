@@ -1,4 +1,4 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/fei1dlin.h,v 1.1 2003/04/06 14:08:24 bp Exp $ */
+/* $Header: /home/cvs/bp/oofem/oofemlib/src/element.h,v 1.27 2003/04/06 14:08:24 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -33,26 +33,32 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#ifndef fei1dlin_h
-#define fei1dlin_h
+#ifndef feinurbs_h
+#define feinurbs_h
 
-#include "feinterpol1d.h"
+/*
+ * oofem nodes - control points (coordinates ) + dofs
+ * oofem elements - NURBS patches as well as integration elements
+ *
+ *
+ * NURBS PATCH:
+ * knot vector - store knot coordinates + multiplicity
+ * patch integration rule - keep list of elements
+ *
+ */
+
+#include "feibspline.h"
 #include "flotarry.h"
-#include "intarray.h"
-#include "domain.h"
+#include "flotmtrx.h"
+#include "mathfem.h"
 
 namespace oofem {
 
-/**
- * Class representing a 1d linear isparametric interpolation.
- */
-class FEI1dLin : public FEInterpolation1d
+class NURBSInterpolation : public BSplineInterpolation
 {
-protected:
-    int cindx;
-
 public:
-    FEI1dLin(int coordIndx) : FEInterpolation1d(1) { cindx = coordIndx; }
+    NURBSInterpolation(int nsd) : BSplineInterpolation(nsd) { }
+    ~NURBSInterpolation();
 
     /**
      * Evaluates the array of interpolation functions (shape functions) at given point.
@@ -60,53 +66,39 @@ public:
      * @param lcoords array containing (local) coordinates
      * @param cellgeo underlying cell geometry
      * @param time time
+     *
+     * see also giveNonzeroBasisFunctMask method of BSplineInterpolation
      */
-    virtual void evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry& cellgeo, double time);
+    virtual void evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time);
     /**
      * Evaluates the matrix of derivatives of interpolation functions (shape functions) at given point.
      * These derivatives are in global coordinate system (where the nodal coordinates are defined)
-     * @param matrix contains resulting matrix of derivatives, the member at i,j position contains value of dNi/dxj
+     * @param answer contains resulting matrix of derivatives, the member at i,j position contains value of dNi/dxj
      * @param lcoords array containing (local) coordinates
      * @param cellgeo underlying cell geometry
      * @param time time
      */
-    virtual void evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry& cellgeo, double time);
+    virtual void evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time);
     /**
      * Evaluates global coordinates from given local ones
-     * These derivatives are in global coordinate system (where the nodal coordinates are defined)
      * @param answer contains resulting global coordinates
      * @param lcoords array containing (local) coordinates
      * @param cellgeo underlying cell geometry
      * @param time time
      */
-    virtual void local2global(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry& cellgeo, double time);
-    /**
-     * Evaluates local coordinates from given global ones. Returns nonzero if local coordinates are interpolating,
-     * zero if extrapolating (nonzero is returned if point is within the element geometry, zero otherwise).
-     * These derivatives are in global coordinate system (where the nodal coordinates are defined)
-     * @param answer contains evaluated local coordinates
-     * @param gcoords array containing global coordinates
-     * @param time time
-     * @param cellgeo underlying cell geometry
-     * @return nonzero is returned if point is within the element geometry, zero otherwise
-     */
-    virtual int  global2local(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry& cellgeo, double time);
+    virtual void local2global(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time);
+    virtual int  global2local(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time) {
+        OOFEM_ERROR("Not yet inplemented, contact lazy dr for implementation");
+        return 0;
+    }
     /**
      * Evaluates the jacobian of transformation between local and global coordinates.
      */
-    virtual double giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry& cellgeo, double time);
+    virtual double giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time);
 
-protected:
-    double computeLength(const FEICellGeometry& cellgeo);
-};
-
-
+    /// Returns class name of the receiver.
+    const char *giveClassName() const { return "NURBSInterpolation"; }
+}; // end of NURBSInterpolation class definition
 
 } // end namespace oofem
-#endif // fei1dlin_h
-
-
-
-
-
-
+#endif //feinurbs_h

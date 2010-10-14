@@ -42,7 +42,7 @@
 namespace oofem {
 
 void
-FEI1dLin :: evalN(FloatArray &answer, const FloatArray &lcoords, double time)
+FEI1dLin :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry& cellgeo, double time)
 {
     double ksi = lcoords.at(1);
     answer.resize(2);
@@ -54,9 +54,9 @@ FEI1dLin :: evalN(FloatArray &answer, const FloatArray &lcoords, double time)
 }
 
 void
-FEI1dLin :: evaldNdx(FloatMatrix &answer, const FloatArray **nc, const FloatArray &lcoords, double time)
+FEI1dLin :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry& cellgeo, double time)
 {
-    double l = this->computeLength(nc);
+    double l = this->computeLength(cellgeo);
     answer.resize(2, 1);
 
     answer.at(1, 1) = -1.0 / l;
@@ -64,41 +64,41 @@ FEI1dLin :: evaldNdx(FloatMatrix &answer, const FloatArray **nc, const FloatArra
 }
 
 void
-FEI1dLin :: local2global(FloatArray &answer, const FloatArray **nc, const FloatArray &lcoords, double time)
+FEI1dLin :: local2global(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry& cellgeo, double time)
 {
     FloatArray n(2);
     answer.resize(1);
 
-    this->evalN(n, lcoords, time);
-    answer.at(1) = ( n.at(1) * nc [ 0 ]->at(cindx) +
-                    n.at(2) * nc [ 1 ]->at(cindx) );
+    this->evalN(n, lcoords, cellgeo, time);
+    answer.at(1) = ( n.at(1) * cellgeo.giveVertexCoordinates(1)->at(cindx) +
+                     n.at(2) * cellgeo.giveVertexCoordinates(2)->at(cindx) );
 }
 
 int
-FEI1dLin :: global2local(FloatArray &answer, const FloatArray **nc, const FloatArray &coords, double time)
+FEI1dLin :: global2local(FloatArray &answer, const FloatArray &coords, const FEICellGeometry& cellgeo, double time)
 {
     double ksi, x1, x2;
     answer.resize(1);
 
 
-    x1 = nc [ 0 ]->at(cindx);
-    x2 = nc [ 1 ]->at(cindx);
+    x1 = cellgeo.giveVertexCoordinates(1)->at(cindx);
+    x2 = cellgeo.giveVertexCoordinates(2)->at(cindx);
 
     answer.at(1) = ksi = ( 2.0 * coords.at(1) - ( x1 + x2 ) ) / ( x2 - x1 );
     return ( fabs(ksi) <= 1.0 ) ? 1 : 0;
 }
 
 double
-FEI1dLin :: giveTransformationJacobian(const FloatArray **nc, const FloatArray &lcoords, double time)
+FEI1dLin :: giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry& cellgeo, double time)
 {
-    double l = computeLength(nc);
+    double l = computeLength(cellgeo);
     return 0.5 * l;
 }
 
 double
-FEI1dLin :: computeLength(const FloatArray **nc)
+FEI1dLin :: computeLength(const FEICellGeometry& cellgeo)
 {
-    return ( nc [ 1 ]->at(cindx) - nc [ 0 ]->at(cindx) );
+  return ( cellgeo.giveVertexCoordinates(2)->at(cindx) - cellgeo.giveVertexCoordinates(1)->at(cindx) );
 }
 
 } // end namespace oofem

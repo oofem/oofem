@@ -79,7 +79,7 @@ Brick1_ht :: computeNSubMatrixAt(FloatMatrix &answer, FloatArray *coords)
 // evaluated at aGaussPoint.
 {
     FloatArray n;
-    this->interpolation.evalN(n, * coords, 0.0);
+    this->interpolation.evalN(n, * coords, FEIElementGeometryWrapper(this), 0.0);
     answer.resize(1, 8);
 
     for ( int i = 1; i <= 8; i++ ) {
@@ -113,7 +113,7 @@ Brick1_ht :: computeGradientMatrixAt(FloatMatrix &answer, GaussPoint *aGaussPoin
 {
     FloatMatrix dnx;
 
-    this->interpolation.evaldNdx(dnx, this->giveDomain(), dofManArray, * aGaussPoint->giveCoordinates(), 0.0);
+    this->interpolation.evaldNdx(dnx, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0);
     answer.beTranspositionOf(dnx);
 }
 
@@ -181,8 +181,8 @@ Brick1_ht :: computeVolumeAround(GaussPoint *aGaussPoint)
 // Returns the portion of the receiver which is attached to aGaussPoint.
 {
     double determinant, weight, volume;
-    determinant = fabs( this->interpolation.giveTransformationJacobian(domain, dofManArray,
-                                                                       * aGaussPoint->giveCoordinates(), 0.0) );
+    determinant = fabs( this->interpolation.giveTransformationJacobian(* aGaussPoint->giveCoordinates(), 
+								       FEIElementGeometryWrapper(this), 0.0) );
 
     weight      = aGaussPoint->giveWeight();
     volume      = determinant * weight;
@@ -206,7 +206,7 @@ Brick1_ht :: computeEgdeNMatrixAt(FloatMatrix &answer, GaussPoint *gp)
      * without regarding particular side
      */
     FloatArray n(2);
-    this->interpolation.edgeEvalN(n, * gp->giveCoordinates(), 0.0);
+    this->interpolation.edgeEvalN(n, * gp->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0);
 
     answer.resize(1, 2);
     answer.at(1, 1) = n.at(1);
@@ -219,8 +219,8 @@ Brick1_ht :: computeEgdeNMatrixAt(FloatMatrix &answer, GaussPoint *gp)
 double
 Brick1_ht :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 {
-    double result = this->interpolation.edgeGiveTransformationJacobian(iEdge, domain, dofManArray,
-                                                                       * gp->giveCoordinates(), 0.0);
+    double result = this->interpolation.edgeGiveTransformationJacobian(iEdge, * gp->giveCoordinates(), 
+								       FEIElementGeometryWrapper(this), 0.0);
     return result * gp->giveWeight();
 }
 
@@ -280,7 +280,7 @@ Brick1_ht :: giveEdgeDofMapping(IntArray &answer, int iEdge)
 void
 Brick1_ht :: computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge)
 {
-    this->interpolation.edgeLocal2global(answer, iEdge, domain, dofManArray, * gp->giveCoordinates(), 0.0);
+  this->interpolation.edgeLocal2global(answer, iEdge, * gp->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0);
 }
 
 IntegrationRule *Brick1_ht :: GetSurfaceIntegrationRule(int approxOrder)
@@ -294,7 +294,7 @@ IntegrationRule *Brick1_ht :: GetSurfaceIntegrationRule(int approxOrder)
 void Brick1_ht :: computeSurfaceNMatrixAt(FloatMatrix &answer, GaussPoint *gp)
 {
     FloatArray n(4);
-    interpolation.surfaceEvalN(n, * gp->giveCoordinates(), 0.0);
+    interpolation.surfaceEvalN(n, * gp->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0);
 
     answer.resize(1, 4);
     answer.zero();
@@ -308,7 +308,7 @@ void Brick1_ht :: computeSurfaceNMatrixAt(FloatMatrix &answer, GaussPoint *gp)
 double Brick1_ht :: computeSurfaceVolumeAround(GaussPoint *gp, int iSurf)
 {
     double determinant, weight, volume;
-    determinant = fabs( interpolation.surfaceGiveTransformationJacobian(iSurf, domain, dofManArray, * gp->giveCoordinates(), 0.0) );
+    determinant = fabs( interpolation.surfaceGiveTransformationJacobian(iSurf, * gp->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0) );
 
     weight      = gp->giveWeight();
     volume      = determinant * weight;
@@ -357,7 +357,7 @@ void Brick1_ht :: giveSurfaceDofMapping(IntArray &answer, int iSurf)
 void
 Brick1_ht :: computeSurfIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iSurf)
 {
-    interpolation.surfaceLocal2global(answer, iSurf, domain, dofManArray, * gp->giveCoordinates(), 0.0);
+  interpolation.surfaceLocal2global(answer, iSurf, * gp->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0);
 }
 
 
@@ -389,8 +389,8 @@ Brick1_ht :: computeInternalSourceRhsVectorAt(FloatArray &answer, TimeStep *atTi
 int
 Brick1_ht :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords)
 {
-    this->interpolation.local2global(answer, domain, dofManArray, lcoords, 0.0);
-    return 1;
+  this->interpolation.local2global(answer, lcoords, FEIElementGeometryWrapper(this), 0.0);
+  return 1;
 }
 
 
@@ -425,7 +425,7 @@ Brick1_ht :: ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatMatrix &an
 {
     int i;
     FloatArray n;
-    this->interpolation.evalN(n, * aGaussPoint->giveCoordinates(), 0.0);
+    this->interpolation.evalN(n, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0);
 
     if ( this->giveIPValueSize(type, aGaussPoint) ) {
         answer.resize(1, 8);
@@ -478,7 +478,7 @@ Brick1_ht :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray
 int
 Brick1_ht :: computeLocalCoordinates(FloatArray &answer, const FloatArray &coords)
 {
-    return this->interpolation.global2local(answer, domain, dofManArray, coords, 0.0);
+  return this->interpolation.global2local(answer, coords, FEIElementGeometryWrapper(this), 0.0);
 }
 
 

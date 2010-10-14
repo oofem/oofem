@@ -2530,7 +2530,9 @@ StructuralMaterial :: computeStressIndependentStrainVector(FloatArray &answer,
     FloatMatrix GCS;
     MaterialMode matmode = gp->giveMaterialMode();
     StructuralCrossSection *crossSection =  dynamic_cast< StructuralCrossSection * >( gp->giveCrossSection() );
-    StructuralElement *elem = ( StructuralElement * ) gp->giveElement();
+    Element *elem = gp->giveElement();
+    StructuralElement *selem = dynamic_cast< StructuralElement * >( gp->giveElement() );
+    
 
     answer.resize(0);
     answerTemper.resize(0);
@@ -2542,9 +2544,11 @@ StructuralMaterial :: computeStressIndependentStrainVector(FloatArray &answer,
     }
 
     //sum up all prescribed temperatures over an element
-    elem->computeResultingIPTemperatureAt(et, stepN, gp, mode);
+    //elem->computeResultingIPTemperatureAt(et, stepN, gp, mode);
+    if (selem) selem->computeResultingIPTemperatureAt(et, stepN, gp, mode); // HUHU
+
     //sum up all prescribed eigenstrain over an element
-    elem->computeResultingIPEigenstrainAt(eigenstrain, stepN, gp, mode);
+    if (selem) selem->computeResultingIPEigenstrainAt(eigenstrain, stepN, gp, mode);
     if(eigenstrain.giveSize()!=0 && eigenstrain.giveSize()!=giveSizeOfReducedStressStrainVector(matmode))
         _error5( "Number of given eigenstrain components %d is different than required %d by material mode %s, element %d", eigenstrain.giveSize(), giveSizeOfReducedStressStrainVector(matmode), __MaterialModeToString(matmode), elem->giveNumber() );
 

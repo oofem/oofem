@@ -62,91 +62,43 @@ public:
      * Evaluates the array of interpolation functions (shape functions) at given point.
      * @param answer contains resulting array of evaluated interpolation functions
      * @param lcoords array containing (local) coordinates
+     * @param cellgeo underlying cell geometry
      * @param time time
      */
-    virtual void evalN(FloatArray &answer, const FloatArray &lcoords, double time);
+    virtual void evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry& cellgeo, double time);
     /**
      * Evaluates the matrix of derivatives of interpolation functions (shape functions) at given point.
      * These derivatives are in global coordinate system (where the nodal coordinates are defined)
      * @param matrix contains resulting matrix of derivatives, the member at i,j position contains value of dNi/dxj
-     * @param coords coordinates of nodes defining the interpolation geometry
      * @param lcoords array containing (local) coordinates
+     * @param cellgeo underlying cell geometry
      * @param time time
      */
-    virtual void evaldNdx(FloatMatrix &answer, const FloatArray **coords, const FloatArray &lcoords, double time);
-    /**
-     * Evaluates the matrix of derivatives of interpolation functions (shape functions) at given point.
-     * These derivatives are in global coordinate system (where the nodal coordinates are defined)
-     * @param matrix contains resulting matrix of derivatives, the member at i,j position contains value of dNi/dxj
-     * @param nodes array of node numbers defining the interpolation geometry
-     * @param lcoords array containing (local) coordinates
-     * @param time time
-     */
-    virtual void evaldNdx(FloatMatrix &answer, Domain *d, IntArray &nodes, const FloatArray &lcoords, double time) {
-        const FloatArray *c [ 8 ];
-        nodes2coords(d, nodes, c, 8);
-        evaldNdx(answer, c, lcoords, time);
-    }
+    virtual void evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry& cellgeo, double time);
     /**
      * Evaluates global coordinates from given local ones
      * These derivatives are in global coordinate system (where the nodal coordinates are defined)
      * @param answer contains resulting global coordinates
-     * @param coords coordinates of nodes defining the interpolation geometry
      * @param lcoords array containing (local) coordinates
+     * @param cellgeo underlying cell geometry
      * @param time time
      */
-    virtual void local2global(FloatArray &answer, const FloatArray **coords, const FloatArray &lcoords, double time);
-    /**
-     * Evaluates global coordinates from given local ones
-     * These derivatives are in global coordinate system (where the nodal coordinates are defined)
-     * @param answer contains resulting global coordinates
-     * @param nodes array of node numbers defining the interpolation geometry
-     * @param lcoords array containing local coordinates
-     * @param time time
-     */
-    virtual void local2global(FloatArray &answer, Domain *d, IntArray &nodes, const FloatArray &lcoords, double time) {
-        const FloatArray *c [ 8 ];
-        nodes2coords(d, nodes, c, 8);
-        local2global(answer, c, lcoords, time);
-    }
+    virtual void local2global(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry& cellgeo, double time);
     /**
      * Evaluates local coordinates from given global ones. Returns nonzero if local coordinates are interpolating,
      * zero if extrapolating (nonzero is returned if point is within the element geometry, zero otherwise).
      * These derivatives are in global coordinate system (where the nodal coordinates are defined)
      * @param answer contains evaluated local coordinates
-     * @param coords coordinates of nodes defining the interpolation geometry
      * @param gcoords array containing global coordinates
+     * @param cellgeo underlying cell geometry
      * @param time time
      * @return nonzero is returned if point is within the element geometry, zero otherwise
      */
-    virtual int  global2local(FloatArray &answer, const FloatArray **coords, const FloatArray &gcoords, double time);
-    /**
-     * Evaluates local coordinates from given global ones. Returns nonzero if local coordinates are interpolating,
-     * zero if extrapolating (nonzero is returned if point is within the element geometry, zero otherwise).
-     * These derivatives are in global coordinate system (where the nodal coordinates are defined)
-     * @param answer contains evaluated local coordinates
-     * @param nodes array of node numbers defining the interpolation geometry
-     * @param gcoords array containing global coordinates
-     * @param time time
-     * @return nonzero is returned if point is within the element geometry, zero otherwise
-     */
-    virtual int  global2local(FloatArray &answer, Domain *d, IntArray &nodes, const FloatArray &gcoords, double time) {
-        const FloatArray *c [ 8 ];
-        nodes2coords(d, nodes, c, 8);
-        return global2local(answer, c, gcoords, time);
-    }
+    virtual int  global2local(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry& cellgeo, double time);
     /**
      * Evaluates the jacobian of transformation between local and global coordinates.
      */
-    virtual double giveTransformationJacobian(const FloatArray **coords, const FloatArray &lcoords, double time);
-    /**
-     * Evaluates the jacobian of transformation between local and global coordinates.
-     */
-    virtual double giveTransformationJacobian(Domain *d, IntArray &nodes, const FloatArray &lcoords, double time) {
-        const FloatArray *c [ 8 ];
-        nodes2coords(d, nodes, c, 8);
-        return giveTransformationJacobian(c, lcoords, time);
-    }
+    virtual double giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry& cellgeo, double time);
 
 
     /**@name Edge interpolation servises */
@@ -155,78 +107,37 @@ public:
      * Evaluates the array of edge interpolation functions (shape functions) at given point.
      * @param answer contains resulting array of evaluated interpolation functions
      * @param lcoords array containing (local) coordinates
+     * @param cellgeo underlying cell geometry
      * @param time time
      */
-    virtual void edgeEvalN(FloatArray &answer, const FloatArray &lcoords, double time);
+    virtual void edgeEvalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry& cellgeo, double time);
     /**
      * Evaluates the matrix of derivatives of edge interpolation functions (shape functions) at given point.
      * These derivatives are in global coordinate system (where the nodal coordinates are defined)
      * @param answer contains resulting matrix of derivatives, the member at i,j position contains value of dNj/dxi
      * @param iedge determines the edge number
-     * @param coords coordinates of nodes defining the interpolation geometry (for the whole element)
      * @param lcoords array containing (local) coordinates
+     * @param cellgeo underlying cell geometry
      * @param time time
      */
     virtual void edgeEvaldNdx(FloatMatrix &answer, int iedge,
-                              const FloatArray **coords, const FloatArray &lcoords, double time);
-    /**
-     * Evaluates the matrix of derivatives of edge interpolation functions (shape functions) at given point.
-     * These derivatives are in global coordinate system (where the nodal coordinates are defined)
-     * @param answer contains resulting matrix of derivatives, the member at i,j position contains value of dNj/dxi
-     * @param iedge determines the edge number
-     * @param nodes array of node numbers (for the whole element) defining the interpolation geometry
-     * @param lcoords array containing (local) coordinates
-     * @param time time
-     */
-    virtual void edgeEvaldNdx(FloatMatrix &answer, int iedge,
-                              Domain *d, IntArray &nodes, const FloatArray &lcoords, double time) {
-        const FloatArray *c [ 8 ];
-        nodes2coords(d, nodes, c, 8);
-        edgeEvaldNdx(answer, iedge, c, lcoords, time);
-    }
-
+                              const FloatArray &lcoords, const FEICellGeometry& cellgeo, double time);
     /**
      * Evaluates edge global coordinates from given local ones
      * These derivatives are in global coordinate system (where the nodal coordinates are defined)
      * @param answer contains resulting global coordinates
      * @param iedge determines edge number
-     * @param coords coordinates of nodes defining the interpolation geometry (for the whole element)
      * @param lcoords array containing (local) coordinates
+     * @param cellgeo underlying cell geometry
      * @param time time
      */
     virtual void edgeLocal2global(FloatArray &answer, int iedge,
-                                  const FloatArray **coords, const FloatArray &lcoords, double time);
-    /**
-     * Evaluates edge global coordinates from given local ones
-     * These derivatives are in global coordinate system (where the nodal coordinates are defined)
-     * @param answer contains resulting global coordinates
-     * @param iedge determines edge number
-     * @param nodes array of node numbers (for the whole element) defining the interpolation geometry
-     * @param lcoords array containing (local) coordinates
-     * @param time time
-     */
-    virtual void edgeLocal2global(FloatArray &answer, int iedge,
-                                  Domain *d, IntArray &nodes, const FloatArray &lcoords, double time) {
-        const FloatArray *c [ 8 ];
-        nodes2coords(d, nodes, c, 8);
-        edgeLocal2global(answer, iedge, c, lcoords, time);
-    }
-
+                                  const FloatArray &lcoords, const FEICellGeometry& cellgeo, double time);
     /**
      * Evaluates the edge jacobian of transformation between local and global coordinates.
      */
-    virtual double edgeGiveTransformationJacobian(int iedge, const FloatArray **coords, const FloatArray &lcoords,
-                                                  double time);
-    /**
-     * Evaluates the edge jacobian of transformation between local and global coordinates.
-     */
-    virtual double edgeGiveTransformationJacobian(int iedge, Domain *d, IntArray &nodes, const FloatArray &lcoords,
-                                                  double time) {
-        const FloatArray *c [ 8 ];
-        nodes2coords(d, nodes, c, 8);
-        return edgeGiveTransformationJacobian(iedge, c, lcoords, time);
-    }
-
+    virtual double edgeGiveTransformationJacobian(int iedge, const FloatArray &lcoords,
+                                                  const FEICellGeometry& cellgeo, double time);
     virtual void computeLocalEdgeMapping(IntArray &edgeNodes, int iedge);
     //@}
 
@@ -236,16 +147,17 @@ public:
      * Evaluates the array of edge interpolation functions (shape functions) at given point.
      * @param answer contains resulting array of evaluated interpolation functions
      * @param lcoords array containing (local) coordinates
+     * @param cellgeo underlying cell geometry
      * @param time time
      */
-    virtual void surfaceEvalN(FloatArray &answer, const FloatArray &lcoords, double time);
+    virtual void surfaceEvalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry& cellgeo, double time);
     /**
      * Evaluates the matrix of derivatives of edge interpolation functions (shape functions) at given point.
      * These derivatives are in global coordinate system (where the nodal coordinates are defined)
      * @param answer contains resulting matrix of derivatives, the member at i,j position contains value of dNj/dxi
      * @param iedge determines the edge number
-     * @param nodes array of node numbers (for the whole element) defining the interpolation geometry
      * @param lcoords array containing (local) coordinates
+     * @param cellgeo underlying cell geometry
      * @param time time
      */
     //virtual void surfaceEvaldNdx (FloatMatrix&answer, int iedge,
@@ -255,51 +167,27 @@ public:
      * These derivatives are in global coordinate system (where the nodal coordinates are defined)
      * @param answer contains resulting global coordinates
      * @param iedge determines edge number
-     * @param nodes array of node numbers (for the whole element) defining the interpolation geometry
      * @param lcoords array containing (local) coordinates
+     * @param cellgeo underlying cell geometry
      * @param time time
      */
     virtual void surfaceLocal2global(FloatArray &answer, int iedge,
-                                     const FloatArray **coords, const FloatArray &lcoords, double time);
-    /**
-     * Evaluates edge global coordinates from given local ones
-     * These derivatives are in global coordinate system (where the nodal coordinates are defined)
-     * @param answer contains resulting global coordinates
-     * @param iedge determines edge number
-     * @param nodes array of node numbers (for the whole element) defining the interpolation geometry
-     * @param lcoords array containing (local) coordinates
-     * @param time time
-     */
-    virtual void surfaceLocal2global(FloatArray &answer, int iedge,
-                                     Domain *d, IntArray &nodes, const FloatArray &lcoords, double time) {
-        const FloatArray *c [ 8 ];
-        nodes2coords(d, nodes, c, 8);
-        surfaceLocal2global(answer, iedge, c, lcoords, time);
-    }
+                                     const FloatArray &lcoords, const FEICellGeometry& cellgeo, double time);
     /**
      * Evaluates the edge jacobian of transformation between local and global coordinates.
      */
-    virtual double surfaceGiveTransformationJacobian(int isurf, const FloatArray **coords, const FloatArray &lcoords,
-                                                     double time);
-    /**
-     * Evaluates the edge jacobian of transformation between local and global coordinates.
-     */
-    virtual double surfaceGiveTransformationJacobian(int isurf, Domain *d, IntArray &nodes, const FloatArray &lcoords,
-                                                     double time) {
-        const FloatArray *c [ 8 ];
-        nodes2coords(d, nodes, c, 8);
-        return surfaceGiveTransformationJacobian(isurf, c, lcoords, time);
-    }
+    virtual double surfaceGiveTransformationJacobian(int isurf, const FloatArray &lcoords,
+                                                     const FEICellGeometry& cellgeo, double time);
     virtual void computeLocalSurfaceMapping(IntArray &edgeNodes, int iedge);
     //@}
 
 protected:
-    double edgeComputeLength(IntArray &edgeNodes, const FloatArray **coords);
+    double edgeComputeLength(IntArray &edgeNodes, const FEICellGeometry& cellgeo);
     void   giveDerivativeKsi(FloatArray &dx, double v, double w);
     void   giveDerivativeEta(FloatArray &dy, double u, double w);
     void   giveDerivativeDzeta(FloatArray &dz, double u, double v);
 public:
-    void   giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatArray **coords, const FloatArray &lcoords);
+    void   giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatArray &lcoords, const FEICellGeometry& cellgeo);
 };
 
 
