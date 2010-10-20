@@ -690,7 +690,6 @@ void CemhydMatStatus :: initializeMicrostructure() {
     MAXCYC_SEAL = 30000; /* Maximum number of cycles of sealed hydration (originally MAXCYC in disrealnew.c */
     NUMSIZES = 100;   /* maximum number of different particle sizes */
     MAXSPH = 10000; /* maximum number of elements in a spherical template */
-    PI = 3.141592653589793;
 
     Cp_pozz = 0.75;
     Cp_CH = 0.75;
@@ -3362,7 +3361,7 @@ void CemhydMatStatus :: rand3d(int phasein, int phaseout, float xpt) {
     for ( i = 1; i <= ( ( SYSIZE * SYSIZE * SYSIZE ) / 2 ); i++ ) {
         u1 = ran1(seed);
         u2 = ran1(seed);
-        t1 = 2. * PI * u2;
+        t1 = 2. * M_PI * u2;
         t2 = sqrt( -2. * log(u1) );
         x1 = cos(t1) * t2;
         x2 = sin(t1) * t2;
@@ -12374,7 +12373,7 @@ void CemhydMatStatus :: laguer(fcomplex_cem a[], int m, fcomplex_cem *x, float e
     for ( iter = 1; iter <= MAXIT; iter++ ) {
         b = a [ m ];
         err = Cabs(b);
-        d = f = Complex(0.0, 0.0);
+        d = f = ComplexCemhyd(0.0, 0.0);
         abx = Cabs(* x);
         for ( j = m - 1; j >= 0; j-- ) {
             f = Cadd(Cmul(* x, f), d);
@@ -12398,7 +12397,7 @@ void CemhydMatStatus :: laguer(fcomplex_cem a[], int m, fcomplex_cem *x, float e
             gp = gm;
         }
 
-        dx = Cdiv(Complex( ( float ) m, 0.0 ), gp);
+        dx = Cdiv(ComplexCemhyd( ( float ) m, 0.0 ), gp);
         x1 = Csub(* x, dx);
         if ( x->r == x1.r && x->i == x1.i ) {
             return;
@@ -12435,7 +12434,7 @@ void CemhydMatStatus :: zroots(fcomplex_cem a[], int m, fcomplex_cem roots[], in
     }
 
     for ( j = m; j >= 1; j-- ) {
-        x = Complex(0.0, 0.0);
+        x = ComplexCemhyd(0.0, 0.0);
         laguer(ad, j, & x, EPSP, 0);
         if ( fabs(x.i) <= ( 2.0 * EPSP * fabs(x.r) ) ) {
             x.i = 0.0;
@@ -12569,20 +12568,20 @@ void CemhydMatStatus :: pHpred(void) { //dangerous function - can lead to zero d
                 B = conckplus + concnaplus;
                 C = ( -2. * KspGypsum / ( activityCa * activitySO4 ) );
                 concohminus = conckplus + concnaplus;
-                coef [ 0 ] = Complex(C, 0.0);
-                coef [ 1 ] = Complex( ( A + 2. * B * C ) / C, 0.0 );
-                coef [ 2 ] = Complex(B * B / C + 4., 0.0);
-                coef [ 3 ] = Complex(4. * B / C, 0.0);
-                coef [ 4 ] = Complex(4. / C, 0.0);
+                coef [ 0 ] = ComplexCemhyd(C, 0.0);
+                coef [ 1 ] = ComplexCemhyd( ( A + 2. * B * C ) / C, 0.0 );
+                coef [ 2 ] = ComplexCemhyd(B * B / C + 4., 0.0);
+                coef [ 3 ] = ComplexCemhyd(4. * B / C, 0.0);
+                coef [ 4 ] = ComplexCemhyd(4. / C, 0.0);
                 /*         printf("coef 0 is (%f,%f)\n",coef[0].r,coef[0].i);
                  *     printf("coef 1 is (%f,%f)\n",coef[1].r,coef[1].i);
                  *     printf("coef 2 is (%f,%f)\n",coef[2].r,coef[2].i);
                  *     printf("coef 3 is (%f,%f)\n",coef[3].r,coef[3].i);
                  *     printf("coef 4 is (%f,%f)\n",coef[4].r,coef[4].i); */
-                roots [ 1 ] = Complex(0.0, 0.0);
-                roots [ 2 ] = Complex(0.0, 0.0);
-                roots [ 3 ] = Complex(0.0, 0.0);
-                roots [ 4 ] = Complex(0.0, 0.0);
+                roots [ 1 ] = ComplexCemhyd(0.0, 0.0);
+                roots [ 2 ] = ComplexCemhyd(0.0, 0.0);
+                roots [ 3 ] = ComplexCemhyd(0.0, 0.0);
+                roots [ 4 ] = ComplexCemhyd(0.0, 0.0);
                 zroots(coef, 4, roots, 1);
                 sumbest = 100;
                 /* Find the best real root for electoneutrality */
@@ -13801,7 +13800,7 @@ fcomplex_cem CemhydMatStatus :: Cmul(fcomplex_cem a, fcomplex_cem b) {
     return c;
 }
 
-fcomplex_cem CemhydMatStatus :: Complex(float re, float im) {
+fcomplex_cem CemhydMatStatus :: ComplexCemhyd(float re, float im) {
     fcomplex_cem c;
     c.r = re;
     c.i = im;
@@ -14140,10 +14139,10 @@ void CemhydMatStatus :: AnalyticHomogenizationConcrete(double E_paste_inp, doubl
     //ITZ covers all aggregates, therefore its fraction associated with mortar and concrete has to be determined
     //ITZ occupies additional space
     double n_FA, n_CA, vol_ITZ_FA, vol_ITZ_CA;
-    n_FA = Vol_FA / ( 4. / 3. * PI * pow(0.01 * Grain_average_FA / 2., 3.) ); //amount of FA particles
-    vol_ITZ_FA = n_FA * 4. / 3. * PI * ( pow(0.01 * Grain_average_FA / 2. + 0.00001 * ITZ_thickness, 3) - pow(0.01 * Grain_average_FA / 2., 3) ); //volume occupied by ITZ in FA [l]
-    n_CA = Vol_CA / ( 4. / 3. * PI * pow(0.01 * Grain_average_CA / 2., 3) ); //amount of CA particles
-    vol_ITZ_CA = n_CA * 4. / 3. * PI * ( pow(0.01 * Grain_average_CA / 2. + 0.00001 * ITZ_thickness, 3) - pow(0.01 * Grain_average_CA / 2., 3) ); //volume occupied by ITZ in CA [l]
+    n_FA = Vol_FA / ( 4. / 3. * M_PI * pow(0.01 * Grain_average_FA / 2., 3.) ); //amount of FA particles
+    vol_ITZ_FA = n_FA * 4. / 3. * M_PI * ( pow(0.01 * Grain_average_FA / 2. + 0.00001 * ITZ_thickness, 3) - pow(0.01 * Grain_average_FA / 2., 3) ); //volume occupied by ITZ in FA [l]
+    n_CA = Vol_CA / ( 4. / 3. * M_PI * pow(0.01 * Grain_average_CA / 2., 3) ); //amount of CA particles
+    vol_ITZ_CA = n_CA * 4. / 3. * M_PI * ( pow(0.01 * Grain_average_CA / 2. + 0.00001 * ITZ_thickness, 3) - pow(0.01 * Grain_average_CA / 2., 3) ); //volume occupied by ITZ in CA [l]
     double vol_tot_mortar = vol_tot_paste + Vol_FA;
 
     Mortar(0, 0) = Vol_FA / vol_tot_mortar; //Fine aggregates

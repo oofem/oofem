@@ -6,6 +6,11 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <math.h>
+
+#ifndef M_PI
+#define M_PI 3.1415926535897932384626433832795029L /* pi */
+#endif
 
 #define TINYXML //read CEMHYD3D input file through tinyXML library
 //#define CMLFILE //read CEMHYD3D input file through cmlfile library - outdated, use XML
@@ -226,7 +231,6 @@ int NUMSIZES;       /* maximum number of different particle sizes */
 
 //+distrib3d
 long MAXSPH;     /* maximum number of elements in a spherical template */
-double PI;
 
 /*define heat capacities for all components in J/g/C*/
 /*including free and bound water*/
@@ -583,7 +587,7 @@ long int *phase;
 fcomplex_cem Cadd(fcomplex_cem a, fcomplex_cem b);
 fcomplex_cem Csub(fcomplex_cem a, fcomplex_cem b);
 fcomplex_cem Cmul(fcomplex_cem a, fcomplex_cem b);
-fcomplex_cem Complex(float re, float im);
+fcomplex_cem ComplexCemhyd(float re, float im);
 fcomplex_cem Conjg(fcomplex_cem z);
 fcomplex_cem Cdiv(fcomplex_cem a, fcomplex_cem b);
 float Cabs(fcomplex_cem z);
