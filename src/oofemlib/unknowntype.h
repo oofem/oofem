@@ -61,7 +61,8 @@ namespace oofem {
     ENUM_ITEM(ReynoldsNumber)                                             \
     ENUM_ITEM(Theta_1) /* CBS integration constan)*/ \
     ENUM_ITEM(Theta_2) /* CBS integration constan)*/ \
-    ENUM_ITEM(PrescribedTractionPressure) /* CBS prescribed pressure due to applied tractio)*/
+    ENUM_ITEM(PrescribedTractionPressure) /* CBS prescribed pressure due to applied tractio)*/ \
+    ENUM_ITEM(InternalForcesEBENorm) /* Norm of nodal internal forces evaluated on element by element basis*/
 
 enum UnknownType {
     UnknownType_DEF

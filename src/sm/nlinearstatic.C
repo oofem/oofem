@@ -83,6 +83,7 @@ NonLinearStatic :: NonLinearStatic(int i, EngngModel *_master) : LinearStatic(i,
     //
     prevStepLength = 0.;
     currentStepLength = 0.;
+    internalForcesEBENorm = 0.0;
     //totalDisplacement = NULL ;
     //incrementOfDisplacement = NULL;
     loadLevel = cumulatedLoadLevel = 0.;
@@ -376,12 +377,13 @@ TimeStep *NonLinearStatic :: giveNextStep()
 
 
 void
-NonLinearStatic :: giveInternalForces(FloatArray &answer, const FloatArray &DeltaR, Domain *domain, TimeStep *stepN)
+NonLinearStatic :: giveInternalForces(FloatArray &answer, double& ebeNorm, const FloatArray &DeltaR, Domain *domain, TimeStep *stepN)
 {
     // computes nodal representation of internal forces (real ones)
     // simply assembles contributions from each element in domain
     // DeltaR is last increment of displacement vector during solution
     // not the total increments of displacements summed from start of step
+    // Also Element by Element norm of internal forces is computed
     Element *element;
     IntArray loc;
     FloatArray charVec;
@@ -391,6 +393,7 @@ NonLinearStatic :: giveInternalForces(FloatArray &answer, const FloatArray &Delt
 
     answer.resize( DeltaR.giveSize() );
     answer.zero();
+    ebeNorm = 0.0;
 
     // this -> updateInternalStepState (DeltaR, stepN) ; // force updating due to DeltaR
     // stepN-> incrementStateCounter();              // update solution state counter
@@ -424,6 +427,8 @@ NonLinearStatic :: giveInternalForces(FloatArray &answer, const FloatArray &Delt
         element->giveCharacteristicVector(charVec, NodalInternalForcesVector, VM_Total, stepN);
         // if (charVec->containsOnlyZeroes ()) continue;
         answer.assemble(charVec, loc);
+	// compute element norm contribution
+	ebeNorm += dotProduct (answer, answer, answer.giveSize());
 
         /*
          * // debug loop
@@ -441,16 +446,6 @@ NonLinearStatic :: giveInternalForces(FloatArray &answer, const FloatArray &Delt
     }
 
     this->timer.pauseTimer(EngngModelTimer :: EMTT_NetComputationalStepTimer);
-
-#ifdef __PARALLEL_MODE
-    /*
-     * Vec fglob;
-     * this->givePetscContext(1)->createVecGlobal (&fglob);
-     * this->givePetscContext(1)->scatter2G(&answer, fglob, ADD_VALUES);
-     * VecView(fglob,PETSC_VIEWER_STDOUT_WORLD);
-     * this->givePetscContext(1)->scatter2N(fglob, &answer, INSERT_VALUES);
-     */
-#endif
 
 
 #ifdef __PARALLEL_MODE
@@ -476,6 +471,15 @@ NonLinearStatic :: giveInternalForces(FloatArray &answer, const FloatArray &Delt
     }
 
 #endif
+
+#ifdef __PARALLEL_MODE
+    // exchange ebeNorm contributions
+    double my_ebeNorm = ebeNorm;
+    ebeNorm = 0.0;
+    MPI_Allreduce(& my_ebeNorm, & ebeNorm, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
+#endif
+
+
 
 
     // remember last internal vars update time stamp
@@ -759,11 +763,11 @@ NonLinearStatic :: proceedStep(int di, TimeStep *tStep)
     if ( initialLoadVector.isNotEmpty() ) {
         numMetStatus = nMethod->solve(stiffnessMatrix, & incrementalLoadVector, & initialLoadVector,
                                       & incrementalBCLoadVector, & totalDisplacement, & incrementOfDisplacement, & internalForces,
-                                      loadLevel, refLoadInputMode, currentIterations, tStep);
+                                      internalForcesEBENorm, loadLevel, refLoadInputMode, currentIterations, tStep);
     } else {
         numMetStatus = nMethod->solve(stiffnessMatrix, & incrementalLoadVector, NULL,
                                       & incrementalBCLoadVector, & totalDisplacement, & incrementOfDisplacement, & internalForces,
-                                      loadLevel, refLoadInputMode, currentIterations, tStep);
+                                      internalForcesEBENorm, loadLevel, refLoadInputMode, currentIterations, tStep);
     }
 
     //
@@ -827,7 +831,8 @@ void NonLinearStatic ::  updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Do
 
         break;
     case InternalRhs:
-        this->giveInternalForces(internalForces, incrementOfDisplacement, d, tStep);
+        // update internalForces and internalForcesEBENorm concurrently
+        this->giveInternalForces(internalForces, internalForcesEBENorm, incrementOfDisplacement, d, tStep);
         break;
     case NonLinearRhs_Total:
         _error("updateComponent: Not supported.");

@@ -129,7 +129,7 @@ CylindricalALM ::  ~CylindricalALM() {
 NM_Status
 CylindricalALM :: solve(SparseMtrx *k, FloatArray *Ri, FloatArray *R0,
                         FloatArray *Rr, FloatArray *r, FloatArray *DeltaR, FloatArray *F,
-                        double &ReachedLambda, referenceLoadInputModeType rlm,
+                        double &internalForcesEBENorm, double &ReachedLambda, referenceLoadInputModeType rlm,
                         int &nite, TimeStep *tNow)
 {
     FloatArray rhs, *R, deltaRt, deltaR_, DeltaRm1;
@@ -389,6 +389,7 @@ restart:
     // update solution state counter
     tNow->incrementStateCounter();
     engngModel->updateComponent(tNow, InternalRhs, domain);
+    
     //((NonLinearStatic *)engngModel) -> giveInternalForces(F, *DeltaR, tNow);
 
     do {
@@ -546,7 +547,7 @@ restart:
         //
 
         converged = this->checkConvergence(* R, R0, * F, * r, deltaR, Lambda, RR0, RR, drProduct,
-                                           nite, errorOutOfRangeFlag);
+                                           internalForcesEBENorm, nite, errorOutOfRangeFlag);
         if ( ( nite >= nsmax ) || errorOutOfRangeFlag ) {
             irest++;
             if ( irest <= CALM_MAX_RESTARTS ) {
@@ -659,7 +660,7 @@ bool
 CylindricalALM :: checkConvergence(FloatArray &R, FloatArray *R0, FloatArray &F,
                                    FloatArray &r, FloatArray &rIterIncr,
                                    double Lambda, double RR0, double RR, double drProduct,
-                                   int nite, bool &errorOutOfRange)
+                                   double internalForcesEBENorm, int nite, bool &errorOutOfRange)
 {
     /*
      * typedef std::set<DofID> __DofIDSet;
@@ -885,10 +886,12 @@ CylindricalALM :: checkConvergence(FloatArray &R, FloatArray *R0, FloatArray &F,
 
 #endif
         // we compute a relative error norm
-        if ( ( RR0 + RR * Lambda * Lambda ) < calm_SMALL_ERROR_NUM ) {
+	if (( RR0 + RR * Lambda * Lambda ) > calm_SMALL_ERROR_NUM ) {
+	  forceErr = sqrt( forceErr / ( RR0 + RR * Lambda * Lambda ) );
+	} else if (internalForcesEBENorm > calm_SMALL_ERROR_NUM ) {
+	  forceErr = sqrt( forceErr / internalForcesEBENorm );
+	} else {
             sqrt(forceErr);
-        } else {
-            forceErr = sqrt( forceErr / ( RR0 + RR * Lambda * Lambda ) );
         }
 
         //

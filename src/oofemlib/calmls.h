@@ -208,11 +208,12 @@ public:
      * @param l  Rhs scale factor (load level)
      * @param F  InternalRhs (real internal forces)
      * @param rlm - reference load mode
+     * @param internalForcesEBENorm norm of internal nodal forces (evaluated on element by element basis)
      * @return NM_Status value
      */
     virtual NM_Status solve(SparseMtrx *k, FloatArray *Ri, FloatArray *R0,
                             FloatArray *Rr, FloatArray *r, FloatArray *DeltaR, FloatArray *F,
-                            double &ReachedLambda, referenceLoadInputModeType rlm,
+                            double &internalForcesEBENorm, double &ReachedLambda, referenceLoadInputModeType rlm,
                             int &nite, TimeStep *);
 
     virtual double giveCurrentStepLength() { return deltaL; }
@@ -265,7 +266,7 @@ protected:
     bool checkConvergence(FloatArray &R, FloatArray *R0, FloatArray &F,
                           FloatArray &r, FloatArray &rIterIncr,
                           double Lambda, double RR0, double RR, double drProduct,
-                          int nite, bool &errorOutOfRange);
+                          double internalForcesEBENorm, int nite, bool &errorOutOfRange);
 
     /// Perform line search optimization of step length
     void do_lineSearch(FloatArray &r, FloatArray &rInitial, FloatArray &deltaR_, FloatArray &deltaRt,

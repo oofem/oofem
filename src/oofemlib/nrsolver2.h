@@ -164,11 +164,12 @@ public:
      * @param l  Rhs scale factor (load level)
      * @param rlm - reference load mode
      * @param F  InternalRhs (real internal forces)
+     * @param internalForcesEBENorm norm of internal nodal forces (evaluated on element by element basis)
      * @return NM_Status value
      */
     virtual NM_Status solve(SparseMtrx *k, FloatArray *R, FloatArray *R0,
                             FloatArray *Rr, FloatArray *r, FloatArray *dr, FloatArray *F,
-                            double &l, referenceLoadInputModeType rlm,
+                            double &internalForcesEBENorm, double &l, referenceLoadInputModeType rlm,
                             int &nite, TimeStep *);
 
     virtual double giveCurrentStepLength() { return deltaL; }

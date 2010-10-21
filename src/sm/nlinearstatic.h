@@ -99,6 +99,8 @@ protected:
     double prevStepLength, currentStepLength;
     FloatArray totalDisplacement,  incrementOfDisplacement;
     FloatArray internalForces;
+    /// norm of nodal internal forces evaluated on element by element basis
+    double internalForcesEBENorm;
     /// initialLoadVector is a load vector already applied, which does not scales
     FloatArray initialLoadVector;
     /**
@@ -238,7 +240,16 @@ public:
 protected:
     void       assemble(SparseMtrx *answer, TimeStep *tStep, EquationID ut, CharType type, 
 			const UnknownNumberingScheme& , Domain *domain);
-    void giveInternalForces(FloatArray &answer, const FloatArray &DeltaR, Domain *d, TimeStep *);
+    /**
+       Evaluates the nodal representation of internal forces by assembling
+       contributions from individual elements. 
+       @param answer vector of nodal internal forces
+       @param norm element by element norm of internal forces
+       @param DeltaR increment of displacement vector
+       @param d solution domain
+       @param stepN solution step
+     */
+    void giveInternalForces(FloatArray &answer, double& norm, const FloatArray &DeltaR, Domain *d, TimeStep *stepN);
     void proceedStep(int di, TimeStep *);
     void updateLoadVectors(TimeStep *tStep);
     // void        updateInternalStepState (const FloatArray &, TimeStep* );

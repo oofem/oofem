@@ -113,11 +113,12 @@ public:
      * @param F  InternalRhs (real internal forces)
      * @param nite - number of iterations needed
      * @param rlm - reference load mode
+     * @param internalForcesEBENorm norm of internal nodal forces (evaluated on element by element basis)
      * @return NM_Status value
      */
     virtual NM_Status solve(SparseMtrx *K, FloatArray *R, FloatArray *R0,
                             FloatArray *Rr, FloatArray *r, FloatArray *dr, FloatArray *F,
-                            double &l, referenceLoadInputModeType rlm,
+                            double &internalForcesEBENorm, double &l, referenceLoadInputModeType rlm,
                             int &nite, TimeStep *) = 0;
 
     virtual double giveCurrentStepLength() = 0;

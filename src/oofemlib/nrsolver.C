@@ -124,7 +124,7 @@ NRSolver ::  ~NRSolver() {
 NM_Status
 NRSolver :: solve(SparseMtrx *k, FloatArray *R, FloatArray *R0,
                   FloatArray *Rr, FloatArray *r, FloatArray *DeltaR, FloatArray *F,
-                  double &l, referenceLoadInputModeType rlm,
+                  double &internalForcesEBENorm, double &l, referenceLoadInputModeType rlm,
                   int &nite, TimeStep *tNow)
 //
 // this function solve the problem of the unbalanced equilibrium
@@ -273,7 +273,7 @@ restart:
         }
         
         // convergency check
-        converged = this->checkConvergence(RT, *F, rhs, deltaR, *r, RRT, nite, errorOutOfRangeFlag, tNow);
+        converged = this->checkConvergence(RT, *F, rhs, deltaR, *r, RRT, internalForcesEBENorm, nite, errorOutOfRangeFlag, tNow);
 
 
         if ( ( nite >= nsmax ) || errorOutOfRangeFlag ) {
@@ -811,7 +811,8 @@ NRSolver :: printState(FILE *outputStream)
 #if 1
 bool
 NRSolver :: checkConvergence(FloatArray &RT, FloatArray &F,FloatArray &rhs,  FloatArray &deltaR, FloatArray &r,
-                             double RRT, int nite, bool &errorOutOfRange, TimeStep *tNow)
+                             double RRT, double internalForcesEBENorm, 
+			     int nite, bool &errorOutOfRange, TimeStep *tNow)
 {
     int _dg, _idofman, _ielem, _idof, _eq, _ndof, _ng = nccdg;
     int ndofman = domain->giveNumberOfDofManagers();
@@ -1017,10 +1018,17 @@ NRSolver :: checkConvergence(FloatArray &RT, FloatArray &F,FloatArray &rhs,  Flo
         // we compute a relative error norm
         if ( ( RRT ) > nrsolver_ERROR_NORM_SMALL_NUM ) {
             forceErr = sqrt( forceErr / ( RRT ) );
-        } else {
+        } else if (internalForcesEBENorm > nrsolver_ERROR_NORM_SMALL_NUM ) {
+	    forceErr = sqrt( forceErr / internalForcesEBENorm );
+	} else {
+	  forceErr = sqrt(forceErr); // absolute norm as last resort
+	}
+
+	/*
           // load vector norm close to zero
           // try to take norm of reactions instead
-          //
+
+        } else {
           FloatArray reactions;
           int i, di = 1; // hard wired domain index =  1
           // ask emodel to evaluate reactions
@@ -1057,8 +1065,8 @@ NRSolver :: checkConvergence(FloatArray &RT, FloatArray &F,FloatArray &rhs,  Flo
             forceErr = sqrt(forceErr); // absolute norm as last resort
           }
         }
+	*/
 
-        //
         // compute displacement error
         //
         // err is relative displacement change
