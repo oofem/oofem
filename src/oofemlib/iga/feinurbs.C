@@ -49,10 +49,14 @@ NURBSInterpolation :: ~NURBSInterpolation() { }
 
 void NURBSInterpolation :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time) {
     FEIIGAElementGeometryWrapper *gw = ( FEIIGAElementGeometryWrapper * ) & cellgeo;
-    FloatArray N [ nsd ];
     IntArray span(nsd);
     double sum = 0.0, val;
     int count, c = 1, i, l, k, m, ind, indx, uind, vind, tind;
+#ifdef HAVE_VARIABLE_ARRAY_SIZE
+    FloatArray N [ nsd ];
+#else
+    FloatArray *N = new FloatArray [ nsd ];
+#endif
 
     if ( gw->knotSpan ) {
         span = * gw->knotSpan;
@@ -113,6 +117,10 @@ void NURBSInterpolation :: evalN(FloatArray &answer, const FloatArray &lcoords, 
     while ( count ) {
         answer.at(count--) /= sum;
     }
+
+#ifndef HAVE_VARIABLE_ARRAY_SIZE
+    delete [] N;
+#endif
 }
 
 
@@ -121,10 +129,14 @@ void NURBSInterpolation :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoor
     FEIIGAElementGeometryWrapper *gw = ( FEIIGAElementGeometryWrapper * ) & cellgeo;
     const FloatArray *vertexCoordsPtr;
     FloatMatrix jacobian(nsd, nsd);
-    FloatMatrix ders [ nsd ];
     IntArray span(nsd);
     double Jacob, product, w, weight;
     int count, cnt, i, l, k, m, ind, indx, uind, vind, tind;
+#ifdef HAVE_VARIABLE_ARRAY_SIZE
+    FloatMatrix ders [ nsd ];
+#else
+    FloatMatrix *ders = new FloatMatrix [ nsd ];
+#endif
 
     if ( gw->knotSpan ) {
         span = * gw->knotSpan;
@@ -145,9 +157,9 @@ void NURBSInterpolation :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoor
     if ( nsd == 2 ) {
         FloatArray tmp1(nsd + 1), tmp2(nsd + 1);    // allow for weight
 
-        FloatMatrix Aders [ nsd ];      // derivatives in each coordinate direction on BSpline
+        FloatMatrix Aders [ 2 ];      // derivatives in each coordinate direction on BSpline
  #ifndef OPTIMIZED_VERSION_A4dot4
-        FloatMatrix Sders [ nsd ];      // derivatives in each coordinate direction on NURBS
+        FloatMatrix Sders [ 2 ];      // derivatives in each coordinate direction on NURBS
  #endif
         FloatMatrix wders;              // derivatives in w direction on BSpline
         /*
@@ -300,7 +312,11 @@ void NURBSInterpolation :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoor
     }
 
 #else
+#ifdef HAVE_VARIABLE_ARRAY_SIZE
     FloatArray Aders [ nsd ];  // 0th and 1st derivatives in each coordinate direction on BSpline
+#else
+    FloatArray *Aders = new FloatArray [ nsd ];
+#endif
     FloatArray wders;          // 0th and 1st derivatives in w direction on BSpline
 
     for ( i = 0; i < nsd; i++ ) {
@@ -539,8 +555,17 @@ void NURBSInterpolation :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoor
     } else   {
         OOFEM_ERROR2("evaldNdx not implemented for nsd = %d", nsd);
     }
-
+    
+#ifndef HAVE_VARIABLE_ARRAY_SIZE
+    delete [] Aders;
 #endif
+#endif
+
+#ifndef HAVE_VARIABLE_ARRAY_SIZE
+    delete [] ders;
+#endif
+
+
 }
 
 
@@ -548,10 +573,14 @@ void NURBSInterpolation :: local2global(FloatArray &answer, const FloatArray &lc
     /* Based on SurfacePoint A4.3 implementation*/
     FEIIGAElementGeometryWrapper *gw = ( FEIIGAElementGeometryWrapper * ) & cellgeo;
     const FloatArray *vertexCoordsPtr;
-    FloatArray N [ nsd ];
     IntArray span(nsd);
     double w, weight = 0.0;
     int i, l, k, m, ind, indx, uind, vind, tind;
+#ifdef HAVE_VARIABLE_ARRAY_SIZE
+    FloatArray N [ nsd ];
+#else
+    FloatArray *N = new FloatArray [ nsd ];
+#endif
 
     if ( gw->knotSpan ) {
         span = * gw->knotSpan;
@@ -639,6 +668,10 @@ void NURBSInterpolation :: local2global(FloatArray &answer, const FloatArray &lc
     }
 
     answer.times(1.0 / weight);
+
+#ifndef HAVE_VARIABLE_ARRAY_SIZE
+    delete [] N;
+#endif
 }
 
 
@@ -649,10 +682,14 @@ double NURBSInterpolation :: giveTransformationJacobian(const FloatArray &lcoord
     FEIIGAElementGeometryWrapper *gw = ( FEIIGAElementGeometryWrapper * ) & cellgeo;
     const FloatArray *vertexCoordsPtr;
     FloatMatrix jacobian(nsd, nsd);
-    FloatMatrix ders [ nsd ];
     IntArray span(nsd);
     double Jacob, w, weight;
     int i, l, k, m, ind, indx, uind, vind, tind;
+#ifdef HAVE_VARIABLE_ARRAY_SIZE
+    FloatMatrix ders [ nsd ];
+#else
+    FloatMatrix *ders = new FloatMatrix [ nsd ];
+#endif
 
     if ( gw->knotSpan ) {
         span = * gw->knotSpan;
@@ -670,9 +707,9 @@ double NURBSInterpolation :: giveTransformationJacobian(const FloatArray &lcoord
     if ( nsd == 2 ) {
         FloatArray tmp1(nsd + 1), tmp2(nsd + 1);    // allow for weight
 
-        FloatMatrix Aders [ nsd ];      // derivatives in each coordinate direction on BSpline
+        FloatMatrix Aders [ 2 ];      // derivatives in each coordinate direction on BSpline
  #ifndef OPTIMIZED_VERSION_A4dot4
-        FloatMatrix Sders [ nsd ];      // derivatives in each coordinate direction on NURBS
+        FloatMatrix Sders [ 2 ];      // derivatives in each coordinate direction on NURBS
  #endif
         FloatMatrix wders;              // derivatives in w direction on BSpline
         /*
@@ -803,7 +840,11 @@ double NURBSInterpolation :: giveTransformationJacobian(const FloatArray &lcoord
     }
 
 #else
+#ifdef HAVE_VARIABLE_ARRAY_SIZE
     FloatArray Aders [ nsd ];  // 0th and 1st derivatives in each coordinate direction on BSpline
+#else
+    FloatArray *Aders = new FloatArray [ nsd ];
+#endif
     FloatArray wders;          // 0th and 1st derivatives in w direction on BSpline
 
     for ( i = 0; i < nsd; i++ ) {
@@ -972,6 +1013,11 @@ double NURBSInterpolation :: giveTransformationJacobian(const FloatArray &lcoord
         OOFEM_ERROR2("giveTransformationJacobianMatrix not implemented for nsd = %d", nsd);
     }
 
+#ifndef HAVE_VARIABLE_ARRAY_SIZE
+    delete [] Aders;
+#endif
+
+
 #endif
 
     Jacob = jacobian.giveDeterminant();
@@ -979,6 +1025,11 @@ double NURBSInterpolation :: giveTransformationJacobian(const FloatArray &lcoord
     if ( fabs(Jacob) < 1.0e-10 ) {
         OOFEM_ERROR("giveTransformationJacobianMatrix - zero Jacobian");
     }
+
+#ifndef HAVE_VARIABLE_ARRAY_SIZE
+    delete [] ders;
+#endif
+
 
     return Jacob;
 }

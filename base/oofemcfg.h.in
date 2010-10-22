@@ -42,6 +42,9 @@
 /* Define if __VA_ARGS__ macro is supported by preprocessor */
 #undef HAVE_MACRO_VA_ARGS
 
+/* Define if varaible array size declarations are supported */
+#undef HAVE_VARIABLE_ARRAY_SIZE
+
 /* Define to support arbitrary compoment labels */
 #define __ENABLE_COMPONENT_LABELS
 

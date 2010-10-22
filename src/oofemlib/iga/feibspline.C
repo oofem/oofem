@@ -176,9 +176,14 @@ BSplineInterpolation :: initializeFrom(InputRecord *ir) {
 
 void BSplineInterpolation :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time) {
     FEIIGAElementGeometryWrapper *gw = ( FEIIGAElementGeometryWrapper * ) & cellgeo;
-    FloatArray N [ nsd ];
     IntArray span(nsd);
     int i, l, k, m, c = 1, count;
+#ifdef HAVE_VARIABLE_ARRAY_SIZE
+    FloatArray N [ nsd ];
+#else
+    FloatArray *N = new FloatArray [ nsd ];
+#endif
+
 
     if ( gw->knotSpan ) {
         span = * gw->knotSpan;
@@ -216,6 +221,10 @@ void BSplineInterpolation :: evalN(FloatArray &answer, const FloatArray &lcoords
     } else   {
         OOFEM_ERROR2("evalN not implemented for nsd = %d", nsd);
     }
+
+#ifndef HAVE_VARIABLE_ARRAY_SIZE
+    delete [] N;
+#endif
 }
 
 
@@ -223,10 +232,16 @@ void BSplineInterpolation :: evaldNdx(FloatMatrix &answer, const FloatArray &lco
     FEIIGAElementGeometryWrapper *gw = ( FEIIGAElementGeometryWrapper * ) & cellgeo;
     const FloatArray *vertexCoordsPtr;
     FloatMatrix jacobian(nsd, nsd);
-    FloatMatrix ders [ nsd ];
     IntArray span(nsd);
     double Jacob;
     int count, cnt, i, l, k, m, ind, indx, uind, vind, tind;
+#ifdef HAVE_VARIABLE_ARRAY_SIZE
+    FloatMatrix ders [ nsd ];
+#else
+    FloatMatrix *ders = new FloatMatrix [ nsd ];
+#endif
+
+
 
     if ( gw->knotSpan ) {
         span = * gw->knotSpan;
@@ -394,6 +409,10 @@ void BSplineInterpolation :: evaldNdx(FloatMatrix &answer, const FloatArray &lco
     } else   {
         OOFEM_ERROR2("evaldNdx not implemented for nsd = %d", nsd);
     }
+
+#ifndef HAVE_VARIABLE_ARRAY_SIZE
+    delete [] ders;
+#endif
 }
 
 
@@ -401,9 +420,14 @@ void BSplineInterpolation :: local2global(FloatArray &answer, const FloatArray &
     /* Based on SurfacePoint A3.5 implementation*/
     FEIIGAElementGeometryWrapper *gw = ( FEIIGAElementGeometryWrapper * ) & cellgeo;
     const FloatArray *vertexCoordsPtr;
-    FloatArray N [ nsd ];
     IntArray span(nsd);
     int i, l, k, m, ind, indx, uind, vind, tind;
+#ifdef HAVE_VARIABLE_ARRAY_SIZE
+    FloatArray N [ nsd ];
+#else
+    FloatArray *N = new FloatArray [ nsd ];
+#endif
+
 
     if ( gw->knotSpan ) {
         span = * gw->knotSpan;
@@ -482,6 +506,10 @@ void BSplineInterpolation :: local2global(FloatArray &answer, const FloatArray &
     } else   {
         OOFEM_ERROR2("local2global not implemented for nsd = %d", nsd);
     }
+
+#ifndef HAVE_VARIABLE_ARRAY_SIZE
+    delete [] N;
+#endif
 }
 
 
@@ -489,10 +517,15 @@ double BSplineInterpolation :: giveTransformationJacobian(const FloatArray &lcoo
     FEIIGAElementGeometryWrapper *gw = ( FEIIGAElementGeometryWrapper * ) & cellgeo;
     const FloatArray *vertexCoordsPtr;
     FloatMatrix jacobian(nsd, nsd);
-    FloatMatrix ders [ nsd ];
     IntArray span(nsd);
     double Jacob;
     int i, l, k, m, indx, ind, uind, vind, tind;
+#ifdef HAVE_VARIABLE_ARRAY_SIZE
+    FloatMatrix ders [ nsd ];
+#else
+    FloatMatrix *ders = new FloatMatrix [ nsd ];
+#endif
+
 
     if ( gw->knotSpan ) {
         span = * gw->knotSpan;
@@ -609,6 +642,9 @@ double BSplineInterpolation :: giveTransformationJacobian(const FloatArray &lcoo
         OOFEM_ERROR("giveTransformationJacobian - zero Jacobian");
     }
 
+#ifndef HAVE_VARIABLE_ARRAY_SIZE
+    delete [] ders;
+#endif
     return Jacob;
 }
 

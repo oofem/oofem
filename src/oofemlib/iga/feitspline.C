@@ -193,13 +193,20 @@ void TSplineInterpolation :: evaldNdx(FloatMatrix &answer, const FloatArray &lco
     FEIIGAElementGeometryWrapper *gw = ( FEIIGAElementGeometryWrapper * ) & cellgeo;
     const FloatArray *vertexCoordsPtr;
     FloatMatrix jacobian(nsd, nsd);
-    FloatArray tmp_ders [ nsd ];
-    FloatMatrix ders [ nsd ];
     FloatArray temp(nsd);
     IntArray span(nsd);
     IntArray mask;
     double Jacob, product, w, xw, yw, weight;
     int count, i, k;
+#ifdef HAVE_VARIABLE_ARRAY_SIZE
+    FloatArray tmp_ders [ nsd ];
+    FloatMatrix ders [ nsd ];
+#else
+    FloatArray *tmp_ders = new FloatArray [ nsd ];
+    FloatMatrix *ders = new FloatMatrix [ nsd ];
+#endif
+
+
     /*
      * IntArray Bin(2,2);      // binomial coefficients from 0 to d=1
      *                // Bin(n,k)=(n above k)=n!/k!(n-k)! for n>=k>=0
@@ -228,7 +235,7 @@ void TSplineInterpolation :: evaldNdx(FloatMatrix &answer, const FloatArray &lco
     }
 
     if ( nsd == 2 ) {
-        FloatMatrix Aders [ nsd ];      // derivatives in each coordinate direction on BSpline
+        FloatMatrix Aders [ 2 ];      // derivatives in each coordinate direction on BSpline
         //FloatMatrix Sders[nsd]; // derivatives in each coordinate direction on TSpline
         FloatMatrix wders;              // derivatives in w direction on BSpline
 
@@ -314,6 +321,12 @@ void TSplineInterpolation :: evaldNdx(FloatMatrix &answer, const FloatArray &lco
             answer(k, 1) = ( -jacobian(1, 0) * temp(0) + jacobian(0, 0) * temp(1) ) / product;
         }
     }
+#ifndef HAVE_VARIABLE_ARRAY_SIZE
+    delete [] tmp_ders;
+    delete [] ders;
+#endif
+
+
 }
 
 
@@ -375,12 +388,16 @@ double TSplineInterpolation :: giveTransformationJacobian(const FloatArray &lcoo
     FEIIGAElementGeometryWrapper *gw = ( FEIIGAElementGeometryWrapper * ) & cellgeo;
     const FloatArray *vertexCoordsPtr;
     FloatMatrix jacobian(nsd, nsd);
-    FloatArray ders [ nsd ];
     FloatArray temp(nsd);
     IntArray span(nsd);
     IntArray mask;
     double Jacob, w, xw, yw, product, weight;
     int i, k, count;
+#ifdef HAVE_VARIABLE_ARRAY_SIZE
+    FloatArray ders [ nsd ];
+#else
+    FloatArray *ders = new FloatArray [ nsd ];
+#endif
     /*
      * IntArray Bin(2,2);      // binomial coefficients from 0 to d=1
      *                // Bin(n,k)=(n above k)=n!/k!(n-k)! for n>=k>=0
@@ -404,7 +421,7 @@ double TSplineInterpolation :: giveTransformationJacobian(const FloatArray &lcoo
     count = mask.giveSize();
 
     if ( nsd == 2 ) {
-        FloatMatrix Aders [ nsd ];      // derivatives in each coordinate direction on BSpline
+        FloatMatrix Aders [ 2 ];      // derivatives in each coordinate direction on BSpline
         //FloatMatrix Sders[nsd]; // derivatives in each coordinate direction on TSpline
         FloatMatrix wders;              // derivatives in w direction on BSpline
 
@@ -477,6 +494,11 @@ double TSplineInterpolation :: giveTransformationJacobian(const FloatArray &lcoo
     if ( fabs(Jacob) < 1.0e-10 ) {
         OOFEM_ERROR("giveTransformationJacobianMatrix - zero Jacobian");
     }
+
+#ifndef HAVE_VARIABLE_ARRAY_SIZE
+    delete [] ders;
+#endif
+
 
     return Jacob;
 }

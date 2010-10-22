@@ -267,6 +267,23 @@ AC_MSG_RESULT(no)
 echo "c++ compiler support for function templates required."
 exit])
 
+dnl --------------------------------------------------------------------
+dnl check for variable array size declaration
+dnl --------------------------------------------------------------------
+AC_MSG_CHECKING([Variable array size declaration])
+AC_TRY_COMPILE([],
+[
+int i, size = 10;
+double vec[size];
+for (i=0; i<size; i++) vec[i]=0.0;
+],
+[
+AC_MSG_RESULT(yes)
+AC_DEFINE(HAVE_VARIABLE_ARRAY_SIZE,,Define if varaible array size declarations are supported)
+],
+[
+AC_MSG_RESULT(no)
+])
 
 dnl
 dnl --------------------------------------------------------------------
