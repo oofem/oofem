@@ -141,6 +141,29 @@ to 1.
 
 \descitem{Status} Reliable
 
+
+\subsubsection{Truss 3D element}
+\label{Truss3d}
+
+Two node linear isoparametric truss element for 3D analysis. The
+element geometry is specified in (x,y,z) plane. 
+
+\elemkeyword{truss3d}\\
+\descitem{Parameters} none.\\
+
+\descitem{Unknowns}
+Three displacement DOFs (in x, y, and z directions) are required
+in each node.\\
+\descitem{Approximation} Linear approximation of displacements and geometry.\\
+\descitem{Integration} Exact.\\
+\descitem{Features} Full dynamic analysis support. Full nonlocal
+constitutive support.\\
+\descitem{CS properties} cross section area should be
+provided.\\
+\descitem{Status} Reliable
+
+
+
 \subsection{Beam Elements}
 \subsubsection{Beam2d element}
 Beam element for 2D analysis, based on Timoshenko hypothesis. Structure should be defined in x,z
