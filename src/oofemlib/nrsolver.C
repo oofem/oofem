@@ -829,7 +829,7 @@ NRSolver :: checkConvergence(FloatArray &RT, FloatArray &F,FloatArray &rhs,  Flo
     int i;
     // HUHU hard wired domain no 1
     PetscNatural2LocalOrdering *n2l = engngModel->givePetscContext(1, ut)->giveN2Lmap();
-    PetscNatural2LocalOrdering *n2l_prescribed = engngModel->givePetscContext(1, ut)->giveN2LPrescribedmap();
+    //PetscNatural2LocalOrdering *n2l_prescribed = engngModel->givePetscContext(1, ut)->giveN2LPrescribedmap();
   #endif
  #endif
 
@@ -1024,7 +1024,7 @@ NRSolver :: checkConvergence(FloatArray &RT, FloatArray &F,FloatArray &rhs,  Flo
 	  forceErr = sqrt(forceErr); // absolute norm as last resort
 	}
 
-	/*
+#if 0 
           // load vector norm close to zero
           // try to take norm of reactions instead
 
@@ -1058,14 +1058,14 @@ NRSolver :: checkConvergence(FloatArray &RT, FloatArray &F,FloatArray &rhs,  Flo
           for (i = 1; i <= numberOfPrescribedDofs; i++ ) {
             RN+= F.at(prescribedEqs.at(i)) * F.at(prescribedEqs.at(i));
           }
-#endif
+#endif // __PARALLEL_MODE
           if ( RN > nrsolver_ERROR_NORM_SMALL_NUM ) {
             forceErr = sqrt( forceErr / ( RN ) );
           } else {
             forceErr = sqrt(forceErr); // absolute norm as last resort
           }
         }
-	*/
+#endif // if 0
 
         // compute displacement error
         //
