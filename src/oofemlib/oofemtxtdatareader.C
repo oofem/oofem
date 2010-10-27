@@ -92,12 +92,8 @@ OOFEMTXTDataReader :: giveLineFromInput(char *line)
     giveRawLineFromInput(line);
     
     for (ptr = line; *ptr != '\0'; ptr++){
-      if(*ptr == '"'){//change quotation mark to space
-        *ptr = ' ';
-        if(flag)//switch flag
-          flag=false;
-        else
-          flag=true;
+      if(*ptr == '"'){//do not change to lowercase inside quotation marks
+	flag = !flag; // switch flag
       }
 
       if(!flag)
