@@ -60,7 +60,9 @@ class StructuralElementEvaluator
 {
 protected:
     FloatMatrix *rotationMatrix;
-public:
+    /// Flag indicating if tranformation matrix has been already computed
+    int rotationMatrixDefined;
+
     StructuralElementEvaluator();
     virtual void giveCharacteristicMatrix(FloatMatrix &answer, CharType mtrx, TimeStep *tStep);
     virtual void giveCharacteristicVector(FloatArray &answer, CharType type, ValueModeType mode, TimeStep *tStep) {
@@ -116,7 +118,16 @@ protected:
      * rotationMatrix attribute, so rotation matrix is computed only once.
      * @return nonzero if transformation is necessary.
      */
-    virtual int updateRotationMatrix() { return 0; } // to be moved from structural element
+    virtual int updateRotationMatrix() ;
+    /**
+     * Returns transformation matrix for DOFs from global coordinate system
+     * to local coordinate system in nodes (i.e. r(n)=T r(g)) if mode == _toNodalCS.
+     * If mode == _toGlobalCS, the transformation from local nodal cs to
+     * global cs in node is returned. If no trasformation is
+     * necessary sets answer to empty mtrx and returns zero value.
+     * @return nonzero if transformation is necessary, zero otherwise.
+     */
+    virtual int  computeGNDofRotationMatrix(FloatMatrix &answer, DofManTransfType mode);
     /**
      * Assembles the code numbers of given integration element (sub-patch)
      * This is done by obtaining list of nonzero shape functions and

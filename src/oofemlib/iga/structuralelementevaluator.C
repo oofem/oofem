@@ -432,4 +432,83 @@ void StructuralElementEvaluator :: computeStiffnessMatrix(FloatMatrix &answer, M
     return;
 }
 
+int
+StructuralElementEvaluator :: updateRotationMatrix()
+{
+    /* returns a tranformation matrix between local coordinate system
+     * and global coordinate system, taking into account possible local
+     * coordinate system in nodes.
+     * if no transformation necessary - returns NULL
+     */
+    int isT_NtoG;
+    FloatMatrix T_NtoG;
+
+    if ( rotationMatrixDefined ) {
+        return ( rotationMatrix != NULL );
+    }
+
+    rotationMatrixDefined = 1;
+    isT_NtoG = this->computeGNDofRotationMatrix(T_NtoG, _toGlobalCS);
+    if (T_NtoG.isNotEmpty() ) {
+      rotationMatrix = T_NtoG.GiveCopy();
+    } else {
+      rotationMatrix = NULL;
+    }
+
+    return ( rotationMatrix != NULL );
+}
+
+int
+StructuralElementEvaluator :: computeGNDofRotationMatrix(FloatMatrix &answer, DofManTransfType mode)
+{
+    int i, j, k, lastRowPos = 0, lastColPos = 0, flag = 0;
+    Element *elem = this->giveElement();
+    int numberOfDofMans = elem->giveNumberOfDofManagers();
+
+    // test if transformation is necessary
+    for ( i = 1; i <= numberOfDofMans; i++ ) {
+        flag += elem->giveDofManager(i)->requiresTransformation();
+    }
+
+    if ( flag == 0 ) {
+        answer.beEmptyMtrx();
+        return 0;
+    }
+
+    // initialize answer
+    int gsize = elem->computeGlobalNumberOfDofs(EID_MomentumBalance);
+    if ( mode == _toGlobalCS ) {
+        answer.resize(elem->computeNumberOfL2GDofs(EID_MomentumBalance), gsize); 
+    } else if ( mode == _toNodalCS ) {
+        answer.resize( gsize, elem->computeNumberOfL2GDofs(EID_MomentumBalance) ); 
+    } else {
+        OOFEM_ERROR("StructuralElementEvaluator::computeGNDofRotationMatrix:\n unsupported DofManTrasfType value");
+    }
+
+    answer.zero();
+
+    FloatMatrix dofManT;
+    IntArray dofIDmask;
+    int nr, nc;
+    // loop over nodes
+    for ( i = 1; i <= numberOfDofMans; i++ ) {
+        elem->giveDofManDofIDMask(i, EID_MomentumBalance, dofIDmask);
+        elem->giveDofManager(i)->computeDofTransformation(dofManT, & dofIDmask, mode);
+        nc = dofManT.giveNumberOfColumns();
+        nr = dofManT.giveNumberOfRows();
+        for ( j = 1; j <= nr; j++ ) {
+            for ( k = 1; k <= nc; k++ ) {
+                // localize node contributions
+                answer.at(lastRowPos + j, lastColPos + k) = dofManT.at(j, k);
+            }
+        }
+
+        lastRowPos += nr;
+        lastColPos += nc;
+    }
+
+    return 1;
+}
+
+
 } // end namespace oofem
