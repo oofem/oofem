@@ -4007,6 +4007,94 @@ prescribed, then always value reported by boundary condition is taken
 into account.
 \end{itemize}
 
+
+\section{XFEM module}
+
+Design of object-oriented application consists in finding classes and objects, identifying structures and attributes, and defining required services. From the description of XFEM principles, given in the previous section, one can identify the basic classes that represent the fundamental building blocks. 
+
+The model entity, described or represented by one or more enrichment functions is represented by hierarchy of classes derived from base \class{EnrichmentItem} class. Such entity may represent crack, material interface, slipping interface, etc. Each \class{EnrichmentItem} keeps a list of its enrichment functions. The geometry (spatial location) of individual enrichment items can be described in number of ways. This includes fixed explicit descriptions (circular inclusion, fixed slip line, etc), or general representations based on polygonal, spline, or level set descriptions. To achieve flexibility of geometry representation of individual \class{EnrichmentItems}, that allows to choose the optimum for particular purpose, the hierarchy of classes derived from base \class{Geometry} class is designed. The abstract interface, declared by parent \class{Geometry} class defines general methods to compute receiver signed distance from given point, methods to test whether receiver intersects given element, methods to compute intersection points, etc. The instance of \class{Geometry} class is an attribute of \class{EnrichmentItem} class.
+
+The global shape functions are represented by classes derived from parent \class{EnrichmentFunction} class. The parent class declares abstract interface common to all \class{EnrichmentFunction} implementations. Particularly, it defines \service{evaluateAt} and \service{evaluateDerivativeAt} methods to evaluate the value and spatial derivatives at a given point. Moreover, it also defines a method \service{resolveLinearDependency} at a node. Linear dependency typically occurs, when a nodal support is cut into two disjoint pieces and the area of one piece is very small compared to the other piece\cite{MoDoBe99}. This is usually resolved by excluding the node from the enrichment.
+
+
+At the level of problem representation, the \class{XfemManager} has been introduced. It manages the list of active enrichment items. Its interface provides initialization and access services to individual enrichment items. When a certain node in the problem domain is subjected to enrichment, the corresponding enrichment item has to introduce additional degree(s) of freedom in that node. Since several enrichment items can be active in a node, all DOFs are assigned with a label, that allows to distinguish between them (in traditional FE codes labels are also used to distinguish physical meaning of particular DOF representing displacement along x,y,z axes, rotations, etc.). The \class{XfemManager} class maintains a pool of available labels and is responsible for their assignment to individual enrichment items. As many enrichment items evolve in time, depending on the solution state, the method to update their state and geometry at the end of each solution step is provided (by calling corresponding update method of each \class{EnrichmentItem}). Also, other useful services such as tests whether node/element is enriched with given enrichment item are provided. The basic reason for introducing \class{XfemManager} class is to wrap XFEM related matter at the problem level within a single class. This avoids to a certain extent the need to modify and penetrate the original code, keeping its structure and interface simple. The graphical representation of mutual relations between aforementioned classes is shown in Fig.~\ref{fig:EnrichmentItem} using UML notation (see \cite{uml} for reference).
+ 
+\begin{figure}[ht]
+\begin{center}
+\ifpdf
+\oofemlnk{\centerline{\includegraphics[width=0.7\textwidth]{enrichmentitem_collab.pdf}}}
+\else
+\oofemlnk{\centerline{\includegraphics[width=0.7\textwidth]{enrichmentitem_collab.eps}}}
+\fi
+\caption{Collaboration diagram for \class{EnrichmentItem} class}
+\label{fig:EnrichmentItem}
+\end{center}
+\end{figure}
+
+Each enrichment item keeps its assigned DOF labels (provided by XfemManager). These are used by individual enrichment items to introduce and later identify related DOFs in individual nodes. The physical meaning of these DOFs depends on the enrichment item. For example, a single DOF is needed to represent slip along slip line, two DOFs are required for displacement discontinuity in 2D (normal and tangential displacement jumps), etc. Each enrichment item has to implement its \service{update} method. This method implements all the physics behind, driving for example the crack growth or interface evolution. It is responsible for updating geometry, enriching corresponding nodes, and by collaboration with XfemManager to trigger the update of integration schemes at enriched elements. . 
+
+A degree of freedom in the standard FEM implementation is represented by a class \class{DOF}. Each \class{DOF} maintains its label, reference to the node it belongs to, list of applied boundary and initial conditions and its equation number. 
+When the particular enrichment item evolves, additional elements and corresponding nodes are subjected to enrichment. At node level, additional DOFs corresponding to enrichment item need to be introduced. This is the responsibility of \service{EnrichmentItem::update} method. In collaboration with \class{XfemManager}, the new \class{DOF} instance is created, assigned with proper label and equation number (next available equation number obtained from problem representation) and added into corresponding node. The introduction of new DOFs during solution also leads to increase of number of equations. This requires some support from underlying FEM system.  
+
+
+\begin{figure}[ht]
+\begin{center}
+\ifpdf
+\oofemlnk{\centerline{\includegraphics[width=0.7\textwidth]{integrationrule_collab.pdf}}}
+\else
+\oofemlnk{\centerline{\includegraphics[width=0.7\textwidth]{integrationrule_collab.eps}}}
+\fi
+\caption{Collaboration diagram for \class{IntegrationRule} class}
+\label{fig:IntegrationRule}
+\end{center}
+\end{figure}
+
+Standard FEM implementation at element level has to be extended in order to manage additional complexity introduced by extended formulation. This includes handling of additional degrees of freedom due to enrichment, integration, treating additional terms in element characteristic matrices, etc. Most of the XFEM complexity at element level is encapsulated into \class{XfemElementInterface} class. The elements with XFEM functionality are derived from standard \class{Element} base class, as well as from \class{XfemElementInterface}. In this way the design strives for the least possible interception with the current FEM code.
+
+In order to provide a high-level abstraction for different integration techniques and to make the element implementation independent of particular integration technique and transparent as much as possible, the \class{IntegrationRule} class is proposed. This class maintains its integration points, which are represented by class \class{IntegrationPoint}. Integration points maintain their spatial coordinates and corresponding integration weights. Integration rule is responsible for setting up the individual integration points and for providing access methods to these points. 
+
+An important feature of element implementation is the possibility to set up and maintain several integration rules. In standard FE implementation this is used to implement reduced or selective integration. This concept has been found useful also in present context. For example, 
+the commonly used sub-patch integration scheme is represented by sequence of instances of \class{PatchIntegrationRule} class. As Gauss integration is typically employed on individual patches, the \class{PatchIntegrationRule} can be conveniently derived from existing \class{GaussIntegrationRule} class (see Fig.~\ref{fig:IntegrationRule}). When initializing the integration points, their local coordinates (related to patch geometry) are mapped into parent element coordinates and corresponding integration weights are scaled accordingly. There is no need to store individual patch geometries, as the parent element geometry is used to correctly evaluate transformation Jacobians. This concept also allows to easily accommodate additional integration points, if needed. For example, in the case of cohesive crack model, the additional integration points along the discontinuity are needed. Then the additional integration rules (representing discontinuity line) can be introduced into the list of element integration rules. The example of stiffness matrix evaluation at element level, which can be used both by classical and enriched elements and profits from aforementioned concept, is presented in Tab.~\ref{table:stiffnessComputation} using symbolic code. 
+
+\begin{table}[ht]
+\makebox[\textwidth]{\hrulefill}
+\begin{tabbing}
+{\bf FloatMatrix* PlaneStress2d::computeStiffnessMatrix()}\\
+\=loop on all IntegrationRules of the Element:\\
+\>\hspace{2em}\=loop on all Gauss points of the IntegrationRule:\\
+\>\>\hspace{2em}\=B = this$\to$computeStrainDisplMatrix(gp)\\
+\>\>\>D = this$\to$computeConstitutiveMatrix(gp)\\
+\>\>\>dV = computeVolumeAround(gp)\\
+\>\>\>stiffnessMatrix$\to$add($B^TDB\ dV$)
+\end{tabbing}
+\makebox[\textwidth]{\hrulefill}
+\caption{Stiffness matrix evaluation}
+\label{table:stiffnessComputation}
+\end{table}
+
+The implementation of stiffness matrix evaluation assumes, that the strain - displacement matrix contains all the terms, i.e. the standard terms as well as terms due to the enrichment. The implementation of method for computing plane stress strain displacement matrix is presented in the Tab.~\ref{table:straindisplmatComputation}. The matrix comes with more columns to account for additional DOFs due to enrichment. The stiffness matrix evaluation, implemented using classes representing real valued matrices and corresponding methods, can therefore work with any matrix size, provided that the sizes of individual matrices are compatible. 
+
+\begin{table}[ht]
+\makebox[\textwidth]{\hrulefill}
+\begin{tabbing}
+{\bf FloatMatrix* PlaneStress2d::computeStrainDisplMatrix(GaussPoint* gp)}\\
+\=\\
+\>compute standard part of the strain-displ. matrix at gp\\
+\\
+\>loop on EnrichmentItems of the element nodes:\\
+\>\hspace{2em}\=loop on element nodes:\\
+\>\>\hspace{2em}\=if node is enriched by  enrichment item:\\
+\>\>\>give enrichment function(s) of the enrichment item\\
+\>\>\>loop on the number of dofs of an enrichment function(s):\\
+\>\>\>\hspace{2em}\=add the contribution of the enrichment function\\
+\>\>\>\>to the strain-displacement matrix
+\end{tabbing}
+\makebox[\textwidth]{\hrulefill}
+\caption{Strain-displacement matrix evaluation}
+\label{table:straindisplmatComputation}
+\end{table}
+
+
 \section{Miscellaneous}
 \subsection{Vectors and Matrices}
 The OOFEMlib provides the abstraction for integer vectors (\class{IntArray})
