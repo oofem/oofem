@@ -2804,8 +2804,9 @@ Subdivision::RS_Node::drawGeometry()
 //
 {
     GraphicObj *go;
-		EPixel color;
-		BOOLEAN suc;
+    EPixel color;
+    BOOLEAN suc;
+    const char* colors[] = {"orange", "black"};
 
     WCRec p [ 1 ]; /* point */
     p [ 0 ].x = ( FPNum ) this->giveCoordinate(1);
@@ -2813,8 +2814,8 @@ Subdivision::RS_Node::drawGeometry()
     p [ 0 ].z = ( FPNum ) this->giveCoordinate(3);
     
     EASValsSetMType(FILLED_CIRCLE_MARKER);
-		color = ColorGetPixelFromString("orange", & suc);
-		EASValsSetColor(color);
+    color = ColorGetPixelFromString(colors[0], & suc);
+    EASValsSetColor(color);
     //EASValsSetColor( gc.getNodeColor() );
     EASValsSetLayer(OOFEG_RAW_GEOMETRY_LAYER);
     EASValsSetMSize(8);
@@ -2823,8 +2824,8 @@ Subdivision::RS_Node::drawGeometry()
     EMAddGraphicsToModel(ESIModel(), go);
 
     char num [ 6 ];
-		color = ColorGetPixelFromString("black", & suc);
-		EASValsSetColor(color);
+    color = ColorGetPixelFromString(colors[1], & suc);
+    EASValsSetColor(color);
      //EASValsSetColor( gc.getNodeColor() );
     EASValsSetLayer(OOFEG_RAW_GEOMETRY_LAYER);
     p [ 0 ].x = ( FPNum ) this->giveCoordinate(1);
@@ -2842,14 +2843,15 @@ Subdivision::RS_Triangle::drawGeometry()
 {
     WCRec p [ 3 ];
     GraphicObj *go;
-		EPixel color;
-		BOOLEAN suc;
+    EPixel color;
+    BOOLEAN suc;
+    const char[] colors = {"DodgerBlue", "black"};
 
     EASValsSetLineWidth(OOFEG_RAW_GEOMETRY_WIDTH);
-		color = ColorGetPixelFromString("DodgerBlue", & suc);
-		EASValsSetColor(color);
-		color = ColorGetPixelFromString("black", & suc);
-		EASValsSetEdgeColor(color);
+    color = ColorGetPixelFromString(colors[0], & suc);
+    EASValsSetColor(color);
+    color = ColorGetPixelFromString(colors[1], & suc);
+    EASValsSetEdgeColor(color);
     //EASValsSetColor( gc.getElementColor() );
     //EASValsSetEdgeColor( gc.getElementEdgeColor() );
     EASValsSetEdgeFlag(TRUE);
@@ -2878,14 +2880,15 @@ Subdivision::RS_Tetra::drawGeometry()
 {
     WCRec p [ 4 ];
     GraphicObj *go;
-		EPixel color;
-		BOOLEAN suc;
+    EPixel color;
+    BOOLEAN suc;
+    const char[] colors={"DodgerBlue", "black"};
 
     EASValsSetLineWidth(OOFEG_RAW_GEOMETRY_WIDTH);
-		color = ColorGetPixelFromString("DodgerBlue", & suc);
-		EASValsSetColor(color);
-		color = ColorGetPixelFromString("black", & suc);
-		EASValsSetEdgeColor(color);
+    color = ColorGetPixelFromString(colors[0], & suc);
+    EASValsSetColor(color);
+    color = ColorGetPixelFromString(colors[1], & suc);
+    EASValsSetEdgeColor(color);
     //EASValsSetColor( gc.getElementColor() );
     //EASValsSetEdgeColor( gc.getElementEdgeColor() );
     EASValsSetEdgeFlag(TRUE);
@@ -3649,10 +3652,10 @@ Subdivision::bisectMesh () {
 #ifdef __OOFEG
 #ifdef DRAW_MESH_AFTER_EACH_BISECTION_LEVEL
 		for (ie=1; ie<=nelems; ie++) {
-			if (!mesh->giveElement(ie)->isTerminal()) continue;
-			mesh->giveElement(ie)->drawGeometry();
+		  if (!mesh->giveElement(ie)->isTerminal()) continue;
+		  mesh->giveElement(ie)->drawGeometry();
 		}
-		ESIEventLoop (YES, "Subdivision Bisection; Press Ctrl-p to continue");
+		ESIEventLoop (YES, oofem_tmpstr("Subdivision Bisection; Press Ctrl-p to continue"));
 #endif
 #endif
 	}

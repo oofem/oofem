@@ -1032,7 +1032,7 @@ void LIBeam3dNL2 :: drawDeformedGeometry(oofegGraphicContext &gc, UnknownType ty
     double defScale = gc.getDefScale();
     //  if (!go) { // create new one
     WCRec p [ 2 ]; /* poin */
-    char *colors[] = {"red", "green", "blue"};
+    const char *colors[] = {"red", "green", "blue"};
 
     EASValsSetLineWidth(OOFEG_DEFORMED_GEOMETRY_WIDTH);
     EASValsSetColor( gc.getDeformedElementColor() );
