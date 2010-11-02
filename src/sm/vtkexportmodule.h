@@ -74,7 +74,7 @@ protected:
 
     /// smoother type
     enum VTKEM_SmootherType { VTK_Smother_NA, VTK_Smoother_ZZ, VTK_Smoother_SPR } stype;
-    /// smotther
+    /// smoother
     NodalRecoveryModel *smoother;
     /// list of regions to skip
     IntArray regionsToSkip;
@@ -163,6 +163,14 @@ protected:
      * added multiple times.
      */
     int giveTotalRBRNumberOfNodes(Domain *d);
+    /**
+     * Returns the value of Primary variable at given dof manager.
+     * If such variable not directly available in dofman dofs, can use 
+     * smoother to recover this nodal value.
+     */
+    void getDofManPrimaryVariable (FloatArray& answer, DofManager* dman, IntArray& dofIDMask, EquationID type, 
+				   ValueModeType mode, TimeStep *tStep, InternalStateType iType);
+
 };
 } // end namespace oofem
 #endif // vtkexportmodule_h
