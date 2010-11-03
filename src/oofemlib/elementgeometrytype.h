@@ -67,7 +67,6 @@ namespace oofem {
     ENUM_ITEM(EGT_point) /* point in space */   \
     ENUM_ITEM(EGT_line_1) /* line elements with two nodes  1-------2 */   \
     ENUM_ITEM(EGT_line_2) /* line element with three nodes 1---3---2 */   \
-    ENUM_ITEM(EGT_line_2_123) /* line element with three nodes 1---2---3 */   \
     ENUM_ITEM(EGT_triangle_1) /* triangle element with three nodes */ \
     ENUM_ITEM(EGT_triangle_2) /* triangle element with 6 nodes */ \
     ENUM_ITEM(EGT_quad_1)   /* quadrialateral with 4 nodes */   \

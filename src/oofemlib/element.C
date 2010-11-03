@@ -1019,7 +1019,7 @@ Element :: giveSpatialDimension(void)
         return 2;
 
     case EGT_tetra_1:
-        //  case EGT_tetra_2:
+    case EGT_tetra_2:
     case EGT_hexa_1:
     case EGT_hexa_2:
         return 3;
@@ -1054,7 +1054,7 @@ Element :: giveNumberOfBoundarySides(void)
         return 4;
 
     case EGT_tetra_1:
-        //  case EGT_tetra_2:
+    case EGT_tetra_2:
         return 4;
 
     case EGT_hexa_1:
