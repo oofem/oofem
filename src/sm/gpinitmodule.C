@@ -95,23 +95,23 @@ GPInitModule :: doInit ()
     for (igp=0 ; igp < iRule->getNumberOfIntegrationPoints() ; igp++) {
       gp = iRule->getIntegrationPoint(igp) ;
       MaterialStatus* status = mat -> giveStatus(gp);
-      fscanf (initStream,"%d %d",&ie,&ig);
+      if (fscanf (initStream,"%d %d",&ie,&ig) != 2) OOFEM_ERROR ("GPInitModule :: doInit: initStream reading error");
       // check whether the element and GP number agree
       assert (ielem==ie);
       assert ((igp+1)==ig);
       // read coordinates
-      fscanf (initStream,"%d",&nc);
+      if (fscanf (initStream,"%d",&nc) != 1) OOFEM_ERROR ("GPInitModule :: doInit: initStream reading error");
       assert (nc>=0 && nc<=3);
       for (ic=0; ic<nc; ic++)
-	fscanf (initStream,"%lg",&coords[ic]);
-      fscanf (initStream,"%d",&nv);
+	if (fscanf (initStream,"%lg",&coords[ic]) != 1) OOFEM_ERROR ("GPInitModule :: doInit: initStream reading error");
+      if (fscanf (initStream,"%d",&nv) != 1) OOFEM_ERROR ("GPInitModule :: doInit: initStream reading error");
       assert (nv>=0);
       for (iv=1; iv<=nv; iv++){
-	fscanf (initStream,"%d %d",&vt,&varsize);
+	if (fscanf (initStream,"%d %d",&vt,&varsize) != 2) OOFEM_ERROR ("GPInitModule :: doInit: initStream reading error");
 	vartype = (InternalStateType) vt;
 	value.resize(varsize);
 	for (ic=1; ic<=varsize; ic++)
-	  fscanf (initStream,"%lg",&value.at(ic));
+	  if (fscanf (initStream,"%lg",&value.at(ic)) != 1) OOFEM_ERROR ("GPInitModule :: doInit: initStream reading error");
 	mat -> setIPValue (value, gp, vartype);
       }
       
