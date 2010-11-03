@@ -49,6 +49,7 @@ enum integrationDomain {
      *
      */
     _Unknown_integrationDomain,
+    _Point,
     _Line,
     _Triangle,
     _Square,

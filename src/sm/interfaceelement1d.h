@@ -45,10 +45,8 @@ namespace oofem {
 class InterfaceElem1d : public StructuralElement
 {
     /*
-     * This class implements a two dimensional interface element.
-     * Even if geometry approx is quadratic, the element is assumed straight
-     * If not straight, the rotation matrix depends on actual integration point
-     * and stiffness and strain computations should be modified.
+     * This class implements a 1D dimensional interface element connecting two nodes (with the same position)
+     * In order to compute normal and tangential direction of the slip plane, a reference node is needed.
      */
 
 protected:
@@ -96,9 +94,9 @@ public:
     const char *giveClassName() const { return "InterfaceElem1d"; }
     classType            giveClassID() const { return InterfaceElem1dClass; }
     IRResultType initializeFrom(InputRecord *ir);
-    Element_Geometry_Type giveGeometryType() const { return EGT_line_2; }
+    Element_Geometry_Type giveGeometryType() const { return EGT_point; }
 
-    integrationDomain  giveIntegrationDomain() { return _Line; }
+    integrationDomain  giveIntegrationDomain() { return _Point; }
     MaterialMode          giveMaterialMode()  {return _1dInterface;}
 
 protected:
