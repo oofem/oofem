@@ -71,7 +71,7 @@ Logger :: appendlogTo(char *fname)
 {
     FILE *stream = NULL;
     if ( this->closeFlag ) {
-        freopen(fname, "w", stream);
+        stream = freopen(fname, "w", mylogStream);
     } else {
         stream = fopen(fname, "w");
     }
