@@ -373,6 +373,8 @@ public:
     /// Returns number of nonlocal integration barriers
     int                giveNumberOfNonlocalBarriers() { return nonlocalBarierList->giveSize(); }
     int                giveCorrespondingCoordinateIndex(int);
+    /// Returns number of spatial dimensions
+    int                giveNumerOfSpatialDimensions();
     /**
      *@name Advanced domain manipulation methods.
      */

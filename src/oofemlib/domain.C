@@ -911,6 +911,20 @@ Domain :: giveDefaultNodeDofIDArry()
 }
 
 
+int Domain :: giveNumerOfSpatialDimensions()
+{
+	//_HeatTransferMode _HeatMass1Mode // Are these deprecated?
+	// Perhaps i shouldn't use the modes to determine this at all, but i couldn't see any other good way.
+	if ( dType == _1dTrussMode )
+		return 1;
+	if ( dType == _2dIncompressibleFlow || dType == _2dBeamMode || dType == _2dTrussMode || dType == _2dMindlinPlateMode || dType == _3dAxisymmMode || dType == _PlaneStrainMode || dType == _2dPlaneStressMode || dType == _2dPlaneStressRotMode)
+		return 2;
+	else if ( dType == _3dIncompressibleFlow || dType == _3dShellMode || dType == _3dMode )
+		return 3;
+	else
+		return 0;
+}
+
 
 int Domain ::  giveNumberOfDefaultNodeDofs()
 //
@@ -1222,7 +1236,7 @@ int Domain ::  giveCorrespondingCoordinateIndex(int idof)
             return 1;
         } else if ( idof == 2 ) {
             return 2;
-        } else if ( idof == 3 )                                      {
+        } else if ( idof == 3 ) {
             return 3;
         }
 
@@ -1242,13 +1256,31 @@ int Domain ::  giveCorrespondingCoordinateIndex(int idof)
             return 1;
         } else if ( idof == 2 ) {
             return 2;
-        } else if ( idof == 3 )                                      {
+        } else if ( idof == 3 ) {
             return 3;
         }
 
         return 0;
 
+    case _3dIncompressibleFlow:
+        if ( idof == 1 ) {
+            return 1;
+        } else if ( idof == 2 ) {
+            return 2;
+        } else if ( idof == 3 ) {
+            return 3;
+        }
 
+        return 0;
+
+    case _2dIncompressibleFlow:
+        if ( idof == 1 ) {
+            return 1;
+        } else if ( idof == 2 ) {
+            return 2;
+        }
+
+        return 0;
 
     default:
         _error("giveCorrespondingCoordinateIndex : unsupported domain type");
