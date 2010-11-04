@@ -82,7 +82,7 @@ BoundaryCondition *MasterDof :: giveBc()
 {
     if ( bc ) {
         GeneralBoundaryCondition *bcptr = dofManager->giveDomain()->giveBc(bc);
-        if ( bcptr->giveClassID() == BoundaryConditionClass ) {
+        if ( bcptr->giveType() == DirichletBT ) {
             return ( BoundaryCondition * ) bcptr;
         }
     }
