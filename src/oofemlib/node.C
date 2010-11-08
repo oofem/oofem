@@ -43,6 +43,7 @@
 
 #include "node.h"
 #include "dof.h"
+#include "unknowntype.h"
 #include "slavedof.h"
 #include "simpleslavedof.h"
 #include "nodload.h"
@@ -253,14 +254,19 @@ void Node :: updateYourself(TimeStep *tStep)
 
     fMode mode = domain->giveEngngModel()->giveFormulation();
 
-    //DofManager :: updateYourself(tStep);
-
+    double dt = tStep->giveTimeIncrement();
     for ( i = 1; i <= numberOfDofs; i++ ) {
         if ( mode == AL ) { // updated Lagrange
             ic = domain->giveCorrespondingCoordinateIndex(i);
-            if ( ic != 0 ) { // && (this->giveDof(i)->giveUnknownType() == DisplacementVector))   {
-                coordinates.at(ic) +=
-                    this->giveDof(i)->giveUnknown(EID_MomentumBalance, VM_Incremental, tStep);
+            if (ic != 0) {
+                Dof *d = this->giveDof(i);
+                DofID id = d->giveDofID();
+                if (id == D_u || id == D_v || id == D_w) {
+                    coordinates.at(ic) += d->giveUnknown(EID_MomentumBalance, VM_Incremental, tStep);
+                }
+                else if (id == V_u || id == V_v || id == V_w) {
+                    coordinates.at(ic) += d->giveUnknown(EID_MomentumBalance, VM_Total, tStep)*dt;
+                }
             }
         }
     }
