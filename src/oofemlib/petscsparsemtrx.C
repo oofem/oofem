@@ -41,36 +41,268 @@
 #include "engngm.h"
 
 #ifndef __MAKEDEPEND
-#include <stdio.h>
-#include <set>
-#include <vector>
-#include "petscksp.h"
+ #include <stdio.h>
+ #include <set>
+ #include <vector>
+ #include "petscksp.h"
+ #include "petscvec.h"
 #endif
 
 namespace oofem {
-
 SparseMtrx *
 PetscSparseMtrx :: GiveCopy() const
 {
     OOFEM_ERROR("PetscSparseMtrx :: GiveCopy - Not implemented");
+    //MatDuplicate(this->mtrx, MAT_COPY_VALUES, B);
     return NULL;
 }
 
 void
 PetscSparseMtrx :: times(const FloatArray &x, FloatArray &answer) const
 {
+    if ( this->giveNumberOfColumns() != x.giveSize() ) {
+        OOFEM_ERROR("Dimension mismatch");
+    }
+
+#ifdef __PARALLEL_MODE
     OOFEM_ERROR("PetscSparseMtrx :: times - Not implemented");
+#else
+    Vec globX, globY;
+    VecCreateSeqWithArray(PETSC_COMM_SELF, x.giveSize(), x.givePointer(), & globX);
+    VecCreate(PETSC_COMM_SELF, & globY);
+    VecSetType(globY, VECSEQ);
+    VecSetSizes(globY, PETSC_DECIDE, this->nRows);
+
+    MatMult(this->mtrx, globX, globY);
+    double *ptr;
+    VecGetArray(globY, & ptr);
+    answer.resize(this->nRows);
+    for ( int i = 0; i < this->nRows; i++ ) {
+        answer(i) = ptr [ i ];
+    }
+
+    VecRestoreArray(globY, & ptr);
+    VecDestroy(globX);
+    VecDestroy(globY);
+#endif
+}
+
+void
+PetscSparseMtrx :: timesT(const FloatArray &x, FloatArray &answer) const
+{
+    if ( this->giveNumberOfRows() != x.giveSize() ) {
+        OOFEM_ERROR("Dimension mismatch");
+    }
+
+#ifdef __PARALLEL_MODE
+    OOFEM_ERROR("PetscSparseMtrx :: times - Not implemented");
+#else
+    Vec globX, globY;
+    VecCreateSeqWithArray(PETSC_COMM_SELF, x.giveSize(), x.givePointer(), & globX);
+    VecCreate(PETSC_COMM_SELF, & globY);
+    VecSetType(globY, VECSEQ);
+    VecSetSizes(globY, PETSC_DECIDE, this->nColumns);
+
+    MatMultTranspose(this->mtrx, globX, globY);
+    double *ptr;
+    VecGetArray(globY, & ptr);
+    answer.resize(this->nColumns);
+    for ( int i = 0; i < this->nColumns; i++ ) {
+        answer(i) = ptr [ i ];
+    }
+
+    VecRestoreArray(globY, & ptr);
+    VecDestroy(globX);
+    VecDestroy(globY);
+#endif
 }
 
 
 void
+PetscSparseMtrx :: times(const FloatMatrix &B, FloatMatrix &answer) const
+{
+    if ( this->giveNumberOfColumns() != B.giveNumberOfRows() ) {
+        OOFEM_ERROR("Dimension mismatch");
+    }
+
+#ifdef __PARALLEL_MODE
+    OOFEM_ERROR("PetscSparseMtrx :: times - Not implemented");
+#else
+    // I'm opting to work with a set of vectors, as i think it might be faster and more robust. / Mikael
+
+    int nr = this->giveNumberOfRows();
+    int nc = B.giveNumberOfColumns();
+    answer.resize(nr, nc);
+    double *aptr = answer.givePointer();
+
+    /*
+     *      // Approach using several vectors. Not sure if it is optimal, but it includes petsc calls which i suspect are inefficient. / Mikael
+     *      // UNTESTED!
+     *  Vec globX, globY;
+     *  VecCreate(PETSC_COMM_SELF, &globY);
+     *  VecSetType(globY, VECSEQ);
+     *  VecSetSizes(globY, PETSC_DECIDE, nr);
+     *  int nrB = B.giveNumberOfRows();
+     *  for (int k = 0; k < nc; k++) {
+     *      double colVals[nrB];
+     *      for (int i = 0; i < nrB; i++) colVals[i] = B(i,k); // B.copyColumn(Bk,k);
+     *      VecCreateSeqWithArray(PETSC_COMM_SELF, nrB, colVals, &globX);
+     *      MatMult(this->mtrx, globX, globY );
+     *              double *ptr;
+     *              VecGetArray(globY, &ptr);
+     *              for (int i = 0; i < nr; i++) *aptr++ = ptr[i]; // answer.setColumn(Ak,k);
+     *              VecRestoreArray(globY, &ptr);
+     *              VecDestroy(globX);
+     *  }
+     *  VecDestroy(globY);
+     */
+
+    Mat globB, globC;
+    MatCreateSeqDense(PETSC_COMM_SELF, B.giveNumberOfRows(), B.giveNumberOfColumns(), B.givePointer(), & globB);
+    MatMatMult(this->mtrx, globB, MAT_INITIAL_MATRIX, PETSC_DEFAULT, & globC);
+    const double *vals;
+    for ( int r = 0; r < nr; r++ ) {
+        MatGetRow(globC, r, NULL, NULL, & vals);
+        for ( int i = 0, i2 = r; i < nc; i++, i2 += nr ) {
+            aptr [ i2 ] = vals [ i ];
+        }
+    }
+
+    MatDestroy(globB);
+    MatDestroy(globC);
+#endif
+}
+
+void
+PetscSparseMtrx :: timesT(const FloatMatrix &B, FloatMatrix &answer) const
+{
+    if ( this->giveNumberOfRows() != B.giveNumberOfRows() ) {
+        OOFEM_ERROR("Dimension mismatch");
+    }
+
+#ifdef __PARALLEL_MODE
+    OOFEM_ERROR("PetscSparseMtrx :: times - Not implemented");
+#else
+    int nr = this->giveNumberOfColumns();
+    int nc = B.giveNumberOfColumns();
+    answer.resize(nr, nc);
+    double *aptr = answer.givePointer();
+
+    // For some reason SEQAIJ and SEQDENSE are incompatible with each other for MatMatMultTranspose (MatMatMult is OK). I don't know why.
+    // Either way, this is not to bad, except for an extra transposition.
+
+    Mat globB, globC;
+    FloatMatrix BT;
+    BT.beTranspositionOf(B);
+    MatCreateSeqDense(PETSC_COMM_SELF, BT.giveNumberOfRows(), BT.giveNumberOfColumns(), BT.givePointer(), & globB);
+    MatMatMult(globB, this->mtrx, MAT_INITIAL_MATRIX, PETSC_DEFAULT, & globC);
+    const double *vals;
+    for ( int r = 0; r < nc; r++ ) {
+        MatGetRow(globC, r, NULL, NULL, & vals);
+        for ( int i = 0; i < nr; i++ ) {
+            * aptr++ = vals [ i ];
+        }
+    }
+
+    MatDestroy(globB);
+    MatDestroy(globC);
+#endif
+}
+
+void
 PetscSparseMtrx :: times(double x)
 {
-    OOFEM_ERROR("PetscSparseMtrx::times(double x) - unsupported");
+    MatScale(this->mtrx, x);
+}
+
+// NOTE! I haven't looked at the parallel code yet (lack of time right now, and i want to see it work first). / Mikael
+int
+PetscSparseMtrx :: buildInternalStructure(EngngModel *eModel, int di, EquationID ut, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s)
+{
+#ifdef __PARALLEL_MODE
+    OOFEM_ERROR("PetscSparseMtrx :: buildInternalStructure - Not implemented");
+#else
+    Domain *domain = eModel->giveDomain(di);
+    int nelem;
+
+    if ( mtrx ) {
+        MatDestroy(mtrx);
+    }
+
+    this->ut = ut;
+    // This should be based on the numberingscheme. Also, geqs seems redundant.
+
+    /*
+     * // This could simplify things.
+     * if (r_s.isPrescribed())
+     *  nRows = geqs = leqs = eModel->giveNumberOfPrescribedEquations(ut);
+     * else
+     *  nRows = geqs = leqs = eModel->giveNumberOfEquations(ut);
+     *
+     * if (c_s.isPrescribed())
+     *  nColumns = eModel->giveNumberOfPrescribedEquations(ut);
+     * else
+     *  nColumns = eModel->giveNumberOfEquations(ut);
+     */
+
+    int totalEquations = eModel->giveNumberOfEquations(ut) + eModel->giveNumberOfPrescribedEquations(ut);
+
+    //determine nonzero structure of matrix
+    int i, ii, j, jj, n;
+    Element *elem;
+    IntArray r_loc, c_loc;
+    std :: vector< std :: set< int > >rows(totalEquations);
+    nRows = nColumns = 0;
+
+    nelem = domain->giveNumberOfElements();
+    for ( n = 1; n <= nelem; n++ ) {
+        elem = domain->giveElement(n);
+        elem->giveLocationArray(r_loc, ut, r_s);
+        elem->giveLocationArray(c_loc, ut, c_s);
+        for ( i = 1; i <= r_loc.giveSize(); i++ ) {
+            if ( ( ii = r_loc.at(i) ) ) {
+                if ( ii > nRows ) {
+                    nRows = ii;
+                }
+
+                for ( j = 1; j <= c_loc.giveSize(); j++ ) {
+                    if ( ( jj = c_loc.at(j) ) ) {
+                        if ( jj > nColumns ) {
+                            nColumns = jj;
+                        }
+
+                        rows [ ii - 1 ].insert(jj - 1);
+                    }
+                }
+            }
+        }
+    }
+
+    geqs = leqs = nRows;
+
+    IntArray d_nnz(leqs);
+    for ( i = 0; i < leqs; i++ ) {
+        d_nnz(i) = rows [ i ].size();
+    }
+
+    // create PETSc mat
+    /*
+     * MatCreateSeqAIJ(PETSC_COMM_SELF,leqs,leqs,0,d_nnz.givePointer(),&mtrx);
+     */
+    MatCreate(PETSC_COMM_WORLD, & mtrx);
+    // Trying to do this with leqs and geqs doesn't make any sense. They can only mean lines if i understand this correctly (local vs global). / Mikael.
+    // Besides, geqs is meaningless, as it will always be the number of rows. Why not lRows and lColumns instead?
+    MatSetSizes(mtrx, nRows, nColumns, nRows, nColumns);
+    MatSetType(mtrx, MATSEQAIJ);
+    MatSetFromOptions(mtrx);
+    MatSeqAIJSetPreallocation( mtrx, 0, d_nnz.givePointer() );
+
+#endif
+    return TRUE;
 }
 
 int
-PetscSparseMtrx :: buildInternalStructure(EngngModel *eModel, int di, EquationID ut, const UnknownNumberingScheme&s)
+PetscSparseMtrx :: buildInternalStructure(EngngModel *eModel, int di, EquationID ut, const UnknownNumberingScheme &s)
 {
     IntArray loc;
     Domain *domain = eModel->giveDomain(di);
@@ -93,9 +325,9 @@ PetscSparseMtrx :: buildInternalStructure(EngngModel *eModel, int di, EquationID
         n2g = eModel->givePetscContext(di, ut)->giveN2Gmap();
     }
 
-#ifdef __VERBOSE_PARALLEL
+ #ifdef __VERBOSE_PARALLEL
     VERBOSEPARALLEL_PRINT("PetscSparseMtrx:: buildInternalStructure", "", rank);
-#endif
+ #endif
 
 
     // initialize n2l map
@@ -109,9 +341,9 @@ PetscSparseMtrx :: buildInternalStructure(EngngModel *eModel, int di, EquationID
     leqs = n2g->giveNumberOfLocalEqs();
     geqs = n2g->giveNumberOfGlobalEqs();
 
-#ifdef __VERBOSE_PARALLEL
+ #ifdef __VERBOSE_PARALLEL
     OOFEM_LOG_INFO( "[%d]PetscSparseMtrx:: buildInternalStructure: l_eqs = %d, g_eqs = %d, n_eqs = %d\n", rank, leqs, geqs, eModel->giveNumberOfEquations(ut) );
-#endif
+ #endif
 
 #else
     leqs = geqs = eModel->giveNumberOfEquations(ut);
@@ -126,7 +358,7 @@ PetscSparseMtrx :: buildInternalStructure(EngngModel *eModel, int di, EquationID
         int i, ii, j, jj, n;
         Element *elem;
         // allocation map
-        std :: vector< std :: set< int > > rows(leqs); // ??
+        std :: vector< std :: set< int > >rows(leqs);  // ??
 
         IntArray d_nnz(leqs), lloc;
 
@@ -137,7 +369,7 @@ PetscSparseMtrx :: buildInternalStructure(EngngModel *eModel, int di, EquationID
         for ( n = 1; n <= nelem; n++ ) {
             //fprintf (stderr, "(elem %d) ", n);
             elem = domain->giveElement(n);
-            elem->giveLocationArray(loc, ut,s);
+            elem->giveLocationArray(loc, ut, s);
             n2l.map2New(lloc, loc, 0); // translate natural->local numbering
             for ( i = 1; i <= lloc.giveSize(); i++ ) {
                 if ( ( ii = lloc.at(i) ) ) {
@@ -177,9 +409,9 @@ PetscSparseMtrx :: buildInternalStructure(EngngModel *eModel, int di, EquationID
         MatSetFromOptions(mtrx);
         MatMPIAIJSetPreallocation(mtrx, 1, d_nnz.givePointer(), 6, PETSC_NULL);
 
-#ifdef __VERBOSE_PARALLEL
+ #ifdef __VERBOSE_PARALLEL
         VERBOSEPARALLEL_PRINT("PetscSparseMtrx:: buildInternalStructure", "done", rank);
-#endif
+ #endif
     } else {
 #endif
 
@@ -187,17 +419,16 @@ PetscSparseMtrx :: buildInternalStructure(EngngModel *eModel, int di, EquationID
     int i, ii, j, jj, n;
     Element *elem;
     // allocation map
-    std :: vector< std :: set< int > > rows(leqs); // ??
+    std :: vector< std :: set< int > >rows(leqs);  // ??
     IntArray d_nnz(leqs);
 
     nelem = domain->giveNumberOfElements();
     for ( n = 1; n <= nelem; n++ ) {
         elem = domain->giveElement(n);
-        elem->giveLocationArray(loc, ut,s);
+        elem->giveLocationArray(loc, ut, s);
         for ( i = 1; i <= loc.giveSize(); i++ ) {
             if ( ( ii = loc.at(i) ) ) {
                 for ( j = 1; j <= loc.giveSize(); j++ ) {
-                    jj = loc.at(j);
                     if ( ( jj = loc.at(j) ) ) {
                         rows [ ii - 1 ].insert(jj - 1);
                     }
@@ -210,12 +441,9 @@ PetscSparseMtrx :: buildInternalStructure(EngngModel *eModel, int di, EquationID
         d_nnz(i) = rows [ i ].size();
     }
 
-    // create PETSc mat
-    /*
-     * MatCreateSeqAIJ(PETSC_COMM_SELF,leqs,leqs,0,d_nnz.givePointer(),&mtrx);
-     */
+    //MatCreateSeqAIJ(PETSC_COMM_SELF,leqs,leqs,0,d_nnz.givePointer(),&mtrx);
     MatCreate(PETSC_COMM_WORLD, & mtrx);
-    MatSetSizes(mtrx, leqs, leqs, leqs, leqs);
+    MatSetSizes(mtrx, leqs, leqs, geqs, geqs);
     MatSetType(mtrx, MATSEQAIJ);
     MatSetFromOptions(mtrx);
     MatSeqAIJSetPreallocation( mtrx, 0, d_nnz.givePointer() );
@@ -368,18 +596,5 @@ PetscSparseMtrx :: printYourself() const
     PetscViewerSetFormat(PETSC_VIEWER_STDOUT_SELF, PETSC_VIEWER_ASCII_DENSE);
     MatView(this->mtrx, PETSC_VIEWER_STDOUT_SELF);
 }
-
-FloatArray
-PetscSparseMtrx :: trans_mult(const FloatArray &x) const
-{
-    OOFEM_ERROR("PetscSparseMtrx::trans_mult() - unsupported");
-    return x; // to supress compiler warning
-}
-
 } // end namespace oofem
 #endif //ifdef __PETSC_MODULE
-
-
-
-
-

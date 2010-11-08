@@ -36,21 +36,20 @@
 #include "petscsolver.h"
 
 #ifdef __PETSC_MODULE
-#include "petscsparsemtrx.h"
-#include "engngm.h"
-#include "flotarry.h"
-#include "verbose.h"
+ #include "petscsparsemtrx.h"
+ #include "engngm.h"
+ #include "flotarry.h"
+ #include "verbose.h"
 
 namespace oofem {
+ #define TIME_REPORT
 
-#define TIME_REPORT
-
-#ifdef TIME_REPORT
-#ifndef __MAKEDEPEND
-#include <time.h>
-#endif
-#include "clock.h"
-#endif
+ #ifdef TIME_REPORT
+  #ifndef __MAKEDEPEND
+   #include <time.h>
+  #endif
+  #include "clock.h"
+ #endif
 
 PetscSolver :: PetscSolver(int i, Domain *d, EngngModel *m) : SparseLinearSystemNM(i, d, m)
 {
@@ -80,7 +79,7 @@ PetscSolver :: initializeFrom(InputRecord *ir)
 NM_Status
 PetscSolver :: solve(SparseMtrx *A, FloatArray *b, FloatArray *x)
 {
-    int neqs, l_eqs, g_eqs;
+    int neqs, l_eqs;
 
     // first check whether Lhs is defined
     if ( !A ) {
@@ -107,32 +106,31 @@ PetscSolver :: solve(SparseMtrx *A, FloatArray *b, FloatArray *x)
 
     Lhs = ( PetscSparseMtrx * ) A;
     l_eqs = Lhs->giveLeqs();
-    g_eqs = Lhs->giveGeqs();
 
     Vec globRhsVec;
     Vec globSolVec;
 
-#ifdef __PARALLEL_MODE
+ #ifdef __PARALLEL_MODE
     /*
      * scatter and gather rhs to global representation
      */
     engngModel->givePetscContext( Lhs->giveDomainIndex(), Lhs->giveEquationID() )->createVecGlobal(& globRhsVec);
     engngModel->givePetscContext( Lhs->giveDomainIndex(), Lhs->giveEquationID() )->scatterL2G(b, globRhsVec, ADD_VALUES);
-#else
+ #else
     VecCreateSeqWithArray(PETSC_COMM_SELF, b->giveSize(), b->givePointer(), & globRhsVec);
-#endif
+ #endif
 
     VecDuplicate(globRhsVec, & globSolVec);
     /* solve */
     //VecView(globRhsVec,PETSC_VIEWER_STDOUT_WORLD);
-    this->petsc_solve(Lhs, globRhsVec, globSolVec);
+    NM_Status s = this->petsc_solve(Lhs, globRhsVec, globSolVec);
 
     //VecView(globSolVec,PETSC_VIEWER_STDOUT_WORLD);
 
 
-#ifdef __PARALLEL_MODE
+ #ifdef __PARALLEL_MODE
     engngModel->givePetscContext( Lhs->giveDomainIndex(), Lhs->giveEquationID() )->scatterG2N(globSolVec, x, INSERT_VALUES);
-#else
+ #else
     double *ptr;
     VecGetArray(globSolVec, & ptr);
     x->resize(l_eqs);
@@ -141,12 +139,12 @@ PetscSolver :: solve(SparseMtrx *A, FloatArray *b, FloatArray *x)
     }
 
     VecRestoreArray(globSolVec, & ptr);
-#endif
+ #endif
 
     VecDestroy(globSolVec);
     VecDestroy(globRhsVec);
 
-    return 1;
+    return s;
 }
 
 NM_Status
@@ -158,25 +156,25 @@ PetscSolver :: petsc_solve(PetscSparseMtrx *Lhs, Vec b, Vec x)
         _error("solveYourselfAt: PetscSparseMtrx Expected");
     }
 
-#ifdef TIME_REPORT
+ #ifdef TIME_REPORT
     //clock_t tstart = clock();
     oofem_timeval tstart;
     getUtime(tstart);
-#endif
+ #endif
 
     /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    *  Create the linear solver and set various options
-    *  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
+     *  Create the linear solver and set various options
+     *  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
     if ( !kspInit ) {
         /*
          * Create linear solver context
          */
-#ifdef __PARALLEL_MODE
+ #ifdef __PARALLEL_MODE
         KSPCreate(PETSC_COMM_WORLD, & ksp);
-#else
+ #else
         KSPCreate(PETSC_COMM_SELF, & ksp);
-#endif
+ #endif
         kspInit = true;
     }
 
@@ -207,8 +205,8 @@ PetscSolver :: petsc_solve(PetscSparseMtrx *Lhs, Vec b, Vec x)
     KSPSetFromOptions(ksp);
 
     /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    *  Solve the linear system
-    *  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
+     *  Solve the linear system
+     *  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
     //MatView(*Lhs->giveMtrx(),PETSC_VIEWER_STDOUT_SELF);
 
     //KSPSetRhs(ksp,b);
@@ -216,15 +214,18 @@ PetscSolver :: petsc_solve(PetscSparseMtrx *Lhs, Vec b, Vec x)
     KSPSolve(ksp, b, x);
     KSPGetConvergedReason(ksp, & reason);
     KSPGetIterationNumber(ksp, & nite);
-    OOFEM_LOG_INFO("PetscSolver::petsc_solve KSPConvergedReason: %d, number of iterations: %d\n", reason, nite);
+    OOFEM_LOG_INFO("PetscSolver::petsc_solve KSPConvergedReason: %d, number of iterations: %d\n", reason, nite); // To verbose for multiscale.
 
-#ifdef TIME_REPORT
+ #ifdef TIME_REPORT
     oofem_timeval ut;
     getRelativeUtime(ut, tstart);
     OOFEM_LOG_INFO( "PetscSolver info: user time consumed by solution: %.2fs\n", ( double ) ( ut.tv_sec + ut.tv_usec / ( double ) OOFEM_USEC_LIM ) );
-#endif
-
-    return 1;
+ #endif
+    if ( reason < 0 ) {
+        return NM_NoSuccess;
+    } else {
+        return NM_Success;
+    }
 }
 
 void
@@ -236,13 +237,11 @@ PetscSolver :: reinitialize()
 
     kspInit = false;
 }
-
 } // end namespace oofem
 #endif //ifdef __PETSC_MODULE
 
 #ifndef __PETSC_MODULE
 namespace oofem {
-
 PetscSolver :: PetscSolver(int i, Domain *d, EngngModel *m) : SparseLinearSystemNM(i, d, m)
 {
     _error("PetscSolver: can't create, PETSc support not compiled");
@@ -259,6 +258,5 @@ PetscSolver :: solve(SparseMtrx *A, FloatArray *b, FloatArray *x) { return NM_No
 void
 PetscSolver :: reinitialize()
 { }
-
 } // end namespace oofem
 #endif

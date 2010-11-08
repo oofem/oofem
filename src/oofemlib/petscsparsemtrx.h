@@ -37,14 +37,13 @@
 
 #ifdef __PETSC_MODULE
 
-#include "sparsemtrx.h"
+ #include "sparsemtrx.h"
 
-#ifndef __MAKEDEPEND
-#include "petscksp.h"
-#endif
+ #ifndef __MAKEDEPEND
+  #include "petscksp.h"
+ #endif
 
 namespace oofem {
-
 /**
  * This class provides an sparse matrix interface to PETSc Matrices
  */
@@ -62,23 +61,29 @@ protected:
     EngngModel *emodel;
 
 public:
-#ifdef __PARALLEL_MODE
+ #ifdef __PARALLEL_MODE
     PetscSparseMtrx(int n, int m) : SparseMtrx(n, m)
-    { di = 0;
-      leqs = n;
-      geqs = n;
-      symmFlag = false;
-      mtrx = NULL; }
-#else
+    {
+        di = 0;
+        leqs = n;
+        geqs = n;
+        symmFlag = false;
+        mtrx = NULL;
+    }
+ #else
     PetscSparseMtrx(int n, int m) : SparseMtrx(n, m)
-    { di = 0;
-      leqs = n;
-      geqs = n;
-      symmFlag = false;
-      mtrx = NULL; }
-#endif
-    PetscSparseMtrx() : SparseMtrx() { di = 0;
-                                       mtrx = NULL; }
+    {
+        di = 0;
+        leqs = n;
+        geqs = n;
+        symmFlag = false;
+        mtrx = NULL;
+    }
+ #endif
+    PetscSparseMtrx() : SparseMtrx() {
+        di = 0;
+        mtrx = NULL;
+    }
     ~PetscSparseMtrx() { MatDestroy(mtrx); }
 
     /** Returns {\bf newly allocated} copy of receiver. Programmer must take
@@ -86,12 +91,32 @@ public:
      * @return newly allocated copy of receiver */
     virtual SparseMtrx *GiveCopy() const;
 
-    /** Evaluates a product of receiver with vector.
-     * @param x array to be multiplied with receiver
-     * @param answer result of product of receiver and x parameter
+    /**
+     * Evaluates @f$ y = A\cdot x @f$
+     * @param x Array to be multiplied with receiver.
+     * @param answer y.
      */
     virtual void times(const FloatArray &x, FloatArray &answer) const;
-    /** Multiplies receiver by scalar value.
+    /**
+     * Evaluates @f$ y = A^{\rm T}\cdot x @f$
+     * @param x Array to be multiplied with transpose of the receiver.
+     * @param answer y.
+     */
+    virtual void timesT(const FloatArray &x, FloatArray &answer) const;
+    /**
+     * Evaluates @f$ C = A^{\rm T}\cdot B @f$
+     * @param B array to be multiplied with receiver.
+     * @param answer C.
+     */
+    virtual void times(const FloatMatrix &B, FloatMatrix &answer) const;
+    /**
+     * Evaluates @f$ C = A^{\rm T}\cdot B @f$
+     * @param x matrix to be multiplied with receiver.
+     * @param answer C.
+     */
+    virtual void timesT(const FloatMatrix &B, FloatMatrix &answer) const;
+    /**
+     * Multiplies receiver by scalar value.
      * @param x value to multiply receiver
      */
     virtual void times(double x);
@@ -105,7 +130,17 @@ public:
      * @param eModel pointer to corresponding engineering model
      * @param di domain index specify which domain to use
      */
-    virtual int buildInternalStructure(EngngModel * eModel, int di, EquationID, const UnknownNumberingScheme&s);
+    virtual int buildInternalStructure(EngngModel * eModel, int di, EquationID, const UnknownNumberingScheme & s);
+    /**
+     * Builds internal structure.
+     * Same as buildInternalStructure except with different numbering schemes for rows and columns
+     * @param eModel pointer to corresponding engineering model.
+     * @param di domain index to specify which domain to use.
+     * @param eid equation id to use to numbering scheme.
+     * @param r_s numbering scheme for rows.
+     * @param c_s numbering scheme for columns.
+     */
+    virtual int buildInternalStructure(EngngModel *eModel, int di, EquationID eid, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s);
     // virtual int assemble (FloatMatrix*, IntArray*) = 0;
     /**
      * Assembles sparse matrix from contribution of local elements. This method for
@@ -168,25 +203,29 @@ public:
     int       setOption(MatOption op, PetscTruth flag) { return MatSetOption(this->mtrx, op, flag); }
     EquationID       giveEquationID() { return ut; }
 
-#ifdef IML_COMPAT
+ #ifdef IML_COMPAT
     // /***********************************/
     //  /*  Matrix/Vector multiply         */
     //  /***********************************/
 
-    virtual FloatArray operator *(const FloatArray &x) const
-    { FloatArray answer;
-      this->times(x, answer);
-      return answer; }
-    virtual FloatArray trans_mult(const FloatArray &x) const;
+    virtual FloatArray operator*(const FloatArray &x) const
+    {
+        FloatArray answer;
+        this->times(x, answer);
+        return answer;
+    }
+    virtual FloatArray trans_mult(const FloatArray &x) const
+    {
+        FloatArray answer;
+        this->timesT(x, answer);
+        return answer;
+    }
 
-#endif
-
+ #endif
 
     int giveLeqs() { return leqs; }
-    int giveGeqs() { return geqs; }
     int giveDomainIndex() { return di; }
 };
-
 } // end namespace oofem
 #endif
 #endif // petscsparsemtrx_h

@@ -46,7 +46,7 @@
 //#endif
 
 #ifndef __MAKEDEPEND
-#include <stdio.h>
+ #include <stdio.h>
 #endif
 
 #include "matrix.h"
@@ -59,7 +59,6 @@
 #include "unknownnumberingscheme.h"
 
 namespace oofem {
-
 class EngngModel;
 class TimeStep;
 /**
@@ -121,15 +120,35 @@ public:
      * @return newly allocated copy of receiver */
     virtual SparseMtrx *GiveCopy() const = 0;
 
-    /** Evaluates a product of receiver with vector.
-     * @param x array to be multiplied with receiver
-     * @param answer result of product of receiver and x parameter
+    /**
+     * Evaluates @f$ y = A\cdot x @f$
+     * @param x Array to be multiplied with receiver.
+     * @param answer y.
      */
-    virtual void times(const FloatArray &x, FloatArray &answer) const = 0;
+    virtual void times(const FloatArray &x, FloatArray &answer) const { OOFEM_ERROR("Not implemented"); };
+    /**
+     * Evaluates @f$ y = A^{\rm T}\cdot x @f$
+     * @param x Array to be multiplied with transpose of the receiver.
+     * @param answer y.
+     */
+    virtual void timesT(const FloatArray &x, FloatArray &answer) const { OOFEM_ERROR("Not implemented"); };
+    /**
+     * Evaluates @f$ C = A^{\rm T}\cdot B @f$
+     * @param B array to be multiplied with receiver.
+     * @param answer C.
+     */
+    virtual void times(const FloatMatrix &B, FloatMatrix &answer) const { OOFEM_ERROR("Not implemented"); };
+    /**
+     * Evaluates @f$ C = A^{\rm T}\cdot B @f$
+     * @param x matrix to be multiplied with receiver.
+     * @param answer C.
+     */
+    virtual void timesT(const FloatMatrix &B, FloatMatrix &answer) const { OOFEM_ERROR("Not implemented"); };
     /** Multiplies receiver by scalar value.
      * @param x value to multiply receiver
      */
     virtual void times(double x) = 0;
+
     /**
      * Builds internal structure of receiver. This method determines the internal profile
      * of sparse matrix, allocates necessary space for storing nonzero coefficients and
@@ -144,7 +163,18 @@ public:
      * @param s determines unknown numbering scheme
      * @param ut unknown type
      */
-    virtual int buildInternalStructure(EngngModel *eModel, int di, EquationID ut, const UnknownNumberingScheme&s) = 0;
+    virtual int buildInternalStructure(EngngModel *eModel, int di, EquationID ut, const UnknownNumberingScheme &s) = 0;
+    /**
+     * Build internal structure of reciever. @see buildInternalStructure for details.
+     * @param eModel pointer to corresponding engineering model
+     * @param di domain index specify which domain to use
+     * @param r_s determines unknown numbering scheme for the rows
+     * @param c_s determines unknown numbering scheme for the columns
+     * @param ut unknown type
+     */
+    virtual int buildInternalStructure(EngngModel *eModel, int di, EquationID, const UnknownNumberingScheme &r_s,
+                                       const UnknownNumberingScheme &c_s) { OOFEM_ERROR("Not implemented");
+                                                                            return 0; }
     // virtual int assemble (FloatMatrix*, IntArray*) = 0;
     /**
      * Assembles sparse matrix from contribution of local elements. This method for
@@ -210,14 +240,15 @@ public:
     //  /*  Matrix/Vector multiply         */
     //  /***********************************/
 
-    virtual FloatArray operator *(const FloatArray &x) const
-    { FloatArray answer;
-      this->times(x, answer);
-      return answer; }
+    virtual FloatArray operator*(const FloatArray &x) const
+    {
+        FloatArray answer;
+        this->times(x, answer);
+        return answer;
+    }
     virtual FloatArray trans_mult(const FloatArray &x) const = 0;
 
 #endif
 };
-
 } // end namespace oofem
 #endif // sparsemtrx_h

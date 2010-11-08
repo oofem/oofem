@@ -36,7 +36,7 @@
 #define petscsolver_h
 
 #ifndef __MAKEDEPEND
-#include <stdio.h>
+ #include <stdio.h>
 #endif
 #include "sparselinsystemnm.h"
 #include "sparsemtrx.h"
@@ -44,13 +44,12 @@
 #include "flotarry.h"
 
 #ifdef __PETSC_MODULE
-#ifndef __MAKEDEPEND
-#include "petscksp.h"
-#endif
+ #ifndef __MAKEDEPEND
+  #include "petscksp.h"
+ #endif
 #endif
 
 namespace oofem {
-
 class Domain;
 class EngngModel;
 class FloatMatrix;
@@ -111,6 +110,5 @@ public:
     classType giveClassID() const { return PetscSolverClass; }
     LinSystSolverType giveLinSystSolverType() const { return ST_Petsc; }
 };
-
 } // end namespace oofem
 #endif // petscsolver_h
