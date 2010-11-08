@@ -418,7 +418,9 @@ VTKExportModule :: giveCellType(Element *elem)
 {
     Element_Geometry_Type elemGT = elem->giveGeometryType();
     int vtkCellType = 0;
-    if ( elemGT == EGT_line_1 ) {
+    if ( elemGT == EGT_point ) {
+        vtkCellType = 1;
+    } else if ( elemGT == EGT_line_1 ) {
         vtkCellType = 3;
     } else if ( elemGT == EGT_line_2 ) {
     	vtkCellType = 21;
@@ -449,6 +451,8 @@ int
 VTKExportModule :: giveNumberOfNodesPerCell(int cellType)
 {
 	switch (cellType) {
+	case 1:
+		return 1;
 	case 3:
 		return 2;
 	case 5:
@@ -482,25 +486,26 @@ VTKExportModule :: giveElementCell(IntArray &answer, Element *elem, int cell)
     Element_Geometry_Type elemGT = elem->giveGeometryType();
     int i, nelemNodes;
 
-    if ( ( elemGT == EGT_line_1 ) || ( elemGT == EGT_line_2 ) ||
-	 ( elemGT == EGT_triangle_1 ) || ( elemGT == EGT_triangle_2 ) ||
-	 ( elemGT == EGT_tetra_1 ) ||
-	 ( elemGT == EGT_quad_1 ) || ( elemGT == EGT_quad_2 ) ||
-	 ( elemGT == EGT_hexa_1 ) ) {
-      nelemNodes = elem->giveNumberOfNodes();
-      answer.resize(nelemNodes);
-      for ( i = 1; i <= nelemNodes; i++ ) {
-	answer.at(i) = elem->giveNode(i)->giveNumber() - 1;
-      }
+    if ( ( elemGT == EGT_point ) ||
+         ( elemGT == EGT_line_1 ) || ( elemGT == EGT_line_2 ) ||
+         ( elemGT == EGT_triangle_1 ) || ( elemGT == EGT_triangle_2 ) ||
+         ( elemGT == EGT_tetra_1 ) || ( elemGT == EGT_tetra_2 ) ||
+         ( elemGT == EGT_quad_1 ) || ( elemGT == EGT_quad_2 ) ||
+         ( elemGT == EGT_hexa_1 ) ) {
+        nelemNodes = elem->giveNumberOfNodes();
+        answer.resize(nelemNodes);
+        for ( i = 1; i <= nelemNodes; i++ ) {
+            answer.at(i) = elem->giveNode(i)->giveNumber() - 1;
+        }
     } else if (elemGT == EGT_hexa_2) {
-      int HexaQuadNodeMapping [] = {
-        5, 8, 7, 6, 1, 4, 3, 2, 16, 15, 14, 13, 12, 11, 10, 9, 17, 20, 19, 18
-      };
-      nelemNodes = elem->giveNumberOfNodes();
-      answer.resize(nelemNodes);
-      for ( i = 1; i <= nelemNodes; i++ ) {
-	answer.at(i) = elem->giveNode(HexaQuadNodeMapping[i-1])->giveNumber() - 1;
-      }
+        int HexaQuadNodeMapping [] = {
+                5, 8, 7, 6, 1, 4, 3, 2, 16, 15, 14, 13, 12, 11, 10, 9, 17, 20, 19, 18
+        };
+        nelemNodes = elem->giveNumberOfNodes();
+        answer.resize(nelemNodes);
+        for ( i = 1; i <= nelemNodes; i++ ) {
+            answer.at(i) = elem->giveNode(HexaQuadNodeMapping[i-1])->giveNumber() - 1;
+        }
     } else {
         OOFEM_ERROR("VTKExportModule: unsupported element geometry type");
     }
@@ -514,7 +519,12 @@ VTKExportModule :: giveNumberOfElementCells(Element *elem)
 {
     Element_Geometry_Type elemGT = elem->giveGeometryType();
 
-    if ( ( elemGT == EGT_line_1 ) || ( elemGT == EGT_line_2 ) || ( elemGT == EGT_triangle_1 ) || ( elemGT == EGT_triangle_2 ) || ( elemGT == EGT_tetra_1 ) || ( elemGT == EGT_quad_1 ) || ( elemGT == EGT_quad_2 ) || ( elemGT == EGT_hexa_1 ) || ( elemGT == EGT_hexa_2 ) ) {
+    if ( (elemGT == EGT_point ) ||
+       ( elemGT == EGT_line_1 ) || ( elemGT == EGT_line_2 ) ||
+       ( elemGT == EGT_triangle_1 ) || ( elemGT == EGT_triangle_2 ) ||
+       ( elemGT == EGT_tetra_1 ) || ( elemGT == EGT_tetra_2 ) ||
+       ( elemGT == EGT_quad_1 ) ||( elemGT == EGT_quad_2 ) ||
+       ( elemGT == EGT_hexa_1 ) || ( elemGT == EGT_hexa_2 ) ) {
         return 1;
     } else {
         OOFEM_ERROR("VTKExportModule: unsupported element geometry type");
