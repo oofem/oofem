@@ -1,4 +1,4 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/nodalaveragingrecoverymodel.C,v 1.2.4.1 2004/04/05 15:19:43 bp Exp $ */
+/* $HeadURL$, $Revision$, $Date$, $Author$ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -43,11 +43,10 @@
 #include "node.h"
 #include "elementside.h"
 #ifndef __MAKEDEPEND
-#include <stdio.h>
+ #include <stdio.h>
 #endif
 
 namespace oofem {
-
 NodalAveragingRecoveryModel :: NodalAveragingRecoveryModel(Domain *d) : NodalRecoveryModel(d)
 { }
 
@@ -117,15 +116,20 @@ NodalAveragingRecoveryModel :: recoverValues(InternalStateType type, TimeStep *t
             element = domain->giveElement(ielem);
 
 #ifdef __PARALLEL_MODE
-            if (element->giveParallelMode() != Element_local) continue;
+            if ( element->giveParallelMode() != Element_local ) {
+                continue;
+            }
+
 #endif
             if ( element->giveRegionNumber() != ireg ) {
                 continue;
             }
 
+            // If an element doesn't implement the interface, it is ignored.
             if ( ( interface = ( NodalAveragingRecoveryModelInterface * )
                                element->giveInterface(NodalAveragingRecoveryModelInterfaceType) ) == NULL ) {
-                abort();
+                //abort();
+                continue;
             }
 
             elemNodes = element->giveNumberOfDofManagers();
@@ -151,7 +155,12 @@ NodalAveragingRecoveryModel :: recoverValues(InternalStateType type, TimeStep *t
             if ( regionNodalNumbers.at(inode) ) {
                 eq = ( regionNodalNumbers.at(inode) - 1 ) * regionValSize;
                 for ( i = 1; i <= regionValSize; i++ ) {
-                    lhs.at(eq + i) /= regionDofMansConnectivity.at( regionNodalNumbers.at(inode) );
+                    if ( regionDofMansConnectivity.at( regionNodalNumbers.at(inode) ) > 0 ) {
+                        lhs.at(eq + i) /= regionDofMansConnectivity.at( regionNodalNumbers.at(inode) );
+                    } else {
+                        OOFEM_WARNING2("NodalAveragingRecoveryModel::recoverValues: values of dofmanager %d undetermined", inode);
+                        lhs.at(eq + i) = 0.0;
+                    }
                 }
             }
         }
@@ -184,27 +193,25 @@ NodalAveragingRecoveryModel :: initRegionMap(IntArray &regionMap, IntArray &regi
         element = domain->giveElement(ielem);
 
 #ifdef __PARALLEL_MODE
-        if (element->giveParallelMode() != Element_local) continue;
+        if ( element->giveParallelMode() != Element_local ) {
+            continue;
+        }
+
 #endif
 
         if ( ( interface =  ( NodalAveragingRecoveryModelInterface * ) element->
                            giveInterface(NodalAveragingRecoveryModelInterfaceType) ) == NULL ) {
-            /*
-             * printf ("NodalAveragingRecoveryModel :: initRegionMap: Element %d does not support required interface", ielem);
-             * printf ("-skipping region %d\n", element->giveRegionNumber());
-             */
-            regionsSkipped = 1;
-            regionMap.at( element->giveRegionNumber() ) = 1;
+            // If an element doesn't implement the interface, it is ignored.
+
+            //regionsSkipped = 1;
+            //regionMap.at( element->giveRegionNumber() ) = 1;
             continue;
         } else {
             if ( regionValSize.at( element->giveRegionNumber() ) ) {
                 if ( regionValSize.at( element->giveRegionNumber() ) !=
                     interface->NodalAveragingRecoveryMI_giveDofManRecordSize(type) ) {
+                    // This indicates a size mis-match between different elements, no choice but to skip the region.
                     regionMap.at( element->giveRegionNumber() ) = 1;
-                    /*
-                     *       printf ("NodalAveragingRecoveryModel :: initRegionMap: element %d has incompatible value size, skipping region\n",
-                     *               ielem);
-                     */
                     regionsSkipped = 1;
                 }
             } else {
@@ -230,76 +237,79 @@ NodalAveragingRecoveryModel :: initRegionMap(IntArray &regionMap, IntArray &regi
 #ifdef __PARALLEL_MODE
 
 void
-NodalAveragingRecoveryModel :: initCommMaps ()
+NodalAveragingRecoveryModel :: initCommMaps()
 {
-#ifdef __PARALLEL_MODE
-  if (initCommMap) {
-    EngngModel *emodel=domain->giveEngngModel();
-    ProblemCommunicatorMode commMode = emodel->giveProblemCommMode();
-    if (commMode == ProblemCommMode__NODE_CUT) {
-      commBuff = new CommunicatorBuff(emodel->giveNumberOfProcesses(), CBT_dynamic);
-      communicator = new ProblemCommunicator(emodel, commBuff, emodel->giveRank(),
-                                             emodel->giveNumberOfProcesses(),
-                                             commMode);
-      communicator->setUpCommunicationMaps(domain->giveEngngModel(), true, true);
-      OOFEM_LOG_INFO ("NodalAveragingRecoveryModel :: initCommMaps: initialized comm maps");
-      initCommMap = false;
-    } else {
-      OOFEM_ERROR ("NodalAveragingRecoveryModel :: initCommMaps: unsupported comm mode");
+ #ifdef __PARALLEL_MODE
+    if ( initCommMap ) {
+        EngngModel *emodel = domain->giveEngngModel();
+        ProblemCommunicatorMode commMode = emodel->giveProblemCommMode();
+        if ( commMode == ProblemCommMode__NODE_CUT ) {
+            commBuff = new CommunicatorBuff(emodel->giveNumberOfProcesses(), CBT_dynamic);
+            communicator = new ProblemCommunicator(emodel, commBuff, emodel->giveRank(),
+                                                   emodel->giveNumberOfProcesses(),
+                                                   commMode);
+            communicator->setUpCommunicationMaps(domain->giveEngngModel(), true, true);
+            OOFEM_LOG_INFO("NodalAveragingRecoveryModel :: initCommMaps: initialized comm maps");
+            initCommMap = false;
+        } else {
+            OOFEM_ERROR("NodalAveragingRecoveryModel :: initCommMaps: unsupported comm mode");
+        }
     }
-  }
-#endif
+
+ #endif
 }
 
 void
-NodalAveragingRecoveryModel :: exchangeDofManValues (int ireg, FloatArray& lhs, IntArray& regionDofMansConnectivity,
-                                                     IntArray& regionNodalNumbers, int regionValSize) 
+NodalAveragingRecoveryModel :: exchangeDofManValues(int ireg, FloatArray &lhs, IntArray &regionDofMansConnectivity,
+                                                    IntArray &regionNodalNumbers, int regionValSize)
 {
-  EngngModel *emodel = domain->giveEngngModel();
-  ProblemCommunicatorMode commMode = emodel->giveProblemCommMode();
-  
-  if (commMode == ProblemCommMode__NODE_CUT) {
-    parallelStruct ls (&lhs, &regionDofMansConnectivity, &regionNodalNumbers, regionValSize);
-    
-    // exchange data for shared nodes
-    communicator->packAllData( this, &ls, &NodalAveragingRecoveryModel::packSharedDofManData );
-    communicator->initExchange(789+ireg);
-    communicator->unpackAllData( this, &ls, &NodalAveragingRecoveryModel::unpackSharedDofManData );
-    communicator->finishExchange();
-  } else {
-    OOFEM_ERROR ("NodalAveragingRecoveryModel :: exchangeDofManValues: Unsupported commMode");
-  }
+    EngngModel *emodel = domain->giveEngngModel();
+    ProblemCommunicatorMode commMode = emodel->giveProblemCommMode();
+
+    if ( commMode == ProblemCommMode__NODE_CUT ) {
+        parallelStruct ls( &lhs, &regionDofMansConnectivity, &regionNodalNumbers, regionValSize);
+
+        // exchange data for shared nodes
+        communicator->packAllData(this, & ls, & NodalAveragingRecoveryModel :: packSharedDofManData);
+        communicator->initExchange(789 + ireg);
+        communicator->unpackAllData(this, & ls, & NodalAveragingRecoveryModel :: unpackSharedDofManData);
+        communicator->finishExchange();
+    } else {
+        OOFEM_ERROR("NodalAveragingRecoveryModel :: exchangeDofManValues: Unsupported commMode");
+    }
 }
 
 int
-NodalAveragingRecoveryModel :: packSharedDofManData (parallelStruct* s, ProcessCommunicator &processComm)
+NodalAveragingRecoveryModel :: packSharedDofManData(parallelStruct *s, ProcessCommunicator &processComm)
 {
-  int result = 1, i, j, indx, eq, size;
-  ProcessCommunicatorBuff *pcbuff = processComm.giveProcessCommunicatorBuff();
-  IntArray const *toSendMap = processComm.giveToSendMap();
-  
-  size = toSendMap->giveSize();
-  for ( i = 1; i <= size; i++ ) {
-    // toSendMap contains all shared dofmans with remote partition
-    // one has to check, if particular shared node value is available for given region
-    indx = s->regionNodalNumbers->at(toSendMap->at(i));
-    if (indx) {
-      // pack "1" to indicate that for given shared node this is a valid contribution
-      result &= pcbuff->packInt (1);
-      result &= pcbuff->packInt(s->regionDofMansConnectivity->at(indx));
-      eq = ( indx - 1 ) * s->regionValSize;
-      for (j=1; j<=s->regionValSize; j++) result &= pcbuff->packDouble (s->lhs->at(eq+j));
-    } else {
-      // ok shared node is not in active region (determined by s->regionNodalNumbers)
-      result &= pcbuff->packInt (0);
+    int result = 1, i, j, indx, eq, size;
+    ProcessCommunicatorBuff *pcbuff = processComm.giveProcessCommunicatorBuff();
+    IntArray const *toSendMap = processComm.giveToSendMap();
+
+    size = toSendMap->giveSize();
+    for ( i = 1; i <= size; i++ ) {
+        // toSendMap contains all shared dofmans with remote partition
+        // one has to check, if particular shared node value is available for given region
+        indx = s->regionNodalNumbers->at( toSendMap->at(i) );
+        if ( indx ) {
+            // pack "1" to indicate that for given shared node this is a valid contribution
+            result &= pcbuff->packInt(1);
+            result &= pcbuff->packInt( s->regionDofMansConnectivity->at(indx) );
+            eq = ( indx - 1 ) * s->regionValSize;
+            for ( j = 1; j <= s->regionValSize; j++ ) {
+                result &= pcbuff->packDouble( s->lhs->at(eq + j) );
+            }
+        } else {
+            // ok shared node is not in active region (determined by s->regionNodalNumbers)
+            result &= pcbuff->packInt(0);
+        }
     }
-  } 
-  return result;
-  
+
+    return result;
 }
 
-int 
-NodalAveragingRecoveryModel :: unpackSharedDofManData (parallelStruct* s, ProcessCommunicator &processComm)
+int
+NodalAveragingRecoveryModel :: unpackSharedDofManData(parallelStruct *s, ProcessCommunicator &processComm)
 {
     int result = 1;
     int i, j, eq, indx, size, flag, intValue;
@@ -309,25 +319,30 @@ NodalAveragingRecoveryModel :: unpackSharedDofManData (parallelStruct* s, Proces
 
     size = toRecvMap->giveSize();
     for ( i = 1; i <= size; i++ ) {
-      indx = s->regionNodalNumbers->at(toRecvMap->at(i));
-      // toRecvMap contains all shared dofmans with remote partition
-      // one has to check, if particular shared node received contribution is available for given region
-      result &= pcbuff->unpackInt (flag);
-      if (flag) {
-        // "1" to indicates that for given shared node this is a valid contribution
-        result &= pcbuff->unpackInt(intValue);
-        // now check if we have a valid number
-        if (indx) s->regionDofMansConnectivity->at(indx) += intValue;
-        eq = ( indx - 1 ) * s->regionValSize;
-        for (j=1; j<=s->regionValSize; j++) {
-          result &= pcbuff->unpackDouble(value);
-          if (indx) s->lhs->at(eq+j) += value;
-        } 
-      } 
+        indx = s->regionNodalNumbers->at( toRecvMap->at(i) );
+        // toRecvMap contains all shared dofmans with remote partition
+        // one has to check, if particular shared node received contribution is available for given region
+        result &= pcbuff->unpackInt(flag);
+        if ( flag ) {
+            // "1" to indicates that for given shared node this is a valid contribution
+            result &= pcbuff->unpackInt(intValue);
+            // now check if we have a valid number
+            if ( indx ) {
+                s->regionDofMansConnectivity->at(indx) += intValue;
+            }
+
+            eq = ( indx - 1 ) * s->regionValSize;
+            for ( j = 1; j <= s->regionValSize; j++ ) {
+                result &= pcbuff->unpackDouble(value);
+                if ( indx ) {
+                    s->lhs->at(eq + j) += value;
+                }
+            }
+        }
     }
+
     return result;
 }
 
 #endif
-
 } // end namespace oofem

@@ -1,4 +1,4 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/zznodalrecoverymodel.C,v 1.4.4.1 2004/04/05 15:19:44 bp Exp $ */
+/* $HeadURL$, $Revision$, $Date$, $Author$ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -43,6 +43,7 @@
 #include "node.h"
 #include "elementside.h"
 #include "integrationrule.h"
+#include "mathfem.h"
 #ifndef __MAKEDEPEND
  #include <stdio.h>
 #endif
@@ -50,6 +51,8 @@
 #ifdef __PARALLEL_MODE
  #include "communicator.h"
 #endif
+
+#define ZZNRM_ZERO_VALUE 1.e-12
 
 namespace oofem {
 ZZNodalRecoveryModel :: ZZNodalRecoveryModel(Domain *d) : NodalRecoveryModel(d)
@@ -218,8 +221,10 @@ ZZNodalRecoveryModel :: recoverValues(InternalStateType type, TimeStep *tStep)
                 continue;
             }
 
+            // If an element doesn't implement the interface, it is ignored.
             if ( ( interface = ( ZZNodalRecoveryModelInterface * ) element->giveInterface(ZZNodalRecoveryModelInterfaceType) ) == NULL ) {
-                abort();
+                //abort();
+                continue;
             }
 
 
@@ -246,18 +251,27 @@ ZZNodalRecoveryModel :: recoverValues(InternalStateType type, TimeStep *tStep)
         this->exchangeDofManValues(ireg, lhs, rhs, regionNodalNumbers);
 #endif
 
-
+        bool missingDofManContribution = false;
         // solve for recovered values of active region
         for ( i = 1; i <= regionDofMans; i++ ) {
             eq = ( i - 1 ) * regionValSize;
             for ( j = 1; j <= regionValSize; j++ ) {
                 // rhs will be overriden by recovered values
-                sol.at(eq + j) = rhs.at(i, j) / lhs.at(i);
+                if ( fabs( lhs.at(i) ) > ZZNRM_ZERO_VALUE ) {
+                    sol.at(eq + j) = rhs.at(i, j) / lhs.at(i);
+                } else {
+                    missingDofManContribution = true;
+                    sol.at(eq + j) = 0.0;
+                }
             }
         }
 
         // update recovered values
         this->updateRegionRecoveredValues(ireg, regionNodalNumbers, regionValSize, sol);
+
+        if ( missingDofManContribution ) {
+            OOFEM_WARNING2("ZZNodalRecoveryModel::recoverValues: region %d: values of some dofmanagers undetermined", ireg);
+        }
     } // end loop over regions
 
     this->valType = type;
@@ -290,20 +304,16 @@ ZZNodalRecoveryModel :: initRegionMap(IntArray &regionMap, IntArray &regionValSi
 
 #endif
         if ( ( interface =  ( ZZNodalRecoveryModelInterface * ) element->giveInterface(ZZNodalRecoveryModelInterfaceType) ) == NULL ) {
-            /*
-             *   printf ("NodalRecoveryModel :: initRegionMap: Element %d does not support required interface", ielem);
-             * printf ("-skipping region %d\n", element->giveRegionNumber());
-             */
-            regionsSkipped = 1;
-            regionMap.at( element->giveRegionNumber() ) = 1;
+            // If an element doesn't implement the interface, it is ignored.
+
+            //regionsSkipped = 1;
+            //regionMap.at( element->giveRegionNumber() ) = 1;
             continue;
         } else {
             if ( regionValSize.at( element->giveRegionNumber() ) ) {
                 if ( regionValSize.at( element->giveRegionNumber() ) != interface->ZZNodalRecoveryMI_giveDofManRecordSize(type) ) {
+                    // This indicates a size mis-match between different elements, no choice but to skip the region.
                     regionMap.at( element->giveRegionNumber() ) = 1;
-                    /*
-                     *   printf ("NodalRecoveryModel :: initRegionMap: element %d has incompatible value size, skipping region\n",ielem);
-                     */
                     regionsSkipped = 1;
                 }
             } else {
