@@ -2,6 +2,7 @@
 \usepackage{html}
 \usepackage{graphicx}
 \usepackage{ifpdf}
+\usepackage{ifthen}
 \input{include.tex}
 
 \renewcommand{\topfraction}{0.99}	% 99% of page top can be a float
@@ -17,6 +18,38 @@
 \newcommand{\optelemparam}[2]{{[~\elemparam{#1}{#2}]}}
 \newcommand{\param}[1]{{\texttt{#1}}}
 
+\newcommand{\param}[1]{{\em #1}}
+\newcommand{\fieldVal}[2]{\mbox{({\it\bf{#1}\#)\tiny (#2)}}}
+\newcommand{\keywordnotype}[1]{\mbox{{\it{\bf{#1}}}}}
+\newcommand{\keyword}[2]{\mbox{{\keywordnotype{#1}\tiny (#2)}}}
+\newcommand{\entKeyword}[1]{\mbox{{*{\bf{#1}}}}}
+\newcommand{\entKeywordWithVal}[2]{\mbox{*\keyword{#1}{#2}}}
+\newcommand{\entKeywordInst}[1]{\mbox{{\bf{{#1}}}}}
+\newcommand{\field}[2]{\mbox{\keyword{#1}{#2}~\#}}
+\newcommand{\optField}[2]{\mbox{[\field{#1}{#2}]}}
+%% macros for items related to parallel
+%%\newcommand{\Pmode}[1]{\begin{minipage}[t]{11cm}\textsf{#1}\end{minipage}}
+\newcommand{\Pmode}[1]{{\sffamily #1}}
+\newcommand{\Pparam}[1]{\param{#1}}
+\newcommand{\PfieldVal}[2]{\mbox{$\langle$({\it\bf{#1}\#)\tiny (#2)}$\rangle$}}
+\newcommand{\Pkeywordnotype}[1]{\mbox{$\langle${\it{\bf{#1}}}}$\rangle$}
+\newcommand{\Pkeyword}[2]{\mbox{$\langle${\keywordnotype{#1}\tiny (#2)}$\rangle$}}
+\newcommand{\PentKeyword}[1]{\mbox{{$\langle$*{\bf{#1}}$\rangle$}}}
+\newcommand{\PentKeywordWithVal}[2]{\mbox{*\Pkeyword{#1}{#2}}}
+\newcommand{\PentKeywordInst}[1]{\mbox{$\langle${\bf{{#1}}}$\rangle$}}
+\newcommand{\Pfield}[2]{\mbox{$\langle$\keyword{#1}{#2}~\#$\rangle$}}
+\newcommand{\PoptField}[2]{\mbox{$\langle$[\field{#1}{#2}]$\rangle$}}
+
+\begin{htmlonly}
+\newenvironment{record}[1][]{\begin{tabular}{|ll}}{\end{tabular}\\}
+\newcommand{\recentry}[2]{{#1}&{#2}\\}
+\end{htmlonly}
+%begin{latexonly}
+\newcounter{rcc}
+\newenvironment{record}[1][\textwidth]{\setcounter{rcc}{0}\begin{tabular*}{#1}{|ll@{\extracolsep{\fill}}r}}{\end{tabular*}\\}
+%\newenvironment{record}{\begin{tabular}{|llr}}{\end{tabular*}\\}
+\newcommand{\recentry}[2]{\ifthenelse{\value{rcc}>0}{&$\backslash$ \\}{\setcounter{rcc}{1}}{#1}&{#2}}
+%end{latexonly}
 
 \begin{document}
 %begin{latexonly}
@@ -893,6 +926,41 @@ w-displacement) are required in each node, according to element mode.\\
 \descitem{Features} None.\\
 \descitem{Loads} \\
 \descitem{Status} 
+
+
+\subsection{Iso Geometric Analysis based (IGA) elements}
+The following record describes the common part of IGA element record:
+ 
+\noindent
+\begin{record}
+  \recentry{\entKeyword{IGAElement}}{\fieldVal{num}{in}}
+  \recentry{}{\field{mat}{in} \field{crossSect}{in} \field{nodes}{ia}}
+  %% interpolation specific
+  \recentry{}{\field{knotvectoru}{ra} \field{knotvectorv}{ra} \field{knotvectorw}{ra}}
+  \recentry{}{\optField{knotmultiplicityu}{ia} \optField{knotmultiplicityv}{ia}}
+  \recentry{}{\optField{knotmultiplicityw}{ia}}
+  \recentry{}{\field{degree}{ia} \field{nip}{ia}}
+  %% parallel stuff
+  \recentry{}{\PoptField{partitions}{ia} \PoptField{remote}{}}
+\end{record}
+The \param{knotvectoru}, \param{knotvectorv}, and \param{knotvectorw} parameters specify  knot vectors in individual parametric directions, considering only distinct knots. Open knot vector is always assumed, so the multiplicity of the first and last knot should be equal to $p+1$, where $p$ is polynomial degree in coresponding direction (determined by \param{degree} parameter, see further).\\
+The knot multiplicity can be set using optional parameters \param{knotmultiplicityu}, \param{knotmultiplicityv}, and \param{knotmultiplicityw}. By default, the open knot vector is assumed and multiplicity of internal knots is assumed to be equal to one. Note, that total number of knots in particular direction (including multiplicity) must be equal to number of control points in this direction increased by degree in this direction plus 1.\\
+The degree of approximation for each parametric direction is determined from \param{degree} array, dimension of which is equal to number of spatial dimensions of the problem.\\
+In case of elements with BSpline or Nurbs interpolation, the nodes forming the rectangular array of control points of the element are ordered in a such way, that u-index is changing most quicly, and w-index (or v-index in case of 2d problems) most slowly. In case of elements with T-spline interpolation, the nodes forming the T-mesh of the element are ordered arbitrarily.
+
+
+The supported \entKeyword{IGAElement} values are following:\\\\
+\elemkeyword{bsplineplanestresselement}\\
+\descitem{Parameters} None.\\
+\elemkeyword{nurbsplanestresselement}\\
+\descitem{Parameters} None.\\
+\elemkeyword{nurbs3delement}\\
+\descitem{Parameters} None.\\
+\elemkeywordb{tsplineplanestresselement}\\
+\descitem{Parameters} \elemparam{localindexknotvectoru}{in} \elemparam{localindexknotvectorv}{in} \elemparam{localindexknotvectorw}{in}\\
+The parameters \param{localindexknotvectoru}, \param{localindexknotvectorv},\\ and \param{localindexknotvectorw} defined by the indices to global knot vectors (given by \param{knotvectoru}, \param{knotvectorv}, and \param{knotvectorw} parameters) specify the local knot vectors for each control point of T-mesh (node) in the same order as the nodes have been specified for the element. The local knot vector in a particular direction has $p+2$ entries, where the $p$ is the polynomial degree in that direction.
+
+
 
 \subsection{Special elements}
 \subsubsection{LumpedMass element}
