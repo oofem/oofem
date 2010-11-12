@@ -45,6 +45,7 @@
 #include "mathfem.h"
 #include "oofem_limits.h"
 #include "cltypes.h"
+#include "material.h"
 
 #ifndef __MAKEDEPEND
  #include <vector>
@@ -76,8 +77,10 @@ VTKXMLExportModule :: initializeFrom(InputRecord *ir)
     int val;
 
     ExportModule :: initializeFrom(ir);
-    IR_GIVE_OPTIONAL_FIELD(ir, internalVarsToExport, IFT_VTKXMLExportModule_vars, "vars"); // Macro
-    IR_GIVE_OPTIONAL_FIELD(ir, primaryVarsToExport, IFT_VTKXMLExportModule_primvars, "primvars"); // Macro
+    
+    IR_GIVE_OPTIONAL_FIELD(ir, cellVarsToExport, IFT_VTKXMLExportModule_cellvars, "cellvars"); // Macro - see internalstatetype.h
+    IR_GIVE_OPTIONAL_FIELD(ir, internalVarsToExport, IFT_VTKXMLExportModule_vars, "vars"); // Macro - see internalstatetype.h
+    IR_GIVE_OPTIONAL_FIELD(ir, primaryVarsToExport, IFT_VTKXMLExportModule_primvars, "primvars"); // Macro - see unknowntype.h
 
     val = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_VTKXMLExportModule_stype, "stype"); // Macro
@@ -233,6 +236,9 @@ VTKXMLExportModule :: doOutput(TimeStep *tStep)
             this->exportIntVars(stream, mapG2L, mapL2G, regionDofMans, ireg, tStep);
             this->exportPointDataFooter(stream, tStep);
 
+            //export cell data
+            this->exportCellVars(stream, totalcells, ireg, tStep);
+            
             // end of piece record
             fprintf(stream, "</Piece>\n");
         } // end of default piece for simple geometry elements
@@ -258,7 +264,7 @@ VTKXMLExportModule :: doOutput(TimeStep *tStep)
                 VTKXMLExportModuleElementInterface* interface =
                   ( VTKXMLExportModuleElementInterface * ) elem->giveInterface(VTKXMLExportModuleElementInterfaceType);
                 if ( interface ) {
-                    // passing this to access general piece related methoods like exportPointDataHeader, etc.
+                    // passing this to access general piece related methods like exportPointDataHeader, etc.
                     interface->_export ( stream, this, primaryVarsToExport, internalVarsToExport, tStep );
                 }
             }
@@ -607,7 +613,7 @@ VTKXMLExportModule :: exportIntVarAs(InternalStateType valID, InternalStateValue
         } else {
             this->smoother->giveNodalVector(val, mapL2G.at(inode), ireg);
             if ( val == NULL ) {
-                OOFEM_ERROR("VTKXMLExportModule::exportIntVars: internal error: invalid dofman data");
+                OOFEM_ERROR2("VTKXMLExportModule::exportIntVars: smoothing error: invalid data in node %d", inode);
             }
         }
 
@@ -865,5 +871,102 @@ VTKXMLExportModule :: exportPrimVarAs(UnknownType valID, IntArray &mapG2L, IntAr
 
     fprintf(stream, "</DataArray>\n");
 }
+
+
+void VTKXMLExportModule :: exportCellVars(FILE *stream, int totalcells, int region, TimeStep *tStep)
+{
+ int i, n = cellVarsToExport.giveSize();   
+ InternalStateType type;
+
+    if ( n == 0 ) {
+        return;
+    }   
+    
+    //print header
+    fprintf( stream, "<CellData Scalars=\"\" Vectors=\"\" Tensors=\"\">\n"); // should contain a list of InternalStateType
+    
+    for ( i = 1; i <= n; i++ ) {
+        type = ( InternalStateType ) cellVarsToExport.at(i);
+        this->exportCellVarAs(type, totalcells, region, stream, tStep);
+    }
+    //print footer
+    fprintf( stream, "</CellData>\n");
+}
+  
+  
+  //keyword "cellvars" in OOFEM input file
+void
+VTKXMLExportModule :: exportCellVarAs(InternalStateType type, int nelem, int region, FILE *stream, TimeStep *tStep)
+{
+    Domain *d = emodel->giveDomain(1);
+    int ielem;
+    int pos;
+    Element *elem;
+    FloatMatrix mtrx(3, 3);
+    IntegrationRule *iRule;
+    GaussPoint *gp;
+    FloatArray answer;
+    
+     switch ( type ){
+        case IST_MaterialNumber:
+        case IST_ElementNumber:
+        case IST_AverageTemperature:
+            fprintf( stream, "<DataArray type=\"Float32\" Name=\"%s\" format=\"ascii\"> ", __InternalStateTypeToString(type) );
+            for ( ielem = 1; ielem <= nelem; ielem++ ) {
+                elem = d->giveElement(ielem);     
+#ifdef __PARALLEL_MODE
+                if ( elem->giveParallelMode() != Element_local ) {
+                    continue;
+                }
+#endif        
+                if ( type == IST_MaterialNumber ) {
+                    fprintf( stream, "%d ", elem->giveMaterial()->giveNumber() );
+                } else if ( type == IST_ElementNumber ) {
+                    fprintf( stream, "%d ", elem->giveNumber() );
+                } else if ( type == IST_AverageTemperature ) {//grab from the first IP
+                    iRule = elem->giveDefaultIntegrationRulePtr();
+                    gp  = iRule->getIntegrationPoint(0);
+                    gp->giveMaterialStatus();
+                    elem->giveIPValue(answer, gp, IST_AverageTemperature, tStep);
+                    fprintf( stream, "%f ", answer.at(1) );
+                } else {
+                        OOFEM_ERROR2("Unsupported Cell variable %s\n", __InternalStateTypeToString(type) );
+                }
+            }
+            break;
+            
+            case IST_MaterialOrientation_x:
+            case IST_MaterialOrientation_y:
+            case IST_MaterialOrientation_z:
+                fprintf( stream, "<DataArray type=\"Float32\" Name=\"%s\" NumberOfComponents=\"3\" format=\"ascii\"> ", __InternalStateTypeToString(type) );
+            if ( type == IST_MaterialOrientation_x ) {
+                pos = 1;
+            }
+            if ( type == IST_MaterialOrientation_y ) {
+                pos = 2;
+            }
+            if ( type == IST_MaterialOrientation_z ) {
+                pos = 3;
+            }
+
+            for ( ielem = 1; ielem <= nelem; ielem++ ) {
+                if ( !d->giveElement(ielem)->giveLocalCoordinateSystem(mtrx) ) {
+                    mtrx.resize(3, 3);
+                    mtrx.zero();
+                }
+
+                fprintf( stream, "%f %f %f  ", mtrx.at(1, pos), mtrx.at(2, pos), mtrx.at(3, pos) );
+            }
+
+            break;
+
+        default:
+            OOFEM_ERROR2( "Unsupported Cell variable %s", __InternalStateTypeToString(type) );
+        }
+
+            
+    fprintf(stream, "</DataArray>\n");
+}
+  
 
 } // end namespace oofem

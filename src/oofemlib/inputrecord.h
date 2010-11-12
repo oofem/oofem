@@ -98,6 +98,7 @@ enum InputFieldType {
     IFT_VTKExportModule_stype,
     IFT_VTKExportModule_regionstoskip,
 
+    IFT_VTKXMLExportModule_cellvars,
     IFT_VTKXMLExportModule_vars,
     IFT_VTKXMLExportModule_primvars,
     IFT_VTKXMLExportModule_stype,

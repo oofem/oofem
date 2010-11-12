@@ -495,6 +495,9 @@ CemhydMatStatus :: CemhydMatStatus(int n, Domain *d, GaussPoint *gp, CemhydMatSt
     ConnNumbers = NULL;
     cshage = NULL;
     faces = NULL;
+    PhaseFrac = NULL;
+    last_values = NULL;
+    phase = NULL;
     //set common variables in constructor
  #ifdef PRINTF
     printf("Constructor of CemhydMatStatus on GP %p, withMicrostructure %d, copy from CemhydMatStatus %p\n", gp, withMicrostructure, CemStat);
@@ -14233,7 +14236,7 @@ CemhydMatStatus :: printOutputAt(FILE *file, TimeStep *atTime)
     fprintf(file, "   status {");
     fprintf( file, "cyc %d  time %e  DoH %f  conductivity %f  capacity %f  density %f", cemhydmat->giveCycleNumber(this->gp), 3600 * cemhydmat->giveTimeOfCycle(this->gp), cemhydmat->giveDoHActual(this->gp), cemhydmat->giveConcreteConductivity(this->gp), cemhydmat->giveConcreteCapacity(this->gp), cemhydmat->giveConcreteDensity(this->gp) );
     if ( ms->Calculate_elastic_homogenization ) {
-        fprintf(file, "EVirginPaste %f NuVirginPaste %f EConcrete %f NuConcrete %f", ms->last_values [ 2 ], ms->last_values [ 3 ], ms->last_values [ 4 ], ms->last_values [ 5 ]);
+        fprintf(file, " EVirginPaste %f NuVirginPaste %f EConcrete %f NuConcrete %f", ms->last_values [ 2 ], ms->last_values [ 3 ], ms->last_values [ 4 ], ms->last_values [ 5 ]);
     }
 
 

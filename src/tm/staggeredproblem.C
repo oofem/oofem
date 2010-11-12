@@ -140,7 +140,7 @@ StaggeredProblem :: initializeFrom(InputRecord *ir)
 
     IR_GIVE_OPTIONAL_FIELD(ir, stepMultiplier, IFT_StaggeredProblem_stepmultiplier, "stepmultiplier"); // Macro
     if (stepMultiplier<=1)
-    	_error("stepMultiplier must be >= 1!")
+        _error("stepMultiplier must be >= 1!")
     IR_GIVE_FIELD2(ir, problem_inputStream, IFT_StaggeredProblem_prob1, "prob1", MAX_FILENAME_LENGTH); // Macro
     strncpy(inputStreamNames [ 0 ], problem_inputStream, MAX_FILENAME_LENGTH);
     IR_GIVE_FIELD2(ir, problem_inputStream, IFT_StaggeredProblem_prob2, "prob2", MAX_FILENAME_LENGTH); // Macro

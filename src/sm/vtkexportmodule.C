@@ -92,9 +92,9 @@ VTKExportModule :: initializeFrom(InputRecord *ir)
     int val;
 
     ExportModule :: initializeFrom(ir);
-    IR_GIVE_OPTIONAL_FIELD(ir, cellVarsToExport, IFT_VTKExportModule_cellvars, "cellvars"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, cellVarsToExport, IFT_VTKExportModule_cellvars, "cellvars"); // Macro - see internalstatetype.h
     IR_GIVE_OPTIONAL_FIELD(ir, internalVarsToExport, IFT_VTKExportModule_vars, "vars"); // Macro - see internalstatetype.h
-    IR_GIVE_OPTIONAL_FIELD(ir, primaryVarsToExport, IFT_VTKExportModule_primvars, "primvars"); // Macro - see dofiditem.h
+    IR_GIVE_OPTIONAL_FIELD(ir, primaryVarsToExport, IFT_VTKExportModule_primvars, "primvars");  // Macro - see unknowntype.h
 
     val = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_VTKExportModule_stype, "stype"); // Macro
@@ -594,10 +594,10 @@ VTKExportModule :: exportCellVars(FILE *stream, int elemToProcess, TimeStep *tSt
 #endif
                 if ( type == IST_MaterialNumber ) {
                     fprintf( stream, "%d\n", elem->giveMaterial()->giveNumber() );
-                }
-
-                if ( type == IST_ElementNumber ) {
+                } else if ( type == IST_ElementNumber ) {
                     fprintf( stream, "%d\n", elem->giveNumber() );
+                } else {
+                        OOFEM_ERROR2("Unsupported Cell variable %s\n", __InternalStateTypeToString(type) );
                 }
             }
 

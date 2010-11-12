@@ -48,21 +48,21 @@ namespace oofem {
  */
 
 #define UnknownType_DEF \
-    ENUM_ITEM(UnknownType_Unknown) \
-    ENUM_ITEM(DisplacementVector) \
-    ENUM_ITEM(GeneralizedDisplacementVector) \
-    ENUM_ITEM(FluxVector) \
-    ENUM_ITEM(VelocityVector)                     \
-    ENUM_ITEM(PressureVector)                     \
-    ENUM_ITEM(TemperatureVector)                  \
-    ENUM_ITEM(EigenValue)                         \
-    ENUM_ITEM(EigenVector)                        \
-    ENUM_ITEM(TotalLoadLevel)                     \
-    ENUM_ITEM(ReynoldsNumber)                                             \
-    ENUM_ITEM(Theta_1) /* CBS integration constan)*/ \
-    ENUM_ITEM(Theta_2) /* CBS integration constan)*/ \
-    ENUM_ITEM(PrescribedTractionPressure) /* CBS prescribed pressure due to applied tractio)*/ \
-    ENUM_ITEM(InternalForcesEBENorm) /* Norm of nodal internal forces evaluated on element by element basis*/
+    ENUM_ITEM_WITH_VALUE(UnknownType_Unknown, 0) \
+    ENUM_ITEM_WITH_VALUE(DisplacementVector, 1) \
+    ENUM_ITEM_WITH_VALUE(GeneralizedDisplacementVector, 2) \
+    ENUM_ITEM_WITH_VALUE(FluxVector, 3) \
+    ENUM_ITEM_WITH_VALUE(VelocityVector, 4)                     \
+    ENUM_ITEM_WITH_VALUE(PressureVector, 5)                     \
+    ENUM_ITEM_WITH_VALUE(TemperatureVector, 6)                  \
+    ENUM_ITEM_WITH_VALUE(EigenValue, 7)                         \
+    ENUM_ITEM_WITH_VALUE(EigenVector, 8)                        \
+    ENUM_ITEM_WITH_VALUE(TotalLoadLevel, 9)                     \
+    ENUM_ITEM_WITH_VALUE(ReynoldsNumber, 10)                                             \
+    ENUM_ITEM_WITH_VALUE(Theta_1, 11) /* CBS integration constan)*/ \
+    ENUM_ITEM_WITH_VALUE(Theta_2, 12) /* CBS integration constan)*/ \
+    ENUM_ITEM_WITH_VALUE(PrescribedTractionPressure, 13) /* CBS prescribed pressure due to applied tractio)*/ \
+    ENUM_ITEM_WITH_VALUE(InternalForcesEBENorm, 14) /* Norm of nodal internal forces evaluated on element by element basis*/
 
 enum UnknownType {
     UnknownType_DEF

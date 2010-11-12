@@ -69,6 +69,8 @@ protected:
     IntArray internalVarsToExport;
     /// list of primary unknowns to export
     IntArray primaryVarsToExport;
+    /// list of cell data to export
+    IntArray cellVarsToExport;
 
     /// smoother type
     enum VTKEM_SmootherType { VTK_Smother_NA, VTK_Smoother_ZZ, VTK_Smoother_SPR } stype;
@@ -139,18 +141,22 @@ protected:
      * export internal variables
      */
     void exportIntVars(FILE *stream, IntArray& mapG2L, IntArray& mapL2G,
-		       int regionDofMans, int ireg, TimeStep *tStep);
+               int regionDofMans, int ireg, TimeStep *tStep);
     /**
      * export primary variables
      */
     void exportPrimaryVars(FILE *stream, IntArray& mapG2L, IntArray& mapL2G,
-			   int regionDofMans, int region, TimeStep *tStep);
+               int regionDofMans, int region, TimeStep *tStep);
     /** exports single variable */
     void exportIntVarAs(InternalStateType valID, InternalStateValueType type, IntArray& mapG2L, IntArray& mapL2G,
-			int regionDofMans, int ireg, FILE *stream, TimeStep *tStep);
+            int regionDofMans, int ireg, FILE *stream, TimeStep *tStep);
     /** exports single variable */
     void exportPrimVarAs(UnknownType valID, IntArray& mapG2L, IntArray& mapL2G,
-			 int regionDofMans, int region, FILE *stream, TimeStep *tStep);
+             int regionDofMans, int region, FILE *stream, TimeStep *tStep);
+    
+    /** exports cell variables */
+    void exportCellVars(FILE *stream, int totalcells, int region, TimeStep *tStep);
+    void exportCellVarAs(InternalStateType type, int nelem, int region, FILE *stream, TimeStep *tStep);
 
     /**
      * Assembles the region node map. Also computes the total number of nodes in region.
@@ -161,7 +167,7 @@ protected:
      * The i-th value contains the corresponding global node number.
      */
     int initRegionNodeNumbering(IntArray &mapG2L, IntArray& mapL2G, 
-				int &regionDofMans, int &totalcells,
+                int &regionDofMans, int &totalcells,
                                 Domain *domain, int reg);
 
     /// Returns true if element geometry type is composite (not a single cell)

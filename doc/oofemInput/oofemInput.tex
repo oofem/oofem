@@ -1952,12 +1952,14 @@ of this array are corresponding load record numbers. The loads should
 have the proper type (body load type), otherwise error will be generated.
 
 Boundary load acting on element boundary is specified using
-\param{boundaryLoads} array. The format of this array is\\
-size*2~lnum(1)~id(1)~...~lnum(size)~id(size),\\
-where size is total number of loadings applied to element,
-lnum(i) is load number, which is applied, and id(i)
-is corresponding entity number, to which load is applied (for example
-side or surface number). The entity numbering is element dependent and
+\param{boundaryLoads} array. The format of this array is
+\begin{displaymath}
+2\cdot size \quad lnum(1)~id(1)~\dots~lnum(size)~id(size),
+\end{displaymath}
+where $size$ is total number of loadings applied to element,
+$lnum(i)$ is the applied load number, and $id(i)$
+is the corresponding entity number, to which the load is applied (for example
+a side or a surface number). The entity numbering is element dependent and
 is described in element specific sections. The applied loads must be
 of proper type (boundary load type), otherwise error is generated.
 
@@ -2265,7 +2267,7 @@ distinguishes the type of boundary condition (supported values are:
 If the boundary condition corresponds to distributed force load, the
 \param{Components} array contains components of distributed load
 corresponding to element unknowns.
-The load is pecified for all dofs of object to which is associated.
+The load is specified for all DOFs of object to which is associated.
 For some types of boundary conditions the zero value of load does not mean
 that the load is not applied (Newton's type of bc, for example). Then
 some mask, which allows to exclude specific dofs is necessary.
