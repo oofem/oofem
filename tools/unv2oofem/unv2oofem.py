@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from unv2x import *
 from oofemctrlreader import *
 import time
@@ -87,37 +88,76 @@ UNV2OOFEM: Converts UNV file from Salome to OOFEM native file format
         # write oofem header
         of.write(CTRL.header)
 
-        #count elements
-        nelems=0
-        for elem in FEM.elems:
-            if elem.oofem_elemtype:
-                nelems+=1
-
-        #write component record
-        of.write('ndofman %d nelem %d ncrosssect %d nmat %d nbc %d nic %d nltf %d\n' % (FEM.nnodes, nelems, CTRL.ncrosssect, CTRL.nmat, CTRL.nbc, CTRL.nic, CTRL.nltf))
-        #write nodes
-        for node in FEM.nodes:
-            #resolve nodal properties
-            properties=""
-            for igroup in node.oofem_groups:
-                properties+=igroup.oofem_properties
-            # write nodal record
-            of.write(('node %5d coords 3 %8g %8g %8g %s\n') % (node.id,node.coords[0],node.coords[1],node.coords[2], properties))
-
-
-        #write elements
+        #store elements in meshElements list. Reason: need to assign boundaryLoad to elements, which may be read after elements
+        meshElements = []
+        #create auxiliary array of elemtn numbers to be searched for boundaryLoads
+        elemNotBoundary = []
+        #counter = 0
         for elem in FEM.elems:
             #resolve element properties
             properties=""
             for igroup in elem.oofem_groups:
                 properties+=igroup.oofem_properties
-            #do output if elemtype resolved
-            if elem.oofem_elemtype:
-                dat=[CTRL.elementNames[elem.oofem_elemtype], elem.id,elem.nnodes]
-                dat.extend([x for x in elem.cntvt])
+            #do output if oofem_elemtype resolved and not BoundaryLoads
+            if elem.oofem_elemtype and CTRL.oofem_elemProp[elem.oofem_elemtype].name != 'BoundaryLoads':
+                elemNotBoundary.append(elem)
+                dat = elem.oofem_outputData
+                dat.append(CTRL.oofem_elemProp[elem.oofem_elemtype].name)
+                dat.append("%-5d" % elem.id)
+                dat.append("nodes")
+                dat.append("%-3d" % elem.nnodes)
+                for n in range(elem.nnodes):
+                    mask = CTRL.oofem_elemProp[elem.oofem_elemtype].nodeMask[n]
+                    dat.append("%-3d" % elem.cntvt[mask])
+                #dat.extend(["%-3d" % x for x in elem.cntvt])
                 dat.append(properties)
-                # format='%5d, ' * (4 + elem.nnodes) + ' %5d'            
-                of.write('%s %5d nodes %d %5d %5d %5d %s\n' % tuple(dat))
+                meshElements.append([])
+        
+        #assign BoundaryLoads to elements
+        nboLoads = 0
+        for belem in FEM.elems:
+            #resolve element properties
+            properties=""
+            for igroup in belem.oofem_groups:
+                properties+=igroup.oofem_properties
+            if CTRL.oofem_elemProp[belem.oofem_elemtype].name == 'BoundaryLoads':
+                nodesOnBoundary = belem.cntvt
+                for elem in elemNotBoundary:
+                    cnt=0
+                    for n in range(len(nodesOnBoundary)):
+                        if(elem.cntvt.count(int(nodesOnBoundary[n]))):
+                            cnt = cnt+1
+                    if (cnt==len(nodesOnBoundary)):#found eligible element
+                        edgeMask = CTRL.oofem_elemProp[elem.oofem_elemtype].edgeMask
+                        for i in range(len(edgeMask)):
+                            nodesInMask = []#list of nodes which are extracted according to mask
+                            for x in edgeMask[i]:
+                                nodesInMask.append(elem.cntvt[x])
+                            if (len(edgeMask[i]) == 2):#extract edges defined by two points
+                                if(nodesOnBoundary.count(nodesInMask[0]) and nodesOnBoundary.count(nodesInMask[1])):
+                                    elem.oofem_outputData.append(properties)
+                                    elem.oofem_outputData.append("%d" % (i+1))
+       
+        #write component record
+        of.write('ndofman %d nelem %d ncrosssect %d nmat %d nbc %d nic %d nltf %d\n' % (FEM.nnodes, len(elemNotBoundary), CTRL.ncrosssect, CTRL.nmat, CTRL.nbc, CTRL.nic, CTRL.nltf))
+        #write nodes
+        for node in FEM.nodes:
+            #resolve nodal properties
+            outputLine="node %-5d coords %-2d" % (node.id, len(node.coords))
+            for coord in node.coords:
+                outputLine+= "%-8g " % coord
+            properties=""
+            for igroup in node.oofem_groups:
+                if(len(properties)>0 and properties[-1]!=" "):#insert white space if necessary
+                    properties+=" "
+                properties+=igroup.oofem_properties
+            outputLine+=properties
+            # write nodal record
+            of.write(('%s\n') % (outputLine))
+
+        for elem in elemNotBoundary:
+            str = ' '.join(elem.oofem_outputData)
+            of.write('%s\n' % str) 
 
         # write final sections
         of.write(CTRL.footer);
@@ -125,10 +165,12 @@ UNV2OOFEM: Converts UNV file from Salome to OOFEM native file format
         #
         t2 = time.time()
         #
-        print "done ( %d nodes %d elements)" % (FEM.nnodes, nelems)
+        print "done ( %d nodes %d elements)" % (FEM.nnodes, len(elemNotBoundary))
         print "Finished in %0.2f [s]" % ((t2-t1))
         
     else:
         print(helpmsg)
 
         
+
+

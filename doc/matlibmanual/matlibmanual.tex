@@ -2070,7 +2070,7 @@ The hydrating model is coupled with temperature and averaging over shared
 elements within one material instance occurs during the solution. Such approach
 allows domain partitioning to many CemhydMat instances, depending on expected
 accuracy or computational speed. A more detailed description with engineering
-examples was published \cite{Smilauer:09}.
+examples was published \cite{Smilauer:09}. Table~\ref{Cemhydmat_table} summarizes input parameters.
 
 \begin{table}[!htb]
 %\begin{center}
@@ -2078,7 +2078,7 @@ examples was published \cite{Smilauer:09}.
 \hline
 Description & Cemhyd hydrating material\\
 \hline
-Record Format & \descitem{CemhydMat} \elemparam{num}{in} \elemparam{d}{rn} \elemparam{k}{rn} \elemparam{c}{rn} \elemparam{file}{s} [\elemparam{eachGP}{in}] [\elemparam{densityType}{in}] [\elemparam{conductivityType}{in}] [\elemparam{capacityType}{in}] [\elemparam{castingtime}{rn}\\
+Record Format & \descitem{CemhydMat} \elemparam{num}{in} \elemparam{d}{rn} \elemparam{k}{rn} \elemparam{c}{rn} \elemparam{file}{s} [\elemparam{eachGP}{in}] [\elemparam{densityType}{in}] [\elemparam{conductivityType}{in}] [\elemparam{capacityType}{in}] [\elemparam{castingtime}{ia}] [\elemparam{nowarnings}{ia}]\\
 Parameters &- \param{num} material model number\\
 &- \param{d} material density\\
 &- \param{k} Conductivity\\
@@ -2089,11 +2089,12 @@ Parameters &- \param{num} material model number\\
 &- \param{conductivityType} 0 (default) get constant conductivity from OOFEM input file, 1 compute as $\lambda = \textrm{k} (1.33-0.33\textrm{DoH})$ \cite{Ruiz:01}\\
 &- \param{capacityType} 0 (default) get capacity, 1 according to Bentz, 2 according to XML and CEMHYD3D routines\\
 &- \param{castingtime} optional casting time of concrete, from which hydration takes place\\
+&- \param{nowarnings} supresses warnings when material data are out of standard ranges. The array of size 4 represent entries for density, conductivity, capacity, temperature. Nonzero values mean supression.\\
 Supported modes& \_2dHeat, \_3dHeat\\
 \hline
 \end{tabular}
 \caption{Cemhydmat - summary.}
-\label{Isoheat_table}
+\label{Cemhydmat_table}
 %\end{center}
 \end{table}
 
@@ -2114,10 +2115,9 @@ strongly suggested (specified as NlTransientTransportProblem).
 \subsection{Coupled heat and mass transfer material model}
 Coupled heat and mass transfer material model.
 Source: T. Krejci doctoral thesis; Bazant and Najjar, 1972;
-Pedersen, 1990. Assumptions:water vapor is the only driving
+Pedersen, 1990. Assumptions: water vapor is the only driving
 mechanism; relative humidity is from range 0.2 - 0.98 (I and II
-regions).
-The model parameters are summarized
+regions). The model parameters are summarized
 in table~\ref{hemotk_table}.
 \begin{table}[!htb]
 %\begin{center}

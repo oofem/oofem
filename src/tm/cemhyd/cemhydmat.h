@@ -85,7 +85,10 @@ public:
     virtual void averageTemperature(void);
 
     IRResultType initializeFrom(InputRecord *ir);
-    int conductivityType, capacityType, densityType; //use different methods to evaluate material parameters
+    ///use different methods to evaluate material parameters
+    int conductivityType, capacityType, densityType;
+    ///array containing warnings supression for density, conductivity, capacity, high temperature
+    IntArray nowarnings;
     ///assign a separate microstructure in each integration point
     int eachGP;
     ///XML input file name for CEMHYD3D

@@ -177,7 +177,7 @@ double CemhydMat :: giveConcreteConductivity(GaussPoint *gp) {
         OOFEM_ERROR2("Unknown conductivityType %d\n", conductivityType);
     }
 
-    if ( conduct < 0.3 || conduct > 5 ) {
+    if ( !this->nowarnings.at(2) && (conduct < 0.3 || conduct > 5) ) {
         OOFEM_WARNING2("Weird concrete thermal conductivity %f W/m/K\n", conduct);
     }
 
@@ -202,7 +202,7 @@ double CemhydMat :: giveConcreteCapacity(GaussPoint *gp) {
         OOFEM_ERROR2("Unknown capacityType %d\n", capacityType);
     }
 
-    if ( capacityConcrete < 500 || capacityConcrete > 2000 ) {
+    if ( !this->nowarnings.at(3) && (capacityConcrete < 500 || capacityConcrete > 2000) ) {
         OOFEM_WARNING2("Weird concrete heat capacity %f J/kg/K\n", capacityConcrete);
     }
 
@@ -224,7 +224,7 @@ double CemhydMat :: giveConcreteDensity(GaussPoint *gp) {
         OOFEM_ERROR2("Unknown densityType %d\n", densityType);
     }
 
-    if ( concreteBulkDensity < 1000 || concreteBulkDensity > 4000 ) {
+    if ( !this->nowarnings.at(1) && (concreteBulkDensity < 1000 || concreteBulkDensity > 4000) ) {
         OOFEM_WARNING2("Weird concrete density %f kg/m3\n", concreteBulkDensity);
     }
 
@@ -458,12 +458,17 @@ IRResultType CemhydMat :: initializeFrom(InputRecord *ir)
     capacityType = 0;
     densityType = 0;
     eachGP = 0;
+    nowarnings.resize(4);
+    nowarnings.zero();
     //if you want computation of material properties directly from CEMHYD3D, sum up 1 for density, 2 for conductivity, 4 for capacity
     IR_GIVE_OPTIONAL_FIELD(ir, conductivityType, IFT_HydratingIsoHeatMaterial_hydration, "conductivitytype"); // Macro
     IR_GIVE_OPTIONAL_FIELD(ir, capacityType, IFT_HydratingIsoHeatMaterial_hydration, "capacitytype"); // Macro
     IR_GIVE_OPTIONAL_FIELD(ir, densityType, IFT_HydratingIsoHeatMaterial_hydration, "densitytype"); // Macro
     IR_GIVE_OPTIONAL_FIELD(ir, eachGP, IFT_HydratingIsoHeatMaterial_hydration, "eachgp"); // Macro
-
+    IR_GIVE_OPTIONAL_FIELD(ir, nowarnings, IFT_HydratingIsoHeatMaterial_hydration, "nowarnings"); // Macro
+    if(nowarnings.giveSize() != 4){
+        OOFEM_ERROR2("Incorrect size %d of nowarnings", nowarnings.giveSize());
+    }
     IR_GIVE_FIELD2(ir, XMLfileName, IFT_CemhydMatInputFileName, "file", MAX_FILENAME_LENGTH);
 
     return IRRT_OK;
@@ -7308,11 +7313,17 @@ double CemhydMatStatus :: GiveIncrementalHeat(double GiveTemp, double TargTime) 
         printf("Cannot go backwards in hydration, time_now = %f s < last_time = %f s\n", TargTime, LastCallTime);
         exit(0);
     }
-
+#ifdef __TM_MODULE //OOFEM transport module
+    CemhydMat *cemhydmat = ( CemhydMat * ) this->gp->giveMaterial();
+    if ( !cemhydmat->nowarnings.at(4) && (GiveTemp > 200.) ) {
+        printf("Temperature exceeds 200 C (file %s, line %d),\n", __FILE__, __LINE__);
+    }
+#else
     if ( GiveTemp > 200. ) {
         printf("Temperature exceeds 200 C (file %s, line %d),\n", __FILE__, __LINE__);
-        //exit(0);
     }
+#endif
+
 
     /*perform as many cycles as necessary, always more than required
      * first, calculate everything on the cement paste*/

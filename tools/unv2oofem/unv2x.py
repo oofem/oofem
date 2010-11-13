@@ -112,6 +112,7 @@ def UNV2412Reader(file,FEM):
 
 def UNV2467Reader(file,FEM):
     """ reads an UNV2467 dataset (groups) from file and store data in FEM structure
+	a group may represent a nodeset, an elementset or an edgeset ...
         return an updated FEM object"""
     endFlag='    -1'
     loop=True
@@ -136,7 +137,7 @@ def UNV2467Reader(file,FEM):
                     lst.append(dat[0:3])
                     if len(dat)>4:
                         lst.append(dat[4:7])
-                # split group in node & element sets
+                # split group in node (7) sets, element or edge sets (8)
                 nset=Group(id,groupname)
                 elset=Group(id,groupname)
                 nset.type=7
@@ -255,4 +256,6 @@ if __name__=='__main__':
         print(helpmsg)
     
     
+
+
 
