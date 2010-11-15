@@ -1,4 +1,3 @@
-// New class created by mj
 /*
 
                    *****    *****   ******  ******  ***   ***                            
@@ -57,6 +56,10 @@ namespace oofem {
 class GPExportModule : public ExportModule
 {
 protected:
+  /// identification numbers of variables to be exported 
+  IntArray vartypes;
+  /// number of coordinates to be exported (at each Gauss point)
+  int ncoords;
 
 public:
  /// Constructor. Creates empty Output Manager. By default all components are selected.
@@ -68,7 +71,7 @@ public:
  /// Initializes receiver acording to object description stored in input record
  virtual IRResultType initializeFrom (InputRecord* ir);
  /**
-  Writes the output. Abstract service.
+  Writes the output. 
   @param tStep time step.
   */
  void              doOutput (TimeStep* tStep);
@@ -87,41 +90,9 @@ public:
  virtual const char* giveClassName () const { return "GPExportModuleClass" ;}
 
 protected:
- /// returns the internal smoother
- NodalRecoveryModel* giveSmoother();
-
  /// returns the output stream for given solution step
  FILE* giveOutputStream (TimeStep*) ;
- /**
-  Returns corresponding element cell_type.
-  Some common element types are supported, others can be supported via interface concept.
-  */
- int   giveCellType (Element*);
- /**
-  Returns the number of elements vtk cells
-  */
- int giveNumberOfElementCells (Element*);
- /**
-  Returns number of nodes correpsonding to cell type
-  */
- int giveNumberOfNodesPerCell (int cellType);
- /**
-  Returns the element cell geometry.
-  */
- void giveElementCell (IntArray& answer, Element* elem, int cell);
- /**
-  export internal variables 
-  */
- void exportIntVars (FILE* stream, TimeStep* tStep);
- /**
-  export primary variables 
-  */
- void exportPrimaryVars (FILE* stream, TimeStep* tStep);
- /** exports single variable */
- void exportIntVarAs (InternalStateType valID, InternalStateValueType type, FILE* stream, TimeStep* tStep);
- /** exports single variable */
- void exportPrimVarAs (UnknownType valID, FILE* stream, TimeStep* tStep);
- 
+
 };
 
 #define gpexportmodule_h

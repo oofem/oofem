@@ -112,6 +112,9 @@ enum InputFieldType {
     IFT_HOMExportModule_scale,
     IFT_HOMExportModule_matnum,
 
+    IFT_GPExportModule_vartypes,
+    IFT_GPExportModule_ncoords,
+
     IFT_IncrementalLinearStatic_endoftimeofinterest,
     IFT_IncrementalLinearStatic_prescribedtimes,
     IFT_IncrementalLinearStatic_lstype,
@@ -235,6 +238,7 @@ enum InputFieldType {
     IFT_CylindricalALM_minsteplength,
     IFT_CylindricalALM_steplength,
     IFT_CylindricalALM_initialsteplength,
+    IFT_CylindricalALM_forcedinitialsteplength,
     IFT_CylindricalALM_reqiterations,
     IFT_CylindricalALM_miniterations,
     IFT_CylindricalALM_manrmsteps,

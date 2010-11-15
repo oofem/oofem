@@ -1,4 +1,3 @@
-// New class created by mj
 /*
 
                    *****    *****   ******  ******  ***   ***                            
@@ -56,6 +55,7 @@ namespace oofem {
 
 GPExportModule :: GPExportModule (EngngModel* e) : ExportModule(e)
 {
+  ncoords = -1.; // means: export as many coordinates as available
 }
 
 
@@ -67,87 +67,97 @@ GPExportModule::~GPExportModule ()
 IRResultType
 GPExportModule :: initializeFrom (InputRecord* ir)
 {
- ExportModule::initializeFrom (ir);
- return IRRT_OK;
+  const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
+  IRResultType result;                // Required by IR_GIVE_FIELD macro
+
+  ExportModule::initializeFrom (ir);
+
+  IR_GIVE_FIELD(ir, vartypes, IFT_GPExportModule_vartypes, "vars"); 
+  IR_GIVE_OPTIONAL_FIELD(ir, ncoords, IFT_GPExportModule_ncoords, "ncoords"); 
+  return IRRT_OK;
 }
 
 
 void    
 GPExportModule::doOutput (TimeStep* tStep)
 {
-
  if (!testTimeStepOutput(tStep)) return;
 
+ int ielem, j, ic, nc, iv, nv, nvars;
+ double weight;
+ Element* elem;
+ GaussPoint* gp;
+ FloatArray gcoords, intvar;
+ InternalStateType vartype;
+ IntegrationRule* iRule;
+
+ Domain* d  = emodel->giveDomain(1);
+ int nelem = d -> giveNumberOfElements();
  FILE* stream = this->giveOutputStream(tStep);
 
- fprintf(stream, "# gp DataFile Version 1.2\n");
- fprintf(stream, "# Output for time %f\n", tStep->giveTime());
-  
- Domain* d  = emodel->giveDomain(1);
+ // print the header
+ fprintf(stream, "# gauss point data file\n");
+ fprintf(stream, "# output for time %g\n", tStep->giveTime());
+ fprintf(stream, "# variables: ");
+ nvars = vartypes.giveSize();
+ fprintf(stream, "%d  ",nvars);
+ for (iv=1; iv<=nvars; iv++)
+   fprintf(stream, "%d ",vartypes.at(iv));
+ fprintf(stream, "\n# for interpretation see internalstatetype.h\n");
 
-  int ielem, j, nelem = d -> giveNumberOfElements();
-  Element* elem;
-  GaussPoint* gp;
-  FloatArray gcoords;
-  //FloatArray intvar1,intvar2;
-  FloatArray intvar3,intvar4;
-  double x, y, z;
-  int ncoord;
-  for (ielem = 1; ielem <= nelem; ielem++) {
-    elem = d->giveElement(ielem);
-    IntegrationRule* iRule = elem->giveDefaultIntegrationRulePtr();
-    for (j=0 ; j < iRule->getNumberOfIntegrationPoints() ; j++) {
-      gp = iRule->getIntegrationPoint(j) ;
-      elem->computeGlobalCoordinates (gcoords, *(gp->giveCoordinates()));
-      x = gcoords.at(1);
-      ncoord = gcoords.giveSize();
-      y = 0.;
-      if (ncoord>1)
-	y = gcoords.at(2);
-      z = 0.;
-      if (ncoord>2)
-	z = gcoords.at(3);
-      //elem->giveIPValue (intvar1, gp, IST_DissWorkDensity, tStep);
-      //elem->giveIPValue (intvar2, gp, IST_StressWorkDensity, tStep);
-      elem->giveIPValue (intvar3, gp, IST_DamageTensor, tStep);
-      elem->giveIPValue (intvar4, gp, IST_MaxEquivalentStrainLevel, tStep);
+ // loop over elements
+ for (ielem = 1; ielem <= nelem; ielem++) {
+   elem = d->giveElement(ielem);
+   iRule = elem->giveDefaultIntegrationRulePtr();
 
-  // integration weight (contributing area or volume)
-  //    double weight = gp->giveElement()->computeVolumeAround(gp);
-  // multiply by weight if you want the contribution to the total
-  // here we work just with densities
-  //    double stressWork = intvar2.at(1) * weight;
-      //double stressWork = intvar2.at(1);
-      //double dissWork = intvar1.at(1);
-      //double freeEnergy = stressWork-dissWork;
-      // write data only for Gauss points with nonzero dissipation 
-      //if (dissWork > 1.e-6 * freeEnergy)
-      {
-	fprintf (stream, "%d %d %d %g %g %g ",elem->giveNumber(),elem->giveMaterial()->giveNumber(),j+1,x,y,z);
-	//fprintf (stream, "%f %f %f ",dissWork,freeEnergy,stressWork);
-	// for CST elements write also nodal coordinates
-	/*
-	int nnode = elem->giveNumberOfNodes();
-	if (nnode==3){
-	  for (int inod=1; inod<=3; inod++)
-	    fprintf (stream, "%f %f ",elem->giveNode(inod)->giveCoordinate(1),elem->giveNode(inod)->giveCoordinate(2));
-	}
-	*/
-	StructuralMaterialStatus* stat = (StructuralMaterialStatus*) gp->giveMaterialStatus();
-	double eps = stat->giveStrainVector().at(1);
-	//fprintf (stream, "%f %f %f ",eps,intvar3.at(1),intvar4.at(1));
-	double damage = 0., kappa = 0.;
-	if (intvar3.giveSize()>0)
-	  damage = intvar3.at(1);
-	if (intvar4.giveSize()>0)
-	  kappa = intvar4.at(1);
-	fprintf (stream, "%g %g %g %g ",eps,damage,kappa,1.-damage);
-	fprintf (stream, "\n");
-	// we have written: element_number, mat_number, gp_number, x_coordinate, y_coordinate, z_coordinate, strain, damage, kappa
-      }
-    }
-  }
- 
+   // loop over Gauss points
+   for (j=0 ; j < iRule->getNumberOfIntegrationPoints() ; j++) {
+     gp = iRule->getIntegrationPoint(j) ;
+     // export:
+     // 1) element number
+     // 2) material number
+     // 3) Gauss point number
+     // 4) contributing volume around Gauss point
+     weight = gp->giveElement()->computeVolumeAround(gp);
+     fprintf (stream, "%d %d %d %.6e ",elem->giveNumber(),elem->giveMaterial()->giveNumber(),j+1,weight);
+
+     // export Gauss point coordinates
+     if (ncoords){ // no coordinates exported if ncoords==0
+       elem->computeGlobalCoordinates (gcoords, *(gp->giveCoordinates()));
+       nc = gcoords.giveSize();
+       if (ncoords>=0)
+	 fprintf (stream, "%d ",ncoords);
+       else
+	 fprintf (stream, "%d ",nc);
+       if (ncoords>0 && ncoords<nc)
+	 nc = ncoords;
+       for (ic=1; ic<=nc; ic++)
+	 fprintf (stream, "%.6e ",gcoords.at(ic));
+       for (ic=nc+1; ic<=ncoords; ic++)
+	 fprintf (stream, "%g ",0.0);
+     }
+
+     // export internal variables
+     for (iv=1; iv<=nvars; iv++){
+       vartype = (InternalStateType) vartypes.at(iv);
+       elem->giveIPValue (intvar, gp, vartype, tStep);
+       nv = intvar.giveSize();
+       fprintf (stream, "%d ",nv);
+       for (ic=1; ic<=nv; ic++)
+	 fprintf (stream, "%.6e ",intvar.at(ic));
+     }
+     fprintf (stream, "\n");
+   }
+   /*
+   // for CST elements write also nodal coordinates
+   // (non-standard part, used only exceptionally)
+   int nnode = elem->giveNumberOfNodes();
+   if (nnode==3){
+   for (int inod=1; inod<=3; inod++)
+   fprintf (stream, "%f %f ",elem->giveNode(inod)->giveCoordinate(1),elem->giveNode(inod)->giveCoordinate(2));
+   }
+   */
+ }
  fclose (stream);
 }
 
