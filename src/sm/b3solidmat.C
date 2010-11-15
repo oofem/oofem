@@ -44,6 +44,8 @@
 #include "gausspnt.h"
 #include "structuralcrosssection.h"
 #include "timestep.h"
+#include "contextioerr.h"
+#include "datastream.h"
 
 namespace oofem {
 
@@ -97,7 +99,7 @@ B3SolidMaterial :: initializeFrom(InputRecord *ir)
 		IR_GIVE_FIELD(ir, c0, IFT_B3Material_c0, "c0");
 		// constant c1 (=C1*R*T/M)
 		IR_GIVE_FIELD(ir, c1, IFT_B3Material_c1, "c1");
-		// tS0- necessary for the initial value of microprestress = S0 (age when the load is applied)
+		// tS0- necessary for the initial value of microprestress = S0 (age when drying begins)
 		IR_GIVE_FIELD(ir, tS0, IFT_B3Material_ts0, "ts0");
 
 		// microprestress-sol-theory: read data for inverse desorption isotherm
@@ -275,7 +277,7 @@ B3SolidMaterial :: giveEModulus(GaussPoint *gp, TimeStep *atTime)
     double t_halfstep;
 
     t_halfstep = relMatAge + ( atTime->giveTime() - 0.5 * atTime->giveTimeIncrement() ) / timeFactor;
-    v = computeSolidifiedVolume(gp, t_halfstep);
+    v = computeSolidifiedVolume(gp, atTime);
 	eta = this->computeFlowTermViscosity(gp, atTime); //evaluated in the middle of the time-step
 
 	if(EparVal.giveSize()==0)
@@ -291,7 +293,7 @@ B3SolidMaterial :: giveEModulus(GaussPoint *gp, TimeStep *atTime)
 		sum = KelvinChainMaterial :: giveEModulus(gp, atTime);
 	}
 
-    Einc = 1 / ( q1*1.e-6 + sum / v + 0.5*(atTime->giveTimeIncrement()/ timeFactor)/eta );
+    Einc = 1 / ( q1*1.e-6 + sum / v  + 0.5*(atTime->giveTimeIncrement()/ timeFactor)/eta );
 
     return Einc;
 }
@@ -323,7 +325,7 @@ B3SolidMaterial :: computeCharTimes()
 	this->endOfTimeOfInterest = RheoChainMaterial :: giveEndOfTimeOfInterest();
 
 	j = 1;
-	while ( 0.5 * this->endOfTimeOfInterest >= Tau1 * pow(10., j-1) ) {
+	while ( 0.5 * this->endOfTimeOfInterest >= Tau1 * pow10(j-1) ) {
 		j++;
 	}
 
@@ -621,18 +623,21 @@ B3SolidMaterial :: computePointShrinkageStrainVectorMPS(FloatArray &answer, MatR
 }
 
 double
-B3SolidMaterial :: computeSolidifiedVolume(GaussPoint *gp, double atAge)
+B3SolidMaterial :: computeSolidifiedVolume(GaussPoint *gp, TimeStep *atTime)
 // compute the relative volume of the solidified material at given age (in days)
 {
 	double m, lambda0, alpha;
 	double v; //return value
+	double atAge; // (equivalent age)
 
 	// standard values of exponents - empirical constants
 	m = 0.5;
 	lambda0 = 1; //[day]
 	alpha = q3/q2;
 
-	v = 1 / (alpha + __OOFEM_POW(lambda0/atAge, m));
+	atAge = relMatAge + ( atTime->giveTime() - 0.5 * atTime->giveTimeIncrement() ) / timeFactor;
+    v = 1 / (alpha + __OOFEM_POW(lambda0/atAge, m));
+
 	return v;
 }
 
@@ -664,7 +669,7 @@ B3SolidMaterial :: giveEigenStrainVector(FloatArray &answer, MatResponseForm for
 // (in fact, the INCREMENT of creep strain is computed for mode == VM_Incremental)
 //
 {
-	double v, eta, t_halfstep;
+	double v, eta;
 	FloatArray help, reducedAnswer, sigma;
 	FloatMatrix C;
 	KelvinChainMaterialStatus *status = ( KelvinChainMaterialStatus * ) this->giveStatus(gp);
@@ -672,8 +677,7 @@ B3SolidMaterial :: giveEigenStrainVector(FloatArray &answer, MatResponseForm for
 	// !!! chartime exponents are assumed to be equal to 1 !!!
 	if ( mode == VM_Incremental ) {
 
-		t_halfstep = relMatAge + ( atTime->giveTime() - 0.5 * atTime->giveTimeIncrement() ) / timeFactor;
-		v = computeSolidifiedVolume(gp, t_halfstep);
+		v = computeSolidifiedVolume(gp, atTime);
 		eta = this->computeFlowTermViscosity(gp, atTime); //evaluated too in the middle of the time-step
 
 		sigma = status->giveStressVector(); //stress vector at the beginning of time-step
@@ -907,8 +911,8 @@ B3SolidMaterial :: computeMicroPrestress(GaussPoint *gp, TimeStep *atTime, int o
 	double S, Stemp; // old and new microprestress
 	double humOld, humNew; // previous and new value of humidity
 	double A; // auxiliary variable
-	double k; // constant RHS of the diff equation
-	double dHdt; // first time derivative of the humidity
+	double RHS; // constant RHS of the diff equation
+	double dHdt; // first time difference of the humidity
 	double deltaT; // length of the time step
 
 	deltaT = atTime->giveTimeIncrement() / timeFactor;
@@ -939,9 +943,9 @@ B3SolidMaterial :: computeMicroPrestress(GaussPoint *gp, TimeStep *atTime, int o
 		Stemp = 1 / (1 / S + c0 * deltaT);
 	} else { // the following section is used only if there is a change in humidity
 		dHdt = (humNew - humOld) / deltaT;
-		k = fabs(c1 * dHdt / humNew);
-		A = sqrt(k / c0);
-		Stemp = A * (1 - 2 * (A - S) / ((A - S) + (A + S) * exp(2 * deltaT * sqrt(k * c0))));
+		RHS = fabs(c1 * dHdt / humNew);
+		A = sqrt(RHS / c0);
+		Stemp = A * (1 - 2 * (A - S) / ((A - S) + (A + S) * exp(2 * deltaT * sqrt(RHS * c0))));
 	}
 
 	return Stemp;
@@ -1044,11 +1048,11 @@ B3SolidMaterial :: updateYourself(GaussPoint *gp, TimeStep *tNow)
 
 
 /****************************************************************************************/
+/********** 	B3SolidMaterialStatus - HUMIDITY ****************************************/
 
-B3SolidMaterialStatus :: B3SolidMaterialStatus(int n, Domain *d,
-                                                         GaussPoint *g, int nunits) :
-    KelvinChainMaterialStatus(n, d, g, nunits) {
-}
+
+B3SolidMaterialStatus :: B3SolidMaterialStatus(int n, Domain *d,GaussPoint *g, int nunits) :
+    KelvinChainMaterialStatus(n, d, g, nunits) {}
 
 void
 B3SolidMaterialStatus :: updateYourself(TimeStep *tStep)
@@ -1060,7 +1064,7 @@ B3SolidMaterialStatus :: updateYourself(TimeStep *tStep)
 	KelvinChainMaterialStatus :: updateYourself(tStep);
 }
 
-/*
+
 contextIOResultType
 B3SolidMaterialStatus :: saveContext(DataStream *stream, ContextMode mode, void *obj)
 //
@@ -1069,12 +1073,21 @@ B3SolidMaterialStatus :: saveContext(DataStream *stream, ContextMode mode, void 
 {
     contextIOResultType iores;
 
-    if ( ( iores = KelvinChainMaterialStatus :: restoreContext(stream, mode, obj) ) != CIO_OK ) {
+    if ( stream == NULL ) {
+        _error("saveContext : can't write into NULL stream");
+    }
+
+    if ( ( iores = KelvinChainMaterialStatus :: saveContext(stream, mode, obj) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
+
+    // write microprestress value
+    if ( !stream->write(& microprestress_old, 1) ) {
+        THROW_CIOERR(CIO_IOERR);
+    }
+
     return CIO_OK;
 }
-
 
 contextIOResultType
 B3SolidMaterialStatus :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
@@ -1083,12 +1096,14 @@ B3SolidMaterialStatus :: restoreContext(DataStream *stream, ContextMode mode, vo
 //
 {
     contextIOResultType iores;
-
     if ( ( iores = KelvinChainMaterialStatus :: restoreContext(stream, mode, obj) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
+    // write microprestress value
+    if ( !stream->read(& microprestress_old, 1) ) {
+        return CIO_IOERR;
+    }
     return CIO_OK;
 }
-*/
 
 } // end namespace oofem

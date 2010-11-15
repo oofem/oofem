@@ -1616,12 +1616,71 @@ When vtk is configured to operate in region-by-region mode (the default), then t
 
 \item An integer array \param{MatNum} specifies which material numbers are taken into account. All material numbers are averaged by default.
 \end{itemize}
+
+\item Gauss point export is useful if one needs to plot a certain variable
+(such as damage) as a function of a spatial coordinate using tools like
+gnuplot. It generates files with data organized in columns, each row
+representing one Gauss point. In this way, one can plot e.g.\ the damage
+distribution along a one-dimensional bar.
+
+\begin{record}[0.9\textwidth]
+    \recentry{gpexportmodule}{\optField{vars}{ia}} \recentry{}{\optField{ncoords}{in}}
+  \end{record}
+
+\begin{itemize}
+\item The array \param{vars} contains identifiers for those internal
+variables which are to be exported. The id values are defined by
+InternalStateType enumeration, which is defined in include file
+``src/oofemlib/internal\-statetype.h''.
+\item Parameter \param{ncoords} specifies the number of spatial coordinates to be exported at each Gauss point. Depending on the spatial dimension of the
+domain, the points can have one, two or three coordinates. If  \param{ncoords}
+is set to -1, only those coordinates that are actually used are exported.
+ If  \param{ncoords} is set to 0, no coordinates are exported. 
+If  \param{ncoords}
+is set to a positive integer, exactly \param{ncoords} coordinates are exported.
+If  \param{ncoords} exceeds the actual number of coordinates, the actual
+coordinates are supplemented by zeros. For instance, if we deal with a 2D
+problem, the actual number of coordinates is 2. For  \param{ncoords}=3,
+the two actual coordinates followed by 0 will be exported. 
+For  \param{ncoords}=1, only the first coordinate will be exported.
+\end{itemize}
+The Gauss point export module creates a file with extension ``gp''
+after each step for which the output is performed. This file contains
+a header with lines starting by the symbol \#, followed by the actual data
+section.
+Each data line corresponds to one Gauss point and contains the following
+data: 
+\begin{enumerate}
+\item element number,
+ \item    material number,
+ \item     Gauss point number,
+  \item   contributing volume around Gauss point,
+\item Gauss point global coordinates (written as a real array of length \param{ncoords}),
+\item internal variables according to the specification in \param{vars} (each written as a real array of the corresponding length).
+\end{enumerate}
+Example:\\ 
+``GPExportModule 1 tstep\_step 100 domain\_all ncoords 2 vars 5 4 13 31 64 65''
+\\
+means that the *.gp file will be written after each 100 steps and will contain
+for each of the Gauss points in the entire domain its 2 coordinates and also internal
+variables of type 4, 13, 31, 64 and 65, which are the strain tensor, damage tensor, maximum equivalent strain level, stress work density and dissipated work density. Of course, the material model must be able to deliver such variables. 
+The size of the strain tensor depends on the spatial dimension, and the size
+of the damage tensor depends on the spatial dimension and type of model
+(e.g., for a simple isotropic damage model it will have just 1 component
+while for an anisotropic damage model it may have more). The other variables
+in this example are scalars, but they will be written as arrays of length 1,
+so the actual value will always be preceded by ``1'' as the length of the array. Since certain internal variables have the meaning of densities (per unit volume
+or area, again depending on the spatial dimension), it is useful to have
+access to the contributing volume  of the Gauss point. The product of this
+contributing volume and the density gives an additive contribution to the
+total value of the corresponding variable. This can be exploited e.g.\ to
+evaluate the total dissipated energy over the entire domain.  
 \end{itemize}
 
 \section{Domain record(s)}
 \label{_DomainRecord}
 This set of records describes the whole domain and its type. Depending
-on type of problem, there may be one or several domain records. If not
+on the type of problem, there may be one or several domain records. If not
 indicated, one domain record is default for all problem types.
 
 The domain type is used to resolve the

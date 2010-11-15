@@ -43,6 +43,8 @@
 
 namespace oofem {
 
+/********** 	B3SolidMaterialStatus - HUMIDITY ****************************************/
+
 class B3SolidMaterialStatus : public KelvinChainMaterialStatus
 {
     /*
@@ -80,12 +82,12 @@ public:
     /// update after new equilibrium state reached
     virtual void updateYourself(TimeStep *);
 
-    /*
+
     /// save current context (state) into a stream
     contextIOResultType    saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
     /// restore current context (state) from a stream
     contextIOResultType    restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-    */
+
 
     double giveMPS (void) { return microprestress_old; }
 
@@ -181,7 +183,7 @@ protected:
     double computeNonAgingCreepFunction(GaussPoint *gp, double loadDuration);
 
     /// evaluation of the relative volume of the solidified material
-    double computeSolidifiedVolume(GaussPoint *gp, double atAge);
+    double computeSolidifiedVolume(GaussPoint *gp, TimeStep *atTime);
 
     /// evaluation of the flow term viscosity
     double computeFlowTermViscosity(GaussPoint *gp, TimeStep *atTime);
