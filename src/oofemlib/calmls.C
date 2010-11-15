@@ -931,7 +931,7 @@ CylindricalALM :: initializeFrom(InputRecord *ir)
     IRResultType result;                   // Required by IR_GIVE_FIELD macro
 
     double oldPsi =  Psi; // default from constructor
-    double initialStepLength;
+    double initialStepLength,forcedInitialStepLength;
     int hpcMode;
     IRResultType val;
 
@@ -963,6 +963,11 @@ CylindricalALM :: initializeFrom(InputRecord *ir)
     if ( ( deltaL <= 0.0 ) || ( deltaL > maxStepLength ) ) {
         deltaL = initialStepLength;
     }
+    // using this, one can enforce deltaL from the input file after restart 
+    forcedInitialStepLength = 0.;
+    IR_GIVE_OPTIONAL_FIELD(ir, forcedInitialStepLength, IFT_CylindricalALM_forcedinitialsteplength, "forcedinitialsteplength"); // Macro
+    if (forcedInitialStepLength>0.)
+      deltaL = forcedInitialStepLength;
 
     numberOfRequiredIterations = 3;
     IR_GIVE_OPTIONAL_FIELD(ir, numberOfRequiredIterations, IFT_CylindricalALM_reqiterations, "reqiterations"); // Macro
