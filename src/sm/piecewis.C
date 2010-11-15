@@ -43,12 +43,14 @@
 
 namespace oofem {
 
+#define PiecewiseLinFunction_PRECISION 1.e-12
+
 double PiecewiseLinFunction :: __at(double time)
 // Returns the value of the receiver at time 'time'. 'time' should be
 // one of the dates of the receiver (currently there is no interpola-
 // tion between two points).
 {
-    const double precision = 0.000001;
+    const double precision = PiecewiseLinFunction_PRECISION;
     double xa, xb, ya, yb;
     int i;
 
@@ -83,7 +85,7 @@ double PiecewiseLinFunction :: __derAt(double time)
 // one of the dates of the receiver (currently there is no interpola-
 // tion between two points).
 {
-    const double precision = 0.000001;
+    const double precision = PiecewiseLinFunction_PRECISION;
     double xa, xb, ya, yb;
     int i;
 
