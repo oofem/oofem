@@ -184,6 +184,13 @@ int SimpleSlaveDof :: giveIcId()
 }
 
 
+double
+SimpleSlaveDof :: giveBcValue(ValueModeType mode, TimeStep *tStep)
+{
+  return this->giveMasterDof()->giveBcValue(mode, tStep);
+}
+
+
 contextIOResultType SimpleSlaveDof :: saveContext(DataStream *stream, ContextMode mode, void *obj)
 //
 // saves full node context (saves state variables, that completely describe

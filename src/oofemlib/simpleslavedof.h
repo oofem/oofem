@@ -204,8 +204,15 @@ public:
      * @param id of associated initial condition, zero otherwise
      */
     int giveIcId () ;
-
-
+    /**
+     * Returns value of boundary condition of dof if it is prescribed.
+     * Use hasBc service to determine, if boundary condition is active.
+     * The physical meaning of Bc is determined by corresponding DOF.
+     * @param mode unknown char type (if total or incremental value is returned)
+     * @param tStep time step
+     * @return prescribed value of unknown or zero if not prescribed
+     */
+    virtual double  giveBcValue(ValueModeType mode, TimeStep *tStep);
     /**
      * Stores receiver state to output stream.
      * @exception throws an ContextIOERR exception if error encountered.

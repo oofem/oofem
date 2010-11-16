@@ -218,12 +218,16 @@ Dof :: giveDofIDName(char *s)
 double
 Dof :: giveBcValue(ValueModeType mode, TimeStep *tStep)
 {
+  if (this->hasBc(tStep)) {
     double rel = 0.0;
     if ( mode == VM_Incremental && tStep->isTheFirstStep() && hasIcOn(VM_Total) ) {
-        rel = giveIc()->give(VM_Total);
+      rel = giveIc()->give(VM_Total);
     }
-
+    
     return this->giveBc()->give(this, mode, tStep) - rel;
+  } else {
+    return 0.0;
+  }
 }
 
 contextIOResultType
