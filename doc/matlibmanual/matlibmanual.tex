@@ -219,7 +219,7 @@ Supported modes& 3dMat, PlaneStress, PlaneStrain, 1dMat,
 3dBeam, PlaneStressRot\\
 \hline
 \end{tabular}
-\caption{Orthotropic, linear elastic material - summary.}
+\caption{Orthotropic, linear elastic material -- summary.}
 \label{OrthoLE_table}
 %\end{center}
 \end{table}
@@ -2086,6 +2086,8 @@ Supported modes& 3dMat, PlaneStress, PlaneStrain, 1dMat,
 \end{table}
 
 
+\clearpage
+
 
 \subsubsection{Microplane model M4}
 Model M4 covers inelastic behavior of concrete under complex
@@ -2123,7 +2125,265 @@ Supported modes& 3dMat\\
 %\end{center}
 \end{table}
 
-\clearpage
+\newcommand{\beq}{\begin{equation}}
+\newcommand{\eeq}{\end{equation}}
+\newcommand{\fc}{\bar{f}_c}
+\newcommand{\ft}{\bar{f}_t}
+\newcommand{\mD}{\mbf{D}}
+\newcommand{\qh}{q_{\rm h}}
+
+\subsubsection{Damage-plastic model for concrete}
+
+This model, developed by Grassl and Jir\'{a}sek for failure of concrete
+under general triaxial stress, is described in detail in \cite{GraJir}.
+It belongs to the class of damage-plastic models with yield condition formulated
+in terms of the effective stress $\bar{\vsig}=\mD_e:(\veps-\veps_p)$.
+The stress-strain law is postulated in the form 
+\beq
+\vsig = (1-\omega)\bar{\vsig}=(1-\omega)\mD_e:(\veps-\veps_p)
+\eeq
+where $\mD_e$ is the elastic stiffness tensor
+and $\omega$ is a scalar damage parameter. 
+The plastic part of the model consists of a three-invariant yield condition, nonassociated flow rule and pressure-dependent hardening law. 
+For simplicity, damage is assumed to be isotropic.
+In contrast to pure damage models with damage driven by the total strain, here the damage is linked to the evolution of plastic strain.
+
+The {\bf yield surface} is described in terms of the cylindrical coordinates in the principal effective stress space (Haigh-Westergaard coordinates), which are the volumetric effective stress $\bar{\sigma}_{\rm V} = {I_1(\bar{\vsig})}/{3}$, the norm of the deviatoric effective stress
+$\bar{\rho} = \sqrt{2 J_2(\bar{\vsig})}$, 
+and the Lode angle $\theta$ defined by the relation
+\beq\label{lodeangle}
+\cos 3 \theta = \frac{3 \sqrt{3}}{2}\frac{J_3}{J_2^{3/2}}
+\eeq
+where $J_2$ and $J_3$ are the second and third deviatoric invariants.
+The yield function
+\bea\nonumber
+f_{\rm p}(\bar\sigma_{\rm V},\bar\rho,\bar\theta;\kappa_{\rm p})&=&\left(\left[1-q_{\rm{h}}(\kappa_{\rm p})\right]\left( \frac{\bar{\rho}} {\sqrt{6}\fc} + \frac{\bar{\sigma}_{\rm V}} {\fc} \right)^2 + \sqrt{\frac{3}{2}} \frac {\bar{\rho}}{\fc} \right)^2 +\\
+&& 
+ +m_0 q_{\rm{h}}^2(\kappa_{\rm p}) \left(\frac{\bar{\rho}r(\bar{\theta}) }{\sqrt{6}\fc} + \frac{\bar{\sigma}_{\rm V}}{\fc} \right) - q_{\rm{h}}^2(\kappa_{\rm p})
+\label{eq:yieldSurface}
+\eea
+depends on the effective stress (which enters in the form of cylindrical coordinates) and on the hardening variable $\kappa_{\rm p}$ (which enters through a dimensionless variable $q_{\rm h}$). Parameter $\fc$ is the uniaxial compressive strength. 
+Note that, under uniaxial compression characterized by axial stress 
+$\bar\sigma<0$,  we have $\bar\sigma_{\rm V}=\bar\sigma/3$,
+$\bar\rho=-\sqrt{2/3}\,\bar\sigma$ and $\bar\theta=60^o$. The yield function
+then reduces to $f_{\rm p}=(\bar\sigma/\fc)^2-q_{\rm{h}}^2$. This means that
+function $q_{\rm{h}}$ describes the evolution of the uniaxial compressive
+yield stress normalized by its maximum value, $\fc$.
+
+The evolution of the yield surface during hardening is presented in Fig.~\ref{fig:surfaceMerDev}.
+The parabolic shape of the meridians (Fig.~\ref{fig:surfaceMerDev}a) is controlled by the hardening variable $q_{\rm h}$ and the friction parameter $m_0$.
+The initial yield surface is closed, which allows modeling of compaction under highly confined compression. The initial and intermediate 
+yield surfaces have two vertices on the hydrostatic axis but the ultimate yield surface has only one vertex 
+on the tensile part of the hydrostatic axis and opens up along the compressive
+part of the hydrostatic axis.
+The deviatoric sections evolve as shown in Fig.~\ref{fig:surfaceMerDev}b,
+and their final shape at full hardening
+is a rounded triangle at low confinement and almost circular 
+at high confinement.
+The shape of the deviatoric section is controlled by the Willam-Warnke 
+function 
+\beq\label{bf103}
+r(\theta)=\frac{4(1-e^2)\cos^2\theta+(2e-1)^2}{2(1-e^2)\cos\theta+(2e-1)\sqrt{4(1-e^2)\cos^2\theta+5e^2-4e}}
+\eeq
+The eccentricity parameter $e$ that appears in this function, as well as the friction parameter $m_0$, are calibrated from the values of uniaxial and equibiaxial compressive strengths and uniaxial tensile strength.
+
+\begin{figure}[!htb]
+\centering
+\begin{tabular}{cc}
+(a) & (b)
+\\
+\begin{htmlonly}
+  \includegraphics[width=0.5\textwidth]{meridians.eps}&
+  \includegraphics[width=0.5\textwidth]{deviatoric.eps}
+\end{htmlonly}
+%begin{latexonly}
+\ifpdf
+\includegraphics[width=0.5\textwidth]{meridians.pdf}
+\else
+\includegraphics[width=0.5\textwidth]{meridians.eps}
+\fi
+&
+\ifpdf
+\includegraphics[width=0.5\textwidth]{deviatoric.pdf}
+\else
+\includegraphics[width=0.5\textwidth]{deviatoric.eps}
+\fi
+%end{latexonly}
+\end{tabular} 
+\caption{Evolution of the yield surface during hardening:
+a) meridional section, b) deviatoric section for a constant volumetric effective stress of $\bar{\sigma}_{\rm V} = -\fc/3$} 
+\label{fig:surfaceMerDev}
+\end{figure}
+
+The maximum size of the elastic domain is attained when the variable $q_{\rm h}$ is equal to one (which is its maximum value, as follows from the hardening law, to be specified in~(\ref{eq:hardeningLaw})). The yield surface is then described by the equation
+%
+\begin{equation}\label{eq:failureSurface}
+f_{\rm p}\left(\bar\sigma_{\rm V},\bar\rho,\bar\theta;1\right) \equiv \frac{3}{2} \frac{\bar{\rho}^2}{\fc^2} + m_0 \left(\frac{\bar{\rho} }{\sqrt{6}\fc}r(\bar{\theta}) + \frac{\bar{\sigma}_{\rm V}}{\fc} \right) - 1 = 0
+\end{equation}
+
+The {\bf flow rule} 
+%
+\begin{equation} \label{eq:flowRuleDPM}
+\dot{\mbf{\eps}}_{\rm p} = \dot{\lambda} \frac{\partial g_{\rm p}}{\partial\bar{\sigma}} 
+\end{equation}
+%
+is non-associated, which means that the yield function $f_{\rm p}$ and the plastic potential 
+\bea\nonumber
+g_{\rm p}(\bar\sigma_{\rm V},\bar\rho;\kappa_{\rm p})&=&\left(\left[1-q_{\rm{h}}(\kappa_{\rm p})\right] \left( \frac{\bar{\rho}} {\sqrt{6}\fc} + \frac{\bar{\sigma}_{\rm V}}{\fc} \right)^2 + \sqrt{\frac{3}{2}} \frac {\bar{\rho}}{\fc} \right)^2 +\\
+&&+q_{\rm{h}}^2(\kappa_{\rm p}) \left( \frac{m_0 \bar{\rho}}{\sqrt{6}\fc} + \frac{m_{\rm g}(\bar{\sigma}_{\rm V})}{\fc} \right)
+ \label{eq:plasticPotential}
+\eea
+do not coincide and, therefore, the direction of the plastic flow $\partial g_{\rm p}/\partial\bar{\vsig}$ is not normal to the yield surface.
+The ratio of the volumetric and the deviatoric parts of the flow direction is controled by function $m_{\rm g}$, which depends on the volumetric stress and is defined as 
+\begin{equation} \label{eq:mg}
+m_{\rm g}(\bar{\sigma}_{\rm V})=A_{\rm g}B_{\rm g}\fc \exp{\frac{\bar{\sigma}_{\rm V} -\ft/3}{B_{\rm g}\fc}}
+\end{equation}
+%
+where $A_{\rm g}$ and $B_{\rm g}$ are model parameters that are determined from certain assumptions on the plastic flow in uniaxial tension and compression.
+
+The dimensionless variable $q_{\rm h}$ that appears in the yield function (\ref{eq:yieldSurface}) is a function of the hardening variable $\kappa_{\rm p}$. It controls the size and shape of the yield surface and, thereby, of the elastic domain. 
+The {\bf hardening law} is given by
+%
+\begin{equation} \label{eq:hardeningLaw}
+\qh(\kappa_{\rm p}) = \left\{ \begin{array}{ll}
+{\qh}_0 + (1-{\qh}_0)\kappa_{\rm p}({\kappa_{\rm p}}^2 - 3\kappa_{\rm p}+3) & \mbox{if $\kappa_{\rm p} < 1$} \\
+1 & \mbox{if $\kappa_{\rm p} \ge 1$}
+\end{array}
+\right.
+\end{equation}
+%
+The initial inclination of the hardening curve (at $\kappa_{\rm p}=0$) is positive and finite, and the inclination at peak (i.e., at $\kappa_{\rm p} = 1$) is zero.
+
+
+The evolution law for the hardening variable,\footnote{In the original paper \cite{GraJir},
+equation (\ref{eq:dotkappap}) was written with $\cos^2\bar{\theta}$ instead of $(2\cos\bar{\theta})^2$,
+but all the results presented in that paper were computed with OOFEM using an implementation based on (\ref{eq:dotkappap}).}
+\begin{equation}\label{eq:dotkappap}
+\dot{\kappa}_{\rm {p}} = \frac {\| \dot{\veps}_{\rm{p}}\|}{x_{\rm{h}}\left(\bar{\sigma}_{\rm V} \right)}(2\cos\bar{\theta})^2} 
+\end{equation}
+sets the rate of the hardening variable equal to the norm of the plastic strain rate 
+scaled by a hardening ductility measure 
+\begin{equation} \label{eq:hardeningMeasure}
+x_{\rm{h}}\left(\bar{\sigma}_{\rm V}\right) = \left\{ \begin{array}{ll}
+A_{\rm{h}} - \left(A_{\rm{h}} - B_{\rm{h}} \right)\exp{\left(-R_{\rm h}(\bar{\sigma}_{\rm V})/C_{\rm h}\right)} & \mbox{if $R_{\rm h}(\bar{\sigma}_{\rm V}) \geq 0 $} \\[5mm]
+E_{\rm h}\exp({R_{\rm h}(\bar{\sigma}_{\rm V})/F_{\rm h}})+D_{\rm h} & \mbox{if $R_{\rm h}(\bar{\sigma}_{\rm V}) < 0$}
+\end{array}
+\right.
+\end{equation}
+The dependence of the scaling factor
+$x_{\rm{h}}$ on the volumetric effective stress $\bar{\sigma}_{\rm V}$ is constructed such that
+the model response is more ductile under compression.
+%
+The variable 
+\begin{equation}
+R_{\rm h}(\bar{\sigma}_{\rm V}) = -\frac{\bar{\sigma}_{\rm V}}{\fc}-\frac{1}{3}
+\end{equation}
+is a linear function of the volumetric effective stress.
+%
+Model parameters $A_{\rm h}, B_{\rm h}, C_{\rm h}$ and $D_{\rm h}$ are calibrated from the values of strain at peak stress under uniaxial tension, uniaxial compression and triaxial compression, whereas the parameters 
+\begin{eqnarray}
+E_{\rm h} &=& B_{\rm h} - D_{\rm h}
+\\
+F_{\rm h} &=& \frac{\left(B_{\rm h} -D_{\rm h}\right)C_{\rm h}}{B_{\rm h} - A_{\rm h}}
+\end{eqnarray}
+are determined from the conditions of a smooth transition between the two parts of equation (\ref{eq:hardeningMeasure}) at $R_{\rm h} = 0$.
+
+For the present model, the {\bf evolution of damage} starts after full saturation of plastic hardening, i.e., at $\kappa_{\rm p}=1$. This greatly facilitates calibration of model parameters, because the strength envelope is fully controled by the plastic part of the model and damage affects only the softening behavior.
+In contrast to pure damage models,
+damage is assumed to be driven by the plastic strain, more
+specifically by its volumetric part, which is closely related 
+to cracking. To slow down the evolution of damage under compressive stress states,
+the damage-driving variable $\kappa_{\rm d}$ is not set equal to the volumetric
+plastic strain, but it is defined incrementally by the rate equation
+%
+\begin{equation}\label{eq:equivStrain}
+\dot{\kappa}_{\rm d} = \left\{ \begin{array}{ll}
+0 & \mbox{if $\kappa_{\rm p}< 1$} \\
+{\rm Tr}(\dot{\veps}_{\rm p})/x_{\rm s}\left(\bar{\sigma}_{\rm V}\right) & \mbox{if $\kappa_{\rm p}\ge 1$}
+\end{array}
+ \right.
+\end{equation}
+where
+\begin{equation}\label{eq:damageDuctility}
+x_{\rm s}(\bar{\sigma}_{\rm V}) = \left\{\begin{array}{ll}
+1 + A_{\rm s}R_{\rm s}^2(\bar{\sigma}_{\rm V}) & \mbox{if $R_{\rm s}(\bar{\sigma}_{\rm V}) < 1$}\\[5mm]
+1 - 3 A_{\rm s} + 4 A_{\rm s} \sqrt{R_{\rm s}(\bar{\sigma}_{\rm V})} & \mbox{if $R_{\rm s}(\bar{\sigma}_{\rm V}) \geq 1$}
+\end{array}
+\right .
+\end{equation}
+is a softening ductility measure.
+Parameter $A_{\rm s}$ is determined from the softening response in uniaxial compression. The dimensionless variable
+$R_{\rm s}=\dot{\varepsilon}_{\rm pV}^{-}/\dot{\varepsilon}_{\rm {pV}}$ is defined as the ratio between the ``negative'' volumetric plastic strain rate
+%
+\begin{equation}\label{eq:xs}
+\dot{\varepsilon}_{\rm pV}^{-} = \displaystyle{\sum_{I = 1}^3 \langle-\dot{\varepsilon}_{\rm{p}I}\rangle}
+\end{equation}
+%
+and the total volumetric plastic strain rate $\dot{\varepsilon}_{\rm {pV}}$.
+This ratio depends only on the flow direction $\partial g_{\rm p}/\partial\bar{\vsig}$, and thus
+$R_{\rm s}$ can be shown to be a unique function of the volumetric effective stress. In (\ref{eq:xs}), $\dot{\varepsilon}_{\rm{p}I}$ are the principal components of the rate of plastic strains and $\left<\cdot\right>$ denotes the McAuley brackets (positive-part operator).
+For uniaxial tension, for instance, all three principal plastic strain rates are nonnegative, and so $\dot{\varepsilon}_{\rm pV}^{-} =0$, $R_{\rm s}=0$ and $x_{\rm s}=1$. This means that under uniaxial tensile loading we have $\kappa_{\rm d}=\kappa_{\rm p}-1$. On the other hand, under compressive stress states the negative principal plastic strain rates lead to a ductility measure $x_{\rm s}$ greater than one and the evolution of damage is slowed down. It should be emphasized that the flow rule for this specific model is constructed such that the volumetric part of plastic strain rate at the ultimate yield surface cannot be negative.
+
+\begin{table}[!htb]
+%\begin{center}
+\begin{tabular}{|l|p{9cm}|}
+\hline
+Description & Damage-plastic model for concrete\\
+\hline
+Record Format & \descitem{ConcreteDPM}  \elemparam{d}{rn}
+\elemparam{E}{rn} \elemparam{n}{rn} \elemparam{tAlpha}{rn}
+ \elemparam{ft}{rn} \elemparam{fc}{rn} \elemparam{wf}{rn} \elemparam{ecc}{rn}
+ \elemparam{kinit}{rn} \elemparam{Ahard}{rn} \elemparam{Bhard}{rn} \elemparam{Chard}{rn} \elemparam{Dhard}{rn} \elemparam{Asoft}{rn} \elemparam{helem}{rn} \elemparam{dilation}{rn} \elemparam{yieldtol}{rn} \elemparam{newtoniter}{in} \\
+Parameters &- \param{d} material density\\
+&- \param{E} Young modulus\\
+&- \param{n} Poisson ratio\\
+&- \param{tAlpha} thermal dilatation coefficient\\
+&- \param{ft} uniaxial tensile strength\\
+&- \param{fc} uniaxial compressive strength\\
+&- \param{wf} parameter $w_f$ that controls the slope of the softening branch (serves for the evaluation of $\eps_f=w_f/h$ to be used in (\ref{eq:damageLaw}))\\
+&- \param{ecc} eccentricity parameter $e$ from (\ref{bf103}), optional, default value 0.525\\
+&- \param{kinit} parameter ${\qh}_0$ from (\ref{eq:hardeningLaw}), optional, default value 0.1\\
+&- \param{Ahard} parameter $A_{\rm h}$ from (\ref{eq:hardeningMeasure}), optional, default value 0.08\\
+&- \param{Bhard} parameter $B_{\rm h}$ from (\ref{eq:hardeningMeasure}), optional, default value 0.003\\
+&- \param{Chard} parameter $C_{\rm h}$ from (\ref{eq:hardeningMeasure}), optional, default value 2\\
+&- \param{Dhard} parameter $D_{\rm h}$ from (\ref{eq:hardeningMeasure}), optional, default value $10^{-6}$\\
+&- \param{Asoft} parameter $A_{\rm s}$ from (\ref{eq:damageDuctility}), optional, default value 15\\
+&- \param{helem} element size $h$, optional (if not specified, the actual element size is used)\\
+&- \param{dilation} dilation factor (ratio between lateral and axial plastic strain rates in the softening regime under uniaxial compression), optional, default value -0.85\\
+&- \param{yieldtol} tolerance for the implicit stress return algorithm, optional, default value $10^{-10}$\\
+&- \param{newtoniter} maximum number of iterations in the implicit stress return algorithm, optional, default value 100\\
+Supported modes& 3dMat\\
+\hline
+\end{tabular}
+\caption{Damage-plastic model for concrete -- summary.}
+\label{dpm_table}
+%\end{center}
+\end{table}
+
+
+The relation between the damage variable $\omega$ and the internal variable $\kappa_{\rm d}$ (maximum level of equivalent strain) is assumed to have the exponential form 
+\begin{equation} \label{eq:damageLaw}
+\omega = 
+1-\exp\left(-\kappa_{\rm d}/\varepsilon_f\right) 
+\end{equation}
+where $\varepsilon_f$ is a parameter that controls the slope of the softening curve. To avoid pathological sensitivity
+of the results to the size of finite elements, this parameter is adjusted according to the element size.
+Therefore, another parameter, $w_f$, is considered as a material property, and $\eps_f$ is evaluated as $w_f/h$
+where $h$ is the size of the finite element (projected onto the direction of maximum principal strain).
+
+The damage-plastic model contains 15 parameters, but only 6 of them are actually calibrated for different concrete types, namely Young's modulus $E$, Poisson's ratio $\nu$, tensile strength $f_{\rm t}$, compressive strength $f_{\rm c}$, parameter $\varepsilon_{\rm f}$ of the damage law (\ref{eq:damageLaw}), and parameter $A_{\rm s}$ in the ductility measure (\ref{eq:damageDuctility}) of the damage model. The remaining parameters can be set to their default values specified in \cite{GraJir}.
+
+The model parameters are summarized
+in table~\ref{dpm_table}. Note that it is possible to specify the ``size'' of finite element, $h$, which (if specified) replaces
+the actual element size in the relation between the material parameter $w_f$ and the parameter $\eps_f=w_f/h$ that is used
+in (\ref{eq:damageLaw}). The usual approach is to consider $h$ as the actual element size (evaluated automatically by OOFEM), 
+in which case the optional
+parameter $h$ is missing (or is set to 0., which has the same effect in the code). However, for various studies of mesh sensitivity
+it is useful to have the option of setting $\eps_f$ to a fixed value, independent of the element size. 
+This can be achieved by specifying $h$ as an input ``material'' value.
+For instance, if $h$ is set to 1, then the parameter $\eps_f$ used  in (\ref{eq:damageLaw}) will have the same value
+as the input parameter $w_f$, independently of the actual element size.
+
 
 \subsection{Orthotropic damage model with fixed crack orientations for composites}
 
@@ -3090,16 +3350,20 @@ documentation of MPlasticMaterial class):
 \begin{thebibliography}{99}
 \bibitem{Bazant:98} Z.P. Ba\v{z}ant, J. Planas: Fracture and Size Effect in Concrete and Other Quasibrittle  Materials, CRC Press, 1998.
 \bibitem{NISTIR7232} D.P. Bentz: CEMHYD3D: A Three-Dimensional Cement Hydration and Microstructure Development Modeling Package. Version 3.0., NIST Building and Fire Research Laboratory, Gaithersburg, Maryland, Technical report, 2005.
+\bibitem{GraJir}
+P.~Grassl and M.~Jir\'{a}sek.
+\newblock Damage-plastic model for concrete failure.
+\newblock {\em International Journal of Solids and Structures}, 43:7166--7196, 2006.
 \bibitem{inel} M. Jir\'asek, Z.P. Ba\v zant: Inelastic analysis of structures, John Wiley, 2001.
 \bibitem{mdm} M. Jir\'{a}sek: Comments on microplane theory, Mechanics of Quasi-Brittle Materials and Structures, ed. G. Pijaudier-Cabot, Z. Bittnar, and B. G\'{e}rard, Herm\`{e}s Science Publications, Paris, 1999, pp. 57-77.
 \bibitem{Rots} B. Lourenco, J.G. Rots: Multisurface Interface Model for Analysis of Masonry Structures, Journal of Engng Mech, vol. 123, No. 7, 1997.
 \bibitem{ortiz} M. Ortiz, E.P. Popov: Accuracy and stability of integration algorithms for elasto-plastic constitutive relations, Int. J. Numer. Methods Engrg, 21, 1561-1576, 1985.
 \bibitem{oofem} B. Patz\'ak: OOFEM home page, http://www.oofem.org, 2003.
 \bibitem{SimoHughes} J.C. Simo, T.J.R. Hughes: Computational Inelasticity, Springer, 1998.
+\bibitem{Ruiz:01} J. Ruiz, A. Schindler, R. Rasmussen, P. Kim, G. Chang: Concrete temperature modeling and strength prediction using maturity concepts in the FHWA HIPERPAV software, 7th international conference on concrete pavements, Orlando (FL), USA, 2001.
 \bibitem{simo}  J.C. Simo, J.G. Kennedy, S. Govindjee: Non-smooth multisurface plasticity and viscoplasticity. Loading/unloading conditions and numerical algorithms, Int. J. Numer. Methods Engrg, 26, 2161-2185, 1988.
 \bibitem{SimoPister} J.C. Simo, K.S. Pister: Remarks on rate constitutive equations for finite deformation problems: computational implications, Comp Methods in Applied Mech and Engng, 46, 201-215, 1984.
 \bibitem{Smilauer:09} V. \v{S}milauer and T. Krej\v{c}\'i, Multiscale Model for Temperature Distribution in Hydrating Concrete, International Journal for Multiscale Computational Engineering, 7 (2), 135-151, 2009.
-\bibitem{Ruiz:01} J. Ruiz, A. Schindler, R. Rasmussen, P. Kim, G. Chang: Concrete temperature modeling and strength prediction using maturity concepts in the FHWA HIPERPAV software, 7th international conference on concrete pavements, Orlando (FL), USA, 2001.
 \end{thebibliography}
 \end{document}
 

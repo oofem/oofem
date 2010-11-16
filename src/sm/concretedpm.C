@@ -349,7 +349,7 @@ ConcreteDPM::initializeFrom (InputRecord* ir)
 
   //Damage parameters. Only exponential softening
   // in ef variable the wf (crack opening) is stored.
-  IR_GIVE_FIELD (ir, ef,IFT_ConcreteDPM_ef, "ef");
+  IR_GIVE_FIELD (ir, ef,IFT_ConcreteDPM_ef, "wf");
 
 
   // default parameters
