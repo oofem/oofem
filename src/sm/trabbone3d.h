@@ -116,9 +116,7 @@ class TrabBone3DStatus : public StructuralMaterialStatus
   double giveTempTSED();
   double giveDeltaKappa();
   double giveBeta();
-/*************************************************************************/
   void giveTrialEffectiveStress(FloatArray& answer){answer = trialStress;}
-/*************************************************************************/
   const FloatArray *givePlasDef();
   const FloatArray *giveTempPlasDef();
   const FloatArray *giveTempEffectiveStress();
@@ -127,9 +125,7 @@ class TrabBone3DStatus : public StructuralMaterialStatus
   const FloatMatrix *giveSmtrx();
   const FloatMatrix *giveSSaTensor();
 
-/**************************************************************************/
   void letTrialEffectiveStressBe(FloatArray values){trialStress = values;}
-/**************************************************************************/
   void setTempKappa(double al){tempKappa=al;}
   void setTempDam(double da){tempDam=da;}
   void setTempPSED(double pse){tempPSED=pse;}
@@ -204,7 +200,7 @@ class TrabBone3D : public StructuralMaterial
   // STATE VARIABLE DECLARATION
   // declare material properties here
 
-  double m1, m2, rho, eps0, nu0, mu0, expk, expl, sig0Pos, sig0Neg, chi0Pos, chi0Neg, tau0, expq;
+  double m1, m2, rho, eps0, nu0, mu0, expk, expl, sig0Pos, sig0Neg, chi0Pos, chi0Neg, tau0, expq,expp;
   double plasHardFactor, expPlasHard, expDam, critDam, gamDens, tDens, JCrit;
 
   public:
@@ -249,7 +245,7 @@ class TrabBone3D : public StructuralMaterial
   // Construct Tensor to adjust Norm.
   void         constructNormAdjustTensor (FloatMatrix& answer);
  
-  //Method for computing 1d  stifness matrix of receiver.
+ 
   //Default implementation computes 3d stifness matrix using give3dMaterialStiffnessMatrix and
   //reduces it to 1d stiffness using reduce method described above.
   //Howewer, this reduction is quite time consuming and if it is possible, 

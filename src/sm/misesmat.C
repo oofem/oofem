@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2010   Borek Patzak
+ *               Copyright (C) 1993 - 2008   Borek Patzak
  *
  *
  *
@@ -68,20 +68,6 @@ MisesMat :: ~MisesMat()
 int 
 MisesMat :: hasMaterialModeCapability (MaterialMode mode)
 {
-  /*
-    if ( ( mode == _3dMat ) ||
-        ( mode == _1dMat ) ||
-        //<RESTRICTED_SECTION>
-        ( mode == _PlaneStress )  ||
-        //</RESTRICTED_SECTION>
-        ( mode == _PlaneStrain )  ||
-        ( mode == _2dPlateLayer ) ||
-        ( mode == _2dBeamLayer )  ||
-        ( mode == _3dShellLayer ) ||
-        ( mode == _1dFiber ) ) {
-        return 1;
-    }
-  */ 
 
   if ( ( mode == _3dMat ) || ( mode == _3dMat_F ) )
     return 1;
@@ -104,13 +90,6 @@ MisesMat :: initializeFrom(InputRecord *ir)
 
     H = 0.;
     IR_GIVE_OPTIONAL_FIELD(ir, H, IFT_MisesMat_h, "h"); // hardening modulus
-/*********************************************************************************************************/
-    IR_GIVE_FIELD(ir, omega_crit, IFT_MisesMat_omega_crit, "omega_crit"); // critical damage
-
-    IR_GIVE_OPTIONAL_FIELD(ir, a, IFT_MisesMat_a, "a"); // exponent in damage law
-/********************************************************************************************************/
-
-
 
 
     return IRRT_OK;
@@ -154,18 +133,16 @@ MisesMat :: giveRealStressVectorComputedFromDefGrad(FloatArray &answer,
                                           const FloatArray &totalDefGrad,
                                           TimeStep *atTime)
 {
-
-
-  //StructuralCrossSection *crossSection = ( StructuralCrossSection * ) ( gp->giveElement()->giveCrossSection() );
   MisesMatStatus *status = ( MisesMatStatus * ) this->giveStatus(gp);
 
   this->initTempStatus(gp);
-  this->initGpForNewStep(gp);
-  
+  this->initGpForNewStep(gp);  
 
-  double kappa, dKappa, yieldValue;
+  double kappa, dKappa, yieldValue,mi;
   FloatMatrix F,oldF,invOldF;
   FloatArray totalStrain;
+  FloatArray s(6);
+  
   //converts deformation gradient from array into 3x3 matrix
   F.resize(3,3);
   F.at(1,1) = totalDefGrad(0);
@@ -179,7 +156,7 @@ MisesMat :: giveRealStressVectorComputedFromDefGrad(FloatArray &answer,
   F.at(3,3) = totalDefGrad(8);
   
   kappa = status->giveCumulativePlasticStrain();
-  status->giveDefGrad(oldF);
+  status->giveTempDefGrad(oldF);
   invOldF.beInverseOf(oldF);
   //relative deformation radient
   FloatMatrix f,f_T;
@@ -191,13 +168,26 @@ MisesMat :: giveRealStressVectorComputedFromDefGrad(FloatArray &answer,
   oldLeftCauchyGreen.resize(3,3);
   trialLeftCauchyGreen.resize(3,3);
   help.resize(3,3);
-
+  
   f.times(pow(f.giveDeterminant(),-1./3.));
   f_T.beTranspositionOf(f);
-  status->giveLeftCauchyGreen(oldLeftCauchyGreen);
+  status->giveTempLeftCauchyGreen(oldLeftCauchyGreen);
   help.beProductOf(f,oldLeftCauchyGreen);
   trialLeftCauchyGreen.beProductOf(help,f_T);
-  
+  FloatMatrix def,F_T;
+  F_T.beTranspositionOf(F);
+  def.beProductOf(F,F_T);
+  def.at(1,1) = def.at(1,1)-1;
+  def.at(2,2) = def.at(2,2)-1;
+  def.at(3,3) = def.at(3,3)-1;
+  def.times(1./2.);
+  FloatArray vDef(6);
+  vDef.at(1) = def.at(1,1);
+  vDef.at(2) = def.at(2,2);
+  vDef.at(3) = def.at(3,3);
+  vDef.at(4) = 2.*def.at(2,3);
+  vDef.at(5) = 2.*def.at(1,3);
+  vDef.at(6) = 2.*def.at(1,2);
 
   StrainVector leftCauchyGreen(_3dMat);
   StrainVector leftCauchyGreenDev(_3dMat);
@@ -206,73 +196,75 @@ MisesMat :: giveRealStressVectorComputedFromDefGrad(FloatArray &answer,
   leftCauchyGreen(0) = trialLeftCauchyGreen.at(1,1);
   leftCauchyGreen(1) = trialLeftCauchyGreen.at(2,2);
   leftCauchyGreen(2) = trialLeftCauchyGreen.at(3,3);
-  leftCauchyGreen(3) =2* trialLeftCauchyGreen.at(2,3);
-  leftCauchyGreen(4) =2* trialLeftCauchyGreen.at(1,3);
-  leftCauchyGreen(5) =2* trialLeftCauchyGreen.at(1,2);
-
+  leftCauchyGreen(3) = 2.*trialLeftCauchyGreen.at(2,3);
+  leftCauchyGreen(4) = 2.*trialLeftCauchyGreen.at(1,3);
+  leftCauchyGreen(5) = 2.*trialLeftCauchyGreen.at(1,2);
+  
 
   leftCauchyGreen.computeDeviatoricVolumetricSplit(leftCauchyGreenDev,leftCauchyGreenVol);
   StressVector trialStressDev(_3dMat);
   leftCauchyGreenDev.applyDeviatoricElasticStiffness(trialStressDev,G/2.);
-
+  s = trialStressDev;  
 
   //check for plastic loading
   double trialS = trialStressDev.computeStressNorm();
   double sigmaY = sig0 + H*kappa;
-  yieldValue = sqrt(3./2.)*trialS-sigmaY;
-  double mi = 0;
+   yieldValue = trialS-sqrt(2./3.)*sigmaY;
+  
 
   //store deviatoric trial stress(reused by algorithmic stiffness)
    status->letTrialStressDevBe(trialStressDev);
   //the return-mapping algorithm 
-  if(yieldValue > 0){
-    
-     mi = leftCauchyGreenVol*G;
-     dKappa = yieldValue/(H + 3.*mi);     
-     trialStressDev.times(1-sqrt(6.)*mi*dKappa/trialS);	
-     kappa += dKappa;
+   double J = F.giveDeterminant();
+   mi =leftCauchyGreenVol*G;
+  if(yieldValue > 0){      
+     dKappa = (yieldValue/(2*mi))/(1+H/(3*mi));
+     FloatArray n = trialStressDev;
+     n.times(2*mi*dKappa/trialS);
+     ////return map
+     s = trialStressDev-n;	
+     kappa += sqrt(2./3.)*dKappa;
+
+
+     //update of intermediate configuration
+     trialLeftCauchyGreen.at(1,1) = s(0)/G + leftCauchyGreenVol; 
+     trialLeftCauchyGreen.at(2,2) = s(1)/G + leftCauchyGreenVol;
+     trialLeftCauchyGreen.at(3,3) = s(2)/G + leftCauchyGreenVol;
+     trialLeftCauchyGreen.at(2,3) = s(3)/G;
+     trialLeftCauchyGreen.at(1,3) = s(4)/G;
+     trialLeftCauchyGreen.at(1,2) = s(5)/G;
+     trialLeftCauchyGreen.at(3,2) = trialLeftCauchyGreen.at(2,3);
+     trialLeftCauchyGreen.at(3,1) = trialLeftCauchyGreen.at(1,3);
+     trialLeftCauchyGreen.at(2,1) = trialLeftCauchyGreen.at(1,2);
+     trialLeftCauchyGreen.times(J*J);
   }
   
   //addition of the elastic mean stress
-  double J = F.giveDeterminant();
+
   
   FloatMatrix kirchhoffStress;
   kirchhoffStress.resize(3,3);
-  kirchhoffStress.at(1,1) = trialStressDev(0) + 1./2. *  K*(J*J-1);
-  kirchhoffStress.at(2,2) = trialStressDev(1) + 1./2. *  K*(J*J-1);
-  kirchhoffStress.at(3,3) = trialStressDev(2) + 1./2. *  K*(J*J-1);
-  kirchhoffStress.at(2,3) = trialStressDev(3);
-  kirchhoffStress.at(1,3) = trialStressDev(4);
-  kirchhoffStress.at(1,2) = trialStressDev(5);
+  kirchhoffStress.at(1,1) = s(0) + 1./2. *  K*(J*J-1);
+  kirchhoffStress.at(2,2) = s(1) + 1./2. *  K*(J*J-1);
+  kirchhoffStress.at(3,3) = s(2) + 1./2. *  K*(J*J-1);
+  kirchhoffStress.at(2,3) = s(3);
+  kirchhoffStress.at(1,3) = s(4);
+  kirchhoffStress.at(1,2) = s(5);
   kirchhoffStress.at(3,2) = kirchhoffStress.at(2,3);
   kirchhoffStress.at(3,1) = kirchhoffStress.at(1,3);
-  kirchhoffStress.at(2,1) = kirchhoffStress.at(1,2);
-
-  
-
-  //update of intermediate configuration
-   trialLeftCauchyGreen.at(1,1) = trialStressDev(0)/G + leftCauchyGreenVol; 
-   trialLeftCauchyGreen.at(2,2) = trialStressDev(1)/G + leftCauchyGreenVol;
-   trialLeftCauchyGreen.at(3,3) = trialStressDev(2)/G + leftCauchyGreenVol;
-   trialLeftCauchyGreen.at(2,3) = trialStressDev(3)/G;
-   trialLeftCauchyGreen.at(1,3) = trialStressDev(4)/G;
-   trialLeftCauchyGreen.at(1,2) = trialStressDev(5)/G;
-   trialLeftCauchyGreen.at(3,2) = trialLeftCauchyGreen.at(2,3);
-   trialLeftCauchyGreen.at(3,1) = trialLeftCauchyGreen.at(1,3);
-   trialLeftCauchyGreen.at(2,1) = trialLeftCauchyGreen.at(1,2);
-  
+  kirchhoffStress.at(2,1) = kirchhoffStress.at(1,2); 
 
   //transform Kirchhoff stress into Second Piola - Kirchhoff stress
-   //  FloatMatrix iF(3,3),iF_T(3,3);
-   //iF.beInverseOf(F);
-   //iF_T.beTranspositionOf(iF);
-   //FloatMatrix S;
-   //help.resize(3,3);
-   //S.resize(3,3);
+   FloatMatrix iF(3,3),iF_T(3,3);
+   iF.beInverseOf(F);
+   iF_T.beTranspositionOf(iF);
+   FloatMatrix S;
+   help.resize(3,3);
+   S.resize(3,3);
   
-   //help.beProductOf(iF,kirchhoffStress);
-   //S.beProductOf(help,iF_T);
- 
+  help.beProductOf(iF,kirchhoffStress);
+  S.beProductOf(help,iF_T);
+
   FloatMatrix Ep(3,3);
   FloatMatrix E(3,3);
   FloatArray ep(6);
@@ -295,13 +287,12 @@ MisesMat :: giveRealStressVectorComputedFromDefGrad(FloatArray &answer,
   e(5) =2* E.at(1,2);
 
   answer.resize(6);
-  answer(0) =  kirchhoffStress.at(1,1);
-  answer(1) =  kirchhoffStress.at(2,2);
-  answer(2) =  kirchhoffStress.at(3,3);
-  answer(3) =  kirchhoffStress.at(2,3);
-  answer(4) =  kirchhoffStress.at(1,3);
-  answer(5) =  kirchhoffStress.at(1,2);
-
+  answer(0) =  S.at(1,1);
+  answer(1) =  S.at(2,2);
+  answer(2) =  S.at(3,3);
+  answer(3) =  S.at(2,3);
+  answer(4) =  S.at(1,3);
+  answer(5) =  S.at(1,2);
 
  
   status->setTrialStressVol(mi);
@@ -418,15 +409,6 @@ MisesMat :: giveRealStressVectorComputedFromStrain(FloatArray &answer,
     double stressVol = 3.*K*elStrainVol;
     trialStressDev.computeDeviatoricVolumetricSum(fullStress, stressVol);
 
-    /***********************************************************************/
-    double  omega = omega_crit*(1-exp(-a*kappa));
-    fullStress.at(1) = (1-omega)*fullStress.at(1);
-    fullStress.at(2) = (1-omega)*fullStress.at(2);
-    fullStress.at(3) = (1-omega)*fullStress.at(3);
-    fullStress.at(4) = (1-omega)*fullStress.at(4);
-    fullStress.at(5) = (1-omega)*fullStress.at(5);
-    fullStress.at(6) = (1-omega)*fullStress.at(6);
-    /***********************************************************************/
     // store the total strain in status
     status->letTempStrainVectorBe(totalStrain);
 
@@ -437,8 +419,6 @@ MisesMat :: giveRealStressVectorComputedFromStrain(FloatArray &answer,
     // store the plastic strain and cumulative plastic strain
     status->letTempPlasticStrainBe(plStrain);
     status->setTempCumulativePlasticStrain(kappa);
-    status->setTempDamage(omega);
-
     // reduce the stress vector (if required) and return it
     if ( form == FullForm ) 
       answer = fullStress;
@@ -483,15 +463,10 @@ MisesMat :: give3dSSMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseForm
     return;
 
   MisesMatStatus *status = ( MisesMatStatus * ) this->giveStatus(gp);
-  //StructuralCrossSection *crossSection = ( StructuralCrossSection * ) ( gp->giveElement()->giveCrossSection() );
   double kappa = status->giveCumulativePlasticStrain();
   // increment of cumulative plastic strain as an indicator of plastic loading
   double dKappa = status->giveTempCumulativePlasticStrain() - kappa;
-  /********************************************************************/
-  double kappaN = status ->giveTempCumulativePlasticStrain();
-  double  omega = omega_crit*(1-exp(-a*kappaN));
-/*********************************************************************/
-
+  
   if (dKappa <= 0.0) // elastic loading - elastic stiffness plays the role of tangent stiffness
     return;
 
@@ -503,12 +478,6 @@ MisesMat :: give3dSSMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseForm
   // trial deviatoric stress and its norm
   StressVector trialStressDev(_3dMat);
   
-  /*****************************************************/
-  double trialStressVol;
-  status ->giveTrialStressVol(trialStressVol);
-  /****************************************************/
-
-
   status -> giveTrialStressDev(trialStressDev);
   double trialS = trialStressDev.computeStressNorm(); 
 
@@ -525,75 +494,43 @@ MisesMat :: give3dSSMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseForm
   double factor2 = factor*dKappa;
   stiffnessCorrection.times(factor2);
   answer.plus(stiffnessCorrection);
- 
- /********************************************************************************************/
-  //influence of damage  
-  answer.times((1-omega));
-  
-  double scalar1 = -2./3.*omega_crit*a*exp(-a*kappaN)*sigmaY/trialS/trialS;
-  double scalar2 = -sqrt(2./3.)*omega_crit*a*exp(-a*kappaN)*trialStressVol/trialS;
-  FloatArray delta(6);
-  delta.at(1) = 1;
-  delta.at(2) = 1;
-  delta.at(3) = 1;
-
-  stiffnessCorrection.beDyadicProductOf(trialStressDev,trialStressDev);
-  stiffnessCorrection.times(scalar1);
-
-  answer.plus(stiffnessCorrection);
-  
-   stiffnessCorrection.beDyadicProductOf(delta,trialStressDev);
-
-   stiffnessCorrection.times(scalar2);
-  
-  answer.plus(stiffnessCorrection);
-  
-  /*********************************************************************************/
+   
   return;
 }
-
 
 
 
 void 
 MisesMat::give3dLSMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime)
 {
-    // start from the elastic stiffness
-  this->giveLinearElasticMaterial()->giveCharacteristicMatrix(answer, form, mode, gp, atTime);
-  if ( mode != TangentStiffness ) 
-    return;
 
   MisesMatStatus *status = ( MisesMatStatus * ) this->giveStatus(gp);
-  //StructuralCrossSection *crossSection = ( StructuralCrossSection * ) ( gp->giveElement()->giveCrossSection() );
-  double kappa = status->giveCumulativePlasticStrain();
-  // increment of cumulative plastic strain as an indicator of plastic loading
-  double dKappa = status->giveTempCumulativePlasticStrain() - kappa;
-  
-  if (dKappa <= 0.0) // elastic loading - elastic stiffness plays the role of tangent stiffness
-    return;
-
-  // === plastic loading ===
-  dKappa = dKappa*sqrt(3./2.);
-  // trial deviatoric stress and its norm
-  StressVector trialStressDev(_3dMat);
-  double trialStressVol;
-  status ->giveTrialStressVol(trialStressVol);
-  status -> giveTrialStressDev(trialStressDev);
-  double trialS = trialStressDev.computeStressNorm(); 
-  FloatMatrix F;
-  status->giveTempDefGrad(F);
-  double J;
-  J = F.giveDeterminant();
-
+  // start from the elastic stiffness
+ 
   FloatMatrix I(6,6);
   I.at(1,1) = I.at(2,2) = I.at(3,3) = 1;
   I.at(4,4) = I.at(5,5) = I.at(6,6) = 0.5;
   FloatArray delta(6);
   delta.at(1) = delta.at(2) = delta.at(3) = 1;
 
-  FloatArray n = trialStressDev;
-  n.times(1/trialS);
+  FloatMatrix F,F_Tr;
+  status->giveTempDefGrad(F);
+  double J;
+  J = F.giveDeterminant();
+
+  StressVector trialStressDev(_3dMat);
+  double trialStressVol;
+  status ->giveTrialStressVol(trialStressVol);
+  status -> giveTrialStressDev(trialStressDev);
+  double trialS = trialStressDev.computeStressNorm();
+  FloatArray n(6);
+  n = trialStressDev;
+  if(trialS == 0){
+    n.resize(6);}
+  else n.times(1/trialS);
+
   
+  FloatMatrix Cdev(6,6);
   FloatMatrix C(6,6);
   FloatMatrix help(6,6);
   help.beDyadicProductOf(delta,delta);
@@ -603,59 +540,222 @@ MisesMat::give3dLSMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseForm f
   C1.plus(help);
   C1.times(2*trialStressVol);
   
-  FloatMatrix n1,n2;
+  FloatMatrix n1(6,6),n2(6,6);
   n1.beDyadicProductOf(n,delta);
   n2.beDyadicProductOf(delta,n);
   help = n1;
   help.plus(n2);
   help.times(-2./3.*trialS);
   C1.plus(help);
-
+  Cdev = C1;
   C.times(K*J*J);
   
   help = I;
   help.times(-K*(J*J-1));
   C.plus(help);
+  FloatMatrix Cvol = C;
   C.plus(C1);
+  //////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-  double beta0 = 1+H/3/trialStressVol;
-  double beta1 = 2*trialStressVol*dKappa/trialS;
-  double beta2 = (1-1/beta0)*2./3.*trialS*dKappa/trialStressVol;
-  double beta3 = 1/beta0-beta1+beta2;
-  double beta4 = (1/beta0-beta1)*trialS/trialStressVol;
+  FloatMatrix invF(3,3);
+  FloatMatrix T(6,6),tT(6,6);
+
+  invF.beInverseOf(F);
+  //////////////////////////////////////////////////
+  //first row of pull back transformation matrix
+  T.at(1,1) = invF.at(1,1)*invF.at(1,1);
+  T.at(1,2) = invF.at(1,2)*invF.at(1,2);
+  T.at(1,3) = invF.at(1,3)*invF.at(1,3);
+  T.at(1,4) = 2.*invF.at(1,2)*invF.at(1,3);
+  T.at(1,5) = 2.*invF.at(1,1)*invF.at(1,3);
+  T.at(1,6) = 2.*invF.at(1,1)*invF.at(1,2);
+  //second row of pull back transformation matrix
+  T.at(2,1) = invF.at(2,1)*invF.at(2,1);
+  T.at(2,2) = invF.at(2,2)*invF.at(2,2);
+  T.at(2,3) = invF.at(2,3)*invF.at(2,3);
+  T.at(2,4) = 2.*invF.at(2,2)*invF.at(2,3);
+  T.at(2,5) = 2.*invF.at(2,1)*invF.at(2,3);
+  T.at(2,6) = 2.*invF.at(2,1)*invF.at(2,2);
+ //third row of pull back transformation matrix
+  T.at(3,1) = invF.at(3,1)*invF.at(3,1);
+  T.at(3,2) = invF.at(3,2)*invF.at(3,2);
+  T.at(3,3) = invF.at(3,3)*invF.at(3,3);
+  T.at(3,4) = 2.*invF.at(3,2)*invF.at(3,3);
+  T.at(3,5) = 2.*invF.at(3,1)*invF.at(3,3);
+  T.at(3,6) = 2.*invF.at(3,1)*invF.at(3,2);
+ //fourth row of pull back transformation matrix
+  T.at(4,1) = invF.at(2,1)*invF.at(3,1);
+  T.at(4,2) = invF.at(2,2)*invF.at(3,2);
+  T.at(4,3) = invF.at(2,3)*invF.at(3,3);
+  T.at(4,4) = (invF.at(2,2)*invF.at(3,3) + invF.at(2,3)*invF.at(3,2));
+  T.at(4,5) = (invF.at(2,1)*invF.at(3,3) + invF.at(2,3)*invF.at(3,1));
+  T.at(4,6) = (invF.at(2,1)*invF.at(3,2) + invF.at(2,2)*invF.at(3,1));
+ //fifth row of pull back transformation matrix
+  T.at(5,1) = invF.at(1,1)*invF.at(3,1);
+  T.at(5,2) = invF.at(1,2)*invF.at(3,2);
+  T.at(5,3) = invF.at(1,3)*invF.at(3,3);
+  T.at(5,4) = (invF.at(1,2)*invF.at(3,3) + invF.at(1,3)*invF.at(3,2));
+  T.at(5,5) = (invF.at(1,1)*invF.at(3,3) + invF.at(1,3)*invF.at(3,1));
+  T.at(5,6) = (invF.at(1,1)*invF.at(3,2) + invF.at(1,2)*invF.at(3,1));
+ //sixth row of pull back transformation matrix
+  T.at(6,1) = invF.at(1,1)*invF.at(2,1);
+  T.at(6,2) = invF.at(1,2)*invF.at(2,2);
+  T.at(6,3) = invF.at(1,3)*invF.at(2,3);
+  T.at(6,4) = (invF.at(1,2)*invF.at(2,3) + invF.at(1,3)*invF.at(2,2));
+  T.at(6,5) = (invF.at(1,1)*invF.at(2,3) + invF.at(1,3)*invF.at(2,1));
+  T.at(6,6) = (invF.at(1,1)*invF.at(2,2) + invF.at(1,2)*invF.at(2,1));
+  ///////////////////////////////////////////
+  tT.beTranspositionOf(T);
+  answer.resize(6,6);
+  //////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+  if ( mode != TangentStiffness ){ 
+     help.beProductOf(C,tT);
+    answer.beProductOf(T,help);
+    return;
+  }
+
+  double kappa = status->giveCumulativePlasticStrain();
+  // increment of cumulative plastic strain as an indicator of plastic loading
+  double dKappa = sqrt(3./2.)*( status->giveTempCumulativePlasticStrain() - kappa);
+  if (dKappa <= 0.0){ // elastic loading - elastic stiffness plays the role of tangent stiffness
+    help.beProductOf(C,tT);   
+    answer.beProductOf(T,help);
+    return;
+  }
+
+  // === plastic loading ===
+  // trial deviatoric stress and its norm
+  
+
+  double beta0,beta1,beta2,beta3,beta4;
+  if(trialS ==0)
+    beta1 =0;
+  else
+    beta1 = 2*trialStressVol*dKappa/trialS;
+  if(trialStressVol == 0){
+    beta0 =0;
+    beta2 = 0;
+    beta3 = beta1;
+    beta4 = 0;
+  }
+  else{
+    beta0 = 1+H/3/trialStressVol;
+    beta2 = (1-1/beta0)*2./3.*trialS*dKappa/trialStressVol;
+    beta3 = 1/beta0-beta1+beta2;
+    beta4 = (1/beta0-beta1)*trialS/trialStressVol;
+  }
   FloatMatrix N;
   N.beDyadicProductOf(n,n);
+  N.times(-2*trialStressVol*beta3);
   answer.resize(6,6);
 
   C1.times(-beta1);
-  N.times(-2*trialStressVol*beta3);
-
+   FloatMatrix mN(3,3);
+  mN.at(1,1) = n.at(1);
+  mN.at(1,2) = n.at(6);
+  mN.at(1,3) = n.at(5);
+  mN.at(2,1) = n.at(6);
+  mN.at(2,2) = n.at(2);
+  mN.at(2,3) = n.at(4);
+  mN.at(3,1) = n.at(5);
+  mN.at(3,2) = n.at(4);
+  mN.at(3,3) = n.at(3);
+  FloatMatrix mN2(3,3);
+  mN2.beProductOf(mN,mN);
+  
+  double volN2 =1./3.*(mN2.at(1,1) + mN2.at(2,2) + mN2.at(3,3));
   FloatArray devN2(6);
-  double volN2 =1./3.*(n.at(1)*n.at(1) + n.at(2)*n.at(2) + n.at(3)*n.at(3));
-  devN2.at(1) = n.at(1)*n.at(1) + n.at(6)*n.at(6) + n.at(5)*n.at(5) - volN2;
-  devN2.at(2) = n.at(6)*n.at(6) + n.at(2)*n.at(2) + n.at(4)*n.at(4) - volN2;
-  devN2.at(3) = n.at(5)*n.at(5) + n.at(4)*n.at(4) + n.at(3)*n.at(3) - volN2;
-  devN2.at(4) = n.at(6)*n.at(5) + n.at(2)*n.at(4) + n.at(4)*n.at(3);
-  devN2.at(5) = n.at(1)*n.at(5) + n.at(6)*n.at(4) + n.at(5)*n.at(3);
-  devN2.at(6) = n.at(1)*n.at(6) + n.at(6)*n.at(2) + n.at(5)*n.at(4);
+  devN2.at(1)= mN2.at(1,1)-volN2;
+  devN2.at(2)= mN2.at(2,2)-volN2;
 
+  devN2.at(3)= mN2.at(3,3)-volN2;
+  devN2.at(4)= mN2.at(2,3);
+  devN2.at(5)= mN2.at(1,3);
+  devN2.at(6)= mN2.at(1,2);
   FloatMatrix nonSymPart,symP;
-  nonSymPart.beDyadicProductOf(n,devN2);
-  symP.beTranspositionOf(nonSymPart);
-  symP.plus(nonSymPart);
-  symP.times(-trialStressVol*beta4);
+  nonSymPart.beDyadicProductOf(n,devN2); 
+  nonSymPart.times(-2*trialStressVol*beta4);
   
+  C.plus(C1);
+  C.plus(N); 
+  C.plus(nonSymPart);
+  help.beProductOf(C,tT);
+  answer.beProductOf(T,help);
+}
 
 
-  answer = C;
-  answer.plus(C1);
-  answer.plus(N);
-  answer.plus(symP);
-  
+#ifdef __OOFEG
+#endif
 
+
+const FloatArray* 
+MisesMatStatus::givePlasDef()
+{
+  return &plasticStrain;
 
 }
 
+int
+MisesMat::giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime)
+{
+    MisesMatStatus *status = ( MisesMatStatus * ) this->giveStatus(aGaussPoint);
+    if ( type == IST_PlasticStrainTensor )
+      {
+        answer.resize(6);
+        answer  = *status->givePlasDef();
+        return 1;
+    } 
+   else if (type == IST_MaxEquivalentStrainLevel) {
+  	answer.resize(1);
+  	answer.at(1) = status->giveCumulativePlasticStrain();
+	return 1;
+	}
+    else return StructuralMaterial :: giveIPValue(answer, aGaussPoint, type, atTime);
+ }
+
+
+
+
+InternalStateValueType
+MisesMat :: giveIPValueType(InternalStateType type)
+{
+  if(type == IST_PlasticStrainTensor) return ISVT_TENSOR_S3; 
+  else if(type == IST_MaxEquivalentStrainLevel) return ISVT_SCALAR;
+   else return StructuralMaterial :: giveIPValueType(type);
+}
+
+
+int
+MisesMat::giveIntVarCompFullIndx(IntArray &answer, InternalStateType type, MaterialMode mmode)
+{
+    if ( type == IST_PlasticStrainTensor){
+        answer.resize(6);
+        answer.at(1) = 1;
+	answer.at(2) = 2;
+	answer.at(3) = 3;
+	answer.at(4) = 4;
+	answer.at(5) = 5;
+	answer.at(6) = 6;
+	return 1;
+    }
+    else if (type == IST_MaxEquivalentStrainLevel) {
+	 answer.resize (1);
+	 answer.at(1) = 1;
+	 return 1;
+    }
+    else  return StructuralMaterial :: giveIntVarCompFullIndx(answer, type, mmode);
+}
+
+
+int
+MisesMat :: giveIPValueSize(InternalStateType type, GaussPoint *aGaussPoint)
+{
+  if (type == IST_PlasticStrainTensor) return 6;      
+  else if (type == IST_MaxEquivalentStrainLevel) return 1;
+  else return StructuralMaterial :: giveIPValueSize(type, aGaussPoint);
+  
+}
 
 //=============================================================================
 
@@ -666,10 +766,8 @@ MisesMatStatus :: MisesMatStatus(int n, Domain *d, GaussPoint *g) :
   kappa = tempKappa = 0.;
   defGrad.resize(3,3);
   defGrad.at(1,1) = defGrad.at(2,2) = defGrad.at(3,3) = 1;
-  // tempDefGrad.resize(3,3);
-  //tempDefGrad.at(1,1) = tempDefGrad.at(2,2) = tempDefGrad.at(3,3) = 1;
-  // tempLeftCauchyGreen.resize(3,3);
-  //tempLeftCauchyGreen.at(1,1) = tempLeftCauchyGreen.at(2,2) = tempLeftCauchyGreen.at(3,3) = 1;
+  tempDefGrad.resize(3,3);
+  tempDefGrad.at(1,1) = tempDefGrad.at(2,2) = tempDefGrad.at(3,3) = 1;
   leftCauchyGreen.resize(3,3);
   leftCauchyGreen.at(1,1) = leftCauchyGreen.at(2,2) = leftCauchyGreen.at(3,3) = 1;
 }
@@ -685,57 +783,42 @@ MisesMatStatus :: printOutputAt(FILE *file, TimeStep *tStep)
     StructuralMaterialStatus :: printOutputAt(file, tStep);
 
     fprintf(file, "status { ");
-    /*
-    // this would not be correct, since the status is already updated and kappa is now the "final" value
-    if ( tempKappa > kappa ) {
-      fprintf(file, " Yielding, ");
-    } else {
-      fprintf(file, " Unloading, ");
-    }
-    */
-
-    /*********************************************************************************/
-
-    fprintf(file,"damage %.4e",tempDamage);
-
-    /********************************************************************************/
-
     // print the plastic strain
-        n = plasticStrain.giveSize();
-        fprintf(file, " plastic strains ");
-        for ( i = 1; i <= n; i++ ) {
-            fprintf( file, " % .4e", plasticStrain.at(i) );
-        }
-
-	// print the cumulative plastic strain
-	fprintf(file, ", kappa ");
-	fprintf( file, " % .4e", kappa );
-
-	fprintf(file, "}\n");
-	//print Left Cauchy - Green deformation tensor
-       fprintf(file," left Cauchy Green");
-       fprintf( file, " % .4e",tempLeftCauchyGreen.at(1,1) );
-       fprintf( file, " % .4e",tempLeftCauchyGreen.at(2,2) );
-       fprintf( file, " % .4e",tempLeftCauchyGreen.at(3,3) );
-       fprintf( file, " % .4e",tempLeftCauchyGreen.at(2,3) );
-       fprintf( file, " % .4e",tempLeftCauchyGreen.at(1,3) );
-       fprintf( file, " % .4e",tempLeftCauchyGreen.at(1,2) );
-
-       //print deformation gradient
-       fprintf(file," Deformation Gradient");
-       fprintf( file, " % .4e",tempDefGrad.at(1,1) );
-       fprintf( file, " % .4e",tempDefGrad.at(1,2) );
-       fprintf( file, " % .4e",tempDefGrad.at(1,3) );
-       fprintf( file, " % .4e",tempDefGrad.at(2,1) );
-       fprintf( file, " % .4e",tempDefGrad.at(2,2) );
-       fprintf( file, " % .4e",tempDefGrad.at(2,3) );
-       fprintf( file, " % .4e",tempDefGrad.at(3,1) );
-       fprintf( file, " % .4e",tempDefGrad.at(3,2) );
-       fprintf( file, " % .4e",tempDefGrad.at(3,3) );
-
-
-       fprintf(file, "}\n");
-
+    n = plasticStrain.giveSize();
+    fprintf(file, " plastic strains ");
+    for ( i = 1; i <= n; i++ ) {
+      fprintf( file, " % .4e", plasticStrain.at(i) );
+    }
+    
+    // print the cumulative plastic strain
+    fprintf(file, ", kappa ");
+    fprintf( file, " % .4e", kappa );
+    
+    fprintf(file, "}\n");
+    //print Left Cauchy - Green deformation tensor
+    fprintf(file," left Cauchy Green");
+    fprintf( file, " % .4e",tempLeftCauchyGreen.at(1,1) );
+    fprintf( file, " % .4e",tempLeftCauchyGreen.at(2,2) );
+    fprintf( file, " % .4e",tempLeftCauchyGreen.at(3,3) );
+    fprintf( file, " % .4e",tempLeftCauchyGreen.at(2,3) );
+    fprintf( file, " % .4e",tempLeftCauchyGreen.at(1,3) );
+    fprintf( file, " % .4e",tempLeftCauchyGreen.at(1,2) );
+    
+    //print deformation gradient
+    fprintf(file," Deformation Gradient");
+    fprintf( file, " % .4e",tempDefGrad.at(1,1) );
+    fprintf( file, " % .4e",tempDefGrad.at(1,2) );
+    fprintf( file, " % .4e",tempDefGrad.at(1,3) );
+    fprintf( file, " % .4e",tempDefGrad.at(2,1) );
+    fprintf( file, " % .4e",tempDefGrad.at(2,2) );
+    fprintf( file, " % .4e",tempDefGrad.at(2,3) );
+    fprintf( file, " % .4e",tempDefGrad.at(3,1) );
+    fprintf( file, " % .4e",tempDefGrad.at(3,2) );
+    fprintf( file, " % .4e",tempDefGrad.at(3,3) );
+    
+    
+    fprintf(file, "}\n");
+    
 }
 
 
@@ -763,7 +846,7 @@ void
 MisesMatStatus :: updateYourself(TimeStep *atTime)
 {
     StructuralMaterialStatus :: updateYourself(atTime);
-
+    
     plasticStrain = tempPlasticStrain;
     kappa = tempKappa;
     trialStressD.resize(0); // to indicate that it is not defined any more

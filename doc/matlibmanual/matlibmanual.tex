@@ -92,7 +92,7 @@ Th\'akurova 7, 166 29 Prague, Czech Republic
 \listoftables
 \newpage
 \section{Material Models for Structural Analysis}
-\subsection{Linear elastic materials}
+\subsection{Elastic materials}
 \subsubsection{Isotropic linear elastic material}
 \label{IsoLE}
 Linear isotropic material model. The model parameters are summarized
@@ -225,6 +225,39 @@ Supported modes& 3dMat, PlaneStress, PlaneStrain, 1dMat,
 \end{table}
 
 
+\subsubsection{Hyperelastic material}
+This material model can describe elastic behavior at large strains.
+A hyperelastic model postulates the existence of free energy potential. Existence of the potential implies reversibility of deformations and no energy dissipation during loading process. Here we use the free energy function introduced in \cite{SimoHughes}
+\begin{equation}\label{freeEnergy}
+\rho_0 \psi = \frac{1}{4} \left(K - \frac{2}{3}G \right) \left( J^2 - 2 \rm{ln}J -1\right) + G \left(\mbf{E}:\mbf{I} - \rm{ln}J \right)
+\end{equation}
+where $K$ is the bulk modulus, $G$ is the shear modulus, $J$ is the Jacobian (determinant of the deformation gradient, corresponding to the ratio of the current and initial volume) and $\mbf{E}$ is the Green-Lagrange strain.
+Then stress-strain law can be derived from (\ref{freeEnergy}) as
+\begin{equation}
+\mbf{S} = \rho_0 \frac{\partial \psi}{\partial \mbf{E}} = \frac{1}{2}\left(K - \frac{2}{3}G \right) \left(J^2 -1 \right)\mbf{C}^{-1} + G \left(\mbf{I} -\mbf{C}^{-1} \right)
+\end{equation}
+where $\mbf{S}$ is the second Piola-Kirchhoff stress, $\mbf{E}$ is the Green-Lagrange strain and $\mbf{C}$ is the right Cauchy-Green tensor.
+The model description and parameters are summarized in table~\ref{hyperElMat_table}.
+\begin{table}[!htb]
+%\begin{center}
+\begin{tabular}{|l|p{9cm}|}
+\hline
+Description & Hyperelastic material\\
+\hline
+Record Format & \descitem{HyperMat}  \elemparam{}{in}
+\elemparam{d}{rn} \elemparam{K}{rn} \elemparam{G}{rn} \\
+Parameters &- \param{} material number\\
+&- \param{d} material density\\
+&- \param{K} bulk modulus\\
+&- \param{G} shear modulus\\
+Supported modes& 3dMat\\
+\hline
+\end{tabular}
+\caption{Hyperelastic material - summary.}
+\label{hyperElMat_table}
+%\end{center}
+\end{table}
+
 
 \subsection{Plasticity-based material models}
 
@@ -339,7 +372,7 @@ tension-dominated.
 \hline
 Description & DP material\\
 \hline
-Record Format & \descitem{druckerprager} \elemparam{num}{in}
+Record Format & \descitem{DruckerPrager} \elemparam{num}{in}
 \elemparam{d}{rn} \elemparam{tAlpha}{rn} \elemparam{E}{rn} \elemparam{n}{rn}
 \elemparam{alpha}{rn} \elemparam{alphaPsi}{rn} \elemparam{ht}{in}
 \elemparam{iys}{rn} \elemparam{lys}{rn} \elemparam{hm}{rn} \elemparam{kc}{rn} \optelemparam{yieldtol}{rn} \\
@@ -365,6 +398,109 @@ hardening\\
 %\end{center}
 \end{table}
 
+
+\subsubsection{Hardening plasticity model with Mises yield condition}
+
+This model is appropriate for plastic yielding in material such as metals.
+It is based on the Mises yield condition (in terms of the second deviatoric invariant, $J_2$),
+associated flow rule and linear isotropic hardening driven by the cumulative plastic strain. The model can be used in the small-strain context, with additive split 
+of the strain tensor into the elastic and plastic parts, or in the large-strain context,
+with multiplicative split of the deformation gradient and with yield condition formulated in terms of Kirchhoff stress (which is the true Cauchy stress multiplied by the Jacobian).
+
+\paragraph{Small strain formulation:}
+The basic equations include the additive decomposition of strain into elastic and plastic parts,
+\begin{equation}\label{VMadditiveDecomposition}
+\veps = \veps_{\rm{e}} + \veps_{\rm{p}},
+\end{equation}
+the stress strain law
+\begin{equation}\label{VMconstitutiveEquation}
+\vsig = \mbf{D} :(\veps-\veps_{\rm{p}}),
+\end{equation}
+the yield condition
+\begin{equation}\label{VMvonMisesCondition}
+f(\vs,\kappa) = \sqrt{\frac{3}{2}\vs:\vs}-\sigma_Y(\kappa),
+\end{equation}
+the incremental definition of cumulative plastic strain
+\begin{equation}\label{VMcumPlasStrain}
+\dot{\kappa} = \| \epspd \|,
+\end{equation}
+the linear hardening law
+\begin{equation}\label{VMlinearHardeningLaw}
+\sigma_Y(\kappa) = H\kappa,
+\end{equation}
+the evolution law for the plastic strain
+\begin{equation}
+ \epspd = \dot{\lambda}\frac{\partial f}{\partial \vs},
+\end{equation}
+and the loading-unloading conditions
+\begin{equation}\label{VMkuhnTucker}
+\dot{\lambda} > 0 \qquad f(\vs,\kappa)\leq 0 \qquad \dot{\lambda} f(\vs,\kappa) = 0.
+\end{equation}
+In the equations above, $\veps$ is the strain tensor, $\veps_{\rm{e}}$ is the elastic strain tensor, $\veps_{p}$ is the plastic strain tensor, $\mbf{D}$ is the elastic stiffness tensor, $\vs$ is the deviatoric stress tensor, $\sigma_Y$ is the magnitude of stress at yielding under uniaxial tension (or compression), $\kappa$ is the cumulated plastic strain, $H$ is the hardening modulus and $\lambda$ is the plastic multiplier.
+
+\paragraph{Large strain formulation}
+is based on the introduction of an intermediate local configuration, relative to which the elastic response is characterized. This notion leads to a multiplicative decomposition of deformation gradient into elastic and plastic parts:
+\begin{equation}
+\mbf{F} = \mbf{F}^e\mbf{F}^p.
+\end{equation}
+The stress-evaluation algorithm can be based on the 
+classical radial return mapping; see \cite{SimoHughes} for more details. 
+The model description and parameters are summarized in table~\ref{misesMat_table}.
+\begin{table}[!htb]
+%\begin{center}
+\begin{tabular}{|l|p{9cm}|}
+\hline
+Description & Von Mises Plasticity with isotropic hardening\\
+\hline
+Record Format & \descitem{MisesMat}  \elemparam{}{in}
+\elemparam{d}{rn} \elemparam{E}{rn} \elemparam{n}{rn} \elemparam{sig0}{rn} \elemparam{H}{rn}\\
+Parameters &- \param{} material number\\
+&- \param{d} material density\\
+&- \param{E} Young modulus\\
+&- \param{n} Poisson ratio\\
+&- \param{sig0} initial yield stress in uniaxial tension(compression)\\
+&- \param{H} hardening modulus\\
+Supported modes& 3dMat,3dMatF\\
+\hline
+\end{tabular}
+\caption{Mises plasticity -- summary.}
+\label{misesMat_table}
+%\end{center}
+\end{table}
+
+
+
+\subsubsection{Perfectly plastic material with Mises yield condition}
+
+This is an older model, kept here for compatibility with previous versions.
+It uses Mises plasticity condition with no hardening and under small strain only.
+The model description and parameters are summarized
+in table~\ref{Steel1_table}.
+
+\begin{table}[!htb]
+%\begin{center}
+\begin{tabular}{|l|p{9cm}|}
+\hline
+Description & Perfectly plastic material with Mises condition\\
+\hline
+Record Format & \descitem{Steel1} \elemparam{num}{in}
+\elemparam{d}{rn} \elemparam{E}{rn} \elemparam{n}{rn}
+\elemparam{tAlpha}{rn} \elemparam{Ry}{rn}\\
+Parameters &- \param{num} material model number\\
+&- \param{d} material density\\
+&- \param{E} Young modulus\\
+&- \param{n} Poisson ratio\\
+&- \param{tAlpha} thermal dilatation coefficient\\
+&- \param{Ry} uniaxial yield stress\\
+Supported modes& 3dMat, PlaneStress, PlaneStrain, 1dMat,
+2dPlateLayer, 2dBeamLayer, 3dShellLayer
+3dBeam, PlaneStressRot\\
+\hline
+\end{tabular}
+\caption{Perfectly plastic material  with Mises condition -- summary.}
+\label{Steel1_table}
+%\end{center}
+\end{table}
 
 
 \subsubsection{Composite plasticity model for masonry}
@@ -562,44 +698,6 @@ Supported modes& \_2dInterface\\
 
 
 
-\subsubsection{HMH perfectly plastic material}
-
-Implements a perfectly plastic material.
-HMH plasticity condition with no hardening is used.
-Before plastic condition apply, and during unloading and reloading an
-isotropic linear elastic behavior is assumed. Linear elastic behavior
-is described using Young modulus and Poisson ratio. Plasticity
-condition is described using uniaxial strength.
-The model description and parameters are summarized
-in table~\ref{Steel1_table}.
-
-\begin{table}[!htb]
-%\begin{center}
-\begin{tabular}{|l|p{9cm}|}
-\hline
-Description & HMH perfectly plastic material\\
-\hline
-Record Format & \descitem{Steel1} \elemparam{num}{in}
-\elemparam{d}{rn} \elemparam{E}{rn} \elemparam{n}{rn}
-\elemparam{tAlpha}{rn} \elemparam{Ry}{rn}\\
-Parameters &- \param{num} material model number\\
-&- \param{d} material density\\
-&- \param{E} Young modulus\\
-&- \param{n} Poisson ratio\\
-&- \param{tAlpha} thermal dilatation coefficient\\
-&- \param{Ry} uniaxial strength defining the yield limit\\
-Supported modes& 3dMat, PlaneStress, PlaneStrain, 1dMat,
-2dPlateLayer, 2dBeamLayer, 3dShellLayer
-3dBeam, PlaneStressRot\\
-\hline
-\end{tabular}
-\caption{HMH perfectly plastic material - summary.}
-\label{Steel1_table}
-%\end{center}
-\end{table}
-
-
-
 \subsubsection{Nonlinear elasto-plastic material model for concrete
 plates and shells}
 \label{Rer}
@@ -663,8 +761,6 @@ Supported modes& 3dShellLayer, 2dPlateLayer\\
 \end{table}
 
 
-
-\subsubsection{J2 plasticity material model with hardening}
 
 
 
@@ -2128,12 +2224,12 @@ Parameters
 &- \param{num} material model number\\
 &- \param{d} material density\\
 &- \param{Exx} Young's modulus for principal direction $xx$\\
-&- \param{EyyEzz} Young's modulus in othogonal directions to the principal direction $xx$\\
+&- \param{EyyEzz} Young's modulus in orthogonal directions to the principal direction $xx$\\
 &- \param{nuxynuxz} Poisson's ratio in $xy$ and $xz$ directions\\
 &- \param{nuyz} Poisson's ratio in $yz$ direction\\
 &- \param{GxyGxz} shear modulus in $xy$ and $xz$ directions\\
-&- \param{Tension\_f0\_Gf} array with six pairs of positive numbers. Each pair desribes maximum stress in tension and fracture energy for each direction ($xx$, $yy$, $zz$, $yz$, $zx$, $xy$)\\
-&- \param{Compres\_f0\_Gf} array with six pairs of numbers. Each pair desribes maximum stress in compression (given as a negative number) and positive fracture energy for each direction ($xx$, $yy$, $zz$, $yz$, $zx$, $xy$)\\
+&- \param{Tension\_f0\_Gf} array with six pairs of positive numbers. Each pair describes maximum stress in tension and fracture energy for each direction ($xx$, $yy$, $zz$, $yz$, $zx$, $xy$)\\
+&- \param{Compres\_f0\_Gf} array with six pairs of numbers. Each pair describes maximum stress in compression (given as a negative number) and positive fracture energy for each direction ($xx$, $yy$, $zz$, $yz$, $zx$, $xy$)\\
 Supported modes& 3dMat, 1dMat\\
 &- \param {afterIter} how many iterations must pass until damage is computed from strains, zero is default. User must ensure that the solver proceeds the minimum number of iterations.\\
 &- \param {allowSnapBack} array to skip checking for snap-back. The array members are 1-6 for tension and 7-12 for compression components.\\
@@ -2142,6 +2238,186 @@ Supported modes& 3dMat, 1dMat\\
 \caption{Orthotropic damage model with fixed crack orientations for composites -- summary.}
 \label{compdammat_table}
 \end{table}
+
+
+
+\subsection{Orthotropic elastoplastic model with isotropic damage}
+
+This model combines orthotropic elastoplasticity with isotropic damage.
+Material orthotropy is described by the fabric tensor, i.e., a symmetric second-order
+tensor with principal directions aligned with the axes of orthotropy and principal
+values normalized such that their sum is 3. Elastic constants as well as coefficients
+that appear in the yield condition are linked to the principal values of the
+fabric tensor and to porosity. The yield condition is piecewise quadratic,
+with different parameters in the regions of positive and negative volumetric strain. 
+
+\subsubsection{Local formulation}
+The basic equations include an additive decomposition of total strain into elastic (reversible) part and plastic (irreversible) part
+\begin{equation}\label{additiveDecomposition}
+\veps = \veps_{\rm{e}}+\veps_{\rm{p}},
+\end{equation}
+the stress strain law
+\begin{equation}\label{constitutiveLaw}
+\vsig = \left(1-\omega\right)\bar{\vsig}=\left(1-\omega\right)\mbf{D}:{\veps}_{\rm{e}},
+\end{equation}
+the yield function 
+\begin{equation}
+f(\bar{\vsig},\kappa) = \sqrt{\bar{\vsig} :\mbf{F}:\bar{\vsig}} - \sigma_Y(\kappa).
+\end{equation}
+loading-unloading conditions
+\begin{equation}
+f(\bar{\vsig},\kappa)\le 0 \qquad \dot{\lambda}\geq 0 \qquad \dot{\lambda}f(\bar{\vsig},\kappa)=0,
+\end{equation}
+evolution law for plastic strain
+\begin{equation}
+\dot{\veps}_{\rm{p}} = \dot{\lambda} \frac{\partial f}{\partial \bar{\vsig}},
+\end{equation}
+the incremental definition of cumulated plastic strain
+\begin{equation}
+\dot{\kappa} = \| \epspd \|,
+\end{equation}
+the law governing the evolution of the damage variable
+\begin{equation}
+\omega(\kappa) = \omega_c(1-\mbox{e}^{-a\kappa}),
+\end{equation}
+and the hardening law
+\begin{equation}
+\sigma_Y(\kappa) = 1+\sigma_H(1-\mbox{e}^{-s\kappa}).
+\end{equation}
+In the equations above, $\bar{\vsig}$~is the effective stress tensor, $\mbf{D}$~is the elastic stiffness tensor, $f$~is the yield function, $\lambda$ is the consistency parameter (plastic multiplier), $\omega$~is the damage variable, $\sigma_Y$~is the yield stress and $s$, $a$, $\sigma_H$ and  $\omega_c$~are positive material parameters. 
+Material anisotropy is characterized by the second-order positive definite  fabric tensor 
+\begin{equation}\label{fabric}
+\mbf{M} = \sum_{i=1}^3 m_i(\mbf{m}_i \otimes \mbf{m}_i),
+\end{equation}
+normalized such that Tr$(\mbf{M}) = 3$, $m_i$ are the eigenvalues and $\mbf{m}_i$ the eigenvectors.
+The eigenvectors of the fabric tensor determine the directions of material orthotropy and the components of the elastic stiffness tensor $\mbf{D}$ are linked to eigenvalues of the fabric tensor. In the coordinate system aligned with $m_i$, $i=1,2,3$,
+the stiffness can be presented in Voigt (engineering) notation as
+\begin{equation}
+  \mbf{D}=\left[\begin{array}{cccccc}
+\frac{1}{E_1} & -\frac{\nu_{12}}{E_1}&-\frac{\nu_{13}}{E_1}& 0& 0&0\\
+-\frac{\nu_{21}}{E_2} & \frac{1}{E_2}&-\frac{\nu_{23}}{E_2}& 0& 0&0\\
+-\frac{\nu_{31}}{E_3} & -\frac{\nu_{32}}{E_3}&\frac{1}{E_3}& 0& 0&0\\
+0 & 0 & 0 & \frac{1}{G_{23}} & 0 & 0\\
+0 & 0 & 0 & 0 & \frac{1}{G_{13}} & 0\\
+0 & 0 & 0 & 0 & 0 & \frac{1}{G_{12}}
+ \end{array}\right]^{-1},
+\end{equation}
+where $E_i = E_0\rho^k m_i^{2l}$, $G_{ij} = G_0 \rho^k m_i^l m_j^l$  and $\nu_{ij} = \nu_0 \frac{m_i^l}{m_j^l}$. Here, $E_0$, $G_0$ and $\nu_0$ are elastic constants characterizing the compact (poreless) material, $\rho$ is the volume fraction of solid phase and $k$ and $l$ are dimensionless exponents.
+
+Similar relations as for the stiffness tensor are also postulated for the components of a fourth-order tensor $\mbf{F}$ that is used in the yield condition. The yield condition is divided into tensile and compressive parts. Tensor $\mbf{F}$ is different in each part of the effective stress space. This tensor is denoted $\mbf{F}^{+}$ in tensile part, characterized by $\hat{\mbf{N}}:\bar{\vsig} \leq 0$ and $\mbf{F}^{-}$ in compressive part, characterized by $\hat{\mbf{N}}:\bar{\vsig} \leq 0$, where
+\begin{equation}
+\hat{\mbf{N}} = \frac{\sum_{i=1}^{3} m_i^{-2q}}{\sqrt{\sum_{i=1}^3 m_i^{-4q}}}(\mbf{m}_i \otimes \mbf{m}_i)
+\end{equation}
+
+\begin{equation}
+  \mbf{F^{\pm}}=\left[\begin{array}{cccccc}
+\frac{1}{\left({\sigma_{1}^{\pm}}\right)^2} & -\frac{\chi_{12}^{\pm}}{\left({\sigma_{1}^{\pm}}\right)^2}&-\frac{\chi_{13}^{\pm}}{\left({\sigma_{1}^{\pm}}\right)^2}& 0& 0&0\\
+-\frac{\chi_{21}^{\pm}}{\left({\sigma_{2}^{\pm}}\right)^2} & \frac{1}{\left({\sigma_{2}^{\pm}}\right)^2}&-\frac{\chi_{23}^{\pm}}{\left({\sigma_{2}^{\pm}}\right)^2}& 0& 0&0\\
+-\frac{\chi_{31}^{\pm}}{\left({\sigma_{3}^{\pm}}\right)^2} & -\frac{\chi_{32}^{\pm}}{\left({\sigma_{3}^{\pm}}\right)^2}&\frac{1}{\left({\sigma_{3}^{\pm}}\right)^2}& 0& 0&0\\
+0 & 0 & 0 & \frac{1}{\tau_{23}} & 0 & 0\\
+0 & 0 & 0 & 0 & \frac{1}{\tau_{13}} & 0\\
+0 & 0 & 0 & 0 & 0 & \frac{1}{\tau_{12}}
+ \end{array}\right].
+\end{equation}
+In the equation above $\sigma_i^{\pm} = \sigma_0^{\pm}\rho^p m_i^{2q}$ is uniaxial yield stress along the $i$-th principal axis of orthotropy, $\tau_{ij} = \tau_0 \rho^p m_i^q m_j^q$ is the shear yield stress in the plane of orthotropy and $\chi_{ij}^{\pm} = \chi_0^{\pm}\frac{m_i^{2q}}{m_j^{2q}}$ is the so-called interaction coefficient, $p$ and $q$ are dimensionless exponents and parameters with subscript $0$ are related to a fictitious material with zero porosity. The yield surface is continuously differentiable if the parameters values are constrained by the condition
+\begin{equation}
+\frac{\chi_0^- +1}{(\sigma_0^-)^2} = \frac{\chi_0^+ +1}{(\sigma_0^+)^2}.
+\end{equation}
+The model description and parameters are summarized in table~\ref{trabbone_table}.
+\begin{table}[!htb]
+%\begin{center}
+\begin{tabular}{|l|p{9cm}|}
+\hline
+Description & Anisotropic elastoplastic model with isotropic damage\\
+\hline
+Record Format & \descitem{TrabBone3d}  \elemparam{}{in}
+\elemparam{d}{rn} \elemparam{eps0}{rn} \elemparam{nu0}{rn} \elemparam{mu0}{rn} \elemparam{expk}{rn} \elemparam{expl}{rn} \elemparam{m1}{rn} \elemparam{m2}{rn} \elemparam{rho}{rn}
+\elemparam{sig0pos}{rn} \elemparam{sig0neg}{rn} \elemparam{chi0pos}{rn} \elemparam{chi0neg}{rn} \elemparam{tau0}{rn} \elemparam{plashardfactor}{rn} \elemparam{expplashard}{rn} \elemparam{expdam}{rn} \elemparam{critdam}{rn}\\
+Parameters &- \param{} material number\\
+&- \param{d} material density\\
+&- \param{eps0} Young modulus (at zero porosity)\\
+&- \param{nu0} Poisson ratio (at zero porosity)\\
+&- \param{mu0} shear modulus of elasticity (at zero porosity)\\
+&- \param{m1} first eigenvalue of the fabric tensor\\
+&- \param{m2} second eigenvalue of the fabric tensor\\
+&- \param{rho} volume fraction of solid phase\\
+&- \param{sig0pos} yield stress in tension\\
+&- \param{sig0neg} yield stress in compression\\
+&- \param{tau0} yield stress in shear\\
+&- \param{chi0pos} interaction coefficient in tension\\
+&- \param{plashardfactor} hardening parameter\\
+&- \param{expplashard} exponent in hardening law\\
+&- \param{expdam} exponent in damage law\\
+&- \param{critdam} critical damage\\
+&- \param{expk} exponent $k$ in the expression for elastic stiffness\\
+&- \param{expl} exponent $l$ in the expression for elastic stiffness\\
+&- \param{expq} exponent $q$ in the expression for tensor \mbf{F}\\
+&- \param{expp} exponent $p$ in the expression for tensor \mbf{F}\\
+Supported modes& 3dMat\\
+\hline
+\end{tabular}
+\caption{Anisotropic elastoplastic model with isotropic damage - summary.}
+\label{trabbone_table}
+%\end{center}
+\end{table}
+\subsubsection{Nonlocal formulation}
+The model is regularized by the over-nonlocal formulation with damage driven by a combination of local and nonlocal cumulated plastic strain
+\begin{equation}\label{overKappa}
+\hat{\kappa} = (1-m)\kappa + m\bar{\kappa},
+\end{equation}
+where $m$ is a dimensionless material parameter (typically $m>1$) and
+\begin{equation}\label{nonLocalPlStrain}
+\bar{\kappa}(x) = \int\limits_V \alpha(x,s)\kappa(s)\,{\rm d}s
+\end{equation}
+is the nonlocal cumulated plastic strain. The nonlocal weight function is defined as
+\begin{equation}
+\alpha(x,s) = \frac{\alpha_0(\Vert x-s\Vert )}{\int\limits_V\alpha_0(\Vert x-t\Vert )\,{\rm d}t}
+\end{equation}
+where
+\begin{equation}
+\alpha_0(r) =\left\{\begin{array}{cc} \left(1-\frac{r^2}{R^2}\right)^2 & \mbox{ if } r\le R \\ 0 & \mbox{ if } r> R \end{array}\right.
+\end{equation}
+Parameter $R$ is related to the internal length of the material.
+The model description and parameters are summarized in table~\ref{trabboneNl_table}.
+\begin{table}[!htb]
+%\begin{center}
+\begin{tabular}{|l|p{9cm}|}
+\hline
+Description & Nonlocal anisotropic elastoplastic model with isotropic damage\\
+\hline
+Record Format & \descitem{TrabBoneNL3d}  \elemparam{}{in}
+\elemparam{d}{rn} \elemparam{eps0}{rn} \elemparam{nu0}{rn} \elemparam{mu0}{rn} \elemparam{expk}{rn} \elemparam{expl}{rn} \elemparam{m1}{rn} \elemparam{m2}{rn} \elemparam{rho}{rn}
+\elemparam{sig0pos}{rn} \elemparam{sig0neg}{rn} \elemparam{chi0pos}{rn} \elemparam{chi0neg}{rn} \elemparam{tau0}{rn} \elemparam{plashardfactor}{rn} \elemparam{expplashard}{rn} \elemparam{expdam}{rn} \elemparam{critdam}{rn} \elemparam{m}{rn} \elemparam{R}{rn}\\
+Parameters &- \param{} material number\\
+&- \param{d} material density\\
+&- \param{eps0} Young modulus (at zero porosity)\\
+&- \param{nu0} Poisson ratio (at zero porosity)\\
+&- \param{mu0} shear modulus (at zero porosity)\\
+&- \param{m1} first eigenvalue of the fabric tensor\\
+&- \param{m2} second eigenvalue of the fabric tensor\\
+&- \param{rho} volume fraction of the solid phase\\
+&- \param{sig0pos} yield stress in tension\\
+&- \param{tau0} yield stress in shear\\
+&- \param{chi0pos} interaction coefficient in tension\\
+&- \param{chi0neg} interaction coefficient in compression\\
+&- \param{plashardfactor} hardening parameter\\
+&- \param{expplashard} exponent in the hardening law\\
+&- \param{expdam} exponent in the damage law\\
+&- \param{critdam} critical damage\\
+&- \param{expk} exponent $k$ in the expression for elastic stiffness\\
+&- \param{expl} exponent $l$ in the expression for elastic stiffness\\
+&- \param{expq} exponent $q$ in the expression for tensor \mbf{F}\\
+&- \param{expp} exponent $p$ in the expression for tensor \mbf{F}\\
+&- \param{m} over-nonlocal parameter\\
+&- \param{R} nonlocal interaction radius\\
+Supported modes& 3dMat\\
+\hline
+\end{tabular}
+\caption{Nonlocal formulation of anisotropic elastoplastic model with isotropic damage -- summary.}
+\label{trabboneNl_table}
+%\end{center}
+\end{table}
+
 
 
 \clearpage
@@ -2819,7 +3095,9 @@ documentation of MPlasticMaterial class):
 \bibitem{Rots} B. Lourenco, J.G. Rots: Multisurface Interface Model for Analysis of Masonry Structures, Journal of Engng Mech, vol. 123, No. 7, 1997.
 \bibitem{ortiz} M. Ortiz, E.P. Popov: Accuracy and stability of integration algorithms for elasto-plastic constitutive relations, Int. J. Numer. Methods Engrg, 21, 1561-1576, 1985.
 \bibitem{oofem} B. Patz\'ak: OOFEM home page, http://www.oofem.org, 2003.
+\bibitem{SimoHughes} J.C. Simo, T.J.R. Hughes: Computational Inelasticity, Springer, 1998.
 \bibitem{simo}  J.C. Simo, J.G. Kennedy, S. Govindjee: Non-smooth multisurface plasticity and viscoplasticity. Loading/unloading conditions and numerical algorithms, Int. J. Numer. Methods Engrg, 26, 2161-2185, 1988.
+\bibitem{SimoPister} J.C. Simo, K.S. Pister: Remarks on rate constitutive equations for finite deformation problems: computational implications, Comp Methods in Applied Mech and Engng, 46, 201-215, 1984.
 \bibitem{Smilauer:09} V. \v{S}milauer and T. Krej\v{c}\'i, Multiscale Model for Temperature Distribution in Hydrating Concrete, International Journal for Multiscale Computational Engineering, 7 (2), 135-151, 2009.
 \bibitem{Ruiz:01} J. Ruiz, A. Schindler, R. Rasmussen, P. Kim, G. Chang: Concrete temperature modeling and strength prediction using maturity concepts in the FHWA HIPERPAV software, 7th international conference on concrete pavements, Orlando (FL), USA, 2001.
 \end{thebibliography}

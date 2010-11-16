@@ -94,6 +94,7 @@ void TrabBone3D::computePlasStrainEnerDensity (GaussPoint* gp, const FloatArray&
 {
   TrabBone3DStatus *status = (TrabBone3DStatus*) this -> giveStatus (gp);
 
+
   double tsed, tempPSED, tempTSED, tempESED;
   FloatArray newTotalDef, oldTotalDef, tempPlasDef, oldStress;
 
@@ -108,7 +109,7 @@ void TrabBone3D::computePlasStrainEnerDensity (GaussPoint* gp, const FloatArray&
   tempTSED = tsed + dotProduct(0.5*(totalStrain-oldTotalDef),(totalStress+oldStress),6);
   tempPSED = tempTSED - tempESED;
 
-  if (sqrt(tempPSED*tempPSED) < pow(10.,-16.0))
+  if (sqrt(tempPSED*tempPSED) < pow(10.,-16))
     tempPSED = 0.;
 
   status -> setTempTSED(tempTSED);
@@ -130,8 +131,10 @@ TrabBone3D::give3dMaterialStiffnessMatrix (FloatMatrix& answer,
                                    TimeStep* atTime)
 {
   TrabBone3DStatus *status = (TrabBone3DStatus*) this -> giveStatus (gp);
+  
 
-  double tempDam, beta, deltaKappa, tempKappa;
+
+  double tempDam, beta, tempKappa;
   FloatArray tempEffectiveStress, tempTensor2, prodTensor, plasFlowDirec;
   FloatMatrix elasticity, compliance, SSaTensor, secondTerm, thirdTerm, tangentMatrix;
 
@@ -153,24 +156,20 @@ TrabBone3D::give3dMaterialStiffnessMatrix (FloatMatrix& answer,
   }
   else if (mode == TangentStiffness)
   {
-    /*****************************************/
-    //double dKappa = status ->giveDeltaKappa();
-    double kappa = status -> giveKappa();
+       double kappa = status -> giveKappa();
     tempKappa = status -> giveTempKappa();
-    deltaKappa = tempKappa - kappa;
-    /*****************************************/
-    if (deltaKappa > 0.0)
+    double dKappa = tempKappa - kappa;
+    if(dKappa<10.e-9) dKappa = 0;
+    if (dKappa > 0.0)
     {
-// Imports
+   // Imports
 
-/***************************************************************************/
-  tempEffectiveStress = *status -> giveTempEffectiveStress();  
-/**************************************************************************/
-  tempKappa = status -> giveTempKappa();
-      tempDam = status -> giveTempDam();
-       plasFlowDirec = *status -> givePlasFlowDirec(); 
-       SSaTensor = *status -> giveSSaTensor();
-       beta = status -> giveBeta();
+     tempEffectiveStress = *status -> giveTempEffectiveStress();  
+     tempKappa = status -> giveTempKappa();
+     tempDam = status -> giveTempDam();
+     plasFlowDirec = *status -> givePlasFlowDirec(); 
+     SSaTensor = *status -> giveSSaTensor();
+     beta = status -> giveBeta();
 // Construction of the dyadic product tensor
       prodTensor.beTProductOf(SSaTensor,plasFlowDirec);
 // Construction of the tangent stiffness third term
@@ -222,8 +221,7 @@ TrabBone3D :: performPlasticityReturn(GaussPoint* gp, const FloatArray& totalStr
   int flagLoop = 0, flag0 = 0;
 
   double tempKappa, deltaKappa, kappa, incKappa, halfSpaceCriterion, beta, tempScalar, norm;
-  double plasCriterion, plasModulus, toSolveScalar, err, errTolerance = pow(10.,-15.0);
-
+  double plasCriterion, plasModulus, toSolveScalar, errorF,errorR;
   FloatArray tempPlasDef, tempEffectiveStress, incTempEffectiveStress, trialEffectiveStress, errLoop;
   FloatArray toSolveTensor, plasFlowDirec, yieldDerivative, tempTensor2, tensorFF_S;
 
@@ -248,16 +246,16 @@ TrabBone3D :: performPlasticityReturn(GaussPoint* gp, const FloatArray& totalStr
   halfSpaceCriterion=(pow(m1,-2.0*expq)*trialEffectiveStress.at(1)+pow(m2,-2.0*expq)*trialEffectiveStress.at(2)+pow((3.0-(m1+m2)),-2.0*expq)*trialEffectiveStress.at(3))/sqrt((pow(m1,-4.0*expq)+pow(m2,-4.0*expq)+pow((3.0-(m1+m2)),-4.0*expq)));
 
   if(halfSpaceCriterion < 0.0)
-    this->constructAnisoFabricTensor(fabric, m1, m2, (3.0-(m1+m2)), rho, sig0Neg, chi0Neg, tau0, expk, expq);
+    this->constructAnisoFabricTensor(fabric, m1, m2, (3.0-(m1+m2)), rho, sig0Neg, chi0Neg, tau0, expp, expq);
   else 
-    this->constructAnisoFabricTensor(fabric, m1, m2, (3.0-(m1+m2)), rho, sig0Pos, chi0Pos, tau0, expk, expq);
+    this->constructAnisoFabricTensor(fabric, m1, m2, (3.0-(m1+m2)), rho, sig0Pos, chi0Pos, tau0, expp, expq);
 
   // Evaluation of the plastic criterion
 
   tempTensor2.beProductOf(fabric,trialEffectiveStress);
   plasCriterion = sqrt(dotProduct(trialEffectiveStress,tempTensor2,6))-(1.0 + plasHardFactor*(1.0-exp(-tempKappa*expPlasHard)));
 
-  if (plasCriterion <= errTolerance)
+  if (plasCriterion <= 1.e-10)
   {
     tempPlasDef = tempPlasDef;
     tempKappa = tempKappa;
@@ -267,11 +265,12 @@ TrabBone3D :: performPlasticityReturn(GaussPoint* gp, const FloatArray& totalStr
   {
 
      
-        this->constructAnisoFabricTensor(fabric, m1, m2, (3.0-(m1+m2)), rho, sig0Neg, chi0Neg, tau0, expk, expq);   // Initial values
+        this->constructAnisoFabricTensor(fabric, m1, m2, (3.0-(m1+m2)), rho, sig0Neg, chi0Neg, tau0, expp, expq);   // Initial values
 
     toSolveTensor.resize(6);
     toSolveScalar = plasCriterion;
-    err = plasCriterion;
+    errorF = plasCriterion;
+    errorR = 0;
     SSaTensor = elasticity;
 
     // Construction of the norm 
@@ -289,15 +288,16 @@ TrabBone3D :: performPlasticityReturn(GaussPoint* gp, const FloatArray& totalStr
 
     plasFlowDirec = tensorFF_S;
     plasFlowDirec.times(1.0/norm);
-
+    
         
         
     deltaKappa = 0;
     kappa =  status-> giveKappa();
-    
-      while (err > errTolerance)
+   
+      while (errorF >1.e-4 || errorR> 1.e-6)
       {
 
+      
          plasModulus = -(plasHardFactor*expPlasHard*exp(-(tempKappa + deltaKappa)*expPlasHard));
 
 	//*************************************
@@ -369,58 +369,38 @@ TrabBone3D :: performPlasticityReturn(GaussPoint* gp, const FloatArray& totalStr
 	//*************************************
 
 	errLoop = toSolveTensor;
-       	errLoop.resize(7);
-	errLoop.at(7) = toSolveScalar;
-        err = sqrt(dotProduct(errLoop,errLoop,7));
+       	errorR = sqrt(dotProduct(errLoop,errLoop,6));
+	errorF = toSolveScalar;
 	flagLoop+=1;
 
-        if (flagLoop > 10) flag0 =1;
-        if (flagLoop > 1000) _error("No convergence of the stress return algorithm");
+        if (flagLoop > 1900){
+	  printf ("\ndeltaKappa %f errorR %1.17f, errorF %1.17f\n", deltaKappa,errorR, errorF);
+	  flag0 =1;
+	}
+        if (flagLoop > 2000){
+	  _error("No convergence of the stress return algorithm");
+	}
 
       }
 
-    if (flag0 == 1)
-      printf ("\nElement Number: %d (GP %d ), iterationNumber %d, deltaKappa %f ", gp->giveElement()->giveNumber(), gp->giveNumber(), flagLoop, deltaKappa);
-
-
-
-
-    /************************************************************************************/
      plasModulus = -(plasHardFactor*expPlasHard*exp(-(tempKappa + deltaKappa)*expPlasHard));
      tempTensor2.beProductOf(SSaTensor,plasFlowDirec);
      beta = dotProduct(plasFlowDirec,tempTensor2,6);
      beta -= sqrt(dotProduct(tempEffectiveStress,tensorFF_S,6))/norm*plasModulus;
-     /***********************************************************************************/
-
-
     kappa += deltaKappa;
-   tempPlasDef -= -deltaKappa*plasFlowDirec;
+    tempPlasDef -= -deltaKappa*plasFlowDirec;
     tempKappa += deltaKappa;
 
-  status -> setBeta(beta);
-  status -> setPlasFlowDirec(plasFlowDirec);
-  status -> setSSaTensor(SSaTensor);
+    status -> setBeta(beta);
+    status -> setPlasFlowDirec(plasFlowDirec);
+    status -> setSSaTensor(SSaTensor);
 
   }
 
   status -> setTempPlasDef(tempPlasDef);
-  //  status -> setTempKappa(tempKappa);
-  status -> setTempKappa(kappa);
+  status -> setTempKappa(tempKappa);
   status -> setDeltaKappa(deltaKappa);
   status -> setTempEffectiveStress(tempEffectiveStress);
-
-////  if (gp->giveNumber()==1)
-////  {
-////    printf ("\nParameter Number: %d ", gp->giveElement()->giveNumber());
-////    printf ("\nFabric Tensor\n");
-////    fabric.printYourself();
-////    printf ("\nCompliance Tensor\n");
-////    compliance.printYourself();
-////    printf ("\nElasticity Tensor\n");
-////    elasticity.printYourself();
-////    printf ("\nInput Parameter (D_C, expDam, chi, expPlas)\n");
-////    printf ("%f %f %f %f\n", critDam, expDam, plasHardFactor, expPlasHard);
-////  }
 
 }
 
@@ -554,7 +534,7 @@ TrabBone3D :: giveRealStressVector (FloatArray& answer, MatResponseForm form, Ga
   totalStress = (1-tempDam)*effStress;
 
   for(i=1;i<=6;i++){
-     if (sqrt(totalStress.at(i)*totalStress.at(i))< pow(10.0,-16.0))
+     if (sqrt(totalStress.at(i)*totalStress.at(i))< pow(10,-16))
 	totalStress.at(i)=0.;
     }
 
@@ -568,13 +548,6 @@ TrabBone3D :: giveRealStressVector (FloatArray& answer, MatResponseForm form, Ga
   status -> setTempDam(tempDam);
   status -> letTempStrainVectorBe(totalStrain);
   status -> letTempStressVectorBe(answer);
-
-////   double tempKappa = status -> giveTempKappa();
-////   double deltaKappa = status -> giveDeltaKappa();
-////   printf("\nInternal Variable, Element %d (GP %d )\n", gp->giveElement()->giveNumber(), gp->giveNumber());
-////   printf("deltaKappa %10.16e , kappa %10.16e , damage %10.16e , nlKappa %10.16e \n", deltaKappa, tempKappa, tempDam, tempKappa);
-////   printf("Plastic Stress");
-////   effStress.printYourself();
 
 }
 
@@ -702,9 +675,10 @@ TrabBone3D :: initializeFrom (InputRecord* ir)
  IR_GIVE_FIELD (ir, sig0Pos, IFT_TrabBone3D_sig0Pos, "sig0pos"); // Macro
  IR_GIVE_FIELD (ir, sig0Neg, IFT_TrabBone3D_sig0Neg, "sig0neg"); // Macro
  IR_GIVE_FIELD (ir, chi0Pos, IFT_TrabBone3D_chi0Pos, "chi0pos"); // Macro
- IR_GIVE_FIELD (ir, chi0Neg, IFT_TrabBone3D_chi0Neg, "chi0neg"); // Macro
- IR_GIVE_FIELD (ir, tau0, IFT_TrabBone3D_tau0, "tau0"); // Macro
+chi0Neg = (sig0Neg*sig0Neg)/(sig0Pos*sig0Pos)*(chi0Pos+1)-1;
+  IR_GIVE_FIELD (ir, tau0, IFT_TrabBone3D_tau0, "tau0"); // Macro
  IR_GIVE_FIELD (ir, expq, IFT_TrabBone3D_expq, "expq"); // Macro
+ IR_GIVE_FIELD (ir, expq, IFT_TrabBone3D_expq, "expp"); // Macro
 
  IR_GIVE_FIELD (ir, plasHardFactor, IFT_TrabBone3D_plasHardFactor, "plashardfactor"); // Macro
  IR_GIVE_FIELD (ir, expPlasHard, IFT_TrabBone3D_expPlasHard, "expplashard"); // Macro
@@ -1010,7 +984,7 @@ TrabBone3DStatus::updateYourself(TimeStep* atTime)
 {
   StructuralMaterialStatus::updateYourself(atTime);
   this->kappa = this->tempKappa;
-  this->dam = this->tempKappa;
+  this->dam = this->tempDam;
   this->tsed = this->tempTSED;
   this->plasDef= this->tempPlasDef;
 }
@@ -1032,10 +1006,6 @@ TrabBone3DStatus::saveContext (DataStream* stream, ContextMode mode, void *obj)
  // save parent class status
  if ((iores = StructuralMaterialStatus :: saveContext (stream, mode, obj)) != CIO_OK) THROW_CIOERR(iores);
 
- // write a raw data
- //if (fwrite(&deltaKappa,sizeof(double),1,stream) != 1) THROW_CIOERR(CIO_IOERR);
- //if (fwrite(&damage,sizeof(double),1,stream)!= 1) THROW_CIOERR(CIO_IOERR);
-
  return CIO_OK;
 }
 
@@ -1056,9 +1026,6 @@ TrabBone3DStatus::restoreContext(DataStream* stream, ContextMode mode, void *obj
  // read parent class status
  if ((iores = StructuralMaterialStatus :: restoreContext (stream, mode, obj)) != CIO_OK) THROW_CIOERR(iores);
 
- // read raw data 
- //if (fread (&deltaKappa,sizeof(double),1,stream) != 1) THROW_CIOERR(CIO_IOERR);
- //if (fread (&damage,sizeof(double),1,stream) != 1) THROW_CIOERR(CIO_IOERR);
 
  return CIO_OK;
 }

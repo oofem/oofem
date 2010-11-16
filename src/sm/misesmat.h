@@ -81,10 +81,6 @@ protected:
     /// initial (uniaxial) yield stress 
     double sig0; 
 
-/*********************************************************/
-    double omega_crit;
-    double a;
-/*************************************************************/
 public:
     MisesMat(int n, Domain *d);
     ~MisesMat();
@@ -163,6 +159,30 @@ public:
                                                GaussPoint * gp,
                                                TimeStep * atTime);
 
+ virtual int giveIPValue (FloatArray& answer, GaussPoint* aGaussPoint, InternalStateType type, TimeStep* atTime) ;
+
+ /**
+  Returns the mask of reduced indexes of Internal Variable component .
+  @param answer mask of Full VectorSize, with components beeing the indexes to reduced form vectors.
+  @param type determines the internal variable requested (physical meaning)
+  @returns nonzero if ok or error is generated for unknown mat mode.
+  */
+ virtual int giveIntVarCompFullIndx (IntArray& answer, InternalStateType type, MaterialMode mmode);
+
+ /**
+  Returns the type of internal variable (scalar, vector, tensor,...).
+  @param type determines the type of internal variable
+  @returns type of internal variable
+  */
+ virtual  InternalStateValueType giveIPValueType (InternalStateType type) ;
+
+ /**
+  Returns the corresponding integration point  value size in Reduced form.
+  @param type determines the type of internal variable
+  @returns var size, zero if var not supported
+  */
+ virtual int giveIPValueSize (InternalStateType type, GaussPoint* aGaussPoint) ;
+
 };
 
 //=============================================================================
@@ -179,10 +199,8 @@ protected:
 
     /// deviatoric trial stress - needed for tangent stiffness
     FloatArray trialStressD;
-    /**************************************************/
-    double  trialStressV;
-    /**************************************************/
-
+    //volumetric trial stress - needed for tangent stiffness
+    double trialStressV;
     /// cumulative plastic strain (initial)
     double kappa;
 
@@ -191,9 +209,6 @@ protected:
 
  /// deformation gradient(final)
     FloatMatrix tempDefGrad,defGrad;
-   /************************/
-   double tempDamage;
-   /******************************/
    /// Left Cauchy-Green deformation gradient(final)
    FloatMatrix tempLeftCauchyGreen,leftCauchyGreen;
 
@@ -207,10 +222,8 @@ public:
     void giveTrialStressDev(FloatArray& answer)
     {answer = trialStressD;}
 
-    /*******************************************/
     void giveTrialStressVol(double& answer)
     {answer = trialStressV;}
-    /*******************************************/
 
     double giveCumulativePlasticStrain()
     {return kappa;}
@@ -235,24 +248,22 @@ public:
     void letTrialStressDevBe(FloatArray values)
     {trialStressD = values;}
 
-    void setTrialStressVol(double value)
-    {trialStressV = value;}
-
     void setTempCumulativePlasticStrain(double value)
     {tempKappa = value;}
-    /****************************************/
- void setTempDamage(double value)
-    {tempDamage = value;}
- /************************************************/
- void letDefGradBe(FloatMatrix values)
- {defGrad = values;}
- void letTempDefGradBe(FloatMatrix values)
- {tempDefGrad = values;}
+    void setTrialStressVol(double value)
+    {trialStressV = value;}
+    void letDefGradBe(FloatMatrix values)
+    {defGrad = values;}
+ 
+    void letTempDefGradBe(FloatMatrix values)
+    {tempDefGrad = values;}
  
  void letTempLeftCauchyGreenBe(FloatMatrix values)
  {tempLeftCauchyGreen = values;}
  void letLeftCauchyGreenBe(FloatMatrix values)
  {leftCauchyGreen = values;}
+
+ const FloatArray *givePlasDef();
 
  /// prints the output variables into the *.out file
  void printOutputAt(FILE *file, TimeStep *tStep);

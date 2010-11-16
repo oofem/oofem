@@ -75,10 +75,6 @@ class HyperElasticMaterialStatus : public StructuralMaterialStatus
   /// Prints the receiver state to stream
   void   printOutputAt (FILE *file, TimeStep* tStep) ;
 
-  
-  /* 
-     declare state variable access amd modification methods
-  */
 
   // definition
   const char* giveClassName () const { return "HyperElasticMaterialStatus" ;}

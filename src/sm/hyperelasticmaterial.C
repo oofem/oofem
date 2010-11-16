@@ -161,9 +161,6 @@ HyperElasticMaterial :: giveRealStressVector (FloatArray& answer, MatResponseFor
 
 MaterialStatus* 
 HyperElasticMaterial :: CreateStatus (GaussPoint* gp) const
-/* 
- creates new  material status  corresponding to this class
-*/
 {
  StructuralMaterialStatus *status ;
  
@@ -188,9 +185,7 @@ StructuralMaterial :: initializeFrom (ir) ;
  IR_GIVE_FIELD (ir, K, IFT_HyperElasticMaterial_k, "k"); // Macro
  IR_GIVE_FIELD (ir, G, IFT_HyperElasticMaterial_g, "g");
  
-//this -> HyperElasticMaterial::initializeFrom(ir);
 return IRRT_OK;
-// return StructuralMaterial::initializeFrom (ir);
 } 
 
 
@@ -215,10 +210,6 @@ HyperElasticMaterialStatus :: printOutputAt  (FILE *file, TimeStep* tStep)
   
     StructuralMaterialStatus :: printOutputAt (file, tStep);
     fprintf (file,"status { ");
-   // if (this->damage > 0.0) {
-   // fprintf (file,"kappa %f, damage %f ",this->kappa, this->damage);
-   // }
- 
     fprintf (file,"}\n");
   
 }
@@ -228,8 +219,6 @@ void
 HyperElasticMaterialStatus::initTempStatus ()
 {
  StructuralMaterialStatus :: initTempStatus();
- //this->tempKappa = this->kappa;
- //this->tempDamage= this->damage;
 }
 
 
@@ -238,41 +227,6 @@ void
 HyperElasticMaterialStatus::updateYourself(TimeStep* atTime)
 {
  StructuralMaterialStatus::updateYourself(atTime);
- //this->kappa = this->tempKappa;
- //this->damage= this->tempDamage;
 }
-
-
-
-/*contextIOResultType
-HyperElasticMaterialStatus::saveContext (FILE* stream, void *obj)
-{
- contextIOResultType iores;
-
- // save parent class status
- if ((iores = StructuralMaterialStatus :: saveContext (stream, obj)) != CIO_OK) THROW_CIOERR(iores);
-
- // write a raw data
- //if (fwrite(&kappa,sizeof(double),1,stream) != 1) THROW_CIOERR(CIO_IOERR);
- //if (fwrite(&damage,sizeof(double),1,stream)!= 1) THROW_CIOERR(CIO_IOERR);
-
- return CIO_OK;
-}
-
-contextIOResultType
-HyperElasticMaterialStatus::restoreContext(FILE* stream, void *obj)
-{
- contextIOResultType iores;
-
- // read parent class status
- if ((iores = StructuralMaterialStatus :: restoreContext (stream,obj)) != CIO_OK) THROW_CIOERR(iores);
-
- // read raw data 
- //if (fread (&kappa,sizeof(double),1,stream) != 1) THROW_CIOERR(CIO_IOERR);
- //if (fread (&damage,sizeof(double),1,stream) != 1) THROW_CIOERR(CIO_IOERR);
-
- return CIO_OK;
-}*/
-
 
 } // end namespace oofem
