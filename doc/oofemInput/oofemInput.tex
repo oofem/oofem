@@ -731,8 +731,10 @@ The corresponding meta step solver parameters (\param{solverParams}) are:\\
 \begin{record}
 \recentry{\hspace{10mm}}{\field{Psi}{rn}}
 \recentry{}{\field{MaxIter}{in}}
-\recentry{}{\optField{min\-Step\-Le\-ngth}{in}}
 \recentry{}{\field{stepLength}{rn}}
+\recentry{}{\optField{min\-Step\-Le\-ngth}{in}}
+\recentry{}{\optField{initialStepLength}{rn}}
+\recentry{}{\optField{forcedInitialStepLength}{rn}}
 \recentry{}{\optField{reqIterations}{in}}
 \recentry{}{\optField{minIter}{in}}
 \recentry{}{\optField{manrmsteps}{in}}
@@ -751,10 +753,12 @@ load control apply.
 \item \param{MaxIter} - determines the maximum number of iteration allowed to
 reach equilibrium state. If this limit is reached, restart follows
 with smaller step length.
+\item \param{stepLength} - determines the maximum value of arc-length (step length).
 \item \param{min\-Step\-Le\-ngth} - minimum step length. The step length will never be
 smaller. If convergence problems are encountered and step length cannot
 be decreased, computation terminates.
-\item \param{stepLength} - initial step length (the arc-length).
+\item \param{initialsteplength} - determines the initial step length (the arc-length). If not provided, the maximum step length (determined by \param{stepLength} parameter) will be used as the value of initial step length. 
+\item \param{forcedInitialStepLength} - When simulation is restarted, the last predicted step length is used. Use \param{forcedInitialStepLength} parameter to override the value of step length. This parameter will also override the value of initial step length set by \param{initialsteplength} parameter.
 \item \param{reqIterations} - approximate number of iterations controlled by changing the step length.
 \item \param{minIter} - minimum number of iterations which always proceed during the iterative solution. \param{reqIterations} are set to be the same, \param{MaxIter} are increased if lower.
 \item \param{manrmsteps} - Forces the use of accelerated
