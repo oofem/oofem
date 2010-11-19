@@ -911,7 +911,7 @@ Domain :: giveDefaultNodeDofIDArry()
 }
 
 
-int Domain :: giveNumerOfSpatialDimensions()
+int Domain :: giveNumberOfSpatialDimensions()
 {
 	//_HeatTransferMode _HeatMass1Mode // Are these deprecated?
 	// Perhaps i shouldn't use the modes to determine this at all, but i couldn't see any other good way.
