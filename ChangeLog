@@ -1,7 +1,42 @@
+2010-11-20  Borek Patzak  <Borek.Patzak@fsv.cvut.cz>
+
+	* OOFEM 2.0 released
+
+	* Implemented selective evaluation of convergence criteria based on user-defined DOF groups in nonlinear structural solvers. Improved evaluation of relative force error in nonlinear structural solvers.
+
+	* Added general support for Isogeometric analysis. New FE interpolation classes for B-splines, NURBS, and T-spline surfaces and solids. Implemented plane stress and 3d IGA elements for structural analysis.
+
+	* Introduced new concept of initialization modules, intended to initialize the solution vectors, state variables, etc to given initial state from external data sources. Added Gauss point initialization module, which permits to read initial values of state variables from a file.
+
+	* Added new elements: cct3d and TrPlaneStrRot3d are based on existing cct and TrPlaneStrRot elements, but can be positioned arbitrary in space. Added new composite element TR_SHELL01 representing a shell element composed of cct3d and TrPlaneStrRot3d. Compared to rershell element, this one comes with complete system of 6 DOFs per node.
+
+	* Adding lumped mass element, defined by a single node, allowing to introduce additional concentrated mass and/or rotational inertias.
+
+	* Enhanced vtkxml module: Added handling of local coordinate system and master-slave transformation in nodes for displacement and velocities.
+
+	* New library for elastic homogenization now includes elastic homogenization schemes, such as Mori-Tanaka or self-consistent ones. Added representation for macro level element and material. New material model for cement hydration, based on CEMHYD3D model.
+
+	* Added implementation of P2P1 Taylor Hood element for transient incompressible flow analysis.
+
+	* Added creep model based on microprestress-solidification theory.
+
+	* Major enhancement of the capabilities of nonlocal models in general and nonlocal isotropic damage model in particular. Updates of several material models (trabecular bone, large-strain Mises, particle model).
+
+	* Added new damage-plastic model for concrete concreteDPM. New hyperelastic material (for large strain). New anisotropic plastic-damage model (for trabecular bone).
+
+	* Added implementation of an isotropic elastoplastic material with Mises yield condition, associated flow rule and linear isotropic hardening. (large-strain plasticity)
+
+	* Updated to PETSc 3.1 and SLEPc 3.1
+
+	* Updated documentation. Documentation now available in html,ps,
+	and pdf formats.
+
+	* Many, many enhancements and bug-fixes.
+
 2009-07-28  Borek Patzak  <Borek.Patzak@fsv.cvut.cz>
 
 	* OOFEM 1.9 released
-	
+
 	* Added support fo adaptive, parallel jobs with dynamic load
 	balancing.
 
@@ -55,7 +90,7 @@
 
 	* Many, many enhancements and bug-fixes.
 
-	
+
 2008-03-02  Borek Patzak  <Borek.Patzak@fsv.cvut.cz>
 
 	* New installation and compilation procedure implemented. Now uses
@@ -75,7 +110,7 @@
 	algorithms. Despite this, this framework is ready to use for
 	nonlinear static computations. Active development is scheduled for
 	upcoming versions in this direction.
-	
+
 	* Corrected implementation of orthotropic material, now uses major
 	Poisson's ratios (submitted by Douglas Beaton). Improved and
 	enhanced corresponding documentation entry.
@@ -146,9 +181,9 @@
 2006-11-02  Borek Patzak  <Borek.Patzak@fsv.cvut.cz>
 
 	* OOFEM 1.7 released
-	 
+
 	* Added new solution algorithm for incompressible flow using
-	SUPG/PSPG stabilization and corresponding elements. 
+	SUPG/PSPG stabilization and corresponding elements.
 	* Added support for incompressible analysis of two immiscible
 	fluids on a fixed domain in 2D, based on VOF approach. This also
 	allows to analyze problems with free-surface flow.
@@ -166,7 +201,7 @@
 	be easier for domain decomposition tools)
 	* Simplified makefile syntax (thanks to L. Svoboda)
 	* Many minor enhancement and bug-fixes.
-	
+
 
 2005-10-24  Borek Patzak  <Borek.Patzak@fsv.cvut.cz>
 
@@ -176,17 +211,17 @@
 	representing general error estimator, remeshing criteria and mesh
 	generator interface. The adaptive linear and nonlinear static
 	analyses are now available (see oofemInput manual for details).
-	True adaptivity with primary and internal variables transfer 
+	True adaptivity with primary and internal variables transfer
 	is supported. The Zienkiewicz-Zhu error estimator and error indicator are
 	provided for linear and nonlinear problems. Actually supported
 	only by	selected elements and material models. Adaptivity requires
 	external mesh generator.
 	* Implemented dynamic relaxation to serial/parallel nonlinear
 	explicit dynamic, allowing to solve static tests (with
-	proportional loading). This uses "optimum" load history that minimizes the inertia and damping forces. 
+	proportional loading). This uses "optimum" load history that minimizes the inertia and damping forces.
 	* Added new FM module (Fluid dynamic)
 	* Added CBS algorithm for incompressible transient flow analysis
-	including the constitutive model for Newtonian fluid, and linear 
+	including the constitutive model for Newtonian fluid, and linear
 	2d element with equal order velocity and pressure interpolation.
 	* Introduced new keywords in domain components record!  This includes
 	ndofman, nelem, nmat, ncrosssect, nbc, nltf to identify number of
@@ -194,12 +229,12 @@
 	* Released implementation of MDM model (Anisotropic damage model).
 
 	* Added exchange of reaction contributions for shared dofs. Works
-	for pnldeidynamic, nlinear and linear statics. 
-	* Fixed contex fopen call (added "b" flag) to correctly open binary context file on non posix platforms 
+	for pnldeidynamic, nlinear and linear statics.
+	* Fixed contex fopen call (added "b" flag) to correctly open binary context file on non posix platforms
 	* Added new IMLPrecondTypes : IML_ILU_CompRowPrec,
-	IML_ILU_CompColPrec. Deleted old one IML_ILUPrec. 
-	* Removed plaintextdatareader.* (also from cvs) -> replaced by oofemtxtdatareader.* 
-	* Removed plaintextinputrecord.* (also form cvs) -> replaced by oofemtxtinputrecord.* 
+	IML_ILU_CompColPrec. Deleted old one IML_ILUPrec.
+	* Removed plaintextdatareader.* (also from cvs) -> replaced by oofemtxtdatareader.*
+	* Removed plaintextinputrecord.* (also form cvs) -> replaced by oofemtxtinputrecord.*
 	* Implementation of generalized inputreader and datareder
 	services; input reader is now abstract class declaring only basic
 	services. Fields in particular record are identified by both
@@ -209,7 +244,7 @@
 	the same time, the passed string is used to report possible error(s) in
 	human readable form. String values are used in parsing oofem input
 	files, while InputFieldType values can be used to retrieve values
-	from binary files, databases, etc. 
+	from binary files, databases, etc.
 	* Updated to new petsc-2.3.0.
 	* Updated to mpich-1.2.6
 	* Element Class: all dof managers: nodes, sides, and internal dofs
@@ -219,13 +254,13 @@
 	introduced. The method returning particular node (giveNode, but
 	made virtual) is preserved to allow loop only over nodes. This
 	allows to introduce additional dof managers and dofs at element
-	level (internal nodes, etc.) that are not condensed. 
+	level (internal nodes, etc.) that are not condensed.
 	* oofeg: the plot of beam quantities (forces/moments/strains)
 	decoupled from stress/strain plot, oofeg accepts the (-l) option
 	allowing to set verbose level, added visualization to libeam3d2
-	elements (using markers). 
-	* UnknownType replaced by EquationType {ET_MomentumEq, ET_ConservationEq} 
-	* Added test length of maxa columns in skyline (if set to initial value, there is no stiffness for this equation) 
+	elements (using markers).
+	* UnknownType replaced by EquationType {ET_MomentumEq, ET_ConservationEq}
+	* Added test length of maxa columns in skyline (if set to initial value, there is no stiffness for this equation)
 	* Fixed error in generalized eigen value solver based on subspace iteration
 	* Added new generalized eigen value solver based on inverse iteration algorithm
 	* Added short docs for linear stability
@@ -235,7 +270,7 @@
 	* Automatic time step control in CBS
 	* CBS equation can now be scaled (dimensionless support)
 	* Removed win32 support
-	
+
 
 2004-04-14  Borek Patzak  <Borek.Patzak@fsv.cvut.cz>
 
@@ -265,10 +300,10 @@
 	* Added new multisurface model for masonry.
 
 	* Added new multisurface plasticity driver (MPlasticMaterial2).
-	
+
 	* Added new program parameter "-c" with same meaning as -context
 	(-context becomes obsolete).
-	
+
 	* Added stress/strain transformation procedures into stress/strain
 	vectors.
 
@@ -279,7 +314,7 @@
 	* Fixed problem in NRsolver, where for direct displacement
 	control, stiffness is modified and if elastic matrix is used it
 	should be reassembled for new metastep.
-	
+
 	* Fixed problem in NRsolver, where BC constraints were enforced
 	multiple times (for any solution step) leading to loss of
 	precision (too huge numbers on diagonal).
@@ -289,15 +324,15 @@
 
 	* Fixed the Sloan renumbering procedure to work with standalone
 	nodes and separate sub-domains.
-	
+
 	* Many minor enhancement and bug-fixes.
 
 
-	
+
 2003-04-04  Borek Patzak  <Borek.Patzak at fsv.cvut.cz>
 
 	* OOFEM 1.4 released
-	
+
 	* Significantly improved parsing of input files. Non-relevant
 	tokens are detected and reported.
 
@@ -321,42 +356,40 @@
 	with corresponding services (evaluation of shape functions,
 	derivatives, jacobians, transformation of global coordinates to
 	local ones and vice versa, etc). The implementation of
-	isoparametric interpolations is provided. 
+	isoparametric interpolations is provided.
 
 	* Upgrade of Elixir library to actual version required.
-  
-	* Fixed problem in parallel explicit dynamics - the element load
+ 	* Fixed problem in parallel explicit dynamics - the element load
 	for shared dof managers is now properly transferred to adjacent
 	subdomains.
 
 	* Merged similar types CharTypeMode and UnknownTypeMode  into
 	ValueModeType.
-	
+
 	* Implemented abstraction of fields. Field represent the spatial
 	distribution of	certain variable. Fields are able to evaluate its
-	value at any point of interest at given time. 
+	value at any point of interest at given time.
 
 	* Added new module for solving transport problems (tm
 	directory). Current capabilities include stationary and
-	transient analysis of heat and coupled heat&mass transfer 
+	transient analysis of heat and coupled heat&mass transfer
 	problems for axisymmetric, two, and three dimensional cases.
 
 	* Added tests for tm module. Test splitted into separate
 	directories corresponding to particular modules.
 
 	* Added general staggered problem, which allows to group basic problems
-	together and to transfer and share the solution fields between 
+	together and to transfer and share the solution fields between
 	basic subproblems. It allows, for example, to simultaneously solve
 	heat transfer analysis and mechanical analysis, where temperature
 	field generated by heat transfer anaslysis is used in mechanical
-	analysis as teperature loading. Moreover, a general implementation 
+	analysis as teperature loading. Moreover, a general implementation
 	allows to use different discretizations for basic subproblems.
-	
+
 	* IML sources excluded from basic distribution. They should be
-	downloaded separately. Added configure option to include IML 
+	downloaded separately. Added configure option to include IML
 	support during compilation.
 
-	
 
 2001-12-09  Borek Patzak  <Borek.Patzak at fsv.cvut.cz>
 
@@ -381,7 +414,7 @@
 	NRSolver. The direct displacement control and direct load control
 	are now supported. The non-linear problem can be now solved under
 	direct load control, direct displacement control, indirect
-	control, or their combination. 
+	control, or their combination.
 
 	* Added support for data export in vtk format (vtkexportmodule).
 	Implemented as export module. The scalars, vectors, and symmetric
@@ -413,8 +446,8 @@
 	trplanestrain elements.
 
 	* Fixed error in evaluation of reaction forces with element load
-	contribution in non-linear problems with non-proportional loading. 
-	
+	contribution in non-linear problems with non-proportional loading.
+
 	* Mdm material model functionality extended to plane strain. Mdm
 	model now accept latest format of input parameters.
 
@@ -424,6 +457,6 @@
 	platforms. Fixed missing Elixir declaration of EVFastRedraw
 	function. Added initialization of len variable in readQuotedString
 	in strreader.C causing problems on some compilers.
-	
+
 No news for earlier releases.
 
