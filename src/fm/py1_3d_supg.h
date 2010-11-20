@@ -120,6 +120,8 @@ protected:
     virtual void computeDivUMatrix(FloatMatrix &answer, GaussPoint *gp);
     virtual void computeNpMatrix(FloatMatrix &answer, GaussPoint *gp);
     virtual void computeGradPMatrix(FloatMatrix &answer, GaussPoint *gp);
+    virtual void computeDivTauMatrix(FloatMatrix &answer, GaussPoint *gp, TimeStep *atTime);
+    virtual void computeGradUMatrix(FloatMatrix &answer, GaussPoint *gp, TimeStep *atTime);
     virtual int  giveNumberOfSpatialDimensions();
 };
 

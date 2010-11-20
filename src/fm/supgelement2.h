@@ -77,6 +77,13 @@ protected:
      */
     //double t_supg, t_pspg, t_lsic;
 
+  /// Cached transformation matrix of receiver
+    FloatMatrix *rotationMatrix;
+    /// Flag indicating if tranformation matrix has been already computed
+    int rotationMatrixDefined;
+
+
+
 public:
     // constructor
     SUPGElement2(int, Domain *);
@@ -187,7 +194,53 @@ public:
     //virtual void  drawDeformedGeometry(oofegGraphicContext&, UnknownType) {}
 #endif
 
-protected:
+    /**
+     * Transformation matrices
+     * Updates rotation matrix r(l)=T r(g*) between  local and global coordinate system
+     * taking into account also possible local - coordinate system in some elements
+     * nodes.
+     * Default implementation uses \ref computeGtoLRotationMatrix and
+     \ref computeGNDofRotationMatrix  services to compute result.
+     * Default implembalentation uses cached rotation matrix in
+     * rotationMatrix attribute, so rotation matrix is computed only once.
+     * @return nonzero if transformation is necessary.
+     */
+    virtual int   updateRotationMatrix();      //
+    // give Transformation matrix from global coord. sysyt. to element-local c.s
+    // i.e. r(l)=T r(h), if no trasformation necessary set anser to empty mtrx
+    /**
+     * Returns  transformation matrix from global coord. system to local element
+     * coordinate system ( i.e. r(l)=T r(g)). If no trasformation is necessary
+     * then answer is empty mtrx and zero value is returned.
+     * @return nonzero if transformation is necessary, zero otherwise.
+     */
+    virtual int  computeGtoLRotationMatrix(FloatMatrix &answer) { answer.beEmptyMtrx();
+                                                                  return 0; }
+    // give Transformation matrix from global coord. syst. to local coordinate system in nodes.
+    // i.e. r(n)=T r(g), if no trasformation necessary sets answer to empty mtrx.
+    /**
+     * Returns transformation matrix for DOFs from global coordinate system
+     * to local coordinate system in nodes (i.e. r(n)=T r(g)) if mode == _toNodalCS.
+     * If mode == _toGlobalCS, the transformation from local nodal cs to
+     * global cs in node is returned. If no trasformation is
+     * necessary sets answer to empty mtrx and returns zero value.
+     * @return nonzero if transformation is necessary, zero otherwise.
+     */
+    
+    
+      
+
+    virtual int  computeGNDofRotationMatrix(FloatMatrix &answer, DofManTransfType mode);
+    
+    virtual int computeGNLoadRotationMatrix(FloatMatrix &answer, DofManTransfType mode);
+
+
+
+
+
+
+
+ protected:
     virtual void computeDeviatoricStress(FloatArray &answer, GaussPoint *gp, TimeStep *);
     virtual void computeNuMatrix(FloatMatrix &answer, GaussPoint *gp) = 0;
     virtual void computeUDotGradUMatrix(FloatMatrix &answer, GaussPoint *gp, TimeStep *atTime) = 0;
@@ -195,6 +248,8 @@ protected:
     virtual void computeDivUMatrix(FloatMatrix &answer, GaussPoint *gp) = 0;
     virtual void computeNpMatrix(FloatMatrix &answer, GaussPoint *gp) = 0;
     virtual void computeGradPMatrix(FloatMatrix &answer, GaussPoint *gp) = 0;
+    virtual void computeDivTauMatrix(FloatMatrix &answer, GaussPoint *gp, TimeStep *atTime ) = 0;
+    virtual void computeGradUMatrix(FloatMatrix &answer, GaussPoint *gp, TimeStep *atTime) = 0;
     virtual int  giveNumberOfSpatialDimensions() = 0;
 
 

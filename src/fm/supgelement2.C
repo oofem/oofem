@@ -65,12 +65,21 @@ namespace oofem {
 SUPGElement2 :: SUPGElement2(int n, Domain *aDomain) :
     SUPGElement(n, aDomain)
     // Constructor. Creates an element with number n, belonging to aDomain.
-{ }
+{ 
+  rotationMatrix     = NULL;
+  rotationMatrixDefined = 0;
+
+}
 
 
 SUPGElement2 :: ~SUPGElement2()
 // Destructor.
-{ }
+{ 
+
+if ( rotationMatrix ) {
+        delete rotationMatrix;
+    }
+}
 
 IRResultType
 SUPGElement2 :: initializeFrom(InputRecord *ir)
@@ -321,7 +330,7 @@ SUPGElement2 :: computeAccelerationTerm_MB(FloatMatrix &answer, TimeStep *atTime
 
     answer.resize(undofs, undofs);
     answer.zero();
-    IntegrationRule *iRule = this->integrationRulesArray [ 1 ];
+    IntegrationRule *iRule = this->integrationRulesArray [ 2 ];
     /* consistent part + supg stabilization term */
     for ( k = 0; k < iRule->getNumberOfIntegrationPoints(); k++ ) {
         gp = iRule->getIntegrationPoint(k);
@@ -334,12 +343,22 @@ SUPGElement2 :: computeAccelerationTerm_MB(FloatMatrix &answer, TimeStep *atTime
         /* supg stabilization */
         answer.plusProductUnsym(b, n, rho * t_supg * dV);
     }
+
+    if ( this->updateRotationMatrix() ) {
+      //answer.rotatedWith(* this->rotationMatrix);
+    
+      FloatMatrix *Trans = this->rotationMatrix->GiveTransposition();
+      answer.rotatedWith(* Trans);
+      delete Trans;
+      
+    }
+
 }
 
 void
 SUPGElement2 :: computeAdvectionTerm_MB(FloatArray &answer, TimeStep *atTime)
 {
-    FloatMatrix n, b;
+  FloatMatrix n, b, bn;
     FloatArray u, v(3);
     double dV, rho, coeff, sum;
     int i, k, undofs = this->computeNumberOfDofs(EID_MomentumBalance);
@@ -350,60 +369,95 @@ SUPGElement2 :: computeAdvectionTerm_MB(FloatArray &answer, TimeStep *atTime)
     answer.zero();
 
     this->computeVectorOf(EID_MomentumBalance, VM_Total, atTime, u);
-    IntegrationRule *iRule = this->integrationRulesArray [ 1 ];
+    
+    
+    if ( this->updateRotationMatrix() ) {
+      u.rotatedWith(this->rotationMatrix, 't');
+    }
+    
+    IntegrationRule *iRule = this->integrationRulesArray [ 2 ];
     /* consistent part + supg stabilization term */
     for ( k = 0; k < iRule->getNumberOfIntegrationPoints(); k++ ) {
-        gp = iRule->getIntegrationPoint(k);
-        this->computeNuMatrix(n, gp);
-        this->computeUDotGradUMatrix( b, gp, atTime->givePreviousStep() );
-        v.beProductOf(b, u);
-        dV  = this->computeVolumeAround(gp);
-        rho = this->giveMaterial()->giveCharacteristicValue(MRM_Density, gp, atTime);
-        /* consistent part */
-        coeff = rho * dV;
-        for ( i = 1; i <= undofs; i++ ) {
-            for ( sum = 0.0, isd = 1; isd <= nsd; isd++ ) {
-                sum += n.at(isd, i) * v.at(isd);
-            }
-
-            answer.at(i) += coeff * sum;
-        }
-
-        /* supg stabilization */
-        coeff = t_supg * rho * dV;
-        for ( i = 1; i <= undofs; i++ ) {
-            for ( sum = 0, isd = 1; isd <= nsd; isd++ ) {
-                sum += b.at(isd, i) * v.at(isd);
-            }
-
-            answer.at(i) += coeff * sum;
-        }
+      gp = iRule->getIntegrationPoint(k);
+      this->computeNuMatrix(n, gp);
+      this->computeUDotGradUMatrix( bn, gp, atTime->givePreviousStep() );
+      this->computeUDotGradUMatrix( b, gp, atTime);
+      v.beProductOf(b, u);
+      dV  = this->computeVolumeAround(gp);
+      rho = this->giveMaterial()->giveCharacteristicValue(MRM_Density, gp, atTime);
+      /* consistent part */
+      coeff = rho * dV;
+      for ( i = 1; i <= undofs; i++ ) {
+	for ( sum = 0.0, isd = 1; isd <= nsd; isd++ ) {
+	  sum += n.at(isd, i) * v.at(isd);
+	}
+	
+	answer.at(i) += coeff * sum;
+      }
+      
+      /* supg stabilization */
+      coeff = t_supg * rho * dV;
+      for ( i = 1; i <= undofs; i++ ) {
+	for ( sum = 0, isd = 1; isd <= nsd; isd++ ) {
+	  sum += bn.at(isd, i) * v.at(isd);
+	}
+	
+	answer.at(i) += coeff * sum;
+      }
+      
+      
+      
+    }
+    
+    if ( this->updateRotationMatrix() ) {
+      answer.rotatedWith(* this->rotationMatrix, 'n');
     }
 }
 
 void
 SUPGElement2 :: computeAdvectionDerivativeTerm_MB(FloatMatrix &answer, TimeStep *atTime)
 {
-    FloatMatrix n, b;
-    double dV, rho;
-    int k, undofs = this->computeNumberOfDofs(EID_MomentumBalance);
-    GaussPoint *gp;
-
-    answer.resize(undofs, undofs);
-    answer.zero();
-
-    IntegrationRule *iRule = this->integrationRulesArray [ 1 ];
-    /* consistent part + supg stabilization term */
+  FloatMatrix n, b, bn, grad_u, grad_uN, N;
+  FloatArray u; 
+  double dV, rho;
+  int k, undofs = this->computeNumberOfDofs(EID_MomentumBalance);
+  GaussPoint *gp;
+  
+  answer.resize(undofs, undofs);
+  answer.zero();
+  //this->computeVectorOf(EID_MomentumBalance, VM_Total, atTime, u);
+  IntegrationRule *iRule = this->integrationRulesArray [ 2 ];
+  /* consistent part + supg stabilization term */
     for ( k = 0; k < iRule->getNumberOfIntegrationPoints(); k++ ) {
-        gp = iRule->getIntegrationPoint(k);
-        this->computeNuMatrix(n, gp);
-        this->computeUDotGradUMatrix( b, gp, atTime->givePreviousStep() );
-        dV  = this->computeVolumeAround(gp);
-        rho = this->giveMaterial()->giveCharacteristicValue(MRM_Density, gp, atTime);
-        /* consistent part */
-        answer.plusProductUnsym(n, b, rho * dV);
-        /* supg stabilization */
-        answer.plusProductUnsym(b, b, t_supg * rho * dV);
+      gp = iRule->getIntegrationPoint(k);
+      this->computeNuMatrix(n, gp);
+      this->computeUDotGradUMatrix( bn, gp, atTime->givePreviousStep() );
+      this->computeUDotGradUMatrix( b, gp, atTime);
+      dV  = this->computeVolumeAround(gp);
+      rho = this->giveMaterial()->giveCharacteristicValue(MRM_Density, gp, atTime);
+      
+      this->computeGradUMatrix(grad_u, gp, atTime);
+     
+      
+      /* consistent part */
+      answer.plusProductUnsym(n, b, rho * dV);
+      
+      grad_uN.beProductOf(grad_u, n);
+      answer.plusProductUnsym(n, grad_uN, rho * dV);
+      /* supg stabilization */
+      answer.plusProductUnsym(bn, b, t_supg * rho * dV);
+      answer.plusProductUnsym(bn, grad_uN, t_supg * rho * dV);
+    }
+
+    if ( this->updateRotationMatrix() ) {
+      //answer.rotatedWith(* this->rotationMatrix);
+    
+      FloatMatrix *Trans = this->rotationMatrix->GiveTransposition();
+      answer.rotatedWith(* Trans);
+      delete Trans;
+
+
+
     }
 }
 
@@ -411,26 +465,51 @@ void
 SUPGElement2 :: computeDiffusionTerm_MB(FloatArray &answer, TimeStep *atTime)
 {
     int k, undofs = this->computeNumberOfDofs(EID_MomentumBalance);
-    FloatArray u, eps, stress, bs;
-    FloatMatrix b;
+    FloatArray u, eps, stress, bs, dDB_u;
+    FloatMatrix b, un_gu, dDB;
     GaussPoint *gp;
-    double dV, Re = domain->giveEngngModel()->giveUnknownComponent(ReynoldsNumber, VM_Unknown, atTime, domain, NULL);
+    double coeff,i, sum, isd, nsd,  dV, Re = domain->giveEngngModel()->giveUnknownComponent(ReynoldsNumber, VM_Unknown, atTime, domain, NULL);
 
     answer.resize(undofs);
     answer.zero();
-
+    
+    nsd = this->giveNumberOfSpatialDimensions();
     this->computeVectorOf(EID_MomentumBalance, VM_Total, atTime, u);
-    IntegrationRule *iRule = this->integrationRulesArray [ 0 ];
+ 
+    if ( this->updateRotationMatrix() ) {
+        u.rotatedWith(this->rotationMatrix, 't');
+    }
+
+    IntegrationRule *iRule = this->integrationRulesArray [ 1 ];
     for ( k = 0; k < iRule->getNumberOfIntegrationPoints(); k++ ) {
         gp = iRule->getIntegrationPoint(k);
         dV  = this->computeVolumeAround(gp);
         this->computeBMatrix(b, gp);
-        eps.beProductOf(b, u);
-        ( ( FluidDynamicMaterial * ) this->giveMaterial() )->computeDeviatoricStressVector(stress, gp,
-                                                                                           eps, atTime);
+        this->computeDivTauMatrix(dDB, gp, atTime);
+	this->computeUDotGradUMatrix( un_gu, gp, atTime->givePreviousStep() );
+	eps.beProductOf(b, u);
+        ( ( FluidDynamicMaterial * ) this->giveMaterial() )->computeDeviatoricStressVector(stress, gp, eps, atTime);
+	dDB_u.beProductOf(dDB, u);
+	/* consistent part */
         stress.times(dV / Re);
         bs.beTProductOf(b, stress);
         answer.add(bs);
+    
+	/* SUPG term */	
+	//answer.plusProductUnsym(un_gu,dDB_u, t_supg * dV * (-1.0) * (1./Re));
+	
+	coeff = (-1.0) * t_supg * dV;
+        for ( i = 1; i <= undofs; i++ ) {
+            for ( sum = 0, isd = 1; isd <= nsd; isd++ ) {
+                sum += un_gu.at(isd, i) * dDB_u.at(isd);
+            }
+
+            answer.at(i) += coeff * sum;
+	}
+    }
+   
+    if ( this->updateRotationMatrix() ) {
+      answer.rotatedWith(* this->rotationMatrix, 'n');
     }
 }
 
@@ -441,24 +520,40 @@ SUPGElement2 :: computeDiffusionDerivativeTerm_MB(FloatMatrix &answer, MatRespon
 
     answer.resize(undofs, undofs);
     answer.zero();
-    FloatMatrix _db, _d, _b;
+    FloatMatrix _db, _d, _b, dDB, un_gu;
     double dV, Re = domain->giveEngngModel()->giveUnknownComponent(ReynoldsNumber, VM_Unknown, atTime, domain, NULL);
     GaussPoint *gp;
-
-    IntegrationRule *iRule = this->integrationRulesArray [ 0 ];
+    FloatArray dDB_u;
+    IntegrationRule *iRule = this->integrationRulesArray [ 1 ];
     for ( k = 0; k < iRule->getNumberOfIntegrationPoints(); k++ ) {
         gp = iRule->getIntegrationPoint(k);
         dV  = this->computeVolumeAround(gp);
         this->computeBMatrix(_b, gp);
-        ( ( FluidDynamicMaterial * ) this->giveMaterial() )->giveDeviatoricStiffnessMatrix(_d, mode,
-                                                                                           gp, atTime);
+        ( ( FluidDynamicMaterial * ) this->giveMaterial() )->giveDeviatoricStiffnessMatrix(_d, mode,gp, atTime);
+
+	this->computeDivTauMatrix(dDB, gp, atTime);
+	this->computeUDotGradUMatrix( un_gu, gp, atTime->givePreviousStep() );
+	/* standard term */
         _db.beProductOf(_d, _b);
         answer.plusProductUnsym(_b, _db, dV); //answer.plusProduct (_b,_db,area);
         //answer.symmetrized() ;
         answer.times(1. / Re);
+    
+	/* SUPG term */	
+
+	answer.plusProductUnsym(un_gu, dDB, t_supg * dV * (-1.0) * (1./Re));
+
     }
 
-    answer.symmetrized();
+    
+    if ( this->updateRotationMatrix() ) {
+      //answer.rotatedWith(* this->rotationMatrix);
+    
+      FloatMatrix * Trans = this->rotationMatrix->GiveTransposition();
+      answer.rotatedWith(* Trans);
+      delete Trans;
+    }
+
 }
 
 
@@ -495,8 +590,15 @@ SUPGElement2 :: computePressureTerm_MB(FloatMatrix &answer, TimeStep *atTime)
         // supg term
         answer.plusProductUnsym(b, np, t_supg * dV);
     }
-}
 
+    if ( this->updateRotationMatrix() ) {
+      
+
+      FloatMatrix tmp = answer;
+      answer.beProductOf(*rotationMatrix, tmp);
+      
+    }
+}
 void
 SUPGElement2 :: computeLSICStabilizationTerm_MB(FloatMatrix &answer, TimeStep *atTime)
 {
@@ -519,6 +621,16 @@ SUPGElement2 :: computeLSICStabilizationTerm_MB(FloatMatrix &answer, TimeStep *a
     }
 
     answer.symmetrized();
+    
+    if ( this->updateRotationMatrix() ) {
+      //answer.rotatedWith(* this->rotationMatrix);
+      
+      FloatMatrix *Trans = this->rotationMatrix->GiveTransposition();
+      answer.rotatedWith(* Trans);
+      delete Trans;
+      
+    }
+    
 }
 
 void
@@ -533,7 +645,7 @@ SUPGElement2 :: computeLinearAdvectionTerm_MC(FloatMatrix &answer, TimeStep *atT
 
     answer.resize(pndofs, undofs);
     answer.zero();
-    IntegrationRule *iRule = this->integrationRulesArray [ 0 ];
+    IntegrationRule *iRule = this->integrationRulesArray [ 1 ];
     for ( k = 0; k < iRule->getNumberOfIntegrationPoints(); k++ ) {
         gp = iRule->getIntegrationPoint(k);
         dV  = this->computeVolumeAround(gp);
@@ -543,6 +655,14 @@ SUPGElement2 :: computeLinearAdvectionTerm_MC(FloatMatrix &answer, TimeStep *atT
         /* standard term */
         answer.plusProductUnsym(np, gu, dV);
     }
+    if ( this->updateRotationMatrix() ) {
+      
+      FloatMatrix tmp = answer;
+      FloatMatrix *Trans = this->rotationMatrix->GiveTransposition();
+      answer.beProductOf(tmp, *Trans);
+      delete Trans;
+    }
+    
 }
 
 void
@@ -561,11 +681,16 @@ SUPGElement2 :: computeAdvectionTerm_MC(FloatArray &answer, TimeStep *atTime)
 
     IntegrationRule *iRule = this->integrationRulesArray [ 1 ];
     this->computeVectorOf(EID_MomentumBalance, VM_Total, atTime, u);
+    
+     if ( this->updateRotationMatrix() ) {
+      u.rotatedWith(this->rotationMatrix, 't');
+    }
+
     /* pspg stabilization term */
     for ( k = 0; k < iRule->getNumberOfIntegrationPoints(); k++ ) {
         gp = iRule->getIntegrationPoint(k);
         this->computeGradPMatrix(g, gp);
-        this->computeUDotGradUMatrix( b, gp, atTime->givePreviousStep() );
+        this->computeUDotGradUMatrix( b, gp, atTime);
         v.beProductOf(b, u);
         dV  = this->computeVolumeAround(gp);
         coeff = dV * t_pspg;
@@ -598,11 +723,23 @@ SUPGElement2 :: computeAdvectionDerivativeTerm_MC(FloatMatrix &answer, TimeStep 
     for ( k = 0; k < iRule->getNumberOfIntegrationPoints(); k++ ) {
         gp = iRule->getIntegrationPoint(k);
         this->computeGradPMatrix(g, gp);
-        this->computeUDotGradUMatrix( b, gp, atTime->givePreviousStep() );
+        this->computeUDotGradUMatrix( b, gp, atTime);
         dV  = this->computeVolumeAround(gp);
         coeff = dV * t_pspg;
         answer.plusProductUnsym(g, b, coeff);
     }
+    if ( this->updateRotationMatrix() ) {
+     
+      FloatMatrix tmp = answer;
+      FloatMatrix *Trans = this->rotationMatrix->GiveTransposition();
+      answer.beProductOf(tmp, *Trans);
+      delete Trans;
+      
+      
+    }
+    
+    
+    
 }
 
 void
@@ -612,6 +749,27 @@ SUPGElement2 :: computeDiffusionDerivativeTerm_MC(FloatMatrix &answer, TimeStep 
     int undofs = this->computeNumberOfDofs(EID_MomentumBalance);
 
     answer.resize(pndofs, undofs);
+    FloatMatrix dDB, _d, g;
+    double dV, coeff, rho;
+    GaussPoint *gp;
+    IntegrationRule *iRule = this->integrationRulesArray [ 1 ];
+    int k;
+
+    for ( k = 0; k < iRule->getNumberOfIntegrationPoints(); k++ ) {
+        gp = iRule->getIntegrationPoint(k);
+        dV  = this->computeVolumeAround(gp);
+	rho = this->giveMaterial()->giveCharacteristicValue(MRM_Density, gp, atTime); 
+
+	  coeff = (-1.0) * dV * t_pspg / rho;
+	  //( ( FluidDynamicMaterial * ) this->giveMaterial() )->giveDeviatoricStiffnessMatrix(_d, TangentStiffness,gp, atTime);
+
+	this->computeDivTauMatrix(dDB, gp, atTime);
+	this->computeGradPMatrix(g, gp);
+
+	answer.plusProductUnsym(g, dDB, coeff);
+    }
+
+    
     answer.zero();
 }
 
@@ -620,6 +778,42 @@ SUPGElement2 :: computeDiffusionTerm_MC(FloatArray &answer, TimeStep *atTime)
 {
     int pndofs = this->computeNumberOfDofs(EID_ConservationEquation);
     answer.resize(pndofs);
+   
+    /*
+    FloatMatrix dDB, _d, g;
+    double sum, dV, coeff, rho, isd, nsd = this->giveNumberOfSpatialDimensions();
+    GaussPoint *gp;
+    IntegrationRule *iRule = this->integrationRulesArray [ 1 ];
+    int i,k;
+    FloatArray u, dDB_u;
+
+    this->computeVectorOf(EID_MomentumBalance, VM_Total, atTime, u);
+    
+    for ( k = 0; k < iRule->getNumberOfIntegrationPoints(); k++ ) {
+        gp = iRule->getIntegrationPoint(k);
+        dV  = this->computeVolumeAround(gp);
+	rho = this->giveMaterial()->giveCharacteristicValue(MRM_Density, gp, atTime); 
+
+	coeff = (-1.0) * dV * t_pspg / rho;
+	
+	this->computeGradPMatrix(g, gp);
+	this->computeDivTauMatrix(dDB, gp, atTime);
+	
+	dDB_u.beProductOf(dDB, u);
+
+	for ( i = 1; i <= pndofs; i++ ) {
+            for ( sum = 0, isd = 1; isd <= nsd; isd++ ) {
+                sum += g.at(isd, i) * dDB_u.at(isd);
+            }
+
+            answer.at(i) += coeff * sum;
+	}
+
+
+
+    }
+    */
+    
     answer.zero();
 }
 
@@ -647,6 +841,20 @@ SUPGElement2 :: computeAccelerationTerm_MC(FloatMatrix &answer, TimeStep *atTime
         coeff = dV * t_pspg;
         answer.plusProductUnsym(g, n, coeff);
     }
+
+    if ( this->updateRotationMatrix() ) {
+      
+      FloatMatrix tmp = answer;
+      FloatMatrix *Trans = this->rotationMatrix->GiveTransposition();
+      answer.beProductOf(tmp, *Trans);
+      delete Trans;
+    }
+    
+    
+
+
+
+
 }
 
 void
@@ -743,8 +951,16 @@ SUPGElement2 :: computeBCRhsTerm_MB(FloatArray &answer, TimeStep *atTime)
             _error("computeForceLoadVector : unsupported load type class");
         }
     }
-
-    return;
+    if ( this->updateRotationMatrix() ) {
+      
+      //FloatMatrix *T;
+      //int p, i, j, k;
+      //double coeff; 
+      //T =  this->rotationMatrix;
+      
+      answer.rotatedWith(this->rotationMatrix, 'n');
+      
+    } 
 }
 
 
@@ -942,5 +1158,173 @@ SUPGElement2 :: computeDeviatoricStress(FloatArray &answer, GaussPoint *gp, Time
     eps.beProductOf(b, u);
     ( ( FluidDynamicMaterial * ) this->giveMaterial() )->computeDeviatoricStressVector(answer, gp, eps, tStep);
 }
+
+
+
+
+
+int
+SUPGElement2 :: updateRotationMatrix()
+{
+    /* returns a tranformation matrix between local coordinate system
+     * and global coordinate system, taking into account possible local
+     * coordinate system in nodes.
+     * if no transformation necessary - returns NULL
+     */
+    int isT_GtoL, isT_NtoG;
+    FloatMatrix T_GtoL, T_NtoG;
+
+    if ( rotationMatrixDefined ) {
+        return ( rotationMatrix != NULL );
+    }
+
+    rotationMatrixDefined = 1;
+    isT_GtoL = this->computeGtoLRotationMatrix(T_GtoL);
+    isT_NtoG = this->computeGNDofRotationMatrix(T_NtoG, _toNodalCS);
+
+#ifdef DEBUG
+    if ( isT_GtoL ) {
+        if ( ( !T_GtoL.isSquare() ) ||
+            ( T_GtoL.giveNumberOfRows() != this->computeNumberOfDofs(EID_MomentumBalance) ) ) {
+            _error("StructuralElement :: updateRotationMatrix - T_GtoL transformation matrix size mismatch");
+        }
+    }
+
+    if ( isT_NtoG ) {
+        if ( ( !T_NtoG.isSquare() ) ||
+            ( T_NtoG.giveNumberOfRows() != this->computeNumberOfDofs(EID_MomentumBalance) ) ) {
+            _error("StructuralElement :: updateRotationMatrix - T_NtoG transformation matrix size mismatch");
+        }
+    }
+
+#endif
+
+    if ( isT_GtoL && T_NtoG.isNotEmpty() ) {
+        rotationMatrix = T_GtoL.Times(& T_NtoG);
+    } else if ( isT_GtoL ) {
+        rotationMatrix = T_GtoL.GiveCopy();
+    } else if ( T_NtoG.isNotEmpty() ) {
+        rotationMatrix = T_NtoG.GiveCopy();
+    } else {
+        rotationMatrix = NULL;
+    }
+
+    //delete T_GtoL;
+    //delete T_GtoNTransp;
+    return ( rotationMatrix != NULL );
+}
+
+
+
+int
+SUPGElement2 :: computeGNDofRotationMatrix(FloatMatrix &answer, DofManTransfType mode)
+{
+    int i, j, k, lastRowPos = 0, lastColPos = 0, flag = 0;
+
+    // test if transformation is necessary
+    for ( i = 1; i <= numberOfDofMans; i++ ) {
+        flag += this->giveDofManager(i)->requiresTransformation();
+    }
+
+    if ( flag == 0 ) {
+        answer.beEmptyMtrx();
+        return 0;
+    }
+
+    // initialize answer
+    int gsize = this->computeGlobalNumberOfDofs(EID_MomentumBalance);
+    if ( mode == _toGlobalCS ) {
+        answer.resize(this->computeNumberOfDofs(EID_MomentumBalance), gsize);
+    } else if ( mode == _toNodalCS ) {
+        answer.resize( gsize, this->computeNumberOfDofs(EID_MomentumBalance) );
+    } else {
+        _error("computeGNDofRotationMatrix: unsupported DofManTrasfType value");
+    }
+
+    answer.zero();
+
+    FloatMatrix dofManT;
+    IntArray dofIDmask;
+    int nr, nc;
+    // loop over nodes
+    for ( i = 1; i <= numberOfDofMans; i++ ) {
+        this->giveDofManDofIDMask(i, EID_MomentumBalance, dofIDmask);
+        this->giveDofManager(i)->computeDofTransformation(dofManT, & dofIDmask, mode);
+        nc = dofManT.giveNumberOfColumns();
+        nr = dofManT.giveNumberOfRows();
+        for ( j = 1; j <= nr; j++ ) {
+            for ( k = 1; k <= nc; k++ ) {
+                // localize node contributions
+                answer.at(lastRowPos + j, lastColPos + k) = dofManT.at(j, k);
+            }
+        }
+
+        lastRowPos += nr;
+        lastColPos += nc;
+    }
+
+    return 1;
+}
+
+
+int
+SUPGElement2 :: computeGNLoadRotationMatrix(FloatMatrix &answer, DofManTransfType mode)
+{
+    int i, j, k, lastRowPos = 0, lastColPos = 0, flag = 0;
+
+    // test if transformation is necessary
+    for ( i = 1; i <= numberOfDofMans; i++ ) {
+        flag += this->giveDofManager(i)->requiresTransformation();
+    }
+
+    if ( flag == 0 ) {
+        answer.beEmptyMtrx();
+        return 0;
+    }
+
+    // initialize answer
+    int gsize = this->computeGlobalNumberOfDofs(EID_MomentumBalance);
+    if ( mode == _toGlobalCS ) {
+        answer.resize(this->computeNumberOfDofs(EID_MomentumBalance), gsize);
+    } else if ( mode == _toNodalCS ) {
+        answer.resize( gsize, this->computeNumberOfDofs(EID_MomentumBalance) );
+    } else {
+        _error("computeGNDofRotationMatrix: unsupported DofManTrasfType value");
+    }
+
+    answer.zero();
+
+    FloatMatrix dofManT;
+    IntArray dofIDmask;
+    int nr, nc;
+    // loop over nodes
+    for ( i = 1; i <= numberOfDofMans; i++ ) {
+        this->giveDofManDofIDMask(i, EID_MomentumBalance, dofIDmask);
+        this->giveDofManager(i)->computeLoadTransformation(dofManT, & dofIDmask, mode);
+        nc = dofManT.giveNumberOfColumns();
+        nr = dofManT.giveNumberOfRows();
+        for ( j = 1; j <= nr; j++ ) {
+            for ( k = 1; k <= nc; k++ ) {
+                // localize node contributions
+                answer.at(lastRowPos + j, lastColPos + k) = dofManT.at(j, k);
+            }
+        }
+
+        lastRowPos += nr;
+        lastColPos += nc;
+    }
+
+    return 1;
+}
+
+
+
+
+
+
+
+
+
+
 
 } // end namespace oofem

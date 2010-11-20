@@ -274,6 +274,49 @@ PY1_3D_SUPG :: computeGradPMatrix(FloatMatrix &answer, GaussPoint *gp)
     return;
 }
 
+void
+PY1_3D_SUPG :: computeGradUMatrix(FloatMatrix &answer, GaussPoint *gp, TimeStep *atTime )
+{
+  int i;
+  FloatArray dnx(3), dny(3), u, u1(3), u2(3);
+  FloatMatrix dn;
+ 
+  answer.resize(2, 2);
+  answer.zero();
+  
+  this->computeVectorOf(EID_MomentumBalance, VM_Total, atTime, u);
+  
+  if ( this->updateRotationMatrix() ) {
+      u.rotatedWith(this->rotationMatrix, 't');
+  }
+
+  interpolation.evaldNdx(dn, * gp->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0);
+  for (i = 1; i <= 3; i++){
+    dnx.at(i) = dn.at(i, 1);
+    dny.at(i) = dn.at(i, 2);
+    
+    u1.at(i) = u.at(2*i-1);
+    u2.at(i) = u.at(2*i);
+  }
+  
+ 
+  answer.at(1, 1) =  dotProduct(dnx, u1, 3);
+  answer.at(1, 2) =  dotProduct(dny, u1, 3); 
+  answer.at(2, 1) =  dotProduct(dnx, u2, 3);
+  answer.at(2, 2) =  dotProduct(dny, u2, 3);
+    
+}
+
+
+void
+PY1_3D_SUPG :: computeDivTauMatrix(FloatMatrix &answer, GaussPoint *gp, TimeStep *atTime )
+{
+  answer.resize(2, 6);
+  answer.zero();
+}
+
+
+
 int
 PY1_3D_SUPG :: giveNumberOfSpatialDimensions()
 {
