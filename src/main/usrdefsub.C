@@ -44,7 +44,6 @@
 #endif
 
 #include "node.h"
-#include "particle.h"
 #include "element.h"
 #include "engngm.h"
 #include "xfemmanager.h"
@@ -117,6 +116,7 @@
 #include "planstrssxfem.h"
 #include "cohsur3d.h"
 #include "lumpedmasselement.h"
+#include "particle.h"
 // iga elements
 #include "igaelements.h"
 
@@ -412,7 +412,7 @@ Element *CreateUsrDefElementOfType(char *aClass, int number, Domain *domain)
 
 #endif //__TM_MODULE
 #ifdef __FM_MODULE
-    else if ( !strncasecmp(aClass, "tr1cbs", 6) ) {
+    if ( !strncasecmp(aClass, "tr1cbs", 6) ) {
         newElement = new TR1_2D_CBS(number, domain);
     } else if ( !strncasecmp(aClass, "tr1supgaxi", 10) )    {
         newElement = new TR1_2D_SUPG_AXI(number, domain);
@@ -440,9 +440,11 @@ Element *CreateUsrDefElementOfType(char *aClass, int number, Domain *domain)
 DofManager *CreateUsrDefDofManagerOfType(char *aClass, int number, Domain *domain)
 {
     DofManager *newDofManager = NULL;
-    if (! strncasecmp(aClass,"particle",8)) {
+ #ifdef __SM_MODULE
+   if (! strncasecmp(aClass,"particle",8)) {
         newDofManager = new Particle(number, domain);
     }
+#endif //__SM_MODULE
     return newDofManager;
 }
 
@@ -896,10 +898,12 @@ NonlocalBarrier *CreateUsrDefNonlocalBarrierOfType(char *aClass, int num, Domain
 RandomFieldGenerator *CreateUsrDefRandomFieldGenerator(char *aClass, int num, Domain *d)
 {
     RandomFieldGenerator *answer = NULL;
+
+#ifdef __SM_MODULE
     if ( !strncasecmp(aClass, "localgaussrandomgenerator", 25) ) {
         answer = new LocalGaussianRandomGenerator(num, d);
     }
-
+#endif
 
     return answer;
 }
@@ -924,6 +928,7 @@ Element *CreateUsrDefElementOfType(classType type, int number, Domain *domain)
 {
 	Element *answer = NULL;
 
+#ifdef __SM_MODULE
 	if ( type == PlaneStress2dClass ) {
 		answer = new PlaneStress2d(number, domain);
 	} else if ( type == TrPlaneStress2dClass )  {
@@ -933,6 +938,7 @@ Element *CreateUsrDefElementOfType(classType type, int number, Domain *domain)
 	} else if ( type == TrPlaneStrainClass ) {
 		answer = new TrPlaneStrain(number, domain);
 	}
+#endif
 
 	if ( answer == NULL ) {
 		OOFEM_ERROR2("CreateUsrDefElementOfType: Unknown element type [%d]", type);
@@ -976,14 +982,16 @@ Dof *CreateUsrDefDofOfType(classType type, int number, DofManager *dman)
 MaterialMappingAlgorithm *CreateUsrDefMaterialMappingAlgorithm(MaterialMappingAlgorithmType type)
 {
     MaterialMappingAlgorithm *answer = NULL;
+
+#ifdef __SM_MODULE
     if ( type == MMA_ClosestPoint ) {
         answer = new MMAClosestIPTransfer();
     } else if ( type == MMA_LeastSquareProjection )  {
         answer = new MMALeastSquareProjection();
-    } else if ( type == MMA_ShapeFunctionProjection )                                                                                             {
+    } else if ( type == MMA_ShapeFunctionProjection ) {
         answer = new MMAShapeFunctProjection();
     }
-
+#endif
     if ( answer == NULL ) {
         OOFEM_ERROR2("CreateUsrDefMaterialMappingAlgorithm: Unknown mma type [%d]", type);
     }
@@ -994,6 +1002,7 @@ MaterialMappingAlgorithm *CreateUsrDefMaterialMappingAlgorithm(MaterialMappingAl
 MesherInterface *CreateUsrDefMesherInterface(MeshPackageType type, Domain* d)
 {
   MesherInterface *answer = NULL;
+#ifdef __SM_MODULE
   if (type == MPT_T3D) {
     answer = new T3DInterface(d);
   } else if (type == MPT_TARGE2) {
@@ -1002,7 +1011,9 @@ MesherInterface *CreateUsrDefMesherInterface(MeshPackageType type, Domain* d)
     answer = new FreemInterface(d);
   } else if (type == MPT_SUBDIVISION) {
     answer = new Subdivision(d);
-  } else {
+  } 
+#endif
+  if ( answer == NULL ) {
     OOFEM_ERROR2("CreateUsrDefMesherInterface: Unknown MI type [%d]", type);
   }
 
