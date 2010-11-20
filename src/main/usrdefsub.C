@@ -50,6 +50,7 @@
 #include "load.h"
 #include "loadtime.h"
 #include "material.h"
+#include "gaussintegrationrule.h"
 
 #include "sparsemtrx.h"
 #include "skyline.h"
@@ -374,6 +375,8 @@ Element *CreateUsrDefElementOfType(char *aClass, int number, Domain *domain)
         newElement = new MacroLSpace(number, domain);
     } else if ( !strncasecmp(aClass, "lumpedmass", 10) )   {
         newElement = new LumpedMassElement(number, domain);
+    } else if (! strncasecmp(aClass,"cohsur3d",8)) {
+      newElement = new CohesiveSurface3d (number,domain);
     } else if ( !strncasecmp(aClass, "bsplineplanestresselement", 25)  ) {
       newElement = new BsplinePlaneStressElement(number, domain);
     } else if ( !strncasecmp(aClass, "nurbsplanestresselement", 23)  ) {
@@ -406,9 +409,7 @@ Element *CreateUsrDefElementOfType(char *aClass, int number, Domain *domain)
         newElement = new Tetrah1_ht(number, domain);
     } else if ( !strncasecmp(aClass, "tetrah1hmt", 10) )    {
         newElement = new Tetrah1_ht(number, domain, Tetrah1_ht :: HeatMass1TransferEM);
-    } else if (! strncasecmp(aClass,"cohsur3d",8)) {
-     newElement = new CohesiveSurface3d (number,domain);
-    }
+    } 
 
 #endif //__TM_MODULE
 #ifdef __FM_MODULE
@@ -683,15 +684,18 @@ Material *CreateUsrDefMaterialOfType(char *aClass, int number, Domain *domain)
         newMaterial = new IsotropicHeatTransferMaterial(number, domain);
     } else if ( !strncasecmp(aClass, "hemotk", 6) )    {
         newMaterial = new HeMoTKMaterial(number, domain);
-    } else if ( !strncmp(aClass, "hisoheat", 8) ) {
-        newMaterial = new HydratingIsoHeatMaterial(number, domain);
-    } else if ( !strncmp(aClass, "hhemotk", 7) ) {
-        newMaterial = new HydratingHeMoMaterial(number, domain);
     } else if ( !strncmp(aClass, "cemhydmat", 9) ) {
         newMaterial = new CemhydMat(number, domain);
     }
-
 #endif //__TM_MODULE
+
+#if defined(__SM_MODULE) && defined (__TM_MODULE)
+    if (!strncmp(aClass, "hisoheat", 8) ) {
+        newMaterial = new HydratingIsoHeatMaterial(number, domain);
+    } else if ( !strncmp(aClass, "hhemotk", 7) ) {
+        newMaterial = new HydratingHeMoMaterial(number, domain);
+    }
+#endif //defined(__SM_MODULE) && defined (__TM_MODULE)
 
 #ifdef __FM_MODULE
     if ( !strncasecmp(aClass, "newtonianfluid", 14) ) {
