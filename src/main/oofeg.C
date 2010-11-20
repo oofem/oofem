@@ -108,7 +108,7 @@ static void OOFEGReturnHitInCmd(Widget w, XEvent *event, String *params,
 
 static XtTranslations tt1;
 static XtActionsRec oofeg_remap_return[] = {
-    { "oofegretActCmd", OOFEGReturnHitInCmd },
+  { (String) "oofegretActCmd", OOFEGReturnHitInCmd },
 };
 
 static int oofeg_box_setup = 0;
@@ -480,7 +480,7 @@ void ESICustomize(Widget parent_pane)
                 ac++;
                 lx = XtCreateManagedWidget("smin", labelWidgetClass, grey_scale_setup_palette, al, ac);
                 ac = 0;
-                XtSetArg(al [ ac ], XtNfromHoriz, lx);
+                XtSetArg(al [ ac ], (String) XtNfromHoriz, lx);
                 ac++;
                 XtSetArg(al [ ac ], XtNeditType, XawtextEdit);
                 ac++;
@@ -488,13 +488,13 @@ void ESICustomize(Widget parent_pane)
                                                  asciiTextWidgetClass, grey_scale_setup_palette,
                                                  al, ac, NULL, NULL);
                 ac = 0;
-                XtSetArg(al [ ac ], XtNfromHoriz, greyscale_min);
+                XtSetArg(al [ ac ], (String) XtNfromHoriz, greyscale_min);
                 ac++;
                 XtSetArg(al [ ac ], XtNlabel, " grey_max (<=1.0)");
                 ac++;
                 ly = XtCreateManagedWidget("smax", labelWidgetClass, grey_scale_setup_palette, al, ac);
                 ac = 0;
-                XtSetArg(al [ ac ], XtNfromHoriz, ly);
+                XtSetArg(al [ ac ], (String) XtNfromHoriz, ly);
                 ac++;
                 XtSetArg(al [ ac ], XtNeditType, XawtextEdit);
                 ac++;
@@ -503,7 +503,7 @@ void ESICustomize(Widget parent_pane)
                                                  al, ac, NULL, NULL);
                 
                 ac = 0;
-                XtSetArg(al [ ac ], XtNfromHoriz, greyscale_max);
+                XtSetArg(al [ ac ], (String) XtNfromHoriz, greyscale_max);
                 ac++;
                 scale_setup_ok = oofeg_add_button("precinput_xyz_ok", " OK ",
                                                   commandWidgetClass, grey_scale_setup_palette,
@@ -551,7 +551,7 @@ void ESICustomize(Widget parent_pane)
                 ac++;
                 lx = XtCreateManagedWidget("smin", labelWidgetClass, color_scale_setup_palette, al, ac);
                 ac = 0;
-                XtSetArg(al [ ac ], XtNfromHoriz, lx);
+                XtSetArg(al [ ac ], (String) XtNfromHoriz, lx);
                 ac++;
                 XtSetArg(al [ ac ], XtNeditType, XawtextEdit);
                 ac++;
@@ -559,13 +559,13 @@ void ESICustomize(Widget parent_pane)
                                              asciiTextWidgetClass, color_scale_setup_palette,
                                              al, ac, NULL, NULL);
                 ac = 0;
-                XtSetArg(al [ ac ], XtNfromHoriz, scale_min);
+                XtSetArg(al [ ac ], (String) XtNfromHoriz, scale_min);
                 ac++;
                 XtSetArg(al [ ac ], XtNlabel, " scale_max");
                 ac++;
                 ly = XtCreateManagedWidget("smax", labelWidgetClass, color_scale_setup_palette, al, ac);
                 ac = 0;
-                XtSetArg(al [ ac ], XtNfromHoriz, ly);
+                XtSetArg(al [ ac ], (String) XtNfromHoriz, ly);
                 ac++;
                 XtSetArg(al [ ac ], XtNeditType, XawtextEdit);
                 ac++;
@@ -574,7 +574,7 @@ void ESICustomize(Widget parent_pane)
                                              al, ac, NULL, NULL);
 
                 ac = 0;
-                XtSetArg(al [ ac ], XtNfromHoriz, scale_max);
+                XtSetArg(al [ ac ], (String) XtNfromHoriz, scale_max);
                 ac++;
                 scale_setup_ok = oofeg_add_button("precinput_xyz_ok", " OK ",
                                                   commandWidgetClass, color_scale_setup_palette,
@@ -634,7 +634,7 @@ void ESICustomize(Widget parent_pane)
             ac++;
             lx = XtCreateManagedWidget("sstep", labelWidgetClass, animate_setup_palette, al, ac);
             ac = 0;
-            XtSetArg(al [ ac ], XtNfromHoriz, lx);
+            XtSetArg(al [ ac ], (String) XtNfromHoriz, lx);
             ac++;
             XtSetArg(al [ ac ], XtNeditType, XawtextEdit);
             ac++;
@@ -642,13 +642,13 @@ void ESICustomize(Widget parent_pane)
                                           asciiTextWidgetClass, animate_setup_palette,
                                           al, ac, NULL, NULL);
             ac = 0;
-            XtSetArg(al [ ac ], XtNfromHoriz, start_step);
+            XtSetArg(al [ ac ], (String) XtNfromHoriz, start_step);
             ac++;
             XtSetArg(al [ ac ], XtNlabel, " end step");
             ac++;
             ly = XtCreateManagedWidget("estep", labelWidgetClass, animate_setup_palette, al, ac);
             ac = 0;
-            XtSetArg(al [ ac ], XtNfromHoriz, ly);
+            XtSetArg(al [ ac ], (String) XtNfromHoriz, ly);
             ac++;
             XtSetArg(al [ ac ], XtNeditType, XawtextEdit);
             ac++;
@@ -657,7 +657,7 @@ void ESICustomize(Widget parent_pane)
                                         al, ac, NULL, NULL);
 
             ac = 0;
-            XtSetArg(al [ ac ], XtNfromHoriz, end_step);
+            XtSetArg(al [ ac ], (String) XtNfromHoriz, end_step);
             ac++;
             animate_scale_setup_ok = oofeg_add_button("precinput_xyz_ok", " OK ",
                                                       commandWidgetClass, animate_setup_palette,
@@ -1085,7 +1085,7 @@ int  updateDefPlotFlag()
     t = XtNameToWidget(varplot_palette, tname);
     if ( t != NULL ) {
         ac = 0;
-        XtSetArg(al [ ac ], XtNstate, & s);
+        XtSetArg(al [ ac ], (String) XtNstate, & s);
         ac++;
         XtGetValues(t, al, ac);
         gc [ OOFEG_DEFORMED_GEOMETRY_LAYER ].setInternalVarsDefGeoFlag( ( BOOLEAN ) s );
@@ -1271,7 +1271,7 @@ void stresscompPlot(Widget w, XtPointer ptr, XtPointer call_data)
     t = XtNameToWidget(scalarplot_palette, tname);
     if ( t != NULL ) {
         ac = 0;
-        XtSetArg(al [ ac ], XtNstate, & s);
+        XtSetArg(al [ ac ], (String) XtNstate, & s);
         ac++;
         XtGetValues(t, al, ac);
     }
@@ -1340,7 +1340,7 @@ void straincompPlot(Widget w, XtPointer ptr, XtPointer call_data)
     t = XtNameToWidget(scalarplot_palette, tname);
     if ( t != NULL ) {
         ac = 0;
-        XtSetArg(al [ ac ], XtNstate, & s);
+        XtSetArg(al [ ac ], (String) XtNstate, & s);
         ac++;
         XtGetValues(t, al, ac);
     }
@@ -1895,7 +1895,7 @@ static void apply_layer_update(Widget w, XtPointer ptr, XtPointer call_data)
         t = XtNameToWidget(paned, tname);
         if ( t != NULL ) {
             ac = 0;
-            XtSetArg(al [ ac ], XtNstate, & s);
+            XtSetArg(al [ ac ], (String) XtNstate, & s);
             ac++;
             XtGetValues(t, al, ac);
             gc [ i ].setActivityFlag(s);
@@ -1931,7 +1931,7 @@ set_layer_on_off(EView *v_p, caddr_t data, WCRec *p)
         t = XtNameToWidget(paned, tname);
         if ( t != NULL ) {
             ac = 0;
-            XtSetArg(al [ ac ], XtNstate, & s);
+            XtSetArg(al [ ac ], (String) XtNstate, & s);
             ac++;
             XtGetValues(t, al, ac);
             /*      EVSetLayerOnOff(v_p, i, (BOOLEAN)s);  */
@@ -1979,7 +1979,7 @@ static void apply_mat_reg_filter(Widget data, XtPointer ptr, XtPointer call_data
             t = XtNameToWidget(paned, tname);
             if ( t != NULL ) {
                 ac = 0;
-                XtSetArg(al [ ac ], XtNstate, & s);
+                XtSetArg(al [ ac ], (String) XtNstate, & s);
                 ac++;
                 XtGetValues(t, al, ac);
                 /*      EVSetLayerOnOff(v_p, i, (BOOLEAN)s);  */
