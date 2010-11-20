@@ -365,7 +365,7 @@ VTKXMLExportModule :: giveElementCell(IntArray &answer, Element *elem, int cell)
     Element_Geometry_Type elemGT = elem->giveGeometryType();
     int i, nelemNodes;
 
-    if ( ( elemGT == EGT_triangle_1 ) || ( elemGT == EGT_triangle_1 ) || ( elemGT == EGT_tetra_1 ) ||
+    if ( ( elemGT == EGT_triangle_1 ) || ( elemGT == EGT_triangle_2 ) || ( elemGT == EGT_tetra_1 ) ||
         ( elemGT == EGT_quad_1 ) || ( elemGT == EGT_quad_2 ) ||
         ( elemGT == EGT_hexa_1 ) ) {
         nelemNodes = elem->giveNumberOfNodes();
@@ -394,7 +394,7 @@ VTKXMLExportModule :: giveNumberOfElementCells(Element *elem)
 {
     Element_Geometry_Type elemGT = elem->giveGeometryType();
 
-    if ( ( elemGT == EGT_triangle_1 ) || ( elemGT == EGT_triangle_1 ) || ( elemGT == EGT_tetra_1 ) ||
+    if ( ( elemGT == EGT_triangle_1 ) || ( elemGT == EGT_triangle_2 ) || ( elemGT == EGT_tetra_1 ) || 
 	 ( elemGT == EGT_quad_1 ) || ( elemGT == EGT_quad_2 ) || ( elemGT == EGT_hexa_1 ) ) {
         return 1;
     } else {
