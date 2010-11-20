@@ -136,7 +136,18 @@ public:
      * @param time time
      */
     virtual void evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry& cellgeo, double time) = 0;
-    /**
+     /**
+     * Evaluates the matrix of second derivatives of interpolation functions (shape functions) at given point.
+     * These derivatives are in global coordinate system (where the nodal coordinates are defined)
+     * @param matrix contains resulting matrix of derivatives, the member at i,j position contains value of dNi/dxj
+     * @param nodes array of node numbers defining the interpolation geometry
+     * @param lcoords array containing (local) coordinates
+     * @param time time
+     */ 
+    virtual void evald2Ndx2(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry& cellgeo, double time) {
+      OOFEM_ERROR ("FEInterpolation::evald2Ndx2: not implemented");
+    }
+   /**
      * Evaluates global coordinates from given local ones
      * These derivatives are in global coordinate system (where the nodal coordinates are defined)
      * @param answer contains resulting global coordinates
