@@ -16,7 +16,7 @@
 \newcommand{\elemkeyword}[1]{\descitem{Keyword}~{\bf \texttt{#1}}}
 \newcommand{\elemparam}[2]{{{\texttt{#1}\tiny (#2)}~~\#}}
 \newcommand{\optelemparam}[2]{{[~\elemparam{#1}{#2}]}}
-\newcommand{\param}[1]{{\texttt{#1}}}
+%%\newcommand{\param}[1]{{\texttt{#1}}}
 
 \newcommand{\param}[1]{{\em #1}}
 \newcommand{\fieldVal}[2]{\mbox{({\it\bf{#1}\#)\tiny (#2)}}}
@@ -656,6 +656,29 @@ not supported now.
 
 \descitem{Status} Reliable.
 
+\subsubsection {CCT3D Element}
+Implementation of constant curvature triangular element for plate
+analysis. Formulation based on Mindlin hypothesis. The element could be arbitrarily oriented in space. 
+The nodes should be numbered anti-clockwise (positive rotation around element normal). 
+
+
+\elemkeyword{cctplate3d}\\
+\descitem{Parameters} none.\\
+\descitem{Unknowns}
+Six dofs (u,v,w-displacements and u,v,w rotations) are required in each node.
+
+%\descitem{Approximation} 
+
+\descitem{Integration}
+Integration of all terms using one point formula.
+
+\descitem{Features} Layered cross section support.
+
+\descitem{Loads} Body loads are supported. Boundary loads are
+not supported.
+
+\descitem{Status} Reliable.
+
 \subsubsection {RerShell Element}
 Combination of CCT plate element (Mindlin hypothesis) with triangular plane stress element
 for membrane behavior. The element curvature can be specified. 
@@ -670,6 +693,34 @@ Integration of all terms using one point formula.\\
 \descitem{Loads} Body loads are supported. Boundary loads are
 not supported now.\\
 \descitem{Status} Reliable.
+
+
+\subsubsection {tr\_shell01 element}
+Combination of CCT3D plate element (Mindlin hypothesis) with triangular plane stress element
+for membrane behavior. It comes with complete set of 6 DOFs per node.
+\begin{figure}[tb]
+\begin{htmlonly}
+  \centerline{\includegraphics[width=0.7\textwidth]{trshell_lin.eps}}
+\end{htmlonly}
+%begin{latexonly}
+\ifpdf
+ \centerline{\includegraphics[width=0.7\textwidth]{trshell_lin.pdf}}
+\else
+ \centerline{\includegraphics[width=0.7\textwidth]{trshell_lin.eps}}
+\fi
+%end{latexonly}
+\caption{Geometry of tr\_shell01 element.}
+\end{figure}
+
+\elemkeyword{tr\_shell01}\\
+\descitem{Parameters} none.\\
+\descitem{Integration}
+Integration of all terms using one point formula.\\
+\descitem{Features} Layered cross section support.\\
+\descitem{Loads} Body loads are supported. Boundary loads are
+not supported.\\
+\descitem{Status} Reliable.
+
 
 \subsection{Axisymmetric Elements}
 \subsubsection{Axisymm3d element}
@@ -1231,13 +1282,14 @@ representing the self-weight load are supported.
 
 \descitem{Multi-fluid analysis} The element has suport for solving
 problems with two immiscible fluids in
-a fixed spatial domain. In the present implementation, a VOF tracking algorithm
-is used to track the position of interface. An initial VOF fraction
+a fixed spatial domain. In the present implementation, a VOF and LevelSet tracking algorithms
+are used to track the position of interface. In case of VOF tracking, an initial VOF fraction
 (volume fraction of reference fluid) can be specified using
 \param{vof} (default is zero). Element can also be marked as allways
 filled with reference fluid (some form of source) using parameter
-\param{pvof} which specifies the permanent VOF value. In this case,
-the material model should be of type \elemkeyword{twofluidmat}, that
+\param{pvof} which specifies the permanent VOF value. In case of LevelSet tracking, the initial levelset is specified using 
+reference polygon (see corresponding levelset record in oofem input manual).
+The material model should be of type \elemkeyword{twofluidmat}, that
 supports modelling of two immiscible fluids.
 
 \subsubsection{Tr21SUPG element}
@@ -1334,6 +1386,49 @@ filled with reference fluid (some form of source) using parameter
 the material model should be of type \elemkeyword{twofluidmat}, that
 supports modelling of two immiscible fluids.
 
+\subsection{3D SUPG/PSGP Elements}
+\subsubsection{PY1\_3D\_SUPG element}
+\label{PY1_3D_SUPG}
+Represents 3D linear pyramid element for transient
+incompressible flow analysis using SUPG/PSPG stabilization with equal order
+approximation of velocity and pressure fields. Each node has 3 degrees
+of freedoms (two components of velocity and pressure).
+
+\begin{figure}[tb]
+\begin{htmlonly}
+  \centerline{\includegraphics[width=0.7\textwidth]{tetrahedra_lin.eps}}
+\end{htmlonly}
+%begin{latexonly}
+\ifpdf
+ \centerline{\includegraphics[width=0.7\textwidth]{tetrahedra_lin.pdf}}
+\else
+ \centerline{\includegraphics[width=0.7\textwidth]{tetrahedra_lin.eps}}
+\fi
+%end{latexonly}
+\caption{PY1\_3D\_SUPG element.}
+\label{PY1_3D_SUPGfig}
+\end{figure}
+
+\elemkeyword{PY1SUPG}\\
+\descitem{Parameters} \\
+\descitem{Unknowns}
+Two velocity components (V\_u and V\_v) and pressure (P\_f) are required in each node.
+
+\descitem{Approximation} Linear approximation of velocity and pressure
+fields.
+
+\descitem{Integration}
+exact
+
+\descitem{Loads} Constant boundary tractions are supported. Body loads
+representing the self-weight load are supported.
+
+\descitem{Multi-fluid analysis} The element has suport for solving
+problems with two immiscible fluids in
+a fixed spatial domain. In the present implementation, a LevelSet tracking algorithm
+is used to track the position of interface. 
+The material model should be of type \elemkeyword{twofluidmat}, that
+supports modelling of two immiscible fluids.
 
 \end{document}
 
