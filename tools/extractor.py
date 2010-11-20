@@ -505,8 +505,10 @@ def check_results ():
     print "Checker.py:%55s   "%os.path.basename(infilename),
     if success:
         print "[  OK  ]"
+        exit(0)
     else:
         print "[FAILED]"
+        exit(1)
 
 
 def print_step_results ():
@@ -579,19 +581,19 @@ def main():
         exit(1)
 
     # flag whether -f compulsory option provided
-    infileflag = 0
+    infileflag = False
     #print opts
     for o, a in opts:
         if o == "-f":
             infilename = a
-            infileflag = 1
+            infileflag = True
         elif o == "-c":
             mode = 'c'
         else:
             usage()
             assert False, "unhandled option"
 
-    if infileflag == 0:
+    if not infileflag:
         usage()
         assert False, "-f option required"
 
