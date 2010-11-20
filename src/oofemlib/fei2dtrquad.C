@@ -82,6 +82,60 @@ FEI2dTrQuad :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FE
 }
 
 void
+FEI2dTrQuad :: evald2Ndx2(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry& cellgeo, double time)
+{
+  
+  double x1, x2, x3, y1, y2, y3, y23, x32, y31, x13, y12, x21, area;
+
+  answer.resize(6, 3);
+
+  x1 = cellgeo.giveVertexCoordinates(1)->at(xind);
+  x2 = cellgeo.giveVertexCoordinates(2)->at(xind);
+  x3 = cellgeo.giveVertexCoordinates(3)->at(xind);
+
+  y1 = cellgeo.giveVertexCoordinates(1)->at(yind);
+  y2 = cellgeo.giveVertexCoordinates(2)->at(yind);
+  y3 = cellgeo.giveVertexCoordinates(3)->at(yind);
+
+  area = 0.5 * ( x2 * y3 + x1 * y2 + y1 * x3 - x2 * y1 - x3 * y2 - x1 * y3 );
+  
+  y23 = ( y2 - y3 ) / ( 2. * area );
+  x32 = ( x3 - x2 ) / ( 2. * area );
+  
+  y31 = ( y3 - y1 ) / ( 2. * area );
+  x13 = ( x1 - x3 ) / ( 2. * area );
+  
+  y12 = ( y1 - y2 ) / ( 2. * area );
+  x21 = ( x2 - x1 ) / ( 2. * area );
+  
+  answer.at(1, 1) = 4 * y23 * y23;
+  answer.at(1, 2) = 4 * x32 * x32;
+  answer.at(1, 3) = 4 * y23 * x32;
+  
+  answer.at(2, 1) = 4 * y31 * y31;
+  answer.at(2, 2) = 4 * x13 * x13;
+  answer.at(2, 3) = 4 * y31 * x13;
+  
+  answer.at(3, 1) = 4 * y23 * y23 + 8 * y31 * y23 + 4 * y31 * y31;
+  answer.at(3, 2) = 4 * x32 * x32 + 8 * x13 * x32 + 4 * x13 * x13;
+  answer.at(3, 3) = 4 * y23 * x32 + 4 * y31 * x32 + 4 * y23 * x13 + 4 * y31 * x13;
+  
+  answer.at(4, 1) = 8 * y31 * y23;
+  answer.at(4, 2) = 8 * x13 * x32;
+  answer.at(4, 3) = 4 * y31 * x32 + 4 * y23 * x13;
+  
+  answer.at(5, 1) = (-8) * y31 * y23 + (-8) * y31 * y31;
+  answer.at(5, 2) = (-8) * x13 * x32 + (-8) * x13 * x13;
+  answer.at(5, 3) = (-4) * y31 * x32 + (-4) * y23 * x13 + (-8) * y31 * x13;
+  
+  answer.at(6, 1) = (-8) * y23 * y23 + (-8) * y31 * y23;
+  answer.at(6, 2) = (-8) * x32 * x32 + (-8) * x13 * x32;
+  answer.at(6, 3) = (-8) * y23 * x32 + (-4) * y31 * x32 + (-4) * y23 * x13;
+}
+  
+
+
+void
 FEI2dTrQuad :: local2global(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry& cellgeo, double time)
 {
     int i;
