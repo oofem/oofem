@@ -272,6 +272,7 @@
 #include "tr1_2d_supg_axi.h"
 #include "tr1_2d_supg2_axi.h"
 #include "py1_3d_supg.h"
+#include "tr21_2d_supg.h"
 //#include "tr1_2d_supg99.h"
 #include "twofluidmaterial.h"
 #include "binghamfluid2.h"
@@ -428,6 +429,8 @@ Element *CreateUsrDefElementOfType(char *aClass, int number, Domain *domain)
         newElement = new TR1_2D_SUPG(number, domain);
     } else if ( !strncasecmp(aClass, "py1supg", 7) )    {
         newElement = new PY1_3D_SUPG(number, domain);
+    } else if ( !strncasecmp(aClass, "tr21supg", 8) )    {
+        newElement = new TR21_2D_SUPG(number, domain);
     }
 
 #endif //__FM_MODULE

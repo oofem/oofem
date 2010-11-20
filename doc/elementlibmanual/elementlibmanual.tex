@@ -956,7 +956,7 @@ The supported \entKeyword{IGAElement} values are following:\\\\
 \descitem{Parameters} None.\\
 \elemkeyword{nurbs3delement}\\
 \descitem{Parameters} None.\\
-\elemkeywordb{tsplineplanestresselement}\\
+\elemkeyword{tsplineplanestresselement}\\
 \descitem{Parameters} \elemparam{localindexknotvectoru}{in} \elemparam{localindexknotvectorv}{in} \elemparam{localindexknotvectorw}{in}\\
 The parameters \param{localindexknotvectoru}, \param{localindexknotvectorv},\\ and \param{localindexknotvectorw} defined by the indices to global knot vectors (given by \param{knotvectoru}, \param{knotvectorv}, and \param{knotvectorw} parameters) specify the local knot vectors for each control point of T-mesh (node) in the same order as the nodes have been specified for the element. The local knot vector in a particular direction has $p+2$ entries, where the $p$ is the polynomial degree in that direction.
 
@@ -1239,6 +1239,50 @@ filled with reference fluid (some form of source) using parameter
 \param{pvof} which specifies the permanent VOF value. In this case,
 the material model should be of type \elemkeyword{twofluidmat}, that
 supports modelling of two immiscible fluids.
+
+\subsubsection{Tr21SUPG element}
+\label{Tr21SUPG}
+Implementation of P2P1 Taylor Hood element for transient incompressible flow analysis 
+using SUPG and LSIC stabilization. It consists of globally continuous, piecewise quadratic functions for 
+approximation in velocity space and globally continuous, piecewise linear functions for
+approximation in pressure space. LBB condition is satisfied. There are 3 degrees
+of freedom in vertices (two components of velocity and pressure), and 2 degrees of freedom
+in edge nodes (two components of velocity only).
+The node numbering is anti-clockwise, vertices are numbered first.
+
+\begin{figure}[htb]
+\begin{htmlonly}
+  \centerline{\includegraphics[width=0.7\textwidth]{qtrplanstrss.eps}}
+\end{htmlonly}
+%begin{latexonly}
+\ifpdf
+\centerline{\includegraphics[width=0.7\textwidth]{qtrplanstrss.pdf}}
+\else
+\centerline{\includegraphics[width=0.7\textwidth]{qtrplanstrss.eps}}
+\fi
+%end{latexonly}
+\caption{Tr21SUPG element - node and side numbering.}
+\label{Tr21SUPGfig}
+\end{figure}
+
+\elemkeyword{Tr21SUPG}\\
+\descitem{Parameters}
+
+\descitem{Unknowns}
+Two velocity components (V\_u and V\_v) and pressure (P\_f) in vertices and two velocity components (V\_u and V\_v) in edge nodes are required.
+
+\descitem{Approximation} Quadratic approximation of velocity and linear approximation of pressure fields.
+
+\descitem{Integration}
+Integration is exact, each submatrix of element stiffness matrix is evaluated in proper number of
+Gauss points. Submatrices connected with velocity are evaluated in 7 or 13 points, mixed velocity-pressure
+submatrices in 3 or 7 points, submatrices connected with pressure in 3 points.
+
+\descitem{Loads} Constant boundary tractions are supported. Body loads
+representing the self-weight load are supported.
+
+\descitem{Multi-fluid analysis} The element has no suport for solving
+problems with two immiscible fluids in a fixed spatial domain.
 
 \subsubsection{Tr1SUPGAxi element}
 \label{Tr1SUPGAxi}
