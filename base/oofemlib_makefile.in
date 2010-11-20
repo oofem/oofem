@@ -27,6 +27,7 @@ CC         = @CXX@
 AR         = ar -r
 RM         = rm -f
 
+MAKEDEPEND= $(CC) -M $(CFLAGS) $(SYMBOLS) $(INCLUDE_DIR) -o $*.d $<
 VPATH=@OOFEM_DIR@/src/oofemlib @OOFEM_DIR@/src/oofemlib/xfem @OOFEM_DIR@/src/oofemlib/iga
 
 ## sources
@@ -60,19 +61,16 @@ oofemLib_deps := $(all_src:.C=.d)
 all: oofemlib.a 
 	echo all target done
 
-include $(oofemLib_deps)
+-include $(oofemLib_deps)
 
 
 %.o:	%.C
+	@$(MAKEDEPEND)
 	$(CC) -c $(CFLAGS) $(RELEASE_FLAGS) $(INCLUDE_DIR) $< -o $@
 
 %.o:	%.c
+	@$(MAKEDEPEND)
 	$(CC) -c $(CFLAGS) $(RELEASE_FLAGS) $(INCLUDE_DIR) $< -o $@
-
-%.d:	%.C
-	set -e; \
-	$(CC) -MM $(INCLUDE_DIR) $(SYMBOLS) $< | sed 's|\($*\)\.o[ :]*|\1.o $@ : |g' > $@; \
-	[ -s $@ ] || rm -f $@
 
 oofemlib.a:  $(oofemLib_objs) 
 	echo huhu

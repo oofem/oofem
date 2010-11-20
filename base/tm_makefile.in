@@ -25,6 +25,7 @@ CC         = @CXX@
 AR         = ar -r
 RM         = rm -f
 
+MAKEDEPEND= $(CC) -M $(CFLAGS) $(SYMBOLS) $(INCLUDE_DIR) -o $*.d $<
 VPATH=@OOFEM_DIR@/src/tm @OOFEM_DIR@/src/tm/cemhyd @OOFEM_DIR@/src/tm/cemhyd/tinyxml
 
 
@@ -54,18 +55,15 @@ tmLib_deps := $(all_src:.C=.d)
 all: tmlib.a 
 	echo all target done
 
-include $(tmLib_deps)
+-include $(tmLib_deps)
 
 %.o:	%.C
+	@$(MAKEDEPEND)
 	$(CC) -c $(CFLAGS) $(RELEASE_FLAGS) $(INCLUDE_DIR) $< -o $@
 
 %.o:	%.c
+	@$(MAKEDEPEND)
 	$(CC) -c $(CFLAGS) $(RELEASE_FLAGS) $(INCLUDE_DIR) $< -o $@
-
-%.d:	%.C
-	set -e; \
-	$(CC) -MM $(INCLUDE_DIR) $(SYMBOLS) $< | sed 's|\($*\)\.o[ :]*|\1.o $@ : |g' > $@; \
-	[ -s $@ ] || rm -f $@
 
 tmlib.a:  $(tmLib_objs) 
 	rm -f tmlib.a

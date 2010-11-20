@@ -25,10 +25,11 @@ CC         = @CXX@
 AR         = ar -r
 RM         = rm -f
 
+MAKEDEPEND= $(CC) -M $(CFLAGS) $(SYMBOLS) $(INCLUDE_DIR) -o $*.d $<
 VPATH=@OOFEM_DIR@/src/fm @OOFEM_DIR@/src/fm/pfem
 
 ## source files
-srcs0= cbselement.C fluiddynamicmaterial.C cbs.C tr1_2d_cbs.C newtonianfluid.C tractionpressurebc.C fmelement.C
+srcs0= cbselement.C fluiddynamicmaterial.C cbs.C tr1_2d_cbs.C newtonianfluid.C tractionpressurebc.C fmelement.C 
 srcs1= 
 srcs2= 
 srcs3= 
@@ -37,7 +38,7 @@ srcs5=
 srcs6= 
 srcs7= 
 srcs8= levelsetpcs.C fastmarchingmethod.C
-srcs9= leplic.C twofluidmaterial.C supg.C supgelement.C tr1_2d_supg.C tr1_2d_supg2.C tr1_2d_supg_axi.C binghamfluid2.C tr1_2d_supg2_axi.C supgelement2.C py1_3d_supg.C
+srcs9= leplic.C twofluidmaterial.C supg.C supgelement.C tr1_2d_supg.C tr1_2d_supg2.C tr1_2d_supg_axi.C binghamfluid2.C tr1_2d_supg2_axi.C supgelement2.C py1_3d_supg.C 
 
 all_src = $(srcs0) $(srcs1) $(srcs2) $(srcs3) $(srcs4) $(srcs5) $(srcs6) $(srcs7) $(srcs8) $(srcs9) $(psrc1) 
 
@@ -50,18 +51,15 @@ fmLib_deps := $(all_src:.C=.d)
 all: fmlib.a 
 	echo all target done
 
-include $(fmLib_deps)
+-include $(fmLib_deps)
 
 %.o:	%.C
+	@$(MAKEDEPEND)
 	$(CC) -c $(CFLAGS) $(RELEASE_FLAGS) $(INCLUDE_DIR) $< -o $@
 
 %.o:	%.c
+	@$(MAKEDEPEND)
 	$(CC) -c $(CFLAGS) $(RELEASE_FLAGS) $(INCLUDE_DIR) $< -o $@
-
-%.d:	%.C
-	set -e; \
-	$(CC) -MM $(INCLUDE_DIR) $(SYMBOLS) $< | sed 's|\($*\)\.o[ :]*|\1.o $@ : |g' > $@; \
-	[ -s $@ ] || rm -f $@
 
 fmlib.a:  $(fmLib_objs) 
 	echo huhu

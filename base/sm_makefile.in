@@ -25,6 +25,7 @@ CC         = @CXX@
 AR         = ar -r
 RM         = rm -f
 
+MAKEDEPEND= $(CC) -M $(CFLAGS) $(SYMBOLS) $(INCLUDE_DIR) -o $*.d $<
 VPATH=@OOFEM_DIR@/src/sm
 
 ##
@@ -57,18 +58,15 @@ smLib_deps := $(all_src:.C=.d)
 all: smlib.a
 	echo all target done
 
-include $(smLib_deps)
+-include $(smLib_deps)
 
 %.o:	%.C
+	@$(MAKEDEPEND)
 	$(CC) -c $(CFLAGS) $(RELEASE_FLAGS) $(INCLUDE_DIR) $< -o $@
 
 %.o:	%.c
+	@$(MAKEDEPEND)
 	$(CC) -c $(CFLAGS) $(RELEASE_FLAGS) $(INCLUDE_DIR) $< -o $@
-
-%.d:	%.C
-	set -e; \
-	$(CC) -MM $(INCLUDE_DIR) $(SYMBOLS) $< | sed 's|\($*\)\.o[ :]*|\1.o $@ : |g' > $@; \
-	[ -s $@ ] || rm -f $@
 
 smlib.a:  $(smLib_objs)
 	rm -f smlib.a

@@ -60,6 +60,7 @@ MV         = mv
 #######################################################################
 INSTALL_DIR        = @OOFEM_DIR@/targets/@OOFEM_TARGET@/bin
 
+MAKEDEPEND= $(CC) -M $(CFLAGS) $(SYMBOLS) $(INCLUDE_DIR) -o $*.d $<
 VPATH=@OOFEM_DIR@/src/main
 
 #
@@ -76,15 +77,11 @@ all_deps := $(all_src:.C=.d)
 
 all:: $(INSTALL_DIR)/$(PROG_NAME)
 
-include $(all_deps)
+-include $(all_deps)
 
 %.o:	%.C
+	@$(MAKEDEPEND)
 	$(CC) -c $(INCLUDE_DIR) $(CFLAGS) $(RELEASE_FLAGS) $< -o $@
-
-%.d:	%.C
-	set -e; \
-	$(CC) -MM $(INCLUDE_DIR) $(SYMBOLS) $< | sed 's|\($*\)\.o[ :]*|\1.o $@ : |g' > $@; \
-	[ -s $@ ] || rm -f $@
 
 #
 # local targets
