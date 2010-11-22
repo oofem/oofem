@@ -35,13 +35,13 @@ ln -s $1/bin/oofem  ./oofem
 ln -s $1/bin/poofem ./poofem
 
 ./oofem -f brazil_2d_nl.oofem.in
-../../../tools/extractor.py -c -f brazil_2d_nl.oofem.in >> ${RESULT}
+python ../../../tools/extractor.py -c -f brazil_2d_nl.oofem.in >> ${RESULT}
 mpirun -np 2 ./poofem -f brazil_2d_nl2.oofem.in -ksp_rtol 1.e-15 -ksp_type cg
-for i in brazil_2d_nl2.oofem.in??; do ../../../tools/extractor.py -c -f $i; done >> ${RESULT}
+for i in brazil_2d_nl2.oofem.in??; do python ../../../tools/extractor.py -c -f $i; done >> ${RESULT}
 mpirun -np 4 ./poofem -f brazil_2d_nl4.oofem.in -ksp_rtol 1.e-15 -ksp_type cg
-for i in brazil_2d_nl4.oofem.in??; do ../../../tools/extractor.py -c -f $i; done >> ${RESULT}
+for i in brazil_2d_nl4.oofem.in??; do python ../../../tools/extractor.py -c -f $i; done >> ${RESULT}
 mpirun -np 7 ./poofem -f brazil_2d_nl7.oofem.in -ksp_rtol 1.e-15 -ksp_type cg
-for i in brazil_2d_nl7.oofem.in??; do ../../../tools/extractor.py -c -f $i; done >> ${RESULT}
+for i in brazil_2d_nl7.oofem.in??; do python ../../../tools/extractor.py -c -f $i; done >> ${RESULT}
 
 rm *.oofem.out
 rm *.oofem.out.*

@@ -35,10 +35,10 @@ ln -s $1/bin/oofem  ./oofem
 ln -s $1/bin/poofem ./poofem
 
 ./oofem -f 4test.oofem.in -ksp_rtol 1.e-15
-../../../tools/extractor.py -c -f 4test.oofem.in >> ${RESULT}
+python ../../../tools/extractor.py -c -f 4test.oofem.in >> ${RESULT}
 mpirun -np 4 ./poofem -f 4test.oofem.in -ksp_rtol 1.e-15 
 echo
-for i in *.in??; do ../../../tools/extractor.py -c -f $i; done >> ${RESULT}
+for i in *.in??; do python ../../../tools/extractor.py -c -f $i; done >> ${RESULT}
 
 rm *.oofem.out
 rm *.oofem.out.*
