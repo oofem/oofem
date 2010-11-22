@@ -41,6 +41,7 @@ srcs6=outputmanager.C compiler.C parser.C rigidarmnode.C spatiallocalizer.C dumm
 srcs7=calmls.C nrsolver.C nrsolver2.C subspaceit.C gjacobi.C linesearch.C nonlocalbarrier.C primaryfield.C field.C fieldmanager.C oofemtxtdatareader.C oofemtxtinputrecord.C buffereddatareader.C stressstrainbasevector.C stressvector.C strainvector.C fei1dlin.C  fei2dquadlin.C  fei2dquadquad.C fei2dtrlin.C fei3dtrlin.C fei3dhexalin.C spoolessparsemtrx.C spoolessolver.C petscsparsemtrx.C petscsolver.C petsccontext.C hangingnode.C pointload.C slepcsolver.C
 srcs8=errorestimator.C remeshingcrit.C primaryunknownmapper.C materialmappingalgorithm.C dofdistributedprimaryfield.C domaintransactionmanager.C fei2dtrquad.C localgaussianrandomgenerator.C randommaterialext.C
 srcs9=geotoolbox.C dss.C dsssolver.C intvarfield.C localgaussianrandomgenerator.C fei3dhexaquad.C geometry.C homexportmodule.C homogenize.C
+srcs10=peak.C piecewis.C  piecewisper.C heavisideltf.C usrdeftimefunct.C vtkexportmodule.C vtkxmlexportmodule.C 
 
 xfemsrc=delaunay.C xfemelementinterface.C enrichmentfunction.C patch.C xfemmanager.C enrichmentitem.C patchintegrationrule.C
 
@@ -51,7 +52,7 @@ srcs99=
 #parallel
 psrcs1=communicator.C processcomm.C problemcomm.C combuff.C petscordering.C dyncombuff.C loadbalancer.C parmetisloadbalancer.C nonlocalmatwtp.C
 
-all_src = $(srcs0) $(srcs1) $(srcs2) $(srcs3) $(srcs4) $(srcs5) $(srcs6) $(srcs7) $(srcs8) $(srcs9) $(xfemsrc) $(igasrc) $(psrcs1)
+all_src = $(srcs0) $(srcs1) $(srcs2) $(srcs3) $(srcs4) $(srcs5) $(srcs6) $(srcs7) $(srcs8) $(srcs9) $(srcs10) $(xfemsrc) $(igasrc) $(psrcs1)
 
 ## object files
 oofemLib_objs := $(all_src:.C=.o)
