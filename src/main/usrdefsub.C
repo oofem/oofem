@@ -43,6 +43,8 @@
 #endif
 #endif
 
+
+// __OOFEMLIB_MODULE
 #include "node.h"
 #include "element.h"
 #include "engngm.h"
@@ -75,6 +77,24 @@
 #include "subspaceit.h"
 #include "inverseit.h"
 
+// general loads in OOFEMLIB 
+#include "linearedgeload.h"
+#include "constantedgeload.h"
+#include "constantsurfaceload.h"
+#include "pointload.h"
+
+// ltf in OOFEMLIB
+#include "peak.h"
+#include "piecewis.h"
+#include "piecewisper.h"
+#include "heavisideltf.h"
+#include "usrdeftimefunct.h"
+
+// export modules
+#include "vtkexportmodule.h"
+#include "vtkxmlexportmodule.h"
+
+// end __OOFEMLIB_MODULE
 
 
 #ifdef __SM_MODULE
@@ -140,19 +160,9 @@
 // loads of SM module
 #include "structtemperatureload.h"
 #include "structeigenstrainload.h"
-#include "linearedgeload.h"
-#include "constantedgeload.h"
-#include "constantsurfaceload.h"
 #include "usrdeftempfield.h"
 #include "tf1.h"
-#include "pointload.h"
 
-// ltf of SM module
-#include "peak.h"
-#include "piecewis.h"
-#include "piecewisper.h"
-#include "heavisideltf.h"
-#include "usrdeftimefunct.h"
 
 // crosssections of SM module
 #include "layeredcrosssection.h"
@@ -207,8 +217,6 @@
 #include "huertaerrorestimator.h"
 
 // export modules
-#include "vtkexportmodule.h"
-#include "vtkxmlexportmodule.h"
 #include "poiexportmodule.h"
 #include "homexportmodule.h"
 #include "dmexportmodule.h"
@@ -539,24 +547,27 @@ GeneralBoundaryCondition *CreateUsrDefBoundaryConditionOfType(char *aClass, int 
 {
     GeneralBoundaryCondition *newBc = NULL;
 
-#ifdef __SM_MODULE
-    if ( !strncasecmp(aClass, "structtemperatureload", 21) ) {
-        newBc = new StructuralTemperatureLoad(number, domain);
-    } else if ( !strncasecmp(aClass, "structeigenstrainload", 21) )     {
-      newBc = new StructuralEigenstrainLoad(number, domain);
-    } else if ( !strncasecmp(aClass, "linearedgeload", 14) )     {
+
+    if ( !strncasecmp(aClass, "linearedgeload", 14) )     {
         newBc = new LinearEdgeLoad(number, domain);
     } else if ( !strncasecmp(aClass, "constantedgeload", 16) )     {
         newBc = new ConstantEdgeLoad(number, domain);
     } else if ( !strncasecmp(aClass, "constantsurfaceload", 19) )     {
         newBc = new ConstantSurfaceLoad(number, domain);
-    } else if ( !strncasecmp(aClass, "usrdeftempfield", 15) )     {
-        newBc = new UserDefinedTemperatureField(number, domain);
-    } else if ( !strncasecmp(aClass, "tf1", 3) )     {
-        newBc = new TF1(number, domain);
     } else if ( !strncasecmp(aClass, "pointload", 9) )     {
         newBc = new PointLoad(number, domain);
     }
+
+#ifdef __SM_MODULE
+    if ( !strncasecmp(aClass, "structtemperatureload", 21) ) {
+        newBc = new StructuralTemperatureLoad(number, domain);
+    } else if ( !strncasecmp(aClass, "structeigenstrainload", 21) )     {
+      newBc = new StructuralEigenstrainLoad(number, domain);
+    } else  if ( !strncasecmp(aClass, "usrdeftempfield", 15) )     {
+        newBc = new UserDefinedTemperatureField(number, domain);
+    } else if ( !strncasecmp(aClass, "tf1", 3) )     {
+        newBc = new TF1(number, domain);
+    } 
 
 #endif //__SM_MODULE
 #ifdef __FM_MODULE
@@ -572,7 +583,6 @@ LoadTimeFunction *CreateUsrDefLoadTimeFunctionOfType(char *aClass, int number, D
 {
     LoadTimeFunction *newLTF = NULL;
 
-#ifdef __SM_MODULE
     if ( !strncasecmp(aClass, "peakfunction", 5) ) {
         newLTF = new PeakFunction(number, domain);
     } else if ( !strncasecmp(aClass, "piecewiselinfunction", 5) )   {
@@ -584,8 +594,6 @@ LoadTimeFunction *CreateUsrDefLoadTimeFunctionOfType(char *aClass, int number, D
     } else if ( !strncasecmp(aClass, "usrdefltf", 9) )   {
         newLTF = new UserDefinedLoadTimeFunction(number, domain);
     }
-
-#endif //__SM_MODULE
 
     return newLTF;
 }
@@ -849,12 +857,14 @@ ExportModule *CreateUsrDefExportModuleOfType(char *aClass, EngngModel *emodel)
 {
     ExportModule *answer = NULL;
 
-#ifdef __SM_MODULE
     if ( !strncasecmp(aClass, "vtkxml", 6) ) {
         answer = new VTKXMLExportModule(emodel);
     } else if ( !strncasecmp(aClass, "vtk", 3) ) {
         answer = new VTKExportModule(emodel);
-    } else if ( !strncasecmp(aClass, "poi", 3) ) {
+    }
+
+#ifdef __SM_MODULE
+    if ( !strncasecmp(aClass, "poi", 3) ) {
         answer = new POIExportModule(emodel);
     } else if ( !strncasecmp(aClass, "hom", 3) ) {
         answer = new HOMExportModule(emodel);
