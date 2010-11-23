@@ -224,16 +224,19 @@ adding ``M'' superscript to keyword. Then the field format is \field{Keyword$^M$
 
 As already mentioned, each field value is typed. The possible types are:
 \begin{itemize}
-\item in - integer number;
-\item rn - real number;
+\item in - integer number.
+\item rn - real number.
 \item ch - character (usually for unknowns description ('d' for
-displacement unknown, 't' for temperature unknown, ...);
+displacement unknown, 't' for temperature unknown, ...).
 \item ia - integer array, format of integer array is
 ``size~val(1)~...~val(size)'', where size, val(1),...,val(size) are
-integer numbers. Values are separated by one or more spaces;
-\item rn - real array, format of real array is
+integer numbers. Values are separated by one or more spaces.
+\item ra - real array, format of real array is
 ``size~val(1)~...~val(size)'', where size is integer number and val(1),
 ..., val(size) are real numbers. Values are separated by one or more spaces;
+\item rm - real matrix, format of real matrix is\\
+``rows~columns~\{val(1,1)~val(1,2)~...;~val(2,1)~...\}'', where ``rows'' and ``columns'' are integer numbers and val(1,1),
+..., are real numbers. Columns are seperated by space or comma and lines by semicolon.
 \item dc - dictionary. Dictionary consist of pairs, each pair has key
 (character type) and its associated value (integer type).
 Format of dictionary is
