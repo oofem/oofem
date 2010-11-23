@@ -79,8 +79,6 @@ using namespace oofem;
 // debug
 void oofem_debug(EngngModel *emodel);
 
-
-int gPF = 0;
 void oofem_print_help();
 void oofem_print_version();
 void oofem_print_epilog();
@@ -272,7 +270,7 @@ int main(int argc, char *argv[])
         SlepcFinalize();
 #endif
 
-#ifdef __PARALLEL_MODE
+#ifdef __USE_MPI
     MPI_Finalize();
 #endif
 
