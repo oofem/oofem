@@ -75,7 +75,7 @@
 #include "subspaceit.h"
 #include "inverseit.h"
 
-//#include "prescribedgradient.h"
+#include "prescribedgradient.h"
 
 #ifdef __SM_MODULE
 

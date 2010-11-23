@@ -2239,6 +2239,22 @@ The nonzero value of \param{isImposedTimeFunction} time function
 indicates that given boundary condition is active, zero value
 indicates not active boundary condition in given time (the bc does not
 exist). By default, the boundary condition apply at any time.
+
+\item Prescribed gradient boundary condition (Dirichlet type)
+
+  \begin{record}[0.9\textwidth]
+    \recentry{\entKeywordInst{PrescribedGradient}}{\field{gradient}{rm}}
+    \recentry{}{\optField{cCoords}{ra}}
+    \recentry{}{\optField{isImposedTimeFunction}{in}}
+  \end{record}
+
+  Prescribes $ v_i = d_{ij}(x_j-\bar{x}_j) $ or $ s = d_{1j}(x_j - \bar{x}_j) $
+where $ v_i $ are primary unknowns, $x_j$ is the coordinate of the node, $\bar x$ is \param{cCoords} and $d$ is \param{gradient}.
+The parameter \param{cCoords} defaults to zero.
+This is typical boundary condition in multiscale analysis where $ d = \partial_x s$
+would a macroscopic gradient at the integration point, i.e. this is a boundary condition for prolongation.
+It is also convenient to use when one wants to test a arbitrary specimen for shear. 
+
 \item Nodal fluxes (loads)
 
 \noindent

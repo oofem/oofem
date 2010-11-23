@@ -294,6 +294,9 @@ enum InputFieldType {
     IFT_BoundaryCondition_PrescribedValue,
     IFT_GeneralBoundaryCondition_valType,
 
+    IFT_PrescribedTensor_centercoords,
+    IFT_PrescribedTensor_gradient,
+
     IFT_Load_components,
     IFT_Load_dofexcludemask,
     IFT_BoundaryLoad_ndofs,
@@ -379,6 +382,14 @@ enum InputFieldType {
     IFT_SUPGElement_bsides,
     IFT_SUPGElement_bcodes,
 
+    IFT_StokesFlow_lstype,
+    IFT_StokesFlow_smtype,
+    IFT_StokesFlow_deltat,
+
+    IFT_StokesFlow_updatescheme,
+    IFT_StokesFlow_homogenizationtype,
+
+    IFT_SurfaceTension_gamma_s,
 
     IFT_NLStructuralElement_nlgeoflag,
 

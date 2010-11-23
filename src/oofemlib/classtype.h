@@ -53,6 +53,7 @@ enum classType {
     GeneralBoundaryConditionClass,
     LoadClass,
     BoundaryConditionClass,
+    PrescribedGradientClass,
     InitialConditionClass,
     NodalLoadClass,
     DeadWeightClass,
@@ -98,6 +99,7 @@ enum classType {
     FMElementClass,
     CBSElementClass,
     SUPGElementClass,
+    Tr21StokesElementClass,
 
     TrStructuralElementClass,
     NLStructuralElementClass,
@@ -168,6 +170,8 @@ enum classType {
     StaggeredProblemClass,
     CBSClass,
     SUPGClass,
+    StokesFlowClass,
+    StokesFlowStressHomogenizationClass,
 
     NumericalMethodClass,
     SparseLinearSystemNMClass,
@@ -229,6 +233,7 @@ enum classType {
     TrabBone3DClass,
     TrabBoneEmbedClass,
     ConcreteDPMClass,
+    RVESinteringMaterialClass,
 
     TransportMaterialClass,
     IsotropicHeatTransferMaterialClass,
@@ -274,6 +279,7 @@ enum classType {
     TrabBone3DStatusClass,
     TrabBoneEmbedStatusClass,
     ConcreteDPMStatusClass,
+    RVESinteringMaterialStatusClass,
 
     FluidDynamicMaterialClass,
     FluidDynamicMaterialStatusClass,
