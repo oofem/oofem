@@ -75,7 +75,7 @@
 #include "subspaceit.h"
 #include "inverseit.h"
 
-
+//#include "prescribedgradient.h"
 
 #ifdef __SM_MODULE
 
@@ -259,8 +259,13 @@
 #ifdef __FM_MODULE
 // Emodels
 #include "cbs.h"
+//#include "stokesflow.h"
+//#include "stokesflowstresshomogenization.h"
 // Elements
 #include "tr1_2d_cbs.h"
+//#include "tr21stokes.h"
+//#include "linesurfacetension.h"
+//#include "line2surfacetension.h"
 // materials
 #include "newtonianfluid.h"
 // boundary conditions
@@ -296,22 +301,22 @@ Element *CreateUsrDefElementOfType(char *aClass, int number, Domain *domain)
 {
     Element *newElement = NULL;
 #ifdef __SM_MODULE
-    if ( !strncasecmp(aClass, "planestress2dxfem", 16) ) {
+    if ( !strncasecmp(aClass, "planestress2dxfem", 17) ) {
         newElement = new PlaneStress2dXfem(number, domain);
     }
-    else if ( !strncasecmp(aClass, "planestress2d", 12) ) {
+    else if ( !strncasecmp(aClass, "planestress2d", 13) ) {
         newElement = new PlaneStress2d(number, domain);
     }
 
     if ( !strncasecmp(aClass, "quad1planestrain", 16) ) {
         newElement = new Quad1PlaneStrain(number, domain);
-    } else if ( !strncasecmp(aClass, "trplanestress2d", 12) )   {
+    } else if ( !strncasecmp(aClass, "trplanestress2d", 15) ) {
         newElement = new TrPlaneStress2d(number, domain);
-    } else if ( !strncasecmp(aClass, "trplanestrrot3d", 14) )   {
+    } else if ( !strncasecmp(aClass, "trplanestrrot3d", 15) ) {
         newElement = new TrPlaneStrRot3d(number, domain);
-    } else if ( !strncasecmp(aClass, "trplanestrrot", 12) )   {
+    } else if ( !strncasecmp(aClass, "trplanestrrot", 13) ) {
         newElement = new TrPlaneStrRot(number, domain);
-    } else if ( !strncasecmp(aClass, "qplanestress2d", 12) )   {
+    } else if ( !strncasecmp(aClass, "qplanestress2d", 14) ) {
         newElement = new QPlaneStress2d(number, domain);
     } else if ( !strncasecmp(aClass, "qtrplstr", 8) )   {
         newElement = new QTrPlaneStress2d(number, domain);
@@ -328,7 +333,7 @@ Element *CreateUsrDefElementOfType(char *aClass, int number, Domain *domain)
     } else if ( !strncasecmp(aClass, "qspace", 6) )   {
         newElement = new QSpace(number, domain);
     } else if ( !strncasecmp(aClass, "cctplate3d", 10) )   {
-      newElement = new CCTPlate3d(number, domain);
+        newElement = new CCTPlate3d(number, domain);
     } else if ( !strncasecmp(aClass, "cctplate", 8) )   {
         newElement = new CCTPlate(number, domain);
     }
@@ -342,9 +347,9 @@ Element *CreateUsrDefElementOfType(char *aClass, int number, Domain *domain)
         newElement = new RerShell(number, domain);
     } else if ( !strncasecmp(aClass, "tr_shell01", 10) )   {
         newElement = new TR_SHELL01(number, domain);
-    } else if ( !strncasecmp(aClass, "beam2d", 12) )   {
+    } else if ( !strncasecmp(aClass, "beam2d", 6) )   {
         newElement = new Beam2d(number, domain);
-    } else if ( !strncasecmp(aClass, "beam3d", 12) )   {
+    } else if ( !strncasecmp(aClass, "beam3d", 6) )   {
         newElement = new Beam3d(number, domain);
     } else if ( !strncasecmp(aClass, "libeam2dNL", 10) )    {
         newElement = new LIBeam2dNL(number, domain);
@@ -431,6 +436,12 @@ Element *CreateUsrDefElementOfType(char *aClass, int number, Domain *domain)
         newElement = new PY1_3D_SUPG(number, domain);
     } else if ( !strncasecmp(aClass, "tr21supg", 8) )    {
         newElement = new TR21_2D_SUPG(number, domain);
+    //} else if ( !strncasecmp(aClass, "tr21stokes", 10)) {
+    //    newElement = new Tr21Stokes(number, domain);
+    //} else if ( !strncasecmp(aClass, "surfacetension2dq2", 18)) {
+    //    newElement = new SurfaceTension2DQ2(number, domain);
+    //} else if ( !strncasecmp(aClass, "surfacetension2d", 16)) {
+    //    newElement = new SurfaceTension2D(number, domain);
     }
 
 #endif //__FM_MODULE
@@ -450,7 +461,7 @@ CrossSection *CreateUsrDefCrossSectionOfType(char *aClass, int number, Domain *d
 {
     CrossSection *newCS = NULL;
 #ifdef __SM_MODULE
-    if ( !strncasecmp(aClass, "layeredcs", 14) ) {
+    if ( !strncasecmp(aClass, "layeredcs", 9) ) {
         newCS =   new LayeredCrossSection(number, domain);
     } else if ( !strncasecmp(aClass, "fiberedcs", 9) ) {
         newCS =   new FiberedCrossSection(number, domain);
@@ -469,11 +480,11 @@ EngngModel *CreateUsrDefEngngModelOfType(char *aClass, int number, EngngModel *m
         newEModel = new LinearStatic(number, master);
     } else if ( !strncasecmp(aClass, "stationaryflow", 14) ) {
         newEModel = new StationaryFlow(number, master);
-    } else if ( !strncasecmp(aClass, "eigenvaluedynamic", 14) ) {
+    } else if ( !strncasecmp(aClass, "eigenvaluedynamic", 17) ) {
         newEModel = new EigenValueDynamic(number, master);
-    } else if ( !strncasecmp(aClass, "nonlinearstatic", 13) ) {
+    } else if ( !strncasecmp(aClass, "nonlinearstatic", 15) ) {
         newEModel = new NonLinearStatic(number, master);
-    } else if ( !strncasecmp(aClass, "nldeidynamic", 8) ) {
+    } else if ( !strncasecmp(aClass, "nldeidynamic", 12) ) {
         newEModel = new NlDEIDynamic(number, master);
     }
     //#ifdef __PARALLEL_MODE
@@ -503,11 +514,11 @@ EngngModel *CreateUsrDefEngngModelOfType(char *aClass, int number, EngngModel *m
 #endif //__SM_MODULE
 
 #ifdef __TM_MODULE
-    if ( !strncasecmp(aClass, "stationaryproblem", 13) ) {
+    if ( !strncasecmp(aClass, "stationaryproblem", 17) ) {
         newEModel = new StationaryTransportProblem(number, master);
-    } else if ( !strncasecmp(aClass, "nonstationaryproblem", 16) ) {
+    } else if ( !strncasecmp(aClass, "nonstationaryproblem", 20) ) {
         newEModel = new NonStationaryTransportProblem(number, master);
-    } else if ( !strncasecmp(aClass, "nltransienttransportproblem", 23) ) {
+    } else if ( !strncasecmp(aClass, "nltransienttransportproblem", 27) ) {
         newEModel = new NLTransientTransportProblem(number, master);
     } else if ( !strncasecmp(aClass, "staggeredproblem", 16) ) {
         newEModel = new StaggeredProblem(number, master);
@@ -520,6 +531,10 @@ EngngModel *CreateUsrDefEngngModelOfType(char *aClass, int number, EngngModel *m
         newEModel = new CBS(number, master);
     } else if ( !strncasecmp(aClass, "supg", 4) ) {
         newEModel = new SUPG(number, master);
+    //} else if ( !strncasecmp(aClass, "stokesflowstresshomogenization", 30) ) {
+    //    newEModel = new StokesFlowStressHomogenization(number, master);
+    //} else if ( !strncasecmp(aClass, "stokesflow", 10) ) {
+    //    newEModel = new StokesFlow(number, master);
     }
 
 #endif //__FM_MODULE
@@ -535,7 +550,9 @@ EngngModel *CreateUsrDefEngngModelOfType(char *aClass, int number, EngngModel *m
 GeneralBoundaryCondition *CreateUsrDefBoundaryConditionOfType(char *aClass, int number, Domain *domain)
 {
     GeneralBoundaryCondition *newBc = NULL;
-
+    if ( !strncasecmp(aClass, "prescribedgradient", 18) ) {
+        newBc = new PrescribedGradient(number, domain);
+    }
 #ifdef __SM_MODULE
     if ( !strncasecmp(aClass, "structtemperatureload", 21) ) {
         newBc = new StructuralTemperatureLoad(number, domain);
@@ -570,15 +587,15 @@ LoadTimeFunction *CreateUsrDefLoadTimeFunctionOfType(char *aClass, int number, D
     LoadTimeFunction *newLTF = NULL;
 
 #ifdef __SM_MODULE
-    if ( !strncasecmp(aClass, "peakfunction", 5) ) {
+    if ( !strncasecmp(aClass, "peakfunction", 12) ) {
         newLTF = new PeakFunction(number, domain);
-    } else if ( !strncasecmp(aClass, "piecewiselinfunction", 5) )   {
+    } else if ( !strncasecmp(aClass, "piecewiselinfunction", 20) ) {
         newLTF = new PiecewiseLinFunction(number, domain);
-    } else if ( !strncasecmp(aClass, "periodicpiecewiselinfunction", 5) )   {
+    } else if ( !strncasecmp(aClass, "periodicpiecewiselinfunction", 28) ) {
         newLTF = new PeriodicPiecewiseLinFunction(number, domain);
-    } else if ( !strncasecmp(aClass, "heavisideltf", 12) )   {
+    } else if ( !strncasecmp(aClass, "heavisideltf", 12) ) {
         newLTF = new HeavisideLTF(number, domain);
-    } else if ( !strncasecmp(aClass, "usrdefltf", 9) )   {
+    } else if ( !strncasecmp(aClass, "usrdefltf", 9) ) {
         newLTF = new UserDefinedLoadTimeFunction(number, domain);
     }
 
@@ -628,7 +645,7 @@ Material *CreateUsrDefMaterialOfType(char *aClass, int number, Domain *domain)
         newMaterial = new MazarsNLMaterial(number, domain);
     } else if ( !strncasecmp(aClass, "mazarsmodel", 11) ) {
         newMaterial = new MazarsMaterial(number, domain);
-    } else if ( !strncmp(aClass, "druckerprager", 13) ) {
+    } else if ( !strncasecmp(aClass, "druckerprager", 13) ) {
         newMaterial = new DruckerPragerPlasticitySM(number, domain);
     } else if ( !strncasecmp(aClass, "j2mmat", 6) ) {
         newMaterial = new J2MPlasticMaterial(number, domain);
@@ -642,7 +659,7 @@ Material *CreateUsrDefMaterialOfType(char *aClass, int number, Domain *domain)
         newMaterial = new J2Mat(number, domain);
     } else if ( !strncasecmp(aClass, "cebfipslip90", 12) ) {
         newMaterial = new CebFipSlip90Material(number, domain);
-    } else if ( !strncmp(aClass, "hellmat", 7) ) {
+    } else if ( !strncasecmp(aClass, "hellmat", 7) ) {
         newMaterial = new HellmichMaterial(number, domain);
     } else if ( !strncasecmp(aClass, "mdm", 3) ) {
         newMaterial = new MDM(number, domain);
@@ -650,28 +667,28 @@ Material *CreateUsrDefMaterialOfType(char *aClass, int number, Domain *domain)
       newMaterial = new CompoDamageMat (number,domain);
     } else if (! strncasecmp(aClass,"micromat",8) ) {
       newMaterial = new MicroMaterial (number,domain);
-    } else if ( !strncmp(aClass, "hyperelmat", 10) ) {
+    } else if ( !strncasecmp(aClass, "hyperelmat", 10) ) {
         newMaterial = new HyperElasticMaterial(number, domain);
-    } else if ( !strncmp(aClass, "misesmat", 8) ) {
+    } else if ( !strncasecmp(aClass, "misesmat", 8) ) {
         newMaterial = new MisesMat(number, domain);
-    } else if (! strncasecmp(aClass,"trabbonenl3d",12)) {
+    } else if ( !strncasecmp(aClass,"trabbonenl3d",12)) {
       newMaterial = new TrabBoneNL3D (number,domain);
-    } else if (! strncasecmp(aClass,"trabboneembed",13)) {
+    } else if ( !strncasecmp(aClass,"trabboneembed",13)) {
       newMaterial = new TrabBoneEmbed (number,domain);
-    } else if (! strncasecmp(aClass,"trabbonenlembed",15)) {
+    } else if ( !strncasecmp(aClass,"trabbonenlembed",15)) {
       newMaterial = new TrabBoneNLEmbed (number,domain);
-    } else if (! strncasecmp(aClass,"trabbonenl",10)) {
+    } else if ( !strncasecmp(aClass,"trabbonenl",10)) {
       newMaterial = new TrabBoneNL (number,domain);
-    } else if (! strncasecmp(aClass,"trabbone3d",10)) {
+    } else if ( !strncasecmp(aClass,"trabbone3d",10)) {
       newMaterial = new TrabBone3D (number,domain);
-    } else if (! strncasecmp(aClass,"trabbone",8)) {
+    } else if ( !strncasecmp(aClass,"trabbone",8)) {
       newMaterial = new TrabBoneMaterial (number,domain);
-    } else if (! strncasecmp(aClass,"concretedpm",11)) {
+    } else if ( !strncasecmp(aClass,"concretedpm",11)) {
       newMaterial = new ConcreteDPM(number,domain);
-    } else if (! strncasecmp(aClass,"concreteidm",11)) {
+    } else if ( !strncasecmp(aClass,"concreteidm",11)) {
       // for compatibility with old input files
       newMaterial = new ConcreteDPM(number,domain);
-    } else if (! strncasecmp(aClass,"cohint",6)) {
+    } else if ( !strncasecmp(aClass,"cohint",6)) {
     newMaterial = new CohesiveInterfaceMaterial(number,domain);
     }
 #endif //__SM_MODULE
@@ -679,13 +696,13 @@ Material *CreateUsrDefMaterialOfType(char *aClass, int number, Domain *domain)
 #ifdef __TM_MODULE
     if ( !strncasecmp(aClass, "isoheat", 7) ) {
         newMaterial = new IsotropicHeatTransferMaterial(number, domain);
-    } else if ( !strncasecmp(aClass, "hemotk", 6) )    {
+    } else if ( !strncasecmp(aClass, "hemotk", 6) ) {
         newMaterial = new HeMoTKMaterial(number, domain);
-    } else if ( !strncmp(aClass, "hisoheat", 8) ) {
+    } else if ( !strncasecmp(aClass, "hisoheat", 8) ) {
         newMaterial = new HydratingIsoHeatMaterial(number, domain);
-    } else if ( !strncmp(aClass, "hhemotk", 7) ) {
+    } else if ( !strncasecmp(aClass, "hhemotk", 7) ) {
         newMaterial = new HydratingHeMoMaterial(number, domain);
-    } else if ( !strncmp(aClass, "cemhydmat", 9) ) {
+    } else if ( !strncasecmp(aClass, "cemhydmat", 9) ) {
         newMaterial = new CemhydMat(number, domain);
     }
 
@@ -852,10 +869,10 @@ ExportModule *CreateUsrDefExportModuleOfType(char *aClass, EngngModel *emodel)
         answer = new POIExportModule(emodel);
     } else if ( !strncasecmp(aClass, "hom", 3) ) {
         answer = new HOMExportModule(emodel);
-    } else if (! strncasecmp(aClass,"dm",2)) {
-   	answer = new DofManExportModule(emodel);
-    } else if (! strncasecmp(aClass,"gp",2)) {
-   	answer = new GPExportModule(emodel);
+    } else if ( !strncasecmp(aClass,"dm",2) ) {
+        answer = new DofManExportModule(emodel);
+    } else if ( !strncasecmp(aClass,"gp",2) ) {
+        answer = new GPExportModule(emodel);
     }
 #endif //__SM_MODULE
 
@@ -922,23 +939,23 @@ IntegrationRule *CreateUsrDefIRuleOfType(classType type, int number, Element *e)
 
 Element *CreateUsrDefElementOfType(classType type, int number, Domain *domain)
 {
-	Element *answer = NULL;
+    Element *answer = NULL;
 
-	if ( type == PlaneStress2dClass ) {
-		answer = new PlaneStress2d(number, domain);
-	} else if ( type == TrPlaneStress2dClass )  {
-		answer = new TrPlaneStress2d(number, domain);
-	} else if ( type == LTRSpaceClass ) {
-		answer = new LTRSpace(number, domain);
-	} else if ( type == TrPlaneStrainClass ) {
-		answer = new TrPlaneStrain(number, domain);
-	}
+    if ( type == PlaneStress2dClass ) {
+        answer = new PlaneStress2d(number, domain);
+    } else if ( type == TrPlaneStress2dClass )  {
+        answer = new TrPlaneStress2d(number, domain);
+    } else if ( type == LTRSpaceClass ) {
+        answer = new LTRSpace(number, domain);
+    } else if ( type == TrPlaneStrainClass ) {
+        answer = new TrPlaneStrain(number, domain);
+    }
 
-	if ( answer == NULL ) {
-		OOFEM_ERROR2("CreateUsrDefElementOfType: Unknown element type [%d]", type);
-	}
+    if ( answer == NULL ) {
+        OOFEM_ERROR2("CreateUsrDefElementOfType: Unknown element type [%d]", type);
+    }
 
-	return answer;
+    return answer;
 }
 
 DofManager *CreateUsrDefDofManagerOfType(classType type, int number, Domain *domain)
