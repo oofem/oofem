@@ -297,6 +297,8 @@ public:
     
   
     virtual void updateStabilizationCoeffs(TimeStep *);
+
+    virtual int giveTermIntergationRuleIndex(CharType termType);
 };
 
 } // end namespace oofem

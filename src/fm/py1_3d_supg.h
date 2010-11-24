@@ -93,6 +93,9 @@ public:
     double                computeCriticalTimeStep(TimeStep *tStep);
     double                computeVolumeAround(GaussPoint *);
 
+    virtual void     updateStabilizationCoeffs(TimeStep *);
+
+
     /**
      * @name The element interface required by LevelSetPCSElementInterface
      */
@@ -112,6 +115,10 @@ public:
     //@}
 
 
+#ifdef __OOFEG
+    void          drawRawGeometry(oofegGraphicContext &);
+#endif
+
 protected:
     void                  computeGaussPoints();
     virtual void computeNuMatrix(FloatMatrix &answer, GaussPoint *gp);
@@ -123,6 +130,8 @@ protected:
     virtual void computeDivTauMatrix(FloatMatrix &answer, GaussPoint *gp, TimeStep *atTime);
     virtual void computeGradUMatrix(FloatMatrix &answer, GaussPoint *gp, TimeStep *atTime);
     virtual int  giveNumberOfSpatialDimensions();
+
+    virtual int giveTermIntergationRuleIndex(CharType termType);
 };
 
 } // end namespace oofem

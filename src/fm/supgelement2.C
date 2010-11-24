@@ -296,6 +296,10 @@ SUPGElement2 :: giveIntVarCompFullIndx(IntArray &answer, InternalStateType type)
         answer.resize(1);
         answer.at(1) = 1;
         return 1;
+    } else if ( ( type == IST_VOFFraction ) || ( type == IST_Density ) ) {
+        answer.resize(1);
+        answer.at(1) = 1;
+        return 1;
     } else {
         return Element :: giveIntVarCompFullIndx(answer, type);
     }
@@ -330,7 +334,9 @@ SUPGElement2 :: computeAccelerationTerm_MB(FloatMatrix &answer, TimeStep *atTime
 
     answer.resize(undofs, undofs);
     answer.zero();
-    IntegrationRule *iRule = this->integrationRulesArray [ 2 ];
+    
+    int rule = this->giveTermIntergationRuleIndex(AccelerationTerm_MB);
+    IntegrationRule *iRule = this->integrationRulesArray [ rule ];
     /* consistent part + supg stabilization term */
     for ( k = 0; k < iRule->getNumberOfIntegrationPoints(); k++ ) {
         gp = iRule->getIntegrationPoint(k);
@@ -375,7 +381,8 @@ SUPGElement2 :: computeAdvectionTerm_MB(FloatArray &answer, TimeStep *atTime)
       u.rotatedWith(this->rotationMatrix, 't');
     }
     
-    IntegrationRule *iRule = this->integrationRulesArray [ 2 ];
+    int rule = this->giveTermIntergationRuleIndex(AdvectionTerm_MB);
+    IntegrationRule *iRule = this->integrationRulesArray [ rule ];
     /* consistent part + supg stabilization term */
     for ( k = 0; k < iRule->getNumberOfIntegrationPoints(); k++ ) {
       gp = iRule->getIntegrationPoint(k);
@@ -426,7 +433,9 @@ SUPGElement2 :: computeAdvectionDerivativeTerm_MB(FloatMatrix &answer, TimeStep 
   answer.resize(undofs, undofs);
   answer.zero();
   //this->computeVectorOf(EID_MomentumBalance, VM_Total, atTime, u);
-  IntegrationRule *iRule = this->integrationRulesArray [ 2 ];
+  
+  int rule = this->giveTermIntergationRuleIndex(AdvectionDerivativeTerm_MB);
+  IntegrationRule *iRule = this->integrationRulesArray [ rule ];
   /* consistent part + supg stabilization term */
     for ( k = 0; k < iRule->getNumberOfIntegrationPoints(); k++ ) {
       gp = iRule->getIntegrationPoint(k);
@@ -480,7 +489,8 @@ SUPGElement2 :: computeDiffusionTerm_MB(FloatArray &answer, TimeStep *atTime)
         u.rotatedWith(this->rotationMatrix, 't');
     }
 
-    IntegrationRule *iRule = this->integrationRulesArray [ 1 ];
+    int rule = this->giveTermIntergationRuleIndex(DiffusionTerm_MB);
+    IntegrationRule *iRule = this->integrationRulesArray [ rule ];
     for ( k = 0; k < iRule->getNumberOfIntegrationPoints(); k++ ) {
         gp = iRule->getIntegrationPoint(k);
         dV  = this->computeVolumeAround(gp);
@@ -524,7 +534,9 @@ SUPGElement2 :: computeDiffusionDerivativeTerm_MB(FloatMatrix &answer, MatRespon
     double dV, Re = domain->giveEngngModel()->giveUnknownComponent(ReynoldsNumber, VM_Unknown, atTime, domain, NULL);
     GaussPoint *gp;
     FloatArray dDB_u;
-    IntegrationRule *iRule = this->integrationRulesArray [ 1 ];
+    
+    int rule = this->giveTermIntergationRuleIndex(DiffusionDerivativeTerm_MB);
+    IntegrationRule *iRule = this->integrationRulesArray [ rule ];
     for ( k = 0; k < iRule->getNumberOfIntegrationPoints(); k++ ) {
         gp = iRule->getIntegrationPoint(k);
         dV  = this->computeVolumeAround(gp);
@@ -569,7 +581,9 @@ SUPGElement2 :: computePressureTerm_MB(FloatMatrix &answer, TimeStep *atTime)
 
     answer.resize(undofs, pndofs);
     answer.zero();
-    IntegrationRule *iRule = this->integrationRulesArray [ 0 ];
+    
+    int rule = this->giveTermIntergationRuleIndex(PressureTerm_MB);
+    IntegrationRule *iRule = this->integrationRulesArray [ rule ];
     for ( k = 0; k < iRule->getNumberOfIntegrationPoints(); k++ ) {
         gp = iRule->getIntegrationPoint(k);
         dV  = this->computeVolumeAround(gp);
@@ -610,7 +624,8 @@ SUPGElement2 :: computeLSICStabilizationTerm_MB(FloatMatrix &answer, TimeStep *a
     answer.resize(undofs, undofs);
     answer.zero();
 
-    IntegrationRule *iRule = this->integrationRulesArray [ 0 ];
+    int rule = this->giveTermIntergationRuleIndex(LSICStabilizationTerm_MB);
+    IntegrationRule *iRule = this->integrationRulesArray [ rule ];
     for ( k = 0; k < iRule->getNumberOfIntegrationPoints(); k++ ) {
         gp = iRule->getIntegrationPoint(k);
         dV  = this->computeVolumeAround(gp);
@@ -645,7 +660,9 @@ SUPGElement2 :: computeLinearAdvectionTerm_MC(FloatMatrix &answer, TimeStep *atT
 
     answer.resize(pndofs, undofs);
     answer.zero();
-    IntegrationRule *iRule = this->integrationRulesArray [ 1 ];
+    
+    int rule = this->giveTermIntergationRuleIndex(LinearAdvectionTerm_MC);
+    IntegrationRule *iRule = this->integrationRulesArray [ rule ];
     for ( k = 0; k < iRule->getNumberOfIntegrationPoints(); k++ ) {
         gp = iRule->getIntegrationPoint(k);
         dV  = this->computeVolumeAround(gp);
@@ -679,7 +696,8 @@ SUPGElement2 :: computeAdvectionTerm_MC(FloatArray &answer, TimeStep *atTime)
     answer.resize(pndofs);
     answer.zero();
 
-    IntegrationRule *iRule = this->integrationRulesArray [ 1 ];
+    int rule = this->giveTermIntergationRuleIndex(AdvectionTerm_MC);
+    IntegrationRule *iRule = this->integrationRulesArray [ rule ];
     this->computeVectorOf(EID_MomentumBalance, VM_Total, atTime, u);
     
      if ( this->updateRotationMatrix() ) {
@@ -718,7 +736,8 @@ SUPGElement2 :: computeAdvectionDerivativeTerm_MC(FloatMatrix &answer, TimeStep 
     answer.resize(pndofs, undofs);
     answer.zero();
 
-    IntegrationRule *iRule = this->integrationRulesArray [ 1 ];
+    int rule = this->giveTermIntergationRuleIndex(AdvectionDerivativeTerm_MC);
+    IntegrationRule *iRule = this->integrationRulesArray [ rule ];
     /* pspg stabilization term */
     for ( k = 0; k < iRule->getNumberOfIntegrationPoints(); k++ ) {
         gp = iRule->getIntegrationPoint(k);
@@ -752,7 +771,9 @@ SUPGElement2 :: computeDiffusionDerivativeTerm_MC(FloatMatrix &answer, TimeStep 
     FloatMatrix dDB, _d, g;
     double dV, coeff, rho;
     GaussPoint *gp;
-    IntegrationRule *iRule = this->integrationRulesArray [ 1 ];
+    
+    int rule = this->giveTermIntergationRuleIndex(DiffusionDerivativeTerm_MC);
+    IntegrationRule *iRule = this->integrationRulesArray [ rule ];
     int k;
 
     for ( k = 0; k < iRule->getNumberOfIntegrationPoints(); k++ ) {
@@ -831,7 +852,10 @@ SUPGElement2 :: computeAccelerationTerm_MC(FloatMatrix &answer, TimeStep *atTime
     answer.resize(pndofs, undofs);
     answer.zero();
     // pspg stabilization term: M_\epsilon term
-    IntegrationRule *iRule = this->integrationRulesArray [ 1 ];
+    
+
+    int rule = this->giveTermIntergationRuleIndex(AccelerationTerm_MC);
+    IntegrationRule *iRule = this->integrationRulesArray [ rule ];
 
     for ( k = 0; k < iRule->getNumberOfIntegrationPoints(); k++ ) {
         gp = iRule->getIntegrationPoint(k);
@@ -868,8 +892,8 @@ SUPGElement2 :: computePressureTerm_MC(FloatMatrix &answer, TimeStep *atTime)
 
     answer.resize(pndofs, pndofs);
     answer.zero();
-
-    IntegrationRule *iRule = this->integrationRulesArray [ 1 ];
+    int rule = this->giveTermIntergationRuleIndex(PressureTerm_MC);
+    IntegrationRule *iRule = this->integrationRulesArray [ rule ];
 
     for ( k = 0; k < iRule->getNumberOfIntegrationPoints(); k++ ) {
         gp = iRule->getIntegrationPoint(k);
@@ -896,7 +920,9 @@ SUPGElement2 :: computeBCRhsTerm_MB(FloatArray &answer, TimeStep *atTime)
     double dV, rho;
     Load *load;
     bcGeomType ltype;
-    IntegrationRule *iRule = this->integrationRulesArray [ 1 ];
+    
+    int rule = this->giveTermIntergationRuleIndex(BCRhsTerm_MB);
+    IntegrationRule *iRule = this->integrationRulesArray [ rule ];
     GaussPoint *gp;
     FloatArray un, gVector, s, helpLoadVector;
     FloatMatrix b, nu;
@@ -975,7 +1001,9 @@ SUPGElement2 :: computeBCRhsTerm_MC(FloatArray &answer, TimeStep *atTime)
     FloatArray s, gVector, helpLoadVector;
     FloatMatrix g;
     int pndofs = this->computeNumberOfDofs(EID_ConservationEquation);
-    IntegrationRule *iRule = this->integrationRulesArray [ 1 ];
+    
+    int rule = this->giveTermIntergationRuleIndex(BCRhsTerm_MC);
+    IntegrationRule *iRule = this->integrationRulesArray [ rule ];
     GaussPoint *gp;
 
     answer.resize(pndofs);
@@ -1024,103 +1052,6 @@ SUPGElement2 :: computeBCRhsTerm_MC(FloatArray &answer, TimeStep *atTime)
             _error("computeForceLoadVector : unsupported load type class");
         }
     }
-}
-
-void
-SUPGElement2 :: updateStabilizationCoeffs(TimeStep *atTime)
-{
-    //TR1_2D_SUPG :: updateStabilizationCoeffs (atTime);
-    /* UGN-Based Stabilization */
-    double h_ugn, sum = 0.0, vnorm, t_sugn1, t_sugn2, t_sugn3, u_1, u_2, u_3, z, Re_ugn;
-    double dscale, uscale, lscale, tscale, dt;
-    //bool zeroFlag = false;
-    int i, k, im1;
-    FloatArray u, divu;
-    FloatMatrix du;
-
-    uscale = domain->giveEngngModel()->giveVariableScale(VST_Velocity);
-    lscale = domain->giveEngngModel()->giveVariableScale(VST_Length);
-    tscale = domain->giveEngngModel()->giveVariableScale(VST_Time);
-    dscale = domain->giveEngngModel()->giveVariableScale(VST_Density);
-
-    this->computeVectorOf(EID_MomentumBalance, VM_Total, atTime, u);
-    u.times(uscale);
-    double nu;
-
-    // compute averaged viscosity based on rule of mixture
-    GaussPoint *gp;
-
-    dt = atTime->giveTimeIncrement() * tscale;
-
-    IntegrationRule *iRule = this->integrationRulesArray [ 1 ];
-    gp = iRule->getIntegrationPoint(0);
-    nu = this->giveMaterial()->giveCharacteristicValue(MRM_Viscosity, gp, atTime);
-    nu *= domain->giveEngngModel()->giveVariableScale(VST_Viscosity);
-
-    for ( k = 0; k < iRule->getNumberOfIntegrationPoints(); k++ ) {
-        gp = iRule->getIntegrationPoint(k);
-        this->computeDivUMatrix(du, gp);
-        divu.beProductOf(du, u);
-        sum += divu.at(1);
-    }
-
-    sum *= ( 1. / lscale / iRule->getNumberOfIntegrationPoints() );
-
-    /*
-     * for (i=1; i<=3;i++) {
-     * im1=i-1;
-     * sum+= fabs(u.at((im1)*2+1)*b[im1]/lscale + u.at(im1*2+2)*c[im1]/lscale);
-     * }
-     */
-    vnorm = 0.;
-    int nsd = this->giveNumberOfSpatialDimensions();
-    for ( i = 1; i <= numberOfDofMans; i++ ) {
-        im1 = i - 1;
-        u_1 = u.at( ( im1 ) * nsd + 1 );
-        u_2 = u.at( ( im1 ) * nsd + 2 );
-        if ( nsd > 2 ) {
-            u_3 = u.at( ( im1 ) * nsd + 3 );
-        } else {
-            u_3 = 0.;
-        }
-
-        vnorm = max( vnorm, sqrt(u_1 * u_1 + u_2 * u_2 + u_3 * u_3) );
-    }
-
-    if ( ( vnorm == 0.0 ) || ( sum == 0.0 ) ) {
-        //t_sugn1 = inf;
-        t_sugn2 = dt / 2.0;
-        //t_sugn3 = inf;
-        this->t_supg = 1. / sqrt( 1. / ( t_sugn2 * t_sugn2 ) );
-        this->t_pspg = this->t_supg;
-        this->t_lsic = 0.0;
-    } else {
-        h_ugn = 2.0 * vnorm / sum;
-        t_sugn1 = 1. / sum;
-        t_sugn2 = dt / 2.0;
-        t_sugn3 = h_ugn * h_ugn / 4.0 / nu;
-
-        this->t_supg = 1. / sqrt( 1. / ( t_sugn1 * t_sugn1 ) + 1. / ( t_sugn2 * t_sugn2 ) + 1. / ( t_sugn3 * t_sugn3 ) );
-        this->t_pspg = this->t_supg;
-
-        Re_ugn = vnorm * h_ugn / ( 2. * nu );
-        z = ( Re_ugn <= 3. ) ? Re_ugn / 3. : 1.0;
-        this->t_lsic = h_ugn * vnorm * z / 2.0;
-    }
-
-    // if (this->number == 1) {
-    //  printf ("t_supg %e t_pspg %e t_lsic %e\n", t_supg, t_pspg, t_lsic);
-    // }
-
-
-    this->t_supg *= uscale / lscale;
-    this->t_pspg *= 1. / ( lscale * dscale );
-    this->t_lsic *= ( dscale * uscale ) / ( lscale * lscale );
-
-    this->t_lsic = 0.0;
-
-    //this->t_lsic=0.0;
-    //this->t_pspg=0.0;
 }
 
 void

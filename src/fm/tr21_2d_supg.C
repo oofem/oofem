@@ -85,8 +85,27 @@ TR21_2D_SUPG :: ~TR21_2D_SUPG()
 }
 
 
-
-
+int
+TR21_2D_SUPG :: giveTermIntergationRuleIndex(CharType termType)
+{
+  if (( termType == AccelerationTerm_MB ) || (termType == AdvectionTerm_MB) || 
+      (termType == AdvectionDerivativeTerm_MB)) {
+    return 2;
+  } else if (( termType == DiffusionTerm_MB ) || ( termType == DiffusionDerivativeTerm_MB ) || 
+	     ( termType == PressureTerm_MB ) || (termType == AdvectionTerm_MC) || (termType == AdvectionDerivativeTerm_MC) || 
+	     ( termType == DiffusionDerivativeTerm_MC) || (termType == BCRhsTerm_MC)) {
+    return 1;
+  } else if (( termType == LSICStabilizationTerm_MB ) || (termType == LinearAdvectionTerm_MC) || 
+	     (termType == DiffusionTerm_MC) || (termType == AccelerationTerm_MC) || 
+	     (termType == PressureTerm_MC) || (termType ==  BCRhsTerm_MB) ) {
+    return 0;
+  } else                                                         {
+      _error2 ("giveTermIntergationRuleIndex: Unknown CharType encountered [%s]", __CharTypeToString(termType));
+  }
+  
+  return 0;
+}
+  
 int
 TR21_2D_SUPG :: computeNumberOfDofs(EquationID ut)
 {
