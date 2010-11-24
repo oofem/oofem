@@ -1133,19 +1133,19 @@ SUPG :: giveVariableScale(VarScaleType varID)
 {
     if ( varID == VST_Length ) {
         return this->lscale;
-    } else if ( varID == VST_Velocity )  {
+    } else if ( varID == VST_Velocity ) {
         return this->uscale;
-    } else if ( varID == VST_Density )                                                             {
+    } else if ( varID == VST_Density ) {
         return this->dscale;
-    } else if ( varID == VST_Time )                                                                                                                       {
+    } else if ( varID == VST_Time ) {
         return ( lscale / uscale );
-    } else if ( varID == VST_Pressure )                                                                                                                                                                                     {
+    } else if ( varID == VST_Pressure ) {
         return ( dscale * uscale * uscale );
-    } else if ( varID == VST_Force )                                                                                                                                                                                                                                                                {
+    } else if ( varID == VST_Force ) {
         return ( uscale * uscale / lscale );
-    } else if ( varID == VST_Viscosity )                                                                                                                                                                                                                                                                                                                                        {
+    } else if ( varID == VST_Viscosity ) {
         return 1.0;
-    } else                                                                                                                                                                                                                                                                                                                                                                                         {
+    } else {
         _error("giveVariableScale: unknown variable type");
     }
 
