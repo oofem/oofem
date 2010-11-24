@@ -708,10 +708,6 @@ void drawIGAPatchDeformedGeometry(Element *elem, StructuralElementEvaluator *se,
     double defScale = gc.getDefScale();
 
 
- #ifdef DRAW_MESH
-    WCRec pp [ 2 ];
- #endif
-
     if ( !gc.testElementGraphicActivity(elem) ) {
         return;
     }

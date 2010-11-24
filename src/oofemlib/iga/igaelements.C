@@ -244,8 +244,8 @@ void NURBSPlaneStressElement :: drawScalar(oofegGraphicContext &context) {
     const IntArray *span;
     IntegrationRule *iRule;
     int ir, j, nsd = this->giveNsd();
-    int numberOfKnotSpans_u = interp->giveNumberOfKnotSpans(1);
-    int numberOfKnotSpans_v = interp->giveNumberOfKnotSpans(2);
+    //int numberOfKnotSpans_u = interp->giveNumberOfKnotSpans(1);
+    //int numberOfKnotSpans_v = interp->giveNumberOfKnotSpans(2);
     FloatArray c [ 4 ], cg [ 4 ];
     IntArray sign [ 4 ];
 
@@ -272,8 +272,6 @@ void NURBSPlaneStressElement :: drawScalar(oofegGraphicContext &context) {
     if ( ( indx = map.at( context.giveIntVarIndx() ) ) == 0 ) {
         return;
     }
-
-    double maxs = -100, mins = 100.0;
 
     // loop over individual integration rules (i.e., knot spans)
     for ( ir = 0; ir < numberOfIntegrationRules; ir++ ) {
@@ -433,8 +431,8 @@ void TSplinePlaneStressElement :: drawScalar(oofegGraphicContext &context) {
     const IntArray *span;
     IntegrationRule *iRule;
     int ir, j, nsd = this->giveNsd();
-    int numberOfKnotSpans_u = interp->giveNumberOfKnotSpans(1);
-    int numberOfKnotSpans_v = interp->giveNumberOfKnotSpans(2);
+    //int numberOfKnotSpans_u = interp->giveNumberOfKnotSpans(1);
+    //int numberOfKnotSpans_v = interp->giveNumberOfKnotSpans(2);
     FloatArray c [ 4 ], cg [ 4 ];
     IntArray sign [ 4 ];
 
@@ -550,9 +548,6 @@ void NURBSSpace3dElement :: drawScalar(oofegGraphicContext &context) {
     const IntArray *span;
     IntegrationRule *iRule;
     int ir, j, nsd = this->giveNsd();
-    int numberOfKnotSpans_u = interp->giveNumberOfKnotSpans(1);
-    int numberOfKnotSpans_v = interp->giveNumberOfKnotSpans(2);
-    int numberOfKnotSpans_w = interp->giveNumberOfKnotSpans(3);
     FloatArray c [ 8 ], cg [ 8 ];
     IntArray sign [ 8 ];
 

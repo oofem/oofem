@@ -381,8 +381,6 @@ protected:
   
   ///parameter of the ductilityMeasure of the damage model.
   double ASoft; 
-  ///parameter of the ductilityMeasure of the damage model.
-  double BSoft;
 
   ///parameter of the hardening law of the plasticity model.
   double yieldHardInitial;

@@ -48,6 +48,8 @@
 #include "usrdefsub.h"
 #include "oofemtxtinputrecord.h"
 #include "outputmanager.h"
+#include "util.h"
+
 #ifndef __MAKEDEPEND
  #include <stdio.h>
  #include <queue>
@@ -3275,7 +3277,7 @@ Subdivision :: RS_Node :: drawGeometry()
     p [ 0 ].z = ( FPNum ) this->giveCoordinate(3);
 
     EASValsSetMType(FILLED_CIRCLE_MARKER);
-    color = ColorGetPixelFromString(colors [ 0 ], & suc);
+    color = ColorGetPixelFromString(oofem_tmpstr(colors [ 0 ]), & suc);
     EASValsSetColor(color);
     //EASValsSetColor( gc.getNodeColor() );
     EASValsSetLayer(OOFEG_RAW_GEOMETRY_LAYER);
@@ -3285,7 +3287,7 @@ Subdivision :: RS_Node :: drawGeometry()
     EMAddGraphicsToModel(ESIModel(), go);
 
     char num [ 6 ];
-    color = ColorGetPixelFromString(colors [ 1 ], & suc);
+    color = ColorGetPixelFromString(oofem_tmpstr(colors [ 1 ]), & suc);
     EASValsSetColor(color);
     //EASValsSetColor( gc.getNodeColor() );
     EASValsSetLayer(OOFEG_RAW_GEOMETRY_LAYER);
@@ -3306,14 +3308,14 @@ Subdivision :: RS_Triangle :: drawGeometry()
     GraphicObj *go;
     EPixel color;
     BOOLEAN suc;
-    const char[] colors = {
+    const char* colors[] = {
         "DodgerBlue", "black"
     };
 
     EASValsSetLineWidth(OOFEG_RAW_GEOMETRY_WIDTH);
-    color = ColorGetPixelFromString(colors [ 0 ], & suc);
+    color = ColorGetPixelFromString(oofem_tmpstr(colors [ 0 ]), & suc);
     EASValsSetColor(color);
-    color = ColorGetPixelFromString(colors [ 1 ], & suc);
+    color = ColorGetPixelFromString(oofem_tmpstr(colors [ 1 ]), & suc);
     EASValsSetEdgeColor(color);
     //EASValsSetColor( gc.getElementColor() );
     //EASValsSetEdgeColor( gc.getElementEdgeColor() );
@@ -3345,14 +3347,14 @@ Subdivision :: RS_Tetra :: drawGeometry()
     GraphicObj *go;
     EPixel color;
     BOOLEAN suc;
-    const char[] colors = {
+    const char* colors[] = {
         "DodgerBlue", "black"
     };
 
     EASValsSetLineWidth(OOFEG_RAW_GEOMETRY_WIDTH);
-    color = ColorGetPixelFromString(colors [ 0 ], & suc);
+    color = ColorGetPixelFromString(oofem_tmpstr(colors [ 0 ]), & suc);
     EASValsSetColor(color);
-    color = ColorGetPixelFromString(colors [ 1 ], & suc);
+    color = ColorGetPixelFromString(oofem_tmpstr(colors [ 1 ]), & suc);
     EASValsSetEdgeColor(color);
     //EASValsSetColor( gc.getElementColor() );
     //EASValsSetEdgeColor( gc.getElementEdgeColor() );

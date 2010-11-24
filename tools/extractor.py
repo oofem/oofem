@@ -643,8 +643,8 @@ def main():
     infile.close()
 
 #process oofem output file
-    if debug: print "Opening oofem output file:", oofemoutfilename[:-1]
-    infile = open(oofemoutfilename[:-1])
+    if debug: print "Opening oofem output file:", oofemoutfilename.rstrip('\r\n')
+    infile = open(oofemoutfilename.rstrip('\r\n'))
 
     for i in range(len(userrec)):
         recVal[i]='--'

@@ -77,6 +77,29 @@ PY1_3D_SUPG :: ~PY1_3D_SUPG()
 { }
 
 
+int
+
+PY1_3D_SUPG :: giveTermIntergationRuleIndex(CharType termType)
+{
+
+  if (( termType == AccelerationTerm_MB ) || ( termType == AdvectionTerm_MB ) || ( termType == AdvectionDerivativeTerm_MB ) || 
+      ( termType == DiffusionTerm_MB ) || ( termType == DiffusionDerivativeTerm_MB ) || ( termType == PressureTerm_MB ) || 
+      ( termType == AdvectionTerm_MC ) || ( termType == AdvectionDerivativeTerm_MC ) || ( termType == DiffusionDerivativeTerm_MC ) || 
+      ( termType == BCRhsTerm_MC )) {
+    return 1;
+  } else if (( termType == LSICStabilizationTerm_MB ) || ( termType == LinearAdvectionTerm_MC ) || 
+	     ( termType == DiffusionTerm_MC ) || ( termType == AccelerationTerm_MC ) || ( termType == PressureTerm_MC ) || 
+	     ( termType == BCRhsTerm_MB ))  {
+    return 0;
+  } else                                                         {
+    _error("giveNumeberOfIntergationRule: Unknown approximation type encountered");
+  }
+  
+  return 0;  
+}
+
+
+
 
 int
 PY1_3D_SUPG :: computeNumberOfDofs(EquationID ut)
@@ -204,6 +227,57 @@ PY1_3D_SUPG :: computeUDotGradUMatrix(FloatMatrix &answer, GaussPoint *gp, TimeS
 }
 
 void
+PY1_3D_SUPG :: computeDivTauMatrix(FloatMatrix &answer, GaussPoint *gp, TimeStep *atTime )
+{
+  answer.resize(3, 12);
+  answer.zero();
+
+}
+
+
+void
+PY1_3D_SUPG :: computeGradUMatrix(FloatMatrix &answer, GaussPoint *gp, TimeStep *atTime )
+{
+  int i;
+  FloatArray dnx(4), dny(4), dnz(4), u, u1(4), u2(4), u3(4);
+  FloatMatrix dn;
+ 
+  answer.resize(3, 3);
+  answer.zero();
+  
+  this->computeVectorOf(EID_MomentumBalance, VM_Total, atTime, u);
+  
+  if ( this->updateRotationMatrix() ) {
+      u.rotatedWith(this->rotationMatrix, 't');
+  }
+  interpolation.evaldNdx(dn, * gp->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0);
+  //interpolation.evaldNdx(dn, * gp->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0);
+  for (i = 1; i <= 4; i++){
+    dnx.at(i) = dn.at(i, 1);
+    dny.at(i) = dn.at(i, 2);
+    dnz.at(i) = dn.at(i, 3);
+
+    u1.at(i) = u.at(3*i-2);
+    u2.at(i) = u.at(3*i-1);
+    u3.at(i) = u.at(3*i-0);
+  }
+  
+ 
+  answer.at(1, 1) =  dotProduct(dnx, u1, 4);
+  answer.at(1, 2) =  dotProduct(dny, u1, 4); 
+  answer.at(1, 3) =  dotProduct(dnz, u1, 4);
+  answer.at(2, 1) =  dotProduct(dnx, u2, 4);
+  answer.at(2, 2) =  dotProduct(dny, u2, 4);
+  answer.at(2, 3) =  dotProduct(dnz, u2, 4);
+  answer.at(3, 1) =  dotProduct(dnx, u3, 4);
+  answer.at(3, 2) =  dotProduct(dny, u3, 4); 
+  answer.at(3, 3) =  dotProduct(dnz, u3, 4);
+  
+}
+
+
+
+void
 PY1_3D_SUPG :: computeBMatrix(FloatMatrix &answer, GaussPoint *gp)
 {
     int i;
@@ -274,48 +348,105 @@ PY1_3D_SUPG :: computeGradPMatrix(FloatMatrix &answer, GaussPoint *gp)
     return;
 }
 
-void
-PY1_3D_SUPG :: computeGradUMatrix(FloatMatrix &answer, GaussPoint *gp, TimeStep *atTime )
-{
-  int i;
-  FloatArray dnx(3), dny(3), u, u1(3), u2(3);
-  FloatMatrix dn;
- 
-  answer.resize(2, 2);
-  answer.zero();
-  
-  this->computeVectorOf(EID_MomentumBalance, VM_Total, atTime, u);
-  
-  if ( this->updateRotationMatrix() ) {
-      u.rotatedWith(this->rotationMatrix, 't');
-  }
-
-  interpolation.evaldNdx(dn, * gp->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0);
-  for (i = 1; i <= 3; i++){
-    dnx.at(i) = dn.at(i, 1);
-    dny.at(i) = dn.at(i, 2);
-    
-    u1.at(i) = u.at(2*i-1);
-    u2.at(i) = u.at(2*i);
-  }
-  
- 
-  answer.at(1, 1) =  dotProduct(dnx, u1, 3);
-  answer.at(1, 2) =  dotProduct(dny, u1, 3); 
-  answer.at(2, 1) =  dotProduct(dnx, u2, 3);
-  answer.at(2, 2) =  dotProduct(dny, u2, 3);
-    
-}
 
 
 void
-PY1_3D_SUPG :: computeDivTauMatrix(FloatMatrix &answer, GaussPoint *gp, TimeStep *atTime )
+PY1_3D_SUPG :: updateStabilizationCoeffs(TimeStep *atTime)
 {
-  answer.resize(2, 6);
-  answer.zero();
+    //TR1_2D_SUPG :: updateStabilizationCoeffs (atTime);
+    /* UGN-Based Stabilization */
+    double h_ugn, sum = 0.0, vnorm, t_sugn1, t_sugn2, t_sugn3, u_1, u_2, u_3, z, Re_ugn;
+    double dscale, uscale, lscale, tscale, dt;
+    //bool zeroFlag = false;
+    int i, k, im1;
+    FloatArray u, divu;
+    FloatMatrix du;
+
+    uscale = domain->giveEngngModel()->giveVariableScale(VST_Velocity);
+    lscale = domain->giveEngngModel()->giveVariableScale(VST_Length);
+    tscale = domain->giveEngngModel()->giveVariableScale(VST_Time);
+    dscale = domain->giveEngngModel()->giveVariableScale(VST_Density);
+
+    this->computeVectorOf(EID_MomentumBalance, VM_Total, atTime, u);
+    u.times(uscale);
+    double nu;
+
+    // compute averaged viscosity based on rule of mixture
+    GaussPoint *gp;
+
+    dt = atTime->giveTimeIncrement() * tscale;
+
+    IntegrationRule *iRule = this->integrationRulesArray [ 1 ];
+    gp = iRule->getIntegrationPoint(0);
+    nu = this->giveMaterial()->giveCharacteristicValue(MRM_Viscosity, gp, atTime);
+    nu *= domain->giveEngngModel()->giveVariableScale(VST_Viscosity);
+
+    for ( k = 0; k < iRule->getNumberOfIntegrationPoints(); k++ ) {
+        gp = iRule->getIntegrationPoint(k);
+        this->computeDivUMatrix(du, gp);
+        divu.beProductOf(du, u);
+        sum += divu.at(1);
+    }
+
+    sum *= ( 1. / lscale / iRule->getNumberOfIntegrationPoints() );
+
+    /*
+     * for (i=1; i<=3;i++) {
+     * im1=i-1;
+     * sum+= fabs(u.at((im1)*2+1)*b[im1]/lscale + u.at(im1*2+2)*c[im1]/lscale);
+     * }
+     */
+    vnorm = 0.;
+    int nsd = this->giveNumberOfSpatialDimensions();
+    for ( i = 1; i <= numberOfDofMans; i++ ) {
+        im1 = i - 1;
+        u_1 = u.at( ( im1 ) * nsd + 1 );
+        u_2 = u.at( ( im1 ) * nsd + 2 );
+        if ( nsd > 2 ) {
+            u_3 = u.at( ( im1 ) * nsd + 3 );
+        } else {
+            u_3 = 0.;
+        }
+
+        vnorm = max( vnorm, sqrt(u_1 * u_1 + u_2 * u_2 + u_3 * u_3) );
+    }
+
+    if ( ( vnorm == 0.0 ) || ( sum == 0.0 ) ) {
+        //t_sugn1 = inf;
+        t_sugn2 = dt / 2.0;
+        //t_sugn3 = inf;
+        this->t_supg = 1. / sqrt( 1. / ( t_sugn2 * t_sugn2 ) );
+        this->t_pspg = this->t_supg;
+        this->t_lsic = 0.0;
+    } else {
+        h_ugn = 2.0 * vnorm / sum;
+        t_sugn1 = 1. / sum;
+        t_sugn2 = dt / 2.0;
+        t_sugn3 = h_ugn * h_ugn / 4.0 / nu;
+
+        this->t_supg = 1. / sqrt( 1. / ( t_sugn1 * t_sugn1 ) + 1. / ( t_sugn2 * t_sugn2 ) + 1. / ( t_sugn3 * t_sugn3 ) );
+        this->t_pspg = this->t_supg;
+
+        Re_ugn = vnorm * h_ugn / ( 2. * nu );
+        z = ( Re_ugn <= 3. ) ? Re_ugn / 3. : 1.0;
+        this->t_lsic = h_ugn * vnorm * z / 2.0;
+    }
+
+    // if (this->number == 1) {
+    //  printf ("t_supg %e t_pspg %e t_lsic %e\n", t_supg, t_pspg, t_lsic);
+    // }
+
+
+    this->t_supg *= uscale / lscale;
+    this->t_pspg *= 1. / ( lscale * dscale );
+    this->t_lsic *= ( dscale * uscale ) / ( lscale * lscale );
+
+    this->t_lsic = 0.0;
+
+    //this->t_lsic=0.0;
+    //this->t_pspg=0.0;
+ 
 }
-
-
 
 int
 PY1_3D_SUPG :: giveNumberOfSpatialDimensions()
@@ -539,7 +670,8 @@ PY1_3D_SUPG :: LS_PCS_computeVOFFractions(FloatArray &answer, FloatArray &fi)
 
 
                 double vol = LS_PCS_computeVolume();
-                if ( ( __vol < 0 ) || ( __vol > vol ) ) {
+		if ( (fabs(__vol)-vol) < 0.0000001) __vol=sgn(__vol)*vol;
+                if ( ( __vol < 0 ) || ( fabs(__vol)/vol > 1.0000001 ) ) {
                     OOFEM_ERROR("TR1_2D_SUPG::LS_PCS_computeVOFFractions: internal consistency error");
                 }
 
@@ -643,5 +775,45 @@ PY1_3D_SUPG :: LS_PCS_computeVOFFractions(FloatArray &answer, FloatArray &fi)
         }
     }
 }
+
+
+#ifdef __OOFEG
+#define TR_LENGHT_REDUCT 0.3333
+
+void PY1_3D_SUPG :: drawRawGeometry(oofegGraphicContext &gc)
+{
+    WCRec p [ 4 ];
+    GraphicObj *go;
+
+    if ( !gc.testElementGraphicActivity(this) ) {
+        return;
+    }
+
+    EASValsSetLineWidth(OOFEG_RAW_GEOMETRY_WIDTH);
+    EASValsSetColor( gc.getElementColor() );
+    EASValsSetEdgeColor( gc.getElementEdgeColor() );
+    EASValsSetEdgeFlag(TRUE);
+    EASValsSetLayer(OOFEG_RAW_GEOMETRY_LAYER);
+    EASValsSetFillStyle(FILL_SOLID);
+    p [ 0 ].x = ( FPNum ) this->giveNode(1)->giveCoordinate(1);
+    p [ 0 ].y = ( FPNum ) this->giveNode(1)->giveCoordinate(2);
+    p [ 0 ].z = ( FPNum ) this->giveNode(1)->giveCoordinate(3);
+    p [ 1 ].x = ( FPNum ) this->giveNode(2)->giveCoordinate(1);
+    p [ 1 ].y = ( FPNum ) this->giveNode(2)->giveCoordinate(2);
+    p [ 1 ].z = ( FPNum ) this->giveNode(2)->giveCoordinate(3);
+    p [ 2 ].x = ( FPNum ) this->giveNode(3)->giveCoordinate(1);
+    p [ 2 ].y = ( FPNum ) this->giveNode(3)->giveCoordinate(2);
+    p [ 2 ].z = ( FPNum ) this->giveNode(3)->giveCoordinate(3);
+    p [ 3 ].x = ( FPNum ) this->giveNode(4)->giveCoordinate(1);
+    p [ 3 ].y = ( FPNum ) this->giveNode(4)->giveCoordinate(2);
+    p [ 3 ].z = ( FPNum ) this->giveNode(4)->giveCoordinate(3);
+
+    go =  CreateTetra(p);
+    EGWithMaskChangeAttributes(WIDTH_MASK | FILL_MASK | COLOR_MASK | EDGE_COLOR_MASK | EDGE_FLAG_MASK | LAYER_MASK, go);
+    EGAttachObject(go, ( EObjectP ) this);
+    EMAddGraphicsToModel(ESIModel(), go);
+}
+
+#endif
 
 } // end namespace oofem

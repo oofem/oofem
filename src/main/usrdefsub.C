@@ -43,14 +43,16 @@
 #endif
 #endif
 
+
+// __OOFEMLIB_MODULE
 #include "node.h"
-#include "particle.h"
 #include "element.h"
 #include "engngm.h"
 #include "xfemmanager.h"
 #include "load.h"
 #include "loadtime.h"
 #include "material.h"
+#include "gaussintegrationrule.h"
 
 #include "sparsemtrx.h"
 #include "skyline.h"
@@ -75,7 +77,26 @@
 #include "subspaceit.h"
 #include "inverseit.h"
 
+// general loads in OOFEMLIB 
+#include "linearedgeload.h"
+#include "constantedgeload.h"
+#include "constantsurfaceload.h"
+#include "pointload.h"
 #include "prescribedgradient.h"
+
+// ltf in OOFEMLIB
+#include "peak.h"
+#include "piecewis.h"
+#include "piecewisper.h"
+#include "heavisideltf.h"
+#include "usrdeftimefunct.h"
+
+// export modules
+#include "vtkexportmodule.h"
+#include "vtkxmlexportmodule.h"
+
+// end __OOFEMLIB_MODULE
+
 
 #ifdef __SM_MODULE
 
@@ -117,6 +138,7 @@
 #include "planstrssxfem.h"
 #include "cohsur3d.h"
 #include "lumpedmasselement.h"
+#include "particle.h"
 // iga elements
 #include "igaelements.h"
 
@@ -139,19 +161,9 @@
 // loads of SM module
 #include "structtemperatureload.h"
 #include "structeigenstrainload.h"
-#include "linearedgeload.h"
-#include "constantedgeload.h"
-#include "constantsurfaceload.h"
 #include "usrdeftempfield.h"
 #include "tf1.h"
-#include "pointload.h"
 
-// ltf of SM module
-#include "peak.h"
-#include "piecewis.h"
-#include "piecewisper.h"
-#include "heavisideltf.h"
-#include "usrdeftimefunct.h"
 
 // crosssections of SM module
 #include "layeredcrosssection.h"
@@ -206,8 +218,6 @@
 #include "huertaerrorestimator.h"
 
 // export modules
-#include "vtkexportmodule.h"
-#include "vtkxmlexportmodule.h"
 #include "poiexportmodule.h"
 #include "homexportmodule.h"
 #include "dmexportmodule.h"
@@ -379,6 +389,8 @@ Element *CreateUsrDefElementOfType(char *aClass, int number, Domain *domain)
         newElement = new MacroLSpace(number, domain);
     } else if ( !strncasecmp(aClass, "lumpedmass", 10) )   {
         newElement = new LumpedMassElement(number, domain);
+    } else if (! strncasecmp(aClass,"cohsur3d",8)) {
+      newElement = new CohesiveSurface3d (number,domain);
     } else if ( !strncasecmp(aClass, "bsplineplanestresselement", 25)  ) {
       newElement = new BsplinePlaneStressElement(number, domain);
     } else if ( !strncasecmp(aClass, "nurbsplanestresselement", 23)  ) {
@@ -411,13 +423,11 @@ Element *CreateUsrDefElementOfType(char *aClass, int number, Domain *domain)
         newElement = new Tetrah1_ht(number, domain);
     } else if ( !strncasecmp(aClass, "tetrah1hmt", 10) )    {
         newElement = new Tetrah1_ht(number, domain, Tetrah1_ht :: HeatMass1TransferEM);
-    } else if (! strncasecmp(aClass,"cohsur3d",8)) {
-     newElement = new CohesiveSurface3d (number,domain);
-    }
+    } 
 
 #endif //__TM_MODULE
 #ifdef __FM_MODULE
-    else if ( !strncasecmp(aClass, "tr1cbs", 6) ) {
+    if ( !strncasecmp(aClass, "tr1cbs", 6) ) {
         newElement = new TR1_2D_CBS(number, domain);
     } else if ( !strncasecmp(aClass, "tr1supgaxi", 10) )    {
         newElement = new TR1_2D_SUPG_AXI(number, domain);
@@ -451,9 +461,11 @@ Element *CreateUsrDefElementOfType(char *aClass, int number, Domain *domain)
 DofManager *CreateUsrDefDofManagerOfType(char *aClass, int number, Domain *domain)
 {
     DofManager *newDofManager = NULL;
-    if (! strncasecmp(aClass,"particle",8)) {
+ #ifdef __SM_MODULE
+   if (! strncasecmp(aClass,"particle",8)) {
         newDofManager = new Particle(number, domain);
     }
+#endif //__SM_MODULE
     return newDofManager;
 }
 
@@ -553,24 +565,27 @@ GeneralBoundaryCondition *CreateUsrDefBoundaryConditionOfType(char *aClass, int 
     if ( !strncasecmp(aClass, "prescribedgradient", 18) ) {
         newBc = new PrescribedGradient(number, domain);
     }
-#ifdef __SM_MODULE
-    if ( !strncasecmp(aClass, "structtemperatureload", 21) ) {
-        newBc = new StructuralTemperatureLoad(number, domain);
-    } else if ( !strncasecmp(aClass, "structeigenstrainload", 21) )     {
-      newBc = new StructuralEigenstrainLoad(number, domain);
-    } else if ( !strncasecmp(aClass, "linearedgeload", 14) )     {
+
+    if ( !strncasecmp(aClass, "linearedgeload", 14) )     {
         newBc = new LinearEdgeLoad(number, domain);
     } else if ( !strncasecmp(aClass, "constantedgeload", 16) )     {
         newBc = new ConstantEdgeLoad(number, domain);
     } else if ( !strncasecmp(aClass, "constantsurfaceload", 19) )     {
         newBc = new ConstantSurfaceLoad(number, domain);
-    } else if ( !strncasecmp(aClass, "usrdeftempfield", 15) )     {
-        newBc = new UserDefinedTemperatureField(number, domain);
-    } else if ( !strncasecmp(aClass, "tf1", 3) )     {
-        newBc = new TF1(number, domain);
     } else if ( !strncasecmp(aClass, "pointload", 9) )     {
         newBc = new PointLoad(number, domain);
     }
+
+#ifdef __SM_MODULE
+    if ( !strncasecmp(aClass, "structtemperatureload", 21) ) {
+        newBc = new StructuralTemperatureLoad(number, domain);
+    } else if ( !strncasecmp(aClass, "structeigenstrainload", 21) )     {
+      newBc = new StructuralEigenstrainLoad(number, domain);
+    } else  if ( !strncasecmp(aClass, "usrdeftempfield", 15) )     {
+        newBc = new UserDefinedTemperatureField(number, domain);
+    } else if ( !strncasecmp(aClass, "tf1", 3) )     {
+        newBc = new TF1(number, domain);
+    } 
 
 #endif //__SM_MODULE
 #ifdef __FM_MODULE
@@ -586,7 +601,6 @@ LoadTimeFunction *CreateUsrDefLoadTimeFunctionOfType(char *aClass, int number, D
 {
     LoadTimeFunction *newLTF = NULL;
 
-#ifdef __SM_MODULE
     if ( !strncasecmp(aClass, "peakfunction", 12) ) {
         newLTF = new PeakFunction(number, domain);
     } else if ( !strncasecmp(aClass, "piecewiselinfunction", 20) ) {
@@ -598,8 +612,6 @@ LoadTimeFunction *CreateUsrDefLoadTimeFunctionOfType(char *aClass, int number, D
     } else if ( !strncasecmp(aClass, "usrdefltf", 9) ) {
         newLTF = new UserDefinedLoadTimeFunction(number, domain);
     }
-
-#endif //__SM_MODULE
 
     return newLTF;
 }
@@ -698,15 +710,18 @@ Material *CreateUsrDefMaterialOfType(char *aClass, int number, Domain *domain)
         newMaterial = new IsotropicHeatTransferMaterial(number, domain);
     } else if ( !strncasecmp(aClass, "hemotk", 6) ) {
         newMaterial = new HeMoTKMaterial(number, domain);
-    } else if ( !strncasecmp(aClass, "hisoheat", 8) ) {
+    } else if ( !strncmp(aClass, "cemhydmat", 9) ) {
+        newMaterial = new CemhydMat(number, domain);
+    }
+#endif //__TM_MODULE
+
+#if defined(__SM_MODULE) && defined (__TM_MODULE)
+    if (!strncmp(aClass, "hisoheat", 8) ) {
         newMaterial = new HydratingIsoHeatMaterial(number, domain);
     } else if ( !strncasecmp(aClass, "hhemotk", 7) ) {
         newMaterial = new HydratingHeMoMaterial(number, domain);
-    } else if ( !strncasecmp(aClass, "cemhydmat", 9) ) {
-        newMaterial = new CemhydMat(number, domain);
-    }
-
-#endif //__TM_MODULE
+    } 
+#endif //defined(__SM_MODULE) && defined (__TM_MODULE)
 
 #ifdef __FM_MODULE
     if ( !strncasecmp(aClass, "newtonianfluid", 14) ) {
@@ -860,12 +875,14 @@ ExportModule *CreateUsrDefExportModuleOfType(char *aClass, EngngModel *emodel)
 {
     ExportModule *answer = NULL;
 
-#ifdef __SM_MODULE
     if ( !strncasecmp(aClass, "vtkxml", 6) ) {
         answer = new VTKXMLExportModule(emodel);
     } else if ( !strncasecmp(aClass, "vtk", 3) ) {
         answer = new VTKExportModule(emodel);
-    } else if ( !strncasecmp(aClass, "poi", 3) ) {
+    }
+
+#ifdef __SM_MODULE
+    if ( !strncasecmp(aClass, "poi", 3) ) {
         answer = new POIExportModule(emodel);
     } else if ( !strncasecmp(aClass, "hom", 3) ) {
         answer = new HOMExportModule(emodel);
@@ -913,10 +930,12 @@ NonlocalBarrier *CreateUsrDefNonlocalBarrierOfType(char *aClass, int num, Domain
 RandomFieldGenerator *CreateUsrDefRandomFieldGenerator(char *aClass, int num, Domain *d)
 {
     RandomFieldGenerator *answer = NULL;
+
+#ifdef __SM_MODULE
     if ( !strncasecmp(aClass, "localgaussrandomgenerator", 25) ) {
         answer = new LocalGaussianRandomGenerator(num, d);
     }
-
+#endif
 
     return answer;
 }
@@ -941,15 +960,17 @@ Element *CreateUsrDefElementOfType(classType type, int number, Domain *domain)
 {
     Element *answer = NULL;
 
-    if ( type == PlaneStress2dClass ) {
-        answer = new PlaneStress2d(number, domain);
-    } else if ( type == TrPlaneStress2dClass )  {
-        answer = new TrPlaneStress2d(number, domain);
-    } else if ( type == LTRSpaceClass ) {
-        answer = new LTRSpace(number, domain);
-    } else if ( type == TrPlaneStrainClass ) {
-        answer = new TrPlaneStrain(number, domain);
-    }
+#ifdef __SM_MODULE
+	if ( type == PlaneStress2dClass ) {
+		answer = new PlaneStress2d(number, domain);
+	} else if ( type == TrPlaneStress2dClass )  {
+		answer = new TrPlaneStress2d(number, domain);
+	} else if ( type == LTRSpaceClass ) {
+		answer = new LTRSpace(number, domain);
+	} else if ( type == TrPlaneStrainClass ) {
+		answer = new TrPlaneStrain(number, domain);
+	}
+#endif
 
     if ( answer == NULL ) {
         OOFEM_ERROR2("CreateUsrDefElementOfType: Unknown element type [%d]", type);
@@ -993,14 +1014,16 @@ Dof *CreateUsrDefDofOfType(classType type, int number, DofManager *dman)
 MaterialMappingAlgorithm *CreateUsrDefMaterialMappingAlgorithm(MaterialMappingAlgorithmType type)
 {
     MaterialMappingAlgorithm *answer = NULL;
+
+#ifdef __SM_MODULE
     if ( type == MMA_ClosestPoint ) {
         answer = new MMAClosestIPTransfer();
     } else if ( type == MMA_LeastSquareProjection )  {
         answer = new MMALeastSquareProjection();
-    } else if ( type == MMA_ShapeFunctionProjection )                                                                                             {
+    } else if ( type == MMA_ShapeFunctionProjection ) {
         answer = new MMAShapeFunctProjection();
     }
-
+#endif
     if ( answer == NULL ) {
         OOFEM_ERROR2("CreateUsrDefMaterialMappingAlgorithm: Unknown mma type [%d]", type);
     }
@@ -1011,6 +1034,7 @@ MaterialMappingAlgorithm *CreateUsrDefMaterialMappingAlgorithm(MaterialMappingAl
 MesherInterface *CreateUsrDefMesherInterface(MeshPackageType type, Domain* d)
 {
   MesherInterface *answer = NULL;
+#ifdef __SM_MODULE
   if (type == MPT_T3D) {
     answer = new T3DInterface(d);
   } else if (type == MPT_TARGE2) {
@@ -1019,7 +1043,9 @@ MesherInterface *CreateUsrDefMesherInterface(MeshPackageType type, Domain* d)
     answer = new FreemInterface(d);
   } else if (type == MPT_SUBDIVISION) {
     answer = new Subdivision(d);
-  } else {
+  } 
+#endif
+  if ( answer == NULL ) {
     OOFEM_ERROR2("CreateUsrDefMesherInterface: Unknown MI type [%d]", type);
   }
 

@@ -367,8 +367,6 @@ ConcreteDPM::initializeFrom (InputRecord* ir)
   IR_GIVE_OPTIONAL_FIELD (ir, DHard,IFT_ConcreteDPM_dhard, "dhard");
   ASoft = 15.;
   IR_GIVE_OPTIONAL_FIELD (ir, ASoft,IFT_ConcreteDPM_asoft, "asoft");
-  BSoft = 1.;
-  IR_GIVE_OPTIONAL_FIELD (ir, BSoft,IFT_ConcreteDPM_bsoft, "bsoft");
   helem = 0.;
   IR_GIVE_OPTIONAL_FIELD (ir, helem, IFT_ConcreteDPM_helem, "helem") ;  
 

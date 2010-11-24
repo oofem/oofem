@@ -96,7 +96,6 @@ public:
     void giveCharacteristicMatrix(FloatMatrix & answer, CharType, TimeStep *);
     void giveCharacteristicVector(FloatArray & answer, CharType, ValueModeType, TimeStep *);
     virtual double giveCharacteristicValue(CharType, TimeStep *);
-    virtual void     updateStabilizationCoeffs(TimeStep *);
     virtual void     updateElementForNewInterfacePosition(TimeStep *) { }
 
     /**
@@ -234,13 +233,12 @@ public:
     
     virtual int computeGNLoadRotationMatrix(FloatMatrix &answer, DofManTransfType mode);
 
-
-
-
-
-
-
  protected:
+    /**
+       Returns index of integration rule used to evaluate given characteristic term
+    */
+    virtual int giveTermIntergationRuleIndex(CharType termType) = 0;
+
     virtual void computeDeviatoricStress(FloatArray &answer, GaussPoint *gp, TimeStep *);
     virtual void computeNuMatrix(FloatMatrix &answer, GaussPoint *gp) = 0;
     virtual void computeUDotGradUMatrix(FloatMatrix &answer, GaussPoint *gp, TimeStep *atTime) = 0;

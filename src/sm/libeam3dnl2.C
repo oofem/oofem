@@ -52,6 +52,7 @@
 #include "engngm.h"
 #include "timestep.h"
 #include "contextioerr.h"
+#include "util.h"
 
 #ifdef __OOFEG
 #include "oofeggraphiccontext.h"
@@ -1064,7 +1065,7 @@ void LIBeam3dNL2 :: drawDeformedGeometry(oofegGraphicContext &gc, UnknownType ty
         p [ 1 ].y = p [ 0 ].y + coeff *tc.at(2, i);
         p [ 1 ].z = p [ 0 ].z + coeff *tc.at(3, i);
 
-        EASValsSetColor( ColorGetPixelFromString(colors[i-1], & succ) );
+        EASValsSetColor( ColorGetPixelFromString(oofem_tmpstr(colors[i-1]), & succ) );
 
         go = CreateLine3D(p);
         EGWithMaskChangeAttributes(WIDTH_MASK | COLOR_MASK | LAYER_MASK, go);
