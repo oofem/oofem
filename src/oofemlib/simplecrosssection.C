@@ -300,7 +300,6 @@ SimpleCrossSection :: giveInputRecordString(std :: string &str, bool keyword)
 double
 SimpleCrossSection :: give(CrossSectionProperty aProperty)
 {
-    printf("property = %d",aProperty);
     double value = 0.0;
 
      if ( aProperty == CS_Area ) {
