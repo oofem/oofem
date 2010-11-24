@@ -59,24 +59,16 @@
 
 namespace oofem {
 
-#define THICKNESS 400
-#define WIDTH     401
-#define BEAM_SHEAR_COEFF 402
-#define AREA      403
-#define INERTIA_MOMENT_Y 404
-#define INERTIA_MOMENT_Z 405
-#define TORSION_MOMENT_X 406
-
-// id's for layered model
-#define TOPZCOORD 498
-#define BOTTOMZCOORD 499
-
-
-
-
-enum updateGpMode {
-    doNotUpdate,
-    Update
+enum CrossSectionProperty {
+    CS_Thickness=400,  /// Thickness
+    CS_Width,          /// Width
+    CS_BeamShearCoeff, /// Shear coefficient of beam
+    CS_Area,           /// Area
+    CS_InertiaMomentY, /// Moment of inertia around y-axis
+    CS_InertiaMomentZ, /// Moment of inertia around z-axis
+    CS_TorsionMomentX, /// Moment of inertia around x-axis
+    CS_TopZCoord,      /// Top z coordinate
+    CS_BottomZCoord,   /// Bottom z coordinate
 };
 
 /**
@@ -140,11 +132,11 @@ public:
 
     /**
      * Returns the value of cross section property 'aProperty'. Property must be identified
-     * by unique int id.
-     * @aProperty id of peroperty requested
-     * @return property value
+     * by unique id.
+     * @param a Id of property requested
+     * @return Property value
      */
-    virtual double   give(int);
+    virtual double give(CrossSectionProperty a);
     /**
      * Returns true if stiffness matrix of receiver is symmetric
      * Default implementation returns true.

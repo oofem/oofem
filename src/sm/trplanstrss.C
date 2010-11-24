@@ -562,7 +562,7 @@ double TrPlaneStress2d :: computeVolumeAround(GaussPoint *aGaussPoint)
     weight  = aGaussPoint->giveWeight();
     area    = this->giveArea();
 
-    return 2.0 * area * weight * this->giveCrossSection()->give('t');
+    return 2.0 * area * weight * this->giveCrossSection()->give(CS_Thickness);
 }
 
 

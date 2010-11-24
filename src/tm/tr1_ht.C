@@ -209,7 +209,7 @@ Tr1_ht :: computeVolumeAround(GaussPoint *aGaussPoint)
     weight  = aGaussPoint->giveWeight();
     area    = this->giveArea();
 
-    return 2.0 *area *weight *this->giveCrossSection()->give('t');
+    return 2.0 *area *weight *this->giveCrossSection()->give(CS_Thickness);
 }
 
 void
@@ -270,7 +270,7 @@ Tr1_ht :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
     dx      = nodeB->giveCoordinate(1) - nodeA->giveCoordinate(1);
     dy      = nodeB->giveCoordinate(2) - nodeA->giveCoordinate(2);
     length = sqrt(dx * dx + dy * dy);
-    thick = this->giveCrossSection()->give('t');
+    thick = this->giveCrossSection()->give(CS_Thickness);
     return 0.5 *length *thick *gp->giveWeight();
 }
 

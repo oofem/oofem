@@ -757,22 +757,17 @@ FiberedCrossSection :: GiveIntegrated3dBeamStress(GaussPoint *masterGp)
 
 
 double
-FiberedCrossSection :: give(int aProperty)
-// Returns the value of the property aProperty (e.g. the area
-// 'A') of the receiver.
+FiberedCrossSection :: give(CrossSectionProperty aProperty)
 {
-    if ( aProperty == THICKNESS ) {
+    if ( aProperty == CS_Thickness ) {
         return this->thick;
     }
-
-    if ( aProperty == WIDTH ) {
+    else if ( aProperty == CS_Width ) {
         return this->width;
     }
-
-    if ( ( aProperty == 'A' ) || ( aProperty == AREA ) ) {
+    else if ( aProperty == CS_Area ){
         return this->giveArea();
     }
-
     return CrossSection :: give(aProperty);
 }
 

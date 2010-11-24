@@ -113,7 +113,7 @@ LinearElasticMaterial :: give2dPlateStiffMtrx(FloatMatrix &answer,
     }
 
     this->givePlaneStressStiffMtrx(mat3d, FullForm, rMode, gp, tStep);
-    thickness = crossSection->give(THICKNESS);
+    thickness = crossSection->give(CS_Thickness);
     thickness3 = thickness * thickness * thickness;
 
     if ( form == ReducedForm ) {
@@ -230,7 +230,7 @@ LinearElasticMaterial :: give3dShellStiffMtrx(FloatMatrix &answer,
     }
 
     this->givePlaneStressStiffMtrx(mat3d, FullForm, rMode, gp, tStep);
-    thickness = crossSection->give(THICKNESS);
+    thickness = crossSection->give(CS_Thickness);
     thickness3 = thickness * thickness * thickness;
 
     //answer = new FloatMatrix (8,8);

@@ -87,10 +87,10 @@ StructuralMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
     switch ( mMode ) {
     case _3dMat:
     case _3dMat_F: // even if material uses deformation gradient, stiffness is computed in the usual way
-        give3dMaterialStiffnessMatrix(answer, form, rMode, gp, atTime);
+    	this->give3dMaterialStiffnessMatrix(answer, form, rMode, gp, atTime);
         break;
     case _PlaneStress:
-        givePlaneStressStiffMtrx(answer, form, rMode, gp, atTime);
+        this->givePlaneStressStiffMtrx(answer, form, rMode, gp, atTime);
         break;
     case _PlaneStrain:
         this->givePlaneStrainStiffMtrx(answer, form, rMode, gp, atTime);
@@ -2583,7 +2583,7 @@ StructuralMaterial :: computeStressIndependentStrainVector(FloatArray &answer,
 
         switch ( matmode ) {
             case _2dBeam:
-                thick = crossSection->give(THICKNESS);
+                thick = crossSection->give(CS_Thickness);
                 answerTemper.resize(3);
                 answerTemper.zero();
                 answerTemper.at(1) = e0.at(1) * ( et.at(1) - this->giveReferenceTemperature() );
@@ -2592,8 +2592,8 @@ StructuralMaterial :: computeStressIndependentStrainVector(FloatArray &answer,
                 }
                 break;
             case _3dBeam:
-                thick = crossSection->give(THICKNESS);
-                width = crossSection->give(WIDTH);
+                thick = crossSection->give(CS_Thickness);
+                width = crossSection->give(CS_Width);
                 answerTemper.resize(6);
                 answerTemper.zero();
                 answerTemper.at(1) = e0.at(1) * ( et.at(1) - this->giveReferenceTemperature() );
@@ -2605,7 +2605,7 @@ StructuralMaterial :: computeStressIndependentStrainVector(FloatArray &answer,
                 }
                 break;
             case _2dPlate:
-                thick = crossSection->give(THICKNESS);
+                thick = crossSection->give(CS_Thickness);
                 if ( et.giveSize() > 1 ) {
                     answerTemper.resize(5);
                     answerTemper.zero();
@@ -2617,7 +2617,7 @@ StructuralMaterial :: computeStressIndependentStrainVector(FloatArray &answer,
                 }
                 break;
             case _3dShell:
-                thick = crossSection->give(THICKNESS);
+                thick = crossSection->give(CS_Thickness);
                 answerTemper.resize(8);
                 answerTemper.zero();
 

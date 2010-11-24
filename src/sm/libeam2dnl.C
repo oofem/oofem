@@ -332,7 +332,7 @@ LIBeam2dNL :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep)
     GaussPoint* gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
 
     mat        = this->giveMaterial();
-    halfMass   = mat->give('d',gp) * this->giveCrossSection()->give('A') * this->giveLength() / 2.;
+    halfMass   = mat->give('d',gp) * this->giveCrossSection()->give(CS_Area) * this->giveLength() / 2.;
     answer.resize(6, 6);
     answer.zero();
     answer.at(1, 1) = halfMass;
@@ -428,8 +428,8 @@ LIBeam2dNL :: computeStrainVectorInLayer(FloatArray &answer, GaussPoint *masterG
     double layerZeta, layerZCoord, top, bottom;
 
     this->computeStrainVector(masterGpStrain, masterGp, tStep);
-    top    = masterGp->giveElement()->giveCrossSection()->give(TOPZCOORD);
-    bottom = masterGp->giveElement()->giveCrossSection()->give(BOTTOMZCOORD);
+    top    = masterGp->giveElement()->giveCrossSection()->give(CS_TopZCoord);
+    bottom = masterGp->giveElement()->giveCrossSection()->give(CS_BottomZCoord);
     layerZeta = slaveGp->giveCoordinate(3);
     layerZCoord = 0.5 * ( ( 1. - layerZeta ) * bottom + ( 1. + layerZeta ) * top );
 

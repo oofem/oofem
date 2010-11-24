@@ -249,32 +249,32 @@ SimpleCrossSection :: initializeFrom(InputRecord *ir)
 
     value = 0.0;
     IR_GIVE_OPTIONAL_FIELD(ir, value, IFT_SimpleCrossSection_thick, "thick"); // Macro
-    propertyDictionary->add(THICKNESS, value);
+    propertyDictionary->add(CS_Thickness, value);
 
     value = 0.0;
     IR_GIVE_OPTIONAL_FIELD(ir, value, IFT_SimpleCrossSection_width, "width"); // Macro
-    propertyDictionary->add(WIDTH, value);
+    propertyDictionary->add(CS_Width, value);
 
     if ( ir->hasField(IFT_SimpleCrossSection_area, "area") ) {
         IR_GIVE_FIELD(ir, value, IFT_SimpleCrossSection_area, "area"); // Macro
-        propertyDictionary->add(AREA, value);
+        propertyDictionary->add(CS_Area, value);
     }
 
     value = 0.0;
     IR_GIVE_OPTIONAL_FIELD(ir, value, IFT_SimpleCrossSection_iy, "iy"); // Macro
-    propertyDictionary->add(INERTIA_MOMENT_Y, value);
+    propertyDictionary->add(CS_InertiaMomentY, value);
 
     value = 0.0;
     IR_GIVE_OPTIONAL_FIELD(ir, value, IFT_SimpleCrossSection_iz, "iz"); // Macro
-    propertyDictionary->add(INERTIA_MOMENT_Z, value);
+    propertyDictionary->add(CS_InertiaMomentZ, value);
 
     value = 0.0;
     IR_GIVE_OPTIONAL_FIELD(ir, value, IFT_SimpleCrossSection_ik, "ik"); // Macro
-    propertyDictionary->add(TORSION_MOMENT_X, value);
+    propertyDictionary->add(CS_TorsionMomentX, value);
 
     value = 0.0;
     IR_GIVE_OPTIONAL_FIELD(ir, value, IFT_SimpleCrossSection_shearcoeff, "beamshearcoeff"); // Macro
-    propertyDictionary->add(BEAM_SHEAR_COEFF, value);
+    propertyDictionary->add(CS_BeamShearCoeff, value);
 
     return IRRT_OK;
 }
@@ -287,9 +287,9 @@ SimpleCrossSection :: giveInputRecordString(std :: string &str, bool keyword)
 
     CrossSection :: giveInputRecordString(str, keyword);
     sprintf( buff, " thick %e width %e area %e iy %e iz %e ik %e beamshearcoeff %e",
-            this->give(THICKNESS), this->give(WIDTH), this->give(AREA),
-            this->give(INERTIA_MOMENT_Y), this->give(INERTIA_MOMENT_Z), this->give(TORSION_MOMENT_X),
-            this->give(BEAM_SHEAR_COEFF) );
+            this->give(CS_Thickness), this->give(CS_Width), this->give(CS_Area),
+            this->give(CS_InertiaMomentY), this->give(CS_InertiaMomentZ), this->give(CS_TorsionMomentX),
+            this->give(CS_BeamShearCoeff) );
     str += buff;
 
     return 1;
@@ -298,30 +298,22 @@ SimpleCrossSection :: giveInputRecordString(std :: string &str, bool keyword)
 
 
 double
-SimpleCrossSection :: give(int aProperty)
-// Returns the value of the property aProperty (e.g. the area
-// 'A') of the receiver.
+SimpleCrossSection :: give(CrossSectionProperty aProperty)
 {
+    printf("property = %d",aProperty);
     double value = 0.0;
 
-    if ( aProperty == 't' ) {
-        return this->give(THICKNESS);
-    }
-
-    if ( ( aProperty == 'A' ) || ( aProperty == AREA ) ) {
-        if ( propertyDictionary->includes(AREA) ) {
-            return propertyDictionary->at(AREA);
+     if ( aProperty == CS_Area ) {
+        if ( propertyDictionary->includes(CS_Area) ) {
+            return propertyDictionary->at(CS_Area);
         } else {
-            return this->give(THICKNESS) * this->give(WIDTH);
+            return this->give(CS_Thickness) * this->give(CS_Width);
         }
     }
-
-    if ( propertyDictionary->includes(aProperty) ) {
+    else if ( propertyDictionary->includes(aProperty) ) {
         value = propertyDictionary->at(aProperty);
     } else {
-        //      value = this -> read(aProperty) ;
-        //      propertyDictionary -> add(aProperty,value) ;}
-        _error("give: property not defined");
+        OOFEM_ERROR("SimpleCrossSection :: give: property not defined");
     }
 
     return value;

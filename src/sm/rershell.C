@@ -326,7 +326,7 @@ RerShell :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep)
     gp                 =  integrationRulesArray [ 0 ]->getIntegrationPoint(0);
 
     dV = this->computeVolumeAround(gp);
-    mss1 = dV * this->giveCrossSection()->give('t') * this->giveMaterial()->give('d',gp) / 3.;
+    mss1 = dV * this->giveCrossSection()->give(CS_Thickness) * this->giveMaterial()->give('d',gp) / 3.;
 
     answer.at(1, 1) = mss1;
     answer.at(2, 2) = mss1;
@@ -366,7 +366,7 @@ RerShell :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, TimeStep 
         return;                                             // nil resultant
     } else {
         dens= this->giveMaterial()->give('d',gp);
-        dV = this->computeVolumeAround(gp) * this->giveCrossSection()->give(THICKNESS);
+        dV = this->computeVolumeAround(gp) * this->giveCrossSection()->give(CS_Thickness);
 
         answer.resize(18);
 
@@ -516,7 +516,7 @@ int RerShell :: computeLocalCoordinates (FloatArray& answer, const FloatArray& c
     double elthick;
 
     cs = (StructuralCrossSection*) this->giveCrossSection();
-    elthick = cs->give(THICKNESS);
+    elthick = cs->give(CS_Thickness);
 
     if (elthick/2.0+midplZ - fabs(inputCoords_ElCS.at(3)) < -POINT_TOL){
         answer.zero();
@@ -708,8 +708,8 @@ RerShell :: computeStrainVectorInLayer(FloatArray &answer, GaussPoint *masterGp,
     double layerZeta, layerZCoord, top, bottom;
 
     this->computeStrainVector(masterGpStrain, masterGp, tStep);
-    top    = masterGp->giveElement()->giveCrossSection()->give(TOPZCOORD);
-    bottom = masterGp->giveElement()->giveCrossSection()->give(BOTTOMZCOORD);
+    top    = masterGp->giveElement()->giveCrossSection()->give(CS_TopZCoord);
+    bottom = masterGp->giveElement()->giveCrossSection()->give(CS_BottomZCoord);
     layerZeta = slaveGp->giveCoordinate(3);
     layerZCoord = 0.5 * ( ( 1. - layerZeta ) * bottom + ( 1. + layerZeta ) * top );
 

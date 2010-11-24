@@ -372,9 +372,9 @@ IsotropicLinearElasticMaterial :: give2dBeamStiffMtrx(FloatMatrix &answer,
     }
 
     this->give1dStressStiffMtrx(mat3d, FullForm, rMode, gp, tStep);
-    area = crossSection->give(AREA);
-    Iy   = crossSection->give(INERTIA_MOMENT_Y);
-    shearCoeff = crossSection->give(BEAM_SHEAR_COEFF);
+    area = crossSection->give(CS_Area);
+    Iy   = crossSection->give(CS_InertiaMomentY);
+    shearCoeff = crossSection->give(CS_BeamShearCoeff);
 
     if ( form == ReducedForm ) {
         //answer = new FloatMatrix (3,3);
@@ -425,12 +425,12 @@ IsotropicLinearElasticMaterial :: give3dBeamStiffMtrx(FloatMatrix &answer,
 
     this->give1dStressStiffMtrx(mat3d, FullForm, rMode, gp, tStep);
     E    = mat3d.at(1, 1);
-    area = crossSection->give(AREA);
-    Iy   = crossSection->give(INERTIA_MOMENT_Y);
-    Iz   = crossSection->give(INERTIA_MOMENT_Z);
-    Ik   = crossSection->give(TORSION_MOMENT_X);
+    area = crossSection->give(CS_Area);
+    Iy   = crossSection->give(CS_InertiaMomentY);
+    Iz   = crossSection->give(CS_InertiaMomentZ);
+    Ik   = crossSection->give(CS_TorsionMomentX);
 
-    shearCoeff = crossSection->give(BEAM_SHEAR_COEFF);
+    shearCoeff = crossSection->give(CS_BeamShearCoeff);
 
     //answer = new FloatMatrix (8,8);
     answer.resize(6, 6);

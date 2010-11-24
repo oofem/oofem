@@ -105,7 +105,7 @@ double PlaneStressStructuralElementEvaluator :: computeVolumeAround(GaussPoint *
                                                                                  gp->giveIntegrationRule()->giveKnotSpan() ),
                                                     0.0) );
     weight      = gp->giveWeight();
-    thickness   = this->giveElement()->giveCrossSection()->give('t');
+    thickness   = this->giveElement()->giveCrossSection()->give(CS_Thickness);
     volume      = determinant * weight * thickness;
 
     return volume;

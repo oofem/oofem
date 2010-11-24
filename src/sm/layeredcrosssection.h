@@ -53,35 +53,35 @@ namespace oofem {
 class GaussPoint;
 class LayeredCrossSectionModelInterface;
 
+/**
+ * This class implements a layered cross section in a finite element problem. A cross
+ * section  is an attribute of a domain. It is usually also attribute of many
+ * elements.
+ *
+ * DESCRIPTION
+ * The attribute 'propertyDictionary' contains all the properties of a
+ * layered cross section, like thickness and width of each layer.
+ * The atribute 'layerMaterials' contains an array of Materials corresponding
+ * to each layer.
+ *
+ * it uses master - slave GaussPoint approach, where master gp has more slaves gp.
+ * slave gp represent for each layer material point. It's coordinate sections
+ * conteins z-coordinate (-1,1) from mid-section. the slaves are manageg completely
+ * ( created, saved their context.,,,) from this class. Master gp only deletes
+ * slaves in destructor.
+ *
+ * TASK
+ * - Returning standard material stiffness marices (like 3dstress-strain, 2d plane ,
+ *   plate, 3dbeam, 2d beam ..) according to current state determined by parametr
+ *   StressMode by calling gp->material->GiveMaterialStiffnessMatrix (....) and by
+ *   possible modifiing returned matrix. (for example in layerde mode aproach
+ *   each layer  is asked for 3dMatrialStiffnes and this is integrated for example
+ *   over thickness for plate bending broblems)
+ * - Returning RealStress state in gauss point and for given Stress mode.
+ * - Returning a properties of cross section like thickness or area.
+ */
 class LayeredCrossSection : public StructuralCrossSection
 {
-    /*
-     * This class implements a layered cross section in a finite element problem. A cross
-     * section  is an attribute of a domain. It is usually also attribute of many
-     * elements.
-     *
-     * DESCRIPTION
-     * The attribute 'propertyDictionary' contains all the properties of a
-     * layered cross section, like thickness and width of each layer.
-     * The atribute 'layerMaterials' contains an array of Materials corresponding
-     * to each layer.
-     *
-     * it uses master - slave GaussPoint approach, where master gp has more slaves gp.
-     * slave gp represent for each layer material point. It's coordinate sections
-     * conteins z-coordinate (-1,1) from mid-section. the slaves are manageg completely
-     * ( created, saved their context.,,,) from this class. Master gp only deletes
-     * slaves in destructor.
-     *
-     * TASK
-     * - Returning standard material stiffness marices (like 3dstress-strain, 2d plane ,
-     * plate, 3dbeam, 2d beam ..) according to current state determined by parametr
-     * StressMode by calling gp->material->GiveMaterialStiffnessMatrix (....) and by
-     * possible modifiing returned matrix. (for example in layerde mode aproach
-     * each layer  is asked for 3dMatrialStiffnes and this is integrated for example
-     * over thickness for plate bending broblems)
-     * - Returning RealStress state in gauss point and for given Stress mode.
-     * - Returning a properties of cross section like thickness or area.
-     */
 
 protected:
     IntArray layerMaterials; // material of each layer
@@ -150,14 +150,15 @@ public:
     virtual void computeStressIndependentStrainVector(FloatArray &answer,
                                                       GaussPoint *gp, TimeStep *stepN, ValueModeType mode);
 
-
-    double   give(int);
+    /// @see CrossSection :: give
+    double   give(CrossSectionProperty a);
 
     // identification and auxiliary functions
     const char *giveClassName() const { return "LayeredCrossSection"; }
     classType giveClassID()         const { return LayeredCrossSectionClass; }
     IRResultType initializeFrom(InputRecord *ir);
     void     printYourself();
+    /// Returns the total thickness of all layers.
     double   computeIntegralThick();
     MaterialMode giveCorrespondingSlaveMaterialMode(MaterialMode);
     GaussPoint *giveSlaveGaussPoint(GaussPoint *, int);

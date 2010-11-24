@@ -236,7 +236,7 @@ QTrPlaneStress2d :: computeVolumeAround(GaussPoint *aGaussPoint)
     determinant = fabs( this->interpolation.giveTransformationJacobian(* aGaussPoint->giveCoordinates(), 
 								       FEIElementGeometryWrapper(this), 0.0) );
     weight      = aGaussPoint->giveWeight();
-    thickness   = this->giveCrossSection()->give('t');
+    thickness   = this->giveCrossSection()->give(CS_Thickness);
     volume      = determinant * weight * thickness;
 
     return volume;
@@ -629,7 +629,7 @@ QTrPlaneStress2d :: DirectErrorIndicatorRCI_giveCharacteristicSize() {
         volume += this->computeVolumeAround(gp);
     }
 
-    return sqrt( volume * 2.0 / this->giveCrossSection()->give('t') );
+    return sqrt( volume * 2.0 / this->giveCrossSection()->give(CS_Thickness) );
 }
 
 int

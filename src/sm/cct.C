@@ -113,7 +113,7 @@ CCTPlate :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, TimeStep 
         gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
 
         dens = this->giveMaterial()->give('d', gp);
-        dV   = this->computeVolumeAround(gp) * this->giveCrossSection()->give(THICKNESS);
+        dV   = this->computeVolumeAround(gp) * this->giveCrossSection()->give(CS_Thickness);
 
         answer.resize(9);
         answer.zero();
@@ -480,7 +480,7 @@ CCTPlate :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep)
     gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
 
     dV = this->computeVolumeAround(gp);
-    mss1 = dV * this->giveCrossSection()->give(THICKNESS) * this->giveMaterial()->give('d', gp) / 3.;
+    mss1 = dV * this->giveCrossSection()->give(CS_Thickness) * this->giveMaterial()->give('d', gp) / 3.;
 
     answer.at(1, 1) = mss1;
     answer.at(4, 4) = mss1;
@@ -578,7 +578,7 @@ CCTPlate :: computeLocalCoordinates(FloatArray &answer, const FloatArray &coords
     double elthick;
 
     cs = ( StructuralCrossSection * ) this->giveCrossSection();
-    elthick = cs->give(THICKNESS);
+    elthick = cs->give(CS_Thickness);
 
     if ( elthick / 2.0 + midplZ - fabs( coords.at(3) ) < -POINT_TOL ) {
         answer.zero();
@@ -735,8 +735,8 @@ CCTPlate :: computeStrainVectorInLayer(FloatArray &answer, GaussPoint *masterGp,
     double layerZeta, layerZCoord, top, bottom;
 
     this->computeStrainVector(masterGpStrain, masterGp, tStep);
-    top    = masterGp->giveElement()->giveCrossSection()->give(TOPZCOORD);
-    bottom = masterGp->giveElement()->giveCrossSection()->give(BOTTOMZCOORD);
+    top    = masterGp->giveElement()->giveCrossSection()->give(CS_TopZCoord);
+    bottom = masterGp->giveElement()->giveCrossSection()->give(CS_BottomZCoord);
     layerZeta = slaveGp->giveCoordinate(3);
     layerZCoord = 0.5 * ( ( 1. - layerZeta ) * bottom + ( 1. + layerZeta ) * top );
 

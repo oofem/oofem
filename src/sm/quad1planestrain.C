@@ -406,7 +406,7 @@ Quad1PlaneStrain :: computeVolumeAround(GaussPoint *aGaussPoint)
     this->computeJacobianMatrixAt(jacMtrx, aGaussPoint);
     determinant = fabs( jacMtrx.giveDeterminant() );
     weight      = aGaussPoint->giveWeight();
-    thickness   = this->giveCrossSection()->give('t');
+    thickness   = this->giveCrossSection()->give(CS_Thickness);
     volume      = determinant * weight * thickness;
 
     return volume;
@@ -1269,7 +1269,7 @@ Quad1PlaneStrain :: DirectErrorIndicatorRCI_giveCharacteristicSize() {
         volume += this->computeVolumeAround(gp);
     }
 
-    volume /= this->giveCrossSection()->give('t');
+    volume /= this->giveCrossSection()->give(CS_Thickness);
 
     return sqrt(volume);
 }

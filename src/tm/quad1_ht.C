@@ -256,7 +256,7 @@ Quad1_ht :: computeVolumeAround(GaussPoint *aGaussPoint)
     this->computeJacobianMatrix(jacobianMtrx, aGaussPoint);
     determinant = fabs( jacobianMtrx.giveDeterminant() );
     weight      = aGaussPoint->giveWeight();
-    thickness   = this->giveCrossSection()->give('t');
+    thickness   = this->giveCrossSection()->give(CS_Thickness); // 't'
     volume      = determinant * weight * thickness;
 
     return volume;
@@ -323,7 +323,7 @@ Quad1_ht :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
     dx      = nodeB->giveCoordinate(1) - nodeA->giveCoordinate(1);
     dy      = nodeB->giveCoordinate(2) - nodeA->giveCoordinate(2);
     length = sqrt(dx * dx + dy * dy);
-    thick = this->giveCrossSection()->give('t');
+    thick = this->giveCrossSection()->give(CS_Thickness); // 't'
     return 0.5 *length *thick *gp->giveWeight();
 }
 

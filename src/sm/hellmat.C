@@ -2060,7 +2060,7 @@ void HellmichMaterial :: giveEigenStrainVector(FloatArray &answer, MatResponseFo
     if ( dT ) {
         giveThermalDilatationVector(auxvec, gp, atTime); // {tAlpha, tAlpha, tAlpha, 0, 0, 0}
         if ( ( mmode == _2dBeam ) || ( mmode == _3dBeam ) || ( mmode == _3dShell ) || ( mmode == _2dPlate ) ) {
-            double thick = crossSection->give(THICKNESS);
+            double thick = crossSection->give(CS_Thickness);
             if ( mmode == _2dBeam ) {
                 answer.resize(12);
                 answer.zero();
@@ -2071,7 +2071,7 @@ void HellmichMaterial :: giveEigenStrainVector(FloatArray &answer, MatResponseFo
             } else if ( mmode == _3dBeam ) {
                 answer.resize(12);
                 answer.zero();
-                double width = crossSection->give(WIDTH);
+                double width = crossSection->give(CS_Width);
                 answer.at(1) = auxvec.at(1) * ( dT );
                 if ( et.giveSize() > 1 ) {
                     answer.at(8) = auxvec.at(1) * et.at(2) / thick; // kappa_y

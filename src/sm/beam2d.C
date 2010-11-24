@@ -304,8 +304,8 @@ Beam2d :: computeStrainVectorInLayer(FloatArray &answer, GaussPoint *masterGp,
     double layerZeta, layerZCoord, top, bottom;
 
     this->computeStrainVector(masterGpStrain, masterGp, tStep);
-    top    = masterGp->giveElement()->giveCrossSection()->give(TOPZCOORD);
-    bottom = masterGp->giveElement()->giveCrossSection()->give(BOTTOMZCOORD);
+    top    = masterGp->giveElement()->giveCrossSection()->give(CS_TopZCoord);
+    bottom = masterGp->giveElement()->giveCrossSection()->give(CS_BottomZCoord);
     layerZeta = slaveGp->giveCoordinate(3);
     layerZCoord = 0.5 * ( ( 1. - layerZeta ) * bottom + ( 1. + layerZeta ) * top );
 
@@ -764,7 +764,7 @@ Beam2d :: computeConsistentMassMatrix(FloatMatrix &answer, TimeStep *tStep, doub
     double kappa = this->giveKappaCoeff();
     double kappa2 = kappa * kappa;
     double density = this->giveMaterial()->give('d',gp);
-    double area = this->giveCrossSection()->give('A');
+    double area = this->giveCrossSection()->give(CS_Area);
     double c2 = ( area * density ) / ( ( 1. + 2. * kappa ) * ( 1. + 2. * kappa ) );
     double c1 = ( area * density );
 

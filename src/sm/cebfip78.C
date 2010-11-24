@@ -93,7 +93,7 @@ CebFip78Material :: computeCreepFunction(GaussPoint *gp, double atTime, double o
         firv = 0.4;
     }
 
-    hd = this->kap_a *cs->give('A') * 1000. * 1000. / this->u;
+    hd = this->kap_a *cs->give(CS_Area) * 1000. * 1000. / this->u;
     if ( hd < 50. ) {
         hd = 50.;
     }

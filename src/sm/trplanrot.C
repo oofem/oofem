@@ -672,7 +672,7 @@ TrPlaneStrRot :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, Time
         gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
 
         dens = this->giveMaterial()->give('d', gp);
-        dV   = this->computeVolumeAround(gp) * this->giveCrossSection()->give(THICKNESS);
+        dV   = this->computeVolumeAround(gp) * this->giveCrossSection()->give(CS_Thickness);
 
         answer.resize(9);
         answer.zero();

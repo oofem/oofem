@@ -163,7 +163,7 @@ Truss2d :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep)
     if (!isActivated(tStep)) return;
 
     mat        = this->giveMaterial();
-    halfMass   =  mat->give('d',gp) * this->giveCrossSection()->give('A') * this->giveLength() / 2.;
+    halfMass   =  mat->give('d',gp) * this->giveCrossSection()->give(CS_Area) * this->giveLength() / 2.;
     answer.at(1, 1) = halfMass;
     answer.at(2, 2) = halfMass;
     answer.at(3, 3) = halfMass;
@@ -268,7 +268,7 @@ double Truss2d :: computeVolumeAround(GaussPoint *aGaussPoint)
 // Gauss point is used.
 {
     double weight  = aGaussPoint->giveWeight();
-    return 0.5 * this->giveLength() * weight * this->giveCrossSection()->give('A');
+    return 0.5 * this->giveLength() * weight * this->giveCrossSection()->give(CS_Area);
 }
 
 

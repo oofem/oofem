@@ -165,7 +165,7 @@ InterfaceElement3dTrLin :: computeVolumeAround(GaussPoint *aGaussPoint)
 
     determinant = fabs( this->interpolation.giveTransformationJacobian(* aGaussPoint->giveCoordinates(), FEIVertexListGeometryWrapper(3, lncp), 0.0) );
     weight      = aGaussPoint->giveWeight();
-    thickness   = this->giveCrossSection()->give('t');
+    thickness   = this->giveCrossSection()->give(CS_Thickness);
     volume      = determinant * weight * thickness;
 
     return volume;

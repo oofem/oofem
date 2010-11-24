@@ -1173,27 +1173,21 @@ LayeredCrossSection :: GiveIntegrated3dShellStress(GaussPoint *masterGp)
 
 
 double
-LayeredCrossSection :: give(int aProperty)
-// Returns the value of the property aProperty (e.g. the area
-// 'A') of the receiver.
+LayeredCrossSection :: give(CrossSectionProperty aProperty)
 {
-    if ( aProperty == THICKNESS ) {
+    if ( aProperty == CS_Thickness ) {
         return this->computeIntegralThick();
     }
-
-    if ( aProperty == TOPZCOORD ) {
+    else if ( aProperty == CS_TopZCoord ) {
         this->computeIntegralThick();
         return totalThick - midSurfaceZcoordFromBottom;
     }
-
-    if ( aProperty == BOTTOMZCOORD ) {
+    else if ( aProperty == CS_BottomZCoord ) {
         return -midSurfaceZcoordFromBottom;
     }
-
-    if ( ( aProperty == 'A' ) || ( aProperty == AREA ) ) {
+    else if ( aProperty == CS_Area ) {
         return this->giveArea();
     }
-
     return CrossSection :: give(aProperty);
 }
 

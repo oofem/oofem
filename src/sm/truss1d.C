@@ -117,7 +117,7 @@ Truss1d :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep)
     GaussPoint* gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
 
     mat        = this->giveMaterial();
-    halfMass   = mat->give('d',gp) * this->giveCrossSection()->give('A') * this->giveLength() / 2.;
+    halfMass   = mat->give('d',gp) * this->giveCrossSection()->give(CS_Area) * this->giveLength() / 2.;
     answer.resize(2, 2);
     answer.zero();
     answer.at(1, 1) = halfMass;
@@ -171,7 +171,7 @@ Truss1d :: computeVolumeAround(GaussPoint *aGaussPoint)
 // Gauss point is used.
 {
     double weight  = aGaussPoint->giveWeight();
-    return 0.5 * this->giveLength() * weight * this->giveCrossSection()->give('A');
+    return 0.5 * this->giveLength() * weight * this->giveCrossSection()->give(CS_Area);
 }
 
 

@@ -95,7 +95,6 @@ class SimpleCrossSection : public StructuralCrossSection
      * - Returning RealStress state in gauss point and for given Stress mode.
      * - Returning a properties of cross section like thickness or area.
      */
-protected:
 
 public:
     /// Constructor - creates SimpleCrossSection instance with number n and associates it with domain d.
@@ -193,14 +192,12 @@ public:
      * GiveCharMaterialStiffnessMatrix  (GaussPoint*, FloatArray *strainIncrement = NULL) ;*/
 
     /**
-     * Returns the value of cross section property 'aProperty'. Property must be identified
-     * by unique int id.
-     * Implementation adds support for THICKNESS,WIDTH,AREA,INERTIA_MOMENT_Y,INERTIA_MOMENT_Z,TORSION_MOMENT_X
-     * and BEAM_SHEAR_COEFF properties.
-     * @aProperty id of peroperty requested
+     * Returns the value of cross section property.
+     * Implementation adds support for all properties listed in CS_CrossSectionProperties.
+     * @param a id of property requested
      * @return property value
      */
-    double   give(int);
+    double give(CrossSectionProperty a);
 
     // identification and auxiliary functions
     /// Returns "SimpleCrossSection" - class name of the receiver.
@@ -212,8 +209,13 @@ public:
     /**
      * Initializes receiver acording to object description stored in input record.
      * Calls CrossSection initializeFrom service and reads the values of
-     * THICKNESS,WIDTH,AREA,INERTIA_MOMENT_Y,INERTIA_MOMENT_Z,TORSION_MOMENT_X
-     * and BEAM_SHEAR_COEFF parameters.
+     * - 'thick' thickness
+     * - 'width' width
+     * - 'area' area
+     * - 'iy' Moment of inertia around y
+     * - 'iz' Moment of inertia around z
+     * - 'ik' Torsion moment around x
+     * - 'beamshearcoeff' Beam shear coefficient
      */
     IRResultType initializeFrom(InputRecord *ir);
     /** Setups the input record string of receiver
@@ -243,7 +245,6 @@ protected:
                                        GaussPoint *gp,
                                        StructuralMaterial *mat,
                                        TimeStep *tStep);
-    //
 };
 
 

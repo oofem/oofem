@@ -146,7 +146,7 @@ CrossSection :: ofType(char *aClass)
 
 
 double
-CrossSection :: give(int aProperty)
+CrossSection :: give(CrossSectionProperty aProperty)
 // Returns the value of the property aProperty (e.g. the area
 // 'A') of the receiver.
 {

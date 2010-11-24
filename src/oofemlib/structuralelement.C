@@ -735,7 +735,6 @@ StructuralElement :: computeNonForceLoadVector(FloatArray &answer, TimeStep *ste
     FloatArray helpLoadVector;
 
     answer.resize(0);
-
     // test for deactivation of receiver
     if ( ( mode == VM_Incremental ) && ( !stepN->isTheFirstStep() ) ) {
         if ( isActivated( stepN->givePreviousStep() ) && !isActivated(stepN) ) {
