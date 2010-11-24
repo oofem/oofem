@@ -842,9 +842,13 @@ VTKExportModule :: exportIntVarAs(InternalStateType valID, InternalStateValueTyp
             int regionDofMans = 0, offset = 0;
             ireg = -1;
 
-            // assemble local->global map
-            this->initRegionNodeNumbering(regionNodalNumbers, regionDofMans, offset, d, ireg, 1);
-            this->smoother->giveRegionRecordMap(regionVarMap, ireg, valID);
+	    this->initRegionNodeNumbering(regionNodalNumbers, regionDofMans, offset, d, ireg, 1);
+	    if ( !( ( valID == IST_DisplacementVector ) || ( valID == IST_MaterialInterfaceVal ) ) ) {
+	      // assemble local->global map
+	      this->smoother->giveRegionRecordMap(regionVarMap, ireg, valID);
+	    } else {
+	      regionDofMans = nnodes;
+	    }
 
             for ( inode = 1; inode <= regionDofMans; inode++ ) {
                 if ( valID == IST_DisplacementVector ) {
@@ -948,9 +952,11 @@ VTKExportModule :: exportIntVarAs(InternalStateType valID, InternalStateValueTyp
                     continue;
                 }
 
-                // assemble local->global map
-                this->initRegionNodeNumbering(regionNodalNumbers, regionDofMans, offset, d, ireg, 1);
-                this->smoother->giveRegionRecordMap(regionVarMap, ireg, valID);
+		if ( !( ( valID == IST_DisplacementVector ) || ( valID == IST_MaterialInterfaceVal ) ) ) {
+		  // assemble local->global map
+		  this->initRegionNodeNumbering(regionNodalNumbers, regionDofMans, offset, d, ireg, 1);
+		  this->smoother->giveRegionRecordMap(regionVarMap, ireg, valID);
+		}
 
                 for ( inode = 1; inode <= regionDofMans; inode++ ) {
                     if ( valID == IST_DisplacementVector ) {

@@ -591,9 +591,8 @@ VTKXMLExportModule :: exportIntVarAs(InternalStateType valID, InternalStateValue
 
     if ( !( ( valID == IST_DisplacementVector ) || ( valID == IST_MaterialInterfaceVal ) ) ) {
         this->smoother->recoverValues(valID, tStep);
+	this->smoother->giveRegionRecordMap(regionVarMap, ireg, valID);
     }
-
-    this->smoother->giveRegionRecordMap(regionVarMap, ireg, valID);
 
     for ( inode = 1; inode <= regionDofMans; inode++ ) {
         if ( valID == IST_DisplacementVector ) {
