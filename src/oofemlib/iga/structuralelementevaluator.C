@@ -48,35 +48,34 @@
 #include "iga.h"
 
 namespace oofem {
-
 StructuralElementEvaluator :: StructuralElementEvaluator() {
     this->rotationMatrix = NULL;
 }
 
 /*
-int StructuralElementEvaluator :: giveIntegrationElementCodeNumbers(IntArray &answer, Element *elem,
-                                                                    IntegrationRule *ie, EquationID ut) {
-    int i;
-    IntArray mask, nodeDofIDMask, nodalArray;
-
-    // first evaluate nonzero basis function mask
-    if ( elem->giveInterpolation()->hasSubPatchFormulation() ) {
-        IGAIntegrationElement *ee = ( IGAIntegrationElement * ) ie;
-        elem->giveInterpolation()->giveKnotSpanBasisFuncMask(* ee->giveKnotSpan(), mask);
-        // loop over nonzero shape functions and assemble localization array
-        answer.resize(0);
-        for ( i = 1; i <= mask.giveSize(); i++ ) {
-            elem->giveDofManDofIDMask(mask.at(i), ut, nodeDofIDMask);
-            elem->giveDofManager( mask.at(i) )->giveLocationArray(nodeDofIDMask, nodalArray);
-            answer.followedBy(nodalArray);
-        }
-
-        return 1;
-    } else {
-        return 0;
-    }
-}
-*/
+ * int StructuralElementEvaluator :: giveIntegrationElementCodeNumbers(IntArray &answer, Element *elem,
+ *                                                                  IntegrationRule *ie, EquationID ut) {
+ *  int i;
+ *  IntArray mask, nodeDofIDMask, nodalArray;
+ *
+ *  // first evaluate nonzero basis function mask
+ *  if ( elem->giveInterpolation()->hasSubPatchFormulation() ) {
+ *      IGAIntegrationElement *ee = ( IGAIntegrationElement * ) ie;
+ *      elem->giveInterpolation()->giveKnotSpanBasisFuncMask(* ee->giveKnotSpan(), mask);
+ *      // loop over nonzero shape functions and assemble localization array
+ *      answer.resize(0);
+ *      for ( i = 1; i <= mask.giveSize(); i++ ) {
+ *          elem->giveDofManDofIDMask(mask.at(i), ut, nodeDofIDMask);
+ *          elem->giveDofManager( mask.at(i) )->giveLocationArray(nodeDofIDMask, nodalArray);
+ *          answer.followedBy(nodalArray);
+ *      }
+ *
+ *      return 1;
+ *  } else {
+ *      return 0;
+ *  }
+ * }
+ */
 
 int StructuralElementEvaluator :: giveIntegrationElementLocalCodeNumbers(IntArray &answer, Element *elem,
                                                                          IntegrationRule *ie, EquationID ut) {
@@ -449,10 +448,10 @@ StructuralElementEvaluator :: updateRotationMatrix()
 
     rotationMatrixDefined = 1;
     isT_NtoG = this->computeGNDofRotationMatrix(T_NtoG, _toGlobalCS);
-    if (T_NtoG.isNotEmpty() ) {
-      rotationMatrix = T_NtoG.GiveCopy();
+    if ( T_NtoG.isNotEmpty() ) {
+        rotationMatrix = T_NtoG.GiveCopy();
     } else {
-      rotationMatrix = NULL;
+        rotationMatrix = NULL;
     }
 
     return ( rotationMatrix != NULL );
@@ -478,9 +477,9 @@ StructuralElementEvaluator :: computeGNDofRotationMatrix(FloatMatrix &answer, Do
     // initialize answer
     int gsize = elem->computeGlobalNumberOfDofs(EID_MomentumBalance);
     if ( mode == _toGlobalCS ) {
-        answer.resize(elem->computeNumberOfL2GDofs(EID_MomentumBalance), gsize); 
+        answer.resize(elem->computeNumberOfL2GDofs(EID_MomentumBalance), gsize);
     } else if ( mode == _toNodalCS ) {
-        answer.resize( gsize, elem->computeNumberOfL2GDofs(EID_MomentumBalance) ); 
+        answer.resize( gsize, elem->computeNumberOfL2GDofs(EID_MomentumBalance) );
     } else {
         OOFEM_ERROR("StructuralElementEvaluator::computeGNDofRotationMatrix:\n unsupported DofManTrasfType value");
     }
@@ -509,6 +508,4 @@ StructuralElementEvaluator :: computeGNDofRotationMatrix(FloatMatrix &answer, Do
 
     return 1;
 }
-
-
 } // end namespace oofem

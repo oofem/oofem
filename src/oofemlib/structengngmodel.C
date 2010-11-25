@@ -51,7 +51,6 @@
 #include "outputmanager.h"
 
 namespace oofem {
-
 StructuralEngngModel :: ~StructuralEngngModel()
 {
 #ifdef __PARALLEL_MODE

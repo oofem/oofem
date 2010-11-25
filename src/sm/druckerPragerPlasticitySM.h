@@ -54,7 +54,6 @@
 #include "isolinearelasticmaterial.h"
 
 namespace oofem {
-
 class DruckerPragerPlasticitySMStatus : public StructuralMaterialStatus
 {
     /*
@@ -337,7 +336,7 @@ public:
     double  computeYieldValue(const double volumetricStress,
                               const double JTwo,
                               const double kappa,
-			      const double eM) const;
+                              const double eM) const;
     /// Compute current yield stress in pure shear
     /**
      *      Compute the current yield stress in pure shear of the Drucker-Prager model according to the used hardening law. The yield stress is tauY in f(sigma, kappa) = F(sigma) - tauY(kappa).
@@ -454,10 +453,9 @@ public:
      * Returns the relative redistribution cost of the receiver
      */
     virtual double predictRelativeRedistributionCost(GaussPoint *gp) { return 1.0; }
-#endif    
+#endif
 
 protected:
 };
-
 } // end namespace oofem
 #endif // druckerpragerplasticitysm_h

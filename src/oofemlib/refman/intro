@@ -27,7 +27,7 @@ FEM kernel of general FE program.
           layer for message passing libraries, which is available on many parallel platforms
           (massively parallel computers, shared memory systems and workstation clusters) .</LI>
 <LI>adaptive analysis support - multiple domain concept, fast spatial localization algorithms 
-					based on tree techniques are available.</LI>
+    based on tree techniques are available.</LI>
 <LI>includes enhanced support for structural analysis.</LI>
 </UL>
 

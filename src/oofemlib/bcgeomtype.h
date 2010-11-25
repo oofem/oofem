@@ -40,7 +40,6 @@
 #define bcgeomtype_h
 
 namespace oofem {
-
 /**
  * Type representing the geometric character of loading.
  */
@@ -53,7 +52,6 @@ enum bcGeomType {
     SurfaceLoadBGT,
     PointLoadBGT
 };
-
 } // end namespace oofem
 #endif // bcgeomtype_h
 

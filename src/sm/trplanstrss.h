@@ -53,7 +53,6 @@
 #include "huertaerrorestimator.h"
 
 namespace oofem {
-
 class TrPlaneStress2d : public NLStructuralElement, public ZZNodalRecoveryModelInterface,
     public NodalAveragingRecoveryModelInterface, public SPRNodalRecoveryModelInterface,
     public SpatialLocalizerInterface
@@ -289,7 +288,7 @@ public:
     //@}
 
     integrationDomain  giveIntegrationDomain() { return _Triangle; }
-    MaterialMode          giveMaterialMode()  {return _PlaneStress;}
+    MaterialMode          giveMaterialMode()  { return _PlaneStress; }
 
 protected:
     // edge load support
@@ -317,6 +316,5 @@ protected:
      */
     int  giveNumberOfIPForMassMtrxIntegration() { return 1; }
 };
-
 } // end namespace oofem
 #endif // trplanstrss_h

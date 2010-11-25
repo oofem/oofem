@@ -45,44 +45,44 @@
 DSS_NAMESPASE_BEGIN
 ////////////////// ////////////////////////////////////////////////////////////////////////////////////
 // You can modify this class, or inherit a new one . If you want to redirect the output somewhere else.
-class MathTracer 
+class MathTracer
 {
 private:
-	char m_string[128];
+    char m_string [ 128 ];
 
 public:
-	double min_pivot;
-	double stabil_pivot;
-	int break_flag;
-	long act_block;
-	long act_row;
+    double min_pivot;
+    double stabil_pivot;
+    int break_flag;
+    long act_block;
+    long act_row;
 
-	MathTracer();
+    MathTracer();
 
-	virtual void Write(double a);
-	virtual void Write(int a);
-	virtual void Writeln();
-	virtual void Writeln(const char* str);
-	virtual void Write(const char* str);
+    virtual void Write(double a);
+    virtual void Write(int a);
+    virtual void Writeln();
+    virtual void Writeln(const char *str);
+    virtual void Write(const char *str);
 
-//	virtual void DrawProgress(double e);
+    //virtual void DrawProgress(double e);
 
-	// true - continue factorization
-	// false - break factorization
-	virtual bool CallUnstableDialog();
+    // true - continue factorization
+    // false - break factorization
+    virtual bool CallUnstableDialog();
 
-//	virtual void PrintUnstablePivot(long pivot);
+    //virtual void PrintUnstablePivot(long pivot);
 
-	char* NowString();
-	void CS(void);
-	char* MC_();
+    char *NowString();
+    void CS(void);
+    char *MC_();
 
-	clock_t ClockStart(void);
-	char* MeasureClock(clock_t& clock);
+    clock_t ClockStart(void);
+    char *MeasureClock(clock_t &clock);
 
 protected:
-	time_t m_temporary_measure_start;
-	clock_t m_clock_start;
+    time_t m_temporary_measure_start;
+    clock_t m_clock_start;
 };
 
 

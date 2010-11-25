@@ -45,7 +45,6 @@
 #include "../sm/hydram.h"
 
 namespace oofem {
-
 class GaussPoint;
 
 class HydratingTransportMaterialStatus : public TransportMaterialStatus, public HydrationModelStatusInterface
@@ -58,8 +57,10 @@ public:
     const char *giveClassName() const { return "HydratingTransportMaterialStatus"; }
     classType giveClassID()         const { return HydratingTransportMaterialStatusClass; }
 
-    virtual void updateYourself(TimeStep *atTime) { HydrationModelStatusInterface :: updateYourself(atTime);
-                                                    TransportMaterialStatus :: updateYourself(atTime); }
+    virtual void updateYourself(TimeStep *atTime) {
+        HydrationModelStatusInterface :: updateYourself(atTime);
+        TransportMaterialStatus :: updateYourself(atTime);
+    }
     void printOutputAt(FILE *file, TimeStep *atTime);
 };
 
@@ -132,6 +133,5 @@ public:
 protected:
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
 };
-
 } // end namespace oofem
 #endif // hydratingisoheatmat_h

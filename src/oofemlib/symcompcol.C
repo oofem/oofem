@@ -74,11 +74,10 @@
 #include "engngm.h"
 #include "domain.h"
 #ifndef __MAKEDEPEND
-#include <set>
+ #include <set>
 #endif
 
 namespace oofem {
-
 SymCompCol :: SymCompCol(void) : CompCol()
 { }
 
@@ -97,14 +96,14 @@ SymCompCol :: SymCompCol(const SymCompCol &S) : CompCol(S)
 
 SparseMtrx *SymCompCol :: GiveCopy() const
 {
-    SymCompCol *result = new SymCompCol(* this);
+    SymCompCol *result = new SymCompCol(*this);
     return result;
 }
 
 
 #define MAP(i, j) map [ ( j ) * neq - ( j ) * ( ( j ) + 1 ) / 2 + ( i ) ]
 
-int SymCompCol :: buildInternalStructure(EngngModel *eModel, int di, EquationID ut, const UnknownNumberingScheme& s)
+int SymCompCol :: buildInternalStructure(EngngModel *eModel, int di, EquationID ut, const UnknownNumberingScheme &s)
 {
     /*
      * IntArray  loc;
@@ -181,7 +180,7 @@ int SymCompCol :: buildInternalStructure(EngngModel *eModel, int di, EquationID 
     int i, ii, j, jj, n, indx;
     Element *elem;
     // allocation map
-    std :: vector< std :: set< int > > columns(neq);
+    std :: vector< std :: set< int > >columns(neq);
     /*
      * std::set<int> **columns = new std::set<int>*[neq];
      * for (j=0; j<neq; j++) {
@@ -413,7 +412,7 @@ double SymCompCol :: at(int i, int j) const
     }
 }
 
-double SymCompCol :: operator()(int i, int j)  const
+double SymCompCol :: operator() (int i, int j)  const
 {
     int ii = i, jj = j;
     if ( ii < jj ) {
@@ -435,7 +434,7 @@ double SymCompCol :: operator()(int i, int j)  const
     }
 }
 
-double &SymCompCol :: operator()(int i, int j)
+double &SymCompCol :: operator() (int i, int j)
 {
     int ii = i, jj = j;
     if ( ii < jj ) {
@@ -455,6 +454,4 @@ double &SymCompCol :: operator()(int i, int j)
     OOFEM_ERROR3("SymCompCol::operator(): Array element (%d,%d) not in sparse structure -- cannot assign", i, j);
     return val_(0); // return to suppress compiler warning message
 }
-
-
 } // end namespace oofem

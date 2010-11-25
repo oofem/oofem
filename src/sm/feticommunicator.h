@@ -37,16 +37,15 @@
 
 #ifdef __PARALLEL_MODE
 
-#include "communicator.h"
-#include "fetiboundarydofman.h"
-#include "error.h"
-#ifndef __MAKEDEPEND
-#include <vector>
-#endif
+ #include "communicator.h"
+ #include "fetiboundarydofman.h"
+ #include "error.h"
+ #ifndef __MAKEDEPEND
+  #include <vector>
+ #endif
 
 using namespace std;
 namespace oofem {
-
 class FETISolver;
 
 /**
@@ -159,7 +158,6 @@ private:
      */
     //void setUpCommunicationMapsForRemoteElementMode (Domain* domain);
 };
-
 } // end namespace oofem
 #endif
 #endif // feticommunicator_h

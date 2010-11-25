@@ -59,7 +59,6 @@
 #endif
 
 namespace oofem {
-
 class Domain;
 class EngngModel;
 
@@ -68,7 +67,7 @@ class EngngModel;
  * for solving non-linear problems.
  * Except the traditional load control, it also provides direct displacement control without
  * requiring BC applied,
- * so that the equation renumbering is not required when combining arc-length and Newton-Raphson 
+ * so that the equation renumbering is not required when combining arc-length and Newton-Raphson
  * solvers within a simulation.
  *
  * The direct displacement control is achieved by adding a large number alpha to the corresponding
@@ -139,7 +138,7 @@ class NRSolver : public SparseNonLinearSystemNM
 private:
 
     enum    nrsolver_ModeType { nrsolverModifiedNRM, nrsolverFullNRM, nrsolverAccelNRM };
-    typedef std :: set< DofID > __DofIDSet;
+    typedef std :: set< DofID >__DofIDSet;
 
 
     int nite, nsmax, minIterations;
@@ -197,7 +196,7 @@ private:
 
 
 public:
-    NRSolver(int i, Domain * d, EngngModel * m, EquationID ut);
+    NRSolver(int i, Domain *d, EngngModel *m, EquationID ut);
     // constructor
     ~NRSolver();              // destructor
 
@@ -261,9 +260,10 @@ public:
         }
     }
     /// This method clears receiver cached data dependent on topology, when it changes.
-    virtual void reinitialize() { if ( linSolver ) {
-                                      linSolver->reinitialize();
-                                  }
+    virtual void reinitialize() {
+        if ( linSolver ) {
+            linSolver->reinitialize();
+        }
     }
 protected:
 
@@ -274,9 +274,8 @@ protected:
     void applyConstraintsToStiffness(SparseMtrx *k);
     void applyConstraintsToLoadIncrement(int nite, const SparseMtrx *k, FloatArray &R,
                                          referenceLoadInputModeType rlm, TimeStep *atTime);
-    bool checkConvergence(FloatArray &RT, FloatArray &F, FloatArray& rhs, FloatArray &deltaR, FloatArray &r,
+    bool checkConvergence(FloatArray &RT, FloatArray &F, FloatArray &rhs, FloatArray &deltaR, FloatArray &r,
                           double RRT, double internalForcesEBENorm, int nite, bool &errorOutOfRange, TimeStep *tNow);
 };
-
 } // end namespace oofem
 #endif // nrsolver_h

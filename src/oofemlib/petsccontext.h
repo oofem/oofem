@@ -37,15 +37,14 @@
 
 #ifdef __PETSC_MODULE
 
-#ifndef __MAKEDPEND
-#include "petscksp.h"
-#include "petscordering.h"
-#endif
+ #ifndef __MAKEDPEND
+  #include "petscksp.h"
+  #include "petscordering.h"
+ #endif
 
-#include "equationid.h"
+ #include "equationid.h"
 
 namespace oofem {
-
 class EngngModel;
 class FloatArray;
 
@@ -59,13 +58,13 @@ protected:
     EquationID ut;
     VecScatter n2gvecscat;
     VecScatter l2gvecscat;
-#ifdef __PARALLEL_MODE
+ #ifdef __PARALLEL_MODE
     PetscNatural2GlobalOrdering n2g;
     PetscNatural2LocalOrdering n2l;
 
     PetscNatural2GlobalOrdering n2g_prescribed;
     PetscNatural2LocalOrdering n2l_prescribed;
-#endif
+ #endif
 
 public:
     PetscContext(EngngModel *e, EquationID ut);
@@ -91,16 +90,15 @@ public:
 
     void createVecGlobal(Vec *answer);
 
-#ifdef __PARALLEL_MODE
+ #ifdef __PARALLEL_MODE
     PetscNatural2GlobalOrdering *giveN2Gmap() { return & n2g; }
     PetscNatural2LocalOrdering *giveN2Lmap() { return & n2l; }
 
     PetscNatural2GlobalOrdering *giveN2GPrescribedmap() { return & n2g_prescribed; }
     PetscNatural2LocalOrdering *giveN2LPrescribedmap() { return & n2l_prescribed; }
 
-#endif
+ #endif
 };
-
 } // end namespace oofem
 #endif
 #endif // petscscontext_h

@@ -58,7 +58,6 @@
 #include "unknownnumberingscheme.h"
 
 namespace oofem {
-
 class TimeStep;
 class Node;
 class Material;
@@ -206,7 +205,7 @@ public:
      * @param n Element's number
      * @param aDomain Pointer to the domain to which element belongs.
      */
-    Element(int n, Domain * aDomain);   // constructors
+    Element(int n, Domain *aDomain);    // constructors
     /// Virtual destructor.
     virtual ~Element();                // destructor
 
@@ -220,7 +219,7 @@ public:
      * can be numbered separately. The default implementation assumes that location array will be assembled only for
      * one UnknownType value, and this array is cached on element level.
      */
-    virtual void giveLocationArray(IntArray &locationArray, EquationID, const UnknownNumberingScheme &s) const;
+    virtual void giveLocationArray(IntArray & locationArray, EquationID, const UnknownNumberingScheme & s) const;
     /**
      * Invalidates location array in receiver. Each element stores its copy of location array(s), in order
      * to avoid time consuming assembly of code numbers every time when requested. Some enginnering models
@@ -342,13 +341,13 @@ public:
      */
     virtual int            computeNumberOfDofs(EquationID ut) { return 0; }
     /**
-     * Computes the total number of element's global dofs. This should be the size of global element contribution, 
+     * Computes the total number of element's global dofs. This should be the size of global element contribution,
      * including the transformation from global coordinate system to nodal one.
      * The transition from global cs to nodal one can change the value, as rigid arm and other transfromations could
      * be included.
      */
     virtual int            computeGlobalNumberOfDofs(EquationID ut);
-    /** 
+    /**
      * Returns number of DOFs after transformation from local to global coordinate system, before the
      * transformation to final nodal coordinate system happens.
      */
@@ -386,15 +385,15 @@ public:
      */
     virtual double        computeVolumeAround(GaussPoint *gp) { return 0.; }
     /**
-     * Computes the overall volume, area, or length (depending on element dimension) 
+     * Computes the overall volume, area, or length (depending on element dimension)
      */
-    virtual double        computeVolume () {return 0.0;}
+    virtual double        computeVolume() { return 0.0; }
 
     // data management
     ///Returns (global) number of i-th dofmanager of element
     int                    giveDofManagerNumber(int i) const { return dofManArray.at(i); }
     ///Returns receiver list of dof managers
-    IntArray&        giveDofManArray () {return dofManArray;} // HUHU const
+    IntArray &giveDofManArray() { return dofManArray; }       // HUHU const
     ///Rerurns reference to the i-th dofmanager of element.
     DofManager *giveDofManager(int i) const;
     /**Returns reference to the i-th node of element.
@@ -437,7 +436,7 @@ public:
     /**
      * Returns material mode for receiver integration poits. Should be specialized.
      */
-    virtual MaterialMode          giveMaterialMode()  {return _Unknown;}
+    virtual MaterialMode          giveMaterialMode()  { return _Unknown; }
     /**
      * Assembles the code numbers of given integration element (sub-patch)
      * This is done by obtaining list of nonzero shape functions and
@@ -569,7 +568,7 @@ public:
      */
     virtual int giveDefaultIntegrationRule() { return 0; }
     IntegrationRule *giveDefaultIntegrationRulePtr() { return integrationRulesArray [ giveDefaultIntegrationRule() ]; }
-    int giveNumberOfIntegrationRules() {return this->numberOfIntegrationRules;}
+    int giveNumberOfIntegrationRules() { return this->numberOfIntegrationRules; }
     IntegrationRule *giveIntegrationRule(int i) { return integrationRulesArray [ i ]; }
     /**
      * Tests if the element implements required extension. ElementExtension type defines
@@ -615,7 +614,7 @@ public:
     virtual int giveIntVarCompFullIndx(IntArray &answer, InternalStateType type);
     /// Computes the volume, area or length of the element depending on its spatial dimension
     double computeVolumeAreaOrLength();
-    /// Computes the size of the element defined as its length, 
+    /// Computes the size of the element defined as its length,
     /// square root of area or cube root of volume (depending on spatial dimension)
     double computeMeanSize();
 
@@ -710,9 +709,9 @@ public:
     virtual void updateLocalNumbering(EntityRenumberingFunctor &f);
 
     /// Integration point evaluator, loops over receiver IP's and calls given function (passed as f parameter) on them. The IP is parameter to function f.
-    template< class T > void ipEvaluator( T *src, void ( T :: *f )( GaussPoint *gp ) );
+    template< class T >void ipEvaluator( T * src, void ( T :: *f )( GaussPoint * gp ) );
     /// Integration point evaluator, loops over receiver IP's and calls given function (passed as f parameter) on them. The IP is parameter to function f as well as additional array.
-    template< class T, class S > void ipEvaluator(T *src, void ( T :: *f )( GaussPoint *, S & ), S &_val);
+    template< class T, class S >void ipEvaluator(T * src, void ( T :: *f )( GaussPoint *, S & ), S & _val);
 
 
 
@@ -878,8 +877,8 @@ protected:
     virtual void          computeGaussPoints() { }
 };
 
-template< class T > void
-Element :: ipEvaluator( T *src, void ( T :: *f )( GaussPoint *gp ) )
+template< class T >void
+Element :: ipEvaluator( T *src, void ( T :: *f )( GaussPoint * gp ) )
 {
     int ir, ip, nir, nip;
     GaussPoint *gp;
@@ -893,7 +892,7 @@ Element :: ipEvaluator( T *src, void ( T :: *f )( GaussPoint *gp ) )
     }
 }
 
-template< class T, class S > void
+template< class T, class S >void
 Element :: ipEvaluator(T *src, void ( T :: *f )( GaussPoint *, S & ), S &_val)
 {
     int ir, ip, nip;
@@ -907,7 +906,6 @@ Element :: ipEvaluator(T *src, void ( T :: *f )( GaussPoint *, S & ), S &_val)
         }
     }
 }
-
 } // end namespace oofem
 #endif //element_h
 

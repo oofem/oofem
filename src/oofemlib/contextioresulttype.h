@@ -40,14 +40,12 @@
 #define contextioresulttype_h
 
 namespace oofem {
-
 enum contextIOResultType {
     CIO_OK = 0,     // ok
     CIO_BADVERSION, // incompatible context file
     CIO_BADOBJ,     // bad object passed
     CIO_IOERR       // general io error
 };
-
 } // end namespace oofem
 #endif // contextioresulttype_h
 

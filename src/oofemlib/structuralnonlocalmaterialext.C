@@ -40,12 +40,7 @@
 #include "structuralnonlocalmaterialext.h"
 
 
-namespace oofem {
-
-
-
-
-} // end namespace oofem
+namespace oofem {} // end namespace oofem
 
 
 

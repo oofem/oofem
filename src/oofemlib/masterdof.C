@@ -52,13 +52,12 @@
 #include "contextioerr.h"
 
 #ifndef __MAKEDEPEND
-#include <stdlib.h>
-#include <ctype.h>
-#include <string.h>
+ #include <stdlib.h>
+ #include <ctype.h>
+ #include <string.h>
 #endif
 
 namespace oofem {
-
 MasterDof :: MasterDof(int i, DofManager *aNode, int nbc, int nic, DofID id) : Dof(i, aNode, id)
     // Constructor. Creates a new d.o.f., with number i, belonging
     // to aNode with bc=nbc, ic=nic
@@ -162,26 +161,26 @@ double MasterDof :: giveUnknown(EquationID type, ValueModeType mode, TimeStep *s
 // current time step n, it is assumed to be the previous one (n-1).
 {
     /*   double value ;
-    *
-    *  if (stepN -> isTheCurrentTimeStep()) {
-    *     if (unknowns -> includes(u))                       // already known
-    *  value = unknowns -> at(u) ;
-    *     else {
-    *  if (stepN->giveNumber()==0) {                   // step 0
-    *    if (this->hasIcOn(u))                        //   init. cond.
-    *       value = this -> giveIc() -> give(u) ;
-    *    else                                         //   no init. cond.
-    *       value = 0. ;}
-    *  else if (this->hasBc() && islower(u))           // bound . cond.
-    *    value = this -> giveBc() -> give(u,stepN) ;
-    *  else                                            // compute it !
-    *    value = this -> computeUnknown(u,stepN) ;
-    *  unknowns -> add(u,value) ;}}
-    *
-    *  else
-    *     value = this -> givePastUnknown(u,stepN) ;         // the previous step
-    *
-    *  return value ;   */
+     *
+     *  if (stepN -> isTheCurrentTimeStep()) {
+     *     if (unknowns -> includes(u))                       // already known
+     *  value = unknowns -> at(u) ;
+     *     else {
+     *  if (stepN->giveNumber()==0) {                   // step 0
+     *    if (this->hasIcOn(u))                        //   init. cond.
+     *       value = this -> giveIc() -> give(u) ;
+     *    else                                         //   no init. cond.
+     *       value = 0. ;}
+     *  else if (this->hasBc() && islower(u))           // bound . cond.
+     *    value = this -> giveBc() -> give(u,stepN) ;
+     *  else                                            // compute it !
+     *    value = this -> computeUnknown(u,stepN) ;
+     *  unknowns -> add(u,value) ;}}
+     *
+     *  else
+     *     value = this -> givePastUnknown(u,stepN) ;         // the previous step
+     *
+     *  return value ;   */
     double value;
 
 #ifdef DEBUG
@@ -330,9 +329,9 @@ int MasterDof :: giveBcId()
     return this->bc;
 }
 
-int MasterDof :: giveIcId ()
+int MasterDof :: giveIcId()
 {
-  return this->ic;
+    return this->ic;
 }
 
 void MasterDof :: updateYourself(TimeStep *tStep)
@@ -498,5 +497,4 @@ MasterDof :: unpackAndUpdateUnknown(CommunicationBuffer &buff, EquationID type,
 }
 
 #endif
-
 } // end namespace oofem

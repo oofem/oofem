@@ -38,13 +38,12 @@
 #define matstatus_h
 
 #ifndef __MAKEDEPEND
-#include <stdio.h>
+ #include <stdio.h>
 #endif
 #include "femcmpnn.h"
 #include "classtype.h"
 
 namespace oofem {
-
 /*
  * This class implements a material status information. It is atribute of
  * gaussPoint. This is only an abstract class, for every instance of material class
@@ -139,32 +138,32 @@ public:
      * Returns the value of material model property stored in receiving status.
      * This is typically used when random variation of some material property is considered,
      * in this case the individual values are to be stored in status (they are no longer material constatnts)
-     * Returns true if property is available in status,  false  
+     * Returns true if property is available in status,  false
      */
-     virtual bool giveMaterialProperty (int propID, double &value) {return false;}
+    virtual bool giveMaterialProperty(int propID, double &value) { return false; }
     /**
      * Allows to set the value of material model property to be stored in receiving status.
      * This is typically used when random variation of some material property is considered,
      * in this case the individual values are to be stored in status (they are no longer material constatnts)
      */
-     virtual void setMaterialProperty (int propID, double value) {}
+    virtual void setMaterialProperty(int propID, double value) {}
 
-     /**
-      * Allows to set the value of a specific variable, identified by varID.
-      * The meaning of varID is defined in each specific implementation
-      * of the method depending on the material model.
-      * This method can be used to set the initial values of internal
-      * variables, stresses, etc., which have been previously determined
-      * by another simulation (e.g. of the manufacturing process).  
-      */
-     virtual void setStatusVariable (int varID, double value) {}
-     /**
-      * Restores consistency of the status, i.e., computes or corrects
-      * the values of certain status variables such that the state is admissible.
-      * For instance, if the initial values of some internal variables 
-      * are read from a file, other internal variables are adjusted accordingly.
-      */ 
-     virtual void restoreConsistency () {}
+    /**
+     * Allows to set the value of a specific variable, identified by varID.
+     * The meaning of varID is defined in each specific implementation
+     * of the method depending on the material model.
+     * This method can be used to set the initial values of internal
+     * variables, stresses, etc., which have been previously determined
+     * by another simulation (e.g. of the manufacturing process).
+     */
+    virtual void setStatusVariable(int varID, double value) {}
+    /**
+     * Restores consistency of the status, i.e., computes or corrects
+     * the values of certain status variables such that the state is admissible.
+     * For instance, if the initial values of some internal variables
+     * are read from a file, other internal variables are adjusted accordingly.
+     */
+    virtual void restoreConsistency() {}
 
     // definition
     /// Returns class name of the receiver.
@@ -175,6 +174,5 @@ public:
 
     IRResultType initializeFrom(InputRecord *ir) { return IRRT_OK; }
 };
-
 } // end namespace oofem
 #endif // matstatus_h

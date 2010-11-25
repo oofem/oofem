@@ -49,7 +49,6 @@
 #include "valuemodetype.h"
 
 namespace oofem {
-
 /**
  * Class implementing general initial condition. Initial condition is usually attribute of
  * one or more degrees of freedom (DOFs).
@@ -142,6 +141,5 @@ public:
     /// Returns class name of the receiver.
     const char *giveClassName() const { return "InitialCondition"; }
 };
-
 } // end namespace oofem
 #endif // initial_h

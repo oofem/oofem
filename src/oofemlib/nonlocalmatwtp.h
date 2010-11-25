@@ -36,24 +36,23 @@
 
 #ifdef __PARALLEL_MODE
 
-#include "loadbalancer.h"
-#ifndef __MAKEDEPEND
-#include <map>
-#include <list>
-#include <vector>
-#include <set>
-#endif
+ #include "loadbalancer.h"
+ #ifndef __MAKEDEPEND
+  #include <map>
+  #include <list>
+  #include <vector>
+  #include <set>
+ #endif
 
 namespace oofem {
-
 /**
  * End-of-data marker, used to identify end of data stream received.
  * The value should not conflict with any classType value and any possible globnum id.
  */
-#define NonlocalMaterialWTP_END_DATA -1
+ #define NonlocalMaterialWTP_END_DATA -1
 
-#define MIGRATE_NONLOCALDEP_TAG 4008
-#define MIGRATE_REMOTE_ELEMENTS_TAG 4009
+ #define MIGRATE_NONLOCALDEP_TAG 4008
+ #define MIGRATE_REMOTE_ELEMENTS_TAG 4009
 
 
 class GaussPoint;
@@ -120,7 +119,6 @@ protected:
      */
     void fastElementIPNonlocTableUpdater(GaussPoint *gp, IntArray &map);
 };
-
 } // end namespace oofem
 #endif
 #endif // nonlocalmatwtp_h

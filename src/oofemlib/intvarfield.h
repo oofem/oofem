@@ -42,7 +42,6 @@
 #include "materialmappingalgorithmtype.h"
 
 namespace oofem {
-
 /**
  * Abstract class representing a field of an internal variable. Field represent the spatial distribution of certain variable and is able to evaluate its value at any point of interest. The field is usually associated to the specific domain.
  * It uses MaterialMappingAlgorithm interface to perform interpolation. Note, that some classes implementing MaterialMappingAlgorithm may require that elements implement corresponding interface.
@@ -93,6 +92,5 @@ public:
      */
     virtual const char *giveClassName() const { return "InternalVariableField"; }
 };
-
 } // end namespace oofem
 #endif // intvarfield_h

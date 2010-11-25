@@ -36,11 +36,10 @@
 #include "tokenizer.h"
 #include "error.h"
 #ifndef __MAKEDEPEND
-#include <ctype.h>
+ #include <ctype.h>
 #endif
 
 namespace oofem {
-
 Tokenizer :: Tokenizer(char separator)
 {
     this->separator = separator;
@@ -54,7 +53,7 @@ Tokenizer :: readStringToken(int &bpos, const char * &line, char * &token)
     this->readToken(bpos, line, token, '"'); // read everything up to terminating '"'
     if ( * line == '"' ) {
         line++;            // check if terminating '"' was found
-    } else                               {
+    } else {
         OOFEM_WARNING("Tokenizer::readStringToken : Missing closing separator (\")");
     }
 }
@@ -75,7 +74,7 @@ Tokenizer :: readStructToken(int &bpos, const char * &line, char * &token)
 
         if ( c == '{' ) {
             refLevel++;
-        } else if ( c == '}' )   {
+        } else if ( c == '}' ) {
             refLevel--;
         }
     } while ( refLevel && c != '\0' && c != '\n' );
@@ -95,7 +94,7 @@ Tokenizer :: readToken(int &bpos, const char * &line, char * &token, char sep)
             if ( bpos < OOFEM_MAX_TOKENS_LENGTH - 1 ) {
                 * token = c;
                 token++;
-		bpos++;
+                bpos++;
             }
         }
     } else {
@@ -103,7 +102,7 @@ Tokenizer :: readToken(int &bpos, const char * &line, char * &token, char sep)
             if ( bpos < OOFEM_MAX_TOKENS_LENGTH - 1 ) {
                 * token = c;
                 token++;
-		bpos++;
+                bpos++;
             }
         }
     }
@@ -139,7 +138,7 @@ int Tokenizer :: tokenizeLine(const char *currentLine)
                 readStringToken(bpos, ptr, token);
             } else if ( c == '{' ) {
                 readStructToken(bpos, ptr, token);
-            } else                                                        {
+            } else {
                 this->readToken(bpos, ptr, token, 0);
             }
         } else {
@@ -151,19 +150,23 @@ int Tokenizer :: tokenizeLine(const char *currentLine)
 
         if ( token - tokenPosition [ nTokens ] ) {  // if some chars were valid
             * token = '\0';
-	    if ( bpos < OOFEM_MAX_TOKENS_LENGTH-1 ) {
-	      token++; bpos++;
-	      nTokens ++; 
-	    } else {
-	      overflow = true;
-	    }
+            if ( bpos < OOFEM_MAX_TOKENS_LENGTH - 1 ) {
+                token++;
+                bpos++;
+                nTokens++;
+            } else {
+                overflow = true;
+            }
         }
     }
 
-    if ( overflow ) 
-      OOFEM_WARNING ("Tokenizer :: tokenizeLine: overflow detected, increase token buffer");
-    if ( nTokens >= OOFEM_MAX_TOKENS ) 
-      OOFEM_WARNING ("Tokenizer :: tokenizeLine: overflow detected, increase number of tokens");
+    if ( overflow ) {
+        OOFEM_WARNING("Tokenizer :: tokenizeLine: overflow detected, increase token buffer");
+    }
+
+    if ( nTokens >= OOFEM_MAX_TOKENS ) {
+        OOFEM_WARNING("Tokenizer :: tokenizeLine: overflow detected, increase number of tokens");
+    }
 
     if ( * ptr == '\n' || * ptr == '\0' ) {
         return 0;
@@ -188,7 +191,4 @@ const char *Tokenizer :: giveToken(int i)
         return NULL;
     }
 }
-
-
-
 } // end namespace oofem

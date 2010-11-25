@@ -46,7 +46,6 @@
 #include "error.h"
 
 namespace oofem {
-
 #ifdef DEBUG
 double &Column :: at(int i)
 //  Returns the i-th coefficient of the receiver. Slow but safe.
@@ -131,6 +130,4 @@ Column *Column :: GiveCopy()
 
     return answer;
 }
-
-
 } // end namespace oofem

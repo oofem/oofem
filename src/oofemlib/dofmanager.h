@@ -60,7 +60,6 @@
 #include "unknownnumberingscheme.h"
 
 namespace oofem {
-
 #ifdef __PARALLEL_MODE
 class CommunicationBuffer;
 /**
@@ -138,7 +137,7 @@ protected:
     bool isBoundaryFlag;
     /// flag indicating whether receiver has slave dofs
     bool hasSlaveDofs;
-#if defined(__PARALLEL_MODE) || defined(__ENABLE_COMPONENT_LABELS)
+#if defined( __PARALLEL_MODE ) || defined( __ENABLE_COMPONENT_LABELS )
     /**
      * In parallel mode, globalNumber contains globally unique DoFManager number.
      * The component number, inherited from FEMComponent class contains
@@ -184,7 +183,7 @@ public:
     int giveNumberOfPrimaryMasterDofs(IntArray &dofArray) const;
     //virtual int          giveNumberOfDofs () const;
     /** Returns location array (array containing for each requested dof related equation number) for
-     * given numbering scheme. 
+     * given numbering scheme.
      * @param dofIDArry array containing dof mask. This mask containing DofIDItem values
      * (they describe physical meaning of dofs, see cltypes.h) is used to extract only
      * required values. If dof with requested physical meaning dos not exist in receiver,
@@ -194,14 +193,14 @@ public:
      * @see Element::giveDofManDofIDMask function.
      */
     virtual void         giveLocationArray(const IntArray &dofIDArry, IntArray &locationArray,
-					   const UnknownNumberingScheme& s) const;
+                                           const UnknownNumberingScheme &s) const;
     /** Returns full location array of receiver containing equation numbers of all dofs
      * of receiver. Their order is specific to every DofManager. Mainly used at EngngModel level
      * to assemble DofManager contribution (typically load vector).
      * @param locationArray complete location array of receiver.
      * @param s determines the equation numbering scheme
      */
-    virtual void         giveCompleteLocationArray(IntArray &locationArray, const UnknownNumberingScheme& s) const;
+    virtual void         giveCompleteLocationArray(IntArray &locationArray, const UnknownNumberingScheme &s) const;
     /** Returns DOFs numbers of receiver with required physical meaning.
      * @param dofIDArry array containing DofIDItem-type values (this is enumeration
      * identifying physical meaning of particular DOF, see cltypes.h).
@@ -347,11 +346,11 @@ public:
     virtual int  hasAnySlaveDofs();
     /**
      * Returns true if the receiver is linked (its slave DOFs depend on master values) to some other dof managers.
-     * In this case, the masters array should contain the list of masters. 
-     * In both serial and parallel modes, local numbers are be provided. 
+     * In this case, the masters array should contain the list of masters.
+     * In both serial and parallel modes, local numbers are be provided.
      * If the receiver contains only primary DOFs, false is returned.
      */
-    virtual bool giveMasterDofMans (IntArray& masters);
+    virtual bool giveMasterDofMans(IntArray &masters);
 
     /**
      * Returns a newly allocated DofManager, with type depending on parameter.
@@ -399,7 +398,7 @@ public:
      * these relations to reflext updated numbering. The renumbering funciton is passed, which is supposed
      * to return an updated number of specified entyty type based on old number.
      */
-    virtual void updateLocalNumbering( EntityRenumberingFunctor &f ) ;
+    virtual void updateLocalNumbering(EntityRenumberingFunctor &f);
 
     /**@name Advanced functions */
     //@{
@@ -417,12 +416,12 @@ public:
     virtual void   drawYourself(oofegGraphicContext &context) { }
 #endif
 
-#if defined(__PARALLEL_MODE) || defined(__ENABLE_COMPONENT_LABELS)
+#if defined( __PARALLEL_MODE ) || defined( __ENABLE_COMPONENT_LABELS )
     /**
      * Returns receiver globally unique number.
      */
     int giveGlobalNumber() const { return globalNumber; }
-    int giveLabel() const {return globalNumber;}
+    int giveLabel() const { return globalNumber; }
     /** sets receiver global number */
     void setGlobalNumber(int _number) { globalNumber = _number; }
 #endif
@@ -473,7 +472,6 @@ protected:
     void computeSlaveDofTransformation(FloatMatrix &answer, const IntArray *dofMask, DofManTransfType mode);
     IntArray *giveCompleteGlobalDofIDArray(void) const;
 };
-
 } // end namespace oofem
 #endif // dofmanager_h
 

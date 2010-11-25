@@ -41,15 +41,15 @@
 #include "gausspnt.h"
 
 namespace oofem {
-
 MMAContainingElementProjection :: MMAContainingElementProjection() : MaterialMappingAlgorithm()
 { }
 
 void
 MMAContainingElementProjection :: __init(Domain *dold, IntArray &type, FloatArray &coords, int region, TimeStep *tStep)
 {
-    SpatialLocalizer *sl = dold->giveSpatialLocalizer();	
-    IntArray regionList(1); regionList.at(1)=region;
+    SpatialLocalizer *sl = dold->giveSpatialLocalizer();
+    IntArray regionList(1);
+    regionList.at(1) = region;
     GaussPoint *jGp;
     FloatArray jGpCoords;
     double distance, minDist = 1.e6;
@@ -57,34 +57,32 @@ MMAContainingElementProjection :: __init(Domain *dold, IntArray &type, FloatArra
     IntegrationRule *iRule;
     Element *srcElem;
 
-    if ((srcElem = sl->giveElementContainingPoint (coords, &regionList))) {
-    
+    if ( ( srcElem = sl->giveElementContainingPoint(coords, & regionList) ) ) {
+        iRule = srcElem->giveDefaultIntegrationRulePtr();
 
-      iRule = srcElem->giveDefaultIntegrationRulePtr();
-      
-      this->source = NULL;
-      for ( j = 0; j < iRule->getNumberOfIntegrationPoints(); j++ ) {
-        jGp = iRule->getIntegrationPoint(j);
-        if ( srcElem->computeGlobalCoordinates( jGpCoords, * ( jGp->giveCoordinates() ) ) ) {
-          distance = coords.distance(jGpCoords);
-          if ( distance < minDist ) {
-            minDist = distance;
-            this->source = jGp;
-          }
+        this->source = NULL;
+        for ( j = 0; j < iRule->getNumberOfIntegrationPoints(); j++ ) {
+            jGp = iRule->getIntegrationPoint(j);
+            if ( srcElem->computeGlobalCoordinates( jGpCoords, * ( jGp->giveCoordinates() ) ) ) {
+                distance = coords.distance(jGpCoords);
+                if ( distance < minDist ) {
+                    minDist = distance;
+                    this->source = jGp;
+                }
+            }
         }
-      }
-      
-      if ( !source ) {
-        OOFEM_ERROR("MMAContainingElementProjection::__init : no suitable source found");
-      }
+
+        if ( !source ) {
+            OOFEM_ERROR("MMAContainingElementProjection::__init : no suitable source found");
+        }
     } else {
-      OOFEM_ERROR ("MMAContainingElementProjection: No suitable element found");
+        OOFEM_ERROR("MMAContainingElementProjection: No suitable element found");
     }
 }
 
 int
 MMAContainingElementProjection :: __mapVariable(FloatArray &answer, FloatArray &coords,
-						InternalStateType type, TimeStep *tStep)
+                                                InternalStateType type, TimeStep *tStep)
 {
     if ( source ) {
         source->giveMaterial()->giveIPValue(answer, source, type, tStep);
@@ -93,6 +91,4 @@ MMAContainingElementProjection :: __mapVariable(FloatArray &answer, FloatArray &
 
     return 0;
 }
-
-
 } // end namespace oofem

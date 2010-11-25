@@ -182,8 +182,8 @@ Tetrah1_ht :: computeVolumeAround(GaussPoint *aGaussPoint)
 // Returns the portion of the receiver which is attached to aGaussPoint.
 {
     double determinant, weight, volume;
-    determinant = fabs( this->interpolation.giveTransformationJacobian(* aGaussPoint->giveCoordinates(), 
-								       FEIElementGeometryWrapper(this), 0.0) );
+    determinant = fabs( this->interpolation.giveTransformationJacobian(* aGaussPoint->giveCoordinates(),
+                                                                       FEIElementGeometryWrapper(this), 0.0) );
 
     weight      = aGaussPoint->giveWeight();
     volume      = determinant * weight;
@@ -222,9 +222,9 @@ Tetrah1_ht :: computeEgdeNMatrixAt(FloatMatrix &answer, GaussPoint *gp)
 double
 Tetrah1_ht :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 {
-    double result = this->interpolation.edgeGiveTransformationJacobian(iEdge, * gp->giveCoordinates(), 
-								       FEIElementGeometryWrapper(this), 0.0);
-    return result *gp-> giveWeight();
+    double result = this->interpolation.edgeGiveTransformationJacobian(iEdge, * gp->giveCoordinates(),
+                                                                       FEIElementGeometryWrapper(this), 0.0);
+    return result * gp->giveWeight();
 }
 
 
@@ -265,7 +265,7 @@ Tetrah1_ht :: giveEdgeDofMapping(IntArray &answer, int iEdge)
 void
 Tetrah1_ht :: computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge)
 {
-  this->interpolation.edgeLocal2global(answer, iEdge, * gp->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0);
+    this->interpolation.edgeLocal2global(answer, iEdge, * gp->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0);
 }
 
 IntegrationRule *
@@ -331,7 +331,7 @@ Tetrah1_ht :: giveSurfaceDofMapping(IntArray &answer, int iSurf)
 void
 Tetrah1_ht :: computeSurfIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iSurf)
 {
-  interpolation.surfaceLocal2global(answer, iSurf, * gp->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0);
+    interpolation.surfaceLocal2global(answer, iSurf, * gp->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0);
 }
 
 
@@ -363,8 +363,8 @@ Tetrah1_ht :: computeInternalSourceRhsVectorAt(FloatArray &answer, TimeStep *atT
 int
 Tetrah1_ht :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords)
 {
-  this->interpolation.local2global(answer, lcoords, FEIElementGeometryWrapper(this), 0.0);
-  return 1;
+    this->interpolation.local2global(answer, lcoords, FEIElementGeometryWrapper(this), 0.0);
+    return 1;
 }
 
 
@@ -385,7 +385,7 @@ Tetrah1_ht :: giveInterface(InterfaceType interface)
 int
 Tetrah1_ht :: ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type)
 {
-    if ( ( type == IST_TemperatureFlow ) || (type == IST_HumidityFlow) ) {
+    if ( ( type == IST_TemperatureFlow ) || ( type == IST_HumidityFlow ) ) {
         return 3;
     }
 
@@ -450,7 +450,7 @@ Tetrah1_ht :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArra
 int
 Tetrah1_ht :: computeLocalCoordinates(FloatArray &answer, const FloatArray &coords)
 {
-  return this->interpolation.global2local(answer, coords, FEIElementGeometryWrapper(this), 0.0);
+    return this->interpolation.global2local(answer, coords, FEIElementGeometryWrapper(this), 0.0);
 }
 
 

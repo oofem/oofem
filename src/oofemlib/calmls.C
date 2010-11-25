@@ -62,7 +62,6 @@
 #endif
 
 namespace oofem {
-
 #define CALM_RESET_STEP_REDUCE 0.25
 #define CALM_MAX_RESTARTS 4
 #define CALM_TANGENT_STIFF_TRESHOLD 0.1
@@ -389,7 +388,7 @@ restart:
     // update solution state counter
     tNow->incrementStateCounter();
     engngModel->updateComponent(tNow, InternalRhs, domain);
-    
+
     //((NonLinearStatic *)engngModel) -> giveInternalForces(F, *DeltaR, tNow);
 
     do {
@@ -886,11 +885,11 @@ CylindricalALM :: checkConvergence(FloatArray &R, FloatArray *R0, FloatArray &F,
 
 #endif
         // we compute a relative error norm
-	if (( RR0 + RR * Lambda * Lambda ) > calm_SMALL_ERROR_NUM ) {
-	  forceErr = sqrt( forceErr / ( RR0 + RR * Lambda * Lambda ) );
-	} else if (internalForcesEBENorm > calm_SMALL_ERROR_NUM ) {
-	  forceErr = sqrt( forceErr / internalForcesEBENorm );
-	} else {
+        if ( ( RR0 + RR * Lambda * Lambda ) > calm_SMALL_ERROR_NUM ) {
+            forceErr = sqrt( forceErr / ( RR0 + RR * Lambda * Lambda ) );
+        } else if ( internalForcesEBENorm > calm_SMALL_ERROR_NUM ) {
+            forceErr = sqrt(forceErr / internalForcesEBENorm);
+        } else {
             sqrt(forceErr);
         }
 
@@ -931,7 +930,7 @@ CylindricalALM :: initializeFrom(InputRecord *ir)
     IRResultType result;                   // Required by IR_GIVE_FIELD macro
 
     double oldPsi =  Psi; // default from constructor
-    double initialStepLength,forcedInitialStepLength;
+    double initialStepLength, forcedInitialStepLength;
     int hpcMode;
     IRResultType val;
 
@@ -963,11 +962,13 @@ CylindricalALM :: initializeFrom(InputRecord *ir)
     if ( ( deltaL <= 0.0 ) || ( deltaL > maxStepLength ) ) {
         deltaL = initialStepLength;
     }
-    // using this, one can enforce deltaL from the input file after restart 
+
+    // using this, one can enforce deltaL from the input file after restart
     forcedInitialStepLength = 0.;
     IR_GIVE_OPTIONAL_FIELD(ir, forcedInitialStepLength, IFT_CylindricalALM_forcedinitialsteplength, "forcedinitialsteplength"); // Macro
-    if (forcedInitialStepLength>0.)
-      deltaL = forcedInitialStepLength;
+    if ( forcedInitialStepLength > 0. ) {
+        deltaL = forcedInitialStepLength;
+    }
 
     numberOfRequiredIterations = 3;
     IR_GIVE_OPTIONAL_FIELD(ir, numberOfRequiredIterations, IFT_CylindricalALM_reqiterations, "reqiterations"); // Macro
@@ -1823,5 +1824,4 @@ CylindricalALM :: do_lineSearch(FloatArray &r, FloatArray &rInitial, FloatArray 
         OOFEM_LOG_INFO("LS: err_id=%d, eta=%e, dlambda=%e\n", ls_failed, currEta, deltaLambda);
     }
 }
-
 } // end namespace oofem

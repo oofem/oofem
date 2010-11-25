@@ -37,23 +37,21 @@
 #include "element.h"
 
 namespace oofem {
-
 /*
-void
-FEInterpolation :: nodes2coords(Domain *d, IntArray &nodes, const FloatArray **c, int n)
-{
-    int i, nnode = nodes.giveSize();
-    if ( n < nnode ) {
-        OOFEM_ERROR("FEInterpolation::nodes2coords: size mismatch");
-    }
+ * void
+ * FEInterpolation :: nodes2coords(Domain *d, IntArray &nodes, const FloatArray **c, int n)
+ * {
+ *  int i, nnode = nodes.giveSize();
+ *  if ( n < nnode ) {
+ *      OOFEM_ERROR("FEInterpolation::nodes2coords: size mismatch");
+ *  }
+ *
+ *  for ( i = 0; i < nnode; i++ ) {
+ *      c [ i ] = d->giveNode( nodes(i) )->giveCoordinates();
+ *  }
+ * }
+ */
 
-    for ( i = 0; i < nnode; i++ ) {
-        c [ i ] = d->giveNode( nodes(i) )->giveCoordinates();
-    }
-}
-*/
-
-int FEIElementGeometryWrapper::giveNumberOfVertices () const {return elem->giveNumberOfNodes();}
-const FloatArray* FEIElementGeometryWrapper::giveVertexCoordinates(int i) const {return elem->giveNode(i)->giveCoordinates();}
-
+int FEIElementGeometryWrapper :: giveNumberOfVertices() const { return elem->giveNumberOfNodes(); }
+const FloatArray *FEIElementGeometryWrapper :: giveVertexCoordinates(int i) const { return elem->giveNode(i)->giveCoordinates(); }
 } // end namespace oofem

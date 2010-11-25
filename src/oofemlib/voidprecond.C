@@ -38,11 +38,9 @@
 #include "voidprecond.h"
 
 namespace oofem {
-
 VoidPreconditioner :: VoidPreconditioner(const SparseMtrx &a, InputRecord &attributes) : Preconditioner(a, attributes)
 { }
 
 VoidPreconditioner :: VoidPreconditioner() : Preconditioner()
 { }
-
 } // end namespace oofem

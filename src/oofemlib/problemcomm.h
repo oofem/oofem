@@ -42,12 +42,11 @@
 
 #ifdef __PARALLEL_MODE
 
-#include "problemcommunicatormode.h"
-#include "communicator.h"
-#include "error.h"
+ #include "problemcommunicatormode.h"
+ #include "communicator.h"
+ #include "error.h"
 
 namespace oofem {
-
 /**
  * Class representing communicator for engng model.
  * It is assumed to be an attribute of  Engng model.
@@ -109,11 +108,11 @@ private:
      * @param cmp comparison function must return a negative value if first argument is less than the second,
      * zero if the arguments are equal, and a positive number otherwise.
      */
-    void sortCommMap( IntArray & map, int ( ProblemCommunicator :: * cmp )( int, int ) );
+    void sortCommMap( IntArray & map, int ( ProblemCommunicator :: *cmp )( int, int ) );
     /// Implementation of Quiksort algorithm
-    void quickSortCommMap( IntArray & map, int l, int r, int ( ProblemCommunicator :: * cmp )( int, int ) );
+    void quickSortCommMap( IntArray & map, int l, int r, int ( ProblemCommunicator :: *cmp )( int, int ) );
     /// Partitioning used in quiksort
-    int quickSortPartition( IntArray & map, int l, int r, int ( ProblemCommunicator :: * cmp )( int, int ) );
+    int quickSortPartition( IntArray & map, int l, int r, int ( ProblemCommunicator :: *cmp )( int, int ) );
 
     /// global dofManager number comparison function
     int DofManCmp(int, int);
@@ -139,7 +138,6 @@ private:
      */
     void setUpCommunicationMapsForRemoteElementMode(EngngModel *domain, bool excludeSelfCommFlag);
 };
-
 } // end namespace oofem
 #endif
 #endif // problemcomm_h

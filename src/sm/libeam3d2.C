@@ -53,18 +53,17 @@
 #include "util.h"
 
 #ifndef __MAKEDEPEND
-#include <math.h>
+ #include <math.h>
 #endif
 
 #ifdef __OOFEG
-#include "engngm.h"
-#include "oofeggraphiccontext.h"
-#include "oofegutils.h"
-#include "conTable.h"
+ #include "engngm.h"
+ #include "oofeggraphiccontext.h"
+ #include "oofegutils.h"
+ #include "conTable.h"
 #endif
 
 namespace oofem {
-
 LIBeam3d2 :: LIBeam3d2(int n, Domain *aDomain) : NLStructuralElement(n, aDomain), tc(), tempTc()
     // Constructor.
 {
@@ -130,12 +129,12 @@ void
 LIBeam3d2 :: computeGaussPoints()
 // Sets up the array of Gauss Points of the receiver.
 {
-  if (!integrationRulesArray) {
-    numberOfIntegrationRules = 1;
-    integrationRulesArray = new IntegrationRule * [ 1 ];
-    integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 2);
-    integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Line, 1, _3dBeam);
-  }
+    if ( !integrationRulesArray ) {
+        numberOfIntegrationRules = 1;
+        integrationRulesArray = new IntegrationRule * [ 1 ];
+        integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 2);
+        integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Line, 1, _3dBeam);
+    }
 }
 
 
@@ -147,10 +146,10 @@ LIBeam3d2 :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep)
 {
     Material *mat;
     double halfMass;
-    GaussPoint* gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
+    GaussPoint *gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
 
     mat        = this->giveMaterial();
-    halfMass   = mat->give('d',gp) * this->giveCrossSection()->give(CS_Area) * this->giveLength() / 2.;
+    halfMass   = mat->give('d', gp) * this->giveCrossSection()->give(CS_Area) * this->giveLength() / 2.;
     answer.resize(12, 12);
     answer.zero();
     answer.at(1, 1) = answer.at(2, 2) = answer.at(3, 3) = halfMass;
@@ -283,9 +282,9 @@ LIBeam3d2 :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoo
     n2  = ( 1. + ksi ) * 0.5;
 
     answer.resize(3);
-    answer.at(1) = n1 * this->giveNode(1)->giveCoordinate(1) + n2 * this->giveNode(2)->giveCoordinate(1);
-    answer.at(2) = n1 * this->giveNode(1)->giveCoordinate(2) + n2 * this->giveNode(2)->giveCoordinate(2);
-    answer.at(3) = n1 * this->giveNode(1)->giveCoordinate(3) + n2 * this->giveNode(2)->giveCoordinate(3);
+    answer.at(1) = n1 * this->giveNode(1)->giveCoordinate(1) + n2 *this->giveNode(2)->giveCoordinate(1);
+    answer.at(2) = n1 * this->giveNode(1)->giveCoordinate(2) + n2 *this->giveNode(2)->giveCoordinate(2);
+    answer.at(3) = n1 * this->giveNode(1)->giveCoordinate(3) + n2 *this->giveNode(2)->giveCoordinate(3);
 
     return 1;
 }
@@ -475,6 +474,7 @@ LIBeam3d2 :: computeLoadGToLRotationMtrx(FloatMatrix &answer)
 
     //delete lcs;
     return 1;
+
     ;
 }
 
@@ -867,7 +867,9 @@ LIBeam3d2 :: drawDeformedGeometry(oofegGraphicContext &gc, UnknownType type)
     double defScale = gc.getDefScale();
     //  if (!go) { // create new one
     WCRec p [ 2 ]; /* poin */
-    char const *colors[] = {"red", "green", "blue"};
+    char const *colors[] = {
+        "red", "green", "blue"
+    };
 
     EASValsSetLineWidth(OOFEG_DEFORMED_GEOMETRY_WIDTH);
     EASValsSetColor( gc.getDeformedElementColor() );
@@ -898,7 +900,7 @@ LIBeam3d2 :: drawDeformedGeometry(oofegGraphicContext &gc, UnknownType type)
         p [ 1 ].y = p [ 0 ].y + coeff *tc.at(2, i);
         p [ 1 ].z = p [ 0 ].z + coeff *tc.at(3, i);
 
-        EASValsSetColor( ColorGetPixelFromString(oofem_tmpstr(colors[i-1]), & succ) );
+        EASValsSetColor( ColorGetPixelFromString(oofem_tmpstr(colors [ i - 1 ]), & succ) );
 
         go = CreateLine3D(p);
         EGWithMaskChangeAttributes(WIDTH_MASK | COLOR_MASK | LAYER_MASK, go);

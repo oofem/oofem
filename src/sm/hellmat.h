@@ -10,9 +10,9 @@
 
 // standard includes
 #ifndef __MAKEDEPEND
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+ #include <stdio.h>
+ #include <stdlib.h>
+ #include <string.h>
 #endif
 
 // oofem includes
@@ -24,13 +24,11 @@
 
 #ifdef __TM_MODULE
 // Hellmat includes
-#include "../tm/hemotkmat.h"      // for inverse sorption isotherm function
-#include "hydram.h"                      // hydration model
+ #include "../tm/hemotkmat.h"     // for inverse sorption isotherm function
+ #include "hydram.h"                     // hydration model
 #endif
 
 namespace oofem {
-
-
 #ifdef __TM_MODULE
 
 class GaussPoint;
@@ -42,45 +40,45 @@ class GaussPoint;
 //#define VERBOSE_TANGENT // consistent tangent statistic
 
 // substitution for 0 hydration degree for determining non-singular stiffness matrix
-#define HYDRATION_MINDEGREE 1e-3 // 1e-6 deteriorates the iterative solver efficiency for consequent cast
+ #define HYDRATION_MINDEGREE 1e-3 // 1e-6 deteriorates the iterative solver efficiency for consequent cast
 
 // === additional output file ===
-#define OUTPUTFILE_SS "out/plastic.out"
+ #define OUTPUTFILE_SS "out/plastic.out"
 
 // settings for local plastic Newton iteration
 // approxNewton solution parameter - dx for derivative evaluation
 // also used for dRcdchi1
-#define NEWTON_DERIVATIVEDX 1e-12
+ #define NEWTON_DERIVATIVEDX 1e-12
 // relative error bound for plastic local iteration (d f1)
-#define ROOT_PRECISION_DLAMBDA 1e-10
+ #define ROOT_PRECISION_DLAMBDA 1e-10
 // absolute error bound for plastic local iteration (D f1) - has same scale as stress ... 1e-8/1e6 = 1e-14
-#define FINDROOT_SMALLNUM 1e-8
+ #define FINDROOT_SMALLNUM 1e-8
 
 // active plastic surface
 enum ActiveSurface { asNone = 0, asDP = 1, asTC = 2, asCorner = 3 };
 // material options mask {
 typedef unsigned int MaterialOptions;
 // options
-#define moIsothermal 1          // DEFAULT constant temperature in space
-#define moHydration 2           // DEFAULT compute hydration
-#define moShrinkage 4           // DEFAULT autogenous shrinkage
-#define moHardening 8           // DEFAULT plastic hardening of Drucker-Prager surface
-#define moSqrtHardeningLaw 16   // DEFAULT for smooth stress-strain curve, otherwise quadratic hardening is used
-#define moCreep 32              // DEFAULT creep
-#define moApproxNewton 64       //         approximates the derivative in local plastic iteration with finite dx
-#define moPlasticity 128        // DEFAULT use plasticity
-#define moPlotStressStrain 256  //         output stress-strain data
-#define moPlotStressStrainIter 512 //        for each iteration
-#define moComputedl 1024        //         direct computation of plastic increment (quadratic equation); if not set, newton iteration is used
-#define moDeviatoricCreepE 2048  //         only deviatoric part of stress is taken into account for flow creep strain increment evaluation
-#define moDeviatoricCreepF 4096  //         -"- for viscous creep strain increment evaluation
-#define moLinearEModulus   8192  //        force linear relation E(ksi)
-#define moHumidityStrain  16384  //        reversible humidity dilatation
-#define moDryingShrinkage 32768  //        include drying shrinkage and stress-induced temperature dilatation in the flow creep strain / that's a shit!
+ #define moIsothermal 1         // DEFAULT constant temperature in space
+ #define moHydration 2          // DEFAULT compute hydration
+ #define moShrinkage 4          // DEFAULT autogenous shrinkage
+ #define moHardening 8          // DEFAULT plastic hardening of Drucker-Prager surface
+ #define moSqrtHardeningLaw 16  // DEFAULT for smooth stress-strain curve, otherwise quadratic hardening is used
+ #define moCreep 32             // DEFAULT creep
+ #define moApproxNewton 64      //         approximates the derivative in local plastic iteration with finite dx
+ #define moPlasticity 128       // DEFAULT use plasticity
+ #define moPlotStressStrain 256 //         output stress-strain data
+ #define moPlotStressStrainIter 512 //        for each iteration
+ #define moComputedl 1024       //         direct computation of plastic increment (quadratic equation); if not set, newton iteration is used
+ #define moDeviatoricCreepE 2048 //         only deviatoric part of stress is taken into account for flow creep strain increment evaluation
+ #define moDeviatoricCreepF 4096 //         -"- for viscous creep strain increment evaluation
+ #define moLinearEModulus   8192 //        force linear relation E(ksi)
+ #define moHumidityStrain  16384 //        reversible humidity dilatation
+ #define moDryingShrinkage 32768 //        include drying shrinkage and stress-induced temperature dilatation in the flow creep strain / that's a shit!
 // option sets
-#define moHasShrinkage 6        //         moHydration + moShrinkage
-#define moDefault 191           //         1+2+4+8+16+32+128 - hydrating plasticity with sqrt hardening, shrinkage, creep.
-#define moMaterialLevel 0       //         nonIsothermal, no creep, no plasticity, ??? hydration - depends
+ #define moHasShrinkage 6       //         moHydration + moShrinkage
+ #define moDefault 191          //         1+2+4+8+16+32+128 - hydrating plasticity with sqrt hardening, shrinkage, creep.
+ #define moMaterialLevel 0      //         nonIsothermal, no creep, no plasticity, ??? hydration - depends
 // }
 
 // ==== Aging isotropic linear elastic material class allowing to set E ====
@@ -195,123 +193,191 @@ public:
     virtual ~HellmichMaterialStatus();
     // === Status variables access routines ===
     // all access routines are defined, appropriate data class is checked and used
-#ifdef VERBOSE_HELLMAT // error-checking status access
+ #ifdef VERBOSE_HELLMAT // error-checking status access
     // Non-isothermal
-    double giveTemperature() { if ( !nonisoData ) { _error("giveTemperature: missing nonisoData."); }
+    double giveTemperature() {
+        if ( !nonisoData ) { _error("giveTemperature: missing nonisoData."); }
 
-                               return nonisoData->temperature; }
-    double giveTempTemperature() { if ( !nonisoData ) { _error("giveTempTemperature: missing nonisoData."); }
+        return nonisoData->temperature;
+    }
+    double giveTempTemperature() {
+        if ( !nonisoData ) { _error("giveTempTemperature: missing nonisoData."); }
 
-                                   return nonisoData->tempTemperature; }
-    double giveHumidity() { if ( !nonisoData ) { _error("giveHumidity: missing nonisoData."); }
+        return nonisoData->tempTemperature;
+    }
+    double giveHumidity() {
+        if ( !nonisoData ) { _error("giveHumidity: missing nonisoData."); }
 
-                            return nonisoData->humidity; }
-    double giveTempHumidity() { if ( !nonisoData ) { _error("giveTempHumidity: missing nonisoData."); }
+        return nonisoData->humidity;
+    }
+    double giveTempHumidity() {
+        if ( !nonisoData ) { _error("giveTempHumidity: missing nonisoData."); }
 
-                                return nonisoData->tempHumidity; }
-    double giveInitialTemperature() { if ( !nonisoData ) { _error("giveInitialTemperature: missing nonisoData."); }
+        return nonisoData->tempHumidity;
+    }
+    double giveInitialTemperature() {
+        if ( !nonisoData ) { _error("giveInitialTemperature: missing nonisoData."); }
 
-                                      return nonisoData->initialTemperature; }
+        return nonisoData->initialTemperature;
+    }
     void setInitialTemperature(double v);
-    void setTempTemperature(double v) { if ( !nonisoData ) { _error("setTempTemperature: missing nonisoData."); }
+    void setTempTemperature(double v) {
+        if ( !nonisoData ) { _error("setTempTemperature: missing nonisoData."); }
 
-                                        nonisoData->tempTemperature = v; }
-    void setTempHumidity(double v) { if ( !nonisoData ) { _error("setTempHumidity: missing nonisoData."); }
+        nonisoData->tempTemperature = v;
+    }
+    void setTempHumidity(double v) {
+        if ( !nonisoData ) { _error("setTempHumidity: missing nonisoData."); }
 
-                                     nonisoData->tempHumidity = v; }
+        nonisoData->tempHumidity = v;
+    }
     // Non-isothermal creep
-    double giveGamma0() { if ( !nonisoData ) { _error("giveGamma0: missing nonisoData."); }
+    double giveGamma0() {
+        if ( !nonisoData ) { _error("giveGamma0: missing nonisoData."); }
 
-                          return nonisoData->gamma0; }
-    double giveViscousSlip() { if ( !nonisoData ) { _error("giveViscousSlip: missing nonisoData."); }
+        return nonisoData->gamma0;
+    }
+    double giveViscousSlip() {
+        if ( !nonisoData ) { _error("giveViscousSlip: missing nonisoData."); }
 
-                               return nonisoData->viscousSlip; }
-    double giveTempViscousSlip() { if ( !nonisoData ) { _error("giveTempViscousSlip: missing nonisoData."); }
+        return nonisoData->viscousSlip;
+    }
+    double giveTempViscousSlip() {
+        if ( !nonisoData ) { _error("giveTempViscousSlip: missing nonisoData."); }
 
-                                   return nonisoData->tempViscousSlip; }
-    double giveViscosity() { if ( !nonisoData ) { _error("giveViscosity: missing nonisoData."); }
+        return nonisoData->tempViscousSlip;
+    }
+    double giveViscosity() {
+        if ( !nonisoData ) { _error("giveViscosity: missing nonisoData."); }
 
-                             return nonisoData->viscosity; }
-    void setGamma0(double v) { if ( !nonisoData ) { _error("setGamma0: missing nonisoData."); }
+        return nonisoData->viscosity;
+    }
+    void setGamma0(double v) {
+        if ( !nonisoData ) { _error("setGamma0: missing nonisoData."); }
 
-                               nonisoData->gamma0 = v; }
-    void setViscousSlip(double v) { if ( !nonisoData ) { _error("setViscousSlip: missing nonisoData."); }
+        nonisoData->gamma0 = v;
+    }
+    void setViscousSlip(double v) {
+        if ( !nonisoData ) { _error("setViscousSlip: missing nonisoData."); }
 
-                                    nonisoData->viscousSlip = v; }
-    void setTempViscousSlip(double v) { if ( !nonisoData ) { _error("setTempViscousSlip: missing nonisoData."); }
+        nonisoData->viscousSlip = v;
+    }
+    void setTempViscousSlip(double v) {
+        if ( !nonisoData ) { _error("setTempViscousSlip: missing nonisoData."); }
 
-                                        nonisoData->tempViscousSlip = v; }
-    void setViscosity(double v) { if ( !nonisoData ) { _error("setViscosity: missing nonisoData."); }
+        nonisoData->tempViscousSlip = v;
+    }
+    void setViscosity(double v) {
+        if ( !nonisoData ) { _error("setViscosity: missing nonisoData."); }
 
-                                  nonisoData->viscosity = v; }
+        nonisoData->viscosity = v;
+    }
 
     // Plasticity
-    void givePlasticStrainVector(FloatArray &answer) const { if ( !plastData ) { _error("givePlasticStrainVector: missing plastData."); }
+    void givePlasticStrainVector(FloatArray &answer) const {
+        if ( !plastData ) { _error("givePlasticStrainVector: missing plastData."); }
 
-                                                             answer = plastData->plasticStrainVector; }
-    void giveTempPlasticStrainVector(FloatArray &answer) const { if ( !plastData ) { _error("giveTempPlasticStrainVector: missing plastData."); }
+        answer = plastData->plasticStrainVector;
+    }
+    void giveTempPlasticStrainVector(FloatArray &answer) const {
+        if ( !plastData ) { _error("giveTempPlasticStrainVector: missing plastData."); }
 
-                                                                 answer = plastData->tempPlasticStrainVector; }
+        answer = plastData->tempPlasticStrainVector;
+    }
     double giveHardeningVar() { if ( plastData ) { return plastData->hardeningVar; } else { return 0.; } }
     double giveTempHardeningVar() { if ( plastData ) { return plastData->tempHardeningVar; } else { return 0.; } }
-    void giveTrialStressVector(FloatArray &answer) const { if ( !plastData ) { _error("giveTrialStressVector: missing plastData."); }
+    void giveTrialStressVector(FloatArray &answer) const {
+        if ( !plastData ) { _error("giveTrialStressVector: missing plastData."); }
 
-                                                           answer = plastData->trialStressVector; }
+        answer = plastData->trialStressVector;
+    }
     ActiveSurface giveActiveSurface() { if ( !plastData ) { return asNone; } else { return plastData->activeSurface; } }
-    double giveFlowIncrement() { if ( !plastData ) { _error("giveFlowIncrement: missing plastData."); }
+    double giveFlowIncrement() {
+        if ( !plastData ) { _error("giveFlowIncrement: missing plastData."); }
 
-                                 return plastData->flowIncrement; }
+        return plastData->flowIncrement;
+    }
 
-    void setPlasticStrainVector(const FloatArray &v) { if ( !plastData ) { _error("setPlasticStrainVector: missing plastData."); }
+    void setPlasticStrainVector(const FloatArray &v) {
+        if ( !plastData ) { _error("setPlasticStrainVector: missing plastData."); }
 
-                                                       plastData->plasticStrainVector = v; }
-    void setTempPlasticStrainVector(const FloatArray &v) { if ( !plastData ) { _error("setTempPlasticStrainVector: missing plastData."); }
+        plastData->plasticStrainVector = v;
+    }
+    void setTempPlasticStrainVector(const FloatArray &v) {
+        if ( !plastData ) { _error("setTempPlasticStrainVector: missing plastData."); }
 
-                                                           plastData->tempPlasticStrainVector = v; }
-    void setHardeningVar(double v) { if ( !plastData ) { _error("setHardeningVar: missing plastData."); }
+        plastData->tempPlasticStrainVector = v;
+    }
+    void setHardeningVar(double v) {
+        if ( !plastData ) { _error("setHardeningVar: missing plastData."); }
 
-                                     plastData->hardeningVar = v; }
-    void setTempHardeningVar(double v) { if ( !plastData ) { _error("setTempHardeningVar: missing plastData."); }
+        plastData->hardeningVar = v;
+    }
+    void setTempHardeningVar(double v) {
+        if ( !plastData ) { _error("setTempHardeningVar: missing plastData."); }
 
-                                         plastData->tempHardeningVar = v; }
-    void setTrialStressVector(const FloatArray &v) { if ( !plastData ) { _error("setTrialStressVector: missing plastData."); }
+        plastData->tempHardeningVar = v;
+    }
+    void setTrialStressVector(const FloatArray &v) {
+        if ( !plastData ) { _error("setTrialStressVector: missing plastData."); }
 
-                                                     plastData->trialStressVector = v; }
-    void setActiveSurface(ActiveSurface as) { if ( !plastData ) { _error("setActiveSurface: missing plastData."); }
+        plastData->trialStressVector = v;
+    }
+    void setActiveSurface(ActiveSurface as) {
+        if ( !plastData ) { _error("setActiveSurface: missing plastData."); }
 
-                                              plastData->activeSurface = as; }
-    void setFlowIncrement(double v) { if ( !plastData ) { _error("setFlowIncrement: missing plastData."); }
+        plastData->activeSurface = as;
+    }
+    void setFlowIncrement(double v) {
+        if ( !plastData ) { _error("setFlowIncrement: missing plastData."); }
 
-                                      plastData->flowIncrement = v; }
+        plastData->flowIncrement = v;
+    }
 
     // Creep strain vectors
-    void giveViscousStrainVector(FloatArray &answer) const { if ( !creepData ) { _error("giveViscousStrainVector: missing creepData."); }
+    void giveViscousStrainVector(FloatArray &answer) const {
+        if ( !creepData ) { _error("giveViscousStrainVector: missing creepData."); }
 
-                                                             answer = creepData->viscousStrainVector; }
-    void giveTempViscousStrainVector(FloatArray &answer) const { if ( !creepData ) { _error("giveTempViscousStrainVector: missing creepData."); }
+        answer = creepData->viscousStrainVector;
+    }
+    void giveTempViscousStrainVector(FloatArray &answer) const {
+        if ( !creepData ) { _error("giveTempViscousStrainVector: missing creepData."); }
 
-                                                                 answer = creepData->tempViscousStrainVector; }
-    void giveFlowStrainVector(FloatArray &answer) const { if ( !creepData ) { _error("giveFlowStrainVector: missing creepData."); }
+        answer = creepData->tempViscousStrainVector;
+    }
+    void giveFlowStrainVector(FloatArray &answer) const {
+        if ( !creepData ) { _error("giveFlowStrainVector: missing creepData."); }
 
-                                                          answer = creepData->flowStrainVector; }
-    void giveTempFlowStrainVector(FloatArray &answer) const { if ( !creepData ) { _error("giveTempFlowStrainVector: missing creepData."); }
+        answer = creepData->flowStrainVector;
+    }
+    void giveTempFlowStrainVector(FloatArray &answer) const {
+        if ( !creepData ) { _error("giveTempFlowStrainVector: missing creepData."); }
 
-                                                              answer = creepData->tempFlowStrainVector; }
+        answer = creepData->tempFlowStrainVector;
+    }
 
-    void setViscousStrainVector(const FloatArray &v) { if ( !creepData ) { _error("setViscousStrainVector: missing creepData."); }
+    void setViscousStrainVector(const FloatArray &v) {
+        if ( !creepData ) { _error("setViscousStrainVector: missing creepData."); }
 
-                                                       creepData->viscousStrainVector = v; }
-    void setTempViscousStrainVector(const FloatArray &v) { if ( !creepData ) { _error("setTempViscousStrainVector: missing creepData."); }
+        creepData->viscousStrainVector = v;
+    }
+    void setTempViscousStrainVector(const FloatArray &v) {
+        if ( !creepData ) { _error("setTempViscousStrainVector: missing creepData."); }
 
-                                                           creepData->tempViscousStrainVector = v; }
-    void setFlowStrainVector(const FloatArray &v) { if ( !creepData ) { _error("setFlowStrainVector: missing creepData."); }
+        creepData->tempViscousStrainVector = v;
+    }
+    void setFlowStrainVector(const FloatArray &v) {
+        if ( !creepData ) { _error("setFlowStrainVector: missing creepData."); }
 
-                                                    creepData->flowStrainVector = v; }
-    void setTempFlowStrainVector(const FloatArray &v) { if ( !creepData ) { _error("setTempFlowStrainVector: missing creepData."); }
+        creepData->flowStrainVector = v;
+    }
+    void setTempFlowStrainVector(const FloatArray &v) {
+        if ( !creepData ) { _error("setTempFlowStrainVector: missing creepData."); }
 
-                                                        creepData->tempFlowStrainVector = v; }
-#else // standard status access
-    // Non-isothermal
+        creepData->tempFlowStrainVector = v;
+    }
+ #else // standard status access
+       // Non-isothermal
     double giveTemperature() { if ( nonisoData ) { return nonisoData->temperature; } else { return 0; } }
     double giveTempTemperature() { if ( nonisoData ) { return nonisoData->tempTemperature; } else { return 0; } }
     double giveHumidity() { if ( nonisoData ) { return nonisoData->humidity; } else { return 0; } }
@@ -358,7 +424,7 @@ public:
     void setTempViscousStrainVector(const FloatArray &v) { if ( creepData ) { creepData->tempViscousStrainVector = v; } }
     void setFlowStrainVector(const FloatArray &v) { if ( creepData ) { creepData->flowStrainVector = v; } }
     void setTempFlowStrainVector(const FloatArray &v) { if ( creepData ) { creepData->tempFlowStrainVector = v; } }
-#endif // status access
+ #endif // status access
 
     /// Returns the material options mask. Retrieves options from material or uses moMaterialLevel for gp number 0
     MaterialOptions giveMaterialOptions();
@@ -665,7 +731,7 @@ public:
      * @param mode VM_Incremental:
      * @param kv  returns coefficient for viscous creep (ev)
      * @param gv  returns coefficient for flow creep    (fv)
-     */                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       //ev        //fv
+     */                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       //ev        //fv
     void giveKvCoeffs(GaussPoint *gp, TimeStep *atTime, double &kv, double &gv, ValueModeType mode);
     /// Original service for compatibility with non-3D ananlysis, uses gv from giveKvCoeffs.
     double giveKvCoeff(GaussPoint *gp, TimeStep *atTime);
@@ -762,7 +828,7 @@ public:
      *     @param gp integration point
      *     @return property value
      */
-    double give(int, GaussPoint*);
+    double give(int, GaussPoint *);
 
     // === Postprocessing functions ===
     /**
@@ -803,22 +869,20 @@ protected:
 
 class HellmichMaterial : public StructuralMaterial
 {
- public:
-  /// === initialization ===
-  /// Constructor
-  HellmichMaterial(int n, Domain *d) ;
-  ~HellmichMaterial() {}
-  // return stress according to strain and gp material mode
-  void giveRealStressVector(FloatArray &answer, MatResponseForm f, GaussPoint *gp,
-                            const FloatArray &strain, TimeStep *tstep) {answer.resize(0);}
-  
-  /// Returns "HellmichMaterial" - class  name of the receiver.
-  const char *giveClassName() const { return "HellmichMaterial"; }
-  /// Returns HellmichMaterialClass - classType id of receiver.
-  classType giveClassID()         const { return HellmichMaterialClass; }
+public:
+    /// === initialization ===
+    /// Constructor
+    HellmichMaterial(int n, Domain *d);
+    ~HellmichMaterial() {}
+    // return stress according to strain and gp material mode
+    void giveRealStressVector(FloatArray &answer, MatResponseForm f, GaussPoint *gp,
+                              const FloatArray &strain, TimeStep *tstep) { answer.resize(0); }
+
+    /// Returns "HellmichMaterial" - class  name of the receiver.
+    const char *giveClassName() const { return "HellmichMaterial"; }
+    /// Returns HellmichMaterialClass - classType id of receiver.
+    classType giveClassID()         const { return HellmichMaterialClass; }
 };
 #endif
-
-
 } // end namespace oofem
 #endif // hellmat_h

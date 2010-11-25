@@ -42,12 +42,11 @@
 
 #ifdef __PARALLEL_MODE
 
-#include "communicator.h"
-#include "pnldeidynamic.h"
-#include "error.h"
+ #include "communicator.h"
+ #include "pnldeidynamic.h"
+ #include "error.h"
 
 namespace oofem {
-
 /**
  * Class representing communicator for PNlDEIDynamic engng model.
  * It is attribute of pnlDeiDynamic Engng model.
@@ -106,11 +105,11 @@ private:
      * @param cmp comparison function must return a negative value if first argument is less than the second,
      * zero if the arguments are equal, and a positive number otherwise.
      */
-    void sortCommMap( IntArray & map, int ( PNlDEIDynamicComunicator :: * cmp )( int, int ) );
+    void sortCommMap( IntArray & map, int ( PNlDEIDynamicComunicator :: *cmp )( int, int ) );
     /// Implementation of Quiksort algorithm
-    void quickSortCommMap( IntArray & map, int l, int r, int ( PNlDEIDynamicComunicator :: * cmp )( int, int ) );
+    void quickSortCommMap( IntArray & map, int l, int r, int ( PNlDEIDynamicComunicator :: *cmp )( int, int ) );
     /// Partitioning used in quiksort
-    int quickSortPartition( IntArray & map, int l, int r, int ( PNlDEIDynamicComunicator :: * cmp )( int, int ) );
+    int quickSortPartition( IntArray & map, int l, int r, int ( PNlDEIDynamicComunicator :: *cmp )( int, int ) );
 
     /// global dofManager number comparison function
     int DofManCmp(int, int);
@@ -133,8 +132,6 @@ private:
      */
     void setUpCommunicationMapsForRemoteElementMode(EngngModel *domain);
 };
-
-
 } // end namespace oofem
 #endif
 #endif // pnldeidynamiccomm_h

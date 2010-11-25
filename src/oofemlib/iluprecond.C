@@ -33,27 +33,26 @@
 
 
 #ifndef __MAKEDEPEND
-#include <stdlib.h>
+ #include <stdlib.h>
 #endif
 #include "dyncompcol.h"
 #include "iluprecond.h"
 #include "verbose.h"
 
 #ifdef TIME_REPORT
-#ifndef __MAKEDEPEND
-#include <time.h>
-#endif
-#include "clock.h"
+ #ifndef __MAKEDEPEND
+  #include <time.h>
+ #endif
+ #include "clock.h"
 #endif
 
 #ifdef DynCompCol_USE_STL_SETS
-#ifndef __MAKEDEPEND
-#include <map>
-#endif
+ #ifndef __MAKEDEPEND
+  #include <map>
+ #endif
 #endif
 
 namespace oofem {
-
 CompCol_ILUPreconditioner ::
 CompCol_ILUPreconditioner(const SparseMtrx &A, InputRecord &attributes) : Preconditioner(A, attributes)
 { }
@@ -443,5 +442,4 @@ CompCol_ILUPreconditioner :: qsortRowPartition(IntArray &src, FloatArray &val, i
 
     return i;
 }
-
 } // end namespace oofem

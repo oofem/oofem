@@ -38,7 +38,6 @@
 #include "clock.h"
 
 namespace oofem {
-
 /**
  * Class implementing single timer, providing wall clock and user time capabilities.
  */
@@ -55,21 +54,31 @@ class Timer
 
 public:
     Timer() { initTimer(); }
-    void startTimer() { this->initTimer();
-                        oofem :: getTime(start_wtime);
-                        oofem :: getUtime(start_utime);
-                        running = true; }
-    void stopTimer() { this->pauseTimer();
-                       running = false; }
-    void pauseTimer() { oofem :: getTime(end_wtime);
-                        oofem :: getUtime(end_utime);
-                        running = false;
-                        this->updateElapsedTime(); }
-    void resumeTimer() { oofem :: getTime(start_wtime);
-                         oofem :: getUtime(start_utime);
-                         running = true; }
-    void initTimer() { elapsedWTime.tv_sec = elapsedWTime.tv_usec = elapsedUTime.tv_sec = elapsedUTime.tv_usec = 0;
-                       running = false; }
+    void startTimer() {
+        this->initTimer();
+        oofem :: getTime(start_wtime);
+        oofem :: getUtime(start_utime);
+        running = true;
+    }
+    void stopTimer() {
+        this->pauseTimer();
+        running = false;
+    }
+    void pauseTimer() {
+        oofem :: getTime(end_wtime);
+        oofem :: getUtime(end_utime);
+        running = false;
+        this->updateElapsedTime();
+    }
+    void resumeTimer() {
+        oofem :: getTime(start_wtime);
+        oofem :: getUtime(start_utime);
+        running = true;
+    }
+    void initTimer() {
+        elapsedWTime.tv_sec = elapsedWTime.tv_usec = elapsedUTime.tv_sec = elapsedUTime.tv_usec = 0;
+        running = false;
+    }
     bool isRunning() { return running; }
 
     /// Returns total user time elapsed in seconds
@@ -164,6 +173,5 @@ public:
     void toString(EngngModelTimerType t, char *buff) { return timers [ t ].toString(buff); }
     //@}
 };
-
 } // end namespace oofem
 #endif // timer_h

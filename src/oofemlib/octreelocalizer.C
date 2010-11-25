@@ -43,11 +43,10 @@
 #include "conTable.h"
 #include "mathfem.h"
 #ifndef __MAKEDEPEND
-#include <time.h>
+ #include <time.h>
 #endif
 
 namespace oofem {
-
 oofemOctantRec :: oofemOctantRec(OctreeSpatialLocalizer *loc, oofemOctantRec *parent, FloatArray &origin, double size)
 {
     int i, j, k;
@@ -1125,9 +1124,9 @@ OctreeSpatialLocalizer :: giveElementsWithIPWithinBox(elementContainerType &elem
                 ielem = domain->giveElement(* pos);
 
                 /* HUHU CHEATING
-                 #ifdef __PARALLEL_MODE
+                 * #ifdef __PARALLEL_MODE
                  *       if(ielem -> giveParallelMode() == Element_remote)continue;
-                 #endif
+                 *#endif
                  */
                 // is one of his ip's  within given bbox -> inset it into elemSet
                 iRule = ielem->giveDefaultIntegrationRulePtr();
@@ -1279,15 +1278,22 @@ OctreeSpatialLocalizer :: giveListOfTerminalCellsInBoundingBox(std :: list< oofe
     }
 }
 
-int 
-OctreeSpatialLocalizer::init(bool force) 
-{ 
-  if (force) {
-    if (rootCell) delete rootCell; 
-    rootCell = NULL;
-    elementIPListsInitialized = 0;
-  }
-  if ( !rootCell ) { return this->buildOctreeDataStructure(); } else { return 0; } 
-}
+int
+OctreeSpatialLocalizer :: init(bool force)
+{
+    if ( force ) {
+        if ( rootCell ) {
+            delete rootCell;
+        }
 
+        rootCell = NULL;
+        elementIPListsInitialized = 0;
+    }
+
+    if ( !rootCell ) {
+        return this->buildOctreeDataStructure();
+    } else {
+        return 0;
+    }
+}
 } // end namespace oofem

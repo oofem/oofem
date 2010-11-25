@@ -37,7 +37,6 @@
 #include "precond.h"
 
 namespace oofem {
-
 /**
  * Implementation of diagonal preconditioner
  */
@@ -69,6 +68,5 @@ public:
     const double &diag(int i) const { return diag_(i); }
     double &diag(int i) { return diag_(i); }
 };
-
 } // end namespace oofem
 #endif // diagpre_h

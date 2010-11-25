@@ -72,23 +72,22 @@
 #include "xfemmanager.h"
 
 #ifdef __PARALLEL_MODE
-#include "parallel.h"
-#include "processcomm.h"
-#include "datastream.h"
-#include "communicator.h"
+ #include "parallel.h"
+ #include "processcomm.h"
+ #include "datastream.h"
+ #include "communicator.h"
 #endif
 
 #ifndef __MAKEDEPEND
-#include <string.h>
-#include <stdarg.h>
-#ifdef HAVE_STRINGS_H
-#include <strings.h>
-#endif
-#include <ctype.h>
+ #include <string.h>
+ #include <stdarg.h>
+ #ifdef HAVE_STRINGS_H
+  #include <strings.h>
+ #endif
+ #include <ctype.h>
 #endif
 
 namespace oofem {
-
 Domain :: Domain(int n, int serNum, EngngModel *pm) : defaultNodeDofIDArry(), defaultSideDofIDArry()
     // Constructor. Creates a new domain.
 {
@@ -145,10 +144,12 @@ Domain :: ~Domain()
     if ( smoother ) {
         delete smoother;
     }
+
 #ifdef __PARALLEL_MODE
-    if (transactionManager) {
-      delete transactionManager;
+    if ( transactionManager ) {
+        delete transactionManager;
     }
+
 #endif
 }
 
@@ -275,7 +276,7 @@ Node *Domain :: giveNode(int n)
 
     if ( dofManagerList->includes(n) ) {
         node = dofManagerList->at(n);
-        if ( ( node->giveClassID() != NodeClass ) && ( node->giveClassID() != RigidArmNodeClass ) && ( node->giveClassID() != HangingNodeClass ) && (node->giveClassID() != ParticleClass) ) {
+        if ( ( node->giveClassID() != NodeClass ) && ( node->giveClassID() != RigidArmNodeClass ) && ( node->giveClassID() != HangingNodeClass ) && ( node->giveClassID() != ParticleClass ) ) {
             _error2("giveNode: incompatible type of dofManager %d, can not convert", n);
         }
     } else {
@@ -388,25 +389,25 @@ EngngModel *Domain :: giveEngngModel()
     return NULL;
 }
 
-void Domain::resizeDofManagers (int _newSize) {dofManagerList->growTo (_newSize);}
-void Domain::resizeElements (int _newSize) {elementList->growTo (_newSize);}
-void Domain::resizeCrossSectionModels (int _newSize) {crossSectionList->growTo (_newSize);}
-void Domain::resizeMaterials (int _newSize) {materialList->growTo (_newSize);}
-void Domain::resizeNonlocalBarriers (int _newSize) {nonlocalBarierList->growTo (_newSize);}
-void Domain::resizeBoundaryConditions (int _newSize) {bcList->growTo (_newSize);}
-void Domain::resizeInitialConditions (int _newSize) {icList->growTo (_newSize);}
-void Domain::resizeLoadTimeFunctions (int _newSize) {loadTimeFunctionList->growTo (_newSize);}
+void Domain :: resizeDofManagers(int _newSize) { dofManagerList->growTo(_newSize); }
+void Domain :: resizeElements(int _newSize) { elementList->growTo(_newSize); }
+void Domain :: resizeCrossSectionModels(int _newSize) { crossSectionList->growTo(_newSize); }
+void Domain :: resizeMaterials(int _newSize) { materialList->growTo(_newSize); }
+void Domain :: resizeNonlocalBarriers(int _newSize) { nonlocalBarierList->growTo(_newSize); }
+void Domain :: resizeBoundaryConditions(int _newSize) { bcList->growTo(_newSize); }
+void Domain :: resizeInitialConditions(int _newSize) { icList->growTo(_newSize); }
+void Domain :: resizeLoadTimeFunctions(int _newSize) { loadTimeFunctionList->growTo(_newSize); }
 
-void Domain::setDofManager (int i, DofManager* obj) {dofManagerList->put(i,obj);}
-void Domain::setElement (int i, Element* obj) {elementList->put(i,obj);}
-void Domain::setCrossSection (int i, CrossSection* obj) {crossSectionList->put(i,obj);}
-void Domain::setMaterial (int i, Material* obj) {materialList->put(i,obj);}
-void Domain::setNonlocalBarrier (int i, NonlocalBarrier* obj) {nonlocalBarierList->put(i,obj);}
-void Domain::setBoundaryCondition (int i, GeneralBoundaryCondition* obj) {bcList->put(i,obj);}
-void Domain::setInitialCondition (int i, InitialCondition* obj) {icList->put(i,obj);}
-void Domain::setLoadTimeFunction (int i, LoadTimeFunction* obj) {loadTimeFunctionList->put(i,obj);}
+void Domain :: setDofManager(int i, DofManager *obj) { dofManagerList->put(i, obj); }
+void Domain :: setElement(int i, Element *obj) { elementList->put(i, obj); }
+void Domain :: setCrossSection(int i, CrossSection *obj) { crossSectionList->put(i, obj); }
+void Domain :: setMaterial(int i, Material *obj) { materialList->put(i, obj); }
+void Domain :: setNonlocalBarrier(int i, NonlocalBarrier *obj) { nonlocalBarierList->put(i, obj); }
+void Domain :: setBoundaryCondition(int i, GeneralBoundaryCondition *obj) { bcList->put(i, obj); }
+void Domain :: setInitialCondition(int i, InitialCondition *obj) { icList->put(i, obj); }
+void Domain :: setLoadTimeFunction(int i, LoadTimeFunction *obj) { loadTimeFunctionList->put(i, obj); }
 
-void Domain::clearBoundaryConditions () {bcList->clear(true);};
+void Domain :: clearBoundaryConditions() { bcList->clear(true); };
 
 int Domain :: instanciateYourself(DataReader *dr)
 // Creates all objects mentioned in the data file.
@@ -430,7 +431,7 @@ int Domain :: instanciateYourself(DataReader *dr)
 
 #ifdef __ENABLE_COMPONENT_LABELS
     // mapping from label to local numbers for dofmans and elements
-    std :: map< int, int> dofManLabelMap, elemLabelMap;
+    std :: map< int, int >dofManLabelMap, elemLabelMap;
 #endif
 
 
@@ -476,7 +477,7 @@ int Domain :: instanciateYourself(DataReader *dr)
     // read optional number of RandomFieldGenerator
     nrfg = 0;
     result = ir->giveOptionalField(nrfg,  IFT_Domain_nrfg, "nrandgen");
-    
+
 
 
     // read nodes
@@ -488,21 +489,21 @@ int Domain :: instanciateYourself(DataReader *dr)
         IR_GIVE_RECORD_KEYWORD_FIELD(ir, name, num, MAX_NAME_LENGTH);
 
 #ifdef __ENABLE_COMPONENT_LABELS
-	// assign component number according to record order
-	// component number (as given in input record) becomes label
+        // assign component number according to record order
+        // component number (as given in input record) becomes label
         ( node = ( DofManager * )
-	  ( DofManager(i+1, this).ofType(name) ) )->initializeFrom(ir);
-	if ( dofManLabelMap.find(num) == dofManLabelMap.end() ) {
-	  // label does not exist yet
-	  dofManLabelMap[num]=i+1;
-	} else {
-	  _error2("instanciateYourself: Dofmanager entry already exist (label=%d)", num);
-	}
-	  
-	node -> setGlobalNumber (num); // set label
-	dofManagerList->put(i+1, node);
+                 ( DofManager(i + 1, this).ofType(name) ) )->initializeFrom(ir);
+        if ( dofManLabelMap.find(num) == dofManLabelMap.end() ) {
+            // label does not exist yet
+            dofManLabelMap [ num ] = i + 1;
+        } else {
+            _error2("instanciateYourself: Dofmanager entry already exist (label=%d)", num);
+        }
+
+        node->setGlobalNumber(num);    // set label
+        dofManagerList->put(i + 1, node);
 #else
-	// component numbers as given in input record
+        // component numbers as given in input record
         ( node = ( DofManager * )
                  ( DofManager(num, this).ofType(name) ) )->initializeFrom(ir);
 
@@ -516,6 +517,7 @@ int Domain :: instanciateYourself(DataReader *dr)
         } else {
             _error2("instanciateYourself: Dofmanager entry already exist (num=%d)", num);
         }
+
 #endif
 
         //dofManagerList->put(i+1,node) ;
@@ -536,17 +538,17 @@ int Domain :: instanciateYourself(DataReader *dr)
 
 #ifdef __ENABLE_COMPONENT_LABELS
         ( elem = ( Element * )
-                 ( Element(i+1, this).ofType(name) ) )->initializeFrom(ir);
+                 ( Element(i + 1, this).ofType(name) ) )->initializeFrom(ir);
 
-	if ( elemLabelMap.find(num) == elemLabelMap.end() ) {
-	  // label does not exist yet
-	  elemLabelMap[num]=i+1;
-	} else {
-	  _error2("instanciateYourself: Element entry already exist (label=%d)", num);
-	}
+        if ( elemLabelMap.find(num) == elemLabelMap.end() ) {
+            // label does not exist yet
+            elemLabelMap [ num ] = i + 1;
+        } else {
+            _error2("instanciateYourself: Element entry already exist (label=%d)", num);
+        }
 
-	elem->setGlobalNumber(num);
-	elementList->put(i+1, elem);
+        elem->setGlobalNumber(num);
+        elementList->put(i + 1, elem);
 #else
         ( elem = ( Element * )
                  ( Element(num, this).ofType(name) ) )->initializeFrom(ir);
@@ -561,6 +563,7 @@ int Domain :: instanciateYourself(DataReader *dr)
         } else {
             _error2("instanciateYourself: element entry already exist (num=%d)", num);
         }
+
 #endif
         //elementList->put(i+1,elem) ;
         ir->finish();
@@ -787,14 +790,19 @@ int Domain :: instanciateYourself(DataReader *dr)
 #  ifdef VERBOSE
     VERBOSE_PRINT0("Instanciated load-time fncts ", nloadtimefunc)
 #  endif
-      
-      
+
+
 #ifdef __ENABLE_COMPONENT_LABELS
-      // change internal component references from labels to assigned local numbers
-      MapBasedEntityRenumberingFunctor labelToLocNumFunctor (dofManLabelMap, elemLabelMap);
-    for (i=1;i<=nnode;i++) this->giveDofManager(i)->updateLocalNumbering(labelToLocNumFunctor); 
-    for (i=1;i<=nelem;i++) this->giveElement(i)->updateLocalNumbering(labelToLocNumFunctor); 
-			     
+    // change internal component references from labels to assigned local numbers
+    MapBasedEntityRenumberingFunctor labelToLocNumFunctor(dofManLabelMap, elemLabelMap);
+    for ( i = 1; i <= nnode; i++ ) {
+        this->giveDofManager(i)->updateLocalNumbering(labelToLocNumFunctor);
+    }
+
+    for ( i = 1; i <= nelem; i++ ) {
+        this->giveElement(i)->updateLocalNumbering(labelToLocNumFunctor);
+    }
+
 #endif
 
     return 1;
@@ -842,30 +850,30 @@ Domain :: giveDefaultNodeDofIDArry()
         defaultNodeDofIDArry.at(1) = D_u;
         defaultNodeDofIDArry.at(2) = D_v;
         defaultNodeDofIDArry.at(3) = R_w;
-    } else if ( dType == _2dPlaneStressMode )     {
+    } else if ( dType == _2dPlaneStressMode ) {
         defaultNodeDofIDArry.resize(2);
         defaultNodeDofIDArry.at(1) = D_u;
         defaultNodeDofIDArry.at(2) = D_v;
-    } else if ( dType == _PlaneStrainMode )     {
+    } else if ( dType == _PlaneStrainMode ) {
         defaultNodeDofIDArry.resize(2);
         defaultNodeDofIDArry.at(1) = D_u;
         defaultNodeDofIDArry.at(2) = D_v;
-    } else if  ( dType == _3dMode )   {
+    } else if  ( dType == _3dMode ) {
         defaultNodeDofIDArry.resize(3);
         defaultNodeDofIDArry.at(1) = D_u;
         defaultNodeDofIDArry.at(2) = D_v;
         defaultNodeDofIDArry.at(3) = D_w;
-    } else if ( dType == _3dAxisymmMode )     {
+    } else if ( dType == _3dAxisymmMode ) {
         defaultNodeDofIDArry.resize(3);
         defaultNodeDofIDArry.at(1) = D_u;
         defaultNodeDofIDArry.at(2) = D_v;
         defaultNodeDofIDArry.at(3) = R_w;
-    } else if  ( dType == _2dMindlinPlateMode )   {
+    } else if  ( dType == _2dMindlinPlateMode ) {
         defaultNodeDofIDArry.resize(3);
         defaultNodeDofIDArry.at(1) = D_w;
         defaultNodeDofIDArry.at(2) = R_u;
         defaultNodeDofIDArry.at(3) = R_v;
-    } else if ( dType == _3dShellMode )    {
+    } else if ( dType == _3dShellMode ) {
         defaultNodeDofIDArry.resize(6);
         defaultNodeDofIDArry.at(1) = D_u;
         defaultNodeDofIDArry.at(2) = D_v;
@@ -873,31 +881,31 @@ Domain :: giveDefaultNodeDofIDArry()
         defaultNodeDofIDArry.at(4) = R_u;
         defaultNodeDofIDArry.at(5) = R_v;
         defaultNodeDofIDArry.at(6) = R_w;
-    } else if  ( dType == _2dTrussMode )   {
+    } else if  ( dType == _2dTrussMode ) {
         defaultNodeDofIDArry.resize(2);
         defaultNodeDofIDArry.at(1) = D_u;
         defaultNodeDofIDArry.at(2) = D_w;
-    } else if  ( dType == _1dTrussMode )   {
+    } else if  ( dType == _1dTrussMode ) {
         defaultNodeDofIDArry.resize(1);
         defaultNodeDofIDArry.at(1) = D_u;
-    } else if  ( dType == _2dBeamMode )   {
+    } else if  ( dType == _2dBeamMode ) {
         defaultNodeDofIDArry.resize(3);
         defaultNodeDofIDArry.at(1) = D_u;
         defaultNodeDofIDArry.at(2) = D_w;
         defaultNodeDofIDArry.at(3) = R_v;
-    } else if  ( dType == _HeatTransferMode )   {
+    } else if  ( dType == _HeatTransferMode ) {
         defaultNodeDofIDArry.resize(1);
         defaultNodeDofIDArry.at(1) = T_f;
-    } else if  ( dType == _HeatMass1Mode )   {
+    } else if  ( dType == _HeatMass1Mode ) {
         defaultNodeDofIDArry.resize(2);
         defaultNodeDofIDArry.at(1) = T_f;
         defaultNodeDofIDArry.at(2) = C_1;
-    }  else if ( dType == _2dIncompressibleFlow )  {
+    }  else if ( dType == _2dIncompressibleFlow ) {
         defaultNodeDofIDArry.resize(3);
         defaultNodeDofIDArry.at(1) = V_u;
         defaultNodeDofIDArry.at(2) = V_v;
         defaultNodeDofIDArry.at(3) = P_f;
-    }  else if ( dType == _3dIncompressibleFlow )  {
+    }  else if ( dType == _3dIncompressibleFlow ) {
         defaultNodeDofIDArry.resize(4);
         defaultNodeDofIDArry.at(1) = V_u;
         defaultNodeDofIDArry.at(2) = V_v;
@@ -913,16 +921,19 @@ Domain :: giveDefaultNodeDofIDArry()
 
 int Domain :: giveNumberOfSpatialDimensions()
 {
-	//_HeatTransferMode _HeatMass1Mode // Are these deprecated?
-	// Perhaps i shouldn't use the modes to determine this at all, but i couldn't see any other good way.
-	if ( dType == _1dTrussMode )
-		return 1;
-	if ( dType == _2dIncompressibleFlow || dType == _2dBeamMode || dType == _2dTrussMode || dType == _2dMindlinPlateMode || dType == _3dAxisymmMode || dType == _PlaneStrainMode || dType == _2dPlaneStressMode || dType == _2dPlaneStressRotMode)
-		return 2;
-	else if ( dType == _3dIncompressibleFlow || dType == _3dShellMode || dType == _3dMode )
-		return 3;
-	else
-		return 0;
+    //_HeatTransferMode _HeatMass1Mode // Are these deprecated?
+    // Perhaps i shouldn't use the modes to determine this at all, but i couldn't see any other good way.
+    if ( dType == _1dTrussMode ) {
+        return 1;
+    }
+
+    if ( dType == _2dIncompressibleFlow || dType == _2dBeamMode || dType == _2dTrussMode || dType == _2dMindlinPlateMode || dType == _3dAxisymmMode || dType == _PlaneStrainMode || dType == _2dPlaneStressMode || dType == _2dPlaneStressRotMode ) {
+        return 2;
+    } else if ( dType == _3dIncompressibleFlow || dType == _3dShellMode || dType == _3dMode ) {
+        return 3;
+    } else {
+        return 0;
+    }
 }
 
 
@@ -1402,11 +1413,12 @@ int Domain :: commitTransactions(DomainTransactionManager *tm)
     AList< Element > *elementList_new = new AList< Element >(0);
 
 
-    if ( tm->dofmanTransactions.empty() && tm->elementTransactions.empty()) return 1;
+    if ( tm->dofmanTransactions.empty() && tm->elementTransactions.empty() ) {
+        return 1;
+    }
 
     this->initGlobalDofManMap();
     if ( !tm->dofmanTransactions.empty() ) {
-
         DofManager *dman;
         for ( it = tm->dofmanTransactions.begin(); it != tm->dofmanTransactions.end(); ++it ) {
             _exist = false;
@@ -1597,9 +1609,9 @@ Domain :: renumberDofManData(DomainTransactionManager *tm) {
     int _i;
     std :: map< int, DofManager * > :: iterator it;
 
-    SpecificEntityRenumberingFunctor<Domain> domainGToLFunctor (this, & Domain :: LB_giveUpdatedGlobalNumber);
-    SpecificEntityRenumberingFunctor<Domain> domainLToLFunctor (this, & Domain :: LB_giveUpdatedLocalNumber);
-    
+    SpecificEntityRenumberingFunctor< Domain >domainGToLFunctor(this, &Domain :: LB_giveUpdatedGlobalNumber);
+    SpecificEntityRenumberingFunctor< Domain >domainLToLFunctor(this, &Domain :: LB_giveUpdatedLocalNumber);
+
 
     for ( _i = 0, it = dmanMap.begin(); it != dmanMap.end(); it++ ) {
         if ( tm->dofmanTransactions.find(it->first) != tm->dofmanTransactions.end() ) {
@@ -1617,8 +1629,8 @@ Domain :: renumberElementData(DomainTransactionManager *tm) {
     int _i;
     std :: map< int, Element * > :: iterator it;
 
-    SpecificEntityRenumberingFunctor<Domain> domainGToLFunctor (this, & Domain :: LB_giveUpdatedGlobalNumber);
-    SpecificEntityRenumberingFunctor<Domain> domainLToLFunctor (this, & Domain :: LB_giveUpdatedLocalNumber);
+    SpecificEntityRenumberingFunctor< Domain >domainGToLFunctor(this, &Domain :: LB_giveUpdatedGlobalNumber);
+    SpecificEntityRenumberingFunctor< Domain >domainLToLFunctor(this, &Domain :: LB_giveUpdatedLocalNumber);
 
 
     for ( _i = 0, it = elementMap.begin(); it != elementMap.end(); it++ ) {
@@ -1716,12 +1728,12 @@ Domain :: elementGlobal2Local(int _globnum)
     }
 }
 
-void 
-Domain::setXfemManager(XfemManager *xfemManager)
+void
+Domain :: setXfemManager(XfemManager *xfemManager)
 {
     this->xfemManager = xfemManager;
 }
 
- 
+
 #endif
 } // end namespace oofem

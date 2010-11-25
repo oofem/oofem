@@ -51,7 +51,6 @@
 #include "structuralms.h"
 
 namespace oofem {
-
 // material contant's keys for give()
 class GaussPoint;
 
@@ -95,12 +94,12 @@ protected:
 
 #ifdef keep_track_of_dissipated_energy
     /// density of total work done by stresses on strain increments
-    double stressWork; 
+    double stressWork;
     /// non-equilibrated density of total work done by stresses on strain increments
     double tempStressWork;
-    /// density of dissipated work 
+    /// density of dissipated work
     double dissWork;
-    /// non-equilibrated density of dissipated work 
+    /// non-equilibrated density of dissipated work
     double tempDissWork;
 #endif
 
@@ -128,19 +127,19 @@ public:
 
 #ifdef keep_track_of_dissipated_energy
     /// Returns the density of total work of stress on strain increments
-    double giveStressWork(){return stressWork;}
+    double giveStressWork() { return stressWork; }
     /// Returns the temp density of total work of stress on strain increments
-    double giveTempStressWork(){return tempStressWork;}
+    double giveTempStressWork() { return tempStressWork; }
     /// Sets the density of total work of stress on strain increments to given value
-    void setTempStressWork(double w){tempStressWork = w;}
-    /// Returns the density of dissipated work 
-    double giveDissWork(){return dissWork;}
-    /// Returns the density of temp dissipated work 
-    double giveTempDissWork(){return tempDissWork;}
+    void setTempStressWork(double w) { tempStressWork = w; }
+    /// Returns the density of dissipated work
+    double giveDissWork() { return dissWork; }
+    /// Returns the density of temp dissipated work
+    double giveTempDissWork() { return tempDissWork; }
     /// Sets the density of dissipated work to given value
-    void setTempDissWork(double w){tempDissWork = w;}
+    void setTempDissWork(double w) { tempDissWork = w; }
     /// computes the increment of total stress work and of dissipated work
-    void computeWork(GaussPoint*);
+    void computeWork(GaussPoint *);
 #endif
 
     // definition
@@ -391,6 +390,5 @@ protected:
                                GaussPoint * gp,
                                TimeStep * atTime);
 };
-
 } // end namespace oofem
 #endif // isodamagemodel_h

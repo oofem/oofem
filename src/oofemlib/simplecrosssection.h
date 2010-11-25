@@ -48,7 +48,6 @@
 #include "flotmtrx.h"
 
 namespace oofem {
-
 class GaussPoint;
 
 /**
@@ -246,7 +245,5 @@ protected:
                                        StructuralMaterial *mat,
                                        TimeStep *tStep);
 };
-
-
 } // end namespace oofem
 #endif // simplecrosssection_h

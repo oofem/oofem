@@ -45,7 +45,6 @@
 #include "huertaerrorestimator.h"
 
 namespace oofem {
-
 /// Comment or uncomment the following line to force full or reduced integration
 //#define Quad1PlaneStrain_reducedShearIntegration
 
@@ -219,7 +218,7 @@ public:
     Element_Geometry_Type giveGeometryType() const { return EGT_quad_1; }
 
     integrationDomain  giveIntegrationDomain() { return _Square; }
-    MaterialMode          giveMaterialMode()  {return _PlaneStrain;}
+    MaterialMode          giveMaterialMode()  { return _PlaneStrain; }
 
 protected:
     // edge load support
@@ -241,6 +240,5 @@ protected:
     int           giveApproxOrder() { return 1; }
     int           giveNumberOfIPForMassMtrxIntegration() { return 4; }
 };
-
 } // end namespace oofem
 #endif // quad1planestrain_h

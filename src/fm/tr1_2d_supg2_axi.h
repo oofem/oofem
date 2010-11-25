@@ -40,7 +40,6 @@
 #include "tr1_2d_supg.h"
 
 namespace oofem {
-
 /**
  * Class representing 2d linear axisymmetric triangular element
  * for solving incompressible fluid with SUPG solver
@@ -274,6 +273,5 @@ protected:
 
     //@}
 };
-
 } // end namespace oofem
 #endif // tr1_2d_supg2_axi_h

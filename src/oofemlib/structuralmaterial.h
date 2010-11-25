@@ -51,7 +51,6 @@
 #include "stressstrainprincmode.h"
 
 namespace oofem {
-
 #define STRAIN_STEPS 10.0
 
 class GaussPoint;
@@ -219,8 +218,10 @@ public:
      * @param tStep time step (most models are able to respond only when atTime is current time step)
      */
     virtual void giveThermalDilatationVector(FloatArray &answer, GaussPoint *, TimeStep *)
-    { answer.resize(0);
-      return; }
+    {
+        answer.resize(0);
+        return;
+    }
     /**
      * Returns the reference temperature of receiver.
      */
@@ -767,6 +768,5 @@ protected:
     friend class LayeredCrossSection;
     friend class RheoChainMaterial;
 };
-
 } // end namespace oofem
 #endif // structuralmaterial_h

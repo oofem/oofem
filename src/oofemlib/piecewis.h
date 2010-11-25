@@ -48,7 +48,6 @@
 
 
 namespace oofem {
-
 class PiecewiseLinFunction : public LoadTimeFunction
 {
     /*
@@ -102,6 +101,5 @@ public:
      */
     virtual double    __accelAt(double) { return 0.; }
 };
-
 } // end namespace oofem
 #endif // piecewis_h

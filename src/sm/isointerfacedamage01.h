@@ -46,7 +46,6 @@
 #include "structuralms.h"
 
 namespace oofem {
-
 // material contant's keys for give()
 class GaussPoint;
 
@@ -317,6 +316,5 @@ protected:
     void give3dInterfaceMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseForm form, MatResponseMode rMode,
                                                 GaussPoint *gp, TimeStep *atTime);
 };
-
 } // end namespace oofem
 #endif // isointerfacedamage01_h

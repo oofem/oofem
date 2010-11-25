@@ -44,7 +44,6 @@
 #include "matstatus.h"
 
 namespace oofem {
-
 /**
  * Base class for all nonlocal structural material statuses.
  */
@@ -66,7 +65,7 @@ public:
  * point depends not only on the state of that point, but also takes into account the state of surrounding
  * points. The response typically depends on some nonlocal quantity obtained as weighted average over
  * some characteristic volume.
- * This class declares the necessary interface for all nonlocal structural constitutive  models. 
+ * This class declares the necessary interface for all nonlocal structural constitutive  models.
  * It also stores the parameters needed for nonlocal averaging and provides services for evaluation of the weight function.
  */
 class StructuralNonlocalMaterialExtensionInterface : public NonlocalMaterialExtensionInterface
@@ -100,6 +99,5 @@ public:
      */
     virtual void updateBeforeNonlocAverage(const FloatArray &strainVector, GaussPoint *gp, TimeStep *atTime) = 0;
 };
-
 } // end namespace oofem
 #endif // structuralnonlocalmaterialext_h

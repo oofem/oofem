@@ -44,7 +44,6 @@
 #include "gausspnt.h"
 
 namespace oofem {
-
 class TimeStep;
 
 
@@ -84,7 +83,6 @@ public:
 private:
     void computeNArray(FloatArray &answer, FloatArray &coords) const { answer.resize(0); }
 };
-
 } // end namespace oofem
 #endif // constantsurfaceload_h
 

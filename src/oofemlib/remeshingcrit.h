@@ -48,11 +48,10 @@
 #include "classtype.h"
 
 #ifdef __PARALLEL_MODE
-#include "problemcomm.h"
+ #include "problemcomm.h"
 #endif
 
 namespace oofem {
-
 class Domain;
 class Element;
 class TimeStep;
@@ -89,7 +88,7 @@ public:
     /// Constructor
     RemeshingCriteria(int n, ErrorEstimator *e);
     /// Destructor
-    virtual ~RemeshingCriteria() ;
+    virtual ~RemeshingCriteria();
     /** Returns the required mesh size n given dof manager.
      * The mesh density is defined as a required element size
      * (in 1D the element length, in 2D the square from element area).
@@ -129,6 +128,5 @@ public:
 
 protected:
 };
-
 } // end namespace oofem
 #endif // remeshingcrit_h

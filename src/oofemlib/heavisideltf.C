@@ -37,11 +37,10 @@
 
 #include "heavisideltf.h"
 #ifndef __MAKEDEPEND
-#include <math.h>
+ #include <math.h>
 #endif
 
 namespace oofem {
-
 double
 HeavisideLTF :: __at(double time)
 // Returns the value of the receiver at time 'time'. 'time' should be
@@ -66,7 +65,7 @@ HeavisideLTF :: initializeFrom(InputRecord *ir)
     const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
-    LoadTimeFunction::initializeFrom(ir);
+    LoadTimeFunction :: initializeFrom(ir);
     IR_GIVE_FIELD(ir, origin, IFT_HeavisideLTF_origin, "origin"); // Macro
     IR_GIVE_FIELD(ir, value, IFT_HeavisideLTF_value, "value"); // Macro
 
@@ -84,5 +83,4 @@ HeavisideLTF :: giveInputRecordString(std :: string &str, bool keyword)
 
     return 1;
 }
-
 } // end namespace oofem

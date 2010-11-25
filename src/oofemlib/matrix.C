@@ -44,12 +44,11 @@
 #include "matrix.h"
 #include "error.h"
 #ifndef __MAKEDEPEND
-#include <stdio.h>
-#include <stdlib.h>
+ #include <stdio.h>
+ #include <stdlib.h>
 #endif
 
 namespace oofem {
-
 void Matrix :: checkBounds(int i, int j) const
 // Checks that the receiver includes a position (i,j).
 {
@@ -69,6 +68,4 @@ void Matrix :: checkBounds(int i, int j) const
         OOFEM_ERROR3("Matrix::checkBounds : matrix error on columns : %d > %d", j, nColumns);
     }
 }
-
-
 } // end namespace oofem

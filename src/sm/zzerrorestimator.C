@@ -49,11 +49,10 @@
 #include "integrationrule.h"
 #include "conTable.h"
 #ifndef __MAKEDEPEND
-#include <vector>
+ #include <vector>
 #endif
 
 namespace oofem {
-
 #ifdef EXPERIMENT
 FloatArray sNorms;
 #endif
@@ -93,9 +92,9 @@ ZZErrorEstimator :: estimateError(EE_ErrorMode mode, TimeStep *tStep)
 
 #ifdef ZZErrorEstimator_ElementResultCashed
     this->eNorms.resize(nelems);
-#ifdef EXPERIMENT
+ #ifdef EXPERIMENT
     sNorms.resize(nelems);
-#endif
+ #endif
 #else
     double eNorm;
 #endif
@@ -115,9 +114,9 @@ ZZErrorEstimator :: estimateError(EE_ErrorMode mode, TimeStep *tStep)
 #ifdef ZZErrorEstimator_ElementResultCashed
         interface->ZZErrorEstimatorI_computeElementContributions(eNorms.at(ielem), sNorm, this->normType, type, tStep);
         this->globalENorm += eNorms.at(ielem) * eNorms.at(ielem);
-#ifdef EXPERIMENT
+ #ifdef EXPERIMENT
         sNorms.at(ielem) = sNorm;
-#endif
+ #endif
 #else
         interface->ZZErrorEstimatorI_computeElementContributions(eNorm, sNorm, this->normType, type, tStep);
         this->globalENorm += eNorm * eNorm;
@@ -127,11 +126,15 @@ ZZErrorEstimator :: estimateError(EE_ErrorMode mode, TimeStep *tStep)
 
 #ifdef __PARALLEL_MODE
     // compute global ENorm and SNorm by summing up comtributions on all partitions
-    double lnorms[2] = {this->globalENorm, this->globalSNorm};
-    double gnorms[2] = {0.0, 0.0};
-    MPI_Allreduce (lnorms, gnorms, 2, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
-    this->globalENorm = gnorms[0];
-    this->globalSNorm = gnorms[1];
+    double lnorms [ 2 ] = {
+        this->globalENorm, this->globalSNorm
+    };
+    double gnorms [ 2 ] = {
+        0.0, 0.0
+    };
+    MPI_Allreduce(lnorms, gnorms, 2, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
+    this->globalENorm = gnorms [ 0 ];
+    this->globalSNorm = gnorms [ 1 ];
 #endif
 
     // recover the stored smoother
@@ -379,7 +382,7 @@ ZZRemeshingCriteria :: estimateMeshDensities(TimeStep *tStep)
 
     //std::vector<char> nodalDensities(nnode);
     this->nodalDensities.resize(nnode);
-    std :: vector< char > dofManInitFlag(nnode);
+    std :: vector< char >dofManInitFlag(nnode);
     for ( i = 0; i < nnode; i++ ) {
         dofManInitFlag [ i ] = 0;
     }
@@ -409,7 +412,7 @@ ZZRemeshingCriteria :: estimateMeshDensities(TimeStep *tStep)
     }
 
     elemErrLimit = sqrt( ( globValNorm * globValNorm + globValErrorNorm * globValErrorNorm ) / nelem ) *
-    this->requiredError * coeff;
+                   this->requiredError * coeff;
 
     for ( i = 1; i <= nelem; i++ ) {
         ielem = domain->giveElement(i);
@@ -524,6 +527,4 @@ ZZRemeshingCriteria :: giveDofManDensity(int num)
 
     return density;
 }
-
-
 } // end namespace oofem

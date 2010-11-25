@@ -40,11 +40,10 @@
 #include "spoolesinterface.h"
 
 #ifndef __MAKEDEPEND
-#include <stdio.h>
+ #include <stdio.h>
 #endif
 
 namespace oofem {
-
 SparseMtrx *
 SpoolesSparseMtrx :: GiveCopy() const
 {
@@ -84,7 +83,7 @@ SpoolesSparseMtrx :: times(double x)
 }
 
 int
-SpoolesSparseMtrx :: buildInternalStructure(EngngModel *eModel, int di, EquationID ut, const UnknownNumberingScheme&s)
+SpoolesSparseMtrx :: buildInternalStructure(EngngModel *eModel, int di, EquationID ut, const UnknownNumberingScheme &s)
 {
     // detrmine number of equations and estimate number of nonzero entries
     int neq = eModel->giveNumberOfDomainEquations(di, ut);
@@ -215,6 +214,5 @@ SpoolesSparseMtrx :: trans_mult(const FloatArray &x) const
 
     return answer;
 }
-
 } // end namespace oofem
 #endif //ifdef __SPOOLES_MODULE

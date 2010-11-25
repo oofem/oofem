@@ -40,7 +40,6 @@
 #define contextfilemode_h
 
 namespace oofem {
-
 /**
  * Determines the input/output mode of context file.
  * contextMode_read - context file is openned for reading.
@@ -52,6 +51,5 @@ enum ContextFileMode {
     contextMode_read,
     contextMode_write
 };
-
 } // end namespace oofem
 #endif // contextfilemode_h

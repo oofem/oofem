@@ -67,6 +67,5 @@ typedef unsigned long NM_Status;
 #define NM_NoSuccess    ( 1L << 2 )
 #define NM_KeepTangent  ( 1L << 3 )
 #define NM_ForceRestart ( 1L << 4 )
-
 } // end namespace oofem
 #endif // nmstatus_h

@@ -38,16 +38,15 @@
 
 #ifdef __DSS_MODULE
 
-#include "flotarry.h"
-#include "engngm.h"
-#include "domain.h"
-#include "DSSolver.h"
-#ifndef __MAKEDEPEND
-#include <set>
-#endif
+ #include "flotarry.h"
+ #include "engngm.h"
+ #include "domain.h"
+ #include "DSSolver.h"
+ #ifndef __MAKEDEPEND
+  #include <set>
+ #endif
 
 namespace oofem {
-
 DSSMatrix :: DSSMatrix(dssType _t) : SparseMtrx()
 {
     eDSSolverType _st = eDSSFactorizationLDLT;
@@ -55,11 +54,11 @@ DSSMatrix :: DSSMatrix(dssType _t) : SparseMtrx()
     _type = _t;
     if ( _t == sym_LDL ) {
         _st = eDSSFactorizationLDLT;
-    } else if ( _t == sym_LL )    {
+    } else if ( _t == sym_LL ) {
         _st = eDSSFactorizationLLT;
-    } else if ( _t == unsym_LU )                                                             {
+    } else if ( _t == unsym_LU ) {
         _st = eDSSFactorizationLU;
-    } else                                                                                                                   {
+    } else {
         OOFEM_ERROR("DSSMatrix::DSSMatrix() -- unknown dssType");
     }
 
@@ -76,11 +75,11 @@ DSSMatrix :: DSSMatrix(dssType _t, int n) : SparseMtrx(n, n)
     _type = _t;
     if ( _t == sym_LDL ) {
         _st = eDSSFactorizationLDLT;
-    } else if ( _t == sym_LL )    {
+    } else if ( _t == sym_LL ) {
         _st = eDSSFactorizationLLT;
-    } else if ( _t == unsym_LU )                                                             {
+    } else if ( _t == unsym_LU ) {
         _st = eDSSFactorizationLU;
-    } else                                                                                                                   {
+    } else {
         OOFEM_ERROR("DSSMatrix::DSSMatrix() -- unknown dssType");
     }
 
@@ -137,7 +136,7 @@ void DSSMatrix :: times(double x)
     return;
 }
 
-int DSSMatrix :: buildInternalStructure(EngngModel *eModel, int di, EquationID ut, const UnknownNumberingScheme& s)
+int DSSMatrix :: buildInternalStructure(EngngModel *eModel, int di, EquationID ut, const UnknownNumberingScheme &s)
 {
     IntArray loc;
     Domain *domain = eModel->giveDomain(di);
@@ -147,7 +146,7 @@ int DSSMatrix :: buildInternalStructure(EngngModel *eModel, int di, EquationID u
     unsigned long indx;
     Element *elem;
     // allocation map
-    std :: vector< std :: set< int > > columns(neq);
+    std :: vector< std :: set< int > >columns(neq);
 
     unsigned long nz_ = 0;
 
@@ -197,42 +196,50 @@ int DSSMatrix :: buildInternalStructure(EngngModel *eModel, int di, EquationID u
     }
 
     int bsize = eModel->giveDomain(1)->giveDefaultNodeDofIDArry().giveSize();
-    /** 
-	Assemble block to equation mapping information
-    */
-    
+    /**
+     *  Assemble block to equation mapping information
+     */
+
     bool _succ = true;
     int _ndofs, _neq, ndofmans = domain->giveNumberOfDofManagers();
-    long *mcn = new long [ndofmans*bsize];
+    long *mcn = new long [ ndofmans * bsize ];
     long _c = 0;
-    DofManager* dman;
+    DofManager *dman;
 
-    if (mcn==NULL) OOFEM_ERROR ("DSSMatrix::buildInternalStructure: free store exhausted, exiting");
-    for ( n = 1; n <= ndofmans; n++ ) {
-      dman=domain->giveDofManager(n);
-      _ndofs = dman->giveNumberOfDofs();
-      if (_ndofs>bsize) {
-	_succ = false;
-	break;
-      }
-      for (i=1; i<=_ndofs; i++) {
-	if (dman->giveDof(i)->isPrimaryDof()) {
-	  _neq = dman->giveDof(i)->giveEquationNumber(s);
-	  if (_neq > 0) {
-	    mcn[_c++] = _neq-1;
-	  } else {
-	    mcn[_c++] = -1; // no corresponding row in sparse mtrx structure
-	  }
-	}
-      }
-      for (i=_ndofs+1; i<= bsize; i++) mcn[_c++] = -1; // no corresponding row in sparse mtrx structure
+    if ( mcn == NULL ) {
+        OOFEM_ERROR("DSSMatrix::buildInternalStructure: free store exhausted, exiting");
     }
-    if (_succ) {
-      _dss->SetMatrixPattern(_sm, bsize);
-      _dss->LoadMCN(ndofmans, bsize, mcn);
+
+    for ( n = 1; n <= ndofmans; n++ ) {
+        dman = domain->giveDofManager(n);
+        _ndofs = dman->giveNumberOfDofs();
+        if ( _ndofs > bsize ) {
+            _succ = false;
+            break;
+        }
+
+        for ( i = 1; i <= _ndofs; i++ ) {
+            if ( dman->giveDof(i)->isPrimaryDof() ) {
+                _neq = dman->giveDof(i)->giveEquationNumber(s);
+                if ( _neq > 0 ) {
+                    mcn [ _c++ ] = _neq - 1;
+                } else {
+                    mcn [ _c++ ] = -1; // no corresponding row in sparse mtrx structure
+                }
+            }
+        }
+
+        for ( i = _ndofs + 1; i <= bsize; i++ ) {
+            mcn [ _c++ ] = -1;                         // no corresponding row in sparse mtrx structure
+        }
+    }
+
+    if ( _succ ) {
+        _dss->SetMatrixPattern(_sm, bsize);
+        _dss->LoadMCN(ndofmans, bsize, mcn);
     } else {
-      OOFEM_LOG_INFO ("DSSMatrix: using assumed block structure");
-      _dss->SetMatrixPattern(_sm, bsize);
+        OOFEM_LOG_INFO("DSSMatrix: using assumed block structure");
+        _dss->SetMatrixPattern(_sm, bsize);
     }
 
     _dss->PreFactorize();
@@ -253,13 +260,13 @@ int DSSMatrix :: assemble(const IntArray &loc, const FloatMatrix &mat)
 {
     int i, j, ii, jj, dim;
 
-#  ifdef DEBUG
+ #  ifdef DEBUG
     dim = mat.giveNumberOfRows();
     if ( dim != loc.giveSize() ) {
         OOFEM_ERROR("CompCol::assemble : dimension of 'k' and 'loc' mismatch");
     }
 
-#  endif
+ #  endif
 
     dim = mat.giveNumberOfRows();
 
@@ -379,24 +386,21 @@ double DSSMatrix :: at(int i, int j) const
     return _dss->ElementAt(i - 1, j - 1);
 }
 
-double DSSMatrix :: operator()(int i, int j)  const
+double DSSMatrix :: operator() (int i, int j)  const
 {
     return _dss->ElementAt(i, j);
 }
 
-double &DSSMatrix :: operator()(int i, int j)
+double &DSSMatrix :: operator() (int i, int j)
 {
     // increment version
     this->version++;
     return _dss->ElementAt(i, j);
 }
-
-
 } // end namespace oofem
 #else // ifndef __DSS_MODULE
 
 namespace oofem {
-
 double DSS__zero;
 
 DSSMatrix :: DSSMatrix(dssType _t, int n) : SparseMtrx() {
@@ -421,7 +425,7 @@ SparseMtrx *DSSMatrix :: GiveCopy() const {
 
 void DSSMatrix :: times(const FloatArray &x, FloatArray &answer) const { }
 void DSSMatrix :: times(double x) { }
-int DSSMatrix :: buildInternalStructure(EngngModel *, int, EquationID, const UnknownNumberingScheme&s) { return 0; }
+int DSSMatrix :: buildInternalStructure(EngngModel *, int, EquationID, const UnknownNumberingScheme &s) { return 0; }
 int DSSMatrix :: assemble(const IntArray &loc, const FloatMatrix &mat) { return 0; }
 int DSSMatrix :: assemble(const IntArray &rloc, const IntArray &cloc, const FloatMatrix &mat) { return 0; }
 SparseMtrx *DSSMatrix :: factorized() { return NULL; }
@@ -429,9 +433,10 @@ void DSSMatrix :: solve(FloatArray *b, FloatArray *x) { }
 SparseMtrx *DSSMatrix :: zero() { return NULL; }
 double &DSSMatrix :: at(int i, int j) { return DSS__zero; }
 double DSSMatrix :: at(int i, int j) const { return 0.; }
-double DSSMatrix :: operator()(int i, int j) const { return 0.; };
-double &DSSMatrix :: operator()(int i, int j) { return DSS__zero; }
-
+double DSSMatrix :: operator() (int i, int j) const { return 0.; };
+double &DSSMatrix :: operator() (int i, int j) {
+    return DSS__zero;
+}
 } // end namespace oofem
 #endif
 

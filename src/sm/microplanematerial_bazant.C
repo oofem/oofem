@@ -43,11 +43,10 @@
 #include "flotarry.h"
 #include "structuralcrosssection.h"
 #ifndef __MAKEDEPEND
-#include <math.h>
+ #include <math.h>
 #endif
 
 namespace oofem {
-
 MicroplaneMaterial_Bazant :: MicroplaneMaterial_Bazant(int n, Domain *d) : MicroplaneMaterial(n, d)
 { }
 
@@ -162,6 +161,4 @@ MicroplaneMaterial_Bazant :: giveRealStressVector(FloatArray &answer, MatRespons
     status->letTempStressVectorBe(answer);
     return;
 }
-
-
 } // end namespace oofem

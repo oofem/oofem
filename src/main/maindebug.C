@@ -52,12 +52,12 @@
 #include "error.h"
 #include "logger.h"
 #ifdef __PETSC_MODULE
-#include "petsc.h"
+ #include "petsc.h"
 #endif
 #ifndef __MAKEDEPEND
-#include <stdio.h>
-#include <string.h>
-#include <new>
+ #include <stdio.h>
+ #include <string.h>
+ #include <new>
 #endif
 
 #include "domain.h"

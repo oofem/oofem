@@ -42,13 +42,12 @@
 
 #ifdef __DSS_MODULE
 
-#include "dss.h"
-#ifndef __MAKEDEPEND
-#include <stdio.h>
-#endif
+ #include "dss.h"
+ #ifndef __MAKEDEPEND
+  #include <stdio.h>
+ #endif
 
 namespace oofem {
-
 DSSSolver :: DSSSolver(int i, Domain *d, EngngModel *m) :
     SparseLinearSystemNM(i, d, m) { }
 
@@ -57,14 +56,14 @@ DSSSolver ::  ~DSSSolver() { }
 NM_Status
 DSSSolver :: solve(SparseMtrx *A, FloatArray *b, FloatArray *x)
 {
-#ifdef TIME_REPORT
+ #ifdef TIME_REPORT
     //clock_t tstart = clock();
     oofem_timeval tstart;
     :: getUtime(tstart);
-#endif
+ #endif
 
 
-    DSSMatrix *_mtrx = dynamic_cast< DSSMatrix * >( A );
+    DSSMatrix *_mtrx = dynamic_cast< DSSMatrix * >(A);
     if ( _mtrx ) {
         _mtrx->factorized();
         _mtrx->solve(b, x);
@@ -72,11 +71,11 @@ DSSSolver :: solve(SparseMtrx *A, FloatArray *b, FloatArray *x)
         OOFEM_ERROR("DSSSolver::solve : incompatible sparse mtrx format");
     }
 
-#ifdef TIME_REPORT
+ #ifdef TIME_REPORT
     oofem_timeval ut;
     :: getRelativeUtime(ut, tstart);
     OOFEM_LOG_INFO( "DSSSolver info: user time consumed by solution: %.2fs\n", ( double ) ( ut.tv_sec + ut.tv_usec / ( double ) OOFEM_USEC_LIM ) );
-#endif
+ #endif
 
     return NM_Success;
 }
@@ -90,13 +89,11 @@ DSSSolver :: initializeFrom(InputRecord *ir)
     //IR_GIVE_OPTIONAL_FIELD (ir, val, IFT_IMLSolver_lstype, "lstype"); // Macro
     return IRRT_OK;
 }
-
 } // end namespace oofem
 
 #else // __DSS_MODULE
 
 namespace oofem {
-
 DSSSolver :: DSSSolver(int i, Domain *d, EngngModel *m) : SparseLinearSystemNM(i, d, m)
 {
     _error("DSSSolver: can't create, DSS support not compiled");
@@ -109,6 +106,5 @@ DSSSolver :: initializeFrom(InputRecord *ir) { return IRRT_OK; }
 
 NM_Status
 DSSSolver :: solve(SparseMtrx *A, FloatArray *b, FloatArray *x) { return NM_NoSuccess; }
-
 } // end namespace oofem
 #endif

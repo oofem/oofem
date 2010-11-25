@@ -44,7 +44,6 @@
 #include "mathfem.h"
 
 namespace oofem {
-
 Masonry02 ::     Masonry02(int n, Domain *d) : MPlasticMaterial2(n, d)
 {
     //
@@ -125,14 +124,14 @@ Masonry02 :: computeYieldValueAt(GaussPoint *gp, int isurf, const FloatArray &st
         // double help = this->gfI*this->c0/(this->gfII*this->ft0);
         double k1 = strainSpaceHardeningVariables.at(1);
         //double ft = min( this->ft0*exp((-1.0)*this->ft0*k1/this->gfI), this->ft0);
-        double ft = this->ft0 *exp( ( -1.0 ) * this->ft0 * k1 / this->gfI );
+        double ft = this->ft0 * exp( ( -1.0 ) * this->ft0 * k1 / this->gfI );
         return stressVector.at(1) - ft;
     } else if ( isurf == 2 ) {
         // double help = this->gfI*this->c0/(this->gfII*this->ft0);
         double k2 = strainSpaceHardeningVariables.at(2);
         //double c=   min (this->c0*exp((-1.0)*this->c0*k2/this->gfII), this->c0);
 
-        double c = this->c0 *exp( ( -1.0 ) * this->c0 * k2 / this->gfII );
+        double c = this->c0 * exp( ( -1.0 ) * this->c0 * k2 / this->gfII );
         double tanfi = tanfi0 + ( tanfir - tanfi0 ) * ( c0 - c ) / c0;
         //double nx = tanfi; double ny=sgn (stressVector.at(2));
 
@@ -173,7 +172,7 @@ Masonry02 :: computeStressGradientVector(FloatArray &answer, functType ftype, in
         if ( ftype == yieldFunction ) {
             // double help = this->gfI*this->c0/(this->gfII*this->ft0);
             double k2 = strainSpaceHardeningVariables.at(2);
-            double c =   this->c0 *exp( ( -1.0 ) * this->c0 * k2 / this->gfII );
+            double c =   this->c0 * exp( ( -1.0 ) * this->c0 * k2 / this->gfII );
 
             double tanfi = tanfi0 + ( tanfir - tanfi0 ) * ( c0 - c ) / c0;
             double nx = tanfi;
@@ -203,8 +202,8 @@ Masonry02 :: computeStressGradientVector(FloatArray &answer, functType ftype, in
          * }
          */
     } else if ( isurf == 3 ) {
-        answer.at(1) = 2.0 * this->Cnn *stressVector.at(1) + this->Cn;
-        answer.at(2) = 2.0 * this->Css *stressVector.at(2);
+        answer.at(1) = 2.0 *this->Cnn *stressVector.at(1) + this->Cn;
+        answer.at(2) = 2.0 *this->Css *stressVector.at(2);
     }
 }
 
@@ -246,8 +245,8 @@ Masonry02 :: computeStrainHardeningVarsIncrement(FloatArray &answer, GaussPoint 
         }
     }
 
-    double p1 = 2.0 * this->Cnn *stress.at(1) + this->Cn;
-    double p2 = 2.0 * this->Css *stress.at(2);
+    double p1 = 2.0 *this->Cnn *stress.at(1) + this->Cn;
+    double p2 = 2.0 *this->Css *stress.at(2);
 
     if ( dlambda.at(3) > 0. ) {
         answer.at(3) = dlambda.at(3) * sqrt(p1 * p1 + p2 * p2);
@@ -287,8 +286,8 @@ Masonry02 :: computeReducedHardeningVarsLamGradient(FloatMatrix &answer, GaussPo
     double k2 = sqrt( ( dlambda.at(1) / help ) * ( dlambda.at(1) / help ) +
                      dlambda.at(2) * dlambda.at(2) );
 
-    double p1 = 2.0 * this->Cnn *fullStressVector.at(1) + this->Cn;
-    double p2 = 2.0 * this->Css *fullStressVector.at(2);
+    double p1 = 2.0 *this->Cnn *fullStressVector.at(1) + this->Cn;
+    double p2 = 2.0 *this->Css *fullStressVector.at(2);
 
     if ( ( indx = activeConditionMap.at(1) ) ) {
         if ( dlambda.at(1) > 0. ) {
@@ -355,14 +354,14 @@ Masonry02 :: computeKGradientVector(FloatArray &answer, functType ftype, int isu
     answer.resize(3);
 
     if ( isurf == 1 ) {
-        answer.at(1) = ( -1.0 ) * this->ft0 *exp( ( -1.0 ) * this->ft0 * strainSpaceHardeningVariables.at(1) / this->gfI ) * ( -1.0 ) * this->ft0 / this->gfI;
+        answer.at(1) = ( -1.0 ) * this->ft0 * exp( ( -1.0 ) * this->ft0 * strainSpaceHardeningVariables.at(1) / this->gfI ) * ( -1.0 ) * this->ft0 / this->gfI;
         answer.at(2) = 0.0;
         answer.at(3) = 0.0;
     } else if ( isurf == 2 ) {
         if ( ftype == yieldFunction ) {
             //double help = this->gfI*this->c0/(this->gfII*this->ft0);
             double k2 = strainSpaceHardeningVariables.at(2);
-            double c =   this->c0 *exp( ( -1.0 ) * this->c0 * k2 / this->gfII );
+            double c =   this->c0 * exp( ( -1.0 ) * this->c0 * k2 / this->gfII );
 
 
             //double tanfi=tanfi0+(tanfir-tanfi0)*(c0-c)/c0;
@@ -373,7 +372,7 @@ Masonry02 :: computeKGradientVector(FloatArray &answer, functType ftype, int isu
             answer.at(3) = 0.0;
         } else {
             double k2 = strainSpaceHardeningVariables.at(2);
-            double c =   this->c0 *exp( ( -1.0 ) * this->c0 * k2 / this->gfII );
+            double c =   this->c0 * exp( ( -1.0 ) * this->c0 * k2 / this->gfII );
 
             answer.at(1) = 0.0;
             answer.at(2) = ( -1.0 ) * c * ( -1.0 ) * this->c0 / this->gfII;
@@ -412,8 +411,8 @@ Masonry02 :: computeReducedHardeningVarsSigmaGradient(FloatMatrix &answer, Gauss
     answer.resize(3, 2);
     answer.zero();
 
-    double p1 = 2.0 * this->Cnn *fullStressVector.at(1) + this->Cn;
-    double p2 = 2.0 * this->Css *fullStressVector.at(2);
+    double p1 = 2.0 *this->Cnn *fullStressVector.at(1) + this->Cn;
+    double p2 = 2.0 *this->Css *fullStressVector.at(2);
 
     if ( activeConditionMap.at(3) ) {
         if ( dlambda.at(3) >= 0. ) {
@@ -452,7 +451,7 @@ Masonry02 :: computeReducedSKGradientMatrix(FloatMatrix &gradientMatrix,  int i,
         if ( 0 ) {
             // double help = this->gfI*this->c0/(this->gfII*this->ft0);
             double k2 = strainSpaceHardeningVariables.at(2);
-            double c =   this->c0 *exp( ( -1.0 ) * this->c0 * k2 / this->gfII );
+            double c =   this->c0 * exp( ( -1.0 ) * this->c0 * k2 / this->gfII );
 
 
             //double tanfi=tanfi0+(tanfir-tanfi0)*(c0-c)/c0;
@@ -623,7 +622,7 @@ Masonry02 :: giveFullCharacteristicVector(FloatArray &answer,
     if ( mode == _2dInterface ) {
         answer = strainVector;
         return;
-    } else                                                             {
+    } else {
         MPlasticMaterial2 :: giveFullCharacteristicVector(answer, gp, strainVector);
     }
 }
@@ -667,14 +666,14 @@ Masonry02 :: computeReducedElasticModuli(FloatMatrix &answer,
 }
 
 /*
- #define sic 1./3.
- #define spc 1.0
- #define smc 0.5
- #define src 1./7.
+ * #define sic 1./3.
+ * #define spc 1.0
+ * #define smc 0.5
+ * #define src 1./7.
  *
- #define kp 0.09
- #define km 0.49
- #define kr 1.e6
+ *#define kp 0.09
+ *#define km 0.49
+ *#define kr 1.e6
  */
 
 double
@@ -792,6 +791,4 @@ Masonry02 :: computeF3HardeningGradient(double k)
 
     return 0.0;
 }
-
-
 } // end namespace oofem

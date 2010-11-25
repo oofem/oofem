@@ -51,7 +51,6 @@
 #include "dynalist.h"
 
 namespace oofem {
-
 #define SLOAN_TIME_CHUNK 60
 /** If defined, the support for Multiple subDomains is turned on.
  *  Then the algorithm properly handles the isolated nodes as well as
@@ -158,8 +157,10 @@ public:
     /// Sets WeightDegree to given value
     void  setWeightDegree(int w) { if ( w >= 0 ) { WeightDegree = w; } }
     /// Select spine quality generation
-    void  setSpineQuality(SpineQualityType q) { SpineQuality = q;
-                                                resetAll(); }
+    void  setSpineQuality(SpineQualityType q) {
+        SpineQuality = q;
+        resetAll();
+    }
 
     /// Prints actual parameters
     void  printParameters();
@@ -208,6 +209,5 @@ public:
     SloanNodalDegreeOrderingCrit(SloanGraph *g) { graph = g; }
     int operator()(const int n1, const int n2) { return graph->giveNode(n1)->giveDegree() - graph->giveNode(n2)->giveDegree(); }
 };
-
 } // end namespace oofem
 #endif // sloangraph_h

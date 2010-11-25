@@ -49,7 +49,6 @@
 #include "interface.h"
 
 namespace oofem {
-
 class GaussPoint;
 class LayeredCrossSectionModelInterface;
 
@@ -82,7 +81,6 @@ class LayeredCrossSectionModelInterface;
  */
 class LayeredCrossSection : public StructuralCrossSection
 {
-
 protected:
     IntArray layerMaterials; // material of each layer
     FloatArray layerThicks; // thikness for each layer
@@ -94,9 +92,11 @@ protected:
 public:
 
     LayeredCrossSection(int n, Domain *d) : StructuralCrossSection(n, d), layerMaterials(), layerThicks(), layerWidths()
-    { numberOfLayers = 0;
-      totalThick = 0.;
-      area = -1.0; }
+    {
+        numberOfLayers = 0;
+        totalThick = 0.;
+        area = -1.0;
+    }
 
     ~LayeredCrossSection()  { }
 
@@ -181,8 +181,10 @@ public:
      * @param ip integration point
      */
     int packUnknowns(CommunicationBuffer &buff, TimeStep *stepN, GaussPoint *ip)
-    { _error("packUnknowns: not implemented");
-      return 0; }
+    {
+        _error("packUnknowns: not implemented");
+        return 0;
+    }
     /**
      * Unpack and updates all necessary data of given integration point (according to element parallel_mode)
      * into given communication buffer.
@@ -192,16 +194,20 @@ public:
      * @param ip integration point
      */
     int unpackAndUpdateUnknowns(CommunicationBuffer &buff, TimeStep *stepN, GaussPoint *ip)
-    { _error("unpackAndUpdateUnknowns: not implemented");
-      return 0; }
+    {
+        _error("unpackAndUpdateUnknowns: not implemented");
+        return 0;
+    }
     /**
      * Estimates the necessary pack size to hold all packed data of receiver.
      * The corresponding material model  service is invoked. The
      * nature of packed data is typically material model dependent.
      */
     int estimatePackSize(CommunicationBuffer &buff, GaussPoint *ip)
-    { _error("estimatePackSize: not implemented");
-      return 0; }
+    {
+        _error("estimatePackSize: not implemented");
+        return 0;
+    }
 #endif
 
 protected:
@@ -266,6 +272,5 @@ public:
     virtual void computeStrainVectorInLayer(FloatArray &answer, GaussPoint *masterGp,
                                             GaussPoint *slaveGp, TimeStep *tStep) = 0;
 };
-
 } // end namespace oofem
 #endif // layeredcrosssection_h

@@ -42,7 +42,6 @@
 #include "enumitem.h"
 
 namespace oofem {
-
 /* Dof Type, determines the type of DOF created
  */
 #define dofType_DEF \
@@ -60,6 +59,5 @@ enum dofType {
 
 
 const char *__dofTypeToString(dofType _value);
-
 } // end namespace oofem
 #endif // doftype_h

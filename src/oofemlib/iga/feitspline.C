@@ -39,7 +39,6 @@
 #include "iga.h"
 
 namespace oofem {
-
 // optimized version of A4.4 for d=1
 #define OPTIMIZED_VERSION_A4dot4
 
@@ -321,12 +320,11 @@ void TSplineInterpolation :: evaldNdx(FloatMatrix &answer, const FloatArray &lco
             answer(k, 1) = ( -jacobian(1, 0) * temp(0) + jacobian(0, 0) * temp(1) ) / product;
         }
     }
+
 #ifndef HAVE_VARIABLE_ARRAY_SIZE
     delete [] tmp_ders;
     delete [] ders;
 #endif
-
-
 }
 
 
@@ -732,5 +730,4 @@ void TSplineInterpolation :: createLocalKnotVector(int p, const FloatArray &U, c
         openLocalKnotVector [ j++ ] = last;
     }
 }
-
-} // end namespace oofem 
+} // end namespace oofem

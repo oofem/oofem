@@ -42,7 +42,6 @@
 #include "structuralms.h"
 
 namespace oofem {
-
 int
 LinearElasticMaterial :: hasMaterialModeCapability(MaterialMode mode)
 //
@@ -318,9 +317,9 @@ LinearElasticMaterial :: giveStressStrainComponentIndOf(MatResponseForm form, Ma
                 return 1;
             } else if ( ind == 2 ) {
                 return 2;
-            } else if ( ind == 3 )                                    {
+            } else if ( ind == 3 ) {
                 return 6;
-            } else if ( ind == 4 )                                                                       {
+            } else if ( ind == 4 ) {
                 return 7;
             }
 
@@ -335,9 +334,9 @@ LinearElasticMaterial :: giveStressStrainComponentIndOf(MatResponseForm form, Ma
                 return 1;
             } else if ( ind == 2 ) {
                 return 2;
-            } else if ( ind == 6 )                                    {
+            } else if ( ind == 6 ) {
                 return 3;
-            } else if ( ind == 7 )                                                                       {
+            } else if ( ind == 7 ) {
                 return 4;
             }
 
@@ -407,5 +406,4 @@ LinearElasticMaterial :: giveStressStrainMask(IntArray &answer, MatResponseForm 
 
     return;
 }
-
 } // end namespace oofem

@@ -41,11 +41,9 @@
 #define statecountertype_h
 
 namespace oofem {
-
 /// StateCounterType type used to indicate solution state.
 typedef long StateCounterType;
 //typedef unsigned long StateCounterType;
-
 } // end namespace oofem
 #endif // statecountertype_h
 

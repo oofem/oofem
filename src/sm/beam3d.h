@@ -44,7 +44,6 @@
 #include "fiberedcs.h"
 
 namespace oofem {
-
 class Beam3d : public StructuralElement, public FiberedCrossSectionInterface
 {
     /*
@@ -108,7 +107,7 @@ public:
     const char *giveClassName() const { return "Beam3d"; }
     classType            giveClassID() const { return Beam3dClass; }
     IRResultType initializeFrom(InputRecord *ir);
-    Element_Geometry_Type giveGeometryType() const {return EGT_line_1;}
+    Element_Geometry_Type giveGeometryType() const { return EGT_line_1; }
 
 #ifdef __OOFEG
     void          drawRawGeometry(oofegGraphicContext &);
@@ -135,9 +134,8 @@ protected:
                                              MatResponseMode rMode, TimeStep *tStep);
     void          computeGaussPoints();
     integrationDomain  giveIntegrationDomain() { return _Line; }
-    MaterialMode          giveMaterialMode()   {return _3dBeam;}
+    MaterialMode          giveMaterialMode()   { return _3dBeam; }
     virtual int  giveNumberOfIPForMassMtrxIntegration() { return 4; }
 };
-
 } // end namespace oofem
 #endif // beam3d_h

@@ -43,11 +43,10 @@
 #include "material.h"
 #include "debug.h"
 #ifndef __MAKEDEPEND
-#include <string.h>
+ #include <string.h>
 #endif
 
 namespace oofem {
-
 GaussPoint :: GaussPoint(IntegrationRule *ir, int n, FloatArray *a, double w, MaterialMode mode)
 // Constructor. Creates a Gauss point belonging to element e, with number
 // n, with coordinates a, with weight w.
@@ -104,9 +103,11 @@ void GaussPoint :: printOutputAt(FILE *File, TimeStep *stepN)
 // Prints the strains and stresses on the data file.
 {
     int i;
-    int iruleNumber=0;
+    int iruleNumber = 0;
 
-    if (irule) iruleNumber = irule->giveNumber(); 
+    if ( irule ) {
+        iruleNumber = irule->giveNumber();
+    }
 
     fprintf(File, "  GP %2d.%-2d :", iruleNumber, number);
     /*
@@ -260,6 +261,4 @@ void GaussPoint :: updateYourself(TimeStep *tStep)
  *
  * }
  */
-
-
 } // end namespace oofem

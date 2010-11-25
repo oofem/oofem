@@ -53,12 +53,11 @@
 #include "fieldmanager.h"
 
 #ifndef __MAKEDEPEND
-#include <stdlib.h>
-#include <math.h>
+ #include <stdlib.h>
+ #include <math.h>
 #endif
 
 namespace oofem {
-
 int
 StructuralMaterial :: hasMaterialModeCapability(MaterialMode mode)
 //
@@ -87,7 +86,7 @@ StructuralMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
     switch ( mMode ) {
     case _3dMat:
     case _3dMat_F: // even if material uses deformation gradient, stiffness is computed in the usual way
-    	this->give3dMaterialStiffnessMatrix(answer, form, rMode, gp, atTime);
+        this->give3dMaterialStiffnessMatrix(answer, form, rMode, gp, atTime);
         break;
     case _PlaneStress:
         this->givePlaneStressStiffMtrx(answer, form, rMode, gp, atTime);
@@ -330,7 +329,7 @@ StructuralMaterial :: giveStressStrainComponentIndOf(MatResponseForm form, Mater
                 return 1;
             } else if ( ind == 2 ) {
                 return 2;
-            } else if ( ind == 3 )                                    {
+            } else if ( ind == 3 ) {
                 return 6;
             }
 
@@ -340,9 +339,9 @@ StructuralMaterial :: giveStressStrainComponentIndOf(MatResponseForm form, Mater
                 return 1;
             } else if ( ind == 2 ) {
                 return 2;
-            } else if ( ind == 3 )                                    {
+            } else if ( ind == 3 ) {
                 return 3;
-            } else if ( ind == 4 )                                                                       {
+            } else if ( ind == 4 ) {
                 return 6;
             }
 
@@ -359,11 +358,11 @@ StructuralMaterial :: giveStressStrainComponentIndOf(MatResponseForm form, Mater
                 return 1;
             } else if ( ind == 2 ) {
                 return 2;
-            } else if ( ind == 3 )                                    {
+            } else if ( ind == 3 ) {
                 return 4;
-            } else if ( ind == 4 )                                                                       {
+            } else if ( ind == 4 ) {
                 return 5;
-            } else if ( ind == 5 )                                                                                                          {
+            } else if ( ind == 5 ) {
                 return 6;
             }
 
@@ -381,11 +380,11 @@ StructuralMaterial :: giveStressStrainComponentIndOf(MatResponseForm form, Mater
                 return 7;
             } else if ( ind == 2 ) {
                 return 8;
-            } else if ( ind == 3 )                                    {
+            } else if ( ind == 3 ) {
                 return 12;
-            } else if ( ind == 4 )                                                                        {
+            } else if ( ind == 4 ) {
                 return 5;
-            } else if ( ind == 5 )                                                                                                           {
+            } else if ( ind == 5 ) {
                 return 4;
             }
 
@@ -395,7 +394,7 @@ StructuralMaterial :: giveStressStrainComponentIndOf(MatResponseForm form, Mater
                 return 1;
             } else if ( ind == 2 ) {
                 return 8;
-            } else if ( ind == 3 )                                    {
+            } else if ( ind == 3 ) {
                 return 5;
             }
 
@@ -405,7 +404,7 @@ StructuralMaterial :: giveStressStrainComponentIndOf(MatResponseForm form, Mater
                 return 1;
             } else if ( ind == 2 ) {
                 return 5;
-            } else if ( ind == 3 )                                    {
+            } else if ( ind == 3 ) {
                 return 6;
             }
 
@@ -415,17 +414,17 @@ StructuralMaterial :: giveStressStrainComponentIndOf(MatResponseForm form, Mater
                 return 1;
             } else if ( ind == 2 ) {
                 return 2;
-            } else if ( ind == 3 )                                   {
+            } else if ( ind == 3 ) {
                 return 6;
-            } else if ( ind == 4 )                                                                      {
+            } else if ( ind == 4 ) {
                 return 7;
-            } else if ( ind == 5 )                                                                                                         {
+            } else if ( ind == 5 ) {
                 return 8;
-            } else if ( ind == 6 )                                                                                                                                            {
+            } else if ( ind == 6 ) {
                 return 12;
-            } else if ( ind == 7 )                                                                                                                                                                                {
+            } else if ( ind == 7 ) {
                 return 5;
-            } else if ( ind == 8 )                                                                                                                                                                                                                   {
+            } else if ( ind == 8 ) {
                 return 4;
             }
 
@@ -447,7 +446,7 @@ StructuralMaterial :: giveStressStrainComponentIndOf(MatResponseForm form, Mater
                 return 1;
             } else if ( ind == 2 ) {
                 return 2;
-            } else if ( ind == 6 )                                    {
+            } else if ( ind == 6 ) {
                 return 3;
             }
 
@@ -457,9 +456,9 @@ StructuralMaterial :: giveStressStrainComponentIndOf(MatResponseForm form, Mater
                 return 1;
             } else if ( ind == 2 ) {
                 return 2;
-            } else if ( ind == 3 )                                    {
+            } else if ( ind == 3 ) {
                 return 3;
-            } else if ( ind == 6 )                                                                       {
+            } else if ( ind == 6 ) {
                 return 4;
             }
 
@@ -476,11 +475,11 @@ StructuralMaterial :: giveStressStrainComponentIndOf(MatResponseForm form, Mater
                 return 1;
             } else if ( ind == 2 ) {
                 return 2;
-            } else if ( ind == 4 )                                    {
+            } else if ( ind == 4 ) {
                 return 3;
-            } else if ( ind == 5 )                                                                       {
+            } else if ( ind == 5 ) {
                 return 4;
-            } else if ( ind == 6 )                                                                                                          {
+            } else if ( ind == 6 ) {
                 return 5;
             }
 
@@ -498,11 +497,11 @@ StructuralMaterial :: giveStressStrainComponentIndOf(MatResponseForm form, Mater
                 return 1;
             } else if ( ind == 8 ) {
                 return 2;
-            } else if ( ind == 12 )                                    {
+            } else if ( ind == 12 ) {
                 return 3;
-            } else if ( ind == 5 )                                                                        {
+            } else if ( ind == 5 ) {
                 return 4;
-            } else if ( ind == 4 )                                                                                                           {
+            } else if ( ind == 4 ) {
                 return 5;
             }
 
@@ -512,7 +511,7 @@ StructuralMaterial :: giveStressStrainComponentIndOf(MatResponseForm form, Mater
                 return 1;
             } else if ( ind == 8 ) {
                 return 2;
-            } else if ( ind == 5 )                                    {
+            } else if ( ind == 5 ) {
                 return 3;
             }
 
@@ -522,7 +521,7 @@ StructuralMaterial :: giveStressStrainComponentIndOf(MatResponseForm form, Mater
                 return 1;
             } else if ( ind == 5 ) {
                 return 2;
-            } else if ( ind == 6 )                                    {
+            } else if ( ind == 6 ) {
                 return 3;
             }
 
@@ -532,17 +531,17 @@ StructuralMaterial :: giveStressStrainComponentIndOf(MatResponseForm form, Mater
                 return 1;
             } else if ( ind == 2 ) {
                 return 2;
-            } else if ( ind == 6 )                                   {
+            } else if ( ind == 6 ) {
                 return 3;
-            } else if ( ind == 7 )                                                                      {
+            } else if ( ind == 7 ) {
                 return 4;
-            } else if ( ind == 8 )                                                                                                         {
+            } else if ( ind == 8 ) {
                 return 5;
-            } else if ( ind == 12 )                                                                                                                                            {
+            } else if ( ind == 12 ) {
                 return 6;
-            } else if ( ind == 5 )                                                                                                                                                                                {
+            } else if ( ind == 5 ) {
                 return 7;
-            } else if ( ind == 4 )                                                                                                                                                                                                                   {
+            } else if ( ind == 4 ) {
                 return 8;
             }
 
@@ -1857,26 +1856,26 @@ StructuralMaterial :: computePrincipalValues(FloatArray &answer, const FloatArra
         if ( mode == principal_stress ) {
             I1 = s.at(1) + s.at(2) + s.at(3);
             I2 = s.at(1) * s.at(2) + s.at(2) * s.at(3) + s.at(3) * s.at(1) -
-            ( s.at(4) * s.at(4) + s.at(5) * s.at(5) + s.at(6) * s.at(6) );
+                 ( s.at(4) * s.at(4) + s.at(5) * s.at(5) + s.at(6) * s.at(6) );
             I3 = s.at(1) * s.at(2) * s.at(3) + 2. * s.at(4) * s.at(5) * s.at(6) -
-            ( s.at(1) * s.at(4) * s.at(4) + s.at(2) * s.at(5) * s.at(5) +
-             s.at(3) * s.at(6) * s.at(6) );
+                 ( s.at(1) * s.at(4) * s.at(4) + s.at(2) * s.at(5) * s.at(5) +
+                  s.at(3) * s.at(6) * s.at(6) );
         } else if ( mode == principal_deviatoricstress ) {
             help = ( s.at(1) + s.at(2) + s.at(3) ) / 3.0;
             I1 = 0.;
             I2 = -( 1. / 6. ) * ( ( s.at(1) - s.at(2) ) * ( s.at(1) - s.at(2) ) + ( s.at(2) - s.at(3) ) * ( s.at(2) - s.at(3) ) +
                                  ( s.at(3) - s.at(1) ) * ( s.at(3) - s.at(1) ) ) - s.at(4) * s.at(4) - s.at(5) * s.at(5) -
-            s.at(6) * s.at(6);
+                 s.at(6) * s.at(6);
             I3 = ( s.at(1) - help ) * ( s.at(2) - help ) * ( s.at(3) - help ) + 2. * s.at(4) * s.at(5) * s.at(6) -
-            s.at(5) * s.at(5) * ( s.at(2) - help ) - s.at(4) * s.at(4) * ( s.at(1) - help ) -
-            s.at(6) * s.at(6) * ( s.at(3) - help );
+                 s.at(5) * s.at(5) * ( s.at(2) - help ) - s.at(4) * s.at(4) * ( s.at(1) - help ) -
+                 s.at(6) * s.at(6) * ( s.at(3) - help );
         } else if ( mode == principal_strain ) {
             I1 = s.at(1) + s.at(2) + s.at(3);
             I2 = s.at(1) * s.at(2) + s.at(2) * s.at(3) + s.at(3) * s.at(1) -
-            0.25 * ( s.at(4) * s.at(4) + s.at(5) * s.at(5) + s.at(6) * s.at(6) );
+                 0.25 * ( s.at(4) * s.at(4) + s.at(5) * s.at(5) + s.at(6) * s.at(6) );
             I3 = s.at(1) * s.at(2) * s.at(3) +
-            0.25 * ( s.at(4) * s.at(5) * s.at(6) - s.at(1) * s.at(4) * s.at(4) -
-                    s.at(2) * s.at(5) * s.at(5) - s.at(3) * s.at(6) * s.at(6) );
+                 0.25 * ( s.at(4) * s.at(5) * s.at(6) - s.at(1) * s.at(4) * s.at(4) -
+                         s.at(2) * s.at(5) * s.at(5) - s.at(3) * s.at(6) * s.at(6) );
         } else {
             _error("ComputePrincipalValues: not supported");
         }
@@ -2330,21 +2329,22 @@ StructuralMaterial :: sortPrincDirAndValCloseTo(FloatArray *pVal, FloatMatrix *p
 int
 StructuralMaterial :: setIPValue(const FloatArray value, GaussPoint *aGaussPoint, InternalStateType type)
 {
-  StructuralMaterialStatus *status = ( StructuralMaterialStatus * ) this->giveStatus(aGaussPoint);
-  if ( type == IST_StressTensor ) {
-    status -> letStressVectorBe (value);
-    return 1;
-  } else if ( type == IST_StrainTensor ) {
-    status -> letStrainVectorBe (value);
-    return 1;
-  } else if ( type == IST_StressTensorTemp ) {
-    status -> letTempStressVectorBe (value);
-    return 1;
-  } else if ( type == IST_StrainTensorTemp ) {
-    status -> letTempStrainVectorBe (value);
-    return 1;
-  } else
-    return 0;
+    StructuralMaterialStatus *status = ( StructuralMaterialStatus * ) this->giveStatus(aGaussPoint);
+    if ( type == IST_StressTensor ) {
+        status->letStressVectorBe(value);
+        return 1;
+    } else if ( type == IST_StrainTensor ) {
+        status->letStrainVectorBe(value);
+        return 1;
+    } else if ( type == IST_StressTensorTemp ) {
+        status->letTempStressVectorBe(value);
+        return 1;
+    } else if ( type == IST_StrainTensorTemp ) {
+        status->letTempStrainVectorBe(value);
+        return 1;
+    } else {
+        return 0;
+    }
 }
 
 int
@@ -2469,9 +2469,9 @@ StructuralMaterial :: giveIPValueType(InternalStateType type)
     // strains components packed in enginnering notation
     else if ( ( type == IST_StrainTensor ) || ( type == IST_StrainTensorTemp ) || ( type == IST_CylindricalStrainTensor ) ) {
         return ISVT_TENSOR_S3E;
-    } else if ( type == IST_Temperature )  {
+    } else if ( type == IST_Temperature ) {
         return ISVT_SCALAR;
-    } else                                                            {
+    } else {
         return Material :: giveIPValueType(type);
     }
 }
@@ -2532,7 +2532,7 @@ StructuralMaterial :: computeStressIndependentStrainVector(FloatArray &answer,
     StructuralCrossSection *crossSection =  dynamic_cast< StructuralCrossSection * >( gp->giveCrossSection() );
     Element *elem = gp->giveElement();
     StructuralElement *selem = dynamic_cast< StructuralElement * >( gp->giveElement() );
-    
+
 
     answer.resize(0);
     answerTemper.resize(0);
@@ -2545,12 +2545,18 @@ StructuralMaterial :: computeStressIndependentStrainVector(FloatArray &answer,
 
     //sum up all prescribed temperatures over an element
     //elem->computeResultingIPTemperatureAt(et, stepN, gp, mode);
-    if (selem) selem->computeResultingIPTemperatureAt(et, stepN, gp, mode); // HUHU
+    if ( selem ) {
+        selem->computeResultingIPTemperatureAt(et, stepN, gp, mode);        // HUHU
+    }
 
     //sum up all prescribed eigenstrain over an element
-    if (selem) selem->computeResultingIPEigenstrainAt(eigenstrain, stepN, gp, mode);
-    if(eigenstrain.giveSize()!=0 && eigenstrain.giveSize()!=giveSizeOfReducedStressStrainVector(matmode))
+    if ( selem ) {
+        selem->computeResultingIPEigenstrainAt(eigenstrain, stepN, gp, mode);
+    }
+
+    if ( eigenstrain.giveSize() != 0 && eigenstrain.giveSize() != giveSizeOfReducedStressStrainVector(matmode) ) {
         _error5( "Number of given eigenstrain components %d is different than required %d by material mode %s, element %d", eigenstrain.giveSize(), giveSizeOfReducedStressStrainVector(matmode), __MaterialModeToString(matmode), elem->giveNumber() );
+    }
 
     /* add external source, if provided */
     FieldManager *fm = domain->giveEngngModel()->giveContext()->giveFieldManager();
@@ -2576,87 +2582,90 @@ StructuralMaterial :: computeStressIndependentStrainVector(FloatArray &answer,
     }
 
 
-    if ( et.giveSize() ) {//found temperature boundary conditions or prescribed field
+    if ( et.giveSize() ) { //found temperature boundary conditions or prescribed field
         double thick, width;
 
         this->giveThermalDilatationVector(e0, gp, stepN);
 
         switch ( matmode ) {
-            case _2dBeam:
-                thick = crossSection->give(CS_Thickness);
-                answerTemper.resize(3);
-                answerTemper.zero();
-                answerTemper.at(1) = e0.at(1) * ( et.at(1) - this->giveReferenceTemperature() );
-                if ( et.giveSize() > 1 ) {
-                    answerTemper.at(2) = e0.at(1) * et.at(2) / thick; // kappa_x
-                }
-                break;
-            case _3dBeam:
-                thick = crossSection->give(CS_Thickness);
-                width = crossSection->give(CS_Width);
-                answerTemper.resize(6);
-                answerTemper.zero();
-                answerTemper.at(1) = e0.at(1) * ( et.at(1) - this->giveReferenceTemperature() );
-                if ( et.giveSize() > 1 ) {
-                    answerTemper.at(5) = e0.at(1) * et.at(2) / thick; // kappa_y
-                    if ( et.giveSize() > 2 ) {
-                        answerTemper.at(6) = e0.at(1) * et.at(3) / width; // kappa_z
-                    }
-                }
-                break;
-            case _2dPlate:
-                thick = crossSection->give(CS_Thickness);
-                if ( et.giveSize() > 1 ) {
-                    answerTemper.resize(5);
-                    answerTemper.zero();
+        case _2dBeam:
+            thick = crossSection->give(CS_Thickness);
+            answerTemper.resize(3);
+            answerTemper.zero();
+            answerTemper.at(1) = e0.at(1) * ( et.at(1) - this->giveReferenceTemperature() );
+            if ( et.giveSize() > 1 ) {
+                answerTemper.at(2) = e0.at(1) * et.at(2) / thick;     // kappa_x
+            }
 
-                    if ( et.giveSize() > 1 ) {
-                        answerTemper.at(1) = e0.at(1) * et.at(2) / thick; // kappa_x
-                        answerTemper.at(2) = e0.at(2) * et.at(2) / thick; // kappa_y
-                    }
+            break;
+        case _3dBeam:
+            thick = crossSection->give(CS_Thickness);
+            width = crossSection->give(CS_Width);
+            answerTemper.resize(6);
+            answerTemper.zero();
+            answerTemper.at(1) = e0.at(1) * ( et.at(1) - this->giveReferenceTemperature() );
+            if ( et.giveSize() > 1 ) {
+                answerTemper.at(5) = e0.at(1) * et.at(2) / thick;     // kappa_y
+                if ( et.giveSize() > 2 ) {
+                    answerTemper.at(6) = e0.at(1) * et.at(3) / width;     // kappa_z
                 }
-                break;
-            case _3dShell:
-                thick = crossSection->give(CS_Thickness);
-                answerTemper.resize(8);
+            }
+
+            break;
+        case _2dPlate:
+            thick = crossSection->give(CS_Thickness);
+            if ( et.giveSize() > 1 ) {
+                answerTemper.resize(5);
                 answerTemper.zero();
 
-                answerTemper.at(1) = e0.at(1) * ( et.at(1) - this->giveReferenceTemperature() );
-                answerTemper.at(2) = e0.at(2) * ( et.at(1) - this->giveReferenceTemperature() );
                 if ( et.giveSize() > 1 ) {
-                    answerTemper.at(4) = e0.at(1) * et.at(2) / thick; // kappa_x
-                    answerTemper.at(5) = e0.at(2) * et.at(2) / thick; // kappa_y
+                    answerTemper.at(1) = e0.at(1) * et.at(2) / thick;     // kappa_x
+                    answerTemper.at(2) = e0.at(2) * et.at(2) / thick;     // kappa_y
                 }
-                break;
-            default:
-                if ( e0.giveSize() ) {
-                    fullAnswer = e0;
-                    if ( mode == VM_Total ) {
-                        fullAnswer.times(et.at(1) - this->referenceTemperature);
-                    } else {
-                        fullAnswer.times( et.at(1) );
-                    }
+            }
 
-                    this->giveReducedCharacteristicVector(answerTemper, gp, fullAnswer);
+            break;
+        case _3dShell:
+            thick = crossSection->give(CS_Thickness);
+            answerTemper.resize(8);
+            answerTemper.zero();
+
+            answerTemper.at(1) = e0.at(1) * ( et.at(1) - this->giveReferenceTemperature() );
+            answerTemper.at(2) = e0.at(2) * ( et.at(1) - this->giveReferenceTemperature() );
+            if ( et.giveSize() > 1 ) {
+                answerTemper.at(4) = e0.at(1) * et.at(2) / thick;     // kappa_x
+                answerTemper.at(5) = e0.at(2) * et.at(2) / thick;     // kappa_y
+            }
+
+            break;
+        default:
+            if ( e0.giveSize() ) {
+                fullAnswer = e0;
+                if ( mode == VM_Total ) {
+                    fullAnswer.times(et.at(1) - this->referenceTemperature);
+                } else {
+                    fullAnswer.times( et.at(1) );
                 }
+
+                this->giveReducedCharacteristicVector(answerTemper, gp, fullAnswer);
+            }
         }
     }
 
-    if( eigenstrain.giveSize() ){//found prescribed eigenstrain
-
+    if ( eigenstrain.giveSize() ) { //found prescribed eigenstrain
         switch ( matmode ) {
-            case _1dMat:
-            case _3dMat:
-            case _3dMat_F:
-            case _PlaneStress:
-            case _PlaneStrain:
-            case _3dRotContinuum:
-            case _3dMicroplane:
-                fullAnswer = eigenstrain;
-                break;
+        case _1dMat:
+        case _3dMat:
+        case _3dMat_F:
+        case _PlaneStress:
+        case _PlaneStrain:
+        case _3dRotContinuum:
+        case _3dMicroplane:
+            fullAnswer = eigenstrain;
+            break;
 
-            default:
-                _error2("Material mode %s for eigenstrains not supported", __MaterialModeToString(matmode));
+        default:
+            _error2( "Material mode %s for eigenstrains not supported", __MaterialModeToString(matmode) );
         }
 
         answerEigenstrain = fullAnswer;
@@ -2664,22 +2673,20 @@ StructuralMaterial :: computeStressIndependentStrainVector(FloatArray &answer,
     }
 
     //join temperature and eigenstrain vectors, compare vector sizes
-    if ( answerTemper.giveSize() ){
+    if ( answerTemper.giveSize() ) {
         answer = answerTemper;
-        if ( answerEigenstrain.giveSize() ){
-            if (answerTemper.giveSize() != answerEigenstrain.giveSize() ){
-                _error4("Vector of temperature strains has the size %d which is different with the size of eigenstrain vector %d, element %d", answerTemper.giveSize(), answerEigenstrain.giveSize(), elem->giveNumber() );
+        if ( answerEigenstrain.giveSize() ) {
+            if ( answerTemper.giveSize() != answerEigenstrain.giveSize() ) {
+                _error4( "Vector of temperature strains has the size %d which is different with the size of eigenstrain vector %d, element %d", answerTemper.giveSize(), answerEigenstrain.giveSize(), elem->giveNumber() );
             }
+
             answer.add(answerEigenstrain);
         }
-    }
-    else {
-        if ( answerEigenstrain.giveSize() ){
+    } else   {
+        if ( answerEigenstrain.giveSize() ) {
             answer = answerEigenstrain;
         }
     }
-
-
 }
 
 
@@ -2804,5 +2811,4 @@ StructuralMaterial :: giveInputRecordString(std :: string &str, bool keyword)
 
     return 1;
 }
-
 } // end namespace oofem

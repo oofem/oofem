@@ -43,8 +43,8 @@
 #include "intarray.h"
 
 #ifndef __MAKEDEPEND
-#include <math.h>
-#include <stdlib.h>
+ #include <math.h>
+ #include <stdlib.h>
 #endif
 
 #include "fei1dlin.h"
@@ -54,7 +54,6 @@
 #include "mathfem.h"
 
 namespace oofem {
-
 /**
  * Constructor. Creates a hanging node with number n, belonging to aDomain.
  */
@@ -103,10 +102,8 @@ HangingNode :: initializeFrom(InputRecord *ir)
 
     if ( typeOfContrib == 0 ) {
         IR_GIVE_FIELD(ir, * masterContribution, IFT_HangingNode_weigths, "weights"); // Macro
-    }
-    else if (typeOfContrib < 0){//determine ksi, eta, dzeta directly from element-like configuration defined by nodes
-    }
-    else {
+    } else if ( typeOfContrib < 0 )     { //determine ksi, eta, dzeta directly from element-like configuration defined by nodes
+    } else   {
         IR_GIVE_FIELD(ir, locoords->at(1), IFT_HangingNode_ksi, "ksi");      // Macro
         IR_GIVE_OPTIONAL_FIELD(ir, locoords->at(2), IFT_HangingNode_eta, "eta"); // Macro
         IR_GIVE_OPTIONAL_FIELD(ir, locoords->at(3), IFT_HangingNode_dzeta, "dzeta"); // Macro
@@ -150,8 +147,9 @@ HangingNode :: checkConsistency()
     }
 
     //compute natural coordinates from the master ones if desired
-    if(typeOfContrib<0)
-      computeNaturalCoordinates();
+    if ( typeOfContrib < 0 ) {
+        computeNaturalCoordinates();
+    }
 
     // check if receiver has the same coordinate system as master dofManagers
     for ( i = 0; i < countOfMasterNodes; i++ ) {
@@ -172,11 +170,11 @@ HangingNode :: checkConsistency()
     suma = masterContribution->sum();
     // TEMPORARILY TURNED OFF !!!!
     /*
-    if ( nonzero(suma - 1.0, 10e-9) ) {
-        _warning2("checkConsistency: sum of coefficients of master contributions(%.12e) != 1.0", suma);
-        result = 0;
-    }
-    */
+     * if ( nonzero(suma - 1.0, 10e-9) ) {
+     *  _warning2("checkConsistency: sum of coefficients of master contributions(%.12e) != 1.0", suma);
+     *  result = 0;
+     * }
+     */
 
     // matching of local and global coordinates
     FloatArray **mnc, coords(3);
@@ -210,19 +208,19 @@ HangingNode :: checkConsistency()
     }
 
     /*
-      #ifdef __PARALLEL_MODE
-       // check if master in same mode
-       if ( parallel_mode != DofManager_local ) {
-         for ( i = 1; i <= countOfMasterNodes; i++ ) {
-           if ( masterNode [ i - 1 ]->giveParallelMode() != parallel_mode ) {
-             _warning2("checkConsistency: mismatch in parallel mode of HangingNode and master", 1);
-                result = 0;
-           }
-         }
-       }
-
-      #endif
-    */
+     * #ifdef __PARALLEL_MODE
+     * // check if master in same mode
+     * if ( parallel_mode != DofManager_local ) {
+     *   for ( i = 1; i <= countOfMasterNodes; i++ ) {
+     *     if ( masterNode [ i - 1 ]->giveParallelMode() != parallel_mode ) {
+     *       _warning2("checkConsistency: mismatch in parallel mode of HangingNode and master", 1);
+     *          result = 0;
+     *     }
+     *   }
+     * }
+     *
+     * #endif
+     */
 
 
     // deallocate auxiliary arrays
@@ -240,40 +238,40 @@ HangingNode :: computeMasterContribution()
     }
 
     switch ( abs(typeOfContrib) ) {
-      case 211: {// linear truss
+    case 211: {  // linear truss
         FEI1dLin(0).evalN(* masterContribution, * locoords, FEIVoidCellGeometry(), 0.0);
         break;
     }
-    case 312: {// linear triangle
+    case 312: { // linear triangle
         FEI2dTrLin(0, 0).evalN(* masterContribution, * locoords, FEIVoidCellGeometry(), 0.0);
         break;
     }
-    case 412: {// linear rectangle
+    case 412: { // linear rectangle
         FEI2dQuadLin(0, 0).evalN(* masterContribution, * locoords, FEIVoidCellGeometry(), 0.0);
         break;
     }
-    case 813: {// linear hexahedron
-      double x = locoords->at(1), y = locoords->at(2), z = locoords->at(3);
+    case 813: { // linear hexahedron
+        double x = locoords->at(1), y = locoords->at(2), z = locoords->at(3);
 
-      masterContribution->resize(8);
-      masterContribution->at(1)  = 0.125 * ( 1. - x ) * ( 1. - y ) * ( 1. + z );
-      masterContribution->at(2)  = 0.125 * ( 1. - x ) * ( 1. + y ) * ( 1. + z );
-      masterContribution->at(3)  = 0.125 * ( 1. + x ) * ( 1. + y ) * ( 1. + z );
-      masterContribution->at(4)  = 0.125 * ( 1. + x ) * ( 1. - y ) * ( 1. + z );
-      masterContribution->at(5)  = 0.125 * ( 1. - x ) * ( 1. - y ) * ( 1. - z );
-      masterContribution->at(6)  = 0.125 * ( 1. - x ) * ( 1. + y ) * ( 1. - z );
-      masterContribution->at(7)  = 0.125 * ( 1. + x ) * ( 1. + y ) * ( 1. - z );
-      masterContribution->at(8)  = 0.125 * ( 1. + x ) * ( 1. - y ) * ( 1. - z );
-      break;
+        masterContribution->resize(8);
+        masterContribution->at(1)  = 0.125 * ( 1. - x ) * ( 1. - y ) * ( 1. + z );
+        masterContribution->at(2)  = 0.125 * ( 1. - x ) * ( 1. + y ) * ( 1. + z );
+        masterContribution->at(3)  = 0.125 * ( 1. + x ) * ( 1. + y ) * ( 1. + z );
+        masterContribution->at(4)  = 0.125 * ( 1. + x ) * ( 1. - y ) * ( 1. + z );
+        masterContribution->at(5)  = 0.125 * ( 1. - x ) * ( 1. - y ) * ( 1. - z );
+        masterContribution->at(6)  = 0.125 * ( 1. - x ) * ( 1. + y ) * ( 1. - z );
+        masterContribution->at(7)  = 0.125 * ( 1. + x ) * ( 1. + y ) * ( 1. - z );
+        masterContribution->at(8)  = 0.125 * ( 1. + x ) * ( 1. - y ) * ( 1. - z );
+        break;
     }
-    case 321: {// quadratic truss
+    case 321: { // quadratic truss
         masterContribution->resize(3);
         masterContribution->at(1) = 0.5 * locoords->at(1) * ( locoords->at(1) - 1.0 );
         masterContribution->at(2) = 0.5 * locoords->at(1) * ( locoords->at(1) + 1.0 );
         masterContribution->at(3) = 1.0 - locoords->at(1) *  locoords->at(1);
         break;
     }
-    case 622: {// quadratic triangle
+    case 622: { // quadratic triangle
         masterContribution->resize(6);
         locoords->at(3) = 1. - locoords->at(1) - locoords->at(2);
         masterContribution->at(1) = ( 2. * locoords->at(1) - 1. ) * locoords->at(1);
@@ -284,7 +282,7 @@ HangingNode :: computeMasterContribution()
         masterContribution->at(6) =  4. * locoords->at(3) * locoords->at(1);
         break;
     }
-    case 822: {// quadratic rectangle
+    case 822: { // quadratic rectangle
         masterContribution->resize(8);
         masterContribution->at(1) = ( 1. + locoords->at(1) ) * ( 1. + locoords->at(2) ) * 0.25 * ( locoords->at(1) + locoords->at(2) - 1. );
         masterContribution->at(2) = ( 1. - locoords->at(1) ) * ( 1. + locoords->at(2) ) * 0.25 * ( -locoords->at(1) + locoords->at(2) - 1. );
@@ -310,48 +308,51 @@ HangingNode :: computeMasterContribution()
 }
 
 int
-HangingNode :: computeNaturalCoordinates(){
-  int i,j;
-  //const FloatArray *masterCoords [ countOfMasterNodes ];
-  const FloatArray **masterCoords = new const FloatArray* [ countOfMasterNodes ];
+HangingNode :: computeNaturalCoordinates() {
+    int i, j;
+    //const FloatArray *masterCoords [ countOfMasterNodes ];
+    const FloatArray **masterCoords = new const FloatArray * [ countOfMasterNodes ];
 
-  locoords->zero();
+    locoords->zero();
 
-  for ( i = 1; i <= countOfMasterNodes; i++ ) {//master nodes of element-like topology
-    j = masterDofMngr->at(i);
-    masterCoords [ i - 1 ] = new const FloatArray( *this->domain->giveNode(j)->giveCoordinates() );
-  }
-
-  //need to extend to other elements
-  switch ( typeOfContrib ) {
-    case -412: {// linear rectangle
-      FEI2dQuadLin(1, 2).global2local(*this->locoords, coordinates, FEIVertexListGeometryWrapper(countOfMasterNodes, masterCoords), 0.0);
-      break;
+    for ( i = 1; i <= countOfMasterNodes; i++ ) { //master nodes of element-like topology
+        j = masterDofMngr->at(i);
+        masterCoords [ i - 1 ] = new const FloatArray( *this->domain->giveNode( j )->giveCoordinates() );
     }
-    case -813: {// linear hexahedron
-      FEI3dHexaLin().global2local(*this->locoords, coordinates, FEIVertexListGeometryWrapper(countOfMasterNodes, masterCoords), 0.0);
-      break;
+
+    //need to extend to other elements
+    switch ( typeOfContrib ) {
+    case -412: { // linear rectangle
+        FEI2dQuadLin(1, 2).global2local(* this->locoords, coordinates, FEIVertexListGeometryWrapper(countOfMasterNodes, masterCoords), 0.0);
+        break;
+    }
+    case -813: { // linear hexahedron
+        FEI3dHexaLin().global2local(* this->locoords, coordinates, FEIVertexListGeometryWrapper(countOfMasterNodes, masterCoords), 0.0);
+        break;
     }
     default: {
-      _warning("Unknown element-like configuration of master nodes or not implemented element type");
+        _warning("Unknown element-like configuration of master nodes or not implemented element type");
 
-      // clean up
-      for ( i = 1; i <= countOfMasterNodes; i++ )
-        delete masterCoords[i-1];
-      delete [] masterCoords; 
-      
-      return 0;
+        // clean up
+        for ( i = 1; i <= countOfMasterNodes; i++ ) {
+            delete masterCoords [ i - 1 ];
+        }
 
-      break;
+        delete [] masterCoords;
+
+        return 0;
+
+        break;
     }
-  }
+    }
 
-  // clean up
-  for ( i = 1; i <= countOfMasterNodes; i++ )
-    delete masterCoords[i-1];
-  delete [] masterCoords; 
+    // clean up
+    for ( i = 1; i <= countOfMasterNodes; i++ ) {
+        delete masterCoords [ i - 1 ];
+    }
 
-  return 1;
+    delete [] masterCoords;
+
+    return 1;
 }
-
 } // end namespace oofem

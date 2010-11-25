@@ -43,11 +43,10 @@
 #include "maxwellChM.h"
 
 namespace oofem {
-
 class B3Material : public MaxwellChainMaterial
 {
     /*
-     * This class implements the B3 model for concrete creep and shrinkage. 
+     * This class implements the B3 model for concrete creep and shrinkage.
      *
      * DESCRIPTION
      * TASK
@@ -101,6 +100,5 @@ protected:
 
     double inverse_sorption_isotherm(double w);
 };
-
 } // end namespace oofem
 #endif // b3mat_h

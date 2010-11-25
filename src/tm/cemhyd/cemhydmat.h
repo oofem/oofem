@@ -9,7 +9,7 @@
 #include <math.h>
 
 #ifndef M_PI
-#define M_PI 3.1415926535897932384626433832795029L /* pi */
+ #define M_PI 3.1415926535897932384626433832795029L /* pi */
 #endif
 
 #define TINYXML //read CEMHYD3D input file through tinyXML library
@@ -89,6 +89,10 @@ public:
     int conductivityType, capacityType, densityType;
     ///array containing warnings supression for density, conductivity, capacity, high temperature
     IntArray nowarnings;
+    ///array containing scaling factors for density, conductivity and capacity
+    FloatArray scaling;
+    ///degree of reinforcement, if defined, reinforcement effect for conductivity and capacity is accounted for. Isotropic case.
+    int reinforcementDegree;
     ///assign a separate microstructure in each integration point
     int eachGP;
     ///XML input file name for CEMHYD3D
@@ -480,7 +484,7 @@ long int n_anhydrite, target_anhydrite, n_hemi, target_hemi;
 double probgyp, probhem, probanh;     /* probability of gypsum particle instead of cement */
 /* and probabilities of anhydrite and hemihydrate */
 /* relative to total sulfate */
-//  struct cluster *clust[NPARTC];	/* limit of NPARTC particles/clusters */
+//  struct cluster *clust[NPARTC];/* limit of NPARTC particles/clusters */
 struct cluster **clust;
 
 //distrib3d

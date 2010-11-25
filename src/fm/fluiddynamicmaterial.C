@@ -49,13 +49,12 @@
 #include "fieldmanager.h"
 
 #ifndef __MAKEDEPEND
-#include <stdlib.h>
-#include <math.h>
+ #include <stdlib.h>
+ #include <math.h>
 #endif
 #include "contextioerr.h"
 
 namespace oofem {
-
 void
 FluidDynamicMaterial :: updateInternalState(const FloatArray &vec, GaussPoint *gp, TimeStep *)
 { }
@@ -145,7 +144,4 @@ FluidDynamicMaterialStatus :: restoreContext(DataStream *stream, ContextMode mod
 
     return CIO_OK;
 }
-
-
-
 } // end namespace oofem

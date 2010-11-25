@@ -41,7 +41,7 @@
 #define pnldeidynamic_h
 
 #ifndef __MAKEDEPEND
-#include <stdio.h>
+ #include <stdio.h>
 #endif
 #include "structengngmodel.h"
 #include "skyline.h"
@@ -50,10 +50,9 @@
 #include "flotmtrx.h"
 
 namespace oofem {
-
 #ifdef __PARALLEL_MODE
-#include "problemcomm.h"
-#include "processcomm.h"
+ #include "problemcomm.h"
+ #include "processcomm.h"
 
 
 class PNlDEIDynamic;
@@ -103,22 +102,22 @@ class ProblemCommunicator;
  *
  * Current implementation supports parallel processing. Both node- and element cut strategies can
  * be used.
- \begin{itemize}
- \item
+ * \begin{itemize}
+ * \item
  * In node cut strategy, partitions are divided using cut, which goes through nodes.
  * These cutted nodes are called "shared" nodes. Generally, unknown values in shared nodes are
  * composed from local partition contributions as well as from contributions from remote partitions
  * sharing this node. Particullary, masses and real nodal forces have to be exchaneged for shared
  * nodes.
- \item
+ * \item
  * In element cut strategy, partitions are divided using cut running through elements. The cutted elements are
  * replicated on neighbouring partitions. The nodes belonging to  replicated elements belonging to
  * remote partitions are called remote nodes. The are mirrors or remote copies of cooresponding
  * nodes on neighbouring partition.
- \item additional mode has been introduced remote element mode. It introduces the "remote" elements, the
+ * \item additional mode has been introduced remote element mode. It introduces the "remote" elements, the
  * exact local mirrors of remote counterparts. Introduced to support general nonlocal constitutive models,
  * in order to provide efficient way, how to average local data without need of fine grain communication.
- \end{itemize}
+ * \end{itemize}
  */
 class PNlDEIDynamic : public StructuralEngngModel
 {
@@ -341,6 +340,5 @@ public:
     //int initRemoteDofManList ();
 #endif
 };
-
 } // end namespace oofem
 #endif // pnldeidynamic_h

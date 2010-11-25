@@ -52,11 +52,10 @@
 #include "statecountertype.h"
 
 #ifdef __PARALLEL_MODE
-#include "problemcomm.h"
+ #include "problemcomm.h"
 #endif
 
 namespace oofem {
-
 class Domain;
 class Element;
 class CrossSection;
@@ -73,7 +72,7 @@ class TimeStep;
 class NodalRecoveryModel
 {
 protected:
-    typedef TDictionary< int, FloatArray > vectorDictType;
+    typedef TDictionary< int, FloatArray >vectorDictType;
     /**
      * Array of nodal dictionaries, containing nodal values for each region.
      * The region id is dictionary key to corresponding values.
@@ -201,6 +200,5 @@ protected:
     int updateRegionRecoveredValues(const int ireg, const IntArray &regionNodalNumbers,
                                     int regionValSize, const FloatArray &rhs);
 };
-
 } // end namespace oofem
 #endif // nodalrecoverymodel_h

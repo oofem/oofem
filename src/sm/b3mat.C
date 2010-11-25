@@ -37,7 +37,7 @@
 //   *** CLASS B3 Material (concrete creep and shrinkage)
 //   ****************************************************
 #ifndef __MAKEDEPEND
-#include <math.h>
+ #include <math.h>
 #endif
 #include "b3mat.h"
 #include "mathfem.h"
@@ -46,7 +46,6 @@
 #include "timestep.h"
 
 namespace oofem {
-
 IRResultType
 B3Material :: initializeFrom(InputRecord *ir)
 {
@@ -65,25 +64,25 @@ B3Material :: initializeFrom(InputRecord *ir)
 
     int mode = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, mode, IFT_B3Material_mode, "mode");
-    if (mode == 0) { // default, determine raw params q1,..,q5 from composition
-      IR_GIVE_FIELD(ir, fc, IFT_B3Material_fc, "fc"); // 28-day standard cylinder compression strength in MPa
-      IR_GIVE_FIELD(ir, c, IFT_B3Material_cc, "cc"); // cement content of concrete  in kg m^-3.
-      IR_GIVE_FIELD(ir, wc, IFT_B3Material_wc, "w/c"); // ratio (by weight) of water to cementitious material
-      IR_GIVE_FIELD(ir, ac, IFT_B3Material_ac, "a/c"); // ratio (by weight) of agregate to cement
-      IR_GIVE_FIELD(ir, t0, IFT_B3Material_t0, "t0"); // age when drying begins (in days)
+    if ( mode == 0 ) { // default, determine raw params q1,..,q5 from composition
+        IR_GIVE_FIELD(ir, fc, IFT_B3Material_fc, "fc"); // 28-day standard cylinder compression strength in MPa
+        IR_GIVE_FIELD(ir, c, IFT_B3Material_cc, "cc"); // cement content of concrete  in kg m^-3.
+        IR_GIVE_FIELD(ir, wc, IFT_B3Material_wc, "w/c"); // ratio (by weight) of water to cementitious material
+        IR_GIVE_FIELD(ir, ac, IFT_B3Material_ac, "a/c"); // ratio (by weight) of agregate to cement
+        IR_GIVE_FIELD(ir, t0, IFT_B3Material_t0, "t0"); // age when drying begins (in days)
     } else { // read raw Basic creep parameters
-      IR_GIVE_FIELD(ir, q1, IFT_B3Material_q1, "q1"); 
-      IR_GIVE_FIELD(ir, q2, IFT_B3Material_q2, "q2"); 
-      IR_GIVE_FIELD(ir, q3, IFT_B3Material_q3, "q3"); 
-      IR_GIVE_FIELD(ir, q4, IFT_B3Material_q4, "q4"); 
+        IR_GIVE_FIELD(ir, q1, IFT_B3Material_q1, "q1");
+        IR_GIVE_FIELD(ir, q2, IFT_B3Material_q2, "q2");
+        IR_GIVE_FIELD(ir, q3, IFT_B3Material_q3, "q3");
+        IR_GIVE_FIELD(ir, q4, IFT_B3Material_q4, "q4");
     }
-      
-      // read shrinkage mode
-      int shm = 0;
-      IR_GIVE_FIELD(ir, shm, IFT_B3Material_shmode, "shmode");
-      this->shMode = ( b3ShModeType ) shm;
-      
-      if ( this->shMode == B3_PointShrinkage ) {
+
+    // read shrinkage mode
+    int shm = 0;
+    IR_GIVE_FIELD(ir, shm, IFT_B3Material_shmode, "shmode");
+    this->shMode = ( b3ShModeType ) shm;
+
+    if ( this->shMode == B3_PointShrinkage ) {
         // read additional shrinkage params required
         IR_GIVE_FIELD(ir, es0, IFT_B3Material_es0, "es0");
         IR_GIVE_FIELD(ir, r, IFT_B3Material_r, "r");
@@ -94,35 +93,38 @@ B3Material :: initializeFrom(InputRecord *ir)
         IR_GIVE_FIELD(ir, n, IFT_B3Material_ncoeff, "ncoeff"); // Macro
         IR_GIVE_FIELD(ir, a, IFT_B3Material_a, "a"); // Macro
     } else if ( this->shMode == B3_AverageShrinkage ) {
-	if (mode == 0) { // default mode
-	  IR_GIVE_FIELD(ir, alpha1, IFT_B3Material_alpha1, "alpha1"); // shrinkage parameter
-	  IR_GIVE_FIELD(ir, alpha2, IFT_B3Material_alpha2, "alpha2"); // shrinkage parameter
-	  IR_GIVE_FIELD(ir, ks, IFT_B3Material_ks, "ks"); //cross section shape factor
-	  /*
-	   * use ks = 1.0 for an infinite slab
-	   * = 1.15 for an infinite cylinder
-	   * = 1.25 for an infinite square prism
-	   * = 1.30 for a sphere
-	   * = 1.55 for a cube
-	   */
-	  IR_GIVE_FIELD(ir, hum, IFT_B3Material_hum, "hum"); // relative humidity of the environment
-	  IR_GIVE_FIELD(ir, vs, IFT_B3Material_vs, "vs"); // volume to surface ratio (in m)
-	} else { // read raw params
-	  IR_GIVE_FIELD(ir, kt, IFT_B3Material_kt, "kt"); // shrinkage parameter
-	  IR_GIVE_FIELD(ir, EpsSinf, IFT_B3Material_EpsSinf, "EpsSinf"); // shrinkage parameter
-	  IR_GIVE_FIELD(ir, q5, IFT_B3Material_q5, "q5"); // shrinkage parameter
-	  IR_GIVE_FIELD(ir, vs, IFT_B3Material_vs, "vs"); // volume to surface ratio (in m)
-	  IR_GIVE_FIELD(ir, ks, IFT_B3Material_ks, "ks"); //cross section shape factor
-	  IR_GIVE_FIELD(ir, hum, IFT_B3Material_hum, "hum"); // relative humidity of the environment
-	}
+        if ( mode == 0 ) { // default mode
+            IR_GIVE_FIELD(ir, alpha1, IFT_B3Material_alpha1, "alpha1"); // shrinkage parameter
+            IR_GIVE_FIELD(ir, alpha2, IFT_B3Material_alpha2, "alpha2"); // shrinkage parameter
+            IR_GIVE_FIELD(ir, ks, IFT_B3Material_ks, "ks"); //cross section shape factor
+            /*
+             * use ks = 1.0 for an infinite slab
+             * = 1.15 for an infinite cylinder
+             * = 1.25 for an infinite square prism
+             * = 1.30 for a sphere
+             * = 1.55 for a cube
+             */
+            IR_GIVE_FIELD(ir, hum, IFT_B3Material_hum, "hum"); // relative humidity of the environment
+            IR_GIVE_FIELD(ir, vs, IFT_B3Material_vs, "vs"); // volume to surface ratio (in m)
+        } else { // read raw params
+            IR_GIVE_FIELD(ir, kt, IFT_B3Material_kt, "kt"); // shrinkage parameter
+            IR_GIVE_FIELD(ir, EpsSinf, IFT_B3Material_EpsSinf, "EpsSinf"); // shrinkage parameter
+            IR_GIVE_FIELD(ir, q5, IFT_B3Material_q5, "q5"); // shrinkage parameter
+            IR_GIVE_FIELD(ir, vs, IFT_B3Material_vs, "vs"); // volume to surface ratio (in m)
+            IR_GIVE_FIELD(ir, ks, IFT_B3Material_ks, "ks"); //cross section shape factor
+            IR_GIVE_FIELD(ir, hum, IFT_B3Material_hum, "hum"); // relative humidity of the environment
+        }
     }
-      
+
     IR_GIVE_FIELD(ir, talpha, IFT_B3Material_talpha, "talpha"); // Macro
 
 
     w = wc * c;
     E28 = 4734. * sqrt(fc); // or 4733. ?
-    if (mode == 0) this->predictParametersFrom(fc, c, wc, ac, t0, alpha1, alpha2);
+    if ( mode == 0 ) {
+        this->predictParametersFrom(fc, c, wc, ac, t0, alpha1, alpha2);
+    }
+
     return IRRT_OK;
 }
 
@@ -185,7 +187,7 @@ B3Material :: predictParametersFrom(double fc, double c, double wc, double ac,
     // Basic creep parameters
 
     // q1  = 0.6e6 / E28;
-    q1  = 127*__OOFEM_POW(fc, -0.5);
+    q1  = 127 * __OOFEM_POW(fc, -0.5);
     q2  = 185.4 * __OOFEM_POW(c, 0.5) * __OOFEM_POW(fc, -0.9);
     q3  = 0.29 * __OOFEM_POW(wc, 4.) * q2;
     q4  = 20.3 * __OOFEM_POW(ac, -0.7);
@@ -193,8 +195,8 @@ B3Material :: predictParametersFrom(double fc, double c, double wc, double ac,
     // Shrinkage
 
     if ( this->shMode == B3_AverageShrinkage ) {
-      // the exact value converted from US units would be 85220
-      // but this is the SI formula presented in Inelastic Analysis
+        // the exact value converted from US units would be 85220
+        // but this is the SI formula presented in Inelastic Analysis
         kt = 85000 * __OOFEM_POW(t0, -0.08) * __OOFEM_POW(fc, -0.25);
         EpsSinf = alpha1 * alpha2 * ( 1.9e-2 * __OOFEM_POW(w, 2.1) * __OOFEM_POW(fc, -0.28) + 270. );
 
@@ -203,9 +205,9 @@ B3Material :: predictParametersFrom(double fc, double c, double wc, double ac,
         q5 = 7.57e5 * ( 1. / fc ) * __OOFEM_POW(EpsSinf, -0.6);
     }
 
-    char buff[1024];
-    sprintf (buff, "q1=%lf q2=%lf q3=%lf q4=%lf q5=%lf kt=%lf EpsSinf=%lf", q1,q2,q3,q4,q5,kt,EpsSinf);
-    OOFEM_LOG_DEBUG ("B3mat[%d]: estimated params: %s\n", this->number, buff);
+    char buff [ 1024 ];
+    sprintf(buff, "q1=%lf q2=%lf q3=%lf q4=%lf q5=%lf kt=%lf EpsSinf=%lf", q1, q2, q3, q4, q5, kt, EpsSinf);
+    OOFEM_LOG_DEBUG("B3mat[%d]: estimated params: %s\n", this->number, buff);
     return;
 }
 
@@ -332,9 +334,9 @@ B3Material :: computeTotalAverageShrinkageStrainVector(FloatArray &answer, MatRe
     // humidity dependence
     if ( hum <= 0.98 ) {
         kh = 1. - __OOFEM_POW(hum, 3);
-    } else if ( hum == 1 )  {
+    } else if ( hum == 1 ) {
         kh = -0.2;              // swelling in water
-    } else                                    {
+    } else {
         // linear interpolation for 0.98 <= h <= 1.
         help = 1. - __OOFEM_POW(hum, 3);
         kh = help + ( -0.2 - help ) / ( 1. - 0.98 ) * ( hum - 0.98 );
@@ -508,5 +510,4 @@ B3Material :: inverse_sorption_isotherm(double w)
 
     return phi;
 }
-
 } // end namespace oofem

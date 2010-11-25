@@ -73,7 +73,7 @@
 #define hydram_h
 
 // oofem includes
- // cltypes.h entry: classType HellmichMaterialStatusClass, HellmichMaterialClass
+// cltypes.h entry: classType HellmichMaterialStatusClass, HellmichMaterialClass
 #include "flotarry.h"
 #include "flotmtrx.h"
 #include "timestep.h"
@@ -81,7 +81,6 @@
 #include "structuralmaterial.h"
 
 namespace oofem {
-
 #define ROOT_PRECISION_DKSI 1e-14
 #define BINARY_TREE_STEPS 2
 
@@ -319,13 +318,17 @@ public:
     IRResultType initializeFrom(InputRecord *ir);
 
     contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL)
-    { if ( hydrationModel ) { hydrationModel->saveContext(stream, mode, obj); }
+    {
+        if ( hydrationModel ) { hydrationModel->saveContext(stream, mode, obj); }
 
-      return CIO_OK; }
+        return CIO_OK;
+    }
     contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL)
-    { if ( hydrationModel ) { hydrationModel->restoreContext(stream, mode, obj); }
+    {
+        if ( hydrationModel ) { hydrationModel->restoreContext(stream, mode, obj); }
 
-      return CIO_OK; }
+        return CIO_OK;
+    }
 
     virtual void updateInternalState(const FloatArray &vec, GaussPoint *gp, TimeStep *atTime);
     /**
@@ -340,6 +343,5 @@ public:
     /// Destructor. Deletes the associated hydration model.
     ~HydrationModelInterface() { delete hydrationModel; }
 };
-
 } // end namespace oofem
 #endif // hydram_h

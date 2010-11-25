@@ -46,8 +46,6 @@ class DSSolver;
 class SparseMatrixF;
 
 namespace oofem {
-
-
 /**
  * Interface to Direct Sparse Solver written by R.Vonracek.
  * This class represent the sparse matrix interface to DSS library. It allows to build internal structure,
@@ -96,7 +94,7 @@ public:
      */
     virtual void times(double x);
     /// Builds internal structure of receiver
-    int buildInternalStructure(EngngModel *, int, EquationID, const UnknownNumberingScheme& s);
+    int buildInternalStructure(EngngModel *, int, EquationID, const UnknownNumberingScheme & s);
     /** Assembles receiver from local element contributions.
      *  @param loc location array. The values corresponding to zero loc array value are not assembled.
      *  @param mat contribution to be assembled using loc array.
@@ -153,18 +151,20 @@ protected:
     /***********************************/
 
     FloatArray operator*(const FloatArray &x) const
-    { FloatArray answer;
-      this->times(x, answer);
-      return answer; }
+    {
+        FloatArray answer;
+        this->times(x, answer);
+        return answer;
+    }
     FloatArray trans_mult(const FloatArray &x) const
-    { FloatArray answer;
-      this->times(x, answer);
-      return answer; }
+    {
+        FloatArray answer;
+        this->times(x, answer);
+        return answer;
+    }
 
 #endif
 };
-
-
 } // end namespace oofem
 #endif // dss_h
 

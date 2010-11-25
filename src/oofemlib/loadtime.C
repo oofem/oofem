@@ -49,40 +49,38 @@
 #include "domain.h"
 #include "usrdefsub.h"
 #ifndef __MAKEDEPEND
-#include <stdlib.h>
-#include <stdio.h>
+ #include <stdlib.h>
+ #include <stdio.h>
 #endif
 
 #ifndef __MAKEDEPEND
-#include <string.h>
-#ifdef HAVE_STRINGS_H
-#include <strings.h>
-#endif
+ #include <string.h>
+ #ifdef HAVE_STRINGS_H
+  #include <strings.h>
+ #endif
 #endif
 
 namespace oofem {
-
 double
 LoadTimeFunction :: evaluate(TimeStep *atTime, ValueModeType mode)
 {
-  if ( mode == VM_Total ) {
-    return this->__at( atTime->giveTime() );
-  } else if ( mode == VM_Velocity )  {
-    return this->__derAt( atTime->giveTime() );
-  } else if ( mode == VM_Acceleration ) {
-    return this->__accelAt( atTime->giveTime() );
-  } else if ( mode == VM_Incremental )  {
-    
-    //return this->__at( atTime->giveTime() ) - this->__at( atTime->giveTime() - atTime->giveTimeIncrement() );
-    
-      if ( atTime->isTheFirstStep() ) {
-      return this->__at( atTime->giveTime() - this->initialValue );
-      } else {
-      return this->__at( atTime->giveTime() ) - this->__at( atTime->giveTime() - atTime->giveTimeIncrement() );
-      }
-  } else {
-    _error2("LoadTimeFunction:: evaluate: unsupported mode(%d)", mode);
-  }
+    if ( mode == VM_Total ) {
+        return this->__at( atTime->giveTime() );
+    } else if ( mode == VM_Velocity ) {
+        return this->__derAt( atTime->giveTime() );
+    } else if ( mode == VM_Acceleration ) {
+        return this->__accelAt( atTime->giveTime() );
+    } else if ( mode == VM_Incremental ) {
+        //return this->__at( atTime->giveTime() ) - this->__at( atTime->giveTime() - atTime->giveTimeIncrement() );
+
+        if ( atTime->isTheFirstStep() ) {
+            return this->__at(atTime->giveTime() - this->initialValue);
+        } else {
+            return this->__at( atTime->giveTime() ) - this->__at( atTime->giveTime() - atTime->giveTimeIncrement() );
+        }
+    } else {
+        _error2("LoadTimeFunction:: evaluate: unsupported mode(%d)", mode);
+    }
 
     return 0.;
 }
@@ -99,11 +97,11 @@ LoadTimeFunction *LoadTimeFunction :: ofType(char *aClass)
         newLTF = new ConstantFunction(number, domain);
     }
     /*   else if (! strncasecmp(aClass,"peakfunction",5))
-     *    newLTF = new PeakFunction(number,domain) ;
-     * else if (! strncasecmp(aClass,"piecewiselinfunction",5))
-     *    newLTF = new PiecewiseLinFunction(number,domain) ;
-     * else if (! strncasecmp(aClass,"heavisideltf",12))
-     *    newLTF = new HeavisideLTF(number,domain) ;    */
+    *    newLTF = new PeakFunction(number,domain) ;
+    * else if (! strncasecmp(aClass,"piecewiselinfunction",5))
+    *    newLTF = new PiecewiseLinFunction(number,domain) ;
+    * else if (! strncasecmp(aClass,"heavisideltf",12))
+    *    newLTF = new HeavisideLTF(number,domain) ;    */
     else {
         // last resort - call aditional user defined subroutine
         newLTF = CreateUsrDefLoadTimeFunctionOfType(aClass, number, domain);
@@ -120,16 +118,16 @@ LoadTimeFunction *LoadTimeFunction :: ofType(char *aClass)
 IRResultType
 LoadTimeFunction :: initializeFrom(InputRecord *ir)
 {
-  //
-  // instanciates receiver according to input record
-  //
-  const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
-  IRResultType result;                // Required by IR_GIVE_FIELD macro
-  
-  
-  IR_GIVE_OPTIONAL_FIELD(ir, initialValue, IFT_LoadTimeFunction_initialvalue, "initialvalue"); // Macro
-  
-  return IRRT_OK;
+    //
+    // instanciates receiver according to input record
+    //
+    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
+    IRResultType result;              // Required by IR_GIVE_FIELD macro
+
+
+    IR_GIVE_OPTIONAL_FIELD(ir, initialValue, IFT_LoadTimeFunction_initialvalue, "initialvalue"); // Macro
+
+    return IRRT_OK;
 }
 
 int
@@ -142,5 +140,4 @@ LoadTimeFunction :: giveInputRecordString(std :: string &str, bool keyword)
 
     return 1;
 }
-
 } // end namespace oofem

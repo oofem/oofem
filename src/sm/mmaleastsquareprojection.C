@@ -46,7 +46,6 @@
 #include "strreader.h"
 
 namespace oofem {
-
 MMALeastSquareProjection :: MMALeastSquareProjection() : MaterialMappingAlgorithm()
 {
     this->stateFilter = 0;
@@ -435,16 +434,16 @@ MMALeastSquareProjection :: giveInputRecordString(std :: string &str, bool keywo
 {
     char buff [ 1024 ];
 
-		if(this->stateFilter){
-			sprintf(buff, " mmalsp_statefilter %d", (int)(this->stateFilter));
-			str += buff;
-		}
-		if(this->regionFilter){
-			sprintf(buff, " mmalsp_regionfilter %d", (int)(this->regionFilter));
-			str += buff;
-		}
+    if ( this->stateFilter ) {
+        sprintf( buff, " mmalsp_statefilter %d", ( int ) ( this->stateFilter ) );
+        str += buff;
+    }
+
+    if ( this->regionFilter ) {
+        sprintf( buff, " mmalsp_regionfilter %d", ( int ) ( this->regionFilter ) );
+        str += buff;
+    }
 
     return 1;
 }
-
 } // end namespace oofem

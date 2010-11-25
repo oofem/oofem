@@ -41,7 +41,7 @@
 #define adaptnlinearstatic_h
 
 #ifndef __MAKEDEPEND
-#include <stdio.h>
+ #include <stdio.h>
 #endif
 #include "nlinearstatic.h"
 #include "sparsemtrx.h"
@@ -49,7 +49,6 @@
 #include "meshpackagetype.h"
 
 namespace oofem {
-
 class AdaptiveNonLinearStatic : public NonLinearStatic
 {
     /*
@@ -78,10 +77,10 @@ protected:
     /// flag indication whether to restore equlibrium after adaptive remapping
     int equilibrateMappedConfigurationFlag;
     /**
-     * Flag to trigger load balancing before adaptive remapping. 
-     * The emodel loadBalancingFlag will trigger load balancing after 
+     * Flag to trigger load balancing before adaptive remapping.
+     * The emodel loadBalancingFlag will trigger load balancing after
      * mapping and optional consistency recovery.
-     */ 
+     */
     bool preMappingLoadBalancingFlag;
     /// Error estimator
     ErrorEstimator *ee;
@@ -129,11 +128,11 @@ public:
      */
     virtual int                initializeAdaptiveFrom(EngngModel *sourceProblem);
     /**
-     * Remaps the solution state to newly given domain. This includes mapping of source solution, 
+     * Remaps the solution state to newly given domain. This includes mapping of source solution,
      * internal variable mapping procedures and optionally restoring new global equilibrium.
      * Given domain becomes new domain of receiver.
      */
-    int                        adaptiveRemap (Domain *dNew);
+    int                        adaptiveRemap(Domain *dNew);
 
 
     /**
@@ -167,6 +166,5 @@ protected:
      *                 AdaptiveNonLinearStatic* sourceProblem, int domainIndx, TimeStep* atTime);
      */
 };
-
 } // end namespace oofem
 #endif // adaptnlinearstatic_h

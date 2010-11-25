@@ -51,17 +51,16 @@
 #include "engngm.h"
 #include "mathfem.h"
 #ifndef __MAKEDEPEND
-#include <stdio.h>
+ #include <stdio.h>
 #endif
 
 #ifdef __OOFEG
-#include "oofeggraphiccontext.h"
-#include "oofegutils.h"
-#include "conTable.h"
+ #include "oofeggraphiccontext.h"
+ #include "oofegutils.h"
+ #include "conTable.h"
 #endif
 
 namespace oofem {
-
 FEI2dQuadLin L4Axisymm :: interpolation(1, 2);
 
 L4Axisymm :: L4Axisymm(int n, Domain *aDomain) :
@@ -203,15 +202,15 @@ void
 L4Axisymm :: computeGaussPoints()
 // Sets up the array containing the four Gauss points of the receiver.
 {
-  if (!integrationRulesArray) {
-    numberOfIntegrationRules = 2;
-    integrationRulesArray = new IntegrationRule * [ 2 ];
-    integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 2);
-    integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Square, numberOfGaussPoints, _3dMat);
+    if ( !integrationRulesArray ) {
+        numberOfIntegrationRules = 2;
+        integrationRulesArray = new IntegrationRule * [ 2 ];
+        integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 2);
+        integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Square, numberOfGaussPoints, _3dMat);
 
-    integrationRulesArray [ 1 ] = new GaussIntegrationRule(2, this, 3, 6);
-    integrationRulesArray [ 1 ]->setUpIntegrationPoints(_Square, numberOfFiAndShGaussPoints, _3dMat);
-  }
+        integrationRulesArray [ 1 ] = new GaussIntegrationRule(2, this, 3, 6);
+        integrationRulesArray [ 1 ]->setUpIntegrationPoints(_Square, numberOfFiAndShGaussPoints, _3dMat);
+    }
 }
 
 double
@@ -230,8 +229,8 @@ L4Axisymm :: computeVolumeAround(GaussPoint *aGaussPoint)
         r += x * n.at(i);
     }
 
-    determinant = fabs( this->interpolation.giveTransformationJacobian(* aGaussPoint->giveCoordinates(), 
-								       FEIElementGeometryWrapper(this), 0.0) );
+    determinant = fabs( this->interpolation.giveTransformationJacobian(* aGaussPoint->giveCoordinates(),
+                                                                       FEIElementGeometryWrapper(this), 0.0) );
 
     weight      = aGaussPoint->giveWeight();
     volume      = determinant * weight * r;
@@ -388,14 +387,14 @@ L4Axisymm ::   giveDofManDofIDMask(int inode, EquationID, IntArray &answer) cons
 int
 L4Axisymm :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords)
 {
-  this->interpolation.local2global(answer, lcoords, FEIElementGeometryWrapper(this), 0.0);
-  return 1;
+    this->interpolation.local2global(answer, lcoords, FEIElementGeometryWrapper(this), 0.0);
+    return 1;
 }
 
 int
 L4Axisymm :: computeLocalCoordinates(FloatArray &answer, const FloatArray &coords)
 {
-  return this->interpolation.global2local(answer, coords, FEIElementGeometryWrapper(this), 0.0);
+    return this->interpolation.global2local(answer, coords, FEIElementGeometryWrapper(this), 0.0);
 }
 
 void
@@ -562,8 +561,8 @@ L4Axisymm ::   computeEdgeVolumeAround(GaussPoint *aGaussPoint, int iEdge)
 {
     FloatArray c(2);
     this->computeEdgeIpGlobalCoords(c, aGaussPoint, iEdge);
-    double result = this->interpolation.edgeGiveTransformationJacobian(iEdge, * aGaussPoint->giveCoordinates(), 
-								       FEIElementGeometryWrapper(this), 0.0);
+    double result = this->interpolation.edgeGiveTransformationJacobian(iEdge, * aGaussPoint->giveCoordinates(),
+                                                                       FEIElementGeometryWrapper(this), 0.0);
 
 
     return c.at(1) * result * aGaussPoint->giveWeight();
@@ -572,7 +571,7 @@ L4Axisymm ::   computeEdgeVolumeAround(GaussPoint *aGaussPoint, int iEdge)
 void
 L4Axisymm :: computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge)
 {
-  this->interpolation.edgeLocal2global(answer, iEdge, * gp->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0);
+    this->interpolation.edgeLocal2global(answer, iEdge, * gp->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0);
 }
 
 
@@ -616,7 +615,7 @@ L4Axisymm :: computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, Gaus
 
 #ifdef __OOFEG
 //#include "rcm2.h"
-#define TR_LENGHT_REDUCT 0.3333
+ #define TR_LENGHT_REDUCT 0.3333
 
 void L4Axisymm :: drawRawGeometry(oofegGraphicContext &gc)
 {

@@ -34,10 +34,9 @@
  */
 
 #ifndef __SPOOLES_MODULE
-#include "spoolessolver.h"
+ #include "spoolessolver.h"
 
 namespace oofem {
-
 SpoolesSolver :: SpoolesSolver(int i, Domain *d, EngngModel *m) : SparseLinearSystemNM(i, d, m)
 {
     _error("IMLSolver: can't create, SPOOLES support not compiled");
@@ -50,31 +49,29 @@ SpoolesSolver :: initializeFrom(InputRecord *ir) { return IRRT_OK; }
 
 NM_Status
 SpoolesSolver :: solve(SparseMtrx *A, FloatArray *b, FloatArray *x) { return NM_NoSuccess; }
-
 } // end namespace oofem
 #endif
 
 #ifdef __SPOOLES_MODULE
-#define TIME_REPORT
+ #define TIME_REPORT
 
-#include "spoolessolver.h"
-#include "spoolessparsemtrx.h"
-#include "flotarry.h"
-#include "verbose.h"
-#include "oofem_limits.h"
+ #include "spoolessolver.h"
+ #include "spoolessparsemtrx.h"
+ #include "flotarry.h"
+ #include "verbose.h"
+ #include "oofem_limits.h"
 
 // Spooles includes
-#include "spoolesinterface.h"
+ #include "spoolesinterface.h"
 
-#ifdef TIME_REPORT
-#ifndef __MAKEDEPEND
-#include <time.h>
-#endif
-#include "clock.h"
-#endif
+ #ifdef TIME_REPORT
+  #ifndef __MAKEDEPEND
+   #include <time.h>
+  #endif
+  #include "clock.h"
+ #endif
 
 namespace oofem {
-
 SpoolesSolver :: SpoolesSolver(int i, Domain *d, EngngModel *m) : SparseLinearSystemNM(i, d, m)
 {
     Lhs = NULL;
@@ -193,11 +190,11 @@ SpoolesSolver :: solve(SparseMtrx *A, FloatArray *b, FloatArray *x)
         _error("solveYourselfAt: size mismatch");
     }
 
-#ifdef TIME_REPORT
+ #ifdef TIME_REPORT
     //clock_t tstart = clock();
     oofem_timeval tstart;
     getUtime(tstart);
-#endif
+ #endif
 
     if ( A->giveType() != SMT_SpoolesMtrx ) {
         _error("solveYourselfAt: SpoolesSparseMtrx Expected");
@@ -424,11 +421,11 @@ SpoolesSolver :: solve(SparseMtrx *A, FloatArray *b, FloatArray *x)
 
     // DenseMtx_copyRowIntoVector(mtxX, 0, x->givePointer());
 
-#ifdef TIME_REPORT
+ #ifdef TIME_REPORT
     oofem_timeval ut;
     getRelativeUtime(ut, tstart);
     OOFEM_LOG_DEBUG( "SpoolesSolver info: user time consumed by solution: %.2fs\n", ( double ) ( ut.tv_sec + ut.tv_usec / ( double ) OOFEM_USEC_LIM ) );
-#endif
+ #endif
 
     /*
      * -----------
@@ -467,11 +464,11 @@ SpoolesSolver :: solve(SparseMtrx *A, FloatArray *b, FloatArray *x)
  * Lhs = A;
  * this->lhsVersion = A->giveVersion();
  *
- #ifdef TIME_REPORT
+ *#ifdef TIME_REPORT
  * //clock_t tstart = clock();
  * oofem_timeval tstart;
  * ::getUtime(tstart);
- #endif
+ *#endif
  *
  *
  * if (solverType == ST_CG) {
@@ -489,17 +486,16 @@ SpoolesSolver :: solve(SparseMtrx *A, FloatArray *b, FloatArray *x)
  * _error("solveYourselfAt: unknown lsover type");
  * }
  *
- #ifdef TIME_REPORT
+ *#ifdef TIME_REPORT
  * oofem_timeval ut;
  * ::getRelativeUtime (ut, tstart);
  * printf ("\nIMLSolver info: user time consumed by solution: %.2fs\n", (double)(ut.tv_sec+ut.tv_usec/(double)OOFEM_USEC_LIM));
- #endif
+ *#endif
  *
  *
  * //solved = 1;
  * return NM_Success;
  * }
  */
-
 } // end namespace oofem
 #endif //ifdef __SPOOLES_MODULE

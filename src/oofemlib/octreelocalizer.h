@@ -44,12 +44,11 @@
 #include "compiler.h"
 
 #ifndef __MAKEDEPEND
-#include <set>
-#include <list>
+ #include <set>
+ #include <list>
 #endif
 
 namespace oofem {
-
 class Domain;
 class Element;
 class TimeStep;
@@ -142,9 +141,11 @@ public:
     /**
      * Clears and deletes the nodeList
      */
-    void deleteNodeList() { if ( elementList ) { delete elementList; }
+    void deleteNodeList() {
+        if ( elementList ) { delete elementList; }
 
-                            elementList = NULL; }
+        elementList = NULL;
+    }
 };
 
 
@@ -355,6 +356,5 @@ protected:
     void giveListOfTerminalCellsInBoundingBox(std :: list< oofemOctantRec * > &cellList, const FloatArray &coords,
                                               const double radius, oofemOctantRec *currentCell);
 };
-
 } // end namespace oofem
 #endif // octreelocalizer_h

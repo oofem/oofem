@@ -61,7 +61,6 @@
 #include "contextmode.h"
 
 namespace oofem {
-
 #define STRAIN_STEPS 10.0
 
 class GaussPoint;
@@ -126,7 +125,8 @@ public:
      * @param d domain to which new material will belong
      */
     Material(int n, Domain *d) : FEMComponent(n, d)
-    { propertyDictionary = new Dictionary(); this->castingTime=-1; }
+    { propertyDictionary = new Dictionary();
+      this->castingTime = -1; }
     /// Destructor.
     ~Material()                { delete propertyDictionary; }
 
@@ -172,7 +172,7 @@ public:
      */
     virtual void updateYourself(GaussPoint *gp, TimeStep *atTime);
 
-//     // non-standard - returns time independent material constant
+    //     // non-standard - returns time independent material constant
     /**
      * Returns the value of material property 'aProperty'. Property must be identified
      * by unique int id. Intgeration point also passed to allow for materials with spatially
@@ -181,21 +181,21 @@ public:
      * @param gp integration point,
      * @return property value
      */
-    virtual double   give(int aProperty, GaussPoint* gp);
+    virtual double   give(int aProperty, GaussPoint *gp);
     /**
      * Returns true if 'aProperty' exists on material
      * @param aProperty id of property requested
      * @param gp integration point
      * @return true if 'aProperty' exists
      */
-    virtual bool   hasProperty(int aProperty, GaussPoint* gp);
+    virtual bool   hasProperty(int aProperty, GaussPoint *gp);
     /**
-     * Modify 'aProperty', which already exists on material. Intended for evolving material properties. 
+     * Modify 'aProperty', which already exists on material. Intended for evolving material properties.
      * @param aProperty id of a property requested
      * @param value assigned value
      * @param gp integration point
      */
-    virtual void modifyProperty(int aProperty, double value, GaussPoint* gp);
+    virtual void modifyProperty(int aProperty, double value, GaussPoint *gp);
     /**
      * Returns casting time of the receiver
      */
@@ -262,8 +262,10 @@ public:
      * @returns type of internal variable
      */
     virtual InternalStateValueType giveIPValueType(InternalStateType type)
-    { _error("giveIPValueType: unsupported InternalStateType");
-      return ISVT_UNDEFINED; }
+    {
+        _error("giveIPValueType: unsupported InternalStateType");
+        return ISVT_UNDEFINED;
+    }
 
     /// Returns class name of the receiver.
     const char *giveClassName() const { return "Material"; }
@@ -334,8 +336,8 @@ public:
     /**
      * Optional function to call specific procedures when initializing a material.
      * For example, multiscale simulations need to create master and slave material statuses on specific integration points before the computation.
-     @param element pointer to element
-     @return zero on error.
+     * @param element pointer to element
+     * @return zero on error.
      */
     virtual int initMaterial(Element *element);
     /**
@@ -421,6 +423,5 @@ protected:
      */
     virtual void initTempStatus(GaussPoint *gp);
 };
-
 } // end namespace oofem
 #endif // material_h

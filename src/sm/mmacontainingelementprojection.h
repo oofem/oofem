@@ -45,13 +45,12 @@
 #include "materialmappingalgorithm.h"
 
 namespace oofem {
-
 class Domain;
 class Element;
 class TimeStep;
 
 /**
- * The class implements the transfer of internal variabless based on containing element 
+ * The class implements the transfer of internal variabless based on containing element
  * The element containing the receiving gauss point is localized and its closest gauss point
  * is used as a source gauss point that determines the values of receiver.
  */
@@ -104,6 +103,5 @@ public:
 
 protected:
 };
-
 } // end namespace oofem
 #endif // mmacontainingelementprojection_h

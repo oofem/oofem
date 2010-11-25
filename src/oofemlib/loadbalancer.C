@@ -50,7 +50,6 @@
 #include "nonlocalmatwtp.h"
 
 namespace oofem {
-
 #define LoadBalancer_debug_print 0
 
 LoadBalancer :: LoadBalancer(Domain *d)  : wtpList(0)
@@ -137,7 +136,7 @@ LoadBalancer :: migrateLoad(Domain *d)
     for ( i = 1; i <= nnodes; i++ ) {
         if ( d->giveDofManager(i)->giveParallelMode() == DofManager_local ) {
             fprintf( stderr, "[%d]: %5d[%d] local\n", myrank, i, d->giveDofManager(i)->giveGlobalNumber() );
-        } else if ( d->giveDofManager(i)->giveParallelMode() == DofManager_shared )  {
+        } else if ( d->giveDofManager(i)->giveParallelMode() == DofManager_shared ) {
             fprintf( stderr, "[%d]: %5d[%d] shared ", myrank, i, d->giveDofManager(i)->giveGlobalNumber() );
             for ( j = 1; j <= d->giveDofManager(i)->givePartitionList()->giveSize(); j++ ) {
                 fprintf( stderr, "%d ", d->giveDofManager(i)->givePartitionList()->at(j) );
@@ -173,21 +172,20 @@ LoadBalancer :: migrateLoad(Domain *d)
     int nelem = domain->giveNumberOfElements();
     int nnode = domain->giveNumberOfDofManagers();
     int lnode = 0, lelem = 0;
-    
+
     for ( i = 1; i <= nnode; i++ ) {
-      if ( domain->giveDofManager(i)->giveParallelMode() == DofManager_local ) {
-        lnode++;
-      }
+        if ( domain->giveDofManager(i)->giveParallelMode() == DofManager_local ) {
+            lnode++;
+        }
     }
-    
+
     for ( i = 1; i <= nelem; i++ ) {
-      if ( domain->giveElement(i)->giveParallelMode() == Element_local ) {
-        lelem++;
-      }
+        if ( domain->giveElement(i)->giveParallelMode() == Element_local ) {
+            lelem++;
+        }
     }
+
     OOFEM_LOG_RELEVANT("[%d] LB Statistics:  local elem=%d local node=%d\n", myrank, lelem, lnode);
-
-
 }
 
 int
@@ -307,13 +305,13 @@ LoadBalancer :: unpackMigratingData(Domain *d, ProcessCommunicator &pc)
             // receiving new local dofManager
             pcbuff->unpackInt(_globnum);
             /*
-            _newentry = false;
-            if ( ( dofman = dtm->giveDofManager(_globnum) ) == NULL ) {
-                // data not available -> create a new one
-                _newentry = true;
-                dofman = CreateUsrDefDofManagerOfType(_etype, 0, d);
-            }
-            */
+             * _newentry = false;
+             * if ( ( dofman = dtm->giveDofManager(_globnum) ) == NULL ) {
+             *  // data not available -> create a new one
+             *  _newentry = true;
+             *  dofman = CreateUsrDefDofManagerOfType(_etype, 0, d);
+             * }
+             */
             _newentry = true;
             dofman = CreateUsrDefDofManagerOfType(_etype, 0, d);
 
@@ -322,7 +320,7 @@ LoadBalancer :: unpackMigratingData(Domain *d, ProcessCommunicator &pc)
             dofman->restoreContext(& pcDataStream, CM_Definition | CM_DefinitionGlobal | CM_State | CM_UnknownDictState);
             // unpack list of new partitions
             pcbuff->unpackIntArray(_partitions);
-            dofman->setPartitionList(&_partitions);
+            dofman->setPartitionList(& _partitions);
             dofman->setParallelMode(DofManager_local);
             // add transaction if new entry allocated; otherwise existing one has been modified via returned dofman
             if ( _newentry ) {
@@ -337,13 +335,13 @@ LoadBalancer :: unpackMigratingData(Domain *d, ProcessCommunicator &pc)
             // should be received only once (from partition where was local)
             pcbuff->unpackInt(_globnum);
             /*
-            _newentry = false;
-            if ( ( dofman = dtm->giveDofManager(_globnum) ) == NULL ) {
-                // data not available -> mode should be SharedUpdate
-                _newentry = true;
-                dofman = CreateUsrDefDofManagerOfType(_etype, 0, d);
-            }
-            */
+             * _newentry = false;
+             * if ( ( dofman = dtm->giveDofManager(_globnum) ) == NULL ) {
+             *  // data not available -> mode should be SharedUpdate
+             *  _newentry = true;
+             *  dofman = CreateUsrDefDofManagerOfType(_etype, 0, d);
+             * }
+             */
             _newentry = true;
             dofman = CreateUsrDefDofManagerOfType(_etype, 0, d);
 
@@ -353,7 +351,7 @@ LoadBalancer :: unpackMigratingData(Domain *d, ProcessCommunicator &pc)
             dofman->restoreContext(& pcDataStream, CM_Definition | CM_DefinitionGlobal | CM_State | CM_UnknownDictState);
             // unpack list of new partitions
             pcbuff->unpackIntArray(_partitions);
-            dofman->setPartitionList(&_partitions);
+            dofman->setPartitionList(& _partitions);
             dofman->setParallelMode(DofManager_shared);
 #ifdef __VERBOSE_PARALLEL
             fprintf(stderr, "[%d] received Shared new dofman [%d]\n", myrank, _globnum);
@@ -388,7 +386,7 @@ LoadBalancer :: unpackMigratingData(Domain *d, ProcessCommunicator &pc)
         _etype = ( classType ) _type;
         elem = CreateUsrDefElementOfType(_etype, 0, d);
         elem->restoreContext(& pcDataStream, CM_Definition | CM_State);
-	elem->initForNewStep();
+        elem->initForNewStep();
         dtm->addTransaction(DomainTransactionManager :: DTT_ADD, DomainTransactionManager :: DCT_Element, elem->giveGlobalNumber(), elem);
         nrecv++;
         //recvElemList.push_back(elem);
@@ -430,7 +428,7 @@ LoadBalancer :: deleteRemoteDofManagers(Domain *d)
             dtm->addTransaction(DomainTransactionManager :: DTT_Remove, DomainTransactionManager :: DCT_DofManager, d->giveDofManager(i)->giveGlobalNumber(), NULL);
         } else if ( dmode == LoadBalancer :: DM_Shared ) {
             dman = d->giveDofManager(i);
-            dman->setPartitionList(this->giveDofManPartitions(i));
+            dman->setPartitionList( this->giveDofManPartitions(i) );
             dman->setParallelMode(DofManager_shared);
             if ( !dman->givePartitionList()->findFirstIndexOf(myrank) ) {
                 dtm->addTransaction(DomainTransactionManager :: DTT_Remove, DomainTransactionManager :: DCT_DofManager, d->giveDofManager(i)->giveGlobalNumber(), NULL);
@@ -441,7 +439,7 @@ LoadBalancer :: deleteRemoteDofManagers(Domain *d)
         } else if ( dmode == LoadBalancer :: DM_Local ) {
             IntArray _empty(0);
             dman = d->giveDofManager(i);
-            dman->setPartitionList(&_empty);
+            dman->setPartitionList(& _empty);
             dman->setParallelMode(DofManager_local);
         } else {
             OOFEM_ERROR("Domain::deleteRemoteDofManagers: unknown dmode encountered");
@@ -535,7 +533,7 @@ WallClockLoadBalancerMonitor :: decide(TimeStep *atTime)
         OOFEM_ERROR("LoadBalancer::LoadEvaluation failed to allocate node_relcomppowers array");
     }
 
-    if (node_equivelements == NULL) {
+    if ( node_equivelements == NULL ) {
         OOFEM_ERROR("LoadBalancer::LoadEvaluation failed to allocate node_equivelements array");
     }
 
@@ -558,6 +556,7 @@ WallClockLoadBalancerMonitor :: decide(TimeStep *atTime)
         mySolutionTime *= perturbFactor;
         OOFEM_LOG_RELEVANT("[%d] WallClockLoadBalancerMonitor: perturbed solution time by factor=%.2f\n", myrank, perturbFactor);
     }
+
 #endif
 
     // collect wall clock computational time
@@ -590,35 +589,38 @@ WallClockLoadBalancerMonitor :: decide(TimeStep *atTime)
     nelem = d->giveNumberOfElements();
     neqelems = 0.0;
     for ( ie = 1; ie <= nelem; ie++ ) {
-	if(d->giveElement(ie)->giveParallelMode() == Element_remote)continue;
+        if ( d->giveElement(ie)->giveParallelMode() == Element_remote ) {
+            continue;
+        }
+
         neqelems += d->giveElement(ie)->predictRelativeComputationalCost();
     }
 
     // exchange number or equivalent elements
     MPI_Allgather(& neqelems, 1, MPI_DOUBLE, node_equivelements, 1, MPI_DOUBLE, MPI_COMM_WORLD);
-   
 
-    if (!this->staticNodeWeightFlag) {
-      // compute relative computational powers (solution_time/number_of_equivalent_elements)
-      for ( i = 0; i < nproc; i++ ) {
-	node_relcomppowers [ i ] = node_equivelements [i]/node_solutiontimes [ i ];
-      }
-     
-      // normalize computational powers
-      sum_relcomppowers = 0.0;
-      for ( i = 0; i < nproc; i++ ) {
-        sum_relcomppowers += node_relcomppowers [ i ];
-      }
 
-      for ( i = 0; i < nproc; i++ ) {
-        nodeWeights(i) = node_relcomppowers [ i ] / sum_relcomppowers;
-      }
-    } 
+    if ( !this->staticNodeWeightFlag ) {
+        // compute relative computational powers (solution_time/number_of_equivalent_elements)
+        for ( i = 0; i < nproc; i++ ) {
+            node_relcomppowers [ i ] = node_equivelements [ i ] / node_solutiontimes [ i ];
+        }
+
+        // normalize computational powers
+        sum_relcomppowers = 0.0;
+        for ( i = 0; i < nproc; i++ ) {
+            sum_relcomppowers += node_relcomppowers [ i ];
+        }
+
+        for ( i = 0; i < nproc; i++ ) {
+            nodeWeights(i) = node_relcomppowers [ i ] / sum_relcomppowers;
+        }
+    }
 
     // log equivalent elements on nodes
     OOFEM_LOG_RELEVANT("[%d] LoadBalancer:  node equivalent elements: ", myrank);
     for ( i = 0; i < nproc; i++ ) {
-      OOFEM_LOG_RELEVANT( "%6d ", (int) node_equivelements [i] );
+        OOFEM_LOG_RELEVANT("%6d ", ( int ) node_equivelements [ i ]);
     }
 
     OOFEM_LOG_RELEVANT("\n");
@@ -629,7 +631,7 @@ WallClockLoadBalancerMonitor :: decide(TimeStep *atTime)
 #ifdef __LB_DEBUG
         OOFEM_LOG_RELEVANT( "%22.15e ", nodeWeights(i) );
 #else
-	OOFEM_LOG_RELEVANT( "%4.3f ", nodeWeights(i) );
+        OOFEM_LOG_RELEVANT( "%4.3f ", nodeWeights(i) );
 #endif
     }
 
@@ -640,43 +642,43 @@ WallClockLoadBalancerMonitor :: decide(TimeStep *atTime)
     delete[] node_equivelements;
 
 #ifdef __LB_DEBUG
-    if(recoveredSteps.giveSize()){
-	// recover lb if requested
-	int pos;
-	if ((pos = recoveredSteps.findFirstIndexOf(atTime->giveNumber()))) {
-	    double procWeight, sumWeight = 0.0, *procWeights = new double [ nproc ];
+    if ( recoveredSteps.giveSize() ) {
+        // recover lb if requested
+        int pos;
+        if ( ( pos = recoveredSteps.findFirstIndexOf( atTime->giveNumber() ) ) ) {
+            double procWeight, sumWeight = 0.0, *procWeights = new double [ nproc ];
 
-	    // assign prescribed processing weight
-	    procWeight = processingWeights.at(pos);
-	    OOFEM_LOG_RELEVANT("[%d] WallClockLoadBalancerMonitor: processing weight overriden by value=%e\n", myrank, procWeight);
-	    
-	    // exchange processing weights
-	    MPI_Allgather(& procWeight, 1, MPI_DOUBLE, procWeights, 1, MPI_DOUBLE, MPI_COMM_WORLD);
-	    for ( i = 0; i < nproc; i++ ) {
-		nodeWeights(i) = procWeights [ i ];
-		sumWeight += procWeights [ i ];
-	    }
+            // assign prescribed processing weight
+            procWeight = processingWeights.at(pos);
+            OOFEM_LOG_RELEVANT("[%d] WallClockLoadBalancerMonitor: processing weight overriden by value=%e\n", myrank, procWeight);
 
-	    delete[] procWeights;
+            // exchange processing weights
+            MPI_Allgather(& procWeight, 1, MPI_DOUBLE, procWeights, 1, MPI_DOUBLE, MPI_COMM_WORLD);
+            for ( i = 0; i < nproc; i++ ) {
+                nodeWeights(i) = procWeights [ i ];
+                sumWeight += procWeights [ i ];
+            }
 
-	    if(fabs(sumWeight - 1.0) > 1.0e-10){
-		OOFEM_ERROR2("[%d] WallClockLoadBalancerMonitor:processing weights do not sum to 1.0 (sum = %e)\n", sumWeight);
-	    }
+            delete[] procWeights;
 
-	    OOFEM_LOG_RELEVANT("[%d] LoadBalancer: wall clock imbalance rel=%.2f\%,abs=%.2fs, recovering load\n", myrank, 100 * relWallClockImbalance, absWallClockImbalance);
-	    return LBD_RECOVER;
-	}
-	else{
-	    OOFEM_LOG_RELEVANT("[%d] LoadBalancer: wall clock imbalance rel=%.2f\%,abs=%.2fs, continuing\n", myrank, 100 * relWallClockImbalance, absWallClockImbalance);
-	    return LBD_CONTINUE;
-	}
+            if ( fabs(sumWeight - 1.0) > 1.0e-10 ) {
+                OOFEM_ERROR2("[%d] WallClockLoadBalancerMonitor:processing weights do not sum to 1.0 (sum = %e)\n", sumWeight);
+            }
+
+            OOFEM_LOG_RELEVANT("[%d] LoadBalancer: wall clock imbalance rel=%.2f\%,abs=%.2fs, recovering load\n", myrank, 100 * relWallClockImbalance, absWallClockImbalance);
+            return LBD_RECOVER;
+        } else   {
+            OOFEM_LOG_RELEVANT("[%d] LoadBalancer: wall clock imbalance rel=%.2f\%,abs=%.2fs, continuing\n", myrank, 100 * relWallClockImbalance, absWallClockImbalance);
+            return LBD_CONTINUE;
+        }
     }
+
 #endif
 
     // decide
-    if ( ( atTime->giveNumber() % this->lbstep == 0 ) && 
-         ( ( absWallClockImbalance > this->absWallClockImbalanceTreshold ) || 
-           ( ( relWallClockImbalance > this->relWallClockImbalanceTreshold ) && ( absWallClockImbalance > this->minAbsWallClockImbalanceTreshold ) ) ) ) {
+    if ( ( atTime->giveNumber() % this->lbstep == 0 ) &&
+        ( ( absWallClockImbalance > this->absWallClockImbalanceTreshold ) ||
+         ( ( relWallClockImbalance > this->relWallClockImbalanceTreshold ) && ( absWallClockImbalance > this->minAbsWallClockImbalanceTreshold ) ) ) ) {
         OOFEM_LOG_RELEVANT("[%d] LoadBalancer: wall clock imbalance rel=%.2f\%,abs=%.2fs, recovering load\n", myrank, 100 * relWallClockImbalance, absWallClockImbalance);
         return LBD_RECOVER;
     } else {
@@ -692,27 +694,29 @@ LoadBalancerMonitor :: initializeFrom(InputRecord *ir)
     IRResultType result;                 // Required by IR_GIVE_FIELD macro
     int i, nproc = emodel->giveNumberOfProcesses();
     int nodeWeightMode = 0;
-    
+
     nodeWeights.resize(nproc);
-    for ( i = 0; i < nproc; i++ ) 
-      nodeWeights(i) = 1.0/nproc;
-    
-    IR_GIVE_OPTIONAL_FIELD(ir, nodeWeightMode, IFT_LoadBalancerMonitor_nodeWeightMode, "nodeweightmode"); // Macro
-    if (nodeWeightMode == 0) { // default, dynamic weights
-      staticNodeWeightFlag=false;
-    } else if (nodeWeightMode == 1) { // equal weights for all nodes
-      staticNodeWeightFlag=true;
-    } else if (nodeWeightMode == 2) {// user defined static weights
-      IR_GIVE_OPTIONAL_FIELD(ir, nodeWeights, IFT_LoadBalancerMonitor_initialnodeweights, "nw"); // Macro
-      if ( nodeWeights.giveSize() != nproc ) {
-        OOFEM_ERROR("nodeWeights size not equal to number of processors");
-      }
-      staticNodeWeightFlag=true;
-    } else {
-      OOFEM_ERROR("unsupported node weight type, using default value");
-      staticNodeWeightFlag=false;
+    for ( i = 0; i < nproc; i++ ) {
+        nodeWeights(i) = 1.0 / nproc;
     }
-  
+
+    IR_GIVE_OPTIONAL_FIELD(ir, nodeWeightMode, IFT_LoadBalancerMonitor_nodeWeightMode, "nodeweightmode"); // Macro
+    if ( nodeWeightMode == 0 ) { // default, dynamic weights
+        staticNodeWeightFlag = false;
+    } else if ( nodeWeightMode == 1 ) { // equal weights for all nodes
+        staticNodeWeightFlag = true;
+    } else if ( nodeWeightMode == 2 ) { // user defined static weights
+        IR_GIVE_OPTIONAL_FIELD(ir, nodeWeights, IFT_LoadBalancerMonitor_initialnodeweights, "nw"); // Macro
+        if ( nodeWeights.giveSize() != nproc ) {
+            OOFEM_ERROR("nodeWeights size not equal to number of processors");
+        }
+
+        staticNodeWeightFlag = true;
+    } else {
+        OOFEM_ERROR("unsupported node weight type, using default value");
+        staticNodeWeightFlag = false;
+    }
+
     return IRRT_OK;
 }
 
@@ -724,7 +728,7 @@ WallClockLoadBalancerMonitor :: initializeFrom(InputRecord *ir)
 
     result = LoadBalancerMonitor :: initializeFrom(ir);
 
-      
+
 
     IR_GIVE_OPTIONAL_FIELD(ir, relWallClockImbalanceTreshold, IFT_WallClockLoadBalancerMonitor_relwct, "relwct"); // Macro
     IR_GIVE_OPTIONAL_FIELD(ir, absWallClockImbalanceTreshold, IFT_WallClockLoadBalancerMonitor_abswct, "abswct"); // Macro
@@ -741,16 +745,17 @@ WallClockLoadBalancerMonitor :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, recoveredSteps, IFT_WallClockLoadBalancerMonitor_recoveredsteps, "lbrecoveredsteps"); // Macro
     processingWeights.resize(0);
     IR_GIVE_OPTIONAL_FIELD(ir, processingWeights, IFT_WallClockLoadBalancerMonitor_processingweights, "lbprocessingweights"); // Macro
-    if(recoveredSteps.giveSize() != processingWeights.giveSize()){
-	OOFEM_ERROR("WallClockLoadBalancerMonitor::initializeFrom - mismatch size of lbrecoveredsteps and lbprocessingweights");
+    if ( recoveredSteps.giveSize() != processingWeights.giveSize() ) {
+        OOFEM_ERROR("WallClockLoadBalancerMonitor::initializeFrom - mismatch size of lbrecoveredsteps and lbprocessingweights");
     }
+
 #endif
 
     return result;
 }
 
 /*
- #else //__PARALLEL_MODE
+ * #else //__PARALLEL_MODE
  * void
  * LoadBalancer::migrateLoad () {}
  *
@@ -770,6 +775,5 @@ LoadBalancer :: WorkTransferPlugin :: WorkTransferPlugin(LoadBalancer *_lb) {
     lb = _lb;
 }
 LoadBalancer :: WorkTransferPlugin :: ~WorkTransferPlugin() { }
-
 } // end namespace oofem
 #endif

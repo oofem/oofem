@@ -44,11 +44,10 @@
 #include "compiler.h"
 
 namespace oofem {
+template< class T >class dynaList;
+template< class T >class dynaListIterator;
 
-template< class T > class dynaList;
-template< class T > class dynaListIterator;
-
-template< class T > class listItem
+template< class T >class listItem
 {
 public:
     T data;
@@ -76,21 +75,23 @@ public:
  * constant time, no elements are moved, only internal pointers are manipulated.
  * To access elements in a list, you must use iterators. List provide efficient bidirectional iterator.
  */
-template< class T > class dynaList
+template< class T >class dynaList
 {
 public:
     /// List iterator type
-    typedef dynaListIterator< T > iterator;
+    typedef dynaListIterator< T >iterator;
     /// Link type
     typedef listItem< T > *linkType;
 protected:
     linkType last; // last->next is head of list
 public:
     /// Constructor, creates the empty list
-    dynaList() { T val;
-                 last = new listItem< T >(val);
-                 last->next = last;
-                 last->prev = last; }
+    dynaList() {
+        T val;
+        last = new listItem< T >(val);
+        last->next = last;
+        last->prev = last;
+    }
     /// Destructor
     ~dynaList();
 
@@ -124,7 +125,7 @@ protected:
 /**
  * Bidirectional iterator for dynaList.
  */
-template< class T > class dynaListIterator
+template< class T >class dynaListIterator
 {
 protected:
     listItem< T > *node;
@@ -142,7 +143,7 @@ public:
     /// Operator !=
     bool operator!=(const dynaListIterator< T > &x) const { return node != x.node; }
     /// Value access operator. Returns the element of the actual position.
-    T &operator *() const { return ( * node ).data; }
+    T & operator*() const { return ( * node ).data; }
 
     /// Lets the iterator step forward to the next element.
     dynaListIterator< T > &operator++() {
@@ -176,7 +177,7 @@ template< class T >dynaList< T > :: ~dynaList()
     delete last;
 }
 
-template< class T > dynaListIterator< T >
+template< class T >dynaListIterator< T >
 dynaList< T > :: insert(iterator position, const T &value)
 {
     listItem< T > *tmp = new listItem< T >(value);
@@ -190,18 +191,18 @@ dynaList< T > :: insert(iterator position, const T &value)
 
 
 
-template< class T > void dynaList< T > :: pushFront(const T &value)
+template< class T >void dynaList< T > :: pushFront(const T &value)
 {
     insert(begin(), value);
 }
 
-template< class T > void dynaList< T > :: pushBack(const T &value)
+template< class T >void dynaList< T > :: pushBack(const T &value)
 {
     insert(end(), value);
 }
 
 
-template< class T > void dynaList< T > :: clear()
+template< class T >void dynaList< T > :: clear()
 {
     linkType cur = last->next;
     while ( cur != last ) {
@@ -214,7 +215,7 @@ template< class T > void dynaList< T > :: clear()
     last->prev = last;
 }
 
-template< class T > int dynaList< T > :: size()
+template< class T >int dynaList< T > :: size()
 {
     int size = 0;
     linkType cur = last->next;
@@ -228,7 +229,7 @@ template< class T > int dynaList< T > :: size()
 
 
 
-template< class T > dynaListIterator< T >
+template< class T >dynaListIterator< T >
 dynaList< T > :: erase(iterator position)
 {
     linkType next_node = position.node->next;
@@ -238,7 +239,5 @@ dynaList< T > :: erase(iterator position)
     delete ( position.node );
     return iterator(next_node);
 }
-
-
 } // end namespace oofem
 #endif // dynalist_h

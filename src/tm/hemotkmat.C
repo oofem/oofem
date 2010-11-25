@@ -39,11 +39,10 @@
 #include "gausspnt.h"
 #include "mathfem.h"
 #ifndef __MAKEDEPEND
-#include <stdlib.h>
+ #include <stdlib.h>
 #endif
 
 namespace oofem {
-
 int
 HeMoTKMaterial :: hasMaterialModeCapability(MaterialMode mode)
 {
@@ -86,13 +85,13 @@ HeMoTKMaterial :: initializeFrom(InputRecord *ir)
 
 
 double
-HeMoTKMaterial :: give(int aProperty, GaussPoint* gp)
+HeMoTKMaterial :: give(int aProperty, GaussPoint *gp)
 //
 // Returns the value of the property aProperty (e.g. the Young's modulus
 // 'E') of the receiver.
 //
 {
-  return this->Material :: give(aProperty,gp);
+    return this->Material :: give(aProperty, gp);
 }
 
 
@@ -589,5 +588,4 @@ HeMoTKMaterial :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, Inter
         return TransportMaterial :: giveIPValue(answer, aGaussPoint, type, atTime);
     }
 }
-
 } // end namespace oofem

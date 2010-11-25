@@ -52,7 +52,6 @@
 //#include "fei3dhexalin.h"
 
 namespace oofem {
-
 class MicroMaterial;
 
 class MacroLSpace : public LSpace
@@ -112,8 +111,6 @@ protected:
     FloatArray internalMacroForcesVector;
     ///last time step when stiffness matrix was assembled
     TimeStep *lastStiffMatrixTimeStep;
-    
 };
-
 } // end namespace oofem
 #endif //macrolspace_h

@@ -40,7 +40,6 @@
 #define integrationdomain_h
 
 namespace oofem {
-
 enum integrationDomain {
     /*
      * Used by integrator class to suply
@@ -58,6 +57,5 @@ enum integrationDomain {
 
     _Embedded2dLine
 };
-
 } // end namespace oofem
 #endif // integrationdomain_h

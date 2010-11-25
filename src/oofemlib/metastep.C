@@ -40,7 +40,6 @@
 #include "metastep.h"
 
 namespace oofem {
-
 MetaStep :: MetaStep(int n, EngngModel *e)
 {
     this->number = n;
@@ -88,7 +87,7 @@ MetaStep :: setStepBounds(int startStepNumber)
 void
 MetaStep :: setNumberOfSteps(int numberOfSteps)
 {
-  this->numberOfSteps = numberOfSteps;
+    this->numberOfSteps = numberOfSteps;
 }
 
 int
@@ -101,5 +100,4 @@ MetaStep :: isStepValid(int solStepNumber)
 
     return 0;
 }
-
 } // end namespace oofem

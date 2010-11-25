@@ -45,11 +45,10 @@
 #include "flotmtrx.h"
 #include "gausspnt.h"
 #ifndef __MAKEDEPEND
-#include <stdlib.h>
+ #include <stdlib.h>
 #endif
 
 namespace oofem {
-
 IsotropicLinearElasticMaterial :: IsotropicLinearElasticMaterial(int n, Domain *d,
                                                                  double _E, double _nu) :
     LinearElasticMaterial(n, d)
@@ -148,7 +147,7 @@ IsotropicLinearElasticMaterial :: giveInputRecordString(std :: string &str, bool
 
 
 double
-IsotropicLinearElasticMaterial :: give(int aProperty, GaussPoint* gp)
+IsotropicLinearElasticMaterial :: give(int aProperty, GaussPoint *gp)
 //
 // Returns the value of the property aProperty (e.g. the Young's modulus
 // 'E') of the receiver.
@@ -437,9 +436,9 @@ IsotropicLinearElasticMaterial :: give3dBeamStiffMtrx(FloatMatrix &answer,
     answer.zero();
 
     answer.at(1, 1) = E * area;
-    answer.at(2, 2) = shearCoeff * this->give('G',gp) * area;
-    answer.at(3, 3) = shearCoeff * this->give('G',gp) * area;
-    answer.at(4, 4) = this->give('G',gp) * Ik;
+    answer.at(2, 2) = shearCoeff * this->give('G', gp) * area;
+    answer.at(3, 3) = shearCoeff * this->give('G', gp) * area;
+    answer.at(4, 4) = this->give('G', gp) * Ik;
     answer.at(5, 5) = E * Iy;
     answer.at(6, 6) = E * Iz;
 
@@ -461,9 +460,9 @@ IsotropicLinearElasticMaterial :: giveThermalDilatationVector(FloatArray &answer
     //FloatArray *result = new FloatArray (6);
     answer.resize(6);
     answer.zero();
-    answer.at(1) = this->give(tAlpha,gp);
-    answer.at(2) = this->give(tAlpha,gp);
-    answer.at(3) = this->give(tAlpha,gp);
+    answer.at(1) = this->give(tAlpha, gp);
+    answer.at(2) = this->give(tAlpha, gp);
+    answer.at(3) = this->give(tAlpha, gp);
 
     return;
 }
@@ -477,6 +476,4 @@ IsotropicLinearElasticMaterial :: CreateStatus(GaussPoint *gp) const
 {
     return new StructuralMaterialStatus(1, this->giveDomain(), gp);
 }
-
-
 } // end namespace oofem

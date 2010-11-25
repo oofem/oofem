@@ -48,11 +48,10 @@
 #include "contextioerr.h"
 
 #ifndef __MAKEDEPEND
-#include <stdio.h>
+ #include <stdio.h>
 #endif
 
 namespace oofem {
-
 TimeStep :: TimeStep(int n, EngngModel *e, int mn, double tt, double dt, StateCounterType counter)
 // Constructor. Creates a new time step, with number n, and belonging to
 // the time history of s. Used for the initial step (0 or 1).
@@ -89,7 +88,7 @@ TimeStep :: TimeStep(const TimeStep &src)
 }
 
 TimeStep &
-TimeStep :: operator=(const TimeStep &src)
+TimeStep :: operator = ( const TimeStep & src )
 {
     eModel = src.eModel;
     t      = src.t;
@@ -232,5 +231,4 @@ TimeStep ::  restoreContext(DataStream *stream, ContextMode mode, void *obj)
     // return result back
     return CIO_OK;
 }
-
 } // end namespace oofem

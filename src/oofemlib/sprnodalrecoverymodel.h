@@ -46,7 +46,6 @@
 #include "interface.h"
 
 namespace oofem {
-
 class GaussPoint;
 class SPRNodalRecoveryModelInterface;
 
@@ -62,16 +61,20 @@ enum SPRPatchType { SPRPatchType_2dxy, SPRPatchType_3dBiLin, SPRPatchType_2dquad
 class SPRNodalRecoveryModel : public NodalRecoveryModel
 {
 protected:
-  /** Helper structure to pass required argumets to packing/unpacking functions
-      needed in parallel mode */
-  struct parallelStruct {
-    FloatArray* dofManValues;
-    IntArray* dofManPatchCount;
-    IntArray* regionNodalNumbers;
-    int regionValSize;
-    parallelStruct (FloatArray* a, IntArray* b, IntArray* c, int d) {
-      dofManValues=a; dofManPatchCount=b; regionNodalNumbers=c; regionValSize=d;}
-  };
+    /** Helper structure to pass required argumets to packing/unpacking functions
+     *  needed in parallel mode */
+    struct parallelStruct {
+        FloatArray *dofManValues;
+        IntArray *dofManPatchCount;
+        IntArray *regionNodalNumbers;
+        int regionValSize;
+        parallelStruct(FloatArray *a, IntArray *b, IntArray *c, int d) {
+            dofManValues = a;
+            dofManPatchCount = b;
+            regionNodalNumbers = c;
+            regionValSize = d;
+        }
+    };
 
 public:
     /// Constructor
@@ -107,12 +110,12 @@ private:
     int  giveNumberOfUnknownPolynomialCoefficients(SPRPatchType regType);
 
 #ifdef __PARALLEL_MODE
-    void initCommMaps ();
-    void exchangeDofManValues   (int ireg, FloatArray& dofManValues, 
-				 IntArray& dofManPatchCount, IntArray& regionNodalNumbers,
-				 int regionValSize);
-    int  packSharedDofManData   (parallelStruct* s, ProcessCommunicator &processComm);
-    int  unpackSharedDofManData (parallelStruct* s, ProcessCommunicator &processComm);
+    void initCommMaps();
+    void exchangeDofManValues(int ireg, FloatArray &dofManValues,
+                              IntArray &dofManPatchCount, IntArray &regionNodalNumbers,
+                              int regionValSize);
+    int  packSharedDofManData(parallelStruct *s, ProcessCommunicator &processComm);
+    int  unpackSharedDofManData(parallelStruct *s, ProcessCommunicator &processComm);
 #endif
 };
 
@@ -134,6 +137,5 @@ public:
     virtual void SPRNodalRecoveryMI_computeIPGlobalCoordinates(FloatArray &coords, GaussPoint *gp) = 0;
     virtual SPRPatchType SPRNodalRecoveryMI_givePatchType() = 0;
 };
-
 } // end namespace oofem
 #endif // sprnodalrecoverymodel_h

@@ -45,7 +45,6 @@
 #include "conTable.h"
 
 namespace oofem {
-
 EIPrimaryUnknownMapper :: EIPrimaryUnknownMapper() : PrimaryUnknownMapper()
 { }
 
@@ -71,10 +70,9 @@ EIPrimaryUnknownMapper :: mapAndUpdate(FloatArray &answer, ValueModeType mode, E
     for ( inode = 1; inode <= nd_nnodes; inode++ ) {
         /* HUHU CHEATING */
 #ifdef __PARALLEL_MODE
-      if (( newd->giveNode(inode)->giveParallelMode() == DofManager_null ) ||
-	  ( newd->giveNode(inode)->giveParallelMode() == DofManager_remote ))
-	{
-	  continue;
+        if ( ( newd->giveNode(inode)->giveParallelMode() == DofManager_null ) ||
+            ( newd->giveNode(inode)->giveParallelMode() == DofManager_remote ) ) {
+            continue;
         }
 
 #endif
@@ -100,7 +98,7 @@ EIPrimaryUnknownMapper :: mapAndUpdate(FloatArray &answer, ValueModeType mode, E
             // should be there, but newNode can accommodate only certain dofs.
             //
             //
-	  newd->giveNode(inode)->giveLocationArray(dofMask, locationArray, EModelDefaultEquationNumbering());
+            newd->giveNode(inode)->giveLocationArray( dofMask, locationArray, EModelDefaultEquationNumbering() );
             if ( newd->giveNode(inode)->hasAnySlaveDofs() ) {
                 for ( int ii = 1; ii <= dofMask.giveSize(); ii++ ) {
                     // exclude slaves; they are determined from masters
@@ -156,5 +154,4 @@ EIPrimaryUnknownMapper :: evaluateAt(FloatArray &answer, IntArray &dofMask, Equa
 
     return 1;
 }
-
 } // end namespace oofem

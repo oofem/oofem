@@ -40,11 +40,10 @@
 #include "cltypes.h"
 
 #ifndef __MAKEDEPEND
-#include <stdlib.h>
+ #include <stdlib.h>
 #endif
 
 namespace oofem {
-
 /*
  * double  InitialCondition :: give (char u)
  * // Returns the value of the prescribed value of the kinematic unknown 'u'.
@@ -131,5 +130,4 @@ InitialCondition :: scale(ValueModeType type, double s)
         initialValueDictionary.at(type) *= s;
     }
 }
-
 } // end namespace oofem

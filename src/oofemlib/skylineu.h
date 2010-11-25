@@ -44,7 +44,6 @@
 #include "rowcol.h"
 
 namespace oofem {
-
 /// "zero" pivot for SkylineUnsym class
 #define SkylineUnsym_TINY_PIVOT 1.e-30
 
@@ -90,7 +89,7 @@ public:
      */
     virtual void times(double x);
     /// Builds internal structure of receiver
-    int buildInternalStructure(EngngModel *, int, EquationID, const UnknownNumberingScheme& s);
+    int buildInternalStructure(EngngModel *, int, EquationID, const UnknownNumberingScheme & s);
     /**
      * allocates and built structure according to given
      * array of maximal column heights
@@ -171,7 +170,5 @@ protected:
 
 #endif
 };
-
-
 } // end namespace oofem
 #endif // skylineu_h

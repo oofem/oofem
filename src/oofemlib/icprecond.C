@@ -32,14 +32,13 @@
 // adapted & optimized by Borek Patzak
 
 #ifndef __MAKEDEPEND
-#include <stdlib.h>
+ #include <stdlib.h>
 #endif
 #include "icprecond.h"
 #include "symcompcol.h"
 #include "mathfem.h"
 
 namespace oofem {
-
 CompCol_ICPreconditioner :: CompCol_ICPreconditioner(const SparseMtrx &A, InputRecord &attributes) :
     Preconditioner(A, attributes)
 { }
@@ -248,5 +247,4 @@ CompCol_ICPreconditioner :: qsortRowPartition(IntArray &src, FloatArray &val, in
 
     return i;
 }
-
 } // end namespace oofem

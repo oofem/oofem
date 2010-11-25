@@ -40,7 +40,6 @@
 #define problemmode_h
 
 namespace oofem {
-
 enum problemMode {
     _processor,
     _postProcessor
@@ -52,6 +51,5 @@ enum problemScale {
     macroScale,
     microScale
 };
-
 } // end namespace oofem
 #endif // problemmode_h

@@ -42,7 +42,7 @@
 #define imlsolver_h
 
 #ifndef __MAKEDEPEND
-#include <stdio.h>
+ #include <stdio.h>
 #endif
 #include "sparselinsystemnm.h"
 #include "sparsemtrx.h"
@@ -51,7 +51,6 @@
 #include "precond.h"
 
 namespace oofem {
-
 class Domain;
 class EngngModel;
 class FloatMatrix;
@@ -117,6 +116,5 @@ public:
     classType giveClassID() const { return IMLSolverClass; }
     LinSystSolverType giveLinSystSolverType() const { return ST_IML; }
 };
-
 } // end namespace oofem
 #endif // imlsolver_h

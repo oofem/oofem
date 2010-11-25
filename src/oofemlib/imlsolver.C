@@ -33,10 +33,9 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 #ifndef __IML_MODULE
-#include "imlsolver.h"
+ #include "imlsolver.h"
 
 namespace oofem {
-
 IMLSolver :: IMLSolver(int i, Domain *d, EngngModel *m) : SparseLinearSystemNM(i, d, m)
 {
     _error("IMLSolver: can't create, IML support not compiled");
@@ -49,34 +48,32 @@ IMLSolver :: initializeFrom(InputRecord *ir) { return IRRT_OK; }
 
 NM_Status
 IMLSolver :: solve(SparseMtrx *A, FloatArray *b, FloatArray *x) { return NM_NoSuccess; }
-
 } // end namespace oofem
 #endif
 
 #ifdef __IML_MODULE
 
-#include "imlsolver.h"
-#include "sparsemtrx.h"
-#include "flotarry.h"
-#include "diagpre.h"
-#include "voidprecond.h"
-#include "cg.h"
-#include "gmres.h"
-#include "compcol.h"
-#include "iluprecond.h"
-#include "icprecond.h"
-#include "verbose.h"
-#include "ilucomprowprecond.h"
+ #include "imlsolver.h"
+ #include "sparsemtrx.h"
+ #include "flotarry.h"
+ #include "diagpre.h"
+ #include "voidprecond.h"
+ #include "cg.h"
+ #include "gmres.h"
+ #include "compcol.h"
+ #include "iluprecond.h"
+ #include "icprecond.h"
+ #include "verbose.h"
+ #include "ilucomprowprecond.h"
 
-#ifdef TIME_REPORT
-#ifndef __MAKEDEPEND
-#include <time.h>
-#endif
-#include "clock.h"
-#endif
+ #ifdef TIME_REPORT
+  #ifndef __MAKEDEPEND
+   #include <time.h>
+  #endif
+  #include "clock.h"
+ #endif
 
 namespace oofem {
-
 IMLSolver :: IMLSolver(int i, Domain *d, EngngModel *m) : SparseLinearSystemNM(i, d, m)
 {
     Lhs = NULL;
@@ -175,11 +172,11 @@ IMLSolver :: solve(SparseMtrx *A, FloatArray *b, FloatArray *x)
     Lhs = A;
     this->lhsVersion = A->giveVersion();
 
-#ifdef TIME_REPORT
+ #ifdef TIME_REPORT
     //clock_t tstart = clock();
     oofem_timeval tstart;
     getUtime(tstart);
-#endif
+ #endif
 
 
     if ( solverType == IML_ST_CG ) {
@@ -197,16 +194,15 @@ IMLSolver :: solve(SparseMtrx *A, FloatArray *b, FloatArray *x)
         _error("solveYourselfAt: unknown lsover type");
     }
 
-#ifdef TIME_REPORT
+ #ifdef TIME_REPORT
     oofem_timeval ut;
     getRelativeUtime(ut, tstart);
     OOFEM_LOG_INFO( "IMLSolver info: user time consumed by solution: %.2fs\n", ( double ) ( ut.tv_sec + ut.tv_usec / ( double ) OOFEM_USEC_LIM ) );
-#endif
+ #endif
 
 
     //solved = 1;
     return NM_Success;
 }
-
 } // end namespace oofem
 #endif //ifdef __IML_MODULE

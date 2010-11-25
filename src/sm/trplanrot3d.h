@@ -46,9 +46,8 @@
 #include "trplanrot.h"
 
 namespace oofem {
-
 #ifndef __CHARTENSOR
-#define __CHARTENSOR
+ #define __CHARTENSOR
 enum CharTensor {
     LocalStrainTensor,
     GlobalStrainTensor,

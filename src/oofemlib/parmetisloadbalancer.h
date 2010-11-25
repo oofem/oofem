@@ -35,23 +35,22 @@
 #define parmetisloadbalancer_h
 
 #ifdef __PARALLEL_MODE
-#include "loadbalancer.h"
+ #include "loadbalancer.h"
 
-#ifdef __PARMETIS_MODULE
-#ifndef __MAKEDEPEND
-#include "parmetis.h"
-#include <vector>
-#endif
-#endif
+ #ifdef __PARMETIS_MODULE
+  #ifndef __MAKEDEPEND
+   #include "parmetis.h"
+   #include <vector>
+  #endif
+ #endif
 
 namespace oofem {
-
 /**
  * End-of-data marker, used to identify end of data stream received.
  * The value should not conflict with any globnum id
  */
-#define PARMETISLB_END_DATA -1
-#define SHARED_DOFMAN_PARTITIONS_TAG 9998
+ #define PARMETISLB_END_DATA -1
+ #define SHARED_DOFMAN_PARTITIONS_TAG 9998
 
 /**
  * ParMetis load balancer.
@@ -60,7 +59,7 @@ class ParmetisLoadBalancer : public LoadBalancer
 {
 protected:
 
-#ifdef __PARMETIS_MODULE
+ #ifdef __PARMETIS_MODULE
     // element numbering maps
     IntArray gToLMap, lToGMap;
     idxtype *elmdist;
@@ -73,7 +72,7 @@ protected:
     std :: vector< IntArray >dofManPartitions;
     /// partition vector of the locally-stored elements
     IntArray elementPart;
-#endif
+ #endif
 
 public:
     ParmetisLoadBalancer(Domain *d);
@@ -81,15 +80,15 @@ public:
 
     virtual void calculateLoadTransfer();
 
-#if 1
+ #if 1
     virtual DofManMode giveDofManState(int idofman);
     virtual IntArray *giveDofManPartitions(int idofman);
     virtual int giveElementPartition(int ielem);
-#endif
+ #endif
 protected:
-    void handleMasterSlaveDofManLinks ();
+    void handleMasterSlaveDofManLinks();
 
-#ifdef __PARMETIS_MODULE
+ #ifdef __PARMETIS_MODULE
     void initGlobalParmetisElementNumbering();
     int  giveLocalElementNumber(int globnum) { return gToLMap.at(globnum - myGlobNumOffset); }
     int  giveGlobalElementNumber(int locnum) { return lToGMap.at(locnum); }
@@ -107,10 +106,8 @@ protected:
     int packSharedDmanPartitions(ProcessCommunicator &pc);
     int unpackSharedDmanPartitions(ProcessCommunicator &pc);
     void addSharedDofmanPartitions(int _locnum, IntArray _partitions);
-#endif
+ #endif
 };
-
-
 } // end namespace oofem
 #endif
 #endif // parmetisloadbalancer_h

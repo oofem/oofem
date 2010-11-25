@@ -42,19 +42,18 @@
 
 #ifdef __PARALLEL_MODE
 
-#include "parallel.h"
-#include "combuff.h"
-#ifndef __MAKEDEPEND
-#include <list>
-#endif
+ #include "parallel.h"
+ #include "combuff.h"
+ #ifndef __MAKEDEPEND
+  #include <list>
+ #endif
 
 namespace oofem {
-
 class IntArray;
 class FloatArray;
 class FloatMatrix;
 
-#define __CommunicationPacket_DEFAULT_SIZE 40960
+ #define __CommunicationPacket_DEFAULT_SIZE 40960
 
 /**
  * Class CommunicationPacket represent a data-packet, that is used to implement dynamic
@@ -75,12 +74,12 @@ protected:
 
 public:
 
-#ifdef __USE_MPI
+ #ifdef __USE_MPI
     /// Constructor. Creeates buffer of given size, using given communicator for packing
     CommunicationPacket(MPI_Comm comm, int size, int num);
     /// Constructor. Creeates empty buffer, using given communicator for packing
     CommunicationPacket(MPI_Comm comm, int num);
-#endif
+ #endif
     /// Destructor.
     ~CommunicationPacket();
 
@@ -91,7 +90,7 @@ public:
 
     /**@name Services for buffer sending/receiving */
     //@{
-#ifdef __USE_MPI
+ #ifdef __USE_MPI
     /**
      * Starts standard mode, nonblocking send.
      * @param dest rank of destination
@@ -117,7 +116,7 @@ public:
      * is set to MPI_REQUEST_NULL. Otherwise call returns flag=false.
      * @return true if operation complete, false otherwise.
      */
-    virtual int testCompletion() ;
+    virtual int testCompletion();
     /**
      * Waits until a completion of a nonblocking communication. The completion of a send operation indicates that the sender is
      * now free to update the locations in the send buffer, the completion of a receive operation indicates that the
@@ -127,7 +126,7 @@ public:
      *
      */
     virtual int waitCompletion();
-#endif
+ #endif
     //@}
 
     void setNumber(int _num) { this->number = _num; }
@@ -174,7 +173,7 @@ protected:
     int number_of_packets;
 
     // receiver mode
-    enum DCB_Mode {DCB_null, DCB_send, DCB_receive} mode;
+    enum DCB_Mode { DCB_null, DCB_send, DCB_receive } mode;
     // static packet pool
     static CommunicationPacketPool packetPool;
     // communication completion flag
@@ -262,7 +261,7 @@ protected:
      *  templated version used since implementation is similar for different types
      *  but type info is needed since implementation is relying on pointer arithmetic
      */
-    template< class T > int __packArray(T *src, int n, MPI_Datatype type) {
+    template< class T >int __packArray(T *src, int n, MPI_Datatype type) {
         int _result = 1;
         int start_indx = 0, end_indx, _size;
         int remaining_size = n;
@@ -289,7 +288,7 @@ protected:
      *  templated version used since implementation is similar for different types
      *  but type info is needed since implementation is relying on pointer arithmetic
      */
-    template< class T > int __unpackArray(T *dest, int n, MPI_Datatype type) {
+    template< class T >int __unpackArray(T *dest, int n, MPI_Datatype type) {
         int _result = 1;
         int start_indx = 0, end_indx, _size;
         int remaining_size = n;
@@ -311,8 +310,6 @@ protected:
         return _result;
     }
 };
-
-
 } // end namespace oofem
 #endif
 #endif // dyncombuff_h

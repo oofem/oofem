@@ -37,21 +37,21 @@
 #define parser_h
 
 #ifndef __MAKEDEPEND
-#include <stdio.h>
-#include <math.h>
+ #include <stdio.h>
+ #include <math.h>
 #endif
 
 namespace oofem {
-
 #define Parser_CMD_LENGTH 1024
 #define Parser_TBLSZ 23
 
 class Parser
 {
 public:
-    Parser() { curr_tok = PRINT;
-               no_of_errors = 0;
-               for ( int i = 0; i < Parser_TBLSZ; i++ ) { table [ i ] = 0; } }
+    Parser() {
+        curr_tok = PRINT;
+        no_of_errors = 0;
+        for ( int i = 0; i < Parser_TBLSZ; i++ ) { table [ i ] = 0; } }
     ~Parser() { reset(); }
 
     double eval(const char *string, int &err);
@@ -67,9 +67,11 @@ private:
 
     int no_of_errors;
     Token_value curr_tok;
-    struct name { char *string;
-                  name *next;
-                  double value; };
+    struct name {
+        char *string;
+        name *next;
+        double value;
+    };
     name *table [ Parser_TBLSZ ];
     double number_value;
     char string_value [ Parser_CMD_LENGTH ];
@@ -84,6 +86,5 @@ private:
     double agr(int get);
     Token_value get_token();
 };
-
 } // end namespace oofem
 #endif // parser_h

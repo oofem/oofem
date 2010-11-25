@@ -37,10 +37,10 @@
 
 #include "usrdefsub.h"
 #ifndef __MAKEDEPEND
-#include <string.h>
-#ifdef HAVE_STRINGS_H
-#include <strings.h>
-#endif
+ #include <string.h>
+ #ifdef HAVE_STRINGS_H
+  #include <strings.h>
+ #endif
 #endif
 
 
@@ -71,13 +71,13 @@
 #include "slepcsolver.h"
 #include "dsssolver.h"
 #ifdef __PARALLEL_MODE
-#include "fetisolver.h"
+ #include "fetisolver.h"
 #endif
 
 #include "subspaceit.h"
 #include "inverseit.h"
 
-// general loads in OOFEMLIB 
+// general loads in OOFEMLIB
 #include "linearedgeload.h"
 #include "constantedgeload.h"
 #include "constantsurfaceload.h"
@@ -101,196 +101,196 @@
 #ifdef __SM_MODULE
 
 // Elements of SM module
-#include "truss2d.h"
-#include "trplanstrss.h"
-#include "trplanrot.h"
-#include "trplanrot3d.h"
-#include "libeam2d.h"
-#include "planstrss.h"
-#include "quad1planestrain.h"
-#include "qplanstrss.h"
-#include "qtrplstr.h"
-#include "lspace.h"
-#include "lspacebb.h"
-#include "qspace.h"
-#include "axisymm3d.h"
-#include "q4axisymm.h"
-#include "l4axisymm.h"
-#include "ltrspace.h"
-#include "beam2d.h"
-#include "beam3d.h"
-#include "libeam2dnl.h"
-#include "libeam3dnl.h"
-#include "truss3d.h"
-#include "trplanestrain.h"
-#include "libeam3dnl2.h"
-#include "libeam3d.h"
-#include "libeam3d2.h"
-#include "truss1d.h"
-#include "cct.h"
-#include "cct3d.h"
-#include "tr_shell01.h"
-#include "rershell.h"
-#include "interfaceelem2dquad.h"
-#include "interfaceelement1d.h"
-#include "interfaceelem3dtrlin.h"
-#include "macrolspace.h"
-#include "planstrssxfem.h"
-#include "cohsur3d.h"
-#include "lumpedmasselement.h"
-#include "particle.h"
+ #include "truss2d.h"
+ #include "trplanstrss.h"
+ #include "trplanrot.h"
+ #include "trplanrot3d.h"
+ #include "libeam2d.h"
+ #include "planstrss.h"
+ #include "quad1planestrain.h"
+ #include "qplanstrss.h"
+ #include "qtrplstr.h"
+ #include "lspace.h"
+ #include "lspacebb.h"
+ #include "qspace.h"
+ #include "axisymm3d.h"
+ #include "q4axisymm.h"
+ #include "l4axisymm.h"
+ #include "ltrspace.h"
+ #include "beam2d.h"
+ #include "beam3d.h"
+ #include "libeam2dnl.h"
+ #include "libeam3dnl.h"
+ #include "truss3d.h"
+ #include "trplanestrain.h"
+ #include "libeam3dnl2.h"
+ #include "libeam3d.h"
+ #include "libeam3d2.h"
+ #include "truss1d.h"
+ #include "cct.h"
+ #include "cct3d.h"
+ #include "tr_shell01.h"
+ #include "rershell.h"
+ #include "interfaceelem2dquad.h"
+ #include "interfaceelement1d.h"
+ #include "interfaceelem3dtrlin.h"
+ #include "macrolspace.h"
+ #include "planstrssxfem.h"
+ #include "cohsur3d.h"
+ #include "lumpedmasselement.h"
+ #include "particle.h"
 // iga elements
-#include "igaelements.h"
+ #include "igaelements.h"
 
 // Emodels of SM module
-#include "nlinearstatic.h"
-#include "eigenvaluedynamic.h"
-#include "deidynamic.h"
-#include "nldeidynamic.h"
-#include "pnldeidynamic.h"
-#include "diidynamic.h"
-#include "incrementallinearstatic.h"
-#include "linearstability.h"
-#include "plinearstatic.h"
-#include "linearstatic.h"
-#include "stationaryflow.h"
-#include "adaptnlinearstatic.h"
-#include "adaptlinearstatic.h"
+ #include "nlinearstatic.h"
+ #include "eigenvaluedynamic.h"
+ #include "deidynamic.h"
+ #include "nldeidynamic.h"
+ #include "pnldeidynamic.h"
+ #include "diidynamic.h"
+ #include "incrementallinearstatic.h"
+ #include "linearstability.h"
+ #include "plinearstatic.h"
+ #include "linearstatic.h"
+ #include "stationaryflow.h"
+ #include "adaptnlinearstatic.h"
+ #include "adaptlinearstatic.h"
 
 
 // loads of SM module
-#include "structtemperatureload.h"
-#include "structeigenstrainload.h"
-#include "usrdeftempfield.h"
-#include "tf1.h"
+ #include "structtemperatureload.h"
+ #include "structeigenstrainload.h"
+ #include "usrdeftempfield.h"
+ #include "tf1.h"
 
 
 // crosssections of SM module
-#include "layeredcrosssection.h"
-#include "fiberedcs.h"
+ #include "layeredcrosssection.h"
+ #include "fiberedcs.h"
 
 
 // materials of SM module
-#include "ortholinearelasticmaterial.h"
-#include "perfectlyplasticmaterial.h"
-#include "steel1.h"
-#include "concrete2.h"
-#include "concrete3.h"
-#include "cebfip78.h"
-#include "doublepowerlaw.h"
-#include "b3mat.h"
-#include "b3solidmat.h"
-#include "j2plasticmaterial.h"
-#include "rcsd.h"
-#include "rcsde.h"
-#include "rcsdnl.h"
-#include "m4.h"
-#include "idm1.h"
-#include "idm2.h"
-#include "idmnl1.h"
-#include "mazarsmodel.h"
-#include "mazarsmodelnl.h"
-#include "druckerPragerPlasticitySM.h"
-#include "j2mplasticmaterial.h"
-#include "rankinepm.h"
-#include "masonry02.h"
-#include "isointerfacedamage01.h"
-#include "j2mat.h"
-#include "mat_cebfip90.h"
-#include "hellmat.h"
-#include "mdm.h"
-#include "compodamagemat.h"
-#include "micromaterial.h"
-#include "hyperelasticmaterial.h"
-#include "misesmat.h"
-#include "trabbonematerial.h"
-#include "trabbonenl.h"
-#include "trabbone3d.h"
-#include "trabboneembed.h"
-#include "trabbonenlembed.h"
-#include "trabbonenl3d.h"
-#include "concretedpm.h"
-#include "cohint.h"
+ #include "ortholinearelasticmaterial.h"
+ #include "perfectlyplasticmaterial.h"
+ #include "steel1.h"
+ #include "concrete2.h"
+ #include "concrete3.h"
+ #include "cebfip78.h"
+ #include "doublepowerlaw.h"
+ #include "b3mat.h"
+ #include "b3solidmat.h"
+ #include "j2plasticmaterial.h"
+ #include "rcsd.h"
+ #include "rcsde.h"
+ #include "rcsdnl.h"
+ #include "m4.h"
+ #include "idm1.h"
+ #include "idm2.h"
+ #include "idmnl1.h"
+ #include "mazarsmodel.h"
+ #include "mazarsmodelnl.h"
+ #include "druckerPragerPlasticitySM.h"
+ #include "j2mplasticmaterial.h"
+ #include "rankinepm.h"
+ #include "masonry02.h"
+ #include "isointerfacedamage01.h"
+ #include "j2mat.h"
+ #include "mat_cebfip90.h"
+ #include "hellmat.h"
+ #include "mdm.h"
+ #include "compodamagemat.h"
+ #include "micromaterial.h"
+ #include "hyperelasticmaterial.h"
+ #include "misesmat.h"
+ #include "trabbonematerial.h"
+ #include "trabbonenl.h"
+ #include "trabbone3d.h"
+ #include "trabboneembed.h"
+ #include "trabbonenlembed.h"
+ #include "trabbonenl3d.h"
+ #include "concretedpm.h"
+ #include "cohint.h"
 
-#include "scalarerrorindicator.h"
-#include "zzerrorestimator.h"
-#include "combinedzzsiee.h"
-#include "huertaerrorestimator.h"
+ #include "scalarerrorindicator.h"
+ #include "zzerrorestimator.h"
+ #include "combinedzzsiee.h"
+ #include "huertaerrorestimator.h"
 
 // export modules
-#include "poiexportmodule.h"
-#include "homexportmodule.h"
-#include "dmexportmodule.h"
-#include "gpexportmodule.h"
+ #include "poiexportmodule.h"
+ #include "homexportmodule.h"
+ #include "dmexportmodule.h"
+ #include "gpexportmodule.h"
 
 // init modules
-#include "gpinitmodule.h"
+ #include "gpinitmodule.h"
 
 // nonlocal barriers
-#include "polylinenonlocalbarrier.h"
-#include "symmetrybarrier.h"
+ #include "polylinenonlocalbarrier.h"
+ #include "symmetrybarrier.h"
 
 // random generators
-#include "localgaussianrandomgenerator.h"
+ #include "localgaussianrandomgenerator.h"
 
 // mesher interfaces
-#include "t3dinterface.h"
-#include "targe2interface.h"
-#include "freeminterface.h"
-#include "subdivision.h"
+ #include "t3dinterface.h"
+ #include "targe2interface.h"
+ #include "freeminterface.h"
+ #include "subdivision.h"
 
-#include "dss.h"
+ #include "dss.h"
 #endif //__SM_MODULE
 
 
 
 #ifdef __TM_MODULE
 // Emodels of SM module
-#include "stationarytransportproblem.h"
-#include "nonstationarytransportproblem.h"
-#include "nltransienttransportproblem.h"
-#include "staggeredproblem.h"
+ #include "stationarytransportproblem.h"
+ #include "nonstationarytransportproblem.h"
+ #include "nltransienttransportproblem.h"
+ #include "staggeredproblem.h"
 // Elements of TM module
-#include "quad1_ht.h"
-#include "tr1_ht.h"
-#include "quadaxisym1_ht.h"
-#include "traxisym1_ht.h"
-#include "brick1_ht.h"
-#include "tetrah1_ht.h"
+ #include "quad1_ht.h"
+ #include "tr1_ht.h"
+ #include "quadaxisym1_ht.h"
+ #include "traxisym1_ht.h"
+ #include "brick1_ht.h"
+ #include "tetrah1_ht.h"
 // materials of TM module
-#include "isoheatmat.h"
-#include "hemotkmat.h"
-#include "hydratingisoheatmat.h"
-#include "hydratinghemomat.h"
-#include "cemhydmat.h"
+ #include "isoheatmat.h"
+ #include "hemotkmat.h"
+ #include "hydratingisoheatmat.h"
+ #include "hydratinghemomat.h"
+ #include "cemhydmat.h"
 #endif //__TM_MODULE
 
 
 #ifdef __FM_MODULE
 // Emodels
-#include "cbs.h"
+ #include "cbs.h"
 //#include "stokesflow.h"
 //#include "stokesflowstresshomogenization.h"
 // Elements
-#include "tr1_2d_cbs.h"
+ #include "tr1_2d_cbs.h"
 //#include "tr21stokes.h"
 //#include "linesurfacetension.h"
 //#include "line2surfacetension.h"
 // materials
-#include "newtonianfluid.h"
+ #include "newtonianfluid.h"
 // boundary conditions
-#include "tractionpressurebc.h"
+ #include "tractionpressurebc.h"
 
-#include "supg.h"
-#include "tr1_2d_supg.h"
-#include "tr1_2d_supg2.h"
-#include "tr1_2d_supg_axi.h"
-#include "tr1_2d_supg2_axi.h"
-#include "py1_3d_supg.h"
-#include "tr21_2d_supg.h"
+ #include "supg.h"
+ #include "tr1_2d_supg.h"
+ #include "tr1_2d_supg2.h"
+ #include "tr1_2d_supg_axi.h"
+ #include "tr1_2d_supg2_axi.h"
+ #include "py1_3d_supg.h"
+ #include "tr21_2d_supg.h"
 //#include "tr1_2d_supg99.h"
-#include "twofluidmaterial.h"
-#include "binghamfluid2.h"
+ #include "twofluidmaterial.h"
+ #include "binghamfluid2.h"
 
 #endif // __FM_Module
 
@@ -301,20 +301,18 @@
 
 
 #ifdef __PARALLEL_MODE
-#include "loadbalancer.h"
-#include "parmetisloadbalancer.h"
+ #include "loadbalancer.h"
+ #include "parmetisloadbalancer.h"
 #endif
 
 namespace oofem {
-
 Element *CreateUsrDefElementOfType(char *aClass, int number, Domain *domain)
 {
     Element *newElement = NULL;
 #ifdef __SM_MODULE
     if ( !strncasecmp(aClass, "planestress2dxfem", 17) ) {
         newElement = new PlaneStress2dXfem(number, domain);
-    }
-    else if ( !strncasecmp(aClass, "planestress2d", 13) ) {
+    } else if ( !strncasecmp(aClass, "planestress2d", 13) )   {
         newElement = new PlaneStress2d(number, domain);
     }
 
@@ -328,112 +326,112 @@ Element *CreateUsrDefElementOfType(char *aClass, int number, Domain *domain)
         newElement = new TrPlaneStrRot(number, domain);
     } else if ( !strncasecmp(aClass, "qplanestress2d", 14) ) {
         newElement = new QPlaneStress2d(number, domain);
-    } else if ( !strncasecmp(aClass, "qtrplstr", 8) )   {
+    } else if ( !strncasecmp(aClass, "qtrplstr", 8) ) {
         newElement = new QTrPlaneStress2d(number, domain);
-    } else if ( !strncasecmp(aClass, "axisymm3d", 9) )   {
+    } else if ( !strncasecmp(aClass, "axisymm3d", 9) ) {
         newElement = new Axisymm3d(number, domain);
-    } else if ( !strncasecmp(aClass, "q4axisymm", 9) )   {
+    } else if ( !strncasecmp(aClass, "q4axisymm", 9) ) {
         newElement = new Q4Axisymm(number, domain);
-    } else if ( !strncasecmp(aClass, "l4axisymm", 9) )   {
+    } else if ( !strncasecmp(aClass, "l4axisymm", 9) ) {
         newElement = new L4Axisymm(number, domain);
-    } else if ( !strncasecmp(aClass, "lspacebb", 8) )   {
+    } else if ( !strncasecmp(aClass, "lspacebb", 8) ) {
         newElement = new LSpaceBB(number, domain);
-    } else if ( !strncasecmp(aClass, "lspace", 6) )   {
+    } else if ( !strncasecmp(aClass, "lspace", 6) ) {
         newElement = new LSpace(number, domain);
-    } else if ( !strncasecmp(aClass, "qspace", 6) )   {
+    } else if ( !strncasecmp(aClass, "qspace", 6) ) {
         newElement = new QSpace(number, domain);
-    } else if ( !strncasecmp(aClass, "cctplate3d", 10) )   {
+    } else if ( !strncasecmp(aClass, "cctplate3d", 10) ) {
         newElement = new CCTPlate3d(number, domain);
-    } else if ( !strncasecmp(aClass, "cctplate", 8) )   {
+    } else if ( !strncasecmp(aClass, "cctplate", 8) ) {
         newElement = new CCTPlate(number, domain);
     }
     //   else if (! strncasecmp(aClass,"ltrspaceec",10))
     //     newElement = new LTRSpaceWithEmbeddedCrack (number,domain) ;
     else if ( !strncasecmp(aClass, "ltrspace", 8) ) {
         newElement = new LTRSpace(number, domain);
-    } else if ( !strncasecmp(aClass, "truss2d", 7) )   {
+    } else if ( !strncasecmp(aClass, "truss2d", 7) ) {
         newElement = new Truss2d(number, domain);
-    } else if ( !strncasecmp(aClass, "rershell", 8) )   {
+    } else if ( !strncasecmp(aClass, "rershell", 8) ) {
         newElement = new RerShell(number, domain);
-    } else if ( !strncasecmp(aClass, "tr_shell01", 10) )   {
+    } else if ( !strncasecmp(aClass, "tr_shell01", 10) ) {
         newElement = new TR_SHELL01(number, domain);
-    } else if ( !strncasecmp(aClass, "beam2d", 6) )   {
+    } else if ( !strncasecmp(aClass, "beam2d", 6) ) {
         newElement = new Beam2d(number, domain);
-    } else if ( !strncasecmp(aClass, "beam3d", 6) )   {
+    } else if ( !strncasecmp(aClass, "beam3d", 6) ) {
         newElement = new Beam3d(number, domain);
-    } else if ( !strncasecmp(aClass, "libeam2dNL", 10) )    {
+    } else if ( !strncasecmp(aClass, "libeam2dNL", 10) ) {
         newElement = new LIBeam2dNL(number, domain);
-    } else if ( !strncasecmp(aClass, "libeam2d", 8) )   {
+    } else if ( !strncasecmp(aClass, "libeam2d", 8) ) {
         newElement = new LIBeam2d(number, domain);
-    } else if ( !strncasecmp(aClass, "libeam3dnl2", 11) )    {
+    } else if ( !strncasecmp(aClass, "libeam3dnl2", 11) ) {
         newElement = new LIBeam3dNL2(number, domain);
-    } else if ( !strncasecmp(aClass, "libeam3dNL", 10) )    {
+    } else if ( !strncasecmp(aClass, "libeam3dNL", 10) ) {
         newElement = new LIBeam3dNL(number, domain);
-    } else if ( !strncasecmp(aClass, "truss3d", 7) )    {
+    } else if ( !strncasecmp(aClass, "truss3d", 7) ) {
         newElement = new Truss3d(number, domain);
-    } else if ( !strncasecmp(aClass, "trplanestrain", 13) )    {
+    } else if ( !strncasecmp(aClass, "trplanestrain", 13) ) {
         newElement = new TrPlaneStrain(number, domain);
-    } else if ( !strncasecmp(aClass, "libeam3d2", 9) )   {
+    } else if ( !strncasecmp(aClass, "libeam3d2", 9) ) {
         newElement = new LIBeam3d2(number, domain);
-    } else if ( !strncasecmp(aClass, "libeam3d", 8) )   {
+    } else if ( !strncasecmp(aClass, "libeam3d", 8) ) {
         newElement = new LIBeam3d(number, domain);
-    } else if ( !strncasecmp(aClass, "truss1d", 7) )   {
+    } else if ( !strncasecmp(aClass, "truss1d", 7) ) {
         newElement = new Truss1d(number, domain);
-    } else if ( !strncasecmp(aClass, "interface2dquad", 15) )   {
+    } else if ( !strncasecmp(aClass, "interface2dquad", 15) ) {
         newElement = new InterfaceElem2dQuad(number, domain);
-    } else if ( !strncasecmp(aClass, "interface3dtrlin", 16) )   {
+    } else if ( !strncasecmp(aClass, "interface3dtrlin", 16) ) {
         newElement = new InterfaceElement3dTrLin(number, domain);
-    } else if ( !strncasecmp(aClass, "interface1d", 11) )   {
+    } else if ( !strncasecmp(aClass, "interface1d", 11) ) {
         newElement = new InterfaceElem1d(number, domain);
-    } else if ( !strncasecmp(aClass, "macrolspace", 11) )   {
+    } else if ( !strncasecmp(aClass, "macrolspace", 11) ) {
         newElement = new MacroLSpace(number, domain);
-    } else if ( !strncasecmp(aClass, "lumpedmass", 10) )   {
+    } else if ( !strncasecmp(aClass, "lumpedmass", 10) ) {
         newElement = new LumpedMassElement(number, domain);
-    } else if (! strncasecmp(aClass,"cohsur3d",8)) {
-      newElement = new CohesiveSurface3d (number,domain);
-    } else if ( !strncasecmp(aClass, "bsplineplanestresselement", 25)  ) {
-      newElement = new BsplinePlaneStressElement(number, domain);
-    } else if ( !strncasecmp(aClass, "nurbsplanestresselement", 23)  ) {
-      newElement = new NURBSPlaneStressElement(number, domain);
-    } else if ( !strncasecmp(aClass, "tsplineplanestresselement", 25)  ) {
-      newElement = new TSplinePlaneStressElement(number, domain);
-    } else if ( !strncasecmp(aClass, "nurbs3delement", 14)  ) {
-      newElement = new NURBSSpace3dElement(number, domain);
+    } else if ( !strncasecmp(aClass, "cohsur3d", 8) ) {
+        newElement = new CohesiveSurface3d(number, domain);
+    } else if ( !strncasecmp(aClass, "bsplineplanestresselement", 25) ) {
+        newElement = new BsplinePlaneStressElement(number, domain);
+    } else if ( !strncasecmp(aClass, "nurbsplanestresselement", 23) ) {
+        newElement = new NURBSPlaneStressElement(number, domain);
+    } else if ( !strncasecmp(aClass, "tsplineplanestresselement", 25) ) {
+        newElement = new TSplinePlaneStressElement(number, domain);
+    } else if ( !strncasecmp(aClass, "nurbs3delement", 14) ) {
+        newElement = new NURBSSpace3dElement(number, domain);
     }
 
 #endif //__SM_MODULE
 #ifdef __TM_MODULE
     if ( !strncasecmp(aClass, "quad1ht", 7) ) {
         newElement = new Quad1_ht(number, domain);
-    } else if ( !strncasecmp(aClass, "tr1ht", 5) )    {
+    } else if ( !strncasecmp(aClass, "tr1ht", 5) ) {
         newElement = new Tr1_ht(number, domain);
-    } else if ( !strncasecmp(aClass, "quadaxisym1ht", 13) )    {
+    } else if ( !strncasecmp(aClass, "quadaxisym1ht", 13) ) {
         newElement = new QuadAxisym1_ht(number, domain);
-    } else if ( !strncasecmp(aClass, "traxisym1ht", 11) )    {
+    } else if ( !strncasecmp(aClass, "traxisym1ht", 11) ) {
         newElement = new TrAxisym1_ht(number, domain);
-    } else if ( !strncasecmp(aClass, "quad1hmt", 8) )    {
+    } else if ( !strncasecmp(aClass, "quad1hmt", 8) ) {
         newElement = new Quad1_ht(number, domain, Quad1_ht :: HeatMass1TransferEM);
-    } else if ( !strncasecmp(aClass, "quadaxisym1hmt", 14) )    {
+    } else if ( !strncasecmp(aClass, "quadaxisym1hmt", 14) ) {
         newElement = new QuadAxisym1_ht(number, domain, Quad1_ht :: HeatMass1TransferEM);
-    } else if ( !strncasecmp(aClass, "brick1ht", 8) )    {
+    } else if ( !strncasecmp(aClass, "brick1ht", 8) ) {
         newElement = new Brick1_ht(number, domain);
-    } else if ( !strncasecmp(aClass, "brick1hmt", 9) )    {
+    } else if ( !strncasecmp(aClass, "brick1hmt", 9) ) {
         newElement = new Brick1_ht(number, domain, Brick1_ht :: HeatMass1TransferEM);
-    } else if ( !strncasecmp(aClass, "tetrah1ht", 9) )    {
+    } else if ( !strncasecmp(aClass, "tetrah1ht", 9) ) {
         newElement = new Tetrah1_ht(number, domain);
-    } else if ( !strncasecmp(aClass, "tetrah1hmt", 10) )    {
+    } else if ( !strncasecmp(aClass, "tetrah1hmt", 10) ) {
         newElement = new Tetrah1_ht(number, domain, Tetrah1_ht :: HeatMass1TransferEM);
-    } 
+    }
 
 #endif //__TM_MODULE
 #ifdef __FM_MODULE
     if ( !strncasecmp(aClass, "tr1cbs", 6) ) {
         newElement = new TR1_2D_CBS(number, domain);
-    } else if ( !strncasecmp(aClass, "tr1supgaxi", 10) )    {
+    } else if ( !strncasecmp(aClass, "tr1supgaxi", 10) ) {
         newElement = new TR1_2D_SUPG_AXI(number, domain);
-    } else if ( !strncasecmp(aClass, "tr1supg2axi", 11) )    {
+    } else if ( !strncasecmp(aClass, "tr1supg2axi", 11) ) {
         newElement = new TR1_2D_SUPG2_AXI(number, domain);
-    } else if ( !strncasecmp(aClass, "tr1supg2", 8) )    {
+    } else if ( !strncasecmp(aClass, "tr1supg2", 8) ) {
         newElement = new TR1_2D_SUPG2(number, domain);
     }
     /*
@@ -442,16 +440,16 @@ Element *CreateUsrDefElementOfType(char *aClass, int number, Domain *domain)
      */
     else if ( !strncasecmp(aClass, "tr1supg", 7) ) {
         newElement = new TR1_2D_SUPG(number, domain);
-    } else if ( !strncasecmp(aClass, "py1supg", 7) )    {
+    } else if ( !strncasecmp(aClass, "py1supg", 7) ) {
         newElement = new PY1_3D_SUPG(number, domain);
-    } else if ( !strncasecmp(aClass, "tr21supg", 8) )    {
+    } else if ( !strncasecmp(aClass, "tr21supg", 8) ) {
         newElement = new TR21_2D_SUPG(number, domain);
-    //} else if ( !strncasecmp(aClass, "tr21stokes", 10)) {
-    //    newElement = new Tr21Stokes(number, domain);
-    //} else if ( !strncasecmp(aClass, "surfacetension2dq2", 18)) {
-    //    newElement = new SurfaceTension2DQ2(number, domain);
-    //} else if ( !strncasecmp(aClass, "surfacetension2d", 16)) {
-    //    newElement = new SurfaceTension2D(number, domain);
+        //} else if ( !strncasecmp(aClass, "tr21stokes", 10)) {
+        //    newElement = new Tr21Stokes(number, domain);
+        //} else if ( !strncasecmp(aClass, "surfacetension2dq2", 18)) {
+        //    newElement = new SurfaceTension2DQ2(number, domain);
+        //} else if ( !strncasecmp(aClass, "surfacetension2d", 16)) {
+        //    newElement = new SurfaceTension2D(number, domain);
     }
 
 #endif //__FM_MODULE
@@ -461,10 +459,11 @@ Element *CreateUsrDefElementOfType(char *aClass, int number, Domain *domain)
 DofManager *CreateUsrDefDofManagerOfType(char *aClass, int number, Domain *domain)
 {
     DofManager *newDofManager = NULL;
- #ifdef __SM_MODULE
-   if (! strncasecmp(aClass,"particle",8)) {
+#ifdef __SM_MODULE
+    if ( !strncasecmp(aClass, "particle", 8) ) {
         newDofManager = new Particle(number, domain);
     }
+
 #endif //__SM_MODULE
     return newDofManager;
 }
@@ -518,11 +517,11 @@ EngngModel *CreateUsrDefEngngModelOfType(char *aClass, int number, EngngModel *m
         newEModel = new AdaptiveLinearStatic(number, master);
     }
 
-#ifdef __PARALLEL_MODE
+ #ifdef __PARALLEL_MODE
     else if ( !strncasecmp(aClass, "plinearstatic", 13) ) {
         newEModel = new PLinearStatic(number, master);
     }
-#endif
+ #endif
 #endif //__SM_MODULE
 
 #ifdef __TM_MODULE
@@ -543,10 +542,10 @@ EngngModel *CreateUsrDefEngngModelOfType(char *aClass, int number, EngngModel *m
         newEModel = new CBS(number, master);
     } else if ( !strncasecmp(aClass, "supg", 4) ) {
         newEModel = new SUPG(number, master);
-    //} else if ( !strncasecmp(aClass, "stokesflowstresshomogenization", 30) ) {
-    //    newEModel = new StokesFlowStressHomogenization(number, master);
-    //} else if ( !strncasecmp(aClass, "stokesflow", 10) ) {
-    //    newEModel = new StokesFlow(number, master);
+        //} else if ( !strncasecmp(aClass, "stokesflowstresshomogenization", 30) ) {
+        //    newEModel = new StokesFlowStressHomogenization(number, master);
+        //} else if ( !strncasecmp(aClass, "stokesflow", 10) ) {
+        //    newEModel = new StokesFlow(number, master);
     }
 
 #endif //__FM_MODULE
@@ -566,26 +565,26 @@ GeneralBoundaryCondition *CreateUsrDefBoundaryConditionOfType(char *aClass, int 
         newBc = new PrescribedGradient(number, domain);
     }
 
-    if ( !strncasecmp(aClass, "linearedgeload", 14) )     {
+    if ( !strncasecmp(aClass, "linearedgeload", 14) ) {
         newBc = new LinearEdgeLoad(number, domain);
-    } else if ( !strncasecmp(aClass, "constantedgeload", 16) )     {
+    } else if ( !strncasecmp(aClass, "constantedgeload", 16) ) {
         newBc = new ConstantEdgeLoad(number, domain);
-    } else if ( !strncasecmp(aClass, "constantsurfaceload", 19) )     {
+    } else if ( !strncasecmp(aClass, "constantsurfaceload", 19) ) {
         newBc = new ConstantSurfaceLoad(number, domain);
-    } else if ( !strncasecmp(aClass, "pointload", 9) )     {
+    } else if ( !strncasecmp(aClass, "pointload", 9) ) {
         newBc = new PointLoad(number, domain);
     }
 
 #ifdef __SM_MODULE
     if ( !strncasecmp(aClass, "structtemperatureload", 21) ) {
         newBc = new StructuralTemperatureLoad(number, domain);
-    } else if ( !strncasecmp(aClass, "structeigenstrainload", 21) )     {
-      newBc = new StructuralEigenstrainLoad(number, domain);
-    } else  if ( !strncasecmp(aClass, "usrdeftempfield", 15) )     {
+    } else if ( !strncasecmp(aClass, "structeigenstrainload", 21) ) {
+        newBc = new StructuralEigenstrainLoad(number, domain);
+    } else if ( !strncasecmp(aClass, "usrdeftempfield", 15) ) {
         newBc = new UserDefinedTemperatureField(number, domain);
-    } else if ( !strncasecmp(aClass, "tf1", 3) )     {
+    } else if ( !strncasecmp(aClass, "tf1", 3) ) {
         newBc = new TF1(number, domain);
-    } 
+    }
 
 #endif //__SM_MODULE
 #ifdef __FM_MODULE
@@ -623,27 +622,27 @@ Material *CreateUsrDefMaterialOfType(char *aClass, int number, Domain *domain)
 #ifdef __SM_MODULE
     if ( !strncasecmp(aClass, "orthole", 7) ) {
         newMaterial = new OrthotropicLinearElasticMaterial(number, domain);
-    } else if ( !strncasecmp(aClass, "steel1", 6) )    {
+    } else if ( !strncasecmp(aClass, "steel1", 6) ) {
         newMaterial = new Steel1(number, domain);
-    } else if ( !strncasecmp(aClass, "concrete2", 9) )    {
+    } else if ( !strncasecmp(aClass, "concrete2", 9) ) {
         newMaterial = new Concrete2(number, domain);
-    } else if ( !strncasecmp(aClass, "concrete3", 9) )    {
+    } else if ( !strncasecmp(aClass, "concrete3", 9) ) {
         newMaterial = new Concrete3(number, domain);
-    } else if ( !strncasecmp(aClass, "cebfip78", 8) )    {
+    } else if ( !strncasecmp(aClass, "cebfip78", 8) ) {
         newMaterial = new CebFip78Material(number, domain);
-    } else if ( !strncasecmp(aClass, "doublepowerlaw", 14) )    {
+    } else if ( !strncasecmp(aClass, "doublepowerlaw", 14) ) {
         newMaterial = new DoublePowerLawMaterial(number, domain);
-    } else if ( !strncasecmp(aClass, "b3mat", 5) )    {
+    } else if ( !strncasecmp(aClass, "b3mat", 5) ) {
         newMaterial = new B3Material(number, domain);
-    } else if ( !strncasecmp(aClass, "b3solidmat", 10) )    {
+    } else if ( !strncasecmp(aClass, "b3solidmat", 10) ) {
         newMaterial = new B3SolidMaterial(number, domain);
-    } else if ( !strncasecmp(aClass, "j2mat", 5) )    {
+    } else if ( !strncasecmp(aClass, "j2mat", 5) ) {
         newMaterial = new J2plasticMaterial(number, domain);
-    } else if ( !strncasecmp(aClass, "rcsdnl", 6) )    {
+    } else if ( !strncasecmp(aClass, "rcsdnl", 6) ) {
         newMaterial = new RCSDNLMaterial(number, domain);
-    } else if ( !strncasecmp(aClass, "rcsde", 5) )    {
+    } else if ( !strncasecmp(aClass, "rcsde", 5) ) {
         newMaterial = new RCSDEMaterial(number, domain);
-    } else if ( !strncasecmp(aClass, "rcsd", 4) )    {
+    } else if ( !strncasecmp(aClass, "rcsd", 4) ) {
         newMaterial = new RCSDMaterial(number, domain);
     } else if ( !strncasecmp(aClass, "microplane_m4", 13) ) {
         newMaterial = new M4Material(number, domain);
@@ -675,34 +674,35 @@ Material *CreateUsrDefMaterialOfType(char *aClass, int number, Domain *domain)
         newMaterial = new HellmichMaterial(number, domain);
     } else if ( !strncasecmp(aClass, "mdm", 3) ) {
         newMaterial = new MDM(number, domain);
-    } else if (! strncasecmp(aClass,"compdammat",10) ) {
-      newMaterial = new CompoDamageMat (number,domain);
-    } else if (! strncasecmp(aClass,"micromat",8) ) {
-      newMaterial = new MicroMaterial (number,domain);
+    } else if ( !strncasecmp(aClass, "compdammat", 10) ) {
+        newMaterial = new CompoDamageMat(number, domain);
+    } else if ( !strncasecmp(aClass, "micromat", 8) ) {
+        newMaterial = new MicroMaterial(number, domain);
     } else if ( !strncasecmp(aClass, "hyperelmat", 10) ) {
         newMaterial = new HyperElasticMaterial(number, domain);
     } else if ( !strncasecmp(aClass, "misesmat", 8) ) {
         newMaterial = new MisesMat(number, domain);
-    } else if ( !strncasecmp(aClass,"trabbonenl3d",12)) {
-      newMaterial = new TrabBoneNL3D (number,domain);
-    } else if ( !strncasecmp(aClass,"trabboneembed",13)) {
-      newMaterial = new TrabBoneEmbed (number,domain);
-    } else if ( !strncasecmp(aClass,"trabbonenlembed",15)) {
-      newMaterial = new TrabBoneNLEmbed (number,domain);
-    } else if ( !strncasecmp(aClass,"trabbonenl",10)) {
-      newMaterial = new TrabBoneNL (number,domain);
-    } else if ( !strncasecmp(aClass,"trabbone3d",10)) {
-      newMaterial = new TrabBone3D (number,domain);
-    } else if ( !strncasecmp(aClass,"trabbone",8)) {
-      newMaterial = new TrabBoneMaterial (number,domain);
-    } else if ( !strncasecmp(aClass,"concretedpm",11)) {
-      newMaterial = new ConcreteDPM(number,domain);
-    } else if ( !strncasecmp(aClass,"concreteidm",11)) {
-      // for compatibility with old input files
-      newMaterial = new ConcreteDPM(number,domain);
-    } else if ( !strncasecmp(aClass,"cohint",6)) {
-    newMaterial = new CohesiveInterfaceMaterial(number,domain);
+    } else if ( !strncasecmp(aClass, "trabbonenl3d", 12) ) {
+        newMaterial = new TrabBoneNL3D(number, domain);
+    } else if ( !strncasecmp(aClass, "trabboneembed", 13) ) {
+        newMaterial = new TrabBoneEmbed(number, domain);
+    } else if ( !strncasecmp(aClass, "trabbonenlembed", 15) ) {
+        newMaterial = new TrabBoneNLEmbed(number, domain);
+    } else if ( !strncasecmp(aClass, "trabbonenl", 10) ) {
+        newMaterial = new TrabBoneNL(number, domain);
+    } else if ( !strncasecmp(aClass, "trabbone3d", 10) ) {
+        newMaterial = new TrabBone3D(number, domain);
+    } else if ( !strncasecmp(aClass, "trabbone", 8) ) {
+        newMaterial = new TrabBoneMaterial(number, domain);
+    } else if ( !strncasecmp(aClass, "concretedpm", 11) ) {
+        newMaterial = new ConcreteDPM(number, domain);
+    } else if ( !strncasecmp(aClass, "concreteidm", 11) ) {
+        // for compatibility with old input files
+        newMaterial = new ConcreteDPM(number, domain);
+    } else if ( !strncasecmp(aClass, "cohint", 6) ) {
+        newMaterial = new CohesiveInterfaceMaterial(number, domain);
     }
+
 #endif //__SM_MODULE
 
 #ifdef __TM_MODULE
@@ -713,24 +713,26 @@ Material *CreateUsrDefMaterialOfType(char *aClass, int number, Domain *domain)
     } else if ( !strncmp(aClass, "cemhydmat", 9) ) {
         newMaterial = new CemhydMat(number, domain);
     }
+
 #endif //__TM_MODULE
 
-#if defined(__SM_MODULE) && defined (__TM_MODULE)
-    if (!strncmp(aClass, "hisoheat", 8) ) {
+#if defined( __SM_MODULE ) && defined ( __TM_MODULE )
+    if ( !strncmp(aClass, "hisoheat", 8) ) {
         newMaterial = new HydratingIsoHeatMaterial(number, domain);
     } else if ( !strncasecmp(aClass, "hhemotk", 7) ) {
         newMaterial = new HydratingHeMoMaterial(number, domain);
-    } 
+    }
+
 #endif //defined(__SM_MODULE) && defined (__TM_MODULE)
 
 #ifdef __FM_MODULE
     if ( !strncasecmp(aClass, "newtonianfluid", 14) ) {
         newMaterial = new NewtonianFluidMaterial(number, domain);
-    } else if ( !strncasecmp(aClass, "twofluidmat", 11) )    {
+    } else if ( !strncasecmp(aClass, "twofluidmat", 11) ) {
         newMaterial = new TwoFluidMaterial(number, domain);
-    } else if ( !strncasecmp(aClass, "binghamfluid2", 13) )   {
+    } else if ( !strncasecmp(aClass, "binghamfluid2", 13) ) {
         newMaterial = new BinghamFluidMaterial2(number, domain);
-    } else if ( !strncasecmp(aClass, "binghamfluid", 12) )   {
+    } else if ( !strncasecmp(aClass, "binghamfluid", 12) ) {
         newMaterial = new BinghamFluidMaterial2(number, domain);
     }
 
@@ -886,11 +888,12 @@ ExportModule *CreateUsrDefExportModuleOfType(char *aClass, EngngModel *emodel)
         answer = new POIExportModule(emodel);
     } else if ( !strncasecmp(aClass, "hom", 3) ) {
         answer = new HOMExportModule(emodel);
-    } else if ( !strncasecmp(aClass,"dm",2) ) {
+    } else if ( !strncasecmp(aClass, "dm", 2) ) {
         answer = new DofManExportModule(emodel);
-    } else if ( !strncasecmp(aClass,"gp",2) ) {
+    } else if ( !strncasecmp(aClass, "gp", 2) ) {
         answer = new GPExportModule(emodel);
     }
+
 #endif //__SM_MODULE
 
     return answer;
@@ -904,6 +907,7 @@ InitModule *CreateUsrDefInitModuleOfType(char *aClass, EngngModel *emodel)
     if ( !strncasecmp(aClass, "gpinitmodule", 12) ) {
         answer = new GPInitModule(emodel);
     }
+
 #endif //__SM_MODULE
 
     return answer;
@@ -935,6 +939,7 @@ RandomFieldGenerator *CreateUsrDefRandomFieldGenerator(char *aClass, int num, Do
     if ( !strncasecmp(aClass, "localgaussrandomgenerator", 25) ) {
         answer = new LocalGaussianRandomGenerator(num, d);
     }
+
 #endif
 
     return answer;
@@ -961,15 +966,16 @@ Element *CreateUsrDefElementOfType(classType type, int number, Domain *domain)
     Element *answer = NULL;
 
 #ifdef __SM_MODULE
-	if ( type == PlaneStress2dClass ) {
-		answer = new PlaneStress2d(number, domain);
-	} else if ( type == TrPlaneStress2dClass )  {
-		answer = new TrPlaneStress2d(number, domain);
-	} else if ( type == LTRSpaceClass ) {
-		answer = new LTRSpace(number, domain);
-	} else if ( type == TrPlaneStrainClass ) {
-		answer = new TrPlaneStrain(number, domain);
-	}
+    if ( type == PlaneStress2dClass ) {
+        answer = new PlaneStress2d(number, domain);
+    } else if ( type == TrPlaneStress2dClass ) {
+        answer = new TrPlaneStress2d(number, domain);
+    } else if ( type == LTRSpaceClass ) {
+        answer = new LTRSpace(number, domain);
+    } else if ( type == TrPlaneStrainClass ) {
+        answer = new TrPlaneStrain(number, domain);
+    }
+
 #endif
 
     if ( answer == NULL ) {
@@ -999,9 +1005,9 @@ Dof *CreateUsrDefDofOfType(classType type, int number, DofManager *dman)
     if  ( type == MasterDofClass ) {
         answer = new MasterDof(number, dman);
     } else if ( type == SimpleSlaveDofClass ) {
-      answer = new SimpleSlaveDof (number, dman);
+        answer = new SimpleSlaveDof(number, dman);
     } else if ( type == SlaveDofClass ) {
-      answer = new SlaveDof (number, dman);
+        answer = new SlaveDof(number, dman);
     }
 
     if ( answer == NULL ) {
@@ -1018,11 +1024,12 @@ MaterialMappingAlgorithm *CreateUsrDefMaterialMappingAlgorithm(MaterialMappingAl
 #ifdef __SM_MODULE
     if ( type == MMA_ClosestPoint ) {
         answer = new MMAClosestIPTransfer();
-    } else if ( type == MMA_LeastSquareProjection )  {
+    } else if ( type == MMA_LeastSquareProjection ) {
         answer = new MMALeastSquareProjection();
     } else if ( type == MMA_ShapeFunctionProjection ) {
         answer = new MMAShapeFunctProjection();
     }
+
 #endif
     if ( answer == NULL ) {
         OOFEM_ERROR2("CreateUsrDefMaterialMappingAlgorithm: Unknown mma type [%d]", type);
@@ -1031,37 +1038,38 @@ MaterialMappingAlgorithm *CreateUsrDefMaterialMappingAlgorithm(MaterialMappingAl
     return answer;
 }
 
-MesherInterface *CreateUsrDefMesherInterface(MeshPackageType type, Domain* d)
+MesherInterface *CreateUsrDefMesherInterface(MeshPackageType type, Domain *d)
 {
-  MesherInterface *answer = NULL;
+    MesherInterface *answer = NULL;
 #ifdef __SM_MODULE
-  if (type == MPT_T3D) {
-    answer = new T3DInterface(d);
-  } else if (type == MPT_TARGE2) {
-    answer = new Targe2Interface(d);
-  } else if (type == MPT_FREEM) {
-    answer = new FreemInterface(d);
-  } else if (type == MPT_SUBDIVISION) {
-    answer = new Subdivision(d);
-  } 
+    if ( type == MPT_T3D ) {
+        answer = new T3DInterface(d);
+    } else if ( type == MPT_TARGE2 ) {
+        answer = new Targe2Interface(d);
+    } else if ( type == MPT_FREEM ) {
+        answer = new FreemInterface(d);
+    } else if ( type == MPT_SUBDIVISION ) {
+        answer = new Subdivision(d);
+    }
+
 #endif
-  if ( answer == NULL ) {
-    OOFEM_ERROR2("CreateUsrDefMesherInterface: Unknown MI type [%d]", type);
-  }
+    if ( answer == NULL ) {
+        OOFEM_ERROR2("CreateUsrDefMesherInterface: Unknown MI type [%d]", type);
+    }
 
-  return answer;
-
+    return answer;
 }
 
-EnrichmentItem *CreateUsrDefEnrichmentItem(char *aClass, int num, XfemManager* xm, Domain *d) {
+EnrichmentItem *CreateUsrDefEnrichmentItem(char *aClass, int num, XfemManager *xm, Domain *d) {
     EnrichmentItem *answer = NULL;
     if ( !strncasecmp(aClass, "cracktip", 8) ) {
-      answer = new CrackTip(num, xm, d);
-    } else if ( !strncasecmp(aClass, "crackinterior", 13) )    {
-      answer = new CrackInterior(num, xm, d);
-    } else if ( !strncasecmp(aClass, "inclusion", 9) )    {
-      answer = new Inclusion(num, xm, d);
+        answer = new CrackTip(num, xm, d);
+    } else if ( !strncasecmp(aClass, "crackinterior", 13) ) {
+        answer = new CrackInterior(num, xm, d);
+    } else if ( !strncasecmp(aClass, "inclusion", 9) ) {
+        answer = new Inclusion(num, xm, d);
     }
+
     return answer;
 }
 
@@ -1069,10 +1077,9 @@ EnrichmentFunction *CreateUsrDefEnrichmentFunction(char *aClass, int num, Domain
     EnrichmentFunction *answer = NULL;
     if ( !strncasecmp(aClass, "discontinuousfunction", 21) ) {
         answer = new DiscontinuousFunction(num, d);
-    } else if ( !strncasecmp(aClass, "branchfunction", 14) )    {
+    } else if ( !strncasecmp(aClass, "branchfunction", 14) ) {
         answer = new BranchFunction(num, d);
-    }
-    else if ( !strncasecmp(aClass, "rampfunction", 14) )    {
+    } else if ( !strncasecmp(aClass, "rampfunction", 14) )   {
         answer = new RampFunction(num, d);
     }
 
@@ -1083,19 +1090,19 @@ BasicGeometry *CreateUsrDefGeometry(char *aClass) {
     BasicGeometry *answer = NULL;
     if ( !strncasecmp(aClass, "line", 4) ) {
         answer = new Line();
-    } else if ( !strncasecmp(aClass, "circle", 6) )    {
+    } else if ( !strncasecmp(aClass, "circle", 6) ) {
         answer = new Circle();
     }
 
     return answer;
 }
 
-Patch *CreateUsrDefPatch(Patch::PatchType ptype, Element* e) {
+Patch *CreateUsrDefPatch(Patch :: PatchType ptype, Element *e) {
     Patch *answer = NULL;
-    if ( ptype == Patch::PT_TrianglePatch) {
-      answer = new TrianglePatch(e);
+    if ( ptype == Patch :: PT_TrianglePatch ) {
+        answer = new TrianglePatch(e);
     } else {
-      OOFEM_ERROR2("CreateUsrDefPatch: Unknown PatchType [%d]", ptype);
+        OOFEM_ERROR2("CreateUsrDefPatch: Unknown PatchType [%d]", ptype);
     }
 
     return answer;
@@ -1130,5 +1137,4 @@ LoadBalancer *CreateUsrDefLoadBalancerOfType(classType type, Domain *d)
     return answer;
 }
 #endif
-
 } // end namespace oofem

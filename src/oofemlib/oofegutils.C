@@ -6,7 +6,6 @@
 #include "oofegutils.h"
 
 namespace oofem {
-
 void
 oofeg_drawIsoLinesOnTriangle(WCRec coords [ 3 ], double s [ 3 ]) {
     /* Draws the iso-lines on triangle given by its coordinates (coords argument).
@@ -201,6 +200,5 @@ oofeg_drawIsoLinesOnQuad(WCRec coords [ 4 ], double s [ 4 ]) {
         zcoord += delta;
     }
 }
-
 } // end namespace oofem
 #endif

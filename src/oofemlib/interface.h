@@ -91,6 +91,5 @@ public:
     virtual ~Interface() { }
     virtual const char *giveClassName() const  = 0;
 };
-
 } // end namespace oofem
 #endif // interface_h

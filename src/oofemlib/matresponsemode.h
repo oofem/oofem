@@ -42,7 +42,6 @@
 #include "enumitem.h"
 
 namespace oofem {
-
 /**
  * Describes the character of characteristic material matrix.
  */
@@ -78,7 +77,6 @@ enum MatResponseMode {
 
 
 const char *__MatResponseModeToString(MatResponseMode _value);
-
 } // end namespace oofem
 #endif // matesponsemode_h
 

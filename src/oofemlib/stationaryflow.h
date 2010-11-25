@@ -42,14 +42,13 @@
 #define stationaryflow_h
 
 #ifndef __MAKEDEPEND
-#include <stdio.h>
+ #include <stdio.h>
 #endif
 #include "engngm.h"
 #include "sparselinsystemnm.h"
 #include "sparsemtrx.h"
 
 namespace oofem {
-
 class StationaryFlow : public EngngModel
 {
     /*
@@ -74,8 +73,10 @@ protected:
 
 public:
     StationaryFlow(int i, EngngModel *_master = NULL) : EngngModel(i, _master), loadVector(), fluxVector()
-    { conductivityMatrix = NULL;
-      ndomains = 1; }
+    {
+        conductivityMatrix = NULL;
+        ndomains = 1;
+    }
     ~StationaryFlow()
     { delete  conductivityMatrix; }
     // solving
@@ -107,6 +108,5 @@ public:
     int isFlow() { return 1; }
     fMode giveFormulation() { return TL; }
 };
-
 } // end namespace oofem
 #endif // stationaryflow_h

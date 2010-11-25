@@ -42,7 +42,6 @@
 #include "domain.h"
 
 namespace oofem {
-
 /**
  * Class representing a 1d linear isparametric interpolation.
  */
@@ -61,7 +60,7 @@ public:
      * @param cellgeo underlying cell geometry
      * @param time time
      */
-    virtual void evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry& cellgeo, double time);
+    virtual void evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time);
     /**
      * Evaluates the matrix of derivatives of interpolation functions (shape functions) at given point.
      * These derivatives are in global coordinate system (where the nodal coordinates are defined)
@@ -70,7 +69,7 @@ public:
      * @param cellgeo underlying cell geometry
      * @param time time
      */
-    virtual void evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry& cellgeo, double time);
+    virtual void evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time);
     /**
      * Evaluates global coordinates from given local ones
      * These derivatives are in global coordinate system (where the nodal coordinates are defined)
@@ -79,7 +78,7 @@ public:
      * @param cellgeo underlying cell geometry
      * @param time time
      */
-    virtual void local2global(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry& cellgeo, double time);
+    virtual void local2global(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time);
     /**
      * Evaluates local coordinates from given global ones. Returns nonzero if local coordinates are interpolating,
      * zero if extrapolating (nonzero is returned if point is within the element geometry, zero otherwise).
@@ -90,18 +89,15 @@ public:
      * @param cellgeo underlying cell geometry
      * @return nonzero is returned if point is within the element geometry, zero otherwise
      */
-    virtual int  global2local(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry& cellgeo, double time);
+    virtual int  global2local(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time);
     /**
      * Evaluates the jacobian of transformation between local and global coordinates.
      */
-    virtual double giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry& cellgeo, double time);
+    virtual double giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time);
 
 protected:
-    double computeLength(const FEICellGeometry& cellgeo);
+    double computeLength(const FEICellGeometry &cellgeo);
 };
-
-
-
 } // end namespace oofem
 #endif // fei1dlin_h
 

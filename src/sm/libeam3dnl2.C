@@ -55,11 +55,10 @@
 #include "util.h"
 
 #ifdef __OOFEG
-#include "oofeggraphiccontext.h"
+ #include "oofeggraphiccontext.h"
 #endif
 
 namespace oofem {
-
 LIBeam3dNL2 :: LIBeam3dNL2(int n, Domain *aDomain) : NLStructuralElement(n, aDomain), q(4), tempQ(4) //, kappa (3)
     // Constructor.
 {
@@ -212,10 +211,10 @@ LIBeam3dNL2 :: computeQuaternionFromRotMtrx(FloatArray &answer, FloatMatrix &R) 
         if ( ii == 1 ) {
             jj = 2;
             kk = 3;
-        } else if ( ii == 2 )                              {
+        } else if ( ii == 2 ) {
             jj = 3;
             kk = 1;
-        } else                                                                  {
+        } else {
             jj = 1;
             kk = 2;
         }
@@ -450,12 +449,12 @@ void
 LIBeam3dNL2 :: computeGaussPoints()
 // Sets up the array of Gauss Points of the receiver.
 {
-  if (!integrationRulesArray) {
-    numberOfIntegrationRules = 1;
-    integrationRulesArray = new IntegrationRule * [ 1 ];
-    integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 2);
-    integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Line, 1, _3dBeam);
-  }
+    if ( !integrationRulesArray ) {
+        numberOfIntegrationRules = 1;
+        integrationRulesArray = new IntegrationRule * [ 1 ];
+        integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 2);
+        integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Line, 1, _3dBeam);
+    }
 }
 
 IRResultType
@@ -518,10 +517,10 @@ LIBeam3dNL2 :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep)
 {
     Material *mat;
     double halfMass;
-    GaussPoint* gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
+    GaussPoint *gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
 
     mat        = this->giveMaterial();
-    halfMass   = mat->give('d',gp) * this->giveCrossSection()->give(CS_Area) * this->giveLength() / 2.;
+    halfMass   = mat->give('d', gp) * this->giveCrossSection()->give(CS_Area) * this->giveLength() / 2.;
     answer.resize(12, 12);
     answer.zero();
     answer.at(1, 1) = answer.at(2, 2) = answer.at(3, 3) = halfMass;
@@ -611,9 +610,9 @@ LIBeam3dNL2 :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lc
     n2  = ( 1. + ksi ) * 0.5;
 
     answer.resize(3);
-    answer.at(1) = n1 * this->giveNode(1)->giveCoordinate(1) + n2 * this->giveNode(2)->giveCoordinate(1);
-    answer.at(2) = n1 * this->giveNode(1)->giveCoordinate(2) + n2 * this->giveNode(2)->giveCoordinate(2);
-    answer.at(3) = n1 * this->giveNode(1)->giveCoordinate(3) + n2 * this->giveNode(2)->giveCoordinate(3);
+    answer.at(1) = n1 * this->giveNode(1)->giveCoordinate(1) + n2 *this->giveNode(2)->giveCoordinate(1);
+    answer.at(2) = n1 * this->giveNode(1)->giveCoordinate(2) + n2 *this->giveNode(2)->giveCoordinate(2);
+    answer.at(3) = n1 * this->giveNode(1)->giveCoordinate(3) + n2 *this->giveNode(2)->giveCoordinate(3);
 
     return 1;
 }
@@ -791,6 +790,7 @@ LIBeam3dNL2 :: computeLoadGToLRotationMtrx(FloatMatrix &answer)
     }
 
     return 1;
+
     ;
 }
 
@@ -1033,7 +1033,9 @@ void LIBeam3dNL2 :: drawDeformedGeometry(oofegGraphicContext &gc, UnknownType ty
     double defScale = gc.getDefScale();
     //  if (!go) { // create new one
     WCRec p [ 2 ]; /* poin */
-    const char *colors[] = {"red", "green", "blue"};
+    const char *colors[] = {
+        "red", "green", "blue"
+    };
 
     EASValsSetLineWidth(OOFEG_DEFORMED_GEOMETRY_WIDTH);
     EASValsSetColor( gc.getDeformedElementColor() );
@@ -1065,7 +1067,7 @@ void LIBeam3dNL2 :: drawDeformedGeometry(oofegGraphicContext &gc, UnknownType ty
         p [ 1 ].y = p [ 0 ].y + coeff *tc.at(2, i);
         p [ 1 ].z = p [ 0 ].z + coeff *tc.at(3, i);
 
-        EASValsSetColor( ColorGetPixelFromString(oofem_tmpstr(colors[i-1]), & succ) );
+        EASValsSetColor( ColorGetPixelFromString(oofem_tmpstr(colors [ i - 1 ]), & succ) );
 
         go = CreateLine3D(p);
         EGWithMaskChangeAttributes(WIDTH_MASK | COLOR_MASK | LAYER_MASK, go);
@@ -1073,6 +1075,4 @@ void LIBeam3dNL2 :: drawDeformedGeometry(oofegGraphicContext &gc, UnknownType ty
     }
 }
 #endif
-
-
 } // end namespace oofem

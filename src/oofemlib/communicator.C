@@ -36,20 +36,19 @@
 #ifdef __PARALLEL_MODE
 
 #ifndef __MAKEDEPEND
-#include <stdarg.h>
+ #include <stdarg.h>
 #endif
 #include "communicator.h"
 #include "intarray.h"
 #include "oofem_limits.h"
 
 #ifdef __USE_MPI
-#ifndef __MAKEDEPEND
-#include "mpi.h"
-#endif
+ #ifndef __MAKEDEPEND
+  #include "mpi.h"
+ #endif
 #endif
 
 namespace oofem {
-
 CommunicatorBuff :: CommunicatorBuff(int s, CommBuffType t)
 {
     int i;
@@ -70,7 +69,7 @@ CommunicatorBuff :: ~CommunicatorBuff()
     int i;
     for ( i = 0; i < size; i++ ) {
         if ( processCommBuffs [ i ] ) {
-            delete ( processCommBuffs [ i ] );
+            delete(processCommBuffs [ i ]);
         }
     }
 
@@ -105,7 +104,7 @@ Communicator :: ~Communicator()
 
     if ( size ) {
         while ( i-- ) {
-            delete ( processComms [ i ] );
+            delete(processComms [ i ]);
         }
 
         delete[]  processComms;
@@ -179,6 +178,5 @@ Communicator :: error(const char *file, int line, const char *format, ...) const
 
     __OOFEM_ERROR3(file, line, "Class: Communicator, Rank: %d\n%s", rank, buffer);
 }
-
 } // end namespace oofem
 #endif

@@ -44,7 +44,6 @@
 #include "layeredcrosssection.h"
 
 namespace oofem {
-
 class Beam2d : public StructuralElement, public LayeredCrossSectionInterface
 {
     /*
@@ -106,7 +105,7 @@ public:
     const char *giveClassName() const { return "Beam2d"; }
     classType            giveClassID() const { return Beam2dClass; }
     IRResultType initializeFrom(InputRecord *ir);
-    Element_Geometry_Type giveGeometryType() const {return EGT_line_1;}
+    Element_Geometry_Type giveGeometryType() const { return EGT_line_1; }
 
 #ifdef __OOFEG
     void          drawRawGeometry(oofegGraphicContext &);
@@ -150,11 +149,10 @@ protected:
                                              MatResponseMode rMode, TimeStep *tStep);
     void          computeGaussPoints();
     integrationDomain  giveIntegrationDomain() { return _Line; }
-    MaterialMode          giveMaterialMode()  {return _2dBeam;}
+    MaterialMode          giveMaterialMode()  { return _2dBeam; }
     // return desired number of integration points for consistent mass matrix
     // computation, if required.
     virtual int  giveNumberOfIPForMassMtrxIntegration() { return 4; }
 };
-
 } // end namespace oofem
 #endif // beam2d_h

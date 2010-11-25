@@ -45,7 +45,6 @@
 #include "dictionr.h"
 
 namespace oofem {
-
 class TimeStep;
 
 /**
@@ -107,8 +106,10 @@ public:
      * @param n load number
      * @param d domain to which new object will belongs.
      */
-    PointLoad(int i, Domain *d) : Load(i, d) { nDofs = 0;
-                                               coordSystemType = PL_GlobalMode; }                 // constructor
+    PointLoad(int i, Domain *d) : Load(i, d) {
+        nDofs = 0;
+        coordSystemType = PL_GlobalMode;
+    }                                                                                             // constructor
 
     /**
      * Computes components values of load at given point - global coordinates (coordinates given).
@@ -166,6 +167,5 @@ public:
 
 protected:
 };
-
 } // end namespace oofem
 #endif // pointload_h

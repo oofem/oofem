@@ -52,7 +52,6 @@
 #include "flotarry.h"
 
 namespace oofem {
-
 class Domain;
 class EngngModel;
 
@@ -140,7 +139,7 @@ protected:
     enum    calm_ControllType { calm_hpc_off = 0, calm_hpc_on, calml_hpc };
     enum    calm_NR_ModeType { calm_modifiedNRM, calm_fullNRM, calm_accelNRM };
 
-    typedef std :: set< DofID > __DofIDSet;
+    typedef std :: set< DofID >__DofIDSet;
 
     //FloatArray     *F;
     int nsmax;
@@ -191,7 +190,7 @@ protected:
 
 
 public:
-    CylindricalALM(int i, Domain * d, EngngModel * m, EquationID ut);
+    CylindricalALM(int i, Domain *d, EngngModel *m, EquationID ut);
     // constructor
     ~CylindricalALM();              // destructor
 
@@ -275,7 +274,6 @@ protected:
                        double &DeltaLambda, double &DeltaLambdam1, double &deltaLambda,
                        double &Lambda, double &ReachedLambda, double RR, double &drProduct, TimeStep *tNow);
 };
-
 } // end namespace oofem
 #endif // calmls_h
 

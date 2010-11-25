@@ -15,12 +15,11 @@
 #include "node.h"
 
 namespace oofem {
-
 /** abstract representation of a part of element after subdivision  */
 class Patch : public BasicGeometry
 {
- public:
-  enum PatchType {PT_Unknown, PT_TrianglePatch};
+public:
+    enum PatchType { PT_Unknown, PT_TrianglePatch };
 protected:
     /// parental element
     Element *parent;
@@ -38,7 +37,7 @@ public:
     /// returns reference to parent element
     Element *giveParent() { return this->parent; }
     /// Returns patch type id of receiver
-    virtual PatchType givePatchType () {return PT_Unknown;}
+    virtual PatchType givePatchType() { return PT_Unknown; }
     /**
      * Stores receiver state to output stream.
      * @exception throws an ContextIOERR exception if error encountered
@@ -61,7 +60,7 @@ public:
 class TrianglePatch : public Patch
 {
 public:
-    TrianglePatch(Element *parent) : Patch (parent) {}
+    TrianglePatch(Element *parent) : Patch(parent) {}
     TrianglePatch(Element *parent, int material) : Patch(parent, material) { }
     TrianglePatch(Element *parent, AList< FloatArray > *vertices) : Patch(parent, vertices) { }
     ~TrianglePatch() { }
@@ -69,12 +68,11 @@ public:
     static FEI2dTrLin interpolation;
     void convertGPIntoParental(GaussPoint *gp);
     /// Returns patch type id of receiver
-    PatchType givePatchType () {return PT_TrianglePatch;}
+    PatchType givePatchType() { return PT_TrianglePatch; }
 #ifdef __OOFEG
     void          draw(oofegGraphicContext &gc);
     void  drawWD(oofegGraphicContext &gc, FloatArray &vd);
 #endif
 };
-
 } // end namespace oofem
 #endif

@@ -52,17 +52,16 @@
 
 #include "materialinterface.h"
 #ifndef __MAKEDEPEND
-#include <math.h>
-#include <stdio.h>
+ #include <math.h>
+ #include <stdio.h>
 #endif
 
 #ifdef __OOFEG
-#include "oofeggraphiccontext.h"
-#include "conTable.h"
+ #include "oofeggraphiccontext.h"
+ #include "conTable.h"
 #endif
 
 namespace oofem {
-
 FEI3dTrLin PY1_3D_SUPG :: interpolation;
 
 PY1_3D_SUPG :: PY1_3D_SUPG(int n, Domain *aDomain) :
@@ -81,21 +80,20 @@ int
 
 PY1_3D_SUPG :: giveTermIntergationRuleIndex(CharType termType)
 {
+    if ( ( termType == AccelerationTerm_MB ) || ( termType == AdvectionTerm_MB ) || ( termType == AdvectionDerivativeTerm_MB ) ||
+        ( termType == DiffusionTerm_MB ) || ( termType == DiffusionDerivativeTerm_MB ) || ( termType == PressureTerm_MB ) ||
+        ( termType == AdvectionTerm_MC ) || ( termType == AdvectionDerivativeTerm_MC ) || ( termType == DiffusionDerivativeTerm_MC ) ||
+        ( termType == BCRhsTerm_MC ) ) {
+        return 1;
+    } else if ( ( termType == LSICStabilizationTerm_MB ) || ( termType == LinearAdvectionTerm_MC ) ||
+               ( termType == DiffusionTerm_MC ) || ( termType == AccelerationTerm_MC ) || ( termType == PressureTerm_MC ) ||
+               ( termType == BCRhsTerm_MB ) ) {
+        return 0;
+    } else {
+        _error("giveNumeberOfIntergationRule: Unknown approximation type encountered");
+    }
 
-  if (( termType == AccelerationTerm_MB ) || ( termType == AdvectionTerm_MB ) || ( termType == AdvectionDerivativeTerm_MB ) || 
-      ( termType == DiffusionTerm_MB ) || ( termType == DiffusionDerivativeTerm_MB ) || ( termType == PressureTerm_MB ) || 
-      ( termType == AdvectionTerm_MC ) || ( termType == AdvectionDerivativeTerm_MC ) || ( termType == DiffusionDerivativeTerm_MC ) || 
-      ( termType == BCRhsTerm_MC )) {
-    return 1;
-  } else if (( termType == LSICStabilizationTerm_MB ) || ( termType == LinearAdvectionTerm_MC ) || 
-	     ( termType == DiffusionTerm_MC ) || ( termType == AccelerationTerm_MC ) || ( termType == PressureTerm_MC ) || 
-	     ( termType == BCRhsTerm_MB ))  {
     return 0;
-  } else                                                         {
-    _error("giveNumeberOfIntergationRule: Unknown approximation type encountered");
-  }
-  
-  return 0;  
 }
 
 
@@ -106,9 +104,9 @@ PY1_3D_SUPG :: computeNumberOfDofs(EquationID ut)
 {
     if ( ut == EID_MomentumBalance ) {
         return 12;
-    } else if ( ut == EID_ConservationEquation )  {
+    } else if ( ut == EID_ConservationEquation ) {
         return 4;
-    } else                                                         {
+    } else {
         _error("computeNumberOfDofs: Unknown equation id encountered");
     }
 
@@ -164,15 +162,15 @@ void
 PY1_3D_SUPG :: computeGaussPoints()
 // Sets up the array containing the integration points of the receiver.
 {
-  if (!integrationRulesArray) {
-    numberOfIntegrationRules = 2;
-    integrationRulesArray = new IntegrationRule * [ 2 ];
-    integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3);
-    integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Tetrahedra, 1, _3dFlow);
+    if ( !integrationRulesArray ) {
+        numberOfIntegrationRules = 2;
+        integrationRulesArray = new IntegrationRule * [ 2 ];
+        integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3);
+        integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Tetrahedra, 1, _3dFlow);
 
-    integrationRulesArray [ 1 ] = new GaussIntegrationRule(1, this, 1, 3);
-    integrationRulesArray [ 1 ]->setUpIntegrationPoints(_Tetrahedra, 4, _3dFlow);
-  }
+        integrationRulesArray [ 1 ] = new GaussIntegrationRule(1, this, 1, 3);
+        integrationRulesArray [ 1 ]->setUpIntegrationPoints(_Tetrahedra, 4, _3dFlow);
+    }
 }
 
 
@@ -227,52 +225,51 @@ PY1_3D_SUPG :: computeUDotGradUMatrix(FloatMatrix &answer, GaussPoint *gp, TimeS
 }
 
 void
-PY1_3D_SUPG :: computeDivTauMatrix(FloatMatrix &answer, GaussPoint *gp, TimeStep *atTime )
+PY1_3D_SUPG :: computeDivTauMatrix(FloatMatrix &answer, GaussPoint *gp, TimeStep *atTime)
 {
-  answer.resize(3, 12);
-  answer.zero();
-
+    answer.resize(3, 12);
+    answer.zero();
 }
 
 
 void
-PY1_3D_SUPG :: computeGradUMatrix(FloatMatrix &answer, GaussPoint *gp, TimeStep *atTime )
+PY1_3D_SUPG :: computeGradUMatrix(FloatMatrix &answer, GaussPoint *gp, TimeStep *atTime)
 {
-  int i;
-  FloatArray dnx(4), dny(4), dnz(4), u, u1(4), u2(4), u3(4);
-  FloatMatrix dn;
- 
-  answer.resize(3, 3);
-  answer.zero();
-  
-  this->computeVectorOf(EID_MomentumBalance, VM_Total, atTime, u);
-  
-  if ( this->updateRotationMatrix() ) {
-      u.rotatedWith(this->rotationMatrix, 't');
-  }
-  interpolation.evaldNdx(dn, * gp->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0);
-  //interpolation.evaldNdx(dn, * gp->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0);
-  for (i = 1; i <= 4; i++){
-    dnx.at(i) = dn.at(i, 1);
-    dny.at(i) = dn.at(i, 2);
-    dnz.at(i) = dn.at(i, 3);
+    int i;
+    FloatArray dnx(4), dny(4), dnz(4), u, u1(4), u2(4), u3(4);
+    FloatMatrix dn;
 
-    u1.at(i) = u.at(3*i-2);
-    u2.at(i) = u.at(3*i-1);
-    u3.at(i) = u.at(3*i-0);
-  }
-  
- 
-  answer.at(1, 1) =  dotProduct(dnx, u1, 4);
-  answer.at(1, 2) =  dotProduct(dny, u1, 4); 
-  answer.at(1, 3) =  dotProduct(dnz, u1, 4);
-  answer.at(2, 1) =  dotProduct(dnx, u2, 4);
-  answer.at(2, 2) =  dotProduct(dny, u2, 4);
-  answer.at(2, 3) =  dotProduct(dnz, u2, 4);
-  answer.at(3, 1) =  dotProduct(dnx, u3, 4);
-  answer.at(3, 2) =  dotProduct(dny, u3, 4); 
-  answer.at(3, 3) =  dotProduct(dnz, u3, 4);
-  
+    answer.resize(3, 3);
+    answer.zero();
+
+    this->computeVectorOf(EID_MomentumBalance, VM_Total, atTime, u);
+
+    if ( this->updateRotationMatrix() ) {
+        u.rotatedWith(this->rotationMatrix, 't');
+    }
+
+    interpolation.evaldNdx(dn, * gp->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0);
+    //interpolation.evaldNdx(dn, * gp->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0);
+    for ( i = 1; i <= 4; i++ ) {
+        dnx.at(i) = dn.at(i, 1);
+        dny.at(i) = dn.at(i, 2);
+        dnz.at(i) = dn.at(i, 3);
+
+        u1.at(i) = u.at(3 * i - 2);
+        u2.at(i) = u.at(3 * i - 1);
+        u3.at(i) = u.at(3 * i - 0);
+    }
+
+
+    answer.at(1, 1) =  dotProduct(dnx, u1, 4);
+    answer.at(1, 2) =  dotProduct(dny, u1, 4);
+    answer.at(1, 3) =  dotProduct(dnz, u1, 4);
+    answer.at(2, 1) =  dotProduct(dnx, u2, 4);
+    answer.at(2, 2) =  dotProduct(dny, u2, 4);
+    answer.at(2, 3) =  dotProduct(dnz, u2, 4);
+    answer.at(3, 1) =  dotProduct(dnx, u3, 4);
+    answer.at(3, 2) =  dotProduct(dny, u3, 4);
+    answer.at(3, 3) =  dotProduct(dnz, u3, 4);
 }
 
 
@@ -445,7 +442,6 @@ PY1_3D_SUPG :: updateStabilizationCoeffs(TimeStep *atTime)
 
     //this->t_lsic=0.0;
     //this->t_pspg=0.0;
- 
 }
 
 int
@@ -512,8 +508,8 @@ PY1_3D_SUPG :: computeVolumeAround(GaussPoint *aGaussPoint)
 // Returns the portion of the receiver which is attached to aGaussPoint.
 {
     double determinant, weight, volume;
-    determinant = fabs( this->interpolation.giveTransformationJacobian(* aGaussPoint->giveCoordinates(), 
-								       FEIElementGeometryWrapper(this), 0.0) );
+    determinant = fabs( this->interpolation.giveTransformationJacobian(* aGaussPoint->giveCoordinates(),
+                                                                       FEIElementGeometryWrapper(this), 0.0) );
 
 
     weight      = aGaussPoint->giveWeight();
@@ -670,8 +666,11 @@ PY1_3D_SUPG :: LS_PCS_computeVOFFractions(FloatArray &answer, FloatArray &fi)
 
 
                 double vol = LS_PCS_computeVolume();
-		if ( (fabs(__vol)-vol) < 0.0000001) __vol=sgn(__vol)*vol;
-                if ( ( __vol < 0 ) || ( fabs(__vol)/vol > 1.0000001 ) ) {
+                if ( ( fabs(__vol) - vol ) < 0.0000001 ) {
+                    __vol = sgn(__vol) * vol;
+                }
+
+                if ( ( __vol < 0 ) || ( fabs(__vol) / vol > 1.0000001 ) ) {
                     OOFEM_ERROR("TR1_2D_SUPG::LS_PCS_computeVOFFractions: internal consistency error");
                 }
 
@@ -778,7 +777,7 @@ PY1_3D_SUPG :: LS_PCS_computeVOFFractions(FloatArray &answer, FloatArray &fi)
 
 
 #ifdef __OOFEG
-#define TR_LENGHT_REDUCT 0.3333
+ #define TR_LENGHT_REDUCT 0.3333
 
 void PY1_3D_SUPG :: drawRawGeometry(oofegGraphicContext &gc)
 {
@@ -815,5 +814,4 @@ void PY1_3D_SUPG :: drawRawGeometry(oofegGraphicContext &gc)
 }
 
 #endif
-
 } // end namespace oofem

@@ -45,7 +45,6 @@
 #include "matstatus.h"
 
 namespace oofem {
-
 class GaussPoint;
 
 /**
@@ -197,7 +196,7 @@ public:
      * @param gp integration point
      * @return property value
      */
-    virtual double   give(int aProperty, GaussPoint*);
+    virtual double   give(int aProperty, GaussPoint *);
     /**
      * Initializes receiver acording to object description stored in input record.
      * The density of material is read into property dictionary (keyword 'd')
@@ -245,6 +244,5 @@ protected:
 
     void    __debug(GaussPoint *gp, TimeStep *atTime);
 };
-
 } // end namespace oofem
 #endif // binghamfluid2_h

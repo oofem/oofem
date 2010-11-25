@@ -99,6 +99,5 @@ public:
      */
     virtual double     __at(double)            { return this->giveValue(); }
 };
-
 } // end namespace oofem
 #endif // constant_h

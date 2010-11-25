@@ -45,11 +45,10 @@
 #include "structuralelement.h"
 
 namespace oofem {
-
 class LumpedMassElement : public StructuralElement
 {
     /*
-     * This class implements a simple lumped mass element. Its purpose is to introduce 
+     * This class implements a simple lumped mass element. Its purpose is to introduce
      * an additional mass (mass components or rotary inertias) into a node.
      * The mass element is defined by a single node.
      * At present, mass is defined in the nodal coordinate system.
@@ -57,7 +56,7 @@ class LumpedMassElement : public StructuralElement
      */
 
 protected:
-  FloatArray components; ///Mass and moments of inertia corresponding to nodal DOFs
+    FloatArray components; ///Mass and moments of inertia corresponding to nodal DOFs
 
 public:
     LumpedMassElement(int, Domain *);                         // constructor
@@ -66,16 +65,16 @@ public:
     void          computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep);
     void          computeMassMatrix(FloatMatrix &answer, TimeStep *tStep)
     { computeLumpedMassMatrix(answer, tStep); }
-    void          computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep) 
-    { answer.resize(0,0);}
+    void          computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep)
+    { answer.resize(0, 0); }
     void          computeInitialStressMatrix(FloatMatrix &answer, TimeStep *tStep)
-    { answer.resize(0,0);}
+    { answer.resize(0, 0); }
     void                  computeNonForceLoadVector(FloatArray &answer, TimeStep *, ValueModeType mode)
-    { answer.resize(0);}
-    void computeForceLoadVector(FloatArray & answer, TimeStep *, ValueModeType)
-    { answer.resize(0);}
+    { answer.resize(0); }
+    void computeForceLoadVector(FloatArray &answer, TimeStep *, ValueModeType)
+    { answer.resize(0); }
     void giveInternalForcesVector(FloatArray &answer, TimeStep *, int useUpdatedGpRecord = 0)
-    { answer.resize(0);}
+    { answer.resize(0); }
 
     int            computeNumberOfDofs(EquationID ut);
     void giveDofManDofIDMask(int inode, EquationID, IntArray &) const;
@@ -96,12 +95,11 @@ public:
     IRResultType initializeFrom(InputRecord *ir);
     Element_Geometry_Type giveGeometryType() const { return EGT_point; }
 
- protected:
+protected:
     void  computeBmatrixAt(GaussPoint *, FloatMatrix &answer,
-			   int lowerIndx = 1, int upperIndx = ALL_STRAINS)
+                           int lowerIndx = 1, int upperIndx = ALL_STRAINS)
     {}
     void  computeNmatrixAt(GaussPoint *, FloatMatrix &) {}
 };
-
 } // end namespace oofem
 #endif // lumpedmasselement_h

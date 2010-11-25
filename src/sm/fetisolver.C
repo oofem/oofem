@@ -35,7 +35,7 @@
 #ifdef __PARALLEL_MODE
 
 #ifndef __MAKEDEPEND
-#include <stdio.h>
+ #include <stdio.h>
 #endif
 #include "mathfem.h"
 #include "fetisolver.h"
@@ -47,7 +47,6 @@
 #include "feticommunicator.h"
 
 namespace oofem {
-
 FETISolver :: FETISolver(int i, Domain *d, EngngModel *m) : SparseLinearSystemNM(i, d, m), pcbuff(CBT_static), processCommunicator(m, & pcbuff, 0)
 {
     err    = 1.e-6;
@@ -82,7 +81,7 @@ FETISolver :: estimateMaxPackSize(IntArray &map, CommunicationBuffer &buff, int 
         }
     } else {
         for ( i = 1; i <= mapSize; i++ ) {
-	  domain->giveDofManager( map.at(i) )->giveCompleteLocationArray(locationArray,dn);
+            domain->giveDofManager( map.at(i) )->giveCompleteLocationArray(locationArray, dn);
             ndofs = locationArray.giveSize();
             for ( j = 1; j <= ndofs; j++ ) {
                 if ( ( eqNum = locationArray.at(j) ) ) {
@@ -175,7 +174,7 @@ void FETISolver :: setUpCommunicationMaps()
                 // remember comm map entry
                 commMap.at(indx++) = i;
                 // determine number of DOFs
-                domain->giveDofManager(i)->giveCompleteLocationArray(locNum,dn);
+                domain->giveDofManager(i)->giveCompleteLocationArray(locNum, dn);
                 neq = 0;
                 for ( j = 1; j <= locNum.giveSize(); j++ ) {
                     if ( locNum.at(j) ) {
@@ -266,7 +265,7 @@ FETISolver :: packRBM(ProcessCommunicator &processComm)
 
     size = toSendMap->giveSize();
     for ( i = 1; i <= size; i++ ) {
-      domain->giveDofManager( toSendMap->at(i) )->giveCompleteLocationArray(locationArray,dn);
+        domain->giveDofManager( toSendMap->at(i) )->giveCompleteLocationArray(locationArray, dn);
         ndofs = locationArray.giveSize();
         for ( j = 1; j <= ndofs; j++ ) {
             if ( ( eqNum = locationArray.at(j) ) ) {
@@ -309,7 +308,7 @@ FETISolver :: masterUnpackRBM(ProcessCommunicator &processComm)
                     // unpack contribution
                     result &= recv_buff->unpackDouble(value);
                     if ( masterCommunicator->giveDofManager(to)->giveReferencePratition() == receivedRank ) { // contribution from reference partition localizes to all
-                                                                                                             // corresponding DOFs in boundary node
+                                                                                                              // corresponding DOFs in boundary node
 
                         // localize to corresponding places
                         nshared = masterCommunicator->giveDofManager(to)->giveNumberOfSharedPartitions();
@@ -352,7 +351,7 @@ FETISolver :: masterMapRBM()
             // itself any data. Note, however, that send and receive maps are same.
             from = masterCommMap.at(i);
 
-            domain->giveDofManager(from)->giveCompleteLocationArray(locationArray,dn);
+            domain->giveDofManager(from)->giveCompleteLocationArray(locationArray, dn);
             locpos = 1;
             //
             //   ndofs = locationArray.giveSize(); // including supported
@@ -373,7 +372,7 @@ FETISolver :: masterMapRBM()
 
                 value = rbm.at(locationArray.at(locpos), irbm);
                 if ( masterCommunicator->giveDofManager(to)->giveReferencePratition() == receivedRank ) { // contribution from reference partition localizes to all
-                                                                                                         // corresponding DOFs in boundary node
+                                                                                                          // corresponding DOFs in boundary node
 
                     // localize to corresponding places
                     nshared = masterCommunicator->giveDofManager(to)->giveNumberOfSharedPartitions();
@@ -522,7 +521,7 @@ FETISolver :: unpackSolution(ProcessCommunicator &processComm)
     // if (receivedRank != 0) {
     for ( i = 1; i <= size; i++ ) {
         to = toRecvMap->at(i);
-        domain->giveDofManager(to)->giveCompleteLocationArray(locationArray,dn);
+        domain->giveDofManager(to)->giveCompleteLocationArray(locationArray, dn);
         ndofs = locationArray.giveSize();
         for ( j = 1; j <= ndofs; j++ ) {
             if ( ( eqNum = locationArray.at(j) ) ) {
@@ -557,7 +556,7 @@ FETISolver :: masterMapSolution()
         // itself any data. Note, however, that send and receive maps are same.
         to = masterCommMap.at(i);
 
-        domain->giveDofManager(to)->giveCompleteLocationArray(locationArray,dn);
+        domain->giveDofManager(to)->giveCompleteLocationArray(locationArray, dn);
         locpos = 1;
         //
         // loop over all dofs
@@ -573,7 +572,7 @@ FETISolver :: masterMapSolution()
 
             value = 0.0;
             if ( masterCommunicator->giveDofManager(from)->giveReferencePratition() == receivedRank ) { // contribution from reference partition localizes to all
-                                                                                                       // corresponding DOFs in boundary node
+                                                                                                        // corresponding DOFs in boundary node
 
                 // localize to corresponding places
                 nshared = masterCommunicator->giveDofManager(from)->giveNumberOfSharedPartitions();
@@ -617,7 +616,7 @@ FETISolver :: packResiduals(ProcessCommunicator &processComm)
 
     size = toSendMap->giveSize();
     for ( i = 1; i <= size; i++ ) {
-      domain->giveDofManager( toSendMap->at(i) )->giveCompleteLocationArray(locationArray,dn);
+        domain->giveDofManager( toSendMap->at(i) )->giveCompleteLocationArray(locationArray, dn);
         ndofs = locationArray.giveSize();
         for ( j = 1; j <= ndofs; j++ ) {
             if ( ( eqNum = locationArray.at(j) ) ) {
@@ -655,7 +654,7 @@ FETISolver :: unpackResiduals(ProcessCommunicator &processComm)
                 // unpack contribution
                 result &= recv_buff->unpackDouble(value);
                 if ( masterCommunicator->giveDofManager(to)->giveReferencePratition() == receivedRank ) { // contribution from reference partition localizes to all
-                                                                                                         // corresponding DOFs in boundary node
+                                                                                                          // corresponding DOFs in boundary node
 
                     // localize to corresponding places
                     nshared = masterCommunicator->giveDofManager(to)->giveNumberOfSharedPartitions();
@@ -694,7 +693,7 @@ FETISolver :: masterMapResiduals()
         // itself any data. Note, however, that send and receive maps are same.
         from = masterCommMap.at(i);
 
-        domain->giveDofManager(from)->giveCompleteLocationArray(locationArray,dn);
+        domain->giveDofManager(from)->giveCompleteLocationArray(locationArray, dn);
         locpos = 1;
         //
         //   ndofs = locationArray.giveSize(); // including supported
@@ -715,7 +714,7 @@ FETISolver :: masterMapResiduals()
 
             value = pp.at( locationArray.at(locpos) );
             if ( masterCommunicator->giveDofManager(to)->giveReferencePratition() == receivedRank ) { // contribution from reference partition localizes to all
-                                                                                                     // corresponding DOFs in boundary node
+                                                                                                      // corresponding DOFs in boundary node
 
                 // localize to corresponding places
                 nshared = masterCommunicator->giveDofManager(to)->giveNumberOfSharedPartitions();
@@ -808,7 +807,7 @@ FETISolver :: unpackDirectionVector(ProcessCommunicator &processComm)
     size = toRecvMap->giveSize();
     // if (receivedRank != 0) {
     for ( i = 1; i <= size; i++ ) {
-      domain->giveDofManager( toRecvMap->at(i) )->giveCompleteLocationArray(locationArray,dn);
+        domain->giveDofManager( toRecvMap->at(i) )->giveCompleteLocationArray(locationArray, dn);
         ndofs = locationArray.giveSize();
         for ( j = 1; j <= ndofs; j++ ) {
             if ( ( eqNum = locationArray.at(j) ) ) {
@@ -837,7 +836,7 @@ FETISolver :: masterMapDirectionVector()
         // itself any data. Note, however, that send and receive maps are same.
         to = masterCommMap.at(i);
 
-        domain->giveDofManager(to)->giveCompleteLocationArray(locationArray,dn);
+        domain->giveDofManager(to)->giveCompleteLocationArray(locationArray, dn);
         locpos = 1;
         //
         // loop over all dofs
@@ -853,7 +852,7 @@ FETISolver :: masterMapDirectionVector()
 
             value = 0.0;
             if ( masterCommunicator->giveDofManager(from)->giveReferencePratition() == receivedRank ) { // contribution from reference partition localizes to all
-                                                                                                       // corresponding DOFs in boundary node
+                                                                                                        // corresponding DOFs in boundary node
 
                 // localize to corresponding places
                 nshared = masterCommunicator->giveDofManager(from)->giveNumberOfSharedPartitions();
@@ -896,7 +895,7 @@ FETISolver :: packPPVector(ProcessCommunicator &processComm)
 
     size = toSendMap->giveSize();
     for ( i = 1; i <= size; i++ ) {
-      domain->giveDofManager( toSendMap->at(i) )->giveCompleteLocationArray(locationArray,dn);
+        domain->giveDofManager( toSendMap->at(i) )->giveCompleteLocationArray(locationArray, dn);
         ndofs = locationArray.giveSize();
         for ( j = 1; j <= ndofs; j++ ) {
             if ( ( eqNum = locationArray.at(j) ) ) {
@@ -934,7 +933,7 @@ FETISolver :: unpackPPVector(ProcessCommunicator &processComm)
                 // unpack contribution
                 result &= recv_buff->unpackDouble(value);
                 if ( masterCommunicator->giveDofManager(to)->giveReferencePratition() == receivedRank ) { // contribution from reference partition localizes to all
-                                                                                                         // corresponding DOFs in boundary node
+                                                                                                          // corresponding DOFs in boundary node
 
                     // localize to corresponding places
                     nshared = masterCommunicator->giveDofManager(to)->giveNumberOfSharedPartitions();
@@ -973,7 +972,7 @@ FETISolver :: masterMapPPVector()
         // itself any data. Note, however, that send and receive maps are same.
         from = masterCommMap.at(i);
 
-        domain->giveDofManager(from)->giveCompleteLocationArray(locationArray,dn);
+        domain->giveDofManager(from)->giveCompleteLocationArray(locationArray, dn);
         locpos = 1;
         //
         //   ndofs = locationArray.giveSize(); // including supported
@@ -994,7 +993,7 @@ FETISolver :: masterMapPPVector()
 
             value = pp.at( locationArray.at(locpos) );
             if ( masterCommunicator->giveDofManager(to)->giveReferencePratition() == receivedRank ) { // contribution from reference partition localizes to all
-                                                                                                     // corresponding DOFs in boundary node
+                                                                                                      // corresponding DOFs in boundary node
 
                 // localize to corresponding places
                 nshared = masterCommunicator->giveDofManager(to)->giveNumberOfSharedPartitions();
@@ -1697,6 +1696,5 @@ FETISolver :: solve(SparseMtrx *A, FloatArray *partitionLoad, FloatArray *partit
 
     return NM_Success;
 }
-
 } // end namespace oofem
 #endif

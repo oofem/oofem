@@ -38,8 +38,8 @@
 
 
 #ifndef __MAKEDEPEND
-#include <stdio.h>
-#include <string.h>
+ #include <stdio.h>
+ #include <string.h>
 #endif
 #include "inputrecord.h"
 #include "intarray.h"
@@ -51,7 +51,6 @@
 #include "tokenizer.h"
 
 namespace oofem {
-
 #define IR_MAX_ERROR_LENGTH 100
 
 /** Tokenizer is used to parse records.
@@ -82,7 +81,7 @@ public:
     /// Destructor
     ~OOFEMTXTInputRecord() { }
     /// Assingnment operator
-    OOFEMTXTInputRecord &operator=(const OOFEMTXTInputRecord &);
+    OOFEMTXTInputRecord & operator=(const OOFEMTXTInputRecord &);
 
     /** Creates a newly allocated copy of the receiver */
     virtual InputRecord *GiveCopy() { return new OOFEMTXTInputRecord(* this); }
@@ -192,6 +191,5 @@ protected:
      */
     int    readMatrix(const char *helpSource, int r, int c, FloatMatrix &ans);
 };
-
 } // end namespace oofem
 #endif // oofemtxtinputrecord_h

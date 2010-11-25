@@ -41,7 +41,6 @@
 #include "timestep.h"
 
 namespace oofem {
-
 void
 PointLoad :: computeValueAt(FloatArray &answer, TimeStep *tStep, FloatArray &coords, ValueModeType mode)  {
     double factor;
@@ -103,5 +102,4 @@ PointLoad :: giveInputRecordString(std :: string &str, bool keyword)
 
     return 1;
 }
-
 } // end namespace oofem

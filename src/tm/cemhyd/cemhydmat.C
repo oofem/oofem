@@ -177,9 +177,15 @@ double CemhydMat :: giveConcreteConductivity(GaussPoint *gp) {
         OOFEM_ERROR2("Unknown conductivityType %d\n", conductivityType);
     }
 
-    if ( !this->nowarnings.at(2) && (conduct < 0.3 || conduct > 5) ) {
+
+    //Parallel Voigt model, 20 W/m/K for steel
+    conduct = conduct * ( 1. - this->reinforcementDegree ) + 20. * this->reinforcementDegree;
+
+    if ( !this->nowarnings.at(2) && ( conduct < 0.3 || conduct > 5 ) ) {
         OOFEM_WARNING2("Weird concrete thermal conductivity %f W/m/K\n", conduct);
     }
+
+    conduct *= this->scaling.at(2);
 
     return conduct;
 }
@@ -202,9 +208,14 @@ double CemhydMat :: giveConcreteCapacity(GaussPoint *gp) {
         OOFEM_ERROR2("Unknown capacityType %d\n", capacityType);
     }
 
-    if ( !this->nowarnings.at(3) && (capacityConcrete < 500 || capacityConcrete > 2000) ) {
+    //Parallel Voigt model, 500 J/kg/K for steel
+    capacityConcrete = capacityConcrete * ( 1. - this->reinforcementDegree ) + 500. * this->reinforcementDegree;
+
+    if ( !this->nowarnings.at(3) && ( capacityConcrete < 500 || capacityConcrete > 2000 ) ) {
         OOFEM_WARNING2("Weird concrete heat capacity %f J/kg/K\n", capacityConcrete);
     }
+
+    capacityConcrete *= this->scaling.at(3);
 
     return capacityConcrete;
 }
@@ -224,9 +235,14 @@ double CemhydMat :: giveConcreteDensity(GaussPoint *gp) {
         OOFEM_ERROR2("Unknown densityType %d\n", densityType);
     }
 
-    if ( !this->nowarnings.at(1) && (concreteBulkDensity < 1000 || concreteBulkDensity > 4000) ) {
+    //Parallel Voigt model, 7850 kg/m3 for steel
+    concreteBulkDensity = concreteBulkDensity * ( 1. - this->reinforcementDegree ) + 7850. * this->reinforcementDegree;
+
+    if ( !this->nowarnings.at(1) && ( concreteBulkDensity < 1000 || concreteBulkDensity > 4000 ) ) {
         OOFEM_WARNING2("Weird concrete density %f kg/m3\n", concreteBulkDensity);
     }
+
+    concreteBulkDensity *= this->scaling.at(1);
 
     return concreteBulkDensity;
 }
@@ -452,6 +468,7 @@ IRResultType CemhydMat :: initializeFrom(InputRecord *ir)
     const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                   // Required by IR_GIVE_FIELD macro
     castingTime = 0.;
+    int i;
 
     this->IsotropicHeatTransferMaterial :: initializeFrom(ir); //read d,k,c
     conductivityType = 0;
@@ -460,15 +477,28 @@ IRResultType CemhydMat :: initializeFrom(InputRecord *ir)
     eachGP = 0;
     nowarnings.resize(4);
     nowarnings.zero();
+    scaling.resize(3);
+    for ( i = 1; i <= scaling.giveSize(); i++ ) {
+        scaling.at(i) = 1.;
+    }
+
+    reinforcementDegree = 0.;
     //if you want computation of material properties directly from CEMHYD3D, sum up 1 for density, 2 for conductivity, 4 for capacity
     IR_GIVE_OPTIONAL_FIELD(ir, conductivityType, IFT_HydratingIsoHeatMaterial_hydration, "conductivitytype"); // Macro
     IR_GIVE_OPTIONAL_FIELD(ir, capacityType, IFT_HydratingIsoHeatMaterial_hydration, "capacitytype"); // Macro
     IR_GIVE_OPTIONAL_FIELD(ir, densityType, IFT_HydratingIsoHeatMaterial_hydration, "densitytype"); // Macro
     IR_GIVE_OPTIONAL_FIELD(ir, eachGP, IFT_HydratingIsoHeatMaterial_hydration, "eachgp"); // Macro
     IR_GIVE_OPTIONAL_FIELD(ir, nowarnings, IFT_HydratingIsoHeatMaterial_hydration, "nowarnings"); // Macro
-    if(nowarnings.giveSize() != 4){
-        OOFEM_ERROR2("Incorrect size %d of nowarnings", nowarnings.giveSize());
+    if ( nowarnings.giveSize() != 4 ) {
+        OOFEM_ERROR2( "Incorrect size %d of nowarnings", nowarnings.giveSize() );
     }
+
+    IR_GIVE_OPTIONAL_FIELD(ir, scaling, IFT_HydratingIsoHeatMaterial_hydration, "scaling"); // Macro
+    if ( scaling.giveSize() != 3 ) {
+        OOFEM_ERROR2( "Incorrect size %d of scaling", nowarnings.giveSize() );
+    }
+
+    IR_GIVE_OPTIONAL_FIELD(ir, reinforcementDegree, IFT_HydratingIsoHeatMaterial_hydration, "reinforcementdegree"); // Macro
     IR_GIVE_FIELD2(ir, XMLfileName, IFT_CemhydMatInputFileName, "file", MAX_FILENAME_LENGTH);
 
     return IRRT_OK;
@@ -2231,7 +2261,7 @@ void CemhydMatStatus :: measure(void)
 
 
 /* Routine to measure phase fractions as a function of distance from */
-/* aggregate surface						     */
+/* aggregate surface*/
 void CemhydMatStatus :: measagg(void)
 /* Calls: no other routines */
 /* Called by: main program */
@@ -3677,7 +3707,10 @@ void CemhydMatStatus :: distrib3d(void)
         for ( k = 1; k <= SYSIZE; k++ ) {
             for ( j = 1; j <= SYSIZE; j++ ) {
                 for ( i = 1; i <= SYSIZE; i++ ) {
-  		    if (fscanf(infile, "%d", & valin) != 1) OOFEM_ERROR ("CemhydMatStatus :: distrib3d reading error");
+                    if ( fscanf(infile, "%d", & valin) != 1 ) {
+                        OOFEM_ERROR("CemhydMatStatus :: distrib3d reading error");
+                    }
+
                     mask [ i ] [ j ] [ k ] = valin;
                     curvature [ i ] [ j ] [ k ] = 0;
                 }
@@ -4199,23 +4232,59 @@ void CemhydMatStatus :: init(void)
         }
 
 
-        if (fscanf(slagfile, "%lf", & slagin) != 1) OOFEM_ERROR ("CemhydMatStatus::init: slagfile reading error");
-        if (fscanf(slagfile, "%lf", & slagin) != 1) OOFEM_ERROR ("CemhydMatStatus::init: slagfile reading error");
-        if (fscanf(slagfile, "%lf", & slagin) != 1) OOFEM_ERROR ("CemhydMatStatus::init: slagfile reading error");
+        if ( fscanf(slagfile, "%lf", & slagin) != 1 ) {
+            OOFEM_ERROR("CemhydMatStatus::init: slagfile reading error");
+        }
+
+        if ( fscanf(slagfile, "%lf", & slagin) != 1 ) {
+            OOFEM_ERROR("CemhydMatStatus::init: slagfile reading error");
+        }
+
+        if ( fscanf(slagfile, "%lf", & slagin) != 1 ) {
+            OOFEM_ERROR("CemhydMatStatus::init: slagfile reading error");
+        }
+
         specgrav [ SLAG ] = slagin;
-        if (fscanf(slagfile, "%lf", & slagin) != 1) OOFEM_ERROR ("CemhydMatStatus::init: slagfile reading error");
+        if ( fscanf(slagfile, "%lf", & slagin) != 1 ) {
+            OOFEM_ERROR("CemhydMatStatus::init: slagfile reading error");
+        }
+
         specgrav [ SLAGCSH ] = slagin;
-        if (fscanf(slagfile, "%lf", & slagin) != 1) OOFEM_ERROR ("CemhydMatStatus::init: slagfile reading error");
+        if ( fscanf(slagfile, "%lf", & slagin) != 1 ) {
+            OOFEM_ERROR("CemhydMatStatus::init: slagfile reading error");
+        }
+
         molarv [ SLAG ] = slagin;
-        if (fscanf(slagfile, "%lf", & slagin) != 1) OOFEM_ERROR ("CemhydMatStatus::init: slagfile reading error");
+        if ( fscanf(slagfile, "%lf", & slagin) != 1 ) {
+            OOFEM_ERROR("CemhydMatStatus::init: slagfile reading error");
+        }
+
         molarv [ SLAGCSH ] = slagin;
-        if (fscanf(slagfile, "%lf", & slagcasi) != 1) OOFEM_ERROR ("CemhydMatStatus::init: slagfile reading error");
-        if (fscanf(slagfile, "%lf", & slaghydcasi) != 1) OOFEM_ERROR ("CemhydMatStatus::init: slagfile reading error");
-        if (fscanf(slagfile, "%lf", & siperslag) != 1) OOFEM_ERROR ("CemhydMatStatus::init: slagfile reading error");
-        if (fscanf(slagfile, "%lf", & slagin) != 1) OOFEM_ERROR ("CemhydMatStatus::init: slagfile reading error");
+        if ( fscanf(slagfile, "%lf", & slagcasi) != 1 ) {
+            OOFEM_ERROR("CemhydMatStatus::init: slagfile reading error");
+        }
+
+        if ( fscanf(slagfile, "%lf", & slaghydcasi) != 1 ) {
+            OOFEM_ERROR("CemhydMatStatus::init: slagfile reading error");
+        }
+
+        if ( fscanf(slagfile, "%lf", & siperslag) != 1 ) {
+            OOFEM_ERROR("CemhydMatStatus::init: slagfile reading error");
+        }
+
+        if ( fscanf(slagfile, "%lf", & slagin) != 1 ) {
+            OOFEM_ERROR("CemhydMatStatus::init: slagfile reading error");
+        }
+
         waterc [ SLAGCSH ] = slagin * siperslag;
-        if (fscanf(slagfile, "%lf", & slagc3a) != 1) OOFEM_ERROR ("CemhydMatStatus::init: slagfile reading error");
-        if (fscanf(slagfile, "%lf", & slagreact) != 1) OOFEM_ERROR ("CemhydMatStatus::init: slagfile reading error");
+        if ( fscanf(slagfile, "%lf", & slagc3a) != 1 ) {
+            OOFEM_ERROR("CemhydMatStatus::init: slagfile reading error");
+        }
+
+        if ( fscanf(slagfile, "%lf", & slagreact) != 1 ) {
+            OOFEM_ERROR("CemhydMatStatus::init: slagfile reading error");
+        }
+
         waterc [ SLAG ] = 0.0;
         heatf [ SLAG ] = 0.0;
         heatf [ SLAGCSH ] = 0.0;
@@ -4715,9 +4784,9 @@ void CemhydMatStatus :: extslagcsh(int xpres, int ypres, int zpres) {
     int mstest = 0, mstest2 = 0;
 
     /* first try 6 neighboring locations until      */
-    /*	a) successful				*/
-    /*	b) all 6 sites are tried or             */
-    /*	c) 100 tries are made           */
+    /*    a) successful                */
+    /*    b) all 6 sites are tried or             */
+    /*    c) 100 tries are made           */
     /* try to grow slag C-S-H as plates */
     fchr = 0;
     sump = 1;
@@ -4850,7 +4919,7 @@ void CemhydMatStatus :: dissolve(int cycle) {
         cemmass = ( specgrav [ C3S ] * ( float ) count [ C3S ] + specgrav [ C2S ] *
                     ( float ) count [ C2S ] + specgrav [ C3A ] * ( float ) count [ C3A ] +
                     specgrav [ C4AF ] * ( float ) count [ C4AF ] );
-        /*	+specgrav[GYPSUM]*
+        /*    +specgrav[GYPSUM]*
          * (float)count[GYPSUM]+specgrav[ANHYDRITE]*(float)
          * count[ANHYDRITE]+specgrav[HEMIHYD]*(float)count[HEMIHYD]); */
         cemmasswgyp = ( specgrav [ C3S ] * ( float ) count [ C3S ] + specgrav [ C2S ] *
@@ -4915,7 +4984,7 @@ void CemhydMatStatus :: dissolve(int cycle) {
 
         /* Conversion factor to kJ/kg for heat produced */
         if ( cemmass != 0.0 ) {
-            heatfill = ( float ) ( count [ INERT ] + count [ SLAG ] + count [ POZZ ] + count [ CACL2 ] + count [ ASG ] + count [ CAS2 ] ) / cemmass;    //units pixels^3/g, inverse to the density
+            heatfill = ( float ) ( count [ INERT ] + count [ SLAG ] + count [ POZZ ] + count [ CACL2 ] + count [ ASG ] + count [ CAS2 ] ) / cemmass;       //units pixels^3/g, inverse to the density
         } else {
             heatfill = 0.0;
         }
@@ -4924,7 +4993,7 @@ void CemhydMatStatus :: dissolve(int cycle) {
             heat_cf = 1000. / SYSIZE_POW3 * ( 0.3125 + w_to_c + heatfill ); //heat conversion factor,1/ro_c=0.3125, fixed
         } else {
             /* Need volume per 1 gram of silica fume */
-            heat_cf = 1000. / SYSIZE_POW3 * ( ( 1. / specgrav [ POZZ ] ) + ( float ) ( count [ POROSITY ] + count [ CH ] + count [ INERT ] ) / ( specgrav [ POZZ ] * ( float ) count [ POZZ ] ) );    //fixed
+            heat_cf = 1000. / SYSIZE_POW3 * ( ( 1. / specgrav [ POZZ ] ) + ( float ) ( count [ POROSITY ] + count [ CH ] + count [ INERT ] ) / ( specgrav [ POZZ ] * ( float ) count [ POZZ ] ) );       //fixed
         }
 
         mass_fill_pozz = ( 1. - mass_agg ) * ( float ) ( count [ POZZ ] * specgrav [ POZZ ] ) / tot_mass;
@@ -5325,8 +5394,8 @@ void CemhydMatStatus :: dissolve(int cycle) {
 
         /* Adjust C3AH6 solubility based on potential gypsum which will dissolve */
         /*gypready and maxsulfate is size dependent */
-        if ( maxsulfate < ( int ) ( ( float ) gypready * disprob [ GYPSUM ] * ( float ) count [ POROSITY ] / SYSIZE_POW3 ) ) {  //fixed
-            maxsulfate = ( int ) ( ( float ) gypready * disprob [ GYPSUM ] * ( float ) count [ POROSITY ] / SYSIZE_POW3 );  //fixed
+        if ( maxsulfate < ( int ) ( ( float ) gypready * disprob [ GYPSUM ] * ( float ) count [ POROSITY ] / SYSIZE_POW3 ) ) {   //fixed
+            maxsulfate = ( int ) ( ( float ) gypready * disprob [ GYPSUM ] * ( float ) count [ POROSITY ] / SYSIZE_POW3 );   //fixed
         }
 
         if ( maxsulfate > 0 ) {
@@ -5514,7 +5583,7 @@ void CemhydMatStatus :: dissolve(int cycle) {
     }
 
     /* Reduce dissolution probabilities based on saturation of system */
-    if ( ( count [ EMPTYP ] > 0 ) && ( ( count [ POROSITY ] + count [ EMPTYP ] ) < 220000. * ( double ) ( SYSIZE_POW3 / 1000000. ) ) ) {    //fixed
+    if ( ( count [ EMPTYP ] > 0 ) && ( ( count [ POROSITY ] + count [ EMPTYP ] ) < 220000. * ( double ) ( SYSIZE_POW3 / 1000000. ) ) ) {       //fixed
         if ( countpore == 0 ) {
             countpore = count [ EMPTYP ];
         }
@@ -5845,7 +5914,7 @@ void CemhydMatStatus :: dissolve(int cycle) {
                                 /* Possibly need even more pozzolanic CSH */
                                 /* Would need a diffusing pozzolanic
                                  * CSH species??? */
-                                /*					if(calcz>0.0){
+                                /*                    if(calcz>0.0){
                                  * plfh3=ran1(seed);
                                  * if(plfh3<=calcz){
                                  * cshrand+=1;
@@ -5998,7 +6067,7 @@ void CemhydMatStatus :: dissolve(int cycle) {
     /* gypsum formation  (1 anhydrite --> 1.423 gypsum) */
     /* Since hemihydrate can now react with C3A, etc., can't */
     /* do expansion here any longer  7/99 */
-    /*	fanhext=1.423*(float)discount[ANHYDRITE]; */
+    /*    fanhext=1.423*(float)discount[ANHYDRITE]; */
     fanhext = ( float ) discount [ ANHYDRITE ];
     nanhext = ( int ) fanhext;
     if ( fanhext > ( float ) nanhext ) {
@@ -6013,7 +6082,7 @@ void CemhydMatStatus :: dissolve(int cycle) {
     /* Since hemihydrate can now react with C3A, etc., can't */
     /* do expansion here any longer  7/99 */
     fhemext = ( float ) discount [ HEMIHYD ];
-    /*	fhemext=1.3955*(float)discount[HEMIHYD];  */
+    /*    fhemext=1.3955*(float)discount[HEMIHYD];  */
 
     nhemext = ( int ) fhemext;
     if ( fhemext > ( float ) nhemext ) {
@@ -6043,7 +6112,7 @@ void CemhydMatStatus :: dissolve(int cycle) {
         plok = 0;
         tries = 0;
         do {
-            xc = ( int ) ( ( float ) SYSIZE * ran1(seed) );  //locate random place in the microstructure
+            xc = ( int ) ( ( float ) SYSIZE * ran1(seed) );   //locate random place in the microstructure
             yc = ( int ) ( ( float ) SYSIZE * ran1(seed) );
             zc = ( int ) ( ( float ) SYSIZE * ran1(seed) );
             if ( xc >= SYSIZE ) {
@@ -7278,7 +7347,7 @@ void CemhydMatStatus :: disrealnew(double GiveTemp, double hydrationTime, int fl
  * The heat is independent on the hydrating cube size but may slightly
  * decrease as some reversible reactions exist!!! (checked)
  * ^
- *|Released heat                                            (stops now)
+ **|Released heat                                            (stops now)
  |                                                            CYC_m
  |             (last stop)                      t_n+1           |
  |                CYC   ..CYC..  CYC_m-1          |             |
@@ -7286,7 +7355,7 @@ void CemhydMatStatus :: disrealnew(double GiveTemp, double hydrationTime, int fl
  |  !LastTotHeat   !LastHydrTime  |PrevHydrTime   |TargTime     |time_cur
  |  !LastCallTime  !LastCycHeat   |PrevCycHeat    |LastTargTime |heat_new
  |  !              !LastCycCnt    |               |             |
- ||------------------------------------------------------------------->time
+ |||------------------------------------------------------------------->time
  *
  * let all time counters in seconds! (numerical precision)
  * TargTime, LastCallTime, LastTargTime are in absolute time taken from OOFEM
@@ -7313,15 +7382,18 @@ double CemhydMatStatus :: GiveIncrementalHeat(double GiveTemp, double TargTime) 
         printf("Cannot go backwards in hydration, time_now = %f s < last_time = %f s\n", TargTime, LastCallTime);
         exit(0);
     }
+
 #ifdef __TM_MODULE //OOFEM transport module
     CemhydMat *cemhydmat = ( CemhydMat * ) this->gp->giveMaterial();
-    if ( !cemhydmat->nowarnings.at(4) && (GiveTemp > 200.) ) {
+    if ( !cemhydmat->nowarnings.at(4) && ( GiveTemp > 200. ) ) {
         printf("Temperature exceeds 200 C (file %s, line %d),\n", __FILE__, __LINE__);
     }
+
 #else
     if ( GiveTemp > 200. ) {
         printf("Temperature exceeds 200 C (file %s, line %d),\n", __FILE__, __LINE__);
     }
+
 #endif
 
 
@@ -8471,9 +8543,9 @@ void CemhydMatStatus :: extfh3(int xpres, int ypres, int zpres)
     long int tries;
 
     /* first try 6 neighboring locations until      */
-    /*	a) successful				*/
-    /*	b) all 6 sites are tried and full or    */
-    /*	c) 500 tries are made           */
+    /*    a) successful                */
+    /*    b) all 6 sites are tried and full or    */
+    /*    c) 500 tries are made           */
     fchr = 0;
     sump = 1;
     for ( i1 = 1; ( ( i1 <= 500 ) && ( fchr == 0 ) && ( sump != 30030 ) ); i1++ ) {
@@ -8554,8 +8626,8 @@ int CemhydMatStatus :: extettr(int xpres, int ypres, int zpres, int etype)
     long int tries;
 
     /* first try neighboring locations until        */
-    /*	a) successful				*/
-    /*	c) 1000 tries are made          */
+    /*    a) successful                */
+    /*    c) 1000 tries are made          */
     fchr = 0;
     sump = 1;
     /* Note that 30030 = 2*3*5*7*11*13 */
@@ -8737,9 +8809,9 @@ void CemhydMatStatus :: extgyps(int xpres, int ypres, int zpres)
     long int tries;
 
     /* first try 6 neighboring locations until      */
-    /*	a) successful				*/
-    /*	b) all 6 sites are tried and full or    */
-    /*	c) 500 tries are made           */
+    /*    a) successful                */
+    /*    b) all 6 sites are tried and full or    */
+    /*    c) 500 tries are made           */
     fchr = 0;
     sump = 1;
     for ( i1 = 1; ( ( i1 <= 500 ) && ( fchr == 0 ) && ( sump != 30030 ) ); i1++ ) {
@@ -9383,9 +9455,9 @@ int CemhydMatStatus :: extfreidel(int xpres, int ypres, int zpres)
     long int tries;
 
     /* first try 6 neighboring locations until      */
-    /*	a) successful				*/
-    /*	b) all 6 sites are tried and full or    */
-    /*	c) 500 tries are made           */
+    /*    a) successful                */
+    /*    b) all 6 sites are tried and full or    */
+    /*    c) 500 tries are made           */
     fchr = 0;
     sump = 1;
     for ( i1 = 1; ( ( i1 <= 500 ) && ( fchr == 0 ) && ( sump != 30030 ) ); i1++ ) {
@@ -9464,9 +9536,9 @@ int CemhydMatStatus :: extstrat(int xpres, int ypres, int zpres)
     long int tries;
 
     /* first try 6 neighboring locations until      */
-    /*	a) successful				*/
-    /*	b) all 6 sites are tried and full or    */
-    /*	c) 500 tries are made           */
+    /*    a) successful                */
+    /*    b) all 6 sites are tried and full or    */
+    /*    c) 500 tries are made           */
     fchr = 0;
     sump = 1;
     for ( i1 = 1; ( ( i1 <= 500 ) && ( fchr == 0 ) && ( sump != 30030 ) ); i1++ ) {
@@ -10573,9 +10645,9 @@ void CemhydMatStatus :: extafm(int xpres, int ypres, int zpres)
     long int tries;
 
     /* first try 6 neighboring locations until      */
-    /*	a) successful				*/
-    /*	b) all 6 sites are tried or             */
-    /*	c) 100 tries are made           */
+    /*    a) successful                */
+    /*    b) all 6 sites are tried or             */
+    /*    c) 100 tries are made           */
     fchr = 0;
     sump = 1;
     for ( i1 = 1; ( ( i1 <= 100 ) && ( fchr == 0 ) && ( sump != 30030 ) ); i1++ ) {
@@ -10789,9 +10861,9 @@ void CemhydMatStatus :: extpozz(int xpres, int ypres, int zpres)
     long int tries;
 
     /* first try 6 neighboring locations until      */
-    /*	a) successful				*/
-    /*	b) all 6 sites are tried or             */
-    /*	c) 100 tries are made           */
+    /*    a) successful                */
+    /*    b) all 6 sites are tried or             */
+    /*    c) 100 tries are made           */
     fchr = 0;
     sump = 1;
     for ( i1 = 1; ( ( i1 <= 100 ) && ( fchr == 0 ) && ( sump != 30030 ) ); i1++ ) {
@@ -11031,9 +11103,9 @@ void CemhydMatStatus :: extc3ah6(int xpres, int ypres, int zpres)
     long int tries;
 
     /* First try 6 neighboring locations until      */
-    /*  a) successful				*/
-    /*	b) all 6 sites are tried or             */
-    /*	c) 100 random attempts are made     */
+    /*  a) successful                */
+    /*    b) all 6 sites are tried or             */
+    /*    c) 100 random attempts are made     */
     fchr = 0;
     sump = 1;
     for ( i1 = 1; ( ( i1 <= 100 ) && ( fchr == 0 ) && ( sump != 30030 ) ); i1++ ) {
@@ -12210,13 +12282,13 @@ void CemhydMatStatus :: hydrate(int fincyc, int stepmax, float chpar1, float chp
         ndale = 0;
 
         /* determine probabilities for CH and C3AH6 nucleation */
-        beterm = exp(-( double ) ( count [ DIFFCH ] ) * 1000000. / SYSIZE_POW3 / chpar2);    //fixed
+        beterm = exp(-( double ) ( count [ DIFFCH ] ) * 1000000. / SYSIZE_POW3 / chpar2);       //fixed
         chprob = chpar1 * ( 1. - beterm );
-        beterm = exp(-( double ) ( count [ DIFFC3A ] ) * 1000000. / SYSIZE_POW3 / hgpar2);    //fixed
+        beterm = exp(-( double ) ( count [ DIFFC3A ] ) * 1000000. / SYSIZE_POW3 / hgpar2);       //fixed
         c3ah6prob = hgpar1 * ( 1. - beterm );
-        beterm = exp(-( double ) ( count [ DIFFFH3 ] ) * 1000000. / SYSIZE_POW3 / fhpar2);    //fixed
+        beterm = exp(-( double ) ( count [ DIFFFH3 ] ) * 1000000. / SYSIZE_POW3 / fhpar2);       //fixed
         fh3prob = fhpar1 * ( 1. - beterm );
-        beterm = exp(-( double ) ( count [ DIFFANH ] + count [ DIFFHEM ] ) * 1000000. / SYSIZE_POW3 / gypar2);    //fixed
+        beterm = exp(-( double ) ( count [ DIFFANH ] + count [ DIFFHEM ] ) * 1000000. / SYSIZE_POW3 / gypar2);       //fixed
         gypprob = gypar1 * ( 1. - beterm );
 
         /* Process each diffusing species in turn */
@@ -12576,7 +12648,7 @@ void CemhydMatStatus :: pHpred(void) { //dangerous function - can lead to zero d
                 activitySO4 = exp(activitySO4);
                 /* Now try to find roots of fourth degree polynomial */
                 /* to determine sulfate, OH-, and calcium ion concentrations */
-                /*	A=(-KspCH); */
+                /*    A=(-KspCH); */
                 /* Now with activities */
                 A = ( -KspCH / ( activityCa * activityOH * activityOH ) );
                 B = conckplus + concnaplus;
@@ -12939,7 +13011,7 @@ void CemhydMatStatus :: burn_phases(int d1, int d2, int d3) {
                                           ( mic_CSH [ qx ] [ qy ] [ qz ] == C2S ) ||
                                           ( mic_CSH [ qx ] [ qy ] [ qz ] == C3A ) ||
                                           ( mic_CSH [ qx ] [ qy ] [ qz ] == C4AF ) ) ) {
-                                    //		  ntot+=1;
+                                    //          ntot+=1;
                                     phase_temp [ ( int ) newmat [ px ] [ py ] [ pz ] ]++;
                                     WriteUnsortedList(px, py, pz);
                                     newmat [ px ] [ py ] [ pz ] = BURNT;
@@ -12972,7 +13044,7 @@ void CemhydMatStatus :: burn_phases(int d1, int d2, int d3) {
                     }
                 } while ( nnew > 0 );
 
-                //	ntop+=ntot;
+                //    ntop+=ntot;
                 xl = 0;
                 xh = SYSIZE - 1;
                 /* Check for percolated path through system */
@@ -12999,7 +13071,7 @@ void CemhydMatStatus :: burn_phases(int d1, int d2, int d3) {
                 }
 
                 if ( igood == 2 ) {
-                    //	  nthrough+=ntot;
+                    //      nthrough+=ntot;
 
                     while ( last != NULL ) { //go through all voxel coordinates
                         ArrPerc [ last->x ] [ last->y ] [ last->z ] = mic_CSH [ last->x ] [ last->y ] [ last->z ];
@@ -13160,11 +13232,11 @@ int CemhydMatStatus :: IsConnected(int cx, int cy, int cz, int dx, int dy, int d
  * / .      32|
  * /  . 4   /  256
  * /   .    / 2 |
- *|--16---512  |
+ **|--16---512  |
  |   .....|...2048
  |  .     8   /
  | .  1   | 128
- ||.       | /
+ |||.       | /
  * ----64---1024
  *
  * e.g. if number 1 is present, that means that solid voxel below is disconnected
@@ -13300,7 +13372,7 @@ void CemhydMatStatus :: GenerateConnNumbers(void) {
                      * third way
                      */
                     if ( IsSolidPhase(ArrPerc [ AdjCoord(cx + 1) ] [ AdjCoord(cy + 1) ] [ AdjCoord(cz + 1) ]) ) {
-                        //	    printf("%d %d %d\n", IsConnected(cx, cy, cz, 1, 0, 0), IsConnected(cx+1, cy, cz, 1, 0, 1), IsConnected(cx+1, cy, cz+1, 1, 1, 1));
+                        //        printf("%d %d %d\n", IsConnected(cx, cy, cz, 1, 0, 0), IsConnected(cx+1, cy, cz, 1, 0, 1), IsConnected(cx+1, cy, cz+1, 1, 1, 1));
 
                         if ( ( IsConnected(cx, cy, cz, 1, 0, 0) != 2 ||
                                IsConnected(cx + 1, cy, cz, 0, 0, 1) != 2 ||

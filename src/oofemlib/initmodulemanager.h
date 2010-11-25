@@ -48,19 +48,18 @@
 #include "datareader.h"
 
 #ifndef __MAKEDEPEND
-#include <stdio.h>
-#include <time.h>
+ #include <stdio.h>
+ #include <time.h>
 #endif
 
 namespace oofem {
-
 class EngngModel;
 
 /**
  * Class representing and implementing InitModuleManager. It is attribute of EngngModel.
  * It manages the init modules, which perform module - specific init oprations.
  */
-class InitModuleManager : public ModuleManager <InitModule>
+class InitModuleManager : public ModuleManager< InitModule >
 {
 private:
 public:
@@ -74,17 +73,16 @@ public:
     IRResultType initializeFrom(InputRecord *ir);
 
     /** Creates new instance of module of given name, belonging to given EngngModel */
-    InitModule* CreateModuleOfType (char *name, EngngModel *emodel);
+    InitModule *CreateModuleOfType(char *name, EngngModel *emodel);
 
     /**
      * Performs the initialization of individual modules. Loops over all modules and calls corresponding doInit module service.
      * @param tStep time step.
      */
-    void              doInit ();
+    void              doInit();
     const char *giveClassName() const { return "InitModuleManager"; }
 
 protected:
 };
-
 } // end namespace oofem
 #endif // initmodulemanager_h

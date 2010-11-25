@@ -42,7 +42,6 @@
 #include "flotmtrx.h"
 
 namespace oofem {
-
 double PrescribedGradient :: give(Dof *dof, ValueModeType mode, TimeStep *tStep)
 {
     DofIDItem id = dof->giveDofID();
@@ -95,7 +94,7 @@ void PrescribedGradient :: setPrescribedGradientVoigt(const FloatArray &t)
         this->gradient.at(1, 1) = t.at(1);
         this->gradient.at(2, 2) = t.at(2);
         this->gradient.at(1, 2) = this->gradient.at(2, 1) = t.at(3);
-    } else if ( n == 6 )     { // Then 3D
+    } else if ( n == 6 ) {     // Then 3D
         OOFEM_ERROR("setPrescribedTensorVoigt: Check the order of voigt vectors in OOFEM");
         this->gradient.resize(2, 2, 0);
         this->gradient.at(1, 1) = t.at(1);
@@ -105,7 +104,7 @@ void PrescribedGradient :: setPrescribedGradientVoigt(const FloatArray &t)
         this->gradient.at(1, 2) = this->gradient.at(2, 1) = t.at(6) / 2;
         this->gradient.at(1, 3) = this->gradient.at(3, 1) = t.at(5) / 2;
         this->gradient.at(2, 3) = this->gradient.at(3, 2) = t.at(4) / 2;
-    } else   {
+    } else {
         OOFEM_ERROR("setPrescribedTensorVoigt: Tensor is in strange voigt format. Should be 3 or 6. Use setPrescribedTensor directly if needed.");
     }
 }
@@ -119,8 +118,8 @@ IRResultType PrescribedGradient :: initializeFrom(InputRecord *ir)
 
     IR_GIVE_FIELD(ir, this->gradient, IFT_PrescribedTensor_gradient, "gradient");
     IRResultType rt = IR_GIVE_OPTIONAL_FIELD(ir, this->centerCoord, IFT_PrescribedTensor_centercoords, "ccoord")
-    if (rt == IRRT_OK) {
-        this->centerCoord.resize(this->gradient.giveNumberOfColumns());
+                      if ( rt == IRRT_OK ) {
+        this->centerCoord.resize( this->gradient.giveNumberOfColumns() );
         this->centerCoord.zero();
     }
 

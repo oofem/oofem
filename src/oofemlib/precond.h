@@ -45,11 +45,10 @@
 #include "sparsemtrx.h"
 #include "inputrecord.h"
 #ifndef __MAKEDEPEND
-#include <string.h>
+ #include <string.h>
 #endif
 
 namespace oofem {
-
 /**
  * Abstract class for IML++ compatible preconditioner.
  * Each preconditioner provides solve() and transpose_solve() functionality,
@@ -84,13 +83,17 @@ public:
     virtual void init(const SparseMtrx &a) { };
 
     /// Solves the linear system
-    FloatArray solve(const FloatArray &x) const { FloatArray y;
-                                                  this->solve(x, y);
-                                                  return y; }
+    FloatArray solve(const FloatArray &x) const {
+        FloatArray y;
+        this->solve(x, y);
+        return y;
+    }
     /// Solves transposed system
-    FloatArray trans_solve(const FloatArray &x) const { FloatArray y;
-                                                        this->trans_solve(x, y);
-                                                        return y; }
+    FloatArray trans_solve(const FloatArray &x) const {
+        FloatArray y;
+        this->trans_solve(x, y);
+        return y;
+    }
     /// Solves the linear system
     virtual void solve(const FloatArray &x, FloatArray &y) const = 0;
     /// Solves transposed system
@@ -100,6 +103,5 @@ public:
     /// Initializes receiver from given record. Empty implementation.
     virtual IRResultType initializeFrom(InputRecord *ir) { return IRRT_OK; }
 };
-
 } // end namespace oofem
 #endif // precond_h

@@ -56,12 +56,11 @@
 #include "contextmode.h"
 
 #ifndef __MAKEDEPEND
-#include <stdio.h>
-#include <stdlib.h>
+ #include <stdio.h>
+ #include <stdlib.h>
 #endif
 
 namespace oofem {
-
 class FloatArray;
 class DiagonalMatrix;
 class IntArray;
@@ -108,11 +107,15 @@ public:
      * @param n number of rows
      * @param m requested number of columns
      */
-    FloatMatrix(int n, int m) : Matrix(n, m) { allocatedSize = n * m;
-                                               values = allocDouble(n * m); }
+    FloatMatrix(int n, int m) : Matrix(n, m) {
+        allocatedSize = n * m;
+        values = allocDouble(n * m);
+    }
     /// Constructor, creates zero sized matrix.
-    FloatMatrix() : Matrix(0, 0)          { allocatedSize = 0;
-                                            values = NULL; }
+    FloatMatrix() : Matrix(0, 0)          {
+        allocatedSize = 0;
+        values = NULL;
+    }
     /** Constructor. Creates float matrix from float vector. Vector may be stored rowwise
      * or columnwise, depending on second parameter.
      * @param vector float vector from which matrix is constructed
@@ -126,7 +129,7 @@ public:
     /// destructor
     virtual ~FloatMatrix()               { if ( values ) { freeDouble(values); } }
     /// assingnment operator, adjusts size of the receiver if necessary
-    FloatMatrix &operator=(const FloatMatrix &); // assignment: cleanup and copy
+    FloatMatrix & operator=(const FloatMatrix &); // assignment: cleanup and copy
 
 
 #ifdef DEBUG
@@ -201,7 +204,7 @@ public:
     void          zero() const;
     /// sets receiver to unity matrix.
     void beUnitMatrix();
-    /// sets receiver to the inverse of scaling matrix P multiplied by the deviatoric projector ID 
+    /// sets receiver to the inverse of scaling matrix P multiplied by the deviatoric projector ID
     void bePinvID();
 
     /** Assigns to the receiver the tharansposition of parameter.
@@ -405,7 +408,6 @@ public:
 
 protected:
 };
-
 } // end namespace oofem
 #endif // flotmtrx_h
 

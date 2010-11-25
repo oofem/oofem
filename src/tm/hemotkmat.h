@@ -43,7 +43,6 @@
 #include "matconst.h"
 
 namespace oofem {
-
 class GaussPoint;
 
 /**
@@ -125,7 +124,7 @@ public:
     IRResultType initializeFrom(InputRecord *ir);
 
     // non-standard - returns time independent material constant
-    double   give(int, GaussPoint*);
+    double   give(int, GaussPoint *);
 
     /**
      * Request material extension.
@@ -187,6 +186,5 @@ protected:
 #ifdef __OOFEG
 #endif
 };
-
 } // end namespace oofem
 #endif // hemotkmat_h

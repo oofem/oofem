@@ -45,49 +45,51 @@ DSS_NAMESPASE_BEGIN
 class IntLinkArray
 {
 public:
-	long* last;
-	long* next;
+    long *last;
+    long *next;
 
-	long first;
-	long N;
+    long first;
+    long N;
 
-	IntLinkArray()
-	{
-		last = next = NULL;
-		first = 0;
-		N = 0;
-	}
-				 	
-	IntLinkArray(long* l,long* n,long N)
-	{
-		last = l;
-		next = n;
-		first = 0;
-		this->N = N;
-	}
+    IntLinkArray()
+    {
+        last = next = NULL;
+        first = 0;
+        N = 0;
+    }
 
-	void Init(long* l,long* n,long N)
-	{
-		last = l;
-		next = n;
-		first = 0;
-		this->N = N;
-	}
+    IntLinkArray(long *l, long *n, long N)
+    {
+        last = l;
+        next = n;
+        first = 0;
+        this->N = N;
+    }
 
-	void Remove(long i)
-	{
-		//if(!(last[i]!=-2))	{i =i;}
+    void Init(long *l, long *n, long N)
+    {
+        last = l;
+        next = n;
+        first = 0;
+        this->N = N;
+    }
 
-		if (last[i]>=0)	next[last[i]] = next[i];
-		if (next[i]>=0)	last[next[i]] = last[i];
+    void Remove(long i)
+    {
+        //if(!(last[i]!=-2)) {i =i;}
 
-		if (i == first)
-			first = next[i];
-		N--;
+        if ( last [ i ] >= 0 ) { next [ last [ i ] ] = next [ i ]; }
 
-		//if(!((last[i]=-2)==-2))	{i =i;}
-	}
+        if ( next [ i ] >= 0 ) { last [ next [ i ] ] = last [ i ]; }
 
+        if ( i == first ) {
+            first = next [ i ];
+        }
+
+        N--;
+
+        //if(!((last[i]=-2)==-2)) {i =i;}
+    }
 };
 
 DSS_NAMESPASE_END

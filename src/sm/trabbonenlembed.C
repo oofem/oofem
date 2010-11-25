@@ -1,37 +1,37 @@
 /* $Header: /home/cvs/bp/oofem/sm/src/idmnl1.C,v 1.7 2003/04/06 14:08:30 bp Exp $ */
 /*
-
-                   *****    *****   ******  ******  ***   ***                            
-                 **   **  **   **  **      **      ** *** **                             
-                **   **  **   **  ****    ****    **  *  **                              
-               **   **  **   **  **      **      **     **                               
-              **   **  **   **  **      **      **     **                                
-              *****    *****   **      ******  **     **         
-            
-                                                                   
-               OOFEM : Object Oriented Finite Element Code                 
-                    
-                 Copyright (C) 1993 - 2000   Borek Patzak                                       
-
-
-
-         Czech Technical University, Faculty of Civil Engineering,
-     Department of Structural Mechanics, 166 29 Prague, Czech Republic
-                                                                               
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.                                                                              
-*/
+ *
+ *****    *****   ******  ******  ***   ***
+ **   **  **   **  **      **      ** *** **
+ **   **  **   **  ****    ****    **  *  **
+ **   **  **   **  **      **      **     **
+ **   **  **   **  **      **      **     **
+ *****    *****   **      ******  **     **
+ *****
+ *****
+ *****         OOFEM : Object Oriented Finite Element Code
+ *****
+ *****           Copyright (C) 1993 - 2000   Borek Patzak
+ *****
+ *****
+ *****
+ *****   Czech Technical University, Faculty of Civil Engineering,
+ *****Department of Structural Mechanics, 166 29 Prague, Czech Republic
+ *****
+ *****This program is free software; you can redistribute it and/or modify
+ *****it under the terms of the GNU General Public License as published by
+ *****the Free Software Foundation; either version 2 of the License, or
+ *****(at your option) any later version.
+ *****
+ *****This program is distributed in the hope that it will be useful,
+ *****but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *****MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *****GNU General Public License for more details.
+ *****
+ *****You should have received a copy of the GNU General Public License
+ *****along with this program; if not, write to the Free Software
+ *****Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
 
 
 #include "trabbonenlembed.h"
@@ -47,16 +47,15 @@
 #include "error.h"
 #include "nonlocalmaterialext.h"
 #ifndef __MAKEDEPEND
-#include <math.h>
+ #include <math.h>
 #endif
 
 #ifdef __OOFEG
-#include "oofeggraphiccontext.h"
-#include "conTable.h"
+ #include "oofeggraphiccontext.h"
+ #include "conTable.h"
 #endif
 
 namespace oofem {
-
 /////////////////////////////////////////////////////////////////
 ////////////TRABECULAR BONE NONLOCAL MATERIAL////////////////////
 /////////////////////////////////////////////////////////////////
@@ -66,9 +65,9 @@ namespace oofem {
 // BEGIN: CONSTRUCTOR
 //
 
-TrabBoneNLEmbed :: TrabBoneNLEmbed (int n, Domain *d) :TrabBoneEmbed (n,d), StructuralNonlocalMaterialExtensionInterface(d)
+TrabBoneNLEmbed :: TrabBoneNLEmbed(int n, Domain *d) : TrabBoneEmbed(n, d), StructuralNonlocalMaterialExtensionInterface(d)
 {
-  R = 0.;
+    R = 0.;
 }
 
 //
@@ -80,9 +79,8 @@ TrabBoneNLEmbed :: TrabBoneNLEmbed (int n, Domain *d) :TrabBoneEmbed (n,d), Stru
 // BEGIN: DESTRUCTOR
 //
 
-TrabBoneNLEmbed :: ~TrabBoneNLEmbed ()
-{
-}
+TrabBoneNLEmbed :: ~TrabBoneNLEmbed()
+{}
 
 //
 // END: DESTRUCTOR
@@ -93,25 +91,25 @@ TrabBoneNLEmbed :: ~TrabBoneNLEmbed ()
 // BEGIN: SUBROUTINE FOR UPDATE BEFORE NON LOCAL AVERAGE
 // update local values of accumulated pastic strain
 
-void 
-TrabBoneNLEmbed :: updateBeforeNonlocAverage (const FloatArray& strainVector, GaussPoint* gp, TimeStep* atTime)
+void
+TrabBoneNLEmbed :: updateBeforeNonlocAverage(const FloatArray &strainVector, GaussPoint *gp, TimeStep *atTime)
 {
-  FloatArray SDstrainVector, fullSDStrainVector;
-  double cumPlastStrain;
-  TrabBoneNLEmbedStatus *nlstatus = (TrabBoneNLEmbedStatus*) this -> giveStatus (gp);
- 
-  this->initTempStatus(gp);
-  this->initGpForNewStep(gp);
-  this->giveStressDependentPartOfStrainVector(SDstrainVector, gp, strainVector,atTime, VM_Total);
+    FloatArray SDstrainVector, fullSDStrainVector;
+    double cumPlastStrain;
+    TrabBoneNLEmbedStatus *nlstatus = ( TrabBoneNLEmbedStatus * ) this->giveStatus(gp);
 
-  nlstatus->letTempStrainVectorBe(strainVector); 
+    this->initTempStatus(gp);
+    this->initGpForNewStep(gp);
+    this->giveStressDependentPartOfStrainVector(SDstrainVector, gp, strainVector, atTime, VM_Total);
 
-  StrainVector strain(strainVector, gp->giveMaterialMode());
+    nlstatus->letTempStrainVectorBe(strainVector);
 
-  this->performPlasticityReturn(gp, strain);
-  this->computeLocalCumPlastStrain (cumPlastStrain, strain, gp, atTime);
+    StrainVector strain( strainVector, gp->giveMaterialMode() );
 
-  nlstatus->setLocalCumPlastStrainForAverage (cumPlastStrain);
+    this->performPlasticityReturn(gp, strain);
+    this->computeLocalCumPlastStrain(cumPlastStrain, strain, gp, atTime);
+
+    nlstatus->setLocalCumPlastStrainForAverage(cumPlastStrain);
 }
 
 //
@@ -123,38 +121,38 @@ TrabBoneNLEmbed :: updateBeforeNonlocAverage (const FloatArray& strainVector, Ga
 // BEGIN: SUBROUTINE FOR EVALUATION OF TOTAL STRESS
 //
 
-void  
-TrabBoneNLEmbed::giveRealStressVector(FloatArray& answer,  
-                                  MatResponseForm form, 
-                                 GaussPoint* gp , 
-                                  const FloatArray& strainVector, 
-                                  TimeStep* atTime)
+void
+TrabBoneNLEmbed :: giveRealStressVector(FloatArray &answer,
+                                        MatResponseForm form,
+                                        GaussPoint *gp,
+                                        const FloatArray &strainVector,
+                                        TimeStep *atTime)
 {
-  TrabBoneNLEmbedStatus *nlStatus = (TrabBoneNLEmbedStatus*) this -> giveStatus (gp);
+    TrabBoneNLEmbedStatus *nlStatus = ( TrabBoneNLEmbedStatus * ) this->giveStatus(gp);
 
-  double tempDam, tempTSED; 
-  FloatArray plasDef, totalStress;
-  FloatMatrix compliance, elasticity;
+    double tempDam, tempTSED;
+    FloatArray plasDef, totalStress;
+    FloatMatrix compliance, elasticity;
 
-  compliance.resize(6,6);
-  this->constructIsoComplTensor(compliance, eps0, nu0);
-  elasticity.beInverseOf(compliance);
- 
-  tempDam = 0;
-  plasDef.resize(6);
+    compliance.resize(6, 6);
+    this->constructIsoComplTensor(compliance, eps0, nu0);
+    elasticity.beInverseOf(compliance);
 
-  totalStress.beProductOf(elasticity,strainVector);
+    tempDam = 0;
+    plasDef.resize(6);
 
-  tempTSED = dotProduct(0.5*strainVector,totalStress,6);
+    totalStress.beProductOf(elasticity, strainVector);
 
-  answer.resize(6);
-  answer = totalStress;
-  
-  nlStatus -> setTempDam(tempDam);
-  nlStatus -> letTempStrainVectorBe (strainVector);
-  nlStatus -> letTempStressVectorBe( answer ) ;
-  nlStatus -> setTempTSED(tempTSED);
-  return ;
+    tempTSED = dotProduct(0.5 * strainVector, totalStress, 6);
+
+    answer.resize(6);
+    answer = totalStress;
+
+    nlStatus->setTempDam(tempDam);
+    nlStatus->letTempStrainVectorBe(strainVector);
+    nlStatus->letTempStressVectorBe(answer);
+    nlStatus->setTempTSED(tempTSED);
+    return;
 }
 
 //
@@ -166,30 +164,30 @@ TrabBoneNLEmbed::giveRealStressVector(FloatArray& answer,
 // BEGIN: SUBROUTINE OF NONLOCAL ALPHA EVALUATION
 //
 
-void 
-TrabBoneNLEmbed :: computeCumPlastStrain (double& alpha, GaussPoint* gp, TimeStep* atTime)
+void
+TrabBoneNLEmbed :: computeCumPlastStrain(double &alpha, GaussPoint *gp, TimeStep *atTime)
 {
-  double nonlocalContribution, nonlocalCumPlastStrain = 0.0;
-  TrabBoneNLEmbedStatus *nonlocStatus, *status = (TrabBoneNLEmbedStatus*) this -> giveStatus (gp);
+    double nonlocalContribution, nonlocalCumPlastStrain = 0.0;
+    TrabBoneNLEmbedStatus *nonlocStatus, *status = ( TrabBoneNLEmbedStatus * ) this->giveStatus(gp);
 
-  this->buildNonlocalPointTable(gp);
-  this->updateDomainBeforeNonlocAverage(atTime);
-  
-  dynaList<localIntegrationRecord>* list = status->giveIntegrationDomainList();
-  dynaList<localIntegrationRecord>::iterator pos;
+    this->buildNonlocalPointTable(gp);
+    this->updateDomainBeforeNonlocAverage(atTime);
 
-  for (pos = list->begin(); pos!= list->end(); ++pos) {
-    nonlocStatus = (TrabBoneNLEmbedStatus*) this -> giveStatus ((*pos).nearGp);
-    nonlocalContribution = nonlocStatus->giveLocalCumPlastStrainForAverage();
-    nonlocalContribution *= (*pos).weight;
-    nonlocalCumPlastStrain += nonlocalContribution;
-  }
+    dynaList< localIntegrationRecord > *list = status->giveIntegrationDomainList();
+    dynaList< localIntegrationRecord > :: iterator pos;
 
-  nonlocalCumPlastStrain *= 1./status->giveIntegrationScale();
+    for ( pos = list->begin(); pos != list->end(); ++pos ) {
+        nonlocStatus = ( TrabBoneNLEmbedStatus * ) this->giveStatus( ( * pos ).nearGp );
+        nonlocalContribution = nonlocStatus->giveLocalCumPlastStrainForAverage();
+        nonlocalContribution *= ( * pos ).weight;
+        nonlocalCumPlastStrain += nonlocalContribution;
+    }
 
-//  double localCumPlastStrain = status->giveLocalCumPlastStrainForAverage();
-//  alpha = mParam*nonlocalCumPlastStrain +(1-mParam)*localCumPlastStrain ;
-  alpha = 0.;
+    nonlocalCumPlastStrain *= 1. / status->giveIntegrationScale();
+
+    //  double localCumPlastStrain = status->giveLocalCumPlastStrainForAverage();
+    //  alpha = mParam*nonlocalCumPlastStrain +(1-mParam)*localCumPlastStrain ;
+    alpha = 0.;
 }
 
 //
@@ -201,13 +199,18 @@ TrabBoneNLEmbed :: computeCumPlastStrain (double& alpha, GaussPoint* gp, TimeSte
 // BEGIN: INTERFACE ????
 //
 
-Interface* 
-TrabBoneNLEmbed::giveInterface (InterfaceType type)
+Interface *
+TrabBoneNLEmbed :: giveInterface(InterfaceType type)
 {
- if (type == NonlocalMaterialExtensionInterfaceType) return (StructuralNonlocalMaterialExtensionInterface*) this;
- else if (type == NonlocalMaterialStiffnessInterfaceType) return (NonlocalMaterialStiffnessInterface*) this;
- //
- else return NULL;
+    if ( type == NonlocalMaterialExtensionInterfaceType ) {
+        return ( StructuralNonlocalMaterialExtensionInterface * ) this;
+    } else if ( type == NonlocalMaterialStiffnessInterfaceType ) {
+        return ( NonlocalMaterialStiffnessInterface * ) this;
+    }
+    //
+    else {
+        return NULL;
+    }
 }
 
 //
@@ -220,22 +223,23 @@ TrabBoneNLEmbed::giveInterface (InterfaceType type)
 //
 
 IRResultType
-TrabBoneNLEmbed :: initializeFrom (InputRecord* ir)
+TrabBoneNLEmbed :: initializeFrom(InputRecord *ir)
 {
+    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
+    IRResultType result;                             // Required by IR_GIVE_FIELD macro
 
-  const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
-  IRResultType result;                               // Required by IR_GIVE_FIELD macro
- 
-  TrabBoneEmbed::initializeFrom (ir);
-  StructuralNonlocalMaterialExtensionInterface::initializeFrom (ir);
+    TrabBoneEmbed :: initializeFrom(ir);
+    StructuralNonlocalMaterialExtensionInterface :: initializeFrom(ir);
 
-  IR_GIVE_FIELD (ir, R, IFT_TrabBoneNLEmbed_r, "r"); // Macro
-  if (R < 0.0) R = 0.0;
+    IR_GIVE_FIELD(ir, R, IFT_TrabBoneNLEmbed_r, "r"); // Macro
+    if ( R < 0.0 ) {
+        R = 0.0;
+    }
 
-  mParam = 1.5;
-  IR_GIVE_OPTIONAL_FIELD (ir, mParam, IFT_TrabBoneNLEmbed_m, "m"); // Macro
- 
-  return IRRT_OK;
+    mParam = 1.5;
+    IR_GIVE_OPTIONAL_FIELD(ir, mParam, IFT_TrabBoneNLEmbed_m, "m"); // Macro
+
+    return IRRT_OK;
 }
 
 //
@@ -248,16 +252,16 @@ TrabBoneNLEmbed :: initializeFrom (InputRecord* ir)
 //
 
 int
-TrabBoneNLEmbed :: giveInputRecordString(std::string &str, bool keyword)
+TrabBoneNLEmbed :: giveInputRecordString(std :: string &str, bool keyword)
 {
-  char buff[1024];
+    char buff [ 1024 ];
 
-  TrabBoneEmbed::giveInputRecordString(str, keyword);
-  StructuralNonlocalMaterialExtensionInterface::giveInputRecordString(str, false);
-  sprintf(buff, " r %e", this -> R);
-  str += buff;
+    TrabBoneEmbed :: giveInputRecordString(str, keyword);
+    StructuralNonlocalMaterialExtensionInterface :: giveInputRecordString(str, false);
+    sprintf(buff, " r %e", this->R);
+    str += buff;
 
-  return 1;
+    return 1;
 }
 
 //
@@ -266,21 +270,20 @@ TrabBoneNLEmbed :: giveInputRecordString(std::string &str, bool keyword)
 
 
 /////////////////////////////////////////////////////////////////
-// BEGIN: WEIGHT FUNCTION FOR NONLOCAL CONTRIBUTION 
+// BEGIN: WEIGHT FUNCTION FOR NONLOCAL CONTRIBUTION
 //
 
-double 
-TrabBoneNLEmbed :: computeWeightFunction (const FloatArray& src, const FloatArray& coord)
+double
+TrabBoneNLEmbed :: computeWeightFunction(const FloatArray &src, const FloatArray &coord)
 {
+    double dist = src.distance(coord);
 
-  double dist = src.distance (coord);
+    if ( ( dist >= 0. ) && ( dist <= this->R ) ) {
+        double help = ( 1. - dist * dist / ( R * R ) );
+        return help * help;
+    }
 
-  if ((dist >= 0.) && (dist <= this-> R))
-  {
-    double help = (1.-dist*dist/(R*R));
-    return help*help;
-  }
-  return 0.0;
+    return 0.0;
 }
 
 //
@@ -297,10 +300,10 @@ TrabBoneNLEmbed :: computeWeightFunction (const FloatArray& src, const FloatArra
 // BEGIN: CONSTRUCTOR
 // init state variables
 
-TrabBoneNLEmbedStatus :: TrabBoneNLEmbedStatus (int n, Domain*d, GaussPoint *g) 
-  : TrabBoneEmbedStatus(n,d,g), StructuralNonlocalMaterialStatusExtensionInterface()
+TrabBoneNLEmbedStatus :: TrabBoneNLEmbedStatus(int n, Domain *d, GaussPoint *g) :
+    TrabBoneEmbedStatus(n, d, g), StructuralNonlocalMaterialStatusExtensionInterface()
 {
- localCumPlastStrainForAverage = 0.0;
+    localCumPlastStrainForAverage = 0.0;
 }
 
 //
@@ -312,9 +315,8 @@ TrabBoneNLEmbedStatus :: TrabBoneNLEmbedStatus (int n, Domain*d, GaussPoint *g)
 // BEGIN: DESTRUCTOR
 //
 
-TrabBoneNLEmbedStatus :: ~TrabBoneNLEmbedStatus ()
-{
-}
+TrabBoneNLEmbedStatus :: ~TrabBoneNLEmbedStatus()
+{}
 
 //
 // END: DESTRUCTOR
@@ -325,22 +327,24 @@ TrabBoneNLEmbedStatus :: ~TrabBoneNLEmbedStatus ()
 // BEGIN: PRINTOUT
 //
 
-void 
-TrabBoneNLEmbedStatus :: printOutputAt  (FILE *file, TimeStep* tStep)
+void
+TrabBoneNLEmbedStatus :: printOutputAt(FILE *file, TimeStep *tStep)
 {
- StructuralMaterialStatus :: printOutputAt (file, tStep);
-  fprintf (file,"status {");
-  fprintf (file," plastrains ") ;
-  int n = plasDef.giveSize() ;
-  for (int i=1 ; i<=n ; i++) 
-    fprintf (file," % .4e", plasDef.at(i)) ;
-  fprintf (file, " ,");
-  fprintf ( file," alpha % .4e ,", alpha ) ;
-  fprintf ( file," dam  % .4e ,", dam ) ;
-  fprintf ( file," esed  % .4e ,", this->tempTSED ) ;
-  fprintf ( file," psed  0. ,") ;
-  fprintf ( file," tsed  % .4e ,", this->tempTSED ) ;
-  fprintf (file,"}\n");
+    StructuralMaterialStatus :: printOutputAt(file, tStep);
+    fprintf(file, "status {");
+    fprintf(file, " plastrains ");
+    int n = plasDef.giveSize();
+    for ( int i = 1; i <= n; i++ ) {
+        fprintf( file, " % .4e", plasDef.at(i) );
+    }
+
+    fprintf(file, " ,");
+    fprintf(file, " alpha % .4e ,", alpha);
+    fprintf(file, " dam  % .4e ,", dam);
+    fprintf(file, " esed  % .4e ,", this->tempTSED);
+    fprintf(file, " psed  0. ,");
+    fprintf(file, " tsed  % .4e ,", this->tempTSED);
+    fprintf(file, "}\n");
 }
 
 //
@@ -352,10 +356,10 @@ TrabBoneNLEmbedStatus :: printOutputAt  (FILE *file, TimeStep* tStep)
 // BEGIN: INITIALIZE TEMP VARIABLE (UPDATED DURING ITERATIONS)
 // initialize temporary state variables according to equilibriated state vars
 
-void 
-TrabBoneNLEmbedStatus :: initTempStatus ()
+void
+TrabBoneNLEmbedStatus :: initTempStatus()
 {
- TrabBoneEmbedStatus :: initTempStatus();
+    TrabBoneEmbedStatus :: initTempStatus();
 }
 
 //
@@ -367,10 +371,10 @@ TrabBoneNLEmbedStatus :: initTempStatus ()
 // BEGIN: SETS VARIABLE EQUAL TO TEMP VARIABLE AT THE END OF THE STEP
 // Called when equlibrium reached, set equilibriated vars according to temporary (working) ones.
 
-void 
-TrabBoneNLEmbedStatus :: updateYourself(TimeStep* atTime)
+void
+TrabBoneNLEmbedStatus :: updateYourself(TimeStep *atTime)
 {
- TrabBoneEmbedStatus::updateYourself(atTime);
+    TrabBoneEmbedStatus :: updateYourself(atTime);
 }
 
 //
@@ -383,9 +387,9 @@ TrabBoneNLEmbedStatus :: updateYourself(TimeStep* atTime)
 //
 
 contextIOResultType
-TrabBoneNLEmbedStatus :: saveContext (DataStream* stream, ContextMode mode,  void *obj)
+TrabBoneNLEmbedStatus :: saveContext(DataStream *stream, ContextMode mode,  void *obj)
 {
-  return TrabBoneEmbedStatus :: saveContext (stream, mode, obj);
+    return TrabBoneEmbedStatus :: saveContext(stream, mode, obj);
 }
 
 //
@@ -398,9 +402,9 @@ TrabBoneNLEmbedStatus :: saveContext (DataStream* stream, ContextMode mode,  voi
 //
 
 contextIOResultType
-TrabBoneNLEmbedStatus :: restoreContext(DataStream* stream, ContextMode mode,  void *obj)
+TrabBoneNLEmbedStatus :: restoreContext(DataStream *stream, ContextMode mode,  void *obj)
 {
-  return  TrabBoneEmbedStatus :: restoreContext (stream, mode, obj);
+    return TrabBoneEmbedStatus :: restoreContext(stream, mode, obj);
 }
 
 //
@@ -412,15 +416,17 @@ TrabBoneNLEmbedStatus :: restoreContext(DataStream* stream, ContextMode mode,  v
 // BEGIN: INTERFACE ???????????
 //
 
-Interface* 
-TrabBoneNLEmbedStatus::giveInterface (InterfaceType type)
+Interface *
+TrabBoneNLEmbedStatus :: giveInterface(InterfaceType type)
 {
-  if (type == NonlocalMaterialStatusExtensionInterfaceType) return this;
-  else return NULL;
+    if ( type == NonlocalMaterialStatusExtensionInterfaceType ) {
+        return this;
+    } else {
+        return NULL;
+    }
 }
 
 //
 // END: INTERFACE ???????????????
 /////////////////////////////////////////////////////////////////
-
 } // end namespace oofem

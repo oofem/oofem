@@ -49,11 +49,10 @@
 #include "dof.h"
 #include "timestep.h"
 #ifndef __MAKEDEPEND
-#include <math.h>
+ #include <math.h>
 #endif
 
 namespace oofem {
-
 LIBeam3d :: LIBeam3d(int n, Domain *aDomain) : StructuralElement(n, aDomain)
     // Constructor.
 {
@@ -112,12 +111,12 @@ void
 LIBeam3d :: computeGaussPoints()
 // Sets up the array of Gauss Points of the receiver.
 {
-  if (!integrationRulesArray) {
-    numberOfIntegrationRules = 1;
-    integrationRulesArray = new IntegrationRule * [ 1 ];
-    integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 2);
-    integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Line, 1, _3dBeam);
-  }
+    if ( !integrationRulesArray ) {
+        numberOfIntegrationRules = 1;
+        integrationRulesArray = new IntegrationRule * [ 1 ];
+        integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 2);
+        integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Line, 1, _3dBeam);
+    }
 }
 
 
@@ -129,10 +128,10 @@ LIBeam3d :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep)
 {
     Material *mat;
     double halfMass;
-    GaussPoint* gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
+    GaussPoint *gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
 
     mat        = this->giveMaterial();
-    halfMass   = mat->give('d',gp) * this->giveCrossSection()->give(CS_Area) * this->giveLength() / 2.;
+    halfMass   = mat->give('d', gp) * this->giveCrossSection()->give(CS_Area) * this->giveLength() / 2.;
     answer.resize(12, 12);
     answer.zero();
     answer.at(1, 1) = answer.at(2, 2) = answer.at(3, 3) = halfMass;
@@ -252,9 +251,9 @@ LIBeam3d :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoor
     n2  = ( 1. + ksi ) * 0.5;
 
     answer.resize(3);
-    answer.at(1) = n1 * this->giveNode(1)->giveCoordinate(1) + n2 * this->giveNode(2)->giveCoordinate(1);
-    answer.at(2) = n1 * this->giveNode(1)->giveCoordinate(2) + n2 * this->giveNode(2)->giveCoordinate(2);
-    answer.at(3) = n1 * this->giveNode(1)->giveCoordinate(3) + n2 * this->giveNode(2)->giveCoordinate(3);
+    answer.at(1) = n1 * this->giveNode(1)->giveCoordinate(1) + n2 *this->giveNode(2)->giveCoordinate(1);
+    answer.at(2) = n1 * this->giveNode(1)->giveCoordinate(2) + n2 *this->giveNode(2)->giveCoordinate(2);
+    answer.at(3) = n1 * this->giveNode(1)->giveCoordinate(3) + n2 *this->giveNode(2)->giveCoordinate(3);
 
     return 1;
 }
@@ -438,6 +437,7 @@ LIBeam3d :: computeLoadGToLRotationMtrx(FloatMatrix &answer)
 
     //delete lcs;
     return 1;
+
     ;
 }
 

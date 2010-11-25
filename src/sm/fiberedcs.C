@@ -47,7 +47,6 @@
 #include "contextioerr.h"
 
 namespace oofem {
-
 void
 FiberedCrossSection ::  giveRealStresses(FloatArray &answer, MatResponseForm form,
                                          GaussPoint *gp,
@@ -761,13 +760,12 @@ FiberedCrossSection :: give(CrossSectionProperty aProperty)
 {
     if ( aProperty == CS_Thickness ) {
         return this->thick;
-    }
-    else if ( aProperty == CS_Width ) {
+    } else if ( aProperty == CS_Width )   {
         return this->width;
-    }
-    else if ( aProperty == CS_Area ){
+    } else if ( aProperty == CS_Area )   {
         return this->giveArea();
     }
+
     return CrossSection :: give(aProperty);
 }
 
@@ -809,5 +807,4 @@ FiberedCrossSection :: computeStressIndependentStrainVector(FloatArray &answer,
         _error("computeStressIndependentStrainVector: temperature loading not supported");
     }
 }
-
 } // end namespace oofem

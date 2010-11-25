@@ -43,7 +43,6 @@
 #include "maxwellChM.h"
 
 namespace oofem {
-
 class DoublePowerLawMaterial : public MaxwellChainMaterial
 {
     /*
@@ -72,6 +71,5 @@ protected:
 
     virtual double  computeCreepFunction(GaussPoint *gp, double atTime, double ofAge);
 };
-
 } // end namespace oofem
 #endif // doublepowerlaw_h

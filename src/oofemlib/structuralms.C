@@ -42,7 +42,6 @@
 #include "contextioerr.h"
 
 namespace oofem {
-
 StructuralMaterialStatus :: StructuralMaterialStatus(int n, Domain *d, GaussPoint *g) :
     MaterialStatus(n, d, g), strainVector(), stressVector(),
     tempStressVector(), tempStrainVector()
@@ -205,7 +204,4 @@ StructuralMaterialStatus :: restoreContext(DataStream *stream, ContextMode mode,
 
     return CIO_OK;
 }
-
-
-
 } // end namespace oofem

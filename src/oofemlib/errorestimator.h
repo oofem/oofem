@@ -50,7 +50,6 @@
 #include "errorestimatortype.h"
 
 namespace oofem {
-
 class Domain;
 class Element;
 class TimeStep;
@@ -88,9 +87,11 @@ protected:
 
 public:
     /// Constructor
-    ErrorEstimator(int n, Domain *d) : FEMComponent(n, d) { rc = NULL;
-                                                            skippedNelems = 0;
-                                                            regionSkipMap.resize(0); }
+    ErrorEstimator(int n, Domain *d) : FEMComponent(n, d) {
+        rc = NULL;
+        skippedNelems = 0;
+        regionSkipMap.resize(0);
+    }
     /// Destructor
     ~ErrorEstimator() { if ( rc ) { delete rc; } }
     /// Sets Domain; should also re-initialize attributes if necessary.
@@ -144,11 +145,10 @@ public:
      * regionSkipMap variable by derivad classes, since the size check is done here.
      */
     int skipRegion(int reg) { if ( reg <= regionSkipMap.giveSize() ) { return regionSkipMap.at(reg); } else { return 0; } }
-    virtual void reinitialize() {this->rc->reinitialize();}
+    virtual void reinitialize() { this->rc->reinitialize(); }
 
 protected:
 };
-
 } // end namespace oofem
 #endif // errorestimator_h
 

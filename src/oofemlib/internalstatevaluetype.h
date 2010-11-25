@@ -40,7 +40,6 @@
 #define internalstatevaluetype_h
 
 namespace oofem {
-
 /// enum determining the type of internal variable
 enum InternalStateValueType {
     ISVT_UNDEFINED,
@@ -48,10 +47,9 @@ enum InternalStateValueType {
     ISVT_VECTOR,
     ISVT_TENSOR_S3, // symmetric 3x3 tensor
     ISVT_TENSOR_S3E, // symmetric 3x3 tensor, packed with off diagonal components multiplied by 2
-                    // (engineering strain vector, for example)
+                     // (engineering strain vector, for example)
     ISVT_TENSOR_G // general tensor
 };
-
 } // end namespace oofem
 #endif // internalstatevaluetype_h
 

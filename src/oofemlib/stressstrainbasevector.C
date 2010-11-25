@@ -34,7 +34,7 @@
  */
 
 #ifndef __MAKEDEPEND
-#include <stdio.h>
+ #include <stdio.h>
 #endif
 #include "stressstrainbasevector.h"
 #include "intarray.h"
@@ -45,7 +45,6 @@
 #include "matresponseform.h"
 
 namespace oofem {
-
 StressStrainBaseVector :: StressStrainBaseVector(MaterialMode m) : FloatArray()
 {
     this->resize( this->giveReducedSize(m) );
@@ -63,7 +62,7 @@ StressStrainBaseVector :: StressStrainBaseVector(const FloatArray &src, Material
 }
 
 StressStrainBaseVector &
-StressStrainBaseVector :: operator=(const StressStrainBaseVector &src)
+StressStrainBaseVector :: operator = ( const StressStrainBaseVector & src )
 {
     // assignment: cleanup and copy
     double *srcVal;
@@ -337,5 +336,4 @@ StressStrainBaseVector :: transformTo(StressStrainBaseVector &answer, const Floa
     // convert back to reduced form
     answer.convertFromFullForm( fullAnswer, this->giveStressStrainMode() );
 }
-
 } // end namespace oofem

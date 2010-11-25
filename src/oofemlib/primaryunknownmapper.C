@@ -40,12 +40,11 @@
 #include "oofem_limits.h"
 
 #ifndef __MAKEDEPEND
-#include <stdlib.h>
-#include <stdarg.h>
+ #include <stdlib.h>
+ #include <stdarg.h>
 #endif
 
 namespace oofem {
-
 void PrimaryUnknownMapper :: error(const char *file, int line, const char *format, ...) const
 {
     char buffer [ MAX_ERROR_MSG_LENGTH ];
@@ -69,6 +68,4 @@ void PrimaryUnknownMapper :: warning(const char *file, int line, const char *for
 
     __OOFEM_WARNING2(file, line, "Class: PrimaryUnknownMapper\n%s", buffer);
 }
-
-
 } // end namespace oofem

@@ -58,7 +58,6 @@
 #include "contextioresulttype.h"
 
 namespace oofem {
-
 enum CrossSectionProperty {
     CS_Thickness=400,  /// Thickness
     CS_Width,          /// Width
@@ -294,7 +293,6 @@ public:
 
     friend class Material;
 };
-
 } // end namespace oofem
 #endif // crosssection_h
 

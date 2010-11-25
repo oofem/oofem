@@ -48,7 +48,6 @@
 #include "tdictionary.h"
 
 namespace oofem {
-
 class Element;
 class Material;
 class LayeredCrossSection;
@@ -113,6 +112,5 @@ public:
     ///Initializes receiver acording to object description stored in input record.
     IRResultType initializeFrom(InputRecord *ir) { return IRRT_OK; }
 };
-
 } // end namespace oofem
 #endif // microplane_h

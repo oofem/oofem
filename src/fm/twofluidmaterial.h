@@ -45,7 +45,6 @@
 #include "matstatus.h"
 
 namespace oofem {
-
 class GaussPoint;
 
 /**
@@ -113,7 +112,7 @@ public:
      * @param gp integration point
      * @return property value
      */
-    virtual double   give(int aProperty, GaussPoint* gp);
+    virtual double   give(int aProperty, GaussPoint *gp);
     /**
      * Initializes receiver acording to object description stored in input record.
      * The density of material is read into property dictionary (keyword 'd')
@@ -156,7 +155,5 @@ protected:
     FluidDynamicMaterial *giveMaterial(int i) const { return static_cast< FluidDynamicMaterial * >( domain->giveMaterial(slaveMaterial [ i ]) ); }
     double giveTempVOF(GaussPoint *gp);
 };
-
-
 } // end namespace oofem
 #endif // twofluidmaterial_h

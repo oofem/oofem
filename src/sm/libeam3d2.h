@@ -44,7 +44,6 @@
 #include "fiberedcs.h"
 
 namespace oofem {
-
 class LIBeam3d2 : public NLStructuralElement, public FiberedCrossSectionInterface
 {
     /*
@@ -132,7 +131,7 @@ public:
 #endif
 
     integrationDomain  giveIntegrationDomain() { return _Line; }
-    MaterialMode          giveMaterialMode()  {return _3dBeam;}
+    MaterialMode          giveMaterialMode()  { return _3dBeam; }
 
 protected:
     // edge load support
@@ -158,6 +157,5 @@ protected:
     void          initForNewStep();
     int           updateRotationMatrix();
 };
-
 } // end namespace oofem
 #endif // libeam3d2_h

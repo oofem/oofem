@@ -50,31 +50,36 @@
 #include "nonlocalbarrier.h"
 
 #ifdef __PARALLEL_MODE
-#include "parallel.h"
+ #include "parallel.h"
 #endif
 #ifndef __MAKEDEPEND
-#include <math.h>
+ #include <math.h>
 #endif
 
 namespace oofem {
-
 // flag forcing the inclusion of all elements with volume inside support of weight function.
 // This forces inclusion of all integration points of these elements, even if weight is zero
 // If not defined (default) only integration points with nonzero weight are included.
 // #define NMEI_USE_ALL_ELEMENTS_IN_SUPPORT
 
-  
-  /// constructor
-NonlocalMaterialExtensionInterface::NonlocalMaterialExtensionInterface(Domain *d)  : Interface()
-{ domain = d;
-  regionMap.resize( d->giveNumberOfRegions() ); /*lastUpdatedStateCounter = 0;*/
-  if (this->hasBoundedSupport()) permanentNonlocTableFlag=true; else permanentNonlocTableFlag = false;
-  cl = 0.;
-  suprad = 0.;
-  mm = 0.;
-  weightFun = WFT_Unknown;
-  scaling = ST_Unknown;
-  averagedVar = AVT_Unknown;
+
+/// constructor
+NonlocalMaterialExtensionInterface :: NonlocalMaterialExtensionInterface(Domain *d)  : Interface()
+{
+    domain = d;
+    regionMap.resize( d->giveNumberOfRegions() ); /*lastUpdatedStateCounter = 0;*/
+    if ( this->hasBoundedSupport() ) {
+        permanentNonlocTableFlag = true;
+    } else {
+        permanentNonlocTableFlag = false;
+    }
+
+    cl = 0.;
+    suprad = 0.;
+    mm = 0.;
+    weightFun = WFT_Unknown;
+    scaling = ST_Unknown;
+    averagedVar = AVT_Unknown;
 }
 
 void
@@ -104,7 +109,7 @@ NonlocalMaterialExtensionInterface :: buildNonlocalPointTable(GaussPoint *gp)
 
     NonlocalMaterialStatusExtensionInterface *statusExt =
         ( NonlocalMaterialStatusExtensionInterface * ) gp->giveMaterialStatus()->
-    giveInterface(NonlocalMaterialStatusExtensionInterfaceType);
+        giveInterface(NonlocalMaterialStatusExtensionInterfaceType);
     dynaList< localIntegrationRecord > *iList;
 
     Element *ielem;
@@ -118,10 +123,10 @@ NonlocalMaterialExtensionInterface :: buildNonlocalPointTable(GaussPoint *gp)
     // test for bounded support - if no bounded support, the nonlocal point table is
     // big vasting of space.
     /*
-    if ( !this->hasBoundedSupport() ) {
-        return;
-    }
-    */
+     * if ( !this->hasBoundedSupport() ) {
+     *  return;
+     * }
+     */
 
     if ( !statusExt->giveIntegrationDomainList()->isEmpty() ) {
         return;                                                  // already done
@@ -139,7 +144,7 @@ NonlocalMaterialExtensionInterface :: buildNonlocalPointTable(GaussPoint *gp)
 #ifdef NMEI_USE_ALL_ELEMENTS_IN_SUPPORT
     this->giveDomain()->giveSpatialLocalizer()->giveAllElementsWithNodesWithinBox(elemSet, gpCoords, suprad);
     // insert element containing given gp
-    elemSet.insert(gp->giveElement()->giveNumber());
+    elemSet.insert( gp->giveElement()->giveNumber() );
 #else
     this->giveDomain()->giveSpatialLocalizer()->giveAllElementsWithIpWithinBox(elemSet, gpCoords, suprad);
 #endif
@@ -165,7 +170,7 @@ NonlocalMaterialExtensionInterface :: buildNonlocalPointTable(GaussPoint *gp)
                      */
                     this->applyBarrierConstraints(gpCoords, jGpCoords, weight);
 #ifdef NMEI_USE_ALL_ELEMENTS_IN_SUPPORT
-                    if (1) {
+                    if ( 1 ) {
 #else
                     if ( weight > 0. ) {
 #endif
@@ -221,7 +226,7 @@ NonlocalMaterialExtensionInterface :: rebuildNonlocalPointTable(GaussPoint *gp, 
 
     NonlocalMaterialStatusExtensionInterface *statusExt =
         ( NonlocalMaterialStatusExtensionInterface * ) gp->giveMaterialStatus()->
-    giveInterface(NonlocalMaterialStatusExtensionInterfaceType);
+        giveInterface(NonlocalMaterialStatusExtensionInterfaceType);
     dynaList< localIntegrationRecord > *iList;
 
     Element *ielem;
@@ -235,10 +240,10 @@ NonlocalMaterialExtensionInterface :: rebuildNonlocalPointTable(GaussPoint *gp, 
     // test for bounded support - if no bounded support, the nonlocal point table is
     // big vasting of space.
     /*
-    if ( !this->hasBoundedSupport() ) {
-        return;
-    }
-    */
+     * if ( !this->hasBoundedSupport() ) {
+     *  return;
+     * }
+     */
 
     iList = statusExt->giveIntegrationDomainList();
     iList->clear();
@@ -268,7 +273,7 @@ NonlocalMaterialExtensionInterface :: rebuildNonlocalPointTable(GaussPoint *gp, 
 
                         this->applyBarrierConstraints(gpCoords, jGpCoords, weight);
 #ifdef NMEI_USE_ALL_ELEMENTS_IN_SUPPORT
-                    if (1) {
+                        if ( 1 ) {
 #else
                         if ( weight > 0. ) {
 #endif
@@ -288,7 +293,7 @@ NonlocalMaterialExtensionInterface :: rebuildNonlocalPointTable(GaussPoint *gp, 
 
         statusExt->setIntegrationScale(integrationVolume); // remember scaling factor
 #ifdef __PARALLEL_MODE
-#ifdef __VERBOSE_PARALLEL
+ #ifdef __VERBOSE_PARALLEL
         dynaList< localIntegrationRecord > :: iterator pos;
         fprintf( stderr, "%d(%d):", gp->giveElement()->giveGlobalNumber(), gp->giveNumber() );
         for ( pos = iList->begin(); pos != iList->end(); ++pos ) {
@@ -296,7 +301,7 @@ NonlocalMaterialExtensionInterface :: rebuildNonlocalPointTable(GaussPoint *gp, 
         }
 
         fprintf(stderr, "\n");
-#endif
+ #endif
 #endif
     }
 }
@@ -305,202 +310,235 @@ NonlocalMaterialExtensionInterface :: rebuildNonlocalPointTable(GaussPoint *gp, 
 dynaList< localIntegrationRecord > *
 NonlocalMaterialExtensionInterface :: giveIPIntegrationList(GaussPoint *gp)
 {
-  NonlocalMaterialStatusExtensionInterface *statusExt =
-    ( NonlocalMaterialStatusExtensionInterface * ) gp->giveMaterialStatus()->
-    giveInterface(NonlocalMaterialStatusExtensionInterfaceType);
+    NonlocalMaterialStatusExtensionInterface *statusExt =
+        ( NonlocalMaterialStatusExtensionInterface * ) gp->giveMaterialStatus()->
+        giveInterface(NonlocalMaterialStatusExtensionInterfaceType);
 
-  if ( !statusExt ) {
-    OOFEM_ERROR("NonlocalMaterialExtensionInterface::givIPIntegrationList : local material status encountered");
-  }
+    if ( !statusExt ) {
+        OOFEM_ERROR("NonlocalMaterialExtensionInterface::givIPIntegrationList : local material status encountered");
+    }
 
-  if ( statusExt->giveIntegrationDomainList()->isEmpty() ) {
-    this->buildNonlocalPointTable(gp);
-  }
+    if ( statusExt->giveIntegrationDomainList()->isEmpty() ) {
+        this->buildNonlocalPointTable(gp);
+    }
 
-  return statusExt->giveIntegrationDomainList();
+    return statusExt->giveIntegrationDomainList();
 }
 
 void
 NonlocalMaterialExtensionInterface :: endIPNonlocalAverage(GaussPoint *gp)
 {
-  NonlocalMaterialStatusExtensionInterface *statusExt =
-    ( NonlocalMaterialStatusExtensionInterface * ) gp->giveMaterialStatus()->
-    giveInterface(NonlocalMaterialStatusExtensionInterfaceType);
+    NonlocalMaterialStatusExtensionInterface *statusExt =
+        ( NonlocalMaterialStatusExtensionInterface * ) gp->giveMaterialStatus()->
+        giveInterface(NonlocalMaterialStatusExtensionInterfaceType);
 
-  if ( !statusExt ) {
-    OOFEM_ERROR("NonlocalMaterialExtensionInterface::givIPIntegrationList : local material status encountered");
-  }
+    if ( !statusExt ) {
+        OOFEM_ERROR("NonlocalMaterialExtensionInterface::givIPIntegrationList : local material status encountered");
+    }
 
-  if ( (!this->hasBoundedSupport()) || (!permanentNonlocTableFlag)) {
-    statusExt->clear();
-  }
+    if ( ( !this->hasBoundedSupport() ) || ( !permanentNonlocTableFlag ) ) {
+        statusExt->clear();
+    }
 }
 
-double 
+double
 NonlocalMaterialExtensionInterface :: computeWeightFunction(double distance)
-{  
-  if (weightFun==WFT_UniformOverElement) // uniform function over one element
-    return 1.;
+{
+    if ( weightFun == WFT_UniformOverElement ) { // uniform function over one element
+        return 1.;
+    }
 
-  if (distance>suprad || distance<0.)
-    return 0.;
+    if ( distance > suprad || distance < 0. ) {
+        return 0.;
+    }
 
-  double aux = distance/this->cl;
-  double iwf = giveIntegralOfWeightFunction(2); // 2D formulation assumed !!!!
-  
-  switch (weightFun){
-  case WFT_Bell: // Bell shaped function (quartic spline)
-    aux = (1.-aux*aux);
-    return aux*aux/iwf;
-  case WFT_Gauss: // Gauss function
-    return exp(-aux*aux)/iwf;
-  case WFT_Green: // Function corresponding in 1D to Green's function of Helmholtz equation (implicit gradient model) 
-    return exp(-aux)/iwf;
-  case WFT_Uniform: // uniform function over an interaction distance
-    return 1./iwf;
-  default:
-    printf("IDNLMaterial :: computeWeightFunction ... unknown type of weight function %d\n",weightFun);
-    return 0.0;
-  }
+    double aux = distance / this->cl;
+    double iwf = giveIntegralOfWeightFunction(2); // 2D formulation assumed !!!!
+
+    switch ( weightFun ) {
+    case WFT_Bell: // Bell shaped function (quartic spline)
+        aux = ( 1. - aux * aux );
+        return aux * aux / iwf;
+
+    case WFT_Gauss: // Gauss function
+        return exp(-aux * aux) / iwf;
+
+    case WFT_Green: // Function corresponding in 1D to Green's function of Helmholtz equation (implicit gradient model)
+        return exp(-aux) / iwf;
+
+    case WFT_Uniform: // uniform function over an interaction distance
+        return 1. / iwf;
+
+    default:
+        printf("IDNLMaterial :: computeWeightFunction ... unknown type of weight function %d\n", weightFun);
+        return 0.0;
+    }
 }
 
-double 
+double
 NonlocalMaterialExtensionInterface :: computeWeightFunction(const FloatArray &src, const FloatArray &coord)
 {
-  return computeWeightFunction(src.distance(coord));
+    return computeWeightFunction( src.distance(coord) );
 }
 
-double 
-NonlocalMaterialExtensionInterface :: giveIntegralOfWeightFunction (const int spatial_dimension)
+double
+NonlocalMaterialExtensionInterface :: giveIntegralOfWeightFunction(const int spatial_dimension)
 {
-  const double pi = 3.1415926;
-  switch (weightFun){
-  case WFT_Bell:
-    switch (spatial_dimension){
-    case 1: return cl*16./15.;
-    case 2: return cl*cl*pi/3.;
-    case 3: return cl*cl*cl*pi*8./105.;
+    const double pi = 3.1415926;
+    switch ( weightFun ) {
+    case WFT_Bell:
+        switch ( spatial_dimension ) {
+        case 1: return cl * 16. / 15.;
+
+        case 2: return cl * cl * pi / 3.;
+
+        case 3: return cl * cl * cl * pi * 8. / 105.;
+
+        default: return 1.;
+        }
+
+    case WFT_Gauss:
+        switch ( spatial_dimension ) {
+        case 1: return cl * sqrt(pi);
+
+        case 2: return cl * cl * pi;
+
+        case 3: return cl * cl * cl * sqrt(pi * pi * pi) / 4.;
+
+        default: return 1.;
+        }
+
+    case WFT_Green:
+        switch ( spatial_dimension ) {
+        case 1: return cl * 2.;
+
+        case 2: return cl * cl * 2. * pi;
+
+        case 3: return cl * cl * cl * 2. * pi;
+
+        default: return 1.;
+        }
+
+    case WFT_Uniform:
+        switch ( spatial_dimension ) {
+        case 1: return cl * 2.;
+
+        case 2: return cl * cl * pi;
+
+        case 3: return cl * cl * cl * ( 4. / 3. ) * pi;
+
+        default: return 1.;
+        }
+
     default: return 1.;
     }
-  case WFT_Gauss:
-    switch (spatial_dimension){
-    case 1: return cl*sqrt(pi);
-    case 2: return cl*cl*pi;
-    case 3: return cl*cl*cl*sqrt(pi*pi*pi)/4.;
-    default: return 1.;
-    }
-  case WFT_Green:
-    switch (spatial_dimension){
-    case 1: return cl*2.;
-    case 2: return cl*cl*2.*pi;
-    case 3: return cl*cl*cl*2.*pi;
-    default: return 1.;
-    }
-  case WFT_Uniform:
-    switch (spatial_dimension){
-    case 1: return cl*2.;
-    case 2: return cl*cl*pi;
-    case 3: return cl*cl*cl*(4./3.)*pi;
-    default: return 1.;
-    }
-  default: return 1.;
-  }    
 }
-    
-double 
+
+double
 NonlocalMaterialExtensionInterface :: maxValueOfWeightFunction()
 {
-  double iwf = giveIntegralOfWeightFunction(2); // 2D formulation assumed !!!!
-  return 1./iwf;
+    double iwf = giveIntegralOfWeightFunction(2); // 2D formulation assumed !!!!
+    return 1. / iwf;
 }
 
-double 
+double
 NonlocalMaterialExtensionInterface :: evaluateSupportRadius()
 {
-  switch (weightFun){
-  case WFT_Bell:  return cl; 
-  case WFT_Gauss: return 2.5*cl; 
-  case WFT_Green: return 6.*cl;
-  case WFT_Uniform:  return cl; 
-  case WFT_UniformOverElement:  return 0.0; // to make sure that only Gauss points of the same element will be considered as neighbors 
-  default:        return cl;
-  }
+    switch ( weightFun ) {
+    case WFT_Bell:  return cl;
+
+    case WFT_Gauss: return 2.5 * cl;
+
+    case WFT_Green: return 6. * cl;
+
+    case WFT_Uniform:  return cl;
+
+    case WFT_UniformOverElement:  return 0.0; // to make sure that only Gauss points of the same element will be considered as neighbors
+
+    default:        return cl;
+    }
 }
 
 
 IRResultType
 NonlocalMaterialExtensionInterface :: initializeFrom(InputRecord *ir)
 {
-  const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
-  IRResultType result;                // Required by IR_GIVE_FIELD macro
+    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
+    IRResultType result;              // Required by IR_GIVE_FIELD macro
 
-  if ( ir->hasField(IFT_NonlocalMaterialExtensionInterface_regionmap, "regionmap") ) {
-    IR_GIVE_FIELD(ir, regionMap, IFT_NonlocalMaterialExtensionInterface_regionmap, "regionmap"); 
-    if ( regionMap.giveSize() != this->giveDomain()->giveNumberOfRegions() ) {
-      OOFEM_ERROR("NonlocalMaterialExtensionInterface::instanciateFrom: regionMap size mismatch");
+    if ( ir->hasField(IFT_NonlocalMaterialExtensionInterface_regionmap, "regionmap") ) {
+        IR_GIVE_FIELD(ir, regionMap, IFT_NonlocalMaterialExtensionInterface_regionmap, "regionmap");
+        if ( regionMap.giveSize() != this->giveDomain()->giveNumberOfRegions() ) {
+            OOFEM_ERROR("NonlocalMaterialExtensionInterface::instanciateFrom: regionMap size mismatch");
+        }
+    } else {
+        regionMap.zero();
     }
-  } else {
-    regionMap.zero();
-  }
 
-  int _permanentNonlocTableFlag = this->permanentNonlocTableFlag;
-  IR_GIVE_OPTIONAL_FIELD (ir, _permanentNonlocTableFlag,
-			  IFT_NonlocalMaterialExtensionInterface_permanentNonlocTableFlag, "permanentnonloctableflag");
-  this->permanentNonlocTableFlag = _permanentNonlocTableFlag;
+    int _permanentNonlocTableFlag = this->permanentNonlocTableFlag;
+    IR_GIVE_OPTIONAL_FIELD(ir, _permanentNonlocTableFlag,
+                           IFT_NonlocalMaterialExtensionInterface_permanentNonlocTableFlag, "permanentnonloctableflag");
+    this->permanentNonlocTableFlag = _permanentNonlocTableFlag;
 
-  // read the characteristic length
-  IR_GIVE_FIELD (ir, cl, IFT_NonlocalMaterialExtensionInterface_r, "r"); 
-  if (cl < 0.0) cl = 0.0;
+    // read the characteristic length
+    IR_GIVE_FIELD(ir, cl, IFT_NonlocalMaterialExtensionInterface_r, "r");
+    if ( cl < 0.0 ) {
+        cl = 0.0;
+    }
 
-  // read the type of weight function
-  int wft=1;
-  IR_GIVE_OPTIONAL_FIELD (ir, wft, IFT_NonlocalMaterialExtensionInterface_wft, "wft");
-  if (wft==2)
-    weightFun = WFT_Gauss;
-  else if (wft==3)
-    weightFun = WFT_Green;
-  else if (wft==4)
-    weightFun = WFT_Uniform;
-  else if (wft==5)
-    weightFun = WFT_UniformOverElement;
-  else
-    weightFun = WFT_Bell; // default
+    // read the type of weight function
+    int wft = 1;
+    IR_GIVE_OPTIONAL_FIELD(ir, wft, IFT_NonlocalMaterialExtensionInterface_wft, "wft");
+    if ( wft == 2 ) {
+        weightFun = WFT_Gauss;
+    } else if ( wft == 3 )    {
+        weightFun = WFT_Green;
+    } else if ( wft == 4 )    {
+        weightFun = WFT_Uniform;
+    } else if ( wft == 5 )    {
+        weightFun = WFT_UniformOverElement;
+    } else {
+        weightFun = WFT_Bell; // default
+    }
 
-  // this is introduced for compatibility of input format with previous versions
-  // ("averagingtype 1" in the input means that the weight function
-  //   should be uniform over an element, 
-  //   which can now be described as "wft 5") 
-  int avt=0;
-  IR_GIVE_OPTIONAL_FIELD (ir, avt, IFT_NonlocalMaterialExtensionInterface_averagingtype, "averagingtype");
-  if (avt==1)
-    weightFun = WFT_UniformOverElement;
+    // this is introduced for compatibility of input format with previous versions
+    // ("averagingtype 1" in the input means that the weight function
+    //   should be uniform over an element,
+    //   which can now be described as "wft 5")
+    int avt = 0;
+    IR_GIVE_OPTIONAL_FIELD(ir, avt, IFT_NonlocalMaterialExtensionInterface_averagingtype, "averagingtype");
+    if ( avt == 1 ) {
+        weightFun = WFT_UniformOverElement;
+    }
 
-  // evaluate the support radius based on type of weight function and characteristic length
-  suprad = evaluateSupportRadius();
+    // evaluate the support radius based on type of weight function and characteristic length
+    suprad = evaluateSupportRadius();
 
-  // read the optional parameter for overnonlocal formulation
-  mm = 1.;
-  IR_GIVE_OPTIONAL_FIELD (ir, mm, IFT_NonlocalMaterialExtensionInterface_m, "m");
+    // read the optional parameter for overnonlocal formulation
+    mm = 1.;
+    IR_GIVE_OPTIONAL_FIELD(ir, mm, IFT_NonlocalMaterialExtensionInterface_m, "m");
 
-  // read the type of scaling
-  int st = 1;
-  IR_GIVE_OPTIONAL_FIELD (ir, st, IFT_NonlocalMaterialExtensionInterface_scalingtype, "scaling"); 
-  if (st==2)
-    scaling = ST_Noscaling;
-  else if (st==3)
-    scaling = ST_Borino;
-  else
-    scaling = ST_Standard; // default
+    // read the type of scaling
+    int st = 1;
+    IR_GIVE_OPTIONAL_FIELD(ir, st, IFT_NonlocalMaterialExtensionInterface_scalingtype, "scaling");
+    if ( st == 2 ) {
+        scaling = ST_Noscaling;
+    } else if ( st == 3 )    {
+        scaling = ST_Borino;
+    } else {
+        scaling = ST_Standard; // default
+    }
 
-  // read the type of averaged variable
-  int av = 1;
-  IR_GIVE_OPTIONAL_FIELD (ir, av, IFT_NonlocalMaterialExtensionInterface_averagedquantity, "averagedvar"); 
-  if (av==2)
-    averagedVar = AVT_Compliance;
-  else
-    averagedVar = AVT_EqStrain; // default
+    // read the type of averaged variable
+    int av = 1;
+    IR_GIVE_OPTIONAL_FIELD(ir, av, IFT_NonlocalMaterialExtensionInterface_averagedquantity, "averagedvar");
+    if ( av == 2 ) {
+        averagedVar = AVT_Compliance;
+    } else {
+        averagedVar = AVT_EqStrain; // default
+    }
 
-  return IRRT_OK;
+    return IRRT_OK;
 }
 
 
@@ -564,9 +602,9 @@ NonlocalMaterialExtensionInterface :: manipulateWeight(double &weight, GaussPoin
     Element *ielem = jGp->giveElement();
     IntegrationRule *iRule = ielem->giveDefaultIntegrationRulePtr();
 
-    if ( ielem->giveMaterial()->hasProperty(AVERAGING_TYPE,jGp) ){
-        if( ielem->giveMaterial()->give(AVERAGING_TYPE,jGp) == 1){
-            weight = 1./( iRule->getNumberOfIntegrationPoints() );//asign the same weights over the whole element
+    if ( ielem->giveMaterial()->hasProperty(AVERAGING_TYPE, jGp) ) {
+        if ( ielem->giveMaterial()->give(AVERAGING_TYPE, jGp) == 1 ) {
+            weight = 1. / ( iRule->getNumberOfIntegrationPoints() ); //asign the same weights over the whole element
         }
     }
 }
@@ -582,5 +620,4 @@ NonlocalMaterialStatusExtensionInterface :: ~NonlocalMaterialStatusExtensionInte
 {
     ;
 }
-
 } // end namespace oofem

@@ -50,22 +50,21 @@
 #include "load.h"
 #include "mathfem.h"
 #ifndef __MAKEDEPEND
-#include <stdio.h>
+ #include <stdio.h>
 #endif
 
 #ifdef __OOFEG
-#include "engngm.h"
-#include "oofeggraphiccontext.h"
-#include "oofegutils.h"
-#include "conTable.h"
-#ifndef __MAKEDEPEND
-#include "Etetrawd.h"
-#include "rcm2.h"
-#endif
+ #include "engngm.h"
+ #include "oofeggraphiccontext.h"
+ #include "oofegutils.h"
+ #include "conTable.h"
+ #ifndef __MAKEDEPEND
+  #include "Etetrawd.h"
+  #include "rcm2.h"
+ #endif
 #endif
 
 namespace oofem {
-
 FEI3dTrLin LTRSpace :: interpolation;
 
 LTRSpace :: LTRSpace(int n, Domain *aDomain) :
@@ -171,47 +170,57 @@ LTRSpace :: computeNLBMatrixAt(FloatMatrix &answer, GaussPoint *aGaussPoint, int
 // Returns the [12x12] nonlinear part of the strain-displacement matrix {B} of the receiver,
 // evaluated at aGaussPoint
 {
-  int j, k, l;
-   FloatMatrix dnx;
+    int j, k, l;
+    FloatMatrix dnx;
 
-   interpolation.evaldNdx(dnx, *aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0);
-  
-   answer.resize(12,12);
-   answer.zero();
+    interpolation.evaldNdx(dnx, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0);
 
-   if (i<=3){
-     for (k=0;k<4;k++)
-       for (l=0;l<3;l++)
-	 for (j=1;j<=12;j+=3)
-	   answer.at(k*3+l+1,l+j) = dnx.at(k+1,i) * dnx.at((j-1)/3+1,i);
-   }
-   else if (i==4){
-     for (k=0;k<4;k++)
-       for (l=0;l<3;l++)
-	 for (j=1;j<=12;j+=3)
-	   answer.at(k*3+l+1,l+j) = dnx.at(k+1,2) * dnx.at((j-1)/3+1,3) + dnx.at(k+1,3) * dnx.at((j-1)/3+1,2);
-   }
-   else if(i==5){
-     for (k=0;k<4;k++)
-       for (l=0;l<3;l++)
-	 for (j=1;j<=12;j+=3)
-	   answer.at(k*3+l+1,l+j) = dnx.at(k+1,1) * dnx.at((j-1)/3+1,3) + dnx.at(k+1,3) * dnx.at((j-1)/3+1,1);
-   }
-   else if (i==6){
-     for (k=0;k<4;k++)
-       for (l=0;l<3;l++)
-	 for (j=1;j<=12;j+=3)
-	   answer.at(k*3+l+1,l+j) = dnx.at(k+1,1) * dnx.at((j-1)/3+1,2) + dnx.at(k+1,2) * dnx.at((j-1)/3+1,1);
-   }
-   return;
+    answer.resize(12, 12);
+    answer.zero();
+
+    if ( i <= 3 ) {
+        for ( k = 0; k < 4; k++ ) {
+            for ( l = 0; l < 3; l++ ) {
+                for ( j = 1; j <= 12; j += 3 ) {
+                    answer.at(k * 3 + l + 1, l + j) = dnx.at(k + 1, i) * dnx.at( ( j - 1 ) / 3 + 1, i );
+                }
+            }
+        }
+    } else if ( i == 4 )       {
+        for ( k = 0; k < 4; k++ ) {
+            for ( l = 0; l < 3; l++ ) {
+                for ( j = 1; j <= 12; j += 3 ) {
+                    answer.at(k * 3 + l + 1, l + j) = dnx.at(k + 1, 2) * dnx.at( ( j - 1 ) / 3 + 1, 3 ) + dnx.at(k + 1, 3) * dnx.at( ( j - 1 ) / 3 + 1, 2 );
+                }
+            }
+        }
+    } else if ( i == 5 )        {
+        for ( k = 0; k < 4; k++ ) {
+            for ( l = 0; l < 3; l++ ) {
+                for ( j = 1; j <= 12; j += 3 ) {
+                    answer.at(k * 3 + l + 1, l + j) = dnx.at(k + 1, 1) * dnx.at( ( j - 1 ) / 3 + 1, 3 ) + dnx.at(k + 1, 3) * dnx.at( ( j - 1 ) / 3 + 1, 1 );
+                }
+            }
+        }
+    } else if ( i == 6 )       {
+        for ( k = 0; k < 4; k++ ) {
+            for ( l = 0; l < 3; l++ ) {
+                for ( j = 1; j <= 12; j += 3 ) {
+                    answer.at(k * 3 + l + 1, l + j) = dnx.at(k + 1, 1) * dnx.at( ( j - 1 ) / 3 + 1, 2 ) + dnx.at(k + 1, 2) * dnx.at( ( j - 1 ) / 3 + 1, 1 );
+                }
+            }
+        }
+    }
+
+    return;
 }
 
 double LTRSpace :: computeVolumeAround(GaussPoint *aGaussPoint)
 // Returns the portion of the receiver which is attached to aGaussPoint.
 {
     double determinant, weight, volume;
-    determinant = fabs( this->interpolation.giveTransformationJacobian(* aGaussPoint->giveCoordinates(), 
-								       FEIElementGeometryWrapper(this), 0.0) );
+    determinant = fabs( this->interpolation.giveTransformationJacobian(* aGaussPoint->giveCoordinates(),
+                                                                       FEIElementGeometryWrapper(this), 0.0) );
     weight      = aGaussPoint->giveWeight();
     volume      = determinant * weight;
     return volume;
@@ -220,8 +229,8 @@ double LTRSpace :: computeVolumeAround(GaussPoint *aGaussPoint)
 IRResultType
 LTRSpace :: initializeFrom(InputRecord *ir)
 {
-  //const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
-  //IRResultType result;                            // Required by IR_GIVE_FIELD macro
+    //const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
+    //IRResultType result;                            // Required by IR_GIVE_FIELD macro
 
     this->NLStructuralElement :: initializeFrom(ir);
     numberOfGaussPoints = 1;
@@ -236,12 +245,12 @@ LTRSpace :: initializeFrom(InputRecord *ir)
 void LTRSpace :: computeGaussPoints()
 // Sets up the array containing the four Gauss points of the receiver.
 {
-  if (!integrationRulesArray) {
-    numberOfIntegrationRules = 1;
-    integrationRulesArray = new IntegrationRule * [ 1 ];
-    integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 6);
-    integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Tetrahedra, numberOfGaussPoints, _3dMat);
-  }
+    if ( !integrationRulesArray ) {
+        numberOfIntegrationRules = 1;
+        integrationRulesArray = new IntegrationRule * [ 1 ];
+        integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 6);
+        integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Tetrahedra, numberOfGaussPoints, _3dMat);
+    }
 }
 
 
@@ -308,7 +317,7 @@ LTRSpace :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep)
     gp                 = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
 
     dV = this->computeVolumeAround(gp);
-    mss1 = dV * this->giveMaterial()->give('d',gp) / 4.;
+    mss1 = dV * this->giveMaterial()->give('d', gp) / 4.;
 
     for ( int i = 1; i <= 12; i++ ) {
         answer.at(i, i) = mss1;
@@ -352,7 +361,7 @@ LTRSpace :: giveCharacteristicLenght(GaussPoint *gp, const FloatArray &normalToC
 int
 LTRSpace :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords)
 {
-  this->interpolation.local2global(answer, lcoords, FEIElementGeometryWrapper(this), 0.0);
+    this->interpolation.local2global(answer, lcoords, FEIElementGeometryWrapper(this), 0.0);
     return 1;
 }
 
@@ -543,7 +552,7 @@ LTRSpace :: HuertaErrorEstimatorI_setupRefinedElementProblem(RefinedElement *ref
 }
 
 #ifdef __OOFEG
-#define TR_LENGHT_REDUCT 0.3333
+ #define TR_LENGHT_REDUCT 0.3333
 
 void LTRSpace :: drawRawGeometry(oofegGraphicContext &gc)
 {
@@ -746,10 +755,10 @@ LTRSpace :: drawSpecial(oofegGraphicContext &gc)
                         if ( i == 1 ) {
                             j = 2;
                             k = 3;
-                        } else if ( i == 2 )                            {
+                        } else if ( i == 2 ) {
                             j = 3;
                             k = 1;
-                        } else                                                            {
+                        } else {
                             j = 1;
                             k = 2;
                         }
@@ -794,7 +803,7 @@ LTRSpace :: drawSpecial(oofegGraphicContext &gc)
 int
 LTRSpace :: computeLocalCoordinates(FloatArray &answer, const FloatArray &coords)
 {
-  return this->interpolation.global2local(answer, coords, FEIElementGeometryWrapper(this), 0.0);
+    return this->interpolation.global2local(answer, coords, FEIElementGeometryWrapper(this), 0.0);
 }
 
 int
@@ -820,7 +829,7 @@ LTRSpace :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray 
 
     if ( size == gsize ) {
         dist = coords.distance(gcoords);
-    } else   {
+    } else {
         FloatArray helpCoords = coords;
 
         helpCoords.resize(gsize);
@@ -833,9 +842,9 @@ LTRSpace :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray 
 
 double
 LTRSpace :: DirectErrorIndicatorRCI_giveCharacteristicSize() {
-  FloatArray lc(4);
-  double volume = interpolation.giveTransformationJacobian(lc, FEIElementGeometryWrapper(this), 0.0);
-  return __OOFEM_POW(volume * 6.0, 1. / 3.);
+    FloatArray lc(4);
+    double volume = interpolation.giveTransformationJacobian(lc, FEIElementGeometryWrapper(this), 0.0);
+    return __OOFEM_POW(volume * 6.0, 1. / 3.);
 }
 
 int
@@ -1002,16 +1011,16 @@ LTRSpace :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
 double
 LTRSpace ::   computeEdgeVolumeAround(GaussPoint *aGaussPoint, int iEdge)
 {
-    double result = this->interpolation.edgeGiveTransformationJacobian(iEdge, * aGaussPoint->giveCoordinates(), 
-								       FEIElementGeometryWrapper(this), 0.0);
-    return result *aGaussPoint->giveWeight();
+    double result = this->interpolation.edgeGiveTransformationJacobian(iEdge, * aGaussPoint->giveCoordinates(),
+                                                                       FEIElementGeometryWrapper(this), 0.0);
+    return result * aGaussPoint->giveWeight();
 }
 
 
 void
 LTRSpace ::   computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge)
 {
-  this->interpolation.edgeLocal2global(answer, iEdge, * gp->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0);
+    this->interpolation.edgeLocal2global(answer, iEdge, * gp->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0);
 }
 
 
@@ -1135,7 +1144,7 @@ LTRSpace :: computeSurfaceVolumeAround(GaussPoint *gp, int iSurf)
 void
 LTRSpace :: computeSurfIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int isurf)
 {
-  interpolation.surfaceLocal2global(answer, isurf, * gp->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0);
+    interpolation.surfaceLocal2global(answer, isurf, * gp->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0);
 }
 
 
@@ -1145,5 +1154,4 @@ LTRSpace :: computeLoadLSToLRotationMatrix(FloatMatrix &answer, int, GaussPoint 
     _error("computeLoadLSToLRotationMatrix: surface local coordinate system not supported");
     return 1;
 }
-
 } // end namespace oofem

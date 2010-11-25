@@ -49,7 +49,6 @@
 #include "intarray.h"
 
 namespace oofem {
-
 class SloanGraph;
 
 /**
@@ -76,10 +75,12 @@ private:
 public:
     /// Constructor. Creates new level structure assignet to graph, with root being the root node.
     SloanLevelStructure(SloanGraph *graph, int root) : Structure(0)
-    { Graph = graph;
-      Root = root;
-      End = 0;
-      Depth = Width = 0; }
+    {
+        Graph = graph;
+        Root = root;
+        End = 0;
+        Depth = Width = 0;
+    }
     /// Destructor
     ~SloanLevelStructure();
 
@@ -95,13 +96,17 @@ public:
     int   formYourself(int limitWidth = -1);
 
     /// Returns the depth of receiver
-    int  giveDepth() { if ( !Depth ) { computeDepth(); }
+    int  giveDepth() {
+        if ( !Depth ) { computeDepth(); }
 
-                       return Depth; }
+        return Depth;
+    }
     /// Returns the width of receiver
-    int  giveWidth() { if ( !Width ) { computeWidth(); }
+    int  giveWidth() {
+        if ( !Width ) { computeWidth(); }
 
-                       return Width; }
+        return Width;
+    }
     /// Returns the i-th level of receiver
     IntArray *giveLevel(int num);
     /// Sets the end node of receiver
@@ -117,6 +122,5 @@ private:
     /// Computes the Width of receiver
     void  computeWidth();
 };
-
 } // end namespace oofem
 #endif // sloanlevelstruct_h

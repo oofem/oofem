@@ -39,7 +39,6 @@
 #include "femcmpnn.h"
 
 namespace oofem {
-
 /**
  * Abstract base class representing (moving) material interfaces.
  * Its typical use to model moving interface (such as free surface)
@@ -90,6 +89,5 @@ public:
     /** Returns scalar value representation of material Interface at given point. For visualization */
     virtual double giveNodalScalarRepresentation(int) = 0;
 };
-
 } // end namespace oofem
 #endif // materialinterface_h

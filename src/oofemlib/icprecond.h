@@ -37,11 +37,10 @@
 #include "symcompcol.h"
 #include "precond.h"
 #ifndef __MAKEDEPEND
-#include <string.h>
+ #include <string.h>
 #endif
 
 namespace oofem {
-
 /**
  * Incomplete Cholesky IC(0) (no fill - up) preconditioner for
  * symmetric, positive definite matrices
@@ -89,6 +88,5 @@ protected:
     void ICSolve(FloatArray &dest) const;
     void ICFactor();
 };
-
 } // end namespace oofem
 #endif // icprecond_h

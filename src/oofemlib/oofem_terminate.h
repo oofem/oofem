@@ -40,7 +40,6 @@
 #define oofem_terminate_h
 
 namespace oofem {
-
 /// oofem terminate exception class
 class OOFEM_Terminate
 {
@@ -53,7 +52,5 @@ public:
     OOFEM_exit_status status;
     OOFEM_Terminate(OOFEM_exit_status s = ES_OK) { status = s; }
 };
-
-
 } // end namespace oofem
 #endif // oofem_terminate_h

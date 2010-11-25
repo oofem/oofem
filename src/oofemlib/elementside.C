@@ -47,12 +47,11 @@
 #include "debug.h"
 #include "verbose.h"
 #ifndef __MAKEDEPEND
-#include <math.h>
-#include <stdlib.h>
+ #include <math.h>
+ #include <stdlib.h>
 #endif
 
 namespace oofem {
-
 ElementSide :: ElementSide(int n, Domain *aDomain) :
     DofManager(n, aDomain)
     // Constructor. Creates a node with number n, belonging to aDomain.
@@ -128,5 +127,4 @@ ElementSide :: computeTransformation(FloatMatrix &answer, const IntArray *map)
         answer.at(i, i) = 1.0;
     }
 }
-
 } // end namespace oofem

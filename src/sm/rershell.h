@@ -43,9 +43,8 @@
 #include "layeredcrosssection.h"
 
 namespace oofem {
-
 #ifndef __CHARTENSOR // termitovo
-#define __CHARTENSOR
+ #define __CHARTENSOR
 enum CharTensor {
     LocalStrainTensor,
     GlobalStrainTensor,
@@ -188,7 +187,7 @@ public:
     IRResultType initializeFrom(InputRecord *ir);
 
     integrationDomain  giveIntegrationDomain() { return _Triangle; }
-    MaterialMode          giveMaterialMode()  {return _3dShell;}
+    MaterialMode          giveMaterialMode()  { return _3dShell; }
 
 protected:
     void               computeBodyLoadVectorAt(FloatArray &answer, Load *, TimeStep *, ValueModeType mode);
@@ -201,6 +200,5 @@ protected:
 
     double             giveArea();
 };
-
 } // end namespace oofem
 #endif // rershell_h

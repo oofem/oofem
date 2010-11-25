@@ -50,7 +50,6 @@
 #include "geometry.h"
 
 namespace oofem {
-
 class GaussPoint;
 class Element;
 class FEInterpolation;
@@ -151,7 +150,7 @@ public:
      * Access particular integration point of receiver.
      * @param n integration point number (should be in range 0,.., getNumberOfIntegrationPoints()-1).
      */
-    GaussPoint *getIntegrationPoint(int n) ;
+    GaussPoint *getIntegrationPoint(int n);
     /**
      * Returns starting component index, for which receiver applies.
      */
@@ -199,7 +198,7 @@ public:
     /** Returns reference to interpolation asscoiated with GaussPoint */
     FEInterpolation *giveInterpolation(GaussPoint *gp);
     /** Returns receiver number */
-    int giveNumber() {return this->number;}
+    int giveNumber() { return this->number; }
     /**
      * Abstract service.`
      * Returns requred number of integration points to exactly integrate
@@ -237,7 +236,7 @@ public:
     virtual const char *giveClassName() const { return "IntegrationRule"; }
     virtual IRResultType initializeFrom(InputRecord *ir) { return IRRT_OK; }
     /// Returns receiver sub patch idices (if apply)
-    virtual const IntArray* giveKnotSpan () {return NULL;} 
+    virtual const IntArray *giveKnotSpan() { return NULL; }
 protected:
     /**
      * Sets up receiver's  integration points on unit line integration domain.
@@ -281,6 +280,5 @@ protected:
     virtual int SetUpPointsOn2DEmbeddedLine(int nPoints, MaterialMode mode, GaussPoint ***,
                                             const FloatArray **coords) { return 0; }
 };
-
 } // end namespace oofem
 #endif // integrationrule_h

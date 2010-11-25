@@ -44,7 +44,6 @@
 #include "flotarry.h"
 
 namespace oofem {
-
 class TimeStep;
 
 /**
@@ -58,12 +57,12 @@ class FreemInterface : public MesherInterface
 {
 public:
     /// Constructor
-    FreemInterface(Domain* d) : MesherInterface(d) { }
+    FreemInterface(Domain *d) : MesherInterface(d) { }
     /// Destructor
     virtual ~FreemInterface() { }
 
     /// Runs the mesh generation, mesh will be written to corresponding domain din file
-    virtual returnCode createMesh(TimeStep *tStep, int domainNumber, int domainSerNum, Domain** dNew);
+    virtual returnCode createMesh(TimeStep *tStep, int domainNumber, int domainSerNum, Domain **dNew);
 
 
 protected:
@@ -72,6 +71,5 @@ protected:
     /// service for smoothing the densities for freem
     void smoothNodalDensities(Domain *d,  FloatArray &nodalDensities, TimeStep *stepN);
 };
-
 } // end namespace oofem
 #endif // freeminterface_h

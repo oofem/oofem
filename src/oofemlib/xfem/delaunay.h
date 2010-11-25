@@ -13,7 +13,6 @@
 #include "geometry.h"
 
 namespace oofem {
-
 // O(n4) algorithm, only for testing purposes
 
 class Delaunay
@@ -24,7 +23,6 @@ public:
     bool isInsideCC(FloatArray *p, FloatArray *p1, FloatArray *p2, FloatArray *p3);
     void triangulate(AList< FloatArray > *overtices, AList< Triangle > *triangles);
 };
-
 } // end namespace oofem
 #endif  /* _DELAUNAY_H */
 

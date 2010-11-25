@@ -67,7 +67,6 @@
 #endif
 
 namespace oofem {
-
 Node :: Node(int n, Domain *aDomain) :
     DofManager(n, aDomain), coordinates()
     // Constructor. Creates a node with number n, belonging to aDomain.
@@ -156,13 +155,13 @@ Node :: initializeFrom(InputRecord *ir)
         // vector e3' computed from vector product of e1', e2'
         localCoordinateSystem->at(3, 1) =
             localCoordinateSystem->at(1, 2) * localCoordinateSystem->at(2, 3) -
-        localCoordinateSystem->at(1, 3) * localCoordinateSystem->at(2, 2);
+            localCoordinateSystem->at(1, 3) * localCoordinateSystem->at(2, 2);
         localCoordinateSystem->at(3, 2) =
             localCoordinateSystem->at(1, 3) * localCoordinateSystem->at(2, 1) -
-        localCoordinateSystem->at(1, 1) * localCoordinateSystem->at(2, 3);
+            localCoordinateSystem->at(1, 1) * localCoordinateSystem->at(2, 3);
         localCoordinateSystem->at(3, 3) =
             localCoordinateSystem->at(1, 1) * localCoordinateSystem->at(2, 2) -
-        localCoordinateSystem->at(1, 2) * localCoordinateSystem->at(2, 1);
+            localCoordinateSystem->at(1, 2) * localCoordinateSystem->at(2, 1);
     }
 
     return IRRT_OK;
@@ -258,14 +257,13 @@ void Node :: updateYourself(TimeStep *tStep)
     for ( i = 1; i <= numberOfDofs; i++ ) {
         if ( mode == AL ) { // updated Lagrange
             ic = domain->giveCorrespondingCoordinateIndex(i);
-            if (ic != 0) {
+            if ( ic != 0 ) {
                 Dof *d = this->giveDof(i);
                 DofID id = d->giveDofID();
-                if (id == D_u || id == D_v || id == D_w) {
+                if ( id == D_u || id == D_v || id == D_w ) {
                     coordinates.at(ic) += d->giveUnknown(EID_MomentumBalance, VM_Incremental, tStep);
-                }
-                else if (id == V_u || id == V_v || id == V_w) {
-                    coordinates.at(ic) += d->giveUnknown(EID_MomentumBalance, VM_Total, tStep)*dt;
+                } else if ( id == V_u || id == V_v || id == V_w )     {
+                    coordinates.at(ic) += d->giveUnknown(EID_MomentumBalance, VM_Total, tStep) * dt;
                 }
             }
         }
@@ -315,7 +313,7 @@ double Node :: giveUpdatedCoordinate(int ic, TimeStep *tStep, EquationID type, d
                 j = domain->giveCorrespondingCoordinateIndex(i);
                 if ( j ) { // && (this->giveDof(i)->giveUnknownType()==DisplacementVector))
                     displacements.at(j) = scale * this->giveDof(i)->
-                    giveUnknown(type, VM_Total, tStep);
+                                          giveUnknown(type, VM_Total, tStep);
                 }
             }
 
@@ -483,7 +481,7 @@ Node :: computeLoadTransformation(FloatMatrix &answer, const IntArray *dofMask, 
 
     if ( mode == _toNodalCS ) {
         computeDofTransformation(t, dofMask, _toGlobalCS);
-	answer.beTranspositionOf(t);
+        answer.beTranspositionOf(t);
     } else if ( mode == _toGlobalCS ) {
         computeDofTransformation(answer, dofMask, _toGlobalCS);
     } else {
@@ -769,14 +767,14 @@ void Node :: drawYourself(oofegGraphicContext &gc)
         EASValsSetLayer(OOFEG_NODE_ANNOTATION_LAYER);
         EASValsSetMType(FILLED_CIRCLE_MARKER);
  #if 1
-        if (this->giveDomain()->giveEngngModel()->hasXfemManager(1)) {
-          XfemManager *xf = this->giveDomain()->giveEngngModel()->giveXfemManager(1);
-          int i;
-          for ( i = 1; i <= xf->giveNumberOfEnrichmentItems(); i++ ) {
-            if ( xf->giveEnrichmentItem(i)->isDofManEnriched(this->number) ) {
-              EASValsSetMType(SQUARE_MARKER);
+        if ( this->giveDomain()->giveEngngModel()->hasXfemManager(1) ) {
+            XfemManager *xf = this->giveDomain()->giveEngngModel()->giveXfemManager(1);
+            int i;
+            for ( i = 1; i <= xf->giveNumberOfEnrichmentItems(); i++ ) {
+                if ( xf->giveEnrichmentItem(i)->isDofManEnriched(this->number) ) {
+                    EASValsSetMType(SQUARE_MARKER);
+                }
             }
-          }
         }
 
  #endif

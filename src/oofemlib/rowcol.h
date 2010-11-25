@@ -44,7 +44,6 @@
 #include "debug.h"
 
 namespace oofem {
-
 class FloatArray;
 class IntArray;
 
@@ -121,6 +120,5 @@ public:
 protected:
     RowColumn(int, int, double *, double *, double);
 };
-
 } // end namespace oofem
 #endif // rowcol_h

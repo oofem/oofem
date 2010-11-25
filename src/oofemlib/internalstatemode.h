@@ -40,13 +40,11 @@
 #define internalstatemode_h
 
 namespace oofem {
-
 /// enum determining the mode of internal variable
 enum InternalStateMode {
     ISM_local,
     ISM_recovered
 };
-
 } // end namespace oofem
 #endif // internalstatemode_h
 

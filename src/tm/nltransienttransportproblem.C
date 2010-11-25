@@ -51,11 +51,10 @@
 #include "usrdefsub.h"
 #include "mathfem.h"
 #ifndef __MAKEDEPEND
-#include <stdio.h>
+ #include <stdio.h>
 #endif
 
 namespace oofem {
-
 IRResultType
 NLTransientTransportProblem :: initializeFrom(InputRecord *ir)
 {
@@ -98,7 +97,7 @@ void NLTransientTransportProblem :: solveYourselfAt(TimeStep *tStep) {
             _error("solveYourselfAt: sparse matrix creation failed");
         }
 
-        lhs->buildInternalStructure(this, 1, EID_ConservationEquation, EModelDefaultEquationNumbering());
+        lhs->buildInternalStructure( this, 1, EID_ConservationEquation, EModelDefaultEquationNumbering() );
 
         rhs.resize(neq);
         initFlag = 0;
@@ -141,12 +140,12 @@ void NLTransientTransportProblem :: solveYourselfAt(TimeStep *tStep) {
         if ( ( nite == 1 ) || ( NR_Mode == nrsolverFullNRM ) || ( ( NR_Mode == nrsolverAccelNRM ) && ( nite % MANRMSteps == 0 ) ) ) {
             lhs->zero();
             this->assemble( lhs, & TauStep, EID_ConservationEquation, LHSBCMatrix,
-			    EModelDefaultEquationNumbering(), this->giveDomain(1) );
+                           EModelDefaultEquationNumbering(), this->giveDomain(1) );
             this->assemble( lhs, & TauStep, EID_ConservationEquation, IntSourceLHSMatrix,
-			    EModelDefaultEquationNumbering(), this->giveDomain(1) );
+                           EModelDefaultEquationNumbering(), this->giveDomain(1) );
             lhs->times(alpha);
             this->assemble( lhs, & TauStep, EID_ConservationEquation, NSTP_MidpointLhs,
-			    EModelDefaultEquationNumbering(), this->giveDomain(1) );
+                           EModelDefaultEquationNumbering(), this->giveDomain(1) );
         }
 
 #ifdef VERBOSE
@@ -158,19 +157,19 @@ void NLTransientTransportProblem :: solveYourselfAt(TimeStep *tStep) {
         //
         rhs.zero();
         this->assembleVectorFromElements( rhs, & TauStep, EID_ConservationEquation, ElementBCTransportVector, VM_Total,
-					  EModelDefaultEquationNumbering(), this->giveDomain(1) );
+                                         EModelDefaultEquationNumbering(), this->giveDomain(1) );
         // this->assembleDirichletBcRhsVector (rhs, &TauStep, VM_Total, NSTP_MidpointLhs, this->giveDomain(1));
         this->assembleVectorFromElements( rhs, & TauStep, EID_ConservationEquation, ElementInternalSourceVector, VM_Total,
-					  EModelDefaultEquationNumbering(), this->giveDomain(1) );
+                                         EModelDefaultEquationNumbering(), this->giveDomain(1) );
         //
         // assembling the nodal part of load vector
         //
         this->assembleVectorFromDofManagers( rhs, & TauStep, EID_ConservationEquation, NodalLoadVector, VM_Total,
-					     EModelDefaultEquationNumbering(), this->giveDomain(1) );
+                                            EModelDefaultEquationNumbering(), this->giveDomain(1) );
         //
         // add the rhs part depending on previous solution
         //
-        assembleAlgorithmicPartOfRhs(rhs, EID_ConservationEquation, EModelDefaultEquationNumbering(), &TauStep, nite);
+        assembleAlgorithmicPartOfRhs(rhs, EID_ConservationEquation, EModelDefaultEquationNumbering(), & TauStep, nite);
         //
         // set-up numerical model
         //
@@ -212,7 +211,7 @@ void NLTransientTransportProblem :: solveYourselfAt(TimeStep *tStep) {
 
 double NLTransientTransportProblem ::  giveUnknownComponent(EquationID chc, ValueModeType mode,
                                                             TimeStep *tStep, Domain *d, Dof *dof)
-// returns unknown quantity like displaacement, velocity of equation eq
+// returns unknown quantity like displacement, velocity of equation eq
 // This function translates this request to numerical method language
 {
     int eq = dof->__giveEquationNumber();
@@ -303,7 +302,7 @@ NLTransientTransportProblem :: updateInternalState(TimeStep *stepN)
 
 void
 NLTransientTransportProblem :: assembleAlgorithmicPartOfRhs(FloatArray &answer, EquationID ut,
-							    const UnknownNumberingScheme& ns, TimeStep *tStep, int nite)
+                                                            const UnknownNumberingScheme &ns, TimeStep *tStep, int nite)
 {
     //
     // computes the real nodal fluxes on elements
@@ -385,5 +384,4 @@ NLTransientTransportProblem :: assembleAlgorithmicPartOfRhs(FloatArray &answer, 
         answer.assemble(contrib, loc);
     }
 }
-
 } // end namespace oofem

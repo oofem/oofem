@@ -42,7 +42,6 @@
 #include "enumitem.h"
 
 namespace oofem {
-
 /**
  * Type representing type of domain.
  * Domain type (the member value of Domain class) is used to determine the default
@@ -75,7 +74,5 @@ enum domainType {
 
 
 const char *__domainTypeToString(domainType _value);
-
-
 } // end namespace oofem
 #endif // domaintype_h

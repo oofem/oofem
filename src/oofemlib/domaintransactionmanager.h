@@ -35,12 +35,11 @@
 #define domaintransactionmanager_h
 
 #ifdef __PARALLEL_MODE
-#ifndef __MAKEDEPEND
-#include <map>
-#endif
+ #ifndef __MAKEDEPEND
+  #include <map>
+ #endif
 
 namespace oofem {
-
 class FEMComponent;
 class Domain;
 class DofManager;
@@ -109,7 +108,6 @@ public:
 
     friend class Domain;
 };
-
 } // end namespace oofem
 #endif
 #endif // domaintransactionmanager_h

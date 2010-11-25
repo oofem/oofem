@@ -42,15 +42,14 @@
 #define buffereddatareader_h
 
 #ifndef __MAKEDEPEND
-#include <stdio.h>
-#include <string>
+ #include <stdio.h>
+ #include <string>
 #endif
 
 #include "datareader.h"
 #include "oofemtxtinputrecord.h"
 
 namespace oofem {
-
 /**
  * Class representing the implemantaion of plain text date reader.
  * It reads a sequentional seqence of input records from data file
@@ -90,6 +89,5 @@ protected:
     void giveRawLineFromInput(char *line);
     void giveLineFromInput(char *line);
 };
-
 } // end namespace oofem
 #endif // buffereddatareader_h

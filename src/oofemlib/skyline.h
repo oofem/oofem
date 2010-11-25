@@ -44,7 +44,6 @@
 #include "sparsemtrx.h"
 
 namespace oofem {
-
 /**
  * Class implementing sparse matrix stored in skyline form. This class
  * assumes symmetric form of matrix to be stored, i.e., only upper half
@@ -115,7 +114,7 @@ public:
      */
     virtual void times(double x);
     /// Builds internal structure of receiver
-    int buildInternalStructure(EngngModel *, int, EquationID, const UnknownNumberingScheme&);
+    int buildInternalStructure(EngngModel *, int, EquationID, const UnknownNumberingScheme &);
     /**
      * Allocates and builds internal structure according to given
      * array holding adresses of diagonal members values (addr).
@@ -196,9 +195,11 @@ public:
     // /***********************************/
 
     virtual FloatArray trans_mult(const FloatArray &x) const
-    { FloatArray answer;
-      this->times(x, answer);
-      return answer; }
+    {
+        FloatArray answer;
+        this->times(x, answer);
+        return answer;
+    }
 
 #endif
 
@@ -207,6 +208,5 @@ public:
 protected:
     Skyline(int, int, double *, IntArray *);
 };
-
 } // end namespace oofem
 #endif // skyline_h

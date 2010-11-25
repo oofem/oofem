@@ -41,7 +41,6 @@
 #include "matresponseform.h"
 
 namespace oofem {
-
 typedef char StressStrainMatMode;
 /**
  * Base class for stress/strain vector representations. It is derived from FloatArray class, which is used
@@ -75,7 +74,7 @@ public:
      *  the FloatArray assignment operator is used, where the operand is converted to FloatArray (mode is lost).
      *  The assignment from FloatArray to StressStrainBaseVector is not defined (needs materialmode).
      */
-    StressStrainBaseVector &operator=(const StressStrainBaseVector &);        // assignment: cleanup and copy
+    StressStrainBaseVector & operator=(const StressStrainBaseVector &);        // assignment: cleanup and copy
 
     /// Returns the material mode of receiver
     MaterialMode giveStressStrainMode() const { return ( MaterialMode ) mode; }
@@ -162,6 +161,5 @@ protected:
     virtual void giveTranformationMtrx(FloatMatrix &answer, const FloatMatrix &base,
                                        int transpose = 0) const = 0;
 };
-
 } // end namespace oofem
 #endif // stressstrainbasevector_h

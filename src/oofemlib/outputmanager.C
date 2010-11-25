@@ -41,7 +41,6 @@
 #include "logger.h"
 
 namespace oofem {
-
 OutputManager :: OutputManager(Domain *d) : dofman_out(), dofman_except(), element_out(), element_except()
 {
     domain = d;
@@ -168,7 +167,7 @@ OutputManager :: _testDofManOutput(int number)
         // test for particular dofman selection
         dynaList< Range > :: iterator dofmanOutIter;
 
-	int _label = domain->giveDofManager(number)->giveLabel();
+        int _label = domain->giveDofManager(number)->giveLabel();
         for ( dofmanOutIter = dofman_out.begin(); dofmanOutIter != dofman_out.end(); ++dofmanOutIter ) {
             if ( ( * dofmanOutIter ).test(_label) ) {
                 selected  = 1;
@@ -219,7 +218,7 @@ OutputManager :: _testElementOutput(int number)
     } else {
         // test for particular element selection
         dynaList< Range > :: iterator elemOutIter;
-	int _label = domain->giveDofManager(number)->giveLabel();
+        int _label = domain->giveDofManager(number)->giveLabel();
 
         for ( elemOutIter = element_out.begin(); elemOutIter != element_out.end(); ++elemOutIter ) {
             if ( ( * elemOutIter ).test(_label) ) {
@@ -296,5 +295,4 @@ OutputManager :: testElementOutput(int num, TimeStep *tStep)
 
     return 0;
 }
-
 } // end namespace oofem

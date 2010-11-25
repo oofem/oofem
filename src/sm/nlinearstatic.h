@@ -41,19 +41,18 @@
 #define nlinearstatic_h
 
 #ifndef __MAKEDEPEND
-#include <stdio.h>
+ #include <stdio.h>
 #endif
 #include "linearstatic.h"
 #include "sparsenonlinsystemnm.h"
 #include "sparsemtrx.h"
 
 #ifdef __PARALLEL_MODE
-#include "problemcomm.h"
-#include "processcomm.h"
+ #include "problemcomm.h"
+ #include "processcomm.h"
 #endif
 
 namespace oofem {
-
 /**
  * Type determing the stiffness mode
  * nls_tangentStiffness - the tangent stiffness is used and updated whenever requsted
@@ -238,18 +237,18 @@ public:
 #endif
 
 protected:
-    void       assemble(SparseMtrx *answer, TimeStep *tStep, EquationID ut, CharType type, 
-			const UnknownNumberingScheme& , Domain *domain);
+    void       assemble(SparseMtrx *answer, TimeStep *tStep, EquationID ut, CharType type,
+                        const UnknownNumberingScheme &, Domain *domain);
     /**
-       Evaluates the nodal representation of internal forces by assembling
-       contributions from individual elements. 
-       @param answer vector of nodal internal forces
-       @param norm element by element norm of internal forces
-       @param DeltaR increment of displacement vector
-       @param d solution domain
-       @param stepN solution step
+     * Evaluates the nodal representation of internal forces by assembling
+     * contributions from individual elements.
+     * @param answer vector of nodal internal forces
+     * @param norm element by element norm of internal forces
+     * @param DeltaR increment of displacement vector
+     * @param d solution domain
+     * @param stepN solution step
      */
-    void giveInternalForces(FloatArray &answer, double& norm, const FloatArray &DeltaR, Domain *d, TimeStep *stepN);
+    void giveInternalForces(FloatArray &answer, double &norm, const FloatArray &DeltaR, Domain *d, TimeStep *stepN);
     void proceedStep(int di, TimeStep *);
     void updateLoadVectors(TimeStep *tStep);
     // void        updateInternalStepState (const FloatArray &, TimeStep* );
@@ -281,6 +280,5 @@ protected:
 
 #endif
 };
-
 } // end namespace oofem
 #endif // nlinearstatic_h

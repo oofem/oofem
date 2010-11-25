@@ -41,13 +41,12 @@
 #include "dofmanager.h"
 
 #ifdef __USE_MPI
-#ifndef __MAKEDEPEND
-#include "mpi.h"
-#endif
+ #ifndef __MAKEDEPEND
+  #include "mpi.h"
+ #endif
 #endif
 
 namespace oofem {
-
 FETICommunicator :: FETICommunicator(EngngModel *emodel, CommunicatorBuff *b, int rank, int size) :
     Communicator(emodel, b, rank, size)
 {
@@ -305,7 +304,7 @@ FETICommunicator :: setUpCommunicationMaps(EngngModel *pm)
  * quickSortCommMap (map, i+1, r, cmp);
  * }
  *
- #define GLOBNUM(locnum) (engngModel->giveDomain()->giveDofManager(locnum)->giveGlobalNumber())
+ *#define GLOBNUM(locnum) (engngModel->giveDomain()->giveDofManager(locnum)->giveGlobalNumber())
  *
  *
  * int
@@ -325,7 +324,7 @@ FETICommunicator :: setUpCommunicationMaps(EngngModel *pm)
  * return i;
  * }
  *
- #undef GLOBNUM
+ *#undef GLOBNUM
  *
  * int
  * PNlDEIDynamicCommunicator :: DofManCmp (int i, int j)
@@ -340,6 +339,5 @@ FETICommunicator :: setUpCommunicationMaps(EngngModel *pm)
  *   engngModel->giveDomain()->giveElement(j)->giveGlobalNumber());
  * }
  */
-
 } // end namespace oofem
 #endif

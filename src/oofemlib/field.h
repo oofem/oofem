@@ -42,7 +42,6 @@
 #include "contextmode.h"
 
 namespace oofem {
-
 enum FieldType {
     FT_Unknown,
     FT_Temperature,
@@ -123,6 +122,5 @@ public:
     void warning(const char *file, int line, const char *format, ...) const;
     //@}
 };
-
 } // end namespace oofem
 #endif // field_h

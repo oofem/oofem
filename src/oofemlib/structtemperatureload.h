@@ -46,7 +46,6 @@
 #include "load.h"
 
 namespace oofem {
-
 class Element;
 class TimeStep;
 
@@ -82,6 +81,5 @@ public:
     bcGeomType   giveBCGeoType() const { return BodyLoadBGT; }
     const char *giveClassName() const { return "StructuralTemperatureLoad"; }
 };
-
 } // end namespace oofem
 #endif // structtemperatureload_h

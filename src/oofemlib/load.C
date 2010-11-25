@@ -47,11 +47,10 @@
 #include "usrdefsub.h"
 #include "timestep.h"
 #ifndef __MAKEDEPEND
-#include <stdlib.h>
+ #include <stdlib.h>
 #endif
 
 namespace oofem {
-
 Load :: Load(int i, Domain *aDomain) :
     GeneralBoundaryCondition(i, aDomain), componentArray(), dofExcludeMask()
     // Constructor. Creates a load with number i, belonging to aDomain.
@@ -149,5 +148,4 @@ Load :: isDofExcluded(int indx)
 
     return 0;
 }
-
 } // end namespace oofem

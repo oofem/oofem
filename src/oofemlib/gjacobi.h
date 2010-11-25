@@ -42,7 +42,7 @@
 #define gjacobi_h
 
 #ifndef __MAKEDEPEND
-#include <stdio.h>
+ #include <stdio.h>
 #endif
 #include "nummet.h"
 #include "skyline.h"
@@ -51,7 +51,6 @@
 #include "nmstatus.h"
 
 namespace oofem {
-
 class Domain;
 class EngngModel;
 
@@ -130,7 +129,6 @@ public:
     classType giveClassID() const { return GeneralizedJacobiSolverClass; }
 protected:
 };
-
 } // end namespace oofem
 #endif // gjacobi_h
 

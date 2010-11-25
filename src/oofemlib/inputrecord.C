@@ -40,11 +40,10 @@
 
 #include "inputrecord.h"
 #ifndef __MAKEDEPEND
-#include <ctype.h>
+ #include <ctype.h>
 #endif
 
 namespace oofem {
-
 InputRecord :: InputRecord()
 { }
 
@@ -54,7 +53,7 @@ InputRecord :: InputRecord(const InputRecord &src)
 
 
 InputRecord &
-InputRecord :: operator=(const InputRecord &src)
+InputRecord :: operator = ( const InputRecord & src )
 {
     return * this;
 }
@@ -80,5 +79,4 @@ InputRecord :: report_error(const char *_class, const char *proc, const InputFie
 {
     __OOFEM_ERROR6(file, line, "Input error: \"%s\", field keyword \"%s\" (fieldID=%d)\n%s::%s", strerror(result), kwd, fieldID, _class, proc);
 }
-
 } // end namespace oofem

@@ -40,13 +40,12 @@
 #include "intarray.h"
 
 #ifdef __USE_MPI
-#ifndef __MAKEDEPEND
-#include "mpi.h"
-#endif
+ #ifndef __MAKEDEPEND
+  #include "mpi.h"
+ #endif
 #endif
 
 namespace oofem {
-
 PNlDEIDynamicComunicator :: PNlDEIDynamicComunicator(PNlDEIDynamic *emodel, int rank, int size,
                                                      PNlDEIDynamicComunicatorMode mode) :
     Communicator< PNlDEIDynamic >(emodel, rank, size)
@@ -411,13 +410,13 @@ PNlDEIDynamicComunicator :: setUpCommunicationMapsForRemoteElementMode(EngngMode
         }
 
         /*
-         #ifdef __VERBOSE_PARALLEL
+         * #ifdef __VERBOSE_PARALLEL
          * for (i=0; i<size; i++) {
          * fprintf (stderr, "domain %d-%d: domainCommRecvsize is %d\n",rank,i,this->giveDomainComunicator(i)->giveRecvBuff()->giveSize() );
          * printf ("domain %d-%d: reecv map:",rank,i);
          * this->giveDomainComunicator(i)->giveToRecvMap()->printYourself();
          * }
-         #endif
+         *#endif
          */
 
         // delete local maps
@@ -545,12 +544,12 @@ WARNING: NOT SUPPORTED MESSAGE PARSING LIBRARY
                 this->setProblemComunicatorToSendArry(this->giveProblemComunicator(i), toSendMap);
 
                 /*
-                 #ifdef __VERBOSE_PARALLEL
+                 * #ifdef __VERBOSE_PARALLEL
                  *  fprintf (stderr, "domain %d-%d: domainCommSendsize is %d\n",rank,i,this->giveDomainComunicator(i)->giveSendBuff()->giveSize() );
                  *  printf ("domain %d-%d: send map:",rank,i);
                  *  this->giveDomainComunicator(i)->giveToSendMap()->printYourself();
                  *
-                 #endif
+                 *#endif
                  */
 
                 //this->giveDomainComunicator(i)->setToSendArry (this->engngModel, toSendMap);
@@ -596,9 +595,9 @@ PNlDEIDynamicComunicator :: setUpCommunicationMaps(EngngModel *pm)
  * int nnodes = domain->giveNumberOfDofManagers();
  * int i, j, partition;
  *
- #ifdef __VERBOSE_PARALLEL
+ *#ifdef __VERBOSE_PARALLEL
  * VERBOSEPARALLEL_PRINT("PNlDEIDynamicComunicator :: setUpCommunicationMaps", "Setting up communication maps", rank);
- #endif
+ *#endif
  *
  *
  * if (this->mode == PNlDEIDynamicComunicator__NODE_CUT) {
@@ -758,9 +757,9 @@ PNlDEIDynamicComunicator :: setUpCommunicationMaps(EngngModel *pm)
  * // to assemble send maps, we must analyze broadcasted remote domain send lists
  * // and we must also broadcast our send list.
  *
- #ifdef __VERBOSE_PARALLEL
+ *#ifdef __VERBOSE_PARALLEL
  * VERBOSEPARALLEL_PRINT("PNlDEIDynamicComunicator::setUpCommunicationMaps", "Element-cut broadcasting started", rank);
- #endif
+ *#endif
  *
  *
  * CommunicationBuffer commBuff (MPI_COMM_WORLD);
@@ -772,16 +771,16 @@ PNlDEIDynamicComunicator :: setUpCommunicationMaps(EngngModel *pm)
  * // determine the size of receive buffer using AllReduce operation
  * localExpectedSize = domainRecvList.givePackSize(commBuff);
  *
- #ifdef __USE_MPI
+ *#ifdef __USE_MPI
  * result = MPI_Allreduce (&localExpectedSize, &globalRecvSize, 1, MPI_INT, MPI_MAX, MPI_COMM_WORLD);
  * if (result != MPI_SUCCESS) _error ("setUpCommunicationMaps: MPI_Allreduce failed");
- #else
+ *#else
  * WARNING: NOT SUPPORTED MESSAGE PARSING LIBRARY
- #endif
+ *#endif
  *
- #ifdef __VERBOSE_PARALLEL
+ *#ifdef __VERBOSE_PARALLEL
  * VERBOSEPARALLEL_PRINT("PNlDEIDynamicComunicator::setUpCommunicationMaps", "Finished reducing receiveBufferSize", rank);
- #endif
+ *#endif
  *
  *
  * // resize to fit largest received message
@@ -796,32 +795,32 @@ PNlDEIDynamicComunicator :: setUpCommunicationMaps(EngngModel *pm)
  *  //current domain has to send its receive list to all domains
  *  // broadcast domainRecvList
  *
- #ifdef __VERBOSE_PARALLEL
+ *#ifdef __VERBOSE_PARALLEL
  * VERBOSEPARALLEL_PRINT("PNlDEIDynamicComunicator::setUpCommunicationMaps", "Broadcasting own send list", rank);
- #endif
+ *#endif
  *
  *  commBuff.packIntArray (domainRecvList);
  *  result = commBuff.bcast (i);
  *  if (result!= MPI_SUCCESS) _error ("setUpCommunicationMaps: commBuff broadcast failed");
  *
- #ifdef __VERBOSE_PARALLEL
+ *#ifdef __VERBOSE_PARALLEL
  * VERBOSEPARALLEL_PRINT("PNlDEIDynamicComunicator::setUpCommunicationMaps", "Broadcasting own send list finished", rank);
- #endif
+ *#endif
  *
  * } else {
  *
- #ifdef __VERBOSE_PARALLEL
+ *#ifdef __VERBOSE_PARALLEL
  *  fprintf(stderr, "\n[process rank %3d]: %-30s: Receiving broadcasted send map from partition %3d",
  *      rank,"PNlDEIDynamicComunicator :: unpackAllData", i);
- #endif
+ *#endif
  *  // receive broadcasted lists
  *  result = commBuff.bcast (i);
  *  if (result != MPI_SUCCESS) _error ("setUpCommunicationMaps: commBuff broadcast failed");
  *
- #ifdef __VERBOSE_PARALLEL
+ *#ifdef __VERBOSE_PARALLEL
  *  fprintf(stderr, "\n[process rank %3d]: %-30s: Receiving broadcasted send map from partition %3d finished",
  *      rank,"PNlDEIDynamicComunicator :: unpackAllData", i);
- #endif
+ *#endif
  *
  *
  *  // unpack remote receive list
@@ -880,9 +879,9 @@ PNlDEIDynamicComunicator :: setUpCommunicationMaps(EngngModel *pm)
  *  this->setDomainComunicatorToSendArry (this->giveDomainComunicator(i), toSendMap);
  *  //this->giveDomainComunicator(i)->setToSendArry (this->engngModel, toSendMap);
  * } // end receiving broadcasted lists
- #ifdef __VERBOSE_PARALLEL
+ *#ifdef __VERBOSE_PARALLEL
  * VERBOSEPARALLEL_PRINT("PNlDEIDynamicComunicator::setUpCommunicationMaps", "Receiving broadcasted send maps finished", rank);
- #endif
+ *#endif
  *
  * } // end loop over domains
  * } else _error ("setUpCommunicationMaps: unknown mode");
@@ -925,14 +924,14 @@ PNlDEIDynamicComunicator :: setProblemComunicatorToRecvArry(ProblemComunicator< 
 
 
 void
-PNlDEIDynamicComunicator :: sortCommMap( IntArray &map, int ( PNlDEIDynamicComunicator :: *cmp )( int, int ) )
+PNlDEIDynamicComunicator :: sortCommMap( IntArray &map, int ( PNlDEIDynamicComunicator :: *cmp ) (int, int) )
 {
     this->quickSortCommMap(map, 1, map.giveSize(), cmp);
 }
 
 
 void
-PNlDEIDynamicComunicator :: quickSortCommMap( IntArray &map, int l, int r, int ( PNlDEIDynamicComunicator :: *cmp )( int, int ) )
+PNlDEIDynamicComunicator :: quickSortCommMap( IntArray &map, int l, int r, int ( PNlDEIDynamicComunicator :: *cmp ) (int, int) )
 {
     if ( r <= l ) {
         return;
@@ -947,7 +946,7 @@ PNlDEIDynamicComunicator :: quickSortCommMap( IntArray &map, int l, int r, int (
 
 
 int
-PNlDEIDynamicComunicator :: quickSortPartition( IntArray &map, int l, int r, int ( PNlDEIDynamicComunicator :: *cmp )( int, int ) )
+PNlDEIDynamicComunicator :: quickSortPartition( IntArray &map, int l, int r, int ( PNlDEIDynamicComunicator :: *cmp ) (int, int) )
 {
     int i = l - 1, j = r;
     int v = map.at(r);
@@ -993,6 +992,5 @@ PNlDEIDynamicComunicator :: ElemCmp(int i, int j)
     return ( engngModel->giveDomain(1)->giveElement(i)->giveGlobalNumber() -
             engngModel->giveDomain(1)->giveElement(j)->giveGlobalNumber() );
 }
-
 } // end namespace oofem
 #endif

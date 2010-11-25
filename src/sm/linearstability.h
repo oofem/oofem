@@ -41,7 +41,7 @@
 #define linearstability_h
 
 #ifndef __MAKEDEPEND
-#include <stdio.h>
+ #include <stdio.h>
 #endif
 #include "structengngmodel.h"
 #include "geneigvalsolvertype.h"
@@ -53,7 +53,6 @@
 #include "nummet.h"
 
 namespace oofem {
-
 class LinearStability : public StructuralEngngModel
 {
     /*
@@ -140,6 +139,5 @@ public:
     classType giveClassID()      const { return LinearStabilityClass; }
     fMode giveFormulation() { return TL; }
 };
-
 } // end namespace oofem
 #endif // linearstability_h

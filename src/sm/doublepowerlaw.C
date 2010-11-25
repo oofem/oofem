@@ -37,7 +37,7 @@
 //   *** CLASS RHEOLOGIC DOUBLE POWER LAW Material
 //   *********************************************
 #ifndef __MAKEDEPEND
-#include <math.h>
+ #include <math.h>
 #endif
 #include "doublepowerlaw.h"
 #include "mathfem.h"
@@ -45,7 +45,6 @@
 #include "crosssection.h"
 
 namespace oofem {
-
 IRResultType
 DoublePowerLawMaterial :: initializeFrom(InputRecord *ir)
 {
@@ -82,6 +81,4 @@ DoublePowerLawMaterial :: computeCreepFunction(GaussPoint *gp, double atTime, do
 
     return 1. / e0 + h1 * h2 * h3;
 }
-
-
 } // end namespace oofem

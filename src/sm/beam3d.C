@@ -51,15 +51,14 @@
 #include "structuralmaterial.h"
 #include "mathfem.h"
 #ifndef __MAKEDEPEND
-#include <math.h>
+ #include <math.h>
 #endif
 
 #ifdef __OOFEG
-#include "oofeggraphiccontext.h"
+ #include "oofeggraphiccontext.h"
 #endif
 
 namespace oofem {
-
 Beam3d :: Beam3d(int n, Domain *aDomain) : StructuralElement(n, aDomain)
     // Constructor.
 {
@@ -125,15 +124,14 @@ Beam3d :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int li,
 void Beam3d :: computeGaussPoints()
 // Sets up the array of Gauss Points of the receiver.
 {
-  if (!integrationRulesArray) {
-
-    // the gauss point is used only when methods from crosssection and/or material
-    // classes are requested
-    numberOfIntegrationRules = 1;
-    integrationRulesArray = new IntegrationRule * [ 1 ];
-    integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 2);
-    integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Line, 3, _3dBeam);
-  }
+    if ( !integrationRulesArray ) {
+        // the gauss point is used only when methods from crosssection and/or material
+        // classes are requested
+        numberOfIntegrationRules = 1;
+        integrationRulesArray = new IntegrationRule * [ 1 ];
+        integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 2);
+        integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Line, 3, _3dBeam);
+    }
 }
 
 
@@ -164,9 +162,9 @@ Beam3d :: computeNmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
     answer.at(1, 1) = 1. - ksi;
     answer.at(1, 7) = ksi;
     answer.at(2, 2) = ( ( 1. + 2. * kappaz ) - 2. * kappaz * ksi - 3. * ksi2 + 2. * ksi3 ) / c1z;
-    answer.at(2, 6) =-l * ( -( 1. + kappaz ) * ksi + ( 2. + kappaz ) * ksi2 - ksi3 ) / c1z;
+    answer.at(2, 6) = -l * ( -( 1. + kappaz ) * ksi + ( 2. + kappaz ) * ksi2 - ksi3 ) / c1z;
     answer.at(2, 8) = ( 2. * kappaz * ksi + 3. * ksi2 - 2. * ksi3 ) / c1z;
-    answer.at(2, 12) =-l * ( kappaz * ksi + ( 1. - kappaz ) * ksi2 - ksi3 ) / c1z;
+    answer.at(2, 12) = -l * ( kappaz * ksi + ( 1. - kappaz ) * ksi2 - ksi3 ) / c1z;
     answer.at(3, 3) = ( ( 1. + 2. * kappay ) - 2. * kappay * ksi - 3. * ksi2 + 2. * ksi3 ) / c1y;
     answer.at(3, 5) = l * ( -( 1. + kappay ) * ksi + ( 2. + kappay ) * ksi2 - ksi3 ) / c1y;
     answer.at(3, 9) = ( 2. * kappay * ksi + 3. * ksi2 - 2. * ksi3 ) / c1y;
@@ -177,9 +175,9 @@ Beam3d :: computeNmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
     answer.at(4, 10) = ksi;
     answer.at(5, 3) = ( 6. * ksi - 6. * ksi2 ) / ( l * c1y );
     answer.at(5, 5) = ( ( 1. + 2. * kappay ) - 2. * ( 2. + kappay ) * ksi + 3. * ksi2 ) / c1y;
-    answer.at(5, 9) =-( 6. * ksi + 6. * ksi2 ) / ( l * c1y );
+    answer.at(5, 9) = -( 6. * ksi + 6. * ksi2 ) / ( l * c1y );
     answer.at(5, 11) = ( -2. * ( 1. - kappay ) * ksi + 3. * ksi2 ) / c1y;
-    answer.at(6, 2) =-( 6. * ksi - 6. * ksi2 ) / ( l * c1z );
+    answer.at(6, 2) = -( 6. * ksi - 6. * ksi2 ) / ( l * c1z );
     answer.at(6, 6) = ( ( 1. + 2. * kappaz ) - 2. * ( 2. + kappaz ) * ksi + 3. * ksi2 ) / c1z;
     answer.at(6, 8) = ( 6. * ksi + 6. * ksi2 ) / ( l * c1z );
     answer.at(6, 12) = ( -2. * ( 1. - kappaz ) * ksi + 3. * ksi2 ) / c1z;
@@ -305,6 +303,7 @@ Beam3d :: computeLoadGToLRotationMtrx(FloatMatrix &answer)
 
     //delete lcs;
     return 1;
+
     ;
 }
 
@@ -556,7 +555,7 @@ Beam3d :: computeEdgeLoadVectorAt(FloatArray &answer, Load *load, int iedge, Tim
     // evaluates the receivers edge load vector
     // for clamped beam
     //
-    BoundaryLoad *edgeLoad = dynamic_cast< BoundaryLoad * >( load );
+    BoundaryLoad *edgeLoad = dynamic_cast< BoundaryLoad * >(load);
     if ( edgeLoad ) {
         if ( edgeLoad->giveNumberOfDofs() != 6 ) {
             _error("computeEdgeLoadVectorAt: load number of dofs mismatch");
@@ -729,7 +728,7 @@ void Beam3d :: printOutputAt(FILE *File, TimeStep *stepN)
     if ( this->updateRotationMatrix() ) {
         rl.beProductOf(* this->rotationMatrix, rg);
         // delete rg;
-    } else   {
+    } else {
         rl = rg;
     }
 
@@ -858,7 +857,7 @@ Beam3d :: computeConsistentMassMatrix(FloatMatrix &answer, TimeStep *tStep, doub
     // computes mass matrix of the receiver
 
     FloatMatrix stiff;
-    GaussPoint* gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
+    GaussPoint *gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
 
     /*
      * StructuralElement::computeMassMatrix(answer, tStep);
@@ -869,7 +868,7 @@ Beam3d :: computeConsistentMassMatrix(FloatMatrix &answer, TimeStep *tStep, doub
     double kappaz = this->giveKappazCoeff();
     double kappay2 = kappay * kappay;
     double kappaz2 = kappaz * kappaz;
-    double density = this->giveMaterial()->give('d',gp);
+    double density = this->giveMaterial()->give('d', gp);
     double area = this->giveCrossSection()->give(CS_Area);
     double c2y = ( area * density ) / ( ( 1. + 2. * kappay ) * ( 1. + 2. * kappay ) );
     double c2z = ( area * density ) / ( ( 1. + 2. * kappaz ) * ( 1. + 2. * kappaz ) );
@@ -927,9 +926,9 @@ Beam3d :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords
     n2  = ( 1. + ksi ) * 0.5;
 
     answer.resize(3);
-    answer.at(1) = n1 * this->giveNode(1)->giveCoordinate(1) + n2 * this->giveNode(2)->giveCoordinate(1);
-    answer.at(2) = n1 * this->giveNode(1)->giveCoordinate(2) + n2 * this->giveNode(2)->giveCoordinate(2);
-    answer.at(3) = n1 * this->giveNode(1)->giveCoordinate(3) + n2 * this->giveNode(2)->giveCoordinate(3);
+    answer.at(1) = n1 * this->giveNode(1)->giveCoordinate(1) + n2 *this->giveNode(2)->giveCoordinate(1);
+    answer.at(2) = n1 * this->giveNode(1)->giveCoordinate(2) + n2 *this->giveNode(2)->giveCoordinate(2);
+    answer.at(3) = n1 * this->giveNode(1)->giveCoordinate(3) + n2 *this->giveNode(2)->giveCoordinate(3);
 
     return 1;
 }

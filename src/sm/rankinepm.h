@@ -43,7 +43,6 @@
 #include "mplasticmaterial.h"
 
 namespace oofem {
-
 class Domain;
 
 /**
@@ -95,6 +94,5 @@ protected:
     void computeStressSpaceHardeningVars(FloatArray &answer, GaussPoint *gp,
                                          const FloatArray &strainSpaceHardeningVariables);
 };
-
 } // end namespace oofem
 #endif // rankinepm_h

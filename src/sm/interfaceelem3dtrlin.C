@@ -47,19 +47,18 @@
 #include "cltypes.h"
 #include "engngm.h"
 #ifndef __MAKEDEPEND
-#include <stdlib.h>
-#include <math.h>
+ #include <stdlib.h>
+ #include <math.h>
 #endif
 
 #ifdef __OOFEG
-#include "oofeggraphiccontext.h"
-#ifndef __MAKEDEPEND
-#include "Emarkwd3d.h"
-#endif
+ #include "oofeggraphiccontext.h"
+ #ifndef __MAKEDEPEND
+  #include "Emarkwd3d.h"
+ #endif
 #endif
 
 namespace oofem {
-
 FEI2dTrLin InterfaceElement3dTrLin :: interpolation(1, 2);
 
 InterfaceElement3dTrLin :: InterfaceElement3dTrLin(int n, Domain *aDomain) :
@@ -98,14 +97,14 @@ void
 InterfaceElement3dTrLin :: computeGaussPoints()
 // Sets up the array of Gauss Points of the receiver.
 {
-  if (!integrationRulesArray) {
-    numberOfIntegrationRules = 1;
-    integrationRulesArray = new IntegrationRule * [ 1 ];
-    //integrationRulesArray[0] = new LobattoIntegrationRule (1,domain, 1, 2);
-    integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3);
+    if ( !integrationRulesArray ) {
+        numberOfIntegrationRules = 1;
+        integrationRulesArray = new IntegrationRule * [ 1 ];
+        //integrationRulesArray[0] = new LobattoIntegrationRule (1,domain, 1, 2);
+        integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3);
 
-    integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Triangle, 4, _3dInterface);
-  }
+        integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Triangle, 4, _3dInterface);
+    }
 }
 
 

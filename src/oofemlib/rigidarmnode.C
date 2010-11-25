@@ -43,12 +43,11 @@
 #include "intarray.h"
 
 #ifndef __MAKEDEPEND
-#include <math.h>
-#include <stdlib.h>
+ #include <math.h>
+ #include <stdlib.h>
 #endif
 
 namespace oofem {
-
 /**
  * Constructor. Creates a rigid arm node with number n, belonging to aDomain.
  */
@@ -69,7 +68,7 @@ RigidArmNode :: allocAuxArrays(void)
         if ( dofArray [ i - 1 ]->giveClassID() == SlaveDofClass ) {
             masterDofID [ i - 1 ] = new IntArray;
             masterContribution [ i - 1 ] = new FloatArray;
-        } else   {
+        } else {
             masterDofID [ i - 1 ] = NULL;
             masterContribution [ i - 1 ] = NULL;
         }
@@ -150,8 +149,9 @@ RigidArmNode :: checkConsistency()
     // check if created DOFs (dofType) compatible with mastermask
     ndofs = master->giveNumberOfDofs();
     for ( i = 1; i <= numberOfDofs; i++ ) {
-      if (masterMask->at(i) && (dofArray [ i - 1 ]->giveClassID() == MasterDofClass))
-	_error ("checkConsistency: incompatible mastermask and doftype data");
+        if ( masterMask->at(i) && ( dofArray [ i - 1 ]->giveClassID() == MasterDofClass ) ) {
+            _error("checkConsistency: incompatible mastermask and doftype data");
+        }
     }
 
 
@@ -178,18 +178,18 @@ RigidArmNode :: checkConsistency()
         }
     }
 
-/*
-#ifdef __PARALLEL_MODE
-    // check if master in same mode
-    if ( parallel_mode != DofManager_local ) {
-        if ( ( * masterNode )->giveParallelMode() != parallel_mode ) {
-            _warning2("checkConsistency: mismatch in parallel mode of RigidArmNode and master", 1);
-            result = 0;
-        }
-    }
-
-#endif
-*/
+    /*
+     * #ifdef __PARALLEL_MODE
+     *  // check if master in same mode
+     *  if ( parallel_mode != DofManager_local ) {
+     *      if ( ( * masterNode )->giveParallelMode() != parallel_mode ) {
+     *          _warning2("checkConsistency: mismatch in parallel mode of RigidArmNode and master", 1);
+     *          result = 0;
+     *      }
+     *  }
+     *
+     * #endif
+     */
 
     // deallocate auxiliary arrays
     deallocAuxArrays();
@@ -235,7 +235,7 @@ RigidArmNode :: computeMasterContribution()
                 if ( uvw.at(3) && masterMask->at( uvw.at(3) ) ) {
                     R_uvw.at(2) = -( ( int ) R_w );
                 }
-            } else if ( id == D_v )     {
+            } else if ( id == D_v ) {
                 if ( uvw.at(1) && masterMask->at( uvw.at(1) ) ) {
                     R_uvw.at(3) = -( ( int ) R_u );
                 }
@@ -243,7 +243,7 @@ RigidArmNode :: computeMasterContribution()
                 if ( uvw.at(3) && masterMask->at( uvw.at(3) ) ) {
                     R_uvw.at(1) =  ( ( int ) R_w );
                 }
-            } else if ( id == D_w )     {
+            } else if ( id == D_w ) {
                 if ( uvw.at(1) && masterMask->at( uvw.at(1) ) ) {
                     R_uvw.at(2) =  ( ( int ) R_u );
                 }
@@ -276,5 +276,4 @@ RigidArmNode :: computeMasterContribution()
 
     return 1;
 }
-
 } // end namespace oofem

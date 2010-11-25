@@ -39,7 +39,6 @@
 #include "iga.h"
 
 namespace oofem {
-
 // optimized version of A4.4 for d=1
 #define OPTIMIZED_VERSION_A4dot4
 
@@ -80,7 +79,7 @@ void NURBSInterpolation :: evalN(FloatArray &answer, const FloatArray &lcoords, 
             answer.at(c++) = val = N [ 0 ](k) * cellgeo.giveVertexCoordinates(ind + k)->at(2);       // Nu*w
             sum += val;
         }
-    } else if ( nsd == 2 )      {
+    } else if ( nsd == 2 ) {
         uind = span(0) - degree [ 0 ];
         vind = span(1) - degree [ 1 ];
         ind = vind * numberOfControlPoints [ 0 ] + uind + 1;
@@ -92,7 +91,7 @@ void NURBSInterpolation :: evalN(FloatArray &answer, const FloatArray &lcoords, 
 
             ind += numberOfControlPoints [ 0 ];
         }
-    } else if ( nsd == 3 )      {
+    } else if ( nsd == 3 ) {
         uind = span(0) - degree [ 0 ];
         vind = span(1) - degree [ 1 ];
         tind = span(2) - degree [ 2 ];
@@ -110,7 +109,7 @@ void NURBSInterpolation :: evalN(FloatArray &answer, const FloatArray &lcoords, 
 
             ind = indx + numberOfControlPoints [ 0 ] * numberOfControlPoints [ 1 ];
         }
-    } else   {
+    } else {
         OOFEM_ERROR2("evalN not implemented for nsd = %d", nsd);
     }
 
@@ -307,16 +306,16 @@ void NURBSInterpolation :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoor
 
             ind += numberOfControlPoints [ 0 ];
         }
-    } else   {
+    } else {
         OOFEM_ERROR2("evaldNdx not implemented for nsd = %d", nsd);
     }
 
 #else
-#ifdef HAVE_VARIABLE_ARRAY_SIZE
+ #ifdef HAVE_VARIABLE_ARRAY_SIZE
     FloatArray Aders [ nsd ];  // 0th and 1st derivatives in each coordinate direction on BSpline
-#else
+ #else
     FloatArray *Aders = new FloatArray [ nsd ];
-#endif
+ #endif
     FloatArray wders;          // 0th and 1st derivatives in w direction on BSpline
 
     for ( i = 0; i < nsd; i++ ) {
@@ -359,7 +358,7 @@ void NURBSInterpolation :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoor
             answer(cnt, 0) = ders [ 0 ](1, k) * w * weight - ders [ 0 ](0, k) * w * wders(1) / product;
             cnt++;
         }
-    } else if ( nsd == 2 )      {
+    } else if ( nsd == 2 ) {
         FloatArray tmp1(nsd + 1), tmp2(nsd + 1);    // allow for weight
 
         // calculate values and derivatives of nonrational Bspline surface with weights at first (Aders, wders)
@@ -428,7 +427,7 @@ void NURBSInterpolation :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoor
 
             ind += numberOfControlPoints [ 0 ];
         }
-    } else if ( nsd == 3 )      {
+    } else if ( nsd == 3 ) {
         FloatArray tmp1(nsd + 1), tmp2(nsd + 1);    // allow for weight
         FloatArray temp1(nsd + 1), temp2(nsd + 1), temp3(nsd + 1); // allow for weight
 
@@ -552,20 +551,18 @@ void NURBSInterpolation :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoor
 
             ind = indx + numberOfControlPoints [ 0 ] * numberOfControlPoints [ 1 ];
         }
-    } else   {
+    } else {
         OOFEM_ERROR2("evaldNdx not implemented for nsd = %d", nsd);
     }
-    
-#ifndef HAVE_VARIABLE_ARRAY_SIZE
+
+ #ifndef HAVE_VARIABLE_ARRAY_SIZE
     delete [] Aders;
-#endif
+ #endif
 #endif
 
 #ifndef HAVE_VARIABLE_ARRAY_SIZE
     delete [] ders;
 #endif
-
-
 }
 
 
@@ -606,7 +603,7 @@ void NURBSInterpolation :: local2global(FloatArray &answer, const FloatArray &lc
             answer(0) += N [ 0 ](k) * vertexCoordsPtr->at(1) * w;       // xw=sum(Nu*x*w)
             weight    += N [ 0 ](k) * w;                                // w=sum(Nu*w)
         }
-    } else if ( nsd == 2 )      {
+    } else if ( nsd == 2 ) {
         FloatArray tmp(nsd + 1);       // allow for weight
 
         uind = span(0) - degree [ 0 ];
@@ -627,7 +624,7 @@ void NURBSInterpolation :: local2global(FloatArray &answer, const FloatArray &lc
             answer(1) += N [ 1 ](l) * tmp(1); // yw=sum(Nv*Nu*y*w)
             weight    += N [ 1 ](l) * tmp(2); // w=sum(Nv*Nu*w)
         }
-    } else if ( nsd == 3 )      {
+    } else if ( nsd == 3 ) {
         FloatArray tmp(nsd + 1), temp(nsd + 1);    // allow for weight
 
         uind = span(0) - degree [ 0 ];
@@ -663,7 +660,7 @@ void NURBSInterpolation :: local2global(FloatArray &answer, const FloatArray &lc
             answer(2) += N [ 2 ](m) * temp(2); // zw=sum(Nv*Nu*Nt*z*w)
             weight    += N [ 2 ](m) * temp(3); // w=sum(Nv*Nu*Nt*w)
         }
-    } else   {
+    } else {
         OOFEM_ERROR2("local2global not implemented for nsd = %d", nsd);
     }
 
@@ -840,11 +837,11 @@ double NURBSInterpolation :: giveTransformationJacobian(const FloatArray &lcoord
     }
 
 #else
-#ifdef HAVE_VARIABLE_ARRAY_SIZE
+ #ifdef HAVE_VARIABLE_ARRAY_SIZE
     FloatArray Aders [ nsd ];  // 0th and 1st derivatives in each coordinate direction on BSpline
-#else
+ #else
     FloatArray *Aders = new FloatArray [ nsd ];
-#endif
+ #endif
     FloatArray wders;          // 0th and 1st derivatives in w direction on BSpline
 
     for ( i = 0; i < nsd; i++ ) {
@@ -874,7 +871,7 @@ double NURBSInterpolation :: giveTransformationJacobian(const FloatArray &lcoord
 
         // calculation of jacobian matrix according to Eq 4.7
         jacobian(0, 0) = ( Aders [ 0 ](1) - wders(1) * Aders [ 0 ](0) / weight ) / weight; // dx/du
-    } else if ( nsd == 2 )      {
+    } else if ( nsd == 2 ) {
         FloatArray tmp1(nsd + 1), tmp2(nsd + 1);    // allow for weight
 
         // calculate values and derivatives of nonrational Bspline surface with weights at first (Aders, wders)
@@ -921,7 +918,7 @@ double NURBSInterpolation :: giveTransformationJacobian(const FloatArray &lcoord
         jacobian(0, 1) = ( Aders [ 1 ](1) - wders(1) * tmp1(1) ) / weight; // dy/du
         jacobian(1, 0) = ( Aders [ 0 ](2) - wders(2) * tmp1(0) ) / weight; // dx/dv
         jacobian(1, 1) = ( Aders [ 1 ](2) - wders(2) * tmp1(1) ) / weight; // dy/dv
-    } else if ( nsd == 3 )      {
+    } else if ( nsd == 3 ) {
         FloatArray tmp1(nsd + 1), tmp2(nsd + 1);    // allow for weight
         FloatArray temp1(nsd + 1), temp2(nsd + 1), temp3(nsd + 1); // allow for weight
 
@@ -1009,13 +1006,13 @@ double NURBSInterpolation :: giveTransformationJacobian(const FloatArray &lcoord
         jacobian(2, 0) = ( Aders [ 0 ](3) - wders(3) * tmp1(0) ) / weight; // dx/dt
         jacobian(2, 1) = ( Aders [ 1 ](3) - wders(3) * tmp1(1) ) / weight; // dy/dt
         jacobian(2, 2) = ( Aders [ 2 ](3) - wders(3) * tmp1(2) ) / weight; // dz/dt
-    } else   {
+    } else {
         OOFEM_ERROR2("giveTransformationJacobianMatrix not implemented for nsd = %d", nsd);
     }
 
-#ifndef HAVE_VARIABLE_ARRAY_SIZE
+ #ifndef HAVE_VARIABLE_ARRAY_SIZE
     delete [] Aders;
-#endif
+ #endif
 
 
 #endif
@@ -1033,5 +1030,4 @@ double NURBSInterpolation :: giveTransformationJacobian(const FloatArray &lcoord
 
     return Jacob;
 }
-
-} // end namespace oofem 
+} // end namespace oofem

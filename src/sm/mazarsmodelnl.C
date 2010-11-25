@@ -48,15 +48,14 @@
 #include "contextioerr.h"
 
 #ifdef __PARALLEL_MODE
-#include "combuff.h"
+ #include "combuff.h"
 #endif
 
 #ifndef __MAKEDEPEND
-#include <math.h>
+ #include <math.h>
 #endif
 
 namespace oofem {
-
 MazarsNLMaterial :: MazarsNLMaterial(int n, Domain *d) : MazarsMaterial(n, d), StructuralNonlocalMaterialExtensionInterface(d)
     //
     // constructor
@@ -137,7 +136,7 @@ MazarsNLMaterial :: computeEquivalentStrain(double &kappa, const FloatArray &str
     }
 
     nonlocalEquivalentStrain *= 1. / status->giveIntegrationScale();
-    this->endIPNonlocalAverage (gp); // !
+    this->endIPNonlocalAverage(gp);  // !
     kappa = nonlocalEquivalentStrain;
 }
 
@@ -289,7 +288,7 @@ Interface *
 MazarsNLMaterialStatus :: giveInterface(InterfaceType type)
 {
     if ( type == NonlocalMaterialStatusExtensionInterfaceType ) {
-      return (StructuralNonlocalMaterialStatusExtensionInterface*) this;
+        return ( StructuralNonlocalMaterialStatusExtensionInterface * ) this;
     } else {
         return NULL;
     }
@@ -332,7 +331,4 @@ MazarsNLMaterial :: estimatePackSize(CommunicationBuffer &buff, GaussPoint *ip)
 }
 
 #endif
-
-
-
 } // end namespace oofem

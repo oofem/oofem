@@ -46,7 +46,6 @@
 #include "parser.h"
 
 namespace oofem {
-
 #define UserDefinedLoadTimeFunction_MAX_EXPR_LENGTH 200
 
 /**
@@ -107,6 +106,5 @@ public:
      */
     virtual double    __accelAt(double);
 };
-
 } // end namespace oofem
 #endif // usrdeftimefunct_h

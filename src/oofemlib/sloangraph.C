@@ -46,12 +46,11 @@
 #include "elementside.h"
 #include "intarray.h"
 #ifndef __MAKEDEPEND
-#include <time.h>
-#include <set>
+ #include <time.h>
+ #include <set>
 #endif
 
 namespace oofem {
-
 SloanGraph :: SloanGraph(Domain *d)  : nodes(0), queue(), OptimalRenumberingTable()
 {
     //NumberOfNodes = 0;
@@ -207,7 +206,7 @@ SloanGraph :: findPeripheralNodes()
     // clock_t time_0 = ::clock();
     if ( SpineQuality == Best ) {
         InitialRoot = findBestRoot();
-    } else if ( SpineQuality == Good )  {
+    } else if ( SpineQuality == Good ) {
         InitialRoot = giveNodeWithMinDegree();
     } else {
         OOFEM_WARNING("SloanGraph::findPeripheralNodes : Unsupported value of SpineQuality, using (Good)");
@@ -537,7 +536,7 @@ SloanGraph :: modifyPriorityAround(int next)
                 status = neighborOfNeighbor->giveStatus();
                 if ( status == SloanGraphNode :: Active || status == SloanGraphNode :: Preactive ) {
                     neighborOfNeighbor->increasePriorityBy(WeightDegree);
-                } else if ( status == SloanGraphNode :: Inactive )    {
+                } else if ( status == SloanGraphNode :: Inactive ) {
                     neighborOfNeighbor->increasePriorityBy(WeightDegree);
                     this->queue.pushFront(* npos);
                     neighborOfNeighbor->setStatus(SloanGraphNode :: Preactive);
@@ -677,5 +676,4 @@ SloanGraph ::  giveFullProfileSize()
     int n = this->domain->giveNumberOfDofManagers();
     return n * ( n + 1 );
 }
-
 } // end namespace oofem

@@ -40,7 +40,6 @@
 #define matstatusvar_h
 
 namespace oofem {
-
 enum MatStatusVar {
     ms_unknown,
     ms_yield_flag,
@@ -49,6 +48,5 @@ enum MatStatusVar {
     ms_crackStatus_flag,
     ms_damage_flag
 };
-
 } // end namespace oofem
 #endif // matstatusvar_h

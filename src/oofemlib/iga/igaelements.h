@@ -49,7 +49,6 @@
 #include "mathfem.h"
 
 namespace oofem {
-
 class BsplinePlaneStressElement : public IGAElement, public PlaneStressStructuralElementEvaluator
 {
 protected:
@@ -204,6 +203,5 @@ public:
 protected:
     virtual int giveNsd() { return 3; }
 };
-
 } // end namespace oofem
 #endif //igaelements_h

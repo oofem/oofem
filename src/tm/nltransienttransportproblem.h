@@ -44,11 +44,10 @@
 #include "sparselinsystemnm.h"
 #include "sparsemtrx.h"
 #ifndef __MAKEDEPEND
-#include <stdio.h>
+ #include <stdio.h>
 #endif
 
 namespace oofem {
-
 /**
  * This class represents nonlinear transient transport problem.
  */
@@ -93,9 +92,8 @@ protected:
      */
     void updateInternalState(TimeStep *);
     void applyIC(TimeStep *);
-    void assembleAlgorithmicPartOfRhs(FloatArray &rhs, EquationID ut, 
-				      const UnknownNumberingScheme& s, TimeStep *tStep, int nite);
+    void assembleAlgorithmicPartOfRhs(FloatArray &rhs, EquationID ut,
+                                      const UnknownNumberingScheme &s, TimeStep *tStep, int nite);
 };
-
 } // end namespace oofem
 #endif // nltransienttransportproblem_h

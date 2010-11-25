@@ -43,7 +43,6 @@
 #include "maxwellChM.h"
 
 namespace oofem {
-
 class CebFip78Material : public MaxwellChainMaterial
 {
     /*
@@ -76,6 +75,5 @@ protected:
 
     virtual double  computeCreepFunction(GaussPoint *gp, double atTime, double ofAge);
 };
-
 } // end namespace oofem
 #endif // cebfip78_h

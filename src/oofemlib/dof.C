@@ -55,14 +55,13 @@
 #include "unknownnumberingscheme.h"
 
 #ifndef __MAKEDEPEND
-#include <string.h>
-#include <stdlib.h>
-#include <ctype.h>
-#include <stdarg.h>
+ #include <string.h>
+ #include <stdlib.h>
+ #include <ctype.h>
+ #include <stdarg.h>
 #endif
 
 namespace oofem {
-
 Dof :: Dof(int i, DofManager *aNode, DofID id)
 // Constructor. Creates a new d.o.f., with number i, belonging
 // to aNode
@@ -73,14 +72,14 @@ Dof :: Dof(int i, DofManager *aNode, DofID id)
     ;
 }
 
-int Dof::giveEquationNumber(const UnknownNumberingScheme& s) {
-  return s.giveDofEquationNumber (this);
+int Dof :: giveEquationNumber(const UnknownNumberingScheme &s) {
+    return s.giveDofEquationNumber(this);
 }
 
-void Dof::giveEquationNumbers(IntArray &masterEqNumbers, const UnknownNumberingScheme& s)
+void Dof :: giveEquationNumbers(IntArray &masterEqNumbers, const UnknownNumberingScheme &s)
 {
-  masterEqNumbers.resize(1);
-  masterEqNumbers.at(1) = s.giveDofEquationNumber(this);
+    masterEqNumbers.resize(1);
+    masterEqNumbers.at(1) = s.giveDofEquationNumber(this);
 }
 
 
@@ -88,7 +87,7 @@ int
 Dof :: giveDofManNumber() const { return this->dofManager->giveNumber(); } // termitovo
 
 #ifdef __PARALLEL_MODE
-int 
+int
 Dof :: giveDofManGlobalNumber() const { return this->dofManager->giveGlobalNumber(); }
 #endif
 
@@ -218,16 +217,16 @@ Dof :: giveDofIDName(char *s)
 double
 Dof :: giveBcValue(ValueModeType mode, TimeStep *tStep)
 {
-  if (this->hasBc(tStep)) {
-    double rel = 0.0;
-    if ( mode == VM_Incremental && tStep->isTheFirstStep() && hasIcOn(VM_Total) ) {
-      rel = giveIc()->give(VM_Total);
+    if ( this->hasBc(tStep) ) {
+        double rel = 0.0;
+        if ( mode == VM_Incremental && tStep->isTheFirstStep() && hasIcOn(VM_Total) ) {
+            rel = giveIc()->give(VM_Total);
+        }
+
+        return this->giveBc()->give(this, mode, tStep) - rel;
+    } else {
+        return 0.0;
     }
-    
-    return this->giveBc()->give(this, mode, tStep) - rel;
-  } else {
-    return 0.0;
-  }
 }
 
 contextIOResultType
@@ -240,16 +239,14 @@ Dof :: saveContext(DataStream *stream, ContextMode mode, void *obj)
     // store dofid
     int _val = dofID;
     if ( !stream->write(& _val, 1) ) {
-      THROW_CIOERR(CIO_IOERR);
+        THROW_CIOERR(CIO_IOERR);
     }
-    
+
 
     if ( mode & CM_Definition ) {
-      
-      if ( !stream->write(& number, 1) ) {
-	THROW_CIOERR(CIO_IOERR);
-      }
-
+        if ( !stream->write(& number, 1) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
     }
 
     return CIO_OK;
@@ -259,24 +256,22 @@ Dof :: saveContext(DataStream *stream, ContextMode mode, void *obj)
 contextIOResultType
 Dof :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
 {
-
-  // restore dofid
-  int _val;
-  if ( !stream->read(& _val, 1) ) {
-    THROW_CIOERR(CIO_IOERR);
-  }
-  dofID = ( DofIDItem ) _val;
-
-
-  if ( mode & CM_Definition ) {
-    
-    if ( !stream->read(& number, 1) ) {
-      THROW_CIOERR(CIO_IOERR);
+    // restore dofid
+    int _val;
+    if ( !stream->read(& _val, 1) ) {
+        THROW_CIOERR(CIO_IOERR);
     }
-    
-  }
-  
-  return CIO_OK;
+
+    dofID = ( DofIDItem ) _val;
+
+
+    if ( mode & CM_Definition ) {
+        if ( !stream->read(& number, 1) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+    }
+
+    return CIO_OK;
 }
 
 
@@ -284,5 +279,4 @@ Dof :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
 
 #ifdef __PARALLEL_MODE
 #endif
-
 } // end namespace oofem

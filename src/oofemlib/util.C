@@ -34,9 +34,9 @@
  */
 
 #ifndef __MAKEDEPEND
-#include <stdio.h>
-#include <string.h>
-#include <ctype.h>
+ #include <stdio.h>
+ #include <string.h>
+ #include <ctype.h>
 #endif
 
 #include "engngm.h"
@@ -46,7 +46,6 @@
 #include "oofem_limits.h"
 
 namespace oofem {
-
 char *giveLineFromInput(FILE *inputStream, char *line, int len)
 //
 // reads one line from inputStream - for private use only.
@@ -147,18 +146,17 @@ EngngModel *InstanciateProblem(DataReader *dr, problemMode mode, int contextFlag
 
     problem->instanciateYourself(dr, emodelir, dataOutputFileName, desc);
     //emodelir.finish();
-    delete ( emodelir );
+    delete(emodelir);
 
     return problem;
 }
 
 #define oofem_tmpstring_len 1024
-static char oofem_tmpstring[oofem_tmpstring_len + 1];
+static char oofem_tmpstring [ oofem_tmpstring_len + 1 ];
 
-char* oofem_tmpstr (const char* src) {
-  strncpy (oofem_tmpstring, src, oofem_tmpstring_len);
-  oofem_tmpstring[oofem_tmpstring_len]='\0';
-  return oofem_tmpstring; 
+char *oofem_tmpstr(const char *src) {
+    strncpy(oofem_tmpstring, src, oofem_tmpstring_len);
+    oofem_tmpstring [ oofem_tmpstring_len ] = '\0';
+    return oofem_tmpstring;
 }
-
 } // end namespace oofem

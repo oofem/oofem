@@ -44,16 +44,15 @@
 #include "compiler.h"
 #include "error.h"
 #ifndef __MAKEDEPEND
-#include <stdlib.h> // for NULL
+ #include <stdlib.h> // for NULL
 #endif
 
 namespace oofem {
+template< class Key, class T >class TDictionaryIterator;
+template< class Key, class T >class TDictionary;
 
-template< class Key, class T > class TDictionaryIterator;
-template< class Key, class T > class TDictionary;
 
-
-template< class Key, class T > class TPair
+template< class Key, class T >class TPair
 {
     /*
      * This class implements key/value associations,
@@ -75,9 +74,11 @@ protected:
     T *data;         // data, from client
     TPair< Key, T > *next; // link to next TPair
 public:
-    TPair(Key k, T *d) { key = k;
-                         data = d;
-                         next = NULL; }
+    TPair(Key k, T *d) {
+        key = k;
+        data = d;
+        next = NULL;
+    }
     ~TPair() { delete data; }
 
     void append(TPair< Key, T > *p) { next = p; }
@@ -87,7 +88,7 @@ public:
 };
 
 
-template< class Key, class T > class TDictionary
+template< class Key, class T >class TDictionary
 {
     /*
      * This class implements a linked list whose entries are TPairs (see below).
@@ -108,8 +109,10 @@ protected:
     TPair< Key, T > *last;
 
 public:
-    TDictionary() { first = NULL;
-                    last = NULL; }
+    TDictionary() {
+        first = NULL;
+        last = NULL;
+    }
     ~TDictionary();
 
     TPair< Key, T > *add(Key, T *);
@@ -121,7 +124,7 @@ protected:
     friend class TDictionaryIterator< Key, T >;
 };
 
-template< class Key, class T > class TDictionaryIterator
+template< class Key, class T >class TDictionaryIterator
 {
 protected:
     TPair< Key, T > *curr;
@@ -129,8 +132,10 @@ protected:
 public:
     TDictionaryIterator(TDictionary< Key, T > *l);
     void initialize() { curr = list->first; }
-    void initialize(TDictionary< Key, T > *l) { list = l;
-                                                curr = l->first; }
+    void initialize(TDictionary< Key, T > *l) {
+        list = l;
+        curr = l->first;
+    }
     T *next();
 };
 
@@ -147,7 +152,7 @@ template< class Key, class T >TDictionary< Key, T > :: ~TDictionary()
     }
 }
 
-template< class Key, class T > TPair< Key, T > *TDictionary< Key, T > :: add(Key k, T *v)
+template< class Key, class T >TPair< Key, T > *TDictionary< Key, T > :: add(Key k, T *v)
 // Adds the pair (k,v) to the receiver. Returns this new pair.
 {
     TPair< Key, T > *newPair;
@@ -171,7 +176,7 @@ template< class Key, class T > TPair< Key, T > *TDictionary< Key, T > :: add(Key
     return newPair;
 }
 
-template< class Key, class T > T *TDictionary< Key, T > :: at(Key aKey)
+template< class Key, class T >T *TDictionary< Key, T > :: at(Key aKey)
 // Returns the value of the pair which key is aKey. If such pair does
 // not exist, creates it and assign value 0.
 {
@@ -191,7 +196,7 @@ template< class Key, class T > T *TDictionary< Key, T > :: at(Key aKey)
     return NULL;
 }
 
-template< class Key, class T > int TDictionary< Key, T > :: includes(Key aKey)
+template< class Key, class T >int TDictionary< Key, T > :: includes(Key aKey)
 // Returns True if the receiver contains a pair which key is aKey, else
 // returns False.
 {
@@ -210,7 +215,7 @@ template< class Key, class T > int TDictionary< Key, T > :: includes(Key aKey)
 }
 
 
-template< class Key, class T > void
+template< class Key, class T >void
 TDictionary< Key, T > :: clear()
 {
     TPair< Key, T > *Next;
@@ -228,7 +233,7 @@ template< class Key, class T >TDictionaryIterator< Key, T > :: TDictionaryIterat
     curr = l->first;
 }
 
-template< class Key, class T > T *TDictionaryIterator< Key, T > :: next() {
+template< class Key, class T >T *TDictionaryIterator< Key, T > :: next() {
     TPair< Key, T > *ret = curr ? ( curr = curr->giveNext() ) : 0;
     if ( curr == list->last ) {
         curr = 0;
@@ -236,9 +241,5 @@ template< class Key, class T > T *TDictionaryIterator< Key, T > :: next() {
 
     return ret ? ret->giveValue() : 0;
 }
-
-
-
-
 } // end namespace oofem
 #endif // tdictionary_h

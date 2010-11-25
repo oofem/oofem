@@ -41,14 +41,13 @@
 #define inverseit_h
 
 #ifndef __MAKEDEPEND
-#include <stdio.h>
+ #include <stdio.h>
 #endif
 #include "sparsegeneigenvalsystemnm.h"
 #include "skyline.h"
 #include "flotarry.h"
 
 namespace oofem {
-
 class Domain;
 class EngngModel;
 
@@ -122,6 +121,5 @@ public:
     classType giveClassID() const { return InverseIterationSolverClass; }
 protected:
 };
-
 } // end namespace oofem
 #endif // inverseit_h

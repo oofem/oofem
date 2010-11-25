@@ -46,7 +46,6 @@
 #include "matstatus.h"
 
 namespace oofem {
-
 class GaussPoint;
 
 /**
@@ -182,6 +181,5 @@ public:
 #ifdef __OOFEG
 #endif
 };
-
 } // end namespace oofem
 #endif // fluiddynamicmaterial_h

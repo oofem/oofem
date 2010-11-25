@@ -34,7 +34,7 @@
 // file: KelvinChM.C
 
 #ifndef __MAKEDEPEND
-#include <math.h>
+ #include <math.h>
 #endif
 #include "mathfem.h"
 #include "kelvinChM.h"
@@ -51,21 +51,19 @@
 
 
 namespace oofem {
-
 KelvinChainMaterial :: KelvinChainMaterial(int n, Domain *d) : RheoChainMaterial(n, d)
-{
-}
+{}
 
 void
 KelvinChainMaterial :: computeCharCoefficients(FloatArray &answer, GaussPoint *gp,
                                                double atTime)
 {
     /*
-     * This function computes the moduli of individual Kelvin units 
+     * This function computes the moduli of individual Kelvin units
      * such that the corresponding Dirichlet series gives the best
      * approximation of the actual compliance function J(t,t0) with t0 fixed.
      *
-     * The optimal moduli are obtained using the least-square method. 
+     * The optimal moduli are obtained using the least-square method.
      *
      * INPUTS:
      * atTime = age of material when load is applied
@@ -83,8 +81,9 @@ KelvinChainMaterial :: computeCharCoefficients(FloatArray &answer, GaussPoint *g
     // compute values of the compliance function at specified times rTimes
     // (can be done directly, since the compliance function is available)
 
-    for ( i = 1; i<= rSize; i++)
-    	discreteComplianceFunctionVal.at(i) = this->computeCreepFunction(gp, atTime + rTimes.at(i), atTime);
+    for ( i = 1; i <= rSize; i++ ) {
+        discreteComplianceFunctionVal.at(i) = this->computeCreepFunction(gp, atTime + rTimes.at(i), atTime);
+    }
 
     // assemble the matrix of the set of linear equations
     // for computing the optimal compliances
@@ -96,17 +95,17 @@ KelvinChainMaterial :: computeCharCoefficients(FloatArray &answer, GaussPoint *g
             for ( sum = 0., r = 1; r <= rSize; r++ ) {
                 tti = rTimes.at(r) / taui;
                 ttj = rTimes.at(r) / tauj;
-                sum += (1.-exp(-tti)) * (1.-exp(-ttj));
+                sum += ( 1. - exp(-tti) ) * ( 1. - exp(-ttj) );
             }
 
             A.at(i, j) = sum;
         }
 
         // assemble rhs
-	// !!! chartime exponents are assumed to be equal to 1 !!!
+        // !!! chartime exponents are assumed to be equal to 1 !!!
         for ( sumRhs = 0., r = 1; r <= rSize; r++ ) {
             tti = rTimes.at(r) / taui;
-            sumRhs += (1.-exp(-tti)) * discreteComplianceFunctionVal.at(r);
+            sumRhs += ( 1. - exp(-tti) ) * discreteComplianceFunctionVal.at(r);
         }
 
         rhs.at(i) = sumRhs;
@@ -116,8 +115,9 @@ KelvinChainMaterial :: computeCharCoefficients(FloatArray &answer, GaussPoint *g
     A.solveForRhs(rhs, answer);
 
     // convert compliances into moduli
-    for ( i = 1; i <= this->nUnits; i++ )
-      answer.at(i) = 1./answer.at(i);
+    for ( i = 1; i <= this->nUnits; i++ ) {
+        answer.at(i) = 1. / answer.at(i);
+    }
 
     return;
 }
@@ -145,29 +145,30 @@ KelvinChainMaterial :: giveDiscreteTimes()
 
 void
 KelvinChainMaterial :: generateLogTimeScale(FloatArray &answer, double from, double to,
-                                             int nsteps,
-                                             int fromIncluded)
+                                            int nsteps,
+                                            int fromIncluded)
 {
     /*
-	 * function generates discrete times starting from time "from" to time "to"
-	 * uniformely distributed in log time scale. The time interval (to-from) is
-	 * divided to nsteps intervals. if from is wanted to be included in return
-	 * array fromIncluded must be set to 1, otherwise we return times starting
-	 * from ("from" + first increment);
-	 */
-	int size = nsteps + 1;
-	int i;
-	double help;
+     * function generates discrete times starting from time "from" to time "to"
+     * uniformely distributed in log time scale. The time interval (to-from) is
+     * divided to nsteps intervals. if from is wanted to be included in return
+     * array fromIncluded must be set to 1, otherwise we return times starting
+     * from ("from" + first increment);
+     */
+    int size = nsteps + 1;
+    int i;
+    double help;
 
-	answer.resize(size);
-	answer.zero();
+    answer.resize(size);
+    answer.zero();
 
-	help = (log10(to) - log10(from)) / (double) (nsteps);
-	for (i = 1; i <= nsteps; i++) {
-		answer.at(i + 1) = __OOFEM_POW( 10., ( i*help+log10(from) ) );
-	}
-	answer.at(1) = from;
-	return;
+    help = ( log10(to) - log10(from) ) / ( double ) ( nsteps );
+    for ( i = 1; i <= nsteps; i++ ) {
+        answer.at(i + 1) = __OOFEM_POW( 10., ( i * help + log10(from) ) );
+    }
+
+    answer.at(1) = from;
+    return;
 }
 
 double
@@ -180,89 +181,94 @@ KelvinChainMaterial :: giveEModulus(GaussPoint *gp, TimeStep *atTime)
      *
      * It is stored as "Einc" for further expected requests from other gaussPoints that correspond to the same material.
      *
-     * Note: time -1 refers to the previous time.    
+     * Note: time -1 refers to the previous time.
      */
 
     int mu;
     double deltaT, tauMu, lambdaMu, Dmu;
     double sum = 0.0; // return value
 
-    if(EparVal.giveSize()==0)
-    this->updateEparModuli(gp, relMatAge + ( atTime->giveTime() - 0.5 * atTime->giveTimeIncrement() ) / timeFactor);
+    if ( EparVal.giveSize() == 0 ) {
+        this->updateEparModuli(gp, relMatAge + ( atTime->giveTime() - 0.5 * atTime->giveTimeIncrement() ) / timeFactor);
+    }
 
-	deltaT = atTime->giveTimeIncrement() / timeFactor;
+    deltaT = atTime->giveTimeIncrement() / timeFactor;
 
-	// EparVal values were determined using the least-square method
-	for ( mu = 1; mu <= nUnits; mu++ ) {
-		tauMu = this->giveCharTime(mu);
-		if (deltaT/tauMu < 1.e-5)
-			lambdaMu = 1 - 0.5*(deltaT/tauMu) + 1/6*( __OOFEM_POW(deltaT/tauMu, 2) ) - 1/24 * ( __OOFEM_POW(deltaT/tauMu, 3));
-		else if (deltaT/tauMu > 30)
-			lambdaMu = tauMu/deltaT;
-		else
-			lambdaMu = ( 1.0 - exp(-deltaT/tauMu)) * tauMu/deltaT;
-		Dmu = this->giveEparModulus(mu);
-		sum += (1-lambdaMu)/Dmu;
-	}
-	return sum;
+    // EparVal values were determined using the least-square method
+    for ( mu = 1; mu <= nUnits; mu++ ) {
+        tauMu = this->giveCharTime(mu);
+        if ( deltaT / tauMu < 1.e-5 ) {
+            lambdaMu = 1 - 0.5 * ( deltaT / tauMu ) + 1 / 6 * ( __OOFEM_POW(deltaT / tauMu, 2) ) - 1 / 24 * ( __OOFEM_POW(deltaT / tauMu, 3) );
+        } else if ( deltaT / tauMu > 30 ) {
+            lambdaMu = tauMu / deltaT;
+        } else {
+            lambdaMu = ( 1.0 - exp(-deltaT / tauMu) ) * tauMu / deltaT;
+        }
+
+        Dmu = this->giveEparModulus(mu);
+        sum += ( 1 - lambdaMu ) / Dmu;
+    }
+
+    return sum;
 }
 
 void
 KelvinChainMaterial :: giveEigenStrainVector(FloatArray &answer, MatResponseForm form,
-                                              GaussPoint *gp, TimeStep *atTime, ValueModeType mode)
+                                             GaussPoint *gp, TimeStep *atTime, ValueModeType mode)
 //
 // computes the strain due to creep at constant stress during the increment
 // (in fact, the INCREMENT of creep strain is computed for mode == VM_Incremental)
 //
 {
     int mu;
-	double beta;
-	FloatArray * gamma, reducedAnswer, help;
-	KelvinChainMaterialStatus *status = ( KelvinChainMaterialStatus * ) this->giveStatus(gp);
+    double beta;
+    FloatArray *gamma, reducedAnswer, help;
+    KelvinChainMaterialStatus *status = ( KelvinChainMaterialStatus * ) this->giveStatus(gp);
 
-	// !!! chartime exponents are assumed to be equal to 1 !!!
+    // !!! chartime exponents are assumed to be equal to 1 !!!
 
-	if ( mode == VM_Incremental ) {
+    if ( mode == VM_Incremental ) {
+        for ( mu = 1; mu <= nUnits; mu++ ) {
+            if ( ( atTime->giveTimeIncrement() / timeFactor ) / this->giveCharTime(mu) > 30 ) {
+                beta = 0;
+            } else {
+                beta = exp( -( atTime->giveTimeIncrement() / timeFactor ) / ( this->giveCharTime(mu) ) );
+            }
 
-		for ( mu=1; mu <= nUnits; mu++ ) {
+            gamma =  status->giveHiddenVarsVector(mu);
+            if ( gamma ) {
+                help.zero();
+                help.add(* gamma);
+                help.times(1.0 - beta);
+                reducedAnswer.add(help);
+            }
+        }
 
-			if ( (atTime->giveTimeIncrement() / timeFactor) / this->giveCharTime(mu) > 30 )
-				beta = 0;
-			else
-				beta = exp(-(atTime->giveTimeIncrement() / timeFactor )/(this->giveCharTime(mu)));
-			gamma =  status->giveHiddenVarsVector(mu);
-			if ( gamma ) {
-				help.zero();
-				help.add(* gamma);
-				help.times(1.0 - beta);
-				reducedAnswer.add(help);
-			}
-		}
+        if ( form == ReducedForm ) {
+            answer =  reducedAnswer;
+            return;
+        }
 
-		if ( form == ReducedForm ) {
-			answer =  reducedAnswer;
-			return;
-		}
-		// expand the strain to full form if requested
-		( ( StructuralCrossSection * ) gp->giveCrossSection() )->
-		giveFullCharacteristicVector(answer, gp, reducedAnswer);
-	} else {
-		/* error - total mode not implemented yet */
-		_error("giveEigenStrainVector - mode is not supported");
-	}
+        // expand the strain to full form if requested
+        ( ( StructuralCrossSection * ) gp->giveCrossSection() )->
+        giveFullCharacteristicVector(answer, gp, reducedAnswer);
+    } else {
+        /* error - total mode not implemented yet */
+        _error("giveEigenStrainVector - mode is not supported");
+    }
 
-	return;
+    return;
 }
 
 
 void
 KelvinChainMaterial :: updateYourself(GaussPoint *gp, TimeStep *tNow)
 {
-     /*
+    /*
      * Updates hidden variables used to effectively trace the load history
      */
 
-	// !!! chartime exponents are assumed to be equal to 1 !!!
+    // !!! chartime exponents are assumed to be equal to 1 !!!
     double betaMu;
     double lambdaMu;
     double deltaT;
@@ -280,31 +286,29 @@ KelvinChainMaterial :: updateYourself(GaussPoint *gp, TimeStep *tNow)
         help.substract(deltaEps0); // should be equal to zero if there is no stress change during the time-step
     }
 
-    help.times(this->giveEModulus(gp, tNow)); // = delta_sigma
+    help.times( this->giveEModulus(gp, tNow) ); // = delta_sigma
     help1 = help;
 
-    deltaT = tNow->giveTimeIncrement()/ timeFactor;
+    deltaT = tNow->giveTimeIncrement() / timeFactor;
 
-    for (int mu = 1; mu <= nUnits; mu++ ) {
-    	help = help1;
-    	tauMu = (this->giveCharTime(mu));
+    for ( int mu = 1; mu <= nUnits; mu++ ) {
+        help = help1;
+        tauMu = ( this->giveCharTime(mu) );
 
-    	muthHiddenVarsVector = status->giveHiddenVarsVector(mu); //gamma_mu
+        muthHiddenVarsVector = status->giveHiddenVarsVector(mu); //gamma_mu
 
-		if (deltaT/tauMu < 1.e-5){
-			betaMu = exp(-(deltaT)/tauMu);
-			lambdaMu = 1 - 0.5*(deltaT/tauMu) + 1/6*( __OOFEM_POW(deltaT/tauMu, 2) ) - 1/24 * ( __OOFEM_POW(deltaT/tauMu, 3));
-		}
-		else if (deltaT/tauMu > 30){
-			betaMu = 0;
-			lambdaMu = tauMu/deltaT;
-		}
-		else {
-			betaMu = exp(-(deltaT )/tauMu);
-			lambdaMu = ( 1.0 - betaMu) * tauMu/deltaT;
-		}
+        if ( deltaT / tauMu < 1.e-5 ) {
+            betaMu = exp(-( deltaT ) / tauMu);
+            lambdaMu = 1 - 0.5 * ( deltaT / tauMu ) + 1 / 6 * ( __OOFEM_POW(deltaT / tauMu, 2) ) - 1 / 24 * ( __OOFEM_POW(deltaT / tauMu, 3) );
+        } else if ( deltaT / tauMu > 30 )       {
+            betaMu = 0;
+            lambdaMu = tauMu / deltaT;
+        } else   {
+            betaMu = exp(-( deltaT ) / tauMu);
+            lambdaMu = ( 1.0 - betaMu ) * tauMu / deltaT;
+        }
 
-    	help.times(lambdaMu / (this->giveEparModulus(mu)));
+        help.times( lambdaMu / ( this->giveEparModulus(mu) ) );
 
         if ( muthHiddenVarsVector ) {
             muthHiddenVarsVector->times(betaMu);
@@ -313,6 +317,7 @@ KelvinChainMaterial :: updateYourself(GaussPoint *gp, TimeStep *tNow)
             status->letHiddenVarsVectorBe( mu, help.GiveCopy() );
         }
     }
+
     // now we call KelvinChainMaterialStatus->updateYourself()
     status->updateYourself(tNow);
 }
@@ -366,9 +371,8 @@ KelvinChainMaterial :: restoreContext(DataStream *stream, ContextMode mode, void
 /****************************************************************************************/
 
 KelvinChainMaterialStatus :: KelvinChainMaterialStatus(int n, Domain *d,
-                                                         GaussPoint *g, int nunits) :
-  RheoChainMaterialStatus(n, d, g, nunits) {
-}
+                                                       GaussPoint *g, int nunits) :
+    RheoChainMaterialStatus(n, d, g, nunits) {}
 
 void
 KelvinChainMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)
@@ -397,6 +401,7 @@ KelvinChainMaterialStatus :: saveContext(DataStream *stream, ContextMode mode, v
     if ( ( iores = RheoChainMaterialStatus :: saveContext(stream, mode, obj) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
+
     return CIO_OK;
 }
 
@@ -410,7 +415,7 @@ KelvinChainMaterialStatus :: restoreContext(DataStream *stream, ContextMode mode
     if ( ( iores = RheoChainMaterialStatus :: restoreContext(stream, mode, obj) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
+
     return CIO_OK;
 }
-
 } // end namespace oofem

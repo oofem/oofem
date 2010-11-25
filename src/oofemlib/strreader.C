@@ -45,11 +45,10 @@
 #include "oofem_limits.h"
 
 #ifndef __MAKEDEPEND
-#include <ctype.h>
+ #include <ctype.h>
 #endif
 
 namespace oofem {
-
 const char *StringReader :: getPosAfter(const char *source, const char *idString)
 //
 // returns possition of substring idString in source
@@ -83,12 +82,12 @@ const char *StringReader :: skipNextWord(const char *src)
 // skips next word in src ; returns pointer after it
 //
 {
-    while ( isspace(* src) || ! * src ) {
+    while ( isspace(* src) || !* src ) {
         src++;
     }
 
     // skips whitespaces if any
-    while ( !( isspace(* src) || ! * src ) ) {
+    while ( !( isspace(* src) || !* src ) ) {
         src++;
     }
 
@@ -196,7 +195,7 @@ StringReader :: readQuotedString(const char *source, const char *idString, char 
     }
 
     // skip whitespaces
-    while ( isspace(* curr) || ! * curr ) {
+    while ( isspace(* curr) || !* curr ) {
         curr++;
     }
 
@@ -207,7 +206,7 @@ StringReader :: readQuotedString(const char *source, const char *idString, char 
 
     if ( * curr++ == '"' ) {
         while ( !( * curr == '"' ) ) {
-            if ( ( * curr == '\n' ) || ! * curr ) {
+            if ( ( * curr == '\n' ) || !* curr ) {
                 fprintf(stderr, "readQuotedString: final \" expected\a\n");
                 exit(1);
             }
@@ -326,7 +325,7 @@ char *StringReader :: readSimpleString(const char *source, char *simpleString, i
         return NULL;
     }
 
-    while ( isspace(* curr) || ! * curr ) {
+    while ( isspace(* curr) || !* curr ) {
         curr++;
     }
 
@@ -335,7 +334,7 @@ char *StringReader :: readSimpleString(const char *source, char *simpleString, i
         exit(1);
     }
 
-    while ( ( !( isspace(* curr) || ! * curr ) ) && ( ++count < maxchar ) ) {
+    while ( ( !( isspace(* curr) || !* curr ) ) && ( ++count < maxchar ) ) {
         * ss++ = * curr++;
     }
 
@@ -472,7 +471,7 @@ StringReader :: readRange(const char **helpSource, int &li, int &hi)
         if ( * * helpSource == ')' ) {
             ( * helpSource )++;
             return 1;
-        } else                                                      {
+        } else {
             OOFEM_WARNING("StringReader::readRange: end ')' missing while parsing range value");
             return 0;
         }
@@ -480,5 +479,4 @@ StringReader :: readRange(const char **helpSource, int &li, int &hi)
 
     return 0;
 }
-
 } // end namespace oofem

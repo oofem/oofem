@@ -7,7 +7,6 @@
 #include "gaussintegrationrule.h"
 
 namespace oofem {
-
 /** represents an IntegrationRule for an interacted element
  * the standard integration is replaced by an integration over a
  * patchset
@@ -67,8 +66,6 @@ public:
     virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj);
     ///Returns classType id of receiver.
     virtual classType giveClassID() const { return PatchIntegrationRuleClass; }
-
 };
-
 } // end namespace oofem
 #endif

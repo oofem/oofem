@@ -50,7 +50,6 @@
 #include "structuralms.h"
 
 namespace oofem {
-
 #define MNC_NPOINTS 30
 #define TIME_DIFF   1.e-10
 
@@ -59,7 +58,7 @@ class RheoChainMaterialStatus : public StructuralMaterialStatus
 {
     /*
      * This class implements associated Material Status to RheoChainMaterial.
-     * It is an attribute of matStatusDictionary at every GaussPoint 
+     * It is an attribute of matStatusDictionary at every GaussPoint
      * for which this material
      * is active. Isotropic linear viscoelastic material is assumed.
      * DESCRIPTION:
@@ -75,13 +74,13 @@ class RheoChainMaterialStatus : public StructuralMaterialStatus
      */
 
 protected:
-    /// number of units in the chain 
+    /// number of units in the chain
     int nUnits;
     /// hidden (internal) variables, the meaning of which depends on the type of chain
     FloatArray **hiddenVars;
-    /* total shrinkage strain (needed only when the shrinkage evolution 
-       is described in the incremental form)
-    */
+    /* total shrinkage strain (needed only when the shrinkage evolution
+     * is described in the incremental form)
+     */
     FloatArray shrinkageStrain;
 
 public:
@@ -98,7 +97,7 @@ public:
     /// initialize the status
     virtual void initTempStatus();
     /// update after new equilibrium state reached
-    virtual void updateYourself(TimeStep *); 
+    virtual void updateYourself(TimeStep *);
 
     /// save current context (state) into a stream
     contextIOResultType    saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
@@ -117,7 +116,7 @@ public:
 class RheoChainMaterial : public StructuralMaterial
 {
     /*
-     * This class implements a rheologic chain model 
+     * This class implements a rheologic chain model
      * describing a viscoelastic material.
      * It serves as the parent class for Maxwell and Kelvin chains.
      *
@@ -125,7 +124,7 @@ class RheoChainMaterial : public StructuralMaterial
 
 protected:
 
-    /// number of (Maxwell or Kelvin) units in the rheologic chain 
+    /// number of (Maxwell or Kelvin) units in the rheologic chain
     int nUnits;
     /// physical age of the material at simulation time = 0
     double relMatAge;
@@ -138,7 +137,7 @@ protected:
 
     /// time from which the model should give a good approximation. Optional field. Default value is 0.1 [day].
     double begOfTimeOfInterest; // local one or taken from e-model
-    /// time (age???) up to which the model should give a good approximation 
+    /// time (age???) up to which the model should give a good approximation
     double endOfTimeOfInterest; // local one or taken from e-model
     // associated linearElasticMaterial, with E = 1;
     LinearElasticMaterial *linearElasticMaterial;
@@ -151,8 +150,8 @@ protected:
     FloatArray discreteTimeScale;
 
     /** scaling factor transforming the simulation time units into days
-      * (gives the number of simulation time units in one day,
-      *  e.g. 86400 if the simulation works with seconds as the time units) */
+     * (gives the number of simulation time units in one day,
+     *  e.g. 86400 if the simulation works with seconds as the time units) */
     double timeFactor;
 
 
@@ -178,13 +177,13 @@ public:
     { answer.resize(0); }
 
     /// evaluation of the incremental modulus
-    virtual double giveEModulus(GaussPoint *gp, TimeStep *atTime){return 0.0;}
+    virtual double giveEModulus(GaussPoint *gp, TimeStep *atTime) { return 0.0; }
 
     /// evaluation of the moduli of individual units
-    virtual void computeCharCoefficients(FloatArray &answer, GaussPoint *gp, double){};
+    virtual void computeCharCoefficients(FloatArray &answer, GaussPoint *gp, double) {};
 
     /// update of MatStatus to the newly reached (equilibrium) state
-    virtual void updateYourself(GaussPoint *gp, TimeStep *){};
+    virtual void updateYourself(GaussPoint *gp, TimeStep *) {};
 
     // identification and auxiliary functions
     virtual int hasNonLinearBehaviour()   { return 0; }
@@ -206,7 +205,7 @@ public:
                                                TimeStep * atTime);
 
     /**
-     * Computes, for the given integration point, 
+     * Computes, for the given integration point,
      * the strain vector induced by stress-independent
      * internal processes in the material.
      * Default implementation takes into account only temperature-induced strains.
@@ -219,8 +218,8 @@ public:
     virtual void computeStressIndependentStrainVector(FloatArray &answer,
                                                       GaussPoint *gp, TimeStep *stepN, ValueModeType mode);
     /**
-     * Computes, for the given integration point, 
-     * the strain vector induced by stress-independent shrinkage 
+     * Computes, for the given integration point,
+     * the strain vector induced by stress-independent shrinkage
      * @param answer returned strain vector
      * @param form material response form
      * @param gp integration point
@@ -236,7 +235,7 @@ public:
 
     // Note: must take LoadResponseMode into account
     /**
-     * Computes, for the given integration point, 
+     * Computes, for the given integration point,
      * the strain vector induced by the stress history (typically creep strain)
      * @param answer computed strains
      * @param form material response form
@@ -245,7 +244,7 @@ public:
      * @param mode determines response mode
      */
     virtual void  giveEigenStrainVector(FloatArray &answer, MatResponseForm form,
-                                        GaussPoint *gp, TimeStep *atTime, ValueModeType mode){};
+                                        GaussPoint *gp, TimeStep *atTime, ValueModeType mode) {};
 
 #ifdef __OOFEG
 #endif
@@ -268,15 +267,15 @@ protected:
 
     /// evaluation of the relaxation function at given times
     void computeDiscreteRelaxationFunction(FloatArray &answer, GaussPoint *gp,
-                                                   const FloatArray &atTimes,
-                                                   double t0, double tr);
+                                           const FloatArray &atTimes,
+                                           double t0, double tr);
 
     /// evaluation of elastic compliance matrix for unit Young's modulus
     void giveUnitComplianceMatrix(FloatMatrix & answer, MatResponseForm,
-                                   GaussPoint * gp, TimeStep * tStep);
+                                  GaussPoint * gp, TimeStep * tStep);
     /// evaluation of elastic stiffness matrix for unit Young's modulus
     void giveUnitStiffnessMatrix(FloatMatrix & answer,
-                                      MatResponseForm, GaussPoint * gp, TimeStep * tStep);
+                                 MatResponseForm, GaussPoint * gp, TimeStep * tStep);
 
     /// update of partial moduli of individual chain units
     void         updateEparModuli(GaussPoint *gp, double atTime);
@@ -324,7 +323,7 @@ protected:
                                            GaussPoint * gp,
                                            TimeStep * atTime);
     /**
-     * Computes, for the given integration point, 
+     * Computes, for the given integration point,
      * the strain vector induced by stress-independent
      * internal processes in the material.
      * Takes into account only temperature and shrinkage-induced strains.
@@ -336,6 +335,5 @@ protected:
     void computeTrueStressIndependentStrainVector(FloatArray &answer, GaussPoint *gp,
                                                   TimeStep *stepN, ValueModeType mode);
 };
-
 } // end namespace oofem
 #endif // rheochm_h

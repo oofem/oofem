@@ -28,14 +28,13 @@
 #include "hydram.h"
 #include "datastream.h"
 #ifndef __MAKEDEPEND
-#include <stdio.h>
-#include <stdlib.h>
-#include <math.h>
+ #include <stdio.h>
+ #include <stdlib.h>
+ #include <math.h>
 #endif
 #include "contextioerr.h"
 
 namespace oofem {
-
 // ======= class HydrationModelStatus implementation =======
 HydrationModelStatus :: HydrationModelStatus(int n, Domain *d, GaussPoint *g) : MaterialStatus(n, d, g)
 {
@@ -211,7 +210,7 @@ HydrationModel :: setMixture(MixtureType mix)
         da = 10;
 
         e0 = 0.05; // ksi_0
-    } else   {
+    } else {
         _error("Unknown mixture type!");
     }
 
@@ -380,7 +379,7 @@ HydrationModel :: computeHydrationDegreeIncrement(double ksi, double T, double h
 #endif
             result = 1.0 - ksi;
         }
-    } else   {
+    } else {
         result = 0.;
     }
 
@@ -414,7 +413,7 @@ HydrationModel :: computeIntSource(const FloatArray &vec, GaussPoint *gp, TimeSt
         case IntSource:
         case IntSource_hh: return -le *dksidT(ksi, T, h, dt);
 
-        case IntSource_ww: return we *dksidh(ksi, T, h, dt);
+        case IntSource_ww: return we * dksidh(ksi, T, h, dt);
 
         case IntSource_hw: return -le *dksidh(ksi, T, h, dt);
 
@@ -433,7 +432,7 @@ double
 HydrationModel :: giveHydrationDegree(GaussPoint *gp, TimeStep *atTime, ValueModeType mode)
 // returns the hydration degree in integration point gp
 {
-  HydrationModelStatus *status = (HydrationModelStatus*) giveStatus(gp);
+    HydrationModelStatus *status = ( HydrationModelStatus * ) giveStatus(gp);
     double ksi = status->giveTempHydrationDegree();
     if ( mode == VM_Incremental ) {
         ksi -= status->giveHydrationDegree();
@@ -451,7 +450,7 @@ HydrationModel :: updateInternalState(const FloatArray &vec, GaussPoint *gp, Tim
 {
     double ksi, dksi, T = 0., h = 1., dt;
     // get hydration model status associated with integration point
-    HydrationModelStatus *status = (HydrationModelStatus*) giveStatus(gp);
+    HydrationModelStatus *status = ( HydrationModelStatus * ) giveStatus(gp);
 
     if ( vec.giveSize() ) {
         T = vec(0);
@@ -628,7 +627,7 @@ HydrationModelInterface :: initializeFrom(InputRecord *ir)
     else if ( value >= -1. ) {
         constantHydrationDegree = -value;
         printf("\nHydratingMaterial: Hydration degree set to %.2f.", -value);
-    } else   {
+    } else {
         printf("\nHydration degree input incorrect, use -1..<0 for constant hydration degree, 0..1 to set initial material hydration degree.");
         exit(0);
     }
@@ -652,7 +651,7 @@ HydrationModelInterface :: updateInternalState(const FloatArray &vec, GaussPoint
  */
 {
     if ( hydrationModel ) {
-        TimeStep *hydraTime = new TimeStep( ( const TimeStep ) * atTime );
+        TimeStep *hydraTime = new TimeStep( ( const TimeStep ) *atTime );
         int notime = 0;
         if ( atTime->giveTime() - atTime->giveTimeIncrement() < castAt ) {
             if ( atTime->giveTime() >= castAt ) {
@@ -680,5 +679,4 @@ HydrationModelInterface :: giveHydrationDegree(GaussPoint *gp, TimeStep *atTime,
         return constantHydrationDegree;
     }
 }
-
 } // end namespace oofem

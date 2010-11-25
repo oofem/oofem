@@ -41,13 +41,12 @@
 #include "classtype.h"
 
 #ifndef __MAKEDEPEND
-#include <vector>
-#include <list>
-#include <queue>
+ #include <vector>
+ #include <list>
+ #include <queue>
 #endif
 
 namespace oofem {
-
 /**
  * Fast Marching Method for unstructured grids.
  * Used to solve Eikonal equation and especially to construct
@@ -94,7 +93,7 @@ public:
     Domain *domain;
 
     /// Priority queue for trial T values
-    std :: priority_queue< int, std :: vector< int > , FMM_DofmanRecordDelegate_greater >dmanTrialQueue;
+    std :: priority_queue< int, std :: vector< int >, FMM_DofmanRecordDelegate_greater >dmanTrialQueue;
 
 public:
     /** Constructor. Takes two two arguments. Creates
@@ -132,6 +131,5 @@ protected:
     /// get the trial point with smallest T; zero if emty
     int  getSmallestTrialDofMan();
 };
-
 } // end namespace oofem
 #endif // fastmarchingmethod_h

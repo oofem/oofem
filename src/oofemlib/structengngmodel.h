@@ -52,7 +52,6 @@
 #endif
 
 namespace oofem {
-
 class StructuralElement;
 
 /**
@@ -278,6 +277,5 @@ public:
     void               showSparseMtrxStructure(int type, oofegGraphicContext &context, TimeStep *atTime);
 #endif
 };
-
 } // end namespace oofem
 #endif // structengngmodel_h

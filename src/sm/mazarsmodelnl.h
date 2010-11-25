@@ -44,7 +44,6 @@
 #include "structuralnonlocalmaterialext.h"
 
 namespace oofem {
-
 class GaussPoint;
 
 /**
@@ -236,6 +235,5 @@ protected:
      */
     void initDamaged(double kappa, FloatArray &totalStrainVector, GaussPoint *gp);
 };
-
 } // end namespace oofem
 #endif // mazarsmodelnl_h

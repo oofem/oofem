@@ -691,7 +691,7 @@ TrPlaneStrRot :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, Time
         if ( this->computeGtoLRotationMatrix(T) ) {
             answer.rotatedWith(T, 'n');
         }
-    } else   {
+    } else {
         answer.resize(0);          // nil resultant
     }
 

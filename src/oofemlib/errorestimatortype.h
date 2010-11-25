@@ -40,13 +40,11 @@
 #define errorestimatortype_h
 
 namespace oofem {
-
 enum ErrorEstimatorType {
     EET_SEI,   // Scalar Error Indicator
     EET_ZZEE,  // Zienkiewicz-Zhu EE
     EET_CZZSI, // Combined ZZ and ScalarIndicator EE
     EET_HEE    // Huerta EE
 };
-
 } // end namespace oofem
 #endif // errorestimatortype_h

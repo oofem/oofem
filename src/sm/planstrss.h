@@ -51,7 +51,6 @@
 #include "huertaerrorestimator.h"
 
 namespace oofem {
-
 /// Comment or uncomment the following line to force full or reduced integration
 #define PlaneStress2d_reducedShearIntegration
 
@@ -105,7 +104,7 @@ public:
      */
     virtual int computeLocalCoordinates(FloatArray &answer, const FloatArray &gcoords);
     // returns interpolation type
-    FEInterpolation* giveInterpolation() { return &interpolation; } // rch
+    FEInterpolation *giveInterpolation() { return & interpolation; } // rch
     /**
      * @name The element interface required by ZZNodalRecoveryModel
      */
@@ -226,7 +225,7 @@ public:
     IRResultType initializeFrom(InputRecord *ir);
     Element_Geometry_Type giveGeometryType() const { return EGT_quad_1; }
     integrationDomain  giveIntegrationDomain() { return _Square; }
-    MaterialMode          giveMaterialMode()  {return _PlaneStress;}
+    MaterialMode          giveMaterialMode()  { return _PlaneStress; }
 
 protected:
     // edge load support
@@ -247,6 +246,5 @@ protected:
     int           giveApproxOrder() { return 1; }
     int           giveNumberOfIPForMassMtrxIntegration() { return 4; }
 };
-
 } // end namespace oofem
 #endif // planstrss_h

@@ -39,8 +39,8 @@
 
 #include "nrsolver2.h"
 #ifndef __MAKEDEPEND
-#include <stdio.h>
-#include <math.h>
+ #include <stdio.h>
+ #include <math.h>
 #endif
 
 #include "verbose.h"
@@ -53,7 +53,6 @@
 #include "usrdefsub.h"
 
 namespace oofem {
-
 #define nrsolver_SMALL_NUM 1.e-20
 #define NRSOLVER_MAX_REL_ERROR_BOUND 1.e10
 #define NRSOLVER_MAX_RESTARTS 4
@@ -379,5 +378,4 @@ NRSolver2 :: giveLineSearchSolver()
 
     return linesearchSolver;
 }
-
 } // end namespace oofem

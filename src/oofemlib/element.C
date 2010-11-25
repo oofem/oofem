@@ -87,7 +87,6 @@
 #include "contextioerr.h"
 
 namespace oofem {
-
 Element :: Element(int n, Domain *aDomain) :
     FEMComponent(n, aDomain), dofManArray(), bodyLoadArray(), boundaryLoadArray()
     // Constructor. Creates an element with number n, belonging to aDomain.
@@ -820,47 +819,54 @@ contextIOResultType Element :: restoreContext(DataStream *stream, ContextMode mo
 
 double
 Element :: computeVolumeAreaOrLength()
-// the element computes its volume, area or length 
-// (depending on the spatial dimension of that element) 
+// the element computes its volume, area or length
+// (depending on the spatial dimension of that element)
 {
-  int i;
-  GaussPoint* gp;
-  double answer = 0.;
-  IntegrationRule *iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
-  if (iRule){
-    for ( i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
-      gp  = iRule->getIntegrationPoint(i);
-      answer += this->computeVolumeAround(gp);
+    int i;
+    GaussPoint *gp;
+    double answer = 0.;
+    IntegrationRule *iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
+    if ( iRule ) {
+        for ( i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
+            gp  = iRule->getIntegrationPoint(i);
+            answer += this->computeVolumeAround(gp);
+        }
+
+        return answer;
     }
-    return answer;
-  }
-  return -1.; // means "cannot be evaluated"
+
+    return -1.; // means "cannot be evaluated"
 }
 
-double 
+double
 Element :: computeMeanSize()
-// Computes the size of the element defined as its length, 
+// Computes the size of the element defined as its length,
 // square root of area or cube root of volume (depending on spatial dimension)
 {
-  // if the method "giveArea" is properly implemented 
-  // for the particular type of element, the mean size is the square root of area
-  // 8 July 2010 - does not seem to work any more (Element does not inherit from ElementGeometry)
-  // double area = this->giveArea();
-  // if (area>0.)
-  //  return sqrt(area);
+    // if the method "giveArea" is properly implemented
+    // for the particular type of element, the mean size is the square root of area
+    // 8 July 2010 - does not seem to work any more (Element does not inherit from ElementGeometry)
+    // double area = this->giveArea();
+    // if (area>0.)
+    //  return sqrt(area);
 
-  // if "giveArea" is not implemented (default value 0.), 
-  // then the contributing areas or volumes are collected from Gauss points 
-  double volume = this->computeVolumeAreaOrLength();
-  if (volume<0.)
+    // if "giveArea" is not implemented (default value 0.),
+    // then the contributing areas or volumes are collected from Gauss points
+    double volume = this->computeVolumeAreaOrLength();
+    if ( volume < 0. ) {
+        return -1.; // means "cannot be evaluated"
+    }
+
+    int dim = this->giveSpatialDimension();
+    switch ( dim ) {
+    case 1: return volume;
+
+    case 2: return sqrt(volume);
+
+    case 3: return pow(volume, 1. / 3.);
+    }
+
     return -1.; // means "cannot be evaluated"
-  int dim = this->giveSpatialDimension();
-  switch (dim){
-  case 1: return volume;
-  case 2: return sqrt(volume);
-  case 3: return pow(volume,1./3.);
-  }
-  return -1.; // means "cannot be evaluated"
 }
 
 double
@@ -899,14 +905,14 @@ Element :: giveLenghtInDir(const FloatArray &normalToCrackPlane)
 
 //local orientation on beams and trusses is overridden by derived classes
 int
-Element :: giveLocalCoordinateSystem(FloatMatrix &answer){
-    if(elemLocalCS.isNotEmpty()){
+Element :: giveLocalCoordinateSystem(FloatMatrix &answer) {
+    if ( elemLocalCS.isNotEmpty() ) {
         answer = elemLocalCS;
         return 1;
-    }
-    else{
+    } else   {
         answer.beEmptyMtrx();
     }
+
     return 0;
 }
 
@@ -1267,7 +1273,7 @@ Element :: giveInternalStateAtNode(FloatArray &answer, InternalStateType type, I
         if ( ee ) {
             answer.resize(1);
             answer.at(1) = this->giveDomain()->giveErrorEstimator()->giveRemeshingCrit()->
-            giveRequiredDofManDensity(this->giveNode(node)->giveNumber(), atTime, 1);
+                           giveRequiredDofManDensity(this->giveNode(node)->giveNumber(), atTime, 1);
             return 1;
         } else {
             answer.resize(0);

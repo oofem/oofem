@@ -47,7 +47,6 @@
 #include "bcgeomtype.h"
 
 namespace oofem {
-
 class Element;
 class TimeStep;
 
@@ -82,7 +81,6 @@ public:
     bcGeomType giveBCGeoType() const { return BodyLoadBGT; }
     const char *giveClassName() const { return "BodyLoad"; }
 };
-
 } // end namespace oofem
 #endif // bodyload_h
 

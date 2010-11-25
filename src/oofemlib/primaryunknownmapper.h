@@ -48,11 +48,10 @@
 #include "valuemodetype.h"
 
 #ifndef __MAKEDEPEND
-#include <stdio.h>
+ #include <stdio.h>
 #endif
 
 namespace oofem {
-
 class Domain;
 class Element;
 class TimeStep;
@@ -112,6 +111,5 @@ protected:
     /// prints warning message
     void warning(const char *file, int line, const char *format, ...) const;
 };
-
 } // end namespace oofem
 #endif // primaryunknownmapper_h

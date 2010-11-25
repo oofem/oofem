@@ -41,7 +41,6 @@
 #include "gaussintegrationrule.h"
 
 namespace oofem {
-
 class InterfaceElem1d : public StructuralElement
 {
     /*
@@ -97,7 +96,7 @@ public:
     Element_Geometry_Type giveGeometryType() const { return EGT_point; }
 
     integrationDomain  giveIntegrationDomain() { return _Point; }
-    MaterialMode          giveMaterialMode()  {return _1dInterface;}
+    MaterialMode          giveMaterialMode()  { return _1dInterface; }
 
 protected:
     void          computeBmatrixAt(GaussPoint *, FloatMatrix &, int = 1, int = ALL_STRAINS);
@@ -115,6 +114,5 @@ protected:
     void computeLocalSlipDir(FloatArray &grad);
     cmode giveCoordMode() const { return this->mode; }
 };
-
 } // end namespace oofem
 #endif // interfaceelement1d_h

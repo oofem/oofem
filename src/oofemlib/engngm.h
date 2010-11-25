@@ -93,7 +93,6 @@
 #endif
 
 namespace oofem {
-
 class Domain;
 class NumericalMethod;
 class TimeStep;
@@ -375,8 +374,10 @@ public:
     XfemManager *giveXfemManager(int n);
     /** Return true if XfemManager at a particular position is available */
     bool hasXfemManager(int n);
-    void setNumberOfEquations(int id, int neq) { numberOfEquations = neq;
-    domainNeqs.at(id) = neq; }
+    void setNumberOfEquations(int id, int neq) {
+        numberOfEquations = neq;
+        domainNeqs.at(id) = neq;
+    }
     // input / output
     /// Returns input file path.
     //char*              giveInputDataFileName () ;
@@ -841,7 +842,7 @@ public:
      * @param domain source domain
      */
     virtual void       assemble(SparseMtrx *answer, TimeStep *tStep, EquationID ut,
-				CharType type, const UnknownNumberingScheme& s, Domain *domain);
+                                CharType type, const UnknownNumberingScheme &s, Domain *domain);
     /**
      * Assembles characteristic matrix of required type into given sparse matrix.
      * @param answer assembled matrix
@@ -853,7 +854,7 @@ public:
      * @param domain source domain
      */
     virtual void       assemble(SparseMtrx *answer, TimeStep *tStep, EquationID r_id, EquationID c_id,
-				CharType type, const UnknownNumberingScheme& s, Domain *domain);
+                                CharType type, const UnknownNumberingScheme &s, Domain *domain);
     /**
      * Assembles characteristic vector of required type into given vector.
      * @param answer assembled vector
@@ -872,8 +873,8 @@ protected:
      * from dofManagers and assembled using code numbers.
      */
     virtual void assembleVectorFromDofManagers(FloatArray &, TimeStep *, EquationID ut,
-					       CharType type, ValueModeType mode,
-					       const UnknownNumberingScheme& s, Domain *domain);
+                                               CharType type, ValueModeType mode,
+                                               const UnknownNumberingScheme &s, Domain *domain);
     /**
      * Assembles prescribed characteristic vector of required type from dofManagers into given vector.
      * @param answer assembled vector
@@ -891,8 +892,8 @@ protected:
      * from elements and assembled using  using code numbers.
      */
     void assembleVectorFromElements(FloatArray &, TimeStep *, EquationID,
-				    CharType type, ValueModeType mode,
-				    const UnknownNumberingScheme& s, Domain * domain);
+                                    CharType type, ValueModeType mode,
+                                    const UnknownNumberingScheme & s, Domain * domain);
     /**
      * Assembles prescribed characteristic vector of required type from elements into given vector.
      * @param answer assembled vector
@@ -932,8 +933,8 @@ public:
      * @return nonzero if receiver check is o.k. */
     int checkProblemConsistency();      // returns nonzero if o.k.
     /** Initializes the receiver state. Default implementation calls initModuleManager::doInit service to
-	invoke initialization by individual init modules.
-    */
+     *  invoke initialization by individual init modules.
+     */
     virtual void init();
 
     /**
@@ -1069,7 +1070,6 @@ public:
 };
 
 typedef EngngModel Problem;
-
 } // end namespace oofem
 #endif // engngm_h
 

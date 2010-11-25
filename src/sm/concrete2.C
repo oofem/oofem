@@ -48,13 +48,12 @@
 #include "contextioerr.h"
 
 #ifndef __MAKEDEPEND
-#include <stdlib.h>
-#include <math.h>
-#include <stdio.h>
+ #include <stdlib.h>
+ #include <math.h>
+ #include <stdio.h>
 #endif
 
 namespace oofem {
-
 Concrete2 :: Concrete2(int n, Domain *d) : DeformationTheoryMaterial(n, d)
     //
     // constructor
@@ -110,7 +109,7 @@ Concrete2 :: initializeFrom(InputRecord *ir)
 
 
 double
-Concrete2 :: give(int aProperty, GaussPoint* gp)
+Concrete2 :: give(int aProperty, GaussPoint *gp)
 // Returns the value of the property aProperty (e.g. the Young's modulus
 // 'E') of the receiver.
 {
@@ -172,8 +171,8 @@ Concrete2 :: give(int aProperty, GaussPoint* gp)
         if ( propertyDictionary->includes(aProperty) ) {
             value = propertyDictionary->at(aProperty);
             return value;
-        } else   {
-	  return this->linearElasticMaterial->give(aProperty,gp);
+        } else {
+            return this->linearElasticMaterial->give(aProperty, gp);
             // error ("give: property not defined");
         }
     }
@@ -297,11 +296,11 @@ Concrete2 ::  giveRealStresses3dShellLayer(FloatArray &answer, MatResponseForm f
         //
         // called for the firs time - init flags
         //
-      status->giveTempCurrentPressureStrength() = this->give(c2_SCCC,gp);
-      status->giveTempCurrentTensionStrength() = this->give(c2_SCCT,gp);
+        status->giveTempCurrentPressureStrength() = this->give(c2_SCCC, gp);
+        status->giveTempCurrentTensionStrength() = this->give(c2_SCCT, gp);
 
-      status->giveCurrentPressureStrength() = this->give(c2_SCCC,gp);
-      status->giveCurrentTensionStrength() = this->give(c2_SCCT,gp);
+        status->giveCurrentPressureStrength() = this->give(c2_SCCC, gp);
+        status->giveCurrentTensionStrength() = this->give(c2_SCCT, gp);
     }
 
     status->givePlasticStrainVector(plasticStrainVector);
@@ -318,13 +317,13 @@ Concrete2 ::  giveRealStresses3dShellLayer(FloatArray &answer, MatResponseForm f
     // Concrete strenghts, SCC and SCT are actual strenghts
     // which may change in the iteration if there is any
     //
-    SCC = this->give(c2_SCCC,gp);
-    if ( this->give(c2_EPP,gp) != 0. ) {
+    SCC = this->give(c2_SCCC, gp);
+    if ( this->give(c2_EPP, gp) != 0. ) {
         SCC = status->giveTempCurrentPressureStrength();
     }
 
-    SCT = this->give(c2_SCCT,gp);
-    if ( this->give(c2_EOPP,gp) != 0. ) {
+    SCT = this->give(c2_SCCT, gp);
+    if ( this->give(c2_EOPP, gp) != 0. ) {
         SCT = status->giveTempCurrentTensionStrength();
     }
 
@@ -333,7 +332,7 @@ Concrete2 ::  giveRealStresses3dShellLayer(FloatArray &answer, MatResponseForm f
     //
     //currentEffStrain = new FloatArray (6);
 
-    if ( this->give(c2_IS_PLASTIC_FLOW,gp) > 0. ) {
+    if ( this->give(c2_IS_PLASTIC_FLOW, gp) > 0. ) {
         currentEffStrain.at(1) = currentStrain.at(1) - plasticStrain.at(1);
         currentEffStrain.at(2) = currentStrain.at(2) - plasticStrain.at(2);
         currentEffStrain.at(3) = ez - plasticStrain.at(3);
@@ -354,7 +353,7 @@ Concrete2 ::  giveRealStresses3dShellLayer(FloatArray &answer, MatResponseForm f
     //
     ifsh = 0;
     psi2 = currentEffStrain.at(4) * currentEffStrain.at(4) +
-    currentEffStrain.at(5) * currentEffStrain.at(5);
+           currentEffStrain.at(5) * currentEffStrain.at(5);
     comp = sqrt(currentEffStrain.at(1) * currentEffStrain.at(1) +
                 currentEffStrain.at(2) * currentEffStrain.at(2) +
                 currentEffStrain.at(3) * currentEffStrain.at(3) +
@@ -409,7 +408,7 @@ Concrete2 ::  giveRealStresses3dShellLayer(FloatArray &answer, MatResponseForm f
     // then shear computation cannot be abandoned even if the
     // shear strain drops bellow the limit.
     //
-    if ( ( ez != 0. ) && ( ( sqrt(psi2) / comp ) < this->give(c2_SHEARTOL,gp) ) ) {
+    if ( ( ez != 0. ) && ( ( sqrt(psi2) / comp ) < this->give(c2_SHEARTOL, gp) ) ) {
         //
         // no transverse shear - 2d case
         //
@@ -452,11 +451,11 @@ Concrete2 ::  giveRealStresses3dShellLayer(FloatArray &answer, MatResponseForm f
         // iteration only possible when stirrups present
         // Number of loops nez
         tol = 0.;
-        if ( this->give(stirr_E,gp) > 0 ) {
-	  tol = this->give(stirr_TOL,gp);
+        if ( this->give(stirr_E, gp) > 0 ) {
+            tol = this->give(stirr_TOL, gp);
         }
 
-        crit = fabs( this->give(c2_SCCC,gp) ) + this->give(c2_SCCT,gp);
+        crit = fabs( this->give(c2_SCCC, gp) ) + this->give(c2_SCCT, gp);
         nez = 0;
         effstold = 0.;
         dezold = 0.;
@@ -483,8 +482,8 @@ label18:
         //
         // Stirrups component
         //
-        if ( this->give(stirr_E,gp) > 0. ) {
-	  us += status->giveTempCurrentStressInStirrups() * this->give(stirr_A,gp);
+        if ( this->give(stirr_E, gp) > 0. ) {
+            us += status->giveTempCurrentStressInStirrups() * this->give(stirr_A, gp);
         }
 
         //
@@ -526,15 +525,15 @@ label18:
                 effst = 1.e-6;
             }
 
-            effst *= this->give(c2_E,gp);
-            if ( this->give(stirr_E,gp) > 0. ) {
-	      effst += this->give(stirr_E,gp) * this->give(stirr_A,gp);
+            effst *= this->give(c2_E, gp);
+            if ( this->give(stirr_E, gp) > 0. ) {
+                effst += this->give(stirr_E, gp) * this->give(stirr_A, gp);
             }
 
             effst *= 2.0;
         } else {
             // concrete is elastic
-	  effst = this->give(c2_E,gp) * 1.1;
+            effst = this->give(c2_E, gp) * 1.1;
         }
 
         dez = -us / effst;
@@ -553,7 +552,7 @@ label18:
 
         //
         ez  +=  dez;
-        if ( this->give(stirr_E,gp) > 0. ) {
+        if ( this->give(stirr_E, gp) > 0. ) {
             strainIncr->at(1) = dez;
             this->updateStirrups(gp, strainIncr);
             // updates flags->at(SEZ)
@@ -565,14 +564,14 @@ label18:
     // strain softening
     //
     ifupd = 0;
-    if ( this->give(c2_IFAD,gp) ) {
-      if ( this->give(c2_EOPP,gp) >= 0. ) {
-	if ( this->give(c2_EOPU,gp) > 0. ) {
-	  epsult = this->give(c2_EOPU,gp);
+    if ( this->give(c2_IFAD, gp) ) {
+        if ( this->give(c2_EOPP, gp) >= 0. ) {
+            if ( this->give(c2_EOPU, gp) > 0. ) {
+                epsult = this->give(c2_EOPU, gp);
             } else {
                 // position dependent strain softening
                 // NOT IMPLEMENTED
-	  epsult = this->give(c2_EOPU,gp);
+                epsult = this->give(c2_EOPU, gp);
             }
         }
 
@@ -596,7 +595,7 @@ label18:
             currentEffStrain.at(6) += pDir.at(3, 1) * dez * pDir.at(3, 2);
             //     back to EZ iteration start
             //
-            if ( this->give(c2_IS_PLASTIC_FLOW,gp) && this->give(c2_IFAD,gp) ) {
+            if ( this->give(c2_IS_PLASTIC_FLOW, gp) && this->give(c2_IFAD, gp) ) {
                 plasticStrain.at(1) += ( pDir.at(1, 1) * ep1 * pDir.at(1, 1) +
                                         pDir.at(1, 2) * ep2 * pDir.at(1, 2) +
                                         pDir.at(1, 3) * ep3 * pDir.at(1, 3) );
@@ -627,8 +626,8 @@ label18:
     // update compressive plastic strains.
     //
     if ( ifupd ) {
-      if ( this->give(c2_IFAD,gp) ) {
-	if ( this->give(c2_IS_PLASTIC_FLOW,gp) ) {
+        if ( this->give(c2_IFAD, gp) ) {
+            if ( this->give(c2_IS_PLASTIC_FLOW, gp) ) {
                 // -
                 if ( ifsh == 0 ) {
                     //
@@ -672,7 +671,7 @@ label18:
     //
     // 36
     if ( ifsh == 0 ) {
-      G = 0.5 * this->give(c2_E,gp) / ( 1.0 + this->give(c2_n,gp) );
+        G = 0.5 * this->give(c2_E, gp) / ( 1.0 + this->give(c2_n, gp) );
 
         currentStress.at(1) = ( pDir.at(1, 1) * pStress->at(1) * pDir.at(1, 1) +
                                pDir.at(1, 2) * pStress->at(2) * pDir.at(1, 2) );
@@ -702,7 +701,7 @@ label18:
                                pDir.at(1, 3) * pStress->at(3) * pDir.at(2, 3) );
     }
 
-    if ( this->give(c2_IFAD,gp) ) {
+    if ( this->give(c2_IFAD, gp) ) {
         status->giveTempCurrentStrainInZDir() = ez;
     }
 
@@ -792,13 +791,13 @@ Concrete2 :: dtp3(GaussPoint *gp, FloatArray *e, FloatArray *s, FloatArray *ep,
 
     * ifplas = 0;
 
-    yy  = this->give(c2_n,gp);
-    ey  = this->give(c2_E,gp);
-    e0  = this->give(c2_E,gp) / ( 1. + yy ) / ( 1. - yy - yy );
+    yy  = this->give(c2_n, gp);
+    ey  = this->give(c2_E, gp);
+    e0  = this->give(c2_E, gp) / ( 1. + yy ) / ( 1. - yy - yy );
     yy1 = 1. - yy;
     yy2 = 1. + yy;
 
-    if ( this->give(c2_E,gp) < 1.e-6 ) {
+    if ( this->give(c2_E, gp) < 1.e-6 ) {
         for ( i = 1; i <= 3; i++ ) {
             s->at(i) = 0.;
             ep->at(i) = 0.;
@@ -807,7 +806,7 @@ Concrete2 :: dtp3(GaussPoint *gp, FloatArray *e, FloatArray *s, FloatArray *ep,
         return;
     }
 
-    if ( this->give(c2_n,gp) >= 0.01 ) {
+    if ( this->give(c2_n, gp) >= 0.01 ) {
         s->at(1) =  e0 * ( yy1 * e->at(1) + yy * ( e->at(2) + e->at(3) ) );
         s->at(2) =  e0 * ( yy1 * e->at(2) + yy * ( e->at(1) + e->at(3) ) );
         s->at(3) =  e0 * ( yy1 * e->at(3) + yy * ( e->at(2) + e->at(1) ) );
@@ -998,8 +997,8 @@ Concrete2 :: dtp2(GaussPoint *gp, FloatArray *e, FloatArray *s, FloatArray *ep,
 
     * ifplas = 0;
 
-    yy  = this->give(c2_n,gp);
-    ey  = this->give(c2_E,gp);
+    yy  = this->give(c2_n, gp);
+    ey  = this->give(c2_E, gp);
 
     * ifplas = 0;
     if ( ey == 0. ) {
@@ -1145,9 +1144,9 @@ Concrete2 :: strsoft(GaussPoint *gp, double epsult, FloatArray *ep, double &ep1,
     // strain softening
     // tension
     //
-    if ( this->give(c2_EOPP,gp) != 0. ) {
+    if ( this->give(c2_EOPP, gp) != 0. ) {
         eop = max(ep->at(1), 0.) + max(ep->at(2), 0.) +
-        max(ep->at(3), 0.);
+              max(ep->at(3), 0.);
         if ( eop >  status->giveTempMaxVolPlasticStrain() ) {
             //
             // Current plastic volum. strain is greater than max.
@@ -1156,8 +1155,8 @@ Concrete2 :: strsoft(GaussPoint *gp, double epsult, FloatArray *ep, double &ep1,
             // reduced plastic strain withe respect to the elastic
             // limit strain of the virgin concrete E0PR
             //
-	  eopr = eop - ( this->give(c2_SCCT,gp) - SCT ) / this->give(c2_E,gp);
-	  if ( eopr <= this->give(c2_EOPP,gp) ) {
+            eopr = eop - ( this->give(c2_SCCT, gp) - SCT ) / this->give(c2_E, gp);
+            if ( eopr <= this->give(c2_EOPP, gp) ) {
                 status->giveTempMaxVolPlasticStrain() = eop;
                 goto label14;
             }
@@ -1168,13 +1167,13 @@ Concrete2 :: strsoft(GaussPoint *gp, double epsult, FloatArray *ep, double &ep1,
             if ( eop > epsult ) {
                 SCT = 0.;
             } else {
-	      SCT = this->give(c2_SCCT,gp) * ( 1. - ( eopr - this->give(c2_EOPP,gp) ) / ( epsult - this->give(c2_EOPP,gp) ) );
+                SCT = this->give(c2_SCCT, gp) * ( 1. - ( eopr - this->give(c2_EOPP, gp) ) / ( epsult - this->give(c2_EOPP, gp) ) );
             }
 
             // When actual strength is lowered the eff. plastic strain
             // increases though no additional strain occurred
             status->giveTempMaxVolPlasticStrain() = eop + ( status->giveTempCurrentTensionStrength() - SCT ) /
-	      this->give(c2_E,gp);
+                                                    this->give(c2_E, gp);
             status->giveTempCurrentTensionStrength() = SCT;
         }
     }
@@ -1188,7 +1187,7 @@ Concrete2 :: strsoft(GaussPoint *gp, double epsult, FloatArray *ep, double &ep1,
 label14:
 
     ifupd = 0;
-    if ( !( ( this->give(c2_EPP,gp) == 0. ) && ( !this->give(c2_IS_PLASTIC_FLOW,gp) ) ) ) {
+    if ( !( ( this->give(c2_EPP, gp) == 0. ) && ( !this->give(c2_IS_PLASTIC_FLOW, gp) ) ) ) {
         ep1 = min(ep->at(1), 0.);
         ep2 = min(ep->at(2), 0.);
         ep3 = min(ep->at(3), 0.);
@@ -1200,11 +1199,11 @@ label14:
             // flow theory is used then DEP is the
             // increment of the plastic
             // strain.
-	  if ( this->give(c2_EPP,gp) == 0. ) {
+            if ( this->give(c2_EPP, gp) == 0. ) {
                 // No compression softening.
                 // For flow theory the plastic strain component
                 // must be updated
-	    if ( this->give(c2_IS_PLASTIC_FLOW,gp) ) {
+                if ( this->give(c2_IS_PLASTIC_FLOW, gp) ) {
                     ifupd = 1;
                     return;
                 }
@@ -1212,7 +1211,7 @@ label14:
 
             d = 1.5 * ( ep1 * ep1 + ep2 * ep2 + ep3 * ep3 ) - 0.5 * dep * dep;
             dep = sqrt(d);
-            if ( this->give(c2_IS_PLASTIC_FLOW,gp) ) {
+            if ( this->give(c2_IS_PLASTIC_FLOW, gp) ) {
                 // flow theory
                 eep = status->giveTempMaxEffPlasticStrain() + dep;
             } else {
@@ -1225,35 +1224,35 @@ label14:
                 // current plast.def. EEP is greater than the max. reached
                 // upto now EPM - strength must be lowered and
                 // plastic strain components updated if flow rule.
-	      if ( this->give(c2_IS_PLASTIC_FLOW,gp) ) {
+                if ( this->give(c2_IS_PLASTIC_FLOW, gp) ) {
                     ifupd = 1;
                 }
 
                 //
                 //     SOFTENING?
                 //
-	      if ( this->give(c2_EPP,gp) != 0. ) {
+                if ( this->give(c2_EPP, gp) != 0. ) {
                     //
                     // reduced plastic strain with respect to the elastic
                     // limit of the virgin concrete EEPR
                     //
-		eepr = eep + ( this->give(c2_SCCC,gp) - SCC ) / this->give(c2_E,gp);
-		if ( eepr <= this->give(c2_EPP,gp) ) {
+                    eepr = eep + ( this->give(c2_SCCC, gp) - SCC ) / this->give(c2_E, gp);
+                    if ( eepr <= this->give(c2_EPP, gp) ) {
                         status->giveTempMaxEffPlasticStrain() = eep;
                     } else {
                         // softening
-		  if ( eepr >= this->give(c2_EPU,gp) ) {
+                        if ( eepr >= this->give(c2_EPU, gp) ) {
                             SCC = 0.;
                         } else {
-		    SCC = this->give(c2_SCCC,gp) * ( 1. - ( eepr - this->give(c2_EPP,gp) ) /
-						     ( this->give(c2_EPU,gp) - this->give(c2_EPP,gp) ) );
+                            SCC = this->give(c2_SCCC, gp) * ( 1. - ( eepr - this->give(c2_EPP, gp) ) /
+                                                             ( this->give(c2_EPU, gp) - this->give(c2_EPP, gp) ) );
                         }
 
                         //
                         //   When actual strength is lowered the eff. plastic strain
                         //   increases though no additional strain occurred
                         status->giveTempMaxEffPlasticStrain() = eep - ( status->giveTempCurrentPressureStrength() - SCC ) /
-			  this->give(c2_E,gp);
+                                                                this->give(c2_E, gp);
                         status->giveTempCurrentPressureStrength() = SCC;
                     }
                 }
@@ -1307,20 +1306,20 @@ Concrete2 :: updateStirrups(GaussPoint *gp, FloatArray *strainIncrement)
     srf = status->giveTempCurrentStressInStirrups();
 
     dep = 0.;
-    ovs = fabs(srf) / this->give(stirr_Ft,gp) - 1.;
+    ovs = fabs(srf) / this->give(stirr_Ft, gp) - 1.;
     if ( ( ovs ) > 0. ) {
-      if ( this->give(stirr_EREF,gp) <= 0. ) {
+        if ( this->give(stirr_EREF, gp) <= 0. ) {
             if ( ( dez * srf ) > 0. ) {
                 dep = dez;
             }
         } else {
             dt  = domain->giveEngngModel()->giveCurrentStep()->giveTimeIncrement();
-            dep = this->give(stirr_EREF,gp) * exp( ovs / this->give(stirr_LAMBDA,gp) ) * dt;
+            dep = this->give(stirr_EREF, gp) * exp( ovs / this->give(stirr_LAMBDA, gp) ) * dt;
         }
     }
 
-    s = srf + this->give(stirr_E,gp) * ( dez - dep );
-    if ( this->give(c2_IFAD,gp) ) {
+    s = srf + this->give(stirr_E, gp) * ( dez - dep );
+    if ( this->give(c2_IFAD, gp) ) {
         srf = s;
     }
 
@@ -1524,5 +1523,4 @@ Concrete2MaterialStatus :: updateYourself(TimeStep *atTime)
 
     plasticStrainVector = plasticStrainIncrementVector;
 }
-
 } // end namespace oofem

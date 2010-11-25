@@ -47,7 +47,6 @@
 #include "alist.h"
 
 namespace oofem {
-
 class Element;
 class GaussPoint;
 
@@ -376,8 +375,5 @@ public:
      */
     virtual int HuertaRemeshingCriteriaI_givePolynOrder() = 0;
 };
-
-
-
 } // end namespace oofem
 #endif // huertaerrorestimator_h

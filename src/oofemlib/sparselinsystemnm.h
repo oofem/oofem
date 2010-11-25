@@ -50,11 +50,10 @@
 #include "linsystsolvertype.h"
 
 #ifndef __MAKEDEPEND
-#include <stdio.h>
+ #include <stdio.h>
 #endif
 
 namespace oofem {
-
 class EngngModel;
 class SparseMtrx;
 class FloatArray;
@@ -103,6 +102,5 @@ public:
 
 public:
 };
-
 } // end namespace oofem
 #endif // sparselinsystemnm_h

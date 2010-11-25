@@ -19,8 +19,8 @@ Beam2d 4 nodes 2 4 5 mat 1 crossSect 1
 Beam2d 5 nodes 2 6 2 mat 1 crossSect 1 DofsToCondense 1 6 
 SimpleCS 1 area 1.e8 Iy 0.0039366 beamShearCoeff 1.e18 thick 0.54 
 IsoLE 1 d 1. E 30.e6 n 0.2 tAlpha 1.2e-5
-BoundaryCondition  1 loadTimeFunction 1 prescribedvalue 0.0 	
-BoundaryCondition  2 loadTimeFunction 2 prescribedvalue -0.006e-3 	
+BoundaryCondition  1 loadTimeFunction 1 prescribedvalue 0.0
+BoundaryCondition  2 loadTimeFunction 2 prescribedvalue -0.006e-3
 ConstantEdgeLoad 3 loadTimeFunction 1 Components 3 0.0 10.0 0.0 loadType 3 ndofs 3
 NodalLoad 4 loadTimeFunction 1 Components 3 -18.0 24.0 0.0
 StructTemperatureLoad 5 loadTimeFunction 3 Components 2 30.0 -20.0

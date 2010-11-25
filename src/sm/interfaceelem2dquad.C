@@ -49,19 +49,18 @@
 
 #include "engngm.h"
 #ifndef __MAKEDEPEND
-#include <stdlib.h>
-#include <math.h>
+ #include <stdlib.h>
+ #include <math.h>
 #endif
 
 #ifdef __OOFEG
-#include "oofeggraphiccontext.h"
-#ifndef __MAKEDEPEND
-#include "Emarkwd3d.h"
-#endif
+ #include "oofeggraphiccontext.h"
+ #ifndef __MAKEDEPEND
+  #include "Emarkwd3d.h"
+ #endif
 #endif
 
 namespace oofem {
-
 InterfaceElem2dQuad :: InterfaceElem2dQuad(int n, Domain *aDomain) :
     StructuralElement(n, aDomain)
 {
@@ -100,13 +99,13 @@ void
 InterfaceElem2dQuad :: computeGaussPoints()
 // Sets up the array of Gauss Points of the receiver.
 {
-  if (!integrationRulesArray) {
-    numberOfIntegrationRules = 1;
-    integrationRulesArray = new IntegrationRule * [ 1 ];
-    //integrationRulesArray[0] = new LobattoIntegrationRule (1,domain, 1, 2);
-    integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 2);
-    integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Line, 4, _2dInterface);
-  }
+    if ( !integrationRulesArray ) {
+        numberOfIntegrationRules = 1;
+        integrationRulesArray = new IntegrationRule * [ 1 ];
+        //integrationRulesArray[0] = new LobattoIntegrationRule (1,domain, 1, 2);
+        integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 2);
+        integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Line, 4, _2dInterface);
+    }
 }
 
 
@@ -123,8 +122,8 @@ InterfaceElem2dQuad :: computeGlobalCoordinates(FloatArray &answer, const FloatA
 
 
     answer.resize(2);
-    answer.at(1) = n1 * this->giveNode(1)->giveCoordinate(1) + n2 * this->giveNode(2)->giveCoordinate(1) + n3 * this->giveNode(3)->giveCoordinate(1);
-    answer.at(2) = n1 * this->giveNode(1)->giveCoordinate(2) + n2 * this->giveNode(2)->giveCoordinate(2) + n3 * this->giveNode(3)->giveCoordinate(2);
+    answer.at(1) = n1 * this->giveNode(1)->giveCoordinate(1) + n2 *this->giveNode(2)->giveCoordinate(1) + n3 *this->giveNode(3)->giveCoordinate(1);
+    answer.at(2) = n1 * this->giveNode(1)->giveCoordinate(2) + n2 *this->giveNode(2)->giveCoordinate(2) + n3 *this->giveNode(3)->giveCoordinate(2);
 
     return 1;
 }
@@ -202,8 +201,8 @@ InterfaceElem2dQuad :: computeGtoLRotationMatrix(FloatMatrix &answer)
     double dn3 = -2.0 * ksi;
 
     // tangent
-    grad.at(1) = dn1 * this->giveNode(1)->giveCoordinate(1) + dn2 * this->giveNode(2)->giveCoordinate(1) + dn3 * this->giveNode(3)->giveCoordinate(1);
-    grad.at(2) = dn1 * this->giveNode(1)->giveCoordinate(2) + dn2 * this->giveNode(2)->giveCoordinate(2) + dn3 * this->giveNode(3)->giveCoordinate(2);
+    grad.at(1) = dn1 * this->giveNode(1)->giveCoordinate(1) + dn2 *this->giveNode(2)->giveCoordinate(1) + dn3 *this->giveNode(3)->giveCoordinate(1);
+    grad.at(2) = dn1 * this->giveNode(1)->giveCoordinate(2) + dn2 *this->giveNode(2)->giveCoordinate(2) + dn3 *this->giveNode(3)->giveCoordinate(2);
     grad.normalize();
 
     answer.resize(12, 12);

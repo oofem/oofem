@@ -135,8 +135,8 @@ protected:
     /* computes the submatrix of interpolation matrix cooresponding to single unknown.*/
     virtual void  computeNSubMatrixAt(FloatMatrix &n, FloatArray *);
 
-    void giveDerivativeKsi(FloatArray & answer, double);
-    void giveDerivativeEta(FloatArray & answer, double);
+    void giveDerivativeKsi(FloatArray &answer, double);
+    void giveDerivativeEta(FloatArray &answer, double);
     void computeJacobianMatrix(FloatMatrix &answer, GaussPoint *aGaussPoint);
 
     void computeEgdeNMatrixAt(FloatMatrix &n, GaussPoint *gp);

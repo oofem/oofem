@@ -40,11 +40,10 @@
 
 #include "ldltfact.h"
 #ifndef __MAKEDEPEND
-#include <stdio.h>
+ #include <stdio.h>
 #endif
 
 namespace oofem {
-
 LDLTFactorization :: LDLTFactorization(int i, Domain *d, EngngModel *m) :
     SparseLinearSystemNM(i, d, m) {
     //
@@ -94,7 +93,7 @@ LDLTFactorization :: solve(SparseMtrx *A, FloatArray *b, FloatArray *x)
     // solving
     // depends on method used (direct or iterative ), on used matrix storage type ...
     /*
-     #if defined(skyline_h)
+     * #if defined(skyline_h)
      * x = A -> factorized()
      *
      * -> forwardReductionWith(x)
@@ -115,5 +114,4 @@ LDLTFactorization :: initializeFrom(InputRecord *ir)
 {
     return IRRT_OK;
 }
-
 } // end namespace oofem

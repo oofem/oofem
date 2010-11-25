@@ -54,7 +54,6 @@
 #include "huertaerrorestimator.h"
 
 namespace oofem {
-
 class Truss1d : public StructuralElement, public ZZNodalRecoveryModelInterface,
     public NodalAveragingRecoveryModelInterface, public SpatialLocalizerInterface,
     public DirectErrorIndicatorRCInterface,
@@ -288,7 +287,7 @@ public:
     //@}
 
     integrationDomain  giveIntegrationDomain() { return _Line; }
-    MaterialMode          giveMaterialMode()  {return _1dMat;}
+    MaterialMode          giveMaterialMode()  { return _1dMat; }
 
 protected:
     void          computeBmatrixAt(GaussPoint *, FloatMatrix &, int = 1, int = ALL_STRAINS);
@@ -300,6 +299,5 @@ protected:
     double        givePitch();
     int           giveApproxOrder() { return 1; }
 };
-
 } // end namespace oofem
 #endif // truss1d_h

@@ -48,7 +48,6 @@
 #include "contextioerr.h"
 
 namespace oofem {
-
 #define YIELD_TOL 1.e-6
 #define YIELD_TOL_SECONDARY 1.e-4
 #define RES_TOL   1.e-8
@@ -198,7 +197,7 @@ MPlasticMaterial2 :: giveRealStressVector(FloatArray &answer,
     if ( form == FullForm ) {
         answer = fullStressVector;
         return;
-    } else                                                             {
+    } else {
         crossSection->giveReducedCharacteristicVector(answer, gp, fullStressVector);
         return;
     }
@@ -228,8 +227,8 @@ MPlasticMaterial2 :: closestPointReturn(FloatArray &answer,
     FloatMatrix ks, kl, lmat, rmat, gradientMatrix;
     FloatMatrix gmat;
     IntArray initialConditionMap;
-    std :: vector< FloatArray > yieldGradSigVec(this->nsurf), loadGradSigVec(this->nsurf), * yieldGradSigVecPtr, * loadGradSigVecPtr;
-    std :: vector< FloatArray > yieldGradKVec(this->nsurf), loadGradKVec(this->nsurf), * yieldGradKVecPtr, * loadGradKVecPtr;
+    std :: vector< FloatArray >yieldGradSigVec(this->nsurf), loadGradSigVec(this->nsurf), * yieldGradSigVecPtr, * loadGradSigVecPtr;
+    std :: vector< FloatArray >yieldGradKVec(this->nsurf), loadGradKVec(this->nsurf), * yieldGradKVecPtr, * loadGradKVecPtr;
     FloatArray rhs;
     double yieldValue;
     int nIterations = 0;
@@ -878,8 +877,8 @@ MPlasticMaterial2 :: cuttingPlaneReturn(FloatArray &answer,
     FloatMatrix elasticModuli, helpMtrx, helpMtrx2, gmat;
     FloatMatrix kl, ks, lmat, rmat;
     IntArray initialConditionMap;
-    std :: vector< FloatArray > yieldGradSigVec(this->nsurf), loadGradSigVec(this->nsurf), * yieldGradSigVecPtr, * loadGradSigVecPtr;
-    std :: vector< FloatArray > yieldGradKVec(this->nsurf), loadGradKVec(this->nsurf), * yieldGradKVecPtr, * loadGradKVecPtr;
+    std :: vector< FloatArray >yieldGradSigVec(this->nsurf), loadGradSigVec(this->nsurf), * yieldGradSigVecPtr, * loadGradSigVecPtr;
+    std :: vector< FloatArray >yieldGradKVec(this->nsurf), loadGradKVec(this->nsurf), * yieldGradKVecPtr, * loadGradKVecPtr;
     FloatArray dgamma(this->nsurf);
     double yieldValue;
     int nIterations = 0;
@@ -1407,8 +1406,8 @@ MPlasticMaterial2 :: giveConsistentStiffnessMatrix(FloatMatrix &answer,
     FloatMatrix gradientMatrix, gmat, gmatInv, gradMat, helpMtrx, helpMtrx2, answerR;
     FloatArray gradientVector, stressVector, fullStressVector;
     FloatArray strainSpaceHardeningVariables, helpVector;
-    std :: vector< FloatArray > yieldGradSigVec(this->nsurf), loadGradSigVec(this->nsurf), * yieldGradSigVecPtr, * loadGradSigVecPtr;
-    std :: vector< FloatArray > yieldGradKVec(this->nsurf), loadGradKVec(this->nsurf), * yieldGradKVecPtr, * loadGradKVecPtr;
+    std :: vector< FloatArray >yieldGradSigVec(this->nsurf), loadGradSigVec(this->nsurf), * yieldGradSigVecPtr, * loadGradSigVecPtr;
+    std :: vector< FloatArray >yieldGradKVec(this->nsurf), loadGradKVec(this->nsurf), * yieldGradKVecPtr, * loadGradKVecPtr;
     FloatArray helpVector2;
 
     IntArray activeConditionMap, mask;
@@ -1579,8 +1578,8 @@ MPlasticMaterial2 :: giveElastoPlasticStiffnessMatrix(FloatMatrix &answer,
     FloatMatrix gmat, gmatInv, helpMtrx, helpMtrx2, kl, ks;
     FloatArray gradientVector, stressVector, fullStressVector;
     FloatArray strainSpaceHardeningVariables, helpVector, helpVector2;
-    std :: vector< FloatArray > yieldGradSigVec(this->nsurf), loadGradSigVec(this->nsurf), * yieldGradSigVecPtr, * loadGradSigVecPtr;
-    std :: vector< FloatArray > yieldGradKVec(this->nsurf), loadGradKVec(this->nsurf), * yieldGradKVecPtr, * loadGradKVecPtr;
+    std :: vector< FloatArray >yieldGradSigVec(this->nsurf), loadGradSigVec(this->nsurf), * yieldGradSigVecPtr, * loadGradSigVecPtr;
+    std :: vector< FloatArray >yieldGradKVec(this->nsurf), loadGradKVec(this->nsurf), * yieldGradKVecPtr, * loadGradKVecPtr;
     FloatArray helpVec;
 
     IntArray activeConditionMap, mask;
@@ -2454,7 +2453,4 @@ MPlasticMaterial2Status :: restoreContext(DataStream *stream, ContextMode mode, 
 
     return CIO_OK; // return succes
 }
-
-
-
 } // end namespace oofem

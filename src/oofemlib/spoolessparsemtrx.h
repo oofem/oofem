@@ -37,11 +37,10 @@
 
 #ifdef __SPOOLES_MODULE
 
-#include "sparsemtrx.h"
-#include "spoolesinterface.h"
+ #include "sparsemtrx.h"
+ #include "spoolesinterface.h"
 
 namespace oofem {
-
 /**
  * This class provides an sparse matrix interface to SPOOLES InpMtrx
  */
@@ -55,14 +54,18 @@ protected:
 
 public:
     SpoolesSparseMtrx(int _type, int _nent, int _sflag, int n, int m) : SparseMtrx(n, m)
-    { type = _type;
-      nent = _nent;
-      sflag = _sflag;
-      mtrx = NULL; }
-    SpoolesSparseMtrx() : SparseMtrx() { type = SPOOLES_REAL;
-                                         nent = 0;
-                                         sflag = SPOOLES_SYMMETRIC;
-                                         mtrx = NULL; }
+    {
+        type = _type;
+        nent = _nent;
+        sflag = _sflag;
+        mtrx = NULL;
+    }
+    SpoolesSparseMtrx() : SparseMtrx() {
+        type = SPOOLES_REAL;
+        nent = 0;
+        sflag = SPOOLES_SYMMETRIC;
+        mtrx = NULL;
+    }
     ~SpoolesSparseMtrx() { if ( mtrx ) { InpMtx_free(mtrx); } }
 
     /** Returns {\bf newly allocated} copy of receiver. Programmer must take
@@ -89,7 +92,7 @@ public:
      * @param eModel pointer to corresponding engineering model
      * @param di domain index specify which domain to use
      */
-    virtual int buildInternalStructure (EngngModel *eModel, int di, EquationID ut, const UnknownNumberingScheme&s) ;
+    virtual int buildInternalStructure(EngngModel *eModel, int di, EquationID ut, const UnknownNumberingScheme &s);
     // virtual int assemble (FloatMatrix*, IntArray*) = 0;
     /**
      * Assembles sparse matrix from contribution of local elements. This method for
@@ -149,20 +152,21 @@ public:
     int       giveValueType() const { return type; }
     int       giveSymmetryFlag() const { return sflag; }
 
-#ifdef IML_COMPAT
+ #ifdef IML_COMPAT
     // /***********************************/
     //  /*  Matrix/Vector multiply         */
     //  /***********************************/
 
-    virtual FloatArray operator *(const FloatArray &x) const
-    { FloatArray answer;
-      this->times(x, answer);
-      return answer; }
+    virtual FloatArray operator*(const FloatArray &x) const
+    {
+        FloatArray answer;
+        this->times(x, answer);
+        return answer;
+    }
     virtual FloatArray trans_mult(const FloatArray &x) const;
 
-#endif
+ #endif
 };
-
 } // end namespace oofem
 #endif
 #endif // spoolessparsemtrx_h

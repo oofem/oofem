@@ -39,12 +39,11 @@
 
 #include "nummet.h"
 #ifndef __MAKEDEPEND
-#include <stdio.h>
+ #include <stdio.h>
 #endif
 #include "ldltfact.h"
 
 namespace oofem {
-
 /*
  * NumericalMethod* NumericalMethod :: ofType (char* aClass)
  * // Returns a new element, which has the same number than the receiver,
@@ -64,5 +63,4 @@ namespace oofem {
  * }
  *
  */
-
 } // end namespace oofem

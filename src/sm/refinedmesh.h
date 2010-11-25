@@ -41,7 +41,6 @@
 #include "alist.h"
 
 namespace oofem {
-
 //#define DEBUG                      /* debug prints and checks */
 
 #define SAVE                       /* memory savings */
@@ -49,7 +48,7 @@ namespace oofem {
 //#define COMPLETE_DATA_STRUCTURE    /* only for 2-manifolds */
 
 #ifdef SAVE
-#undef COMPLETE_DATA_STRUCTURE
+ #undef COMPLETE_DATA_STRUCTURE
 #endif
 
 class Domain;
@@ -155,13 +154,14 @@ private:
 
 public:
 
-    RefinedMesh() { completed = 0;
-                    nodes = edges = quads = hexas = 0; };
+    RefinedMesh() {
+        completed = 0;
+        nodes = edges = quads = hexas = 0;
+    };
 
     ~RefinedMesh() { };
 
     int refineMeshGlobally(Domain *d, int level, AList< RefinedElement > &refinedElementList);
 };
-
 } // end namespace oofem
 #endif // refinedmesh_h

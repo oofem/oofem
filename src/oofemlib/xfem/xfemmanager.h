@@ -17,7 +17,6 @@
 #include "patch.h"
 
 namespace oofem {
-
 /* this class manages the xfem part as well as takes over some functions which would appear
  * in the Domain and Node class */
 class XfemManager
@@ -34,7 +33,7 @@ protected:
     /// Enrichment function list
     AList< EnrichmentFunction > *enrichmentFunctionList;
     /// map giving for a node a position of its fictitious node
-    AList< IntArray> *fictPosition;
+    AList< IntArray > *fictPosition;
     /// index of next available dofId from pool
     int dofIdPos;
     int numberOfEnrichmentItems;
@@ -46,7 +45,7 @@ public:
         SPLIT = 1, TIP = 4, STANDARD = 0
     };
     /// Constructor
-    XfemManager(EngngModel * emodel, int index);
+    XfemManager(EngngModel *emodel, int index);
     /// destructor
     ~XfemManager();
     /* gets interacted enrichment items for a particular element, the enrichment items
@@ -78,18 +77,17 @@ public:
     /// gives Domain
     Domain *giveDomain();
     /// accessor
-    IntArray* giveFictPosition(int nodeNumber) {return fictPosition->at(nodeNumber);}
+    IntArray *giveFictPosition(int nodeNumber) { return fictPosition->at(nodeNumber); }
     /// Stores receiver state to output stream.
-    contextIOResultType    saveContext(DataStream *stream, ContextMode mode, void *obj = NULL) {return CIO_OK;}
+    contextIOResultType    saveContext(DataStream *stream, ContextMode mode, void *obj = NULL) { return CIO_OK; }
     /// Restores the receiver state previously written in stream.
-    contextIOResultType    restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL) {return CIO_OK;}
+    contextIOResultType    restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL) { return CIO_OK; }
     /// geometry update; calls individual enrichment item updateGeometry method
     void updateGeometry(TimeStep *tStep);
 protected:
     // changes dofIdPos to next index
     DofID allocateNewDofID();
 };
-
 } // end namespace oofem
 #endif  /* _XFEMMANAGER_H */
 

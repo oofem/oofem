@@ -46,7 +46,6 @@
 #include "contextioerr.h"
 
 namespace oofem {
-
 IsoInterfaceDamageMaterial :: IsoInterfaceDamageMaterial(int n, Domain *d) : StructuralMaterial(n, d)
     //
     // constructor
@@ -68,7 +67,7 @@ IsoInterfaceDamageMaterial :: hasMaterialModeCapability(MaterialMode mode)
 // returns whether receiver supports given mode
 //
 {
-  if (( mode == _2dInterface ) || (mode == _3dInterface)) {
+    if ( ( mode == _2dInterface ) || ( mode == _3dInterface ) ) {
         return 1;
     }
 
@@ -180,6 +179,7 @@ IsoInterfaceDamageMaterial :: giveSizeOfReducedStressStrainVector(MaterialMode m
     switch ( mode ) {
     case _2dInterface:
         return 2;
+
     case _3dInterface:
         return 3;
 
@@ -199,7 +199,7 @@ IsoInterfaceDamageMaterial :: giveStressStrainComponentIndOf(MatResponseForm for
 {
     //MaterialMode mode  = gp -> giveMaterialMode ();
 
-  if (( mmode == _2dInterface ) || ( mmode == _3dInterface)) {
+    if ( ( mmode == _2dInterface ) || ( mmode == _3dInterface ) ) {
         return ind;
     } else {
         return StructuralMaterial :: giveStressStrainComponentIndOf(form, mmode, ind);
@@ -255,7 +255,7 @@ IsoInterfaceDamageMaterial :: giveReducedCharacteristicVector(FloatArray &answer
 {
     MaterialMode mode = gp->giveMaterialMode();
 
-    if (( mode == _2dInterface ) || (mode == _3dInterface )) {
+    if ( ( mode == _2dInterface ) || ( mode == _3dInterface ) ) {
         answer = charVector3d;
         return;
     } else {
@@ -281,10 +281,10 @@ IsoInterfaceDamageMaterial :: giveFullCharacteristicVector(FloatArray &answer,
 //
 {
     MaterialMode mode = gp->giveMaterialMode();
-    if (( mode == _2dInterface ) || ( mode == _3dInterface )) {
+    if ( ( mode == _2dInterface ) || ( mode == _3dInterface ) ) {
         answer = strainVector;
         return;
-    } else                                                             {
+    } else {
         StructuralMaterial :: giveFullCharacteristicVector(answer, gp, strainVector);
     }
 }
@@ -363,7 +363,7 @@ IsoInterfaceDamageMaterial :: give3dInterfaceMaterialStiffnessMatrix(FloatMatrix
         answer.at(1, 1) = kn;
         answer.at(2, 2) = ks;
         answer.at(3, 3) = ks;
-        answer.at(1, 2) = answer.at(2, 1) = answer.at(1,3) = answer.at(3,1) = answer.at(2,3) = answer.at(3,2) = 0.0;
+        answer.at(1, 2) = answer.at(2, 1) = answer.at(1, 3) = answer.at(3, 1) = answer.at(2, 3) = answer.at(3, 2) = 0.0;
 
         if ( rMode == ElasticStiffness ) {
             return;
@@ -425,7 +425,7 @@ IsoInterfaceDamageMaterial :: giveIPValue(FloatArray &answer, GaussPoint *aGauss
         answer.resize(1);
         answer.at(1) = status->giveKappa();
         return 1;
-    } else  {
+    } else {
         return StructuralMaterial :: giveIPValue(answer, aGaussPoint, type, atTime);
     }
 }
@@ -514,8 +514,8 @@ IsoInterfaceDamageMaterial :: initializeFrom(InputRecord *ir)
 
     //Set limit on the maximum isotropic damage parameter if needed
     IR_GIVE_OPTIONAL_FIELD(ir, maxOmega, IFT_IsotropicDamageMaterial_maxOmega, "maxomega"); // Macro
-    maxOmega = min(maxOmega,0.999999);
-    maxOmega = max(maxOmega,0.0);
+    maxOmega = min(maxOmega, 0.999999);
+    maxOmega = max(maxOmega, 0.0);
 
     IR_GIVE_FIELD(ir, tempDillatCoeff, IFT_IsoInterfaceDamageMaterial_talpha, "talpha"); // Macro
     return StructuralMaterial :: initializeFrom(ir);
@@ -637,6 +637,4 @@ IsoInterfaceDamageMaterialStatus :: restoreContext(DataStream *stream, ContextMo
 
     return CIO_OK;
 }
-
-
 } // end namespace oofem

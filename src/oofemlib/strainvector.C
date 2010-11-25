@@ -41,7 +41,6 @@
 #include "error.h"
 
 namespace oofem {
-
 StrainVector :: StrainVector(MaterialMode m) : StressStrainBaseVector(m)
 { }
 
@@ -65,7 +64,7 @@ StrainVector :: computeDeviatoricVolumetricSplit(StrainVector &dev, double &vol)
         // vol = (this->at(1)+this->at(2))/2.0;
         //    dev.at(1) -= vol;
         // dev.at(2) -= vol;
-    } else          {
+    } else {
         // 3d problem or plane strain problem
         dev = * this;
         vol = ( this->at(1) + this->at(2) + this->at(3) ) / 3.0;
@@ -85,14 +84,14 @@ StrainVector :: computeDeviatoricVolumetricSum(StrainVector &answer, const doubl
         OOFEM_ERROR("StrainVector::computeDeviatoricVolumetricSum: No sum for 1D!");
         //  dev.resize(1); dev.at(1) = 0.0;
         // vol = this->at (1);
-    } else if ( myMode == _PlaneStress )     {
+    } else if ( myMode == _PlaneStress ) {
         // plane stress problem
         OOFEM_ERROR("StrainVector::computeDeviatoricVolumetricSum: No sum for plane stress!");
         //  dev = *this;
         // vol = (this->at(1)+this->at(2))/2.0;
         //    dev.at(1) -= vol;
         // dev.at(2) -= vol;
-    } else   {
+    } else {
         // 3d, plane strain or axisymmetric problem
         answer = * this;
         for ( int i = 0; i < 3; i++ ) {
@@ -174,10 +173,10 @@ StrainVector :: computePrincipalValues(FloatArray &answer) const
 
         I1 = s.at(1) + s.at(2) + s.at(3);
         I2 = s.at(1) * s.at(2) + s.at(2) * s.at(3) + s.at(3) * s.at(1) -
-        0.25 * ( s.at(4) * s.at(4) + s.at(5) * s.at(5) + s.at(6) * s.at(6) );
+             0.25 * ( s.at(4) * s.at(4) + s.at(5) * s.at(5) + s.at(6) * s.at(6) );
         I3 = s.at(1) * s.at(2) * s.at(3) +
-        0.25 * ( s.at(4) * s.at(5) * s.at(6) - s.at(1) * s.at(4) * s.at(4) -
-                s.at(2) * s.at(5) * s.at(5) - s.at(3) * s.at(6) * s.at(6) );
+             0.25 * ( s.at(4) * s.at(5) * s.at(6) - s.at(1) * s.at(4) * s.at(4) -
+                     s.at(2) * s.at(5) * s.at(5) - s.at(3) * s.at(6) * s.at(6) );
 
         /*
          * Call cubic3r to ensure, that all three real eigenvalues will be found, because we have symmetric tensor.
@@ -338,10 +337,10 @@ StrainVector :: computeVolumeChange() const
     if ( myMode == _1dMat ) {
         // 1d problem
         return values [ 0 ];
-    } else if ( myMode == _PlaneStress )       {
+    } else if ( myMode == _PlaneStress ) {
         // 2d problem: plane stress
         return values [ 0 ] + values [ 1 ];
-    } else     {
+    } else {
         // plane strain, axisymmetry or full 3d
         return values [ 0 ] + values [ 1 ] + values [ 2 ];
     }
@@ -357,14 +356,14 @@ StrainVector :: computeStrainNorm() const
     if ( myMode == _1dMat ) {
         // 1d problem
         return sqrt(values [ 0 ] * values [ 0 ]);
-    } else if ( myMode == _PlaneStress )       {
+    } else if ( myMode == _PlaneStress ) {
         // 2d problem: plane stress
         return sqrt( .5 * ( 2. * values [ 0 ] * values [ 0 ] + 2 * values [ 1 ] * values [ 1 ] + values [ 2 ] * values [ 2 ] ) );
-    } else if ( myMode == _PlaneStrain || myMode == _3dRotContinuum )       {
+    } else if ( myMode == _PlaneStrain || myMode == _3dRotContinuum ) {
         //  plane strain or axisymmetry
         return sqrt( .5 * ( 2. * values [ 0 ] * values [ 0 ] + 2. * values [ 1 ] * values [ 1 ] + 2. * values [ 2 ] * values [ 2 ] +
                             values [ 3 ] * values [ 3 ] ) );
-    } else     {
+    } else {
         // 3d problem
         return sqrt( .5 * ( 2. * values [ 0 ] * values [ 0 ] + 2. * values [ 1 ] * values [ 1 ] + 2. * values [ 2 ] * values [ 2 ] +
                             values [ 3 ] * values [ 3 ] + values [ 4 ] * values [ 4 ] + values [ 5 ] * values [ 5 ] ) );
@@ -381,12 +380,12 @@ StrainVector :: applyElasticStiffness(StressVector &stress, const double EModulu
     MaterialMode myMode = giveStressStrainMode();
     if ( myMode == _1dMat ) {
         stress(0) = EModulus * values [ 0 ];
-    } else if ( myMode == _PlaneStress )     {
+    } else if ( myMode == _PlaneStress ) {
         const double factor = EModulus / ( 1. - nu * nu );
         stress(0) = factor * ( values [ 0 ] + nu * values [ 1 ] );
         stress(1) = factor * ( nu * values [ 0 ] + values [ 1 ] );
         stress(2) = factor * ( ( ( 1 - nu ) / 2. ) * values [ 2 ] );
-    } else if ( myMode == _PlaneStrain )     {
+    } else if ( myMode == _PlaneStrain ) {
         if ( nu >= 0.5 ) {
             OOFEM_ERROR("StrainVector::applyElasticStiffness: nu must be less than 0.5");
         }
@@ -396,7 +395,7 @@ StrainVector :: applyElasticStiffness(StressVector &stress, const double EModulu
         stress(1) = factor * ( nu * values [ 0 ] + ( 1. - nu ) * values [ 1 ] );
         stress(2) = nu * ( stress(0) + stress(1) );
         stress(3) = factor * ( ( ( 1. - 2. * nu ) / 2. ) * values [ 3 ] );
-    } else if ( myMode == _3dRotContinuum )      {
+    } else if ( myMode == _3dRotContinuum ) {
         // Order:  r,  theta, z,  zr
         if ( nu >= 0.5 ) {
             OOFEM_ERROR("StrainVector::applyElasticStiffness: nu must be less than 0.5");
@@ -407,7 +406,7 @@ StrainVector :: applyElasticStiffness(StressVector &stress, const double EModulu
         stress(1) = factor * ( nu * values [ 0 ] + ( 1. - nu ) * values [ 1 ] + nu * values [ 2 ] );
         stress(2) = factor * ( nu * values [ 0 ] + nu * values [ 1 ] + ( 1. - nu ) * values [ 2 ] );
         stress(3) = factor * ( ( 1. - 2. * nu ) / 2. ) * values [ 3 ];
-    } else   {
+    } else {
         if ( nu >= 0.5 ) {
             OOFEM_ERROR("StrainVector::applyElasticStiffness: nu must be less than 0.5");
         }
@@ -445,9 +444,9 @@ StrainVector :: applyDeviatoricElasticStiffness(StressVector &stress,
     MaterialMode myMode = giveStressStrainMode();
     if ( myMode == _1dMat ) {
         OOFEM_ERROR("StrainVector::applyDeviatoricElasticStiffness: No Split for 1D");
-    } else if ( myMode == _PlaneStress )     {
+    } else if ( myMode == _PlaneStress ) {
         OOFEM_ERROR("StrainVector::applyDeviatoricElasticStiffness: No Split for Plane Stress");
-    } else if ( myMode == _PlaneStrain )     {
+    } else if ( myMode == _PlaneStrain ) {
         if ( stress.giveStressStrainMode() != _PlaneStrain ) {
             stress.letStressStrainModeBe(_PlaneStrain);
         }
@@ -456,7 +455,7 @@ StrainVector :: applyDeviatoricElasticStiffness(StressVector &stress,
         stress(1) = 2. * GModulus * values [ 1 ];
         stress(2) = 2. * GModulus * values [ 2 ];
         stress(3) = GModulus * values [ 3 ];
-    } else if ( myMode == _3dRotContinuum )      {
+    } else if ( myMode == _3dRotContinuum ) {
         if ( stress.giveStressStrainMode() != _3dRotContinuum ) {
             stress.letStressStrainModeBe(_3dRotContinuum);
         }
@@ -466,7 +465,7 @@ StrainVector :: applyDeviatoricElasticStiffness(StressVector &stress,
         stress(1) = 2. * GModulus * values [ 1 ];
         stress(2) = 2. * GModulus * values [ 2 ];
         stress(3) = GModulus * values [ 3 ];
-    } else   {
+    } else {
         if ( stress.giveStressStrainMode() != _3dMat ) {
             stress.letStressStrainModeBe(_3dMat);
         }
@@ -549,6 +548,4 @@ StrainVector :: giveTranformationMtrx(FloatMatrix &answer,
 
     return;
 }
-
-
 } // end namespace oofem

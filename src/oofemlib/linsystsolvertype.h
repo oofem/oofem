@@ -56,6 +56,5 @@ enum LinSystSolverType {
     ST_DSS    = 4,
     ST_Feti   = 5
 };
-
 } // end namespace oofem
 #endif // linsystsolvertype_h

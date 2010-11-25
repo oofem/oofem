@@ -57,13 +57,12 @@
 #include "error.h"
 
 #ifndef __MAKEDEPEND
-#include <stdlib.h>
-#include <stdio.h>
-#include <assert.h>
+ #include <stdlib.h>
+ #include <stdio.h>
+ #include <assert.h>
 #endif
 
 namespace oofem {
-
 class IntArray;
 class FloatMatrix;
 class DataStream;
@@ -126,7 +125,7 @@ public:
     virtual ~FloatArray() { if ( values ) { freeDouble(values); } } // destructor
 
     /// Assingnment operator
-    FloatArray &operator=(const FloatArray &);  // assignment: cleanup and copy
+    FloatArray & operator=(const FloatArray &);  // assignment: cleanup and copy
 
 #ifdef DEBUG
     /** Coefficient access function. Returns value of coeffiicient at given
@@ -153,10 +152,11 @@ public:
     double &operator()(int i)
     {
 #ifdef DEBUG
-      if ( i >= size ) {
-        OOFEM_ERROR2("FloatArray :: operator() : array error on index : %d <= 0 \n", i);
-      }
-      // assert(i < size);
+        if ( i >= size ) {
+            OOFEM_ERROR2("FloatArray :: operator() : array error on index : %d <= 0 \n", i);
+        }
+
+        // assert(i < size);
 #endif
         return values [ i ];
     }
@@ -168,10 +168,11 @@ public:
     const double &operator()(int i) const
     {
 #ifdef DEBUG
-      if ( i >= size ) {
-        OOFEM_ERROR2("FloatArray :: operator() : array error on index : %d <= 0 \n", i);
-      }
-      //assert(i < size);
+        if ( i >= size ) {
+            OOFEM_ERROR2("FloatArray :: operator() : array error on index : %d <= 0 \n", i);
+        }
+
+        //assert(i < size);
 #endif
         return values [ i ];
     }
@@ -301,7 +302,7 @@ public:
     /**
      * Computes the square of distance between position represented by receiver and position given as parameter.
      */
-    double       distance_square (const FloatArray &) const;
+    double       distance_square(const FloatArray &) const;
     /**
      * Returns the receiver 'a' rotated according the change-of-base matrix r.
      * @param r Rotation matrix.
@@ -389,23 +390,20 @@ public:
     // FloatArray & operator=(const FloatArray&);
 
     /// Assignment of scalar to all componenets of receiver
-    FloatArray &operator=(const double &);
+    FloatArray & operator=(const double &);
 
 #endif
 
 #ifdef BOOST_PYTHON
-    double __getItem__ (int i) {return this->operator()(i);}
-    void   __setItem__ (int i, double val) {this->operator()(i)=val;}
+    double __getItem__(int i) { return this->operator()(i); }
+    void   __setItem__(int i, double val) { this->operator()(i) = val; }
 #endif
-
-
-
 };
 
 
 #ifdef IML_COMPAT
 /// Vector multiplication by scalar
-FloatArray &operator*=(FloatArray &x, const double &a);
+FloatArray & operator*=(FloatArray &x, const double &a);
 FloatArray operator*(const double &a, const FloatArray &x);
 FloatArray operator*(const FloatArray &x, const double &a);
 FloatArray operator+(const FloatArray &x, const FloatArray &y);
@@ -431,7 +429,6 @@ double  dotProduct(const FloatArray &p1, const FloatArray &p2, int i);
 
 
 #endif
-
 } // end namespace oofem
 #endif // flotarry_h
 

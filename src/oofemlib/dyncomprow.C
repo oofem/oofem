@@ -45,14 +45,13 @@
 
 
 #ifdef TIME_REPORT
-#ifndef __MAKEDEPEND
-#include <time.h>
-#endif
-#include "clock.h"
+ #ifndef __MAKEDEPEND
+  #include <time.h>
+ #endif
+ #include "clock.h"
 #endif
 
 namespace oofem {
-
 DynCompRow :: DynCompRow(void) : SparseMtrx(), base_(0)
 {
     rows_ = NULL;
@@ -79,7 +78,7 @@ DynCompRow :: DynCompRow(const DynCompRow &S) : SparseMtrx(S.nRows, S.nColumns),
     if ( S.rows_ ) {
         this->rows_ = new FloatArray * [ S.nRows ];
         for ( i = 0; i < S.nRows; i++ ) {
-            this->rows_ [ i ] = new FloatArray(* S.rows_ [ i ]);
+            this->rows_ [ i ] = new FloatArray(*S.rows_ [ i ]);
         }
     } else {
         this->rows_ = NULL;
@@ -88,7 +87,7 @@ DynCompRow :: DynCompRow(const DynCompRow &S) : SparseMtrx(S.nRows, S.nColumns),
     if ( S.colind_ ) {
         this->colind_ = new IntArray * [ S.nRows ];
         for ( i = 0; i < S.nRows; i++ ) {
-            this->colind_ [ i ] = new IntArray(* S.colind_ [ i ]);
+            this->colind_ [ i ] = new IntArray(*S.colind_ [ i ]);
         }
     } else {
         this->colind_ = NULL;
@@ -128,7 +127,7 @@ DynCompRow :: ~DynCompRow()
 /* Assignment operator...  */
 /***************************/
 
-DynCompRow &DynCompRow :: operator=(const DynCompRow &C)
+DynCompRow &DynCompRow :: operator = ( const DynCompRow & C )
 {
     base_   = C.base_;
 
@@ -145,7 +144,7 @@ DynCompRow &DynCompRow :: operator=(const DynCompRow &C)
     if ( C.rows_ ) {
         this->rows_ = new FloatArray * [ C.nRows ];
         for ( i = 0; i < C.nRows; i++ ) {
-            this->rows_ [ i ] = new FloatArray(* C.rows_ [ i ]);
+            this->rows_ [ i ] = new FloatArray(*C.rows_ [ i ]);
         }
     } else {
         this->rows_ = NULL;
@@ -163,7 +162,7 @@ DynCompRow &DynCompRow :: operator=(const DynCompRow &C)
     if ( C.colind_ ) {
         this->colind_ = new IntArray * [ C.nRows ];
         for ( i = 0; i < C.nRows; i++ ) {
-            this->colind_ [ i ] = new IntArray(* C.colind_ [ i ]);
+            this->colind_ [ i ] = new IntArray(*C.colind_ [ i ]);
         }
     } else {
         this->colind_ = NULL;
@@ -177,7 +176,7 @@ DynCompRow &DynCompRow :: operator=(const DynCompRow &C)
 
 SparseMtrx *DynCompRow :: GiveCopy() const
 {
-    DynCompRow *result = new DynCompRow(* this);
+    DynCompRow *result = new DynCompRow(*this);
     return result;
 }
 
@@ -217,7 +216,7 @@ void DynCompRow :: times(double x)
     this->version++;
 }
 
-int DynCompRow :: buildInternalStructure(EngngModel *eModel, int di, EquationID ut, const UnknownNumberingScheme& s)
+int DynCompRow :: buildInternalStructure(EngngModel *eModel, int di, EquationID ut, const UnknownNumberingScheme &s)
 {
     /*
      * int neq = eModel -> giveNumberOfDomainEquations (di);
@@ -497,7 +496,7 @@ double DynCompRow :: at(int i, int j) const
     }
 }
 
-double DynCompRow :: operator()(int i, int j)  const
+double DynCompRow :: operator() (int i, int j)  const
 {
     int colIndx;
     if ( ( colIndx = this->giveColIndx(i, j) ) ) {
@@ -512,7 +511,7 @@ double DynCompRow :: operator()(int i, int j)  const
     }
 }
 
-double &DynCompRow :: operator()(int i, int j)
+double &DynCompRow :: operator() (int i, int j)
 {
     int colIndx;
 
@@ -532,7 +531,7 @@ double &DynCompRow :: operator()(int i, int j)
 /* Matrix-Vector multiplication...  */
 /***************************************/
 
-FloatArray DynCompRow :: operator *(const FloatArray &x) const
+FloatArray DynCompRow :: operator *( const FloatArray & x ) const
 {
     //      Check for compatible dimensions:
     if ( x.giveSize() != nColumns ) {
@@ -770,14 +769,14 @@ DynCompRow :: insertColInRow(int row, int col)
  * IntArray iw (nColumns);
  * diag_rowptr_.resize(nRows);
  *
- #ifndef DynCompRow_USE_STL_SETS
+ *#ifndef DynCompRow_USE_STL_SETS
  * for (i = 0; i < nRows; i++) // row loop
  *  if ((diag_rowptr_(i) = giveColIndx (i, i)) == 0) { // giveColIndx returns 1-based indexing
  * printf ("DynCompRow:: Zero diagonal member\n");
  * exit(1);
  * }
  *
- #else
+ *#else
  * std::map<int, double>::iterator pos;
  * for (i = 0; i < nRows; i++) {// row loop
  * pos  = this->rows[i]->find(i);
@@ -788,10 +787,10 @@ DynCompRow :: insertColInRow(int row, int col)
  * exit(1);
  * }
  * }
- #endif
+ *#endif
  *
  * // FACTOR MATRIX //
- #ifndef DynCompRow_USE_STL_SETS
+ *#ifndef DynCompRow_USE_STL_SETS
  *
  * for (i=1; i< nRows; i++) { // loop  over rows
  * for (k=0; k < (diag_rowptr_(i)-1); k++) { // loop 1,...,i-1 for (i,k) \in NZ(A)
@@ -810,9 +809,9 @@ DynCompRow :: insertColInRow(int row, int col)
  * }
  * }
  *
- #else
+ *#else
  * NOT IMPLEMENTED NOW
- #endif
+ *#endif
  * }
  */
 
@@ -858,7 +857,7 @@ DynCompRow :: ILUPYourself(int part_fill, double drop_tol)
 
         w.resize(rows_ [ i ]->giveSize(), ILU_ROW_CHUNK);
         iw.resize(rows_ [ i ]->giveSize(), ILU_ROW_CHUNK);
-        for ( kk = 1;  kk <= rows_ [ i ]->giveSize(); kk++ ) {
+        for ( kk = 1; kk <= rows_ [ i ]->giveSize(); kk++ ) {
             irw( colind_ [ i ]->at(kk) ) = kk;
             iw(kk - 1) = colind_ [ i ]->at(kk);
             w(kk - 1) = rows_ [ i ]->at(kk);
@@ -1049,7 +1048,7 @@ DynCompRow :: ILUPYourself(int part_fill, double drop_tol)
         }
 
         //Refresh all iw enries to zero
-        for ( kk = 1;  kk <= iw.giveSize(); kk++ ) {
+        for ( kk = 1; kk <= iw.giveSize(); kk++ ) {
             irw( iw.at(kk) ) = 0;
         }
 
@@ -1229,5 +1228,4 @@ DynCompRow :: qsortRowPartition(IntArray &ind, IntArray &ir, FloatArray &val, in
 
     return i;
 }
-
 } // end namespace oofem

@@ -40,12 +40,11 @@
 #include "gausspnt.h"
 #include "mathfem.h"
 #ifndef __MAKEDEPEND
-#include <stdlib.h>
-#include <math.h>
+ #include <stdlib.h>
+ #include <math.h>
 #endif
 
 namespace oofem {
-
 Steel1 :: Steel1(int n, Domain *d) : PerfectlyPlasticMaterial(n, d)
     // constructor
 {
@@ -70,7 +69,7 @@ Steel1 :: computeYCValueAt(GaussPoint *gp,
 // ig gp->status are posibly stored hardenining variables
 {
     // double answer;
-  return this->computeJ2InvariantAt(currentStress) - this->give('k',gp);
+    return this->computeJ2InvariantAt(currentStress) - this->give('k', gp);
 }
 
 
@@ -92,7 +91,7 @@ Steel1 :: computeJ2InvariantAt(FloatArray *currentStress)
     v3 = ( ( currentStress->at(3) - currentStress->at(1) ) * ( currentStress->at(3) - currentStress->at(1) ) );
 
     answer = ( 1. / 6. ) * ( v1 + v2 + v3 ) + currentStress->at(4) * currentStress->at(4) +
-    currentStress->at(5) * currentStress->at(5) + currentStress->at(6) * currentStress->at(6);
+             currentStress->at(5) * currentStress->at(5) + currentStress->at(6) * currentStress->at(6);
 
     return sqrt(answer);
 }
@@ -192,5 +191,4 @@ Steel1 :: initializeFrom(InputRecord *ir)
 
     return IRRT_OK;
 }
-
 } // end namespace oofem

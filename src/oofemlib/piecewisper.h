@@ -43,7 +43,6 @@
 #include "piecewis.h"
 
 namespace oofem {
-
 class PeriodicPiecewiseLinFunction : public PiecewiseLinFunction
 {
     /*
@@ -60,14 +59,16 @@ private:
     /** If nonzero, the value of time function specified by addTF is added to computed value */
     int addTF;
     /** If less than zero no periodicity, if >=0 date time is computed as
-     * given time%period.
-     * If points span more than period, span of LAST period is repeated */
+    * given time%period.
+    * If points span more than period, span of LAST period is repeated */
     double period;
 
 public:
     PeriodicPiecewiseLinFunction(int i, Domain *d) : PiecewiseLinFunction(i, d)
-    { period = -1.0;
-      addTF = 0; }
+    {
+        period = -1.0;
+        addTF = 0;
+    }
     ~PeriodicPiecewiseLinFunction()             { }
 
     //      void    getPoints () ;
@@ -96,6 +97,5 @@ public:
      */
     virtual double    __derAt(double);
 };
-
 } // end namespace oofem
 #endif // piecewisper_h

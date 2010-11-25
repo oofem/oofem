@@ -45,7 +45,6 @@
 #include "domain.h"
 
 namespace oofem {
-
 /**
  * Class representing usr defined temparature field.
  * No user input. The expression is hard - coded in the class body
@@ -90,6 +89,5 @@ public:
      */
     IRResultType initializeFrom(InputRecord *ir);
 };
-
 } // end namespace oofem
 #endif // tf1_h

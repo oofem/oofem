@@ -48,7 +48,6 @@
 #include "feinterpol.h"
 
 namespace oofem {
-
 /**
  * Class representing a general abstraction for surface finite element interpolation class.
  */
@@ -60,7 +59,7 @@ public:
     /**
      * Returns number of spatial dimensions
      */
-    int const giveNsd() {return 3;}
+    int const giveNsd() { return 3; }
     /**@name Edge interpolation servises */
     //@{
     /**
@@ -70,18 +69,18 @@ public:
      * @param cellgeo underlying cell geometry
      * @param time time
      */
-    virtual void edgeEvalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry& cellgeo, double time) = 0;
+    virtual void edgeEvalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time) = 0;
     /**
      * Evaluates the matrix of derivatives of edge interpolation functions (shape functions) at given point.
      * These derivatives are in global coordinate system (where the nodal coordinates are defined)
      * @param answer contains resulting matrix of derivatives, the member at i,j position contains value of dNj/dxi
      * @param iedge determines the edge number
-      * @param lcoords array containing (local) coordinates
+     * @param lcoords array containing (local) coordinates
      * @param cellgeo underlying cell geometry
      * @param time time
      */
     virtual void edgeEvaldNdx(FloatMatrix &answer, int iedge,
-                              const FloatArray &lcoords, const FEICellGeometry& cellgeo, double time) = 0;
+                              const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time) = 0;
     /**
      * Evaluates edge global coordinates from given local ones
      * These derivatives are in global coordinate system (where the nodal coordinates are defined)
@@ -92,15 +91,15 @@ public:
      * @param time time
      */
     virtual void edgeLocal2global(FloatArray &answer, int iedge,
-                                  const FloatArray &lcoords, const FEICellGeometry& cellgeo, double time) = 0;
+                                  const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time) = 0;
     /**
      * Evaluates the edge jacobian of transformation between local and global coordinates.
      */
-    virtual double edgeGiveTransformationJacobian(int iedge, 
-                                                  const FloatArray &lcoords, 
-                                                  const FEICellGeometry& cellgeo, 
+    virtual double edgeGiveTransformationJacobian(int iedge,
+                                                  const FloatArray &lcoords,
+                                                  const FEICellGeometry &cellgeo,
                                                   double time) = 0;
-    
+
 
     virtual void computeLocalEdgeMapping(IntArray &edgeNodes, int iedge) = 0;
     void computeEdgeMapping(IntArray &edgeNodes, IntArray &elemNodes, int iedge) {
@@ -122,7 +121,7 @@ public:
      * @param cellgeo underlying cell geometry
      * @param time time
      */
-    virtual void surfaceEvalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry& cellgeo, double time) = 0;
+    virtual void surfaceEvalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time) = 0;
     /**
      * Evaluates the matrix of derivatives of edge interpolation functions (shape functions) at given point.
      * These derivatives are in global coordinate system (where the nodal coordinates are defined)
@@ -144,12 +143,12 @@ public:
      * @param time time
      */
     virtual void surfaceLocal2global(FloatArray &answer, int iedge,
-                                     const FloatArray &lcoords, const FEICellGeometry& cellgeo, double time) = 0;
+                                     const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time) = 0;
     /**
      * Evaluates the edge jacobian of transformation between local and global coordinates.
      */
     virtual double surfaceGiveTransformationJacobian(int isurf, const FloatArray &lcoords,
-                                                     const FEICellGeometry& cellgeo, double time) = 0;
+                                                     const FEICellGeometry &cellgeo, double time) = 0;
     virtual void computeLocalSurfaceMapping(IntArray &edgeNodes, int iedge) = 0;
     void computeSurfaceMapping(IntArray &edgeNodes, IntArray &elemNodes, int iedge) {
         int i, size;
@@ -161,9 +160,6 @@ public:
     }
     //@}
 };
-
-
-
 } // end namespace oofem
 #endif // feinterpol3d_h
 

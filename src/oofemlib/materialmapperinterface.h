@@ -46,7 +46,6 @@
 #include "interface.h"
 
 namespace oofem {
-
 class Domain;
 class Element;
 class TimeStep;
@@ -97,6 +96,5 @@ public:
 
 protected:
 };
-
 } // end namespace oofem
 #endif // materilmapperinterface_h

@@ -41,13 +41,12 @@
 #define adaptlinearstatic_h
 
 #ifndef __MAKEDEPEND
-#include <stdio.h>
+ #include <stdio.h>
 #endif
 #include "linearstatic.h"
 #include "meshpackagetype.h"
 
 namespace oofem {
-
 class AdaptiveLinearStatic : public LinearStatic
 {
     /*
@@ -92,6 +91,5 @@ public:
     const char *giveClassName() const { return "AdaptiveLinearStatic"; }
     classType giveClassID()      const { return AdaptiveLinearStaticClass; }
 };
-
 } // end namespace oofem
 #endif // adaptlinearstatic_h

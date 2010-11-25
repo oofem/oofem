@@ -46,7 +46,6 @@
 #include "mathfem.h"
 
 namespace oofem {
-
 J2MPlasticMaterial :: J2MPlasticMaterial(int n, Domain *d) : MPlasticMaterial(n, d)
 {
     //
@@ -143,7 +142,7 @@ J2MPlasticMaterial :: computeStressSpaceHardeningVars(FloatArray &answer, GaussP
         for ( i = 1; i <= isize; i++ ) {
             // to be consistent with equivalent plastic strain formulation
             // we multiply by (sqrt(2.)*2./3.)
-            answer.at( mask.at(i) ) = ( sqrt(2.) * 2. / 3. ) * this->kinematicModuli *strainSpaceHardeningVariables.at(i);
+            answer.at( mask.at(i) ) = ( sqrt(2.) * 2. / 3. ) * this->kinematicModuli * strainSpaceHardeningVariables.at(i);
         }
 
         count = 6;
@@ -329,7 +328,7 @@ J2MPlasticMaterial :: computeReducedGradientMatrix(FloatMatrix &answer, int isur
 
     this->giveStressStrainMask( mask, FullForm, gp->giveMaterialMode() );
     size = giveSizeOfReducedStressStrainVector( gp->giveMaterialMode() ) +
-    this->giveSizeOfReducedHardeningVarsVector(gp);
+           this->giveSizeOfReducedHardeningVarsVector(gp);
 
     //FloatMatrix* answer = new FloatMatrix(size,size);
     answer.resize(size, size);
@@ -453,7 +452,7 @@ J2MPlasticMaterial :: computeJ2InvariantAt(const FloatArray &stressVector)
     v3 = ( ( stressVector.at(3) - stressVector.at(1) ) * ( stressVector.at(3) - stressVector.at(1) ) );
 
     answer = ( 1. / 6. ) * ( v1 + v2 + v3 ) + stressVector.at(4) * stressVector.at(4) +
-    stressVector.at(5) * stressVector.at(5) + stressVector.at(6) * stressVector.at(6);
+             stressVector.at(5) * stressVector.at(5) + stressVector.at(6) * stressVector.at(6);
 
     return answer;
 }
@@ -527,5 +526,4 @@ J2MPlasticMaterial :: giveIsotropicHardeningVar(const FloatArray &stressSpaceHar
 
     return 0.;
 }
-
 } // end namespace oofem

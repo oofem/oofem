@@ -41,7 +41,7 @@
 #define eigenvaluedynamic_h
 
 #ifndef __MAKEDEPEND
-#include <stdio.h>
+ #include <stdio.h>
 #endif
 #include "engngm.h"
 #include "sparsegeneigenvalsystemnm.h"
@@ -51,7 +51,6 @@
 #include "geneigvalsolvertype.h"
 
 namespace oofem {
-
 class EigenValueDynamic : public EngngModel
 {
     /*
@@ -115,10 +114,10 @@ public:
 
 #ifdef __SLEPC_MODULE
     /*
-      Creates Petsc contexts. Must be implemented by derived classes since the governing equation type is required
-      for context creation.
-    */
-    virtual void initPetscContexts ();
+     * Creates Petsc contexts. Must be implemented by derived classes since the governing equation type is required
+     * for context creation.
+     */
+    virtual void initPetscContexts();
 #endif
 
     /** DOF printing routine. Called by DofManagers to print Dof specific part.
@@ -134,6 +133,5 @@ public:
     const char *giveClassName() const { return "EigenValueDynamic"; }
     classType giveClassID()      const { return EigenValueDynamicClass; }
 };
-
 } // end namespace oofem
 #endif // eigenvaluedynamic_h

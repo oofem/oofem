@@ -36,12 +36,9 @@
 #include "sparsegeneigenvalsystemnm.h"
 
 namespace oofem {
-
 SparseGeneralEigenValueSystemNM :: SparseGeneralEigenValueSystemNM(int i, Domain *d, EngngModel *m) : NumericalMethod(i, d, m)
 { }
 
 SparseGeneralEigenValueSystemNM :: ~SparseGeneralEigenValueSystemNM()
 { }
-
-
 } // end namespace oofem

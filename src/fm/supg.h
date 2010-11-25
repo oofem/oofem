@@ -42,11 +42,10 @@
 #include "primaryfield.h"
 #include "materialinterface.h"
 #ifndef __MAKEDEPEND
-#include <stdio.h>
+ #include <stdio.h>
 #endif
 
 namespace oofem {
-
 /**
  * This class represents transient incopressible flow problem. Solution is based on
  * algorithm with SUPG/PSPG stabilization.
@@ -257,6 +256,5 @@ protected:
     //void imposeAmbientPressureInOuterNodes(SparseMtrx* lhs, FloatArray* rhs, TimeStep* stepN);
     //void    __debug  (TimeStep* atTime);
 };
-
 } // end namespace oofem
 #endif // supg_h

@@ -39,17 +39,16 @@
 #include "node.h"
 
 #ifndef __MAKEDEPEND
-#include <stdio.h>
+ #include <stdio.h>
 #endif
 
 namespace oofem {
-
 class FloatArray;
 class IntArray;
 
 /**
  * Class implementing hanging node connected to other nodes (masters) using interpolation.
- * Hanging node posses no degrees of freedom	- all values are interpolated from corresponding master dofs.
+ * Hanging node posses no degrees of freedom - all values are interpolated from corresponding master dofs.
  *
  * The introduction of hanging nodes allows, for example, to include reinforcing bar elements inside
  * arbitrary fe mesh of concrete specimen or facilitates the local refinment of fe-mesh.
@@ -135,6 +134,5 @@ public:
     /// Returns true if dof of given type is allowed to be associated to receiver
     bool isDofTypeCompatible(dofType type) const { return ( type == DT_master || type == DT_slave ); } // termitovo
 };
-
 } // end namespace oofem
 #endif // hangingnode_h

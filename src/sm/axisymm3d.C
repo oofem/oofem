@@ -55,17 +55,16 @@
 #include "engngm.h"
 #include "mathfem.h"
 #ifndef __MAKEDEPEND
-#include <math.h>
-#include <stdio.h>
+ #include <math.h>
+ #include <stdio.h>
 #endif
 
 #ifdef __OOFEG
-#include "oofeggraphiccontext.h"
-#include "conTable.h"
+ #include "oofeggraphiccontext.h"
+ #include "conTable.h"
 #endif
 
 namespace oofem {
-
 FEI2dTrLin Axisymm3d :: interpolation(1, 2);
 
 Axisymm3d :: Axisymm3d(int n, Domain *aDomain) :
@@ -224,8 +223,10 @@ Axisymm3d :: giveArea()
     y3 = node3->giveCoordinate(2);
 
     area = 0.5 * ( x2 * y3 + x1 * y2 + y1 * x3 - x2 * y1 - x3 * y2 - x1 * y3 );
-    if (area<0.)
-      area = -area;
+    if ( area < 0. ) {
+        area = -area;
+    }
+
     return area;
 }
 
@@ -244,8 +245,8 @@ Axisymm3d :: computeVolumeAround(GaussPoint *aGaussPoint)
         r += x * n.at(i);
     }
 
-    determinant = fabs( this->interpolation.giveTransformationJacobian(*aGaussPoint->giveCoordinates(), 
-								       FEIElementGeometryWrapper(this), 0.0) );
+    determinant = fabs( this->interpolation.giveTransformationJacobian(* aGaussPoint->giveCoordinates(),
+                                                                       FEIElementGeometryWrapper(this), 0.0) );
 
     weight      = aGaussPoint->giveWeight();
     volume      = determinant * weight * r;
@@ -257,14 +258,14 @@ Axisymm3d :: computeVolumeAround(GaussPoint *aGaussPoint)
 void
 Axisymm3d :: computeGaussPoints()
 {
-  if (!integrationRulesArray) {
-    numberOfIntegrationRules = 2;
-    integrationRulesArray = new IntegrationRule * [ 2 ];
-    integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 2);
-    integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Triangle, numberOfGaussPoints, _3dMat);
-    integrationRulesArray [ 1 ] = new GaussIntegrationRule(2, this, 3, 6);
-    integrationRulesArray [ 1 ]->setUpIntegrationPoints(_Triangle, numberOfFiAndShGaussPoints, _3dMat);
-  }
+    if ( !integrationRulesArray ) {
+        numberOfIntegrationRules = 2;
+        integrationRulesArray = new IntegrationRule * [ 2 ];
+        integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 2);
+        integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Triangle, numberOfGaussPoints, _3dMat);
+        integrationRulesArray [ 1 ] = new GaussIntegrationRule(2, this, 3, 6);
+        integrationRulesArray [ 1 ]->setUpIntegrationPoints(_Triangle, numberOfFiAndShGaussPoints, _3dMat);
+    }
 }
 
 IRResultType
@@ -422,7 +423,7 @@ Axisymm3d ::   giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) c
 int
 Axisymm3d :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords)
 {
-  this->interpolation.local2global(answer, lcoords, FEIElementGeometryWrapper(this), 0.0);
+    this->interpolation.local2global(answer, lcoords, FEIElementGeometryWrapper(this), 0.0);
     return 1;
 }
 
@@ -595,8 +596,8 @@ Axisymm3d ::   computeEdgeVolumeAround(GaussPoint *aGaussPoint, int iEdge)
 {
     FloatArray c(2);
     this->computeEdgeIpGlobalCoords(c, aGaussPoint, iEdge);
-    double result = this->interpolation.edgeGiveTransformationJacobian(iEdge, * aGaussPoint->giveCoordinates(), 
-								       FEIElementGeometryWrapper(this), 0.0);
+    double result = this->interpolation.edgeGiveTransformationJacobian(iEdge, * aGaussPoint->giveCoordinates(),
+                                                                       FEIElementGeometryWrapper(this), 0.0);
 
 
     return c.at(1) * result * aGaussPoint->giveWeight();
@@ -606,7 +607,7 @@ Axisymm3d ::   computeEdgeVolumeAround(GaussPoint *aGaussPoint, int iEdge)
 void
 Axisymm3d ::   computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge)
 {
-  this->interpolation.edgeLocal2global(answer, iEdge, * gp->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0);
+    this->interpolation.edgeLocal2global(answer, iEdge, * gp->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0);
 }
 
 
@@ -657,8 +658,8 @@ Axisymm3d :: computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, Gaus
 
 
 #ifdef __OOFEG
-#include "rcm2.h"
-#define TR_LENGHT_REDUCT 0.3333
+ #include "rcm2.h"
+ #define TR_LENGHT_REDUCT 0.3333
 
 void Axisymm3d :: drawRawGeometry(oofegGraphicContext &gc)
 {
@@ -1020,5 +1021,4 @@ Axisymm3d :: drawScalar(oofegGraphicContext &context)
  */
 
 #endif
-
 } // end namespace oofem

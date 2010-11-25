@@ -58,7 +58,6 @@
 #include "error.h"
 
 namespace oofem {
-
 /**
  * MacroLspace needs stiffness matrix derived from this microproblem. For this purpose, natural boundary conditions on microproblem have to be excluded. All DoFs have to be included. The static condensation of full microscale matrix follows.
  */
@@ -141,7 +140,7 @@ public:
     const FloatArray *microMasterCoords [ 8 ];
     ///Array containing equation numbers for boundary nodes [DofManagerNumber][DOF]
     int **microBoundaryDofs;
-     ///Array of equation numbers associated to boundary nodes
+    ///Array of equation numbers associated to boundary nodes
     IntArray microBoundaryDofsArr;
     ///Array containing equation numbers for internal nodes to be condensed out [DofManagerNumber][DOF]
     int **microInternalDofs;
@@ -160,13 +159,12 @@ protected:
     int reqNumberOfDomainEquation;
     ///number of DOF Managers
     int NumberOfDofManagers;
-    enum EquationNumbering {AllNodes, BoundaryNodes, InteriorNodes};
+    enum EquationNumbering { AllNodes, BoundaryNodes, InteriorNodes };
     EquationNumbering DofEquationNumbering;
     ///number of equations associated with boundary nodes
     int totalBoundaryDofs;
     ///number of equations associated with boundary nodes
     int totalInternalDofs;
 };
-
 } // end namespace oofem
 #endif // micromaterial_h

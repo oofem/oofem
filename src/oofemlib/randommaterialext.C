@@ -44,66 +44,69 @@
 #include "randommaterialext.h"
 
 namespace oofem {
-
 bool
-RandomMaterialStatusExtensionInterface::_giveProperty (int key, double& value) 
+RandomMaterialStatusExtensionInterface :: _giveProperty(int key, double &value)
 {
-  if (randProperties.includes(key)) {
-    value = randProperties.at(key);
-    return true;
-  } else {
-    return false;
-  }
+    if ( randProperties.includes(key) ) {
+        value = randProperties.at(key);
+        return true;
+    } else {
+        return false;
+    }
 }
 
 void
-RandomMaterialStatusExtensionInterface::_setProperty (int key, double value)
+RandomMaterialStatusExtensionInterface :: _setProperty(int key, double value)
 {
-  randProperties.at(key) = value;
+    randProperties.at(key) = value;
 }
 
 
 IRResultType
-RandomMaterialExtensionInterface::initializeFrom (InputRecord *ir)
+RandomMaterialExtensionInterface :: initializeFrom(InputRecord *ir)
 {
-  const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
-  IRResultType result;                // Required by IR_GIVE_FIELD macro
-  
-  randVariables.resize(0); randomVariableGenerators.resize(0);
-  IR_GIVE_OPTIONAL_FIELD(ir, randVariables, IFT_RandomMaterialExt_randVariables, "randvars"); // Macro
-  IR_GIVE_OPTIONAL_FIELD(ir, randomVariableGenerators, IFT_RandomMaterialExt_randGen, "randgen"); // Macro
-  
-  if (randVariables.giveSize() != randomVariableGenerators.giveSize()) {
-    OOFEM_ERROR ("RandomMaterialExtensionInterface::_initializeFrom: Incompatible size of randvars and randdist attrs");
-  }
-  return IRRT_OK;
+    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
+    IRResultType result;              // Required by IR_GIVE_FIELD macro
+
+    randVariables.resize(0);
+    randomVariableGenerators.resize(0);
+    IR_GIVE_OPTIONAL_FIELD(ir, randVariables, IFT_RandomMaterialExt_randVariables, "randvars"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, randomVariableGenerators, IFT_RandomMaterialExt_randGen, "randgen"); // Macro
+
+    if ( randVariables.giveSize() != randomVariableGenerators.giveSize() ) {
+        OOFEM_ERROR("RandomMaterialExtensionInterface::_initializeFrom: Incompatible size of randvars and randdist attrs");
+    }
+
+    return IRRT_OK;
 }
 
 
 bool
-RandomMaterialExtensionInterface::give (int key, GaussPoint* gp, double& value)
+RandomMaterialExtensionInterface :: give(int key, GaussPoint *gp, double &value)
 {
-  MaterialStatus* status=gp->giveMaterialStatus();
-  if (!status) status = gp->giveMaterial()->giveStatus(gp);
+    MaterialStatus *status = gp->giveMaterialStatus();
+    if ( !status ) {
+        status = gp->giveMaterial()->giveStatus(gp);
+    }
 
-  RandomMaterialStatusExtensionInterface* interface = (RandomMaterialStatusExtensionInterface*)
-    status->giveInterface(RandomMaterialStatusExtensionInterfaceType);
-  return interface->_giveProperty(key, value);
+    RandomMaterialStatusExtensionInterface *interface = ( RandomMaterialStatusExtensionInterface * )
+                                                        status->giveInterface(RandomMaterialStatusExtensionInterfaceType);
+    return interface->_giveProperty(key, value);
 }
 
-void 
-RandomMaterialExtensionInterface::_generateStatusVariables (GaussPoint* gp) const
+void
+RandomMaterialExtensionInterface :: _generateStatusVariables(GaussPoint *gp) const
 {
-  int i, size = randVariables.giveSize();
-  double value;
-  RandomMaterialStatusExtensionInterface* status = (RandomMaterialStatusExtensionInterface*)
-    gp->giveMaterialStatus()->giveInterface(RandomMaterialStatusExtensionInterfaceType);;
-  
-  for (i=1; i<=size; i++) {
-    gp->giveElement()->giveDomain()->
-      giveRandomFieldGenerator (randomVariableGenerators.at(i))->generateRandomValueAt (value, gp);
-    status->_setProperty (randVariables.at(i), value);
-  }
-}
+    int i, size = randVariables.giveSize();
+    double value;
+    RandomMaterialStatusExtensionInterface *status = ( RandomMaterialStatusExtensionInterface * )
+                                                     gp->giveMaterialStatus()->giveInterface(RandomMaterialStatusExtensionInterfaceType);
+    ;
 
+    for ( i = 1; i <= size; i++ ) {
+        gp->giveElement()->giveDomain()->
+        giveRandomFieldGenerator( randomVariableGenerators.at(i) )->generateRandomValueAt(value, gp);
+        status->_setProperty(randVariables.at(i), value);
+    }
+}
 } // end namespace oofem

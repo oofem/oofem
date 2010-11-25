@@ -48,8 +48,8 @@
 #include "dof.h"
 #include "initial.h"
 #ifndef __MAKEDEPEND
-#include <stdio.h>
-#include <math.h>
+ #include <stdio.h>
+ #include <math.h>
 #endif
 
 #include "verbose.h"
@@ -59,12 +59,11 @@
 #include "contextioerr.h"
 
 #ifdef __PARALLEL_MODE
-#include "problemcomm.h"
+ #include "problemcomm.h"
 //#include "domaincomm.h"
 #endif
 
 namespace oofem {
-
 #define ZERO_REL_MASS  1.E-6
 
 PNlDEIDynamic ::  PNlDEIDynamic(int i, EngngModel *_master) : StructuralEngngModel(i, _master), massMatrix(), loadVector(),
@@ -224,11 +223,11 @@ void PNlDEIDynamic :: solveYourself()
     //this -> giveNumericalMethod ();     // can be awoided
 
 #ifdef __PARALLEL_MODE
-#ifdef __VERBOSE_PARALLEL
+ #ifdef __VERBOSE_PARALLEL
     // force equation numbering before setting up comm maps
     int neq = this->giveNumberOfEquations(EID_MomentumBalance);
     OOFEM_LOG_INFO("[process rank %d] neq is %d\n", this->giveRank(), neq);
-#endif
+ #endif
 
     // set up communication patterns
     communicator->setUpCommunicationMaps(this, true);
@@ -559,7 +558,7 @@ void PNlDEIDynamic :: solveYourselfAt(TimeStep *tStep) {
     for ( i = 1; i <= neq; i++ ) {
         prevIncrOfDisplacement = previousIncrementOfDisplacementVector.at(i);
         incrOfDisplacement = loadVector.at(i) /
-        ( massMatrix.at(i) * ( 1. / ( deltaT * deltaT ) + dumpingCoef / ( 2. * deltaT ) ) );
+                             ( massMatrix.at(i) * ( 1. / ( deltaT * deltaT ) + dumpingCoef / ( 2. * deltaT ) ) );
         accelerationVector.at(i) = ( incrOfDisplacement - prevIncrOfDisplacement ) / ( deltaT * deltaT );
         velocityVector.at(i)     = ( incrOfDisplacement + prevIncrOfDisplacement ) / ( 2. * deltaT );
         previousIncrementOfDisplacementVector.at(i) = incrOfDisplacement; // becomes previous
@@ -648,11 +647,11 @@ PNlDEIDynamic :: computeLoadVector(FloatArray &answer, ValueModeType mode, TimeS
     // assembling the nodal part of load vector
     //
     this->assembleVectorFromDofManagers(answer, stepN, EID_MomentumBalance, NodalLoadVector, mode,
-					EModelDefaultEquationNumbering(), domain);
+                                        EModelDefaultEquationNumbering(), domain);
 
 
     /*
-     #ifdef __PARALLEL_MODE
+     * #ifdef __PARALLEL_MODE
      * // nodal load for shared nodes is applied on all partitions; local value should be rescaled
      *
      * int dm, j, eqNum, ndofs, ndofman = domain->giveNumberOfDofManagers();
@@ -676,31 +675,31 @@ PNlDEIDynamic :: computeLoadVector(FloatArray &answer, ValueModeType mode, TimeS
      *   }
      * }
      * }
-     #endif
+     *#endif
      */
     //
     // assembling the element part of load vector
     //
     this->assembleVectorFromElements(answer, stepN, EID_MomentumBalance, ElementForceLoadVector, mode,
-				     EModelDefaultEquationNumbering(), domain);
+                                     EModelDefaultEquationNumbering(), domain);
 
 
     // exchange contributions
 
 #ifdef __PARALLEL_MODE
-#ifdef __VERBOSE_PARALLEL
+ #ifdef __VERBOSE_PARALLEL
     VERBOSEPARALLEL_PRINT( "PNlDEIDynamic :: computeLoadVector", "Packing load", this->giveRank() );
-#endif
+ #endif
     communicator->packAllData( ( StructuralEngngModel * ) this, & answer, & StructuralEngngModel :: packLoad );
 
-#ifdef __VERBOSE_PARALLEL
+ #ifdef __VERBOSE_PARALLEL
     VERBOSEPARALLEL_PRINT( "PNlDEIDynamic :: computeLoadVector", "Exchange of load started", this->giveRank() );
-#endif
+ #endif
     communicator->initExchange(LoadExchangeTag);
 
-#ifdef __VERBOSE_PARALLEL
+ #ifdef __VERBOSE_PARALLEL
     VERBOSEPARALLEL_PRINT( "PNlDEIDynamic :: computeLoadVector", "Receiving and unpacking of load started", this->giveRank() );
-#endif
+ #endif
 
     communicator->unpackAllData( ( StructuralEngngModel * ) this, & answer, & StructuralEngngModel :: unpackLoad );
     communicator->finishExchange();
@@ -752,21 +751,21 @@ PNlDEIDynamic :: giveInternalForces(FloatArray &answer, TimeStep *stepN)
 #ifdef __PARALLEL_MODE
     // if (commMode == PNlDEIDynamicCommunicator__NODE_CUT) {
     // exchange Internal forces for  node cut mode
-#ifdef __VERBOSE_PARALLEL
+ #ifdef __VERBOSE_PARALLEL
     VERBOSEPARALLEL_PRINT( "PNlDEIDynamic :: giveInternalForces", "Packing internal forces", this->giveRank() );
-#endif
+ #endif
 
     communicator->packAllData( ( StructuralEngngModel * ) this, & answer, & StructuralEngngModel :: packInternalForces );
 
-#ifdef __VERBOSE_PARALLEL
+ #ifdef __VERBOSE_PARALLEL
     VERBOSEPARALLEL_PRINT( "PNlDEIDynamic :: giveInternalForces", "Exchange of internal forces started", this->giveRank() );
-#endif
+ #endif
 
     communicator->initExchange(InternalForcesExchangeTag);
 
-#ifdef __VERBOSE_PARALLEL
+ #ifdef __VERBOSE_PARALLEL
     VERBOSEPARALLEL_PRINT( "PNlDEIDynamic :: giveInternalForces", "Receiving and unpacking internal forces started", this->giveRank() );
-#endif
+ #endif
 
     communicator->unpackAllData( ( StructuralEngngModel * ) this, & answer, & StructuralEngngModel :: unpackInternalForces );
     communicator->finishExchange();
@@ -920,86 +919,87 @@ PNlDEIDynamic :: computeMassMtrx(FloatArray &massMatrix, double &maxOm, TimeStep
 #ifdef __PARALLEL_MODE
     // if (commMode == PNlDEIDynamicCommunicator__NODE_CUT) {
     // exchange Internal forces for  node and element cut mode
-#ifdef __VERBOSE_PARALLEL
+ #ifdef __VERBOSE_PARALLEL
     VERBOSEPARALLEL_PRINT( "PNlDEIDynamic :: computeMassMtrx", "Packing masses", this->giveRank() );
-#endif
+ #endif
 
     communicator->packAllData(this, & PNlDEIDynamic :: packMasses);
 
-#ifdef __VERBOSE_PARALLEL
+ #ifdef __VERBOSE_PARALLEL
     VERBOSEPARALLEL_PRINT( "PNlDEIDynamic :: computeMassMtrx", "Mass exchangePacking started", this->giveRank() );
-#endif
+ #endif
 
     communicator->initExchange(MassExchangeTag);
 
-#ifdef __VERBOSE_PARALLEL
+ #ifdef __VERBOSE_PARALLEL
     VERBOSEPARALLEL_PRINT( "PNlDEIDynamic :: computeMassMtrx", "Receiveng and Unpacking masses", this->giveRank() );
-#endif
+ #endif
 
     if ( !communicator->unpackAllData(this, & PNlDEIDynamic :: unpackMasses) ) {
         _error("PNlDEIDynamic :: computeMassMtrx: Receiveng and Unpacking masses failed");
     }
+
     communicator->finishExchange();
 
     // }
 
     // determine maxOm over all processes
-#ifdef __USE_MPI
+ #ifdef __USE_MPI
     double globalMaxOm;
 
-#ifdef __VERBOSE_PARALLEL
+  #ifdef __VERBOSE_PARALLEL
     VERBOSEPARALLEL_PRINT( "PNlDEIDynamic :: computeMassMtrx", "Reduce of maxOm started", this->giveRank() );
-#endif
+  #endif
 
     result = MPI_Allreduce(& maxOm, & globalMaxOm, 1, MPI_DOUBLE, MPI_MAX, MPI_COMM_WORLD);
 
-#ifdef __VERBOSE_PARALLEL
+  #ifdef __VERBOSE_PARALLEL
     VERBOSEPARALLEL_PRINT( "PNlDEIDynamic :: computeMassMtrx", "Reduce of maxOm finished", this->giveRank() );
-#endif
+  #endif
 
     if ( result != MPI_SUCCESS ) {
         _error("setUpCommunicationMaps: MPI_Allreduce failed");
     }
 
     maxOm = globalMaxOm;
-#else
+ #else
 WARNING: NOT SUPPORTED MESSAGE PARSING LIBRARY
-#endif
+ #endif
 
 #endif
 }
 
 /*
- #ifdef __PARALLEL_MODE
+ * #ifdef __PARALLEL_MODE
  * void
  * PNlDEIDynamic :: updateRemoteDofs ()
  * {
- #ifdef __PARALLEL_MODE
+ *#ifdef __PARALLEL_MODE
  * if (commMode == PNlDEIDynamicCommunicator__ELEMENT_CUT) {
  * // exchange remote dof unknowns for element cut mode
- #ifdef __VERBOSE_PARALLEL
+ *#ifdef __VERBOSE_PARALLEL
  * VERBOSEPARALLEL_PRINT("PNlDEIDynamic :: updateRemoteDofs","Packing remote dofs unknowns",domain->giveRank());
- #endif
+ *#endif
  *
  * communicator->packAllData (&PNlDEIDynamic::packRemoteDofsUnknowns);
  *
- #ifdef __VERBOSE_PARALLEL
+ *#ifdef __VERBOSE_PARALLEL
  * VERBOSEPARALLEL_PRINT("PNlDEIDynamic :: updateRemoteDofs","Remote dofs unknowns exchange started",domain->giveRank());
- #endif
+ *#endif
  *
  * communicator->initExchange (RemoteDofsUnknwnExchangeTag);
  *
- #ifdef __VERBOSE_PARALLEL
+ *#ifdef __VERBOSE_PARALLEL
  * VERBOSEPARALLEL_PRINT("PNlDEIDynamic :: updateRemoteDofs","Receiveng and Unpacking remote dofs unknws",domain->giveRank());
- #endif
+ *#endif
  *
  * if (!communicator->unpackAllData (&PNlDEIDynamic::unpackAndUpdateRemoteDofsUnknowns))
  * _error ("PNlDEIDynamic :: updateRemoteDofs: Receiveng and Unpacking remote dofs unknws failed");
  *
  * }
- #endif
+ *#endif
  * }
- #endif
+ *#endif
  */
 
 #ifdef __PARALLEL_MODE
@@ -1177,7 +1177,7 @@ PNlDEIDynamic :: estimateMaxPackSize(IntArray &commMap, CommunicationBuffer &buf
 
         //printf ("\nestimated count is %d\n",count);
         return ( buff.givePackSize(MPI_DOUBLE, 1) * max(count, pcount) );
-    } else  if ( packUnpackType == ProblemCommMode__REMOTE_ELEMENT_MODE ) {
+    } else if ( packUnpackType == ProblemCommMode__REMOTE_ELEMENT_MODE ) {
         for ( i = 1; i <= mapSize; i++ ) {
             count += domain->giveElement( commMap.at(i) )->estimatePackSize(buff);
         }
@@ -1267,21 +1267,21 @@ int PNlDEIDynamic :: exchangeRemoteElementData()
     int result = 1;
 
     if ( nonlocalExt ) {
-#ifdef __VERBOSE_PARALLEL
+ #ifdef __VERBOSE_PARALLEL
         VERBOSEPARALLEL_PRINT( "PNlDEIDynamic :: exchangeRemoteElementData", "Packing remote element data", this->giveRank() );
-#endif
+ #endif
 
         result &= nonlocCommunicator->packAllData( ( StructuralEngngModel * ) this, & StructuralEngngModel :: packRemoteElementData );
 
-#ifdef __VERBOSE_PARALLEL
+ #ifdef __VERBOSE_PARALLEL
         VERBOSEPARALLEL_PRINT( "PNlDEIDynamic :: exchangeRemoteElementData", "Remote element data exchange started", this->giveRank() );
-#endif
+ #endif
 
         result &= nonlocCommunicator->initExchange(RemoteElementsExchangeTag);
 
-#ifdef __VERBOSE_PARALLEL
+ #ifdef __VERBOSE_PARALLEL
         VERBOSEPARALLEL_PRINT( "PNlDEIDynamic :: exchangeRemoteElementData", "Receiveng and Unpacking remote element data", this->giveRank() );
-#endif
+ #endif
 
         if ( !( result &= nonlocCommunicator->unpackAllData( ( StructuralEngngModel * ) this, & StructuralEngngModel :: unpackRemoteElementData ) ) ) {
             _error("PNlDEIDynamic :: exchangeRemoteElementData: Receiveng and Unpacking remote element data");
@@ -1448,5 +1448,4 @@ PNlDEIDynamic :: printOutputAt(FILE *File, TimeStep *stepN)
     this->giveDomain(1)->giveOutputManager()->doDofManOutput(File, stepN);
     this->giveDomain(1)->giveOutputManager()->doElementOutput(File, stepN);
 }
-
 } // end namespace oofem

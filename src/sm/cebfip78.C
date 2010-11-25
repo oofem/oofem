@@ -37,7 +37,7 @@
 //   *** CLASS CEB-FIP 78 rheologic model *****
 //   ******************************************
 #ifndef __MAKEDEPEND
-#include <math.h>
+ #include <math.h>
 #endif
 #include "cebfip78.h"
 #include "mathfem.h"
@@ -45,7 +45,6 @@
 #include "crosssection.h"
 
 namespace oofem {
-
 IRResultType
 CebFip78Material :: initializeFrom(InputRecord *ir)
 {
@@ -93,7 +92,7 @@ CebFip78Material :: computeCreepFunction(GaussPoint *gp, double atTime, double o
         firv = 0.4;
     }
 
-    hd = this->kap_a *cs->give(CS_Area) * 1000. * 1000. / this->u;
+    hd = this->kap_a * cs->give(CS_Area) * 1000. * 1000. / this->u;
     if ( hd < 50. ) {
         hd = 50.;
     }
@@ -112,8 +111,4 @@ CebFip78Material :: computeCreepFunction(GaussPoint *gp, double atTime, double o
 
     return ( 1. / e0 ) + fi / E28;
 }
-
-
-
-
 } // end namespace oofem

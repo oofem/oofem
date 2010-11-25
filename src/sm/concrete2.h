@@ -52,7 +52,6 @@
 #include "structuralms.h"
 
 namespace oofem {
-
 #define c2_SCCC  300
 #define c2_SCCT  301
 #define c2_EPP   302
@@ -236,7 +235,7 @@ protected:
 public:
 
     // non-standard
-    double   give(int, GaussPoint*);
+    double   give(int, GaussPoint *);
 
     // identification and auxiliary functions
 
@@ -246,6 +245,5 @@ public:
     IRResultType initializeFrom(InputRecord *ir);
     //      void     printYourself () ;
 };
-
 } // end namespace oofem
 #endif // concrete2_h

@@ -49,16 +49,15 @@
 #include "classtype.h"
 
 #ifndef __MAKEDEPEND
-#include <math.h>
-#include <string.h>
+ #include <math.h>
+ #include <string.h>
 #endif
 
 #ifdef __PARALLEL_MODE
-#include "combuff.h"
+ #include "combuff.h"
 #endif
 
 namespace oofem {
-
 FloatArray :: FloatArray(int n)
 // Constructor : creates an array of size n (filled with garbage).
 {
@@ -90,7 +89,7 @@ FloatArray :: FloatArray(const FloatArray &src)
 }
 
 FloatArray &
-FloatArray :: operator=(const FloatArray &src)
+FloatArray :: operator = ( const FloatArray & src )
 {
     // assignment: cleanup and copy
     double *srcVal;
@@ -239,10 +238,10 @@ FloatArray :: beSubArrayOf(const FloatArray &src, const IntArray &indx)
     n = indx.giveSize();
 
     /*
-    if ( src.size != n ) {
-        OOFEM_ERROR("FloatArray :: beSubArrayOf - size mismatch");
-    }
-    */
+     * if ( src.size != n ) {
+     *  OOFEM_ERROR("FloatArray :: beSubArrayOf - size mismatch");
+     * }
+     */
 
     for ( isize = 0, i = 1; i <= n; i++ ) {
         if ( indx.at(i) > isize ) {
@@ -303,7 +302,7 @@ FloatArray :: beVectorProductOf(const FloatArray &v1, const FloatArray &v2)
 }
 
 double
-FloatArray :: distance_square (const FloatArray &from) const
+FloatArray :: distance_square(const FloatArray &from) const
 //
 // returns distance between receiver and from from
 // computed using generalized pythagora formulae
@@ -327,9 +326,9 @@ FloatArray :: distance_square (const FloatArray &from) const
 
 
 double
-FloatArray :: distance (const FloatArray &from) const
+FloatArray :: distance(const FloatArray &from) const
 {
-  return sqrt(this->distance_square(from));
+    return sqrt( this->distance_square(from) );
 }
 
 
@@ -781,7 +780,7 @@ FloatArray *FloatArray :: rotatedWith(FloatMatrix *r, char mode)
 
     if ( mode == 't' ) {
         rot = r->GiveTransposition();
-    } else if ( mode == 'n' )  {
+    } else if ( mode == 'n' ) {
         rot = r;
     } else {
         OOFEM_ERROR("FloatArray :: rotatedWith: unsupported mode");
@@ -795,7 +794,7 @@ FloatArray *FloatArray :: rotatedWith(FloatMatrix *r, char mode)
      *
      * i  = size ;
      * while (i--)
-     *p1++ = *p2++ ;
+     **p1++ = *p2++ ;
      */
 
     * this = * rta;
@@ -1074,7 +1073,7 @@ FloatArray :: givePackSize(CommunicationBuffer &buff) const
 #ifdef IML_COMPAT
 
 FloatArray &
-FloatArray :: operator=(const double &val)
+FloatArray :: operator = ( const double & val )
 {
     for ( int i = 0; i < size; i++ ) {
         values [ i ] = val;
@@ -1083,7 +1082,7 @@ FloatArray :: operator=(const double &val)
     return * this;
 }
 
-FloatArray &operator*=(FloatArray &x, const double &a)
+FloatArray &operator *= ( FloatArray & x, const double & a )
 {
     int N = x.giveSize();
     for ( int i = 0; i < N; i++ ) {
@@ -1094,7 +1093,7 @@ FloatArray &operator*=(FloatArray &x, const double &a)
 }
 
 
-FloatArray operator*(const double &a, const FloatArray &x)
+FloatArray operator *( const double & a, const FloatArray & x )
 {
     int N = x.giveSize();
     FloatArray result(N);
@@ -1105,7 +1104,7 @@ FloatArray operator*(const double &a, const FloatArray &x)
     return result;
 }
 
-FloatArray operator*(const FloatArray &x, const double &a)
+FloatArray operator *( const FloatArray & x, const double & a )
 {
     // This is the other commutative case of vector*scalar.
     // It should be just defined to be
@@ -1124,7 +1123,7 @@ FloatArray operator*(const FloatArray &x, const double &a)
     return result;
 }
 
-FloatArray operator+(const FloatArray &x, const FloatArray &y)
+FloatArray operator + ( const FloatArray & x, const FloatArray & y )
 {
     int N = x.giveSize();
     if ( N != y.giveSize() ) {
@@ -1139,7 +1138,7 @@ FloatArray operator+(const FloatArray &x, const FloatArray &y)
     return result;
 }
 
-FloatArray operator-(const FloatArray &x, const FloatArray &y)
+FloatArray operator - ( const FloatArray & x, const FloatArray & y )
 {
     int N = x.giveSize();
     if ( N != y.giveSize() ) {
@@ -1155,7 +1154,7 @@ FloatArray operator-(const FloatArray &x, const FloatArray &y)
 }
 
 
-FloatArray &operator+=(FloatArray &x, const FloatArray &y)
+FloatArray &operator += ( FloatArray & x, const FloatArray & y )
 {
     int N = x.giveSize();
     if ( N != y.giveSize() ) {
@@ -1170,7 +1169,7 @@ FloatArray &operator+=(FloatArray &x, const FloatArray &y)
 }
 
 
-FloatArray &operator-=(FloatArray &x, const FloatArray &y)
+FloatArray &operator -= ( FloatArray & x, const FloatArray & y )
 {
     int N = x.giveSize();
     if ( N != y.giveSize() ) {
@@ -1202,11 +1201,9 @@ double dot(const FloatArray &x, const FloatArray &y)
 
 double norm(const FloatArray &x)
 {
-    double temp = oofem::dot(x, x);
+    double temp = oofem :: dot(x, x);
     return sqrt(temp);
 }
 
 #endif
-
-
 } // end namespace oofem

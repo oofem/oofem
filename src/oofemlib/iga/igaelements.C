@@ -54,7 +54,6 @@
 #endif
 
 namespace oofem {
-
 BsplinePlaneStressElement :: BsplinePlaneStressElement(int n, Domain *aDomain) : IGAElement(n, aDomain), PlaneStressStructuralElementEvaluator(), interpolation(2) { }
 
 
@@ -676,5 +675,4 @@ void NURBSSpace3dElement :: drawScalar(oofegGraphicContext &context) {
 
 
 #endif
-
 } // end namespace oofem

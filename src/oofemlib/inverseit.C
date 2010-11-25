@@ -40,8 +40,8 @@
 #include "inverseit.h"
 #include "engngm.h"
 #ifndef __MAKEDEPEND
-#include <stdio.h>
-#include <math.h>
+ #include <stdio.h>
+ #include <math.h>
 #endif
 
 #include "verbose.h"
@@ -52,7 +52,6 @@
 #include "mathfem.h"
 
 namespace oofem {
-
 #define DETAILED_REPORT
 
 InverseIteration ::  InverseIteration(int i, Domain *d, EngngModel *m) :
@@ -218,6 +217,7 @@ InverseIteration :: solve(SparseMtrx *a, SparseMtrx *b, FloatArray *_eigv, Float
 
 
     return NM_Success;
+
     ;
 }
 
@@ -229,6 +229,4 @@ InverseIteration :: initializeFrom(InputRecord *ir)
 {
     return IRRT_OK;
 }
-
-
 } // end namespace oofem

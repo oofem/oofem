@@ -53,7 +53,6 @@
 #include "mathfem.h"
 
 namespace oofem {
-
 class QTrPlaneStress2d : public StructuralElement, public SpatialLocalizerInterface,
     public SPRNodalRecoveryModelInterface // , public ZZNodalRecoveryModelInterface
     , public DirectErrorIndicatorRCInterface, public EIPrimaryUnknownMapperInterface
@@ -201,7 +200,7 @@ public:
     //@}
 
     integrationDomain  giveIntegrationDomain() { return _Triangle; }
-    MaterialMode          giveMaterialMode()  {return _PlaneStress;}
+    MaterialMode          giveMaterialMode()  { return _PlaneStress; }
 
 
 protected:
@@ -215,6 +214,5 @@ protected:
     void            computeDerivativeEta(FloatArray &, double, double);
     void            computeJacobianMatrixAt(FloatMatrix &, GaussPoint *);
 };
-
 } // end namespace oofem
 #endif // qtrplstr_h

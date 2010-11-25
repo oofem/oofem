@@ -38,7 +38,6 @@
 #include "error.h"
 
 namespace oofem {
-
 FETIBoundaryDofManager :: FETIBoundaryDofManager() : partitions(), codeNumbers()  {
     globalNumber = 0;
     numberOfPartitions = 0;
@@ -145,7 +144,6 @@ FETIBoundaryDofManager :: giveCompleteLocationArray(int rank, IntArray &location
 
     return 1;
 }
-
 } // end namespace oofem
 #endif
 

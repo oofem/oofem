@@ -47,9 +47,8 @@
 #include "fei2dquadlin.h"
 
 namespace oofem {
-
 void
-FEI3dHexaQuad :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry& cellgeo, double time)
+FEI3dHexaQuad :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time)
 {
     double u, v, w;
     answer.resize(20);
@@ -110,7 +109,7 @@ FEI3dHexaQuad :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEIC
 }
 
 void
-FEI3dHexaQuad :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry& cellgeo, double time)
+FEI3dHexaQuad :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time)
 {
     int i;
     FloatMatrix jacobianMatrix(3, 3), inv(3, 3);
@@ -138,7 +137,7 @@ FEI3dHexaQuad :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const 
 }
 
 void
-FEI3dHexaQuad :: local2global(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry& cellgeo, double time)
+FEI3dHexaQuad :: local2global(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time)
 {
     int i;
     FloatArray n(20);
@@ -149,23 +148,23 @@ FEI3dHexaQuad :: local2global(FloatArray &answer, const FloatArray &lcoords, con
     answer.zero();
 
     for ( i = 1; i <= 20; i++ ) {
-      answer.at(1) += n.at(i) * cellgeo.giveVertexCoordinates(i)->at(1);
-      answer.at(2) += n.at(i) * cellgeo.giveVertexCoordinates(i)->at(2);
-      answer.at(3) += n.at(i) * cellgeo.giveVertexCoordinates(i)->at(3);
+        answer.at(1) += n.at(i) * cellgeo.giveVertexCoordinates(i)->at(1);
+        answer.at(2) += n.at(i) * cellgeo.giveVertexCoordinates(i)->at(2);
+        answer.at(3) += n.at(i) * cellgeo.giveVertexCoordinates(i)->at(3);
     }
 }
 
 // #define POINT_TOL 1.e-3
 //
 int
-FEI3dHexaQuad :: global2local(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry& cellgeo, double time)
+FEI3dHexaQuad :: global2local(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time)
 {
-  OOFEM_ERROR("FEI3dHexaQuad :: global2local not implemented");
-  return 1;
+    OOFEM_ERROR("FEI3dHexaQuad :: global2local not implemented");
+    return 1;
 }
 
 double
-FEI3dHexaQuad :: giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry& cellgeo, double time)
+FEI3dHexaQuad :: giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time)
 {
     FloatMatrix jacobianMatrix(3, 3);
 
@@ -173,22 +172,24 @@ FEI3dHexaQuad :: giveTransformationJacobian(const FloatArray &lcoords, const FEI
     return jacobianMatrix.giveDeterminant();
 }
 
-void FEI3dHexaQuad :: edgeEvalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry& cellgeo, double time)
+void FEI3dHexaQuad :: edgeEvalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time)
 { OOFEM_ERROR("FEI3dHexaQuad :: edgeEvalN not implemented"); }
-void FEI3dHexaQuad :: edgeEvaldNdx(FloatMatrix &answer, int iedge, const FloatArray &lcoords, const FEICellGeometry& cellgeo, double time)
+void FEI3dHexaQuad :: edgeEvaldNdx(FloatMatrix &answer, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time)
 { OOFEM_ERROR("FEI3dHexaQuad :: edgeEvaldNdx not implemented"); }
-void FEI3dHexaQuad :: edgeLocal2global(FloatArray &answer, int iedge, const FloatArray &lcoords, const FEICellGeometry& cellgeo, double time)
+void FEI3dHexaQuad :: edgeLocal2global(FloatArray &answer, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time)
 { OOFEM_ERROR("FEI3dHexaQuad :: edgeLocal2global not implemented"); }
-double FEI3dHexaQuad :: edgeGiveTransformationJacobian(int iedge, const FloatArray &lcoords, const FEICellGeometry& cellgeo, double time)
-{ OOFEM_ERROR("FEI3dHexaQuad :: edgeGiveTransformationJacobian not implemented");
-  return 0.0; }
+double FEI3dHexaQuad :: edgeGiveTransformationJacobian(int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time)
+{
+    OOFEM_ERROR("FEI3dHexaQuad :: edgeGiveTransformationJacobian not implemented");
+    return 0.0;
+}
 
 void
 FEI3dHexaQuad :: computeLocalEdgeMapping(IntArray &edgeNodes, int iedge)
 { OOFEM_ERROR("FEI3dHexaQuad :: computeLocalEdgeMapping not implemented"); }
 
 void
-FEI3dHexaQuad :: surfaceEvalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry& cellgeo, double time)
+FEI3dHexaQuad :: surfaceEvalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time)
 {
     double ksi, eta;
     answer.resize(8);
@@ -211,7 +212,7 @@ FEI3dHexaQuad :: surfaceEvalN(FloatArray &answer, const FloatArray &lcoords, con
 
 void
 FEI3dHexaQuad :: surfaceLocal2global(FloatArray &answer, int isurf,
-                                     const FloatArray &lcoords, const FEICellGeometry& cellgeo, double time)
+                                     const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time)
 {
     IntArray nodes(8);
     FloatArray n;
@@ -224,9 +225,9 @@ FEI3dHexaQuad :: surfaceLocal2global(FloatArray &answer, int isurf,
     answer.zero();
 
     for ( int i = 1; i <= 8; i++ ) {
-      answer.at(1) += n.at(i) *  cellgeo.giveVertexCoordinates(nodes.at(i))->at(1);
-      answer.at(2) += n.at(i) *  cellgeo.giveVertexCoordinates(nodes.at(i))->at(2);
-      answer.at(3) += n.at(i) *  cellgeo.giveVertexCoordinates(nodes.at(i))->at(3);
+        answer.at(1) += n.at(i) *  cellgeo.giveVertexCoordinates( nodes.at(i) )->at(1);
+        answer.at(2) += n.at(i) *  cellgeo.giveVertexCoordinates( nodes.at(i) )->at(2);
+        answer.at(3) += n.at(i) *  cellgeo.giveVertexCoordinates( nodes.at(i) )->at(3);
     }
 }
 
@@ -234,7 +235,7 @@ FEI3dHexaQuad :: surfaceLocal2global(FloatArray &answer, int isurf,
 
 double
 FEI3dHexaQuad :: surfaceGiveTransformationJacobian(int isurf, const FloatArray &lcoords,
-                                                   const FEICellGeometry& cellgeo, double time)
+                                                   const FEICellGeometry &cellgeo, double time)
 {
     // only plane surface is supported !!!
 
@@ -253,16 +254,16 @@ FEI3dHexaQuad :: surfaceGiveTransformationJacobian(int isurf, const FloatArray &
 
     // check whether all surface nodes are in plane
     //corner nodes
-    n1 = snodes.at(1) ;
-    n2 = snodes.at(2) ;
-    n3 = snodes.at(3) ;
-    n4 = snodes.at(4) ;
+    n1 = snodes.at(1);
+    n2 = snodes.at(2);
+    n3 = snodes.at(3);
+    n4 = snodes.at(4);
 
     // get the normal using nodes 1 2 3
     FloatArray a(3), b(3), c(3);
     for ( i = 1; i <= 3; i++ ) {
-      b.at(i) = cellgeo.giveVertexCoordinates(n2)->at(i) - cellgeo.giveVertexCoordinates(n1)->at(i);
-      a.at(i) = cellgeo.giveVertexCoordinates(n3)->at(i) - cellgeo.giveVertexCoordinates(n1)->at(i);
+        b.at(i) = cellgeo.giveVertexCoordinates(n2)->at(i) - cellgeo.giveVertexCoordinates(n1)->at(i);
+        a.at(i) = cellgeo.giveVertexCoordinates(n3)->at(i) - cellgeo.giveVertexCoordinates(n1)->at(i);
     }
 
     n = n4;
@@ -272,7 +273,7 @@ FEI3dHexaQuad :: surfaceGiveTransformationJacobian(int isurf, const FloatArray &
     // if normal not found, try other nodes 1 3 4
     if ( length < 1.0e-10 ) {
         for ( i = 1; i <= 3; i++ ) {
-          b.at(i) = cellgeo.giveVertexCoordinates(n4)->at(i) - cellgeo.giveVertexCoordinates(n1)->at(i);
+            b.at(i) = cellgeo.giveVertexCoordinates(n4)->at(i) - cellgeo.giveVertexCoordinates(n1)->at(i);
         }
 
         n = n2;
@@ -288,43 +289,44 @@ FEI3dHexaQuad :: surfaceGiveTransformationJacobian(int isurf, const FloatArray &
     //check that all nodes are on planar surface
     c.times(1.0 / length);
     for ( i = 1; i <= 8; i++ ) {
-      for ( j= 1; j<=3; j++){
-        b.at(j) = cellgeo.giveVertexCoordinates(n)->at(j) - cellgeo.giveVertexCoordinates(snodes.at(i))->at(j);
-      }
-      // check distance of all nodes to the reference node
-      if ( fabs( dotProduct(b, c, 3) ) > 1.0e-6 ) {
-        OOFEM_ERROR2("FEI3dHexaQuad :: surfaceGiveTransformationJacobian: not planar surface, local node %d failed", snodes.at(i));
-      }
+        for ( j = 1; j <= 3; j++ ) {
+            b.at(j) = cellgeo.giveVertexCoordinates(n)->at(j) - cellgeo.giveVertexCoordinates( snodes.at(i) )->at(j);
+        }
+
+        // check distance of all nodes to the reference node
+        if ( fabs( dotProduct(b, c, 3) ) > 1.0e-6 ) {
+            OOFEM_ERROR2( "FEI3dHexaQuad :: surfaceGiveTransformationJacobian: not planar surface, local node %d failed", snodes.at(i) );
+        }
     }
 
 
     // ensure that all edges are straight
     for ( i = 1; i <= 4; i++ ) {
-        nod1 = cellgeo.giveVertexCoordinates(snodes.at(i));
-        nod2 = cellgeo.giveVertexCoordinates(snodes.at(i % 4 + 1));
-        midnod  = cellgeo.giveVertexCoordinates(snodes.at(i + 4));
+        nod1 = cellgeo.giveVertexCoordinates( snodes.at(i) );
+        nod2 = cellgeo.giveVertexCoordinates( snodes.at(i % 4 + 1) );
+        midnod  = cellgeo.giveVertexCoordinates( snodes.at(i + 4) );
 
         //distance of nod1 nod2
-        dist1 = sqrt( (nod2->at(1)-nod1->at(1))*(nod2->at(1)-nod1->at(1)) + (nod2->at(2)-nod1->at(2))*(nod2->at(2)-nod1->at(2)) + (nod2->at(3)-nod1->at(3))*(nod2->at(3)-nod1->at(3)) );
+        dist1 = sqrt( ( nod2->at(1) - nod1->at(1) ) * ( nod2->at(1) - nod1->at(1) ) + ( nod2->at(2) - nod1->at(2) ) * ( nod2->at(2) - nod1->at(2) ) + ( nod2->at(3) - nod1->at(3) ) * ( nod2->at(3) - nod1->at(3) ) );
         //distance of nod1 midnod
-        dist2 = sqrt( (midnod->at(1)-nod1->at(1))*(midnod->at(1)-nod1->at(1)) + (midnod->at(2)-nod1->at(2))*(midnod->at(2)-nod1->at(2)) + (midnod->at(3)-nod1->at(3))*(midnod->at(3)-nod1->at(3)) );
-        k = dist2/dist1;
+        dist2 = sqrt( ( midnod->at(1) - nod1->at(1) ) * ( midnod->at(1) - nod1->at(1) ) + ( midnod->at(2) - nod1->at(2) ) * ( midnod->at(2) - nod1->at(2) ) + ( midnod->at(3) - nod1->at(3) ) * ( midnod->at(3) - nod1->at(3) ) );
+        k = dist2 / dist1;
 
-        if(k>1){
-          OOFEM_ERROR2("surfaceGiveTransformationJacobian: midside node %d lays outside associated corner nodes", i);
+        if ( k > 1 ) {
+            OOFEM_ERROR2("surfaceGiveTransformationJacobian: midside node %d lays outside associated corner nodes", i);
         }
 
-        if ( ( fabs(midnod->at(1)-nod1->at(1)) - k*fabs(nod2->at(1)-nod1->at(1)) ) > 1.0e-4 || ( fabs(midnod->at(2)-nod1->at(2)) - k*fabs(nod2->at(2)-nod1->at(2)) ) > 1.0e-4 || ( fabs(midnod->at(3)-nod1->at(3)) - k*fabs(nod2->at(3)-nod1->at(3)) ) > 1.0e-4)
-        {
-          OOFEM_ERROR2("surfaceGiveTransformationJacobian: not a straight edge. Edge number %d", i);
+        if ( ( fabs( midnod->at(1) - nod1->at(1) ) - k * fabs( nod2->at(1) - nod1->at(1) ) ) > 1.0e-4 || ( fabs( midnod->at(2) - nod1->at(2) ) - k * fabs( nod2->at(2) - nod1->at(2) ) ) > 1.0e-4 || ( fabs( midnod->at(3) - nod1->at(3) ) - k * fabs( nod2->at(3) - nod1->at(3) ) ) > 1.0e-4 ) {
+            OOFEM_ERROR2("surfaceGiveTransformationJacobian: not a straight edge. Edge number %d", i);
         }
-//         //can be zero division
-//         k = ( nod2->at(1) - nod1->at(1) ) / ( midnod->at(1) - nod1->at(1) );
-//         dif1 = k - ( nod2->at(2) - nod1->at(2) ) / ( midnod->at(2) - nod1->at(2) );
-//         dif2 = k - ( nod2->at(3) - nod1->at(3) ) / ( midnod->at(3) - nod1->at(3) );
-//         if ( fabs( dif1 ) > 1.0e-6 || fabs( dif2 ) > 1.0e-6 ) {
-//           OOFEM_ERROR2("surfaceGiveTransformationJacobian: not a straight edge number %d", i);
-//         }
+
+        //         //can be zero division
+        //         k = ( nod2->at(1) - nod1->at(1) ) / ( midnod->at(1) - nod1->at(1) );
+        //         dif1 = k - ( nod2->at(2) - nod1->at(2) ) / ( midnod->at(2) - nod1->at(2) );
+        //         dif2 = k - ( nod2->at(3) - nod1->at(3) ) / ( midnod->at(3) - nod1->at(3) );
+        //         if ( fabs( dif1 ) > 1.0e-6 || fabs( dif2 ) > 1.0e-6 ) {
+        //           OOFEM_ERROR2("surfaceGiveTransformationJacobian: not a straight edge number %d", i);
+        //         }
     }
 
     // map nodes to the surface (x,y) plane
@@ -344,14 +346,14 @@ FEI3dHexaQuad :: surfaceGiveTransformationJacobian(int isurf, const FloatArray &
     sn [ 2 ].at(2) = 0.0;
 
     for ( i = 1; i <= 3; i++ ) {
-      c.at(i) = cellgeo.giveVertexCoordinates(n2)->at(i) - cellgeo.giveVertexCoordinates(n1)->at(i);
+        c.at(i) = cellgeo.giveVertexCoordinates(n2)->at(i) - cellgeo.giveVertexCoordinates(n1)->at(i);
     }
 
     sn [ 1 ].at(1) = dotProduct(c, a, 3);
     sn [ 1 ].at(2) = dotProduct(c, b, 3);
 
     for ( i = 1; i <= 3; i++ ) {
-      c.at(i) = cellgeo.giveVertexCoordinates(n4)->at(i) - cellgeo.giveVertexCoordinates(n1)->at(i);
+        c.at(i) = cellgeo.giveVertexCoordinates(n4)->at(i) - cellgeo.giveVertexCoordinates(n1)->at(i);
     }
 
     sn [ 3 ].at(1) = dotProduct(c, a, 3);
@@ -430,7 +432,7 @@ FEI3dHexaQuad :: computeLocalSurfaceMapping(IntArray &nodes, int isurf)
         nodes.at(6) = 13;
         nodes.at(7) = 17;
         nodes.at(8) =  9;
-    } else if ( isurf == 4 )     { // surface 4 - nodes   3 7 6 2  19 14 18 10
+    } else if ( isurf == 4 ) {     // surface 4 - nodes   3 7 6 2  19 14 18 10
         nodes.at(1) =  3;
         nodes.at(2) =  7;
         nodes.at(3) =  6;
@@ -439,7 +441,7 @@ FEI3dHexaQuad :: computeLocalSurfaceMapping(IntArray &nodes, int isurf)
         nodes.at(6) = 14;
         nodes.at(7) = 18;
         nodes.at(8) = 10;
-    } else if ( isurf == 5 )     { // surface 5 - nodes   3 4 8 7  11 20 15 19
+    } else if ( isurf == 5 ) {     // surface 5 - nodes   3 4 8 7  11 20 15 19
         nodes.at(1) =  3;
         nodes.at(2) =  4;
         nodes.at(3) =  8;
@@ -457,53 +459,53 @@ FEI3dHexaQuad :: computeLocalSurfaceMapping(IntArray &nodes, int isurf)
         nodes.at(6) = 17;
         nodes.at(7) = 16;
         nodes.at(8) = 20;
-    } else   {
+    } else {
         OOFEM_ERROR2("FEI3dHexaQuad :: computeLocalSurfaceMapping: wrong surface number (%d)", isurf);
     }
 
     /*
-    // this commented numbering is symmetrical with respect to local coordinate axes
-
-    if      ( isurf == 1 ) { // surface 1 - nodes   3 2 1 4  10  9 12 11
-        nodes.at(1) =  3;
-        nodes.at(2) =  2;
-        nodes.at(3) =  1;
-        nodes.at(4) =  4;
-        nodes.at(5) = 10;
-        nodes.at(6) =  9;
-        nodes.at(7) = 12;
-        nodes.at(8) = 11;
-    } else if (iSurf == 2) { // surface 2 - nodes   7 6 5 8  14 13 16 15
-      nodes.at(1) =  7;  nodes.at(2) =  6;  nodes.at(3) =  5;  nodes.at(4) =  8;
-       nodes.at(5) = 14;  nodes.at(6) = 13;  nodes.at(7) = 16;  nodes.at(8) = 15;
-    } else if (iSurf == 3) { // surface 3 - nodes   2 1 5 6   9 17 13 18
-      nodes.at(1) =  2;  nodes.at(2) =  1;  nodes.at(3) =  5;  nodes.at(4) =  6;
-      nodes.at(5) =  9;  nodes.at(6) = 17;  nodes.at(7) = 13;  nodes.at(8) = 18;
-    } else if ( isurf == 4 )     { // surface 4 - nodes   3 7 6 2  19 14 18 10
-        nodes.at(1) =  3;
-        nodes.at(2) =  7;
-        nodes.at(3) =  6;
-        nodes.at(4) =  2;
-        nodes.at(5) = 19;
-        nodes.at(6) = 14;
-        nodes.at(7) = 18;
-        nodes.at(8) = 10;
-    } else if ( isurf == 5 )     { // surface 5 - nodes   3 4 8 7  11 20 15 19
-        nodes.at(1) =  3;
-        nodes.at(2) =  4;
-        nodes.at(3) =  8;
-        nodes.at(4) =  7;
-        nodes.at(5) = 11;
-        nodes.at(6) = 20;
-        nodes.at(7) = 15;
-        nodes.at(8) = 19;
-    } else if (iSurf == 6) { // surface 6 - nodes   4 8 5 1  20 16 17 12
-      nodes.at(1) =  4;  nodes.at(2) =  8;  nodes.at(3) =  5;  nodes.at(4) =  1;
-      nodes.at(5) = 20;  nodes.at(6) = 16;  nodes.at(7) = 17;  nodes.at(8) = 12;
-    } else   {
-      OOFEM_ERROR2("FEI3dHexaQuad :: computeLocalSurfaceMapping: wrong surface number (%d)", isurf);
-    }
-    */
+     * // this commented numbering is symmetrical with respect to local coordinate axes
+     *
+     * if      ( isurf == 1 ) { // surface 1 - nodes   3 2 1 4  10  9 12 11
+     *  nodes.at(1) =  3;
+     *  nodes.at(2) =  2;
+     *  nodes.at(3) =  1;
+     *  nodes.at(4) =  4;
+     *  nodes.at(5) = 10;
+     *  nodes.at(6) =  9;
+     *  nodes.at(7) = 12;
+     *  nodes.at(8) = 11;
+     * } else if (iSurf == 2) { // surface 2 - nodes   7 6 5 8  14 13 16 15
+     * nodes.at(1) =  7;  nodes.at(2) =  6;  nodes.at(3) =  5;  nodes.at(4) =  8;
+     * nodes.at(5) = 14;  nodes.at(6) = 13;  nodes.at(7) = 16;  nodes.at(8) = 15;
+     * } else if (iSurf == 3) { // surface 3 - nodes   2 1 5 6   9 17 13 18
+     * nodes.at(1) =  2;  nodes.at(2) =  1;  nodes.at(3) =  5;  nodes.at(4) =  6;
+     * nodes.at(5) =  9;  nodes.at(6) = 17;  nodes.at(7) = 13;  nodes.at(8) = 18;
+     * } else if ( isurf == 4 )     { // surface 4 - nodes   3 7 6 2  19 14 18 10
+     *  nodes.at(1) =  3;
+     *  nodes.at(2) =  7;
+     *  nodes.at(3) =  6;
+     *  nodes.at(4) =  2;
+     *  nodes.at(5) = 19;
+     *  nodes.at(6) = 14;
+     *  nodes.at(7) = 18;
+     *  nodes.at(8) = 10;
+     * } else if ( isurf == 5 )     { // surface 5 - nodes   3 4 8 7  11 20 15 19
+     *  nodes.at(1) =  3;
+     *  nodes.at(2) =  4;
+     *  nodes.at(3) =  8;
+     *  nodes.at(4) =  7;
+     *  nodes.at(5) = 11;
+     *  nodes.at(6) = 20;
+     *  nodes.at(7) = 15;
+     *  nodes.at(8) = 19;
+     * } else if (iSurf == 6) { // surface 6 - nodes   4 8 5 1  20 16 17 12
+     * nodes.at(1) =  4;  nodes.at(2) =  8;  nodes.at(3) =  5;  nodes.at(4) =  1;
+     * nodes.at(5) = 20;  nodes.at(6) = 16;  nodes.at(7) = 17;  nodes.at(8) = 12;
+     * } else   {
+     * OOFEM_ERROR2("FEI3dHexaQuad :: computeLocalSurfaceMapping: wrong surface number (%d)", isurf);
+     * }
+     */
 }
 
 
@@ -522,7 +524,7 @@ FEI3dHexaQuad :: computeGlobalSurfaceMapping(IntArray &surfNodes, IntArray &elem
 
 
 void
-FEI3dHexaQuad :: giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatArray &lcoords, const FEICellGeometry& cellgeo)
+FEI3dHexaQuad :: giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 // Returns the jacobian matrix  J (x,y,z)/(ksi,eta,dzeta)  of the receiver.
 // Computes it if it does not exist yet.
 {
@@ -542,9 +544,9 @@ FEI3dHexaQuad :: giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatAr
     this->giveDerivativeDzeta(dz, u, v, w);
 
     for ( i = 1; i <= 20; i++ ) {
-      x = cellgeo.giveVertexCoordinates(i)->at(1);
-      y = cellgeo.giveVertexCoordinates(i)->at(2);
-      z = cellgeo.giveVertexCoordinates(i)->at(3);
+        x = cellgeo.giveVertexCoordinates(i)->at(1);
+        y = cellgeo.giveVertexCoordinates(i)->at(2);
+        z = cellgeo.giveVertexCoordinates(i)->at(3);
 
         jacobianMatrix.at(1, 1) += dx.at(i) * x;
         jacobianMatrix.at(1, 2) += dx.at(i) * y;
@@ -642,5 +644,4 @@ FEI3dHexaQuad :: giveDerivativeDzeta(FloatArray &dz, double u, double v, double 
     dz.at(19)  =  -0.5 * ( 1.0 + u ) * ( 1.0 + v ) * w;
     dz.at(20)  =  -0.5 * ( 1.0 + u ) * ( 1.0 - v ) * w;
 }
-
 } // end namespace oofem

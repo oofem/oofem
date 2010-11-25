@@ -52,7 +52,6 @@
 #include "bctype.h"
 
 namespace oofem {
-
 /**
  * Abstract base class for all boudary conditions of problem.
  * Boundary condition is an aribute of the domain (it belongs to).
@@ -147,7 +146,6 @@ public:
 
 protected:
 };
-
 } // end namespace oofem
 #endif // generalbc_h
 

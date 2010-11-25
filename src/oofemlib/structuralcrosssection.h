@@ -52,7 +52,6 @@
 #include "flotmtrx.h"
 
 namespace oofem {
-
 /**
  * Abstract base class for all structural cross section models. It declares commons services provided by all
  * structural cross section models. The implementation of this services is left on derived classes,
@@ -69,13 +68,13 @@ namespace oofem {
  * by output routines to print results in general form). Methods for converting vectors between
  * full and reduced format are provided.
  * General full strain vector has one of the following forms:
- \begin{enumerate}
- \enum
+ * \begin{enumerate}
+ * \enum
  * strainVector3d {eps_x,eps_y,eps_z,gamma_yz,gamma_zx,gamma_xy}
- \enum
+ * \enum
  * For integrated cross section models (2d and 3d beams, plates and general shells)
  * strainVectorShell {eps_x,eps_y,gamma_xy, kappa_x, kappa_y, kappa_xy, gamma_zx, gamma_zy}
- \end{enumerate}
+ * \end{enumerate}
  *
  *
  */
@@ -345,7 +344,6 @@ protected:
     friend class StructuralMaterial;
     //   friend class PerfectlyPlasticMaterial;
 };
-
 } // end namespace oofem
 #endif // structuralcrosssection_h
 

@@ -44,7 +44,6 @@
 #include "gausspnt.h"
 
 namespace oofem {
-
 class LIBeam3dNL : public NLStructuralElement
 {
     /*
@@ -109,7 +108,7 @@ public:
                                           TimeStep *, int useUpdatedGpRecord = 0);
 
     integrationDomain  giveIntegrationDomain() { return _Line; }
-    MaterialMode          giveMaterialMode()  {return _3dBeam;}
+    MaterialMode          giveMaterialMode()  { return _3dBeam; }
 
 protected:
     // edge load support
@@ -173,6 +172,5 @@ protected:
      */
     void          computeXdVector(FloatArray &answer, TimeStep *tStep);
 };
-
 } // end namespace oofem
 #endif // libeam3dnl_h

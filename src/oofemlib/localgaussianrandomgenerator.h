@@ -34,8 +34,8 @@
  */
 
 /*
-  Author: Peter Grassl
-*/
+ * Author: Peter Grassl
+ */
 
 // file: localrandomgenerator.h
 
@@ -51,66 +51,63 @@
 #include "gausspnt.h"
 
 namespace oofem {
-
-/** 
-    This class implements a local (no spatial correlation) random generator using Guassian distribution. 
-*/
-class LocalGaussianRandomGenerator: public RandomFieldGenerator
+/**
+ *  This class implements a local (no spatial correlation) random generator using Guassian distribution.
+ */
+class LocalGaussianRandomGenerator : public RandomFieldGenerator
 {
+protected:
+    /// integer which is the input of the pseudo-random number generator
+    long randomInteger;
+    /// gauss distribution parameters
+    double mean, variance;
+public:
+
+    /// Constructor. Creates empty RandomFieldGenerator
+    LocalGaussianRandomGenerator(int n, Domain *d);
+
+    /// Destructor
+    virtual ~LocalGaussianRandomGenerator();
+
+    /**
+     * Computes the random value.
+     */
+    void generateRandomValue(double &value, FloatArray *position);
+    void generateRandomValueAt(double &value, GaussPoint *gp) {
+        this->generateRandomValue(value, NULL);
+    }
+
+    virtual IRResultType initializeFrom(InputRecord *ir);
+    /// Returns class name of the receiver.
+    virtual const char *giveClassName() const { return "LocalGaussianRandomGenerator"; }
+
 
 protected:
-  /// integer which is the input of the pseudo-random number generator
-  long randomInteger;
-  /// gauss distribution parameters
-  double mean, variance; 
- public:
+    /**
+     * Computes pseudo-random numbers.
+     * @param idum Pointer to start integer (must be negative)
+     * @return Random number between 0 and 1
+     */
+    double ran1(long *idum);
 
-  /// Constructor. Creates empty RandomFieldGenerator
-  LocalGaussianRandomGenerator (int n, Domain *d);
+    /**
+     * Computes the inverse of the Gaussian CDF
+     * @param x Input probability
+     * @param a Mean
+     * @param b Standard deviation
+     * @returns Inverse
+     */
+    double normalCdfInverse(double cdf, double a, double b);
 
-  /// Destructor
-  virtual ~LocalGaussianRandomGenerator ();
-  
-  /**
-     Computes the random value.
-  */
-  void generateRandomValue(double& value, FloatArray *position);
-  void generateRandomValueAt(double& value, GaussPoint *gp) {
-    this->generateRandomValue (value, NULL);
-  }
+    /**
+     * Computes the inverse of the normal distribution
+     * @param p Input probability
+     * @returns Inverse
+     */
+    double normal01CdfInverse(double p);
 
-  virtual IRResultType initializeFrom(InputRecord *ir);
-  /// Returns class name of the receiver.
-  virtual const char *giveClassName() const { return "LocalGaussianRandomGenerator"; }
-
-
- protected:
-  /**
-     Computes pseudo-random numbers.
-     @param idum Pointer to start integer (must be negative)
-     @return Random number between 0 and 1
-  */
-  double ran1(long *idum);
-  
-  /**
-     Computes the inverse of the Gaussian CDF
-     @param x Input probability
-     @param a Mean
-     @param b Standard deviation
-     @returns Inverse
-  */
-  double normalCdfInverse ( double cdf, double a, double b );
-  
-  /**
-     Computes the inverse of the normal distribution
-     @param p Input probability
-     @returns Inverse
-  */
-  double normal01CdfInverse ( double p );
-  
-  double dpolyValue(int n,double a[],double x);
+    double dpolyValue(int n, double a[], double x);
 };
-
 } // end namespace oofem
 #endif
 

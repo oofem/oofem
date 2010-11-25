@@ -37,11 +37,10 @@
 #include "error.h"
 
 #ifndef __MAKEDEPEND
-#include <stdlib.h>
+ #include <stdlib.h>
 #endif
 
 namespace oofem {
-
 /**
  * Global variable containing warning level, should be in interval (0,3).
  * Zero level supress all warning messafes, level 3 causes to report all
@@ -57,15 +56,15 @@ void oofem_exit(int code) {
 }
 
 /*
- #ifndef HAVE_MACRO_VA_ARGS
+ * #ifndef HAVE_MACRO_VA_ARGS
  *
- #ifndef __MAKEDEPEND
- #include <stdarg.h>
- #endif
+ *#ifndef __MAKEDEPEND
+ *#include <stdarg.h>
+ *#endif
  *
  *
  *
- #define __PROCESS_LOG \
+ *#define __PROCESS_LOG \
  * char buff[MAX_ERROR_MSG_LENGTH]; \
  * va_list args; \
  * va_start(args, format); \
@@ -125,7 +124,6 @@ void oofem_exit(int code) {
  * oofem_errLogger.writeELogMsg(Logger::LOG_LEVEL_WARNING, _file,_line,buff);
  * }
  *
- #endif
+ *#endif
  */
-
 } // end namespace oofem

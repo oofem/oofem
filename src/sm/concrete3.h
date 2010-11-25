@@ -44,7 +44,6 @@
 #include "isolinearelasticmaterial.h"
 
 namespace oofem {
-
 class Concrete3 : public RCM2Material
 {
     /*
@@ -89,6 +88,5 @@ protected:
     virtual double computeStrength(GaussPoint *, double);
     virtual int    checkSizeLimit(GaussPoint *gp, double);
 };
-
 } // end namespace oofem
 #endif // concrete3_h

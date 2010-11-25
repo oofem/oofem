@@ -43,7 +43,6 @@
 #include "rcm2.h"
 
 namespace oofem {
-
 #define rcsd_Omega 300
 #define pscm_SDTransitionCoeff 306
 #define RCSD_DAMAGE_EPS 1.e-4
@@ -156,7 +155,7 @@ public:
     contextIOResultType    restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 
     // non-standard - returns time independent material constant
-    double   give(int, GaussPoint*);
+    double   give(int, GaussPoint *);
 
     void giveRealStressVector(FloatArray & answer,  MatResponseForm, GaussPoint *,
                               const FloatArray &, TimeStep *);
@@ -190,6 +189,5 @@ protected:
     virtual int    checkSizeLimit(GaussPoint *gp, double);
     ////
 };
-
 } // end namespace oofem
 #endif // rcsd_h

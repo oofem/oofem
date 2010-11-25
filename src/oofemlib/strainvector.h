@@ -39,7 +39,6 @@
 #include "stressstrainbasevector.h"
 
 namespace oofem {
-
 class StressVector;
 /**
  */
@@ -117,6 +116,5 @@ protected:
     void giveTranformationMtrx(FloatMatrix &answer, const FloatMatrix &base,
                                int transpose = 0) const;
 };
-
 } // end namespace oofem
 #endif // strainvector_h

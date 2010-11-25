@@ -75,7 +75,6 @@
 #include "compcol.h"
 
 namespace oofem {
-
 /**
  * Implementation of symmetric sparse matrix stored using compressed column/row storage.
  * Only the lower part is stored.
@@ -111,7 +110,7 @@ public:
      */
     virtual void times(double x);
     /// Builds internal structure of receiver
-    int buildInternalStructure(EngngModel *, int, EquationID, const UnknownNumberingScheme&);
+    int buildInternalStructure(EngngModel *, int, EquationID, const UnknownNumberingScheme &);
     /** Assembles receiver from local element contributions.
      * @param loc location array. The values corresponding to zero loc array value are not assembled.
      * @param mat contribution to be assembled using loc array.
@@ -170,16 +169,19 @@ protected:
     /***********************************/
 
     FloatArray operator*(const FloatArray &x) const
-    { FloatArray answer;
-      this->times(x, answer);
-      return answer; }
+    {
+        FloatArray answer;
+        this->times(x, answer);
+        return answer;
+    }
     FloatArray trans_mult(const FloatArray &x) const
-    { FloatArray answer;
-      this->times(x, answer);
-      return answer; }
+    {
+        FloatArray answer;
+        this->times(x, answer);
+        return answer;
+    }
 
 #endif
 };
-
 } // end namespace oofem
 #endif // symcompcol_h

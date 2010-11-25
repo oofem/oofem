@@ -49,7 +49,6 @@
 #include "internalstatetype.h"
 
 namespace oofem {
-
 class Domain;
 class Element;
 class TimeStep;
@@ -153,13 +152,12 @@ public:
      * @param str string to be filled by input record
      * @param keyword print record keyword (default true)
      */
-    virtual int giveInputRecordString(std :: string &str, bool keyword = true) {return 1;}
+    virtual int giveInputRecordString(std :: string &str, bool keyword = true) { return 1; }
     /// Returns class name of the receiver.
     virtual const char *giveClassName() const  = 0;
 
 
 protected:
 };
-
 } // end namespace oofem
 #endif // materialmappingalgorithm_h

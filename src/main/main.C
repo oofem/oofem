@@ -53,25 +53,25 @@
 #include "oofem_terminate.h"
 
 #ifdef __PARALLEL_MODE
-#include "dyncombuff.h"
+ #include "dyncombuff.h"
 #endif
 
 #ifdef __PETSC_MODULE
-#ifndef __MAKEDEPEND
-#include "petsc.h"
-#endif
+ #ifndef __MAKEDEPEND
+  #include "petsc.h"
+ #endif
 #endif
 
 #ifdef __SLEPC_MODULE
-#ifndef __MAKEDEPEND
-#include "slepceps.h"
-#endif
+ #ifndef __MAKEDEPEND
+  #include "slepceps.h"
+ #endif
 #endif
 
 #ifndef __MAKEDEPEND
-#include <stdio.h>
-#include <string.h>
-#include <new>
+ #include <stdio.h>
+ #include <string.h>
+ #include <new>
 #endif
 
 using namespace oofem;
@@ -84,8 +84,8 @@ void oofem_print_version();
 void oofem_print_epilog();
 
 /* Default oofem loggers */
-Logger oofem::oofem_logger(Logger :: LOG_LEVEL_INFO, stdout);
-Logger oofem::oofem_errLogger(Logger :: LOG_LEVEL_WARNING, stderr);
+Logger oofem :: oofem_logger(Logger :: LOG_LEVEL_INFO, stdout);
+Logger oofem :: oofem_errLogger(Logger :: LOG_LEVEL_WARNING, stderr);
 
 
 int main(int argc, char *argv[])
@@ -107,10 +107,10 @@ int main(int argc, char *argv[])
 #ifdef __PARALLEL_MODE
     char fileName [ MAX_FILENAME_LENGTH ];
     int rank = 0;
-#ifdef __USE_MPI
+ #ifdef __USE_MPI
     MPI_Init(& argc, & argv);
     MPI_Comm_rank(MPI_COMM_WORLD, & rank);
-#endif
+ #endif
 #endif
 
 #ifdef __PETSC_MODULE
@@ -118,7 +118,7 @@ int main(int argc, char *argv[])
 #endif
 
 #ifdef __SLEPC_MODULE
-    SlepcInitialize(&argc, &argv, PETSC_NULL, PETSC_NULL);
+    SlepcInitialize(& argc, & argv, PETSC_NULL, PETSC_NULL);
 #endif
 
     //
@@ -220,7 +220,7 @@ int main(int argc, char *argv[])
     if ( restartFlag ) {
         try {
             problem->restoreContext(NULL, CM_State, ( void * ) restartStepInfo);
-        } catch ( ContextIOERR &c ) {
+        } catch(ContextIOERR & c) {
             c.print();
             exit(1);
         }
@@ -238,7 +238,7 @@ int main(int argc, char *argv[])
 
     try {
         problem->solveYourself();
-    } catch ( OOFEM_Terminate &c ) {
+    } catch(OOFEM_Terminate & c) {
         delete problem;
 #ifdef __PETSC_MODULE
         PetscFinalize();
@@ -267,7 +267,7 @@ int main(int argc, char *argv[])
 #endif
 
 #ifdef __SLEPC_MODULE
-        SlepcFinalize();
+    SlepcFinalize();
 #endif
 
 #ifdef __USE_MPI
@@ -294,7 +294,7 @@ void oofem_print_help() {
 }
 
 #ifndef HOST_TYPE
-#define HOST_TYPE "unknown"
+ #define HOST_TYPE "unknown"
 #endif
 
 void oofem_print_version() {
@@ -310,13 +310,13 @@ oofem_print_epilog() {
 }
 
 #ifndef __MAKEDEPEND
-#include "loadbalancer.h"
-#include "iga.h"
+ #include "loadbalancer.h"
+ #include "iga.h"
 #endif
 void oofem_debug(EngngModel *emodel)
 {
-  //FloatMatrix k;
-  //((BsplinePlaneStressElement*)emodel->giveDomain(1)->giveElement(1))->giveCharacteristicMatrix(k, StiffnessMatrix, NULL);
+    //FloatMatrix k;
+    //((BsplinePlaneStressElement*)emodel->giveDomain(1)->giveElement(1))->giveCharacteristicMatrix(k, StiffnessMatrix, NULL);
 
 #ifdef __PARALLEL_MODE
     //LoadBalancer* lb = emodel->giveDomain(1)->giveLoadBalancer();

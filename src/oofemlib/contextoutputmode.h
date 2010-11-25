@@ -40,14 +40,12 @@
 #define contextoutputmode_h
 
 namespace oofem {
-
 enum ContextOutputMode {
     NOCONTEXT,
     ALWAYS,       // enable for post-processing
     REQUIRED,     // if required (for backtracing computation)
     USERDEFINED   // input attribute of domain (each n-th step)
 };
-
 } // end namespace oofem
 #endif // contextoutputmode_h
 

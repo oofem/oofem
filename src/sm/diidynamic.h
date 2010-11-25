@@ -41,14 +41,13 @@
 #define diidynamic_h
 
 #ifndef __MAKEDEPEND
-#include <stdio.h>
+ #include <stdio.h>
 #endif
 #include "structengngmodel.h"
 #include "sparselinsystemnm.h"
 #include "sparsemtrx.h"
 
 namespace oofem {
-
 class DIIDynamic : public StructuralEngngModel
 {
     /*
@@ -85,13 +84,16 @@ protected:
 public:
     DIIDynamic(int i, EngngModel *_master = NULL) : StructuralEngngModel(i, _master),  loadVector(), previousLoadVector(),
         rhs(), displacementVector(), velocityVector(), accelerationVector()
-    { stiffnessMatrix = NULL;
-      massMatrix = NULL;
-      ndomains = 1;
-      nMethod = NULL; }
-    ~DIIDynamic() { delete  stiffnessMatrix;
-                    delete massMatrix;
-                    if ( nMethod ) { delete nMethod; } }
+    {
+        stiffnessMatrix = NULL;
+        massMatrix = NULL;
+        ndomains = 1;
+        nMethod = NULL;
+    }
+    ~DIIDynamic() {
+        delete  stiffnessMatrix;
+        delete massMatrix;
+        if ( nMethod ) { delete nMethod; } }
     // solving
     //void solveYourself ();
     void solveYourselfAt(TimeStep *);
@@ -123,6 +125,5 @@ public:
 
 protected:
 };
-
 } // end namespace oofem
 #endif // diidynamic_h

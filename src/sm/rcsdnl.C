@@ -36,7 +36,7 @@
 
 
 #ifndef __MAKEDEPEND
-#include <math.h>
+ #include <math.h>
 #endif
 
 #include "rcsdnl.h"
@@ -50,7 +50,6 @@
 #include "contextioerr.h"
 
 namespace oofem {
-
 RCSDNLMaterial :: RCSDNLMaterial(int n, Domain *d) : RCSDEMaterial(n, d), StructuralNonlocalMaterialExtensionInterface(d)
     //
     // constructor
@@ -141,7 +140,7 @@ RCSDNLMaterial :: giveRealStressVector(FloatArray &answer, MatResponseForm form,
     }
 
     reducedNonlocStrainVector.times( 1. / status->giveIntegrationScale() );
-    this->endIPNonlocalAverage (gp); // !
+    this->endIPNonlocalAverage(gp);  // !
 
     // substract stress independent part
     ////# this->giveStressDependentPartOfStrainVector(nonlocalStrainIncrement, gp, nonlocalTotalStrainIncrement,atTime);
@@ -225,26 +224,26 @@ RCSDNLMaterial :: giveRealStressVector(FloatArray &answer, MatResponseForm form,
             double G, minG, currG, princStressDis, princStrainDis;
             int ii, jj;
 
-            minG = G = this->give(pscm_G,gp);
+            minG = G = this->give(pscm_G, gp);
             for ( i = 4; i <= 6; i++ ) {
                 if ( ( this->giveStressStrainComponentIndOf(FullForm, gp->giveMaterialMode(), i) ) ) {
                     if ( i == 4 ) {
                         ii = 2;
                         jj = 3;
-                    } else if ( i == 5 )                                {
+                    } else if ( i == 5 ) {
                         ii = 1;
                         jj = 3;
-                    } else if ( i == 6 )                                                                       {
+                    } else if ( i == 6 ) {
                         ii = 1;
                         jj = 2;
-                    } else                                                                                                            {
+                    } else {
                         continue;
                     }
 
                     princStressDis = princStress.at(ii) -
-                    princStress.at(jj);
+                                     princStress.at(jj);
                     princStrainDis = principalStrain.at(ii) -
-                    principalStrain.at(jj);
+                                     principalStrain.at(jj);
 
                     if ( fabs(princStrainDis) < rcm_SMALL_STRAIN ) {
                         currG = G;
@@ -293,8 +292,8 @@ RCSDNLMaterial :: giveRealStressVector(FloatArray &answer, MatResponseForm form,
                 //else printf (":");
                 //
                 Le = status->giveCharLength(ipos);
-                E = linearElasticMaterial->give(Ex,gp);
-                Gf = this->give(pscm_Gf,gp) / Le;
+                E = linearElasticMaterial->give(Ex, gp);
+                Gf = this->give(pscm_Gf, gp) / Le;
                 ef = this->ef;
                 e0 = principalStrain.at(ipos);
                 Gf0 = -CurrFt * ef * ( exp(-status->giveCrackStrain(ipos) / ef) - 1.0 ); // already disipated + 0.5*sigma0*epsilon0
@@ -324,7 +323,7 @@ RCSDNLMaterial :: giveRealStressVector(FloatArray &answer, MatResponseForm form,
         FloatArray reducedSpaceStressVector;
         double damage = 1.0;
 
-        E = linearElasticMaterial->give(Ex,gp);
+        E = linearElasticMaterial->give(Ex, gp);
         equivStrain = this->computeCurrEquivStrain(gp, nonlocalStrain, E, atTime);
         equivStrain = max( equivStrain, status->giveTempMaxEquivStrain() );
         ////# reducedSpaceStressVector.beProductOf (*status->giveDs0Matrix(), reducedNonlocStrainVector);

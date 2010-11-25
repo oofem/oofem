@@ -40,11 +40,10 @@
 #include "mathfem.h"
 #include "geotoolbox.h"
 #ifndef __MAKEDEPEND
-#include <vector>
+ #include <vector>
 #endif
 
 namespace oofem {
-
 #define LevelSetPCS_CACHE_ELEMENT_VOF 0
 
 class LevelSetPCS;
@@ -129,9 +128,11 @@ public:
      *  node number in particular domain.
      *  @param d domain to which component belongs to
      */
-    LevelSetPCS(int n, Domain *d) : MaterialInterface(n, d) { initialRefMatFlag = false;
-                                                              reinit_dt_flag = false;
-                                                              levelSetVersion = 0; }
+    LevelSetPCS(int n, Domain *d) : MaterialInterface(n, d) {
+        initialRefMatFlag = false;
+        reinit_dt_flag = false;
+        levelSetVersion = 0;
+    }
 
     /// initialize receiver
     virtual void initialize();
@@ -182,7 +183,7 @@ protected:
     double evalElemfContribution(PCSEqType t, int ie, TimeStep *atTime);
 
     /** Reinitializes the level set representation by solving
-     \f$d_{\tau} = S(\phi)(1-\vert\nabla d\vert)\f$ to steady state
+     * \f$d_{\tau} = S(\phi)(1-\vert\nabla d\vert)\f$ to steady state
      */
     void redistance(TimeStep *atTime);
 
@@ -193,6 +194,5 @@ protected:
     void FMMReinitialization(FloatArray &ls);
     //@}
 };
-
 } // end namespace oofem
 #endif // levelsetpcs_h

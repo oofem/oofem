@@ -40,17 +40,16 @@
 
 #include "oofemtxtinputrecord.h"
 #ifndef __MAKEDEPEND
-#include <ctype.h>
+ #include <ctype.h>
 #endif
 
 namespace oofem {
-
 OOFEMTXTInputRecord :: OOFEMTXTInputRecord() : InputRecord(), tokenizer() {
     record [ 0 ] = '\0';
 }
 
 OOFEMTXTInputRecord :: OOFEMTXTInputRecord(const OOFEMTXTInputRecord &src) : InputRecord(src), tokenizer() {
-    strncpy(this->record, src.record, OOFEM_MAX_LINE_LENGTH-1);
+    strncpy(this->record, src.record, OOFEM_MAX_LINE_LENGTH - 1);
     this->record [ OOFEM_MAX_LINE_LENGTH - 1 ] = '\0';
     tokenizer.tokenizeLine(this->record);
     int ntok = tokenizer.giveNumberOfTokens();
@@ -61,7 +60,7 @@ OOFEMTXTInputRecord :: OOFEMTXTInputRecord(const OOFEMTXTInputRecord &src) : Inp
 
 OOFEMTXTInputRecord :: OOFEMTXTInputRecord(char *source) : InputRecord(), tokenizer()
 {
-    strncpy(this->record, source, OOFEM_MAX_LINE_LENGTH-1);
+    strncpy(this->record, source, OOFEM_MAX_LINE_LENGTH - 1);
     this->record [ OOFEM_MAX_LINE_LENGTH - 1 ] = '\0';
     tokenizer.tokenizeLine(this->record);
     int ntok = tokenizer.giveNumberOfTokens();
@@ -71,9 +70,9 @@ OOFEMTXTInputRecord :: OOFEMTXTInputRecord(char *source) : InputRecord(), tokeni
 }
 
 OOFEMTXTInputRecord &
-OOFEMTXTInputRecord :: operator=(const OOFEMTXTInputRecord &src)
+OOFEMTXTInputRecord :: operator = ( const OOFEMTXTInputRecord & src )
 {
-    strncpy(this->record, src.record, OOFEM_MAX_LINE_LENGTH-1);
+    strncpy(this->record, src.record, OOFEM_MAX_LINE_LENGTH - 1);
     this->record [ OOFEM_MAX_LINE_LENGTH - 1 ] = '\0';
     tokenizer.tokenizeLine(this->record);
     int ntok = tokenizer.giveNumberOfTokens();
@@ -100,7 +99,7 @@ IRResultType
 OOFEMTXTInputRecord :: giveRecordKeywordField(char *answer, int &value, int maxchar)
 {
     if ( tokenizer.giveNumberOfTokens() ) {
-        strncpy(answer, tokenizer.giveToken(1), maxchar-1);
+        strncpy(answer, tokenizer.giveToken(1), maxchar - 1);
         answer [ maxchar - 1 ] = '\0';
         setReadFlag(1);
         if ( scanInteger(tokenizer.giveToken(2), value) == 0 ) {
@@ -119,7 +118,7 @@ IRResultType
 OOFEMTXTInputRecord :: giveRecordKeywordField(char *answer, int maxchar)
 {
     if ( tokenizer.giveNumberOfTokens() ) {
-        strncpy(answer, tokenizer.giveToken(1), maxchar-1);
+        strncpy(answer, tokenizer.giveToken(1), maxchar - 1);
         answer [ maxchar - 1 ] = '\0';
         setReadFlag(1);
 
@@ -178,15 +177,15 @@ OOFEMTXTInputRecord :: giveField(char *answer, int maxchar, const InputFieldType
         indx = 1;
     }
 
-    const char* _token = tokenizer.giveToken(indx);
-    if (_token) {
-      strncpy(answer, tokenizer.giveToken(indx), maxchar-1);
-      answer [ maxchar - 1 ] = '\0';
-      setReadFlag(indx);
-      return IRRT_OK;
+    const char *_token = tokenizer.giveToken(indx);
+    if ( _token ) {
+        strncpy(answer, tokenizer.giveToken(indx), maxchar - 1);
+        answer [ maxchar - 1 ] = '\0';
+        setReadFlag(indx);
+        return IRRT_OK;
     } else {
-      answer [0]='\0';
-      return IRRT_NOTFOUND;
+        answer [ 0 ] = '\0';
+        return IRRT_NOTFOUND;
     }
 }
 
@@ -490,7 +489,7 @@ char *OOFEMTXTInputRecord :: __readSimpleString(const char *source, char *simple
         return NULL;
     }
 
-    while ( isspace(* curr) || ! * curr ) {
+    while ( isspace(* curr) || !* curr ) {
         curr++;
     }
 
@@ -498,7 +497,7 @@ char *OOFEMTXTInputRecord :: __readSimpleString(const char *source, char *simple
         OOFEM_ERROR("OOFEMTXTInputRecord::readSimpleString : unexpected end-of-line");
     }
 
-    while ( ( !( isspace(* curr) || ! * curr ) ) && ( ++count < maxchar ) ) {
+    while ( ( !( isspace(* curr) || !* curr ) ) && ( ++count < maxchar ) ) {
         * ss++ = * curr++;
     }
 
@@ -565,12 +564,12 @@ const char *OOFEMTXTInputRecord :: __skipNextWord(const char *src)
 // skips next word in src ; returns pointer after it
 //
 {
-    while ( isspace(* src) || ! * src ) {
+    while ( isspace(* src) || !* src ) {
         src++;
     }
 
     // skips whitespaces if any
-    while ( !( isspace(* src) || ! * src ) ) {
+    while ( !( isspace(* src) || !* src ) ) {
         src++;
     }
 
@@ -749,7 +748,7 @@ OOFEMTXTInputRecord :: readRange(const char **helpSource, int &li, int &hi)
         if ( * * helpSource == ')' ) {
             ( * helpSource )++;
             return 1;
-        } else                                                      {
+        } else {
             OOFEM_WARNING("OOFEMTXTInputRecord::readRange: end ')' missing while parsing range value");
             return 0;
         }
@@ -793,7 +792,7 @@ OOFEMTXTInputRecord :: readMatrix(const char *helpSource, int r, int c, FloatMat
                 // test for row terminating semicolon
                 if ( * endptr == ';' ) {
                     ( endptr )++;
-                } else                                  {
+                } else {
                     OOFEM_WARNING("OOFEMTXTInputRecord::readMatrix: missing row terminating semicolon");
                     return 0;
                 }
@@ -820,5 +819,4 @@ OOFEMTXTInputRecord :: readMatrix(const char *helpSource, int r, int c, FloatMat
 
     return 0;
 }
-
 } // end namespace oofem

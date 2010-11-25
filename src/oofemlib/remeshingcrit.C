@@ -37,7 +37,6 @@
 #include "errorestimator.h"
 
 namespace oofem {
-
 RemeshingCriteria :: RemeshingCriteria(int n, ErrorEstimator *e) : FEMComponent( n, e->giveDomain() ) {
     ee = e;
 #ifdef __PARALLEL_MODE
@@ -49,9 +48,8 @@ RemeshingCriteria :: RemeshingCriteria(int n, ErrorEstimator *e) : FEMComponent(
 
 RemeshingCriteria :: ~RemeshingCriteria() {
 #ifdef __PARALLEL_MODE
-  delete communicator;
-  delete commBuff;
+    delete communicator;
+    delete commBuff;
 #endif
 }
-
 } // end namespace oofem

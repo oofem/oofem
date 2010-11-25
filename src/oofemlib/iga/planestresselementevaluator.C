@@ -48,7 +48,6 @@
 #include "iga.h"
 
 namespace oofem {
-
 void PlaneStressStructuralElementEvaluator :: computeNMatrixAt(FloatMatrix &answer, GaussPoint *gp) {
     int i, nDofMan;
     FloatArray N;
@@ -110,5 +109,4 @@ double PlaneStressStructuralElementEvaluator :: computeVolumeAround(GaussPoint *
 
     return volume;
 }
-
 } // end namespace oofem

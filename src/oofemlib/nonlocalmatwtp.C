@@ -44,11 +44,10 @@
 #include "domaintransactionmanager.h"
 #include "usrdefsub.h"
 #ifndef __MAKEDEPEND
-#include <set>
+ #include <set>
 #endif
 
 namespace oofem {
-
 #define NonlocalMaterialWTP_DEBUG_PRINT 0
 
 /*
@@ -117,7 +116,7 @@ NonlocalMaterialWTP :: init(Domain *domain)
     int nproc = emodel->giveNumberOfProcesses();
     int myrank = emodel->giveRank();
     CommunicatorBuff cb(nproc, CBT_dynamic);
-    Communicator com(emodel, & cb, myrank, nproc, CommMode_Dynamic);
+    Communicator com(emodel, &cb, myrank, nproc, CommMode_Dynamic);
     this->nonlocElementDependencyMap.clear();
 
     // build nonlocal element dependency array for each element
@@ -150,7 +149,7 @@ NonlocalMaterialWTP :: migrate()
     int nproc = emodel->giveNumberOfProcesses();
     int myrank = emodel->giveRank();
     CommunicatorBuff cb(nproc, CBT_dynamic);
-    Communicator com(emodel, & cb, myrank, nproc, CommMode_Dynamic);
+    Communicator com(emodel, &cb, myrank, nproc, CommMode_Dynamic);
     StaticCommunicationBuffer commBuff(MPI_COMM_WORLD);
 
     /*
@@ -541,7 +540,6 @@ NonlocalMaterialWTP :: fastElementIPNonlocTableUpdater(GaussPoint *gp, IntArray 
         iface->rebuildNonlocalPointTable(gp, & map);
     }
 }
-
 } // end namespace oofem
 #endif
 

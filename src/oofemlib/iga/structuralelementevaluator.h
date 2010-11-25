@@ -40,16 +40,15 @@
 #include "matresponsemode.h"
 
 namespace oofem {
-
 /**
- * 
+ *
  * This class represent a new concept on how to define elements.
  * Traditionally, Elements are derived from problem specific class (structural element, for example)
  * define their interpolation and implement methods to evaluate shape function matrix, geometrical matrix, etc.
- * This new concept, here represented by  StructuralElementEvaluator and derived classes allows to 
+ * This new concept, here represented by  StructuralElementEvaluator and derived classes allows to
  * define all problem specific methods (including shape function matrix, geometrical matrix evaluation) to be defined
- * once for all elements of the same type (plane stress elements, space3d elements, etc) just relying on 
- * services of finite element interpolation classes. 
+ * once for all elements of the same type (plane stress elements, space3d elements, etc) just relying on
+ * services of finite element interpolation classes.
  * Definition of particular element is then done simply by deriving if from evaluator and providing interpolation.
  *
  * StructuralElementEvaluator - base class of all structural elements
@@ -113,12 +112,12 @@ protected:
      * taking into account also possible local - coordinate system in some elements
      * nodes.
      * Default implementation uses \ref computeGtoLRotationMatrix and
-     \ref computeGNDofRotationMatrix  services to compute result.
+     * \ref computeGNDofRotationMatrix  services to compute result.
      * Default implementation uses cached rotation matrix in
      * rotationMatrix attribute, so rotation matrix is computed only once.
      * @return nonzero if transformation is necessary.
      */
-    virtual int updateRotationMatrix() ;
+    virtual int updateRotationMatrix();
     /**
      * Returns transformation matrix for DOFs from global coordinate system
      * to local coordinate system in nodes (i.e. r(n)=T r(g)) if mode == _toNodalCS.
@@ -151,6 +150,5 @@ protected:
     friend void drawIGAPatchDeformedGeometry(Element * elem, StructuralElementEvaluator * se, oofegGraphicContext & gc, UnknownType);
 #endif
 };
-
 } // end namespace oofem
 #endif //structuralelementevaluator_h

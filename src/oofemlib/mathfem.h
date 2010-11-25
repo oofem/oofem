@@ -43,18 +43,17 @@
 #define mathfem_h
 
 #ifndef __MAKEDEPEND
-#include <math.h>
-#include "error.h"
+ #include <math.h>
+ #include "error.h"
 #endif
 #include "compiler.h"
 
 namespace oofem {
-
 #ifndef HAVE_M_PI
-#define M_PI 3.1415926535897932384626433832795029L /* pi */
+ #define M_PI 3.1415926535897932384626433832795029L /* pi */
 #endif
 #ifndef HAVE_M_LN2
-#define M_LN2 0.6931471805599453094172321214581766L  /* log_e 2 */
+ #define M_LN2 0.6931471805599453094172321214581766L /* log_e 2 */
 #endif
 
 //#ifdef LINUX_PLATFORM
@@ -69,7 +68,7 @@ namespace oofem {
 //#endif
 
 #ifndef HAVE_NEAREST
-#define nearest(x) floor( ( x ) + 0.5 )
+ #define nearest(x) floor( ( x ) + 0.5 )
 #endif
 
 /// Returns smaller value from two given decimals
@@ -135,9 +134,9 @@ int iperm(int val, int rank);
 #define MATHFEM_R ( 1 - MATHFEM_C )
 #define MATHFEM_BRENT_MAXITER 100
 
-template< class T > class mem_fun
+template< class T >class mem_fun
 {
-    double ( T :: * pmf )( double );
+    double ( T :: *pmf )( double );
     T *ptr;
 public:
     mem_fun( T *o, double( T :: *p )( double ) ) : pmf(p), ptr(o) { }
@@ -147,16 +146,16 @@ public:
 
 class c_fun
 {
-    double ( * func )(double);
+    double ( *func )(double);
 public:
-    c_fun( double( *p )( double ) ) : func(p) { }
+    c_fun( double( * p )( double ) ) : func(p) { }
     double operator()(double x) const { return ( * func )( x ); }
 };
 
 
 
-template< class T > double gss(double ax, double bx, double cx, const T &f,
-                               double tol, double &xmin)
+template< class T >double gss(double ax, double bx, double cx, const T &f,
+                              double tol, double &xmin)
 {
     /*
      * Minimize function of one variable using golden section search
@@ -224,8 +223,8 @@ template< class T > double gss(double ax, double bx, double cx, const T &f,
     }
 }
 
-template< class T > double brent(double ax, double bx, double cx, const T &f,
-                                 double tol, double &xmin)
+template< class T >double brent(double ax, double bx, double cx, const T &f,
+                                double tol, double &xmin)
 {
     int ii;
     double x_left = ax, x_right = cx;
@@ -323,6 +322,5 @@ template< class T > double brent(double ax, double bx, double cx, const T &f,
     xmin = x;
     return fx;
 }
-
 } // end namespace oofem
 #endif // mathfem_h

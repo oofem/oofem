@@ -47,20 +47,19 @@
 #include "debug.h"
 #include "verbose.h"
 #ifndef __MAKEDEPEND
-#include <math.h>
-#include <limits.h>
-#include <stdlib.h>
+ #include <math.h>
+ #include <limits.h>
+ #include <stdlib.h>
 #endif
 
 #ifdef TIME_REPORT
-#ifndef __MAKEDEPEND
-#include <time.h>
-#endif
-#include "clock.h"
+ #ifndef __MAKEDEPEND
+  #include <time.h>
+ #endif
+ #include "clock.h"
 #endif
 
 namespace oofem {
-
 Skyline :: Skyline(int n) : SparseMtrx(n, n)
 {
     // constructor
@@ -89,7 +88,7 @@ Skyline :: ~Skyline()
     // Destructor.
     if ( this->giveNumberOfRows() ) {
         freeDouble(mtrx);
-        delete ( adr );
+        delete(adr);
     }
 }
 
@@ -178,18 +177,19 @@ Skyline ::   at(int i, int j) const
 int
 Skyline :: isAllocatedAt(int i, int j) const
 {
-  int k, answer = 1;
+    int k, answer = 1;
 
-  if ( j < i ) {
-    k = i;
-    i = j;
-    j = k;
-  }
+    if ( j < i ) {
+        k = i;
+        i = j;
+        j = k;
+    }
 
-  if ( ( adr->at(j + 1) - adr->at(j) ) <= ( j - i ) )
-    answer = 0;
+    if ( ( adr->at(j + 1) - adr->at(j) ) <= ( j - i ) ) {
+        answer = 0;
+    }
 
-  return answer;
+    return answer;
 }
 
 
@@ -391,7 +391,7 @@ int Skyline :: setInternalStructure(IntArray *a)
     // allocates and built structure according to given
     // array of maximal column heights
     //
-    adr = new IntArray(* a);
+    adr = new IntArray(*a);
     int n = a->giveSize();
     nwk = adr->at(n); // check
     if ( mtrx ) {
@@ -406,7 +406,7 @@ int Skyline :: setInternalStructure(IntArray *a)
     return TRUE;
 }
 
-int Skyline :: buildInternalStructure(EngngModel *eModel, int di, EquationID ut, const UnknownNumberingScheme& s)
+int Skyline :: buildInternalStructure(EngngModel *eModel, int di, EquationID ut, const UnknownNumberingScheme &s)
 {
     // first create array of
     // maximal column height for assembled characteristics matrix
@@ -415,12 +415,13 @@ int Skyline :: buildInternalStructure(EngngModel *eModel, int di, EquationID ut,
     int j, js, ieq, maxle;
     int i, ac1;
     int neq;
-    if (s.isDefault())
-      neq = eModel->giveNumberOfDomainEquations(di, ut);
-    else{
-      neq = s.giveRequiredNumberOfDomainEquation();
-      if ( neq == 0 )
-        OOFEM_ERROR("Undefined Required number of domain equations");
+    if ( s.isDefault() ) {
+        neq = eModel->giveNumberOfDomainEquations(di, ut);
+    } else {
+        neq = s.giveRequiredNumberOfDomainEquation();
+        if ( neq == 0 ) {
+            OOFEM_ERROR("Undefined Required number of domain equations");
+        }
     }
 
     IntArray loc;
@@ -435,7 +436,7 @@ int Skyline :: buildInternalStructure(EngngModel *eModel, int di, EquationID ut,
 
     // loop over elements code numbers
     for ( i = 1; i <= nelem; i++ ) {
-      domain->giveElement(i)->giveLocationArray(loc, ut, s);
+        domain->giveElement(i)->giveLocationArray(loc, ut, s);
         js = loc.giveSize();
         maxle = INT_MAX;
         for ( j = 1; j <= js; j++ ) {
@@ -708,7 +709,7 @@ void Skyline :: rbmodes(FloatMatrix &r, int &nse, IntArray &se,
     int i, j, k, ii, jj, kk, lj, uj, li, ui, lk, uk, mi, ise, ib, neq = this->giveNumberOfRows();
     IntArray adrb(7);
     double s, g;
-    FloatArray b(6 * neq);
+    FloatArray b(6 *neq);
 
     /**********************/
     /*  rozklad matice A  */
@@ -743,7 +744,7 @@ void Skyline :: rbmodes(FloatMatrix &r, int &nse, IntArray &se,
                 if ( k < mi ) {
                     uk = uj + 1;
                     ii = li + j - mi;
-                } else                                           {
+                } else {
                     uk = lj + i - k;
                     ii = ui;
                 }
@@ -958,6 +959,4 @@ void Skyline :: ldl_feti_sky(FloatArray &x, FloatArray &y,
     // increment version
     //this->version++;
 }
-
-
 } // end namespace oofem

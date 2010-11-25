@@ -51,7 +51,6 @@
 #include "gausspnt.h"
 
 namespace oofem {
-
 /**
  * This class implements a two-node truss bar element for two-dimensional
  * analysis.
@@ -110,10 +109,10 @@ public:
     const char *giveClassName() const { return "Truss2d"; }
     classType            giveClassID() const { return Truss2dClass; }
     IRResultType initializeFrom(InputRecord *ir);
-    Element_Geometry_Type giveGeometryType() const {return EGT_line_1;}
+    Element_Geometry_Type giveGeometryType() const { return EGT_line_1; }
     integrationDomain  giveIntegrationDomain() { return _Line; }
-    MaterialMode          giveMaterialMode()  {return _1dMat;}
-    
+    MaterialMode          giveMaterialMode()  { return _1dMat; }
+
 protected:
     // edge load support
     void resolveCoordIndices(int &c1, int &c2);
@@ -133,6 +132,5 @@ protected:
     double        givePitch();
     int           giveApproxOrder() { return 1; }
 };
-
 } // end namespace oofem
 #endif // truss2d_h

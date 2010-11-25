@@ -39,7 +39,6 @@
 #include "femcmpnn.h"
 
 namespace oofem {
-
 DomainTransactionManager :: DomainTransactionManager(Domain *d)
 {
     this->domain = d;
@@ -74,7 +73,7 @@ DomainTransactionManager :: addTransaction(DomainTransactionType dtt, DomainComp
         // local enry exist
         // delete previous record
         if ( ( * rec ) [ label ] ) {
-            delete ( * rec ) [ label ];
+            delete(* rec) [ label ];
         }
     }
 
@@ -120,6 +119,5 @@ DomainTransactionManager :: commitTransactions()
 {
     return domain->commitTransactions(this);
 }
-
 } // end namespace oofem
 #endif

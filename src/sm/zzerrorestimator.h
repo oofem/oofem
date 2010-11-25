@@ -45,15 +45,14 @@
 #include "internalstatetype.h"
 
 namespace oofem {
-
 #define ZZErrorEstimator_ElementResultCashed
 
 class Element;
 class GaussPoint;
 
 /**
- * The implementation of Zienkiewicz Zhu Error Estimator (Zienkiewicz and Zhu: A simple error 
- * estimator and adaptive procedure for practical engineering analysis, International Journal 
+ * The implementation of Zienkiewicz Zhu Error Estimator (Zienkiewicz and Zhu: A simple error
+ * estimator and adaptive procedure for practical engineering analysis, International Journal
  * for Numerical Methods in Engineering, vol. 24, 337-357, 1987).
  * The basic task is to evaluate the stress error on associated domain.
  * The algorithm is written in general way, so it is possible to to evaluate
@@ -268,8 +267,5 @@ public:
      */
     virtual int ZZRemeshingCriteriaI_givePolynOrder() = 0;
 };
-
-
-
 } // end namespace oofem
 #endif // zzerrorestimator_h

@@ -36,10 +36,10 @@
 // file connectivityTable.cc
 
 #ifndef __MAKEDEPEND
-#include <stdio.h>
-#include <stdlib.h>
+ #include <stdio.h>
+ #include <stdlib.h>
 //#include <malloc.h>
-#include <set>
+ #include <set>
 #endif
 #include "freestor.h"
 #include "domain.h"
@@ -49,7 +49,6 @@
 #include "conTable.h"
 
 namespace oofem {
-
 ConnectivityTable :: ~ConnectivityTable()
 // destructor
 {
@@ -198,8 +197,8 @@ ConnectivityTable :: reset()
  *
  * this->instanciateYourself(gc);
  * int nnodes = domain -> giveNumberOfDofManagers ();
- *min = +1.e30;
- *max = -1.e30;
+ **min = +1.e30;
+ **max = -1.e30;
  * for (i = 0; i< nnodes; i++) {
  * if (dofManagersConnectivity[i] != 0) {
  * val = dofManagersValues[i];
@@ -215,8 +214,8 @@ ConnectivityTable :: reset()
 
 
 /*
- #include "dof.h"
- #include "structuralelement.h"
+ * #include "dof.h"
+ * #include "structuralelement.h"
  *
  * void
  * ConnectivityTable :: instanciateReactionForceTable (TimeStep* tStep)
@@ -507,7 +506,7 @@ ConnectivityTable :: instanciateConnectivityTable()
         return;                     // already initialized
     }
 
-    OOFEM_LOG_INFO ("ConnectivityTable: initializing\n");
+    OOFEM_LOG_INFO("ConnectivityTable: initializing\n");
 
     for ( i = 1; i <= nelems; i++ ) {
         ielem = domain->giveElement(i);
@@ -593,11 +592,11 @@ ConnectivityTable :: giveNodeNeighbourList(IntArray &answer, IntArray &nodeList)
     std :: set< int >neighbours;
 
     for ( i = 1; i <= nnodes; i++ ) {
-			inode = nodeList.at(i);
-			for ( k = 1; k <= this->nodalConnectivity.at(inode)->giveSize(); k++ ) {
-				neighbours.insert( this->nodalConnectivity.at(inode)->at(k) );
-			}
-		}
+        inode = nodeList.at(i);
+        for ( k = 1; k <= this->nodalConnectivity.at(inode)->giveSize(); k++ ) {
+            neighbours.insert( this->nodalConnectivity.at(inode)->at(k) );
+        }
+    }
 
     answer.resize( neighbours.size() );
     std :: set< int > :: iterator pos;
@@ -605,5 +604,4 @@ ConnectivityTable :: giveNodeNeighbourList(IntArray &answer, IntArray &nodeList)
         answer.at(i) = * pos;
     }
 }
-
 } // end namespace oofem

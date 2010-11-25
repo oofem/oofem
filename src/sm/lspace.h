@@ -50,7 +50,6 @@
 #include "huertaerrorestimator.h"
 
 namespace oofem {
-
 class LSpace  : public NLStructuralElement, public ZZNodalRecoveryModelInterface,
     public SPRNodalRecoveryModelInterface, public NodalAveragingRecoveryModelInterface,
     public SpatialLocalizerInterface
@@ -240,7 +239,7 @@ public:
 #endif
 
     integrationDomain  giveIntegrationDomain() { return _Cube; }
-    MaterialMode          giveMaterialMode() ;
+    MaterialMode          giveMaterialMode();
 
 protected:
     void               computeBmatrixAt(GaussPoint *, FloatMatrix &, int = 1, int = ALL_STRAINS);
@@ -274,6 +273,5 @@ protected:
     virtual int  computeLoadLSToLRotationMatrix(FloatMatrix &answer, int, GaussPoint *);
     //@}
 };
-
 } // end namespace oofem
 #endif // lspace_h

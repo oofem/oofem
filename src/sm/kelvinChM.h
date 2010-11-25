@@ -42,12 +42,11 @@
 #include "rheoChM.h"
 
 namespace oofem {
-
 class KelvinChainMaterialStatus : public RheoChainMaterialStatus
 {
     /*
      * This class implements associated Material Status to KelvinChainMaterial.
-     * It is an attribute of matStatusDictionary at every GaussPoint 
+     * It is an attribute of matStatusDictionary at every GaussPoint
      * for which this material
      * DESCRIPTION:
      * Idea used there is that we have variables
@@ -70,7 +69,7 @@ protected:
 
 public:
     KelvinChainMaterialStatus(int n, Domain *d, GaussPoint *g, int nunits);
-    ~KelvinChainMaterialStatus(){}
+    ~KelvinChainMaterialStatus() {}
     void printOutputAt(FILE *file, TimeStep *tStep);
 
     /// initialize the status
@@ -97,7 +96,7 @@ public:
 class KelvinChainMaterial : public RheoChainMaterial
 {
     /*
-     * This class implements a solidifying Kelvin chain model 
+     * This class implements a solidifying Kelvin chain model
      * describing a viscoelastic material.
      *
      * DESCRIPTION
@@ -108,7 +107,7 @@ protected:
 
 public:
     KelvinChainMaterial(int n, Domain *d);
-    ~KelvinChainMaterial(){}
+    ~KelvinChainMaterial() {}
 
     // updates MatStatus to the newly reached (equilibrium) state
     void updateYourself(GaussPoint *gp, TimeStep *);
@@ -124,26 +123,26 @@ public:
     contextIOResultType    saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
     contextIOResultType    restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 
-   /**
-     * Computes, for the given integration point, 
-     * the strain vector induced by stress-independent shrinkage 
+    /**
+     * Computes, for the given integration point,
+     * the strain vector induced by stress-independent shrinkage
      * @param answer returned strain vector
      * @param form material response form
      * @param gp integration point
      * @param atTime time step (most models are able to respond only when atTime is current time step)
      * @param determines response mode (Total or incremental)
      */
-       
+
     virtual void  giveShrinkageStrainVector(FloatArray &answer,
                                             MatResponseForm form,
                                             GaussPoint *gp,
                                             TimeStep *atTime,
                                             ValueModeType mode)
     { answer.resize(0); }
-    
+
 
     /**
-     * Computes, for the given integration point, 
+     * Computes, for the given integration point,
      * the strain vector induced by the stress history (typically creep strain)
      * @param answer computed strains
      * @param form material response form
@@ -178,6 +177,5 @@ protected:
                                       int fromIncluded = 0);
     const FloatArray &giveDiscreteTimes();
 };
-
 } // end namespace oofem
 #endif // kelvinchm_h

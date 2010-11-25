@@ -40,7 +40,6 @@
 #define drawmode_h
 
 namespace oofem {
-
 enum DrawMode {
     unknown,
 
@@ -84,6 +83,5 @@ enum DrawMode {
 
     internalStateEnd
 };
-
 } // end namespace oofem
 #endif // drawmode_h

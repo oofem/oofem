@@ -39,7 +39,6 @@
 #include "structuralelementevaluator.h"
 
 namespace oofem {
-
 /**
  * general purpose 3d structural element evaluator
  */
@@ -66,6 +65,5 @@ protected:
         answer.at(3) = D_w;
     }
 }; // end of SpaceStructuralElementEvaluator definition
-
 } // end namespace oofem
 #endif //space3delementevaluator_h

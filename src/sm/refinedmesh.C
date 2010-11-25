@@ -40,7 +40,6 @@
 #include "refinedelement.h"
 
 namespace oofem {
-
 #define EDGE_ELEM          1
 #define FACE_ELEM          2
 #define QUAD_ELEM          3
@@ -70,11 +69,11 @@ namespace oofem {
 
 /*  <, >= : C style */
 /*
- #define is_edge(ID)    (((ID) <= CUMUL_EDGES && (ID) > 0) ? 1 : 0)
- #define is_face(ID)    (((ID) <= CUMUL_FACES && (ID) > CUMUL_EDGES) ? 1 : 0)
- #define is_quad(ID)    (((ID) <= CUMUL_QUADS && (ID) > CUMUL_FACES) ? 1 : 0)
- #define is_tetra(ID)   (((ID) <= CUMUL_TETRAS && (ID) > CUMUL_QUADS) ? 1 : 0)
- #define is_hexa(ID)    (((ID) <= CUMUL_HEXAS && (ID) > CUMUL_TETRAS) ? 1 : 0)
+ * #define is_edge(ID)    (((ID) <= CUMUL_EDGES && (ID) > 0) ? 1 : 0)
+ * #define is_face(ID)    (((ID) <= CUMUL_FACES && (ID) > CUMUL_EDGES) ? 1 : 0)
+ * #define is_quad(ID)    (((ID) <= CUMUL_QUADS && (ID) > CUMUL_FACES) ? 1 : 0)
+ * #define is_tetra(ID)   (((ID) <= CUMUL_TETRAS && (ID) > CUMUL_QUADS) ? 1 : 0)
+ * #define is_hexa(ID)    (((ID) <= CUMUL_HEXAS && (ID) > CUMUL_TETRAS) ? 1 : 0)
  */
 
 #define global_edge_id(ID)    ( ( ID ) )
@@ -890,7 +889,7 @@ RefinedMesh :: refineMeshGlobally(Domain *d, int level, AList< RefinedElement > 
         }
     }
 
-#ifdef DEBUG
+ #ifdef DEBUG
     tmp_face = tmp_face_array;
     for ( i = 0; i < fe_faces; i++, tmp_face++ ) {
         OOFEM_LOG_DEBUG("face %ld: ", i + 1);
@@ -926,7 +925,7 @@ RefinedMesh :: refineMeshGlobally(Domain *d, int level, AList< RefinedElement > 
     }
 
     OOFEM_LOG_DEBUG("\n");
-#endif
+ #endif
 
 #endif
 
@@ -1173,7 +1172,7 @@ RefinedMesh :: refineMeshGlobally(Domain *d, int level, AList< RefinedElement > 
                 if ( node1 < node2 ) {
                     mesh_edge->node [ 0 ] = nd1;
                     mesh_edge->node [ 1 ] = nd2;
-                } else   {
+                } else {
                     mesh_edge->node [ 0 ] = nd2;
                     mesh_edge->node [ 1 ] = nd1;
                 }
@@ -1248,7 +1247,7 @@ RefinedMesh :: refineMeshGlobally(Domain *d, int level, AList< RefinedElement > 
                 if ( node1 < node2 ) {
                     mesh_edge->node [ 0 ] = nd1;
                     mesh_edge->node [ 1 ] = nd2;
-                } else   {
+                } else {
                     mesh_edge->node [ 0 ] = nd2;
                     mesh_edge->node [ 1 ] = nd1;
                 }
@@ -1521,7 +1520,7 @@ RefinedMesh :: refineMeshGlobally(Domain *d, int level, AList< RefinedElement > 
                         break;
                     }
                 }
-            } else   {
+            } else {
                 for ( k = node_num_nodes [ node2 - 1 ]; k < node_num_nodes [ node2 ]; k++ ) {
                     mesh_edge = & ( mesh_edge_array [ node_con_nodes [ k ] - 1 ] );
                     if ( mesh_edge->node [ 1 ]->id == node1 ) {
@@ -1600,7 +1599,7 @@ RefinedMesh :: refineMeshGlobally(Domain *d, int level, AList< RefinedElement > 
                         break;
                     }
                 }
-            } else   {
+            } else {
                 for ( k = node_num_nodes [ node2 - 1 ]; k < node_num_nodes [ node2 ]; k++ ) {
                     mesh_edge = & ( mesh_edge_array [ node_con_nodes [ k ] - 1 ] );
                     if ( mesh_edge->node [ 1 ]->id == node1 ) {
@@ -1726,7 +1725,7 @@ RefinedMesh :: refineMeshGlobally(Domain *d, int level, AList< RefinedElement > 
                     tmp_array_start [ j ] [ k ] = mesh_edge->fine_id [ 0 ] [ k ];
                     tmp_array_end [ j ] [ k ] = mesh_edge->fine_id [ 1 ] [ k ];
                 }
-            } else   {
+            } else {
 #ifndef COMPLETE_DATA_STRUCTURE
                 for ( k = node_num_nodes [ node2 - 1 ]; k < node_num_nodes [ node2 ]; k++ ) {
                     mesh_edge = & ( mesh_edge_array [ node_con_nodes [ k ] - 1 ] );
@@ -1820,7 +1819,7 @@ RefinedMesh :: refineMeshGlobally(Domain *d, int level, AList< RefinedElement > 
                     tmp_array_start [ j ] [ k ] = mesh_edge->fine_id [ 0 ] [ k ];
                     tmp_array_end [ j ] [ k ] = mesh_edge->fine_id [ 1 ] [ k ];
                 }
-            } else   {
+            } else {
 #ifndef COMPLETE_DATA_STRUCTURE
                 for ( k = node_num_nodes [ node2 - 1 ]; k < node_num_nodes [ node2 ]; k++ ) {
                     mesh_edge = & ( mesh_edge_array [ node_con_nodes [ k ] - 1 ] );
@@ -2126,7 +2125,7 @@ RefinedMesh :: refineMeshGlobally(Domain *d, int level, AList< RefinedElement > 
                         matrix_3d(fine_hexa->fine_id, n, m, 0) = mesh_face->fine_id [ k ] [ pos ]; /* macro */
                     }
                 }
-            } else   {
+            } else {
                 for ( pos = 0, n = 0; n < level + 2; n++ ) {
                     for ( m = 0; m < level + 2; m++, pos++ ) {
                         matrix_3d(fine_hexa->fine_id, m, n, 0) = mesh_face->fine_id [ k ] [ pos ]; /* macro */
@@ -2147,7 +2146,7 @@ RefinedMesh :: refineMeshGlobally(Domain *d, int level, AList< RefinedElement > 
                         matrix_3d(fine_hexa->fine_id, n, 0, m) = mesh_face->fine_id [ k ] [ pos ]; /* macro */
                     }
                 }
-            } else   {
+            } else {
                 for ( pos = 0, n = 0; n < level + 2; n++ ) {
                     for ( m = 0; m < level + 2; m++, pos++ ) {
                         matrix_3d(fine_hexa->fine_id, m, 0, n) = mesh_face->fine_id [ k ] [ pos ]; /* macro */
@@ -2172,7 +2171,7 @@ RefinedMesh :: refineMeshGlobally(Domain *d, int level, AList< RefinedElement > 
                         matrix_3d(fine_hexa->fine_id, 0, m, n) = mesh_face->fine_id [ k ] [ pos ]; /* macro */
                     }
                 }
-            } else   {
+            } else {
                 for ( pos = 0, n = 0; n < level + 2; n++ ) {
                     for ( m = 0; m < level + 2; m++, pos++ ) {
                         matrix_3d(fine_hexa->fine_id, 0, n, m) = mesh_face->fine_id [ k ] [ pos ]; /* macro */
@@ -2219,7 +2218,7 @@ RefinedMesh :: refineMeshGlobally(Domain *d, int level, AList< RefinedElement > 
                     matrix_3d(fine_hexa->fine_id, n, 0, m) = mesh_face->fine_id [ k ] [ pos ]; /* macro */
                 }
             }
-        } else   {
+        } else {
             for ( pos = 0, n = 0; n < level + 2; n++ ) {
                 for ( m = 0; m < level + 2; m++, pos++ ) {
                     matrix_3d(fine_hexa->fine_id, m, 0, n) = mesh_face->fine_id [ k ] [ pos ]; /* macro */
@@ -2240,7 +2239,7 @@ RefinedMesh :: refineMeshGlobally(Domain *d, int level, AList< RefinedElement > 
                     matrix_3d(fine_hexa->fine_id, 0, m, n) = mesh_face->fine_id [ k ] [ pos ]; /* macro */
                 }
             }
-        } else   {
+        } else {
             for ( pos = 0, n = 0; n < level + 2; n++ ) {
                 for ( m = 0; m < level + 2; m++, pos++ ) {
                     matrix_3d(fine_hexa->fine_id, 0, n, m) = mesh_face->fine_id [ k ] [ pos ]; /* macro */
@@ -2261,7 +2260,7 @@ RefinedMesh :: refineMeshGlobally(Domain *d, int level, AList< RefinedElement > 
                     matrix_3d(fine_hexa->fine_id, m, n, 0) = mesh_face->fine_id [ k ] [ pos ]; /* macro */
                 }
             }
-        } else   {
+        } else {
             for ( pos = 0, n = 0; n < level + 2; n++ ) {
                 for ( m = 0; m < level + 2; m++, pos++ ) {
                     matrix_3d(fine_hexa->fine_id, n, m, 0) = mesh_face->fine_id [ k ] [ pos ]; /* macro */
@@ -2537,7 +2536,7 @@ RefinedMesh :: refineMeshGlobally(Domain *d, int level, AList< RefinedElement > 
                         matrix_3d(fine_hexa->fine_id, n, m, 0) = mesh_quad->fine_id [ k ] [ pos ]; /* macro */
                     }
                 }
-            } else   {
+            } else {
                 for ( pos = 0, n = 0; n < level + 2; n++ ) {
                     for ( m = 0; m < level + 2; m++, pos++ ) {
                         matrix_3d(fine_hexa->fine_id, m, n, 0) = mesh_quad->fine_id [ k ] [ pos ]; /* macro */
@@ -2558,7 +2557,7 @@ RefinedMesh :: refineMeshGlobally(Domain *d, int level, AList< RefinedElement > 
                         matrix_3d(fine_hexa->fine_id, n, 0, m) = mesh_quad->fine_id [ k ] [ pos ]; /* macro */
                     }
                 }
-            } else   {
+            } else {
                 for ( pos = 0, n = 0; n < level + 2; n++ ) {
                     for ( m = 0; m < level + 2; m++, pos++ ) {
                         matrix_3d(fine_hexa->fine_id, m, 0, n) = mesh_quad->fine_id [ k ] [ pos ]; /* macro */
@@ -2583,7 +2582,7 @@ RefinedMesh :: refineMeshGlobally(Domain *d, int level, AList< RefinedElement > 
                         matrix_3d(fine_hexa->fine_id, 0, m, n) = mesh_quad->fine_id [ k ] [ pos ]; /* macro */
                     }
                 }
-            } else   {
+            } else {
                 for ( pos = 0, n = 0; n < level + 2; n++ ) {
                     for ( m = 0; m < level + 2; m++, pos++ ) {
                         matrix_3d(fine_hexa->fine_id, 0, n, m) = mesh_quad->fine_id [ k ] [ pos ]; /* macro */
@@ -2631,7 +2630,7 @@ RefinedMesh :: refineMeshGlobally(Domain *d, int level, AList< RefinedElement > 
                         matrix_3d(fine_hexa->fine_id, n, m, 0) = mesh_quad->fine_id [ k ] [ pos ]; /* macro */
                     }
                 }
-            } else   {
+            } else {
                 for ( pos = 0, n = 0; n < level + 2; n++ ) {
                     for ( m = 0; m < level + 2; m++, pos++ ) {
                         matrix_3d(fine_hexa->fine_id, m, n, 0) = mesh_quad->fine_id [ k ] [ pos ]; /* macro */
@@ -2652,7 +2651,7 @@ RefinedMesh :: refineMeshGlobally(Domain *d, int level, AList< RefinedElement > 
                         matrix_3d(fine_hexa->fine_id, 0, m, n) = mesh_quad->fine_id [ k ] [ pos ]; /* macro */
                     }
                 }
-            } else   {
+            } else {
                 for ( pos = 0, n = 0; n < level + 2; n++ ) {
                     for ( m = 0; m < level + 2; m++, pos++ ) {
                         matrix_3d(fine_hexa->fine_id, 0, n, m) = mesh_quad->fine_id [ k ] [ pos ]; /* macro */
@@ -2677,7 +2676,7 @@ RefinedMesh :: refineMeshGlobally(Domain *d, int level, AList< RefinedElement > 
                         matrix_3d(fine_hexa->fine_id, n, 0, m) = mesh_quad->fine_id [ k ] [ pos ]; /* macro */
                     }
                 }
-            } else   {
+            } else {
                 for ( pos = 0, n = 0; n < level + 2; n++ ) {
                     for ( m = 0; m < level + 2; m++, pos++ ) {
                         matrix_3d(fine_hexa->fine_id, m, 0, n) = mesh_quad->fine_id [ k ] [ pos ]; /* macro */
@@ -3074,6 +3073,4 @@ RefinedMesh :: refineMeshGlobally(Domain *d, int level, AList< RefinedElement > 
 
     return ( 0 );
 }
-
-
 } // end namespace oofem

@@ -41,13 +41,12 @@
 #define deidynamic_h
 
 #ifndef __MAKEDEPEND
-#include <stdio.h>
+ #include <stdio.h>
 #endif
 #include "structengngmodel.h"
 #include "skyline.h"
 
 namespace oofem {
-
 class DEIDynamic : public StructuralEngngModel
 {
     /*
@@ -124,6 +123,5 @@ public:
     virtual int        giveNumberOfFirstStep() { return 0; }
     virtual int        giveNumberOfTimeStepWhenIcApply() { return 0; }
 };
-
 } // end namespace oofem
 #endif // deidynamic_h

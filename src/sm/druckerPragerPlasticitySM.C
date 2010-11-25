@@ -56,11 +56,10 @@
 #include "contextioerr.h"
 
 #ifndef __MAKEDEPEND
-#include <math.h>
+ #include <math.h>
 #endif
 
 namespace oofem {
-
 DruckerPragerPlasticitySMStatus :: DruckerPragerPlasticitySMStatus(int n, Domain *d, GaussPoint *gp) :
     StructuralMaterialStatus(n, d, gp),
     plasticStrainDeviator( gp->giveMaterialMode() ),
@@ -342,8 +341,8 @@ DruckerPragerPlasticitySM :: performLocalStressReturn(GaussPoint *gp,
     StrainVector strainDeviator( gp->giveMaterialMode() );
     double volumetricStrain;
     // elastic constants
-    double eM = LEMaterial->give(Ex,gp);
-    double nu = LEMaterial->give(NYxz,gp);
+    double eM = LEMaterial->give(Ex, gp);
+    double nu = LEMaterial->give(NYxz, gp);
     double gM = eM / ( 2. * ( 1. + nu ) );
     double kM = eM / ( 3. * ( 1. - 2. * nu ) );
 
@@ -370,14 +369,14 @@ DruckerPragerPlasticitySM :: performLocalStressReturn(GaussPoint *gp,
     // choose and perform correct stress return and update state flag
     if ( computeYieldValue(volumetricStress, trialStressJTwo, tempKappa, eM) / eM
          > yieldTol ) {
-      if ( checkForVertexCase(eM, gM, kM) ) {
+        if ( checkForVertexCase(eM, gM, kM) ) {
             performVertexReturn(eM, gM, kM);
             status->letTempStateFlagBe(DruckerPragerPlasticitySMStatus :: DP_Vertex);
-        } else   {
+        } else {
             performRegularReturn(eM, gM, kM);
             status->letTempStateFlagBe(DruckerPragerPlasticitySMStatus :: DP_Yielding);
         }
-    } else   {
+    } else {
         const int state_flag = status->giveStateFlag();
         if ( state_flag == DruckerPragerPlasticitySMStatus :: DP_Elastic ) {
             status->letTempStateFlagBe(DruckerPragerPlasticitySMStatus :: DP_Elastic);
@@ -529,11 +528,11 @@ DruckerPragerPlasticitySM :: performVertexReturn(double eM, double gM, double kM
         // exclude division by zero
         if ( deltaKappa == 0. ) {
             yieldValuePrime = yieldValuePrimeZero
-	      - sqrt(2.) / 3. / kM *computeYieldStressPrime(tempKappa, eM);
+                              - sqrt(2.) / 3. / kM *computeYieldStressPrime(tempKappa, eM);
         } else {
             yieldValuePrime = yieldValuePrimeZero
-	      - 2. / 9. / kM / kM *computeYieldStressPrime(tempKappa, eM)
-            * deltaVolumetricStress / deltaKappa;
+                              - 2. / 9. / kM / kM *computeYieldStressPrime(tempKappa, eM)
+                              * deltaVolumetricStress / deltaKappa;
         }
 
         deltaVolumetricStressIncrement = -yieldValue / yieldValuePrime;
@@ -560,9 +559,9 @@ double
 DruckerPragerPlasticitySM :: computeYieldValue(const double volumetricStress,
                                                const double JTwo,
                                                const double kappa,
-					       const double eM) const
+                                               const double eM) const
 {
-  return 3. * alpha * volumetricStress + sqrt(JTwo) - computeYieldStressInShear(kappa, eM);
+    return 3. * alpha * volumetricStress + sqrt(JTwo) - computeYieldStressInShear(kappa, eM);
 }
 
 double
@@ -685,8 +684,8 @@ DruckerPragerPlasticitySM :: giveRegAlgorithmicStiffMatrix(FloatMatrix &answer,
     stress.computeDeviatoricVolumetricSplit(deviatoricStress, volumetricStress);
     const double normOfStress = sqrt( 2. * deviatoricStress.computeSecondInvariant() );
     // elastic constants
-    const double eM = LEMaterial->give(Ex,gp);
-    const double nu = LEMaterial->give(NYxz,gp);
+    const double eM = LEMaterial->give(Ex, gp);
+    const double nu = LEMaterial->give(NYxz, gp);
     const double gM = eM / ( 2. * ( 1. + nu ) );
     const double kM = eM / ( 3. * ( 1. - 2. * nu ) );
 
@@ -771,8 +770,8 @@ DruckerPragerPlasticitySM :: giveVertexAlgorithmicStiffMatrix(FloatMatrix &answe
     const double tempKappa = status->giveTempKappa();
     const double deltaKappa = tempKappa - status->giveKappa();
     // elastic constants
-    const double eM = LEMaterial->give(Ex,gp);
-    const double nu = LEMaterial->give(NYxz,gp);
+    const double eM = LEMaterial->give(Ex, gp);
+    const double nu = LEMaterial->give(NYxz, gp);
     //const double gM = eM / ( 2. * ( 1. + nu ) );
     const double kM = eM / ( 3. * ( 1. - 2. * nu ) );
 
@@ -956,18 +955,17 @@ DruckerPragerPlasticitySM :: CreateStatus(GaussPoint *gp) const
 double
 DruckerPragerPlasticitySM :: predictRelativeComputationalCost(GaussPoint *gp)
 {
-  //
-  DruckerPragerPlasticitySMStatus *status =
+    //
+    DruckerPragerPlasticitySMStatus *status =
         ( DruckerPragerPlasticitySMStatus * ) ( giveStatus(gp) );
-  const int state_flag = status->giveStateFlag();
+    const int state_flag = status->giveStateFlag();
 
-  if ((state_flag == DruckerPragerPlasticitySMStatus :: DP_Vertex) ||
-      (state_flag == DruckerPragerPlasticitySMStatus :: DP_Yielding)) {
-    return 20.;
-  } else {
-    return 1.0;
-  }
-
+    if ( ( state_flag == DruckerPragerPlasticitySMStatus :: DP_Vertex ) ||
+        ( state_flag == DruckerPragerPlasticitySMStatus :: DP_Yielding ) ) {
+        return 20.;
+    } else {
+        return 1.0;
+    }
 }
 
 #endif

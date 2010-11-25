@@ -39,11 +39,10 @@
 #include "oofem_limits.h"
 
 #ifndef __MAKEDEPEND
-#include <stdarg.h>
+ #include <stdarg.h>
 #endif
 
 namespace oofem {
-
 InitModule :: InitModule(EngngModel *e)
 {
     emodel = e;
@@ -60,12 +59,12 @@ InitModule :: initializeFrom(InputRecord *ir)
     const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
-    char initFileName[MAX_FILENAME_LENGTH];
-    IR_GIVE_FIELD2(ir, initFileName, IFT_InitModule_initfilename, "initfile",MAX_FILENAME_LENGTH); // Macro
-    if ((initStream = fopen (initFileName,"r")) == NULL) {
-      OOFEM_ERROR2 ("InitModule::initializeFrom: failed to open file %s", initFileName);
- }
+    char initFileName [ MAX_FILENAME_LENGTH ];
+    IR_GIVE_FIELD2(ir, initFileName, IFT_InitModule_initfilename, "initfile", MAX_FILENAME_LENGTH); // Macro
+    if ( ( initStream = fopen(initFileName, "r") ) == NULL ) {
+        OOFEM_ERROR2("InitModule::initializeFrom: failed to open file %s", initFileName);
+    }
+
     return IRRT_OK;
 }
-
 } // end namespace oofem

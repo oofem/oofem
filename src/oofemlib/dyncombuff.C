@@ -37,7 +37,7 @@
 #ifdef __PARALLEL_MODE
 
 #ifndef __MAKEDEPEND
-#include <list>
+ #include <list>
 #endif
 
 #include "compiler.h"
@@ -46,7 +46,6 @@
 #include "error.h"
 
 namespace oofem {
-
 CommunicationPacket :: CommunicationPacket(MPI_Comm comm, int size, int num) : MPIBuffer(max(size, __CommunicationPacket_DEFAULT_SIZE), false)
 {
     this->EOF_Flag = false;
@@ -105,7 +104,7 @@ CommunicationPacket :: iRecv(MPI_Comm communicator, int source, int tag, int cou
 
 
 int
-CommunicationPacket :: testCompletion () {
+CommunicationPacket :: testCompletion() {
     int flag;
     MPI_Status status;
 
@@ -118,7 +117,7 @@ CommunicationPacket :: waitCompletion()
 {
     MPI_Status status;
 
-    return (MPI_Wait(& this->request, & status) == MPI_SUCCESS );
+    return ( MPI_Wait(& this->request, & status) == MPI_SUCCESS );
 }
 
 
@@ -306,7 +305,9 @@ int DynamicCommunicationBuffer :: receiveCompleted()
      * int _myrank;
      * MPI_Comm_rank (communicator, &_myrank);
      */
-    if (completed) return 1;
+    if ( completed ) {
+        return 1;
+    }
 
     if ( active_packet->testCompletion() ) {
         // active packet received, add it to the pool and unpach header info
@@ -340,35 +341,48 @@ int DynamicCommunicationBuffer :: sendCompleted()
 {
     int result = 1;
 
-    if (completed) return 1;
+    if ( completed ) {
+        return 1;
+    }
+
     std :: list< CommunicationPacket * > :: const_iterator it;
 
     for ( it = packet_list.begin(); it != packet_list.end(); ++it ) {
         result &= ( * it )->testCompletion();
     }
+
     completed = result;
     return result;
 }
 
-int 
-DynamicCommunicationBuffer :: testCompletion ()
+int
+DynamicCommunicationBuffer :: testCompletion()
 {
-  if (mode == DCB_send) return this->sendCompleted();
-  else if (mode == DCB_receive) return this->receiveCompleted();
-  else return 0;
+    if ( mode == DCB_send ) {
+        return this->sendCompleted();
+    } else if ( mode == DCB_receive )  {
+        return this->receiveCompleted();
+    } else                                                                     {
+        return 0;
+    }
 }
 
-int 
-DynamicCommunicationBuffer:: waitCompletion ()
+int
+DynamicCommunicationBuffer :: waitCompletion()
 {
-  if (mode == DCB_send) {
-    while (!this->sendCompleted()) {};
-    return 1;
-  } else if (mode == DCB_receive) {
-    while (!this->receiveCompleted()) {};
-    return 1;
-  } 
-  return 0;
+    if ( mode == DCB_send ) {
+        while ( !this->sendCompleted() ) {}
+
+        ;
+        return 1;
+    } else if ( mode == DCB_receive ) {
+        while ( !this->receiveCompleted() ) {}
+
+        ;
+        return 1;
+    }
+
+    return 0;
 }
 
 
@@ -505,7 +519,7 @@ CommunicationPacketPool :: clear()
     std :: list< CommunicationPacket * > :: iterator it;
     for ( it = available_packets.begin(); it != available_packets.end(); ++it ) {
         if ( * it ) {
-            delete * it;
+            delete *it;
         }
     }
 
@@ -520,6 +534,5 @@ CommunicationPacketPool :: printInfo()
     OOFEM_LOG_INFO("CommunicationPacketPool: allocated %d packets\n(packet size: %d, %d leased, %d free)\n",
                    allocatedPackets,  __CommunicationPacket_DEFAULT_SIZE, leasedPackets, freePackets);
 }
-
 } // end namespace oofem
 #endif

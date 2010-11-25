@@ -39,7 +39,6 @@
 
 
 namespace oofem {
-
 BSplineInterpolation :: ~BSplineInterpolation() {
     int i;
 
@@ -123,7 +122,7 @@ BSplineInterpolation :: initializeFrom(InputRecord *ir) {
             for ( i = 1; i < size - 1; i++ ) {
                 knotMultiplicity [ n ].at(i + 1) = 1;
             }
-        } else   {
+        } else {
             if ( knotMultiplicity [ n ].giveSize() != size ) {
                 OOFEM_ERROR2("BSplineInterpolation::initializeFrom - knot multiplicity %s size mismatch", IFT_knotMultiplicityString [ n ]);
             }
@@ -204,13 +203,13 @@ void BSplineInterpolation :: evalN(FloatArray &answer, const FloatArray &lcoords
         for ( k = 0; k <= degree [ 0 ]; k++ ) {
             answer.at(c++) = N [ 0 ](k);
         }
-    } else if ( nsd == 2 )      {
+    } else if ( nsd == 2 ) {
         for ( l = 0; l <= degree [ 1 ]; l++ ) {
             for ( k = 0; k <= degree [ 0 ]; k++ ) {
                 answer.at(c++) = N [ 0 ](k) * N [ 1 ](l);
             }
         }
-    } else if ( nsd == 3 )      {
+    } else if ( nsd == 3 ) {
         for ( m = 0; m <= degree [ 2 ]; k++ ) {
             for ( l = 0; l <= degree [ 1 ]; l++ ) {
                 for ( k = 0; k <= degree [ 0 ]; k++ ) {
@@ -218,7 +217,7 @@ void BSplineInterpolation :: evalN(FloatArray &answer, const FloatArray &lcoords
                 }
             }
         }
-    } else   {
+    } else {
         OOFEM_ERROR2("evalN not implemented for nsd = %d", nsd);
     }
 
@@ -278,7 +277,7 @@ void BSplineInterpolation :: evaldNdx(FloatMatrix &answer, const FloatArray &lco
             answer(cnt, 0) = ders [ 0 ](1, k) / Jacob;         // dN/dx=dN/du / dx/du
             cnt++;
         }
-    } else if ( nsd == 2 )      {
+    } else if ( nsd == 2 ) {
         FloatArray tmp1(nsd), tmp2(nsd);
 
         uind = span(0) - degree [ 0 ];
@@ -322,7 +321,7 @@ void BSplineInterpolation :: evaldNdx(FloatMatrix &answer, const FloatArray &lco
                 cnt++;
             }
         }
-    } else if ( nsd == 3 )      {
+    } else if ( nsd == 3 ) {
         FloatArray tmp1(nsd), tmp2(nsd);
         FloatArray temp1(nsd), temp2(nsd), temp3(nsd);
 
@@ -406,7 +405,7 @@ void BSplineInterpolation :: evaldNdx(FloatMatrix &answer, const FloatArray &lco
                 }
             }
         }
-    } else   {
+    } else {
         OOFEM_ERROR2("evaldNdx not implemented for nsd = %d", nsd);
     }
 
@@ -451,7 +450,7 @@ void BSplineInterpolation :: local2global(FloatArray &answer, const FloatArray &
             vertexCoordsPtr = cellgeo.giveVertexCoordinates(ind + k);
             answer(0) += N [ 0 ](k) * vertexCoordsPtr->at(1);
         }
-    } else if ( nsd == 2 )      {
+    } else if ( nsd == 2 ) {
         FloatArray tmp(nsd);
 
         uind = span(0) - degree [ 0 ];
@@ -471,7 +470,7 @@ void BSplineInterpolation :: local2global(FloatArray &answer, const FloatArray &
             answer(0) += N [ 1 ](l) * tmp(0);
             answer(1) += N [ 1 ](l) * tmp(1);
         }
-    } else if ( nsd == 3 )      {
+    } else if ( nsd == 3 ) {
         FloatArray tmp(nsd), temp(nsd);
 
         uind = span(0) - degree [ 0 ];
@@ -503,7 +502,7 @@ void BSplineInterpolation :: local2global(FloatArray &answer, const FloatArray &
             answer(1) += N [ 2 ](m) * temp(1);
             answer(2) += N [ 2 ](m) * temp(2);
         }
-    } else   {
+    } else {
         OOFEM_ERROR2("local2global not implemented for nsd = %d", nsd);
     }
 
@@ -548,7 +547,7 @@ double BSplineInterpolation :: giveTransformationJacobian(const FloatArray &lcoo
             vertexCoordsPtr = cellgeo.giveVertexCoordinates(ind + k);
             jacobian(0, 0) += ders [ 0 ](1, k) * vertexCoordsPtr->at(1);       // dx/du=sum(dNu/du*x)
         }
-    } else if ( nsd == 2 )      {
+    } else if ( nsd == 2 ) {
         FloatArray tmp1(nsd), tmp2(nsd);
 
         uind = span(0) - degree [ 0 ];
@@ -575,7 +574,7 @@ double BSplineInterpolation :: giveTransformationJacobian(const FloatArray &lcoo
             jacobian(1, 0) += ders [ 1 ](1, l) * tmp2(0); // dx/dv=sum(dNv/dv*sum(Nu*x))
             jacobian(1, 1) += ders [ 1 ](1, l) * tmp2(1); // dy/dv=sum(dNv/dv*sum(Nu*y))
         }
-    } else if ( nsd == 3 )      {
+    } else if ( nsd == 3 ) {
         FloatArray tmp1(nsd), tmp2(nsd);
         FloatArray temp1(nsd), temp2(nsd), temp3(nsd);
 
@@ -632,7 +631,7 @@ double BSplineInterpolation :: giveTransformationJacobian(const FloatArray &lcoo
             jacobian(2, 1) += ders [ 2 ](1, m) * temp3(1); // dy/dt=sum(dNt/dt*sum(Nv*sum(Nu*y)))
             jacobian(2, 2) += ders [ 2 ](1, m) * temp3(2); // dz/dt=sum(dNt/dt*sum(Nv*sum(Nu*z)))
         }
-    } else   {
+    } else {
         OOFEM_ERROR2("giveTransformationJacobian not implemented for nsd = %d", nsd);
     }
 
@@ -660,7 +659,7 @@ int BSplineInterpolation :: giveKnotSpanBasisFuncMask(const IntArray &knotSpan, 
             iindx = ( i + knotSpan(0) - degree [ 0 ] );
             mask.at(c++) = iindx + 1;
         }
-    } else if ( nsd == 2 )      {
+    } else if ( nsd == 2 ) {
         for ( j = 0; j <= degree [ 1 ]; j++ ) {
             jindx = ( j + knotSpan(1) - degree [ 1 ] );
             for ( i = 0; i <= degree [ 0 ]; i++ ) {
@@ -668,7 +667,7 @@ int BSplineInterpolation :: giveKnotSpanBasisFuncMask(const IntArray &knotSpan, 
                 mask.at(c++) = jindx * numberOfControlPoints [ 0 ] + iindx + 1;
             }
         }
-    } else if ( nsd == 3 )      {
+    } else if ( nsd == 3 ) {
         for ( k = 0; k <= degree [ 2 ]; k++ ) {
             kindx = ( k + knotSpan(2) - degree [ 2 ] );
             for ( j = 0; j <= degree [ 1 ]; j++ ) {
@@ -679,7 +678,7 @@ int BSplineInterpolation :: giveKnotSpanBasisFuncMask(const IntArray &knotSpan, 
                 }
             }
         }
-    } else   {
+    } else {
         OOFEM_ERROR2("giveKnotSpanBasisFunctMask not implemented for nsd = %d", nsd);
     }
 
@@ -799,7 +798,7 @@ void BSplineInterpolation :: dersBasisFuns(int n, double u, int span, int p, dou
 
             if ( r - 1 <= pk ) {
                 j2 = k - 1;
-            } else  {
+            } else {
                 j2 = p - r;
             }
 
@@ -860,5 +859,4 @@ int BSplineInterpolation :: findSpan(int n, int p, double u, const double *U) co
 
     return mid;
 }
-
-} // end namespace oofem 
+} // end namespace oofem

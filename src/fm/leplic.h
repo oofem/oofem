@@ -41,7 +41,6 @@
 #include "mathfem.h"
 
 namespace oofem {
-
 class LEPlic;
 
 /**
@@ -60,8 +59,10 @@ protected:
     /// interface segment normal
     FloatArray normal, temp_normal;
 public:
-    LEPlicElementInterface() { permanentVofFlag = false;
-                               vof = temp_vof = 0.0; }
+    LEPlicElementInterface() {
+        permanentVofFlag = false;
+        vof = temp_vof = 0.0;
+    }
     /// Computes corresponding volume fraction to given interface position
     virtual double computeLEPLICVolumeFraction(const FloatArray &n, const double p, LEPlic *matInterface, bool updFlag) = 0;
     /// Assembles the true element material polygon (takes receiver vof into accout)
@@ -88,17 +89,24 @@ public:
     void setTempLineConstant(double tp) { temp_p = tp; }
     void setTempInterfaceNormal(const FloatArray &tg) { temp_normal = tg; }
     void setTempVolumeFraction(double v) { if ( !permanentVofFlag ) { temp_vof = v; } }
-    void setPermanentVolumeFraction(double v) { temp_vof = vof = v;
-                                                permanentVofFlag = true; }
-    void addTempVolumeFraction(double v) { if ( !permanentVofFlag ) { temp_vof += v;
-                                                                      if ( temp_vof > 1.0 ) { temp_vof = 1.0; } } }
+    void setPermanentVolumeFraction(double v) {
+        temp_vof = vof = v;
+        permanentVofFlag = true;
+    }
+    void addTempVolumeFraction(double v) {
+        if ( !permanentVofFlag ) {
+            temp_vof += v;
+            if ( temp_vof > 1.0 ) { temp_vof = 1.0; } }
+    }
     double giveVolumeFraction() { return vof; }
     double giveTempVolumeFraction() { return temp_vof; }
     void giveTempInterfaceNormal(FloatArray &n) { n = temp_normal; }
     double giveTempLineConstant() { return temp_p; }
-    void updateYourself(TimeStep *tStep) { vof = temp_vof;
-                                           p = temp_p;
-                                           normal = temp_normal; }
+    void updateYourself(TimeStep *tStep) {
+        vof = temp_vof;
+        p = temp_p;
+        normal = temp_normal;
+    }
 
     /**
      * Stores context of receiver into given stream.
@@ -204,15 +212,16 @@ protected:
         double target_vof;
         bool upd;
 public:
-        computeLEPLICVolumeFractionWrapper(LEPlicElementInterface *i, LEPlic *mi, const FloatArray &n, const double target_vof_val, bool upd_val) { iface = i;
-                                                                                                                                                    normal = n;
-                                                                                                                                                    minterf = mi;
-                                                                                                                                                    target_vof = target_vof_val;
-                                                                                                                                                    upd = upd_val; }
+        computeLEPLICVolumeFractionWrapper(LEPlicElementInterface *i, LEPlic *mi, const FloatArray &n, const double target_vof_val, bool upd_val) {
+            iface = i;
+            normal = n;
+            minterf = mi;
+            target_vof = target_vof_val;
+            upd = upd_val;
+        }
         void setNormal(const FloatArray &n) { normal = n; }
         double eval(double x) { return fabs(iface->computeLEPLICVolumeFraction(normal, x, minterf, upd) - target_vof); }
     };
 };
-
 } // end namespace oofem
 #endif // leplic_h

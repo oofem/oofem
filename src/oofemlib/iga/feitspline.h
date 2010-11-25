@@ -53,7 +53,6 @@
 #include "mathfem.h"
 
 namespace oofem {
-
 /* alternatively, it is possible to store for individual control points open local knot vector;
  *       however, this is not enough as I need to know how many knots have been prepended and appended
  *       (see createLocalKnotVector) as these are relevant for finding relevant knot span using BSpline method
@@ -170,6 +169,5 @@ protected:
     /** Returns the number of nonzero basis functions at given knot span interval (from start to end) */
     int  giveNumberOfKnotSpanBasisFunctions(const IntArray &startKnotSpan, const IntArray &endKnotSpan);
 }; // end of TSplineInterpolation class definition
-
 } // end namespace oofem
 #endif //feitspline_h

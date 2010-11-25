@@ -69,8 +69,10 @@ public:
     /// Constructor
     TR_SHELL01(int, Domain *);
     /// Destructor
-    ~TR_SHELL01() { delete plate;
-                    delete membrane; }
+    ~TR_SHELL01() {
+        delete plate;
+        delete membrane;
+    }
 
     virtual int computeNumberOfDofs(EquationID ut) { return 18; }
     virtual void giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const
@@ -101,9 +103,9 @@ public:
 #endif
 
     integrationDomain giveIntegrationDomain()
-    { return _Triangle;}
-    MaterialMode          giveMaterialMode()  
-    {return _Unknown;}
+    { return _Triangle; }
+    MaterialMode          giveMaterialMode()
+    { return _Unknown; }
 
 protected:
     void computeBmatrixAt(GaussPoint *, FloatMatrix &, int = 1, int = ALL_STRAINS)

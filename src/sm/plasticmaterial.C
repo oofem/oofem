@@ -45,12 +45,11 @@
 #include "structuralcrosssection.h"
 #include "datastream.h"
 #ifndef __MAKEDEPEND
-#include <math.h>
+ #include <math.h>
 #endif
 #include "contextioerr.h"
 
 namespace oofem {
-
 #define YIELD_TOL 1.e-5
 #define RES_TOL   1.e-5
 #define PLASTIC_MATERIAL_MAX_ITERATIONS 40
@@ -325,7 +324,7 @@ PlasticMaterial :: giveRealStressVector(FloatArray &answer,
     if ( form == FullForm ) {
         answer = fullStressVector;
         return;
-    } else                                                             {
+    } else {
         crossSection->giveReducedCharacteristicVector(answer, gp, fullStressVector);
         return;
     }
@@ -527,7 +526,7 @@ PlasticMaterial :: giveConsistentStiffnessMatrix(FloatMatrix &answer,
         if ( form == ReducedForm ) {
             answer = elasticModuli;
             return;
-        } else                                                              {
+        } else {
             this->giveStressStrainMask( mask, ReducedForm, gp->giveMaterialMode() );
             answer.beSubMatrixOfSizeOf(elasticModuli, mask, 6);
             //delete mask;
@@ -1115,7 +1114,4 @@ PlasticMaterialStatus :: restoreContext(DataStream *stream, ContextMode mode, vo
 
     return CIO_OK; // return succes
 }
-
-
-
 } // end namespace oofem

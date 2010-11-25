@@ -47,7 +47,6 @@
 #include "domain.h"
 
 namespace oofem {
-
 /**
  * Class representing a general abstraction for finite element interpolation class.
  */
@@ -56,14 +55,12 @@ class FEInterpolation1d : public FEInterpolation
 protected:
 
 public:
- FEInterpolation1d(int o) : FEInterpolation(o) { }
-  /**
-   * Returns number of spatial dimensions
-   */
-  int const giveNsd() {return 1;}
+    FEInterpolation1d(int o) : FEInterpolation(o) { }
+    /**
+     * Returns number of spatial dimensions
+     */
+    int const giveNsd() { return 1; }
 };
-
-
 } // end namespace oofem
 #endif // feinterpol1d_h
 

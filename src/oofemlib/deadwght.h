@@ -77,7 +77,7 @@ public:
     ///Returns type of class
     classType    giveClassID() const { return DeadWeightClass; }
     ///Returns name of class
-    const char   *giveClassName() const { return "DeadWeight"; }
+    const char *giveClassName() const { return "DeadWeight"; }
     ///Returns input record name of the receiver.
     const char *giveInputRecordName() const { return "DeadWeight"; }
     ///Returns type of boundary condition
@@ -85,7 +85,6 @@ public:
     ///Returns type of load
     bcGeomType    giveBCGeoType() const { return BodyLoadBGT; }
 };
-
 } // end namespace oofem
 #endif // deadwght_h
 

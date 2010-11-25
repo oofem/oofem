@@ -6,10 +6,10 @@
 // file hellmat.C
 
 #ifndef __MAKEDEPEND
-#include <stdio.h>
-#include <stdlib.h>
-#include <math.h>
-#include <string.h>
+ #include <stdio.h>
+ #include <stdlib.h>
+ #include <math.h>
+ #include <string.h>
 #endif
 
 #include "gausspnt.h"
@@ -24,14 +24,14 @@
 #include "contextioerr.h"
 
 namespace oofem {
-
-
 #ifdef __TM_MODULE
 
 // --------- class AgingIsoLEMaterial implementation---------
 AgingIsoLEMaterial :: AgingIsoLEMaterial(int n, Domain *d, double E, double nu) : IsotropicLinearElasticMaterial(n, d, E, nu) { }
-void AgingIsoLEMaterial :: setE(double newE) { E = newE;
-                                               G = 0.5 * E / ( 1. + nu ); }
+void AgingIsoLEMaterial :: setE(double newE) {
+    E = newE;
+    G = 0.5 * E / ( 1. + nu );
+}
 
 // --------- class HellmichMaterial implementation---------
 HellmichMaterial :: HellmichMaterial(int n, Domain *d) : StructuralMaterial(n, d), HydrationModelInterface()
@@ -83,14 +83,14 @@ HellmichMaterial :: createMaterialGp()
     }
 
     ( ( HellmichMaterialStatus * ) giveStatus(materialGp) )->setInitialTemperature(initialTemperature); // set material temperature in K
-#ifdef VERBOSE_HELLMAT
+ #ifdef VERBOSE_HELLMAT
     // output to check if it worked
     printf("\n Hellmat::createMaterialGp:");
     printf("\n  Auxiliary element input record: %s", eirstr);
     printf( "\n  Created auxiliary element with material %s.", elem->giveMaterial()->giveClassName() );
     printf( "\n  Created material-level gp with material %s.", materialGp->giveMaterial()->giveClassName() );
     printf( "\n  Material temperature set to %f.", giveTemperature(NULL) );
-#endif
+ #endif
 }
 
 GaussPoint *
@@ -303,7 +303,7 @@ HellmichMaterial :: initializeFrom(InputRecord *ir)
         if ( intvalue & 1 ) {
             options = options | moShrinkage;
             printf("\nHellMat: Autogenous shrinkage enabled.");
-        } else                                                                                                           {
+        } else {
             options = options & ~moShrinkage;
             printf("\nHellMat: No autogenous shrinkage.");
         }
@@ -311,7 +311,7 @@ HellmichMaterial :: initializeFrom(InputRecord *ir)
         if ( intvalue & 2 ) {
             options = options | moHumidityStrain;
             printf("\nHellMat: Humidity shrinkage enabled.");
-        } else                                                                                                              {
+        } else {
             options = options & ~moHumidityStrain;
             printf("\nHellMat: No humidity shrinkage.");
         }
@@ -319,7 +319,7 @@ HellmichMaterial :: initializeFrom(InputRecord *ir)
         if ( intvalue & 4 ) {
             options = options | moDryingShrinkage;
             printf("\nHellMat: Drying shrinkage enabled.");
-        } else                                                                                                             {
+        } else {
             options = options & ~moDryingShrinkage;
             printf("\nHellMat: No drying shrinkage.");
         }
@@ -430,7 +430,7 @@ HellmichMaterial :: initializeFrom(InputRecord *ir)
         if ( ( options & moPlasticity ) && ( ir->hasField(IFT_HellmichMaterial_computedl, "computedl") ) ) {
             options = options | moComputedl;
             printf("\nHellMat: Direct computation of plastic multiplier dlambda1.");
-        } else   {
+        } else {
             options = options & ~moComputedl;
             printf("\nHellMat: Newton solution of plastic multiplier dlambda1.");
         }
@@ -468,7 +468,7 @@ HellmichMaterial :: agingE(double ksi)
 {
     if ( ( options & moLinearEModulus ) || ( mixture == mtHuber ) ) {
         return ( ae * ksi );                                             // Huber mixture, input forced
-    } else                                                                              {
+    } else {
         return ( ae * sqrt(ksi) ); // Lafarge mixture
     }
 }
@@ -516,9 +516,9 @@ HellmichMaterial :: elasticStiffness(FloatArray &stress, FloatArray &strain, Gau
         for ( i = 3; i < 6; i++ ) {
             stress(i) = Gv * strain(i);
         }
-    } else if ( strain.containsOnlyZeroes() )     {
+    } else if ( strain.containsOnlyZeroes() ) {
         stress = strain;
-    } else                                                                { // linear elastic material
+    } else {                                                                // linear elastic material
         FloatMatrix d;
         LinearElasticMaterial *lMat;
         lMat = giveLinearElasticMaterial(gp, atTime);
@@ -577,9 +577,9 @@ void HellmichMaterial :: elasticCompliance(FloatArray &strain, FloatArray &stres
         for ( i = 3; i < 6; i++ ) {
             strain(i) = stress(i) / Gv;
         }
-    } else if ( stress.containsOnlyZeroes() )     {
+    } else if ( stress.containsOnlyZeroes() ) {
         strain = stress;
-    } else                                                                {
+    } else {
         FloatMatrix d;
         LinearElasticMaterial *lMat;
         lMat = giveLinearElasticMaterial(gp, atTime);
@@ -596,12 +596,12 @@ double HellmichMaterial :: prestressValue(double time)
     if ( prestress ) {
         if ( time < prestressFrom ) {
             return 0;
-        } else if ( ( prestressTo > prestressFrom ) && ( time < prestressTo ) )        {
+        } else if ( ( prestressTo > prestressFrom ) && ( time < prestressTo ) ) {
             return prestress * ( time - prestressFrom ) / ( prestressTo - prestressFrom );
         } else {
             return prestress;
         }
-    } else   {
+    } else {
         return 0.;
     }
 }
@@ -843,14 +843,14 @@ void HellmichMaterial :: projection(ActiveSurface &active, double &dlambda1, dou
 {
     double i1;
 
-#ifdef DEBUG
+ #ifdef DEBUG
     if ( active == asNone ) {
         dlambda1 = dlambda2 = 0;
         printf("HellmichMaterial::projection: No active yield surface!\n");
         return;
     }
 
-#endif
+ #endif
 
 
     i1 = invariantI1(trialStress);
@@ -860,12 +860,12 @@ void HellmichMaterial :: projection(ActiveSurface &active, double &dlambda1, dou
         dlambda2 = auxKv * ( i1 - delta * fcStrength(auxksi) )
                    / ( 9 * agingK(auxksi) );
         return;
-    } else if ( active == asDP )     {
+    } else if ( active == asDP ) {
         dlambda2 = 0;
 
         tempa = alpha * i1 + deviatorNorm(trialStress);
         tempb = -( 9 * alpha * alpha * agingK(auxksi) / auxKv + 2 * agingG(auxksi) / auxGv );
-    } else if ( active == asCorner )     {
+    } else if ( active == asCorner ) {
         tempa = deviatorNorm(trialStress) + alpha *delta *fcStrength(auxksi);
         tempb = -2 * agingG(auxksi) / auxGv;
     } else {
@@ -884,33 +884,33 @@ void HellmichMaterial :: projection(ActiveSurface &active, double &dlambda1, dou
 
     if ( active == asCorner ) {
         if ( dlambda1 < 0 ) {
-#ifdef VERBOSE
+ #ifdef VERBOSE
             //   printf("HellmichMaterial::projection: corner region - only TC surface active.\n");
-#endif
+ #endif
             active = asTC;
             projection(active, dlambda1, dlambda2, trialStress);
         } else {
             dlambda2 = auxKv * ( i1 - delta * fcStrength(auxksi) ) / ( 9 * agingK(auxksi) )
                        - dlambda1 * alpha;
             if ( dlambda2 < 0 ) {
-#ifdef VERBOSE
+ #ifdef VERBOSE
                 //    printf("HellmichMaterial::projection: corner region - only DP surface active.\n");
-#endif
+ #endif
                 active = asDP;
                 projection(active, dlambda1, dlambda2, trialStress);
             }
         }
     }
 
-#ifdef DEBUG
+ #ifdef DEBUG
     // check
     if ( ( dlambda1 < 0 ) || ( ( dlambda2 < 0 ) ) ) {
         printf("HellmichMaterial::projection: negative yield increment!\n \
-  dl1=%f, dl2=%f, activeSurface=%d"                                                                            , dlambda1, dlambda2, active);
+  dl1=%f, dl2=%f, activeSurface=%d", dlambda1, dlambda2, active);
         _error("");
     }
 
-#endif
+ #endif
 }
 
 void HellmichMaterial :: stressReturn(FloatArray &stress, FloatArray &trialStress, GaussPoint *gp, TimeStep *atTime)
@@ -952,7 +952,7 @@ void HellmichMaterial :: stressReturn(FloatArray &stress, FloatArray &trialStres
             depsp(3) /= snorm;
             depsp(4) /= snorm;
             depsp(5) /= snorm;
-        } else   {
+        } else {
             depsp.zero();
         }
 
@@ -999,12 +999,12 @@ void HellmichMaterial :: give1dMaterialStiffnessMatrix(FloatMatrix &answer,
     ActiveSurface as;
     double Eep = 0, Ev, drc, ksi;
     HellmichMaterialStatus *status;
-#ifdef DEBUG
+ #ifdef DEBUG
     if ( gp->giveMaterialMode() != _1dMat ) {
         _error("give1dStiffMtrx: wrong stress-strain mode!");
     }
 
-#endif
+ #endif
     ksi = giveHydrationDegree(gp, atTime, VM_Total);
     if ( ksi < HYDRATION_MINDEGREE ) {
         ksi = HYDRATION_MINDEGREE;
@@ -1052,12 +1052,12 @@ void HellmichMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
     HellmichMaterialStatus *status;
     FloatArray stress;
 
-#ifdef DEBUG
+ #ifdef DEBUG
     if ( gp->giveMaterialMode() != _3dMat ) {
         _error("give3dStiffMtrx: wrong stress-strain mode!");
     }
 
-#endif
+ #endif
     if ( !( ( rMode == TangentStiffness ) || ( rMode == ElasticStiffness ) || ( rMode == SecantStiffness ) ) ) {
         _error("HellmichMaterial:give3dStiffness.: Unsupported material response mode.");
     }
@@ -1094,7 +1094,7 @@ void HellmichMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
             for ( j = 0; j < 6; j++ ) {
                 if ( i == j ) {
                     curent = GGv;    // I
-                } else                                       {
+                } else {
                     curent = 0;
                 }
 
@@ -1114,7 +1114,7 @@ void HellmichMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
             for ( j = 0; j < 6; j++ ) { // Idev = I  -  1/3 1x1
                 if ( i == j ) {
                     curent = 1;        // I
-                } else                                         {
+                } else {
                     curent = 0;
                 }
 
@@ -1161,7 +1161,7 @@ void HellmichMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
                 for ( j = 0; j < 6; j++ ) {
                     if ( i == j ) {
                         curent = GGv - GGv2 * dl1 / snorm;    // I
-                    } else                                                               {
+                    } else {
                         curent = 0;                                  // Idev + 1x1
                     }
 
@@ -1183,7 +1183,7 @@ void HellmichMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
                 for ( j = 0; j < 6; j++ ) {
                     if ( i == j ) {
                         curent = GGv - GGv2 * dl1 / snorm;    // I
-                    } else                                                               {
+                    } else {
                         curent = 0;                                  // Idev
                     }
 
@@ -1230,9 +1230,9 @@ double HellmichMaterial :: approxnewtonfindroot()
         dfdx = ( f1(x0 + NEWTON_DERIVATIVEDX) - y0 ) / NEWTON_DERIVATIVEDX;
         x0 -= y0 / dfdx;
         y0 = f1(x0);
-#ifdef VERBOSEFINDROOT
+ #ifdef VERBOSEFINDROOT
         printf("approxnewtonfindroot: x=%.15g, dfdx= %.15g, chyba %.2g \n", x0, dfdx, y0);
-#endif
+ #endif
     } while ( fabs(y0) > prec );
 
     return ( x0 );
@@ -1250,16 +1250,16 @@ double HellmichMaterial :: newtonfindroot()
 
     do {
         df = dfdx(x0);
-#ifdef VERBOSEFINDROOT
+ #ifdef VERBOSEFINDROOT
         printf("newtonfindroot: x=%.15g, dfdx= %.15g, chyba %.2g \n", x0, df, y0);
-#endif
+ #endif
         x0 -= y0 / df;
         y0 = f1(x0);
     } while ( fabs(y0) > prec );
 
-#ifdef VERBOSEFINDROOT
+ #ifdef VERBOSEFINDROOT
     printf("          root: x=%.15g, dfdx= %.15g, chyba %.2g \n", x0, df, y0);
-#endif
+ #endif
     return ( x0 );
 }
 
@@ -1317,11 +1317,11 @@ void principalStresses(double *answer, double *s, stressStrainPrincMode mode)
         answer [ 2 ] = s3;
     }
 
-#ifdef DEBUG
+ #ifdef DEBUG
     else {
         printf("principalStresses: 3 valid roots not found!\n");
     }
-#endif
+ #endif
 
     // sort results
     for ( i = 1; i < 3; i++ ) {
@@ -1365,12 +1365,12 @@ void HellmichMaterial :: plotReturn(FILE *outputStream, GaussPoint *gp, TimeStep
     HellmichMaterialStatus *status;
     FloatArray trialStress(6), stress(6);
 
-#ifdef DEBUG
+ #ifdef DEBUG
     if ( outputStream == NULL ) {
         _error("plotReturn: can't write into NULL stream");
     }
 
-#endif
+ #endif
 
     status = ( HellmichMaterialStatus * ) giveStatus(gp);
     status->giveTrialStressVector(trialStress);
@@ -1544,9 +1544,9 @@ HellmichMaterial :: initAuxStatus(GaussPoint *gp, TimeStep *atTime)
     // 0  -> initialize, set to 1
     // 1  -> nothing
     if ( ( options & moIsothermal ) && !materialGpUpdateFlag ) {
-#ifdef VERBOSE_HELLMAT
+ #ifdef VERBOSE_HELLMAT
         printf( "Hellmat: Material-level auxiliary status initialized for time=%.0f, flag 0->1\n", giveTime(atTime) );
-#endif
+ #endif
         materialGpUpdateFlag = 1;
         materialGpInitAt = atTime->giveSolutionStateCounter();
         initAuxStatus(giveMaterialGp(), atTime);
@@ -1582,7 +1582,7 @@ HellmichMaterial :: initAuxStatus(GaussPoint *gp, TimeStep *atTime)
         } else {
             h = giveHumidity(gp, VM_Total);
         }
-    } else   { // === Non-isothermal ===
+    } else {   // === Non-isothermal ===
         // Get temperature from transportProblem via Field Manager
         // Might also get hydration degree, so that it need not be computed twice
         FieldManager *fm = domain->giveEngngModel()->giveContext()->giveFieldManager();
@@ -1623,17 +1623,17 @@ HellmichMaterial :: initAuxStatus(GaussPoint *gp, TimeStep *atTime)
                 _error("InitAuxStatus: Temperature field not registered, initial temperature not set. Use isoT or iniT setting.");
             }
 
-#ifdef VERBOSE_HELLMAT
+ #ifdef VERBOSE_HELLMAT
             printf("\nInitAuxStatus: Temperature field not registered, using initial teperature %.2f.", T);
-#endif
+ #endif
         }
 
         // set initial temperature to actual temperature at time of cast
         if ( T && ( tim >= castAt ) && ( status->giveInitialTemperature() <= 0 ) ) {
             status->setInitialTemperature(T);
-#ifdef VERBOSE_HELLMAT
+ #ifdef VERBOSE_HELLMAT
             printf("\nInitAuxStatus: Setting initial temperature of gp %d to %.3f", gp->giveNumber(), T);
-#endif
+ #endif
         } // end set initial temperature
 
         // == Moisture ==
@@ -1656,9 +1656,9 @@ HellmichMaterial :: initAuxStatus(GaussPoint *gp, TimeStep *atTime)
             }
         } else { // no moisture field
             h = 1.;
-#ifdef VERBOSE_HELLMAT
+ #ifdef VERBOSE_HELLMAT
             printf("\nInitAuxStatus: Moisture field not registered, using saturated conditions.");
-#endif
+ #endif
         } // == end Moisture ==
 
     } // === end non-isothermal ===
@@ -1689,9 +1689,9 @@ HellmichMaterial :: initAuxStatus(GaussPoint *gp, TimeStep *atTime)
             ksi0tim = tim - dt * ( ksi - ksi0 ) / dksi;
             ksi0T = T - dT * ( tim - ksi0tim ) / dt;
             g0 = computeGamma0(ksi0tim, ksi0T);
-#ifdef VERBOSE_HELLMAT
+ #ifdef VERBOSE_HELLMAT
             printf("Starting long-term creep process at ksi=%.4f for time=%f, T=%f.\n", ksi, ksi0tim, ksi0T);
-#endif
+ #endif
             // save the base prestress value
             status->setGamma0(g0);
         } // end base prestress evaluation
@@ -1721,7 +1721,7 @@ HellmichMaterial :: giveHydrationDegree(GaussPoint *gp, TimeStep *atTime, ValueM
         }
 
         return hydrationModel->giveHydrationDegree(gp, atTime, mode);
-    } else   {
+    } else {
         return ( mode == VM_Total ) ? constantHydrationDegree : 0.;
     }
 }
@@ -1811,10 +1811,10 @@ double HellmichMaterial :: givePrestress(GaussPoint *gp)
         g0 = status->giveGamma0();
         if ( g0 <= 0 ) {
             return ( 0. ); // gamma0 not set yet
-        } else                             {
+        } else {
             return ( g0 - modulusH * status->giveTempViscousSlip() );
         }
-    } else   {
+    } else {
         return 0.; // no creep
     }
 }
@@ -1830,7 +1830,7 @@ double HellmichMaterial :: giveViscosity(GaussPoint *gp)
     HellmichMaterialStatus *status = ( HellmichMaterialStatus * ) giveStatus(gp);
     if ( status->giveGamma0() <= 0. ) {
         return ( 0. );                     // gamma0 not set yet
-    } else                                                {
+    } else {
         return ( status->giveViscosity() );
     }
 }
@@ -1922,7 +1922,7 @@ void HellmichMaterial :: giveThermalDilatationVector(FloatArray &answer,
 {
     answer.resize(6);
     answer.zero();
-    double aux = this->give(tAlpha,gp);
+    double aux = this->give(tAlpha, gp);
     answer(0) = aux;
     answer(1) = aux;
     answer(2) = aux;
@@ -2223,9 +2223,9 @@ void HellmichMaterial :: giveRealStressVector(FloatArray &answer,
             _error("Can't use VM_Total with creep.");
         }
 
-#ifdef DEBUG
+ #ifdef DEBUG
         _warning1("HellmichMaterial::giveRealStress - VM_Total!\n");
-#endif
+ #endif
 
         auxKv = auxGv = 1.; // no creep
         auxStrain = totalStrain;
@@ -2626,9 +2626,9 @@ HellmichMaterial :: updateYourself(GaussPoint *gp, TimeStep *atTime)
 {
     // update the material-level status if necessary (once per material)
     if ( ( options & moIsothermal ) && materialGpUpdateFlag ) {
-#ifdef VERBOSE_HELLMAT
+ #ifdef VERBOSE_HELLMAT
         printf( "Hellmat: Material-level status updated for time=%.0f, flag 1->0.\n", giveTime(atTime) );
-#endif
+ #endif
         materialGpUpdateFlag = 0;
         updateYourself(giveMaterialGp(), atTime);
     }
@@ -2658,11 +2658,11 @@ HellmichMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
     } else if ( !( options & moPlasticity ) ) {
         giveLinearElasticMaterial(gp, atTime)->giveCharacteristicMatrix(answer, form, rMode, gp, atTime);
         answer.times( 1 / giveKvCoeff(gp, atTime) );
-    } else   {
+    } else {
         _error("giveCharMtrx: unsupported stress-strain mode!");
     }
 
-#ifdef VERBOSE_TANGENT
+ #ifdef VERBOSE_TANGENT
     if ( options & moPlotStressStrainIter ) {
         HellmichMaterialStatus *status = ( HellmichMaterialStatus * ) giveStatus(gp);
         if ( mMode == _1dMat ) {
@@ -2673,7 +2673,7 @@ HellmichMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
         }
     }
 
-#endif
+ #endif
 }
 
 void HellmichMaterial :: setMixture(MixtureType mix)
@@ -2762,7 +2762,7 @@ HellmichMaterial :: CreateStatus(GaussPoint *gp) const
     return new HellmichMaterialStatus(1, this->giveDomain(), gp);
 }
 
-double HellmichMaterial :: give(int aProperty, GaussPoint* gp)
+double HellmichMaterial :: give(int aProperty, GaussPoint *gp)
 /**
  * Returns the value of the property aProperty.
  * Only the final values of the Young and shear modulus andPoisson ratio are returned.
@@ -2786,7 +2786,7 @@ double HellmichMaterial :: give(int aProperty, GaussPoint* gp)
         ( aProperty == NYyx ) ) {
         return ny;
     } else {
-      return this->Material :: give(aProperty, gp);
+        return this->Material :: give(aProperty, gp);
     }
 }
 
@@ -2881,7 +2881,7 @@ HellmichMaterialStatus :: HellmichMaterialStatus(int n, Domain *d, GaussPoint *g
         nonisoData = new NonisoData();
         // uninitialized
         setInitialTemperature(-1.);
-    } else   {
+    } else {
         nonisoData = NULL;
     }
 
@@ -3079,9 +3079,9 @@ void HellmichMaterialStatus :: printOutputAt(FILE *stream, TimeStep *atTime)
             fprintf(stream, " Plast");
             if ( as == asDP ) {
                 fprintf(stream, "DP");
-            } else if ( as == asTC )   {
+            } else if ( as == asTC ) {
                 fprintf(stream, "TC");
-            } else if ( as == asCorner )                                                     {
+            } else if ( as == asCorner ) {
                 fprintf(stream, "CO");
             }
 
@@ -3368,11 +3368,10 @@ HellmichMaterialStatus :: restoreContext(DataStream *stream, ContextMode mode, v
 }
 
 #else // #ifdef __TM_MODULE
-#include "hellmat.h"
+ #include "hellmat.h"
 
-HellmichMaterial::HellmichMaterial(int n, Domain *d) : StructuralMaterial (n,d) {
-  _error ("Can't create instance of this class, TM module required");
+HellmichMaterial :: HellmichMaterial(int n, Domain *d) : StructuralMaterial(n, d) {
+    _error("Can't create instance of this class, TM module required");
 }
 #endif
-
 } // end namespace oofem

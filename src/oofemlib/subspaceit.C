@@ -42,8 +42,8 @@
 #include "subspaceit.h"
 #include "engngm.h"
 #ifndef __MAKEDEPEND
-#include <stdio.h>
-#include <math.h>
+ #include <stdio.h>
+ #include <math.h>
 #endif
 
 #include "verbose.h"
@@ -54,7 +54,6 @@
 #include "mathfem.h"
 
 namespace oofem {
-
 SubspaceIteration ::  SubspaceIteration(int i, Domain *d, EngngModel *m) :
     SparseGeneralEigenValueSystemNM(i, d, m) {
     //
@@ -498,6 +497,7 @@ label400:
     //delete eigv;
     solved = 1;
     return NM_Success;
+
     ;
 }
 
@@ -509,7 +509,4 @@ SubspaceIteration :: initializeFrom(InputRecord *ir)
 {
     return IRRT_OK;
 }
-
-
-
 } // end namespace oofem

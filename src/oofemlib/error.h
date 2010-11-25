@@ -44,11 +44,10 @@
 #include "oofemcfg.h"
 #include "logger.h"
 #ifndef __MAKEDEPEND
-#include <stdlib.h>
+ #include <stdlib.h>
 #endif
 
 namespace oofem {
-
 /** cause oofem  program termination by calling exit */
 void oofem_exit(int code);
 
@@ -103,15 +102,15 @@ void oofem_exit(int code);
 
 /*
  * // log-family macros that use OOFEM loggers and exit
- #define OOFEM_FATAL(...) {oofem_errLogger.writeELogMsg(Logger::LOG_LEVEL_FATAL, __FILE__, __LINE__, __VA_ARGS__); oofem_exit(1);}
- #define OOFEM_ERROR(...) {oofem_errLogger.writeELogMsg(Logger::LOG_LEVEL_ERROR, __FILE__, __LINE__, __VA_ARGS__); oofem_exit(1);}
- #define OOFEM_WARNING(...) {oofem_errLogger.writeELogMsg(Logger::LOG_LEVEL_WARNING, __FILE__, __LINE__, __VA_ARGS__);}
+ *#define OOFEM_FATAL(...) {oofem_errLogger.writeELogMsg(Logger::LOG_LEVEL_FATAL, __FILE__, __LINE__, __VA_ARGS__); oofem_exit(1);}
+ *#define OOFEM_ERROR(...) {oofem_errLogger.writeELogMsg(Logger::LOG_LEVEL_ERROR, __FILE__, __LINE__, __VA_ARGS__); oofem_exit(1);}
+ *#define OOFEM_WARNING(...) {oofem_errLogger.writeELogMsg(Logger::LOG_LEVEL_WARNING, __FILE__, __LINE__, __VA_ARGS__);}
  *
  *
  * //log-family macros that allow to pass file and line info. They use OOFEM loggers and exit
- #define __OOFEM_FATAL(_file,_line,...) {oofem_errLogger.writeELogMsg(Logger::LOG_LEVEL_FATAL,_file,_line,__VA_ARGS__);oofem_exit(1);}
- #define __OOFEM_ERROR(_file,_line,...) {oofem_errLogger.writeELogMsg(Logger::LOG_LEVEL_ERROR,_file,_line,__VA_ARGS__);oofem_exit(1);}
- #define __OOFEM_WARNING(_file,_line,...) {oofem_errLogger.writeELogMsg(Logger::LOG_LEVEL_WARNING,_file,_line,__VA_ARGS__);}
+ *#define __OOFEM_FATAL(_file,_line,...) {oofem_errLogger.writeELogMsg(Logger::LOG_LEVEL_FATAL,_file,_line,__VA_ARGS__);oofem_exit(1);}
+ *#define __OOFEM_ERROR(_file,_line,...) {oofem_errLogger.writeELogMsg(Logger::LOG_LEVEL_ERROR,_file,_line,__VA_ARGS__);oofem_exit(1);}
+ *#define __OOFEM_WARNING(_file,_line,...) {oofem_errLogger.writeELogMsg(Logger::LOG_LEVEL_WARNING,_file,_line,__VA_ARGS__);}
  *
  */
 
@@ -169,6 +168,5 @@ void oofem_exit(int code);
 #define __OOFEM_ERROR(_file, _line, _1) __OOFEM_ERROR1(_file, _line, _1)
 #define __OOFEM_WARNING(_file, _line, _1) __OOFEM_WARNING1(_file, _line, _1)
 //@}
-
 } // end namespace oofem
 #endif // error_h

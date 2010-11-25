@@ -12,12 +12,11 @@
 #include "dof.h"
 
 #ifndef __MAKEDEPEND
-#include <stdio.h>
-#include <string.h>
+ #include <stdio.h>
+ #include <string.h>
 #endif
 
 namespace oofem {
-
 /**
  * Class representing "slave" degree of freedom. This dof is generally linked to some master dofs
  * with various weights - contributions - combination (link slave-slave is allowed).
@@ -53,12 +52,12 @@ public:
 
     void initialize(int cntOfMstrDfMngr, Node **mstrNode, const IntArray *mstrDofID, const FloatArray *mstrContribution);
     int giveNumberOfPrimaryMasterDofs(void);
-    void giveMasterDofManArray (IntArray& answer);
+    void giveMasterDofManArray(IntArray &answer);
     void giveUnknowns(FloatArray &masterUnknowns, EquationID type, ValueModeType mode, TimeStep *stepN);
     void giveUnknowns(FloatArray &masterUnknowns, PrimaryField &field, ValueModeType mode, TimeStep *stepN);
     void giveBcValues(FloatArray &masterBcValues, ValueModeType mode, TimeStep *stepN);
     void computeDofTransformation(FloatArray &masterContribs);
-    void giveEquationNumbers(IntArray &masterEqNumbers, const UnknownNumberingScheme& s);
+    void giveEquationNumbers(IntArray &masterEqNumbers, const UnknownNumberingScheme &s);
 
     double giveUnknown(EquationID type, ValueModeType mode, TimeStep *stepN);
     double giveUnknown(PrimaryField &field, ValueModeType mode, TimeStep *stepN);
@@ -68,8 +67,10 @@ public:
      * computes the results.
      * @see MasterDof::giveUnknown function
      */
-    double giveLocalUnknown(EquationID, ValueModeType, TimeStep *) { _error("HangingDof :: giveLocalUnknown: local coordinate system doesn't exist");
-                                                                     return 0.0; }
+    double giveLocalUnknown(EquationID, ValueModeType, TimeStep *) {
+        _error("HangingDof :: giveLocalUnknown: local coordinate system doesn't exist");
+        return 0.0;
+    }
 
     /**
      * Returns equation number corresponding to receiver.
@@ -78,8 +79,10 @@ public:
      * contributing to several master dofs (diplacement to displacement and rotations in master).
      * @return prints error msg and exits.
      */
-    int __giveEquationNumber(void) { _error("giveEquationNumber: undefined");
-      return 0; }
+    int __giveEquationNumber(void) {
+        _error("giveEquationNumber: undefined");
+        return 0;
+    }
 
     /**
      * Returns equation number corresponding to receiver.
@@ -88,8 +91,10 @@ public:
      * contributing to several master dofs (diplacement to displacement and rotations in master).
      * @return prints error msg and exits.
      */
-    int __givePrescribedEquationNumber(void) { _error("givePrescribedEquationNumber: undefined");
-                                             return 0; }
+    int __givePrescribedEquationNumber(void) {
+        _error("givePrescribedEquationNumber: undefined");
+        return 0;
+    }
     /**
      * Asks new equation number. Empty function (master is assumed to receive same message).
      */
@@ -120,13 +125,13 @@ public:
      * to decide whether bc is active. Use appropriate services instead.
      * @param id of associated Boundary condition, zero otherwise
      */
-    int giveBcId () {return 0;}
+    int giveBcId() { return 0; }
     /** Returns the id of associated initial condition, if there is any.
      * Used only for printing purposes. In general, id could not be used
      * to decide whether bc is active. Use appropriate services instead.
      * @param id of associated initial condition, zero otherwise
      */
-    int giveIcId () {return 0;}
+    int giveIcId() { return 0; }
 
     /// Stores receiver state to output stream.
     virtual contextIOResultType    saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
@@ -150,12 +155,10 @@ public:
      * these relations to reflext updated numbering. The renumbering funciton is passed, which is supposed
      * to return an updated number of specified entyty type based on old number.
      */
-    virtual void updateLocalNumbering( EntityRenumberingFunctor &f );
+    virtual void updateLocalNumbering(EntityRenumberingFunctor &f);
 
- protected:
-    inline Dof* giveMasterDof (int i); 
+protected:
+    inline Dof *giveMasterDof(int i);
 };
-
-
 } // end namespace oofem
 #endif // slavedof_h

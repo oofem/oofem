@@ -43,7 +43,6 @@
 #include "mathfem.h"
 
 namespace oofem {
-
 DynCompCol :: DynCompCol(void) : SparseMtrx(), base_(0)
 {
 #ifndef DynCompCol_USE_STL_SETS
@@ -79,7 +78,7 @@ DynCompCol :: DynCompCol(const DynCompCol &S) : SparseMtrx(S.nRows, S.nColumns),
     if ( S.columns_ ) {
         this->columns_ = new FloatArray * [ S.nColumns ];
         for ( i = 0; i < S.nColumns; i++ ) {
-            this->columns_ [ i ] = new FloatArray(* S.columns_ [ i ]);
+            this->columns_ [ i ] = new FloatArray(*S.columns_ [ i ]);
         }
     } else {
         this->columns_ = NULL;
@@ -88,7 +87,7 @@ DynCompCol :: DynCompCol(const DynCompCol &S) : SparseMtrx(S.nRows, S.nColumns),
     if ( S.rowind_ ) {
         this->rowind_ = new IntArray * [ S.nColumns ];
         for ( i = 0; i < S.nColumns; i++ ) {
-            this->rowind_ [ i ] = new IntArray(* S.rowind_ [ i ]);
+            this->rowind_ [ i ] = new IntArray(*S.rowind_ [ i ]);
         }
     } else {
         this->rowind_ = NULL;
@@ -99,7 +98,7 @@ DynCompCol :: DynCompCol(const DynCompCol &S) : SparseMtrx(S.nRows, S.nColumns),
     if ( S.columns ) {
         this->columns = new std :: map< int, double > * [ S.nColumns ];
         for ( i = 0; i < S.nColumns; i++ ) {
-            this->columns [ i ] = new std :: map< int, double >(* S.columns [ i ]);
+            this->columns [ i ] = new std :: map< int, double >(*S.columns [ i ]);
         }
     } else {
         this->columns = NULL;
@@ -155,7 +154,7 @@ DynCompCol :: ~DynCompCol()
 /* Assignment operator...  */
 /***************************/
 
-DynCompCol &DynCompCol :: operator=(const DynCompCol &C)
+DynCompCol &DynCompCol :: operator = ( const DynCompCol & C )
 {
     base_   = C.base_;
 
@@ -173,7 +172,7 @@ DynCompCol &DynCompCol :: operator=(const DynCompCol &C)
     if ( C.columns_ ) {
         this->columns_ = new FloatArray * [ C.nColumns ];
         for ( i = 0; i < C.nColumns; i++ ) {
-            this->columns_ [ i ] = new FloatArray(* C.columns_ [ i ]);
+            this->columns_ [ i ] = new FloatArray(*C.columns_ [ i ]);
         }
     } else {
         this->columns_ = NULL;
@@ -191,7 +190,7 @@ DynCompCol &DynCompCol :: operator=(const DynCompCol &C)
     if ( C.rowind_ ) {
         this->rowind_ = new IntArray * [ C.nColumns ];
         for ( i = 0; i < C.nColumns; i++ ) {
-            this->rowind_ [ i ] = new IntArray(* C.rowind_ [ i ]);
+            this->rowind_ [ i ] = new IntArray(*C.rowind_ [ i ]);
         }
     } else {
         this->rowind_ = NULL;
@@ -217,7 +216,7 @@ DynCompCol &DynCompCol :: operator=(const DynCompCol &C)
 
 SparseMtrx *DynCompCol :: GiveCopy() const
 {
-    DynCompCol *result = new DynCompCol(* this);
+    DynCompCol *result = new DynCompCol(*this);
     return result;
 }
 
@@ -282,12 +281,12 @@ void DynCompCol :: times(double x)
     this->version++;
 }
 
-int DynCompCol :: buildInternalStructure(EngngModel *eModel, int di, EquationID ut, const UnknownNumberingScheme& s)
+int DynCompCol :: buildInternalStructure(EngngModel *eModel, int di, EquationID ut, const UnknownNumberingScheme &s)
 {
     /*
      * int neq = eModel -> giveNumberOfDomainEquations (di);
      *
-     #ifndef DynCompCol_USE_STL_SETS
+     *#ifndef DynCompCol_USE_STL_SETS
      * IntArray  loc;
      * Domain* domain = eModel->giveDomain(di);
      * int nelem = domain -> giveNumberOfElements() ;
@@ -356,7 +355,7 @@ int DynCompCol :: buildInternalStructure(EngngModel *eModel, int di, EquationID 
      * }
      *
      * printf ("\nDynCompCol info: neq is %d, nelem is %d\n",neq,nz_);
-     #else
+     *#else
      * int i,j;
      * if (columns) {
      * for (i=0; i< nColumns; i++) delete this->columns[i];
@@ -367,7 +366,7 @@ int DynCompCol :: buildInternalStructure(EngngModel *eModel, int di, EquationID 
      * columns[j] = new std::map<int, double>;
      * }
      *
-     #endif
+     *#endif
      *
      * nColumns = nRows = neq;
      * // increment version
@@ -700,7 +699,7 @@ double DynCompCol :: at(int i, int j) const
 #endif
 }
 
-double DynCompCol :: operator()(int i, int j)  const
+double DynCompCol :: operator() (int i, int j)  const
 {
 #ifndef DynCompCol_USE_STL_SETS
     /*
@@ -739,7 +738,7 @@ double DynCompCol :: operator()(int i, int j)  const
 #endif
 }
 
-double &DynCompCol :: operator()(int i, int j)
+double &DynCompCol :: operator() (int i, int j)
 {
     // increment version
     this->version++;
@@ -772,7 +771,7 @@ double &DynCompCol :: operator()(int i, int j)
 /* Matrix-Vector multiplication...  */
 /***************************************/
 
-FloatArray DynCompCol :: operator *(const FloatArray &x) const
+FloatArray DynCompCol :: operator *( const FloatArray & x ) const
 {
     //      Check for compatible dimensions:
     if ( x.giveSize() != nColumns ) {

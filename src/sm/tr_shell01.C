@@ -303,15 +303,15 @@ TR_SHELL01 :: drawDeformedGeometry(oofegGraphicContext &gc, UnknownType type)
 //   if ( context.getScalarAlgo() == SA_ISO_SURF ) {
 //     for ( i = 0; i < 3; i++ ) {
 //       if ( context.getInternalVarsDefGeoFlag() ) {
-// 	// use deformed geometry
-// 	defScale = context.getDefScale();
-// 	p [ i ].x = ( FPNum ) this->giveNode(i + 1)->giveUpdatedCoordinate(1, tStep, EID_MomentumBalance, defScale);
-// 	p [ i ].y = ( FPNum ) this->giveNode(i + 1)->giveUpdatedCoordinate(2, tStep, EID_MomentumBalance, defScale);
-// 	p [ i ].z = ( FPNum ) this->giveNode(i + 1)->giveUpdatedCoordinate(3, tStep, EID_MomentumBalance, defScale);
+//  // use deformed geometry
+//  defScale = context.getDefScale();
+//  p [ i ].x = ( FPNum ) this->giveNode(i + 1)->giveUpdatedCoordinate(1, tStep, EID_MomentumBalance, defScale);
+//  p [ i ].y = ( FPNum ) this->giveNode(i + 1)->giveUpdatedCoordinate(2, tStep, EID_MomentumBalance, defScale);
+//  p [ i ].z = ( FPNum ) this->giveNode(i + 1)->giveUpdatedCoordinate(3, tStep, EID_MomentumBalance, defScale);
 //       } else {
-// 	p [ i ].x = ( FPNum ) this->giveNode(i + 1)->giveCoordinate(1);
-// 	p [ i ].y = ( FPNum ) this->giveNode(i + 1)->giveCoordinate(2);
-// 	p [ i ].z = ( FPNum ) this->giveNode(i + 1)->giveCoordinate(3);
+//  p [ i ].x = ( FPNum ) this->giveNode(i + 1)->giveCoordinate(1);
+//  p [ i ].y = ( FPNum ) this->giveNode(i + 1)->giveCoordinate(2);
+//  p [ i ].z = ( FPNum ) this->giveNode(i + 1)->giveCoordinate(3);
 //       }
 //     }
 //

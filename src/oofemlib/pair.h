@@ -43,11 +43,10 @@
 
 
 #ifndef __MAKEDEPEND
-#include <stdio.h>
+ #include <stdio.h>
 #endif
 
 namespace oofem {
-
 /**
  * This class implements key/value associations - the key and its associated value.
  * An instance of Pair is used as an entry in a dictionary.
@@ -76,9 +75,11 @@ private:
 
 public:
     /// Constructor - creates the new Pair with given key k and value v.
-    Pair(int k, double v)    { key = k;
-                               value = v;
-                               next = NULL; }
+    Pair(int k, double v)    {
+        key = k;
+        value = v;
+        next = NULL;
+    }
     /// Destructor
     ~Pair()                  { }
 
@@ -93,6 +94,5 @@ public:
     /// Prints receiver to screen
     void     printYourself() { printf("   Pair (%d,%f)\n", key, value); }
 };
-
 } // end namespace oofem
 #endif // pair_h

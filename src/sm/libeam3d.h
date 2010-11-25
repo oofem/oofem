@@ -44,7 +44,6 @@
 #include "fiberedcs.h"
 
 namespace oofem {
-
 class LIBeam3d : public StructuralElement, public FiberedCrossSectionInterface
 {
     /*
@@ -104,7 +103,7 @@ public:
 #endif
 
     integrationDomain  giveIntegrationDomain() { return _Line; }
-    MaterialMode          giveMaterialMode()  {return _3dBeam;}
+    MaterialMode          giveMaterialMode()  { return _3dBeam; }
 
 protected:
     // edge load support
@@ -121,6 +120,5 @@ protected:
     void          computeGaussPoints();
     double        giveLength();
 };
-
 } // end namespace oofem
 #endif // libeam3d_h

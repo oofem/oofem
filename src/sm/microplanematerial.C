@@ -45,11 +45,10 @@
 #include "contextioerr.h"
 
 #ifndef __MAKEDEPEND
-#include <math.h>
+ #include <math.h>
 #endif
 
 namespace oofem {
-
 Microplane *
 MicroplaneMaterial :: giveMicroplane(int i, GaussPoint *masterGp)
 {
@@ -551,7 +550,7 @@ MicroplaneMaterial :: initializeData(int numberOfMicroplanes)
          * }
          *
          */
-    } else  if ( numberOfMicroplanes == 61 )     {
+    } else if ( numberOfMicroplanes == 61 ) {
         double help [ 61 ] [ 4 ] = {
             { 1.000000000000, 0.000000000000, 0.000000000000, 0.00795844204678 },
             { 0.745355992500, 0.0, 0.666666666667, 0.00795844204678 },
@@ -666,7 +665,7 @@ MicroplaneMaterial :: initializeData(int numberOfMicroplanes)
          *
          * }
          */
-    } else   {
+    } else {
         _error("initializeData: Unsupported number of microplanes");
     }
 
@@ -686,7 +685,7 @@ MicroplaneMaterial :: initializeData(int numberOfMicroplanes)
                 m.at(1) = n.at(2) / aux;
                 m.at(2) = -n.at(1) / aux;
                 m.at(3) = 0.0;
-            } else   {
+            } else {
                 m.at(1) = 1.0;
                 m.at(2) = 0.0;
                 m.at(3) = 0.0;
@@ -697,7 +696,7 @@ MicroplaneMaterial :: initializeData(int numberOfMicroplanes)
                 m.at(1) = 0.0;
                 m.at(2) = n.at(3) / aux;
                 m.at(3) = -n.at(2) / aux;
-            } else   {
+            } else {
                 m.at(1) = 0.0;
                 m.at(2) = 1.0;
                 m.at(3) = 0.0;
@@ -708,7 +707,7 @@ MicroplaneMaterial :: initializeData(int numberOfMicroplanes)
                 m.at(1) = n.at(3) / aux;
                 m.at(2) = 0.0;
                 m.at(3) = -n.at(1) / aux;
-            } else   {
+            } else {
                 m.at(1) = 0.0;
                 m.at(2) = 0.0;
                 m.at(3) = 1.0;
@@ -730,5 +729,4 @@ MicroplaneMaterial :: initializeData(int numberOfMicroplanes)
 
     return;
 }
-
 } // end namespace oofem

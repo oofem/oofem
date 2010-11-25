@@ -48,16 +48,15 @@
 
 #include "engngm.h"
 #ifndef __MAKEDEPEND
-#include <stdlib.h>
-#include <math.h>
+ #include <stdlib.h>
+ #include <math.h>
 #endif
 
 #ifdef __OOFEG
-#include "oofeggraphiccontext.h"
+ #include "oofeggraphiccontext.h"
 #endif
 
 namespace oofem {
-
 Truss1d :: Truss1d(int n, Domain *aDomain) :
     StructuralElement(n, aDomain),
     ZZNodalRecoveryModelInterface(), NodalAveragingRecoveryModelInterface(),
@@ -97,12 +96,12 @@ Truss1d :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int li
 void Truss1d :: computeGaussPoints()
 // Sets up the array of Gauss Points of the receiver.
 {
-  if (!integrationRulesArray) {
-    numberOfIntegrationRules = 1;
-    integrationRulesArray = new IntegrationRule * [ 1 ];
-    integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 2);
-    integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Line, 1, _1dMat);
-  }
+    if ( !integrationRulesArray ) {
+        numberOfIntegrationRules = 1;
+        integrationRulesArray = new IntegrationRule * [ 1 ];
+        integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 2);
+        integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Line, 1, _1dMat);
+    }
 }
 
 
@@ -114,10 +113,10 @@ Truss1d :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep)
 {
     Material *mat;
     double halfMass;
-    GaussPoint* gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
+    GaussPoint *gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
 
     mat        = this->giveMaterial();
-    halfMass   = mat->give('d',gp) * this->giveCrossSection()->give(CS_Area) * this->giveLength() / 2.;
+    halfMass   = mat->give('d', gp) * this->giveCrossSection()->give(CS_Area) * this->giveLength() / 2.;
     answer.resize(2, 2);
     answer.zero();
     answer.at(1, 1) = halfMass;
@@ -159,7 +158,7 @@ Truss1d :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoord
     n2  = ( 1. + ksi ) * 0.5;
 
     answer.resize(1);
-    answer.at(1) = n1 * this->giveNode(1)->giveCoordinate(1) + n2 * this->giveNode(2)->giveCoordinate(1);
+    answer.at(1) = n1 * this->giveNode(1)->giveCoordinate(1) + n2 *this->giveNode(2)->giveCoordinate(1);
 
     return 1;
 }
@@ -576,7 +575,7 @@ Truss1d :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &
 
     if ( size == gsize ) {
         dist = coords.distance(gcoords);
-    } else   {
+    } else {
         FloatArray helpCoords = coords;
 
         helpCoords.resize(gsize);
@@ -650,5 +649,4 @@ Truss1d :: MMAShapeFunctProjectionInterface_interpolateIntVarAt(FloatArray &answ
 
     return;
 }
-
 } // end namespace oofem

@@ -47,7 +47,6 @@
 #include "dynalist.h"
 
 namespace oofem {
-
 class SloanGraph;
 
 /**
@@ -127,6 +126,5 @@ public:
      */
     int   computeProfileHeight();
 };
-
 } // end namespace oofem
 #endif // sloangraphnode_h

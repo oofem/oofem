@@ -41,14 +41,13 @@
 
 #ifdef __PARALLEL_MODE
 
-#ifndef __MAKEDEPEND
-#include <stdio.h>
-#endif
-#include "linearstatic.h"
-#include "sparsemtrx.h"
+ #ifndef __MAKEDEPEND
+  #include <stdio.h>
+ #endif
+ #include "linearstatic.h"
+ #include "sparsemtrx.h"
 
 namespace oofem {
-
 class PLinearStatic : public LinearStatic
 {
     /*
@@ -91,10 +90,9 @@ public:
      * from dofManagers/elements and assembled.
      */
     virtual void               assembleVectorFromDofManagers(FloatArray &, TimeStep *, EquationID ut,
-                                                             CharType type, ValueModeType mode, 
-							     const UnknownNumberingScheme& s, Domain *domain);
+                                                             CharType type, ValueModeType mode,
+                                                             const UnknownNumberingScheme &s, Domain *domain);
 };
-
 } // end namespace oofem
 #endif
 #endif // plinearstatic_h

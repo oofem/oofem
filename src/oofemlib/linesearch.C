@@ -39,8 +39,8 @@
 
 #include "linesearch.h"
 #ifndef __MAKEDEPEND
-#include <stdio.h>
-#include <math.h>
+ #include <stdio.h>
+ #include <math.h>
 #endif
 
 #include "verbose.h"
@@ -50,7 +50,6 @@
 #include "nmstatus.h"
 
 namespace oofem {
-
 LineSearchNM :: LineSearchNM(int i, Domain *d, EngngModel *m) :
     NumericalMethod(i, d, m)
 {
@@ -302,5 +301,4 @@ LineSearchNM :: initializeFrom(InputRecord *ir)
 
     return IRRT_OK;
 }
-
 } // end namespace oofem

@@ -45,14 +45,13 @@
 #include "compiler.h"
 #include "dictionr.h"
 #ifndef __MAKEDEPEND
-#include <stdio.h>
-#include <string.h>
+ #include <stdio.h>
+ #include <string.h>
 #endif
 
 #include "error.h"
 
 namespace oofem {
-
 class Domain;
 class DofManager;
 class TimeStep;
@@ -197,13 +196,13 @@ public:
      * to decide whether bc is active. Use appropriate services instead.
      * @param id of associated Boundary condition, zero otherwise
      */
-    int giveBcId () ;
+    int giveBcId();
     /** Returns the id of associated initial condition, if there is any.
      * Used only for printing purposes. In general, id could not be used
      * to decide whether bc is active. Use appropriate services instead.
      * @param id of associated initial condition, zero otherwise
      */
-    int giveIcId () ;
+    int giveIcId();
     /**
      * Returns value of boundary condition of dof if it is prescribed.
      * Use hasBc service to determine, if boundary condition is active.
@@ -226,7 +225,8 @@ public:
 
     /// Returns Master Dof Manager Number.
     int giveMasterDofManagerNum() const { return masterDofMngr; }
-    virtual void giveMasterDofManArray (IntArray& answer) {answer.resize(1); answer.at(1) = masterDofMngr;} // termitovo
+    virtual void giveMasterDofManArray(IntArray &answer) { answer.resize(1);
+                                                           answer.at(1) = masterDofMngr; }                  // termitovo
     /// Sets masterDofMngr
     void setMasterDofManagerNum(int i) { masterDofMngr = i; }
     /// Returns number of master dof in master dofManager.
@@ -239,7 +239,7 @@ public:
      * these relations to reflext updated numbering. The renumbering funciton is passed, which is supposed
      * to return an updated number of specified entyty type based on old number.
      */
-    virtual void updateLocalNumbering( EntityRenumberingFunctor &f );
+    virtual void updateLocalNumbering(EntityRenumberingFunctor &f);
 
 
 private:
@@ -261,6 +261,5 @@ protected:
      */
     InitialCondition *giveIc();
 };
-
 } // end namespace oofem
 #endif // simpleslavedof_h

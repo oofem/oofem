@@ -43,7 +43,6 @@
 #include "mesherinterface.h"
 
 namespace oofem {
-
 #define BMF_FILENAME    "t3d.bmf"
 
 class TimeStep;
@@ -59,18 +58,17 @@ class T3DInterface : public MesherInterface
 {
 public:
     /// Constructor
-    T3DInterface(Domain* d) : MesherInterface(d) { }
+    T3DInterface(Domain *d) : MesherInterface(d) { }
     /// Destructor
     virtual ~T3DInterface() { }
 
     /// Runs the mesh generation, mesh will be written to corresponding domain din file
-    virtual returnCode createMesh(TimeStep *tStep, int domainNumber, int domainSerNum, Domain** dNew);
+    virtual returnCode createMesh(TimeStep *tStep, int domainNumber, int domainSerNum, Domain **dNew);
 
 
 protected:
     /// Creates the mesher input, containing the required mesh density informations.
     int createInput(Domain *d, TimeStep *stepN);
 };
-
 } // end namespace oofem
 #endif // t3dinterface_h

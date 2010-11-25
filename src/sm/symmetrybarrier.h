@@ -47,7 +47,6 @@
 #include "flotmtrx.h"
 
 namespace oofem {
-
 /**
  * Implementation of symmetry nonlocal barier.
  * It allows to specify up to three planes (orthogonal ones) of symmetry
@@ -98,6 +97,5 @@ public:
      */
     classType                giveClassID() const { return NonlocalBarrierClass; }
 };
-
 } // end namespace oofem
 #endif // symmetrybarrier_h

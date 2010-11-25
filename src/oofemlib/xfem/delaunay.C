@@ -8,10 +8,9 @@
 #include <map>
 
 namespace oofem {
-
 bool Delaunay :: colinear(FloatArray *p1, FloatArray *p2, FloatArray *p3) {
     double dist = p1->at(1) * ( p2->at(2) - p3->at(2) ) + p2->at(1) * ( p3->at(2) - p1->at(2) ) +
-    p3->at(1) * ( p1->at(2) - p2->at(2) );
+                  p3->at(1) * ( p1->at(2) - p2->at(2) );
     // the tolerance probably needs a setter
     if ( dist < 0.0001 && dist > ( -1 ) * 0.0001 ) {
         return true;
@@ -48,15 +47,15 @@ void Delaunay :: triangulate(AList< FloatArray > *overtices, AList< Triangle > *
     int n = overtices->giveSize();
     int count = 0;
     /// copy of vertices, since they will be shifted
-    AList<FloatArray>* vertices = new AList<FloatArray>();
-    std::map<FloatArray*, FloatArray*> backToOld; // map for putting the shifted vertices into the old position
+    AList< FloatArray > *vertices = new AList< FloatArray >();
+    std :: map< FloatArray *, FloatArray * >backToOld; // map for putting the shifted vertices into the old position
     for ( int i = 1; i <= overtices->giveSize(); i++ ) {
-	    FloatArray *ip = overtices->at(i);
-            FloatArray *ipCopy = new FloatArray(*ip);
-            vertices->put(i, ipCopy);   
-	    backToOld[ipCopy] = ip;
+        FloatArray *ip = overtices->at(i);
+        FloatArray *ipCopy = new FloatArray(*ip);
+        vertices->put(i, ipCopy);
+        backToOld [ ipCopy ] = ip;
     }
-    
+
     // small shift of vertices
     for ( int i = 1; i <= n; i++ ) {
         vertices->at(i)->at(1) += vertices->at(i)->at(1) * 0.000001 * double ( rand() ) / RAND_MAX;
@@ -87,22 +86,22 @@ void Delaunay :: triangulate(AList< FloatArray > *overtices, AList< Triangle > *
                     count++;
                     // here we switch to old vertices
                     FloatArray *p1 = new FloatArray();
-                    * p1 = * (backToOld[vertices->at(i)]);
+                    * p1 = * ( backToOld [ vertices->at(i) ] );
                     FloatArray *p2 = new FloatArray();
-                    * p2 = * (backToOld[vertices->at(j)]);
+                    * p2 = * ( backToOld [ vertices->at(j) ] );
                     FloatArray *p3 = new FloatArray();
-                    * p3 = * (backToOld[vertices->at(k)]);
+                    * p3 = * ( backToOld [ vertices->at(k) ] );
                     Triangle *triangle = new Triangle(p1, p2, p3);
                     if ( !triangle->isOrientedAnticlockwise() ) {
                         triangle->changeToAnticlockwise();
                     }
+
                     triangles->put(count, triangle);
                 }
             }
         }
     }
+
     delete vertices;
 }
-
-
 } // end namespace oofem

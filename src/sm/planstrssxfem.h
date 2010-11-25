@@ -6,7 +6,6 @@
 #include "usrdefsub.h"
 
 namespace oofem {
-
 /** temporary class for testing
  * in the usual case instead of PlaneStress2dXfem
  * there will be the standard PlaneStress2d
@@ -44,6 +43,5 @@ public:
     //     void          drawInternalState (oofegGraphicContext&);
 #endif
 };
-
 } // end namespace oofem
 #endif

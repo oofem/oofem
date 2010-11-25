@@ -45,7 +45,6 @@
 #include "flotarry.h"
 
 namespace oofem {
-
 class TimeStep;
 
 
@@ -95,6 +94,5 @@ public:
 protected:
     void computeNArray(FloatArray &answer, FloatArray &coords) const;
 };
-
 } // end namespace oofem
 #endif // linearedgeload_h

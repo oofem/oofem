@@ -45,7 +45,6 @@
 #include "matconst.h"
 
 namespace oofem {
-
 class Microplane;
 
 #define MAX_NUMBER_OF_MICROPLANES 61
@@ -214,6 +213,5 @@ protected:
     virtual MaterialStatus *CreateMicroplaneStatus(GaussPoint *gp) = 0;
     virtual void initTempStatus(GaussPoint *gp);
 };
-
 } // end namespace oofem
 #endif // microplanematerial_h

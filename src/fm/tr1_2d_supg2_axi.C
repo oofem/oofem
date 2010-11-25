@@ -36,9 +36,9 @@
 /*
  * TODO:
  * - modify computeDeviatoricStress to account for two material setting
- *done, since this method is used only for output purposes (rule of mixture used here)
+ **done, since this method is used only for output purposes (rule of mixture used here)
  * - check computation of stabilization coeffs whether the multi material setting is correctly taken into account
- *done, average viscosity according to rule of mixture applied
+ **done, average viscosity according to rule of mixture applied
  *
  * - save&restore context will not work (some way how to save/restore dynamic integration rules have to be found:
  *  element has to restore these rules based on restored data, and then rules will be restored,
@@ -69,17 +69,16 @@
 #include "geotoolbox.h"
 
 #ifndef __MAKEDEPEND
-#include <math.h>
-#include <stdio.h>
+ #include <math.h>
+ #include <stdio.h>
 #endif
 
 #ifdef __OOFEG
-#include "oofeggraphiccontext.h"
-#include "conTable.h"
+ #include "oofeggraphiccontext.h"
+ #include "conTable.h"
 #endif
 
 namespace oofem {
-
 #define TRSUPG_ZERO_VOF 1.e-8
 #define POINT_TOL 1.e-8
 
@@ -132,12 +131,12 @@ void
 TR1_2D_SUPG2_AXI :: computeGaussPoints()
 // Sets up the array containing the four Gauss points of the receiver.
 {
-  if (!integrationRulesArray) {
-    numberOfIntegrationRules = 2;
-    integrationRulesArray = new IntegrationRule * [ 2 ];
-    integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3, true);
-    integrationRulesArray [ 1 ] = new GaussIntegrationRule(2, this, 1, 3, true);
-  }
+    if ( !integrationRulesArray ) {
+        numberOfIntegrationRules = 2;
+        integrationRulesArray = new IntegrationRule * [ 2 ];
+        integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3, true);
+        integrationRulesArray [ 1 ] = new GaussIntegrationRule(2, this, 1, 3, true);
+    }
 }
 
 
@@ -1187,10 +1186,10 @@ TR1_2D_SUPG2_AXI :: computeGlobalCoordinates(FloatArray &answer, const FloatArra
     l3 = 1.0 - l1 - l2;
 
     answer.resize(2);
-    answer.at(1) = l1 * this->giveNode(1)->giveCoordinate(1) + l2 * this->giveNode(2)->giveCoordinate(1) +
-    l3 * this->giveNode(3)->giveCoordinate(1);
-    answer.at(2) = l1 * this->giveNode(1)->giveCoordinate(2) + l2 * this->giveNode(2)->giveCoordinate(2) +
-    l3 * this->giveNode(3)->giveCoordinate(2);
+    answer.at(1) = l1 * this->giveNode(1)->giveCoordinate(1) + l2 *this->giveNode(2)->giveCoordinate(1) +
+                   l3 *this->giveNode(3)->giveCoordinate(1);
+    answer.at(2) = l1 * this->giveNode(1)->giveCoordinate(2) + l2 *this->giveNode(2)->giveCoordinate(2) +
+                   l3 *this->giveNode(3)->giveCoordinate(2);
 
     return 1;
 }
@@ -1262,7 +1261,7 @@ TR1_2D_SUPG2_AXI :: computeLEPLICVolumeFraction(const FloatArray &n, const doubl
     if ( answer > 1.000000001 ) {
         _warning2("VOF fraction out of bounds, vof = %e\n", answer);
         return 1.0;
-    } else   {
+    } else {
         return answer;
     }
 }
@@ -1528,7 +1527,7 @@ TR1_2D_SUPG2_AXI :: truncateMatVolume(const Polygon &matvolpoly, double &volume)
     this->formMyVolumePoly(me, NULL, false);
     g.clip(clip, me, matvolpoly);
 #ifdef __OOFEG
-    EASValsSetColor(gc [ 0 ].getActiveCrackColor() );
+    EASValsSetColor( gc [ 0 ].getActiveCrackColor() );
     //GraphicObj *go = clip.draw(::gc[OOFEG_DEBUG_LAYER],true);
     clip.draw(gc [ OOFEG_DEBUG_LAYER ], true);
     //EVFastRedraw(myview);
@@ -1694,7 +1693,7 @@ TR1_2D_SUPG2_AXI :: updateIntegrationRules()
         // remap ip coords into area coords of receiver
         for ( ip = 0; ip < integrationRulesArray [ i ]->getNumberOfIntegrationPoints(); ip++ ) {
             gp = integrationRulesArray [ i ]->getIntegrationPoint(ip);
-            approx->local2global(gc, * gp->giveCoordinates(), FEIVertexListGeometryWrapper(c[i], vcoords [ i ]), 0.0);
+            approx->local2global(gc, * gp->giveCoordinates(), FEIVertexListGeometryWrapper(c [ i ], vcoords [ i ]), 0.0);
             triaApprox.global2local(lc, gc, FEIElementGeometryWrapper(this), 0.0);
             // modify original ip coords to target ones
             gp->setLocalCoordinates( * gp->giveCoordinates() );
@@ -1761,7 +1760,7 @@ TR1_2D_SUPG2_AXI :: computeVolumeAround(GaussPoint *gp, integrationDomain id, co
 
     if ( id == _Triangle ) {
         FEI2dTrLin __interpolation(1, 2);
-        return _r *weight *fabs( __interpolation.giveTransformationJacobian(* gp->giveLocalCoordinates(), FEIVertexListGeometryWrapper(3, idpoly), 0.0) );
+        return _r * weight * fabs( __interpolation.giveTransformationJacobian(* gp->giveLocalCoordinates(), FEIVertexListGeometryWrapper(3, idpoly), 0.0) );
     } else {
         FEI2dQuadLin __interpolation(1, 2);
         double det = fabs( __interpolation.giveTransformationJacobian(* gp->giveLocalCoordinates(), FEIVertexListGeometryWrapper(4, idpoly), 0.0) );

@@ -40,7 +40,6 @@
 #include "gausspnt.h"
 
 namespace oofem {
-
 Element *
 DummySpatialLocalizer :: giveElementContainingPoint(const FloatArray &coords, const IntArray *regionList)
 {
@@ -166,21 +165,20 @@ DummySpatialLocalizer :: giveAllElementsWithIpWithinBox(elementContainerType &el
 }
 
 void
-DummySpatialLocalizer :: giveAllNodesWithinBox(nodeContainerType &nodeSet, const FloatArray &coords, const double radius) 
+DummySpatialLocalizer :: giveAllNodesWithinBox(nodeContainerType &nodeSet, const FloatArray &coords, const double radius)
 {
-  int i, nnode;
-  DofManager* idofman;
-  Node* inode;
+    int i, nnode;
+    DofManager *idofman;
+    Node *inode;
 
-  nnode = this->giveDomain()->giveNumberOfDofManagers();
-  for ( i = 1; i <= nnode; i++ ) {
-    idofman = this->giveDomain()->giveDofManager(i);
-    if ((inode = dynamic_cast <Node*> (idofman)) != NULL) {
-      if (coords.distance(inode->giveCoordinates()) <= radius) {
-        nodeSet.push_back(i);
-      }
+    nnode = this->giveDomain()->giveNumberOfDofManagers();
+    for ( i = 1; i <= nnode; i++ ) {
+        idofman = this->giveDomain()->giveDofManager(i);
+        if ( ( inode = dynamic_cast< Node * >(idofman) ) != NULL ) {
+            if ( coords.distance( inode->giveCoordinates() ) <= radius ) {
+                nodeSet.push_back(i);
+            }
+        }
     }
-  }
 }
-
 } // end namespace oofem

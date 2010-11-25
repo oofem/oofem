@@ -42,7 +42,6 @@
 #include "mathfem.h"
 
 namespace oofem {
-
 bool
 PetscOrdering_Base :: isLocal(DofManager *dman) {
     int myrank = dman->giveDomain()->giveEngngModel()->giveRank();
@@ -171,7 +170,7 @@ PetscNatural2GlobalOrdering :: init(EngngModel *emodel, EquationID ut, int di, E
     int psize, nproc = emodel->giveNumberOfProcesses();
     IntArray sizeToSend(nproc), sizeToRecv(nproc), nrecToReceive(nproc);
 #ifdef __VERBOSE_PARALLEL
-    IntArray nrecToSend (nproc);
+    IntArray nrecToSend(nproc);
 #endif
     const IntArray *plist;
     for ( i = 1; i <= ndofman; i++ ) {
@@ -186,24 +185,25 @@ PetscNatural2GlobalOrdering :: init(EngngModel *emodel, EquationID ut, int di, E
             }
 
             if ( minrank == myrank ) { // count to send
-	      for ( j = 1; j <= psize; j++ ) {
+                for ( j = 1; j <= psize; j++ ) {
 #ifdef __VERBOSE_PARALLEL
-		nrecToSend(plist->at(j))++;
+                    nrecToSend( plist->at(j) )++;
 #endif
-		sizeToSend( plist->at(j) ) += ( 1 + n );      // ndofs+dofman number
-	      }
+                    sizeToSend( plist->at(j) ) += ( 1 + n );  // ndofs+dofman number
+                }
             } else {
-	      nrecToReceive(minrank)++;
-	      sizeToRecv( minrank ) += ( 1 + n );      // ndofs+dofman number
+                nrecToReceive(minrank)++;
+                sizeToRecv(minrank) += ( 1 + n );      // ndofs+dofman number
             }
         }
     }
 
 #ifdef __VERBOSE_PARALLEL
-    for (i=0; i<nproc; i++) {
-      OOFEM_LOG_INFO ("[%d] Record Statistics: Sending %d Receiving %d to %d\n", 
-		      myrank,nrecToSend(i), nrecToReceive(i),i);
+    for ( i = 0; i < nproc; i++ ) {
+        OOFEM_LOG_INFO("[%d] Record Statistics: Sending %d Receiving %d to %d\n",
+                       myrank, nrecToSend(i), nrecToReceive(i), i);
     }
+
 #endif
 
 
@@ -211,7 +211,7 @@ PetscNatural2GlobalOrdering :: init(EngngModel *emodel, EquationID ut, int di, E
     std :: map< int, int >globloc; //  global->local mapping for shared
     // number local guys
     int globeq = offset;
-    for ( i = 1;  i <= ndofman; i++ ) {
+    for ( i = 1; i <= ndofman; i++ ) {
         dman = d->giveDofManager(i);
         //if (dman->giveParallelMode() == DofManager_shared) {
         if ( isShared(dman) ) {
@@ -274,15 +274,15 @@ PetscNatural2GlobalOrdering :: init(EngngModel *emodel, EquationID ut, int di, E
     for ( p = 0; p < nproc; p++ ) {
         buffs [ p ] = new StaticCommunicationBuffer(MPI_COMM_WORLD, 0);
         buffs [ p ]->resize( buffs [ p ]->givePackSize(MPI_INT, 1) * sizeToSend(p) );
-	
+
 #if 0
-	OOFEM_LOG_INFO("[%d]PetscN2G:: init: Send buffer[%d] size %d\n", 
-		       myrank, p, sizeToSend(p));
+        OOFEM_LOG_INFO( "[%d]PetscN2G:: init: Send buffer[%d] size %d\n",
+                       myrank, p, sizeToSend(p) );
 #endif
     }
 
 
-    for ( i = 1;  i <= ndofman; i++ ) {
+    for ( i = 1; i <= ndofman; i++ ) {
         if ( isShared( d->giveDofManager(i) ) ) {
             dman = d->giveDofManager(i);
             plist = dman->givePartitionList();
@@ -300,8 +300,8 @@ PetscNatural2GlobalOrdering :: init(EngngModel *emodel, EquationID ut, int di, E
                     }
 
 #if 0
-                    OOFEM_LOG_INFO("[%d]PetscN2G:: init: Sending localShared node %d[%d] to proc %d\n", 
-				   myrank, i, dman->giveGlobalNumber(), p);
+                    OOFEM_LOG_INFO("[%d]PetscN2G:: init: Sending localShared node %d[%d] to proc %d\n",
+                                   myrank, i, dman->giveGlobalNumber(), p);
 #endif
                     buffs [ p ]->packInt( dman->giveGlobalNumber() );
                     ndofs = dman->giveNumberOfDofs();
@@ -368,8 +368,8 @@ PetscNatural2GlobalOrdering :: init(EngngModel *emodel, EquationID ut, int di, E
         rbuffs [ p ] = new StaticCommunicationBuffer(MPI_COMM_WORLD, 0);
         rbuffs [ p ]->resize( rbuffs [ p ]->givePackSize(MPI_INT, 1) * sizeToRecv(p) );
 #if 0
-	OOFEM_LOG_INFO("[%d]PetscN2G:: init: Receive buffer[%d] size %d\n", 
-		       myrank, p, sizeToRecv(p));
+        OOFEM_LOG_INFO( "[%d]PetscN2G:: init: Receive buffer[%d] size %d\n",
+                       myrank, p, sizeToRecv(p) );
 #endif
     }
 
@@ -382,7 +382,8 @@ PetscNatural2GlobalOrdering :: init(EngngModel *emodel, EquationID ut, int di, E
     }
 
 
-    IntArray finished(nproc); finished.zero();
+    IntArray finished(nproc);
+    finished.zero();
     int fin = 1;
     finished.at(emodel->giveRank() + 1) = 1;
     do {
@@ -397,16 +398,16 @@ PetscNatural2GlobalOrdering :: init(EngngModel *emodel, EquationID ut, int di, E
                         rbuffs [ p ]->unpackInt(shdm);
 
 #if 0
-			OOFEM_LOG_INFO("[%d]PetscN2G:: init: Received shared node [%d] from proc %d\n", 
-				   myrank, shdm, p);
+                        OOFEM_LOG_INFO("[%d]PetscN2G:: init: Received shared node [%d] from proc %d\n",
+                                       myrank, shdm, p);
 #endif
-			//
+                        //
                         // find local guy coorecponding to shdm
-			if (globloc.find(shdm) != globloc.end()) {
-			  ldm = globloc [ shdm ];
-			} else {
-			  OOFEM_ERROR3 ("[%d] PetscNatural2GlobalOrdering :: init: invalid shared dofman received, globnum %d\n", myrank, shdm);
-			}
+                        if ( globloc.find(shdm) != globloc.end() ) {
+                            ldm = globloc [ shdm ];
+                        } else {
+                            OOFEM_ERROR3("[%d] PetscNatural2GlobalOrdering :: init: invalid shared dofman received, globnum %d\n", myrank, shdm);
+                        }
 
                         dman = d->giveDofManager(ldm);
                         ndofs = dman->giveNumberOfDofs();
@@ -427,6 +428,7 @@ PetscNatural2GlobalOrdering :: init(EngngModel *emodel, EquationID ut, int di, E
                             }
                         }
                     }
+
                     finished.at(p + 1) = 1;
                     fin++;
                 }
@@ -454,7 +456,7 @@ PetscNatural2GlobalOrdering :: init(EngngModel *emodel, EquationID ut, int di, E
                 ptr = locname;
             } else if ( dman->giveParallelMode() == DofManager_shared ) {
                 ptr = shname;
-            } else                                                                        {
+            } else {
                 ptr = unkname;
             }
 
@@ -494,7 +496,7 @@ PetscNatural2GlobalOrdering :: init(EngngModel *emodel, EquationID ut, int di, E
     delete[] buffs;
     delete[] leqs;
 
-    MPI_Barrier (MPI_COMM_WORLD);
+    MPI_Barrier(MPI_COMM_WORLD);
 #ifdef __VERBOSE_PARALLEL
     VERBOSEPARALLEL_PRINT("PetscNatural2GlobalOrdering :: init", "done", myrank);
 #endif
@@ -633,7 +635,5 @@ PetscNatural2LocalOrdering :: map2Old(IntArray &answer, const IntArray &src, int
         answer.at(i) = giveOldEq( src.at(i) ) - baseOffset;
     }
 }
-
-
 } // end namespace oofem
 #endif

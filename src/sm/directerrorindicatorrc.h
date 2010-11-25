@@ -46,7 +46,6 @@
 #include "remeshingcrit.h"
 
 namespace oofem {
-
 class Domain;
 class Element;
 class TimeStep;
@@ -57,8 +56,8 @@ class TimeStep;
  */
 class DirectErrorIndicatorRCInterface : public Interface
 {
- protected:
- public:
+protected:
+public:
     /// Constructor
     DirectErrorIndicatorRCInterface() : Interface() { }
     /*
@@ -97,15 +96,15 @@ protected:
     StateCounterType stateCounter;
     RemeshingStrategy currStrategy;
 #ifdef __PARALLEL_MODE
-    std::map<int, double> sharedDofManDensities;
-    std::map<int, double> sharedDofManIndicatorVals;
+    std :: map< int, double >sharedDofManDensities;
+    std :: map< int, double >sharedDofManIndicatorVals;
     bool dofManDensityExchangeFlag;
 #endif
 
 public:
     /// Constructor
-  DirectErrorIndicatorRC(int n, ErrorEstimator *e);
-  virtual ~DirectErrorIndicatorRC();
+    DirectErrorIndicatorRC(int n, ErrorEstimator *e);
+    virtual ~DirectErrorIndicatorRC();
     /** Returns the required mesh size n given dof manager.
      * The mesh density is defined as a required element size
      * (in 1D the element length, in 2D the square from element area).
@@ -143,29 +142,28 @@ public:
     //protected:
     void giveNodeChar(int inode, TimeStep *tStep, double &indicatorVal, double &currDensity);
     double giveZeroIndicatorDensity() { return zeroIndicatorDensity; }
-    void reinitialize() ;
+    void reinitialize();
     /// sets associated Domain
-    virtual void         setDomain(Domain *d); 
+    virtual void         setDomain(Domain *d);
 
- protected:
+protected:
     double giveLocalDofManDensity(int num);
     /**
      * Returns dof man indicator values.
      * @param num dofMan number
      */
 
-    double giveDofManIndicator(int num, TimeStep*);
-    double giveLocalDofManIndicator(int num, TimeStep*);
+    double giveDofManIndicator(int num, TimeStep *);
+    double giveLocalDofManIndicator(int num, TimeStep *);
 #ifdef __PARALLEL_MODE
-    void exchangeDofManDensities () ;
-    int packSharedDofManLocalDensities (ProcessCommunicator &processComm);
-    int unpackSharedDofManLocalDensities (ProcessCommunicator &processComm);
+    void exchangeDofManDensities();
+    int packSharedDofManLocalDensities(ProcessCommunicator &processComm);
+    int unpackSharedDofManLocalDensities(ProcessCommunicator &processComm);
 
-    void exchangeDofManIndicatorVals (TimeStep*) ;
-    int packSharedDofManLocalIndicatorVals (ProcessCommunicator &processComm);
-    int unpackSharedDofManLocalIndicatorVals (ProcessCommunicator &processComm);
+    void exchangeDofManIndicatorVals(TimeStep *);
+    int packSharedDofManLocalIndicatorVals(ProcessCommunicator &processComm);
+    int unpackSharedDofManLocalIndicatorVals(ProcessCommunicator &processComm);
 #endif
 };
-
 } // end namespace oofem
 #endif // directerrorindicatorrc_h

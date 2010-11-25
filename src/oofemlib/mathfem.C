@@ -35,12 +35,11 @@
 
 
 #ifndef __MAKEDEPEND
-#include <math.h>
+ #include <math.h>
 #endif
 #include "mathfem.h"
 
 namespace oofem {
-
 // measure dependent constant
 #define CUBIC_ZERO 1.0e-100
 
@@ -247,8 +246,8 @@ void cubic3r(double a, double b, double c, double d, double *r1, double *r2, dou
          * else
          * B = 0.0;
          *
-         *r1 = (A+B) - a/3.0;
-         *num = 1;
+         **r1 = (A+B) - a/3.0;
+         **num = 1;
          * }
          */
         return;
@@ -268,12 +267,12 @@ int iperm(int val, int rank)
 }
 
 /*
- #ifndef __MAKEDEPEND
- #include <stdlib.h>
- #include <string.h>
- #include <errno.h>
- #include <stdio.h>
- #endif
+ * #ifndef __MAKEDEPEND
+ * #include <stdlib.h>
+ * #include <string.h>
+ * #include <errno.h>
+ * #include <stdio.h>
+ * #endif
  *
  * // matherr - error-handling function
  * // When an math error occurs, a pointer to the exception
@@ -301,5 +300,4 @@ int iperm(int val, int rank)
  * }
  * }
  */
-
 } // end namespace oofem

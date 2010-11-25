@@ -48,19 +48,18 @@
 #include "datareader.h"
 
 #ifndef __MAKEDEPEND
-#include <stdio.h>
-#include <time.h>
+ #include <stdio.h>
+ #include <time.h>
 #endif
 
 namespace oofem {
-
 class EngngModel;
 
 /**
  * Class representing and implementing ExportModuleManager. It is attribute of EngngModel.
  * It manages the export output modules, which perform module - specific output oprations.
  */
-class ExportModuleManager : public ModuleManager <ExportModule>
+class ExportModuleManager : public ModuleManager< ExportModule >
 {
 private:
 public:
@@ -74,8 +73,8 @@ public:
     IRResultType initializeFrom(InputRecord *ir);
 
     /** Creates new instance of module of given name, belonging to given EngngModel */
-    ExportModule* CreateModuleOfType (char *name, EngngModel *emodel);
-    
+    ExportModule *CreateModuleOfType(char *name, EngngModel *emodel);
+
     /**
      * Writes the output. Loops over all modules and calls corresponding doOutput module service.
      * @param tStep time step.
@@ -93,6 +92,5 @@ public:
 
 protected:
 };
-
 } // end namespace oofem
 #endif // exportmodulemanager_h

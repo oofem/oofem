@@ -61,17 +61,17 @@
 #include "mmaclosestiptransfer.h"
 
 #ifdef MDM_MAPPING_DEBUG
-#include "mmashapefunctprojection.h"
-#include "mmaleastsquareprojection.h"
+ #include "mmashapefunctprojection.h"
+ #include "mmaleastsquareprojection.h"
 
 #else
 
-#ifdef MDM_USE_MMAShapeFunctProjection
-#include "mmashapefunctprojection.h"
-#endif
-#ifdef MDM_USE_MMALeastSquareProjection
-#include "mmaleastsquareprojection.h"
-#endif
+ #ifdef MDM_USE_MMAShapeFunctProjection
+  #include "mmashapefunctprojection.h"
+ #endif
+ #ifdef MDM_USE_MMALeastSquareProjection
+  #include "mmaleastsquareprojection.h"
+ #endif
 #endif
 
 #include "mmashapefunctprojection.h"
@@ -79,7 +79,6 @@
 
 
 namespace oofem {
-
 class Microplane;
 
 /**
@@ -206,18 +205,18 @@ protected:
     MDMMapperType mapperType;
 #else
 
-#ifdef MDM_USE_MMAClosestIPTransfer
+ #ifdef MDM_USE_MMAClosestIPTransfer
     /// Mapper used to map internal variables in adaptivity
     static MMAClosestIPTransfer mapper;
-#endif
-#ifdef MDM_USE_MMAShapeFunctProjection
+ #endif
+ #ifdef MDM_USE_MMAShapeFunctProjection
     /// Mapper used to map internal variables in adaptivity
     static MMAShapeFunctProjection mapper;
-#endif
-#ifdef MDM_USE_MMALeastSquareProjection
+ #endif
+ #ifdef MDM_USE_MMALeastSquareProjection
     /// Mapper used to map internal variables in adaptivity
     static MMALeastSquareProjection mapper;
-#endif
+ #endif
 #endif
 
     /// Mapper used to map stresses in adaptivity
@@ -232,11 +231,13 @@ public:
      * @param d domain to which newly created material belongs
      */
     MDM(int n, Domain *d) : MicroplaneMaterial(n, d), StructuralNonlocalMaterialExtensionInterface(d), MaterialModelMapperInterface()
-    { linearElasticMaterial = NULL;
-      nonlocal = 0;
-      type_dam = 0;
-      type_soft = 0;
-      mdm_Ep = mdm_Efp = -1.0; }
+    {
+        linearElasticMaterial = NULL;
+        nonlocal = 0;
+        type_dam = 0;
+        type_soft = 0;
+        mdm_Ep = mdm_Efp = -1.0;
+    }
     /// Destructor.
     ~MDM()                { if ( linearElasticMaterial ) { delete linearElasticMaterial; } }
 
@@ -503,6 +504,5 @@ protected:
     //double giveParameterEfp(const FloatArray& reducedStrain, GaussPoint* gp);
     void   giveRawMDMParameters(double &Efp, double &Ep, const FloatArray &reducedStrain, GaussPoint *gp);
 };
-
 } // end namespace oofem
 #endif // mdm_h

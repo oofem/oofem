@@ -55,7 +55,6 @@
 #include "gaussintegrationrule.h"
 
 namespace oofem {
-
 class TimeStep;
 class Node;
 class Material;
@@ -134,10 +133,14 @@ public:
     /**
      * Computes diffusion terms for mass conservation equation
      */
-    void computeDiffusionDerivativeTerm_MC(FloatMatrix &answer, TimeStep *atTime) { answer.resize(3, 6);
-                                                                                    answer.zero(); }
-    void computeDiffusionTerm_MC(FloatArray &answer, TimeStep *atTime) { answer.resize(3);
-                                                                         answer.zero(); }
+    void computeDiffusionDerivativeTerm_MC(FloatMatrix &answer, TimeStep *atTime) {
+        answer.resize(3, 6);
+        answer.zero();
+    }
+    void computeDiffusionTerm_MC(FloatArray &answer, TimeStep *atTime) {
+        answer.resize(3);
+        answer.zero();
+    }
     /**
      * Computes acceleration terms for mass conservation equation
      */
@@ -362,6 +365,5 @@ protected:
     void updateIntegrationRules();
     Material *_giveMaterial(int indx) { return domain->giveMaterial(mat [ indx ]); }
 };
-
 } // end namespace oofem
 #endif // tr1_2d_supg2_h

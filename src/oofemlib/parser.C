@@ -37,14 +37,13 @@
 #include "parser.h"
 #include "error.h"
 #ifndef __MAKEDEPEND
-#include <ctype.h>
-#include <stdlib.h>
-#include <string.h>
+ #include <ctype.h>
+ #include <stdlib.h>
+ #include <string.h>
 #endif
 #include "compiler.h"
 
 namespace oofem {
-
 double Parser :: expr(int get)
 {
     // get indicates whether there is need to to call get_token() to get next token.
@@ -222,7 +221,7 @@ Parser :: Token_value Parser :: get_token()
     int len;
 
     do { // skip whitespaces except '\n'
-        //  if (! input->get(ch)) return curr_tok = END;
+         //  if (! input->get(ch)) return curr_tok = END;
         if ( !( ch = * ( parsedLine++ ) ) ) {
             return curr_tok = END;
         }
@@ -301,19 +300,19 @@ Parser :: Token_value Parser :: get_token()
 
             if ( !strncmp(string_value, "sqrt", 4) ) {
                 return curr_tok = SQRT_FUNC;
-            } else if ( !strncmp(string_value, "sin", 3) )  {
+            } else if ( !strncmp(string_value, "sin", 3) ) {
                 return curr_tok = SIN_FUNC;
-            } else if ( !strncmp(string_value, "cos", 3) )  {
+            } else if ( !strncmp(string_value, "cos", 3) ) {
                 return curr_tok = COS_FUNC;
-            } else if ( !strncmp(string_value, "tan", 3) )  {
+            } else if ( !strncmp(string_value, "tan", 3) ) {
                 return curr_tok = TAN_FUNC;
-            } else if ( !strncmp(string_value, "atan", 4) )  {
+            } else if ( !strncmp(string_value, "atan", 4) ) {
                 return curr_tok = ATAN_FUNC;
-            } else if ( !strncmp(string_value, "asin", 4) )  {
+            } else if ( !strncmp(string_value, "asin", 4) ) {
                 return curr_tok = ASIN_FUNC;
-            } else if ( !strncmp(string_value, "acos", 4) )  {
+            } else if ( !strncmp(string_value, "acos", 4) ) {
                 return curr_tok = ACOS_FUNC;
-            } else if ( !strncmp(string_value, "exp", 4) )  {
+            } else if ( !strncmp(string_value, "exp", 4) ) {
                 return curr_tok = EXP_FUNC;
             } else {
                 return curr_tok = NAME;
@@ -392,5 +391,4 @@ void Parser :: reset() {
         }
     }
 }
-
 } // end namespace oofem

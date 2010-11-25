@@ -46,7 +46,6 @@
 #include "interface.h"
 
 namespace oofem {
-
 class GaussPoint;
 class ZZNodalRecoveryModelInterface;
 
@@ -60,15 +59,17 @@ class ZZNodalRecoveryModel : public NodalRecoveryModel
 {
 protected:
 
-  /** Helper structure to pass required argumets to packing/unpacking functions
-      needed in parallel mode */
-  struct parallelStruct {
-    FloatArray* lhs;
-    FloatMatrix* rhs;
-    IntArray* regionNodalNumbers;
-    parallelStruct (FloatArray* a, FloatMatrix* b, IntArray* c) {lhs=a; rhs=b; regionNodalNumbers=c;}
-  };
-  
+    /** Helper structure to pass required argumets to packing/unpacking functions
+     *  needed in parallel mode */
+    struct parallelStruct {
+        FloatArray *lhs;
+        FloatMatrix *rhs;
+        IntArray *regionNodalNumbers;
+        parallelStruct(FloatArray *a, FloatMatrix *b, IntArray *c) { lhs = a;
+                                                                     rhs = b;
+                                                                     regionNodalNumbers = c; }
+    };
+
 public:
     /// Constructor
     ZZNodalRecoveryModel(Domain *d);
@@ -91,10 +92,10 @@ private:
     void initRegionMap(IntArray &regionMap, IntArray &regionValSize, InternalStateType type);
 
 #ifdef __PARALLEL_MODE
-    void initCommMaps ();
-    void exchangeDofManValues   (int ireg, FloatArray& lhs, FloatMatrix& rhs, IntArray& rn);
-    int  packSharedDofManData   (parallelStruct* s, ProcessCommunicator &processComm);
-    int  unpackSharedDofManData (parallelStruct* s, ProcessCommunicator &processComm);
+    void initCommMaps();
+    void exchangeDofManValues(int ireg, FloatArray &lhs, FloatMatrix &rhs, IntArray &rn);
+    int  packSharedDofManData(parallelStruct *s, ProcessCommunicator &processComm);
+    int  unpackSharedDofManData(parallelStruct *s, ProcessCommunicator &processComm);
 #endif
 };
 
@@ -140,6 +141,5 @@ public:
     virtual void ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatMatrix &answer, GaussPoint *aGaussPoint,
                                                                      InternalStateType type) = 0;
 };
-
 } // end namespace oofem
 #endif // zznodalrecoverymodel_h

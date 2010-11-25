@@ -42,8 +42,8 @@
 #define strreader_h
 
 #ifndef __MAKEDEPEND
-#include <stdio.h>
-#include <string.h>
+ #include <stdio.h>
+ #include <string.h>
 #endif
 #include "intarray.h"
 #include "flotarry.h"
@@ -51,7 +51,6 @@
 #include "dynalist.h"
 
 namespace oofem {
-
 class Range;
 
 class StringReader
@@ -127,6 +126,5 @@ private:
     const char *scanDouble(const char *source, double *value);
     const char *skipNextWord(const char *src);
 };
-
 } // end namespace oofem
 #endif // strreader_h

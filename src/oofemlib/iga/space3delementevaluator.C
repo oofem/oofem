@@ -48,7 +48,6 @@
 #include "iga.h"
 
 namespace oofem {
-
 /* 3D Space Elements */
 void Space3dStructuralElementEvaluator :: computeNMatrixAt(FloatMatrix &answer, GaussPoint *gp) {
     int i, nDofMan;
@@ -116,5 +115,4 @@ double Space3dStructuralElementEvaluator :: computeVolumeAround(GaussPoint *gp) 
 
     return volume;
 }
-
 } // end namespace oofem

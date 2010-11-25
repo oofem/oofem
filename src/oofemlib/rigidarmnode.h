@@ -40,11 +40,10 @@
 #include "node.h"
 
 #ifndef __MAKEDEPEND
-#include <stdio.h>
+ #include <stdio.h>
 #endif
 
 namespace oofem {
-
 class FloatArray;
 class IntArray;
 
@@ -129,6 +128,5 @@ public:
     /// returns reference to master dof. Public because RigidArmSlaveDof need to access.
     Node *giveMasterDofMngr() const { return * masterNode; }
 };
-
 } // end namespace oofem
 #endif // rigidarmnode_h

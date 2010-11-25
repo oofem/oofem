@@ -91,6 +91,5 @@ const char *__DofIDItemToString(DofIDItem _value);
 // max length of text string with DofIdName + 1
 // see Dof::giveDofIDName function
 #define DofIdNameMaxLength 5
-
 } // end namespace oofem
 #endif // dofiditem_h

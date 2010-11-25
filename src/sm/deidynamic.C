@@ -47,14 +47,13 @@
 #include "elementside.h"
 #include "dof.h"
 #ifndef __MAKEDEPEND
-#include <stdio.h>
-#include <math.h>
+ #include <stdio.h>
+ #include <math.h>
 #endif
 
 #include "verbose.h"
 
 namespace oofem {
-
 #define ZERO_MASS  1.E-10   // unit dependent !!!!
 
 DEIDynamic :: ~DEIDynamic()  { }
@@ -189,7 +188,7 @@ void DEIDynamic :: solveYourselfAt(TimeStep *tStep) {
 
         massMatrix.resize(neq);
         massMatrix.zero();
-	EModelDefaultEquationNumbering dn;
+        EModelDefaultEquationNumbering dn;
         for ( i = 1; i <= nelem; i++ ) {
             element = domain->giveElement(i);
             element->giveLocationArray(loc, EID_MomentumBalance, dn);
@@ -310,10 +309,10 @@ void DEIDynamic :: solveYourselfAt(TimeStep *tStep) {
     //loadVector = new FloatArray (this->giveNumberOfEquations());
     loadVector.resize( this->giveNumberOfEquations(EID_MomentumBalance) );
     loadVector.zero();
-    this->assembleVectorFromElements(loadVector, tStep, EID_MomentumBalance, ElementForceLoadVector, 
-				     VM_Total, EModelDefaultEquationNumbering(), domain);
-    this->assembleVectorFromDofManagers(loadVector, tStep, EID_MomentumBalance, NodalLoadVector, 
-					VM_Total, EModelDefaultEquationNumbering(), domain);
+    this->assembleVectorFromElements(loadVector, tStep, EID_MomentumBalance, ElementForceLoadVector,
+                                     VM_Total, EModelDefaultEquationNumbering(), domain);
+    this->assembleVectorFromDofManagers(loadVector, tStep, EID_MomentumBalance, NodalLoadVector,
+                                        VM_Total, EModelDefaultEquationNumbering(), domain);
 
     //
     // assembling additional parts of right hand side
@@ -349,8 +348,8 @@ void DEIDynamic :: solveYourselfAt(TimeStep *tStep) {
     for ( j = 1; j <= neq; j++ ) {
         coeff =  massMatrix.at(j);
         loadVector.at(j) += coeff * c3 * displacementVector.at(j) -
-        coeff * ( c1 - dumpingCoef * c2 ) *
-        previousDisplacementVector.at(j);
+                            coeff * ( c1 - dumpingCoef * c2 ) *
+                            previousDisplacementVector.at(j);
     }
 
     //
@@ -371,11 +370,11 @@ void DEIDynamic :: solveYourselfAt(TimeStep *tStep) {
     for ( i = 1; i <= neq; i++ ) {
         prevD = previousDisplacementVector.at(i);
         nextDisplacementVector.at(i) = loadVector.at(i) /
-        ( massMatrix.at(i) * ( c1 + dumpingCoef * c2 ) );
+                                       ( massMatrix.at(i) * ( c1 + dumpingCoef * c2 ) );
         velocityVector.at(i) = nextDisplacementVector.at(i) - prevD;
         accelerationVector.at(i) =
             nextDisplacementVector.at(i) -
-        2. * displacementVector.at(i) + prevD;
+            2. * displacementVector.at(i) + prevD;
     }
 
     accelerationVector.times(c1);
@@ -402,5 +401,4 @@ DEIDynamic :: printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *atTime)
 
     iDof->printMultipleOutputAt(stream, atTime, dofchar, EID_MomentumBalance, dofmodes, 3);
 }
-
 } // end namespace oofem

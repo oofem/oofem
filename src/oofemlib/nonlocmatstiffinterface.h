@@ -51,12 +51,11 @@
 #include "nonlocalmaterialext.h"
 
 #ifdef __OOFEG
-#include "oofeggraphiccontext.h"
-#include "conTable.h"
+ #include "oofeggraphiccontext.h"
+ #include "conTable.h"
 #endif
 
 namespace oofem {
-
 class SparseMtrx;
 class GaussPoint;
 class TimeStep;
@@ -68,7 +67,7 @@ public:
     NonlocalMaterialStiffnessInterface() : Interface() { }
 
     /// compute ans add IP contributions to destination matrix
-    virtual void NonlocalMaterialStiffnessInterface_addIPContribution(SparseMtrx &dest, const UnknownNumberingScheme &s, 
+    virtual void NonlocalMaterialStiffnessInterface_addIPContribution(SparseMtrx &dest, const UnknownNumberingScheme &s,
                                                                       GaussPoint *gp, TimeStep *atTime) = 0;
     /**
      * Returns integration list of receiver. Contains localIntegrationRecord structures, containing
@@ -84,6 +83,5 @@ public:
     virtual void NonlocalMaterialStiffnessInterface_showSparseMtrxStructure(GaussPoint *gp, oofegGraphicContext &gc, TimeStep *) { };
 #endif
 };
-
 } // end namespace oofem
 #endif // nonlocmatstiffinterface_h

@@ -59,7 +59,6 @@
 #endif
 
 namespace oofem {
-
 class Domain;
 class DofManager;
 class TimeStep;
@@ -273,12 +272,12 @@ public:
      * @exception throws an ContextIOERR exception if error encountered.
      */
     contextIOResultType    restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-    
+
     void setBcId(int bcId) { this->bc = bcId; }
     void setEquationNumber(int equationNumber) { this->equationNumber = equationNumber; } // rch
     void setUnknowns(Dictionary *unknowns) { this->unknowns = unknowns; } // rch
     Dictionary *giveUnknowns() { return this->unknowns; } // rch
-    int giveEqn() {return equationNumber;}
+    int giveEqn() { return equationNumber; }
 
 #ifdef __PARALLEL_MODE
     /**
@@ -328,6 +327,5 @@ protected:
      */
     InitialCondition *giveIc();
 };
-
 } // end namespace oofem
 #endif // masterdof_h

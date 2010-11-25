@@ -41,8 +41,8 @@
 #define exportmodule_h
 
 #ifndef __MAKEDEPEND
-#include <stdio.h>
-#include <string.h>
+ #include <stdio.h>
+ #include <string.h>
 #endif
 #include "intarray.h"
 #include "dynalist.h"
@@ -50,7 +50,6 @@
 #include "inputrecord.h"
 
 namespace oofem {
-
 class EngngModel;
 class TimeStep;
 
@@ -128,7 +127,6 @@ protected:
 
 protected:
 };
-
 } // end namespace oofem
 #endif // exportmodule_h
 

@@ -42,14 +42,13 @@
 #define subspaceit_h
 
 #ifndef __MAKEDEPEND
-#include <stdio.h>
+ #include <stdio.h>
 #endif
 #include "sparsegeneigenvalsystemnm.h"
 #include "sparsemtrx.h"
 #include "flotarry.h"
 
 namespace oofem {
-
 class Domain;
 class EngngModel;
 
@@ -135,6 +134,5 @@ public:
     classType giveClassID() const { return SubspaceIterationSolverClass; }
 protected:
 };
-
 } // end namespace oofem
 #endif // subspaceit_h

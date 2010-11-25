@@ -42,12 +42,11 @@
 #include "freestor.h"
 #include "error.h"
 #ifndef __MAKEDEPEND
-#include <stdio.h>
-#include <stdlib.h>
+ #include <stdio.h>
+ #include <stdlib.h>
 #endif
 
 namespace oofem {
-
 RowColumn :: RowColumn(int n, int st)
 // Constructor. Creates a row-column with number n, starting at index st.
 {
@@ -60,7 +59,7 @@ RowColumn :: RowColumn(int n, int st)
     if ( size ) {
         row    = allocDouble(size);
         column = allocDouble(size);
-    } else                                  {
+    } else {
         row    = NULL;
         column = NULL;
     }
@@ -299,5 +298,4 @@ RowColumn :: RowColumn(int inumber, int istart, double *irow, double *icol, doub
     this->column = icol;
     this->diag   = idiag;
 }
-
 } // end namespace oofem

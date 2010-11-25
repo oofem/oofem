@@ -47,7 +47,6 @@
 #include "compiler.h"
 
 namespace oofem {
-
 class Domain;
 class Element;
 class TimeStep;
@@ -63,7 +62,7 @@ public:
     /**
      * Typedefs to introduce the container type for nodal numbers
      */
-    typedef AList< FloatArray > nodalValContainerType;
+    typedef AList< FloatArray >nodalValContainerType;
 
     enum coordType { coordType_local, coordType_global };
 
@@ -172,6 +171,5 @@ public:
     const char *giveClassName() const { return "MMAShapeFunctProjectionInterface"; }
 protected:
 };
-
 } // end namespace oofem
 #endif // mmashapefunctprojection_h

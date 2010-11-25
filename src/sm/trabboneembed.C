@@ -1,37 +1,37 @@
 /* $Header: /home/cvs/bp/oofem/sm/src/isodamagemodel.C,v 1.4.4.1 2004/04/05 15:19:47 bp Exp $ */
 /*
-
-                   *****    *****   ******  ******  ***   ***                            
-                 **   **  **   **  **      **      ** *** **                             
-                **   **  **   **  ****    ****    **  *  **                              
-               **   **  **   **  **      **      **     **                               
-              **   **  **   **  **      **      **     **                                
-              *****    *****   **      ******  **     **         
-            
-                                                                   
-               OOFEM : Object Oriented Finite Element Code                 
-                    
-                 Copyright (C) 1993 - 2000   Borek Patzak                                       
-
-
-
-         Czech Technical University, Faculty of Civil Engineering,
-     Department of Structural Mechanics, 166 29 Prague, Czech Republic
-                                                                               
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.                                                                              
-*/
+ *
+ *****    *****   ******  ******  ***   ***
+ **   **  **   **  **      **      ** *** **
+ **   **  **   **  ****    ****    **  *  **
+ **   **  **   **  **      **      **     **
+ **   **  **   **  **      **      **     **
+ *****    *****   **      ******  **     **
+ *****
+ *****
+ *****         OOFEM : Object Oriented Finite Element Code
+ *****
+ *****           Copyright (C) 1993 - 2000   Borek Patzak
+ *****
+ *****
+ *****
+ *****   Czech Technical University, Faculty of Civil Engineering,
+ *****Department of Structural Mechanics, 166 29 Prague, Czech Republic
+ *****
+ *****This program is free software; you can redistribute it and/or modify
+ *****it under the terms of the GNU General Public License as published by
+ *****the Free Software Foundation; either version 2 of the License, or
+ *****(at your option) any later version.
+ *****
+ *****This program is distributed in the hope that it will be useful,
+ *****but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *****MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *****GNU General Public License for more details.
+ *****
+ *****You should have received a copy of the GNU General Public License
+ *****along with this program; if not, write to the Free Software
+ *****Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
 
 #include "trabboneembed.h"
 #include "gausspnt.h"
@@ -42,7 +42,6 @@
 #include "contextioerr.h"
 
 namespace oofem {
-
 /////////////////////////////////////////////////////////////////
 ///////////TRABECULAR BONE EMBEDDING MATERIAL////////////////////
 /////////////////////////////////////////////////////////////////
@@ -52,9 +51,8 @@ namespace oofem {
 // BEGIN: CONSTRUCTOR
 //
 
-TrabBoneEmbed :: TrabBoneEmbed (int n, Domain *d) : StructuralMaterial (n,d)
-{
-}
+TrabBoneEmbed :: TrabBoneEmbed(int n, Domain *d) : StructuralMaterial(n, d)
+{}
 
 //
 // END: CONSTRUCTOR
@@ -75,10 +73,13 @@ TrabBoneEmbed :: TrabBoneEmbed (int n, Domain *d) : StructuralMaterial (n,d)
 // returns whether receiver supports given mode
 
 int
-TrabBoneEmbed :: hasMaterialModeCapability (MaterialMode mode)
+TrabBoneEmbed :: hasMaterialModeCapability(MaterialMode mode)
 {
-  if ((mode == _3dMat)) return 1;
-  return 0;
+    if ( ( mode == _3dMat ) ) {
+        return 1;
+    }
+
+    return 0;
 }
 
 //
@@ -90,9 +91,9 @@ TrabBoneEmbed :: hasMaterialModeCapability (MaterialMode mode)
 // BEGIN: SUBROUTINE OF ALPHA EVALUATION
 //
 
-void TrabBoneEmbed::computeCumPlastStrain (double& tempAlpha, GaussPoint* gp, TimeStep* atTime)
+void TrabBoneEmbed :: computeCumPlastStrain(double &tempAlpha, GaussPoint *gp, TimeStep *atTime)
 {
-  tempAlpha = 0.;
+    tempAlpha = 0.;
 }
 
 //
@@ -105,21 +106,21 @@ void TrabBoneEmbed::computeCumPlastStrain (double& tempAlpha, GaussPoint* gp, Ti
 //
 
 void
-TrabBoneEmbed::give3dMaterialStiffnessMatrix (FloatMatrix& answer,
-                                   MatResponseForm form,MatResponseMode mode,GaussPoint* gp,
-                                   TimeStep* atTime)
+TrabBoneEmbed :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
+                                               MatResponseForm form, MatResponseMode mode, GaussPoint *gp,
+                                               TimeStep *atTime)
 {
-  TrabBoneEmbedStatus *status = (TrabBoneEmbedStatus*) this -> giveStatus (gp);
+    TrabBoneEmbedStatus *status = ( TrabBoneEmbedStatus * ) this->giveStatus(gp);
 
-  FloatMatrix elasticity, compliance;
- 
-  this->constructIsoComplTensor(compliance, eps0, nu0);
-  elasticity.beInverseOf(compliance);
+    FloatMatrix elasticity, compliance;
 
-  answer.resize(6,6);
-  answer = elasticity;
+    this->constructIsoComplTensor(compliance, eps0, nu0);
+    elasticity.beInverseOf(compliance);
 
-  status -> setSmtrx(answer);
+    answer.resize(6, 6);
+    answer = elasticity;
+
+    status->setSmtrx(answer);
 }
 
 //
@@ -132,20 +133,18 @@ TrabBoneEmbed::give3dMaterialStiffnessMatrix (FloatMatrix& answer,
 //
 
 void
-TrabBoneEmbed :: performPlasticityReturn(GaussPoint* gp, const FloatArray& totalStrain)
+TrabBoneEmbed :: performPlasticityReturn(GaussPoint *gp, const FloatArray &totalStrain)
 {
+    double tempAlpha;
+    FloatArray tempPlasDef;
 
-  double tempAlpha;
-  FloatArray tempPlasDef;
+    TrabBoneEmbedStatus *status = ( TrabBoneEmbedStatus * ) this->giveStatus(gp);
 
-  TrabBoneEmbedStatus *status = (TrabBoneEmbedStatus*) this -> giveStatus (gp);
+    tempPlasDef.resize(6);
+    tempAlpha = 0.;
 
-  tempPlasDef.resize(6);
-  tempAlpha = 0.;
-
-  status -> setTempPlasDef(tempPlasDef);
-  status -> setTempAlpha(tempAlpha);
-
+    status->setTempPlasDef(tempPlasDef);
+    status->setTempAlpha(tempAlpha);
 }
 
 //
@@ -157,12 +156,12 @@ TrabBoneEmbed :: performPlasticityReturn(GaussPoint* gp, const FloatArray& total
 // BEGIN: FUNCTION FOR DAMAGE PARAMETER
 //
 
-double  
-TrabBoneEmbed::computeDamageParam (double alpha, GaussPoint* gp)  
+double
+TrabBoneEmbed :: computeDamageParam(double alpha, GaussPoint *gp)
 {
-  double tempDam = 0.0;
+    double tempDam = 0.0;
 
-  return tempDam;
+    return tempDam;
 }
 //
 //
@@ -175,18 +174,17 @@ TrabBoneEmbed::computeDamageParam (double alpha, GaussPoint* gp)
 //
 
 double
-TrabBoneEmbed::computeDamage (GaussPoint* gp,  TimeStep* atTime)
+TrabBoneEmbed :: computeDamage(GaussPoint *gp,  TimeStep *atTime)
 {
-  double tempAlpha;
+    double tempAlpha;
 
-  computeCumPlastStrain(tempAlpha, gp, atTime);
+    computeCumPlastStrain(tempAlpha, gp, atTime);
 
-  double tempDam = computeDamageParam (tempAlpha, gp);
+    double tempDam = computeDamageParam(tempAlpha, gp);
 
-//  double dam=0.0;
+    //  double dam=0.0;
 
-  return tempDam;
-
+    return tempDam;
 }
 
 //
@@ -196,48 +194,47 @@ TrabBoneEmbed::computeDamage (GaussPoint* gp,  TimeStep* atTime)
 
 /////////////////////////////////////////////////////////////////
 // BEGIN: SUBROUTINE FOR EVALUATION OF TOTAL STRESS
-// returns real stress vector in 3d stress space of receiver according to 
+// returns real stress vector in 3d stress space of receiver according to
 // previous level of stress and current
 // strain increment, the only way, how to correctly update gp records
 //
 
 void
-TrabBoneEmbed :: giveRealStressVector (FloatArray& answer, MatResponseForm form, GaussPoint* gp, 
-                                    const FloatArray& totalStrain, 
-                                    TimeStep* atTime)
+TrabBoneEmbed :: giveRealStressVector(FloatArray &answer, MatResponseForm form, GaussPoint *gp,
+                                      const FloatArray &totalStrain,
+                                      TimeStep *atTime)
 {
-  double tempDam, tempTSED;
-  FloatArray newTotalDef, plasDef;
-  FloatArray totalStress;
-  double dt;
-  FloatMatrix compliance, elasticity;
+    double tempDam, tempTSED;
+    FloatArray newTotalDef, plasDef;
+    FloatArray totalStress;
+    double dt;
+    FloatMatrix compliance, elasticity;
 
-  this->constructIsoComplTensor(compliance, eps0, nu0);
-  elasticity.beInverseOf(compliance);
+    this->constructIsoComplTensor(compliance, eps0, nu0);
+    elasticity.beInverseOf(compliance);
 
-  TrabBoneEmbedStatus *status = (TrabBoneEmbedStatus*) this -> giveStatus (gp);
+    TrabBoneEmbedStatus *status = ( TrabBoneEmbedStatus * ) this->giveStatus(gp);
 
-  this->initGpForNewStep(gp);
+    this->initGpForNewStep(gp);
 
-  performPlasticityReturn(gp, totalStrain);
+    performPlasticityReturn(gp, totalStrain);
 
-  dt = atTime ->  giveTimeIncrement();
-  
-  tempDam = computeDamage(gp, atTime);
+    dt = atTime->giveTimeIncrement();
 
-  plasDef.resize(6);
-  
-  totalStress.beProductOf(elasticity,totalStrain);
+    tempDam = computeDamage(gp, atTime);
 
-  tempTSED = dotProduct(0.5*totalStrain,totalStress,6);
+    plasDef.resize(6);
 
-  answer.resize(6);
-  answer = totalStress;
-  status -> setTempDam(tempDam);
-  status -> letTempStrainVectorBe(totalStrain);
-  status -> letTempStressVectorBe(answer);
-  status -> setTempTSED(tempTSED);
+    totalStress.beProductOf(elasticity, totalStrain);
 
+    tempTSED = dotProduct(0.5 * totalStrain, totalStress, 6);
+
+    answer.resize(6);
+    answer = totalStress;
+    status->setTempDam(tempDam);
+    status->letTempStrainVectorBe(totalStrain);
+    status->letTempStressVectorBe(answer);
+    status->setTempTSED(tempTSED);
 }
 
 //
@@ -249,18 +246,18 @@ TrabBoneEmbed :: giveRealStressVector (FloatArray& answer, MatResponseForm form,
 // BEGIN: MATRIX DEFINITION
 
 void
-TrabBoneEmbed :: constructIsoComplTensor (FloatMatrix& answer, const  double eps0, const  double nu0)
+TrabBoneEmbed :: constructIsoComplTensor(FloatMatrix &answer, const double eps0, const double nu0)
 {
-  double mu0 = eps0/(2*(1+nu0));
+    double mu0 = eps0 / ( 2 * ( 1 + nu0 ) );
 
-  answer.resize (6,6);
-  answer.at(1,1) = answer.at(2,2) = answer.at(3,3) = 1/eps0;
-  answer.at(1,2) = answer.at(2,1) = answer.at(1,3) = -nu0/eps0;
-  answer.at(3,1) = answer.at(2,3) = answer.at(3,2) = -nu0/eps0;
-  answer.at(4,4) = answer.at(5,5) = answer.at(6,6) = 1/mu0;
+    answer.resize(6, 6);
+    answer.at(1, 1) = answer.at(2, 2) = answer.at(3, 3) = 1 / eps0;
+    answer.at(1, 2) = answer.at(2, 1) = answer.at(1, 3) = -nu0 / eps0;
+    answer.at(3, 1) = answer.at(2, 3) = answer.at(3, 2) = -nu0 / eps0;
+    answer.at(4, 4) = answer.at(5, 5) = answer.at(6, 6) = 1 / mu0;
 
-   return  ;
- }
+    return;
+}
 
 //
 // END: MATRIX DEFINITION
@@ -272,18 +269,18 @@ TrabBoneEmbed :: constructIsoComplTensor (FloatMatrix& answer, const  double eps
 //
 
 IRResultType
-TrabBoneEmbed :: initializeFrom (InputRecord* ir)
+TrabBoneEmbed :: initializeFrom(InputRecord *ir)
 {
- const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
- IRResultType result;                   // Required by IR_GIVE_FIELD macro
+    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
+    IRResultType result;                // Required by IR_GIVE_FIELD macro
 
- /// Read material properties here
+    /// Read material properties here
 
- IR_GIVE_FIELD (ir, eps0, IFT_TrabBoneEmbed_eps0, "eps0"); // Macro
- IR_GIVE_FIELD (ir, nu0, IFT_TrabBoneEmbed_nu0, "nu0"); // Macro
+    IR_GIVE_FIELD(ir, eps0, IFT_TrabBoneEmbed_eps0, "eps0"); // Macro
+    IR_GIVE_FIELD(ir, nu0, IFT_TrabBoneEmbed_nu0, "nu0"); // Macro
 
- return StructuralMaterial::initializeFrom (ir);
-} 
+    return StructuralMaterial :: initializeFrom(ir);
+}
 
 //
 // END: PARAMETERS OF INPUT FILE
@@ -293,94 +290,105 @@ TrabBoneEmbed :: initializeFrom (InputRecord* ir)
 // BEGIN: VTK Output
 //
 
-int 
-TrabBoneEmbed::giveIPValue (FloatArray& answer, GaussPoint* aGaussPoint, InternalStateType type, TimeStep* atTime)
+int
+TrabBoneEmbed :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime)
 {
- TrabBoneEmbedStatus* status = (TrabBoneEmbedStatus*) this -> giveStatus (aGaussPoint);
- if (type == IST_DamageScalar) {
-  answer.resize(1);
-  answer.at(1) = 0.;
-  return 1;
- } else if (type == IST_PlasticStrainTensor) {
-  answer.resize(6);
-  return 1;
- } else if (type == IST_MaxEquivalentStrainLevel) {
-  answer.resize(1);
-  answer.at(1) = 0.;
-  return 1;
- } else if (type == IST_BoneVolumeFraction) {
-  answer.resize(1);
-  answer.at(1) = 1.;
-  return 1;
- } else if (type == IST_PlasStrainEnerDens) {
-  answer.resize(1);
-  answer.at(1) = 0. ;
-  return 1;
- } else if (type == IST_ElasStrainEnerDens) {
-  answer.resize(1);
-  answer.at(1) = status ->giveTempTSED();
-  return 1;
- } else if (type == IST_TotalStrainEnerDens) {
-  answer.resize(1);
-  answer.at(1) = status ->giveTempTSED();
-  return 1;
- } else return StructuralMaterial::giveIPValue (answer, aGaussPoint, type, atTime);
+    TrabBoneEmbedStatus *status = ( TrabBoneEmbedStatus * ) this->giveStatus(aGaussPoint);
+    if ( type == IST_DamageScalar ) {
+        answer.resize(1);
+        answer.at(1) = 0.;
+        return 1;
+    } else if ( type == IST_PlasticStrainTensor ) {
+        answer.resize(6);
+        return 1;
+    } else if ( type == IST_MaxEquivalentStrainLevel ) {
+        answer.resize(1);
+        answer.at(1) = 0.;
+        return 1;
+    } else if ( type == IST_BoneVolumeFraction ) {
+        answer.resize(1);
+        answer.at(1) = 1.;
+        return 1;
+    } else if ( type == IST_PlasStrainEnerDens ) {
+        answer.resize(1);
+        answer.at(1) = 0.;
+        return 1;
+    } else if ( type == IST_ElasStrainEnerDens ) {
+        answer.resize(1);
+        answer.at(1) = status->giveTempTSED();
+        return 1;
+    } else if ( type == IST_TotalStrainEnerDens ) {
+        answer.resize(1);
+        answer.at(1) = status->giveTempTSED();
+        return 1;
+    } else {
+        return StructuralMaterial :: giveIPValue(answer, aGaussPoint, type, atTime);
+    }
 }
 
-InternalStateValueType 
-TrabBoneEmbed::giveIPValueType (InternalStateType type)
+InternalStateValueType
+TrabBoneEmbed :: giveIPValueType(InternalStateType type)
 {
- if (type == IST_PlasticStrainTensor) return ISVT_TENSOR_S3;
- else if ((type == IST_DamageScalar)||(type == IST_MaxEquivalentStrainLevel)||(type == IST_BoneVolumeFraction)||(type == IST_PlasStrainEnerDens)||(type == IST_ElasStrainEnerDens)||(type == IST_TotalStrainEnerDens)) return ISVT_SCALAR;
- else return StructuralMaterial::giveIPValueType (type);
-}
-
-int 
-TrabBoneEmbed::giveIntVarCompFullIndx (IntArray& answer, InternalStateType type, MaterialMode mmode)
-{
- if (type == IST_DamageScalar) {
-  answer.resize (1);
-  answer.at(1) = 1;
-  return 1;
- } else if (type == IST_PlasticStrainTensor) {
-  answer.resize (6);
-  answer.at(1) = 1;
-  answer.at(2) = 2;
-  answer.at(3) = 3;
-  answer.at(4) = 4;
-  answer.at(5) = 5;
-  answer.at(6) = 6;
-  return 1;
- } else if (type == IST_MaxEquivalentStrainLevel) {
-  answer.resize (1);
-  answer.at(1) = 1;
-  return 1;
- } else if (type == IST_BoneVolumeFraction) {
-  answer.resize (1);
-  answer.at(1) = 1;
-  return 1;
- } else if (type == IST_PlasStrainEnerDens) {
-  answer.resize (1);
-  answer.at(1) = 1;
-  return 1;
- } else if (type == IST_ElasStrainEnerDens) {
-  answer.resize (1);
-  answer.at(1) = 1;
-  return 1;
- } else if (type == IST_TotalStrainEnerDens) {
-  answer.resize (1);
-  answer.at(1) = 1;
-  return 1;
- } else 
-  return StructuralMaterial::giveIntVarCompFullIndx (answer, type, mmode);
+    if ( type == IST_PlasticStrainTensor ) {
+        return ISVT_TENSOR_S3;
+    } else if ( ( type == IST_DamageScalar ) || ( type == IST_MaxEquivalentStrainLevel ) || ( type == IST_BoneVolumeFraction ) || ( type == IST_PlasStrainEnerDens ) || ( type == IST_ElasStrainEnerDens ) || ( type == IST_TotalStrainEnerDens ) ) {
+        return ISVT_SCALAR;
+    } else {
+        return StructuralMaterial :: giveIPValueType(type);
+    }
 }
 
 int
-TrabBoneEmbed::giveIPValueSize (InternalStateType type, GaussPoint* aGaussPoint)
+TrabBoneEmbed :: giveIntVarCompFullIndx(IntArray &answer, InternalStateType type, MaterialMode mmode)
 {
- if ((type == IST_DamageScalar)||(type == IST_MaxEquivalentStrainLevel)||(type == IST_BoneVolumeFraction)||(type == IST_ElasStrainEnerDens)||(type == IST_PlasStrainEnerDens)||(type == IST_TotalStrainEnerDens)) return 1;
- else if (type == IST_PlasticStrainTensor) return 6;
- else return StructuralMaterial::giveIPValueSize (type, aGaussPoint);
+    if ( type == IST_DamageScalar ) {
+        answer.resize(1);
+        answer.at(1) = 1;
+        return 1;
+    } else if ( type == IST_PlasticStrainTensor ) {
+        answer.resize(6);
+        answer.at(1) = 1;
+        answer.at(2) = 2;
+        answer.at(3) = 3;
+        answer.at(4) = 4;
+        answer.at(5) = 5;
+        answer.at(6) = 6;
+        return 1;
+    } else if ( type == IST_MaxEquivalentStrainLevel ) {
+        answer.resize(1);
+        answer.at(1) = 1;
+        return 1;
+    } else if ( type == IST_BoneVolumeFraction ) {
+        answer.resize(1);
+        answer.at(1) = 1;
+        return 1;
+    } else if ( type == IST_PlasStrainEnerDens ) {
+        answer.resize(1);
+        answer.at(1) = 1;
+        return 1;
+    } else if ( type == IST_ElasStrainEnerDens ) {
+        answer.resize(1);
+        answer.at(1) = 1;
+        return 1;
+    } else if ( type == IST_TotalStrainEnerDens ) {
+        answer.resize(1);
+        answer.at(1) = 1;
+        return 1;
+    } else {
+        return StructuralMaterial :: giveIntVarCompFullIndx(answer, type, mmode);
+    }
+}
+
+int
+TrabBoneEmbed :: giveIPValueSize(InternalStateType type, GaussPoint *aGaussPoint)
+{
+    if ( ( type == IST_DamageScalar ) || ( type == IST_MaxEquivalentStrainLevel ) || ( type == IST_BoneVolumeFraction ) || ( type == IST_ElasStrainEnerDens ) || ( type == IST_PlasStrainEnerDens ) || ( type == IST_TotalStrainEnerDens ) ) {
+        return 1;
+    } else if ( type == IST_PlasticStrainTensor ) {
+        return 6;
+    } else {
+        return StructuralMaterial :: giveIPValueSize(type, aGaussPoint);
+    }
 }
 
 //
@@ -397,16 +405,15 @@ TrabBoneEmbed::giveIPValueSize (InternalStateType type, GaussPoint* aGaussPoint)
 // BEGIN: CONSTRUCTOR
 // init state variables
 
-TrabBoneEmbedStatus::TrabBoneEmbedStatus (int n, Domain*d, GaussPoint* g):StructuralMaterialStatus(n,d,g)
+TrabBoneEmbedStatus :: TrabBoneEmbedStatus(int n, Domain *d, GaussPoint *g) : StructuralMaterialStatus(n, d, g)
 {
-
-	alpha = 0.0;
-	dam = 0.0;
-	tsed= 0.0;
-	tempAlpha = 0.0;
-	tempDam = 0.0;
-	tempTSED= 0.0;
-	smtrx.resize(6,6);
+    alpha = 0.0;
+    dam = 0.0;
+    tsed = 0.0;
+    tempAlpha = 0.0;
+    tempDam = 0.0;
+    tempTSED = 0.0;
+    smtrx.resize(6, 6);
 }
 
 //
@@ -416,11 +423,10 @@ TrabBoneEmbedStatus::TrabBoneEmbedStatus (int n, Domain*d, GaussPoint* g):Struct
 
 /////////////////////////////////////////////////////////////////
 // BEGIN: DESTRUCTOR
-// 
+//
 
-TrabBoneEmbedStatus::~TrabBoneEmbedStatus () 
-{
-}
+TrabBoneEmbedStatus :: ~TrabBoneEmbedStatus()
+{}
 
 //
 // END: DESTRUCTOR
@@ -434,7 +440,7 @@ TrabBoneEmbedStatus::~TrabBoneEmbedStatus ()
 double
 TrabBoneEmbedStatus :: giveTempTSED()
 {
-  return tempTSED;
+    return tempTSED;
 }
 
 //
@@ -446,14 +452,14 @@ TrabBoneEmbedStatus :: giveTempTSED()
 // BEGIN: OUTPUT
 // print state to output stream
 
-void 
-TrabBoneEmbedStatus :: printOutputAt  (FILE *file, TimeStep* tStep)
+void
+TrabBoneEmbedStatus :: printOutputAt(FILE *file, TimeStep *tStep)
 {
-  StructuralMaterialStatus :: printOutputAt (file, tStep);
-  fprintf (file,"status { ");
-  fprintf (file,"plastrains: %f  %f  %f  %f  %f  %f",this->tempPlasDef.at(1),this->tempPlasDef.at(2),this->tempPlasDef.at(3),this->tempPlasDef.at(4),this->tempPlasDef.at(5),this->tempPlasDef.at(6));
-  fprintf (file," , alpha 0. , dam 0. , esed %f , psed 0. , tsed %f ", this->tempTSED, this->tempTSED);
-  fprintf (file,"}\n");
+    StructuralMaterialStatus :: printOutputAt(file, tStep);
+    fprintf(file, "status { ");
+    fprintf( file, "plastrains: %f  %f  %f  %f  %f  %f", this->tempPlasDef.at(1), this->tempPlasDef.at(2), this->tempPlasDef.at(3), this->tempPlasDef.at(4), this->tempPlasDef.at(5), this->tempPlasDef.at(6) );
+    fprintf(file, " , alpha 0. , dam 0. , esed %f , psed 0. , tsed %f ", this->tempTSED, this->tempTSED);
+    fprintf(file, "}\n");
 }
 
 //
@@ -465,14 +471,14 @@ TrabBoneEmbedStatus :: printOutputAt  (FILE *file, TimeStep* tStep)
 // BEGIN: INITIALIZE TEMP VARIABLE (UPDATED DURING ITERATIONS)
 // initialize temporary state variables according to equilibriated state vars
 
-void 
-TrabBoneEmbedStatus::initTempStatus ()
+void
+TrabBoneEmbedStatus :: initTempStatus()
 {
-  StructuralMaterialStatus :: initTempStatus();
-  this->tempAlpha = this->alpha;
-  this->tempDam = this->dam;
-  this->tempTSED= this->tsed;
-  this->tempPlasDef= this->plasDef;
+    StructuralMaterialStatus :: initTempStatus();
+    this->tempAlpha = this->alpha;
+    this->tempDam = this->dam;
+    this->tempTSED = this->tsed;
+    this->tempPlasDef = this->plasDef;
 }
 
 //
@@ -484,14 +490,14 @@ TrabBoneEmbedStatus::initTempStatus ()
 // BEGIN: SETS VARIABLE EQUAL TO TEMP VARIABLE AT THE END OF THE STEP
 // Called when equlibrium reached, set equilibriated vars according to temporary (working) ones.
 
-void 
-TrabBoneEmbedStatus::updateYourself(TimeStep* atTime)
+void
+TrabBoneEmbedStatus :: updateYourself(TimeStep *atTime)
 {
-  StructuralMaterialStatus::updateYourself(atTime);
-  this->alpha = this->tempAlpha;
-  this->dam = this->tempDam;
-  this->tsed = this->tempTSED;
-  this->plasDef= this->tempPlasDef;
+    StructuralMaterialStatus :: updateYourself(atTime);
+    this->alpha = this->tempAlpha;
+    this->dam = this->tempDam;
+    this->tsed = this->tempTSED;
+    this->plasDef = this->tempPlasDef;
 }
 
 //
@@ -504,18 +510,20 @@ TrabBoneEmbedStatus::updateYourself(TimeStep* atTime)
 //
 
 contextIOResultType
-TrabBoneEmbedStatus::saveContext (DataStream* stream, ContextMode mode, void *obj)
+TrabBoneEmbedStatus :: saveContext(DataStream *stream, ContextMode mode, void *obj)
 {
- contextIOResultType iores;
+    contextIOResultType iores;
 
- // save parent class status
- if ((iores = StructuralMaterialStatus :: saveContext (stream, mode, obj)) != CIO_OK) THROW_CIOERR(iores);
+    // save parent class status
+    if ( ( iores = StructuralMaterialStatus :: saveContext(stream, mode, obj) ) != CIO_OK ) {
+        THROW_CIOERR(iores);
+    }
 
- // write a raw data
- //if (fwrite(&kappa,sizeof(double),1,stream) != 1) THROW_CIOERR(CIO_IOERR);
- //if (fwrite(&damage,sizeof(double),1,stream)!= 1) THROW_CIOERR(CIO_IOERR);
+    // write a raw data
+    //if (fwrite(&kappa,sizeof(double),1,stream) != 1) THROW_CIOERR(CIO_IOERR);
+    //if (fwrite(&damage,sizeof(double),1,stream)!= 1) THROW_CIOERR(CIO_IOERR);
 
- return CIO_OK;
+    return CIO_OK;
 }
 
 //
@@ -528,18 +536,20 @@ TrabBoneEmbedStatus::saveContext (DataStream* stream, ContextMode mode, void *ob
 //
 
 contextIOResultType
-TrabBoneEmbedStatus::restoreContext(DataStream* stream, ContextMode mode, void *obj)
+TrabBoneEmbedStatus :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
 {
- contextIOResultType iores;
+    contextIOResultType iores;
 
- // read parent class status
- if ((iores = StructuralMaterialStatus :: restoreContext (stream,mode,obj)) != CIO_OK) THROW_CIOERR(iores);
+    // read parent class status
+    if ( ( iores = StructuralMaterialStatus :: restoreContext(stream, mode, obj) ) != CIO_OK ) {
+        THROW_CIOERR(iores);
+    }
 
- // read raw data 
- //if (fread (&kappa,sizeof(double),1,stream) != 1) THROW_CIOERR(CIO_IOERR);
- //if (fread (&damage,sizeof(double),1,stream) != 1) THROW_CIOERR(CIO_IOERR);
+    // read raw data
+    //if (fread (&kappa,sizeof(double),1,stream) != 1) THROW_CIOERR(CIO_IOERR);
+    //if (fread (&damage,sizeof(double),1,stream) != 1) THROW_CIOERR(CIO_IOERR);
 
- return CIO_OK;
+    return CIO_OK;
 }
 
 //
@@ -551,15 +561,14 @@ TrabBoneEmbedStatus::restoreContext(DataStream* stream, ContextMode mode, void *
 // BEGIN: CREATE STATUS
 //
 
-MaterialStatus *TrabBoneEmbed::CreateStatus (GaussPoint* gp) const
+MaterialStatus *TrabBoneEmbed :: CreateStatus(GaussPoint *gp) const
 {
-  TrabBoneEmbedStatus *status =
-    new  TrabBoneEmbedStatus (1, StructuralMaterial :: giveDomain(), gp) ;
-  return status ;
+    TrabBoneEmbedStatus *status =
+        new  TrabBoneEmbedStatus(1, StructuralMaterial :: giveDomain(), gp);
+    return status;
 }
 
 //
 // END: CREATE STATUS
 /////////////////////////////////////////////////////////////////
-
 } // end namespace oofem

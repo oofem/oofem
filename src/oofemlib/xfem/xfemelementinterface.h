@@ -8,7 +8,6 @@
 #include "structuralelement.h"
 
 namespace oofem {
-
 /** provides xfem interface for an element */
 class XfemElementInterface : public Interface
 {
@@ -26,6 +25,5 @@ public:
 protected:
     Element *element;
 };
-
 } // end namespace oofem
 #endif

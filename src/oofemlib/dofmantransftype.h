@@ -53,6 +53,5 @@ enum DofManTransfType {
     _toGlobalCS,
     _toNodalCS
 };
-
 } // end namespace oofem
 #endif // dofmantransftype_h

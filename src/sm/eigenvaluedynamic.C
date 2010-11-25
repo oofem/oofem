@@ -46,8 +46,8 @@
 #include "node.h"
 #include "elementside.h"
 #ifndef __MAKEDEPEND
-#include <stdio.h>
-#include <math.h>
+ #include <stdio.h>
+ #include <math.h>
 #endif
 #include "flotmtrx.h"
 
@@ -60,11 +60,10 @@
 #include "contextioerr.h"
 
 #ifdef __OOFEG
-#include "oofeggraphiccontext.h"
+ #include "oofeggraphiccontext.h"
 #endif
 
 namespace oofem {
-
 NumericalMethod *EigenValueDynamic :: giveNumericalMethod(TimeStep *)
 {
     if ( nMethod ) {
@@ -108,9 +107,9 @@ EigenValueDynamic :: initializeFrom(InputRecord *ir)
     solverType = ( GenEigvalSolverType ) val;
 
     val = 0; //Default Skyline
-    IR_GIVE_OPTIONAL_FIELD (ir, val, IFT_EigenValueDynamic_smtype, "smtype"); // Macro
-    sparseMtrxType = (SparseMtrxType) val;
-    
+    IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_EigenValueDynamic_smtype, "smtype");  // Macro
+    sparseMtrxType = ( SparseMtrxType ) val;
+
     return IRRT_OK;
 }
 
@@ -222,16 +221,16 @@ void EigenValueDynamic :: solveYourselfAt(TimeStep *tStep) {
          */
 
         stiffnessMatrix = CreateUsrDefSparseMtrx(sparseMtrxType);
-        stiffnessMatrix->buildInternalStructure(this, 1, EID_MomentumBalance, EModelDefaultEquationNumbering());
+        stiffnessMatrix->buildInternalStructure( this, 1, EID_MomentumBalance, EModelDefaultEquationNumbering() );
 
         //massMatrix = stiffnessMatrix->GiveCopy();
         massMatrix = CreateUsrDefSparseMtrx(sparseMtrxType);
-        massMatrix->buildInternalStructure(this, 1, EID_MomentumBalance, EModelDefaultEquationNumbering());
+        massMatrix->buildInternalStructure( this, 1, EID_MomentumBalance, EModelDefaultEquationNumbering() );
 
-        this->assemble( stiffnessMatrix, tStep, EID_MomentumBalance, StiffnessMatrix, 
-			EModelDefaultEquationNumbering(), this->giveDomain(1) );
-        this->assemble( massMatrix, tStep, EID_MomentumBalance, MassMatrix, 
-			EModelDefaultEquationNumbering(), this->giveDomain(1) );
+        this->assemble( stiffnessMatrix, tStep, EID_MomentumBalance, StiffnessMatrix,
+                       EModelDefaultEquationNumbering(), this->giveDomain(1) );
+        this->assemble( massMatrix, tStep, EID_MomentumBalance, MassMatrix,
+                       EModelDefaultEquationNumbering(), this->giveDomain(1) );
         //
         // create resulting objects eigVec and eigVal
         //
@@ -274,14 +273,14 @@ void EigenValueDynamic :: solveYourselfAt(TimeStep *tStep) {
     nMethod->solve(stiffnessMatrix, massMatrix, & eigVal, & eigVec, rtolv, numberOfRequiredEigenValues);
 
     /*
-    // compute eigen frequencies
-    for ( i = 1; i <= numberOfRequiredEigenValues; i++ ) {
-        eigVal.at(i) = sqrt( eigVal.at(i) );
-    }
-    */
+     * // compute eigen frequencies
+     * for ( i = 1; i <= numberOfRequiredEigenValues; i++ ) {
+     *  eigVal.at(i) = sqrt( eigVal.at(i) );
+     * }
+     */
 
-    delete  stiffnessMatrix;
-    delete  massMatrix;
+    delete stiffnessMatrix;
+    delete massMatrix;
     //delete  eigVec;
     //delete  eigVal;
     stiffnessMatrix = massMatrix = NULL;
@@ -358,12 +357,12 @@ void EigenValueDynamic :: terminate(TimeStep *stepN)
      */
 
     for ( i = 1; i <=  numberOfRequiredEigenValues; i++ ) {
-      // export using export manager
-      stepN->setTime( ( double ) i ); // we use time as intrinsic eigen value index
-      stepN->setNumber(i);
-      exportModuleManager->doOutput(stepN);
+        // export using export manager
+        stepN->setTime( ( double ) i ); // we use time as intrinsic eigen value index
+        stepN->setNumber(i);
+        exportModuleManager->doOutput(stepN);
     }
-      
+
     this->saveStepContext(stepN);
 }
 
@@ -495,18 +494,17 @@ EigenValueDynamic :: printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *atTime)
 }
 
 #ifdef __SLEPC_MODULE
-void 
-EigenValueDynamic::initPetscContexts ()
+void
+EigenValueDynamic :: initPetscContexts()
 {
-  PetscContext *petscContext;
-  
-  int i;
-  petscContextList -> growTo(ndomains) ;
-  for (i=0; i < this->ndomains ; i++) {
-    petscContext =  new PetscContext (this, EID_MomentumBalance);
-    petscContextList->put(i+1,petscContext) ;
-    
-  }
+    PetscContext *petscContext;
+
+    int i;
+    petscContextList->growTo(ndomains);
+    for ( i = 0; i < this->ndomains; i++ ) {
+        petscContext =  new PetscContext(this, EID_MomentumBalance);
+        petscContextList->put(i + 1, petscContext);
+    }
 }
 #endif
 } // end namespace oofem

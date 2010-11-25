@@ -48,18 +48,17 @@
 #include "structuralms.h"
 #include "mathfem.h"
 #ifndef __MAKEDEPEND
-#include <stdio.h>
+ #include <stdio.h>
 #endif
 
 #ifdef __OOFEG
-#include "engngm.h"
-#include "oofeggraphiccontext.h"
-#include "oofegutils.h"
-#include "conTable.h"
+ #include "engngm.h"
+ #include "oofeggraphiccontext.h"
+ #include "oofegutils.h"
+ #include "conTable.h"
 #endif
 
 namespace oofem {
-
 LSpaceBB :: LSpaceBB(int n, Domain *aDomain) : LSpace(n, aDomain)
 { }
 
@@ -117,6 +116,4 @@ LSpaceBB :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int l
 
     return;
 }
-
-
 } // end namespace oofem

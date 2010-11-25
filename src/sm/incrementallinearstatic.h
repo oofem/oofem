@@ -41,14 +41,13 @@
 #define incrementallinearstatic_h
 
 #ifndef __MAKEDEPEND
-#include <stdio.h>
+ #include <stdio.h>
 #endif
 #include "structengngmodel.h"
 #include "sparselinsystemnm.h"
 #include "sparselinsystemnm.h"
 
 namespace oofem {
-
 /**
  * This class implements Incremental LinearStatic Engineering problem.
  * problem is solved as series of linear solutions. This class is intended to
@@ -138,6 +137,5 @@ public:
     virtual int       giveUnknownDictHashIndx(EquationID type, ValueModeType mode, TimeStep *stepN)
     { return ( int ) mode; }
 };
-
 } // end namespace oofem
 #endif // incrementallinearstatic_h

@@ -6,107 +6,121 @@
 #include "mathfem.h"
 
 namespace oofem {
-
 /*
-void EnrichmentFunction :: insertEnrichmentItem(EnrichmentItem *er) {
-    int sz = assocEnrItemArray.giveSize();
-    assocEnrItemArray.resize(sz + 1);
-    this->assocEnrItemArray.at(sz + 1) = er->giveNumber();
-}
-
-void EnrichmentFunction :: setActive(EnrichmentItem *er) {
-    this->activeEnrItem = er;
-}
-*/
+ * void EnrichmentFunction :: insertEnrichmentItem(EnrichmentItem *er) {
+ *  int sz = assocEnrItemArray.giveSize();
+ *  assocEnrItemArray.resize(sz + 1);
+ *  this->assocEnrItemArray.at(sz + 1) = er->giveNumber();
+ * }
+ *
+ * void EnrichmentFunction :: setActive(EnrichmentItem *er) {
+ *  this->activeEnrItem = er;
+ * }
+ */
 IRResultType EnrichmentFunction :: initializeFrom(InputRecord *ir) {
     return IRRT_OK;
 }
 
-double EnrichmentFunction::evaluateFunctionAt(GaussPoint *gp, EnrichmentItem* ei) {
-  FloatArray gcoords;
-  gp->giveElement()->computeGlobalCoordinates (gcoords, *gp->giveCoordinates());
-  return this->evaluateFunctionAt(&gcoords, ei);
+double EnrichmentFunction :: evaluateFunctionAt(GaussPoint *gp, EnrichmentItem *ei) {
+    FloatArray gcoords;
+    gp->giveElement()->computeGlobalCoordinates( gcoords, * gp->giveCoordinates() );
+    return this->evaluateFunctionAt(& gcoords, ei);
 }
 
-void EnrichmentFunction::evaluateDerivativeAt(FloatArray &answer, GaussPoint *gp, EnrichmentItem* ei) {
-  FloatArray gc;
-  gp->giveElement()->computeGlobalCoordinates (gc, *gp->giveCoordinates());
-  this->evaluateDerivativeAt(answer, &gc, ei);
-}  
+void EnrichmentFunction :: evaluateDerivativeAt(FloatArray &answer, GaussPoint *gp, EnrichmentItem *ei) {
+    FloatArray gc;
+    gp->giveElement()->computeGlobalCoordinates( gc, * gp->giveCoordinates() );
+    this->evaluateDerivativeAt(answer, & gc, ei);
+}
 
 
-double DiscontinuousFunction :: evaluateFunctionAt(FloatArray *point, EnrichmentItem* ei) {
+double DiscontinuousFunction :: evaluateFunctionAt(FloatArray *point, EnrichmentItem *ei) {
     double dist = ei->giveGeometry()->computeDistanceTo(point);
     return sgn(dist);
 }
 
-void DiscontinuousFunction :: evaluateDerivativeAt(FloatArray &answer, FloatArray *point, EnrichmentItem* ei) {
+void DiscontinuousFunction :: evaluateDerivativeAt(FloatArray &answer, FloatArray *point, EnrichmentItem *ei) {
     answer.resize(2);
     answer.zero();
 }
 
-double RampFunction :: evaluateFunctionAt(FloatArray *point, EnrichmentItem* ei) {
+double RampFunction :: evaluateFunctionAt(FloatArray *point, EnrichmentItem *ei) {
     double dist = ei->giveGeometry()->computeDistanceTo(point);
     double absDist;
-    if (dist < 0.0000) absDist = (-1)*dist;
-    else absDist = dist;
+    if ( dist < 0.0000 ) {
+        absDist = ( -1 ) * dist;
+    } else {
+        absDist = dist;
+    }
+
     return absDist;
 }
 
-void RampFunction :: evaluateDerivativeAt(FloatArray &answer, FloatArray *point, EnrichmentItem* ei) {
+void RampFunction :: evaluateDerivativeAt(FloatArray &answer, FloatArray *point, EnrichmentItem *ei) {
     double dist = ei->giveGeometry()->computeDistanceTo(point);
     double absDist;
-    if (dist < 0.0000) absDist = (-1)*dist;
-    else absDist = dist;
+    if ( dist < 0.0000 ) {
+        absDist = ( -1 ) * dist;
+    } else {
+        absDist = dist;
+    }
+
     answer.resize(2);
     answer.zero();
     answer.at(1) = answer.at(2) = absDist / dist;
 }
 
-double RampFunction :: evaluateFunctionAt(GaussPoint *gp, EnrichmentItem* ei){
-  FloatArray N;
-  Element *el = gp->giveElement();
-  el->giveInterpolation()->evalN(N, * gp->giveCoordinates(), FEIElementGeometryWrapper(el), 0.0);
-  double dist = 0;
-  double absMember = 0;
-  double member = 0;
-  for(int i = 1; i <= el->giveNumberOfDofManagers(); i++){
-      dist = ei->giveGeometry()->computeDistanceTo(el->giveDofManager(i)->giveCoordinates());
-      member += N.at(i)*dist;
-  }
-  if (member < 0.0000) absMember = (-1)*member;
-  else absMember = member;
-  return absMember;
+double RampFunction :: evaluateFunctionAt(GaussPoint *gp, EnrichmentItem *ei) {
+    FloatArray N;
+    Element *el = gp->giveElement();
+    el->giveInterpolation()->evalN(N, * gp->giveCoordinates(), FEIElementGeometryWrapper(el), 0.0);
+    double dist = 0;
+    double absMember = 0;
+    double member = 0;
+    for ( int i = 1; i <= el->giveNumberOfDofManagers(); i++ ) {
+        dist = ei->giveGeometry()->computeDistanceTo( el->giveDofManager(i)->giveCoordinates() );
+        member += N.at(i) * dist;
+    }
+
+    if ( member < 0.0000 ) {
+        absMember = ( -1 ) * member;
+    } else {
+        absMember = member;
+    }
+
+    return absMember;
 }
 
-void RampFunction :: evaluateDerivativeAt(FloatArray &answer, GaussPoint *gp, EnrichmentItem* ei){
-  FloatArray N;
-  Element *el = gp->giveElement();
-  el->giveInterpolation()->evalN(N, * gp->giveCoordinates(), FEIElementGeometryWrapper(el), 0.0);
-  IntArray dofManArray(el->giveNumberOfDofManagers());
-  for(int i = 1; i <= el->giveNumberOfDofManagers(); i++){
-      dofManArray.at(i) = el->giveDofManagerNumber(i);
-  }
-  FloatMatrix dNdx;
-  el->giveInterpolation()->evaldNdx(dNdx, * gp->giveCoordinates(), FEIElementGeometryWrapper(el), 0.0);
-  double dist = 0;
-  double dfdx = 0;
-  double dfdy = 0;
-  double phi = 0;
-  for(int i = 1; i <= el->giveNumberOfDofManagers(); i++){
-      dist = ei->giveGeometry()->computeDistanceTo(el->giveDofManager(i)->giveCoordinates());
-      phi += N.at(i)*dist;
-      dfdx += dNdx.at(i,1)*dist;
-      dfdy += dNdx.at(i,2)*dist;
-  }
-  answer.resize(2);
-  answer.zero();
-  answer.at(1) = dfdx*sgn(phi);
-  answer.at(2) = dfdy*sgn(phi);
+void RampFunction :: evaluateDerivativeAt(FloatArray &answer, GaussPoint *gp, EnrichmentItem *ei) {
+    FloatArray N;
+    Element *el = gp->giveElement();
+    el->giveInterpolation()->evalN(N, * gp->giveCoordinates(), FEIElementGeometryWrapper(el), 0.0);
+    IntArray dofManArray( el->giveNumberOfDofManagers() );
+    for ( int i = 1; i <= el->giveNumberOfDofManagers(); i++ ) {
+        dofManArray.at(i) = el->giveDofManagerNumber(i);
+    }
+
+    FloatMatrix dNdx;
+    el->giveInterpolation()->evaldNdx(dNdx, * gp->giveCoordinates(), FEIElementGeometryWrapper(el), 0.0);
+    double dist = 0;
+    double dfdx = 0;
+    double dfdy = 0;
+    double phi = 0;
+    for ( int i = 1; i <= el->giveNumberOfDofManagers(); i++ ) {
+        dist = ei->giveGeometry()->computeDistanceTo( el->giveDofManager(i)->giveCoordinates() );
+        phi += N.at(i) * dist;
+        dfdx += dNdx.at(i, 1) * dist;
+        dfdy += dNdx.at(i, 2) * dist;
+    }
+
+    answer.resize(2);
+    answer.zero();
+    answer.at(1) = dfdx * sgn(phi);
+    answer.at(2) = dfdy * sgn(phi);
 }
 
 // to change
-double BranchFunction :: evaluateFunctionAt(FloatArray *point, EnrichmentItem* ei) {
+double BranchFunction :: evaluateFunctionAt(FloatArray *point, EnrichmentItem *ei) {
     /*
      *  double ret = 0;
      *  CrackTip *cr = (CrackTip*) activeEnrItem;
@@ -123,11 +137,11 @@ double BranchFunction :: evaluateFunctionAt(FloatArray *point, EnrichmentItem* e
      *  }
      *  return ret;
      */
-  return 0.0;
+    return 0.0;
 }
 
 // to change
-void BranchFunction :: evaluateDerivativeAt(FloatArray &answer, FloatArray *point, EnrichmentItem* ei) {
+void BranchFunction :: evaluateDerivativeAt(FloatArray &answer, FloatArray *point, EnrichmentItem *ei) {
     /*
      *  answer.resize(2);
      *  CrackTip *cr = (CrackTip*) activeEnrItem;
@@ -166,5 +180,4 @@ void BranchFunction :: evaluateDerivativeAt(FloatArray &answer, FloatArray *poin
      *  answer.at(2) = dPhidr * drdy + dPhidt*dtdy;
      */
 }
-
 } // end namespace oofem

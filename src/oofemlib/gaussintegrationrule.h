@@ -45,7 +45,6 @@
 #include "element.h"
 
 namespace oofem {
-
 /**
  * Class representing Gaussian-quadrature integration rule.
  * The number of integration points and their coordinates and integration weights depends on
@@ -136,6 +135,5 @@ protected:
     int SetUpPointsOn2DEmbeddedLine(int nPoints, MaterialMode mode, GaussPoint ***,
                                     const FloatArray **coords);
 };
-
 } // end namespace oofem
 #endif // gaussintegrationrule_h

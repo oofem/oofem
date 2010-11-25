@@ -49,7 +49,6 @@
 #include "structuralms.h"
 
 namespace oofem {
-
 class GaussPoint;
 
 
@@ -175,7 +174,7 @@ public:
 
 
     // non-standard  - returns time independent material constant
-    double   give(int, GaussPoint*);
+    double   give(int, GaussPoint *);
 
     virtual void give3dMaterialStiffnessMatrix(FloatMatrix & answer,
                                                MatResponseForm, MatResponseMode,
@@ -296,6 +295,5 @@ protected:
 
     // virtual int  updateYieldStatus (GaussPoint* gp, FloatArray* strainIncrementIn3d);
 };
-
 } // end namespace oofem
 #endif // perfectlyplasticmaterial_h

@@ -48,17 +48,16 @@
 #include "boundaryload.h"
 
 #ifndef __MAKEDEPEND
-#include <math.h>
-#include <stdio.h>
+ #include <math.h>
+ #include <stdio.h>
 #endif
 
 #ifdef __OOFEG
-#include "oofeggraphiccontext.h"
-#include "conTable.h"
+ #include "oofeggraphiccontext.h"
+ #include "conTable.h"
 #endif
 
 namespace oofem {
-
 TR1_2D_SUPG_AXI :: TR1_2D_SUPG_AXI(int n, Domain *aDomain) : TR1_2D_SUPG(n, aDomain)
     // Constructor.
 { }
@@ -71,12 +70,12 @@ void
 TR1_2D_SUPG_AXI :: computeGaussPoints()
 // Sets up the array containing the four Gauss points of the receiver.
 {
-  if (!integrationRulesArray) {
-    numberOfIntegrationRules = 1;
-    integrationRulesArray = new IntegrationRule * [ 1 ];
-    integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3);
-    integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Triangle, 7, _2dAxiFlow);
-  }
+    if ( !integrationRulesArray ) {
+        numberOfIntegrationRules = 1;
+        integrationRulesArray = new IntegrationRule * [ 1 ];
+        integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3);
+        integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Triangle, 7, _2dAxiFlow);
+    }
 }
 
 
@@ -964,5 +963,4 @@ TR1_2D_SUPG_AXI :: updateStabilizationCoeffs(TimeStep *atTime)
 
     //this->t_lsic = 0.0;
 }
-
 } // end namespace oofem

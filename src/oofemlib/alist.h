@@ -44,11 +44,10 @@
 #include "compiler.h"
 #include "error.h"
 #ifndef __MAKEDEPEND
-#include <stdlib.h> // for NULL
+ #include <stdlib.h> // for NULL
 #endif
 
 namespace oofem {
-
 class FEMComponent;
 
 /**
@@ -66,7 +65,7 @@ class FEMComponent;
  * component is very efficient. On the other hand, the resizing of array is relative time expensive (the whole
  * existing pointer table must be transfered) and is recomended to set size of the array to the final size.
  */
-template< class T > class AList
+template< class T >class AList
 {
     /*
      * This class implements an array which contains elements, nodes, materials,
@@ -160,7 +159,7 @@ template< class T >AList< T > :: ~AList()
     this->clear(true);
 }
 
-template< class T > void
+template< class T >void
 AList< T > :: clear(bool deleteObjectFlag)
 {
     int i = size;
@@ -180,7 +179,7 @@ AList< T > :: clear(bool deleteObjectFlag)
     values = NULL;
 }
 
-template< class T > void
+template< class T >void
 AList< T > :: growTo(int newSize)
 // Expands the receiver from its current size to newSize, in order to acco-
 // modate new entries.
@@ -191,19 +190,17 @@ AList< T > :: growTo(int newSize)
 
     if ( newSize < size ) {
 #ifdef DEBUG
-      OOFEM_WARNING3("AList::growTo : new list size (%d) not larger than current size (%d)", newSize, size);
+        OOFEM_WARNING3("AList::growTo : new list size (%d) not larger than current size (%d)", newSize, size);
 #endif
-      // delete entities in indexes in the range (newSize, size)
-      i = size;
-      if ( size ) {
-	while ( (--i) >= newSize  ) {
-	  delete ( values [ i ] );
-	  values [i] = NULL;
-	}
-      }
-
+        // delete entities in indexes in the range (newSize, size)
+        i = size;
+        if ( size ) {
+            while ( ( --i ) >= newSize ) {
+                delete ( values [ i ] );
+                values [ i ] = NULL;
+            }
+        }
     } else if ( newSize > allocatedSize ) {
-
         this->allocatedSize = newSize + this->sizeIncrement;
         newValues = new T * [ this->allocatedSize ];
         p1        = values;
@@ -230,7 +227,7 @@ AList< T > :: growTo(int newSize)
 
 
 
-template< class T > int
+template< class T >int
 AList< T > :: includes(int i)
 // Returns True if the receiver has a non-null i-th entry, else returns
 // False.
@@ -244,7 +241,7 @@ AList< T > :: includes(int i)
 
 
 
-template< class T > void
+template< class T >void
 AList< T > :: printYourself()
 // Prints the receiver on screen.
 {
@@ -261,7 +258,7 @@ AList< T > :: printYourself()
 }
 
 
-template< class T > void AList< T > :: put(int i, T *anObject)
+template< class T >void AList< T > :: put(int i, T *anObject)
 // Stores anObject at position i. Enlarge the receiver if too small.
 {
     if ( size < i ) {
@@ -276,7 +273,7 @@ template< class T > void AList< T > :: put(int i, T *anObject)
     values [ i - 1 ] = anObject;
 }
 
-template< class T > void AList< T > :: remove(int i)
+template< class T >void AList< T > :: remove(int i)
 {
     if ( size < i ) {
         return;
@@ -289,7 +286,7 @@ template< class T > void AList< T > :: remove(int i)
 }
 
 
-template< class T > T *AList< T > :: unlink(int i)
+template< class T >T *AList< T > :: unlink(int i)
 {
     if ( size < i ) {
         return NULL;
@@ -299,7 +296,6 @@ template< class T > T *AList< T > :: unlink(int i)
     values [ i - 1 ] = NULL;
     return answer;
 }
-
 } // end namespace oofem
 #endif // alist_h
 

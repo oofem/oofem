@@ -37,9 +37,9 @@
 #ifdef __PARALLEL_MODE
 
 #ifndef __MAKEDEPEND
-#include <stdlib.h>
+ #include <stdlib.h>
 // include string.h for memmove
-#include <string.h>
+ #include <string.h>
 #endif
 #include "compiler.h"
 #include "combuff.h"
@@ -49,7 +49,6 @@
 #include "error.h"
 
 namespace oofem {
-
 #ifdef __USE_MPI
 MPIBuffer :: MPIBuffer(int size, bool dynamic)
 {
@@ -146,7 +145,7 @@ MPIBuffer :: packArray(MPI_Comm communicator, const void *src, int n, MPI_Dataty
         }
     }
 
-    void *__src = const_cast< void * >( src ); // throw away const
+    void *__src = const_cast< void * >(src);   // throw away const
     return ( MPI_Pack(__src, n, type, this->buff, this->size,
                       & this->curr_pos, communicator) == MPI_SUCCESS );
 }
@@ -211,9 +210,9 @@ MPIBuffer :: waitCompletion()
 {
     MPI_Status status;
 
-    return (MPI_Wait(& this->request, & status) == MPI_SUCCESS );
+    return ( MPI_Wait(& this->request, & status) == MPI_SUCCESS );
 }
-    
+
 
 int
 MPIBuffer :: bcast(MPI_Comm communicator, int root)

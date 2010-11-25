@@ -45,7 +45,6 @@
 #include "mathfem.h"
 
 namespace oofem {
-
 #define CZZSI_ZERO_INDICATOR_TOL 1.e-3
 
 void
@@ -209,5 +208,4 @@ CombinedZZSIRemeshingCriteria :: setDomain(Domain *d) {
     zzrc.setDomain(d);
     dirc.setDomain(d);
 }
-
 } // end namespace oofem

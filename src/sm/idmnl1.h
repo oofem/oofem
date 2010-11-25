@@ -49,12 +49,11 @@
 #include "dynalist.h"
 
 #ifdef __OOFEG
-#include "oofeggraphiccontext.h"
-#include "conTable.h"
+ #include "oofeggraphiccontext.h"
+ #include "conTable.h"
 #endif
 
 namespace oofem {
-
 /* Flag indicating a special averaging on elements:
  * 0=no special averaging
  * 1=boundary layer method averages the strains over the whole finite element, the influence radius is close to zero
@@ -151,13 +150,13 @@ public:
 class IDNLMaterial : public IsotropicDamageMaterial1, public StructuralNonlocalMaterialExtensionInterface,
     public NonlocalMaterialStiffnessInterface
 {
- protected:
-  /// Final value of interaction radius, for a model with evolving characteristic length
-  double Rf;
-  /// Parameter used as an exponent by models with evolving characteristic length
-  double exponent;
-  /// Parameter specifying how the weight function should be adjusted due to damage
-  int averType;
+protected:
+    /// Final value of interaction radius, for a model with evolving characteristic length
+    double Rf;
+    /// Parameter used as an exponent by models with evolving characteristic length
+    double exponent;
+    /// Parameter specifying how the weight function should be adjusted due to damage
+    int averType;
 
 public:
 
@@ -228,7 +227,7 @@ public:
     /**@name Services required by NonlocalMaterialStiffnessInterface and related ones to support Nonlocal Stiffness*/
     //@{
     /// compute and add IP contributions to destination matrix
-    virtual void NonlocalMaterialStiffnessInterface_addIPContribution(SparseMtrx &dest, const UnknownNumberingScheme &s, 
+    virtual void NonlocalMaterialStiffnessInterface_addIPContribution(SparseMtrx &dest, const UnknownNumberingScheme &s,
                                                                       GaussPoint *gp, TimeStep *atTime);
     /**
      * Returns integration list of receiver. Contains localIntegrationRecord structures, containing
@@ -244,7 +243,7 @@ public:
      * @param lcontrib "local" contribution
      * @return nonzero if local point contributes (loading) or zero if not (unloading in elastic range, elastic)
      */
-    int     giveLocalNonlocalStiffnessContribution(GaussPoint *gp, IntArray &loc, const UnknownNumberingScheme &s, 
+    int     giveLocalNonlocalStiffnessContribution(GaussPoint *gp, IntArray &loc, const UnknownNumberingScheme &s,
                                                    FloatArray &lcontrib, TimeStep *atTime);
     /**
      * Computes the "remote" part of nonlocal stiffness contribution assembled for given integration point.
@@ -253,7 +252,7 @@ public:
      * @param s determines the equation numbering scheme
      * @param rcontrib "remote" contribution
      */
-    void     giveRemoteNonlocalStiffnessContribution(GaussPoint *gp, IntArray &rloc, const UnknownNumberingScheme &s, 
+    void     giveRemoteNonlocalStiffnessContribution(GaussPoint *gp, IntArray &rloc, const UnknownNumberingScheme &s,
                                                      FloatArray &rcontrib, TimeStep *atTime);
     /**
      * Computes elastic stiffness for normal stress components
@@ -309,6 +308,5 @@ public:
 protected:
     virtual void initDamaged(double kappa, FloatArray &totalStrainVector, GaussPoint *gp) { }
 };
-
 } // end namespace oofem
 #endif // idmnl1_h

@@ -47,7 +47,6 @@
 #include "flotmtrx.h"
 
 namespace oofem {
-
 class GaussPoint;
 
 
@@ -67,8 +66,8 @@ class IsotropicHeatTransferMaterial : public TransportMaterial
 
 protected:
 
-    double conductivity;//conductivity (k in input file)
-    double capacity;//capacity (c in input file)
+    double conductivity; //conductivity (k in input file)
+    double capacity; //capacity (c in input file)
 
 public:
 
@@ -76,14 +75,14 @@ public:
     ~IsotropicHeatTransferMaterial() { }
 
     virtual void  giveCharacteristicMatrix(FloatMatrix &answer,
-                                   MatResponseForm form,
-                                   MatResponseMode mode,
-                                   GaussPoint *gp,
-                                   TimeStep *atTime); // identification and auxiliary functions
+                                           MatResponseForm form,
+                                           MatResponseMode mode,
+                                           GaussPoint *gp,
+                                           TimeStep *atTime); // identification and auxiliary functions
 
     virtual double giveCharacteristicValue(MatResponseMode mode,
-                                            GaussPoint *gp,
-                                            TimeStep *atTime);
+                                           GaussPoint *gp,
+                                           TimeStep *atTime);
 
 
     const char *giveClassName() const { return "IsotropicHeatTransferMaterial"; }
@@ -92,7 +91,7 @@ public:
     IRResultType initializeFrom(InputRecord *ir);
 
     // non-standard - returns time independent material constant
-    double   give(int, GaussPoint*);
+    double   give(int, GaussPoint *);
 
     /**
      * Creates a new copy of the associated status and inserts it into a given integration point.
@@ -104,6 +103,5 @@ public:
 
 protected:
 };
-
 } // end namespace oofem
 #endif // isoheatmat_h

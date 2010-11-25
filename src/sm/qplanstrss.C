@@ -47,12 +47,11 @@
 #include "domain.h"
 #include "engngm.h"
 #ifndef __MAKEDEPEND
-#include <math.h>
-#include <stdio.h>
+ #include <math.h>
+ #include <stdio.h>
 #endif
 
 namespace oofem {
-
 FEI2dQuadQuad QPlaneStress2d :: interpolation(1, 2);
 
 QPlaneStress2d :: QPlaneStress2d(int n, Domain *aDomain) :
@@ -144,12 +143,12 @@ void
 QPlaneStress2d :: computeGaussPoints()
 // Sets up the array containing the four Gauss points of the receiver.
 {
-  if (!integrationRulesArray) {
-    numberOfIntegrationRules = 1;
-    integrationRulesArray = new IntegrationRule * [ 1 ];
-    integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3);
-    integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Square, numberOfGaussPoints, _PlaneStress);
-  }
+    if ( !integrationRulesArray ) {
+        numberOfIntegrationRules = 1;
+        integrationRulesArray = new IntegrationRule * [ 1 ];
+        integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3);
+        integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Square, numberOfGaussPoints, _PlaneStress);
+    }
 }
 
 double
@@ -157,12 +156,12 @@ QPlaneStress2d :: computeVolumeAround(GaussPoint *aGaussPoint)
 // Returns the portion of the receiver which is attached to aGaussPoint.
 {
     double determinant, weight, thickness, volume;
-    determinant = fabs( this->interpolation.giveTransformationJacobian(* aGaussPoint->giveCoordinates(), 
-								       FEIElementGeometryWrapper(this), 0.0) );
+    determinant = fabs( this->interpolation.giveTransformationJacobian(* aGaussPoint->giveCoordinates(),
+                                                                       FEIElementGeometryWrapper(this), 0.0) );
     weight      = aGaussPoint->giveWeight();
     thickness   = this->giveCrossSection()->give(CS_Thickness);
     volume      = determinant * weight * thickness;
-    
+
     return volume;
 }
 
@@ -186,7 +185,7 @@ QPlaneStress2d ::   giveDofManDofIDMask(int inode, EquationID, IntArray &answer)
 int
 QPlaneStress2d :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords)
 {
-  this->interpolation.local2global(answer, lcoords, FEIElementGeometryWrapper(this), 0.0);
+    this->interpolation.local2global(answer, lcoords, FEIElementGeometryWrapper(this), 0.0);
     return 1;
 }
 
@@ -211,7 +210,7 @@ QPlaneStress2d :: ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatMatri
     // Definition : sigmaVector = N * nodalSigmaVector
 
     int i;
-    
+
     if ( this->giveIPValueSize(type, aGaussPoint) ) {
         answer.resize(1, 8);
     } else {
@@ -220,10 +219,11 @@ QPlaneStress2d :: ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatMatri
 
     FloatArray n;
     this->interpolation.evalN(n, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0);
-    
-    for (i=1; i<=8;i++){
-        answer.at(1,i)=n.at(i);
+
+    for ( i = 1; i <= 8; i++ ) {
+        answer.at(1, i) = n.at(i);
     }
+
     return;
 }
 

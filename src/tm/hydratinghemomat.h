@@ -49,7 +49,6 @@
 #include "flotmtrx.h"
 
 namespace oofem {
-
 class GaussPoint;
 
 class HydratingHeMoMaterial : public HeMoTKMaterial, public HydrationModelInterface
@@ -121,6 +120,5 @@ public:
 protected:
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
 };
-
 } // end namespace oofem
 #endif // hydratinghemomat_h

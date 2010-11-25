@@ -45,7 +45,6 @@
 #include "structuralms.h"
 
 namespace oofem {
-
 /**
  * This class implements associated Material Status to MazarsMaterial.
  */
@@ -125,7 +124,7 @@ class MazarsMaterial : public IsotropicDamageMaterial1
 protected:
 
     /// Elastic parameters
-  double E, nu;
+    double E, nu;
     /// Model parameters related to the shape of uniaxial stress-strain diagrams
     double At, Bt, Ac, Bc;
     /// Reference elem-length for objectivity
@@ -187,19 +186,17 @@ protected:
      * @param gp integration point
      * @param atTime time step
      */
-    
+
     /*
-void giveNormalElasticStiffnessMatrix(FloatMatrix &answer,
-                                          MatResponseMode rMode,
-                                          GaussPoint *gp, TimeStep *atTime);
-    */
+     * void giveNormalElasticStiffnessMatrix(FloatMatrix &answer,
+     *                                    MatResponseMode rMode,
+     *                                    GaussPoint *gp, TimeStep *atTime);
+     */
 
-    int giveNumberOfSpatialDimensions(GaussPoint *gp);    
+    int giveNumberOfSpatialDimensions(GaussPoint *gp);
     void giveNormalBlockOfElasticCompliance(FloatMatrix &answer, GaussPoint *gp);
-    double computeGt(double kappa, GaussPoint* gp);
-    double computeGc(double kappa, GaussPoint* gp);
-
+    double computeGt(double kappa, GaussPoint *gp);
+    double computeGc(double kappa, GaussPoint *gp);
 };
-
 } // end namespace oofem
 #endif // mazarsmodel_h

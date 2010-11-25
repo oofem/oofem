@@ -51,17 +51,16 @@
 #include "elementside.h"
 #include "mathfem.h"
 #ifndef __MAKEDEPEND
-#include <stdlib.h>
-#include <stdio.h>
+ #include <stdlib.h>
+ #include <stdio.h>
 #endif
 
 #ifdef __OOFEG
-#include "oofeggraphiccontext.h"
-#include "conTable.h"
+ #include "oofeggraphiccontext.h"
+ #include "conTable.h"
 #endif
 
 namespace oofem {
-
 SUPGElement :: SUPGElement(int n, Domain *aDomain) :
     FMElement(n, aDomain)
     // Constructor. Creates an element with number n, belonging to aDomain.
@@ -94,29 +93,29 @@ SUPGElement ::  giveCharacteristicMatrix(FloatMatrix &answer,
 {
     if ( mtrx == AccelerationTerm_MB ) {
         this->computeAccelerationTerm_MB(answer, tStep);
-    } else if ( mtrx == AdvectionDerivativeTerm_MB )  {
+    } else if ( mtrx == AdvectionDerivativeTerm_MB ) {
         this->computeAdvectionDerivativeTerm_MB(answer, tStep);
-    } else if ( mtrx == DiffusionDerivativeTerm_MB )  {
+    } else if ( mtrx == DiffusionDerivativeTerm_MB ) {
         this->computeDiffusionDerivativeTerm_MB(answer, TangentStiffness, tStep);
-    } else if ( mtrx == SecantDiffusionDerivativeTerm_MB )  {
+    } else if ( mtrx == SecantDiffusionDerivativeTerm_MB ) {
         this->computeDiffusionDerivativeTerm_MB(answer, SecantStiffness, tStep);
-    } else if ( mtrx == TangentDiffusionDerivativeTerm_MB )  {
+    } else if ( mtrx == TangentDiffusionDerivativeTerm_MB ) {
         this->computeDiffusionDerivativeTerm_MB(answer, TangentStiffness, tStep);
-    } else if ( mtrx == InitialDiffusionDerivativeTerm_MB )  {
+    } else if ( mtrx == InitialDiffusionDerivativeTerm_MB ) {
         this->computeDiffusionDerivativeTerm_MB(answer, ElasticStiffness, tStep);
-    } else if ( mtrx == PressureTerm_MB )  {
+    } else if ( mtrx == PressureTerm_MB ) {
         this->computePressureTerm_MB(answer, tStep);
-    } else if ( mtrx == LinearAdvectionTerm_MC )  {
+    } else if ( mtrx == LinearAdvectionTerm_MC ) {
         this->computeLinearAdvectionTerm_MC(answer, tStep);
-    } else if ( mtrx == AdvectionDerivativeTerm_MC )  {
+    } else if ( mtrx == AdvectionDerivativeTerm_MC ) {
         this->computeAdvectionDerivativeTerm_MC(answer, tStep);
-    } else if ( mtrx == DiffusionDerivativeTerm_MC )  {
+    } else if ( mtrx == DiffusionDerivativeTerm_MC ) {
         this->computeDiffusionDerivativeTerm_MC(answer, tStep);
-    } else if ( mtrx == AccelerationTerm_MC )  {
+    } else if ( mtrx == AccelerationTerm_MC ) {
         this->computeAccelerationTerm_MC(answer, tStep);
-    } else if ( mtrx == PressureTerm_MC )  {
+    } else if ( mtrx == PressureTerm_MC ) {
         this->computePressureTerm_MC(answer, tStep);
-    } else if ( mtrx == LSICStabilizationTerm_MB )  {
+    } else if ( mtrx == LSICStabilizationTerm_MB ) {
         this->computeLSICStabilizationTerm_MB(answer, tStep);
     } else {
         _error("giveCharacteristicMatrix: Unknown Type of characteristic mtrx.");
@@ -135,15 +134,15 @@ SUPGElement ::  giveCharacteristicVector(FloatArray &answer, CharType mtrx, Valu
 {
     if ( mtrx == AdvectionTerm_MB ) {
         this->computeAdvectionTerm_MB(answer, tStep);
-    } else if ( mtrx == DiffusionTerm_MB )  {
+    } else if ( mtrx == DiffusionTerm_MB ) {
         this->computeDiffusionTerm_MB(answer, tStep);
-    } else if ( mtrx == AdvectionTerm_MC )  {
+    } else if ( mtrx == AdvectionTerm_MC ) {
         this->computeAdvectionTerm_MC(answer, tStep);
-    } else if ( mtrx == BCRhsTerm_MB )  {
+    } else if ( mtrx == BCRhsTerm_MB ) {
         this->computeBCRhsTerm_MB(answer, tStep);
-    } else if ( mtrx == BCRhsTerm_MC )  {
+    } else if ( mtrx == BCRhsTerm_MC ) {
         this->computeBCRhsTerm_MC(answer, tStep);
-    } else if ( mtrx == DiffusionTerm_MC )  {
+    } else if ( mtrx == DiffusionTerm_MC ) {
         this->computeDiffusionTerm_MC(answer, tStep);
     } else {
         _error("giveCharacteristicVector: Unknown Type of characteristic mtrx.");
@@ -309,5 +308,4 @@ SUPGElement :: giveIntVarCompFullIndx(IntArray &answer, InternalStateType type)
  * }
  * }
  */
-
 } // end namespace oofem

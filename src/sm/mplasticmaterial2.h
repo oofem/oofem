@@ -44,12 +44,11 @@
 
 #include "structuralms.h"
 #ifndef __MAKEDEPEND
-#include <vector>
-#include <set>
+ #include <vector>
+ #include <set>
 #endif
 
 namespace oofem {
-
 class GaussPoint;
 
 /**
@@ -153,27 +152,27 @@ public:
  * plastic strain does not change.
  *
  * It is assumed that the elastic domain, denoted as $IE$ is bounded by a composite yield surface. It is defined as
- \f[
+ * \f[
  * IE=\{(\sigma,\kappa)|f_i(\sigma,\kappa)<0, \rm{for\ all\ }i\in\{1,\cdots,m\}\}
- \f]
+ * \f]
  * where \f$f_i(\sigma,\kappa)\f$ are \f$m\ge1\f$ yield functions intersecting in a possibly non-smooth fashion. The
  * vector \f$\kappa\f$ contains internal variables controlling the evolution of yield surfaces (amount of hardening or softening).
  * The evolution of plastic strain $\ep$ is expressed in Koiter's form. Assuming the non-associated plasticity, this reads
- \f[
- \label{epe}
- \varepsilon^p=\sum^{m}_{i=1} \lambda^i \partial_{\sigma}g_i(\sigma,\kappa)
- \f]
+ * \f[
+ * \label{epe}
+ * \varepsilon^p=\sum^{m}_{i=1} \lambda^i \partial_{\sigma}g_i(\sigma,\kappa)
+ * \f]
  * where \f$g_i\f$ are plastic potential functions. The \f$\lambda^i\f$ are referred as plastic consistency parameters, which satisfy the following Kuhn-Tucker conditions
- \f[
- \label{ktc}
- \lambda^i\ge0,\;f_i\le0,\;{\rm and}\ \lambda^i f_i=0
- \f]
+ * \f[
+ * \label{ktc}
+ * \lambda^i\ge0,\;f_i\le0,\;{\rm and}\ \lambda^i f_i=0
+ * \f]
  * These conditions imply  that in the elastic regime the yield function must remain negative and the rate of the plastic multiplier is zero (plastic strain remains constant) while in the plastic regime the yield function must be equal to zero (stress remains on the surface) and the rate of the plastic multiplier is positive.
  * The evolution of vector of internal hardening/softening variables \f$\kappa\f$  is expressed in terms of a general
  * hardening/softening law of the form
- \f[
- \dot{\kappa} = \dot{\kappa}(\sigma, \lambda)
- \f]
+ * \f[
+ * \dot{\kappa} = \dot{\kappa}(\sigma, \lambda)
+ * \f]
  * where \f$\lambda\f$ is the vector of plastic consistency parameters \f$\lambda_i\f$.
  *
  */
@@ -417,6 +416,5 @@ protected:
     void addNewPopulation(IntArray &mask);
     int getNewPopulation(IntArray &result, IntArray &candidateMask, int degree, int size);
 };
-
 } // end namespace oofem
 #endif // mplasticmaterial2_h

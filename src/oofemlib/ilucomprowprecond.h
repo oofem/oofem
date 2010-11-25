@@ -49,7 +49,6 @@
 #include "precond.h"
 
 namespace oofem {
-
 class CompRow_ILUPreconditioner : public Preconditioner
 {
 private:
@@ -90,6 +89,5 @@ protected:
     void qsortCol(IntArray &, FloatArray &, int l, int r);
     int  qsortColPartition(IntArray &, FloatArray &, int l, int r);
 };
-
 } // end namespace oofem
 #endif // ilucomprowprecond_h

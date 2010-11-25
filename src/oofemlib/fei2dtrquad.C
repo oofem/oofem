@@ -41,14 +41,13 @@
 #include "mathfem.h"
 
 namespace oofem {
-
 void
-FEI2dTrQuad :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry& cellgeo, double time)
+FEI2dTrQuad :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time)
 {
     double l1 = lcoords.at(1);
     double l2 = lcoords.at(2);
-    double l3 = 1.-l1-l2;
-  
+    double l3 = 1. - l1 - l2;
+
     answer.resize(6);
 
     answer.at(1) = ( 2. * l1 - 1. ) * l1;
@@ -62,7 +61,7 @@ FEI2dTrQuad :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICel
 }
 
 void
-FEI2dTrQuad :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry& cellgeo, double time)
+FEI2dTrQuad :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time)
 {
     answer.resize(6, 2);
     int i;
@@ -82,61 +81,60 @@ FEI2dTrQuad :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FE
 }
 
 void
-FEI2dTrQuad :: evald2Ndx2(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry& cellgeo, double time)
+FEI2dTrQuad :: evald2Ndx2(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time)
 {
-  
-  double x1, x2, x3, y1, y2, y3, y23, x32, y31, x13, y12, x21, area;
+    double x1, x2, x3, y1, y2, y3, y23, x32, y31, x13, y12, x21, area;
 
-  answer.resize(6, 3);
+    answer.resize(6, 3);
 
-  x1 = cellgeo.giveVertexCoordinates(1)->at(xind);
-  x2 = cellgeo.giveVertexCoordinates(2)->at(xind);
-  x3 = cellgeo.giveVertexCoordinates(3)->at(xind);
+    x1 = cellgeo.giveVertexCoordinates(1)->at(xind);
+    x2 = cellgeo.giveVertexCoordinates(2)->at(xind);
+    x3 = cellgeo.giveVertexCoordinates(3)->at(xind);
 
-  y1 = cellgeo.giveVertexCoordinates(1)->at(yind);
-  y2 = cellgeo.giveVertexCoordinates(2)->at(yind);
-  y3 = cellgeo.giveVertexCoordinates(3)->at(yind);
+    y1 = cellgeo.giveVertexCoordinates(1)->at(yind);
+    y2 = cellgeo.giveVertexCoordinates(2)->at(yind);
+    y3 = cellgeo.giveVertexCoordinates(3)->at(yind);
 
-  area = 0.5 * ( x2 * y3 + x1 * y2 + y1 * x3 - x2 * y1 - x3 * y2 - x1 * y3 );
-  
-  y23 = ( y2 - y3 ) / ( 2. * area );
-  x32 = ( x3 - x2 ) / ( 2. * area );
-  
-  y31 = ( y3 - y1 ) / ( 2. * area );
-  x13 = ( x1 - x3 ) / ( 2. * area );
-  
-  y12 = ( y1 - y2 ) / ( 2. * area );
-  x21 = ( x2 - x1 ) / ( 2. * area );
-  
-  answer.at(1, 1) = 4 * y23 * y23;
-  answer.at(1, 2) = 4 * x32 * x32;
-  answer.at(1, 3) = 4 * y23 * x32;
-  
-  answer.at(2, 1) = 4 * y31 * y31;
-  answer.at(2, 2) = 4 * x13 * x13;
-  answer.at(2, 3) = 4 * y31 * x13;
-  
-  answer.at(3, 1) = 4 * y23 * y23 + 8 * y31 * y23 + 4 * y31 * y31;
-  answer.at(3, 2) = 4 * x32 * x32 + 8 * x13 * x32 + 4 * x13 * x13;
-  answer.at(3, 3) = 4 * y23 * x32 + 4 * y31 * x32 + 4 * y23 * x13 + 4 * y31 * x13;
-  
-  answer.at(4, 1) = 8 * y31 * y23;
-  answer.at(4, 2) = 8 * x13 * x32;
-  answer.at(4, 3) = 4 * y31 * x32 + 4 * y23 * x13;
-  
-  answer.at(5, 1) = (-8) * y31 * y23 + (-8) * y31 * y31;
-  answer.at(5, 2) = (-8) * x13 * x32 + (-8) * x13 * x13;
-  answer.at(5, 3) = (-4) * y31 * x32 + (-4) * y23 * x13 + (-8) * y31 * x13;
-  
-  answer.at(6, 1) = (-8) * y23 * y23 + (-8) * y31 * y23;
-  answer.at(6, 2) = (-8) * x32 * x32 + (-8) * x13 * x32;
-  answer.at(6, 3) = (-8) * y23 * x32 + (-4) * y31 * x32 + (-4) * y23 * x13;
+    area = 0.5 * ( x2 * y3 + x1 * y2 + y1 * x3 - x2 * y1 - x3 * y2 - x1 * y3 );
+
+    y23 = ( y2 - y3 ) / ( 2. * area );
+    x32 = ( x3 - x2 ) / ( 2. * area );
+
+    y31 = ( y3 - y1 ) / ( 2. * area );
+    x13 = ( x1 - x3 ) / ( 2. * area );
+
+    y12 = ( y1 - y2 ) / ( 2. * area );
+    x21 = ( x2 - x1 ) / ( 2. * area );
+
+    answer.at(1, 1) = 4 * y23 * y23;
+    answer.at(1, 2) = 4 * x32 * x32;
+    answer.at(1, 3) = 4 * y23 * x32;
+
+    answer.at(2, 1) = 4 * y31 * y31;
+    answer.at(2, 2) = 4 * x13 * x13;
+    answer.at(2, 3) = 4 * y31 * x13;
+
+    answer.at(3, 1) = 4 * y23 * y23 + 8 * y31 * y23 + 4 * y31 * y31;
+    answer.at(3, 2) = 4 * x32 * x32 + 8 * x13 * x32 + 4 * x13 * x13;
+    answer.at(3, 3) = 4 * y23 * x32 + 4 * y31 * x32 + 4 * y23 * x13 + 4 * y31 * x13;
+
+    answer.at(4, 1) = 8 * y31 * y23;
+    answer.at(4, 2) = 8 * x13 * x32;
+    answer.at(4, 3) = 4 * y31 * x32 + 4 * y23 * x13;
+
+    answer.at(5, 1) = ( -8 ) * y31 * y23 + ( -8 ) * y31 * y31;
+    answer.at(5, 2) = ( -8 ) * x13 * x32 + ( -8 ) * x13 * x13;
+    answer.at(5, 3) = ( -4 ) * y31 * x32 + ( -4 ) * y23 * x13 + ( -8 ) * y31 * x13;
+
+    answer.at(6, 1) = ( -8 ) * y23 * y23 + ( -8 ) * y31 * y23;
+    answer.at(6, 2) = ( -8 ) * x32 * x32 + ( -8 ) * x13 * x32;
+    answer.at(6, 3) = ( -8 ) * y23 * x32 + ( -4 ) * y31 * x32 + ( -4 ) * y23 * x13;
 }
-  
+
 
 
 void
-FEI2dTrQuad :: local2global(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry& cellgeo, double time)
+FEI2dTrQuad :: local2global(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time)
 {
     int i;
     FloatArray n(6);
@@ -146,15 +144,15 @@ FEI2dTrQuad :: local2global(FloatArray &answer, const FloatArray &lcoords, const
     this->evalN(n, lcoords, cellgeo, time);
 
     for ( i = 1; i <= 6; i++ ) {
-      answer.at(1) += n.at(i) * cellgeo.giveVertexCoordinates(i)->at(xind);
-      answer.at(2) += n.at(i) * cellgeo.giveVertexCoordinates(i)->at(yind);
+        answer.at(1) += n.at(i) * cellgeo.giveVertexCoordinates(i)->at(xind);
+        answer.at(2) += n.at(i) * cellgeo.giveVertexCoordinates(i)->at(yind);
     }
 }
 
 #define POINT_TOL 1.e-3
 
 int
-FEI2dTrQuad :: global2local(FloatArray &answer, const FloatArray &coords, const FEICellGeometry& cellgeo, double time)
+FEI2dTrQuad :: global2local(FloatArray &answer, const FloatArray &coords, const FEICellGeometry &cellgeo, double time)
 {
     FloatArray lc(2);
     FloatArray r(2), n(6), dksi, deta, delta;
@@ -188,8 +186,8 @@ FEI2dTrQuad :: global2local(FloatArray &answer, const FloatArray &coords, const 
         r.at(1) = coords.at(1);
         r.at(2) = coords.at(2);
         for ( i = 1; i <= 6; i++ ) {
-          r.at(1) -= n.at(i) * cellgeo.giveVertexCoordinates(i)->at(xind);
-          r.at(2) -= n.at(i) * cellgeo.giveVertexCoordinates(i)->at(yind);
+            r.at(1) -= n.at(i) * cellgeo.giveVertexCoordinates(i)->at(xind);
+            r.at(2) -= n.at(i) * cellgeo.giveVertexCoordinates(i)->at(yind);
         }
 
         // check for convergence
@@ -203,8 +201,8 @@ FEI2dTrQuad :: global2local(FloatArray &answer, const FloatArray &coords, const 
 
         p.zero();
         for ( i = 1; i <= 6; i++ ) {
-          x = cellgeo.giveVertexCoordinates(i)->at(xind);
-          y = cellgeo.giveVertexCoordinates(i)->at(yind);
+            x = cellgeo.giveVertexCoordinates(i)->at(xind);
+            y = cellgeo.giveVertexCoordinates(i)->at(yind);
 
             p.at(1, 1) += dksi.at(i) * x;
             p.at(1, 2) += deta.at(i) * x;
@@ -238,7 +236,7 @@ FEI2dTrQuad :: global2local(FloatArray &answer, const FloatArray &coords, const 
 
 
 double
-FEI2dTrQuad :: giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry& cellgeo, double time)
+FEI2dTrQuad :: giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time)
 {
     FloatMatrix jacobianMatrix(2, 2);
 
@@ -248,7 +246,7 @@ FEI2dTrQuad :: giveTransformationJacobian(const FloatArray &lcoords, const FEICe
 
 
 void
-FEI2dTrQuad :: edgeEvalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry& cellgeo, double time)
+FEI2dTrQuad :: edgeEvalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time)
 {
     double n3, ksi = lcoords.at(1);
     answer.resize(3);
@@ -261,14 +259,14 @@ FEI2dTrQuad :: edgeEvalN(FloatArray &answer, const FloatArray &lcoords, const FE
 
 void
 FEI2dTrQuad :: edgeEvaldNdx(FloatMatrix &answer, int iedge,
-                            const FloatArray &lcoords, const FEICellGeometry& cellgeo, double time)
+                            const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time)
 {
     OOFEM_ERROR("FEI2dTrQuad :: edgeEvaldNdx: not implemented");
 }
 
 void
 FEI2dTrQuad :: edgeLocal2global(FloatArray &answer, int iedge,
-                                const FloatArray &lcoords, const FEICellGeometry& cellgeo, double time)
+                                const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time)
 {
     IntArray edgeNodes;
     FloatArray n;
@@ -276,12 +274,12 @@ FEI2dTrQuad :: edgeLocal2global(FloatArray &answer, int iedge,
     this->edgeEvalN(n, lcoords, cellgeo, time);
 
     answer.resize(2);
-    answer.at(1) = ( n.at(1) * cellgeo.giveVertexCoordinates(edgeNodes.at(1))->at(xind) +
-                     n.at(2) * cellgeo.giveVertexCoordinates(edgeNodes.at(2))->at(xind) +
-                     n.at(3) * cellgeo.giveVertexCoordinates(edgeNodes.at(3))->at(xind) );
-    answer.at(2) = ( n.at(1) * cellgeo.giveVertexCoordinates(edgeNodes.at(1))->at(yind) +
-                     n.at(2) * cellgeo.giveVertexCoordinates(edgeNodes.at(2))->at(yind) +
-                     n.at(3) * cellgeo.giveVertexCoordinates(edgeNodes.at(3))->at(yind) );
+    answer.at(1) = ( n.at(1) * cellgeo.giveVertexCoordinates( edgeNodes.at(1) )->at(xind) +
+                    n.at(2) * cellgeo.giveVertexCoordinates( edgeNodes.at(2) )->at(xind) +
+                    n.at(3) * cellgeo.giveVertexCoordinates( edgeNodes.at(3) )->at(xind) );
+    answer.at(2) = ( n.at(1) * cellgeo.giveVertexCoordinates( edgeNodes.at(1) )->at(yind) +
+                    n.at(2) * cellgeo.giveVertexCoordinates( edgeNodes.at(2) )->at(yind) +
+                    n.at(3) * cellgeo.giveVertexCoordinates( edgeNodes.at(3) )->at(yind) );
 }
 
 
@@ -313,7 +311,7 @@ FEI2dTrQuad :: computeLocalEdgeMapping(IntArray &edgeNodes, int iedge)
 }
 
 double
-FEI2dTrQuad :: edgeGiveTransformationJacobian(int iedge, const FloatArray &lcoords, const FEICellGeometry& cellgeo, double time)
+FEI2dTrQuad :: edgeGiveTransformationJacobian(int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time)
 {
     OOFEM_ERROR("FEI2dTrQuad :: edgeGiveTransformationJacobian: not implemented");
     return 0.0;
@@ -322,7 +320,7 @@ FEI2dTrQuad :: edgeGiveTransformationJacobian(int iedge, const FloatArray &lcoor
 
 
 void
-FEI2dTrQuad :: giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatArray &lcoords, const FEICellGeometry& cellgeo)
+FEI2dTrQuad :: giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 // Returns the jacobian matrix  J (x,y)/(ksi,eta)  of the receiver.
 // Computes it if it does not exist yet.
 {
@@ -337,13 +335,13 @@ FEI2dTrQuad :: giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatArra
     this->giveDerivativeEta(deta, lcoords);
 
     for ( i = 1; i <= 6; i++ ) {
-      x = cellgeo.giveVertexCoordinates(i)->at(xind);
-      y = cellgeo.giveVertexCoordinates(i)->at(yind);
+        x = cellgeo.giveVertexCoordinates(i)->at(xind);
+        y = cellgeo.giveVertexCoordinates(i)->at(yind);
 
-      jacobianMatrix.at(1, 1) += dxi.at(i) * x;
-      jacobianMatrix.at(1, 2) += dxi.at(i) * y;
-      jacobianMatrix.at(2, 1) += deta.at(i) * x;
-      jacobianMatrix.at(2, 2) += deta.at(i) * y;
+        jacobianMatrix.at(1, 1) += dxi.at(i) * x;
+        jacobianMatrix.at(1, 2) += dxi.at(i) * y;
+        jacobianMatrix.at(2, 1) += deta.at(i) * x;
+        jacobianMatrix.at(2, 2) += deta.at(i) * y;
     }
 }
 
@@ -385,5 +383,4 @@ FEI2dTrQuad :: giveDerivativeEta(FloatArray &n, const FloatArray &lc)
     n.at(5) = 4.0 * l3 - 4.0 * l2;
     n.at(6) = -4.0 * l1;
 }
-
 } // end namespace oofem

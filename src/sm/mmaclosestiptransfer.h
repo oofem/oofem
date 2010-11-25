@@ -45,7 +45,6 @@
 #include "materialmappingalgorithm.h"
 
 namespace oofem {
-
 class Domain;
 class Element;
 class TimeStep;
@@ -102,6 +101,5 @@ public:
 
 protected:
 };
-
 } // end namespace oofem
 #endif // mmaclosestiptransfer_h

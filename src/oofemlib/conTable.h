@@ -46,7 +46,6 @@
 #include "element.h"
 
 namespace oofem {
-
 /**
  * Class representing connectivity table. Usually attribute of domain. Provides
  * selected connectivity information services for domain.
@@ -156,6 +155,5 @@ public:
     /// Prints receiver contens on output.
     void printYourself();
 };
-
 } // end namespace oofem
 #endif // conTable_h

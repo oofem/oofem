@@ -42,7 +42,6 @@
 #include "enumitem.h"
 
 namespace oofem {
-
 //
 // following mode determines the mode of particular unknown
 // which can be requested on DOF.
@@ -80,6 +79,5 @@ enum ValueModeType {
 
 
 const char *__ValueModeTypeToString(ValueModeType _value);
-
 } // end namespace oofem
 #endif // valuemodetype_h

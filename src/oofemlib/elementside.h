@@ -46,11 +46,10 @@
 #include "domain.h"
 
 #ifndef __MAKEDEPEND
-#include <stdio.h>
+ #include <stdio.h>
 #endif
 
 namespace oofem {
-
 class Dof;
 class NodalLoad;
 class TimeStep;
@@ -129,7 +128,6 @@ public:
     /// Returns true if dof of given type is allowed to be associated to receiver
     virtual bool isDofTypeCompatible(dofType type) const { return ( type == DT_master || type == DT_simpleSlave ); }
 };
-
 } // end namespace oofem
 #endif // elementside_h
 

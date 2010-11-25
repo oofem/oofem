@@ -40,7 +40,6 @@
 #define equationid_h
 
 namespace oofem {
-
 /**
  * This type identifies the governing equation
  */
@@ -50,7 +49,6 @@ enum EquationID {
     EID_ConservationEquation,
     EID_MomentumBalance_ConservationEquation, // Coupled system
 };
-
 } // end namespace oofem
 #endif // equationid_h
 

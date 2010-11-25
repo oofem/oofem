@@ -114,7 +114,7 @@ QuadAxisym1_ht :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
     this->computeEgdeNMatrixAt(n, gp);
     radius = n.at(1, 1) * nodeA->giveCoordinate(1) + n.at(1, 2) * nodeB->giveCoordinate(1);
 
-    return 0.5 *length *gp-> giveWeight() * radius;
+    return 0.5 *length *gp->giveWeight() * radius;
 }
 
 double

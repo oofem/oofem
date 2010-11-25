@@ -40,7 +40,6 @@
 #define stressstrainprincmode_h
 
 namespace oofem {
-
 enum stressStrainPrincMode {
     /*
      * we have only one algorithm for computing eigen values and vectors
@@ -51,6 +50,5 @@ enum stressStrainPrincMode {
     principal_stress, // for computing principal_stress
     principal_deviatoricstress
 };
-
 } // end namespace oofem
 #endif // stressstrainprincmode_h

@@ -67,23 +67,22 @@
 #include "materialmapperinterface.h"
 
 #ifdef IDM_USE_MMAClosestIPTransfer
-#include "mmaclosestiptransfer.h"
+ #include "mmaclosestiptransfer.h"
 #endif
 
 #ifdef IDM_USE_MMAContainingElementProjection
-#include "mmacontainingelementprojection.h"
+ #include "mmacontainingelementprojection.h"
 #endif
 
 #ifdef IDM_USE_MMAShapeFunctProjection
-#include "mmashapefunctprojection.h"
+ #include "mmashapefunctprojection.h"
 #endif
 
 #ifdef IDM_USE_MMALeastSquareProjection
-#include "mmaleastsquareprojection.h"
+ #include "mmaleastsquareprojection.h"
 #endif
 
 namespace oofem {
-
 #define IDM1_ITERATION_LIMIT 1.e-9
 
 /**
@@ -188,7 +187,7 @@ protected:
     double ef;
 
     /// type characterizing the algorithm used to compute equivalent strain measure
-    enum EquivStrainType {EST_Unknown, EST_Mazars, EST_Rankine, EST_ElasticEnergy, EST_Mises};
+    enum EquivStrainType { EST_Unknown, EST_Mazars, EST_Rankine, EST_ElasticEnergy, EST_Mises };
     /// parameter specifying the definition of equivalent strain
     EquivStrainType equivStrainType;
 
@@ -196,7 +195,7 @@ protected:
     double k;
 
     /// type characterizing the formula for the damage law
-    enum SofteningType {ST_Unknown, ST_Exponential, ST_Linear, ST_Mazars, ST_Smooth, ST_SmoothExtended, ST_Exponential_Cohesive_Crack, ST_Linear_Cohesive_Crack};
+    enum SofteningType { ST_Unknown, ST_Exponential, ST_Linear, ST_Mazars, ST_Smooth, ST_SmoothExtended, ST_Exponential_Cohesive_Crack, ST_Linear_Cohesive_Crack };
     /// parameter specifying the type of softening (damage law)
     SofteningType softType;
 
@@ -246,13 +245,13 @@ public:
      */
     virtual int giveInputRecordString(std :: string &str, bool keyword = true);
     /**
-     * Computes invariants I1 and J2 of the strain tensor 
+     * Computes invariants I1 and J2 of the strain tensor
      * from the strain components stored in a vector.
-     * @param strainVector input strain components 
+     * @param strainVector input strain components
      * @param I1e output value of strain invariant I1
      * @param J2e output value of strain invariant J2
-     */       
-    void computeStrainInvariants(FloatArray* strainVector, double* I1e, double* J2e);
+     */
+    void computeStrainInvariants(FloatArray *strainVector, double *I1e, double *J2e);
     /**
      * Computes the equivalent strain measure from given strain vector (full form).
      * @param kappa return param, comtaining the corresponding equivalent strain
@@ -262,42 +261,42 @@ public:
      */
     virtual void computeEquivalentStrain(double &kappa, const FloatArray &strain, GaussPoint *gp, TimeStep *atTime);
     /**
-     * computes the value of damage parameter omega, 
+     * computes the value of damage parameter omega,
      * based on a given value of equivalent strain
      * @param omega contains the resulting damage
      * @param kappa equivalent strain measure
      */
     virtual void computeDamageParam(double &omega, double kappa, const FloatArray &strain, GaussPoint *gp);
     /**
-     * computes the value of damage parameter omega, 
+     * computes the value of damage parameter omega,
      * based on a given value of equivalent strain,
      * using iterations to achieve objectivity,
      * based on the crack band concept (effective element size used)
      * @param omega contains the resulting damage
      * @param kappa equivalent strain measure
      */
-    void computeDamageParamForCohesiveCrack (double& omega, double kappa, GaussPoint* gp); 
+    void computeDamageParamForCohesiveCrack(double &omega, double kappa, GaussPoint *gp);
     /**
      * Returns the value of damage parameter
      * corresponding to a given value
-     * of the damage-driving variable kappa, 
+     * of the damage-driving variable kappa,
      * depending on the type of selected damage law,
      * using a simple dependence (no adjustment for element size).
      * @param kappa equivalent strain measure
      */
-    double damageFunction(double kappa, GaussPoint* gp);
+    double damageFunction(double kappa, GaussPoint *gp);
     /**
      * Returns the value of compliance parameter
      * corresponding to a given value
-     * of the damage-driving variable kappa, 
+     * of the damage-driving variable kappa,
      * depending on the type of selected damage law,
      * using a simple dependence (no adjustment for element size).
      * The compliance parameter gamma is defined as
-     * gamma = omega/(1-omega) 
+     * gamma = omega/(1-omega)
      * where omega is the damage.
      * @param kappa equivalent strain measure
      */
-    double complianceFunction(double kappa, GaussPoint* gp);
+    double complianceFunction(double kappa, GaussPoint *gp);
 
     /** Interface requesting service */
     virtual Interface *giveInterface(InterfaceType);
@@ -354,7 +353,7 @@ public:
      * @param gp integration point,
      * @return property value
      */
-    double   give(int aProperty, GaussPoint* gp);
+    double   give(int aProperty, GaussPoint *gp);
 
 protected:
     /**
@@ -367,7 +366,6 @@ protected:
      */
     void initDamaged(double kappa, FloatArray &totalStrainVector, GaussPoint *gp);
 };
-
 } // end namespace oofem
 #endif // idm1_h
 

@@ -41,7 +41,6 @@
 #include "mathfem.h"
 
 namespace oofem {
-
 int
 ScalarErrorIndicator :: estimateError(EE_ErrorMode mode, TimeStep *tStep) {
     if ( indicatorType == 1 ) {
@@ -110,5 +109,4 @@ ScalarErrorIndicator :: giveRemeshingCrit() {
 
     return ( this->rc = new DirectErrorIndicatorRC(1, this) );
 }
-
 } // end namespace oofem

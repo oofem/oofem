@@ -2733,7 +2733,7 @@ examples was published \cite{Smilauer:09}. Table~\ref{Cemhydmat_table} summarize
 \hline
 Description & Cemhyd hydrating material\\
 \hline
-Record Format & \descitem{CemhydMat} \elemparam{num}{in} \elemparam{d}{rn} \elemparam{k}{rn} \elemparam{c}{rn} \elemparam{file}{s} [\elemparam{eachGP}{in}] [\elemparam{densityType}{in}] [\elemparam{conductivityType}{in}] [\elemparam{capacityType}{in}] [\elemparam{castingtime}{ia}] [\elemparam{nowarnings}{ia}]\\
+Record Format & \descitem{CemhydMat} \elemparam{num}{in} \elemparam{d}{rn} \elemparam{k}{rn} \elemparam{c}{rn} \elemparam{file}{s} [\elemparam{eachGP}{in}] [\elemparam{densityType}{in}] [\elemparam{conductivityType}{in}] [\elemparam{capacityType}{in}] [\elemparam{castingtime}{ia}] [\elemparam{nowarnings}{ia}] [\elemparam{scaling}{ra}] [\elemparam{reinforcementDegree}{rn}]\\
 Parameters &- \param{num} material model number\\
 &- \param{d} material density\\
 &- \param{k} Conductivity\\
@@ -2745,6 +2745,8 @@ Parameters &- \param{num} material model number\\
 &- \param{capacityType} 0 (default) get capacity, 1 according to Bentz, 2 according to XML and CEMHYD3D routines\\
 &- \param{castingtime} optional casting time of concrete, from which hydration takes place\\
 &- \param{nowarnings} supresses warnings when material data are out of standard ranges. The array of size 4 represent entries for density, conductivity, capacity, temperature. Nonzero values mean supression.\\
+&- \param{scaling} components in the array scale density, conductivity, capacity in this order. \param{nowarnings} are checked before scaling.\\
+&- \param{reinforcementDegree} specifies the area fraction of reinforcement. Typical values is 0.015. Steel reinforcement slightly increases concrete conductivity and slightly decreases its capacity. Thermal properties of steel are considered 20~W/m/K and 500~J/kg/K.\\
 Supported modes& \_2dHeat, \_3dHeat\\
 \hline
 \end{tabular}

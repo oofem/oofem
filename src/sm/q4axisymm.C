@@ -49,12 +49,11 @@
 #include "structuralcrosssection.h"
 #include "structuralms.h"
 #ifndef __MAKEDEPEND
-#include <math.h>
-#include <stdio.h>
+ #include <math.h>
+ #include <stdio.h>
 #endif
 
 namespace oofem {
-
 Q4Axisymm :: Q4Axisymm(int n, Domain *aDomain) :
     StructuralElement(n, aDomain)
     // Constructor.
@@ -316,15 +315,15 @@ void
 Q4Axisymm :: computeGaussPoints()
 // Sets up the array containing the four Gauss points of the receiver.
 {
-  if (!integrationRulesArray) {
-    numberOfIntegrationRules = 2;
-    integrationRulesArray = new IntegrationRule * [ 2 ];
-    integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 2);
-    integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Square, numberOfGaussPoints, _3dMat);
+    if ( !integrationRulesArray ) {
+        numberOfIntegrationRules = 2;
+        integrationRulesArray = new IntegrationRule * [ 2 ];
+        integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 2);
+        integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Square, numberOfGaussPoints, _3dMat);
 
-    integrationRulesArray [ 1 ] = new GaussIntegrationRule(2, this, 3, 6);
-    integrationRulesArray [ 1 ]->setUpIntegrationPoints(_Square, numberOfFiAndShGaussPoints, _3dMat);
-  }
+        integrationRulesArray [ 1 ] = new GaussIntegrationRule(2, this, 3, 6);
+        integrationRulesArray [ 1 ]->setUpIntegrationPoints(_Square, numberOfFiAndShGaussPoints, _3dMat);
+    }
 }
 
 
@@ -481,5 +480,4 @@ Q4Axisymm :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoo
 
     return 1;
 }
-
 } // end namespace oofem

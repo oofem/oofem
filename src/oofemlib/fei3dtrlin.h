@@ -48,7 +48,6 @@
 #include "feinterpol3d.h"
 
 namespace oofem {
-
 /**
  * Class representing implementation of linar tetrahedra interpolation class.
  */
@@ -65,7 +64,7 @@ public:
      * @param cellgeo underlying cell geometry
      * @param time time
      */
-    virtual void evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry& cellgeo, double time);
+    virtual void evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time);
     /**
      * Evaluates the matrix of derivatives of interpolation functions (shape functions) at given point.
      * These derivatives are in global coordinate system (where the nodal coordinates are defined)
@@ -74,7 +73,7 @@ public:
      * @param cellgeo underlying cell geometry
      * @param time time
      */
-    virtual void evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry& cellgeo, double time);
+    virtual void evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time);
     /**
      * Evaluates global coordinates from given local ones
      * These derivatives are in global coordinate system (where the nodal coordinates are defined)
@@ -83,7 +82,7 @@ public:
      * @param cellgeo underlying cell geometry
      * @param time time
      */
-    virtual void local2global(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry& cellgeo, double time);
+    virtual void local2global(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time);
     /**
      * Evaluates local coordinates from given global ones. Returns nonzero if local coordinates are interpolating,
      * zero if extrapolating (nonzero is returned if point is within the element geometry, zero otherwise).
@@ -94,11 +93,11 @@ public:
      * @param time time
      * @return nonzero is returned if point is within the element geometry, zero otherwise
      */
-    virtual int  global2local(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry& cellgeo, double time);
+    virtual int  global2local(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time);
     /**
      * Evaluates the jacobian of transformation between local and global coordinates.
      */
-    virtual double giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry& cellgeo, double time);
+    virtual double giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time);
 
     /**@name Edge interpolation servises */
     //@{
@@ -109,7 +108,7 @@ public:
      * @param cellgeo underlying cell geometry
      * @param time time
      */
-    virtual void edgeEvalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry& cellgeo, double time);
+    virtual void edgeEvalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time);
     /**
      * Evaluates the matrix of derivatives of edge interpolation functions (shape functions) at given point.
      * These derivatives are in global coordinate system (where the nodal coordinates are defined)
@@ -120,7 +119,7 @@ public:
      * @param time time
      */
     virtual void edgeEvaldNdx(FloatMatrix &answer, int iedge,
-                              const FloatArray &lcoords, const FEICellGeometry& cellgeo, double time);
+                              const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time);
     /**
      * Evaluates edge global coordinates from given local ones
      * These derivatives are in global coordinate system (where the nodal coordinates are defined)
@@ -131,12 +130,12 @@ public:
      * @param time time
      */
     virtual void edgeLocal2global(FloatArray &answer, int iedge,
-                                  const FloatArray &lcoords, const FEICellGeometry& cellgeo, double time);
+                                  const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time);
     /**
      * Evaluates the edge jacobian of transformation between local and global coordinates.
      */
     virtual double edgeGiveTransformationJacobian(int iedge, const FloatArray &lcoords,
-                                                  const FEICellGeometry& cellgeo, double time);
+                                                  const FEICellGeometry &cellgeo, double time);
     virtual void computeLocalEdgeMapping(IntArray &edgeNodes, int iedge);
     //@}
 
@@ -149,7 +148,7 @@ public:
      * @param cellgeo underlying cell geometry
      * @param time time
      */
-    virtual void surfaceEvalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry& cellgeo, double time);
+    virtual void surfaceEvalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time);
     /**
      * Evaluates the matrix of derivatives of edge interpolation functions (shape functions) at given point.
      * These derivatives are in global coordinate system (where the nodal coordinates are defined)
@@ -171,20 +170,18 @@ public:
      * @param time time
      */
     virtual void surfaceLocal2global(FloatArray &answer, int iedge,
-                                     const FloatArray &lcoords, const FEICellGeometry& cellgeo, double time);
+                                     const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time);
     /**
      * Evaluates the edge jacobian of transformation between local and global coordinates.
      */
     virtual double surfaceGiveTransformationJacobian(int isurf, const FloatArray &lcoords,
-                                                     const FEICellGeometry& cellgeo, double time);
+                                                     const FEICellGeometry &cellgeo, double time);
     virtual void computeLocalSurfaceMapping(IntArray &edgeNodes, int iedge);
     //@}
 
 protected:
-    double edgeComputeLength(IntArray &edgeNodes, const FEICellGeometry& cellgeo);
+    double edgeComputeLength(IntArray &edgeNodes, const FEICellGeometry &cellgeo);
 };
-
-
 } // end namespace oofem
 #endif // fei3dtrlin_h
 

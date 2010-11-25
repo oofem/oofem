@@ -46,11 +46,10 @@
 #include "contextmode.h"
 
 #ifndef __MAKEDEPEND
-#include <vector>
+ #include <vector>
 #endif
 
 namespace oofem {
-
 class PrimaryField;
 class Dof;
 
@@ -144,6 +143,5 @@ protected:
     int resolveIndx(TimeStep *atTime, int shift);
     virtual FloatArray *giveSolutionVector(int);
 };
-
 } // end namespace oofem
 #endif // primaryfield_h

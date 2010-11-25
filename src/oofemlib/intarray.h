@@ -54,13 +54,12 @@
 #include "contextmode.h"
 
 #ifndef __MAKEDEPEND
-#include <stdio.h>
-#include <stdlib.h>
-#include <assert.h>
+ #include <stdio.h>
+ #include <stdlib.h>
+ #include <assert.h>
 #endif
 
 namespace oofem {
-
 class DataStream;
 #ifdef __PARALLEL_MODE
 class CommunicationBuffer;
@@ -112,7 +111,7 @@ public:
     ~IntArray()  { if ( values ) { freeInt(values); } } // destructor
 
     /// Assingnment operator
-    IntArray &operator=(const IntArray &);              // assignment: cleanup and copy
+    IntArray & operator=(const IntArray &);              // assignment: cleanup and copy
 
 
 #     ifdef DEBUG
@@ -219,21 +218,21 @@ public:
      *  @return index of inserted (or existing) value
      */
     int insertSortedOnce(int value, int allocChunk = 0);
-		/**
+    /**
      * Erase the element of given value.
      * If the value is found on position _pos receiver will shrink accordingly,
-		 * the values at positions (_pos+1,...,size) will be moved to positions (_pos,...,size-1)
-		*/
-		void eraseSorted(int value);
-		/** Extracts common values in receiver and iarray.
-		 *  Assumes that receiver as well as iarray are sorted.
-		 *  The size of array common is changed accordingly.
-		 *  @param iarray array to search for values common with receiver
-		 *  @param common array of common values
-		 *  @param allocChunk if reallocation needed, an aditional space for allocChunk values will be allocated
-		 *  @return size of array common
-		 */
-		int findCommonValuesSorted(const IntArray &iarray, IntArray &common, int allocChunk = 0) const;
+     * the values at positions (_pos+1,...,size) will be moved to positions (_pos,...,size-1)
+     */
+    void eraseSorted(int value);
+    /** Extracts common values in receiver and iarray.
+     *  Assumes that receiver as well as iarray are sorted.
+     *  The size of array common is changed accordingly.
+     *  @param iarray array to search for values common with receiver
+     *  @param common array of common values
+     *  @param allocChunk if reallocation needed, an aditional space for allocChunk values will be allocated
+     *  @return size of array common
+     */
+    int findCommonValuesSorted(const IntArray &iarray, IntArray &common, int allocChunk = 0) const;
 
     /**
      * Finds index of first occurence of given value in array. If such value is not presented,
@@ -303,15 +302,13 @@ public:
 #endif
 
 #ifdef BOOST_PYTHON
-    double __getItem__ (int i) {return this->operator()(i);}
-    void   __setItem__ (int i, double val) {this->operator()(i)=val;}
+    double __getItem__(int i) { return this->operator()(i); }
+    void   __setItem__(int i, double val) { this->operator()(i) = val; }
 #endif
-
-
 };
 
 
-template< class operation > int
+template< class operation >int
 quickSortPartition(IntArray &arry, int l, int r, operation op) {
     int i = l - 1, j = r;
     int v = arry.at(r);
@@ -345,7 +342,7 @@ quickSortPartition(IntArray &arry, int l, int r, operation op) {
 
 
 
-template< class operation > void quickSort(IntArray &arry, int l, int r, operation op) {
+template< class operation >void quickSort(IntArray &arry, int l, int r, operation op) {
     if ( r <= l ) {
         return;
     }
@@ -362,8 +359,7 @@ template< class operation > void quickSort(IntArray &arry, int l, int r, operati
  * must return a negative value if first argument is less than the second,
  * zero if the arguments are equal, and a positive number otherwise.
  */
-template< class operation > void sort(IntArray &arry, operation op) { quickSort(arry, 1, arry.giveSize(), op); }
-
+template< class operation >void sort(IntArray &arry, operation op) { quickSort(arry, 1, arry.giveSize(), op); }
 } // end namespace oofem
 #endif // intarray_h
 

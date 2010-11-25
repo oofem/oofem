@@ -309,7 +309,7 @@ Subdivision :: RS_Tetra :: numberSharedEdges(int iNode, IntArray &connNodes)
             IntArray common;
             if ( iElems->giveSize() <= jElems->giveSize() ) {
                 common.preallocate( iElems->giveSize() );
-            } else   {
+            } else {
                 common.preallocate( jElems->giveSize() );
             }
 
@@ -889,7 +889,7 @@ Subdivision :: RS_Tetra :: bisect(std :: queue< int > &subdivqueue, std :: list<
                 inode = eIndex;
                 jnode = ( eIndex < 3 ) ? inode + 1 : 1;
                 ngb = 1;
-            } else   {
+            } else {
                 inode = eIndex - 3;
                 jnode = 4;
                 ngb = inode + 1;
@@ -1018,7 +1018,7 @@ Subdivision :: RS_Tetra :: bisect(std :: queue< int > &subdivqueue, std :: list<
                     IntArray common;
                     if ( iElems->giveSize() <= jElems->giveSize() ) {
                         common.preallocate( iElems->giveSize() );
-                    } else   {
+                    } else {
                         common.preallocate( jElems->giveSize() );
                     }
 
@@ -1163,7 +1163,7 @@ Subdivision :: RS_Tetra :: bisect(std :: queue< int > &subdivqueue, std :: list<
                         } else {
                             ngb = 1;
                         }
-                    } else   {
+                    } else {
                         if ( elem2->giveNeighbor(eInd - 2) == elem1->giveNumber() ) {
                             ngb = ( eInd > 4 ) ? eInd - 3 : 4;
                         } else {
@@ -1207,7 +1207,7 @@ Subdivision :: RS_Tetra :: bisect(std :: queue< int > &subdivqueue, std :: list<
                     IntArray common;
                     if ( iElems->giveSize() <= jElems->giveSize() ) {
                         common.preallocate( iElems->giveSize() );
-                    } else   {
+                    } else {
                         common.preallocate( jElems->giveSize() );
                     }
 
@@ -2033,7 +2033,7 @@ Subdivision :: RS_Tetra :: generate(std :: list< int > &sharedEdgesQueue)
                 child->setIrregular( 1, irregular_nodes.at(kedge) );
                 child->setIrregular( 5, irregular_nodes.at(jjedge) );
                 child->setIrregular( 4, irregular_nodes.at(iiedge) );
-            } else   {
+            } else {
                 child->setNeighbor( 1, -this->giveNeighbor(nside) );
                 child->setNeighbor( 2, -this->giveNeighbor(kside) );
                 child->setNeighbor( 3, -this->giveNeighbor(iside) );
@@ -2114,7 +2114,7 @@ Subdivision :: RS_Tetra :: generate(std :: list< int > &sharedEdgesQueue)
                 child->setIrregular( 3, irregular_nodes.at(jedge) );
                 child->setIrregular( 6, irregular_nodes.at(kkedge) );
                 child->setIrregular( 4, irregular_nodes.at(iiedge) );
-            } else   {
+            } else {
                 child->setNeighbor( 1, -this->giveNeighbor(nside) );
                 child->setNeighbor( 3, -this->giveNeighbor(iside) );
                 child->setNeighbor( 4, -this->giveNeighbor(jside) );
@@ -2409,7 +2409,7 @@ Subdivision :: RS_Tetra :: generate(std :: list< int > &sharedEdgesQueue)
                 child->setIrregular( 1, irregular_nodes.at(kedge) );
                 child->setIrregular( 3, irregular_nodes.at(jedge) );
                 child->setIrregular( 2, irregular_nodes.at(iedge) );
-            } else   {
+            } else {
                 child->setNeighbor( 1, -this->giveNeighbor(nside) );
                 child->setNeighbor( 2, -this->giveNeighbor(kside) );
                 child->setNeighbor( 4, -this->giveNeighbor(jside) );
@@ -2489,7 +2489,7 @@ Subdivision :: RS_Tetra :: generate(std :: list< int > &sharedEdgesQueue)
                 child->setIrregular( 5, irregular_nodes.at(jjedge) );
                 child->setIrregular( 6, irregular_nodes.at(kkedge) );
                 child->setIrregular( 2, irregular_nodes.at(iedge) );
-            } else   {
+            } else {
                 child->setNeighbor( 2, -this->giveNeighbor(kside) );
                 child->setNeighbor( 3, -this->giveNeighbor(iside) );
                 child->setNeighbor( 4, -this->giveNeighbor(jside) );
@@ -2866,7 +2866,7 @@ Subdivision :: RS_Tetra :: update_neighbours()
                         OOFEM_ERROR4( "Subdivision::RS_Tetra::update_neighbours: element %d is not neighbor (%d) of element %d",
                                      this->number, i, this->neghbours_base_elements.at(i) );
                     }
-                } else   {
+                } else {
                     // ngb has not been yet processed ==> I cannot check particular side of ngb
                     for ( k = 1; k <= 3; k++ ) {
                         if ( ngb->giveNodes()->findFirstIndexOf( snodes1.at(k) ) ) {
@@ -2877,7 +2877,7 @@ Subdivision :: RS_Tetra :: update_neighbours()
                                      this->number, this->neghbours_base_elements.at(i) );
                     }
                 }
-            } else   {
+            } else {
                 OOFEM_ERROR3("Subdivision::RS_Tetra::update_neighbours negative neighbour %d of %d not expected",
                              this->neghbours_base_elements.at(i), this->number);
             }
@@ -3247,12 +3247,12 @@ Subdivision :: RS_Tetra :: importConnectivity(ConnectivityTable *ct)
     }
 
     /*
-     #ifdef DEBUG_INFO
+     * #ifdef DEBUG_INFO
      * OOFEM_LOG_INFO("Elem %d connectivity imported (nds %d %d %d %d ngbs %d %d %d %d)\n", this->number,
      *                                                       nodes.at(1), nodes.at(2), nodes.at(3), nodes.at(4),
      *                                                       neghbours_base_elements.at(1), neghbours_base_elements.at(2),
      *                                                       neghbours_base_elements.at(3), neghbours_base_elements.at(4));
-     #endif
+     *#endif
      */
 }
 
@@ -3308,7 +3308,7 @@ Subdivision :: RS_Triangle :: drawGeometry()
     GraphicObj *go;
     EPixel color;
     BOOLEAN suc;
-    const char* colors[] = {
+    const char *colors[] = {
         "DodgerBlue", "black"
     };
 
@@ -3347,7 +3347,7 @@ Subdivision :: RS_Tetra :: drawGeometry()
     GraphicObj *go;
     EPixel color;
     BOOLEAN suc;
-    const char* colors[] = {
+    const char *colors[] = {
         "DodgerBlue", "black"
     };
 
@@ -3408,8 +3408,8 @@ Subdivision :: createMesh(TimeStep *stepN, int domainNumber, int domainSerNum, D
     // all nodes (including remote which are not needed) are imported to ensure consistency between
     // node number (in the mesh) and its parent number (in the domain) because the domain is used to import connectivities
     for ( i = 1; i <= nnodes; i++ ) {
-        _node = new Subdivision :: RS_Node( i, mesh, i, *( domain->giveNode ( i )->giveCoordinates() ),
-                                           domain->giveErrorEstimator ( )->giveRemeshingCrit ( )->giveRequiredDofManDensity ( i, stepN ),
+        _node = new Subdivision :: RS_Node( i, mesh, i, *( domain->giveNode(i)->giveCoordinates() ),
+                                           domain->giveErrorEstimator()->giveRemeshingCrit()->giveRequiredDofManDensity(i, stepN),
                                            domain->giveNode ( i )->isBoundary() );
 #ifdef __PARALLEL_MODE
         _node->setGlobalNumber( domain->giveNode(i)->giveGlobalNumber() );
@@ -3615,21 +3615,21 @@ Subdivision :: createMesh(TimeStep *stepN, int domainNumber, int domainSerNum, D
                 if ( !dof ) {
                     if ( fabs(coords->at(1) - 200.0) < 0.000001 ) {
                         if ( coords->at(2) > -0.000001 && coords->at(2) < 97.500001 ) {
-                            dof = new MasterDof( idof, node, 1, 0, dofIDArrayPtr.at ( idof ) );
+                            dof = new MasterDof( idof, node, 1, 0, dofIDArrayPtr.at(idof) );
                         }
                     }
                 }
 
                 if ( !dof ) {
                     if ( fabs( coords->at(2) ) < 0.000001 ) {
-                        dof = new MasterDof( idof, node, 1, 0, dofIDArrayPtr.at ( idof ) );
+                        dof = new MasterDof( idof, node, 1, 0, dofIDArrayPtr.at(idof) );
                     }
                 }
 
                 if ( !dof ) {
                     if ( fabs( coords->at(1) ) < 0.000001 ) {
                         if ( coords->at(2) > 102.4999999 && coords->at(2) < 199.9999999 ) {
-                            dof = new SimpleSlaveDof( idof, node, 5, ( DofID ) dofIDArrayPtr.at ( idof ) );                             // HUHU
+                            dof = new SimpleSlaveDof( idof, node, 5, ( DofID ) dofIDArrayPtr.at(idof) );                                // HUHU
                         }
                     }
                 }
@@ -3637,13 +3637,13 @@ Subdivision :: createMesh(TimeStep *stepN, int domainNumber, int domainSerNum, D
                 if ( !dof ) {
                     if ( fabs(coords->at(2) - 200.0) < 0.000001 ) {
                         if ( coords->at(1) > 0.000001 && coords->at(1) < 200.000001 ) {
-                            dof = new SimpleSlaveDof( idof, node, 6, ( DofID ) dofIDArrayPtr.at ( idof ) );                               // HUHU
+                            dof = new SimpleSlaveDof( idof, node, 6, ( DofID ) dofIDArrayPtr.at(idof) );                                  // HUHU
                         }
                     }
                 }
 
                 if ( !dof ) {
-                    dof = new MasterDof( idof, node, 0, 0, dofIDArrayPtr.at ( idof ) );
+                    dof = new MasterDof( idof, node, 0, 0, dofIDArrayPtr.at(idof) );
                 }
 
 #else
@@ -3654,7 +3654,7 @@ Subdivision :: createMesh(TimeStep *stepN, int domainNumber, int domainSerNum, D
                     if ( fabs( coords->at(1) ) < 0.000001 ) {
                         if ( coords->at(2) > 0.000001 ) {
                             if ( idof == 1 ) {
-                                dof = new MasterDof( idof, node, 1, 0, dofIDArrayPtr.at ( idof ) );
+                                dof = new MasterDof( idof, node, 1, 0, dofIDArrayPtr.at(idof) );
                             }
                         }
                     }
@@ -3664,14 +3664,14 @@ Subdivision :: createMesh(TimeStep *stepN, int domainNumber, int domainSerNum, D
                     if ( fabs( coords->at(2) ) < 0.000001 ) {
                         if ( coords->at(1) > 0.000001 ) {
                             if ( idof == 2 ) {
-                                dof = new MasterDof( idof, node, 1, 0, dofIDArrayPtr.at ( idof ) );
+                                dof = new MasterDof( idof, node, 1, 0, dofIDArrayPtr.at(idof) );
                             }
                         }
                     }
                 }
 
                 if ( !dof ) {
-                    dof = new MasterDof( idof, node, 0, 0, dofIDArrayPtr.at ( idof ) );
+                    dof = new MasterDof( idof, node, 0, 0, dofIDArrayPtr.at(idof) );
                 }
 
  #else
@@ -3683,7 +3683,7 @@ Subdivision :: createMesh(TimeStep *stepN, int domainNumber, int domainSerNum, D
                         if ( coords->at(2) > 0.000001 ) {
                             if ( coords->at(3) > 499.999999 ) {
                                 if ( idof == 1 || idof == 3 ) {
-                                    dof = new MasterDof( idof, node, 1, 0, dofIDArrayPtr.at ( idof ) );
+                                    dof = new MasterDof( idof, node, 1, 0, dofIDArrayPtr.at(idof) );
                                 }
                             }
                         }
@@ -3695,7 +3695,7 @@ Subdivision :: createMesh(TimeStep *stepN, int domainNumber, int domainSerNum, D
                         if ( coords->at(2) > 0.000001 ) {
                             if ( coords->at(3) > 499.999999 ) {
                                 if ( idof == 3 ) {
-                                    dof = new MasterDof( idof, node, 1, 0, dofIDArrayPtr.at ( idof ) );
+                                    dof = new MasterDof( idof, node, 1, 0, dofIDArrayPtr.at(idof) );
                                 }
                             }
                         }
@@ -3703,7 +3703,7 @@ Subdivision :: createMesh(TimeStep *stepN, int domainNumber, int domainSerNum, D
                 }
 
                 if ( !dof ) {
-                    dof = new MasterDof( idof, node, 0, 0, dofIDArrayPtr.at ( idof ) );
+                    dof = new MasterDof( idof, node, 0, 0, dofIDArrayPtr.at(idof) );
                 }
 
   #else
@@ -3718,18 +3718,18 @@ Subdivision :: createMesh(TimeStep *stepN, int domainNumber, int domainSerNum, D
                         if ( coords->at(2) > 70.000001 ) {
                             if ( fabs(dist - 7.0 * 7.0) < 0.01 ) {                            // be very tolerant (geometry is not precise)
                                 if ( idof == 1 || idof == 3 ) {
-                                    dof = new MasterDof( idof, node, 1, 0, dofIDArrayPtr.at ( idof ) );
+                                    dof = new MasterDof( idof, node, 1, 0, dofIDArrayPtr.at(idof) );
                                 }
                             }
-                        } else if ( coords->at(2) > 67.9999999 )    {
+                        } else if ( coords->at(2) > 67.9999999 ) {
                             rad = 18.0 - 11.0 / 5.5 * ( coords->at(2) - 64.5 );
                             if ( fabs(dist - rad * rad) < 0.01 ) {                            // be very tolerant (geometry is not precise)
                                 if ( idof == 1 || idof == 3 ) {
-                                    dof = new MasterDof( idof, node, 1, 0, dofIDArrayPtr.at ( idof ) );
+                                    dof = new MasterDof( idof, node, 1, 0, dofIDArrayPtr.at(idof) );
                                 }
 
                                 if ( idof == 2 ) {
-                                    dof = new MasterDof( idof, node, 2, 0, dofIDArrayPtr.at ( idof ) );
+                                    dof = new MasterDof( idof, node, 2, 0, dofIDArrayPtr.at(idof) );
                                 }
                             }
                         }
@@ -3738,24 +3738,24 @@ Subdivision :: createMesh(TimeStep *stepN, int domainNumber, int domainSerNum, D
 
                 if ( !dof ) {
                     if ( coords->at(1) > 299.999999 || coords->at(3) > 299.999999 ) {
-                        dof = new MasterDof( idof, node, 1, 0, dofIDArrayPtr.at ( idof ) );
+                        dof = new MasterDof( idof, node, 1, 0, dofIDArrayPtr.at(idof) );
                     }
                 }
 
                 if ( !dof ) {
                     if ( coords->at(1) < 0.00000001 ) {
                         if ( idof == 1 ) {
-                            dof = new MasterDof( idof, node, 1, 0, dofIDArrayPtr.at ( idof ) );
+                            dof = new MasterDof( idof, node, 1, 0, dofIDArrayPtr.at(idof) );
                         }
                     }
                 }
 
                 if ( !dof ) {
-                    dof = new MasterDof( idof, node, 0, 0, dofIDArrayPtr.at ( idof ) );
+                    dof = new MasterDof( idof, node, 0, 0, dofIDArrayPtr.at(idof) );
                 }
 
    #else
-                dof = new MasterDof( idof, node, 0, 0, dofIDArrayPtr.at ( idof ) );
+                dof = new MasterDof( idof, node, 0, 0, dofIDArrayPtr.at(idof) );
    #endif
   #endif
  #endif
@@ -4062,11 +4062,11 @@ Subdivision :: bisectMesh() {
                 repeat = 1;                // force repetition in seqeuntial run
 #endif
                 /*
-                 #ifdef __PARALLEL_MODE
+                 * #ifdef __PARALLEL_MODE
                  * OOFEM_LOG_INFO("[%d] Subdivision: scheduling element %d[%d] for bisection, dens=%lf rdens=%lf\n", myrank, ie, elem->giveGlobalNumber(), iedensity, rdensity);
-                 #else
+                 *#else
                  * OOFEM_LOG_INFO("Subdivision: scheduling element %d for bisection, dens=%lf rdens=%lf\n", ie, iedensity, rdensity);
-                 #endif
+                 *#endif
                  */
             }
         }
@@ -4100,7 +4100,12 @@ Subdivision :: bisectMesh() {
 
 #ifdef __PARALLEL_MODE
         // in parallel communicate with neighbours the irregular nodes on shared bondary
-	} while ( !exchangeSharedIrregulars() );
+    }
+
+    while ( !exchangeSharedIrregulars() ) {
+        ;
+    }
+
 #endif
 
         int in;
@@ -4714,7 +4719,7 @@ Subdivision :: unpackSharedIrregulars(Subdivision *s, ProcessCommunicator &pc)
             IntArray common;
             if ( iElems->giveSize() <= jElems->giveSize() ) {
                 common.preallocate( iElems->giveSize() );
-            } else   {
+            } else {
                 common.preallocate( jElems->giveSize() );
             }
 
@@ -4746,7 +4751,7 @@ Subdivision :: unpackSharedIrregulars(Subdivision *s, ProcessCommunicator &pc)
  #ifdef __VERBOSE_PARALLEL
                 OOFEM_LOG_INFO( "...already exists as %d on element %d\n", elem->giveIrregular(eIndex), elem->giveNumber() );
  #endif
-            } else   {
+            } else {
                 // irregular does not exist:
                 // compute coordinates of new irregular
                 coords = * ( mesh->giveNode(iNode)->giveCoordinates() );
@@ -4968,7 +4973,7 @@ Subdivision :: unpackIrregularSharedGlobnums(Subdivision *s, ProcessCommunicator
             IntArray common;
             if ( iElems->giveSize() <= jElems->giveSize() ) {
                 common.preallocate( iElems->giveSize() );
-            } else   {
+            } else {
                 common.preallocate( jElems->giveSize() );
             }
 
@@ -5445,7 +5450,7 @@ Subdivision :: exchangeSharedEdges()
             edge->giveEdgeNodes(iNode, jNode);
  #ifdef __VERBOSE_PARALLEL
             //OOFEM_LOG_INFO("edge %d %d [%d %d] not shared\n", iNode, jNode,
-            //							 mesh->giveNode(iNode)->giveGlobalNumber(), mesh->giveNode(jNode)->giveGlobalNumber());
+            //mesh->giveNode(iNode)->giveGlobalNumber(), mesh->giveNode(jNode)->giveGlobalNumber());
  #endif
             iElems = mesh->giveNode(iNode)->giveConnectedElements();
             jElems = mesh->giveNode(jNode)->giveConnectedElements();
@@ -5453,7 +5458,7 @@ Subdivision :: exchangeSharedEdges()
             IntArray common;
             if ( iElems->giveSize() <= jElems->giveSize() ) {
                 common.preallocate( iElems->giveSize() );
-            } else   {
+            } else {
                 common.preallocate( jElems->giveSize() );
             }
 
@@ -5566,7 +5571,7 @@ Subdivision :: unpackSharedEdges(Subdivision *s, ProcessCommunicator &pc)
             IntArray common;
             if ( iElems->giveSize() <= jElems->giveSize() ) {
                 common.preallocate( iElems->giveSize() );
-            } else   {
+            } else {
                 common.preallocate( jElems->giveSize() );
             }
 

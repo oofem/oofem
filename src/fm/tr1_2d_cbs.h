@@ -56,7 +56,6 @@
 //</RESTRICTED_SECTION>
 
 namespace oofem {
-
 class TimeStep;
 class Node;
 class Material;
@@ -305,6 +304,5 @@ protected:
     void                  computeGaussPoints();
     virtual void computeDeviatoricStress(FloatArray &answer, GaussPoint *gp, TimeStep *);
 };
-
 } // end namespace oofem
 #endif // tr1_2d_cbs_h

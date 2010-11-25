@@ -44,7 +44,6 @@
 #include "mathfem.h"
 
 namespace oofem {
-
 RankinePlasticMaterial ::        RankinePlasticMaterial(int n, Domain *d) : MPlasticMaterial(n, d)
 {
     //
@@ -151,5 +150,4 @@ RankinePlasticMaterial :: CreateStatus(GaussPoint *gp)
     status = new MPlasticMaterialStatus(1, this->giveDomain(), gp);
     return status;
 }
-
 } // end namespace oofem

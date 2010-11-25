@@ -36,31 +36,30 @@
 #define loadbalancer_h
 
 #ifdef __PARALLEL_MODE
-#include "inputrecord.h"
-#include "interface.h"
-#include "clock.h"
-#include "alist.h"
+ #include "inputrecord.h"
+ #include "interface.h"
+ #include "clock.h"
+ #include "alist.h"
 
-#ifdef __LB_DEBUG
-#include "dynalist.h"
-#include "range.h"
-#endif
+ #ifdef __LB_DEBUG
+  #include "dynalist.h"
+  #include "range.h"
+ #endif
 
 namespace oofem {
-
-#define __LB_DEBUG
+ #define __LB_DEBUG
 
 class Domain;
 class EngngModel;
 class ProcessCommunicator;
 class TimeStep;
 
-#define MIGRATE_LOAD_TAG       9998
+ #define MIGRATE_LOAD_TAG       9998
 /**
  * End-of-data marker, used to identify end of data stream received.
  * The value should not conflict with any classType value
  */
-#define LOADBALANCER_END_DATA -1
+ #define LOADBALANCER_END_DATA -1
 
 /**
  * Abstract base class representing general load balancer monitor. The task of the monitor is to
@@ -105,11 +104,11 @@ public:
 class WallClockLoadBalancerMonitor : public LoadBalancerMonitor
 {
 protected:
-  /// minAbsWallClockImbalanceTreshold declares min abs imbalance to perform relative imbalance check
-  double relWallClockImbalanceTreshold, absWallClockImbalanceTreshold, minAbsWallClockImbalanceTreshold;
+    /// minAbsWallClockImbalanceTreshold declares min abs imbalance to perform relative imbalance check
+    double relWallClockImbalanceTreshold, absWallClockImbalanceTreshold, minAbsWallClockImbalanceTreshold;
     /// the rebalancing done every lbstep
     int lbstep;
-#ifdef __LB_DEBUG
+ #ifdef __LB_DEBUG
     // list of steps with perturbed ballancing
     dynaList< Range >perturbedSteps;
     // perturbing factor
@@ -118,7 +117,7 @@ protected:
     IntArray recoveredSteps;
     // processing weights for lb recovery
     FloatArray processingWeights;
-#endif
+ #endif
 public:
     WallClockLoadBalancerMonitor(EngngModel *em) : LoadBalancerMonitor(em) {
         relWallClockImbalanceTreshold = 0.1;
@@ -267,7 +266,6 @@ public:
 
     virtual double predictRelativeComputationalCost();
 };
-
 } // end namespace oofem
 #endif
 #endif // loadbalancer_h

@@ -41,11 +41,9 @@
 #define errhdr_h
 
 namespace oofem {
-
 #define ERR_HEADER "_______________________________________________________\nError : \n"
 #define WRN_HEADER "_______________________________________________________\nWarning : \n"
 
 #define ERR_TAIL   "_______________________________________________________\a\n"
-
 } // end namespace oofem
 #endif // errhdr_h

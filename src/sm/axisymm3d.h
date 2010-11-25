@@ -47,7 +47,6 @@
 #include "sprnodalrecoverymodel.h"
 
 namespace oofem {
-
 class Axisymm3d : public NLStructuralElement, public ZZNodalRecoveryModelInterface,
     public NodalAveragingRecoveryModelInterface, public SPRNodalRecoveryModelInterface
 {
@@ -173,7 +172,7 @@ public:
     IRResultType initializeFrom(InputRecord *ir);
 
     integrationDomain  giveIntegrationDomain() { return _Triangle; }
-    MaterialMode          giveMaterialMode()   {return _3dMat;}
+    MaterialMode          giveMaterialMode()   { return _3dMat; }
 
 protected:
     void               computeBmatrixAt(GaussPoint *, FloatMatrix &, int = 1, int = ALL_STRAINS);
@@ -187,6 +186,5 @@ protected:
     void          computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge);
     int   computeLoadLEToLRotationMatrix(FloatMatrix &, int, GaussPoint *);
 };
-
 } // end namespace oofem
 #endif // axisymm3d_h

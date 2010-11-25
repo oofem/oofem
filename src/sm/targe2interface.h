@@ -43,7 +43,6 @@
 #include "mesherinterface.h"
 
 namespace oofem {
-
 class TimeStep;
 
 /**
@@ -57,18 +56,17 @@ class Targe2Interface : public MesherInterface
 {
 public:
     /// Constructor
-    Targe2Interface(Domain* d) : MesherInterface(d) { }
+    Targe2Interface(Domain *d) : MesherInterface(d) { }
     /// Destructor
     virtual ~Targe2Interface() { }
 
     /// Runs the mesh generation, mesh will be written to corresponding domain din file
-    virtual returnCode createMesh(TimeStep *tStep, int domainNumber, int domainSerNum, Domain** dNew);
+    virtual returnCode createMesh(TimeStep *tStep, int domainNumber, int domainSerNum, Domain **dNew);
 
 
 protected:
     /// Creates the mesher input, containing the required mesh density informations.
     int createInput(Domain *d, TimeStep *stepN);
 };
-
 } // end namespace oofem
 #endif // targe2interface_h

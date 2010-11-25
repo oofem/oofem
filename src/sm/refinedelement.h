@@ -41,7 +41,6 @@
 #include "valuemodetype.h"
 
 namespace oofem {
-
 class Domain;
 class Element;
 class TimeStep;
@@ -91,6 +90,5 @@ protected:
     /// prints simple error message and exits
     void error(const char *file, int line, const char *format, ...) const;
 };
-
 } // end namespace oofem
 #endif // refinedelement_h

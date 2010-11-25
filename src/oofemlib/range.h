@@ -37,7 +37,6 @@
 #define range_h
 
 namespace oofem {
-
 /**
  * Class Range is an abstraction for interval of integer numbers. It is decribed using its start and end values of interval
  * it represents. The inteval is defined to represent all valus between start and end values, including start and end values.
@@ -56,16 +55,19 @@ public:
     /// Constructor. Creates Range containing only given single number
     Range(int indx) { startIndx = endIndx = indx; }
     /// Consructor. Creates range <li, hi>
-    Range(int li, int hi) { startIndx = li;
-                            endIndx = hi; }
+    Range(int li, int hi) {
+        startIndx = li;
+        endIndx = hi;
+    }
     /// Empty range constructor
-    Range() { startIndx = 0;
-              endIndx = -1; }
+    Range() {
+        startIndx = 0;
+        endIndx = -1;
+    }
 
 
     /// tests if number is in range
     int test(int i) { return ( ( i >= startIndx ) && ( i <= endIndx ) ) ? 1 : 0; }
 };
-
 } // end namespace oofem
 #endif // range_h

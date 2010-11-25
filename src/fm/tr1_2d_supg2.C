@@ -36,9 +36,9 @@
 /*
  * TODO:
  * - modify computeDeviatoricStress to account for two material setting
- *done, since this method is used only for output purposes (rule of mixture used here)
+ **done, since this method is used only for output purposes (rule of mixture used here)
  * - check computation of stabilization coeffs whether the multi material setting is correctly taken into account
- *done, average viscosity according to rule of mixture applied
+ **done, average viscosity according to rule of mixture applied
  *
  * - save&restore context will not work (some way how to save/restore dynamic integration rules have to be found:
  *  element has to restore these rules based on restored data, and then rules will be restored,
@@ -69,18 +69,17 @@
 #include "geotoolbox.h"
 
 #ifndef __MAKEDEPEND
-#include <math.h>
-#include <stdio.h>
+ #include <math.h>
+ #include <stdio.h>
 #endif
 #include "contextioerr.h"
 
 #ifdef __OOFEG
-#include "oofeggraphiccontext.h"
-#include "conTable.h"
+ #include "oofeggraphiccontext.h"
+ #include "conTable.h"
 #endif
 
 namespace oofem {
-
 #define TRSUPG_ZERO_VOF 1.e-8
 #define POINT_TOL 1.e-8
 
@@ -116,9 +115,9 @@ TR1_2D_SUPG2 :: computeNumberOfDofs(EquationID ut)
 {
     if ( ut == EID_MomentumBalance ) {
         return 2;
-    } else if ( ut == EID_ConservationEquation )  {
+    } else if ( ut == EID_ConservationEquation ) {
         return 1;
-    } else                                                         {
+    } else {
         _error("computeNumberOfDofs: Unknown equation id encountered");
     }
 
@@ -182,7 +181,7 @@ TR1_2D_SUPG2 :: initializeFrom(InputRecord *ir)
 
     this->computeGaussPoints();
     this->initGeometry();
-    this -> updateIntegrationRules();
+    this->updateIntegrationRules();
     return IRRT_OK;
 }
 
@@ -190,12 +189,12 @@ void
 TR1_2D_SUPG2 :: computeGaussPoints()
 // Sets up the array containing the four Gauss points of the receiver.
 {
-  if (!integrationRulesArray) {
-    numberOfIntegrationRules = 2;
-    integrationRulesArray = new IntegrationRule * [ 2 ];
-    integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3, true);
-    integrationRulesArray [ 1 ] = new GaussIntegrationRule(2, this, 1, 3, true);
-  }
+    if ( !integrationRulesArray ) {
+        numberOfIntegrationRules = 2;
+        integrationRulesArray = new IntegrationRule * [ 2 ];
+        integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3, true);
+        integrationRulesArray [ 1 ] = new GaussIntegrationRule(2, this, 1, 3, true);
+    }
 }
 
 
@@ -1178,10 +1177,10 @@ TR1_2D_SUPG2 :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &l
     l3 = 1.0 - l1 - l2;
 
     answer.resize(2);
-    answer.at(1) = l1 * this->giveNode(1)->giveCoordinate(1) + l2 * this->giveNode(2)->giveCoordinate(1) +
-    l3 * this->giveNode(3)->giveCoordinate(1);
-    answer.at(2) = l1 * this->giveNode(1)->giveCoordinate(2) + l2 * this->giveNode(2)->giveCoordinate(2) +
-    l3 * this->giveNode(3)->giveCoordinate(2);
+    answer.at(1) = l1 * this->giveNode(1)->giveCoordinate(1) + l2 *this->giveNode(2)->giveCoordinate(1) +
+                   l3 *this->giveNode(3)->giveCoordinate(1);
+    answer.at(2) = l1 * this->giveNode(1)->giveCoordinate(2) + l2 *this->giveNode(2)->giveCoordinate(2) +
+                   l3 *this->giveNode(3)->giveCoordinate(2);
 
     return 1;
 }
@@ -1191,15 +1190,15 @@ TR1_2D_SUPG2 :: giveInterface(InterfaceType interface)
 {
     if ( interface == ZZNodalRecoveryModelInterfaceType ) {
         return ( ZZNodalRecoveryModelInterface * ) this;
-    } else if ( interface == NodalAveragingRecoveryModelInterfaceType )  {
+    } else if ( interface == NodalAveragingRecoveryModelInterfaceType ) {
         return ( NodalAveragingRecoveryModelInterface * ) this;
-    } else if ( interface == SPRNodalRecoveryModelInterfaceType )                                                                                                                                {
+    } else if ( interface == SPRNodalRecoveryModelInterfaceType ) {
         return ( SPRNodalRecoveryModelInterface * ) this;
-    } else if ( interface == SpatialLocalizerInterfaceType )                                                                                                                                                                                                                                                  {
+    } else if ( interface == SpatialLocalizerInterfaceType ) {
         return ( SpatialLocalizerInterface * ) this;
-    } else if ( interface == EIPrimaryFieldInterfaceType )                                                                                                                                                                                                                                                                                                                                                          {
+    } else if ( interface == EIPrimaryFieldInterfaceType ) {
         return ( EIPrimaryFieldInterface * ) this;
-    } else if ( interface == LEPlicElementInterfaceType )                                                                                                                                                                                                                                                                                                                                                                                                                                                              {
+    } else if ( interface == LEPlicElementInterfaceType ) {
         return ( LEPlicElementInterface * ) this;
     }
 
@@ -1229,7 +1228,7 @@ TR1_2D_SUPG2 :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatAr
 
     if ( size == gsize ) {
         dist = coords.distance(gcoords);
-    } else   {
+    } else {
         FloatArray helpCoords = coords;
 
         helpCoords.resize(gsize);
@@ -1350,7 +1349,7 @@ TR1_2D_SUPG2 :: computeLEPLICVolumeFraction(const FloatArray &n, const double p,
     if ( answer > 1.000000001 ) {
         _warning2("VOF fraction out of bounds, vof = %e\n", answer);
         return 1.0;
-    } else   {
+    } else {
         return answer;
     }
 }
@@ -1616,7 +1615,7 @@ TR1_2D_SUPG2 :: truncateMatVolume(const Polygon &matvolpoly, double &volume)
     this->formMyVolumePoly(me, NULL, false);
     g.clip(clip, me, matvolpoly);
 #ifdef __OOFEG
-    EASValsSetColor(gc [ 0 ].getActiveCrackColor() );
+    EASValsSetColor( gc [ 0 ].getActiveCrackColor() );
     //GraphicObj *go = clip.draw(::gc[OOFEG_DEBUG_LAYER],true);
     clip.draw(gc [ OOFEG_DEBUG_LAYER ], true);
     //EVFastRedraw(myview);
@@ -1821,7 +1820,7 @@ TR1_2D_SUPG2 :: updateIntegrationRules()
         // remap ip coords into area coords of receiver
         for ( ip = 0; ip < integrationRulesArray [ i ]->getNumberOfIntegrationPoints(); ip++ ) {
             gp = integrationRulesArray [ i ]->getIntegrationPoint(ip);
-            approx->local2global(gc, * gp->giveCoordinates(), FEIVertexListGeometryWrapper(c[i], vcoords [ i ]), 0.0);
+            approx->local2global(gc, * gp->giveCoordinates(), FEIVertexListGeometryWrapper(c [ i ], vcoords [ i ]), 0.0);
             triaApprox.global2local(lc, gc, FEIElementGeometryWrapper(this), 0.0);
             // modify original ip coords to target ones
             gp->setLocalCoordinates( * gp->giveCoordinates() );
@@ -1866,7 +1865,7 @@ TR1_2D_SUPG2 :: computeVolumeAround(GaussPoint *gp, integrationDomain id, const 
 
     if ( id == _Triangle ) {
         FEI2dTrLin __interpolation(1, 2);
-        return weight *fabs( __interpolation.giveTransformationJacobian(* gp->giveLocalCoordinates(), FEIVertexListGeometryWrapper(3, idpoly), 0.0) );
+        return weight * fabs( __interpolation.giveTransformationJacobian(* gp->giveLocalCoordinates(), FEIVertexListGeometryWrapper(3, idpoly), 0.0) );
     } else {
         FEI2dQuadLin __interpolation(1, 2);
         double det = fabs( __interpolation.giveTransformationJacobian(* gp->giveLocalCoordinates(), FEIVertexListGeometryWrapper(4, idpoly), 0.0) );

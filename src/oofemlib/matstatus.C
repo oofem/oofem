@@ -38,11 +38,8 @@
 #include "matstatus.h"
 
 namespace oofem {
-
 MaterialStatus :: MaterialStatus(int n, Domain *d, GaussPoint *g) : FEMComponent(n, d)
 {
     this->gp = g;
 }
-
-
 } // end namespace oofem

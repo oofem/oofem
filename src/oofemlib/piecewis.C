@@ -38,11 +38,10 @@
 
 #include "piecewis.h"
 #ifndef __MAKEDEPEND
-#include <math.h>
+ #include <math.h>
 #endif
 
 namespace oofem {
-
 #define PiecewiseLinFunction_PRECISION 1.e-12
 
 double PiecewiseLinFunction :: __at(double time)
@@ -64,8 +63,8 @@ double PiecewiseLinFunction :: __at(double time)
             return values.at(i);
         } else if ( dates.at(i) > time ) {
             if ( i == 1 ) {
-              OOFEM_WARNING ("PiecewiseLinFunction :: __at: time out of range, extrapolating value(s)");
-              return 0.;
+                OOFEM_WARNING("PiecewiseLinFunction :: __at: time out of range, extrapolating value(s)");
+                return 0.;
             }
 
             xa = dates.at(i - 1);
@@ -146,8 +145,8 @@ PiecewiseLinFunction :: initializeFrom(InputRecord *ir)
     const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
-    LoadTimeFunction::initializeFrom(ir);
-    
+    LoadTimeFunction :: initializeFrom(ir);
+
     IR_GIVE_FIELD(ir, numberOfPoints, IFT_PiecewiseLinFunction_npoints, "npoints"); // Macro
 
     IR_GIVE_FIELD(ir, dates, IFT_PiecewiseLinFunction_t, "t"); // Macro
@@ -182,5 +181,4 @@ PiecewiseLinFunction :: giveInputRecordString(std :: string &str, bool keyword)
 
     return 1;
 }
-
 } // end namespace oofem

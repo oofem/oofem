@@ -45,7 +45,6 @@
 #include "util.h"
 
 namespace oofem {
-
 #define LEPLIC_ZERO_VOF  1.e-12
 #define LEPLIC_BRENT_EPS 1.e-12
 
@@ -153,7 +152,7 @@ LEPlic :: updatePosition(TimeStep *atTime)
     // to reconstruct interface (normal, constant) on original grid
     this->doInterfaceReconstruction(atTime, false, true);
 #ifdef __OOFEG
-    ESIEventLoop(NO, oofem_tmpstr("doInterfaceReconstruction Finished; Press Ctrl-p to continue"));
+    ESIEventLoop( NO, oofem_tmpstr("doInterfaceReconstruction Finished; Press Ctrl-p to continue") );
     //ESIEventLoop (YES, "doInterfaceReconstruction Finished; Press Ctrl-p to continue");
 #endif
 }
@@ -330,7 +329,7 @@ LEPlic :: doInterfaceRemapping(TimeStep *atTime)
                             matVolSum += in_vol;
                         }
                     }
-                } catch ( GT_Exception &c ) {
+                } catch(GT_Exception & c) {
                     c.print();
 
                     neighbrNum = neighbours.at(in);
@@ -353,7 +352,7 @@ LEPlic :: doInterfaceRemapping(TimeStep *atTime)
                 if ( ( err > 2.e-3 ) && ( fabs(matVol - matVolSum) > 2.e-3 ) ) {
                     //debug
 
-#ifdef __OOFEG
+ #ifdef __OOFEG
                     //ESIEventLoop (YES, "Press Ctrl-p to continue");
                     deleteLayerGraphics(OOFEG_DEBUG_LAYER);
                     EASValsSetColor( :: gc [ OOFEG_DEBUG_LAYER ].getElementColor() );
@@ -362,7 +361,7 @@ LEPlic :: doInterfaceRemapping(TimeStep *atTime)
                     //EVHiliteGraphics (myview, go);
                     //ESIEventLoop (YES, "Press Ctrl-p to continue");
                     EVFastRedraw(myview);
-#endif
+ #endif
 
                     matVolSum = 0.0;
                     // loop over neighbours to truncate material volume on target (original) grid
@@ -739,13 +738,12 @@ LEPlic :: giveNodalScalarRepresentation(int inode)
 
     if ( vof_0 && vof_1 ) {
         return 0.5;
-    } else if ( vof_0 )  {
+    } else if ( vof_0 ) {
         return 0.0;
-    } else if ( vof_1 )                                    {
+    } else if ( vof_1 ) {
         return 1.0;
-    } else                                                                    {
+    } else {
         return vofsum / shelem->giveSize();
     }
 }
-
 } // end namespace oofem

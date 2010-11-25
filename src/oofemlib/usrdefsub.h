@@ -245,7 +245,7 @@ MesherInterface *CreateUsrDefMesherInterface(MeshPackageType type, Domain *d);
  * @param type id determining the type of new instance
  * @return newly allocated object of requested type, null if keyword not suppported
  */
-EnrichmentItem *CreateUsrDefEnrichmentItem(char *aClass, int num, XfemManager* xm, Domain *d);
+EnrichmentItem *CreateUsrDefEnrichmentItem(char *aClass, int num, XfemManager *xm, Domain *d);
 /**
  * Creates new instance of enrichment function.
  * @param type id determining the type of new instance
@@ -261,10 +261,10 @@ BasicGeometry *CreateUsrDefGeometry(char *aClass);
 /**
  * Creates new instance of patch.
  * @param type id determining the type of new instance
- * @param e parent element 
+ * @param e parent element
  * @return newly allocated object of requested type, null if keyword not suppported
  */
- Patch *CreateUsrDefPatch(Patch::PatchType ptype, Element* e);
+Patch *CreateUsrDefPatch(Patch :: PatchType ptype, Element *e);
 #ifdef __PARALLEL_MODE
 /**
  * Creates new instance of load balance monitor corresponding to given keyword.

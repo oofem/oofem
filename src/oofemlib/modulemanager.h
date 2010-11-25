@@ -47,19 +47,18 @@
 #include "oofem_limits.h"
 
 #ifndef __MAKEDEPEND
-#include <stdio.h>
-#include <time.h>
+ #include <stdio.h>
+ #include <time.h>
 #endif
 
 namespace oofem {
-
 class EngngModel;
 
 /**
  * Class representing and implementing ModuleManager. It is attribute of EngngModel.
  * It manages the modules of given type.
  */
-template <class M>
+template< class M >
 class ModuleManager
 {
 protected:
@@ -72,16 +71,16 @@ protected:
 
 public:
     ModuleManager(EngngModel *emodel) {
-      this->emodel = emodel;
-      
-      moduleList = new AList< M >(0);
-      numberOfModules = 0;
-    }      
+        this->emodel = emodel;
+
+        moduleList = new AList< M >(0);
+        numberOfModules = 0;
+    }
     virtual ~ModuleManager() {
-      delete moduleList;
+        delete moduleList;
     }
     /** Creates new instance of module of given name, belonging to given EngngModel */
-    virtual M* CreateModuleOfType (char *name, EngngModel *emodel) = 0;
+    virtual M *CreateModuleOfType(char *name, EngngModel *emodel) = 0;
     /**
      * Reads receiver description from input stream and creates corresponding modules components accordingly.
      * It scans input file, each line is assumed to be single record describing particular module.
@@ -94,39 +93,39 @@ public:
      * @return nonzero if o.k.
      */
     virtual int                instanciateYourself(DataReader *dr, InputRecord *ir) {
-      const char *__proc = "instanciateYourself"; // Required by IR_GIVE_FIELD macro
-      IRResultType result;                     // Required by IR_GIVE_FIELD macro
-      
-      int i;
-      char name [ MAX_NAME_LENGTH ];
-      M *module;
-      InputRecord *mir;
-      
-      // read modules
-      moduleList->growTo(numberOfModules);
-      for ( i = 0; i < numberOfModules; i++ ) {
-        mir = dr->giveInputRecord(DataReader :: IR_expModuleRec, i + 1);
-        result = mir->giveRecordKeywordField(name, MAX_NAME_LENGTH);
-        if ( result != IRRT_OK ) {
-	  IR_IOERR(giveClassName(), __proc, IFT_RecordIDField, "", mir, result);
+        const char *__proc = "instanciateYourself"; // Required by IR_GIVE_FIELD macro
+        IRResultType result;                   // Required by IR_GIVE_FIELD macro
+
+        int i;
+        char name [ MAX_NAME_LENGTH ];
+        M *module;
+        InputRecord *mir;
+
+        // read modules
+        moduleList->growTo(numberOfModules);
+        for ( i = 0; i < numberOfModules; i++ ) {
+            mir = dr->giveInputRecord(DataReader :: IR_expModuleRec, i + 1);
+            result = mir->giveRecordKeywordField(name, MAX_NAME_LENGTH);
+            if ( result != IRRT_OK ) {
+                IR_IOERR(giveClassName(), __proc, IFT_RecordIDField, "", mir, result);
+            }
+
+            // read type of module
+            module = this->CreateModuleOfType(name, emodel);
+            if ( module == NULL ) {
+                OOFEM_ERROR2("InitModuleManager::instanciateYourself: unknown module (%s)", name);
+            }
+
+            module->initializeFrom(mir);
+            moduleList->put(i + 1, module);
         }
-	
-        // read type of module
-        module = this->CreateModuleOfType(name, emodel);
-        if ( module == NULL ) {
-            OOFEM_ERROR2("InitModuleManager::instanciateYourself: unknown module (%s)", name);
-        }
-	
-        module->initializeFrom(mir);
-        moduleList->put(i + 1, module);
-      }
-      
+
 #  ifdef VERBOSE
-      VERBOSE_PRINT0("Instanciated output modules ", numberOfModules)
+        VERBOSE_PRINT0("Instanciated output modules ", numberOfModules)
 #  endif
-	return 1;
+        return 1;
     }
-    
+
     /**
      * Instanciates the receiver from input record. Called from instanciateYourself to initialize yourself
      * from corresponding record. Should be caled before instanciateYourself.
@@ -141,17 +140,16 @@ protected:
      * @param num module number
      */
     M *giveModule(int num) {
-      M *elem = NULL;
-      
-      if ( moduleList->includes(num) ) {
-        elem = moduleList->at(num);
-      } else {
-        OOFEM_ERROR2("ModuleManager::giveOuputModule: No module no. %d defined", num);
-      }
-      
-      return elem;
+        M *elem = NULL;
+
+        if ( moduleList->includes(num) ) {
+            elem = moduleList->at(num);
+        } else {
+            OOFEM_ERROR2("ModuleManager::giveOuputModule: No module no. %d defined", num);
+        }
+
+        return elem;
     }
 };
-
 } // end namespace oofem
 #endif // modulemanager_h

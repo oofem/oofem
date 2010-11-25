@@ -37,7 +37,6 @@
 #include "engngm.h"
 
 namespace oofem {
-
 //#define PetscContext_debug_print
 
 PetscContext :: PetscContext(EngngModel *e, EquationID ut)
@@ -68,9 +67,9 @@ PetscContext :: init(int di)
         n2g_prescribed.init(emodel, ut, di, ApplicationOrdering :: et_prescribed);
         n2l_prescribed.init(emodel, ut, di, ApplicationOrdering :: et_prescribed);
 
-#ifdef  PetscContext_debug_print
+ #ifdef  PetscContext_debug_print
         fprintf( stderr, "[%d] Petsccontext::init leq:%d, neq:%d, geq:%d\n", emodel->giveRank(), giveNumberOfLocalEqs(), giveNumberOfNaturalEqs(), giveNumberOfGlobalEqs() );
-#endif
+ #endif
     }
 
 #endif
@@ -308,6 +307,5 @@ PetscContext :: createVecGlobal(Vec *answer)
 }
 #endif
 }
-
 } // end namespace oofem
 #endif

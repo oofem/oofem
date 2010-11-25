@@ -49,15 +49,14 @@
 #include "classtype.h"
 
 #ifndef __MAKEDEPEND
-#include <stdio.h>
+ #include <stdio.h>
 #endif
 
 #ifdef __PARALLEL_MODE
-#include "combuff.h"
+ #include "combuff.h"
 #endif
 
 namespace oofem {
-
 IntArray :: IntArray(int n)
 // Constructor : creates an array of size n (filled with garbage).
 {
@@ -91,7 +90,7 @@ IntArray :: IntArray(const IntArray &src)
 
 
 IntArray &
-IntArray :: operator=(const IntArray &src)
+IntArray :: operator = ( const IntArray & src )
 {
     // assignment: cleanup and copy
     if ( values ) {
@@ -211,7 +210,9 @@ void IntArray :: preallocate(int futureSize)
 {
     int *p1, *p2, *newValues, i;
 
-    if ( allocatedSize >= futureSize ) return;
+    if ( allocatedSize >= futureSize ) {
+        return;
+    }
 
     newValues = allocInt(futureSize);
 
@@ -360,7 +361,7 @@ void IntArray :: printYourself() const
         if ( i > 35 ) {
             printf("   (other components not printed)");
             break;
-        } else      {
+        } else {
             printf( "%d  ", this->at(i) );
         }
     }
@@ -497,9 +498,9 @@ IntArray :: findSorted(int _val)   const
         mid = ( first + last ) / 2; //rule out half of the data by spliting the array
         if ( values [ mid ] == _val ) { //if we have found the target
             return mid + 1;
-        } else if ( values [ mid ] > _val )      {
+        } else if ( values [ mid ] > _val ) {
             last = mid - 1; //the desired value is in the lower part of the array
-        } else                      {
+        } else {
             first = mid + 1; //the desired value is in the upper part of the array
         }
     }
@@ -529,7 +530,7 @@ IntArray :: insertSorted(int _val, int allocChunk)
         i--;
     }
 
-    pos = i ;
+    pos = i;
     p2 [ pos ] = _val; // insert _val
     i--;
 
@@ -569,35 +570,42 @@ IntArray :: insertSortedOnce(int _val, int allocChunk)
 
 void IntArray :: eraseSorted(int value)
 {
-	int pos;
+    int pos;
 
-	if((pos = findSorted(value))){
-		erase(pos);
-	}
+    if ( ( pos = findSorted(value) ) ) {
+        erase(pos);
+    }
 }
 
 
 int
 IntArray :: findCommonValuesSorted(const IntArray &iarray, IntArray &common, int allocChunk) const
 {
-	int i = 0, j, val;
+    int i = 0, j, val;
 
-	for(j=1;j<=iarray.giveSize();j++){
-		val = iarray.at(j);
-		
-		while(i<size){
-			if(values[i] == val){
-				common.followedBy(val, allocChunk);
-				i++;
-				break;
-			}
-			if(values[i] > val)break;
-			i++;
-		}
-		if(i == size)break;
-	}
+    for ( j = 1; j <= iarray.giveSize(); j++ ) {
+        val = iarray.at(j);
 
-	return(common.giveSize());
+        while ( i < size ) {
+            if ( values [ i ] == val ) {
+                common.followedBy(val, allocChunk);
+                i++;
+                break;
+            }
+
+            if ( values [ i ] > val ) {
+                break;
+            }
+
+            i++;
+        }
+
+        if ( i == size ) {
+            break;
+        }
+    }
+
+    return ( common.giveSize() );
 }
 
 
@@ -643,5 +651,4 @@ IntArray :: givePackSize(CommunicationBuffer &buff)
     return buff.givePackSize(MPI_INT, 1) + buff.givePackSize(MPI_INT, this->size);
 }
 #endif
-
 } // end namespace oofem

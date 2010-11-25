@@ -45,7 +45,6 @@
 #ifndef _MSC_VER
 
 namespace oofem {
-
 void getUtime(oofem_timeval &answer)
 {
     struct rusage rsg;
@@ -90,7 +89,6 @@ time_t getTime()
 #else // #ifndef _MSC_VER
 
 namespace oofem {
-
 void getUtime(oofem_timeval &answer)
 {
     clock_t utime = clock();
@@ -161,5 +159,4 @@ void convertTS2HMS(int &nhrs, int &nmin, int &nsec, double tsec)
 
     nsec = _nsec;
 }
-
 } // end namespace oofem

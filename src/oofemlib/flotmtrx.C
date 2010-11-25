@@ -50,15 +50,14 @@
 #include "classtype.h"
 
 #ifndef __MAKEDEPEND
-#include <math.h>
+ #include <math.h>
 #endif
 
 #ifdef __PARALLEL_MODE
-#include "combuff.h"
+ #include "combuff.h"
 #endif
 
 namespace oofem {
-
 FloatMatrix :: FloatMatrix(FloatArray *vector, int transpose)
 //
 // constructor : creates (vector->giveSize(),1) FloatMatrix
@@ -109,7 +108,7 @@ FloatMatrix(const FloatMatrix &src) : Matrix(src.nRows, src.nColumns)
 }
 
 FloatMatrix &
-FloatMatrix :: operator=(const FloatMatrix &src)
+FloatMatrix :: operator = ( const FloatMatrix & src )
 {
     // assignment: cleanup and copy
     double *P1, *P2;
@@ -146,7 +145,7 @@ double FloatMatrix :: at(int i, int j) const
 #endif
 
 
-double &FloatMatrix :: operator()(int i, int j)
+double &FloatMatrix :: operator() (int i, int j)
 {
 #ifdef DEBUG
     assert(0 <= i && i < nRows);
@@ -155,7 +154,7 @@ double &FloatMatrix :: operator()(int i, int j)
     return values [ ( j ) * nRows + i ];
 }
 
-double FloatMatrix :: operator()(int i, int j) const
+double FloatMatrix :: operator() (int i, int j) const
 {
 #ifdef DEBUG
     assert(0 <= i && i < nRows);
@@ -287,14 +286,17 @@ void
 FloatMatrix :: beDyadicProductOf(const FloatArray &vec1, const FloatArray &vec2)
 // Receiver = vec1 * vec2^T
 {
-  int i,j;
-  int n1 = vec1.giveSize();
-  int n2 = vec2.giveSize();
-  this->resize(n1,n2);
-  for ( i = 1; i <= n1; i++ )
-    for ( j = 1; j <= n2; j++ )
-      this->at(i,j) = vec1.at(i) * vec2.at(j);
-  return;
+    int i, j;
+    int n1 = vec1.giveSize();
+    int n2 = vec2.giveSize();
+    this->resize(n1, n2);
+    for ( i = 1; i <= n1; i++ ) {
+        for ( j = 1; j <= n2; j++ ) {
+            this->at(i, j) = vec1.at(i) * vec2.at(j);
+        }
+    }
+
+    return;
 }
 
 
@@ -560,8 +562,8 @@ FloatMatrix :: beInverseOf(const FloatMatrix &src)
         return;
     } else if ( nRows == 3 ) {
         det = src.at(1, 1) * src.at(2, 2) * src.at(3, 3) + src.at(1, 2) * src.at(2, 3) * src.at(3, 1) +
-        src.at(1, 3) * src.at(2, 1) * src.at(3, 2) - src.at(1, 3) * src.at(2, 2) * src.at(3, 1) -
-        src.at(2, 3) * src.at(3, 2) * src.at(1, 1) - src.at(3, 3) * src.at(1, 2) * src.at(2, 1);
+              src.at(1, 3) * src.at(2, 1) * src.at(3, 2) - src.at(1, 3) * src.at(2, 2) * src.at(3, 1) -
+              src.at(2, 3) * src.at(3, 2) * src.at(1, 1) - src.at(3, 3) * src.at(1, 2) * src.at(2, 1);
 
         this->at(1, 1) = ( src.at(2, 2) * src.at(3, 3) - src.at(2, 3) * src.at(3, 2) ) / det;
         this->at(2, 1) = ( src.at(2, 3) * src.at(3, 1) - src.at(2, 1) * src.at(3, 3) ) / det;
@@ -583,7 +585,7 @@ FloatMatrix :: beInverseOf(const FloatMatrix &src)
         //p[7]= (values[6]*values[1]-values[0]*values[7])/det ;
         //p[8]= (values[0]*values[4]-values[3]*values[1])/det ;
         return;
-    } else    {
+    } else {
         // size >3 ... gaussian elimination - slow but safe
         //
         int i, j, k;
@@ -765,7 +767,7 @@ void FloatMatrix :: plus(const FloatMatrix &aMatrix)
     n = aMatrix.nRows;
     m = aMatrix.nColumns;
     if ( nRows * nColumns == 0 ) {
-        this->operator=(aMatrix);
+        this->operator = ( aMatrix );
     } else {
 #     ifdef DEBUG
         if ( n - nRows || m - nColumns ) {
@@ -1145,11 +1147,11 @@ void FloatMatrix :: beUnitMatrix()
 // and the inverse scaling matrix Pinv
 void FloatMatrix :: bePinvID()
 {
-    this->resize(6,6);
+    this->resize(6, 6);
     this->zero();
-    values[0] = values[7] = values[14] = 2./3.;
-    values[1] = values[2] = values[6] = values[8] = values[12] = values[13] = -1./3.;
-    values[21] = values[28] = values[35] = 0.5;
+    values [ 0 ] = values [ 7 ] = values [ 14 ] = 2. / 3.;
+    values [ 1 ] = values [ 2 ] = values [ 6 ] = values [ 8 ] = values [ 12 ] = values [ 13 ] = -1. / 3.;
+    values [ 21 ] = values [ 28 ] = values [ 35 ] = 0.5;
 }
 
 void
@@ -1184,7 +1186,7 @@ FloatMatrix :: resizeWithData(int rows, int columns)
 // resizes receiver, all data kept
 //
 {
-    FloatMatrix old(* this);
+    FloatMatrix old(*this);
 
     if ( rows * columns > allocatedSize ) {
         // memory realocation necessary
@@ -1493,7 +1495,7 @@ FloatMatrix *FloatMatrix :: GiveTransposition()
  *    P1       = values ;
  *    P2       = aMatrix->values ;
  *    while (i--)
- *P1++ = *P2++ ;}
+ **P1++ = *P2++ ;}
  * else {
  #     ifdef DEBUG
  * if (n-nRows || m-nColumns) {
@@ -1506,7 +1508,7 @@ FloatMatrix *FloatMatrix :: GiveTransposition()
  *    P2 = aMatrix->values ;
  *    i  = n * m ;
  *    while (i--)
- *P1++ += *P2++ ;}
+ **P1++ += *P2++ ;}
  *
  * return this ;
  * }
@@ -1577,16 +1579,18 @@ void FloatMatrix :: pY() const
     int i, j;
 
     printf("[");
-        for ( i = 1; i <= nRows; ++i ) {
-            for ( j = 1; j <= nColumns; ++j ) {
-                printf( "%20.15e", this->at(i, j) );
-		if (j<nColumns)
-		  printf(",");
-		else
-		  printf(";");
-	    }
+    for ( i = 1; i <= nRows; ++i ) {
+        for ( j = 1; j <= nColumns; ++j ) {
+            printf( "%20.15e", this->at(i, j) );
+            if ( j < nColumns ) {
+                printf(",");
+            } else {
+                printf(";");
+            }
         }
-	printf("];\n");
+    }
+
+    printf("];\n");
 }
 
 void
@@ -1915,7 +1919,7 @@ contextIOResultType FloatMatrix :: restoreYourself(DataStream *stream, ContextMo
  * // size of returned submatrix is determined from
  * // input parametrs
  * {
- #ifdef DEBUG
+ *#ifdef DEBUG
  * // check input params
  * if ((topRow < 1) || (bottomRow < 1) || (topCol < 1) || (bottomCol < 1)) {
  *  printf ("GiveSubMatrix : subindexes size mismatch\nfile %s, line %d\n",__FILE__,__LINE__);
@@ -1927,7 +1931,7 @@ contextIOResultType FloatMatrix :: restoreYourself(DataStream *stream, ContextMo
  *  printf ("GiveSubMatrix : subindexes size mismatch\nfile %s, line %d\n",__FILE__,__LINE__);
  * exit(1);
  * }
- #endif
+ *#endif
  *
  *
  * int i,j,topRm1,topCm1;
@@ -2144,8 +2148,8 @@ FloatMatrix :: jaco_(FloatArray &eval, FloatMatrix &v, int nf)
                     // ---- MODIFY "I" AND "J" COLUMNS OF "A" AND "V"
                     for ( k = 1; k < i; ++k ) {
                         tt = this->at(k, i);
-                        this->at(k, i) = co * tt + si * this->at(k, j);
-                        this->at(k, j) = -si * tt + co * this->at(k, j);
+                        this->at(k, i) = co * tt + si *this->at(k, j);
+                        this->at(k, j) = -si * tt + co *this->at(k, j);
                         tt = v.at(k, i);
                         v.at(k, i) = co * tt + si *v.at(k, j);
                         v.at(k, j) = -si * tt + co *v.at(k, j);
@@ -2153,16 +2157,16 @@ FloatMatrix :: jaco_(FloatArray &eval, FloatMatrix &v, int nf)
 
                     // diagonal term (i,i)
                     tt = eval.at(i);
-                    eval.at(i) = co * tt + si * this->at(i, j);
-                    aij = -si * tt + co * this->at(i, j);
+                    eval.at(i) = co * tt + si *this->at(i, j);
+                    aij = -si * tt + co *this->at(i, j);
                     tt = v.at(i, i);
                     v.at(i, i) = co * tt + si *v.at(i, j);
                     v.at(i, j) = -si * tt + co *v.at(i, j);
 
                     for ( k = i + 1; k < j; ++k ) {
                         tt = this->at(i, k);
-                        this->at(i, k) = co * tt + si * this->at(k, j);
-                        this->at(k, j) = -si * tt + co * this->at(k, j);
+                        this->at(i, k) = co * tt + si *this->at(k, j);
+                        this->at(k, j) = -si * tt + co *this->at(k, j);
                         tt = v.at(k, i);
                         v.at(k, i) = co * tt + si *v.at(k, j);
                         v.at(k, j) = -si * tt + co *v.at(k, j);
@@ -2179,8 +2183,8 @@ FloatMatrix :: jaco_(FloatArray &eval, FloatMatrix &v, int nf)
                     //
                     for ( k = j + 1; k <= neq; ++k ) {
                         tt = this->at(i, k);
-                        this->at(i, k) = co * tt + si * this->at(j, k);
-                        this->at(j, k) = -si * tt + co * this->at(j, k);
+                        this->at(i, k) = co * tt + si *this->at(j, k);
+                        this->at(j, k) = -si * tt + co *this->at(j, k);
                         tt = v.at(k, i);
                         v.at(k, i) = co * tt + si *v.at(k, j);
                         v.at(k, j) = -si * tt + co *v.at(k, j);

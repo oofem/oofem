@@ -46,7 +46,6 @@
 #include "contextioerr.h"
 
 namespace oofem {
-
 void
 LevelSetPCS :: initialize()
 {
@@ -545,7 +544,7 @@ LevelSetPCS :: evalElemFContribution(PCSEqType t, int ie, TimeStep *atTime)
                                              domain->giveElement(ie)->giveInterface(LevelSetPCSElementInterfaceType);
     if ( t == PCS_levelSetUpdate ) {
         return interface->LS_PCS_computeF(this, atTime);
-    } else if ( t == PCS_levelSetRedistance )  {
+    } else if ( t == PCS_levelSetRedistance ) {
         return interface->LS_PCS_computeS(this, atTime);
     }
 
@@ -559,7 +558,7 @@ LevelSetPCS :: evalElemfContribution(PCSEqType t, int ie, TimeStep *atTime)
                                              domain->giveElement(ie)->giveInterface(LevelSetPCSElementInterfaceType);
     if ( t == PCS_levelSetUpdate ) {
         return 0.0;
-    } else if ( t == PCS_levelSetRedistance )  {
+    } else if ( t == PCS_levelSetRedistance ) {
         return interface->LS_PCS_computeS(this, atTime);
     }
 
@@ -650,5 +649,4 @@ LevelSetPCS :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
 
     return CIO_OK;
 }
-
 } // end namespace oofem

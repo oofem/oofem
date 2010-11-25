@@ -44,7 +44,6 @@
 #include "structuralnonlocalmaterialext.h"
 
 namespace oofem {
-
 class GaussPoint;
 
 
@@ -214,6 +213,5 @@ protected:
 
     ////
 };
-
 } // end namespace oofem
 #endif // rcsdnl_h

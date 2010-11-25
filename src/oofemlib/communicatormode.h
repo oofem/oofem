@@ -55,6 +55,5 @@ enum CommunicatorMode {
     CommMode_Static,
     CommMode_Dynamic
 };
-
 } // end namespace oofem
 #endif // communicatormode_h

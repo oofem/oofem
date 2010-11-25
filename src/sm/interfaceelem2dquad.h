@@ -41,7 +41,6 @@
 #include "gaussintegrationrule.h"
 
 namespace oofem {
-
 class InterfaceElem2dQuad : public StructuralElement
 {
     /*
@@ -94,7 +93,7 @@ public:
     Element_Geometry_Type giveGeometryType() const { return EGT_line_2; }
 
     integrationDomain  giveIntegrationDomain() { return _Line; }
-    MaterialMode          giveMaterialMode()  {return _2dInterface;}
+    MaterialMode          giveMaterialMode()  { return _2dInterface; }
 
 protected:
     void          computeBmatrixAt(GaussPoint *, FloatMatrix &, int = 1, int = ALL_STRAINS);
@@ -111,6 +110,5 @@ protected:
      */
     int          computeGtoLRotationMatrix(FloatMatrix &answer);
 };
-
 } // end namespace oofem
 #endif // interfaceelem2dquad_h

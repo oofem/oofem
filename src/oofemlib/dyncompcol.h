@@ -45,7 +45,6 @@
 #include "intarray.h"
 
 namespace oofem {
-
 // alloc chunk for columns
 #define DynCompCol_CHUNK 8
 // turns on the stl set container, used to store column data, usually slower
@@ -53,9 +52,9 @@ namespace oofem {
 
 
 #ifdef DynCompCol_USE_STL_SETS
-#ifndef __MAKEDEPEND
-#include <map>
-#endif
+ #ifndef __MAKEDEPEND
+  #include <map>
+ #endif
 #endif
 /**
  * Implementation of sparse matrix stored in compressed column storage.
@@ -103,7 +102,7 @@ public:
      */
     virtual void times(double x);
     /// Builds internal structure of receiver
-    int buildInternalStructure(EngngModel *, int, EquationID, const UnknownNumberingScheme&);
+    int buildInternalStructure(EngngModel *, int, EquationID, const UnknownNumberingScheme &);
     /** Assembles receiver from local element contributions.
      * @param loc location array. The values corresponding to zero loc array value are not assembled.
      * @param mat contribution to be assembled using loc array.
@@ -175,7 +174,6 @@ protected:
     void          checkSizeTowards(const IntArray &rloc, const IntArray &cloc);
     void          growTo(int);
 };
-
 } // end namespace oofem
 #endif // dyncompcol_h
 

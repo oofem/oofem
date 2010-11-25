@@ -46,20 +46,19 @@
 #include "contextioerr.h"
 
 namespace oofem {
-
 #ifndef MDM_MAPPING_DEBUG
 
-#ifdef MDM_USE_MMAClosestIPTransfer
+ #ifdef MDM_USE_MMAClosestIPTransfer
 MMAClosestIPTransfer MDM :: mapper;
-#endif
+ #endif
 
-#ifdef MDM_USE_MMAShapeFunctProjection
+ #ifdef MDM_USE_MMAShapeFunctProjection
 MMAShapeFunctProjection MDM :: mapper;
-#endif
+ #endif
 
-#ifdef MDM_USE_MMALeastSquareProjection
+ #ifdef MDM_USE_MMALeastSquareProjection
 MMALeastSquareProjection MDM :: mapper;
-#endif
+ #endif
 
 #else
 MMAShapeFunctProjection MDM :: mapperSFT;
@@ -202,7 +201,7 @@ MDM :: computeDamageTensor(FloatMatrix &damageTensor, const FloatArray &totalStr
 
         nonlocalDamageTensor.times( 1. / status->giveIntegrationScale() );
         nonlocalDamageTensor.symmetrized();
-	this->endIPNonlocalAverage (gp); // !
+        this->endIPNonlocalAverage(gp);  // !
 
         damageTensor = nonlocalDamageTensor;
     } else {
@@ -245,7 +244,7 @@ MDM :: computeLocalDamageTensor(FloatMatrix &damageTensor, const FloatArray &tot
             for ( int i = 1; i <= 6; i++ ) {
                 damageVector.at(i) += this->N [ im ] [ i - 1 ] * this->microplaneWeights [ im ] * Psi;
             }
-        } else if ( formulation == STIFFNESS_DAMAGE )    {
+        } else if ( formulation == STIFFNESS_DAMAGE ) {
             //for (int i=1; i<=ndc; i++) DamageVector->at(i) += MP->N[im][i] * MP->W[im] / PsiActive;
             for ( int i = 1; i <= 6; i++ ) {
                 damageVector.at(i) += this->N [ im ] [ i - 1 ] * this->microplaneWeights [ im ] / Psi;
@@ -318,7 +317,7 @@ MDM :: computeDamageOnPlane(GaussPoint *gp, Microplane *mplane, const FloatArray
     }
 
     ParEpp = Ep / ( 1. - ParMd ); // 1d sv reduction
-    fmicroplane = linearElasticMaterial->give('E',gp) * ParEpp;
+    fmicroplane = linearElasticMaterial->give('E', gp) * ParEpp;
     // en /= (1.-ParMd*sv);
     en /= ( 1. - ParMd * sv / ( fmicroplane ) ); // suggested by P.Grassl (ParMd is unit dependent)
 
@@ -395,36 +394,36 @@ MDM :: transformStrainToPDC(FloatArray &answer, FloatArray &strain,
 
         answer.resize(6);
         answer.at(1) = N(1, 1) * ( N(1, 1) * E(1) + N(1, 2) * E(6) + N(1, 3) * E(5) )
-        + N(1, 2) * ( N(1, 2) * E(2) + N(1, 3) * E(4) )
-        + N(1, 3) *  N(1, 3) * E(3);
+                       + N(1, 2) * ( N(1, 2) * E(2) + N(1, 3) * E(4) )
+                       + N(1, 3) *  N(1, 3) * E(3);
         answer.at(2) = N(2, 1) * ( N(2, 1) * E(1) + N(2, 2) * E(6) + N(2, 3) * E(5) )
-        + N(2, 2) * ( N(2, 2) * E(2) + N(2, 3) * E(4) )
-        + N(2, 3) *  N(2, 3) * E(3);
+                       + N(2, 2) * ( N(2, 2) * E(2) + N(2, 3) * E(4) )
+                       + N(2, 3) *  N(2, 3) * E(3);
         answer.at(3) = N(3, 1) * ( N(3, 1) * E(1) + N(3, 2) * E(6) + N(3, 3) * E(5) )
-        + N(3, 2) * ( N(3, 2) * E(2) + N(3, 3) * E(4) )
-        + N(3, 3) *  N(3, 3) * E(3);
+                       + N(3, 2) * ( N(3, 2) * E(2) + N(3, 3) * E(4) )
+                       + N(3, 3) *  N(3, 3) * E(3);
         answer.at(4) = N(2, 1) * ( N(3, 1) * E(1)  + N(3, 2) * E(6) / 2 + N(3, 3) * E(5) / 2 )
-        + N(2, 2) * ( N(3, 1) * E(6) / 2 + N(3, 2) * E(2)  + N(3, 3) * E(4) / 2 )
-        + N(2, 3) * ( N(3, 1) * E(5) / 2 + N(3, 2) * E(4) / 2 + N(3, 3) * E(3) );
+                       + N(2, 2) * ( N(3, 1) * E(6) / 2 + N(3, 2) * E(2)  + N(3, 3) * E(4) / 2 )
+                       + N(2, 3) * ( N(3, 1) * E(5) / 2 + N(3, 2) * E(4) / 2 + N(3, 3) * E(3) );
         answer.at(4) *= 2;
         answer.at(5) = N(1, 1) * ( N(3, 1) * E(1)  + N(3, 2) * E(6) / 2 + N(3, 3) * E(5) / 2 )
-        + N(1, 2) * ( N(3, 1) * E(6) / 2 + N(3, 2) * E(2)  + N(3, 3) * E(4) / 2 )
-        + N(1, 3) * ( N(3, 1) * E(5) / 2 + N(3, 2) * E(4) / 2 + N(3, 3) * E(3) );
+                       + N(1, 2) * ( N(3, 1) * E(6) / 2 + N(3, 2) * E(2)  + N(3, 3) * E(4) / 2 )
+                       + N(1, 3) * ( N(3, 1) * E(5) / 2 + N(3, 2) * E(4) / 2 + N(3, 3) * E(3) );
         answer.at(5) *= 2;
         answer.at(6) = N(1, 1) * ( N(2, 1) * E(1)  + N(2, 2) * E(6) / 2 + N(2, 3) * E(5) / 2 )
-        + N(1, 2) * ( N(2, 1) * E(6) / 2 + N(2, 2) * E(2)  + N(2, 3) * E(4) / 2 )
-        + N(1, 3) * ( N(2, 1) * E(5) / 2 + N(2, 2) * E(4) / 2 + N(2, 3) * E(3) );
+                       + N(1, 2) * ( N(2, 1) * E(6) / 2 + N(2, 2) * E(2)  + N(2, 3) * E(4) / 2 )
+                       + N(1, 3) * ( N(2, 1) * E(5) / 2 + N(2, 2) * E(4) / 2 + N(2, 3) * E(3) );
         answer.at(6) *= 2;
     } else if ( mdmMode == mdm_2d ) {
         fullStrain = strain;
 
         answer.resize(3);
         answer.at(1) = N(1, 1) * ( N(1, 1) * E(1) + N(1, 2) * E(3) )
-        + N(1, 2) *  N(1, 2) * E(2);
+                       + N(1, 2) *  N(1, 2) * E(2);
         answer.at(2) = N(2, 1) * ( N(2, 1) * E(1) + N(2, 2) * E(3) )
-        + N(2, 2) *  N(2, 2) * E(2);
+                       + N(2, 2) *  N(2, 2) * E(2);
         answer.at(3) = N(1, 1) * ( N(2, 1) * E(1)  + N(2, 2) * E(3) / 2 )
-        + N(1, 2) * ( N(2, 1) * E(3) / 2 + N(2, 2) * E(2) );
+                       + N(1, 2) * ( N(2, 1) * E(3) / 2 + N(2, 2) * E(2) );
         answer.at(3) *= 2;
     }
 }
@@ -505,23 +504,23 @@ MDM :: transformStressFromPDC(FloatArray &answer, const FloatArray &stressPDC, c
         //answer.resize (6);
 
         fullAnswer.at(1) = Nt(1, 1) * ( Nt(1, 1) * S(1) + 2 * Nt(1, 2) * S(6) + 2 * Nt(1, 3) * S(5) )
-        + Nt(1, 2) * ( Nt(1, 2) * S(2) + 2 * Nt(1, 3) * S(4) )
-        + Nt(1, 3) *  Nt(1, 3) * S(3);
+                           + Nt(1, 2) * ( Nt(1, 2) * S(2) + 2 * Nt(1, 3) * S(4) )
+                           + Nt(1, 3) *  Nt(1, 3) * S(3);
         fullAnswer.at(2) = Nt(2, 1) * ( Nt(2, 1) * S(1) + 2 * Nt(2, 2) * S(6) + 2 * Nt(2, 3) * S(5) )
-        + Nt(2, 2) * ( Nt(2, 2) * S(2) + 2 * Nt(2, 3) * S(4) )
-        + Nt(2, 3) *  Nt(2, 3) * S(3);
+                           + Nt(2, 2) * ( Nt(2, 2) * S(2) + 2 * Nt(2, 3) * S(4) )
+                           + Nt(2, 3) *  Nt(2, 3) * S(3);
         fullAnswer.at(3) = Nt(3, 1) * ( Nt(3, 1) * S(1) + 2 * Nt(3, 2) * S(6) + 2 * Nt(3, 3) * S(5) )
-        + Nt(3, 2) * ( Nt(3, 2) * S(2) + 2 * Nt(3, 3) * S(4) )
-        + Nt(3, 3) *  Nt(3, 3) * S(3);
+                           + Nt(3, 2) * ( Nt(3, 2) * S(2) + 2 * Nt(3, 3) * S(4) )
+                           + Nt(3, 3) *  Nt(3, 3) * S(3);
         fullAnswer.at(4) = Nt(2, 1) * ( Nt(3, 1) * S(1)  + Nt(3, 2) * S(6)  + Nt(3, 3) * S(5) )
-        + Nt(2, 2) * ( Nt(3, 1) * S(6)  + Nt(3, 2) * S(2)  + Nt(3, 3) * S(4) )
-        + Nt(2, 3) * ( Nt(3, 1) * S(5)  + Nt(3, 2) * S(4)  + Nt(3, 3) * S(3) );
+                           + Nt(2, 2) * ( Nt(3, 1) * S(6)  + Nt(3, 2) * S(2)  + Nt(3, 3) * S(4) )
+                           + Nt(2, 3) * ( Nt(3, 1) * S(5)  + Nt(3, 2) * S(4)  + Nt(3, 3) * S(3) );
         fullAnswer.at(5) = Nt(1, 1) * ( Nt(3, 1) * S(1)  + Nt(3, 2) * S(6)  + Nt(3, 3) * S(5) )
-        + Nt(1, 2) * ( Nt(3, 1) * S(6)  + Nt(3, 2) * S(2)  + Nt(3, 3) * S(4) )
-        + Nt(1, 3) * ( Nt(3, 1) * S(5)  + Nt(3, 2) * S(4)  + Nt(3, 3) * S(3) );
+                           + Nt(1, 2) * ( Nt(3, 1) * S(6)  + Nt(3, 2) * S(2)  + Nt(3, 3) * S(4) )
+                           + Nt(1, 3) * ( Nt(3, 1) * S(5)  + Nt(3, 2) * S(4)  + Nt(3, 3) * S(3) );
         fullAnswer.at(6) = Nt(1, 1) * ( Nt(2, 1) * S(1)  + Nt(2, 2) * S(6)  + Nt(2, 3) * S(5) )
-        + Nt(1, 2) * ( Nt(2, 1) * S(6)  + Nt(2, 2) * S(2)  + Nt(2, 3) * S(4) )
-        + Nt(1, 3) * ( Nt(2, 1) * S(5)  + Nt(2, 2) * S(4)  + Nt(2, 3) * S(3) );
+                           + Nt(1, 2) * ( Nt(2, 1) * S(6)  + Nt(2, 2) * S(2)  + Nt(2, 3) * S(4) )
+                           + Nt(1, 3) * ( Nt(2, 1) * S(5)  + Nt(2, 2) * S(4)  + Nt(2, 3) * S(3) );
 
         ( ( StructuralCrossSection * ) gp->giveElement()->giveCrossSection() )
         ->giveReducedCharacteristicVector(answer, gp, fullAnswer);
@@ -529,11 +528,11 @@ MDM :: transformStressFromPDC(FloatArray &answer, const FloatArray &stressPDC, c
         answer.resize(3);
 
         answer.at(1) = Nt(1, 1) * ( Nt(1, 1) * S(1) + Nt(1, 2) * 2. * S(3) )
-        + Nt(1, 2) *  Nt(1, 2) * S(2);
+                       + Nt(1, 2) *  Nt(1, 2) * S(2);
         answer.at(2) = Nt(2, 1) * ( Nt(2, 1) * S(1) + Nt(2, 2) * 2. * S(3) )
-        + Nt(2, 2) *  Nt(2, 2) * S(2);
+                       + Nt(2, 2) *  Nt(2, 2) * S(2);
         answer.at(3) = Nt(1, 1) * ( Nt(2, 1) * S(1) + Nt(2, 2) * S(3) )
-        + Nt(1, 2) * ( Nt(2, 1) * S(3) + Nt(2, 2) * S(2) );
+                       + Nt(1, 2) * ( Nt(2, 1) * S(3) + Nt(2, 2) * S(2) );
     }
 }
 
@@ -972,7 +971,7 @@ MDM :: giveInputRecordString(std :: string &str, bool keyword)
     char buff [ 1024 ];
 
     MicroplaneMaterial :: giveInputRecordString(str, keyword);
-		this->giveLinearElasticMaterial()->giveInputRecordString(str, false);
+    this->giveLinearElasticMaterial()->giveInputRecordString(str, false);
     sprintf(buff, " talpha %e", this->tempDillatCoeff);
     str += buff;
     sprintf(buff, " parmd %e", this->ParMd);
@@ -980,46 +979,47 @@ MDM :: giveInputRecordString(std :: string &str, bool keyword)
     sprintf(buff, " nonloc %d", this->nonlocal);
     str += buff;
     if ( this->nonlocal ) {
-			sprintf(buff, " r %e", this->R);
-			str += buff;
+        sprintf(buff, " r %e", this->R);
+        str += buff;
 
-			if(this->mdm_Ep >= 0.0 && this->mdm_Efp >= 0.0){
-				sprintf(buff, " efp %e", this->mdm_Efp);
-				str += buff;
-				sprintf(buff, " ep %e", this->mdm_Ep);
-				str += buff;
-			} else {
-				sprintf(buff, " gf %e", this->Gf);
-				str += buff;
-				sprintf(buff, " ft %e", this->Ft);
-				str += buff;
-			}
-		} else { // local case
-			if(this->mdm_Ep >= 0.0 && this->mdm_Efp >= 0.0){
-				sprintf(buff, " efp %e", this->mdm_Efp);
-				str += buff;
-				sprintf(buff, " ep %e", this->mdm_Ep);
-				str += buff;
-			} else {
-				sprintf(buff, " gf %e", this->Gf);
-				str += buff;
-				if(this->mdm_Ep >= 0.0){
-					sprintf(buff, " ep %e", this->mdm_Ep);
-					str += buff;
-				}
-			}
-		}
+        if ( this->mdm_Ep >= 0.0 && this->mdm_Efp >= 0.0 ) {
+            sprintf(buff, " efp %e", this->mdm_Efp);
+            str += buff;
+            sprintf(buff, " ep %e", this->mdm_Ep);
+            str += buff;
+        } else {
+            sprintf(buff, " gf %e", this->Gf);
+            str += buff;
+            sprintf(buff, " ft %e", this->Ft);
+            str += buff;
+        }
+    } else {             // local case
+        if ( this->mdm_Ep >= 0.0 && this->mdm_Efp >= 0.0 ) {
+            sprintf(buff, " efp %e", this->mdm_Efp);
+            str += buff;
+            sprintf(buff, " ep %e", this->mdm_Ep);
+            str += buff;
+        } else {
+            sprintf(buff, " gf %e", this->Gf);
+            str += buff;
+            if ( this->mdm_Ep >= 0.0 ) {
+                sprintf(buff, " ep %e", this->mdm_Ep);
+                str += buff;
+            }
+        }
+    }
 
-		if(this->formulation){
-			sprintf(buff, " formulation %d", (int)(this->formulation));
-			str += buff;
-		}
-		sprintf(buff, " mode %d", (int)(this->mdmMode));
-		str += buff;
+    if ( this->formulation ) {
+        sprintf( buff, " formulation %d", ( int ) ( this->formulation ) );
+        str += buff;
+    }
+
+    sprintf( buff, " mode %d", ( int ) ( this->mdmMode ) );
+    str += buff;
 
 #ifdef MDM_MAPPING_DEBUG
-		sprintf(buff, " mapper %d", (int)(this->mapperType));
-		str += buff;
+    sprintf( buff, " mapper %d", ( int ) ( this->mapperType ) );
+    str += buff;
 #endif
 
     StructuralNonlocalMaterialExtensionInterface :: giveInputRecordString(str, false);
@@ -1121,7 +1121,7 @@ MDM :: giveRawMDMParameters(double &Efp, double &Ep, const FloatArray &reducedSt
     // determine params from macroscopic ones
     if ( nonlocal ) {
         // formulas derived for 3d case
-      double EModulus = linearElasticMaterial->give('E',gp);
+        double EModulus = linearElasticMaterial->give('E', gp);
         double gammaf = ( EModulus * this->Gf ) / ( this->R * this->Ft * this->Ft );
         double gamma  = gammaf / ( 1.47 - 0.0014 * gammaf );
         double f = this->Ft / ( 1.56 + 0.006 * gamma ); // microplane tensile strength
@@ -1158,7 +1158,7 @@ MDM :: giveRawMDMParameters(double &Efp, double &Ep, const FloatArray &reducedSt
 
         h  = gp->giveElement()->giveCharacteristicLenght(gp, dir);
 
-        double E  = this->giveLinearElasticMaterial()->give(Ex,gp);
+        double E  = this->giveLinearElasticMaterial()->give(Ex, gp);
         Ep = this->mdm_Ep;
         if ( nsd == 2 ) {
             Efp = ( Gf / ( h * E * Ep ) + 1.2 * Ep ) / 1.75 - Ep;
@@ -1466,24 +1466,27 @@ MDM :: estimatePackSize(CommunicationBuffer &buff, GaussPoint *ip)
 double
 MDM :: predictRelativeComputationalCost(GaussPoint *gp)
 {
-  //
-  // The values returned come from mesurement
-  // do not change them unless you know what are you doing
-  //
-  double cost = 1.5;
+    //
+    // The values returned come from mesurement
+    // do not change them unless you know what are you doing
+    //
+    double cost = 1.5;
 
-  if (nsd == 2) cost = 1.5;
-  else if (nsd == 3) cost = 1.8;
+    if ( nsd == 2 ) {
+        cost = 1.5;
+    } else if ( nsd == 3 )  {
+        cost = 1.8;
+    }
 
-  if (nonlocal) {
-	MDMStatus *status = (MDMStatus*) this -> giveStatus (gp);
-	int size = status->giveIntegrationDomainList()->size();
-	// just a guess (size/10) found optimal
-	// cost *= (1.0 + (size/10)*0.5);
-	cost *= (1.0 + size/15.0);
-  }
+    if ( nonlocal ) {
+        MDMStatus *status = ( MDMStatus * ) this->giveStatus(gp);
+        int size = status->giveIntegrationDomainList()->size();
+        // just a guess (size/10) found optimal
+        // cost *= (1.0 + (size/10)*0.5);
+        cost *= ( 1.0 + size / 15.0 );
+    }
 
-  return cost;
+    return cost;
 }
 
 #endif
@@ -1648,5 +1651,4 @@ MDMStatus :: giveInterface(InterfaceType type)
         return NULL;
     }
 }
-
 } // end namespace oofem

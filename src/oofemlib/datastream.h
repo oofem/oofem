@@ -40,7 +40,7 @@
 #include "processcomm.h"
 #include "statecountertype.h"
 #ifndef __MAKEDEPEND
-#include <stdio.h>
+ #include <stdio.h>
 #endif
 
 

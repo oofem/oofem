@@ -47,7 +47,6 @@ enum LoadResponseMode {
     TotalLoad,
     IncrementOfLoad
 };
-
 } // end namespace oofem
 #endif // loadresponsemode_h
 

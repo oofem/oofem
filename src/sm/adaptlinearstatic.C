@@ -53,7 +53,6 @@
 #include "contextioerr.h"
 
 namespace oofem {
-
 void
 AdaptiveLinearStatic :: solveYourselfAt(TimeStep *tStep)
 {
@@ -69,25 +68,21 @@ AdaptiveLinearStatic :: solveYourselfAt(TimeStep *tStep)
         return;
     } else {
         // do remeshing
-      MesherInterface *mesher = CreateUsrDefMesherInterface(meshPackage, this->giveDomain(1));
-      Domain *newDomain;
+        MesherInterface *mesher = CreateUsrDefMesherInterface( meshPackage, this->giveDomain(1) );
+        Domain *newDomain;
 
-      MesherInterface::returnCode result = 
-	mesher->createMesh(this->giveCurrentStep(), 1, 
-			   this->giveDomain(1)->giveSerialNumber() + 1, &newDomain);
+        MesherInterface :: returnCode result =
+            mesher->createMesh(this->giveCurrentStep(), 1,
+                               this->giveDomain(1)->giveSerialNumber() + 1, & newDomain);
 
- 	if (result == MesherInterface::MI_OK) {
-	  
-	} else if (result == MesherInterface::MI_NEEDS_EXTERNAL_ACTION) {
-	  
-	  // terminate step
-	  this->terminate( this->giveCurrentStep() );
-	  this->terminateAnalysis();
-	  exit(1);
-	  
-	} else {
-	  _error ("solveYourselfAt: MesherInterface::createMesh failed");
-	}
+        if ( result == MesherInterface :: MI_OK ) {} else if ( result == MesherInterface :: MI_NEEDS_EXTERNAL_ACTION ) {
+            // terminate step
+            this->terminate( this->giveCurrentStep() );
+            this->terminateAnalysis();
+            exit(1);
+        } else {
+            _error("solveYourselfAt: MesherInterface::createMesh failed");
+        }
     }
 }
 
@@ -180,5 +175,4 @@ AdaptiveLinearStatic :: updateDomainLinks()
     // associate ee to possibly newly restored mesh
     this->ee->setDomain( this->giveDomain(1) );
 }
-
 } // end namespace oofem

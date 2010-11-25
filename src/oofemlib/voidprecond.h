@@ -42,7 +42,6 @@
 #include "precond.h"
 
 namespace oofem {
-
 /**
  * Class implementing void preconditioner.
  */
@@ -67,6 +66,5 @@ public:
     /// returns the preconditioner name
     virtual const char *giveClassName() const { return "VoidPreconditioner"; }
 };
-
 } // end namespace oofem
 #endif // voidprecond_h

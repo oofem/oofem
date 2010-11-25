@@ -48,13 +48,12 @@
 #include "mathfem.h"
 #include "datastream.h"
 #ifndef __MAKEDEPEND
-#include <stdlib.h>
-#include <math.h>
+ #include <stdlib.h>
+ #include <math.h>
 #endif
 #include "contextioerr.h"
 
 namespace oofem {
-
 int
 PerfectlyPlasticMaterial :: hasMaterialModeCapability(MaterialMode mode)
 //
@@ -1092,7 +1091,7 @@ PerfectlyPlasticMaterial :: initializeFrom(InputRecord *ir)
 
 
 double
-PerfectlyPlasticMaterial :: give(int aProperty, GaussPoint* gp)
+PerfectlyPlasticMaterial :: give(int aProperty, GaussPoint *gp)
 // Returns the value of the property aProperty (e.g. the Young's modulus
 // 'E') of the receiver.
 {
@@ -1102,7 +1101,7 @@ PerfectlyPlasticMaterial :: give(int aProperty, GaussPoint* gp)
         value = propertyDictionary->at(aProperty);
     } else {
         if ( linearElasticMaterial ) {
-	  value = this->linearElasticMaterial->give(aProperty,gp);
+            value = this->linearElasticMaterial->give(aProperty, gp);
         } else {
             _error("give: property not defined");
         }
@@ -1375,5 +1374,4 @@ PerfectlyPlasticMaterialStatus :: updateYourself(TimeStep *tNow)
 
     yield_flag = temp_yield_flag;
 }
-
 } // end namespace oofem

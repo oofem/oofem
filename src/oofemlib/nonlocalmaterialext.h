@@ -48,7 +48,6 @@
 #include "interface.h"
 
 namespace oofem {
-
 //
 // local integration record - stores pointer to gp and its integration weight
 // Also remote integration record should be defined in case of parallel scheme
@@ -113,7 +112,7 @@ public:
     /// Sets associated integration scale.
     void   setIntegrationScale(double val) { integrationScale = val; }
     /// clears the integration list of receiver
-    void clear() {integrationDomainList.clear();}
+    void clear() { integrationDomainList.clear(); }
 };
 
 
@@ -161,30 +160,30 @@ protected:
     /// flag indicating whether to keep nonlocal interaction tables of integration points cached
     bool permanentNonlocTableFlag;
 
-  /// type characterizing the nonlocal weight function
-    enum WeightFunctionType {WFT_Unknown, WFT_Bell, WFT_Gauss, WFT_Green, WFT_Uniform, WFT_UniformOverElement};
-  /// parameter specifying the type of nonlocal weight function 
-  WeightFunctionType weightFun;
+    /// type characterizing the nonlocal weight function
+    enum WeightFunctionType { WFT_Unknown, WFT_Bell, WFT_Gauss, WFT_Green, WFT_Uniform, WFT_UniformOverElement };
+    /// parameter specifying the type of nonlocal weight function
+    WeightFunctionType weightFun;
 
-  /// characteristic length of the nonlocal model
-  /// (its interpretation depends on the type of weight function)
-  double cl;
+    /// characteristic length of the nonlocal model
+    /// (its interpretation depends on the type of weight function)
+    double cl;
 
-  /// support radius
-  double suprad;
+    /// support radius
+    double suprad;
 
-  /// parameter "m" for "undernonlocal" or "overnonlocal" formulation
-  double mm; 
+    /// parameter "m" for "undernonlocal" or "overnonlocal" formulation
+    double mm;
 
-  /// type characterizing the scaling approach
-  enum ScalingType {ST_Unknown, ST_Standard, ST_Noscaling, ST_Borino}; 
-  /// parameter specifying the type of scaling of nonlocal weight function
-  ScalingType scaling;
+    /// type characterizing the scaling approach
+    enum ScalingType { ST_Unknown, ST_Standard, ST_Noscaling, ST_Borino };
+    /// parameter specifying the type of scaling of nonlocal weight function
+    ScalingType scaling;
 
-  /// type characterizing the averaged (nonlocal) variable
-  enum AveragedVarType {AVT_Unknown, AVT_EqStrain, AVT_Compliance};
-  /// parameter specifying the type of averaged (nonlocal) variable
-  AveragedVarType averagedVar;
+    /// type characterizing the averaged (nonlocal) variable
+    enum AveragedVarType { AVT_Unknown, AVT_EqStrain, AVT_Compliance };
+    /// parameter specifying the type of averaged (nonlocal) variable
+    AveragedVarType averagedVar;
 
 
 public:
@@ -262,10 +261,10 @@ public:
     virtual double computeWeightFunction(const FloatArray &src, const FloatArray &coord);
 
     /**
-     * Provides the integral of the weight function 
+     * Provides the integral of the weight function
      * over the contributing volume in 1, 2 or 3D
      */
-    double giveIntegralOfWeightFunction (const int spatial_dimension);
+    double giveIntegralOfWeightFunction(const int spatial_dimension);
 
 
     /// Determines the maximum value of the nonlocal weight function
@@ -286,12 +285,12 @@ public:
      * Determines, whether receiver has bounded weighting function (limited support)
      * @return true if weighting function bounded, zero otherwise
      */
-    virtual int hasBoundedSupport() {return 1;}
+    virtual int hasBoundedSupport() { return 1; }
     /**
      * Determines the width (radius) of limited support of weighting function
      */
     /// Determines the radius of support of the nonlocal weight function
-    /// (i.e., the distance at which the interaction weight becomes zero)  
+    /// (i.e., the distance at which the interaction weight becomes zero)
     virtual double evaluateSupportRadius();
 
     /// returns reference to domain
@@ -316,7 +315,7 @@ public:
      * This can save significat memory, since nonlocal tables are not stored, but every time computed when needed,
      * but on the other hand computational time may significantly grow.
      */
-    void endIPNonlocalAverage (GaussPoint*gp);
+    void endIPNonlocalAverage(GaussPoint *gp);
 
 protected:
     /**
@@ -341,6 +340,5 @@ protected:
      */
     void manipulateWeight(double &weight, GaussPoint *gp, GaussPoint *jGp);
 };
-
 } // end namespace oofem
 #endif // nonlocalmaterialext_h

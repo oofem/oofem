@@ -117,7 +117,7 @@ VTKExportModule :: doOutput(TimeStep *tStep)
     FILE *stream = this->giveOutputStream(tStep);
 
     fprintf(stream, "# vtk DataFile Version 2.0\n");
-    fprintf(stream, "Output for time %f\n", tStep->giveTime() );
+    fprintf( stream, "Output for time %f\n", tStep->giveTime() );
     fprintf(stream, "ASCII\n");
 
     fprintf(stream, "DATASET UNSTRUCTURED_GRID\n");
@@ -213,7 +213,7 @@ VTKExportModule :: doOutput(TimeStep *tStep)
         elemToProcess++;
         // element composed from same-type cells asumed
         ncells = this->giveNumberOfElementCells( d->giveElement(ielem) );
-        celllistsize += ncells + ncells *this-> giveNumberOfNodesPerCell( this->giveCellType ( d->giveElement ( ielem ) ) );
+        celllistsize += ncells + ncells *this->giveNumberOfNodesPerCell( this->giveCellType( d->giveElement(ielem) ) );
     }
 
     int nelemNodes;
@@ -241,11 +241,11 @@ VTKExportModule :: doOutput(TimeStep *tStep)
 #endif
             vtkCellType = this->giveCellType(elem);
 
-            nelemNodes = this->giveNumberOfNodesPerCell( vtkCellType ); //elem->giveNumberOfNodes(); // It HAS to be the same size as giveNumberOfNodesPerCell, otherwise the file will be incorrect.
-	    this->giveElementCell (cellNodes, elem, 0);
+            nelemNodes = this->giveNumberOfNodesPerCell(vtkCellType);   //elem->giveNumberOfNodes(); // It HAS to be the same size as giveNumberOfNodesPerCell, otherwise the file will be incorrect.
+            this->giveElementCell(cellNodes, elem, 0);
             fprintf(stream, "%d ", nelemNodes);
             for ( i = 1; i <= nelemNodes; i++ ) {
-	      fprintf(stream, "%d ", regionNodalNumbers.at( cellNodes.at(i)));
+                fprintf( stream, "%d ", regionNodalNumbers.at( cellNodes.at(i) ) );
             }
 
             fprintf(stream, "\n");
@@ -326,11 +326,11 @@ VTKExportModule :: doOutput(TimeStep *tStep)
 #endif
 
                 nelemNodes = elem->giveNumberOfNodes();
-		this->giveElementCell (cellNodes, elem, 0);
+                this->giveElementCell(cellNodes, elem, 0);
 
                 fprintf(stream, "%d ", nelemNodes);
                 for ( i = 1; i <= nelemNodes; i++ ) {
-		  fprintf(stream, "%d ", regionNodalNumbers.at( cellNodes.at(i)));
+                    fprintf( stream, "%d ", regionNodalNumbers.at( cellNodes.at(i) ) );
                 }
 
                 fprintf(stream, "\n");
@@ -423,7 +423,7 @@ VTKExportModule :: giveCellType(Element *elem)
     } else if ( elemGT == EGT_line_1 ) {
         vtkCellType = 3;
     } else if ( elemGT == EGT_line_2 ) {
-    	vtkCellType = 21;
+        vtkCellType = 21;
     } else if ( elemGT == EGT_triangle_1 ) {
         vtkCellType = 5;
     } else if ( elemGT == EGT_triangle_2 ) {
@@ -450,32 +450,42 @@ VTKExportModule :: giveCellType(Element *elem)
 int
 VTKExportModule :: giveNumberOfNodesPerCell(int cellType)
 {
-	switch (cellType) {
-	case 1:
-		return 1;
-	case 3:
-		return 2;
-	case 5:
-	case 21:
-		return 3;
-	case 9:
-	case 10:
-		return 4;
-	case 14:
-		return 5;
-	case 13:
-	case 22:
-		return 6;
-	case 12:
-	case 23:
-		return 8;
-	case 24:
-		return 10;
-	case 25:
-		return 20;
-	default:
-		OOFEM_ERROR("VTKExportModule: unsupported cell type ID");
-	}
+    switch ( cellType ) {
+    case 1:
+        return 1;
+
+    case 3:
+        return 2;
+
+    case 5:
+    case 21:
+        return 3;
+
+    case 9:
+    case 10:
+        return 4;
+
+    case 14:
+        return 5;
+
+    case 13:
+    case 22:
+        return 6;
+
+    case 12:
+    case 23:
+        return 8;
+
+    case 24:
+        return 10;
+
+    case 25:
+        return 20;
+
+    default:
+        OOFEM_ERROR("VTKExportModule: unsupported cell type ID");
+    }
+
     return 0; // to make compiler happy
 }
 
@@ -487,24 +497,24 @@ VTKExportModule :: giveElementCell(IntArray &answer, Element *elem, int cell)
     int i, nelemNodes;
 
     if ( ( elemGT == EGT_point ) ||
-         ( elemGT == EGT_line_1 ) || ( elemGT == EGT_line_2 ) ||
-         ( elemGT == EGT_triangle_1 ) || ( elemGT == EGT_triangle_2 ) ||
-         ( elemGT == EGT_tetra_1 ) || ( elemGT == EGT_tetra_2 ) ||
-         ( elemGT == EGT_quad_1 ) || ( elemGT == EGT_quad_2 ) ||
-         ( elemGT == EGT_hexa_1 ) ) {
+        ( elemGT == EGT_line_1 ) || ( elemGT == EGT_line_2 ) ||
+        ( elemGT == EGT_triangle_1 ) || ( elemGT == EGT_triangle_2 ) ||
+        ( elemGT == EGT_tetra_1 ) || ( elemGT == EGT_tetra_2 ) ||
+        ( elemGT == EGT_quad_1 ) || ( elemGT == EGT_quad_2 ) ||
+        ( elemGT == EGT_hexa_1 ) ) {
         nelemNodes = elem->giveNumberOfNodes();
         answer.resize(nelemNodes);
         for ( i = 1; i <= nelemNodes; i++ ) {
             answer.at(i) = elem->giveNode(i)->giveNumber() - 1;
         }
-    } else if (elemGT == EGT_hexa_2) {
+    } else if ( elemGT == EGT_hexa_2 ) {
         int HexaQuadNodeMapping [] = {
-                5, 8, 7, 6, 1, 4, 3, 2, 16, 15, 14, 13, 12, 11, 10, 9, 17, 20, 19, 18
+            5, 8, 7, 6, 1, 4, 3, 2, 16, 15, 14, 13, 12, 11, 10, 9, 17, 20, 19, 18
         };
         nelemNodes = elem->giveNumberOfNodes();
         answer.resize(nelemNodes);
         for ( i = 1; i <= nelemNodes; i++ ) {
-            answer.at(i) = elem->giveNode(HexaQuadNodeMapping[i-1])->giveNumber() - 1;
+            answer.at(i) = elem->giveNode(HexaQuadNodeMapping [ i - 1 ])->giveNumber() - 1;
         }
     } else {
         OOFEM_ERROR("VTKExportModule: unsupported element geometry type");
@@ -519,12 +529,12 @@ VTKExportModule :: giveNumberOfElementCells(Element *elem)
 {
     Element_Geometry_Type elemGT = elem->giveGeometryType();
 
-    if ( (elemGT == EGT_point ) ||
-       ( elemGT == EGT_line_1 ) || ( elemGT == EGT_line_2 ) ||
-       ( elemGT == EGT_triangle_1 ) || ( elemGT == EGT_triangle_2 ) ||
-       ( elemGT == EGT_tetra_1 ) || ( elemGT == EGT_tetra_2 ) ||
-       ( elemGT == EGT_quad_1 ) ||( elemGT == EGT_quad_2 ) ||
-       ( elemGT == EGT_hexa_1 ) || ( elemGT == EGT_hexa_2 ) ) {
+    if ( ( elemGT == EGT_point ) ||
+        ( elemGT == EGT_line_1 ) || ( elemGT == EGT_line_2 ) ||
+        ( elemGT == EGT_triangle_1 ) || ( elemGT == EGT_triangle_2 ) ||
+        ( elemGT == EGT_tetra_1 ) || ( elemGT == EGT_tetra_2 ) ||
+        ( elemGT == EGT_quad_1 ) || ( elemGT == EGT_quad_2 ) ||
+        ( elemGT == EGT_hexa_1 ) || ( elemGT == EGT_hexa_2 ) ) {
         return 1;
     } else {
         OOFEM_ERROR("VTKExportModule: unsupported element geometry type");
@@ -551,14 +561,14 @@ VTKExportModule :: exportIntVars(FILE *stream, TimeStep *tStep)
     //nnodes = d->giveNumberOfDofManagers();
 
     /*
-     #ifdef RBR_SUPPORT
+     * #ifdef RBR_SUPPORT
      * if (outMode == wdmode)
      * fprintf(stream,"\n\nPOINT_DATA %d\n", nnodes);
      * else
      * fprintf(stream,"\n\nPOINT_DATA %d\n", this->giveTotalRBRNumberOfNodes(d));
-     #else
+     *#else
      * fprintf(stream,"\n\nPOINT_DATA %d\n", nnodes);
-     #endif
+     *#endif
      */
 
     for ( i = 1; i <= n; i++ ) {
@@ -597,7 +607,7 @@ VTKExportModule :: exportCellVars(FILE *stream, int elemToProcess, TimeStep *tSt
                 } else if ( type == IST_ElementNumber ) {
                     fprintf( stream, "%d\n", elem->giveNumber() );
                 } else {
-                        OOFEM_ERROR2("Unsupported Cell variable %s\n", __InternalStateTypeToString(type) );
+                    OOFEM_ERROR2( "Unsupported Cell variable %s\n", __InternalStateTypeToString(type) );
                 }
             }
 
@@ -651,7 +661,7 @@ VTKExportModule :: giveTotalRBRNumberOfNodes(Domain *d)
 {
     Element *elem;
     int rbrnodes = 0, nnodes = d->giveNumberOfDofManagers(), nelems = d->giveNumberOfElements();
-    std :: vector< char > map(nnodes);
+    std :: vector< char >map(nnodes);
     //char map[nnodes];
     int i, j, nregions = d->giveNumberOfRegions();
     int elemnodes, ielemnode;
@@ -842,13 +852,13 @@ VTKExportModule :: exportIntVarAs(InternalStateType valID, InternalStateValueTyp
             int regionDofMans = 0, offset = 0;
             ireg = -1;
 
-	    this->initRegionNodeNumbering(regionNodalNumbers, regionDofMans, offset, d, ireg, 1);
-	    if ( !( ( valID == IST_DisplacementVector ) || ( valID == IST_MaterialInterfaceVal ) ) ) {
-	      // assemble local->global map
-	      this->smoother->giveRegionRecordMap(regionVarMap, ireg, valID);
-	    } else {
-	      regionDofMans = nnodes;
-	    }
+            this->initRegionNodeNumbering(regionNodalNumbers, regionDofMans, offset, d, ireg, 1);
+            if ( !( ( valID == IST_DisplacementVector ) || ( valID == IST_MaterialInterfaceVal ) ) ) {
+                // assemble local->global map
+                this->smoother->giveRegionRecordMap(regionVarMap, ireg, valID);
+            } else {
+                regionDofMans = nnodes;
+            }
 
             for ( inode = 1; inode <= regionDofMans; inode++ ) {
                 if ( valID == IST_DisplacementVector ) {
@@ -952,11 +962,11 @@ VTKExportModule :: exportIntVarAs(InternalStateType valID, InternalStateValueTyp
                     continue;
                 }
 
-		if ( !( ( valID == IST_DisplacementVector ) || ( valID == IST_MaterialInterfaceVal ) ) ) {
-		  // assemble local->global map
-		  this->initRegionNodeNumbering(regionNodalNumbers, regionDofMans, offset, d, ireg, 1);
-		  this->smoother->giveRegionRecordMap(regionVarMap, ireg, valID);
-		}
+                if ( !( ( valID == IST_DisplacementVector ) || ( valID == IST_MaterialInterfaceVal ) ) ) {
+                    // assemble local->global map
+                    this->initRegionNodeNumbering(regionNodalNumbers, regionDofMans, offset, d, ireg, 1);
+                    this->smoother->giveRegionRecordMap(regionVarMap, ireg, valID);
+                }
 
                 for ( inode = 1; inode <= regionDofMans; inode++ ) {
                     if ( valID == IST_DisplacementVector ) {
@@ -1193,11 +1203,10 @@ VTKExportModule :: exportPrimVarAs(UnknownType valID, FILE *stream, TimeStep *tS
                     }
                 }
             } else if ( valID == PressureVector ) {
-	      dofIDMask.resize(1); 
-	      dofIDMask.at(1) = P_f;
-	      this->getDofManPrimaryVariable (iVal, dman, dofIDMask, EID_ConservationEquation, 
-					      VM_Total, tStep, IST_Pressure);
-
+                dofIDMask.resize(1);
+                dofIDMask.at(1) = P_f;
+                this->getDofManPrimaryVariable(iVal, dman, dofIDMask, EID_ConservationEquation,
+                                               VM_Total, tStep, IST_Pressure);
             } else {
                 OOFEM_ERROR2( "VTKExportModule: unsupported unknownType (%s)", __UnknownTypeToString(valID) );
                 //d->giveDofManager(regionNodalNumbers.at(inode))->giveUnknownVector(iVal, d->giveDefaultNodeDofIDArry(), valID, VM_Total, tStep);
@@ -1330,35 +1339,34 @@ VTKExportModule :: exportPrimVarAs(UnknownType valID, FILE *stream, TimeStep *tS
 }
 
 void
-VTKExportModule :: getDofManPrimaryVariable (FloatArray& answer, DofManager* dman, IntArray& dofIDMask, EquationID type, 
-					     ValueModeType mode, TimeStep *tStep, InternalStateType iType)
+VTKExportModule :: getDofManPrimaryVariable(FloatArray &answer, DofManager *dman, IntArray &dofIDMask, EquationID type,
+                                            ValueModeType mode, TimeStep *tStep, InternalStateType iType)
 {
-  int j, indx, size = dofIDMask.giveSize();
-  const FloatArray* recoveredVal;
-  answer.resize(size);
-  // all values zero by default
-  answer.zero();
-  
-  for ( j = 1; j <= size; j++ ) {
-    if ((indx = dman->findDofWithDofId(dofIDMask.at(j)))) {
-      // primary variable available directly in dof manager
-      answer.at(j) = dman->giveDof(indx)->giveUnknown(EID_MomentumBalance, VM_Total, tStep);
-    } else if (iType != IST_Undefined) {
-      // ok primary variable not directly available
-      // but equivalent InternalStateType provided
-      // in this case use smoother to recover nodal value
-      this->giveSmoother()->recoverValues(iType, tStep); /// recover values if not done before
-      this->giveSmoother()->giveNodalVector(recoveredVal, dman->giveNumber(), 1);
-      // here we have a lack of information about how to convert recoveredVal to response
-      // if the size is compatible we accept it, otherwise an error is thrown
-      if (size == recoveredVal->giveSize()) {
-	answer.at(j)=recoveredVal->at(j);
-      } else {
-	OOFEM_WARNING ("VTKExportModule :: getDofManPrimaryVariable: recovered variable size mismatch");
-	answer.at(j) = 0.0;
-      }
-    }
-  }
-}
+    int j, indx, size = dofIDMask.giveSize();
+    const FloatArray *recoveredVal;
+    answer.resize(size);
+    // all values zero by default
+    answer.zero();
 
+    for ( j = 1; j <= size; j++ ) {
+        if ( ( indx = dman->findDofWithDofId( dofIDMask.at(j) ) ) ) {
+            // primary variable available directly in dof manager
+            answer.at(j) = dman->giveDof(indx)->giveUnknown(EID_MomentumBalance, VM_Total, tStep);
+        } else if ( iType != IST_Undefined ) {
+            // ok primary variable not directly available
+            // but equivalent InternalStateType provided
+            // in this case use smoother to recover nodal value
+            this->giveSmoother()->recoverValues(iType, tStep); /// recover values if not done before
+            this->giveSmoother()->giveNodalVector(recoveredVal, dman->giveNumber(), 1);
+            // here we have a lack of information about how to convert recoveredVal to response
+            // if the size is compatible we accept it, otherwise an error is thrown
+            if ( size == recoveredVal->giveSize() ) {
+                answer.at(j) = recoveredVal->at(j);
+            } else {
+                OOFEM_WARNING("VTKExportModule :: getDofManPrimaryVariable: recovered variable size mismatch");
+                answer.at(j) = 0.0;
+            }
+        }
+    }
+}
 } // end namespace oofem

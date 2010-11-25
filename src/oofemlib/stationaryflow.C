@@ -52,7 +52,7 @@
 #include "unknownnumberingscheme.h"
 
 #ifndef __MAKEDEPEND
-#include <stdio.h>
+ #include <stdio.h>
 #endif
 
 #include "verbose.h"
@@ -60,7 +60,6 @@
 #include "skyline.h"
 
 namespace oofem {
-
 NumericalMethod *StationaryFlow :: giveNumericalMethod(TimeStep *tStep)
 // only one has reason for StationaryFlow
 //     - SolutionOfLinearEquations
@@ -106,7 +105,7 @@ double StationaryFlow ::  giveUnknownComponent(EquationID chc, ValueModeType mod
             return 0.;
         }
 
-        // return nMethod-> giveUnknownComponent (LinearEquationSolution, eq);
+    // return nMethod-> giveUnknownComponent (LinearEquationSolution, eq);
 
     default:
         _error("giveUnknownComponent: Unknown is of undefined ValueModeType for this problem");
@@ -155,12 +154,12 @@ void StationaryFlow :: solveYourselfAt(TimeStep *tStep) {
          */
 
         conductivityMatrix = new Skyline();
-        conductivityMatrix->buildInternalStructure(this, 1, EID_ConservationEquation, EModelDefaultEquationNumbering());
+        conductivityMatrix->buildInternalStructure( this, 1, EID_ConservationEquation, EModelDefaultEquationNumbering() );
 
-        this->assemble( conductivityMatrix, tStep, EID_ConservationEquation, ConductivityMatrix, 
-			EModelDefaultEquationNumbering(), this->giveDomain(1) );
-        this->assemble( conductivityMatrix, tStep, EID_ConservationEquation, BcLhsDueToConvection, 
-			EModelDefaultEquationNumbering(), this->giveDomain(1) );
+        this->assemble( conductivityMatrix, tStep, EID_ConservationEquation, ConductivityMatrix,
+                       EModelDefaultEquationNumbering(), this->giveDomain(1) );
+        this->assemble( conductivityMatrix, tStep, EID_ConservationEquation, BcLhsDueToConvection,
+                       EModelDefaultEquationNumbering(), this->giveDomain(1) );
         //
         // alocate space for fluxVector
         //
@@ -179,14 +178,14 @@ void StationaryFlow :: solveYourselfAt(TimeStep *tStep) {
     //loadVector = new FloatArray (this->giveNumberOfEquations());
     loadVector.resize( this->giveNumberOfEquations(EID_ConservationEquation) );
     loadVector.zero();
-    this->assembleVectorFromElements( loadVector, tStep, EID_ConservationEquation, ElementPPDELoadVector, VM_Total, 
-				      EModelDefaultEquationNumbering(), this->giveDomain(1) );
+    this->assembleVectorFromElements( loadVector, tStep, EID_ConservationEquation, ElementPPDELoadVector, VM_Total,
+                                     EModelDefaultEquationNumbering(), this->giveDomain(1) );
 
     //
     // assembling the nodal part of load vector
     //
-    this->assembleVectorFromDofManagers( loadVector, tStep, EID_ConservationEquation, NodalLoadVector, VM_Total, 
-					 EModelDefaultEquationNumbering(), this->giveDomain(1) );
+    this->assembleVectorFromDofManagers( loadVector, tStep, EID_ConservationEquation, NodalLoadVector, VM_Total,
+                                        EModelDefaultEquationNumbering(), this->giveDomain(1) );
 
     //
     // set-up numerical model
@@ -301,5 +300,4 @@ StationaryFlow :: printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *atTime)
 {
     iDof->printSingleOutputAt(stream, atTime, 'f', EID_ConservationEquation, VM_Total);
 }
-
 } // end namespace oofem

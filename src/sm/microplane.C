@@ -40,16 +40,15 @@
 #include "material.h"
 #include "debug.h"
 #ifndef __MAKEDEPEND
-#include <string.h>
+ #include <string.h>
 #endif
 
 namespace oofem {
-
 Microplane :: Microplane(IntegrationRule *ir, int n, MaterialMode mode) :
     GaussPoint(ir, n, NULL, 0., mode)
 
-// Constructor. Creates a Microplane belonging to element e, with number
-// n, with coordinates a, with weight w.
+    // Constructor. Creates a Microplane belonging to element e, with number
+    // n, with coordinates a, with weight w.
 { }
 
 
@@ -82,6 +81,4 @@ Microplane :: printOutputAt(FILE *File, TimeStep *stepN)
      * }
      */
 }
-
-
 } // end namespace oofem

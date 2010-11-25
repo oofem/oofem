@@ -39,7 +39,6 @@
 #include "constant.h"
 
 namespace oofem {
-
 double ConstantFunction :: giveValue()
 // Returns the constant value of the receiver. Reads 'value' in the data
 // file if it hasn't been done yet.
@@ -56,7 +55,7 @@ ConstantFunction :: initializeFrom(InputRecord *ir)
     const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
-    LoadTimeFunction::initializeFrom(ir);
+    LoadTimeFunction :: initializeFrom(ir);
     IR_GIVE_FIELD(ir, value, IFT_LoadTimeFunction_ft, "f(t)"); // Macro
 
     return IRRT_OK;
@@ -74,5 +73,4 @@ ConstantFunction :: giveInputRecordString(std :: string &str, bool keyword)
 
     return 1;
 }
-
 } // end namespace oofem

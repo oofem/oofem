@@ -53,7 +53,6 @@
 #include "mathfem.h"
 
 namespace oofem {
-
 class NURBSInterpolation : public BSplineInterpolation
 {
 public:
@@ -99,6 +98,5 @@ public:
     /// Returns class name of the receiver.
     const char *giveClassName() const { return "NURBSInterpolation"; }
 }; // end of NURBSInterpolation class definition
-
 } // end namespace oofem
 #endif //feinurbs_h

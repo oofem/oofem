@@ -42,7 +42,6 @@
 #include "mathfem.h"
 
 namespace oofem {
-
 M4Material :: M4Material(int n, Domain *d) :
     MicroplaneMaterial_Bazant(n, d)
 { }
@@ -126,7 +125,7 @@ M4Material :: giveCharacteristicMatrix(FloatMatrix &answer,
     answer.at(4, 4) = answer.at(5, 5) = answer.at(6, 6) = E / ( 2. + 2. * nu );
     answer.at(1, 1) = answer.at(2, 2) = answer.at(3, 3) = E * ( 1. - nu ) / ( ( 1. + nu ) * ( 1. - 2. * nu ) );
     answer.at(1, 2) = answer.at(2, 1) = answer.at(1, 3) = answer.at(3, 1) =
-        answer.at(2, 3) = answer.at(3, 2) = E * nu / ( ( 1. + nu ) * ( 1. - 2. * nu ) );
+                                                              answer.at(2, 3) = answer.at(3, 2) = E * nu / ( ( 1. + nu ) * ( 1. - 2. * nu ) );
 }
 
 
@@ -214,17 +213,17 @@ M4Material :: giveRealMicroplaneStressVector(FloatArray &answer,
 
     if ( SEL > F ) {
         answer.at(3) = F;
-    } else if ( SEL < -F )    {
+    } else if ( SEL < -F ) {
         answer.at(3) = -F;
-    } else                                            {
+    } else {
         answer.at(3) = SEL;
     }
 
     if ( SEM > F ) {
         answer.at(4) = F;
-    } else if ( SEM < -F )    {
+    } else if ( SEM < -F ) {
         answer.at(4) = -F;
-    } else                                            {
+    } else {
         answer.at(4) = SEM;
     }
 
@@ -382,5 +381,4 @@ M4MaterialStatus :: restoreContext(DataStream *stream, ContextMode mode, void *o
 {
     return StructuralMaterialStatus :: restoreContext(stream, mode, obj);
 }
-
 } // end namespace oofem

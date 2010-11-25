@@ -48,21 +48,20 @@
 #include "statecountertype.h"
 
 #ifndef __MAKEDEPEND
-#include <stdio.h>
-#include <time.h>
-#include <map>
-#ifdef __PARALLEL_MODE
-#include <list>
-#include "entityrenumberingscheme.h"
-#endif
+ #include <stdio.h>
+ #include <time.h>
+ #include <map>
+ #ifdef __PARALLEL_MODE
+  #include <list>
+  #include "entityrenumberingscheme.h"
+ #endif
 #endif
 
 #ifdef __OOFEG
-#include "oofeggraphiccontext.h"
+ #include "oofeggraphiccontext.h"
 #endif
 
 namespace oofem {
-
 class Element;
 class Node;
 class Material;
@@ -211,7 +210,7 @@ private:
      */
     StateCounterType nonlocalUpdateStateCounter;
     /// xfemManager
-    XfemManager *xfemManager ;
+    XfemManager *xfemManager;
 
 #ifdef __PARALLEL_MODE
     /**
@@ -376,47 +375,47 @@ public:
     /// Returns number of spatial dimensions
     int                giveNumberOfSpatialDimensions();
     /**
-     *@name Advanced domain manipulation methods.
+     * *@name Advanced domain manipulation methods.
      */
     //@{
     /// Resizes the internal data structure to accommodate space for _newSize dofManagers
-    void resizeDofManagers (int _newSize);
+    void resizeDofManagers(int _newSize);
     /// Resizes the internal data structure to accommodate space for _newSize elements
-    void resizeElements (int _newSize);
+    void resizeElements(int _newSize);
     /// Resizes the internal data structure to accommodate space for _newSize cross section models
-    void resizeCrossSectionModels (int _newSize);
+    void resizeCrossSectionModels(int _newSize);
     /// Resizes the internal data structure to accommodate space for _newSize materials
-    void resizeMaterials (int _newSize);
+    void resizeMaterials(int _newSize);
     /// Resizes the internal data structure to accommodate space for _newSize nonlocal barriers
-    void resizeNonlocalBarriers (int _newSize);
+    void resizeNonlocalBarriers(int _newSize);
     /// Resizes the internal data structure to accommodate space for _newSize boundary conditions
-    void resizeBoundaryConditions (int _newSize);
+    void resizeBoundaryConditions(int _newSize);
     /// Resizes the internal data structure to accommodate space for _newSize initial conditions
-    void resizeInitialConditions (int _newSize);
+    void resizeInitialConditions(int _newSize);
     /// Resizes the internal data structure to accommodate space for _newSize load time functions
-    void resizeLoadTimeFunctions (int _newSize);
+    void resizeLoadTimeFunctions(int _newSize);
 
-    /// Sets i-th component. The component will be futher managed and maintained by domain object. 
-    void setDofManager (int i, DofManager* obj);
-    /// Sets i-th component. The component will be futher managed and maintained by domain object. 
-    void setElement (int i, Element* obj);
-    /// Sets i-th component. The component will be futher managed and maintained by domain object. 
-    void setCrossSection (int i, CrossSection* obj);
-    /// Sets i-th component. The component will be futher managed and maintained by domain object. 
-    void setMaterial (int i, Material* obj);
-     /// Sets i-th component. The component will be futher managed and maintained by domain object. 
-    void setNonlocalBarrier (int i, NonlocalBarrier* obj);
-    /// Sets i-th component. The component will be futher managed and maintained by domain object. 
-    void setBoundaryCondition (int i, GeneralBoundaryCondition* obj);
-    /// Sets i-th component. The component will be futher managed and maintained by domain object. 
-    void setInitialCondition (int i, InitialCondition* obj);
-    /// Sets i-th component. The component will be futher managed and maintained by domain object. 
-    void setLoadTimeFunction (int i, LoadTimeFunction* obj);
+    /// Sets i-th component. The component will be futher managed and maintained by domain object.
+    void setDofManager(int i, DofManager *obj);
+    /// Sets i-th component. The component will be futher managed and maintained by domain object.
+    void setElement(int i, Element *obj);
+    /// Sets i-th component. The component will be futher managed and maintained by domain object.
+    void setCrossSection(int i, CrossSection *obj);
+    /// Sets i-th component. The component will be futher managed and maintained by domain object.
+    void setMaterial(int i, Material *obj);
+    /// Sets i-th component. The component will be futher managed and maintained by domain object.
+    void setNonlocalBarrier(int i, NonlocalBarrier *obj);
+    /// Sets i-th component. The component will be futher managed and maintained by domain object.
+    void setBoundaryCondition(int i, GeneralBoundaryCondition *obj);
+    /// Sets i-th component. The component will be futher managed and maintained by domain object.
+    void setInitialCondition(int i, InitialCondition *obj);
+    /// Sets i-th component. The component will be futher managed and maintained by domain object.
+    void setLoadTimeFunction(int i, LoadTimeFunction *obj);
     /// Temporary function, sets xfemManager
-    void               setXfemManager(XfemManager* xfemManager);
+    void               setXfemManager(XfemManager *xfemManager);
 
     /// clear all boundary conditions
-    void clearBoundaryConditions ();
+    void clearBoundaryConditions();
 
     //@}
     /**
@@ -441,7 +440,7 @@ public:
     /// Returns domain type.
     domainType         giveDomainType()        { return dType; }
     /// Sets domain type
-    void               setDomainType(domainType _dType)         { this->dType = _dType;}
+    void               setDomainType(domainType _dType)         { this->dType = _dType; }
     // consistency check
     /**
      * Checks internal consistency of domain and all domain componenets.
@@ -544,7 +543,6 @@ private:
     void error(const char *file, int line, const char *format, ...);
     void warning(const char *file, int line, const char *format, ...);
 };
-
 } // end namespace oofem
 #endif // domain_h
 

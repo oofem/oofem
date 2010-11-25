@@ -50,7 +50,6 @@
 #include "fluiddynamicmaterial.h"
 
 namespace oofem {
-
 class TimeStep;
 class Node;
 class Material;
@@ -186,6 +185,5 @@ public:
 protected:
     virtual void computeDeviatoricStress(FloatArray &answer, GaussPoint *gp, TimeStep *) = 0;
 };
-
 } // end namespace oofem
 #endif // supgelement_h

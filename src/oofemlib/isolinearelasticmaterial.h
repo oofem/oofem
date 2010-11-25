@@ -47,7 +47,6 @@
 #include "flotmtrx.h"
 
 namespace oofem {
-
 class GaussPoint;
 
 /**
@@ -153,15 +152,15 @@ public:
      * @param gp integration point
      * @return property value
      */
-    double   give(int, GaussPoint*);
+    double   give(int, GaussPoint *);
 
     /// returns the shear elastic modulus G = E / (2*(1+nu))
     double giveShearModulus()
-    {return G;}
+    { return G; }
 
     /// returns the bulk elastic modulus K = E / (3*(1-2*nu))
     double giveBulkModulus()
-    {return E/(3.*(1.-2.*nu));}
+    { return E / ( 3. * ( 1. - 2. * nu ) ); }
 
 
     /**
@@ -265,6 +264,5 @@ protected:
     //@}
     friend class CrossSection;
 };
-
 } // end namespace oofem
 #endif // isolinearelasticmaterial_h

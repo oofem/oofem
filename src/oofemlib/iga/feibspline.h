@@ -52,7 +52,6 @@
 #include "feinterpol.h"
 
 namespace oofem {
-
 class BSplineInterpolation : public FEInterpolation
 {
 protected:
@@ -180,9 +179,10 @@ protected:
      */
     int findSpan(int n, int p, double u, const double *U) const;
     /** Return the range of nonzero basis functions for given knot span and given degree */
-    void giveNonzeroBasisFuncInterval(int span, int deg, int &s, int &e) { s = span - deg;
-                                                                           e = span; }
+    void giveNonzeroBasisFuncInterval(int span, int deg, int &s, int &e) {
+        s = span - deg;
+        e = span;
+    }
 }; // enf of BSplineInterpolation class definition
-
 } // end namespace oofem
 #endif //feibspline_h

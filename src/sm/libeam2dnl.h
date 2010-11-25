@@ -44,7 +44,6 @@
 #include "layeredcrosssection.h"
 
 namespace oofem {
-
 class LIBeam2dNL : public NLStructuralElement, public LayeredCrossSectionInterface
 {
     /*
@@ -99,7 +98,7 @@ public:
 #endif
 
     integrationDomain  giveIntegrationDomain() { return _Line; }
-    MaterialMode          giveMaterialMode()  {return _2dBeam;}
+    MaterialMode          giveMaterialMode()  { return _2dBeam; }
 
 protected:
     // edge load support
@@ -120,6 +119,5 @@ protected:
     double        giveLength();
     double        givePitch();
 };
-
 } // end namespace oofem
 #endif // libeam2dnl_h

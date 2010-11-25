@@ -46,7 +46,6 @@
 
 
 namespace oofem {
-
 #define GT_EPS 1.e-12
 // zero for parallel lines test
 #define GT_TEPS 1.e-16
@@ -70,7 +69,7 @@ public:
         coords(1) = c [ 1 ];
     }
     Vertex(const Vertex &src) { coords = src.coords; }
-    Vertex &operator=(const Vertex &src) {
+    Vertex & operator=(const Vertex &src) {
         coords = src.coords;
         return * this;
     }
@@ -255,6 +254,5 @@ public:
 
 #define THROW_GT_EXCEPTION() throw GT_Exception(__FILE__, __LINE__);
 #define THROW_GT_EXCEPTIONM(m) throw GT_Exception(m, __FILE__, __LINE__);
-
 } // end namespace oofem
 #endif // geotoolbox_h

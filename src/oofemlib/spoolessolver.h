@@ -36,7 +36,7 @@
 #define spoolessolver_h
 
 #ifndef __MAKEDEPEND
-#include <stdio.h>
+ #include <stdio.h>
 #endif
 #include "sparselinsystemnm.h"
 #include "sparsemtrx.h"
@@ -45,7 +45,6 @@
 #include "spoolesinterface.h"
 
 namespace oofem {
-
 class Domain;
 class EngngModel;
 class FloatMatrix;
@@ -103,6 +102,5 @@ public:
     classType giveClassID() const { return SpoolesSolverClass; }
     LinSystSolverType giveLinSystSolverType() const { return ST_Spooles; }
 };
-
 } // end namespace oofem
 #endif // spoolessolver_h

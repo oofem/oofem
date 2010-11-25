@@ -42,7 +42,6 @@
 #include "enumitem.h"
 
 namespace oofem {
-
 /**
  * Enumerative type used to classify supported
  * MeshPackages
@@ -63,7 +62,5 @@ enum MeshPackageType {
 
 
 const char *__MeshPackageTypeToString(MeshPackageType _value);
-
-
 } // end namespace oofem
 #endif // meshpackagetype_h

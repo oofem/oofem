@@ -56,18 +56,17 @@
 #include "leplic.h"
 //</RESTRICTED_SECTION>
 #ifndef __MAKEDEPEND
-#include <stdio.h>
+ #include <stdio.h>
 #endif
 #ifdef TIME_REPORT
-#ifndef __MAKEDEPEND
-#include <time.h>
-#endif
-#include "clock.h"
+ #ifndef __MAKEDEPEND
+  #include <time.h>
+ #endif
+ #include "clock.h"
 #endif
 #include "contextioerr.h"
 
 namespace oofem {
-
 NumericalMethod *CBS :: giveNumericalMethod(TimeStep *atTime)
 // only one has reason for LinearStatic
 //     - SolutionOfLinearEquations
@@ -193,11 +192,11 @@ CBS ::  giveUnknownComponent(UnknownType chc, ValueModeType mode,
         } else {
             return 1.0;
         }
-    } else if ( chc == Theta_1 )     {
+    } else if ( chc == Theta_1 ) {
         return this->theta [ 0 ];
-    } else if ( chc == Theta_2 )                                                              {
+    } else if ( chc == Theta_2 ) {
         return this->theta [ 1 ];
-    } else if ( chc == PrescribedTractionPressure )                                                                                                                       {
+    } else if ( chc == PrescribedTractionPressure ) {
         if ( mode == VM_Total ) {
             int eq = dof->__givePrescribedEquationNumber();
             if ( eq ) {
@@ -208,7 +207,7 @@ CBS ::  giveUnknownComponent(UnknownType chc, ValueModeType mode,
         } else {
             _error("giveUnknownComponent: only total values supported for PrescribedTractionPressure");
         }
-    } else   {
+    } else {
         _error("giveUnknownComponent: Unknown is of undefined CharType for this problem");
     }
 
@@ -243,7 +242,7 @@ CBS :: giveNextStep()
 
     if ( currentStep == NULL ) {
         // first step -> generate initial step
-        currentStep = new TimeStep( * giveSolutionStepWhenIcApply() );
+        currentStep = new TimeStep( *giveSolutionStepWhenIcApply() );
     } else {
         istep =  currentStep->giveNumber() + 1;
         counter = currentStep->giveSolutionStateCounter() + 1;
@@ -302,10 +301,10 @@ CBS :: solveYourselfAt(TimeStep *tStep)
             _error("solveYourselfAt: sparse matrix creation failed");
         }
 
-        lhs->buildInternalStructure(this, 1, EID_ConservationEquation, EModelDefaultEquationNumbering());
+        lhs->buildInternalStructure( this, 1, EID_ConservationEquation, EModelDefaultEquationNumbering() );
 
-        this->assemble( lhs, stepWhenIcApply, EID_ConservationEquation, PressureLhs, 
-			EModelDefaultEquationNumbering(), this->giveDomain(1) );
+        this->assemble( lhs, stepWhenIcApply, EID_ConservationEquation, PressureLhs,
+                       EModelDefaultEquationNumbering(), this->giveDomain(1) );
         lhs->times(deltaT * theta [ 0 ] * theta [ 1 ]);
 
         if ( consistentMassFlag ) {
@@ -314,14 +313,14 @@ CBS :: solveYourselfAt(TimeStep *tStep)
                 _error("solveYourselfAt: sparse matrix creation failed");
             }
 
-            mss->buildInternalStructure(this, 1, EID_MomentumBalance, EModelDefaultEquationNumbering());
-            this->assemble( mss, stepWhenIcApply, EID_MomentumBalance, MassMatrix, 
-			    EModelDefaultEquationNumbering(), this->giveDomain(1) );
+            mss->buildInternalStructure( this, 1, EID_MomentumBalance, EModelDefaultEquationNumbering() );
+            this->assemble( mss, stepWhenIcApply, EID_MomentumBalance, MassMatrix,
+                           EModelDefaultEquationNumbering(), this->giveDomain(1) );
         } else {
             mm.resize(momneq);
             mm.zero();
-            this->assembleVectorFromElements( mm, tStep, EID_MomentumBalance, LumpedMassMatrix, VM_Total, 
-					      EModelDefaultEquationNumbering(), this->giveDomain(1) );
+            this->assembleVectorFromElements( mm, tStep, EID_MomentumBalance, LumpedMassMatrix, VM_Total,
+                                             EModelDefaultEquationNumbering(), this->giveDomain(1) );
         }
 
         //<RESTRICTED_SECTION>
@@ -336,18 +335,18 @@ CBS :: solveYourselfAt(TimeStep *tStep)
     //<RESTRICTED_SECTION>
     else if ( materialInterface ) {
         lhs->zero();
-        this->assemble( lhs, stepWhenIcApply, EID_ConservationEquation, PressureLhs, 
-			EModelDefaultEquationNumbering(), this->giveDomain(1) );
+        this->assemble( lhs, stepWhenIcApply, EID_ConservationEquation, PressureLhs,
+                       EModelDefaultEquationNumbering(), this->giveDomain(1) );
         lhs->times(deltaT * theta [ 0 ] * theta [ 1 ]);
 
         if ( consistentMassFlag ) {
             mss->zero();
-            this->assemble( mss, stepWhenIcApply, EID_MomentumBalance, MassMatrix, 
-			    EModelDefaultEquationNumbering(), this->giveDomain(1) );
+            this->assemble( mss, stepWhenIcApply, EID_MomentumBalance, MassMatrix,
+                           EModelDefaultEquationNumbering(), this->giveDomain(1) );
         } else {
             mm.zero();
-            this->assembleVectorFromElements( mm, tStep, EID_MomentumBalance, LumpedMassMatrix, VM_Total, 
-					      EModelDefaultEquationNumbering(), this->giveDomain(1) );
+            this->assembleVectorFromElements( mm, tStep, EID_MomentumBalance, LumpedMassMatrix, VM_Total,
+                                             EModelDefaultEquationNumbering(), this->giveDomain(1) );
         }
     }
 
@@ -366,16 +365,16 @@ CBS :: solveYourselfAt(TimeStep *tStep)
 
     /* STEP 1 - calculates auxiliary velocities*/
     rhs.zero();
-    this->assembleVectorFromElements( rhs, tStep, EID_AuxMomentumBalance, IntermediateConvectionTerm, VM_Total, 
-				      EModelDefaultEquationNumbering(), this->giveDomain(1) );
-    this->assembleVectorFromElements( rhs, tStep, EID_AuxMomentumBalance, IntermediateDiffusionTerm, VM_Total, 
-				      EModelDefaultEquationNumbering(), this->giveDomain(1) );
+    this->assembleVectorFromElements( rhs, tStep, EID_AuxMomentumBalance, IntermediateConvectionTerm, VM_Total,
+                                     EModelDefaultEquationNumbering(), this->giveDomain(1) );
+    this->assembleVectorFromElements( rhs, tStep, EID_AuxMomentumBalance, IntermediateDiffusionTerm, VM_Total,
+                                     EModelDefaultEquationNumbering(), this->giveDomain(1) );
     //this->assembleVectorFromElements(mm, tStep, EID_AuxMomentumBalance, LumpedMassMatrix, VM_Total, this->giveDomain(1));
 
     if ( consistentMassFlag ) {
         rhs.times(deltaT);
-        this->assembleVectorFromElements( rhs, tStep, EID_AuxMomentumBalance, PrescribedVelocityRhsVector, VM_Incremental, 
-					  EModelDefaultEquationNumbering(), this->giveDomain(1) );
+        this->assembleVectorFromElements( rhs, tStep, EID_AuxMomentumBalance, PrescribedVelocityRhsVector, VM_Incremental,
+                                         EModelDefaultEquationNumbering(), this->giveDomain(1) );
         nMethod->solve(mss, & rhs, & deltaAuxVelocity);
     } else {
         for ( i = 1; i <= momneq; i++ ) {
@@ -393,10 +392,10 @@ CBS :: solveYourselfAt(TimeStep *tStep)
     }
 
     //prescribedTractionPressure.printYourself();
-    this->assembleVectorFromElements( rhs, tStep, EID_ConservationEquation, DensityRhsVelocityTerms, VM_Total, 
-				      EModelDefaultEquationNumbering(), this->giveDomain(1) );
-    this->assembleVectorFromElements( rhs, tStep, EID_ConservationEquation, DensityRhsPressureTerms, VM_Total, 
-				      EModelDefaultEquationNumbering(), this->giveDomain(1) );
+    this->assembleVectorFromElements( rhs, tStep, EID_ConservationEquation, DensityRhsVelocityTerms, VM_Total,
+                                     EModelDefaultEquationNumbering(), this->giveDomain(1) );
+    this->assembleVectorFromElements( rhs, tStep, EID_ConservationEquation, DensityRhsPressureTerms, VM_Total,
+                                     EModelDefaultEquationNumbering(), this->giveDomain(1) );
     this->giveNumericalMethod(tStep);
     pressureVector->resize(presneq);
     nMethod->solve(lhs, & rhs, pressureVector);
@@ -407,8 +406,8 @@ CBS :: solveYourselfAt(TimeStep *tStep)
     rhs.resize(momneq);
     rhs.zero();
     velocityVector->resize(momneq);
-    this->assembleVectorFromElements( rhs, tStep, EID_MomentumBalance, CorrectionRhs, VM_Total, 
-				      EModelDefaultEquationNumbering(), this->giveDomain(1) );
+    this->assembleVectorFromElements( rhs, tStep, EID_MomentumBalance, CorrectionRhs, VM_Total,
+                                     EModelDefaultEquationNumbering(), this->giveDomain(1) );
     if ( consistentMassFlag ) {
         rhs.times(deltaT);
         //this->assembleVectorFromElements(rhs, tStep, EID_MomentumBalance, PrescribedRhsVector, VM_Incremental, this->giveDomain(1));
@@ -599,7 +598,7 @@ CBS :: checkConsistency()
 
     for ( i = 1; i <= nelem; i++ ) {
         ePtr = domain->giveElement(i);
-        sePtr = dynamic_cast< CBSElement * >( ePtr );
+        sePtr = dynamic_cast< CBSElement * >(ePtr);
         if ( sePtr == NULL ) {
             _warning2("Element %d has no CBS base", i);
             return 0;
@@ -657,7 +656,7 @@ CBS :: printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *atTime)
     DofIDItem type = iDof->giveDofID();
     if ( ( type == V_u ) || ( type == V_v ) || ( type == V_w ) ) {
         iDof->printSingleOutputAt(stream, atTime, 'v', EID_MomentumBalance, VM_Total, uscale);
-    } else if ( ( type == P_f ) )    {
+    } else if ( ( type == P_f ) ) {
         iDof->printSingleOutputAt(stream, atTime, 'p', EID_ConservationEquation, VM_Total, pscale);
     } else {
         _error("printDofOutputAt: unsupported dof type");
@@ -733,7 +732,7 @@ CBS :: giveNewEquationNumber(int domain, DofIDItem id)
 {
     if ( ( id == V_u ) || ( id == V_v ) || ( id == V_w ) ) {
         return ++numberOfMomentumEqs;
-    } else if ( id == P_f )  {
+    } else if ( id == P_f ) {
         return ++numberOfConservationEqs;
     } else {
         _error("giveNewEquationNumber:: Unknown DofIDItem");
@@ -747,7 +746,7 @@ CBS :: giveNewPrescribedEquationNumber(int domain, DofIDItem id)
 {
     if ( ( id == V_u ) || ( id == V_v ) || ( id == V_w ) ) {
         return ++numberOfPrescribedMomentumEqs;
-    } else if ( id == P_f )  {
+    } else if ( id == P_f ) {
         return ++numberOfPrescribedConservationEqs;
     } else {
         _error("giveNewPrescribedEquationNumber:: Unknown DofIDItem");
@@ -769,7 +768,7 @@ int CBS :: giveNumberOfEquations(EquationID id) {
 
     if ( ( id == EID_MomentumBalance ) || ( id == EID_AuxMomentumBalance ) ) {
         return numberOfMomentumEqs;
-    } else if ( id == EID_ConservationEquation )  {
+    } else if ( id == EID_ConservationEquation ) {
         return numberOfConservationEqs;
     } else {
         _error("giveNumberOfEquations: unknown equation id");
@@ -791,7 +790,7 @@ int CBS :: giveNumberOfPrescribedEquations(EquationID id) {
 
     if ( ( id == EID_MomentumBalance ) || ( id == EID_AuxMomentumBalance ) ) {
         return numberOfPrescribedMomentumEqs;
-    } else if ( id == EID_ConservationEquation )  {
+    } else if ( id == EID_ConservationEquation ) {
         return numberOfPrescribedConservationEqs;
     } else {
         _error("giveNumberOfPrescribedEquations: unknown equation id");
@@ -813,7 +812,7 @@ int CBS :: giveNumberOfDomainEquations(int d, EquationID id) {
 
     if ( ( id == EID_MomentumBalance ) || ( id == EID_AuxMomentumBalance ) ) {
         return numberOfMomentumEqs;
-    } else if ( id == EID_ConservationEquation )  {
+    } else if ( id == EID_ConservationEquation ) {
         return numberOfConservationEqs;
     } else {
         _error("giveNumberOfDomainEquations: unknown equation id");
@@ -835,7 +834,7 @@ int CBS :: giveNumberOfPrescribedDomainEquations(int d, EquationID id) {
 
     if ( ( id == EID_MomentumBalance ) || ( id == EID_AuxMomentumBalance ) ) {
         return numberOfPrescribedMomentumEqs;
-    } else if ( id == EID_ConservationEquation )  {
+    } else if ( id == EID_ConservationEquation ) {
         return numberOfPrescribedConservationEqs;
     } else {
         _error("giveNumberOfPrescribedDomainEquations: unknown equation id");
@@ -848,19 +847,19 @@ double CBS :: giveVariableScale(VarScaleType varID)
 {
     if ( varID == VST_Length ) {
         return this->lscale;
-    } else if ( varID == VST_Velocity )  {
+    } else if ( varID == VST_Velocity ) {
         return this->uscale;
-    } else if ( varID == VST_Density )                                                             {
+    } else if ( varID == VST_Density ) {
         return this->dscale;
-    } else if ( varID == VST_Time )                                                                                                                       {
+    } else if ( varID == VST_Time ) {
         return ( lscale / uscale );
-    } else if ( varID == VST_Pressure )                                                                                                                                                                                     {
+    } else if ( varID == VST_Pressure ) {
         return ( dscale * uscale * uscale );
-    } else if ( varID == VST_Force )                                                                                                                                                                                                                                                                {
+    } else if ( varID == VST_Force ) {
         return ( uscale * uscale / lscale );
-    } else if ( varID == VST_Viscosity )                                                                                                                                                                                                                                                                                                                                        {
+    } else if ( varID == VST_Viscosity ) {
         return 1.0;
-    } else                                                                                                                                                                                                                                                                                                                                                                                         {
+    } else {
         _error("giveVariableScale: unknown variable type");
     }
 
@@ -893,5 +892,4 @@ double CBS :: giveVariableScale(VarScaleType varID)
  * }
  *
  */
-
 } // end namespace oofem

@@ -41,7 +41,7 @@
 #define vtkxmlexportmodule_h
 
 #ifndef __MAKEDEPEND
-#include <stdio.h>
+ #include <stdio.h>
 #endif
 #include "exportmodule.h"
 #include "domain.h"
@@ -52,12 +52,11 @@
 
 
 namespace oofem {
-
 /**
  * Represents VTK (Visualization Toolkit) export module. It uses vtk file format, Unstructured grid dataset.
  * The export of data is done on Region By Region basis, possibly taking care about possible nonsmooth character of
- * some internal variables at region boundaries. 
- * Each region is usually exported as a single piece. When region contains composite cells, these are assumed to be 
+ * some internal variables at region boundaries.
+ * Each region is usually exported as a single piece. When region contains composite cells, these are assumed to be
  * exported in individual subsequent pices after the default one for the particular region.
  *
  */
@@ -133,27 +132,27 @@ protected:
      * Returns the element cell geometry.
      */
     void giveElementCell(IntArray &answer, Element *elem, int cell);
-    /// Prints point data header 
-    void exportPointDataHeader (FILE* stream, TimeStep* tStep);
-    /// Prints point data footer 
-    void exportPointDataFooter (FILE* stream, TimeStep* tStep);
+    /// Prints point data header
+    void exportPointDataHeader(FILE *stream, TimeStep *tStep);
+    /// Prints point data footer
+    void exportPointDataFooter(FILE *stream, TimeStep *tStep);
     /**
      * export internal variables
      */
-    void exportIntVars(FILE *stream, IntArray& mapG2L, IntArray& mapL2G,
-               int regionDofMans, int ireg, TimeStep *tStep);
+    void exportIntVars(FILE *stream, IntArray &mapG2L, IntArray &mapL2G,
+                       int regionDofMans, int ireg, TimeStep *tStep);
     /**
      * export primary variables
      */
-    void exportPrimaryVars(FILE *stream, IntArray& mapG2L, IntArray& mapL2G,
-               int regionDofMans, int region, TimeStep *tStep);
+    void exportPrimaryVars(FILE *stream, IntArray &mapG2L, IntArray &mapL2G,
+                           int regionDofMans, int region, TimeStep *tStep);
     /** exports single variable */
-    void exportIntVarAs(InternalStateType valID, InternalStateValueType type, IntArray& mapG2L, IntArray& mapL2G,
-            int regionDofMans, int ireg, FILE *stream, TimeStep *tStep);
+    void exportIntVarAs(InternalStateType valID, InternalStateValueType type, IntArray &mapG2L, IntArray &mapL2G,
+                        int regionDofMans, int ireg, FILE *stream, TimeStep *tStep);
     /** exports single variable */
-    void exportPrimVarAs(UnknownType valID, IntArray& mapG2L, IntArray& mapL2G,
-             int regionDofMans, int region, FILE *stream, TimeStep *tStep);
-    
+    void exportPrimVarAs(UnknownType valID, IntArray &mapG2L, IntArray &mapL2G,
+                         int regionDofMans, int region, FILE *stream, TimeStep *tStep);
+
     /** exports cell variables */
     void exportCellVars(FILE *stream, int totalcells, int region, TimeStep *tStep);
     void exportCellVarAs(InternalStateType type, int nelem, int region, FILE *stream, TimeStep *tStep);
@@ -166,26 +165,26 @@ protected:
      * if mode == 1 then regionNodalNumbers is array with mapping from local to global numbering.
      * The i-th value contains the corresponding global node number.
      */
-    int initRegionNodeNumbering(IntArray &mapG2L, IntArray& mapL2G, 
-                int &regionDofMans, int &totalcells,
+    int initRegionNodeNumbering(IntArray &mapG2L, IntArray &mapL2G,
+                                int &regionDofMans, int &totalcells,
                                 Domain *domain, int reg);
 
     /// Returns true if element geometry type is composite (not a single cell)
-    bool isElementComposite(Element* elem);
+    bool isElementComposite(Element *elem);
 };
 
 /**
-   Elements with geometry defined as EGT_Composite are exported using individual pieces.
-   The VTKXMLExportModuleElementInterface serves for this purpose, defining abstract
-   export method, responsible for exporting individual element piece in xml vtk syntax.
-   Elements with geometry defined as EGT_Composite should implement this interface.
+ * Elements with geometry defined as EGT_Composite are exported using individual pieces.
+ * The VTKXMLExportModuleElementInterface serves for this purpose, defining abstract
+ * export method, responsible for exporting individual element piece in xml vtk syntax.
+ * Elements with geometry defined as EGT_Composite should implement this interface.
  */
-class VTKXMLExportModuleElementInterface : public Interface {
- public:
-  VTKXMLExportModuleElementInterface () : Interface() {}
-  const char *giveClassName() const { return "VTKXMLExportModuleElementInterface"; }
-  virtual void _export (FILE * stream, VTKXMLExportModule* m, IntArray& primaryVarsToExport, IntArray& internalVarsToExport, TimeStep* tStep ) = 0;
+class VTKXMLExportModuleElementInterface : public Interface
+{
+public:
+    VTKXMLExportModuleElementInterface() : Interface() {}
+    const char *giveClassName() const { return "VTKXMLExportModuleElementInterface"; }
+    virtual void _export(FILE *stream, VTKXMLExportModule *m, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, TimeStep *tStep) = 0;
 };
-
 } // end namespace oofem
 #endif // vtkxmlexportmodule_h

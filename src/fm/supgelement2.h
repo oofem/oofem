@@ -50,7 +50,6 @@
 #include "fluiddynamicmaterial.h"
 
 namespace oofem {
-
 class TimeStep;
 class Node;
 class Material;
@@ -77,7 +76,7 @@ protected:
      */
     //double t_supg, t_pspg, t_lsic;
 
-  /// Cached transformation matrix of receiver
+    /// Cached transformation matrix of receiver
     FloatMatrix *rotationMatrix;
     /// Flag indicating if tranformation matrix has been already computed
     int rotationMatrixDefined;
@@ -199,7 +198,7 @@ public:
      * taking into account also possible local - coordinate system in some elements
      * nodes.
      * Default implementation uses \ref computeGtoLRotationMatrix and
-     \ref computeGNDofRotationMatrix  services to compute result.
+     * \ref computeGNDofRotationMatrix  services to compute result.
      * Default implembalentation uses cached rotation matrix in
      * rotationMatrix attribute, so rotation matrix is computed only once.
      * @return nonzero if transformation is necessary.
@@ -213,8 +212,10 @@ public:
      * then answer is empty mtrx and zero value is returned.
      * @return nonzero if transformation is necessary, zero otherwise.
      */
-    virtual int  computeGtoLRotationMatrix(FloatMatrix &answer) { answer.beEmptyMtrx();
-                                                                  return 0; }
+    virtual int  computeGtoLRotationMatrix(FloatMatrix &answer) {
+        answer.beEmptyMtrx();
+        return 0;
+    }
     // give Transformation matrix from global coord. syst. to local coordinate system in nodes.
     // i.e. r(n)=T r(g), if no trasformation necessary sets answer to empty mtrx.
     /**
@@ -225,18 +226,18 @@ public:
      * necessary sets answer to empty mtrx and returns zero value.
      * @return nonzero if transformation is necessary, zero otherwise.
      */
-    
-    
-      
+
+
+
 
     virtual int  computeGNDofRotationMatrix(FloatMatrix &answer, DofManTransfType mode);
-    
+
     virtual int computeGNLoadRotationMatrix(FloatMatrix &answer, DofManTransfType mode);
 
- protected:
+protected:
     /**
-       Returns index of integration rule used to evaluate given characteristic term
-    */
+     * Returns index of integration rule used to evaluate given characteristic term
+     */
     virtual int giveTermIntergationRuleIndex(CharType termType) = 0;
 
     virtual void computeDeviatoricStress(FloatArray &answer, GaussPoint *gp, TimeStep *);
@@ -246,7 +247,7 @@ public:
     virtual void computeDivUMatrix(FloatMatrix &answer, GaussPoint *gp) = 0;
     virtual void computeNpMatrix(FloatMatrix &answer, GaussPoint *gp) = 0;
     virtual void computeGradPMatrix(FloatMatrix &answer, GaussPoint *gp) = 0;
-    virtual void computeDivTauMatrix(FloatMatrix &answer, GaussPoint *gp, TimeStep *atTime ) = 0;
+    virtual void computeDivTauMatrix(FloatMatrix &answer, GaussPoint *gp, TimeStep *atTime) = 0;
     virtual void computeGradUMatrix(FloatMatrix &answer, GaussPoint *gp, TimeStep *atTime) = 0;
     virtual int  giveNumberOfSpatialDimensions() = 0;
 
@@ -264,6 +265,5 @@ public:
     virtual void computeEdgeLoadVector_MC(FloatArray &answer, Load *load, int id, TimeStep *stepN);
     virtual void computeSurfaceLoadVector_MC(FloatArray &answer, Load *load, int id, TimeStep *stepN);
 };
-
 } // end namespace oofem
 #endif // supgelement2_h

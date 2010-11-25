@@ -48,7 +48,6 @@
 #include "flotmtrx.h"
 
 namespace oofem {
-
 class TimeStep;
 class Node;
 class Material;
@@ -109,7 +108,7 @@ public:
     /**
      * Computes the stiffness matrix of receiver.
      * The response is evaluated using \f$\int (B_1+B_2(r))^TD(B_1+B_2(r)) dv\f$, where
-     \f$B_2\f$ is nonlinear contribution evaluated using computeNLBMatrixAt service for each strain component
+     * \f$B_2\f$ is nonlinear contribution evaluated using computeNLBMatrixAt service for each strain component
      * (\f$B_2(i) = \Delta r^T A(i)\f$)
      * Necessary transformations and reduced integration are taken into account.
      * @param answer computed stiffness matrix.
@@ -120,12 +119,12 @@ public:
                                          MatResponseMode rMode, TimeStep *tStep);
 
     /**
-     * Computes numerically stiffness matrix of receiver. The response is evaluated 
+     * Computes numerically stiffness matrix of receiver. The response is evaluated
      * using \f$\int (B_1+B_2(r))^TD(B_1+B_2(r)) dv\f$, where
      * \f$B_2\f$ is nonlinear contribution evaluated using computeNLBMatrixAt service for each strain component
      * (\f$B_2(i) = \Delta r^T A(i)\f$).
      * Numerical integration procedure uses integrationRulesArray
-     * for numrical integration. This implementation regards element integration rules as that they represent sub-cells 
+     * for numrical integration. This implementation regards element integration rules as that they represent sub-cells
      * so that the integration is performed over all subcells for all terms.
      * For higher numerical performance, only one half of stiffness matrix is computed and answer is then symmetrized.
      * Therefore, if element matrix will be generally nonsymmetric, one must specialize this method.
@@ -135,7 +134,7 @@ public:
      * @param tStep time step
      */
     void          computeStiffnessMatrix_withIRulesAsSubcells(FloatMatrix &answer,
-							      MatResponseMode rMode, TimeStep *tStep);
+                                                              MatResponseMode rMode, TimeStep *tStep);
 
 
     // stress equivalent vector (vector of internal forces) - for nonLinear Analysis.
@@ -157,7 +156,7 @@ public:
      * B is linear strain-displacement contribution, $B_2$ is nonlinear contribution evaluated using
      * computeNLBMatrixAt service for each strain component ($B_2(i) = \Delta r^T A(i)$).
      * Numerical integration procedure uses integrationRulesArray
-     * for numrical integration. This implementation regards element integration rules as that they represent sub-cells 
+     * for numrical integration. This implementation regards element integration rules as that they represent sub-cells
      * so that the integration is performed over all subcells for all terms.
      * Necessary transformations are taken into account.
      * @param answer equivalent nodal forces vector
@@ -165,13 +164,13 @@ public:
      * @param useUpdatedGpRecord if equal to zero, the stresses in integration points are computed (slow but safe), else if
      */
     void giveInternalForcesVector_withIRulesAsSubcells(FloatArray &answer,
-						       TimeStep *, int useUpdatedGpRecord = 0);
+                                                       TimeStep *, int useUpdatedGpRecord = 0);
 
     /**
      * Compute strain vector of receiver evaluated at given integration point at time
      * step stepN from element displacement vector.
      * Total (green) strains are computed using following scheme
-     \f$\varepsilon_G = Br+B_2(r)\f$, where \f$B_2\f$ is obtained using
+     * \f$\varepsilon_G = Br+B_2(r)\f$, where \f$B_2\f$ is obtained using
      * computeNLBMatrixAt service for each strain component (\f$B_2(i) = \Delta r^T A(i)\f$)
      * and \f$B\f$ is usual linear strain-displacement matrix.
      * Necessary transformation are taken into account.
@@ -229,7 +228,5 @@ protected:
         return;
     }
 };
-
-
 } // end namespace oofem
 #endif // nlstructuralelement_h

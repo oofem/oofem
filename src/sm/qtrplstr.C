@@ -49,18 +49,17 @@
 #include "crosssection.h"
 #include "gaussintegrationrule.h"
 #ifndef __MAKEDEPEND
-#include <stdio.h>
+ #include <stdio.h>
 #endif
 
 #ifdef __OOFEG
-#include "oofeggraphiccontext.h"
-#include "conTable.h"
-#include "oofegutils.h"
-#include "rcm2.h"
+ #include "oofeggraphiccontext.h"
+ #include "conTable.h"
+ #include "oofegutils.h"
+ #include "rcm2.h"
 #endif
 
 namespace oofem {
-
 FEI2dTrQuad QTrPlaneStress2d :: interpolation(1, 2);
 
 QTrPlaneStress2d :: QTrPlaneStress2d(int n, Domain *aDomain) :
@@ -233,8 +232,8 @@ QTrPlaneStress2d :: computeVolumeAround(GaussPoint *aGaussPoint)
 // Returns the portion of the receiver which is attached to aGaussPoint.
 {
     double determinant, weight, thickness, volume;
-    determinant = fabs( this->interpolation.giveTransformationJacobian(* aGaussPoint->giveCoordinates(), 
-								       FEIElementGeometryWrapper(this), 0.0) );
+    determinant = fabs( this->interpolation.giveTransformationJacobian(* aGaussPoint->giveCoordinates(),
+                                                                       FEIElementGeometryWrapper(this), 0.0) );
     weight      = aGaussPoint->giveWeight();
     thickness   = this->giveCrossSection()->give(CS_Thickness);
     volume      = determinant * weight * thickness;
@@ -246,8 +245,8 @@ QTrPlaneStress2d :: computeVolumeAround(GaussPoint *aGaussPoint)
 int
 QTrPlaneStress2d :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords)
 {
-  this->interpolation.local2global(answer, lcoords, FEIElementGeometryWrapper(this), 0.0);
-  return 1;
+    this->interpolation.local2global(answer, lcoords, FEIElementGeometryWrapper(this), 0.0);
+    return 1;
 }
 
 
@@ -256,18 +255,18 @@ QTrPlaneStress2d :: computeGlobalCoordinates(FloatArray &answer, const FloatArra
 int
 QTrPlaneStress2d :: computeLocalCoordinates(FloatArray &answer, const FloatArray &coords)
 {
-  return this->interpolation.global2local(answer, coords, FEIElementGeometryWrapper(this), 0.0);
+    return this->interpolation.global2local(answer, coords, FEIElementGeometryWrapper(this), 0.0);
 }
 
 void QTrPlaneStress2d :: computeGaussPoints()
 // Sets up the array containing the four Gauss points of the receiver.
 {
-  if (!integrationRulesArray) {
-    numberOfIntegrationRules = 1;
-    integrationRulesArray = new IntegrationRule * [ 1 ];
-    integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3);
-    integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Triangle, numberOfGaussPoints, _PlaneStress);
-  }
+    if ( !integrationRulesArray ) {
+        numberOfIntegrationRules = 1;
+        integrationRulesArray = new IntegrationRule * [ 1 ];
+        integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3);
+        integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Triangle, numberOfGaussPoints, _PlaneStress);
+    }
 }
 
 void
@@ -310,7 +309,7 @@ QTrPlaneStress2d :: SpatialLocalizerI_giveDistanceFromParametricCenter(const Flo
 
     if ( size == gsize ) {
         dist = coords.distance(gcoords);
-    } else   {
+    } else {
         FloatArray helpCoords = coords;
 
         helpCoords.resize(gsize);
@@ -322,7 +321,7 @@ QTrPlaneStress2d :: SpatialLocalizerI_giveDistanceFromParametricCenter(const Flo
 
 
 #ifdef __OOFEG
-#define TR_LENGHT_REDUCT 0.3333
+ #define TR_LENGHT_REDUCT 0.3333
 
 void QTrPlaneStress2d :: drawRawGeometry(oofegGraphicContext &gc)
 {
@@ -430,15 +429,15 @@ void QTrPlaneStress2d :: drawScalar(oofegGraphicContext &context)
                 n [ 0 ] = 1;
                 n [ 1 ] = 4;
                 n [ 2 ] = 6;
-            } else if ( t == 2 )                                           {
+            } else if ( t == 2 ) {
                 n [ 0 ] = 2;
                 n [ 1 ] = 5;
                 n [ 2 ] = 4;
-            } else if ( t == 3 )                                                                                                         {
+            } else if ( t == 3 ) {
                 n [ 0 ] = 3;
                 n [ 1 ] = 6;
                 n [ 2 ] = 5;
-            } else                                                                                                                                                                   {
+            } else {
                 n [ 0 ] = 4;
                 n [ 1 ] = 5;
                 n [ 2 ] = 6;
@@ -661,6 +660,4 @@ QTrPlaneStress2d :: EIPrimaryUnknownMI_givePrimaryUnknownVectorDofID(IntArray &a
 {
     giveDofManDofIDMask(1, EID_MomentumBalance, answer);
 }
-
-
 } // end namespace oofem

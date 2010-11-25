@@ -34,20 +34,19 @@
  */
 
 #ifndef __MAKEDEPEND
-#include <stdio.h>
-#include <ctype.h>
+ #include <stdio.h>
+ #include <ctype.h>
 #endif
 #include "oofemtxtdatareader.h"
 
 namespace oofem {
-
 OOFEMTXTDataReader :: OOFEMTXTDataReader(char *inputfilename) : DataReader(), ir()
 {
     if ( ( inputStream = fopen(inputfilename, "r") ) == NULL ) {
         OOFEM_ERROR2("OOFEMTXTDataReader::OOFEMTXTDataReader: Can't open input stream (%s)", inputfilename);
     }
 
-    strncpy(dataSourceName, inputfilename, MAX_FILENAME_LENGTH-1);
+    strncpy(dataSourceName, inputfilename, MAX_FILENAME_LENGTH - 1);
     dataSourceName [ MAX_FILENAME_LENGTH - 1 ] = '\0';
 }
 
@@ -85,24 +84,25 @@ OOFEMTXTDataReader :: giveLineFromInput(char *line)
 {
     //
     // reads one line from inputStream - for private use only.
-    // if " detected, start/stop changing to lower case characters 
+    // if " detected, start/stop changing to lower case characters
     char *ptr;
-    bool flag=false;//0-tolower, 1-remain with capitals
+    bool flag = false; //0-tolower, 1-remain with capitals
 
     giveRawLineFromInput(line);
-    
-    for (ptr = line; *ptr != '\0'; ptr++){
-      if(*ptr == '"'){//do not change to lowercase inside quotation marks
-	flag = !flag; // switch flag
-      }
 
-      if(!flag)
-        *ptr = tolower(* ptr);// convert line to lowercase
+    for ( ptr = line; * ptr != '\0'; ptr++ ) {
+        if ( * ptr == '"' ) { //do not change to lowercase inside quotation marks
+            flag = !flag; // switch flag
+        }
+
+        if ( !flag ) {
+            * ptr = tolower(* ptr); // convert line to lowercase
+        }
     }
 
-//     for ( ptr = line; ( * ptr = tolower(* ptr) ); ptr++ ) {
-//         ;
-//     }
+    //     for ( ptr = line; ( * ptr = tolower(* ptr) ); ptr++ ) {
+    //         ;
+    //     }
 }
 
 void
@@ -121,5 +121,4 @@ OOFEMTXTDataReader :: giveRawLineFromInput(char *line)
     } while ( * line == '#' ); // skip comments
 
 }
-
 } // end namespace oofem

@@ -67,7 +67,7 @@ protected:
 public:
 
     /// Constructor
-    IsotropicDamageMaterial2(int n, Domain * d);
+    IsotropicDamageMaterial2(int n, Domain *d);
     /// Destructor
     ~IsotropicDamageMaterial2();
 

@@ -37,7 +37,6 @@
 #include <math.h>
 
 namespace oofem {
-
 double UserDefinedLoadTimeFunction :: __at(double time)
 // Returns the value of the receiver at time 'time'. 'time' should be
 // one of the dates of the receiver (currently there is no interpola-
@@ -110,7 +109,7 @@ UserDefinedLoadTimeFunction :: initializeFrom(InputRecord *ir)
     const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
-    LoadTimeFunction::initializeFrom(ir);
+    LoadTimeFunction :: initializeFrom(ir);
 
     result = ir->giveField(ftExpression, UserDefinedLoadTimeFunction_MAX_EXPR_LENGTH, IFT_UserDefinedLoadTimeFunction_ft, "f(t)");
     if ( result != IRRT_OK ) {
@@ -124,5 +123,4 @@ UserDefinedLoadTimeFunction :: initializeFrom(InputRecord *ir)
 
     return IRRT_OK;
 }
-
 } // end namespace oofem

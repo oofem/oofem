@@ -42,17 +42,19 @@
 #include "conTable.h"
 #include "mathfem.h"
 #ifndef __MAKEDEPEND
-#include <stdio.h>
+ #include <stdio.h>
 #endif
 
 namespace oofem {
-
-MesherInterface::returnCode
-FreemInterface :: createMesh(TimeStep *stepN, int domainNumber, int domainSerNum, Domain** dNew)
+MesherInterface :: returnCode
+FreemInterface :: createMesh(TimeStep *stepN, int domainNumber, int domainSerNum, Domain **dNew)
 {
-  *dNew = NULL;
-  if (this->createInput(this->domain, stepN)) return MI_NEEDS_EXTERNAL_ACTION;
-  else return MI_FAILED;
+    * dNew = NULL;
+    if ( this->createInput(this->domain, stepN) ) {
+        return MI_NEEDS_EXTERNAL_ACTION;
+    } else {
+        return MI_FAILED;
+    }
 }
 
 int
@@ -188,5 +190,4 @@ FreemInterface :: smoothNodalDensities(Domain *d,  FloatArray &nodalDensities, T
 
     }
 }
-
 } // end namespace oofem

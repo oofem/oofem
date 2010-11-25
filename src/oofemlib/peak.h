@@ -42,7 +42,6 @@
 #include "loadtime.h"
 
 namespace oofem {
-
 class PeakFunction : public LoadTimeFunction
 {
     /*
@@ -60,8 +59,10 @@ private:
 
 public:
     PeakFunction(int i, Domain *d) : LoadTimeFunction(i, d)
-    { t = 0.0;
-      value = 0.0; }
+    {
+        t = 0.0;
+        value = 0.0;
+    }
     ~PeakFunction()                       { }
 
     //      void    getCoefficients () ;
@@ -71,6 +72,5 @@ public:
 
     double  __at(double);
 };
-
 } // end namespace oofem
 #endif // peak_h

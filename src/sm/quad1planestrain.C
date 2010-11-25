@@ -47,19 +47,18 @@
 #include "engngm.h"
 #include "structuralms.h"
 #ifndef __MAKEDEPEND
-#include <math.h>
-#include <stdio.h>
+ #include <math.h>
+ #include <stdio.h>
 #endif
 
 #ifdef __OOFEG
-#include "oofeggraphiccontext.h"
-#include "oofegutils.h"
-#include "conTable.h"
-#include "rcm2.h"
+ #include "oofeggraphiccontext.h"
+ #include "oofegutils.h"
+ #include "conTable.h"
+ #include "rcm2.h"
 #endif
 
 namespace oofem {
-
 Quad1PlaneStrain :: Quad1PlaneStrain(int n, Domain *aDomain) :
     StructuralElement(n, aDomain), ZZNodalRecoveryModelInterface(), SPRNodalRecoveryModelInterface(),
     SpatialLocalizerInterface()
@@ -169,12 +168,12 @@ void
 Quad1PlaneStrain :: computeGaussPoints()
 // Sets up the array containing the four Gauss points of the receiver.
 {
-  if (!integrationRulesArray) {
-    numberOfIntegrationRules = 1;
-    integrationRulesArray = new IntegrationRule * [ 1 ];
-    integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3);
-    integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Square, numberOfGaussPoints, _PlaneStrain);
-  }
+    if ( !integrationRulesArray ) {
+        numberOfIntegrationRules = 1;
+        integrationRulesArray = new IntegrationRule * [ 1 ];
+        integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3);
+        integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Square, numberOfGaussPoints, _PlaneStrain);
+    }
 }
 
 void
@@ -540,10 +539,10 @@ Quad1PlaneStrain :: computeGlobalCoordinates(FloatArray &answer, const FloatArra
     n4 = ( 1. + ksi ) * ( 1. - eta ) * 0.25;
 
     answer.resize(2);
-    answer.at(1) = n1 * this->giveNode(1)->giveCoordinate(1) + n2 * this->giveNode(2)->giveCoordinate(1) +
-    n3 * this->giveNode(3)->giveCoordinate(1) + n4 * this->giveNode(4)->giveCoordinate(1);
-    answer.at(2) = n1 * this->giveNode(1)->giveCoordinate(2) + n2 * this->giveNode(2)->giveCoordinate(2) +
-    n3 * this->giveNode(3)->giveCoordinate(2) + n4 * this->giveNode(4)->giveCoordinate(2);
+    answer.at(1) = n1 * this->giveNode(1)->giveCoordinate(1) + n2 *this->giveNode(2)->giveCoordinate(1) +
+                   n3 *this->giveNode(3)->giveCoordinate(1) + n4 *this->giveNode(4)->giveCoordinate(1);
+    answer.at(2) = n1 * this->giveNode(1)->giveCoordinate(2) + n2 *this->giveNode(2)->giveCoordinate(2) +
+                   n3 *this->giveNode(3)->giveCoordinate(2) + n4 *this->giveNode(4)->giveCoordinate(2);
 
     return 1;
 }
@@ -675,7 +674,7 @@ Quad1PlaneStrain :: HuertaErrorEstimatorI_setupRefinedElementProblem(RefinedElem
 
 
 #ifdef __OOFEG
-#define TR_LENGHT_REDUCT 0.3333
+ #define TR_LENGHT_REDUCT 0.3333
 
 void Quad1PlaneStrain :: drawRawGeometry(oofegGraphicContext &gc)
 {
@@ -1245,7 +1244,7 @@ Quad1PlaneStrain :: SpatialLocalizerI_giveDistanceFromParametricCenter(const Flo
 
     if ( size == gsize ) {
         dist = coords.distance(gcoords);
-    } else   {
+    } else {
         FloatArray helpCoords = coords;
 
         helpCoords.resize(gsize);
@@ -1309,5 +1308,4 @@ Quad1PlaneStrain :: EIPrimaryUnknownMI_givePrimaryUnknownVectorDofID(IntArray &a
 {
     giveDofManDofIDMask(1, EID_MomentumBalance, answer);
 }
-
 } // end namespace oofem

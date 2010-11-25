@@ -43,14 +43,13 @@
 #define dsssolver_h
 
 #ifndef __MAKEDEPEND
-#include <stdio.h>
+ #include <stdio.h>
 #endif
 #include "sparselinsystemnm.h"
 #include "sparsemtrx.h"
 #include "flotarry.h"
 
 namespace oofem {
-
 class Domain;
 class EngngModel;
 class FloatMatrix;
@@ -91,7 +90,6 @@ public:
     classType giveClassID() const { return LDLTFactorizationClass; }
     LinSystSolverType giveLinSystSolverType() const { return ST_DSS; }
 };
-
 } // end namespace oofem
 #endif // dsssolver_h
 

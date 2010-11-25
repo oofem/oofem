@@ -49,7 +49,6 @@
 #include "primaryfield.h"
 
 namespace oofem {
-
 class TimeStep;
 class Node;
 class Material;
@@ -152,6 +151,5 @@ protected:
     /// Computes deviatoric stress vector in given integration point and solution step from given total strain vector
     virtual void computeDeviatoricStress(FloatArray &answer, GaussPoint *gp, TimeStep *) = 0;
 };
-
 } // end namespace oofem
 #endif // cbselement_h

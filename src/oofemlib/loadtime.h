@@ -53,7 +53,6 @@
 #include "valuemodetype.h"
 
 namespace oofem {
-
 /**
  * Abstract base class representing load time function. Classes derived from Load class typically
  * describe load from spatial point of view. The purpose of introducing load time function is to express
@@ -75,26 +74,26 @@ class LoadTimeFunction : public FEMComponent
      * Returning the value 'y' at any abscissa 't'.
      */
 
- protected:
-  /**
-     By default, the increment of receiver is computed as a difference between values evaluated at given solution step and in previous step.
-     However, if the solution step is the first step, the difference is typically set to the total value of receiver at the first step.
-     This is quite natural, as a loading with constant time function is expected to be applied at first step.
-     In certain cases, this default behavior has to be changed. The initial value (set by default to zero) 
-     allows to set initial value of receiver. This initial value is used only when the increment of receiver is evaluated at first step,
-     when result is defined as value of receiver at given step minus the initial value.
-     This allows to correctly handle temperature loading, that is specified with respect to some reference temperature.
-     In this case, the initial value should be set to the reference temperature, allowing to obtain correct temperate increment in first step.
-   */
-  double initialValue;
- public:
+protected:
+    /**
+     * By default, the increment of receiver is computed as a difference between values evaluated at given solution step and in previous step.
+     * However, if the solution step is the first step, the difference is typically set to the total value of receiver at the first step.
+     * This is quite natural, as a loading with constant time function is expected to be applied at first step.
+     * In certain cases, this default behavior has to be changed. The initial value (set by default to zero)
+     * allows to set initial value of receiver. This initial value is used only when the increment of receiver is evaluated at first step,
+     * when result is defined as value of receiver at given step minus the initial value.
+     * This allows to correctly handle temperature loading, that is specified with respect to some reference temperature.
+     * In this case, the initial value should be set to the reference temperature, allowing to obtain correct temperate increment in first step.
+     */
+    double initialValue;
+public:
 
     /**
      * Constructor. Creates load time function with given number, belonging to given domain.
      * @param n load time function number
      * @param d domain to which new object will belongs.
      */
-    LoadTimeFunction(int i, Domain *d) : FEMComponent(i, d) { initialValue = 0.0;}
+    LoadTimeFunction(int i, Domain *d) : FEMComponent(i, d) { initialValue = 0.0; }
     /// Destructor
     virtual ~LoadTimeFunction()  { }
 
@@ -157,6 +156,5 @@ class LoadTimeFunction : public FEMComponent
      */
     virtual double    __accelAt(double) { return 0.; }
 };
-
 } // end namespace oofem
 #endif // loadtime_h

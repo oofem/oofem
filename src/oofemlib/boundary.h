@@ -49,12 +49,11 @@
 #include "valuemodetype.h"
 
 #ifndef __MAKEDEPEND
-#include <string.h>
+ #include <string.h>
 #endif
 #include "classtype.h"
 
 namespace oofem {
-
 class TimeStep;
 class Dictionary;
 
@@ -171,7 +170,6 @@ public:
     /// Returns classType id of receiver.
     classType giveClassID() const { return BoundaryConditionClass; }
 };
-
 } // end namespace oofem
 #endif // boudary_h
 

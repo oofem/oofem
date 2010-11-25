@@ -50,18 +50,17 @@
 #include "timestep.h"
 #include "boundaryload.h"
 #ifndef __MAKEDEPEND
-#include <math.h>
-#include <stdio.h>
+ #include <math.h>
+ #include <stdio.h>
 #endif
 #include "contextioerr.h"
 
 #ifdef __OOFEG
-#include "oofeggraphiccontext.h"
-#include "conTable.h"
+ #include "oofeggraphiccontext.h"
+ #include "conTable.h"
 #endif
 
 namespace oofem {
-
 #define TRSUPG_ZERO_VOF 1.e-8
 
 
@@ -86,9 +85,9 @@ TR1_2D_CBS :: computeNumberOfDofs(EquationID ut)
 {
     if ( ut == EID_MomentumBalance ) {
         return 2;
-    } else if ( ut == EID_ConservationEquation )  {
+    } else if ( ut == EID_ConservationEquation ) {
         return 1;
-    } else                                                         {
+    } else {
         _error("computeNumberOfDofs: Unknown equation id encountered");
     }
 
@@ -153,12 +152,12 @@ void
 TR1_2D_CBS :: computeGaussPoints()
 // Sets up the array containing the four Gauss points of the receiver.
 {
-  if (!integrationRulesArray) {
-    numberOfIntegrationRules = 1;
-    integrationRulesArray = new IntegrationRule * [ 1 ];
-    integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3);
-    integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Triangle, 1, _2dFlow);
-  }
+    if ( !integrationRulesArray ) {
+        numberOfIntegrationRules = 1;
+        integrationRulesArray = new IntegrationRule * [ 1 ];
+        integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3);
+        integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Triangle, 1, _2dFlow);
+    }
 }
 
 void
@@ -676,10 +675,10 @@ TR1_2D_CBS :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lco
     l3 = 1.0 - l1 - l2;
 
     answer.resize(2);
-    answer.at(1) = l1 * this->giveNode(1)->giveCoordinate(1) + l2 * this->giveNode(2)->giveCoordinate(1) +
-    l3 * this->giveNode(3)->giveCoordinate(1);
-    answer.at(2) = l1 * this->giveNode(1)->giveCoordinate(2) + l2 * this->giveNode(2)->giveCoordinate(2) +
-    l3 * this->giveNode(3)->giveCoordinate(2);
+    answer.at(1) = l1 * this->giveNode(1)->giveCoordinate(1) + l2 *this->giveNode(2)->giveCoordinate(1) +
+                   l3 *this->giveNode(3)->giveCoordinate(1);
+    answer.at(2) = l1 * this->giveNode(1)->giveCoordinate(2) + l2 *this->giveNode(2)->giveCoordinate(2) +
+                   l3 *this->giveNode(3)->giveCoordinate(2);
 
     return 1;
 }
@@ -689,13 +688,13 @@ TR1_2D_CBS :: giveInterface(InterfaceType interface)
 {
     if ( interface == ZZNodalRecoveryModelInterfaceType ) {
         return ( ZZNodalRecoveryModelInterface * ) this;
-    } else if ( interface == NodalAveragingRecoveryModelInterfaceType )  {
+    } else if ( interface == NodalAveragingRecoveryModelInterfaceType ) {
         return ( NodalAveragingRecoveryModelInterface * ) this;
-    } else if ( interface == SPRNodalRecoveryModelInterfaceType )                                                                                                                                {
+    } else if ( interface == SPRNodalRecoveryModelInterfaceType ) {
         return ( SPRNodalRecoveryModelInterface * ) this;
-    } else if ( interface == SpatialLocalizerInterfaceType )                                                                                                                                                                                                                                                  {
+    } else if ( interface == SpatialLocalizerInterfaceType ) {
         return ( SpatialLocalizerInterface * ) this;
-    } else if ( interface == EIPrimaryFieldInterfaceType )                                                                                                                                                                                                                                                                                                                                                          {
+    } else if ( interface == EIPrimaryFieldInterfaceType ) {
         return ( EIPrimaryFieldInterface * ) this;
     }
     //<RESTRICTED_SECTION>
@@ -730,7 +729,7 @@ TR1_2D_CBS :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArra
 
     if ( size == gsize ) {
         dist = coords.distance(gcoords);
-    } else   {
+    } else {
         FloatArray helpCoords = coords;
 
         helpCoords.resize(gsize);

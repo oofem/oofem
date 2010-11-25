@@ -51,12 +51,11 @@
 #include "elementside.h"
 #include "mathfem.h"
 #ifndef __MAKEDEPEND
-#include <stdlib.h>
-#include <stdio.h>
+ #include <stdlib.h>
+ #include <stdio.h>
 #endif
 
 namespace oofem {
-
 FMElement :: FMElement(int n, Domain *aDomain) :
     Element(n, aDomain)
     // Constructor. Creates an element with number n, belonging to aDomain.
@@ -82,5 +81,4 @@ FMElement :: initializeFrom(InputRecord *ir)
     //this -> computeGaussPoints();
     return IRRT_OK;
 }
-
 } // end namespace oofem

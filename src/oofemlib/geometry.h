@@ -13,7 +13,6 @@
 #include "node.h"
 
 namespace oofem {
-
 /** Abstract representation of Geometry
  *  Patch inherits from this class
  */
@@ -30,7 +29,7 @@ public:
     /// computes normal signed distance between this object and a point
     virtual double computeDistanceTo(FloatArray *point) { return 0; }
     /// checks whether an element is interacted, Element reference will be later replaced by Geometry
-    virtual bool intersects(Element *element) {return FALSE;}; //{return NULL;};
+    virtual bool intersects(Element *element) { return FALSE; }; //{return NULL;};
     /// gives number of intersection points of Geometry entity with an element, Element reference will be later replaced by Geometry
     virtual int computeNumberOfIntersectionPoints(Element *element) { return 0; }
     // gives intersection points between this Geometry and Element
@@ -47,7 +46,7 @@ public:
     virtual const char *giveClassName() const { return NULL; }
     /// returns number of Geometry vertices
     int giveNrVertices() { return this->vertices->giveSize(); }
-    virtual bool isOutside(BasicGeometry *bg) {return FALSE; } //{return NULL; }
+    virtual bool isOutside(BasicGeometry *bg) { return FALSE; } //{return NULL; }
     virtual void printYourself() { }
 #ifdef __OOFEG
     virtual void          draw(oofegGraphicContext &gc) { }
@@ -108,7 +107,6 @@ public:
     bool isOutside(BasicGeometry *bg);
     void printYourself();
 };
-
 } // end namespace oofem
 #endif  /* _GEOMETRY_H */
 

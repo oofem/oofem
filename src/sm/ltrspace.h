@@ -52,7 +52,6 @@
 #include "huertaerrorestimator.h"
 
 namespace oofem {
-
 class LTRSpace : public NLStructuralElement, public ZZNodalRecoveryModelInterface,
     public NodalAveragingRecoveryModelInterface, public SPRNodalRecoveryModelInterface,
     public SpatialLocalizerInterface
@@ -118,7 +117,7 @@ public:
     Element_Geometry_Type giveGeometryType() const { return EGT_tetra_1; }
 
     integrationDomain  giveIntegrationDomain() { return _Tetrahedra; }
-    MaterialMode          giveMaterialMode()  {return _3dMat;}
+    MaterialMode          giveMaterialMode()  { return _3dMat; }
 
 
 #ifdef __OOFEG
@@ -304,7 +303,7 @@ public:
 protected:
     void               computeBmatrixAt(GaussPoint *, FloatMatrix &, int = 1, int = ALL_STRAINS);
     void               computeNmatrixAt(GaussPoint *, FloatMatrix &);
-    void               computeNLBMatrixAt(FloatMatrix & answer, GaussPoint *, int i);
+    void               computeNLBMatrixAt(FloatMatrix &answer, GaussPoint *, int i);
     void       computeGaussPoints();
 
     /**
@@ -330,6 +329,5 @@ protected:
     virtual int  computeLoadLSToLRotationMatrix(FloatMatrix &answer, int, GaussPoint *);
     //@}
 };
-
 } // end namespace oofem
 #endif // ltrspace_h

@@ -54,7 +54,6 @@
 #include "fei3dtrlin.h"
 
 namespace oofem {
-
 class TimeStep;
 class Node;
 class Material;
@@ -133,6 +132,5 @@ protected:
 
     virtual int giveTermIntergationRuleIndex(CharType termType);
 };
-
 } // end namespace oofem
 #endif // py1_3d_supg_h

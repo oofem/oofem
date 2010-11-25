@@ -35,7 +35,7 @@
 // file: rheoChM.C
 
 #ifndef __MAKEDEPEND
-#include <math.h>
+ #include <math.h>
 #endif
 #include "mathfem.h"
 #include "rheoChM.h"
@@ -51,7 +51,6 @@
 #include "contextioerr.h"
 
 namespace oofem {
-
 RheoChainMaterial :: RheoChainMaterial(int n, Domain *d) : StructuralMaterial(n, d),
     EparVal(), charTimes(), discreteTimeScale()
 {
@@ -95,9 +94,9 @@ RheoChainMaterial :: hasMaterialModeCapability(MaterialMode mode)
 
 void
 RheoChainMaterial :: giveRealStressVector(FloatArray &answer, MatResponseForm form,
-                                             GaussPoint *gp,
-                                             const FloatArray &totalStrain,
-                                             TimeStep *atTime)
+                                          GaussPoint *gp,
+                                          const FloatArray &totalStrain,
+                                          TimeStep *atTime)
 //
 // returns the total stress vector (in full or reduced form - form parameter)
 // of the receiver according to
@@ -105,7 +104,7 @@ RheoChainMaterial :: giveRealStressVector(FloatArray &answer, MatResponseForm fo
 // strain increment at time atTime.
 //
 {
-    FloatArray stressIncrement, stressVector, strainIncrement, reducedStrain, eigenStrain; 
+    FloatArray stressIncrement, stressVector, strainIncrement, reducedStrain, eigenStrain;
     FloatMatrix Binv;
     double Emodulus;
     RheoChainMaterialStatus *status = ( RheoChainMaterialStatus * ) this->giveStatus(gp);
@@ -171,14 +170,14 @@ RheoChainMaterial :: giveRealStressVector(FloatArray &answer, MatResponseForm fo
 
 void
 RheoChainMaterial :: computeDiscreteRelaxationFunction(FloatArray &answer,
-                                                          GaussPoint *gp,
-                                                          const FloatArray &atTimes,
-                                                          double t0, double tr)
+                                                       GaussPoint *gp,
+                                                       const FloatArray &atTimes,
+                                                       double t0, double tr)
 {
     /*
      * This functions solves numerically an integral equation of the form
      *
-     \varepsilon(t) = \int{0}{t} J(t, \Tau) d\sigma(\Tau) + \varepsilon_n(t),
+     * \varepsilon(t) = \int{0}{t} J(t, \Tau) d\sigma(\Tau) + \varepsilon_n(t),
      * (where \varepsilon_n(t) is stress-independent deformation) for the case
      * where \varepsilon(t) = 1  is kept at constant value in time.
      *
@@ -188,7 +187,7 @@ RheoChainMaterial :: computeDiscreteRelaxationFunction(FloatArray &answer,
      * tr - age of material when relaxation has begun ???
      * atTimes - at which times the relaxation function will be evaluated.
      *   WARNING: atTimes should be uniformly distributed in log time scale
-     *            and relatively dense (100 intervals) 
+     *            and relatively dense (100 intervals)
      *            in order to achieve a reasonable accuracy.
      */
 
@@ -207,15 +206,15 @@ RheoChainMaterial :: computeDiscreteRelaxationFunction(FloatArray &answer,
     sig0  = 1. / Jtrt0;
     answer.at(1) = sig0;
     si = 2;
- 
+
     totalDeltaSigma = 0.;
     for ( k = si; k <= nsteps; k++ ) {
         for ( sum = 0., i = si; i <= k - 1; i++ ) {
             if ( i == 1 ) {
-  // ??? it seems that tr plays no role because si=2 and the case
-  // i=1 or k=1 can never occur
+                // ??? it seems that tr plays no role because si=2 and the case
+                // i=1 or k=1 can never occur
                 taui = 0.5 * ( t0 + atTimes.at(i) + tr );
-            } else                                                  {
+            } else {
                 taui = t0 + 0.5 * ( atTimes.at(i) + atTimes.at(i - 1) );
             }
 
@@ -223,10 +222,10 @@ RheoChainMaterial :: computeDiscreteRelaxationFunction(FloatArray &answer,
         }
 
         if ( k == 1 ) {
-  // ??? it seems that tr plays no role because si=2 and the case
-  // i=1 or k=1 can never occur
+            // ??? it seems that tr plays no role because si=2 and the case
+            // i=1 or k=1 can never occur
             tauk = 0.5 * ( t0 + atTimes.at(k) + tr );
-        } else                                                  {
+        } else {
             tauk = t0 + 0.5 * ( atTimes.at(k) + atTimes.at(k - 1) );
         }
 
@@ -243,8 +242,8 @@ RheoChainMaterial :: computeDiscreteRelaxationFunction(FloatArray &answer,
 
 void
 RheoChainMaterial :: generateLogTimeScale(FloatArray &answer, double from, double to,
-                                             int nsteps,
-                                             int fromIncluded)
+                                          int nsteps,
+                                          int fromIncluded)
 {
     /*
      * function generates discrete times starting from time "from" to time "to"
@@ -270,7 +269,7 @@ RheoChainMaterial :: generateLogTimeScale(FloatArray &answer, double from, doubl
     help = ( log10(to - from) - almostlogZero ) / ( double ) nsteps;
     for ( i = 0; i <= nsteps; i++ ) {
         answer.at(i + i0) = __OOFEM_POW( 10., ( almostlogZero + help * i ) ) + from;
-        OOFEM_LOG_INFO( "DiscreteTimes.at %d %15.15g \n",i, answer.at(i + i0));
+        OOFEM_LOG_INFO( "DiscreteTimes.at %d %15.15g \n", i, answer.at(i + i0) );
     }
 
     if ( fromIncluded ) {
@@ -304,14 +303,14 @@ RheoChainMaterial :: giveDiscreteTimes()
 
 void
 RheoChainMaterial :: giveUnitStiffnessMatrix(FloatMatrix &answer,
-                                                     MatResponseForm form,
-                                                     GaussPoint *gp,
-                                                     TimeStep *tStep)
+                                             MatResponseForm form,
+                                             GaussPoint *gp,
+                                             TimeStep *tStep)
 {
     /*
      * Returns the stiffness matrix of an isotropic linear elastic material
      * with the given Poisson ratio (assumed to be unaffected by creep)
-     * and a unit value of Young's modulus. 
+     * and a unit value of Young's modulus.
      *
      * We call crossSection, because we need Binv matrix also for modes
      * defined at the crosssection level.
@@ -330,16 +329,15 @@ RheoChainMaterial :: giveUnitStiffnessMatrix(FloatMatrix &answer,
 
 void
 RheoChainMaterial :: giveUnitComplianceMatrix(FloatMatrix &answer,
-                                                  MatResponseForm form,
-                                                  GaussPoint *gp,
-                                                  TimeStep *tStep)
-    /*
-     * Returns the compliance matrix of an isotropic linear elastic material
-     * with the given Poisson ratio (assumed to be unaffected by creep)
-     * and a unit value of Young's modulus. 
-     */
+                                              MatResponseForm form,
+                                              GaussPoint *gp,
+                                              TimeStep *tStep)
+/*
+ * Returns the compliance matrix of an isotropic linear elastic material
+ * with the given Poisson ratio (assumed to be unaffected by creep)
+ * and a unit value of Young's modulus.
+ */
 {
-
     ( ( StructuralCrossSection * ) gp->giveCrossSection() )->
     giveCharMaterialComplianceMatrixOf(answer, form, TangentStiffness, gp,
                                        this->giveLinearElasticMaterial(),
@@ -352,7 +350,7 @@ RheoChainMaterial :: giveUnitComplianceMatrix(FloatMatrix &answer,
 double
 RheoChainMaterial :: giveEparModulus(int iChain)
 {
-    /* returns the modulus of unit number iChain, 
+    /* returns the modulus of unit number iChain,
      * previously computed by updateEparModuli() function
      */
     return EparVal.at(iChain);
@@ -366,7 +364,7 @@ RheoChainMaterial :: updateEparModuli(GaussPoint *gp, double atTime)
      * Computes moduli of individual units in the chain that provide
      * the best approximation of the relaxation or creep function,
      * depending on whether a Maxwell or Kelvin chain is used.
-      *
+     *
      * INPUTS:
      *
      * atTime - age of material when load is applied ???
@@ -393,7 +391,7 @@ RheoChainMaterial :: updateEparModuli(GaussPoint *gp, double atTime)
 
 void
 RheoChainMaterial :: computeTrueStressIndependentStrainVector(FloatArray &answer,
-                                                                 GaussPoint *gp, TimeStep *stepN, ValueModeType mode)
+                                                              GaussPoint *gp, TimeStep *stepN, ValueModeType mode)
 //
 // computes the strain due to temperature and shrinkage effects
 // (it is called "true" because the "stress-independent strain"
@@ -412,12 +410,12 @@ RheoChainMaterial :: computeTrueStressIndependentStrainVector(FloatArray &answer
 
 void
 RheoChainMaterial :: computeStressIndependentStrainVector(FloatArray &answer,
-                                                             GaussPoint *gp, TimeStep *stepN, ValueModeType mode)
+                                                          GaussPoint *gp, TimeStep *stepN, ValueModeType mode)
 //
 // computes the strain due to temperature, shrinkage and creep effects
 // (it is the strain which would occur at the end of the step if the stress
 //  during the step was held constant, so it is not really the part of strain
-//  independent of stress, but independent of the stress increment) 
+//  independent of stress, but independent of the stress increment)
 //
 // takes into account the form of the load vector assumed by engngModel (Incremental or Total Load form)
 //
@@ -461,7 +459,7 @@ RheoChainMaterial :: computeCharTimes()
      * Default value of the first relaxation time Tau(1) is chosen to be equal to 0.1 day.
      * The last relaxation time Tau(n) is chosen as 1.0e30
      * (to approximate very long processes).
-     * The second largest time Tau(n-1) is chosen as 0.75 tmax 
+     * The second largest time Tau(n-1) is chosen as 0.75 tmax
      * where tmax is the lifetime of structure or the end of the time of interest.
      * Times  Tau(2) .. Tau(n-2) are defined by uniform division to n-2 steps in the
      * log scale. It is necessary to check the condition a <= 10, where Tau(k) = a Tau(k-1)
@@ -476,13 +474,15 @@ RheoChainMaterial :: computeCharTimes()
     endTime = this->giveEndOfTimeOfInterest() + relMatAge;
     Taun1 = 0.75 * endTime;
 
-	if (this->begOfTimeOfInterest == -1) {
-		this->begOfTimeOfInterest = 0.1; //default value
-	}
-	Tau1  = begOfTimeOfInterest;
+    if ( this->begOfTimeOfInterest == -1 ) {
+        this->begOfTimeOfInterest = 0.1;         //default value
+    }
 
-	if (Tau1<=0)
-		_error("begOfTimeOfInterest must be a positive number");
+    Tau1  = begOfTimeOfInterest;
+
+    if ( Tau1 <= 0 ) {
+        _error("begOfTimeOfInterest must be a positive number");
+    }
 
     nsteps = ( int ) ( ( log(Taun1) - log(Tau1) ) / log(a) + 1. );
     if ( nsteps < 8 ) {
@@ -506,10 +506,10 @@ RheoChainMaterial :: computeCharTimes()
 
 void
 RheoChainMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
-                                                 MatResponseForm form,
-                                                 MatResponseMode mode,
-                                                 GaussPoint *gp,
-                                                 TimeStep *atTime)
+                                              MatResponseForm form,
+                                              MatResponseMode mode,
+                                              GaussPoint *gp,
+                                              TimeStep *atTime)
 {
     //
     // Returns the incremental material stiffness matrix of the receiver
@@ -522,9 +522,9 @@ RheoChainMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
 
 void
 RheoChainMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
-                                                      MatResponseForm form, MatResponseMode mode,
-                                                      GaussPoint *gp,
-                                                      TimeStep *atTime)
+                                                   MatResponseForm form, MatResponseMode mode,
+                                                   GaussPoint *gp,
+                                                   TimeStep *atTime)
 {
     //
     // Returns the incremental material stiffness matrix of the receiver
@@ -538,9 +538,9 @@ RheoChainMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
 
 void
 RheoChainMaterial :: givePlaneStressStiffMtrx(FloatMatrix &answer,
-                                                 MatResponseForm form, MatResponseMode mode,
-                                                 GaussPoint *gp,
-                                                 TimeStep *atTime)
+                                              MatResponseForm form, MatResponseMode mode,
+                                              GaussPoint *gp,
+                                              TimeStep *atTime)
 {
     //
     // Returns the incremental material stiffness matrix of the receiver
@@ -552,9 +552,9 @@ RheoChainMaterial :: givePlaneStressStiffMtrx(FloatMatrix &answer,
 
 void
 RheoChainMaterial :: givePlaneStrainStiffMtrx(FloatMatrix &answer,
-                                                 MatResponseForm form, MatResponseMode mode,
-                                                 GaussPoint *gp,
-                                                 TimeStep *atTime)
+                                              MatResponseForm form, MatResponseMode mode,
+                                              GaussPoint *gp,
+                                              TimeStep *atTime)
 {
     //
     // Returns the incremental material stiffness matrix of the receiver
@@ -567,9 +567,9 @@ RheoChainMaterial :: givePlaneStrainStiffMtrx(FloatMatrix &answer,
 
 void
 RheoChainMaterial :: give1dStressStiffMtrx(FloatMatrix &answer,
-                                              MatResponseForm form, MatResponseMode mode,
-                                              GaussPoint *gp,
-                                              TimeStep *atTime)
+                                           MatResponseForm form, MatResponseMode mode,
+                                           GaussPoint *gp,
+                                           TimeStep *atTime)
 {
     //
     // Returns the incremental material stiffness matrix of the receiver
@@ -582,9 +582,9 @@ RheoChainMaterial :: give1dStressStiffMtrx(FloatMatrix &answer,
 
 void
 RheoChainMaterial :: give2dBeamLayerStiffMtrx(FloatMatrix &answer,
-                                                 MatResponseForm form, MatResponseMode mode,
-                                                 GaussPoint *gp,
-                                                 TimeStep *atTime)
+                                              MatResponseForm form, MatResponseMode mode,
+                                              GaussPoint *gp,
+                                              TimeStep *atTime)
 {
     //
     // Returns the incremental material stiffness matrix of the receiver
@@ -597,9 +597,9 @@ RheoChainMaterial :: give2dBeamLayerStiffMtrx(FloatMatrix &answer,
 
 void
 RheoChainMaterial :: give2dPlateLayerStiffMtrx(FloatMatrix &answer,
-                                                  MatResponseForm form, MatResponseMode mode,
-                                                  GaussPoint *gp,
-                                                  TimeStep *atTime)
+                                               MatResponseForm form, MatResponseMode mode,
+                                               GaussPoint *gp,
+                                               TimeStep *atTime)
 {
     //
     // Returns the incremental material stiffness matrix of the receiver
@@ -612,9 +612,9 @@ RheoChainMaterial :: give2dPlateLayerStiffMtrx(FloatMatrix &answer,
 
 void
 RheoChainMaterial :: give3dShellLayerStiffMtrx(FloatMatrix &answer,
-                                                  MatResponseForm form, MatResponseMode mode,
-                                                  GaussPoint *gp,
-                                                  TimeStep *atTime)
+                                               MatResponseForm form, MatResponseMode mode,
+                                               GaussPoint *gp,
+                                               TimeStep *atTime)
 {
     //
     // Returns the incremental material stiffness matrix of the receiver
@@ -683,7 +683,7 @@ contextIOResultType
 RheoChainMaterial :: saveContext(DataStream *stream, ContextMode mode, void *obj)
 //
 // saves full status for this material, also invokes saving
-// for sub-objects of this 
+// for sub-objects of this
 {
     contextIOResultType iores;
 
@@ -707,7 +707,7 @@ contextIOResultType
 RheoChainMaterial :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
 //
 // reads full status for this material, also invokes reading
-// of sub-objects of this 
+// of sub-objects of this
 //
 {
     contextIOResultType iores;
@@ -729,7 +729,7 @@ RheoChainMaterial :: restoreContext(DataStream *stream, ContextMode mode, void *
 /****************************************************************************************/
 
 RheoChainMaterialStatus :: RheoChainMaterialStatus(int n, Domain *d,
-                                                         GaussPoint *g, int nunits) :
+                                                   GaussPoint *g, int nunits) :
     StructuralMaterialStatus(n, d, g), shrinkageStrain() {
     // constructor
     int i;
@@ -892,5 +892,4 @@ RheoChainMaterialStatus :: restoreContext(DataStream *stream, ContextMode mode, 
 
     return CIO_OK;
 }
-
 } // end namespace oofem

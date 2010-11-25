@@ -65,7 +65,6 @@
 #endif
 
 namespace oofem {
-
 #define nrsolver_ERROR_NORM_SMALL_NUM 1.e-6
 #define NRSOLVER_MAX_REL_ERROR_BOUND 1.e10
 #define NRSOLVER_MAX_RESTARTS 4
@@ -269,11 +268,11 @@ restart:
         rhs.substract(F);
         // account for quasi BC
         for ( int ii = 1; ii <= numberOfPrescribedDofs; ii++ ) {
-          rhs.at( prescribedEqs.at(ii) ) = 0.0;
+            rhs.at( prescribedEqs.at(ii) ) = 0.0;
         }
-        
+
         // convergency check
-        converged = this->checkConvergence(RT, *F, rhs, deltaR, *r, RRT, internalForcesEBENorm, nite, errorOutOfRangeFlag, tNow);
+        converged = this->checkConvergence(RT, * F, rhs, deltaR, * r, RRT, internalForcesEBENorm, nite, errorOutOfRangeFlag, tNow);
 
 
         if ( ( nite >= nsmax ) || errorOutOfRangeFlag ) {
@@ -711,7 +710,7 @@ NRSolver :: applyConstraintsToLoadIncrement(int nite, const SparseMtrx *k, Float
         //factor -= engngModel->giveDomain(1)->giveLoadTimeFunction(prescribedDisplacementLTF)->
         // at(atTime->givePreviousStep()->giveTime()) ;
         factor -= engngModel->giveDomain(1)->giveLoadTimeFunction(prescribedDisplacementLTF)->
-        __at( atTime->giveTime() - atTime->giveTimeIncrement() );
+                  __at( atTime->giveTime() - atTime->giveTimeIncrement() );
     }
 
     if ( nite == 1 ) {
@@ -810,9 +809,9 @@ NRSolver :: printState(FILE *outputStream)
 
 #if 1
 bool
-NRSolver :: checkConvergence(FloatArray &RT, FloatArray &F,FloatArray &rhs,  FloatArray &deltaR, FloatArray &r,
-                             double RRT, double internalForcesEBENorm, 
-			     int nite, bool &errorOutOfRange, TimeStep *tNow)
+NRSolver :: checkConvergence(FloatArray &RT, FloatArray &F, FloatArray &rhs,  FloatArray &deltaR, FloatArray &r,
+                             double RRT, double internalForcesEBENorm,
+                             int nite, bool &errorOutOfRange, TimeStep *tNow)
 {
     int _dg, _idofman, _ielem, _idof, _eq, _ndof, _ng = nccdg;
     int ndofman = domain->giveNumberOfDofManagers();
@@ -834,14 +833,14 @@ NRSolver :: checkConvergence(FloatArray &RT, FloatArray &F,FloatArray &rhs,  Flo
  #endif
 
     /*
-      The force arrors are (if possible) evaluated as relative errors.
-      If the norm of applied load vector is zero (one may load by temperature, etc)
-      then the norm of reaction forces is used in relative norm evaluation.
-      
-      Note: This is done only when all dofs are included (nccdg = 0). Not implemented if 
-      multiple convergence criteia are used.
-
-    */
+     * The force arrors are (if possible) evaluated as relative errors.
+     * If the norm of applied load vector is zero (one may load by temperature, etc)
+     * then the norm of reaction forces is used in relative norm evaluation.
+     *
+     * Note: This is done only when all dofs are included (nccdg = 0). Not implemented if
+     * multiple convergence criteia are used.
+     *
+     */
 
     answer = true;
     errorOutOfRange = false;
@@ -1018,54 +1017,55 @@ NRSolver :: checkConvergence(FloatArray &RT, FloatArray &F,FloatArray &rhs,  Flo
         // we compute a relative error norm
         if ( ( RRT ) > nrsolver_ERROR_NORM_SMALL_NUM ) {
             forceErr = sqrt( forceErr / ( RRT ) );
-        } else if (internalForcesEBENorm > nrsolver_ERROR_NORM_SMALL_NUM ) {
-	    forceErr = sqrt( forceErr / internalForcesEBENorm );
-	} else {
-	  forceErr = sqrt(forceErr); // absolute norm as last resort
-	}
-
-#if 0 
-          // load vector norm close to zero
-          // try to take norm of reactions instead
-
+        } else if ( internalForcesEBENorm > nrsolver_ERROR_NORM_SMALL_NUM ) {
+            forceErr = sqrt(forceErr / internalForcesEBENorm);
         } else {
-          FloatArray reactions;
-          int i, di = 1; // hard wired domain index =  1
-          // ask emodel to evaluate reactions
-          ((StructuralEngngModel *)engngModel)->computeReactions(reactions, tNow, di);
-          // compute corresponding norm
-          double RN;
-
-#ifdef __PARALLEL_MODE
- #ifdef __PETSC_MODULE
-          double myRN = 0.0;
-          for ( i = 1; i <= reactions.giveSize(); i++ ) {
-            if ( n2l_prescribed->giveNewEq(i) ) {
-              myRN += reactions.at(i) * reactions.at(i);
-            }
-          }
-
-          // account for quasi bc reactions
-          for (i = 1; i <= numberOfPrescribedDofs; i++ ) {
-            myRN += F.at(prescribedEqs.at(i)) * F.at(prescribedEqs.at(i));
-          }
-
-          MPI_Allreduce(& myRN, & RN, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
- #endif
-#else
-          RN = dotProduct(reactions, reactions, reactions.giveSize());
-          // account for quasi bc reactions
-          for (i = 1; i <= numberOfPrescribedDofs; i++ ) {
-            RN+= F.at(prescribedEqs.at(i)) * F.at(prescribedEqs.at(i));
-          }
-#endif // __PARALLEL_MODE
-          if ( RN > nrsolver_ERROR_NORM_SMALL_NUM ) {
-            forceErr = sqrt( forceErr / ( RN ) );
-          } else {
             forceErr = sqrt(forceErr); // absolute norm as last resort
-          }
         }
-#endif // if 0
+
+ #if 0
+        // load vector norm close to zero
+        // try to take norm of reactions instead
+    } else {
+        FloatArray reactions;
+        int i, di = 1;   // hard wired domain index =  1
+        // ask emodel to evaluate reactions
+        ( ( StructuralEngngModel * ) engngModel )->computeReactions(reactions, tNow, di);
+        // compute corresponding norm
+        double RN;
+
+  #ifdef __PARALLEL_MODE
+   #ifdef __PETSC_MODULE
+        double myRN = 0.0;
+        for ( i = 1; i <= reactions.giveSize(); i++ ) {
+            if ( n2l_prescribed->giveNewEq(i) ) {
+                myRN += reactions.at(i) * reactions.at(i);
+            }
+        }
+
+        // account for quasi bc reactions
+        for ( i = 1; i <= numberOfPrescribedDofs; i++ ) {
+            myRN += F.at( prescribedEqs.at(i) ) * F.at( prescribedEqs.at(i) );
+        }
+
+        MPI_Allreduce(& myRN, & RN, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
+   #endif
+  #else
+        RN = dotProduct( reactions, reactions, reactions.giveSize() );
+        // account for quasi bc reactions
+        for ( i = 1; i <= numberOfPrescribedDofs; i++ ) {
+            RN += F.at( prescribedEqs.at(i) ) * F.at( prescribedEqs.at(i) );
+        }
+
+  #endif // __PARALLEL_MODE
+        if ( RN > nrsolver_ERROR_NORM_SMALL_NUM ) {
+            forceErr = sqrt( forceErr / ( RN ) );
+        } else {
+            forceErr = sqrt(forceErr); // absolute norm as last resort
+        }
+    }
+
+ #endif // if 0
 
         // compute displacement error
         //

@@ -42,16 +42,15 @@
 
 #ifdef __PARALLEL_MODE
 
-#include "parallel.h"
+ #include "parallel.h"
 
 namespace oofem {
-
 class IntArray;
 class FloatArray;
 class FloatMatrix;
 
 
-#define __CommunicationBuffer_ALLOC_CHUNK 1024
+ #define __CommunicationBuffer_ALLOC_CHUNK 1024
 /**
  * Type with size equal to one byte (sizeof (ComBuff_BYTE_TYPE) should be 1).
  * Communication buffer buffer member is of this type.
@@ -506,7 +505,7 @@ public:
      * @param tag contain the tag of received message
      * @return true if operation complete, false otherwise.
      */
-    int testCompletion(int &source, int &tag) {return MPIBuffer :: testCompletion(source, tag); }
+    int testCompletion(int &source, int &tag) { return MPIBuffer :: testCompletion(source, tag); }
 
     /**
      * Waits until a completion of a nonblocking communication. The completion of a send operation indicates that the sender is
@@ -516,7 +515,7 @@ public:
      * then the object is deallocated by the call to MPI_WAIT and the request handle is set to MPI_REQUEST_NULL.
      *
      */
-    virtual int waitCompletion() {return MPIBuffer :: waitCompletion(); };
+    virtual int waitCompletion() { return MPIBuffer :: waitCompletion(); };
     /**
      * Initalizes broadcast over colaborating processes.
      * The whole buffer size is broadcasted. All buffers participating in broadcast
@@ -527,7 +526,6 @@ public:
     virtual int bcast(int root) { return MPIBuffer :: bcast(this->communicator, root); }
     //@}
 };
-
 } // end namespace oofem
 #endif
 #endif // combuff_h

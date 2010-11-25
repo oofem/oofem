@@ -41,7 +41,6 @@
 #include "timestep.h"
 
 namespace oofem {
-
 IRResultType
 ConstantEdgeLoad :: initializeFrom(InputRecord *ir)
 {
@@ -77,5 +76,4 @@ ConstantEdgeLoad :: computeValueAt(FloatArray &answer, TimeStep *stepN, FloatArr
     answer.times(factor);
     return;
 }
-
 } // end namespace oofem

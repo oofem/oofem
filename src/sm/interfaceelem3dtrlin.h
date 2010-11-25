@@ -41,7 +41,6 @@
 #include "fei2dtrlin.h"
 
 namespace oofem {
-
 /*
  * This class implements 3d triangular surface interface element with linear interpolation.
  */
@@ -68,7 +67,7 @@ public:
     virtual int computeLocalCoordinates(FloatArray &answer, const FloatArray &gcoords);
 
     virtual int            computeNumberOfDofs(EquationID ut) { return 18; }
-    virtual void           giveDofManDofIDMask(int inode, EquationID, IntArray &) const;
+    virtual void giveDofManDofIDMask(int inode, EquationID, IntArray &) const;
 
     double        computeVolumeAround(GaussPoint *);
 
@@ -80,7 +79,7 @@ public:
 
 #ifdef __OOFEG
     void          drawRawGeometry(oofegGraphicContext &);
-    void          drawDeformedGeometry(oofegGraphicContext &, UnknownType);
+    void drawDeformedGeometry(oofegGraphicContext &, UnknownType);
     void          drawScalar(oofegGraphicContext &context);
 #endif
     //
@@ -92,7 +91,7 @@ public:
     Element_Geometry_Type giveGeometryType() const { return EGT_triangle_1; }
 
     integrationDomain  giveIntegrationDomain() { return _Triangle; }
-    MaterialMode          giveMaterialMode()  {return _3dInterface;}
+    MaterialMode          giveMaterialMode()  { return _3dInterface; }
 
 protected:
     void          computeBmatrixAt(GaussPoint *, FloatMatrix &, int = 1, int = ALL_STRAINS);
@@ -110,6 +109,5 @@ protected:
     int          computeGtoLRotationMatrix(FloatMatrix &answer);
     void         computeLCS(FloatMatrix &answer);
 };
-
 } // end namespace oofem
 #endif // interfaceelem3dtrlin_h

@@ -42,7 +42,6 @@
 #include "flotarry.h"
 
 namespace oofem {
-
 void
 SimpleCrossSection ::  giveRealStresses(FloatArray &answer, MatResponseForm form, GaussPoint *gp,
                                         const FloatArray &totalStrain, TimeStep *tStep)
@@ -302,14 +301,13 @@ SimpleCrossSection :: give(CrossSectionProperty aProperty)
 {
     double value = 0.0;
 
-     if ( aProperty == CS_Area ) {
+    if ( aProperty == CS_Area ) {
         if ( propertyDictionary->includes(CS_Area) ) {
             return propertyDictionary->at(CS_Area);
         } else {
             return this->give(CS_Thickness) * this->give(CS_Width);
         }
-    }
-    else if ( propertyDictionary->includes(aProperty) ) {
+    } else if ( propertyDictionary->includes(aProperty) )   {
         value = propertyDictionary->at(aProperty);
     } else {
         OOFEM_ERROR("SimpleCrossSection :: give: property not defined");
@@ -396,5 +394,4 @@ SimpleCrossSection :: computeStressIndependentStrainVector(FloatArray &answer,
      */
     mat->computeStressIndependentStrainVector(answer, gp, stepN, mode);
 }
-
 } // end namespace oofem

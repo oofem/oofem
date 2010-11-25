@@ -46,14 +46,13 @@
 #include "elementside.h"
 #include "dof.h"
 #ifndef __MAKEDEPEND
-#include <stdio.h>
+ #include <stdio.h>
 #endif
 
 #include "verbose.h"
 #include "skyline.h"
 
 namespace oofem {
-
 NumericalMethod *DIIDynamic :: giveNumericalMethod(TimeStep *)
 // only one has reason for DIIDynamic
 //     - SolutionOfLinearEquations
@@ -183,7 +182,7 @@ void DIIDynamic :: solveYourselfAt(TimeStep *tStep) {
          * delete mht;
          */
         stiffnessMatrix = new Skyline();
-        stiffnessMatrix->buildInternalStructure(this, 1, EID_MomentumBalance, EModelDefaultEquationNumbering());
+        stiffnessMatrix->buildInternalStructure( this, 1, EID_MomentumBalance, EModelDefaultEquationNumbering() );
         massMatrix = stiffnessMatrix->GiveCopy();
 
         this->assemble(massMatrix, tStep, EID_MomentumBalance, MassMatrix, EModelDefaultEquationNumbering(), domain);
@@ -270,8 +269,8 @@ void DIIDynamic :: solveYourselfAt(TimeStep *tStep) {
         // assemble LHS of problem ( K* = K + a0*M)
         //
 
-        this->assemble(stiffnessMatrix, tStep, EID_MomentumBalance, DIIModifiedStiffnessMatrix, 
-		       EModelDefaultEquationNumbering(), domain);
+        this->assemble(stiffnessMatrix, tStep, EID_MomentumBalance, DIIModifiedStiffnessMatrix,
+                       EModelDefaultEquationNumbering(), domain);
         /*
          *  Element* element;
          *  IntArray* loc ;
@@ -304,14 +303,14 @@ void DIIDynamic :: solveYourselfAt(TimeStep *tStep) {
     loadVector.resize( this->giveNumberOfEquations(EID_MomentumBalance) );
     loadVector.zero();
 
-    this->assembleVectorFromElements(loadVector, tStep, EID_MomentumBalance, ElementForceLoadVector, 
-				     VM_Total, EModelDefaultEquationNumbering(), domain);
+    this->assembleVectorFromElements(loadVector, tStep, EID_MomentumBalance, ElementForceLoadVector,
+                                     VM_Total, EModelDefaultEquationNumbering(), domain);
 
     //
     // assembling the nodal part of load vector
     //
-    this->assembleVectorFromDofManagers(loadVector, tStep, EID_MomentumBalance, NodalLoadVector, 
-					VM_Total, EModelDefaultEquationNumbering(), domain);
+    this->assembleVectorFromDofManagers(loadVector, tStep, EID_MomentumBalance, NodalLoadVector,
+                                        VM_Total, EModelDefaultEquationNumbering(), domain);
 
     //
     // assembling modified load vector
@@ -319,15 +318,15 @@ void DIIDynamic :: solveYourselfAt(TimeStep *tStep) {
     help.resize( this->giveNumberOfEquations(EID_MomentumBalance) );
     for ( i = 1; i <= neq; i++ ) {
         help.at(i) = a1 * displacementVector.at(i) +
-        a2 *velocityVector.at(i)     +
-        a3 *accelerationVector.at(i);
+                     a2 *velocityVector.at(i)     +
+                     a3 *accelerationVector.at(i);
     }
 
     massMatrix->times(help, rhs);
     //delete help;
     for ( i = 1; i <= neq; i++ ) {
         rhs.at(i) += previousLoadVector.at(i) +
-        Psi * ( loadVector.at(i) - previousLoadVector.at(i) );
+                     Psi * ( loadVector.at(i) - previousLoadVector.at(i) );
         // store load vector
         previousLoadVector.at(i) = loadVector.at(i);
     }
@@ -356,11 +355,11 @@ void DIIDynamic :: solveYourselfAt(TimeStep *tStep) {
     //
     for ( i = 1; i <= neq; i++ ) {
         rhs.at(i) = a4 * help.at(i) + a5 *displacementVector.at(i) +
-        a6 *velocityVector.at(i) +
-        a7 *accelerationVector.at(i);
+                    a6 *velocityVector.at(i) +
+                    a7 *accelerationVector.at(i);
         displacementVector.at(i) += deltaT * velocityVector.at(i) +
-        a9 *accelerationVector.at(i) +
-        a10 *rhs.at(i);
+                                    a9 *accelerationVector.at(i) +
+                                    a10 *rhs.at(i);
         velocityVector.at(i) += a8 * ( accelerationVector.at(i) + rhs.at(i) );
         accelerationVector.at(i) = rhs.at(i);
     }
@@ -413,5 +412,4 @@ DIIDynamic :: printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *atTime)
 
     iDof->printMultipleOutputAt(stream, atTime, dofchar, EID_MomentumBalance, dofmodes, 3);
 }
-
 } // end namespace oofem

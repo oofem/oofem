@@ -49,7 +49,6 @@
 #include "element.h"
 
 namespace oofem {
-
 class GaussPoint;
 
 
@@ -99,13 +98,16 @@ protected:
 public:
 
     OrthotropicLinearElasticMaterial(int n, Domain *d) : LinearElasticMaterial(n, d)
-    { localCoordinateSystem = NULL;
-      helpPlaneNormal = NULL;
-      cs_type = unknownCS; }
+    {
+        localCoordinateSystem = NULL;
+        helpPlaneNormal = NULL;
+        cs_type = unknownCS;
+    }
     ~OrthotropicLinearElasticMaterial()
-    { if ( localCoordinateSystem ) { delete localCoordinateSystem; }
+    {
+        if ( localCoordinateSystem ) { delete localCoordinateSystem; }
 
-      if ( helpPlaneNormal ) { delete helpPlaneNormal; } }
+        if ( helpPlaneNormal ) { delete helpPlaneNormal; } }
 
     void giveThermalDilatationVector(FloatArray &answer, GaussPoint *, TimeStep *);
 
@@ -115,7 +117,7 @@ public:
     IRResultType initializeFrom(InputRecord *ir);
 
     // non-standard - returns time independent material constant
-    double   give(int, GaussPoint*);
+    double   give(int, GaussPoint *);
 
     void give3dMaterialStiffnessMatrix(FloatMatrix & answer,
                                        MatResponseForm, MatResponseMode, GaussPoint * gp,
@@ -144,6 +146,5 @@ protected:
 
     friend class CrossSection;
 };
-
 } // end namespace oofem
 #endif // ortholinearelasticmaterial_h

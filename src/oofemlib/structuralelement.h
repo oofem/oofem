@@ -55,7 +55,6 @@
 #include "dofmantransftype.h"
 
 namespace oofem {
-
 #define ALL_STRAINS -1
 
 class TimeStep;
@@ -75,7 +74,7 @@ class IDNLMaterial;
  * The general implementation provided here is intended for both linear and nonlinear computations.
  * At this level, only material model nonlinearities are taken into account. If particular element type
  * will participate in geometrically - nonlinear computation, it should be derived from derived
- \ref NLStructuralElement class, which provide support for this cases.
+ * \ref NLStructuralElement class, which provide support for this cases.
  */
 class StructuralElement : public Element
 {
@@ -123,7 +122,7 @@ protected:
     /// element activity ltf, if defined, nonzero value indicates active receiver, zero value inactive element
     int activityLtf;
     /// initial displacement vector, describes the initial nodal displacements when element has been casted
-    FloatArray* initialDisplacements;
+    FloatArray *initialDisplacements;
 public:
     /**
      * Constructor. Creates structural element with given number, belonging to given domain.
@@ -201,11 +200,13 @@ public:
      * @returns zero sized mask
      */
     virtual void          giveMassMtrxIntegrationgMask(IntArray &answer)
-    { answer.resize(0);
-      return; }
+    {
+        answer.resize(0);
+        return;
+    }
     /**
      * Computes numerically stiffness matrix of receiver. Default implementation computes element stiffness using
-     \f$K=\int_v B^T D B dV\f$ formulae, where \f$B\f$ is element geometric matrix and \f$D\f$ is material stiffness matrix.
+     * \f$K=\int_v B^T D B dV\f$ formulae, where \f$B\f$ is element geometric matrix and \f$D\f$ is material stiffness matrix.
      * No geometrical nonlinearity is taken into account. NUmerical integration procedure uses integrationRulesArray
      * for numerical integration. Support for reduced or selected integration is implemented. The individual integration
      * rules are assumed to correspond to different terms from which the overall matrix is assembled.
@@ -244,7 +245,7 @@ public:
      * @param tStep time step
      */
     void          computeStiffnessMatrix_withIRulesAsSubcells(FloatMatrix &answer,
-							      MatResponseMode rMode, TimeStep *tStep);
+                                                              MatResponseMode rMode, TimeStep *tStep);
 
     /**
      * Computes initial stress matrix for linear stability problem.
@@ -255,8 +256,10 @@ public:
      * @param tStep time step.
      */
     virtual void          computeInitialStressMatrix(FloatMatrix &answer, TimeStep *tStep)
-    { _error("computeInitialStressMatrix: not implemented");
-      return; }
+    {
+        _error("computeInitialStressMatrix: not implemented");
+        return;
+    }
 
     // load vector
     /**
@@ -315,7 +318,7 @@ public:
      * (fast, but engineering model must ensure valid status data in each integration point).
      */
     virtual void giveInternalForcesVector_withIRulesAsSubcells(FloatArray &answer,
-							       TimeStep *, int useUpdatedGpRecord = 0);
+                                                               TimeStep *, int useUpdatedGpRecord = 0);
 
     /**
      * Compute strain vector of receiver evaluated at given integration point at time
@@ -369,7 +372,7 @@ public:
      * other IP (generally belonging to different elements) and as a consequence leads to
      * increase of stiffness matrix profile, to take into account this "remote" dependency.
      */
-    virtual void giveNonlocalLocationArray(IntArray &locationArray, const UnknownNumberingScheme&);
+    virtual void giveNonlocalLocationArray(IntArray &locationArray, const UnknownNumberingScheme &);
     /**
      * Adds the "nonlocal" contribution to stiffness matrix, to account for nonlocality of
      * material model. Typically, this contribution is obtained by summing up mutual IP contributions.
@@ -425,12 +428,11 @@ public:
      */
     bool   isActivated(TimeStep *atTime)
     {
-      if (activityLtf) {
-	if (atTime) return (domain->giveLoadTimeFunction(activityLtf)->evaluate(atTime, VM_Total) > 1.e-3);
-	else return 0.0;
-      } else {
-	return 1.0;
-      }
+        if ( activityLtf ) {
+            if ( atTime ) { return ( domain->giveLoadTimeFunction(activityLtf)->evaluate(atTime, VM_Total) > 1.e-3 ); } else { return 0.0; }
+        } else {
+            return 1.0;
+        }
     }
 
     ///Initializes receiver acording to object description stored in input record.
@@ -441,7 +443,7 @@ public:
     classType                giveClassID() const
     { return StructuralElementClass; }
     /*      int                   giveNumber ()
-     * { return FEMComponent::giveNumber() ;} */
+    * { return FEMComponent::giveNumber() ;} */
 
 #ifdef __OOFEG
     /**
@@ -658,8 +660,10 @@ protected:
      * If no transformation is necessary, answer is empty matrix (default);
      * @return nonzero if transformation matrix is not empty matrix, zero otherwise
      */
-    virtual int  computeLoadGToLRotationMtrx(FloatMatrix &answer) { answer.beEmptyMtrx();
-                                                                    return 0; }
+    virtual int  computeLoadGToLRotationMtrx(FloatMatrix &answer) {
+        answer.beEmptyMtrx();
+        return 0;
+    }
     // Local edge (LE-local Edge c.s) or surface (LS-local surface c.s) c.s
     // to element local c.s for load vector dofs
     /**
@@ -671,8 +675,10 @@ protected:
      * @param gp integration point (point, where transformation is computed, usefull for curved edges)
      * @return nonzero if transformation matrix is not empty matrix, zero otherwise
      */
-    virtual int  computeLoadLEToLRotationMatrix(FloatMatrix &answer, int, GaussPoint *) { answer.beEmptyMtrx();
-                                                                                          return 0; }
+    virtual int  computeLoadLEToLRotationMatrix(FloatMatrix &answer, int, GaussPoint *) {
+        answer.beEmptyMtrx();
+        return 0;
+    }
     /**
      * Returns transformation matrix from local surface c.s  to element local coordinate system
      * of load vector components. Necessary, because integration must be done in local coordinate
@@ -682,8 +688,10 @@ protected:
      * @param gp integration point (point, where transformation is computed, usefull for curved surfaces)
      * @return nonzero if transformation matrix is not empty matrix, zero otherwise
      */
-    virtual int  computeLoadLSToLRotationMatrix(FloatMatrix &answer, int, GaussPoint *) { answer.beEmptyMtrx();
-                                                                                          return 0; }
+    virtual int  computeLoadLSToLRotationMatrix(FloatMatrix &answer, int, GaussPoint *) {
+        answer.beEmptyMtrx();
+        return 0;
+    }
     // END edge and surface load support
     //@}
 
@@ -740,7 +748,7 @@ protected:
      * taking into account also possible local - coordinate system in some elements
      * nodes.
      * Default implementation uses \ref computeGtoLRotationMatrix and
-     \ref computeGNDofRotationMatrix  services to compute result.
+     * \ref computeGNDofRotationMatrix  services to compute result.
      * Default implementation uses cached rotation matrix in
      * rotationMatrix attribute, so rotation matrix is computed only once.
      * @return nonzero if transformation is necessary.
@@ -754,8 +762,10 @@ protected:
      * then answer is empty mtrx and zero value is returned.
      * @return nonzero if transformation is necessary, zero otherwise.
      */
-    virtual int  computeGtoLRotationMatrix(FloatMatrix &answer) { answer.beEmptyMtrx();
-                                                                  return 0; }
+    virtual int  computeGtoLRotationMatrix(FloatMatrix &answer) {
+        answer.beEmptyMtrx();
+        return 0;
+    }
     // give Transformation matrix from global coord. syst. to local coordinate system in nodes.
     // i.e. r(n)=T r(g), if no trasformation necessary sets answer to empty mtrx.
     /**
@@ -804,6 +814,5 @@ protected:
     friend  class IDNLMaterial;
     friend  class TrabBoneNL3D;
 };
-
 } // end namespace oofem
 #endif // structuralelement_h

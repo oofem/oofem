@@ -47,8 +47,8 @@
 #include "elementside.h"
 #include "dof.h"
 #ifndef __MAKEDEPEND
-#include <stdio.h>
-#include <math.h>
+ #include <stdio.h>
+ #include <math.h>
 #endif
 
 #include "verbose.h"
@@ -57,7 +57,6 @@
 #include "contextioerr.h"
 
 namespace oofem {
-
 #define ZERO_REL_MASS  1.E-6
 
 
@@ -191,7 +190,7 @@ void NlDEIDynamic :: solveYourselfAt(TimeStep *tStep) {
         // first step  assemble mass Matrix
         //
         FloatMatrix charMtrx, charMtrx2;
-	EModelDefaultEquationNumbering en;
+        EModelDefaultEquationNumbering en;
         massMatrix.resize(neq);
         massMatrix.zero();
         for ( i = 1; i <= nelem; i++ ) {
@@ -313,9 +312,9 @@ void NlDEIDynamic :: solveYourselfAt(TimeStep *tStep) {
             loadRefVector.zero();
 
             this->assembleVectorFromElements(loadRefVector, tStep, EID_MomentumBalance, ElementForceLoadVector, VM_Total,
-					     EModelDefaultEquationNumbering(), domain);
+                                             EModelDefaultEquationNumbering(), domain);
             this->assembleVectorFromDofManagers(loadRefVector, tStep, EID_MomentumBalance, NodalLoadVector, VM_Total,
-						EModelDefaultEquationNumbering(), domain);
+                                                EModelDefaultEquationNumbering(), domain);
 
             // compute the load vector norm pMp
             this->pMp = 0.0;
@@ -420,9 +419,9 @@ void NlDEIDynamic :: solveYourselfAt(TimeStep *tStep) {
         loadVector.zero();
 
         this->assembleVectorFromElements(loadVector, tStep, EID_MomentumBalance, ElementForceLoadVector, VM_Total,
-					 EModelDefaultEquationNumbering(), domain);
+                                         EModelDefaultEquationNumbering(), domain);
         this->assembleVectorFromDofManagers(loadVector, tStep, EID_MomentumBalance, NodalLoadVector, VM_Total,
-					    EModelDefaultEquationNumbering(), domain);
+                                            EModelDefaultEquationNumbering(), domain);
         //
         // assembling additional parts of right hand side
         //
@@ -481,11 +480,11 @@ void NlDEIDynamic :: solveYourselfAt(TimeStep *tStep) {
 
     for ( i = 1; i <= neq; i++ ) {
         incrementOfDisplacementVector.at(i) = loadVector.at(i) /
-        ( massMatrix.at(i) * ( c1 + dumpingCoef * c2 ) );
+                                              ( massMatrix.at(i) * ( c1 + dumpingCoef * c2 ) );
         accelerationVector.at(i) = incrementOfDisplacementVector.at(i) -
-        previousIncrementOfDisplacementVector.at(i);
+                                   previousIncrementOfDisplacementVector.at(i);
         velocityVector.at(i) = incrementOfDisplacementVector.at(i) +
-        previousIncrementOfDisplacementVector.at(i);
+                               previousIncrementOfDisplacementVector.at(i);
     }
 
     accelerationVector.times(c1);
@@ -668,5 +667,4 @@ NlDEIDynamic :: terminate(TimeStep *tStep)
     StructuralEngngModel :: terminate(tStep);
     this->printReactionForces(tStep, 1);
 }
-
 } // end namespace oofem

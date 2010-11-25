@@ -173,8 +173,10 @@ public:
      * @param ut unknown type
      */
     virtual int buildInternalStructure(EngngModel *eModel, int di, EquationID, const UnknownNumberingScheme &r_s,
-                                       const UnknownNumberingScheme &c_s) { OOFEM_ERROR("Not implemented");
-                                                                            return 0; }
+                                       const UnknownNumberingScheme &c_s) {
+        OOFEM_ERROR("Not implemented");
+        return 0;
+    }
     // virtual int assemble (FloatMatrix*, IntArray*) = 0;
     /**
      * Assembles sparse matrix from contribution of local elements. This method for

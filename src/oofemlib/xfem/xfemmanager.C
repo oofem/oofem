@@ -27,14 +27,13 @@
 #include "patchintegrationrule.h"
 
 namespace oofem {
-
 XfemManager :: XfemManager(EngngModel *emodel, int domainIndex) {
     this->emodel = emodel;
     this->domainIndex = domainIndex;
     this->enrichmentFunctionList = new AList< EnrichmentFunction >(0);
     this->enrichmentItemList = new AList< EnrichmentItem >(0);
     this->geometryList = new AList< BasicGeometry >(0);
-    this->fictPosition = new AList<IntArray>();
+    this->fictPosition = new AList< IntArray >();
     numberOfEnrichmentItems = 0;
     numberOfEnrichmentFunctions = 0;
     numberOfGeometryItems = 0;
@@ -115,24 +114,25 @@ int XfemManager :: computeFictPosition() {
     int count = this->giveDomain()->giveEngngModel()->giveNumberOfEquations(EID_MomentumBalance);
     IntArray edofs;
     for ( int j = 1; j <= nrNodes; j++ ) {
-      IntArray *dofs = new IntArray();
+        IntArray *dofs = new IntArray();
 
-      for(int i = 1; i <= this->enrichmentItemList->giveSize(); i++){
+        for ( int i = 1; i <= this->enrichmentItemList->giveSize(); i++ ) {
+            int dofSize = enrichmentItemList->at(i)->getDofIdArray()->giveSize();
+            if ( enrichmentItemList->at(i)->isDofManEnriched(j) ) {
+                edofs.resize(dofSize);
+                for ( int k = 1; k <= dofSize; k++ ) {
+                    count++;
+                    edofs.at(k) = count;
+                }
 
-        int dofSize = enrichmentItemList->at(i)->getDofIdArray()->giveSize();
-	if(enrichmentItemList->at(i)->isDofManEnriched(j)){
-	  edofs.resize(dofSize);
-	  for(int k = 1; k <= dofSize; k++){
-	    count++;
-	    edofs.at(k) = count;
-	  }               
-	  dofs->followedBy(edofs);
-	}
-      }
-      fictPosition->put(j,dofs);
+                dofs->followedBy(edofs);
+            }
+        }
+
+        fictPosition->put(j, dofs);
     }
+
     return count;
-    
 }
 
 bool XfemManager :: isEnriched(int nodeNumber) {
@@ -162,12 +162,12 @@ XfemManager :: XfemType XfemManager :: computeNodeEnrichmentType(int nodeNumber)
         ret = STANDARD;
     } else if ( intersectionCount == 1 ) {
         ret = TIP;
-    } else if ( intersectionCount > 1 )                                                  {
+    } else if ( intersectionCount > 1 ) {
         ret = SPLIT;
     }
 
     return ret;
-} 
+}
 
 IRResultType
 XfemManager :: initializeFrom(InputRecord *ir) {
@@ -284,11 +284,9 @@ void XfemManager :: updateIntegrationRule() {
 }
 
 void
-XfemManager::updateGeometry(TimeStep *tStep) {
-  for(int i = 1; i <= this->enrichmentItemList->giveSize(); i++){
-    enrichmentItemList->at(i)->updateGeometry(tStep);
-  }
+XfemManager :: updateGeometry(TimeStep *tStep) {
+    for ( int i = 1; i <= this->enrichmentItemList->giveSize(); i++ ) {
+        enrichmentItemList->at(i)->updateGeometry(tStep);
+    }
 }
-
-
 } // end namespace oofem

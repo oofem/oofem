@@ -46,7 +46,6 @@
 #include "valuemodetype.h"
 
 namespace oofem {
-
 class TimeStep;
 
 /**
@@ -122,6 +121,5 @@ public:
      */
     virtual int giveInputRecordString(std :: string &str, bool keyword = true);
 };
-
 } // end namespace oofem
 #endif // nodload_h

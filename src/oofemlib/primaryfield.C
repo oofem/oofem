@@ -43,7 +43,6 @@
 #include "contextioerr.h"
 
 namespace oofem {
-
 PrimaryField :: PrimaryField(EngngModel *a, int idomain,
                              FieldBaseID ft, EquationID ut, int nHist) : Field(ft), solutionVectors(nHist + 1), solStepList(nHist + 1)
 {
@@ -123,7 +122,7 @@ PrimaryField :: giveSolutionVector(int i)
     FloatArray *answer = NULL;
     if ( ( i >= 1 ) && ( i <= ( nHistVectors + 1 ) ) ) {
         answer = solutionVectors.at(i); // alist 1-based access
-    } else                                       {
+    } else {
         _error("giveSolutionVector: index out of range");
     }
 
@@ -261,5 +260,4 @@ PrimaryField :: restoreContext(DataStream *stream, ContextMode mode)
 
     return CIO_OK;
 }
-
 } // end namespace oofem

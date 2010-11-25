@@ -127,7 +127,7 @@ CCTPlate :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, TimeStep 
         if ( this->computeGtoLRotationMatrix(T) ) {
             answer.rotatedWith(T, 'n');
         }
-    } else   {
+    } else {
         answer.resize(0);          // nil resultant
     }
 
@@ -521,10 +521,10 @@ CCTPlate :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoor
     l3 = 1.0 - l1 - l2;
 
     answer.resize(2);
-    answer.at(1) = l1 * this->giveNode(1)->giveCoordinate(1) + l2 * this->giveNode(2)->giveCoordinate(1) +
-    l3 * this->giveNode(3)->giveCoordinate(1);
-    answer.at(2) = l1 * this->giveNode(1)->giveCoordinate(2) + l2 * this->giveNode(2)->giveCoordinate(2) +
-    l3 * this->giveNode(3)->giveCoordinate(2);
+    answer.at(1) = l1 * this->giveNode(1)->giveCoordinate(1) + l2 *this->giveNode(2)->giveCoordinate(1) +
+                   l3 *this->giveNode(3)->giveCoordinate(1);
+    answer.at(2) = l1 * this->giveNode(1)->giveCoordinate(2) + l2 *this->giveNode(2)->giveCoordinate(2) +
+                   l3 *this->giveNode(3)->giveCoordinate(2);
 
     return 1;
 }

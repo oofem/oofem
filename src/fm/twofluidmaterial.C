@@ -44,11 +44,10 @@
 #include "materialinterface.h"
 //#include "leplic.h"
 #ifndef __MAKEDEPEND
-#include <stdlib.h>
+ #include <stdlib.h>
 #endif
 
 namespace oofem {
-
 int
 TwoFluidMaterial :: checkConsistency()
 {
@@ -140,7 +139,7 @@ TwoFluidMaterial :: giveCharacteristicValue(MatResponseMode mode,
 
 
 double
-TwoFluidMaterial :: give(int aProperty, GaussPoint* gp)
+TwoFluidMaterial :: give(int aProperty, GaussPoint *gp)
 //
 // Returns the value of the property aProperty (e.g. the Young's modulus
 // 'E') of the receiver.
@@ -230,5 +229,4 @@ TwoFluidMaterial :: giveTempVOF(GaussPoint *gp)
         return 0.0;
     }
 }
-
 } // end namespace oofem

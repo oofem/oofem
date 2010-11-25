@@ -54,160 +54,161 @@
 #include "structuralcrosssection.h"
 
 #ifndef __MAKEDEPEND
-#include <stdio.h>
+ #include <stdio.h>
 #endif
 
 namespace oofem {
-
 FEI3dHexaQuad QSpace :: interpolation;
 
-QSpace :: QSpace (int n, Domain* aDomain) : StructuralElement (n,aDomain)
-  // Constructor.
+QSpace :: QSpace(int n, Domain *aDomain) : StructuralElement(n, aDomain)
+    // Constructor.
 {
-  numberOfDofMans = 20 ;
-  //nn = numberOfDofMans; // number of nodes
-  //nnsurf = 8;           // number of nodes on surface
-  //ndofsn = 3;           // number of DOFs on node
+    numberOfDofMans = 20;
+    //nn = numberOfDofMans; // number of nodes
+    //nnsurf = 8;           // number of nodes on surface
+    //ndofsn = 3;           // number of DOFs on node
 }
 
 
 IRResultType
-QSpace :: initializeFrom (InputRecord* ir)
+QSpace :: initializeFrom(InputRecord *ir)
 {
-  const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
-  IRResultType result;                   // Required by IR_GIVE_FIELD macro
+    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
+    IRResultType result;                 // Required by IR_GIVE_FIELD macro
 
-  this->StructuralElement :: initializeFrom (ir);
-  IR_GIVE_OPTIONAL_FIELD (ir, numberOfGaussPoints, IFT_QSpace_nip, "nip"); // Macro
+    this->StructuralElement :: initializeFrom(ir);
+    IR_GIVE_OPTIONAL_FIELD(ir, numberOfGaussPoints, IFT_QSpace_nip, "nip"); // Macro
 
-  if ((numberOfGaussPoints != 8) && (numberOfGaussPoints != 14) && (numberOfGaussPoints != 27) && (numberOfGaussPoints != 64)) numberOfGaussPoints = 27;
+    if ( ( numberOfGaussPoints != 8 ) && ( numberOfGaussPoints != 14 ) && ( numberOfGaussPoints != 27 ) && ( numberOfGaussPoints != 64 ) ) {
+        numberOfGaussPoints = 27;
+    }
 
-  // set - up Gaussian integration points
-  this -> computeGaussPoints();
+    // set - up Gaussian integration points
+    this->computeGaussPoints();
 
-  return IRRT_OK;
+    return IRRT_OK;
 }
 
 
 void
-QSpace :: giveDofManDofIDMask (int inode, EquationID ut, IntArray& answer) const
-  // returns DofId mask array for inode element node.
-  // DofId mask array determines the dof ordering requsted from node.
-  // DofId mask array contains the DofID constants (defined in cltypes.h)
-  // describing physical meaning of particular DOFs.
+QSpace :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const
+// returns DofId mask array for inode element node.
+// DofId mask array determines the dof ordering requsted from node.
+// DofId mask array contains the DofID constants (defined in cltypes.h)
+// describing physical meaning of particular DOFs.
 {
-  answer.resize (3);
+    answer.resize(3);
 
-  answer.at(1) = D_u;
-  answer.at(2) = D_v;
-  answer.at(3) = D_w;
+    answer.at(1) = D_u;
+    answer.at(2) = D_v;
+    answer.at(3) = D_w;
 
-  return ;
+    return;
 }
 
 
 double
-QSpace :: computeVolumeAround (GaussPoint* aGaussPoint)
-  // Returns the portion of the receiver which is attached to aGaussPoint.
+QSpace :: computeVolumeAround(GaussPoint *aGaussPoint)
+// Returns the portion of the receiver which is attached to aGaussPoint.
 {
-  double determinant = this->interpolation.giveTransformationJacobian (*aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0);
-  double weight      = aGaussPoint -> giveWeight();
+    double determinant = this->interpolation.giveTransformationJacobian(* aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0);
+    double weight      = aGaussPoint->giveWeight();
 
-  return (determinant * weight);
+    return ( determinant * weight );
 }
 
 
 int
-QSpace :: computeGlobalCoordinates (FloatArray& answer, const FloatArray& lcoords)
+QSpace :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords)
 {
-  this->interpolation.local2global (answer, lcoords, FEIElementGeometryWrapper(this), 0.0); 
-  return 1;
+    this->interpolation.local2global(answer, lcoords, FEIElementGeometryWrapper(this), 0.0);
+    return 1;
 }
 
 double
-QSpace::giveCharacteristicLenght(GaussPoint* gp, const FloatArray &normalToCrackPlane)
+QSpace :: giveCharacteristicLenght(GaussPoint *gp, const FloatArray &normalToCrackPlane)
 {
-  double factor = __OOFEM_POW((double)this->numberOfGaussPoints, 1./3.);
-  return this -> giveLenghtInDir (normalToCrackPlane)/factor;
+    double factor = __OOFEM_POW( ( double ) this->numberOfGaussPoints, 1. / 3. );
+    return this->giveLenghtInDir(normalToCrackPlane) / factor;
 }
 
 
 void
-QSpace :: computeGaussPoints ()
-  // Sets up the array containing the four Gauss points of the receiver.
+QSpace :: computeGaussPoints()
+// Sets up the array containing the four Gauss points of the receiver.
 {
-  numberOfIntegrationRules = 1;
-  integrationRulesArray = new IntegrationRule* [numberOfIntegrationRules];
-  integrationRulesArray[0] = new GaussIntegrationRule (1,this,1, 6);
-  integrationRulesArray[0]->setUpIntegrationPoints (_Cube, numberOfGaussPoints, _3dMat);
+    numberOfIntegrationRules = 1;
+    integrationRulesArray = new IntegrationRule * [ numberOfIntegrationRules ];
+    integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 6);
+    integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Cube, numberOfGaussPoints, _3dMat);
 }
 
 
 void
-QSpace :: computeNmatrixAt (GaussPoint* aGaussPoint, FloatMatrix& answer)
-  // Returns the displacement interpolation matrix {N} of the receiver, eva-
-  // luated at aGaussPoint.
+QSpace :: computeNmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
+// Returns the displacement interpolation matrix {N} of the receiver, eva-
+// luated at aGaussPoint.
 {
-  int i;
-  FloatArray n(20);
+    int i;
+    FloatArray n(20);
 
-  answer.resize(3,60);
-  answer.zero();
-  
-  this->interpolation.evalN (n, *aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0); 
-  
-  for (i=1;i<=20;i++){
-    answer.at(1,3*i-2) = n.at(i);
-    answer.at(2,3*i-1) = n.at(i);
-    answer.at(3,3*i-0) = n.at(i);
-  }
+    answer.resize(3, 60);
+    answer.zero();
 
-  return ;
+    this->interpolation.evalN(n, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0);
+
+    for ( i = 1; i <= 20; i++ ) {
+        answer.at(1, 3 * i - 2) = n.at(i);
+        answer.at(2, 3 * i - 1) = n.at(i);
+        answer.at(3, 3 * i - 0) = n.at(i);
+    }
+
+    return;
 }
 
 
 void
-QSpace :: computeNLBMatrixAt(FloatMatrix& answer, GaussPoint *aGaussPoint, int i){
-  OOFEM_ERROR("NLBmatrix not implemented");
+QSpace :: computeNLBMatrixAt(FloatMatrix &answer, GaussPoint *aGaussPoint, int i) {
+    OOFEM_ERROR("NLBmatrix not implemented");
 }
 
 
 void
-QSpace :: computeBmatrixAt (GaussPoint *aGaussPoint, FloatMatrix& answer, int li, int ui)
-  // Returns the [6x60] strain-displacement matrix {B} of the receiver, eva-
-  // luated at aGaussPoint.
-  // B matrix  -  6 rows : epsilon-X, epsilon-Y, epsilon-Z, gamma-YZ, gamma-ZX, gamma-XY  :
+QSpace :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int li, int ui)
+// Returns the [6x60] strain-displacement matrix {B} of the receiver, eva-
+// luated at aGaussPoint.
+// B matrix  -  6 rows : epsilon-X, epsilon-Y, epsilon-Z, gamma-YZ, gamma-ZX, gamma-XY  :
 {
-  int i;
-  FloatMatrix dnx;
+    int i;
+    FloatMatrix dnx;
 
-  this->interpolation.evaldNdx (dnx, *aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0);
+    this->interpolation.evaldNdx(dnx, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0);
 
-  answer.resize(6,60);
-  answer.zero();
+    answer.resize(6, 60);
+    answer.zero();
 
-  for (i=1;i<=20;i++){
-    answer.at(1,3*i-2) = dnx.at(i,1);
-    answer.at(2,3*i-1) = dnx.at(i,2);
-    answer.at(3,3*i-0) = dnx.at(i,3);
+    for ( i = 1; i <= 20; i++ ) {
+        answer.at(1, 3 * i - 2) = dnx.at(i, 1);
+        answer.at(2, 3 * i - 1) = dnx.at(i, 2);
+        answer.at(3, 3 * i - 0) = dnx.at(i, 3);
 
-    answer.at(4,3*i-1) = dnx.at(i,3);
-    answer.at(4,3*i-0) = dnx.at(i,2);
+        answer.at(4, 3 * i - 1) = dnx.at(i, 3);
+        answer.at(4, 3 * i - 0) = dnx.at(i, 2);
 
-    answer.at(5,3*i-2) = dnx.at(i,3);
-    answer.at(5,3*i-0) = dnx.at(i,1);
+        answer.at(5, 3 * i - 2) = dnx.at(i, 3);
+        answer.at(5, 3 * i - 0) = dnx.at(i, 1);
 
-    answer.at(6,3*i-2) = dnx.at(i,2);
-    answer.at(6,3*i-1) = dnx.at(i,1);
-  }
+        answer.at(6, 3 * i - 2) = dnx.at(i, 2);
+        answer.at(6, 3 * i - 1) = dnx.at(i, 1);
+    }
 
-  return ;
+    return;
 }
 
 
 void
-QSpace :: computeBFmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer){
-  OOFEM_ERROR("BFmatrix not implemented");
+QSpace :: computeBFmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer) {
+    OOFEM_ERROR("BFmatrix not implemented");
 }
 
 
@@ -215,182 +216,201 @@ QSpace :: computeBFmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer){
 // ***  Surface load support  ***
 // ******************************
 
-IntegrationRule*
-QSpace :: GetSurfaceIntegrationRule (int approxOrder)
+IntegrationRule *
+QSpace :: GetSurfaceIntegrationRule(int approxOrder)
 {
-  IntegrationRule* iRule = new GaussIntegrationRule (1,this, 1, 1);
-  int npoints = iRule -> getRequiredNumberOfIntegrationPoints (_Square, approxOrder);
-  iRule ->setUpIntegrationPoints (_Square, npoints, _Unknown);
-  return iRule;
+    IntegrationRule *iRule = new GaussIntegrationRule(1, this, 1, 1);
+    int npoints = iRule->getRequiredNumberOfIntegrationPoints(_Square, approxOrder);
+    iRule->setUpIntegrationPoints(_Square, npoints, _Unknown);
+    return iRule;
 }
 
 void
-QSpace :: computeSurfaceNMatrixAt (FloatMatrix& answer, GaussPoint* sgp)
+QSpace :: computeSurfaceNMatrixAt(FloatMatrix &answer, GaussPoint *sgp)
 {
-  FloatArray n(8);
-  interpolation.surfaceEvalN (n, *sgp->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0);
+    FloatArray n(8);
+    interpolation.surfaceEvalN(n, * sgp->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0);
 
-  answer.resize (3,24);
-  answer.zero();
+    answer.resize(3, 24);
+    answer.zero();
 
-  for (int i=0 ; i<8 ; i++) // loop over surfaces
-    for (int j=0 ; j<3 ; j++) // loop over DOFs
-      answer(j,j+i*3) = n(i);
-
+    for ( int i = 0; i < 8; i++ ) { // loop over surfaces
+        for ( int j = 0; j < 3; j++ ) { // loop over DOFs
+            answer(j, j + i * 3) = n(i);
+        }
+    }
 }
 
 void
-QSpace :: giveSurfaceDofMapping (IntArray& answer, int iSurf) const
+QSpace :: giveSurfaceDofMapping(IntArray &answer, int iSurf) const
 {
-  IntArray nodes;
-  const int ndofsn = 3;
+    IntArray nodes;
+    const int ndofsn = 3;
 
-  interpolation.computeLocalSurfaceMapping (nodes, iSurf);
+    interpolation.computeLocalSurfaceMapping(nodes, iSurf);
 
-  answer.resize (24);
+    answer.resize(24);
 
-  for (int i=1; i<=8 ; i++) {
-    answer.at(i*ndofsn-2) = nodes.at(i)*ndofsn-2;
-    answer.at(i*ndofsn-1) = nodes.at(i)*ndofsn-1;
-    answer.at(i*ndofsn	) = nodes.at(i)*ndofsn	;
-  }
+    for ( int i = 1; i <= 8; i++ ) {
+        answer.at(i * ndofsn - 2) = nodes.at(i) * ndofsn - 2;
+        answer.at(i * ndofsn - 1) = nodes.at(i) * ndofsn - 1;
+        answer.at(i * ndofsn) = nodes.at(i) * ndofsn;
+    }
 }
 
 double
-QSpace :: computeSurfaceVolumeAround (GaussPoint* gp, int iSurf)
+QSpace :: computeSurfaceVolumeAround(GaussPoint *gp, int iSurf)
 {
-  double       determinant,weight,volume;
-  determinant = fabs(interpolation.surfaceGiveTransformationJacobian (iSurf, *gp->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0));
+    double determinant, weight, volume;
+    determinant = fabs( interpolation.surfaceGiveTransformationJacobian(iSurf, * gp->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0) );
 
-  weight      = gp -> giveWeight();
-  volume      = determinant * weight;
+    weight      = gp->giveWeight();
+    volume      = determinant * weight;
 
-  return volume;
+    return volume;
 }
 
 void
-QSpace :: computeSurfIpGlobalCoords (FloatArray& answer, GaussPoint* gp, int iSurf)
+QSpace :: computeSurfIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iSurf)
 {
-  interpolation.surfaceLocal2global (answer, iSurf, *gp->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0);
+    interpolation.surfaceLocal2global(answer, iSurf, * gp->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0);
 }
 
 int
-QSpace :: computeLoadLSToLRotationMatrix (FloatMatrix& answer, int iSurf, GaussPoint* gp)
+QSpace :: computeLoadLSToLRotationMatrix(FloatMatrix &answer, int iSurf, GaussPoint *gp)
 {
-  // returns transformation matrix from
-  // surface local coordinate system
-  // to element local c.s
-  // (same as global c.s in this case)
-  //
-  // i.e. f(element local) = T * f(edge local)
+    // returns transformation matrix from
+    // surface local coordinate system
+    // to element local c.s
+    // (same as global c.s in this case)
+    //
+    // i.e. f(element local) = T * f(edge local)
 
-  // definition of local c.s on surface:
-  // local z axis - perpendicular to surface, pointing outwards from element
-  // local x axis - is in global xy plane (perpendicular to global z axis)
-  // local y axis - completes the righ hand side cs.
+    // definition of local c.s on surface:
+    // local z axis - perpendicular to surface, pointing outwards from element
+    // local x axis - is in global xy plane (perpendicular to global z axis)
+    // local y axis - completes the righ hand side cs.
 
-  /*
-     _error ("computeLoadLSToLRotationMatrix: surface local coordinate system not supported");
-     return 1;
-  */
-  int i, j;
-  FloatArray gc(3);
-  FloatArray h1(3),h2(3),nn(3),n(3);
-  IntArray snodes(4);
+    /*
+     * _error ("computeLoadLSToLRotationMatrix: surface local coordinate system not supported");
+     * return 1;
+     */
+    int i, j;
+    FloatArray gc(3);
+    FloatArray h1(3), h2(3), nn(3), n(3);
+    IntArray snodes(4);
 
-  answer.resize(3,3);
+    answer.resize(3, 3);
 
-  this->interpolation.computeSurfaceMapping (snodes, dofManArray, iSurf);
-  for (i=1; i<=4; i++) gc.add(domain->giveNode(snodes.at(i))->giveCoordinates());
-  gc.times(1./4.);
-  // determine "average normal"
-  for (i=1; i<=4; i++) {
-    j = (i)%4+1;
-    h1 = *domain->giveNode(snodes.at(i))->giveCoordinates();
-    h1.substract(gc);
-    h2 = *domain->giveNode(snodes.at(j))->giveCoordinates();
-    h2.substract(gc);
-    n.beVectorProductOf(h1,h2);
-    if (dotProduct(n,n,3) > 1.e-6) n.normalize();
-    nn.add(n);
-  }
-  nn.times(1./4.);
-  if (dotProduct(nn,nn,3) < 1.e-6) {
-    answer.zero();
+    this->interpolation.computeSurfaceMapping(snodes, dofManArray, iSurf);
+    for ( i = 1; i <= 4; i++ ) {
+        gc.add( domain->giveNode( snodes.at(i) )->giveCoordinates() );
+    }
+
+    gc.times(1. / 4.);
+    // determine "average normal"
+    for ( i = 1; i <= 4; i++ ) {
+        j = ( i ) % 4 + 1;
+        h1 = * domain->giveNode( snodes.at(i) )->giveCoordinates();
+        h1.substract(gc);
+        h2 = * domain->giveNode( snodes.at(j) )->giveCoordinates();
+        h2.substract(gc);
+        n.beVectorProductOf(h1, h2);
+        if ( dotProduct(n, n, 3) > 1.e-6 ) {
+            n.normalize();
+        }
+
+        nn.add(n);
+    }
+
+    nn.times(1. / 4.);
+    if ( dotProduct(nn, nn, 3) < 1.e-6 ) {
+        answer.zero();
+        return 1;
+    }
+
+    nn.normalize();
+    for ( i = 1; i <= 3; i++ ) {
+        answer.at(i, 3) = nn.at(i);
+    }
+
+    // determine lcs of surface
+    // local x axis in xy plane
+    double test = fabs(fabs( nn.at(3) ) - 1.0);
+    if ( test < 1.e-5 ) {
+        h1.at(1) = answer.at(1, 1) = 1.0;
+        h1.at(2) = answer.at(2, 1) = 0.0;
+    } else {
+        h1.at(1) = answer.at(1, 1) = answer.at(2, 3);
+        h1.at(2) = answer.at(2, 1) = -answer.at(1, 3);
+    }
+
+    h1.at(3) = answer.at(3, 1) = 0.0;
+    // local y axis perpendicular to local x,z axes
+    h2.beVectorProductOf(nn, h1);
+    for ( i = 1; i <= 3; i++ ) {
+        answer.at(i, 2) = h2.at(i);
+    }
+
     return 1;
-  }
-  nn.normalize();
-  for (i=1; i<=3; i++) answer.at(i,3) = nn.at(i);
-  // determine lcs of surface
-  // local x axis in xy plane
-  double test = fabs(fabs(nn.at(3)) -1.0);
-  if (test < 1.e-5) {
-    h1.at(1) = answer.at(1,1) = 1.0;
-    h1.at(2) = answer.at(2,1) = 0.0;
-  } else {
-    h1.at(1) = answer.at(1,1) = answer.at(2,3);
-    h1.at(2) = answer.at(2,1) = -answer.at(1,3);
-  }
-  h1.at(3) = answer.at(3,1) = 0.0;
-  // local y axis perpendicular to local x,z axes
-  h2.beVectorProductOf (nn,h1);
-  for (i=1; i<=3; i++) answer.at(i,2) = h2.at(i);
-
-  return 1;
 }
 
-Interface*
-QSpace :: giveInterface (InterfaceType interface)
+Interface *
+QSpace :: giveInterface(InterfaceType interface)
 {
- if (interface == ZZNodalRecoveryModelInterfaceType) return (ZZNodalRecoveryModelInterface*) this;
- else if (interface == NodalAveragingRecoveryModelInterfaceType) return (NodalAveragingRecoveryModelInterface*) this;
+    if ( interface == ZZNodalRecoveryModelInterfaceType ) {
+        return ( ZZNodalRecoveryModelInterface * ) this;
+    } else if ( interface == NodalAveragingRecoveryModelInterfaceType ) {
+        return ( NodalAveragingRecoveryModelInterface * ) this;
+    }
 
- OOFEM_LOG_INFO("Interface on Qspace element not supported");
- return NULL;
+    OOFEM_LOG_INFO("Interface on Qspace element not supported");
+    return NULL;
 }
 
 int
 QSpace :: ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type)
 {
-  if ((type == IST_StressTensor) || (type == IST_StrainTensor) || (type == IST_DamageTensor)) return 6;
+    if ( ( type == IST_StressTensor ) || ( type == IST_StrainTensor ) || ( type == IST_DamageTensor ) ) {
+        return 6;
+    }
 
- GaussPoint *gp = integrationRulesArray[0]-> getIntegrationPoint(0) ;
- return this->giveIPValueSize (type, gp);
+    GaussPoint *gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
+    return this->giveIPValueSize(type, gp);
 }
 
 void
-QSpace :: ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx
-  (FloatMatrix& answer, GaussPoint* aGaussPoint, InternalStateType type)
+QSpace :: ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatMatrix &answer, GaussPoint *aGaussPoint, InternalStateType type)
 {
-  int i;
-  FloatArray n;
-  this->interpolation.evalN(n, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0);
+    int i;
+    FloatArray n;
+    this->interpolation.evalN(n, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0);
 
-  if ( this->giveIPValueSize(type, aGaussPoint) ) {
-    answer.resize(1, 20);
-  } else {
+    if ( this->giveIPValueSize(type, aGaussPoint) ) {
+        answer.resize(1, 20);
+    } else {
+        return;
+    }
+
+    for ( i = 1; i <= 20; i++ ) {
+        answer.at(1, i)  = n.at(i);
+    }
+
     return;
-  }
-
-  for (i=1;i<=20;i++)
-    answer.at(1, i)  = n.at(i);
-
-  return;
 }
 
 void
-QSpace::NodalAveragingRecoveryMI_computeNodalValue (FloatArray& answer, int node, InternalStateType type, TimeStep* tStep)
+QSpace :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node, InternalStateType type, TimeStep *tStep)
 {
-  int size = NodalAveragingRecoveryMI_giveDofManRecordSize(type);
-  answer.resize(size);
-  answer.zero();
-  _warning("Qspace element: IP values will not be transferred to nodes. Use ZZNodalRecovery instead (parameter stype 1)");
+    int size = NodalAveragingRecoveryMI_giveDofManRecordSize(type);
+    answer.resize(size);
+    answer.zero();
+    _warning("Qspace element: IP values will not be transferred to nodes. Use ZZNodalRecovery instead (parameter stype 1)");
 }
 
 void
-QSpace::NodalAveragingRecoveryMI_computeSideValue (FloatArray& answer, int side, InternalStateType type, TimeStep* tStep)
+QSpace :: NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side, InternalStateType type, TimeStep *tStep)
 {
- answer.resize(0);
+    answer.resize(0);
 }
-
 } // end namespace oofem

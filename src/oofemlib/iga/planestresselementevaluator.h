@@ -39,7 +39,6 @@
 #include "structuralelementevaluator.h"
 
 namespace oofem {
-
 /**
  * general purpose Plane stress structural element evaluator
  */
@@ -67,6 +66,5 @@ protected:
         answer.at(2) = D_v;
     }
 }; // end of PlaneStressStructuralElementEvaluator definition
-
 } // end namespace oofem
 #endif //planestresselementevaluator_h

@@ -38,11 +38,10 @@
 #include "oofem_limits.h"
 
 #ifndef __MAKEDEPEND
-#include <stdarg.h>
+ #include <stdarg.h>
 #endif
 
 namespace oofem {
-
 #define LOG_ERR_HEADER "_______________________________________________________"
 #define LOG_ERR_TAIL   "_______________________________________________________\a\n"
 
@@ -98,7 +97,7 @@ Logger :: writeLogMsg(logLevelType level, const char *format, ...)
 
     if ( ( level == LOG_LEVEL_FATAL ) || ( level == LOG_LEVEL_ERROR ) ) {
         numberOfErr++;
-    } else if ( level == LOG_LEVEL_WARNING )  {
+    } else if ( level == LOG_LEVEL_WARNING ) {
         numberOfWrn++;
     }
 }
@@ -124,7 +123,7 @@ Logger :: writeELogMsg(logLevelType level, const char *_file, int _line, const c
 
     if ( ( level == LOG_LEVEL_FATAL ) || ( level == LOG_LEVEL_ERROR ) ) {
         numberOfErr++;
-    } else if ( level == LOG_LEVEL_WARNING )  {
+    } else if ( level == LOG_LEVEL_WARNING ) {
         numberOfWrn++;
     }
 }
@@ -133,7 +132,7 @@ const char *
 Logger :: giveLevelName(logLevelType l) const
 {
     switch ( l ) {
-        //case LOG_LEVEL_FATAL:
+    //case LOG_LEVEL_FATAL:
     case LOG_LEVEL_ERROR:
         return "Error";
 
@@ -165,25 +164,25 @@ Logger :: printStatistics()
 #ifndef HAVE_MACRO_VA_ARGS
 
 
-#ifdef _MSC_VER
+ #ifdef _MSC_VER
 
-#define __PROCESS_LOG \
+  #define __PROCESS_LOG \
     char buff [ MAX_ERROR_MSG_LENGTH ]; \
     va_list args; \
     va_start(args, format); \
     _vsnprintf(buff, MAX_ERROR_MSG_LENGTH, format, args); \
     va_end(args);
 
-#else
+ #else
 
-#define __PROCESS_LOG \
+  #define __PROCESS_LOG \
     char buff [ MAX_ERROR_MSG_LENGTH ]; \
     va_list args; \
     va_start(args, format); \
     vsnprintf(buff, MAX_ERROR_MSG_LENGTH, format, args); \
     va_end(args);
 
-#endif
+ #endif
 
 void LOG_FORCED_MSG(Logger &logger, const char *format, ...)
 {

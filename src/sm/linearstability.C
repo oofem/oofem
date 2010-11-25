@@ -63,8 +63,8 @@
 #include "contextioerr.h"
 
 #ifndef __MAKEDEPEND
-#include <stdio.h>
-#include <math.h>
+ #include <stdio.h>
+ #include <math.h>
 #endif
 #include "flotmtrx.h"
 
@@ -75,12 +75,11 @@
 #include "datastream.h"
 
 #ifdef __OOFEG
-#include "oofeggraphiccontext.h"
+ #include "oofeggraphiccontext.h"
 #endif
 
 //#include "gjacobi.h"
 namespace oofem {
-
 NumericalMethod *LinearStability :: giveNumericalMethod(TimeStep *stepN)
 // only one is awailable now
 //     - SubspaceIteration
@@ -184,7 +183,7 @@ double LinearStability ::  giveUnknownComponent(UnknownType chc, ValueModeType m
     int activeVector = ( int ) tStep->giveTime();
     if ( chc == EigenValue ) {
         return eigVal.at(eq);
-    } else  if ( chc == DisplacementVector ) {
+    } else if ( chc == DisplacementVector ) {
         switch ( mode ) {
         case VM_Total: // EigenVector
             if ( activeVector ) {
@@ -261,7 +260,7 @@ void LinearStability :: solveYourselfAt(TimeStep *tStep) {
         // first step - slove linear static problem
         //
         stiffnessMatrix = new Skyline();
-        stiffnessMatrix->buildInternalStructure(this, 1, EID_MomentumBalance, EModelDefaultEquationNumbering());
+        stiffnessMatrix->buildInternalStructure( this, 1, EID_MomentumBalance, EModelDefaultEquationNumbering() );
 
         //
         // alocate space for displacementVector
@@ -274,12 +273,12 @@ void LinearStability :: solveYourselfAt(TimeStep *tStep) {
     }
 
 #ifndef LIN_STAB_COMPATIBILITY_MODE
-#ifdef VERBOSE
+ #ifdef VERBOSE
     OOFEM_LOG_INFO("Assembling stiffness matrix\n");
-#endif
+ #endif
     stiffnessMatrix->zero();
     this->assemble( stiffnessMatrix, tStep, EID_MomentumBalance, StiffnessMatrix,
-		    EModelDefaultEquationNumbering(), this->giveDomain(1) );
+                   EModelDefaultEquationNumbering(), this->giveDomain(1) );
 #endif
 
 
@@ -291,15 +290,15 @@ void LinearStability :: solveYourselfAt(TimeStep *tStep) {
     loadVector.zero();
 
     this->assembleVectorFromElements( loadVector, tStep, EID_MomentumBalance, ElementForceLoadVector, VM_Total,
-				      EModelDefaultEquationNumbering(), this->giveDomain(1) );
+                                     EModelDefaultEquationNumbering(), this->giveDomain(1) );
     this->assembleVectorFromElements( loadVector, tStep, EID_MomentumBalance, ElementNonForceLoadVector, VM_Total,
-				      EModelDefaultEquationNumbering(), this->giveDomain(1) );
+                                     EModelDefaultEquationNumbering(), this->giveDomain(1) );
 
     //
     // assembling the nodal part of load vector
     //
     this->assembleVectorFromDofManagers( loadVector, tStep, EID_MomentumBalance, NodalLoadVector, VM_Total,
-					 EModelDefaultEquationNumbering(), this->giveDomain(1) );
+                                        EModelDefaultEquationNumbering(), this->giveDomain(1) );
 
     //
     // set-up numerical model
@@ -335,12 +334,12 @@ void LinearStability :: solveYourselfAt(TimeStep *tStep) {
     OOFEM_LOG_INFO("Assembling stiffness  matrix\n");
 #endif
     this->assemble( stiffnessMatrix, tStep, EID_MomentumBalance, StiffnessMatrix,
-		    EModelDefaultEquationNumbering(), this->giveDomain(1) );
+                   EModelDefaultEquationNumbering(), this->giveDomain(1) );
 #ifdef VERBOSE
     OOFEM_LOG_INFO("Assembling  initial stress matrix\n");
 #endif
     this->assemble( initialStressMatrix, tStep, EID_MomentumBalance, InitialStressMatrix,
-		    EModelDefaultEquationNumbering(), this->giveDomain(1) );
+                   EModelDefaultEquationNumbering(), this->giveDomain(1) );
     initialStressMatrix->times(-1.0);
 
     //  stiffnessMatrix->printYourself();
@@ -633,5 +632,4 @@ LinearStability :: printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *atTime)
 {
     iDof->printSingleOutputAt(stream, atTime, 'd', EID_MomentumBalance, VM_Total);
 }
-
 } // end namespace oofem

@@ -41,7 +41,7 @@
 #define poiexportmodule_h
 
 #ifndef __MAKEDEPEND
-#include <stdio.h>
+ #include <stdio.h>
 #endif
 #include "exportmodule.h"
 #include "domain.h"
@@ -51,7 +51,6 @@
 #include "dynalist.h"
 
 namespace oofem {
-
 /**
  * Represents POI (Point Of Interest) export module.
  * It is able to perform output on given points, which are inside domain but can have arbitrary position.
@@ -124,6 +123,5 @@ protected:
     void exportPrimVarAs(UnknownType valID, FILE *stream, TimeStep *tStep);
     MaterialMappingAlgorithm *giveMapper();
 };
-
 } // end namespace oofem
 #endif // poiexportmodule_h

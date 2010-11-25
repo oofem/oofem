@@ -50,7 +50,6 @@
 #include "nodalaveragingrecoverymodel.h"
 
 namespace oofem {
-
 class Truss3d : public NLStructuralElement, public DirectErrorIndicatorRCInterface, public ZZNodalRecoveryModelInterface, public NodalAveragingRecoveryModelInterface
 {
     /*
@@ -93,55 +92,55 @@ public:
     virtual int testElementExtension(ElementExtension ext) { return ( ( ext == Element_EdgeLoadSupport ) ? 1 : 0 ); }
     //int    hasEdgeLoadSupport () {return 1;}
 
-  /** Interface requesting service */
-  Interface *giveInterface(InterfaceType);
-  /**
-  @name The element interface required by ZZNodalRecoveryModel
-  */
-  //@{
-  /**
-   Returns the size of DofManger record required to hold recovered values for given mode.
-   @param type determines the type of internal variable to be recovered
-   @return size of DofManger record required to hold recovered values
-  */
-  int ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type);
-  
-  /// Returns the corresponding element to interface
-  Element *ZZNodalRecoveryMI_giveElement() { return this; }
-  
-  /// Evaluates N matrix (interpolation estimated stress matrix)
-  void ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx (FloatMatrix& answer, GaussPoint* aGaussPoint, InternalStateType type);
-  //@}
-  /**
-  @name The element interface required by NodalAveragingRecoveryModel
-  */
-  //@{
-  /**
-   Computes the element value in given node.
-   @param answer contains the result
-   @param node element node number
-   @param type determines the type of internal variable to be recovered
-   @param tStep time step
-  */
-  void NodalAveragingRecoveryMI_computeNodalValue (FloatArray& answer, int node, InternalStateType type, TimeStep* tStep);
-  
-  /**
-   Computes the element value in given side.
-   @param answer contains the result
-   @param side element side number
-   @param type determines the type of internal variable to be recovered
-   @param tStep time step
-  */
-  void NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side, InternalStateType type, TimeStep *tStep);
-  
-  /**
-   Returns the size of DofManger record required to hold recovered values for given mode.
-   @param type determines the type of internal variable to be recovered
-   @return size of DofManger record required to hold recovered values
-  */
-  virtual int NodalAveragingRecoveryMI_giveDofManRecordSize(InternalStateType type)
+    /** Interface requesting service */
+    Interface *giveInterface(InterfaceType);
+    /**
+     * @name The element interface required by ZZNodalRecoveryModel
+     */
+    //@{
+    /**
+     * Returns the size of DofManger record required to hold recovered values for given mode.
+     * @param type determines the type of internal variable to be recovered
+     * @return size of DofManger record required to hold recovered values
+     */
+    int ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type);
+
+    /// Returns the corresponding element to interface
+    Element *ZZNodalRecoveryMI_giveElement() { return this; }
+
+    /// Evaluates N matrix (interpolation estimated stress matrix)
+    void ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatMatrix &answer, GaussPoint *aGaussPoint, InternalStateType type);
+    //@}
+    /**
+     * @name The element interface required by NodalAveragingRecoveryModel
+     */
+    //@{
+    /**
+     * Computes the element value in given node.
+     * @param answer contains the result
+     * @param node element node number
+     * @param type determines the type of internal variable to be recovered
+     * @param tStep time step
+     */
+    void NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node, InternalStateType type, TimeStep *tStep);
+
+    /**
+     * Computes the element value in given side.
+     * @param answer contains the result
+     * @param side element side number
+     * @param type determines the type of internal variable to be recovered
+     * @param tStep time step
+     */
+    void NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side, InternalStateType type, TimeStep *tStep);
+
+    /**
+     * Returns the size of DofManger record required to hold recovered values for given mode.
+     * @param type determines the type of internal variable to be recovered
+     * @return size of DofManger record required to hold recovered values
+     */
+    virtual int NodalAveragingRecoveryMI_giveDofManRecordSize(InternalStateType type)
     { return ZZNodalRecoveryMI_giveDofManRecordSize(type); }
-  //@}
+    //@}
 
 #ifdef __OOFEG
     void          drawRawGeometry(oofegGraphicContext &);
@@ -153,7 +152,7 @@ public:
     const char *giveClassName() const { return "Truss3d"; }
     classType            giveClassID() const { return Truss3dClass; }
     IRResultType initializeFrom(InputRecord *ir);
-    Element_Geometry_Type giveGeometryType() const {return EGT_line_1;}
+    Element_Geometry_Type giveGeometryType() const { return EGT_line_1; }
 
     /**
      * @name The element interface required by SPRNodalRecoveryModelInterface
@@ -167,7 +166,7 @@ public:
     //@}
 
     integrationDomain  giveIntegrationDomain() { return _Line; }
-    MaterialMode          giveMaterialMode()  {return _1dMat;}
+    MaterialMode          giveMaterialMode()  { return _1dMat; }
 
 protected:
     // edge load support
@@ -187,6 +186,5 @@ protected:
     double        givePitch();
     int           giveApproxOrder() { return 1; }
 };
-
 } // end namespace oofem
 #endif // truss3d_h

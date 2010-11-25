@@ -37,11 +37,10 @@
 #include "mathfem.h"
 
 #ifdef __OOFEG
-#include "oofeggraphiccontext.h"
+ #include "oofeggraphiccontext.h"
 #endif
 
 namespace oofem {
-
 //#define GRAPH_DEBUG_PRINT
 #define GRAPH_LENGTH_FRAC 1.e-4
 
@@ -92,8 +91,8 @@ Polygon :: testPoint(double x, double y) const
         x2 = p2.coords(0);
         y2 = p2.coords(1);
 
-        if ( ((y1 < y) && (y2 >= y)) ||
-             ((y2 < y) && (y1 >= y)) ) {
+        if ( ( ( y1 < y ) && ( y2 >= y ) ) ||
+            ( ( y2 < y ) && ( y1 >= y ) ) ) {
             if ( x1 + ( y - y1 ) / ( y2 - y1 ) * ( x2 - x1 ) < x ) {
                 oddNODES = !oddNODES;
             }
@@ -614,7 +613,7 @@ void
 Graph :: clip(Polygon &result, const Polygon &a, const Polygon &b)
 {
     // create lists s,c from a and b
-    Polygon :: PolygonVertexIterator it(& a);
+    Polygon :: PolygonVertexIterator it( &a);
     Vertex v;
     node *nw;
     int ret;
@@ -1456,7 +1455,7 @@ Graph :: belongs(node *n, node *v1, node *v2)
 {
     if ( n->status == NS_Vertex ) {
         return false;
-    } else if ( n->neighbor->status == NS_Intersection )  { //Intersection or intersection vertex
+    } else if ( n->neighbor->status == NS_Intersection ) {  //Intersection or intersection vertex
         if ( ( next_node(n->neighbor) == v2 ) && ( prev_node(n->neighbor) == v1 ) ) {
             return true;
         }
@@ -1656,7 +1655,7 @@ Graph :: testNewIntersectionVertexEdgeCollapse(node *v, node *l1, node *l2)
             vp_par = 0.;
         } else if ( vp->neighbor == l2 ) {
             vp_par = 1.;
-        } else                                              {
+        } else {
             vp_par = vp->neighbor->alpha;
         }
 
@@ -1664,7 +1663,7 @@ Graph :: testNewIntersectionVertexEdgeCollapse(node *v, node *l1, node *l2)
             v_par = 0.;
         } else if ( v->neighbor == l2 ) {
             v_par = 1.;
-        } else                                            {
+        } else {
             v_par = v->neighbor->alpha;
         }
 
@@ -1681,7 +1680,7 @@ Graph :: testNewIntersectionVertexEdgeCollapse(node *v, node *l1, node *l2)
             vn_par = 0.;
         } else if ( vn->neighbor == l2 ) {
             vn_par = 1.;
-        } else                                              {
+        } else {
             vn_par = vn->neighbor->alpha;
         }
 
@@ -1689,7 +1688,7 @@ Graph :: testNewIntersectionVertexEdgeCollapse(node *v, node *l1, node *l2)
             v_par = 0.;
         } else if ( v->neighbor == l2 ) {
             v_par = 1.;
-        } else                                            {
+        } else {
             v_par = v->neighbor->alpha;
         }
 
@@ -1765,8 +1764,8 @@ Graph :: testPoint(node *s, double x, double y) const
             x2 = auxs->next->x;
             y2 = auxs->next->y;
 
-            if ( ((y1 < y) && (y2 >= y)) ||
-                 ((y2 < y) && (y1 >= y)) ) {
+            if ( ( ( y1 < y ) && ( y2 >= y ) ) ||
+                ( ( y2 < y ) && ( y1 >= y ) ) ) {
                 if ( x1 + ( y - y1 ) / ( y2 - y1 ) * ( x2 - x1 ) < x ) {
                     oddNODES = !oddNODES;
                 }
@@ -1826,5 +1825,4 @@ GT_Exception :: print()
         fprintf(stderr, "msg: %s\n", msg);
     }
 }
-
 } // end namespace oofem

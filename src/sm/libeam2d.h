@@ -44,7 +44,6 @@
 #include "layeredcrosssection.h"
 
 namespace oofem {
-
 class LIBeam2d : public StructuralElement, public LayeredCrossSectionInterface
 {
     /*
@@ -93,7 +92,7 @@ public:
     IRResultType initializeFrom(InputRecord *ir);
 
     integrationDomain  giveIntegrationDomain() { return _Line; }
-    MaterialMode          giveMaterialMode()  {return _2dBeam;}
+    MaterialMode          giveMaterialMode()  { return _2dBeam; }
 
 protected:
     // edge load support
@@ -111,6 +110,5 @@ protected:
     double        giveLength();
     double        givePitch();
 };
-
 } // end namespace oofem
 #endif // libeam2d_h

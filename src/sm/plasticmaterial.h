@@ -50,7 +50,6 @@
 #include "structuralms.h"
 
 namespace oofem {
-
 class GaussPoint;
 
 // material contant's keys for give()
@@ -333,6 +332,5 @@ protected:
                                            GaussPoint * gp,
                                            TimeStep * atTime);
 };
-
 } // end namespace oofem
 #endif // plasticmaterial_h

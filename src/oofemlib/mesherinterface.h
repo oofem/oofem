@@ -43,7 +43,6 @@
 #include "inputrecord.h"
 
 namespace oofem {
-
 class Domain;
 class TimeStep;
 
@@ -56,31 +55,30 @@ class TimeStep;
  */
 class MesherInterface
 {
- protected:
-  Domain *domain;
- public:
-  enum returnCode {MI_OK, MI_NEEDS_EXTERNAL_ACTION, MI_FAILED};
-  /// Constructor
-  MesherInterface(Domain* d) {domain=d;}
-  /// Destructor
-  virtual ~MesherInterface() { }
-    
+protected:
+    Domain *domain;
+public:
+    enum returnCode { MI_OK, MI_NEEDS_EXTERNAL_ACTION, MI_FAILED };
+    /// Constructor
+    MesherInterface(Domain *d) { domain = d; }
+    /// Destructor
+    virtual ~MesherInterface() { }
+
     /**
      * Runs the mesh generation, mesh will be written to corresponding domain din file
-       * @param time step
+     * @param time step
      * @param domainNumber new domain number
      * @param domainSerNum new domain serial number
      * @param newly allocated domain, representing new mesh or set to NULL if external generation has to be performed.
      */
-    virtual returnCode createMesh(TimeStep *, int domainNumber, int domainSerNum, Domain** dNew) = 0;
+    virtual returnCode createMesh(TimeStep *, int domainNumber, int domainSerNum, Domain **dNew) = 0;
     /** Initializes receiver acording to object description stored in input record.
      *  This function is called immediately after creating object using
      * constructor. Input record can be imagined as data record in component database
      * belonging to receiver. Receiver may use value-name extracting functions
      * to extract particular field from record.
      * @see readInteger, readDouble and similar functions */
-    virtual IRResultType initializeFrom(InputRecord *ir) {return IRRT_OK;}
+    virtual IRResultType initializeFrom(InputRecord *ir) { return IRRT_OK; }
 };
-
 } // end namespace oofem
 #endif // mesherinterface_h

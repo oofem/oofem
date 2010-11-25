@@ -34,7 +34,7 @@
  */
 
 #ifndef __MAKEDEPEND
-#include <stdlib.h>
+ #include <stdlib.h>
 #endif
 #include "dyncomprow.h"
 #include "ilucomprowprecond.h"
@@ -42,20 +42,19 @@
 #include "strreader.h"
 
 #ifdef TIME_REPORT
-#ifndef __MAKEDEPEND
-#include <time.h>
-#endif
-#include "clock.h"
+ #ifndef __MAKEDEPEND
+  #include <time.h>
+ #endif
+ #include "clock.h"
 #endif
 
 #ifdef DynCompRow_USE_STL_SETS
-#ifndef __MAKEDEPEND
-#include <map>
-#endif
+ #ifndef __MAKEDEPEND
+  #include <map>
+ #endif
 #endif
 
 namespace oofem {
-
 CompRow_ILUPreconditioner ::
 CompRow_ILUPreconditioner(const SparseMtrx &A, InputRecord &attributes) : Preconditioner(A, attributes)
 { }
@@ -101,5 +100,4 @@ CompRow_ILUPreconditioner :: trans_solve(const FloatArray &x, FloatArray &y) con
 {
     A.ILUPtrans_solve(x, y);
 }
-
 } // end namespace oofem

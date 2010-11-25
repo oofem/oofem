@@ -15,7 +15,6 @@
 #include "enrichmentfunction.h"
 
 namespace oofem {
-
 class Geometry;
 
 /**
@@ -31,7 +30,7 @@ class EnrichmentItem : public FEMComponent
 {
 public:
     /// Constructor
-    EnrichmentItem(int n, XfemManager* xm, Domain *aDomain);
+    EnrichmentItem(int n, XfemManager *xm, Domain *aDomain);
     /// initializes EnrichmentItem from InputRecord
     IRResultType initializeFrom(InputRecord *ir);
     /// returns class name
@@ -58,7 +57,7 @@ public:
     bool isOutside(BasicGeometry *bg);
     virtual Material *giveMaterial() { return NULL; }
     /// updates receiver geometry to the state reached at given time step
-    virtual void updateGeometry (TimeStep* tStep) {}
+    virtual void updateGeometry(TimeStep *tStep) {}
 protected:
     /// link to associated xfem manager
     XfemManager *xmanager;
@@ -74,14 +73,14 @@ protected:
 class CrackTip : public EnrichmentItem
 {
 public:
-    CrackTip(int n, XfemManager* xm, Domain *aDomain) : EnrichmentItem(n, xm, aDomain) { }
+    CrackTip(int n, XfemManager *xm, Domain *aDomain) : EnrichmentItem(n, xm, aDomain) { }
 };
 
 /** Concrete representation of EnrichmentItem */
 class CrackInterior : public EnrichmentItem
 {
 public:
-    CrackInterior(int n, XfemManager* xm, Domain *aDomain) : EnrichmentItem(n, xm, aDomain) { }
+    CrackInterior(int n, XfemManager *xm, Domain *aDomain) : EnrichmentItem(n, xm, aDomain) { }
 };
 
 /** Concrete representation of EnrichmentItem */
@@ -90,11 +89,10 @@ class Inclusion : public EnrichmentItem
 protected:
     Material *mat;
 public:
-    Inclusion(int n, XfemManager* xm, Domain *aDomain) : EnrichmentItem(n, xm, aDomain) { }
+    Inclusion(int n, XfemManager *xm, Domain *aDomain) : EnrichmentItem(n, xm, aDomain) { }
     const char *giveClassName() const { return "Inclusion"; }
     IRResultType initializeFrom(InputRecord *ir);
     Material *giveMaterial() { return mat; }
 };
-
 } // end namespace oofem
 #endif  /* _ENRICHMENTITEM_H */

@@ -38,9 +38,7 @@
 #include "emptycs.h"
 
 namespace oofem {
-
 EmptyCS :: EmptyCS(int n, Domain *d) : CrossSection(n, d) { }
 
 EmptyCS :: ~EmptyCS()                { }
-
 } // end namespace oofem

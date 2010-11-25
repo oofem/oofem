@@ -45,12 +45,11 @@
 #include "structuralcrosssection.h"
 #include "datastream.h"
 #ifndef __MAKEDEPEND
-#include <math.h>
+ #include <math.h>
 #endif
 #include "contextioerr.h"
 
 namespace oofem {
-
 #define YIELD_TOL 1.e-4
 #define RES_TOL   1.e-4
 #define PLASTIC_MATERIAL_MAX_ITERATIONS 90
@@ -198,7 +197,7 @@ MPlasticMaterial :: giveRealStressVector(FloatArray &answer,
     if ( form == FullForm ) {
         answer = fullStressVector;
         return;
-    } else                                                             {
+    } else {
         crossSection->giveReducedCharacteristicVector(answer, gp, fullStressVector);
         return;
     }
@@ -226,7 +225,7 @@ MPlasticMaterial :: closestPointReturn(FloatArray &answer,
     FloatMatrix elasticModuliInverse, hardeningModuliInverse;
     FloatMatrix helpMtrx, helpMtrx2;
     FloatMatrix gmat;
-    std :: vector< FloatArray > yieldGradVec(this->nsurf), loadGradVec(this->nsurf), * yieldGradVecPtr, * loadGradVecPtr;
+    std :: vector< FloatArray >yieldGradVec(this->nsurf), loadGradVec(this->nsurf), * yieldGradVecPtr, * loadGradVecPtr;
     FloatArray rhs;
     double yieldValue;
     int nIterations = 0;
@@ -463,7 +462,7 @@ MPlasticMaterial :: cuttingPlaneReturn(FloatArray &answer,
     FloatArray fSigmaGradientVectorR, gGradientVectorR, helpVector, trialStressIncrement, rhs;
     FloatArray di, dj;
     FloatMatrix elasticModuli, hardeningModuli, dmat, helpMtrx, gmatInv, gradMat;
-    std :: vector< FloatArray > yieldGradVec(this->nsurf), loadGradVec(this->nsurf), * yieldGradVecPtr, * loadGradVecPtr;
+    std :: vector< FloatArray >yieldGradVec(this->nsurf), loadGradVec(this->nsurf), * yieldGradVecPtr, * loadGradVecPtr;
     FloatArray dgamma(this->nsurf);
     double yieldValue;
     int nIterations = 0;
@@ -905,7 +904,7 @@ MPlasticMaterial :: giveConsistentStiffnessMatrix(FloatMatrix &answer,
     FloatArray gradientVector, stressVector, fullStressVector;
     FloatArray stressSpaceHardeningVars;
     FloatArray strainSpaceHardeningVariables, helpVector;
-    std :: vector< FloatArray > yieldGradVec(this->nsurf), loadGradVec(this->nsurf), * yieldGradVecPtr, * loadGradVecPtr;
+    std :: vector< FloatArray >yieldGradVec(this->nsurf), loadGradVec(this->nsurf), * yieldGradVecPtr, * loadGradVecPtr;
     FloatArray helpVec;
 
     IntArray activeConditionMap, mask;
@@ -1066,7 +1065,7 @@ MPlasticMaterial :: giveElastoPlasticStiffnessMatrix(FloatMatrix &answer,
     FloatArray gradientVector, stressVector, fullStressVector;
     FloatArray stressSpaceHardeningVars;
     FloatArray strainSpaceHardeningVariables, helpVector;
-    std :: vector< FloatArray > yieldGradVec(this->nsurf), loadGradVec(this->nsurf), * yieldGradVecPtr, * loadGradVecPtr;
+    std :: vector< FloatArray >yieldGradVec(this->nsurf), loadGradVec(this->nsurf), * yieldGradVecPtr, * loadGradVecPtr;
     FloatArray helpVec;
 
     IntArray activeConditionMap, mask;
@@ -1747,7 +1746,4 @@ MPlasticMaterialStatus :: restoreContext(DataStream *stream, ContextMode mode, v
 
     return CIO_OK; // return succes
 }
-
-
-
 } // end namespace oofem

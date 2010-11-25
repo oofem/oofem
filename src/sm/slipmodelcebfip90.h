@@ -46,7 +46,6 @@
 #include "structuralms.h"
 
 namespace oofem {
-
 // material contant's keys for give()
 class GaussPoint;
 
@@ -305,6 +304,5 @@ protected:
     void give2dInterfaceMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseForm form, MatResponseMode rMode,
                                                 GaussPoint *gp, TimeStep *atTime);
 };
-
 } // end namespace oofem
 #endif // slipmodelcebfip90_h

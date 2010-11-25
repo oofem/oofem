@@ -41,7 +41,7 @@
 #include "conTable.h"
 #include "error.h"
 #ifndef __MAKEDEPEND
-#include <set>
+ #include <set>
 #endif
 
 
@@ -50,7 +50,6 @@
 #include "communicator.h"
 
 namespace oofem {
-
 //#define ParmetisLoadBalancer_DEBUG_PRINT
 
 
@@ -60,7 +59,7 @@ ParmetisLoadBalancer :: ParmetisLoadBalancer(Domain *d) : LoadBalancer(d)
     elmdist = NULL;
     tpwgts  = NULL;
 #else
-    OOFEM_ERROR ("ParMETIS support not compiled");
+    OOFEM_ERROR("ParMETIS support not compiled");
 #endif
 }
 
@@ -141,7 +140,7 @@ ParmetisLoadBalancer :: calculateLoadTransfer()
     ncommonnodes = 2;
     ParMETIS_V3_Mesh2Dual(elmdist, eptr, eind, & numflag, & ncommonnodes, & xadj, & adjncy, & communicator);
 
-#ifdef ParmetisLoadBalancer_DEBUG_PRINT
+ #ifdef ParmetisLoadBalancer_DEBUG_PRINT
     int myrank = domain->giveEngngModel()->giveRank();
     // DEBUG PRINT
     fprintf(stderr, "[%d] xadj:", myrank);
@@ -155,7 +154,7 @@ ParmetisLoadBalancer :: calculateLoadTransfer()
     }
 
     fprintf(stderr, "\n");
-#endif
+ #endif
 
 
     // setup imbalance tolerance for each vertex weight - ubvec param
@@ -234,7 +233,7 @@ ParmetisLoadBalancer :: calculateLoadTransfer()
         delete[] part;
     }
 
-#ifdef ParmetisLoadBalancer_DEBUG_PRINT
+ #ifdef ParmetisLoadBalancer_DEBUG_PRINT
     // debug
     fprintf(stderr, "[%d] edgecut: %d elementPart:", myrank, edgecut);
     for ( i = 1; i <= nelem; i++ ) {
@@ -242,7 +241,7 @@ ParmetisLoadBalancer :: calculateLoadTransfer()
     }
 
     fprintf(stderr, "\n");
-#endif
+ #endif
 
     // delete allocated xadj, adjncy arrays by ParMETIS
     delete[] eind;
@@ -263,11 +262,11 @@ ParmetisLoadBalancer :: initGlobalParmetisElementNumbering()
     IntArray procElementCounts(nproc);
 
     //if (procElementCounts) delete procElementCounts;
-    if (elmdist == NULL) {
-      elmdist = new idxtype [ nproc + 1 ];
-      if ( elmdist == NULL ) {
-        OOFEM_ERROR("ParmetisLoadBalancer::initGlobalParmetisNumbering: failed to allocate elmdist array");
-      }
+    if ( elmdist == NULL ) {
+        elmdist = new idxtype [ nproc + 1 ];
+        if ( elmdist == NULL ) {
+            OOFEM_ERROR("ParmetisLoadBalancer::initGlobalParmetisNumbering: failed to allocate elmdist array");
+        }
     }
 
     // determine number of local elements for the receiver
@@ -336,10 +335,10 @@ ParmetisLoadBalancer :: labelDofManagers()
     dofManPartitions.clear();
     dofManPartitions.resize(ndofman);
 
-#ifdef ParmetisLoadBalancer_DEBUG_PRINT
+ #ifdef ParmetisLoadBalancer_DEBUG_PRINT
     int _cols = 0;
     fprintf(stderr, "[%d] DofManager labels:\n", myrank);
-#endif
+ #endif
 
     // loop over local dof managers
     for ( idofman = 1; idofman <= ndofman; idofman++ ) {
@@ -366,12 +365,12 @@ ParmetisLoadBalancer :: labelDofManagers()
     }
 
     // handle master slave links between dofmans (master and slave required on same partition)
-    this->handleMasterSlaveDofManLinks ();
+    this->handleMasterSlaveDofManLinks();
 
 
     /* Exchange new partitions for shared nodes */
     CommunicatorBuff cb(nproc, CBT_dynamic);
-    Communicator com(domain->giveEngngModel(), & cb, myrank, nproc, CommMode_Dynamic);
+    Communicator com(domain->giveEngngModel(), &cb, myrank, nproc, CommMode_Dynamic);
     com.packAllData(this, & ParmetisLoadBalancer :: packSharedDmanPartitions);
     com.initExchange(SHARED_DOFMAN_PARTITIONS_TAG);
     com.unpackAllData(this, & ParmetisLoadBalancer :: unpackSharedDmanPartitions);
@@ -391,18 +390,18 @@ ParmetisLoadBalancer :: labelDofManagers()
     }
 
 
-#ifdef ParmetisLoadBalancer_DEBUG_PRINT
+ #ifdef ParmetisLoadBalancer_DEBUG_PRINT
     for ( idofman = 1; idofman <= ndofman; idofman++ ) {
         fprintf(stderr, " | %d: ", idofman);
         if ( dofManState.at(idofman) == DM_NULL ) {
             fprintf(stderr, "NULL  ");
         } else if ( dofManState.at(idofman) == DM_Local ) {
             fprintf(stderr, "Local ");
-        } else if ( dofManState.at(idofman) == DM_Shared )                                                                               {
+        } else if ( dofManState.at(idofman) == DM_Shared ) {
             fprintf(stderr, "Shared");
-        } else if ( dofManState.at(idofman) == DM_Remote )                                                                                                                                                               {
+        } else if ( dofManState.at(idofman) == DM_Remote ) {
             fprintf(stderr, "Remote");
-        } else                                                                                                                                                                                                                                             {
+        } else {
             fprintf(stderr, "Unknown");
         }
 
@@ -415,7 +414,7 @@ ParmetisLoadBalancer :: labelDofManagers()
         }
     }
 
-#endif
+ #endif
 }
 
 int
@@ -575,48 +574,48 @@ void ParmetisLoadBalancer :: addSharedDofmanPartitions(int _locnum, IntArray _pa
     }
 }
 
-void ParmetisLoadBalancer:: handleMasterSlaveDofManLinks ()
+void ParmetisLoadBalancer :: handleMasterSlaveDofManLinks()
 {
-  int idofman, ndofman = domain->giveNumberOfDofManagers();
-  DofManager *dofman, *_masterPtr;
-  //int myrank = domain->giveEngngModel()->giveRank();
-  int __i, __j, __partition, _master;
-  bool isSlave;
-  IntArray slaveMastersDofMans;
+    int idofman, ndofman = domain->giveNumberOfDofManagers();
+    DofManager *dofman, *_masterPtr;
+    //int myrank = domain->giveEngngModel()->giveRank();
+    int __i, __j, __partition, _master;
+    bool isSlave;
+    IntArray slaveMastersDofMans;
 
-  /*
-    We assume that in the old partitioning, the master and slave consistency was assured. This means that master is presented 
-    on the same partition as slave. The master can be local (then all slaves are local) or master is shared (then slaves are on 
-    partitions sharing the master).
-    
-    If master was local, then its new partitioning can be locally resolved (as all slaves were local).
-    If the master was shared, the new partitioning of master has to be communicated between old sharing partitions.
-  */
-  // handle master slave links between dofmans (master and slave required on same partition)
+    /*
+     * We assume that in the old partitioning, the master and slave consistency was assured. This means that master is presented
+     * on the same partition as slave. The master can be local (then all slaves are local) or master is shared (then slaves are on
+     * partitions sharing the master).
+     *
+     * If master was local, then its new partitioning can be locally resolved (as all slaves were local).
+     * If the master was shared, the new partitioning of master has to be communicated between old sharing partitions.
+     */
+    // handle master slave links between dofmans (master and slave required on same partition)
 
-  for ( idofman = 1; idofman <= ndofman; idofman++ ) {
-    dofman = domain->giveDofManager(idofman);
-    isSlave = dofman->hasAnySlaveDofs();
+    for ( idofman = 1; idofman <= ndofman; idofman++ ) {
+        dofman = domain->giveDofManager(idofman);
+        isSlave = dofman->hasAnySlaveDofs();
 
-    if (isSlave) {
-      // ok have a look on its masters
-      dofman->giveMasterDofMans(slaveMastersDofMans);
-      for (__i=1; __i <=slaveMastersDofMans.giveSize(); __i++) {
-        // loop over all slave masters
-        _master = slaveMastersDofMans.at(__i);
-        _masterPtr = domain->giveDofManager(_master);
-        
-        // now loop over all slave new partitions and annd then to master's partitions
-        for (__j=1; __j<=dofManPartitions [idofman-1].giveSize(); __j++) {
-          __partition = dofManPartitions [idofman-1].at(__j);
-          // add slave partition to master
-          dofManPartitions [_master-1].insertOnce(__partition);
+        if ( isSlave ) {
+            // ok have a look on its masters
+            dofman->giveMasterDofMans(slaveMastersDofMans);
+            for ( __i = 1; __i <= slaveMastersDofMans.giveSize(); __i++ ) {
+                // loop over all slave masters
+                _master = slaveMastersDofMans.at(__i);
+                _masterPtr = domain->giveDofManager(_master);
+
+                // now loop over all slave new partitions and annd then to master's partitions
+                for ( __j = 1; __j <= dofManPartitions [ idofman - 1 ].giveSize(); __j++ ) {
+                    __partition = dofManPartitions [ idofman - 1 ].at(__j);
+                    // add slave partition to master
+                    dofManPartitions [ _master - 1 ].insertOnce(__partition);
+                }
+            }
         }
-      }
     }
-  }
 }
-          
+
 
 #else //PARMETIS_MODULE
 void ParmetisLoadBalancer :: calculateLoadTransfer() { }
@@ -634,7 +633,6 @@ int
 ParmetisLoadBalancer :: giveElementPartition(int ielem)
 { return 0; }
 #endif
-
 } // end namespace oofem
 #endif
 

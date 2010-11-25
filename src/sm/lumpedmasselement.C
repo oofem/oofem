@@ -46,16 +46,15 @@
 
 #include "engngm.h"
 #ifndef __MAKEDEPEND
-#include <stdlib.h>
-#include <math.h>
+ #include <stdlib.h>
+ #include <math.h>
 #endif
 
 #ifdef __OOFEG
-#include "oofeggraphiccontext.h"
+ #include "oofeggraphiccontext.h"
 #endif
 
 namespace oofem {
-
 LumpedMassElement :: LumpedMassElement(int n, Domain *aDomain) : StructuralElement(n, aDomain)
     // Constructor.
 {
@@ -68,15 +67,15 @@ LumpedMassElement :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tSte
 // Returns the lumped mass matrix of the receiver. This expression is
 // valid in both local and global axes.
 {
+    int _i, _ndofs = this->computeNumberOfDofs(EID_MomentumBalance);
+    answer.resize(_ndofs, _ndofs);
+    answer.zero();
 
-  int _i, _ndofs = this->computeNumberOfDofs (EID_MomentumBalance);
-  answer.resize(_ndofs, _ndofs);
-  answer.zero();
+    for ( _i = 1; _i <= _ndofs; _i++ ) {
+        answer.at(_i, _i) = this->components.at(_i);
+    }
 
-  for (_i=1; _i<=_ndofs; _i++) {
-    answer.at(_i,_i) = this->components.at(_i);
-  }
-  return;
+    return;
 }
 
 IRResultType
@@ -97,34 +96,35 @@ LumpedMassElement :: checkConsistency()
 // check internal consistency
 //
 {
-  int _result = StructuralElement :: checkConsistency();
-  int _ndofs = this->computeNumberOfDofs (EID_MomentumBalance);
-  if (_ndofs != this->components.giveSize()) {
-    _warning("checkConsistency : component array size mismatch");
-    _result = 0;
-  }
-  return _result;
+    int _result = StructuralElement :: checkConsistency();
+    int _ndofs = this->computeNumberOfDofs(EID_MomentumBalance);
+    if ( _ndofs != this->components.giveSize() ) {
+        _warning("checkConsistency : component array size mismatch");
+        _result = 0;
+    }
+
+    return _result;
 }
 
 
 int
 LumpedMassElement :: computeNumberOfDofs(EquationID ut)
 {
-  DofManager* dman = this->giveDofManager (1);
-  int _i, _ndof = dman->giveNumberOfDofs();
-  int answer = 0;
-  DofIDItem _dofid;
+    DofManager *dman = this->giveDofManager(1);
+    int _i, _ndof = dman->giveNumberOfDofs();
+    int answer = 0;
+    DofIDItem _dofid;
 
-  // simply count all "structural" dofs of element node
-  for (_i=1; _i<=_ndof; _i++) {
-    _dofid = dman->giveDof(_i)->giveDofID();
-    if ((_dofid == D_u) || (_dofid == D_v) || (_dofid == D_w) ||
-	(_dofid == R_u) || (_dofid == R_v) || (_dofid == R_w))
-      answer++;
-  }
-    
-  return answer;
+    // simply count all "structural" dofs of element node
+    for ( _i = 1; _i <= _ndof; _i++ ) {
+        _dofid = dman->giveDof(_i)->giveDofID();
+        if ( ( _dofid == D_u ) || ( _dofid == D_v ) || ( _dofid == D_w ) ||
+            ( _dofid == R_u ) || ( _dofid == R_v ) || ( _dofid == R_w ) ) {
+            answer++;
+        }
+    }
 
+    return answer;
 }
 
 
@@ -134,20 +134,21 @@ LumpedMassElement ::   giveDofManDofIDMask(int inode, EquationID eid, IntArray &
     // DofId mask array determines the dof ordering requsted from node.
     // DofId mask array contains the DofID constants (defined in cltypes.h)
     // describing physical meaning of particular DOFs.
-  answer.resize(0,6);
-  DofManager* dman = this->giveDofManager (inode);
-  int _i, _ndof = dman->giveNumberOfDofs();
-  DofIDItem _dofid;
+    answer.resize(0, 6);
+    DofManager *dman = this->giveDofManager(inode);
+    int _i, _ndof = dman->giveNumberOfDofs();
+    DofIDItem _dofid;
 
-  // simply collect all "structural" dofs of element node
-  for (_i=1; _i<=_ndof; _i++) {
-    _dofid = dman->giveDof(_i)->giveDofID();
-    if ((_dofid == D_u) || (_dofid == D_v) || (_dofid == D_w) ||
-	(_dofid == R_u) || (_dofid == R_v) || (_dofid == R_w))
-      answer.followedBy(_dofid);
-  }
-    
-  return;
+    // simply collect all "structural" dofs of element node
+    for ( _i = 1; _i <= _ndof; _i++ ) {
+        _dofid = dman->giveDof(_i)->giveDofID();
+        if ( ( _dofid == D_u ) || ( _dofid == D_v ) || ( _dofid == D_w ) ||
+            ( _dofid == R_u ) || ( _dofid == R_v ) || ( _dofid == R_w ) ) {
+            answer.followedBy(_dofid);
+        }
+    }
+
+    return;
 }
 
 #ifdef __OOFEG
@@ -203,6 +204,4 @@ void LumpedMassElement :: drawScalar(oofegGraphicContext &context)
 
 
 #endif
-
-
 } // end namespace oofem

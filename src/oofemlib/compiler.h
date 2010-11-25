@@ -40,7 +40,6 @@
 #include "oofemcfg.h"
 
 namespace oofem {
-
 #ifndef HAVE_FALSETRUE
 enum { FALSE=0, TRUE = 1 };
 #endif
@@ -57,8 +56,7 @@ int strncasecmp(const char *s1, const char *s2, int count);
 #define __OOFEM_DO_NOT_PARSE_NULL
 
 #ifdef _MSC_VER // If Microsoft C do not complain about names longer than 255
-#pragma warning( disable : 4786 )
+ #pragma warning( disable : 4786 )
 #endif
-
 } // end namespace oofem
 #endif // compiler_h

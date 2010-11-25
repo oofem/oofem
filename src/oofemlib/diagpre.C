@@ -30,13 +30,12 @@
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
 #ifndef __MAKEDEPEND
-#include <stdlib.h>
+ #include <stdlib.h>
 #endif
 #include "diagpre.h"
 #include "sparsemtrx.h"
 
 namespace oofem {
-
 DiagPreconditioner :: DiagPreconditioner(const SparseMtrx &C, InputRecord &attributes) : Preconditioner(C, attributes),
     diag_( C.giveNumberOfRows() )
 { }
@@ -82,5 +81,4 @@ DiagPreconditioner :: trans_solve(const FloatArray &x, FloatArray &y) const
         y(i) = x(i) * diag(i);
     }
 }
-
 } // end namespace oofem

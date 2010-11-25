@@ -56,18 +56,17 @@
 #include "levelsetpcs.h"
 #include "datastream.h"
 #ifndef __MAKEDEPEND
-#include <stdio.h>
+ #include <stdio.h>
 #endif
 #ifdef TIME_REPORT
-#ifndef __MAKEDEPEND
-#include <time.h>
-#endif
-#include "clock.h"
+ #ifndef __MAKEDEPEND
+  #include <time.h>
+ #endif
+ #include "clock.h"
 #endif
 #include "contextioerr.h"
 
 namespace oofem {
-
 /* define if implicit interface update required */
 //#define SUPG_IMPLICIT_INTERFACE
 
@@ -289,7 +288,7 @@ SUPG ::  giveUnknownComponent(UnknownType chc, ValueModeType mode,
         } else {
             return 1.0;
         }
-    } else   {
+    } else {
         _error("giveUnknownComponent: Unknown is of undefined CharType for this problem");
     }
 
@@ -325,7 +324,7 @@ SUPG :: giveNextStep()
 
     if ( currentStep == NULL ) {
         // first step -> generate initial step
-        currentStep = new TimeStep( * giveSolutionStepWhenIcApply() );
+        currentStep = new TimeStep( *giveSolutionStepWhenIcApply() );
     } else {
         istep =  currentStep->giveNumber() + 1;
         counter = currentStep->giveSolutionStateCounter() + 1;
@@ -411,7 +410,7 @@ SUPG :: solveYourselfAt(TimeStep *tStep)
             _error("solveYourselfAt: sparse matrix creation failed");
         }
 
-        lhs->buildInternalStructure(this, 1, EID_MomentumBalance_ConservationEquation, EModelDefaultEquationNumbering());
+        lhs->buildInternalStructure( this, 1, EID_MomentumBalance_ConservationEquation, EModelDefaultEquationNumbering() );
 
         if ( materialInterface ) {
             this->updateElementsForNewInterfacePosition(tStep);
@@ -421,7 +420,7 @@ SUPG :: solveYourselfAt(TimeStep *tStep)
     } else if ( requiresUnknownsDictionaryUpdate() ) {
         // rebuild lhs structure and resize solution vector
         incrementalSolutionVector.resize(neq);
-        lhs->buildInternalStructure(this, 1, EID_MomentumBalance_ConservationEquation, EModelDefaultEquationNumbering());
+        lhs->buildInternalStructure( this, 1, EID_MomentumBalance_ConservationEquation, EModelDefaultEquationNumbering() );
     }
 
 
@@ -471,17 +470,17 @@ SUPG :: solveYourselfAt(TimeStep *tStep)
         if ( materialInterface ) {
             //if (this->fsflag) updateDofManVals(tStep);
 #ifdef SUPG_IMPLICIT_INTERFACE
-#ifdef TIME_REPORT
+ #ifdef TIME_REPORT
             oofem_timeval tstart;
             :: getUtime(tstart);
-#endif
+ #endif
             materialInterface->updatePosition( this->giveCurrentStep() );
             updateElementsForNewInterfacePosition(tStep);
-#ifdef TIME_REPORT
+ #ifdef TIME_REPORT
             oofem_timeval ut;
             :: getRelativeUtime(ut, tstart);
             OOFEM_LOG_INFO( "SUPG info: user time consumed by updating interfaces: %.2fs\n", ( double ) ( ut.tv_sec + ut.tv_usec / ( double ) OOFEM_USEC_LIM ) );
-#endif
+ #endif
 #else
             //updateElementsForNewInterfacePosition (tStep);
 #endif
@@ -496,15 +495,15 @@ SUPG :: solveYourselfAt(TimeStep *tStep)
     // assemble rhs (residual)
     //
     rhs.zero();
-    this->assembleVectorFromElements( rhs, tStep, EID_MomentumBalance, BCRhsTerm_MB, VM_Total, 
-				      EModelDefaultEquationNumbering(), this->giveDomain(1) );
-    this->assembleVectorFromElements( rhs, tStep, EID_ConservationEquation, BCRhsTerm_MC, VM_Total, 
-				      EModelDefaultEquationNumbering(), this->giveDomain(1) );
+    this->assembleVectorFromElements( rhs, tStep, EID_MomentumBalance, BCRhsTerm_MB, VM_Total,
+                                     EModelDefaultEquationNumbering(), this->giveDomain(1) );
+    this->assembleVectorFromElements( rhs, tStep, EID_ConservationEquation, BCRhsTerm_MC, VM_Total,
+                                     EModelDefaultEquationNumbering(), this->giveDomain(1) );
     // algoritmic rhs part (assembled by e-model (in giveCharComponent service) from various element contribs)
-    this->assembleVectorFromElements( rhs, tStep, EID_MomentumBalance, AlgorithmicRhsTerm_MB, VM_Total, 
-				      EModelDefaultEquationNumbering(), this->giveDomain(1) );
-    this->assembleVectorFromElements( rhs, tStep, EID_ConservationEquation, AlgorithmicRhsTerm_MC, VM_Total, 
-				      EModelDefaultEquationNumbering(), this->giveDomain(1) );
+    this->assembleVectorFromElements( rhs, tStep, EID_MomentumBalance, AlgorithmicRhsTerm_MB, VM_Total,
+                                     EModelDefaultEquationNumbering(), this->giveDomain(1) );
+    this->assembleVectorFromElements( rhs, tStep, EID_ConservationEquation, AlgorithmicRhsTerm_MC, VM_Total,
+                                     EModelDefaultEquationNumbering(), this->giveDomain(1) );
 
     //
     // corrector
@@ -519,33 +518,33 @@ SUPG :: solveYourselfAt(TimeStep *tStep)
         {
             // momentum balance part
             lhs->zero();
-            this->assemble( lhs, tStep, EID_MomentumBalance, AccelerationTerm_MB, 
-			    EModelDefaultEquationNumbering(), this->giveDomain(1) );
-            this->assemble( lhs, tStep, EID_MomentumBalance, AdvectionDerivativeTerm_MB, 
-			    EModelDefaultEquationNumbering(), this->giveDomain(1) );
+            this->assemble( lhs, tStep, EID_MomentumBalance, AccelerationTerm_MB,
+                           EModelDefaultEquationNumbering(), this->giveDomain(1) );
+            this->assemble( lhs, tStep, EID_MomentumBalance, AdvectionDerivativeTerm_MB,
+                           EModelDefaultEquationNumbering(), this->giveDomain(1) );
             if ( 1 ) { //if ((nite > 5)) // && (rnorm < 1.e4))
-                this->assemble( lhs, tStep, EID_MomentumBalance, TangentDiffusionDerivativeTerm_MB, 
-				EModelDefaultEquationNumbering(), this->giveDomain(1) );
+                this->assemble( lhs, tStep, EID_MomentumBalance, TangentDiffusionDerivativeTerm_MB,
+                               EModelDefaultEquationNumbering(), this->giveDomain(1) );
             } else {
-                this->assemble( lhs, tStep, EID_MomentumBalance, SecantDiffusionDerivativeTerm_MB, 
-				EModelDefaultEquationNumbering(), this->giveDomain(1) );
+                this->assemble( lhs, tStep, EID_MomentumBalance, SecantDiffusionDerivativeTerm_MB,
+                               EModelDefaultEquationNumbering(), this->giveDomain(1) );
             }
 
-            this->assemble( lhs, tStep, EID_MomentumBalance, EID_ConservationEquation, PressureTerm_MB, 
-			    EModelDefaultEquationNumbering(), this->giveDomain(1) );
-            this->assemble( lhs, tStep, EID_MomentumBalance, LSICStabilizationTerm_MB, 
-			    EModelDefaultEquationNumbering(), this->giveDomain(1) );
+            this->assemble( lhs, tStep, EID_MomentumBalance, EID_ConservationEquation, PressureTerm_MB,
+                           EModelDefaultEquationNumbering(), this->giveDomain(1) );
+            this->assemble( lhs, tStep, EID_MomentumBalance, LSICStabilizationTerm_MB,
+                           EModelDefaultEquationNumbering(), this->giveDomain(1) );
             // conservation eq part
-            this->assemble( lhs, tStep, EID_ConservationEquation, EID_MomentumBalance, LinearAdvectionTerm_MC, 
-			    EModelDefaultEquationNumbering(), this->giveDomain(1) );
-            this->assemble( lhs, tStep, EID_ConservationEquation, EID_MomentumBalance, AdvectionDerivativeTerm_MC, 
-			    EModelDefaultEquationNumbering(), this->giveDomain(1) );
-            this->assemble( lhs, tStep, EID_ConservationEquation, EID_MomentumBalance, AccelerationTerm_MC, 
-			    EModelDefaultEquationNumbering(), this->giveDomain(1) );
-            this->assemble( lhs, tStep, EID_ConservationEquation, EID_MomentumBalance, DiffusionDerivativeTerm_MC, 
-			    EModelDefaultEquationNumbering(), this->giveDomain(1) );
-            this->assemble( lhs, tStep, EID_ConservationEquation, EID_ConservationEquation, PressureTerm_MC, 
-			    EModelDefaultEquationNumbering(), this->giveDomain(1) );
+            this->assemble( lhs, tStep, EID_ConservationEquation, EID_MomentumBalance, LinearAdvectionTerm_MC,
+                           EModelDefaultEquationNumbering(), this->giveDomain(1) );
+            this->assemble( lhs, tStep, EID_ConservationEquation, EID_MomentumBalance, AdvectionDerivativeTerm_MC,
+                           EModelDefaultEquationNumbering(), this->giveDomain(1) );
+            this->assemble( lhs, tStep, EID_ConservationEquation, EID_MomentumBalance, AccelerationTerm_MC,
+                           EModelDefaultEquationNumbering(), this->giveDomain(1) );
+            this->assemble( lhs, tStep, EID_ConservationEquation, EID_MomentumBalance, DiffusionDerivativeTerm_MC,
+                           EModelDefaultEquationNumbering(), this->giveDomain(1) );
+            this->assemble( lhs, tStep, EID_ConservationEquation, EID_ConservationEquation, PressureTerm_MC,
+                           EModelDefaultEquationNumbering(), this->giveDomain(1) );
         }
         //if (this->fsflag) this->imposeAmbientPressureInOuterNodes(lhs,&rhs,tStep);
 
@@ -572,7 +571,7 @@ SUPG :: solveYourselfAt(TimeStep *tStep)
         }
 
         OOFEM_LOG_INFO("SUPG: solver check: absoluteError %e, relativeError %e\n", __absErr, __relErr);
-        delete ( __lhs );
+        delete(__lhs);
 #endif
 
 
@@ -610,24 +609,24 @@ SUPG :: solveYourselfAt(TimeStep *tStep)
         }
 
 #if 0
-#ifdef SUPG_IMPLICIT_INTERFACE
+ #ifdef SUPG_IMPLICIT_INTERFACE
         if ( materialInterface ) {
-#ifdef TIME_REPORT
+  #ifdef TIME_REPORT
             oofem_timeval tstart;
             :: getUtime(tstart);
-#endif
+  #endif
             //if (this->fsflag) updateDofManVals(tStep);
             materialInterface->updatePosition( this->giveCurrentStep() );
             updateElementsForNewInterfacePosition(tStep);
-#ifdef TIME_REPORT
+  #ifdef TIME_REPORT
             oofem_timeval ut;
             :: getRelativeUtime(ut, tstart);
             OOFEM_LOG_INFO( "SUPG info: user time consumed by updating interfaces: %.2fs\n", ( double ) ( ut.tv_sec + ut.tv_usec / ( double ) OOFEM_USEC_LIM ) );
-#endif
+  #endif
             //if (this->fsflag) this->updateDofManActivityMap(tStep);
         }
 
-#endif
+ #endif
 #else
         if ( materialInterface ) {
             //if (this->fsflag) updateDofManVals(tStep);
@@ -647,15 +646,15 @@ SUPG :: solveYourselfAt(TimeStep *tStep)
         // assemble rhs (residual)
         //
         rhs.zero();
-        this->assembleVectorFromElements( rhs, tStep, EID_MomentumBalance, BCRhsTerm_MB, VM_Total, 
-					  EModelDefaultEquationNumbering(), this->giveDomain(1) );
-        this->assembleVectorFromElements( rhs, tStep, EID_ConservationEquation, BCRhsTerm_MC, VM_Total, 
-					  EModelDefaultEquationNumbering(), this->giveDomain(1) );
+        this->assembleVectorFromElements( rhs, tStep, EID_MomentumBalance, BCRhsTerm_MB, VM_Total,
+                                         EModelDefaultEquationNumbering(), this->giveDomain(1) );
+        this->assembleVectorFromElements( rhs, tStep, EID_ConservationEquation, BCRhsTerm_MC, VM_Total,
+                                         EModelDefaultEquationNumbering(), this->giveDomain(1) );
         // algoritmic rhs part (assembled by e-model (in giveCharComponent service) from various element contribs)
-        this->assembleVectorFromElements( rhs, tStep, EID_MomentumBalance, AlgorithmicRhsTerm_MB, VM_Total, 
-					  EModelDefaultEquationNumbering(), this->giveDomain(1) );
-        this->assembleVectorFromElements( rhs, tStep, EID_ConservationEquation, AlgorithmicRhsTerm_MC, VM_Total, 
-					  EModelDefaultEquationNumbering(), this->giveDomain(1) );
+        this->assembleVectorFromElements( rhs, tStep, EID_MomentumBalance, AlgorithmicRhsTerm_MB, VM_Total,
+                                         EModelDefaultEquationNumbering(), this->giveDomain(1) );
+        this->assembleVectorFromElements( rhs, tStep, EID_ConservationEquation, AlgorithmicRhsTerm_MC, VM_Total,
+                                         EModelDefaultEquationNumbering(), this->giveDomain(1) );
 
         rnorm = sqrt( dotProduct(rhs, rhs, neq) );
 
@@ -677,15 +676,15 @@ SUPG :: solveYourselfAt(TimeStep *tStep)
             // assemble rhs (residual)
             //
             rhs.zero();
-            this->assembleVectorFromElements( rhs, tStep, EID_MomentumBalance, BCRhsTerm_MB, VM_Total, 
-					      EModelDefaultEquationNumbering(), this->giveDomain(1) );
-            this->assembleVectorFromElements( rhs, tStep, EID_ConservationEquation, BCRhsTerm_MC, VM_Total, 
-					      EModelDefaultEquationNumbering(), this->giveDomain(1) );
+            this->assembleVectorFromElements( rhs, tStep, EID_MomentumBalance, BCRhsTerm_MB, VM_Total,
+                                             EModelDefaultEquationNumbering(), this->giveDomain(1) );
+            this->assembleVectorFromElements( rhs, tStep, EID_ConservationEquation, BCRhsTerm_MC, VM_Total,
+                                             EModelDefaultEquationNumbering(), this->giveDomain(1) );
             // algoritmic rhs part (assembled by e-model (in giveCharComponent service) from various element contribs)
-            this->assembleVectorFromElements( rhs, tStep, EID_MomentumBalance, AlgorithmicRhsTerm_MB, VM_Total, 
-					      EModelDefaultEquationNumbering(), this->giveDomain(1) );
-            this->assembleVectorFromElements( rhs, tStep, EID_ConservationEquation, AlgorithmicRhsTerm_MC, VM_Total, 
-					      EModelDefaultEquationNumbering(), this->giveDomain(1) );
+            this->assembleVectorFromElements( rhs, tStep, EID_MomentumBalance, AlgorithmicRhsTerm_MB, VM_Total,
+                                             EModelDefaultEquationNumbering(), this->giveDomain(1) );
+            this->assembleVectorFromElements( rhs, tStep, EID_ConservationEquation, AlgorithmicRhsTerm_MC, VM_Total,
+                                             EModelDefaultEquationNumbering(), this->giveDomain(1) );
         }
     } while ( ( rnorm > rtolv ) && ( _absErrResid > atolv ) && ( nite <= maxiter ) );
 
@@ -700,17 +699,17 @@ SUPG :: solveYourselfAt(TimeStep *tStep)
 
 #ifndef SUPG_IMPLICIT_INTERFACE
     if ( materialInterface ) {
-#ifdef TIME_REPORT
+ #ifdef TIME_REPORT
         oofem_timeval tstart;
         getUtime(tstart);
-#endif
+ #endif
         materialInterface->updatePosition( this->giveCurrentStep() );
         updateElementsForNewInterfacePosition(tStep);
-#ifdef TIME_REPORT
+ #ifdef TIME_REPORT
         oofem_timeval ut;
         getRelativeUtime(ut, tstart);
         OOFEM_LOG_INFO( "SUPG info: user time consumed by updating interfaces: %.2fs\n", ( double ) ( ut.tv_sec + ut.tv_usec / ( double ) OOFEM_USEC_LIM ) );
-#endif
+ #endif
         //if (this->fsflag) this->updateDofManActivityMap(tStep);
     }
 
@@ -880,7 +879,7 @@ SUPG :: checkConsistency()
 
     for ( i = 1; i <= nelem; i++ ) {
         ePtr = domain->giveElement(i);
-        sePtr = dynamic_cast< SUPGElement * >( ePtr );
+        sePtr = dynamic_cast< SUPGElement * >(ePtr);
         if ( sePtr == NULL ) {
             _warning2("Element %d has no SUPG base", i);
             return 0;
@@ -938,7 +937,7 @@ SUPG :: printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *atTime)
     DofIDItem type = iDof->giveDofID();
     if ( ( type == V_u ) || ( type == V_v ) || ( type == V_w ) ) {
         iDof->printSingleOutputAt(stream, atTime, 'v', EID_MomentumBalance, VM_Total, uscale);
-    } else if ( ( type == P_f ) )    {
+    } else if ( ( type == P_f ) ) {
         iDof->printSingleOutputAt(stream, atTime, 'p', EID_ConservationEquation, VM_Total, pscale);
     } else {
         _error("printDofOutputAt: unsupported dof type");
@@ -1021,7 +1020,7 @@ SUPG :: giveNewEquationNumber(int domain, DofIDItem id)
 {
     if ( ( id == V_u ) || ( id == V_v ) || ( id == V_w ) ) {
         return ++domainNeqs.at(domain);
-    } else if ( id == P_f )  {
+    } else if ( id == P_f ) {
         return ++domainNeqs.at(domain);
     } else {
         _error("giveNewEquationNumber:: Unknown DofIDItem");
@@ -1035,7 +1034,7 @@ SUPG :: giveNewPrescribedEquationNumber(int domain, DofIDItem id)
 {
     if ( ( id == V_u ) || ( id == V_v ) || ( id == V_w ) ) {
         return ++domainPrescribedNeqs.at(domain);
-    } else if ( id == P_f )  {
+    } else if ( id == P_f ) {
         return ++domainPrescribedNeqs.at(domain);
     } else {
         _error("giveNewPrescribedEquationNumber:: Unknown DofIDItem");
@@ -1586,5 +1585,4 @@ SUPG :: giveUnknownDictHashIndx(EquationID type, ValueModeType mode, TimeStep *s
  * }
  *
  */
-
 } // end namespace oofem

@@ -46,7 +46,6 @@
 #include "structuralms.h"
 
 namespace oofem {
-
 // material contant's keys for give()
 #define pscm_Ee 300
 #define pscm_Et 301
@@ -249,7 +248,7 @@ public:
     contextIOResultType    restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 
     // non-standard - returns time independent material constant
-    double   give(int, GaussPoint*);
+    double   give(int, GaussPoint *);
 
     LinearElasticMaterial *giveLinearElasticMaterial() { return linearElasticMaterial; }
     virtual void give3dMaterialStiffnessMatrix(FloatMatrix & answer,
@@ -367,6 +366,5 @@ protected:
                                    GaussPoint * gp,
                                    TimeStep * atTime);
 };
-
 } // end namespace oofem
 #endif // rcm2_h

@@ -42,7 +42,7 @@
 #define nrsolver2_h
 
 #ifndef __MAKEDEPEND
-#include <stdio.h>
+ #include <stdio.h>
 #endif
 #include "sparselinsystemnm.h"
 #include "sparsenonlinsystemnm.h"
@@ -52,7 +52,6 @@
 #include "linesearch.h"
 
 namespace oofem {
-
 class Domain;
 class EngngModel;
 
@@ -194,8 +193,9 @@ public:
     const char *giveClassName() const { return "NRSolver2"; }
     classType giveClassID() const { return NRSolverClass; }
     /// sets associated Domain
-    virtual void         setDomain(Domain *d) { this->domain = d;
-                                                if ( linSolver ) { linSolver->setDomain(d); } }
+    virtual void         setDomain(Domain *d) {
+        this->domain = d;
+        if ( linSolver ) { linSolver->setDomain(d); } }
     /// This method clears receiver cached data dependent on topology, when it changes.
     virtual void reinitialize() { if ( linSolver ) { linSolver->reinitialize(); } }
 
@@ -204,6 +204,5 @@ protected:
     SparseLinearSystemNM *giveLinearSolver();
     LineSearchNM *giveLineSearchSolver();
 };
-
 } // end namespace oofem
 #endif // nrsolver2_h

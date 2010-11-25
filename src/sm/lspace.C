@@ -49,19 +49,18 @@
 #include "mathfem.h"
 #include "util.h"
 #ifndef __MAKEDEPEND
-#include <stdio.h>
+ #include <stdio.h>
 #endif
 
 #ifdef __OOFEG
-#include "engngm.h"
-#include "oofeggraphiccontext.h"
-#include "oofegutils.h"
-#include "conTable.h"
-#include "rcm2.h"
+ #include "engngm.h"
+ #include "oofeggraphiccontext.h"
+ #include "oofegutils.h"
+ #include "conTable.h"
+ #include "rcm2.h"
 #endif
 
 namespace oofem {
-
 FEI3dHexaLin LSpace :: interpolation;
 
 LSpace :: LSpace(int n, Domain *aDomain) : NLStructuralElement(n, aDomain), ZZNodalRecoveryModelInterface(),
@@ -131,11 +130,11 @@ LSpace :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int li,
 
 void
 LSpace :: computeBFmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
-// Returns the [9x24] defgrad-displacement matrix {BF} of the receiver, 
+// Returns the [9x24] defgrad-displacement matrix {BF} of the receiver,
 // evaluated at aGaussPoint.
 // BF matrix  -  9 rows : du/dx, dv/dx, dw/dx, du/dy, dv/dy, dw/dy, du/dz, dv/dz, dw/dz
 {
-  int i,j;
+    int i, j;
     FloatMatrix dnx;
 
     this->interpolation.evaldNdx(dnx, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0);
@@ -144,79 +143,93 @@ LSpace :: computeBFmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
     answer.zero();
 
     for ( i = 1; i <= 3; i++ ) { // 3 spatial dimensions
-      for ( j = 1; j <= 8; j++ ) { // 8 nodes
-        answer.at(3*i-2, 3*j-2) = 
-        answer.at(3*i-1, 3*j-1) = 
-	answer.at(3*i  , 3*j  ) = dnx.at(j, i); // derivative of Nj wrt Xi
-      }
+        for ( j = 1; j <= 8; j++ ) { // 8 nodes
+            answer.at(3 * i - 2, 3 * j - 2) =
+                answer.at(3 * i - 1, 3 * j - 1) =
+                    answer.at(3 * i, 3 * j) = dnx.at(j, i); // derivative of Nj wrt Xi
+        }
     }
 }
 
 void
-LSpace :: computeNLBMatrixAt ( FloatMatrix& answer, GaussPoint *aGaussPoint, int i)
+LSpace :: computeNLBMatrixAt(FloatMatrix &answer, GaussPoint *aGaussPoint, int i)
 //
 // Returns the [24x24] nonlinear part of strain-displacement matrix {B} of the receiver,
 // evaluated at aGaussPoint
- 
+
 {
-  int j, k, l;
-  FloatMatrix  dnx ;
+    int j, k, l;
+    FloatMatrix dnx;
 
-  // compute the derivatives of shape functions
-  this->interpolation.evaldNdx (dnx, *aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0);
-  
-  answer.resize (24,24);
-  answer.zero();
+    // compute the derivatives of shape functions
+    this->interpolation.evaldNdx(dnx, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0);
 
-  // put the products of derivatives of shape functions into the "nonlinear B matrix",
-  // depending on parameter i, which is the number of the strain component
-  if(i<=3){
-    for(k=0;k<8;k++)
-      for(l=0;l<3;l++)
-	for(j=1;j<=24;j+=3)
-	  answer.at(k*3+l+1,l+j) = dnx.at(k+1,i) * dnx.at((j-1)/3+1,i);
-  }
-  else if(i==4){
-    for(k=0;k<8;k++)
-      for(l=0;l<3;l++)
-	for(j=1;j<=24;j+=3)
-	  answer.at(k*3+l+1,l+j) = dnx.at(k+1,2) * dnx.at((j-1)/3+1,3) + dnx.at(k+1,3) * dnx.at((j-1)/3+1,2);
-  }
-  else if(i==5){
-    for(k=0;k<8;k++)
-      for(l=0;l<3;l++)
-	for(j=1;j<=24;j+=3)
-	  answer.at(k*3+l+1,l+j) = dnx.at(k+1,1) * dnx.at((j-1)/3+1,3) + dnx.at(k+1,3) * dnx.at((j-1)/3+1,1);
-  }
-  else if(i==6){
-    for(k=0;k<8;k++)
-      for(l=0;l<3;l++)
-	for(j=1;j<=24;j+=3)
-	  answer.at(k*3+l+1,l+j) = dnx.at(k+1,1) * dnx.at((j-1)/3+1,2) + dnx.at(k+1,2) * dnx.at((j-1)/3+1,1);
-  }  
-  return;
+    answer.resize(24, 24);
+    answer.zero();
+
+    // put the products of derivatives of shape functions into the "nonlinear B matrix",
+    // depending on parameter i, which is the number of the strain component
+    if ( i <= 3 ) {
+        for ( k = 0; k < 8; k++ ) {
+            for ( l = 0; l < 3; l++ ) {
+                for ( j = 1; j <= 24; j += 3 ) {
+                    answer.at(k * 3 + l + 1, l + j) = dnx.at(k + 1, i) * dnx.at( ( j - 1 ) / 3 + 1, i );
+                }
+            }
+        }
+    } else if ( i == 4 )        {
+        for ( k = 0; k < 8; k++ ) {
+            for ( l = 0; l < 3; l++ ) {
+                for ( j = 1; j <= 24; j += 3 ) {
+                    answer.at(k * 3 + l + 1, l + j) = dnx.at(k + 1, 2) * dnx.at( ( j - 1 ) / 3 + 1, 3 ) + dnx.at(k + 1, 3) * dnx.at( ( j - 1 ) / 3 + 1, 2 );
+                }
+            }
+        }
+    } else if ( i == 5 )        {
+        for ( k = 0; k < 8; k++ ) {
+            for ( l = 0; l < 3; l++ ) {
+                for ( j = 1; j <= 24; j += 3 ) {
+                    answer.at(k * 3 + l + 1, l + j) = dnx.at(k + 1, 1) * dnx.at( ( j - 1 ) / 3 + 1, 3 ) + dnx.at(k + 1, 3) * dnx.at( ( j - 1 ) / 3 + 1, 1 );
+                }
+            }
+        }
+    } else if ( i == 6 )        {
+        for ( k = 0; k < 8; k++ ) {
+            for ( l = 0; l < 3; l++ ) {
+                for ( j = 1; j <= 24; j += 3 ) {
+                    answer.at(k * 3 + l + 1, l + j) = dnx.at(k + 1, 1) * dnx.at( ( j - 1 ) / 3 + 1, 2 ) + dnx.at(k + 1, 2) * dnx.at( ( j - 1 ) / 3 + 1, 1 );
+                }
+            }
+        }
+    }
+
+    return;
 }
 
-MaterialMode  
+MaterialMode
 LSpace :: giveMaterialMode()
 {
-  if (nlGeometry>1) 
-    return _3dMat_F; 
-  else return _3dMat;
+    if ( nlGeometry > 1 ) {
+        return _3dMat_F;
+    } else {
+        return _3dMat;
+    }
 }
 
 void LSpace :: computeGaussPoints()
 // Sets up the array containing the four Gauss points of the receiver.
 {
-  if (!integrationRulesArray) {
-    numberOfIntegrationRules = 1;
-    integrationRulesArray = new IntegrationRule * [ 1 ];
-    integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 6);
-    MaterialMode mode = _3dMat; // material model is based on strain (standard approach)
-    if (nlGeometry>1)
-      mode = _3dMat_F; // material model is based on deformation gradient, not on strain
-    integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Cube, numberOfGaussPoints, mode);
-  }
+    if ( !integrationRulesArray ) {
+        numberOfIntegrationRules = 1;
+        integrationRulesArray = new IntegrationRule * [ 1 ];
+        integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 6);
+        MaterialMode mode = _3dMat; // material model is based on strain (standard approach)
+        if ( nlGeometry > 1 ) {
+            mode = _3dMat_F; // material model is based on deformation gradient, not on strain
+        }
+
+        integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Cube, numberOfGaussPoints, mode);
+    }
 }
 
 
@@ -246,8 +259,8 @@ double LSpace :: computeVolumeAround(GaussPoint *aGaussPoint)
 // Returns the portion of the receiver which is attached to aGaussPoint.
 {
     double determinant, weight, volume;
-    determinant = fabs( this->interpolation.giveTransformationJacobian(* aGaussPoint->giveCoordinates(), 
-								       FEIElementGeometryWrapper(this), 0.0) );
+    determinant = fabs( this->interpolation.giveTransformationJacobian(* aGaussPoint->giveCoordinates(),
+                                                                       FEIElementGeometryWrapper(this), 0.0) );
 
 
     weight      = aGaussPoint->giveWeight();
@@ -322,7 +335,7 @@ LSpace :: giveCharacteristicLenght(GaussPoint *gp, const FloatArray &normalToCra
 int
 LSpace :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords)
 {
-  this->interpolation.local2global(answer, lcoords, FEIElementGeometryWrapper(this), 0.0);
+    this->interpolation.local2global(answer, lcoords, FEIElementGeometryWrapper(this), 0.0);
     return 1;
 }
 
@@ -548,7 +561,7 @@ LSpace :: NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side
 int
 LSpace :: computeLocalCoordinates(FloatArray &answer, const FloatArray &coords)
 {
-  return this->interpolation.global2local(answer, coords, FEIElementGeometryWrapper(this), 0.0);
+    return this->interpolation.global2local(answer, coords, FEIElementGeometryWrapper(this), 0.0);
 }
 
 
@@ -575,7 +588,7 @@ LSpace :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &c
 
     if ( size == gsize ) {
         dist = coords.distance(gcoords);
-    } else   {
+    } else {
         FloatArray helpCoords = coords;
 
         helpCoords.resize(gsize);
@@ -724,7 +737,7 @@ LSpace :: HuertaRemeshingCriteriaI_giveCharacteristicSize() {
 
 
 #ifdef __OOFEG
-#define TR_LENGHT_REDUCT 0.3333
+ #define TR_LENGHT_REDUCT 0.3333
 
 void LSpace :: drawRawGeometry(oofegGraphicContext &gc)
 {
@@ -793,8 +806,10 @@ void LSpace :: drawTriad(FloatArray &coords, int isurf)
     IntArray snodes(4);
     FloatArray h1(3), h2(3), nn(3), n(3);
     int j;
-    const char *colors[] = {"red", "green", "blue"};
-    
+    const char *colors[] = {
+        "red", "green", "blue"
+    };
+
 
     this->interpolation.computeSurfaceMapping(snodes, dofManArray, isurf);
     for ( i = 1; i <= 4; i++ ) {
@@ -855,7 +870,7 @@ void LSpace :: drawTriad(FloatArray &coords, int isurf)
         p [ 1 ].y = p [ 0 ].y + coeff *jm.at(2, i);
         p [ 1 ].z = p [ 0 ].z + coeff *jm.at(3, i);
 
-        EASValsSetColor( ColorGetPixelFromString(oofem_tmpstr(colors[i-1]), & succ) );
+        EASValsSetColor( ColorGetPixelFromString(oofem_tmpstr(colors [ i - 1 ]), & succ) );
 
         go = CreateLine3D(p);
         EGWithMaskChangeAttributes(WIDTH_MASK | COLOR_MASK | LAYER_MASK, go);
@@ -989,7 +1004,7 @@ LSpace :: drawSpecial(oofegGraphicContext &gc)
 
             //
             // obtain gp global coordinates
-	    this->computeGlobalCoordinates(gpc, * gp->giveCoordinates() );
+            this->computeGlobalCoordinates( gpc, * gp->giveCoordinates() );
             length = 0.3333 * __OOFEM_POW(this->computeVolumeAround(gp), 1. / 3.);
             if ( mat->giveIPValue(crackDir, gp, IST_CrackDirs, tStep) ) {
                 mat->giveIPValue(crackStatuses, gp, IST_CrackStatuses, tStep);
@@ -1004,10 +1019,10 @@ LSpace :: drawSpecial(oofegGraphicContext &gc)
                         if ( i == 1 ) {
                             j = 2;
                             k = 3;
-                        } else if ( i == 2 )                            {
+                        } else if ( i == 2 ) {
                             j = 3;
                             k = 1;
-                        } else                                                            {
+                        } else {
                             j = 1;
                             k = 2;
                         }
@@ -1041,6 +1056,7 @@ LSpace :: drawSpecial(oofegGraphicContext &gc)
                 }
             }
         } // end loop over gp
+
     }
 }
 
@@ -1184,16 +1200,16 @@ LSpace :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
 double
 LSpace ::   computeEdgeVolumeAround(GaussPoint *aGaussPoint, int iEdge)
 {
-    double result = this->interpolation.edgeGiveTransformationJacobian(iEdge, * aGaussPoint->giveCoordinates(), 
-								       FEIElementGeometryWrapper(this), 0.0);
-    return result *aGaussPoint->giveWeight();
+    double result = this->interpolation.edgeGiveTransformationJacobian(iEdge, * aGaussPoint->giveCoordinates(),
+                                                                       FEIElementGeometryWrapper(this), 0.0);
+    return result * aGaussPoint->giveWeight();
 }
 
 
 void
 LSpace ::   computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge)
 {
-  this->interpolation.edgeLocal2global(answer, iEdge, * gp->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0);
+    this->interpolation.edgeLocal2global(answer, iEdge, * gp->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0);
 }
 
 
@@ -1365,7 +1381,7 @@ LSpace :: computeSurfaceVolumeAround(GaussPoint *gp, int iSurf)
 void
 LSpace :: computeSurfIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int isurf)
 {
-  interpolation.surfaceLocal2global(answer, isurf, * gp->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0);
+    interpolation.surfaceLocal2global(answer, isurf, * gp->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0);
 }
 
 
@@ -1447,5 +1463,4 @@ LSpace :: computeLoadLSToLRotationMatrix(FloatMatrix &answer, int isurf, GaussPo
 
     return 1;
 }
-
 } // end namespace oofem

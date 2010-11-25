@@ -44,11 +44,10 @@
 #include "contextmode.h"
 
 #ifndef __MAKEDEPEND
-#include <stdlib.h>
+ #include <stdlib.h>
 #endif
 
 namespace oofem {
-
 Dictionary :: ~Dictionary()
 // Destructor.
 {
@@ -274,5 +273,4 @@ contextIOResultType Dictionary :: restoreContext(DataStream *stream, ContextMode
 
     return CIO_OK;
 }
-
 } // end namespace oofem

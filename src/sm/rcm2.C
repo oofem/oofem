@@ -45,11 +45,10 @@
 #include "contextioerr.h"
 
 #ifndef __MAKEDEPEND
-#include <math.h>
+ #include <math.h>
 #endif
 
 namespace oofem {
-
 #define rcm_STRESSRELERROR 1.e-5
 #define rcm_RESIDUALSTIFFFACTOR 1.e-3
 
@@ -376,7 +375,7 @@ RCM2Material ::  giveRealPrincipalStressVector3d(FloatArray &answer, GaussPoint 
             }
         }
 
-        if ( maxErr < rcm_STRESSRELERROR * this->give(pscm_Ft,gp) ) {
+        if ( maxErr < rcm_STRESSRELERROR * this->give(pscm_Ft, gp) ) {
             //delete dSigma;
 
             status->letPrincipalStressVectorBe(sigmaEl);
@@ -766,29 +765,29 @@ RCM2Material :: giveEffectiveMaterialStiffnessMatrix(FloatMatrix &answer,
     status->getPrincipalStrainVector(principalStrainVector);
 
     // now remain to set shears
-    G = this->give(pscm_G,gp);
+    G = this->give(pscm_G, gp);
     for ( i = 4; i <= 6; i++ ) {
         if ( ( indi = this->giveStressStrainComponentIndOf(FullForm, gp->giveMaterialMode(), i) ) ) {
             if ( i == 4 ) {
                 ii = 2;
                 jj = 3;
-            } else if ( i == 5 )                                {
+            } else if ( i == 5 ) {
                 ii = 1;
                 jj = 3;
-            } else                                                                     {
+            } else {
                 ii = 1;
                 jj = 2;
             }
 
             princStressDis = principalStressVector.at(ii) -
-            principalStressVector.at(jj);
+                             principalStressVector.at(jj);
             princStrainDis = principalStrainVector.at(ii) -
-            principalStrainVector.at(jj);
+                             principalStrainVector.at(jj);
             if ( fabs(princStrainDis) < rcm_SMALL_STRAIN ) {
                 compliance.at(indi, indi) = 1. / G;
             } else if ( fabs(princStressDis) < 1.e-8 ) {
                 compliance.at(indi, indi) = rcm2_BIGNUMBER;
-            } else                                                                                        {
+            } else {
                 compliance.at(indi, indi) = 2 * princStrainDis / princStressDis;
             }
         }
@@ -974,7 +973,7 @@ RCM2Material :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
 
 
 double
-RCM2Material :: give(int aProperty, GaussPoint* gp)
+RCM2Material :: give(int aProperty, GaussPoint *gp)
 // Returns the value of the property aProperty (e.g. the Young's modulus
 // 'E') of the receiver.
 {
@@ -1001,7 +1000,7 @@ RCM2Material :: give(int aProperty, GaussPoint* gp)
         value = propertyDictionary->at(aProperty);
     } else {
         if ( linearElasticMaterial ) {
-	  value = this->linearElasticMaterial->give(aProperty,gp);
+            value = this->linearElasticMaterial->give(aProperty, gp);
         } else {
             _error("give: property not defined");
         }
@@ -1541,6 +1540,4 @@ RCM2MaterialStatus :: restoreContext(DataStream *stream, ContextMode mode, void 
 
     return CIO_OK; // return succes
 }
-
-
 } // end namespace oofem

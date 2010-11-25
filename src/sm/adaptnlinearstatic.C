@@ -49,7 +49,7 @@
 #include "elementside.h"
 #include "util.h"
 #ifndef __MAKEDEPEND
-#include <stdio.h>
+ #include <stdio.h>
 #endif
 #include "calmls.h"
 #include "nrsolver.h"
@@ -72,11 +72,10 @@
 #include "oofem_terminate.h"
 
 #ifdef __PETSC_MODULE
-#include "petsccontext.h"
+ #include "petsccontext.h"
 #endif
 
 namespace oofem {
-
 AdaptiveNonLinearStatic :: AdaptiveNonLinearStatic(int i, EngngModel *_master) : NonLinearStatic(i, _master),
     d2_totalDisplacement(), d2_incrementOfDisplacement(), timeStepLoadLevels() {
     //
@@ -118,7 +117,7 @@ AdaptiveNonLinearStatic :: initializeFrom(InputRecord *ir)
     ee->initializeFrom(ir);
     int meshPackageId = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, meshPackageId, IFT_AdaptiveNonLinearStatic_meshpackage, "meshpackage"); // Macro
-    meshPackage = (MeshPackageType) meshPackageId;
+    meshPackage = ( MeshPackageType ) meshPackageId;
 
     equilibrateMappedConfigurationFlag =  0;
     IR_GIVE_OPTIONAL_FIELD(ir, equilibrateMappedConfigurationFlag, IFT_AdaptiveNonLinearStatic_equilmc, "equilmc"); // Macro
@@ -135,13 +134,16 @@ AdaptiveNonLinearStatic :: solveYourselfAt(TimeStep *tStep) {
     this->updateYourself(tStep);
 
 #ifdef __OOFEG
-    ESIEventLoop (YES, oofem_tmpstr("AdaptiveNonLinearStatic: Solution finished; Press Ctrl-p to continue"));
+    ESIEventLoop( YES, oofem_tmpstr("AdaptiveNonLinearStatic: Solution finished; Press Ctrl-p to continue") );
 #endif
 
     this->terminate( this->giveCurrentStep() );
 
 #ifdef __PARALLEL_MODE
-    if (preMappingLoadBalancingFlag) this->balanceLoad( this->giveCurrentStep() );
+    if ( preMappingLoadBalancingFlag ) {
+        this->balanceLoad( this->giveCurrentStep() );
+    }
+
 #endif
 
     // evaluate error of the reached solution
@@ -155,38 +157,33 @@ AdaptiveNonLinearStatic :: solveYourselfAt(TimeStep *tStep) {
 
     if ( strategy == NoRemeshing_RS ) {
         //
-    } else  if ( ( strategy == RemeshingFromCurrentState_RS ) || ( strategy == RemeshingFromPreviousState_RS ) ) {
-
+    } else if ( ( strategy == RemeshingFromCurrentState_RS ) || ( strategy == RemeshingFromPreviousState_RS ) ) {
         // do remeshing
-        MesherInterface *mesher = CreateUsrDefMesherInterface(meshPackage, this->giveDomain(1));
+        MesherInterface *mesher = CreateUsrDefMesherInterface( meshPackage, this->giveDomain(1) );
 
-	Domain *newDomain;
-	MesherInterface::returnCode result = mesher->createMesh(this->giveCurrentStep(), 1, 
-								this->giveDomain(1)->giveSerialNumber() + 1, &newDomain);
+        Domain *newDomain;
+        MesherInterface :: returnCode result = mesher->createMesh(this->giveCurrentStep(), 1,
+                                                                  this->giveDomain(1)->giveSerialNumber() + 1, & newDomain);
 
-	delete mesher;
-	  
-	if (result == MesherInterface::MI_OK) {
+        delete mesher;
 
-	  this->initFlag = 1;
-	  this->adaptiveRemap(newDomain);
+        if ( result == MesherInterface :: MI_OK ) {
+            this->initFlag = 1;
+            this->adaptiveRemap(newDomain);
+        } else if ( result == MesherInterface :: MI_NEEDS_EXTERNAL_ACTION ) {
+            if ( strategy == RemeshingFromCurrentState_RS ) {
+                // ensure the updating the step
+                this->setContextOutputMode(ALWAYS);
+                //this->terminate (this->giveCurrentStep());
+            } else {
+                // save previous step (because update not called)
+            }
 
-	} else if (result == MesherInterface::MI_NEEDS_EXTERNAL_ACTION) {
-
-	  if ( strategy == RemeshingFromCurrentState_RS ) {
-            // ensure the updating the step
-            this->setContextOutputMode(ALWAYS);
-            //this->terminate (this->giveCurrentStep());
-	  } else {
-            // save previous step (because update not called)
-	  }
-	  
-	  this->terminateAnalysis();
-	  throw OOFEM_Terminate();
-
-	} else {
-	  _error ("solveYourselfAt: MesherInterface::createMesh failed");
-	}
+            this->terminateAnalysis();
+            throw OOFEM_Terminate();
+        } else {
+            _error("solveYourselfAt: MesherInterface::createMesh failed");
+        }
     }
 }
 
@@ -390,10 +387,10 @@ AdaptiveNonLinearStatic :: initializeAdaptiveFrom(EngngModel *sourceProblem)
                 }
             }
 
-            stiffnessMatrix->buildInternalStructure(this, 1, EID_MomentumBalance, EModelDefaultEquationNumbering());
+            stiffnessMatrix->buildInternalStructure( this, 1, EID_MomentumBalance, EModelDefaultEquationNumbering() );
             stiffnessMatrix->zero(); // zero stiffness matrix
-            this->assemble( stiffnessMatrix, this->giveCurrentStep(), EID_MomentumBalance, SecantStiffnessMatrix, 
-			    EModelDefaultEquationNumbering(), this->giveDomain(1) );
+            this->assemble( stiffnessMatrix, this->giveCurrentStep(), EID_MomentumBalance, SecantStiffnessMatrix,
+                           EModelDefaultEquationNumbering(), this->giveDomain(1) );
             initFlag = 0;
         }
 
@@ -422,11 +419,11 @@ AdaptiveNonLinearStatic :: initializeAdaptiveFrom(EngngModel *sourceProblem)
         if ( initialLoadVector.isNotEmpty() ) {
             numMetStatus = nMethod->solve( stiffnessMatrix, & incrementalLoadVector, & initialLoadVector,
                                           & ibcLoadVector, & totalDisplacement, & incrementOfDisplacement, & internalForces,
-					  internalForcesEBENorm, loadLevel, refLoadInputMode, currentIterations, this->giveCurrentStep() );
+                                          internalForcesEBENorm, loadLevel, refLoadInputMode, currentIterations, this->giveCurrentStep() );
         } else {
             numMetStatus = nMethod->solve( stiffnessMatrix, & incrementalLoadVector, NULL,
                                           & ibcLoadVector, & totalDisplacement, & incrementOfDisplacement, & internalForces,
-					  internalForcesEBENorm, loadLevel, refLoadInputMode, currentIterations, this->giveCurrentStep() );
+                                          internalForcesEBENorm, loadLevel, refLoadInputMode, currentIterations, this->giveCurrentStep() );
         }
 
 
@@ -454,15 +451,14 @@ AdaptiveNonLinearStatic :: initializeAdaptiveFrom(EngngModel *sourceProblem)
 int
 AdaptiveNonLinearStatic :: initializeAdaptive(int stepNumber)
 {
+    int stepinfo [ 2 ];
 
-  int stepinfo [2];
+    stepinfo [ 0 ] = stepNumber;
+    stepinfo [ 1 ] = 0;
 
-  stepinfo [ 0 ] = stepNumber;
-  stepinfo [ 1 ] = 0;
-  
     try {
         this->restoreContext(NULL, CM_State, ( void * ) stepinfo);
-    } catch ( ContextIOERR &c ) {
+    } catch(ContextIOERR & c) {
         c.print();
         exit(1);
     }
@@ -480,12 +476,12 @@ AdaptiveNonLinearStatic :: initializeAdaptive(int stepNumber)
     delete domainDr;
 
     // remap solution to new domain
-    return this->adaptiveRemap (dNew);
+    return this->adaptiveRemap(dNew);
 }
 
 
 int
-AdaptiveNonLinearStatic :: adaptiveRemap(Domain* dNew)
+AdaptiveNonLinearStatic :: adaptiveRemap(Domain *dNew)
 {
     int ielem, nelem, result = 1;
 
@@ -559,7 +555,7 @@ AdaptiveNonLinearStatic :: adaptiveRemap(Domain* dNew)
 
 #ifdef __PETSC_MODULE
     petscContextList->put( 1, petscContextList->unlink(2) );
-    petscContextList->growTo (1);
+    petscContextList->growTo(1);
 #endif
 
     // keep equation numbering of new domain
@@ -583,6 +579,7 @@ AdaptiveNonLinearStatic :: adaptiveRemap(Domain* dNew)
         this->initializeCommMaps(true);
         exchangeRemoteElementData();
     }
+
 #endif
 
     //mc2 = this->getClock();
@@ -647,9 +644,9 @@ AdaptiveNonLinearStatic :: adaptiveRemap(Domain* dNew)
     this->assembleInitialLoadVector( initialLoadVector, initialLoadVectorOfPrescribed,
                                     this, 1, this->giveCurrentStep() );
     this->assembleIncrementalReferenceLoadVectors( incrementalLoadVector, incrementalLoadVectorOfPrescribed,
-						   refLoadInputMode, this->giveDomain(1), EID_MomentumBalance, 
-						   this->giveCurrentStep() );
-    
+                                                  refLoadInputMode, this->giveDomain(1), EID_MomentumBalance,
+                                                  this->giveCurrentStep() );
+
     // assemble new total load for new discretization
     // this->assembleCurrentTotalLoadVector (totalLoadVector, totalLoadVectorOfPrescribed, this->giveCurrentStep());
     // set bcloadVector to zero (no increment within same step)
@@ -667,7 +664,7 @@ AdaptiveNonLinearStatic :: adaptiveRemap(Domain* dNew)
     //
 
     /********
-     #if 0
+     * #if 0
      * {
      *
      * // evaluate the force error of mapped configuration
@@ -701,11 +698,11 @@ AdaptiveNonLinearStatic :: adaptiveRemap(Domain* dNew)
      * printf ("Relative Force Error of Mapped Configuration is %-15e\n", forceErr);
      *
      * }
-     #endif
+     *#endif
      *************/
 
 #ifdef __OOFEG
-    ESIEventLoop (YES, oofem_tmpstr("AdaptiveRemap: Press Ctrl-p to continue"));
+    ESIEventLoop( YES, oofem_tmpstr("AdaptiveRemap: Press Ctrl-p to continue") );
 #endif
 
     //
@@ -719,25 +716,25 @@ AdaptiveNonLinearStatic :: adaptiveRemap(Domain* dNew)
 
 
         if ( initFlag ) {
-	  if (!stiffnessMatrix) {
-	    stiffnessMatrix = CreateUsrDefSparseMtrx(sparseMtrxType);
-	    if ( stiffnessMatrix == NULL ) {
-	      _error("proceedStep: sparse matrix creation failed");
-	    }
-	  }
+            if ( !stiffnessMatrix ) {
+                stiffnessMatrix = CreateUsrDefSparseMtrx(sparseMtrxType);
+                if ( stiffnessMatrix == NULL ) {
+                    _error("proceedStep: sparse matrix creation failed");
+                }
+            }
 
-	  if ( nonlocalStiffnessFlag ) {
-	    //stiffnessMatrix = new SkylineUnsym ();
-	    if ( !stiffnessMatrix->isAntisymmetric() ) {
-	      _error("proceedStep: stiffnessMatrix does not support antisymmetric storage");
-	    }
-	  }
+            if ( nonlocalStiffnessFlag ) {
+                //stiffnessMatrix = new SkylineUnsym ();
+                if ( !stiffnessMatrix->isAntisymmetric() ) {
+                    _error("proceedStep: stiffnessMatrix does not support antisymmetric storage");
+                }
+            }
 
-	  stiffnessMatrix->buildInternalStructure(this, 1, EID_MomentumBalance, EModelDefaultEquationNumbering());
-	  stiffnessMatrix->zero(); // zero stiffness matrix
-	  this->assemble( stiffnessMatrix, this->giveCurrentStep(), EID_MomentumBalance, SecantStiffnessMatrix, 
-			  EModelDefaultEquationNumbering(), this->giveDomain(1) );
-	  initFlag = 0;
+            stiffnessMatrix->buildInternalStructure( this, 1, EID_MomentumBalance, EModelDefaultEquationNumbering() );
+            stiffnessMatrix->zero(); // zero stiffness matrix
+            this->assemble( stiffnessMatrix, this->giveCurrentStep(), EID_MomentumBalance, SecantStiffnessMatrix,
+                           EModelDefaultEquationNumbering(), this->giveDomain(1) );
+            initFlag = 0;
         }
 
         // updateYourself() not necessary - the adaptiveUpdate previously called does the job
@@ -763,11 +760,11 @@ AdaptiveNonLinearStatic :: adaptiveRemap(Domain* dNew)
         if ( initialLoadVector.isNotEmpty() ) {
             numMetStatus = nMethod->solve( stiffnessMatrix, & incrementalLoadVector, & initialLoadVector,
                                           & ibcLoadVector, & totalDisplacement, & incrementOfDisplacement, & internalForces,
-					   internalForcesEBENorm, loadLevel, refLoadInputMode, currentIterations, this->giveCurrentStep() );
+                                          internalForcesEBENorm, loadLevel, refLoadInputMode, currentIterations, this->giveCurrentStep() );
         } else {
             numMetStatus = nMethod->solve( stiffnessMatrix, & incrementalLoadVector, NULL,
                                           & ibcLoadVector, & totalDisplacement, & incrementOfDisplacement, & internalForces,
-					   internalForcesEBENorm, loadLevel, refLoadInputMode, currentIterations, this->giveCurrentStep() );
+                                          internalForcesEBENorm, loadLevel, refLoadInputMode, currentIterations, this->giveCurrentStep() );
         }
 
 
@@ -1092,5 +1089,4 @@ AdaptiveNonLinearStatic :: giveLoadBalancerMonitor()
     }
 }
 #endif
-
 } // end namespace oofem

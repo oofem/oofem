@@ -47,8 +47,8 @@
 #define femcmpnn_h
 
 #ifndef __MAKEDEPEND
-#include <stdio.h>
-#include <string>
+ #include <stdio.h>
+ #include <string>
 #endif
 
 #include "intarray.h"
@@ -64,11 +64,10 @@
 #include "contextmode.h"
 
 #ifdef __OOFEG
-#include "oofeggraphiccontext.h"
+ #include "oofeggraphiccontext.h"
 #endif
 
 namespace oofem {
-
 class DataStream;
 /**
  * The top abstract class of all classes constituting the finite element mesh.
@@ -106,8 +105,10 @@ public:
      * @param n component number in particular domain. For instance, can represent
      * node number in particular domain.
      * @param d domain to which component belongs to */
-    FEMComponent(int n, Domain *d) { number = n;
-                                     domain = d; }
+    FEMComponent(int n, Domain *d) {
+        number = n;
+        domain = d;
+    }
     /// virtual destructor
     virtual ~FEMComponent() { }                             // destructor
 
@@ -138,7 +139,7 @@ public:
      * these relations to reflext updated numbering. The renumbering funciton is passed, which is supposed
      * to return an updated number of specified entyty type based on old number.
      */
-    virtual void updateLocalNumbering( EntityRenumberingFunctor &f ) { }
+    virtual void updateLocalNumbering(EntityRenumberingFunctor &f) { }
     /** Initializes receiver acording to object description stored in input record.
      *  This function is called immediately after creating object using
      * constructor. Input record can be imagined as data record in component database
@@ -200,7 +201,6 @@ public:
     virtual void   drawYourself(oofegGraphicContext &) { }
 #endif
 };
-
 } // end namespace oofem
 #endif // femcmpnn_h
 

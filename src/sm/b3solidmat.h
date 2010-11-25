@@ -42,8 +42,7 @@
 #include "kelvinChM.h"
 
 namespace oofem {
-
-/********** 	B3SolidMaterialStatus - HUMIDITY ****************************************/
+/**********     B3SolidMaterialStatus - HUMIDITY ****************************************/
 
 class B3SolidMaterialStatus : public KelvinChainMaterialStatus
 {
@@ -73,8 +72,8 @@ protected:
     double microprestress_new;
 
 public:
-	B3SolidMaterialStatus(int n, Domain *d, GaussPoint *g, int nunits);
-    ~B3SolidMaterialStatus(){}
+    B3SolidMaterialStatus(int n, Domain *d, GaussPoint *g, int nunits);
+    ~B3SolidMaterialStatus() {}
     //void printOutputAt(FILE *file, TimeStep *tStep);
 
     /// initialize the status
@@ -89,7 +88,7 @@ public:
     contextIOResultType    restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 
 
-    double giveMPS (void) { return microprestress_old; }
+    double giveMPS(void) { return microprestress_old; }
 
     void setMPS(const double src) { microprestress_new = src; }
 
@@ -127,10 +126,10 @@ protected:
     double a;         //constant (obtained from experiments) A [Pedersen, 1990]
     double talpha;   // thermal dilatation coeff.
     double EspringVal; // elastic modulus of the aging spring (first member of Kelvin chain if retardation spectrum is used)
-    int EmoduliMode;  	// 0 = analysis of retardation spectrum is used for evaluation of Kelvin units moduli (default)
-						// 1 = least-squares method is used for evaluation of Kelvin units moduli
+    int EmoduliMode;    // 0 = analysis of retardation spectrum is used for evaluation of Kelvin units moduli (default)
+    // 1 = least-squares method is used for evaluation of Kelvin units moduli
     int MicroPrestress; // if = 1, computation exploiting Microprestress solidification theory is done
-						// default value is 0 -> without external fields it can be used for basic creep
+    // default value is 0 -> without external fields it can be used for basic creep
     double c0; //MPS constant c0 [MPa^-1 * day^-1]
     double c1; //MPS constant c1 (=C1*R*T/M)
     double tS0; //MPS tS0 - necessary for the initial value of microprestress (age when the load is applied)
@@ -173,7 +172,7 @@ protected:
 
     /// evaluation of the shrinkageStrainVector - shrinkage is fully dependent on humidity rate in given GP
     void computePointShrinkageStrainVectorMPS(FloatArray &answer, MatResponseForm form,
-            GaussPoint *gp, TimeStep *atTime);
+                                              GaussPoint *gp, TimeStep *atTime);
 
     void computeShrinkageStrainVector(FloatArray &answer, MatResponseForm form,
                                       GaussPoint *gp, TimeStep *atTime, ValueModeType mode);
@@ -227,10 +226,8 @@ protected:
 
     /// computes relative humidity increment at given time step and GP
     double giveHumidityIncrement(GaussPoint *gp, TimeStep *atTime);
-
 };
 
 // Note: There is no associated material status - everything is handled by KelvinChainMaterialStatus
-
 } // end namespace oofem
 #endif // b3solidmat_h

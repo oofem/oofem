@@ -40,7 +40,6 @@
 #include "error.h"
 
 namespace oofem {
-
 void
 FastMarchingMethod :: solve(FloatArray &dmanValues,
                             const std :: list< int > &bcDofMans,
@@ -208,11 +207,11 @@ FastMarchingMethod :: updateTrialValue(FloatArray &dmanValues, int id, double F)
                     reg_upd_flag = false;
                 } else if ( nroot == 1 ) {
                     t = r1;
-                } else if ( r1 >= 0.0 )                               {
+                } else if ( r1 >= 0.0 ) {
                     t = r1;
-                } else if ( r2 >= 0.0 )                                                                 {
+                } else if ( r2 >= 0.0 ) {
                     t = r2;
-                } else                                                                                                 {
+                } else {
                     reg_upd_flag = false;
                 }
 
@@ -272,5 +271,4 @@ FastMarchingMethod :: getSmallestTrialDofMan()
     dmanTrialQueue.pop();
     return answer;
 }
-
 } // end namespace oofem

@@ -48,7 +48,6 @@
 #include "spatiallocalizer.h"
 
 namespace oofem {
-
 class L4Axisymm : public NLStructuralElement, public ZZNodalRecoveryModelInterface, public SPRNodalRecoveryModelInterface,
     public SpatialLocalizerInterface
 {
@@ -160,7 +159,7 @@ public:
 #endif
 
     integrationDomain  giveIntegrationDomain() { return _Square; }
-    MaterialMode          giveMaterialMode()  {return _3dMat;}
+    MaterialMode          giveMaterialMode()  { return _3dMat; }
 
 protected:
     void                  computeBmatrixAt(GaussPoint *, FloatMatrix &, int = 1, int = ALL_STRAINS);
@@ -174,6 +173,5 @@ protected:
     void          computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge);
     int   computeLoadLEToLRotationMatrix(FloatMatrix &answer, int, GaussPoint *);
 };
-
 } // end namespace oofem
 #endif // l4axisymm_h

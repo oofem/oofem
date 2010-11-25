@@ -48,7 +48,6 @@
 
 
 namespace oofem {
-
 /* Poissons coeficients */
 #define NYxz 300
 #define NYyz 301
@@ -89,6 +88,5 @@ namespace oofem {
 #define AVERAGING_TYPE 901
 #define exponent_ID 902
 #define rf_ID 903
-
 } // end namespace oofem
 #endif // matconst_h

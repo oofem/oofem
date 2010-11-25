@@ -50,13 +50,12 @@
 #include "contextioerr.h"
 
 #ifndef __MAKEDEPEND
-#include <stdlib.h>
-#include <ctype.h>
-#include <string.h>
+ #include <stdlib.h>
+ #include <ctype.h>
+ #include <string.h>
 #endif
 
 namespace oofem {
-
 SimpleSlaveDof :: SimpleSlaveDof(int i, DofManager *aNode, int master, DofID id) : Dof(i, aNode, id)
     // Constructor. Creates a new d.o.f., with number i, belonging
     // to aNode with bc=nbc, ic=nic
@@ -82,7 +81,7 @@ Dof *SimpleSlaveDof :: giveMasterDof()
 
     if ( this->masterDofIndx == -1 ) {
         this->masterDofIndx = dofManager->giveDomain()->giveDofManager(masterDofMngr)
-        ->findDofWithDofId(this->dofID);
+                              ->findDofWithDofId(this->dofID);
 
         if ( this->masterDofIndx ) {
             /*
@@ -187,7 +186,7 @@ int SimpleSlaveDof :: giveIcId()
 double
 SimpleSlaveDof :: giveBcValue(ValueModeType mode, TimeStep *tStep)
 {
-  return this->giveMasterDof()->giveBcValue(mode, tStep);
+    return this->giveMasterDof()->giveBcValue(mode, tStep);
 }
 
 
@@ -197,32 +196,33 @@ contextIOResultType SimpleSlaveDof :: saveContext(DataStream *stream, ContextMod
 // current state)
 //
 {
-  contextIOResultType iores;
-  if ( ( iores = Dof :: saveContext(stream, mode, obj) ) != CIO_OK ) {
+    contextIOResultType iores;
+    if ( ( iores = Dof :: saveContext(stream, mode, obj) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-  if ( mode & CM_Definition ) {
-
+    if ( mode & CM_Definition ) {
 #ifdef __PARALLEL_MODE
-    if ( mode & CM_DefinitionGlobal ) {
-      int _masterGlobNum = dofManager->giveDomain()->giveDofManager(masterDofMngr)->giveGlobalNumber();
-      if ( !stream->write(& _masterGlobNum, 1) ) {
-	THROW_CIOERR(CIO_IOERR);
-      }
-    } else {
-      if ( !stream->write(& masterDofMngr, 1) ) {
-	THROW_CIOERR(CIO_IOERR);
-      }
-    }
-#else
-    if ( !stream->write(& masterDofMngr, 1) ) {
-      THROW_CIOERR(CIO_IOERR);
-    }
-#endif
-  }    
+        if ( mode & CM_DefinitionGlobal ) {
+            int _masterGlobNum = dofManager->giveDomain()->giveDofManager(masterDofMngr)->giveGlobalNumber();
+            if ( !stream->write(& _masterGlobNum, 1) ) {
+                THROW_CIOERR(CIO_IOERR);
+            }
+        } else {
+            if ( !stream->write(& masterDofMngr, 1) ) {
+                THROW_CIOERR(CIO_IOERR);
+            }
+        }
 
-  return CIO_OK;
+#else
+        if ( !stream->write(& masterDofMngr, 1) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+
+#endif
+    }
+
+    return CIO_OK;
 }
 
 
@@ -232,28 +232,27 @@ contextIOResultType SimpleSlaveDof :: restoreContext(DataStream *stream, Context
 // current state)
 //
 {
-  contextIOResultType iores;
-  
-  if ( ( iores = Dof :: restoreContext(stream, mode, obj) ) != CIO_OK ) {
-    THROW_CIOERR(iores);
-  }
+    contextIOResultType iores;
 
-  if ( mode & CM_Definition ) {
-    if ( !stream->read(& masterDofMngr, 1) ) {
-      THROW_CIOERR(CIO_IOERR);
+    if ( ( iores = Dof :: restoreContext(stream, mode, obj) ) != CIO_OK ) {
+        THROW_CIOERR(iores);
     }
-  }
-  this->masterDofIndx = -1;
+
+    if ( mode & CM_Definition ) {
+        if ( !stream->read(& masterDofMngr, 1) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+    }
+
+    this->masterDofIndx = -1;
 
 
-  return CIO_OK;
+    return CIO_OK;
 }
 
 void
-SimpleSlaveDof :: updateLocalNumbering( EntityRenumberingFunctor &f )
+SimpleSlaveDof :: updateLocalNumbering(EntityRenumberingFunctor &f)
 {
-  masterDofMngr = f(masterDofMngr, ERS_DofManager);
+    masterDofMngr = f(masterDofMngr, ERS_DofManager);
 }
-
-
 } // end namespace oofem

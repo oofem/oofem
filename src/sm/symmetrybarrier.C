@@ -41,12 +41,11 @@
 #include "flotarry.h"
 #include "mathfem.h"
 #ifndef __MAKEDEPEND
-#include <stdlib.h>
-#include <stdio.h>
+ #include <stdlib.h>
+ #include <stdio.h>
 #endif
 
 namespace oofem {
-
 SymmetryBarrier :: SymmetryBarrier(int n, Domain *aDomain) :
     NonlocalBarrier(n, aDomain), origin(), normals(), mask(), lcs(3, 3)
     // Constructor. Creates an element with number n, belonging to aDomain.
@@ -181,5 +180,4 @@ SymmetryBarrier :: initializeFrom(InputRecord *ir)
 
     return IRRT_OK;
 }
-
 } // end namespace oofem

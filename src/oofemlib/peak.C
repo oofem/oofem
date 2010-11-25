@@ -38,11 +38,10 @@
 
 #include "peak.h"
 #ifndef __MAKEDEPEND
-#include <math.h>
+ #include <math.h>
 #endif
 
 namespace oofem {
-
 double PeakFunction :: __at(double time)
 // Returns the value of the receiver at time 'time'.
 {
@@ -62,8 +61,8 @@ double PeakFunction :: __at(double time)
  * t     = new double[1] ;
  * value = new double[1] ;
  *
- *t     = this -> read("t") ;
- *value = this -> read("f(t)") ;
+ **t     = this -> read("t") ;
+ **value = this -> read("f(t)") ;
  * }*/
 
 
@@ -73,11 +72,10 @@ PeakFunction :: initializeFrom(InputRecord *ir)
     const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
-    LoadTimeFunction::initializeFrom(ir);
+    LoadTimeFunction :: initializeFrom(ir);
     IR_GIVE_FIELD(ir, t, IFT_PeakFunction_t, "t"); // Macro
     IR_GIVE_FIELD(ir, value, IFT_PeakFunction_ft, "f(t)"); // Macro
 
     return IRRT_OK;
 }
-
 } // end namespace oofem

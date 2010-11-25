@@ -50,7 +50,6 @@
 #include "interface.h"
 
 namespace oofem {
-
 class GaussPoint;
 class FiberedCrossSectionModelInterface;
 
@@ -83,7 +82,6 @@ class FiberedCrossSectionModelInterface;
  */
 class FiberedCrossSection : public StructuralCrossSection
 {
-
 protected:
     IntArray fiberMaterials; // material of each fiber
     FloatArray fiberThicks; // thikness for each fiber
@@ -95,9 +93,11 @@ public:
 
     FiberedCrossSection(int n, Domain *d) : StructuralCrossSection(n, d), fiberMaterials(), fiberThicks(), fiberWidths(),
         fiberYcoords(), fiberZcoords()
-    { thick = 0.;
-      width = 0.;
-      area = -1.0; }
+    {
+        thick = 0.;
+        width = 0.;
+        area = -1.0;
+    }
 
     ~FiberedCrossSection()  { }
 
@@ -185,8 +185,10 @@ public:
      * @param ip integration point
      */
     int packUnknowns(CommunicationBuffer &buff, TimeStep *stepN, GaussPoint *ip)
-    { _error("packUnknowns: not implemented");
-      return 0; }
+    {
+        _error("packUnknowns: not implemented");
+        return 0;
+    }
     /**
      * Unpack and updates all necessary data of given integration point (according to element parallel_mode)
      * into given communication buffer.
@@ -196,16 +198,20 @@ public:
      * @param ip integration point
      */
     int unpackAndUpdateUnknowns(CommunicationBuffer &buff, TimeStep *stepN, GaussPoint *ip)
-    { _error("unpackAndUpdateUnknowns: not implemented");
-      return 0; }
+    {
+        _error("unpackAndUpdateUnknowns: not implemented");
+        return 0;
+    }
     /**
      * Estimates the necessary pack size to hold all packed data of receiver.
      * The corresponding material model  service is invoked. The
      * nature of packed data is typically material model dependent.
      */
     int estimatePackSize(CommunicationBuffer &buff, GaussPoint *ip)
-    { _error("estimatePackSize: not implemented");
-      return 0; }
+    {
+        _error("estimatePackSize: not implemented");
+        return 0;
+    }
 #endif
 
 protected:
@@ -249,6 +255,5 @@ public:
     virtual void FiberedCrossSectionInterface_computeStrainVectorInFiber(FloatArray &answer, GaussPoint *masterGp,
                                                                          GaussPoint *slaveGp, TimeStep *tStep) = 0;
 };
-
 } // end namespace oofem
 #endif // fiberedcs_h

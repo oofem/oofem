@@ -44,34 +44,31 @@
 #include "oofem_limits.h"
 
 #ifndef __MAKEDEPEND
-#include <stdio.h>
-#include <time.h>
+ #include <stdio.h>
+ #include <time.h>
 #endif
 
 namespace oofem {
-
-  ExportModuleManager :: ExportModuleManager(EngngModel *emodel) : ModuleManager<ExportModule> (emodel)
-{
-}
+ExportModuleManager :: ExportModuleManager(EngngModel *emodel) : ModuleManager< ExportModule >(emodel)
+{}
 
 ExportModuleManager :: ~ExportModuleManager()
-{
+{}
+
+IRResultType
+ExportModuleManager :: initializeFrom(InputRecord *ir) {
+    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
+    IRResultType result;              // Required by IR_GIVE_FIELD macro
+
+    this->numberOfModules = 0;
+    IR_GIVE_OPTIONAL_FIELD(ir, numberOfModules, IFT_ExportModuleManager_nmodules, "nmodules"); // Macro
+    return IRRT_OK;
 }
 
-IRResultType 
-ExportModuleManager::initializeFrom(InputRecord *ir) {
-  const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
-  IRResultType result;                // Required by IR_GIVE_FIELD macro
-  
-  this->numberOfModules = 0;
-  IR_GIVE_OPTIONAL_FIELD(ir, numberOfModules, IFT_ExportModuleManager_nmodules, "nmodules"); // Macro
-  return IRRT_OK;
-}
 
 
-
-ExportModule* ExportModuleManager::CreateModuleOfType (char *name, EngngModel *emodel) {
-   return CreateUsrDefExportModuleOfType(name, emodel); 
+ExportModule *ExportModuleManager :: CreateModuleOfType(char *name, EngngModel *emodel) {
+    return CreateUsrDefExportModuleOfType(name, emodel);
 }
 
 void
@@ -80,7 +77,7 @@ ExportModuleManager :: doOutput(TimeStep *tStep)
     int i;
 
     for ( i = 1; i <= numberOfModules; i++ ) {
-      ((ExportModule*)this->giveModule(i))->doOutput(tStep);
+        ( ( ExportModule * ) this->giveModule(i) )->doOutput(tStep);
     }
 }
 
@@ -90,7 +87,7 @@ ExportModuleManager :: initialize()
     int i;
 
     for ( i = 1; i <= numberOfModules; i++ ) {
-        ((ExportModule*)this->giveModule(i))->initialize();
+        ( ( ExportModule * ) this->giveModule(i) )->initialize();
     }
 }
 
@@ -101,8 +98,7 @@ ExportModuleManager :: terminate()
     int i;
 
     for ( i = 1; i <= numberOfModules; i++ ) {
-        ((ExportModule*)this->giveModule(i))->terminate();
+        ( ( ExportModule * ) this->giveModule(i) )->terminate();
     }
 }
-
 } // end namespace oofem

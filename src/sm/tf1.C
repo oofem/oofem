@@ -38,7 +38,6 @@
 #include "mathfem.h"
 
 namespace oofem {
-
 void
 TF1 :: computeValueAt(FloatArray &answer, TimeStep *stepN, FloatArray &coords, ValueModeType mode)
 // Returns the value of the receiver at time and given position respecting the mode.
@@ -75,5 +74,4 @@ TF1 :: initializeFrom(InputRecord *ir)
 {
     return IRRT_OK;
 }
-
 } // end namespace oofem

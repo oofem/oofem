@@ -44,11 +44,10 @@
 
 #include "structuralms.h"
 #ifndef __MAKEDEPEND
-#include <vector>
+ #include <vector>
 #endif
 
 namespace oofem {
-
 class GaussPoint;
 
 /**
@@ -336,6 +335,5 @@ protected:
                                            GaussPoint * gp,
                                            TimeStep * atTime);
 };
-
 } // end namespace oofem
 #endif // mplasticmaterial_h

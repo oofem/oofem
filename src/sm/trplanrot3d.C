@@ -230,12 +230,12 @@ TrPlaneStrRot3d :: giveCharacteristicTensor(FloatMatrix &answer, CharTensor type
         answer.at(2, 2) = charVect.at(2);
         answer.at(1, 2) = charVect.at(3);
         answer.at(2, 1) = charVect.at(3);
-    } else if ( ( type == LocalMomentumTensor ) || ( type == GlobalMomentumTensor ) )   {
+    } else if ( ( type == LocalMomentumTensor ) || ( type == GlobalMomentumTensor ) ) {
         //this->computeStressVector(charVect, gp, tStep);
         charVect = ( ( StructuralMaterialStatus * ) mat->giveStatus(gp) )->giveStressVector();
 
         answer.at(3, 3) = charVect.at(4);
-    } else if ( ( type == LocalStrainTensor ) || ( type == GlobalStrainTensor ) )   {
+    } else if ( ( type == LocalStrainTensor ) || ( type == GlobalStrainTensor ) ) {
         //this->computeStrainVector(charVect, gp, tStep);
         charVect = ( ( StructuralMaterialStatus * ) mat->giveStatus(gp) )->giveStrainVector();
 
@@ -243,12 +243,12 @@ TrPlaneStrRot3d :: giveCharacteristicTensor(FloatMatrix &answer, CharTensor type
         answer.at(2, 2) = charVect.at(2);
         answer.at(1, 2) = charVect.at(3) / 2.;
         answer.at(2, 1) = charVect.at(3) / 2.;
-    } else if ( ( type == LocalCurvatureTensor ) || ( type == GlobalCurvatureTensor ) )   {
+    } else if ( ( type == LocalCurvatureTensor ) || ( type == GlobalCurvatureTensor ) ) {
         //this->computeStrainVector(charVect, gp, tStep);
         charVect = ( ( StructuralMaterialStatus * ) mat->giveStatus(gp) )->giveStrainVector();
 
         answer.at(3, 3) = charVect.at(4);
-    } else   {
+    } else {
         _error("GiveCharacteristicTensor: unsupported tensor mode");
         exit(1);
     }
@@ -301,7 +301,7 @@ TrPlaneStrRot3d :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, Inte
         answer.at(12) = globTensor.at(1, 2); //mxyForce
 
         return 1;
-    } else   {
+    } else {
         answer.resize(0);
         return 0;
     }
@@ -318,7 +318,7 @@ TrPlaneStrRot3d :: giveIntVarCompFullIndx(IntArray &answer, InternalStateType ty
         }
 
         return 1;
-    } else   {
+    } else {
         return TrPlaneStrRot :: giveIntVarCompFullIndx(answer, type);
     }
 }
@@ -372,7 +372,7 @@ TrPlaneStrRot3d :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, Ti
         if ( this->computeGtoLRotationMatrix(T) ) {
             answer.rotatedWith(T, 'n');
         }
-    } else   {
+    } else {
         answer.resize(0);          // nil resultant
     }
 

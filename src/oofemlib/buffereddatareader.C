@@ -34,14 +34,13 @@
  */
 
 #ifndef __MAKEDEPEND
-#include <stdio.h>
-#include <ctype.h>
+ #include <stdio.h>
+ #include <ctype.h>
 #endif
 #include "buffereddatareader.h"
 #include "dynalist.h"
 
 namespace oofem {
-
 BufferedDataReader :: BufferedDataReader()
 { }
 
@@ -179,6 +178,4 @@ BufferedDataReader :: giveRawLineFromInput(char *line)
     } while ( * line == '#' ); // skip comments
 
 }
-
-
 } // end namespace oofem

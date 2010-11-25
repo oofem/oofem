@@ -43,11 +43,10 @@
 #include "oofem_limits.h"
 
 #ifndef __MAKEDEPEND
-#include <stdarg.h>
+ #include <stdarg.h>
 #endif
 
 namespace oofem {
-
 RefinedElement :: RefinedElement(Domain *d, int elem, int level) : fineNodeList(0), boundaryFlag()
     // Construktor
 {
@@ -694,6 +693,4 @@ void RefinedElement :: error(const char *file, int line, const char *format, ...
 
     __OOFEM_ERROR3(file, line, "Class: RefinedElement, number: %d\n%s", this->elementId, buffer);
 }
-
-
 } // end namespace oofem

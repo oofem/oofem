@@ -38,7 +38,7 @@
 //
 
 #ifndef __MAKEDEPEND
-#include <stdio.h>
+ #include <stdio.h>
 #endif
 #include "mathfem.h"
 #include "gjacobi.h"
@@ -49,7 +49,6 @@
 #include "nmstatus.h"
 
 namespace oofem {
-
 GJacobi :: GJacobi(int i, Domain *d, EngngModel *m) :
     NumericalMethod(i, d, m) {
     //
@@ -369,5 +368,4 @@ GJacobi :: initializeFrom(InputRecord *ir)
 {
     return IRRT_OK;
 }
-
 } // end namespace oofem

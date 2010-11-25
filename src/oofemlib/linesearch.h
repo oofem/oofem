@@ -48,11 +48,10 @@
 #include "nmstatus.h"
 
 #ifndef __MAKEDEPEND
-#include <stdio.h>
+ #include <stdio.h>
 #endif
 
 namespace oofem {
-
 class EngngModel;
 class SparseMtrx;
 class FloatArray;
@@ -114,6 +113,5 @@ public:
 protected:
     void search(int istep, FloatArray &prod, FloatArray &eta, double amp, double maxeta, double mineta, int &status);
 };
-
 } // end namespace oofem
 #endif // linesearch_h

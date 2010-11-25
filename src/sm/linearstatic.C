@@ -46,7 +46,7 @@
 #include "dofmanager.h"
 #include "elementside.h"
 #ifndef __MAKEDEPEND
-#include <stdio.h>
+ #include <stdio.h>
 #endif
 
 #include "verbose.h"
@@ -61,11 +61,10 @@
 #include "contextioerr.h"
 
 #ifdef __PETSC_MODULE
-#include "petscsolver.h"
+ #include "petscsolver.h"
 #endif
 
 namespace oofem {
-
 LinearStatic :: LinearStatic(int i, EngngModel *_master) : StructuralEngngModel(i, _master), loadVector(), displacementVector()
 {
     stiffnessMatrix = NULL;
@@ -84,7 +83,7 @@ LinearStatic :: LinearStatic(int i, EngngModel *_master) : StructuralEngngModel(
 
 LinearStatic :: ~LinearStatic()
 {
-    delete  stiffnessMatrix;
+    delete stiffnessMatrix;
     if ( nMethod ) {
         delete nMethod;
     }
@@ -172,7 +171,7 @@ double LinearStatic ::  giveUnknownComponent(EquationID chc, ValueModeType mode,
             return 0.;
         }
 
-        // return nMethod-> giveUnknownComponent (LinearEquationSolution, eq);
+    // return nMethod-> giveUnknownComponent (LinearEquationSolution, eq);
 
     default:
         _error("giveUnknownComponent: Unknown is of undefined type for this problem");
@@ -204,11 +203,11 @@ TimeStep *LinearStatic :: giveNextStep()
 void LinearStatic :: solveYourself()
 {
 #ifdef __PARALLEL_MODE
-#ifdef __VERBOSE_PARALLEL
+ #ifdef __VERBOSE_PARALLEL
     // force equation numbering before setting up comm maps
     int neq = this->giveNumberOfEquations(EID_MomentumBalance);
     OOFEM_LOG_INFO("[process rank %d] neq is %d\n", this->giveRank(), neq);
-#endif
+ #endif
 
     // set up communication patterns
     // needed only for correct shared rection computation
@@ -252,10 +251,10 @@ void LinearStatic :: solveYourselfAt(TimeStep *tStep) {
         //stiffnessMatrix = new DynCompCol ();
         //stiffnessMatrix = new CompCol ();
 
-        stiffnessMatrix->buildInternalStructure(this, 1, EID_MomentumBalance, EModelDefaultEquationNumbering());
+        stiffnessMatrix->buildInternalStructure( this, 1, EID_MomentumBalance, EModelDefaultEquationNumbering() );
 
         this->assemble( stiffnessMatrix, tStep, EID_MomentumBalance, StiffnessMatrix,
-			EModelDefaultEquationNumbering(), this->giveDomain(1) );
+                       EModelDefaultEquationNumbering(), this->giveDomain(1) );
 
         //
         // alocate space for displacementVector
@@ -281,20 +280,20 @@ void LinearStatic :: solveYourselfAt(TimeStep *tStep) {
 #ifdef __PETSC_MODULE
     // direct interface to PETSC
     if ( solverType == ST_Petsc ) {
-      VecSetOption(_loadVec, VEC_IGNORE_NEGATIVE_INDICES, PETSC_TRUE);
+        VecSetOption(_loadVec, VEC_IGNORE_NEGATIVE_INDICES, PETSC_TRUE);
         this->petsc_assembleVectorFromElements( _loadVec, tStep, EID_MomentumBalance, ElementForceLoadVector, VM_Total, this->giveDomain(1) );
         this->petsc_assembleVectorFromElements( _loadVec, tStep, EID_MomentumBalance, ElementNonForceLoadVector, VM_Total, this->giveDomain(1) );
         this->petsc_assembleVectorFromDofManagers( _loadVec, tStep, EID_MomentumBalance, NodalLoadVector, VM_Total, this->giveDomain(1) );
         VecAssemblyBegin(_loadVec);
         VecAssemblyEnd(_loadVec);
         this->giveNumericalMethod(tStep);
-#ifdef VERBOSE
+ #ifdef VERBOSE
         OOFEM_LOG_INFO("Solving ...\n");
-#endif
+ #endif
 
         //nMethod -> solveYourselfAt(tStep);
-        PetscSolver *ps = dynamic_cast< PetscSolver * >( nMethod );
-        PetscSparseMtrx *psm = dynamic_cast< PetscSparseMtrx * >( stiffnessMatrix );
+        PetscSolver *ps = dynamic_cast< PetscSolver * >(nMethod);
+        PetscSparseMtrx *psm = dynamic_cast< PetscSparseMtrx * >(stiffnessMatrix);
         ps->petsc_solve(psm, _loadVec, _dispVec);
 
         this->givePetscContext(1, EID_MomentumBalance)->scatterG2N(_dispVec, & displacementVector, INSERT_VALUES);
@@ -309,16 +308,16 @@ void LinearStatic :: solveYourselfAt(TimeStep *tStep) {
         loadVector.zero();
 
         this->assembleVectorFromElements( loadVector, tStep, EID_MomentumBalance, ElementForceLoadVector, VM_Total,
-					  EModelDefaultEquationNumbering(), this->giveDomain(1) );
+                                         EModelDefaultEquationNumbering(), this->giveDomain(1) );
 
         this->assembleVectorFromElements( loadVector, tStep, EID_MomentumBalance, ElementNonForceLoadVector, VM_Total,
-					  EModelDefaultEquationNumbering(), this->giveDomain(1) );
+                                         EModelDefaultEquationNumbering(), this->giveDomain(1) );
 
         //
         // assembling the nodal part of load vector
         //
         this->assembleVectorFromDofManagers( loadVector, tStep, EID_MomentumBalance, NodalLoadVector, VM_Total,
-					     EModelDefaultEquationNumbering(), this->giveDomain(1) );
+                                            EModelDefaultEquationNumbering(), this->giveDomain(1) );
 
         //
         // set-up numerical model
@@ -460,10 +459,10 @@ LinearStatic :: checkConsistency()
 
     for ( i = 1; i <= nelem; i++ ) {
         ePtr = domain->giveElement(i);
-        sePtr = dynamic_cast< StructuralElement * >( ePtr );
-        see   = dynamic_cast< StructuralElementEvaluator * >( ePtr );
+        sePtr = dynamic_cast< StructuralElement * >(ePtr);
+        see   = dynamic_cast< StructuralElementEvaluator * >(ePtr);
 
-        if ( (sePtr == NULL) && (see == NULL) ) {
+        if ( ( sePtr == NULL ) && ( see == NULL ) ) {
             _warning2("checkConsistency: element %d has no Structural support", i);
             return 0;
         }
@@ -526,7 +525,7 @@ LinearStatic :: estimateMaxPackSize(IntArray &commMap, CommunicationBuffer &buff
         // --------------------------------------------------------------------------------
 
         return ( buff.givePackSize(MPI_DOUBLE, 1) * pcount );
-    } else  if ( packUnpackType == ProblemCommMode__REMOTE_ELEMENT_MODE ) {
+    } else if ( packUnpackType == ProblemCommMode__REMOTE_ELEMENT_MODE ) {
         for ( i = 1; i <= mapSize; i++ ) {
             count += domain->giveElement( commMap.at(i) )->estimatePackSize(buff);
         }
@@ -537,5 +536,4 @@ LinearStatic :: estimateMaxPackSize(IntArray &commMap, CommunicationBuffer &buff
     return 0;
 }
 #endif
-
 } // end namespace oofem

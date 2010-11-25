@@ -50,19 +50,18 @@
 #include "verbose.h"
 #include "engngm.h"
 #ifndef __MAKEDEPEND
-#include <math.h>
-#include <stdio.h>
+ #include <math.h>
+ #include <stdio.h>
 #endif
 #include "mathfem.h"
 
 #ifdef __OOFEG
-#include "oofeggraphiccontext.h"
-#include "conTable.h"
-#include "oofegutils.h"
+ #include "oofeggraphiccontext.h"
+ #include "conTable.h"
+ #include "oofegutils.h"
 #endif
 
 namespace oofem {
-
 TrPlaneStress2d :: TrPlaneStress2d(int n, Domain *aDomain) :
     NLStructuralElement(n, aDomain), ZZNodalRecoveryModelInterface(), NodalAveragingRecoveryModelInterface(),
     SPRNodalRecoveryModelInterface(), SpatialLocalizerInterface()
@@ -326,12 +325,12 @@ TrPlaneStress2d :: computeNLBMatrixAt(FloatMatrix &answer, GaussPoint *aGaussPoi
 void TrPlaneStress2d :: computeGaussPoints()
 // Sets up the array containing the four Gauss points of the receiver.
 {
-  if (!integrationRulesArray) {
-    numberOfIntegrationRules = 1;
-    integrationRulesArray = new IntegrationRule * [ 1 ];
-    integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3);
-    integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Triangle, numberOfGaussPoints, _PlaneStress);
-  }
+    if ( !integrationRulesArray ) {
+        numberOfIntegrationRules = 1;
+        integrationRulesArray = new IntegrationRule * [ 1 ];
+        integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3);
+        integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Triangle, numberOfGaussPoints, _PlaneStress);
+    }
 }
 
 
@@ -562,7 +561,7 @@ double TrPlaneStress2d :: computeVolumeAround(GaussPoint *aGaussPoint)
     weight  = aGaussPoint->giveWeight();
     area    = this->giveArea();
 
-    return 2.0 * area * weight * this->giveCrossSection()->give(CS_Thickness);
+    return 2.0 *area *weight *this->giveCrossSection()->give(CS_Thickness);
 }
 
 
@@ -754,10 +753,10 @@ TrPlaneStress2d :: computeGlobalCoordinates(FloatArray &answer, const FloatArray
     l3 = 1.0 - l1 - l2;
 
     answer.resize(2);
-    answer.at(1) = l1 * this->giveNode(1)->giveCoordinate(1) + l2 * this->giveNode(2)->giveCoordinate(1) +
-    l3 * this->giveNode(3)->giveCoordinate(1);
-    answer.at(2) = l1 * this->giveNode(1)->giveCoordinate(2) + l2 * this->giveNode(2)->giveCoordinate(2) +
-    l3 * this->giveNode(3)->giveCoordinate(2);
+    answer.at(1) = l1 * this->giveNode(1)->giveCoordinate(1) + l2 *this->giveNode(2)->giveCoordinate(1) +
+                   l3 *this->giveNode(3)->giveCoordinate(1);
+    answer.at(2) = l1 * this->giveNode(1)->giveCoordinate(2) + l2 *this->giveNode(2)->giveCoordinate(2) +
+                   l3 *this->giveNode(3)->giveCoordinate(2);
 
     return 1;
 }
@@ -886,8 +885,8 @@ TrPlaneStress2d :: HuertaErrorEstimatorI_setupRefinedElementProblem(RefinedEleme
 
 
 #ifdef __OOFEG
-#include "rcm2.h"
-#define TR_LENGHT_REDUCT 0.3333
+ #include "rcm2.h"
+ #define TR_LENGHT_REDUCT 0.3333
 
 void TrPlaneStress2d :: drawRawGeometry(oofegGraphicContext &gc)
 {
@@ -1430,7 +1429,7 @@ TrPlaneStress2d :: SpatialLocalizerI_giveDistanceFromParametricCenter(const Floa
 
     if ( size == gsize ) {
         dist = coords.distance(gcoords);
-    } else   {
+    } else {
         FloatArray helpCoords = coords;
 
         helpCoords.resize(gsize);
@@ -1506,5 +1505,4 @@ TrPlaneStress2d :: MMAShapeFunctProjectionInterface_interpolateIntVarAt(FloatArr
 
     return;
 }
-
 } // end namespace oofem

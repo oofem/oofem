@@ -42,7 +42,6 @@
 #include "mathfem.h"
 
 namespace oofem {
-
 IRResultType
 LinearEdgeLoad :: initializeFrom(InputRecord *ir)
 {
@@ -149,7 +148,4 @@ LinearEdgeLoad :: computeNArray(FloatArray &answer, FloatArray &coords) const
 
     return;
 }
-
-
-
 } // end namespace oofem

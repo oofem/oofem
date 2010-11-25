@@ -38,12 +38,11 @@
 #include "gausspnt.h"
 #include "timestep.h"
 #ifndef __MAKEDEPEND
-#include <stdlib.h>
+ #include <stdlib.h>
 #endif
 #include "contextioerr.h"
 
 namespace oofem {
-
 #define PRECAST_CAPACITY_COEFF 1e-2 // coefficient for obtaining capacity before cast of the material : 1e-4, tried 1e-2 for jete (no convergency with 1e-4)
 
 IRResultType
@@ -140,7 +139,7 @@ HydratingHeMoMaterial :: computeInternalSourceVector(FloatArray &val, GaussPoint
         if ( hydrationModel ) { //!!! better via HydrationModelInterface
             hydrationModel->computeInternalSourceVector(val, gp, atTime, VM_Incremental); //!!! mode is VM_Total for nltransientstatic
             val.times( 1. / atTime->giveTimeIncrement() ); // /give('d');
-        } else   {
+        } else {
             val.zero();
         }
 
@@ -148,7 +147,7 @@ HydratingHeMoMaterial :: computeInternalSourceVector(FloatArray &val, GaussPoint
          * printf("HIsoHeatMat: Ksi %.4f, dksi %.4f, heat %g\n",
          * giveHydrationDegree(gp, atTime, VM_Total), giveHydrationDegree(gp, atTime, VM_Incremental), (val.giveSize())?val.at(1):0);
          */
-    } else   {
+    } else {
         val.resize(0);
     }
 }
@@ -178,7 +177,7 @@ HydratingHeMoMaterial :: updateInternalState(const FloatArray &vec, GaussPoint *
             FloatArray *vech = vec.GiveCopy();
             if ( vech->giveSize() >= 2 ) {
                 vech->at(2) = inverse_sorption_isotherm( vec.at(2) );           // compute relative humidity
-            } else                                                                                   {
+            } else {
                 vech->resize(2);
                 vech->at(2) = 1.; // saturated if undefined
             }
@@ -195,7 +194,7 @@ HydratingHeMoMaterial :: updateInternalState(const FloatArray &vec, GaussPoint *
                     aux.zero();
                 }
 
-                aux.times( 1. / give('d',gp) );
+                aux.times( 1. / give('d', gp) );
                 fprintf( vyst, "Elem %.3d krok %.2d: t= %.0f, dt=%.0f, %ld. it, ksi= %.12f, T= %.8f, heat=%.8f\n", gp->giveElement()->giveNumber(), atTime->giveNumber(),
                         atTime->giveTime(), atTime->giveTimeIncrement(), atTime->giveSolutionStateCounter(),
                         giveHydrationDegree(gp, atTime, VM_Total), vec.at(1), aux.at(1) * atTime->giveTimeIncrement() );
@@ -216,10 +215,10 @@ HydratingHeMoMaterial :: giveCharacteristicValue(MatResponseMode rmode, GaussPoi
         if ( castAt && ( atTime->giveTime() < castAt ) ) {
             answer *= PRECAST_CAPACITY_COEFF;                                  // ~Zero capacity before cast
         }
-    } else if ( ( rmode >= IntSource_ww ) && ( rmode <= IntSource_wh ) )         { // Internal source values
+    } else if ( ( rmode >= IntSource_ww ) && ( rmode <= IntSource_wh ) ) {         // Internal source values
         if ( !hydrationLHS ) {
             answer = 0;
-        } else if ( hydrationModel )  { //!!! better via HydrationModelInterface
+        } else if ( hydrationModel ) {  //!!! better via HydrationModelInterface
             vec = ( ( TransportMaterialStatus * ) giveStatus(gp) )->giveTempStateVector().GiveCopy();
 
             if ( vec->giveSize() < 2 ) {
@@ -230,7 +229,7 @@ HydratingHeMoMaterial :: giveCharacteristicValue(MatResponseMode rmode, GaussPoi
             }
 
             answer = hydrationModel->giveCharacteristicValue(* vec, rmode, gp, atTime)
-            / atTime->giveTimeIncrement();
+                     / atTime->giveTimeIncrement();
             if ( ( rmode == IntSource_ww ) || ( rmode == IntSource_hw ) ) {
                 answer *= give_dphi_dw( vec->at(2) );
             }
@@ -337,5 +336,4 @@ HydratingHeMoMaterial :: CreateStatus(GaussPoint *gp) const
 {
     return new HydratingTransportMaterialStatus(1, domain, gp);
 }
-
 } // end namespace oofem

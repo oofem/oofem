@@ -79,7 +79,6 @@
 #include "materialmapperinterface.h"
 
 namespace oofem {
-
 StructuralElement :: StructuralElement(int n, Domain *aDomain) :
     Element(n, aDomain)
     // Constructor. Creates an element with number n, belonging to aDomain.
@@ -260,7 +259,7 @@ StructuralElement :: computePointLoadVectorAt(FloatArray &answer, Load *load, Ti
     FloatArray force, coords, lcoords;
     FloatMatrix T, n;
 
-    PointLoad *pointLoad = dynamic_cast< PointLoad * >( load );
+    PointLoad *pointLoad = dynamic_cast< PointLoad * >(load);
     pointLoad->giveCoordinates(coords);
     pointLoad->computeValueAt(force, tStep, coords, mode);
     if ( this->computeLocalCoordinates(lcoords, coords) ) {
@@ -305,7 +304,7 @@ StructuralElement :: computeEdgeLoadVectorAt(FloatArray &answer, Load *load,
         _error("computeEdgeLoadVectorAt : no edge load support");
     }
 
-    BoundaryLoad *edgeLoad = dynamic_cast< BoundaryLoad * >( load );
+    BoundaryLoad *edgeLoad = dynamic_cast< BoundaryLoad * >(load);
     if ( edgeLoad ) {
         approxOrder = edgeLoad->giveApproxOrder() + this->giveApproxOrder();
         numberOfGaussPoints = ( int ) ceil( ( approxOrder + 1. ) / 2. );
@@ -409,7 +408,7 @@ StructuralElement :: computeSurfaceLoadVectorAt(FloatArray &answer, Load *load,
         _error("computeSurfaceLoadVectorAt : no surface load support");
     }
 
-    BoundaryLoad *surfLoad = dynamic_cast< BoundaryLoad * >( load );
+    BoundaryLoad *surfLoad = dynamic_cast< BoundaryLoad * >(load);
     if ( surfLoad ) {
         IntegrationRule *iRule;
         GaussPoint *gp;
@@ -583,8 +582,8 @@ StructuralElement :: computeConsistentMassMatrix(FloatMatrix &answer, TimeStep *
         _error("computeConsistentMassMatrix no integration points available");
     }
 
-    iRule.setUpIntegrationPoints(this->giveIntegrationDomain(),
-                                 nip, this->giveMaterialMode());
+    iRule.setUpIntegrationPoints( this->giveIntegrationDomain(),
+                                 nip, this->giveMaterialMode() );
 
     this->giveMassMtrxIntegrationgMask(mask);
 
@@ -655,7 +654,7 @@ StructuralElement :: computeLocalForceLoadVector(FloatArray &answer, TimeStep *s
                 answer.add(helpLoadVector);
             }
         } else {
-          if ( load->giveBCValType() != TemperatureBVT && load->giveBCValType() != EigenstrainBVT) {
+            if ( load->giveBCValType() != TemperatureBVT && load->giveBCValType() != EigenstrainBVT ) {
                 // temperature and eigenstrain is handled separately at computeLoadVectorAt subroutine
                 _error("computeForceLoadVector : unsupported load type class");
                 exit(1);
@@ -1247,7 +1246,7 @@ StructuralElement :: giveInternalForcesVector(FloatArray &answer,
 
 void
 StructuralElement :: giveInternalForcesVector_withIRulesAsSubcells(FloatArray &answer,
-								   TimeStep *tStep, int useUpdatedGpRecord)
+                                                                   TimeStep *tStep, int useUpdatedGpRecord)
 //
 // returns nodal representation of real internal forces - necessary only for
 // non-linear analysis.
@@ -1275,58 +1274,60 @@ StructuralElement :: giveInternalForcesVector_withIRulesAsSubcells(FloatArray &a
     Rflag = this->computeGtoLRotationMatrix(R);
     GNTflag = this->computeGNLoadRotationMatrix(GNT, _toNodalCS);
 
-    FloatArray *m = &answer;
-    if (this->giveInterpolation() && this->giveInterpolation()->hasSubPatchFormulation()) m = &temp;
+    FloatArray *m = & answer;
+    if ( this->giveInterpolation() && this->giveInterpolation()->hasSubPatchFormulation() ) {
+        m = & temp;
+    }
 
     // loop over individual integration rules
-    for (ir=0; ir < numberOfIntegrationRules; ir++) {
-      iRule = integrationRulesArray [ ir ];
+    for ( ir = 0; ir < numberOfIntegrationRules; ir++ ) {
+        iRule = integrationRulesArray [ ir ];
 
-      for ( int i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
-        gp = iRule->getIntegrationPoint(i);
-        this->computeBmatrixAt(gp, b);
-        bt.beTranspositionOf(b);
-        // TotalStressVector = gp->giveStressVector() ;
-        if ( useUpdatedGpRecord == 1 ) {
-            TotalStressVector = ( ( StructuralMaterialStatus * ) mat->giveStatus(gp) )
-                                ->giveStressVector();
-        } else {
-            this->computeStressVector(TotalStressVector, gp, tStep);
+        for ( int i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
+            gp = iRule->getIntegrationPoint(i);
+            this->computeBmatrixAt(gp, b);
+            bt.beTranspositionOf(b);
+            // TotalStressVector = gp->giveStressVector() ;
+            if ( useUpdatedGpRecord == 1 ) {
+                TotalStressVector = ( ( StructuralMaterialStatus * ) mat->giveStatus(gp) )
+                                    ->giveStressVector();
+            } else {
+                this->computeStressVector(TotalStressVector, gp, tStep);
+            }
+
+            //
+            // updates gp stress and strain record  acording to current
+            // increment of displacement
+            //
+            if ( TotalStressVector.giveSize() == 0 ) {
+                break;
+            }
+
+            //
+            // now every gauss point has real stress vector
+            //
+            // compute nodal representation of internal forces using f = B^T*Sigma dV
+            //
+            dV  = this->computeVolumeAround(gp);
+            bs.beProductOf(bt, TotalStressVector);
+            bs.times(dV);
+
+            if ( Rflag ) {
+                bs.rotatedWith(R, 't');
+            }
+
+            if ( GNTflag ) {
+                bs.rotatedWith(GNT, 'n');
+            }
+
+            m->add(bs);
+
+            // localize irule contribution into element matrix
+            if ( this->giveIntegrationRuleLocalCodeNumbers(irlocnum, iRule, EID_MomentumBalance) ) {
+                answer.assemble(* m, irlocnum);
+                m->resize(0, 0);
+            }
         }
-
-        //
-        // updates gp stress and strain record  acording to current
-        // increment of displacement
-        //
-        if ( TotalStressVector.giveSize() == 0 ) {
-            break;
-        }
-
-        //
-        // now every gauss point has real stress vector
-        //
-        // compute nodal representation of internal forces using f = B^T*Sigma dV
-        //
-        dV  = this->computeVolumeAround(gp);
-        bs.beProductOf(bt, TotalStressVector);
-        bs.times(dV);
-
-        if ( Rflag ) {
-            bs.rotatedWith(R, 't');
-        }
-
-        if ( GNTflag ) {
-            bs.rotatedWith(GNT, 'n');
-        }
-
-        m->add(bs);
-
-	// localize irule contribution into element matrix
-	if (this->giveIntegrationRuleLocalCodeNumbers (irlocnum, iRule, EID_MomentumBalance)) {
-	  answer.assemble (*m, irlocnum);
-	  m->resize(0,0);
-	}
-      }
     }
 
     // if inactive update state, but no contribution to global system
@@ -1468,7 +1469,7 @@ StructuralElement :: updateBeforeNonlocalAverage(TimeStep *atTime)
     //StructuralNonlocalMaterial* material = DYNAMIC_CAST(StructuralNonlocalMaterial, this->giveMaterial());
     StructuralNonlocalMaterialExtensionInterface *materialExt =
         ( StructuralNonlocalMaterialExtensionInterface * ) this->giveMaterial()->
-    giveInterface(NonlocalMaterialExtensionInterfaceType);
+        giveInterface(NonlocalMaterialExtensionInterfaceType);
 
     if ( !materialExt ) {
         return;             //_error ("updateBeforeNonlocalAverage: material with no StructuralNonlocalMaterial support");
@@ -1519,8 +1520,8 @@ StructuralElement :: updateRotationMatrix()
 
     if ( isT_NtoG ) {
         if ( ( !T_NtoG.isSquare() ) ||
-	     //( T_NtoG.giveNumberOfRows() != this->computeNumberOfDofs(EID_MomentumBalance) ) ) {
-	     ( T_NtoG.giveNumberOfRows() != this->computeNumberOfL2GDofs(EID_MomentumBalance) ) ) {  
+            //( T_NtoG.giveNumberOfRows() != this->computeNumberOfDofs(EID_MomentumBalance) ) ) {
+            ( T_NtoG.giveNumberOfRows() != this->computeNumberOfL2GDofs(EID_MomentumBalance) ) ) {
             _error("StructuralElement :: updateRotationMatrix - T_NtoG transformation matrix size mismatch");
         }
     }
@@ -1645,8 +1646,8 @@ StructuralElement :: condense(FloatMatrix *stiff, FloatMatrix *mass, FloatArray 
                 for ( k = 1; k <= size; k++ ) {
                     if ( ( ii != j ) && ( ii != k ) ) {
                         mass->at(j, k) += mass->at(j, ii) * gaussCoeff->at(k) +
-                        mass->at(ii, k) * gaussCoeff->at(j) +
-                        mass->at(ii, ii) * gaussCoeff->at(j) * gaussCoeff->at(k);
+                                          mass->at(ii, k) * gaussCoeff->at(j) +
+                                          mass->at(ii, ii) * gaussCoeff->at(j) * gaussCoeff->at(k);
                     }
                 }
             }
@@ -1685,9 +1686,9 @@ StructuralElement :: computeGNDofRotationMatrix(FloatMatrix &answer, DofManTrans
     // initialize answer
     int gsize = this->computeGlobalNumberOfDofs(EID_MomentumBalance);
     if ( mode == _toGlobalCS ) {
-        answer.resize(this->computeNumberOfL2GDofs(EID_MomentumBalance), gsize); 
+        answer.resize(this->computeNumberOfL2GDofs(EID_MomentumBalance), gsize);
     } else if ( mode == _toNodalCS ) {
-        answer.resize( gsize, this->computeNumberOfL2GDofs(EID_MomentumBalance) ); 
+        answer.resize( gsize, this->computeNumberOfL2GDofs(EID_MomentumBalance) );
     } else {
         _error("computeGNDofRotationMatrix: unsupported DofManTrasfType value");
     }
@@ -1835,7 +1836,7 @@ StructuralElement :: addNonlocalStiffnessContributions(SparseMtrx &dest, const U
         IntegrationRule *iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
         // loop over element IP
         for ( int i = 0; i < iRule->getNumberOfIntegrationPoints(); i++ ) {
-          interface->NonlocalMaterialStiffnessInterface_addIPContribution(dest, s, iRule->getIntegrationPoint(i), atTime);
+            interface->NonlocalMaterialStiffnessInterface_addIPContribution(dest, s, iRule->getIntegrationPoint(i), atTime);
         }
     }
 }

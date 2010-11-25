@@ -54,11 +54,10 @@
 #include "statecountertype.h"
 
 #ifndef __MAKEDEPEND
-#include <stdio.h>
+ #include <stdio.h>
 #endif
 
 namespace oofem {
-
 /**
  * Class representing solution step. The Solution step instance may represent either
  * time step, load increment, or load case depending on current Engineering model used.
@@ -133,7 +132,7 @@ public:
     /// Returns receiver's number
     int giveNumber() { return number; }
     /// Set receiver's number
-    void setNumber(int i) {number=i;}
+    void setNumber(int i) { number = i; }
     /// Returns receiver's version
     int giveVersion() { return version; }
     /// Returns receiver's meta step number
@@ -204,6 +203,5 @@ public:
      * @see saveContext member function.*/
     contextIOResultType    restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 };
-
 } // end namespace oofem
 #endif // timestep_h

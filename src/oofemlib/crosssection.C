@@ -48,14 +48,13 @@
 #include "contextioerr.h"
 
 #ifndef __MAKEDEPEND
-#include <string.h>
-#ifdef HAVE_STRINGS_H
-#include <strings.h>
-#endif
+ #include <string.h>
+ #ifdef HAVE_STRINGS_H
+  #include <strings.h>
+ #endif
 #endif
 
 namespace oofem {
-
 IRResultType
 CrossSection :: initializeFrom(InputRecord *ir)
 //
@@ -130,7 +129,7 @@ CrossSection :: ofType(char *aClass)
 
     if ( !strncasecmp(aClass, "simplecs", 8) ) {
         newCrossSection = new SimpleCrossSection(this->giveNumber(), domain);
-    } else if ( !strncasecmp(aClass, "emptycs", 7) )   {
+    } else if ( !strncasecmp(aClass, "emptycs", 7) ) {
         newCrossSection = new EmptyCS(number, domain);
     } else {
         // last resort - call aditional user defined subroutine
@@ -173,5 +172,4 @@ CrossSection :: predictRelativeComputationalCost(GaussPoint *gp)
     return this->giveRelativeSelfComputationalCost() * gp->giveMaterial()->predictRelativeComputationalCost(gp);
 }
 #endif
-
 } // end namespace oofem

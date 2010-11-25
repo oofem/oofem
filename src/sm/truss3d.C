@@ -48,16 +48,15 @@
 
 #include "engngm.h"
 #ifndef __MAKEDEPEND
-#include <stdlib.h>
-#include <math.h>
+ #include <stdlib.h>
+ #include <math.h>
 #endif
 
 #ifdef __OOFEG
-#include "oofeggraphiccontext.h"
+ #include "oofeggraphiccontext.h"
 #endif
 
 namespace oofem {
-
 //
 // upravit teplota u geom. nelinearity
 //
@@ -77,10 +76,10 @@ Truss3d :: giveInterface(InterfaceType interface)
 {
     if ( interface == DirectErrorIndicatorRCInterfaceType ) {
         return ( DirectErrorIndicatorRCInterface * ) this;
-    } else if (interface == ZZNodalRecoveryModelInterfaceType) {
-      return (ZZNodalRecoveryModelInterface*) this;
-    } else if (interface == NodalAveragingRecoveryModelInterfaceType) {
-      return (NodalAveragingRecoveryModelInterface*) this;
+    } else if ( interface == ZZNodalRecoveryModelInterfaceType ) {
+        return ( ZZNodalRecoveryModelInterface * ) this;
+    } else if ( interface == NodalAveragingRecoveryModelInterfaceType ) {
+        return ( NodalAveragingRecoveryModelInterface * ) this;
     }
 
     OOFEM_LOG_INFO("Interface on Truss3d element not supported");
@@ -91,50 +90,52 @@ Truss3d :: giveInterface(InterfaceType interface)
 int
 Truss3d :: ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type)
 {
-  //needs 6 components for VTK export module in order not to skip the region
- if ((type == IST_StressTensor) || (type == IST_StrainTensor) || (type == IST_DamageTensor)) return 6;
+    //needs 6 components for VTK export module in order not to skip the region
+    if ( ( type == IST_StressTensor ) || ( type == IST_StrainTensor ) || ( type == IST_DamageTensor ) ) {
+        return 6;
+    }
 
- GaussPoint *gp = integrationRulesArray[0]-> getIntegrationPoint(0) ;
- return this->giveIPValueSize (type, gp);
+    GaussPoint *gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
+    return this->giveIPValueSize(type, gp);
 }
 
 void
-Truss3d :: ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx
-  (FloatMatrix& answer, GaussPoint* aGaussPoint, InternalStateType type)
+Truss3d :: ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatMatrix &answer, GaussPoint *aGaussPoint, InternalStateType type)
 {
-  int i;
-  double ksi;
-  FloatArray n(2);
+    int i;
+    double ksi;
+    FloatArray n(2);
 
-  ksi = aGaussPoint->giveCoordinate(1);
-  n.at(1)  = ( 1. - ksi ) * 0.5;
-  n.at(2)  = ( 1. + ksi ) * 0.5;
+    ksi = aGaussPoint->giveCoordinate(1);
+    n.at(1)  = ( 1. - ksi ) * 0.5;
+    n.at(2)  = ( 1. + ksi ) * 0.5;
 
-  if ( this->giveIPValueSize(type, aGaussPoint) ) {
-    answer.resize(1, 2);
-  } else {
+    if ( this->giveIPValueSize(type, aGaussPoint) ) {
+        answer.resize(1, 2);
+    } else {
+        return;
+    }
+
+    for ( i = 1; i <= 2; i++ ) {
+        answer.at(1, i)  = n.at(i);
+    }
+
     return;
-  }
-
-  for (i=1;i<=2;i++)
-    answer.at(1, i)  = n.at(i);
-
-  return;
 }
 
 void
-Truss3d::NodalAveragingRecoveryMI_computeNodalValue (FloatArray& answer, int node, InternalStateType type, TimeStep* tStep)
+Truss3d :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node, InternalStateType type, TimeStep *tStep)
 {
-  int size = NodalAveragingRecoveryMI_giveDofManRecordSize(type);
-  answer.resize(size);
-  answer.zero();
-  _warning("Truss3d element: IP values will not be transferred to nodes. Use ZZNodalRecovery instead (parameter stype 1)");
+    int size = NodalAveragingRecoveryMI_giveDofManRecordSize(type);
+    answer.resize(size);
+    answer.zero();
+    _warning("Truss3d element: IP values will not be transferred to nodes. Use ZZNodalRecovery instead (parameter stype 1)");
 }
 
 void
-Truss3d::NodalAveragingRecoveryMI_computeSideValue (FloatArray& answer, int side, InternalStateType type, TimeStep* tStep)
+Truss3d :: NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side, InternalStateType type, TimeStep *tStep)
 {
- answer.resize(0);
+    answer.resize(0);
 }
 
 
@@ -211,12 +212,12 @@ Truss3d :: computeNLBMatrixAt(FloatMatrix &answer, GaussPoint *aGaussPoint, int 
 void Truss3d :: computeGaussPoints()
 // Sets up the array of Gauss Points of the receiver.
 {
-  if (!integrationRulesArray) {
-    numberOfIntegrationRules = 1;
-    integrationRulesArray = new IntegrationRule * [ 1 ];
-    integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 2);
-    integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Line, 1, _1dMat);
-  }
+    if ( !integrationRulesArray ) {
+        numberOfIntegrationRules = 1;
+        integrationRulesArray = new IntegrationRule * [ 1 ];
+        integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 2);
+        integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Line, 1, _1dMat);
+    }
 }
 
 
@@ -228,14 +229,16 @@ Truss3d :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep)
 {
     Material *mat;
     double halfMass;
-    GaussPoint* gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
+    GaussPoint *gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
 
     answer.resize(6, 6);
     answer.zero();
-    if (!this->isActivated(tStep)) return;
+    if ( !this->isActivated(tStep) ) {
+        return;
+    }
 
     mat        = this->giveMaterial();
-    halfMass   = mat->give('d',gp) * this->giveCrossSection()->give(CS_Area) * this->giveLength() / 2.;
+    halfMass   = mat->give('d', gp) * this->giveCrossSection()->give(CS_Area) * this->giveLength() / 2.;
     answer.at(1, 1) = halfMass;
     answer.at(2, 2) = halfMass;
     answer.at(3, 3) = halfMass;
@@ -286,9 +289,9 @@ Truss3d :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoord
     n2  = ( 1. + ksi ) * 0.5;
 
     answer.resize(3);
-    answer.at(1) = n1 * this->giveNode(1)->giveCoordinate(1) + n2 * this->giveNode(2)->giveCoordinate(1);
-    answer.at(2) = n1 * this->giveNode(1)->giveCoordinate(2) + n2 * this->giveNode(2)->giveCoordinate(2);
-    answer.at(3) = n1 * this->giveNode(1)->giveCoordinate(3) + n2 * this->giveNode(2)->giveCoordinate(3);
+    answer.at(1) = n1 * this->giveNode(1)->giveCoordinate(1) + n2 *this->giveNode(2)->giveCoordinate(1);
+    answer.at(2) = n1 * this->giveNode(1)->giveCoordinate(2) + n2 *this->giveNode(2)->giveCoordinate(2);
+    answer.at(3) = n1 * this->giveNode(1)->giveCoordinate(3) + n2 *this->giveNode(2)->giveCoordinate(3);
 
     return 1;
 }
@@ -350,7 +353,7 @@ Truss3d :: giveLocalCoordinateSystem(FloatMatrix &answer)
 
     int minIndx = 1;
     for ( i = 2; i <= 3; i++ ) {
-        if ( lx.at(i) < abs(lx.at(minIndx)) ) {
+        if ( lx.at(i) < abs( lx.at(minIndx) ) ) {
             minIndx = i;
         }
     }
@@ -526,7 +529,4 @@ void Truss3d :: drawDeformedGeometry(oofegGraphicContext &gc, UnknownType type)
     EMAddGraphicsToModel(ESIModel(), go);
 }
 #endif
-
-
-
 } // end namespace oofem

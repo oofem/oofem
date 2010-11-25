@@ -64,7 +64,6 @@
 #include "mathfem.h"
 
 namespace oofem {
-
 #ifdef __OOFEG
 class StructuralElementEvaluator;
 void drawIGAPatchDeformedGeometry(Element * elem, StructuralElementEvaluator * se, oofegGraphicContext & gc, UnknownType);
@@ -147,6 +146,5 @@ public:
 protected:
     virtual int giveNsd() = 0;
 };
-
 } // end namespace oofem
 #endif //iga_h

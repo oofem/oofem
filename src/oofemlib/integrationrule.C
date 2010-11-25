@@ -47,7 +47,6 @@
 // initialize class member
 
 namespace oofem {
-
 IntegrationRule :: IntegrationRule(int n, Element *e, int startIndx, int endIndx, bool dynamic)
 {
     number = n;
@@ -357,6 +356,4 @@ IntegrationRule :: setUpEmbeddedIntegrationPoints(integrationDomain mode, int nP
 
     return 0;
 }
-
-
 } // end namespace oofem

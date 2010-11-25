@@ -40,7 +40,6 @@
 #define fmode_h
 
 namespace oofem {
-
 /**
  * Type representing the type of formulation (total or updated) of non-linear computation.
  */
@@ -50,6 +49,5 @@ enum fMode {
     TL,      // Total Lagrange
     AL       // Updated Lagrange
 };
-
 } // end namespace oofem
 #endif // fmode_h

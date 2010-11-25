@@ -54,7 +54,6 @@
 #include "materialmode.h"
 
 namespace oofem {
-
 class Material;
 class LayeredCrossSection;
 class MicroplaneMaterial;
@@ -217,8 +216,10 @@ public:
      * @return pointer to new status.
      */
     MaterialStatus *setMaterialStatus(MaterialStatus *ptr)
-    { delete matStatus;
-      return ( matStatus = ptr ); }
+    {
+        delete matStatus;
+        return ( matStatus = ptr );
+    }
     /**
      * Returns index-th slave gauss point of receiver.
      * @param index of retuned slave
@@ -291,7 +292,6 @@ public:
     /*   friend Material;
      * friend LayeredMaterial ; */
 };
-
 } // end namespace oofem
 #endif // gausspnt_h
 

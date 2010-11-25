@@ -17,21 +17,20 @@
 #include "usrdefsub.h"
 
 namespace oofem {
-
-EnrichmentItem::EnrichmentItem(int n, XfemManager*xm, Domain* aDomain) : FEMComponent(n, aDomain) {
-  xmanager = xm;
-  geometry = 0;
-  enrichmentFunction = 0;
+EnrichmentItem :: EnrichmentItem(int n, XfemManager *xm, Domain *aDomain) : FEMComponent(n, aDomain) {
+    xmanager = xm;
+    geometry = 0;
+    enrichmentFunction = 0;
 }
 
-BasicGeometry* EnrichmentItem::giveGeometry() {
+BasicGeometry *EnrichmentItem :: giveGeometry() {
     return xmanager->giveGeometry(this->geometry);
 }
-EnrichmentFunction *EnrichmentItem::giveEnrichmentFunction() {
-    return xmanager->giveEnrichmentFunction (this->enrichmentFunction);
+EnrichmentFunction *EnrichmentItem :: giveEnrichmentFunction() {
+    return xmanager->giveEnrichmentFunction(this->enrichmentFunction);
 }
 
-IRResultType EnrichmentItem::initializeFrom(InputRecord* ir) {
+IRResultType EnrichmentItem :: initializeFrom(InputRecord *ir) {
     const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result; // Required by IR_GIVE_FIELD macro
 
@@ -47,43 +46,44 @@ IRResultType EnrichmentItem::initializeFrom(InputRecord* ir) {
     return IRRT_OK;
 }
 
-bool EnrichmentItem::interacts(Element* element) {
+bool EnrichmentItem :: interacts(Element *element) {
     return this->giveGeometry()->intersects(element);
 }
 
-bool EnrichmentItem::isOutside(BasicGeometry *bg) {
+bool EnrichmentItem :: isOutside(BasicGeometry *bg) {
     return this->giveGeometry()->isOutside(bg);
 }
 
-void EnrichmentItem::computeIntersectionPoints(AList<FloatArray>* intersectionPoints, Element *element) {
+void EnrichmentItem :: computeIntersectionPoints(AList< FloatArray > *intersectionPoints, Element *element) {
     this->giveGeometry()->computeIntersectionPoints(element, intersectionPoints);
 }
 
-double EnrichmentItem::computeNumberOfIntersectionPoints(Element *element) {
+double EnrichmentItem :: computeNumberOfIntersectionPoints(Element *element) {
     return this->giveGeometry()->computeNumberOfIntersectionPoints(element);
 }
 
 /*
-void EnrichmentItem::setEnrichmentFunction(EnrichmentFunction *ef) {
-    this->ef = ef;
-}
-*/
-bool EnrichmentItem::isDofManEnriched(int nodeNumber) {
+ * void EnrichmentItem::setEnrichmentFunction(EnrichmentFunction *ef) {
+ *  this->ef = ef;
+ * }
+ */
+bool EnrichmentItem :: isDofManEnriched(int nodeNumber) {
     bool ret = false;
     // gets neighbouring elements of a node
     const IntArray *neighbours = domain->giveConnectivityTable()->giveDofManConnectivityArray(nodeNumber);
-    for (int i = 1; i <= neighbours->giveSize(); i++) {
+    for ( int i = 1; i <= neighbours->giveSize(); i++ ) {
         // for each of the neighbouring elements finds out whether it interacts with this EnrichmentItem
-        if (this->interacts(domain->giveElement(neighbours->at(i)))) {
+        if ( this->interacts( domain->giveElement( neighbours->at(i) ) ) ) {
             ret = true;
             break;
         }
     }
+
     return ret;
 }
 
-IRResultType Inclusion::initializeFrom(InputRecord* ir) {
-    EnrichmentItem::initializeFrom(ir);
+IRResultType Inclusion :: initializeFrom(InputRecord *ir) {
+    EnrichmentItem :: initializeFrom(ir);
     const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result; // Required by IR_GIVE_FIELD macro
     int material = 0;
@@ -91,5 +91,4 @@ IRResultType Inclusion::initializeFrom(InputRecord* ir) {
     this->mat = this->giveDomain()->giveMaterial(material);
     return IRRT_OK;
 }
-
 } // end namespace oofem

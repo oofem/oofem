@@ -47,11 +47,10 @@
 #include "contextioerr.h"
 
 #ifndef __MAKEDEPEND
-#include <math.h>
+ #include <math.h>
 #endif
 
 namespace oofem {
-
 RCSDMaterial :: RCSDMaterial(int n, Domain *d) : RCM2Material(n, d)
     //
     // constructor
@@ -150,7 +149,7 @@ RCSDMaterial :: giveRealStressVector(FloatArray &answer, MatResponseForm form, G
         if ( minSofteningPrincStress <= this->SDTransitionCoeff * CurrFt ) {
             // sd transition takes place
 
-            E = linearElasticMaterial->give(Ex,gp);
+            E = linearElasticMaterial->give(Ex, gp);
             ep = CurrFt / E;
             ef = this->giveMinCrackStrainsForFullyOpenCrack(gp, ipos);
             dCoeff = ( E / ( princStress.at(ipos) / principalStrain.at(ipos) ) );
@@ -174,7 +173,7 @@ RCSDMaterial :: giveRealStressVector(FloatArray &answer, MatResponseForm form, G
         double damage = 1.0;
         //int ipos;
 
-        E = linearElasticMaterial->give(Ex,gp);
+        E = linearElasticMaterial->give(Ex, gp);
         equivStrain = this->computeCurrEquivStrain(gp, reducedStrainVector, E, atTime);
         equivStrain = max( equivStrain, status->giveTempMaxEquivStrain() );
         reducedSpaceStressVector.beProductOf(* status->giveDs0Matrix(), reducedStrainVector);
@@ -340,7 +339,7 @@ RCSDMaterial :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
 
 
 double
-RCSDMaterial :: give(int aProperty, GaussPoint* gp)
+RCSDMaterial :: give(int aProperty, GaussPoint *gp)
 // Returns the value of the property aProperty (e.g. the Young's modulus
 // 'E') of the receiver.
 {
@@ -348,7 +347,7 @@ RCSDMaterial :: give(int aProperty, GaussPoint* gp)
         return this->SDTransitionCoeff;
     }
 
-    return RCM2Material :: give(aProperty,gp);
+    return RCM2Material :: give(aProperty, gp);
 }
 
 
@@ -363,9 +362,9 @@ RCSDMaterial :: checkSizeLimit(GaussPoint *gp, double charLength)
 {
     double Ee, Gf, Ft, LeCrit;
 
-    Ee = this->give(pscm_Ee,gp);
-    Gf = this->give(pscm_Gf,gp);
-    Ft = this->give(pscm_Ft,gp);
+    Ee = this->give(pscm_Ee, gp);
+    Gf = this->give(pscm_Gf, gp);
+    Ft = this->give(pscm_Ft, gp);
 
     LeCrit = 2.0 * Gf * Ee / ( Ft * Ft );
     return ( charLength < LeCrit );
@@ -381,9 +380,9 @@ RCSDMaterial :: computeStrength(GaussPoint *gp, double charLength)
 {
     double Ee, Gf, Ft;
 
-    Ee = this->give(pscm_Ee,gp);
-    Gf = this->give(pscm_Gf,gp);
-    Ft = this->give(pscm_Ft,gp);
+    Ee = this->give(pscm_Ee, gp);
+    Gf = this->give(pscm_Gf, gp);
+    Ft = this->give(pscm_Ft, gp);
 
     if ( this->checkSizeLimit(gp, charLength) ) {
         ;
@@ -410,7 +409,7 @@ RCSDMaterial :: giveMinCrackStrainsForFullyOpenCrack(GaussPoint *gp, int i)
     double Le, Gf, Ft;
 
     Le = status->giveCharLength(i);
-    Gf = this->give(pscm_Gf,gp);
+    Gf = this->give(pscm_Gf, gp);
     Ft = this->computeStrength(gp, Le);
 
     return 2.0 * Gf / ( Le * Ft );
@@ -463,7 +462,7 @@ RCSDMaterial :: giveCrackingModulus(MatResponseMode rMode, GaussPoint *gp,
     //
     //Ee = this->give(pscm_Ee);
     //Gf = this->give(pscm_Gf);
-    Ft = this->give(pscm_Ft,gp);
+    Ft = this->give(pscm_Ft, gp);
     Le = status->giveCharLength(i);
 
     Ft = this->computeStrength(gp, Le);
@@ -712,5 +711,4 @@ RCSDMaterialStatus :: restoreContext(DataStream *stream, ContextMode mode, void 
 
     return CIO_OK; // return succes
 }
-
 } // end namespace oofem

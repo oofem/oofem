@@ -32,11 +32,11 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
- 
+
 // file: MaxwellChM.C
 
 #ifndef __MAKEDEPEND
-#include <math.h>
+ #include <math.h>
 #endif
 #include "mathfem.h"
 #include "maxwellChM.h"
@@ -52,22 +52,20 @@
 #include "contextioerr.h"
 
 namespace oofem {
-
 MaxwellChainMaterial :: MaxwellChainMaterial(int n, Domain *d) : RheoChainMaterial(n, d)
-{
-}
+{}
 
 
 void
 MaxwellChainMaterial :: computeCharCoefficients(FloatArray &answer, GaussPoint *gp,
-                                               double atTime)
+                                                double atTime)
 {
     /*
-     * This function computes the moduli of individual Maxwell units 
+     * This function computes the moduli of individual Maxwell units
      * such that the corresponding Dirichlet series gives the best
      * approximation of the actual relaxation function.
      *
-     * The optimal moduli are obtained using the least-square method, 
+     * The optimal moduli are obtained using the least-square method,
      * i.e. by minimizing the following functional (atTime = t_0):
      *
      * $$ F=\sum^{k}_{r=1} \left[ \sum^{N}_{\mju=1} E_m(t_0) \exp^{-(t_r-t_0)/\tau_{\mju}
@@ -102,9 +100,9 @@ MaxwellChainMaterial :: computeCharCoefficients(FloatArray &answer, GaussPoint *
             tauj = this->giveCharTime(j);
             for ( sum = 0., r = 1; r <= rSize; r++ ) {
                 tti = __OOFEM_POW( ( atTime + rTimes.at(r) ) / taui, giveCharTimeExponent(i) ) -
-                __OOFEM_POW( atTime / taui, giveCharTimeExponent(i) );
+                      __OOFEM_POW( atTime / taui, giveCharTimeExponent(i) );
                 ttj = __OOFEM_POW( ( atTime + rTimes.at(r) ) / tauj, giveCharTimeExponent(j) ) -
-                __OOFEM_POW( atTime / tauj, giveCharTimeExponent(j) );
+                      __OOFEM_POW( atTime / tauj, giveCharTimeExponent(j) );
                 sum += exp(-tti - ttj);
             }
 
@@ -114,7 +112,7 @@ MaxwellChainMaterial :: computeCharCoefficients(FloatArray &answer, GaussPoint *
         // assemble rhs
         for ( sumRhs = 0., r = 1; r <= rSize; r++ ) {
             tti = __OOFEM_POW( ( atTime + rTimes.at(r) ) / taui, giveCharTimeExponent(i) ) -
-            __OOFEM_POW( atTime / taui, giveCharTimeExponent(i) );
+                  __OOFEM_POW( atTime / taui, giveCharTimeExponent(i) );
             sumRhs += exp(-tti) * discreteRelaxFunctionVal.at(r);
         }
 
@@ -138,7 +136,7 @@ MaxwellChainMaterial :: giveEModulus(GaussPoint *gp, TimeStep *atTime)
      *
      * It is stored as "Einc" for further expected requests from other gaussPoints that correspond to the same material.
      *
-     * Note: time -1 refers to the previous time.    
+     * Note: time -1 refers to the previous time.
      */
     int mu;
     double lambdaMu, Emu, deltaYmu;
@@ -204,7 +202,7 @@ MaxwellChainMaterial :: giveEigenStrainVector(FloatArray &answer, MatResponseFor
             return;
         }
 
-	// expand the strain to full form if requested
+        // expand the strain to full form if requested
         ( ( StructuralCrossSection * ) gp->giveCrossSection() )->
         giveFullCharacteristicVector(answer, gp, reducedAnswer);
     } else {
@@ -321,8 +319,7 @@ MaxwellChainMaterial :: restoreContext(DataStream *stream, ContextMode mode, voi
 
 MaxwellChainMaterialStatus :: MaxwellChainMaterialStatus(int n, Domain *d,
                                                          GaussPoint *g, int nunits) :
-  RheoChainMaterialStatus(n, d, g, nunits) {
-}
+    RheoChainMaterialStatus(n, d, g, nunits) {}
 
 
 void
@@ -356,6 +353,7 @@ MaxwellChainMaterialStatus :: saveContext(DataStream *stream, ContextMode mode, 
     if ( ( iores = RheoChainMaterialStatus :: saveContext(stream, mode, obj) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
+
     return CIO_OK;
 }
 
@@ -368,7 +366,7 @@ MaxwellChainMaterialStatus :: restoreContext(DataStream *stream, ContextMode mod
     if ( iores != CIO_OK ) {
         THROW_CIOERR(iores);
     }
+
     return CIO_OK;
 }
-
 } // end namespace oofem

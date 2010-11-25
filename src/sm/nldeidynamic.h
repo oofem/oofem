@@ -41,7 +41,7 @@
 #define nldeidynamic_h
 
 #ifndef __MAKEDEPEND
-#include <stdio.h>
+ #include <stdio.h>
 #endif
 #include "structengngmodel.h"
 #include "skyline.h"
@@ -50,7 +50,6 @@
 #include "flotmtrx.h"
 
 namespace oofem {
-
 #define LOCAL_ZERO_MASS_REPLACEMENT 1
 
 class NlDEIDynamic : public StructuralEngngModel
@@ -111,8 +110,10 @@ protected:
 public:
     NlDEIDynamic(int i, EngngModel *_master = NULL) : StructuralEngngModel(i, _master), massMatrix(), loadVector(),
         previousIncrementOfDisplacementVector(), incrementOfDisplacementVector(),
-        displacementVector(), velocityVector(), accelerationVector() { ndomains = 1;
-                                                                       initFlag = 1; }
+        displacementVector(), velocityVector(), accelerationVector() {
+        ndomains = 1;
+        initFlag = 1;
+    }
     ~NlDEIDynamic();
     // solving
     //void solveYourself ();
@@ -147,6 +148,5 @@ public:
     virtual int        giveNumberOfFirstStep() { return 0; }
     virtual int        giveNumberOfTimeStepWhenIcApply() { return 0; }
 };
-
 } // end namespace oofem
 #endif // nldeidynamic_h

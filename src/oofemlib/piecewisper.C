@@ -35,11 +35,10 @@
 
 #include "piecewisper.h"
 #ifndef __MAKEDEPEND
-#include <math.h>
+ #include <math.h>
 #endif
 
 namespace oofem {
-
 double PeriodicPiecewiseLinFunction :: __at(double time)
 // Returns the value of the receiver at time 'time'. 'time' should be
 // one of the dates of the receiver (currently there is no interpola-
@@ -133,5 +132,4 @@ PeriodicPiecewiseLinFunction :: giveInputRecordString(std :: string &str, bool k
 
     return 1;
 }
-
 } // end namespace oofem

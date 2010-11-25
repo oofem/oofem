@@ -108,7 +108,7 @@ static void OOFEGReturnHitInCmd(Widget w, XEvent *event, String *params,
 
 static XtTranslations tt1;
 static XtActionsRec oofeg_remap_return[] = {
-  { (String) "oofegretActCmd", OOFEGReturnHitInCmd },
+    { ( String ) "oofegretActCmd", OOFEGReturnHitInCmd },
 };
 
 static int oofeg_box_setup = 0;
@@ -190,7 +190,7 @@ static Widget oofeg_add_palette(const char *palette_label, Widget parent, Widget
 static Widget oofeg_add_popdown_menu(const char *menu_label, Widget parent, Widget *palette);
 static Widget oofeg_add_button(const char *name, const char *button_label, WidgetClass wclass, Widget palette,
                                XtCallbackProc action, XtPointer data);
-static Widget oofeg_add_button(const char *name, const char *button_label, WidgetClass wclass, Widget palette, Arg* arg, int ac, 
+static Widget oofeg_add_button(const char *name, const char *button_label, WidgetClass wclass, Widget palette, Arg *arg, int ac,
                                XtCallbackProc action, XtPointer data);
 static Widget oofeg_add_menu_item(const char *name, const char *item_label, Widget palette,
                                   XtCallbackProc action, XtPointer data);
@@ -266,8 +266,8 @@ oofegGraphicContext gc [ OOFEG_LAST_LAYER ];
 EView *myview;
 
 /* Defaul oofem loggers */
-Logger oofem::oofem_logger(Logger :: LOG_LEVEL_INFO, stdout);
-Logger oofem::oofem_errLogger(Logger :: LOG_LEVEL_WARNING, stderr);
+Logger oofem :: oofem_logger(Logger :: LOG_LEVEL_INFO, stdout);
+Logger oofem :: oofem_errLogger(Logger :: LOG_LEVEL_WARNING, stderr);
 
 
 int
@@ -365,8 +365,8 @@ main(int argc, char *argv[])
 
 
     ESIBuildInterface(mask, argc, argv);
-    myview  =  ElixirNewView(viewTitle, const_cast<char*>("OOFEG"), const_cast<char*>(OOFEG_BACKGROUND_COLOR), 
-                             const_cast<char*>(OOFEG_DEFAULTDRAW_COLOR), 500, 400);
+    myview  =  ElixirNewView(viewTitle, const_cast< char * >("OOFEG"), const_cast< char * >(OOFEG_BACKGROUND_COLOR),
+                             const_cast< char * >(OOFEG_DEFAULTDRAW_COLOR), 500, 400);
     EVSetRenderMode(myview, WIRE_RENDERING);
     EMAttachView(age_model, myview);
     gc [ 0 ].init(problem); // init all gcs
@@ -387,7 +387,7 @@ main(int argc, char *argv[])
     }
 
     if ( oofeg_box_setup ) {
-      oofeg_display_message(oofem_tmpstr(OOFEG_VERSION));
+        oofeg_display_message( oofem_tmpstr(OOFEG_VERSION) );
     }
 
     updateISA(gc);
@@ -396,7 +396,7 @@ main(int argc, char *argv[])
 
     // this versiont supports keybort shortcuts like Ctrl+A, Ctrl+X etc.
     ESIPopup();
-    ESIEventLoop(TRUE,NULL);
+    ESIEventLoop(TRUE, NULL);
 
 #ifdef __PETSC_MODULE
     PetscFinalize();
@@ -480,7 +480,7 @@ void ESICustomize(Widget parent_pane)
                 ac++;
                 lx = XtCreateManagedWidget("smin", labelWidgetClass, grey_scale_setup_palette, al, ac);
                 ac = 0;
-                XtSetArg(al [ ac ], (String) XtNfromHoriz, lx);
+                XtSetArg(al [ ac ], ( String ) XtNfromHoriz, lx);
                 ac++;
                 XtSetArg(al [ ac ], XtNeditType, XawtextEdit);
                 ac++;
@@ -488,22 +488,22 @@ void ESICustomize(Widget parent_pane)
                                                  asciiTextWidgetClass, grey_scale_setup_palette,
                                                  al, ac, NULL, NULL);
                 ac = 0;
-                XtSetArg(al [ ac ], (String) XtNfromHoriz, greyscale_min);
+                XtSetArg(al [ ac ], ( String ) XtNfromHoriz, greyscale_min);
                 ac++;
                 XtSetArg(al [ ac ], XtNlabel, " grey_max (<=1.0)");
                 ac++;
                 ly = XtCreateManagedWidget("smax", labelWidgetClass, grey_scale_setup_palette, al, ac);
                 ac = 0;
-                XtSetArg(al [ ac ], (String) XtNfromHoriz, ly);
+                XtSetArg(al [ ac ], ( String ) XtNfromHoriz, ly);
                 ac++;
                 XtSetArg(al [ ac ], XtNeditType, XawtextEdit);
                 ac++;
                 greyscale_max = oofeg_add_button("greyscale_max_val", "",
                                                  asciiTextWidgetClass, grey_scale_setup_palette,
                                                  al, ac, NULL, NULL);
-                
+
                 ac = 0;
-                XtSetArg(al [ ac ], (String) XtNfromHoriz, greyscale_max);
+                XtSetArg(al [ ac ], ( String ) XtNfromHoriz, greyscale_max);
                 ac++;
                 scale_setup_ok = oofeg_add_button("precinput_xyz_ok", " OK ",
                                                   commandWidgetClass, grey_scale_setup_palette,
@@ -551,7 +551,7 @@ void ESICustomize(Widget parent_pane)
                 ac++;
                 lx = XtCreateManagedWidget("smin", labelWidgetClass, color_scale_setup_palette, al, ac);
                 ac = 0;
-                XtSetArg(al [ ac ], (String) XtNfromHoriz, lx);
+                XtSetArg(al [ ac ], ( String ) XtNfromHoriz, lx);
                 ac++;
                 XtSetArg(al [ ac ], XtNeditType, XawtextEdit);
                 ac++;
@@ -559,13 +559,13 @@ void ESICustomize(Widget parent_pane)
                                              asciiTextWidgetClass, color_scale_setup_palette,
                                              al, ac, NULL, NULL);
                 ac = 0;
-                XtSetArg(al [ ac ], (String) XtNfromHoriz, scale_min);
+                XtSetArg(al [ ac ], ( String ) XtNfromHoriz, scale_min);
                 ac++;
                 XtSetArg(al [ ac ], XtNlabel, " scale_max");
                 ac++;
                 ly = XtCreateManagedWidget("smax", labelWidgetClass, color_scale_setup_palette, al, ac);
                 ac = 0;
-                XtSetArg(al [ ac ], (String) XtNfromHoriz, ly);
+                XtSetArg(al [ ac ], ( String ) XtNfromHoriz, ly);
                 ac++;
                 XtSetArg(al [ ac ], XtNeditType, XawtextEdit);
                 ac++;
@@ -574,7 +574,7 @@ void ESICustomize(Widget parent_pane)
                                              al, ac, NULL, NULL);
 
                 ac = 0;
-                XtSetArg(al [ ac ], (String) XtNfromHoriz, scale_max);
+                XtSetArg(al [ ac ], ( String ) XtNfromHoriz, scale_max);
                 ac++;
                 scale_setup_ok = oofeg_add_button("precinput_xyz_ok", " OK ",
                                                   commandWidgetClass, color_scale_setup_palette,
@@ -634,7 +634,7 @@ void ESICustomize(Widget parent_pane)
             ac++;
             lx = XtCreateManagedWidget("sstep", labelWidgetClass, animate_setup_palette, al, ac);
             ac = 0;
-            XtSetArg(al [ ac ], (String) XtNfromHoriz, lx);
+            XtSetArg(al [ ac ], ( String ) XtNfromHoriz, lx);
             ac++;
             XtSetArg(al [ ac ], XtNeditType, XawtextEdit);
             ac++;
@@ -642,13 +642,13 @@ void ESICustomize(Widget parent_pane)
                                           asciiTextWidgetClass, animate_setup_palette,
                                           al, ac, NULL, NULL);
             ac = 0;
-            XtSetArg(al [ ac ], (String) XtNfromHoriz, start_step);
+            XtSetArg(al [ ac ], ( String ) XtNfromHoriz, start_step);
             ac++;
             XtSetArg(al [ ac ], XtNlabel, " end step");
             ac++;
             ly = XtCreateManagedWidget("estep", labelWidgetClass, animate_setup_palette, al, ac);
             ac = 0;
-            XtSetArg(al [ ac ], (String) XtNfromHoriz, ly);
+            XtSetArg(al [ ac ], ( String ) XtNfromHoriz, ly);
             ac++;
             XtSetArg(al [ ac ], XtNeditType, XawtextEdit);
             ac++;
@@ -657,7 +657,7 @@ void ESICustomize(Widget parent_pane)
                                         al, ac, NULL, NULL);
 
             ac = 0;
-            XtSetArg(al [ ac ], (String) XtNfromHoriz, end_step);
+            XtSetArg(al [ ac ], ( String ) XtNfromHoriz, end_step);
             ac++;
             animate_scale_setup_ok = oofeg_add_button("precinput_xyz_ok", " OK ",
                                                       commandWidgetClass, animate_setup_palette,
@@ -928,13 +928,13 @@ void OOFEGSimpleCmd(char *buf)
         stepinfo [ 1 ] = iversion;
         try {
             result = problem->restoreContext(NULL, CM_State, ( void * ) stepinfo);
-        } catch ( ContextIOERR &m ) {
+        } catch(ContextIOERR & m) {
             m.print();
             stepinfo [ 0 ] = pstep;
             stepinfo [ 1 ] = iversion;
             try {
                 result = problem->restoreContext(NULL, CM_State, ( void * ) stepinfo);
-            } catch ( ContextIOERR &m2 ) {
+            } catch(ContextIOERR & m2) {
                 m2.print();
                 exit(1);
             }
@@ -952,7 +952,7 @@ void OOFEGSimpleCmd(char *buf)
         stepinfo [ 1 ] = iversion;
         try {
             problem->restoreContext(NULL, CM_State, ( void * ) stepinfo);
-        } catch ( ContextIOERR &m ) {
+        } catch(ContextIOERR & m) {
             m.print();
             exit(1);
         }
@@ -1085,7 +1085,7 @@ int  updateDefPlotFlag()
     t = XtNameToWidget(varplot_palette, tname);
     if ( t != NULL ) {
         ac = 0;
-        XtSetArg(al [ ac ], (String) XtNstate, & s);
+        XtSetArg(al [ ac ], ( String ) XtNstate, & s);
         ac++;
         XtGetValues(t, al, ac);
         gc [ OOFEG_DEFORMED_GEOMETRY_LAYER ].setInternalVarsDefGeoFlag( ( BOOLEAN ) s );
@@ -1121,14 +1121,14 @@ void nextStep(Widget wid, XtPointer cl, XtPointer cd)
             printf("OOFEG: restoring context file %d.%d\n", stepInfo [ 0 ], stepInfo [ 1 ]);
             try {
                 result = problem->restoreContext(NULL, CM_State, ( void * ) stepInfo);
-            } catch ( ContextIOERR &m ) {
+            } catch(ContextIOERR & m) {
                 m.print();
                 istepVersion = 0;
                 stepInfo [ 0 ] = prevStep;
                 stepInfo [ 1 ] = 0;
                 try {
                     problem->restoreContext(NULL, CM_State, ( void * ) stepInfo);
-                } catch ( ContextIOERR &m2 ) {
+                } catch(ContextIOERR & m2) {
                     m2.print();
                     exit(1);
                 }
@@ -1144,13 +1144,13 @@ void nextStep(Widget wid, XtPointer cl, XtPointer cd)
             //printf ("NextStep: prevStep %d, nstep %d, stepStep %d\n", prevStep, istep, stepStep);
             try {
                 result = problem->restoreContext(NULL, CM_State, ( void * ) stepInfo);
-            } catch ( ContextIOERR &m ) {
+            } catch(ContextIOERR & m) {
                 m.print();
                 stepInfo [ 0 ] = prevStep;
                 stepInfo [ 1 ] = 0;
                 try {
                     problem->restoreContext(NULL, CM_State, ( void * ) stepInfo);
-                } catch ( ContextIOERR &m2 ) {
+                } catch(ContextIOERR & m2) {
                     m2.print();
                     exit(1);
                 }
@@ -1166,7 +1166,7 @@ void nextStep(Widget wid, XtPointer cl, XtPointer cd)
         stepInfo [ 1 ] = 0;
         try {
             result = problem->restoreContext(NULL, CM_State, ( void * ) stepInfo);
-        } catch ( ContextIOERR &m ) {
+        } catch(ContextIOERR & m) {
             m.print();
             exit(1);
         }
@@ -1192,13 +1192,13 @@ void previousStep(Widget wid, XtPointer cl, XtPointer cd)
             stepInfo [ 1 ] = 0;
             try {
                 result = problem->restoreContext(NULL, CM_State, ( void * ) stepInfo);
-            } catch ( ContextIOERR &m ) {
+            } catch(ContextIOERR & m) {
                 m.print();
                 stepInfo [ 0 ] = prevStep;
                 stepInfo [ 1 ] = 0;
                 try {
                     problem->restoreContext(NULL, CM_State, ( void * ) stepInfo);
-                } catch ( ContextIOERR &m2 ) {
+                } catch(ContextIOERR & m2) {
                     m2.print();
                     exit(1);
                 }
@@ -1215,7 +1215,7 @@ void previousStep(Widget wid, XtPointer cl, XtPointer cd)
         stepInfo [ 1 ] = 0;
         try {
             result = problem->restoreContext(NULL, CM_State, ( void * ) stepInfo);
-        } catch ( ContextIOERR &m ) {
+        } catch(ContextIOERR & m) {
             m.print();
             exit(1);
         }
@@ -1271,7 +1271,7 @@ void stresscompPlot(Widget w, XtPointer ptr, XtPointer call_data)
     t = XtNameToWidget(scalarplot_palette, tname);
     if ( t != NULL ) {
         ac = 0;
-        XtSetArg(al [ ac ], (String) XtNstate, & s);
+        XtSetArg(al [ ac ], ( String ) XtNstate, & s);
         ac++;
         XtGetValues(t, al, ac);
     }
@@ -1340,7 +1340,7 @@ void straincompPlot(Widget w, XtPointer ptr, XtPointer call_data)
     t = XtNameToWidget(scalarplot_palette, tname);
     if ( t != NULL ) {
         ac = 0;
-        XtSetArg(al [ ac ], (String) XtNstate, & s);
+        XtSetArg(al [ ac ], ( String ) XtNstate, & s);
         ac++;
         XtGetValues(t, al, ac);
     }
@@ -1734,7 +1734,7 @@ char *readSimpleString(char *source, char *simpleString, char **remain)
     char *curr = source;
     char *ss = simpleString;
 
-    while ( ( * curr == ' ' ) || ( * curr == '\n' ) || ( * curr == '\t' ) || ! * curr ) {
+    while ( ( * curr == ' ' ) || ( * curr == '\n' ) || ( * curr == '\t' ) || !* curr ) {
         curr++;
     }
 
@@ -1743,7 +1743,7 @@ char *readSimpleString(char *source, char *simpleString, char **remain)
         exit(1);
     }
 
-    while ( !( ( * curr == ' ' ) || ( * curr == '\n' ) || ( * curr == '\t' ) || ! * curr ) ) {
+    while ( !( ( * curr == ' ' ) || ( * curr == '\n' ) || ( * curr == '\t' ) || !* curr ) ) {
         * ss++ = * curr++;
     }
 
@@ -1895,7 +1895,7 @@ static void apply_layer_update(Widget w, XtPointer ptr, XtPointer call_data)
         t = XtNameToWidget(paned, tname);
         if ( t != NULL ) {
             ac = 0;
-            XtSetArg(al [ ac ], (String) XtNstate, & s);
+            XtSetArg(al [ ac ], ( String ) XtNstate, & s);
             ac++;
             XtGetValues(t, al, ac);
             gc [ i ].setActivityFlag(s);
@@ -1931,7 +1931,7 @@ set_layer_on_off(EView *v_p, caddr_t data, WCRec *p)
         t = XtNameToWidget(paned, tname);
         if ( t != NULL ) {
             ac = 0;
-            XtSetArg(al [ ac ], (String) XtNstate, & s);
+            XtSetArg(al [ ac ], ( String ) XtNstate, & s);
             ac++;
             XtGetValues(t, al, ac);
             /*      EVSetLayerOnOff(v_p, i, (BOOLEAN)s);  */
@@ -1979,7 +1979,7 @@ static void apply_mat_reg_filter(Widget data, XtPointer ptr, XtPointer call_data
             t = XtNameToWidget(paned, tname);
             if ( t != NULL ) {
                 ac = 0;
-                XtSetArg(al [ ac ], (String) XtNstate, & s);
+                XtSetArg(al [ ac ], ( String ) XtNstate, & s);
                 ac++;
                 XtGetValues(t, al, ac);
                 /*      EVSetLayerOnOff(v_p, i, (BOOLEAN)s);  */
@@ -2092,7 +2092,7 @@ pass_setanimate_command(Widget w, XtPointer ptr, XtPointer call_data)
         stepinfo [ 1 ] = iversion;
         try {
             result = problem->restoreContext(NULL, CM_State, ( void * ) stepinfo);
-        } catch ( ContextIOERR &m ) {
+        } catch(ContextIOERR & m) {
             m.print();
             return;
         }
@@ -2357,35 +2357,35 @@ oofeg_add_palette(const char *palette_label, Widget parent, Widget *palette)
 
     /* create palette with simple palette label and then apply modifications */
 
-    button = ESIAddPalette(const_cast<char*>(OOFEG_PALETTE_BUTTON_RESOURCE), const_cast<char*>(palette_label), parent, NULL, 0, palette);
+    button = ESIAddPalette(const_cast< char * >(OOFEG_PALETTE_BUTTON_RESOURCE), const_cast< char * >(palette_label), parent, NULL, 0, palette);
     return ( button );
 }
 
 static Widget
 oofeg_add_popdown_menu(const char *menu_label, Widget parent, Widget *palette)
 {
-  return ( ESIAddPopdownMenu(const_cast<char*>(OOFEG_MENU_BUTTON_RESOURCE), const_cast<char*>(menu_label), parent, NULL, 0, palette) );
+    return ( ESIAddPopdownMenu(const_cast< char * >(OOFEG_MENU_BUTTON_RESOURCE), const_cast< char * >(menu_label), parent, NULL, 0, palette) );
 }
 
 static Widget
 oofeg_add_button(const char *name, const char *button_label, WidgetClass wclass, Widget palette,
                  XtCallbackProc action, XtPointer data)
 {
-  return ( ESIAddButton(const_cast<char*>(name), const_cast<char*>(button_label), wclass, palette, NULL, 0, action, data) );
+    return ( ESIAddButton(const_cast< char * >(name), const_cast< char * >(button_label), wclass, palette, NULL, 0, action, data) );
 }
 
 static Widget
-oofeg_add_button(const char *name, const char *button_label, WidgetClass wclass, Widget palette, Arg* arg, int ac, 
+oofeg_add_button(const char *name, const char *button_label, WidgetClass wclass, Widget palette, Arg *arg, int ac,
                  XtCallbackProc action, XtPointer data)
 {
-  return ( ESIAddButton(const_cast<char*>(name), const_cast<char*>(button_label), wclass, palette, arg, ac, action, data) );
+    return ( ESIAddButton(const_cast< char * >(name), const_cast< char * >(button_label), wclass, palette, arg, ac, action, data) );
 }
 
 static Widget
 oofeg_add_menu_item(const char *name, const char *item_label, Widget palette,
                     XtCallbackProc action, XtPointer data)
 {
-  return ( ESIAddMenuItem(const_cast<char*>(name), const_cast<char*>(item_label), palette, NULL, 0, action, data) );
+    return ( ESIAddMenuItem(const_cast< char * >(name), const_cast< char * >(item_label), palette, NULL, 0, action, data) );
 }
 
 
@@ -2395,8 +2395,8 @@ oofeg_add_dialog(const char *name, const char *dialog_label, const char *prompt,
                  XtCallbackProc action, const char *data, ESIDialogValueType type, ESIVerifyValueProc proc)
 {
     Widget button;
-    button = ESIAddPopupDialog(const_cast<char*>(name), const_cast<char*>(dialog_label), const_cast<char*>(prompt), 
-                               const_cast<char*>(init_value), palette,
+    button = ESIAddPopupDialog(const_cast< char * >(name), const_cast< char * >(dialog_label), const_cast< char * >(prompt),
+                               const_cast< char * >(init_value), palette,
                                NULL, 0, action, ( XtPointer ) data, type, proc);
 
     return ( button );
@@ -2414,7 +2414,7 @@ oofeg_display_message(const char *message)
 void
 oofeg_exit(Widget w, XtPointer ptr, XtPointer call_data)
 {
-  ESIPopupConfirmDialog( ( Widget ) ptr, const_cast<char*>("Really exit?"), oofeg_quit, ptr, NULL, NULL );
+    ESIPopupConfirmDialog( ( Widget ) ptr, const_cast< char * >("Really exit?"), oofeg_quit, ptr, NULL, NULL );
 }
 
 void
@@ -2428,8 +2428,8 @@ void
 oofeg_open_frame(Widget w, XtPointer ptr, XtPointer call_data)
 {
     EView *view;
-    view = ElixirNewView(viewTitle, const_cast<char*>("SimpleXF"), const_cast<char*>(OOFEG_BACKGROUND_COLOR), 
-                         const_cast<char*>(OOFEG_DEFAULTDRAW_COLOR), 500, 400);
+    view = ElixirNewView(viewTitle, const_cast< char * >("SimpleXF"), const_cast< char * >(OOFEG_BACKGROUND_COLOR),
+                         const_cast< char * >(OOFEG_DEFAULTDRAW_COLOR), 500, 400);
 
     EMAttachView(ESIModel(), view);
     EMRegenerateGraphics(ESIModel(), view);
@@ -2440,7 +2440,7 @@ oofeg_open_frame(Widget w, XtPointer ptr, XtPointer call_data)
 void
 oofeg_close_frame(Widget w, XtPointer ptr, XtPointer call_data)
 {
-    EVSetApplyToViewFunction( ( void(*) (EView *, caddr_t, WCRec *) )oofeg_destroy_frame, NULL, NULL );
+    EVSetApplyToViewFunction( ( void ( * )(EView *, caddr_t, WCRec *) )oofeg_destroy_frame, NULL, NULL );
     EVSetApplyToViewPreventRedisplay(YES);
     EMPushHandler(ESIModel(), EVApplyToViewHandler, NULL);
 }
@@ -2671,7 +2671,7 @@ void debug_run(Widget w, XtPointer ptr, XtPointer call_data)
         problem->checkProblemConsistency();
         gc [ 0 ].setActiveStep(0);
         problem->solveYourself();
-    } catch ( OOFEM_Terminate &c ) {
+    } catch(OOFEM_Terminate & c) {
         delete problem;
  #ifdef __PETSC_MODULE
         PetscFinalize();

@@ -44,7 +44,6 @@
 #include "structuralms.h"
 
 namespace oofem {
-
 /**
  * Related material model status to BazantMBCMaterial class
  * for storing history  variables in particular integration point
@@ -174,6 +173,5 @@ protected:
 
     MaterialStatus *CreateMicroplaneStatus(GaussPoint *gp) { return new M4MaterialStatus(1, domain, gp); }
 };
-
 } // end namespace oofem
 #endif // m4_h

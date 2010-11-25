@@ -43,7 +43,6 @@
 #include "cltypes.h"
 
 namespace oofem {
-
 /**
  * Material damage model for transversely orthotropic material. Fixed cracks are induced in principal material coordinates, always perpendicular to material axis. Six cracking modes are implemented in three orthogonal directions - three for tension/compression failure and three for shear failure. Material orientation can be specified on each element with "lmcs" keyword, otherwise global material orientation is assumed.
  *
@@ -257,12 +256,11 @@ protected:
      */
     void giveCharLengthForModes(FloatArray &charLenModes, GaussPoint *gp);
     /**
-    * Check that element is small enough or Gf is large enough to prevent the snap-back
-    * @param gp integration point
-    * @param mMode type of material (_1dMat, _3dMat supported)
-    */
+     * Check that element is small enough or Gf is large enough to prevent the snap-back
+     * @param gp integration point
+     * @param mMode type of material (_1dMat, _3dMat supported)
+     */
     void checkSnapBack(GaussPoint *gp, MaterialMode mMode);
 };
-
 } // end namespace oofem
 #endif // compodamagemat_h

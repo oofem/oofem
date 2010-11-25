@@ -61,7 +61,6 @@
 #include "entityrenumberingscheme.h"
 
 namespace oofem {
-
 #ifdef __PARALLEL_MODE
 class CommunicationBuffer;
 #endif
@@ -77,10 +76,10 @@ class UnknownNumberingScheme;
  * Abstract class Dof represents Degree Of Freedom in finite element mesh.
  * DOFs are possesed by DofManagers (i.e, nodes, sides or whatever) and
  * one DOF belongs to only one DofManager.
- * Dof maintain its related equation or prescribed equation number. 
+ * Dof maintain its related equation or prescribed equation number.
  * This equation number is usually assigned by Engng Model, hovewer, several
  * numbering schemes can exists (see giveEquationNumber and similar services).
- * 
+ *
  * It maintains also its physical meaning and reference to
  * related DofManager (reference to DofManager which possess particular DOF).
  * To describe physical meaning of particular Dof, special enum type "DofId" has
@@ -177,7 +176,7 @@ public:
     int giveDofManNumber() const;
 
     /// Returns associated DofManager.
-    DofManager *giveDofManager() const {return dofManager; }
+    DofManager *giveDofManager() const { return dofManager; }
 #ifdef __PARALLEL_MODE
     int giveDofManGlobalNumber() const;
 #endif
@@ -205,11 +204,11 @@ public:
 
     //  virtual double  giveBcValue (UnknownType type, ValueModeType mode, TimeStep* tStep) ;
     /**
-     * Returns equation number of receiver for given equation numbering scheme. 
+     * Returns equation number of receiver for given equation numbering scheme.
      */
-    int                 giveEquationNumber(const UnknownNumberingScheme& s);
+    int                 giveEquationNumber(const UnknownNumberingScheme &s);
     /**
-     * Returns equation number of receiver, usually assigned by emodel. 
+     * Returns equation number of receiver, usually assigned by emodel.
      * If Dof has active BC, returned equation number
      * is zero. After initializing Dof by calling constructor, Dof has no equation
      * number assigned. When firstly invoked, this function asks EngngModel object
@@ -230,7 +229,7 @@ public:
      *
      * For slave dofs (dependent on other primary dofs) the array of master equation numbers is returned.
      */
-    virtual void giveEquationNumbers(IntArray &masterEqNumbers, const UnknownNumberingScheme& s);
+    virtual void giveEquationNumbers(IntArray &masterEqNumbers, const UnknownNumberingScheme &s);
 
     /**
      * Returns prescribed equation number of receiver. If Dof has inactive BC,
@@ -382,7 +381,7 @@ public:
      * these relations to reflext updated numbering. The renumbering funciton is passed, which is supposed
      * to return an updated number of specified entyty type based on old number.
      */
-    virtual void updateLocalNumbering( EntityRenumberingFunctor &f ) {}
+    virtual void updateLocalNumbering(EntityRenumberingFunctor &f) {}
 
     /**
      * Prints Dof output (it prints value of unknown related to dof at given timeStep).
@@ -451,7 +450,7 @@ public:
     virtual void setEquationNumber(int equationNumber) {}; // rch
     virtual void setUnknowns(Dictionary *unknowns) {}; // rch
     virtual Dictionary *giveUnknowns() { return NULL; } // rch
-    virtual int giveEqn() {return 0;}
+    virtual int giveEqn() { return 0; }
 
 #ifdef __PARALLEL_MODE
     /**
@@ -504,6 +503,5 @@ protected:
 
     friend class SimpleSlaveDof;
 };
-
 } // end namespace oofem
 #endif // dof_h

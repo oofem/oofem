@@ -44,32 +44,30 @@
 #include "elementside.h"
 #include "crosssection.h"
 #ifndef __MAKEDEPEND
-#include <stdio.h>
+ #include <stdio.h>
 #endif
 
 namespace oofem {
-
-NodalRecoveryModel::NodalRecoveryModel(Domain *d) : nodalValList(0)
+NodalRecoveryModel :: NodalRecoveryModel(Domain *d) : nodalValList(0)
 {
-  stateCounter = 0;
-  domain = d;
-  this->init();
+    stateCounter = 0;
+    domain = d;
+    this->init();
 
 #ifdef __PARALLEL_MODE
-  communicator = NULL;
-  commBuff = NULL;
-  initCommMap = true;
+    communicator = NULL;
+    commBuff = NULL;
+    initCommMap = true;
 #endif
-
 }
 
 
 NodalRecoveryModel :: ~NodalRecoveryModel()
 {
-  //printf ("NodalRecoveryModel::~NodalRecoveryModel()\n");
+    //printf ("NodalRecoveryModel::~NodalRecoveryModel()\n");
 #ifdef __PARALLEL_MODE
-  delete communicator;
-  delete commBuff;
+    delete communicator;
+    delete commBuff;
 #endif
 }
 
@@ -81,7 +79,7 @@ NodalRecoveryModel :: clear()
     FloatArray *valArray;
 
     if ( nnodes ) {
-        TDictionaryIterator< int, FloatArray > iterator( this->nodalValList.at(1) );
+        TDictionaryIterator< int, FloatArray >iterator( this->nodalValList.at(1) );
         for ( i = 1; i <= nnodes; i++ ) {
             // this->nodalValList->at(i)->clear();
             iterator.initialize( this->nodalValList.at(i) );
@@ -266,7 +264,7 @@ NodalRecoveryModel :: giveRegionRecordMap(IntArray &answer, int reg, InternalSta
     //Element* element;
 
     for ( ielem = 1; ielem <= nelem; ielem++ ) {
-      if ( (reg<0) || domain->giveElement(ielem)->giveRegionNumber() == reg ) {
+        if ( ( reg < 0 ) || domain->giveElement(ielem)->giveRegionNumber() == reg ) {
             domain->giveElement(ielem)->giveIntVarCompFullIndx(answer, type);
             return;
         }
@@ -275,5 +273,4 @@ NodalRecoveryModel :: giveRegionRecordMap(IntArray &answer, int reg, InternalSta
     OOFEM_WARNING2("NodalRecoveryModel::giveRegionRecordMap: bad region number (%d) or no element in given region\n", reg);
     answer.resize(0);
 }
-
 } // end namespace oofem

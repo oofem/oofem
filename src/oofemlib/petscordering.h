@@ -38,15 +38,14 @@
 
 #ifdef __PARALLEL_MODE
 
-#include "appordering.h"
-#include "intarray.h"
-#include "dofmanager.h"
-#ifndef __MAKEDEPEND
-#include <map>
-#endif
+ #include "appordering.h"
+ #include "intarray.h"
+ #include "dofmanager.h"
+ #ifndef __MAKEDEPEND
+  #include <map>
+ #endif
 
 namespace oofem {
-
 class PetscOrdering_Base : public ApplicationOrdering
 {
 protected:
@@ -113,7 +112,6 @@ public:
 
     IntArray *giveN2Lmap() { return & n2l; }
 };
-
 } // end namespace oofem
 #endif
 #endif // petscordering_h

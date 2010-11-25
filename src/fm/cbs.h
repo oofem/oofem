@@ -48,11 +48,10 @@
 #include "materialinterface.h"
 //</RESTRICTED_SECTION>
 #ifndef __MAKEDEPEND
-#include <stdio.h>
+ #include <stdio.h>
 #endif
 
 namespace oofem {
-
 /**
  * This class represents CBS algorithm for solving incompressible Navier-Stokes equations
  */
@@ -192,6 +191,5 @@ protected:
     void applyIC(TimeStep *);
     void assembleAlgorithmicPartOfRhs(FloatArray &rhs, EquationID ut, TimeStep *tStep, int nite);
 };
-
 } // end namespace oofem
 #endif // cbs_h

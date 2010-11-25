@@ -42,7 +42,6 @@
 #include "enumitem.h"
 
 namespace oofem {
-
 /**
  * Type representing kind of characteristic value (of scalar, verot or tensorial character) or
  * unknown, which is required, requested, returned, or passed to/from various general services.
@@ -131,7 +130,6 @@ enum CharType {
 #undef enumitem_h
 
 
-const char * __CharTypeToString(CharType _value);
-
+const char *__CharTypeToString(CharType _value);
 } // end namespace oofem
 #endif // chartype_h

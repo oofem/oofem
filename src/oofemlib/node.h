@@ -51,11 +51,10 @@
 #include "domain.h"
 
 #ifndef __MAKEDEPEND
-#include <stdio.h>
+ #include <stdio.h>
 #endif
 
 namespace oofem {
-
 class Dof;
 class NodalLoad;
 class TimeStep;
@@ -131,7 +130,7 @@ public:
     /// Returns pointer to node coordinate array.
     FloatArray *giveCoordinates() { return & coordinates; }
     /// Sets node coordinates to given array
-    void        setCoordinates (const FloatArray& _coords) {this->coordinates = _coords;}
+    void        setCoordinates(const FloatArray &_coords) { this->coordinates = _coords; }
     /**
      * Returns updated ic-th coordinate of receiver. Return value is computed
      * as coordinate + scale * displacement, where corresponding displacement is obtained
@@ -252,6 +251,5 @@ public:
     void         drawYourself(oofegGraphicContext &);
 #endif
 };
-
 } // end namespace oofem
 #endif // node_h

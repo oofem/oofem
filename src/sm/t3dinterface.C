@@ -40,17 +40,19 @@
 #include "element.h"
 #include "engngm.h"
 #ifndef __MAKEDEPEND
-#include <stdio.h>
+ #include <stdio.h>
 #endif
 
 namespace oofem {
-
-MesherInterface::returnCode
-T3DInterface :: createMesh(TimeStep *stepN, int domainNumber, int domainSerNum, Domain** dNew)
+MesherInterface :: returnCode
+T3DInterface :: createMesh(TimeStep *stepN, int domainNumber, int domainSerNum, Domain **dNew)
 {
-  *dNew = NULL;
-  if (this->createInput(this->domain, stepN)) return MI_NEEDS_EXTERNAL_ACTION;
-  else return MI_FAILED;
+    * dNew = NULL;
+    if ( this->createInput(this->domain, stepN) ) {
+        return MI_NEEDS_EXTERNAL_ACTION;
+    } else {
+        return MI_FAILED;
+    }
 }
 
 int
@@ -70,8 +72,8 @@ T3DInterface :: createInput(Domain *d, TimeStep *stepN) {
     for ( i = 1; i <= nelem; i++ ) {
         ielem = d->giveElement(i);
         switch ( ielem->giveGeometryType() ) {
-	case EGT_point:
-   	    break;
+        case EGT_point:
+            break;
         case EGT_line_1:
         case EGT_line_2:
             edges++;
@@ -85,7 +87,7 @@ T3DInterface :: createInput(Domain *d, TimeStep *stepN) {
             quads++;
             break;
         case EGT_tetra_1:
-	case EGT_tetra_2:
+        case EGT_tetra_2:
             tetras++;
             break;
         case EGT_hexa_1:
@@ -93,7 +95,7 @@ T3DInterface :: createInput(Domain *d, TimeStep *stepN) {
             hexas++;
             break;
         case EGT_unknown:
-	case EGT_Composite:
+        case EGT_Composite:
             OOFEM_ERROR2( "T3DInterface::createInput unknown element type (%s)",
                          __Element_Geometry_TypeToString( ielem->giveGeometryType() ) );
         }
@@ -111,8 +113,8 @@ T3DInterface :: createInput(Domain *d, TimeStep *stepN) {
     for ( i = 1; i <= nelem; i++ ) {
         ielem = d->giveElement(i);
         switch ( ielem->giveGeometryType() ) {
-	case EGT_point:
-	    break;
+        case EGT_point:
+            break;
         case EGT_line_1:
         case EGT_line_2:
             edgeIdArray.at(++edges) = i;
@@ -126,7 +128,7 @@ T3DInterface :: createInput(Domain *d, TimeStep *stepN) {
             quadIdArray.at(++quads) = i;
             break;
         case EGT_tetra_1:
-	case EGT_tetra_2:
+        case EGT_tetra_2:
             tetraIdArray.at(++tetras) = i;
             break;
         case EGT_hexa_1:
@@ -134,7 +136,7 @@ T3DInterface :: createInput(Domain *d, TimeStep *stepN) {
             hexaIdArray.at(++hexas) = i;
             break;
         case EGT_unknown:
-	case EGT_Composite:
+        case EGT_Composite:
             break;
         }
     }
@@ -154,7 +156,7 @@ T3DInterface :: createInput(Domain *d, TimeStep *stepN) {
     if ( tri_tetra == true ) {
         fprintf(outputStrem, "3 1\n");
         fprintf(outputStrem, "%d %d %d %d\n", nnodes, edges, trias, tetras);
-    } else   {
+    } else {
         fprintf(outputStrem, "7 1\n");
         fprintf(outputStrem, "%d %d %d %d %d %d %d %d\n", nnodes, edges, trias, quads, tetras, pyrams, wedges, hexas);
     }
@@ -259,5 +261,4 @@ T3DInterface :: createInput(Domain *d, TimeStep *stepN) {
     OOFEM_LOG_INFO("t3d.bmf file created\n");
     return 1;
 }
-
 } // end namespace oofem

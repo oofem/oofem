@@ -40,8 +40,6 @@
 #define commbufftype_h
 
 namespace oofem {
-
 enum CommBuffType { CBT_static, CBT_dynamic };
-
 } // end namespace oofem
 #endif // commbufftype_h

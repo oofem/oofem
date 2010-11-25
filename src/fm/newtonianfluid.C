@@ -43,11 +43,10 @@
 #include "gausspnt.h"
 #include "engngm.h"
 #ifndef __MAKEDEPEND
-#include <stdlib.h>
+ #include <stdlib.h>
 #endif
 
 namespace oofem {
-
 int
 NewtonianFluidMaterial :: hasMaterialModeCapability(MaterialMode mode)
 //
@@ -97,17 +96,17 @@ NewtonianFluidMaterial :: giveCharacteristicValue(MatResponseMode mode,
                                                   TimeStep *atTime)
 {
     if ( mode == MRM_Density ) {
-      return this->give('d',gp);
-    } else if ( mode == MRM_Viscosity )  {
+        return this->give('d', gp);
+    } else if ( mode == MRM_Viscosity ) {
         return this->viscosity;
-    } else                                                              {
+    } else {
         return FluidDynamicMaterial :: giveCharacteristicValue(mode, gp, atTime);
     }
 }
 
 
 double
-NewtonianFluidMaterial :: give(int aProperty, GaussPoint* gp)
+NewtonianFluidMaterial :: give(int aProperty, GaussPoint *gp)
 //
 // Returns the value of the property aProperty (e.g. the Young's modulus
 // 'E') of the receiver.
@@ -116,7 +115,7 @@ NewtonianFluidMaterial :: give(int aProperty, GaussPoint* gp)
     if ( ( aProperty == Viscosity ) ) {
         return viscosity;
     } else {
-      return FluidDynamicMaterial :: give(aProperty,gp);
+        return FluidDynamicMaterial :: give(aProperty, gp);
     }
 }
 
@@ -214,7 +213,7 @@ NewtonianFluidMaterial :: giveDeviatoricStiffnessMatrix(FloatMatrix &answer, Mat
         answer.at(3, 1) = answer.at(3, 2) = -2.0 * viscosity * ( 1. / 3. );
 
         answer.at(4, 4) = answer.at(5, 5) = answer.at(6, 6) = viscosity;
-    } else   {
+    } else {
         _error("giveDeviatoricStiffnessMatrix: unsupportted material mode");
     }
 }
@@ -233,5 +232,4 @@ NewtonianFluidMaterial :: checkConsistency()
 
     return 1;
 }
-
 } // end namespace oofem

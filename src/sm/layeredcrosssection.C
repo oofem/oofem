@@ -47,7 +47,6 @@
 #include "contextioerr.h"
 
 namespace oofem {
-
 void
 LayeredCrossSection ::  giveRealStresses(FloatArray &answer, MatResponseForm form,
                                          GaussPoint *gp,
@@ -836,13 +835,13 @@ LayeredCrossSection :: giveStressStrainMask(IntArray &answer, MatResponseForm fo
                 answer.at(2) = 5;
                 answer.at(3) = 7;
                 break;
-                /*   case _3dRotContinuum:
-                 * indx = new IntArray (4);
-                 * indx->at(1) = 1;
-                 * indx->at(2) = 2;
-                 * indx->at(3) = 3;
-                 * indx->at(4) = 6;
-                 * break;*/
+            /*   case _3dRotContinuum:
+             * indx = new IntArray (4);
+             * indx->at(1) = 1;
+             * indx->at(2) = 2;
+             * indx->at(3) = 3;
+             * indx->at(4) = 6;
+             * break;*/
             case _3dShell:
                 //indx = new IntArray (8);
                 answer.resize(8);
@@ -874,13 +873,13 @@ LayeredCrossSection :: giveStressStrainMask(IntArray &answer, MatResponseForm fo
                 answer.at(5) = 2;
                 answer.at(7) = 3;
                 break;
-                /*   case _3dRotContinuum:
-                 * indx = new IntArray (6);
-                 * indx->at(1) = 1;
-                 * indx->at(2) = 2;
-                 * indx->at(3) = 3;
-                 * indx->at(6) = 4;
-                 * break;*/
+            /*   case _3dRotContinuum:
+             * indx = new IntArray (6);
+             * indx->at(1) = 1;
+             * indx->at(2) = 2;
+             * indx->at(3) = 3;
+             * indx->at(6) = 4;
+             * break;*/
             case _3dShell:
                 //indx = new IntArray (8);
                 answer.resize(8);
@@ -963,9 +962,16 @@ LayeredCrossSection :: giveSlaveGaussPoint(GaussPoint *masterGp, int i)
         for ( int j = 0; j < numberOfLayers; j++ ) {
             currentZTopCoord += this->layerThicks.at(j + 1);
             currentZCoord = currentZTopCoord - this->layerThicks.at(j + 1) / 2.0;
-            zCoord = new FloatArray(3);zCoord->zero();
-            if (masterCoords->giveSize() > 0) zCoord->at(1) = masterCoords->at(1);
-            if (masterCoords->giveSize() > 1) zCoord->at(2) = masterCoords->at(2);
+            zCoord = new FloatArray(3);
+            zCoord->zero();
+            if ( masterCoords->giveSize() > 0 ) {
+                zCoord->at(1) = masterCoords->at(1);
+            }
+
+            if ( masterCoords->giveSize() > 1 ) {
+                zCoord->at(2) = masterCoords->at(2);
+            }
+
             zCoord->at(3) = ( 2.0 * ( currentZCoord ) - top - bottom ) / ( top - bottom );
             // in gp - is stored isoparametric coordinate (-1,1) of z-coordinate
             masterGp->gaussPointArray [ j ] = new GaussPoint(masterGp->giveIntegrationRule(), j + 1, zCoord, 0., slaveMode);
@@ -1177,17 +1183,15 @@ LayeredCrossSection :: give(CrossSectionProperty aProperty)
 {
     if ( aProperty == CS_Thickness ) {
         return this->computeIntegralThick();
-    }
-    else if ( aProperty == CS_TopZCoord ) {
+    } else if ( aProperty == CS_TopZCoord )   {
         this->computeIntegralThick();
         return totalThick - midSurfaceZcoordFromBottom;
-    }
-    else if ( aProperty == CS_BottomZCoord ) {
+    } else if ( aProperty == CS_BottomZCoord )   {
         return -midSurfaceZcoordFromBottom;
-    }
-    else if ( aProperty == CS_Area ) {
+    } else if ( aProperty == CS_Area )   {
         return this->giveArea();
     }
+
     return CrossSection :: give(aProperty);
 }
 
@@ -1233,5 +1237,4 @@ LayeredCrossSection :: computeStressIndependentStrainVector(FloatArray &answer,
         _error("computeStressIndependentStrainVector: temperature loading not supported");
     }
 }
-
 } // end namespace oofem

@@ -53,7 +53,6 @@
 #include "levelsetpcs.h"
 
 namespace oofem {
-
 class TimeStep;
 class Node;
 class Material;
@@ -69,12 +68,12 @@ class IntArray;
  *
  */
 
- class TR21_2D_SUPG : public SUPGElement2, public LevelSetPCSElementInterface, public ZZNodalRecoveryModelInterface, public NodalAveragingRecoveryModelInterface
+class TR21_2D_SUPG : public SUPGElement2, public LevelSetPCSElementInterface, public ZZNodalRecoveryModelInterface, public NodalAveragingRecoveryModelInterface
 {
 protected:
-  static FEI2dTrQuad velocityInterpolation;
-  static FEI2dTrLin pressureInterpolation;
-  IntArray pressureDofManArray;
+    static FEI2dTrQuad velocityInterpolation;
+    static FEI2dTrLin pressureInterpolation;
+    IntArray pressureDofManArray;
 
 
 
@@ -96,7 +95,7 @@ public:
      * Computes the element local coordinates from given global coordinates.
      * @returns nonzero if successful (if point is inside element); zero otherwise
      */
-   
+
 
     // definition
     const char *giveClassName() const { return "TR21_2D_SUPG"; }
@@ -123,12 +122,12 @@ public:
     contextIOResultType   restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 
 
-      
+
 
     /**
      * @name The element interface required by LevelSetPCSElementInterface
      */
-    
+
     /** Evaluetes F in level set equation of the form
      *  fi_t+F(grad(fi), x)*norm(grad(fi)) = 0
      *  where for interface position driven by flow with speed u:
@@ -157,7 +156,7 @@ public:
      */
     virtual void LS_PCS_computeVOFFractions(FloatArray &answer, FloatArray &fi);
 
-    
+
     //@}
     /**
      * @name The element interface required by ZZNodalRecoveryModel
@@ -218,7 +217,7 @@ public:
 
 
 
-    /*another helping functions for computing VOFFractions*/ 
+    /*another helping functions for computing VOFFractions*/
 
     void computeIntersection(int iedge, FloatArray &intcoords, FloatArray &fi);
 
@@ -227,14 +226,14 @@ public:
     void computeCenterOf(FloatArray &C, FloatArray c, int dim);
 
     void computeQuadraticRoots(FloatArray Coeff, double &r1, double &r2);
-    
+
     void computeCoordsOfEdge(FloatArray &answer, int iedge);
 
     void computeQuadraticFunct(FloatArray &answer, int iedge);
 
     void computeQuadraticFunct(FloatArray &answer, FloatArray line);
 
-      /**
+    /**
      * Returns the integration point corresponding value in REDUCED form.
      * @param answer contain corresponding ip value, zero sized if not available.
      * @param aGaussPoint integration point
@@ -261,26 +260,26 @@ public:
     /** Prints output of receiver to stream, for given time step */
     virtual void   printOutputAt(FILE *, TimeStep *);
     double computeCriticalTimeStep(TimeStep *tStep);
-    
+
     // three terms for computing their norms due to computing t_supg
     virtual void computeAdvectionTerm(FloatMatrix &answer, TimeStep *atTime);
-    
+
     virtual void computeAdvectionDeltaTerm(FloatMatrix &answer, TimeStep *atTime);
 
     virtual void computeMassDeltaTerm(FloatMatrix &answer, TimeStep *atTime);
     virtual void computeLSICTerm(FloatMatrix &answer, TimeStep *atTime);
 
-  
+
 
     /** Interface requesting service */
     Interface *giveInterface(InterfaceType);
 
 
- protected:
-   
-  
+protected:
+
+
     virtual void computeDeviatoricStress(FloatArray &answer, GaussPoint *gp, TimeStep *);
-   
+
     void                  computeGaussPoints();
     virtual void computeNuMatrix(FloatMatrix &answer, GaussPoint *gp);
     virtual void computeUDotGradUMatrix(FloatMatrix &answer, GaussPoint *gp, TimeStep *atTime);
@@ -294,12 +293,11 @@ public:
     double  computeVolumeAround(GaussPoint *aGaussPoint);
     virtual void initGeometry();
 
-    
-  
+
+
     virtual void updateStabilizationCoeffs(TimeStep *);
 
     virtual int giveTermIntergationRuleIndex(CharType termType);
 };
-
 } // end namespace oofem
 #endif // tr21_2d_supg_h

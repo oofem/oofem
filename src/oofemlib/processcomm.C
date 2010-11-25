@@ -43,13 +43,12 @@
 #include "dyncombuff.h"
 
 #ifdef __USE_MPI
-#ifndef __MAKEDEPEND
-#include "mpi.h"
-#endif
+ #ifndef __MAKEDEPEND
+  #include "mpi.h"
+ #endif
 #endif
 
 namespace oofem {
-
 ProcessCommunicatorBuff :: ProcessCommunicatorBuff(CommBuffType t)
 {
     if ( t == CBT_static ) {
@@ -115,7 +114,7 @@ ProcessCommunicator :: initExchange(int tag)
 int
 ProcessCommunicator :: finishExchange()
 {
-  return waitCompletion();
+    return waitCompletion();
 }
 
 void
@@ -125,34 +124,39 @@ ProcessCommunicator :: clearBuffers()
 }
 
 int
-ProcessCommunicator :: sendCompleted() 
-{ 
-  if ( !toSend.isEmpty() || ( this->mode == CommMode_Dynamic ) ) {
-    return giveProcessCommunicatorBuff()->sendCompleted(); 
-  } else return 1;
-}
-
-int 
-ProcessCommunicator :: receiveCompleted() 
-{ 
-  if ( !toReceive.isEmpty() || ( this->mode == CommMode_Dynamic ) ) {
-    return giveProcessCommunicatorBuff()->receiveCompleted(); 
-  } else return 1;
-}
-
-int 
-ProcessCommunicator :: testCompletion () 
+ProcessCommunicator :: sendCompleted()
 {
-  return (sendCompleted() && receiveCompleted());
+    if ( !toSend.isEmpty() || ( this->mode == CommMode_Dynamic ) ) {
+        return giveProcessCommunicatorBuff()->sendCompleted();
+    } else {
+        return 1;
+    }
 }
 
-int 
-ProcessCommunicator :: waitCompletion () 
+int
+ProcessCommunicator :: receiveCompleted()
 {
-  while (!testCompletion());
-  return 1;
+    if ( !toReceive.isEmpty() || ( this->mode == CommMode_Dynamic ) ) {
+        return giveProcessCommunicatorBuff()->receiveCompleted();
+    } else {
+        return 1;
+    }
 }
 
+int
+ProcessCommunicator :: testCompletion()
+{
+    return ( sendCompleted() && receiveCompleted() );
+}
 
+int
+ProcessCommunicator :: waitCompletion()
+{
+    while ( !testCompletion() ) {
+        ;
+    }
+
+    return 1;
+}
 } // end namespace oofem
 #endif

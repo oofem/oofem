@@ -47,13 +47,12 @@
 #include "interface.h"
 #include "logger.h"
 #ifndef __MAKEDEPEND
-#include <stdio.h>
-#include <set>
-#include <list>
+ #include <stdio.h>
+ #include <set>
+ #include <list>
 #endif
 
 namespace oofem {
-
 class Domain;
 class Element;
 class TimeStep;
@@ -76,8 +75,10 @@ public:
     int SpatialLocalizerI_BBoxContainsPoint(const FloatArray &coords);
     /// Returns distance of given point from element parametric center
     virtual double SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords)
-    { OOFEM_ERROR("SpatialLocalizerI_giveDistanceFromParametricCenter: not implemented");
-      return 0.0; }
+    {
+        OOFEM_ERROR("SpatialLocalizerI_giveDistanceFromParametricCenter: not implemented");
+        return 0.0;
+    }
 };
 
 
@@ -96,11 +97,11 @@ public:
     /**
      * Typedefs to introduce the container type for element numbers, returned by some services
      */
-    typedef std :: set< int > elementContainerType;
+    typedef std :: set< int >elementContainerType;
     /**
      * Typedefs to introduce the container type for nodal numbers, returned by some services
      */
-    typedef std :: list< int > nodeContainerType;
+    typedef std :: list< int >nodeContainerType;
 
 
     /// Constructor
@@ -163,7 +164,7 @@ public:
      * If force is set to true, the initialization is enforced (useful if domain geometry has changed)
      * Returns nonzero if successful.
      */
-    virtual int init(bool force = false) {return 1;} 
+    virtual int init(bool force = false) { return 1; }
 
     /** Initializes receiver acording to object description stored in input record.
      * This function is called immediately after creating object using
@@ -181,6 +182,5 @@ public:
 
 protected:
 };
-
 } // end namespace oofem
 #endif // spatiallocalizer_h

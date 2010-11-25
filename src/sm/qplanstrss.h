@@ -46,7 +46,6 @@
 #include "mathfem.h"
 
 namespace oofem {
-
 class QPlaneStress2d : public StructuralElement, public ZZNodalRecoveryModelInterface
 {
     /*
@@ -125,14 +124,12 @@ public:
     //      void          drawInternalState (DrawMode mode);
 #endif
     integrationDomain  giveIntegrationDomain() { return _Square; }
-    MaterialMode          giveMaterialMode()  {return _PlaneStress;}
+    MaterialMode          giveMaterialMode()  { return _PlaneStress; }
 
 protected:
     void             computeBmatrixAt(GaussPoint *, FloatMatrix &, int = 1, int = ALL_STRAINS);
     void             computeNmatrixAt(GaussPoint *, FloatMatrix &);
     void             computeGaussPoints();
-
 };
-
 } // end namespace oofem
 #endif // qplanstrss_h

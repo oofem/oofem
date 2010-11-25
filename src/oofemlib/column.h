@@ -47,7 +47,6 @@ class FloatMatrix;
 class Skyline;
 
 namespace oofem {
-
 class Column : public FloatArray
 {
     /*
@@ -68,8 +67,10 @@ private:
 
 public:
     Column(int n, int size, Skyline *m) : FloatArray(size)
-    { number = n;
-      matrix = m; }
+    {
+        number = n;
+        matrix = m;
+    }
     ~Column() { }
 #ifdef DEBUG
     double &at(int i);
@@ -88,6 +89,5 @@ protected:
     void     checkSizeTowards(const IntArray &i) { FloatArray :: checkSizeTowards(i); }
     void     resize(int i) { FloatArray :: resize(i); }
 };
-
 } // end namespace oofem
 #endif // column_h

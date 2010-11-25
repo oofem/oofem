@@ -41,13 +41,12 @@
 #define initmodule_h
 
 #ifndef __MAKEDEPEND
-#include <stdio.h>
-#include <string.h>
+ #include <stdio.h>
+ #include <string.h>
 #endif
 #include "inputrecord.h"
 
 namespace oofem {
-
 class EngngModel;
 class TimeStep;
 
@@ -67,10 +66,10 @@ protected:
     /// Problem pointer
     EngngModel *emodel;
     /// Initialization file
-    FILE* initStream;
+    FILE *initStream;
 public:
 
-    /// Constructor. Creates empty Init Module. 
+    /// Constructor. Creates empty Init Module.
     InitModule(EngngModel *e);
     /// Destructor
     virtual ~InitModule();
@@ -85,7 +84,6 @@ public:
 
 protected:
 };
-
 } // end namespace oofem
 #endif // initmodule_h
 

@@ -79,12 +79,10 @@ extern "C" {
 // not declared in any *.h Elixir file
 
 extern "C" {
-    void EVFastRedraw(EView * v_p);
+void EVFastRedraw(EView *v_p);
 };
 
 namespace oofem {
-
-
 // width definition variables
  #define OOFEG_RAW_GEOMETRY_WIDTH 0
  #define OOFEG_DEFORMED_GEOMETRY_WIDTH 0
@@ -319,7 +317,7 @@ protected:
 } // end namespace oofem
 
 /* these reside in global name space */
-extern oofem::oofegGraphicContext gc [ OOFEG_LAST_LAYER ];
+extern oofem :: oofegGraphicContext gc [ OOFEG_LAST_LAYER ];
 extern EView *myview;
 extern void deleteLayerGraphics(int iLayer);
 

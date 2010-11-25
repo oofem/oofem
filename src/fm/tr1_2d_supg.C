@@ -52,18 +52,17 @@
 
 #include "materialinterface.h"
 #ifndef __MAKEDEPEND
-#include <math.h>
-#include <stdio.h>
+ #include <math.h>
+ #include <stdio.h>
 #endif
 #include "contextioerr.h"
 
 #ifdef __OOFEG
-#include "oofeggraphiccontext.h"
-#include "conTable.h"
+ #include "oofeggraphiccontext.h"
+ #include "conTable.h"
 #endif
 
 namespace oofem {
-
 #define TRSUPG_ZERO_VOF 1.e-8
 
 
@@ -85,9 +84,9 @@ TR1_2D_SUPG :: computeNumberOfDofs(EquationID ut)
 {
     if ( ut == EID_MomentumBalance ) {
         return 2;
-    } else if ( ut == EID_ConservationEquation )  {
+    } else if ( ut == EID_ConservationEquation ) {
         return 1;
-    } else                                                         {
+    } else {
         _error("computeNumberOfDofs: Unknown equation id encountered");
     }
 
@@ -153,12 +152,12 @@ void
 TR1_2D_SUPG :: computeGaussPoints()
 // Sets up the array containing the four Gauss points of the receiver.
 {
-  if (!integrationRulesArray) {
-    numberOfIntegrationRules = 1;
-    integrationRulesArray = new IntegrationRule * [ 1 ];
-    integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3);
-    integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Triangle, 1, _2dFlow);
-  }
+    if ( !integrationRulesArray ) {
+        numberOfIntegrationRules = 1;
+        integrationRulesArray = new IntegrationRule * [ 1 ];
+        integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3);
+        integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Triangle, 1, _2dFlow);
+    }
 }
 
 
@@ -1092,10 +1091,10 @@ TR1_2D_SUPG :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lc
     l3 = 1.0 - l1 - l2;
 
     answer.resize(2);
-    answer.at(1) = l1 * this->giveNode(1)->giveCoordinate(1) + l2 * this->giveNode(2)->giveCoordinate(1) +
-    l3 * this->giveNode(3)->giveCoordinate(1);
-    answer.at(2) = l1 * this->giveNode(1)->giveCoordinate(2) + l2 * this->giveNode(2)->giveCoordinate(2) +
-    l3 * this->giveNode(3)->giveCoordinate(2);
+    answer.at(1) = l1 * this->giveNode(1)->giveCoordinate(1) + l2 *this->giveNode(2)->giveCoordinate(1) +
+                   l3 *this->giveNode(3)->giveCoordinate(1);
+    answer.at(2) = l1 * this->giveNode(1)->giveCoordinate(2) + l2 *this->giveNode(2)->giveCoordinate(2) +
+                   l3 *this->giveNode(3)->giveCoordinate(2);
 
     return 1;
 }
@@ -1105,17 +1104,17 @@ TR1_2D_SUPG :: giveInterface(InterfaceType interface)
 {
     if ( interface == ZZNodalRecoveryModelInterfaceType ) {
         return ( ZZNodalRecoveryModelInterface * ) this;
-    } else if ( interface == NodalAveragingRecoveryModelInterfaceType )  {
+    } else if ( interface == NodalAveragingRecoveryModelInterfaceType ) {
         return ( NodalAveragingRecoveryModelInterface * ) this;
-    } else if ( interface == SPRNodalRecoveryModelInterfaceType )  {
+    } else if ( interface == SPRNodalRecoveryModelInterfaceType ) {
         return ( SPRNodalRecoveryModelInterface * ) this;
-    } else if ( interface == SpatialLocalizerInterfaceType )  {
+    } else if ( interface == SpatialLocalizerInterfaceType ) {
         return ( SpatialLocalizerInterface * ) this;
-    } else if ( interface == EIPrimaryFieldInterfaceType )  {
+    } else if ( interface == EIPrimaryFieldInterfaceType ) {
         return ( EIPrimaryFieldInterface * ) this;
-    } else if ( interface == LEPlicElementInterfaceType )  {
+    } else if ( interface == LEPlicElementInterfaceType ) {
         return ( LEPlicElementInterface * ) this;
-    } else if ( interface == LevelSetPCSElementInterfaceType )  {
+    } else if ( interface == LevelSetPCSElementInterfaceType ) {
         return ( LevelSetPCSElementInterface * ) this;
     }
 
@@ -1145,7 +1144,7 @@ TR1_2D_SUPG :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArr
 
     if ( size == gsize ) {
         dist = coords.distance(gcoords);
-    } else   {
+    } else {
         FloatArray helpCoords = coords;
 
         helpCoords.resize(gsize);
@@ -1463,7 +1462,7 @@ TR1_2D_SUPG :: truncateMatVolume(const Polygon &matvolpoly, double &volume)
     this->formMyVolumePoly(me, NULL, false);
     g.clip(clip, me, matvolpoly);
 #ifdef __OOFEG
-    EASValsSetColor(gc [ 0 ].getActiveCrackColor() );
+    EASValsSetColor( gc [ 0 ].getActiveCrackColor() );
     //GraphicObj *go = clip.draw(::gc[OOFEG_DEBUG_LAYER],true);
     clip.draw(gc [ OOFEG_DEBUG_LAYER ], true);
     //EVFastRedraw(myview);
@@ -2024,8 +2023,11 @@ TR1_2D_SUPG :: LS_PCS_computeVOFFractions(FloatArray &answer, FloatArray &fi)
             if ( fabs(__area) / area > 1.00001 ) {
                 OOFEM_ERROR("TR1_2D_SUPG::LS_PCS_computeVOFFractions: internal consistency error");
             }
-	    // prevent some roundoff errors
-	    if ( fabs(__area) > area ) __area = sgn(__area)*area;
+
+            // prevent some roundoff errors
+            if ( fabs(__area) > area ) {
+                __area = sgn(__area) * area;
+            }
 
             if ( pos > neg ) {
                 // negative area computed

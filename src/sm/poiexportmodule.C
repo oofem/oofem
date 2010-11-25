@@ -48,7 +48,6 @@
 #include "oofem_limits.h"
 
 namespace oofem {
-
 POIExportModule :: POIExportModule(EngngModel *e) : ExportModule(e), internalVarsToExport(), primaryVarsToExport(), POIList()
 {
     mapper = NULL;
@@ -267,7 +266,7 @@ POIExportModule :: exportPrimVarAs(UnknownType valID, FILE *stream, TimeStep *tS
 
     if ( valID == DisplacementVector ) {
         type = ISVT_VECTOR;
-    } else if ( valID == FluxVector )  {
+    } else if ( valID == FluxVector ) {
         type = ISVT_SCALAR;
     } else {
         OOFEM_ERROR("POIExportModule::exportPrimVarAs: unsupported UnknownType");
@@ -276,7 +275,7 @@ POIExportModule :: exportPrimVarAs(UnknownType valID, FILE *stream, TimeStep *tS
     // print header
     if ( type == ISVT_SCALAR ) {
         fprintf(stream, "SCALARS prim_scalar_%d\n", ( int ) valID);
-    } else if ( type == ISVT_VECTOR )  {
+    } else if ( type == ISVT_VECTOR ) {
         fprintf(stream, "VECTORS vector_%d float\n", ( int ) valID);
     } else {
         fprintf(stderr, "POIExportModule::exportPrimVarAs: unsupported variable type\n");
@@ -319,5 +318,4 @@ POIExportModule :: exportPrimVarAs(UnknownType valID, FILE *stream, TimeStep *tS
         }
     }
 }
-
 } // end namespace oofem

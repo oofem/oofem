@@ -11,7 +11,6 @@
 #include "structuralcrosssection.h"
 
 namespace oofem {
-
 Interface *
 PlaneStress2dXfem :: giveInterface(InterfaceType interface) {
     if ( interface != XfemElementInterfaceType ) {
@@ -102,7 +101,7 @@ void PlaneStress2dXfem :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer,
     int columns = 1;
     for ( int i = 1; i <= additionals.giveSize(); i++ ) {
         for ( int j = 1; j <= additionals.at(i)->giveNumberOfColumns(); j++ ) {
-            for ( int k = 1;  k <= 3; k++ ) {
+            for ( int k = 1; k <= 3; k++ ) {
                 answer.at(k, columns) = additionals.at(i)->at(k, j);
             }
 
@@ -114,10 +113,10 @@ void PlaneStress2dXfem :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer,
 void PlaneStress2dXfem :: giveLocationArray(IntArray &locationArray, EquationID, const UnknownNumberingScheme &s) const {
     IntArray interactedEI;
     XfemManager *xf = this->giveDomain()->giveEngngModel()->giveXfemManager(1);
-    xf->getInteractedEI( interactedEI, const_cast< PlaneStress2dXfem * >( this ) );
+    xf->getInteractedEI( interactedEI, const_cast< PlaneStress2dXfem * >(this) );
 
     // for all enrichment items which element interacts
-    for ( int i = 1; i <= ( const_cast< PlaneStress2dXfem * >( this ) )->giveNumberOfDofManagers(); i++ ) {
+    for ( int i = 1; i <= ( const_cast< PlaneStress2dXfem * >(this) )->giveNumberOfDofManagers(); i++ ) {
         DofManager *dm = this->giveDomain()->giveDofManager( dofManArray.at(i) );
         for ( int j = 1; j <= xf->giveNumberOfEnrichmentItems(); j++ ) {
             EnrichmentItem *er = xf->giveEnrichmentItem(j);
@@ -139,8 +138,8 @@ void PlaneStress2dXfem :: giveLocationArray(IntArray &locationArray, EquationID,
     locationArray.resize(0);
     IntArray enriched;
     enriched.resize(0);
-    for ( int i = 1; i <= ( const_cast< PlaneStress2dXfem * >( this ) )->giveNumberOfDofManagers(); i++ ) {
-        DofManager *dm = ( const_cast< PlaneStress2dXfem * >( this ) )->giveDomain()->giveDofManager( dofManArray.at(i) );
+    for ( int i = 1; i <= ( const_cast< PlaneStress2dXfem * >(this) )->giveNumberOfDofManagers(); i++ ) {
+        DofManager *dm = ( const_cast< PlaneStress2dXfem * >(this) )->giveDomain()->giveDofManager( dofManArray.at(i) );
         for ( int j = 1; j <= dm->giveNumberOfDofs(); j++ ) {
             int eqN = dm->giveDof(j)->giveEquationNumber(s);
             if ( j <= 2 ) {
@@ -256,8 +255,8 @@ void PlaneStress2dXfem :: computeStiffnessMatrix(FloatMatrix &answer, MatRespons
 
 void
 PlaneStress2dXfem :: giveInternalForcesVector(FloatArray &answer,
-					      TimeStep *tStep, int useUpdatedGpRecord) {
-  this->giveInternalForcesVector_withIRulesAsSubcells(answer, tStep, useUpdatedGpRecord);
+                                              TimeStep *tStep, int useUpdatedGpRecord) {
+    this->giveInternalForcesVector_withIRulesAsSubcells(answer, tStep, useUpdatedGpRecord);
 }
 
 
@@ -285,7 +284,7 @@ void PlaneStress2dXfem :: drawRawGeometry(oofegGraphicContext &context)
             int i;
             PatchIntegrationRule *iRule;
             for ( i = 0; i < numberOfIntegrationRules; i++ ) {
-                iRule = dynamic_cast< PatchIntegrationRule * >( integrationRulesArray [ i ] );
+                iRule = dynamic_cast< PatchIntegrationRule * >(integrationRulesArray [ i ]);
                 if ( iRule ) {
                     iRule->givePatch()->draw(context);
                 }
@@ -321,7 +320,7 @@ void PlaneStress2dXfem :: drawScalar(oofegGraphicContext &context)
             TimeStep *tStep = this->giveDomain()->giveEngngModel()->giveCurrentStep();
             PatchIntegrationRule *iRule;
             for ( i = 0; i < numberOfIntegrationRules; i++ ) {
-                iRule = dynamic_cast< PatchIntegrationRule * >( integrationRulesArray [ i ] );
+                iRule = dynamic_cast< PatchIntegrationRule * >(integrationRulesArray [ i ]);
 
  #if 0
                 val = iRule->giveMaterial();
@@ -344,5 +343,4 @@ void PlaneStress2dXfem :: drawScalar(oofegGraphicContext &context)
     }
 }
 #endif
-
 } // end namespace oofem

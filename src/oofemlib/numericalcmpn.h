@@ -71,6 +71,5 @@ enum NumericalCmpn {
     IncrementOfNonlinearSolution,
     InternalState
 };
-
 } // end namespace oofem
 #endif // numericalcmpn_h

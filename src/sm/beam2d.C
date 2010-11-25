@@ -51,15 +51,14 @@
 #include "structuralmaterial.h"
 #include "mathfem.h"
 #ifndef __MAKEDEPEND
-#include <math.h>
+ #include <math.h>
 #endif
 
 #ifdef __OOFEG
-#include "oofeggraphiccontext.h"
+ #include "oofeggraphiccontext.h"
 #endif
 
 namespace oofem {
-
 Beam2d :: Beam2d(int n, Domain *aDomain) : StructuralElement(n, aDomain), LayeredCrossSectionInterface()
     // Constructor.
 {
@@ -125,15 +124,14 @@ Beam2d :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int li,
 void Beam2d :: computeGaussPoints()
 // Sets up the array of Gauss Points of the receiver.
 {
-  if (!integrationRulesArray) {
-    
-    // the gauss point is used only when methods from crosssection and/or material
-    // classes are requested
-    numberOfIntegrationRules = 1;
-    integrationRulesArray = new IntegrationRule * [ 1 ];
-    integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3);
-    integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Line, 3, _2dBeam);
-  }
+    if ( !integrationRulesArray ) {
+        // the gauss point is used only when methods from crosssection and/or material
+        // classes are requested
+        numberOfIntegrationRules = 1;
+        integrationRulesArray = new IntegrationRule * [ 1 ];
+        integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3);
+        integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Line, 3, _2dBeam);
+    }
 }
 
 
@@ -527,7 +525,7 @@ Beam2d :: computeEdgeLoadVectorAt(FloatArray &answer, Load *load, int iedge, Tim
     // evaluates the receivers edge load vector
     // for clamped beam
     //
-    BoundaryLoad *edgeLoad = dynamic_cast< BoundaryLoad * >( load );
+    BoundaryLoad *edgeLoad = dynamic_cast< BoundaryLoad * >(load);
     if ( edgeLoad ) {
         if ( edgeLoad->giveNumberOfDofs() != 3 ) {
             _error("computeEdgeLoadVectorAt: load number of dofs mismatch");
@@ -658,7 +656,7 @@ void Beam2d :: printOutputAt(FILE *File, TimeStep *stepN)
     if ( this->updateRotationMatrix() ) {
         rl.beProductOf(* this->rotationMatrix, rg);
         // delete rg;
-    } else   {
+    } else {
         rl = rg;
     }
 
@@ -719,8 +717,8 @@ Beam2d :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords
     n2  = ( 1. + ksi ) * 0.5;
 
     answer.resize(3);
-    answer.at(1) = n1 * this->giveNode(1)->giveCoordinate(1) + n2 * this->giveNode(2)->giveCoordinate(1);
-    answer.at(3) = n1 * this->giveNode(1)->giveCoordinate(3) + n2 * this->giveNode(2)->giveCoordinate(3);
+    answer.at(1) = n1 * this->giveNode(1)->giveCoordinate(1) + n2 *this->giveNode(2)->giveCoordinate(1);
+    answer.at(3) = n1 * this->giveNode(1)->giveCoordinate(3) + n2 *this->giveNode(2)->giveCoordinate(3);
 
     return 1;
 }
@@ -754,7 +752,7 @@ Beam2d :: computeConsistentMassMatrix(FloatMatrix &answer, TimeStep *tStep, doub
     // computes mass matrix of the receiver
 
     FloatMatrix stiff;
-    GaussPoint* gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
+    GaussPoint *gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
 
     /*
      * StructuralElement::computeMassMatrix(answer, tStep);
@@ -763,7 +761,7 @@ Beam2d :: computeConsistentMassMatrix(FloatMatrix &answer, TimeStep *tStep, doub
     double l = this->giveLength();
     double kappa = this->giveKappaCoeff();
     double kappa2 = kappa * kappa;
-    double density = this->giveMaterial()->give('d',gp);
+    double density = this->giveMaterial()->give('d', gp);
     double area = this->giveCrossSection()->give(CS_Area);
     double c2 = ( area * density ) / ( ( 1. + 2. * kappa ) * ( 1. + 2. * kappa ) );
     double c1 = ( area * density );

@@ -40,8 +40,6 @@
 #define varscaletype_h
 
 namespace oofem {
-
-
 /// type determining the scale corresponding to particular variable
 enum VarScaleType {
     VST_Length,
@@ -53,6 +51,5 @@ enum VarScaleType {
     VST_Viscosity,
     VST_ReynoldsNumber
 };
-
 } // end namespace oofem
 #endif // varscaletype_h

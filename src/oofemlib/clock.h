@@ -46,23 +46,23 @@
 
 #ifndef _MSC_VER // If no Microsoft C
 
-#ifndef __MAKEDEPEND
-#ifdef TIME_WITH_SYS_TIME
-# include <sys/time.h>
-# include <time.h>
-#else
-# ifdef HAVE_SYS_TIME_H
-#  include <sys/time.h>
-# else
-#  include <time.h>
-# endif
-#endif
-#endif
+ #ifndef __MAKEDEPEND
+  #ifdef TIME_WITH_SYS_TIME
+   # include <sys/time.h>
+   # include <time.h>
+  #else
+   # ifdef HAVE_SYS_TIME_H
+    #  include <sys/time.h>
+   # else
+    #  include <time.h>
+   # endif
+  #endif
+ #endif
 
 // for getrusage - user time reporting
-#ifndef __MAKEDEPEND
-#include <sys/resource.h>
-#endif
+ #ifndef __MAKEDEPEND
+  #include <sys/resource.h>
+ #endif
 
 /*
  * oofem timeval structure used to measure user time.
@@ -72,12 +72,12 @@
  *  __time_t tv_usec;           // Microseconds.
  * }
  */
-#define OOFEM_USEC_LIM 1000000
+ #define OOFEM_USEC_LIM 1000000
 
 #else // _MSC_VER active
-#ifndef __MAKEDEPEND
-#include <time.h>
-#endif
+ #ifndef __MAKEDEPEND
+  #include <time.h>
+ #endif
 
 //oofem timeval structure used to measure user time.
 struct timeval
@@ -86,12 +86,11 @@ struct timeval
     unsigned long tv_usec;         // Microseconds.
 };
 
-#define OOFEM_USEC_LIM 1
+ #define OOFEM_USEC_LIM 1
 
 #endif // end of _MSC_VER
 
 namespace oofem {
-
 typedef timeval oofem_timeval;
 
 /**
@@ -122,7 +121,6 @@ void getRelativeUtime(oofem_timeval &answer, oofem_timeval &from, oofem_timeval 
  */
 void convertTS2HMS(int &nhrs, int &nmin, int &nsec, long int tsec);
 void convertTS2HMS(int &nhrs, int &nmin, int &nsec, double tsec);
-
 } // end namespace oofem
 #endif // clock_h
 

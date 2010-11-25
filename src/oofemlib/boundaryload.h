@@ -45,7 +45,6 @@
 #include "dictionr.h"
 
 namespace oofem {
-
 class TimeStep;
 
 /**
@@ -168,8 +167,10 @@ public:
      * @param n load number
      * @param d domain to which new object will belongs.
      */
-    BoundaryLoad(int i, Domain *d) : Load(i, d) { nDofs = 0;
-                                                  coordSystemType = BL_GlobalMode; }                 // constructor
+    BoundaryLoad(int i, Domain *d) : Load(i, d) {
+        nDofs = 0;
+        coordSystemType = BL_GlobalMode;
+    }                                                                                                // constructor
 
     /**
      * Computes components values of load at given point - global coordinates (coordinates given).
@@ -249,7 +250,6 @@ protected:
      */
     void                 computeComponentArrayAt(FloatArray &answer, TimeStep *, ValueModeType mode);
 };
-
 } // end namespace oofem
 #endif // boundaryload_h
 

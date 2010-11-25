@@ -136,7 +136,7 @@ CCTPlate3d :: computeLocalCoordinates(FloatArray &answer, const FloatArray &coor
 {
     // rotate the input point Coordinate System into the element CS
     FloatArray inputCoords_ElCS;
-    this->giveLocalCoordinates( inputCoords_ElCS, const_cast< FloatArray & >( coords ) );
+    this->giveLocalCoordinates( inputCoords_ElCS, const_cast< FloatArray & >(coords) );
 
     return CCTPlate :: computeLocalCoordinates(answer, inputCoords_ElCS);
 }
@@ -239,7 +239,7 @@ CCTPlate3d :: giveCharacteristicTensor(FloatMatrix &answer, CharTensor type, Gau
         answer.at(3, 1) = charVect.at(4);
         answer.at(2, 3) = charVect.at(5);
         answer.at(3, 2) = charVect.at(5);
-    } else if ( ( type == LocalMomentumTensor ) || ( type == GlobalMomentumTensor ) )   {
+    } else if ( ( type == LocalMomentumTensor ) || ( type == GlobalMomentumTensor ) ) {
         //this->computeStressVector(charVect, gp, tStep);
         charVect = ( ( StructuralMaterialStatus * ) mat->giveStatus(gp) )->giveStressVector();
 
@@ -247,7 +247,7 @@ CCTPlate3d :: giveCharacteristicTensor(FloatMatrix &answer, CharTensor type, Gau
         answer.at(2, 2) = charVect.at(2);
         answer.at(1, 2) = charVect.at(3);
         answer.at(2, 1) = charVect.at(3);
-    } else if ( ( type == LocalStrainTensor ) || ( type == GlobalStrainTensor ) )   {
+    } else if ( ( type == LocalStrainTensor ) || ( type == GlobalStrainTensor ) ) {
         //this->computeStrainVector(charVect, gp, tStep);
         charVect = ( ( StructuralMaterialStatus * ) mat->giveStatus(gp) )->giveStrainVector();
 
@@ -255,7 +255,7 @@ CCTPlate3d :: giveCharacteristicTensor(FloatMatrix &answer, CharTensor type, Gau
         answer.at(3, 1) = charVect.at(4) / 2.;
         answer.at(2, 3) = charVect.at(5) / 2.;
         answer.at(3, 2) = charVect.at(5) / 2.;
-    } else if ( ( type == LocalCurvatureTensor ) || ( type == GlobalCurvatureTensor ) )   {
+    } else if ( ( type == LocalCurvatureTensor ) || ( type == GlobalCurvatureTensor ) ) {
         //this->computeStrainVector(charVect, gp, tStep);
         charVect = ( ( StructuralMaterialStatus * ) mat->giveStatus(gp) )->giveStrainVector();
 
@@ -263,7 +263,7 @@ CCTPlate3d :: giveCharacteristicTensor(FloatMatrix &answer, CharTensor type, Gau
         answer.at(2, 2) = charVect.at(2);
         answer.at(1, 2) = charVect.at(3) / 2.;
         answer.at(2, 1) = charVect.at(3) / 2.;
-    } else   {
+    } else {
         _error("GiveCharacteristicTensor: unsupported tensor mode");
         exit(1);
     }
@@ -316,7 +316,7 @@ CCTPlate3d :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalS
         answer.at(12) = globTensor.at(1, 2); //mxyForce
 
         return 1;
-    } else   {
+    } else {
         answer.resize(0);
         return 0;
     }
@@ -333,7 +333,7 @@ CCTPlate3d :: giveIntVarCompFullIndx(IntArray &answer, InternalStateType type)
         }
 
         return 1;
-    } else   {
+    } else {
         return CCTPlate :: giveIntVarCompFullIndx(answer, type);
     }
 }
@@ -387,7 +387,7 @@ CCTPlate3d :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, TimeSte
         if ( this->computeGtoLRotationMatrix(T) ) {
             answer.rotatedWith(T, 'n');
         }
-    } else   {
+    } else {
         answer.resize(0);          // nil resultant
     }
 

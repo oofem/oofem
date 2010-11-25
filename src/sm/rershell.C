@@ -51,17 +51,16 @@
 #include "structuralcrosssection.h"
 #include "structuralmaterial.h"
 #ifndef __MAKEDEPEND
-#include <math.h>
-#include <stdio.h>
+ #include <math.h>
+ #include <stdio.h>
 #endif
 
 #ifdef __OOFEG
-#include "oofeggraphiccontext.h"
-#include "conTable.h"
+ #include "oofeggraphiccontext.h"
+ #include "conTable.h"
 #endif
 
 namespace oofem {
-
 RerShell :: RerShell(int n, Domain *aDomain) :
     CCTPlate(n, aDomain)
     // Constructor.
@@ -174,12 +173,12 @@ RerShell :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int l
 void RerShell :: computeGaussPoints()
 // Sets up the array containing the four Gauss points of the receiver.
 {
-  if (!integrationRulesArray) {
-    numberOfIntegrationRules = 1;
-    integrationRulesArray = new IntegrationRule * [ 1 ];
-    integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 8);
-    integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Triangle, numberOfGaussPoints, _3dShell);
-  }
+    if ( !integrationRulesArray ) {
+        numberOfIntegrationRules = 1;
+        integrationRulesArray = new IntegrationRule * [ 1 ];
+        integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 8);
+        integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Triangle, numberOfGaussPoints, _3dShell);
+    }
 }
 
 
@@ -326,7 +325,7 @@ RerShell :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep)
     gp                 =  integrationRulesArray [ 0 ]->getIntegrationPoint(0);
 
     dV = this->computeVolumeAround(gp);
-    mss1 = dV * this->giveCrossSection()->give(CS_Thickness) * this->giveMaterial()->give('d',gp) / 3.;
+    mss1 = dV * this->giveCrossSection()->give(CS_Thickness) * this->giveMaterial()->give('d', gp) / 3.;
 
     answer.at(1, 1) = mss1;
     answer.at(2, 2) = mss1;
@@ -365,22 +364,22 @@ RerShell :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, TimeStep 
         answer.resize(0);
         return;                                             // nil resultant
     } else {
-        dens= this->giveMaterial()->give('d',gp);
+        dens = this->giveMaterial()->give('d', gp);
         dV = this->computeVolumeAround(gp) * this->giveCrossSection()->give(CS_Thickness);
 
         answer.resize(18);
 
-        load = f.at(1) * dens* dV / 3.0;
+        load = f.at(1) * dens * dV / 3.0;
         answer.at(1) = load;
         answer.at(7) = load;
         answer.at(13) = load;
 
-        load = f.at(2) * dens* dV / 3.0;
+        load = f.at(2) * dens * dV / 3.0;
         answer.at(2) = load;
         answer.at(8) = load;
         answer.at(14) = load;
 
-        load = f.at(3) * dens* dV / 3.0;
+        load = f.at(3) * dens * dV / 3.0;
         answer.at(3) = load;
         answer.at(9) = load;
         answer.at(15) = load;
@@ -470,64 +469,70 @@ RerShell :: giveLocalCoordinateSystem(FloatMatrix &answer)
 //converts global coordinates to local planar area coordinates, does not return a coordinate in the thickness direction, but
 //does check that the point is in the element thickness
 #define POINT_TOL 1.e-3
-int RerShell :: computeLocalCoordinates (FloatArray& answer, const FloatArray& coords)
+int RerShell :: computeLocalCoordinates(FloatArray &answer, const FloatArray &coords)
 {
     //set size of return value to 3 area coordinates
     answer.resize(3);
 
     //rotate the input point Coordinate System into the element CS
     FloatArray inputCoords_ElCS;
-    this->giveLocalCoordinates(inputCoords_ElCS, const_cast<FloatArray&>(coords));
+    this->giveLocalCoordinates( inputCoords_ElCS, const_cast< FloatArray & >(coords) );
 
-    //Nodes are defined in the global CS, so they also need to be rotated into the element CS, therefore get the node points and 
-    //rotate them into the element CS 
+    //Nodes are defined in the global CS, so they also need to be rotated into the element CS, therefore get the node points and
+    //rotate them into the element CS
     FloatArray nodeCoords;
-    double  x1,x2,x3,y1,y2,y3,z1,z2,z3;
+    double x1, x2, x3, y1, y2, y3, z1, z2, z3;
 
-    this->giveLocalCoordinates (nodeCoords, *(this -> giveNode(1)->giveCoordinates()));
+    this->giveLocalCoordinates( nodeCoords, * ( this->giveNode(1)->giveCoordinates() ) );
     x1 = nodeCoords.at(1);
     y1 = nodeCoords.at(2);
     z1 = nodeCoords.at(3);
 
-    this->giveLocalCoordinates (nodeCoords, *(this -> giveNode(2)->giveCoordinates()));
+    this->giveLocalCoordinates( nodeCoords, * ( this->giveNode(2)->giveCoordinates() ) );
     x2 = nodeCoords.at(1);
     y2 = nodeCoords.at(2);
     z2 = nodeCoords.at(3);
 
-    this->giveLocalCoordinates (nodeCoords, *(this -> giveNode(3)->giveCoordinates()));
+    this->giveLocalCoordinates( nodeCoords, * ( this->giveNode(3)->giveCoordinates() ) );
     x3 = nodeCoords.at(1);
     y3 = nodeCoords.at(2);
     z3 = nodeCoords.at(3);
 
     //Compute the area coordinates corresponding to this point
-    double  area;
-    area = 0.5*(x2*y3+x1*y2+y1*x3-x2*y1-x3*y2-x1*y3);
+    double area;
+    area = 0.5 * ( x2 * y3 + x1 * y2 + y1 * x3 - x2 * y1 - x3 * y2 - x1 * y3 );
 
-    answer.at(1) = ((x2*y3-x3*y2) + (y2-y3)*inputCoords_ElCS.at(1) + (x3-x2)*inputCoords_ElCS.at(2))/2./area;
-    answer.at(2) = ((x3*y1-x1*y3) + (y3-y1)*inputCoords_ElCS.at(1) + (x1-x3)*inputCoords_ElCS.at(2))/2./area;
-    answer.at(3) = ((x1*y2-x2*y1) + (y1-y2)*inputCoords_ElCS.at(1) + (x2-x1)*inputCoords_ElCS.at(2))/2./area;
+    answer.at(1) = ( ( x2 * y3 - x3 * y2 ) + ( y2 - y3 ) * inputCoords_ElCS.at(1) + ( x3 - x2 ) * inputCoords_ElCS.at(2) ) / 2. / area;
+    answer.at(2) = ( ( x3 * y1 - x1 * y3 ) + ( y3 - y1 ) * inputCoords_ElCS.at(1) + ( x1 - x3 ) * inputCoords_ElCS.at(2) ) / 2. / area;
+    answer.at(3) = ( ( x1 * y2 - x2 * y1 ) + ( y1 - y2 ) * inputCoords_ElCS.at(1) + ( x2 - x1 ) * inputCoords_ElCS.at(2) ) / 2. / area;
 
-    //get midplane location at this point 
+    //get midplane location at this point
     double midplZ;
-    midplZ = z1*answer.at(1) + z2*answer.at(2) + z3*answer.at(3);
+    midplZ = z1 * answer.at(1) + z2 *answer.at(2) + z3 *answer.at(3);
 
     //check that the z is within the element
-    StructuralCrossSection* cs;
+    StructuralCrossSection *cs;
     double elthick;
 
-    cs = (StructuralCrossSection*) this->giveCrossSection();
+    cs = ( StructuralCrossSection * ) this->giveCrossSection();
     elthick = cs->give(CS_Thickness);
 
-    if (elthick/2.0+midplZ - fabs(inputCoords_ElCS.at(3)) < -POINT_TOL){
+    if ( elthick / 2.0 + midplZ - fabs( inputCoords_ElCS.at(3) ) < -POINT_TOL ) {
         answer.zero();
         return 0;
     }
 
     //check that the point is in the element and set flag
-    for (int i=1; i<=3; i++) {
-        if (answer.at(i)<(0.-POINT_TOL)) return 0;
-        if (answer.at(i)>(1.+POINT_TOL)) return 0;
+    for ( int i = 1; i <= 3; i++ ) {
+        if ( answer.at(i) < ( 0. - POINT_TOL ) ) {
+            return 0;
+        }
+
+        if ( answer.at(i) > ( 1. + POINT_TOL ) ) {
+            return 0;
+        }
     }
+
     return 1;
 }
 
@@ -1080,28 +1085,28 @@ RerShell :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalSta
  *                       this->giveDomain()->giveSmoother()->giveElementRegion(this));
  * if (result) {
  * if (mode == sxForce ) {
- *val =  nodval->at(1);
+ **val =  nodval->at(1);
  * return 1;
  * } else if (mode == syForce) {
- *val =  nodval->at(2);
+ **val =  nodval->at(2);
  * return 1;
  * } else if (mode == sxyForce) {
- *val =  nodval->at(3);
+ **val =  nodval->at(3);
  * return 1;
  * } else if (mode == mxForce ) {
- *val =  nodval->at(4);
+ **val =  nodval->at(4);
  * return 1;
  * } else if (mode == myForce) {
- *val =  nodval->at(5);
+ **val =  nodval->at(5);
  * return 1;
  * } else if (mode == mxyForce) {
- *val =  nodval->at(6);
+ **val =  nodval->at(6);
  * return 1;
  * } else if (mode == szxForce ) {
- *val =  nodval->at(7);
+ **val =  nodval->at(7);
  * return 1;
  * } else if (mode == syzForce) {
- *val =  nodval->at(8);
+ **val =  nodval->at(8);
  * return 1;
  * } else return 0;
  * }

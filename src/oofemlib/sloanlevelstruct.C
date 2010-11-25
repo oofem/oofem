@@ -43,7 +43,6 @@
 #include "domain.h"
 
 namespace oofem {
-
 #define LEVEL_LIST_GROW_CHUNK 50
 
 SloanLevelStructure :: ~SloanLevelStructure()
@@ -144,7 +143,4 @@ SloanLevelStructure :: giveLevel(int num)
 
     return Structure.at(num);
 }
-
-
-
 } // end namespace oofem

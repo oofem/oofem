@@ -53,14 +53,12 @@
 
 #ifdef __USE_MPI
 // if MPI used, include headers
-#ifndef __MAKEDEPEND
-#include "mpi.h"
-#endif
+ #ifndef __MAKEDEPEND
+  #include "mpi.h"
+ #endif
 #endif
 
 namespace oofem {
-
 #define PROCESSOR_NAME_LENGTH 60
-
 } // end namespace oofem
 #endif // parallel_h

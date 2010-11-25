@@ -39,7 +39,6 @@
 #include "equationid.h"
 
 namespace oofem {
-
 class EngngModel;
 class IntArray;
 
@@ -71,6 +70,5 @@ public:
     virtual void map2New(IntArray &answer, const IntArray &src, int baseOffset = 0) = 0;
     virtual void map2Old(IntArray &answer, const IntArray &src, int baseOffset = 0) = 0;
 };
-
 } // end namespace oofem
 #endif // appordering_h

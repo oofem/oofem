@@ -42,29 +42,28 @@
 
 #ifdef __PARALLEL_MODE
 
-#include "sparselinsystemnm.h"
-#include "sparsemtrx.h"
-#include "flotarry.h"
+ #include "sparselinsystemnm.h"
+ #include "sparsemtrx.h"
+ #include "flotarry.h"
 
-#include "skyline.h"
-#include "flotmtrx.h"
-#include "processcomm.h"
-#include "feticommunicator.h"
-#include "engngm.h"
+ #include "skyline.h"
+ #include "flotmtrx.h"
+ #include "processcomm.h"
+ #include "feticommunicator.h"
+ #include "engngm.h"
 
-#ifndef __MAKEDEPEND
-#include <stdio.h>
-#endif
+ #ifndef __MAKEDEPEND
+  #include <stdio.h>
+ #endif
 
 namespace oofem {
-
 class Domain;
 class EngngModel;
 
 
-#define FETISOLVER_MAX_RBM 6
+ #define FETISOLVER_MAX_RBM 6
 /// computer zero
-#define FETISOLVER_ZERONUM 1.e-40
+ #define FETISOLVER_ZERONUM 1.e-40
 
 class FETISolver : public SparseLinearSystemNM
 {
@@ -168,7 +167,6 @@ public:
 
     enum { FETISolverZeroTag, NumberOfRBMMsg, RBMMessage, QQMessage, SolutionMessage, ResidualMessage, DirectionVectorMessage, PPVectorMessage, GammasMessage, FETISolverIterationContinue, FETISolverIterationBreak };
 };
-
 } // end namespace oofem
 #endif
 #endif // fetisolver_h

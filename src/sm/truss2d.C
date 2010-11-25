@@ -48,16 +48,15 @@
 
 #include "engngm.h"
 #ifndef __MAKEDEPEND
-#include <stdlib.h>
-#include <math.h>
+ #include <stdlib.h>
+ #include <math.h>
 #endif
 
 #ifdef __OOFEG
-#include "oofeggraphiccontext.h"
+ #include "oofeggraphiccontext.h"
 #endif
 
 namespace oofem {
-
 //
 // upravit teplota u geom. nelinearity
 //
@@ -139,12 +138,12 @@ Truss2d :: computeNLBMatrixAt(FloatMatrix &answer, GaussPoint *aGaussPoint, int 
 void Truss2d :: computeGaussPoints()
 // Sets up the array of Gauss Points of the receiver.
 {
-  if (!integrationRulesArray) {
-    numberOfIntegrationRules = 1;
-    integrationRulesArray = new IntegrationRule * [ 1 ];
-    integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 2);
-    integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Line, 1, _1dMat);
-  }
+    if ( !integrationRulesArray ) {
+        numberOfIntegrationRules = 1;
+        integrationRulesArray = new IntegrationRule * [ 1 ];
+        integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 2);
+        integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Line, 1, _1dMat);
+    }
 }
 
 
@@ -156,14 +155,16 @@ Truss2d :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep)
 {
     Material *mat;
     double halfMass;
-    GaussPoint* gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
+    GaussPoint *gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
 
     answer.resize(4, 4);
     answer.zero();
-    if (!isActivated(tStep)) return;
+    if ( !isActivated(tStep) ) {
+        return;
+    }
 
     mat        = this->giveMaterial();
-    halfMass   =  mat->give('d',gp) * this->giveCrossSection()->give(CS_Area) * this->giveLength() / 2.;
+    halfMass   =  mat->give('d', gp) * this->giveCrossSection()->give(CS_Area) * this->giveLength() / 2.;
     answer.at(1, 1) = halfMass;
     answer.at(2, 2) = halfMass;
     answer.at(3, 3) = halfMass;
@@ -214,8 +215,8 @@ Truss2d :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoord
     n2  = ( 1. + ksi ) * 0.5;
 
     answer.resize(3);
-    answer.at(c1) = n1 * this->giveNode(1)->giveCoordinate(c1) + n2 * this->giveNode(2)->giveCoordinate(c1);
-    answer.at(c2) = n1 * this->giveNode(1)->giveCoordinate(c2) + n2 * this->giveNode(2)->giveCoordinate(c2);
+    answer.at(c1) = n1 * this->giveNode(1)->giveCoordinate(c1) + n2 *this->giveNode(2)->giveCoordinate(c1);
+    answer.at(c2) = n1 * this->giveNode(1)->giveCoordinate(c2) + n2 *this->giveNode(2)->giveCoordinate(c2);
 
     return 1;
 }
@@ -456,10 +457,10 @@ Truss2d ::   giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const 
     if ( cs_mode == 0 ) {
         answer.at(1) = D_u;
         answer.at(2) = D_w;
-    } else if ( cs_mode == 1 )        {
+    } else if ( cs_mode == 1 ) {
         answer.at(1) = D_u;
         answer.at(2) = D_v;
-    } else if ( cs_mode == 2 )        {
+    } else if ( cs_mode == 2 ) {
         answer.at(1) = D_v;
         answer.at(2) = D_w;
     }
@@ -575,14 +576,14 @@ void Truss2d :: drawRawGeometry(oofegGraphicContext &gc)
         p [ 1 ].x = ( FPNum ) this->giveNode(2)->giveCoordinate(c1);
         p [ 1 ].y = 0.;
         p [ 1 ].z = ( FPNum ) this->giveNode(2)->giveCoordinate(c2);
-    } else if ( cs_mode == 1 )        {
+    } else if ( cs_mode == 1 ) {
         p [ 0 ].x = ( FPNum ) this->giveNode(1)->giveCoordinate(c1);
         p [ 0 ].y = ( FPNum ) this->giveNode(1)->giveCoordinate(c2);
         p [ 0 ].z = 0.;
         p [ 1 ].x = ( FPNum ) this->giveNode(2)->giveCoordinate(c1);
         p [ 1 ].y = ( FPNum ) this->giveNode(2)->giveCoordinate(c2);
         p [ 1 ].z = 0.;
-    } else if ( cs_mode == 2 )        {
+    } else if ( cs_mode == 2 ) {
         p [ 0 ].x = 0.;
         p [ 0 ].y = ( FPNum ) this->giveNode(1)->giveCoordinate(c1);
         p [ 0 ].z = ( FPNum ) this->giveNode(1)->giveCoordinate(c2);
@@ -629,7 +630,4 @@ void Truss2d :: drawDeformedGeometry(oofegGraphicContext &gc, UnknownType type)
     EMAddGraphicsToModel(ESIModel(), go);
 }
 #endif
-
-
-
 } // end namespace oofem

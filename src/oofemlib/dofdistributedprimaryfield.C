@@ -41,7 +41,6 @@
 #include "timestep.h"
 
 namespace oofem {
-
 DofDistributedPrimaryField :: DofDistributedPrimaryField(EngngModel *a, int idomain,
                                                          FieldBaseID ft, EquationID ut, int nHist) :
     PrimaryField(a, idomain, ft, ut, nHist)
@@ -83,5 +82,4 @@ DofDistributedPrimaryField :: restoreContext(DataStream *stream, ContextMode mod
 {
     return CIO_OK;
 }
-
 } // end namespace oofem

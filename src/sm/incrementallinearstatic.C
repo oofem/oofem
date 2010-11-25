@@ -46,7 +46,7 @@
 #include "dof.h"
 #include "boundary.h"
 #ifndef __MAKEDEPEND
-#include <stdio.h>
+ #include <stdio.h>
 #endif
 
 #include "verbose.h"
@@ -56,7 +56,6 @@
 #include "contextioerr.h"
 
 namespace oofem {
-
 IncrementalLinearStatic :: IncrementalLinearStatic(int i, EngngModel *_master) : StructuralEngngModel(i, _master),
     incrementOfLoadVector(), incrementOfDisplacementVector(), totalDisplacementVector(), discreteTimes()
 {
@@ -287,7 +286,7 @@ IncrementalLinearStatic :: solveYourselfAt(TimeStep *tStep) {
         _error("solveYourselfAt: sparse matrix creation failed");
     }
 
-    stiffnessMatrix->buildInternalStructure(this, 1, EID_MomentumBalance, EModelDefaultEquationNumbering());
+    stiffnessMatrix->buildInternalStructure( this, 1, EID_MomentumBalance, EModelDefaultEquationNumbering() );
 
     //if (totalDisplacementVector) delete totalDisplacementVector;
     //totalDisplacementVector = new FloatArray (this->giveNumberOfEquations());
@@ -297,8 +296,8 @@ IncrementalLinearStatic :: solveYourselfAt(TimeStep *tStep) {
     OOFEM_LOG_INFO("Assembling stiffness matrix\n");
 #endif
     stiffnessMatrix->zero();     // zero stiffness matrix
-    this->assemble( stiffnessMatrix, tStep, EID_MomentumBalance, StiffnessMatrix, 
-		    EModelDefaultEquationNumbering(), this->giveDomain(1) );
+    this->assemble( stiffnessMatrix, tStep, EID_MomentumBalance, StiffnessMatrix,
+                   EModelDefaultEquationNumbering(), this->giveDomain(1) );
     //
     // alocate space for displacementVector
     //
@@ -315,16 +314,16 @@ IncrementalLinearStatic :: solveYourselfAt(TimeStep *tStep) {
     //incrementOfLoadVector = new FloatArray (this->giveNumberOfEquations());
     incrementOfLoadVector.resize( this->giveNumberOfEquations(EID_MomentumBalance) );
     incrementOfLoadVector.zero();
-    this->assembleVectorFromElements( incrementOfLoadVector, tStep, EID_MomentumBalance, ElementForceLoadVector, 
-				      VM_Incremental, EModelDefaultEquationNumbering(), this->giveDomain(1) );
-    this->assembleVectorFromElements( incrementOfLoadVector, tStep, EID_MomentumBalance, ElementNonForceLoadVector, 
-				      VM_Incremental, EModelDefaultEquationNumbering(), this->giveDomain(1) );
+    this->assembleVectorFromElements( incrementOfLoadVector, tStep, EID_MomentumBalance, ElementForceLoadVector,
+                                     VM_Incremental, EModelDefaultEquationNumbering(), this->giveDomain(1) );
+    this->assembleVectorFromElements( incrementOfLoadVector, tStep, EID_MomentumBalance, ElementNonForceLoadVector,
+                                     VM_Incremental, EModelDefaultEquationNumbering(), this->giveDomain(1) );
 
     //
     // assembling the nodal part of load vector
     //
-    this->assembleVectorFromDofManagers( incrementOfLoadVector, tStep, EID_MomentumBalance, NodalLoadVector, 
-					 VM_Incremental, EModelDefaultEquationNumbering(), this->giveDomain(1) );
+    this->assembleVectorFromDofManagers( incrementOfLoadVector, tStep, EID_MomentumBalance, NodalLoadVector,
+                                        VM_Incremental, EModelDefaultEquationNumbering(), this->giveDomain(1) );
 
     //
     // set-up numerical model
@@ -489,5 +488,4 @@ IncrementalLinearStatic :: printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *a
 {
     iDof->printSingleOutputAt(stream, atTime, 'd', EID_MomentumBalance, VM_Total);
 }
-
 } // end namespace oofem

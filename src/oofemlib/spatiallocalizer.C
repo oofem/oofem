@@ -41,7 +41,6 @@
 #include "error.h"
 
 namespace oofem {
-
 #define POINT_TOL 1.e-6
 
 int
@@ -101,25 +100,26 @@ SpatialLocalizerInterface :: SpatialLocalizerI_BBoxContainsPoint(const FloatArra
 
 
 
-void 
-SpatialLocalizer::giveAllElementsWithNodesWithinBox(elementContainerType &elemSet, const FloatArray &coords,
-                                                    const double radius)
+void
+SpatialLocalizer :: giveAllElementsWithNodesWithinBox(elementContainerType &elemSet, const FloatArray &coords,
+                                                      const double radius)
 {
-  nodeContainerType nodesWithinBox;
-  nodeContainerType::iterator it;
-  const IntArray* dofmanConnectivity;
-  int i;
+    nodeContainerType nodesWithinBox;
+    nodeContainerType :: iterator it;
+    const IntArray *dofmanConnectivity;
+    int i;
 
-  elemSet.clear();
+    elemSet.clear();
 
-  ConnectivityTable* ct = domain->giveConnectivityTable();
+    ConnectivityTable *ct = domain->giveConnectivityTable();
 
-  this->giveAllNodesWithinBox (nodesWithinBox, coords, radius);
-  
-  for (it=nodesWithinBox.begin(); it != nodesWithinBox.end(); ++it) {
-   dofmanConnectivity = ct->giveDofManConnectivityArray (*it);
-   for (i=1; i<=dofmanConnectivity->giveSize(); i++) elemSet.insert(dofmanConnectivity->at(i));
-  }
+    this->giveAllNodesWithinBox(nodesWithinBox, coords, radius);
+
+    for ( it = nodesWithinBox.begin(); it != nodesWithinBox.end(); ++it ) {
+        dofmanConnectivity = ct->giveDofManConnectivityArray(* it);
+        for ( i = 1; i <= dofmanConnectivity->giveSize(); i++ ) {
+            elemSet.insert( dofmanConnectivity->at(i) );
+        }
+    }
 }
-
 } // end namespace oofem

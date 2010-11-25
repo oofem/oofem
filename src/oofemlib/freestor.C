@@ -40,12 +40,11 @@
 #include "debug.h"
 #include "error.h"
 #ifndef __MAKEDEPEND
-#include <stdio.h>
-#include <stdlib.h>
+ #include <stdio.h>
+ #include <stdlib.h>
 #endif
 
 namespace oofem {
-
 double *allocDouble(int n)
 // Allocates and returns an array of n doubles. Issues an error message if
 // the free store is exhausted.
@@ -116,5 +115,4 @@ void  freeInt(int *a)
     free(a);
     //#endif
 }
-
 } // end namespace oofem

@@ -74,11 +74,10 @@
 #include "engngm.h"
 #include "domain.h"
 #ifndef __MAKEDEPEND
-#include <set>
+ #include <set>
 #endif
 
 namespace oofem {
-
 CompCol :: CompCol(void) : SparseMtrx(), val_(0), rowind_(0), colptr_(0), base_(0), nz_(0)
 {
     dim_ [ 0 ] = 0;
@@ -113,7 +112,7 @@ CompCol :: CompCol(const CompCol &S) : SparseMtrx(S.nRows, S.nColumns),
 /* Assignment operator...  */
 /***************************/
 
-CompCol &CompCol :: operator=(const CompCol &C)
+CompCol &CompCol :: operator = ( const CompCol & C )
 {
     dim_ [ 0 ] = C.dim_ [ 0 ];
     dim_ [ 1 ] = C.dim_ [ 1 ];
@@ -134,7 +133,7 @@ CompCol &CompCol :: operator=(const CompCol &C)
 
 SparseMtrx *CompCol :: GiveCopy() const
 {
-    CompCol *result = new CompCol(* this);
+    CompCol *result = new CompCol(*this);
     return result;
 }
 
@@ -175,7 +174,7 @@ void CompCol :: times(double x)
     this->version++;
 }
 
-int CompCol :: buildInternalStructure(EngngModel *eModel, int di, EquationID ut, const UnknownNumberingScheme& s)
+int CompCol :: buildInternalStructure(EngngModel *eModel, int di, EquationID ut, const UnknownNumberingScheme &s)
 {
     /*
      * IntArray  loc;
@@ -252,7 +251,7 @@ int CompCol :: buildInternalStructure(EngngModel *eModel, int di, EquationID ut,
     int i, ii, j, jj, n, indx;
     Element *elem;
     // allocation map
-    std :: vector< std :: set< int > > columns(neq);
+    std :: vector< std :: set< int > >columns(neq);
     /*
      * std::set<int> **columns = new std::set<int>*[neq];
      * for (j=0; j<neq; j++) {
@@ -435,7 +434,7 @@ double CompCol :: at(int i, int j) const
     }
 }
 
-double CompCol :: operator()(int i, int j)  const
+double CompCol :: operator() (int i, int j)  const
 {
     for ( int t = colptr_(j); t < colptr_(j + 1); t++ ) {
         if ( rowind_(t) == i ) {
@@ -451,7 +450,7 @@ double CompCol :: operator()(int i, int j)  const
     }
 }
 
-double &CompCol :: operator()(int i, int j)
+double &CompCol :: operator() (int i, int j)
 {
     // increment version
     this->version++;
@@ -471,7 +470,7 @@ double &CompCol :: operator()(int i, int j)
 /* Matrix-Vector multiplication...  */
 /***************************************/
 
-FloatArray CompCol :: operator *(const FloatArray &x) const
+FloatArray CompCol :: operator *( const FloatArray & x ) const
 {
     int M = dim_ [ 0 ];
     int N = dim_ [ 1 ];
@@ -527,7 +526,4 @@ FloatArray CompCol :: trans_mult(const FloatArray &x) const
 
     return result;
 }
-
-
-
 } // end namespace oofem

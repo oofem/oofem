@@ -45,7 +45,6 @@
 #include "inputrecord.h"
 
 namespace oofem {
-
 /**
  * Class representing the abstraction for input data source.
  * Its role is to provide input records for particular components.
@@ -85,6 +84,5 @@ public:
     /// Prints the error message
     void report_error(const char *_class, const char *proc, const char *kwd, IRResultType result, const char *file, int line);
 };
-
 } // end namespace oofem
 #endif // datareader_h

@@ -42,20 +42,20 @@
 #include "feinterpol2d.h"
 
 namespace oofem {
-
 /**
  * Class representing a 2d quad quadratic interpolation based on isoparametric coordinates.
  */
 class FEI2dQuadQuad : public FEInterpolation2d
 {
- protected:
+protected:
     int xind, yind;
 
 
 public:
     FEI2dQuadQuad(int ind1, int ind2) : FEInterpolation2d(2) {
-      xind = ind1;
-      yind = ind2; }
+        xind = ind1;
+        yind = ind2;
+    }
 
     /**
      * Evaluates the array of interpolation functions (shape functions) at given point.
@@ -64,7 +64,7 @@ public:
      * @param cellgeo underlying cell geometry
      * @param time time
      */
-    virtual void evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry& cellgeo, double time);
+    virtual void evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time);
     /**
      * Evaluates the matrix of derivatives of interpolation functions (shape functions) at given point.
      * These derivatives are in global coordinate system (where the nodal coordinates are defined)
@@ -73,7 +73,7 @@ public:
      * @param cellgeo underlying cell geometry
      * @param time time
      */
-    virtual void evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry& cellgeo, double time);
+    virtual void evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time);
     /**
      * Evaluates global coordinates from given local ones
      * These derivatives are in global coordinate system (where the nodal coordinates are defined)
@@ -82,7 +82,7 @@ public:
      * @param cellgeo underlying cell geometry
      * @param time time
      */
-    virtual void local2global(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry& cellgeo, double time);
+    virtual void local2global(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time);
     /**
      * Evaluates local coordinates from given global ones. Returns nonzero if local coordinates are interpolating,
      * zero if extrapolating (nonzero is returned if point is within the element geometry, zero otherwise).
@@ -93,11 +93,11 @@ public:
      * @param time time
      * @return nonzero is returned if point is within the element geometry, zero otherwise
      */
-    virtual int  global2local(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry& cellgeo, double time);
+    virtual int  global2local(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time);
     /**
      * Evaluates the jacobian of transformation between local and global coordinates.
      */
-    virtual double giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry& cellgeo, double time);
+    virtual double giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time);
 
     /**@name Edge interpolation services */
     //@{
@@ -109,7 +109,7 @@ public:
      * @param cellgeo underlying cell geometry
      * @param time time
      */
-    virtual void edgeEvalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry& cellgeo, double time);
+    virtual void edgeEvalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time);
     /**
      * Evaluates the matrix of derivatives of edge interpolation functions (shape functions) at given point.
      * These derivatives are in global coordinate system (where the nodal coordinates are defined)
@@ -120,7 +120,7 @@ public:
      * @param time time
      */
     virtual void edgeEvaldNdx(FloatMatrix &answer, int iedge,
-                              const FloatArray &lcoords, const FEICellGeometry& cellgeo, double time);
+                              const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time);
     /**
      * Evaluates edge global coordinates from given local ones
      * These derivatives are in global coordinate system (where the nodal coordinates are defined)
@@ -131,20 +131,19 @@ public:
      * @param time time
      */
     virtual void edgeLocal2global(FloatArray &answer, int iedge,
-                                  const FloatArray &lcoords, const FEICellGeometry& cellgeo, double time);
+                                  const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time);
     /**
      * Evaluates the edge jacobian of transformation between local and global coordinates.
      */
     virtual double edgeGiveTransformationJacobian(int iedge, const FloatArray &lcoords,
-                                                  const FEICellGeometry& cellgeo, double time);
+                                                  const FEICellGeometry &cellgeo, double time);
     //@}
 
 protected:
     void   giveDerivativeXi(FloatArray &n, const FloatArray &lcoords);
     void   giveDerivativeEta(FloatArray &n, const FloatArray &lcoords);
-    void   giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatArray &lcoords, const FEICellGeometry& cellgeo);
+    void   giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
 };
-
 } // end namespace oofem
 #endif // fei2dquadquad_h
 

@@ -36,14 +36,13 @@
 #include "fieldmanager.h"
 
 namespace oofem {
-
 void
 FieldManager :: registerField(Field *eField, FieldType key)
 {
     std :: map< FieldType, Field * > :: iterator i;
     if ( ( i = this->externalFields.find(key) ) != this->externalFields.end() ) {
         // delete old entry, since map contains only pointers, not fields themselves
-        delete ( * i ).second;
+        delete(* i).second;
     }
 
     this->externalFields [ key ] = eField;
@@ -75,8 +74,7 @@ FieldManager :: unregisterField(FieldType key)
         return;
     }
 
-    delete ( * i ).second;
+    delete(* i).second;
     this->externalFields.erase(i);
 }
-
 } // end namespace oofem

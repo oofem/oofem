@@ -48,7 +48,6 @@
 #define matrix_h
 
 namespace oofem {
-
 /* class FloatMatrix ; class IntArray ; */
 
 /** Abstract root class  for matrices. Matrix is characterized by its size.
@@ -78,8 +77,10 @@ public:
      * @param n number of rows
      * @param m number of rows
      */
-    Matrix(int n, int m)  { nRows = n;
-                            nColumns = m; }
+    Matrix(int n, int m)  {
+        nRows = n;
+        nColumns = m;
+    }
     /// Destructor.
     virtual ~Matrix()    { }                            // destructor
 
@@ -101,6 +102,5 @@ public:
     /// Prints receiver on stdin. Usefull mainly for debugging
     virtual void  printYourself() const { }
 };
-
 } // end namespace oofem
 #endif // matrix_h

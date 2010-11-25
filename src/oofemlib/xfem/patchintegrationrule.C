@@ -9,7 +9,6 @@
 #include "datastream.h"
 
 namespace oofem {
-
 PatchIntegrationRule :: PatchIntegrationRule(int n, Element *e, Patch *patch) : GaussIntegrationRule(n, e) {
     this->patch = patch;
 }
@@ -41,31 +40,32 @@ PatchIntegrationRule :: SetUpPointsOnTriagle(int nPoints, MaterialMode mode, Gau
 contextIOResultType
 PatchIntegrationRule :: saveContext(DataStream *stream, ContextMode mode, void *obj)
 {
-  //
-  // saves full  context (saves state variables, that completely describe
-  // current state)
-  //
-  
-  // save parent data
-  contextIOResultType iores;
-  
-  if ( ( iores = IntegrationRule :: saveContext(stream, mode, obj) ) != CIO_OK ) {
-    THROW_CIOERR(iores);
-  }
-  
-  // save patch data
-  if (this->patch) {
-    // store patch type
-    int _type = this->patch->givePatchType();
-    if ( !stream->write(& _type, 1) ) {
-      THROW_CIOERR(CIO_IOERR);
-    }
-    patch->saveContext (stream, mode, obj);
-  } else {
-    OOFEM_ERROR("saveContex : can't store NULL patch");
-  }
+    //
+    // saves full  context (saves state variables, that completely describe
+    // current state)
+    //
 
-  return CIO_OK;  
+    // save parent data
+    contextIOResultType iores;
+
+    if ( ( iores = IntegrationRule :: saveContext(stream, mode, obj) ) != CIO_OK ) {
+        THROW_CIOERR(iores);
+    }
+
+    // save patch data
+    if ( this->patch ) {
+        // store patch type
+        int _type = this->patch->givePatchType();
+        if ( !stream->write(& _type, 1) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+
+        patch->saveContext(stream, mode, obj);
+    } else {
+        OOFEM_ERROR("saveContex : can't store NULL patch");
+    }
+
+    return CIO_OK;
 }
 
 contextIOResultType
@@ -83,26 +83,24 @@ PatchIntegrationRule :: restoreContext(DataStream *stream, ContextMode mode, voi
     }
 
     if ( ( iores = IntegrationRule :: restoreContext(stream, mode, obj) ) != CIO_OK ) {
-      THROW_CIOERR(iores);
+        THROW_CIOERR(iores);
     }
-    
+
     // restore patch data
-    if (this->patch) {
-      delete this->patch;
+    if ( this->patch ) {
+        delete this->patch;
     }
+
     int _ptype;
     if ( !stream->read(& _ptype, 1) ) {
-      THROW_CIOERR(CIO_IOERR);
+        THROW_CIOERR(CIO_IOERR);
     }
-    
+
     // create new patch
-    this->patch = CreateUsrDefPatch ((Patch::PatchType)_ptype, this->giveElement());
-    this->patch->restoreContext (stream, mode, obj);
-    
-    return CIO_OK;  
+    this->patch = CreateUsrDefPatch( ( Patch :: PatchType ) _ptype, this->giveElement() );
+    this->patch->restoreContext(stream, mode, obj);
+
+    return CIO_OK;
 }
-
-
-
 } // end namespace oofem
 

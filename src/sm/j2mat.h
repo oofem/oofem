@@ -43,7 +43,6 @@
 #include "mplasticmaterial2.h"
 
 namespace oofem {
-
 class Domain;
 
 class J2Mat : public MPlasticMaterial2
@@ -129,6 +128,5 @@ protected:
     double      giveIsotropicHardeningVar(GaussPoint *gp, const FloatArray &strainSpaceHardeningVars);
     void        giveStressBackVector(FloatArray &answer, GaussPoint *gp, const FloatArray &strainSpaceHardeningVars);
 };
-
 } // end namespace oofem
 #endif // j2mat_h

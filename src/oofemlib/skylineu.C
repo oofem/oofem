@@ -49,20 +49,19 @@
 #include "structuralelement.h" // for nonloc stiff support
 #include "error.h"
 #ifndef __MAKEDEPEND
-#include <math.h>
-#include <limits.h>
-#include <stdlib.h>
+ #include <math.h>
+ #include <limits.h>
+ #include <stdlib.h>
 #endif
 
 #ifdef TIME_REPORT
-#ifndef __MAKEDEPEND
-#include <time.h>
-#endif
-#include "clock.h"
+ #ifndef __MAKEDEPEND
+  #include <time.h>
+ #endif
+ #include "clock.h"
 #endif
 
 namespace oofem {
-
 SkylineUnsym :: SkylineUnsym(int n) : SparseMtrx(n, n)
     // Constructor. Creates an empty skyline unsymmetric.
 
@@ -92,7 +91,7 @@ SkylineUnsym :: ~SkylineUnsym()
         i = size;
         p = rowColumns;
         while ( i-- ) {
-            delete * p++;
+            delete *p++;
         }
 
         delete rowColumns;
@@ -267,7 +266,7 @@ SkylineUnsym :: checkSizeTowards(const IntArray &rloc, const IntArray &cloc)
 
 
 int
-SkylineUnsym :: buildInternalStructure(EngngModel *eModel, int di, EquationID ut, const UnknownNumberingScheme& s)
+SkylineUnsym :: buildInternalStructure(EngngModel *eModel, int di, EquationID ut, const UnknownNumberingScheme &s)
 {
     // Instanciates the profile of the receiver and initializes all coeffi-
     // cients to zero.
@@ -290,7 +289,7 @@ SkylineUnsym :: buildInternalStructure(EngngModel *eModel, int di, EquationID ut
         _i = size;
         _p = rowColumns;
         while ( _i-- ) {
-            delete * _p++;
+            delete *_p++;
         }
 
         delete rowColumns;
@@ -311,11 +310,11 @@ SkylineUnsym :: buildInternalStructure(EngngModel *eModel, int di, EquationID ut
         //elem -> giveLocationArray (loc) ;
 
         if ( !nonlocal ) {
-	  elem->giveLocationArray(loc, ut, s);
+            elem->giveLocationArray(loc, ut, s);
         }
         //else ((StructuralElement*)elem) -> giveNonlocalLocationArray(loc) ;
         else {
-	  elem->giveLocationArray(loc, ut, s);
+            elem->giveLocationArray(loc, ut, s);
         }
 
         //    Find 'first', the smallest positive number in LocArray
@@ -805,5 +804,4 @@ FloatArray SkylineUnsym :: trans_mult(const FloatArray &x) const
     return answer;
 }
 #endif
-
 } // end namespace oofem

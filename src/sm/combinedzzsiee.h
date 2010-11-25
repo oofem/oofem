@@ -45,7 +45,6 @@
 #include "directerrorindicatorrc.h"
 
 namespace oofem {
-
 /**
  * The implementation of combined criteria: Zienkiewicz Zhu Error Estimator for elastic regime and
  * scalar error indicator in non-linear regime.
@@ -175,6 +174,5 @@ public:
 
 protected:
 };
-
 } // end namespace oofem
 #endif // combinedzzsiee_h

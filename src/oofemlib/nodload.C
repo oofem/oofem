@@ -42,8 +42,6 @@
 #include "timestep.h"
 
 namespace oofem {
-
-
 IRResultType
 NodalLoad :: initializeFrom(InputRecord *ir)
 {
@@ -71,6 +69,4 @@ NodalLoad :: giveInputRecordString(std :: string &str, bool keyword)
 
     return 1;
 }
-
-
 } // end namespace oofem

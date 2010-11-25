@@ -37,14 +37,13 @@
 
 #ifdef __PARALLEL_MODE
 
-#include "intarray.h"
-#ifndef __MAKEDEPEND
-#include <map>
-#endif
+ #include "intarray.h"
+ #ifndef __MAKEDEPEND
+  #include <map>
+ #endif
 using namespace std;
 
 namespace oofem {
-
 /**
  * Represent the abstraction for dof manager. This dof manager is on partition boudary and
  * influences to master equations. It is typically shared by two or more partitions.

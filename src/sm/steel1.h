@@ -44,7 +44,6 @@
 #include "isolinearelasticmaterial.h"
 
 namespace oofem {
-
 class Domain;
 
 class Steel1 : public PerfectlyPlasticMaterial
@@ -93,6 +92,5 @@ protected:
     // auxiliary function
     double      computeJ2InvariantAt(FloatArray *);
 };
-
 } // end namespace oofem
 #endif // steel1_h

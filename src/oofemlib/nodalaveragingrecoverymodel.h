@@ -41,7 +41,6 @@
 #include "interface.h"
 
 namespace oofem {
-
 class GaussPoint;
 
 /**
@@ -52,17 +51,19 @@ class GaussPoint;
 class NodalAveragingRecoveryModel : public NodalRecoveryModel
 {
 protected:
-  /** Helper structure to pass required argumets to packing/unpacking functions
-      needed in parallel mode */
-  struct parallelStruct {
-    FloatArray* lhs;
-    IntArray* regionDofMansConnectivity;
-    IntArray* regionNodalNumbers;
-    int regionValSize;
-    parallelStruct (FloatArray* a, IntArray* b, IntArray* c, int d) {
-      lhs=a; regionDofMansConnectivity=b; regionNodalNumbers=c, regionValSize=d;
-    }
-  };
+    /** Helper structure to pass required argumets to packing/unpacking functions
+     *  needed in parallel mode */
+    struct parallelStruct {
+        FloatArray *lhs;
+        IntArray *regionDofMansConnectivity;
+        IntArray *regionNodalNumbers;
+        int regionValSize;
+        parallelStruct(FloatArray *a, IntArray *b, IntArray *c, int d) {
+            lhs = a;
+            regionDofMansConnectivity = b;
+            regionNodalNumbers = c, regionValSize = d;
+        }
+    };
 
 public:
     /// Constructor
@@ -86,10 +87,10 @@ private:
     void initRegionMap(IntArray &regionMap, IntArray &regionValSize, InternalStateType type);
 
 #ifdef __PARALLEL_MODE
-    void initCommMaps ();
-    void exchangeDofManValues   (int ireg, FloatArray& lhs, IntArray&, IntArray&, int );
-    int  packSharedDofManData   (parallelStruct* s, ProcessCommunicator &processComm);
-    int  unpackSharedDofManData (parallelStruct* s, ProcessCommunicator &processComm);
+    void initCommMaps();
+    void exchangeDofManValues(int ireg, FloatArray &lhs, IntArray &, IntArray &, int);
+    int  packSharedDofManData(parallelStruct *s, ProcessCommunicator &processComm);
+    int  unpackSharedDofManData(parallelStruct *s, ProcessCommunicator &processComm);
 #endif
 };
 
@@ -127,7 +128,5 @@ public:
      */
     virtual int NodalAveragingRecoveryMI_giveDofManRecordSize(InternalStateType type) = 0;
 };
-
-
 } // end namespace oofem
 #endif // nodalaveragingrecoverymodel_h

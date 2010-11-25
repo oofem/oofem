@@ -40,19 +40,18 @@
 #include "load.h"
 
 namespace oofem {
-
 class Element;
 class TimeStep;
 
 
 class StructuralEigenstrainLoad : public Load
 {
-/* This class implements prescribed eigenstrain (stress-free strain). It reads six
- * strain components (xx, yy, zz, yz, zx, xy) in the global coordinate system. 2D, 1D?
- */
+    /* This class implements prescribed eigenstrain (stress-free strain). It reads six
+     * strain components (xx, yy, zz, yz, zx, xy) in the global coordinate system. 2D, 1D?
+     */
 
 public:
-  StructuralEigenstrainLoad(int i, Domain *d) : Load(i, d) { }    // constructor
+    StructuralEigenstrainLoad(int i, Domain *d) : Load(i, d) { }  // constructor
 
     /**
      * Computes components values of eigenstrain field at given point (coordinates given in Global c.s.).
@@ -68,12 +67,11 @@ public:
     ///Returns type of class
     classType    giveClassID() const { return StructuralEigenstrainLoadClass; }
     ///Returns name of class
-    const char   *giveClassName() const { return "StructuralEigenstrainLoad"; }
+    const char *giveClassName() const { return "StructuralEigenstrainLoad"; }
     ///Returns type of boundary condition
     bcValType    giveBCValType() const { return EigenstrainBVT; }
     ///Returns type of load
     bcGeomType   giveBCGeoType() const { return BodyLoadBGT; }
 };
-
 } // end namespace oofem
 #endif // structeigenstrainload_h

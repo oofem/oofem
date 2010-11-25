@@ -39,33 +39,31 @@
 #include "flotarry.h"
 
 namespace oofem {
-
 class RandomFieldGenerator
 {
 protected:
-  Domain* domain;
+    Domain *domain;
 public:
-  /// Constructor. Creates empty RandomFieldGenerator
-  RandomFieldGenerator (int n, Domain *d) {this->domain = d;}
-  /// Destructor
-  virtual ~RandomFieldGenerator () {}
-  /**
-     Generates random value
-  */
-  virtual void generateRandomValue(double& value, FloatArray *position){;}
-  virtual void generateRandomValueAt(double& value, GaussPoint *gp) {
-    FloatArray globalCoordinates;
-    if (gp->giveElement()->computeGlobalCoordinates(globalCoordinates,*(gp->giveLocalCoordinates())))
-      this->generateRandomValue (value, &globalCoordinates);
-    else
-      OOFEM_ERROR ("RandomFieldGenerator::generateRandomValue computeGlobalCoordinates failed");
-  }
-  
-  virtual IRResultType initializeFrom(InputRecord *ir) {return IRRT_OK;}
-  /// Returns class name of the receiver.
-  virtual const char *giveClassName() const { return "RandomFieldGenerator"; }
- 
-};
+    /// Constructor. Creates empty RandomFieldGenerator
+    RandomFieldGenerator(int n, Domain *d) { this->domain = d; }
+    /// Destructor
+    virtual ~RandomFieldGenerator() {}
+    /**
+     * Generates random value
+     */
+    virtual void generateRandomValue(double &value, FloatArray *position) {; }
+    virtual void generateRandomValueAt(double &value, GaussPoint *gp) {
+        FloatArray globalCoordinates;
+        if ( gp->giveElement()->computeGlobalCoordinates( globalCoordinates, * ( gp->giveLocalCoordinates() ) ) ) {
+            this->generateRandomValue(value, & globalCoordinates);
+        } else {
+            OOFEM_ERROR("RandomFieldGenerator::generateRandomValue computeGlobalCoordinates failed");
+        }
+    }
 
+    virtual IRResultType initializeFrom(InputRecord *ir) { return IRRT_OK; }
+    /// Returns class name of the receiver.
+    virtual const char *giveClassName() const { return "RandomFieldGenerator"; }
+};
 } // end namespace oofem
 #endif

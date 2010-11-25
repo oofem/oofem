@@ -39,7 +39,6 @@
 #include "mplasticmaterial2.h"
 
 namespace oofem {
-
 class Domain;
 
 
@@ -160,6 +159,5 @@ protected:
     double computeF3HardeningLaw(double k);
     double computeF3HardeningGradient(double k);
 };
-
 } // end namespace oofem
 #endif // masonry02_h

@@ -50,12 +50,11 @@
 #include "contextmode.h"
 
 #ifndef __MAKEDEPEND
-#include <stdio.h>
-#include <string>
+ #include <stdio.h>
+ #include <string>
 #endif
 
 namespace oofem {
-
 class DataStream;
 
 /**
@@ -87,8 +86,10 @@ protected:
 
 public:
     /// Constructor, creates empty dictionary
-    Dictionary()  { first = NULL;
-                    last = NULL; }
+    Dictionary()  {
+        first = NULL;
+        last = NULL;
+    }
     /// Destructor
     ~Dictionary();
 
@@ -135,7 +136,6 @@ public:
      */
     contextIOResultType    restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 };
-
 } // end namespace oofem
 #endif // dictionr_h
 

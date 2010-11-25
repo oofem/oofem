@@ -46,9 +46,8 @@
 #include "cct.h"
 
 namespace oofem {
-
 #ifndef __CHARTENSOR
-#define __CHARTENSOR
+ #define __CHARTENSOR
 enum CharTensor {
     LocalStrainTensor,
     GlobalStrainTensor,
@@ -128,7 +127,8 @@ public:
     virtual int computeLocalCoordinates(FloatArray &answer, const FloatArray &gcoords);
 
     int giveLocalCoordinateSystem(FloatMatrix &answer)
-    { _error("cct3d :: giveLocalCoordinateSystem: calling of this function id not allowed"); return 0;}
+    { _error("cct3d :: giveLocalCoordinateSystem: calling of this function id not allowed");
+      return 0; }
 
     void printOutputAt(FILE *file, TimeStep *tStep);
 };

@@ -39,17 +39,19 @@
 #include "node.h"
 #include "element.h"
 #ifndef __MAKEDEPEND
-#include <stdio.h>
+ #include <stdio.h>
 #endif
 
 namespace oofem {
-
-MesherInterface::returnCode
-Targe2Interface :: createMesh(TimeStep *stepN, int domainNumber, int domainSerNum, Domain** dNew)
+MesherInterface :: returnCode
+Targe2Interface :: createMesh(TimeStep *stepN, int domainNumber, int domainSerNum, Domain **dNew)
 {
-  *dNew = NULL;
-  if (this->createInput(this->domain, stepN)) return MI_NEEDS_EXTERNAL_ACTION;
-  else return MI_FAILED;
+    * dNew = NULL;
+    if ( this->createInput(this->domain, stepN) ) {
+        return MI_NEEDS_EXTERNAL_ACTION;
+    } else {
+        return MI_FAILED;
+    }
 }
 
 int
@@ -79,5 +81,4 @@ Targe2Interface :: createInput(Domain *d, TimeStep *stepN) {
     OOFEM_LOG_INFO("Targe2 .bmf file created\n");
     return 1;
 }
-
 } // end namespace oofem

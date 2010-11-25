@@ -51,17 +51,16 @@
 #include "elementside.h"
 #include "mathfem.h"
 #ifndef __MAKEDEPEND
-#include <stdlib.h>
-#include <stdio.h>
+ #include <stdlib.h>
+ #include <stdio.h>
 #endif
 
 #ifdef __OOFEG
-#include "oofeggraphiccontext.h"
-#include "conTable.h"
+ #include "oofeggraphiccontext.h"
+ #include "conTable.h"
 #endif
 
 namespace oofem {
-
 CBSElement :: CBSElement(int n, Domain *aDomain) :
     FMElement(n, aDomain)
     // Constructor. Creates an element with number n, belonging to aDomain.
@@ -95,7 +94,7 @@ CBSElement ::  giveCharacteristicMatrix(FloatMatrix &answer,
 {
     if ( mtrx == PressureLhs ) {
         this->computePressureLhs(answer, tStep);
-    } else if ( mtrx == MassMatrix )  {
+    } else if ( mtrx == MassMatrix ) {
         this->computeConsistentMassMtrx(answer, tStep);
     } else {
         _error("giveCharacteristicMatrix: Unknown Type of characteristic mtrx.");
@@ -113,21 +112,21 @@ CBSElement ::  giveCharacteristicVector(FloatArray &answer, CharType mtrx, Value
 {
     if ( mtrx == LumpedMassMatrix ) {
         this->computeDiagonalMassMtrx(answer, tStep);
-    } else if ( mtrx == IntermediateConvectionTerm )  {
+    } else if ( mtrx == IntermediateConvectionTerm ) {
         this->computeConvectionTermsI(answer, tStep);
-    } else if ( mtrx == IntermediateDiffusionTerm )  {
+    } else if ( mtrx == IntermediateDiffusionTerm ) {
         this->computeDiffusionTermsI(answer, tStep);
-    } else if ( mtrx == DensityRhsVelocityTerms )  {
+    } else if ( mtrx == DensityRhsVelocityTerms ) {
         this->computeDensityRhsVelocityTerms(answer, tStep);
-    } else if ( mtrx == DensityRhsPressureTerms )  {
+    } else if ( mtrx == DensityRhsPressureTerms ) {
         this->computeDensityRhsPressureTerms(answer, tStep);
-    } else if ( mtrx == DensityPrescribedTractionPressure )  {
+    } else if ( mtrx == DensityPrescribedTractionPressure ) {
         this->computePrescribedTractionPressure(answer, tStep);
-    } else if ( mtrx == NumberOfNodalPrescribedTractionPressureContributions )  {
+    } else if ( mtrx == NumberOfNodalPrescribedTractionPressureContributions ) {
         this->computeNumberOfNodalPrescribedTractionPressureContributions(answer, tStep);
-    } else if ( mtrx == CorrectionRhs )  {
+    } else if ( mtrx == CorrectionRhs ) {
         this->computeCorrectionRhs(answer, tStep);
-    } else if ( mtrx == PrescribedVelocityRhsVector )  {
+    } else if ( mtrx == PrescribedVelocityRhsVector ) {
         this->computePrescribedTermsI(answer, mode, tStep);
     }
     //else if (mtrx == PrescribedDensityRhsVector)
@@ -317,5 +316,4 @@ CBSElement :: giveIntVarCompFullIndx(IntArray &answer, InternalStateType type)
  * }
  * }
  */
-
 } // end namespace oofem

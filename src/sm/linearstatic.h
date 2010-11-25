@@ -41,14 +41,13 @@
 #define linearstatic_h
 
 #ifndef __MAKEDEPEND
-#include <stdio.h>
+ #include <stdio.h>
 #endif
 #include "structengngmodel.h"
 #include "sparselinsystemnm.h"
 #include "sparsemtrx.h"
 
 namespace oofem {
-
 class LinearStatic : public StructuralEngngModel
 {
     /*
@@ -138,6 +137,5 @@ public:
     int estimateMaxPackSize(IntArray &commMap, CommunicationBuffer &buff, int packUnpackType);
 #endif
 };
-
 } // end namespace oofem
 #endif // linearstatic_h

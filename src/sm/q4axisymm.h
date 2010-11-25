@@ -43,7 +43,6 @@
 #include "structuralelement.h"
 
 namespace oofem {
-
 class Q4Axisymm : public StructuralElement
 {
     /*
@@ -86,7 +85,7 @@ public:
     classType       giveClassID()   const { return Q4AxisymmClass; }
     IRResultType initializeFrom(InputRecord *ir);
     integrationDomain  giveIntegrationDomain() { return _Square; }
-    MaterialMode          giveMaterialMode()  {return _3dMat;}
+    MaterialMode          giveMaterialMode()  { return _3dMat; }
 
 protected:
     void             computeBmatrixAt(GaussPoint *, FloatMatrix &, int = 1, int = ALL_STRAINS);
@@ -99,7 +98,6 @@ protected:
     // FloatMatrix*    ComputeConstitutiveMatrixAt (GaussPoint*);
     //
 };
-
 } // end namespace oofem
 #endif // q4axisymm_h
 

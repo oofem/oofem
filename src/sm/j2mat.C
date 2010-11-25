@@ -46,7 +46,6 @@
 #include "mathfem.h"
 
 namespace oofem {
-
 J2Mat :: J2Mat(int n, Domain *d) : MPlasticMaterial2(n, d)
 {
     //
@@ -259,7 +258,7 @@ J2Mat :: computeKGradientVector(FloatArray &answer, functType ftype, int isurf, 
         this->computeReducedStressGradientVector(reducedKinematicGrad, ftype, isurf, gp, fullStressVector, strainSpaceHardeningVariables);
         kcount = reducedKinematicGrad.giveSize();
         for ( i = 1; i <= kcount; i++ ) {
-            answer.at(i) = ( -1.0 ) * this->kinematicModuli *reducedKinematicGrad.at(i);
+            answer.at(i) = ( -1.0 ) * this->kinematicModuli * reducedKinematicGrad.at(i);
         }
     }
 
@@ -471,7 +470,7 @@ J2Mat :: computeJ2InvariantAt(const FloatArray &stressVector)
     v3 = ( ( stressVector.at(3) - stressVector.at(1) ) * ( stressVector.at(3) - stressVector.at(1) ) );
 
     answer = ( 1. / 6. ) * ( v1 + v2 + v3 ) + stressVector.at(4) * stressVector.at(4) +
-    stressVector.at(5) * stressVector.at(5) + stressVector.at(6) * stressVector.at(6);
+             stressVector.at(5) * stressVector.at(5) + stressVector.at(6) * stressVector.at(6);
 
     return answer;
 }
@@ -492,7 +491,7 @@ J2Mat :: giveStressBackVector(FloatArray &answer, GaussPoint *gp,
 
         /* kinematic hardening variables are first */
         for ( i = 1; i <= isize; i++ ) {
-            answer.at( mask.at(i) ) = ( -1.0 ) * this->kinematicModuli *strainSpaceHardeningVars.at(i);
+            answer.at( mask.at(i) ) = ( -1.0 ) * this->kinematicModuli * strainSpaceHardeningVars.at(i);
         }
     } else {
         answer.resize(0);
@@ -510,8 +509,7 @@ J2Mat :: giveIsotropicHardeningVar(GaussPoint *gp, const FloatArray &strainSpace
     } else {
         int rSize = this->giveSizeOfReducedHardeningVarsVector(gp);
 
-        return ( -1.0 ) * this->isotropicModuli *strainSpaceHardeningVars.at(rSize);
+        return ( -1.0 ) * this->isotropicModuli * strainSpaceHardeningVars.at(rSize);
     }
 }
-
 } // end namespace oofem

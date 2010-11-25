@@ -43,11 +43,9 @@
 #define debug_h
 
 namespace oofem {
-
 #ifndef DEBUG
 //#define DEBUG                     // activate or de-activate this line
 #endif
-
 } // end namespace oofem
 #endif // debug_h
 

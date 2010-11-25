@@ -48,23 +48,22 @@
 #include "verbose.h"
 
 #ifndef __MAKEDEPEND
-#include <limits.h>
-#include <string.h>
-#include <stdio.h>
+ #include <limits.h>
+ #include <string.h>
+ #include <stdio.h>
 #endif
 
 #ifdef __OOFEG
-#include "oofeggraphiccontext.h"
+ #include "oofeggraphiccontext.h"
 #endif
 
 #ifdef TIME_REPORT
-#ifndef __MAKEDEPEND
-#include <time.h>
-#endif
+ #ifndef __MAKEDEPEND
+  #include <time.h>
+ #endif
 #endif
 
 namespace oofem {
-
 StaggeredProblem :: StaggeredProblem(int i, EngngModel *_master) : EngngModel(i, _master)
     // constructor
 {
@@ -139,9 +138,11 @@ StaggeredProblem :: initializeFrom(InputRecord *ir)
     }
 
     IR_GIVE_OPTIONAL_FIELD(ir, stepMultiplier, IFT_StaggeredProblem_stepmultiplier, "stepmultiplier"); // Macro
-    if (stepMultiplier<=1)
+    if ( stepMultiplier <= 1 ) {
         _error("stepMultiplier must be >= 1!")
-    IR_GIVE_FIELD2(ir, problem_inputStream, IFT_StaggeredProblem_prob1, "prob1", MAX_FILENAME_LENGTH); // Macro
+        IR_GIVE_FIELD2(ir, problem_inputStream, IFT_StaggeredProblem_prob1, "prob1", MAX_FILENAME_LENGTH); // Macro
+    }
+
     strncpy(inputStreamNames [ 0 ], problem_inputStream, MAX_FILENAME_LENGTH);
     IR_GIVE_FIELD2(ir, problem_inputStream, IFT_StaggeredProblem_prob2, "prob2", MAX_FILENAME_LENGTH); // Macro
     strncpy(inputStreamNames [ 1 ], problem_inputStream, MAX_FILENAME_LENGTH);
@@ -198,14 +199,16 @@ double
 StaggeredProblem :: giveDeltaT(int n)
 {
     if ( giveDtTimeFunction() ) {
-        return deltaT *giveDtTimeFunction()->__at(n);
+        return deltaT * giveDtTimeFunction()->__at(n);
     }
+
     //in the first step the time increment is taken as the initial, user-specified value
-    if (stepMultiplier != 0 && currentStep != NULL) {
-    	if (currentStep->giveNumber()>=2 ){
-    		return (currentStep->giveTime()*(stepMultiplier-1));
-    	}
+    if ( stepMultiplier != 0 && currentStep != NULL ) {
+        if ( currentStep->giveNumber() >= 2 ) {
+            return ( currentStep->giveTime() * ( stepMultiplier - 1 ) );
+        }
     }
+
     return deltaT;
 }
 
@@ -234,7 +237,7 @@ StaggeredProblem :: giveNextStep()
         counter = currentStep->giveSolutionStateCounter() + 1;
     } else {
         // first step -> generate initial step
-        currentStep = new TimeStep( * giveSolutionStepWhenIcApply() );
+        currentStep = new TimeStep( *giveSolutionStepWhenIcApply() );
     }
 
     /*
@@ -399,5 +402,4 @@ void StaggeredProblem :: drawNodes(oofegGraphicContext &context) {
     }
 }
 #endif
-
 } // end namespace oofem
