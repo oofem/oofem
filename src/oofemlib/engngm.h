@@ -93,6 +93,7 @@
 #endif
 
 namespace oofem {
+
 class Domain;
 class NumericalMethod;
 class TimeStep;
@@ -390,7 +391,10 @@ public:
      *  @param not more than n bytes of src  are copied
      */
     char *giveOutputBaseFileName(char *dest, size_t n) { return strncpy(dest, dataOutputFileName, n - 1); }
-
+    /** Sets the base output file name. @see giveOutputBaseFileName
+     *  @param src output file name
+     */
+    void letOutputBaseFileNameBe(char *src) { strncpy(dataOutputFileName, src, MAX_FILENAME_LENGTH-1); }
     //FILE*              giveInputStream () ;
 
     /*
@@ -841,8 +845,20 @@ public:
      * @param type characterisctic components of type type are requsted from elements and assembled.
      * @param domain source domain
      */
-    virtual void       assemble(SparseMtrx *answer, TimeStep *tStep, EquationID ut,
-                                CharType type, const UnknownNumberingScheme &s, Domain *domain);
+    virtual void assemble(SparseMtrx *answer, TimeStep *tStep, EquationID ut,
+				CharType type, const UnknownNumberingScheme &s, Domain *domain);
+    /**
+     * Assembles characteristic matrix of required type into given sparse matrix.
+     * @param answer assembled matrix
+     * @param tStep time step, when answer is assembled.
+     * @param ut determines type of equation and corresponding element code numbers
+     * @param r_s determines the equation numbering scheme for the rows
+     * @param c_s determines the equation numbering scheme for the columns
+     * @param type characterisctic components of type type are requsted from elements and assembled.
+     * @param domain source domain
+     */
+    virtual void assemble(SparseMtrx *answer, TimeStep *tStep, EquationID ut,
+				CharType type, const UnknownNumberingScheme& rs, const UnknownNumberingScheme& cs, Domain *domain);
     /**
      * Assembles characteristic matrix of required type into given sparse matrix.
      * @param answer assembled matrix
@@ -853,8 +869,8 @@ public:
      * @param type characterisctic components of type type are requsted from elements and assembled.
      * @param domain source domain
      */
-    virtual void       assemble(SparseMtrx *answer, TimeStep *tStep, EquationID r_id, EquationID c_id,
-                                CharType type, const UnknownNumberingScheme &s, Domain *domain);
+    virtual void assemble(SparseMtrx *answer, TimeStep *tStep, EquationID r_id, EquationID c_id,
+				CharType type, const UnknownNumberingScheme &s, Domain *domain);
     /**
      * Assembles characteristic vector of required type into given vector.
      * @param answer assembled vector
@@ -873,8 +889,8 @@ protected:
      * from dofManagers and assembled using code numbers.
      */
     virtual void assembleVectorFromDofManagers(FloatArray &, TimeStep *, EquationID ut,
-                                               CharType type, ValueModeType mode,
-                                               const UnknownNumberingScheme &s, Domain *domain);
+					       CharType type, ValueModeType mode,
+					       const UnknownNumberingScheme &s, Domain *domain);
     /**
      * Assembles prescribed characteristic vector of required type from dofManagers into given vector.
      * @param answer assembled vector
@@ -977,7 +993,7 @@ public:
      * if updated formulation
      * is done, or on element level, when non linear contributions are computed.
      */
-    virtual fMode giveFormulation() { return UNKNOWN; } // for non-linear computation
+    virtual fMode giveFormulation() { return nonLinFormulation; }
     /*
      * Returns Load Response Mode of receiver.
      * This value indicates, whether nodes and elements should assemble
@@ -1069,7 +1085,8 @@ public:
     //@}
 };
 
-typedef EngngModel Problem;
+typedef EngngModel Problem; // Mark for removal. Unused and unnecessary (?) / Mikael
+
 } // end namespace oofem
 #endif // engngm_h
 
