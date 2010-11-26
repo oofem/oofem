@@ -3252,7 +3252,7 @@ Subdivision :: RS_Tetra :: importConnectivity(ConnectivityTable *ct)
      *                                                       nodes.at(1), nodes.at(2), nodes.at(3), nodes.at(4),
      *                                                       neghbours_base_elements.at(1), neghbours_base_elements.at(2),
      *                                                       neghbours_base_elements.at(3), neghbours_base_elements.at(4));
-     *#endif
+     ***#endif
      */
 }
 
@@ -3993,6 +3993,7 @@ Subdivision :: bisectMesh() {
     int in, remote_elems = 0;
     int myrank = this->giveRank();
     int problem_size = this->giveNumberOfProcesses();
+    int value;
 #endif
 
 #ifdef __PARALLEL_MODE
@@ -4064,9 +4065,9 @@ Subdivision :: bisectMesh() {
                 /*
                  * #ifdef __PARALLEL_MODE
                  * OOFEM_LOG_INFO("[%d] Subdivision: scheduling element %d[%d] for bisection, dens=%lf rdens=%lf\n", myrank, ie, elem->giveGlobalNumber(), iedensity, rdensity);
-                 *#else
+                 ***#else
                  * OOFEM_LOG_INFO("Subdivision: scheduling element %d for bisection, dens=%lf rdens=%lf\n", ie, iedensity, rdensity);
-                 *#endif
+                 ***#endif
                  */
             }
         }
@@ -4080,7 +4081,7 @@ Subdivision :: bisectMesh() {
 #endif
 
 #ifdef __PARALLEL_MODE
-        do {
+        for ( value = 0; value == 0; value = exchangeSharedIrregulars() ) {
 #endif
         // loop over subdivision queue to bisect all local elements there
         while ( !subdivqueue.empty() ) {
@@ -4100,7 +4101,8 @@ Subdivision :: bisectMesh() {
 
 #ifdef __PARALLEL_MODE
         // in parallel communicate with neighbours the irregular nodes on shared bondary
-	} while ( !exchangeSharedIrregulars() ) ;
+    }
+
 #endif
 
         int in;
