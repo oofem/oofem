@@ -4100,12 +4100,7 @@ Subdivision :: bisectMesh() {
 
 #ifdef __PARALLEL_MODE
         // in parallel communicate with neighbours the irregular nodes on shared bondary
-    }
-
-    while ( !exchangeSharedIrregulars() ) {
-        ;
-    }
-
+	} while ( !exchangeSharedIrregulars() ) ;
 #endif
 
         int in;
