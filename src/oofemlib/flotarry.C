@@ -172,7 +172,7 @@ FloatArray :: add(const double factor, const FloatArray &b)
     return;
 }
 
-void FloatArray :: substract(const FloatArray &src)
+void FloatArray :: subtract(const FloatArray &src)
 // Performs the operation a=a-src, where a stands for the receiver. If the
 // receiver's size is 0, adjusts its size to that of src. Returns the
 // receiver.
@@ -709,7 +709,7 @@ void FloatArray :: pY() const
     printf("];\n");
 }
 
-FloatArray *FloatArray :: setValuesToZero()
+/*FloatArray *FloatArray :: setValuesToZero()
 // zeroes all values to zero
 {
     int i;
@@ -745,7 +745,7 @@ FloatArray *FloatArray :: beCopyOf(FloatArray *arry)
     } else {
         return this;
     }
-}
+}*/
 
 
 

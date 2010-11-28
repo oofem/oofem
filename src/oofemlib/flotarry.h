@@ -138,8 +138,7 @@ public:
      * @param i position of coefficient in array
      */
     double       at(int i) const;
-#endif
-#ifndef DEBUG
+#else
     inline double &at(int i) { return values [ i - 1 ]; }
     inline double      at(int i) const { return values [ i - 1 ]; }
 #endif
@@ -248,13 +247,15 @@ public:
      * @param factor factor to be multiplied with FloatArray src
      * @param b will be multiplied by factor and added to receiver
      */
-    void  add(const double factor, const FloatArray &b);
+    void  add(double factor, const FloatArray &b);
     /**
      * Substracts array src to receiver. If the receiver's size is zero, it adjusts its size
      * to size of src array. If recever's size is nonzero and different from src
      * array size an error is generated.
      */
-    void  substract(const FloatArray &src);
+    void  subtract(const FloatArray &src);
+    /// @deprecated, @see subtract
+    void  substract(const FloatArray &src) { this->subtract(src); }
     /**
      * Extract sub vector form src array and stores the result into receiver.
      * @param src source vector for sub vector
@@ -278,6 +279,7 @@ public:
      * be added to receiver value at position loc(i)
      * (if this loc(i) value is nonzero).
      */
+    void assemble(const FloatArray &fe, const IntArray &loc);
     /**
      * copy the given vector as sub-vector to receiver. The sub-vector values will be set to receivers
      * values starting at at positions (si,...,si+src.size). The size of receiver will be
@@ -289,16 +291,24 @@ public:
     /// computes the sum of receiver values
     double sum(void);
 
-    void         assemble(const FloatArray &fe, const IntArray &loc);
+
     /**
      * Computes vector product of vectors given as parameters (v1 x v2) and stores the
      * result into receiver.
      */
     void  beVectorProductOf(const FloatArray &v1, const FloatArray &v2);
     /**
+     * Vector product (or cross product) of caller and v.
+     * Caller should have 3 elements.
+     * @param v A vector with 3 elements.
+     * @return  vector product of caller and v.
+     */
+    FloatArray *VectorProduct(FloatArray *v);
+    /**
      * Computes the distance between position represented by receiver and position given as parameter.
      */
     double       distance(const FloatArray &) const;
+    double       distance(const FloatArray *) const;
     /**
      * Computes the square of distance between position represented by receiver and position given as parameter.
      */
@@ -311,11 +321,14 @@ public:
      * @return modified receiver.
      */
     void  rotatedWith(FloatMatrix &r, char mode);
+    FloatArray *rotatedWith(FloatMatrix *r, char mode);
     /* old pointer like member functions */
     FloatArray *add(FloatArray *);
     FloatArray *substract(FloatArray *);
+    FloatArray *times(double);
     FloatArray *Add(FloatArray *b) { return this->GiveCopy()->add(b); }
     FloatArray *Substract(FloatArray *b) { return this->GiveCopy()->substract(b); }
+    FloatArray *Times(double) const;
     FloatArray *GiveCopy() const { return this->Times(1.); }
     FloatArray *GiveSubArray(IntArray *);
     double *givePointer()  const { return values; }         // see above
@@ -334,13 +347,9 @@ public:
      * @return contextIOResultType.
      */
     contextIOResultType          restoreYourself(DataStream *stream, ContextMode mode);
-    FloatArray *beCopyOf(FloatArray *);
-    FloatArray *setValuesToZero();
-    FloatArray *rotatedWith(FloatMatrix *r, char mode);
-    FloatArray *times(double);
-    FloatArray *Times(double) const;
-    double       distance(const FloatArray *) const;
-    FloatArray *VectorProduct(FloatArray *);
+    //FloatArray *beCopyOf(FloatArray *);
+    //FloatArray *setValuesToZero();
+
     /**
      * Normalizes receiver. Eucleidian norm is used, after operation receiver
      * will have this norm equal to 1.0.

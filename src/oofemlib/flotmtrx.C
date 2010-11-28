@@ -455,6 +455,31 @@ FloatMatrix :: addSubVectorRow(const FloatArray &src, int sr, int sc)
 }
 
 void
+FloatMatrix :: setColumn(const FloatArray &src, int c)
+{
+    int nr = src.giveSize();
+
+    if ( this->giveNumberOfRows() != nr || c < 1 || c > this->giveNumberOfColumns())
+        OOFEM_ERROR("Size mismatch");
+
+    double *P = this->values + c*nr;
+    double *srcP = src.givePointer();
+    for (int j = 0; j < nr; j++ )
+        *P++ = *srcP++;
+}
+
+void
+FloatMatrix :: copyColumn(FloatArray &dest, int c)
+{
+	int nr = this->giveNumberOfRows();
+    dest.resize(nr);
+    double *P = this->values + c*nr;
+    double *destP = dest.givePointer();
+    for (int j = 0; j < nr; j++ )
+        *destP++ = *P++;
+}
+
+void
 FloatMatrix :: copySubVectorRow(const FloatArray &src, int sr, int sc)
 {
     sc--;
@@ -755,8 +780,7 @@ FloatMatrix :: beSubMatrixOfSizeOf(const FloatMatrix &src, const IntArray &indx,
     return;
 }
 
-
-void FloatMatrix :: plus(const FloatMatrix &aMatrix)
+void FloatMatrix :: add(const FloatMatrix &aMatrix)
 // Adds aMatrix to the receiver. If the receiver has a null size,
 // adjusts its size to that of aMatrix. Returns the modified receiver.
 {
@@ -770,11 +794,8 @@ void FloatMatrix :: plus(const FloatMatrix &aMatrix)
         this->operator = ( aMatrix );
     } else {
 #     ifdef DEBUG
-        if ( n - nRows || m - nColumns ) {
-            fprintf(stderr, "FloatMatrix::plus : dimensions mismatch : (r1,c1)+(r2,c2) : (%d,%d)+(%d,%d)", nRows, nColumns, n, m);
-            exit(1);
-        }
-
+        if ( n != nRows || m != nColumns )
+            OOFEM_ERROR5(stderr, "FloatMatrix::add : dimensions mismatch : (r1,c1)+(r2,c2) : (%d,%d)+(%d,%d)", nRows, nColumns, n, m);
 #     endif
 
         P1 = values;
@@ -784,8 +805,33 @@ void FloatMatrix :: plus(const FloatMatrix &aMatrix)
             * P1++ += * P2++;
         }
     }
+}
 
-    return;
+void FloatMatrix :: subtract(const FloatMatrix &aMatrix)
+// Adds aMatrix to the receiver. If the receiver has a null size,
+// adjusts its size to that of aMatrix. Returns the modified receiver.
+{
+    register int i;
+    int n, m;
+    double *P1, *P2;
+
+    n = aMatrix.nRows;
+    m = aMatrix.nColumns;
+    if ( nRows * nColumns == 0 ) {
+        this->operator=(aMatrix);
+    } else {
+#     ifdef DEBUG
+        if ( n != nRows || m != nColumns )
+            OOFEM_ERROR5(stderr, "FloatMatrix::subtract : dimensions mismatch : (r1,c1)-(r2,c2) : (%d,%d)-(%d,%d)", nRows, nColumns, n, m);
+#     endif
+
+        P1 = values;
+        P2 = aMatrix.values;
+        i  = n * m;
+        while ( i-- ) {
+            * P1++ -= * P2++;
+        }
+    }
 }
 
 /*

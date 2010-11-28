@@ -263,8 +263,18 @@ public:
     void addSubVectorRow(const FloatArray &src, int sr, int sc);
     /** Copy (set)  given vector to receiver row sr, starting at column sc */
     void copySubVectorRow(const FloatArray &src, int sr, int sc);
-
-
+    /**
+     * Sets the values of the matrix in specified column. If matrix size is zero, the size is adjusted.
+     * @param src array to set at column c
+     * @param c column position
+     */
+    void setColumn(const FloatArray &src, int c);
+    /**
+     * Fetches the values from the specified column. Output array is resized to fit column.
+     * @param dest array to copy values to
+     * @param c column position to copy
+     */
+    void copyColumn(FloatArray &dest, int c);
     /**
      * Modifies receiver to become inverse of given parameter. Size of receiver will be adjusted.
      */
@@ -297,18 +307,22 @@ public:
      * @param dV double value
      */
     void          plusProductUnsym(const FloatMatrix &a, const FloatMatrix &b, double dV);
-    /**
-     * Adds matrix to the receiver. If receiver has zero size, size is accordingly adjusted.
-     * @param aMatrix matrix to be added.
+    // @deprecated see @add
+    void plus(const FloatMatrix &aMatrix) { this->add(aMatrix); }
+    /** Adds matrix to the receiver.  If receiver has zero size, size is accordingly adjusted.
+     * @param a matrix to be added.
      */
-    void          plus(const FloatMatrix &aMatrix);
+    void add(const FloatMatrix &a);
+    /** Subtracts matrix from the receiver.
+     * @param a matrix to be subtract.
+     */
+    void subtract(const FloatMatrix &a);
     /**
      * Assigns to receiver one column or one row matrix containing vector.
      * @param transposed if (transposed == 0) then (vector->giveSize(),1) FloatMatrix is assigned
      * else (1,vector->giveSize()) FloatMatrix is assigned.
      */
     void          initFromVector(const FloatArray &vector, int transposed);
-    // void          add (const FloatMatrix& src);
     /**
      * Initializes the lower half of the receiver according to the upper half.
      */
