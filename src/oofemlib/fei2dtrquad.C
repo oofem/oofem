@@ -261,7 +261,37 @@ void
 FEI2dTrQuad :: edgeEvaldNdx(FloatMatrix &answer, int iedge,
                             const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time)
 {
-    OOFEM_ERROR("FEI2dTrQuad :: edgeEvaldNdx: not implemented");
+	// I think it at least should return both dNds and J. Both are almost always needed. 
+	// In fact, dxdxi is also needed sometimes (surface tension)
+	/*
+	IntArray edgeNodes;
+	FloatArray J(2);
+	FloatArray dNdxi(3);
+	FloatArray dxdxi(2);
+	double xi = lcoords.at(1);
+	this->computeLocalEdgeMapping(edgeNodes, iedge);
+	dNdxi.at(1) = xi-0.5;
+	dNdxi.at(2) = xi+0.5;
+	dNdxi.at(3) = -2*xi;
+
+	dxdxi.at(1) = dNdxi.at(1)*cellgeo.giveVertexCoordinates(edgeNodes.at(1))->at(xind) +
+                  dNdxi.at(2)*cellgeo.giveVertexCoordinates(edgeNodes.at(2))->at(xind) +
+                  dNdxi.at(3)*cellgeo.giveVertexCoordinates(edgeNodes.at(3))->at(xind);
+	dxdxi.at(2) = dNdxi.at(1)*cellgeo.giveVertexCoordinates(edgeNodes.at(1))->at(yind) +
+	              dNdxi.at(2)*cellgeo.giveVertexCoordinates(edgeNodes.at(2))->at(yind) +
+	              dNdxi.at(3)*cellgeo.giveVertexCoordinates(edgeNodes.at(3))->at(yind);
+
+	double J = dxdxi.computeNorm();
+	answer = dNdxi;
+	answer.times(1/J);
+	return J;
+	*/
+    double xi = lcoords.at(1);
+    double J = edgeGiveTransformationJacobian(iedge,lcoords, cellgeo,time);
+    answer.resize(3,1);
+    answer(0,0) = (xi-0.5)/J;
+    answer(1,0) = (xi+0.5)/J;
+    answer(2,0) = -2*xi/J;
 }
 
 void
@@ -313,11 +343,24 @@ FEI2dTrQuad :: computeLocalEdgeMapping(IntArray &edgeNodes, int iedge)
 double
 FEI2dTrQuad :: edgeGiveTransformationJacobian(int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time)
 {
-    OOFEM_ERROR("FEI2dTrQuad :: edgeGiveTransformationJacobian: not implemented");
-    return 0.0;
+	IntArray edgeNodes;
+	double xi = lcoords.at(1);
+	this->computeLocalEdgeMapping(edgeNodes, iedge);
+	FloatArray dNdxi(3);
+	dNdxi.at(1) = xi-0.5;
+	dNdxi.at(2) = xi+0.5;
+	dNdxi.at(3) = -2*xi;
+
+	FloatArray dxdxi(2);
+	dxdxi.at(1) = dNdxi.at(1)*cellgeo.giveVertexCoordinates(edgeNodes.at(1))->at(xind) +
+                  dNdxi.at(2)*cellgeo.giveVertexCoordinates(edgeNodes.at(2))->at(xind) +
+                  dNdxi.at(3)*cellgeo.giveVertexCoordinates(edgeNodes.at(3))->at(xind);
+	dxdxi.at(2) = dNdxi.at(1)*cellgeo.giveVertexCoordinates(edgeNodes.at(1))->at(yind) +
+	              dNdxi.at(2)*cellgeo.giveVertexCoordinates(edgeNodes.at(2))->at(yind) +
+	              dNdxi.at(3)*cellgeo.giveVertexCoordinates(edgeNodes.at(3))->at(yind);
+
+	return dxdxi.computeNorm();
 }
-
-
 
 void
 FEI2dTrQuad :: giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
