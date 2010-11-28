@@ -45,7 +45,7 @@ namespace oofem {
 // size of token buffer, which holds tokens
 #define OOFEM_MAX_TOKENS_LENGTH 32768
 /// Maximum keyword name string length.
-#define MAX_NAME_LENGTH 30
+#define MAX_NAME_LENGTH 40
 /// Maximum file name path string length.
 #define MAX_FILENAME_LENGTH 120
 /// Maximum class name string length

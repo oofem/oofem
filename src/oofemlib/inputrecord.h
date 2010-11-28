@@ -386,8 +386,7 @@ enum InputFieldType {
     IFT_StokesFlow_smtype,
     IFT_StokesFlow_deltat,
 
-    IFT_StokesFlow_updatescheme,
-    IFT_StokesFlow_homogenizationtype,
+    IFT_StokesFlowStressHomogenization_homogenizationtype,
 
     IFT_SurfaceTension_gamma_s,
 

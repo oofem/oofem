@@ -269,15 +269,16 @@
 #ifdef __FM_MODULE
 // Emodels
  #include "cbs.h"
-//#include "stokesflow.h"
-//#include "stokesflowstresshomogenization.h"
+ #include "stokesflow.h"
+ #include "stokesflowstresshomogenization.h"
 // Elements
  #include "tr1_2d_cbs.h"
-//#include "tr21stokes.h"
-//#include "linesurfacetension.h"
-//#include "line2surfacetension.h"
+ #include "tr21stokes.h"
+ #include "linesurfacetension.h"
+ #include "line2surfacetension.h"
 // materials
  #include "newtonianfluid.h"
+ #include "fe2sinteringmaterial.h"
 // boundary conditions
  #include "tractionpressurebc.h"
 
@@ -444,12 +445,12 @@ Element *CreateUsrDefElementOfType(char *aClass, int number, Domain *domain)
         newElement = new PY1_3D_SUPG(number, domain);
     } else if ( !strncasecmp(aClass, "tr21supg", 8) ) {
         newElement = new TR21_2D_SUPG(number, domain);
-        //} else if ( !strncasecmp(aClass, "tr21stokes", 10)) {
-        //    newElement = new Tr21Stokes(number, domain);
-        //} else if ( !strncasecmp(aClass, "surfacetension2dq2", 18)) {
-        //    newElement = new SurfaceTension2DQ2(number, domain);
-        //} else if ( !strncasecmp(aClass, "surfacetension2d", 16)) {
-        //    newElement = new SurfaceTension2D(number, domain);
+    } else if ( !strncasecmp(aClass, "tr21stokes", 10)) {
+        newElement = new Tr21Stokes(number, domain);
+    } else if ( !strncasecmp(aClass, "line2surfacetension", 19)) {
+        newElement = new Line2SurfaceTension(number, domain);
+    } else if ( !strncasecmp(aClass, "linesurfacetension", 18)) {
+        newElement = new LineSurfaceTension(number, domain);
     }
 
 #endif //__FM_MODULE
@@ -542,10 +543,10 @@ EngngModel *CreateUsrDefEngngModelOfType(char *aClass, int number, EngngModel *m
         newEModel = new CBS(number, master);
     } else if ( !strncasecmp(aClass, "supg", 4) ) {
         newEModel = new SUPG(number, master);
-        //} else if ( !strncasecmp(aClass, "stokesflowstresshomogenization", 30) ) {
-        //    newEModel = new StokesFlowStressHomogenization(number, master);
-        //} else if ( !strncasecmp(aClass, "stokesflow", 10) ) {
-        //    newEModel = new StokesFlow(number, master);
+    } else if ( !strncasecmp(aClass, "stokesflowstresshomogenization", 30) ) {
+        newEModel = new StokesFlowStressHomogenization(number, master);
+    } else if ( !strncasecmp(aClass, "stokesflow", 10) ) {
+        newEModel = new StokesFlow(number, master);
     }
 
 #endif //__FM_MODULE
@@ -734,7 +735,10 @@ Material *CreateUsrDefMaterialOfType(char *aClass, int number, Domain *domain)
         newMaterial = new BinghamFluidMaterial2(number, domain);
     } else if ( !strncasecmp(aClass, "binghamfluid", 12) ) {
         newMaterial = new BinghamFluidMaterial2(number, domain);
+    } else if ( !strncasecmp(aClass, "fe2sinteringmaterial", 20) ) {
+        newMaterial = new FE2SinteringMaterial(number, domain);
     }
+
 
 #endif // __FM_MODULE
 
