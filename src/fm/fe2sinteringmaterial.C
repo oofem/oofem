@@ -204,7 +204,6 @@ void FE2SinteringMaterialStatus::printOutputAt(FILE *file, TimeStep *tNow)
 
 void FE2SinteringMaterialStatus::updateYourself(TimeStep *tStep)
 {
-    this->haveTangent = false;
     this->oldStrainVector = this->strainVector;
     StructuralMaterialStatus::updateYourself(tStep);
     this->volume += strainVector.at(1) + strainVector.at(2) + strainVector.at(3); // must be after strain is updated.
