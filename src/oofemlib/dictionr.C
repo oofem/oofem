@@ -129,7 +129,7 @@ double &Dictionary :: at(int aKey)
 }
 
 
-int Dictionary :: includes(int aKey)
+bool Dictionary :: includes(int aKey)
 // Returns True if the receiver contains a pair which key is aKey, else
 // returns False.
 {
@@ -138,13 +138,13 @@ int Dictionary :: includes(int aKey)
     next = first;
     while ( next ) {
         if ( next->giveKey() == aKey ) {
-            return TRUE;
+            return true;
         }
 
         next = next->giveNext();
     }
 
-    return FALSE;
+    return false;
 }
 
 

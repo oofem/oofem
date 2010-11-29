@@ -59,25 +59,14 @@ class DataStream;
 
 /**
  * This class implements a linked list whose entries are Pairs (see below).
+ *
+ * Dictionaries are typically used by degrees of freedom for storing their unknowns.
  * A dictionary stores its pairs in a linked list form. It knows the first
  * pair (attribute 'first') of the list. It also knows the last one (attri-
  * bute 'last') in order to append fastly an additional pair.
  */
 class Dictionary
 {
-    /*
-     * This class implements a linked list whose entries are Pairs (see below).
-     * Dictionaries are typically used by degrees of freedom for storing their
-     * unknowns.
-     * DESCRIPTION :
-     * A dictionary stores its pairs in a linked list form. It knows the first
-     * pair (attribute 'first') of the list. It also knows the last one (attri-
-     * bute 'last') in order to append fastly an additional pair.
-     * TASK :
-     * Storing pairs (method 'add') and returning the value of a pair (method
-     * 'at').
-     */
-
 protected:
     /// First pair
     Pair *first;
@@ -93,33 +82,32 @@ public:
     /// Destructor
     ~Dictionary();
 
-    /**
-     * Clears the receiver
-     */
+    /// Clears the receiver.
     void clear();
     /**
      * Adds a new Pair with given keyword and value into receiver.
+     * @param aKey key of new pair
+     * @param value value of new pair
      * @return new Pair with given keyword and value
      */
-    Pair *add(int, double);
+    Pair *add(int aKey, double value);
     /**
-     * Returns the value of the pair which key is aKey. If such pair does
-     * not exist, creates it and assign value 0.
+     * Returns the value of the pair which key is aKey.
+     * If requested key doesn't exist, it is created with assigned value 0.
+     * @param aKey key for pair
+     * @return reference to value of pair with given key
      */
-    double &at(int);
+    double &at(int aKey);
     /**
-     * Returns True if the receiver contains a pair which key is aKey, else
-     * returns False.
+     * Checks if dictionary includes given key
+     * @param aKey dictionary key
+     * @return True if reciever contains pair with given key, otherwise false.
      */
-    int          includes(int);
-    /**
-     * Prints the receiver on screen.
-     */
-    void         printYourself();
-    /**
-     * Formats itself as string.
-     */
-    void         formatAsString(std :: string &str);
+    bool includes(int aKey);
+    /// Prints the receiver on screen.
+    void printYourself();
+    /// Formats itself as string.
+    void formatAsString(std :: string &str);
     /// Returns number of pairs of receiver.
     int giveSize();
 
@@ -138,11 +126,3 @@ public:
 };
 } // end namespace oofem
 #endif // dictionr_h
-
-
-
-
-
-
-
-
