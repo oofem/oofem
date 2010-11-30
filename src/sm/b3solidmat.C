@@ -325,7 +325,8 @@ B3SolidMaterial :: computeCharTimes()
 	this->endOfTimeOfInterest = RheoChainMaterial :: giveEndOfTimeOfInterest();
 
 	j = 1;
-	while ( 0.5 * this->endOfTimeOfInterest >= Tau1 * pow10(j-1) ) {
+	//while ( 0.5 * this->endOfTimeOfInterest >= Tau1 * pow10(j-1) ) {
+	while ( 0.5 * this->endOfTimeOfInterest >= Tau1 * pow(10.0, (double) (j-1)) ) {  
 		j++;
 	}
 

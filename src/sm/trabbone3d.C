@@ -534,7 +534,7 @@ TrabBone3D :: giveRealStressVector (FloatArray& answer, MatResponseForm form, Ga
   totalStress = (1-tempDam)*effStress;
 
   for(i=1;i<=6;i++){
-     if (sqrt(totalStress.at(i)*totalStress.at(i))< pow(10,-16))
+     if (sqrt(totalStress.at(i)*totalStress.at(i))< pow(10.0,-16.0))
 	totalStress.at(i)=0.;
     }
 
