@@ -136,9 +136,9 @@ public:
     /**
      * Returns nonzero if receiver representing b.c. is imposed at given time, otherwise returns zero.
      * @param tStep time step representing time when receiver is tested.
-     * @return nonzero if imposed for given time, zero otherwise.
+     * @return true if imposed for given time, false otherwise.
      */
-    int     isImposed(TimeStep *);
+    bool isImposed(TimeStep *);
     /**
      * Returns receiver load type. It distinguish particular boundary conditions according to
      * their "physical" meaning (like StructuralTemperatureLoadLT, StructuralLoadLT).

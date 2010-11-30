@@ -576,7 +576,7 @@ void FloatArray :: hardResize(int n)
 
 
 
-int FloatArray :: containsOnlyZeroes() const
+bool FloatArray :: containsOnlyZeroes() const
 // Returns True if all coefficients of the receiver are 0, else returns
 // False.
 {
@@ -587,11 +587,11 @@ int FloatArray :: containsOnlyZeroes() const
     i = size;
     while ( i-- ) {
         if ( * p++ != 0. ) {
-            return FALSE;
+            return false;
         }
     }
 
-    return TRUE;
+    return true;
 }
 
 

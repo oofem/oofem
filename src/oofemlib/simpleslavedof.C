@@ -149,7 +149,7 @@ double SimpleSlaveDof :: giveUnknown(PrimaryField &field, ValueModeType mode, Ti
 }
 
 
-int SimpleSlaveDof :: hasBc(TimeStep *tStep)
+bool SimpleSlaveDof :: hasBc(TimeStep *tStep)
 // Returns True if the receiver is subjected to a boundary condition, else
 // returns False. If necessary, reads the answer in the data file.
 {
@@ -157,7 +157,7 @@ int SimpleSlaveDof :: hasBc(TimeStep *tStep)
 }
 
 
-int SimpleSlaveDof :: hasIc()
+bool SimpleSlaveDof :: hasIc()
 // Returns True if the receiver is subjected to an initial condition,
 // else returns False.
 {
@@ -165,7 +165,7 @@ int SimpleSlaveDof :: hasIc()
 }
 
 
-int SimpleSlaveDof :: hasIcOn(ValueModeType u)
+bool SimpleSlaveDof :: hasIcOn(ValueModeType u)
 // Returns True if the unknown 'u' (e.g., the displacement 'd') of the
 // receiver is subjected to an initial condition, else returns False.
 {

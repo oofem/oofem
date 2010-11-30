@@ -105,20 +105,20 @@ public:
      * HangingDof can not be subjected to bc, it is only mapping to master
      * @return returns NULL if no BC applied, otherwise pointer to correcpondig BC.
      */
-    int hasBc(TimeStep *tStep) { return 0; }
+    bool hasBc(TimeStep *tStep) { return false; }
 
     /**
      * Returns initial condition of dof if it is prescribed.
      * HangingDof can not be subjected to ic, it is only mapping to master
      * @see MasterDof::hasIc
      */
-    int hasIc() { return 0; }
+    bool hasIc() { return false; }
 
     /**
      * RigidArmSlaveDof can not be subjected to ic - it is only mapping to master.
      * @see MasterDof::hasIc
      */
-    int hasIcOn(ValueModeType) { return 0; }
+    bool hasIcOn(ValueModeType) { return false; }
 
     /** Returns the id of associated boundary condition, if there is any.
      * Used only for printing purposes. In general, id could not be used

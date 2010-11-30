@@ -200,7 +200,7 @@ public:
     /**
      * Returns nonzero if all coefficients of the receiver are 0, else returns zero.
      */
-    int          containsOnlyZeroes() const;
+    bool containsOnlyZeroes() const;
     /// Returns the size of receiver.
     int          giveSize() const { return size; }
     /// Returns nonzero if receiver is not empty.

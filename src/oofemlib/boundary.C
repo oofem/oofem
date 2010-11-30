@@ -104,19 +104,17 @@ double BoundaryCondition :: give(Dof *dof, ValueModeType mode, TimeStep *stepN)
 }
 
 
-int BoundaryCondition :: isImposed(TimeStep *tStep)
+bool BoundaryCondition :: isImposed(TimeStep *tStep)
 {
     // returs a value of isImposedTimeFunction, indicating whether b.c. is imposed or not
     // in given time (nonzero indicates imposed b.c.).
 
     if ( isImposedTimeFunction ) {
-        int flag;
-        flag = ( domain->giveLoadTimeFunction(isImposedTimeFunction)->evaluate(tStep, VM_Total) != 0. );
-        return flag;
+        return ( domain->giveLoadTimeFunction(isImposedTimeFunction)->evaluate(tStep, VM_Total) != 0. );
     } else {
         // zero value indicates default behaviour -> b.c. is imposed
         // anytime
-        return 1;
+        return true;
     }
 }
 

@@ -319,21 +319,21 @@ public:
     /**
      * Test if Dof has active boundary condition.
      * @param tStep time when test is evaluated.
-     * @return nonzero if active BC exists, zero otherwise.
+     * @return true if active BC exists, false otherwise.
      */
-    virtual int                 hasBc(TimeStep *tStep)  = 0;
+    virtual bool hasBc(TimeStep *tStep)  = 0;
     /**
      * Test if Dof has initial condition.
-     * @return nonzero if IC exists, zero otherwise.
+     * @return true if IC exists, false otherwise.
      */
-    virtual int                 hasIc()  = 0;
+    virtual bool hasIc()  = 0;
     /**
      * Test if Dof has initial condition of required ValueModeType.
      * @param u type of required IC
-     * @return nonzero if IC exists, zero otherwise.
+     * @return true if IC exists, false otherwise.
      * @see ValueModeType.
      */
-    virtual int                 hasIcOn(ValueModeType u)  = 0;
+    virtual bool hasIcOn(ValueModeType u)  = 0;
     /**
      * Returns DofID value of receiver, which determines type of
      * of unknown connected to receiver (e.g., u-displacement, v-displacement, ...).
@@ -354,9 +354,9 @@ public:
      * Tests if receiver is primary DOF. Dof is primary if it posses or directly represent
      * certain DOF. If it is linked somehow (rigid arm, doubled node) to other DOF(s) then it is not
      * primary DOF.
-     * @return nonzero if receiver is primary DOF, zero otherwise (default).
+     * @return true if receiver is primary DOF, false otherwise (default).
      */
-    virtual int            isPrimaryDof() { return 0; }
+    virtual bool isPrimaryDof() { return false; }
     /** Returns the id of associated boundary condition, if there is any.
      * Used only for printing purposes. In general, id could not be used
      * to decide whether bc is active. Use appropriate services instead.

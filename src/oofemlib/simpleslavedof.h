@@ -179,18 +179,17 @@ public:
      * Slave simply forwards this message to master.
      * @return returns NULL if no BC applied, otherwise pointer to correcpondig BC.
      */
-    int                 hasBc(TimeStep *tStep);
+    bool hasBc(TimeStep *tStep);
     /**
      * Slave simply forwards this message to master.
      * @see MasterDof::hasIc
      */
-
-    int                 hasIc();
+    bool hasIc();
     /**
      * Slave simply forwards this message to master.
      * @see MasterDof::hasIc
      */
-    int hasIcOn(ValueModeType);
+    bool hasIcOn(ValueModeType);
     /** Returns the id of associated boundary condition, if there is any.
      * Used only for printing purposes. In general, id could not be used
      * to decide whether bc is active. Use appropriate services instead.

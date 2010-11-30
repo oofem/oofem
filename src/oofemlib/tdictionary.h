@@ -117,8 +117,8 @@ public:
 
     TPair< Key, T > *add(Key, T *);
     T *at(Key);
-    int includes(Key);
-    void         clear();
+    bool includes(Key);
+    void clear();
 
 protected:
     friend class TDictionaryIterator< Key, T >;
@@ -196,7 +196,7 @@ template< class Key, class T >T *TDictionary< Key, T > :: at(Key aKey)
     return NULL;
 }
 
-template< class Key, class T >int TDictionary< Key, T > :: includes(Key aKey)
+template< class Key, class T >bool TDictionary< Key, T > :: includes(Key aKey)
 // Returns True if the receiver contains a pair which key is aKey, else
 // returns False.
 {
@@ -205,13 +205,13 @@ template< class Key, class T >int TDictionary< Key, T > :: includes(Key aKey)
     next = first;
     while ( next ) {
         if ( next->giveKey() == aKey ) {
-            return TRUE;
+            return true;
         }
 
         next = next->giveNext();
     }
 
-    return FALSE;
+    return false;
 }
 
 

@@ -276,13 +276,13 @@ double MasterDof :: giveUnknown(PrimaryField &field, ValueModeType mode, TimeSte
 }
 
 
-int MasterDof :: hasBc(TimeStep *tStep)
+bool MasterDof :: hasBc(TimeStep *tStep)
 // Returns True if the receiver is subjected to a boundary condition, else
 // returns False. If necessary, reads the answer in the data file.
 {
 #ifdef __PARALLEL_MODE
     if ( dofManager->giveParallelMode() == DofManager_null ) {
-        return 1;
+        return true;
     }
 
 #endif
@@ -295,12 +295,12 @@ int MasterDof :: hasBc(TimeStep *tStep)
     if ( bc ) {
         return this->giveBc()->isImposed(tStep);
     } else {
-        return 0;
+        return false;
     }
 }
 
 
-int MasterDof :: hasIc()
+bool MasterDof :: hasIc()
 // Returns True if the receiver is subjected to an initial condition,
 // else returns False.
 {
@@ -309,18 +309,18 @@ int MasterDof :: hasIc()
         exit(0);
     }
 
-    return ic;
+    return ic > 0;
 }
 
 
-int MasterDof :: hasIcOn(ValueModeType u)
+bool MasterDof :: hasIcOn(ValueModeType u)
 // Returns True if the unknown 'u' (e.g., the displacement 'd') of the
 // receiver is subjected to an initial condition, else returns False.
 {
     if ( this->hasIc() ) {
         return this->giveIc()->hasConditionOn(u);
     } else {
-        return FALSE;
+        return false;
     }
 }
 
