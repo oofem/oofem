@@ -105,7 +105,7 @@ public:
     /**
      * Returns True if the receiver has a non-null i-th entry, else returns False.
      */
-    int             includes(int);
+    bool includes(int i);
     /// Returns True if receiver is empty
     int             isEmpty()           { return ( size == 0 ); }
     /// Returns True if receiver is not empty
@@ -227,13 +227,13 @@ AList< T > :: growTo(int newSize)
 
 
 
-template< class T >int
+template< class T >bool
 AList< T > :: includes(int i)
 // Returns True if the receiver has a non-null i-th entry, else returns
 // False.
 {
     if ( i > size ) {
-        return FALSE;
+        return false;
     } else {
         return ( values [ i - 1 ] != NULL );
     }
