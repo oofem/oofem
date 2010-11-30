@@ -11,7 +11,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2010   Borek Patzak
  *
  *
  *
@@ -41,10 +41,9 @@
  #include <stdlib.h>
  #include <string.h>
 #endif
-#include "compiler.h"
 
 namespace oofem {
-double Parser :: expr(int get)
+double Parser :: expr(bool get)
 {
     // get indicates whether there is need to to call get_token() to get next token.
 
@@ -57,10 +56,10 @@ double Parser :: expr(int get)
     for ( ; ; ) { // forever
         switch ( curr_tok ) {
         case PLUS:
-            left += term(TRUE);
+            left += term(true);
             break;
         case MINUS:
-            left -= term(TRUE);
+            left -= term(true);
             break;
         default:
             return left;
@@ -68,37 +67,37 @@ double Parser :: expr(int get)
     }
 }
 
-double Parser :: term(int get) // multiply and divide
+double Parser :: term(bool get) // multiply and divide
 {
     double d, left = prim(get);
 
     for ( ; ; ) { // forever
         switch ( curr_tok ) {
         case BOOL_EQ:
-            left = ( left == prim(TRUE) );
+            left = ( left == prim(true) );
             break;
         case BOOL_LE:
-            left = ( left <= prim(TRUE) );
+            left = ( left <= prim(true) );
             break;
         case BOOL_LT:
-            left = ( left < prim(TRUE) );
+            left = ( left < prim(true) );
             break;
         case BOOL_GE:
-            left = ( left >= prim(TRUE) );
+            left = ( left >= prim(true) );
             break;
         case BOOL_GT:
-            left = ( left > prim(TRUE) );
+            left = ( left > prim(true) );
             break;
         case MUL:
-            left *= prim(TRUE);
+            left *= prim(true);
             break;
         case DIV:
-            if ( ( d = prim(TRUE) ) ) {
+            if ( ( d = prim(true) ) ) {
                 left /= d;
                 break;
             }
-
-            return error("divide by 0");
+            error("divide by 0");
+            return 1;
 
         default:
             return left;
@@ -106,9 +105,7 @@ double Parser :: term(int get) // multiply and divide
     }
 }
 
-
-
-double Parser :: prim(int get) // handle primaries
+double Parser :: prim(bool get) // handle primaries
 {
     if ( get ) {
         get_token();
@@ -124,24 +121,25 @@ double Parser :: prim(int get) // handle primaries
     case NAME:
     {
         //   double &v = table[string_value];
-        //   if (get_token() == ASSIGN) v = expr (TRUE);
+        //   if (get_token() == ASSIGN) v = expr (true);
         //   return v;
         if ( get_token() == ASSIGN ) {
             name *n = insert(string_value);
-            n->value = expr(TRUE);
+            n->value = expr(true);
             return n->value;
         }
 
         return look(string_value)->value;
     }
     case MINUS:  // unary minus
-        return -prim(TRUE);
+        return -prim(true);
 
     case LP:
     {
-        double e = expr(TRUE);
+        double e = expr(true);
         if ( curr_tok != RP ) {
-            return error(") expected");
+            error(") expected");
+            return 1;
         }
 
         get_token(); // eat ')'
@@ -149,50 +147,51 @@ double Parser :: prim(int get) // handle primaries
     }
     case SQRT_FUNC:
     {
-        double e = agr(TRUE);
+        double e = agr(true);
         return sqrt(e);
     }
     case SIN_FUNC:
     {
-        double e = agr(TRUE);
+        double e = agr(true);
         return sin(e);
     }
     case COS_FUNC:
     {
-        double e = agr(TRUE);
+        double e = agr(true);
         return cos(e);
     }
     case TAN_FUNC:
     {
-        double e = agr(TRUE);
+        double e = agr(true);
         return tan(e);
     }
     case ATAN_FUNC:
     {
-        double e = agr(TRUE);
+        double e = agr(true);
         return atan(e);
     }
     case ASIN_FUNC:
     {
-        double e = agr(TRUE);
+        double e = agr(true);
         return asin(e);
     }
     case ACOS_FUNC:
     {
-        double e = agr(TRUE);
+        double e = agr(true);
         return acos(e);
     }
     case EXP_FUNC:
     {
-        double e = agr(TRUE);
+        double e = agr(true);
         return exp(e);
     }
     default:
-        return error("primary expected");
+        error("primary expected");
+        return 1;
     }
 }
 
-double Parser :: agr(int get)
+double Parser :: agr(bool get)
 {
     if ( get ) {
         get_token();
@@ -201,16 +200,18 @@ double Parser :: agr(int get)
     switch ( curr_tok ) {
     case LP:
     {
-        double e = expr(TRUE);
+        double e = expr(true);
         if ( curr_tok != RP ) {
-            return error(") expected");
+            error(") expected");
+            return 1;
         }
 
         get_token(); // eat ')'
         return e;
     }
     default:
-        return error("function argument expected");
+        error("function argument expected");
+        return 1;
     }
 }
 
@@ -358,11 +359,10 @@ Parser :: name *Parser :: look(const char *p, int ins) {
 }
 
 
-double Parser :: error(const char *s)
+void Parser :: error(const char *s)
 {
     no_of_errors++;
-    OOFEM_WARNING2("Parser: erorr: %s", s);
-    return 1;
+    OOFEM_WARNING2("Parser :: error: %s", s);
 }
 
 double Parser :: eval(const char *string, int &err) {
@@ -370,7 +370,7 @@ double Parser :: eval(const char *string, int &err) {
     double result;
     no_of_errors = 0;
     do {
-        result = expr(TRUE);
+        result = expr(true);
     } while ( curr_tok != END );
 
     err = no_of_errors;

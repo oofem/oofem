@@ -11,7 +11,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2010   Borek Patzak
  *
  *
  *
@@ -45,6 +45,16 @@ namespace oofem {
 #define Parser_CMD_LENGTH 1024
 #define Parser_TBLSZ 23
 
+/**
+ * Class for evaluating mathematical expressions in strings.
+ * Strings should be in MATLAB syntax. The parser understands variable names with values set by "x=expression;"
+ * The following binary operators are recognized: < > == + - * /
+ * and the following functions: sqrt, sin, cos, tan, atan, asin, acos, exp,
+ * as well as parantheses ( )
+ *
+ * Example string:
+ * x=3;y=7;sqrt(x*(x/y+3))
+ */
 class Parser
 {
 public:
@@ -79,11 +89,11 @@ private:
 
     name *look(const char *p, int ins = 0);
     inline name *insert(const char *s) { return look(s, 1); }
-    double error(const char *s);
-    double expr(int get);
-    double term(int get);
-    double prim(int get);
-    double agr(int get);
+    void error(const char *s);
+    double expr(bool get);
+    double term(bool get);
+    double prim(bool get);
+    double agr(bool get);
     Token_value get_token();
 };
 } // end namespace oofem
