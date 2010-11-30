@@ -131,7 +131,7 @@ void Dof :: printYourself()
 }
 
 
-void Dof :: error(const char *file, int line, const char *format, ...)
+void Dof :: error(const char *file, int line, const char *format, ...) const
 {
     char buffer [ MAX_ERROR_MSG_LENGTH ];
     va_list args;

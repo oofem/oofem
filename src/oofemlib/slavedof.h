@@ -79,7 +79,7 @@ public:
      * contributing to several master dofs (diplacement to displacement and rotations in master).
      * @return prints error msg and exits.
      */
-    int __giveEquationNumber(void) {
+    int __giveEquationNumber(void) const {
         _error("giveEquationNumber: undefined");
         return 0;
     }

@@ -150,7 +150,7 @@ public:
      * when initializing code numbers in EngngMode, designer should alter equation
      * numbering strategy.
      */
-    virtual int                 __giveEquationNumber();
+    virtual int                 __giveEquationNumber() const ;
     /**
      * Returns prescribed equation number of receiver. If Dof has inactive BC,
      * returned prescribed equation number is zero.

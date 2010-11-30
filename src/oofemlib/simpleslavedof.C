@@ -74,7 +74,7 @@ SimpleSlaveDof :: SimpleSlaveDof(int i, DofManager *aNode, DofID id) : Dof(i, aN
 }
 
 
-Dof *SimpleSlaveDof :: giveMasterDof()
+Dof *SimpleSlaveDof :: giveMasterDof() const
 {
     // returns reference to master dof
     // checks dof compatibility and slave to slave references
@@ -108,7 +108,7 @@ BoundaryCondition *SimpleSlaveDof :: giveBc()
 }
 
 
-int SimpleSlaveDof :: __giveEquationNumber()
+int SimpleSlaveDof :: __giveEquationNumber() const 
 // Returns the number of the equation in the governing system of equations that corres-
 // ponds to the receiver. The equation number is 0 if the receiver is
 // subjected to a boundary condition, else it is n+1, where n is the

@@ -122,7 +122,7 @@ private:
     /// number of DofManager containing master dof (Master DofManager)
     int masterDofMngr;
     /// number of master dof in master dofManager.
-    int masterDofIndx;
+    mutable int masterDofIndx;
     /*      Dictionary*  unknowns ;
      *      Dictionary*  pastUnknowns ; */
 
@@ -151,7 +151,7 @@ public:
      * Slave simply forwards this mesage to master.
      * @return equation number, if active BC exists, returns zero
      */
-    int                 __giveEquationNumber();
+    int                 __giveEquationNumber() const;
     /**
      * Returns prescribed equation number corresponding to receiver.
      * Slave simply forwards this mesage to master.
@@ -244,7 +244,7 @@ public:
 
 private:
     /// returns reference to master dof.
-    Dof *giveMasterDof();
+    Dof *giveMasterDof() const;
 
 
 protected:

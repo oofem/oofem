@@ -217,7 +217,7 @@ public:
      * when initializing code numbers in EngngMode, designer should alter equation
      * numbering strategy.
      */
-    virtual int                 __giveEquationNumber()   = 0;
+    virtual int                 __giveEquationNumber() const  = 0;
     /**
      * Returns equation number of receiver. If Dof has active BC, returned equation number
      * is zero. After initializing Dof by calling constructor, Dof has no equation
@@ -440,7 +440,7 @@ public:
                                                    ValueModeType mode, double &dofValue) { }
 
     /// prints simple error message and exits
-    void error(const char *file, int line, const char *format, ...);
+    void error(const char *file, int line, const char *format, ...) const;
     /// Stores receiver state to output stream.
     virtual contextIOResultType    saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
     /// Restores the receiver state previously written in stream.

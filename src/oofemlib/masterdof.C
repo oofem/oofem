@@ -91,7 +91,7 @@ BoundaryCondition *MasterDof :: giveBc()
 }
 
 
-int MasterDof :: __giveEquationNumber()
+int MasterDof :: __giveEquationNumber() const
 // Returns the number of the equation in the governing system of equations that corres-
 // ponds to the receiver. The equationNumber is <0 if the receiver is
 // subjected to a boundary condition and then the equationNumber is a Prescribed equation number
