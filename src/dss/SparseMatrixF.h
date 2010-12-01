@@ -49,7 +49,7 @@ struct IConectMatrix;
 struct SparseMatrixF
 {
 public:
-    ULONG neq;
+    unsigned long neq;
     double *a;
 
     enum eOrientation {
@@ -59,18 +59,18 @@ public:
     };
 
 private:
-    ULONG *ci;
-    ULONG *adr;
-    ULONG Aoffset;
-    ULONG Coffset;
+    unsigned long *ci;
+    unsigned long *adr;
+    unsigned long Aoffset;
+    unsigned long Coffset;
     bool bJardaConvention;
     bool bLocalCopy;
-    bool m_bIsSymmertric;     // TRUE - only diagonal + one half is stored, FALSE - all entries are stored
+    bool m_bIsSymmertric;     // true - only diagonal + one half is stored, false - all entries are stored
     eOrientation m_eSparseOrientation;
 
 public:
     SparseMatrixF();
-    SparseMatrixF(unsigned long neq, double *a, unsigned long *ci, unsigned long *adr, ULONG Aofs = 0, ULONG Cofs = 0, bool JardaConvention = true, bool bIsSymetric = true, eOrientation sparseOri = eCompressedColumns);
+    SparseMatrixF(unsigned long neq, double *a, unsigned long *ci, unsigned long *adr, unsigned long Aofs = 0, unsigned long Cofs = 0, bool JardaConvention = true, bool bIsSymetric = true, eOrientation sparseOri = eCompressedColumns);
     SparseMatrixF(IConectMatrix *pConMtx);
     ~SparseMatrixF();
 
@@ -79,14 +79,14 @@ public:
     void CreateLocalCopy();
 
     long Nonzeros();
-    BOOL IsSymmetric() { return m_bIsSymmertric; }
+    bool IsSymmetric() { return m_bIsSymmertric; }
     eOrientation GetOrientation() { return m_eSparseOrientation; }
 
     void GetA12block(double *pA12, long c);
     void LoadMatrix(FILE *stream);
     void SaveMatrix(FILE *stream);
 
-    inline ULONG Adr(int i) const
+    inline unsigned long Adr(int i) const
     {
         if ( bJardaConvention ) {
             return this->adr [ i ] - Aoffset;
@@ -99,7 +99,7 @@ public:
         }
     }
 
-    inline ULONG Ci(int i) const
+    inline unsigned long Ci(int i) const
     {
         return ( this->ci [ i ] ) - Coffset;
     }

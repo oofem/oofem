@@ -56,7 +56,7 @@ SparseConectivityMtxII :: SparseConectivityMtxII(const SparseMatrixF &sm, char b
     IntArrayList *this_columnJ = NULL;
 
     // Fill the upper half of the matrix
-    for ( ULONG j = 0; j < sm.neq; j++ ) {
+    for ( unsigned long j = 0; j < sm.neq; j++ ) {
         long bj = j / block_size;
 
         if ( j % block_size == 0 ) {
@@ -64,7 +64,7 @@ SparseConectivityMtxII :: SparseConectivityMtxII(const SparseMatrixF &sm, char b
         }
 
         long lastbi = -1;
-        for ( ULONG ad = sm.Adr(j); ad < sm.Adr(j + 1); ad++ ) {
+        for ( unsigned long ad = sm.Adr(j); ad < sm.Adr(j + 1); ad++ ) {
             long i = sm.Ci(ad);
             long bi = i / block_size;
             if ( bi == bj || bi == lastbi ) {
@@ -86,11 +86,11 @@ SparseConectivityMtxII :: SparseConectivityMtxII(const SparseMatrixF &sm, char b
     }
 
     // Fill lower half of the matrix
-    for ( ULONG i = 0; i < sm.neq; i++ ) {
+    for ( unsigned long i = 0; i < sm.neq; i++ ) {
         long bi = i / block_size;
 
         long lastbj = -1;
-        for ( ULONG ad = sm.Adr(i); ad < sm.Adr(i + 1); ad++ ) {
+        for ( unsigned long ad = sm.Adr(i); ad < sm.Adr(i + 1); ad++ ) {
             long j = sm.Ci(ad);
             long bj = j / block_size;
             if ( bi == bj || bj == lastbj ) {
@@ -136,7 +136,7 @@ SparseConectivityMtxII :: SparseConectivityMtxII(const SparseMatrixF &sm, Orderi
     long old_bj = -1;
 
     // Fill the upper half of the matrix
-    for ( ULONG j = 0; j < sm.neq; j++ ) {
+    for ( unsigned long j = 0; j < sm.neq; j++ ) {
         long nj = node_order ? node_order->perm->Items [ j ] : j;
         long bj = nj / block_size;
 
@@ -150,7 +150,7 @@ SparseConectivityMtxII :: SparseConectivityMtxII(const SparseMatrixF &sm, Orderi
         }
 
         long lastbi = -1;
-        for ( ULONG ad = sm.Adr(j); ad < sm.Adr(j + 1); ad++ ) {
+        for ( unsigned long ad = sm.Adr(j); ad < sm.Adr(j + 1); ad++ ) {
             long i = sm.Ci(ad);
 
             long ni = nprm ? nprm [ i ] : i;
@@ -171,13 +171,13 @@ SparseConectivityMtxII :: SparseConectivityMtxII(const SparseMatrixF &sm, Orderi
     }
 
     // Fill lower half of the matrix
-    for ( ULONG i = 0; i < sm.neq; i++ ) {
+    for ( unsigned long i = 0; i < sm.neq; i++ ) {
         long ni = nprm ? nprm [ i ] : i;
 
         long bi = ni / block_size;
 
         long lastbj = -1;
-        for ( ULONG ad = sm.Adr(i); ad < sm.Adr(i + 1); ad++ ) {
+        for ( unsigned long ad = sm.Adr(i); ad < sm.Adr(i + 1); ad++ ) {
             long j = sm.Ci(ad);
             long nj = nprm ? nprm [ j ] : j;
 

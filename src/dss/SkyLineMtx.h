@@ -85,10 +85,10 @@ public:
 
     //ILargeMatrix
     //virtual void LoadZeros();
-    //virtual void LoadMatrixNumbers(SparseMatrixF& sm) PURE;
-    //virtual void SolveLV(const LargeVector& b, LargeVector& x) PURE;
+    //virtual void LoadMatrixNumbers(SparseMatrixF& sm) = 0;
+    //virtual void SolveLV(const LargeVector& b, LargeVector& x) = 0;
     virtual void Factorize() = 0;
-    //virtual void MultiplyByVector(const LargeVectorAttach& x, LargeVectorAttach& y) PURE;
+    //virtual void MultiplyByVector(const LargeVectorAttach& x, LargeVectorAttach& y) = 0;
 
 public:
     virtual void SchurComplementFactorization(int fixed_blocks) = 0;

@@ -198,17 +198,17 @@ struct IMatrix
 struct ILargeMatrix : public IMatrix
 {
     //double this [long i, long j]{get;set;}
-    virtual double &ElementAt(int i, int j) PURE;
+    virtual double &ElementAt(int i, int j) = 0;
 
-    virtual void WriteStatistics(long no_init_blocks, long no_nonzeros) PURE;
-    virtual long No_Multiplications() PURE;
+    virtual void WriteStatistics(long no_init_blocks, long no_nonzeros) = 0;
+    virtual long No_Multiplications() = 0;
 
-    virtual void SolveLV(const LargeVector &x, LargeVector &y) PURE;
-    virtual void Solve(double *b, double *x) PURE;
-    virtual void MultiplyByVector(const LargeVectorAttach &x, LargeVectorAttach &y) PURE;
-    virtual void Factorize() PURE;
-    virtual void LoadZeros() PURE;
-    virtual void LoadMatrixNumbers(SparseMatrixF &sm) PURE;
+    virtual void SolveLV(const LargeVector &x, LargeVector &y) = 0;
+    virtual void Solve(double *b, double *x) = 0;
+    virtual void MultiplyByVector(const LargeVectorAttach &x, LargeVectorAttach &y) = 0;
+    virtual void Factorize() = 0;
+    virtual void LoadZeros() = 0;
+    virtual void LoadMatrixNumbers(SparseMatrixF &sm) = 0;
 };
 
 ////////////////// ////////////////////////////////////////////////////////////////////////////////////

@@ -67,7 +67,7 @@ CMcKee :: ~CMcKee()
     delete [] p_order;
 }
 
-BOOL CMcKee :: IsAvailable(int v)
+bool CMcKee :: IsAvailable(int v)
 {
     return ( p_node_level [ v ] == 0 );
 }

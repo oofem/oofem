@@ -52,11 +52,11 @@ class SparseGridMtxPD
 public:
     // Allocates new space according to bskl and reads old matrix with respect
     // to permutation blockP
-    SparseGridMtxPD(SparseMatrixF &sm, BYTE block_size, Ordering *block_order, long fixed_blocks, MathTracer *MT);
+    SparseGridMtxPD(SparseMatrixF &sm, long block_size, Ordering *block_order, long fixed_blocks, MathTracer *MT);
 
     // Allocates new space according to bskl and reads old matrix with respect
     // to permutation blockP
-    SparseGridMtxPD(SparseMatrixF &sm, BYTE block_size, Ordering *block_order, Ordering *node_order, long fixed_blocks, MathTracer *MT);
+    SparseGridMtxPD(SparseMatrixF &sm, long block_size, Ordering *block_order, Ordering *node_order, long fixed_blocks, MathTracer *MT);
 
     SparseGridMtxPD(SparseGridMtx *pMatrix, long fixed_blocks);
 

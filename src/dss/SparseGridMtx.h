@@ -57,11 +57,11 @@ class SparseGridMtx :
 public:
     // Allocates new space according to bskl and reads old matrix with respect
     // to permutation blockP
-    SparseGridMtx(SparseMatrixF &sm, BYTE block_size, Ordering *block_order, MathTracer *eMT);
+    SparseGridMtx(SparseMatrixF &sm, long block_size, Ordering *block_order, MathTracer *eMT);
 
     // Allocates new space according to bskl and reads old matrix with respect
     // to permutation blockP
-    SparseGridMtx(SparseMatrixF &sm, BYTE block_size, Ordering *block_order, Ordering *node_order, MathTracer *eMT);
+    SparseGridMtx(SparseMatrixF &sm, long block_size, Ordering *block_order, Ordering *node_order, MathTracer *eMT);
 
     virtual ~SparseGridMtx();
 
@@ -117,11 +117,11 @@ public:
 
     //ILargeMatrix
     void WriteStatistics(long no_init_blocks, long no_nonzeros);
-    virtual void LoadMatrixNumbers(SparseMatrixF &sm) PURE;
-    virtual void SolveLV(const LargeVector &b, LargeVector &x) PURE;
-    virtual void Solve(double *b, double *x) PURE;
+    virtual void LoadMatrixNumbers(SparseMatrixF &sm) = 0;
+    virtual void SolveLV(const LargeVector &b, LargeVector &x) = 0;
+    virtual void Solve(double *b, double *x) = 0;
     virtual void MultiplyByVector(const LargeVectorAttach &x, LargeVectorAttach &y);
-    virtual void Factorize() PURE;
+    virtual void Factorize() = 0;
 
 public:
 

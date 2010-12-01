@@ -53,11 +53,11 @@ class SparseGridMtxLDL :
 public:
     // Allocates new space according to bskl and reads old matrix with respect
     // to permutation blockP
-    SparseGridMtxLDL(SparseMatrixF &sm, BYTE block_size, Ordering *block_order, MathTracer *eMT, BOOL load_data = TRUE);
+    SparseGridMtxLDL(SparseMatrixF &sm, long block_size, Ordering *block_order, MathTracer *eMT, bool load_data = true);
 
     // Allocates new space according to bskl and reads old matrix with respect
     // to permutation blockP
-    SparseGridMtxLDL(SparseMatrixF &sm, BYTE block_size, Ordering *block_order, Ordering *node_order, MathTracer *eMT, BOOL load_data = TRUE);
+    SparseGridMtxLDL(SparseMatrixF &sm, long block_size, Ordering *block_order, Ordering *node_order, MathTracer *eMT, bool load_data = true);
 
     virtual ~SparseGridMtxLDL();
 

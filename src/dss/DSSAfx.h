@@ -39,30 +39,12 @@
 //  or project specific include files that are used frequently, but
 //      are changed infrequently
 //
-#if !defined( _DSSAFX_H__ )
+#ifndef _DSSAFX_H__
 #define _DSSAFX_H__
 
 #if _MSC_VER > 1000
  #pragma once
 #endif // _MSC_VER > 1000
-
-#ifdef __WATCOMC__
- #ifndef BOOL_DEF
-enum bool { false = 0, true = 1 };
-  #define BOOL_DEF
- #endif
-#endif
-
-// This is just for compilation with MFC
-#ifdef BUILDING_CCFEModel
- #include <afx.h>
- #ifdef _DEBUG
-  #define new DEBUG_NEW
-  #undef THIS_FILE
-static char THIS_FILE[] = __FILE__;
- #endif
-#endif
-
 
 #include <math.h>
 #include <stdlib.h>
@@ -70,29 +52,8 @@ static char THIS_FILE[] = __FILE__;
 #include <time.h>
 #include <string.h>
 
-
 #ifndef min
  #define min(a, b) ( ( a ) < ( b ) ? ( a ) : ( b ) )
-#endif
-
-#ifndef max
- #define max(a, b) ( ( a ) > ( b ) ? ( a ) : ( b ) )
-#endif
-
-typedef int BOOL;
-typedef unsigned char BYTE;
-typedef unsigned long ULONG;
-
-#ifndef FALSE
- #define FALSE 0
-#endif
-
-#ifndef TRUE
- #define TRUE 1
-#endif
-
-#ifndef PURE
- #define PURE = 0
 #endif
 
 #define DSS_NAMESPASE_BEGIN
@@ -100,5 +61,5 @@ typedef unsigned long ULONG;
 //#define DSS_NAMESPASE_BEGIN namespace DSS {
 //#define DSS_NAMESPASE_END }
 
-#endif // !defined(_DSSAFX_H__)
+#endif // _DSSAFX_H__
 

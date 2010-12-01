@@ -79,12 +79,12 @@ struct ISolver
 
     // Sets the type of the reordering of the sparse matrix to something else than default
     // returns true if possible
-    virtual BOOL SetOrderingType(Ordering :: Type otype) = 0;
+    virtual bool SetOrderingType(Ordering :: Type otype) = 0;
 
     // Registers the source to the DSSolver
-    virtual BOOL LoadMatrix(ULONG neq, unsigned char block_size, double *a, ULONG *ci, ULONG *adr) = 0;
-    virtual BOOL LoadMatrix(SparseMatrixF *sm, unsigned char block_size) = 0;
-    virtual BOOL SetMatrixPattern(SparseMatrixF *smt, unsigned char block_size) = 0;
+    virtual bool LoadMatrix(unsigned long neq, unsigned char block_size, double *a, unsigned long *ci, unsigned long *adr) = 0;
+    virtual bool LoadMatrix(SparseMatrixF *sm, unsigned char block_size) = 0;
+    virtual bool SetMatrixPattern(SparseMatrixF *smt, unsigned char block_size) = 0;
 
     // Loads the "MatrixCodeNumbers" vector[n_blocks*block_size]
     // each entry in the vector[i] can be :
@@ -98,29 +98,29 @@ struct ISolver
     // -2, -3, -4 .. rows (0,1,2) ment to be left uncondensed
     //  n_blocks - number of blocks
 
-    virtual BOOL LoadMCN(ULONG n_blocks, unsigned char block_size, long *mcn) = 0;
+    virtual bool LoadMCN(unsigned long n_blocks, unsigned char block_size, long *mcn) = 0;
 
 
     // Creates the connectivity matrix
     // Computes the MinimumDegree ordering
     // Allocates the memory for the SparseGrid matrix
-    virtual BOOL PreFactorize() = 0;
+    virtual bool PreFactorize() = 0;
 
     // Loads or reloads the numeric values of the sparse matrix 'sm' to the already allocated SparseGrid matrix
-    virtual BOOL LoadNumbers(SparseMatrixF *sm) = 0;
+    virtual bool LoadNumbers(SparseMatrixF *sm) = 0;
 
     // Runs the LDL factorization on the already allocated and loaded matrix
-    virtual BOOL ReFactorize() = 0;
+    virtual bool ReFactorize() = 0;
 
     // This function unites the three previous function into one step if necessary
     // PreFactorize ( ) + LoadNubers( ) + ReFactorize ( )
     // This is usefull for single-pass solutions
-    virtual BOOL Factorize() = 0;
+    virtual bool Factorize() = 0;
 
     // When the matrix was factorized we can solve several A*r=f equations
     // if the pointers are equal (r==f) the result will overwrite the RHS vector (In that case the soultion is faster)
     // It is recomended that both vectors have size in a whole multiple of the 'block_size' or more
-    virtual BOOL Solve(double *r, double *f) = 0;
+    virtual bool Solve(double *r, double *f) = 0;
 
     // When the matrix was factorized we solve r from A*r=f equation
     // where f is vector with units. And we return (f-A*r)|(f-A*r)/N value.
@@ -134,10 +134,10 @@ struct ISolver
 
     virtual void SetMT(MathTracer *MT) = 0;
 
-    virtual BOOL decomp() = 0;
+    virtual bool decomp() = 0;
     virtual void changedecomp() = 0;
 
-    virtual BOOL IsFactorized() = 0;
+    virtual bool IsFactorized() = 0;
 
     virtual ~ISolver() {};
 
@@ -239,30 +239,30 @@ public:
     virtual void SetMT(MathTracer *pMT);
     virtual void Dispose();
 
-    virtual BOOL SetOrderingType(Ordering :: Type otype);
-    virtual BOOL LoadMatrix(unsigned long neq, unsigned char block_size, double *a, unsigned long *ci, unsigned long *adr);
-    virtual BOOL LoadMatrix(SparseMatrixF *smt, unsigned char block_size);
-    virtual BOOL SetMatrixPattern(SparseMatrixF *smt, unsigned char block_size);
+    virtual bool SetOrderingType(Ordering :: Type otype);
+    virtual bool LoadMatrix(unsigned long neq, unsigned char block_size, double *a, unsigned long *ci, unsigned long *adr);
+    virtual bool LoadMatrix(SparseMatrixF *smt, unsigned char block_size);
+    virtual bool SetMatrixPattern(SparseMatrixF *smt, unsigned char block_size);
 
-    virtual BOOL decomp();
+    virtual bool decomp();
     virtual void changedecomp();
-    virtual BOOL IsFactorized();
+    virtual bool IsFactorized();
 
-    virtual BOOL Factorize();
-    virtual BOOL PreFactorize();
+    virtual bool Factorize();
+    virtual bool PreFactorize();
 
     virtual void LoadZeros();
-    virtual BOOL LoadNumbers(SparseMatrixF *sm);
+    virtual bool LoadNumbers(SparseMatrixF *sm);
     virtual double &ElementAt(int i, int j);
 
-    virtual BOOL ReFactorize();
+    virtual bool ReFactorize();
 
-    virtual BOOL Solve(double *r, double *f);
+    virtual bool Solve(double *r, double *f);
     virtual long Close();
 
     void StartSolverWriteInfo();
     void EndSolverWriteInfo();
-    BOOL StartSolver();
+    bool StartSolver();
 
     void SetSM(SparseMatrixF *sm);
     virtual double GetFactorizationError();
@@ -271,9 +271,9 @@ public:
     // each entry in the vector[i] can be :
     // vector[i] >=  0  normal unknown      (means the corresponding row in SparseMatrixF)
     // vector[i] == -1  this entry is not used  (no corresponding row in SparseMatrixF)
-    virtual BOOL LoadMCN(ULONG n_blocks, unsigned char block_size, long *mcn);
+    virtual bool LoadMCN(unsigned long n_blocks, unsigned char block_size, long *mcn);
 
-    virtual BOOL LoadMCN(IntArrayList &mcn);
+    virtual bool LoadMCN(IntArrayList &mcn);
 
     IntArrayList *GetFixedBlocks() { return this->fixed; }
     IntArrayList *GetFixedDOFs()   { return this->lncn; }
@@ -291,12 +291,12 @@ public:
     int CG(double *b, double *x, double epsilon, int max_iter);
 
 private:
-    BOOL LoadMCN_int(IntArrayList *mcn_order);
+    bool LoadMCN_int(IntArrayList *mcn_order);
     void ExpandMCN(IntArrayList &mcn);
     SparseGridMtx *CreateNewSparseGridMtx(IntArrayList *fixed = NULL);
     void WriteFactorizationInfo();
-    BOOL CreateFixedArray(long no_noncondensed_DOFs);
-    BOOL FactorizeSchur();
+    bool CreateFixedArray(long no_noncondensed_DOFs);
+    bool FactorizeSchur();
     void StoreFixedLastPermutation_dom_order();
 };
 

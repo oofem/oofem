@@ -189,7 +189,7 @@ void DSSolver :: Dispose()
     }
 }
 
-BOOL DSSolver :: SetOrderingType(Ordering :: Type otype)
+bool DSSolver :: SetOrderingType(Ordering :: Type otype)
 {
     switch ( otype ) {
     case Ordering :: None:
@@ -205,24 +205,24 @@ BOOL DSSolver :: SetOrderingType(Ordering :: Type otype)
     case Ordering :: ColAMD:
 #endif
         OrderingType = otype;
-        return TRUE;
+        return true;
 
     default:
         eMT->Writeln("Selected ordering type is not implemented! Default value is used.");
         break;
     }
 
-    return FALSE;
+    return false;
 }
 
 
-BOOL DSSolver :: LoadMatrix(unsigned long neq, unsigned char block_size, double *a, unsigned long *ci, unsigned long *adr)
+bool DSSolver :: LoadMatrix(unsigned long neq, unsigned char block_size, double *a, unsigned long *ci, unsigned long *adr)
 {
     SparseMatrixF loc_sm(neq, a, ci, adr);
     return LoadMatrix(& loc_sm, block_size);
 }
 
-BOOL DSSolver :: LoadMatrix(SparseMatrixF *smt, unsigned char block_size)
+bool DSSolver :: LoadMatrix(SparseMatrixF *smt, unsigned char block_size)
 {
     SetMatrixPattern(smt, block_size);
     sm.CreateLocalCopy();
@@ -230,7 +230,7 @@ BOOL DSSolver :: LoadMatrix(SparseMatrixF *smt, unsigned char block_size)
     return 1;
 }
 
-BOOL DSSolver :: SetMatrixPattern(SparseMatrixF *smt, unsigned char block_size)
+bool DSSolver :: SetMatrixPattern(SparseMatrixF *smt, unsigned char block_size)
 {
     Dispose();
     sm = * smt;
@@ -251,7 +251,7 @@ BOOL DSSolver :: SetMatrixPattern(SparseMatrixF *smt, unsigned char block_size)
     return 1;
 }
 
-BOOL DSSolver :: decomp()
+bool DSSolver :: decomp()
 {
     return decompid;
 }
@@ -264,12 +264,12 @@ void DSSolver :: changedecomp()
     }
 }
 
-BOOL DSSolver :: IsFactorized()
+bool DSSolver :: IsFactorized()
 {
     return m_eState == ISolver :: Factorized;
 }
 
-BOOL DSSolver :: Factorize()
+bool DSSolver :: Factorize()
 {
     return StartSolver();
 }
@@ -295,22 +295,22 @@ SparseGridMtx *DSSolver :: CreateNewSparseGridMtx(IntArrayList *fixed)
     eMT->Writeln("Allocating block sparse matrix");
     switch ( SolverType ) {
     case eDSSFactorizationLDLTIncomplete:
-        matrix = new SparseGridMtxLDL(sm, blockSize, order, mcn, eMT, TRUE);
+        matrix = new SparseGridMtxLDL(sm, blockSize, order, mcn, eMT, true);
         break;
     case eDSSFactorizationLLTIncomplete:
-        matrix = new SparseGridMtxLL(sm, blockSize, order, mcn, eMT, TRUE);
+        matrix = new SparseGridMtxLL(sm, blockSize, order, mcn, eMT, true);
         break;
     case eDSSFactorizationLDLT:
-        matrix = new SparseGridMtxLDL(sm, blockSize, order, mcn, eMT, TRUE);
+        matrix = new SparseGridMtxLDL(sm, blockSize, order, mcn, eMT, true);
         break;
     case eDSSFactorizationLLT:
-        matrix = new SparseGridMtxLL(sm, blockSize, order, mcn, eMT, TRUE);
+        matrix = new SparseGridMtxLL(sm, blockSize, order, mcn, eMT, true);
         break;
     case eDSSFactorizationLU:
-        matrix = new SparseGridMtxLU(sm, blockSize, order, mcn, eMT, TRUE);
+        matrix = new SparseGridMtxLU(sm, blockSize, order, mcn, eMT, true);
         break;
     case eDSSFastCG:
-        matrix = new SparseGridMtxLDL(sm, blockSize, order, mcn, eMT, TRUE);
+        matrix = new SparseGridMtxLDL(sm, blockSize, order, mcn, eMT, true);
         break;
     default:
         eMT->Writeln("Unknown solver type.");
@@ -340,11 +340,11 @@ SparseGridMtx *DSSolver :: CreateNewSparseGridMtx(IntArrayList *fixed)
     return matrix;
 }
 
-BOOL DSSolver :: PreFactorize()
+bool DSSolver :: PreFactorize()
 {
     if ( sm.neq == 0 || neq == 0 ) {
         eMT->Write("Can't factorize empty matrix!");
-        return FALSE;
+        return false;
     }
 
     switch ( MatrixType ) {
@@ -352,7 +352,7 @@ BOOL DSSolver :: PreFactorize()
     {
         this->matrix = CreateNewSparseGridMtx();
         if ( this->matrix == NULL ) {
-            return FALSE;
+            return false;
         }
     }
     break;
@@ -381,10 +381,10 @@ BOOL DSSolver :: PreFactorize()
     }
 
     if ( this->matrix == NULL ) {
-        return FALSE;
+        return false;
     }
 
-    return TRUE;
+    return true;
 }
 
 void DSSolver :: LoadZeros()
@@ -406,7 +406,7 @@ double &DSSolver :: ElementAt(int i, int j)
     return matrix->ElementAt(i, j);
 }
 
-BOOL DSSolver :: LoadNumbers(SparseMatrixF *sm)
+bool DSSolver :: LoadNumbers(SparseMatrixF *sm)
 {
     if ( matrix == NULL ) {
         eMT->Writeln("First load matrix.");
@@ -452,11 +452,11 @@ void DSSolver :: WriteFactorizationInfo()
     }
 }
 
-BOOL DSSolver :: ReFactorize()
+bool DSSolver :: ReFactorize()
 {
     if ( matrix == NULL && matrixPD == NULL ) {
         eMT->Writeln("The matrix has to be loaded prior to the factorization.");
-        return FALSE;
+        return false;
     }
 
     eMT->CS();
@@ -496,15 +496,15 @@ BOOL DSSolver :: ReFactorize()
     }
 
     m_eState = ISolver :: Factorized;
-    return TRUE;
+    return true;
 }
 
 
-BOOL DSSolver :: Solve(double *r, double *f)
+bool DSSolver :: Solve(double *r, double *f)
 {
     if ( m_eState == ISolver :: Allocated ) {
         if ( !Factorize() ) {
-            return FALSE;
+            return false;
         }
     }
 
@@ -516,7 +516,7 @@ BOOL DSSolver :: Solve(double *r, double *f)
             Array :: Copy(f, r, neq);
         }
 
-        return FALSE;
+        return false;
     }
 
     if ( mcn ) {
@@ -541,7 +541,7 @@ BOOL DSSolver :: Solve(double *r, double *f)
         }
     }
 
-    return TRUE;
+    return true;
 }
 
 
@@ -585,11 +585,11 @@ void DSSolver :: EndSolverWriteInfo()
     eMT->Writeln(str);
 }
 
-BOOL DSSolver :: StartSolver()
+bool DSSolver :: StartSolver()
 {
     if ( sm.neq == 0 ) {
         eMT->Write("Can't factorize empty matrix!");
-        return FALSE;
+        return false;
     }
 
     long usedmem =  0;    //GC.GetTotalMemory(true);
@@ -597,11 +597,11 @@ BOOL DSSolver :: StartSolver()
 
     StartSolverWriteInfo();
     if ( !PreFactorize() ) {
-        return FALSE;
+        return false;
     }
 
     if ( !ReFactorize() ) {
-        return FALSE;
+        return false;
     }
 
     clock_t solution_end = clock();
@@ -614,7 +614,7 @@ BOOL DSSolver :: StartSolver()
     usedmem =  0;    //GC.GetTotalMemory(true);
     //sprintf(str,"%ld of used memory",usedmem);
     //eMT->Writeln(str);
-    return TRUE;
+    return true;
 }
 
 void DSSolver :: SetSM(SparseMatrixF *sm)
@@ -689,7 +689,7 @@ void DSSolver :: ExpandMCN(IntArrayList &mcn)
 // each entry in the vector[i] can be :
 // vector[i] >=  0  normal unknown                      (means the corresponding row in SparseMatrixF)
 // vector[i] == -1  this entry is not used      (no corresponding row in SparseMatrixF)
-BOOL DSSolver :: LoadMCN(ULONG n_blocks, unsigned char block_size, long *mcn)
+bool DSSolver :: LoadMCN(unsigned long n_blocks, unsigned char block_size, long *mcn)
 {
     this->blockSize = block_size;
     IntArrayList *mcn_order = new IntArrayList(n_blocks * block_size);
@@ -698,7 +698,7 @@ BOOL DSSolver :: LoadMCN(ULONG n_blocks, unsigned char block_size, long *mcn)
     return LoadMCN_int(mcn_order);
 }
 
-BOOL DSSolver :: LoadMCN_int(IntArrayList *mcn_order)
+bool DSSolver :: LoadMCN_int(IntArrayList *mcn_order)
 {
     ExpandMCN(* mcn_order);
     this->n_blocks = mcn_order->Count / blockSize;
@@ -732,7 +732,7 @@ BOOL DSSolver :: LoadMCN_int(IntArrayList *mcn_order)
     return CreateFixedArray(no_noncondensed_DOFs);
 }
 
-BOOL DSSolver :: LoadMCN(IntArrayList &mcn)
+bool DSSolver :: LoadMCN(IntArrayList &mcn)
 {
     IntArrayList *mcn_new = new IntArrayList( ( ( mcn.Count - 1 ) / blockSize + 1 ) * blockSize );
     mcn_new->Alloc();
@@ -741,7 +741,7 @@ BOOL DSSolver :: LoadMCN(IntArrayList &mcn)
     return LoadMCN_int(mcn_new);
 }
 
-BOOL DSSolver :: CreateFixedArray(long no_noncondensed_DOFs)
+bool DSSolver :: CreateFixedArray(long no_noncondensed_DOFs)
 {
     fixed = new IntArrayList();
     lncn = new IntArrayList(no_noncondensed_DOFs);
@@ -851,16 +851,16 @@ BOOL DSSolver :: CreateFixedArray(long no_noncondensed_DOFs)
  * }
  */
 
-BOOL DSSolver :: FactorizeSchur()
+bool DSSolver :: FactorizeSchur()
 {
     if ( sm.neq == 0 || mcn == 0 ) {
         eMT->Writeln("Can't factorize empty matrix!");
-        return FALSE;
+        return false;
     }
 
     if ( mcn == 0 ) {
         eMT->Writeln("The MCN vector was not set!");
-        return FALSE;
+        return false;
     }
 
     StoreFixedLastPermutation_dom_order();
@@ -869,7 +869,7 @@ BOOL DSSolver :: FactorizeSchur()
     matrixPD = new SparseGridMtxPD(matrix, fixed->Count);
 
     ReFactorize();
-    return TRUE;
+    return true;
 }
 
 // Sorts the domain internal DOFs first and the fixed DOFs at the end

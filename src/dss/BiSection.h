@@ -66,7 +66,7 @@ public:
 
     void Init(SparseConectivityMtxII *mtx);
 
-    BOOL IsAvailable(int v);
+    bool IsAvailable(int v);
 
     void PrepareValid();
 

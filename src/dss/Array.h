@@ -67,10 +67,10 @@ public:
         }
     }
 
-    static void Copy(ULONG *source, ULONG *dest, ULONG count)
+    static void Copy(unsigned long *source, unsigned long *dest, unsigned long count)
     {
         if ( count > 0 ) {
-            memcpy( dest, source, count * sizeof( ULONG ) );
+            memcpy( dest, source, count * sizeof( unsigned long ) );
         }
     }
 

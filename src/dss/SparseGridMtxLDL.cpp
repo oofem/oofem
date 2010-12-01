@@ -43,28 +43,28 @@ DSS_NAMESPASE_BEGIN
 
 // Allocates new space according to bskl and reads old matrix with respect
 // to permutation blockP
-SparseGridMtxLDL :: SparseGridMtxLDL(SparseMatrixF &sm, BYTE block_size, Ordering *block_order, MathTracer *eMT, BOOL load_data) :
+SparseGridMtxLDL :: SparseGridMtxLDL(SparseMatrixF &sm, long block_size, Ordering *block_order, MathTracer *eMT, bool load_data) :
     SparseGridMtx(sm, block_size, block_order, eMT)
 {
     IConectMatrix *bskl = block_order->cm;
     this->AlocateMemoryByPattern(bskl);
     ComputeBlocks();
 
-    if ( sm.a != NULL && load_data != FALSE ) {
+    if ( sm.a != NULL && load_data ) {
         LoadMatrixNumbers(sm);
     }
 }
 
 // Allocates new space according to bskl and reads old matrix with respect
 // to permutation blockP
-SparseGridMtxLDL :: SparseGridMtxLDL(SparseMatrixF &sm, BYTE block_size, Ordering *block_order, Ordering *node_order, MathTracer *eMT, BOOL load_data) :
+SparseGridMtxLDL :: SparseGridMtxLDL(SparseMatrixF &sm, long block_size, Ordering *block_order, Ordering *node_order, MathTracer *eMT, bool load_data) :
     SparseGridMtx(sm, block_size, block_order, node_order, eMT)
 {
     IConectMatrix *bskl = block_order->cm;
     this->AlocateMemoryByPattern(bskl);
     ComputeBlocks();
 
-    if ( sm.a != NULL && load_data != FALSE ) {
+    if ( sm.a != NULL && load_data ) {
         LoadMatrixNumbers(sm);
     }
 }
@@ -101,7 +101,7 @@ void SparseGridMtxLDL :: LoadMatrixNumbers(SparseMatrixF &sm)
     long aux_bi_idx = 0;        // index of the last found block in the column
     long aux_bj_idx = 0;
 
-    for ( ULONG j = 0; j < sm.neq; j++ ) {
+    for ( unsigned long j = 0; j < sm.neq; j++ ) {
         long nj = ( nodeP == NULL ) ? j : nodeP [ j ];
 
         long sj = nj % block_size;
@@ -116,7 +116,7 @@ void SparseGridMtxLDL :: LoadMatrixNumbers(SparseMatrixF &sm)
 
         long old_nbi = -1;
 
-        for ( ULONG ad = sm.Adr(j); ad < sm.Adr(j + 1); ad++ ) {
+        for ( unsigned long ad = sm.Adr(j); ad < sm.Adr(j + 1); ad++ ) {
             long i = ( long ) sm.Ci(ad);
             long ni = ( nodeP == NULL ) ? i : nodeP [ i ];
             double val = sm.a [ ad ];

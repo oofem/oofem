@@ -43,7 +43,7 @@ DSS_NAMESPASE_BEGIN
 
 // Allocates new space according to bskl and reads old matrix with respect
 // to permutation blockP
-SparseGridMtx :: SparseGridMtx(SparseMatrixF &sm, BYTE block_size, Ordering *block_order, MathTracer *eMT)
+SparseGridMtx :: SparseGridMtx(SparseMatrixF &sm, long block_size, Ordering *block_order, MathTracer *eMT)
 {
     ///tmp_vector_BS = NULL;
     //tmp_vector_BS_nodes = NULL;
@@ -69,7 +69,7 @@ SparseGridMtx :: SparseGridMtx(SparseMatrixF &sm, BYTE block_size, Ordering *blo
 
 // Allocates new space according to bskl and reads old matrix with respect
 // to permutation blockP
-SparseGridMtx :: SparseGridMtx(SparseMatrixF &sm, BYTE block_size, Ordering *block_order, Ordering *node_order, MathTracer *eMT)
+SparseGridMtx :: SparseGridMtx(SparseMatrixF &sm, long block_size, Ordering *block_order, Ordering *node_order, MathTracer *eMT)
 {
     //tmp_vector_BS = NULL;
     //tmp_vector_BS_nodes = NULL;

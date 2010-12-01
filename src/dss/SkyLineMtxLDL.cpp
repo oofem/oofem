@@ -67,11 +67,11 @@ void SkyLineMtxLDL :: LoadMatrixData(SparseMatrixF &sm)
     long *nodeP = this->order ? order->perm->Items : NULL;
 
     // diagonal
-    for ( ULONG j = 0; j < sm.neq; j++ ) {
+    for ( unsigned long j = 0; j < sm.neq; j++ ) {
         long nj = ( nodeP == NULL ) ? j : nodeP [ j ];
         int col_start = column_starts [ nj ] + nj - 1;
 
-        for ( ULONG ad = sm.Adr(j); ad < sm.Adr(j + 1); ad++ ) {
+        for ( unsigned long ad = sm.Adr(j); ad < sm.Adr(j + 1); ad++ ) {
             long i = ( long ) sm.Ci(ad);
             long ni = ( nodeP == NULL ) ? i : nodeP [ i ];
             double val = sm.a [ ad ];

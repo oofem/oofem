@@ -57,7 +57,7 @@ SparseMatrixF :: SparseMatrixF()
     m_eSparseOrientation = eCompressedColumns;
 }
 
-SparseMatrixF :: SparseMatrixF(unsigned long neq, double *a, unsigned long *ci, unsigned long *adr, ULONG Aofs, ULONG Cofs, bool JardaConvention, bool bIsSymetric, eOrientation sparseOri)
+SparseMatrixF :: SparseMatrixF(unsigned long neq, double *a, unsigned long *ci, unsigned long *adr, unsigned long Aofs, unsigned long Cofs, bool JardaConvention, bool bIsSymetric, eOrientation sparseOri)
 {
     this->a = a;
     this->neq = neq;
@@ -75,9 +75,9 @@ SparseMatrixF :: SparseMatrixF(IConectMatrix *pConMtx)
 {
     /*
      * this->neq = pConMtx->N();
-     * this->adr = new ULONG[neq+1];
+     * this->adr = new unsigned long[neq+1];
      *
-     * ULONG i,length = 0;
+     * unsigned long i,length = 0;
      * adr[0] = 0;
      * for (i=0; i<neq; i++)
      * {
@@ -86,7 +86,7 @@ SparseMatrixF :: SparseMatrixF(IConectMatrix *pConMtx)
      *      adr[i+1] = length;
      * }
      *
-     * this->ci = new ULONG[length];
+     * this->ci = new unsigned long[length];
      * for (i=0; i<neq; i++)
      * {
      *      IntArrayList* plist = pConMtx->GetIndexesAboveDiagonalInColumn(i);
@@ -142,12 +142,12 @@ void SparseMatrixF :: CreateLocalCopy()
 
         long nnz = Nonzeros();
 
-        ULONG *old_adr = adr;
-        adr = new ULONG [ neql ];
+        unsigned long *old_adr = adr;
+        adr = new unsigned long [ neql ];
         Array :: Copy( ( long * ) old_adr, ( long * ) adr, neql );
 
-        ULONG *old_ci = ci;
-        ci = new ULONG [ nnz ];
+        unsigned long *old_ci = ci;
+        ci = new unsigned long [ nnz ];
         Array :: Copy( ( long * ) old_ci, ( long * ) ci, nnz );
 
         double *old_a = a;
@@ -173,9 +173,9 @@ long SparseMatrixF :: Nonzeros()
 
 void SparseMatrixF :: GetA12block(double *pA12, long c)
 {
-    for ( ULONG j = neq - c; j < neq; j++ ) {
-        for ( ULONG ad = Adr(j); ad < Adr(j + 1); ad++ ) {
-            ULONG i = Ci(ad);
+    for ( unsigned long j = neq - c; j < neq; j++ ) {
+        for ( unsigned long ad = Adr(j); ad < Adr(j + 1); ad++ ) {
+            unsigned long i = Ci(ad);
             if ( i < ( neq - c ) ) {
                 pA12 [ i * c + ( j - ( neq - c ) ) ] = a [ ad ];
             }
@@ -197,10 +197,10 @@ void SparseMatrixF :: MulNonsymMatrixByVector(double *b, double *c)
     switch ( m_eSparseOrientation ) {
     case eCompressedColumns:
     {
-        for ( ULONG j = 0; j < neq; j++ ) {
-            for ( ULONG ad = Adr(j); ad < Adr(j + 1); ad++ ) {
+        for ( unsigned long j = 0; j < neq; j++ ) {
+            for ( unsigned long ad = Adr(j); ad < Adr(j + 1); ad++ ) {
                 double A = a [ ad ];
-                ULONG i = Ci(ad);
+                unsigned long i = Ci(ad);
                 c [ i ] += A * b [ j ];
             }
         }
@@ -208,10 +208,10 @@ void SparseMatrixF :: MulNonsymMatrixByVector(double *b, double *c)
     break;
     case eCompressedRows:
     {
-        for ( ULONG j = 0; j < neq; j++ ) {
-            for ( ULONG ad = Adr(j); ad < Adr(j + 1); ad++ ) {
+        for ( unsigned long j = 0; j < neq; j++ ) {
+            for ( unsigned long ad = Adr(j); ad < Adr(j + 1); ad++ ) {
                 double A = a [ ad ];
-                ULONG i = Ci(ad);
+                unsigned long i = Ci(ad);
                 c [ j ] += A * b [ i ];
             }
         }
@@ -225,10 +225,10 @@ void SparseMatrixF :: MulNonsymMatrixByVector(double *b, double *c)
 
 void SparseMatrixF :: MulSymMatrixByVector(double *b, double *c)
 {
-    for ( ULONG j = 0; j < neq; j++ ) {
-        for ( ULONG ad = Adr(j); ad < Adr(j + 1); ad++ ) {
+    for ( unsigned long j = 0; j < neq; j++ ) {
+        for ( unsigned long ad = Adr(j); ad < Adr(j + 1); ad++ ) {
             double A = a [ ad ];
-            ULONG i = Ci(ad);
+            unsigned long i = Ci(ad);
             c [ i ] += A * b [ j ];
             if ( i != j ) {
                 c [ j ] += A * b [ i ];
@@ -239,7 +239,7 @@ void SparseMatrixF :: MulSymMatrixByVector(double *b, double *c)
 
 void SparseMatrixF :: mxv_scr(double *b, double *c)
 {
-    ULONG i, j, ii, lj, uj;
+    unsigned long i, j, ii, lj, uj;
     double s, d;
 
     for ( i = 0; i < neq; i++ ) {
@@ -259,9 +259,9 @@ void SparseMatrixF :: mxv_scr(double *b, double *c)
 
 void SparseMatrixF :: ReadDiagonal(double *dv)
 {
-    for ( ULONG j = 0; j < neq; j++ ) {
-        for ( ULONG ad = Adr(j); ad < Adr(j + 1); ad++ ) {
-            ULONG i = Ci(ad);
+    for ( unsigned long j = 0; j < neq; j++ ) {
+        for ( unsigned long ad = Adr(j); ad < Adr(j + 1); ad++ ) {
+            unsigned long i = Ci(ad);
             if ( i == j ) {
                 dv [ j ] = a [ ad ];
             }
@@ -282,17 +282,17 @@ void SparseMatrixF :: LoadMatrix(FILE *stream)
         //neq = b.ReadUInt32();
         fread(& neq, sizeof( neq ), 1, stream);
 
-        adr = new ULONG [ neq + 1 ];
-        fread(adr, sizeof( ULONG ), neq + 1, stream);
+        adr = new unsigned long [ neq + 1 ];
+        fread(adr, sizeof( unsigned long ), neq + 1, stream);
         //for (long i=0; i<=neq; i++)
         //adr[i] = b.ReadUInt32();
 
-        ci = new ULONG [ adr [ neq ] ];
+        ci = new unsigned long [ adr [ neq ] ];
         a = new double [ adr [ neq ] ];
 
-        for ( ULONG ad = 0; ad < adr [ neq ]; ad++ ) {
+        for ( unsigned long ad = 0; ad < adr [ neq ]; ad++ ) {
             //ci[ad] = b.ReadUInt32();
-            fread(ci + ad, sizeof( ULONG ), 1, stream);
+            fread(ci + ad, sizeof( unsigned long ), 1, stream);
             //a[ad] = b.ReadDouble();
             fread(a + ad, sizeof( double ), 1, stream);
             if ( ci [ ad ] < ad ) {
@@ -330,11 +330,11 @@ void SparseMatrixF :: SaveMatrix(FILE *stream)
 
         //for (long i=0; i<=neq; i++)
         //b.Write(adr[i]);
-        fwrite(adr, sizeof( ULONG ), neq + 1, stream);
+        fwrite(adr, sizeof( unsigned long ), neq + 1, stream);
 
-        for ( ULONG ad = 0; ad < adr [ neq ]; ad++ ) {
+        for ( unsigned long ad = 0; ad < adr [ neq ]; ad++ ) {
             //b.Write(ci[ad]);
-            fwrite(ci + ad, sizeof( ULONG ), 1, stream);
+            fwrite(ci + ad, sizeof( unsigned long ), 1, stream);
             //b.Write(a[ad]);
             fwrite(a + ad, sizeof( double ), 1, stream);
         }
