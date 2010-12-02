@@ -63,7 +63,7 @@ protected:
     /// pointer to DSSolver class (representation of Direct Sparse Solver in DSS lib)
     DSSolver *_dss;
     /// Flag indicating whether factorized.
-    int isFactorized;
+    bool isFactorized;
     /// type of storage & factorization
     dssType _type;
 
