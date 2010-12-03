@@ -67,6 +67,7 @@
 
 
 namespace oofem {
+
 IRResultType IGAElement :: initializeFrom(InputRecord *ir) {
     const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                 // Required by IR_GIVE_FIELD macro
@@ -275,7 +276,7 @@ void IGAElement :: drawRawGeometry(oofegGraphicContext &gc) {
     WCRec p [ 8 ];
     GraphicObj *go;
     FEInterpolation *interp = this->giveInterpolation();
-    int i, j, k, m, nseg = 4;
+    int i, j, k, m, nseg;
 
  #ifdef DRAW_MESH
     WCRec pp [ 2 ];
@@ -290,13 +291,14 @@ void IGAElement :: drawRawGeometry(oofegGraphicContext &gc) {
     EASValsSetEdgeColor( gc.getElementEdgeColor() );
     EASValsSetEdgeFlag(TRUE);
     EASValsSetLayer(OOFEG_RAW_GEOMETRY_LAYER);
+		EASValsSetLineStyle(SOLID_STYLE);
+    EASValsSetFillStyle(FILL_SOLID);
+		//		EASValsSetLineWidth(0);
 
  #ifdef DRAW_MESH
-    EASValsSetLineWidth(0);
-    EASValsSetLineStyle(SOLID_STYLE);
     nseg = 8;
  #else
-    EASValsSetFillStyle(FILL_HOLLOW);
+		nseq = 4;
  #endif
 
     int numberOfIntegrationRules = this->giveNumberOfIntegrationRules();
@@ -304,7 +306,6 @@ void IGAElement :: drawRawGeometry(oofegGraphicContext &gc) {
     const IntArray *span;
     IntegrationRule *iRule;
     int ir, nsd = this->giveNsd();
-    ;
 
     if ( nsd == 1 ) {
         FloatArray c [ 2 ], cg [ 2 ];
@@ -339,7 +340,7 @@ void IGAElement :: drawRawGeometry(oofegGraphicContext &gc) {
             }
         }                 // end loop over knot spans (irules)
 
-    } else if ( nsd == 2 ) {
+    } else if ( nsd == 2 )      {
         FloatArray c [ 4 ], cg [ 4 ];
         double du, dv;
 
@@ -444,7 +445,7 @@ void IGAElement :: drawRawGeometry(oofegGraphicContext &gc) {
             }
         }                 // end loop over knot spans (irules)
 
-    } else if ( nsd == 3 ) {
+    } else if ( nsd == 3 )      {
         FloatArray c [ 8 ], cg [ 8 ];
         double du, dv, dt;
 
@@ -506,10 +507,35 @@ void IGAElement :: drawRawGeometry(oofegGraphicContext &gc) {
                             pp [ 1 ].y = p [ 4 ].y;
                             pp [ 1 ].z = p [ 4 ].z;
 
+#ifdef DRAW_VISIBLE_CONTOUR
+#ifdef SPHERE_WITH_HOLE
+														double xx = 0.0, yy = 0.0, zz = 0.0, rr, r;
+														for(int ii=0;ii<2;ii++){
+															xx += pp[ii].x;
+															yy += pp[ii].y;
+															zz += pp[ii].z;
+														}
+														xx /= 2.0;
+														yy /= 2.0;
+														zz /= 2.0;
+														rr = xx * xx + yy * yy;
+														r = rr + zz * zz;
+
+														if(zz < 2.0001 /* || xx < 0.0001 */|| yy < 0.0001 || rr < 1.001 * 1.001 || r < 25.0 || r > 5.98 * 5.98){
+															if(zz < 2.0001 || rr < 1.001 * 1.001 || yy < 0.0001){
+																go =  CreateLine3D(pp);
+																EGWithMaskChangeAttributes(WIDTH_MASK | STYLE_MASK | COLOR_MASK | LAYER_MASK, go);
+																EGAttachObject(go, ( EObjectP ) this);
+																EMAddGraphicsToModel(ESIModel(), go);
+															}
+														}
+#endif
+#else
                             go =  CreateLine3D(pp);
                             EGWithMaskChangeAttributes(WIDTH_MASK | STYLE_MASK | COLOR_MASK | LAYER_MASK, go);
                             EGAttachObject(go, ( EObjectP ) this);
                             EMAddGraphicsToModel(ESIModel(), go);
+#endif
                         }
 
                         if ( i == 1 && j == nseg ) {
@@ -521,10 +547,35 @@ void IGAElement :: drawRawGeometry(oofegGraphicContext &gc) {
                             pp [ 1 ].y = p [ 7 ].y;
                             pp [ 1 ].z = p [ 7 ].z;
 
+#ifdef DRAW_VISIBLE_CONTOUR
+#ifdef SPHERE_WITH_HOLE
+														double xx = 0.0, yy = 0.0, zz = 0.0, rr, r;
+														for(int ii=0;ii<2;ii++){
+															xx += pp[ii].x;
+															yy += pp[ii].y;
+															zz += pp[ii].z;
+														}
+														xx /= 2.0;
+														yy /= 2.0;
+														zz /= 2.0;
+														rr = xx * xx + yy * yy;
+														r = rr + zz * zz;
+														
+														if(zz < 2.0001 /* || xx < 0.0001 */|| yy < 0.0001 || rr < 1.001 * 1.001 || r < 25.0 || r > 5.98 * 5.98){
+															if(zz < 2.0001 || rr < 1.001 * 1.001 || yy < 0.0001){
+																go =  CreateLine3D(pp);
+																EGWithMaskChangeAttributes(WIDTH_MASK | STYLE_MASK | COLOR_MASK | LAYER_MASK, go);
+																EGAttachObject(go, ( EObjectP ) this);
+																EMAddGraphicsToModel(ESIModel(), go);
+															}
+														}
+#endif
+#else
                             go =  CreateLine3D(pp);
                             EGWithMaskChangeAttributes(WIDTH_MASK | STYLE_MASK | COLOR_MASK | LAYER_MASK, go);
                             EGAttachObject(go, ( EObjectP ) this);
                             EMAddGraphicsToModel(ESIModel(), go);
+#endif
                         }
 
                         if ( i == nseg && j == 1 ) {
@@ -536,10 +587,35 @@ void IGAElement :: drawRawGeometry(oofegGraphicContext &gc) {
                             pp [ 1 ].y = p [ 5 ].y;
                             pp [ 1 ].z = p [ 5 ].z;
 
+#ifdef DRAW_VISIBLE_CONTOUR
+#ifdef SPHERE_WITH_HOLE
+														double xx = 0.0, yy = 0.0, zz = 0.0, rr, r;
+														for(int ii=0;ii<2;ii++){
+															xx += pp[ii].x;
+															yy += pp[ii].y;
+															zz += pp[ii].z;
+														}
+														xx /= 2.0;
+														yy /= 2.0;
+														zz /= 2.0;
+														rr = xx * xx + yy * yy;
+														r = rr + zz * zz;
+														
+														if(zz < 2.0001 /* || xx < 0.0001 */|| yy < 0.0001 || rr < 1.001 * 1.001 || r < 25.0 || r > 5.98 * 5.98){
+															if(zz < 2.0001 || rr < 1.001 * 1.001 || yy < 0.0001){
+																go =  CreateLine3D(pp);
+																EGWithMaskChangeAttributes(WIDTH_MASK | STYLE_MASK | COLOR_MASK | LAYER_MASK, go);
+																EGAttachObject(go, ( EObjectP ) this);
+																EMAddGraphicsToModel(ESIModel(), go);
+															}
+														}
+#endif
+#else
                             go =  CreateLine3D(pp);
                             EGWithMaskChangeAttributes(WIDTH_MASK | STYLE_MASK | COLOR_MASK | LAYER_MASK, go);
                             EGAttachObject(go, ( EObjectP ) this);
                             EMAddGraphicsToModel(ESIModel(), go);
+#endif
                         }
 
                         if ( i == nseg && j == nseg ) {
@@ -551,10 +627,35 @@ void IGAElement :: drawRawGeometry(oofegGraphicContext &gc) {
                             pp [ 1 ].y = p [ 6 ].y;
                             pp [ 1 ].z = p [ 6 ].z;
 
+#ifdef DRAW_VISIBLE_CONTOUR
+#ifdef SPHERE_WITH_HOLE
+														double xx = 0.0, yy = 0.0, zz = 0.0, rr, r;
+														for(int ii=0;ii<2;ii++){
+															xx += pp[ii].x;
+															yy += pp[ii].y;
+															zz += pp[ii].z;
+														}
+														xx /= 2.0;
+														yy /= 2.0;
+														zz /= 2.0;
+														rr = xx * xx + yy * yy;
+														r = rr + zz * zz;
+														
+														if(zz < 2.0001 /* || xx < 0.0001 */|| yy < 0.0001 || rr < 1.001 * 1.001 || r < 25.0 || r > 5.98 * 5.98){
+															if(zz < 2.0001 || rr < 1.001 * 1.001 || yy < 0.0001){
+																go =  CreateLine3D(pp);
+																EGWithMaskChangeAttributes(WIDTH_MASK | STYLE_MASK | COLOR_MASK | LAYER_MASK, go);
+																EGAttachObject(go, ( EObjectP ) this);
+																EMAddGraphicsToModel(ESIModel(), go);
+															}
+														}
+#endif
+#else
                             go =  CreateLine3D(pp);
                             EGWithMaskChangeAttributes(WIDTH_MASK | STYLE_MASK | COLOR_MASK | LAYER_MASK, go);
                             EGAttachObject(go, ( EObjectP ) this);
                             EMAddGraphicsToModel(ESIModel(), go);
+#endif
                         }
 
                         if ( j == 1 && k == 1 ) {
@@ -566,10 +667,33 @@ void IGAElement :: drawRawGeometry(oofegGraphicContext &gc) {
                             pp [ 1 ].y = p [ 1 ].y;
                             pp [ 1 ].z = p [ 1 ].z;
 
-                            go =  CreateLine3D(pp);
+#ifdef DRAW_VISIBLE_CONTOUR
+#ifdef SPHERE_WITH_HOLE
+														double xx = 0.0, yy = 0.0, zz = 0.0, rr, r;
+														for(int ii=0;ii<2;ii++){
+															xx += pp[ii].x;
+															yy += pp[ii].y;
+															zz += pp[ii].z;
+														}
+														xx /= 2.0;
+														yy /= 2.0;
+														zz /= 2.0;
+														rr = xx * xx + yy * yy;
+														r = rr + zz * zz;
+														
+														if(zz < 2.0001 /* || xx < 0.0001 */|| yy < 0.0001 || rr < 1.001 * 1.001 || r < 25.0 || r > 5.98 * 5.98){
+															go =  CreateLine3D(pp);
+															EGWithMaskChangeAttributes(WIDTH_MASK | STYLE_MASK | COLOR_MASK | LAYER_MASK, go);
+															EGAttachObject(go, ( EObjectP ) this);
+															EMAddGraphicsToModel(ESIModel(), go);
+														}
+#endif
+#else
+                           go =  CreateLine3D(pp);
                             EGWithMaskChangeAttributes(WIDTH_MASK | STYLE_MASK | COLOR_MASK | LAYER_MASK, go);
                             EGAttachObject(go, ( EObjectP ) this);
                             EMAddGraphicsToModel(ESIModel(), go);
+#endif
                         }
 
                         if ( j == 1 && k == nseg ) {
@@ -581,10 +705,35 @@ void IGAElement :: drawRawGeometry(oofegGraphicContext &gc) {
                             pp [ 1 ].y = p [ 5 ].y;
                             pp [ 1 ].z = p [ 5 ].z;
 
+#ifdef DRAW_VISIBLE_CONTOUR
+#ifdef SPHERE_WITH_HOLE
+														double xx = 0.0, yy = 0.0, zz = 0.0, rr, r;
+														for(int ii=0;ii<2;ii++){
+															xx += pp[ii].x;
+															yy += pp[ii].y;
+															zz += pp[ii].z;
+														}
+														xx /= 2.0;
+														yy /= 2.0;
+														zz /= 2.0;
+														rr = xx * xx + yy * yy;
+														r = rr + zz * zz;
+														
+														if(zz < 2.0001 /* || xx < 0.0001 */|| yy < 0.0001 || rr < 1.001 * 1.001 || r < 25.0 || r > 5.98 * 5.98){
+															if(yy < 1.5 || zz < 2.0001){
+																go =  CreateLine3D(pp);
+																EGWithMaskChangeAttributes(WIDTH_MASK | STYLE_MASK | COLOR_MASK | LAYER_MASK, go);
+																EGAttachObject(go, ( EObjectP ) this);
+																EMAddGraphicsToModel(ESIModel(), go);
+															}
+														}
+#endif
+#else
                             go =  CreateLine3D(pp);
                             EGWithMaskChangeAttributes(WIDTH_MASK | STYLE_MASK | COLOR_MASK | LAYER_MASK, go);
                             EGAttachObject(go, ( EObjectP ) this);
                             EMAddGraphicsToModel(ESIModel(), go);
+#endif
                         }
 
                         if ( j == nseg && k == 1 ) {
@@ -596,10 +745,33 @@ void IGAElement :: drawRawGeometry(oofegGraphicContext &gc) {
                             pp [ 1 ].y = p [ 2 ].y;
                             pp [ 1 ].z = p [ 2 ].z;
 
+#ifdef DRAW_VISIBLE_CONTOUR
+#ifdef SPHERE_WITH_HOLE
+														double xx = 0.0, yy = 0.0, zz = 0.0, rr, r;
+														for(int ii=0;ii<2;ii++){
+															xx += pp[ii].x;
+															yy += pp[ii].y;
+															zz += pp[ii].z;
+														}
+														xx /= 2.0;
+														yy /= 2.0;
+														zz /= 2.0;
+														rr = xx * xx + yy * yy;
+														r = rr + zz * zz;
+														
+														if(zz < 2.0001 /* || xx < 0.0001 */|| yy < 0.0001 || rr < 1.001 * 1.001 || r < 25.0 || r > 5.98 * 5.98){
+															go =  CreateLine3D(pp);
+															EGWithMaskChangeAttributes(WIDTH_MASK | STYLE_MASK | COLOR_MASK | LAYER_MASK, go);
+															EGAttachObject(go, ( EObjectP ) this);
+															EMAddGraphicsToModel(ESIModel(), go);
+														}
+#endif
+#else
                             go =  CreateLine3D(pp);
                             EGWithMaskChangeAttributes(WIDTH_MASK | STYLE_MASK | COLOR_MASK | LAYER_MASK, go);
                             EGAttachObject(go, ( EObjectP ) this);
                             EMAddGraphicsToModel(ESIModel(), go);
+#endif
                         }
 
                         if ( j == nseg && k == nseg ) {
@@ -611,10 +783,35 @@ void IGAElement :: drawRawGeometry(oofegGraphicContext &gc) {
                             pp [ 1 ].y = p [ 6 ].y;
                             pp [ 1 ].z = p [ 6 ].z;
 
+#ifdef DRAW_VISIBLE_CONTOUR
+#ifdef SPHERE_WITH_HOLE
+														double xx = 0.0, yy = 0.0, zz = 0.0, rr, r;
+														for(int ii=0;ii<2;ii++){
+															xx += pp[ii].x;
+															yy += pp[ii].y;
+															zz += pp[ii].z;
+														}
+														xx /= 2.0;
+														yy /= 2.0;
+														zz /= 2.0;
+														rr = xx * xx + yy * yy;
+														r = rr + zz * zz;
+														
+														if(zz < 2.0001 /* || xx < 0.0001 */|| yy < 0.0001 || rr < 1.001 * 1.001 || r < 25.0 || r > 5.98 * 5.98){
+															if(yy < 1.5 || zz < 2.0001){
+																go =  CreateLine3D(pp);
+																EGWithMaskChangeAttributes(WIDTH_MASK | STYLE_MASK | COLOR_MASK | LAYER_MASK, go);
+																EGAttachObject(go, ( EObjectP ) this);
+																EMAddGraphicsToModel(ESIModel(), go);
+															}
+														}
+#endif
+#else
                             go =  CreateLine3D(pp);
                             EGWithMaskChangeAttributes(WIDTH_MASK | STYLE_MASK | COLOR_MASK | LAYER_MASK, go);
                             EGAttachObject(go, ( EObjectP ) this);
                             EMAddGraphicsToModel(ESIModel(), go);
+#endif
                         }
 
                         if ( k == 1 && i == 1 ) {
@@ -626,10 +823,33 @@ void IGAElement :: drawRawGeometry(oofegGraphicContext &gc) {
                             pp [ 1 ].y = p [ 3 ].y;
                             pp [ 1 ].z = p [ 3 ].z;
 
+#ifdef DRAW_VISIBLE_CONTOUR
+#ifdef SPHERE_WITH_HOLE
+														double xx = 0.0, yy = 0.0, zz = 0.0, rr, r;
+														for(int ii=0;ii<2;ii++){
+															xx += pp[ii].x;
+															yy += pp[ii].y;
+															zz += pp[ii].z;
+														}
+														xx /= 2.0;
+														yy /= 2.0;
+														zz /= 2.0;
+														rr = xx * xx + yy * yy;
+														r = rr + zz * zz;
+														
+														if(zz < 2.0001 /* || xx < 0.0001 */|| yy < 0.0001 || rr < 1.001 * 1.001 || r < 25.0 || r > 5.98 * 5.98){
+															go =  CreateLine3D(pp);
+															EGWithMaskChangeAttributes(WIDTH_MASK | STYLE_MASK | COLOR_MASK | LAYER_MASK, go);
+															EGAttachObject(go, ( EObjectP ) this);
+															EMAddGraphicsToModel(ESIModel(), go);
+														}
+#endif
+#else
                             go =  CreateLine3D(pp);
                             EGWithMaskChangeAttributes(WIDTH_MASK | STYLE_MASK | COLOR_MASK | LAYER_MASK, go);
                             EGAttachObject(go, ( EObjectP ) this);
                             EMAddGraphicsToModel(ESIModel(), go);
+#endif
                         }
 
                         if ( k == 1 && i == nseg ) {
@@ -641,10 +861,33 @@ void IGAElement :: drawRawGeometry(oofegGraphicContext &gc) {
                             pp [ 1 ].y = p [ 2 ].y;
                             pp [ 1 ].z = p [ 2 ].z;
 
+#ifdef DRAW_VISIBLE_CONTOUR
+#ifdef SPHERE_WITH_HOLE
+														double xx = 0.0, yy = 0.0, zz = 0.0, rr, r;
+														for(int ii=0;ii<2;ii++){
+															xx += pp[ii].x;
+															yy += pp[ii].y;
+															zz += pp[ii].z;
+														}
+														xx /= 2.0;
+														yy /= 2.0;
+														zz /= 2.0;
+														rr = xx * xx + yy * yy;
+														r = rr + zz * zz;
+														
+														if(zz < 2.0001 /* || xx < 0.0001 */|| yy < 0.0001 || rr < 1.001 * 1.001 || r < 25.0 || r > 5.98 * 5.98){
+															go =  CreateLine3D(pp);
+															EGWithMaskChangeAttributes(WIDTH_MASK | STYLE_MASK | COLOR_MASK | LAYER_MASK, go);
+															EGAttachObject(go, ( EObjectP ) this);
+															EMAddGraphicsToModel(ESIModel(), go);
+														}
+#endif
+#else
                             go =  CreateLine3D(pp);
                             EGWithMaskChangeAttributes(WIDTH_MASK | STYLE_MASK | COLOR_MASK | LAYER_MASK, go);
                             EGAttachObject(go, ( EObjectP ) this);
                             EMAddGraphicsToModel(ESIModel(), go);
+#endif
                         }
 
                         if ( k == nseg && i == 1 ) {
@@ -656,10 +899,35 @@ void IGAElement :: drawRawGeometry(oofegGraphicContext &gc) {
                             pp [ 1 ].y = p [ 7 ].y;
                             pp [ 1 ].z = p [ 7 ].z;
 
+#ifdef DRAW_VISIBLE_CONTOUR
+#ifdef SPHERE_WITH_HOLE
+														double xx = 0.0, yy = 0.0, zz = 0.0, rr, r;
+														for(int ii=0;ii<2;ii++){
+															xx += pp[ii].x;
+															yy += pp[ii].y;
+															zz += pp[ii].z;
+														}
+														xx /= 2.0;
+														yy /= 2.0;
+														zz /= 2.0;
+														rr = xx * xx + yy * yy;
+														r = rr + zz * zz;
+														
+														if(zz < 2.0001 /* || xx < 0.0001 */|| yy < 0.0001 || rr < 1.001 * 1.001 || r < 25.0 || r > 5.98 * 5.98){
+															if(yy < 0.0001){
+																go =  CreateLine3D(pp);
+																EGWithMaskChangeAttributes(WIDTH_MASK | STYLE_MASK | COLOR_MASK | LAYER_MASK, go);
+																EGAttachObject(go, ( EObjectP ) this);
+																EMAddGraphicsToModel(ESIModel(), go);
+															}
+														}
+#endif
+#else
                             go =  CreateLine3D(pp);
                             EGWithMaskChangeAttributes(WIDTH_MASK | STYLE_MASK | COLOR_MASK | LAYER_MASK, go);
                             EGAttachObject(go, ( EObjectP ) this);
                             EMAddGraphicsToModel(ESIModel(), go);
+#endif
                         }
 
                         if ( k == nseg && i == nseg ) {
@@ -671,10 +939,35 @@ void IGAElement :: drawRawGeometry(oofegGraphicContext &gc) {
                             pp [ 1 ].y = p [ 6 ].y;
                             pp [ 1 ].z = p [ 6 ].z;
 
+#ifdef DRAW_VISIBLE_CONTOUR
+#ifdef SPHERE_WITH_HOLE
+														double xx = 0.0, yy = 0.0, zz = 0.0, rr, r;
+														for(int ii=0;ii<2;ii++){
+															xx += pp[ii].x;
+															yy += pp[ii].y;
+															zz += pp[ii].z;
+														}
+														xx /= 2.0;
+														yy /= 2.0;
+														zz /= 2.0;
+														rr = xx * xx + yy * yy;
+														r = rr + zz * zz;
+														
+														if(zz < 2.0001 /* || xx < 0.0001 */|| yy < 0.0001 || rr < 1.001 * 1.001 || r < 25.0 || r > 5.98 * 5.98){
+															if(yy < 2.0001){
+																go =  CreateLine3D(pp);
+																EGWithMaskChangeAttributes(WIDTH_MASK | STYLE_MASK | COLOR_MASK | LAYER_MASK, go);
+																EGAttachObject(go, ( EObjectP ) this);
+																EMAddGraphicsToModel(ESIModel(), go);
+															}
+														}
+#endif
+#else
                             go =  CreateLine3D(pp);
                             EGWithMaskChangeAttributes(WIDTH_MASK | STYLE_MASK | COLOR_MASK | LAYER_MASK, go);
                             EGAttachObject(go, ( EObjectP ) this);
                             EMAddGraphicsToModel(ESIModel(), go);
+#endif
                         }
 
  #else
@@ -688,7 +981,7 @@ void IGAElement :: drawRawGeometry(oofegGraphicContext &gc) {
             }
         }                 // end loop over knot spans (irules)
 
-    } else {
+    } else   {
         OOFEM_ERROR2("drawRawGeometry: not implemented for nsd = %d", nsd);
     }
 }
@@ -697,7 +990,7 @@ void IGAElement :: drawRawGeometry(oofegGraphicContext &gc) {
 void drawIGAPatchDeformedGeometry(Element *elem, StructuralElementEvaluator *se, oofegGraphicContext &gc, UnknownType) {
     WCRec p [ 8 ];
     GraphicObj *go;
-    int i, j, k, m, n, nseg = 4;
+    int i, j, k, m, n, nseg;
     FloatArray u;
     FloatMatrix N;
     FloatArray ur, d;
@@ -706,6 +999,10 @@ void drawIGAPatchDeformedGeometry(Element *elem, StructuralElementEvaluator *se,
     TimeStep *stepN = elem->giveDomain()->giveEngngModel()->giveCurrentStep();
     double defScale = gc.getDefScale();
 
+
+ #ifdef DRAW_MESH
+    WCRec pp [ 2 ];
+ #endif
 
     if ( !gc.testElementGraphicActivity(elem) ) {
         return;
@@ -716,14 +1013,15 @@ void drawIGAPatchDeformedGeometry(Element *elem, StructuralElementEvaluator *se,
     EASValsSetEdgeColor( gc.getElementEdgeColor() );
     EASValsSetEdgeFlag(TRUE);
     EASValsSetLayer(OOFEG_DEFORMED_GEOMETRY_LAYER);
+		EASValsSetLineStyle(SOLID_STYLE);
+    EASValsSetFillStyle(FILL_SOLID);
+		EASValsSetLineWidth(0);
 
  #ifdef DRAW_MESH
-    EASValsSetLineWidth(0);
-    EASValsSetLineStyle(SOLID_STYLE);
-    EASValsSetFillStyle(FILL_HOLLOW);
-    nseg = 8;
- #else
-    EASValsSetFillStyle(FILL_SOLID);
+		//		nseg = 8;
+		nseg = 4;
+#else
+		nseg = 4;
  #endif
 
     int numberOfIntegrationRules = elem->giveNumberOfIntegrationRules();
@@ -731,7 +1029,6 @@ void drawIGAPatchDeformedGeometry(Element *elem, StructuralElementEvaluator *se,
     const IntArray *span;
     IntegrationRule *iRule;
     int ir, nsd = interp->giveNsd();
-    ;
 
     se->computeVectorOf(EID_MomentumBalance, VM_Total, stepN, u);
 
@@ -790,7 +1087,7 @@ void drawIGAPatchDeformedGeometry(Element *elem, StructuralElementEvaluator *se,
             }
         }                 // end loop over knot spans (irules)
 
-    } else if ( nsd == 2 ) {
+    } else if ( nsd == 2 )      {
         FloatArray c [ 4 ], cg [ 4 ];
         double du, dv;
 
@@ -850,7 +1147,7 @@ void drawIGAPatchDeformedGeometry(Element *elem, StructuralElementEvaluator *se,
             }
         }                 // end loop over knot spans (irules)
 
-    } else if ( nsd == 3 ) {
+    } else if ( nsd == 3 )      {
         FloatArray c [ 8 ], cg [ 8 ];
         double du, dv, dt;
 
@@ -929,7 +1226,7 @@ void drawIGAPatchDeformedGeometry(Element *elem, StructuralElementEvaluator *se,
             }
         }                 // end loop over knot spans (irules)
 
-    } else {
+    } else   {
         OOFEM_ERROR2("drawDeformedGeometry: not implemented for nsd = %d", nsd);
     }
 }
