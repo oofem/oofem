@@ -795,7 +795,7 @@ void FloatMatrix :: add(const FloatMatrix &aMatrix)
     } else {
 #     ifdef DEBUG
         if ( n != nRows || m != nColumns )
-            OOFEM_ERROR5(stderr, "FloatMatrix::add : dimensions mismatch : (r1,c1)+(r2,c2) : (%d,%d)+(%d,%d)", nRows, nColumns, n, m);
+            OOFEM_ERROR5("FloatMatrix::add : dimensions mismatch : (r1,c1)+(r2,c2) : (%d,%d)+(%d,%d)", nRows, nColumns, n, m);
 #     endif
 
         P1 = values;
@@ -822,7 +822,7 @@ void FloatMatrix :: subtract(const FloatMatrix &aMatrix)
     } else {
 #     ifdef DEBUG
         if ( n != nRows || m != nColumns )
-            OOFEM_ERROR5(stderr, "FloatMatrix::subtract : dimensions mismatch : (r1,c1)-(r2,c2) : (%d,%d)-(%d,%d)", nRows, nColumns, n, m);
+            OOFEM_ERROR5("FloatMatrix::subtract : dimensions mismatch : (r1,c1)-(r2,c2) : (%d,%d)-(%d,%d)", nRows, nColumns, n, m);
 #     endif
 
         P1 = values;
