@@ -611,7 +611,10 @@ VTKXMLExportModule :: exportIntVarAs(InternalStateType valID, InternalStateValue
         } else {
             this->smoother->giveNodalVector(val, mapL2G.at(inode), ireg);
             if ( val == NULL ) {
-                OOFEM_ERROR2("VTKXMLExportModule::exportIntVars: smoothing error: invalid data in node %d", inode);
+	      iVal.resize( regionVarMap.giveSize() );
+	      iVal.zero();
+	      val = & iVal;
+	      //OOFEM_ERROR2("VTKXMLExportModule::exportIntVars: smoothing error: invalid data in node %d", inode);
             }
         }
 
