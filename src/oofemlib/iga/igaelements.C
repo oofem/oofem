@@ -205,8 +205,7 @@ void BsplinePlaneStressElement :: drawScalar(oofegGraphicContext &context) {
 #endif
 
                         // create a dummy ip's
-                        FloatArray *cc = new FloatArray;
-                        cc->beCopyOf(& c [ k ]); // constructor of gp does not make its own copy
+                        FloatArray *cc = new FloatArray (c[k]);         // constructor of gp does not make its own copy
                         GaussPoint gp(iRule, 999, cc, 1.0, _PlaneStress);
 #ifdef COMPUTE_STRAIN
                         this->computeStrainVector (val, &gp, tStep);
@@ -261,8 +260,6 @@ void NURBSPlaneStressElement :: drawScalar(oofegGraphicContext &context) {
     const IntArray *span;
     IntegrationRule *iRule;
     int ir, j, nsd = this->giveNsd();
-    int numberOfKnotSpans_u = interp->giveNumberOfKnotSpans(1);
-    int numberOfKnotSpans_v = interp->giveNumberOfKnotSpans(2);
     FloatArray c [ 4 ], cg [ 4 ];
     IntArray sign [ 4 ];
 
@@ -324,8 +321,7 @@ void NURBSPlaneStressElement :: drawScalar(oofegGraphicContext &context) {
                         }
 
                         // create a dummy ip's
-                        FloatArray *cc = new FloatArray;
-                        cc->beCopyOf(& c [ k ]); // constructor of gp does not make its own copy
+                        FloatArray *cc = new FloatArray (c[k]);         // constructor of gp does not make its own copy
                         GaussPoint gp(iRule, 999, cc, 1.0, _PlaneStress);
 #ifdef COMPUTE_STRAIN
                         this->computeStrainVector (val, &gp, tStep);
@@ -458,8 +454,6 @@ void TSplinePlaneStressElement :: drawScalar(oofegGraphicContext &context) {
     const IntArray *span;
     IntegrationRule *iRule;
     int ir, j, nsd = this->giveNsd();
-    int numberOfKnotSpans_u = interp->giveNumberOfKnotSpans(1);
-    int numberOfKnotSpans_v = interp->giveNumberOfKnotSpans(2);
     FloatArray c [ 4 ], cg [ 4 ];
     IntArray sign [ 4 ];
 
@@ -521,10 +515,8 @@ void TSplinePlaneStressElement :: drawScalar(oofegGraphicContext &context) {
 #endif 
 
                         // create a dummy ip's
-                        FloatArray *cc = new FloatArray;
-                        cc->beCopyOf(& c [ k ]); // constructor of gp does not make its own copy
+                        FloatArray *cc = new FloatArray (c[k]);         // constructor of gp does not make its own copy
                         GaussPoint gp(iRule, 999, cc, 1.0, _PlaneStress);
- 
 #ifdef COMPUTE_STRAIN
                         this->computeStrainVector (val, &gp, tStep);
 #endif
@@ -580,9 +572,6 @@ void NURBSSpace3dElement :: drawScalar(oofegGraphicContext &context) {
     const IntArray *span;
     IntegrationRule *iRule;
     int ir, j, nsd = this->giveNsd();
-    int numberOfKnotSpans_u = interp->giveNumberOfKnotSpans(1);
-    int numberOfKnotSpans_v = interp->giveNumberOfKnotSpans(2);
-    int numberOfKnotSpans_w = interp->giveNumberOfKnotSpans(3);
     FloatArray c [ 8 ], cg [ 8 ];
     IntArray sign [ 8 ];
 
@@ -718,8 +707,7 @@ void NURBSSpace3dElement :: drawScalar(oofegGraphicContext &context) {
 												
 												for (k=0;k<8; k++) {
                             // create a dummy ip's
-                            FloatArray *cc = new FloatArray;
-                            cc->beCopyOf(& c [ k ]);             // constructor of gp does not make its own copy
+													  FloatArray *cc = new FloatArray (c[k]);         // constructor of gp does not make its own copy
                             GaussPoint gp(iRule, 999, cc, 1.0, _3dMat);
 #ifdef COMPUTE_STRAIN
                             this->computeStrainVector (val, &gp, tStep);
