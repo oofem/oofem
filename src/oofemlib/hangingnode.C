@@ -58,7 +58,11 @@ namespace oofem {
  * Constructor. Creates a hanging node with number n, belonging to aDomain.
  */
 HangingNode :: HangingNode(int n, Domain *aDomain) : Node(n, aDomain)
-{ }
+{ 
+#ifdef __OOFEG
+	consistencyChecked = false;
+#endif
+}
 
 
 void
@@ -133,6 +137,11 @@ HangingNode :: checkConsistency()
     int result = 1;
     int i, j;
     double suma;
+
+#ifdef __OOFEG
+		if(consistencyChecked) return result;
+		consistencyChecked = true;
+#endif
 
     result = result && Node :: checkConsistency();
 

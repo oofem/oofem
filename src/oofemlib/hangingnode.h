@@ -89,6 +89,10 @@ protected:
     Node **masterNode;
     /// vector of master contribution coefficients - SUMA of contributions == 1.0 ; if node has LCS, contribs are specified in this local coordinate system.
     FloatArray *masterContribution;
+#ifdef __OOFEG
+		/// flag whether consistency check already completed
+		bool consistencyChecked;
+#endif
 
 private:
     void allocAuxArrays(void);
