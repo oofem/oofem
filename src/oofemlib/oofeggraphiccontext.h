@@ -58,6 +58,8 @@ extern "C" {
  #define macbra __macbra
  #define Status __Status
  #define Request __Request
+ #define Complex __Complex
+
  #ifndef __MAKEDEPEND
   #include "Esimple.h"
  #endif
@@ -71,6 +73,8 @@ extern "C" {
  #undef macbra
  #undef Status
  #undef Request
+ #undef PI
+ #undef Complex
  #undef None
 };
 
