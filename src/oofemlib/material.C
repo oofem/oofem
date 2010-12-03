@@ -184,20 +184,17 @@ Material :: hasMaterialModeCapability(MaterialMode mode)
 int
 Material :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime) {
     answer.resize(0);
-    OOFEM_ERROR4( "Material :: giveIPValue in GP %d on element %d for InternalStateType %s not supported", aGaussPoint->giveNumber(), aGaussPoint->giveElement()->giveNumber(), __InternalStateTypeToString(type) );
     return 0;
 }
 
 int
 Material :: giveIPValueSize(InternalStateType type, GaussPoint *aGaussPoint) {
-    OOFEM_ERROR4( "Material :: giveIPValueSize in GP %d on element %d for InternalStateType %s not supported", aGaussPoint->giveNumber(), aGaussPoint->giveElement()->giveNumber(), __InternalStateTypeToString(type) );
     return 0;
 }
 
 int
 Material :: giveIntVarCompFullIndx(IntArray &answer, InternalStateType type, MaterialMode mmode) {
     answer.resize(0);
-    OOFEM_ERROR3( "Material :: giveIntVarCompFullIndx for InternalStateType %s and MaterialMode %s not supported", __InternalStateTypeToString(type), __MaterialModeToString(mmode) );
     return 0;
 }
 
