@@ -118,6 +118,18 @@ protected:
      * @return nonzero if transformation is necessary.
      */
     virtual int updateRotationMatrix();
+    // give Transformation matrix from global coord. sysyt. to element-local c.s
+    // i.e. r(l)=T r(h), if no trasformation necessary set anser to empty mtrx
+    /**
+     * Returns  transformation matrix from global coord. system to local element
+     * coordinate system ( i.e. r(l)=T r(g)). If no trasformation is necessary
+     * then answer is empty mtrx and zero value is returned.
+     * @return nonzero if transformation is necessary, zero otherwise.
+     */
+    virtual int  computeGtoLRotationMatrix(FloatMatrix &answer) {
+        answer.beEmptyMtrx();
+        return 0;
+    }
     /**
      * Returns transformation matrix for DOFs from global coordinate system
      * to local coordinate system in nodes (i.e. r(n)=T r(g)) if mode == _toNodalCS.

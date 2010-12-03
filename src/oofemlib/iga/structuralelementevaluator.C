@@ -431,6 +431,8 @@ void StructuralElementEvaluator :: computeStiffnessMatrix(FloatMatrix &answer, M
     return;
 }
 
+
+#if 0  // HUHU
 int
 StructuralElementEvaluator :: updateRotationMatrix()
 {
@@ -456,6 +458,7 @@ StructuralElementEvaluator :: updateRotationMatrix()
 
     return ( rotationMatrix != NULL );
 }
+#endif
 
 int
 StructuralElementEvaluator :: computeGNDofRotationMatrix(FloatMatrix &answer, DofManTransfType mode)
@@ -508,4 +511,59 @@ StructuralElementEvaluator :: computeGNDofRotationMatrix(FloatMatrix &answer, Do
 
     return 1;
 }
+
+int
+StructuralElementEvaluator :: updateRotationMatrix()
+{
+    /* returns a tranformation matrix between local coordinate system
+     * and global coordinate system, taking into account possible local
+     * coordinate system in nodes.
+     * if no transformation necessary - returns NULL
+     */
+    int isT_GtoL, isT_NtoG;
+    FloatMatrix T_GtoL, T_NtoG;
+
+    if ( rotationMatrixDefined ) {
+        return ( rotationMatrix != NULL );
+    }
+
+    rotationMatrixDefined = 1;
+    isT_GtoL = this->computeGtoLRotationMatrix(T_GtoL);
+    isT_NtoG = this->computeGNDofRotationMatrix(T_NtoG, _toGlobalCS);
+
+#ifdef DEBUG
+    if ( isT_GtoL ) {
+        if ( ( !T_GtoL.isSquare() ) ||
+						 ( T_GtoL.giveNumberOfRows() != this->giveElement()->computeNumberOfDofs(EID_MomentumBalance) ) ) {
+            OOFEM_ERROR("StructuralElement :: updateRotationMatrix - T_GtoL transformation matrix size mismatch");
+        }
+    }
+
+    if ( isT_NtoG ) {
+        if ( ( !T_NtoG.isSquare() ) ||
+            //( T_NtoG.giveNumberOfRows() != this->computeNumberOfDofs(EID_MomentumBalance) ) ) {
+            ( T_NtoG.giveNumberOfRows() != this->giveElement()->computeNumberOfL2GDofs(EID_MomentumBalance) ) ) {
+            OOFEM_ERROR("StructuralElement :: updateRotationMatrix - T_NtoG transformation matrix size mismatch");
+        }
+    }
+
+#endif
+
+    if ( isT_GtoL && T_NtoG.isNotEmpty() ) {
+        rotationMatrix = T_GtoL.Times(& T_NtoG);
+    } else if ( isT_GtoL ) {
+        rotationMatrix = T_GtoL.GiveCopy();
+    } else if ( T_NtoG.isNotEmpty() ) {
+        rotationMatrix = T_NtoG.GiveCopy();
+    } else {
+        rotationMatrix = NULL;
+    }
+
+    //delete T_GtoL;
+    //delete T_GtoNTransp;
+    return ( rotationMatrix != NULL );
+}
+
+
+
 } // end namespace oofem
