@@ -2027,11 +2027,12 @@ pass_setscale_command(Widget w, XtPointer ptr, XtPointer call_data)
     // gc.setDrawMode (mode);
     // problem->giveConnectivityTable()->giveMinMaxVal(gc,&min,&max);
 
+#if 0
 #define COLOR_SCALE_NUM_LABELS 11
     delta = ( max - min ) / ( COLOR_SCALE_NUM_LABELS - 2 );
     max += delta;
     min -= delta;
-
+#endif
 
     if ( fabs(max - min) < 1.e-20 ) {
         max += 1.e-20;
