@@ -1015,7 +1015,7 @@ Quad1PlaneStrain :: drawSpecial(oofegGraphicContext &gc)
 
                         xc = gpglobalcoords.at(1);
                         yc = gpglobalcoords.at(2);
-                        length = sqrt( computeVolumeAround(gp) / this->giveCrossSection()->give('t') ) / 2.;
+                        length = sqrt( computeVolumeAround(gp) / this->giveCrossSection()->give(CS_Thickness) ) / 2.;
                         l [ 0 ].x = ( FPNum ) xc + bx * length;
                         l [ 0 ].y = ( FPNum ) yc + by * length;
                         l [ 0 ].z = 0.;
