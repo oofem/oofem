@@ -37,7 +37,7 @@
 #include "usrdefsub.h"
 
 namespace oofem {
-InternalVariableField :: InternalVariableField(InternalStateType ist, FieldBaseID ft, MaterialMappingAlgorithmType mma_type, Domain *d) :
+InternalVariableField :: InternalVariableField(InternalStateType ist, FieldType ft, MaterialMappingAlgorithmType mma_type, Domain *d) :
     Field(ft)
 {
     this->type = ist;

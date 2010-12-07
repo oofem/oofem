@@ -42,7 +42,7 @@
 
 namespace oofem {
 DofDistributedPrimaryField :: DofDistributedPrimaryField(EngngModel *a, int idomain,
-                                                         FieldBaseID ft, EquationID ut, int nHist) :
+                                                         FieldType ft, EquationID ut, int nHist) :
     PrimaryField(a, idomain, ft, ut, nHist)
 { }
 

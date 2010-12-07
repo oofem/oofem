@@ -70,7 +70,7 @@ protected:
 
 public:
     StationaryTransportProblem(int i, EngngModel *_master = NULL) : EngngModel(i, _master), rhsVector(),
-        FluxField(this, 1, FBID_FluxField, EID_ConservationEquation, 0)
+        FluxField(this, 1, FT_TransportProblemUnknowns, EID_ConservationEquation, 0)
     {
         conductivityMatrix = NULL;
         ndomains = 1;

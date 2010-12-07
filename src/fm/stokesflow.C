@@ -75,7 +75,7 @@ IRResultType StokesFlow :: initializeFrom(InputRecord *ir)
     this->deltaT = 1.0;
     IR_GIVE_OPTIONAL_FIELD(ir, deltaT, IFT_StokesFlow_deltat, "deltat"); // Macro
 
-    velocityPressureField = new PrimaryField(this, 1, FBID_VelocityPressureField, EID_MomentumBalance_ConservationEquation, 1);
+    velocityPressureField = new PrimaryField(this, 1, FT_VelocityPressure, EID_MomentumBalance_ConservationEquation, 1);
 
     return IRRT_OK;
 }

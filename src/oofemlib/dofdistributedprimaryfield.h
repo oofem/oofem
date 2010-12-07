@@ -65,7 +65,7 @@ public:
      * EngngModel attribute. This is because the domain does not exists when
      * PrimaryField is created (this is when EngngModel is created).
      */
-    DofDistributedPrimaryField(EngngModel *a, int idomain, FieldBaseID ft, EquationID ut, int nHist);
+    DofDistributedPrimaryField(EngngModel *a, int idomain, FieldType ft, EquationID ut, int nHist);
     ~DofDistributedPrimaryField();
     /**
      */

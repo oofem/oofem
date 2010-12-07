@@ -44,18 +44,18 @@
 namespace oofem {
 enum FieldType {
     FT_Unknown,
+
+    FT_Velocity,
+    FT_Displacements,
+    FT_VelocityPressure,
+
+    FT_Pressure,
     FT_Temperature,
     FT_HumidityConcentration,
-    FT_Velocity,
+    FT_TransportProblemUnknowns
+
 };
 
-
-enum FieldBaseID {
-    FBID_FluxField,
-    FBID_PressureField,
-    FBID_VelocityField,
-    FBID_VelocityPressureField,
-};
 
 /**
  * Abstract class representing field. Field represent the spatial distribution of certain variable.
@@ -66,13 +66,13 @@ class Field
 {
 protected:
     //Domain* domain;
-    FieldBaseID type;
+    FieldType type;
 
 
 public:
     /** Constructor. Creates a field of given type associated to given domain.
      */
-    Field(FieldBaseID b) { type = b; }
+    Field(FieldType b) { type = b; }
     virtual ~Field() { }
     /** Evaluates the field at given point
      * @param coords coordinates of the point of interest
@@ -81,7 +81,7 @@ public:
     virtual int evaluateAt(FloatArray &answer, FloatArray &coords, IntArray &dofId,
                            ValueModeType mode, TimeStep *atTime) = 0;
     /// Returns the type of receiver
-    FieldBaseID giveType() { return type; }
+    FieldType giveType() { return type; }
 
 
     /** Stores receiver state to output stream.

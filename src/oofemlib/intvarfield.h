@@ -60,7 +60,7 @@ protected:
 public:
     /** Constructor. Creates a internal variable field of given type associated to given domain.
      */
-    InternalVariableField(InternalStateType ist, FieldBaseID b, MaterialMappingAlgorithmType mma_type, Domain *d);
+    InternalVariableField(InternalStateType ist, FieldType b, MaterialMappingAlgorithmType mma_type, Domain *d);
     ~InternalVariableField();
     /** Evaluates the field at given point
      *  @param coords coordinates of the point of interest

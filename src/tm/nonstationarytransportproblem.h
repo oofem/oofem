@@ -82,7 +82,7 @@ protected:
 
 public:
     NonStationaryTransportProblem(int i, EngngModel *_master = NULL) : EngngModel(i, _master),
-        rhs(), bcRhs(), FluxField(this, 1, FBID_FluxField, EID_ConservationEquation, 1)
+        rhs(), bcRhs(), FluxField(this, 1, FT_TransportProblemUnknowns, EID_ConservationEquation, 1)
     {
         lhs = NULL;
         ndomains = 1;

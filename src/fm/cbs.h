@@ -101,8 +101,8 @@ protected:
     MaterialInterface *materialInterface;
     //</RESTRICTED_SECTION>
 public:
-    CBS(int i, EngngModel *_master = NULL) : EngngModel(i, _master), PressureField(this, 1, FBID_PressureField, EID_ConservationEquation, 1),
-        VelocityField(this, 1, FBID_VelocityField, EID_MomentumBalance, 1) {
+    CBS(int i, EngngModel *_master = NULL) : EngngModel(i, _master), PressureField(this, 1, FT_Pressure, EID_ConservationEquation, 1),
+        VelocityField(this, 1, FT_Velocity, EID_MomentumBalance, 1) {
         initFlag = 1;
         lhs = NULL;
         ndomains = 1;

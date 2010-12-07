@@ -152,9 +152,9 @@ SUPG :: initializeFrom(InputRecord *ir)
     }
 
     if ( requiresUnknownsDictionaryUpdate() ) {
-        VelocityPressureField = new DofDistributedPrimaryField(this, 1, FBID_VelocityPressureField, EID_MomentumBalance_ConservationEquation, 1);
+        VelocityPressureField = new DofDistributedPrimaryField(this, 1, FT_VelocityPressure, EID_MomentumBalance_ConservationEquation, 1);
     } else {
-        VelocityPressureField = new PrimaryField(this, 1, FBID_VelocityPressureField, EID_MomentumBalance_ConservationEquation, 1);
+        VelocityPressureField = new PrimaryField(this, 1, FT_VelocityPressure, EID_MomentumBalance_ConservationEquation, 1);
     }
 
     val = 0;
