@@ -47,7 +47,7 @@ double Parser :: expr(bool get)
 {
     // get indicates whether there is need to to call get_token() to get next token.
 
-    // epression:
+    // expression:
     //     expression + term
     //     expression - term
     //
@@ -185,6 +185,15 @@ double Parser :: prim(bool get) // handle primaries
         double e = agr(true);
         return exp(e);
     }
+    case HEAVISIDE_FUNC://Heaviside function
+    {
+        double time = look("t")->value;
+        double e = agr(true);
+        
+        return time<e?0:1;
+    }
+    
+    
     default:
         error("primary expected");
         return 1;
@@ -315,6 +324,8 @@ Parser :: Token_value Parser :: get_token()
                 return curr_tok = ACOS_FUNC;
             } else if ( !strncmp(string_value, "exp", 4) ) {
                 return curr_tok = EXP_FUNC;
+            } else if ( !strncmp(string_value, "h", 1) ) {
+                return curr_tok = HEAVISIDE_FUNC;
             } else {
                 return curr_tok = NAME;
             }

@@ -70,7 +70,7 @@ public:
 private:
     enum Token_value {
         NAME, NUMBER, END,
-        SQRT_FUNC, SIN_FUNC, COS_FUNC, TAN_FUNC, ATAN_FUNC, ASIN_FUNC, ACOS_FUNC, EXP_FUNC,
+        SQRT_FUNC, SIN_FUNC, COS_FUNC, TAN_FUNC, ATAN_FUNC, ASIN_FUNC, ACOS_FUNC, EXP_FUNC, HEAVISIDE_FUNC,
         PLUS='+', MINUS='-', MUL='*', DIV='/', BOOL_EQ, BOOL_LE, BOOL_LT, BOOL_GE, BOOL_GT,
         PRINT=';', ASSIGN='=', LP='(', RP=')'
     };

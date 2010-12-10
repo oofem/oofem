@@ -264,7 +264,7 @@ void
 DofManager :: giveLocationArray(const IntArray &dofIDArry, IntArray &locationArray, const UnknownNumberingScheme &s) const
 // Returns the location array of the receiver. Creates this array if it
 // does not exist yet. The location array contains the equation number of
-// every  requested degree of freedom of the receiver.
+// every requested degree of freedom of the receiver.
 // In dofIDArray are stored DofID's of requsted DOFs in receiver.
 // The DofID's are determining the physical meaning of particular DOFs
 {

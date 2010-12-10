@@ -406,13 +406,13 @@ public:
      * dictionary. Dof then uses this dictionary instead of forwarding the requests to
      * EngngModel (with equationNUmber as parameter). If EngngModel does not support changes
      * of static system (see EngngModel::requiresUnknownsDictionaryUpdate method), the dof
-     * frowards the requests for its unknowns to EngngModel, where unknowns are naturaly kept.
+     * forwards the requests for its unknowns to EngngModel, where unknowns are naturaly kept.
      * This is posible, because dof equation number is same during whole solution.
      * But when changes of static system are allowed, several problem arise. For example
      * by solving simple  incremental static with allowed static changes, the incremetal displacement
      * vector of structure can not be added to total displacement vector of structure, because
      * equation numbers may have changed, and one can not simply add these vector to obtain new
-     * total displacement vector, because uncompatible displacement will be added.
+     * total displacement vector, because incompatible displacement will be added.
      * To solve this problem, uknown dictionary at dof level has been assumed. Dof then keeps
      * its unknowns in its onw private dictionary.
      * After computing increment of solution, engngModel updates for each dof its unknowns  in its

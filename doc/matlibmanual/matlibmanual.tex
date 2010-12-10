@@ -2,6 +2,7 @@
 \usepackage{html}
 \usepackage{graphicx}
 \usepackage{ifpdf}
+\usepackage{amssymb,amsmath}
 \input{include.tex}
 
 \renewcommand{\topfraction}{0.99}	% 99% of page top can be a float
@@ -54,6 +55,9 @@
 \newcommand{\vxi}{\mbf{\xi}}% vector xi
 \newcommand{\quarter}{\mbox{$\frac{1}{4}$}}
 \newcommand{\vx}{\mbf{x}}% vector x
+\newcommand{\refeq}[1]{Eq.~(\ref{#1})}
+\newcommand{\refeqs}[2]{Eqs.~(\ref{#1}), (\ref{#2})}
+\newcommand{\refeqsr}[2]{\mbox{Eqs.~(\ref{#1})-(\ref{#2})}}
 
 
 \begin{document}
@@ -3346,6 +3350,70 @@ documentation of MPlasticMaterial class):
  manipulating these attributes are added and services for context
  initialization, update, and store/restore operations are overloaded, to
  handle the history parameters properly.
+
+\subsection{Nonstationary nonlinear transport model}
+\label{NonNonTrans}
+
+Several differential equations of diffusion-type lead to the following nonlinear system
+\begin{eqnarray}
+\mbf{K}(\mbf{r}) \mbf{r} + \mbf{C}(\mbf{r})\frac{{\rm d}\mbf{r}}{{\rm d} t} = \mbf{F}(\mbf{r})\label{NonNonTrans:1},
+\end{eqnarray}
+where the matrix $\mbf{K}(\mbf{r})$ is a general non-symmetric conductivity matrix, $\mbf{C}(\mbf{r})$ is a general capacity matrix and the vector $\mbf{F}(\mbf{r})$ contains contributions from external and internal sources. The vector of unknowns, $\mbf{r}$, can hold discretized temperature, humidity, or concentration fields, for example.
+
+Time discretization is based on a generalized trapezoidal rule. Let us assume that solution is known at time $t$ and the time increment is provided with $\Delta t$. Equilibrium of nonlinear constitutive laws is required at a new time $\tau\in\langle t,t+\Delta t \rangle$. The parameter $\alpha\in\langle 0, 1\rangle$ defines a type of integration scheme; $\alpha=0$ results in an explicit (forward) method, $\alpha=0.5$ refers to the Crank-Nicolson method, and $\alpha=1$ means an implicit (backward) method. The appromation of solution vector and its time derivative yields
+\begin{eqnarray}
+\tau &=& t+\alpha\Delta t = (t+\Delta t) - (1-\alpha)\Delta t,\label{NonNonTrans:2}\\
+\mbf{r}_{\tau} &=& (1-\alpha)\mbf{r}_t+\alpha\mbf{r}_{t+\Delta t},\label{NonNonTrans:3}\\
+\frac{\partial{\mbf{r}_{\tau}}}{\partial t} &=& \frac{1}{\Delta t}\left(\mbf{r}_{t+\Delta t}-\mbf{r}_t\right).\label{NonNonTrans:4}
+\end{eqnarray}
+
+By substituting of \refeqsr{NonNonTrans:3}{NonNonTrans:4} into \refeq{NonNonTrans:1} leads to the following equation, which is solved at time $\tau$
+\begin{equation}
+\left[(1-\alpha)\mbf{r}_t + \alpha\mbf{r}_{t+\Delta t} \right] \mbf{K}_{\tau}(\mbf{r}) +
+\left[\del{\mbf{r}_{t+\Delta t}-\mbf{r}_t}{\Delta t}\right] \mbf{C}_{\tau}(\mbf{r}) = 
+\mbf{F}_{\tau}(\mbf{r}).\label{NonNonTrans:5}
+\end{equation}
+
+\refeq{NonNonTrans:5} is non-linear and the Newton method is used to obtain the solution. First, the \refeq{NonNonTrans:5} is 
+transformed into a residual form with the residuum vector $\mbf{R}_{\tau}$, which converges to the zero vector
+\begin{equation}
+\mbf{R}_{\tau} = 
+\left[(1-\alpha)\mbf{r}_t + \alpha\mbf{r}_{t+\Delta t} \right] \mbf{K}_{\tau}(\mbf{r}) +
+\left[\del{\mbf{r}_{t+\Delta t}-\mbf{r}_t}{\Delta t}\right] \mbf{C}_{\tau}(\mbf{r}) -
+\mbf{F}_{\tau}(\mbf{r}) \to \mbf{0}.\label{NonNonTrans:6}
+\end{equation}
+
+A new residual vector at the next iteration, $\mbf{R}_\tau^{i+1}$, can determined from the previous residual vector, $\mbf{R}_{\tau}^i$, and its derivative simply by linearization. Since the aim is getting an increment of solution vector, $\Delta\mbf{r}_{\tau}^i$, the new residual vector $\mbf{R}_{\tau}^{i+1}$ is set to zero
+\begin{eqnarray}
+\mbf{R}_\tau^{i+1} &\approx& \mbf{R}_{\tau}^i+\frac{\partial{\mbf{R}_{\tau}^i}}{\partial\mbf{r}_t} \Delta\mbf{r}_{\tau}^i = \mbf{0},\label{NonNonTrans:7}\\
+\Delta \mbf{r}_{\tau}^i &=& - \left[\frac{\partial{\mbf{R}_{\tau}^i}}{\partial\mbf{r}_t}\right]^{-1} \mbf{R}_{\tau}^i\label{NonNonTrans:8}.
+\end{eqnarray}
+Deriving \refeq{NonNonTrans:6} and inserting to \refeq{NonNonTrans:8} leads to
+\begin{eqnarray}
+\mbf{\tilde K}_\tau^i &=& \frac{\partial{\mbf{R}_{\tau}^i}}{\partial\mbf{r}_t} = -\alpha \mbf{K}_{\tau}^i(\mbf{r}) - \del{1}{\Delta
+t}\mbf{C}_{\tau}^i(\mbf{r})\label{NonNonTrans:9},\\
+\Delta \mbf{r}_{\tau}^i &=& - \left[\mbf{\tilde K}_\tau^i\right]^{-1} \mbf{R}_{\tau}^i,\label{NonNonTrans:10}
+\end{eqnarray}
+which gives the resulting increment of the solution vector $\Delta \mbf{r}_{\tau}^i$
+\begin{equation}
+\begin{split}
+\Delta \mbf{r}_{\tau}^i = - \left[\mbf{\tilde K}_\tau^i\right]^{-1} \Big\{ &\left[(1-\alpha)\mbf{r}_t + \alpha\mbf{r}_{t+\Delta t} \right] \mbf{K}_{\tau}^i(\mbf{r}) +\\
+&\left[\del{\mbf{r}_{t+\Delta t}-\mbf{r}_t}{\Delta t}\right] \mbf{C}_{\tau}^i(\mbf{r}) - \mbf{F}_{\tau}(\mbf{r}) \Big\},\label{NonNonTrans:11}
+\end{split}
+\end{equation}
+and the new total solution vector at time $t + \Delta t$ is obtained in each iteration
+\begin{eqnarray}
+\mbf{r}_{t+\Delta t}^{i+1}=\mbf{r}_{t+\Delta t}^{i} + \Delta\mbf{r}_{\tau}^i.\label{NonNonTrans:12}
+\end{eqnarray}
+
+There are two options how to initialize the solution vector at time $t + \Delta t$. While the first case applies linearization with a known derivative, the second case simply starts from the previous solution vector. The second method in \refeq{NonNonTrans:14} is implemented in OOFEM.
+\begin{eqnarray}
+\mbf{r}_{t+\Delta t}^{0} = \mbf{r}_t + \Delta t\frac{\partial{\mbf{r}_t}}{\partial t},\label{NonNonTrans:13}\\
+\mbf{r}_{t+\Delta t}^{0} = \mbf{r}_t.\label{NonNonTrans:14}
+\end{eqnarray}
+
+Note that the matrices $\mbf{K}(\mbf{r}), \mbf{C}(\mbf{r})$ and the vector $\mbf{F}(\mbf{r})$ depend on the solution vector $\mbf{r}$. For this reason, the matrices are updated in each iteration step (Newton method) or only after several steps (modified Newton method). The residuum $\mbf{R}_\tau^{i}$ and the vector $\mbf{F}(\mbf{r})$ are updated in each iteration, using the most recent capacity and conductivity matrices.
+\end{document}
 
 
 %\subsection{Other Elements}

@@ -18,7 +18,6 @@ BoundaryCondition  1 loadTimeFunction 1 prescribedvalue 20.0
 #constantedgeload 2 loadTimeFunction 1 ndofs 1 components 1 15.0 properties 1 a 10.8 loadtype 3
 InitialCondition 1 Conditions 1 u 20.0
 ConstantFunction 1 f(t) 1.0
-
 #%BEGIN_CHECK% tolerance 1.e-3
 ## TIME
 ## Check temperature

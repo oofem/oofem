@@ -57,10 +57,18 @@ namespace oofem {
 class NonStationaryTransportProblem : public EngngModel
 {
 protected:
+    /**
+     * Contains last time stamp of internal variable update.
+     * This update is made via various services
+     * (like those for computing real internal forces or updating the internal state).
+     */
+    StateCounterType internalVarUpdateStamp;
+
     SparseMtrx *lhs;
-    FloatArray rhs, bcRhs;
-    //FloatArray solutionVector, previousSolutionVector;
-    PrimaryField FluxField;
+    ///Right hand side from previous timeStep
+    FloatArray bcRhs;
+    ///This field stores solution vector. Due to changes in equation numbering, actual values are stored on DoFs
+    PrimaryField UnknownsField;
 
     LinSystSolverType solverType;
     SparseMtrxType sparseMtrxType;
@@ -76,37 +84,27 @@ protected:
     /// if set, the receiver flux field will be exported using FieldManager
     int exportFieldFlag;
 
-    int initFlag;
+    bool initFlag;
     /// Associated time function for time step increment
     int dtTimeFunction;
+    
+    /// changingProblemSize=0 means no change in the problem size (application/removal of Dirichet boundary conditions)
+    bool changingProblemSize;
 
 public:
-    NonStationaryTransportProblem(int i, EngngModel *_master = NULL) : EngngModel(i, _master),
-        rhs(), bcRhs(), FluxField(this, 1, FT_TransportProblemUnknowns, EID_ConservationEquation, 1)
-    {
-        lhs = NULL;
-        ndomains = 1;
-        nMethod = NULL;
-        lumpedCapacityStab = 0;
-        exportFieldFlag = 0;
-        initFlag = 1;
-        dtTimeFunction = 0;
-    }
-    ~NonStationaryTransportProblem()
-    {
-        if ( lhs ) { delete  lhs; }
-
-        if ( nMethod ) { delete nMethod; } }
+    ///constructor
+    NonStationaryTransportProblem(int i, EngngModel *_master);
+    ///destructor
+    ~NonStationaryTransportProblem();
 
     void solveYourselfAt(TimeStep *);
     /**
-     * Updates nodal values
-     * (calls also this->updateDofUnknownsDictionary for updating dofs unknowns dictionaries
-     * if model supports changes of static system). The element internal state update is also forced using
-     * updateInternalState service.
+     * Updates nodal values. The method calls also this->updateDofUnknownsDictionary for updating DOFs unknowns dictionaries,
+     * because the model supports assignment of Dirichlet b.c. at various time steps. The number of equations may be different
+     * in each timeStep. The element internal state update is also forced using updateInternalState service.
      */
     virtual void updateYourself(TimeStep *);
-    double giveUnknownComponent(EquationID, ValueModeType, TimeStep *, Domain *, Dof *);
+    //double giveUnknownComponent(EquationID, ValueModeType, TimeStep *, Domain *, Dof *);
     contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
     contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 
@@ -126,6 +124,18 @@ public:
     const char *giveClassName() const { return "NonStationaryTransportProblem"; }
     classType giveClassID()      const { return NonStationaryTransportProblemClass; }
     fMode giveFormulation() { return TL; }
+
+    ///Allows to change number of equations during solution
+    virtual int       requiresUnknownsDictionaryUpdate() { return 1; }
+    virtual bool      requiresEquationRenumbering(TimeStep *) { return true; }
+    ///Store solution vector to involved DoFs
+    virtual void      updateDofUnknownsDictionary(DofManager *, TimeStep *);
+
+    /**
+     * The array of MasterDof::unknowns contains, in this case, one previous solution and previous RHS.
+     * The hash index tells position in the array MasterDof::unknowns, depending on @param mode
+     */
+    virtual int       giveUnknownDictHashIndx(EquationID type, ValueModeType mode, TimeStep *stepN);
 
     virtual void giveElementCharacteristicMatrix(FloatMatrix &answer, int num,
                                                  CharType type, TimeStep *tStep, Domain *domain);
@@ -168,7 +178,22 @@ public:
 protected:
     virtual void assembleAlgorithmicPartOfRhs(FloatArray &rhs, EquationID ut,
                                               const UnknownNumberingScheme &s, TimeStep *tStep);
+
+  /**
+    * Assembles rhs from the last stored values at DoFs.
+     * @param tStep current solution step
+     * @param type type of equation, normally EID_MomentumBalance
+     * @param mode type of mode, which represents a hash, i.e. position in MasterDof::unknowns
+     * @param bcRhs right hand side vector where the contribution is added
+     */
+    virtual void assembleRhsFromDoFs(TimeStep *tStep, EquationID type, ValueModeType mode, FloatArray &bcRhs);
+
+    /**
+    * This function is normally called at the first time to project initial conditions to previous (0^th) solution vector.
+    * @param tStep previous solution step
+    */
     virtual void applyIC(TimeStep *);
+
     /**
      * Assembles part of rhs due to Dirichlet boundary conditions.
      * @param answer global vector where the contribution will be added
@@ -176,6 +201,7 @@ protected:
      * @param mode CharTypeMode of result
      * @param lhsType type of element matrix to be multiplied by vector of prescribed.
      * The giveElementCharacteristicMatrix service is used to get/compute element matrix.
+     * @param s a map of non-default equation numbering if required
      * @param d domain
      */
     virtual void assembleDirichletBcRhsVector(FloatArray &answer, TimeStep *tStep, EquationID ut, ValueModeType mode,

@@ -62,8 +62,10 @@ protected:
     int MANRMSteps;
 
 public:
-    NLTransientTransportProblem(int i, EngngModel *_master = NULL) : NonStationaryTransportProblem(i, _master)  { }
-    ~NLTransientTransportProblem() { }
+    ///constructor
+    NLTransientTransportProblem(int i, EngngModel *_master);
+    ///destructor
+    ~NLTransientTransportProblem();
 
     void solveYourselfAt(TimeStep *);
     /**
@@ -82,6 +84,9 @@ public:
     const char *giveClassName() const { return "NLTransientTransportProblem"; }
     classType giveClassID()      const { return NLTransientTransportProblemClass; }
     fMode giveFormulation() { return nonLinFormulation; }
+    virtual int giveUnknownDictHashIndx(EquationID type, ValueModeType mode, TimeStep *stepN);
+    ///Store solution vector to involved DoFs
+    virtual void      updateDofUnknownsDictionary(DofManager *, TimeStep *);
 
 protected:
     /**
@@ -92,8 +97,9 @@ protected:
      */
     void updateInternalState(TimeStep *);
     void applyIC(TimeStep *);
-    void assembleAlgorithmicPartOfRhs(FloatArray &rhs, EquationID ut,
-                                      const UnknownNumberingScheme &s, TimeStep *tStep, int nite);
+    void createPreviousSolutionInDofUnknownsDictionary(TimeStep *tStep);
+    void assembleStartingSolutionVector(FloatArray *solutionVector, TimeStep *tStep);
+    void assembleAlgorithmicPartOfRhs(FloatArray &rhs, EquationID ut, const UnknownNumberingScheme &s, TimeStep *tStep, int nite);
 };
 } // end namespace oofem
 #endif // nltransienttransportproblem_h

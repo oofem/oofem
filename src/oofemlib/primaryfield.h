@@ -72,14 +72,14 @@ public:
 
 
 /**
- * Abstract class representing field of primary varaibles (those, which are unknown and are typically
+ * Abstract class representing field of primary variables (those, which are unknown and are typically
  * associated to nodes).
  * In the current design the primary field is understood as simple database, that allows to keep track
- * the history of a solution vector representing primary field. The histrory is kept as sequence of
- * solution vectors. The history depth kept can be selected. It basically provides access to
- * its fields, which stores the vector of field unknown. It adds the posibility to
- * further interpolate the field values using element interpolation.
- * The prescribed values of the filed are not maintatined, since they can be obtained from
+ * of the history of a solution vector representing primary field. The histrory is kept as sequence of
+ * solution vectors. The history depth kept can be selected. PrimaryField class basically provides access to
+ * time-dependent vectors of the field of unknowns. It adds the posibility to
+ * further interpolate the field values using element interpolation functions.
+ * The prescribed values of the field are not maintatined, since they can be obtained directly from
  * corresponding DOFs of associated domain.
  */
 class PrimaryField : public Field

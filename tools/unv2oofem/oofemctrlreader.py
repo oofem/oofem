@@ -181,17 +181,24 @@ class CTRLParser:
             if not line.startswith('#'):
                 count+= 1
 
+        #attach all following lines until empty line is hit. This is the end of OOFEM section
+        while True:
+            line=self.file.readline()
+            if line.strip() == '':
+                break
+            self.footer+= line
+
         #look, whether the next line contains extractor data
-        pos = self.file.tell()
-        line=self.file.readline()
-        self.file.seek(pos,0)#return one line back
-        if (len(line)>1 and line.split()[0] == '#%BEGIN_CHECK%'):
-            while (line.split()[0] != '#%END_CHECK%'):
-                line=self.file.readline()
-                self.footer+= line
-                if (len(line)==0 or len(line)==1):
-                    print "EOF reached prematurely, missing #%END_CHECK%"
-                    sys.exit(0)
+        #pos = self.file.tell()
+        #line=self.file.readline()
+        #self.file.seek(pos,0)#return one line back
+        #if (len(line)>1 and line.split()[0] == '#%BEGIN_CHECK%'):
+            #while (line.split()[0] != '#%END_CHECK%'):
+                #line=self.file.readline()
+                #self.footer+= line
+                #if (len(line)==0 or len(line)==1):
+                    #print "EOF reached prematurely, missing #%END_CHECK%"
+                    #sys.exit(0)
 
         #init group properties
         for igroup in FEM.nodesets:

@@ -252,7 +252,7 @@ public:
      * EngngModel for this value. But EngngModel must correctly update these values after finishing each time step.
      * If EngngModel does not support changes of static system
      * (recognized calling  EngngModel::requiresUnknownsDictionaryUpdate method), the dof
-     * frowards the requests for its unknowns to EngngModel, where unknowns are naturaly kept.
+     * forwards the requests for its unknowns to EngngModel, where unknowns are naturaly kept.
      * @see Dof::updateUnknownsDictionary for detailed explanation
      * @see EngngModel::requiresUnknownsDictionaryUpdate
      */

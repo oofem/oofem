@@ -132,7 +132,7 @@ public:
     virtual bool      requiresEquationRenumbering(TimeStep *) { return true; }
     virtual void      updateDofUnknownsDictionary(DofManager *, TimeStep *);
     /*
-     * Here we store only total and inceremental value; so hash is computed from mode value only
+     * Here we store only total and incremental value; so hash is computed from mode value only
      */
     virtual int       giveUnknownDictHashIndx(EquationID type, ValueModeType mode, TimeStep *stepN)
     { return ( int ) mode; }

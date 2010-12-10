@@ -106,7 +106,7 @@ IncrementalLinearStatic :: giveNumericalMethod(TimeStep *)
 /*
  * double
  * IncrementalLinearStatic ::  giveUnknownComponent (CharType chc, int eq)
- * // returns unknown quantity like displaacement, velocity of equation eq
+ * // returns unknown quantity like displacement, velocity of equation eq
  * // This function translates this request to numerical method language
  * {
  * switch (chc)
@@ -440,7 +440,7 @@ IncrementalLinearStatic :: updateDofUnknownsDictionary(DofManager *inode, TimeSt
 {
     // update DOF unknowns dictionary, where
     // unknowns are hold instead of keeping them in global unknowns
-    // vectors in engng instancies
+    // vectors in engng instances
     // this is necessary, because during solution equation numbers for
     // particular DOFs may changed, and it is necesary to keep them
     // in DOF level.
@@ -466,7 +466,7 @@ IncrementalLinearStatic :: updateDofUnknownsDictionary(DofManager *inode, TimeSt
     } else {
         for ( i = 1; i <= ndofs; i++ ) {
             iDof = inode->giveDof(i);
-            if ( iDof->hasBc(tStep) ) { // bound . cond.
+            if ( iDof->hasBc(tStep) ) { // boundary condition
                 //val = iDof -> giveBcValue() -> give(DisplacementVector,IncrementalMode,tStep) ;
                 val = iDof->giveBcValue(VM_Incremental, tStep);
             } else {

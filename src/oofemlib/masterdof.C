@@ -156,7 +156,7 @@ InitialCondition *MasterDof :: giveIc()
 double MasterDof :: giveUnknown(EquationID type, ValueModeType mode, TimeStep *stepN)
 // The key method of class Dof. Returns the value of the unknown 'u'
 // (e.g., the displacement) of the receiver, at stepN. This value may,
-// or may not, be already available. It may depend on a boundary (if it
+// or may not be already available. It may depend on a boundary (if it
 // is not a predicted unknown) or initial condition. stepN is not the
 // current time step n, it is assumed to be the previous one (n-1).
 {
@@ -212,7 +212,7 @@ double MasterDof :: giveUnknown(EquationID type, ValueModeType mode, TimeStep *s
         // if this feature is active, engng model must ensure
         // valid data in unknowns dictionary
         // the e-model must ensure that bc and ic values are correctly set in unknowns dictionaries
-        // they could not be obtained from bc (which are typiccaly incremental)
+        // they could not be obtained from bc (which are typically incremental)
         // directly since dictionaries keep the history.
         int hash = dofManager->giveDomain()->giveEngngModel()->giveUnknownDictHashIndx(type, mode, stepN);
         if ( unknowns->includes(hash) ) {
@@ -222,8 +222,8 @@ double MasterDof :: giveUnknown(EquationID type, ValueModeType mode, TimeStep *s
                     __ValueModeTypeToString(mode) );
         }
     } else {
-        // ask bor BC
-        if ( this->hasBc(stepN) ) {  // bound . cond.
+        // ask for BC
+        if ( this->hasBc(stepN) ) {  // boundary condition
             //value = this -> giveBcValue(giveUnknownType(),mode,stepN) ;
             value = this->giveBcValue(mode, stepN);
             return value;

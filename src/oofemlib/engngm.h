@@ -754,16 +754,16 @@ public:
      * Indicates if Engngmodel requires Dofs dictionaries to be updated.
      * If EngngModel does not support changes
      * of static system, the dof
-     * frowards the requests for its unknowns to EngngModel, where unknowns are naturaly kept.
+     * forwards the requests for its unknowns to EngngModel, where unknowns are naturaly kept.
      * This is posible, because dof equation number is same during whole solution.
      * But when changes of static system are allowed, several problem arise. For example
-     * by solving simple  incremental static with allowed static changes, the incremetal displacement
+     * by solving simple incremental static with allowed static changes, the incremetal displacement
      * vector of structure can not be added to total displacement vector of structure, because
      * equation numbers may have changed, and one can not simply add these vector to obtain new
-     * total displacement vector, because uncompatible displacement will be added.
+     * total displacement vector, because incompatible displacement will be added.
      * To solve this problem, uknown dictionary at dof level has been assumed. Dof then keeps
-     * its unknowns in its onw private dictionary.
-     * After computing increment of solution, engngModel updates for each dof its unknowns  in its
+     * its unknowns in its own private dictionary.
+     * After computing increment of solution, engngModel updates for each dof its unknowns in its
      * dictionary (using updateUnknownsDictionary function). For aforementioned example
      * engngModel updates incremental values but also total value by asking dof for previous total
      * value (dof will use its dictionary, does not asks back EngngModel) adds corresponding increment
@@ -773,7 +773,7 @@ public:
     /**
      * Returns true if equation renumbering is required for given solution step.
      * This may of course change the number of equation and in general there is no gauarantee
-     * that for a certain dof the same eautiaon will be assigned. So the use of
+     * that for a certain dof the same equatiaon will be assigned. So the use of
      * DOF unknowns dictionaries is generally recomended.
      */
     virtual bool requiresEquationRenumbering(TimeStep *) { return false; }
