@@ -44,6 +44,7 @@
 #include "sparselinsystemnm.h"
 #include "sparsemtrx.h"
 #include "primaryfield.h"
+#include "dofdistributedprimaryfield.h"
 #include "transportmaterial.h"
 #include "cemhydmat.h"
 #ifndef __MAKEDEPEND
@@ -65,10 +66,10 @@ protected:
     StateCounterType internalVarUpdateStamp;
 
     SparseMtrx *lhs;
-    ///Right hand side from previous timeStep
+    ///Right hand side vector from boundary conditions
     FloatArray bcRhs;
-    ///This field stores solution vector. Due to changes in equation numbering, actual values are stored on DoFs
-    PrimaryField UnknownsField;
+    ///This field stores solution vector. For fixed size of problem, the PrimaryField is used, for growing/decreasing size, DofDistributedPrimaryField applies
+    PrimaryField *UnknownsField;
 
     LinSystSolverType solverType;
     SparseMtrxType sparseMtrxType;
@@ -78,17 +79,16 @@ protected:
     double deltaT;
     double alpha;
 
-    // if set then stabilization using lumped capacity will be used
+    /// if set then stabilization using lumped capacity will be used
     int lumpedCapacityStab;
 
     /// if set, the receiver flux field will be exported using FieldManager
     int exportFieldFlag;
 
-    bool initFlag;
     /// Associated time function for time step increment
     int dtTimeFunction;
-    
-    /// changingProblemSize=0 means no change in the problem size (application/removal of Dirichet boundary conditions)
+
+    /// changingProblemSize=0 means no change in the problem size (no application/removal of Dirichet boundary conditions)
     bool changingProblemSize;
 
 public:
@@ -104,7 +104,7 @@ public:
      * in each timeStep. The element internal state update is also forced using updateInternalState service.
      */
     virtual void updateYourself(TimeStep *);
-    //double giveUnknownComponent(EquationID, ValueModeType, TimeStep *, Domain *, Dof *);
+    double giveUnknownComponent(EquationID, ValueModeType, TimeStep *, Domain *, Dof *);
     contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
     contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 
@@ -117,7 +117,7 @@ public:
     /// Initialization from given input record
     IRResultType initializeFrom(InputRecord *ir);
 
-    // consistency check
+    /// Consistency check
     virtual int checkConsistency(); // returns nonzero if o.k.
 
     // identification
@@ -126,8 +126,8 @@ public:
     fMode giveFormulation() { return TL; }
 
     ///Allows to change number of equations during solution
-    virtual int       requiresUnknownsDictionaryUpdate() { return 1; }
-    virtual bool      requiresEquationRenumbering(TimeStep *) { return true; }
+    virtual int       requiresUnknownsDictionaryUpdate() { return changingProblemSize; }
+    virtual bool      requiresEquationRenumbering(TimeStep *) { return changingProblemSize; }
     ///Store solution vector to involved DoFs
     virtual void      updateDofUnknownsDictionary(DofManager *, TimeStep *);
 
@@ -174,24 +174,14 @@ public:
 #endif
 
 
-
 protected:
     virtual void assembleAlgorithmicPartOfRhs(FloatArray &rhs, EquationID ut,
                                               const UnknownNumberingScheme &s, TimeStep *tStep);
 
-  /**
-    * Assembles rhs from the last stored values at DoFs.
-     * @param tStep current solution step
-     * @param type type of equation, normally EID_MomentumBalance
-     * @param mode type of mode, which represents a hash, i.e. position in MasterDof::unknowns
-     * @param bcRhs right hand side vector where the contribution is added
-     */
-    virtual void assembleRhsFromDoFs(TimeStep *tStep, EquationID type, ValueModeType mode, FloatArray &bcRhs);
-
     /**
-    * This function is normally called at the first time to project initial conditions to previous (0^th) solution vector.
-    * @param tStep previous solution step
-    */
+     * This function is normally called at the first time to project initial conditions to previous (0^th) solution vector.
+     * @param tStep previous solution step
+     */
     virtual void applyIC(TimeStep *);
 
     /**

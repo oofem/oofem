@@ -953,6 +953,7 @@ atomic id) and take them into account, if they support such feature.
 \recentry{}{\optField{renumber}{in}} \recentry{}{\field{deltaT}{rn}} \recentry{}{\field{alpha}{rn}}
 \recentry{}{\optField{lumpedcapa}{}} \recentry{}{\optField{sparselinsolverparams}{}}
 \recentry{}{\optField{exportfields}{}} \recentry{}{\optField{atomicfields}{in}}
+\recentry{}{\optField{changingProblemSize}{}}
 \end{record}
 
 {\bf Linear} implicit
@@ -966,6 +967,7 @@ which is unconditionally stable, and first-order accurate
 in $\Delta t$. \param{deltaT} is time step length used for
 integration, \param{nsteps} parameter specifies
 number of time steps to be solved.
+
 Nonzero value of optional parameter \param{renumber} turns on the
 equation renumbering to optimize the profile of characteristic matrix
 (uses Sloan algorithm). By default, profile optimization is not
@@ -975,9 +977,11 @@ algorithm using lumped capacity matrix will be used, reducing the
 initial oscillations.
 See section \ref{sparselinsolver} for explanation of
 \param{exportfields} and \param{atomicfields} parameters.
-Note: This problem type {\bf requires transport module} and it
-can be used only when this module is included in your oofem
-configuration.
+
+This linear transport problem supports changes in number of equations. It is possible to impose/remove
+Dirichlet boundary conditions during solution. This feature is enabled with \param{changingProblemSize}, which ensures
+storing solution values on nodes (DoFs) directly. If the problem does not grow/decrease during solution, it is more efficient
+to use conventional solution strategy and the parameter should not be mentioned.
 
 Note: This problem type {\bf requires transport module} and it
 can be used only when this module is included in your oofem
@@ -993,34 +997,39 @@ configuration.
 \recentry{}{\optField{nsmax}{in}} \recentry{}{\field{rtol}{rn}} \recentry{}{\optField{manrmsteps}{in}}
 \recentry{}{\optField{sparselinsolverparams}{}}
 \recentry{}{\optField{exportfields}{}} \recentry{}{\optField{atomicfields}{in}}
+\recentry{}{\optField{changingProblemSize}{}}
 \end{record}
 
-Implicit
-integration scheme for transient transport problems. The generalized
+Implicit integration scheme for transient transport problems. The generalized
 midpoint rule (sometimes called $\alpha$-method) is used for time discretization, with alpha parameter,
 which has limits $0\le\alpha\le1$. For $\alpha=0$ explicit Euler
 forward method is obtained, for $\alpha=0.5$ implicit trapezoidal rule
 is recovered, which is unconditionally stable, second-order accurate
 in $\Delta t$, and $\alpha=1.0$ yields implicit Euler backward method,
 which is unconditionally stable, and first-order accurate
-in $\Delta t$. \param{deltaT} is time step length used for
+in $\Delta t$. See matlibmanual.pdf for solution algorithm.
+
+\param{deltaT} is time step length used for
 integration, \param{nsteps} parameter specifies
 number of time steps to be solved. Parameter \param{maxiter} determines the maximum
-number of iterations allowed to reach equilibrium (default is 30).
-The convergence is reached, when norms of both residual fluxes and iterative
-change of solution vector is less than the value given by \param{rtol}.
+number of iterations allowed to reach equilibrium (default is 30). Norms of
+residual physical quantity (heat, mass) described by solution vector and 
+the change of solution vector are determined in each iteration.
+The convergence is reached, when the norms are less than the value given by \param{rtol}.
 If \param{manrmsteps} parameter is nonzero, then the modified
 N-R scheme is used, with the left-hand side matrix updated after
 \param{manrmsteps} steps.
 If \param{lumpedcapa} is set, then the stabilization of numerical
 algorithm using lumped capacity matrix will be used, reducing the
 initial oscillations.
+
 Nonzero value of optional parameter \param{renumber} turns on the
 equation renumbering to optimize the profile of characteristic matrix
-(uses Sloan algorithm). By default, profile optimization is not
-performed. It will not work in parallel mode.
-See section \ref{sparselinsolver} for explanation of
-\param{exportfields} and \param{atomicfields} parameters.
+(uses the Sloan algorithm). By default, profile optimization is not
+performed. It will not work in the parallel mode.
+See the Section~\ref{sparselinsolver} for explanation of
+\param{exportfields} and \param{atomicfields} parameters. The meaning 
+of \param{changingProblemSize} is given in Section~\ref{LinearTransientTransport}.
 
 Note: This problem type {\bf requires transport module} and it
 can be used only when this module is included in your oofem

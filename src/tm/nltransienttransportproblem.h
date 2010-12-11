@@ -49,7 +49,10 @@
 
 namespace oofem {
 /**
- * This class represents nonlinear transient transport problem.
+ * This class represents nonlinear transient transport problem. The problem can be growing/decreasing, signalized by flag "changingproblemsize"
+ * in the problem description. The solution is stored in UnknownsField, which can obtain/ project solution from/to DoFs (nodes). If the problem
+ * keeps the same equation numbers, solution is taken from UnknownsField without any projection, which is more efficient. See the matlibmanual.pdf
+ * for solution strategy of balance equations and the solution algorithm.
  */
 class NLTransientTransportProblem : public NonStationaryTransportProblem
 {
@@ -85,7 +88,7 @@ public:
     classType giveClassID()      const { return NLTransientTransportProblemClass; }
     fMode giveFormulation() { return nonLinFormulation; }
     virtual int giveUnknownDictHashIndx(EquationID type, ValueModeType mode, TimeStep *stepN);
-    ///Store solution vector to involved DoFs
+    /// Store solution vector to involved DoFs
     virtual void      updateDofUnknownsDictionary(DofManager *, TimeStep *);
 
 protected:
@@ -98,7 +101,6 @@ protected:
     void updateInternalState(TimeStep *);
     void applyIC(TimeStep *);
     void createPreviousSolutionInDofUnknownsDictionary(TimeStep *tStep);
-    void assembleStartingSolutionVector(FloatArray *solutionVector, TimeStep *tStep);
     void assembleAlgorithmicPartOfRhs(FloatArray &rhs, EquationID ut, const UnknownNumberingScheme &s, TimeStep *tStep, int nite);
 };
 } // end namespace oofem

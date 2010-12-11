@@ -55,19 +55,65 @@ DofDistributedPrimaryField :: giveUnknownValue(Dof *dof, ValueModeType mode, Tim
     return dof->giveUnknown(this->ut, mode, atTime);
 }
 
-
 FloatArray *
 DofDistributedPrimaryField :: giveSolutionVector(TimeStep *atTime)
 {
-    _error("giveSolutionVector: not supported");
-    return NULL;
+    return PrimaryField :: giveSolutionVector(atTime);
 }
 
+void
+DofDistributedPrimaryField :: giveVectorOfUnknown(ValueModeType mode, TimeStep *atTime, FloatArray &answer) {
+    int i, j, ndofs, eqNum;
+    double val;
+    Domain *domain = emodel->giveDomain(domainIndx);
+    int neq =  emodel->giveNumberOfEquations(this->ut);
+    int nnodes = domain->giveNumberOfDofManagers();
+    DofManager *inode;
+    Dof *iDof;
 
+    answer.resize(neq);
+    answer.zero();
+
+    for ( j = 1; j <= nnodes; j++ ) {
+        inode = domain->giveDofManager(j);
+        ndofs = inode->giveNumberOfDofs();
+        for ( i = 1; i <= ndofs; i++ ) {
+            iDof = inode->giveDof(i);
+            eqNum = iDof->__giveEquationNumber();
+            if ( eqNum ) {
+                iDof->giveUnknownsDictionaryValue(atTime, this->ut, mode, val);
+                answer.at(eqNum) = val;
+                //answer.at(eqNum) = iDof->giveUnknown(this->ut, mode, atTime);
+            }
+        }
+    }
+}
+
+void
+DofDistributedPrimaryField :: copyUnknownsInDictionary(ValueModeType mode, TimeStep *fromTime, TimeStep *toTime) {
+    int i, j, ndofs;
+    double val;
+    Domain *domain = emodel->giveDomain(domainIndx);
+    int nnodes = domain->giveNumberOfDofManagers();
+    DofManager *inode;
+    Dof *iDof;
+
+    for ( j = 1; j <= nnodes; j++ ) {
+        inode = domain->giveDofManager(j);
+        ndofs = inode->giveNumberOfDofs();
+        for ( i = 1; i <= ndofs; i++ ) {
+            iDof = inode->giveDof(i);
+            val = iDof->giveUnknown(this->ut, mode, fromTime);
+            iDof->updateUnknownsDictionary(toTime, this->ut, mode, val);
+        }
+    }
+}
 
 void
 DofDistributedPrimaryField :: advanceSolution(TimeStep *atTime)
-{ }
+{
+    PrimaryField :: advanceSolution(atTime);
+}
 
 
 contextIOResultType

@@ -56,23 +56,31 @@
 #include "contextioerr.h"
 
 namespace oofem {
-///constructor
-NonStationaryTransportProblem :: NonStationaryTransportProblem(int i, EngngModel *_master = NULL) : EngngModel(i, _master), bcRhs(), UnknownsField(this, 1, FT_TransportProblemUnknowns, EID_ConservationEquation, 1){
+///Constructor
+NonStationaryTransportProblem :: NonStationaryTransportProblem(int i, EngngModel *_master = NULL) : EngngModel(i, _master) {
+    UnknownsField = NULL;
     lhs = NULL;
-    ndomains = 1;
     nMethod = NULL;
+    ndomains = 1;
     lumpedCapacityStab = 0;
     exportFieldFlag = 0;
-    initFlag = true;
     dtTimeFunction = 0;
     internalVarUpdateStamp = 0;
     changingProblemSize = false;
 }
-///destructor
+///Destructor
 NonStationaryTransportProblem :: ~NonStationaryTransportProblem()  {
-    if ( lhs ) { delete  lhs; }
+    if ( lhs ) {
+        delete lhs;
+    }
 
-    if ( nMethod ) { delete nMethod; }
+    if ( nMethod ) {
+        delete nMethod;
+    }
+
+    if ( UnknownsField ) {
+        delete UnknownsField;
+    }
 }
 
 
@@ -124,6 +132,14 @@ NonStationaryTransportProblem :: initializeFrom(InputRecord *ir)
         lumpedCapacityStab = 1;
     }
 
+    //secure equation renumbering, otherwise keep efficient algorithms
+    if ( ir->hasField(IFT_NonStationaryTransportProblem_changingproblemsize, "changingproblemsize") ) {
+        changingProblemSize = true;
+        UnknownsField = new DofDistributedPrimaryField(this, 1, FT_TransportProblemUnknowns, EID_ConservationEquation, 1);
+    } else   {
+        UnknownsField = new PrimaryField(this, 1, FT_TransportProblemUnknowns, EID_ConservationEquation, 1);
+    }
+
     // read field export flag
     exportFieldFlag = 0;
     if ( ir->hasField(IFT_NonStationaryTransportProblem_exportfields, "exportfields") ) {
@@ -132,54 +148,30 @@ NonStationaryTransportProblem :: initializeFrom(InputRecord *ir)
         // export flux fields
         FieldManager *fm = this->giveContext()->giveFieldManager();
         for ( int i = 1; i <= atomicFieldID.giveSize(); i++ ) {
-            fm->registerField( & UnknownsField, ( FieldType ) atomicFieldID.at(i) );
+            fm->registerField( UnknownsField, ( FieldType ) atomicFieldID.at(i) );
         }
     }
-
-    if(ir->hasField(IFT_NonStationaryTransportProblem_changingproblemsize, "changingproblemsize")){
-        changingProblemSize = true;
-    }
-
 
     return IRRT_OK;
 }
 
 
-//This function is superfluous. Unknons are taken from DoFs.
-
-// double NonStationaryTransportProblem ::  giveUnknownComponent(EquationID chc, ValueModeType mode,                                                              TimeStep *tStep, Domain *d, Dof *dof)
+double NonStationaryTransportProblem ::  giveUnknownComponent(EquationID chc, ValueModeType mode, TimeStep *tStep, Domain *d, Dof *dof)
 // returns unknown quantity like displacement, velocity of equation eq
 // This function translates this request to numerical method language
-// {
-//     int eq = dof->__giveEquationNumber();
-//     if ( eq == 0 ) {
-//         _error2("giveUnknownComponent: invalid equation number on DoF %d", dof->giveNumber());
-//     }
+{
+    int eq = dof->__giveEquationNumber();
+    if ( eq == 0 ) {
+        _error2( "giveUnknownComponent: invalid equation number on DoF %d", dof->giveNumber() );
+    }
 
-    /*
-     * if (tStep != this->giveCurrentStep ()) {
-     *  _error ("giveUnknownComponent: unknown time step encountered");
-     * return 0.;
-     * }
-     */
-    //if (chc != HeMaCVector) {// heat and mass concetration vector
-//     if ( chc != EID_ConservationEquation ) { // heat and mass concetration vector
-//         _error("giveUnknownComponent: Unknown is of undefined CharType for this problem");
-//         return 0.;
-//     }
+    if ( chc != EID_ConservationEquation ) { // heat and mass concetration vector
+        _error("giveUnknownComponent: Unknown is of undefined CharType for this problem");
+        return 0.;
+    }
 
-    /*
-     * if ((tStep == this->giveCurrentStep()) && (solutionVector.isNotEmpty()))  {
-     * if (mode == UnknownMode_Total)  return solutionVector.at(eq);
-     * else if (mode == UnknownMode_Incremental) return solutionVector.at(eq)-previousSolutionVector.at(eq);
-     * else  _error ("giveUnknownComponent: Unknown is of undefined type for this problem");
-     * } else if ((tStep == this->givePreviousStep()) && (previousSolutionVector.isNotEmpty()))  {
-     * if (mode == UnknownMode_Incremental)  return previousSolutionVector.at(eq);
-     * else  _error ("giveUnknownComponent: Unknown is of undefined type for this problem");
-     * } else  _error ("giveUnknownComponent: Unknown is of undefined type for this problem");
-     */
-//     return UnknownsField.giveUnknownValue(dof, mode, tStep);
-// }
+    return UnknownsField->giveUnknownValue(dof, mode, tStep);
+}
 
 
 TimeStep *
@@ -238,15 +230,17 @@ NonStationaryTransportProblem :: giveNextStep()
 
     previousStep = currentStep;
     currentStep = new TimeStep(istep, this, 1, totalTime, this->giveDeltaT(istep), counter);
-    // time and dt variables are set eq to 0 for staics - has no meaning
+    // time and dt variables are set eq to 0 for statics - has no meaning
     return currentStep;
 }
 
 
 void NonStationaryTransportProblem :: solveYourselfAt(TimeStep *tStep) {
     // Creates system of governing eq's and solves them at given tStep
-    // The solution is temporarily stored in UnknownsField, but actual values are stored
-    // directly on DoFs after each timeStep.
+    // The solution is stored in UnknownsField. If the problem is growing/decreasing, the UnknownsField is projected on DoFs when needed.
+    // If equations are not renumbered, the algorithm is efficient without projecting unknowns to DoFs (nodes).
+
+    //Right hand side
     FloatArray rhs;
 
     int neq = this->giveNumberOfEquations(EID_ConservationEquation);
@@ -254,32 +248,35 @@ void NonStationaryTransportProblem :: solveYourselfAt(TimeStep *tStep) {
     OOFEM_LOG_RELEVANT( "Solving [step number %8d, time %15e]\n", tStep->giveNumber(), tStep->giveTime() );
 #endif
 
-    //Delete lhs matrix and create a new one. This is necessary due to growing/decreasing amount of equations.
-    if ( lhs ) {
-        delete lhs;
-    }
-    lhs = CreateUsrDefSparseMtrx(sparseMtrxType);
-    if ( lhs == NULL ) {
-        _error("solveYourselfAt: sparse matrix creation failed");
-    }
+    //Create a new lhs matrix if necessary
+    if ( tStep->isTheFirstStep() || this->changingProblemSize ) {
+        if ( lhs ) {
+            delete lhs;
+        }
 
-    lhs->buildInternalStructure( this, 1, EID_ConservationEquation, EModelDefaultEquationNumbering() );
+        lhs = CreateUsrDefSparseMtrx(sparseMtrxType);
+        if ( lhs == NULL ) {
+            _error("solveYourselfAt: sparse matrix creation failed");
+        }
+
+        lhs->buildInternalStructure( this, 1, EID_ConservationEquation, EModelDefaultEquationNumbering() );
+
 #ifdef VERBOSE
         OOFEM_LOG_INFO("Assembling conductivity and capacity matrices\n");
 #endif
 
-    this->assemble( lhs, stepWhenIcApply, EID_ConservationEquation, LHSBCMatrix,
-                    EModelDefaultEquationNumbering(), this->giveDomain(1) );
-    lhs->times(alpha);
-    this->assemble( lhs, stepWhenIcApply, EID_ConservationEquation, NSTP_MidpointLhs,
-                    EModelDefaultEquationNumbering(), this->giveDomain(1) );
-
+        this->assemble( lhs, stepWhenIcApply, EID_ConservationEquation, LHSBCMatrix,
+                       EModelDefaultEquationNumbering(), this->giveDomain(1) );
+        lhs->times(alpha);
+        this->assemble( lhs, stepWhenIcApply, EID_ConservationEquation, NSTP_MidpointLhs,
+                       EModelDefaultEquationNumbering(), this->giveDomain(1) );
+    }
 
     //Solution at the first time step needs history. Therefore, return back one time increment and create it.
     if ( tStep->isTheFirstStep() ) {
         TimeStep *stepWhenIcApply = tStep->givePreviousStep();
 
-        bcRhs.resize(neq);//rhs vector from solution step i-1
+        bcRhs.resize(neq); //rhs vector from solution step i-1
         bcRhs.zero();
 
         this->applyIC(stepWhenIcApply);
@@ -296,34 +293,29 @@ void NonStationaryTransportProblem :: solveYourselfAt(TimeStep *tStep) {
         //add nodal load
         this->assembleVectorFromDofManagers( bcRhs, stepWhenIcApply, EID_ConservationEquation, NodalLoadVector,
                                             VM_Total, EModelDefaultEquationNumbering(), this->giveDomain(1) );
-    } else {
-        bcRhs.resize(neq);
-        bcRhs.zero();
-        assembleRhsFromDoFs(tStep, EID_MomentumBalance, VM_RhsTotal, bcRhs);
     }
 
-    //Prepare position in UnknownsField to store the results.
-    UnknownsField.advanceSolution(tStep);
-    
-    FloatArray *solutionVector = UnknownsField.giveSolutionVector(tStep);
+    //obtain the last Rhs vector from DoFs directly
+    if ( !tStep->isTheFirstStep() && this->changingProblemSize ) {
+        ( dynamic_cast< DofDistributedPrimaryField * >(UnknownsField) )->giveVectorOfUnknown(VM_RhsTotal, tStep, bcRhs);
+    }
+
+    //prepare position in UnknownsField to store the results
+    UnknownsField->advanceSolution(tStep);
+
+    FloatArray *solutionVector = UnknownsField->giveSolutionVector(tStep);
     solutionVector->resize(neq);
     solutionVector->zero();
 
 #ifdef VERBOSE
     OOFEM_LOG_INFO("Assembling rhs\n");
 #endif
-    //
     // assembling load from elements
-    
-    //need to reassemble Rhs history due to possible changes in the NumberOfEquations
-    if ( tStep->giveNumber() != giveNumberOfFirstStep() ){
-    
-    }
-    
+
     rhs = bcRhs;
-    
+
     rhs.times(1. - alpha);
-    
+
     bcRhs.zero();
     this->assembleVectorFromElements( bcRhs, tStep, EID_ConservationEquation, ElementBCTransportVector,
                                      VM_Total, EModelDefaultEquationNumbering(), this->giveDomain(1) );
@@ -331,9 +323,8 @@ void NonStationaryTransportProblem :: solveYourselfAt(TimeStep *tStep) {
                                        EModelDefaultEquationNumbering(), this->giveDomain(1) );
     this->assembleVectorFromElements( bcRhs, tStep, EID_ConservationEquation, ElementInternalSourceVector,
                                      VM_Total, EModelDefaultEquationNumbering(), this->giveDomain(1) );
-    //
+
     // assembling load from nodes
-    //
     this->assembleVectorFromDofManagers( bcRhs, tStep, EID_ConservationEquation, NodalLoadVector, VM_Total,
                                         EModelDefaultEquationNumbering(), this->giveDomain(1) );
     for ( int i = 1; i <= neq; i++ ) {
@@ -353,8 +344,8 @@ void NonStationaryTransportProblem :: solveYourselfAt(TimeStep *tStep) {
     OOFEM_LOG_INFO("Solving ...\n");
 #endif
 
-    UnknownsField.giveSolutionVector(tStep)->resize(neq);
-    nMethod->solve( lhs, & rhs, UnknownsField.giveSolutionVector(tStep) );
+    UnknownsField->giveSolutionVector(tStep)->resize(neq);
+    nMethod->solve( lhs, & rhs, UnknownsField->giveSolutionVector(tStep) );
     // update solution state counter
     tStep->incrementStateCounter();
 
@@ -367,7 +358,6 @@ NonStationaryTransportProblem :: updateYourself(TimeStep *stepN)
 {
     this->updateInternalState(stepN);
     EngngModel :: updateYourself(stepN);
-    //previousSolutionVector = solutionVector;
 }
 
 
@@ -379,7 +369,7 @@ NonStationaryTransportProblem :: updateInternalState(TimeStep *stepN)
 
     for ( idomain = 1; idomain <= this->giveNumberOfDomains(); idomain++ ) {
         domain = this->giveDomain(idomain);
-        
+
         nnodes = domain->giveNumberOfDofManagers();
         if ( requiresUnknownsDictionaryUpdate() ) {
             for ( j = 1; j <= nnodes; j++ ) {
@@ -387,12 +377,13 @@ NonStationaryTransportProblem :: updateInternalState(TimeStep *stepN)
                 this->updateDofUnknownsDictionary(domain->giveDofManager(j), stepN);
             }
         }
-        
+
         if ( internalVarUpdateStamp != stepN->giveSolutionStateCounter() ) {
             nelem = domain->giveNumberOfElements();
             for ( j = 1; j <= nelem; j++ ) {
                 domain->giveElement(j)->updateInternalState(stepN);
             }
+
             internalVarUpdateStamp = stepN->giveSolutionStateCounter();
         }
     }
@@ -422,7 +413,7 @@ NonStationaryTransportProblem :: saveContext(DataStream *stream, ContextMode mod
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = UnknownsField.saveContext(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = UnknownsField->saveContext(stream, mode) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
@@ -465,7 +456,7 @@ NonStationaryTransportProblem :: restoreContext(DataStream *stream, ContextMode 
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = UnknownsField.restoreContext(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = UnknownsField->restoreContext(stream, mode) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
@@ -525,24 +516,26 @@ NonStationaryTransportProblem :: updateDofUnknownsDictionary(DofManager *inode, 
     Dof *iDof;
     double val;
     FloatArray *vect;
-    
+
     for ( i = 1; i <= ndofs; i++ ) {
         iDof = inode->giveDof(i);
         eqNum = iDof->__giveEquationNumber();
         if ( iDof->hasBc(tStep) ) { // boundary condition
             val = iDof->giveBcValue(VM_Total, tStep);
         } else {
-            vect = this->UnknownsField.giveSolutionVector(tStep);
-            val = vect->at( eqNum );
+            vect = this->UnknownsField->giveSolutionVector(tStep);
+            val = vect->at(eqNum);
         }
+
         //update temperature, which is present in every node
         iDof->updateUnknownsDictionary(tStep, EID_MomentumBalance, VM_Total, val);
         //update Rhs, which is applies only to nodes with computed temperature
-        if( !eqNum ){
-            val = 0.;//assume that 0's are present in the beginning of node initiation in the growing problem
+        if ( !eqNum ) {
+            val = 0.; //assume that 0's are present in the beginning of node initiation in the growing problem
         } else {
             val = this->bcRhs.at( iDof->__giveEquationNumber() );
         }
+
         iDof->updateUnknownsDictionary(tStep, EID_MomentumBalance, VM_RhsTotal, val);
     }
 }
@@ -550,13 +543,13 @@ NonStationaryTransportProblem :: updateDofUnknownsDictionary(DofManager *inode, 
 
 
 int
-NonStationaryTransportProblem :: giveUnknownDictHashIndx(EquationID type, ValueModeType mode, TimeStep *stepN){
-    if ( mode == VM_Total){//Nodal temperature from the current timeStep
+NonStationaryTransportProblem :: giveUnknownDictHashIndx(EquationID type, ValueModeType mode, TimeStep *stepN) {
+    if ( mode == VM_Total ) { //Nodal temperature
         return 0;
-    } else if( mode == VM_RhsTotal){//Nodal Rhs from the current timeStep
+    } else if ( mode == VM_RhsTotal ) { //Nodal Rhs
         return 1;
     } else {
-        _error2("ValueModeType %s undefined", __ValueModeTypeToString(mode));
+        _error2( "ValueModeType %s undefined", __ValueModeTypeToString(mode) );
     }
 
     return 0;
@@ -658,33 +651,6 @@ NonStationaryTransportProblem :: printDofOutputAt(FILE *stream, Dof *iDof, TimeS
     iDof->printSingleOutputAt(stream, atTime, 'f', EID_ConservationEquation, VM_Total);
 }
 
-
-void NonStationaryTransportProblem :: assembleRhsFromDoFs(TimeStep *tStep, EquationID type, ValueModeType mode, FloatArray &bcRhs){
-    int i,j,eqNum,nnodes, ndofs, idomain;
-    double val;
-    DofManager *inode;
-    Dof *iDof;
-    Domain *domain;
-    
-    for ( idomain = 1; idomain <= this->giveNumberOfDomains(); idomain++ ) {
-            domain = this->giveDomain(idomain);
-            nnodes = domain->giveNumberOfDofManagers();
-                for ( j = 1; j <= nnodes; j++ ) {
-                    inode = domain->giveDofManager(j);
-                    ndofs = inode->giveNumberOfDofs();
-                    for ( i = 1; i <= ndofs; i++ ) {
-                        iDof = inode->giveDof(i);
-                        eqNum = iDof->__giveEquationNumber();
-                        if(eqNum){
-                            iDof->giveUnknownsDictionaryValue(tStep, type, mode, val);
-                            bcRhs.at(eqNum) = val;
-                        }
-                   }
-              }
-        }
-}
-
-
 void
 NonStationaryTransportProblem :: applyIC(TimeStep *stepWhenIcApply)
 {
@@ -701,8 +667,8 @@ NonStationaryTransportProblem :: applyIC(TimeStep *stepWhenIcApply)
     DofManager *node;
     Dof *iDof;
 
-    UnknownsField.advanceSolution(stepWhenIcApply);
-    solutionVector = UnknownsField.giveSolutionVector(stepWhenIcApply);
+    UnknownsField->advanceSolution(stepWhenIcApply);
+    solutionVector = UnknownsField->giveSolutionVector(stepWhenIcApply);
     solutionVector->resize(neq);
     solutionVector->zero();
 
@@ -722,13 +688,15 @@ NonStationaryTransportProblem :: applyIC(TimeStep *stepWhenIcApply)
             if ( jj ) {
                 val = iDof->giveUnknown(EID_ConservationEquation, VM_Total, stepWhenIcApply);
                 solutionVector->at(jj) = val;
-                //update temperature
-                iDof->updateUnknownsDictionary(stepWhenIcApply, EID_MomentumBalance, VM_Total, val);
+                //update in dictionary, if the problem is growing/decreasing
+                if ( this->changingProblemSize ) {
+                    iDof->updateUnknownsDictionary(stepWhenIcApply, EID_MomentumBalance, VM_Total, val);
+                }
             }
         }
     }
 
-    // Not relevant in linear case, but needed for CemhydMat for temperature averaging before solver
+    // Not relevant in linear case, but needed for CemhydMat for temperature averaging before solving balance equations
     // Update element state according to given ic
     int nelem = domain->giveNumberOfElements();
     TransportElement *element;
@@ -786,9 +754,8 @@ NonStationaryTransportProblem :: assembleDirichletBcRhsVector(FloatArray &answer
             element->giveLocationArray(loc, ut, ns);
             answer.assemble(charVec, loc);
         }
-    }
+    } // end element loop
 
-    // end element loop
 }
 
 ///needed for CemhydMat

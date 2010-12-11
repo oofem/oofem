@@ -48,10 +48,12 @@ class PrimaryField;
 class Dof;
 
 /**
- * Class representing field of primary varaibles (those, which are unknown and are typically
- * associated to nodes). Filed is determined by DOF values stored in DOF repositories (unknown dictionaries).
- * These repositories are maintained and updated by engng models. The purpose of this class is to provide
+ * Class representing field of primary variables, which are typically allocated on nodes.
+ * The field is determined by DOF values stored in DOF repositories (unknown dictionary).
+ * These repositories are maintained and updated by engng models since the algorithms are very specific to each model.
+ * The class can return several variables stored in DOF. The purpose of this class is to provide
  * a shell that allows to access these repositories using field services.
+ * The class contains also a solution vector for temporal storage of unknowns. The vector needs to be projected back to DOFs.
  */
 class DofDistributedPrimaryField : public PrimaryField
 {
@@ -70,8 +72,20 @@ public:
     /**
      */
     virtual double giveUnknownValue(Dof *dof, ValueModeType mode, TimeStep *atTime);
-    /**
+    /** Returns the vector of unknowns
+     * @param mode what the unknown desribes (increment, total value etc.)
+     * @param atTime time of interest
+     * @param answer the resulting vector
      */
+    virtual void giveVectorOfUnknown(ValueModeType mode, TimeStep *atTime, FloatArray &answer);
+    /** Copy unknowns in dictionary, e.g. from current values to previous on all nodes and all DOFs
+     * @param mode what the unknown desribes (increment, total value etc.)
+     * @param fromTime from which timeStep to obtain value
+     * @param toTime to which time to copy
+     */
+    virtual void copyUnknownsInDictionary(ValueModeType mode, TimeStep *fromTime, TimeStep *toTime);
+    //virtual double storeUnknownVectorOnNode(ValueModeType mode, TimeStep *atTime, FloatArray &answer);
+
     virtual FloatArray *giveSolutionVector(TimeStep *atTime);
     /**
      */
