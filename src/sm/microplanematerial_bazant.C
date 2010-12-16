@@ -156,7 +156,7 @@ MicroplaneMaterial_Bazant :: giveRealStressVector(FloatArray &answer, MatRespons
     // uncomment this
     // stressIncrement = answer;
     // crossSection->giveReducedCharacteristicVector(stressIncrement, gp, answer);
-    // stressIncrement.substract (status -> giveStressVector());
+    // stressIncrement.subtract (status -> giveStressVector());
     // status -> letStressIncrementVectorBe (stressIncrement);
     status->letTempStressVectorBe(answer);
     return;

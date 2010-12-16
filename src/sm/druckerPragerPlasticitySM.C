@@ -306,9 +306,9 @@ DruckerPragerPlasticitySM :: giveRealStressVector(FloatArray &answer,
     // Initialize temp variables for this gauss point
     initTempStatus(gp);
 
-    // substract stress independent part
+    // subtract stress independent part
     // note: eigenStrains (temperature) is not contained in mechanical strain stored in gp
-    // therefore it is necessary to substract always the total eigen strain value
+    // therefore it is necessary to subtract always the total eigen strain value
     this->giveStressDependentPartOfStrainVector(strainVectorR, gp, totalStrain,
                                                 atTime, VM_Total);
 
@@ -354,7 +354,7 @@ DruckerPragerPlasticitySM :: performLocalStressReturn(GaussPoint *gp,
     StrainVector plasticStrainDeviator( gp->giveMaterialMode() );
     status->givePlasticStrainDeviator(plasticStrainDeviator);
     StrainVector elasticStrainDeviator = strainDeviator;
-    elasticStrainDeviator.substract(plasticStrainDeviator);
+    elasticStrainDeviator.subtract(plasticStrainDeviator);
 
     // compute trial stresses
     volumetricStress = 3. * kM * volumetricElasticTrialStrain;
@@ -396,7 +396,7 @@ DruckerPragerPlasticitySM :: performLocalStressReturn(GaussPoint *gp,
     // compute and update plastic strains, volumetric and deviatoric part
     stressDeviator.applyDeviatoricElasticCompliance(elasticStrainDeviator, gM);
     plasticStrainDeviator = strainDeviator;
-    plasticStrainDeviator.substract(elasticStrainDeviator);
+    plasticStrainDeviator.subtract(elasticStrainDeviator);
     status->letTempPlasticStrainDeviatorBe(plasticStrainDeviator);
     status->letTempVolumetricPlasticStrainBe(volumetricStrain - volumetricStress / 3. / kM);
 
@@ -477,7 +477,7 @@ DruckerPragerPlasticitySM :: performRegularReturn(double eM, double gM, double k
 
         // plasticFlow = flowDir ;
         //plasticFlow.times( devConstant * deltaLambdaIncrement ) ;
-        //stressDeviator.substract( plasticFlow ) ;
+        //stressDeviator.subtract( plasticFlow ) ;
 
         stressDeviator.add(-devConstant * deltaLambdaIncrement, flowDir);
         tempJTwo = stressDeviator.computeSecondInvariant();
@@ -797,7 +797,7 @@ DruckerPragerPlasticitySM :: giveVertexAlgorithmicStiffMatrix(FloatMatrix &answe
     StrainVector plasticStrainDeviator(_3dMat);
     status->givePlasticStrainDeviator(plasticStrainDeviator);
     StrainVector elasticStrainDeviator = strainDeviator;
-    elasticStrainDeviator.substract(plasticStrainDeviator);
+    elasticStrainDeviator.subtract(plasticStrainDeviator);
 
     const double a_const =
         kM * HBar / ( HBar * deltaVolumetricPlasticStrain + 9. / 2. * alpha * kM * deltaKappa );

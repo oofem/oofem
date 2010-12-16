@@ -136,7 +136,7 @@ StructuralElement :: computeBcLoadVectorAt(FloatArray &answer, TimeStep *stepN, 
      * this -> computeVectorOfPrescribed(DisplacementVector,TotalMode,stepN, d) ;
      * if ((stepN->giveLoadResponseMode()==IncrementOfLoad) && (!stepN->isTheFirstStep())) {
      * this -> computeVectorOfPrescribed(DisplacementVector,TotalMode,stepN->givePreviousStep(), dp);
-     * d.substract (dp);
+     * d.subtract (dp);
      * //delete dp;
      * }
      */
@@ -632,8 +632,8 @@ StructuralElement :: computeLocalForceLoadVector(FloatArray &answer, TimeStep *s
 // on element volume (surface).
 // Why is this function taken separately ?
 // When reactions forces are computed, they are computed from element::GiveRealStressVector
-// in this vector a real forces are stored (temperature part is substracted).
-// so we need further substract part corresponding to non-nodal loading.
+// in this vector a real forces are stored (temperature part is subtracted).
+// so we need further subtract part corresponding to non-nodal loading.
 {
     int i, n, id, nLoads;
     bcGeomType ltype;
@@ -702,7 +702,7 @@ StructuralElement :: computeForceLoadVector(FloatArray &answer, TimeStep *stepN,
 // on element volume (surface).
 // Why is this function taken separately ?
 // When reactions forces are computed, they are computed from element::GiveRealStressVector
-// in this vector a real forces are stored (temperature part is substracted).
+// in this vector a real forces are stored (temperature part is subtracted).
 // so we need further sobstract part corresponding to non-nodeal loading.
 {
     FloatMatrix T;
@@ -1115,9 +1115,9 @@ StructuralElement :: computeStrainVector(FloatArray &answer, GaussPoint *gp, Tim
     this->computeBmatrixAt(gp, b);
     this->computeVectorOf(EID_MomentumBalance, VM_Total, stepN, u);
 
-    // substract initial displacements, if defined
+    // subtract initial displacements, if defined
     if ( initialDisplacements ) {
-        u.substract(initialDisplacements);
+        u.subtract(initialDisplacements);
     }
 
     if ( this->updateRotationMatrix() ) {

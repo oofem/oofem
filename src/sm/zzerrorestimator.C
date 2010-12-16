@@ -288,7 +288,7 @@ ZZErrorEstimatorInterface :: ZZErrorEstimatorI_computeElementContributions(doubl
                 OOFEM_ERROR("ZZErrorEstimatorI_computeElementContributions: unsuported InternalStateType");
             }
 
-            diff.substract(sig);
+            diff.subtract(sig);
 
             eNorm += dotProduct( diff.givePointer(), diff.givePointer(), diff.giveSize() ) * dV;
             sNorm += dotProduct( sig.givePointer(),  sig.givePointer(), sig.giveSize() )   * dV;
@@ -318,7 +318,7 @@ ZZErrorEstimatorInterface :: ZZErrorEstimatorI_computeElementContributions(doubl
                 OOFEM_ERROR("ZZErrorEstimatorI_computeElementContributions: unsuported InternalStateType");
             }
 
-            diff.substract(sig);
+            diff.subtract(sig);
 
             help.beProductOf(DInv, diff);
             eNorm += dotProduct( diff.givePointer(), help.givePointer(), diff.giveSize() ) * dV;

@@ -370,7 +370,7 @@ MisesMat :: giveRealStressVectorComputedFromStrain(FloatArray &answer,
 
     // elastic predictor
     StrainVector elStrain(totalStrain, _3dMat);
-    elStrain.substract(plStrain);
+    elStrain.subtract(plStrain);
     StrainVector elStrainDev(_3dMat);
     double elStrainVol;
     elStrain.computeDeviatoricVolumetricSplit(elStrainDev, elStrainVol);

@@ -105,7 +105,17 @@ public:
      */
     PrimaryField(EngngModel *a, int idomain, FieldType ft, EquationID ut, int nHist);
     ~PrimaryField();
-    /**
+    /** Copy unknowns from previous solution or DOF's dictionary to the solution vector
+     * @param mode what the unknown desribes (increment, total value etc.)
+     * @param atTime time of interest
+     * @param answer the resulting vector
+     */
+    virtual void initialize(ValueModeType mode, TimeStep *atTime, FloatArray &answer);
+
+    /** Return value of interest at given DOF
+     * @param dof pointer to DOF
+     * @param mode what the unknown desribes (increment, total value etc.)
+     * @param atTime time of interest
      */
     virtual double giveUnknownValue(Dof *dof, ValueModeType mode, TimeStep *atTime);
     /** Evaluates the field at given point
@@ -117,6 +127,15 @@ public:
     /**
      */
     virtual FloatArray *giveSolutionVector(TimeStep *atTime);
+
+    /** Project @param vectorToStore back to DOF's dictionary
+     * @param mode what the unknown desribes (increment, total value etc.)
+     * @param atTime time
+     * @param vectorToStore vector with the size of number of equations
+     */
+    virtual void update(ValueModeType mode, TimeStep *atTime, FloatArray &vectorToStore)
+    {  };
+
     /**
      */
     virtual void advanceSolution(TimeStep *atTime);

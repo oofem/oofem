@@ -369,7 +369,7 @@ FloatArray *FloatArray :: add(FloatArray *b)
 }
 
 
-FloatArray *FloatArray :: substract(FloatArray *b)
+FloatArray *FloatArray :: subtract(FloatArray *b)
 // Performs the operation a=a-b, where a stands for the receiver. If the
 // receiver's size is 0, adjusts its size to that of b. Returns the
 // receiver.

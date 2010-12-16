@@ -282,9 +282,9 @@ Concrete2 ::  giveRealStresses3dShellLayer(FloatArray &answer, MatResponseForm f
 
     this->initGpForNewStep(gp);
 
-    // substract stress independent part
+    // subtract stress independent part
     // note: eigenStrains (temperature) is not contained in mechanical strain stored in gp
-    // therefore it is necessary to substract always the total eigen strain value
+    // therefore it is necessary to subtract always the total eigen strain value
     this->giveStressDependentPartOfStrainVector(reducedStrain, gp,
                                                 totalStrain, atTime, VM_Total);
     crossSection->giveFullCharacteristicVector(currentStrain, gp, reducedStrain);
@@ -383,7 +383,7 @@ Concrete2 ::  giveRealStresses3dShellLayer(FloatArray &answer, MatResponseForm f
         //delete helpR;
         crossSection->giveReducedCharacteristicVector(help, gp, plasticStrain);
         status->givePlasticStrainIncrementVector(plasticStrainIncrementVector);
-        plasticStrainIncrementVector.substract(plasticStrainVector);
+        plasticStrainIncrementVector.subtract(plasticStrainVector);
         plasticStrainIncrementVector.add(& help);
         status->letPlasticStrainIncrementVectorBe(plasticStrainIncrementVector);
         //delete help;
@@ -725,7 +725,7 @@ label18:
 
     crossSection->giveReducedCharacteristicVector(help, gp, plasticStrain);
     status->givePlasticStrainIncrementVector(plasticStrainIncrementVector);
-    plasticStrainIncrementVector.substract(plasticStrainVector);
+    plasticStrainIncrementVector.subtract(plasticStrainVector);
     plasticStrainIncrementVector.add(help);
     status->letPlasticStrainIncrementVectorBe(plasticStrainIncrementVector);
     //delete help;

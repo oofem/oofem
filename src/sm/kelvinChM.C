@@ -278,12 +278,12 @@ KelvinChainMaterial :: updateYourself(GaussPoint *gp, TimeStep *tNow)
     KelvinChainMaterialStatus *status = ( KelvinChainMaterialStatus * ) this->giveStatus(gp);
 
     help = status->giveTempStrainVector(); // gives updated strain vector (at the end of time-step)
-    help.substract( status->giveStrainVector() ); // strain increment in current time-step
+    help.subtract( status->giveStrainVector() ); // strain increment in current time-step
 
     // Subtract the stress-independent part of strain
     this->computeStressIndependentStrainVector(deltaEps0, gp, tNow, VM_Incremental);
     if ( deltaEps0.giveSize() ) {
-        help.substract(deltaEps0); // should be equal to zero if there is no stress change during the time-step
+        help.subtract(deltaEps0); // should be equal to zero if there is no stress change during the time-step
     }
 
     help.times( this->giveEModulus(gp, tNow) ); // = delta_sigma

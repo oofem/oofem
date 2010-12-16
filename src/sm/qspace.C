@@ -312,9 +312,9 @@ QSpace :: computeLoadLSToLRotationMatrix(FloatMatrix &answer, int iSurf, GaussPo
     for ( i = 1; i <= 4; i++ ) {
         j = ( i ) % 4 + 1;
         h1 = * domain->giveNode( snodes.at(i) )->giveCoordinates();
-        h1.substract(gc);
+        h1.subtract(gc);
         h2 = * domain->giveNode( snodes.at(j) )->giveCoordinates();
-        h2.substract(gc);
+        h2.subtract(gc);
         n.beVectorProductOf(h1, h2);
         if ( dotProduct(n, n, 3) > 1.e-6 ) {
             n.normalize();

@@ -136,7 +136,7 @@ NonStationaryTransportProblem :: initializeFrom(InputRecord *ir)
     if ( ir->hasField(IFT_NonStationaryTransportProblem_changingproblemsize, "changingproblemsize") ) {
         changingProblemSize = true;
         UnknownsField = new DofDistributedPrimaryField(this, 1, FT_TransportProblemUnknowns, EID_ConservationEquation, 1);
-    } else   {
+    } else {
         UnknownsField = new PrimaryField(this, 1, FT_TransportProblemUnknowns, EID_ConservationEquation, 1);
     }
 
@@ -297,7 +297,7 @@ void NonStationaryTransportProblem :: solveYourselfAt(TimeStep *tStep) {
 
     //obtain the last Rhs vector from DoFs directly
     if ( !tStep->isTheFirstStep() && this->changingProblemSize ) {
-        ( dynamic_cast< DofDistributedPrimaryField * >(UnknownsField) )->giveVectorOfUnknown(VM_RhsTotal, tStep, bcRhs);
+        UnknownsField->initialize(VM_RhsTotal, tStep, bcRhs);
     }
 
     //prepare position in UnknownsField to store the results
@@ -311,11 +311,8 @@ void NonStationaryTransportProblem :: solveYourselfAt(TimeStep *tStep) {
     OOFEM_LOG_INFO("Assembling rhs\n");
 #endif
     // assembling load from elements
-
     rhs = bcRhs;
-
     rhs.times(1. - alpha);
-
     bcRhs.zero();
     this->assembleVectorFromElements( bcRhs, tStep, EID_ConservationEquation, ElementBCTransportVector,
                                      VM_Total, EModelDefaultEquationNumbering(), this->giveDomain(1) );
@@ -372,10 +369,10 @@ NonStationaryTransportProblem :: updateInternalState(TimeStep *stepN)
 
         nnodes = domain->giveNumberOfDofManagers();
         if ( requiresUnknownsDictionaryUpdate() ) {
-            for ( j = 1; j <= nnodes; j++ ) {
-                //update dictionary entry or add a new pair if the position is missing
-                this->updateDofUnknownsDictionary(domain->giveDofManager(j), stepN);
-            }
+            //update temperature vector
+            UnknownsField->update( VM_Total, stepN, * ( this->UnknownsField->giveSolutionVector(stepN) ) );
+            //update Rhs vector
+            UnknownsField->update(VM_RhsTotal, stepN, bcRhs);
         }
 
         if ( internalVarUpdateStamp != stepN->giveSolutionStateCounter() ) {
@@ -506,41 +503,6 @@ NonStationaryTransportProblem :: updateDomainLinks()
     EngngModel :: updateDomainLinks();
     this->giveNumericalMethod( giveCurrentStep() )->setDomain( this->giveDomain(1) );
 }
-
-void
-NonStationaryTransportProblem :: updateDofUnknownsDictionary(DofManager *inode, TimeStep *tStep)
-{
-    // update DoF unknowns dictionary. Store the last temperature and the last RHS, see giveUnknownDictHashIndx
-    int i, ndofs = inode->giveNumberOfDofs();
-    int eqNum;
-    Dof *iDof;
-    double val;
-    FloatArray *vect;
-
-    for ( i = 1; i <= ndofs; i++ ) {
-        iDof = inode->giveDof(i);
-        eqNum = iDof->__giveEquationNumber();
-        if ( iDof->hasBc(tStep) ) { // boundary condition
-            val = iDof->giveBcValue(VM_Total, tStep);
-        } else {
-            vect = this->UnknownsField->giveSolutionVector(tStep);
-            val = vect->at(eqNum);
-        }
-
-        //update temperature, which is present in every node
-        iDof->updateUnknownsDictionary(tStep, EID_MomentumBalance, VM_Total, val);
-        //update Rhs, which is applies only to nodes with computed temperature
-        if ( !eqNum ) {
-            val = 0.; //assume that 0's are present in the beginning of node initiation in the growing problem
-        } else {
-            val = this->bcRhs.at( iDof->__giveEquationNumber() );
-        }
-
-        iDof->updateUnknownsDictionary(tStep, EID_MomentumBalance, VM_RhsTotal, val);
-    }
-}
-
-
 
 int
 NonStationaryTransportProblem :: giveUnknownDictHashIndx(EquationID type, ValueModeType mode, TimeStep *stepN) {

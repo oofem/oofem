@@ -3265,7 +3265,7 @@ HuertaErrorEstimator :: solveRefinedElementProblem(int elemId, IntArray &localNo
             pEnorm = coeff * coeff * elementNorm + patchNorm - 2.0 * coeff * mixedNorm;
             /*
              * elementVector.times(coeff);
-             * patchVector.substract(elementVector);
+             * patchVector.subtract(elementVector);
              * elementVector.times(1.0/coeff);
              *
              * tmpVector.beProductOf(mat, patchVector);
@@ -3952,7 +3952,7 @@ HuertaErrorEstimator :: solveRefinedWholeProblem(IntArray &localNodeIdArray, Int
     }
 
     errorSolution = fineSolution;
-    errorSolution.substract(coarseSolution);
+    errorSolution.subtract(coarseSolution);
 
     if ( this->normType == HuertaErrorEstimator :: L2Norm ) {
         FloatMatrix Nmatrix;

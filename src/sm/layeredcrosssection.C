@@ -89,7 +89,7 @@ LayeredCrossSection ::  giveRealStresses(FloatArray &answer, MatResponseForm for
         /*
          * if (prevLayerStrain.giveSize()) {
          * layerStrainIncrement = layerStrain;
-         * layerStrainIncrement.substract(prevLayerStrain);
+         * layerStrainIncrement.subtract(prevLayerStrain);
          * //layerStrainIncrement = prevLayerStrain->GiveCopy()->negated();
          * //layerStrainIncrement -> add (layerStrain);
          * } else {

@@ -145,7 +145,7 @@ protected:
 
     /*
      * Compute element equivForces in dof managers (nodes and sides).
-     * It substracts part corresponding to non-nodal loading from internal forces vector.
+     * It subtracts part corresponding to non-nodal loading from internal forces vector.
      * @param answer returned equivalent forces
      * @param tStep time step
      * @param ielem element number

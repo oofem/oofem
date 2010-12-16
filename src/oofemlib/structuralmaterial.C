@@ -239,7 +239,7 @@ StructuralMaterial :: giveStressDependentPartOfStrainVector(FloatArray &answer, 
                                                             TimeStep *stepN, ValueModeType mode)
 {
     /*
-     * This functions substract from reducedStrainVector its stress independent part
+     * This functions subtract from reducedStrainVector its stress independent part
      * caused by temperature, shrinkage and possibly by other phenomenas.
      */
     FloatArray EpsilonTemperature;

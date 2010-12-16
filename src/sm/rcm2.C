@@ -150,9 +150,9 @@ RCM2Material :: giveRealStressVector(FloatArray &answer, MatResponseForm form, G
     this->initTempStatus(gp);
     this->initGpForNewStep(gp);
 
-    // substract stress independent part
+    // subtract stress independent part
     // note: eigenStrains (temperature) is not contained in mechanical strain stored in gp
-    // therefore it is necessary to substract always the total eigen strain value
+    // therefore it is necessary to subtract always the total eigen strain value
     this->giveStressDependentPartOfStrainVector(reducedTotalStrainVector, gp, totalStrain, atTime, VM_Total);
     //
 
@@ -260,7 +260,7 @@ RCM2Material ::  giveRealPrincipalStressVector3d(FloatArray &answer, GaussPoint 
     // local strain increment
     status->givePrevPrincStrainVector(prevPrincipalStrain);
     strainIncrement = principalStrain;
-    strainIncrement.substract(prevPrincipalStrain);
+    strainIncrement.subtract(prevPrincipalStrain);
     status->letPrincipalStrainVectorBe(principalStrain);
 
     this->giveNormalElasticStiffnessMatrix(de, FullForm, TangentStiffness,
@@ -318,7 +318,7 @@ RCM2Material ::  giveRealPrincipalStressVector3d(FloatArray &answer, GaussPoint 
 
             // elastic strain component
             elastStrain = principalStrain;
-            elastStrain.substract(crackStrainVector);
+            elastStrain.subtract(crackStrainVector);
             sigmaEl.beProductOf(de, elastStrain);
             //delete elastStrain;
 
@@ -337,7 +337,7 @@ RCM2Material ::  giveRealPrincipalStressVector3d(FloatArray &answer, GaussPoint 
             // no active crack exist - elastic behaviour
             //
             elastStrain = principalStrain;
-            elastStrain.substract(crackStrainVector);
+            elastStrain.subtract(crackStrainVector);
             sigmaEl.beProductOf(de, elastStrain);
             sigmaCr.zero();
             //delete elastStrain;
@@ -360,7 +360,7 @@ RCM2Material ::  giveRealPrincipalStressVector3d(FloatArray &answer, GaussPoint 
         // compute unbalanced stress
         // dSigma = sigmaEl - sigmaCr for active cracks
         fullDSigma = sigmaEl;
-        fullDSigma.substract(sigmaCr);
+        fullDSigma.subtract(sigmaCr);
         dSigma.beSubArrayOf(fullDSigma, crackMapping);
         //delete fullDSigma;
         // find max error in dSigma

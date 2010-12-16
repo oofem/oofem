@@ -306,7 +306,7 @@ MMALeastSquareProjection :: __mapVariable(FloatArray &answer, FloatArray &target
             element = srcgp->giveElement();
             element->giveIPValue(ipVal, srcgp, type, tStep);
             if ( element->computeGlobalCoordinates( coords, * ( srcgp->giveCoordinates() ) ) ) {
-                coords.substract(targetCoords);
+                coords.subtract(targetCoords);
                 // compute ip contribution
                 this->computePolynomialTerms(P, coords, patchType);
                 for ( j = 1; j <= neq; j++ ) {
@@ -357,7 +357,7 @@ MMALeastSquareProjection :: __mapVariable(FloatArray &answer, FloatArray &target
 
     /*
      * double ee;
-     * aa.substract (answer);
+     * aa.subtract (answer);
      * ee = sqrt(dotProduct(aa,aa,aa.giveSize()));
      * if ((aa.giveSize() != answer.giveSize()) || (ee > 1.e-6)) {
      * printf("Diference @@@@@!\n");

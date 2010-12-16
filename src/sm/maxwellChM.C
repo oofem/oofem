@@ -235,12 +235,12 @@ MaxwellChainMaterial :: updateYourself(GaussPoint *gp, TimeStep *tNow)
 
     this->giveUnitStiffnessMatrix(Binv, ReducedForm, gp, tNow);
     help = status->giveTempStrainVector();
-    help.substract( status->giveStrainVector() );
+    help.subtract( status->giveStrainVector() );
 
     // Subtract the stress-independent part of strain
     this->computeTrueStressIndependentStrainVector(deltaEps0, gp, tNow, VM_Incremental);
     if ( deltaEps0.giveSize() ) {
-        help.substract(deltaEps0);
+        help.subtract(deltaEps0);
     }
 
     help1.beProductOf(Binv, help);

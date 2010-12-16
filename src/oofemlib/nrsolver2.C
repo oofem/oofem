@@ -194,7 +194,7 @@ restart:
 
         rhs = RT;
         //if (R0) rhs.add(*R0);
-        rhs.substract(F);
+        rhs.subtract(F);
 
         //
         // compute forceError

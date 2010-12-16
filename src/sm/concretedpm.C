@@ -444,7 +444,7 @@ ConcreteDPM :: giveRealStressVector(FloatArray &answer,
     StrainVector elasticStrain = strain;
     StrainVector tempPlasticStrain(matMode);
     status->giveTempPlasticStrain(tempPlasticStrain);
-    elasticStrain.substract(tempPlasticStrain);
+    elasticStrain.subtract(tempPlasticStrain);
     elasticStrain.applyElasticStiffness(effectiveStress, eM, nu);
 
     // compute the nominal stress
@@ -649,7 +649,7 @@ ConcreteDPM :: computeDuctilityMeasureDamage(const StrainVector &strain, GaussPo
     StrainVector tempPlasticStrain(matMode);
     status->giveTempPlasticStrain(tempPlasticStrain);
     status->givePlasticStrain(plasticStrain);
-    tempPlasticStrain.substract(plasticStrain);
+    tempPlasticStrain.subtract(plasticStrain);
     StrainVector principalStrain(matMode);
     double ductilityMeasure;
     double volStrain = tempPlasticStrain(0) + tempPlasticStrain(1) +
@@ -696,7 +696,7 @@ ConcreteDPM :: performPlasticityReturn(GaussPoint *gp,
 
     // compute elastic strains and trial stress
     StrainVector elasticStrain = strain;
-    elasticStrain.substract(tempPlasticStrain);
+    elasticStrain.subtract(tempPlasticStrain);
     elasticStrain.applyElasticStiffness(effectiveStress, eM, nu);
 
     //Compute trial coordinates
@@ -729,7 +729,7 @@ ConcreteDPM :: performPlasticityReturn(GaussPoint *gp,
     // compute the plastic strains
     effectiveStress.applyElasticCompliance(elasticStrain, eM, nu);
     tempPlasticStrain = strain;
-    tempPlasticStrain.substract(elasticStrain);
+    tempPlasticStrain.subtract(elasticStrain);
     status->letTempPlasticStrainBe(tempPlasticStrain);
     return;
 }

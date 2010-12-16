@@ -66,6 +66,25 @@ PrimaryField :: PrimaryField(EngngModel *a, int idomain,
 PrimaryField :: ~PrimaryField()
 { }
 
+void
+PrimaryField :: initialize(ValueModeType mode, TimeStep *atTime, FloatArray &answer)
+{
+    int neq =  emodel->giveNumberOfEquations(this->ut);
+    answer.resize(neq);
+    answer.zero();
+
+    if ( mode == VM_Total ) {
+        answer = * ( this->giveSolutionVector(atTime) );
+    } else if ( mode == VM_Incremental ) {
+        int indxm1 = this->resolveIndx(atTime, -1);
+        answer = * ( this->giveSolutionVector(atTime) );
+        answer.subtract( this->giveSolutionVector(indxm1) );
+    } else {
+        _error2( "giveUnknownValue: unsupported mode %s", __ValueModeTypeToString(mode) );
+    }
+}
+
+
 double
 PrimaryField :: giveUnknownValue(Dof *dof, ValueModeType mode, TimeStep *atTime)
 {
@@ -99,7 +118,7 @@ PrimaryField :: evaluateAt(FloatArray &answer, FloatArray &coords, IntArray &dof
         return 1;
     }
 
-    EIPrimaryFieldInterface *interface = ( EIPrimaryFieldInterface * )( bgelem->giveInterface(EIPrimaryFieldInterfaceType) );
+    EIPrimaryFieldInterface *interface = ( EIPrimaryFieldInterface * ) ( bgelem->giveInterface(EIPrimaryFieldInterfaceType) );
     if ( interface ) {
         interface->EIPrimaryFieldI_evaluateFieldVectorAt(answer, * this, coords, dofId, mode, atTime);
     } else {

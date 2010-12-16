@@ -125,7 +125,7 @@ RheoChainMaterial :: giveRealStressVector(FloatArray &answer, MatResponseForm fo
     strainIncrement = reducedStrain;
     // subtract the initial strain to get the "net" strain increment,
     // which is related to the stress increment
-    strainIncrement.substract( status->giveStrainVector() );
+    strainIncrement.subtract( status->giveStrainVector() );
 
     // get the initial stress, or set it to zero if not available (first step)
     if ( status->giveStressVector().giveSize() ) {

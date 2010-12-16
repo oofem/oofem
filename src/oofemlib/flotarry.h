@@ -249,13 +249,13 @@ public:
      */
     void  add(double factor, const FloatArray &b);
     /**
-     * Substracts array src to receiver. If the receiver's size is zero, it adjusts its size
+     * Subtracts array src to receiver. If the receiver's size is zero, it adjusts its size
      * to size of src array. If recever's size is nonzero and different from src
      * array size an error is generated.
      */
     void  subtract(const FloatArray &src);
-    /// @deprecated, @see subtract
-    void  substract(const FloatArray &src) { this->subtract(src); }
+    // @deprecated, @see subtract
+    //void  substract(const FloatArray &src) { this->subtract(src); }
     /**
      * Extract sub vector form src array and stores the result into receiver.
      * @param src source vector for sub vector
@@ -324,10 +324,10 @@ public:
     FloatArray *rotatedWith(FloatMatrix *r, char mode);
     /* old pointer like member functions */
     FloatArray *add(FloatArray *);
-    FloatArray *substract(FloatArray *);
+    FloatArray *subtract(FloatArray *);
     FloatArray *times(double);
     FloatArray *Add(FloatArray *b) { return this->GiveCopy()->add(b); }
-    FloatArray *Substract(FloatArray *b) { return this->GiveCopy()->substract(b); }
+    FloatArray *Subtract(FloatArray *b) { return this->GiveCopy()->subtract(b); }
     FloatArray *Times(double) const;
     FloatArray *GiveCopy() const { return this->Times(1.); }
     FloatArray *GiveSubArray(IntArray *);

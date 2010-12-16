@@ -77,7 +77,7 @@ LineSearchNM :: solve(FloatArray *r, FloatArray *dr, FloatArray *F, FloatArray *
         g.add(R0);
     }
 
-    g.substract(F);
+    g.subtract(F);
 
     for ( ii = 1; ii <= eqnmask.giveSize(); ii++ ) {
         g.at( eqnmask.at(ii) ) = 0.0;
@@ -124,7 +124,7 @@ LineSearchNM :: solve(FloatArray *r, FloatArray *dr, FloatArray *F, FloatArray *
             g.add(R0);
         }
 
-        g.substract(F);
+        g.subtract(F);
 
         for ( ii = 1; ii <= eqnmask.giveSize(); ii++ ) {
             g.at( eqnmask.at(ii) ) = 0.0;

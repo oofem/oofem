@@ -178,9 +178,9 @@ PlasticMaterial :: giveRealStressVector(FloatArray &answer,
     this->initTempStatus(gp);
     this->initGpForNewStep(gp);
 
-    // substract stress independent part
+    // subtract stress independent part
     // note: eigenStrains (temperature) is not contained in mechanical strain stored in gp
-    // therefore it is necessary to substract always the total eigen strain value
+    // therefore it is necessary to subtract always the total eigen strain value
     this->giveStressDependentPartOfStrainVector(strainVectorR, gp, totalStrain,
                                                 atTime, VM_Total);
 
@@ -202,7 +202,7 @@ PlasticMaterial :: giveRealStressVector(FloatArray &answer,
 
     do {
         elasticStrainVectorR = strainVectorR;
-        elasticStrainVectorR.substract(plasticStrainVectorR);
+        elasticStrainVectorR.subtract(plasticStrainVectorR);
         // stress vector in full form due to computational convinience
         //if (fullStressVector) delete fullStressVector;
         this->computeTrialStressIncrement(fullStressVector, gp, elasticStrainVectorR, atTime);

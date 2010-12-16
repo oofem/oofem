@@ -2154,7 +2154,7 @@ void HellmichMaterial :: giveEigenStrainVector(FloatArray &answer, MatResponseFo
 
         // subtract previous viscous creep strains dev_n(auxvec)
         status->giveViscousStrainVector(auxvec);
-        redvec.substract( auxvec.times( 1. / ( 1. + twTime( giveHydrationDegree(gp, atTime, VM_Total) ) / dt ) ) ); // can't use ev, here isn't JvE
+        redvec.subtract( auxvec.times( 1. / ( 1. + twTime( giveHydrationDegree(gp, atTime, VM_Total) ) / dt ) ) ); // can't use ev, here isn't JvE
 
         // convert to FullForm and add to answer
         StructuralCrossSection *crossSection = ( StructuralCrossSection * ) gp->giveElement()->giveCrossSection();
@@ -2203,7 +2203,7 @@ void HellmichMaterial :: giveRealStressVector(FloatArray &answer,
         E = agingE(auxksi);
         // --- Strain increment ---
         auxStrain = totalStrain;
-        auxStrain.substract( status->giveStrainVector() );
+        auxStrain.subtract( status->giveStrainVector() );
         // subtract eigenstrains and shrinkage strains (eps_T, eps_v, eps_f, eps_shr)
         // OOFEM: calls StructuralElement->computeStressIndependentStrainVector (reduced)
         //  there sums computeTemperatureStrainVectorAt + CrossSection->computeStressIndependentStrainVector
@@ -2232,7 +2232,7 @@ void HellmichMaterial :: giveRealStressVector(FloatArray &answer,
         giveStressDependentPartOfStrainVector(elasticStrain, gp, auxStrain, atTime, VM_Total);
         if ( options & moPlasticity ) {
             status->givePlasticStrainVector(auxStrain);
-            elasticStrain.substract(auxStrain);
+            elasticStrain.subtract(auxStrain);
         }
 
         // trial stress = Ce * eps_n+1; no creep - can use Kv and Gv, but doesn't
@@ -2406,7 +2406,7 @@ void HellmichMaterial :: giveRealStressVector(FloatArray &answer,
         elasticCompliance(elasticStrain, auxStress, gp, atTime, ReducedForm, false); // using no Kv, Gv!
         elasticStrain.times(jv * E);
         status->giveViscousStrainVector(auxStrain);
-        elasticStrain.substract(auxStrain);
+        elasticStrain.subtract(auxStrain);
         elasticStrain.times( 1. / ( 1. + twTime(auxksi) / dt ) );
 
         elasticStrain.add(auxStrain);

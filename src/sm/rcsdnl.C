@@ -142,15 +142,15 @@ RCSDNLMaterial :: giveRealStressVector(FloatArray &answer, MatResponseForm form,
     reducedNonlocStrainVector.times( 1. / status->giveIntegrationScale() );
     this->endIPNonlocalAverage(gp);  // !
 
-    // substract stress independent part
+    // subtract stress independent part
     ////# this->giveStressDependentPartOfStrainVector(nonlocalStrainIncrement, gp, nonlocalTotalStrainIncrement,atTime);
     //
 
     reducedLocalStrainVector = totalStrain;
 
-    // substract stress independent part
+    // subtract stress independent part
     // note: eigenStrains (temperature) is not contained in mechanical strain stored in gp
-    // therefore it is necessary to substract always the total eigen strain value
+    // therefore it is necessary to subtract always the total eigen strain value
     this->giveStressDependentPartOfStrainVector(nonlocalStrain, gp, reducedNonlocStrainVector,
                                                 atTime, VM_Total);
     this->giveStressDependentPartOfStrainVector(localStrain, gp, reducedLocalStrainVector,
@@ -177,7 +177,7 @@ RCSDNLMaterial :: giveRealStressVector(FloatArray &answer, MatResponseForm form,
         ////#  //delete strainIncrement;
 
         ////#  crossSection->giveReducedCharacteristicVector(stressIncrement, gp, answer);
-        ////# stressIncrement.substract (status -> giveStressVector());
+        ////# stressIncrement.subtract (status -> giveStressVector());
         ////#  status -> letStressIncrementVectorBe (stressIncrement);
 
         status->giveCrackStrainVector(crackStrain);
@@ -348,7 +348,7 @@ RCSDNLMaterial :: giveRealStressVector(FloatArray &answer, MatResponseForm form,
         ////#  }
 
         ////#  stressIncrement = reducedSpaceStressVector;
-        ////#  stressIncrement.substract (status -> giveStressVector());
+        ////#  stressIncrement.subtract (status -> giveStressVector());
         ////#  status -> letStressIncrementVectorBe (stressIncrement);
 
         status->setTempMaxEquivStrain(equivStrain);

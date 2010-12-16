@@ -69,22 +69,27 @@ public:
      */
     DofDistributedPrimaryField(EngngModel *a, int idomain, FieldType ft, EquationID ut, int nHist);
     ~DofDistributedPrimaryField();
-    /**
-     */
-    virtual double giveUnknownValue(Dof *dof, ValueModeType mode, TimeStep *atTime);
-    /** Returns the vector of unknowns
+
+    /** Copy unknowns from previous solution or DOF's dictionary to the solution vector
      * @param mode what the unknown desribes (increment, total value etc.)
      * @param atTime time of interest
      * @param answer the resulting vector
      */
-    virtual void giveVectorOfUnknown(ValueModeType mode, TimeStep *atTime, FloatArray &answer);
-    /** Copy unknowns in dictionary, e.g. from current values to previous on all nodes and all DOFs
+    virtual void initialize(ValueModeType mode, TimeStep *atTime, FloatArray &answer);
+
+    /** Return value of interest at given DOF
+     * @param dof pointer to DOF
      * @param mode what the unknown desribes (increment, total value etc.)
-     * @param fromTime from which timeStep to obtain value
-     * @param toTime to which time to copy
+     * @param atTime time of interest
      */
-    virtual void copyUnknownsInDictionary(ValueModeType mode, TimeStep *fromTime, TimeStep *toTime);
-    //virtual double storeUnknownVectorOnNode(ValueModeType mode, TimeStep *atTime, FloatArray &answer);
+    virtual double giveUnknownValue(Dof *dof, ValueModeType mode, TimeStep *atTime);
+
+    /** Project @param vectorToStore back to DOF's dictionary
+     * @param mode what the unknown desribes (increment, total value etc.)
+     * @param atTime time
+     * @param vectorToStore vector with the size of number of equations
+     */
+    virtual void update(ValueModeType mode, TimeStep *atTime, FloatArray &vectorToStore);
 
     virtual FloatArray *giveSolutionVector(TimeStep *atTime);
     /**

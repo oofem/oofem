@@ -246,7 +246,7 @@ FETISolver :: projection(FloatArray &v, FloatMatrix &l, FloatMatrix &l1)
     help2.beProductOf(l1, help1);
     help1.beProductOf(l, help2);
 
-    v.substract(help1);
+    v.subtract(help1);
 }
 
 
@@ -1314,7 +1314,7 @@ FETISolver :: solve(SparseMtrx *A, FloatArray *partitionLoad, FloatArray *partit
                     rank, "FETISolver :: solveYourselfAt");
 #endif
 
-    dd.substract(partitionLoad);
+    dd.subtract(partitionLoad);
     partitionStiffness->ldl_feti_sky(pp, dd, nse, limit, se);
 
     if ( rank == 0 ) {
@@ -1609,7 +1609,7 @@ FETISolver :: solve(SparseMtrx *A, FloatArray *partitionLoad, FloatArray *partit
     //dd.printYourself();
 #endif
 
-    partitionLoad->substract(dd);
+    partitionLoad->subtract(dd);
 #ifdef __VERBOSE_PARALLEL
     // fprintf(stdout, "\n[process rank %3d]: %-30s: Partition load dump:\n",
     //    rank,"FETISolver :: solveYourselfAt");

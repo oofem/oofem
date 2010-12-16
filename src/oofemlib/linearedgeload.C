@@ -117,7 +117,7 @@ LinearEdgeLoad :: computeNArray(FloatArray &answer, FloatArray &coords) const
         ksi    = ( dl - 0.5 * length ) / ( 0.5 * length );
         FloatArray dir = endCoords;
 
-        dir.substract(startCoords);
+        dir.subtract(startCoords);
 
         if ( ( ksi < -1.0 ) ||  ( ksi > 1.0 ) ) {
             _warning2("computeNArray: point out of receiver, skipped", 1);

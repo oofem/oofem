@@ -456,7 +456,7 @@ Beam2d :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useU
     answer.beProductOf(stiffness, u);
     // delete u;
 
-    /* Substracted in PrintReaction Forces
+    /* Subtracted in PrintReaction Forces
      * if (loadEndForces = this-> ComputeLoadDependentPartOfLoadVector (tStep)) {
      * loadEndForces -> times(-1.0);
      * answer->add(loadEndForces);
@@ -493,18 +493,18 @@ Beam2d :: giveEndForcesVector(FloatArray &answer, TimeStep *tStep)
 
     answer.beProductOf(stiffness, u);
 
-    // substract prescribed strain load
+    // subtract prescribed strain load
     this->computePrescribedStrainLocalLoadVectorAt(load, tStep, VM_Total);
     if ( load.isNotEmpty() ) {
         load.rotatedWith(T_GtoL, 't');
-        answer.substract(load);
+        answer.subtract(load);
     }
 
-    // substract exact end forces due to nonnodal loading
+    // subtract exact end forces due to nonnodal loading
     this->computeLocalForceLoadVector(load, tStep, VM_Total);
     if ( load.isNotEmpty() ) {
         load.rotatedWith(T_GtoL, 't');
-        answer.substract(load);
+        answer.subtract(load);
     }
 
     return;

@@ -135,7 +135,7 @@ NLStructuralElement :: computeStrainVector(FloatArray &answer, GaussPoint *gp, T
         this->computeVectorOf(EID_MomentumBalance, VM_Total, stepN, u);
         // subtract the initial displacements, if defined
         if ( initialDisplacements ) {
-            u.substract(initialDisplacements);
+            u.subtract(initialDisplacements);
         }
 
         // rotate the coordinate system, if required

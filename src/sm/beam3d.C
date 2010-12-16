@@ -499,7 +499,7 @@ Beam3d :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useU
     answer.beProductOf(stiffness, u);
     // delete u;
 
-    /* Substracted in PrintReaction Forces
+    /* Subtracted in PrintReaction Forces
      * if (loadEndForces = this-> ComputeLoadDependentPartOfLoadVector (tStep)) {
      * loadEndForces -> times(-1.0);
      * answer->add(loadEndForces);
@@ -661,7 +661,7 @@ Beam3d :: computeEdgeLoadVectorAt(FloatArray &answer, Load *load, int iedge, Tim
             }
 
             // compute diferences
-            endComponents.substract(components);
+            endComponents.subtract(components);
 
             dfx = endComponents.at(1);
             dfy = endComponents.at(2);

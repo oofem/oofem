@@ -153,7 +153,7 @@ M4Material :: giveRealMicroplaneStressVector(FloatArray &answer,
     previousStress = status->giveStressVector();
     previousStrain = status->giveStrainVector();
     strainIncrement = strain;
-    strainIncrement.substract( status->giveStrainVector() );
+    strainIncrement.subtract( status->giveStrainVector() );
     if ( !previousStress.isNotEmpty() ) {
         previousStress.resize(4);
         previousStress.zero();
@@ -231,7 +231,7 @@ M4Material :: giveRealMicroplaneStressVector(FloatArray &answer,
 
     // uncomment this
     //stressIncrement = answer;
-    //stressIncrement.substract (previousStress);
+    //stressIncrement.subtract (previousStress);
     //status->letStressIncrementVectorBe (stressIncrement);
     //status->letStrainIncrementVectorBe (strainIncrement);
 

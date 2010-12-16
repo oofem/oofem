@@ -265,7 +265,7 @@ restart:
 
         // evaluate residual of momentum balance
         rhs = RT;
-        rhs.substract(F);
+        rhs.subtract(F);
         // account for quasi BC
         for ( int ii = 1; ii <= numberOfPrescribedDofs; ii++ ) {
             rhs.at( prescribedEqs.at(ii) ) = 0.0;

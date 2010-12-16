@@ -62,7 +62,7 @@ DofDistributedPrimaryField :: giveSolutionVector(TimeStep *atTime)
 }
 
 void
-DofDistributedPrimaryField :: giveVectorOfUnknown(ValueModeType mode, TimeStep *atTime, FloatArray &answer) {
+DofDistributedPrimaryField :: initialize(ValueModeType mode, TimeStep *atTime, FloatArray &answer) {
     int i, j, ndofs, eqNum;
     double val;
     Domain *domain = emodel->giveDomain(domainIndx);
@@ -89,9 +89,11 @@ DofDistributedPrimaryField :: giveVectorOfUnknown(ValueModeType mode, TimeStep *
     }
 }
 
+// project solutionVector to DoF unknowns dictionary
 void
-DofDistributedPrimaryField :: copyUnknownsInDictionary(ValueModeType mode, TimeStep *fromTime, TimeStep *toTime) {
+DofDistributedPrimaryField :: update(ValueModeType mode, TimeStep *atTime, FloatArray &vectorToStore) {
     int i, j, ndofs;
+    int eqNum;
     double val;
     Domain *domain = emodel->giveDomain(domainIndx);
     int nnodes = domain->giveNumberOfDofManagers();
@@ -103,11 +105,28 @@ DofDistributedPrimaryField :: copyUnknownsInDictionary(ValueModeType mode, TimeS
         ndofs = inode->giveNumberOfDofs();
         for ( i = 1; i <= ndofs; i++ ) {
             iDof = inode->giveDof(i);
-            val = iDof->giveUnknown(this->ut, mode, fromTime);
-            iDof->updateUnknownsDictionary(toTime, this->ut, mode, val);
+            eqNum = iDof->__giveEquationNumber();
+            if ( mode == VM_Total ) {
+                if ( iDof->hasBc(atTime) ) { // boundary condition
+                    val = iDof->giveBcValue(VM_Total, atTime);
+                } else {
+                    //vect = this->UnknownsField->giveSolutionVector(tStep);
+                    val = vectorToStore.at(eqNum);
+                }
+            } else { //all other modes, e.g. VM_RhsTotal
+                if ( !eqNum ) {
+                    val = 0.; //assume that 0's are present in the beginning of node initiation
+                } else {
+                    val = vectorToStore.at(eqNum);
+                }
+            }
+
+            iDof->updateUnknownsDictionary(atTime, this->ut, mode, val);
         }
     }
 }
+
+
 
 void
 DofDistributedPrimaryField :: advanceSolution(TimeStep *atTime)

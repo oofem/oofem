@@ -136,10 +136,10 @@ void NLTransientTransportProblem :: solveYourselfAt(TimeStep *tStep) {
     if ( changingProblemSize ) {
         if ( !tStep->isTheFirstStep() ) {
             //copy recent solution to previous position, copy from hash=0 to hash=1(previous)
-            ( dynamic_cast< DofDistributedPrimaryField * >(UnknownsField) )->copyUnknownsInDictionary( VM_Total, tStep, tStep->givePreviousStep() );
+            copyUnknownsInDictionary( EID_MomentumBalance, VM_Total, tStep, tStep->givePreviousStep() );
         }
 
-        ( dynamic_cast< DofDistributedPrimaryField * >(UnknownsField) )->giveVectorOfUnknown(VM_Total, tStep->givePreviousStep(), * solutionVector);
+        UnknownsField->initialize(VM_Total, tStep->givePreviousStep(), * solutionVector);
     } else {
         //copy previous solution vector to actual
         * solutionVector = * UnknownsField->giveSolutionVector( tStep->givePreviousStep() );
@@ -291,7 +291,7 @@ NLTransientTransportProblem :: createPreviousSolutionInDofUnknownsDictionary(Tim
         domain = this->giveDomain(idomain);
         nnodes = domain->giveNumberOfDofManagers();
         if ( requiresUnknownsDictionaryUpdate() ) {
-            for ( inode = 1;  inode <= nnodes; inode++ ) {
+            for ( inode = 1; inode <= nnodes; inode++ ) {
                 node = domain->giveDofManager(inode);
                 nDofs = node->giveNumberOfDofs();
                 for ( i = 1; i <= nDofs; i++ ) {
@@ -353,6 +353,28 @@ NLTransientTransportProblem :: updateDofUnknownsDictionary(DofManager *inode, Ti
         iDof->updateUnknownsDictionary(tStep, EID_MomentumBalance, VM_Total, val);
     }
 }
+
+
+void
+NLTransientTransportProblem :: copyUnknownsInDictionary(EquationID type, ValueModeType mode, TimeStep *fromTime, TimeStep *toTime) {
+    int i, j, ndofs;
+    double val;
+    Domain *domain = this->giveDomain(1);
+    int nnodes = domain->giveNumberOfDofManagers();
+    DofManager *inode;
+    Dof *iDof;
+
+    for ( j = 1; j <= nnodes; j++ ) {
+        inode = domain->giveDofManager(j);
+        ndofs = inode->giveNumberOfDofs();
+        for ( i = 1; i <= ndofs; i++ ) {
+            iDof = inode->giveDof(i);
+            val = iDof->giveUnknown(type, mode, fromTime);
+            iDof->updateUnknownsDictionary(toTime, type, mode, val);
+        }
+    }
+}
+
 
 void
 NLTransientTransportProblem :: updateInternalState(TimeStep *stepN)
@@ -426,7 +448,7 @@ NLTransientTransportProblem :: assembleAlgorithmicPartOfRhs(FloatArray &answer, 
 
             //approximate derivative with a difference
             drdt = rc;
-            drdt.substract(rp);
+            drdt.subtract(rp);
             drdt.times( 1. / currentStep->giveTimeIncrement() );
             //approximate current solution from linear interpolation
             rp.times(1 - alpha);

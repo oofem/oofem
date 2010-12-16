@@ -181,7 +181,7 @@ CylindricalALM :: solve(SparseMtrx *k, FloatArray *Ri, FloatArray *R0,
     /*
      * if (R0 && (refLoadInputMode == rlm_total)) {
      * R = Rt->GiveCopy();
-     * R -> substract (R0);
+     * R -> subtract (R0);
      * } else R = Rt;
      */
 
@@ -432,7 +432,7 @@ restart:
             rhs.add(R0);
         }
 
-        rhs.substract(F);
+        rhs.subtract(F);
         deltaR_.resize(neq);
         /*
          * linSolver -> setFloatArrayAsComponent (LinearEquationRhs,&rhs);
@@ -695,7 +695,7 @@ CylindricalALM :: checkConvergence(FloatArray &R, FloatArray *R0, FloatArray &F,
         rhs.add(R0);
     }
 
-    rhs.substract(F);
+    rhs.subtract(F);
     _neq = rhs.giveSize();
 
     if ( _ng > 0 ) {

@@ -140,7 +140,7 @@ void StructuralElementEvaluator :: computeBcLoadVectorAt(FloatArray &answer, Tim
      * this -> computeVectorOfPrescribed(DisplacementVector,TotalMode,stepN, d) ;
      * if ((stepN->giveLoadResponseMode()==IncrementOfLoad) && (!stepN->isTheFirstStep())) {
      * this -> computeVectorOfPrescribed(DisplacementVector,TotalMode,stepN->givePreviousStep(), dp);
-     * d.substract (dp);
+     * d.subtract (dp);
      * //delete dp;
      * }
      */
@@ -217,8 +217,8 @@ void StructuralElementEvaluator :: computeStrainVector(FloatArray &answer, Gauss
     elem->computeVectorOf(EID_MomentumBalance, VM_Total, stepN, u);
 
     /*
-     * // substract initial displacements, if defined
-     * if (initialDisplacements) u.substract(initialDisplacements);
+     * // subtract initial displacements, if defined
+     * if (initialDisplacements) u.subtract(initialDisplacements);
      */
     if ( this->updateRotationMatrix() ) {
         u.rotatedWith(this->rotationMatrix, 'n');
@@ -301,8 +301,8 @@ void StructuralElementEvaluator :: updateInternalState(TimeStep *stepN)
     elem->computeVectorOf(EID_MomentumBalance, VM_Total, stepN, u);
 
     /*
-     * // substract initial displacements, if defined
-     * if (initialDisplacements) u.substract(initialDisplacements);
+     * // subtract initial displacements, if defined
+     * if (initialDisplacements) u.subtract(initialDisplacements);
      */
     if ( this->updateRotationMatrix() ) {
         u.rotatedWith(this->rotationMatrix, 'n');

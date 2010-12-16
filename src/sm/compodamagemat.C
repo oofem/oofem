@@ -154,7 +154,7 @@ void CompoDamageMat :: giveRealStressVector(FloatArray &answer,  MatResponseForm
 
     st->Iteration++; //increase the call number at IP
 
-    //substract strain independent part - temperature, creep ..., in global c.s.
+    //subtract strain independent part - temperature, creep ..., in global c.s.
     this->giveStressDependentPartOfStrainVector(reducedTotalStrainVector, gp, totalStrain, atTime, VM_Total);
     //reducedTotalStrainVector.printYourself();
 
@@ -294,7 +294,7 @@ void CompoDamageMat :: giveRealStressVector(FloatArray &answer,  MatResponseForm
                 sigma = min(sigma, -0.000001);
             }
 
-            switch ( i ) { //need to substract contributions from strains
+            switch ( i ) { //need to subtract contributions from strains
             //in equations we use nu12 = E11/E22*nu21, nu13 = E11/E33*nu31, nu23 = E22/E33*nu32
             case 1: tmp = 1. - sigma / ( this->give(Ex, NULL) * strainVectorL.at(i) + this->give(NYxy, NULL) * tempStressVectorL.at(2) + this->give(NYxz, NULL) * tempStressVectorL.at(3) );
                 break;

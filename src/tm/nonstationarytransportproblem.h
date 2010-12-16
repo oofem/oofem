@@ -108,7 +108,7 @@ public:
     contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
     contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 
-    void   updateDomainLinks();
+    void updateDomainLinks();
 
     TimeStep *giveNextStep();
     TimeStep *giveSolutionStepWhenIcApply();
@@ -122,20 +122,20 @@ public:
 
     // identification
     const char *giveClassName() const { return "NonStationaryTransportProblem"; }
-    classType giveClassID()      const { return NonStationaryTransportProblemClass; }
+    classType giveClassID() const { return NonStationaryTransportProblemClass; }
     fMode giveFormulation() { return TL; }
 
     ///Allows to change number of equations during solution
     virtual int       requiresUnknownsDictionaryUpdate() { return changingProblemSize; }
     virtual bool      requiresEquationRenumbering(TimeStep *) { return changingProblemSize; }
-    ///Store solution vector to involved DoFs
-    virtual void      updateDofUnknownsDictionary(DofManager *, TimeStep *);
+    //Store solution vector to involved DoFs
+    //virtual void      updateDofUnknownsDictionary(DofManager *, TimeStep *);
 
     /**
      * The array of MasterDof::unknowns contains, in this case, one previous solution and previous RHS.
      * The hash index tells position in the array MasterDof::unknowns, depending on @param mode
      */
-    virtual int       giveUnknownDictHashIndx(EquationID type, ValueModeType mode, TimeStep *stepN);
+    virtual int giveUnknownDictHashIndx(EquationID type, ValueModeType mode, TimeStep *stepN);
 
     virtual void giveElementCharacteristicMatrix(FloatMatrix &answer, int num,
                                                  CharType type, TimeStep *tStep, Domain *domain);

@@ -528,7 +528,7 @@ B3SolidMaterial :: giveShrinkageStrainVector(FloatArray &answer,
 
         if ( ( mode == VM_Incremental ) && ( !atTime->isTheFirstStep() ) ) {
             this->computeTotalAverageShrinkageStrainVector( prevAnswer, form, gp, atTime->givePreviousStep() );
-            answer.substract(prevAnswer);
+            answer.subtract(prevAnswer);
         }
     } else if ( this->shMode == B3_PointShrinkageMPS ) {
         this->computePointShrinkageStrainVectorMPS(answer, form, gp, atTime);

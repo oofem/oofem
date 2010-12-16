@@ -141,9 +141,9 @@ MPlasticMaterial :: giveRealStressVector(FloatArray &answer,
     this->initTempStatus(gp);
     this->initGpForNewStep(gp);
 
-    // substract stress independent part
+    // subtract stress independent part
     // note: eigenStrains (temperature) is not contained in mechanical strain stored in gp
-    // therefore it is necessary to substract always the total eigen strain value
+    // therefore it is necessary to subtract always the total eigen strain value
     this->giveStressDependentPartOfStrainVector(strainVectorR, gp, totalStrain,
                                                 atTime, VM_Total);
 
@@ -264,7 +264,7 @@ MPlasticMaterial :: closestPointReturn(FloatArray &answer,
     //
 
     elasticStrainVectorR = totalStrain;
-    elasticStrainVectorR.substract(plasticStrainVectorR);
+    elasticStrainVectorR.subtract(plasticStrainVectorR);
     // stress vector in full form due to computational convinience
     //if (fullStressVector) delete fullStressVector;
     this->computeTrialStressIncrement(fullStressVector, gp, elasticStrainVectorR, atTime);
@@ -294,7 +294,7 @@ MPlasticMaterial :: closestPointReturn(FloatArray &answer,
         do {
             do { // restart loop
                 elasticStrainVectorR = totalStrain;
-                elasticStrainVectorR.substract(plasticStrainVectorR);
+                elasticStrainVectorR.subtract(plasticStrainVectorR);
                 // stress vector in full form due to computational convinience
                 //if (fullStressVector) delete fullStressVector;
                 this->computeTrialStressIncrement(fullStressVector, gp, elasticStrainVectorR, atTime);
@@ -494,11 +494,11 @@ MPlasticMaterial :: cuttingPlaneReturn(FloatArray &answer,
 
     // initialize activeConditionMap
     elasticStrainVectorR = totalStrain;
-    elasticStrainVectorR.substract(plasticStrainVectorR);
+    elasticStrainVectorR.subtract(plasticStrainVectorR);
     // stress vector in full form due to computational convinience
     this->computeTrialStressIncrement(fullStressVector, gp, elasticStrainVectorR, atTime);
     crossSection->giveReducedCharacteristicVector(trialStressIncrement, gp, fullStressVector);
-    trialStressIncrement.substract( status->giveStressVector() );
+    trialStressIncrement.subtract( status->giveStressVector() );
     this->computeStressSpaceHardeningVars(fullStressSpaceHardeningVars, gp, strainSpaceHardeningVariables);
 
     elastic = 1;
@@ -661,7 +661,7 @@ MPlasticMaterial :: cuttingPlaneReturn(FloatArray &answer,
             gamma.add(dgamma);
 
             elasticStrainVectorR = totalStrain;
-            elasticStrainVectorR.substract(plasticStrainVectorR);
+            elasticStrainVectorR.subtract(plasticStrainVectorR);
             // stress vector in full form due to computational convinience
             this->computeTrialStressIncrement(fullStressVector, gp, elasticStrainVectorR, atTime);
             this->computeStressSpaceHardeningVars(fullStressSpaceHardeningVars, gp, strainSpaceHardeningVariables);

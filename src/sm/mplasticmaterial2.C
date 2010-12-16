@@ -141,9 +141,9 @@ MPlasticMaterial2 :: giveRealStressVector(FloatArray &answer,
     this->initTempStatus(gp);
     this->initGpForNewStep(gp);
 
-    // substract stress independent part
+    // subtract stress independent part
     // note: eigenStrains (temperature) is not contained in mechanical strain stored in gp
-    // therefore it is necessary to substract always the total eigen strain value
+    // therefore it is necessary to subtract always the total eigen strain value
     this->giveStressDependentPartOfStrainVector(strainVectorR, gp, totalStrain,
                                                 atTime, VM_Total);
 
@@ -277,7 +277,7 @@ huhu:
     //
 
     elasticStrainVectorR = totalStrain;
-    elasticStrainVectorR.substract(plasticStrainVectorR);
+    elasticStrainVectorR.subtract(plasticStrainVectorR);
     // stress vector in full form due to computational convinience
     //if (fullStressVector) delete fullStressVector;
     this->computeTrialStressIncrement(fullStressVector, gp, elasticStrainVectorR, atTime);
@@ -464,7 +464,7 @@ huhu:
                                 status->giveStrainSpaceHardeningVars(strainSpaceHardeningVariables);
                                 strainSpaceHardeningVariables.printYourself();
                                 elasticStrainVectorR = totalStrain;
-                                elasticStrainVectorR.substract(plasticStrainVectorR);
+                                elasticStrainVectorR.subtract(plasticStrainVectorR);
                                 printf("sg:");
                                 this->computeTrialStressIncrement(fullStressVector, gp, elasticStrainVectorR, atTime);
                                 fullStressVector.printYourself();
@@ -508,7 +508,7 @@ huhu:
                         status->givePlasticStrainVector(plasticStrainVectorR);
                         status->giveStrainSpaceHardeningVars(strainSpaceHardeningVariables);
                         elasticStrainVectorR = totalStrain;
-                        elasticStrainVectorR.substract(plasticStrainVectorR);
+                        elasticStrainVectorR.subtract(plasticStrainVectorR);
                         this->computeTrialStressIncrement(fullStressVector, gp, elasticStrainVectorR, atTime);
                         gamma.zero();
                         nIterations = 0;
@@ -594,7 +594,7 @@ huhu:
                 gmat.plus(helpMtrx2);
                 helpVector2.beProductOf(consistentModuli, residualVectorR);
                 helpVector.beProductOf(lmat, helpVector2);
-                rhs.substract(helpVector);
+                rhs.subtract(helpVector);
 
 
                 // obtain increment to consistency parameter
@@ -639,7 +639,7 @@ huhu:
                         status->givePlasticStrainVector(plasticStrainVectorR);
                         status->giveStrainSpaceHardeningVars(strainSpaceHardeningVariables);
                         elasticStrainVectorR = totalStrain;
-                        elasticStrainVectorR.substract(plasticStrainVectorR);
+                        elasticStrainVectorR.subtract(plasticStrainVectorR);
                         this->computeTrialStressIncrement(fullStressVector, gp, elasticStrainVectorR, atTime);
                         gamma.zero();
                         nIterations = 0;
@@ -686,7 +686,7 @@ huhu:
             }
 
             elasticStrainVectorR = totalStrain;
-            elasticStrainVectorR.substract(plasticStrainVectorR);
+            elasticStrainVectorR.subtract(plasticStrainVectorR);
             // stress vector in full form due to computational convinience
             this->computeTrialStressIncrement(fullStressVector, gp, elasticStrainVectorR, atTime);
 
@@ -760,7 +760,7 @@ huhu:
                             status->giveStrainSpaceHardeningVars(strainSpaceHardeningVariables);
                             strainSpaceHardeningVariables.printYourself();
                             elasticStrainVectorR = totalStrain;
-                            elasticStrainVectorR.substract(plasticStrainVectorR);
+                            elasticStrainVectorR.subtract(plasticStrainVectorR);
                             printf("sg:");
                             this->computeTrialStressIncrement(fullStressVector, gp, elasticStrainVectorR, atTime);
                             fullStressVector.printYourself();
@@ -802,7 +802,7 @@ huhu:
                                     status->giveStrainSpaceHardeningVars(strainSpaceHardeningVariables);
                                     strainSpaceHardeningVariables.printYourself();
                                     elasticStrainVectorR = totalStrain;
-                                    elasticStrainVectorR.substract(plasticStrainVectorR);
+                                    elasticStrainVectorR.subtract(plasticStrainVectorR);
                                     printf("sg:");
                                     this->computeTrialStressIncrement(fullStressVector, gp, elasticStrainVectorR, atTime);
                                     fullStressVector.printYourself();
@@ -833,7 +833,7 @@ huhu:
                     status->givePlasticStrainVector(plasticStrainVectorR);
                     status->giveStrainSpaceHardeningVars(strainSpaceHardeningVariables);
                     elasticStrainVectorR = totalStrain;
-                    elasticStrainVectorR.substract(plasticStrainVectorR);
+                    elasticStrainVectorR.subtract(plasticStrainVectorR);
                     this->computeTrialStressIncrement(fullStressVector, gp, elasticStrainVectorR, atTime);
                     gamma.zero();
                     nIterations = 0;
@@ -913,7 +913,7 @@ huhu:
 
     // initialize activeConditionMap
     elasticStrainVectorR = totalStrain;
-    elasticStrainVectorR.substract(plasticStrainVectorR);
+    elasticStrainVectorR.subtract(plasticStrainVectorR);
     // stress vector in full form due to computational convinience
     this->computeTrialStressIncrement(fullStressVector, gp, elasticStrainVectorR, atTime);
 
@@ -1051,7 +1051,7 @@ huhu:
                         status->givePlasticStrainVector(plasticStrainVectorR);
                         status->giveStrainSpaceHardeningVars(strainSpaceHardeningVariables);
                         elasticStrainVectorR = totalStrain;
-                        elasticStrainVectorR.substract(plasticStrainVectorR);
+                        elasticStrainVectorR.subtract(plasticStrainVectorR);
                         this->computeTrialStressIncrement(fullStressVector, gp, elasticStrainVectorR, atTime);
                         gamma.zero();
                         nIterations = 0;
@@ -1082,7 +1082,7 @@ huhu:
             gamma.add(dgamma);
 
             elasticStrainVectorR = totalStrain;
-            elasticStrainVectorR.substract(plasticStrainVectorR);
+            elasticStrainVectorR.subtract(plasticStrainVectorR);
             // stress vector in full form due to computational convinience
             this->computeTrialStressIncrement(fullStressVector, gp, elasticStrainVectorR, atTime);
 
@@ -1158,7 +1158,7 @@ huhu:
                     status->givePlasticStrainVector(plasticStrainVectorR);
                     status->giveStrainSpaceHardeningVars(strainSpaceHardeningVariables);
                     elasticStrainVectorR = totalStrain;
-                    elasticStrainVectorR.substract(plasticStrainVectorR);
+                    elasticStrainVectorR.subtract(plasticStrainVectorR);
                     this->computeTrialStressIncrement(fullStressVector, gp, elasticStrainVectorR, atTime);
                     gamma.zero();
                     nIterations = 0;
@@ -1221,7 +1221,7 @@ huhu:
                     status->givePlasticStrainVector(plasticStrainVectorR);
                     status->giveStrainSpaceHardeningVars(strainSpaceHardeningVariables);
                     elasticStrainVectorR = totalStrain;
-                    elasticStrainVectorR.substract(plasticStrainVectorR);
+                    elasticStrainVectorR.subtract(plasticStrainVectorR);
                     this->computeTrialStressIncrement(fullStressVector, gp, elasticStrainVectorR, atTime);
                     gamma.zero();
                     nIterations = 0;

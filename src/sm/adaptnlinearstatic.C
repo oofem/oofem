@@ -679,7 +679,7 @@ AdaptiveNonLinearStatic :: adaptiveRemap(Domain *dNew)
      * rhs =  loadVector;
      * rhs.times(loadLevel);
      * if (initialLoadVector.isNotEmpty()) rhs.add(initialLoadVector);
-     * rhs.substract(internalForces);
+     * rhs.subtract(internalForces);
      *
      * //
      * // compute forceError

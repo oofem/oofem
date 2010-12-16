@@ -90,6 +90,13 @@ public:
     virtual int giveUnknownDictHashIndx(EquationID type, ValueModeType mode, TimeStep *stepN);
     /// Store solution vector to involved DoFs
     virtual void      updateDofUnknownsDictionary(DofManager *, TimeStep *);
+    /** Copy unknowns in DOF's from previous to current position
+     * @param type determines type of equation
+     * @param mode what the unknown desribes (increment, total value etc.)
+     * @param fromTime from which timeStep to obtain value
+     * @param toTime to which time to copy
+     */
+    virtual void copyUnknownsInDictionary(EquationID type, ValueModeType mode, TimeStep *fromTime, TimeStep *toTime);
 
 protected:
     /**

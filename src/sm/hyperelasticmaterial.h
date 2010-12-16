@@ -139,7 +139,7 @@ public:
     /**
      * Computes the real stress vector for given total strain and integration point.
      * The total strain is defined as strain computed directly from displacement field at given time.
-     * The stress independent parts (temperature, eigen strains) are substracted in constitutive
+     * The stress independent parts (temperature, eigen strains) are subtracted in constitutive
      * driver.
      * The service should use previously reached equilibrium history variables. Also
      * it should update temporary history variables in status according to newly reached state.

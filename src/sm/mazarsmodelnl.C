@@ -101,9 +101,9 @@ MazarsNLMaterial :: updateBeforeNonlocAverage(const FloatArray &strainVector, Ga
     this->initTempStatus(gp);
     this->initGpForNewStep(gp);
 
-    // substract stress independent part
+    // subtract stress independent part
     // note: eigenStrains (temperature) is not contained in mechanical strain stored in gp
-    // therefore it is necessary to substract always the total eigen strain value
+    // therefore it is necessary to subtract always the total eigen strain value
     this->giveStressDependentPartOfStrainVector(SDstrainVector, gp, strainVector, atTime, VM_Total);
 
     // compute equivalent strain

@@ -295,7 +295,7 @@ B3Material :: giveShrinkageStrainVector(FloatArray &answer,
 
         if ( ( mode == VM_Incremental ) && ( !atTime->isTheFirstStep() ) ) {
             this->computeTotalAverageShrinkageStrainVector( prevAnswer, form, gp, atTime->givePreviousStep() );
-            answer.substract(prevAnswer);
+            answer.subtract(prevAnswer);
         }
     } else {
         this->computeShrinkageStrainVector(answer, form, gp, atTime, mode);

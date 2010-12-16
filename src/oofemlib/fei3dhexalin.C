@@ -234,7 +234,7 @@ FEI3dHexaLin :: global2local(FloatArray &answer, const FloatArray &coords, const
         p.solveForRhs(r, delta);
 
         // update guess
-        answer.substract(delta);
+        answer.subtract(delta);
     } while ( 1 );
 
     // test if inside

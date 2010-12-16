@@ -137,7 +137,7 @@ StructuralEngngModel :: computeReactions(FloatArray &answer, TimeStep *tStep, in
     answer.add(contribution);
     // External loading contribution
     this->computeExternalLoadReactionContribution(contribution, tStep, di);
-    answer.substract(contribution);
+    answer.subtract(contribution);
 
 #ifdef __PARALLEL_MODE
 
