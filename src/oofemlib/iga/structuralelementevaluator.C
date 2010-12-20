@@ -314,6 +314,9 @@ void StructuralElementEvaluator :: updateInternalState(TimeStep *stepN)
 
     // force updating strains & stresses
     for ( i = 0; i < elem->giveNumberOfIntegrationRules(); i++ ) {
+#ifdef __PARALLEL_MODE
+      if (this->giveElement()->giveKnotSpanParallelMode(i) == Element_remote) continue;
+#endif
         iRule = elem->giveIntegrationRule(i);
         for ( j = 0; j < iRule->getNumberOfIntegrationPoints(); j++ ) {
             computeStressVector(stress, iRule->getIntegrationPoint(j), stepN, u);
@@ -329,6 +332,9 @@ void StructuralElementEvaluator :: updateInternalState(TimeStep *stepN)
      *
      * // force updating strains & stresses
      * for ( i = 0; i < elem->giveNumberOfIntegrationRules(); i++ ) {
+     * #ifdef __PARALLEL_MODE
+     *     if (this->giveElement()->giveKnotSpanParallelMode(i) == Element_remote) continue;
+     * #endif
      *  iRule = elem->giveIntegrationRule(i);
      *    for ( j = 0; j < iRule->getNumberOfIntegrationPoints(); j++ ) {
      *      computeStressVector(stress, iRule->getIntegrationPoint(j), stepN);
@@ -395,6 +401,11 @@ void StructuralElementEvaluator :: computeStiffnessMatrix(FloatMatrix &answer, M
     numberOfIntegrationRules = elem->giveNumberOfIntegrationRules();
     // loop over individual integration rules
     for ( ir = 0; ir < numberOfIntegrationRules; ir++ ) {
+
+#ifdef __PARALLEL_MODE
+      if (this->giveElement()->giveKnotSpanParallelMode(ir) == Element_remote) continue;
+      //fprintf (stderr, "[%d] Computing element.knotspan %d.%d\n", elem->giveDomain()->giveEngngModel()->giveRank(), elem->giveNumber(), ir);
+#endif
         m->resize(0, 0);
         iRule = elem->giveIntegrationRule(ir);
         // loop over individual integration points

@@ -793,6 +793,14 @@ public:
     elementParallelMode giveParallelMode() const { return parallel_mode; }
     /// Sets parallel mode of element
     void setParallelMode(elementParallelMode _mode) { parallel_mode = _mode; }
+#ifdef __PARALLEL_MODE
+    /*
+     * Returns the parallel mode for particular knot span of the receiver. 
+     * The knot span identifies the sub-region of the finite element.
+     */
+    virtual elementParallelMode giveKnotSpanParallelMode(int) const {return parallel_mode;}
+#endif
+
     /**
      * Pack all necessary data of element (according to its parallel_mode) integration points
      * into given communication buffer. The corresponding cross section service is invoked, which in

@@ -72,7 +72,7 @@ IRResultType IGAElement :: initializeFrom(InputRecord *ir) {
     const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                 // Required by IR_GIVE_FIELD macro
 
-    int indx = 0, ui, vi, wi, i, nsd, numberOfGaussPoints = 1;
+    int indx = 0, ui, vi, wi, i, nsd, numberOfGaussPoints = 1, numberOfKnotSpans=1;
     double du, dv, dw;
     const FloatArray *gpcoords;
     FloatArray newgpcoords;
@@ -92,6 +92,7 @@ IRResultType IGAElement :: initializeFrom(InputRecord *ir) {
     } else if ( nsd == 2 ) {
         int numberOfKnotSpansU = this->giveInterpolation()->giveNumberOfKnotSpans(1);
         int numberOfKnotSpansV = this->giveInterpolation()->giveNumberOfKnotSpans(2);
+	numberOfKnotSpans = numberOfKnotSpansU*numberOfKnotSpansV;
         IntArray *const knotMultiplicityU = this->giveInterpolation()->giveKnotMultiplicity(1);
         IntArray *const knotMultiplicityV = this->giveInterpolation()->giveKnotMultiplicity(2);
         FloatArray *const knotValuesU = this->giveInterpolation()->giveKnotValues(1);
@@ -133,6 +134,7 @@ IRResultType IGAElement :: initializeFrom(InputRecord *ir) {
         int numberOfKnotSpansU = this->giveInterpolation()->giveNumberOfKnotSpans(1);
         int numberOfKnotSpansV = this->giveInterpolation()->giveNumberOfKnotSpans(2);
         int numberOfKnotSpansW = this->giveInterpolation()->giveNumberOfKnotSpans(3);
+	numberOfKnotSpans = numberOfKnotSpansU*numberOfKnotSpansV*numberOfKnotSpansW;
         IntArray *const knotMultiplicityU = this->giveInterpolation()->giveKnotMultiplicity(1);
         IntArray *const knotMultiplicityV = this->giveInterpolation()->giveKnotMultiplicity(2);
         IntArray *const knotMultiplicityW = this->giveInterpolation()->giveKnotMultiplicity(3);
@@ -183,9 +185,33 @@ IRResultType IGAElement :: initializeFrom(InputRecord *ir) {
         OOFEM_ERROR2("unsupported number of spatial dimensions (nsd = %d)", nsd);
     }
 
+#ifdef __PARALLEL_MODE
+    // read optional knot span parallel mode
+    int _i;
+    this->knotSpanParallelMode.resize(numberOfKnotSpans);
+    // set Element_local as default
+    for (_i=1; _i<=numberOfKnotSpans; _i++) knotSpanParallelMode.at(_i)=Element_local;
+    IR_GIVE_OPTIONAL_FIELD(ir, knotSpanParallelMode, IFT_IGAElement_KnotSpanParallelMode, "knotspanparmode"); // Macro
+#endif
+
+
     return IRRT_OK;
 }
 
+
+#ifdef __PARALLEL_MODE
+elementParallelMode 
+IGAElement::giveKnotSpanParallelMode(int knotSpanIndex) const
+{
+  elementParallelMode emode = this->giveParallelMode();
+  if (emode == Element_remote) {
+    return Element_remote;
+  } else if (emode == Element_local) {
+    return (elementParallelMode) this->knotSpanParallelMode.at(knotSpanIndex+1);
+  }
+}
+
+#endif // __PARALLEL_MODE
 
 
 // integration elements are setup in the same way as for IGAElement for now HUHU

@@ -1045,6 +1045,7 @@ enum InputFieldType {
     IFT_TSplineInterpolation_localIndexKnotVectorW,
 
     IFT_IGAElement_NIP,
+    IFT_IGAElement_KnotSpanParallelMode,
 
     IFT_Unknown
 };

@@ -117,9 +117,16 @@ class IGAElement : public Element
 {
 protected:
     // FEInterpolation interpolation;
+#ifdef __PARALLEL_MODE
+  IntArray knotSpanParallelMode;
+#endif
 public:
     IGAElement(int n, Domain *aDomain) : Element(n, aDomain) { }
     IRResultType initializeFrom(InputRecord *ir);
+
+#ifdef __PARALLEL_MODE
+    elementParallelMode giveKnotSpanParallelMode(int) const;
+#endif
 
 #ifdef __OOFEG
     //
