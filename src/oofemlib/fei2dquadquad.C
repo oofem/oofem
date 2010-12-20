@@ -114,70 +114,61 @@ FEI2dQuadQuad :: local2global(FloatArray &answer, const FloatArray &lcoords,  co
     }
 }
 
+double FEI2dQuadQuad :: giveCharacteristicLength(const FEICellGeometry &cellgeo)
+{
+    const FloatArray *n1 = cellgeo.giveVertexCoordinates(1);
+    const FloatArray *n2 = cellgeo.giveVertexCoordinates(3);
+    return n1->distance(n2);
+}
+
 #define POINT_TOL 1.e-3
 
 int
-FEI2dQuadQuad :: global2local(FloatArray &answer, const FloatArray &coords, const FEICellGeometry &cellgeo, double time)
+FEI2dQuadQuad :: global2local(FloatArray &answer, const FloatArray &gcoords, const FEICellGeometry &cellgeo, double time)
 {
-    FloatArray lc(2);
-    FloatArray r(2), n(8), dksi, deta, delta;
-    FloatMatrix p(2, 2);
-    double x, y;
-    int i, nite = 0;
+    FloatArray res, delta, guess;
+    FloatMatrix jac;
+    double convergence_limit, error;
+
+    // find a suitable convergence limit
+    convergence_limit = 1e-6 * this->giveCharacteristicLength(cellgeo);
 
     // setup initial guess
-    answer.resize(2);
-    answer.at(1) = answer.at(2) = 0.0;
+    answer.resize(gcoords.giveSive());
+    answer.zero();
 
     // apply Newton-Raphson to solve the problem
-    do {
-        if ( ( ++nite ) > 10 ) {
-            //_error ("computeLocalCoords: no convergence after 10 iterations");
-            return 0;
-        }
-
+    for (int nite = 0; nite < 10; nite++) {
         // compute the residual
-        this->evalN(n, answer, cellgeo, time);
-
-        r = answer;
-        for ( i = 1; i <= 8; i++ ) {
-            r.at(1) -= n.at(i) * cellgeo.giveVertexCoordinates(i)->at(xind);
-            r.at(2) -= n.at(i) * cellgeo.giveVertexCoordinates(i)->at(yind);
-        }
+        this->local2global(guess, answer, cellgeo, time);
+        res = gcoords - guess;
 
         // check for convergence
-        if ( sqrt( dotProduct(r, r, 2) ) < 1.e-10 ) {
+        error = res.computeNorm();
+        if ( error < convergence_limit ) {
             break;
         }
 
         // compute the corrections
-        this->giveDerivativeXi(dksi, answer);
-        this->giveDerivativeEta(deta, answer);
+        this->giveJacobianMatrixAt(jac, answer, cellgeo);
+        jac.solveForRhs(res, delta);
 
-        p.zero();
-        for ( i = 1; i <= 8; i++ ) {
-            x = cellgeo.giveVertexCoordinates(i)->at(xind);
-            y = cellgeo.giveVertexCoordinates(i)->at(yind);
-
-            p.at(1, 1) += dksi.at(i) * x;
-            p.at(1, 2) += deta.at(i) * x;
-            p.at(2, 1) += dksi.at(i) * y;
-            p.at(2, 2) += deta.at(i) * y;
-        }
-
-        // solve for corrections
-        p.solveForRhs(r, delta);
         // update guess
         answer.add(delta);
-    } while ( 1 );
+    }
+    if ( error > convergence_limit) { // Imperfect, could give false negatives.
+        //OOFEM_ERROR ("global2local: no convergence after 10 iterations");
+    	return false;
+    }
 
-    for ( i = 1; i <= 2; i++ ) {
+    // check limits for each local coordinate [-1,1] for quadrilaterals. (different for other elements, typically [0,1]).
+    for ( i = 1; i <= answer.giveSize(); i++ ) {
         if ( fabs( answer.at(i) ) > ( 1. + POINT_TOL ) ) {
-            return 0;
+            return false;
         }
     }
 
-    return 1;
+    return true;
 }
 
 
