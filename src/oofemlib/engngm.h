@@ -55,6 +55,7 @@
 #include "initmodulemanager.h"
 #include "field.h"
 #include "fieldmanager.h"
+#include "maskedprimaryfield.h"
 #include "timer.h"
 #include "chartype.h"
 #include "classtype.h"
