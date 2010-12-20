@@ -78,8 +78,21 @@ public:
      * @param coords coordinates of the point of interest
      * @return error code (0-ok, 1-point not found in domain)
      */
-    virtual int evaluateAt(FloatArray &answer, FloatArray &coords, IntArray &dofId,
+    virtual int evaluateAt(FloatArray &answer, FloatArray &coords,
                            ValueModeType mode, TimeStep *atTime) = 0;
+    /** Evaluates the field at given DofManager. This potentially can be resolved quickly, as 
+     * receiver data may be described using values at dofManagers. Here an additional issue
+     * exists: one needs to make sure, that passed dofman is from the same domain, so that its
+     * number can be used toperform tsuggested quick evaluation.
+     *
+     * If this is not the case (the field is described differently),
+     * the response can be evaluated using dofman coordinates in a standard way.
+     * @param dofMan reference to dofManager
+     * @return error code (0-ok, 1-failed)
+     */
+    virtual int evaluateAt(FloatArray &answer, DofManager* dman,
+                           ValueModeType mode, TimeStep *atTime) = 0;
+    
     /// Returns the type of receiver
     FieldType giveType() { return type; }
 

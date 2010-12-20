@@ -2409,10 +2409,8 @@ StructuralMaterial :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, I
         if ( ( tf = fm->giveField(FT_Temperature) ) ) {
             // temperature field registered
             FloatArray gcoords, et2;
-            IntArray dofid(1);
-            dofid.at(1) = ( int ) T_f;
             ( ( StructuralElement * ) aGaussPoint->giveElement() )->computeGlobalCoordinates( gcoords, * aGaussPoint->giveCoordinates() );
-            if ( ( err = tf->evaluateAt(answer, gcoords, dofid, VM_Total, atTime) ) ) {
+            if ( ( err = tf->evaluateAt(answer, gcoords, VM_Total, atTime) ) ) {
                 _error3("giveIPValue: tf->evaluateAt failed, element %d, error code %d", aGaussPoint->giveElement()->giveNumber(), err);
             }
         } else {
@@ -2565,10 +2563,8 @@ StructuralMaterial :: computeStressIndependentStrainVector(FloatArray &answer,
         // temperature field registered
         FloatArray gcoords, et2;
         int err;
-        IntArray dofid(1);
-        dofid.at(1) = ( int ) T_f;
         elem->computeGlobalCoordinates( gcoords, * gp->giveCoordinates() );
-        if ( ( err = tf->evaluateAt(et2, gcoords, dofid, mode, stepN) ) ) {
+        if ( ( err = tf->evaluateAt(et2, gcoords, mode, stepN) ) ) {
             _error3("computeStressIndependentStrainVector: tf->evaluateAt failed, element %d, error code %d", elem->giveNumber(), err);
         }
 

@@ -42,27 +42,51 @@
 #endif
 
 namespace oofem {
+
 /**
  */
 class FieldManager
 {
 protected:
 
-    /** Field container. Stores only pointers to objects (not object themselves)
-     * to avoid copiing elements and to preserve the use of polymorphic types.
-     * This implies that the objects in container must be explicitly deleted.
-     */
-    std :: map< FieldType, Field * >externalFields;
+  /** Internal datastructure to keep reference (pointer)  to registered field and
+   *  flag, indicating, whether the field pointer is managed by field manager or not.
+   *  In case by managed field, the field manager is assumed to own the field and is 
+   *  responsible for its dealocation.
+   */
+  class fieldRecord {
+  protected:
+    Field *field;
+    bool   isManaged;
+  public:
+    /// Creates new field record, containing reference to given field.
+    fieldRecord (Field* f, bool managed) {field=f; isManaged=managed;}
+    fieldRecord () {field=NULL; isManaged=false;}
+    /// Destructor. Deletes managed field.
+    ~fieldRecord () {if (isManaged) delete field;}
+    /// Return reference to field.
+    
+    Field* giveField() {return field;}
+  };
+
+
+  /** Field container. Stores only pointers to objects (not object themselves)
+   * to avoid copying elements and to preserve the use of polymorphic types.
+   */
+  std :: map< FieldType, fieldRecord* >externalFields;
 
 
 public:
 
     FieldManager() { }
+    ~FieldManager() ;
     /**
      * Registers the given field (the receiver is not assumed to own given field).
      * The field is registered under given key. Using this key, it can be later accessed.
+     * If managedFlag set to true, the receiver is assumed to own the field, so it is
+     * responsible for its dealocation).
      */
-    void registerField(Field *eField, FieldType key);
+    void registerField(Field *eField, FieldType key, bool managedFlag = false);
     /** Returns true if field is registered under key */
     bool isFieldRegistered(FieldType key);
     /**

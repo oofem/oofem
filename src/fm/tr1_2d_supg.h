@@ -218,7 +218,7 @@ public:
      * Evaluates the value of field at given point of interest (should be located inside receiver's volume) using
      * element interpolation.
      */
-    virtual void EIPrimaryFieldI_evaluateFieldVectorAt(FloatArray &answer, PrimaryField &pf,
+    virtual int  EIPrimaryFieldI_evaluateFieldVectorAt(FloatArray &answer, PrimaryField &pf,
                                                        FloatArray &coords, IntArray &dofId, ValueModeType mode,
                                                        TimeStep *atTime);
     //@}

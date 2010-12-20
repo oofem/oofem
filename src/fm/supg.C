@@ -164,7 +164,10 @@ SUPG :: initializeFrom(InputRecord *ir)
         this->materialInterface->initializeFrom(ir);
         // export velocity field
         FieldManager *fm = this->giveContext()->giveFieldManager();
-        fm->registerField(VelocityPressureField, FT_Velocity);
+	IntArray mask(3); 
+	mask.at(1) = V_u; mask.at(2) = V_v; mask.at(3) = V_w; 
+	MaskedPrimaryField* _velocityField = new MaskedPrimaryField (FT_Velocity, this->VelocityPressureField, mask);
+        fm->registerField(_velocityField, FT_Velocity, true);
 
         //fsflag = 0;
         //IR_GIVE_OPTIONAL_FIELD (ir, fsflag, IFT_SUPG_fsflag, "fsflag");

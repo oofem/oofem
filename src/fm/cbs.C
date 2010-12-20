@@ -134,7 +134,10 @@ CBS :: initializeFrom(InputRecord *ir)
         this->materialInterface = new LEPlic( 1, this->giveDomain(1) );
         // export velocity field
         FieldManager *fm = this->giveContext()->giveFieldManager();
-        fm->registerField(& VelocityField, FT_Velocity);
+	IntArray mask(3); 
+	mask.at(1) = V_u; mask.at(1) = V_v; mask.at(1) = V_w; 
+	MaskedPrimaryField* _velocityField = new MaskedPrimaryField (FT_Velocity, &this->VelocityField, mask);
+        fm->registerField( _velocityField, FT_Velocity, true);
     }
 
     //</RESTRICTED_SECTION>

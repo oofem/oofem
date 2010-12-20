@@ -64,10 +64,11 @@ public:
     /**
      * Evaluates the value of field at given point of interest (should be located inside receiver's volume) using
      * element interpolation.
+     * @return returns zero if ok, nonzero when error encountered.
      */
-    virtual void EIPrimaryFieldI_evaluateFieldVectorAt(FloatArray &answer, PrimaryField &pf,
-                                                       FloatArray &coords, IntArray &dofId, ValueModeType mode,
-                                                       TimeStep *atTime) = 0;
+  virtual int EIPrimaryFieldI_evaluateFieldVectorAt(FloatArray &answer, PrimaryField &pf,
+						    FloatArray &coords, IntArray &dofId, ValueModeType mode,
+						    TimeStep *atTime) = 0;
 };
 
 
@@ -81,6 +82,11 @@ public:
  * further interpolate the field values using element interpolation functions.
  * The prescribed values of the field are not maintatined, since they can be obtained directly from
  * corresponding DOFs of associated domain.
+ *
+ * As the PrimaryField stores the state directly in solution vectors that are usually directly 
+ * updated by EngngModel, it may contain a mix of different fields (this is especially true for 
+ * strongly coupled problems). Then masked primary field can be used to select only certain DOFs
+ * (based on DofID) from its master PrimaryField.
  */
 class PrimaryField : public Field
 {
@@ -120,10 +126,34 @@ public:
     virtual double giveUnknownValue(Dof *dof, ValueModeType mode, TimeStep *atTime);
     /** Evaluates the field at given point
      * @param coords coordinates of the point of interest
+     * @return error code (0-ok, 1-point not found in domain)
+     */
+    virtual int evaluateAt(FloatArray &answer, FloatArray &coords,
+                           ValueModeType mode, TimeStep *atTime);
+    /** Evaluates the field at given DofManager
+     * @param dofMan reference to dofManager
+     * @return error code (0-ok, 1-point not found in domain)
+     */
+    virtual int evaluateAt(FloatArray &answer, DofManager* dman,
+                           ValueModeType mode, TimeStep *atTime);
+    /** Evaluates the field at given dofman, allows to select specific 
+     * dofs using mask.
+     * @param coords coordinates of the point of interest
+     * @param dofId dof mask, id set to NULL, all Dofs evaluated
      * return error code (0=ok, 1=point not found in domain)
      */
-    virtual int evaluateAt(FloatArray &answer, FloatArray &coords, IntArray &dofId,
-                           ValueModeType mode, TimeStep *atTime);
+    virtual int __evaluateAt(FloatArray &answer, DofManager* dman,
+			     ValueModeType mode, TimeStep *atTime, 
+			     IntArray *dofId);
+    /** Evaluates the field at given point, allows to select specific 
+     * dofs using mask.
+     * @param coords coordinates of the point of interest
+     * @param dofId dof mask, id set to NULL, all Dofs evaluated
+     * return error code (0=ok, 1=point not found in domain)
+     */
+    virtual int __evaluateAt(FloatArray &answer, FloatArray& coords,
+			     ValueModeType mode, TimeStep *atTime, 
+			     IntArray *dofId);
     /**
      */
     virtual FloatArray *giveSolutionVector(TimeStep *atTime);
@@ -162,5 +192,6 @@ protected:
     int resolveIndx(TimeStep *atTime, int shift);
     virtual FloatArray *giveSolutionVector(int);
 };
+
 } // end namespace oofem
 #endif // primaryfield_h

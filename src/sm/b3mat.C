@@ -393,13 +393,11 @@ B3Material :: computeShrinkageStrainVector(FloatArray &answer, MatResponseForm f
     FieldManager *fm = domain->giveEngngModel()->giveContext()->giveFieldManager();
     Field *tf;
     FloatArray gcoords, et2, ei2, stressVector, fullStressVector;
-    IntArray dofid(1);
 
     if ( ( tf = fm->giveField(FT_Temperature) ) ) {
         // temperature field registered
-        dofid.at(1) = ( int ) T_f;
         gp->giveElement()->computeGlobalCoordinates( gcoords, * gp->giveCoordinates() );
-        if ( ( err = tf->evaluateAt(et2, gcoords, dofid, VM_Incremental, atTime) ) ) {
+        if ( ( err = tf->evaluateAt(et2, gcoords, VM_Incremental, atTime) ) ) {
             _error2("computeShrinkageStrainVector: tf->evaluateAt failed, error value %d", err);
         }
 
@@ -409,13 +407,12 @@ B3Material :: computeShrinkageStrainVector(FloatArray &answer, MatResponseForm f
 
     if ( ( tf = fm->giveField(FT_HumidityConcentration) ) ) {
         // temperature field registered
-        dofid.at(1) = ( int ) C_1;
         gp->giveElement()->computeGlobalCoordinates( gcoords, * gp->giveCoordinates() );
-        if ( ( err = tf->evaluateAt(et2, gcoords, dofid, VM_Total, atTime) ) ) {
+        if ( ( err = tf->evaluateAt(et2, gcoords, VM_Total, atTime) ) ) {
             _error2("computeShrinkageStrainVector: tf->evaluateAt failed, error value %d", err);
         }
 
-        if ( ( err = tf->evaluateAt(ei2, gcoords, dofid, VM_Incremental, atTime) ) ) {
+        if ( ( err = tf->evaluateAt(ei2, gcoords, VM_Incremental, atTime) ) ) {
             _error2("computeShrinkageStrainVector: tf->evaluateAt failed, error value %d", err);
         }
 

@@ -36,16 +36,26 @@
 #include "fieldmanager.h"
 
 namespace oofem {
-void
-FieldManager :: registerField(Field *eField, FieldType key)
+
+FieldManager :: ~FieldManager() 
 {
-    std :: map< FieldType, Field * > :: iterator i;
+    std :: map< FieldType, fieldRecord* > :: iterator i;
+    for( i = this->externalFields.begin(); i != this->externalFields.end(); i++ ) {
+      delete (*i).second;
+    }
+}
+
+
+void
+FieldManager :: registerField(Field *eField, FieldType key, bool managedFlag)
+{
+    std :: map< FieldType, fieldRecord* > :: iterator i;
     if ( ( i = this->externalFields.find(key) ) != this->externalFields.end() ) {
         // delete old entry, since map contains only pointers, not fields themselves
-        delete(* i).second;
+        delete(*i).second;
     }
 
-    this->externalFields [ key ] = eField;
+    this->externalFields [ key ] = new fieldRecord (eField, managedFlag);
 }
 
 bool
@@ -57,24 +67,24 @@ FieldManager :: isFieldRegistered(FieldType key)
 Field *
 FieldManager :: giveField(FieldType key)
 {
-    std :: map< FieldType, Field * > :: iterator i;
+    std :: map< FieldType, fieldRecord* > :: iterator i;
     if ( ( i = this->externalFields.find(key) ) == this->externalFields.end() ) {
         return NULL;
     }
 
-    return ( * i ).second;
+    return ( * i ).second->giveField();
 }
 
 void
 FieldManager :: unregisterField(FieldType key)
 {
-    std :: map< FieldType, Field * > :: iterator i;
+    std :: map< FieldType, fieldRecord* > :: iterator i;
     i = this->externalFields.find(key);
     if ( i == this->externalFields.end() ) {
         return;
     }
 
-    delete(* i).second;
+    delete (*i).second;
     this->externalFields.erase(i);
 }
 } // end namespace oofem

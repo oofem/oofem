@@ -147,8 +147,20 @@ NonStationaryTransportProblem :: initializeFrom(InputRecord *ir)
         IR_GIVE_FIELD(ir, atomicFieldID, IFT_NonStationaryTransportProblem_atomicfields, "atomicfields"); // Macro
         // export flux fields
         FieldManager *fm = this->giveContext()->giveFieldManager();
+	IntArray mask(1); 
         for ( int i = 1; i <= atomicFieldID.giveSize(); i++ ) {
-            fm->registerField( UnknownsField, ( FieldType ) atomicFieldID.at(i) );
+
+	  if (atomicFieldID.at(i) == FT_Temperature) {
+	    mask.at(1) = T_f; 
+	    MaskedPrimaryField* _temperatureField = new MaskedPrimaryField (FT_Temperature, this->UnknownsField, mask);
+	    
+            fm->registerField( _temperatureField, ( FieldType ) atomicFieldID.at(i), true );
+	  } else if (atomicFieldID.at(i) == FT_HumidityConcentration) {
+	    mask.at(1) = C_1; 
+	    MaskedPrimaryField* _concentrationField = new MaskedPrimaryField (FT_HumidityConcentration, this->UnknownsField, mask);
+	    
+            fm->registerField( _concentrationField, ( FieldType ) atomicFieldID.at(i), true );
+	  }
         }
     }
 

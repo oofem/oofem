@@ -1563,7 +1563,7 @@ TR1_2D_SUPG :: giveElementCenter(LEPlic *mat_interface, FloatArray &center, bool
     center.times(1. / 3.);
 }
 
-void
+int
 TR1_2D_SUPG :: EIPrimaryFieldI_evaluateFieldVectorAt(FloatArray &answer, PrimaryField &pf,
                                                      FloatArray &coords, IntArray &dofId, ValueModeType mode,
                                                      TimeStep *atTime)
@@ -1592,11 +1592,14 @@ TR1_2D_SUPG :: EIPrimaryFieldI_evaluateFieldVectorAt(FloatArray &answer, Primary
 
                 answer.at(i) = sum;
             } else {
-                _error("EIPrimaryFieldI_evaluateFieldVectorAt: unknown dof id encountered");
+	        // _error("EIPrimaryFieldI_evaluateFieldVectorAt: unknown dof id encountered");
+	      answer.at(i) = 0.0;
             }
         }
+	return 0; // ok
     } else {
         _error("EIPrimaryFieldI_evaluateFieldVectorAt: target point not in receiver volume");
+	return 1; // fail
     }
 }
 

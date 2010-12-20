@@ -1588,12 +1588,10 @@ HellmichMaterial :: initAuxStatus(GaussPoint *gp, TimeStep *atTime)
         FieldManager *fm = domain->giveEngngModel()->giveContext()->giveFieldManager();
         Field *tf;
         StructuralElement *elem;
-        IntArray dofid(1);
         // == Temperature ==
         if ( ( tf = fm->giveField(FT_Temperature) ) ) {
             // temperature field registered
             elem = ( StructuralElement * ) gp->giveElement();
-            dofid.at(1) = ( int ) T_f;
             elem->computeGlobalCoordinates( gcoords, * gp->giveCoordinates() );
             if ( flatTemperature ) {
                 if ( flatTemperature == -1 ) { // temperature xy -> xz (2D cross-section for 3D girder)
@@ -1614,7 +1612,7 @@ HellmichMaterial :: initAuxStatus(GaussPoint *gp, TimeStep *atTime)
                 }
             }
 
-            tf->evaluateAt(et, gcoords, dofid, VM_Total, atTime);
+            tf->evaluateAt(et, gcoords, VM_Total, atTime);
             T = et.at(1) + temperatureFieldBase;
         } else { // no temperature field
             if ( initialTemperature > 0 ) {
@@ -1639,9 +1637,8 @@ HellmichMaterial :: initAuxStatus(GaussPoint *gp, TimeStep *atTime)
         // == Moisture ==
         if ( tf && ( tf = fm->giveField(FT_HumidityConcentration) ) ) {
             // temperature AND humidity concentration field registered
-            dofid.at(1) = ( int ) C_1;
             // using gcoords defined in temperature field
-            tf->evaluateAt(et, gcoords, dofid, VM_Total, atTime);
+            tf->evaluateAt(et, gcoords, VM_Total, atTime);
             if ( et.giveSize() > 0 ) {
                 w = et.at(1);
             } else {

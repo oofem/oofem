@@ -210,7 +210,7 @@ LEPlic :: doLagrangianPhase(TimeStep *atTime)
             _error("doLagrangianPhase: Velocity field not available");
         }
 
-        err = vfield->evaluateAt(v_tn1, x2, velocityMask, VM_Total, atTime);
+        err = vfield->evaluateAt(v_tn1, x2, VM_Total, atTime);
         if ( err == 1 ) {
             // point outside domain -> be explicit
             v_tn1 = v_t;
