@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/fei2dtrlin.C,v 1.1.4.1 2004/04/05 15:19:43 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2010   Borek Patzak
  *
  *
  *
@@ -134,7 +133,7 @@ FEI2dQuadQuad :: global2local(FloatArray &answer, const FloatArray &gcoords, con
     convergence_limit = 1e-6 * this->giveCharacteristicLength(cellgeo);
 
     // setup initial guess
-    answer.resize(gcoords.giveSive());
+    answer.resize(gcoords.giveSize());
     answer.zero();
 
     // apply Newton-Raphson to solve the problem
@@ -162,7 +161,7 @@ FEI2dQuadQuad :: global2local(FloatArray &answer, const FloatArray &gcoords, con
     }
 
     // check limits for each local coordinate [-1,1] for quadrilaterals. (different for other elements, typically [0,1]).
-    for ( i = 1; i <= answer.giveSize(); i++ ) {
+    for (int i = 1; i <= answer.giveSize(); i++ ) {
         if ( fabs( answer.at(i) ) > ( 1. + POINT_TOL ) ) {
             return false;
         }
