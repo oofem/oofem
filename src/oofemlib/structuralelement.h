@@ -426,12 +426,16 @@ public:
     /**
      * Returns true, if receiver is activated for given solution step
      */
-    bool   isActivated(TimeStep *atTime)
+    bool isActivated(TimeStep *atTime)
     {
         if ( activityLtf ) {
-            if ( atTime ) { return ( domain->giveLoadTimeFunction(activityLtf)->evaluate(atTime, VM_Total) > 1.e-3 ); } else { return 0.0; }
+            if ( atTime ) {
+            	return ( domain->giveLoadTimeFunction(activityLtf)->evaluate(atTime, VM_Total) > 1.e-3 );
+            } else {
+            	return false;
+            }
         } else {
-            return 1.0;
+            return true;
         }
     }
 
