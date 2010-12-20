@@ -238,6 +238,20 @@ HangingNode :: checkConsistency()
     return result;
 }
 
+void
+HangingNode :: updateLocalNumbering(EntityRenumberingFunctor &f)
+{
+
+  int i;
+  for (i=1; i<= masterDofMngr->giveSize(); i++) {
+    masterDofMngr->at(i) = f(masterDofMngr->at(i), ERS_DofManager);
+  }
+
+  DofManager::updateLocalNumbering(f);
+}
+
+
+
 
 int
 HangingNode :: computeMasterContribution()
