@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/nodalaveragingrecoverymodel.h,v 1.2 2003/04/06 14:08:25 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2010   Borek Patzak
  *
  *
  *
@@ -32,6 +31,7 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
+ 
 #ifndef nodalaveragingrecoverymodel_h
 #define nodalaveragingrecoverymodel_h
 
@@ -44,7 +44,7 @@ namespace oofem {
 class GaussPoint;
 
 /**
- * The nodal recovery model based on nodal averaging". The recovery is based
+ * The nodal recovery model based on nodal averaging. The recovery is based
  * on nodal averaging or projection process in which element contributions are averaged
  * at node with the same weight.
  */
