@@ -414,34 +414,24 @@ CCTPlate :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
 }
 
 
-FloatArray *
-CCTPlate :: ComputeMidPlaneNormal(GaussPoint *)
+void
+CCTPlate :: computeMidPlaneNormal(FloatArray &answer, GaussPoint *gp)
 // returns normal vector to midPlane in GaussPoinr gp of receiver
 {
     Node *n1, *n2, *n3;
-    FloatArray *answer, *u, *v;
-    int i;
-
-    u = new FloatArray(3);
-    v = new FloatArray(3);
-    answer = new FloatArray(3);
+    FloatArray u(3), v(3);
 
     n1 = this->giveNode(1);
     n2 = this->giveNode(2);
     n3 = this->giveNode(3);
 
-    for ( i = 1; i <= 3; i++ ) {
-        u->at(i) = n2->giveCoordinate(i) - n1->giveCoordinate(i);
-        v->at(i) = n3->giveCoordinate(i) - n1->giveCoordinate(i);
+    for (int i = 1; i <= 3; i++ ) {
+        u.at(i) = n2->giveCoordinate(i) - n1->giveCoordinate(i);
+        v.at(i) = n3->giveCoordinate(i) - n1->giveCoordinate(i);
     }
 
-    answer = u->VectorProduct(v);
-    answer->normalize();
-
-    delete u;
-    delete v;
-
-    return answer;
+    answer.beVectorProductOf(u,v);
+    answer.normalize();
 }
 
 

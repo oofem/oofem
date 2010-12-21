@@ -334,29 +334,23 @@ OrthotropicLinearElasticMaterial :: GiveTensorRotationMatrix(GaussPoint *gp)
             t = this->localCoordinateSystem->GiveCopy();
         }
     } else if ( this->cs_type == shellCS ) {
-        FloatArray *elementNormal, *helpx, *helpy;
+        FloatArray elementNormal, helpx, helpy;
         localCoordinateSystem = new FloatMatrix(3, 3);
-        int i;
 
-        elementNormal = element->ComputeMidPlaneNormal(gp);
-        elementNormal->normalize();
-        helpx = this->helpPlaneNormal->VectorProduct(elementNormal);
+        element->computeMidPlaneNormal(elementNormal, gp);
+        helpx.beVectorProductOf(*(this->helpPlaneNormal), elementNormal);
         // test if localCoordinateSystem is uniquely
         // defined by elementNormal and helpPlaneNormal
-        if ( dotProduct(helpx->givePointer(), helpx->givePointer(), 3) < ZERO_LENGTH ) {
+        if ( helpx.computeNorm() < ZERO_LENGTH ) {
             _error("GiveTensorRotationMatrix: element normal parallel to plane normal encountered");
         }
 
-        helpy = elementNormal->VectorProduct(helpx);
-        for ( i = 1; i < 4; i++ ) {
-            localCoordinateSystem->at(i, 1) = helpx->at(i);
-            localCoordinateSystem->at(i, 2) = helpy->at(i);
-            localCoordinateSystem->at(i, 3) = elementNormal->at(i);
+        helpy.beVectorProductOf(elementNormal, helpx);
+        for (int i = 1; i < 4; i++ ) {
+            localCoordinateSystem->at(i, 1) = helpx.at(i);
+            localCoordinateSystem->at(i, 2) = helpy.at(i);
+            localCoordinateSystem->at(i, 3) = elementNormal.at(i);
         }
-
-        delete elementNormal;
-        delete helpx;
-        delete helpy;
 
         //
         // possible rotation about local z-axix should be considered in future

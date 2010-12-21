@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/element.h,v 1.27 2003/04/06 14:08:24 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2010   Borek Patzak
  *
  *
  *
@@ -33,11 +32,9 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-
 //   *********************
 //   *** CLASS ELEMENT ***
 //   *********************
-
 
 #ifndef element_h
 #define element_h
@@ -74,31 +71,22 @@ class CommunicationBuffer;
 
 /**
  * In parallel mode, this type indicates the mode of element.
- * <UL>
- * <LI>
- * Element_local mode - Element is local, there are no contribution from other domains to this Element.</LI>
- * <LI>
- * Element_shared mode - Element is shared by neighbouring partitions - not implemented.
- * In the case of element cut mode, the cutted element is local on all partitions sharing it.
- * Some of such element  nodes are local and some are remote. The local nodes are completely
- * surronded by local element on particular partition.</LI>
- * <LI>
- * Element_remote - Element in active domain is only mirror of some remote
- * Element. </LI>
- * </UL>
+ * In the case of element cut mode, the cut element is local on all partitions sharing it.
+ * Some of such element nodes are local and some are remote. The local nodes are completely
+ * surrounded by local element on particular partition.
  */
 enum elementParallelMode {
-    Element_local,
-    // Element_shared,
-    Element_remote
+    Element_local, /// Element is local, there are no contributions from other domains to this element.
+    // Element_shared, /// Element is shared by neighboring partitions - not implemented.
+    Element_remote, /// Element in active domain is only mirror of some remote element.
 };
 
 #endif
 
 
 /**
- * Abstract base class for all finite elements. Derived clases should be  base
- * clases for specific analysis type (for example base class for structural analysis,
+ * Abstract base class for all finite elements. Derived classes should be  base
+ * classes for specific analysis type (for example base class for structural analysis,
  * thermal analysis or magnetostatics one). These derived classes then declare
  * analysis-specific part of interface and they provide default implementation
  * for these methods.
@@ -106,8 +94,8 @@ enum elementParallelMode {
  * common to all element types. General methods for obtaining characteristic vectors,
  * matrices and values are introduced and should be used instead of calling directly
  * specific member functions (these must be overloaded by derived analysis-specific
- * clases in order to invoke proper method acording to type of component requested).
- * In general, element class memeber functions are called in following cases:
+ * classes in order to invoke proper method according to type of component requested).
+ * In general, element class member functions are called in following cases:
  * <UL>
  * <LI>
  * When Engineering model assembles governing equation(s) from element's contributions.
@@ -123,8 +111,8 @@ enum elementParallelMode {
  * class sparse matrix should know "something about elements", but only sparse matrix knows, how
  * to build its internal structure (this may require one or more loops over elements code number).</LI>
  * <LI>
- * When element computes its contribution, then it comunicates with its cross-section (and cross
- * section with corresponding material). For some cross-section or matrial models some further
+ * When element computes its contribution, then it communicates with its cross-section (and cross
+ * section with corresponding material). For some cross-section or material models some further
  * communication between these classes and element may be necessary (for example in cases of
  * layered cross section model strains in each layer has to be evaluated from "integrated"
  * strains (integrated means element-like strains including curvatures in case of beams and plates)
@@ -133,17 +121,14 @@ enum elementParallelMode {
  * There are some general rules, that programmer must take into account.
  * <UL>
  * <LI>
- * Element stores the numbers of its dofnamagers in dofManArray.
+ * Element stores the numbers of its dofmanagers in dofManArray.
  * These include nodes, element sides and internal DOFs that are not condensed at element level.
  * Their order and meaning are determined by element definition.
  * Local ordering of dofs for particular element is determined by local numbering of
- * dofnamagers and their corresponding dofs. DOFS necessary for particular node/side is specified using node/side dof mask.
+ * dofmanagers and their corresponding dofs. DOFS necessary for particular node/side is specified using node/side dof mask.
  * Local DOF ordering must be taken into account when assembling various local characteristic
  * vectors and matrices.</LI>
- *
- *
  * </UL>
- *
  */
 class Element : public FEMComponent
 {
@@ -157,11 +142,10 @@ protected:
     /// Number of associated cross section.
     int crossSection;
     /**
-     * Array containing indexes of loads (bodyloads and boundary loads are kept separately),
+     * Array containing indexes of loads (body loads and boundary loads are kept separately),
      * that apply on receiver.
      */
-    IntArray bodyLoadArray, boundaryLoadArray;   /* load index into
-                                                  * LoadList  */
+    IntArray bodyLoadArray, boundaryLoadArray;
     /// Number of integration rules used by receiver.
     int numberOfIntegrationRules;
     /** List of integration rules of receiver (each integration rule contains associated
@@ -170,7 +154,7 @@ protected:
      * points in these rules, history variables are stored and updated.
      * For integrations, where history stored in gauss points is not necessary
      * (mass matrix integration) and different integration rule is needed, one should preferably
-     * use temporarly created integration rule.
+     * use temporarily created integration rule.
      */
     IntegrationRule **integrationRulesArray;
     /// Array of code numbers of element.
@@ -194,7 +178,7 @@ protected:
     elementParallelMode parallel_mode;
     /**
      * List of partition sharing the shared element or
-     * remote partion containing remote element counterpart.
+     * remote partition containing remote element counterpart.
      */
     IntArray partitions;
 #endif
@@ -205,12 +189,12 @@ public:
      * @param n Element's number
      * @param aDomain Pointer to the domain to which element belongs.
      */
-    Element(int n, Domain *aDomain);    // constructors
+    Element(int n, Domain *aDomain);
     /// Virtual destructor.
-    virtual ~Element();                // destructor
+    virtual ~Element();
 
     // assembly
-    /**@name Methods refering to code numbers */
+    /**@name Methods referring to code numbers */
     //@{
     /**
      * Returns the location array (array of code numbers) of receiver for given numbering scheme.
@@ -222,7 +206,7 @@ public:
     virtual void giveLocationArray(IntArray & locationArray, EquationID, const UnknownNumberingScheme & s) const;
     /**
      * Invalidates location array in receiver. Each element stores its copy of location array(s), in order
-     * to avoid time consuming assembly of code numbers every time when requested. Some enginnering models
+     * to avoid time consuming assembly of code numbers every time when requested. Some engineering models
      * may support dynamic changes of static system (generally of boundary conditions during analysis),
      * then these models use this function to invalidate location array after finishing time step,
      * to enforce elements to update they code numbers, which may change. Changes of static system will lead
@@ -230,14 +214,14 @@ public:
      * of sparse matrices  must be reinitialized and characteristic vectors and matrices has to be
      * newly assembled).
      */
-    void                  invalidateLocationArray();
+    void invalidateLocationArray();
     /**
      *  Returns the number of internal element dofs
-     **/
+     */
     virtual int giveNumberOfDofs() { return 0; }
     /**
      * Returns i-th DOF of the receiver
-     **/
+     */
     virtual Dof *giveDof(int i) {
         _error2("No such DOF available on Element %d", number);
         return NULL;
@@ -245,44 +229,44 @@ public:
     //@}
     /**@name General methods for obtaining element contributions
      * Note: These member functions have to  be overloaded by derived analysis-specific
-     * clases in order to invoke proper method acording to type of component requested.
-     * Derived classes from these analysis-specific clases should not modify these functions.
+     * classes in order to invoke proper method according to type of component requested.
+     * Derived classes from these analysis-specific classes should not modify these functions.
      */
     //@{
     // characteristic  matrix
     /**
-     * Computes characteristic matrix of receiver of requested type in given Timestep.
+     * Computes characteristic matrix of receiver of requested type in given time step.
      * @param answer requested characteristic matrix
      * @param mtrx   id  of characteristic component requested.
      * @param tStep  time step when answer is computed.
      * @see CharType type.
-     * @return If element has no capability to compute requsted type of caharacteristic matrix
+     * @return If element has no capability to compute requested type of characteristic matrix
      * error function is invoked.
      */
-    virtual void     giveCharacteristicMatrix(FloatMatrix &answer, CharType mtrx, TimeStep *tStep);
+    virtual void giveCharacteristicMatrix(FloatMatrix &answer, CharType mtrx, TimeStep *tStep);
     /**
-     * Computes characteristic vector of receiver of requested type in given Timestep.
+     * Computes characteristic vector of receiver of requested type in given time step.
      * @param answer requested characteristic vector
      * @param type   id  of characteristic component requested.
      * @param mode   determines mode of answer.
      * @param tStep  time step when answer is computed.
      * @see CharType and ValueModeType types.
-     * @return If element has no capability to compute requsted type of caharacteristic vector
+     * @return If element has no capability to compute requested type of characteristic vector
      * error function is invoked.
      */
-    virtual void     giveCharacteristicVector(FloatArray &answer, CharType type, ValueModeType mode, TimeStep *);
+    virtual void giveCharacteristicVector(FloatArray &answer, CharType type, ValueModeType mode, TimeStep *);
     /**
-     * Computes characteristic value of receiver of requested type in given Timestep.
+     * Computes characteristic value of receiver of requested type in given time step.
      * @param mtrx   id  of characteristic component requested.
      * @param tStep  time step when answer is computed.
      * @see CharType type.
-     * @return requested value. If element has no capability to compute requsted type of caharacteristic value
+     * @return requested value. If element has no capability to compute requested type of characteristic value
      * error function is invoked.
      */
     virtual double giveCharacteristicValue(CharType, TimeStep *);
     //@}
     /*
-     *  // I have tryed name of next fuction  to be again giveCharacteristicVector
+     *  // I have tried name of next function  to be again giveCharacteristicVector
      *  // but there are strong disadvantages of it. (It may be compiler bug). This happen,
      *  // when you have the functions with same names and different arguments and both are
      *  // virtual.  When you overload one of then at parent level you must redefine also
@@ -301,17 +285,16 @@ public:
      * and possibly initial condition). Because unknowns are obtained from engineering
      * model, this must support queries for given unknown and unknown mode. Also
      * engineering model must not be able to complete request for any TimeStep, because
-     * keeping history of all unknowns may became unpossible. But generally all enginnering models
+     * keeping history of all unknowns may became impossible. But generally all engineering models
      * should be able return supported unknowns at current and previous time step. Consult
      * reference manual for particular engineering model.
      *
      * @param type Identifies unknown type (eg. displacement or temperature vector).
-     * @param u    Identifies mode of unknown (eg. total value or velocity of unknown).
+     * @param u Identifies mode of unknown (eg. total value or velocity of unknown).
      * @param stepN Time step, when vector of unknowns is requested.
      * @param answer Local vector of unknowns.
      */
-    virtual void          computeVectorOf(EquationID type, ValueModeType u,
-                                          TimeStep *stepN, FloatArray &answer);
+    virtual void computeVectorOf(EquationID type, ValueModeType u, TimeStep *stepN, FloatArray &answer);
     /**
      * Returns local vector of unknowns. Local vector of unknowns is extracted from
      * given field and from boundary conditions (if dof has active boundary
@@ -321,41 +304,39 @@ public:
      * @param stepN Time step, when vector of unknowns is requested.
      * @param answer Local vector of unknowns.
      */
-    virtual void          computeVectorOf(PrimaryField &field, ValueModeType u, TimeStep *stepN, FloatArray &answer);
+    virtual void computeVectorOf(PrimaryField &field, ValueModeType u, TimeStep *stepN, FloatArray &answer);
     /**
      * Returns local vector of prescribed unknowns. Local vector of prescribed unknowns is
      * extracted from nodal (and side - if they hold unknowns) boundary conditions.
-     * @param u    Identifies mode of unknown (eg. total values or velocity of unknown).
+     * @param u Identifies mode of unknown (eg. total values or velocity of unknown).
      * @param stepN Time step, when vector of prescribed unknowns is requested.
-     * @param answer Local vector of prescribed unknowns. If unknown is not prescibed,
+     * @param answer Local vector of prescribed unknowns. If unknown is not prescribed,
      * zero value is placed on position of free dof.
      */
-    void                  computeVectorOfPrescribed(EquationID ut, ValueModeType type, TimeStep *stepN, FloatArray &answer);
-    //void                  computeVectorOfPrescribed (UnknownType type, ValueModeType u,
-    //                         TimeStep* stepN, FloatArray& answer) ;
-
+    void computeVectorOfPrescribed(EquationID ut, ValueModeType type, TimeStep *stepN, FloatArray &answer);
+    //void computeVectorOfPrescribed(UnknownType type, ValueModeType u, TimeStep* stepN, FloatArray& answer) ;
 
     /**
      * Computes or simply returns total number of element's local dofs.
      * Must be defined by particular element.
      */
-    virtual int            computeNumberOfDofs(EquationID ut) { return 0; }
+    virtual int computeNumberOfDofs(EquationID ut) { return 0; }
     /**
      * Computes the total number of element's global dofs. This should be the size of global element contribution,
      * including the transformation from global coordinate system to nodal one.
-     * The transition from global cs to nodal one can change the value, as rigid arm and other transfromations could
+     * The transition from global cs to nodal one can change the value, as rigid arm and other transformations could
      * be included.
      */
-    virtual int            computeGlobalNumberOfDofs(EquationID ut);
+    virtual int computeGlobalNumberOfDofs(EquationID ut);
     /**
      * Returns number of DOFs after transformation from local to global coordinate system, before the
      * transformation to final nodal coordinate system happens.
      */
-    virtual int            computeNumberOfL2GDofs(EquationID ut) { return this->computeNumberOfDofs(ut); }
+    virtual int computeNumberOfL2GDofs(EquationID ut) { return this->computeNumberOfDofs(ut); }
     /**
      * Returns dofmanager dof mask for node. This mask defines the dofs which are used by element
      * in node. Mask influences the code number ordering for particular node. Code numbers are
-     * ordered acording to node order and dofs belonging to particular node are ordered
+     * ordered according to node order and dofs belonging to particular node are ordered
      * according to this mask. If element requests dofs using node mask which are not in node
      * then error is generated. This masking allows node to be shared by different elements with
      * different dofs in same node. Elements local code numbers are extracted from node using
@@ -365,16 +346,14 @@ public:
      * @param ut unknown type (support for several independent numberings within problem)
      * @param answer mask for node.
      */
-    virtual void           giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const
-    { answer.resize(0); }
+    virtual void giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const { answer.resize(0); }
     /**
      * Returns element dof mask for node. This mask defines the dof ordering of the element interpolation.
      * Must be defined by particular element.
      *
      * @param answer dof mask for receiver.
      */
-    virtual void           giveElementDofIDMask(EquationID ut, IntArray &answer) const
-    { answer.resize(0); }
+    virtual void giveElementDofIDMask(EquationID ut, IntArray &answer) const { answer.resize(0); }
     /**
      * Returns volume related to given integration point. Used typically in subroutines,
      * that perform integration over element volume. Should be implemented by particular
@@ -383,60 +362,63 @@ public:
      * @return related volume
      * @see GaussPoint class
      */
-    virtual double        computeVolumeAround(GaussPoint *gp) { return 0.; }
+    virtual double computeVolumeAround(GaussPoint *gp) { return 0.; }
     /**
      * Computes the overall volume, area, or length (depending on element dimension)
      */
-    virtual double        computeVolume() { return 0.0; }
+    virtual double computeVolume() { return 0.0; }
 
     // data management
     ///Returns (global) number of i-th dofmanager of element
-    int                    giveDofManagerNumber(int i) const { return dofManArray.at(i); }
-    ///Returns receiver list of dof managers
+    int giveDofManagerNumber(int i) const { return dofManArray.at(i); }
+    /// Returns receiver list of dof managers
     IntArray &giveDofManArray() { return dofManArray; }       // HUHU const
-    ///Rerurns reference to the i-th dofmanager of element.
+    /// Returns reference to the i-th dofmanager of element.
     DofManager *giveDofManager(int i) const;
-    /**Returns reference to the i-th node of element.
+    /**
+     * Returns reference to the i-th node of element.
      * Default implementation returns i-th dofmanager of element converted to
      * Node class (check is made).
      */
     virtual Node *giveNode(int i) const;
-    /**Returns reference to the i-th side  of element.
+    /**
+     * Returns reference to the i-th side  of element.
      * Default implementation returns i-th dofmanager of element converted to
      * ElementSide class (check is made).
      */
     virtual ElementSide *giveSide(int i) const;
     /// Returns interpolation of Element
     virtual FEInterpolation *giveInterpolation() { return NULL; }
-    ///Returns reference to the associated material of element.
+    /// Returns reference to the associated material of element.
     Material *giveMaterial();
-    ///Returns reference to the associated crossSection of element.
+    /// Returns reference to the associated crossSection of element.
     CrossSection *giveCrossSection();
-    ///Sets the material of receiver
+    /// Sets the material of receiver
     void setMaterial(int matIndx) { this->material = matIndx; }
-    ///Sets the cross section model of receiver
+    /// Sets the cross section model of receiver
     void setCrossSection(int csIndx) { this->crossSection = csIndx; }
 
-    ///Returns number of dofmanagers of receiver
-    int                   giveNumberOfDofManagers() { return numberOfDofMans; }
-    /**Returns number of nodes of receiver.
+    /// Returns number of dofmanagers of receiver
+    int giveNumberOfDofManagers() { return numberOfDofMans; }
+    /**
+     * Returns number of nodes of receiver.
      * Default implementation returns number of dofmanagers of element
      */
-    virtual int                   giveNumberOfNodes() { return numberOfDofMans; }
+    virtual int giveNumberOfNodes() { return numberOfDofMans; }
     /** Sets receiver dofManagers */
     void setDofManagers(const IntArray &_dmans);
 
     /** Sets integration rules */
-    void setIntegrationRules(AList< IntegrationRule > *irlist); // rch
+    void setIntegrationRules(AList< IntegrationRule > *irlist);
     /**
      * Returns integration domain for receiver, used to initialize
      * integration point over receiver volume. Must be specialized.
      */
     virtual integrationDomain giveIntegrationDomain() { return _Unknown_integrationDomain; }
     /**
-     * Returns material mode for receiver integration poits. Should be specialized.
+     * Returns material mode for receiver integration points. Should be specialized.
      */
-    virtual MaterialMode          giveMaterialMode()  { return _Unknown; }
+    virtual MaterialMode giveMaterialMode()  { return _Unknown; }
     /**
      * Assembles the code numbers of given integration element (sub-patch)
      * This is done by obtaining list of nonzero shape functions and
@@ -447,24 +429,24 @@ public:
     virtual int giveIntegrationRuleLocalCodeNumbers(IntArray &answer, IntegrationRule *ie, EquationID ut)
     { return 0; }
 
-    ///Returns number of sides (which have unknown dofs) of receiver
-    //int                   giveNumberOfSides () {return numberOfSides;}
+    /// Returns number of sides (which have unknown dofs) of receiver
+    //int giveNumberOfSides () {return numberOfSides;}
     /// Returns the corresponding element region. Currently corresponds to cross section model number.
-    int                   giveRegionNumber();
-    ///Initializes receiver acording to object description stored in input record.
+    int giveRegionNumber();
+    /// Initializes receiver according to object description stored in input record.
     IRResultType initializeFrom(InputRecord *ir);
-    ///Performs a post initialization steps
-    void         postInitialize();
+    /// Performs a post initialization steps
+    void postInitialize();
     /**
      * Stores receiver state to output stream.
      * @exception throws an ContextIOERR exception if error encountered
      */
-    contextIOResultType   saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
     /**
      * Restores the receiver state previously written in stream.
      * @exception throws an ContextIOERR exception if error encountered
      */
-    contextIOResultType   restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 
     // time step termination
     /**
@@ -472,36 +454,36 @@ public:
      * Corresponding function for element gauss points is invoked
      * (gaussPoint::printOutputAt).
      */
-    void                  printOutputAt(FILE *, TimeStep *);
+    void printOutputAt(FILE *, TimeStep *);
     /**
      * Updates element state corresponding to newly reached solution.
      * Default is empty, derived classes should force the update of internal integration point values
-     * acording to newly reached state.
+     * according to newly reached state.
      * @see Element::updateYourself
      */
-    virtual void          updateInternalState(TimeStep *tStep) { }
+    virtual void updateInternalState(TimeStep *tStep) { }
     /**
-     * Updates element state after equlibrium in time step has been reached.
+     * Updates element state after equilibrium in time step has been reached.
      * Default implementation updates all integration rules defined by
      * integrationRulesArray member variable. Doing this, all integration points
      * and their material statuses are updated also. All temporary history variables,
-     * which now describe equlibrium state are copied into equilibrium ones.
+     * which now describe equilibrium state are copied into equilibrium ones.
      * The existing internal state is used for update.
      * @see Material::updateYourself
      * @see IntegrationRule::updateYourself
      * @see gaussPoint::updateYourself
      * @see Element::updateInternalState
      */
-    virtual void          updateYourself(TimeStep *tStep);
+    virtual void updateYourself(TimeStep *tStep);
     // initialization to state given by initial conditions
     /** Initialization according to state given by initial conditions.
      * Some type of problems may require initialization of state variables
      * stored in integration points (in statuses related to material models)
-     * according to initial conditions. Defaul implementation is not provided.
+     * according to initial conditions. Default implementation is not provided.
      * Typically, loop over all integration points, and call to some initialization
-     * method of material (with necessary agruments) have to be made.
+     * method of material (with necessary arguments) have to be made.
      */
-    virtual void          initializeYourself(TimeStep *timeStepWhenICApply) { }
+    virtual void initializeYourself(TimeStep *timeStepWhenICApply) { }
 
     // consistency check
     /**
@@ -514,9 +496,9 @@ public:
      * (error or warning member functions).
      * Method can be also used to initialize some variables, since
      * this is invoked after all domain components are instanciated.
-     * @return zero value if check fail, othervise nonzero is returned.
+     * @return zero value if check fail, otherwise nonzero is returned.
      */
-    virtual int    checkConsistency() { return 1; }
+    virtual int checkConsistency() { return 1; }
 
     // time step initialization (required for some non-linear solvers)
     /**
@@ -546,7 +528,7 @@ public:
     /** Returns classType id of receiver.
      * @see FEMComponent::giveClassID
      */
-    classType                giveClassID() const { return ElementClass; }
+    classType giveClassID() const { return ElementClass; }
     /** Returns the element geometry type.
      * This information is assumed to be of general interest, but
      * it is required only for some specialized tasks.
@@ -585,11 +567,11 @@ public:
     // functions required for special functionality
     //
     /**
-     * Returns the integration point corresponding value in REDUCED form.
+     * Returns the integration point corresponding value in reduced form.
      * @param answer contain corresponding ip value, zero sized if not available.
      * @param aGaussPoint integration point
      * @param type determines the type of internal variable
-     * @returns nonzero if ok, zero if var not supported
+     * @returns nonzero if ok, zero otherwise
      */
     virtual int giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime);
     /**
@@ -607,7 +589,7 @@ public:
     virtual InternalStateValueType giveIPValueType(InternalStateType type);
     /**
      * Returns the mask of reduced indexes of Internal Variable component .
-     * @param answer mask of Full VectorSize, with components beeing the indexes to reduced form vectors.
+     * @param answer mask of Full VectorSize, with components being the indexes to reduced form vectors.
      * @param type determines the internal variable requested (physical meaning)
      * @returns nonzero if ok or error is generated for unknown mat mode.
      */
@@ -622,24 +604,23 @@ public:
     /** Returns element length in given direction. Default implementation returns length
      * of element  projection into specified direction
      */
-    virtual double        giveLenghtInDir(const FloatArray &normalToCrackPlane);
+    virtual double giveLenghtInDir(const FloatArray &normalToCrackPlane);
     /**
      * Returns characteristic length of element in given integration point and in
      * given direction. Required by material models relying on crack-band approach to achieve
      * objectivity with respect to mesh size
      */
-    virtual double        giveCharacteristicLenght(GaussPoint *gp, const FloatArray &normalToCrackPlane)
-    { return 0.; }
+    virtual double giveCharacteristicLenght(GaussPoint *gp, const FloatArray &normalToCrackPlane) { return 0.; }
     /**
      * Updates internal element state (in all integration points of receiver)
      * before nonlocal averaging takes place. Used by so nonlocal materials,
      * because their response in particular point depends not only on state in this point, but
-     * depends also on state in point's neighbourhood. Nonlocal quatity is computed as nonlocal
+     * depends also on state in point's neighborhood. Nonlocal quantity is computed as nonlocal
      * average of local quantities. Therefore, before updating integration point state depending on
      * nonlocal quantity (or quantities), local quantities in all integration points must be updated
      * in advance. This function should be  overloaded by derived analysis-specific
      * class, which updates state in all receiver's integration points (using updateBeforeNonlocalAverage
-     * member function deklared at corresponding analysis specific material base class)
+     * member function declared at corresponding analysis specific material base class)
      * depending on driving variable (for example - strain vector in case of structural-analysis elements).
      */
     virtual void updateBeforeNonlocalAverage(TimeStep *atTime) { }
@@ -661,11 +642,11 @@ public:
         return 0;
     }
     // returns a unit vectors of local coordinate system at element
-    // stored rowwise (mainly used by some materials with ortho and anisotrophy)
+    // stored row-wise (mainly used by some materials with ortho- and anisotrophy)
     // if local c.s == global c.s returns NULL
     /**
      * Returns local coordinate system of receiver. Required by material models with
-     * ortho and anisotrophy. If local system is equal to global one, set answer to empty mtrx
+     * ortho- and anisotrophy. If local system is equal to global one, set answer to empty mtrx
      * and return zero value.
      * @return nonzero if answer computed, zero value if answer is empty, i.e. no transformation is necessary.
      */
@@ -676,11 +657,13 @@ public:
     /**
      * Computes mid-plane normal of receiver at integration point.
      * Only for plane elements in space (3d)  (shells, plates, ....).
+     * @param answer The mid plane normal
+     * @param gp The integration point at which to calculate the normal
      */
-    virtual FloatArray *ComputeMidPlaneNormal(GaussPoint *);
+    virtual void computeMidPlaneNormal(FloatArray &answer, const GaussPoint *gp);
     /**
-     * Initializes the internal state variables stored in all IPs according to
-     * stete in given domain. Used in adaptive procedures.
+     * Initializes the internal state variables stored in all IPs according to state in given domain.
+     * Used in adaptive procedures.
      * @param oldd old mesh reference
      * @param tStep time step
      * @return nonzero if o.k.
@@ -689,7 +672,6 @@ public:
     /**
      * Updates the internal state variables stored in all IPs according to
      * already mapped state.
-     * @param oldd old mesh reference
      * @param tStep time step
      * @return nonzero if o.k.
      */
@@ -701,10 +683,10 @@ public:
 
     /**
      * Local renumbering support. For some tasks (parallel load balancing, for example) it is necessary to
-     * renumber the entities. The various fem components (such as nodes or elements) typically contain
+     * renumber the entities. The various FEM components (such as nodes or elements) typically contain
      * links to other entities in terms of their local numbers, etc. This service allows to update
-     * these relations to reflext updated numbering. The renumbering funciton is passed, which is supposed
-     * to return an updated number of specified entyty type based on old number.
+     * these relations to reflect updated numbering. The renumbering function is passed, which is supposed
+     * to return an updated number of specified entity type based on old number.
      */
     virtual void updateLocalNumbering(EntityRenumberingFunctor &f);
 
@@ -806,9 +788,9 @@ public:
      * into given communication buffer. The corresponding cross section service is invoked, which in
      * turn should invoke material model service for particular integration point. The
      * nature of packed data is material model dependent.
-     * Typically, for material of "local" response (response depeneds only on integration point local state)
+     * Typically, for material of "local" response (response depends only on integration point local state)
      * no data are exchanged. For "nonlocal" constitutive models the send/receive of local values which
-     * undergo averaging is performed between local and corressponding remote elements.
+     * undergo averaging is performed between local and corresponding remote elements.
      * @param buff communication buffer
      * @param stepN solution step.
      */
@@ -879,7 +861,7 @@ protected:
      * Element can have multiple integration rules for different tasks.
      * For example structural element family class uses this feature to implement
      * transparent support for reduced and selective integration of some strain components.
-     * Must be defined by terminator clases.
+     * Must be defined by terminator classes.
      * @see IntegrationRule class.
      */
     virtual void          computeGaussPoints() { }
