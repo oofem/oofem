@@ -242,13 +242,13 @@ StructuralMaterial :: giveStressDependentPartOfStrainVector(FloatArray &answer, 
      * This functions subtract from reducedStrainVector its stress independent part
      * caused by temperature, shrinkage and possibly by other phenomenas.
      */
-    FloatArray EpsilonTemperature;
+    FloatArray epsilonTemperature;
     StructuralCrossSection *cs = ( StructuralCrossSection * ) gp->giveElement()->giveCrossSection();
 
     answer = reducedStrainVector;
-    cs->computeStressIndependentStrainVector(EpsilonTemperature, gp, stepN, mode);
-    if ( EpsilonTemperature.giveSize() ) {
-        answer.add( EpsilonTemperature.negated() );
+    cs->computeStressIndependentStrainVector(epsilonTemperature, gp, stepN, mode);
+    if ( epsilonTemperature.giveSize() ) {
+        answer.subtract( epsilonTemperature );
     }
 
     return;
