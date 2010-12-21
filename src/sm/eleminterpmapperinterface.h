@@ -38,6 +38,8 @@
 
 #include "compiler.h"
 
+#include "timestep.h"
+#include "valuemodetype.h"
 #include "interface.h"
 #include "flotarry.h"
 #include "intarray.h"
