@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/sm/src/heavisideltf.h,v 1.4 2003/04/06 14:08:30 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2010   Borek Patzak
  *
  *
  *
@@ -33,9 +32,6 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-//   ******************************************
-//   *** CLASS HEAVISIDE LOAD TIME FUNCTION ***
-//   ******************************************
 #ifndef heavisideltf_h
 #define heavisideltf_h
 
@@ -43,16 +39,19 @@
 #include "loadtime.h"
 
 namespace oofem {
+/*
+ * This class implements a Heaviside step load time function.
+ *
+ * The function is defined by the origin of step and value.
+ * The result is value*H(t-origin),
+ * where
+ * @f[
+ * H(t) = \begin{cases} 0,& t\leq 0  \\ 1, & t>0 \end{cases}
+ * @f]
+ */
 class HeavisideLTF : public LoadTimeFunction
 {
-    /*
-     * This class implements a Heaviside step constant function.
-     * DESCRIPTION
-     * The function is defined by the origin of step and value.
-     * The result is value*H(t-origin),
-     * where H(t) is 0 for all t <= 0;
-     *             1 for all t > 0.;
-     */
+
 private:
     double origin, value;
 
