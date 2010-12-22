@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/sm/src/rershell.C,v 1.3 2003/04/06 14:08:31 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2010   Borek Patzak
  *
  *
  *
@@ -32,8 +31,6 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-
-//   file RerShell.CC
 
 #include "rershell.h"
 #include "node.h"
@@ -412,42 +409,34 @@ RerShell :: computeGtoLRotationMatrix()
     int i;
 
     if ( GtoLRotationMatrix == NULL ) {
-        FloatArray *e1, *e2, *e3, *help;
-
-        e1 = new FloatArray(3);
-        help = new FloatArray(3);
+        FloatArray e1(3), e2, e3, help(3);
 
         for ( i = 1; i <= 3; i++ ) {
-            e1->at(i) = ( this->giveNode(2)->giveCoordinate(i) - this->giveNode(1)->giveCoordinate(i) );
-            help->at(i) = ( this->giveNode(3)->giveCoordinate(i) - this->giveNode(1)->giveCoordinate(i) );
+            e1.at(i) = ( this->giveNode(2)->giveCoordinate(i) - this->giveNode(1)->giveCoordinate(i) );
+            help.at(i) = ( this->giveNode(3)->giveCoordinate(i) - this->giveNode(1)->giveCoordinate(i) );
         }
 
         // compute the norm of e1,help in order to normalize them
-        e1->normalize();
+        e1.normalize();
 
         // compute vector product of e1' x help
 
-        e3 = e1->VectorProduct(help);
+        e3.beVectorProductOf(e1,help);
 
         // let us normalize e3'
-        e3->normalize();
+        e3.normalize();
 
         // now from e3' x e1' compute e2'
 
-        e2 = e3->VectorProduct(e1);
+        e2.beVectorProductOf(e3,e1);
 
         GtoLRotationMatrix = new FloatMatrix(3, 3);
 
         for ( i = 1; i <= 3; i++ ) {
-            GtoLRotationMatrix->at(1, i) = e1->at(i);
-            GtoLRotationMatrix->at(2, i) = e2->at(i);
-            GtoLRotationMatrix->at(3, i) = e3->at(i);
+            GtoLRotationMatrix->at(1, i) = e1.at(i);
+            GtoLRotationMatrix->at(2, i) = e2.at(i);
+            GtoLRotationMatrix->at(3, i) = e3.at(i);
         }
-
-        delete e1;
-        delete e2;
-        delete e3;
-        delete help;
     }
 
     return GtoLRotationMatrix;

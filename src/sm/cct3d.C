@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/element.h,v 1.27 2003/04/06 14:08:24 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2010   Borek Patzak
  *
  *
  *
@@ -156,41 +155,33 @@ CCTPlate3d :: computeGtoLRotationMatrix()
 {
     if ( GtoLRotationMatrix == NULL ) {
         int i;
-        FloatArray *e1, *e2, *e3, *help;
-
-        e1   = new FloatArray(3);
-        help = new FloatArray(3);
+        FloatArray e1(3), e2, e3, help(3);
 
         // compute e1' = [N2-N1]  and  help = [N3-N1]
         for ( i = 1; i <= 3; i++ ) {
-            e1->at(i) = ( this->giveNode(2)->giveCoordinate(i) - this->giveNode(1)->giveCoordinate(i) );
-            help->at(i) = ( this->giveNode(3)->giveCoordinate(i) - this->giveNode(1)->giveCoordinate(i) );
+            e1.at(i) = ( this->giveNode(2)->giveCoordinate(i) - this->giveNode(1)->giveCoordinate(i) );
+            help.at(i) = ( this->giveNode(3)->giveCoordinate(i) - this->giveNode(1)->giveCoordinate(i) );
         }
 
         // let us normalize e1'
-        e1->normalize();
+        e1.normalize();
 
         // compute e3' : vector product of e1' x help
-        e3 = e1->VectorProduct(help);
+        e3.beVectorProductOf(e1,help);
         // let us normalize
-        e3->normalize();
+        e3.normalize();
 
         // now from e3' x e1' compute e2'
-        e2 = e3->VectorProduct(e1);
+        e2.beVectorProductOf(e3,e1);
 
         //
         GtoLRotationMatrix = new FloatMatrix(3, 3);
 
         for ( i = 1; i <= 3; i++ ) {
-            GtoLRotationMatrix->at(1, i) = e1->at(i);
-            GtoLRotationMatrix->at(2, i) = e2->at(i);
-            GtoLRotationMatrix->at(3, i) = e3->at(i);
+            GtoLRotationMatrix->at(1, i) = e1.at(i);
+            GtoLRotationMatrix->at(2, i) = e2.at(i);
+            GtoLRotationMatrix->at(3, i) = e3.at(i);
         }
-
-        delete e1;
-        delete e2;
-        delete e3;
-        delete help;
     }
 
     return GtoLRotationMatrix;

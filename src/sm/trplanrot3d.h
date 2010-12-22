@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/element.h,v 1.27 2003/04/06 14:08:24 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2010   Borek Patzak
  *
  *
  *
@@ -62,9 +61,14 @@ enum CharTensor {
 #endif
 
 /**
- * This class represent triangular plane stress element with rotational degree of freedon around normal
- * that can be arbitrary orinted in space, in contract to base TrPlaneStrRot element that is
- * defined in xy plane
+ * This class represent triangular plane stress element with rotational degree of freedom around normal
+ * that can be arbitrary oriented in space, in contract to base TrPlaneStrRot element that is
+ * defined in xy-plane.
+ *
+ * Each node has 3 degrees of freedom.
+ *
+ * @author L. Svoboda
+ * @date 2010-5-25
  */
 class TrPlaneStrRot3d : public TrPlaneStrRot
 {
@@ -80,8 +84,10 @@ class TrPlaneStrRot3d : public TrPlaneStrRot
      */
 
 protected:
-    // Transformation Matrix form GtoL(3,3) is stored
-    // at the element level for computation efficiency
+    /**
+     * Transformation Matrix form GtoL(3,3) is stored
+     * at the element level for computation efficiency
+     */
     FloatMatrix *GtoLRotationMatrix;
 
 public:
@@ -95,21 +101,21 @@ protected:
     GaussPoint *giveMiddleGaussPoint();
 
     void giveCharacteristicTensor(FloatMatrix &answer, CharTensor type, GaussPoint *gp, TimeStep *tStep);
-    int  giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime);
-    int  giveIntVarCompFullIndx(IntArray &answer, InternalStateType type);
+    int giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime);
+    int giveIntVarCompFullIndx(IntArray &answer, InternalStateType type);
 
     void computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, TimeStep *stepN, ValueModeType mode);
 
-    friend  class TR_SHELL01;
+    friend class TR_SHELL01;
 
 public:
     //
     // definition & identification
     //
     const char *giveClassName() const { return "TrPlaneStrRot3d"; }
-    classType    giveClassID()   const { return TrPlaneStrRot3dClass; }
+    classType giveClassID() const { return TrPlaneStrRot3dClass; }
 
-    virtual int  computeNumberOfDofs(EquationID ut) { return 9; }
+    virtual int computeNumberOfDofs(EquationID ut) { return 9; }
     virtual int computeNumberOfL2GDofs(EquationID ut) { return 18; }
     virtual void giveDofManDofIDMask(int inode, EquationID, IntArray &) const;
 

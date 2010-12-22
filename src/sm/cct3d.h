@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/element.h,v 1.27 2003/04/06 14:08:24 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2010   Borek Patzak
  *
  *
  *
@@ -64,8 +63,14 @@ enum CharTensor {
 
 /**
  * This class represent CCT plate element that can be arbitrary
- * orinted in space, in contract to base CCT element (CCTPlate) that is
- * defined in xy plane
+ * oriented in space, in contrast to base CCT element (@see CCTPlate) that is
+ * defined in xy plane.
+ *
+ * This class implements a triangular three-node plate CCT finite element.
+ * Each node has 3 degrees of freedom.
+ *
+ * @author L. Svoboda
+ * @date 2010-5-25
  */
 class CCTPlate3d : public CCTPlate
 {
@@ -109,9 +114,9 @@ public:
     // definition & identification
     //
     const char *giveClassName() const { return "CCTPlate3d"; }
-    classType    giveClassID()   const { return CCTPlate3dClass; }
+    classType giveClassID()   const { return CCTPlate3dClass; }
 
-    virtual int  computeNumberOfDofs(EquationID ut) { return 9; }
+    virtual int computeNumberOfDofs(EquationID ut) { return 9; }
     virtual int computeNumberOfL2GDofs(EquationID ut) { return 18; }
     virtual void giveDofManDofIDMask(int inode, EquationID, IntArray &) const;
 

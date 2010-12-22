@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/sm/src/rershell.h,v 1.4 2003/04/06 14:08:31 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2010   Borek Patzak
  *
  *
  *
@@ -58,17 +57,12 @@ enum CharTensor {
 };
 #endif
 
+/**
+ * This class implements an triangular three-node  shell (CCT+linear plan stress)
+ * curved finite element. Each node has 5 degrees of freedom.
+ */
 class RerShell : public CCTPlate
 {
-    /*
-     * This class implements an triangular three-node  shell (CCT+linear plan stress)
-     * curved finite element. Each node has 5 degrees of freedom.
-     * DESCRIPTION :
-     *
-     * TASKS :
-     *
-     * - calculating its B,D,N matrices and dV.
-     */
 
 protected:
 
@@ -83,14 +77,14 @@ public:
     RerShell(int, Domain *);                            // constructor
     ~RerShell()  { delete GtoLRotationMatrix; }         // destructor
 
-    // FloatMatrix*       ComputeConstitutiveMatrixAt (GaussPoint *) ;
-    void               computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep);
-    void               computeMassMatrix(FloatMatrix &answer, TimeStep *tStep)
+    // FloatMatrix* ComputeConstitutiveMatrixAt (GaussPoint *) ;
+    void computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep);
+    void computeMassMatrix(FloatMatrix &answer, TimeStep *tStep)
     { computeLumpedMassMatrix(answer, tStep); }
-    //    void               printOutputAt (TimeStep*) ;
+    //void printOutputAt (TimeStep*) ;
     FloatMatrix *computeGtoLRotationMatrix();
-    int                giveLocalCoordinateSystem(FloatMatrix &answer);
-    void               giveLocalCoordinates(FloatArray &answer, FloatArray &);
+    int giveLocalCoordinateSystem(FloatMatrix &answer);
+    void giveLocalCoordinates(FloatArray &answer, FloatArray &);
     /**
      * Computes the element local (iso) coordinates from given global coordinates.
      * @returns nonzero if successful (if point is inside element); zero otherwise
@@ -98,17 +92,17 @@ public:
     virtual int computeLocalCoordinates(FloatArray &answer, const FloatArray &gcoords);
     //
     void giveCharacteristicTensor(FloatMatrix & answer, CharTensor, GaussPoint *, TimeStep *);
-    void               printOutputAt(FILE *, TimeStep *);
+    void printOutputAt(FILE *, TimeStep *);
     //
     // layered cross section support functions
     //
-    void               computeStrainVectorInLayer(FloatArray &answer, GaussPoint *masterGp,
+    void computeStrainVectorInLayer(FloatArray &answer, GaussPoint *masterGp,
                                                   GaussPoint *slaveGp, TimeStep *tStep);
 
     /** Interface requesting service */
     Interface *giveInterface(InterfaceType);
 
-    virtual int            computeNumberOfDofs(EquationID ut) { return 18; }
+    virtual int computeNumberOfDofs(EquationID ut) { return 18; }
     virtual void giveDofManDofIDMask(int inode, EquationID, IntArray &) const;
 
     virtual int giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime);
@@ -164,9 +158,8 @@ public:
     { return ZZNodalRecoveryMI_giveDofManRecordSize(type); }
     //@}
 
-    /**
-     * The element interface required by SPRNodalRecoveryModelInterface not implemented
-     * because the leas square fit must be made in local shell coordinate system-not implemented
+    /* The element interface required by SPRNodalRecoveryModelInterface not implemented
+     * because the least square fit must be made in local shell coordinate system-not implemented
      */
 
     //
@@ -183,22 +176,21 @@ public:
     // definition & identification
     //
     const char *giveClassName() const { return "RerShell"; }
-    classType             giveClassID()          const { return RerShellClass; }
+    classType giveClassID() const { return RerShellClass; }
     IRResultType initializeFrom(InputRecord *ir);
 
     integrationDomain  giveIntegrationDomain() { return _Triangle; }
-    MaterialMode          giveMaterialMode()  { return _3dShell; }
+    MaterialMode giveMaterialMode()  { return _3dShell; }
 
 protected:
-    void               computeBodyLoadVectorAt(FloatArray &answer, Load *, TimeStep *, ValueModeType mode);
-    //void               computeTemperatureStrainVectorAt (FloatArray& answer, GaussPoint*, TimeStep*, ValueModeType mode);
-    void               computeBmatrixAt(GaussPoint *, FloatMatrix &, int = 1, int = ALL_STRAINS);
-    void               computeNmatrixAt(GaussPoint *, FloatMatrix &);
-    int                computeGtoLRotationMatrix(FloatMatrix &); // giveRotationMatrix () ;
-    //  int                computeGtoNRotationMatrix (FloatMatrix&);
-    void               computeGaussPoints();
-
-    double             giveArea();
+    void computeBodyLoadVectorAt(FloatArray &answer, Load *, TimeStep *, ValueModeType mode);
+    //void computeTemperatureStrainVectorAt (FloatArray& answer, GaussPoint*, TimeStep*, ValueModeType mode);
+    void computeBmatrixAt(GaussPoint *, FloatMatrix &, int = 1, int = ALL_STRAINS);
+    void computeNmatrixAt(GaussPoint *, FloatMatrix &);
+    int computeGtoLRotationMatrix(FloatMatrix &); // giveRotationMatrix () ;
+    //int computeGtoNRotationMatrix (FloatMatrix&);
+    void computeGaussPoints();
+    double giveArea();
 };
 } // end namespace oofem
 #endif // rershell_h
