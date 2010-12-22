@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/alist.h,v 1.2.4.1 2004/04/05 15:19:43 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2010   Borek Patzak
  *
  *
  *
@@ -33,11 +32,6 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-
-//   ******************
-//   *** CLASS LIST ***
-//   ******************
-
 #ifndef alist_h
 #define alist_h
 
@@ -52,83 +46,92 @@ class FEMComponent;
 
 /**
  * Class implementing generic list (or more precisely array).
- * It maintains the array of generic pointers to objects of type T.
- * Since the generic pointer to FEMComponent can  point to
+ * It maintains the array of generic pointers to objects of type T using 1-based numbering.
+ * Since the generic pointer to FEMComponent can point to
  * any derived class instance, this class can be used as list or array containing
  * elements, nodes, materials, loads or load-time functions, which are represented by classes
  * derived from base FEMComponent.
- * This class maitains only the links (pointers) to particular objects, objects itselfs are not contained within
+ * 
+ * This class maintains only the links (pointers) to particular objects, objects themselfs are not contained within
  * this array. They have to be created outside (in memory, usually on heap) and then their pointers can be added to
- * array. This is sometimes called non-intrusive approach. When destructor is called, the pointed object
- * are DELETED.
+ * array. This is sometimes called non-intrusive approach. When destructor is called, the linked objects
+ * are <em>deleted</em>. To prevent the deletion, objects should be unlinked before deconstructor is called.
+ * 
  * The links to particular objects in array are stored in pointer array, therefore the access to particular
  * component is very efficient. On the other hand, the resizing of array is relative time expensive (the whole
- * existing pointer table must be transfered) and is recomended to set size of the array to the final size.
+ * existing pointer table must be transfered) and is recommended to set size of the array to the final size.
  */
 template< class T >class AList
 {
-    /*
-     * This class implements an array which contains elements, nodes, materials,
-     * loads or load-time functions.
-     * DESCRIPTION :
-     * The objects are stored in 'values', an array of poinerst to T of size
-     * 'size'.
-     * TASKS :
-     * - storing (method 'put') and returning (method 'at') component ;
-     * - expanding itself, in order to accommodate more components.
-     */
-
-
 protected:
-    /// Array or list size (number of components to store)
+    /// Array or list size (number of components to store).
     int size;
-    /// Real allocated size (may be larger than size, to prevent often realocation)
+    /// Real allocated size (may be larger than size, to prevent often reallocation).
     int allocatedSize;
-    /// List size allocation increment
+    /// List size allocation increment.
     int sizeIncrement;
-    /// Array of pointers to particular components
+    /// Array of pointers to particular components.
     T **values;
 
 public:
-    /// Constructor - creates list (array) of  size s
-    AList(int s = 0, int sizeIncrement = 0);                // constructor
+    /**
+     * Creates list of size s.
+     * @param s Initial size.
+     * @param sizeIncrement Increases array in blocks of this size when necessary.
+     */
+    AList(int s = 0, int sizeIncrement = 0);
     /// Destructor
-    ~AList();                  // destructor
+    ~AList();
 
-    /// Returns component at given index
-    T *at(int i)           { return values [ i - 1 ]; }
-    int             giveSize()          { return size; }
+    /**
+     * @param i Index of object.
+     * @return Object at given index.
+     */
+    T *at(int i);
     /**
      * Expands the receiver from its current size to newSize, in order to accommodate new entries.
+     * @param newSize Size that receiver must fit.
      */
-    void            growTo(int newSize);
+    void growTo(int newSize);
     /**
-     * Returns True if the receiver has a non-null i-th entry, else returns False.
+     * Checks if receiver includes object as given position.
+     * @param i Index of object.
+     * @return true if object is non-null at i-th entry, otherwise false.
      */
     bool includes(int i);
-    /// Returns True if receiver is empty
-    int             isEmpty()           { return ( size == 0 ); }
-    /// Returns True if receiver is not empty
-    int             isNotEmpty()        { return ( size != 0 ); }
+    /// @return Size of array.
+    int giveSize() { return size; }
+    /// @return True if receiver is empty, otherwise false.
+    int isEmpty() { return ( size == 0 ); }
+    /// @return True if receiver is not empty, otherwise false.
+    int  isNotEmpty() { return ( size != 0 ); }
     /// Prints the receiver on screen.
-    void            printYourself();
+    void printYourself();
     /**
-     * Stores anObject at position i. Enlarge the receiver if too small.
-     * Deletes the old value, if exist.
+     * Stores anObject at position i.
+     * Enlarges the receiver if too small and deletes the old value if it exists.
+     * @param i Index to put object
+     * @param anObject Object to put as position i.
      */
-    void            put(int i, T *anObject);
-    /// forces receiver to be empty; objects are DELETED if deleteObjectflag is true (default) .
-    void            clear(bool deleteObjectflag = true);
-    /// Deleletes the object at i-th position.
-    void            remove(int i);
+    void put(int i, T *anObject);
     /**
-     * Unlinks the object a i-th position. The object is returned, and its entry is
+     * Clears receiver.
+     * Objects are deleted if depending on the delete flag.
+     * @param deleteObjectFlag Shows if objects should be deleted.
+     */
+    void clear(bool deleteObjectflag = true);
+    /// Deletes the object at i-th position.
+    void remove(int i);
+    /**
+     * Unlinks the object a i-th position.
+     * The object is returned, and its entry is
      * unlinked, so there will be no further reference to this object. Does not delete
      * the object, its pointer is returned.
+     * @param i Index where to unlink.
+     * @return Object at index i.
      */
     T *unlink(int i);
 };
-
 
 template< class T >AList< T > ::  AList(int s, int sizeIncrement)
 // Constructor : creates a list of size s.
@@ -144,7 +147,7 @@ template< class T >AList< T > ::  AList(int s, int sizeIncrement)
         while ( i-- ) {
             * p++ = NULL;
         }
-    }                                         // initialize 'values'
+    } // initialize 'values'
     else {
         values = NULL;
     }
@@ -154,7 +157,6 @@ template< class T >AList< T > ::  AList(int s, int sizeIncrement)
 
 
 template< class T >AList< T > :: ~AList()
-// Destructor.
 {
     this->clear(true);
 }
@@ -181,8 +183,7 @@ AList< T > :: clear(bool deleteObjectFlag)
 
 template< class T >void
 AList< T > :: growTo(int newSize)
-// Expands the receiver from its current size to newSize, in order to acco-
-// modate new entries.
+// Expands the receiver from its current size to newSize, in order to accommodate new entries.
 {
     register int i;
     T **newValues, **p1, **p2;
@@ -222,16 +223,30 @@ AList< T > :: growTo(int newSize)
         this->allocatedSize = newSize + this->sizeIncrement;
     }
 
-    size   = newSize;
+    size = newSize;
 }
 
-
+template< class T >T*
+AList< T > :: at(int i)
+{
+#ifdef DEBUG
+    if ( i <= 0 ) {
+        OOFEM_ERROR("AList :: at - Asking for negative or zero indices (%d)", i);
+    }
+#endif
+    return values [ i - 1 ];
+}
 
 template< class T >bool
 AList< T > :: includes(int i)
 // Returns True if the receiver has a non-null i-th entry, else returns
 // False.
 {
+#ifdef DEBUG
+    if ( i <= 0 ) {
+        OOFEM_ERROR("AList :: includes - Asking for negative or zero indices (%d)", i);
+    }
+#endif
     if ( i > size ) {
         return false;
     } else {
@@ -239,28 +254,24 @@ AList< T > :: includes(int i)
     }
 }
 
-
-
 template< class T >void
 AList< T > :: printYourself()
 // Prints the receiver on screen.
 {
-    register int i;
-
-    printf("list of components of size %d\n", size);
-    for ( i = 1; i <= size; i++ ) {
-        if ( values [ i - 1 ] == NULL ) {
-            printf("%d  Nil \n", i);
-        } else {
-            printf( "%d %lX\n", i, ( long int ) ( values [ i - 1 ] ) );
-        }
+    printf("List of components of size %d\n", size);
+    for (int i = 1; i <= size; i++ ) {
+        printf("%d : %p\n",i, values [ i - 1 ] );
     }
 }
-
 
 template< class T >void AList< T > :: put(int i, T *anObject)
 // Stores anObject at position i. Enlarge the receiver if too small.
 {
+#ifdef DEBUG
+    if ( i <= 0 ) {
+        OOFEM_ERROR2("AList :: put - Trying to write to zero or negative indices (%d)", i);
+    }
+#endif
     if ( size < i ) {
         this->growTo(i);
     }
@@ -275,6 +286,12 @@ template< class T >void AList< T > :: put(int i, T *anObject)
 
 template< class T >void AList< T > :: remove(int i)
 {
+#ifdef DEBUG
+    if ( i < 0 ) {
+        OOFEM_ERROR2("AList :: remove - Trying to remove at zero or negative indices (%d)", i);
+    }
+#endif
+
     if ( size < i ) {
         return;
     }
@@ -288,6 +305,11 @@ template< class T >void AList< T > :: remove(int i)
 
 template< class T >T *AList< T > :: unlink(int i)
 {
+#ifdef DEBUG
+    if ( i <= 0 ) {
+        OOFEM_ERROR2("AList :: unlink - Trying to unlink at zero or negative indices (%d)", i);
+    }
+#endif
     if ( size < i ) {
         return NULL;
     }
