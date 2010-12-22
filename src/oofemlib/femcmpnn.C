@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/femcmpnn.C,v 1.12.4.1 2004/04/05 15:19:43 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2010   Borek Patzak
  *
  *
  *
@@ -38,8 +37,6 @@
  * Dubois-Pelerin, Y.: "Object-Oriented  Finite Elements: Programming concepts and Implementation",
  * PhD Thesis, EPFL, Lausanne, 1992.
  */
-
-//   file FEMCMPNN.C
 
 #include "femcmpnn.h"
 #include "domain.h"
@@ -146,13 +143,4 @@ FEMComponent :: warning(const char *file, int line, const char *format, ...) con
     __OOFEM_WARNING4(file, line, "Class: %s, number: %d\n%s", giveClassName(), giveNumber(), buffer);
 }
 
-/*
- * // ___DO_NOT_CHANGE_FOLLOWING_LINES
- * // they contain typeInfo informations for base class
- * const TypeInfo  FEMComponent::infoFEMComponent ("FEMComponent",0,NULL);
- *
- * const TypeInfo* FEMComponent::getTypeInfo() const
- * {return &FEMComponent::infoFEMComponent;}
- * // end of typeInfo section
- */
 } // end namespace oofem

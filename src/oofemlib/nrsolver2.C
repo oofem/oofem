@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/nrsolver2.C,v 1.8.4.1 2004/04/05 15:19:43 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2010   Borek Patzak
  *
  *
  *
@@ -32,10 +31,6 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-
-//
-// file nrsolver.C
-//
 
 #include "nrsolver2.h"
 #ifndef __MAKEDEPEND
@@ -70,7 +65,7 @@ NRSolver2 :: NRSolver2(int i, Domain *d, EngngModel *m, EquationID ut) :
     //Psi    = 0.1;       // displacement control on
     solved = 0;
     NR_Mode = NR_OldMode = nrsolverModifiedNRM;
-    NR_ModeTick = -1; // do not swith to calm_NR_OldMode
+    NR_ModeTick = -1; // do not switch to calm_NR_OldMode
     MANRMSteps = 0;
 
     linSolver = NULL;
@@ -173,7 +168,7 @@ restart:
         // update solution
         //
         if ( this->lsFlag && ( nite != 1 ) ) {
-            // linesearch
+            // line search
             LineSearchNM :: LS_status status;
             IntArray prescribedEqs(0);
             double eta;
@@ -185,7 +180,7 @@ restart:
             DeltaR->add(deltaR);
             tNow->incrementStateCounter();     // update solution state counter
             //
-            // convergency check
+            // Convergence check
             //
             //((NonLinearStatic *)engngModel) -> giveInternalForces(F, *DeltaR, tNow);
             engngModel->updateComponent(tNow, InternalRhs, domain);

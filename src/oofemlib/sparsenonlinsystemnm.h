@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/sparsenonlinsystemnm.h,v 1.6 2003/04/06 14:08:26 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2010   Borek Patzak
  *
  *
  *
@@ -74,59 +73,71 @@ public:
     /**
      * The following parameter allows to specify how the reference load vector
      * is obtained from given totalLoadVector and initialLoadVector.
-     * The initialLoadVector desribes the part of loading which does not scale.
-     * If refLoadInputMode is rlm_total (default) then the reference incremental load vector is defined as
-     * totalLoadVector assembled at given time.
-     * If refLoadInputMode is rlm_inceremental then the reference load vector is
-     * obtained as incremental load vector at given time.
+     * The initialLoadVector describes the part of loading which does not scale.
      */
-    enum referenceLoadInputModeType { rlm_total=0, rlm_inceremental=1 };
-
+    enum referenceLoadInputModeType {
+        rlm_total=0, /// The reference incremental load vector is defined as totalLoadVector assembled at given time.
+        rlm_inceremental=1, /// The reference load vector is obtained as incremental load vector at given time.
+    };
 
 protected:
+    /// Equation to solve for.
     EquationID ut;
+
+    /// Load level
+    double deltaL;
+
 public:
     /// Constructor
-    SparseNonLinearSystemNM(int i, Domain *d, EngngModel *m, EquationID ut);
+    SparseNonLinearSystemNM(int i, Domain *d, EngngModel *m, EquationID ut) : NumericalMethod(i, d, m) { this->ut = ut; }
     /// Destructor
-    ~SparseNonLinearSystemNM();
-
-    // identification
-    /// Returns class name of the receiver.
-    const char *giveClassName() const { return "SparseNonLinearSystemNM"; }
-    /** Returns classType id of receiver.
-     * @see FEMComponent::giveClassID
-     */
-    classType giveClassID() const { return SparseNonLinearSystemNMClass; }
+    ~SparseNonLinearSystemNM() { }
 
     /**
-     * Solves the given sparse linear system of equations g(x,l)=l*R+R0-F(x); dx=K^{-1}g+ dl K^{-1}R.
-     * Total load vector not passed, it is defined as l*R+R0, where l is scale factor
-     * @param K coefficient matrix (K = dF/dx; stiffness matrix)
-     * @param R  reference incremental Rhs (incremental load)
-     * @param R0 initial Rhs (initial load)
-     * @param Rr linearization of K*rri, where rri is increment of prescribed displacements
-     * @param r  total solution (total displacement)
-     * @param dr increment of solution (incremental displacaments)
-     * @param l  Rhs scale factor (load level)
-     * @param F  InternalRhs (real internal forces)
-     * @param nite - number of iterations needed
-     * @param rlm - reference load mode
-     * @param internalForcesEBENorm norm of internal nodal forces (evaluated on element by element basis)
-     * @return NM_Status value
+     * Solves the given sparse linear system of equations @f$s  R + R_0 - F(r) = 0@f$; @f$ dr=K^{-1}(s R + R_0 - F({}^n r)) @f$.
+     * Total load vector not passed, it is defined as @f$ s R + R_0 @f$, where s is scale factor.
+     * @see EngngModel::updateComponent Which is used to update the stiffness matrix and load vector.
+     * @param K  Coefficient matrix (@f$\displaystyle K = \frac{\partial F}{\partial r} @f$; stiffness matrix).
+     * @param R  Reference incremental RHS (incremental load).
+     * @param R0 Initial RHS (initial load).
+     * @param Rr Linearization of K*rri, where rri is increment of prescribed displacements.
+     * @param r  Total solution (total displacement).
+     * @param dr Increment of solution (incremental displacements).
+     * @param s  RHS scale factor (load level).
+     * @param F  InternalRhs (real internal forces).
+     * @param nite Number of iterations needed.
+     * @param rlm Reference load mode.
+     * @param internalForcesEBENorm Norm of internal nodal forces (evaluated on element by element basis).
+     * @param tStep Time step to solve for.
+     * @return NM_Status value.
      */
     virtual NM_Status solve(SparseMtrx *K, FloatArray *R, FloatArray *R0,
                             FloatArray *Rr, FloatArray *r, FloatArray *dr, FloatArray *F,
-                            double &internalForcesEBENorm, double &l, referenceLoadInputModeType rlm,
-                            int &nite, TimeStep *) = 0;
+                            double &internalForcesEBENorm, double &s, referenceLoadInputModeType rlm,
+                            int &nite, TimeStep *tStep) = 0;
 
-    virtual double giveCurrentStepLength() = 0;
-    virtual void   setStepLength(double l) = 0;
     /**
-     * Prints status mesage of receiver to output stream.
-     * Prints the message corresponding to last solve.
+     * Returns step length.
+     * @see solve For more details on the step length s.
+     * @return Current step length
      */
-    virtual void   printState(FILE *outputStream) { }
+    virtual double giveCurrentStepLength() { return this->deltaL; }
+    /**
+     * Sets the step length.
+     * @see solve For more details on the step length s.
+     * @param l New step length.
+     */
+    virtual void setStepLength(double s) { this->deltaL = s; }
+    /**
+     * Prints status message of receiver to output stream.
+     * Prints the message corresponding to last solve.
+     * @param outputStream Stream to print state to.
+     */
+    virtual void printState(FILE *outputStream) { }
+
+    // Overloaded methods:
+    const char *giveClassName() const { return "SparseNonLinearSystemNM"; }
+    classType giveClassID() const { return SparseNonLinearSystemNMClass; }
 
 public:
 };

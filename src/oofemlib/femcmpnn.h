@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/femcmpnn.h,v 1.15.4.1 2004/04/05 15:19:43 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2010   Borek Patzak
  *
  *
  *
@@ -38,10 +37,6 @@
  * Dubois-Pelerin, Y.: "Object-Oriented  Finite Elements: Programming concepts and Implementation",
  * PhD Thesis, EPFL, Lausanne, 1992.
  */
-
-//
-//  CLASS FEMCOMPONENT
-//
 
 #ifndef femcmpnn_h
 #define femcmpnn_h
@@ -71,134 +66,148 @@ namespace oofem {
 class DataStream;
 /**
  * The top abstract class of all classes constituting the finite element mesh.
- * Defines the atributes and methods common to all components of mesh.
+ * Defines the attributes and methods common to all components of mesh:
+ * elements, nodes, time steps, materials, loads and load-time functions.
+ * This class defines the two attributes common to all component classes ;
+ * 'number' is primarily used for reading data in the data file. 'domain' is
+ * used for communicating with other components (e.g., for an element to obtain its material),
+ * for accessing the linear system and the data file.
+ * @see error handles error reporting.
+ * @see checkConsistency to ensure, whether internal data structures are consistent.
  */
 class FEMComponent
 {
-    /*
-     * This class is an abstract class, the superclass of all classes that imple-
-     * ment the components of a finite element mesh : elements, nodes, time steps,
-     * materials, loads and load-time functions.
-     * DESCRIPTION
-     * This class defines the two attributes common to all component classes ;
-     * 'number' is primarily used for reading data in the data file. 'domain' is
-     * used for communicating with other components (e.g., for an element to ob-
-     * tain its material), for accessing the linear system and the data file.
-     * Member function error handles error reporting.
-     * Member function checkConsistency() to ensure, whether internal
-     * data structures are consistent.
-     * TASKS
-     *
-     */
 protected:
-    /// component number
+    /// Component number
     int number;
-    /** link to domain object, usefull for communicating
-     *  with other FEM components */
+    /// Link to domain object, useful for communicating with other FEM components
     Domain *domain;
 
 public:
     /// Constructor used for instanciating temporary objects.
-    FEMComponent() { }                                      // constructors
-    /** Regular constructor. Takes two two arguments. Creates
-     *  component with given number and belonging to given domain.
-     * @param n component number in particular domain. For instance, can represent
+    FEMComponent() { }
+    /**
+     * Regular constructor, creates component with given number and belonging to given domain.
+     * @param n Component number in particular domain. For instance, can represent
      * node number in particular domain.
-     * @param d domain to which component belongs to */
+     * @param d Domain to which component belongs to.
+     */
     FEMComponent(int n, Domain *d) {
         number = n;
         domain = d;
     }
-    /// virtual destructor
-    virtual ~FEMComponent() { }                             // destructor
+    /// Virtual destructor.
+    virtual ~FEMComponent() { }
 
-    /** Returns classType id of receiver. Intended for run time
-     *  type checking. Every derived class have to overload this method.
-     * @see cltypes.h include */
+    /**
+     * Returns classType id of receiver. Intended for run time
+     * type checking. Every derived class have to overload this method.
+     * @see classType.
+     * @return Class type of receiver.
+     */
     virtual classType giveClassID() const { return FEMComponentClass; }
-    /** Returns class name of the receiver.
-     */
+    /// @return Class name of the receiver.
     virtual const char *giveClassName() const  = 0;
-    /** Returns input record name of the receiver.
-     */
+    /// @return Input record name of the receiver.
     virtual const char *giveInputRecordName() const { return ( this->giveClassName() ); }
-    /** Returns domain, which receiver belongs to.
-     */
+    /// @return Domain which receiver belongs to.
     Domain *giveDomain() const { return domain; }
-    /// sets associated Domain
-    virtual void         setDomain(Domain *d) { this->domain = d; }
-    /** Returns component number of receiver.
+    /**
+     * Sets associated Domain
+     * @param d New domain which receiver should belong to.
      */
-    int            giveNumber() const { return number; }
-    /// sets number of receiver
-    void setNumber(int _num) { this->number = _num; }
+    virtual void setDomain(Domain *d) { this->domain = d; }
+    /// @return Component number of receiver.
+    int giveNumber() const { return number; }
+    /**
+     * Sets number of receiver.
+     * @param num New number of receiver.
+     */
+    void setNumber(int num) { this->number = num; }
     /**
      * Local renumbering support. For some tasks (parallel load balancing, for example) it is necessary to
-     * renumber the entities. The various fem components (such as nodes or elements) typically contain
+     * renumber the entities. The various FEM components (such as nodes or elements) typically contain
      * links to other entities in terms of their local numbers, etc. This service allows to update
-     * these relations to reflext updated numbering. The renumbering funciton is passed, which is supposed
-     * to return an updated number of specified entyty type based on old number.
+     * these relations to reflect updated numbering. The renumbering function is passed, which is supposed
+     * to return an updated number of specified entity type based on old number.
      */
     virtual void updateLocalNumbering(EntityRenumberingFunctor &f) { }
-    /** Initializes receiver acording to object description stored in input record.
-     *  This function is called immediately after creating object using
+    /**
+     * Initializes receiver according to object description stored in input record.
+     * This function is called immediately after creating object using
      * constructor. Input record can be imagined as data record in component database
      * belonging to receiver. Receiver may use value-name extracting functions
      * to extract particular field from record.
-     * @see readInteger, readDouble and similar functions */
+     * @see IR_GIVE_FIELD, @see IR_GIVE_OPTIONAL_FIELD
+     * @param ir Input record to initialize from.
+     * @return IRResultType
+     */
     virtual IRResultType initializeFrom(InputRecord *ir) = 0;
-    /** Setups the input record string of receiver
-     * @param str string to be filled by input record
+    /**
+     * Setups the input record string of receiver.
+     * @param str String to be filled by input record.
+     * @param keyword Determines if record keyword should be printed.
      */
     virtual int giveInputRecordString(std :: string &str, bool keyword = true);
-    /** Stores receiver state to output stream.
-     *  Writes the FEMComponent class-id in order to allow test whether correct data are then restored.
-     * @param stream output stream
-     * @param mode determines ammount of info required in stream (state, definition,...)
-     * @param obj special parameter, used only to send particular integration
-     * point to material class version of this method. Except this
-     * case, obj parameter is always NULL pointer.
-     * @return contextIOResultType
-     * @exception throws an ContextIOERR exception if error encountered
+    /**
+     * Stores receiver state to output stream.
+     * Writes the FEMComponent class-id in order to allow test whether correct data are then restored.
+     * @param stream Output stream.
+     * @param mode Determines amount of info required in stream (state, definition,...).
+     * @param obj Special parameter, used only to send particular integration point to material class version of this method.
+     * @return contextIOResultType.
+     * @exception throws an ContextIOERR exception if error encountered.
      */
-    virtual contextIOResultType    saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-    /** Restores the receiver state previously written in stream.
-     *  Readss the FEMComponent class-id in order to allow test consistency.
+    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    /**
+     * Restores the receiver state previously written in stream.
+     * Reads the FEMComponent class-id in order to allow test consistency.
      * @see saveContext member function.
-     * @return contextIOResultType
-     * @exception throws an ContextIOERR exception if error encountered
+     * @return contextIOResultType.
+     * @exception throws an ContextIOERR exception if error encountered.
      */
-    virtual contextIOResultType    restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-    // saves current context(state) into stream
-    /** Allows programmer to test some internal data, before computation begins.
-     *  For example, one may use this function, to ensure that element has material with
+    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    /**
+     * Allows programmer to test some internal data, before computation begins.
+     * For example, one may use this function, to ensure that element has material with
      * required capabilities is assigned to element. This must be done after all
      * mesh components are instanciated.
-     * @return nonzero if receiver check is o.k. */
-    virtual int    checkConsistency() { return 1; }
-    /** Prints output of receiver to stream, for given time step */
-    virtual void   printOutputAt(FILE *, TimeStep *) { }
-    /** Interface requesting service */
-    virtual Interface *giveInterface(InterfaceType) { return NULL; }
-    /**@name error and warning reporting methods
+     * @return Nonzero if receiver is consistent.
+     */
+    virtual int checkConsistency() { return 1; }
+    /**
+     * Prints output of receiver to stream, for given time step.
+     * @param file File pointer to print to.
+     * @param tStep Time step to write for.
+     */
+    virtual void printOutputAt(FILE *file, TimeStep *tStep) { }
+    /**
+     * Interface requesting service.
+     * @see InterfaceType
+     * @return Requested interface if implemented, otherwise NULL.
+     */
+    virtual Interface *giveInterface(InterfaceType t) { return NULL; }
+
+    /**
+     * @name error and warning reporting methods
      * These methods will print error (or warning) message using oofem default loggers.
      * Do not use these methods directly, to avoid specify file and line parameters.
      * More preferably, use these methods via corresponding OOFEM_CLASS_ERROR and OOFEM_CLASS_WARNING macros,
      * that will include file and line parameters automatically.
      *
-     * Uses variable number of arguments, so a format string followed by optional argumens is expected
+     * Uses variable number of arguments, so a format string followed by optional arguments is expected
      * (according to printf conventions).
      * @param file  source file name, where error encountered (where error* function called)
      * @param line  source file line number, where error encountered
      */
     //@{
-    /// prints error message and exits
+    /// Prints error message and exits.
     void error(const char *file, int line, const char *format, ...) const;
-    /// prints warning message
+    /// Prints warning message.
     void warning(const char *file, int line, const char *format, ...) const;
     //@}
 #ifdef __OOFEG
-    virtual void   drawYourself(oofegGraphicContext &) { }
+    virtual void drawYourself(oofegGraphicContext &) { }
 #endif
 };
 } // end namespace oofem

@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2010   Borek Patzak
  *
  *
  *
@@ -32,25 +32,18 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-//
-// FILE: bcgeomtype.h
-//
-
 #ifndef bcgeomtype_h
 #define bcgeomtype_h
 
 namespace oofem {
-/**
- * Type representing the geometric character of loading.
- */
+/// Type representing the geometric character of loading.
 enum bcGeomType {
-    // to indentify load gemetry type
-    UnknownBGT,
-    NodalLoadBGT,
-    BodyLoadBGT,
-    EdgeLoadBGT,
-    SurfaceLoadBGT,
-    PointLoadBGT
+    UnknownBGT,     ///< Unknown type.
+    NodalLoadBGT,   ///< Concentrated nodal load.
+    BodyLoadBGT,    ///< Distributed body load.
+    EdgeLoadBGT,    ///< Distrubuted edge load.
+    SurfaceLoadBGT, ///< Distrubuted surface load.
+    PointLoadBGT,   ///< Concentrated point load (placed anywhere). 
 };
 } // end namespace oofem
 #endif // bcgeomtype_h

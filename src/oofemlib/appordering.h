@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/Attic/appordering.h,v 1.1.2.1 2004/04/05 15:19:43 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2010   Borek Patzak
  *
  *
  *
@@ -43,31 +42,60 @@ class EngngModel;
 class IntArray;
 
 /**
+ * Base class for ordering of equation for parallelization.
+ * TODO: Document more
  */
 class ApplicationOrdering
 {
 public:
+    // TODO: Document this
     enum EquationType { et_standard, et_prescribed };
 protected:
 public:
     ApplicationOrdering() { }
     virtual ~ApplicationOrdering() { }
 
+    /**
+     * Initiates the receiver.
+     * @param em Engineering model to determine general information about the problem.
+     * @param ut Equation to solve.
+     * @param di Domain index.
+     * @param et Equation type.
+     */
     virtual void init(EngngModel *em, EquationID ut, int di, EquationType et = et_standard) = 0;
 
     /**
      * Returns number of local eqs; ie. those that belong to receiver processor;
      * Note that some eqs may be owned by remote processors (some shared nodes,...).
-     * The summ of local eqs for all processors should give total number of eqs.
+     * The sum of local eqs for all processors should give total number of eqs.
+     * @return Numbering of local equations.
      */
     virtual int giveNumberOfLocalEqs() { return 0; }
-    /** Returns the total number of eqs of the problem */
+    /**
+     * @return the total number of equations of the problem.
+     */
     virtual int giveNumberOfGlobalEqs() { return 0; }
 
+    /**
+     * Finds the global equation from a local equation. TODO: Document better
+     * @param leq Local equation number.
+     * @return Global equation number.
+     */
     virtual int giveNewEq(int leq) = 0;
+    /**
+     * Finds the local equation number from a global equation. TODO: Document better
+     * @param eq Global equation number.
+     * @return Local equation number.
+     */
     virtual int giveOldEq(int eq) = 0;
 
+    /*
+     *  TODO: Document this
+     */
     virtual void map2New(IntArray &answer, const IntArray &src, int baseOffset = 0) = 0;
+    /*
+     *  TODO: Document this
+     */
     virtual void map2Old(IntArray &answer, const IntArray &src, int baseOffset = 0) = 0;
 };
 } // end namespace oofem

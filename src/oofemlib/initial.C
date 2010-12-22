@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/initial.C,v 1.7 2003/04/06 14:08:24 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2010   Borek Patzak
  *
  *
  *
@@ -33,9 +32,6 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-
-//   file INITIAL.C
-
 #include "initial.h"
 #include "cltypes.h"
 
@@ -44,16 +40,6 @@
 #endif
 
 namespace oofem {
-/*
- * double  InitialCondition :: give (char u)
- * // Returns the value of the prescribed value of the kinematic unknown 'u'.
- * {
- * if (this -> hasConditionOn(u))
- *    return  initialValueDictionary -> at(u) ;
- * else
- *    return  0. ;
- * }
- */
 
 double InitialCondition :: give(ValueModeType type)
 // Returns the value of the prescribed value of the kinematic unknown 'u'.
@@ -99,19 +85,6 @@ InitialCondition :: initializeFrom(InputRecord *ir)
 {
     const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
-
-    //   char   key [1] ;
-    //   double value ;
-    //   int    nCond,i,j ;
-
-    //   initialValueDictionary = new Dictionary() ;
-    //   i     = 0 ;
-    //   nCond = this->readInteger("conditions",++i) ;
-
-    //   for (j=1 ; j<=nCond ; j++) {
-    //      this -> readString("conditions",++i,key) ;
-    //      value = this->read("conditions",++i) ;
-    //     initialValueDictionary -> add(key[0],value) ;}
 
     IR_GIVE_FIELD(ir, initialValueDictionary, IFT_InitialCondition_conditions, "conditions"); // Macro
 

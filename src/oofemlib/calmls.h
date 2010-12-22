@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/calmls.h,v 1.1.4.1 2004/04/13 11:28:15 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2010   Borek Patzak
  *
  *
  *
@@ -59,7 +58,7 @@ class EngngModel;
 #define calm_SMALL_ERROR_NUM 1.e-6
 
 /**
- * Implementation of sparse nonlinear solver with indirect controll.
+ * Implementation of sparse nonlinear solver with indirect control.
  * It uses Cylindrical Arc-Length Method algorithm.
  */
 class CylindricalALM : public SparseNonLinearSystemNM
@@ -72,11 +71,11 @@ class CylindricalALM : public SparseNonLinearSystemNM
      * Perform solution of non-linear problem in the form
      * Kt * deltaR = g
      * where g is defined as g = g(Lambda,r) = Lambda* R - F(r).
-     * During iteration proces, we want g became zero vector.
+     * During iteration process, we want g became zero vector.
      *
      * =======>   This method uses Modified Newton Raphson iteration scheme  <======
      *
-     * If we solve non-linear static we can interprete symbols as follows:
+     * If we solve non-linear static we can interpret symbols as follows:
      *
      * Kt     - tangential stiffness
      * deltaR - increment of displacements
@@ -85,16 +84,16 @@ class CylindricalALM : public SparseNonLinearSystemNM
      * Rt     - Quasi Total Load vector Rt = R0 + Lambda*R
      * r      - total displacement vector
      * F(r)   - Nodal representation of (real) internal forces.
-     * Psi    - control parametr (=0. means displacement control)
+     * Psi    - control parameter (=0. means displacement control)
      * Bergan_k0 - variable used to compute bergan's parameters of current stiffness.
-     * calm_NR_Mode - variable controlling the mode of NRM (ModifiedNR, Full NRM (stifnees update after each iteration),
+     * calm_NR_Mode - variable controlling the mode of NRM (ModifiedNR, Full NRM (stiffness update after each iteration),
      *              Modified Accelerated NRM (we perform iteration with stiffness matrix updated only after calm_MANRMSteps)
      * calm_NR_OldMode - variable containing the old mode of NRM, which will be restored after
      *              calm_NR_ModeTick iterations.
      * calm_NR_ModeTick - see calm_NR_OldMode.
      * calm_MANRMSteps - if calm_NR_Mode == calm_accelNRM, it specifies, that new updated
      *                 stiffness matrix is assembled after calm_MANRMSteps.
-     * calm_Controll - variable indicating the ALM controll.
+     * calm_Controll - variable indicating the ALM control.
      * calm_HPCIndirectDofMask - Mask, telling which dofs are used for HPC.
      * calm_HPCWeights - dofs weights in constrain.
      * TASKS :
@@ -130,18 +129,22 @@ class CylindricalALM : public SparseNonLinearSystemNM
      *
      */
 protected:
-    /**
-     * CALM mode type; determines the calm step length controll.
-     * calm_hpc_off - full ALM with kvadratic constrain and all dofs
-     * calm_hpc_on  - full ALM with kvadratic constrain, taking into account only selected dofs
-     * calml_hpc - linearized ALM (only displacements), taking into account only selected dofs with given weight
-     */
-    enum    calm_ControllType { calm_hpc_off = 0, calm_hpc_on, calml_hpc };
-    enum    calm_NR_ModeType { calm_modifiedNRM, calm_fullNRM, calm_accelNRM };
+    /// CALM mode type; determines the calm step length control.
+    enum calm_ControllType {
+        calm_hpc_off = 0, /// Full ALM with quadratic constrain and all dofs.
+        calm_hpc_on, /// Full ALM with quadratic constrain, taking into account only selected dofs.
+        calml_hpc, ///  Linearized ALM (only displacements), taking into account only selected dofs with given weight.
+    };
+
+    // TODO: Document me
+    enum calm_NR_ModeType {
+        calm_modifiedNRM,
+        calm_fullNRM,
+        calm_accelNRM,
+    };
 
     typedef std :: set< DofID >__DofIDSet;
 
-    //FloatArray     *F;
     int nsmax;
     double Psi;
     double deltaL, minStepLength, maxStepLength;
@@ -150,107 +153,74 @@ protected:
     int calm_NR_ModeTick;
     int calm_MANRMSteps;
 
-    ///minimum hard number of iterations
+    /// Minimum hard number of iteration.s
     int minIterations;
 
-    // variables for HyperPlaneControll
+    /// Variables for HyperPlaneControll.
     int calm_hpc_init;
     calm_ControllType calm_Controll;
     FloatArray calm_HPCWeights;
-    // array containing equation numbers of dofs under indirect controll
+    /// Array containing equation numbers of dofs under indirect control.
     IntArray calm_HPCIndirectDofMask;
-    // input array containing dofmanagers and corresponding dof numbers under indirect controll
+    /// Input array containing dofmanagers and corresponding dof numbers under indirect control.
     IntArray calm_HPCDmanDofSrcArray;
-    // input arry of dofman weights (for hpcmode 2)
+    /// Input array of dofman weights (for hpcmode 2).
     FloatArray calm_HPCDmanWeightSrcArray;
 
-    // linear system solver
+    /// Linear system solver.
     SparseLinearSystemNM *linSolver;
-    // linear system solver ID
+    /// linear system solver ID.
     LinSystSolverType solverType;
 
-    /// lineserach flag
+    /// Line search flag.
     int lsFlag;
-    /// line search tolerance
+    /// Line search tolerance.
     double ls_tolerance;
-    /// line serch aplification factor
+    /// Line search amplification factor.
     double amplifFactor;
-    /// line search parameters (limits)
+    /// Line search parameters (limits).
     double maxEta, minEta;
 
-    /** Support for evaluation of error norms for user defined dof-groups. */
-    /// number of convergence criteria dof groups
+    // Support for evaluation of error norms for user defined dof-groups.
+    /// Number of convergence criteria dof groups.
     int nccdg;
-    /// convergence criteria dof groups
+    /// Convergence criteria dof groups.
     std :: vector< __DofIDSet >ccDofGroups;
-    /// Relative unbalanced force tolerance for each group
+    /// Relative unbalanced force tolerance for each group.
     FloatArray rtolf;
-    /// Relative iterative displacement change tolerance for each group
+    /// Relative iterative displacement change tolerance for each group.
     FloatArray rtold;
 
 
 public:
     CylindricalALM(int i, Domain *d, EngngModel *m, EquationID ut);
-    // constructor
-    ~CylindricalALM();              // destructor
+    ~CylindricalALM();
 
-
-    /**
-     * Solves the given sparse linear system of equations g(x,l)=l-F(x); dx=K^{-1}g+ dl K^{-1}R.
-     * Total load vector not passed, it is defined as l*R+R0, where l is scale factor
-     * @param K coefficient matrix (K = dF/dx; stiffness matrix)
-     * @param R  incremental Rhs (incremental load)
-     * @param R0 initial Rhs (initial load)
-     * @param Rr linearization of K*rri, where rri is increment of prescribed displacements
-     * @param r  total solution (total displacement)
-     * @param dr increment of solution (incremental displacaments)
-     * @param l  Rhs scale factor (load level)
-     * @param F  InternalRhs (real internal forces)
-     * @param rlm - reference load mode
-     * @param internalForcesEBENorm norm of internal nodal forces (evaluated on element by element basis)
-     * @return NM_Status value
-     */
+    // Overloaded methods:
     virtual NM_Status solve(SparseMtrx *k, FloatArray *Ri, FloatArray *R0,
                             FloatArray *Rr, FloatArray *r, FloatArray *DeltaR, FloatArray *F,
                             double &internalForcesEBENorm, double &ReachedLambda, referenceLoadInputModeType rlm,
                             int &nite, TimeStep *);
-
     virtual double giveCurrentStepLength() { return deltaL; }
-    virtual void   setStepLength(double l) { deltaL = l; }
-
-    // management  components
+    virtual void setStepLength(double l) { deltaL = l; }
     IRResultType initializeFrom(InputRecord *ir);
-
-    /** Stores receiver state to output stream.
-     *  Receiver should write class-id first in order to allow test
-     *  whether correct data are then restored.
-     *  @param stream output stream
-     *  @param mode determines ammount of info in stream (state, definition,...)
-     *  @param obj special parameter, used only to send particular integration
-     *  point to material class version of this method. Except this
-     *  case, obj parameter is always NULL pointer.*/
-    contextIOResultType    saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-    /** Restores the receiver state previously written in stream.
-     *  @see saveContext member function.*/
-    contextIOResultType    restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-
-    // identification
-    const char *giveClassName() const { return "CylindricalALM"; }
-    classType giveClassID() const { return CylindricalALMSolverClass; }
-    /// sets associated Domain
-    virtual void         setDomain(Domain *d) {
+    contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual void setDomain(Domain *d) {
         this->domain = d;
         if ( linSolver ) {
             linSolver->setDomain(d);
         }
     }
-    /// This method clears receiver cached data dependent on topology, when it changes.
     virtual void reinitialize() {
         calm_hpc_init = 1;
         if ( linSolver ) {
             linSolver->reinitialize();
         }
     }
+    const char *giveClassName() const { return "CylindricalALM"; }
+    classType giveClassID() const { return CylindricalALMSolverClass; }
+
 protected:
     void convertHPCMap();
     SparseLinearSystemNM *giveLinearSolver();
@@ -261,7 +231,7 @@ protected:
     void search(int istep, FloatArray &prod, FloatArray &eta, double amp,
                 double maxeta, double mineta, int &status);
 
-    /// evaluates the convergence criteria.
+    /// Evaluates the convergence criteria.
     bool checkConvergence(FloatArray &R, FloatArray *R0, FloatArray &F,
                           FloatArray &r, FloatArray &rIterIncr,
                           double Lambda, double RR0, double RR, double drProduct,

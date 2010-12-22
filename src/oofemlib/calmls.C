@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/calmls.C,v 1.2.4.2 2004/04/13 11:28:15 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2010   Borek Patzak
  *
  *
  *
@@ -32,9 +31,6 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-//
-// file calm.cc
-//
 
 #include "calmls.h"
 #ifndef __MAKEDEPEND
@@ -91,7 +87,7 @@ CylindricalALM :: CylindricalALM(int i, Domain *d, EngngModel *m, EquationID ut)
     calm_NR_ModeTick = -1; // do not swith to calm_NR_OldMode
     calm_MANRMSteps = 0;
 
-    //Bergan_k0 = 0.;    // value used for computing Bergan's parametr
+    //Bergan_k0 = 0.;    // value used for computing Bergan's parameter
     // of current stiffness.
 
     deltaL    = -1.0;
@@ -108,7 +104,7 @@ CylindricalALM :: CylindricalALM(int i, Domain *d, EngngModel *m, EquationID ut)
     maxEta = 8.5;
     minEta = 0.2;
 
-    // number of convergence_criteria dof groups, set to 0 (default behaviour)
+    // number of convergence_criteria dof groups, set to 0 (default behavior)
     nccdg = 0;
 
     minIterations = 0;
@@ -133,7 +129,7 @@ CylindricalALM :: solve(SparseMtrx *k, FloatArray *Ri, FloatArray *R0,
 {
     FloatArray rhs, *R, deltaRt, deltaR_, DeltaRm1;
     FloatArray rInitial;
-    FloatArray deltaR; // total incement of displacements in iteration
+    FloatArray deltaR; // total increment of displacements in iteration
     //FloatArray F;
     double Bergan_k0 = 1.0;
     double rr, RR, RR0, rR, p = 0.0, bk;

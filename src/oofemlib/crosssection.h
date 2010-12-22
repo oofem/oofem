@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/crosssection.h,v 1.11 2003/04/06 14:08:23 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2010   Borek Patzak
  *
  *
  *
@@ -59,15 +58,15 @@
 
 namespace oofem {
 enum CrossSectionProperty {
-    CS_Thickness=400,  /// Thickness
-    CS_Width,          /// Width
-    CS_BeamShearCoeff, /// Shear coefficient of beam
-    CS_Area,           /// Area
-    CS_InertiaMomentY, /// Moment of inertia around y-axis
-    CS_InertiaMomentZ, /// Moment of inertia around z-axis
-    CS_TorsionMomentX, /// Moment of inertia around x-axis
-    CS_TopZCoord,      /// Top z coordinate
-    CS_BottomZCoord,   /// Bottom z coordinate
+    CS_Thickness=400,  ///< Thickness
+    CS_Width,          ///< Width
+    CS_BeamShearCoeff, ///< Shear coefficient of beam
+    CS_Area,           ///< Area
+    CS_InertiaMomentY, ///< Moment of inertia around y-axis
+    CS_InertiaMomentZ, ///< Moment of inertia around z-axis
+    CS_TorsionMomentX, ///< Moment of inertia around x-axis
+    CS_TopZCoord,      ///< Top z coordinate
+    CS_BottomZCoord,   ///< Bottom z coordinate
 };
 
 /**

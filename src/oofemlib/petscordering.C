@@ -509,8 +509,8 @@ PetscNatural2GlobalOrdering :: giveNewEq(int leq) {
 }
 
 int
-PetscNatural2GlobalOrdering :: giveOldEq(int leq) {
-    std :: map< int, int > :: iterator i = globLocMap.find(leq);
+PetscNatural2GlobalOrdering :: giveOldEq(int eq) {
+    std :: map< int, int > :: iterator i = globLocMap.find(eq);
     if ( i != globLocMap.end() ) {
         return i->second;
     } else {

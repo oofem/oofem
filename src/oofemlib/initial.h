@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/initial.h,v 1.8 2003/04/06 14:08:24 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2010   Borek Patzak
  *
  *
  *
@@ -53,13 +52,13 @@ namespace oofem {
  * Class implementing general initial condition. Initial condition is usually attribute of
  * one or more degrees of freedom (DOFs).
  *
- * //The inherited attribute 'componentArray' is not used. It is replaced with
- * //the more adequate dictionary 'initialValueDictionary', which entries are
- * //referenced by names rather than by indices.
+ * The inherited attribute 'componentArray' is not used. It is replaced with
+ * the more adequate dictionary 'initialValueDictionary', which entries are
+ * referenced by names rather than by indices.
  *
  * One particular DOF (with its physical meaning - for example displacement)
  * can have associated only single initial condition.
- * Initial condition trefore must represent several initial conditions for particular DOF
+ * Initial condition therefore must represent several initial conditions for particular DOF
  * (for example velocity and acceleration of unknown can be prescribed using single
  * initial condition instance). These multiple entries are distinguished by their ValueModeType value.
  * The ValueModeType value is also used as key in initialValueDictionary.
@@ -75,13 +74,13 @@ namespace oofem {
 class InitialCondition : public FEMComponent
 {
     /*
-     * This class implements an initial condition. An initial condition is usu-
-     * ally attribute of one or more degrees of freedom.
+     * This class implements an initial condition. An initial condition is usually
+     * attribute of one or more degrees of freedom.
      */
 private:
     /// Dictionary of initial values.
     Dictionary initialValueDictionary;
-    /// Physical maening of bc value
+    /// Physical meaning of bc value
     bcValType valType;
 
 

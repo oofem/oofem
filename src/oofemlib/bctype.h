@@ -32,20 +32,16 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-//
-// FILE: bctype.h
-//
-
 #ifndef bctype_h
 #define bctype_h
 
 namespace oofem {
-/**Type representing the type of bc.*/
+/// Type representing the type of bc.
 enum bcType {
-    UnknownBT,
-    DirichletBT,
-    TransmissionBC, // Neumann type (prescribed flux)
-    ConvectionBC  // Newton type
+    UnknownBT,      ///< Unknown.
+    DirichletBT,    ///< Prescribed value.
+    TransmissionBC, ///< Neumann type (prescribed flux).
+    ConvectionBC,   ///< Newton type.
 };
 } // end namespace oofem
 #endif // bctype_h
