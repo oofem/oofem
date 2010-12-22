@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/compcol.C,v 1.5.4.1 2004/04/05 15:19:43 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2010   Borek Patzak
  *
  *
  *
@@ -103,26 +102,11 @@ DSSMatrix :: DSSMatrix(const DSSMatrix &S) : SparseMtrx(S.nRows, S.nColumns)
     OOFEM_ERROR("DSSMatrix::DSSMatrix(const DSSMatrix &S) -- not implemented");
 }
 
-
-
-/***************************/
-/* Assignment operator...  */
-/***************************/
-/*
- * DSSMatrix& DSSMatrix::operator=(const DSSMatrix &C)
- * {
- * OOFEM_ERROR ("DSSMatrix::operator= -- not implemented");
- * return *this;
- * }
- */
-
-
 SparseMtrx *DSSMatrix :: GiveCopy() const
 {
     OOFEM_ERROR("DSSMatrix::GiveCopy -- not implemented");
     return NULL;
 }
-
 
 void DSSMatrix :: times(const FloatArray &x, FloatArray &answer) const
 {
@@ -332,15 +316,13 @@ int DSSMatrix :: assemble(const IntArray &rloc, const IntArray &cloc, const Floa
     return 1;
 }
 
-SparseMtrx *DSSMatrix :: zero()
+void DSSMatrix :: zero()
 {
     _dss->LoadZeros();
 
     // increment version
     this->version++;
     isFactorized = FALSE;
-
-    return this;
 }
 
 SparseMtrx *DSSMatrix :: factorized()
@@ -354,21 +336,12 @@ SparseMtrx *DSSMatrix :: factorized()
     return this;
 }
 
-void
-DSSMatrix :: solve(FloatArray *b, FloatArray *x)
+void DSSMatrix :: solve(FloatArray *b, FloatArray *x)
 {
     x->resize( b->giveSize() );
     _dss->Solve( x->givePointer(), b->givePointer() );
 }
 
-/*
- * void DSSMatrix::toFloatMatrix (FloatMatrix& answer) const
- * {}
- */
-/*
- * void DSSMatrix::printYourself () const
- * {}
- */
 /*********************/
 /*   Array access    */
 /*********************/
@@ -398,47 +371,5 @@ double &DSSMatrix :: operator() (int i, int j)
     return _dss->ElementAt(i, j);
 }
 } // end namespace oofem
-#else // ifndef __DSS_MODULE
 
-namespace oofem {
-double DSS__zero;
-
-DSSMatrix :: DSSMatrix(dssType _t, int n) : SparseMtrx() {
-    OOFEM_ERROR("DSSMatrix: can't create, DSS support not compiled");
-}
-
-DSSMatrix :: DSSMatrix(dssType _t) : SparseMtrx() {
-    OOFEM_ERROR("DSSMatrix: can't create, DSS support not compiled");
-}
-
-DSSMatrix :: DSSMatrix(const DSSMatrix &S) {
-    OOFEM_ERROR("DSSMatrix: can't create, DSS support not compiled");
-}
-
-DSSMatrix :: ~DSSMatrix()
-{}
-
-SparseMtrx *DSSMatrix :: GiveCopy() const {
-    OOFEM_ERROR("DSSMatrix: can't create, DSS support not compiled");
-    return NULL;
-}
-
-void DSSMatrix :: times(const FloatArray &x, FloatArray &answer) const { }
-void DSSMatrix :: times(double x) { }
-int DSSMatrix :: buildInternalStructure(EngngModel *, int, EquationID, const UnknownNumberingScheme &s) { return 0; }
-int DSSMatrix :: assemble(const IntArray &loc, const FloatMatrix &mat) { return 0; }
-int DSSMatrix :: assemble(const IntArray &rloc, const IntArray &cloc, const FloatMatrix &mat) { return 0; }
-SparseMtrx *DSSMatrix :: factorized() { return NULL; }
-void DSSMatrix :: solve(FloatArray *b, FloatArray *x) { }
-SparseMtrx *DSSMatrix :: zero() { return NULL; }
-double &DSSMatrix :: at(int i, int j) { return DSS__zero; }
-double DSSMatrix :: at(int i, int j) const { return 0.; }
-double DSSMatrix :: operator() (int i, int j) const { return 0.; };
-double &DSSMatrix :: operator() (int i, int j) {
-    return DSS__zero;
-}
-} // end namespace oofem
-#endif
-
-
-
+#endif // ifdef __DSS_MODULE

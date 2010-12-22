@@ -39,7 +39,7 @@
 namespace oofem {
 SpoolesSolver :: SpoolesSolver(int i, Domain *d, EngngModel *m) : SparseLinearSystemNM(i, d, m)
 {
-    _error("IMLSolver: can't create, SPOOLES support not compiled");
+    _error("SpoolesSolver: can't create, SPOOLES support not compiled");
 }
 
 SpoolesSolver :: ~SpoolesSolver() { }
@@ -312,7 +312,7 @@ SpoolesSolver :: solve(SparseMtrx *A, FloatArray *b, FloatArray *x)
             fflush(msgFile);
         }
 
-        Tree_writeToFile(frontETree->tree, "haggar.treef");
+        Tree_writeToFile(frontETree->tree, (char*)"haggar.treef");
         /*--------------------------------------------------------------------*/
         /*
          * ------------------------------------------

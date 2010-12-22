@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/dyncomprow.h,v 1.3 2003/04/06 14:08:24 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2010   Borek Patzak
  *
  *
  *
@@ -78,48 +77,22 @@ public:
     DynCompRow &operator=(const DynCompRow &C);
     /// Destructor
     ~DynCompRow();
-    /** Returns {\bf newly allocated} copy of receiver. Programmer must take
-     * care about proper deallocation of allocated space.
-     * @return newly allocated copy of receiver */
+
+    // Overloaded methods:
     SparseMtrx *GiveCopy() const;
-    /** Evaluates a product of receiver with vector.
-     * @param x array to be multiplied with receiver
-     * @param answer result of product of receiver and x parameter
-     */
     void times(const FloatArray &x, FloatArray &answer) const;
-    /** Multiplies receiver by scalar value.
-     * @param x value to multiply receiver
-     */
+    void timesT(const FloatArray &x, FloatArray &answer) const;
     virtual void times(double x);
-    /// Builds internal structure of receiver
     int buildInternalStructure(EngngModel *, int, EquationID, const UnknownNumberingScheme &);
-    /** Assembles receiver from local element contributions.
-     * @param loc location array. The values corresponding to zero loc array value are not assembled.
-     * @param mat contribution to be assembled using loc array.
-     */
     int assemble(const IntArray &loc, const FloatMatrix &mat);
-    /** Assembles receiver from local element contributions.
-     * @param rloc row location array. The values corresponding to zero loc array value are not assembled.
-     * @param cloc column location array. The values corresponding to zero loc array value are not assembled.
-     * @param mat contribution to be assembled using loc array.
-     */
     int assemble(const IntArray &rloc, const IntArray &cloc, const FloatMatrix &mat);
-
-    /// Determines, whether receiver can be factorized.
-    int canBeFactorized() const { return 0; }
-    /// Zeroes the receiver.
-    virtual SparseMtrx *zero();
+    bool canBeFactorized() const { return false; }
+    void zero();
     SparseMtrxType  giveType() const { return SMT_DynCompRow; }
-    int isAntisymmetric() const { return 1; }
-    virtual void printStatistics() const;
-
-    /// Returns coefficient at position (i,j). 1-based element access
-    virtual double &at(int i, int j);
-    /// Returns coefficient at position (i,j). 1-based element access
-    virtual double at(int i, int j) const;
-    virtual void toFloatMatrix(FloatMatrix &answer) const;
-    /// Prints receiver to stdout. Works only for relatively small matrices.
-    virtual void printYourself() const;
+    bool isAsymmetric() const { return true; }
+    void printStatistics() const;
+    double &at(int i, int j);
+    double at(int i, int j) const;
 
     /** Performs LU factorization on yourself; modifies receiver
      * This routine computes the L and U factors of the ILU(p).
@@ -131,7 +104,7 @@ public:
     /*******************************/
     /*  Access and info functions  */
     /*******************************/
-    /// Returns col indx for i-th  row
+    /// Returns col index for i-th  row
     const IntArray *col_ind(int i) const { return colind_ [ i ]; }
     /// Returns row values
     const FloatArray *row(int i) const { return rows_ [ i ]; }
@@ -141,9 +114,9 @@ protected:
     /***********************************/
     /*  General access function (slow) */
     /***********************************/
-    /// implements 0-based acess
+    /// implements 0-based access
     double operator()(int i, int j) const;
-    /// implements 0-based acess
+    /// implements 0-based access
     double &operator()(int i, int j);
 
     /// returns the column index of given column at given row, else returns zero.
@@ -151,19 +124,9 @@ protected:
     /// insert column entry into row, preserving order of column indexes, returns the index of new row.
     int insertColInRow(int row, int col);
 
-#ifdef IML_COMPAT
-    /***********************************/
-    /*  Matrix/Vector multiply         */
-    /***********************************/
-
-    FloatArray operator*(const FloatArray &x) const;
-    FloatArray trans_mult(const FloatArray &x) const;
-
-#endif
-
-    void          checkSizeTowards(IntArray &);
-    void          checkSizeTowards(const IntArray &rloc, const IntArray &cloc);
-    void          growTo(int);
+    void checkSizeTowards(IntArray &);
+    void checkSizeTowards(const IntArray &rloc, const IntArray &cloc);
+    void growTo(int);
 
     void qsortRow(IntArray &ind, IntArray &ir, FloatArray &val, int l, int r);
     int qsortRowPartition(IntArray &ind, IntArray &ir, FloatArray &val, int l, int r);

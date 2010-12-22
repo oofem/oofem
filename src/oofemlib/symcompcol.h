@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/symcompcol.h,v 1.3 2003/04/06 14:08:26 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2010   Borek Patzak
  *
  *
  *
@@ -81,66 +80,45 @@ namespace oofem {
  */
 class SymCompCol : public CompCol
 {
-protected:
-
 public:
-    /** Constructor. Before any operation an internal profile must be built.
-     * @see builInternalStructure
+    /**
+     * Constructor.
+     * Before any operation an internal profile must be built.
+     * @param n Size of matrix
+     * @see buildInternalStructure
      */
     SymCompCol(int n);
-    /** Constructor. Before any operation an internal profile must be built.
-     * @see builInternalStructure
+    /**
+     * Constructor.
+     * Before any operation an internal profile must be built.
+     * @see buildInternalStructure
      */
     SymCompCol();
     /// Copy constructor
     SymCompCol(const SymCompCol &S);
     /// Destructor
-    ~SymCompCol() { }                             // destructor
-    /** Returns {\bf newly allocated} copy of receiver. Programmer must take
-     * care about proper deallocation of allocated space.
-     * @return newly allocated copy of receiver */
+    ~SymCompCol() { }
+
+    // Overloaded methods
     SparseMtrx *GiveCopy() const;
-    /** Evaluates a product of receiver with vector.
-     * @param x array to be multiplied with receiver
-     * @param answer result of product of receiver and x parameter
-     */
     void times(const FloatArray &x, FloatArray &answer) const;
-    /** Multiplies receiver by scalar value.
-     * @param x value to multiply receiver
-     */
+    void timesT(const FloatArray &x, FloatArray &answer) const { this->times(x,answer); }
     virtual void times(double x);
-    /// Builds internal structure of receiver
     int buildInternalStructure(EngngModel *, int, EquationID, const UnknownNumberingScheme &);
-    /** Assembles receiver from local element contributions.
-     * @param loc location array. The values corresponding to zero loc array value are not assembled.
-     * @param mat contribution to be assembled using loc array.
-     */
     int assemble(const IntArray &loc, const FloatMatrix &mat);
-    /** Assembles receiver from local element contributions.
-     * @param rloc row location array. The values corresponding to zero loc array value are not assembled.
-     * @param cloc column location array. The values corresponding to zero loc array value are not assembled.
-     * @param mat contribution to be assembled using loc array.
-     */
     int assemble(const IntArray &rloc, const IntArray &cloc, const FloatMatrix &mat);
-
-    /// Determines, whether receiver can be factorized.
-    int canBeFactorized() const { return 0; }
-    /// Zeroes the receiver.
-    virtual SparseMtrx *zero();
-
-    /// Returns coefficient at position (i,j). 1-based element access
+    bool canBeFactorized() const { return false; }
+    virtual void zero();
     virtual double &at(int i, int j);
-    /// Returns coefficient at position (i,j). 1-based element access
     virtual double at(int i, int j) const;
+    SparseMtrxType giveType() const { return SMT_SymCompCol; }
+    bool isAntisymmetric() const { return false; }
 
-    SparseMtrxType  giveType() const { return SMT_SymCompCol; }
-    int isAntisymmetric() const { return 0; }
 
     const double &val(int i) const { return val_(i); }
     const int &row_ind(int i) const { return rowind_(i); }
     const int &col_ptr(int i) const { return colptr_(i); }
-
-    int          dim(int i) const { return dim_ [ i ]; };
+    int dim(int i) const { return dim_ [ i ]; };
 
 protected:
     /*******************************/
@@ -151,37 +129,17 @@ protected:
     int &row_ind(int i) { return rowind_(i); }
     int &col_ptr(int i) { return colptr_(i); }
 
-    int          size(int i) const { return dim_ [ i ]; };
-    int          NumNonzeros() const { return nz_; };
-    int          base() const { return base_; }
+    int size(int i) const { return dim_ [ i ]; };
+    int NumNonzeros() const { return nz_; };
+    int base() const { return base_; }
 
     /***********************************/
     /*  General access function (slow) */
     /***********************************/
-    /// implements 0-based acess
+    /// implements 0-based access
     double operator()(int i, int j) const;
-    /// implements 0-based acess
+    /// implements 0-based access
     double &operator()(int i, int j);
-
-#ifdef IML_COMPAT
-    /***********************************/
-    /*  Matrix/Vector multiply         */
-    /***********************************/
-
-    FloatArray operator*(const FloatArray &x) const
-    {
-        FloatArray answer;
-        this->times(x, answer);
-        return answer;
-    }
-    FloatArray trans_mult(const FloatArray &x) const
-    {
-        FloatArray answer;
-        this->times(x, answer);
-        return answer;
-    }
-
-#endif
 };
 } // end namespace oofem
 #endif // symcompcol_h

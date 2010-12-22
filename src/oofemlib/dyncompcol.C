@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/dyncompcol.C,v 1.5.4.1 2004/04/05 15:19:43 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2010   Borek Patzak
  *
  *
  *
@@ -32,7 +31,6 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-// Class DynCompCol
 
 // inspired by SL++
 
@@ -219,7 +217,6 @@ SparseMtrx *DynCompCol :: GiveCopy() const
     DynCompCol *result = new DynCompCol(*this);
     return result;
 }
-
 
 void DynCompCol :: times(const FloatArray &x, FloatArray &answer) const
 {
@@ -583,7 +580,7 @@ int DynCompCol :: assemble(const IntArray &rloc, const IntArray &cloc, const Flo
     return 1;
 }
 
-SparseMtrx *DynCompCol :: zero()
+void DynCompCol :: zero()
 {
 #ifndef DynCompCol_USE_STL_SETS
     for ( int j = 0; j < nColumns; j++ ) {
@@ -603,15 +600,7 @@ SparseMtrx *DynCompCol :: zero()
 #endif
     // increment version
     this->version++;
-    return this;
 }
-
-
-void DynCompCol :: toFloatMatrix(FloatMatrix &answer) const
-{ }
-
-void DynCompCol :: printYourself() const
-{ }
 
 void DynCompCol :: printStatistics() const
 {
@@ -767,61 +756,14 @@ double &DynCompCol :: operator() (int i, int j)
 }
 
 
-/***************************************/
-/* Matrix-Vector multiplication...  */
-/***************************************/
-
-FloatArray DynCompCol :: operator *( const FloatArray & x ) const
+void DynCompCol :: timesT(const FloatArray &x, FloatArray &answer) const
 {
-    //      Check for compatible dimensions:
-    if ( x.giveSize() != nColumns ) {
-        OOFEM_ERROR("DynCompCol::operator*: Error in CompCol -- incompatible dimensions");
-        return x;
-    }
-
-    FloatArray result(nRows);
-
-#ifndef DynCompCol_USE_STL_SETS
-    int j, t;
-    double rhs;
-
-    for ( j = 0; j < nColumns; j++ ) {
-        rhs = x(j);
-        for ( t = 1; t <= columns_ [ j ]->giveSize(); t++ ) {
-            result( rowind_ [ j ]->at(t) ) += columns_ [ j ]->at(t) * rhs;
-        }
-    }
-
-#else
-    int j;
-    double rhs;
-    std :: map< int, double > :: iterator pos;
-
-    for ( j = 0; j < nColumns; j++ ) {
-        rhs = x(j);
-        for ( pos = columns [ j ]->begin(); pos != columns [ j ]->end(); ++pos ) {
-            result(pos->first) += pos->second * rhs;
-        }
-    }
-
-#endif
-
-    return result;
-}
-
-/**********************************************/
-/* Matrix-Transpose-Vector multiplication...  */
-/**********************************************/
-
-FloatArray DynCompCol :: trans_mult(const FloatArray &x) const
-{
-    //      Check for compatible dimensions:
+    // Check for compatible dimensions:
     if ( x.giveSize() != nRows ) {
         OOFEM_ERROR("DynCompCol::trans_mult: Error in CompCol -- incompatible dimensions");
-        return x;
     }
-
-    FloatArray result(nColumns);
+    answer.resize(nColumns);
+    answer.zero();
 
 #ifndef DynCompCol_USE_STL_SETS
     int i, t;
@@ -833,7 +775,7 @@ FloatArray DynCompCol :: trans_mult(const FloatArray &x) const
             r += columns_ [ i ]->at(t) * x( rowind_ [ i ]->at(t) );
         }
 
-        result(i) = r;
+        answer(i) = r;
     }
 
 #else
@@ -847,12 +789,10 @@ FloatArray DynCompCol :: trans_mult(const FloatArray &x) const
             r += pos->second * x(pos->first);
         }
 
-        result(i) = r;
+        answer(i) = r;
     }
 
 #endif
-
-    return result;
 }
 
 

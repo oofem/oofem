@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/dyncompcol.h,v 1.3 2003/04/06 14:08:24 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2010   Borek Patzak
  *
  *
  *
@@ -71,7 +70,7 @@ protected:
     std :: map< int, double > ** columns;
 #endif
 
-    int base_;              // index base: offset of first element
+    int base_; // index base: offset of first element
 
 public:
     /** Constructor. Before any operation an internal profile must be built.
@@ -88,54 +87,28 @@ public:
     DynCompCol &operator=(const DynCompCol &C);
     /// Destructor
     ~DynCompCol();
-    /** Returns {\bf newly allocated} copy of receiver. Programmer must take
-     * care about proper deallocation of allocated space.
-     * @return newly allocated copy of receiver */
+
+    // Overloaded methods:
     SparseMtrx *GiveCopy() const;
-    /** Evaluates a product of receiver with vector.
-     * @param x array to be multiplied with receiver
-     * @param answer result of product of receiver and x parameter
-     */
     void times(const FloatArray &x, FloatArray &answer) const;
-    /** Multiplies receiver by scalar value.
-     * @param x value to multiply receiver
-     */
+    void timesT(const FloatArray &x, FloatArray &answer) const;
     virtual void times(double x);
-    /// Builds internal structure of receiver
     int buildInternalStructure(EngngModel *, int, EquationID, const UnknownNumberingScheme &);
-    /** Assembles receiver from local element contributions.
-     * @param loc location array. The values corresponding to zero loc array value are not assembled.
-     * @param mat contribution to be assembled using loc array.
-     */
     int assemble(const IntArray &loc, const FloatMatrix &mat);
-    /** Assembles receiver from local element contributions.
-     * @param rloc row location array. The values corresponding to zero loc array value are not assembled.
-     * @param cloc column location array. The values corresponding to zero loc array value are not assembled.
-     * @param mat contribution to be assembled using loc array.
-     */
     int assemble(const IntArray &rloc, const IntArray &cloc, const FloatMatrix &mat);
-
-    /// Determines, whether receiver can be factorized.
-    int canBeFactorized() const { return 0; }
-    /// Zeroes the receiver.
-    virtual SparseMtrx *zero();
+    bool canBeFactorized() const { return false; }
+    virtual void zero();
     SparseMtrxType  giveType() const { return SMT_DynCompCol; }
-    int isAntisymmetric() const { return 1; }
-
-    /// Returns coefficient at position (i,j). 1-based element access
+    bool isAsymmetric() const { return true; }
     virtual double &at(int i, int j);
-    /// Returns coefficient at position (i,j). 1-based element access
     virtual double at(int i, int j) const;
-    virtual void toFloatMatrix(FloatMatrix &answer) const;
-    /// Prints receiver to stdout. Works only for relatively small matrices.
-    virtual void printYourself() const;
     virtual void printStatistics() const;
 
     /*******************************/
     /*  Access and info functions  */
     /*******************************/
 #ifndef DynCompCol_USE_STL_SETS
-    /// Returns row indx for i-th  column
+    /// Returns row index for i-th  column
     const IntArray *row_ind(int i) const { return rowind_ [ i ]; }
     /// Returns column values
     const FloatArray *column(int i) const { return columns_ [ i ]; }
@@ -149,30 +122,21 @@ protected:
     /***********************************/
     /*  General access function (slow) */
     /***********************************/
-    /// implements 0-based acess
+    /// Implements 0-based access
     double operator()(int i, int j) const;
-    /// implements 0-based acess
+    /// Implements 0-based access
     double &operator()(int i, int j);
 
 #ifndef DynCompCol_USE_STL_SETS
-    /// returns the row index of given row at given column, else returns zero.
+    /// Returns the row index of given row at given column, else returns zero.
     int giveRowIndx(int col, int row) const;
-    /// insert row entry into column, preserving order of row indexes, returns the index of new row.
+    /// Insert row entry into column, preserving order of row indexes, returns the index of new row.
     int insertRowInColumn(int col, int row);
 #endif
-#ifdef IML_COMPAT
-    /***********************************/
-    /*  Matrix/Vector multiply         */
-    /***********************************/
 
-    FloatArray operator*(const FloatArray &x) const;
-    FloatArray trans_mult(const FloatArray &x) const;
-
-#endif
-
-    void          checkSizeTowards(IntArray &);
-    void          checkSizeTowards(const IntArray &rloc, const IntArray &cloc);
-    void          growTo(int);
+    void checkSizeTowards(IntArray &);
+    void checkSizeTowards(const IntArray &rloc, const IntArray &cloc);
+    void growTo(int);
 };
 } // end namespace oofem
 #endif // dyncompcol_h

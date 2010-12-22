@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/skylineu.C,v 1.2.4.1 2004/04/05 15:19:43 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2010   Borek Patzak
  *
  *
  *
@@ -268,8 +267,7 @@ SkylineUnsym :: checkSizeTowards(const IntArray &rloc, const IntArray &cloc)
 int
 SkylineUnsym :: buildInternalStructure(EngngModel *eModel, int di, EquationID ut, const UnknownNumberingScheme &s)
 {
-    // Instanciates the profile of the receiver and initializes all coeffi-
-    // cients to zero.
+    // Instanciates the profile of the receiver and initializes all coefficients to zero.
     // Warning : case diagonal (lumped) matrix to expected.
 
     IntArray loc;
@@ -718,7 +716,7 @@ SkylineUnsym :: printYourself() const
     copy.printYourself();
 }
 
-SparseMtrx *
+void
 SkylineUnsym :: zero()
 {
     // Returns the receiver with all coefficients set to zero.
@@ -732,8 +730,6 @@ SkylineUnsym :: zero()
 
     // increment version
     this->version++;
-
-    return this;
 }
 
 /*
@@ -774,20 +770,17 @@ SkylineUnsym :: SkylineUnsym(RowColumn **newRowCol, int newSize, int isFact) : S
     isFactorized = isFact;
 }
 
-#ifdef IML_COMPAT
-
-FloatArray SkylineUnsym :: trans_mult(const FloatArray &x) const
+void SkylineUnsym :: timesT(const FloatArray &x, FloatArray &answer) const
 {
     int starti, i, j;
     RowColumn *rowColumni;
-    //
+
     // first check sizes
-    //
     if ( this->size != x.giveSize() ) {
         OOFEM_ERROR("SkylineUnsym::trans_mult : size mismatch");
     }
 
-    FloatArray answer(this->size);
+    answer.resize(this->size);
     answer.zero();
 
     for ( i = 1; i <= size; i++ ) {
@@ -800,8 +793,5 @@ FloatArray SkylineUnsym :: trans_mult(const FloatArray &x) const
             answer.at(j) += rowColumni->atL(j) * x.at(i);
         }
     }
-
-    return answer;
 }
-#endif
 } // end namespace oofem

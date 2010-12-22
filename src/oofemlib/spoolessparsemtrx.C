@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/spoolessparsemtrx.C,v 1.1.4.1 2004/04/05 15:19:43 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2010   Borek Patzak
  *
  *
  *
@@ -54,27 +53,21 @@ SpoolesSparseMtrx :: GiveCopy() const
 void
 SpoolesSparseMtrx :: times(const FloatArray &x, FloatArray &answer) const
 {
+    double alpha = 1.0, beta = 0.0;
     int result;
-    double alpha [ 1 ] = {
-        1.0
-    };
-    double beta [ 1 ] = {
-        0.0
-    };
 
-    answer.resize( x.giveSize() );
+    answer.resize( this->giveNumberOfColumns() );
     answer.zero();
 
     if ( sflag == SPOOLES_SYMMETRIC ) {
-        result = InpMtx_sym_gmvm( this->mtrx, beta, 1, answer.givePointer(), alpha, 1, x.givePointer() );
+        result = InpMtx_sym_gmvm( this->mtrx, & beta, 1, answer.givePointer(), & alpha, 1, x.givePointer() );
     } else if ( sflag == SPOOLES_NONSYMMETRIC ) {
-        result = InpMtx_nonsym_gmvm( this->mtrx, beta, 1, answer.givePointer(), alpha, 1, x.givePointer() );
+        result = InpMtx_nonsym_gmvm( this->mtrx, & beta, 1, answer.givePointer(), & alpha, 1, x.givePointer() );
     } else {
         OOFEM_ERROR("SpoolesSparseMtrx::times - unsupported symmetry flag");
         exit(1);
     }
 }
-
 
 void
 SpoolesSparseMtrx :: times(double x)
@@ -82,10 +75,31 @@ SpoolesSparseMtrx :: times(double x)
     OOFEM_ERROR("SpoolesSparseMtrx::times(double x) - unsupported");
 }
 
+void
+SpoolesSparseMtrx :: timesT(const FloatArray &x, FloatArray &answer) const
+{
+    double alpha = 1.0, beta = 0.0;
+    int result;
+    answer.resize(this->giveNumberOfRows());
+    answer.zero();
+
+    if ( sflag == SPOOLES_SYMMETRIC ) {
+        result = InpMtx_sym_gmvm( this->mtrx, & beta, 1, answer.givePointer(), & alpha, 1, x.givePointer() );
+    } else if ( sflag == SPOOLES_NONSYMMETRIC ) {
+        result = InpMtx_nonsym_gmvm_T( this->mtrx, & beta, 1, answer.givePointer(), & alpha, 1, x.givePointer() );
+    } else {
+        OOFEM_ERROR("SpoolesSparseMtrx::timesT - unsupported symmetry flag");
+    }
+
+    if ( result != 1 ) {
+        OOFEM_ERROR2("SpoolesSparseMtrx::timesT - error code from InpMtx_(non)sym_gmvm %d", result);
+    }
+}
+
 int
 SpoolesSparseMtrx :: buildInternalStructure(EngngModel *eModel, int di, EquationID ut, const UnknownNumberingScheme &s)
 {
-    // detrmine number of equations and estimate number of nonzero entries
+    // Determine number of equations and estimate number of nonzero entries
     int neq = eModel->giveNumberOfDomainEquations(di, ut);
     int nent = neq * 5;
 
@@ -123,7 +137,7 @@ SpoolesSparseMtrx :: assemble(const IntArray &loc, const FloatMatrix &mat)
         }
     }
 
-    // increment vesion
+    // increment version
     this->version++;
     return 1;
 }
@@ -153,11 +167,10 @@ SpoolesSparseMtrx :: assemble(const IntArray &rloc, const IntArray &cloc, const 
     return 1;
 }
 
-SparseMtrx *
+void
 SpoolesSparseMtrx :: zero()
 {
     InpMtx_clearData(this->mtrx);
-    return this;
 }
 
 double &
@@ -175,12 +188,6 @@ SpoolesSparseMtrx :: at(int i, int j) const
 }
 
 void
-SpoolesSparseMtrx :: toFloatMatrix(FloatMatrix &answer) const
-{
-    OOFEM_ERROR("SpoolesSparseMtrx::toFloatMatrix() - unsupported");
-}
-
-void
 SpoolesSparseMtrx :: printStatistics() const
 {
     InpMtx_writeStats(this->mtrx, stdout);
@@ -192,27 +199,5 @@ SpoolesSparseMtrx :: printYourself() const
     InpMtx_writeForHumanEye(this->mtrx, stdout);
 }
 
-FloatArray
-SpoolesSparseMtrx :: trans_mult(const FloatArray &x) const
-{
-    FloatArray answer( x.giveSize() );
-    double alpha = 1.0, beta = 0.0;
-    answer.zero();
-    int result;
-
-    if ( sflag == SPOOLES_SYMMETRIC ) {
-        result = InpMtx_sym_gmvm( this->mtrx, & beta, 1, answer.givePointer(), & alpha, 1, x.givePointer() );
-    } else if ( sflag == SPOOLES_NONSYMMETRIC ) {
-        result = InpMtx_nonsym_gmvm_T( this->mtrx, & beta, 1, answer.givePointer(), & alpha, 1, x.givePointer() );
-    } else {
-        OOFEM_ERROR("SpoolesSparseMtrx::trans_mult - unsupported symmetry flag");
-    }
-
-    if ( result != 1 ) {
-        OOFEM_ERROR2("SpoolesSparseMtrx::trans_mult: error code from InpMtx_(non)sym_gmvm %d", result);
-    }
-
-    return answer;
-}
 } // end namespace oofem
 #endif //ifdef __SPOOLES_MODULE

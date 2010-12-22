@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/dyncomprow.C,v 1.5.4.1 2004/04/05 15:19:43 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2010   Borek Patzak
  *
  *
  *
@@ -433,7 +432,7 @@ int DynCompRow :: assemble(const IntArray &rloc, const IntArray &cloc, const Flo
     return 1;
 }
 
-SparseMtrx *DynCompRow :: zero()
+void DynCompRow :: zero()
 {
     for ( int j = 0; j < nRows; j++ ) {
         rows_ [ j ]->zero();
@@ -441,15 +440,8 @@ SparseMtrx *DynCompRow :: zero()
 
     // increment version
     this->version++;
-    return this;
 }
 
-
-void DynCompRow :: toFloatMatrix(FloatMatrix &answer) const
-{ }
-
-void DynCompRow :: printYourself() const
-{ }
 
 void DynCompRow :: printStatistics() const
 {
@@ -526,49 +518,15 @@ double &DynCompRow :: operator() (int i, int j)
     return rows_ [ 0 ]->at(1); // return to suppress compiler warning message
 }
 
-
-/***************************************/
-/* Matrix-Vector multiplication...  */
-/***************************************/
-
-FloatArray DynCompRow :: operator *( const FloatArray & x ) const
-{
-    //      Check for compatible dimensions:
-    if ( x.giveSize() != nColumns ) {
-        OOFEM_ERROR("DynCompRow::operator*: Error in CompRow -- incompatible dimensions");
-        return x;
-    }
-
-    FloatArray result(nRows);
-
-    int j, t;
-    double r;
-
-    for ( j = 0; j < nRows; j++ ) {
-        r = 0.0;
-        for ( t = 1; t <= rows_ [ j ]->giveSize(); t++ ) {
-            r += rows_ [ j ]->at(t) * x( colind_ [ j ]->at(t) );
-        }
-
-        result(j) = r;
-    }
-
-    return result;
-}
-
-/**********************************************/
-/* Matrix-Transpose-Vector multiplication...  */
-/**********************************************/
-
-FloatArray DynCompRow :: trans_mult(const FloatArray &x) const
+void DynCompRow :: timesT(const FloatArray &x, FloatArray &answer) const
 {
     //      Check for compatible dimensions:
     if ( x.giveSize() != nRows ) {
         OOFEM_ERROR("DynCompRow::trans_mult: Error in CompRow -- incompatible dimensions");
-        return x;
     }
 
-    FloatArray result(nColumns);
+    answer.resize(nColumns);
+    answer.zero();
 
     int i, t;
     double r;
@@ -576,11 +534,9 @@ FloatArray DynCompRow :: trans_mult(const FloatArray &x) const
     for ( i = 0; i < nColumns; i++ ) {
         r = x(i);
         for ( t = 1; t <= rows_ [ i ]->giveSize(); t++ ) {
-            result( colind_ [ i ]->at(t) ) += rows_ [ i ]->at(t) * r;
+            answer( colind_ [ i ]->at(t) ) += rows_ [ i ]->at(t) * r;
         }
     }
-
-    return result;
 }
 
 

@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/skylineu.h,v 1.2 2003/04/06 14:08:25 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2010   Borek Patzak
  *
  *
  *
@@ -58,81 +57,44 @@ class SkylineUnsym : public SparseMtrx
 protected:
     /// Row column segments
     RowColumn **rowColumns;
-    /// size of receiver
+    /// Size of receiver
     int size;
-    /// factorizationFlag
+    /// Factorization flag
     int isFactorized;
 
 public:
     /** Constructor. Before any operation an internal profile must be built.
-     * @see builInternalStructure
+     * @param n Size of matrix
+     * @see buildInternalStructure
      */
     SkylineUnsym(int n);
     /** Constructor. Before any operation an internal profile must be built.
-     * @see builInternalStructure
+     * @see buildInternalStructure
      */
     SkylineUnsym();
     /// Destructor
-    ~SkylineUnsym();                               // destructor
+    ~SkylineUnsym();
 
-    /** Returns {\bf newly allocated} copy of receiver. Programmer must take
-     * care about proper deallocation of allocated space.
-     * @return newly allocated copy of receiver */
+    // Overloaded methods:
     SparseMtrx *GiveCopy() const;
-    /** Evaluates a product of receiver with vector.
-     * @param x array to be multiplied with receiver
-     * @param answer result of product of receiver and x parameter
-     */
     void times(const FloatArray &x, FloatArray &answer) const;
-    /** Multiplies receiver by scalar value.
-     * @param x value to multiply receiver
-     */
+    void timesT(const FloatArray &x, FloatArray &answer) const;
     virtual void times(double x);
-    /// Builds internal structure of receiver
     int buildInternalStructure(EngngModel *, int, EquationID, const UnknownNumberingScheme & s);
-    /**
-     * allocates and built structure according to given
-     * array of maximal column heights
-     */
     int setInternalStructure(IntArray *a);
-
-    /** Assembles receiver from local element contributions.
-     * @param loc location array. The values corresponding to zero loc array value are not assembled.
-     * @param mat contribution to be assembled using loc array.
-     */
     int assemble(const IntArray &loc, const FloatMatrix &mat);
-    /** Assembles receiver from local element contributions.
-     * @param rloc row location array. The values corresponding to zero loc array value are not assembled.
-     * @param cloc column location array. The values corresponding to zero loc array value are not assembled.
-     * @param mat contribution to be assembled using loc array.
-     */
     int assemble(const IntArray &rloc, const IntArray &cloc, const FloatMatrix &mat);
-
-    /// Determines, whether receiver can be factorized.
-    int canBeFactorized() const { return 1; }
-    /// Performs factorization of receiver
+    bool canBeFactorized() const { return true; }
     SparseMtrx *factorized();
-    /**
-     * Computes the solution of linear system \f$A x = y\f$. A is receiver.
-     * solution vector x overwrites the right hand side vector y.
-     * Receiver must be in factorized form.
-     * @param y right hand side on input, solution on output.
-     * @return pointer to y array
-     * @see factorized method
-     */
     FloatArray *backSubstitutionWith(FloatArray &) const;
-    /// Zeroes the receiver.
-    virtual SparseMtrx *zero();
-
-    /// Returns coefficient at position (i,j).
-    virtual double &at(int i, int j);
-    virtual double  at(int i, int j) const;
-    virtual void toFloatMatrix(FloatMatrix &answer) const;
-    /// Prints receiver to stdout. Works only for relatively small matrices.
+    void zero();
+    double &at(int i, int j);
+    double at(int i, int j) const;
+    void toFloatMatrix(FloatMatrix &answer) const;
     virtual void printYourself() const;
     virtual void printStatistics() const;
-    SparseMtrxType  giveType() const { return SMT_SkylineU; }
-    int isAntisymmetric() const { return 1; }
+    SparseMtrxType giveType() const { return SMT_SkylineU; }
+    bool isAsymmetric() const { return true; }
 
 protected:
     /*
@@ -148,10 +110,10 @@ protected:
      *    Skyline*      factorized () ;
      *    Skyline*      forwardReductionWith (FloatArray*) ;
      */
-    void          checkSizeTowards(const IntArray &);
-    void          checkSizeTowards(const IntArray &rloc, const IntArray &cloc);
+    void checkSizeTowards(const IntArray &);
+    void checkSizeTowards(const IntArray &rloc, const IntArray &cloc);
     RowColumn *giveRowColumn(int j) const;
-    void          growTo(int);
+    void growTo(int);
     /*
      * void          printYourself () ;
      * Skyline*      reinitialized () ;
@@ -160,15 +122,6 @@ protected:
      */
 
     SkylineUnsym(RowColumn **, int, int);
-
-#ifdef IML_COMPAT
-    /***********************************/
-    /*  Matrix/Vector multiply         */
-    /***********************************/
-
-    virtual FloatArray trans_mult(const FloatArray &x) const;
-
-#endif
 };
 } // end namespace oofem
 #endif // skylineu_h

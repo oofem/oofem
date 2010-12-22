@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/matrix.h,v 1.5 2003/04/06 14:08:25 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2010   Borek Patzak
  *
  *
  *
@@ -39,31 +38,19 @@
  * PhD Thesis, EPFL, Lausanne, 1992.
  */
 
-//   ********************
-//   *** CLASS MATRIX ***
-//   ********************
-
-
 #ifndef matrix_h
 #define matrix_h
 
-namespace oofem {
-/* class FloatMatrix ; class IntArray ; */
+#include "logger.h"
 
-/** Abstract root class  for matrices. Matrix is characterized by its size.
+namespace oofem {
+
+/**
+ * Abstract root class for matrices.
+ * The matrix is characterized by its size.
  */
 class Matrix
 {
-    /*
-     * This abstract class is the superclass of the class that implement
-     * matrices (FloatMatrix, PolynomialMatrix,...).
-     * DESCRIPTION :
-     * A matrix is characterized by its number of rows and columns.
-     * TASKS :
-     * Its tasks are defined in the subclasses.
-     */
-
-
 protected:
     /// Number of rows
     int nRows;
@@ -72,8 +59,9 @@ protected:
 
 public:
     /// Constructor, creates zero sized matrix
-    Matrix()             { nRows = nColumns = 0; }      // constructors
-    /** Constructor. Creates zero matrix, with given size.
+    Matrix() { nRows = nColumns = 0; }
+    /**
+     * Constructor, creates zero matrix, with given size.
      * @param n number of rows
      * @param m number of rows
      */
@@ -82,25 +70,25 @@ public:
         nColumns = m;
     }
     /// Destructor.
-    virtual ~Matrix()    { }                            // destructor
+    virtual ~Matrix() { }
 
-    /** checks size of receiver towards requested bounds.
-     * Current implementation will call exit(1), if dimension
-     * mismatch found.
+    /**
+     * Checks size of receiver towards requested bounds.
+     * Current implementation will call exit(1), if positions are outside bounds.
      * @param i required number of rows
-     * @param j required number of clumns
+     * @param j required number of columns
      */
-    void          checkBounds(int i, int j) const;
+    void checkBounds(int i, int j) const;
     /// Returns number of rows of receiver
-    int           giveNumberOfRows()    const { return nRows; }
+    int giveNumberOfRows() const { return nRows; }
     /// Returns number of columns of receiver
-    int           giveNumberOfColumns() const { return nColumns; }
+    int giveNumberOfColumns() const { return nColumns; }
     /// Returns nonzero if receiver is square matrix.
-    int           isSquare()            const { return ( !nRows - nColumns ); }
+    bool isSquare() const { return nRows == nColumns; }
     /// Tests for empty matrix.
-    int           isNotEmpty()             const { return ( ( ( nRows == 0 ) && ( nColumns == 0 ) ) ? 0 : 1 ); }
-    /// Prints receiver on stdin. Usefull mainly for debugging
-    virtual void  printYourself() const { }
+    bool isNotEmpty() const { return nRows > 0 && nColumns > 0; }
+    /// Prints receiver on stdout. Useful mainly for debugging
+    virtual void printYourself() const { OOFEM_LOG_INFO("Matrix :: printYourself - Not implemented"); }
 };
 } // end namespace oofem
 #endif // matrix_h

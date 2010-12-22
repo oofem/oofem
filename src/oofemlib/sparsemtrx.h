@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/sparsemtrx.h,v 1.12.4.1 2004/04/05 15:19:43 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2010   Borek Patzak
  *
  *
  *
@@ -41,10 +40,6 @@
 #ifndef sparsemtrx_h
 #define sparsemtrx_h
 
-//#ifdef __GNUG__
-//#pragma interface
-//#endif
-
 #ifndef __MAKEDEPEND
  #include <stdio.h>
 #endif
@@ -62,92 +57,83 @@ namespace oofem {
 class EngngModel;
 class TimeStep;
 /**
- * Base class for all matrices stored in sparse format. Basicaly sparce matrix
+ * Base class for all matrices stored in sparse format. Basically sparse matrix
  * contains contribution of local element matrices. Localization of local element
  * matrix into global (structural) matrix is determined using element code numbers.
- * Basic methods include building internal structure of sparse matrix
- * (according to code numbers of elements), assembling of local element matrices,
- * multiplication by array, and possible factorization and back substitution.
+ * Basic methods include
+ * - Building internal structure of sparse matrix (according to code numbers of elements)
+ * - Assembling of local element matrices
+ * - Multiplication by array
+ * - Possible factorization and back substitution.
  */
 class SparseMtrx : public Matrix
 {
-    /*
-     * This class implements a base class for sparse matrices containing
-     * floating point numbers.
-     * DESCRIPTION :
-     * The sparse matrix contains contributions (local matrices) from FE element.
-     * Mapping between local element matrix values and SparseMatrix values is determined
-     * by code number array of each particular element.
-     * TASKS :
-     * - building its internal storage structure (method 'buildInternalStructure')
-     * - store and localize local matrices (method 'localize')
-     * - performing standard operations : multiplication by array (method 'times')
-     * - possible factorization and backSubstitution (recognized by nonzero result of
-     *  canBeFactorized) (methods 'factorize' and 'backSubstitution')
-     * - setting all coefficients to zero (method 'zero')
-     */
 public:
     typedef long SparseMtrxVersionType;
 protected:
     /**
      * Allows to track if receiver changes.
      * Any change on receiver should increment this variable.
-     * The factorization should not change version (nrsolver direct controll relies on that).
+     * The factorization should not change version (nrsolver direct control relies on that).
      * This version info is used for example by preconditioners associated to
      * particular matrix; the preconditioner initialization can be demanding
-     * and this versioning allows to reuse initilized preconditioner for same
+     * and this versioning allows to reuse initialized preconditioner for same
      * matrix, if there is no change;
      */
     SparseMtrxVersionType version;
 
 public:
-    /** Constructor, creates (n,m) sparse matrix. Due to sparsity character of matrix,
-     * not all coefficient are physicaly stored (in general, zero members are ommited).
+    /**
+     * Constructor, creates (n,m) sparse matrix. Due to sparsity character of matrix,
+     * not all coefficient are physically stored (in general, zero members are omitted).
      */
     SparseMtrx(int n, int m) : Matrix(n, m) { version = 0; }
     /// Constructor
     SparseMtrx() : Matrix() { version = 0; }
+
     // plus copy and assignment operators defined by derived classes
     //SparseMtrx& SparseMtrx::operator=(const SparseMtrx &C)  ;
     //SparseMtrx::SparseMtrx(const SparseMtrx &S) ;
 
-
-    /** Return receiver version */
+    /// Return receiver version
     SparseMtrxVersionType giveVersion() { return this->version; }
 
-    /** Returns {\bf newly allocated} copy of receiver. Programmer must take
+    /**
+     * Returns <em>newly allocated</em> copy of receiver. Programmer must take
      * care about proper deallocation of allocated space.
-     * @return newly allocated copy of receiver */
-    virtual SparseMtrx *GiveCopy() const = 0;
+     * @return newly allocated copy of receiver
+     */
+    virtual SparseMtrx *GiveCopy() const { OOFEM_ERROR("SparseMtrx :: GiveCopy - Not implemented"); return NULL; }
 
     /**
-     * Evaluates @f$ y = A\cdot x @f$
+     * Evaluates @f$ y = A \cdot x @f$
      * @param x Array to be multiplied with receiver.
      * @param answer y.
      */
-    virtual void times(const FloatArray &x, FloatArray &answer) const { OOFEM_ERROR("Not implemented"); };
+    virtual void times(const FloatArray &x, FloatArray &answer) const { OOFEM_ERROR("SparseMtrx :: times(FloatArray,FloatArray) - Not implemented"); };
     /**
-     * Evaluates @f$ y = A^{\rm T}\cdot x @f$
+     * Evaluates @f$ y = A^{\mathrm{T}} \cdot x @f$
      * @param x Array to be multiplied with transpose of the receiver.
      * @param answer y.
      */
-    virtual void timesT(const FloatArray &x, FloatArray &answer) const { OOFEM_ERROR("Not implemented"); };
+    virtual void timesT(const FloatArray &x, FloatArray &answer) const { OOFEM_ERROR("SparseMtrx :: timesT(FloatArray,FloatArray) - Not implemented"); };
     /**
-     * Evaluates @f$ C = A^{\rm T}\cdot B @f$
+     * Evaluates @f$ C = A^{\mathrm{T}} \cdot B @f$
      * @param B array to be multiplied with receiver.
      * @param answer C.
      */
-    virtual void times(const FloatMatrix &B, FloatMatrix &answer) const { OOFEM_ERROR("Not implemented"); };
+    virtual void times(const FloatMatrix &B, FloatMatrix &answer) const { OOFEM_ERROR("SparseMtrx :: times(FloatMatrix,FloatMatrix) - Not implemented"); };
     /**
-     * Evaluates @f$ C = A^{\rm T}\cdot B @f$
+     * Evaluates @f$ C = A^{\mathrm{T}} \cdot B @f$
      * @param x matrix to be multiplied with receiver.
      * @param answer C.
      */
-    virtual void timesT(const FloatMatrix &B, FloatMatrix &answer) const { OOFEM_ERROR("Not implemented"); };
-    /** Multiplies receiver by scalar value.
+    virtual void timesT(const FloatMatrix &B, FloatMatrix &answer) const { OOFEM_ERROR("SparseMtrx :: timesT(FloatMatrix,FloatMatrix) - Not implemented"); };
+    /**
+     * Multiplies receiver by scalar value.
      * @param x value to multiply receiver
      */
-    virtual void times(double x) = 0;
+    virtual void times(double x) { OOFEM_ERROR("SparseMtrx :: times(double) - Not implemented"); };
 
     /**
      * Builds internal structure of receiver. This method determines the internal profile
@@ -162,54 +148,59 @@ public:
      * @param di domain index specify which domain to use
      * @param s determines unknown numbering scheme
      * @param ut unknown type
+     * @return zero is successful
      */
     virtual int buildInternalStructure(EngngModel *eModel, int di, EquationID ut, const UnknownNumberingScheme &s) = 0;
     /**
-     * Build internal structure of reciever. @see buildInternalStructure for details.
+     * Build internal structure of receiver. @see buildInternalStructure for details.
      * @param eModel pointer to corresponding engineering model
      * @param di domain index specify which domain to use
      * @param r_s determines unknown numbering scheme for the rows
      * @param c_s determines unknown numbering scheme for the columns
      * @param ut unknown type
+     * @return zero is successful
      */
     virtual int buildInternalStructure(EngngModel *eModel, int di, EquationID, const UnknownNumberingScheme &r_s,
                                        const UnknownNumberingScheme &c_s) {
-        OOFEM_ERROR("Not implemented");
+        OOFEM_ERROR("SparseMtrx :: buildInternalStructure(EngngModel,di,EquationID,UnknownNumberingScheme,unknownNumberingScheme) - Not implemented");
         return 0;
     }
-    // virtual int assemble (FloatMatrix*, IntArray*) = 0;
     /**
      * Assembles sparse matrix from contribution of local elements. This method for
      * each element adds its contribution to itself. Mapping between local element
      * contribution and its global position is given by local code numbers of element.
      * @param loc location array. The values corresponding to zero loc array value are not assembled.
      * @param mat contribution to be assembled using loc array.
+     * @return zero is successful
      */
     virtual int assemble(const IntArray &loc, const FloatMatrix &mat) = 0;
     /**
      * Assembles sparse matrix from contribution of local elements. This method for
      * each element adds its contribution to itself. Mapping between local element
      * contribution and its global position is given by row and column local code numbers.
-     * @param rloc row location array. The values corresponding to zero loc array value are not assembled.
-     * @param cloc column location array. The values corresponding to zero loc array value are not assembled.
-     * @param mat contribution to be assembled using rloc and cloc arrays. The rloc position determines the row, the
-     * cloc determines the corresponding column.
+     * @param rloc Row location array. The values corresponding to zero loc array value are not assembled.
+     * @param cloc Column location array. The values corresponding to zero loc array value are not assembled.
+     * @param mat Contribution to be assembled using rloc and cloc arrays. The rloc position determines the row, the
+     * cloc position determines the corresponding column.
+     * @return zero is successful
      */
     virtual int assemble(const IntArray &rloc, const IntArray &cloc, const FloatMatrix &mat) = 0;
 
+    /// Starts assembling the elements.
     virtual int assembleBegin() { return 1; }
+    /// Returns when assemble is completed.
     virtual int assembleEnd() { return 1; }
 
     /// Determines, whether receiver can be factorized.
-    virtual int canBeFactorized() const = 0;
+    virtual bool canBeFactorized() const = 0;
     /**
-     * Returns the receiver factorized. \f$L^T D L\f$ form is used.
+     * Returns the receiver factorized. @f$ L^{\mathrm{T}} \cdot D \cdot L @f$ form is used.
      * @return pointer to the receiver
      */
     virtual SparseMtrx *factorized() { return NULL; }
     /**
-     * Computes the solution of linear system \f$A x = y\f$. A is receiver.
-     * solution vector x overwrites the right hand side vector y.
+     * Computes the solution of linear system @f$ A\cdot x = y @f$ where A is receiver.
+     * Solution vector x overwrites the right hand side vector y.
      * Receiver must be in factorized form.
      * @param y right hand side on input, solution on output.
      * @return pointer to y array
@@ -217,39 +208,41 @@ public:
      */
     virtual FloatArray *backSubstitutionWith(FloatArray &y) const { return NULL; }
     /// Zeroes the receiver.
-    virtual SparseMtrx *zero() = 0;
+    virtual void zero() = 0;
 
     /// Returns coefficient at position (i,j).
     virtual double &at(int i, int j) = 0;
     /// Returns coefficient at position (i,j).
     virtual double at(int i, int j) const = 0;
-    ///Checks whether memory is allocated at position (i,j).
-    virtual int isAllocatedAt(int i, int j) const { return 0; }
-    virtual void toFloatMatrix(FloatMatrix &answer) const = 0;
+    /// Checks whether memory is allocated at position (i,j).
+    virtual bool isAllocatedAt(int i, int j) const { return false; }
+    /// Converts receiving sparse matrix to a dense float matrix.
+    virtual void toFloatMatrix(FloatMatrix &answer) const { OOFEM_ERROR("SparseMtrx :: toFloatMatrix - Not implemented"); }
     /// Prints the receiver statistics (one-line) to stdout.
-    virtual void printStatistics() const { }
+    virtual void printStatistics() const { OOFEM_LOG_INFO("SparseMtrx :: printStatistics - Not implemented"); }
     /// Prints receiver to stdout. Works only for relatively small matrices.
-    virtual void printYourself() const = 0;
+    virtual void printYourself() const { OOFEM_LOG_INFO("SparseMtrx :: printYourself - Not implemented"); }
 
     /// Sparse matrix type identification
-    virtual SparseMtrxType  giveType() const = 0;
-    /// Returns nonzero if anti-symmetric
-    virtual int isAntisymmetric() const = 0;
-
+    virtual SparseMtrxType giveType() const = 0;
+    /// Returns true if asymmetric
+    virtual bool isAsymmetric() const = 0;
 
 #ifdef IML_COMPAT
-    // /***********************************/
-    //  /*  Matrix/Vector multiply         */
-    //  /***********************************/
-
-    virtual FloatArray operator*(const FloatArray &x) const
+    /// IML compatibility, @f$ A \cdot x@f$
+    FloatArray operator*(const FloatArray &x) const
     {
         FloatArray answer;
         this->times(x, answer);
         return answer;
     }
-    virtual FloatArray trans_mult(const FloatArray &x) const = 0;
-
+    /// IML compatibility, @f$ A^{\mathrm{T}} \cdot x@f$
+    FloatArray trans_mult(const FloatArray &x) const
+    {
+        FloatArray answer;
+        this->timesT(x, answer);
+        return answer;
+    }
 #endif
 };
 } // end namespace oofem

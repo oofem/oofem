@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/Attic/petscsparsemtrx.C,v 1.1.2.1 2004/04/05 15:19:43 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -549,7 +548,7 @@ PetscSparseMtrx :: assembleEnd()
 
 
 
-SparseMtrx *
+void
 PetscSparseMtrx :: zero()
 {
     // test if receiver is aslready assembled
@@ -558,8 +557,6 @@ PetscSparseMtrx :: zero()
     if ( assembled ) {
         MatZeroEntries(this->mtrx);
     }
-
-    return this;
 }
 
 double &

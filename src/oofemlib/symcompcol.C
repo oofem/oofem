@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/symcompcol.C,v 1.5.4.1 2004/04/05 15:19:44 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -32,6 +31,7 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
+
 // Class SymCompCol
 
 // inspired by
@@ -352,7 +352,7 @@ int SymCompCol :: assemble(const IntArray &rloc, const IntArray &cloc, const Flo
     return 1;
 }
 
-SparseMtrx *SymCompCol :: zero()
+void SymCompCol :: zero()
 {
     for ( int t = 0; t < nz_; t++ ) {
         val_(t) = 0.0;
@@ -360,8 +360,6 @@ SparseMtrx *SymCompCol :: zero()
 
     // increment version
     this->version++;
-
-    return this;
 }
 
 /*********************/

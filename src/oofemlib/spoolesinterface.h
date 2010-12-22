@@ -38,9 +38,9 @@
 #ifdef __SPOOLES_MODULE
 
 extern "C" {
- #include "misc.h"
- #include "FrontMtx.h"
- #include "SymbFac.h"
+ #include <spooles/misc.h>
+ #include <spooles/FrontMtx.h>
+ #include <spooles/SymbFac.h>
 };
 
 #endif //ifdef __SPOOLES_MODULE

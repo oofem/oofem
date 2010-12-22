@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/compcol.C,v 1.5.4.1 2004/04/05 15:19:43 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2010   Borek Patzak
  *
  *
  *
@@ -32,6 +31,7 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
+
 // Class CompCol
 
 // inspired by
@@ -379,7 +379,7 @@ int CompCol :: assemble(const IntArray &rloc, const IntArray &cloc, const FloatM
     return 1;
 }
 
-SparseMtrx *CompCol :: zero()
+void CompCol :: zero()
 {
     for ( int t = 0; t < nz_; t++ ) {
         val_(t) = 0.0;
@@ -387,8 +387,6 @@ SparseMtrx *CompCol :: zero()
 
     // increment version
     this->version++;
-
-    return this;
 }
 
 
@@ -465,52 +463,18 @@ double &CompCol :: operator() (int i, int j)
     return val_(0); // return to suppress compiler warning message
 }
 
-
-/***************************************/
-/* Matrix-Vector multiplication...  */
-/***************************************/
-
-FloatArray CompCol :: operator *( const FloatArray & x ) const
-{
-    int M = dim_ [ 0 ];
-    int N = dim_ [ 1 ];
-
-    //      Check for compatible dimensions:
-    if ( x.giveSize() != N ) {
-        OOFEM_ERROR("CompCol::operator*: Error in CompCol -- incompatible dimensions");
-        return x;
-    }
-
-    FloatArray result(M);
-    int j, t;
-    double rhs;
-
-    for ( j = 0; j < N; j++ ) {
-        rhs = x(j);
-        for ( t = colptr_(j); t < colptr_(j + 1); t++ ) {
-            result( rowind_(t) ) += val_(t) * rhs;
-        }
-    }
-
-    return result;
-}
-
-/**********************************************/
-/* Matrix-Transpose-Vector multiplication...  */
-/**********************************************/
-
-FloatArray CompCol :: trans_mult(const FloatArray &x) const
+void CompCol :: timesT(const FloatArray &x, FloatArray &answer) const
 {
     int M = dim_ [ 0 ];
     int N = dim_ [ 1 ];
 
     //      Check for compatible dimensions:
     if ( x.giveSize() != M ) {
-        OOFEM_ERROR("CompCol::trans_mult: Error in CompCol -- incompatible dimensions");
-        return x;
+        OOFEM_ERROR("CompCol::timesT: Error in CompCol -- incompatible dimensions");
     }
 
-    FloatArray result(N);
+    answer.resize(N);
+    answer.zero();
     int i, t;
     double r;
 
@@ -520,10 +484,7 @@ FloatArray CompCol :: trans_mult(const FloatArray &x) const
             r += val_(t) * x( rowind_(t) );
         }
 
-        result(i) = r;
+        answer(i) = r;
     }
-
-
-    return result;
 }
 } // end namespace oofem

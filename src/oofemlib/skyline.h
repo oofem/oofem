@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/skyline.h,v 1.11 2003/04/06 14:08:25 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2010   Borek Patzak
  *
  *
  *
@@ -50,8 +49,8 @@ namespace oofem {
  * part is therefore stored. Coefficients are stored in one dimensional
  * float array, containing for each column the values from the diagonal
  * to the last nonzero entry.
- * This requires to remember the adresses of diagonal members in such
- * array (addr attribute)
+ * This requires to remember the addresses of diagonal members in such
+ * array (adr attribute)
  * @see SparseMtrx class
  */
 class Skyline : public SparseMtrx
@@ -61,14 +60,14 @@ class Skyline : public SparseMtrx
      * form. A skyline is usually an attribute of the linear system.
      * DESCRIPTION :
      *
-     * Attribute 'isFac-torized' is True if the skyline is already in U(T).D.U
+     * Attribute 'isFactorized' is True if the skyline is already in U(T).D.U
      *         factorized form, else it is False.
      * Attribute adr  is array of diagonal members, it's size is size+1 (adr[0]=neni, adr[1]=1)
      * Attribute mtrx is double pointer to skyline stored in a array form
      *         (but we start from index 1)
      * TASKS :
      * - building its internal storage structure (method 'buildInternalStructure')
-     * - store and localize local mtrices (method 'localize')
+     * - store and localize local matrices (method 'localize')
      * - performing standard operations : multiplication by array (method 'times')
      * - possible factorization and backSubstitution (recognized by nonzero result of
      *  canBeFactorized) (methods 'factorize' and 'bacSobstitution')
@@ -78,7 +77,7 @@ class Skyline : public SparseMtrx
 protected:
     /// Total number of nonzero coefficients stored.
     int nwk;
-    /// Integer array holding adresses of diagonal memebers.
+    /// Integer array holding addresses of diagonal members.
     IntArray *adr;
     /// Vector of stored coefficients.
     double *mtrx;
@@ -99,9 +98,10 @@ public:
     /// Destructor
     ~Skyline();
 
-    /** Returns {\bf newly allocated} copy of receiver. Programmer must take
+    /** Returns <em>newly allocated</em> copy of receiver. Programmer must take
      * care about proper deallocation of allocated space.
-     * @return newly allocated copy of receiver */
+     * @return newly allocated copy of receiver
+     */
     SparseMtrx *GiveCopy() const;
 
     /** Evaluates a product of receiver with vector.
@@ -109,6 +109,7 @@ public:
      * @param answer result of product of receiver and x parameter
      */
     void times(const FloatArray &x, FloatArray &answer) const;
+    void timesT(const FloatArray &x, FloatArray &answer) const { this->times(x, answer); }
     /** Multiplies receiver by scalar value.
      * @param x value to multiply receiver
      */
@@ -117,11 +118,10 @@ public:
     int buildInternalStructure(EngngModel *, int, EquationID, const UnknownNumberingScheme &);
     /**
      * Allocates and builds internal structure according to given
-     * array holding adresses of diagonal members values (addr).
+     * array holding addresses of diagonal members values (adr).
      */
     int setInternalStructure(IntArray *a);
 
-    // int assemble (FloatMatrix*, IntArray*) ;
     /** Assembles receiver from local element contributions.
      * @param loc location array. The values corresponding to zero loc array value are not assembled.
      * @param mat contribution to be assembled using loc array.
@@ -135,7 +135,7 @@ public:
     int assemble(const IntArray &rloc, const IntArray &cloc, const FloatMatrix &mat);
 
     /// Determines, whether receiver can be factorized.
-    int canBeFactorized() const { return 1; }
+    bool canBeFactorized() const { return true; }
     /// Performs factorization of receiver
     SparseMtrx *factorized();
     /**
@@ -148,62 +148,44 @@ public:
      */
     FloatArray *backSubstitutionWith(FloatArray &) const;
     /// Zeroes the receiver.
-    SparseMtrx *zero();
+    virtual void zero();
     /**
      * Splits the receiver to LDLT form,
      * and computes the rigid body motions.
      * @param r matrix containing the rigid body motions base vectors.
      * @param nse number of rigid body motions
      * @param se array containing indexes of singular eqs.
-     * @param limit - determines linear dependence or independence
-     * @param   tc - typ vypoctu
-     * = 1 - rozklad matice na tvar LDL
-     * = 2 - konstruovani baze prostoru Ker A
-     * = 3 - rozklad matice na tvar LDL a konstruovani baze prostoru Ker A
+     * @param limit determines linear dependence or independence
+     * @param tc type of calculation
+     * = 1 = Decomposition to LDL form
+     * = 2 = ? konstruovani baze prostoru ? Ker A
+     * = 3 = Decomposition to LDL form and ? konstruovani baze prostoru ? Ker A
      */
-    void rbmodes(FloatMatrix &r, int &nse, IntArray &se,
-                 double limit, int tc);
+    void rbmodes(FloatMatrix &r, int &nse, IntArray &se, double limit, int tc);
     /**
      * Solves the singular system of equations, the receiver should be factorized
      * using rbmodes service.
      * @param x solution vector
      * @param y right hand side
      * @param nse number of rigid body motions
-     * @param limit determines the liner dependency or independency
+     * @param limit determines the linear dependence or independence
      * @param se indexes of singular equations
      */
-    void ldl_feti_sky(FloatArray &x, FloatArray &y,
-                      int nse, double limit, IntArray &se);
+    void ldl_feti_sky(FloatArray &x, FloatArray &y, int nse, double limit, IntArray &se);
     /// Returns coefficient at position (i,j).
     double &at(int, int);
     /// Returns coefficient at position (i,j).
     double at(int i, int j) const;
     /// Returns 0 if the memory is not allocated at position (i,j).
-    int isAllocatedAt(int i, int j) const;
+    bool isAllocatedAt(int i, int j) const;
 
     void toFloatMatrix(FloatMatrix &answer) const;
     /// Prints receiver to stdout.
     void printYourself() const;
     int  giveAllocatedSize() { return nwk; }
 
-    SparseMtrxType  giveType() const { return SMT_Skyline; }
-    int isAntisymmetric() const { return 0; }
-
-#ifdef IML_COMPAT
-    // /***********************************/
-    // /*  Matrix/Vector multiply         */
-    // /***********************************/
-
-    virtual FloatArray trans_mult(const FloatArray &x) const
-    {
-        FloatArray answer;
-        this->times(x, answer);
-        return answer;
-    }
-
-#endif
-
-
+    SparseMtrxType giveType() const { return SMT_Skyline; }
+    bool isAsymmetric() const { return false; }
 
 protected:
     Skyline(int, int, double *, IntArray *);

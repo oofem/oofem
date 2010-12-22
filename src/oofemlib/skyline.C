@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/skyline.C,v 1.12.4.1 2004/04/05 15:19:43 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2010   Borek Patzak
  *
  *
  *
@@ -32,9 +31,6 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-
-
-//   file SKYLINE.CC
 
 #include "skyline.h"
 #include "flotmtrx.h"
@@ -174,7 +170,7 @@ Skyline ::   at(int i, int j) const
 }
 
 
-int
+bool
 Skyline :: isAllocatedAt(int i, int j) const
 {
     int k, answer = 1;
@@ -647,7 +643,7 @@ void Skyline :: printYourself() const
 }
 
 
-SparseMtrx *Skyline :: zero()
+void Skyline :: zero()
 {
     // Returns the receiver with all coefficients set to zero.
 
@@ -661,7 +657,6 @@ SparseMtrx *Skyline :: zero()
 
     // increment version
     this->version++;
-    return this;
 }
 
 SparseMtrx *Skyline :: GiveCopy() const

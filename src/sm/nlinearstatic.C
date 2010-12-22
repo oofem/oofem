@@ -633,8 +633,8 @@ NonLinearStatic :: proceedStep(int di, TimeStep *tStep)
 
         if ( nonlocalStiffnessFlag ) {
             //stiffnessMatrix = new SkylineUnsym ();
-            if ( !stiffnessMatrix->isAntisymmetric() ) {
-                _error("proceedStep: stiffnessMatrix does not support antisymmetric storage");
+            if ( !stiffnessMatrix->isAsymmetric() ) {
+                _error("proceedStep: stiffnessMatrix does not support asymmetric storage");
             }
         }
 

@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/spoolessolver.h,v 1.1 2003/04/06 14:08:26 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2010   Borek Patzak
  *
  *
  *
@@ -50,16 +49,16 @@ class EngngModel;
 class FloatMatrix;
 
 /**
- * Implements the solution of linear system of equation in the form Ax=b using solvers
- * from SPOOLES library. Can work with only spooles sparse matrix implementation.
+ * Implements the solution of linear system of equation in the form @f$ A\cdot x = b @f$ using solvers
+ * from SPOOLES library. Can work with only SPOOLES sparse matrix implementation.
  */
 class SpoolesSolver : public SparseLinearSystemNM
 {
 private:
 #ifdef __SPOOLES_MODULE
-    /// last mapped Lhs matrix
+    /// Last mapped LHS matrix
     SparseMtrx *    Lhs;
-    /// last mapped matrix version
+    /// Last mapped matrix version
     SparseMtrx :: SparseMtrxVersionType lhsVersion;
     int msglvl;
     FILE *msgFile;
