@@ -51,8 +51,7 @@
 namespace oofem {
 /**
  * Load is base abstract class for all loads.
- * Load is an aribute of the domain (it belongs to).
- * Load is also atrribute of several elements, nodes,
+ * Load is an attribute of the domain that is belongs to, and also of several elements, nodes,
  * which are subjected to loading type boundary condition.
  *
  * The value (or the components) of a load will be
@@ -61,29 +60,19 @@ namespace oofem {
  */
 class Load : public GeneralBoundaryCondition
 {
-    /*
-     * This abstract class is the superclass of the classes that implement loads
-     * (body load, nodal load, boundary conditions, etc). A load is an attribute
-     * of the domain. It is usually also attribute of several elements, nodes or
-     * dofs.
-     * DESCRIPTION
-     * The load stores its values in 'componentArray'. The components of a load
-     * at a given time step is the product of 'componentArray' by the value of
-     * the function 'loadTimeFunction' at that time step.
-     * TASK
-     * Returning its components and its load-time function ;
-     */
 protected:
     /// Components of boundary condition
     FloatArray componentArray;
-    /** The load is specified for all dofs of object to which is associated.
+    /**
+     * The load is specified for all dofs of object to which is associated.
      * For some types of boundary conditions the zero value of load does not mean
      * that the load is not applied (newton's type of bc, for example). Then
      * some mask, which allows to exclude specific dofs is necessary.
-     * The dofMask attribute is introduced to alow this.
+     * The dofMask attribute is introduced to allow this.
      * By default it is of the same size as componentArray, filled with zeroes.
      * If some value of dofExcludeMask is set to nonzero, then the corresponding componentArray
-     * is set to zero. */
+     * is set to zero.
+     */
     IntArray dofExcludeMask;
 public:
 
@@ -92,9 +81,9 @@ public:
      * @param n boundary condition number
      * @param d domain to which new object will belongs.
      */
-    Load(int, Domain *);                           // constructor
+    Load(int, Domain *);
     /// Destructor.
-    virtual ~Load()  { }   // destructor
+    virtual ~Load() { }
 
     /**
      * Computes boundary condition value - its components values at given time.
@@ -107,39 +96,32 @@ public:
     virtual void  computeComponentArrayAt(FloatArray &answer, TimeStep *, ValueModeType mode);
     /**
      * Computes components values of load at given point - global coordinates (coordinates given).
-     * Default implementation computes product of aproximation matrix (computeNArray service) and
+     * Default implementation computes product of approximation matrix (computeNArray service) and
      * with "vertex" value array attribute and the result is then multiplied by
      * corresponding load time function value respecting load response mode.
      * @param answer component values at given point and time
-     * @param stepN time step representing time
+     * @param tStep time step representing time
      * @param coords global (or local) problem coordinates, which are used to
      * evaluate components values.
      * @param mode determines response mode.
      */
-    virtual void         computeValueAt(FloatArray &answer, TimeStep *atTime, FloatArray &coords, ValueModeType mode) = 0;
+    virtual void computeValueAt(FloatArray &answer, TimeStep *tStep, FloatArray &coords, ValueModeType mode) = 0;
     /**
-     * Returns the value of dofExcludeMask corresponding to given indx.
+     * Returns the value of dofExcludeMask corresponding to given index.
      * See the description of dofExcludeMask attribute for more details.
+     * @param index Index to check at.
+     * @return Nonzero if excluded, zero otherwise.
      */
-    int isDofExcluded(int indx);
-    // definition of a load
-    /// Initializes receiver acording to object description stored in input record.
+    int isDofExcluded(int index);
+
     IRResultType initializeFrom(InputRecord *ir);
-    /** Setups the input record string of receiver
-     * @param str string to be filled by input record
-     * @param keyword print record keyword (default true)
-     */
     virtual int giveInputRecordString(std :: string &str, bool keyword = true);
-
-    /// Returns classType id of receiver.
-    classType    giveClassID() const { return LoadClass; }
-    /// Returns class name of the receiver.
+    classType giveClassID() const { return LoadClass; }
     const char *giveClassName() const { return "Load"; }
-
 
 protected:
     /**
-     * Returns pointer to receiver component array, where component values of boundary condition are stored.
+     * @return Pointer to receiver component array, where component values of boundary condition are stored.
      */
     FloatArray &giveComponentArray();
 };

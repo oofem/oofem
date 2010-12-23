@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/boundaryload.h,v 1.10 2003/04/06 14:08:23 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2010   Borek Patzak
  *
  *
  *
@@ -59,7 +58,7 @@ class TimeStep;
  *
  * The load can generally be specified in global space or can be related
  * to local entity space (related to edge, surface). If load is specified in global space
- * then its values are evalueated at points, which is characterized by global coordinates.
+ * then its values are evaluated at points, which is characterized by global coordinates.
  * If load is specified in entity space, then point is characterized by entity isoparametric coordinates.
  *
  * Methods for evaluation of load component values in any point on element boundary (on side, face, ...)
@@ -68,7 +67,7 @@ class TimeStep;
  * coordinates - but this is not supported.
  * It is generally assumed, that derived classes will approximate somehow their values
  * based on user specified data (on side nodes for example) and load approximation type.
- * The similar scheme borrowed from FE appriximation is used, values computed at required point
+ * The similar scheme borrowed from FE approximation is used, values computed at required point
  * are computed as a product of approximation matrix (matrix of approximation functions) with
  * "vertex" values, which has to be specified on input by user.
  * Elements can request the order of load approximation (for setting up the appropriate
@@ -77,18 +76,18 @@ class TimeStep;
  *
  * For some elements it may be better to obtain "vertex values" of boundary load to
  * compute load vector directly using exact formulae. Elements then can ask for
- * values at nodal points and obtain cooresponding  "vertex values". Meaning of these values is
+ * values at nodal points and obtain corresponding  "vertex values". Meaning of these values is
  * class dependent, see derived classes documentation for details.
  *
  * Elements must take care, on which boundary the load acts on (side number, ...).
- * Boundary load class also introduces load related cooordinate system indicator.
+ * Boundary load class also introduces load related coordinate system indicator.
  * Load can be generally specified in global coordinate system or in entity dependent local coordinate
  * system. The entity dependent coordinate system is defined by particular element.
  *
- * Note, this class is not restricted to structural problems. For example, in ther-
- * mal analysis, a boundary load load could be a  heat source.
+ * Note, this class is not restricted to structural problems. For example, in thermal
+ * analysis, a boundary load load could be a  heat source.
  *
- * To sumarize, the services provided include
+ * To summarize, the services provided include
  * <UL>
  * <LI>
  * Computing component array evaluated at specific point on boundary.</LI>
@@ -97,7 +96,7 @@ class TimeStep;
  * class dependent, see derived classes documentation for details. "vertexes" can generally differ from
  * element nodes.</LI>
  * <LI>
- * Returning load appriximation order. Usefull when numerical integrations of load vector over element
+ * Returning load approximation order. Useful when numerical integrations of load vector over element
  * boundaries are used.</LI>
  * <LI>
  * Returning type of coordinate system, in which load applies. (global c.s., or entity related c.s.).</LI>
@@ -108,39 +107,16 @@ class TimeStep;
  */
 class BoundaryLoad : public Load
 {
-    /*
-     * This class implements a boundary load (force, moment,...) that acts
-     * directly on a boundary of some finite element (on side, face, ..).
-     * A boundary load is usually attribute of one or more elements.
-     * DESCRIPTION
-     * The boundary load describes its geometry and values (it is assumed, that user will specify
-     * all necessary dofs) on  boundary using isoparametric approximation.
-     * Elements can request the order of approximation (for setting up the appropriate
-     * integration rule order) and the array of values (for each dof) at specific integration point
-     * on the boundary.
-     *
-     * Elements must take care, on which boundary the load acts on (side number, ...).
-     *
-     * For some elements it may be better to obtain "vertex values" of boundary load to
-     * compute load vector directly using exact formulae.
-     *
-     *
-     * REMARK
-     * This class is not restricted to structural problems. For example, in ther-
-     * mal analysis, a boundary load load would be a  heat source.
-     */
 public:
 
-    // type to identify in which coordinate system
-    // is load given
     /**
      * Load coordinate system type. Variable of this type can have following values BL_GlobalMode
      * (indicates that load given in global coordinate system) or BL_LocalMode
      * (entity dependent local coordinate system will be  used).
      */
     enum BL_CoordSystType {
-        BL_GlobalMode, // global mode i.e. load is specifyied in global c.s.
-        BL_LocalMode // local entity (edge or surface) coordinate system
+        BL_GlobalMode, ///< Global mode i.e. load is specified in global c.s.
+        BL_LocalMode, ///< Local entity (edge or surface) coordinate system.
     };
 
     /**
@@ -148,17 +124,17 @@ public:
      */
     enum BL_FormulationType {
         BL_EntityFormulation,
-        BL_GlobalFormulation
+        BL_GlobalFormulation,
     };
 
 protected:
-    /// Number of "DOFs" which represent load geometry
+    /// Number of "DOFs" which represent load geometry.
     int nDofs;
-    /// Load type (its physical meaning)
+    /// Load type (its physical meaning).
     bcType lType;
-    /// Load coordinate system
+    /// Load coordinate system.
     BL_CoordSystType coordSystemType;
-    /// aditional bc properties
+    /// Additional b.c properties.
     Dictionary propertyDictionary;
 
 public:
@@ -170,45 +146,31 @@ public:
     BoundaryLoad(int i, Domain *d) : Load(i, d) {
         nDofs = 0;
         coordSystemType = BL_GlobalMode;
-    }                                                                                                // constructor
+    }
 
+    virtual void computeValueAt(FloatArray &answer, TimeStep *tStep, FloatArray &coords, ValueModeType mode);
     /**
-     * Computes components values of load at given point - global coordinates (coordinates given).
-     * Default implementation computes product of aproximation matrix (computeNArray service) and
-     * with "vertex" value array attribute and the result is then multiplied by
-     * corresponding load time function value respecting load response mode.
-     * @param answer component values at given point and time
-     * @param stepN time step representing time
-     * @param coords global (or local) problem coordinates, which are used to
-     * evaluate components values.
-     * @param mode determines response mode.
+     * @return Approximation order of load geometry.
      */
-    virtual void         computeValueAt(FloatArray &answer, TimeStep *, FloatArray &coords, ValueModeType mode);
+    virtual int giveApproxOrder() = 0;
     /**
-     * Returns approximation order of load geometry.
+     * @return Receiver's number of "DOFs". Should correspond to number of DOFs on loaded entity.
      */
-    virtual int          giveApproxOrder() = 0;
+    int giveNumberOfDofs() { return nDofs; }
     /**
-     * Return receiver's number of "DOFs". Should correspond to number of DOFs on loaded entity.
+     * @return Receiver's coordinate system.
      */
-    int                  giveNumberOfDofs() { return nDofs; }
+    BL_CoordSystType giveCoordSystMode() { return coordSystemType; }
     /**
-     * Returns receiver's coordinate system
+     * @return Formulation type.
      */
-    BL_CoordSystType     giveCoordSystMode() { return coordSystemType; }
+    virtual BL_FormulationType giveFormulationType() { return BL_EntityFormulation; }
     /**
-     * Return formulation type
-     */
-    virtual BL_FormulationType   giveFormulationType() { return BL_EntityFormulation; }
-    /** Initializes receiver acording to object description stored in input record.
+     * Initializes receiver according to object description stored in input record.
      * Reads number of dofs into nDofs attribute (i.e. the number of dofs, which are on loaded entity),
      * its loadType into loadType attribute and coordinate system type into csType attribute.
      */
     IRResultType initializeFrom(InputRecord *ir);
-    /** Setups the input record string of receiver
-     * @param str string to be filled by input record
-     * @param keyword print record keyword (default true)
-     */
     virtual int giveInputRecordString(std :: string &str, bool keyword = true);
     /**
      * Returns receiver load type. It distinguish particular boundary conditions according to
@@ -217,26 +179,22 @@ public:
      * specified on input by user.
      * See cltypes.h file for details.
      */
-    bcType               giveType() const { return lType; }
+    bcType giveType() const { return lType; }
     /**
      * Returns the value of a property 'aProperty'. Property must be identified
-     * by unique int id.
-     * @aProperty id of peroperty requested
+     * by unique integer id.
+     * @param aProperty id of property requested
      * @return property value
      */
-    virtual double   giveProperty(int);
+    virtual double giveProperty(int);
 
-    /** Returns classType id of receiver.
-     * @return BoundaryLoadClass value
-     */
-    classType            giveClassID() const { return BoundaryLoadClass; }
-    /// Returns class name of the receiver.
+    classType giveClassID() const { return BoundaryLoadClass; }
     const char *giveClassName() const { return "BoundaryLoad"; }
 
 protected:
     /**
      * Abstract function, for computing approximation matrix of receiver at given  point.
-     * The product of approximation matrix with "vertex" values array atrribute will produce
+     * The product of approximation matrix with "vertex" values array attribute will produce
      * load components in given  point.
      * @param answer approximation matrix
      * @param coords global integration point coordinates
@@ -248,7 +206,7 @@ protected:
      * @param tStep time step
      * @param mode determines response mode
      */
-    void                 computeComponentArrayAt(FloatArray &answer, TimeStep *, ValueModeType mode);
+    void computeComponentArrayAt(FloatArray &answer, TimeStep *, ValueModeType mode);
 };
 } // end namespace oofem
 #endif // boundaryload_h

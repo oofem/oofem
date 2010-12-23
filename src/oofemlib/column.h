@@ -37,6 +37,7 @@
 //   *** CLASS COLUMN ***
 //   ********************
 
+// TODO: Get rid of this class? Completely unused.
 
 #ifndef column_h
 #define column_h

@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/cltypes.h,v 1.45.4.1 2004/04/05 15:19:43 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2010   Borek Patzak
  *
  *
  *
@@ -33,10 +32,6 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-//
-// FILE: cltypes2.h
-//
-
 #ifndef cltypes2_h
 #define cltypes2_h
 
@@ -44,12 +39,15 @@
 #include "internalstatevaluetype.h"
 
 namespace oofem {
-//char   cltypesGiveUnknownTypeKey (UnknownType type);
-char   cltypesGiveUnknownTypeModeKey(ValueModeType mode);
-int isUnknownTypeModeIncremental(ValueModeType);
+//char cltypesGiveUnknownTypeKey (UnknownType type);
 
-//enum InternalStateValueType;
-/// Returns the value type of corresponding InternalStateType
+/// @return Character corresponding to given ValueModeType.
+char cltypesGiveUnknownTypeModeKey(ValueModeType mode);
+
+/// @return True if ValueModeType is incremental, otherwise false.
+bool isUnknownTypeModeIncremental(ValueModeType);
+
+/// @return The value type of corresponding InternalStateType
 InternalStateValueType giveInternalStateValueType(InternalStateType type);
 } // end namespace oofem
 #endif // cltypes2_h

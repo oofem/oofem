@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2010   Borek Patzak
  *
  *
  *
@@ -32,10 +32,6 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-//
-// FILE: chartype.h
-//
-
 #ifndef chartype_h
 #define chartype_h
 
@@ -43,15 +39,15 @@
 
 namespace oofem {
 /**
- * Type representing kind of characteristic value (of scalar, verot or tensorial character) or
+ * Type representing kind of characteristic value (of scalar, vector or tensorial character) or
  * unknown, which is required, requested, returned, or passed to/from various general services.
  * It typically describes the physical meaning of corresponding component.
  * Typically, many top base classes declare general services for requesting or computing
  * some "characteristic" values of given type. Then only one service for all values of sane type
  * (like vector, scalar) is declared, passing the type of required value (of CharType type) as parameter.
- * Particular implementation based on passed CharType value, usually invokes corresponding specialized servises
+ * Particular implementation based on passed CharType value, usually invokes corresponding specialized services
  * and returns result. If passed CharType value is of unsupported value, error is generated.
- * @see see also ValueModeType type.
+ * @see ValueModeType type.
  */
 // if modified , modify also isCharMtrxIncrementalValue function in cltypes.C
 #define CharType_DEF                            \
@@ -114,8 +110,8 @@ namespace oofem {
     ENUM_ITEM(ElementBCTransportVector)                                   \
     ENUM_ITEM(ElementInternalSourceVector)                                \
     ENUM_ITEM(LHSBCMatrix) /* LHS due to Boundary Conditions (Transport problems) */  \
-    ENUM_ITEM(NSTP_MidpointLhs) /* NonStationaryTransportProblem - LHS for midpoint disretization alg. */ \
-    ENUM_ITEM(NSTP_MidpointRhs) /* NonStationaryTransportProblem - RHS for midpoint disretization alg. */ \
+    ENUM_ITEM(NSTP_MidpointLhs) /* NonStationaryTransportProblem - LHS for midpoint discretization alg. */ \
+    ENUM_ITEM(NSTP_MidpointRhs) /* NonStationaryTransportProblem - RHS for midpoint discretization alg. */ \
     ENUM_ITEM(IntSourceLHSMatrix) /* LHS due to material internal source (Transport problems) */  \
     ENUM_ITEM(ElementForceLoadVectorOfPrescribed) /* Prescribed here means corresponding to prescribed dofs*/  \
     ENUM_ITEM(NodalLoadVectorOfPrescribed)                                \

@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/generalbc.C,v 1.4.4.1 2004/04/05 15:19:43 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2010   Borek Patzak
  *
  *
  *
@@ -32,9 +31,6 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-
-
-//   file LOAD.C
 
 #include "generalbc.h"
 #include "deadwght.h"
@@ -59,7 +55,6 @@ GeneralBoundaryCondition :: GeneralBoundaryCondition(int n, Domain *d) : FEMComp
 {
     loadTimeFunction = 0;
 }
-
 
 
 LoadTimeFunction *GeneralBoundaryCondition :: giveLoadTimeFunction()
@@ -103,6 +98,7 @@ GeneralBoundaryCondition *GeneralBoundaryCondition :: ofType(char *aClass)
 
     return newBC;
 }
+
 
 IRResultType
 GeneralBoundaryCondition :: initializeFrom(InputRecord *ir)

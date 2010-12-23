@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/constantedgeload.C,v 1.1 2003/04/06 14:08:23 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2010   Borek Patzak
  *
  *
  *
@@ -33,8 +32,6 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-//   file constantedgeload.C
-
 #include "constantedgeload.h"
 #include "loadtime.h"
 #include "flotarry.h"
@@ -55,7 +52,7 @@ ConstantEdgeLoad :: initializeFrom(InputRecord *ir)
 void
 ConstantEdgeLoad :: computeValueAt(FloatArray &answer, TimeStep *stepN, FloatArray &coords, ValueModeType mode)
 {
-    // we overload general implementation on the boundaryload level due
+    // we overload general implementation on the boundary load level due
     // to implementation efficiency
 
     double factor;

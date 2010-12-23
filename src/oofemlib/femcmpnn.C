@@ -77,6 +77,7 @@ FEMComponent :: saveContext(DataStream *stream, ContextMode mode, void *obj)
     return CIO_OK;
 }
 
+
 contextIOResultType
 FEMComponent :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
 {
@@ -116,7 +117,6 @@ FEMComponent :: giveInputRecordString(std :: string &str, bool keyword)
 }
 
 
-
 void
 FEMComponent :: error(const char *file, int line, const char *format, ...) const
 {
@@ -129,6 +129,7 @@ FEMComponent :: error(const char *file, int line, const char *format, ...) const
 
     __OOFEM_ERROR4(file, line, "Class: %s, number: %d\n%s", giveClassName(), giveNumber(), buffer);
 }
+
 
 void
 FEMComponent :: warning(const char *file, int line, const char *format, ...) const

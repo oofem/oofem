@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/material.C,v 1.11.4.1 2004/04/05 15:19:43 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2010   Borek Patzak
  *
  *
  *
@@ -33,23 +32,11 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-
-//   file MATERIAL.CC
-
 #include "material.h"
 #include "crosssection.h"
 #include "domain.h"
 #include "verbose.h"
 #include "isolinearelasticmaterial.h"
-//#include "ortholinearelasticmaterial.h"
-//#include "perfectlyplasticmaterial.h"
-//#include "steel1.h"
-//#include "concrete2.h"
-//#include "concrete3.h"
-//#include "cebfip78.h"
-//#include "doublepowerlaw.h"
-//#include "b3mat.h"
-//#include "isolinearheatmat.h"
 
 #include "gausspnt.h"
 #include "flotmtrx.h"
@@ -100,7 +87,7 @@ double
 Material :: give(int aProperty, GaussPoint *gp)
 // Returns the value of the property aProperty (e.g. the Young's modulus
 // 'E') of the receiver.
-// atTime allows time dependent behaviour to be taken into account
+// atTime allows time dependent behavior to be taken into account
 {
     double value = 0.0;
 
@@ -220,7 +207,7 @@ Material :: ofType(char *aClass)
     if ( !strncasecmp(aClass, "isole", 5) ) {
         newMaterial = new IsotropicLinearElasticMaterial(this->giveNumber(), domain);
     } else {
-        // last resort - call aditional user defined subroutine
+        // last resort - call additional user defined subroutine
         newMaterial = CreateUsrDefMaterialOfType(aClass, number, domain);
         if ( newMaterial == NULL ) {
             _error2("ofType:  unknown material (%s)\n", aClass);
@@ -235,7 +222,7 @@ Material :: ofType(char *aClass)
 
 
 //
-// store & restore context - materialinfo in gp not saved now!
+// store & restore context - material info in gp not saved now!
 //
 
 contextIOResultType
@@ -243,9 +230,9 @@ Material :: saveContext(DataStream *stream, ContextMode mode, void *obj)
 //
 // saves full material status (saves state variables, that completely describe
 // current state) stored in gp->matstatusDict with key =  (int)this->giveClassID()
-// storing of correspondin context if it is defined for current material in
+// storing of corresponding context if it is defined for current material in
 // gp status dictionary should be performed here by overloading this function.
-// (such code should invoke also cooresponding function for yield conditions,
+// (such code should invoke also corresponding function for yield conditions,
 //  submaterials and so on)
 //
 
@@ -280,9 +267,9 @@ Material :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
 //
 // restores full material status (saves state variables, that completely describe
 // current state) stored in gp->matstatusDict with key =  (int)this->giveClassID()
-// resstoring of correspondin context if it is defined for current material in
+// restoring of corresponding context if it is defined for current material in
 // gp status dictionary should be performed here by overloading this function.
-// (such code should invoke also cooresponding function for yield conditions,
+// (such code should invoke also corresponding function for yield conditions,
 //  submaterials and so on)
 //
 
@@ -360,10 +347,10 @@ Material :: initTempStatus(GaussPoint *gp)
 void
 Material :: initGpForNewStep(GaussPoint *gp)
 //
-// initialize gp record at the begining of new load Increment
+// initialize gp record at the beginning of new load Increment
 // initialize gp status using this->initTempStatus(gp);
 //
-// this means: kepping Stress, Strain PlasticStrain Vectors.
+// this means: keeping Stress, Strain PlasticStrain Vectors.
 // zeroing Stress, Strain PlasticStrain Increment Vectors.
 //
 {

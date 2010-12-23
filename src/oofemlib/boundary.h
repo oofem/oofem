@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/boundary.h,v 1.11 2003/04/06 14:08:23 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2010   Borek Patzak
  *
  *
  *
@@ -32,11 +31,6 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-
-//   ********************************
-//   *** CLASS BOUNDARY CONDITION ***
-//   ********************************
-
 
 #ifndef boudary_h
 #define boudary_h
@@ -64,15 +58,15 @@ class Dictionary;
  * The type of unknown (physical meaning)
  * is fully determined by corresponding DOF, to which given BC is
  * associated. The previous implementation uses the 'prescribedValueDictionary' to
- * store the unknowns types, but this makes sense, when bc is associated to node,
- * but when associated to bc, the physical meaning of unknown is determined by DOF.
+ * store the unknowns types, but this makes sense, when BC is associated to node,
+ * but when associated to BC, the physical meaning of unknown is determined by DOF.
  *
- * Boundary condition can change its value in time using its inheritted loadTimeFunction.
- * It can also switch itself on or off depending on nonzero value of newly intorduced
+ * Boundary condition can change its value in time using its inherited loadTimeFunction.
+ * It can also switch itself on or off depending on nonzero value of newly introduced
  * isImposedTimeFunction load time function. Please note, that previous option must be
  * supported by particular engineering model (because equation renumbering is necessary,
  * and for incremental solution schemes DOFs unknown dictionaries must be used). See particular
- * engineering model documantation for details.
+ * engineering model documentation for details.
  *
  * The services provided include
  * <UL>
@@ -83,91 +77,62 @@ class Dictionary;
  * for example total value or its change from previous step is requested) - method give.</LI>
  * <LI>
  * Returning a value of isImposedTimeFunction, indicating whether b.c. is imposed or not
- * in given time (nonzero indicates imposed b.c.) - method isImposed.</LI>
+ * in given time (nonzero indicates imposed BC) - method isImposed.</LI>
  * </UL>
  */
 class BoundaryCondition : public GeneralBoundaryCondition
 {
-    /*
-     * This class implements a kinematic boundary condition. A b.c. is usually
-     * attribute of one or more degrees of freedom.
-     * DESCRIPTION
-     * The inherited attribute 'componentArray is not used.
-     * TASKS
-     * -returning a component, i.e., the prescribed value of an  unknown
-     * (displacement, velocity, temperature, etc).
-     * -returning a value of isImposedTimeFunction, indicating whether b.c. is imposed or not
-     * in given time (nonzero indicates imposed b.c.).
-     * REMARK
-     * Like the other Loads, a b.c. possesses a load-time function, which is ty-
-     * pically a ConstantFunction.
-     */
 protected:
     // Dictionary of prescribed values. - not used
     // Dictionary*  prescribedValueDictionary ;
 
-    /// prescribed value
+    /// Prescribed value of DOF.
     double prescribedValue;
 
-    /// Load time function indicating if b.c. is imposed or not.
+    /// Load time function indicating if BC is imposed or not.
     int isImposedTimeFunction;
 
 public:
     /**
      * Constructor. Creates boundary condition with given number, belonging to given domain.
-     * @param n boundary condition number
-     * @param d domain to which new object will belongs.
+     * @param n Boundary condition number
+     * @param d Domain to which new object will belongs.
      */
     BoundaryCondition(int i, Domain *d) : GeneralBoundaryCondition(i, d)
     { isImposedTimeFunction = 0; }
     /// Destructor
-    ~BoundaryCondition()            { }
+    ~BoundaryCondition() { }
 
-
-    //      double  give (char,TimeStep*) ;
     /**
      * Returns the value of a prescribed unknown, respecting requested mode for given time.
      * Its physical meaning is determined by corresponding DOF.
-     * @param dof determines the dof subjected to receiver bc.
-     * @param mode unknown char type (if total or incremental value is returned)
-     * @return prescribed value of unknown or zero if not prescribed
+     * This function should only be used if the BC is imposed.
+     * @see isImposed
+     * @param dof Determines the dof subjected to receiver BC.
+     * @param mode Unknown char type (if total or incremental value is returned)
+     * @param tStep Time step to give value for.
+     * @return Prescribed value of unknown or zero if not prescribed.
      */
-    virtual double give(Dof *, ValueModeType, TimeStep *);
+    virtual double give(Dof *dof, ValueModeType mode, TimeStep *tStep);
     /**
-     * Returns nonzero if receiver representing b.c. is imposed at given time, otherwise returns zero.
-     * @param tStep time step representing time when receiver is tested.
-     * @return true if imposed for given time, false otherwise.
+     * Returns nonzero if receiver representing BC is imposed at given time, otherwise returns zero.
+     * @param tStep Time step representing time when receiver is tested.
+     * @return True if imposed for given time, false otherwise.
      */
-    bool isImposed(TimeStep *);
+    bool isImposed(TimeStep *tStep);
+
     /**
-     * Returns receiver load type. It distinguish particular boundary conditions according to
-     * their "physical" meaning (like StructuralTemperatureLoadLT, StructuralLoadLT).
-     * @return returns BoundaryConditionLT value.
-     */
-    bcType     giveType() const { return DirichletBT; }
-
-    /// Initializes receiver acording to object description stored in input record.
-    IRResultType initializeFrom(InputRecord *ir);
-
-    /** Setups the input record string of receiver
-     *  @param str string to be filled by input record
-     *  @param keyword print record keyword (default true)
-     */
-    virtual int giveInputRecordString(std :: string &str, bool keyword = true);
-    /**
-     * Scales the receiver according to given value. Typically used in nondimensional analysis to scale down BCs and ICs.
-     */
-    virtual void scale(double s) { prescribedValue *= s; }
-
-
-    /** Set prescribed value at the input record string of receiver
-     *  @param s prescribed value
+     * Set prescribed value at the input record string of receiver
+     * @param s prescribed value
      */
     virtual void setPrescribedValue(double s) { prescribedValue = s; }
 
-    /// Returns class name of the receiver.
+    // Overloaded methods:
+    bcType giveType() const { return DirichletBT; }
+    IRResultType initializeFrom(InputRecord *ir);
+    virtual int giveInputRecordString(std :: string &str, bool keyword = true);
+    virtual void scale(double s) { prescribedValue *= s; }
     const char *giveClassName() const { return "BoundaryCondition"; }
-    /// Returns classType id of receiver.
     classType giveClassID() const { return BoundaryConditionClass; }
 };
 } // end namespace oofem

@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/buffereddatareader.h,v 1.2 2003/05/19 13:03:56 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2010   Borek Patzak
  *
  *
  *
@@ -33,11 +32,6 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-
-//
-// Class BufferedDataReader
-//
-
 #ifndef buffereddatareader_h
 #define buffereddatareader_h
 
@@ -51,11 +45,11 @@
 
 namespace oofem {
 /**
- * Class representing the implemantaion of plain text date reader.
- * It reads a sequentional seqence of input records from data file
+ * Class representing the implementation of plain text date reader.
+ * It reads a sequential sequence of input records from data file
  * and creates the corresponding input records.
  * There is no check for record type requested, it is assumed that records are
- * written in coorrect order, which determined by the coded sequence of
+ * written in correct order, which determined by the coded sequence of
  * component initialization and described in input manual.
  */
 class BufferedDataReader : public DataReader
@@ -66,23 +60,42 @@ protected:
     dynaList< std :: string > :: iterator pos;
 
 public:
-
-
     /** Constructor. */
     BufferedDataReader();
     ~BufferedDataReader();
 
     virtual InputRecord *giveInputRecord(InputRecordType, int recordId);
-    virtual void finish();
-    /// prints the name (shortened) of data source
+
+    /// @return The name (shortened) of data source.
     virtual const char *giveDataSourceName() const { return "BufferedDataReader source"; }
 
+    /**
+     * Appends string to end of buffer.
+     * @param str String to add to append
+     */
     void appendInputString(std :: string &str);
+    /**
+     * Appends string to end of buffer.
+     * @param line Null terminated string to append.
+     */
     void appendInputString(const char *line);
+    /// Puts buffer iterator back at start.
     void rewind();
+    /**
+     * Puts buffer iterator at given position.
+     * @param position Position to seek to.
+     */
     void seek(int position);
 
+    virtual void finish();
+
+    /// Prints buffer to stdout.
     void printYourself();
+
+    /**
+     * Dumps buffer to file.
+     * @param fileName Name of file to dump data to.
+     */
     void writeToFile(char *fileName);
 
 protected:

@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/loadtime.h,v 1.9 2003/04/06 14:08:25 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2010   Borek Patzak
  *
  *
  *
@@ -38,12 +37,6 @@
  * PhD Thesis, EPFL, Lausanne, 1992.
  */
 
-
-//   ********************************
-//   *** CLASS LOAD-TIME FUNCTION ***
-//   ********************************
-
-
 #ifndef loadtime_h
 #define loadtime_h
 
@@ -57,23 +50,12 @@ namespace oofem {
  * Abstract base class representing load time function. Classes derived from Load class typically
  * describe load from spatial point of view. The purpose of introducing load time function is to express
  * variation of some components in time. Load time function typically belongs to domain and is
- * attribute of one or more loads. Generally load time function is real function of time (\f$y=f(t)\f$).
+ * attribute of one or more loads. Generally load time function is real function of time, @f$y=f(t)@f$.
+ *
+ * See TJR Hughes, "The Finite Element Method", p 677).
  */
 class LoadTimeFunction : public FEMComponent
 {
-    /*
-     * This abstract class is the superclass of the classes that implement
-     * functions  y = f(t) , where t is the time. These function are used for
-     * weighing the loads (see TJR Hughes, "The Finite Element Method", p 677).
-     * A load-time function is attribute of the domain. It is usually also at-
-     * tribute of one or more loads.
-     * DESCRIPTION
-     * The parameters which describe the function are defined by the subclasses
-     * of this class.
-     * TASK
-     * Returning the value 'y' at any abscissa 't'.
-     */
-
 protected:
     /**
      * By default, the increment of receiver is computed as a difference between values evaluated at given solution step and in previous step.
@@ -95,18 +77,15 @@ public:
      */
     LoadTimeFunction(int i, Domain *d) : FEMComponent(i, d) { initialValue = 0.0; }
     /// Destructor
-    virtual ~LoadTimeFunction()  { }
+    virtual ~LoadTimeFunction() { }
 
-    // computations
     /**
      * Returns the value of load time function at given time. Abstract service.
      * Must be implemented by derived classes.
      * @param t time
      * @return load time function value
      */
-    double     evaluate(TimeStep *atTime, ValueModeType mode);
-
-    // definition of a function
+    double evaluate(TimeStep *atTime, ValueModeType mode);
 
     /**
      * Returns a newly allocated load time function, with type depending on parameter.
@@ -118,43 +97,32 @@ public:
      * @see CreateUsrDefLoadTimeFunctionOfType function.
      */
     LoadTimeFunction *ofType(char *);
-    /// Returns classType id of receiver.
-    classType   giveClassID() const { return LoadTimeFunctionClass; }
-    /// Returns class name of the receiver.
-    const char *giveClassName() const { return "LoadTimeFunction"; }
+
     /**
-     * Initializes receiver acording to object description stored in input record.
-     * Must be implemented in derived classes
+     * Returns the value of load time function at given time.
+     * @param t Time.
+     * @return @f$ f(t) @f$
      */
+    virtual double  __at(double) { return 0.; }
+    /**
+     * Returns the first time derivative of load time function at given time.
+     * @param t Time.
+     * @return @f$ f'(t) @f$
+     */
+    virtual double __derAt(double) { return 0.; }
+    /**
+     * Returns the second time derivative of load time function at given time.
+     * @param t Time.
+     * @return @f$ f''(t) @f$.
+     */
+    virtual double __accelAt(double) { return 0.; }
+
+    // Overloaded methods:
     IRResultType initializeFrom(InputRecord *ir);
-    /** Setups the input record string of receiver
-     *  @param str string to be filled by input record
-     *  @param keyword print record keyword (default true)
-     */
     virtual int giveInputRecordString(std :: string &str, bool keyword = true);
 
-
-    /**
-     * Returns the value of load time function at given time. Abstract service.
-     * Must be implemented by derived classes.
-     * @param t time
-     * @return load time function value
-     */
-    virtual double     __at(double)            { return 0.; }
-    /**
-     * Returns the first time derivative of load time function at given time. Abstract service.
-     * Must be implemented by derived classes.
-     * @param t time
-     * @return load time function value
-     */
-    virtual double    __derAt(double) { return 0.; }
-    /**
-     * Returns the second time derivative of load time function at given time. Abstract service.
-     * Must be implemented by derived classes.
-     * @param t time
-     * @return load time function value
-     */
-    virtual double    __accelAt(double) { return 0.; }
+    classType giveClassID() const { return LoadTimeFunctionClass; }
+    const char *giveClassName() const { return "LoadTimeFunction"; }
 };
 } // end namespace oofem
 #endif // loadtime_h

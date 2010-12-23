@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/conTable.h,v 1.11.4.1 2004/04/05 15:19:43 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2010   Borek Patzak
  *
  *
  *
@@ -33,11 +32,6 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-
-//
-// CLASS CONNECTIVITY TABLE
-//
-
 #ifndef contable_h
 #define contable_h
 
@@ -49,35 +43,24 @@ namespace oofem {
 /**
  * Class representing connectivity table. Usually attribute of domain. Provides
  * selected connectivity information services for domain.
+ *
+ * Its tasks are
+ * - Creating connectivity table - method InstanciateYourself.
+ * - Returning number of Elements belonging to node.
+ * - Returning j-th element belonging to node i.
  */
 class ConnectivityTable
 {
-    /*
-     * This class implements connectivityTable class
-     *
-     * DESCRIPTION:
-     *
-     * The connectivity table is able to create connectivity table
-     * of domain it belongs to.
-     *
-     * TASK:
-     *
-     * - creating connectivity table - method InstanciateYourself()
-     * - returning number of Elements belonging to node
-     * - returning j th element belonging to node i
-     *
-     */
-
 private:
     /// Pointer to domain to which receiver belongs to.
     Domain *domain;
 
-    /// array of connectivities for dofmanagers.
+    /// Array of connectivities for dofmanagers.
     int *dofManagersConnectivity;
 
-    /// Nodal connectivity table for domain
+    /// Nodal connectivity table for domain.
     AList< IntArray >nodalConnectivity;
-    /// Flag indicating assembled connectivity table for domain
+    /// Flag indicating assembled connectivity table for domain.
     int nodalConnectivityFlag;
 
 public:
@@ -128,31 +111,30 @@ public:
      */
 
     /**
-     * Builds connectivity table. This table contatins for each dofManager the list of
+     * Builds connectivity table. This table contains for each dofManager the list of
      * elements sharing it.
      */
     void instanciateConnectivityTable();
     /**
-     * Returns connectivity array for given DofManger.
-     * @param dofman DofManger number
+     * @param dofman DofManger number.
+     * @return Connectivity array for dofman.
      */
     const IntArray *giveDofManConnectivityArray(int dofman);
     /**
      * Returns list of neighboring elements to given elements (they are included too).
-     * Neighbour is defined as element sharing the given element node.
-     * @param answer list of neighbours + given elements, every element contained only once.
-     * @param elemList list of elements, which neighborhood is searched.
+     * Neighbor is defined as element sharing the given element node.
+     * @param answer List of neighbors + given elements, every element contained only once.
+     * @param elemList List of elements, which neighborhood is searched.
      */
     void giveElementNeighbourList(IntArray &answer, IntArray &elemList);
     /**
      * Returns list of elements sharing given nodes.
-     * @param answer list of elements, every element contained only once.
-     * @param nodeList list of nodes, which neighborhood is searched.
+     * @param answer List of elements, every element contained only once.
+     * @param nodeList List of nodes, which neighborhood is searched.
      */
     void giveNodeNeighbourList(IntArray &answer, IntArray &nodeList);
 
-
-    /// Prints receiver contens on output.
+    /// Prints receiver contents on output.
     void printYourself();
 };
 } // end namespace oofem

@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2010   Borek Patzak
  *
  *
  *
@@ -32,14 +32,11 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-//
-// FILE: commbufftype.h
-//
-
 #ifndef commbufftype_h
 #define commbufftype_h
 
 namespace oofem {
+// TODO: Document this
 enum CommBuffType { CBT_static, CBT_dynamic };
 } // end namespace oofem
 #endif // commbufftype_h

@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/loadtime.C,v 1.5.4.1 2004/04/05 15:19:43 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2010   Borek Patzak
  *
  *
  *
@@ -32,20 +31,15 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
+
 /*
  * The original idea for this class comes from
  * Dubois-Pelerin, Y.: "Object-Oriented  Finite Elements: Programming concepts and Implementation",
  * PhD Thesis, EPFL, Lausanne, 1992.
  */
 
-
-//   file LOADTIME.C
-
 #include "loadtime.h"
 #include "constant.h"
-//#include "peak.h"
-//#include "piecewis.h"
-//#include "heavisideltf.h"
 #include "domain.h"
 #include "usrdefsub.h"
 #ifndef __MAKEDEPEND

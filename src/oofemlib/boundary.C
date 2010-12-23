@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/boundary.C,v 1.8.4.1 2004/04/05 15:19:43 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2010   Borek Patzak
  *
  *
  *
@@ -32,11 +31,6 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-
-//
-//   file BOUNDARY.C
-//
-
 
 #include "boundary.h"
 #include "timestep.h"
@@ -106,13 +100,13 @@ double BoundaryCondition :: give(Dof *dof, ValueModeType mode, TimeStep *stepN)
 
 bool BoundaryCondition :: isImposed(TimeStep *tStep)
 {
-    // returs a value of isImposedTimeFunction, indicating whether b.c. is imposed or not
+    // Returns a value of isImposedTimeFunction, indicating whether b.c. is imposed or not
     // in given time (nonzero indicates imposed b.c.).
 
     if ( isImposedTimeFunction ) {
         return ( domain->giveLoadTimeFunction(isImposedTimeFunction)->evaluate(tStep, VM_Total) != 0. );
     } else {
-        // zero value indicates default behaviour -> b.c. is imposed
+        // zero value indicates default behavior -> b.c. is imposed
         // anytime
         return true;
     }

@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/clock.h,v 1.6 2003/05/19 13:03:57 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2010   Borek Patzak
  *
  *
  *
@@ -33,10 +32,9 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-/*
- * //   ********************
- * //   *** CLOCK MODULE ***
- * //   ********************
+/**
+ * @file This file customizes the time functions to your platform.
+ * Function getTime is used for measuring elapsed or CPU time.
  */
 
 #ifndef clock_h
@@ -79,11 +77,11 @@
   #include <time.h>
  #endif
 
-//oofem timeval structure used to measure user time.
+/// Structure used to measure user time.
 struct timeval
 {
-    unsigned long tv_sec;          // Seconds.
-    unsigned long tv_usec;         // Microseconds.
+    unsigned long tv_sec;          ///< Seconds.
+    unsigned long tv_usec;         ///< Microseconds.
 };
 
  #define OOFEM_USEC_LIM 1
@@ -95,16 +93,17 @@ typedef timeval oofem_timeval;
 
 /**
  * Returns current time in seconds.
- * @return current time in oofem_timeval structure.
+ * @param answer Current time in oofem_timeval structure.
  */
 void getTime(oofem_timeval &answer);
 
 /**
- * Returns current time in seconds in time_t.
+ * @return Current time in seconds in time_t.
  */
 time_t getTime();
 /**
- * Function returns user time stored in oofem_timeval structure.
+ * Function gives user time stored in oofem_timeval structure.
+ * @param answer User time.
  */
 void getUtime(oofem_timeval &answer);
 
@@ -113,13 +112,27 @@ void getUtime(oofem_timeval &answer);
  */
 void getRelativeUtime(oofem_timeval &answer, oofem_timeval &from);
 /**
- * Function returning the elapsed user-time startig at "from" and ending at "to", identified by oofem_timeval variables
+ * Function returning the elapsed user-time starting at "from" and ending at "to", identified by oofem_timeval variables
+ * @param answer The time difference.
+ * @param from Starting time.
+ * @param to Final time.
  */
 void getRelativeUtime(oofem_timeval &answer, oofem_timeval &from, oofem_timeval &to);
 /**
  * Function converts total seconds into hours, minutes and remaining seconds
+ * @param[out] nhrs Number of hours.
+ * @param[out] nmin Number of minutes.
+ * @param[out] nsec Number of seconds.
+ * @param[in] tsec Total time in seconds.
  */
 void convertTS2HMS(int &nhrs, int &nmin, int &nsec, long int tsec);
+/**
+ * Function converts total seconds into hours, minutes and remaining seconds
+ * @param[out] nhrs Number of hours.
+ * @param[out] nmin Number of minutes.
+ * @param[out] nsec Number of seconds.
+ * @param[in] tsec Total time in seconds.
+ */
 void convertTS2HMS(int &nhrs, int &nmin, int &nsec, double tsec);
 } // end namespace oofem
 #endif // clock_h

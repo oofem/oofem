@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2010   Borek Patzak
  *
  *
  *
@@ -43,7 +43,7 @@ namespace oofem {
 /**
  * Type introduced to distinguish between classes. Intended for run-time
  * type checking. Every derived class from FemComponent base class should
- * owerload the abstract giveClassID service. This service can be used
+ * overload the abstract giveClassID service. This service can be used
  * to distinguish between multiple derived classes.
  */
 enum classType {
@@ -309,6 +309,9 @@ enum classType {
     TDictionaryClass,
     TimeStepClass,
     MetaStepClass,
+
+    TopologyDescriptionClass,
+    ParticleTopologyDescriptionClass,
 
     DofManExportModuleClass,
 

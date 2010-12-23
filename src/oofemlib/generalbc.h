@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/generalbc.h,v 1.4 2003/04/06 14:08:24 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2010   Borek Patzak
  *
  *
  *
@@ -33,12 +32,6 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-
-//   ****************************************
-//   *** CLASS General Boundary Condition ***
-//   ****************************************
-
-
 #ifndef generalbc_h
 #define generalbc_h
 
@@ -53,14 +46,14 @@
 
 namespace oofem {
 /**
- * Abstract base class for all boudary conditions of problem.
- * Boundary condition is an aribute of the domain (it belongs to).
- * General BC is also atrribute of several elements, nodes, Dofs and so on,
+ * Abstract base class for all boundary conditions of problem.
+ * Boundary condition is an attribute of the domain (it belongs to).
+ * General BC is also attribute of several elements, nodes, Dofs and so on,
  * which are subjected to boundary condition.
  *
  * This base class only declares itself as a base class of all boundary conditions,
  * and declares only very basic services. This base class introduces
- * 'loadTimeFunction' as an atrribute of each boundary condition.
+ * 'loadTimeFunction' as an attribute of each boundary condition.
  * 'loadTimeFunction' represent time variation, its value is dependent on time step.
  * The value (or the components) of a boundary condition (load) will be
  * the product of its value by the value of
@@ -72,30 +65,30 @@ namespace oofem {
  * boundary condition geometrical character (pointwise, acting on element body or edge and so on).
  *
  * Derived classes should represent the base classes for particular boundary condition type (like
- * force load, or boundary condition prescribed directlly on some dof) and should declare
+ * force load, or boundary condition prescribed directly on some dof) and should declare
  * the basic common interface.
  */
 class GeneralBoundaryCondition : public FEMComponent
 {
 protected:
-    /// Associated load time function
+    /// Associated load time function.
     int loadTimeFunction;
-    /// Physical maening of bc value
+    /// Physical meaning of BC value.
     bcValType valType;
+
 public:
 
     /**
      * Constructor. Creates boundary condition with given number, belonging to given domain.
-     * @param n boundary condition number
-     * @param d domain to which new object will belongs.
+     * @param n Boundary condition number.
+     * @param d Domain to which new object will belongs.
      */
-    GeneralBoundaryCondition(int, Domain *);    // constructor
+    GeneralBoundaryCondition(int, Domain *);
     /// Destructor.
-    virtual ~GeneralBoundaryCondition()  { }    // destructor
+    virtual ~GeneralBoundaryCondition() { }
 
-    // computations
     /**
-     * Returns associated load time function of receiver.
+     * @return Associated load time function of receiver.
      */
     LoadTimeFunction *giveLoadTimeFunction();
     /**
@@ -115,36 +108,33 @@ public:
      * Derived classes should always overload, default implementation returns UnknownLT value.
      * See cltypes.h file for details.
      */
-    virtual bcValType  giveBCValType() const { return this->valType; }
+    virtual bcValType giveBCValType() const { return this->valType; }
     /**
-     * Returns type of boundary condition. It allows to distinguish bc according its
-     * mathematical meaning, ie like Dirichlet, Neunamm, or Newton type */
-    virtual bcType     giveType() const { return UnknownBT; }
+     * @return Type of boundary condition. It allows to distinguish BC according its
+     * mathematical meaning, ie. like Dirichlet, Neumann, or Newton type.
+     */
+    virtual bcType giveType() const { return UnknownBT; }
     /**
      * Returns geometry character of boundary condition. For available values see cltypes.h file.
      * Derived classes should always overload, default implementation returns UnknownLoadGT value.
      */
-    virtual bcGeomType giveBCGeoType()   const { return UnknownBGT; }
-    /// Initializes receiver acording to object description stored in input record.
-    IRResultType initializeFrom(InputRecord *ir);
-    /** Setups the input record string of receiver
+    virtual bcGeomType giveBCGeoType() const { return UnknownBGT; }
+    /**
+     * Setups the input record string of receiver
      * @param str string to be filled by input record
      * @param keyword print record keyword (default true)
      */
     virtual int giveInputRecordString(std :: string &str, bool keyword = true);
     /**
      * Scales the receiver according to given value. Typically used in nondimensional analysis to scale down BCs and ICs.
+     * @param s Scale factor.
      */
-    virtual void scale(double) { }
+    virtual void scale(double s) { }
 
-
-    /// Returns classType id of receiver.
-    classType    giveClassID() const { return GeneralBoundaryConditionClass; }
-    /// Returns class name of the receiver.
+    // Overloaded methods:
+    IRResultType initializeFrom(InputRecord *ir);
+    classType giveClassID() const { return GeneralBoundaryConditionClass; }
     const char *giveClassName() const { return "GeneralBoundaryCondition"; }
-
-
-protected:
 };
 } // end namespace oofem
 #endif // generalbc_h

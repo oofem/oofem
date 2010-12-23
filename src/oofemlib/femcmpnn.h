@@ -46,14 +46,12 @@
  #include <string>
 #endif
 
-#include "intarray.h"
-#include "flotarry.h"
 #include "domain.h"
 #include "error.h"
 #include "interface.h"
+#include "interfacetype.h"
 #include "inputrecord.h"
 #include "classtype.h"
-#include "interfacetype.h"
 #include "entityrenumberingscheme.h"
 #include "contextioresulttype.h"
 #include "contextmode.h"

@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/cltypes.C,v 1.10.4.1 2004/04/05 15:19:43 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2010   Borek Patzak
  *
  *
  *
@@ -32,11 +31,6 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-
-/*
- * file cltypes.c
- */
-
 
 #include "error.h"
 #include "chartype.h"
@@ -63,7 +57,7 @@
 namespace oofem {
 /*
  * Function used only by BoundaryCondition and InitialCondition in order to
- * store informations in convinient form for debugging.
+ * store informations in convenient form for debugging.
  */
 /*
  * char cltypesGiveUnknownTypeKey (UnknownType type)
@@ -101,15 +95,14 @@ char cltypesGiveUnknownTypeModeKey(ValueModeType mode)
     return 0;
 }
 
-
-int    isUnknownTypeModeIncremental(ValueModeType mode)
+// TODO: This function seems completely redundant.
+bool isUnknownTypeModeIncremental(ValueModeType mode)
 {
-    // returns nonzero if UnknownMode value represents incremental quantity
     if ( ( mode == VM_Incremental ) ) {
-        return 1;
+        return true;
     }
 
-    return 0;
+    return false;
 }
 
 InternalStateValueType giveInternalStateValueType(InternalStateType type)

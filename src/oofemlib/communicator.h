@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/Attic/communicator.h,v 1.1.2.1 2004/04/05 15:19:43 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2010   Borek Patzak
  *
  *
  *
@@ -33,10 +32,6 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-//
-// Class Communicator
-//
-
 #ifndef communicator_h
 #define communicator_h
 
@@ -55,7 +50,7 @@ namespace oofem {
 /**
  * The Communicator and corresponding buffers (represented by this class)
  * are separated in order to allow share the same buffer by several communicators.
- * Here sharing means reusing for different but NON-OVERLAPPING communications.
+ * Here sharing means reusing for different but <em>non-overlapping</em> communications.
  * if communications overlap, the different instances of CommunicatorBuff should be used!
  * The CommunicatorBuff objects are registered in corresponding communicator,
  * then if maps are available, comBuff should be resized and used in subsequent ops.
@@ -69,9 +64,9 @@ class CommunicatorBuff
 {
 public:
 protected:
-    /// number of processes
+    /// Number of processes.
     int size;
-    /// array of process communicators
+    /// Array of process communicators.
     ProcessCommunicatorBuff **processCommBuffs;
 
 public:
@@ -80,8 +75,8 @@ public:
 
     /**
      * Returns i-th process communicator buff. The process comm buffs are numbered from rank 0.
-     * @param i process communicator buff index [0..size-1]
-     * @return pointer to corresponding process communicator buff, NULL otherwise.
+     * @param i Process communicator buff index [0..size-1].
+     * @return Pointer to corresponding process communicator buff, NULL otherwise.
      */
     ProcessCommunicatorBuff *
     giveProcessCommunicatorBuff(int i) { if ( i < size ) { return processCommBuffs [ i ]; } else { return NULL; } }
@@ -90,9 +85,9 @@ public:
 
 /**
  * Class representing communicator.
- * It is usually attribute of  Engng model.
- * Problem comunicator provides all services for communication with
- * associated remote problems. It manages several process (task) comunicators.
+ * It is usually attribute of an engineering model.
+ * Problem communicator provides all services for communication with
+ * associated remote problems. It manages several process (task) communicators.
  *
  * The communicator mode determines the communication:
  *
@@ -101,32 +96,31 @@ public:
  * communication buffers is known in advance. Also if no data are planned to send to remote node, there
  * is no communication with this node (both sender and receiver know that there will be no data to send).
  *
- * (Dynamic) In this case the communication pattern and the ammount of data sent between nodes is
+ * (Dynamic) In this case the communication pattern and the amount of data sent between nodes is
  * not known in advance. This requires to use dynamic (packeted) buffering.
  *
  */
 class Communicator
 {
 protected:
-    /// rank of process
+    /// Rank of process
     int rank;
-    /// number of processes
+    /// Number of processes
     int size;
-    /// array of process communicators
+    /// Array of process communicators
     ProcessCommunicator **processComms;
-    /// Engng model
+    /// Engineering model
     EngngModel *engngModel;
-    /// mode
+    /// Mode
     CommunicatorMode mode;
-
 
 public:
     /**
      * Constructor. Creates new communicator associated
      * to partition with number (rank) irank.
-     * @param irank rank of associated partition
-     * @param size #number of colaborating processes
-     * @param mode communicator mode.
+     * @param irank Rank of associated partition.
+     * @param size Number of collaborating processes.
+     * @param mode Communicator mode.
      */
     Communicator(EngngModel *emodel, CommunicatorBuff *b, int rank, int size, CommunicatorMode m = CommMode_Static);
     /// Destructor
@@ -134,78 +128,79 @@ public:
 
     /**
      * Returns i-th problem communicator. The problems are numbered from rank 0.
-     * @param i problem communicator index [0..size-1]
-     * @return pointer to corresponding communicator, NULL otherwise.
+     * @param i Problem communicator index [0..size-1].
+     * @return Pointer to corresponding communicator, NULL otherwise.
      */
     ProcessCommunicator *
     giveProcessCommunicator(int i) { if ( i < size ) { return processComms [ i ]; } else { return NULL; } }
 
     /**
      * Pack all problemCommuncators data to their send buffers.
-     * @param packFunc function used to pack nodal data in to buffer.
+     * @param packFunc Function used to pack nodal data in to buffer.
      * @see NlDEIDynamic_Unpack_func
      */
     template< class T >int packAllData( T * ptr, int ( T :: *packFunc )( ProcessCommunicator & ) );
     /**
      * Pack all problemCommuncators data to their send buffers.
-     * @param packFunc function used to pack nodal data in to buffer.
+     * @param packFunc Function used to pack nodal data in to buffer.
      * @see NlDEIDynamic_Unpack_func
      */
     //template <class T> int packAllData (T* ptr, FloatArray* src, int (T::*packFunc) (FloatArray*, ProcessCommunicator&));
     template< class T, class P >int packAllData( T * ptr, P * src, int ( T :: *packFunc )( P *, ProcessCommunicator & ) );
     /**
      * Unpack all problemCommuncators data  from recv buffers.
-     * Waits  untill receive completion before unpacking buffer.
-     * @param unpackFunc function used to unpack nodal data from buffer.
+     * Waits until receive completion before unpacking buffer.
+     * @param unpackFunc Function used to unpack nodal data from buffer.
      * @see NlDEIDynamic_Unpack_func
      */
     template< class T >int unpackAllData( T * ptr, int ( T :: *unpackFunc )( ProcessCommunicator & ) );
     /**
      * Unpack all problemCommuncators data  from recv buffers.
-     * Waits  untill receive completion before unpacking buffer.
-     * @param unpackFunc function used to unpack nodal data from buffer.
+     * Waits until receive completion before unpacking buffer.
+     * @param unpackFunc Function used to unpack nodal data from buffer.
      * @see NlDEIDynamic_Unpack_func
      */
     //template <class T> int unpackAllData (T* ptr, FloatArray* dest, int (T::*unpackFunc) (FloatArray*, ProcessCommunicator&));
     template< class T, class P >int unpackAllData( T * ptr, P * src, int ( T :: *unpackFunc )( P *, ProcessCommunicator & ) );
     /**
      * Initializes data exchange with all problems.
-     * if send or receive pool is empty, communication is not preformed.
+     * if send or receive pool is empty, communication is not performed.
      * @param tag message tag
      */
     int initExchange(int tag);
     /**
      * Initializes data send exchange with all problems.
-     * if send  pool is empty, communication is not preformed.
-     * @param tag message tag
+     * if send  pool is empty, communication is not performed.
+     * @param tag Message tag.
+     * @return Nonzero if successful.
      */
     int initSend(int tag);
     /**
      * Initializes data receive exchange with all problems.
-     * if  receive pool is empty, communication is not preformed.
-     * @param tag message tag
+     * if receive pool is empty, communication is not performed.
+     * @param tag Message tag.
+     * @param Nonzero if successful.
      */
     int initReceive(int tag);
     /*
      * Finishes the exchange. After this call all communication buffers can be reused.
-     *
+     * @return Nonzero if successful.
      */
     int finishExchange();
 
     /**
-     * Clears all buffer contens.
+     * Clears all buffer content.
      */
     void clearBuffers();
     /**
      * Service for setting up the communication patterns with other remote processes.
      * Sets up the toSend and toRecv attributes in associated problem communicators.
+     * @param pm Engineering model to use for setup.
      */
     virtual void setUpCommunicationMaps(EngngModel *pm) { }
 
-    /// prints error message and exits
+    /// Prints error message and exits
     void error(const char *file, int line, const char *format, ...) const;
-
-private:
 };
 
 template< class T >int
