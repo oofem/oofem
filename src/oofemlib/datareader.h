@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/datareader.h,v 1.2 2003/05/19 13:03:57 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2010   Borek Patzak
  *
  *
  *
@@ -32,11 +31,6 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-
-
-//
-// Class DataReader
-//
 
 #ifndef datareader_h
 #define datareader_h
@@ -68,7 +62,7 @@ public:
 
     /**
      * Returns input record corresponding to given InputRecordType value and its record_id.
-     * The returned inputrecord reference is valid only until the next call.
+     * The returned InputRecord reference is valid only until the next call.
      * @param irType determines type of record to be returned
      * @param recordID determines the record  number corresponding to component number
      */

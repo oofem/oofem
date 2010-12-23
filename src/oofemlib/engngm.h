@@ -435,7 +435,7 @@ public:
      */
     void               setUDContextOutputMode(int cStep)
     {
-        contextOutputMode = USERDEFINED;
+        contextOutputMode = COM_UserDefined;
         contextOutputStep = cStep;
     }
     /**

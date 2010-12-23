@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2010   Borek Patzak
  *
  *
  *
@@ -32,21 +32,14 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-//
-// FILE: crosssectextension.h
-//
-
 #ifndef crosssectextension_h
 #define crosssectextension_h
 
 namespace oofem {
-/**
- * Type representing cross section extension.
- */
+/// Type representing cross section extension for run time testing.
 enum CrossSectExtension {
-    // id indicating material class extensions for run time testing
-    CS_StructuralCapability,
-    CS_HeatCapability
+    CS_StructuralCapability, ///< Structural capability.
+    CS_HeatCapability, ///< Heat capability.
 };
 } // end namespace oofem
 #endif // crosssectextension_h

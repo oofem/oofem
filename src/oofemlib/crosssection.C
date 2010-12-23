@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/crosssection.C,v 1.10.4.1 2004/04/05 15:19:43 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2010   Borek Patzak
  *
  *
  *
@@ -32,8 +31,6 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-
-//   file CROSSSECTION.CC
 
 #include "crosssection.h"
 #include "simplecrosssection.h"
@@ -132,7 +129,7 @@ CrossSection :: ofType(char *aClass)
     } else if ( !strncasecmp(aClass, "emptycs", 7) ) {
         newCrossSection = new EmptyCS(number, domain);
     } else {
-        // last resort - call aditional user defined subroutine
+        // last resort - call additional user defined subroutine
         newCrossSection = CreateUsrDefCrossSectionOfType(aClass, number, domain);
         if ( newCrossSection == NULL ) {
             _error2("ofType:  unknown cross section type (%s)\n", aClass);
@@ -146,8 +143,7 @@ CrossSection :: ofType(char *aClass)
 
 double
 CrossSection :: give(CrossSectionProperty aProperty)
-// Returns the value of the property aProperty (e.g. the area
-// 'A') of the receiver.
+// Returns the value of the property aProperty of the receiver.
 {
     if ( propertyDictionary->includes(aProperty) ) {
         return propertyDictionary->at(aProperty);

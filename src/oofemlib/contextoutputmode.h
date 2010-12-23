@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2010   Borek Patzak
  *
  *
  *
@@ -32,19 +32,15 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-//
-// FILE: contextoutputmode.h
-//
-
 #ifndef contextoutputmode_h
 #define contextoutputmode_h
 
 namespace oofem {
 enum ContextOutputMode {
-    NOCONTEXT,
-    ALWAYS,       // enable for post-processing
-    REQUIRED,     // if required (for backtracing computation)
-    USERDEFINED   // input attribute of domain (each n-th step)
+    COM_NoContext,     ///< No context.
+    COM_Always,        ///< Enable for post-processing.
+    COM_Required,      ///< If required (for backtracking computation).
+    COM_UserDefined,   ///< Input attribute of domain (each n-th step).
 };
 } // end namespace oofem
 #endif // contextoutputmode_h

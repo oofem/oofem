@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2010   Borek Patzak
  *
  *
  *
@@ -32,19 +32,16 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-//
-// FILE: contextioresulttype.h
-//
-
 #ifndef contextioresulttype_h
 #define contextioresulttype_h
 
 namespace oofem {
+
 enum contextIOResultType {
-    CIO_OK = 0,     // ok
-    CIO_BADVERSION, // incompatible context file
-    CIO_BADOBJ,     // bad object passed
-    CIO_IOERR       // general io error
+    CIO_OK = 0,     ///< OK.
+    CIO_BADVERSION, ///< Incompatible context file.
+    CIO_BADOBJ,     ///< Bad object passed.
+    CIO_IOERR       ///< General IO error.
 };
 } // end namespace oofem
 #endif // contextioresulttype_h

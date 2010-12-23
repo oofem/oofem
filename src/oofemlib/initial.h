@@ -32,11 +32,6 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-
-//   *******************************
-//   *** CLASS INITIAL CONDITION ***
-//   *******************************
-
 #ifndef initial_h
 #define initial_h
 
@@ -73,34 +68,27 @@ namespace oofem {
  */
 class InitialCondition : public FEMComponent
 {
-    /*
-     * This class implements an initial condition. An initial condition is usually
-     * attribute of one or more degrees of freedom.
-     */
 private:
     /// Dictionary of initial values.
     Dictionary initialValueDictionary;
-    /// Physical meaning of bc value
+    /// Physical meaning of bc value.
     bcValType valType;
-
 
 public:
     /**
-     * Constructor. Creates initial condition with given number, belonging to given domain.
-     * @param n initial condition number
-     * @param d domain to which new object will belongs.
+     * Creates initial condition with given number, belonging to given domain.
+     * @param n Initial condition number.
+     * @param d Domain to which new object will belongs.
      */
-    InitialCondition(int i, Domain *d) : FEMComponent(i, d), initialValueDictionary()
-    { }
+    InitialCondition(int i, Domain *d) : FEMComponent(i, d), initialValueDictionary() { }
     /// Destructor.
-    ~InitialCondition()                { }
+    ~InitialCondition() { }
 
-    //double  give (char) ;
     /**
      * Returns value of initial condition for given unknown mode (determines whether total or velocity or acceleration
      * mode of unknown is requested).
-     * @param mode charcteristic mode of unknown, characteristic type depends on DOF (represent physical meaning).
-     * @return value of initial condition for given mode.
+     * @param mode Characteristic mode of unknown, characteristic type depends on DOF (represent physical meaning).
+     * @return Value of initial condition for given mode.
      */
     double give(ValueModeType);
     /**
@@ -108,36 +96,33 @@ public:
      * their "physical" meaning (like StructuralTemperatureLoadLT, StructuralLoadLT).
      * Derived classes should always overload, default implementation returns UnknownLT value.
      * See cltypes.h file for details.
+     * @return Value type.
      */
-    bcValType  giveICValType() const { return this->valType; }
+    bcValType giveICValType() const { return this->valType; }
     /**
      * Tests if receiver has initial condition for specific unknown-mode.
-     * @param u ValueModeType value of unknown
-     * @return nonzero if given mode has initial condition, zero otherwise
+     * @param u ValueModeType value of unknown.
+     * @return Nonzero if given mode has initial condition, zero otherwise.
      */
-    int     hasConditionOn(int u);
+    int hasConditionOn(int u);
     /**
      * Tests if receiver has initial condition for specific unknown-mode.
-     * @param u ValueModeType value of unknown
-     * @return nonzero if given mode has initial condition, zero otherwise
+     * @param type ValueModeType of unknown.
+     * @return Nonzero if given mode has initial condition, zero otherwise.
      */
-    int     hasConditionOn(ValueModeType type);
+    int hasConditionOn(ValueModeType type);
     /**
      * Scales the receiver value (determined by ValueModeType) by given value.
      * Typically used in nondimensional analysis to scale down BCs and ICs.
+     * @param type ValueModeType of unknown.
+     * @param s Scaling factor.
      */
-    virtual void scale(ValueModeType, double);
+    virtual void scale(ValueModeType type, double s);
 
-
-
-    /// Initializes receiver acording to object description stored in input record.
+    // Overloaded methods:
     IRResultType initializeFrom(InputRecord *ir);
-    /// Print receiver state and contents. Usefull for debuging.
-    void    printYourself();
-
-    /// Returns classType id of receiver.
-    classType    giveClassID() const { return InitialConditionClass; }
-    /// Returns class name of the receiver.
+    void printYourself();
+    classType giveClassID() const { return InitialConditionClass; }
     const char *giveClassName() const { return "InitialCondition"; }
 };
 } // end namespace oofem

@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/bodyload.h,v 1.8 2003/04/06 14:08:23 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2010   Borek Patzak
  *
  *
  *
@@ -32,11 +31,6 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-
-
-//   ***********************
-//   *** CLASS BODY LOAD ***
-//   ***********************
 
 #ifndef bodyload_h
 #define bodyload_h
@@ -59,27 +53,22 @@ class TimeStep;
  */
 class BodyLoad : public Load
 {
-    /*
-     * This abstract class is the superclass of all loads (e.g., the dead weight)
-     * that act on the whole volume of finite elements. A body load is usually
-     * attribute of many elements.
-     */
 public:
     /**
      * Constructor. Creates Body Load object with given number, belonging to given domain.
      * @param n load number
      * @param d domain to which new object will belongs.
      */
-    BodyLoad(int i, Domain *d) : Load(i, d) { }     // constructor
+    BodyLoad(int i, Domain *d) : Load(i, d) { }
 
-
-    classType    giveClassID() const { return BodyLoadClass; }
     /**
-     * Returns receiver's load gemetry type.
-     * @return returns BodyLoadGT value.
+     * Returns receiver's load geometry type.
+     * @return BodyLoadBGT.
      */
     bcGeomType giveBCGeoType() const { return BodyLoadBGT; }
+
     const char *giveClassName() const { return "BodyLoad"; }
+    classType giveClassID() const { return BodyLoadClass; }
 };
 } // end namespace oofem
 #endif // bodyload_h

@@ -52,7 +52,7 @@ namespace oofem {
  * variation of some components in time. Load time function typically belongs to domain and is
  * attribute of one or more loads. Generally load time function is real function of time, @f$y=f(t)@f$.
  *
- * See TJR Hughes, "The Finite Element Method", p 677).
+ * See TJR Hughes, "The Finite Element Method", p 677.
  */
 class LoadTimeFunction : public FEMComponent
 {

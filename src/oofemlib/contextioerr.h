@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2010   Borek Patzak
  *
  *
  *
@@ -32,17 +32,16 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-//
-// FILE: contextioerr.h
-//
-
 #ifndef contextioerr_h
 #define contextioerr_h
 
 #include "contextioresulttype.h"
 
 namespace oofem {
-/// context io exception class
+/**
+ * Context IO exception class
+ * TODO: Document more.
+ */
 class ContextIOERR
 {
     contextIOResultType error;

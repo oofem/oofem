@@ -140,7 +140,7 @@ EngngModel :: EngngModel(int i, EngngModel *_master) : domainNeqs(), domainPresc
     metaStepList          = new AList< MetaStep >(0);
     xfemManagerList       = new AList< XfemManager >(0);
 
-    contextOutputMode     =  NOCONTEXT;
+    contextOutputMode     = COM_NoContext;
     contextOutputStep     = 0;
     pMode                 = _processor;  // for giveContextFile()
     pScale                = macroScale;
@@ -933,10 +933,10 @@ EngngModel :: saveStepContext(TimeStep *stepN)
     // save context if required
     // default - save only if ALWAYS is set ( see cltypes.h )
 
-    if ( ( this->giveContextOutputMode() == ALWAYS ) ||
-        ( this->giveContextOutputMode() == REQUIRED ) ) {
+    if ( ( this->giveContextOutputMode() == COM_Always ) ||
+        ( this->giveContextOutputMode() == COM_Required ) ) {
         this->saveContext(NULL, CM_State);
-    } else if ( this->giveContextOutputMode() == USERDEFINED ) {
+    } else if ( this->giveContextOutputMode() == COM_UserDefined ) {
         if ( stepN->giveNumber() % this->giveContextOutputStep() == 0 ) {
             this->saveContext(NULL, CM_State);
         }

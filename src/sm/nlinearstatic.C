@@ -894,11 +894,11 @@ void NonLinearStatic ::  updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Do
  * // save context if required
  * // default - save only if ALWAYS is set ( see cltypes.h )
  *
- * if ((domain->giveContextOutputMode() == ALWAYS) ||
- * (domain->giveContextOutputMode() == REQUIRED)) {
+ * if ((domain->giveContextOutputMode() == COM_Always) ||
+ * (domain->giveContextOutputMode() == COM_Required)) {
  * this->saveContext(NULL, CM_State);
  * }
- * else if (domain->giveContextOutputMode() == USERDEFINED) {
+ * else if (domain->giveContextOutputMode() == COM_UserDefined) {
  * if (stepN->giveNumber()%domain->giveContextOutputStep() == 0)
  *  this->saveContext(NULL, CM_State);
  * }

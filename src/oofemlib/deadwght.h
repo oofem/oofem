@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/deadwght.h,v 1.8 2003/04/06 14:08:23 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2010   Borek Patzak
  *
  *
  *
@@ -33,11 +32,6 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-//   *************************
-//   *** CLASS DEAD WEIGHT ***
-//   *************************
-
-
 #ifndef deadwght_h
 #define deadwght_h
 
@@ -48,42 +42,33 @@
 namespace oofem {
 /**
  * This class implements a gravity-like load, or internal source (heat etc.) for transport problems.
- * The inheritted attribute 'componentArray' contains the components of an
+ * The inherited attribute 'componentArray' contains the components of an
  * loading prescribed per unit volume.
+ *
+ * Its task is to return the body force @f$ \rho a @f$
  */
 class DeadWeight : public BodyLoad
 {
-    /*
-     * This class implements a gravity-like load.
-     * DESCRIPTION
-     * The attribute 'componentArray' contains the components of an acceleration
-     * 'a', expected (but not required) to be downwards vertical.
-     * TASK
-     * returning the body force  rho*a  acting on a given element.
-     */
 public:
     /// Constructor
-    DeadWeight(int i, Domain *d) : BodyLoad(i, d) { }         // constructor
+    DeadWeight(int i, Domain *d) : BodyLoad(i, d) { }
     /**
      * Computes components values of deadweight field at given point (coordinates given in Global c.s.).
      * taking into account corresponding load time function value while respecting load response mode.
-     * @param answer component values at given point and time
-     * @param stepN time step representing time
-     * @param coords gp global coordinates, which are used to evaluate components values
-     * @param mode determines response mode
+     * @param answer Component values at given point and time.
+     * @param atTime Time step.
+     * @param coords Global coordinates, which are used to evaluate components values.
+     * @param mode Determines response mode-
      */
-    void         computeValueAt(FloatArray &answer, TimeStep *atTime, FloatArray &coords, ValueModeType mode)
+    void computeValueAt(FloatArray &answer, TimeStep *atTime, FloatArray &coords, ValueModeType mode)
     { computeComponentArrayAt(answer, atTime, mode); }
-    ///Returns type of class
-    classType    giveClassID() const { return DeadWeightClass; }
-    ///Returns name of class
+
+    bcValType giveBCValType() const { return ForceLoadBVT; }
+    bcGeomType giveBCGeoType() const { return BodyLoadBGT; }
+
+    classType giveClassID() const { return DeadWeightClass; }
     const char *giveClassName() const { return "DeadWeight"; }
-    ///Returns input record name of the receiver.
     const char *giveInputRecordName() const { return "DeadWeight"; }
-    ///Returns type of boundary condition
-    bcValType    giveBCValType() const { return ForceLoadBVT; }
-    ///Returns type of load
-    bcGeomType    giveBCGeoType() const { return BodyLoadBGT; }
 };
 } // end namespace oofem
 #endif // deadwght_h

@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2010   Borek Patzak
  *
  *
  *
@@ -32,24 +32,14 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-//
-// FILE: contextfilemode.h
-//
-
 #ifndef contextfilemode_h
 #define contextfilemode_h
 
 namespace oofem {
-/**
- * Determines the input/output mode of context file.
- * contextMode_read - context file is openned for reading.
- * contextMode_write- context mode is openned for writting,
- *                  if not exist then is created, otherwise
- *         it will be truncated.
- */
+/// Determines the input/output mode of context file.
 enum ContextFileMode {
-    contextMode_read,
-    contextMode_write
+    contextMode_read, ///< Context file is opened for reading.
+    contextMode_write, ///< Context mode is opened for writing, if not exist is created, otherwise it will be truncated.
 };
 } // end namespace oofem
 #endif // contextfilemode_h

@@ -141,7 +141,7 @@ EngngModel *InstanciateProblem(DataReader *dr, problemMode mode, int contextFlag
     problem->setProblemMode(mode);
 
     if ( contextFlag ) {
-        problem->setContextOutputMode(ALWAYS);
+        problem->setContextOutputMode(COM_Always);
     }
 
     problem->instanciateYourself(dr, emodelir, dataOutputFileName, desc);

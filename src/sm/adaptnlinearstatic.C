@@ -173,7 +173,7 @@ AdaptiveNonLinearStatic :: solveYourselfAt(TimeStep *tStep) {
         } else if ( result == MesherInterface :: MI_NEEDS_EXTERNAL_ACTION ) {
             if ( strategy == RemeshingFromCurrentState_RS ) {
                 // ensure the updating the step
-                this->setContextOutputMode(ALWAYS);
+                this->setContextOutputMode(COM_Always);
                 //this->terminate (this->giveCurrentStep());
             } else {
                 // save previous step (because update not called)

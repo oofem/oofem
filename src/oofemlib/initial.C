@@ -42,7 +42,7 @@
 namespace oofem {
 
 double InitialCondition :: give(ValueModeType type)
-// Returns the value of the prescribed value of the kinematic unknown 'u'.
+// Returns the prescribed value of the kinematic unknown 'u'.
 {
     char u;
     u =  cltypesGiveUnknownTypeModeKey(type);
