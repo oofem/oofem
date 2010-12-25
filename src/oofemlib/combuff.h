@@ -399,7 +399,7 @@ public:
 
 
 
-class StaticCommunicationBuffer : public CommunicationBuffer //, public MPIBuffer
+class StaticCommunicationBuffer : public CommunicationBuffer , public MPIBuffer
 {
 public:
     StaticCommunicationBuffer(MPI_Comm comm, int size, bool dynamic = 0) : CommunicationBuffer(comm, size, dynamic),
@@ -451,7 +451,6 @@ public:
     virtual int waitCompletion() { return MPIBuffer :: waitCompletion(); };
 
     virtual int bcast(int root) { return MPIBuffer :: bcast(this->communicator, root); }
-    //@}
 };
 } // end namespace oofem
 #endif
