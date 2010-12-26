@@ -37,53 +37,52 @@ def Line2Int(line):
     """Convert a string into a list of Int"""
     return map(int,line.split())
 
-#Structure holding OOFEM's element characteristics
+#Structure holding OOFEM's element properties
 class oofem_elementProperties:
     def __init__(self,name,nodeMaskOrPointer,edgeMask=None,faceMask=None):
-	if (edgeMask!=None):
-		self.name=name#string - name if OOFEM elements
-		self.nodeMask=nodeMaskOrPointer#list of nodes in the sequence of OOFEM
-		self.edgeMask=edgeMask#2D array expressing node masks for OOFEM's edge 1,2,..., original UNV node numbering
-		self.faceMask=faceMask#2D array expressing node masks for OOFEM's face 1,2,..., original UNV node numbering
-	else:
-		self.name=name#string - name if OOFEM elements
-	        self.nodeMask=nodeMaskOrPointer.nodeMask#list of nodes in the sequence of OOFEM
-	        self.edgeMask=nodeMaskOrPointer.edgeMask#2D array expressing node masks for OOFEM's edge 1,2,..., original UNV node numbering
-	        self.faceMask=nodeMaskOrPointer.faceMask#2D array expressing node masks for OOFEM's face 1,2,..., original UNV node numbering
-        
+        if (edgeMask!=None):
+            self.name=name#string - name as OOFEM elements
+            self.nodeMask=nodeMaskOrPointer#list of nodes in the sequence of OOFEM
+            self.edgeMask=edgeMask#2D array expressing node masks for OOFEM's edge 1,2,..., original UNV node numbering
+            self.faceMask=faceMask#2D array expressing node masks for OOFEM's face 1,2,..., original UNV node numbering
+        else:
+            self.name=name#string - name as OOFEM elements
+            self.nodeMask=nodeMaskOrPointer.nodeMask#list of nodes in the sequence of OOFEM
+            self.edgeMask=nodeMaskOrPointer.edgeMask#2D array expressing node masks for OOFEM's edge 1,2,..., original UNV node numbering
+            self.faceMask=nodeMaskOrPointer.faceMask#2D array expressing node masks for OOFEM's face 1,2,..., original UNV node numbering
 
 class CTRLParser:
     """ a simple CTRL object structure"""
 
-#   Table of element characteristics
+#   Table of element properties. It contains mapping of nodes, edges and faces between unv and OOFEM element.
     oofem_elemProp = []
     oofem_elemProp.append(oofem_elementProperties("None", [0], [], []))#leave this line [0] as it is
     oofem_elemProp.append(oofem_elementProperties("BoundaryLoads", [0,1],[],[]))
     oofem_elemProp.append(oofem_elementProperties("Truss1D",oofem_elemProp[-1]))
-    oofem_elemProp.append(oofem_elementProperties("Truss2d", [0,1], [0,1],[]))
+    oofem_elemProp.append(oofem_elementProperties("Truss2D", [0,1], [0,1],[]))
     oofem_elemProp.append(oofem_elementProperties("Truss3D",oofem_elemProp[-1]))
     oofem_elemProp.append(oofem_elementProperties("Beam2D",oofem_elemProp[-1]))
     oofem_elemProp.append(oofem_elementProperties("Beam3D",oofem_elemProp[-1]))
-    oofem_elemProp.append(oofem_elementProperties("TrPlaneStress2d", [0,2,1], [[0,2],[2,1],[1,0]],[])) #checked
+    oofem_elemProp.append(oofem_elementProperties("TrPlaneStress2D", [0,2,1], [[0,2],[2,1],[1,0]],[])) #checked
     oofem_elemProp.append(oofem_elementProperties("TrplaneStrain",oofem_elemProp[-1]))
     oofem_elemProp.append(oofem_elementProperties("Tr1ht",oofem_elemProp[-1]))
     oofem_elemProp.append(oofem_elementProperties("TrPlaneStrRot",oofem_elemProp[-1]))
     oofem_elemProp.append(oofem_elementProperties("CCTplate",oofem_elemProp[-1]))
     oofem_elemProp.append(oofem_elementProperties("CCTplate3D",oofem_elemProp[-1]))
     oofem_elemProp.append(oofem_elementProperties("QTrPlStr", [2,0,4,1,5,3], [[2,1,0],[0,5,4],[4,3,2]],[]))#checked
-    oofem_elemProp.append(oofem_elementProperties("PlaneStress2d", [0,1,2,3], [[0,1],[1,2],[2,3],[3,0]],[]))#checked
+    oofem_elemProp.append(oofem_elementProperties("PlaneStress2D", [0,1,2,3], [[0,1],[1,2],[2,3],[3,0]],[]))#checked
     oofem_elemProp.append(oofem_elementProperties("Quad1PlaneStrain", oofem_elemProp[-1]))
     oofem_elemProp.append(oofem_elementProperties("Quad1ht", oofem_elemProp[-1]))
-    oofem_elemProp.append(oofem_elementProperties("QPlaneStress2d", [2,4,6,0,3,5,7,1], [[2,3,4],[4,5,6],[6,7,0],[0,1,2]],[]))#checked
-    oofem_elemProp.append(oofem_elementProperties("LSpace", [4,7,6,5,0,3,2,1], [[4,7],[7,6],[6,5],[5,4],[4,0],[7,3],[6,2],[5,1],[0,3],[3,2],[2,0],[1,0]], [[4,7,6,5],[0,3,2,1],[4,0,3,7],[7,3,2,6],[6,2,1,5],[5,1,0,4]]))#checked 
+    oofem_elemProp.append(oofem_elementProperties("QPlaneStress2D", [2,4,6,0,3,5,7,1], [[2,3,4],[4,5,6],[6,7,0],[0,1,2]],[]))#checked
+    oofem_elemProp.append(oofem_elementProperties("LSpace", [4,7,6,5,0,3,2,1], [[4,7],[7,6],[6,5],[5,4],[4,0],[7,3],[6,2],[5,1],[0,3],[3,2],[2,0],[1,0]], [[4,7,6,5],[0,3,2,1],[4,0,3,7],[7,3,2,6],[6,2,1,5],[5,1,0,4]]))#checked
     oofem_elemProp.append(oofem_elementProperties("Brick1ht", oofem_elemProp[-1]))
     oofem_elemProp.append(oofem_elementProperties("LSpaceBB", oofem_elemProp[-1]))
     oofem_elemProp.append(oofem_elementProperties("QSpace", [12,18,16,14,0,6,4,2,19,17,15,13,7,5,3,1,8,11,10,9], [[12,19,18],[18,17,16],[16,15,14],[14,13,12],[12,8,0],[18,11,6],[16,10,4],[14,9,2],[0,7,6],[6,5,4],[4,3,2],[2,1,0]], [[12,19,18,17,16,15,14,13],[0,7,6,5,4,3,2,1],[12,8,0,7,6,11,18,19],[18,11,6,5,4,10,16,17],[16,10,4,3,2,9,14,15],[14,9,2,1,0,8,12,13]])) #checked [brick nodes], [edges nodes], [faces nodes]
     oofem_elemProp.append(oofem_elementProperties("LTRSpace", [0,1,2,3], [[0,1],[1,2],[2,0],[0,3],[1,3],[2,3]], [[0,1,2],[0,1,3],[1,2,3],[0,2,3]]))#checked
     
-    for i in oofem_elemProp:
-	print i.name, i.edgeMask
-        
+    #for i in oofem_elemProp:
+        #print i.name, i.edgeMask
+    
     def __init__(self, filename):
         self.filename=filename
         self.file=None
@@ -162,7 +161,7 @@ class CTRLParser:
                                     elemName = match.group(2).strip()
                                     #check that elemName exists in a list and assign
                                     for n in range(len(self.oofem_elemProp)):
-                                        if(self.oofem_elemProp[n].name == elemName):
+                                        if(self.oofem_elemProp[n].name.lower() == elemName.lower()):
                                             __gr.oofem_etypemap[unvetype]= n
                                             break
                                     else:
@@ -262,5 +261,3 @@ class CTRLParser:
                 #resolve elemtype
                 if elemmap[ielem].type in igroup.oofem_etypemap:
                     elemmap[ielem].oofem_elemtype = igroup.oofem_etypemap[elemmap[ielem].type]
-
-
