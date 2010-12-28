@@ -4752,7 +4752,7 @@ Subdivision :: unpackSharedIrregulars(Subdivision *s, ProcessCommunicator &pc)
                 // irregular does not exist:
                 // compute coordinates of new irregular
                 coords = * ( mesh->giveNode(iNode)->giveCoordinates() );
-                coords.add( mesh->giveNode(jNode)->giveCoordinates() );
+                coords.add( *mesh->giveNode(jNode)->giveCoordinates() );
                 coords.times(0.5);
  #ifdef HEADEDSTUD
                 double dist, rad, rate;

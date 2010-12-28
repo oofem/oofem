@@ -1314,7 +1314,7 @@ FETISolver :: solve(SparseMtrx *A, FloatArray *partitionLoad, FloatArray *partit
                     rank, "FETISolver :: solveYourselfAt");
 #endif
 
-    dd.subtract(partitionLoad);
+    dd.subtract(*partitionLoad);
     partitionStiffness->ldl_feti_sky(pp, dd, nse, limit, se);
 
     if ( rank == 0 ) {
