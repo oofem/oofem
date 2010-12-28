@@ -41,8 +41,6 @@
 #ifndef rowcol_h
 #define rowcol_h
 
-#include "debug.h"
-
 namespace oofem {
 class FloatArray;
 class IntArray;

@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/main/src/usrdefsub.C,v 1.8.4.1 2004/04/05 15:19:41 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2010   Borek Patzak
  *
  *
  *
@@ -32,8 +31,6 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-
-// file: usrdefsub.C
 
 #include "usrdefsub.h"
 #ifndef __MAKEDEPEND
@@ -307,7 +304,7 @@
 #endif
 
 namespace oofem {
-Element *CreateUsrDefElementOfType(char *aClass, int number, Domain *domain)
+Element *CreateUsrDefElementOfType(const char *aClass, int number, Domain *domain)
 {
     Element *newElement = NULL;
 #ifdef __SM_MODULE
@@ -457,7 +454,7 @@ Element *CreateUsrDefElementOfType(char *aClass, int number, Domain *domain)
     return newElement;
 }
 
-DofManager *CreateUsrDefDofManagerOfType(char *aClass, int number, Domain *domain)
+DofManager *CreateUsrDefDofManagerOfType(const char *aClass, int number, Domain *domain)
 {
     DofManager *newDofManager = NULL;
 #ifdef __SM_MODULE
@@ -469,7 +466,7 @@ DofManager *CreateUsrDefDofManagerOfType(char *aClass, int number, Domain *domai
     return newDofManager;
 }
 
-CrossSection *CreateUsrDefCrossSectionOfType(char *aClass, int number, Domain *domain)
+CrossSection *CreateUsrDefCrossSectionOfType(const char *aClass, int number, Domain *domain)
 {
     CrossSection *newCS = NULL;
 #ifdef __SM_MODULE
@@ -483,7 +480,7 @@ CrossSection *CreateUsrDefCrossSectionOfType(char *aClass, int number, Domain *d
     return newCS;
 }
 
-EngngModel *CreateUsrDefEngngModelOfType(char *aClass, int number, EngngModel *master)
+EngngModel *CreateUsrDefEngngModelOfType(const char *aClass, int number, EngngModel *master)
 {
     EngngModel *newEModel = NULL;
 
@@ -559,7 +556,7 @@ EngngModel *CreateUsrDefEngngModelOfType(char *aClass, int number, EngngModel *m
     return newEModel;
 }
 
-GeneralBoundaryCondition *CreateUsrDefBoundaryConditionOfType(char *aClass, int number, Domain *domain)
+GeneralBoundaryCondition *CreateUsrDefBoundaryConditionOfType(const char *aClass, int number, Domain *domain)
 {
     GeneralBoundaryCondition *newBc = NULL;
     if ( !strncasecmp(aClass, "prescribedgradient", 18) ) {
@@ -597,7 +594,7 @@ GeneralBoundaryCondition *CreateUsrDefBoundaryConditionOfType(char *aClass, int 
     return newBc;
 }
 
-LoadTimeFunction *CreateUsrDefLoadTimeFunctionOfType(char *aClass, int number, Domain *domain)
+LoadTimeFunction *CreateUsrDefLoadTimeFunctionOfType(const char *aClass, int number, Domain *domain)
 {
     LoadTimeFunction *newLTF = NULL;
 
@@ -616,7 +613,7 @@ LoadTimeFunction *CreateUsrDefLoadTimeFunctionOfType(char *aClass, int number, D
     return newLTF;
 }
 
-Material *CreateUsrDefMaterialOfType(char *aClass, int number, Domain *domain)
+Material *CreateUsrDefMaterialOfType(const char *aClass, int number, Domain *domain)
 {
     Material *newMaterial = NULL;
 
@@ -877,7 +874,7 @@ CreateUsrDefErrorEstimator(ErrorEstimatorType type, int number, Domain *d)
     return answer;
 }
 
-ExportModule *CreateUsrDefExportModuleOfType(char *aClass, EngngModel *emodel)
+ExportModule *CreateUsrDefExportModuleOfType(const char *aClass, EngngModel *emodel)
 {
     ExportModule *answer = NULL;
 
@@ -903,7 +900,7 @@ ExportModule *CreateUsrDefExportModuleOfType(char *aClass, EngngModel *emodel)
     return answer;
 }
 
-InitModule *CreateUsrDefInitModuleOfType(char *aClass, EngngModel *emodel)
+InitModule *CreateUsrDefInitModuleOfType(const char *aClass, EngngModel *emodel)
 {
     InitModule *answer = NULL;
 
@@ -917,7 +914,7 @@ InitModule *CreateUsrDefInitModuleOfType(char *aClass, EngngModel *emodel)
     return answer;
 }
 
-NonlocalBarrier *CreateUsrDefNonlocalBarrierOfType(char *aClass, int num, Domain *d)
+NonlocalBarrier *CreateUsrDefNonlocalBarrierOfType(const char *aClass, int num, Domain *d)
 {
     NonlocalBarrier *answer = NULL;
 
@@ -935,7 +932,7 @@ NonlocalBarrier *CreateUsrDefNonlocalBarrierOfType(char *aClass, int num, Domain
     return answer;
 }
 
-RandomFieldGenerator *CreateUsrDefRandomFieldGenerator(char *aClass, int num, Domain *d)
+RandomFieldGenerator *CreateUsrDefRandomFieldGenerator(const char *aClass, int num, Domain *d)
 {
     RandomFieldGenerator *answer = NULL;
 
@@ -1064,7 +1061,7 @@ MesherInterface *CreateUsrDefMesherInterface(MeshPackageType type, Domain *d)
     return answer;
 }
 
-EnrichmentItem *CreateUsrDefEnrichmentItem(char *aClass, int num, XfemManager *xm, Domain *d) {
+EnrichmentItem *CreateUsrDefEnrichmentItem(const char *aClass, int num, XfemManager *xm, Domain *d) {
     EnrichmentItem *answer = NULL;
     if ( !strncasecmp(aClass, "cracktip", 8) ) {
         answer = new CrackTip(num, xm, d);
@@ -1077,7 +1074,7 @@ EnrichmentItem *CreateUsrDefEnrichmentItem(char *aClass, int num, XfemManager *x
     return answer;
 }
 
-EnrichmentFunction *CreateUsrDefEnrichmentFunction(char *aClass, int num, Domain *d) {
+EnrichmentFunction *CreateUsrDefEnrichmentFunction(const char *aClass, int num, Domain *d) {
     EnrichmentFunction *answer = NULL;
     if ( !strncasecmp(aClass, "discontinuousfunction", 21) ) {
         answer = new DiscontinuousFunction(num, d);
@@ -1090,7 +1087,7 @@ EnrichmentFunction *CreateUsrDefEnrichmentFunction(char *aClass, int num, Domain
     return answer;
 }
 
-BasicGeometry *CreateUsrDefGeometry(char *aClass) {
+BasicGeometry *CreateUsrDefGeometry(const char *aClass) {
     BasicGeometry *answer = NULL;
     if ( !strncasecmp(aClass, "line", 4) ) {
         answer = new Line();

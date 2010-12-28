@@ -54,7 +54,6 @@
 //#include <clock.h>
 #endif
 #include "clock.h"
-#include "debug.h"
 #include "verbose.h"
 #include "strreader.h"
 

@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/load.h,v 1.10 2003/04/18 10:37:07 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2010   Borek Patzak
  *
  *
  *
@@ -32,12 +31,6 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-
-
-//   ******************
-//   *** CLASS LOAD ***
-//   ******************
-
 
 #ifndef load_h
 #define load_h
@@ -93,7 +86,7 @@ public:
      * @param stepN time step, for which components are computed.
      * @param mode determines response mode.
      */
-    virtual void  computeComponentArrayAt(FloatArray &answer, TimeStep *, ValueModeType mode);
+    virtual void computeComponentArrayAt(FloatArray &answer, TimeStep *, ValueModeType mode);
     /**
      * Computes components values of load at given point - global coordinates (coordinates given).
      * Default implementation computes product of approximation matrix (computeNArray service) and

@@ -43,7 +43,6 @@
 #include "element.h"
 #include "timestep.h"
 #include "mathfem.h"
-#include "debug.h"
 #include "verbose.h"
 #include "structuralelement.h" // for nonloc stiff support
 #include "error.h"

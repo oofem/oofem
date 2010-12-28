@@ -40,7 +40,6 @@
 #include "element.h"
 #include "timestep.h"
 #include "mathfem.h"
-#include "debug.h"
 #include "verbose.h"
 #ifndef __MAKEDEPEND
  #include <math.h>

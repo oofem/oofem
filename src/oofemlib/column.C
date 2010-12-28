@@ -42,7 +42,6 @@
 #include "flotmtrx.h"
 #include "mathfem.h"
 #include "freestor.h"
-#include "debug.h"
 #include "error.h"
 
 namespace oofem {

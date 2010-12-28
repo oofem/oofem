@@ -51,8 +51,6 @@
 #include "intarray.h"
 #include "flotarry.h"
 #include "flotmtrx.h"
-#include "skyline.h"
-#include "debug.h"
 #include "verbose.h"
 
 #ifndef __MAKEDEPEND

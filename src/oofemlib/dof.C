@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/dof.C,v 1.10.4.1 2004/04/05 15:19:43 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2010   Borek Patzak
  *
  *
  *
@@ -33,9 +32,6 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-
-//   file DOF.CC
-
 #include "dof.h"
 #include "dofmanager.h"
 #include "domain.h"
@@ -45,8 +41,6 @@
 
 #include "flotarry.h"
 #include "dictionr.h"
-
-#include "debug.h"
 
 #include "logger.h"
 #include "datastream.h"
@@ -143,36 +137,6 @@ void Dof :: error(const char *file, int line, const char *format, ...) const
     __OOFEM_ERROR5(file, line, "Class: %s, number %d, of DofManager %d\n%s",
                    this->giveClassName(), number, dofManager->giveNumber(), buffer);
 }
-
-/*
- * UnknownType
- * Dof :: giveUnknownType ()
- * {
- * // returns CharType type corresponding to receiver's DofID value
- * switch (this->giveDofID()) {
- * case D_u:
- * case D_v:
- * case D_w:
- * case R_u:
- * case R_v:
- * case R_w:
- * return DisplacementVector;
- *
- * case T_f:
- * case P_f:
- * return FluxVector;
- *
- * case G_0:
- * case G_1:
- * return GeneralizedDisplacementVector;
- *
- * default:
- * _error ("giveUnknownType:  undefined DofID value\n") ;
- * exit (1);
- * }
- * return UnknownType_Unknown;
- * }
- */
 
 char *
 Dof :: giveDofIDName(char *s)

@@ -44,7 +44,6 @@
 #include "flotarry.h"
 #include "flotmtrx.h"
 #include "intarray.h"
-#include "debug.h"
 #include "verbose.h"
 #ifndef __MAKEDEPEND
  #include <math.h>

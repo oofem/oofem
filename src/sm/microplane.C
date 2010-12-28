@@ -38,7 +38,6 @@
 #include "domain.h"
 #include "matstatus.h"
 #include "material.h"
-#include "debug.h"
 #ifndef __MAKEDEPEND
  #include <string.h>
 #endif

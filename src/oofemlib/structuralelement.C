@@ -35,7 +35,6 @@
 #include "structuralelement.h"
 #include "domain.h"
 #include "timestep.h"
-//#include "timinteg.h"
 #include "node.h"
 #include "dof.h"
 #include "material.h"
@@ -53,9 +52,6 @@
 #include "intarray.h"
 #include "flotarry.h"
 #include "flotmtrx.h"
-//#include "linsyst.h"
-#include "skyline.h"
-#include "debug.h"
 #include "verbose.h"
 
 #include "elementside.h"

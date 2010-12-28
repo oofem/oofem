@@ -47,8 +47,6 @@
 #include "dictionr.h"
 #include "datastream.h"
 
-#include "debug.h"
-
 #include "contextioerr.h"
 
 #ifndef __MAKEDEPEND
@@ -216,7 +214,14 @@ double MasterDof :: giveUnknown(EquationID type, ValueModeType mode, TimeStep *s
         // directly since dictionaries keep the history.
         int hash = dofManager->giveDomain()->giveEngngModel()->giveUnknownDictHashIndx(type, mode, stepN);
         if ( unknowns->includes(hash) ) {
-            return unknowns->at(hash);
+            // TODO
+            //if ( this->hasBc(stepN) ) {
+            //    return unknowns->at(hash) + this->giveBcValue(VM_Incremental, stepN);
+                // Some variable to differentiate between incremental and absolute values of b.c?
+                //return this->giveBcValue(VM_Total, stepN);
+            //} else {
+                return unknowns->at(hash);
+            //}
         } else {
             _error2( "giveUnknown:  Dof unknowns dictionary does not contain unknown of value mode (%s)",
                     __ValueModeTypeToString(mode) );

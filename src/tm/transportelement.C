@@ -48,7 +48,6 @@
 #include "intarray.h"
 #include "flotarry.h"
 #include "flotmtrx.h"
-#include "debug.h"
 #include "verbose.h"
 
 #include "elementside.h"

@@ -64,8 +64,6 @@
 #include "flotarry.h"
 #include "flotmtrx.h"
 //#include "linsyst.h"
-#include "skyline.h"
-#include "debug.h"
 #include "verbose.h"
 
 #include "usrdefsub.h"

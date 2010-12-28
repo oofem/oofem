@@ -37,7 +37,6 @@
 #include "nodload.h"
 #include "boundary.h"
 #include "initial.h"
-#include "debug.h"
 #include "verbose.h"
 #include "usrdefsub.h"
 #include "timestep.h"

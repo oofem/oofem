@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/dictionr.h,v 1.9.4.1 2004/04/05 15:19:43 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2010   Borek Patzak
  *
  *
  *
@@ -32,12 +31,6 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-
-
-//   ************************
-//   *** CLASS DICTIONARY ***
-//   ************************
-
 
 #ifndef dictionr_h
 #define dictionr_h
@@ -62,8 +55,8 @@ class DataStream;
  *
  * Dictionaries are typically used by degrees of freedom for storing their unknowns.
  * A dictionary stores its pairs in a linked list form. It knows the first
- * pair (attribute 'first') of the list. It also knows the last one (attri-
- * bute 'last') in order to append fastly an additional pair.
+ * pair (attribute 'first') of the list. It also knows the last one (attribute
+ * 'last') in order to append an additional pair fast.
  */
 class Dictionary
 {
@@ -88,20 +81,20 @@ public:
      * Adds a new Pair with given keyword and value into receiver.
      * @param aKey key of new pair
      * @param value value of new pair
-     * @return new Pair with given keyword and value
+     * @return New Pair with given keyword and value
      */
     Pair *add(int aKey, double value);
     /**
      * Returns the value of the pair which key is aKey.
      * If requested key doesn't exist, it is created with assigned value 0.
-     * @param aKey key for pair
-     * @return reference to value of pair with given key
+     * @param aKey Key for pair.
+     * @return Reference to value of pair with given key
      */
     double &at(int aKey);
     /**
      * Checks if dictionary includes given key
-     * @param aKey dictionary key
-     * @return True if reciever contains pair with given key, otherwise false.
+     * @param aKey Dictionary key.
+     * @return True if receiver contains pair with given key, otherwise false.
      */
     bool includes(int aKey);
     /// Prints the receiver on screen.
@@ -112,17 +105,17 @@ public:
     int giveSize();
 
     /**
-     * Saves the receiver contens (state) to given stream.
+     * Saves the receiver contends (state) to given stream.
      * @return contextIOResultType value.
      * @exception throws an ContextIOERR exception if error encountered
      */
-    contextIOResultType    saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
     /**
-     * Restores the receiver contens (state) from given stream.
+     * Restores the receiver contents (state) from given stream.
      * @return contextIOResultType value.
      * @exception throws an ContextIOERR exception if error encountered
      */
-    contextIOResultType    restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 };
 } // end namespace oofem
 #endif // dictionr_h

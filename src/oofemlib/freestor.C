@@ -37,7 +37,6 @@
 
 #include "freestor.h"
 #include "compiler.h"
-#include "debug.h"
 #include "error.h"
 #ifndef __MAKEDEPEND
  #include <stdio.h>

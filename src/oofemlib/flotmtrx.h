@@ -42,7 +42,6 @@
 
 #include "compiler.h"
 #include "matrix.h"
-#include "debug.h"
 #include "freestor.h"
 
 #include "contextioresulttype.h"
@@ -55,7 +54,6 @@
 
 namespace oofem {
 class FloatArray;
-class DiagonalMatrix;
 class IntArray;
 class DataStream;
 #ifdef __PARALLEL_MODE
