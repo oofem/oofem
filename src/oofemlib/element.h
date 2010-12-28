@@ -188,13 +188,6 @@ public:
      * @param aDomain Pointer to the domain to which element belongs.
      */
     Element(int n, Domain *aDomain);
-    /**
-     * Constructor. Creates an element with number n belonging to domain aDomain.
-     * @param name Element name.
-     * @param n Element's number
-     * @param aDomain Pointer to the domain to which element belongs.
-     */
-    Element(const char *name, int n, Domain *aDomain);
     /// Virtual destructor.
     virtual ~Element();
 
@@ -480,11 +473,17 @@ public:
     void postInitialize();
 
     /**
-     * Updates element state corresponding to newly reached solution.
-     * Default is empty, derived classes should force the update of internal integration point values
-     * according to newly reached state.
+     * Updates element state after equilibrium in time step has been reached.
+     * Default implementation updates all integration rules defined by
+     * integrationRulesArray member variable. Doing this, all integration points
+     * and their material statuses are updated also. All temporary history variables,
+     * which now describe equilibrium state are copied into equilibrium ones.
+     * The existing internal state is used for update.
      * @param tStep Time step for newly reached state.
-     * @see Element::updateYourself
+     * @see Material::updateYourself
+     * @see IntegrationRule::updateYourself
+     * @see gaussPoint::updateYourself
+     * @see Element::updateInternalState
      */
     virtual void updateInternalState(TimeStep *tStep) { }
     /**
@@ -559,11 +558,11 @@ public:
      * This is completely based on the geometrical shape, so a plane in space counts as 2 dimensions.
      * @return Number of spatial dimensions of element.
      */
-    int giveSpatialDimension() const;
+    int giveSpatialDimension();
     /**
      * @return Number of boundaries of element.
      */
-    int giveNumberOfBoundarySides() const;
+    int giveNumberOfBoundarySides();
     /**
      * Returns id of default integration rule. Various element types can use
      * different integration rules for implementation of selective or reduced
