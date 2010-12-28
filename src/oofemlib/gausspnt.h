@@ -177,7 +177,7 @@ public:
     /// Returns local subpatch coordinates of the receiver
     FloatArray *giveLocalCoordinates() { if ( localCoordinates ) { return localCoordinates; } else { return coordinates; } }
     void         setLocalCoordinates(const FloatArray &c)
-    { if ( localCoordinates ) { * localCoordinates = c; } else { localCoordinates = c.GiveCopy(); } }
+    { if ( localCoordinates ) { * localCoordinates = c; } else { localCoordinates = new FloatArray(c); } }
 
 
     //      FloatArray*  giveStrainVector ()         { return strainVector ;}

@@ -58,7 +58,7 @@ namespace oofem {
 class StructuralElementEvaluator
 {
 protected:
-    FloatMatrix *rotationMatrix;
+    FloatMatrix rotationMatrix;
     /// Flag indicating if tranformation matrix has been already computed
     int rotationMatrixDefined;
 

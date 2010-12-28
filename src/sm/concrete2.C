@@ -384,7 +384,7 @@ Concrete2 ::  giveRealStresses3dShellLayer(FloatArray &answer, MatResponseForm f
         crossSection->giveReducedCharacteristicVector(help, gp, plasticStrain);
         status->givePlasticStrainIncrementVector(plasticStrainIncrementVector);
         plasticStrainIncrementVector.subtract(plasticStrainVector);
-        plasticStrainIncrementVector.add(& help);
+        plasticStrainIncrementVector.add(help);
         status->letPlasticStrainIncrementVectorBe(plasticStrainIncrementVector);
         //delete help;
         //   plasticStrain->negated()->add (status->givePlasticStrainVector());

@@ -537,8 +537,8 @@ int Domain :: instanciateYourself(DataReader *dr)
         IR_GIVE_RECORD_KEYWORD_FIELD(ir, name, num, MAX_NAME_LENGTH);
 
 #ifdef __ENABLE_COMPONENT_LABELS
-        ( elem = ( Element * )
-                 ( Element(i + 1, this).ofType(name) ) )->initializeFrom(ir);
+        elem = Element(i + 1, this).ofType(name);
+        elem->initializeFrom(ir);
 
         if ( elemLabelMap.find(num) == elemLabelMap.end() ) {
             // label does not exist yet

@@ -109,7 +109,7 @@ double Column :: dot(Column *b, int start, int stop)
     P2 = b->values + b->number - stop;       // P2 points to b(stop)
     i  = stop - start + 1;
 
-    return dotProduct(P1, P2, i);
+    return oofem::dotProduct(P1, P2, i);
 }
 
 

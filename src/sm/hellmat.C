@@ -2151,7 +2151,8 @@ void HellmichMaterial :: giveEigenStrainVector(FloatArray &answer, MatResponseFo
 
         // subtract previous viscous creep strains dev_n(auxvec)
         status->giveViscousStrainVector(auxvec);
-        redvec.subtract( auxvec.times( 1. / ( 1. + twTime( giveHydrationDegree(gp, atTime, VM_Total) ) / dt ) ) ); // can't use ev, here isn't JvE
+        auxvec.times( 1. / ( 1. + twTime( giveHydrationDegree(gp, atTime, VM_Total) ) / dt ) );
+        redvec.subtract(auxvec); // can't use ev, here isn't JvE
 
         // convert to FullForm and add to answer
         StructuralCrossSection *crossSection = ( StructuralCrossSection * ) gp->giveElement()->giveCrossSection();

@@ -304,7 +304,7 @@ QSpace :: computeLoadLSToLRotationMatrix(FloatMatrix &answer, int iSurf, GaussPo
 
     this->interpolation.computeSurfaceMapping(snodes, dofManArray, iSurf);
     for ( i = 1; i <= 4; i++ ) {
-        gc.add( domain->giveNode( snodes.at(i) )->giveCoordinates() );
+        gc.add( * domain->giveNode( snodes.at(i) )->giveCoordinates() );
     }
 
     gc.times(1. / 4.);

@@ -674,7 +674,7 @@ Subdivision :: RS_Triangle :: bisect(std :: queue< int > &subdivqueue, std :: li
         jNode = nodes.at(jnode);
         // compute coordinates of new irregular
         coords = * ( mesh->giveNode(iNode)->giveCoordinates() );
-        coords.add( mesh->giveNode(jNode)->giveCoordinates() );
+        coords.add( *mesh->giveNode(jNode)->giveCoordinates() );
         coords.times(0.5);
         // compute required density of a new node
         density = 0.5 * ( mesh->giveNode(iNode)->giveRequiredDensity() +
@@ -899,7 +899,7 @@ Subdivision :: RS_Tetra :: bisect(std :: queue< int > &subdivqueue, std :: list<
             jNode = nodes.at(jnode);
             // compute coordinates of new irregular
             coords = * ( mesh->giveNode(iNode)->giveCoordinates() );
-            coords.add( mesh->giveNode(jNode)->giveCoordinates() );
+            coords.add( *mesh->giveNode(jNode)->giveCoordinates() );
             coords.times(0.5);
 #ifdef HEADEDSTUD
             double dist, rad, rate;
@@ -4573,7 +4573,7 @@ Subdivision :: smoothMesh()
 #else
             coords->zero();
             for ( i = node_num_nodes.at(in); i < node_num_nodes.at(in + 1); i++ ) {
-                coords->add( mesh->giveNode( node_con_nodes.at(i) )->giveCoordinates() );
+                coords->add( *mesh->giveNode( node_con_nodes.at(i) )->giveCoordinates() );
             }
 
             coords->times( 1.0 / ( node_num_nodes.at(in + 1) - node_num_nodes.at(in) ) );

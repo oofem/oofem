@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/flotarry.C,v 1.17.4.1 2004/04/05 15:19:43 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2010   Borek Patzak
  *
  *
  *
@@ -37,8 +36,6 @@
  * Dubois-Pelerin, Y.: "Object-Oriented  Finite Elements: Programming concepts and Implementation",
  * PhD Thesis, EPFL, Lausanne, 1992.
  */
-
-//   file FLOTARRY.CC
 
 #include "flotarry.h"
 #include "intarray.h"
@@ -82,7 +79,7 @@ FloatArray :: FloatArray(const FloatArray &src)
         values = NULL;
     }
 
-    srcVal = src.givePointer();
+    srcVal = src.values;
     for ( int i = 0; i < size; i++ ) {
         this->values [ i ] = srcVal [ i ];
     }
@@ -107,16 +104,15 @@ FloatArray :: operator = ( const FloatArray & src )
 }
 
 
-void
-FloatArray :: add(const FloatArray &b)
+void FloatArray :: add(const FloatArray &b)
 // Performs the operation a=a+b, where a stands for the receiver. If the
 // receiver's size is 0, adjusts its size to that of b. Returns the
 // receiver.
 {
-    register int i;
+    int i;
     double *p1, *p2;
 
-    if ( b.giveSize() == 0 ) {
+    if ( b.size == 0 ) {
         return;
     }
 
@@ -125,7 +121,7 @@ FloatArray :: add(const FloatArray &b)
         zero();
     }
 
-    if ( size != b.size ) {              // unmatching sizes
+    if ( size != b.size ) {              // mismatching sizes
         OOFEM_ERROR3("FloatArray :: add :  dimension mismatch in a[%d]->add(b[%d])\n", size, b.size);
     }
 
@@ -135,18 +131,15 @@ FloatArray :: add(const FloatArray &b)
     while ( i-- ) {
         * p1++ += * p2++;
     }
-
-    return;
 }
 
 
-void
-FloatArray :: add(const double factor, const FloatArray &b)
+void FloatArray :: add(const double factor, const FloatArray &b)
 // Performs the operation a=a+factor*b, where a stands for the receiver. If the
 // receiver's size is 0, adjusts its size to that of b. Returns the
 // receiver.
 {
-    register int i;
+    int i;
     double *p1, *p2;
 
     if ( b.giveSize() == 0 ) {
@@ -158,7 +151,7 @@ FloatArray :: add(const double factor, const FloatArray &b)
         zero();
     }
 
-    if ( size != b.size ) {                     // unmatching sizes
+    if ( size != b.size ) {                     // mismatching sizes
         OOFEM_ERROR3("FloatArray :: add :  dimension mismatch in a[%d]->add(b[%d])\n", size, b.size);
     }
 
@@ -168,8 +161,6 @@ FloatArray :: add(const double factor, const FloatArray &b)
     while ( i-- ) {
         * p1++ += factor * ( * p2++ );
     }
-
-    return;
 }
 
 void FloatArray :: subtract(const FloatArray &src)
@@ -177,7 +168,7 @@ void FloatArray :: subtract(const FloatArray &src)
 // receiver's size is 0, adjusts its size to that of src. Returns the
 // receiver.
 {
-    register int i;
+    int i;
     double *p1, *p2;
 
     if ( src.giveSize() == 0 ) {
@@ -190,7 +181,7 @@ void FloatArray :: subtract(const FloatArray &src)
     }
 
 #  ifdef DEBUG
-    if ( size != src.size ) {              // unmatching sizes
+    if ( size != src.size ) {              // mismatching sizes
         OOFEM_ERROR3("FloatArray dimension mismatch in a[%d]->add(b[%d])\n", size, src.size);
     }
 
@@ -202,30 +193,10 @@ void FloatArray :: subtract(const FloatArray &src)
     while ( i-- ) {
         * p1++ -= * p2++;
     }
-
-    return;
 }
 
 
-
-double  dotProduct(const FloatArray &p1, const FloatArray &p2, register int i)
-// A non-member function. Returns the dot product of the first 'i' coef-
-// ficienst of the two arrays P1 and P2. This method applies to many
-// situations, eg row*column products with matrices.
-{
-    double answer;
-
-    answer = 0.;
-    while ( i ) {
-        answer += p1.at(i) * p2.at(i);
-        i--;
-    }
-
-    return answer;
-}
-
-void
-FloatArray :: beSubArrayOf(const FloatArray &src, const IntArray &indx)
+void FloatArray :: beSubArrayOf(const FloatArray &src, const IntArray &indx)
 //
 // returns subVector from receiver
 // subVector size will be indx max val size
@@ -237,11 +208,11 @@ FloatArray :: beSubArrayOf(const FloatArray &src, const IntArray &indx)
 
     n = indx.giveSize();
 
-    /*
-     * if ( src.size != n ) {
-     *  OOFEM_ERROR("FloatArray :: beSubArrayOf - size mismatch");
-     * }
-     */
+#ifdef DEBUG
+     if ( src.size != n ) {
+         OOFEM_ERROR("FloatArray :: beSubArrayOf - size mismatch");
+     }
+#endif
 
     for ( isize = 0, i = 1; i <= n; i++ ) {
         if ( indx.at(i) > isize ) {
@@ -257,13 +228,10 @@ FloatArray :: beSubArrayOf(const FloatArray &src, const IntArray &indx)
             this->at(ii) = src.at(i);
         }
     }
-
-    return;
 }
 
 
-void
-FloatArray :: addSubVector(const FloatArray &src, int si)
+void FloatArray :: addSubVector(const FloatArray &src, int si)
 {
     int i, reqSize, n = src.giveSize();
 
@@ -274,20 +242,14 @@ FloatArray :: addSubVector(const FloatArray &src, int si)
     }
 
     for ( i = 1; i <= n; i++ ) {
-        this->at(si + i) += src.at(i);
+        this->at(si+i) += src.at(i);
     }
 }
 
 
-
-void
-FloatArray :: beVectorProductOf(const FloatArray &v1, const FloatArray &v2)
-//
-// computes vector product v1 x v2
-// and stores result into receiver
-//
+void FloatArray :: beVectorProductOf(const FloatArray &v1, const FloatArray &v2)
 {
-    // check proper bunds
+    // check proper bounds
     if ( ( v1.giveSize() != 3 ) || ( v2.giveSize() != 3 ) ) {
         OOFEM_ERROR(" FloatArray::VectorProduct : size mismatch, size is not equal to 3");
     }
@@ -297,112 +259,56 @@ FloatArray :: beVectorProductOf(const FloatArray &v1, const FloatArray &v2)
     this->at(1) = v1.at(2) * v2.at(3) - v1.at(3) * v2.at(2);
     this->at(2) = v1.at(3) * v2.at(1) - v1.at(1) * v2.at(3);
     this->at(3) = v1.at(1) * v2.at(2) - v1.at(2) * v2.at(1);
-
-    return;
 }
 
-double
-FloatArray :: distance_square(const FloatArray &from) const
+/*
+double FloatArray :: dotProduct(const FloatArray &x) const
+{
+    int i;
+    double *p1, *p2, answer = 0.;
+
+#ifdef DEBUG
+    if (x.size != this->size) {
+        OOFEM_ERROR("FloatArray :: dotProduct : Size mismatch");
+    }
+#endif
+
+    i = this->size;
+    p1 = this->values;
+    p2 = x.values;
+    while ( i-- ) {
+        answer += (* p1++) * (* p2++);
+    }
+
+    return answer;
+}
+*/
+
+double FloatArray :: distance(const FloatArray &x) const
+{
+    return sqrt(this->distance_square(x));
+}
+
+
+double FloatArray :: distance_square(const FloatArray &from) const
 //
 // returns distance between receiver and from from
-// computed using generalized pythagora formulae
+// computed using generalized pythagorean formulae
 //
 {
-    double dist = 0.;
+    double *p1, *p2, dx, dist = 0.;
 
-    /*
-     * if (size != from.giveSize())  {
-     *  printf ("error in FloatArray::distance size mismatch (%d) is not equal to (%d) \n",
-     *          size,from.giveSize()) ;
-     *  exit(0) ;}
-     */
-    int s = min( size, from.giveSize() );
-    for ( int i = 1; i <= s; i++ ) {
-        dist += ( this->at(i) - from.at(i) ) * ( this->at(i) - from.at(i) );
+    p1 = this->values;
+    p2 = from.values;
+    int s = min( size, from.size );
+    while ( s-- ) {
+        dx = (*p1) - (*p2);
+        dist += dx*dx;
+        p1++;
+        p2++;
     }
-
     return dist;
 }
-
-
-double
-FloatArray :: distance(const FloatArray &from) const
-{
-    return sqrt( this->distance_square(from) );
-}
-
-
-/*******************************************************************************/
-
-FloatArray *FloatArray :: add(FloatArray *b)
-// Performs the operation a=a+b, where a stands for the receiver. If the
-// receiver's size is 0, adjusts its size to that of b. Returns the
-// receiver.
-{
-    register int i;
-    double *p1, *p2;
-
-    if ( !b || b->giveSize() == 0 ) {
-        return this;
-    }
-
-    if ( !size ) {                            // null-sized array
-        size   = b->size;
-        values = allocDouble(size);
-    }
-
-#  ifdef DEBUG
-    if ( size != b->size ) {                  // unmatching sizes
-        OOFEM_ERROR3("FloatArray dimension mismatch in a[%d]->add(b[%d])\n", size, b->size);
-    }
-
-#  endif
-
-    p1 = values;
-    p2 = b->values;
-    i  = size;
-    while ( i-- ) {
-        * p1++ += * p2++;
-    }
-
-    return this;
-}
-
-
-FloatArray *FloatArray :: subtract(FloatArray *b)
-// Performs the operation a=a-b, where a stands for the receiver. If the
-// receiver's size is 0, adjusts its size to that of b. Returns the
-// receiver.
-{
-    register int i;
-    double *p1, *p2;
-
-    if ( !b || b->giveSize() == 0 ) {
-        return this;
-    }
-
-    if ( !size ) {                            // null-sized array
-        size   = b->size;
-        values = allocDouble(size);
-    }
-
-#  ifdef DEBUG
-    if ( size != b->size ) {                  // unmatching sizes
-        OOFEM_ERROR3("FloatArray dimension mismatch in a[%d]->add(b[%d])\n", size, b->size);
-    }
-
-#  endif
-
-    p1 = values;
-    p2 = b->values;
-    i  = size;
-    while ( i-- ) {
-        * p1++ -= * p2++;
-    }
-
-    return this;
-}
-
 
 
 void FloatArray :: assemble(const FloatArray &fe, const IntArray &loc)
@@ -461,39 +367,6 @@ void FloatArray :: checkBounds(int i) const
 }
 #endif
 
-FloatArray *
-FloatArray :: GiveSubArray(IntArray *indx)
-//
-// returns subVector from receiver
-// subVector size will be indx max val size
-// and on i-th position of subVector will be this->at(indx->at(i))
-//
-{
-    FloatArray *answer;
-    int i, ii, n, isize;
-
-    n = indx->giveSize();
-
-    if ( size != n ) {
-        OOFEM_ERROR("FloatArray :: GiveSubArray : size mismatch");
-    }
-
-    for ( isize = 0, i = 1; i <= n; i++ ) {
-        if ( indx->at(i) > isize ) {
-            isize = indx->at(i);
-        }
-    }
-
-    answer = new FloatArray(isize);
-    for ( i = 1; i <= n; i++ ) {
-        ii = indx->at(i);
-        if ( ii > 0 ) {
-            answer->at(ii) = this->at(i);
-        }
-    }
-
-    return answer;
-}
 
 void FloatArray :: checkSizeTowards(const IntArray &loc)
 // Expands the receiver if loc points to coefficients beyond the size of
@@ -507,7 +380,7 @@ void FloatArray :: checkSizeTowards(const IntArray &loc)
         high = max( high, ( loc.at(i) ) );
     }
 
-    if ( high > size ) {                        // receiver must be expanded
+    if ( high > size ) {   // receiver must be expanded
         this->resize(high);
     }
 }
@@ -517,7 +390,7 @@ void FloatArray :: resize(int n, int allocChunk)
 // Expands the receiver up to size n (n is assumed larger than 'size').
 // Initializes all new coefficients to zero.
 {
-    register int i;
+    int i;
     double *newValues, *p1, *p2;
 
     if ( n <= allocatedSize ) {
@@ -549,10 +422,10 @@ void FloatArray :: resize(int n, int allocChunk)
 
 
 void FloatArray :: hardResize(int n)
-// Realocates the receiver with new size.
+// Reallocates the receiver with new size.
 // Initializes all new coefficients to zero.
 {
-    register int i;
+    int i;
     double *newValues, *p1, *p2;
 
     // if (n <= allocatedSize) {size = n; return;}
@@ -571,7 +444,7 @@ void FloatArray :: hardResize(int n)
     }
 
     values = newValues;
-    allocatedSize = size   = n;
+    allocatedSize = size = n;
 }
 
 
@@ -580,7 +453,7 @@ bool FloatArray :: containsOnlyZeroes() const
 // Returns True if all coefficients of the receiver are 0, else returns
 // False.
 {
-    register int i;
+    int i;
     double *p;
 
     p = values;
@@ -595,7 +468,6 @@ bool FloatArray :: containsOnlyZeroes() const
 }
 
 
-
 void FloatArray :: zero()
 // zeroes all values to zero
 {
@@ -605,8 +477,6 @@ void FloatArray :: zero()
             values [ i ] = 0.;
         }
     }
-
-    // return *this ;
 }
 
 
@@ -615,13 +485,11 @@ void FloatArray :: beProductOf(const FloatMatrix &aMatrix, const FloatArray &anA
 {
     int i, j, nColumns, nRows;
     double sum;
-    //FloatArray* answer ;
 
 #  ifdef DEBUG
     if ( ( nColumns = aMatrix.giveNumberOfColumns() ) - anArray.giveSize() ) {
         OOFEM_ERROR("FloatArray :: beProductOf : dimension mismatch");
     }
-
 #  endif
 
     nColumns = aMatrix.giveNumberOfColumns();
@@ -634,22 +502,19 @@ void FloatArray :: beProductOf(const FloatMatrix &aMatrix, const FloatArray &anA
 
         this->at(i) = sum;
     }
-
-    return;
 }
+
 
 void FloatArray :: beTProductOf(const FloatMatrix &aMatrix, const FloatArray &anArray)
 // Stores the product of aMatrix^T * anArray in to receiver
 {
     int i, j, nColumns, nRows;
     double sum;
-    //FloatArray* answer ;
 
 #  ifdef DEBUG
     if ( ( nColumns = aMatrix.giveNumberOfRows() ) - anArray.giveSize() ) {
         OOFEM_ERROR("FloatArray :: beTProductOf : dimension mismatch");
     }
-
 #  endif
 
     nColumns = aMatrix.giveNumberOfRows();
@@ -662,16 +527,12 @@ void FloatArray :: beTProductOf(const FloatMatrix &aMatrix, const FloatArray &an
 
         this->at(i) = sum;
     }
-
-    return;
 }
 
 
-FloatArray *FloatArray :: negated()
-// Switches the sign of every coefficient of the receiver. Returns the
-// receiver.
+void FloatArray :: negated()
 {
-    register int i;
+    int i;
     double x;
     double *p;
 
@@ -681,8 +542,6 @@ FloatArray *FloatArray :: negated()
         x    = -* p;
         * p++ = x;
     }
-
-    return this;
 }
 
 
@@ -709,48 +568,8 @@ void FloatArray :: pY() const
     printf("];\n");
 }
 
-/*FloatArray *FloatArray :: setValuesToZero()
-// zeroes all values to zero
-{
-    int i;
-    if ( values ) {
-        for ( i = 0; i < size; i++ ) {
-            values [ i ] = 0.;
-        }
-    }
 
-    return this;
-}
-
-
-FloatArray *FloatArray :: beCopyOf(FloatArray *arry)
-// Returns the receiver initialized according to array arry
-// if arry is NULL nothing done
-{
-    int i;
-    double *toVal;
-    if ( arry ) {
-        if ( size != arry->giveSize() ) {
-            freeDouble(values);
-            size = arry->giveSize();
-            values = allocDouble(size);
-        }
-
-        toVal = arry->givePointer();
-        for ( i = 0; i < size; i++ ) {
-            values [ i ] = toVal [ i ];
-        }
-
-        return this;
-    } else {
-        return this;
-    }
-}*/
-
-
-
-void
-FloatArray :: rotatedWith(FloatMatrix &r, char mode)
+void FloatArray :: rotatedWith(FloatMatrix &r, char mode)
 // Returns the receiver 'a' rotated according the change-of-base matrix r.
 // If mode = 't', the method performs the operation  a = r(transp) * a .
 // If mode = 'n', the method performs the operation  a = r * a .
@@ -769,50 +588,10 @@ FloatArray :: rotatedWith(FloatMatrix &r, char mode)
 }
 
 
-FloatArray *FloatArray :: rotatedWith(FloatMatrix *r, char mode)
-// Returns the receiver 'a' rotated according the change-of-base matrix r.
-// If mode = 't', the method performs the operation  a = r(transp) * a .
-// If mode = 'n', the method performs the operation  a = r * a .
+void FloatArray :: times(double factor)
+// Multiplies every coefficient of the receiver by factor.
 {
-    // double       *p1,*p2 ;
-    FloatMatrix *rot = NULL;
-    FloatArray *rta;
-
-    if ( mode == 't' ) {
-        rot = r->GiveTransposition();
-    } else if ( mode == 'n' ) {
-        rot = r;
-    } else {
-        OOFEM_ERROR("FloatArray :: rotatedWith: unsupported mode");
-    }
-
-    rta = rot->Times(this);
-
-    /*
-     * p1 = values ;
-     * p2 = rta -> values ;
-     *
-     * i  = size ;
-     * while (i--)
-     **p1++ = *p2++ ;
-     */
-
-    * this = * rta;
-
-    if ( mode == 't' ) {
-        delete rot;
-    }
-
-    delete rta;
-    return this;
-}
-
-
-FloatArray *FloatArray :: times(double factor)
-// Multiplies every coefficient of the receiver by factor. Answers the
-// modified receiver.
-{
-    register int i;
+    int i;
     double *p;
 
     p = values;
@@ -820,127 +599,47 @@ FloatArray *FloatArray :: times(double factor)
     while ( i-- ) {
         * ( p++ ) *= factor;
     }
-
-    return this;
 }
 
 
-FloatArray *FloatArray :: Times(double factor) const
-// Returns a new array, whose components are those of the receicer, times
-// factor.
-{
-    register int i;
-    double *p1, *p2;
-    FloatArray *answer;
-
-    answer = new FloatArray(size);
-    p1     = values;
-    p2     = answer->values;
-    i      = size;
-    while ( i-- ) {
-        * p2++ = factor * ( * p1++ );
-    }
-
-    return answer;
-}
-
-
-double  dotProduct(double *P1, double *P2, register int i)
-// A non-member function. Returns the dot product of the first 'i' coef-
-// ficienst of the two arrays P1 and P2. This method applies to many
-// situations, eg row*column products with matrices.
-{
-    double answer;
-
-    answer = 0.;
-    while ( i-- ) {
-        answer += * P1++ * * P2++;
-    }
-
-    return answer;
-}
-
-
-double
-FloatArray :: distance(const FloatArray *from) const
-//
-// returns distance between receiver and from from
-// computed using generalized pythagora formulae
-//
-{
-    double dist = 0.;
-
-    if ( size != from->giveSize() ) {
-        OOFEM_ERROR3( "FloatArray::distance :  size mismatch (%d) is not equal to (%d)", size, from->giveSize() );
-    }
-
-    for ( int i = 1; i <= size; i++ ) {
-        dist += ( this->at(i) - from->at(i) ) * ( this->at(i) - from->at(i) );
-    }
-
-    return sqrt(dist);
-}
-
-FloatArray *
-FloatArray :: VectorProduct(FloatArray *v2)
-//
-// computes vector product this x v2
-// and return newly allocated result
-//
-{
-    // check proper bunds
-    if ( ( size != 3 ) || ( v2->giveSize() != 3 ) ) {
-        OOFEM_ERROR("FloatArray::VectorProduct : size mismatch, size is not equal to 3");
-    }
-
-    FloatArray *answer = new FloatArray(3);
-
-    answer->at(1) = this->at(2) * v2->at(3) - this->at(3) * v2->at(2);
-    answer->at(2) = this->at(3) * v2->at(1) - this->at(1) * v2->at(3);
-    answer->at(3) = this->at(1) * v2->at(2) - this->at(2) * v2->at(1);
-
-    return answer;
-}
-
-
-FloatArray *
-FloatArray :: normalize()
-//
-// normalizes receiver to have norm equal to 1.0
-//
+void FloatArray :: normalize()
 {
     double norm = this->computeNorm();
     if ( norm < 1.e-80 ) {
         OOFEM_ERROR("FloatArray::normalize : cannot norm receiver, norm is too small");
     }
-
     this->times(1. / norm);
-
-    return this;
 }
 
 
-double
-FloatArray :: computeNorm()
+double FloatArray :: computeNorm() const
+{
+    return sqrt(this->computeSquaredNorm());
+}
+
+
+double FloatArray :: computeSquaredNorm() const
 {
     int i;
-    double norm = 0.;
-    for ( i = 1; i <= size; i++ ) {
-        norm += this->at(i) * this->at(i);
-    }
+    double *p, norm2 = 0.;
 
-    return sqrt(norm);
+    p = this->values;
+    i = this->size;
+    while (i--) {
+        norm2 += (*p) * (*p);
+        p++;
+    }
+    return norm2;
 }
 
-double
-FloatArray :: sum()
-// Returns sum of all values of receiver.
+
+double FloatArray :: sum() const
 {
-    register int i;
+    int i;
     double *p, sum = 0;
 
-    p = values;
-    i = size;
+    p = this->values;
+    i = this->size;
     while ( i-- ) {
         sum += * ( p++ );
     }
@@ -948,8 +647,7 @@ FloatArray :: sum()
     return sum;
 }
 
-void
-FloatArray :: copySubVector(const FloatArray &src, int si)
+void FloatArray :: copySubVector(const FloatArray &src, int si)
 {
     int i, reqSize, n = src.giveSize();
 
@@ -968,7 +666,7 @@ FloatArray :: copySubVector(const FloatArray &src, int si)
 contextIOResultType FloatArray :: storeYourself(DataStream *stream, ContextMode mode)
 // writes receiver's binary image into stream
 // use id to distinguish some instances
-// return value >0 succes
+// return value >0 success
 //              =0 file i/o error
 {
     int type_id = FloatArrayClass;
@@ -1069,11 +767,41 @@ FloatArray :: givePackSize(CommunicationBuffer &buff) const
 
 #endif
 
+double dotProduct(const FloatArray &p1, const FloatArray &p2, register int i)
+// A non-member function. Returns the dot product of the first 'i' coef-
+// ficienst of the two arrays P1 and P2. This method applies to many
+// situations, eg row*column products with matrices.
+{
+    double answer, *v1, *v2;
+
+    answer = 0.;
+    v1 = p1.values;
+    v2 = p2.values;
+    while ( i-- ) {
+        answer += (* v1++) * (* v2++);
+    }
+
+    return answer;
+}
+
+double dotProduct(double *P1, double *P2, int i)
+// A non-member function. Returns the dot product of the first 'i' coef-
+// ficienst of the two arrays P1 and P2. This method applies to many
+// situations, eg row*column products with matrices.
+{
+    double answer;
+
+    answer = 0.;
+    while ( i-- ) {
+        answer += (* P1++) * (* P2++);
+    }
+
+    return answer;
+}
 
 #ifdef IML_COMPAT
 
-FloatArray &
-FloatArray :: operator = ( const double & val )
+FloatArray &FloatArray :: operator =( const double & val )
 {
     for ( int i = 0; i < size; i++ ) {
         values [ i ] = val;
@@ -1082,7 +810,7 @@ FloatArray :: operator = ( const double & val )
     return * this;
 }
 
-FloatArray &operator *= ( FloatArray & x, const double & a )
+FloatArray &operator *=( FloatArray & x, const double & a )
 {
     int N = x.giveSize();
     for ( int i = 0; i < N; i++ ) {
@@ -1123,7 +851,7 @@ FloatArray operator *( const FloatArray & x, const double & a )
     return result;
 }
 
-FloatArray operator + ( const FloatArray & x, const FloatArray & y )
+FloatArray operator +( const FloatArray & x, const FloatArray & y )
 {
     int N = x.giveSize();
     if ( N != y.giveSize() ) {
@@ -1138,7 +866,7 @@ FloatArray operator + ( const FloatArray & x, const FloatArray & y )
     return result;
 }
 
-FloatArray operator - ( const FloatArray & x, const FloatArray & y )
+FloatArray operator -( const FloatArray & x, const FloatArray & y )
 {
     int N = x.giveSize();
     if ( N != y.giveSize() ) {

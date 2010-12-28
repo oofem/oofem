@@ -284,7 +284,7 @@ RCM2Material ::  giveRealPrincipalStressVector3d(FloatArray &answer, GaussPoint 
             // active crack exist
             this->giveCrackedStiffnessMatrix(dcr, TangentStiffness, gp, atTime);
             fullDecr = de;
-            fullDecr.plus(dcr);
+            fullDecr.add(dcr);
             decr.beSubMatrixOf(fullDecr, crackMapping);
             //delete fullDecr;
             //delete dcr;

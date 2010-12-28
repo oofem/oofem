@@ -64,7 +64,6 @@ Beam3d :: Beam3d(int n, Domain *aDomain) : StructuralElement(n, aDomain)
 {
     numberOfDofMans       = 2;
     referenceNode       = 0;
-    rotationMatrix      = NULL;
 
     length              = 0.;
     kappay = kappaz      = -1.0;
@@ -214,7 +213,7 @@ Beam3d :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, Tim
 
     // rotate answer to global coordinate system
     if ( this->updateRotationMatrix() ) {
-        answer.rotatedWith(* this->rotationMatrix);
+        answer.rotatedWith(this->rotationMatrix);
     }
 
 
@@ -726,7 +725,7 @@ void Beam3d :: printOutputAt(FILE *File, TimeStep *stepN)
     // ask for global element displacement vector
     this->computeVectorOf(EID_MomentumBalance, VM_Total, stepN, rg);
     if ( this->updateRotationMatrix() ) {
-        rl.beProductOf(* this->rotationMatrix, rg);
+        rl.beProductOf(this->rotationMatrix, rg);
         // delete rg;
     } else {
         rl = rg;
@@ -1120,7 +1119,7 @@ Beam3d :: computeInitialStressMatrix(FloatMatrix &answer, TimeStep *tStep)
 
     //answer.beLumpedOf (mass);
     if ( this->updateRotationMatrix() ) {
-        answer.rotatedWith(* this->rotationMatrix);
+        answer.rotatedWith(this->rotationMatrix);
     }
 
     //answer.printYourself();

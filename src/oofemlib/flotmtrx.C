@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/flotmtrx.C,v 1.22.4.1 2004/04/05 15:19:43 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2010   Borek Patzak
  *
  *
  *
@@ -38,9 +37,6 @@
  * PhD Thesis, EPFL, Lausanne, 1992.
  */
 
-
-//   file FLOTMTRX.CC
-
 #include "flotmtrx.h"
 #include "flotarry.h"
 #include "intarray.h"
@@ -58,7 +54,7 @@
 #endif
 
 namespace oofem {
-FloatMatrix :: FloatMatrix(FloatArray *vector, int transpose)
+FloatMatrix :: FloatMatrix(const FloatArray *vector, bool transpose)
 //
 // constructor : creates (vector->giveSize(),1) FloatMatrix
 // if transpose = 1 creates (1,vector->giveSize()) FloatMatrix
@@ -87,8 +83,7 @@ FloatMatrix :: FloatMatrix(FloatArray *vector, int transpose)
 }
 
 
-FloatMatrix ::
-FloatMatrix(const FloatMatrix &src) : Matrix(src.nRows, src.nColumns)
+FloatMatrix :: FloatMatrix(const FloatMatrix &src) : Matrix(src.nRows, src.nColumns)
 {
     // copy constructor
     double *P1, *P2;
@@ -107,8 +102,8 @@ FloatMatrix(const FloatMatrix &src) : Matrix(src.nRows, src.nColumns)
     }
 }
 
-FloatMatrix &
-FloatMatrix :: operator = ( const FloatMatrix & src )
+
+FloatMatrix & FloatMatrix :: operator = ( const FloatMatrix & src )
 {
     // assignment: cleanup and copy
     double *P1, *P2;
@@ -141,7 +136,6 @@ double FloatMatrix :: at(int i, int j) const
     this->checkBounds(i, j);
     return values [ ( j - 1 ) * nRows + i - 1 ];
 }
-
 #endif
 
 
@@ -154,6 +148,7 @@ double &FloatMatrix :: operator() (int i, int j)
     return values [ ( j ) * nRows + i ];
 }
 
+
 double FloatMatrix :: operator() (int i, int j) const
 {
 #ifdef DEBUG
@@ -164,10 +159,7 @@ double FloatMatrix :: operator() (int i, int j) const
 }
 
 
-
-
-void
-FloatMatrix :: assemble(const FloatMatrix &src, const IntArray &loc)
+void FloatMatrix :: assemble(const FloatMatrix &src, const IntArray &loc)
 {
     int i, j, ii, jj, size;
 
@@ -190,8 +182,8 @@ FloatMatrix :: assemble(const FloatMatrix &src, const IntArray &loc)
     }
 }
 
-void
-FloatMatrix :: assemble(const FloatMatrix &src, const IntArray &rowind, const IntArray &colind)
+
+void FloatMatrix :: assemble(const FloatMatrix &src, const IntArray &rowind, const IntArray &colind)
 {
     int i, j, ii, jj;
     int nr = src.giveNumberOfRows();
@@ -216,8 +208,8 @@ FloatMatrix :: assemble(const FloatMatrix &src, const IntArray &rowind, const In
     }
 }
 
-void
-FloatMatrix :: assemble(const FloatMatrix &src, const int *rowind, const int *colind)
+
+void FloatMatrix :: assemble(const FloatMatrix &src, const int *rowind, const int *colind)
 {
     int i, j, ii, jj;
     int nr = src.giveNumberOfRows();
@@ -235,8 +227,7 @@ FloatMatrix :: assemble(const FloatMatrix &src, const int *rowind, const int *co
 }
 
 
-void
-FloatMatrix :: beTranspositionOf(const FloatMatrix &src)
+void FloatMatrix :: beTranspositionOf(const FloatMatrix &src)
 {
     // receiver becomes a transposition of src
     int i, j, nrows = src.giveNumberOfColumns(), ncols = src.giveNumberOfRows();
@@ -250,8 +241,7 @@ FloatMatrix :: beTranspositionOf(const FloatMatrix &src)
 }
 
 
-void
-FloatMatrix :: beProductOf(const FloatMatrix &aMatrix, const FloatMatrix &bMatrix)
+void FloatMatrix :: beProductOf(const FloatMatrix &aMatrix, const FloatMatrix &bMatrix)
 // Receiver = aMatrix * bMatrix
 {
     int i, j, k, p;
@@ -282,8 +272,7 @@ FloatMatrix :: beProductOf(const FloatMatrix &aMatrix, const FloatMatrix &bMatri
     return;
 }
 
-void
-FloatMatrix :: beDyadicProductOf(const FloatArray &vec1, const FloatArray &vec2)
+void FloatMatrix :: beDyadicProductOf(const FloatArray &vec1, const FloatArray &vec2)
 // Receiver = vec1 * vec2^T
 {
     int i, j;
@@ -300,8 +289,7 @@ FloatMatrix :: beDyadicProductOf(const FloatArray &vec1, const FloatArray &vec2)
 }
 
 
-void
-FloatMatrix :: beTProductOf(const FloatMatrix &aMatrix, const FloatMatrix &bMatrix)
+void FloatMatrix :: beTProductOf(const FloatMatrix &aMatrix, const FloatMatrix &bMatrix)
 // Receiver = aMatrix^T * bMatrix
 {
     int i, j, k, p;
@@ -333,9 +321,7 @@ FloatMatrix :: beTProductOf(const FloatMatrix &aMatrix, const FloatMatrix &bMatr
 }
 
 
-
-void
-FloatMatrix :: beProductTOf(const FloatMatrix &aMatrix, const FloatMatrix &bMatrix)
+void FloatMatrix :: beProductTOf(const FloatMatrix &aMatrix, const FloatMatrix &bMatrix)
 // Receiver = aMatrix * bMatrix^T
 {
     int i, j, k, p;
@@ -367,9 +353,7 @@ FloatMatrix :: beProductTOf(const FloatMatrix &aMatrix, const FloatMatrix &bMatr
 }
 
 
-
-void
-FloatMatrix :: addSubMatrix(const FloatMatrix &src, int sr, int sc)
+void FloatMatrix :: addSubMatrix(const FloatMatrix &src, int sr, int sc)
 {
     sr--;
     sc--;
@@ -393,9 +377,7 @@ FloatMatrix :: addSubMatrix(const FloatMatrix &src, int sr, int sc)
 }
 
 
-
-void
-FloatMatrix :: beSubMatrixOf(const FloatMatrix &src,
+void FloatMatrix :: beSubMatrixOf(const FloatMatrix &src,
                              int topRow, int bottomRow, int topCol, int bottomCol)
 /*
  * modifies receiver to be  submatrix of the src matrix
@@ -433,8 +415,8 @@ FloatMatrix :: beSubMatrixOf(const FloatMatrix &src,
     return;
 }
 
-void
-FloatMatrix :: addSubVectorRow(const FloatArray &src, int sr, int sc)
+
+void FloatMatrix :: addSubVectorRow(const FloatArray &src, int sr, int sc)
 {
     sc--;
 
@@ -454,8 +436,8 @@ FloatMatrix :: addSubVectorRow(const FloatArray &src, int sr, int sc)
     }
 }
 
-void
-FloatMatrix :: setColumn(const FloatArray &src, int c)
+
+void FloatMatrix :: setColumn(const FloatArray &src, int c)
 {
     int nr = src.giveSize();
 
@@ -468,8 +450,8 @@ FloatMatrix :: setColumn(const FloatArray &src, int c)
         *P++ = *srcP++;
 }
 
-void
-FloatMatrix :: copyColumn(FloatArray &dest, int c)
+
+void FloatMatrix :: copyColumn(FloatArray &dest, int c) const
 {
 	int nr = this->giveNumberOfRows();
     dest.resize(nr);
@@ -479,8 +461,8 @@ FloatMatrix :: copyColumn(FloatArray &dest, int c)
         *destP++ = *P++;
 }
 
-void
-FloatMatrix :: copySubVectorRow(const FloatArray &src, int sr, int sc)
+
+void FloatMatrix :: copySubVectorRow(const FloatArray &src, int sr, int sc)
 {
     sc--;
 
@@ -558,8 +540,7 @@ void FloatMatrix :: plusProductUnsym(const FloatMatrix &a, const FloatMatrix &b,
 }
 
 
-void
-FloatMatrix :: beInverseOf(const FloatMatrix &src)
+void FloatMatrix :: beInverseOf(const FloatMatrix &src)
 // Receiver becomes inverse of given parameter src. If necessary, size is adjusted.
 
 {
@@ -834,118 +815,8 @@ void FloatMatrix :: subtract(const FloatMatrix &aMatrix)
     }
 }
 
-/*
- * void
- * FloatMatrix :: solveForRhs (const FloatArray& b, FloatArray& answer) const
- * // solves equation b = this * x
- * // returns x. this and b are kept untouched
- * //
- * // gaussian elimination - slow but safe
- * //
- * {
- * int i,j,k;
- * double piv,linkomb, help;
- *
- #  ifdef DEBUG
- * if (! this->isSquare()) {
- * printf ("error : cannot solve a %d by %d matrix ! \nfile %s, line %d\n",
- *    nRows,nColumns,__FILE__,__LINE__);
- * exit(0) ;}
- * if (nRows != b.giveSize()) {
- * printf ("error : dimension mismatch \nfile %s, line %d\n",__FILE__,__LINE__);
- * exit(0) ;}
- *
- #  endif
- *
- * FloatMatrix tmp = *this;
- * //FloatArray *answer = b -> GiveCopy();
- * answer = b ;
- * // initialize answer to be unity matrix;
- * // lower triangle elimination by columns
- * for (i=1; i< nRows; i++) {
- * piv = tmp.at(i,i);
- * if (fabs(piv) < 1.e-20) {
- * printf ("error : cannot solve  a %d by %d matrix ! \nfile %s, line %d\n",
- *     nRows,nColumns,__FILE__,__LINE__);
- * exit(0) ;
- * }
- * for (j=i+1; j<=nRows; j++) {
- * linkomb = tmp.at(j,i) / tmp.at(i,i);
- * for (k=i; k<= nRows; k++)
- *  tmp.at(j,k)-= tmp.at(i,k)*linkomb;
- * answer.at(j)-= answer.at(i)*linkomb;
- * }
- * }
- * // back substitution
- * for (i=nRows; i>=1; i--) {
- * help = 0.;
- * for (j=i+1; j<=nRows; j++)
- * help += tmp.at(i,j) * answer.at(j);
- * answer.at(i) = (answer.at(i) - help) / tmp.at(i,i);
- * }
- * // delete tmp;
- * return ;
- * }
- *
- * void
- * FloatMatrix :: solveForRhs (const FloatMatrix& b, FloatMatrix& answer) const
- * // solves equation b = this * x
- * // returns x. this and b are kept untouched
- * //
- * // gaussian elimination - slow but safe
- * //
- * {
- * int i,j,k,nPs;
- * double piv,linkomb, help;
- *
- #  ifdef DEBUG
- * if (! this->isSquare()) {
- * printf ("error : cannot solve a %d by %d matrix ! \nfile %s, line %d\n",
- *    nRows,nColumns,__FILE__,__LINE__);
- * exit(0) ;}
- * if (nRows != b.giveNumberOfRows()) {
- * printf ("error : dimension mismatch \nfile %s, line %d\n",__FILE__,__LINE__);
- * exit(0) ;}
- *
- #  endif
- *
- * nPs = b.giveNumberOfColumns();
- * FloatMatrix tmp = *this;
- * //FloatArray *answer = b -> GiveCopy();
- * answer = b ;
- * // initialize answer to be unity matrix;
- * // lower triangle elimination by columns
- * for (i=1; i< nRows; i++) {
- * piv = tmp.at(i,i);
- * if (fabs(piv) < 1.e-20) {
- * printf ("error : cannot solve  a %d by %d matrix ! \nfile %s, line %d\n",
- *     nRows,nColumns,__FILE__,__LINE__);
- * exit(0) ;
- * }
- * for (j=i+1; j<=nRows; j++) {
- * linkomb = tmp.at(j,i) / tmp.at(i,i);
- * for (k=i; k<= nRows; k++)
- *  tmp.at(j,k)-= tmp.at(i,k)*linkomb;
- * for (k=1; k<= nPs; k++)
- *  answer.at(j,k)-= answer.at(i,k)*linkomb;
- * }
- * }
- * // back substitution
- * for (i=nRows; i>=1; i--) {
- * for (k=1; k<= nPs; k++) {
- * help = 0.;
- * for (j=i+1; j<=nRows; j++)
- *  help += tmp.at(i,j) * answer.at(j,k);
- * answer.at(i,k) = (answer.at(i,k) - help) / tmp.at(i,i);
- * }
- * }
- * // delete tmp;
- * return ;
- * }
- */
 
-void
-FloatMatrix :: solveForRhs(const FloatArray &b, FloatArray &answer)
+void FloatMatrix :: solveForRhs(const FloatArray &b, FloatArray &answer)
 // solves equation b = this * x
 // returns x. this and b are kept untouched
 //
@@ -1024,8 +895,8 @@ FloatMatrix :: solveForRhs(const FloatArray &b, FloatArray &answer)
     return;
 }
 
-void
-FloatMatrix :: solveForRhs(const FloatMatrix &b, FloatMatrix &answer)
+
+void FloatMatrix :: solveForRhs(const FloatMatrix &b, FloatMatrix &answer)
 // solves equation b = this * x
 // returns x. this and b are kept untouched
 //
@@ -1114,9 +985,7 @@ FloatMatrix :: solveForRhs(const FloatMatrix &b, FloatMatrix &answer)
 }
 
 
-
-void
-FloatMatrix :: initFromVector(const FloatArray &vector, int transposed)
+void FloatMatrix :: initFromVector(const FloatArray &vector, bool transposed)
 //
 // constructor : creates (vector->giveSize(),1) FloatMatrix
 // if transpose = 1 creates (1,vector->giveSize()) FloatMatrix
@@ -1140,29 +1009,7 @@ FloatMatrix :: initFromVector(const FloatArray &vector, int transposed)
 }
 
 
-//#########################################################################################//
-
-
-FloatMatrix *FloatMatrix :: GiveCopy()
-// Creates and returns a copy of the receiver.
-{
-    FloatMatrix *answer;
-    double *P1, *P2;
-    int i;
-
-    answer = new FloatMatrix(nRows, nColumns);
-    P1 = answer->values;
-    P2 = values;
-    i  = nRows * nColumns;
-    while ( i-- ) {
-        * P1++ = * P2++;
-    }
-
-    return answer;
-}
-
-void
-FloatMatrix :: zero() const
+void FloatMatrix :: zero() const
 {
     // zeroing the receiver - fast implementation
     double *P1;
@@ -1174,6 +1021,7 @@ FloatMatrix :: zero() const
         * P1++ = 0.;
     }
 }
+
 
 void FloatMatrix :: beUnitMatrix()
 {
@@ -1189,9 +1037,10 @@ void FloatMatrix :: beUnitMatrix()
     }
 }
 
+
+void FloatMatrix :: bePinvID()
 // this matrix is the product of the 6x6 deviatoric projection matrix ID
 // and the inverse scaling matrix Pinv
-void FloatMatrix :: bePinvID()
 {
     this->resize(6, 6);
     this->zero();
@@ -1200,8 +1049,8 @@ void FloatMatrix :: bePinvID()
     values [ 21 ] = values [ 28 ] = values [ 35 ] = 0.5;
 }
 
-void
-FloatMatrix :: resize(int rows, int columns, int allocChunk)
+
+void FloatMatrix :: resize(int rows, int columns, int allocChunk)
 //
 // resizes receiver, all data will be lost
 //
@@ -1226,8 +1075,8 @@ FloatMatrix :: resize(int rows, int columns, int allocChunk)
     this->nColumns = columns;
 }
 
-void
-FloatMatrix :: resizeWithData(int rows, int columns)
+
+void FloatMatrix :: resizeWithData(int rows, int columns)
 //
 // resizes receiver, all data kept
 //
@@ -1262,8 +1111,7 @@ FloatMatrix :: resizeWithData(int rows, int columns)
 }
 
 
-FloatMatrix *
-FloatMatrix :: hardResize(int rows, int columns)
+void FloatMatrix :: hardResize(int rows, int columns)
 //
 // resizes receiver, all data will be lost
 //
@@ -1278,8 +1126,6 @@ FloatMatrix :: hardResize(int rows, int columns)
 
     this->nRows = rows;
     this->nColumns = columns;
-
-    return this;
 }
 
 
@@ -1308,296 +1154,6 @@ double FloatMatrix :: giveDeterminant()
     return 0.;
 }
 
-/*
- * FloatArray*  FloatMatrix :: SolveForRhs (FloatArray *b)
- * // solves equation b = this * x
- * // returns x. this and b are kept untouched
- * //
- * // gaussian elimination - slow but safe
- * //
- * {
- * int i,j,k;
- * double piv,linkomb, help;
- *
- #  ifdef DEBUG
- * if (! this->isSquare()) {
- * printf ("error : cannot solve a %d by %d matrix ! \nfile %s, line %d\n",
- *    nRows,nColumns,__FILE__,__LINE__);
- * exit(0) ;}
- * if (nRows != b->giveSize()) {
- * printf ("error : dimension mismatch \nfile %s, line %d\n",__FILE__,__LINE__);
- * exit(0) ;}
- *
- #  endif
- *
- * FloatMatrix *tmp = this->GiveCopy();
- * FloatArray *answer = b -> GiveCopy();
- * // initialize answer to be unity matrix;
- * // lower triangle elimination by columns
- * for (i=1; i< nRows; i++) {
- * piv = tmp->at(i,i);
- * if (fabs(piv) < 1.e-20) {
- * printf ("error : cannot solve  a %d by %d matrix ! \nfile %s, line %d\n",
- *     nRows,nColumns,__FILE__,__LINE__);
- * exit(0) ;
- * }
- * for (j=i+1; j<=nRows; j++) {
- * linkomb = tmp->at(j,i) / tmp->at(i,i);
- * for (k=i; k<= nRows; k++)
- *  tmp -> at(j,k)-= tmp  ->at(i,k)*linkomb;
- * answer->at(j)-= answer->at(i)*linkomb;
- * }
- * }
- * // back substitution
- * for (i=nRows; i>=1; i--) {
- * help = 0.;
- * for (j=i+1; j<=nRows; j++)
- * help += tmp -> at(i,j) * answer->at(j);
- * answer->at(i) = (answer->at(i) - help) / tmp->at(i,i);
- * }
- * delete tmp;
- * return answer;
- * }
- */
-/*
- * FloatMatrix*  FloatMatrix :: GiveInverse ()
- * // Returns a new matrix, the inverse of the receiver. (implemented only
- * // for 1x1 and 2x2 matrices)
- * {
- * FloatMatrix* answer ;
- * double       det ;
- * double*      p ;
- *
- #  ifdef DEBUG
- *    if (! this->isSquare()) {
- * printf ("error : cannot inverse a %d by %d matrix ! \nfile %s, line %d\n",
- *  nRows,nColumns,__FILE__,__LINE__);
- * exit(0) ;}
- #  endif
- *
- * answer = new FloatMatrix(nRows,nRows) ;
- * p      = answer->values ;
- *
- * if (nRows == 1) {
- *    p[0] = 1. / values[0] ;
- * return answer;
- * }
- * else if (nRows == 2) {
- *    det  = values[0]*values[3] - values[1]*values[2] ;
- *    p[0] =  values[3] / det ;
- *    p[1] = -values[1] / det ;
- *    p[2] = -values[2] / det ;
- *    p[3] =  values[0] / det ;
- * return answer;
- * }
- * else if (nRows == 3) {
- *    det = values[0]*values[4]*values[8]+values[3]*values[7]*values[2] +
- *   values[6]*values[1]*values[5]-values[6]*values[4]*values[2] -
- *   values[7]*values[5]*values[0]-values[8]*values[3]*values[1] ;
- *    p[0]= (values[4]*values[8]-values[7]*values[5])/det ;
- *    p[1]= (values[7]*values[2]-values[1]*values[8])/det ;
- *    p[2]= (values[1]*values[5]-values[4]*values[2])/det ;
- *    p[3]= (values[6]*values[5]-values[3]*values[8])/det ;
- *    p[4]= (values[0]*values[8]-values[6]*values[2])/det ;
- *    p[5]= (values[3]*values[2]-values[0]*values[5])/det ;
- *    p[6]= (values[3]*values[7]-values[6]*values[4])/det ;
- *    p[7]= (values[6]*values[1]-values[0]*values[7])/det ;
- *    p[8]= (values[0]*values[4]-values[3]*values[1])/det ;
- * return answer;
- *
- *  }
- * else {
- * // size >3 ... gaussian elimination - slow but safe
- * //
- * int i,j,k;
- * double piv,linkomb;
- * FloatMatrix *tmp = this->GiveCopy();
- * // initialize answer to be unity matrix;
- * for (i=1; i<= nRows; i++) answer->at(i,i) = 1.0;
- * // lower triangle elimination by columns
- * for (i=1; i< nRows; i++) {
- * piv = tmp->at(i,i);
- * if (fabs(piv) < 1.e-20) {
- *  printf ("error : cannot inverse a %d by %d matrix ! \nfile %s, line %d\n",
- *      nRows,nColumns,__FILE__,__LINE__);
- *  exit(0) ;
- * }
- * for (j=i+1; j<=nRows; j++) {
- *  linkomb = tmp->at(j,i) / tmp->at(i,i);
- *  for (k=i; k<= nRows; k++)
- *   tmp -> at(j,k)-= tmp  ->at(i,k)*linkomb;
- *  for (k=1; k<= nRows; k++)
- *   answer->at(j,k)-= answer->at(i,k)*linkomb;
- *
- * }
- * }
- * // upper triangle elimination by columns
- * for (i=nRows; i>1 ; i--) {
- * piv = this->at(i,i);
- * for (j=i-1; j > 0; j--) {
- *  linkomb = tmp->at(j,i) / tmp->at(i,i);
- *  for (k=nRows ; k > 0 ; k--) {
- *   // tmp -> at(j,k)-= tmp  ->at(i,k)*linkomb;
- *   answer->at(j,k)-= answer->at(i,k)*linkomb;
- *  }
- * }
- * }
- * // diagonal scaling
- * for (i=1; i<=nRows; i++)
- * for (j=1; j<=nRows; j++)
- *  answer->at(i,j)/= tmp->at(i,i);
- * delete tmp;
- * return answer ;
- * }
- * }
- */
-
-FloatMatrix *FloatMatrix :: GiveTransposition()
-// Returns a new matrix, the transposition of the receiver.
-{
-    int i, j;
-    FloatMatrix *answer;
-
-    answer = new FloatMatrix(nColumns, nRows);
-    for ( i = 1; i <= nRows; i++ ) {
-        for ( j = 1; j <= nColumns; j++ ) {
-            answer->at(j, i) = this->at(i, j);
-        }
-    }
-
-    return answer;
-}
-
-
-/*
- * FloatMatrix*  FloatMatrix :: Lumped ()
- * // Returns a new diagonal matrix, which is the lumped receiver : all
- * // coefficients on a column are concentrated on the diagonal.
- * // for creating of lumped mass matrix - good, but only for linear elements.
- * {
- * DiagonalMatrix *answer ;
- * double         sum,*p ;
- * int            j ;
- * register int   i ;
- *
- * answer = new DiagonalMatrix(nRows) ;
- * p      = values ;
- * for (j=1 ; j<=nColumns ; j++) {
- *    sum = 0. ;
- *    i   = nRows ;
- *    while (i--)
- * sum += *p++ ;
- *    answer -> at(j,j) = sum ;}
- *
- * return answer ;
- * }
- */
-/*
- * void
- * FloatMatrix :: beLumpedOf (const FloatMatrix& src)
- * // Modifies a receiver to become  a new  matrix, which is the lumped src : all
- * // coefficients of src  on a column are concentrated on the diagonal.
- * // for creating of lumped mass matrix - good, but only for linear elements.
- *
- * // REMOVED DUE To UNREALISTIC IMPLEMENTATION
- * {
- * double         sum,*p ;
- * int            j ;
- * register int   i ;
- *
- * this->resize (src.nRows, src.nColumns) ;
- * p      = src.values ;
- * for (j=1 ; j<=nColumns ; j++) {
- *    sum = 0. ;
- *    i   = nRows ;
- *    while (i--)
- * sum += *p++ ;
- *    this -> at(j,j) = sum ;}
- *
- * return  ;
- * }
- */
-/*
- * FloatMatrix*  FloatMatrix :: plus (FloatMatrix* aMatrix)
- * // Adds aMatrix to the receiver. If the receiver has a null size,
- * // adjusts its size to that of aMatrix. Returns the modified receiver.
- * {
- * register int i ;
- * int      n,m ;
- * double   *P1,*P2 ;
- *
- * if (aMatrix -> isDiagonal())
- *    return  this->plusDiagonalMatrix((DiagonalMatrix*)aMatrix) ;
- *
- * n = aMatrix -> nRows ;
- * m = aMatrix -> nColumns ;
- * if (nRows*nColumns == 0) {
- *    if (values)
- * freeDouble (values) ;
- *    nRows    = n ;
- *    nColumns = m ;
- *    i        = n * m ;
- *    values   = allocDouble(i) ;
- *    P1       = values ;
- *    P2       = aMatrix->values ;
- *    while (i--)
- **P1++ = *P2++ ;}
- * else {
- #     ifdef DEBUG
- * if (n-nRows || m-nColumns) {
- *    printf ("dimensions mismatch : r1,c1,r2,c2 : %d %d %d %d\nfile %s, line %d\n",
- *      nRows,n,nColumns,m,__FILE__,__LINE__) ;
- *    exit(0) ;}
- #     endif
- *
- *    P1 = values ;
- *    P2 = aMatrix->values ;
- *    i  = n * m ;
- *    while (i--)
- **P1++ += *P2++ ;}
- *
- * return this ;
- * }
- */
-/*
- * FloatMatrix*  FloatMatrix :: plusDiagonalMatrix (DiagonalMatrix* aMatrix)
- * {
- * register int i ;
- * int      n ;
- *
- * n = aMatrix -> giveNumberOfRows() ;
- * if (nRows*nColumns == 0) {
- *    if (values)
- * freeDouble (values) ;
- *    nRows    = n ;
- *    nColumns = n ;
- *    values   = allocDouble(n*n) ;}
- *
- #  ifdef DEBUG
- *    if (n-nRows) {
- * printf ("dimensions mismatch in FloatMatrix+DiagonalMatrix\nfile %s,line %d\n",
- *    __FILE__,__LINE__) ;
- * exit(0) ;}
- #  endif
- *
- * for (i=1 ; i<=nRows ; i++)
- *    this->at(i,i) += aMatrix->at(i,i) ;
- *
- * return this ;
- * }
- */
-/*
- * void  FloatMatrix :: plusProductSymmUpper (FloatMatrix* a, FloatMatrix* b, double dV)
- * // Adds to the receiver the product  a(transposed).b dV .
- * // If the receiver has a null size, it is expanded.
- * // This method assumes that both the receiver and the product above are
- * // symmetric matrices, and therefore computes only the upper half of the
- * // receiver ; the lower half is not modified. Other advantage : it does
- * // not compute the transposition of matrix a.
- * {
- * this->plusProductSymmUpper (*a, *b, dV);
- * }
- */
 
 void FloatMatrix :: printYourself() const
 // Prints the receiver on screen.
@@ -1619,6 +1175,7 @@ void FloatMatrix :: printYourself() const
     }
 }
 
+
 void FloatMatrix :: pY() const
 // Prints the receiver on screen with higher accuracy than printYourself.
 {
@@ -1639,8 +1196,8 @@ void FloatMatrix :: pY() const
     printf("];\n");
 }
 
-void
-FloatMatrix :: rotatedWith(const FloatMatrix &r)
+
+void FloatMatrix :: rotatedWith(const FloatMatrix &r)
 // Returns the receiver 'a' rotated according the change-of-base matrix r.
 // The method performs the operation  a = r(transp) * a * r .
 // Warning : this works only for square matrices (see copying to receiver)
@@ -1654,27 +1211,6 @@ FloatMatrix :: rotatedWith(const FloatMatrix &r)
 
     return;
 }
-
-
-/*
- * FloatMatrix*  FloatMatrix :: RotatedWith (FloatMatrix* r)
- * // Returns the receiver 'a' rotated according the change-of-base matrix r.
- * // The method performs the operation  a = r(transp) * a * r .
- * // This method works for arbitrary matrices
- * {
- * // double        *p1,*p2 ;
- * FloatMatrix   *rt,*rta,*rtar ;
- *
- * rt   = r -> GiveTransposition() ;          //  r(transp)
- * rta  = rt -> Times(this) ;                 //  r(transp) . a
- * rtar = rta -> Times(r) ;                   //  r(transp) . a . r
- *
- * delete rt ;
- * delete rta ;
- * return rtar ;
- * }
- */
-
 
 
 void FloatMatrix :: symmetrized()
@@ -1699,11 +1235,11 @@ void FloatMatrix :: symmetrized()
 }
 
 
-FloatMatrix *FloatMatrix :: times(double factor)
+void FloatMatrix :: times(double factor)
 // Multiplies every coefficient of the receiver by factor. Answers the
 // modified receiver.
 {
-    register int i;
+    int i;
     double *p;
 
     p = values;
@@ -1711,74 +1247,24 @@ FloatMatrix *FloatMatrix :: times(double factor)
     while ( i-- ) {
         * p++ *= factor;
     }
-
-    return this;
 }
 
 
-FloatArray *FloatMatrix :: Times(FloatArray *anArray)
-// Returns the product of the receiver and anArray.
+void FloatMatrix :: negated()
 {
-    int i, j;
-    double sum;
-    FloatArray *answer;
+    int i;
+    double *p;
 
-#  ifdef DEBUG
-    if ( nColumns - anArray->giveSize() ) {
-        OOFEM_ERROR4( "FloatMatrix::Times : in product A(%d,%d)*x(%d) : dimension mismatch", nRows, nColumns, anArray->giveSize() );
+    p = values;
+    i = nRows * nColumns;
+    while ( i-- ) {
+        *p = -(*p);
+        p++;
     }
-
-#  endif
-
-    answer = new FloatArray(nRows);
-    for ( i = 1; i <= nRows; i++ ) {
-        sum = 0.;
-        for ( j = 1; j <= nColumns; j++ ) {
-            sum += this->at(i, j) * anArray->at(j);
-        }
-
-        answer->at(i) = sum;
-    }
-
-    return answer;
 }
 
 
-FloatMatrix *FloatMatrix :: Times(FloatMatrix *aMatrix)
-// Returns the product of the receiver and aMatrix. Easier to use than
-// operator * .
-{
-    int i, j, k, p;
-    double coeff;
-    FloatMatrix *answer;
-
-#  ifdef DEBUG
-    if ( nColumns != aMatrix->nRows ) {
-        fprintf(stderr, "FloatMatrix::Times : in product A(%d,%d)*B(%d,%d) : dimensions do not match",
-                nRows, nColumns, aMatrix->nRows, aMatrix->nColumns);
-        exit(0);
-    }
-
-#  endif
-
-    p      = aMatrix->nColumns;
-    answer = new FloatMatrix(nRows, p);
-    for ( i = 1; i <= nRows; i++ ) {
-        for ( j = 1; j <= p; j++ ) {
-            coeff = 0.;
-            for ( k = 1; k <= nColumns; k++ ) {
-                coeff += this->at(i, k) * aMatrix->at(k, j);
-            }
-
-            answer->at(i, j) = coeff;
-        }
-    }
-
-    return answer;
-}
-
-double
-FloatMatrix :: computeFrobeniusNorm()
+double FloatMatrix :: computeFrobeniusNorm()
 {
     int i, j;
     double answer = 0.0;
@@ -1790,71 +1276,6 @@ FloatMatrix :: computeFrobeniusNorm()
 
     return sqrt(answer);
 }
-
-
-
-/*
- * FloatArray*  FloatMatrix :: timesTo (FloatArray* anArray, FloatArray* toArray)
- * // Stores the product of the receiver and anArray to toArray and returns
- * // pointer to toArray.
- * // toArray must exists and have proper dimensions
- * {
- * int         i,j ;
- * double      sum ;
- * // FloatArray* answer ;
- *
- * if (toArray==NULL) {
- * printf("TimesTo : toArray is NULL pointer\nfile %s,line %d\n",
- *    __FILE__, __LINE__);
- * exit(0);
- * }
- #  ifdef DEBUG
- *    if ((nColumns != anArray->giveSize()) || (nRows != toArray->giveSize())) {
- * printf ("error in product A*x : dimension mismatch \nfile %s, line %d\n",
- *    __FILE__,__LINE__) ;
- * exit(0) ;}
- #  endif
- *
- * for (i=1 ; i<=nRows ; i++) {
- *    sum = 0. ;
- *    for (j=1 ; j<=nColumns ; j++)
- * sum += this->at(i,j) * anArray->at(j) ;
- *    toArray->at(i) = sum ;}
- * return toArray ;
- * }
- */
-
-/*
- * FloatMatrix*  FloatMatrix :: timesTo (FloatMatrix* aMatrix, FloatMatrix* toMatrix)
- * // stores the product of the receiver and aMatrix to toMatrix. Easier to use than
- * // operator * .
- * // toMatrix must have proper dimensions
- * {
- * int          i,j,k,p ;
- * double       coeff ;
- * // FloatMatrix* answer ;
- *
- #  ifdef DEBUG
- *    if (nColumns != aMatrix->nRows) {
- *  printf ("error in product A*B : dimensions do not match \nfile %s, line %d\n",
- *     __FILE__,__LINE__) ;
- *  exit(0) ;}
- * if ((toMatrix->nRows != this->nRows)||(toMatrix->nColumns!=aMatrix->nColumns)){
- *  printf ("error in product A*B : dimensions do not match \nfile %s, line %d\n",
- *     __FILE__,__LINE__) ;
- * exit(0) ;}
- #  endif
- *
- * p      = aMatrix -> nColumns ;
- * for (i=1 ; i<=nRows ; i++)
- *    for (j=1 ; j<=p ; j++) {
- *       coeff = 0. ;
- * for (k=1 ; k<=nColumns ; k++)
- *   coeff += this->at(i,k) * aMatrix->at(k,j) ;
- * toMatrix->at(i,j) = coeff ;}
- * return toMatrix ;
- * }
- */
 
 
 contextIOResultType FloatMatrix :: storeYourself(DataStream *stream, ContextMode mode)
@@ -1887,6 +1308,7 @@ contextIOResultType FloatMatrix :: storeYourself(DataStream *stream, ContextMode
     // return result back
     return CIO_OK;
 }
+
 
 contextIOResultType FloatMatrix :: restoreYourself(DataStream *stream, ContextMode mode)
 // reads receiver from stream
@@ -1934,165 +1356,8 @@ contextIOResultType FloatMatrix :: restoreYourself(DataStream *stream, ContextMo
     return CIO_OK;
 }
 
-/*
- * void
- * FloatMatrix :: assemble (FloatMatrix* src, IntArray* loc)
- * {
- * int i,j,ii,jj,size;
- *
- * if ((size=src->giveNumberOfRows()) != loc->giveSize()) {
- * printf ("dimensions of 'src' and 'loc' mismatch \n") ;
- * exit(0) ; }
- *
- * if (!src->isSquare()) {
- * printf ("'src' is not sqaure matrix\n") ;
- * exit(0) ; }
- *
- * for (i=1; i<= size; i++) {
- * if (ii = loc->at(i)) {
- * for (j=1; j<=size; j++) {
- *  if (jj = loc->at(j)) this->at(ii,jj)+= src->at(i,j);
- * }
- * }
- * }
- * }
- */
 
-/*
- * FloatMatrix*
- * FloatMatrix :: GiveSubMatrix ( int topRow, int bottomRow , int topCol, int bottomCol)
- * // returns newly allocated submatrix of the receiver
- * // size of returned submatrix is determined from
- * // input parametrs
- * {
- *#ifdef DEBUG
- * // check input params
- * if ((topRow < 1) || (bottomRow < 1) || (topCol < 1) || (bottomCol < 1)) {
- *  printf ("GiveSubMatrix : subindexes size mismatch\nfile %s, line %d\n",__FILE__,__LINE__);
- * exit(1);
- * }
- *
- * if ((nRows < bottomRow) || (nColumns < bottomCol) || ((bottomRow-topRow) > nRows) ||
- *    ((bottomCol-topCol) > nColumns)) {
- *  printf ("GiveSubMatrix : subindexes size mismatch\nfile %s, line %d\n",__FILE__,__LINE__);
- * exit(1);
- * }
- *#endif
- *
- *
- * int i,j,topRm1,topCm1;
- * topRm1=topRow-1;
- * topCm1=topCol-1;
- *
- * // allocate return value
- * FloatMatrix * subM = new FloatMatrix (bottomRow-topRm1,bottomCol-topCm1);
- * for (i = topRow; i<= bottomRow; i++)
- *  for (j = topCol; j<= bottomCol; j++)
- *    subM->at(i-topRm1,j-topCm1) = this->at(i,j);
- *
- * return subM;
- *
- * }
- */
-/*
- * FloatMatrix*
- * FloatMatrix :: GiveSubMatrix (IntArray *indx)
- *
- * // returns newly allocated (sub)matrix of the receiver.
- * // (sub)matrix has size of max value in indx
- * // and on its position (indx->at(i),indx->at(j)) are values from receiver at (i, j).
- * // if indx->at(i) or indx->at(j) are <= 0 then at position i,j is zero.
- * //
- * // Warning:
- * //   This method should produce also bigger matrix than receiver
- * //   Works only for square matrices.
- *
- * {
- * int size,n,i,j,ii,jj;
- * FloatMatrix *answer;
- *
- * if (indx == NULL) return NULL;
- * if ((n = indx->giveSize()) == 0) return NULL;
- #  ifdef DEBUG
- * if (! this->isSquare()) {
- * printf ("error : cannot return submatrix constructed from IntArray from %d by %d matrix ! \nfile %s, line %d\n",
- *    nRows,nColumns, __FILE__,__LINE__);
- * exit(0);
- * }
- # endif
- *
- * if (n!=nRows) {
- * printf("error: GiveSubMatrix size mismatch\n,file %s, line %d\n",__FILE__,__LINE__);
- * exit (0);
- * }
- *
- * for (size = 0, i=1; i<=n;i++) if (indx->at(i) > size) size = indx->at(i);
- * answer = new FloatMatrix (size,size);
- *
- * for (i=1; i<= n; i++)
- * for (j=1; j<= n; j++) {
- * if (((ii = indx->at(i))!=0) && ((jj = indx->at(j))!=0)) {
- *  answer->at(ii,jj) = this -> at(i,j);
- * }
- * }
- * return answer;
- * }
- *
- *
- *
- * FloatMatrix*
- * FloatMatrix :: GiveSubMatrixOfSize (IntArray *indx, int size)
- *
- * // returns newly allocated (sub)matrix of the receiver.
- * // (sub)matrix has size size
- * // and on its position (indx->at(i),indx->at(j)) are values from receiver at (i, j).
- * // if indx->at(i) or indx->at(j) are <= 0 then at position i,j is zero.
- * //
- * // Warning:
- * //   This method should produce also bigger matrix than receiver
- * //   Works only for square matrices.
- *
- * {
- * int tsize,n,i,j,ii,jj;
- * FloatMatrix *answer;
- *
- * if (indx == NULL) return NULL;
- * if ((n = indx->giveSize()) == 0) return NULL;
- #  ifdef DEBUG
- * if (! this->isSquare()) {
- * printf ("error : cannot return submatrix constructed from IntArray from %d by %d matrix ! \nfile %s, line %d\n",
- *    nRows,nColumns,__FILE__,__LINE__);
- * exit(0);
- * }
- # endif
- *
- * if (n!=nRows) {
- * printf("error: GiveSubMatrix size mismatch\nfile %s, line %d\n",__FILE__,__LINE__);
- * exit (0);
- * }
- *
- * for (tsize = 0, i=1; i<=n;i++) if (indx->at(i) > tsize) tsize = indx->at(i);
- * if (tsize > size) {
- * printf("error: GiveSubMatrixOfSize index in mask exceed size\nfile %s, line %d\n",
- *    __FILE__,__LINE__);
- * exit (0);
- * }
- *
- * answer = new FloatMatrix (size,size);
- *
- * for (i=1; i<= n; i++)
- * for (j=1; j<= n; j++) {
- * if (((ii = indx->at(i))!=0) && ((jj = indx->at(j))!=0)) {
- *  answer->at(ii,jj) = this -> at(i,j);
- * }
- * }
- * return answer;
- * }
- */
-
-
-int
-FloatMatrix :: jaco_(FloatArray &eval, FloatMatrix &v, int nf)
+int FloatMatrix :: jaco_(FloatArray &eval, FloatMatrix &v, int nf)
 {
     /*
      * Solves the eigenvalues and eigenvectors of real
@@ -2259,8 +1524,6 @@ FloatMatrix :: jaco_(FloatArray &eval, FloatMatrix &v, int nf)
             this->at(i, j) = this->at(j, i);
         }
     }
-
-
 
     return 0;
 } /* jaco_ */

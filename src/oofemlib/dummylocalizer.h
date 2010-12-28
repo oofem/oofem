@@ -52,7 +52,7 @@ class TimeStep;
 /**
  * The dummy implementation of spatial localizer based on traversing the whole domain.
  * The basic task is to provide spatial information and localization for domain, to which receiver is associated.
- * Typical services include searching the closes node to give position, serching of an element containing given point, etc.
+ * Typical services include searching the closes node to give position, searching of an element containing given point, etc.
  * If special element algorithms required, these should be included using interface concept.
  */
 class DummySpatialLocalizer : public SpatialLocalizer

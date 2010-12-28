@@ -386,7 +386,7 @@ DIIDynamic :: giveElementCharacteristicMatrix(FloatMatrix &answer, int num,
         element->giveCharacteristicMatrix(answer, StiffnessMatrix, tStep);
         element->giveCharacteristicMatrix(charMtrx2, MassMatrix, tStep);
         charMtrx2.times(this->a0);
-        answer.plus(charMtrx2);
+        answer.add(charMtrx2);
 
         return;
     } else {

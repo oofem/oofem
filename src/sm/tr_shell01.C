@@ -113,7 +113,7 @@ TR_SHELL01 :: giveCharacteristicMatrix(FloatMatrix &answer, CharType mtrx, TimeS
     plate->giveCharacteristicMatrix(answer, mtrx, tStep);
     membrane->giveCharacteristicMatrix(aux, mtrx, tStep);
 
-    answer.plus(aux);
+    answer.add(aux);
 }
 
 

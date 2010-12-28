@@ -192,7 +192,7 @@ void MacroLSpace :: changeMicroBoundaryConditions(TimeStep *tStep) {
     }
 
     if ( this->updateRotationMatrix() ) {
-        ( * this->rotationMatrix ).printYourself();
+        this->rotationMatrix.printYourself();
         OOFEM_ERROR("Not implemented\n");
     }
 

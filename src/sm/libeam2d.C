@@ -56,7 +56,6 @@ LIBeam2d :: LIBeam2d(int n, Domain *aDomain) : StructuralElement(n, aDomain), La
     // Constructor.
 {
     numberOfDofMans     = 2;
-    rotationMatrix      = NULL;
     length              = 0.;
     pitch               = 10.;   // a dummy value
 }
@@ -157,10 +156,8 @@ LIBeam2d :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep)
     answer.at(5, 5) = halfMass;
 
     if ( this->updateRotationMatrix() ) {
-        answer.rotatedWith(* this->rotationMatrix);
+        answer.rotatedWith(this->rotationMatrix);
     }
-
-    return;
 }
 
 

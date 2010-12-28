@@ -78,7 +78,7 @@ PrimaryField :: initialize(ValueModeType mode, TimeStep *atTime, FloatArray &ans
     } else if ( mode == VM_Incremental ) {
         int indxm1 = this->resolveIndx(atTime, -1);
         answer = * ( this->giveSolutionVector(atTime) );
-        answer.subtract( this->giveSolutionVector(indxm1) );
+        answer.subtract( *this->giveSolutionVector(indxm1) );
     } else {
         _error2( "giveUnknownValue: unsupported mode %s", __ValueModeTypeToString(mode) );
     }

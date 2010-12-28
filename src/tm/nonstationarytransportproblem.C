@@ -570,7 +570,7 @@ NonStationaryTransportProblem :: giveElementCharacteristicMatrix(FloatMatrix &an
             charMtrx2.times( 1. / tStep->giveTimeIncrement() );
         }
 
-        answer.plus(charMtrx2);
+        answer.add(charMtrx2);
         return;
     } else {
         EngngModel :: giveElementCharacteristicMatrix(answer, num, type, tStep, domain);
@@ -607,7 +607,7 @@ NonStationaryTransportProblem :: assembleAlgorithmicPartOfRhs(FloatArray &answer
         element->giveCharacteristicMatrix(bcMtrx, LHSBCMatrix, tStep);
         bcMtrx.times(this->alpha - 1.0);
         if ( bcMtrx.isNotEmpty() ) {
-            charMtrx.plus(bcMtrx);
+            charMtrx.add(bcMtrx);
         }
 
         if ( charMtrx.isNotEmpty() ) {
@@ -721,7 +721,7 @@ NonStationaryTransportProblem :: assembleDirichletBcRhsVector(FloatArray &answer
         } else {
             this->giveElementCharacteristicMatrix(s, ielem, lhsType, tStep, d);
             element->giveCharacteristicMatrix(bcMtrx, LHSBCMatrix, tStep);
-            s.plus(bcMtrx);
+            s.add(bcMtrx);
             charVec.beProductOf(s, rp);
             charVec.negated();
 

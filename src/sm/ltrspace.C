@@ -324,8 +324,7 @@ LTRSpace :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep)
     }
 
     //  this -> giveRotationMatrix () ;
-    //  if (rotationMatrix) answer.rotatedWith(*rotationMatrix) ;
-    return;
+    //  if (rotationMatrix) answer.rotatedWith(rotationMatrix) ;
 }
 
 

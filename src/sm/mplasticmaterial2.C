@@ -568,7 +568,7 @@ huhu:
                                                                  strainSpaceHardeningVariables);
                             helpMtrx.beProductOf(gradientMatrix, kl);
                             helpMtrx.times( gamma.at(i) );
-                            rmat.plus(helpMtrx);
+                            rmat.add(helpMtrx);
                         }
 
                         for ( j = 1; j <= strSize; j++ ) {
@@ -591,7 +591,7 @@ huhu:
 
                 helpMtrx.beProductOf(lmat, consistentModuli);
                 helpMtrx2.beProductOf(helpMtrx, rmat);
-                gmat.plus(helpMtrx2);
+                gmat.add(helpMtrx2);
                 helpVector2.beProductOf(consistentModuli, residualVectorR);
                 helpVector.beProductOf(lmat, helpVector2);
                 rhs.subtract(helpVector);
@@ -1014,7 +1014,7 @@ huhu:
 
                 helpMtrx.beProductOf(lmat, elasticModuli);
                 helpMtrx2.beProductOf(helpMtrx, rmat);
-                gmat.plus(helpMtrx2);
+                gmat.add(helpMtrx2);
 
                 // solve for plastic multiplier increments
                 gmat.solveForRhs(rhs, helpVector);
@@ -1355,7 +1355,7 @@ MPlasticMaterial2 :: computeAlgorithmicModuli(FloatMatrix &answer,
                                                  strainSpaceHardeningVariables);
 
             gradientMatrix.times( gamma.at(i) );
-            helpInverse.plus(gradientMatrix);
+            helpInverse.add(gradientMatrix);
 
             if ( hasHardening ) {
                 this->computeReducedSKGradientMatrix(gradientMatrix,  i, gp, fullStressVector,
@@ -1364,7 +1364,7 @@ MPlasticMaterial2 :: computeAlgorithmicModuli(FloatMatrix &answer,
                 gradientMatrix.times( gamma.at(i) );
                 this->computeReducedHardeningVarsSigmaGradient(ks, gp, activeConditionMap, fullStressVector, strainSpaceHardeningVariables, gamma);
                 help.beProductOf(gradientMatrix, ks);
-                helpInverse.plus(help);
+                helpInverse.add(help);
             }
         }
     }
@@ -1521,7 +1521,7 @@ MPlasticMaterial2 :: giveConsistentStiffnessMatrix(FloatMatrix &answer,
                                                      strainSpaceHardeningVariables);
                 helpMtrx.beProductOf(gradientMatrix, kl);
                 helpMtrx.times( gamma.at(i) );
-                umat.plus(helpMtrx);
+                umat.add(helpMtrx);
             }
 
             for ( j = 1; j <= strSize; j++ ) {
@@ -1540,7 +1540,7 @@ MPlasticMaterial2 :: giveConsistentStiffnessMatrix(FloatMatrix &answer,
 
     helpMtrx.beProductOf(vmat, consistentModuli); // V S
     helpMtrx2.beProductOf(helpMtrx, umat);
-    gmat.plus(helpMtrx2);
+    gmat.add(helpMtrx2);
     /////////////////////////////
     gmatInv.beInverseOf(gmat);
 
@@ -1548,8 +1548,8 @@ MPlasticMaterial2 :: giveConsistentStiffnessMatrix(FloatMatrix &answer,
     helpMtrx2.beProductOf(gmatInv, helpMtrx);
     helpMtrx.beProductOf(consistentModuli, umat); // S U
     answer.beProductOf(helpMtrx, helpMtrx2); // SUGVS
-    answer.times(-1.0);
-    answer.plus(consistentModuli);
+    answer.negated();
+    answer.add(consistentModuli);
 
     if ( form == ReducedForm ) {
         return;
@@ -1694,15 +1694,15 @@ MPlasticMaterial2 :: giveElastoPlasticStiffnessMatrix(FloatMatrix &answer,
 
     helpMtrx.beProductOf(vmat, elasticModuli); // V S
     helpMtrx2.beProductOf(helpMtrx, umat);
-    gmat.plus(helpMtrx2);
+    gmat.add(helpMtrx2);
     /////////////////////////////
     gmatInv.beInverseOf(gmat);
 
     helpMtrx.beProductOf(gmatInv, vmat);
     helpMtrx2.beProductOf(umat, helpMtrx);
     answer.beProductOf(elasticModuli, helpMtrx2);
-    answer.times(-1.0);
-    answer.plus(elasticModuli);
+    answer.negated();
+    answer.add(elasticModuli);
 
     if ( form == ReducedForm ) {
         return;

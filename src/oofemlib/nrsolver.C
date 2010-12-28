@@ -166,7 +166,7 @@ NRSolver :: solve(SparseMtrx *k, FloatArray *R, FloatArray *R0,
     // compute total load R = R+R0
     RT = * R;
     if ( R0 ) {
-        RT.add(R0);
+        RT.add(*R0);
     }
 
 restart:
@@ -264,7 +264,7 @@ restart:
 
         // evaluate residual of momentum balance
         rhs = RT;
-        rhs.subtract(F);
+        rhs.subtract(*F);
         // account for quasi BC
         for ( int ii = 1; ii <= numberOfPrescribedDofs; ii++ ) {
             rhs.at( prescribedEqs.at(ii) ) = 0.0;

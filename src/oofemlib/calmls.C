@@ -364,7 +364,7 @@ restart:
     rhs = * R;
     rhs.times(DeltaLambda);
     if ( R0 ) {
-        rhs.add(R0);
+        rhs.add(*R0);
     }
 
     // DeltaR -> zero();
@@ -374,7 +374,7 @@ restart:
      * linSolver -> solveYourselfAt (tNow);
      */
     linSolver->solve(k, & rhs, DeltaR);
-    r->add(DeltaR);
+    r->add(*DeltaR);
     //linSolver -> updateYourselfExceptLhs ();
 
     //delete rhs; rhs = NULL;
@@ -425,10 +425,10 @@ restart:
         rhs =  * R;
         rhs.times(Lambda);
         if ( R0 ) {
-            rhs.add(R0);
+            rhs.add(*R0);
         }
 
-        rhs.subtract(F);
+        rhs.subtract(*F);
         deltaR_.resize(neq);
         /*
          * linSolver -> setFloatArrayAsComponent (LinearEquationRhs,&rhs);
@@ -688,7 +688,7 @@ CylindricalALM :: checkConvergence(FloatArray &R, FloatArray *R0, FloatArray &F,
     rhs =  R;
     rhs.times(Lambda);
     if ( R0 ) {
-        rhs.add(R0);
+        rhs.add(*R0);
     }
 
     rhs.subtract(F);

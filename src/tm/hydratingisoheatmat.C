@@ -187,7 +187,7 @@ double
 HydratingIsoHeatMaterial :: giveCharacteristicValue(MatResponseMode rmode, GaussPoint *gp, TimeStep *atTime)
 {
     double answer = 0;
-    FloatArray *vec;
+    FloatArray vec;
 
     if ( rmode == Capacity ) {
         if ( castAt && ( atTime->giveTime() < castAt ) ) {
@@ -198,15 +198,14 @@ HydratingIsoHeatMaterial :: giveCharacteristicValue(MatResponseMode rmode, Gauss
     } else if ( !hydrationLHS ) {
         answer = 0;
     } else if ( hydrationModel ) { //!!! better via HydrationModelInterface
-        vec = ( ( TransportMaterialStatus * ) giveStatus(gp) )->giveTempStateVector().GiveCopy();
-        if ( vec->giveSize() < 2 ) {
-            vec->resize(2);
-            vec->at(2) = 1.; // saturated if undefined
+        vec = ( ( TransportMaterialStatus * ) giveStatus(gp) )->giveTempStateVector();
+        if ( vec.giveSize() < 2 ) {
+            vec.resize(2);
+            vec.at(2) = 1.; // saturated if undefined
         }
 
-        answer = hydrationModel->giveCharacteristicValue(* vec, rmode, gp, atTime)
+        answer = hydrationModel->giveCharacteristicValue(vec, rmode, gp, atTime)
                  / atTime->giveTimeIncrement();
-        delete vec;
     } else {
         _error2( "giveCharacteristicValue: unknown MatResponseMode (%s)", __MatResponseModeToString(rmode) );
     }

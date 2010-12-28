@@ -83,10 +83,7 @@ StructuralElement :: StructuralElement(int n, Domain *aDomain) :
     Element(n, aDomain)
     // Constructor. Creates an element with number n, belonging to aDomain.
 {
-    //   constitutiveMatrix = NULL ;
-    //   massMatrix         = NULL ;
-    //   stiffnessMatrix    = NULL ;
-    rotationMatrix     = NULL;
+    rotationMatrix.beEmptyMtrx();
     rotationMatrixDefined = 0;
     activityLtf = 0;
     initialDisplacements = NULL;
@@ -96,17 +93,9 @@ StructuralElement :: StructuralElement(int n, Domain *aDomain) :
 StructuralElement :: ~StructuralElement()
 // Destructor.
 {
-    //   delete massMatrix ;
-    //   delete stiffnessMatrix ;
-    if ( rotationMatrix ) {
-        delete rotationMatrix;
-    }
-
     if ( initialDisplacements ) {
         delete initialDisplacements;
     }
-
-    //   delete constitutiveMatrix ;
 }
 
 
@@ -263,7 +252,7 @@ StructuralElement :: computePointLoadVectorAt(FloatArray &answer, Load *load, Ti
     pointLoad->giveCoordinates(coords);
     pointLoad->computeValueAt(force, tStep, coords, mode);
     if ( this->computeLocalCoordinates(lcoords, coords) ) {
-        GaussPoint __gp(NULL, 0, lcoords.GiveCopy(), 1.0, _Unknown);
+        GaussPoint __gp(NULL, 0, (new FloatArray(lcoords)), 1.0, _Unknown);
         this->computeNmatrixAt(& __gp, n);
         answer.beTProductOf(n, force);
     } else {
@@ -622,7 +611,7 @@ StructuralElement :: computeConsistentMassMatrix(FloatMatrix &answer, TimeStep *
 
     answer.symmetrized();
     //this -> giveRotationMatrix () ;
-    //if (rotationMatrix) answer.rotatedWith(*rotationMatrix) ;
+    //if (rotationMatrix) answer.rotatedWith(rotationMatrix) ;
 }
 
 
@@ -774,7 +763,7 @@ StructuralElement :: computeMassMatrix(FloatMatrix &answer, TimeStep *tStep)
     this->computeConsistentMassMatrix(answer, tStep, mass);
 
     if ( this->updateRotationMatrix() ) {
-        answer.rotatedWith(* this->rotationMatrix);
+        answer.rotatedWith(this->rotationMatrix);
     }
 }
 
@@ -798,7 +787,7 @@ StructuralElement :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tSte
         answer.zero();
 
         if ( this->updateRotationMatrix() ) {
-            answer.rotatedWith(* this->rotationMatrix);
+            answer.rotatedWith(this->rotationMatrix);
         }
 
         return;
@@ -845,7 +834,7 @@ StructuralElement :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tSte
     answer.times(dim * mass / summ);
 
     if ( this->updateRotationMatrix() ) {
-        answer.rotatedWith(* this->rotationMatrix);
+        answer.rotatedWith(this->rotationMatrix);
     }
 }
 
@@ -1035,10 +1024,8 @@ StructuralElement :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode
     }
 
     if ( this->updateRotationMatrix() ) {
-        answer.rotatedWith(* this->rotationMatrix);
+        answer.rotatedWith(this->rotationMatrix);
     }
-
-    return;
 }
 
 void StructuralElement :: computeStiffnessMatrix_withIRulesAsSubcells(FloatMatrix &answer,
@@ -1090,10 +1077,8 @@ void StructuralElement :: computeStiffnessMatrix_withIRulesAsSubcells(FloatMatri
     }
 
     if ( this->updateRotationMatrix() ) {
-        answer.rotatedWith(* this->rotationMatrix);
+        answer.rotatedWith(this->rotationMatrix);
     }
-
-    return;
 }
 
 
@@ -1117,18 +1102,13 @@ StructuralElement :: computeStrainVector(FloatArray &answer, GaussPoint *gp, Tim
 
     // subtract initial displacements, if defined
     if ( initialDisplacements ) {
-        u.subtract(initialDisplacements);
+        u.subtract(*initialDisplacements);
     }
 
     if ( this->updateRotationMatrix() ) {
         u.rotatedWith(this->rotationMatrix, 'n');
     }
-
     answer.beProductOf(b, u);
-
-    // delete b ;
-    // delete u ;
-    return;
 }
 
 
@@ -1494,7 +1474,7 @@ StructuralElement :: updateBeforeNonlocalAverage(TimeStep *atTime)
 int
 StructuralElement :: updateRotationMatrix()
 {
-    /* returns a tranformation matrix between local coordinate system
+    /* returns a transformation matrix between local coordinate system
      * and global coordinate system, taking into account possible local
      * coordinate system in nodes.
      * if no transformation necessary - returns NULL
@@ -1503,7 +1483,7 @@ StructuralElement :: updateRotationMatrix()
     FloatMatrix T_GtoL, T_NtoG;
 
     if ( rotationMatrixDefined ) {
-        return ( rotationMatrix != NULL );
+        return rotationMatrix.isNotEmpty();
     }
 
     rotationMatrixDefined = 1;
@@ -1529,18 +1509,16 @@ StructuralElement :: updateRotationMatrix()
 #endif
 
     if ( isT_GtoL && T_NtoG.isNotEmpty() ) {
-        rotationMatrix = T_GtoL.Times(& T_NtoG);
+        rotationMatrix.beProductOf(T_GtoL, T_NtoG);
     } else if ( isT_GtoL ) {
-        rotationMatrix = T_GtoL.GiveCopy();
+        rotationMatrix = T_GtoL;
     } else if ( T_NtoG.isNotEmpty() ) {
-        rotationMatrix = T_NtoG.GiveCopy();
+        rotationMatrix = T_NtoG;
     } else {
-        rotationMatrix = NULL;
+        rotationMatrix.beEmptyMtrx();
+        return false;
     }
-
-    //delete T_GtoL;
-    //delete T_GtoNTransp;
-    return ( rotationMatrix != NULL );
+    return true;
 }
 
 

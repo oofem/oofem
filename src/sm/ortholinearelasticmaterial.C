@@ -244,15 +244,12 @@ OrthotropicLinearElasticMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &a
 // forceElasticResponse ignored - always elastic
 //
 {
-    FloatMatrix *rotationMatrix;
+    FloatMatrix rotationMatrix;
 
     this->give3dLocalMaterialStiffnessMatrix(answer, form, mode, gp, atTime);
 
-    rotationMatrix = this->GiveRotationMatrix(gp);
-    answer.rotatedWith(* rotationMatrix);
-    delete rotationMatrix;
-
-    return;
+    this->giveRotationMatrix(rotationMatrix, gp);
+    answer.rotatedWith(rotationMatrix);
 }
 
 void
@@ -301,21 +298,21 @@ OrthotropicLinearElasticMaterial :: give3dLocalMaterialStiffnessMatrix(FloatMatr
 }
 
 
-FloatMatrix *
-OrthotropicLinearElasticMaterial :: GiveTensorRotationMatrix(GaussPoint *gp)
+void
+OrthotropicLinearElasticMaterial :: giveTensorRotationMatrix(FloatMatrix &answer, GaussPoint *gp)
 //
 // returns [3,3] rotation matrix from local principal axes of material
 // to local axes used at gp (element) level
 //
 {
     int elementCsFlag;
-    FloatMatrix elementCs, *t = NULL;
+    FloatMatrix elementCs;
     StructuralElement *element = ( StructuralElement * ) gp->giveElement();
 
     if ( gp->giveMaterialMode() == _1dMat ) { //do not rotate 1D materials on trusses and beams
-        t->resize(3, 3);
-        t->beUnitMatrix();
-        return t;
+        answer.resize(3, 3);
+        answer.beUnitMatrix();
+        return;
     }
 
     elementCsFlag = element->giveLocalCoordinateSystem(elementCs);
@@ -328,10 +325,9 @@ OrthotropicLinearElasticMaterial :: GiveTensorRotationMatrix(GaussPoint *gp)
         // in localCoordinateSystem are stored directional cosines
         //
         if ( elementCsFlag ) {
-            t = elementCs.Times(this->localCoordinateSystem);
-            //delete elementCs;
+            answer.beProductOf(elementCs, *this->localCoordinateSystem);
         } else {
-            t = this->localCoordinateSystem->GiveCopy();
+            answer = *this->localCoordinateSystem;
         }
     } else if ( this->cs_type == shellCS ) {
         FloatArray elementNormal, helpx, helpy;
@@ -366,10 +362,9 @@ OrthotropicLinearElasticMaterial :: GiveTensorRotationMatrix(GaussPoint *gp)
          * localCoordinateSystem = rotatedLocalCoordinateSystem;
          */
         if ( elementCsFlag ) {
-            t = elementCs.Times(this->localCoordinateSystem);
-            //delete elementCs;
+            answer.beProductOf(elementCs, *this->localCoordinateSystem);
         } else {
-            t = this->localCoordinateSystem->GiveCopy();
+            answer = *this->localCoordinateSystem;
         }
 
         delete localCoordinateSystem;
@@ -377,16 +372,12 @@ OrthotropicLinearElasticMaterial :: GiveTensorRotationMatrix(GaussPoint *gp)
     } else {
         _error("GiveTensorRotationMatrix - internal error no cs defined");
     }
-
-    //
     // t at (i,j) contains cosine of angle between elementAxis(i) and localMaterialAxis(j).
-    //
-    return t;
 }
 
 
-FloatMatrix *
-OrthotropicLinearElasticMaterial :: GiveRotationMatrix(GaussPoint *gp)
+void
+OrthotropicLinearElasticMaterial :: giveRotationMatrix(FloatMatrix &answer, GaussPoint *gp)
 //
 // returns [6,6] rotation matrix from local principal axes of material
 // to local axes used at the gp (element) level for beams and trusses
@@ -394,16 +385,9 @@ OrthotropicLinearElasticMaterial :: GiveRotationMatrix(GaussPoint *gp)
 //
 //
 {
-    FloatMatrix *t, answer;
-    t = this->GiveTensorRotationMatrix(gp);
-    //
-    // t at (i,j) contains cosine of angle between elementAxis(i) and localMaterialAxis(j).
-    //
-
-
-    this->giveStrainVectorTranformationMtrx(answer, * t);
-    delete t;
-    return answer.GiveCopy();
+    FloatMatrix t;
+    this->giveTensorRotationMatrix(t, gp);
+    this->giveStrainVectorTranformationMtrx(answer, t);
 }
 
 
@@ -528,18 +512,14 @@ OrthotropicLinearElasticMaterial :: giveThermalDilatationVector(FloatArray &answ
 // of each (local) axis given by element lcs.
 //
 {
-    FloatMatrix *transf;
+    FloatMatrix transf;
     FloatArray help(6);
     help.at(1) = this->give(tAlphax, gp);
     help.at(2) = this->give(tAlphay, gp);
     help.at(3) = this->give(tAlphaz, gp);
 
-    transf = this->GiveRotationMatrix(gp);
-    answer.beProductOf(* transf, help);
-    //delete help;
-    delete transf;
-
-    return;
+    this->giveRotationMatrix(transf, gp);
+    answer.beProductOf(transf, help);
 }
 
 

@@ -1761,7 +1761,7 @@ ConcreteDPM :: computeDDRhoDDStress(FloatMatrix &answer,
     FloatMatrix help1;
     help1 = dJ2DJ2;
     help1.times( -1. / ( rho * rho * rho ) );
-    ddRhoddStress.plus(help1);
+    ddRhoddStress.add(help1);
     answer = ddRhoddStress;
     return;
 }

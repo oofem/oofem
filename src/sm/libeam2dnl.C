@@ -60,7 +60,6 @@ LIBeam2dNL :: LIBeam2dNL(int n, Domain *aDomain) : NLStructuralElement(n, aDomai
     // Constructor.
 {
     numberOfDofMans     = 2;
-    rotationMatrix      = NULL;
     length              = 0.;
     pitch               = 10.;   // a dummy value
 }
@@ -292,17 +291,15 @@ LIBeam2dNL :: computeInitialStressMatrix(FloatMatrix &answer, TimeStep *tStep)
                 this->computeNLBMatrixAt(A, gp, j);
                 if ( A.isNotEmpty() ) {
                     A.times(stress.at(j) * dV);
-                    answer.plus(A);
+                    answer.add(A);
                 }
             }
         }
     }
 
     if ( this->updateRotationMatrix() ) {
-        answer.rotatedWith(* this->rotationMatrix);
+        answer.rotatedWith(this->rotationMatrix);
     }
-
-    return;
 }
 
 
@@ -340,10 +337,8 @@ LIBeam2dNL :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep)
     answer.at(5, 5) = halfMass;
 
     if ( this->updateRotationMatrix() ) {
-        answer.rotatedWith(* this->rotationMatrix);
+        answer.rotatedWith(this->rotationMatrix);
     }
-
-    return;
 }
 
 

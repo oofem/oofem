@@ -49,7 +49,7 @@
 
 namespace oofem {
 StructuralElementEvaluator :: StructuralElementEvaluator() {
-    this->rotationMatrix = NULL;
+    this->rotationMatrix.beEmptyMtrx();
 }
 
 /*
@@ -436,7 +436,7 @@ void StructuralElementEvaluator :: computeStiffnessMatrix(FloatMatrix &answer, M
     } // end loop over irules
 
     if ( this->updateRotationMatrix() ) {
-        answer.rotatedWith(* this->rotationMatrix);
+        answer.rotatedWith(this->rotationMatrix);
     }
 
     return;
@@ -456,18 +456,18 @@ StructuralElementEvaluator :: updateRotationMatrix()
     FloatMatrix T_NtoG;
 
     if ( rotationMatrixDefined ) {
-        return ( rotationMatrix != NULL );
+        return rotationMatrix.isNotEmpty();
     }
 
     rotationMatrixDefined = 1;
     isT_NtoG = this->computeGNDofRotationMatrix(T_NtoG, _toGlobalCS);
     if ( T_NtoG.isNotEmpty() ) {
-        rotationMatrix = T_NtoG.GiveCopy();
+        rotationMatrix = T_NtoG;
     } else {
-        rotationMatrix = NULL;
+        rotationMatrix.beEmptyMtrx();
+        return false;
     }
-
-    return ( rotationMatrix != NULL );
+    returnt true;
 }
 #endif
 
@@ -535,7 +535,7 @@ StructuralElementEvaluator :: updateRotationMatrix()
     FloatMatrix T_GtoL, T_NtoG;
 
     if ( rotationMatrixDefined ) {
-        return ( rotationMatrix != NULL );
+        return rotationMatrix.isNotEmpty();
     }
 
     rotationMatrixDefined = 1;
@@ -561,18 +561,16 @@ StructuralElementEvaluator :: updateRotationMatrix()
 #endif
 
     if ( isT_GtoL && T_NtoG.isNotEmpty() ) {
-        rotationMatrix = T_GtoL.Times(& T_NtoG);
+        rotationMatrix.beProductOf(T_GtoL, T_NtoG);
     } else if ( isT_GtoL ) {
-        rotationMatrix = T_GtoL.GiveCopy();
+        rotationMatrix = T_GtoL;
     } else if ( T_NtoG.isNotEmpty() ) {
-        rotationMatrix = T_NtoG.GiveCopy();
+        rotationMatrix = T_NtoG;
     } else {
-        rotationMatrix = NULL;
+        rotationMatrix.beEmptyMtrx();
+        return false;
     }
-
-    //delete T_GtoL;
-    //delete T_GtoNTransp;
-    return ( rotationMatrix != NULL );
+    return true;
 }
 
 

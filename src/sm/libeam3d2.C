@@ -68,7 +68,6 @@ LIBeam3d2 :: LIBeam3d2(int n, Domain *aDomain) : NLStructuralElement(n, aDomain)
     // Constructor.
 {
     numberOfDofMans     = 2;
-    rotationMatrix      = NULL;
     referenceNode       = 0;
     length              = 0.;
 
@@ -156,10 +155,8 @@ LIBeam3d2 :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep)
     answer.at(7, 7) = answer.at(8, 8) = answer.at(9, 9) = halfMass;
 
     if ( this->updateRotationMatrix() ) {
-        answer.rotatedWith(* this->rotationMatrix);
+        answer.rotatedWith(this->rotationMatrix);
     }
-
-    return;
 }
 
 
@@ -588,10 +585,6 @@ LIBeam3d2 :: updateRotationMatrix()
         return NLStructuralElement :: updateRotationMatrix();
     }
 
-    if ( rotationMatrix == NULL ) {
-        rotationMatrix = new FloatMatrix();
-    }
-
     isT_GtoL = this->computeGtoLRotationMatrix(T_GtoL);
     isT_NtoG = this->computeGNDofRotationMatrix(T_NtoG, _toGlobalCS);
 
@@ -613,22 +606,17 @@ LIBeam3d2 :: updateRotationMatrix()
 #endif
 
     if ( isT_GtoL && T_NtoG.isNotEmpty() ) {
-        rotationMatrix->beProductOf(T_GtoL, T_NtoG);
+        rotationMatrix.beProductOf(T_GtoL, T_NtoG);
     } else if ( isT_GtoL ) {
-        * rotationMatrix = T_GtoL;
+        rotationMatrix = T_GtoL;
     } else if ( T_NtoG.isNotEmpty() ) {
-        * rotationMatrix = T_NtoG;
+        rotationMatrix = T_NtoG;
     } else {
-        int i, ndofs = this->computeNumberOfDofs(EID_MomentumBalance);
-        rotationMatrix->resize(ndofs, ndofs);
-        for ( i = 1; i <= ndofs; i++ ) {
-            rotationMatrix->at(i, i) = 1.0;
-        }
+        int ndofs = this->computeNumberOfDofs(EID_MomentumBalance);
+        rotationMatrix.resize(ndofs, ndofs);
+        rotationMatrix.beUnitMatrix();
     }
-
-    //delete T_GtoL;
-    //delete T_GtoNTransp;
-    return 1;
+    return true;
 }
 
 
@@ -656,8 +644,8 @@ LIBeam3d2 ::  computeRotMtrx(FloatMatrix &answer, FloatArray &psi) {
     S.times(sin(psiSize) / psiSize);
     SS.times( ( 1. - cos(psiSize) ) / ( psiSize * psiSize ) );
 
-    answer.plus(S);
-    answer.plus(SS);
+    answer.add(S);
+    answer.add(SS);
 }
 
 
@@ -686,7 +674,7 @@ LIBeam3d2 :: computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *t
 
     this->computeVectorOf(EID_MomentumBalance, VM_Incremental, tStep, ui);
     if ( this->updateRotationMatrix() ) {
-        ui.rotatedWith(* this->rotationMatrix, 'n');
+        ui.rotatedWith(this->rotationMatrix, 'n');
     }
 
     this->computeBmatrixAt(gp, b);

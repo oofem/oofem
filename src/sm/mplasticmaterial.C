@@ -848,7 +848,7 @@ MPlasticMaterial :: computeAlgorithmicModuli(FloatMatrix &answer,
                                                fullStressSpaceHardeningVars);
 
             gradientMatrix.times( gamma.at(i) );
-            helpInverse.plus(gradientMatrix);
+            helpInverse.add(gradientMatrix);
         }
     }
 
@@ -1007,8 +1007,7 @@ MPlasticMaterial :: giveConsistentStiffnessMatrix(FloatMatrix &answer,
         helpMtrx2.beProductOf(helpMtrx, nmat);
 
         answer.beSubMatrixOf(consistentModuli, 1, sizeR, 1, sizeR);
-        helpMtrx2.times(-1.0);
-        answer.plus(helpMtrx2);
+        answer.subtract(helpMtrx2);
     } else {
         FloatMatrix lgradMat(actSurf, size);
         for ( i = 1; i <= nsurf; i++ ) {
@@ -1033,8 +1032,7 @@ MPlasticMaterial :: giveConsistentStiffnessMatrix(FloatMatrix &answer,
         helpMtrx2.beProductOf(helpMtrx, nmat);
 
         answer.beSubMatrixOf(consistentModuli, 1, sizeR, 1, sizeR);
-        helpMtrx2.times(-1.0);
-        answer.plus(helpMtrx2);
+        answer.subtract(helpMtrx2);
     }
 
     if ( form == ReducedForm ) {
@@ -1167,8 +1165,8 @@ MPlasticMaterial :: giveElastoPlasticStiffnessMatrix(FloatMatrix &answer,
         helpMtrx.beProductOf(gradMat, elasticModuli);
         helpMtrx2.beProductOf(gmat, helpMtrx);
         answer.beTProductOf(helpMtrx, helpMtrx2);
-        answer.times(-1.0);
-        answer.plus(elasticModuli);
+        answer.negated();
+        answer.add(elasticModuli);
     } else {
         FloatMatrix lgradMat(actSurf, size);
         for ( i = 1; i <= nsurf; i++ ) {
@@ -1188,8 +1186,8 @@ MPlasticMaterial :: giveElastoPlasticStiffnessMatrix(FloatMatrix &answer,
         helpMtrx2.beProductOf(gmat, helpMtrx);
         helpMtrx.beProductTOf(elasticModuli, lgradMat);
         answer.beTProductOf(helpMtrx, helpMtrx2);
-        answer.times(-1.0);
-        answer.plus(elasticModuli);
+        answer.negated();
+        answer.add(elasticModuli);
     }
 
     if ( form == ReducedForm ) {

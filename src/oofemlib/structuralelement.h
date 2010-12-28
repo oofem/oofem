@@ -61,7 +61,6 @@ class TimeStep;
 class Node;
 class Material;
 class GaussPoint;
-class FloatMatrix;
 class FloatArray;
 class IntArray;
 class SparseMtrx; // required by addNonlocalStiffnessContributions declaration
@@ -115,7 +114,7 @@ class StructuralElement : public Element
 
 protected:
     /// Cached transformation matrix of receiver
-    FloatMatrix *rotationMatrix;
+    FloatMatrix rotationMatrix;
     /// Flag indicating if tranformation matrix has been already computed
     int rotationMatrixDefined;
     //     FloatMatrix* constitutiveMatrix;

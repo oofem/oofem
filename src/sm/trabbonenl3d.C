@@ -182,8 +182,8 @@ TrabBoneNL3D :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
             // Construction of the tangent stiffness
             tangentMatrix = SSaTensor;
             tangentMatrix.times(1.0 - tempDam);
-            tangentMatrix.plus(secondTerm);
-            tangentMatrix.plus(thirdTerm);
+            tangentMatrix.add(secondTerm);
+            tangentMatrix.add(thirdTerm);
 
             answer = tangentMatrix;
         } else   {

@@ -63,7 +63,6 @@ LIBeam3dNL2 :: LIBeam3dNL2(int n, Domain *aDomain) : NLStructuralElement(n, aDom
     // Constructor.
 {
     numberOfDofMans    = 2;
-    rotationMatrix     = NULL;
     l0                 = 0.;
     tempQCounter       = 0;
     referenceNode      = 0;
@@ -113,8 +112,8 @@ LIBeam3dNL2 ::  computeRotMtrx(FloatMatrix &answer, FloatArray &psi) {
     S.times(sin(psiSize) / psiSize);
     SS.times( ( 1. - cos(psiSize) ) / ( psiSize * psiSize ) );
 
-    answer.plus(S);
-    answer.plus(SS);
+    answer.add(S);
+    answer.add(SS);
 }
 
 void
@@ -439,10 +438,8 @@ LIBeam3dNL2 :: computeStiffnessMatrix(FloatMatrix &answer,
     }
 
     if ( this->updateRotationMatrix() ) {
-        answer.rotatedWith(* this->rotationMatrix);
+        answer.rotatedWith(this->rotationMatrix);
     }
-
-    return;
 }
 
 void
@@ -527,10 +524,8 @@ LIBeam3dNL2 :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep)
     answer.at(7, 7) = answer.at(8, 8) = answer.at(9, 9) = halfMass;
 
     if ( this->updateRotationMatrix() ) {
-        answer.rotatedWith(* this->rotationMatrix);
+        answer.rotatedWith(this->rotationMatrix);
     }
-
-    return;
 }
 
 

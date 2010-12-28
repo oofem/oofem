@@ -66,7 +66,6 @@ Truss2d :: Truss2d(int n, Domain *aDomain) :
     // Constructor.
 {
     numberOfDofMans     = 2;
-    rotationMatrix      = NULL;
     length              = 0.;
     pitch               = 10.;   // a dummy value
     cs_mode             = 0;
@@ -171,10 +170,8 @@ Truss2d :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep)
     answer.at(4, 4) = halfMass;
 
     if ( this->updateRotationMatrix() ) {
-        answer.rotatedWith(* this->rotationMatrix);
+        answer.rotatedWith(this->rotationMatrix);
     }
-
-    return;
 }
 
 

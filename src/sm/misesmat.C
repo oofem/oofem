@@ -335,7 +335,7 @@ MisesMat :: computeGLPlasticStrain(const FloatMatrix &F, FloatMatrix &Ep, FloatM
     help.beProductOf(F_T, invB);
     Ep.beProductOf(help, F);
     Ep.times( pow(J, -2. / 3.) );
-    Ep.plus(I);
+    Ep.add(I);
     Ep.times(1. / 2.);
 
     return;
@@ -490,15 +490,13 @@ MisesMat :: give3dSSMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseForm
     double factor = -2. * sqrt(6.) * G * G / trialS;
     double factor1 = factor * sigmaY / ( ( H + 3. * G ) * trialS * trialS );
     stiffnessCorrection.times(factor1);
-    answer.plus(stiffnessCorrection);
+    answer.add(stiffnessCorrection);
 
     // another correction term
     stiffnessCorrection.bePinvID();
     double factor2 = factor * dKappa;
     stiffnessCorrection.times(factor2);
-    answer.plus(stiffnessCorrection);
-
-    return;
+    answer.add(stiffnessCorrection);
 }
 
 
@@ -541,24 +539,24 @@ MisesMat :: give3dLSMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseForm
     C = help;
     help.times(-1. / 3.);
     FloatMatrix C1 = I;
-    C1.plus(help);
+    C1.add(help);
     C1.times(2 * trialStressVol);
 
     FloatMatrix n1(6, 6), n2(6, 6);
     n1.beDyadicProductOf(n, delta);
     n2.beDyadicProductOf(delta, n);
     help = n1;
-    help.plus(n2);
+    help.add(n2);
     help.times(-2. / 3. * trialS);
-    C1.plus(help);
+    C1.add(help);
     Cdev = C1;
     C.times(K * J * J);
 
     help = I;
     help.times( -K * ( J * J - 1 ) );
-    C.plus(help);
+    C.add(help);
     FloatMatrix Cvol = C;
-    C.plus(C1);
+    C.add(C1);
     //////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     FloatMatrix invF(3, 3);
@@ -683,9 +681,9 @@ MisesMat :: give3dLSMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseForm
     nonSymPart.beDyadicProductOf(n, devN2);
     nonSymPart.times(-2 * trialStressVol * beta4);
 
-    C.plus(C1);
-    C.plus(N);
-    C.plus(nonSymPart);
+    C.add(C1);
+    C.add(N);
+    C.add(nonSymPart);
     help.beProductOf(C, tT);
     answer.beProductOf(T, help);
 }

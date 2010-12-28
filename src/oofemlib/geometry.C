@@ -162,15 +162,15 @@ void Line :: computeTransformationMatrix(FloatMatrix &answer) {
 }
 
 void Line :: transformIntoPolar(FloatArray *point, FloatArray &answer) {
-    FloatArray *xp;
+    FloatArray xp;
     FloatMatrix Qt;
     this->computeTransformationMatrix(Qt);
-    FloatArray help = * point - * vertices->at(2);
-    xp = Qt.Times(& help);
+    FloatArray help = * point;
+    help.subtract(* vertices->at(2));
+    xp.beProductOf(Qt,help);
     answer.resize(2);
-    answer.at(1) = xp->computeNorm();
-    answer.at(2) = atan2( xp->at(2), xp->at(1) );
-    delete xp;
+    answer.at(1) = xp.computeNorm();
+    answer.at(2) = atan2( xp.at(2), xp.at(1) );
 }
 
 IRResultType Line :: initializeFrom(InputRecord *ir) {

@@ -259,9 +259,9 @@ MaxwellChainMaterial :: updateYourself(GaussPoint *gp, TimeStep *tNow)
         help.times(lambdaMu * Emu);
         if ( muthHiddenVarsVector ) {
             muthHiddenVarsVector->times( exp(-deltaYmu) );
-            muthHiddenVarsVector->add(& help);
+            muthHiddenVarsVector->add(help);
         } else {
-            status->letHiddenVarsVectorBe( mu, help.GiveCopy() );
+            status->letHiddenVarsVectorBe( mu, (new FloatArray(help)) );
         }
     }
 

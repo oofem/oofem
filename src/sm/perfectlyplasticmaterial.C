@@ -676,11 +676,7 @@ PerfectlyPlasticMaterial :: giveMaterialStiffnessMatrix(FloatMatrix &answer, Mat
                                     NULL,
                                     atTime,
                                     lambda);
-    answer.plus(dp);
-    //delete dp;
-    //delete statusFullPlasticVector;
-    //delete statusFullStressVector;
-    return;
+    answer.add(dp);
 }
 
 
@@ -1055,15 +1051,14 @@ PerfectlyPlasticMaterial :: GiveStressCorrectionBackToYieldSurface(GaussPoint *g
                                                 plasticVector3d);
     crossSection->imposeStressConstrainsOnGradient(gp, yeldStressGrad);
 
-    f3 = this->computeYCValueAt(gp, stressVector3d,
-                                plasticVector3d);
+    f3 = this->computeYCValueAt(gp, stressVector3d, plasticVector3d);
 
     for ( help = 0., j = 1; j <= 6; j++ ) {
         help += yeldStressGrad->at(j) * yeldStressGrad->at(j);
     }
 
-    stressCorrection = yeldStressGrad->Times(f3);
-    stressCorrection->times(-1. / help);
+    stressCorrection = new FloatArray(*yeldStressGrad);
+    stressCorrection->times(-f3 / help);
 
 
     delete yeldStressGrad;

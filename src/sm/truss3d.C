@@ -66,7 +66,6 @@ Truss3d :: Truss3d(int n, Domain *aDomain) :
     // Constructor.
 {
     numberOfDofMans     = 2;
-    rotationMatrix      = NULL;
     length              = 0.;
     //  referenceNode       - 0  ;
 }
@@ -247,10 +246,8 @@ Truss3d :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep)
     answer.at(6, 6) = halfMass;
 
     if ( this->updateRotationMatrix() ) {
-        answer.rotatedWith(* this->rotationMatrix);
+        answer.rotatedWith(this->rotationMatrix);
     }
-
-    return;
 }
 
 

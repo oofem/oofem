@@ -183,8 +183,8 @@ TrabBone3D :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
             // Construction of the tangent stiffness
             tangentMatrix = SSaTensor;
             tangentMatrix.times(1.0 - tempDam);
-            tangentMatrix.plus(secondTerm);
-            tangentMatrix.plus(thirdTerm);
+            tangentMatrix.add(secondTerm);
+            tangentMatrix.add(thirdTerm);
             answer = tangentMatrix;
         } else   {
             // Import of state variables
@@ -333,13 +333,13 @@ TrabBone3D :: performPlasticityReturn(GaussPoint *gp, const FloatArray &totalStr
             tempTensor4.times( -1.0 / ( norm * norm * norm ) );
             derivPlasFlowDirec = fabric;
             derivPlasFlowDirec.times(1.0 / norm);
-            derivPlasFlowDirec.plus(tempTensor4);
+            derivPlasFlowDirec.add(tempTensor4);
 
             // Construction of the gradient Nabla_S of R and SSa tensor
 
             tempTensor4 = derivPlasFlowDirec;
             tempTensor4.times(deltaKappa);
-            tempTensor4.plus(compliance);
+            tempTensor4.add(compliance);
             SSaTensor.beInverseOf(tempTensor4);
 
             // Evaluation of R

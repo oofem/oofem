@@ -74,10 +74,10 @@ LineSearchNM :: solve(FloatArray *r, FloatArray *dr, FloatArray *F, FloatArray *
     g = * R;
     g.times(lambda);
     if ( R0 ) {
-        g.add(R0);
+        g.add(*R0);
     }
 
-    g.subtract(F);
+    g.subtract(*F);
 
     for ( ii = 1; ii <= eqnmask.giveSize(); ii++ ) {
         g.at( eqnmask.at(ii) ) = 0.0;
@@ -87,7 +87,7 @@ LineSearchNM :: solve(FloatArray *r, FloatArray *dr, FloatArray *F, FloatArray *
     if ( s0 >= 0.0 ) {
         //printf ("\nLineSearchNM::solve starting inner product uphill, val=%e",s0);
         OOFEM_LOG_DEBUG("LS: product uphill, eta=%e\n", 1.0);
-        r->add(dr);
+        r->add(*dr);
         tNow->incrementStateCounter();        // update solution state counter
         engngModel->updateComponent(tNow, InternalRhs, domain);
         etaValue = 1.0;
@@ -121,10 +121,10 @@ LineSearchNM :: solve(FloatArray *r, FloatArray *dr, FloatArray *F, FloatArray *
         g = * R;
         g.times(lambda);
         if ( R0 ) {
-            g.add(R0);
+            g.add(*R0);
         }
 
-        g.subtract(F);
+        g.subtract(*F);
 
         for ( ii = 1; ii <= eqnmask.giveSize(); ii++ ) {
             g.at( eqnmask.at(ii) ) = 0.0;

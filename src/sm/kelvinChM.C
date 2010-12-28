@@ -312,9 +312,9 @@ KelvinChainMaterial :: updateYourself(GaussPoint *gp, TimeStep *tNow)
 
         if ( muthHiddenVarsVector ) {
             muthHiddenVarsVector->times(betaMu);
-            muthHiddenVarsVector->add(& help);
+            muthHiddenVarsVector->add(help);
         } else {
-            status->letHiddenVarsVectorBe( mu, help.GiveCopy() );
+            status->letHiddenVarsVectorBe( mu, (new FloatArray(help)) );
         }
     }
 

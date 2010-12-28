@@ -174,16 +174,15 @@ HydratingHeMoMaterial :: updateInternalState(const FloatArray &vec, GaussPoint *
             // it is necessary to convert the passed state vector to relative humidity expected by the hydration model
             //!!! might be cleaner to choose wc / h in hydration model, but it must be defined which one is passed anyway; so relative humidity was chosen
             //!!! also, the humidity vector might be evaluated by a function (ensure 2 elements and set humidity)
-            FloatArray *vech = vec.GiveCopy();
-            if ( vech->giveSize() >= 2 ) {
-                vech->at(2) = inverse_sorption_isotherm( vec.at(2) );           // compute relative humidity
+            FloatArray vech = vec;
+            if ( vech.giveSize() >= 2 ) {
+                vech.at(2) = inverse_sorption_isotherm( vec.at(2) );           // compute relative humidity
             } else {
-                vech->resize(2);
-                vech->at(2) = 1.; // saturated if undefined
+                vech.resize(2);
+                vech.at(2) = 1.; // saturated if undefined
             }
 
-            HydrationModelInterface :: updateInternalState(* vech, gp, atTime);
-            delete vech;
+            HydrationModelInterface :: updateInternalState(vech, gp, atTime);
 
             // additional file output !!!
             if ( teplotaOut && ( gp->giveNumber() == 1 ) && giveStatus(gp) ) {
@@ -219,7 +218,7 @@ HydratingHeMoMaterial :: giveCharacteristicValue(MatResponseMode rmode, GaussPoi
         if ( !hydrationLHS ) {
             answer = 0;
         } else if ( hydrationModel ) {  //!!! better via HydrationModelInterface
-            vec = ( ( TransportMaterialStatus * ) giveStatus(gp) )->giveTempStateVector().GiveCopy();
+            vec = new FloatArray( ( ( TransportMaterialStatus * ) giveStatus(gp) )->giveTempStateVector() );
 
             if ( vec->giveSize() < 2 ) {
                 vec->resize(2);

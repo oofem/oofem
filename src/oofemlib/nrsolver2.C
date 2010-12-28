@@ -119,7 +119,7 @@ NRSolver2 :: solve(SparseMtrx *k, FloatArray *R, FloatArray *R0,
     // compute total load R = R+R0
     RT = * R;
     if ( R0 ) {
-        RT.add(R0);
+        RT.add(*R0);
     }
 
 restart:
@@ -189,7 +189,7 @@ restart:
 
         rhs = RT;
         //if (R0) rhs.add(*R0);
-        rhs.subtract(F);
+        rhs.subtract(*F);
 
         //
         // compute forceError

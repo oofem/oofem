@@ -143,8 +143,8 @@ J2plasticMaterial :: ComputeStressSpaceHardeningVars(GaussPoint *gp,
                                 strainSpaceHardeningVariables->at(rSize);
     }
 
-    //delete mask;
-    return answer->negated();
+    answer->negated();
+    return answer;
 }
 
 double

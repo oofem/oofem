@@ -476,12 +476,12 @@ NLTransientTransportProblem :: assembleAlgorithmicPartOfRhs(FloatArray &answer, 
 
         help.beProductOf(charMtrxCap, drdt);
         if ( bcMtrx.isNotEmpty() ) {
-            charMtrxCond.plus(bcMtrx);
+            charMtrxCond.add(bcMtrx);
         }
 
         contrib.beProductOf(charMtrxCond, r);
         contrib.add(help);
-        contrib.times(-1.0);
+        contrib.negated();
 
         answer.assemble(contrib, loc);
     }

@@ -255,7 +255,7 @@ PlasticMaterial :: giveRealStressVector(FloatArray &answer,
         // we overwrite residualVectorR and gradientVectorR vectors
         // but they are computet once again when iteratin continues
         gradientVectorR->times(dGamma);
-        residualVectorR->add(gradientVectorR);
+        residualVectorR->add(*gradientVectorR);
         helpVec.beProductOf(consistentModuli, * residualVectorR);
         // note elasticModuli and hardeningModuli are yet inverted
         this->computeDiagModuli(helpMtrx, gp, elasticModuliInverse, hardeningModuliInverse);

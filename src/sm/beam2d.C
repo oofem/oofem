@@ -63,7 +63,6 @@ Beam2d :: Beam2d(int n, Domain *aDomain) : StructuralElement(n, aDomain), Layere
     // Constructor.
 {
     numberOfDofMans     = 2;
-    rotationMatrix      = NULL;
 
     kappa = -1; // set kappa to undef value (should be always > 0.)
     length              = 0.;
@@ -200,7 +199,7 @@ Beam2d :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, Tim
     this->computeLocalStiffnessMatrix(answer, rMode, tStep);
     // rotate answer to global coordinate system
     if ( this->updateRotationMatrix() ) {
-        answer.rotatedWith(* this->rotationMatrix);
+        answer.rotatedWith(this->rotationMatrix);
     }
 
     // return result
@@ -654,7 +653,7 @@ void Beam2d :: printOutputAt(FILE *File, TimeStep *stepN)
     // ask for global element displacement vector
     this->computeVectorOf(EID_MomentumBalance, VM_Total, stepN, rg);
     if ( this->updateRotationMatrix() ) {
-        rl.beProductOf(* this->rotationMatrix, rg);
+        rl.beProductOf(this->rotationMatrix, rg);
         // delete rg;
     } else {
         rl = rg;
@@ -946,7 +945,7 @@ Beam2d :: computeInitialStressMatrix(FloatMatrix &answer, TimeStep *tStep)
     //answer.beLumpedOf (mass);
 
     if ( this->updateRotationMatrix() ) {
-        answer.rotatedWith(* this->rotationMatrix);
+        answer.rotatedWith(this->rotationMatrix);
     }
 
     return;

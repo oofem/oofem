@@ -57,7 +57,6 @@ LIBeam3d :: LIBeam3d(int n, Domain *aDomain) : StructuralElement(n, aDomain)
     // Constructor.
 {
     numberOfDofMans     = 2;
-    rotationMatrix      = NULL;
     referenceNode       = 0;
     length              = 0.;
 }
@@ -138,10 +137,8 @@ LIBeam3d :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep)
     answer.at(7, 7) = answer.at(8, 8) = answer.at(9, 9) = halfMass;
 
     if ( this->updateRotationMatrix() ) {
-        answer.rotatedWith(* this->rotationMatrix);
+        answer.rotatedWith(this->rotationMatrix);
     }
-
-    return;
 }
 
 

@@ -456,13 +456,13 @@ Node :: computeDofTransformation(FloatMatrix &answer, const IntArray *dofIDArry,
 
         if ( mode == _toGlobalCS ) {
             if ( hasSlaveDofs ) {
-                answer.beTProductOf( GNTransf, * answer.GiveCopy() );
+                answer.beTProductOf( GNTransf, answer );
             } else {
                 answer.beTranspositionOf(GNTransf);
             }
         } else
         if ( hasSlaveDofs ) {
-            answer.beProductOf(* answer.GiveCopy(), GNTransf);
+            answer.beProductOf(answer, GNTransf);
         } else {
             answer = GNTransf;
         }

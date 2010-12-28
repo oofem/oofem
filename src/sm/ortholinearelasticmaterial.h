@@ -140,8 +140,8 @@ protected:
      * FloatMatrix* Give1dStressStiffMtrx (MatResponseForm,MatResponseMode,GaussPoint* gp,
      *           FloatArray* strainIncrement, TimeStep* atTime);
      */
-    FloatMatrix *GiveTensorRotationMatrix(GaussPoint *);
-    FloatMatrix *GiveRotationMatrix(GaussPoint *);
+    void giveTensorRotationMatrix(FloatMatrix &answer, GaussPoint *gp);
+    void giveRotationMatrix(FloatMatrix &answer, GaussPoint *gp);
     /* Diferent response for every element */
 
     friend class CrossSection;
