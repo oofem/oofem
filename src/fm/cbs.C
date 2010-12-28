@@ -403,7 +403,7 @@ CBS :: solveYourselfAt(TimeStep *tStep)
     pressureVector->resize(presneq);
     nMethod->solve(lhs, & rhs, pressureVector);
     pressureVector->times(this->theta [ 1 ]);
-    pressureVector->add( PressureField.giveSolutionVector( tStep->givePreviousStep() ) );
+    pressureVector->add(*PressureField.giveSolutionVector( tStep->givePreviousStep() ) );
 
     /* STEP 3 - velocity correction step */
     rhs.resize(momneq);
@@ -416,7 +416,7 @@ CBS :: solveYourselfAt(TimeStep *tStep)
         //this->assembleVectorFromElements(rhs, tStep, EID_MomentumBalance, PrescribedRhsVector, VM_Incremental, this->giveDomain(1));
         nMethod->solve(mss, & rhs, velocityVector);
         velocityVector->add(deltaAuxVelocity);
-        velocityVector->add(prevVelocityVector);
+        velocityVector->add(*prevVelocityVector);
     } else {
         for ( i = 1; i <= momneq; i++ ) {
             velocityVector->at(i) = prevVelocityVector->at(i) + deltaAuxVelocity.at(i) + deltaT *rhs.at(i) / mm.at(i);

@@ -77,7 +77,7 @@ protected:
     //double t_supg, t_pspg, t_lsic;
 
     /// Cached transformation matrix of receiver
-    FloatMatrix *rotationMatrix;
+    FloatMatrix rotationMatrix;
     /// Flag indicating if tranformation matrix has been already computed
     int rotationMatrixDefined;
 

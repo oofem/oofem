@@ -56,10 +56,10 @@ void FE2SinteringMaterial::givePlaneStressStiffMtrx(FloatMatrix &answer, MatResp
 
         // Since nonlinear static calls giveRealStressVector after this function, i have to repeat it.
         // This will change eventually. giveRealStressVector should always be called first for all materials.
-        ms->setTimeStep(tStep);
-        FloatArray temp, strainRate = ms->giveTempStrainVector();
-        strainRate.times(1 / tStep->giveTimeIncrement());
-        rve->computeMacroStress(temp, strainRate, tStep);
+        //ms->setTimeStep(tStep);
+        //FloatArray temp, strainRate = ms->giveTempStrainVector();
+        //strainRate.times(1 / tStep->giveTimeIncrement());
+        //rve->computeMacroStress(temp, strainRate, tStep);
 
         // This is all I should need to do.
         rve->computeMacroTangent(answer, tStep);

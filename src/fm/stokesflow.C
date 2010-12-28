@@ -112,6 +112,7 @@ void StokesFlow :: solveYourselfAt(TimeStep *tStep)
     this->incrementOfSolution.resize(neq);
     this->internalForces.resize(neq);
 
+#if 0
     this->giveNumericalMethod(tStep);
     double loadLevel, ebenorm;
     int currentIterations;
@@ -130,15 +131,16 @@ void StokesFlow :: solveYourselfAt(TimeStep *tStep)
                                             SparseNonLinearSystemNM :: rlm_total, // Why this naming scheme? Should be RLM_Total, and ReferenceLoadInputModeType
                                             currentIterations,
                                             tStep);
-    /*
-     *  SparseLinearSystemNM *linMethod = CreateUsrDefSparseLinSolver(ST_Petsc, 1, this->giveDomain(1), this);
-     *  this->updateComponent(tStep, InternalRhs, this->giveDomain(1));
-     *  this->updateComponent(tStep, NonLinearLhs, this->giveDomain(1));
-     *  this->internalForces.times(-1);
-     *  this->internalForces.add(externalForces);
-     *  NM_Status status = linMethod->solve(this->stiffnessMatrix, &(this->internalForces), solutionVector);
-     *  delete(linMethod);
-     */
+#else
+    SparseLinearSystemNM *linMethod = CreateUsrDefSparseLinSolver(ST_Petsc, 1, this->giveDomain(1), this);
+    this->updateComponent(tStep, InternalRhs, this->giveDomain(1));
+    this->updateComponent(tStep, NonLinearLhs, this->giveDomain(1));
+    this->internalForces.times(-1);
+    this->internalForces.add(externalForces);
+    NM_Status status = linMethod->solve(this->stiffnessMatrix, &(this->internalForces), solutionVector);
+    delete(linMethod);
+#endif
+
     if ( status == NM_NoSuccess ) {
         OOFEM_ERROR2( "No success in solving problem at time step", tStep->giveNumber() );
     }
@@ -268,21 +270,11 @@ void StokesFlow :: printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *atTime)
 
 void StokesFlow :: updateInternalState(TimeStep *tStep)
 {
-    int j, nnodes;
     Domain *domain;
-
     for ( int idomain = 1; idomain <= this->giveNumberOfDomains(); idomain++ ) {
         domain = this->giveDomain(idomain);
-
-        nnodes = domain->giveNumberOfDofManagers();
-        if ( requiresUnknownsDictionaryUpdate() ) {
-            for ( j = 1; j <= nnodes; j++ ) {
-                this->updateDofUnknownsDictionary(domain->giveDofManager(j), tStep);
-            }
-        }
-
         int nelem = domain->giveNumberOfElements();
-        for ( j = 1; j <= nelem; j++ ) {
+        for (int j = 1; j <= nelem; j++ ) {
             domain->giveElement(j)->updateInternalState(tStep);
         }
     }

@@ -65,7 +65,7 @@ SUPGElement2 :: SUPGElement2(int n, Domain *aDomain) :
     SUPGElement(n, aDomain)
     // Constructor. Creates an element with number n, belonging to aDomain.
 {
-    rotationMatrix     = NULL;
+    rotationMatrix.beEmptyMtrx();
     rotationMatrixDefined = 0;
 }
 
@@ -73,9 +73,6 @@ SUPGElement2 :: SUPGElement2(int n, Domain *aDomain) :
 SUPGElement2 :: ~SUPGElement2()
 // Destructor.
 {
-    if ( rotationMatrix ) {
-        delete rotationMatrix;
-    }
 }
 
 IRResultType
@@ -348,11 +345,10 @@ SUPGElement2 :: computeAccelerationTerm_MB(FloatMatrix &answer, TimeStep *atTime
     }
 
     if ( this->updateRotationMatrix() ) {
-        //answer.rotatedWith(* this->rotationMatrix);
-
-        FloatMatrix *Trans = this->rotationMatrix->GiveTransposition();
-        answer.rotatedWith(* Trans);
-        delete Trans;
+        //answer.rotatedWith(this->rotationMatrix);
+        FloatMatrix trans;
+        trans.beTranspositionOf(this->rotationMatrix);
+        answer.rotatedWith(trans);
     }
 }
 
@@ -409,7 +405,7 @@ SUPGElement2 :: computeAdvectionTerm_MB(FloatArray &answer, TimeStep *atTime)
     }
 
     if ( this->updateRotationMatrix() ) {
-        answer.rotatedWith(* this->rotationMatrix, 'n');
+        answer.rotatedWith(this->rotationMatrix, 'n');
     }
 }
 
@@ -451,11 +447,10 @@ SUPGElement2 :: computeAdvectionDerivativeTerm_MB(FloatMatrix &answer, TimeStep 
     }
 
     if ( this->updateRotationMatrix() ) {
-        //answer.rotatedWith(* this->rotationMatrix);
-
-        FloatMatrix *Trans = this->rotationMatrix->GiveTransposition();
-        answer.rotatedWith(* Trans);
-        delete Trans;
+        //answer.rotatedWith(this->rotationMatrix);
+        FloatMatrix trans;
+        trans.beTranspositionOf(this->rotationMatrix);
+        answer.rotatedWith(trans);
     }
 }
 
@@ -508,7 +503,7 @@ SUPGElement2 :: computeDiffusionTerm_MB(FloatArray &answer, TimeStep *atTime)
     }
 
     if ( this->updateRotationMatrix() ) {
-        answer.rotatedWith(* this->rotationMatrix, 'n');
+        answer.rotatedWith(this->rotationMatrix, 'n');
     }
 }
 
@@ -547,11 +542,10 @@ SUPGElement2 :: computeDiffusionDerivativeTerm_MB(FloatMatrix &answer, MatRespon
 
 
     if ( this->updateRotationMatrix() ) {
-        //answer.rotatedWith(* this->rotationMatrix);
-
-        FloatMatrix *Trans = this->rotationMatrix->GiveTransposition();
-        answer.rotatedWith(* Trans);
-        delete Trans;
+        //answer.rotatedWith(this->rotationMatrix);
+        FloatMatrix trans;
+        trans.beTranspositionOf(this->rotationMatrix);
+        answer.rotatedWith(trans);
     }
 }
 
@@ -594,7 +588,7 @@ SUPGElement2 :: computePressureTerm_MB(FloatMatrix &answer, TimeStep *atTime)
 
     if ( this->updateRotationMatrix() ) {
         FloatMatrix tmp = answer;
-        answer.beProductOf(* rotationMatrix, tmp);
+        answer.beProductOf(rotationMatrix, tmp);
     }
 }
 void
@@ -622,11 +616,10 @@ SUPGElement2 :: computeLSICStabilizationTerm_MB(FloatMatrix &answer, TimeStep *a
     answer.symmetrized();
 
     if ( this->updateRotationMatrix() ) {
-        //answer.rotatedWith(* this->rotationMatrix);
-
-        FloatMatrix *Trans = this->rotationMatrix->GiveTransposition();
-        answer.rotatedWith(* Trans);
-        delete Trans;
+        //answer.rotatedWith(this->rotationMatrix);
+        FloatMatrix trans;
+        trans.beTranspositionOf(this->rotationMatrix);
+        answer.rotatedWith(trans);
     }
 }
 
@@ -657,9 +650,9 @@ SUPGElement2 :: computeLinearAdvectionTerm_MC(FloatMatrix &answer, TimeStep *atT
 
     if ( this->updateRotationMatrix() ) {
         FloatMatrix tmp = answer;
-        FloatMatrix *Trans = this->rotationMatrix->GiveTransposition();
-        answer.beProductOf(tmp, * Trans);
-        delete Trans;
+        FloatMatrix trans;
+        trans.beTranspositionOf(this->rotationMatrix);
+        answer.beProductOf(tmp, trans);
     }
 }
 
@@ -731,9 +724,9 @@ SUPGElement2 :: computeAdvectionDerivativeTerm_MC(FloatMatrix &answer, TimeStep 
 
     if ( this->updateRotationMatrix() ) {
         FloatMatrix tmp = answer;
-        FloatMatrix *Trans = this->rotationMatrix->GiveTransposition();
-        answer.beProductOf(tmp, * Trans);
-        delete Trans;
+        FloatMatrix trans;
+        trans.beTranspositionOf(this->rotationMatrix);
+        answer.beProductOf(tmp, trans);
     }
 }
 
@@ -844,9 +837,9 @@ SUPGElement2 :: computeAccelerationTerm_MC(FloatMatrix &answer, TimeStep *atTime
 
     if ( this->updateRotationMatrix() ) {
         FloatMatrix tmp = answer;
-        FloatMatrix *Trans = this->rotationMatrix->GiveTransposition();
-        answer.beProductOf(tmp, * Trans);
-        delete Trans;
+        FloatMatrix trans;
+        trans.beTranspositionOf(this->rotationMatrix);
+        answer.beProductOf(tmp, trans);
     }
 }
 
@@ -1074,7 +1067,7 @@ SUPGElement2 :: updateRotationMatrix()
     FloatMatrix T_GtoL, T_NtoG;
 
     if ( rotationMatrixDefined ) {
-        return ( rotationMatrix != NULL );
+        return rotationMatrix.isNotEmpty();
     }
 
     rotationMatrixDefined = 1;
@@ -1099,18 +1092,16 @@ SUPGElement2 :: updateRotationMatrix()
 #endif
 
     if ( isT_GtoL && T_NtoG.isNotEmpty() ) {
-        rotationMatrix = T_GtoL.Times(& T_NtoG);
+        rotationMatrix.beProductOf(T_GtoL, T_NtoG);
     } else if ( isT_GtoL ) {
-        rotationMatrix = T_GtoL.GiveCopy();
+        rotationMatrix = T_GtoL;
     } else if ( T_NtoG.isNotEmpty() ) {
-        rotationMatrix = T_NtoG.GiveCopy();
+        rotationMatrix = T_NtoG;
     } else {
-        rotationMatrix = NULL;
+        rotationMatrix.beEmptyMtrx();
+        return false;
     }
-
-    //delete T_GtoL;
-    //delete T_GtoNTransp;
-    return ( rotationMatrix != NULL );
+    return true;
 }
 
 

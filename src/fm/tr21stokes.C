@@ -371,12 +371,12 @@ void Tr21Stokes :: computeStiffnessMatrix(FloatMatrix &answer, TimeStep *tStep)
         Ia.beTProductOf(B, C);
         Ia2.beProductOf(Ia, B);
         Ia2.times(dA);
-        BTCB.plus(Ia2);
+        BTCB.add(Ia2);
 
         // Build G in elemental stiffness matrix
         Ib.beDyadicProductOf(dN_V, Nlin);
         Ib.times(-dA);
-        G.plus(Ib);
+        G.add(Ib);
     }
 
     GT.beTranspositionOf(G);
@@ -388,7 +388,7 @@ void Tr21Stokes :: computeStiffnessMatrix(FloatMatrix &answer, TimeStep *tStep)
 
     answer.resize(15, 15);
     answer.zero();
-    answer.assemble(& temp, & this->ordering);
+    answer.assemble(temp, this->ordering);
 }
 
 void Tr21Stokes :: updateYourself(TimeStep *tStep)

@@ -190,8 +190,6 @@ void StokesFlowStressHomogenization :: updateC()
             }
         }
     }
-
-    C->printYourself();
 }
 
 void StokesFlowStressHomogenization :: computeMacroStressFromDirichlet(FloatArray &answer, TimeStep *tStep)

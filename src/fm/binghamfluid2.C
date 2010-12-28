@@ -421,7 +421,7 @@ BinghamFluidMaterial2 :: computeDevStrainMagnitude(MaterialMode mmode, const Flo
         _val = 2.0 * ( epsd.at(1) * epsd.at(1) + epsd.at(2) * epsd.at(2) +
                       epsd.at(3) * epsd.at(3) ) + epsd.at(4) * epsd.at(4);
     } else {
-        _error("computeDevStrainMagnitude: unsuported material mode");
+        _error("computeDevStrainMagnitude: unsupported material mode");
     }
 
     return sqrt(_val);
@@ -439,7 +439,7 @@ BinghamFluidMaterial2 :: computeDevStressMagnitude(MaterialMode mmode, const Flo
                       sigd.at(3) * sigd.at(3) +
                       2.0 * sigd.at(4) * sigd.at(4) );
     } else {
-        _error("computeDevStrainMagnitude: unsuported material mode");
+        _error("computeDevStrainMagnitude: unsupported material mode");
     }
 
     return sqrt(_val);
@@ -466,7 +466,7 @@ BinghamFluidMaterial2 :: computeDeviatoricStrain(FloatArray &answer, const Float
         answer.at(3) = eps.at(3) - ekk;
         answer.at(4) = eps.at(4);
     } else {
-        _error("computeDeviatoricStrain: unsuported material mode");
+        _error("computeDeviatoricStrain: unsupported material mode");
     }
 }
 
@@ -513,7 +513,7 @@ BinghamFluidMaterial2Status :: BinghamFluidMaterial2Status(int n, Domain *d, Gau
     } else if ( mmode == _2dAxiFlow ) {
         _size = 4;
     } else {
-        _error("BinghamFluidMaterial2Status: unsupportted material mode");
+        _error("BinghamFluidMaterial2Status: unsupported material mode");
     }
 
     deviatoricStrainVector.resize(_size);

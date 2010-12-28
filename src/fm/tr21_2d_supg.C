@@ -587,7 +587,7 @@ TR21_2D_SUPG :: LS_PCS_computedN(FloatMatrix &answer)
 
         velocityInterpolation.evaldNdx(dn, * gp->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0);
 
-        answer.plus(dn);
+        answer.add(dn);
     }
 }
 

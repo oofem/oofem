@@ -16,9 +16,9 @@
 namespace oofem {
 enum HomogenizationType {
     HT_None = 0,
-    HT_StressDirichlet = 1, /// Dirichlet boundary condition
-    HT_StressNeumann = 2, /// Neumann boundary condition
-    HT_StressPeriodic = 3, /// Periodic boundary condition
+    HT_StressDirichlet = 1, ///< Dirichlet boundary condition
+    HT_StressNeumann = 2,   ///< Neumann boundary condition
+    HT_StressPeriodic = 3,  ///< Periodic boundary condition
 };
 
 

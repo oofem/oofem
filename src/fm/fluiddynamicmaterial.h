@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/tm/src/transportmaterial.h,v 1.1 2003/04/14 16:01:40 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2010   Borek Patzak
  *
  *
  *
@@ -49,15 +48,15 @@ namespace oofem {
 class GaussPoint;
 
 /**
- * This class implements a transport material status information. It is atribute of
+ * This class implements a transport material status information. It is attribute of
  * gaussPoint. This is only an abstract class, for every instance of material class
  * there should be specialized derived class, which handles are history variables.
  * It only adds attributes common to all "transport problem" material models - the
- * state value vectors (both the temp and equlibrium) containing the state values
+ * state value vectors (both the temporary and equilibrium) containing the state values
  * in associated integration point. The corresponding services
  * for accessing, setting, initializing and updating these attributes are provided.
  *
- * For general description of material status, and its role @see MaterialStatus class.
+ * @see MaterialStatus General description of material status and its role.
  */
 class FluidDynamicMaterialStatus : public MaterialStatus
 {
@@ -73,10 +72,10 @@ public:
     ~FluidDynamicMaterialStatus() { }
 
     /// Print receiver's output to given stream.
-    void   printOutputAt(FILE *, TimeStep *);
+    void printOutputAt(FILE *, TimeStep *);
 
     /**
-     * Initializes the temporary internal variables (stresss and strains vectors),
+     * Initializes the temporary internal variables (stresses and strains vectors),
      * describing the current state according to
      * previously reached equilibrium internal variables.
      */
@@ -89,36 +88,31 @@ public:
 
 
     /**
-     * Stores context of receiver into given stream (the equilibriun stress and strains vectors are stored).
+     * Stores context of receiver into given stream (the equilibrium stress and strains vectors are stored).
      * Generally, only non-temp internal history variables should be stored.
      * @param stream stream where to write data
-     * @param mode determines ammount of info required in stream (state, definition,...)
+     * @param mode determines amount of info required in stream (state, definition,...)
      * @param obj pointer to integration point, which invokes this method
      * @return contextIOResultType.
      * @exception throws an ContextIOERR exception if error encountered.
      */
-    contextIOResultType    saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
     /**
-     * Restores context of receiver from given stream (the equilibriun stress and strains vectors are restored).
+     * Restores context of receiver from given stream (the equilibrium stress and strains vectors are restored).
      * @param stream stream where to read data
-     * @param mode determines ammount of info required in stream (state, definition,...)
+     * @param mode determines amount of info required in stream (state, definition,...)
      * @param obj pointer to integration point, which invokes this method
      * @return contextIOResultType.
      * @exception throws an ContextIOERR exception if error encountered.
      */
-    contextIOResultType    restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-    // saves current context(state) into stream
+    contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 
     /// Returns the const pointer to receiver's stateVector attribute
-    const FloatArray &giveDeviatoricStressVector()         { return deviatoricStressVector; }
-    void         letTempDeviatoricStressVectorBe(const FloatArray &v)
-    { deviatoricStressVector = v; }
+    const FloatArray &giveDeviatoricStressVector() { return deviatoricStressVector; }
+    void letTempDeviatoricStressVectorBe(const FloatArray &v) { deviatoricStressVector = v; }
 
-    /// Returns "TransportMaterialStatus" - class name of the receiver.
     const char *giveClassName() const { return "FluidDynamicMaterialStatus"; }
-    /// Returns TransportMaterialStatusClass - classType id of receiver.
-    classType                giveClassID() const
-    { return FluidDynamicMaterialStatusClass; }
+    classType giveClassID() const { return FluidDynamicMaterialStatusClass; }
 };
 
 
@@ -147,15 +141,15 @@ public:
      */
     FluidDynamicMaterial(int n, Domain *d) : Material(n, d) { }
     /// Destructor.
-    ~FluidDynamicMaterial()                { }
+    ~FluidDynamicMaterial() { }
 
     /**
-     * Computes devatoric stress vector from given strain
+     * Computes deviatoric stress vector from given strain
      */
     virtual void computeDeviatoricStressVector(FloatArray &answer, GaussPoint *gp, const FloatArray &eps, TimeStep *tStep) = 0;
 
     /**
-     * Computes Deviatoric stiffness (derivative of deviatoric stress tensor with respect to strain)
+     * Computes the deviatoric stiffness (derivative of deviatoric stress tensor with respect to strain)
      */
     virtual void giveDeviatoricStiffnessMatrix(FloatMatrix & answer, MatResponseMode, GaussPoint * gp,
                                                TimeStep * atTime) = 0;
@@ -173,13 +167,9 @@ public:
      * @return nonzero if implemented
      */
     virtual int testMaterialExtension(MaterialExtension ext) { return ( ( ext == Material_FluidDynamicsCapability ) ? 1 : 0 ); }
-    /// Returns class name of the receiver.
-    const char *giveClassName() const { return "FluidDynamicMaterial"; }
-    /// Returns classType id of receiver.
-    classType giveClassID()         const { return FluidDynamicMaterialClass; }
 
-#ifdef __OOFEG
-#endif
+    const char *giveClassName() const { return "FluidDynamicMaterial"; }
+    classType giveClassID()         const { return FluidDynamicMaterialClass; }
 };
 } // end namespace oofem
 #endif // fluiddynamicmaterial_h

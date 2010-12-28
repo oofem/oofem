@@ -188,10 +188,10 @@ FastMarchingMethod :: updateTrialValue(FloatArray &dmanValues, int id, double F)
                 b = cc->distance(ac);
                 // compute fi angle
                 cb = * bc;
-                cb.subtract(cc);
+                cb.subtract(*cc);
                 cb.normalize();
                 ca = * ac;
-                ca.subtract(cc);
+                ca.subtract(*cc);
                 ca.normalize();
                 cos_fi = dotProduct( cb, ca, cb.giveSize() );
                 sin_fi = sqrt(1.0 - cos_fi * cos_fi);
