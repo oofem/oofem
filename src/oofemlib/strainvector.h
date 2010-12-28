@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/strainvector.h,v 1.1.4.1 2004/04/05 15:19:44 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2010   Borek Patzak
  *
  *
  *
@@ -53,37 +52,27 @@ public:
     /// Destructor
     ~StrainVector() { }
 
-    /**
-     * Member function that computes principal values of receiver (strain vector).
-     * @param answer computed principal values (sorted)
-     * @param s stress/strain vector which eigenvalues are computed
-     */
     void computePrincipalValues(FloatArray &answer) const;
-    /**
-     * Computes principal values and directions of receiver vector.
-     * @param answer computed principal values (sorted)
-     * @param dir principal directions (stored columwise)
-     * @param s stress/strain vector
-     */
     void computePrincipalValDir(FloatArray &answer, FloatMatrix &dir) const;
     /**
-     * Computes split of receiver into deviatoric and volumetric part
-     * @param answer deviatoric strain
-     * @param vol volumetric strain
+     * Computes split of receiver into deviatoric and volumetric part.
+     * @param answer Deviatoric strain.
+     * @param vol Volumetric strain.
      */
-    void computeDeviatoricVolumetricSplit(StrainVector &dev, double &vol) const;
+    void computeDeviatoricVolumetricSplit(StrainVector &answer, double &vol) const;
     /**
      * Computes sum of deviatoric and volumetric part.
-     * @param answer total strain
-     *        @param vol volumetric strain
+     * @param answer Total strain.
+     * @param vol Volumetric strain.
      */
-    void  computeDeviatoricVolumetricSum(StrainVector &answer, const double vol) const;
+    void computeDeviatoricVolumetricSum(StrainVector &answer, const double vol) const;
     /**
-     *      Prints receiver on stdout, usefull for debugging
+     * Prints receiver on stdout, useful for debugging
      */
     void printYourself() const;
     /**
-     * Computes the change of volume. epsv = eps1 + eps2 + eps3
+     * Computes the change of volume.
+     * @return @f$ \epsilon_v = \epsilon_1 + \epsilon_2 + \epsilon_3 @f$.
      */
     double computeVolumeChange() const;
     /**
@@ -91,23 +80,23 @@ public:
      */
     double computeStrainNorm() const;
     /**
-     *        Applies the elastic stiffness to the strain.
-     * @param stress computed stress
-     * @param Emodulus Emodulus of the material
+     * Applies the elastic stiffness to the strain.
+     * @param stress Computed stress.
+     * @param EModulus Elasticity modulus of the material.
      * @param nu Poisson's ratio of the material
      */
     void applyElasticStiffness(StressVector &stress, const double EModulus, const double nu) const;
     /**
-     *        Applies the elastic stiffness to the deviatoric strain.
-     * @param stress computed stress
-     * @param Emodulus Emodulus of the material
-     * @param nu Poisson's ratio of the material
+     * Applies the elastic stiffness to the deviatoric strain.
+     * @param stress Computed stress.
+     * @param EModulus Elasticity modulus of the material.
+     * @param nu Poisson's ratio of the material.
      */
     void applyDeviatoricElasticStiffness(StressVector &stress, const double EModulus, const double nu) const;
     /**
      * Applies the elastic stiffness to the deviatoric strain.
-     * @param stress computed stress
-     * @param Gmodulus Gmodulus of the material
+     * @param stress Computed stress.
+     * @param GModulus Shear modulus of the material
      */
     void applyDeviatoricElasticStiffness(StressVector &stress, const double GModulus) const;
 

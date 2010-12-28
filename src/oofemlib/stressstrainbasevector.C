@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/stressstrainbasevector.C,v 1.1.4.1 2004/04/05 15:19:44 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2010   Borek Patzak
  *
  *
  *
@@ -174,7 +173,7 @@ StressStrainBaseVector :: restoreYourself(DataStream *stream, ContextMode mode)
 
 
 int
-StressStrainBaseVector :: giveReducedSize(MaterialMode mode) const
+StressStrainBaseVector :: giveReducedSize(MaterialMode mode)
 //
 // returns the size of reduced stress-strain vector
 // acording to mode given by gp.

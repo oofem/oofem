@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/dynalist.h,v 1.9 2003/04/06 14:08:23 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2010   Borek Patzak
  *
  *
  *
@@ -32,11 +31,6 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-
-
-//
-// class dynalist
-//
 
 #ifndef dynalist_h
 #define dynalist_h
@@ -68,7 +62,7 @@ public:
 /**
  * Container managing its elements as a doubly linked list.
  * The elements of a list may have any type T that is assignable, copyable
- * and comes with default constructor with no params.
+ * and comes with default constructor with no parameters.
  * A list does not provide random access. For example to access the fifth element, you must navigate
  * the first forth following the chain of elements. Thus accessing the arbitrary element is very slow.
  * THE INSERTING AND REMOVING ELEMENTS AT EACH POSITION IS FAST. The insertion and deletion takes always
@@ -95,28 +89,41 @@ public:
     /// Destructor
     ~dynaList();
 
-    /// Inserts at iterator position pos a copy of value and returns the position of new element.
+    /**
+     * Inserts at iterator position a copy of value and returns the position of new element.
+     * @param Position where to insert value.
+     * @param value Value to insert.
+     */
     iterator insert(iterator position, const T &value);
-    /// Inserts a copy of value at the begining
+    /**
+     * Inserts a copy of value at the beginning
+     * @param value Value to insert.
+     */
     void pushFront(const T &value);
-    /// Inserts a copy of value at the end
+    /**
+     * Inserts a copy of value at the end.
+     * @param value Value to insert.
+     */
     void pushBack(const T &value);
     /// Removes all elements (makes container empty)
-    void clear();              // erase all elements
-    /// Removes the element at iterator position and returns the position of next element.
+    void clear();
+    /**
+     * Removes the element at iterator position and returns the position of next element.
+     * @param position Position where to erase.
+     * @return Iterator to next position.
+     */
     iterator erase(iterator position);
-    /// Returns the size of receiver.
+    /// @return Size of receiver.
     int size();
 
-    /// Returns whether the container is empty
-    int isEmpty()   { return ( last->next == last ); }
-    /// Returns the iterator for the first element
+    /// @return True is receiver is empty, otherwise false.
+    bool isEmpty() { return ( last->next == last ); }
+    /// @return Iterator for the first element.
     iterator begin() { return ( * last ).next; }
     iterator begin() const { return ( * last ).next; }
-    /// Return iterator for the position after the last element
-    iterator end()   { return last; }
-    iterator end()   const { return last; }
-
+    /// @return Iterator for the position after the last element.
+    iterator end() { return last; }
+    iterator end() const { return last; }
 
 protected:
     friend class dynaListIterator< T >;
@@ -133,14 +140,17 @@ protected:
 public:
     /// Constructor.
     dynaListIterator() { }
-    /// Constructor.
+    /**
+     * Constructor.
+     * @param x Nodes that to iterate over.
+     */
     dynaListIterator(listItem< T > *x) : node(x) { }
     /// Copy constructor.
     dynaListIterator(const dynaListIterator< T > &x) : node(x.node) { }
 
-    /// Assignment operator
+    /// Equality comparison operator.
     bool operator==(const dynaListIterator< T > &x) const { return node == x.node; }
-    /// Operator !=
+    /// Inequality comparison operator.
     bool operator!=(const dynaListIterator< T > &x) const { return node != x.node; }
     /// Value access operator. Returns the element of the actual position.
     T & operator*() const { return ( * node ).data; }
@@ -151,7 +161,7 @@ public:
         return * this;
     }
 
-    /// Lets the iterator step forward to the previous element.
+    /// Lets the iterator step backward to the previous element.
     dynaListIterator< T > &operator--() {
         node = ( * node ).prev;
         return * this;

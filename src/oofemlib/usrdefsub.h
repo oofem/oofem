@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/usrdefsub.h,v 1.14 2003/05/19 13:03:58 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2010   Borek Patzak
  *
  *
  *
@@ -74,212 +73,218 @@
 namespace oofem {
 /**
  * Creates new instance of element corresponding to given element keyword.
- * @param name element keyword string determining the type of new instance
- * @param num  element number
- * @param d    domain assigned to new element
- * @return newly allocated object of requested type, null if keyword not suppported
+ * @param name Keyword string determining the type of new instance.
+ * @param num  Element number.
+ * @param d    Domain assigned to new element.
+ * @return Newly allocated object of requested type, null if keyword not supported.
  */
-Element *CreateUsrDefElementOfType(char *, int, Domain *);
+Element *CreateUsrDefElementOfType(const char *name, int num, Domain *d);
 /**
  * Creates new instance of user defined dof manager corresponding to given keyword.
- * @param name keyword string determining the type of new instance
- * @param num  component number
- * @param d    domain assigned to new object
- * @return newly allocated object of requested type, null if keyword not suppported
+ * @param name Keyword string determining the type of new instance
+ * @param num  Component number.
+ * @param d    Domain assigned to new object.
+ * @return Newly allocated object of requested type, null if keyword not supported.
  */
-DofManager *CreateUsrDefDofManagerOfType(char *, int, Domain *);
+DofManager *CreateUsrDefDofManagerOfType(const char *name, int num, Domain *d);
 /**
  * Creates new instance of user defined cross section model corresponding to given keyword.
- * @param name keyword string determining the type of new instance
- * @param num  component number
- * @param d    domain assigned to new object
- * @return newly allocated object of requested type, null if keyword not suppported
+ * @param name Keyword string determining the type of new instance
+ * @param num  Component number
+ * @param d    Domain assigned to new object
+ * @return Newly allocated object of requested type, null if keyword not supported.
  */
-CrossSection *CreateUsrDefCrossSectionOfType(char *, int, Domain *);
+CrossSection *CreateUsrDefCrossSectionOfType(const char *name, int num, Domain *d);
 /**
- * Creates new instance of user defined engng model corresponding to given keyword.
- * @param name keyword string determining the type of new instance
- * @param number  component number
- * @return newly allocated object of requested type, null if keyword not suppported
+ * Creates new instance of user defined engineering model corresponding to given keyword.
+ * @param name Keyword string determining the type of new instance.
+ * @param num  Component number.
+ * @param master Master engineering model.
+ * @return Newly allocated object of requested type, null if keyword not supported.
  */
-EngngModel *CreateUsrDefEngngModelOfType(char *, int, EngngModel *_master = NULL);
+EngngModel *CreateUsrDefEngngModelOfType(const char *name, int num, EngngModel *master = NULL);
 /**
  * Creates new instance of user defined load  corresponding to given keyword.
- * @param name keyword string determining the type of new instance
- * @param num  component number
- * @param d    domain assigned to new object
- * @return newly allocated object of requested type, null if keyword not suppported
+ * @param name Keyword string determining the type of new instance.
+ * @param num  Component number.
+ * @param d    Domain assigned to new object.
+ * @return Newly allocated object of requested type, null if keyword not supported.
  */
-GeneralBoundaryCondition *CreateUsrDefBoundaryConditionOfType(char *, int, Domain *);
+GeneralBoundaryCondition *CreateUsrDefBoundaryConditionOfType(const char *name, int num, Domain *d);
 /**
  * Creates new instance of user defined load time function corresponding to given keyword.
- * @param name keyword string determining the type of new instance
- * @param num  component number
- * @param d    domain assigned to new object
- * @return newly allocated object of requested type, null if keyword not suppported
+ * @param name Keyword string determining the type of new instance.
+ * @param num  Component number.
+ * @param d    Domain assigned to new object.
+ * @return Newly allocated object of requested type, null if keyword not supported.
  */
-LoadTimeFunction *CreateUsrDefLoadTimeFunctionOfType(char *, int, Domain *);
+LoadTimeFunction *CreateUsrDefLoadTimeFunctionOfType(const char *name, int num, Domain *d);
 /**
  * Creates new instance of user defined material model corresponding to given keyword.
- * @param name keyword string determining the type of new instance
- * @param num  component number
- * @param d    domain assigned to new object
- * @return newly allocated object of requested type, null if keyword not suppported
+ * @param name Keyword string determining the type of new instance.
+ * @param num  Component number.
+ * @param d    Domain assigned to new object.
+ * @return Newly allocated object of requested type, null if keyword not supported.
  */
-Material *CreateUsrDefMaterialOfType(char *, int, Domain *);
+Material *CreateUsrDefMaterialOfType(const char *name, int num, Domain *d);
 
 /**
- * Creates new Empty Instance of Sparse matrix of given type (the constructor with no parameters is called).
- * @param type determines sparseMtrx type
- * @return newly allocated object of requested type, null if keyword not suppported
+ * Creates new empty instance of sparse matrix of given type (the constructor with no parameters is called).
+ * @param type Determines sparseMtrx type.
+ * @return Newly allocated object of requested type, null if keyword not supported.
  */
 SparseMtrx *CreateUsrDefSparseMtrx(SparseMtrxType type);
 /**
  * Creates new Instance of Linear Sparse Solver of given type (the constructor with no parameters is called).
- * @param st solver type
- * @param i cpomponent number
- * @param d domain
- * @param m emodel
- * @return newly allocated object of requested type, null if keyword not suppported
+ * @param st Solver type.
+ * @param i Component number.
+ * @param d Domain.
+ * @param m Engineering model.
+ * @return Newly allocated object of requested type, null if keyword not supported.
  */
 SparseLinearSystemNM *CreateUsrDefSparseLinSolver(LinSystSolverType st, int i, Domain *d, EngngModel *m);
 /**
- * Creates new Instance of Generalized Eigen Value Solver of given type (the constructor with no parameters is called).
- * @param st solver type
- * @param i cpomponent number
- * @param d domain
- * @param m emodel
- * @return newly allocated object of requested type, null if keyword not suppported
+ * Creates new instance of Generalized Eigenvalue Solver of given type (the constructor with no parameters is called).
+ * @param st Solver type.
+ * @param i Component number.
+ * @param d Domain.
+ * @param m Engineerig model.
+ * @return Newly allocated object of requested type, null if keyword not supported.
  */
 SparseGeneralEigenValueSystemNM *CreateUsrDefGeneralizedEigenValueSolver(GenEigvalSolverType st, int i, Domain *d, EngngModel *m);
 
 /**
- * Creates new Instance of Error Estimator of given type.
- * @param type determines Error Estimator type
- * @param number EE number
- * @param d domain associated to ee
- * @return newly allocated object of requested type, null if keyword not suppported
+ * Creates new instance of Error Estimator of given type.
+ * @param type Determines Error Estimator type.
+ * @param number Component number.
+ * @param d Domain associated to ee.
+ * @return Newly allocated object of requested type, null if keyword not supported.
  */
 ErrorEstimator *CreateUsrDefErrorEstimator(ErrorEstimatorType type, int number, Domain *d);
 
 /**
- * Creates new Instance of Export Module of given name.
- * @param name determines Export module type
- * @param emodel engn model associated to new export module
- * @return newly allocated object of requested type, null if keyword not suppported
+ * Creates new instance of Export Module of given name.
+ * @param name Export module keyword.
+ * @param emodel Engineering model associated to new export module.
+ * @return Newly allocated object of requested type, null if keyword not supported.
  */
-ExportModule *CreateUsrDefExportModuleOfType(char *name, EngngModel *emodel);
+ExportModule *CreateUsrDefExportModuleOfType(const char *name, EngngModel *emodel);
 
 /**
  * Creates new Instance of Initialization Module of given name.
- * @param name determines Init module type
- * @param emodel engn model associated to new export module
- * @return newly allocated object of requested type, null if keyword not suppported
+ * @param name Initialization module keyword.
+ * @param emodel Engineering model associated to new export module.
+ * @return Newly allocated object of requested type, null if keyword not supported.
  */
-InitModule *CreateUsrDefInitModuleOfType(char *name, EngngModel *emodel);
+InitModule *CreateUsrDefInitModuleOfType(const char *name, EngngModel *emodel);
 
 /**
  * Creates new Instance of Nonlocal Barrier class corresponding to given name.
- * @param name determines Nonlocal Barrier type
- * @param num  component number
- * @param d    domain assigned to new object
- * @return newly allocated object of requested type, null if keyword not suppported
+ * @param name Nonlocal barrier keyword.
+ * @param num  Component number.
+ * @param d    Domain assigned to new object.
+ * @return Newly allocated object of requested type, null if keyword not supported.
  */
-NonlocalBarrier *CreateUsrDefNonlocalBarrierOfType(char *name, int num, Domain *d);
+NonlocalBarrier *CreateUsrDefNonlocalBarrierOfType(const char *name, int num, Domain *d);
 /**
  * Creates new Instance of Random generator class corresponding to given name.
- * @param name determines random generator type
- * @param num  component number
- * @param d    domain assigned to new object
- * @return newly allocated object of requested type, null if keyword not suppported
+ * @param name Random generator keyword.
+ * @param num  Component number.
+ * @param d    Domain assigned to new object.
+ * @return Newly allocated object of requested type, null if keyword not supported.
  */
-RandomFieldGenerator *CreateUsrDefRandomFieldGenerator(char *name, int num, Domain *d);
+RandomFieldGenerator *CreateUsrDefRandomFieldGenerator(const char *name, int num, Domain *d);
 
 /**
  * Creates new instance of user defined integration rule corresponding to given keyword.
- * @param type id determining the type of new instance
- * @param num  component number
- * @param d    dofmanager to which new dof belongs
- * @return newly allocated object of requested type, null if keyword not suppported
+ * @param type Id determining the type of new instance.
+ * @param num  Component number.
+ * @param e    Element to which new IR belongs.
+ * @return Newly allocated object of requested type, null if keyword not supported.
  */
-IntegrationRule *CreateUsrDefIRuleOfType(classType type, int, Element *);
+IntegrationRule *CreateUsrDefIRuleOfType(classType type, int num, Element *e);
 
 /**
  * Creates new instance of element corresponding to given element keyword.
- * @param type element id determining the type of new instance
- * @param num  element number
- * @param d    domain assigned to new element
- * @return newly allocated object of requested type, null if keyword not suppported
+ * @param type Element id determining the type of new instance.
+ * @param num  Element number.
+ * @param d    Domain assigned to new element.
+ * @return Newly allocated object of requested type, null if keyword not supported.
  */
-Element *CreateUsrDefElementOfType(classType type, int, Domain *);
+Element *CreateUsrDefElementOfType(classType type, int num, Domain *d);
 /**
  * Creates new instance of user defined dof manager corresponding to given keyword.
- * @param type id determining the type of new instance
- * @param num  component number
- * @param d    domain assigned to new object
- * @return newly allocated object of requested type, null if keyword not suppported
+ * @param type Id determining the type of new instance.
+ * @param num  Component number.
+ * @param d    Domain assigned to new object.
+ * @return Newly allocated object of requested type, null if keyword not supported.
  */
-DofManager *CreateUsrDefDofManagerOfType(classType type, int, Domain *);
+DofManager *CreateUsrDefDofManagerOfType(classType type, int num, Domain *d);
 /**
  * Creates new instance of user defined dof corresponding to given keyword.
- * @param type id determining the type of new instance
- * @param num  component number
- * @param d    dofmanager to which new dof belongs
- * @return newly allocated object of requested type, null if keyword not suppported
+ * @param type Id determining the type of new instance.
+ * @param num  Domponent number.
+ * @param d    Dofmanager to which new dof belongs.
+ * @return Newly allocated object of requested type, null if keyword not supported.
  */
-Dof *CreateUsrDefDofOfType(classType type, int, DofManager *);
+Dof *CreateUsrDefDofOfType(classType type, int num, DofManager *d);
 /**
  * Creates new instance of matrial mapping algorithm, corresponding to given MaterialMappingAlgorithmType.
- * @param type id determining the type of new instance
- * @return newly allocated object of requested type, null if keyword not suppported
+ * @param type Id determining the type of new instance.
+ * @return Newly allocated object of requested type, null if keyword not supported.
  */
 MaterialMappingAlgorithm *CreateUsrDefMaterialMappingAlgorithm(MaterialMappingAlgorithmType type);
 /**
  * Creates new instance of mesher interface, corresponding to given MeshPackageType.
- * @param type id determining the type of new instance
- * @return newly allocated object of requested type, null if keyword not suppported
+ * @param type id determining the type of new instance.
+ * @param d Domain assigned to new object.
+ * @return Newly allocated object of requested type, null if keyword not supported.
  */
 MesherInterface *CreateUsrDefMesherInterface(MeshPackageType type, Domain *d);
 /**
  * Creates new instance of enrichment item.
- * @param type id determining the type of new instance
- * @return newly allocated object of requested type, null if keyword not suppported
+ * @param type Id determining the type of enrichment item.
+ * @param xm XFEM manager which item belongs to.
+ * @param d Domain assigned to new object.
+ * @return Newly allocated object of requested type, null if keyword not supported.
  */
-EnrichmentItem *CreateUsrDefEnrichmentItem(char *aClass, int num, XfemManager *xm, Domain *d);
+EnrichmentItem *CreateUsrDefEnrichmentItem(const char *name, int num, XfemManager *xm, Domain *d);
 /**
  * Creates new instance of enrichment function.
- * @param type id determining the type of new instance
- * @return newly allocated object of requested type, null if keyword not suppported
+ * @param name Enrichment function keyword.
+ * @param num Component number.
+ * @param d Domain assigned to new object.
+ * @return Newly allocated object of requested type, null if keyword not supported.
  */
-EnrichmentFunction *CreateUsrDefEnrichmentFunction(char *aClass, int num, Domain *d);
+EnrichmentFunction *CreateUsrDefEnrichmentFunction(const char *name, int num, Domain *d);
 /**
  * Creates new instance of geometry.
- * @param type id determining the type of new instance
- * @return newly allocated object of requested type, null if keyword not suppported
+ * @param name Geometry keyword.
+ * @return Newly allocated object of requested type, null if keyword not supported.
  */
-BasicGeometry *CreateUsrDefGeometry(char *aClass);
+BasicGeometry *CreateUsrDefGeometry(const char *name);
 /**
  * Creates new instance of patch.
- * @param type id determining the type of new instance
- * @param e parent element
- * @return newly allocated object of requested type, null if keyword not suppported
+ * @param ptype Id determining the type of new instance.
+ * @param e Parent element.
+ * @return Newly allocated object of requested type, null if keyword not supported.
  */
 Patch *CreateUsrDefPatch(Patch :: PatchType ptype, Element *e);
 #ifdef __PARALLEL_MODE
 /**
  * Creates new instance of load balance monitor corresponding to given keyword.
- * @param type id determining the type of new instance
- * @param e    engng model to which new monitor belongs
- * @return newly allocated object of requested type, null if keyword not suppported
+ * @param type Id determining the type of new instance.
+ * @param e    Engineering model to which new monitor belongs.
+ * @return Newly allocated object of requested type, null if keyword not supported.
  */
-LoadBalancerMonitor *CreateUsrDefLoadBalancerMonitorOfType(classType type, EngngModel *);
+LoadBalancerMonitor *CreateUsrDefLoadBalancerMonitorOfType(classType type, EngngModel *e);
 /**
  * Creates new instance of load balancer corresponding to given keyword.
- * @param type id determining the type of new instance
- * @param d    domain to which new balancer is attached
- * @return newly allocated object of requested type, null if keyword not suppported
+ * @param type Id determining the type of new instance.
+ * @param d    Domain to which new balancer is attached.
+ * @return Newly allocated object of requested type, null if keyword not supported.
  */
-LoadBalancer *CreateUsrDefLoadBalancerOfType(classType type, Domain *);
+LoadBalancer *CreateUsrDefLoadBalancerOfType(classType type, Domain *d);
 #endif
 } // end namespace oofem
 #endif // usrdefsub_h

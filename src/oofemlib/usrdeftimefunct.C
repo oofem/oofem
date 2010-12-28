@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/sm/src/usrdeftimefunct.C,v 1.3 2003/04/06 14:08:32 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2010   Borek Patzak
  *
  *
  *
@@ -106,8 +105,8 @@ double UserDefinedLoadTimeFunction :: __accelAt(double time)
 IRResultType
 UserDefinedLoadTimeFunction :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
+    const char *__proc = "initializeFrom";
+    IRResultType result;
 
     LoadTimeFunction :: initializeFrom(ir);
 

@@ -78,24 +78,20 @@ public:
     /// Destructor
     ~SparseLinearSystemNM();
 
-    // identification
-    /// Returns class name of the receiver.
     const char *giveClassName() const { return "SparseLinearSystemNM"; }
-    /** Returns classType id of receiver.
-     * @see FEMComponent::giveClassID
-     */
     classType giveClassID() const { return SparseLinearSystemNMClass; }
+
     /**
-     * Returns LinSystSolverType value, corresponding to receiver
+     * @return LinSystSolverType value, corresponding to receiver.
      */
     virtual LinSystSolverType giveLinSystSolverType() const = 0;
 
     /**
-     * Solves the given sparse linear system of equations Ax=b.
-     * @param A coefficient matrix
-     * @param b right hand side
-     * @param x solution array
-     * @return NM_Status value
+     * Solves the given sparse linear system of equations @f$ A\cdot x=b @f$.
+     * @param A Coefficient matrix
+     * @param b Right hand side
+     * @param x Solution array.
+     * @return Status of the solver.
      */
     virtual NM_Status solve(SparseMtrx *A, FloatArray *b, FloatArray *x) = 0;
 

@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/sm/src/usrdeftimefunct.h,v 1.5 2003/04/06 14:08:32 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2010   Borek Patzak
  *
  *
  *
@@ -49,21 +48,24 @@ namespace oofem {
 #define UserDefinedLoadTimeFunction_MAX_EXPR_LENGTH 200
 
 /**
- * Class representing usr defined load time function. User input is function expression.
- * Uses Parser class to parse given expresion. Slow but usefull.
+ * Class representing user defined load time function. User input is function expression.
+ * Uses Parser class to parse given expression. Slow but useful.
  * Load time function typically belongs to domain and is
- * attribute of one or more loads. Generally load time function is real function of time (\f$y=f(t)\f$).
+ * attribute of one or more loads. Generally load time function is real function of time (@f$y=f(t)@f$).
  */
 class UserDefinedLoadTimeFunction : public LoadTimeFunction
 {
 private:
+    /// Parser used to evaluate expressions.
     Parser myParser;
+    /// Expression for the function value.
     char ftExpression [ UserDefinedLoadTimeFunction_MAX_EXPR_LENGTH ];
-    char dfdtExpression [ UserDefinedLoadTimeFunction_MAX_EXPR_LENGTH ]; // first time derivative
-    char d2fdt2Expression [ UserDefinedLoadTimeFunction_MAX_EXPR_LENGTH ]; // second time derivative
+    /// Expression for first time derivative.
+    char dfdtExpression [ UserDefinedLoadTimeFunction_MAX_EXPR_LENGTH ];
+    /// Expression for second time derivative.
+    char d2fdt2Expression [ UserDefinedLoadTimeFunction_MAX_EXPR_LENGTH ];
 
 public:
-
     /**
      * Constructor. Creates load time function with given number, belonging to given domain.
      * @param n load time function number
@@ -74,37 +76,19 @@ public:
     /// Destructor
     virtual ~UserDefinedLoadTimeFunction()  { }
 
-    /// Returns classType id of receiver.
-    classType   giveClassID() const { return UserDefinedLoadTimeFunctionClass; }
-    /// Returns class name of the receiver.
-    const char *giveClassName() const { return "UserDefinedLoadTimeFunction"; }
-    /**
-     * Initializes receiver acording to object description stored in input record.
-     * Must be implemented in derived classes
-     */
-    IRResultType initializeFrom(InputRecord *ir);
+    virtual double __at(double);
+    virtual double __derAt(double);
+    virtual double __accelAt(double);
 
     /**
-     * Returns the value of load time function at given time. Abstract service.
-     * Must be implemented by derived classes.
-     * @param t time
-     * @return load time function value
+     * Reads the fields
+     * - f(t) (required)
+     * - dfdt(t) (optional)
+     * - d2fdt2(t) (optional)
      */
-    virtual double     __at(double);
-    /**
-     * Returns the first time derivative of load time function at given time. Abstract service.
-     * Must be implemented by derived classes.
-     * @param t time
-     * @return load time function value
-     */
-    virtual double    __derAt(double);
-    /**
-     * Returns the second time derivative of load time function at given time. Abstract service.
-     * Must be implemented by derived classes.
-     * @param t time
-     * @return load time function value
-     */
-    virtual double    __accelAt(double);
+    IRResultType initializeFrom(InputRecord *ir);
+    classType   giveClassID() const { return UserDefinedLoadTimeFunctionClass; }
+    const char *giveClassName() const { return "UserDefinedLoadTimeFunction"; }
 };
 } // end namespace oofem
 #endif // usrdeftimefunct_h

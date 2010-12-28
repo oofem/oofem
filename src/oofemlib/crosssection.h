@@ -122,6 +122,8 @@ public:
      * Check for symmetry of stiffness matrix.
      * Default implementation returns true.
      * It can be moved to base Cross section class in the future.
+     * @param rMode Response mode of material.
+     * @param mat Material index.
      * @return True if stiffness matrix of receiver is symmetric.
      */
     virtual bool isCharacteristicMtrxSymmetric(MatResponseMode rMode, int mat);
@@ -134,9 +136,9 @@ public:
      * Creates new object for following classes SimpleCrossSection and HeatCrossSection
      * otherwise calls directly CreateUsrDefCrossSectionOfType global function to allocate
      * new instance of cross section of given type.
-     * @param aClass string with cross section model name
-     * @return newly allocated cross section model with required type.
-     * @see CreateUsrDefCrossSectionOfType function.
+     * @param aClass String with cross section model name.
+     * @return newly Allocated cross section model with required type.
+     * @see CreateUsrDefCrossSectionOfType
      */
     CrossSection *ofType(char *aClass);
 
@@ -159,7 +161,7 @@ public:
     { return ip->giveMaterial()->giveIPValue(answer, ip, type, atTime); }
     /**
      * Returns the corresponding integration point value size in Reduced form.
-     * @param type Determines the type of internal variable
+     * @param type Determines the type of internal variable.
      * @param ip Integration point to check.
      * @return Nonzero if o.k, zero otherwise.
      */

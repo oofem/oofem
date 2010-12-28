@@ -44,6 +44,7 @@ class FloatArray;
 class FloatMatrix;
 
 /**
+ * Specialization of a floating point array for representing a stress state.
  */
 class StressVector : public StressStrainBaseVector
 {
@@ -56,101 +57,104 @@ public:
     /// Destructor
     ~StressVector() { }
     /**
-     *      Member function that computes principal values of receiver (stress vector).
-     *      @param answer computed principal values (sorted)
-     *      @param s stress/strain vector which eigenvalues are computed
+     * Member function that computes principal values of receiver (stress vector).
+     * @param answer computed principal values (sorted)
      */
     void computePrincipalValues(FloatArray &answer) const;
     /**
      * Computes principal values and directions of receiver vector.
-     * @param answer computed principal values (sorted)
-     * @param dir principal directions (stored columwise)
-     * @param s stress/strain vector
+     * @param answer Computed principal values (sorted).
+     * @param dir Principal directions (stored column wise).
      */
     void computePrincipalValDir(FloatArray &answer, FloatMatrix &dir) const;
     /**
-     * Computes split of receiver into deviatoric and volumetric part
+     * Computes split of receiver into deviatoric and volumetric part.
+     * @param dev Computed deviatoric part.
+     * @param vol Computed volumetric part.
      */
     void computeDeviatoricVolumetricSplit(StressVector &dev, double &vol) const;
 
     /**
-     * Computes sum of deviatoric and volumetric part.
+     * Sums volumetric part to receiver.
+     * @param answer Computed full stress vector.
+     * @param vol Volumetric part to add.
      */
-    void  computeDeviatoricVolumetricSum(StressVector &answer,
-                                         double &vol) const;
-    /**
-     * Prints receiver on stdout, usefull for debugging
-     */
+    void computeDeviatoricVolumetricSum(StressVector &answer, double vol) const;
+    /// Prints receiver on stdout, useful for debugging.
     void printYourself() const;
     /**
      * Computes the first invariant I1 of the stress.
+     * @return First invariant.
      */
     double computeFirstInvariant() const;
     /**
      * Computes the second invariant J2 of the deviatoric stress.
+     * @return Second invariant.
      */
     double computeSecondInvariant() const;
     /**
-     * Computes the third invariant J3 of the deviatoric stress state s.
+     * Computes the third invariant J3 of the deviatoric stress state.
+     * @return Third invariant.
      */
     double computeThirdInvariant() const;
 
     /**
      * Computes all three Haigh-Westergaard coordinate of the stress.
-     * @param xsi first HW-coordinate
-     *       @param rho second HW-coordinate
-     *       @param theta third HW-coordinate
+     * @param xsi First HW-coordinate.
+     * @param rho Second HW-coordinate.
+     * @param theta third HW-coordinate.
      */
     void computeAllThreeHWCoordinates(double &xsi, double &rho, double &theta) const;
 
     /**
      * Computes the first Haigh-Westergaard coordinate of the  stress.
-     * xsi = I1 / sqrt(3.)
+     * @return @f$ \displaystyle \xi = \frac{I_1}{\sqrt{3}} @f$.
      */
     double computeFirstCoordinate() const;
     /**
      * Computes the second Haigh-Westergaard coordinate of the deviatoric stress.
-     * rho = sqrt(2.*J2)
+     * @return @f$ \rho = \sqrt{2 J_2} @f$.
      */
     double computeSecondCoordinate() const;
     /**
      * Computes the third Haigh-Westergaard coordinate of the deviatoric stress.
-     * theta = 3.*sqrt(3.)/2.*J3/pow(J2,3./2.)
+     * @return @f$ \displaystyle \theta = 3\frac{\sqrt{3}}{2} \frac{J_3}{J_2^{\frac 32}} @f$.
      */
     double computeThirdCoordinate() const;
 
     /**
-     * Applies the elastic compliance to the stress.
-     * @param strain computed strain
-     * @param Emodulus Emodulus of the material
-     * @param nu Poisson's ratio of the material
+     * Applies the isotropic elastic compliance to the stress.
+     * @param strain Computed strain.
+     * @param EModulus Elasticity modulus of the material.
+     * @param nu Poisson's ratio of the material.
      */
     void applyElasticCompliance(StrainVector &strain,
                                 const double EModulus,
                                 const double nu) const;
     /**
-     * Applies the elastic stiffness to the deviatoric stress.
-     * @param strain computed strain
-     * @param Emodulus Emodulus of the material
-     * @param nu Poisson's ratio of the material
+     * Applies the isotropic elastic stiffness to the deviatoric stress.
+     * @param strain Computed strain
+     * @param EModulus Elasticity modulus of the material.
+     * @param nu Poisson's ratio of the material.
      */
     void applyDeviatoricElasticCompliance(StrainVector &strain,
                                           const double EModulus,
                                           const double nu) const;
 
     /**
-     * Applies the elastic stiffness to the deviatoric stress.
-     * @param strain computed strain
-     * @param GModulus Gmodulus of the material
+     * Applies the isotropic elastic stiffness to the deviatoric stress.
+     * @param strain Computed strain.
+     * @param GModulus Shear modulus of the material.
      */
     void applyDeviatoricElasticCompliance(StrainVector &strain,
                                           const double GModulus) const;
     /**
      * Computes the norm of the stress tensor using engineering notation.
+     * @return Norm of the deviatoric part.
      */
     double computeStressNorm() const;
-protected:
 
+protected:
     void giveTranformationMtrx(FloatMatrix &answer, const FloatMatrix &base,
                                int transpose = 0) const;
 };

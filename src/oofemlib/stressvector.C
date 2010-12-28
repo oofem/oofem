@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/stressvector.C,v 1.1.4.1 2004/04/05 15:19:44 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2010   Borek Patzak
  *
  *
  *
@@ -75,7 +74,7 @@ StressVector :: computeDeviatoricVolumetricSplit(StressVector &dev, double &vol)
 }
 
 void
-StressVector :: computeDeviatoricVolumetricSum(StressVector &answer, double &vol) const
+StressVector :: computeDeviatoricVolumetricSum(StressVector &answer, double vol) const
 {
     MaterialMode myMode = this->giveStressStrainMode();
 
@@ -552,7 +551,7 @@ StressVector :: computeStressNorm() const
     MaterialMode myMode = giveStressStrainMode();
     if ( myMode == _1dMat ) {
         // 1d problem
-        return sqrt(values [ 0 ] * values [ 0 ]);
+        return abs(values [ 0 ]);
     } else if ( myMode == _PlaneStress ) {
         // 2d problem: plane stress
         return sqrt(values [ 0 ] * values [ 0 ] + values [ 1 ] * values [ 1 ] + 2. * values [ 2 ] * values [ 2 ]);

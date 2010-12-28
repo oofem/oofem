@@ -50,9 +50,7 @@ namespace oofem {
 class DataReader
 {
 public:
-
-    DataReader() { }
-    virtual ~DataReader() { }
+    /// Determines the type of input record.
     enum InputRecordType {
         IR_outFileRec, IR_jobRec, IR_domainRec, IR_outManRec, IR_domainCompRec,
         IR_emodelRec, IR_mstepRec, IR_expModuleRec, IR_dofmanRec, IR_elemRec,
@@ -60,11 +58,14 @@ public:
         IR_nRandomFieldGenRec, IR_xfemManRec, IR_enrichFuncRec, IR_geoRec, IR_enrichItemRec
     };
 
+    DataReader() { }
+    virtual ~DataReader() { }
+
     /**
      * Returns input record corresponding to given InputRecordType value and its record_id.
      * The returned InputRecord reference is valid only until the next call.
-     * @param irType determines type of record to be returned
-     * @param recordID determines the record  number corresponding to component number
+     * @param irType Determines type of record to be returned.
+     * @param recordId Determines the record  number corresponding to component number.
      */
     virtual InputRecord *giveInputRecord(InputRecordType irType, int recordId) = 0;
 
@@ -73,9 +74,9 @@ public:
      */
     virtual void finish() = 0;
 
-    /// prints the name (shortened) of data source
+    /// Prints the name (shortened) of data source.
     virtual const char *giveDataSourceName() const = 0;
-    /// Prints the error message
+    /// Prints the error message.
     void report_error(const char *_class, const char *proc, const char *kwd, IRResultType result, const char *file, int line);
 };
 } // end namespace oofem

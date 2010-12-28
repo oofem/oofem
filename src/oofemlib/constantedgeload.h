@@ -49,7 +49,7 @@ class TimeStep;
  * This class implements a boundary load (force, moment,...) that acts
  * directly on a boundary of some finite element (on side, face, ..).
  * A boundary load is usually attribute of one or more elements.
- * DESCRIPTION
+ *
  * The boundary load describes its geometry and values (it is assumed, that user will specify
  * all necessary dofs) on element boundary using isoparametric approximation.
  * Elements can request the order of approximation (for setting up the appropriate

@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2010   Borek Patzak
  *
  *
  *
@@ -32,10 +32,6 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-//
-// FILE: elementextension.h
-//
-
 #ifndef elementextension_h
 #define elementextension_h
 
@@ -45,8 +41,8 @@ namespace oofem {
  */
 enum ElementExtension {
     // id indicating element class extensions for run time testing
-    Element_SurfaceLoadSupport,
-    Element_EdgeLoadSupport
+    Element_SurfaceLoadSupport, ///< Element extension for surface loads.
+    Element_EdgeLoadSupport,    ///< Element extension for edge loads.
 };
 } // end namespace oofem
 #endif // elementextension_h

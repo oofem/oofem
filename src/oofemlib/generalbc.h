@@ -96,11 +96,11 @@ public:
      * Creates new object for following classes BoundaryCondition, DeadWeight, InitialCondition and NodalLoad
      * otherwise calls directly CreateUsrDefLoadOfType global function to allocate
      * new instance of boundary condition of given type.
-     * @param aClass string with boundary condition name
-     * @return newly allocated boundary condition with required type.
-     * @see CreateUsrDefLoadOfType function.
+     * @param aClass String with boundary condition name.
+     * @return Newly allocated boundary condition with required type.
+     * @see CreateUsrDefLoadOfType
      */
-    GeneralBoundaryCondition *ofType(char *);
+    GeneralBoundaryCondition *ofType(char *aClass);
 
     /**
      * Returns receiver load type. It distinguish particular boundary conditions according to
@@ -121,8 +121,8 @@ public:
     virtual bcGeomType giveBCGeoType() const { return UnknownBGT; }
     /**
      * Setups the input record string of receiver
-     * @param str string to be filled by input record
-     * @param keyword print record keyword (default true)
+     * @param str String to be filled by input record
+     * @param keyword If true, then also print record keyword (default true).
      */
     virtual int giveInputRecordString(std :: string &str, bool keyword = true);
     /**

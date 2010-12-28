@@ -33,7 +33,7 @@
  */
 
 /**
- * @file This file customizes the time functions to your platform.
+ * @file clock.h This file customizes the time functions to your platform.
  * Function getTime is used for measuring elapsed or CPU time.
  */
 

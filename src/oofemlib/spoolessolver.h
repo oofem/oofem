@@ -71,25 +71,21 @@ private:
     SubMtxManager *mtxmanager;
     Graph *graph;
 #endif
-public:
 
+public:
     /**
-     * Constructor - creates new instance of LDLTFactorization, with number i, belonging to domain d and Engngmodel m.
+     * Constructor.
+     * @param i Solver index.
+     * @param d Domain which solver belongs to.
+     * @param m Engineering model which solver belongs to.
      */
     SpoolesSolver(int i, Domain *d, EngngModel *m);
 
     ///Destructor
-    ~SpoolesSolver(); // destructor
+    ~SpoolesSolver();
 
     /**
      * Solves the given linear system by LDL^T factorization.
-     * Implementation rely on factorization support provided by mapped sparse matrix.
-     * It calls Lhs->factorized()->backSubstitutionWith(*solutionArray). Sets solved flag to 1 if o.k.
-     * @param A coefficient matrix
-     * @param b right hand side
-     * @param x solution array
-     * @return NM_Status value
-     * @param tNow time step
      */
     NM_Status solve(SparseMtrx *A, FloatArray *b, FloatArray *x);
 

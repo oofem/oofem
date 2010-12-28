@@ -1357,7 +1357,7 @@ contextIOResultType FloatMatrix :: restoreYourself(DataStream *stream, ContextMo
 }
 
 
-int FloatMatrix :: jaco_(FloatArray &eval, FloatMatrix &v, int nf)
+bool FloatMatrix :: jaco_(FloatArray &eval, FloatMatrix &v, int nf)
 {
     /*
      * Solves the eigenvalues and eigenvectors of real

@@ -314,8 +314,8 @@ public:
      */
     void solveForRhs(const FloatMatrix &B, FloatMatrix &answer);
     /**
-     * Adds to the receiver the product @f$ a^{\mathrm{T}}\cdot b dV @̣̣f$. If the receiver has zero size, it is expanded.
-     * Assumes that receiver and product @f$ a^{\mathrm{T}}\cdot b dV @f$ are symmetric matrices. Computes only the
+     * Adds to the receiver the product @f$ a^{\mathrm{T}}\cdot b \mathrm{d}V @f$. If the receiver has zero size, it is expanded.
+     * Assumes that receiver and product @f$ a^{\mathrm{T}}\cdot b \mathrm{d}V @f$ are symmetric matrices. Computes only the
      * upper half of receiver.
      * @param a Matrix a in equation.
      * @param b Matrix b in equation.
@@ -323,7 +323,7 @@ public:
      */
     void plusProductSymmUpper(const FloatMatrix &a, const FloatMatrix &b, double dV);
     /**
-     * Adds to the receiver the product @f$a^{\mathrm{T}} \cdot b dV@f$. If the receiver has zero size, it is expanded.
+     * Adds to the receiver the product @f$a^{\mathrm{T}} \cdot b \mathrm{d}V@f$. If the receiver has zero size, it is expanded.
      * @param a Matrix a in equation.
      * @param b Matrix b in equation.
      * @param dV Scaling factor.
@@ -372,10 +372,12 @@ public:
      * Checks size of receiver towards requested bounds.
      * If dimension mismatch, size is adjusted accordingly.
      * Warning: after this operation array values are in undefined state, programmer should
-     * zero receiver
+     * zero receiver is necessary.
+     * @param rows New number of rows.
+     * @param cols New number of columns.
      * @param allocChunk if reallocation needed, an additional space for allocChunk values
      */
-    void resize(int, int, int allocChunk = 0);
+    void resize(int rows, int cols, int allocChunk = 0);
     /**
      * Checks size of receiver towards requested bounds.
      * If dimension mismatch, size is adjusted accordingly.
@@ -391,12 +393,12 @@ public:
     /**
      * Computes eigenvalues and eigenvectors of receiver (must be symmetric)
      * The receiver is preserved.
-     * @param eval eigenvalues
-     * @param v eigen vectors (stored columwise)
-     * @param nf number of significant figures
-     * @return 0 if o.k.
+     * @param eval Requested eigenvalues.
+     * @param v Requested eigenvectors (stored colum wise).
+     * @param nf Number of significant figures.
+     * @return True if ok,otherwise false.
      */
-    int jaco_(FloatArray &eval, FloatMatrix &v, int nf);
+    bool jaco_(FloatArray &eval, FloatMatrix &v, int nf);
 
     /// Prints matrix to stdout. Useful for debugging.
     void printYourself() const;
