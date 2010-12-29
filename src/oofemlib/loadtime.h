@@ -82,7 +82,7 @@ public:
     /**
      * Returns the value of load time function at given time. Abstract service.
      * Must be implemented by derived classes.
-     * @param t time
+     * @param t time. Incremental and total mode uses intrinsic time from giveIntrinsicTime().
      * @return load time function value
      */
     double evaluate(TimeStep *atTime, ValueModeType mode);

@@ -145,7 +145,7 @@ TimeStep *NlDEIDynamic :: giveNextStep()
 
     delete previousStep;
     if ( currentStep != NULL ) {
-        totalTime = currentStep->giveTime() + deltaT;
+        totalTime = currentStep->giveTargetTime() + deltaT;
         istep     = currentStep->giveNumber() + 1;
         counter = currentStep->giveSolutionStateCounter() + 1;
     }
@@ -438,9 +438,9 @@ void NlDEIDynamic :: solveYourselfAt(TimeStep *tStep) {
 
         pt = pt / pMp;
         if ( dumpingCoef < 1.e-3 ) {
-            pt += c * ( Tau - tStep->giveTime() ) / Tau;
+            pt += c * ( Tau - tStep->giveTargetTime() ) / Tau;
         } else {
-            pt += c * ( 1.0 - exp( dumpingCoef * ( tStep->giveTime() - Tau ) ) ) / dumpingCoef / Tau;
+            pt += c * ( 1.0 - exp( dumpingCoef * ( tStep->giveTargetTime() - Tau ) ) ) / dumpingCoef / Tau;
         }
 
         loadVector.resize( this->giveNumberOfEquations(EID_MomentumBalance) );
@@ -475,7 +475,7 @@ void NlDEIDynamic :: solveYourselfAt(TimeStep *tStep) {
     // call numerical model to solve arised problem - done localy here
     //
 #ifdef VERBOSE
-    OOFEM_LOG_RELEVANT( "Solving [step number %8d, time %15e]\n", tStep->giveNumber(), tStep->giveTime() );
+    OOFEM_LOG_RELEVANT( "Solving [step number %8d, time %15e]\n", tStep->giveNumber(), tStep->giveTargetTime() );
 #endif
 
     for ( i = 1; i <= neq; i++ ) {

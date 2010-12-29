@@ -20,7 +20,7 @@ void FE2SinteringMaterialStatus::setTimeStep(TimeStep *tStep)
 {
     TimeStep *rveTStep = this->rve->giveCurrentStep(); // Should i create a new one if it is empty?
     rveTStep->setNumber(tStep->giveNumber());
-    rveTStep->setTime(tStep->giveTime());
+    rveTStep->setTime(tStep->giveTargetTime());
     rveTStep->setTimeIncrement(tStep->giveTimeIncrement());
 }
 

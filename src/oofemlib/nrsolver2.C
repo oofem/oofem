@@ -266,7 +266,7 @@ restart:
             }
         }
 
-        OOFEM_LOG_INFO("%-10d %-15d %-15e %-15e\n", ( int ) tNow->giveTime(), nite, forceErr, dispErr);
+        OOFEM_LOG_INFO("%-10d %-15d %-15e %-15e\n", ( int ) tNow->giveTargetTime(), nite, forceErr, dispErr);
     } while ( ( fabs(forceErr) > rtol ) || ( fabs(dispErr) > rtol ) || ( nite < minIterations ) );
 
     //delete F;

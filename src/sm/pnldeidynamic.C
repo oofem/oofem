@@ -204,7 +204,7 @@ TimeStep *PNlDEIDynamic :: giveNextStep()
 
     delete previousStep;
     if ( currentStep != NULL ) {
-        totalTime = currentStep->giveTime() + deltaT;
+        totalTime = currentStep->giveTargetTime() + deltaT;
         istep     = currentStep->giveNumber() + 1;
         counter = currentStep->giveSolutionStateCounter() + 1;
     }
@@ -482,9 +482,9 @@ void PNlDEIDynamic :: solveYourselfAt(TimeStep *tStep) {
 #endif
         pt = pt / pMp;
         if ( dumpingCoef < 1.e-3 ) {
-            pt += c * ( Tau - tStep->giveTime() ) / Tau;
+            pt += c * ( Tau - tStep->giveTargetTime() ) / Tau;
         } else {
-            pt += c * ( 1.0 - exp( dumpingCoef * ( tStep->giveTime() - Tau ) ) ) / dumpingCoef / Tau;
+            pt += c * ( 1.0 - exp( dumpingCoef * ( tStep->giveTargetTime() - Tau ) ) ) / dumpingCoef / Tau;
         }
 
         loadVector.resize( this->giveNumberOfEquations(EID_MomentumBalance) );
@@ -552,7 +552,7 @@ void PNlDEIDynamic :: solveYourselfAt(TimeStep *tStep) {
     // call numerical model to solve arised problem - done localy here
     //
 #ifdef VERBOSE
-    OOFEM_LOG_RELEVANT( "Solving [step number %8d, time %15e]\n", tStep->giveNumber(), tStep->giveTime() );
+    OOFEM_LOG_RELEVANT( "Solving [step number %8d, time %15e]\n", tStep->giveNumber(), tStep->giveTargetTime() );
 #endif
 
     for ( i = 1; i <= neq; i++ ) {
@@ -1440,7 +1440,7 @@ PNlDEIDynamic :: printOutputAt(FILE *File, TimeStep *stepN)
         return;                                                                      // do not print even Solution step header
     }
 
-    fprintf( File, "\n\nOutput for time % .3e, solution step number %d\n", stepN->giveTime(), stepN->giveNumber() );
+    fprintf( File, "\n\nOutput for time % .3e, solution step number %d\n", stepN->giveTargetTime(), stepN->giveNumber() );
     if ( drFlag ) {
         fprintf(File, "Reached load level : %e\n\n", this->pt);
     }

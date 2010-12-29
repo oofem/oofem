@@ -189,7 +189,7 @@ KelvinChainMaterial :: giveEModulus(GaussPoint *gp, TimeStep *atTime)
     double sum = 0.0; // return value
 
     if ( EparVal.giveSize() == 0 ) {
-        this->updateEparModuli(gp, relMatAge + ( atTime->giveTime() - 0.5 * atTime->giveTimeIncrement() ) / timeFactor);
+        this->updateEparModuli(gp, relMatAge + ( atTime->giveTargetTime() - 0.5 * atTime->giveTimeIncrement() ) / timeFactor);
     }
 
     deltaT = atTime->giveTimeIncrement() / timeFactor;

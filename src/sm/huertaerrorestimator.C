@@ -4346,7 +4346,7 @@ HuertaErrorEstimator :: setupRefinedProblemProlog(const char *problemName, int p
 
             // HUHU dodelat metasteps, dodelat paralelni zpracovani
             sprintf(line, "nonlinearstatic nsteps %d renumber %d rtolv %e maxiter %d reqiterations %d minsteplength %e stiffmode %d manrmsteps %d equilmc 1 controllmode %d %s ",
-                    ( int ) ( problem->giveCurrentStep()->giveTime() + 1.5 ), renumber,
+                    ( int ) ( problem->giveCurrentStep()->giveTargetTime() + 1.5 ), renumber,
                     rtolv, maxIter, reqIter, minStepLength, stiffMode, manrmsteps, controlMode, useContextString);
             str = line;
 
@@ -4487,7 +4487,7 @@ HuertaErrorEstimator :: setupRefinedProblemEpilog2(int ltfuncs)
 
     if ( this->mode == HEE_nlinear ) {
         sprintf(line, "heavisideltf %d origin %e value 1.0", ltfuncs + 1,
-                this->domain->giveEngngModel()->giveCurrentStep()->giveTime() - 0.1);
+                this->domain->giveEngngModel()->giveCurrentStep()->giveTargetTime() - 0.1);
         refinedReader.appendInputString(line);
     }
 }

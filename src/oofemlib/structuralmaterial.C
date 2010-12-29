@@ -2536,7 +2536,7 @@ StructuralMaterial :: computeStressIndependentStrainVector(FloatArray &answer,
     answerTemper.resize(0);
     answerEigenstrain.resize(0);
 
-    if ( stepN->giveTime() < this->castingTime ) {
+    if ( stepN->giveIntrinsicTime() < this->castingTime ) {
         answer.zero();
         return;
     }

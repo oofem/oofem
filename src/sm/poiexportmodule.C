@@ -118,7 +118,7 @@ POIExportModule :: doOutput(TimeStep *tStep)
     FILE *stream = this->giveOutputStream(tStep);
 
     fprintf(stream, "# POI DataFile\n");
-    fprintf( stream, "Output for time %f\n", tStep->giveTime() );
+    fprintf( stream, "Output for time %f\n", tStep->giveTargetTime() );
 
     this->exportPrimaryVars(stream, tStep);
     this->exportIntVars(stream, tStep);

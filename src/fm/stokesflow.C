@@ -308,7 +308,7 @@ TimeStep *StokesFlow :: giveNextStep()
         StateCounterType counter = currentStep->giveSolutionStateCounter() + 1;
         previousStep = currentStep;
         double dt = currentStep->giveTimeIncrement();
-        double totalTime = currentStep->giveTime() + dt;
+        double totalTime = currentStep->giveTargetTime() + dt;
         currentStep = new TimeStep(istep, this, 1, totalTime, dt, counter);
     }
 

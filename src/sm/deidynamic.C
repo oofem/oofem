@@ -136,7 +136,7 @@ TimeStep *DEIDynamic :: giveNextStep()
 
     delete previousStep;
     if ( currentStep != NULL ) {
-        totalTime = currentStep->giveTime() + deltaT;
+        totalTime = currentStep->giveTargetTime() + deltaT;
         istep     = currentStep->giveNumber() + 1;
         counter = currentStep->giveSolutionStateCounter() + 1;
     }
@@ -363,7 +363,7 @@ void DEIDynamic :: solveYourselfAt(TimeStep *tStep) {
     // call numerical model to solve arised problem - done localy here
     //
 #ifdef VERBOSE
-    OOFEM_LOG_RELEVANT( "Solving [step number %8d, time %15e]\n", tStep->giveNumber(), tStep->giveTime() );
+    OOFEM_LOG_RELEVANT( "Solving [step number %8d, time %15e]\n", tStep->giveNumber(), tStep->giveTargetTime() );
 #endif
     double prevD;
 

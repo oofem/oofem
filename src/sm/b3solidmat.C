@@ -282,7 +282,7 @@ B3SolidMaterial :: giveEModulus(GaussPoint *gp, TimeStep *atTime)
     double sum = 0.0;
     double t_halfstep;
 
-    t_halfstep = relMatAge + ( atTime->giveTime() - 0.5 * atTime->giveTimeIncrement() ) / timeFactor;
+    t_halfstep = relMatAge + ( atTime->giveTargetTime() - 0.5 * atTime->giveTimeIncrement() ) / timeFactor;
     v = computeSolidifiedVolume(gp, atTime);
     eta = this->computeFlowTermViscosity(gp, atTime);     //evaluated in the middle of the time-step
 
@@ -548,7 +548,7 @@ B3SolidMaterial :: computeTotalAverageShrinkageStrainVector(FloatArray &answer, 
      */
 
     double TauSh, St, kh, help, E607, Et0Tau, EpsShInf, EpsSh;
-    double time = relMatAge + atTime->giveTime() / timeFactor;
+    double time = relMatAge + atTime->giveTargetTime() / timeFactor;
     int size = 6;
     FloatArray fullAnswer;
     MaterialMode mode = gp->giveMaterialMode();
@@ -644,7 +644,7 @@ B3SolidMaterial :: computeSolidifiedVolume(GaussPoint *gp, TimeStep *atTime)
     lambda0 = 1;     //[day]
     alpha = q3 / q2;
 
-    atAge = relMatAge + ( atTime->giveTime() - 0.5 * atTime->giveTimeIncrement() ) / timeFactor;
+    atAge = relMatAge + ( atTime->giveTargetTime() - 0.5 * atTime->giveTimeIncrement() ) / timeFactor;
     v = 1 / ( alpha + __OOFEM_POW(lambda0 / atAge, m) );
 
     return v;
@@ -660,7 +660,7 @@ B3SolidMaterial :: computeFlowTermViscosity(GaussPoint *gp, TimeStep *atTime)
         S = this->computeMicroPrestress(gp, atTime, 0); //microprestress in the middle of the time-step
         eta = 1.e6 / ( q4 * c0 * S );
     } else if ( this->MicroPrestress == 0 ) {
-        tHalfStep = relMatAge + ( atTime->giveTime() - 0.5 * atTime->giveTimeIncrement() ) / timeFactor;
+        tHalfStep = relMatAge + ( atTime->giveTargetTime() - 0.5 * atTime->giveTimeIncrement() ) / timeFactor;
         eta = 1.e6 * tHalfStep / q4;
     } else {
         _error("computeFlowTermViscosity - mode is not supported");
@@ -727,7 +727,7 @@ B3SolidMaterial :: computeShrinkageStrainVector(FloatArray &answer, MatResponseF
     //  rprime  - coefficient
     //  at      - coeff relating stress-induced thermal strain and shrinkage
     double sv, sn, et0, et, wrate = 0.0, trate = 0.0, h1;
-    double time = relMatAge + atTime->giveTime() / timeFactor;
+    double time = relMatAge + atTime->giveTargetTime() / timeFactor;
     int i, err, tflag = 0, wflag = 0;
     KelvinChainMaterialStatus *status = ( KelvinChainMaterialStatus * ) this->giveStatus(gp);
     int size = 6;

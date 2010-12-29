@@ -52,7 +52,7 @@ TF1 :: computeValueAt(FloatArray &answer, TimeStep *stepN, FloatArray &coords, V
     h = 200.0;
 
 
-    t = stepN->giveTime();
+    t = stepN->giveTargetTime();
     for ( i = 1; i <= coords.giveSize(); i++ ) {
         cd.at(i) = coords.at(i);
     }
@@ -60,7 +60,7 @@ TF1 :: computeValueAt(FloatArray &answer, TimeStep *stepN, FloatArray &coords, V
     result = -1.e-5 - k *macbra( atan(c * t + cd.at(2) - h) );
 
     if ( ( mode == VM_Incremental ) && ( !stepN->isTheFirstStep() ) ) {
-        t = stepN->giveTime() - stepN->giveTimeIncrement();
+        t = stepN->giveTargetTime() - stepN->giveTimeIncrement();
         result -= -1.e-5 - k *macbra( atan(c * t + cd.at(2) - h) );
     }
 

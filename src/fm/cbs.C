@@ -267,7 +267,7 @@ CBS :: giveNextStep()
     dt /= this->giveVariableScale(VST_Time);
 
     if ( currentStep != NULL ) {
-        totalTime = currentStep->giveTime() + dt;
+        totalTime = currentStep->giveTargetTime() + dt;
     }
 
     currentStep = new TimeStep(istep, this, 1, totalTime, dt, counter);

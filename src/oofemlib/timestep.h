@@ -59,14 +59,16 @@
 
 namespace oofem {
 /**
- * Class representing solution step. The Solution step instance may represent either
- * time step, load increment, or load case depending on current Engineering model used.
+ * Class representing solution step. The timeStep instance may represent either
+ * time step, load increment, or load case depending on used Engineering model.
+ * See corresponding Engng model reference for details. TimeStep maintains a reference to correspoding 
+ * Engineering model class instance.
  *
- * Solution step maintain the reference to correspoding Engineering model class instance.
- * It maintain also its "intrinsic time" and corresponding time increment. The meaning of these
- * values is dependent on current Engineering model used. The time may represent either
- * current time, load increment number or load case number. See corresponding
- * Engng model reference for details.
+ * The class hold target time, which may represent the end of time interval. In addition, there is
+ * intrinsic time, which is normally set the same as target time. Intrinsic time is used
+ * especially in constitutive laws, where the material law is not meant to be evaluated at target time. Also,
+ * imposing boundary conditions occurs at intrinsic time by default. This reflects changes of static system and proper
+ * equation numbering during each timeStep.
  *
  * Some components (typically integration points real stresses or integration points nonlocal values)
  * are computationally very demanding. Because in typical code, there are number of requests for same value
@@ -79,7 +81,7 @@ namespace oofem {
  * The solution state counter is guaranteed to grow up smoothly (it newer decreases) during solution process.
  * Other components of program (integration points) can then store their computationally expensive values
  * but have to store also corresponding solution state counter value valid when these were computed.
- * Then their can easily check for difference between freezed solution state counter for their value with
+ * Then, easy check is done for finding differences between freezed solution state counter and their value with
  * current solution state requested from solution step and recompute the values if necessary.
  */
 class TimeStep
@@ -98,8 +100,10 @@ class TimeStep
 protected:
     /// Engng model reference.
     EngngModel *eModel;
-    /// Current intrinsic time.
-    double t;
+    /// Current target time, which represents time at the end of a time step.
+    double targetTime;
+    /// Current intrinsic time, which may represents imposing time of boundary condition or time entering constitutive laws.
+    double intrinsicTime;
     /// Current intrinsic time increment.
     double deltaT;
     /// Solution state counter.
@@ -145,15 +149,20 @@ public:
     const char *giveClassName() const { return "TimeStep"; }
     /// Returns poiter to previous solution step.
     TimeStep *givePreviousStep();
-    /// Returns solution step associated time.
-    double     giveTime()                { return t; }
+    /// Returns target time.
+    double     giveTargetTime()                { return targetTime; }
+    /// Returns intrinsic time.
+    double     giveIntrinsicTime()             { return intrinsicTime; }
     /// Returns solution step associated time increment.
     double     giveTimeIncrement()       { return deltaT; }
     /// Sets solution step time increment.
     void       setTimeIncrement(double newDt) { deltaT = newDt; }
-    /// Sets solution step time.
-    void       setTime(double newt) { t = newt; }
-
+    /// Sets target and intrinsic time to be equal.
+    void       setTime(double newt) { targetTime = newt; intrinsicTime = newt; }
+    /// Sets only target time.
+    void       setTargetTime(double newt) { targetTime = newt; }
+    /// Sets only intrinsic time.
+    void       setIntrinsicTime(double newt) { intrinsicTime = newt; }
 
     /**
      * Tests if solution step is not the last step.

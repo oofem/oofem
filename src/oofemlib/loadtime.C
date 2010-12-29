@@ -59,18 +59,18 @@ double
 LoadTimeFunction :: evaluate(TimeStep *atTime, ValueModeType mode)
 {
     if ( mode == VM_Total ) {
-        return this->__at( atTime->giveTime() );
+        return this->__at( atTime->giveIntrinsicTime() );
     } else if ( mode == VM_Velocity ) {
-        return this->__derAt( atTime->giveTime() );
+        return this->__derAt( atTime->giveIntrinsicTime() );
     } else if ( mode == VM_Acceleration ) {
-        return this->__accelAt( atTime->giveTime() );
+        return this->__accelAt( atTime->giveIntrinsicTime() );
     } else if ( mode == VM_Incremental ) {
         //return this->__at( atTime->giveTime() ) - this->__at( atTime->giveTime() - atTime->giveTimeIncrement() );
 
         if ( atTime->isTheFirstStep() ) {
-            return this->__at(atTime->giveTime() - this->initialValue);
+            return this->__at(atTime->giveIntrinsicTime() - this->initialValue);
         } else {
-            return this->__at( atTime->giveTime() ) - this->__at( atTime->giveTime() - atTime->giveTimeIncrement() );
+            return this->__at( atTime->giveIntrinsicTime() ) - this->__at( atTime->giveIntrinsicTime() - atTime->giveTimeIncrement() );
         }
     } else {
         _error2("LoadTimeFunction:: evaluate: unsupported mode(%d)", mode);

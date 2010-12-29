@@ -200,7 +200,7 @@ public:
      * @param atTime Time step to check activity for.
      * @return True if material is activated for given solution step.
      */
-    bool isActivated(TimeStep *atTime) { if ( atTime ) { return ( atTime->giveTime() >= this->castingTime ); } else { return true; } }
+    bool isActivated(TimeStep *atTime) { if ( atTime ) { return ( atTime->giveIntrinsicTime() >= this->castingTime ); } else { return true; } }
 
     // identification and auxiliary functions
     /**

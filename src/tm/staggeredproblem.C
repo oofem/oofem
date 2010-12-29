@@ -205,7 +205,7 @@ StaggeredProblem :: giveDeltaT(int n)
     //in the first step the time increment is taken as the initial, user-specified value
     if ( stepMultiplier != 0 && currentStep != NULL ) {
         if ( currentStep->giveNumber() >= 2 ) {
-            return ( currentStep->giveTime() * ( stepMultiplier - 1 ) );
+            return ( currentStep->giveTargetTime() * ( stepMultiplier - 1 ) );
         }
     }
 
@@ -233,7 +233,7 @@ StaggeredProblem :: giveNextStep()
 
     if ( currentStep != NULL ) {
         istep =  currentStep->giveNumber() + 1;
-        totalTime = currentStep->giveTime() + giveDeltaT(istep);
+        totalTime = currentStep->giveTargetTime() + giveDeltaT(istep);
         counter = currentStep->giveSolutionStateCounter() + 1;
     } else {
         // first step -> generate initial step
@@ -263,7 +263,7 @@ void
 StaggeredProblem :: solveYourselfAt(TimeStep *stepN)
 {
 #ifdef VERBOSE
-    OOFEM_LOG_RELEVANT( "Solving [step number %5d, time %e]\n", stepN->giveNumber(), stepN->giveTime() );
+    OOFEM_LOG_RELEVANT( "Solving [step number %5d, time %e]\n", stepN->giveNumber(), stepN->giveTargetTime() );
 #endif
 
     for ( int i = 1; i <= nModels; i++ ) {

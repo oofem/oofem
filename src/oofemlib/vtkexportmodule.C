@@ -117,7 +117,7 @@ VTKExportModule :: doOutput(TimeStep *tStep)
     FILE *stream = this->giveOutputStream(tStep);
 
     fprintf(stream, "# vtk DataFile Version 2.0\n");
-    fprintf( stream, "Output for time %f\n", tStep->giveTime() );
+    fprintf( stream, "Output for time %f\n", tStep->giveTargetTime() );
     fprintf(stream, "ASCII\n");
 
     fprintf(stream, "DATASET UNSTRUCTURED_GRID\n");

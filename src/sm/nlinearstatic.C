@@ -353,7 +353,7 @@ TimeStep *NonLinearStatic :: giveNextStep()
 
     delete previousStep;
     if ( currentStep != NULL ) {
-        totalTime = currentStep->giveTime() + deltaTtmp;
+        totalTime = currentStep->giveTargetTime() + deltaTtmp;
         istep =  currentStep->giveNumber() + 1;
         counter = currentStep->giveSolutionStateCounter() + 1;
         mstepNum = currentStep->giveMetaStepNumber();
@@ -919,7 +919,7 @@ NonLinearStatic :: printOutputAt(FILE *File, TimeStep *stepN)
         return;                                                                      // do not print even Solution step header
     }
 
-    fprintf( File, "\n\nOutput for time % .3e, solution step number %d\n", stepN->giveTime(), stepN->giveNumber() );
+    fprintf( File, "\n\nOutput for time % .3e, solution step number %d\n", stepN->giveTargetTime(), stepN->giveNumber() );
     fprintf(File, "Reached load level : %20.6f in %d iterations\n\n",
             cumulatedLoadLevel + loadLevel, currentIterations);
 

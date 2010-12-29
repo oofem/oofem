@@ -962,7 +962,7 @@ EngngModel :: printOutputAt(FILE *File, TimeStep *stepN)
     }
 
     fprintf(File, "\n==============================================================");
-    fprintf( File, "\nOutput for time % .8e ", stepN->giveTime() * this->giveVariableScale(VST_Time) );
+    fprintf( File, "\nOutput for time % .8e ", stepN->giveTargetTime() * this->giveVariableScale(VST_Time) );
     fprintf(File, "\n==============================================================\n");
     for ( idomain = 1; idomain <= this->ndomains; idomain++ ) {
         domain = this->giveDomain(idomain);
@@ -1849,7 +1849,7 @@ contextIOResultType EngngModel :: restoreContext(DataStream *stream, ContextMode
         delete previousStep;
     }
 
-    previousStep = new TimeStep(istep - 1, this, pmstep, currentStep->giveTime() - currentStep->giveTimeIncrement(),
+    previousStep = new TimeStep(istep - 1, this, pmstep, currentStep->giveTargetTime() - currentStep->giveTimeIncrement(),
                                 currentStep->giveTimeIncrement(), currentStep->giveSolutionStateCounter() - 1);
 
     // restore numberOfEquations and domainNeqs array

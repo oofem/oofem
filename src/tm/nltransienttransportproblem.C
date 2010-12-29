@@ -97,7 +97,7 @@ void NLTransientTransportProblem :: solveYourselfAt(TimeStep *tStep) {
     int neq =  this->giveNumberOfEquations(EID_ConservationEquation);
 
 #ifdef VERBOSE
-    OOFEM_LOG_RELEVANT( "Solving [step number %8d, time %15e]\n", tStep->giveNumber(), tStep->giveTime() );
+    OOFEM_LOG_RELEVANT( "Solving [step number %8d, time %15e]\n", tStep->giveNumber(), tStep->giveTargetTime() );
 #endif
     //Delete lhs matrix and create a new one. This is necessary due to growing/decreasing number of equations.
     if ( tStep->isTheFirstStep() || this->changingProblemSize ) {
@@ -123,7 +123,7 @@ void NLTransientTransportProblem :: solveYourselfAt(TimeStep *tStep) {
     }
 
     double dTTau = tStep->giveTimeIncrement();
-    double Tau = tStep->giveTime() - ( 1. - alpha ) * tStep->giveTimeIncrement();
+    double Tau = tStep->giveTargetTime() - ( 1. - alpha ) * tStep->giveTimeIncrement();
     //Time step in which material laws are taken into account
     TimeStep TauStep(tStep->giveNumber(), this, tStep->giveMetaStepNumber(), Tau, dTTau, tStep->giveSolutionStateCounter() + 1);
 
@@ -209,7 +209,7 @@ void NLTransientTransportProblem :: solveYourselfAt(TimeStep *tStep) {
         TauStep.incrementStateCounter();
         tStep->incrementStateCounter();
 
-        OOFEM_LOG_INFO("%-15e %-10d %-15e %-15e\n", tStep->giveTime(), nite, solutionErr, incrementErr);
+        OOFEM_LOG_INFO("%-15e %-10d %-15e %-15e\n", tStep->giveTargetTime(), nite, solutionErr, incrementErr);
 
         if ( nite >= nsmax ) {
             _error2("convergence not reached after %d iterations", nsmax);
@@ -227,7 +227,7 @@ double NLTransientTransportProblem ::  giveUnknownComponent(EquationID chc, Valu
 // This function translates this request to numerical method language
 {
     int eq = dof->__giveEquationNumber();
-    double t = tStep->giveTime();
+    double t = tStep->giveTargetTime();
 
     TimeStep *previousStep = this->givePreviousStep(), *currentStep = this->giveCurrentStep();
 
@@ -240,10 +240,10 @@ double NLTransientTransportProblem ::  giveUnknownComponent(EquationID chc, Valu
         return 0.;
     }
 
-    if ( ( t >= previousStep->giveTime() ) && ( t <= currentStep->giveTime() ) ) {
+    if ( ( t >= previousStep->giveTargetTime() ) && ( t <= currentStep->giveTargetTime() ) ) {
         double rtdt = UnknownsField->giveUnknownValue(dof, VM_Total, currentStep);
         double rt   = UnknownsField->giveUnknownValue(dof, VM_Total, previousStep);
-        double psi = ( t - previousStep->giveTime() ) / currentStep->giveTimeIncrement();
+        double psi = ( t - previousStep->giveTargetTime() ) / currentStep->giveTimeIncrement();
         if ( mode == VM_Velocity ) {
             return ( rtdt - rt ) / currentStep->giveTimeIncrement();
         } else if ( mode == VM_Total ) {
@@ -320,7 +320,7 @@ NLTransientTransportProblem :: giveUnknownDictHashIndx(EquationID type, ValueMod
         } else if ( stepN->giveNumber() == this->giveCurrentStep()->giveNumber() - 1 ) { //previous time
             return 1;
         } else {
-            _error5( "No history available at TimeStep %d = %f, called from TimeStep %d = %f", stepN->giveNumber(), stepN->giveTime(), this->giveCurrentStep()->giveNumber(), this->giveCurrentStep()->giveTime() );
+            _error5( "No history available at TimeStep %d = %f, called from TimeStep %d = %f", stepN->giveNumber(), stepN->giveTargetTime(), this->giveCurrentStep()->giveNumber(), this->giveCurrentStep()->giveTargetTime() );
         }
     } else {
         _error2( "ValueModeType %s undefined", __ValueModeTypeToString(mode) );
@@ -407,7 +407,7 @@ NLTransientTransportProblem :: assembleAlgorithmicPartOfRhs(FloatArray &answer, 
     // Computes right hand side on all nodes
     //
     int i;
-    double t = tStep->giveTime();
+    double t = tStep->giveTargetTime();
     IntArray loc;
     FloatMatrix charMtrxCond, charMtrxCap, bcMtrx;
     FloatArray r, drdt, contrib, help;
@@ -441,7 +441,7 @@ NLTransientTransportProblem :: assembleAlgorithmicPartOfRhs(FloatArray &answer, 
          *  element -> computeVectorOf (EID_ConservationEquation, VM_Velocity, tStep, drdt);
          */
 
-        if ( ( t >= previousStep->giveTime() ) && ( t <= currentStep->giveTime() ) ) {
+        if ( ( t >= previousStep->giveTargetTime() ) && ( t <= currentStep->giveTargetTime() ) ) {
             FloatArray rp, rc;
             element->computeVectorOf(EID_ConservationEquation, VM_Total, currentStep, rc);
             element->computeVectorOf(EID_ConservationEquation, VM_Total, previousStep, rp);

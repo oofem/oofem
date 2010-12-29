@@ -134,7 +134,7 @@ double EigenValueDynamic ::  giveUnknownComponent(EquationID chc, ValueModeType 
 
     switch ( mode ) {
     case VM_Total:  // EigenVector
-        return eigVec.at( eq, ( int ) tStep->giveTime() );
+        return eigVec.at( eq, ( int ) tStep->giveTargetTime() );
 
     default:
         _error("giveUnknownComponent: Unknown is of undefined type for this problem");
@@ -164,7 +164,7 @@ double EigenValueDynamic ::  giveUnknownComponent(UnknownType chc, ValueModeType
 
     switch ( mode ) {
     case VM_Total:  // EigenVector
-        return eigVec.at( eq, ( int ) tStep->giveTime() );
+        return eigVec.at( eq, ( int ) tStep->giveTargetTime() );
 
     default:
         _error("giveUnknownComponent: Unknown is of undefined type for this problem");

@@ -1465,7 +1465,7 @@ void HellmichMaterial :: plotStressStrain(FILE *outputStream, GaussPoint *gp, Ti
     }
 
     fprintf(outputStream, "%.15g %.15g %.15g %.15g %.15f %d %.2g %.15g %.15g %15g %.15g\n",
-            stress, strain, epl, chi, ksi, id, err, evisc, eflow, atTime->giveTime(), eshr);
+            stress, strain, epl, chi, ksi, id, err, evisc, eflow, atTime->giveTargetTime(), eshr);
 }
 void HellmichMaterial :: plotStressPath(FILE *outputStream, GaussPoint *gp, TimeStep *atTime, int id, bool trial)
 // I1-|s| stress path output
@@ -1520,7 +1520,7 @@ double HellmichMaterial :: giveTimeIncrement(TimeStep *atTime)
 double HellmichMaterial :: giveTime(TimeStep *atTime)
 // returns the time of step atTime
 {
-    return atTime->giveTime() * timeScale;
+    return atTime->giveTargetTime() * timeScale;
 }
 void
 HellmichMaterial :: initAuxStatus(GaussPoint *gp, TimeStep *atTime)
@@ -2030,7 +2030,7 @@ void HellmichMaterial :: giveEigenStrainVector(FloatArray &answer, MatResponseFo
     MaterialMode mmode = gp->giveMaterialMode();
 
     // do not generate any temperature
-    if ( atTime->giveTime() < castAt ) {
+    if ( atTime->giveTargetTime() < castAt ) {
         if ( ( mmode == _3dShell ) || ( mmode ==  _3dBeam ) || ( mmode == _2dPlate ) || ( mmode == _2dBeam ) ) {
             answer.resize(12);
         } else {

@@ -152,7 +152,7 @@ double LinearStability ::  giveUnknownComponent(EquationID chc, ValueModeType mo
         _error("giveUnknownComponent: invalid equation number");
     }
 
-    int activeVector = ( int ) tStep->giveTime();
+    int activeVector = ( int ) tStep->giveTargetTime();
     if ( chc == EID_MomentumBalance ) {
         switch ( mode ) {
         case VM_Total: // EigenVector
@@ -180,7 +180,7 @@ double LinearStability ::  giveUnknownComponent(UnknownType chc, ValueModeType m
         _error("giveUnknownComponent: invalid equation number");
     }
 
-    int activeVector = ( int ) tStep->giveTime();
+    int activeVector = ( int ) tStep->giveTargetTime();
     if ( chc == EigenValue ) {
         return eigVal.at(eq);
     } else if ( chc == DisplacementVector ) {
@@ -393,7 +393,7 @@ LinearStability :: terminateLinStatic(TimeStep *stepN)
     File = this->giveOutputStream();
     stepN->setTime(0.);
 
-    fprintf( File, "\nOutput for time % .3e \n\n", stepN->giveTime() );
+    fprintf( File, "\nOutput for time % .3e \n\n", stepN->giveTargetTime() );
     fprintf(File, "Linear static:\n\n");
 
     int nnodes = domain->giveNumberOfDofManagers();

@@ -144,11 +144,12 @@ void MacroLSpace :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode 
     //microEngngModel->timer.startTimer(EngngModelTimer :: EMTT_AnalysisTimer);
     //microproblem must have the same actual time and zero time increment
 
-    this->microEngngModel->giveCurrentStep()->setTime( tStep->giveTime() ); //adjust total time
+    this->microEngngModel->giveCurrentStep()->setTargetTime( tStep->giveTargetTime() ); //adjust total time
+    this->microEngngModel->giveCurrentStep()->setIntrinsicTime( tStep->giveIntrinsicTime() ); //adjust intrinsic time
     this->microEngngModel->giveCurrentStep()->setTimeIncrement(0.); //no time increment
     this->microEngngModel->initMetaStepAttributes( microEngngModel->giveCurrentStep() ); //updates numerical method
 
-    OOFEM_LOG_INFO( "\n** Assembling %s stiffness matrix of microproblem %p on macroElement %d, micTimeStep %d, micTime %f\n", __MatResponseModeToString(rMode), this->microMaterial->problemMicro, this->giveNumber(), this->microEngngModel->giveCurrentStep()->giveNumber(), this->microEngngModel->giveCurrentStep()->giveTime() );
+    OOFEM_LOG_INFO( "\n** Assembling %s stiffness matrix of microproblem %p on macroElement %d, micTimeStep %d, micTime %f\n", __MatResponseModeToString(rMode), this->microMaterial->problemMicro, this->giveNumber(), this->microEngngModel->giveCurrentStep()->giveNumber(), this->microEngngModel->giveCurrentStep()->giveTargetTime() );
 
     //this->microEngngModel->solveYourselfAt( microEngngModel->giveCurrentStep() );
     //this->microEngngModel->terminate( microEngngModel->giveCurrentStep() );
@@ -256,7 +257,8 @@ void MacroLSpace :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep
     DofManager *DofMan;
     double reactionForce;
 
-    this->microEngngModel->giveCurrentStep()->setTime( tStep->giveTime() ); //adjust total time
+    this->microEngngModel->giveCurrentStep()->setTargetTime( tStep->giveTargetTime() ); //adjust total time
+    this->microEngngModel->giveCurrentStep()->setIntrinsicTime( tStep->giveIntrinsicTime() ); //adjust total time
     this->microEngngModel->giveCurrentStep()->setTimeIncrement(0.); //no time increment
 
     //OOFEM_LOG_INFO("*** useUpdatedGpRecord %d\n", useUpdatedGpRecord);
@@ -264,7 +266,7 @@ void MacroLSpace :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep
     if ( useUpdatedGpRecord ) { //printing of data
         answer = this->internalMacroForcesVector;
     } else    {
-        OOFEM_LOG_INFO( "\n*** Solving reactions %p of macroElement %d, micTimeStep %d, macIteration %d, micTime %f\n", this->microMaterial->problemMicro, this->giveNumber(), this->microEngngModel->giveCurrentStep()->giveNumber(), this->iteration, this->microEngngModel->giveCurrentStep()->giveTime() );
+        OOFEM_LOG_INFO( "\n*** Solving reactions %p of macroElement %d, micTimeStep %d, macIteration %d, micTime %f\n", this->microMaterial->problemMicro, this->giveNumber(), this->microEngngModel->giveCurrentStep()->giveNumber(), this->iteration, this->microEngngModel->giveCurrentStep()->giveTargetTime() );
 
         this->iteration++;
         this->changeMicroBoundaryConditions(tStep);

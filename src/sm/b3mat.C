@@ -313,7 +313,7 @@ B3Material :: computeTotalAverageShrinkageStrainVector(FloatArray &answer, MatRe
      */
 
     double TauSh, St, kh, help, E607, Et0Tau, EpsShInf, EpsSh;
-    double time = relMatAge + atTime->giveTime() / timeFactor;
+    double time = relMatAge + atTime->giveTargetTime() / timeFactor;
     int size = 6;
     FloatArray fullAnswer;
     MaterialMode mode = gp->giveMaterialMode();
@@ -371,7 +371,7 @@ B3Material :: computeShrinkageStrainVector(FloatArray &answer, MatResponseForm f
     //  rprime  - coefficient
     //  at      - coeff relating stress-induced thermal strain and shrinkage
     double sv, sn, et0, et, wrate = 0.0, trate = 0.0, h1;
-    double time = relMatAge + atTime->giveTime() / timeFactor;
+    double time = relMatAge + atTime->giveTargetTime() / timeFactor;
     int i, err, tflag = 0, wflag = 0;
     MaxwellChainMaterialStatus *status = ( MaxwellChainMaterialStatus * ) this->giveStatus(gp);
     int size = 6;

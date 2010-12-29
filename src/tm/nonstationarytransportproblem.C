@@ -226,12 +226,13 @@ NonStationaryTransportProblem :: giveNextStep()
 {
     int istep = this->giveNumberOfFirstStep();
     double totalTime = 0;
+    double intrinsicTime;
     StateCounterType counter = 1;
     delete previousStep;
 
     if ( currentStep != NULL ) {
         istep =  currentStep->giveNumber() + 1;
-        totalTime = currentStep->giveTime() + giveDeltaT(istep);
+        totalTime = currentStep->giveTargetTime() + giveDeltaT(istep);
         //istep =  currentStep->giveNumber() + 1   ;
         //totalTime = currentStep->giveTime() + deltaT;
         counter = currentStep->giveSolutionStateCounter() + 1;
@@ -242,6 +243,9 @@ NonStationaryTransportProblem :: giveNextStep()
 
     previousStep = currentStep;
     currentStep = new TimeStep(istep, this, 1, totalTime, this->giveDeltaT(istep), counter);
+    //set intrinsic time to time of integration
+    intrinsicTime = previousStep->giveTargetTime() + this->alpha*this->giveDeltaT(istep);
+    currentStep->setIntrinsicTime( intrinsicTime );
     // time and dt variables are set eq to 0 for statics - has no meaning
     return currentStep;
 }
@@ -257,7 +261,7 @@ void NonStationaryTransportProblem :: solveYourselfAt(TimeStep *tStep) {
 
     int neq = this->giveNumberOfEquations(EID_ConservationEquation);
 #ifdef VERBOSE
-    OOFEM_LOG_RELEVANT( "Solving [step number %8d, time %15e]\n", tStep->giveNumber(), tStep->giveTime() );
+    OOFEM_LOG_RELEVANT( "Solving [step number %8d, time %15e]\n", tStep->giveNumber(), tStep->giveTargetTime() );
 #endif
 
     //Create a new lhs matrix if necessary

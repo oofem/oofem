@@ -274,7 +274,7 @@ IncrementalLinearStatic :: solveYourselfAt(TimeStep *tStep) {
      */
 
 #ifdef VERBOSE
-    OOFEM_LOG_RELEVANT( "Solving [step number %8d, time %15e]\n", tStep->giveNumber(), tStep->giveTime() );
+    OOFEM_LOG_RELEVANT( "Solving [step number %8d, time %15e]\n", tStep->giveNumber(), tStep->giveTargetTime() );
 #endif
 
     if ( stiffnessMatrix ) {

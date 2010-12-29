@@ -653,9 +653,9 @@ HydrationModelInterface :: updateInternalState(const FloatArray &vec, GaussPoint
     if ( hydrationModel ) {
         TimeStep *hydraTime = new TimeStep( ( const TimeStep ) *atTime );
         int notime = 0;
-        if ( atTime->giveTime() - atTime->giveTimeIncrement() < castAt ) {
-            if ( atTime->giveTime() >= castAt ) {
-                hydraTime->setTimeIncrement(atTime->giveTime() - castAt);
+        if ( atTime->giveTargetTime() - atTime->giveTimeIncrement() < castAt ) {
+            if ( atTime->giveTargetTime() >= castAt ) {
+                hydraTime->setTimeIncrement(atTime->giveTargetTime() - castAt);
             } else {
                 notime = 1;
             }

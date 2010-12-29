@@ -121,7 +121,7 @@ HOMExportModule :: doOutput(TimeStep *tStep)
         }
 
         sumState *= ( 1. / VolTot * this->scale );
-        fprintf(this->stream, "%e  % e       ", tStep->giveTime(), sumState);
+        fprintf(this->stream, "%e  % e       ", tStep->giveTargetTime(), sumState);
         sumFlow.times(1. / VolTot * this->scale);
         fprintf( this->stream, "% e  % e  % e\n", sumFlow.at(1), sumFlow.at(2), sumFlow.at(3) );
     } else {
@@ -205,7 +205,7 @@ HOMExportModule :: doOutput(TimeStep *tStep)
         //SumStrain.printYourself();
         //SumEigStrain.printYourself();
         //SumStress.printYourself();
-        fprintf( this->stream, "%f   ", tStep->giveTime() );
+        fprintf( this->stream, "%f   ", tStep->giveTargetTime() );
         for ( j = 0; j < 6; j++ ) { //strain
             fprintf( this->stream, "%06.5e ", SumStrain(j) );
         }

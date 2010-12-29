@@ -142,7 +142,7 @@ MaxwellChainMaterial :: giveEModulus(GaussPoint *gp, TimeStep *atTime)
     double lambdaMu, Emu, deltaYmu;
     double E = 0.0;
 
-    this->updateEparModuli(gp, relMatAge + ( atTime->giveTime() - 0.5 * atTime->giveTimeIncrement() ) / timeFactor);
+    this->updateEparModuli(gp, relMatAge + ( atTime->giveTargetTime() - 0.5 * atTime->giveTimeIncrement() ) / timeFactor);
     for ( mu = 1; mu <= nUnits; mu++ ) {
         deltaYmu = atTime->giveTimeIncrement() / timeFactor / this->giveCharTime(mu);
         if ( deltaYmu <= 0.0 ) {
@@ -245,7 +245,7 @@ MaxwellChainMaterial :: updateYourself(GaussPoint *gp, TimeStep *tNow)
 
     help1.beProductOf(Binv, help);
 
-    this->updateEparModuli(gp, relMatAge + ( tNow->giveTime() - 0.5 * tNow->giveTimeIncrement() ) / timeFactor);
+    this->updateEparModuli(gp, relMatAge + ( tNow->giveTargetTime() - 0.5 * tNow->giveTimeIncrement() ) / timeFactor);
 
     for ( mu = 1; mu <= nUnits; mu++ ) {
         deltaYmu = tNow->giveTimeIncrement() / timeFactor / this->giveCharTime(mu);

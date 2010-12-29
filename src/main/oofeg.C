@@ -2617,7 +2617,7 @@ updateISA(oofegGraphicContext *context)
     double time;
     TimeStep *ct = context [ 0 ].getActiveProblem()->giveCurrentStep();
     if ( ct != NULL ) {
-        time = ct->giveTime();
+        time = ct->giveTargetTime();
     } else {
         time = 0.0;
     }

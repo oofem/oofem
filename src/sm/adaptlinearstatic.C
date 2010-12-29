@@ -116,7 +116,7 @@ AdaptiveLinearStatic :: initializeAdaptive(int stepNumber)
      * this->forceEquationNumbering();
      *
      * // set time step
-     * this->giveCurrentStep()->setTime (stepNumber+1);
+     * this->giveCurrentStep()->setTime(stepNumber+1);
      *
      * // init equation numbering
      * // this->forceEquationNumbering();

@@ -106,8 +106,8 @@ CemhydMat :: computeInternalSourceVector(FloatArray &val, GaussPoint *gp, TimeSt
         averageTemperature = ms->giveAverageTemperature();
         if ( mode == VM_Total ) {
             //for nonlinear solver, return the last value even no time has elapsed
-            if ( atTime->giveTime() != ms->LastCallTime ) {
-                val.at(1) = ms->GiveIncrementalHeat( averageTemperature, atTime->giveTime() );
+            if ( atTime->giveTargetTime() != ms->LastCallTime ) {
+                val.at(1) = ms->GiveIncrementalHeat( averageTemperature, atTime->giveTargetTime() );
             } else {
                 val.at(1) = ms->PartHeat;
             }

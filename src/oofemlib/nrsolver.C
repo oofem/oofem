@@ -704,12 +704,12 @@ NRSolver :: applyConstraintsToLoadIncrement(int nite, const SparseMtrx *k, Float
                                             referenceLoadInputModeType rlm, TimeStep *atTime)
 {
     int eq, i;
-    double factor = engngModel->giveDomain(1)->giveLoadTimeFunction(prescribedDisplacementLTF)->__at( atTime->giveTime() );
+    double factor = engngModel->giveDomain(1)->giveLoadTimeFunction(prescribedDisplacementLTF)->__at( atTime->giveTargetTime() );
     if ( ( rlm == rlm_total ) && ( !atTime->isTheFirstStep() ) ) {
         //factor -= engngModel->giveDomain(1)->giveLoadTimeFunction(prescribedDisplacementLTF)->
         // at(atTime->givePreviousStep()->giveTime()) ;
         factor -= engngModel->giveDomain(1)->giveLoadTimeFunction(prescribedDisplacementLTF)->
-                  __at( atTime->giveTime() - atTime->giveTimeIncrement() );
+                  __at( atTime->giveTargetTime() - atTime->giveTimeIncrement() );
     }
 
     if ( nite == 1 ) {
@@ -953,7 +953,7 @@ NRSolver :: checkConvergence(FloatArray &RT, FloatArray &F, FloatArray &rhs,  Fl
         dg_totalDisp = collectiveErr;
  #endif
 
-        OOFEM_LOG_INFO("%-5d %-5d ", ( int ) tNow->giveTime(), nite);
+        OOFEM_LOG_INFO("%-5d %-5d ", ( int ) tNow->giveTargetTime(), nite);
         // loop over dof groups
         for ( _dg = 1; _dg <= _ng; _dg++ ) {
             //  compute a relative error norm
@@ -1086,7 +1086,7 @@ NRSolver :: checkConvergence(FloatArray &RT, FloatArray &F, FloatArray &rhs,  Fl
             answer = false;
         }
 
-        OOFEM_LOG_INFO("%-10d %-15d %-15e %-15e\n", ( int ) tNow->giveTime(), nite, forceErr, dispErr);
+        OOFEM_LOG_INFO("%-10d %-15d %-15e %-15e\n", ( int ) tNow->giveTargetTime(), nite, forceErr, dispErr);
     } // end default case (all dofs conributing)
 
     return answer;

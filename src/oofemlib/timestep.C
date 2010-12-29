@@ -58,7 +58,8 @@ TimeStep :: TimeStep(int n, EngngModel *e, int mn, double tt, double dt, StateCo
 {
     eModel = e;
     deltaT = dt;
-    t      = tt;
+    targetTime = tt;
+    intrinsicTime = tt;//intrinsicTime is the same as targetTime in constructor.
     solutionStateCounter = counter;
     number = n;
     version = 0;
@@ -69,7 +70,8 @@ TimeStep :: TimeStep(EngngModel *e)
 {
     eModel = e;
     deltaT = 0.0;
-    t      = 0.0;
+    targetTime = 0.0;
+    intrinsicTime = 0.0;
     solutionStateCounter = 0;
     number = -1;
     version = 0;
@@ -79,7 +81,8 @@ TimeStep :: TimeStep(EngngModel *e)
 TimeStep :: TimeStep(const TimeStep &src)
 {
     eModel = src.eModel;
-    t      = src.t;
+    targetTime = src.targetTime;
+    intrinsicTime = src.intrinsicTime;
     deltaT = src.deltaT;
     solutionStateCounter = src.solutionStateCounter;
     number = src.number;
@@ -91,7 +94,8 @@ TimeStep &
 TimeStep :: operator = ( const TimeStep & src )
 {
     eModel = src.eModel;
-    t      = src.t;
+    targetTime = src.targetTime;
+    intrinsicTime = src.intrinsicTime;
     deltaT = src.deltaT;
     solutionStateCounter = src.solutionStateCounter;
     number = src.number;
@@ -171,8 +175,13 @@ TimeStep :: saveContext(DataStream *stream, ContextMode mode, void *obj)
         THROW_CIOERR(CIO_IOERR);
     }
 
-    // write time
-    if ( !stream->write(& this->t, 1) ) {
+    // write target time
+    if ( !stream->write(& this->targetTime, 1) ) {
+        THROW_CIOERR(CIO_IOERR);
+    }
+
+    // write intrinsic time
+    if ( !stream->write(& this->intrinsicTime, 1) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
@@ -213,8 +222,13 @@ TimeStep ::  restoreContext(DataStream *stream, ContextMode mode, void *obj)
         THROW_CIOERR(CIO_IOERR);
     }
 
-    // read time
-    if ( !stream->read(& this->t, 1) ) {
+    // read target time
+    if ( !stream->read(& this->targetTime, 1) ) {
+        THROW_CIOERR(CIO_IOERR);
+    }
+
+    // read intrinsic time
+    if ( !stream->read(& this->intrinsicTime, 1) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 

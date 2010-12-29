@@ -59,7 +59,7 @@ UserDefinedTemperatureField :: computeValueAt(FloatArray &answer, TimeStep *step
     answer.resize(this->size);
     char buff [ UserDefinedTemperatureField_MAX_EXPR_LENGTH + 80 ];
     for ( i = 1; i <= size; i++ ) {
-        sprintf(buff, "x=%e;y=%e;z=%e;t=%e;%s", c.at(1), c.at(2), c.at(3), stepN->giveTime(), ftExpression [ i - 1 ]);
+        sprintf(buff, "x=%e;y=%e;z=%e;t=%e;%s", c.at(1), c.at(2), c.at(3), stepN->giveTargetTime(), ftExpression [ i - 1 ]);
         result = myParser.eval(buff, err);
         if ( err ) {
             _error("computeValueAt: parser syntax error");
@@ -69,7 +69,7 @@ UserDefinedTemperatureField :: computeValueAt(FloatArray &answer, TimeStep *step
 
         if ( ( mode == VM_Incremental ) && ( !stepN->isTheFirstStep() ) ) {
             sprintf(buff, "x=%e;y=%e;z=%e;t=%e;%s", c.at(1), c.at(2), c.at(3),
-                    stepN->giveTime() - stepN->giveTimeIncrement(), ftExpression [ i - 1 ]);
+                    stepN->giveTargetTime() - stepN->giveTimeIncrement(), ftExpression [ i - 1 ]);
 
             result = myParser.eval(buff, err);
             if ( err ) {
