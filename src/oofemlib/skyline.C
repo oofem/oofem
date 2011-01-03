@@ -424,7 +424,7 @@ int Skyline :: buildInternalStructure(EngngModel *eModel, int di, EquationID ut,
     Domain *domain = eModel->giveDomain(di);
 
     for ( j = 1; j <= neq; j++ ) {
-        mht->at(j) = INT_MAX;                             // initialize column height
+        mht->at(j) = j; // initialize column height, maximum is line number (since it only stores upper triangular)
     }
 
     int nelem = domain->giveNumberOfElements();
