@@ -318,18 +318,28 @@ VTKXMLExportModule :: giveCellType(Element *elem)
     Element_Geometry_Type elemGT = elem->giveGeometryType();
     int vtkCellType = 0;
 
-    if ( elemGT == EGT_triangle_1 ) {
+    if ( elemGT == EGT_point ) {
+        vtkCellType = 1;
+    } else if ( elemGT == EGT_line_1 ) {
+        vtkCellType = 3;
+    } else if ( elemGT == EGT_line_2 ) {
+        vtkCellType = 21;
+    } else if ( elemGT == EGT_triangle_1 ) {
         vtkCellType = 5;
     } else if ( elemGT == EGT_triangle_2 ) {
         vtkCellType = 22;
     } else if ( elemGT == EGT_tetra_1 ) {
         vtkCellType = 10;
+    } else if ( elemGT == EGT_tetra_2 ) {
+        vtkCellType = 24;
     } else if ( elemGT == EGT_quad_1 ) {
         vtkCellType = 9;
     } else if ( elemGT == EGT_quad_2 ) {
         vtkCellType = 23;
     } else if ( elemGT == EGT_hexa_1 ) {
         vtkCellType = 12;
+    } else if ( elemGT == EGT_hexa_2 ) {
+        vtkCellType = 25;
     } else {
         OOFEM_ERROR2( "VTKXMLExportModule: unsupported element geometry type on element %d", elem->giveNumber() );
     }
@@ -340,18 +350,40 @@ VTKXMLExportModule :: giveCellType(Element *elem)
 int
 VTKXMLExportModule :: giveNumberOfNodesPerCell(int cellType)
 {
-    if ( cellType == 10 ) {
-        return 4;
-    } else if ( cellType == 5 ) {
+    switch ( cellType ) {
+    case 1:
+        return 1;
+
+    case 3:
+        return 2;
+
+    case 5:
+    case 21:
         return 3;
-    } else if ( cellType == 9 ) {
+
+    case 9:
+    case 10:
         return 4;
-    } else if ( cellType == 22 ) {
+
+    case 14:
+        return 5;
+
+    case 13:
+    case 22:
         return 6;
-    } else if  ( ( cellType == 12 ) || ( cellType == 23 ) ) {
+
+    case 12:
+    case 23:
         return 8;
-    } else {
-        OOFEM_ERROR2("VTKXMLExportModule: unknown number of nodes of cellType %d\n", cellType);
+
+    case 24:
+        return 10;
+
+    case 25:
+        return 20;
+
+    default:
+        OOFEM_ERROR("VTKExportModule: unsupported cell type ID");
     }
 
     return 0; // to make compiler happy
@@ -364,7 +396,10 @@ VTKXMLExportModule :: giveElementCell(IntArray &answer, Element *elem, int cell)
     Element_Geometry_Type elemGT = elem->giveGeometryType();
     int i, nelemNodes;
 
-    if ( ( elemGT == EGT_triangle_1 ) || ( elemGT == EGT_triangle_2 ) || ( elemGT == EGT_tetra_1 ) ||
+    if ( ( elemGT == EGT_point ) ||
+        ( elemGT == EGT_line_1 ) || ( elemGT == EGT_line_2 ) ||
+        ( elemGT == EGT_triangle_1 ) || ( elemGT == EGT_triangle_2 ) ||
+        ( elemGT == EGT_tetra_1 ) || ( elemGT == EGT_tetra_2 ) ||
         ( elemGT == EGT_quad_1 ) || ( elemGT == EGT_quad_2 ) ||
         ( elemGT == EGT_hexa_1 ) ) {
         nelemNodes = elem->giveNumberOfNodes();
@@ -372,8 +407,17 @@ VTKXMLExportModule :: giveElementCell(IntArray &answer, Element *elem, int cell)
         for ( i = 1; i <= nelemNodes; i++ ) {
             answer.at(i) = elem->giveNode(i)->giveNumber() - 1;
         }
+    } else if ( elemGT == EGT_hexa_2 ) {
+        int HexaQuadNodeMapping [] = {
+            5, 8, 7, 6, 1, 4, 3, 2, 16, 15, 14, 13, 12, 11, 10, 9, 17, 20, 19, 18
+        };
+        nelemNodes = elem->giveNumberOfNodes();
+        answer.resize(nelemNodes);
+        for ( i = 1; i <= nelemNodes; i++ ) {
+            answer.at(i) = elem->giveNode(HexaQuadNodeMapping [ i - 1 ])->giveNumber() - 1;
+        }
     } else {
-        OOFEM_ERROR2( "VTKXMLExportModule: unsupported element geometry type on element %d", elem->giveNumber() );
+        OOFEM_ERROR("VTKExportModule: unsupported element geometry type");
     }
 
     return;
@@ -393,11 +437,15 @@ VTKXMLExportModule :: giveNumberOfElementCells(Element *elem)
 {
     Element_Geometry_Type elemGT = elem->giveGeometryType();
 
-    if ( ( elemGT == EGT_triangle_1 ) || ( elemGT == EGT_triangle_2 ) || ( elemGT == EGT_tetra_1 ) ||
-        ( elemGT == EGT_quad_1 ) || ( elemGT == EGT_quad_2 ) || ( elemGT == EGT_hexa_1 ) ) {
+    if ( ( elemGT == EGT_point ) ||
+        ( elemGT == EGT_line_1 ) || ( elemGT == EGT_line_2 ) ||
+        ( elemGT == EGT_triangle_1 ) || ( elemGT == EGT_triangle_2 ) ||
+        ( elemGT == EGT_tetra_1 ) || ( elemGT == EGT_tetra_2 ) ||
+        ( elemGT == EGT_quad_1 ) || ( elemGT == EGT_quad_2 ) ||
+        ( elemGT == EGT_hexa_1 ) || ( elemGT == EGT_hexa_2 ) ) {
         return 1;
     } else {
-        OOFEM_ERROR2( "VTKXMLExportModule: unsupported element geometry type on element %d", elem->giveNumber() );
+        OOFEM_ERROR("VTKExportModule: unsupported element geometry type");
     }
 
     return 0;
