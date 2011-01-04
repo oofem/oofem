@@ -813,7 +813,7 @@ void LSpace :: drawTriad(FloatArray &coords, int isurf)
 
     this->interpolation.computeSurfaceMapping(snodes, dofManArray, isurf);
     for ( i = 1; i <= 4; i++ ) {
-        gc.add( domain->giveNode( snodes.at(i) )->giveCoordinates() );
+      gc.add( *( domain->giveNode( snodes.at(i) )->giveCoordinates() ) );
     }
 
     gc.times(1. / 4.);
