@@ -41,6 +41,7 @@
  #include <stdlib.h> // for NULL
 #endif
 
+
 namespace oofem {
 class FEMComponent;
 
@@ -231,7 +232,7 @@ AList< T > :: at(int i)
 {
 #ifdef DEBUG
     if ( i <= 0 ) {
-        OOFEM_ERROR("AList :: at - Asking for negative or zero indices (%d)", i);
+        OOFEM_ERROR2("AList :: at - Asking for negative or zero indices (%d)", i);
     }
 #endif
     return values [ i - 1 ];
@@ -244,7 +245,7 @@ AList< T > :: includes(int i)
 {
 #ifdef DEBUG
     if ( i <= 0 ) {
-        OOFEM_ERROR("AList :: includes - Asking for negative or zero indices (%d)", i);
+        OOFEM_ERROR2("AList :: includes - Asking for negative or zero indices (%d)", i);
     }
 #endif
     if ( i > size ) {
