@@ -272,7 +272,7 @@ public:
      * The key method of class Dof. Returns the value of the unknown of the receiver
      * at given time step associated to given field.
      * @param field Field used to provide values.
-     * @param Mode of unknown.
+     * @param mode Mode of unknown.
      * @param stepN Time step when unknown is requested. See documentation of particular EngngModel
      * class for valid stepN values (most implementation can return only values for current
      * and possibly for previous time step).
@@ -513,7 +513,7 @@ public:
      * to which receiver belongs has DofManager_shared dofManagerParallelMode type.
      * Unknown is unpacked and stored in unknowns dictionary, if DOFManager
      * to which receiver belongs has DofManager_remote dofManagerParallelMode type.
-     * There is no reason for invoking this service if  DOFManager has DofManager_local mode.
+     * There is no reason for invoking this service if DOFManager has DofManager_local mode.
      * If do is slave, then no unpacking and updating is done. This is left on master, which must be
      * available on same partition.
      * @param buff Buffer containing packed message.
