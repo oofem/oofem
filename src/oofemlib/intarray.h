@@ -48,7 +48,6 @@
 #define intarray_h
 
 #include "freestor.h"
-#include "debug.h"
 
 #include "contextioresulttype.h"
 #include "contextmode.h"
