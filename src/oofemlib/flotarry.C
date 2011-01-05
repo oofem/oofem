@@ -88,15 +88,10 @@ FloatArray :: FloatArray(const FloatArray &src)
 FloatArray &
 FloatArray :: operator = ( const FloatArray & src )
 {
-    // assignment: cleanup and copy
-    double *srcVal;
-
     if ( this != & src ) { // beware of s=s;
         this->resize(src.size);
-
-        srcVal = src.givePointer();
-        for ( int i = 0; i < size; i++ ) {
-            this->values [ i ] = srcVal [ i ];
+        for ( int i = 0; i < this->size; i++ ) {
+            this->values [ i ] = src.values [ i ];
         }
     }
 
@@ -109,89 +104,112 @@ void FloatArray :: add(const FloatArray &b)
 // receiver's size is 0, adjusts its size to that of b. Returns the
 // receiver.
 {
-    int i;
-    double *p1, *p2;
-
     if ( b.size == 0 ) {
         return;
     }
 
-    if ( !size ) {                            // null-sized array
-        resize(b.size);
-        zero();
+    if ( !size ) {
+        *this = b;
+        return;
     }
 
-    if ( size != b.size ) {              // mismatching sizes
+    if ( size != b.size ) {
         OOFEM_ERROR3("FloatArray :: add :  dimension mismatch in a[%d]->add(b[%d])\n", size, b.size);
     }
 
-    p1 = values;
-    p2 = b.values;
-    i  = size;
-    while ( i-- ) {
-        * p1++ += * p2++;
+    for (int i = 0; i < this->size; i++) {
+        this->values[i] += b.values[i];
+    }
+}
+
+
+void FloatArray :: add(double offset)
+{
+    for (int i = 0; i < this->size; i++){
+        this->values[i] += offset;
     }
 }
 
 
 void FloatArray :: add(const double factor, const FloatArray &b)
 // Performs the operation a=a+factor*b, where a stands for the receiver. If the
-// receiver's size is 0, adjusts its size to that of b. Returns the
-// receiver.
+// receiver's size is 0, adjusts its size to that of b.
 {
-    int i;
-    double *p1, *p2;
-
     if ( b.giveSize() == 0 ) {
         return;
     }
 
-    if ( !size ) {                            // null-sized array
-        resize(b.size);
-        zero();
+    if ( !size ) {
+        *this = b;
+        this->times(factor);
     }
 
-    if ( size != b.size ) {                     // mismatching sizes
+#  ifdef DEBUG
+    if ( size != b.size ) {
         OOFEM_ERROR3("FloatArray :: add :  dimension mismatch in a[%d]->add(b[%d])\n", size, b.size);
     }
+#  endif
 
-    p1 = values;
-    p2 = b.values;
-    i  = size;
-    while ( i-- ) {
-        * p1++ += factor * ( * p2++ );
+    for (int i = 0; i < this->size; i++){
+        this->values[i] += factor*b.values[i];
     }
 }
 
 void FloatArray :: subtract(const FloatArray &src)
 // Performs the operation a=a-src, where a stands for the receiver. If the
-// receiver's size is 0, adjusts its size to that of src. Returns the
-// receiver.
+// receiver's size is 0, adjusts its size to that of src.
 {
-    int i;
-    double *p1, *p2;
-
     if ( src.giveSize() == 0 ) {
         return;
     }
 
-    if ( !size ) {                            // null-sized array
+    if ( !size ) {
         this->resize(size = src.size);
         this->zero();
     }
 
 #  ifdef DEBUG
-    if ( size != src.size ) {              // mismatching sizes
+    if ( this->size != src.size ) {
         OOFEM_ERROR3("FloatArray dimension mismatch in a[%d]->add(b[%d])\n", size, src.size);
     }
-
 #  endif
 
-    p1 = values;
-    p2 = src.values;
-    i  = size;
-    while ( i-- ) {
-        * p1++ -= * p2++;
+    for (int i = 0; i < this->size; i++){
+        this->values[i] -= src.values[i];
+    }
+}
+
+
+void FloatArray :: beMaxOf(const FloatArray &a, const FloatArray &b)
+{
+    int n = a.giveSize();
+
+#  ifdef DEBUG
+    if ( n != b.size) {
+        OOFEM_ERROR3("FloatArray dimension mismatch in beMaxOf(a[%d],b[%d])\n", n, b.size);
+    }
+#  endif
+
+    this->resize(n);
+    for (int i = 0; i < n; i++) {
+        values[i] = max(a(i), b(i));
+    }
+}
+
+
+void FloatArray :: beMinOf(const FloatArray &a, const FloatArray &b)
+{
+    int n = a.giveSize();
+
+#  ifdef DEBUG
+    if ( n != b.size) {
+        OOFEM_ERROR3("FloatArray dimension mismatch in beMinOf(a[%d],b[%d])\n", n, b.size);
+    }
+#  endif
+
+    this->resize(n);
+    for (int i = 0; i < n; i++) {
+        values[i] = min(a(i), b(i));
     }
 }
 
@@ -203,7 +221,6 @@ void FloatArray :: beSubArrayOf(const FloatArray &src, const IntArray &indx)
 // and on i-th position of subVector will be this->at(indx->at(i))
 //
 {
-    //FloatArray *answer;
     int i, ii, n, isize;
 
     n = indx.giveSize();
@@ -220,7 +237,6 @@ void FloatArray :: beSubArrayOf(const FloatArray &src, const IntArray &indx)
         }
     }
 
-    //answer = new FloatArray (isize);
     this->resize(isize);
     for ( i = 1; i <= n; i++ ) {
         ii = indx.at(i);
@@ -261,28 +277,23 @@ void FloatArray :: beVectorProductOf(const FloatArray &v1, const FloatArray &v2)
     this->at(3) = v1.at(1) * v2.at(2) - v1.at(2) * v2.at(1);
 }
 
-/*
+
 double FloatArray :: dotProduct(const FloatArray &x) const
 {
-    int i;
-    double *p1, *p2, answer = 0.;
+#  ifdef DEBUG
 
-#ifdef DEBUG
-    if (x.size != this->size) {
-        OOFEM_ERROR("FloatArray :: dotProduct : Size mismatch");
+    if (this->size != x.size) {
+        OOFEM_ERROR3("FloatArray :: dotProduct :  dimension mismatch in a[%d]->dotProduct(b[%d])\n", this->size, x.size);
     }
-#endif
+#  endif
 
-    i = this->size;
-    p1 = this->values;
-    p2 = x.values;
-    while ( i-- ) {
-        answer += (* p1++) * (* p2++);
+    double dp = 0;
+    for (int i = 0; i < this->size; i++) {
+        dp += this->values[i]*x.values[i];
     }
-
-    return answer;
+    return dp;
 }
-*/
+
 
 double FloatArray :: distance(const FloatArray &x) const
 {
@@ -291,10 +302,8 @@ double FloatArray :: distance(const FloatArray &x) const
 
 
 double FloatArray :: distance_square(const FloatArray &from) const
-//
 // returns distance between receiver and from from
 // computed using generalized pythagorean formulae
-//
 {
     double *p1, *p2, dx, dist = 0.;
 
@@ -450,32 +459,20 @@ void FloatArray :: hardResize(int n)
 
 
 bool FloatArray :: containsOnlyZeroes() const
-// Returns True if all coefficients of the receiver are 0, else returns
-// False.
 {
-    int i;
-    double *p;
-
-    p = values;
-    i = size;
-    while ( i-- ) {
-        if ( * p++ != 0. ) {
+    for (int i = 0; i < this->size; i++) {
+        if (this->values[i] != 0.) {
             return false;
         }
     }
-
     return true;
 }
 
 
 void FloatArray :: zero()
-// zeroes all values to zero
 {
-    int i;
-    if ( values ) {
-        for ( i = 0; i < size; i++ ) {
-            values [ i ] = 0.;
-        }
+    for (int i = 0; i < this->size; i++ ) {
+        this->values [ i ] = 0.;
     }
 }
 
@@ -532,15 +529,8 @@ void FloatArray :: beTProductOf(const FloatMatrix &aMatrix, const FloatArray &an
 
 void FloatArray :: negated()
 {
-    int i;
-    double x;
-    double *p;
-
-    i = size;
-    p = values;
-    while ( i-- ) {
-        x    = -* p;
-        * p++ = x;
+    for (int i = 0; i < this->size; i++) {
+        this->values[i] = -this->values[i];
     }
 }
 
@@ -591,13 +581,8 @@ void FloatArray :: rotatedWith(FloatMatrix &r, char mode)
 void FloatArray :: times(double factor)
 // Multiplies every coefficient of the receiver by factor.
 {
-    int i;
-    double *p;
-
-    p = values;
-    i = size;
-    while ( i-- ) {
-        * ( p++ ) *= factor;
+    for (int i = 0; i < this->size; i++ ) {
+        this->values[i] *= factor;
     }
 }
 

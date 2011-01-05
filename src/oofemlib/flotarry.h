@@ -236,17 +236,23 @@ public:
      * Adds array src to receiver. If the receiver's size is zero, it adjusts its size
      * to size of src array. If recever's size is nonzero and different from src
      * array size an error is generated.
+     * @param src Array to add to receiver.
      */
     void add(const FloatArray &src);
     /**
-     * Adds array src times factor to receiver.
+     * Adds array times factor to receiver.
      * If the receiver's size is zero, it adjusts its size
-     * to size of src array. If receiver's size is nonzero and different from src
+     * to size of b array. If receiver's size is nonzero and different from b
      * array size an error is generated.
-     * @param factor factor to be multiplied with FloatArray src
-     * @param b will be multiplied by factor and added to receiver
+     * @param factor Factor to be multiplied with b.
+     * @param b Will be multiplied by factor and added to receiver.
      */
     void add(double factor, const FloatArray &b);
+    /**
+     * Adds scalar to receiver.
+     * @param offset Scalar to add
+     */
+    void add(double offset);
     /**
      * Subtracts array src to receiver. If the receiver's size is zero, it adjusts its size
      * to size of src array. If recever's size is nonzero and different from src
@@ -254,10 +260,22 @@ public:
      */
     void subtract(const FloatArray &src);
     /**
-     * Multiplies reciever with scalar.
+     * Multiplies receiver with scalar.
      * @param s Scalar to multiply by.
      */
     void times(double s);
+    /**
+     * Sets receiver to maximum of a or b's respective elements.
+     * @param a Array of size n.
+     * @param b Array of size n.
+     */
+    void beMaxOf(const FloatArray &a, const FloatArray &b);
+    /**
+     * Sets receiver to be minimum of a or b's respective elements.
+     * @param a Array of size n.
+     * @param b Array of size n.
+     */
+    void beMinOf(const FloatArray &a, const FloatArray &b);
     /**
      * Extract sub vector form src array and stores the result into receiver.
      * @param src source vector for sub vector
