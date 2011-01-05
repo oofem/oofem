@@ -916,7 +916,7 @@ protected:
 template< class T >void
 Element :: ipEvaluator( T *src, void ( T :: *f )( GaussPoint * gp ) )
 {
-    int ir, ip, nir, nip;
+    int ir, ip, nip;
     GaussPoint *gp;
 
     for ( ir = 0; ir < numberOfIntegrationRules; ir++ ) {
