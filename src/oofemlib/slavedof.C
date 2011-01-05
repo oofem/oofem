@@ -1,7 +1,36 @@
-
-//
-//  termitovo - zaloha
-//
+/*
+ *
+ *                 #####    #####   ######  ######  ###   ###
+ *               ##   ##  ##   ##  ##      ##      ## ### ##
+ *              ##   ##  ##   ##  ####    ####    ##  #  ##
+ *             ##   ##  ##   ##  ##      ##      ##     ##
+ *            ##   ##  ##   ##  ##      ##      ##     ##
+ *            #####    #####   ##      ######  ##     ##
+ *
+ *
+ *             OOFEM : Object Oriented Finite Element Code
+ *
+ *               Copyright (C) 1993 - 2011   Borek Patzak
+ *
+ *
+ *
+ *       Czech Technical University, Faculty of Civil Engineering,
+ *   Department of Structural Mechanics, 166 29 Prague, Czech Republic
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
 
 #include "slavedof.h"
 #include "node.h"
@@ -15,16 +44,12 @@
 #endif
 
 namespace oofem {
-/**
- */
 SlaveDof :: SlaveDof(int n, DofManager *aNode, DofID id) : Dof(n, aNode, id), masterContribution()
 {
     countOfPrimaryMasterDofs = -1;
 }
 
 
-/**
- */
 void
 SlaveDof :: initialize(int cntOfMstrDfMngr, Node **mstrNode, const IntArray *mstrDofID, const FloatArray *mstrContribution)
 {
@@ -197,17 +222,6 @@ SlaveDof :: giveEquationNumbers(IntArray &masterEqNumbers, const UnknownNumberin
 }
 
 
-/**
- * Returns the value of the unknown associated with the receiver at given time step.
- * Slave simply asks vector of corresponding master dofs and own transformation
- * vector and returns result as dot product of these vectors. Standard element
- * services have to transform global unknown vector transform into their local c.s
- * before using it (when computing strain vector by \eps=Br, for example,
- * where B is element geometrical matrix). This transformation should contain also
- * nodal to global coordinate system transformation. So, this specialized
- * standard method for unknown query returns the corresponding master DOF value.
- * @see MasterDof::giveUnknown function
- */
 double SlaveDof :: giveUnknown(EquationID type, ValueModeType mode, TimeStep *stepN)
 {
     FloatArray masterUnknowns, t;
@@ -215,7 +229,7 @@ double SlaveDof :: giveUnknown(EquationID type, ValueModeType mode, TimeStep *st
     giveUnknowns(masterUnknowns, type, mode, stepN);
     computeDofTransformation(t);
 
-    return dotProduct( masterUnknowns, t, t.giveSize() );
+    return masterUnknowns.dotProduct(t);
 }
 
 double SlaveDof :: giveUnknown(PrimaryField &field, ValueModeType mode, TimeStep *stepN)
@@ -225,7 +239,7 @@ double SlaveDof :: giveUnknown(PrimaryField &field, ValueModeType mode, TimeStep
     giveUnknowns(masterUnknowns, field, mode, stepN);
     computeDofTransformation(t);
 
-    return dotProduct( masterUnknowns, t, t.giveSize() );
+    return masterUnknowns.dotProduct(t);
 }
 
 

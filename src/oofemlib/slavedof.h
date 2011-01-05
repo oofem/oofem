@@ -1,10 +1,36 @@
-//
-//  termitovo - zaloha
-//
-
-//   ************************
-//   *** CLASS SLAVE DOF ***
-//   ************************
+/*
+ *
+ *                 #####    #####   ######  ######  ###   ###
+ *               ##   ##  ##   ##  ##      ##      ## ### ##
+ *              ##   ##  ##   ##  ####    ####    ##  #  ##
+ *             ##   ##  ##   ##  ##      ##      ##     ##
+ *            ##   ##  ##   ##  ##      ##      ##     ##
+ *            #####    #####   ##      ######  ##     ##
+ *
+ *
+ *             OOFEM : Object Oriented Finite Element Code
+ *
+ *               Copyright (C) 1993 - 2011   Borek Patzak
+ *
+ *
+ *
+ *       Czech Technical University, Faculty of Civil Engineering,
+ *   Department of Structural Mechanics, 166 29 Prague, Czech Republic
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
 
 #ifndef slavedof_h
 #define slavedof_h
@@ -26,28 +52,26 @@ namespace oofem {
 class SlaveDof : public Dof
 {
 protected:
-    /// count of Master DofManagers
+    /// Count of master DofManagers.
     int countOfMasterDofs;
-    /// count of Master DofManagers
+    /// Count of master DofManagers.
     int countOfPrimaryMasterDofs;
-    /// array of Masters
+    /// Array of master  DofManagers.
     IntArray masterDofMans;
-    /// array of masterDofMans dofIDs
+    /// Array of master dofIDs
     IntArray dofIDs;
-    /// vector of master contribution coefficients
+    /// Vector of master contribution coefficients.
     FloatArray masterContribution;
 
 public:
     /**
      * Constructor. Creates slave dof with number n, belonging to aNode dof manager.
-     * @param i dof number
-     * @param aNode receiver will belong to aNode dof manager
-     * @param id DofID of slave dof
+     * @param n Dof number.
+     * @param aNode Node receiver will belong to.
+     * @param id DofID of slave dof.
      */
     SlaveDof(int n, DofManager *aNode, DofID id = Undef);
-    /**
-     * Destructor.
-     */
+    /// Destructor.
     ~SlaveDof(void) { }
 
     void initialize(int cntOfMstrDfMngr, Node **mstrNode, const IntArray *mstrDofID, const FloatArray *mstrContribution);
@@ -59,6 +83,17 @@ public:
     void computeDofTransformation(FloatArray &masterContribs);
     void giveEquationNumbers(IntArray &masterEqNumbers, const UnknownNumberingScheme &s);
 
+    /**
+     * Returns the value of the unknown associated with the receiver at given time step.
+     * Slave simply asks vector of corresponding master dofs and own transformation
+     * vector and returns result as dot product of these vectors. Standard element
+     * services have to transform global unknown vector transform into their local c.s
+     * before using it (when computing strain vector by @f$\epsilon = B\cdot r @f$, for example,
+     * where B is element geometrical matrix). This transformation should contain also
+     * nodal to global coordinate system transformation. So, this specialized
+     * standard method for unknown query returns the corresponding master DOF value.
+     * @see MasterDof::giveUnknown
+     */
     double giveUnknown(EquationID type, ValueModeType mode, TimeStep *stepN);
     double giveUnknown(PrimaryField &field, ValueModeType mode, TimeStep *stepN);
     /**
@@ -76,8 +111,8 @@ public:
      * Returns equation number corresponding to receiver.
      * Rigid Arm Slave have equation number undefined.
      * Usually single dof in node connected using rigid arm is
-     * contributing to several master dofs (diplacement to displacement and rotations in master).
-     * @return prints error msg and exits.
+     * contributing to several master dofs (displacement to displacement and rotations in master).
+     * @return Prints error message and exits.
      */
     int __giveEquationNumber(void) const {
         _error("giveEquationNumber: undefined");
@@ -88,8 +123,8 @@ public:
      * Returns equation number corresponding to receiver.
      * Rigid Arm Slave have equation number undefined.
      * Usually single dof in node connected using rigid arm is
-     * contributing to several master dofs (diplacement to displacement and rotations in master).
-     * @return prints error msg and exits.
+     * contributing to several master dofs (displacement to displacement and rotations in master).
+     * @return Prints error message and exits.
      */
     int __givePrescribedEquationNumber(void) {
         _error("givePrescribedEquationNumber: undefined");
@@ -102,59 +137,33 @@ public:
 
     /**
      * Returns boundary condition of dof if it is prescribed.
-     * HangingDof can not be subjected to bc, it is only mapping to master
-     * @return returns NULL if no BC applied, otherwise pointer to correcpondig BC.
+     * HangingDof can not be subjected to BC, it is only mapping to master
+     * @return NULL if no BC applied, otherwise pointer to corresponding BC.
      */
     bool hasBc(TimeStep *tStep) { return false; }
 
     /**
      * Returns initial condition of dof if it is prescribed.
-     * HangingDof can not be subjected to ic, it is only mapping to master
+     * HangingDof can not be subjected to IC, it is only mapping to master
      * @see MasterDof::hasIc
      */
     bool hasIc() { return false; }
 
     /**
-     * RigidArmSlaveDof can not be subjected to ic - it is only mapping to master.
+     * RigidArmSlaveDof can not be subjected to IC - it is only mapping to master.
      * @see MasterDof::hasIc
      */
     bool hasIcOn(ValueModeType) { return false; }
 
-    /** Returns the id of associated boundary condition, if there is any.
-     * Used only for printing purposes. In general, id could not be used
-     * to decide whether bc is active. Use appropriate services instead.
-     * @param id of associated Boundary condition, zero otherwise
-     */
     int giveBcId() { return 0; }
-    /** Returns the id of associated initial condition, if there is any.
-     * Used only for printing purposes. In general, id could not be used
-     * to decide whether bc is active. Use appropriate services instead.
-     * @param id of associated initial condition, zero otherwise
-     */
     int giveIcId() { return 0; }
 
-    /// Stores receiver state to output stream.
-    virtual contextIOResultType    saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-    /// Restores the receiver state previously written in stream.
-    virtual contextIOResultType    restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 
-    /**
-     * Returns class name of the receiver.
-     */
     const char *giveClassName() const { return "SlaveDof"; }
-
-    /**
-     * Returns classType id of receiver.
-     */
     classType giveClassID() const { return SlaveDofClass; }
 
-    /**
-     * Local renumbering support. For some tasks (parallel load balancing, for example) it is necessary to
-     * renumber the entities. The various fem components (such as nodes or elements) typically contain
-     * links to other entities in terms of their local numbers, etc. This service allows to update
-     * these relations to reflext updated numbering. The renumbering funciton is passed, which is supposed
-     * to return an updated number of specified entyty type based on old number.
-     */
     virtual void updateLocalNumbering(EntityRenumberingFunctor &f);
 
 protected:
