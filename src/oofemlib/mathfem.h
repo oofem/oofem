@@ -87,6 +87,10 @@ inline double min(double i, double j)
 inline int max(int i, int j)
 { return ( i >= j ? i : j ); }
 
+/// Returns the clamped value of a between upper and lower
+inline double clamp(int a, int lower, int upper)
+{ return ( a <= lower ? lower : ( a >= upper ? upper : a) ); }
+
 /// Returns bigger value form two given long decimals
 inline long max(long i, long j)
 { return ( i >= j ? i : j ); }
@@ -95,32 +99,48 @@ inline long max(long i, long j)
 inline double max(double i, double j)
 { return ( i >= j ? i : j ); }
 
+/// Returns the clamped value of a between upper and lower
+inline double clamp(double a, double lower, double upper)
+{ return ( a <= lower ? lower : ( a >= upper ? upper : a) ); }
+
 /// Returns the signum of given value (if value is < 0 returns -1, otherwise returns 1)
 inline double sgn(double i)
 { return ( i < 0. ? -1. : 1. ); }
 
-/// Returns the postive part of given float
-inline double macbra(double x) { return ( x + fabs(x) ) / 2.0; }
+/// Returns the positive part of given float
+inline double macbra(double x) { return ( x >= 0 ? x : 0 ); }
 /// Returns the negative part of given float
-inline double negbra(double x) { return ( x - fabs(x) ) / 2.0; }
+inline double negbra(double x) { return ( x <= 0 ? x : 0 ); }
 
 /**
  * Solves cubic equation for real roots.
- * @param a,b,c,d - coefficients of equation in form: \f$ax^3 + bx^2 + cx + d = 0\f$
- * @param r1,r2,r3 - roots (only first num roots is valid)
- * @param num      - number of roots resolved
+ * The coefficients a to d gives the equation @f$ a x^3 + b x^2 + c x + d = 0@f$.
+ * @param a Coefficient
+ * @param b Coefficient
+ * @param c Coefficient
+ * @param d Coefficient
+ * @param r1 First root
+ * @param r2 Second root
+ * @param r3 Third root
+ * @param num Number of roots resolved (only first num roots are valid).
  */
 void cubic(double a, double b, double c, double d, double *r1, double *r2, double *r3, int *num);
 
 /**
- * Solves cubic equation for real roots, assumung that if cubic polynomial given then only possibility
+ * Solves cubic equation for real roots, assuming that if cubic polynomial given then only possibility
  * is that only three real roots exists. But also accepts cubic coefficient degenerated to
  * quadratic or linear equation.
  * This is used by algorithms for computing principal strain/stresses to
  * overcome rounding errors.
- * @param a,b,c,d - coefficients of equation in form: \f$ax^3 + bx^2 + cx + d = 0\f$
- * @param r1,r2,r3 - roots (only first num roots is valid)
- * @param num      - number of roots resolved
+ * The coefficients a to d gives the equation @f$ a x^3 + b x^2 + c x + d = 0@f$.
+ * @param a Coefficient
+ * @param b Coefficient
+ * @param c Coefficient
+ * @param d Coefficient
+ * @param r1 First root.
+ * @param r2 Second root.
+ * @param r3 Third root.
+ * @param num Number of roots resolved (only first num roots are valid).
  */
 void cubic3r(double a, double b, double c, double d, double *r1, double *r2, double *r3, int *num);
 
