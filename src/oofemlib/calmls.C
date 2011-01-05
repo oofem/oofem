@@ -141,9 +141,6 @@ CylindricalALM :: solve(SparseMtrx *k, FloatArray *Ri, FloatArray *R0,
     double _RR, _rr;
     NM_Status status;
     bool converged, errorOutOfRangeFlag;
-#ifndef __PARALLEL_MODE
-    double *p1;
-#endif
     // print iteration header
     OOFEM_LOG_INFO("CALM: Initial step length: %-15e\n", deltaL);
     if ( nccdg == 0 ) {
@@ -212,7 +209,7 @@ CylindricalALM :: solve(SparseMtrx *k, FloatArray *Ri, FloatArray *R0,
  #endif
 #else
     if ( R0 ) {
-        RR0 = dotProduct(R0->givePointer(), R0->givePointer(), neq);
+        RR0 = R0->computeSquaredNorm();
     } else {
         RR0 = 0.0;
     }
@@ -266,7 +263,7 @@ restart:
     MPI_Allreduce(& myRR, & RR, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
  #endif
 #else
-    RR = dotProduct(R->givePointer(), R->givePointer(), neq);
+    RR = R->computeSquaredNorm();
 #endif
 
     if ( calm_Controll == calm_hpc_off ) {
@@ -282,7 +279,7 @@ restart:
         MPI_Allreduce(& myrr, & rr, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
  #endif
 #else
-        rr = dotProduct(deltaRt.givePointer(), deltaRt.givePointer(), neq);
+        rr = deltaRt.computeSquaredNorm();
 #endif
         p = sqrt(rr + Psi * Psi * RR);
     } else if ( calm_Controll == calm_hpc_on ) {
@@ -339,7 +336,7 @@ restart:
     MPI_Allreduce(& myrR, & rR, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
  #endif
 #else
-    rR = dotProduct(deltaRt.givePointer(), R->givePointer(), neq);
+    rR = deltaRt.computeSquaredNorm();
 #endif
     /* rR is unscaled Bergan's param of current stiffness rR = deltaRt^T k deltaRt
      * this is used to test whether k has negative or positive slope */
@@ -604,9 +601,7 @@ restart:
     bk = bk / colp [ 1 ];
  #endif
 #else
-    p1 = DeltaR->givePointer();
-    bk = DeltaLambda * dotProduct(R->givePointer(), p1, neq);
-    bk = bk / dotProduct(p1, p1, neq);
+    bk = DeltaLambda * DeltaR->dotProduct(*R) / DeltaR->computeSquaredNorm();
 #endif
 
     if ( tNow->giveNumber() == 1 ) {
@@ -875,9 +870,9 @@ CylindricalALM :: checkConvergence(FloatArray &R, FloatArray *R0, FloatArray &F,
  #endif
 #else
         // err is relative error of unbalanced forces
-        forceErr = dotProduct( rhs.givePointer(), rhs.givePointer(), rhs.giveSize() );
+        forceErr = rhs.computeSquaredNorm();
         // err is relative displacement change
-        drr = dotProduct( r.givePointer(), r.givePointer(), r.giveSize() );
+        drr = r.computeSquaredNorm();
 
 #endif
         // we compute a relative error norm
@@ -886,7 +881,7 @@ CylindricalALM :: checkConvergence(FloatArray &R, FloatArray *R0, FloatArray &F,
         } else if ( internalForcesEBENorm > calm_SMALL_ERROR_NUM ) {
             forceErr = sqrt(forceErr / internalForcesEBENorm);
         } else {
-            sqrt(forceErr);
+            forceErr = sqrt(forceErr);
         }
 
         //
@@ -1329,14 +1324,14 @@ CylindricalALM :: computeDeltaLambda(double &deltaLambda, FloatArray &DeltaR, Fl
  #endif
 #else
             p1 = deltaRt.givePointer();
-            rr = dotProduct(p1, p1, neq);
+            rr = deltaRt.computeSquaredNorm();
             a1 = eta * eta * rr + Psi * Psi * RR;
             a2 = RR * Psi * Psi * DeltaLambda0 * 2.0;
-            a2 += 2.0 *eta *dotProduct(DeltaR.givePointer(), p1, neq);
-            a2 += 2.0 *eta *eta *dotProduct(deltaR_.givePointer(), p1, neq);
-            a3 = dotProduct(DeltaR.givePointer(), DeltaR.givePointer(), neq);
-            a3 += 2.0 *eta *dotProduct(DeltaR.givePointer(), deltaR_.givePointer(), neq);
-            a3 += eta * eta * dotProduct(deltaR_, deltaR_, neq);
+            a2 += 2.0 * eta * DeltaR.dotProduct(deltaRt);
+            a2 += 2.0 * eta * eta * deltaR_.dotProduct(deltaRt);
+            a3 = DeltaR.computeSquaredNorm();
+            a3 += 2.0 *eta * DeltaR.dotProduct(deltaR_);
+            a3 += eta * eta * deltaR_.computeSquaredNorm();
             a3 += DeltaLambda0 * DeltaLambda0 * RR * Psi * Psi - deltaL * deltaL;
 #endif
         } else if ( calm_Controll == calm_hpc_on ) {
@@ -1615,10 +1610,10 @@ CylindricalALM :: do_lineSearch(FloatArray &r, FloatArray &rInitial, FloatArray 
     d9 = cold [ 3 ];
  #endif
 #else
-    d6 = dotProduct(deltaR_, F, neq);
-    d7 = dotProduct(deltaRt, F, neq);
-    d8 = -1.0 * dotProduct(deltaR_, R, neq);
-    d9 = -1.0 * dotProduct(deltaRt, R, neq);
+    d6 = deltaR_.dotProduct(F);
+    d7 = deltaRt.dotProduct(F);
+    d8 = -1.0 * deltaR_.dotProduct(R);
+    d9 = -1.0 * deltaRt.dotProduct(R);
 #endif
     double e1, e2, d10 = 0.0, d11 = 0.0;
     double s0, si;
@@ -1713,8 +1708,8 @@ CylindricalALM :: do_lineSearch(FloatArray &r, FloatArray &rInitial, FloatArray 
         e2 = cole [ 1 ];
  #endif
 #else
-        e1 = dotProduct(deltaR_, F, neq);
-        e2 = dotProduct(deltaRt, F, neq);
+        e1 = deltaR_.dotProduct(F);
+        e2 = deltaRt.dotProduct(F);
 #endif
 
         s0 = d6 + deltaLambda * d7 + Lambda * d8 + deltaLambda * Lambda * d9 + d10 + deltaLambda * d11;
