@@ -870,23 +870,13 @@ Element :: giveLenghtInDir(const FloatArray &normalToCrackPlane)
 // to direction given by normalToCrackPlane;
 //
 {
-    FloatArray *coords;
     double maxDis, minDis, dis;
-    double *p1, *p2;
-    int i, nsize, nnode = giveNumberOfNodes();
+    int nnode = giveNumberOfNodes();
 
-    p1 = normalToCrackPlane.givePointer();
-    coords = this->giveNode(1)->giveCoordinates();
-    p2 = coords->givePointer();
-    nsize = coords->giveSize();
-    minDis = maxDis = dotProduct(p1, p2, nsize);
+    minDis = maxDis = normalToCrackPlane.dotProduct(*this->giveNode(1)->giveCoordinates());
 
-
-    for ( i = 2; i <= nnode; i++ ) {
-        coords = this->giveNode(i)->giveCoordinates();
-        p2 = coords->givePointer();
-        nsize = coords->giveSize();
-        dis = dotProduct(p1, p2, nsize);
+    for (int i = 2; i <= nnode; i++ ) {
+        dis = normalToCrackPlane.dotProduct(*this->giveNode(i)->giveCoordinates());
         if ( dis > maxDis ) {
             maxDis = dis;
         } else if ( dis < minDis ) {
