@@ -42,7 +42,7 @@
 
 /* DSS module lives in global namespace, not in oofem namespace */
 class DSSolver;
-class SparseMatrixF;
+struct SparseMatrixF;
 
 namespace oofem {
 /**
