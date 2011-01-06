@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/freestor.C,v 1.5.4.1 2004/04/05 15:19:43 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -32,8 +31,6 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-
-/*   file FREESTOR.C */
 
 #include "freestor.h"
 #include "compiler.h"
@@ -86,7 +83,7 @@ int *allocInt(int n)
 }
 
 
-void  freeStoreError()
+void freeStoreError()
 // This function is called whenever operator "new" is unable to allocate
 // memory.
 {
@@ -94,7 +91,7 @@ void  freeStoreError()
 }
 
 
-void  freeDouble(double *a)
+void freeDouble(double *a)
 // Deallocates the list of decimals 'a'.
 {
     //#ifdef SUN_STATION
@@ -105,7 +102,7 @@ void  freeDouble(double *a)
 }
 
 
-void  freeInt(int *a)
+void freeInt(int *a)
 // Deallocates the list of integers 'a'.
 {
     //#ifdef SUN_STATION

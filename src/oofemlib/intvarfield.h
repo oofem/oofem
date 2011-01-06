@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/field.h,v 1.1.4.1 2004/04/05 15:19:43 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -43,53 +42,40 @@
 
 namespace oofem {
 /**
- * Abstract class representing a field of an internal variable. Field represent the spatial distribution of certain variable and is able to evaluate its value at any point of interest. The field is usually associated to the specific domain.
- * It uses MaterialMappingAlgorithm interface to perform interpolation. Note, that some classes implementing MaterialMappingAlgorithm may require that elements implement corresponding interface.
+ * Abstract class representing a field of an internal variable.
+ * Field represent the spatial distribution of certain variable and is able to
+ * evaluate its value at any point of interest.
+ * The field is usually associated to the specific domain.
  *
+ * It uses MaterialMappingAlgorithm interface to perform interpolation.
+ * Note, that some classes implementing MaterialMappingAlgorithm may require
+ * that elements implement corresponding interface.
  */
 class InternalVariableField : public Field
 {
 protected:
-    /// matrial mapping algorithm used
+    /// Material mapping algorithm used.
     MaterialMappingAlgorithm *mma;
-    /// InternalStateType
+    /// InternalStateType.
     InternalStateType type;
-    /// Source domain
+    /// Source domain.
     Domain *domain;
 
 public:
-    /** Constructor. Creates a internal variable field of given type associated to given domain.
+    /**
+     * Constructor. Creates a internal variable field of given type associated to given domain.
+     * @param ist Physical meaning of field.
+     * @param b Field type.
+     * @param mma_type Algorithm used to map materials.
+     * @param d Domain which field belongs to.
      */
     InternalVariableField(InternalStateType ist, FieldType b, MaterialMappingAlgorithmType mma_type, Domain *d);
     ~InternalVariableField();
-    /** Evaluates the field at given point
-     *  @param coords coordinates of the point of interest
-     *  @return error code (0-ok, 1-point not found in domain)
-     */
-    virtual int evaluateAt(FloatArray &answer, FloatArray &coords, IntArray &dofId,
-                           ValueModeType mode, TimeStep *atTime);
-    /// Returns the InternalStateType of receiver
+
+    virtual int evaluateAt(FloatArray &answer, FloatArray &coords, IntArray &dofId, ValueModeType mode, TimeStep *atTime);
     InternalStateType giveType() { return type; }
-
-    /** Stores receiver state to output stream.
-     *  Writes the FEMComponent class-id in order to allow test whether correct data are then restored.
-     *  @param stream output stream
-     *  @param mode determines ammount of info in stream (state, definition,...)
-     *  @return contextIOResultType
-     *  @exception throws an ContextIOERR exception if error encountered
-     */
-    virtual contextIOResultType    saveContext(DataStream *stream, ContextMode mode);
-    /** Restores the receiver state previously written in stream.
-     *  Reads the FEMComponent class-id in order to allow test consistency.
-     *  @see saveContext member function.
-     *  @return contextIOResultType
-     *  @exception throws an ContextIOERR exception if error encountered
-     */
-    virtual contextIOResultType    restoreContext(DataStream *stream, ContextMode mode);
-
-
-    /** Returns class name of the receiver.
-     */
+    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode);
+    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode);
     virtual const char *giveClassName() const { return "InternalVariableField"; }
 };
 } // end namespace oofem

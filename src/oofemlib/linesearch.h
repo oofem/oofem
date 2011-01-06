@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/linesearch.h,v 1.3 2003/04/06 14:08:25 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -34,17 +33,10 @@
  */
 
 
-//   **************************
-//   *** CLASS LineSearchNM ***
-//   **************************
-
-
 #ifndef linesearch_h
 #define linesearch_h
 
-
 #include "nummet.h"
-
 #include "nmstatus.h"
 
 #ifndef __MAKEDEPEND
@@ -56,10 +48,9 @@ class EngngModel;
 class SparseMtrx;
 class FloatArray;
 
-
 /**
  * This base class is an abstraction/implementation for numerical method solving
- * line search optimisation problem.
+ * line search optimization problem.
  */
 class LineSearchNM : public NumericalMethod
 {
@@ -89,26 +80,27 @@ public:
     classType giveClassID() const { return NumericalMethodClass; }
 
     /**
-     * Solves the line search optimalisation problem in the form of $g(r)=0; r_{new}=r_{old}+\eta\delta r; 0 < \eta < 1$,
-     * The aim is to find $\eta$ so that the $g(r)$ has decresed sufficiently.
+     * Solves the line search optimization problem in the form of @f$ g(r)=0; r_{new}=r_{old}+\eta\delta r; 0 < \eta < 1 @f$,
+     * The aim is to find @f$ \eta @f$ so that the @f$ g(r) @f$ has decreased sufficiently.
      * The total solution vector is updated at exit as well as InternalRhs vector.
-     * @param r  old total solution (total displacement)
-     * @param dr increment of solution (incremental displacaments)
-     * @param F  old InternalRhs (real internal forces)
-     * @param R  reference incremental Rhs (incremental load)
-     * @param R0 initial Rhs (initial load)
-     * @param etaValue reached eta value
-     * @param status linesearch status
+     * @param r  Old total solution.
+     * @param dr Increment of solution.
+     * @param F  Old InternalRhs (real internal forces).
+     * @param R  Reference incremental Rhs (incremental load).
+     * @param R0 Initial Rhs (initial load).
+     * @param eqnmask Equation numbers to mask out from computations.
+     * @param lambda Scaling of R.
+     * @param etaValue Reached eta value.
+     * @param status Linesearch status
+     * @param tStep Time step.
      */
     virtual NM_Status solve(FloatArray *r, FloatArray *dr, FloatArray *F, FloatArray *R, FloatArray *R0,
-                            IntArray &eqnmask, double lambda, double &etaValue, LS_status &status, TimeStep *);
+                            IntArray &eqnmask, double lambda, double &etaValue, LS_status &status, TimeStep *tStep);
 
-    // management  components
+    // Management  components
     IRResultType initializeFrom(InputRecord *ir);
-    contextIOResultType    saveContext(DataStream *stream, ContextMode mode, void *obj = NULL) { return CIO_OK; }
-    contextIOResultType    restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL) { return CIO_OK; }
-
-
+    contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL) { return CIO_OK; }
+    contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL) { return CIO_OK; }
 
 protected:
     void search(int istep, FloatArray &prod, FloatArray &eta, double amp, double maxeta, double mineta, int &status);

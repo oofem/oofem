@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/freestor.h,v 1.5 2003/04/06 14:08:24 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -33,13 +32,6 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-
-/*
- * //   ********************************************
- * //   *** DYNAMIC MEMORY ALLOCATION PROCEDURES ***
- * //   ********************************************
- */
-
 #ifndef freestor_h
 #define freestor_h
 
@@ -52,28 +44,32 @@ namespace oofem {
 /**
  * Allocates space for given number of doubles and returns pointer to newly allocated space in memory.
  * Uses standard malloc. If not enough memory is available, freeStoreError procedure is called.
+ * @param n Number of doubles to allocate.
  * @return pointer to newly allocated space.
  */
-double *allocDouble(int);
+double *allocDouble(int n);
 /**
  * Allocates space for given number of ints and returns pointer to newly allocated space in memory.
  * Uses standard malloc. If not enough memory is available, freeStoreError procedure is called.
+ * @param n Number of integers to allocate.
  * @return pointer to newly allocated space.
  */
-int *allocInt(int);
+int *allocInt(int n);
 /**
  * This function is called whenever system is unable to allocate
  * required memory.
  */
-void     freeStoreError();
+void freeStoreError();
 /**
- * Deallocates the array of decimals 'a'.
+ * Deallocates the array of integers.
+ * @apram a Integers to deallocate.
  */
-void     freeInt(int *);
+void freeInt(int *a);
 /**
- * Deallocates the array of doubles 'a'.
+ * Deallocates the array of doubles.
+ * @param a Doubles to deallocate.
  */
-void     freeDouble(double *);
+void freeDouble(double *a);
 } // end namespace oofem
 #endif // freestor_h
 

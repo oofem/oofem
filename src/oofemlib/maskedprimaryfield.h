@@ -1,4 +1,3 @@
-/* $Id$ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2010   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -61,16 +60,8 @@ protected:
 public:
   MaskedPrimaryField (FieldType b, PrimaryField* m, IntArray& dofIdMask) : Field (b), mask(dofIdMask) {master = m;}
   
-  /** Evaluates the field at given point
-   * @param coords coordinates of the point of interest
-   * @return error code (0-ok, 1-point not found in domain)
-   */
   virtual int evaluateAt(FloatArray &answer, FloatArray &coords,
 			 ValueModeType mode, TimeStep *atTime) ;
-  /** Evaluates the field at given DofManager
-   * @param dofMan reference to dofManager
-   * @return error code (0-ok, 1-point not found in domain)
-   */
   virtual int evaluateAt(FloatArray &answer, DofManager* dman,
 			 ValueModeType mode, TimeStep *atTime) ;
   

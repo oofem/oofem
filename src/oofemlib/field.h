@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/field.h,v 1.1.4.1 2004/04/05 15:19:43 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -42,6 +41,8 @@
 #include "contextmode.h"
 
 namespace oofem {
+
+/// Physical type of field.
 enum FieldType {
     FT_Unknown,
 
@@ -65,30 +66,38 @@ enum FieldType {
 class Field
 {
 protected:
-    //Domain* domain;
     FieldType type;
 
-
 public:
-    /** Constructor. Creates a field of given type associated to given domain.
+    /** 
+     * Constructor. Creates a field of given type associated to given domain.
      */
     Field(FieldType b) { type = b; }
     virtual ~Field() { }
-    /** Evaluates the field at given point
-     * @param coords coordinates of the point of interest
-     * @return error code (0-ok, 1-point not found in domain)
+    /**
+     * Evaluates the field at given point.
+     * @param coords Coordinates of the point of interest
+     * @param answer Field evaluated at coordinate.
+     * @param atTime Time step to evaluate for.
+     * @param mode Mode of value (total, velocity,...).
+     * @return Zero if ok, otherwise nonzero.
      */
     virtual int evaluateAt(FloatArray &answer, FloatArray &coords,
                            ValueModeType mode, TimeStep *atTime) = 0;
-    /** Evaluates the field at given DofManager. This potentially can be resolved quickly, as 
+
+    /**
+     * Evaluates the field at given DofManager. This potentially can be resolved quickly, as
      * receiver data may be described using values at dofManagers. Here an additional issue
-     * exists: one needs to make sure, that passed dofman is from the same domain, so that its
-     * number can be used toperform tsuggested quick evaluation.
+     * exists: one needs to make sure, that passed dman is from the same domain, so that its
+     * number can be used to perform suggested quick evaluation.
      *
      * If this is not the case (the field is described differently),
      * the response can be evaluated using dofman coordinates in a standard way.
-     * @param dofMan reference to dofManager
-     * @return error code (0-ok, 1-failed)
+     * @param[out] answer Evaluated field for dman.
+     * @param dman Reference to dofManager.
+     * @param mode Mode of value (total, velocity,...).
+     * @param atTime Time step to evaluate for.
+     * @return Zero if ok, nonzero Error code (0-ok, 1-failed)
      */
     virtual int evaluateAt(FloatArray &answer, DofManager* dman,
                            ValueModeType mode, TimeStep *atTime) = 0;
@@ -96,44 +105,48 @@ public:
     /// Returns the type of receiver
     FieldType giveType() { return type; }
 
-
-    /** Stores receiver state to output stream.
+    /**
+     * Stores receiver state to output stream.
      * Writes the FEMComponent class-id in order to allow test whether correct data are then restored.
-     * @param stream output stream
-     * @param mode determines ammount of info in stream (state, definition,...)
-     * @return contextIOResultType
-     * @exception throws an ContextIOERR exception if error encountered
+     * @param stream Output stream.
+     * @param mode Determines amount of info in stream (state, definition,...).
+     * @return contextIOResultType.
+     * @exception Throws an ContextIOERR exception if error encountered.
      */
-    virtual contextIOResultType    saveContext(DataStream *stream, ContextMode mode) = 0;
-    /** Restores the receiver state previously written in stream.
+    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode) = 0;
+    /**
+     * Restores the receiver state previously written in stream.
      * Reads the FEMComponent class-id in order to allow test consistency.
-     * @see saveContext member function.
-     * @return contextIOResultType
-     * @exception throws an ContextIOERR exception if error encountered
+     * @param stream Input stream.
+     * @param mode Determines amount of info in stream (state, definition,...).
+     * @return contextIOResultType.
+     * @exception Throws an ContextIOERR exception if error encountered.
      */
-    virtual contextIOResultType    restoreContext(DataStream *stream, ContextMode mode) = 0;
+    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode) = 0;
 
-
-    /** Returns class name of the receiver.
-     */
-    virtual const char *giveClassName() const { return "Field"; }
-    /**@name error and warning reporting methods
+    /**
+     * @name Error and warning reporting methods
      * These methods will print error (or warning) message using oofem default loggers.
      * Do not use these methods directly, to avoid specify file and line parameters.
      * More preferably, use these methods via corresponding OOFEM_CLASS_ERROR and OOFEM_CLASS_WARNING macros,
      * that will include file and line parameters automatically.
      *
-     * Uses variable number of arguments, so a format string followed by optional argumens is expected
+     * Uses variable number of arguments, so a format string followed by optional arguments is expected
      * (according to printf conventions).
-     * @param file  source file name, where error encountered (where error* function called)
-     * @param line  source file line number, where error encountered
+     *
+     * @param file Source file name, where error encountered (where error* function called)
+     * @param line Source file line number, where error encountered
+     *
      */
     //@{
-    /// prints error message and exits
+    /// Prints error message and exits
     void error(const char *file, int line, const char *format, ...) const;
-    /// prints warning message
+    /// Prints warning message
     void warning(const char *file, int line, const char *format, ...) const;
     //@}
+
+    /// @return Class name of the receiver.
+    virtual const char *giveClassName() const { return "Field"; }
 };
 } // end namespace oofem
 #endif // field_h

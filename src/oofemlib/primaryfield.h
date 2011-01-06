@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/primaryfield.h,v 1.1 2003/04/06 14:08:25 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -64,7 +63,13 @@ public:
     /**
      * Evaluates the value of field at given point of interest (should be located inside receiver's volume) using
      * element interpolation.
-     * @return returns zero if ok, nonzero when error encountered.
+     * @param answer Field evaluated at coordinate.
+     * @param pf Field to use for evaluation.
+     * @param coords Coordinate.
+     * @param dofId IDs of DOFs to evaluate.
+     * @param mode Mode of field.
+     * @param atTime Time step to evaluate at.
+     * @return Zero if ok, nonzero when error encountered.
      */
   virtual int EIPrimaryFieldI_evaluateFieldVectorAt(FloatArray &answer, PrimaryField &pf,
 						    FloatArray &coords, IntArray &dofId, ValueModeType mode,
@@ -76,11 +81,11 @@ public:
  * Abstract class representing field of primary variables (those, which are unknown and are typically
  * associated to nodes).
  * In the current design the primary field is understood as simple database, that allows to keep track
- * of the history of a solution vector representing primary field. The histrory is kept as sequence of
+ * of the history of a solution vector representing primary field. The history is kept as sequence of
  * solution vectors. The history depth kept can be selected. PrimaryField class basically provides access to
- * time-dependent vectors of the field of unknowns. It adds the posibility to
+ * time-dependent vectors of the field of unknowns. It adds the possibility to
  * further interpolate the field values using element interpolation functions.
- * The prescribed values of the field are not maintatined, since they can be obtained directly from
+ * The prescribed values of the field are not maintained, since they can be obtained directly from
  * corresponding DOFs of associated domain.
  *
  * As the PrimaryField stores the state directly in solution vectors that are usually directly 
@@ -104,88 +109,103 @@ protected:
     int domainIndx;
     EquationID ut;
 public:
-    /** Constructor. Creates a field of given type associated to given domain.
+    /**
+     * Constructor. Creates a field of given type associated to given domain.
      * Not using pointer to domain, because this will prevent the use of PrimaryField as an
      * EngngModel attribute. This is because the domain does not exists when
      * PrimaryField is created (this is when EngngModel is created).
+     * @param a Engineering model which field belongs to.
+     * @param idomain Index of domain for field.
+     * @param ft Type of stored field.
+     * @param ut Equation ID for unknowns in field.
+     * @param nHist Number of old time steps to store.
      */
     PrimaryField(EngngModel *a, int idomain, FieldType ft, EquationID ut, int nHist);
     ~PrimaryField();
-    /** Copy unknowns from previous solution or DOF's dictionary to the solution vector
-     * @param mode what the unknown desribes (increment, total value etc.)
-     * @param atTime time of interest
-     * @param answer the resulting vector
+
+    /**
+     * Copy unknowns from previous solution or DOF's dictionary to the solution vector
+     * @param mode what the unknown describes (increment, total value etc.).
+     * @param atTime Time of interest.
+     * @param answer Resulting vector.
      */
     virtual void initialize(ValueModeType mode, TimeStep *atTime, FloatArray &answer);
 
-    /** Return value of interest at given DOF
-     * @param dof pointer to DOF
-     * @param mode what the unknown desribes (increment, total value etc.)
-     * @param atTime time of interest
+    /**
+     * @param dof Pointer to DOF.
+     * @param mode What the unknown describes (increment, total value etc.).
+     * @param atTime Time step of interest.
+     * @return Value of interest at given DOF.
      */
     virtual double giveUnknownValue(Dof *dof, ValueModeType mode, TimeStep *atTime);
-    /** Evaluates the field at given point
-     * @param coords coordinates of the point of interest
-     * @return error code (0-ok, 1-point not found in domain)
+    /**
+     * Evaluates the field at given point
+     * @param answer Evaluated field at point.
+     * @param coords Coordinates of the point of interest.
+     * @param mode Mode of evaluated unknowns.
+     * @param atTime Time step of interest.
+     * @return Error code (0-ok, 1-point not found in domain).
      */
     virtual int evaluateAt(FloatArray &answer, FloatArray &coords,
                            ValueModeType mode, TimeStep *atTime);
-    /** Evaluates the field at given DofManager
-     * @param dofMan reference to dofManager
-     * @return error code (0-ok, 1-point not found in domain)
+    /**
+     * Evaluates the field at given DofManager
+     * @param answer Evaluated field at dman.
+     * @param dman DOF manager to evaluate at.
+     * @param mode Mode of evaluated unknowns.
+     * @param atTime Time step of interest.
+     * @return Error code (0-ok, 1-point not found in domain).
      */
     virtual int evaluateAt(FloatArray &answer, DofManager* dman,
                            ValueModeType mode, TimeStep *atTime);
-    /** Evaluates the field at given dofman, allows to select specific 
-     * dofs using mask.
-     * @param coords coordinates of the point of interest
-     * @param dofId dof mask, id set to NULL, all Dofs evaluated
-     * return error code (0=ok, 1=point not found in domain)
+    /**
+     * Evaluates the field at given DOF manager, allows to select specific
+     * dofs using mask
+     * @param answer Evaluated field at dman.
+     * @param dman DOF manager of interest.
+     * @param mode Mode of evaluated unknowns.
+     * @param atTime Time step of interest.
+     * @param dofId Dof mask, id set to NULL, all Dofs evaluated.
+     * @return Error code (0=ok, 1=point not found in domain).
      */
     virtual int __evaluateAt(FloatArray &answer, DofManager* dman,
-			     ValueModeType mode, TimeStep *atTime, 
-			     IntArray *dofId);
-    /** Evaluates the field at given point, allows to select specific 
+			     ValueModeType mode, TimeStep *atTime, IntArray *dofId);
+    /**
+     * Evaluates the field at given point, allows to select specific
      * dofs using mask.
-     * @param coords coordinates of the point of interest
-     * @param dofId dof mask, id set to NULL, all Dofs evaluated
-     * return error code (0=ok, 1=point not found in domain)
+     * @param answer Evaluated field at coords.
+     * @param coords Coordinates of the point of interest.
+     * @param mode Mode of evaluated unknowns.
+     * @param atTime Time step of interest.
+     * @param dofId Dof mask, id set to NULL, all Dofs evaluated.
+     * @return Error code (0=ok, 1=point not found in domain)
      */
     virtual int __evaluateAt(FloatArray &answer, FloatArray& coords,
-			     ValueModeType mode, TimeStep *atTime, 
-			     IntArray *dofId);
+			     ValueModeType mode, TimeStep *atTime, IntArray *dofId);
     /**
+     * @param atTime Time step to take solution for.
+     * @return Solution vector for requested time step.
      */
     virtual FloatArray *giveSolutionVector(TimeStep *atTime);
 
-    /** Project @param vectorToStore back to DOF's dictionary
-     * @param mode what the unknown desribes (increment, total value etc.)
-     * @param atTime time
-     * @param vectorToStore vector with the size of number of equations
+    /**
+     * Project vectorToStore back to DOF's dictionary
+     * @param vectorToStore Vector with the size of number of equations.
+     * @param mode Mode of the unknown (increment, total value etc.)
+     * @param atTime Time step unknowns belong to.
      */
-    virtual void update(ValueModeType mode, TimeStep *atTime, FloatArray &vectorToStore)
-    {  };
+    virtual void update(ValueModeType mode, TimeStep *atTime, FloatArray &vectorToStore) { };
 
     /**
+     * Brings up a new solution vector for given time step.
+     * @param atTime Time step for new solution vector.
      */
     virtual void advanceSolution(TimeStep *atTime);
 
-    /** Stores receiver state to output stream.
-     * Writes the FEMComponent class-id in order to allow test whether correct data are then restored.
-     * @param stream output stream
-     * @param mode determines ammount of info required in stream (state, definition,...)
-     * @return contextIOResultType
-     * @exception throws an ContextIOERR exception if error encountered
-     */
-    virtual contextIOResultType    saveContext(DataStream *stream, ContextMode mode);
-    /** Restores the receiver state previously written in stream.
-     * Reads the FEMComponent class-id in order to allow test consistency.
-     * @see saveContext member function.
-     * @return contextIOResultType
-     * @exception throws an ContextIOERR exception if error encountered
-     */
-    virtual contextIOResultType    restoreContext(DataStream *stream, ContextMode mode);
+    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode);
+    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode);
 
+    /// @return Equation ID coupled to the field.
     EquationID giveEquationID() { return this->ut; }
 
 protected:
