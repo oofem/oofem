@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/sm/src/eleminterpunknownmapper.h,v 1.3 2003/04/06 14:08:30 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -33,10 +32,6 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-//   **********************************************************
-//   *** CLASS ELEMENT INTERPOLATION PRIMARY UNKNOWN MAPPER ***
-//   **********************************************************
-
 #ifndef eleminterpunknownmapper_h
 #define eleminterpunknownmapper_h
 
@@ -50,7 +45,7 @@ class TimeStep;
 
 
 /**
- * The class implementing the primary unknown mapper using element intrpolation functions.
+ * The class implementing the primary unknown mapper using element interpolation functions.
  * The basic task is to map the primary unknowns from one (old) mesh to the new one.
  * This task requires the special element algorithms, these are to be included using interface concept.
  * Requires the element support via EIPrimaryUnknownMapperInterface.
@@ -64,36 +59,10 @@ public:
     EIPrimaryUnknownMapper();
     /// Destructor
     ~EIPrimaryUnknownMapper() { }
-    /** Maps and updates the vector(s) of primary unknowns from old mesh oldd to new mesh newd.
-     * The result is stored in answer array.
-     * The interpolation of the primary unknowns is determined by element interpolation.
-     * The physical meaning of primary unknowns is determined by DofManagers.
-     * The ordering of unknowns in answer is determined by code numbers of
-     * new mesh dofmanagers.
-     * @param answer contains results
-     * @param mode determines the mode of unknown
-     * @param ut   determines unknown type
-     * @param oldd old mesh reference
-     * @param newd new mesh reference
-     * @param tStep time step
-     * @return nonzero if o.k.
-     */
+
     virtual int mapAndUpdate(FloatArray &answer, ValueModeType mode, EquationID ut,
                              Domain *oldd, Domain *newd,  TimeStep *tStep);
-    /**
-     * Evaluates the vector of primary unknowns, determined by domain, at given point.
-     * The physical meaning of primary unknowns mapped is determined by bacground
-     * element containing given point.
-     * @param answer contains evaluated unknown vector
-     * @param output parameter comtaining dofIDs of mapped values
-     * @param mode determines the type of unknown
-     * @param oldd old mesh reference (mesh with unknown field)
-     * @param coords coordinates of point of interest
-     * @param regList - list of regions where to search, if empty all region serach performed.
-     * @param tStep solution step
-     * @return nonzero if o.k.
-     */
-    virtual int evaluateAt(FloatArray &answer, IntArray &dofMAsk, EquationID ut, ValueModeType mode,
+    virtual int evaluateAt(FloatArray &answer, IntArray &dofMask, EquationID ut, ValueModeType mode,
                            Domain *oldd, FloatArray &coords, IntArray &regList, TimeStep *tStep);
 
 protected:

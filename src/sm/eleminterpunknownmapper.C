@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/sm/src/eleminterpunknownmapper.C,v 1.4.4.1 2004/04/05 15:19:46 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -111,7 +110,7 @@ EIPrimaryUnknownMapper :: mapAndUpdate(FloatArray &answer, ValueModeType mode, E
                 answer.assemble(unknownValues, locationArray);
             }
         } else {
-            _error2("mapAndUpdate: evaluateAt service failed for node %d", inode);
+            OOFEM_ERROR2("EIPrimaryUnknownMapper :: mapAndUpdate - evaluateAt service failed for node %d", inode);
         }
     }
 
@@ -147,9 +146,9 @@ EIPrimaryUnknownMapper :: evaluateAt(FloatArray &answer, IntArray &dofMask, Equa
     interface = ( EIPrimaryUnknownMapperInterface * ) ( oelem->giveInterface(EIPrimaryUnknownMapperInterfaceType) );
     if ( interface ) {
         interface->EIPrimaryUnknownMI_computePrimaryUnknownVectorAt(mode, tStep, coords, answer);
-        oelem->giveDofManDofIDMask(1, ut, dofMask);
+        interface->EIPrimaryUnknownMI_givePrimaryUnknownVectorDofID(dofMask);
     } else {
-        _error("mapAndUpdate: element does not support EIPrimaryUnknownMapperInterface");
+        OOFEM_ERROR("EIPrimaryUnknownMapper :: evaluateAt - Element does not support EIPrimaryUnknownMapperInterface");
     }
 
     return 1;
