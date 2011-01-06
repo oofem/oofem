@@ -252,7 +252,6 @@ void FloatMatrix :: beProductOf(const FloatMatrix &aMatrix, const FloatMatrix &b
     if ( aMatrix.nColumns != bMatrix.nRows ) {
         OOFEM_ERROR("FloatMatrix::beProductOf : error in product A*B : dimensions do not match");
     }
-
 #  endif
 
     p      = bMatrix.nColumns;
@@ -300,7 +299,6 @@ void FloatMatrix :: beTProductOf(const FloatMatrix &aMatrix, const FloatMatrix &
     if ( aMatrix.nRows != bMatrix.nRows ) {
         OOFEM_ERROR("FloatMatrix::beTProductOf : error in product A*B : dimensions do not match");
     }
-
 #  endif
 
     p      = bMatrix.nColumns;
@@ -332,7 +330,6 @@ void FloatMatrix :: beProductTOf(const FloatMatrix &aMatrix, const FloatMatrix &
     if ( aMatrix.nColumns != bMatrix.nColumns ) {
         OOFEM_ERROR("FloatMatrix::beProductTOf : error in product A*B : dimensions do not match");
     }
-
 #  endif
 
     p      = bMatrix.nRows;
@@ -395,7 +392,6 @@ void FloatMatrix :: beSubMatrixOf(const FloatMatrix &src,
         ( ( bottomCol - topCol ) > src.nColumns ) ) {
         OOFEM_ERROR("FloatMatrix::beSubMatrixOf : subindexes size mismatch");
     }
-
 #endif
 
 
@@ -676,7 +672,6 @@ FloatMatrix :: beSubMatrixOf(const FloatMatrix &src, const IntArray &indx)
     if ( !src.isSquare() ) {
         OOFEM_ERROR("FloatMatrix::beSubMatrixOf : cannot construct required submatrix");
     }
-
 # endif
 
     if ( n != src.nRows ) {
@@ -730,7 +725,6 @@ FloatMatrix :: beSubMatrixOfSizeOf(const FloatMatrix &src, const IntArray &indx,
     if ( !src.isSquare() ) {
         OOFEM_ERROR("FloatMatrix::beSubMatrixOfSizeOf : cannot construct submatrix");
     }
-
 # endif
 
     if ( n != src.nRows ) {
@@ -775,7 +769,7 @@ void FloatMatrix :: add(const FloatMatrix &aMatrix)
         this->operator = ( aMatrix );
     } else {
 #     ifdef DEBUG
-        if ( n != nRows || m != nColumns )
+        if ( (n != nRows || m != nColumns) && aMatrix.isNotEmpty() )
             OOFEM_ERROR5("FloatMatrix::add : dimensions mismatch : (r1,c1)+(r2,c2) : (%d,%d)+(%d,%d)", nRows, nColumns, n, m);
 #     endif
 
@@ -802,7 +796,7 @@ void FloatMatrix :: subtract(const FloatMatrix &aMatrix)
         this->operator=(aMatrix);
     } else {
 #     ifdef DEBUG
-        if ( n != nRows || m != nColumns )
+        if ( (n != nRows || m != nColumns) && aMatrix.isNotEmpty() )
             OOFEM_ERROR5("FloatMatrix::subtract : dimensions mismatch : (r1,c1)-(r2,c2) : (%d,%d)-(%d,%d)", nRows, nColumns, n, m);
 #     endif
 
