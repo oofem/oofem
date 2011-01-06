@@ -69,13 +69,13 @@ void MathTracer :: Writeln()
 
 void MathTracer :: Writeln(const char *str)
 {
-    printf(str);
+    puts(str);
     printf("\n");
 }
 
 void MathTracer :: Write(const char *str)
 {
-    printf(str);
+    puts(str);
 }
 
 /*void MathTracer::DrawProgress(double e)
