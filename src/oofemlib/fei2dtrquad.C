@@ -137,7 +137,7 @@ void
 FEI2dTrQuad :: local2global(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time)
 {
     int i;
-    FloatArray n(6);
+    FloatArray n;
     answer.resize(2);
     answer.zero();
 
@@ -149,89 +149,68 @@ FEI2dTrQuad :: local2global(FloatArray &answer, const FloatArray &lcoords, const
     }
 }
 
+
+double FEI2dTrQuad :: giveCharacteristicLength(const FEICellGeometry &cellgeo) const
+{
+    const FloatArray *n1 = cellgeo.giveVertexCoordinates(1);
+    const FloatArray *n2 = cellgeo.giveVertexCoordinates(2);
+    return n1->distance(n2);
+}
+
+
 #define POINT_TOL 1.e-3
 
 int
-FEI2dTrQuad :: global2local(FloatArray &answer, const FloatArray &coords, const FEICellGeometry &cellgeo, double time)
+FEI2dTrQuad :: global2local(FloatArray &answer, const FloatArray &gcoords, const FEICellGeometry &cellgeo, double time)
 {
-    FloatArray lc(2);
-    FloatArray r(2), n(6), dksi, deta, delta;
-    FloatMatrix p(2, 2);
-    double l1, l2, l3, x, y;
-    int i, nite = 0;
+    FloatArray res, delta, guess, lcoords_guess;
+    FloatMatrix jac;
+    double convergence_limit, error;
+
+    // find a suitable convergence limit
+    convergence_limit = 1e-6 * this->giveCharacteristicLength(cellgeo);
 
     // setup initial guess
-    lc.resize(2);
-    lc.at(1) = lc.at(2) = 1. / 3.;
+    lcoords_guess.resize(gcoords.giveSize());
+    lcoords_guess.zero();
 
     // apply Newton-Raphson to solve the problem
-    do {
-        if ( ( ++nite ) > 10 ) {
-            //_error ("computeLocalCoords: no convergence after 10 iterations");
-            return 0;
-        }
-
+    for (int nite = 0; nite < 10; nite++) {
         // compute the residual
-        l1 = lc.at(1);
-        l2 = lc.at(2);
-        l3 = 1.0 - l1 - l2;
-
-        n.at(1) = ( 2. * l1 - 1. ) * l1;
-        n.at(2) = ( 2. * l2 - 1. ) * l2;
-        n.at(3) = ( 2. * l3 - 1. ) * l3;
-        n.at(4) = 4. * l1 * l2;
-        n.at(5) = 4. * l2 * l3;
-        n.at(6) = 4. * l3 * l1;
-
-        r.at(1) = coords.at(1);
-        r.at(2) = coords.at(2);
-        for ( i = 1; i <= 6; i++ ) {
-            r.at(1) -= n.at(i) * cellgeo.giveVertexCoordinates(i)->at(xind);
-            r.at(2) -= n.at(i) * cellgeo.giveVertexCoordinates(i)->at(yind);
-        }
+        this->local2global(guess, lcoords_guess, cellgeo, time);
+        res = gcoords;
+        res.subtract(guess);
 
         // check for convergence
-        if ( sqrt( dotProduct(r, r, 2) ) < 1.e-10 ) {
+        error = res.computeNorm();
+        if ( error < convergence_limit ) {
             break;
         }
 
         // compute the corrections
-        this->giveDerivativeXi(dksi, lc);
-        this->giveDerivativeEta(deta, lc);
+        this->giveJacobianMatrixAt(jac, lcoords_guess, cellgeo);
+        jac.solveForRhs(res, delta);
 
-        p.zero();
-        for ( i = 1; i <= 6; i++ ) {
-            x = cellgeo.giveVertexCoordinates(i)->at(xind);
-            y = cellgeo.giveVertexCoordinates(i)->at(yind);
-
-            p.at(1, 1) += dksi.at(i) * x;
-            p.at(1, 2) += deta.at(i) * x;
-            p.at(2, 1) += dksi.at(i) * y;
-            p.at(2, 2) += deta.at(i) * y;
-        }
-
-        // solve for corrections
-        p.solveForRhs(r, delta);
         // update guess
-        lc.add(delta);
-    } while ( 1 );
-
-    answer.resize(3);
-    answer.at(1) = lc(1);
-    answer.at(2) = lc(2);
-    answer.at(3) = 1.0 - lc.at(1) - lc.at(2);
-
-    for ( i = 1; i <= 2; i++ ) {
-        if ( lc.at(i) < ( 0. - POINT_TOL ) ) {
-            return 0;
-        }
-
-        if ( lc.at(i) > ( 1. + POINT_TOL ) ) {
-            return 0;
-        }
+        lcoords_guess.add(delta);
+    }
+    if ( error > convergence_limit) { // Imperfect, could give false negatives.
+        return false;
     }
 
-    return 1;
+    answer.resize(3);
+    answer(0) = lcoords_guess(0);
+    answer(1) = lcoords_guess(1);
+    answer(2) = 1.0 - lcoords_guess(0) - lcoords_guess(1);
+
+    for (int  i = 0; i < 3; i++ ) {
+        if ( answer(i) < ( 0. - POINT_TOL ) ) {
+            return false;
+        } else if ( answer(i) > ( 1. + POINT_TOL ) ) {
+            return false;
+        }
+    }
+    return true;
 }
 
 

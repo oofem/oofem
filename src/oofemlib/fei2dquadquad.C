@@ -113,7 +113,7 @@ FEI2dQuadQuad :: local2global(FloatArray &answer, const FloatArray &lcoords,  co
     }
 }
 
-double FEI2dQuadQuad :: giveCharacteristicLength(const FEICellGeometry &cellgeo)
+double FEI2dQuadQuad :: giveCharacteristicLength(const FEICellGeometry &cellgeo) const
 {
     const FloatArray *n1 = cellgeo.giveVertexCoordinates(1);
     const FloatArray *n2 = cellgeo.giveVertexCoordinates(3);
@@ -140,7 +140,8 @@ FEI2dQuadQuad :: global2local(FloatArray &answer, const FloatArray &gcoords, con
     for (int nite = 0; nite < 10; nite++) {
         // compute the residual
         this->local2global(guess, answer, cellgeo, time);
-        res = gcoords - guess;
+        res = gcoords;
+        res.subtract(guess);
 
         // check for convergence
         error = res.computeNorm();

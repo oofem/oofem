@@ -99,7 +99,7 @@ public:
      * @param cellgeo underlying cell geometry
      * @return distance from node 1 to 3
      */
-    virtual double giveCharacteristicLength(const FEICellGeometry &cellgeo);
+    virtual double giveCharacteristicLength(const FEICellGeometry &cellgeo) const;
     /**
      * Evaluates the jacobian of transformation between local and global coordinates.
      */

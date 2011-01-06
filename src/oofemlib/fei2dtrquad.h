@@ -104,7 +104,14 @@ public:
      * @param time time
      * @return nonzero is returned if point is within the element geometry, zero otherwise
      */
-    virtual int  global2local(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time);
+    virtual int  global2local(FloatArray &answer, const FloatArray &gcoords, const FEICellGeometry &cellgeo, double time);
+
+    /**
+     * Returns a characteristic length of the geometry, typically a diagonal or edge length.
+     * @param cellgeo underlying cell geometry
+     * @return distance from node 1 to 3
+     */
+    virtual double giveCharacteristicLength(const FEICellGeometry &cellgeo) const;
 
     /**
      * Evaluates the jacobian of transformation between local and global coordinates.
