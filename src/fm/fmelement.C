@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/tm/src/transportelement.C,v 1.3.4.1 2004/04/05 15:19:53 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -57,19 +56,17 @@
 namespace oofem {
 FMElement :: FMElement(int n, Domain *aDomain) :
     Element(n, aDomain)
-    // Constructor. Creates an element with number n, belonging to aDomain.
 { }
 
 
 FMElement :: ~FMElement()
-// Destructor.
 { }
 
 IRResultType
 FMElement :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
-    IRResultType result;                            // Required by IR_GIVE_FIELD macro
+    const char *__proc = "initializeFrom";
+    IRResultType result;
 
     Element :: initializeFrom(ir);
     IR_GIVE_OPTIONAL_FIELD(ir, boundarySides, IFT_SUPGElement_bsides, "bsides"); // Macro
@@ -77,7 +74,6 @@ FMElement :: initializeFrom(InputRecord *ir)
         IR_GIVE_FIELD(ir, boundaryCodes, IFT_SUPGElement_bcodes, "bcodes"); // Macro
     }
 
-    //this -> computeGaussPoints();
     return IRRT_OK;
 }
 } // end namespace oofem

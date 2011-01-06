@@ -584,8 +584,8 @@ SUPG :: solveYourselfAt(TimeStep *tStep)
         } else {
             // update
             accelerationVector.add(incrementalSolutionVector);
-            avn = dotProduct(accelerationVector, accelerationVector, neq);
-            aivn = dotProduct(incrementalSolutionVector, incrementalSolutionVector, neq);
+            avn = accelerationVector.computeSquaredNorm();
+            aivn = incrementalSolutionVector.computeSquaredNorm();
 
             for ( j = 1; j <= nman; j++ ) {
                 node = domain->giveDofManager(j);
@@ -659,7 +659,7 @@ SUPG :: solveYourselfAt(TimeStep *tStep)
         this->assembleVectorFromElements( rhs, tStep, EID_ConservationEquation, AlgorithmicRhsTerm_MC, VM_Total,
                                          EModelDefaultEquationNumbering(), this->giveDomain(1) );
 
-        rnorm = sqrt( dotProduct(rhs, rhs, neq) );
+        rnorm = rhs.computeNorm();
 
         _absErrResid = 0.0;
         for ( i = 1; i <= neq; i++ ) {

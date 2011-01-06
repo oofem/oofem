@@ -235,12 +235,8 @@ PY1_3D_SUPG :: computeDivTauMatrix(FloatMatrix &answer, GaussPoint *gp, TimeStep
 void
 PY1_3D_SUPG :: computeGradUMatrix(FloatMatrix &answer, GaussPoint *gp, TimeStep *atTime)
 {
-    int i;
-    FloatArray dnx(4), dny(4), dnz(4), u, u1(4), u2(4), u3(4);
-    FloatMatrix dn;
-
-    answer.resize(3, 3);
-    answer.zero();
+    FloatArray u;
+    FloatMatrix dn, um(3,4);
 
     this->computeVectorOf(EID_MomentumBalance, VM_Total, atTime, u);
 
@@ -249,27 +245,12 @@ PY1_3D_SUPG :: computeGradUMatrix(FloatMatrix &answer, GaussPoint *gp, TimeStep 
     }
 
     interpolation.evaldNdx(dn, * gp->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0);
-    //interpolation.evaldNdx(dn, * gp->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0);
-    for ( i = 1; i <= 4; i++ ) {
-        dnx.at(i) = dn.at(i, 1);
-        dny.at(i) = dn.at(i, 2);
-        dnz.at(i) = dn.at(i, 3);
-
-        u1.at(i) = u.at(3 * i - 2);
-        u2.at(i) = u.at(3 * i - 1);
-        u3.at(i) = u.at(3 * i - 0);
+    for (int i = 1; i <= 4; i++ ) {
+        um.at(1,i) = u.at(3 * i - 2);
+        um.at(2,i) = u.at(3 * i - 1);
+        um.at(3,i) = u.at(3 * i - 0);
     }
-
-
-    answer.at(1, 1) =  dotProduct(dnx, u1, 4);
-    answer.at(1, 2) =  dotProduct(dny, u1, 4);
-    answer.at(1, 3) =  dotProduct(dnz, u1, 4);
-    answer.at(2, 1) =  dotProduct(dnx, u2, 4);
-    answer.at(2, 2) =  dotProduct(dny, u2, 4);
-    answer.at(2, 3) =  dotProduct(dnz, u2, 4);
-    answer.at(3, 1) =  dotProduct(dnx, u3, 4);
-    answer.at(3, 2) =  dotProduct(dny, u3, 4);
-    answer.at(3, 3) =  dotProduct(dnz, u3, 4);
+    answer.beProductOf(um,dn);
 }
 
 
@@ -492,7 +473,7 @@ PY1_3D_SUPG :: computeCriticalTimeStep(TimeStep *tStep)
         n3.at(2) = lnode->giveCoordinate(2) - jnode->giveCoordinate(2);
         n3.at(3) = lnode->giveCoordinate(3) - jnode->giveCoordinate(3);
 
-        ln = min( ln, sqrt( fabs( dotProduct(n, n3, 3) ) ) );
+        ln = min( ln, sqrt( fabs( n.dotProduct(n3) ) ) );
     }
 
     if ( veln != 0.0 ) {
@@ -541,10 +522,10 @@ PY1_3D_SUPG :: LS_PCS_computeF(LevelSetPCS *ls, TimeStep *atTime)
         this->computeNuMatrix(n, gp);
         u.beProductOf(n, un);
         gfi.beTProductOf(dn, fi);
-        norm = sqrt( dotProduct(gfi, gfi, 3) );
+        norm = gfi.computeNorm();
 
         vol += dV;
-        answer += dV * dotProduct(u, gfi, 3) / norm;
+        answer += dV * u.dotProduct(gfi) / norm;
     }
 
     return answer / vol;

@@ -199,9 +199,9 @@ LevelSetPCS :: updatePosition(TimeStep *atTime)
                         }
 
                         volume += ( v = interface->LS_PCS_computeVolume() );
-                        gfi_norm = sqrt( dotProduct(gfi, gfi, nsd) );
+                        gfi_norm = gfi.computeNorm();
                         if ( gfi_norm > 1.e-6 ) {
-                            help += dotProduct(un, gfi, nsd) * v / sqrt( dotProduct(gfi, gfi, nsd) );
+                            help += un.dotProduct(gfi) * v / gfi_norm;
                         }
                     }
                 } // end loop over shared nodes
@@ -483,7 +483,7 @@ LevelSetPCS :: pcs_stage1(FloatArray &ls, FloatArray &fs, FloatArray &w, TimeSte
             }
 
             // eval size of gfi
-            gfi_norm = sqrt( dotProduct(gfi, gfi, nsd) );
+            gfi_norm = gfi.computeNorm();
             // compute ki
             for ( i = 1; i <= inodes; i++ ) {
                 if ( gfi_norm > 1.e-12 ) {
@@ -498,8 +498,7 @@ LevelSetPCS :: pcs_stage1(FloatArray &ls, FloatArray &fs, FloatArray &w, TimeSte
                     k.at(i) = 0.0;
                 }
             }
-
-            dfi = dotProduct(k, fi, inodes);
+            dfi = fi.dotProduct(k);
             for ( i = 1; i <= inodes; i++ ) {
                 help = 0.0;
                 sumkn = 0.0;

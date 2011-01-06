@@ -193,7 +193,7 @@ FastMarchingMethod :: updateTrialValue(FloatArray &dmanValues, int id, double F)
                 ca = * ac;
                 ca.subtract(*cc);
                 ca.normalize();
-                cos_fi = dotProduct( cb, ca, cb.giveSize() );
+                cos_fi = cb.dotProduct(ca);
                 sin_fi = sqrt(1.0 - cos_fi * cos_fi);
                 u = fabs(bt);
                 // compute quadratic equation coefficients for t

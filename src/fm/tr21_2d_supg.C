@@ -289,13 +289,8 @@ TR21_2D_SUPG :: computeNpMatrix(FloatMatrix &answer, GaussPoint *gp)
 void
 TR21_2D_SUPG :: computeGradUMatrix(FloatMatrix &answer, GaussPoint *gp, TimeStep *atTime)
 {
-    int i;
-    FloatArray dnx(6), dny(6), u, u1(6), u2(6);
-    FloatMatrix dn;
-
-    answer.resize(2, 2);
-    answer.zero();
-
+    FloatArray u;
+    FloatMatrix dn, um(2,6);
     this->computeVectorOf(EID_MomentumBalance, VM_Total, atTime, u);
 
     if ( this->updateRotationMatrix() ) {
@@ -303,19 +298,12 @@ TR21_2D_SUPG :: computeGradUMatrix(FloatMatrix &answer, GaussPoint *gp, TimeStep
     }
 
     velocityInterpolation.evaldNdx(dn, * gp->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0);
-    for ( i = 1; i <= 6; i++ ) {
-        dnx.at(i) = dn.at(i, 1);
-        dny.at(i) = dn.at(i, 2);
-
-        u1.at(i) = u.at(2 * i - 1);
-        u2.at(i) = u.at(2 * i);
+    for (int i = 1; i <= 6; i++ ) {
+        um.at(1, i) = u.at(2 * i - 1);
+        um.at(2, i) = u.at(2 * i);
     }
 
-
-    answer.at(1, 1) =  dotProduct(dnx, u1, 6);
-    answer.at(1, 2) =  dotProduct(dny, u1, 6);
-    answer.at(2, 1) =  dotProduct(dnx, u2, 6);
-    answer.at(2, 2) =  dotProduct(dny, u2, 6);
+    answer.beProductOf(um, dn);
 }
 
 void
@@ -382,7 +370,7 @@ TR21_2D_SUPG :: updateStabilizationCoeffs(TimeStep *atTime)
     //this->computeVectorOf(EID_MomentumBalance, VM_Total, atTime->givePreviousStep(), un);
     this->computeVectorOf(EID_MomentumBalance, VM_Total, atTime, u);
 
-    norm_un = sqrt( dotProduct(u, u, 12) );
+    norm_un = u.computeNorm();
 
     this->computeAdvectionTerm(N, atTime);
     this->computeAdvectionDeltaTerm(N_d, atTime);
@@ -561,10 +549,10 @@ TR21_2D_SUPG :: LS_PCS_computeF(LevelSetPCS *ls, TimeStep *atTime)
         this->computeNuMatrix(n, gp);
         u.beProductOf(n, un);
         gfi.beTProductOf(dn, fi);
-        norm = sqrt( dotProduct(gfi, gfi, 2) );
+        norm = gfi.computeNorm();
 
         vol += dV;
-        answer += dV * dotProduct(u, gfi, 2) / norm;
+        answer += dV * u.dotProduct(gfi) / norm;
     }
 
     return answer / vol;
@@ -657,7 +645,7 @@ TR21_2D_SUPG :: LS_PCS_computeS(LevelSetPCS *ls, TimeStep *atTime)
         dV  = this->computeVolumeAround(gp);
         velocityInterpolation.evalN(n,  * gp->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0);
         vol += dV;
-        _fi = dotProduct(n, fi, 6);
+        _fi = n.dotProduct(fi);
         S +=  _fi / ( _fi * _fi + eps * eps ) * dV;
     }
 
@@ -844,8 +832,8 @@ TR21_2D_SUPG :: LS_PCS_computeVOFFractions(FloatArray &answer, FloatArray &fi)
             this->velocityInterpolation.evalN(N_Mid, loc_Mid, FEIElementGeometryWrapper(this), 0.0);
             this->velocityInterpolation.evalN(N_X1, loc_X1, FEIElementGeometryWrapper(this), 0.0);
 
-            fi_Mid = dotProduct(N_Mid, fi, 6);
-            fi_X1 = dotProduct(N_X1, fi, 6);
+            fi_Mid = N_Mid.dotProduct(fi);
+            fi_X1 = N_X1.dotProduct(fi);
 
             line.at(1) = 0;
             line.at(2) = fi.at(si);
@@ -985,8 +973,8 @@ TR21_2D_SUPG :: LS_PCS_computeVOFFractions(FloatArray &answer, FloatArray &fi)
             this->velocityInterpolation.evalN(N_Mid, loc_Mid, FEIElementGeometryWrapper(this), 0.0);
             this->velocityInterpolation.evalN(N_X1, loc_X1, FEIElementGeometryWrapper(this), 0.0);
 
-            fi_Mid = dotProduct(N_Mid, fi, 6);
-            fi_X1 = dotProduct(N_X1, fi, 6);
+            fi_Mid = N_Mid.dotProduct(fi);
+            fi_X1 = N_X1.dotProduct(fi);
 
             line.at(1) = 0;
             line.at(2) = fi.at(si);
@@ -1168,8 +1156,8 @@ TR21_2D_SUPG :: LS_PCS_computeVOFFractions(FloatArray &answer, FloatArray &fi)
             this->velocityInterpolation.evalN(N_Mid, loc_Mid, FEIElementGeometryWrapper(this), 0.0);
             this->velocityInterpolation.evalN(N_X1, loc_X1, FEIElementGeometryWrapper(this), 0.0);
 
-            fi_Mid = dotProduct(N_Mid, fi, 6);
-            fi_X1 = dotProduct(N_X1, fi, 6);
+            fi_Mid = N_Mid.dotProduct(fi);
+            fi_X1 = N_X1.dotProduct(fi);
 
             line.at(1) = 0;
             line.at(2) = fi.at(si);

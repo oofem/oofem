@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/tm/src/transportelement.h,v 1.3 2003/04/23 14:22:15 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -32,10 +31,6 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-
-//   *********************************
-//   *** CLASS GENERAL CFD ELEMENT ***
-//   *********************************
 
 #ifndef fmelement_h
 #define fmelement_h
@@ -69,24 +64,19 @@ class IntArray;
  */
 class FMElement : public Element
 {
-public:
 protected:
-    /// Array of Boundary sides
+    /// Array of boundary sides.
     IntArray boundarySides;
-    /// boundary sides codes
+    /// Boundary sides codes.
     IntArray boundaryCodes;
 
 public:
-    // constructor
     FMElement(int, Domain *);
-    ~FMElement();                        // destructor
+    ~FMElement();
 
-    ///Initializes receiver acording to object description stored in input record.
     IRResultType initializeFrom(InputRecord *ir);
-
-    // definition
     const char *giveClassName() const { return "FMElement"; }
-    classType                giveClassID() const { return FMElementClass; }
+    classType giveClassID() const { return FMElementClass; }
 };
 } // end namespace oofem
 #endif // fmelement_h
