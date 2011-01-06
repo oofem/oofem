@@ -52,13 +52,7 @@ namespace oofem {
 //
 // see also isUnknownModeIncrementalMode() function (cltypes.C)
 // when adding new ValueModeType mode.
-/**
- * Type representing the mode of UnknownType or CharType, or similar types.
- * Afore mentioned types usually describes the physical meaning of
- * value and ValueModeType provides the further necessary classification. For example "DisplacementVector"
- * value can be futher classified to be total displacement (TotalMode) or  velocity of
- * displacement (VelocityMode) an so on.
- */
+
 #define ValueModeType_DEF \
     ENUM_ITEM_WITH_VALUE(VM_Unknown, 0) \
     ENUM_ITEM_WITH_VALUE(VM_Total, 1)              \
@@ -67,8 +61,16 @@ namespace oofem {
     ENUM_ITEM_WITH_VALUE(VM_Incremental, 4)        \
     ENUM_ITEM_WITH_VALUE(VM_RhsTotal, 5)           \
     ENUM_ITEM_WITH_VALUE(VM_RhsIncremental, 6)     \
-    ENUM_ITEM_WITH_VALUE(VM_RhsInitial, 7)
+    ENUM_ITEM_WITH_VALUE(VM_RhsInitial, 7)         \
+    ENUM_ITEM_WITH_VALUE(VM_Total_Old, 8)
 
+/**
+ * Type representing the mode of UnknownType or CharType, or similar types.
+ * Afore mentioned types usually describes the physical meaning of
+ * value and ValueModeType provides the further necessary classification. For example "DisplacementVector"
+ * value can be further classified to be total displacement (TotalMode) or  velocity of
+ * displacement (VelocityMode) an so on.
+ */
 enum ValueModeType {
     ValueModeType_DEF
 };
