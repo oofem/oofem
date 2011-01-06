@@ -281,7 +281,6 @@ void FloatArray :: beVectorProductOf(const FloatArray &v1, const FloatArray &v2)
 double FloatArray :: dotProduct(const FloatArray &x) const
 {
 #  ifdef DEBUG
-
     if (this->size != x.size) {
         OOFEM_ERROR3("FloatArray :: dotProduct :  dimension mismatch in a[%d]->dotProduct(b[%d])\n", this->size, x.size);
     }
@@ -289,6 +288,22 @@ double FloatArray :: dotProduct(const FloatArray &x) const
 
     double dp = 0;
     for (int i = 0; i < this->size; i++) {
+        dp += this->values[i]*x.values[i];
+    }
+    return dp;
+}
+
+
+double FloatArray :: dotProduct(const FloatArray &x, int size) const
+{
+#  ifdef DEBUG
+    if (size > this->size || size > x.size) {
+        OOFEM_ERROR3("FloatArray :: dotProduct :  dimension mismatch in a[%d]->dotProduct(b[%d])\n", this->size, x.size);
+    }
+#  endif
+
+    double dp = 0;
+    for (int i = 0; i < size; i++) {
         dp += this->values[i]*x.values[i];
     }
     return dp;

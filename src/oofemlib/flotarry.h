@@ -328,6 +328,13 @@ public:
     double dotProduct(const FloatArray &x) const;
 
     /**
+     * Computes the dot product (or inner product) of receiver and argument.
+     * @param x Vector to contract to receiver.
+     * @param size Number of elements to contract. May not be larger than
+     */
+    double dotProduct(const FloatArray &x, int size) const;
+
+    /**
      * Normalizes receiver. Euclidean norm is used, after operation receiver
      * will have this norm equal to 1.0.
      * @return modified receiver
