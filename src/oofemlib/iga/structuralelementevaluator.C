@@ -551,9 +551,7 @@ StructuralElementEvaluator :: updateRotationMatrix()
     }
 
     if ( isT_NtoG ) {
-        if ( ( !T_NtoG.isSquare() ) ||
-            //( T_NtoG.giveNumberOfRows() != this->computeNumberOfDofs(EID_MomentumBalance) ) ) {
-            ( T_NtoG.giveNumberOfRows() != this->giveElement()->computeNumberOfL2GDofs(EID_MomentumBalance) ) ) {
+      if ( T_NtoG.giveNumberOfRows() != this->giveElement()->computeNumberOfL2GDofs(EID_MomentumBalance) ) {
             OOFEM_ERROR("StructuralElement :: updateRotationMatrix - T_NtoG transformation matrix size mismatch");
         }
     }
