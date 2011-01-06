@@ -130,7 +130,7 @@ public:
     /**
      * Returns boundary condition of dof if it is prescribed.
      * Slave simply forwards this message to master.
-     * @return NULL if no BC applied, otherwise pointer to correcpondig BC.
+     * @see MasterDof::hasBc
      */
     bool hasBc(TimeStep *tStep);
     /**
@@ -143,9 +143,20 @@ public:
      * @see MasterDof::hasIc
      */
     bool hasIcOn(ValueModeType);
-
+    /**
+     * Slave simply forwards this message to master.
+     * @see MasterDof::hasBcId
+     */
     int giveBcId();
+    /**
+     * Slave simply forwards this message to master.
+     * @see MasterDof::giveIcId
+     */
     int giveIcId();
+    /**
+     * Slave simply forwards this message to master.
+     * @see MasterDof::giveBcValue
+     */
     virtual double  giveBcValue(ValueModeType mode, TimeStep *tStep);
 
     contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
