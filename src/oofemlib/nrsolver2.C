@@ -136,7 +136,7 @@ restart:
 
     //engngModel->updateComponent (tNow, NonLinearRhs_Total);
 
-    RRT = dotProduct(RT.givePointer(), RT.givePointer(), neq);
+    RRT = RT.computeSquaredNorm();
 
     //if (R0) RR0 = dotProduct(R0->givePointer(),R0->givePointer(),neq);
     //else RR0 = 0.0;
@@ -195,7 +195,7 @@ restart:
         // compute forceError
         //
         // err is relative error of unbalanced forces
-        forceErr = dotProduct(rhs.givePointer(), rhs.givePointer(), neq);
+        forceErr = rhs.computeSquaredNorm();
         // we compute a relative error norm
         if ( ( RRT ) > nrsolver_SMALL_NUM ) {
             forceErr = sqrt( forceErr / ( RRT ) );
@@ -207,12 +207,11 @@ restart:
         // compute displacement error
         //
         // err is relative displacement change
-        drr = dotProduct(r->givePointer(), r->givePointer(), neq);
+        drr = r->computeSquaredNorm();
         if ( drr < nrsolver_SMALL_NUM ) {
             dispErr = 1.;
         } else {
-            dispErr = dotProduct(deltaR.givePointer(), deltaR.givePointer(), neq) / drr;
-            dispErr = sqrt(dispErr);
+            dispErr = sqrt( deltaR.computeSquaredNorm() / drr );
         }
 
         //

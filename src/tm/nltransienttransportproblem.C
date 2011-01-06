@@ -197,13 +197,13 @@ void NLTransientTransportProblem :: solveYourselfAt(TimeStep *tStep) {
 #endif
 
         // compute norm of residuals from balance equations
-        solutionErr = sqrt( dotProduct(rhs, rhs, neq) );
+        solutionErr = rhs.computeNorm();
 
         nMethod->solve(lhs, & rhs, & solutionVectorIncrement);
         solutionVector->add(solutionVectorIncrement);
         this->updateInternalState(& TauStep); //insert to hash=0(current), if changes in equation numbering
         // compute error in the solutionvector increment
-        incrementErr = sqrt( dotProduct(solutionVectorIncrement, solutionVectorIncrement, neq) );
+        incrementErr = solutionVectorIncrement.computeNorm();
 
         // update solution state counter
         TauStep.incrementStateCounter();

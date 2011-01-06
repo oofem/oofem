@@ -195,7 +195,7 @@ restart:
     MPI_Allreduce(& myRRT, & RRT, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
  #endif
 #else
-    RRT = dotProduct(RT.givePointer(), RT.givePointer(), neq);
+    RRT = RT.computeSquaredNorm();
 #endif
     //if (R0) RR0 = dotProduct(R0->givePointer(),R0->givePointer(),neq);
     //else RR0 = 0.0;
@@ -1008,9 +1008,9 @@ NRSolver :: checkConvergence(FloatArray &RT, FloatArray &F, FloatArray &rhs,  Fl
         drdr = colerr [ 2 ];
   #endif
  #else
-        forceErr = dotProduct( rhs.givePointer(), rhs.givePointer(), rhs.giveSize() );
-        drr = dotProduct( r.givePointer(), r.givePointer(), r.giveSize() );
-        drdr = dotProduct( deltaR.givePointer(), deltaR.givePointer(), deltaR.giveSize() );
+        forceErr = rhs.computeSquaredNorm();
+        drr = r.computeSquaredNorm();
+        drdr = deltaR.computeSquaredNorm();
  #endif
 
         // we compute a relative error norm
@@ -1050,7 +1050,7 @@ NRSolver :: checkConvergence(FloatArray &RT, FloatArray &F, FloatArray &rhs,  Fl
         MPI_Allreduce(& myRN, & RN, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
    #endif
   #else
-        RN = dotProduct( reactions, reactions, reactions.giveSize() );
+        RN = reactions.computeSquaredNorm();
         // account for quasi bc reactions
         for ( i = 1; i <= numberOfPrescribedDofs; i++ ) {
             RN += F.at( prescribedEqs.at(i) ) * F.at( prescribedEqs.at(i) );
