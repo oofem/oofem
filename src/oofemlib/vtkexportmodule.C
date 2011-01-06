@@ -245,7 +245,7 @@ VTKExportModule :: doOutput(TimeStep *tStep)
             this->giveElementCell(cellNodes, elem, 0);
             fprintf(stream, "%d ", nelemNodes);
             for ( i = 1; i <= nelemNodes; i++ ) {
-                fprintf( stream, "%d ", regionNodalNumbers.at( cellNodes.at(i) ) );
+                fprintf( stream, "%d ", regionNodalNumbers.at( cellNodes.at(i) ) - 1);
             }
 
             fprintf(stream, "\n");
@@ -330,7 +330,7 @@ VTKExportModule :: doOutput(TimeStep *tStep)
 
                 fprintf(stream, "%d ", nelemNodes);
                 for ( i = 1; i <= nelemNodes; i++ ) {
-                    fprintf( stream, "%d ", regionNodalNumbers.at( cellNodes.at(i) ) );
+                    fprintf( stream, "%d ", regionNodalNumbers.at( cellNodes.at(i) ) - 1 );
                 }
 
                 fprintf(stream, "\n");
@@ -505,7 +505,7 @@ VTKExportModule :: giveElementCell(IntArray &answer, Element *elem, int cell)
         nelemNodes = elem->giveNumberOfNodes();
         answer.resize(nelemNodes);
         for ( i = 1; i <= nelemNodes; i++ ) {
-            answer.at(i) = elem->giveNode(i)->giveNumber() - 1;
+            answer.at(i) = elem->giveNode(i)->giveNumber();
         }
     } else if ( elemGT == EGT_hexa_2 ) {
         int HexaQuadNodeMapping [] = {
@@ -514,7 +514,7 @@ VTKExportModule :: giveElementCell(IntArray &answer, Element *elem, int cell)
         nelemNodes = elem->giveNumberOfNodes();
         answer.resize(nelemNodes);
         for ( i = 1; i <= nelemNodes; i++ ) {
-            answer.at(i) = elem->giveNode(HexaQuadNodeMapping [ i - 1 ])->giveNumber() - 1;
+            answer.at(i) = elem->giveNode(HexaQuadNodeMapping [ i - 1 ])->giveNumber();
         }
     } else {
         OOFEM_ERROR("VTKExportModule: unsupported element geometry type");

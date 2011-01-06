@@ -89,11 +89,6 @@ Truss3d :: giveInterface(InterfaceType interface)
 int
 Truss3d :: ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type)
 {
-    //needs 6 components for VTK export module in order not to skip the region
-    if ( ( type == IST_StressTensor ) || ( type == IST_StrainTensor ) || ( type == IST_DamageTensor ) ) {
-        return 6;
-    }
-
     GaussPoint *gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
     return this->giveIPValueSize(type, gp);
 }

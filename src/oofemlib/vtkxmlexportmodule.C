@@ -154,6 +154,7 @@ VTKXMLExportModule :: doOutput(TimeStep *tStep)
 
             // output all cells of the piece
             int vtkCellType, nelemNodes;
+	    IntArray cellNodes;
             fprintf(stream, "<Cells>\n");
             // output the connectivity data
             fprintf(stream, " <DataArray type=\"Int32\" Name=\"connectivity\" format=\"ascii\"> ");
@@ -174,8 +175,9 @@ VTKXMLExportModule :: doOutput(TimeStep *tStep)
 
 #endif
                 nelemNodes = elem->giveNumberOfNodes();
+		this->giveElementCell(cellNodes, elem, 0);
                 for ( i = 1; i <= nelemNodes; i++ ) {
-                    fprintf(stream, "%d ", mapG2L.at( elem->giveNode(i)->giveNumber() ) - 1);
+		    fprintf(stream, "%d ", mapG2L.at( cellNodes.at(i) ) - 1);
                 }
 
                 fprintf(stream, " ");
@@ -405,7 +407,7 @@ VTKXMLExportModule :: giveElementCell(IntArray &answer, Element *elem, int cell)
         nelemNodes = elem->giveNumberOfNodes();
         answer.resize(nelemNodes);
         for ( i = 1; i <= nelemNodes; i++ ) {
-            answer.at(i) = elem->giveNode(i)->giveNumber() - 1;
+            answer.at(i) = elem->giveNode(i)->giveNumber() ;
         }
     } else if ( elemGT == EGT_hexa_2 ) {
         int HexaQuadNodeMapping [] = {
@@ -414,7 +416,7 @@ VTKXMLExportModule :: giveElementCell(IntArray &answer, Element *elem, int cell)
         nelemNodes = elem->giveNumberOfNodes();
         answer.resize(nelemNodes);
         for ( i = 1; i <= nelemNodes; i++ ) {
-            answer.at(i) = elem->giveNode(HexaQuadNodeMapping [ i - 1 ])->giveNumber() - 1;
+            answer.at(i) = elem->giveNode(HexaQuadNodeMapping [ i - 1 ])->giveNumber() ;
         }
     } else {
         OOFEM_ERROR("VTKExportModule: unsupported element geometry type");
