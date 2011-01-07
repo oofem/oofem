@@ -280,21 +280,6 @@ void IncrementalLinearStatic :: updateDofUnknownsDictionary(DofManager *inode, T
         }
         iDof->updateUnknownsDictionary(tStep, EID_MomentumBalance, VM_Total_Old, val);
         iDof->updateUnknownsDictionary(tStep, EID_MomentumBalance, VM_Total, val);
-        printf("val %e\n",val);
-        /*
-        if ( iDof->hasBc(tStep) ) {
-            val = iDof->giveBcValue(VM_Incremental, tStep);
-            //val_tot = iDof->giveBcValue(VM_Total, tStep);
-            val_tot = iDof->giveUnknown(EID_MomentumBalance, VM_Total, tStep);
-        } else {
-            val = this->incrementOfDisplacementVector.at( iDof->__giveEquationNumber() );
-            val_tot = val + iDof->giveUnknown(EID_MomentumBalance, VM_Total, tStep);
-            if (i == 1)
-                printf("Incrementing %d with %e\n", inode->giveNumber(), val);
-        }
-        iDof->updateUnknownsDictionary(tStep, EID_MomentumBalance, VM_Incremental, val);
-        iDof->updateUnknownsDictionary(tStep, EID_MomentumBalance, VM_Total, val_tot);
-        */
     }
 }
 
