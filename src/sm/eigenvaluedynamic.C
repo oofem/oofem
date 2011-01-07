@@ -285,9 +285,6 @@ void EigenValueDynamic :: solveYourselfAt(TimeStep *tStep) {
     //delete  eigVal;
     stiffnessMatrix = massMatrix = NULL;
     //eigVec = NULL; eigVal = NULL;
-
-    // update nodes, elements, etc.
-    this->updateYourself( this->giveCurrentStep() );
 }
 
 void EigenValueDynamic :: updateYourself(TimeStep *stepN)

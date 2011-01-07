@@ -442,8 +442,6 @@ CBS :: solveYourselfAt(TimeStep *tStep)
 
     //</RESTRICTED_SECTION>
 
-    // update nodes, elements, etc.
-    this->updateYourself( this->giveCurrentStep() );
 }
 
 

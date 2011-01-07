@@ -720,10 +720,6 @@ SUPG :: solveYourselfAt(TimeStep *tStep)
 
     // update solution state counter
     tStep->incrementStateCounter();
-
-
-    // update nodes, elements, etc.
-    this->updateYourself( this->giveCurrentStep() );
 }
 
 

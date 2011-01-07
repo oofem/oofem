@@ -509,8 +509,6 @@ void NonLinearStatic :: solveYourself()
 void
 NonLinearStatic :: solveYourselfAt(TimeStep *tStep) {
     proceedStep(1, tStep);
-    // update nodes, elements, etc.
-    this->updateYourself( this->giveCurrentStep() );
 }
 
 void

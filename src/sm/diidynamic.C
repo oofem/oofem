@@ -363,9 +363,6 @@ void DIIDynamic :: solveYourselfAt(TimeStep *tStep) {
         velocityVector.at(i) += a8 * ( accelerationVector.at(i) + rhs.at(i) );
         accelerationVector.at(i) = rhs.at(i);
     }
-
-    // update nodes, elements, etc.
-    this->updateYourself( this->giveCurrentStep() );
 }
 
 void

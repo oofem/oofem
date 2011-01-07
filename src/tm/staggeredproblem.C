@@ -270,9 +270,6 @@ StaggeredProblem :: solveYourselfAt(TimeStep *stepN)
         // transfer state from previous analysis
         this->giveSlaveProblem(i)->solveYourselfAt(stepN);
     }
-
-    // update nodes, elements, etc.
-    this->updateYourself( this->giveCurrentStep() );
 }
 
 void

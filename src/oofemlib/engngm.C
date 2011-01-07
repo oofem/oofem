@@ -775,6 +775,7 @@ EngngModel :: solveYourself()
             }
 
             this->solveYourselfAt( this->giveCurrentStep() );
+            this->updateYourself( this->giveCurrentStep() );
             this->terminate( this->giveCurrentStep() );
 
             //#ifdef TIME_REPORT

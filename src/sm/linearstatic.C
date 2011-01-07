@@ -341,9 +341,6 @@ void LinearStatic :: solveYourselfAt(TimeStep *tStep) {
     }
 
     tStep->incrementStateCounter();            // update solution state counter
-    //
-    // update nodes, elements, etc.
-    this->updateYourself( this->giveCurrentStep() );
 }
 
 void LinearStatic :: updateYourself(TimeStep *stepN)

@@ -215,9 +215,6 @@ void NLTransientTransportProblem :: solveYourselfAt(TimeStep *tStep) {
             _error2("convergence not reached after %d iterations", nsmax);
         }
     } while ( ( fabs(solutionErr) > rtol ) || ( fabs(incrementErr) > rtol ) );
-
-    // update internalStates (put last results to DoFs), update nodes, elements, etc.
-    this->updateYourself( this->giveCurrentStep() );
 }
 
 

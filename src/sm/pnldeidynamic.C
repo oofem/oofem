@@ -581,9 +581,6 @@ void PNlDEIDynamic :: solveYourselfAt(TimeStep *tStep) {
     // update remote dofs if necessary
     // this->updateRemoteDofs ();
 #endif
-
-    // update nodes, elements, etc.
-    this->updateYourself( this->giveCurrentStep() );
 }
 
 

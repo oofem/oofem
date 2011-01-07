@@ -376,9 +376,6 @@ void LinearStability :: solveYourselfAt(TimeStep *tStep) {
     // compute eigen frequencies
     //for (i = 1; i<= numberOfRequiredEigenValues; i++)
     // eigVal.at(i) = sqrt(eigVal.at(i));
-
-    // update nodes, elements, etc.
-    this->updateYourself( this->giveCurrentStep() );
 }
 
 void LinearStability :: updateYourself(TimeStep *stepN)

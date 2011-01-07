@@ -231,7 +231,6 @@ void IncrementalLinearStatic :: solveYourselfAt(TimeStep *tStep)
 #endif
     nMethod->solve(stiffnessMatrix, &loadVector, &incrementOfDisplacementVector);
 
-    this->updateYourself( this->giveCurrentStep() );
 }
 
 

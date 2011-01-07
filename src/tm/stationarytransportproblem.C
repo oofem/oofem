@@ -246,9 +246,6 @@ void StationaryTransportProblem :: solveYourselfAt(TimeStep *tStep) {
     nMethod->solve( conductivityMatrix, & rhsVector, FluxField.giveSolutionVector(tStep) );
     // update solution state counter
     tStep->incrementStateCounter();
-
-    // update nodes, elements, etc.
-    this->updateYourself( this->giveCurrentStep() );
 }
 
 void

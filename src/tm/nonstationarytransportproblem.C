@@ -361,9 +361,6 @@ void NonStationaryTransportProblem :: solveYourselfAt(TimeStep *tStep) {
     nMethod->solve( lhs, & rhs, UnknownsField->giveSolutionVector(tStep) );
     // update solution state counter
     tStep->incrementStateCounter();
-
-    // update nodes, elements, etc.
-    this->updateYourself( this->giveCurrentStep() );
 }
 
 void

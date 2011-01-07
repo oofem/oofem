@@ -379,9 +379,6 @@ void DEIDynamic :: solveYourselfAt(TimeStep *tStep) {
 
     accelerationVector.times(c1);
     velocityVector.times(c2);
-
-    // update nodes, elements, etc.
-    this->updateYourself( this->giveCurrentStep() );
 }
 
 void DEIDynamic :: updateYourself(TimeStep *stepN)
