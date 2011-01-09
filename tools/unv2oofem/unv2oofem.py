@@ -75,77 +75,90 @@ UNV2OOFEM: Converts UNV file from Salome to OOFEM native file format
         print "done"
         # write files in native oofem format
         
-        print 'Writting oofem file ...',
+        print 'Writting oofem file ...'
         # write oofem header
         of.write(CTRL.header)
 
         #store elements in meshElements list. Reason: need to assign boundaryLoad to elements, which may be read after elements
         meshElements = []
-        #create auxiliary array of elemtn numbers to be searched for boundaryLoads
+        #create auxiliary array of element numbers to be searched for boundaryLoads
         elemNotBoundary = []
-        #counter = 0
-        for elem in FEM.elems:
+        for elem in FEM.elems:#loop through all unv elements
             #resolve element properties
             properties=""
             for igroup in elem.oofem_groups:
                 properties+=igroup.oofem_properties
             #Do output if oofem_elemtype resolved and not BoundaryLoads
-            if ( elem.oofem_elemtype and CTRL.oofem_elemProp[elem.oofem_elemtype].name != 'BoundaryLoads'):
-                #Check if unv element and OOFEM element have the same amount of nodes
-                if (elem.nnodes != len(CTRL.oofem_elemProp[elem.oofem_elemtype].nodeMask)):
-                    print "\nUnv element #%d has %d nodes, which should be mapped on OOFEM element \"%s\" with %d nodes" % \
-                        (elem.id, elem.nnodes,CTRL.oofem_elemProp[elem.oofem_elemtype].name, len(CTRL.oofem_elemProp[elem.oofem_elemtype].nodeMask))
-                    exit(0)
-                
-                elemNotBoundary.append(elem)
-                dat = elem.oofem_outputData
-                dat.append(CTRL.oofem_elemProp[elem.oofem_elemtype].name)
-                dat.append("%-5d" % elem.id)
-                dat.append("nodes")
-                dat.append("%-3d" % elem.nnodes)
-                for n in range(elem.nnodes):
-                    mask = CTRL.oofem_elemProp[elem.oofem_elemtype].nodeMask[n]
-                    dat.append("%-3d" % elem.cntvt[mask])
-                #dat.extend(["%-3d" % x for x in elem.cntvt])
-                dat.append(properties)
-                meshElements.append([])
-        
+            if ( elem.oofem_elemtype):
+                if(CTRL.oofem_elemProp[elem.oofem_elemtype].name != 'RepresentsBoundaryLoad'):
+                    #Check if unv element and OOFEM element have the same amount of nodes
+                    if (elem.nnodes != len(CTRL.oofem_elemProp[elem.oofem_elemtype].nodeMask)):
+                        print "\nUnv element #%d has %d nodes, which should be mapped on OOFEM element \"%s\" with %d nodes" % \
+                            (elem.id, elem.nnodes,CTRL.oofem_elemProp[elem.oofem_elemtype].name, len(CTRL.oofem_elemProp[elem.oofem_elemtype].nodeMask))
+                        exit(0)
+                    
+                    elemNotBoundary.append(elem)
+                    dat = elem.oofem_outputData
+                    dat.append(CTRL.oofem_elemProp[elem.oofem_elemtype].name)
+                    dat.append("%-5d" % elem.id)
+                    dat.append("nodes")
+                    dat.append("%-3d" % elem.nnodes)
+                    for n in range(elem.nnodes):
+                        mask = CTRL.oofem_elemProp[elem.oofem_elemtype].nodeMask[n]
+                        try:
+                            dat.append("%-3d" % elem.cntvt[mask])
+                        except:
+                            print "Exception in mapping nodes in unv element number %d, nodes %s" % (elem.id, elem.cntvt)
+                            exit(0)
+                    #dat.extend(["%-3d" % x for x in elem.cntvt])
+                    dat.append(properties)
+                    meshElements.append([])
+
         #Assign BoundaryLoads to elements (corresponds to edge and face loads).
         #We need to loop over all elements and to check whether they have assigned loads. This is time consuming algorithm.
-        nboLoads = 0
-        for belem in FEM.elems:
+        for belem in FEM.elems:#loop over all elements from unv file
             #resolve element properties
-            properties=""
-            for igroup in belem.oofem_groups:
-                properties+=igroup.oofem_properties
-            if CTRL.oofem_elemProp[belem.oofem_elemtype].name == 'BoundaryLoads':#found element, which represents boundary load
-                nodesOnBoundary = belem.cntvt
-                nodesOnBoundary.sort()
-                for elem in elemNotBoundary:
-                    cnt=0
-                    for n in range(len(nodesOnBoundary)):
-                        if(elem.cntvt.count(int(nodesOnBoundary[n]))):
-                            cnt = cnt+1
-                    if (cnt==len(nodesOnBoundary)):#found eligible element to which assign b.c. Now find which edge/face it is.
-                        success = 0
-                        if(belem.type==11 or belem.type==22):#elements representing EDGE loads
-                            mask = CTRL.oofem_elemProp[elem.oofem_elemtype].edgeMask
-                        else:
-                            mask = CTRL.oofem_elemProp[elem.oofem_elemtype].faceMask
-                        
-                        for i in range(len(mask)):
-                            nodesInMask = []#list of nodes which are extracted according to mask
-                            for x in mask[i]:
-                                nodesInMask.append(elem.cntvt[x])
-                            #We need to compare both arrays nodesInMask and nodesOnBoundary. If they contain the same node numbers, we found edge/face.
-                            nodesInMask.sort()
-                            if(nodesInMask==nodesOnBoundary):#both lists are sorted so they can be compared
-                                success = 1
-                                elem.oofem_outputData.append(properties)
-                                elem.oofem_outputData.append("%d" % (i+1))
-                        if(success==0):
-                            print "Can not assign edge/face load to unv element %d" % elem.id
-       
+            #for igroup in elem.oofem_groups:#unv element with boundary load is assigned to some ctrl element group
+                #print elem.id, igroup.oofem_boundaryLoadsNum
+                if CTRL.oofem_elemProp[belem.oofem_elemtype].name == 'RepresentsBoundaryLoad':#found element, which represents boundary load
+                    nodesOnBoundary = belem.cntvt
+                    nodesOnBoundary.sort()
+                    for elem in elemNotBoundary:
+                        cnt=0
+                        for n in range(len(nodesOnBoundary)):
+                            if(elem.cntvt.count(int(nodesOnBoundary[n]))):
+                                cnt = cnt+1
+                        if (cnt==len(nodesOnBoundary)):#found eligible element to which assign b.c. Now find which edge/face it is.
+                            success = 0
+                            if(belem.type==11 or belem.type==22):#elements representing EDGE loads
+                                mask = CTRL.oofem_elemProp[elem.oofem_elemtype].edgeMask
+                            else:#face loads
+                                mask = CTRL.oofem_elemProp[elem.oofem_elemtype].faceMask
+                            
+                            for i in range(len(mask)):
+                                nodesInMask = []#list of nodes which are extracted according to mask
+                                for x in mask[i]:
+                                    nodesInMask.append(elem.cntvt[x])
+                                #We need to compare both arrays nodesInMask and nodesOnBoundary. If they contain the same node numbers, we found edge/face.
+                                nodesInMask.sort()
+                                if(nodesInMask==nodesOnBoundary):#both lists are sorted so they can be compared
+                                    success = 1
+                                    if(len(belem.oofem_groups)!=1):
+                                        print "Element unv number %d is assigned to %d group, which is more than one" % (belem.id,len(belem.oofem_groups))
+                                        exit(0)
+                                    #print elem.oofem_elemtype, belem.oofem_groups[0].name
+                                    #build a new int list, which reflects load numbers and edges/faces
+                                    loadNum = belem.oofem_groups[0].oofem_boundaryLoadsNum
+                                    newList=[-1]*(2*len(loadNum))
+                                    for j in range(len(loadNum)):
+                                        newList[2*j] = loadNum[j]
+                                        newList[2*j+1] = i+1
+                                    #print newList
+                                    elem.oofem_bLoads+=newList
+                                    #print elem.oofem_bLoads
+                            if(success==0):
+                                print "Can not assign edge/face load \"%s\" to unv element %d" % (belem.oofem_groups[0].name, elem.id)
+
         #write component record
         of.write('ndofman %d nelem %d ncrosssect %d nmat %d nbc %d nic %d nltf %d\n' % (FEM.nnodes, len(elemNotBoundary), CTRL.ncrosssect, CTRL.nmat, CTRL.nbc, CTRL.nic, CTRL.nltf))
         #write nodes
@@ -165,7 +178,11 @@ UNV2OOFEM: Converts UNV file from Salome to OOFEM native file format
 
         for elem in elemNotBoundary:
             str = ' '.join(elem.oofem_outputData)
-            of.write('%s\n' % str) 
+            #Add the list of boundaryLoads if it exists
+            if(elem.oofem_bLoads):
+                str+=" BoundaryLoads %d " % len(elem.oofem_bLoads)
+                str+= ' '.join(["%d" % el for el in elem.oofem_bLoads])
+            of.write('%s\n' % str)
 
         # write final sections
         of.write(CTRL.footer);
@@ -175,10 +192,9 @@ UNV2OOFEM: Converts UNV file from Salome to OOFEM native file format
         #
         print "done ( %d nodes %d elements)" % (FEM.nnodes, len(elemNotBoundary))
         print "Finished in %0.2f [s]" % ((t2-t1))
-        
+
     else:
         print(helpmsg)
 
-        
 
 

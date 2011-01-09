@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # UNV2X base code, J.Cugnoni, www.caelinux.com,9.2006
 # Licence: GPL
 # Purpose: this is a set of objects & functions to read a Universal File
@@ -79,13 +80,11 @@ def UNV2411Reader(file,FEM):
         else:
             loop=False
     return FEM
-            
 
 def UNV2412Reader(file,FEM):
     """ reads an UNV2412 dataset (elements) from file and store data in FEM structure
         return an updated FEM object"""
     endFlag='    -1'
-    SpecialElemTypes=[11] # types of elements which are defined on 3 lines
     loop=True
     while loop:
         line1=file.readline()
@@ -97,13 +96,21 @@ def UNV2412Reader(file,FEM):
             else:
                 dataline=Line2Int(line1)
                 eltype=dataline[1]
-                if eltype==11:
+                if eltype==11 or eltype==22:# types of elements which are defined on 3 lines
                     # 1D elements have an additionnal line in their definition
                     line3=file.readline()
                     cntvt=Line2Int(line3)
+                elif eltype==116:#Quadratic brick element has data on 4 lines
+                    line3=file.readline()
+                    line4=file.readline()
+                    cntvt = Line2Int(line2) + Line2Int(line3) + Line2Int(line4)
+                    #print cntvt, type(cntvt)
                 else:
-                    # standard elements have their connectivities on secnd line
+                    # standard elements have their connectivities on second line
                     cntvt=Line2Int(line2)
+                if(len(dataline)<6):
+                    print "I need at least 6 entries on dataline %s" % dataline
+                    exit(0)
                 FEM.elems.append(Element(dataline[0],dataline[1],0,0,dataline[5],cntvt))
                 FEM.nelems=FEM.nelems+1
         else:
@@ -111,9 +118,8 @@ def UNV2412Reader(file,FEM):
     return FEM
 
 def UNV2467Reader(file,FEM):
-    """ reads an UNV2467 dataset (groups) from file and store data in FEM structure
-	a group may represent a nodeset, an elementset or an edgeset ...
-        return an updated FEM object"""
+    """ reads an UNV2467 dataset (groups) from file and store data in FEM structure a group may represent a nodeset, an elementset or an edgeset ...
+    return an updated FEM object"""
     endFlag='    -1'
     loop=True
     while loop:
@@ -127,6 +133,9 @@ def UNV2467Reader(file,FEM):
                 # read group
                 dataline=Line2Int(line1)
                 groupname=line2
+                if(len(dataline)==0):
+                    print "Group %s is empty, did you remesh the object and lost the members?", groupname
+                    exit(0)
                 id=dataline[0]
                 nitems=dataline[7]
                 nlines=(nitems+1)/2
@@ -192,7 +201,7 @@ class UNVParser:
                 loop=False
         # rewind file
         self.file.seek(0)
-                
+
     def parse(self):
         """ parse UNV file to fill the FEM data structure"""
         self.file=open(self.filename,'r')
@@ -200,13 +209,12 @@ class UNVParser:
         for sectionId,offset in self.sections:
             if (sectionId in self.datasetsIds):
                 self.file.seek(offset)
-                func=self.datasetsHandlers[self.datasetsIds.index(sectionId)]                
+                func=self.datasetsHandlers[self.datasetsIds.index(sectionId)]
                 self.FEM=func(self.file,self.FEM)
         self.file.close()
-        return self.FEM                
+        return self.FEM
 
 
-                  
 if __name__=='__main__':
     helpmsg=""" UNV2X: example of use, write data in separate text files
         usage: UNV2X unvfile prefix
@@ -232,17 +240,17 @@ if __name__=='__main__':
         for elem in FEM.elems:
             dat=[elem.id,elem.type,elem.material,elem.color,elem.nnodes]
             dat.extend([x for x in elem.cntvt])
-            format='%5d, ' * (4 + elem.nnodes) + ' %5d' + ls            
+            format='%5d, ' * (4 + elem.nnodes) + ' %5d' + ls
             ef.write(format % tuple(dat))
         ef.close()
         # group file
         grouptypes={7:'NodeSet',8:'ElementSet'}
         gf=open(prefix + '.groups','w')
-        for group in (FEM.nodesets + FEM.elemsets):            
+        for group in (FEM.nodesets + FEM.elemsets):
             gf.write(('%s(%d) Id: %d'+ls) % (grouptypes[group.type],group.type,group.id))
             gf.write('Name: %s' % (group.name))
-            count=0            
-            lst=group.items                        
+            count=0
+            lst=group.items
             for i in range(group.nitems):
                 count=count+1
                 if (count<8)&(i<>group.nitems-1):
@@ -251,11 +259,8 @@ if __name__=='__main__':
                     gf.write(('%5d'+ls) % lst.pop(0))
                     count=0
         gf.close()
-        
+
     else:
         print(helpmsg)
-    
-    
-
 
 

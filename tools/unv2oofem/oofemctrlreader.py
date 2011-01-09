@@ -17,7 +17,7 @@
 #              FEM.Element.oofem_elemtype  - oofem element type, ID in the list of elements
 #              FEM.Group.oofem_properties  - attributes related to components in that group
 #                                            these are resolved to individual components
-#                                            in CTRL.parse
+#                                            in CTRL parse
 #              FEM.Group.oofem_etypemap    - dictionary of element types
 #                                            key is unv element id
 #                                            value is corresponding oofem element type
@@ -28,6 +28,12 @@ import os
 import os.path
 import sys
 import re
+
+def remove_values_from_list(the_list, val):
+    the_list = [element.lower() for element in the_list]
+    val = val.lower()
+    while val in the_list:
+        the_list.remove(val)
 
 def Line2Float(line):
     """Convert a string into a list of Float"""
@@ -57,8 +63,8 @@ class CTRLParser:
 #   Table of element properties. It contains mapping of nodes, edges and faces between unv and OOFEM element.
     oofem_elemProp = []
     oofem_elemProp.append(oofem_elementProperties("None", [0], [], []))#leave this line [0] as it is
-    oofem_elemProp.append(oofem_elementProperties("BoundaryLoads", [0,1],[],[]))
-    oofem_elemProp.append(oofem_elementProperties("Truss1D",oofem_elemProp[-1]))
+    oofem_elemProp.append(oofem_elementProperties("RepresentsBoundaryLoad", [],[],[]))#special element representing boundary load
+    oofem_elemProp.append(oofem_elementProperties("Truss1D", [0,1], [], []))
     oofem_elemProp.append(oofem_elementProperties("Truss2D", [0,1], [0,1],[]))
     oofem_elemProp.append(oofem_elementProperties("Truss3D",oofem_elemProp[-1]))
     oofem_elemProp.append(oofem_elementProperties("Beam2D",oofem_elemProp[-1]))
@@ -125,40 +131,58 @@ class CTRLParser:
             if not line: break
             if line.startswith('#'):
                 continue
-            match=re.search('^group((\w| )+)', line)
+            match=re.search('^group((\w| )+)', line, re.IGNORECASE)
             if match:
                 groups = match.group(1).split()
                 print "\tFound properties for group(s):", groups
                 # parse group record
                 while True:
                     line=self.file.readline()
-                    if not line: 
+                    if not line:
                         break
-                    match=re.search('^(nodeprop|elemprop|etype\[\d+\]|#)\s+((\w| |\t)+)',line)
+                    match=re.search('^(nodeprop|elemprop|etype\[\d+\]|#)\s+((\w| |\t|$)+)', line, re.IGNORECASE)
                     if match:
-                        if match.group(1) == 'nodeprop':
+                        if match.group(1).lower() == 'nodeprop':
                             for igroup in groups:
                                 __gr=self.getNodeGroup(FEM,igroup)
                                 if __gr:
-                                    __gr.oofem_properties=match.group(2)
-                                    print "\t\tgroup \"",igroup, "\" nodeprops:", __gr.oofem_properties
+                                    __gr.oofem_properties=match.group(2).lower()
+                                    str = "\t\tGroup of nodes \"%s\" has properties: %s" % (igroup, __gr.oofem_properties)
+                                    print str
                                 else:
-                                    print "\t\tWARNING: group \"",igroup, "\" no such node group found"
-                        elif match.group(1) == 'elemprop':
-                            for igroup in groups:
-                                __gr=self.getElementGroup(FEM,igroup)
-                                if __gr:
-                                    __gr.oofem_properties=match.group(2)
-                                    print "\t\tgroup \"",igroup, "\" elemprops:", __gr.oofem_properties
-                                else:
-                                    print "\t\tWARNING: group \"",igroup, "\" no such element group found"
-                        elif match.group(1)[:5] == 'etype':
-                            etmatch=re.search('etype\[(\d+)\]*', match.group(1))
+                                    str = "\t\tWARNING: Group of nodes \"%s\" does not exist" % igroup
+                                    print str
+                        elif match.group(1).lower() == 'elemprop':
+                            if (match.group(2)[:8].lower()=='bloadnum'):#check if the group represents a boundary load
+                                loadNumbers = Line2Int(match.group(2)[8:])
+                                for igroup in groups:
+                                    __gr=self.getElementGroup(FEM,igroup)
+                                    if __gr:
+                                        __gr.oofem_boundaryLoadsNum=loadNumbers
+                                        str = "\t\tGroup of elements \"%s\" has boundary loads with numbers: %s" % (igroup, loadNumbers)
+                                        print str
+                                    else:
+                                        str = "\t\tWARNING: Group of elements \"%s\" for boundary load does no exist" % (igroup)
+                            else:#not boundary loads
+                                for igroup in groups:
+                                    __gr=self.getElementGroup(FEM,igroup)
+                                    if __gr:
+                                        __gr.oofem_properties=match.group(2).lower()
+                                        str = "\t\tGroup of elements \"%s\" has properties: %s" % (igroup, __gr.oofem_properties)
+                                        print str
+                                    else:
+                                        str = "\t\tWARNING: Group of elements \"%s\" does no exist" % (igroup)
+                                        print str
+                        elif match.group(1)[:5].lower() == 'etype':
+                            etmatch=re.search('etype\[(\d+)\]*', match.group(1), re.IGNORECASE)
                             unvetype = int(etmatch.group(1))
                             for igroup in groups:
                                 __gr=self.getElementGroup(FEM,igroup)
                                 if __gr:
-                                    elemName = match.group(2).strip()
+                                    if (__gr.oofem_boundaryLoadsNum):
+                                        elemName = 'RepresentsBoundaryLoad'#assign this name to an element so we know it represents a boundary load
+                                    else:
+                                        elemName = match.group(2).strip()
                                     #check that elemName exists in a list and assign
                                     for n in range(len(self.oofem_elemProp)):
                                         if(self.oofem_elemProp[n].name.lower() == elemName.lower()):
@@ -168,9 +192,11 @@ class CTRLParser:
                                         print "OOFEM element %s not found in OOFEM's list of eligible elements" % elemName
                                         sys.exit(0)
 
-                                    print "\t\tgroup \"",igroup, "\" etype[", unvetype, "] =", __gr.oofem_etypemap[unvetype]
+                                    str = "\t\tGroup of elements \"%s\" of unv_element_type[%d] = %s" % (igroup, unvetype, elemName)
+                                    print str
                                 else:
-                                    print "\t\tWARNING: group \"",igroup, "\" no such element group found"
+                                    str = "\t\tWARNING: Group of elements \"%s\" not found" % (igroup)
+                                    print str
                     else:
                         break
 
@@ -228,13 +254,14 @@ class CTRLParser:
                     #print "EOF reached prematurely, missing #%END_CHECK%"
                     #sys.exit(0)
 
-        #init group properties
-        for igroup in FEM.nodesets:
+        #init group properties on UNV data
+        for igroup in FEM.nodesets:#defined in ctrl file
             igroup.oofem_properties=""
-        for igroup in FEM.elemsets:
+        for igroup in FEM.elemsets:#defined in ctrl file
             igroup.oofem_properties=""
             igroup.oofem_elemtype=0
             igroup.oofem_etypemap={}
+            igroup.oofem_boundaryLoadsNum=[]#numbers of boundary loads
         # read and parse individual group records
         while True:
             if not self.parseGroup (FEM):
@@ -250,6 +277,7 @@ class CTRLParser:
             i.oofem_groups=[]
             i.oofem_elemtype=0
             i.oofem_outputData=[]#used for outputting OOFEM file
+            i.oofem_bLoads=[]#array storing BoundaryLoads IDs, they will be merged at the output routine
 
         # apply group membership to individual components
         for igroup in FEM.nodesets:
