@@ -2371,24 +2371,77 @@ The relation between the damage variable $\omega$ and the internal variable $\ka
 \omega = 
 1-\exp\left(-\kappa_{\rm d}/\varepsilon_f\right) 
 \end{equation}
-where $\varepsilon_f$ is a parameter that controls the slope of the softening curve. To avoid pathological sensitivity
-of the results to the size of finite elements, this parameter is adjusted according to the element size.
-Therefore, another parameter, $w_f$, is considered as a material property, and $\eps_f$ is evaluated as $w_f/h$
-where $h$ is the size of the finite element (projected onto the direction of maximum principal strain).
+where $\varepsilon_f$ is a parameter that controls the slope of the softening curve. In fact, equation (\ref{eq:damageLaw}) is used by the nonlocal version
+of the damage-plastic model, with $\kappa_{\rm d}$ replaced by its weighted
+spatial average (not yet available in the public version of OOFEM).
+For the local model, it is necessary to adjust softening according
+to the element size, otherwise the results would suffer by pathological 
+mesh sensitivity. It is assumed that localization takes place at the
+peak of the stress-strain diagram, i.e., at the onset of damage. 
+After that, the strain is decomposed into the distributed
+part, which corresponds to unloading from peak, and the localized part,
+which is added if the material is softening.
+The  localized part of strain 
+is transformed into an equivalent crack opening, $w$, which is 
+under uniaxial tension linked
+to the stress by the exponential law 
+\begin{equation} \label{eq:damageLaw2}
+\sigma = (1-\omega) f_t =
+f_t \exp\left(-w/w_f\right) 
+\end{equation}
+Here, $f_t$ is the uniaxial tensile strength and $w_f$ is the characteristic
+crack opening, playing a similar role to $\varepsilon_f$.
+Under uniaxial tension, the localized strain can be expressed as the sum
+of the post-peak plastic strain (equal to variable $\kappa_{\rm d}$) 
+and the unloaded part of elastic strain (equal to $\omega f_t/E$).
+Denoting the effective element size as $h$, we can write
+\begin{equation}
+w = h(\kappa_{\rm d}+\omega f_t/E)
+\end{equation}
+and substituting this into (\ref{eq:damageLaw2}), we obtain a nonlinear
+equation
+\begin{equation}\label{eq:damageLaw4}
+1-\omega = \exp\left(-\frac{h}{w_f}\left(\kappa_{\rm d}+\omega f_t/E\right)\right)
+\end{equation}
+from which the damage variable $\omega$ corresponding to the given internal
+variable $\kappa_{\rm d}$ can be computed by Newton iteration.
+The effective element size $h$ is obtained by projecting the element onto
+the direction of the maximum principal strain at the onset of cracking,
+and afterwards it is held fixed. The evaluation of $\omega$ from
+$\kappa_{\rm d}$ is no longer explicit, but the resulting load-displacement curve
+of a bar under uniaxial tension is totally independent of the mesh size.
+A simpler approach would be to use (\ref{eq:damageLaw}) with 
+$\varepsilon_f = w_f/h$, but then the scaling would not be perfect and
+the shape of the load-displacement curve (and also the dissipated energy)
+would slightly depend on the mesh size. With the present approach,
+the energy per unit sectional area dissipated under uniaxial tension 
+is exactly $G_f = w_f f_t$. The input parameter controling the damage law
+can be either the characteristic crack opening $w_f$, 
+or the fracture energy $G_f$. If both are specified, $w_f$ is used and
+$G_f$ is ignored. If only $G_f$ is specified, $w_f$ is set to $G_f/f_t$.
 
-The damage-plastic model contains 15 parameters, but only 6 of them are actually calibrated for different concrete types, namely Young's modulus $E$, Poisson's ratio $\nu$, tensile strength $f_{\rm t}$, compressive strength $f_{\rm c}$, parameter $\varepsilon_{\rm f}$ of the damage law (\ref{eq:damageLaw}), and parameter $A_{\rm s}$ in the ductility measure (\ref{eq:damageDuctility}) of the damage model. The remaining parameters can be set to their default values specified in \cite{GraJir}.
+The damage-plastic model contains 15 parameters, but only 6 of them need to be actually calibrated for different concrete types, namely Young's modulus $E$, Poisson's ratio $\nu$, tensile strength $f_{\rm t}$, compressive strength $f_{\rm c}$, parameter $w_f$ (or fracture energy $G_f$), and parameter $A_{\rm s}$ in the ductility measure (\ref{eq:damageDuctility}) of the damage model. The remaining parameters can be set to their default values specified in \cite{GraJir}.
 
 The model parameters are summarized
 in table~\ref{dpm_table}. Note that it is possible to specify the ``size'' of finite element, $h$, which (if specified) replaces
-the actual element size in the relation between the material parameter $w_f$ and the parameter $\eps_f=w_f/h$ that is used
-in (\ref{eq:damageLaw}). The usual approach is to consider $h$ as the actual element size (evaluated automatically by OOFEM), 
+the actual element size in  (\ref{eq:damageLaw4}). The usual approach is to consider $h$ as the actual element size (evaluated automatically by OOFEM), 
 in which case the optional
 parameter $h$ is missing (or is set to 0., which has the same effect in the code). However, for various studies of mesh sensitivity
-it is useful to have the option of setting $\eps_f$ to a fixed value, independent of the element size. 
-This can be achieved by specifying $h$ as an input ``material'' value.
-For instance, if $h$ is set to 1, then the parameter $\eps_f$ used  in (\ref{eq:damageLaw}) will have the same value
-as the input parameter $w_f$, independently of the actual element size.
+it is useful to have the option of  specifying $h$ as an input ``material'' value.
 
+If the element is too large, it may become too brittle and local snap-back
+occurs in the stress-strain diagram, which is not acceptable. 
+In such a case, an error message is issued and the program execution
+is terminated. The maximum admissible element size 
+\begin{equation}
+h_{\max} = \frac{EG_f}{f_t^2} = \frac{Ew_f}{f_t}
+\end{equation}
+happens to be equal to Hillerborg's chacteristic material length. 
+For typical concretes it is in the order of a few hundred mm. 
+If the condition $h<h_{\max}$ is violated, the mesh needs to be refined.
+Note that the effective element size $h$ is obtained by projecting the element.
+For instance, if the element is a cube of edge length 100 mm, its effective
+size in the direction of the body diagonal can be 173 mm. 
 
 \subsection{Orthotropic damage model with fixed crack orientations for composites}
 
