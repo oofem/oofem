@@ -2336,15 +2336,16 @@ Description & Damage-plastic model for concrete\\
 \hline
 Record Format & \descitem{ConcreteDPM}  \elemparam{d}{rn}
 \elemparam{E}{rn} \elemparam{n}{rn} \elemparam{tAlpha}{rn}
- \elemparam{ft}{rn} \elemparam{fc}{rn} \elemparam{wf}{rn} \elemparam{ecc}{rn}
+ \elemparam{ft}{rn} \elemparam{fc}{rn} \elemparam{wf}{rn} \elemparam{Gf}{rn} \elemparam{ecc}{rn}
  \elemparam{kinit}{rn} \elemparam{Ahard}{rn} \elemparam{Bhard}{rn} \elemparam{Chard}{rn} \elemparam{Dhard}{rn} \elemparam{Asoft}{rn} \elemparam{helem}{rn} \elemparam{dilation}{rn} \elemparam{yieldtol}{rn} \elemparam{newtoniter}{in} \\
 Parameters &- \param{d} material density\\
 &- \param{E} Young modulus\\
 &- \param{n} Poisson ratio\\
 &- \param{tAlpha} thermal dilatation coefficient\\
-&- \param{ft} uniaxial tensile strength\\
+&- \param{ft} uniaxial tensile strength $f_t$\\
 &- \param{fc} uniaxial compressive strength\\
 &- \param{wf} parameter $w_f$ that controls the slope of the softening branch (serves for the evaluation of $\eps_f=w_f/h$ to be used in (\ref{eq:damageLaw}))\\
+&- \param{Gf} fracture energy, can be specified instead of wf, it is converted to $w_f=G_f/f_t$ \\
 &- \param{ecc} eccentricity parameter $e$ from (\ref{bf103}), optional, default value 0.525\\
 &- \param{kinit} parameter ${\qh}_0$ from (\ref{eq:hardeningLaw}), optional, default value 0.1\\
 &- \param{Ahard} parameter $A_{\rm h}$ from (\ref{eq:hardeningMeasure}), optional, default value 0.08\\

@@ -875,6 +875,7 @@ enum InputFieldType {
     IFT_ConcreteDPM_yieldtol,
     IFT_ConcreteDPM_newtoniter,
     IFT_ConcreteDPM_ef,
+    IFT_ConcreteDPM_gf,
     IFT_ConcreteDPM_cycmode,
     IFT_ConcreteDPM_cycpar,
     IFT_ConcreteDPM_reltime,
@@ -1052,7 +1053,7 @@ enum InputFieldType {
 
 
 /**
- * Macro simplifying the erorr reporting.
+ * Macro simplifying the error reporting.
  */
 #define IR_IOERR(__class, __proc, __id, __keyword, __ir, __result) \
     __ir->report_error(__class, __proc, __id, __keyword, __result, __FILE__, __LINE__);
@@ -1061,7 +1062,7 @@ enum InputFieldType {
  * Macro facilitating the use of input record reading methods.
  * uses the given input record (__ir parameter) and reads the compulsory
  * field identified by __kwd and stores the  result into __value parameter.
- * Includes also the erorr reporting.
+ * Includes also the error reporting.
  */
 #define IR_GIVE_FIELD(__ir, __value, __id, __kwd) result = __ir->giveField(__value, __id, __kwd); \
     if ( result != IRRT_OK ) { IR_IOERR(giveClassName(), __proc, __id, __kwd, __ir, result); }
@@ -1070,7 +1071,7 @@ enum InputFieldType {
  * Macro facilitating the use of input record reading methods.
  * uses the given input record (__ir parameter) and reads the optional
  * field identified by __kwd and stores the  result into __value parameter.
- * Includes also the erorr reporting.
+ * Includes also the error reporting.
  */
 #define IR_GIVE_OPTIONAL_FIELD(__ir, __value, __id, __kwd) result = __ir->giveOptionalField(__value, __id, __kwd); \
     if ( result != IRRT_OK ) { IR_IOERR(giveClassName(), __proc, __id, __kwd, __ir, result); }
@@ -1079,7 +1080,7 @@ enum InputFieldType {
  * Macro facilitating the use of input record reading methods.
  * uses the given input record (__ir parameter) and reads the compulsory
  * field identified by __kwd and stores the  result into __value parameter.
- * Includes also the erorr reporting.
+ * Includes also the error reporting.
  */
 #define IR_GIVE_FIELD2(__ir, __value, __id, __kwd, __opt) result = __ir->giveField(__value, __opt, __id, __kwd); \
     if ( result != IRRT_OK ) { IR_IOERR(giveClassName(), __proc, __id, __kwd, __ir, result); }
@@ -1088,7 +1089,7 @@ enum InputFieldType {
  * Macro facilitating the use of input record reading methods.
  * uses the given input record (__ir parameter) and reads the optional
  * field identified by __kwd and stores the  result into __value parameter.
- * Includes also the erorr reporting.
+ * Includes also the error reporting.
  */
 #define IR_GIVE_OPTIONAL_FIELD2(__ir, __value, __id, __kwd, __opt) \
     result = __ir->giveOptionalField(__value, __opt, __id, __kwd); \
@@ -1096,7 +1097,7 @@ enum InputFieldType {
 /**
  * Macro facilitating the use of input record reading methods.
  * uses the given input record (__ir parameter) and reads the compulsory record keyword (__kwd)
- * and its number (__value param). Includes also the erorr reporting.
+ * and its number (__value param). Includes also the error reporting.
  */
 #define IR_GIVE_RECORD_KEYWORD_FIELD(__ir, __name, __value, __opt) \
     result = __ir->giveRecordKeywordField(__name, __value, __opt); \
