@@ -687,7 +687,7 @@ OctreeSpatialLocalizer :: giveElementContainingPoint(oofemOctantRec *cell, const
 Element *
 OctreeSpatialLocalizer :: giveElementCloseToPoint(const FloatArray &coords, const IntArray *regionList)
 {
-    Element *ielemptr, *answer;
+    Element *ielemptr, *answer = NULL;
     double currDist, minDist = 1.1 * rootCell->giveSize();
     elementContainerType :: iterator pos;
     elementContainerType *elementList;
