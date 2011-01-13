@@ -52,8 +52,7 @@ InternalVariableField :: ~InternalVariableField()
 }
 
 int
-InternalVariableField :: evaluateAt(FloatArray &answer, FloatArray &coords, IntArray &dofId,
-                                    ValueModeType mode, TimeStep *atTime)
+InternalVariableField :: evaluateAt(FloatArray &answer, FloatArray &coords, ValueModeType mode, TimeStep *atTime)
 {
     IntArray types(1);
     types.at(1) = this->type;
@@ -63,7 +62,16 @@ InternalVariableField :: evaluateAt(FloatArray &answer, FloatArray &coords, IntA
 
     return 0; // ok
 }
-
+  
+int
+InternalVariableField::evaluateAt(FloatArray &answer, DofManager* dman, ValueModeType mode, TimeStep *atTime)
+{
+  if (dman->hasCoordinates()) {
+    return this->evaluateAt(answer, *(dman->giveCoordinates()), mode, atTime);
+  } else {
+    return 1; // failed -> dman without coordinates
+  }
+}
 
 contextIOResultType
 InternalVariableField :: saveContext(DataStream *stream, ContextMode mode)
