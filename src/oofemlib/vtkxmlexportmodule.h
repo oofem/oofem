@@ -72,8 +72,8 @@ protected:
     IntArray cellVarsToExport;
 
     /// smoother type
-    enum VTKEM_SmootherType { VTK_Smother_NA, VTK_Smoother_ZZ, VTK_Smoother_SPR } stype;
-    /// smotther
+    NodalRecoveryModel::NodalRecoveryModelType stype;
+    /// smoother
     NodalRecoveryModel *smoother;
     /// list of regions to skip
     IntArray regionsToSkip;

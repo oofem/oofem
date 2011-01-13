@@ -73,7 +73,7 @@ protected:
     modeType mode;
 
     /// smoother type
-    enum VTKEM_SmootherType { VTK_Smother_NA, VTK_Smoother_ZZ, VTK_Smoother_SPR } stype;
+    NodalRecoveryModel::NodalRecoveryModelType stype;
     /// smoother
     NodalRecoveryModel *smoother;
     /// list of regions to skip

@@ -38,14 +38,12 @@
 #include "engngm.h"
 #include "strreader.h"
 #include "node.h"
-#include "zznodalrecoverymodel.h"
-#include "nodalaveragingrecoverymodel.h"
-#include "sprnodalrecoverymodel.h"
 #include "materialinterface.h"
 #include "mathfem.h"
 #include "oofem_limits.h"
 #include "cltypes.h"
 #include "material.h"
+#include "usrdefsub.h"
 
 #ifndef __MAKEDEPEND
  #include <vector>
@@ -82,7 +80,7 @@ VTKXMLExportModule :: initializeFrom(InputRecord *ir)
 
     val = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_VTKXMLExportModule_stype, "stype"); // Macro
-    stype = ( VTKEM_SmootherType ) val;
+    stype = ( NodalRecoveryModel::NodalRecoveryModelType ) val;
 
     regionsToSkip.resize(0);
     IR_GIVE_OPTIONAL_FIELD(ir, regionsToSkip, IFT_VTKXMLExportModule_regionstoskip, "regionstoskip"); // Macro
@@ -741,17 +739,8 @@ VTKXMLExportModule :: giveSmoother()
     Domain *d = emodel->giveDomain(1);
 
     if ( this->smoother == NULL ) {
-        if ( this->stype == VTK_Smother_NA ) {
-            this->smoother  = new NodalAveragingRecoveryModel(d);
-        } else if ( this->stype == VTK_Smoother_ZZ ) {
-            this->smoother = new ZZNodalRecoveryModel(d);
-        } else if ( this->stype == VTK_Smoother_SPR ) {
-            this->smoother = new SPRNodalRecoveryModel(d);
-        } else {
-            OOFEM_ERROR2("VTKXMLExportModule: unsupported smoother type ID %d", this->stype);
-        }
+      this->smoother = CreateUsrDefNodalRecoveryModel(this->stype, d);
     }
-
     return this->smoother;
 }
 
