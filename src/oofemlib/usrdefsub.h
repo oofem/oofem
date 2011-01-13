@@ -64,6 +64,7 @@
 #include "exportmodule.h"
 #include "initmodule.h"
 #include "patch.h"
+#include "nodalrecoverymodel.h"
 
 #include "errorestimator.h"
 #ifdef __PARALLEL_MODE
@@ -270,6 +271,14 @@ BasicGeometry *CreateUsrDefGeometry(const char *name);
  * @return Newly allocated object of requested type, null if keyword not supported.
  */
 Patch *CreateUsrDefPatch(Patch :: PatchType ptype, Element *e);
+/**
+ * Creates new instance nodal recovery model of given type.
+ * @param type Id determining the type of new instance.
+ * @param d domain to which newly created recovery model is associated to.
+ * @return Newly allocated object of requested type, null if keyword not supported.
+ */
+NodalRecoveryModel *CreateUsrDefNodalRecoveryModel(NodalRecoveryModel :: NodalRecoveryModelType type, Domain *d);
+
 #ifdef __PARALLEL_MODE
 /**
  * Creates new instance of load balance monitor corresponding to given keyword.

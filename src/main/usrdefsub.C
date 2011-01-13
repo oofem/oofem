@@ -92,6 +92,11 @@
 #include "vtkexportmodule.h"
 #include "vtkxmlexportmodule.h"
 
+// nodal recovery models
+#include "zznodalrecoverymodel.h"
+#include "nodalaveragingrecoverymodel.h"
+#include "sprnodalrecoverymodel.h"
+
 // end __OOFEMLIB_MODULE
 
 
@@ -1108,6 +1113,24 @@ Patch *CreateUsrDefPatch(Patch :: PatchType ptype, Element *e) {
 
     return answer;
 }
+
+NodalRecoveryModel *
+CreateUsrDefNodalRecoveryModel(NodalRecoveryModel :: NodalRecoveryModelType type, Domain *d)
+{
+    NodalRecoveryModel* answer = NULL;
+    if ( type == NodalRecoveryModel::NRM_NodalAveraging ) {
+      answer = new NodalAveragingRecoveryModel(d);
+    } else if ( type == NodalRecoveryModel::NRM_ZienkiewiczZhu ) {
+      answer = new ZZNodalRecoveryModel(d);
+    } else if ( type == NodalRecoveryModel::NRM_SPR ) {
+      answer = new SPRNodalRecoveryModel(d);
+    } else {
+      OOFEM_ERROR2("CreateUsrDefNodalRecoveryModel: unsupported NodalRecoveryModelType [%d]", type);
+    }
+
+    return answer;
+}
+
 
 #ifdef __PARALLEL_MODE
 LoadBalancerMonitor *CreateUsrDefLoadBalancerMonitorOfType(classType type, EngngModel *e)
