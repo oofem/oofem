@@ -62,15 +62,16 @@ class TimeStep;
 class InitModule
 {
 protected:
-
+    /// number
+    int number;
     /// Problem pointer
     EngngModel *emodel;
     /// Initialization file
     FILE *initStream;
 public:
 
-    /// Constructor. Creates empty Init Module.
-    InitModule(EngngModel *e);
+    /// Constructor. Creates empty Init Module with number n.
+    InitModule(int n, EngngModel *e);
     /// Destructor
     virtual ~InitModule();
     /// Initializes receiver acording to object description stored in input record.

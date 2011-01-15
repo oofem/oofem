@@ -43,9 +43,10 @@
 #endif
 
 namespace oofem {
-InitModule :: InitModule(EngngModel *e)
+InitModule :: InitModule(int n, EngngModel *e)
 {
     emodel = e;
+    number = n;
 }
 
 

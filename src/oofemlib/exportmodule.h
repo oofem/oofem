@@ -66,6 +66,8 @@ class ExportModule
 {
 protected:
 
+    /// Component number
+    int number;
     /// Problem pointer
     EngngModel *emodel;
     /// Indicates all steps selection
@@ -82,8 +84,8 @@ protected:
 
 public:
 
-    /// Constructor. Creates empty Output Manager. By default all components are selected.
-    ExportModule(EngngModel *e);
+    /// Constructor. Creates empty Output Manager with number n. By default all components are selected.
+    ExportModule(int n, EngngModel *e);
     /// Destructor
     virtual ~ExportModule();
     /// Initializes receiver acording to object description stored in input record.

@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/sm/src/poiexportmodule.h,v 1.1 2003/05/19 13:04:00 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -80,7 +79,7 @@ protected:
 public:
 
     /// Constructor. Creates empty Output Manager. By default all components are selected.
-    POIExportModule(EngngModel *e);
+    POIExportModule(int n, EngngModel *e);
     /// Destructor
     ~POIExportModule();
     /// Initializes receiver acording to object description stored in input record.

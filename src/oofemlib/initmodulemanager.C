@@ -65,8 +65,8 @@ InitModuleManager :: initializeFrom(InputRecord *ir) {
     return IRRT_OK;
 }
 
-InitModule *InitModuleManager :: CreateModuleOfType(char *name, EngngModel *emodel) {
-    return CreateUsrDefInitModuleOfType(name, emodel);
+InitModule *InitModuleManager :: CreateModuleOfType(char *name, int n, EngngModel *emodel) {
+    return CreateUsrDefInitModuleOfType(name, n, emodel);
 }
 
 void

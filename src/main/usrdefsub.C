@@ -879,25 +879,25 @@ CreateUsrDefErrorEstimator(ErrorEstimatorType type, int number, Domain *d)
     return answer;
 }
 
-ExportModule *CreateUsrDefExportModuleOfType(const char *aClass, EngngModel *emodel)
+ExportModule *CreateUsrDefExportModuleOfType(const char *aClass, int number, EngngModel *emodel)
 {
     ExportModule *answer = NULL;
 
     if ( !strncasecmp(aClass, "vtkxml", 6) ) {
-        answer = new VTKXMLExportModule(emodel);
+       answer = new VTKXMLExportModule(number, emodel);
     } else if ( !strncasecmp(aClass, "vtk", 3) ) {
-        answer = new VTKExportModule(emodel);
+       answer = new VTKExportModule(number, emodel);
     }
 
 #ifdef __SM_MODULE
     if ( !strncasecmp(aClass, "poi", 3) ) {
-        answer = new POIExportModule(emodel);
+        answer = new POIExportModule(number, emodel);
     } else if ( !strncasecmp(aClass, "hom", 3) ) {
-        answer = new HOMExportModule(emodel);
+        answer = new HOMExportModule(number, emodel);
     } else if ( !strncasecmp(aClass, "dm", 2) ) {
-        answer = new DofManExportModule(emodel);
+        answer = new DofManExportModule(number, emodel);
     } else if ( !strncasecmp(aClass, "gp", 2) ) {
-        answer = new GPExportModule(emodel);
+        answer = new GPExportModule(number, emodel);
     }
 
 #endif //__SM_MODULE
@@ -905,13 +905,13 @@ ExportModule *CreateUsrDefExportModuleOfType(const char *aClass, EngngModel *emo
     return answer;
 }
 
-InitModule *CreateUsrDefInitModuleOfType(const char *aClass, EngngModel *emodel)
+InitModule *CreateUsrDefInitModuleOfType(const char *aClass, int n, EngngModel *emodel)
 {
     InitModule *answer = NULL;
 
 #ifdef __SM_MODULE
     if ( !strncasecmp(aClass, "gpinitmodule", 12) ) {
-        answer = new GPInitModule(emodel);
+       answer = new GPInitModule(n, emodel);
     }
 
 #endif //__SM_MODULE

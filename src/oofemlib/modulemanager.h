@@ -80,7 +80,7 @@ public:
         delete moduleList;
     }
     /** Creates new instance of module of given name, belonging to given EngngModel */
-    virtual M *CreateModuleOfType(char *name, EngngModel *emodel) = 0;
+    virtual M *CreateModuleOfType(char *name, int n, EngngModel *emodel) = 0;
     /**
      * Reads receiver description from input stream and creates corresponding modules components accordingly.
      * It scans input file, each line is assumed to be single record describing particular module.
@@ -111,7 +111,7 @@ public:
             }
 
             // read type of module
-            module = this->CreateModuleOfType(name, emodel);
+            module = this->CreateModuleOfType(name, i, emodel);
             if ( module == NULL ) {
                 OOFEM_ERROR2("InitModuleManager::instanciateYourself: unknown module (%s)", name);
             }

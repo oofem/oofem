@@ -166,18 +166,20 @@ ErrorEstimator *CreateUsrDefErrorEstimator(ErrorEstimatorType type, int number, 
 /**
  * Creates new instance of Export Module of given name.
  * @param name Export module keyword.
+ * @param number Component number.
  * @param emodel Engineering model associated to new export module.
  * @return Newly allocated object of requested type, null if keyword not supported.
  */
-ExportModule *CreateUsrDefExportModuleOfType(const char *name, EngngModel *emodel);
+ExportModule *CreateUsrDefExportModuleOfType(const char *name, int number, EngngModel *emodel);
 
 /**
  * Creates new Instance of Initialization Module of given name.
  * @param name Initialization module keyword.
+ * @param number Component number.
  * @param emodel Engineering model associated to new export module.
  * @return Newly allocated object of requested type, null if keyword not supported.
  */
-InitModule *CreateUsrDefInitModuleOfType(const char *name, EngngModel *emodel);
+InitModule *CreateUsrDefInitModuleOfType(const char *name, int n, EngngModel *emodel);
 
 /**
  * Creates new Instance of Nonlocal Barrier class corresponding to given name.

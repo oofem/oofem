@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/sm/src/poiexportmodule.C,v 1.1.4.1 2004/04/05 15:19:47 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -48,7 +47,7 @@
 #include "oofem_limits.h"
 
 namespace oofem {
-POIExportModule :: POIExportModule(EngngModel *e) : ExportModule(e), internalVarsToExport(), primaryVarsToExport(), POIList()
+POIExportModule :: POIExportModule(int n, EngngModel *e) : ExportModule(n, e), internalVarsToExport(), primaryVarsToExport(), POIList()
 {
     mapper = NULL;
 }

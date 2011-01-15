@@ -82,7 +82,7 @@ protected:
 public:
 
     /// Constructor. Creates empty Output Manager. By default all components are selected.
-    VTKXMLExportModule(EngngModel *e);
+    VTKXMLExportModule(int n, EngngModel *e);
     /// Destructor
     ~VTKXMLExportModule();
     /// Initializes receiver acording to object description stored in input record.

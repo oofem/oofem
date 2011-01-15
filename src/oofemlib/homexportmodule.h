@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/sm/src/homexportmodule.h,v 1.9 2009/04/22 bp vs Exp $ */
 /*
  *
  *****    *****   ******  ******  ***   ***
@@ -67,7 +66,7 @@ protected:
 public:
 
     /// Constructor. Creates empty Output Manager.
-    HOMExportModule(EngngModel *e);
+    HOMExportModule(int n, EngngModel *e);
     /// Destructor
     ~HOMExportModule();
     /// Initializes receiver acording to object description stored in input record.

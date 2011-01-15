@@ -44,8 +44,9 @@
 #endif
 
 namespace oofem {
-ExportModule :: ExportModule(EngngModel *e) : tsteps_out(), domainMask()
+ExportModule :: ExportModule(int n, EngngModel *e) : tsteps_out(), domainMask()
 {
+    this->number = n;
     emodel = e;
 }
 

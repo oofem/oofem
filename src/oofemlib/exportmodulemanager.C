@@ -67,8 +67,8 @@ ExportModuleManager :: initializeFrom(InputRecord *ir) {
 
 
 
-ExportModule *ExportModuleManager :: CreateModuleOfType(char *name, EngngModel *emodel) {
-    return CreateUsrDefExportModuleOfType(name, emodel);
+ExportModule *ExportModuleManager :: CreateModuleOfType(char *name, int n, EngngModel *emodel) {
+  return CreateUsrDefExportModuleOfType(name, n, emodel);
 }
 
 void

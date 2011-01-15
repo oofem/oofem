@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/sm/src/HOMExportModule.C,v 1.11.4.1 2004/04/05 15:19:47 bp Exp $ */
 /*
  *
  *****    *****   ******  ******  ***   ***
@@ -52,7 +51,7 @@
 
 namespace oofem {
 //inherit LinearElasticMaterial for accessing stress/strain transformation functions
-HOMExportModule :: HOMExportModule(EngngModel *e) : ExportModule(e), LinearElasticMaterial(0, NULL)
+HOMExportModule :: HOMExportModule(int n, EngngModel *e) : ExportModule(n, e), LinearElasticMaterial(0, NULL)
 {
     this->matnum.resize(0);
 }

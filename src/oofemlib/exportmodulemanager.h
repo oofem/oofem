@@ -72,8 +72,8 @@ public:
      */
     IRResultType initializeFrom(InputRecord *ir);
 
-    /** Creates new instance of module of given name, belonging to given EngngModel */
-    ExportModule *CreateModuleOfType(char *name, EngngModel *emodel);
+    /** Creates new instance of module of given name, with given number, belonging to given EngngModel */
+    ExportModule *CreateModuleOfType(char *name, int num, EngngModel *emodel);
 
     /**
      * Writes the output. Loops over all modules and calls corresponding doOutput module service.

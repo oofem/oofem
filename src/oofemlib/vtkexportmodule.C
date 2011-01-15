@@ -65,7 +65,7 @@
 #endif
 
 namespace oofem {
-VTKExportModule :: VTKExportModule(EngngModel *e) : ExportModule(e), internalVarsToExport(), primaryVarsToExport()
+VTKExportModule :: VTKExportModule(int n, EngngModel *e) : ExportModule(n, e), internalVarsToExport(), primaryVarsToExport()
 {
     //this->mode = rbrmode;
     this->mode = wdmode; //preserves node numbering
