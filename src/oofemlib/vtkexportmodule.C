@@ -69,7 +69,7 @@ VTKExportModule :: VTKExportModule(int n, EngngModel *e) : ExportModule(n, e), i
 {
     //this->mode = rbrmode;
     this->mode = wdmode; //preserves node numbering
-    this->outMode = rbrmode; //applies only when mode == rbrmode
+    this->outMode = rbrmode; //applies only when mode == rbrmode; need to set up smoother accordingly
     smoother = NULL;
 }
 
@@ -124,6 +124,8 @@ VTKExportModule :: doOutput(TimeStep *tStep)
     Domain *d  = emodel->giveDomain(1);
     FloatArray *coords;
     int i, inode, nnodes = d->giveNumberOfDofManagers();
+    this->giveSmoother(); // make sure smoother is created
+
     // output points
 
     if ( ( this->mode == wdmode ) || ( ( this->mode == rbrmode ) && ( this->outMode == wdmode ) ) ) {
@@ -169,7 +171,7 @@ VTKExportModule :: doOutput(TimeStep *tStep)
         // output nodes Region By Region
         int nnodes = this->giveTotalRBRNumberOfNodes(d);
         fprintf(stream, "POINTS %d float\n", nnodes);
-        int ireg, nregions = d->giveNumberOfRegions();
+        int ireg, nregions = this->smoother->giveNumberOfVirtualRegions();
         int regionDofMans;
         IntArray map( d->giveNumberOfDofManagers() );
         for ( ireg = 1; ireg <= nregions; ireg++ ) {
@@ -198,7 +200,7 @@ VTKExportModule :: doOutput(TimeStep *tStep)
     int ielem, nelem = d->giveNumberOfElements(), elemToProcess = 0;
     int ncells, celllistsize = 0;
     for ( ielem = 1; ielem <= nelem; ielem++ ) {
-        if ( ( this->mode == rbrmode ) && ( this->regionsToSkip.contains( d->giveElement(ielem)->giveRegionNumber() ) ) ) {
+      if ( ( this->mode == rbrmode ) && ( this->regionsToSkip.contains( smoother->giveElementVirtualRegionNumber(ielem) ) ) ) {
             continue;
         }
 
@@ -269,37 +271,10 @@ VTKExportModule :: doOutput(TimeStep *tStep)
             exportCellVars(stream, elemToProcess, tStep);
         }
 
-        /*
-         * for ( ielem = 1; ielem <= nelem; ielem++ ) {
-         * elem = d->giveElement(ielem);
-         * vtkCellType = this->giveCellType (elem);
-         * nelemNodes = elem->giveNumberOfNodes();
-         * fprintf(stream, "%d ", nelemNodes);
-         * for ( i = 1; i <= nelemNodes; i++ ) {
-         * if(vtkCellType==25){
-         * j=HexaQuadNodeMapping[i-1];
-         * }
-         * else {
-         * j=i;
-         * }
-         * fprintf(stream, "%d ", elem->giveNode(j)->giveNumber() - 1);
-         * }
-         *
-         * fprintf(stream, "\n");
-         * }
-         *
-         * // output cell types
-         * fprintf(stream, "\nCELL_TYPES %d\n", elemToProcess);
-         * for ( ielem = 1; ielem <= nelem; ielem++ ) {
-         * elem = d->giveElement(ielem);
-         * vtkCellType = this->giveCellType(elem);
-         * fprintf(stream, "%d\n", vtkCellType);
-         * }
-         */
     } else { // rbr mode
         IntArray regionNodalNumbers(nnodes);
         int regionDofMans = 0, offset = 0;
-        int ireg, nregions = d->giveNumberOfRegions();
+        int ireg, nregions = smoother->giveNumberOfVirtualRegions();
         for ( ireg = 1; ireg <= nregions; ireg++ ) {
             if ( this->regionsToSkip.contains(ireg) ) {
                 continue;
@@ -311,7 +286,7 @@ VTKExportModule :: doOutput(TimeStep *tStep)
             for ( ielem = 1; ielem <= nelem; ielem++ ) {
                 elem = d->giveElement(ielem);
 
-                if ( elem->giveRegionNumber() != ireg ) {
+                if ( smoother->giveElementVirtualRegionNumber(ielem) != ireg ) {
                     continue;
                 }
 
@@ -345,7 +320,7 @@ VTKExportModule :: doOutput(TimeStep *tStep)
             fprintf(stream, "\nCELL_TYPES %d\n", elemToProcess);
             for ( ielem = 1; ielem <= nelem; ielem++ ) {
                 elem = d->giveElement(ielem);
-                if ( elem->giveRegionNumber() != ireg ) {
+                if ( smoother->giveElementVirtualRegionNumber(ielem) != ireg ) {
                     continue;
                 }
 
@@ -399,10 +374,14 @@ VTKExportModule :: giveOutputStream(TimeStep *tStep)
     FILE *answer;
 
     emodel->giveOutputBaseFileName(baseFileName, MAX_FILENAME_LENGTH);
+    // try to remove last extension, if any
+    char* dotPtr=strrchr(baseFileName,'.');
+    if (dotPtr) baseFileName[dotPtr-baseFileName]='\0';
+    
 #ifdef __PARALLEL_MODE
-    sprintf( fileName, "%s_%03d.%d.vtk", baseFileName, emodel->giveRank(), tStep->giveNumber() );
+    sprintf( fileName, "%s_%03d.m%d.%d.vtk", baseFileName, emodel->giveRank(), this->number, tStep->giveNumber() );
 #else
-    sprintf( fileName, "%s.%d.vtk", baseFileName, tStep->giveNumber() );
+    sprintf( fileName, "%s.m%d.%d.vtk", baseFileName, this->number, tStep->giveNumber() );
 #endif
     if ( ( answer = fopen(fileName, "w") ) == NULL ) {
         OOFEM_ERROR2("VTKExportModule::giveOutputStream: failed to open file %s", fileName);
@@ -661,7 +640,7 @@ VTKExportModule :: giveTotalRBRNumberOfNodes(Domain *d)
     int rbrnodes = 0, nnodes = d->giveNumberOfDofManagers(), nelems = d->giveNumberOfElements();
     std :: vector< char >map(nnodes);
     //char map[nnodes];
-    int i, j, nregions = d->giveNumberOfRegions();
+    int i, j, nregions = smoother->giveNumberOfVirtualRegions();
     int elemnodes, ielemnode;
 
     if ( ( this->mode == wdmode ) || ( ( this->mode == rbrmode ) && ( this->outMode == wdmode ) ) ) {
@@ -697,13 +676,14 @@ VTKExportModule :: giveTotalRBRNumberOfNodes(Domain *d)
             }
 
             for ( j = 1; j <= nelems; j++ ) {
+	      elem = d->giveElement(j);
 #ifdef __PARALLEL_MODE
-                if ( d->giveElement(j)->giveParallelMode() != Element_local ) {
+                if ( elem->giveParallelMode() != Element_local ) {
                     continue;
                 }
 
 #endif
-                if ( ( elem  = d->giveElement(j) )->giveRegionNumber() == i ) {
+                if ( smoother->giveElementVirtualRegionNumber(j) == i ) {
                     elemnodes = elem->giveNumberOfNodes();
                     for ( ielemnode = 1; ielemnode <= elemnodes; ielemnode++ ) {
                         map [ elem->giveNode(ielemnode)->giveNumber() - 1 ] = 1;
@@ -746,7 +726,7 @@ VTKExportModule :: initRegionNodeNumbering(IntArray &regionNodalNumbers, int &re
 
     for ( ielem = 1; ielem <= nelem; ielem++ ) {
         element = domain->giveElement(ielem);
-        if ( ( reg > 0 ) && ( element->giveRegionNumber() != reg ) ) {
+        if ( ( reg > 0 ) && ( smoother->giveElementVirtualRegionNumber(ielem) != reg ) ) {
             continue;
         }
 
@@ -807,7 +787,7 @@ void
 VTKExportModule :: exportIntVarAs(InternalStateType valID, InternalStateValueType type, FILE *stream, TimeStep *tStep)
 {
     Domain *d = emodel->giveDomain(1);
-    int ireg, nregions = d->giveNumberOfRegions();
+    int ireg, nregions = smoother->giveNumberOfVirtualRegions();
     int nnodes = d->giveNumberOfDofManagers(), inode;
     int i, j, jsize, mapindx;
     FloatArray iVal(3);
@@ -1066,6 +1046,13 @@ VTKExportModule :: giveSmoother()
 
     if ( this->smoother == NULL ) {
       this->smoother = CreateUsrDefNodalRecoveryModel(this->stype, d);
+      IntArray vrmap;
+
+      if (this->mode == wdmode) {
+	this->smoother-> setRecoveryMode (0, vrmap);
+      } else { // this->mode == rbrmode
+	this->smoother-> setRecoveryMode ((-1)*d->giveNumberOfRegions(), vrmap);
+      }
     }
     
     return this->smoother;
@@ -1101,7 +1088,7 @@ void
 VTKExportModule :: exportPrimVarAs(UnknownType valID, FILE *stream, TimeStep *tStep)
 {
     Domain *d = emodel->giveDomain(1);
-    int ireg, nregions = d->giveNumberOfRegions();
+    int ireg, nregions = smoother->giveNumberOfVirtualRegions();
     int nnodes = d->giveNumberOfDofManagers(), inode;
     int j, jsize;
     FloatArray iVal, iValLCS;

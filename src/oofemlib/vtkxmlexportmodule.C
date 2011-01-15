@@ -85,6 +85,10 @@ VTKXMLExportModule :: initializeFrom(InputRecord *ir)
     regionsToSkip.resize(0);
     IR_GIVE_OPTIONAL_FIELD(ir, regionsToSkip, IFT_VTKXMLExportModule_regionstoskip, "regionstoskip"); // Macro
 
+    this->nvr = 0; // number of virtual regions
+    IR_GIVE_OPTIONAL_FIELD(ir, nvr, IFT_VTKXMLExportModule_nvr, "nvr"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, vrmap, IFT_VTKXMLExportModule_vrmap, "vrmap"); // Macro
+
     return IRRT_OK;
 }
 
@@ -108,8 +112,10 @@ VTKXMLExportModule :: doOutput(TimeStep *tStep)
     int i, inode;
     int ielem, nelem = d->giveNumberOfElements();
 
+    this->giveSmoother(); // make sure smoother is created
+
     // output nodes Region By Region
-    int ireg, nregions = d->giveNumberOfRegions();
+    int ireg, nregions = this->smoother->giveNumberOfVirtualRegions();
     int regionDofMans, totalcells;
     IntArray mapG2L, mapL2G;
 
@@ -158,7 +164,7 @@ VTKXMLExportModule :: doOutput(TimeStep *tStep)
             fprintf(stream, " <DataArray type=\"Int32\" Name=\"connectivity\" format=\"ascii\"> ");
             for ( ielem = 1; ielem <= nelem; ielem++ ) {
                 elem = d->giveElement(ielem);
-                if ( ( ireg > 0 ) && ( elem->giveRegionNumber() != ireg ) ) {
+                if ( ( ireg > 0 ) && ( this->smoother->giveElementVirtualRegionNumber(ielem) != ireg ) ) {
                     continue;
                 }
 
@@ -187,7 +193,7 @@ VTKXMLExportModule :: doOutput(TimeStep *tStep)
             int offset = 0;
             for ( ielem = 1; ielem <= nelem; ielem++ ) {
                 elem = d->giveElement(ielem);
-                if ( ( ireg > 0 ) && ( elem->giveRegionNumber() != ireg ) ) {
+                if ( ( ireg > 0 ) && ( this->smoother->giveElementVirtualRegionNumber(ielem) != ireg ) ) {
                     continue;
                 }
 
@@ -207,7 +213,7 @@ VTKXMLExportModule :: doOutput(TimeStep *tStep)
             fprintf(stream, " <DataArray type=\"UInt8\" Name=\"types\" format=\"ascii\"> ");
             for ( ielem = 1; ielem <= nelem; ielem++ ) {
                 elem = d->giveElement(ielem);
-                if ( ( ireg > 0 ) && ( elem->giveRegionNumber() != ireg ) ) {
+                if ( ( ireg > 0 ) && ( this->smoother->giveElementVirtualRegionNumber(ielem) != ireg ) ) {
                     continue;
                 }
 
@@ -247,7 +253,7 @@ VTKXMLExportModule :: doOutput(TimeStep *tStep)
         for ( ielem = 1; ielem <= nelem; ielem++ ) {
             elem = d->giveElement(ielem);
 
-            if ( this->regionsToSkip.contains( elem->giveRegionNumber() ) ) {
+            if ( this->regionsToSkip.contains( this->smoother->giveElementVirtualRegionNumber(ielem) ) ) {
                 continue;
             }
 
@@ -300,10 +306,14 @@ VTKXMLExportModule :: giveOutputStream(TimeStep *tStep)
     FILE *answer;
 
     emodel->giveOutputBaseFileName(baseFileName, MAX_FILENAME_LENGTH);
+    // try to remove last extension, if any
+    char* dotPtr=strrchr(baseFileName,'.');
+    if (dotPtr) baseFileName[dotPtr-baseFileName]='\0';
+
 #ifdef __PARALLEL_MODE
-    sprintf( fileName, "%s.%d.%d.vtu", baseFileName, tStep->giveNumber(), emodel->giveRank() );
+    sprintf( fileName, "%s_%03d.m%d.%d.vtu", baseFileName, emodel->giveRank(), this->number, tStep->giveNumber() );
 #else
-    sprintf( fileName, "%s.%d.vtu", baseFileName, tStep->giveNumber() );
+    sprintf( fileName, "%s.m%d.%d.vtu", baseFileName, this->number, tStep->giveNumber() );
 #endif
     if ( ( answer = fopen(fileName, "w") ) == NULL ) {
         OOFEM_ERROR2("VTKXMLExportModule::giveOutputStream: failed to open file %s", fileName);
@@ -558,7 +568,7 @@ VTKXMLExportModule :: initRegionNodeNumbering(IntArray &regionG2LNodalNumbers,
 
     for ( ielem = 1; ielem <= nelem; ielem++ ) {
         element = domain->giveElement(ielem);
-        if ( ( reg > 0 ) && ( element->giveRegionNumber() != reg ) ) {
+        if ( ( reg > 0 ) && ( this->smoother->giveElementVirtualRegionNumber(ielem) != reg ) ) {
             continue;
         }
 
@@ -610,7 +620,6 @@ VTKXMLExportModule :: exportIntVarAs(InternalStateType valID, InternalStateValue
                                      int regionDofMans, int ireg, FILE *stream, TimeStep *tStep)
 {
     Domain *d = emodel->giveDomain(1);
-    //int ireg, nregions = d->giveNumberOfRegions();
     int inode;
     int j, jsize;
     FloatArray iVal(3);
@@ -740,6 +749,7 @@ VTKXMLExportModule :: giveSmoother()
 
     if ( this->smoother == NULL ) {
       this->smoother = CreateUsrDefNodalRecoveryModel(this->stype, d);
+      this->smoother-> setRecoveryMode (nvr, vrmap);
     }
     return this->smoother;
 }

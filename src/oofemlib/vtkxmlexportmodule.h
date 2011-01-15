@@ -77,6 +77,10 @@ protected:
     NodalRecoveryModel *smoother;
     /// list of regions to skip
     IntArray regionsToSkip;
+    /// number of virtual regions
+    int nvr;
+    /// real->virtual region map
+    IntArray vrmap;
 
 
 public:

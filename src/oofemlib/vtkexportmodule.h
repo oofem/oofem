@@ -82,7 +82,7 @@ protected:
 
 public:
 
-    /// Constructor. Creates empty Output Manager. By default all components are selected.
+    /// Constructor. Creates empty Output Manager with number n. By default all components are selected.
     VTKExportModule(int n, EngngModel *e);
     /// Destructor
     ~VTKExportModule();
