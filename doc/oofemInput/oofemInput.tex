@@ -1595,7 +1595,16 @@ Currently, the supported export modules are following
     \recentry{vtk}{\optField{vars}{ia}} \recentry{}{\optField{primvars}{ia}}\recentry{}{\optField{cellvars}{ia}}
     \recentry{}{\optField{stype}{in}} \recentry{}{\optField{regionstoskip}{ia}}
   \end{record}
+
+
+\begin{record}[0.9\textwidth]
+    \recentry{vtkxml}{\optField{vars}{ia}} \recentry{}{\optField{primvars}{ia}}\recentry{}{\optField{cellvars}{ia}}
+    \recentry{}{\optField{stype}{in}} \recentry{}{\optField{regionstoskip}{ia}}
+    \recentry{}{\optField{nvr}{in}} \recentry{}{\optField{vrmap}{ia}}
+  \end{record}
+
 \begin{itemize}
+\item The vtk module is obsolete, use vtkxml instead. It allows to export results recovered on region by region basis and has more features.
 
 \item The array \param{vars} contains identifiers for those internal
 variables which are to be exported. The id values are defined by
@@ -1617,9 +1626,17 @@ on an element (cell), e.g. a material number. Identifier numbers are specified i
 \item The parameter \param{stype} allows to select smoothing procedure for
 internal variables, which is used to compute nodal values from values
 in integration points.
+
+\item The parameter \param{nvr} allows to set number of virual regions. The internal (state) variables defined in integration poits need to be transfered into nodal values. This process is called nodal recovery. VTKXML module allows to perform recovery not only over the whole domain, but also over so called virtual regions. This allows to exactly match discontinuity along region boundary instead of smoothing it. The concept of virtual regions allows to map several true regions onto single virtual region and then perform recovery over virtual regions instead of true ones. If \param{nvr} is set to zero (default), the recovery is performed over whole domain (single virtual region), when positive, it should be equal to number of virtual regions and vrmap should be provided. If negative, then recovery over real regions is used.
+
+\item The array \param{vrmap} defines the mapping from real (true) regions to virtual regions. The size of this array
+should equal to number of true regions and values should be in range <1, nvr>. When \param{nvr} is zero or negative, this parameter 
+is ignored. The i-th value defines mapping of true region number to virtual region number. Zero or nagative value causes
+region to be ignored.
+
 \end{itemize}
 
-When vtk is configured to operate in region-by-region mode (the default), then the export is done on region by region basis. In this case, the smoothing is performed only over particular region, where only elements in this region participate. Then the \param{regionstoskip} parameter allows to skip given regions when generating output, so only remaining regions (and corresponding elements and nodes) will be exported.
+By default vtk and vtkxml modules perform recovery over the whole domain. The VTKXML module can operate in region-by-region mode (see \param{nvr} and \param{vrmap} parameters). In this case, the smoothing is performed only over particular virtual region, where only elements in this virtual region participate. 
 
 \item Homogenization of stresses and strains in the global coordinate system. Corresponding stress and strain components are summed and averaged over the volume. It is possible to select material numbers from which the averaging occurs. The averaging works for 3D domains with an extension to trusses. A truss is considered as a volume element with oriented stress and strain components along the truss axis. The transformation to global components occurs before averaging.
 
