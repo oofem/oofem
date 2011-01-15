@@ -1,4 +1,3 @@
-/* $HeadURL$, $Revision$, $Date$, $Author$ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -58,7 +57,7 @@ SPRNodalRecoveryModel :: ~SPRNodalRecoveryModel()
 int
 SPRNodalRecoveryModel :: recoverValues(InternalStateType type, TimeStep *tStep)
 {
-    int ireg, nregions = domain->giveNumberOfRegions();
+    int ireg, nregions = this->giveNumberOfVirtualRegions();
     int nnodes = domain->giveNumberOfDofManagers();
     int regionValSize;
     int regionDofMans;
@@ -172,7 +171,7 @@ void
 SPRNodalRecoveryModel :: initRegionMap(IntArray &regionMap, IntArray &regionValSize,
                                        IntArray &regionTypes, InternalStateType type)
 {
-    int nregions = domain->giveNumberOfRegions();
+    int nregions = this->giveNumberOfVirtualRegions();
     int ielem, nelem = domain->giveNumberOfElements();
     int i, regionsSkipped = 0;
     Element *element;
@@ -200,25 +199,26 @@ SPRNodalRecoveryModel :: initRegionMap(IntArray &regionMap, IntArray &regionValS
             //regionMap.at( element->giveRegionNumber() ) = 1;
             continue;
         } else {
-            if ( regionValSize.at( element->giveRegionNumber() ) ) {
-                if ( regionValSize.at( element->giveRegionNumber() ) != interface->SPRNodalRecoveryMI_giveDofManRecordSize(type) ) {
+            int elemVR = this->giveElementVirtualRegionNumber(ielem);
+            if ( regionValSize.at(elemVR) ) {
+                if ( regionValSize.at(elemVR) != interface->SPRNodalRecoveryMI_giveDofManRecordSize(type) ) {
                     // This indicates a size mis-match between different elements, no choice but to skip the region.
-                    regionMap.at( element->giveRegionNumber() ) = 1;
+                    regionMap.at(elemVR) = 1;
                     regionsSkipped = 1;
                 }
 
-                if ( regionTypes.at( element->giveRegionNumber() ) != ( int ) interface->SPRNodalRecoveryMI_givePatchType() ) {
-                    regionMap.at( element->giveRegionNumber() ) = 1;
+                if ( regionTypes.at(elemVR) != ( int ) interface->SPRNodalRecoveryMI_givePatchType() ) {
+                    regionMap.at(elemVR) = 1;
                     /*
                      *   printf ("NodalRecoveryModel :: initRegionMap: element %d has incompatible Patch type, skipping region\n",ielem);
                      */
                     regionsSkipped = 1;
                 }
             } else {
-                regionValSize.at( element->giveRegionNumber() ) = interface->SPRNodalRecoveryMI_giveDofManRecordSize(type);
-                regionTypes.at( element->giveRegionNumber() ) = ( int ) interface->SPRNodalRecoveryMI_givePatchType();
-                if ( regionValSize.at( element->giveRegionNumber() ) == 0 ) {
-                    regionMap.at( element->giveRegionNumber() ) = 1;
+                regionValSize.at(elemVR) = interface->SPRNodalRecoveryMI_giveDofManRecordSize(type);
+                regionTypes.at(elemVR) = ( int ) interface->SPRNodalRecoveryMI_givePatchType();
+                if ( regionValSize.at(elemVR) == 0 ) {
+                    regionMap.at(elemVR) = 1;
                     regionsSkipped = 1;
                 }
             }
@@ -263,7 +263,7 @@ SPRNodalRecoveryModel :: determinePatchAssemblyPoints(IntArray &pap, int ireg, S
         }
 
 #endif
-        if ( element->giveRegionNumber() != ireg ) {
+        if ( this->giveElementVirtualRegionNumber(ielem) != ireg ) {
             continue;
         }
 
@@ -300,7 +300,7 @@ SPRNodalRecoveryModel :: determinePatchAssemblyPoints(IntArray &pap, int ireg, S
                 }
 
 #endif
-                if ( element->giveRegionNumber() == ireg ) {
+                if ( this->giveElementVirtualRegionNumber( element->giveNumber() ) == ireg ) {
                     if ( ( interface = ( SPRNodalRecoveryModelInterface * ) element->giveInterface(SPRNodalRecoveryModelInterfaceType) ) ) {
                         nip += interface->SPRNodalRecoveryMI_giveNumberOfIP();
                     }
@@ -340,7 +340,7 @@ SPRNodalRecoveryModel :: determinePatchAssemblyPoints(IntArray &pap, int ireg, S
                 }
 
 #endif
-                if ( element->giveRegionNumber() != ireg ) {
+                if ( this->giveElementVirtualRegionNumber( element->giveNumber() ) != ireg ) {
                     continue;
                 }
 
@@ -372,7 +372,7 @@ SPRNodalRecoveryModel :: determinePatchAssemblyPoints(IntArray &pap, int ireg, S
                 // mark boundaryPap as regulars -> they can be used to assemble patch (they have enough nips)
                 for ( ielem = 1; ielem <= papDofManConnectivity->giveSize(); ielem++ ) {
                     element = domain->giveElement( papDofManConnectivity->at(ielem) );
-                    if ( element->giveRegionNumber() != ireg ) {
+                    if ( this->giveElementVirtualRegionNumber( element->giveNumber() ) != ireg ) {
                         continue;
                     }
 
@@ -447,7 +447,7 @@ SPRNodalRecoveryModel :: initPatch(IntArray &patchElems, IntArray &dofManToDeter
         }
 
 #endif
-        if ( domain->giveElement( papDofManConnectivity->at(ielem) )->giveRegionNumber() == ireg ) {
+        if ( this->giveElementVirtualRegionNumber( papDofManConnectivity->at(ielem) ) == ireg ) {
             count++;
         }
     }
@@ -461,7 +461,7 @@ SPRNodalRecoveryModel :: initPatch(IntArray &patchElems, IntArray &dofManToDeter
         }
 
 #endif
-        if ( domain->giveElement( papDofManConnectivity->at(ielem) )->giveRegionNumber() == ireg ) {
+        if ( this->giveElementVirtualRegionNumber( papDofManConnectivity->at(ielem) ) == ireg ) {
             patchElems.at(++patchElements) = papDofManConnectivity->at(ielem);
         }
     }
