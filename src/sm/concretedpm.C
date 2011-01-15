@@ -1855,8 +1855,8 @@ ConcreteDPM :: giveIPValue(FloatArray &answer,
                            TimeStep *atTime)
 {
     const ConcreteDPMStatus *status = giveStatus(gp);
-    int state_flag = status->giveStateFlag();
-    double stateFlagValue = 0.;
+    //int state_flag = status->giveStateFlag();
+    //double stateFlagValue = 0.;
     StrainVector plasticStrainVector(_3dMat);
 
     if ( type == IST_PlasticStrainTensor ) {
