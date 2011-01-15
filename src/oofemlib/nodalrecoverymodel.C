@@ -48,12 +48,16 @@
 #endif
 
 namespace oofem {
-NodalRecoveryModel :: NodalRecoveryModel(Domain *d) : nodalValList(0)
+NodalRecoveryModel :: NodalRecoveryModel(Domain *d) : nodalValList(0), virtualRegionMap(0)
 {
-    stateCounter = 0;
-    domain = d;
-    this->init();
+  IntArray map;
 
+  stateCounter = 0;
+  domain = d;
+  this->setRecoveryMode (0, map); // set whole domain recovery by default
+  
+  this->init();
+    
 #ifdef __PARALLEL_MODE
     communicator = NULL;
     commBuff = NULL;
@@ -221,7 +225,7 @@ NodalRecoveryModel :: initRegionNodeNumbering(IntArray &regionNodalNumbers, int 
 
     for ( ielem = 1; ielem <= nelem; ielem++ ) {
         element = domain->giveElement(ielem);
-        if ( element->giveRegionNumber() != reg ) {
+        if ( this->giveElementVirtualRegionNumber(ielem) != reg ) {
             continue;
         }
 
@@ -246,7 +250,7 @@ NodalRecoveryModel :: giveRegionRecordSize(int reg, InternalStateType type)
     //Element* element;
 
     for ( ielem = 1; ielem <= nelem; ielem++ ) {
-        if ( domain->giveElement(ielem)->giveRegionNumber() == reg ) {
+        if ( this->giveElementVirtualRegionNumber(ielem) == reg ) {
             return domain->giveElement(ielem)->giveIPValueType(type);
         }
     }
@@ -264,7 +268,7 @@ NodalRecoveryModel :: giveRegionRecordMap(IntArray &answer, int reg, InternalSta
     //Element* element;
 
     for ( ielem = 1; ielem <= nelem; ielem++ ) {
-        if ( ( reg < 0 ) || domain->giveElement(ielem)->giveRegionNumber() == reg ) {
+        if ( ( reg < 0 ) || this->giveElementVirtualRegionNumber(ielem) == reg ) {
             domain->giveElement(ielem)->giveIntVarCompFullIndx(answer, type);
             return;
         }
@@ -273,4 +277,33 @@ NodalRecoveryModel :: giveRegionRecordMap(IntArray &answer, int reg, InternalSta
     OOFEM_WARNING2("NodalRecoveryModel::giveRegionRecordMap: bad region number (%d) or no element in given region\n", reg);
     answer.resize(0);
 }
+
+int 
+NodalRecoveryModel::giveElementVirtualRegionNumber (int ielem) 
+{
+  return this->virtualRegionMap.at(domain->giveElement(ielem)->giveRegionNumber());
+}
+
+void
+NodalRecoveryModel::setRecoveryMode (int nvr, const IntArray &vrmap)
+{
+  if (nvr > 0) { // virtual regions, use provided mapping
+    if (vrmap.giveSize() != domain->giveNumberOfRegions()) {
+      //OOFEM_ERROR ("NodalRecoveryModel::setRecoveryMode: invalid size of virtualRegionMap");
+    }
+    this->virtualRegionMap = vrmap;
+    this->numberOfVirtualRegions = nvr;
+  } else if (nvr < 0) { // use real regions, set up map accordingly
+    int i, nreg = domain->giveNumberOfRegions();
+    this->virtualRegionMap.resize(nreg);
+    for (i=1; i<=nreg; i++) this->virtualRegionMap.at(i) = i;
+    this->numberOfVirtualRegions = nreg;
+  } else { // nvr == 0 (whole domain recovery, emulated by a single virtual region)
+    int i, nreg = domain->giveNumberOfRegions();
+    this->virtualRegionMap.resize(nreg);
+    for (i=1; i<=nreg; i++) this->virtualRegionMap.at(i) = 1;
+    this->numberOfVirtualRegions = 1;
+  }
+}
+
 } // end namespace oofem

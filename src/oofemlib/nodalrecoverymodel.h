@@ -63,8 +63,12 @@ class TimeStep;
 /**
  * The base class for all recovery models, which perform nodal averaging or projection
  * processes for internal variables typically stored in integration points.
- * Since typically many problems results in discontinuos  approximation of stresses
- * some recovery designed to yield a realistic field avoiding unwarranted discontinuities.
+ *
+ * The recovery can be performed independently on regions of the domain to account for potential discontinuity 
+ * of recovered variable over region boundaries. To make this concept more general, the 
+ * virtual regions are introduced. The idea is that several real regions can map to a single virtual region.
+ * The mapping is defined by so called virtualRegionMap. The whole domain recovery can be 
+ * obtained by a single virtual region to which all real regions map.
  *
  * The NodalRecoveryModel class provides common array of nodal dictionaries, where
  * the recovered nodal values are stored for each region.
@@ -102,6 +106,18 @@ protected:
      * @see Element::giveIPValue and Element::giveIntVarCompFullIndx methods
      */
     // AList<IntArray> regionValueMaps;
+    /// 
+    /**
+     * Number of virtual regions, if positive. 
+     * When equals to zero a single virtual region, to which all real regions map, is assumed (whole domain recovery)
+     * If negative, real regions are used instead. 
+     */
+    int numberOfVirtualRegions;
+    /**
+     * Mapping from real regions to virtual regions. The size of this array should be equal to number of real regions.
+     */
+    IntArray virtualRegionMap;
+
 
 #ifdef __PARALLEL_MODE
     /// Common Communicator buffer
@@ -177,6 +193,27 @@ public:
      * for recovering values.
      */
     virtual void giveRegionRecordMap(IntArray &answer, int reg, InternalStateType type);
+    /**
+     * Sets recovery mode (region by region or whole domain mode) and allows to specify virtual region mapping.
+     * @param nvr Specifies number of regions. If set to zero, the recovery is performed over whole domain (single virtual region),
+     * when positive, it should be equal to number of virtual regions and vrmap should be provided. If negative, then recovery over
+     * real regions is used.
+     * @param vrmap When nvr positive, it defines the mapping from real (true) regions to virtual regions. The size of this array
+     * should equal to number of true regions and values should be in range <1, nvr>. When nvr is zero or negative, this parameter 
+     * is ignored. The i-th value defines mapping of true region number to virtual region number. Zero or nagative value causes
+     * region to be ignored.
+     */
+    void setRecoveryMode (int nvr, const IntArray& vrmap);
+    /**
+     * Returns element region number. If virtaul region mapping is active, the element virtual region 
+     * is returned (using map) instead of real element region number.
+     */
+    int giveElementVirtualRegionNumber (int ielem);
+    /**
+     * Returns number of recovery regions
+     */
+    int giveNumberOfVirtualRegions() {return this->numberOfVirtualRegions;}
+
 protected:
     int init();
     /**
@@ -201,6 +238,7 @@ protected:
      */
     int updateRegionRecoveredValues(const int ireg, const IntArray &regionNodalNumbers,
                                     int regionValSize, const FloatArray &rhs);
+
 };
 } // end namespace oofem
 #endif // nodalrecoverymodel_h
