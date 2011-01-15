@@ -38,6 +38,7 @@
 
 #ifndef __MAKEDEPEND
  #include <list>
+ #include <algorithm>
 #endif
 
 #include "compiler.h"
@@ -492,11 +493,11 @@ void
 CommunicationPacketPool :: pushPacket(CommunicationPacket *p)
 {
 #ifdef DEBUG
-    std :: list< CommunicationPacket * > :: iterator it = leased_packets.find(p);
-    if ( p != leased_packets.end() ) {
+    std :: list< CommunicationPacket * > :: iterator it = std::find(leased_packets.begin(), leased_packets.end(), p);
+    if ( it != leased_packets.end() ) {
         // found previosly leased one
         leased_packets.erase(it);
-        available_packets.push_bask(p);
+        available_packets.push_back(p);
     } else {
         OOFEM_ERROR("CommunicationPacketPool::pushPacket: request to push strange packet (not allocated by pool)");
     }
