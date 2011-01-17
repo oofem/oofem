@@ -148,14 +148,14 @@ public:
      * Returns vector of recovered values for given node and region.
      * @param ptr pointer to recovered values at node, NULL if not present
      * @param node node number
-     * @param region region number;
+     * @param (virtual) region region number;
      * @return nonzero if values are defined, zero otherwise
      */
     int giveNodalVector(const FloatArray * &ptr, int node, int region);
     /**
      * Test if recovered values for given node and region exist.
      * @param node node number
-     * @param region region number
+     * @param (virtual) region region number
      * @return nonzero if entry is in table, zero otherwise
      */
     int includes(int node, int region);
@@ -175,7 +175,7 @@ public:
      * to given region is found it is requested for the information. Slow.
      * The overloaded instances can chache these results, since they are easily
      * obtainable during recovery.
-     * @param reg region id
+     * @param reg virtual region id
      * @param type determines the type of variable, for which size is requested. Should be same as used
      * for recovering values.
      */
@@ -188,7 +188,7 @@ public:
      * The overloaded instances can chache these results, since they are easily
      * obtainable during recovery.
      * @param answer contains result
-     * @param reg region id
+     * @param reg virtual region id
      * @param type determines the type of variable, for which size is requested. Should be same as used
      * for recovering values.
      */
@@ -224,14 +224,14 @@ protected:
      * Determine local region node numbering and determine and check nodal values size
      * @param regionNodalNumbers on return array containing for each dofManager its local region number
      * @param regionDofMans on output total number of region dofMans
-     * @param ireg region number
+     * @param ireg virtual region number
      * @returns nonzero if ok, zero if region has to be skipped
      */
     int initRegionNodeNumbering(IntArray &regionNodalNumbers, int &regionDofMans, int reg);
 
     /**
      * Update the nodal table acoording to recovered solution for given region
-     * @param ireg region number
+     * @param ireg virtual region number
      * @param regionNodalNumbers array containing for each dofManager its local region number
      * @param regionValSizevalue size of dofMan record
      * @param rhs array with recovered values
