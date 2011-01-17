@@ -1268,8 +1268,9 @@ Element :: giveInternalStateAtNode(FloatArray &answer, InternalStateType type, I
     } else {
         if ( mode == ISM_recovered ) {
             const FloatArray *nodval;
-            int result = this->giveDomain()->giveSmoother()->giveNodalVector( nodval, this->giveNode(node)->giveNumber(),
-                                                                             this->giveRegionNumber() );
+	    NodalRecoveryModel* smoother = this->giveDomain()->giveSmoother();
+            int result = smoother->giveNodalVector( nodval, this->giveNode(node)->giveNumber(),
+						    smoother->giveElementVirtualRegionNumber(this->number) );
             if ( nodval ) {
                 answer = * nodval;
             } else {
