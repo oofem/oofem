@@ -242,7 +242,7 @@ VTKXMLExportModule :: doOutput(TimeStep *tStep)
             this->exportPointDataFooter(stream, tStep);
 
             //export cell data
-            this->exportCellVars(stream, totalcells, ireg, tStep);
+            this->exportCellVars(stream, ireg, tStep);
 
             // end of piece record
             fprintf(stream, "</Piece>\n");
@@ -929,7 +929,7 @@ VTKXMLExportModule :: exportPrimVarAs(UnknownType valID, IntArray &mapG2L, IntAr
 }
 
 
-void VTKXMLExportModule :: exportCellVars(FILE *stream, int totalcells, int region, TimeStep *tStep)
+void VTKXMLExportModule :: exportCellVars(FILE *stream, int region, TimeStep *tStep)
 {
     int i, n = cellVarsToExport.giveSize();
     InternalStateType type;
@@ -943,7 +943,7 @@ void VTKXMLExportModule :: exportCellVars(FILE *stream, int totalcells, int regi
 
     for ( i = 1; i <= n; i++ ) {
         type = ( InternalStateType ) cellVarsToExport.at(i);
-        this->exportCellVarAs(type, totalcells, region, stream, tStep);
+        this->exportCellVarAs(type, region, stream, tStep);
     }
 
     //print footer
@@ -953,10 +953,10 @@ void VTKXMLExportModule :: exportCellVars(FILE *stream, int totalcells, int regi
 
 //keyword "cellvars" in OOFEM input file
 void
-VTKXMLExportModule :: exportCellVarAs(InternalStateType type, int nelem, int region, FILE *stream, TimeStep *tStep)
+VTKXMLExportModule :: exportCellVarAs(InternalStateType type, int region, FILE *stream, TimeStep *tStep)
 {
     Domain *d = emodel->giveDomain(1);
-    int ielem;
+    int ielem, nelem = d->giveNumberOfElements();
     int pos;
     Element *elem;
     FloatMatrix mtrx(3, 3);
@@ -971,6 +971,15 @@ VTKXMLExportModule :: exportCellVarAs(InternalStateType type, int nelem, int reg
         fprintf( stream, "<DataArray type=\"Float32\" Name=\"%s\" format=\"ascii\"> ", __InternalStateTypeToString(type) );
         for ( ielem = 1; ielem <= nelem; ielem++ ) {
             elem = d->giveElement(ielem);
+
+	    if ( ( region > 0 ) && ( this->smoother->giveElementVirtualRegionNumber(ielem) != region ) ) {
+	      continue;
+	    }
+
+	    if ( this->isElementComposite(elem) ) {
+	      continue;                                  // composite cells exported individually
+	    }
+
 #ifdef __PARALLEL_MODE
             if ( elem->giveParallelMode() != Element_local ) {
                 continue;

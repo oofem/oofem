@@ -158,8 +158,8 @@ protected:
                          int regionDofMans, int region, FILE *stream, TimeStep *tStep);
 
     /** exports cell variables */
-    void exportCellVars(FILE *stream, int totalcells, int region, TimeStep *tStep);
-    void exportCellVarAs(InternalStateType type, int nelem, int region, FILE *stream, TimeStep *tStep);
+    void exportCellVars(FILE *stream, int region, TimeStep *tStep);
+    void exportCellVarAs(InternalStateType type, int region, FILE *stream, TimeStep *tStep);
 
     /**
      * Assembles the region node map. Also computes the total number of nodes in region.
