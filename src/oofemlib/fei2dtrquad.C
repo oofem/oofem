@@ -164,7 +164,7 @@ int
 FEI2dTrQuad :: global2local(FloatArray &answer, const FloatArray &gcoords, const FEICellGeometry &cellgeo, double time)
 {
     FloatArray res, delta, guess, lcoords_guess;
-    FloatMatrix jac;
+    FloatMatrix jac, jacT;
     double convergence_limit, error;
 
     // find a suitable convergence limit
@@ -189,12 +189,15 @@ FEI2dTrQuad :: global2local(FloatArray &answer, const FloatArray &gcoords, const
 
         // compute the corrections
         this->giveJacobianMatrixAt(jac, lcoords_guess, cellgeo);
-        jac.solveForRhs(res, delta);
+        jacT.beTranspositionOf(jac);
+        jacT.solveForRhs(res, delta);
 
         // update guess
         lcoords_guess.add(delta);
     }
     if ( error > convergence_limit) { // Imperfect, could give false negatives.
+        //OOFEM_WARNING("FEI2dTrQuad :: global2local - Failed convergence");
+        answer.resize(0);
         return false;
     }
 
