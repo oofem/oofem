@@ -88,7 +88,7 @@ public:
      * @param i Index of object.
      * @return Object at given index.
      */
-    T *at(int i);
+    T *at(int i) const;
     /**
      * Expands the receiver from its current size to newSize, in order to accommodate new entries.
      * @param newSize Size that receiver must fit.
@@ -99,15 +99,15 @@ public:
      * @param i Index of object.
      * @return true if object is non-null at i-th entry, otherwise false.
      */
-    bool includes(int i);
+    bool includes(int i) const;
     /// @return Size of array.
-    int giveSize() { return size; }
+    int giveSize() const { return size; }
     /// @return True if receiver is empty, otherwise false.
-    int isEmpty() { return ( size == 0 ); }
+    int isEmpty() const { return ( size == 0 ); }
     /// @return True if receiver is not empty, otherwise false.
-    int  isNotEmpty() { return ( size != 0 ); }
+    int isNotEmpty() const { return ( size != 0 ); }
     /// Prints the receiver on screen.
-    void printYourself();
+    void printYourself() const;
     /**
      * Stores anObject at position i.
      * Enlarges the receiver if too small and deletes the old value if it exists.
@@ -228,7 +228,7 @@ AList< T > :: growTo(int newSize)
 }
 
 template< class T >T*
-AList< T > :: at(int i)
+AList< T > :: at(int i) const
 {
 #ifdef DEBUG
     if ( i <= 0 ) {
@@ -239,7 +239,7 @@ AList< T > :: at(int i)
 }
 
 template< class T >bool
-AList< T > :: includes(int i)
+AList< T > :: includes(int i) const
 // Returns True if the receiver has a non-null i-th entry, else returns
 // False.
 {
@@ -256,7 +256,7 @@ AList< T > :: includes(int i)
 }
 
 template< class T >void
-AList< T > :: printYourself()
+AList< T > :: printYourself() const
 // Prints the receiver on screen.
 {
     printf("List of components of size %d\n", size);
