@@ -120,7 +120,7 @@ public:
      * Objects are deleted if depending on the delete flag.
      * @param deleteObjectFlag Shows if objects should be deleted.
      */
-    void clear(bool deleteObjectflag = true);
+    void clear(bool deleteObjectFlag = true);
     /// Deletes the object at i-th position.
     void remove(int i);
     /**

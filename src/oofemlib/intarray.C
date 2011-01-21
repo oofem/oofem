@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/intarray.C,v 1.9.4.1 2004/04/05 15:19:43 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -32,14 +31,12 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
+
 /*
  * The original idea for this class comes from
  * Dubois-Pelerin, Y.: "Object-Oriented  Finite Elements: Programming concepts and Implementation",
  * PhD Thesis, EPFL, Lausanne, 1992.
  */
-
-
-//   file INTARRAY.CC
 
 #include "intarray.h"
 #include "freestor.h"
@@ -89,8 +86,7 @@ IntArray :: IntArray(const IntArray &src)
 }
 
 
-IntArray &
-IntArray :: operator = ( const IntArray & src )
+IntArray &IntArray :: operator = ( const IntArray & src )
 {
     // assignment: cleanup and copy
     if ( values ) {
@@ -117,10 +113,9 @@ IntArray :: operator = ( const IntArray & src )
 }
 
 
-void
-IntArray :: zero()
+void IntArray :: zero()
 {
-    int *p1        = values;
+    int *p1 = values;
 
     int i = size;
     while ( i-- ) {
@@ -129,10 +124,9 @@ IntArray :: zero()
 }
 
 
-void
-IntArray :: add(int value)
+void IntArray :: add(int value)
 {
-    int *p1        = values;
+    int *p1 = values;
 
     int i = size;
     while ( i-- ) {
@@ -173,8 +167,8 @@ void IntArray :: checkBounds(int i) const
 }
 #endif
 
-void
-IntArray :: resize(int n, int allocChunk)
+
+void IntArray :: resize(int n, int allocChunk)
 {
     int *p1, *p2, *newValues, i;
 
@@ -287,7 +281,6 @@ void IntArray :: followedBy(const IntArray &b, int allocChunk)
 }
 
 
-
 void IntArray :: followedBy(const int b, int allocChunk)
 // Appends the array 'b' the receiver. Returns the receiver.
 {
@@ -323,8 +316,8 @@ void IntArray :: followedBy(const int b, int allocChunk)
     }
 }
 
-void
-IntArray :: erase(int _pos)
+
+void IntArray :: erase(int _pos)
 {
     // this will erase the element at given position (1-based index)
     // receiver size will shrink accordingly
@@ -341,8 +334,7 @@ IntArray :: erase(int _pos)
 }
 
 
-int
-IntArray :: containsOnlyZeroes() const
+bool IntArray :: containsOnlyZeroes() const
 {
     for ( int i = 0; i < size; i++ ) {
         if ( values [ i ] ) {
@@ -352,6 +344,7 @@ IntArray :: containsOnlyZeroes() const
 
     return 1;
 }
+
 
 void IntArray :: printYourself() const
 // Prints the receiver on screen.
@@ -439,8 +432,7 @@ contextIOResultType IntArray :: restoreYourself(DataStream *stream, ContextMode 
 }
 
 
-int
-IntArray :: findFirstIndexOf(int value)   const
+int IntArray :: findFirstIndexOf(int value)   const
 {
     // finds index of value in receiver
     // if such value  does not exists, returns zero index
@@ -455,8 +447,8 @@ IntArray :: findFirstIndexOf(int value)   const
     return 0;
 }
 
-void
-IntArray :: addSubVector(const IntArray &src, int si)
+
+void IntArray :: addSubVector(const IntArray &src, int si)
 {
     int i, reqSize, n = src.giveSize();
 
@@ -471,8 +463,8 @@ IntArray :: addSubVector(const IntArray &src, int si)
     }
 }
 
-void
-IntArray :: copySubVector(const IntArray &src, int si)
+
+void IntArray :: copySubVector(const IntArray &src, int si)
 {
     int i, reqSize, n = src.giveSize();
 
@@ -487,8 +479,8 @@ IntArray :: copySubVector(const IntArray &src, int si)
     }
 }
 
-int
-IntArray :: findSorted(int _val)   const
+
+int IntArray :: findSorted(int _val)   const
 {
     int first = 0;
     int last = size - 1;
@@ -509,8 +501,7 @@ IntArray :: findSorted(int _val)   const
 }
 
 
-int
-IntArray :: insertSorted(int _val, int allocChunk)
+int IntArray :: insertSorted(int _val, int allocChunk)
 {
     int pos, i = size;
     int newSize = size + 1;
@@ -556,8 +547,8 @@ IntArray :: insertSorted(int _val, int allocChunk)
     return pos + 1; // return 1-based index
 }
 
-int
-IntArray :: insertSortedOnce(int _val, int allocChunk)
+
+int IntArray :: insertSortedOnce(int _val, int allocChunk)
 {
     int res;
     if ( ( res = findSorted(_val) ) ) {
@@ -578,8 +569,7 @@ void IntArray :: eraseSorted(int value)
 }
 
 
-int
-IntArray :: findCommonValuesSorted(const IntArray &iarray, IntArray &common, int allocChunk) const
+int IntArray :: findCommonValuesSorted(const IntArray &iarray, IntArray &common, int allocChunk) const
 {
     int i = 0, j, val;
 
@@ -609,8 +599,7 @@ IntArray :: findCommonValuesSorted(const IntArray &iarray, IntArray &common, int
 }
 
 
-int
-IntArray :: insertOnce(int _p)
+int IntArray :: insertOnce(int _p)
 {
     if ( !this->findFirstIndexOf(_p) ) {
         this->followedBy(_p, 2);
@@ -619,9 +608,9 @@ IntArray :: insertOnce(int _p)
     return size;
 }
 
+
 #ifdef __PARALLEL_MODE
-int
-IntArray :: packToCommBuffer(CommunicationBuffer &buff) const
+int IntArray :: packToCommBuffer(CommunicationBuffer &buff) const
 {
     int result = 1;
     // pack size
@@ -632,8 +621,8 @@ IntArray :: packToCommBuffer(CommunicationBuffer &buff) const
     return result;
 }
 
-int
-IntArray :: unpackFromCommBuffer(CommunicationBuffer &buff)
+
+int IntArray :: unpackFromCommBuffer(CommunicationBuffer &buff)
 {
     int newSize, result = 1;
     // unpack size
@@ -645,8 +634,8 @@ IntArray :: unpackFromCommBuffer(CommunicationBuffer &buff)
     return result;
 }
 
-int
-IntArray :: givePackSize(CommunicationBuffer &buff)
+
+int IntArray :: givePackSize(CommunicationBuffer &buff)
 {
     return buff.givePackSize(MPI_INT, 1) + buff.givePackSize(MPI_INT, this->size);
 }

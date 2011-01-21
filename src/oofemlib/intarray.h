@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/intarray.h,v 1.9.4.1 2004/04/05 15:19:43 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -39,11 +38,6 @@
  * PhD Thesis, EPFL, Lausanne, 1992.
  */
 
-//   ***********************
-//   *** CLASS INT ARRAY ***
-//   ***********************
-
-
 #ifndef intarray_h
 #define intarray_h
 
@@ -66,235 +60,272 @@ class CommunicationBuffer;
 /**
  * Class implementing an array of integers. Array can grow or shrink to desired dimension.
  * The lower value index of array is 1, upper depends on array size.
+ *
+ * Tasks:
+ * - Storing and returning coefficients (method 'at')
+ * - Appending another IntArray to itself
+ *
+ * The allocatedSize variable to allow dynamic rescaling of array
+ * size possibly without memory reallocation. At startup an array occupies space
+ * given by allocatedSpace = size. Then there can be
+ * further request for resizing array to smaller dimension
+ * then we only change size variable, but allocatedSize
+ * variable remain untouched - expecting possible array grow and then re-using
+ * previously allocated space.
+ * if further request for growing then is necessary memory reallocation.
+ * This process is controlled in resize member function.
  */
 class IntArray
 {
-    /*
-     * This class implements an array of integers.
-     * DESCRIPTION :
-     * An IntArray stores its coefficients in an array 'value' of size 'size'.
-     * TASKS :
-     * - storing and reterning coefficients (method 'at') ;
-     * - appending another IntArray to itself ;
-     * - introduced allocatedSize variable to allow dynamic rescaling of array
-     *   size possibly without memory realocation. At startup array occupies space
-     *   given by allocatedSpace = size. Then there can be
-     *   1) further request for resizeing array to smaller dimension
-     *      then we only change size wariable, but allocatedSize
-     *  variable remain untouched - expecting possible array grow and then re-using
-     *  previously allocated space.
-     *   2) if further request for growing then is necessary memory realocation.
-     *   This process is controlled in resize member function.
-     * REMARK :
-     * see Remark 2 in file "floatarry.hxx".
-     */
-
-
 private:
-    /// size of array
+    /// Size of array.
     int size;
-    /// allocated size for array
+    /// Allocated size for array.
     int allocatedSize;
-    /// stored values
+    /// Stored values.
     int *values;
-
-
 
 public:
     /// Constructor for zero sized array
-    IntArray(int = 0);                                   // constructor
-    /** Copy constructor. Creates the array from another array.
-     */
-    IntArray(const IntArray &);                      // copy constructor
+    IntArray(int = 0);
+    /// Copy constructor. Creates the array from another array.
+    IntArray(const IntArray &);
     /// Destructor.
-    ~IntArray()  { if ( values ) { freeInt(values); } } // destructor
+    ~IntArray() { if ( values ) { freeInt(values); } }
 
-    /// Assingnment operator
-    IntArray & operator=(const IntArray &);              // assignment: cleanup and copy
+    /// Assignment operator
+    IntArray & operator=(const IntArray &);
 
-
-#     ifdef DEBUG
-    /** Coefficient access function. Returns l-value of coeffiicient at given
-     * position of the receiver.
-     * @param i position of coefficient in array
-     */
-    int &at(int i);
-    /** Coefficient access function. Returns value of coeffiicient at given
-     * position of the receiver.
-     * @param i position of coefficient in array
-     */
-    int     at(int i) const;
-#     else
-    int &at(int i)                  { return values [ i - 1 ]; }
-    int     at(int i) const { return values [ i - 1 ]; }
-#     endif
     /**
-     * Coefficient access function. Returns value of coeffiicient at given
+     * Coefficient access function. Returns l-value of coefficient at given
+     * position of the receiver.
+     * @param i Position of coefficient in array.
+     * @return Value at position.
+     */
+#ifdef DEBUG
+    int &at(int i);
+#else
+    int &at(int i) { return values [ i - 1 ]; }
+#endif
+    /**
+     * Coefficient access function. Returns value of coefficient at given
+     * position of the receiver.
+     * @param i position of coefficient in array.
+     * @return Value at position.
+     */
+#ifdef DEBUG
+    int at(int i) const;
+#else
+    int at(int i) const { return values [ i - 1 ]; }
+#endif
+    /**
+     * Coefficient access function. Returns value of coefficient at given
      * position of the receiver. Provides 0-based indexing access.
-     * @param i position of coefficient in array
+     * @param i Position of coefficient in array.
+     * @return Value at position.
      */
     int &operator()(int i)
     {
-#       ifdef DEBUG
-        assert(i < size);
-#       endif
+#ifdef DEBUG
+        checkBounds(i);
+#endif
         return values [ i ];
     }
     /**
-     * Coefficient access function. Returns value of coeffiicient at given
+     * Coefficient access function. Returns value of coefficient at given
      * position of the receiver. Provides 0-based indexing access.
-     * @param i position of coefficient in array
+     * @param i position of coefficient in array.
+     * @return Value at position.
      */
     const int &operator()(int i) const
     {
-#       ifdef DEBUG
-        assert(i < size);
-#       endif
+#ifdef DEBUG
+        checkBounds(i);
+#endif
         return values [ i ];
     }
 
-    /** Checks size of receiver towards requested bounds.
-     * Current implementation will call exit(1), if dimension
+#ifdef DEBUG
+    /**
+     * Checks size of receiver towards requested bounds.
+     * Current implementation will call exit(1) if dimension
      * mismatch found.
-     * @param i required size of receiver
+     * @param i Required size of receiver
      */
-    void       checkBounds(int i) const;
-    /** Checks size of receiver towards requested bounds.
+    void checkBounds(int i) const;
+#endif
+    /**
+     * Checks size of receiver towards requested bounds.
      * If dimension mismatch, size is adjusted accordingly.
-     * Warning: after this operation array values are in undefined state, programmer should
-     * zero receiver
-     * @param allocChunk if reallocation needed, an aditional space for allocChunk values will be allocated
+     * @note{After this operation array values are in undefined state, programmer should zero receiver.}
+     * @param n New size of array.
+     * @param allocChunk If reallocation needed, an additional space for allocChunk values will be allocated
+     * to prevent excessive reallocation.
      */
-    void       resize(int n, int allocChunk = 0);
-    /** Preallocates receiver to given futureSize if larger then allocatedSize.
-     * Warning: after this operation array values are in undefined state, programmer should
-     * zero receiver
-     * @param futureSize size to be allocated
+    void resize(int n, int allocChunk = 0);
+    /**
+     * Preallocates receiver to given futureSize if larger then allocatedSize.
+     * @note{After this operation array values are in undefined state, programmer should zero receiver.}
+     * @param futureSize Size to be allocated.
      */
-    void       preallocate(int futureSize);
+    void preallocate(int futureSize);
     /**
      * Appends array b at the end of receiver.
-     * @param b array to be appended at the end of receiver
-     * @param allocChunk if reallocation needed, an aditional space for allocChunk values will be allocated
-     * will be allocated to prevent excessive realocation
+     * @param b Array to be appended at the end of receiver
+     * @param allocChunk If reallocation needed, an additional space for allocChunk values will be allocated
+     * to prevent excessive reallocation.
      */
-    void       followedBy(const IntArray &b, int allocChunk = 0);
+    void followedBy(const IntArray &b, int allocChunk = 0);
     /**
      * Appends given Number at the end of receiver.
-     * @param b value to be appended
-     * @param allocChunk if reallocation needed, an aditional space for allocChunk values will be allocated
-     * will be allocated to prevent excessive realocation
+     * @param b value to be appended.
+     * @param allocChunk If reallocation needed, an additional space for allocChunk values will be allocated
+     * to prevent excessive reallocation.
      */
-    void       followedBy(const int b, int allocChunk = 0);
-    /// Returns the size of receiver.
-    int        giveSize() const { return size; }
-    /// Checks if receiver is empty (i.e., zero sized).
-    int        isEmpty()  const { return size == 0; }
-    /// Returns true if receiver contains only zeroes
-    int         containsOnlyZeroes() const;
-
-    /** finds the first occurence of given value, assuming that the receiver is sorted.
-     *  Returns its index in (1-based) indexing, if not present, 0 is returned.
+    void followedBy(const int b, int allocChunk = 0);
+    /// @return Size of receiver.
+    int giveSize() const { return size; }
+    /**
+     * Checks if receiver is empty (i.e., zero sized).
+     * @return True is size is zero.
+     */
+    bool isEmpty() const { return size == 0; }
+    /**
+     * Checks if receiver is all zero.
+     * @return True is receiver contains only zeroes.
+     */
+    bool containsOnlyZeroes() const;
+    /**
+     * Finds the first occurrence of given value, assuming that the receiver is sorted.
+     * @return Index (1-based), if not present, 0 is returned.
      */
     int findSorted(int value) const;
     /**
-     * returns true if receiver contains given value
+     * Checks if sorted receiver contains a given value.
+     * @return True if receiver contains given value.
      */
     bool containsSorted(int value) const { return ( findSorted(value) > 0 ); }
 
-    /** Inserts given value into a receiver, which is assumed to be sorted.
-     *  The size of receiver is changed accordingly.
-     *  @param value value to insert
-     *  @param allocChunk if reallocation needed, an aditional space for allocChunk values will be allocated
-     *  @return index of inserted (or existing) value
+    /**
+     * Inserts given value into a receiver, which is assumed to be sorted.
+     * The size of receiver is changed accordingly.
+     * @param value value to insert.
+     * @param allocChunk If reallocation needed, an additional space for allocChunk values will be allocated.
+     * @return Index of inserted (or existing) value.
      */
     int insertSorted(int value, int allocChunk = 0);
-    /** Inserts given value into a receiver, which is assumed to be sorted.
-     *  The value is inserted only if it does not exist.
-     *  The size of receiver is changed accordingly.
-     *  @param value value to insert
-     *  @param allocChunk if reallocation needed, an aditional space for allocChunk values will be allocated
-     *  @return index of inserted (or existing) value
+    /**
+     * Inserts given value into a receiver, which is assumed to be sorted.
+     * The value is inserted only if it does not exist.
+     * The size of receiver is changed accordingly.
+     * @param value Value to insert.
+     * @param allocChunk If reallocation needed, an additional space for allocChunk values will be allocated.
+     * @return Index of inserted (or existing) value.
      */
     int insertSortedOnce(int value, int allocChunk = 0);
     /**
      * Erase the element of given value.
-     * If the value is found on position _pos receiver will shrink accordingly,
-     * the values at positions (_pos+1,...,size) will be moved to positions (_pos,...,size-1)
+     * If the value is found receiver will shrink accordingly,
+     * while preserving a sorted state.
+     * @param value Value to erase.
      */
     void eraseSorted(int value);
-    /** Extracts common values in receiver and iarray.
-     *  Assumes that receiver as well as iarray are sorted.
-     *  The size of array common is changed accordingly.
-     *  @param iarray array to search for values common with receiver
-     *  @param common array of common values
-     *  @param allocChunk if reallocation needed, an aditional space for allocChunk values will be allocated
-     *  @return size of array common
+    /**
+     * Extracts common values in receiver and iarray.
+     * Assumes that receiver as well as iarray are sorted.
+     * The size of array common is changed accordingly.
+     * @param iarray Array to search for values common with receiver.
+     * @param common Array of common values.
+     * @param allocChunk If reallocation needed, an additional space for allocChunk values will be allocated.
+     * @return Number of common values.
      */
     int findCommonValuesSorted(const IntArray &iarray, IntArray &common, int allocChunk = 0) const;
 
     /**
-     * Finds index of first occurence of given value in array. If such value is not presented,
-     * returns zero value.
-     * @param value scanned value
-     * @return index of first value in array, otherwise zero
+     * Finds index of first occurrence of given value in array.
+     * @param value Scanned value.
+     * @return Index of first value in array, otherwise zero.
      */
-    int        findFirstIndexOf(int value)  const;
+    int findFirstIndexOf(int value) const;
     /**
-     * returns true if receiver contains given value
+     * @return True if receiver contains given value.
      */
     bool contains(int value) const { return ( findFirstIndexOf(value) > 0 ); }
     /**
      * Insert once (does not make any assumption about receiver state or ordering, quite
-     * inefficient). More efficient version InsertSortedOnce exist. Insert _p  value into
-     * receiver if it does not exist.
-     * @return index of sorted value;
+     * inefficient). More efficient version insertSortedOnce exist.
+     * @param p Value to insert.
+     * @return Index of sorted value.
      */
-    int insertOnce(int _p);
+    int insertOnce(int p);
     /**
      * Erase the element at given position (1-based index)
-     * Receiver will shrink accordingly, the values at positions (_pos+1,...,size)
-     * will be moved to positions (_pos,...,size-1)
+     * Receiver will shrink accordingly, the values at positions (pos+1,...,size)
+     * will be moved to positions (pos,...,size-1)
+     * @param pos Position to erase.
      */
-    void       erase(int _pos);
+    void erase(int pos);
 
-    /// add given subvector to receiver values starting at position si
+    /**
+     * Add given array to receiver values starting at position si.
+     * @param src Array to add from.
+     * @param si Index to start adding from.
+     */
     void addSubVector(const IntArray &src, int si);
-    /// copy given subvector to receiver values starting at position si
+    /**
+     * Copy given array to receiver values starting at position si.
+     * @param src Array to copy from.
+     * @param si Index to start copying from.
+     */
     void copySubVector(const IntArray &src, int si);
 
-    /// Prints receiver on stdin.
-    void       printYourself() const;
-    /** Stores array  to output stream.
-     * @see FEMComponent class */
-    contextIOResultType          storeYourself(DataStream *stream, ContextMode mode) const;
-    /** Restores array from image on stream.
-     * @see FEMComponent class */
-    contextIOResultType          restoreYourself(DataStream *stream, ContextMode mode);
+    /**
+     * Adds given scalar to all values of receiver
+     * @param val Value to add.
+     */
+    void add(int val);
+
     /// Sets all component to zero.
-    void       zero();
-    int *givePointer()  const { return values; }
-    /// adds given value to all values of receiver
-    void       add(int val);
+    void zero();
+
+    /// Prints receiver on stdout.
+    void printYourself() const;
+
+    /**
+     * Breaks encapsulation. Avoid using this unless absolutely necessary.
+     * @return Internal pointer to stored values.
+     */
+    int *givePointer() const { return values; }
+
+    /**
+     * Stores array to output stream.
+     * @see FEMComponent
+     */
+    contextIOResultType storeYourself(DataStream *stream, ContextMode mode) const;
+    /**
+     * Restores array from image on stream.
+     * @see FEMComponent
+     */
+    contextIOResultType restoreYourself(DataStream *stream, ContextMode mode);
 
 #ifdef __PARALLEL_MODE
-    /**@name Methods for  packing/unpacking to/from communication buffer */
+    /**@name Methods for packing/unpacking to/from communication buffer */
     //@{
     /**
      * Packs receiver into communication buffer.
-     * @param buff buffer to pack itself into.
-     * @return nonzero if succesfull
+     * @param buff Buffer to pack itself into.
+     * @return Nonzero if successful.
      */
     int packToCommBuffer(CommunicationBuffer &buff) const;
     /**
      * Unpacks receiver from communication buffer.
-     * @param buff buffer from which unpack itself.
-     * @return nonzero if succesfull
+     * @param buff Buffer from which unpack itself.
+     * @return Nonzero if successful.
      */
     int unpackFromCommBuffer(CommunicationBuffer &buff);
     /**
      * Returns how much space is needed to pack receivers message.
-     * @param buff buffer used for packing
+     * @param buff Buffer used for packing.
      */
     int givePackSize(CommunicationBuffer &buff);
     //@}
@@ -302,7 +333,7 @@ public:
 
 #ifdef BOOST_PYTHON
     double __getItem__(int i) { return this->operator()(i); }
-    void   __setItem__(int i, double val) { this->operator()(i) = val; }
+    void __setItem__(int i, double val) { this->operator()(i) = val; }
 #endif
 };
 
@@ -354,9 +385,10 @@ template< class operation >void quickSort(IntArray &arry, int l, int r, operatio
 
 /**
  * Sorts the receiver using quicksort algorithm.
- * @param op is Function object, required to have member function int class::operator() (int, int),
+ * @param op Function object, required to have member function int class::operator() (int, int),
  * must return a negative value if first argument is less than the second,
  * zero if the arguments are equal, and a positive number otherwise.
+ * @param arry Array to sort.
  */
 template< class operation >void sort(IntArray &arry, operation op) { quickSort(arry, 1, arry.giveSize(), op); }
 } // end namespace oofem
