@@ -359,6 +359,7 @@ LSpace :: ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatMatrix &answe
     // according to Zienkiewicz & Zhu paper
     // N(nsigma, nsigma*nnodes)
     // Definition : sigmaVector = N * nodalSigmaVector
+    int i;
     FloatArray n;
     this->interpolation.evalN(n, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0);
 
@@ -369,14 +370,10 @@ LSpace :: ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatMatrix &answe
         return;
     }
 
-    answer.at(1, 1)  = n.at(1);
-    answer.at(1, 2)  = n.at(2);
-    answer.at(1, 3)  = n.at(3);
-    answer.at(1, 4)  = n.at(4);
-    answer.at(1, 5)  = n.at(5);
-    answer.at(1, 6)  = n.at(6);
-    answer.at(1, 7)  = n.at(7);
-    answer.at(1, 8)  = n.at(8);
+    for ( i = 1; i <= 8; i++ ) {
+        answer.at(1, i)  = n.at(i);
+    }
+
 
     /******
      * answer.zero();

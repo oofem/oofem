@@ -44,7 +44,7 @@
 #include "structuralelement.h"
 #include "fei2dtrquad.h"
 #include "spatiallocalizer.h"
-//#include "zznodalrecoverymodel.h"
+#include "zznodalrecoverymodel.h"
 #include "sprnodalrecoverymodel.h"
 
 #include "directerrorindicatorrc.h"
@@ -54,8 +54,8 @@
 
 namespace oofem {
 class QTrPlaneStress2d : public StructuralElement, public SpatialLocalizerInterface,
-    public SPRNodalRecoveryModelInterface // , public ZZNodalRecoveryModelInterface
-    , public DirectErrorIndicatorRCInterface, public EIPrimaryUnknownMapperInterface
+    public SPRNodalRecoveryModelInterface, public ZZNodalRecoveryModelInterface,
+    public DirectErrorIndicatorRCInterface, public EIPrimaryUnknownMapperInterface
 {
     /*
      * This class implements an triangular three-node  plane-
@@ -79,10 +79,10 @@ public:
     // FloatMatrix*    ComputeConstitutiveMatrixAt (GaussPoint *) ;
     // FloatArray*     ComputeBodyLoadVectorAt (TimeStep*) ;
 
-    virtual int            computeNumberOfDofs(EquationID ut) { return 12; }
+    virtual int  computeNumberOfDofs(EquationID ut) { return 12; }
     virtual void giveDofManDofIDMask(int inode, EquationID, IntArray &) const;
     // characteristic length in gp (for some material models)
-    double        giveCharacteristicLenght(GaussPoint *gp, const FloatArray &normalToCrackPlane) {
+    double giveCharacteristicLenght(GaussPoint *gp, const FloatArray &normalToCrackPlane) {
         return this->giveLenghtInDir(normalToCrackPlane) / sqrt( ( double ) this->numberOfGaussPoints );
     }
     /**
@@ -102,7 +102,7 @@ public:
     /** Interface requesting service */
     Interface *giveInterface(InterfaceType);
 
-    virtual int testElementExtension(ElementExtension ext) { return 0; }
+    virtual int testElementExtension(ElementExtension ext) { return ( ( ext == Element_EdgeLoadSupport ) ? 0 : 0 ); }
     //int    hasEdgeLoadSupport () {return 0;}
 
 #ifdef __OOFEG
@@ -116,6 +116,7 @@ public:
     //
     const char *giveClassName() const { return "QTrPlaneStress2d"; }
     classType       giveClassID()          const { return QTrPlaneStress2dClass; }
+    Element_Geometry_Type giveGeometryType() const { return EGT_triangle_2; }
     IRResultType initializeFrom(InputRecord *ir);
 
     /**
@@ -132,24 +133,23 @@ public:
 
     /**
      * @name The element interface required by ZZNodalRecoveryModel
-     * currently not used -> problems in lumping procedure
+     * currently used but problems in lumping procedure
      */
     //@{
-    /**
+     /**
      * Returns the size of DofManger record required to hold recovered values for given mode.
      * @param type determines the type of internal variable to be recovered
      * @return size of DofManger record required to hold recovered values
      */
-    //int ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type);
+    int ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type);
     /**
      * Returns the corresponding element to interface
      */
-    //Element* ZZNodalRecoveryMI_giveElement () {return this;}
+    Element* ZZNodalRecoveryMI_giveElement () {return this;}
     /**
      * Evaluates N matrix (interpolation estimated stress matrix).
      */
-    //void ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx (FloatMatrix& answer, GaussPoint* aGaussPoint,
-    //                             InternalStateType type);
+    void ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx (FloatMatrix& answer, GaussPoint* aGaussPoint, InternalStateType type);
     //@}
 
     /**
@@ -204,15 +204,15 @@ public:
 
 
 protected:
-    void            computeBmatrixAt(GaussPoint *, FloatMatrix &, int = 1, int = ALL_STRAINS);
-    void            computeNmatrixAt(GaussPoint *, FloatMatrix &);
-    void               computeGaussPoints();
-    int           giveApproxOrder() { return 2; }
-    int  giveNumberOfIPForMassMtrxIntegration() { return 4; }
+    void computeBmatrixAt(GaussPoint *, FloatMatrix &, int = 1, int = ALL_STRAINS);
+    void computeNmatrixAt(GaussPoint *, FloatMatrix &);
+    void computeGaussPoints();
+    int giveApproxOrder() { return 2; }
+    int giveNumberOfIPForMassMtrxIntegration() { return 4; }
 
-    void            computeDerivativeKsi(FloatArray &, double, double);
-    void            computeDerivativeEta(FloatArray &, double, double);
-    void            computeJacobianMatrixAt(FloatMatrix &, GaussPoint *);
+    void computeDerivativeKsi(FloatArray &, double, double);
+    void computeDerivativeEta(FloatArray &, double, double);
+    void computeJacobianMatrixAt(FloatMatrix &, GaussPoint *);
 };
 } // end namespace oofem
 #endif // qtrplstr_h

@@ -79,11 +79,11 @@ public:
     PlaneStress2d(int, Domain *); // constructor
     ~PlaneStress2d();           // destructor
 
-    virtual int            computeNumberOfDofs(EquationID ut) { return 8; }
+    virtual int computeNumberOfDofs(EquationID ut) { return 8; }
     virtual void giveDofManDofIDMask(int inode, EquationID, IntArray &) const;
 
     // characteristic length in gp (for some material models)
-    double        giveCharacteristicLenght(GaussPoint *, const FloatArray &);
+    double giveCharacteristicLenght(GaussPoint *, const FloatArray &);
 
 
     virtual int testElementExtension(ElementExtension ext) { return ( ( ext == Element_EdgeLoadSupport ) ? 1 : 0 ); }
@@ -231,20 +231,20 @@ protected:
     // edge load support
     void  computeEgdeNMatrixAt(FloatMatrix &answer, GaussPoint *);
     void  giveEdgeDofMapping(IntArray &answer, int) const;
-    double        computeEdgeVolumeAround(GaussPoint *, int);
-    void          computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge);
-    int   computeLoadLEToLRotationMatrix(FloatMatrix &answer, int, GaussPoint *);
+    double computeEdgeVolumeAround(GaussPoint *, int);
+    void  computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge);
+    int computeLoadLEToLRotationMatrix(FloatMatrix &answer, int, GaussPoint *);
 
-    void                  computeBmatrixAt(GaussPoint *, FloatMatrix &, int = 1, int = ALL_STRAINS);
-    void                  computeNLBMatrixAt(FloatMatrix &, GaussPoint *, int i);
-    void                  computeNmatrixAt(GaussPoint *, FloatMatrix &);
+    void computeBmatrixAt(GaussPoint *, FloatMatrix &, int = 1, int = ALL_STRAINS);
+    void computeNLBMatrixAt(FloatMatrix &, GaussPoint *, int i);
+    void computeNmatrixAt(GaussPoint *, FloatMatrix &);
     // give Transformation matrix from global coord. syst. to local coordinate system in nodes.
     // i.e. r(n)=T r(g)
     // int   computeGtoNRotationMatrix (FloatMatrix&);
-    void                  computeGaussPoints();
+    void computeGaussPoints();
 
-    int           giveApproxOrder() { return 1; }
-    int           giveNumberOfIPForMassMtrxIntegration() { return 4; }
+    int giveApproxOrder() { return 1; }
+    int giveNumberOfIPForMassMtrxIntegration() { return 4; }
 };
 } // end namespace oofem
 #endif // planstrss_h

@@ -57,7 +57,7 @@ UNV2OOFEM: Converts UNV file from Salome to OOFEM native file format
         print 'Parsing unv file ....',
         FEM=UNV.parse()
         print "done"
-        
+
         print "Detected node groups:",
         for i in FEM.nodesets:
             print i.name.strip(),
@@ -74,7 +74,7 @@ UNV2OOFEM: Converts UNV file from Salome to OOFEM native file format
         CTRL.parse(FEM)
         print "done"
         # write files in native oofem format
-        
+
         print 'Writting oofem file ...'
         # write oofem header
         of.write(CTRL.header)
@@ -96,7 +96,7 @@ UNV2OOFEM: Converts UNV file from Salome to OOFEM native file format
                         print "\nUnv element #%d has %d nodes, which should be mapped on OOFEM element \"%s\" with %d nodes" % \
                             (elem.id, elem.nnodes,CTRL.oofem_elemProp[elem.oofem_elemtype].name, len(CTRL.oofem_elemProp[elem.oofem_elemtype].nodeMask))
                         exit(0)
-                    
+
                     elemNotBoundary.append(elem)
                     dat = elem.oofem_outputData
                     dat.append(CTRL.oofem_elemProp[elem.oofem_elemtype].name)
@@ -134,7 +134,7 @@ UNV2OOFEM: Converts UNV file from Salome to OOFEM native file format
                                 mask = CTRL.oofem_elemProp[elem.oofem_elemtype].edgeMask
                             else:#face loads
                                 mask = CTRL.oofem_elemProp[elem.oofem_elemtype].faceMask
-                            
+
                             for i in range(len(mask)):
                                 nodesInMask = []#list of nodes which are extracted according to mask
                                 for x in mask[i]:
