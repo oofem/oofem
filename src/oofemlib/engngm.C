@@ -71,7 +71,6 @@
 #include "outputmanager.h"
 #include "oofemtxtdatareader.h"
 #include "util.h"
-#include "oofemdef.h"
 #include "sloangraph.h"
 #include "logger.h"
 #include "errorestimator.h"
