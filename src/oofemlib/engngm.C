@@ -47,6 +47,7 @@
 #include "timestep.h"
 #include "metastep.h"
 #include "element.h"
+#include "oofemdef.h"
 
 #include "mathfem.h"
 #include "clock.h"
