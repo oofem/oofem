@@ -49,9 +49,10 @@
 #include "nodalaveragingrecoverymodel.h"
 #include "eleminterpmapperinterface.h"
 #include "huertaerrorestimator.h"
+#include "sprnodalrecoverymodel.h"
 
 namespace oofem {
-class QSpace : public StructuralElement, public ZZNodalRecoveryModelInterface, public NodalAveragingRecoveryModelInterface
+class QSpace : public StructuralElement, public SPRNodalRecoveryModelInterface, public ZZNodalRecoveryModelInterface, public NodalAveragingRecoveryModelInterface
 
 {
     /*
@@ -107,6 +108,19 @@ public:
     /// Evaluates N matrix (interpolation estimated stress matrix).
     void ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatMatrix &answer, GaussPoint *aGaussPoint, InternalStateType type);
     //@}
+
+    /**
+     * @name The element interface required by SPRNodalRecoveryModelInterface
+     */
+    //@{
+    void SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap);
+    void SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, int pap);
+    int SPRNodalRecoveryMI_giveDofManRecordSize(InternalStateType type);
+    int SPRNodalRecoveryMI_giveNumberOfIP();
+    void SPRNodalRecoveryMI_computeIPGlobalCoordinates(FloatArray &coords, GaussPoint *gp);
+    SPRPatchType SPRNodalRecoveryMI_givePatchType();
+    //@}
+
     /**
      * @name The element interface required by NodalAveragingRecoveryModel
      */

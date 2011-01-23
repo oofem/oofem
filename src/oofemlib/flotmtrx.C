@@ -928,7 +928,7 @@ void FloatMatrix :: solveForRhs(const FloatMatrix &b, FloatMatrix &answer)
         }
 
         if ( fabs(piv) < 1.e-20 ) {
-            OOFEM_ERROR3("FloatMatrix::solveForRhs : cannot solve  a %d by %d matrix", nRows, nColumns);
+            OOFEM_ERROR3("FloatMatrix::solveForRhs : pivot too small, cannot solve %d by %d matrix", nRows, nColumns);
         }
 
         // exchange rows

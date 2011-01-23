@@ -360,6 +360,8 @@ QSpace :: giveInterface(InterfaceType interface)
 {
     if ( interface == ZZNodalRecoveryModelInterfaceType ) {
         return ( ZZNodalRecoveryModelInterface * ) this;
+    } else if ( interface == SPRNodalRecoveryModelInterfaceType ) {
+        return ( SPRNodalRecoveryModelInterface * ) this;
     } else if ( interface == NodalAveragingRecoveryModelInterfaceType ) {
         return ( NodalAveragingRecoveryModelInterface * ) this;
     }
@@ -398,6 +400,65 @@ QSpace :: ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatMatrix &answe
 
     return;
 }
+
+int
+QSpace :: SPRNodalRecoveryMI_giveDofManRecordSize(InternalStateType type)
+{
+    return ZZNodalRecoveryMI_giveDofManRecordSize(type);
+}
+
+void
+QSpace :: SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap)
+{
+    int i;
+
+    pap.resize(20);
+    for ( i = 1; i <= 20; i++ ) {
+        pap.at(i) = this->giveNode(i)->giveNumber();
+    }
+}
+
+void
+QSpace :: SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, int pap)
+{
+    int i, found = 0;
+    answer.resize(1);
+
+    for ( i = 1; i <= 20; i++ ) {
+        if ( this->giveNode(i)->giveNumber() == pap ) {
+            found = 1;
+        }
+    }
+
+    if ( found ) {
+        answer.at(1) = pap;
+    } else {
+        _error2("SPRNodalRecoveryMI_giveDofMansDeterminedByPatch: unknown node number %d", pap);
+    }
+}
+
+int
+QSpace :: SPRNodalRecoveryMI_giveNumberOfIP()
+{
+    return numberOfGaussPoints;
+}
+
+
+void
+QSpace :: SPRNodalRecoveryMI_computeIPGlobalCoordinates(FloatArray &coords, GaussPoint *gp)
+{
+    if ( this->computeGlobalCoordinates( coords, * gp->giveCoordinates() ) == 0 ) {
+        _error("SPRNodalRecoveryMI_computeIPGlobalCoordinates: computeGlobalCoordinates failed");
+    }
+}
+
+SPRPatchType
+QSpace :: SPRNodalRecoveryMI_givePatchType()
+{
+    return SPRPatchType_3dBiQuadratic;
+}
+
+
 
 void
 QSpace :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node, InternalStateType type, TimeStep *tStep)

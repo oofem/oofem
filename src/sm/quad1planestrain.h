@@ -129,8 +129,7 @@ public:
     //@{
     void SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap);
     void SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, int pap);
-    int SPRNodalRecoveryMI_giveDofManRecordSize(InternalStateType type)
-    { return ZZNodalRecoveryMI_giveDofManRecordSize(type); }
+    int SPRNodalRecoveryMI_giveDofManRecordSize(InternalStateType type)  { return ZZNodalRecoveryMI_giveDofManRecordSize(type); }
     int SPRNodalRecoveryMI_giveNumberOfIP();
     //void SPRNodalRecoveryMI_giveIPValue (FloatArray& answer, int ipNum, InternalStateType type);
     void SPRNodalRecoveryMI_computeIPGlobalCoordinates(FloatArray &coords, GaussPoint *gp);

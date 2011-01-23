@@ -63,7 +63,7 @@ namespace oofem {
 FEI2dTrQuad QTrPlaneStress2d :: interpolation(1, 2);
 
 QTrPlaneStress2d :: QTrPlaneStress2d(int n, Domain *aDomain) :
-    StructuralElement(n, aDomain), SpatialLocalizerInterface(), ZZNodalRecoveryModelInterface(),
+    StructuralElement(n, aDomain), SpatialLocalizerInterface(),
     DirectErrorIndicatorRCInterface(), EIPrimaryUnknownMapperInterface()
     // Constructor.
 {

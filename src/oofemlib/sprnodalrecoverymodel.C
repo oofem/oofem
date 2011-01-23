@@ -110,6 +110,7 @@ SPRNodalRecoveryModel :: recoverValues(InternalStateType type, TimeStep *tStep)
         dofManPatchCount.resize(regionDofMans);
         dofManPatchCount.zero();
 
+        //pap = patch assembly points
         this->determinePatchAssemblyPoints(pap, ireg, regType);
 
         npap = pap.giveSize();
@@ -667,6 +668,18 @@ SPRNodalRecoveryModel :: computePolynomialTerms(FloatArray &P, FloatArray &coord
         P.at(4) = coords.at(1) * coords.at(2);
         P.at(5) = coords.at(1) * coords.at(1);
         P.at(6) = coords.at(2) * coords.at(2);
+    } else if ( type == SPRPatchType_3dBiQuadratic ) {
+        P.resize(10);
+        P.at(1) = 1.0;
+        P.at(2) = coords.at(1);
+        P.at(3) = coords.at(2);
+        P.at(4) = coords.at(3);
+        P.at(5) = coords.at(1) * coords.at(1);
+        P.at(6) = coords.at(1) * coords.at(2);
+        P.at(7) = coords.at(1) * coords.at(3);
+        P.at(8) = coords.at(2) * coords.at(2);
+        P.at(9) = coords.at(2) * coords.at(3);
+        P.at(10) = coords.at(3) * coords.at(3);
     } else {
         OOFEM_ERROR("SPRNodalRecoveryModel::computePolynomialTerms - unknown regionType");
     }
@@ -681,6 +694,8 @@ SPRNodalRecoveryModel :: giveNumberOfUnknownPolynomialCoefficients(SPRPatchType 
         return 4;
     } else if ( regType == SPRPatchType_2dquadratic ) {
         return 6;
+    } else if ( regType == SPRPatchType_3dBiQuadratic ) {
+        return 10;
     } else {
         return 0;
     }

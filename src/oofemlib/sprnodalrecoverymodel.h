@@ -48,7 +48,7 @@ namespace oofem {
 class GaussPoint;
 class SPRNodalRecoveryModelInterface;
 
-enum SPRPatchType { SPRPatchType_2dxy, SPRPatchType_3dBiLin, SPRPatchType_2dquadratic };
+enum SPRPatchType { SPRPatchType_2dxy, SPRPatchType_3dBiLin, SPRPatchType_2dquadratic, SPRPatchType_3dBiQuadratic };
 
 /**
  * The Superconvergent Patch Recovery (SPR) nodal recovery model is based on paper of Zienkiewicz and Zhu
