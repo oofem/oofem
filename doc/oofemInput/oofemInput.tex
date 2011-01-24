@@ -936,7 +936,7 @@ of staggered-like analysis, the temperature field obtained by the
 solution can be exported and made available to any subsequent
 analyses. For example, temperature field obtained by present analysis
 can be taken into account in subsequent mechanical analysis.
-To allow this, the temperate must be ``exported''. This can be done
+To allow this, the temperature must be ``exported''. This can be done
 by adding \param{exportfields} parameter, followed by
 \param{atomicfields} array. This array contains the atomic field
 identifiers, which tell the problem to register its primary unknowns
@@ -1839,8 +1839,8 @@ determined by \param{DofIDMask} array. Size of this array
 should be equal to \param{ndofs} value. Each item of \param{DofIDMask}
 array describes the physical meaning of corresponding DOF in dof manager. Currently
 the following values are supported: \{u-displacement=1, v-displacement=2,
- w-displacement=3, u-rotation=4, v-ro\-ta\-tion=5, w-rotation=6, u-velocity=7, v-velocity=8, w-velocity=,
-temperature=7\}. {\bf It is not allowed to have two DOFs
+ w-displacement=3, u-rotation=4, v-ro\-ta\-tion=5, w-rotation=6, u-velocity=7, v-velocity=8, w-velocity=9,
+temperature=10, pressure=11, special dofs for gradient-type constitutive models=12 and 13, mass concentration=14, special dofs for extended finite elements (XFEM)=15--30\}. {\bf It is not allowed to have two DOFs
 with the same physical meaning in the same DofManager.}
 
 Parameters \param{dofType} and \param{masterMask} allows to connect some dof manager's dofs
