@@ -39,23 +39,29 @@
 #include "valuemodetype.h"
 #include "contextioresulttype.h"
 #include "contextmode.h"
+#include "enumitem.h"
 
 namespace oofem {
 
 /// Physical type of field.
+#define FieldType_DEF \
+    ENUM_ITEM_WITH_VALUE(FT_Unknown, 0) \
+    ENUM_ITEM_WITH_VALUE(FT_Velocity, 1) \
+    ENUM_ITEM_WITH_VALUE(FT_Displacements,2 ) \
+    ENUM_ITEM_WITH_VALUE(FT_VelocityPressure, 3) \
+    ENUM_ITEM_WITH_VALUE(FT_Pressure, 4) \
+    ENUM_ITEM_WITH_VALUE(FT_Temperature, 5) \
+    ENUM_ITEM_WITH_VALUE(FT_HumidityConcentration, 6) \
+    ENUM_ITEM_WITH_VALUE(FT_TransportProblemUnknowns, 7)
+
 enum FieldType {
-    FT_Unknown,
-
-    FT_Velocity,
-    FT_Displacements,
-    FT_VelocityPressure,
-
-    FT_Pressure,
-    FT_Temperature,
-    FT_HumidityConcentration,
-    FT_TransportProblemUnknowns
-
+    FieldType_DEF
 };
+#undef ENUM_ITEM
+#undef ENUM_ITEM_WITH_VALUE
+#undef enumitem_h
+
+const FieldType __StringToFieldType(std::string _value);
 
 
 /**

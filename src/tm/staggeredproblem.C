@@ -76,7 +76,7 @@ StaggeredProblem :: StaggeredProblem(int i, EngngModel *_master) : EngngModel(i,
     }
 
     dtTimeFunction = 0;
-    stepMultiplier = 0;
+    stepMultiplier = 1.;
 }
 
 StaggeredProblem ::  ~StaggeredProblem()
@@ -138,11 +138,11 @@ StaggeredProblem :: initializeFrom(InputRecord *ir)
     }
 
     IR_GIVE_OPTIONAL_FIELD(ir, stepMultiplier, IFT_StaggeredProblem_stepmultiplier, "stepmultiplier"); // Macro
-    if ( stepMultiplier <= 1 ) {
-        _error("stepMultiplier must be >= 1!")
-        IR_GIVE_FIELD2(ir, problem_inputStream, IFT_StaggeredProblem_prob1, "prob1", MAX_FILENAME_LENGTH); // Macro
+    if ( stepMultiplier < 0 ) {
+        _error("stepMultiplier must be > 0")
     }
 
+    IR_GIVE_FIELD2(ir, problem_inputStream, IFT_StaggeredProblem_prob1, "prob1", MAX_FILENAME_LENGTH); // Macro
     strncpy(inputStreamNames [ 0 ], problem_inputStream, MAX_FILENAME_LENGTH);
     IR_GIVE_FIELD2(ir, problem_inputStream, IFT_StaggeredProblem_prob2, "prob2", MAX_FILENAME_LENGTH); // Macro
     strncpy(inputStreamNames [ 1 ], problem_inputStream, MAX_FILENAME_LENGTH);
@@ -203,9 +203,9 @@ StaggeredProblem :: giveDeltaT(int n)
     }
 
     //in the first step the time increment is taken as the initial, user-specified value
-    if ( stepMultiplier != 0 && currentStep != NULL ) {
+    if ( stepMultiplier != 1 && currentStep != NULL ) {
         if ( currentStep->giveNumber() >= 2 ) {
-            return ( currentStep->giveTargetTime() * ( stepMultiplier - 1 ) );
+            return ( currentStep->giveTargetTime() * ( stepMultiplier ) );
         }
     }
 
@@ -254,7 +254,7 @@ StaggeredProblem :: giveNextStep()
     //currentStep = new TimeStep (istep,this, 1, totalTime, deltaT, counter);
     currentStep = new TimeStep(istep, this, 1, totalTime, giveDeltaT(istep), counter);
 
-    // time and dt variables are set eq to 0 for staics - has no meaning
+    // time and dt variables are set eq to 0 for statics - has no meaning
     return currentStep;
 }
 
@@ -275,8 +275,9 @@ StaggeredProblem :: solveYourselfAt(TimeStep *stepN)
 void
 StaggeredProblem :: updateYourself(TimeStep *stepN)
 {
-    // nothing implemented here
-    // slaves are updated from in their own solveYourselfAt
+    for ( int i = 1; i <= nModels; i++ ) {
+        this->giveSlaveProblem(i)->updateYourself(stepN);
+    }
 }
 
 void

@@ -151,12 +151,12 @@ void IncrementalLinearStatic :: solveYourselfAt(TimeStep *tStep)
 {
     // Creates system of governing eq's and solves them at given time step
 
-	// Initiates the total displacement to zero.
-    if (tStep->isTheFirstStep()) {
+    // Initiates the total displacement to zero.
+    if ( tStep->isTheFirstStep() ) {
         Domain *d = this->giveDomain(1);
-        for (int i = 1; i <= d->giveNumberOfDofManagers(); i++) {
+        for ( int i = 1; i <= d->giveNumberOfDofManagers(); i++ ) {
             DofManager *dofman = d->giveDofManager(i);
-            for (int j = 1; j <= dofman->giveNumberOfDofs(); j++) {
+            for ( int j = 1; j <= dofman->giveNumberOfDofs(); j++ ) {
                 dofman->giveDof(j)->updateUnknownsDictionary(tStep, EID_MomentumBalance, VM_Total_Old, 0);
                 dofman->giveDof(j)->updateUnknownsDictionary(tStep, EID_MomentumBalance, VM_Total, 0);
                 // This is actually redundant now;
@@ -167,14 +167,15 @@ void IncrementalLinearStatic :: solveYourselfAt(TimeStep *tStep)
 
     // Apply dirichlet b.c's on total values
     Domain *d = this->giveDomain(1);
-    for (int i = 1; i <= d->giveNumberOfDofManagers(); i++) {
+    for ( int i = 1; i <= d->giveNumberOfDofManagers(); i++ ) {
         DofManager *dofman = d->giveDofManager(i);
-        for (int j = 1; j <= dofman->giveNumberOfDofs(); j++) {
+        for ( int j = 1; j <= dofman->giveNumberOfDofs(); j++ ) {
             Dof *d = dofman->giveDof(j);
             double tot = d->giveUnknown(EID_MomentumBalance, VM_Total_Old, tStep);
-            if (d->hasBc(tStep)) {
+            if ( d->hasBc(tStep) ) {
                 tot += d->giveBcValue(VM_Incremental, tStep);
             }
+
             d->updateUnknownsDictionary(tStep, EID_MomentumBalance, VM_Total, tot);
         }
     }
@@ -193,21 +194,21 @@ void IncrementalLinearStatic :: solveYourselfAt(TimeStep *tStep)
     OOFEM_LOG_INFO("Assembling load\n");
 #endif
     // Assembling the element part of load vector
-    internalLoadVector.resize( neq );
+    internalLoadVector.resize(neq);
     internalLoadVector.zero();
     this->assembleVectorFromElements( internalLoadVector, tStep, EID_MomentumBalance, NodalInternalForcesVector,
-            VM_Total, EModelDefaultEquationNumbering(), this->giveDomain(1) );
+                                     VM_Total, EModelDefaultEquationNumbering(), this->giveDomain(1) );
 
-    loadVector.resize( neq );
+    loadVector.resize(neq);
     loadVector.zero();
     // Which one?
     //this->assembleVectorFromElements( incrementOfLoadVector, tStep, EID_MomentumBalance, LoadVector,
     //                                 VM_Total, EModelDefaultEquationNumbering(), this->giveDomain(1) );
     this->assembleVectorFromElements( loadVector, tStep, EID_MomentumBalance, ElementForceLoadVector,
-            VM_Total, EModelDefaultEquationNumbering(), this->giveDomain(1) );
+                                     VM_Total, EModelDefaultEquationNumbering(), this->giveDomain(1) );
 
     this->assembleVectorFromDofManagers( loadVector, tStep, EID_MomentumBalance, NodalLoadVector,
-            VM_Total, EModelDefaultEquationNumbering(), this->giveDomain(1) );
+                                        VM_Total, EModelDefaultEquationNumbering(), this->giveDomain(1) );
 
     loadVector.subtract(internalLoadVector);
 
@@ -217,10 +218,12 @@ void IncrementalLinearStatic :: solveYourselfAt(TimeStep *tStep)
     if ( stiffnessMatrix ) {
         delete stiffnessMatrix;
     }
+
     stiffnessMatrix = CreateUsrDefSparseMtrx(sparseMtrxType);
     if ( stiffnessMatrix == NULL ) {
         _error("solveYourselfAt: sparse matrix creation failed");
     }
+
     stiffnessMatrix->buildInternalStructure( this, 1, EID_MomentumBalance, EModelDefaultEquationNumbering() );
     stiffnessMatrix->zero();
     this->assemble( stiffnessMatrix, tStep, EID_MomentumBalance, StiffnessMatrix,
@@ -229,8 +232,7 @@ void IncrementalLinearStatic :: solveYourselfAt(TimeStep *tStep)
 #ifdef VERBOSE
     OOFEM_LOG_INFO("Solving ...\n");
 #endif
-    nMethod->solve(stiffnessMatrix, &loadVector, &incrementOfDisplacementVector);
-
+    nMethod->solve(stiffnessMatrix, & loadVector, & incrementOfDisplacementVector);
 }
 
 
@@ -242,22 +244,39 @@ void IncrementalLinearStatic :: updateYourself(TimeStep *stepN)
 }
 
 
-#if 0
-double IncrementalLinearStatic :: giveUnknownComponent(EquationID chc, ValueModeType mode, TimeStep *tStep, Domain *d, Dof *dof)
+
+double IncrementalLinearStatic :: giveUnknownComponent(EquationID type, ValueModeType mode, TimeStep *tStep, Domain *d, Dof *dof)
 {
-    if (dof->giveEqn() <= 0) {
-        OOFEM_ERROR("IncrementalLinearStatic :: giveUnknownComponent : Dof is missing equation number.");
+    if ( type != EID_MomentumBalance ) { // heat and mass concetration vector
+        OOFEM_ERROR2( "giveUnknownComponent: EquationID %s is undefined for this problem", __EquationIDToString(type) );
+        return 0.;
     }
-    if (mode == VM_Incremental) {
-        return this->incrementOfDisplacementVector.at(dof->giveEqn());
-    } else if (mode == VM_Total) {
-        return this->displacementVector.at(dof->giveNumber());
+
+    if ( d->giveEngngModel()->requiresUnknownsDictionaryUpdate() ) {
+        int hash = d->giveEngngModel()->giveUnknownDictHashIndx(type, mode, tStep);
+        if ( dof->giveUnknowns()->includes(hash) ) {
+            return dof->giveUnknowns()->at(hash);
+        } else {
+            OOFEM_ERROR2( "giveUnknown:  Dof unknowns dictionary does not contain unknown of value mode (%s)", __ValueModeTypeToString(mode) );
+        }
     } else {
-        OOFEM_ERROR("IncrementalLinearStatic :: giveUnknownComponent : Unknown ValueModeType");
-        return 0.0;
+        OOFEM_ERROR("Only the mode requiresUnknownsDictionaryUpdate() is supported");
     }
+
+    //     if (dof->giveEqn() <= 0) {
+    //         OOFEM_ERROR("IncrementalLinearStatic :: giveUnknownComponent : Dof is missing equation number.");
+    //     }
+    //     if (mode == VM_Incremental) {
+    //         return this->incrementOfDisplacementVector.at(dof->giveEqn());
+    //     } else if (mode == VM_Total) {
+    //         return this->displacementVector.at(dof->giveNumber());
+    //     } else {
+    //         OOFEM_ERROR("IncrementalLinearStatic :: giveUnknownComponent : Unknown ValueModeType");
+    //         return 0.0;
+    //     }
+    return 0.;
 }
-#endif
+
 
 
 void IncrementalLinearStatic :: updateDofUnknownsDictionary(DofManager *inode, TimeStep *tStep)
@@ -272,12 +291,13 @@ void IncrementalLinearStatic :: updateDofUnknownsDictionary(DofManager *inode, T
     int ndofs = inode->giveNumberOfDofs();
     Dof *iDof;
     double val;
-    for (int i = 1; i <= ndofs; i++ ) {
+    for ( int i = 1; i <= ndofs; i++ ) {
         iDof = inode->giveDof(i);
         val = iDof->giveUnknown(EID_MomentumBalance, VM_Total, tStep);
         if ( !iDof->hasBc(tStep) ) {
             val += this->incrementOfDisplacementVector.at( iDof->__giveEquationNumber() );
         }
+
         iDof->updateUnknownsDictionary(tStep, EID_MomentumBalance, VM_Total_Old, val);
         iDof->updateUnknownsDictionary(tStep, EID_MomentumBalance, VM_Total, val);
     }
@@ -347,5 +367,4 @@ contextIOResultType IncrementalLinearStatic :: restoreContext(DataStream *stream
 
     return CIO_OK;
 }
-
 } // end namespace oofem

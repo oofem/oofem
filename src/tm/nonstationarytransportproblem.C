@@ -147,20 +147,19 @@ NonStationaryTransportProblem :: initializeFrom(InputRecord *ir)
         IR_GIVE_FIELD(ir, atomicFieldID, IFT_NonStationaryTransportProblem_atomicfields, "atomicfields"); // Macro
         // export flux fields
         FieldManager *fm = this->giveContext()->giveFieldManager();
-	IntArray mask(1); 
+        IntArray mask(1);
         for ( int i = 1; i <= atomicFieldID.giveSize(); i++ ) {
+            if ( atomicFieldID.at(i) == FT_Temperature ) {
+                mask.at(1) = T_f;
+                MaskedPrimaryField *_temperatureField = new MaskedPrimaryField(FT_Temperature, this->UnknownsField, mask);
 
-	  if (atomicFieldID.at(i) == FT_Temperature) {
-	    mask.at(1) = T_f; 
-	    MaskedPrimaryField* _temperatureField = new MaskedPrimaryField (FT_Temperature, this->UnknownsField, mask);
-	    
-            fm->registerField( _temperatureField, ( FieldType ) atomicFieldID.at(i), true );
-	  } else if (atomicFieldID.at(i) == FT_HumidityConcentration) {
-	    mask.at(1) = C_1; 
-	    MaskedPrimaryField* _concentrationField = new MaskedPrimaryField (FT_HumidityConcentration, this->UnknownsField, mask);
-	    
-            fm->registerField( _concentrationField, ( FieldType ) atomicFieldID.at(i), true );
-	  }
+                fm->registerField(_temperatureField, ( FieldType ) atomicFieldID.at(i), true);
+            } else if ( atomicFieldID.at(i) == FT_HumidityConcentration ) {
+                mask.at(1) = C_1;
+                MaskedPrimaryField *_concentrationField = new MaskedPrimaryField(FT_HumidityConcentration, this->UnknownsField, mask);
+
+                fm->registerField(_concentrationField, ( FieldType ) atomicFieldID.at(i), true);
+            }
         }
     }
 
@@ -168,18 +167,26 @@ NonStationaryTransportProblem :: initializeFrom(InputRecord *ir)
 }
 
 
-double NonStationaryTransportProblem ::  giveUnknownComponent(EquationID chc, ValueModeType mode, TimeStep *tStep, Domain *d, Dof *dof)
+double NonStationaryTransportProblem :: giveUnknownComponent(EquationID type, ValueModeType mode, TimeStep *tStep, Domain *d, Dof *dof)
 // returns unknown quantity like displacement, velocity of equation eq
 // This function translates this request to numerical method language
 {
-    int eq = dof->__giveEquationNumber();
-    if ( eq == 0 ) {
-        _error2( "giveUnknownComponent: invalid equation number on DoF %d", dof->giveNumber() );
+    if ( type != EID_ConservationEquation ) { // heat and mass concetration vector
+        OOFEM_ERROR2( "giveUnknownComponent: EquationID %s is undefined for this problem", __EquationIDToString(type) );
+        return 0.;
     }
 
-    if ( chc != EID_ConservationEquation ) { // heat and mass concetration vector
-        _error("giveUnknownComponent: Unknown is of undefined CharType for this problem");
-        return 0.;
+    if ( d->giveEngngModel()->requiresUnknownsDictionaryUpdate() ) {
+        int hash = d->giveEngngModel()->giveUnknownDictHashIndx(type, mode, tStep);
+        if ( dof->giveUnknowns()->includes(hash) ) {
+            return dof->giveUnknowns()->at(hash);
+        } else {
+            OOFEM_ERROR2( "giveUnknown:  Dof unknowns dictionary does not contain unknown of value mode (%s)", __ValueModeTypeToString(mode) );
+        }
+    }
+
+    if ( dof->__giveEquationNumber() == 0 ) {
+        OOFEM_ERROR2( "giveUnknownComponent: invalid equation number on DoF %d", dof->giveNumber() );
     }
 
     return UnknownsField->giveUnknownValue(dof, mode, tStep);
@@ -244,8 +251,8 @@ NonStationaryTransportProblem :: giveNextStep()
     previousStep = currentStep;
     currentStep = new TimeStep(istep, this, 1, totalTime, this->giveDeltaT(istep), counter);
     //set intrinsic time to time of integration
-    intrinsicTime = previousStep->giveTargetTime() + this->alpha*this->giveDeltaT(istep);
-    currentStep->setIntrinsicTime( intrinsicTime );
+    intrinsicTime = previousStep->giveTargetTime() + this->alpha *this->giveDeltaT(istep);
+    currentStep->setIntrinsicTime(intrinsicTime);
     // time and dt variables are set eq to 0 for statics - has no meaning
     return currentStep;
 }

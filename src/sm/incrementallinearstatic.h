@@ -86,7 +86,7 @@ public:
      * updateInternalState service.
      */
     virtual void updateYourself(TimeStep *);
-    //virtual double giveUnknownComponent(EquationID chc, ValueModeType mode, TimeStep *tStep, Domain *d, Dof *dof);
+    virtual double giveUnknownComponent(EquationID type, ValueModeType mode, TimeStep *tStep, Domain *d, Dof *dof);
     contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
     contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
     TimeStep *giveNextStep();

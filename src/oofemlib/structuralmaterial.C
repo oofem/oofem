@@ -2402,7 +2402,7 @@ StructuralMaterial :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, I
         this->computePrincipalValues(answer, st, principal_strain);
         return 1;
     } else if ( type == IST_Temperature ) {
-        /* add external source, if provided */
+        /* add external source, if provided, such as staggered analysis */
         FieldManager *fm = domain->giveEngngModel()->giveContext()->giveFieldManager();
         Field *tf;
         int err;

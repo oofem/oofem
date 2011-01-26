@@ -38,17 +38,37 @@
 
 #ifndef equationid_h
 #define equationid_h
+#include "enumitem.h"
 
 namespace oofem {
 /**
  * This type identifies the governing equation
  */
+//EID_AuxMomentumBalance - Auxiliary equation for characteristic-split based methods
+//EID_MomentumBalance_ConservationEquation - Coupled system
+
+#define EquationID_DEF \
+    ENUM_ITEM_WITH_VALUE(EID_Undefined, 0) \
+    ENUM_ITEM_WITH_VALUE(EID_MomentumBalance, 1) \
+    ENUM_ITEM_WITH_VALUE(EID_AuxMomentumBalance, 2) \
+    ENUM_ITEM_WITH_VALUE(EID_ConservationEquation, 3) \
+    ENUM_ITEM_WITH_VALUE(EID_MomentumBalance_ConservationEquation, 4) \
+
 enum EquationID {
-    EID_MomentumBalance,
-    EID_AuxMomentumBalance, // Auxiliary equation for characteristic-split based methods
-    EID_ConservationEquation,
-    EID_MomentumBalance_ConservationEquation, // Coupled system
+    EquationID_DEF
 };
+
+// enum EquationID {
+//     EID_MomentumBalance,
+//     EID_AuxMomentumBalance,
+//     EID_ConservationEquation,
+//     EID_MomentumBalance_ConservationEquation,
+// };
+#undef ENUM_ITEM
+#undef ENUM_ITEM_WITH_VALUE
+#undef enumitem_h
+
+const char *__EquationIDToString(EquationID _value);
 } // end namespace oofem
 #endif // equationid_h
 

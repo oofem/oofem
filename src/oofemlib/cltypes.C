@@ -47,6 +47,8 @@
 #include "doftype.h"
 #include "dofiditem.h"
 #include "contextioerr.h"
+#include "field.h"
+#include "equationid.h"
 
 #ifndef __MAKEDEPEND
  #include <stdio.h>
@@ -289,7 +291,36 @@ const char *__MeshPackageTypeToString(MeshPackageType _value) {
     TO_STRING_BODY(MeshPackageType_DEF)
 }
 
+const char *__EquationIDToString(EquationID _value) {
+    TO_STRING_BODY(EquationID_DEF)
+}
+
 #undef ENUM_ITEM
 #undef ENUM_ITEM_WITH_VALUE
 #undef TO_STRING_BODY
+
+
+
+#define ENUM_ITEM(element) \
+    if (!strncasecmp(_value, # element, strlen(# element) ) ) { \
+        return element; \
+    }
+
+#define ENUM_ITEM_WITH_VALUE(element, val) \
+    if (!strncasecmp(_value, # element, strlen(# element) ) ) { \
+        return element; \
+    }
+
+#define TO_STRING_BODY(enum_def) \
+        enum_def \
+        OOFEM_ERROR2("Can not convert string %s to value", _value);\
+        return FieldType(0);
+
+const FieldType __StringToFieldType(const char * _value) {
+    TO_STRING_BODY(FieldType_DEF)
+}
+
+
+
+
 } // end namespace oofem

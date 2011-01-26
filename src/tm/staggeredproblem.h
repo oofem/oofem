@@ -130,7 +130,7 @@ public:
      * Provides the oportunity to initialize state variables stored in element
      * integration points acording to
      * initial conditions using function initializeYourself() on element level.
-     * Should be called when curent time step is time step when IC will aply
+     * Should be called when curent time step is time step when IC will apply
      * (see EngngModel::giveNumberOfTimeStepWhenIcApply)
      * somewhere from solveYourselfAt function). Implementation must be provided.
      * Default implementation is empty.

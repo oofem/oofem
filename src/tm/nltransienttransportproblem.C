@@ -136,7 +136,7 @@ void NLTransientTransportProblem :: solveYourselfAt(TimeStep *tStep) {
     if ( changingProblemSize ) {
         if ( !tStep->isTheFirstStep() ) {
             //copy recent solution to previous position, copy from hash=0 to hash=1(previous)
-            copyUnknownsInDictionary( EID_MomentumBalance, VM_Total, tStep, tStep->givePreviousStep() );
+            copyUnknownsInDictionary( EID_ConservationEquation, VM_Total, tStep, tStep->givePreviousStep() );
         }
 
         UnknownsField->initialize(VM_Total, tStep->givePreviousStep(), * solutionVector);
@@ -218,23 +218,30 @@ void NLTransientTransportProblem :: solveYourselfAt(TimeStep *tStep) {
 }
 
 
-double NLTransientTransportProblem ::  giveUnknownComponent(EquationID chc, ValueModeType mode,
+double NLTransientTransportProblem ::  giveUnknownComponent(EquationID type, ValueModeType mode,
                                                             TimeStep *tStep, Domain *d, Dof *dof)
 // returns unknown quantity like displacement, velocity of equation
 // This function translates this request to numerical method language
 {
-    int eq = dof->__giveEquationNumber();
-    double t = tStep->giveTargetTime();
-
-    TimeStep *previousStep = this->givePreviousStep(), *currentStep = this->giveCurrentStep();
-
-    if ( eq == 0 ) {
-        _error("giveUnknownComponent: invalid equation number");
+    if ( type != EID_ConservationEquation ) { // heat and mass concetration vector
+        OOFEM_ERROR2( "giveUnknownComponent: EquationID %s is undefined for this problem", __EquationIDToString(type) );
+        return 0.;
     }
 
-    if ( chc != EID_ConservationEquation ) { // heat and mass concetration vector
-        _error("giveUnknownComponent: Unknown is of undefined CharType for this problem");
-        return 0.;
+    if ( d->giveEngngModel()->requiresUnknownsDictionaryUpdate() ) {
+        int hash = d->giveEngngModel()->giveUnknownDictHashIndx(type, mode, tStep);
+        if ( dof->giveUnknowns()->includes(hash) ) {
+            return dof->giveUnknowns()->at(hash);
+        } else {
+            OOFEM_ERROR2( "giveUnknown:  Dof unknowns dictionary does not contain unknown of value mode (%s)", __ValueModeTypeToString(mode) );
+        }
+    }
+
+    double t = tStep->giveTargetTime();
+    TimeStep *previousStep = this->givePreviousStep(), *currentStep = this->giveCurrentStep();
+
+    if ( dof->__giveEquationNumber() == 0 ) {
+        OOFEM_ERROR2( "giveUnknownComponent: invalid equation number on DoF %d", dof->giveNumber() );
     }
 
     if ( ( t >= previousStep->giveTargetTime() ) && ( t <= currentStep->giveTargetTime() ) ) {
@@ -246,10 +253,10 @@ double NLTransientTransportProblem ::  giveUnknownComponent(EquationID chc, Valu
         } else if ( mode == VM_Total ) {
             return psi * rtdt + ( 1. - psi ) * rt;
         } else {
-            _error("giveUnknownComponent: Unknown is of undefined mode for this problem");
+            OOFEM_ERROR2( "giveUnknownComponent: Unknown mode %s is undefined for this problem", __ValueModeTypeToString(mode) );
         }
     } else {
-        _error("giveUnknownComponent: unsupported value requested");
+        OOFEM_ERROR4( "giveUnknownComponent: time value %f not within bounds %f and %f", t, previousStep->giveTargetTime(), currentStep->giveTargetTime() );
     }
 
     return 0.; // to make compiler happy;

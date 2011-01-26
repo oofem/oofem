@@ -202,40 +202,31 @@ double MasterDof :: giveUnknown(EquationID type, ValueModeType mode, TimeStep *s
         return value;
     }
 
-    if ( dofManager->giveDomain()->giveEngngModel()->requiresUnknownsDictionaryUpdate() ) {
-        // if this feature is active, engng model must ensure
-        // valid data in unknowns dictionary
-        // the e-model must ensure that bc and ic values are correctly set in unknowns dictionaries
-        // they could not be obtained from bc (which are typically incremental)
-        // directly since dictionaries keep the history.
-        int hash = dofManager->giveDomain()->giveEngngModel()->giveUnknownDictHashIndx(type, mode, stepN);
-        if ( unknowns->includes(hash) ) {
-            // TODO
-            //if ( this->hasBc(stepN) ) {
-            //    return unknowns->at(hash) + this->giveBcValue(VM_Incremental, stepN);
-                // Some variable to differentiate between incremental and absolute values of b.c?
-                //return this->giveBcValue(VM_Total, stepN);
-            //} else {
-                return unknowns->at(hash);
-            //}
-        } else {
-            _error2( "giveUnknown:  Dof unknowns dictionary does not contain unknown of value mode (%s)",
-                    __ValueModeTypeToString(mode) );
-        }
-    } else {
-        // ask for BC
-        if ( this->hasBc(stepN) ) {  // boundary condition
-            //value = this -> giveBcValue(giveUnknownType(),mode,stepN) ;
-            value = this->giveBcValue(mode, stepN);
-            return value;
-        }
+    //  if ( dofManager->giveDomain()->giveEngngModel()->requiresUnknownsDictionaryUpdate() ) {
+    // if this feature is active, engng model must ensure
+    // valid data in unknowns dictionary
+    // the e-model must ensure that bc and ic values are correctly set in unknowns dictionaries
+    // they could not be obtained from bc (which are typically incremental)
+    // directly since dictionaries keep the history.
 
-        // try ask emodel for unknown
-        return ( dofManager->giveDomain()->giveEngngModel()->
-                giveUnknownComponent(type, mode, stepN, dofManager->giveDomain(), this) );
+    //    return ( dofManager->giveDomain()->giveEngngModel()->
+    //         giveUnknownComponent(type, mode, stepN, dofManager->giveDomain(), this) );
+
+    //         int hash = dofManager->giveDomain()->giveEngngModel()->giveUnknownDictHashIndx(type, mode, stepN);
+    //         if ( unknowns->includes(hash) ) {
+    //             return unknowns->at(hash);
+    //         } else {
+    //             _error2( "giveUnknown:  Dof unknowns dictionary does not contain unknown of value mode (%s)", __ValueModeTypeToString(mode) );
+    //         }
+    //  }
+
+    if ( !dofManager->giveDomain()->giveEngngModel()->requiresUnknownsDictionaryUpdate() && this->hasBc(stepN) ) {
+        value = this->giveBcValue(mode, stepN);
+        return value;
     }
 
-    return 0.0;
+    return ( dofManager->giveDomain()->giveEngngModel()->
+            giveUnknownComponent(type, mode, stepN, dofManager->giveDomain(), this) );
 }
 
 double MasterDof :: giveUnknown(PrimaryField &field, ValueModeType mode, TimeStep *stepN)

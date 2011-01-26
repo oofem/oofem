@@ -237,7 +237,9 @@ EngngModel ::  ~EngngModel()
 {
     delete currentStep;
     delete previousStep;
-    delete stepWhenIcApply;
+    if(!stepWhenIcApply){
+        delete stepWhenIcApply;
+    }
 
     //delete nMethod;
 

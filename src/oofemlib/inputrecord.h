@@ -1155,6 +1155,8 @@ public:
     virtual IRResultType giveField(IntArray &answer, const InputFieldType fieldID, const char *idString) = 0;
     /// Reads the FloatMatrix field value
     virtual IRResultType giveField(FloatMatrix &answer, const InputFieldType fieldI, const char *idString) = 0;
+    //// Reads the array of strings
+    //virtual IRResultType giveField(std::string *answer, int maxchar, const InputFieldType fieldID, const char *idString) = 0;
     /// Reads the Dictionary field value
     virtual IRResultType giveField(Dictionary &answer, const InputFieldType fieldID, const char *idString) = 0;
     /// Reads the dynaList<Range> field value

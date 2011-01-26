@@ -1,0 +1,73 @@
+# Compression patch test of confined plane stain TrPlaneStrain elements
+patch107.out
+Patch test of trplanestrain elements
+LinearStatic nsteps 1 nmodules 0
+#vtkxml tstep_all domain_all primvars 1 1 vars 2 1 4 stype 2
+domain  2dPlaneStress
+OutputManager tstep_all dofman_all element_all
+ndofman 5 nelem 4 ncrosssect  1 nmat 1 nbc 2 nic 0 nltf 1
+Node 1 coords 2 0.0 0.0 bc 2 1 1
+Node 2 coords 2 6.0 0.0 bc 2 0 1 load 1 2
+Node 3 coords 2 6.0 3.0 bc 2 0 1 load 1 2
+Node 4 coords 2 0.0 3.0 bc 2 1 1
+Node 5 coords 2 2.0 1.0 bc 2 0 0
+TrPlaneStrain 1 nodes 3 1 2 5 crossSect 1 mat 1
+TrPlaneStrain 2 nodes 3 2 3 5 crossSect 1 mat 1
+TrPlaneStrain 3 nodes 3 3 4 5 crossSect 1 mat 1
+TrPlaneStrain 4 nodes 3 4 1 5 crossSect 1 mat 1
+SimpleCS 1 thick 1.0 width 0.1
+IsoLE 1 d 1.0 E 10. n 0.2 tAlpha 0.000012
+BoundaryCondition 1 loadTimeFunction 1 prescribedvalue 0.0
+NodalLoad 2 loadTimeFunction 1 Components 2 1.5 0.0
+ConstantFunction 1 f(t) 1.0
+#%BEGIN_CHECK% tolerance 1.e-12
+## Note: this is the exact solution
+## check reactions
+#REACTION tStep 1 number 1 dof 1 value -1.5
+#REACTION tStep 1 number 1 dof 2 value -0.75
+#REACTION tStep 1 number 2 dof 2 value -0.75
+#REACTION tStep 1 number 3 dof 2 value  0.75
+#REACTION tStep 1 number 4 dof 1 value -1.5
+#REACTION tStep 1 number 4 dof 1 value -1.5
+#REACTION tStep 1 number 4 dof 2 value  0.75
+## check all nodes
+#NODE tStep 1 number 1 dof 1 unknown d value 0.0
+#NODE tStep 1 number 1 dof 2 unknown d value 0.0
+#NODE tStep 1 number 2 dof 1 unknown d value 0.54
+#NODE tStep 1 number 2 dof 2 unknown d value 0.0
+#NODE tStep 1 number 3 dof 1 unknown d value 0.54
+#NODE tStep 1 number 3 dof 2 unknown d value 0.0
+#NODE tStep 1 number 4 dof 1 unknown d value 0.0
+#NODE tStep 1 number 4 dof 2 unknown d value 0.0
+#NODE tStep 1 number 5 dof 1 unknown d value 0.18
+#NODE tStep 1 number 5 dof 2 unknown d value 0.0
+## check element no. 1 strain vector
+#ELEMENT tStep 1 number 1 gp 1 keyword "strains" component 1  value 9.0000e-02
+#ELEMENT tStep 1 number 1 gp 1 keyword "strains" component 2  value 0.0
+#ELEMENT tStep 1 number 1 gp 1 keyword "strains" component 6  value 0.0
+## check element no. 1 stress vector
+#ELEMENT tStep 1 number 1 gp 1 keyword "stresses" component 1  value 1.0000e+00
+#ELEMENT tStep 1 number 1 gp 1 keyword "stresses" component 2  value 2.5000e-01
+#ELEMENT tStep 1 number 1 gp 1 keyword "stresses" component 6  value 0.0
+##
+#ELEMENT tStep 1 number 2 gp 1 keyword "strains" component 1  value 9.0000e-02
+#ELEMENT tStep 1 number 2 gp 1 keyword "strains" component 2  value 0.0
+#ELEMENT tStep 1 number 2 gp 1 keyword "strains" component 6  value 0.0
+#ELEMENT tStep 1 number 2 gp 1 keyword "stresses" component 1  value 1.0000e+00
+#ELEMENT tStep 1 number 2 gp 1 keyword "stresses" component 2  value 2.5000e-01
+#ELEMENT tStep 1 number 2 gp 1 keyword "stresses" component 6  value 0.0
+##
+#ELEMENT tStep 1 number 3 gp 1 keyword "strains" component 1  value 9.0000e-02
+#ELEMENT tStep 1 number 3 gp 1 keyword "strains" component 2  value 0.0
+#ELEMENT tStep 1 number 3 gp 1 keyword "strains" component 6  value 0.0
+#ELEMENT tStep 1 number 3 gp 1 keyword "stresses" component 1  value 1.0000e+00
+#ELEMENT tStep 1 number 3 gp 1 keyword "stresses" component 2  value 2.5000e-01
+#ELEMENT tStep 1 number 3 gp 1 keyword "stresses" component 6  value 0.0
+##
+#ELEMENT tStep 1 number 4 gp 1 keyword "strains" component 1  value 9.0000e-02
+#ELEMENT tStep 1 number 4 gp 1 keyword "strains" component 2  value 0.0
+#ELEMENT tStep 1 number 4 gp 1 keyword "strains" component 6  value 0.0
+#ELEMENT tStep 1 number 4 gp 1 keyword "stresses" component 1  value 1.0000e+00
+#ELEMENT tStep 1 number 4 gp 1 keyword "stresses" component 2  value 2.5000e-01
+#ELEMENT tStep 1 number 4 gp 1 keyword "stresses" component 6  value 0.0
+#%END_CHECK%
