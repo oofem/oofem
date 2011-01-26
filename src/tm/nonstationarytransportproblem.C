@@ -63,7 +63,7 @@ NonStationaryTransportProblem :: NonStationaryTransportProblem(int i, EngngModel
     nMethod = NULL;
     ndomains = 1;
     lumpedCapacityStab = 0;
-    exportFieldFlag = 0;
+    //exportFieldFlag = 0;
     dtTimeFunction = 0;
     internalVarUpdateStamp = 0;
     changingProblemSize = false;
@@ -141,24 +141,24 @@ NonStationaryTransportProblem :: initializeFrom(InputRecord *ir)
     }
 
     // read field export flag
-    exportFieldFlag = 0;
-    if ( ir->hasField(IFT_NonStationaryTransportProblem_exportfields, "exportfields") ) {
-        IntArray atomicFieldID;
-        IR_GIVE_FIELD(ir, atomicFieldID, IFT_NonStationaryTransportProblem_atomicfields, "atomicfields"); // Macro
+    IntArray exportFields;
+    exportFields.resize(0);
+    IR_GIVE_OPTIONAL_FIELD(ir, exportFields, IFT_NonStationaryTransportProblem_exportfields, "exportfields" ); // Macro
+    if ( exportFields.giveSize() ) {
         // export flux fields
-        FieldManager *fm = this->giveContext()->giveFieldManager();
         IntArray mask(1);
-        for ( int i = 1; i <= atomicFieldID.giveSize(); i++ ) {
-            if ( atomicFieldID.at(i) == FT_Temperature ) {
+        FieldManager *fm = this->giveContext()->giveFieldManager();
+        for ( int i = 1; i <= exportFields.giveSize(); i++ ) {
+            if ( exportFields.at(i) == FT_Temperature ) {
                 mask.at(1) = T_f;
                 MaskedPrimaryField *_temperatureField = new MaskedPrimaryField(FT_Temperature, this->UnknownsField, mask);
 
-                fm->registerField(_temperatureField, ( FieldType ) atomicFieldID.at(i), true);
-            } else if ( atomicFieldID.at(i) == FT_HumidityConcentration ) {
+                fm->registerField(_temperatureField, ( FieldType ) exportFields.at(i), true);
+            } else if ( exportFields.at(i) == FT_HumidityConcentration ) {
                 mask.at(1) = C_1;
                 MaskedPrimaryField *_concentrationField = new MaskedPrimaryField(FT_HumidityConcentration, this->UnknownsField, mask);
 
-                fm->registerField(_concentrationField, ( FieldType ) atomicFieldID.at(i), true);
+                fm->registerField(_concentrationField, ( FieldType ) exportFields.at(i), true);
             }
         }
     }

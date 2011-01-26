@@ -65,8 +65,8 @@ protected:
     SparseMtrxType sparseMtrxType;
     /// Numerical method used to solve the problem
     SparseLinearSystemNM *nMethod;
-    /// if set, the receiver flux field will be exported using FieldManager
-    int exportFieldFlag;
+    //// if set, the receiver flux field will be exported using FieldManager
+    //int exportFieldFlag;
 
 public:
     StationaryTransportProblem(int i, EngngModel *_master = NULL) : EngngModel(i, _master), rhsVector(),

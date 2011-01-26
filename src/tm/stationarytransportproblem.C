@@ -96,25 +96,24 @@ StationaryTransportProblem :: initializeFrom(InputRecord *ir)
      */
 
     // read field export flag
-    exportFieldFlag = 0;
-    if ( ir->hasField(IFT_StationaryTransportProblem_exportfields, "exportfields") ) {
-        IntArray atomicFieldID;
-	IntArray mask(1); 
-        IR_GIVE_FIELD(ir, atomicFieldID, IFT_StationaryTransportProblem_atomicfields, "atomicfields"); // Macro
-        // export flux fields
+    IntArray exportFields;
+    exportFields.resize(0);
+    IR_GIVE_OPTIONAL_FIELD(ir, exportFields, IFT_StationaryTransportProblem_exportfields, "exportfields");  // Macro
+    if ( exportFields.giveSize() ) {
+        IntArray mask(1);
         FieldManager *fm = this->giveContext()->giveFieldManager();
-        for ( int i = 1; i <= atomicFieldID.giveSize(); i++ ) {
-	  if (atomicFieldID.at(i) == FT_Temperature) {
-	    mask.at(1) = T_f; 
-	    MaskedPrimaryField* _temperatureField = new MaskedPrimaryField (FT_Temperature, &this->FluxField, mask);
+        for ( int i = 1; i <= exportFields.giveSize(); i++ ) {
+            if ( exportFields.at(i) == FT_Temperature ) {
+                mask.at(1) = T_f;
+                MaskedPrimaryField *_temperatureField = new MaskedPrimaryField(FT_Temperature, &this->FluxField, mask);
 
-            fm->registerField( _temperatureField, ( FieldType ) atomicFieldID.at(i), true );
-	  } else if (atomicFieldID.at(i) == FT_HumidityConcentration) {
-	    mask.at(1) = C_1; 
-	    MaskedPrimaryField* _concentrationField = new MaskedPrimaryField (FT_HumidityConcentration, &this->FluxField, mask);
+                fm->registerField(_temperatureField, ( FieldType ) exportFields.at(i), true);
+            } else if ( exportFields.at(i) == FT_HumidityConcentration ) {
+                mask.at(1) = C_1;
+                MaskedPrimaryField *_concentrationField = new MaskedPrimaryField(FT_HumidityConcentration, &this->FluxField, mask);
 
-            fm->registerField( _concentrationField, ( FieldType ) atomicFieldID.at(i), true );
-	  }
+                fm->registerField(_concentrationField, ( FieldType ) exportFields.at(i), true);
+            }
         }
     }
 

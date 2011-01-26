@@ -51,7 +51,6 @@ PrimaryField :: PrimaryField(EngngModel *a, int idomain,
     this->actualStepIndx = 0;
     this->nHistVectors = nHist;
     this->ut = ut;
-    //atomicFields = atomFieds;
 
     emodel = a;
     domainIndx = idomain;

@@ -87,6 +87,7 @@ UNV2OOFEM: Converts UNV file from Salome to OOFEM native file format
             #resolve element properties
             properties=""
             for igroup in elem.oofem_groups:
+                #print igroup.name
                 properties+=igroup.oofem_properties
             #Do output if oofem_elemtype resolved and not BoundaryLoads
             if ( elem.oofem_elemtype):
@@ -123,7 +124,7 @@ UNV2OOFEM: Converts UNV file from Salome to OOFEM native file format
                 if CTRL.oofem_elemProp[belem.oofem_elemtype].name == 'RepresentsBoundaryLoad':#found element, which represents boundary load
                     nodesOnBoundary = belem.cntvt
                     nodesOnBoundary.sort()
-                    for elem in elemNotBoundary:
+                    for elem in elemNotBoundary: #loop over, e.g. triangular elements
                         cnt=0
                         for n in range(len(nodesOnBoundary)):
                             if(elem.cntvt.count(int(nodesOnBoundary[n]))):
@@ -143,12 +144,13 @@ UNV2OOFEM: Converts UNV file from Salome to OOFEM native file format
                                 nodesInMask.sort()
                                 if(nodesInMask==nodesOnBoundary):#both lists are sorted so they can be compared
                                     success = 1
-                                    if(len(belem.oofem_groups)!=1):
-                                        print "Element unv number %d is assigned to %d group, which is more than one" % (belem.id,len(belem.oofem_groups))
-                                        exit(0)
-                                    #print elem.oofem_elemtype, belem.oofem_groups[0].name
+                                    #since boundary element may be in more unv groups, we need to find corresponding ctrl group
+                                    for bel in belem.oofem_groups:
+                                        #print "%d '%s' '%s'" % (len(belem.oofem_groups), bel.name.rstrip(), bel.oofem_groupNameForLoads)
+                                        if (bel.name.rstrip() != bel.oofem_groupNameForLoads):
+                                            continue
                                     #build a new int list, which reflects load numbers and edges/faces
-                                    loadNum = belem.oofem_groups[0].oofem_boundaryLoadsNum
+                                    loadNum = bel.oofem_boundaryLoadsNum
                                     newList=[-1]*(2*len(loadNum))
                                     for j in range(len(loadNum)):
                                         newList[2*j] = loadNum[j]
@@ -157,7 +159,7 @@ UNV2OOFEM: Converts UNV file from Salome to OOFEM native file format
                                     elem.oofem_bLoads+=newList
                                     #print elem.oofem_bLoads
                             if(success==0):
-                                print "Can not assign edge/face load \"%s\" to unv element %d" % (belem.oofem_groups[0].name, elem.id)
+                                print "Can not assign edge/face load \"%s\" to unv element %d" % (bel.name, elem.id)
 
         #write component record
         of.write('ndofman %d nelem %d ncrosssect %d nmat %d nbc %d nic %d nltf %d\n' % (FEM.nnodes, len(elemNotBoundary), CTRL.ncrosssect, CTRL.nmat, CTRL.nbc, CTRL.nic, CTRL.nltf))

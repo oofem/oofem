@@ -104,7 +104,6 @@ protected:
     int nHistVectors;
     AList< FloatArray >solutionVectors;
     AList< TimeStep >solStepList;
-    //IntArray atomicFields;
     EngngModel *emodel;
     int domainIndx;
     EquationID ut;

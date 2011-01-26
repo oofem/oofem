@@ -183,7 +183,6 @@ enum InputFieldType {
     IFT_StationaryTransportProblem_lstype,
     IFT_StationaryTransportProblem_smtype,
     IFT_StationaryTransportProblem_exportfields,
-    IFT_StationaryTransportProblem_atomicfields,
 
     IFT_NonStationaryTransportProblem_lstype,
     IFT_NonStationaryTransportProblem_smtype,
@@ -192,7 +191,6 @@ enum InputFieldType {
     IFT_NonStationaryTransportProblem_alpha,
     IFT_NonStationaryTransportProblem_lumpedcapa,
     IFT_NonStationaryTransportProblem_exportfields,
-    IFT_NonStationaryTransportProblem_atomicfields,
     IFT_NonStationaryTransportProblem_changingproblemsize,
 
     IFT_NLTransientTransportProblem_nsmax,

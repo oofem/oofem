@@ -82,8 +82,8 @@ protected:
     /// if set then stabilization using lumped capacity will be used
     int lumpedCapacityStab;
 
-    /// if set, the receiver flux field will be exported using FieldManager
-    int exportFieldFlag;
+    //// if set, the receiver flux field will be exported using FieldManager
+    //int exportFieldFlag;
 
     /// Associated time function for time step increment
     int dtTimeFunction;

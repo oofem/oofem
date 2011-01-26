@@ -8,7 +8,7 @@
 #          This code is based on two main objects:
 #           1) a simple FEM object structure storing nodes, elements and groups
 #              as provided bu UNVParser from unv2x module 
-#           2) CTRLParser reads and parses oofem ctrl file, extends the data structure in given FEM 
+#           2) CTRLParser reads and parses oofem ctrl file, extends the data structure in given FEM
 #              object to provide a simple & modular solution to read
 #              some datasets from UNV file and store them in OOFEM data structure
 #           3) It adds following records into FEM data structure:
@@ -150,7 +150,7 @@ class CTRLParser:
                                     str = "\t\tGroup of nodes \"%s\" has properties: %s" % (igroup, __gr.oofem_properties)
                                     print str
                                 else:
-                                    str = "\t\tWARNING: Group of nodes \"%s\" does not exist" % igroup
+                                    str = "WARNING: Group of nodes \"%s\" does not exist" % igroup
                                     print str
                         elif match.group(1).lower() == 'elemprop':
                             if (match.group(2)[:8].lower()=='bloadnum'):#check if the group represents a boundary load
@@ -159,10 +159,11 @@ class CTRLParser:
                                     __gr=self.getElementGroup(FEM,igroup)
                                     if __gr:
                                         __gr.oofem_boundaryLoadsNum=loadNumbers
+                                        __gr.oofem_groupNameForLoads=igroup.lstrip()
                                         str = "\t\tGroup of elements \"%s\" has boundary loads with numbers: %s" % (igroup, loadNumbers)
                                         print str
                                     else:
-                                        str = "\t\tWARNING: Group of elements \"%s\" for boundary load does no exist" % (igroup)
+                                        str = "WARNING: Group of elements \"%s\" for boundary load does no exist" % (igroup)
                             else:#not boundary loads
                                 for igroup in groups:
                                     __gr=self.getElementGroup(FEM,igroup)
@@ -171,7 +172,7 @@ class CTRLParser:
                                         str = "\t\tGroup of elements \"%s\" has properties: %s" % (igroup, __gr.oofem_properties)
                                         print str
                                     else:
-                                        str = "\t\tWARNING: Group of elements \"%s\" does no exist" % (igroup)
+                                        str = "WARNING: Group of elements \"%s\" does no exist" % (igroup)
                                         print str
                         elif match.group(1)[:5].lower() == 'etype':
                             etmatch=re.search('etype\[(\d+)\]*', match.group(1), re.IGNORECASE)
@@ -195,7 +196,7 @@ class CTRLParser:
                                     str = "\t\tGroup of elements \"%s\" of unv_element_type[%d] = %s" % (igroup, unvetype, elemName)
                                     print str
                                 else:
-                                    str = "\t\tWARNING: Group of elements \"%s\" not found" % (igroup)
+                                    str = "WARNING: Group of elements \"%s\" not found" % (igroup)
                                     print str
                     else:
                         break
@@ -262,6 +263,7 @@ class CTRLParser:
             igroup.oofem_elemtype=0
             igroup.oofem_etypemap={}
             igroup.oofem_boundaryLoadsNum=[]#numbers of boundary loads
+            igroup.oofem_groupNameForLoads=""#CTRL-group name
         # read and parse individual group records
         while True:
             if not self.parseGroup (FEM):
