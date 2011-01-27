@@ -265,10 +265,14 @@ StaggeredProblem :: solveYourselfAt(TimeStep *stepN)
 #ifdef VERBOSE
     OOFEM_LOG_RELEVANT( "Solving [step number %5d, time %e]\n", stepN->giveNumber(), stepN->giveTargetTime() );
 #endif
-
     for ( int i = 1; i <= nModels; i++ ) {
+        EngngModel *emodel=this->giveSlaveProblem(i);
+        // renumber equations if necessary
+        if ( emodel->requiresEquationRenumbering( stepN ) ) {
+            emodel->forceEquationNumbering();
+        }
         // transfer state from previous analysis
-        this->giveSlaveProblem(i)->solveYourselfAt(stepN);
+        emodel->solveYourselfAt(stepN);
     }
 }
 
