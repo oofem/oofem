@@ -89,7 +89,7 @@ element_re = re.compile(r"""
 
 beamelement_re = re.compile(r"""
         ^           # begining of line
-        beam\ element\s*    # element string
+        (beam|spring)\ element\s*    # element string
         (\d+).*         # element number (label)
         """,re.X)
 
@@ -147,6 +147,10 @@ beamdispl_re = re.compile (r"""
 
 beamforces_re = re.compile (r"""
         local\ end\ forces
+        """, re.X)
+
+springforces_re = re.compile (r"""
+        spring\ force\ or\ moment
         """, re.X)
 
 
@@ -289,11 +293,11 @@ def check_beam_rec (time, elem, kwd, value, line):
         else: timeflag = (rec[1] == time)
 
         if ((rec[0]=='ber') and timeflag and (elem == rec[2])):
-#               print "Found ber: looking for ",rec[3],"in ", line
+#            print "Found ber: looking for ",rec[3],"in ", line
             match=re.search(rec[3]+'\s*(([-]*\d+(\.\d+)?(e[+-]\d+)?)\s*)+', line)
             if match:
                 recVal[irec]=re.split('\s+',match.group(0))[rec[4]]
-#                   print "found\n"
+#                print "found\n"
 
 #extract reaction record
 def check_reaction_rec (time, dofman, idof, value):
@@ -368,7 +372,7 @@ def match_primary_rec (line):
     match=beamelement_re.search(line)
     if match:
         rectype = rt_elem
-        recnumber = int(match.group(1))
+        recnumber = int(match.group(2))
         if debug: print "found element", recnumber
         nline = match_beamrec()
         return nline
@@ -480,6 +484,11 @@ def match_beamrec ():
         if ppmatch:
             check_beam_rec (rectime, recnumber, 'forces', 0.0, line)
             if debug: print "     local forces rec"
+            continue
+        ppmatch = springforces_re.search(line)
+        if ppmatch:
+            check_beam_rec (rectime, recnumber, 'huhu', 0.0, line)
+            if debug: print "     spring rec"
             continue
 
         return line
