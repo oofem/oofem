@@ -1030,6 +1030,38 @@ None.\\
 \descitem{Loads} \\
 \descitem{Status} 
 
+\subsubsection{Spring element}
+This element represent longitudial or torsional spring element. It is defined by two nodes, orientation and spring constant.
+The spring element has no mass associated, mass  can be added using LumpedMass element.
+
+\elemkeyword{Spring}\\
+\descitem{Parameters} \elemparam{mode}{in} \elemparam{k}{rn} \elemparam{orientation}{ra}\\
+The \param{mode} parameter defines the type of spring element (see Table~\ref{spring_mode_table}). The spring constant is defined by \param{k} parameter, corresponding units are [Force/Length] for longitudinal spring and [Force*Length/Radian] for torsional spring. The \param{orientation} defines orientation vector of spring element (of size 3) - for longitudinal spring it defines the direction of spring, for torsional spring it defines the axis of rotation.\\
+Note: the spring element nodes doesn't need to be coincident, but the spring orientation is always determined by \param{orientation} vector.
+
+\begin{table}
+  \label{spring_mode_table}
+  \begin{center}
+  \begin{tabular}{lll}
+    \hline
+    mode & description\\
+    \hline
+    0 & 1D spring element along x-axis,\\
+    & requires D\_u DOF in each node, orientation vector is \{1,0,0\}\\
+    1 & 2D spring element in xy plane,\\
+    & requires D\_u and D\_v DOFs in each node \\
+    & (orientation vector should be in xy plane)\\
+    2 & 2D torsional spring element in xz plane,\\
+    & requires R\_v DOFs in each node\\
+    3 & 3D spring element in space,\\
+    & requires D\_u, D\_v, and D\_w DOFs in each node\\
+    4 & 3D torsional spring in space,\\
+    & requires R\_u, R\_v, and R\_w DOFs in each node\\
+    \hline
+  \end{tabular}
+  \caption{Supported spring element modes }
+  \end{center}
+\end{table}
 
 \section{Elements for Transport problems\\(TM Module)}
 \subsection{2D Elements}
