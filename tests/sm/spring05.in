@@ -1,0 +1,44 @@
+spring05.out
+Patch test of torsional spring element in xz plane
+LinearStatic nsteps 1
+domain 2dbeam
+OutputManager tstep_all dofman_all element_all
+ndofman 3 nelem 2 ncrosssect  1 nmat 2 nbc 3 nic 0 nltf  1
+node 1 coords 3 0.  0.  0.  bc 3 1 1 1
+node 2 coords 3 0.  0.  0.  bc 3 1 1 0
+node 3 coords 3 3.  0.  0.  bc 3 0 1 0 
+beam2d 1 nodes 2 2 3 mat 1 crossSect 1 boundaryLoads 2 3 1
+Spring 2 nodes 2 1 2 mat 2 crossSect 1 mode 2 orientation 3 0 1 0 k 5.0
+SimpleCS 1 area 2.0 Iy 15.0 beamShearCoeff 1.e18 thick 0.54 
+IsoLE 1 d 1. E 1.0 n 0.2 tAlpha 1.2e-5
+DummyMat 2 
+BoundaryCondition  1 loadTimeFunction 1 prescribedvalue 0.0 
+NodalLoad 2 loadTimeFunction 1 Components 2 1.0 0.0
+ConstantEdgeLoad 3 loadTimeFunction 1 Components 3 0.0 10.0 0.0 loadType 3 ndofs 3
+ConstantFunction 1 f(t) 1.0
+##
+## Solution:
+## Stiffness matrix of the system (dofs: rotation_at_node_1, rotation_at_node_2)
+## K=[2EI/l+k EI/l; EI/l 2EI/l];
+## f=[-f*l*l/12; f*l*l/12];
+## => r = [-0.56250; 0.65625];
+## => spring force = -0.5625*5= -2.8125
+##
+##
+#
+#%BEGIN_CHECK% tolerance 1.e-4
+## check nodal displacements
+#NODE tStep 1 number 2 dof 3 unknown d value -0.56250
+#NODE tStep 1 number 3 dof 3 unknown d value  0.65625
+## element stresses and strains
+#BEAM_ELEMENT tStep 1 number 1 keyword "forces" component 2  value -1.5938e+01
+#BEAM_ELEMENT tStep 1 number 1 keyword "forces" component 3  value  2.8125e+00
+#BEAM_ELEMENT tStep 1 number 1 keyword "forces" component 5  value -1.4062e+01
+#BEAM_ELEMENT tStep 1 number 1 keyword "forces" component 6  value  0.0
+#BEAM_ELEMENT tStep 1 number 2 keyword "moment" component 1  value  -2.8125
+#REACTION tStep 1 number 1 dof 3 value 2.8125e+00
+#REACTION tStep 1 number 2 dof 2 value -1.5938e+01
+#REACTION tStep 1 number 3 dof 2 value -1.4062e+01
+#%END_CHECK%
+
+

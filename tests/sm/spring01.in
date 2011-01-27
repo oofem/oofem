@@ -1,0 +1,22 @@
+spring01.out
+Patch test of 1D spring element along x axis
+LinearStatic nsteps 1
+domain 1dtruss
+OutputManager tstep_all dofman_all element_all
+ndofman 2 nelem 1 ncrosssect  1 nmat 1 nbc 2 nic 0 nltf  1
+node 1 coords 3 0.  0.  0.  bc 1 1
+node 2 coords 3 0.  0.  0.  bc 1 0 load 1 2 
+Spring 1 nodes 2 1 2 mat 1 crossSect 1 mode 0 orientation 3 1 0 0 k 2.0
+SimpleCS 1 thick 0.1 width 1.0
+dummymat 1 
+BoundaryCondition  1 loadTimeFunction 1 prescribedvalue 0.0 
+NodalLoad 2 loadTimeFunction 1 Components 1 1.0 
+ConstantFunction 1 f(t) 1.0
+#
+#%BEGIN_CHECK% tolerance 1.e-4
+## check nodal displacements
+#NODE tStep 1 number 2 dof 1 unknown d value 0.5 
+## element stresses and strains
+#BEAM_ELEMENT tStep 1 number 1 keyword "moment" component 1  value 1.0
+#REACTION tStep 1 number 1 dof 1 value -1
+#%END_CHECK%
