@@ -74,6 +74,9 @@
 #include "subspaceit.h"
 #include "inverseit.h"
 
+// materials in oofemlib
+#include "dummymaterial.h"
+
 // general loads in OOFEMLIB
 #include "linearedgeload.h"
 #include "constantedgeload.h"
@@ -140,6 +143,7 @@
  #include "planstrssxfem.h"
  #include "cohsur3d.h"
  #include "lumpedmasselement.h"
+ #include "springelement.h"
  #include "particle.h"
 // iga elements
  #include "igaelements.h"
@@ -390,6 +394,8 @@ Element *CreateUsrDefElementOfType(const char *aClass, int number, Domain *domai
         newElement = new MacroLSpace(number, domain);
     } else if ( !strncasecmp(aClass, "lumpedmass", 10) ) {
         newElement = new LumpedMassElement(number, domain);
+    } else if ( !strncasecmp(aClass, "spring", 6) ) {
+        newElement = new SpringElement(number, domain);
     } else if ( !strncasecmp(aClass, "cohsur3d", 8) ) {
         newElement = new CohesiveSurface3d(number, domain);
     } else if ( !strncasecmp(aClass, "bsplineplanestresselement", 25) ) {
@@ -623,7 +629,9 @@ Material *CreateUsrDefMaterialOfType(const char *aClass, int number, Domain *dom
     Material *newMaterial = NULL;
 
 #ifdef __SM_MODULE
-    if ( !strncasecmp(aClass, "orthole", 7) ) {
+    if ( !strncasecmp(aClass, "dummymat", 8) ) {
+        newMaterial = new DummyMaterial(number, domain);
+    } else if ( !strncasecmp(aClass, "orthole", 7) ) {
         newMaterial = new OrthotropicLinearElasticMaterial(number, domain);
     } else if ( !strncasecmp(aClass, "steel1", 6) ) {
         newMaterial = new Steel1(number, domain);
