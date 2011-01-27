@@ -139,6 +139,7 @@ enum classType {
     Tetrah1_htClass,
     PlaneStress2dXfemClass,
     LumpedMassElementClass,
+    SpringElementClass,
 
     MacroLSpaceClass,
     MicroMaterialClass,
@@ -189,6 +190,7 @@ enum classType {
     SlepcSolverClass,
 
     MaterialClass,
+    DummyMaterialClass,
     StructuralMaterialClass,
     LinearElasticMaterialClass,
     IsotropicLinearElasticMaterialClass,
