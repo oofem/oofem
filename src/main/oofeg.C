@@ -1699,7 +1699,10 @@ void setSmoother(SmootherType mode)
             gc [ 0 ].getActiveProblem()->giveDomain(id)->setSmoother( new ZZNodalRecoveryModel( gc [ 0 ].getActiveProblem()->giveDomain(id) ) );
         } else if ( mode == Smoother_SPR ) {
             gc [ 0 ].getActiveProblem()->giveDomain(id)->setSmoother( new SPRNodalRecoveryModel( gc [ 0 ].getActiveProblem()->giveDomain(id) ) );
-        }
+        } else {
+	  OOFEM_ERROR ("Unrecognized nodal recovery model");
+	}
+	gc [ 0 ].getActiveProblem()->giveDomain(id)->giveSmoother()->setRecoveryMode (-1, IntArray());
     }
 
     gc [ 0 ].setSmootherType(mode);
