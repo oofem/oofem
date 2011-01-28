@@ -176,8 +176,8 @@ double NonStationaryTransportProblem :: giveUnknownComponent(EquationID type, Va
         return 0.;
     }
 
-    if ( d->giveEngngModel()->requiresUnknownsDictionaryUpdate() ) {
-        int hash = d->giveEngngModel()->giveUnknownDictHashIndx(type, mode, tStep);
+    if ( this->requiresUnknownsDictionaryUpdate() ) {
+        int hash = this->giveUnknownDictHashIndx(type, mode, tStep);
         if ( dof->giveUnknowns()->includes(hash) ) {
             return dof->giveUnknowns()->at(hash);
         } else {
@@ -271,6 +271,29 @@ void NonStationaryTransportProblem :: solveYourselfAt(TimeStep *tStep) {
     OOFEM_LOG_RELEVANT( "Solving [step number %8d, time %15e]\n", tStep->giveNumber(), tStep->giveTargetTime() );
 #endif
 
+    //Solution at the first time step needs history. Therefore, return back one time increment and create it.
+    if ( tStep->isTheFirstStep() ) {
+        stepWhenIcApply = tStep->givePreviousStep();
+
+        bcRhs.resize(neq); //rhs vector from solution step i-1
+        bcRhs.zero();
+
+        this->applyIC(stepWhenIcApply);
+
+        //edge or surface load on elements
+        this->assembleVectorFromElements( bcRhs, stepWhenIcApply, EID_ConservationEquation, ElementBCTransportVector,
+                                         VM_Total, EModelDefaultEquationNumbering(), this->giveDomain(1) );
+        //add prescribed value, such as temperature, on nodes
+        this->assembleDirichletBcRhsVector( bcRhs, stepWhenIcApply, EID_ConservationEquation, VM_Total,
+                                           NSTP_MidpointLhs, EModelDefaultEquationNumbering(), this->giveDomain(1) );
+        //add internal source vector on elements
+        this->assembleVectorFromElements( bcRhs, stepWhenIcApply, EID_ConservationEquation, ElementInternalSourceVector,
+                                         VM_Total, EModelDefaultEquationNumbering(), this->giveDomain(1) );
+        //add nodal load
+        this->assembleVectorFromDofManagers( bcRhs, stepWhenIcApply, EID_ConservationEquation, NodalLoadVector,
+                                            VM_Total, EModelDefaultEquationNumbering(), this->giveDomain(1) );
+    }
+
     //Create a new lhs matrix if necessary
     if ( tStep->isTheFirstStep() || this->changingProblemSize ) {
         if ( lhs ) {
@@ -293,29 +316,6 @@ void NonStationaryTransportProblem :: solveYourselfAt(TimeStep *tStep) {
         lhs->times(alpha);
         this->assemble( lhs, stepWhenIcApply, EID_ConservationEquation, NSTP_MidpointLhs,
                        EModelDefaultEquationNumbering(), this->giveDomain(1) );
-    }
-
-    //Solution at the first time step needs history. Therefore, return back one time increment and create it.
-    if ( tStep->isTheFirstStep() ) {
-        TimeStep *stepWhenIcApply = tStep->givePreviousStep();
-
-        bcRhs.resize(neq); //rhs vector from solution step i-1
-        bcRhs.zero();
-
-        this->applyIC(stepWhenIcApply);
-
-        //edge or surface load on elements
-        this->assembleVectorFromElements( bcRhs, stepWhenIcApply, EID_ConservationEquation, ElementBCTransportVector,
-                                         VM_Total, EModelDefaultEquationNumbering(), this->giveDomain(1) );
-        //add prescribed value, such as temperature, on nodes
-        this->assembleDirichletBcRhsVector( bcRhs, stepWhenIcApply, EID_ConservationEquation, VM_Total,
-                                           NSTP_MidpointLhs, EModelDefaultEquationNumbering(), this->giveDomain(1) );
-        //add internal source vector on elements
-        this->assembleVectorFromElements( bcRhs, stepWhenIcApply, EID_ConservationEquation, ElementInternalSourceVector,
-                                         VM_Total, EModelDefaultEquationNumbering(), this->giveDomain(1) );
-        //add nodal load
-        this->assembleVectorFromDofManagers( bcRhs, stepWhenIcApply, EID_ConservationEquation, NodalLoadVector,
-                                            VM_Total, EModelDefaultEquationNumbering(), this->giveDomain(1) );
     }
 
     //obtain the last Rhs vector from DoFs directly

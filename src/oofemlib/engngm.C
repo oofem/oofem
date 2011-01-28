@@ -771,8 +771,8 @@ EngngModel :: solveYourself()
                 this->initMetaStepAttributes( this->giveCurrentStep() );
             }
 
-            // renumber equations if necessary
-            if ( this->requiresEquationRenumbering( this->giveCurrentStep() ) ) {
+            // renumber equations if necessary. Ensure to call forceEquationNumbering() for staggered problems
+            if ( this->requiresEquationRenumbering( this->giveCurrentStep() ) || this->giveClassID()== classType(StaggeredProblemClass) ) {
                 this->forceEquationNumbering();
             }
 

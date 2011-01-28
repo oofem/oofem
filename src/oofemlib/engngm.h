@@ -747,7 +747,7 @@ public:
      * and new equation numbers are generated starting from 1 on each domain.
      * It will update numberOfEquations variable accordingly.
      * Should be used at startup to force equation numbering and therefore sets numberOfEquations.
-     * Must be used if model supports changes of static system to assign  new valid equation numbers
+     * Must be used if model supports changes of static system to assign new valid equation numbers
      * to dofManagers.
      */
     virtual int       forceEquationNumbering();

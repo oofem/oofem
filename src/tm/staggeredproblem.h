@@ -121,6 +121,16 @@ public:
     virtual void               solveYourselfAt(TimeStep *);
     //virtual int                requiresNewLhs () {return 1;}
     /**
+     * Forces equation renumbering on all domains associated to engng model.
+     * All equation numbers in all domains for all dofManagers are invalidated,
+     * and new equation numbers are generated starting from 1 on each domain.
+     * It will update numberOfEquations variable accordingly.
+     * Should be used at startup to force equation numbering and therefore sets numberOfEquations.
+     * Must be used if model supports changes of static system to assign new valid equation numbers
+     * to dofManagers.
+     */
+    virtual int       forceEquationNumbering();
+    /**
      * Updates internal state after finishing time step. (for example total values may be
      * updated according to previously solved increments).  Then element values are also updated
      * (together with related integration points and material statuses).

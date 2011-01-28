@@ -252,8 +252,8 @@ double IncrementalLinearStatic :: giveUnknownComponent(EquationID type, ValueMod
         return 0.;
     }
 
-    if ( d->giveEngngModel()->requiresUnknownsDictionaryUpdate() ) {
-        int hash = d->giveEngngModel()->giveUnknownDictHashIndx(type, mode, tStep);
+    if ( this->requiresUnknownsDictionaryUpdate() ) {
+        int hash = this->giveUnknownDictHashIndx(type, mode, tStep);
         if ( dof->giveUnknowns()->includes(hash) ) {
             return dof->giveUnknowns()->at(hash);
         } else {
@@ -263,17 +263,6 @@ double IncrementalLinearStatic :: giveUnknownComponent(EquationID type, ValueMod
         OOFEM_ERROR("Only the mode requiresUnknownsDictionaryUpdate() is supported");
     }
 
-    //     if (dof->giveEqn() <= 0) {
-    //         OOFEM_ERROR("IncrementalLinearStatic :: giveUnknownComponent : Dof is missing equation number.");
-    //     }
-    //     if (mode == VM_Incremental) {
-    //         return this->incrementOfDisplacementVector.at(dof->giveEqn());
-    //     } else if (mode == VM_Total) {
-    //         return this->displacementVector.at(dof->giveNumber());
-    //     } else {
-    //         OOFEM_ERROR("IncrementalLinearStatic :: giveUnknownComponent : Unknown ValueModeType");
-    //         return 0.0;
-    //     }
     return 0.;
 }
 

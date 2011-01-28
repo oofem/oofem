@@ -228,11 +228,11 @@ double NLTransientTransportProblem ::  giveUnknownComponent(EquationID type, Val
         return 0.;
     }
 
-    if ( d->giveEngngModel()->requiresUnknownsDictionaryUpdate() ) {
+    if ( this->requiresUnknownsDictionaryUpdate() ) {
         if (mode == VM_Incremental) { //get difference between current and previous time variable
             return dof->giveUnknowns()->at(0) - dof->giveUnknowns()->at(1);
         }
-        int hash = d->giveEngngModel()->giveUnknownDictHashIndx(type, mode, tStep);
+        int hash = this->giveUnknownDictHashIndx(type, mode, tStep);
         if ( dof->giveUnknowns()->includes(hash) ) {
             return dof->giveUnknowns()->at(hash);
         } else {
