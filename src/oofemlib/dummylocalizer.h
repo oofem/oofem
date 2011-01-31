@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/dummylocalizer.h,v 1.6 2003/04/06 14:08:23 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -32,11 +31,6 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-
-
-//   *************************************
-//   *** CLASS DUMMY SPATIAL LOCALIZER ***
-//   *************************************
 
 #ifndef dummylocalizer_h
 #define dummylocalizer_h
@@ -63,52 +57,14 @@ public:
     /// Constructor
     DummySpatialLocalizer(int n, Domain *d) : SpatialLocalizer(n, d) { }
 
-    /**
-     * Returns the element, containing given point.
-     * @param coords global problem coordinates of point of interest
-     * @param regionList only elements within given regions are considered, if NULL all regions are considered.
-     * @return the element belonging to associated domain, containing given point, NULL otherwise
-     */
     Element *giveElementContainingPoint(const FloatArray &coords, const IntArray *regionList = NULL);
-    /**
-     * Returns the element close to point
-     * @param coords global problem coordinates of point of interest
-     * @param regionList only elements within given regions are considered, if NULL all regions are considered.
-     * @return the element belonging to associated domain, close to given point, NULL otherwise
-     */
     Element *giveElementCloseToPoint(const FloatArray &coords, const IntArray *regionList = NULL);
-    /**
-     * Returns the integration point in associated domain, which is closest
-     * to given point. Since IP holds the information about its element,
-     * the IP reference is containing all the information.
-     * @param coords global problem coordinates of point of interest
-     * @return the IP belonging to associated domain (only those provided by elements in default integration rule
-     * are taken into acount), NULL otherwise
-     */
+    Element *giveElementClosestToPoint(FloatArray &lcoords, FloatArray &closest, const FloatArray &coords, const IntArray *regionList);
     GaussPoint *giveClosestIP(const FloatArray &coords, int region);
-    /**
-     * Returns container (set) of all domain elements having integration point within given box.
-     * @param elemSet answer containing the list of elements meeting the criteria
-     * @param coords center of box of interest
-     * @param radius radius of bounding sphere
-     */
     void giveAllElementsWithIpWithinBox(elementContainerType &elemSet, const FloatArray &coords, const double radius);
-    /**
-     * Returns container (list) of all domain nodes within given box.
-     * @param NODESet answer containing the list of nodes meeting the criteria
-     * @param coords center of box of interest
-     * @param radius radius of bounding sphere
-     */
     void giveAllNodesWithinBox(nodeContainerType &nodeList, const FloatArray &coords, const double radius);
-
-    /// Returns class name of the receiver.
     const char *giveClassName() const { return "DummySpatialLocalizer"; }
-    /** Returns classType id of receiver.
-     * @see FEMComponent::giveClassID
-     */
-    classType                giveClassID() const { return DummySpatialLocalizerClass; }
-
-protected:
+    classType giveClassID() const { return DummySpatialLocalizerClass; }
 };
 } // end namespace oofem
 #endif // dummylocalizer_h

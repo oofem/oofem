@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/octreelocalizer.C,v 1.16.4.1 2004/04/05 15:19:43 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -69,8 +68,8 @@ oofemOctantRec :: oofemOctantRec(OctreeSpatialLocalizer *loc, oofemOctantRec *pa
 
 oofemOctantRec :: ~oofemOctantRec()
 {
-    // destructor - delete all receivers childs recursivelly
-    // delete childs first, then itself
+    // destructor - delete all receivers children recursively
+    // delete children first, then itself
     int i, j, k;
     for ( i = 0; i <= 1; i++ ) {
         for ( j = 0; j <= 1; j++ ) {
@@ -145,19 +144,18 @@ oofemOctantRec :: containsPoint(const FloatArray &coords)
 }
 
 
-int
+oofemOctantRec :: ChildStatus
 oofemOctantRec :: giveChildContainingPoint(oofemOctantRec **child, const FloatArray &coords)
 {
-    int i;
     IntArray ind(3);
 
     if ( this->containsPoint(coords) ) {
         if ( this->isTerminalOctant() ) {
             * child = NULL;
-            return -1;
+            return CS_NoChild;
         }
 
-        for ( i = 1; i <= coords.giveSize(); i++ ) {
+        for (int i = 1; i <= coords.giveSize(); i++ ) {
             if ( localizer->giveOctreeMaskValue(i) && ( coords.at(i) > ( this->origin.at(i) + this->size / 2. ) ) ) {
                 ind.at(i) = 1;
             } else {
@@ -166,23 +164,23 @@ oofemOctantRec :: giveChildContainingPoint(oofemOctantRec **child, const FloatAr
         }
 
         * child = this->child [ ind.at(1) ] [ ind.at(2) ] [ ind.at(3) ];
-        return 1;
+        return CS_ChildFound;
     } else {
         * child = NULL;
-        return -2;
+        return CS_PointOutside;
     }
 }
 
 
-int
+bool
 oofemOctantRec :: isTerminalOctant() {
     // This implemetation is relying on fact, that child [0][0][0]
     // is created even for all degenerated trees
     if ( this->child [ 0 ] [ 0 ] [ 0 ] ) {
-        return 0;
+        return false;
     }
 
-    return 1;
+    return true;
 }
 
 int
@@ -295,18 +293,16 @@ oofemOctantRec :: testBoundingBox(const FloatArray &coords, double radius)
 
 oofemOctantRec *
 OctreeSpatialLocalizer :: findTerminalContaining(oofemOctantRec *startCell, const FloatArray &coords) {
-    int result;
+    oofemOctantRec :: ChildStatus result;
     oofemOctantRec *currCell = startCell;
     if ( startCell->containsPoint(coords) ) {
         // found terminal octant containing node
         while ( !currCell->isTerminalOctant() ) {
             result = currCell->giveChildContainingPoint(& currCell, coords);
-            if ( result == -2 ) {
+            if ( result == oofemOctantRec :: CS_PointOutside ) {
                 _error("findTerminalContaining: internal error - octree inconsistency");
             }
         }
-
-        ;
 
         return currCell;
     } else {
@@ -456,7 +452,7 @@ OctreeSpatialLocalizer :: initElementIPDataStructure()
     // If this is added to existing implementation based on adding elements only if integration point is in the cell
     // This leads to more complete element list in terminal cell.
     // Can improve the searching for background element, but will deteriorate
-    // the performance of closest IP search and serch of elements in given volume.
+    // the performance of closest IP search and search of elements in given volume.
 
     // Note: since in general, the integration point of an element may fall into
     // an octant, where are not the element nodes, the original algorithm is
@@ -523,7 +519,8 @@ OctreeSpatialLocalizer :: insertElementsUsingNodalConnectivitiesIntoOctree(oofem
 int
 OctreeSpatialLocalizer :: insertNodeIntoOctree(oofemOctantRec *rootCell, int nodeNum, const FloatArray &coords)
 {
-    int nCellItems, cellDepth, result;
+    int nCellItems, cellDepth;
+    oofemOctantRec :: ChildStatus result;
     oofemOctantRec *currCell;
     nodeContainerType *cellNodeList;
     nodeContainerType :: const_iterator pos;
@@ -542,7 +539,7 @@ OctreeSpatialLocalizer :: insertNodeIntoOctree(oofemOctantRec *rootCell, int nod
     if ( ( nCellItems > OCTREE_MAX_NODES_LIMIT ) && ( cellDepth <= OCTREE_MAX_DEPTH ) ) {
         // refine tree one level
         currCell->divideLocally(1, this->octreeMask);
-        // propagate all nodes already assigned to currCell to childs
+        // propagate all nodes already assigned to currCell to children
         for ( pos = cellNodeList->begin(); pos != cellNodeList->end(); ++pos ) {
             dman = domain->giveDofManager(* pos);
             nodeCoords = ( ( ( Node * ) dman )->giveCoordinates() );
@@ -554,7 +551,7 @@ OctreeSpatialLocalizer :: insertNodeIntoOctree(oofemOctantRec *rootCell, int nod
         // now the new node record is saved simply to one of created children.
         // Generally, one has to check if child is candidate for further refinement
         // (case, when all parent nodes are belonging to particular child), refine it
-        // and check childs again. This can be implemented by recursive procedure, but
+        // and check children again. This can be implemented by recursive procedure, but
         // probability of this case is relatively small.
         // Current implementation simply insert node to child created in first refinement,
         // which can lead ne node violation of refinement criteria.
@@ -563,7 +560,7 @@ OctreeSpatialLocalizer :: insertNodeIntoOctree(oofemOctantRec *rootCell, int nod
 
         // find child containing new node
         result = currCell->giveChildContainingPoint(& currCell, coords);
-        if ( result != 1 ) {
+        if ( result != oofemOctantRec :: CS_ChildFound ) {
             _error("insertNodeIntoOctree: internal error - octree inconsistency");
         }
     }
@@ -630,7 +627,6 @@ OctreeSpatialLocalizer :: giveElementContainingPoint(oofemOctantRec *cell, const
             if ( ielemptr->giveParallelMode() == Element_remote ) {
                 continue;
             }
-
 #endif
 
             interface = ( SpatialLocalizerInterface * ) ielemptr->giveInterface(SpatialLocalizerInterfaceType);

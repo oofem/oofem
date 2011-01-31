@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/dummylocalizer.C,v 1.6 2003/04/06 14:08:23 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -78,6 +77,7 @@ DummySpatialLocalizer :: giveElementCloseToPoint(const FloatArray &coords, const
     Element *ielemptr, *answer = NULL;
     SpatialLocalizerInterface *interface;
     double dist = 0.0, currDist;
+    FloatArray el_coords, el_lcoords;
 
     for ( ielem = 1; ielem <= nelems; ielem++ ) {
         ielemptr = this->giveDomain()->giveElement(ielem);
@@ -87,17 +87,53 @@ DummySpatialLocalizer :: giveElementCloseToPoint(const FloatArray &coords, const
                 continue;
             }
 
-            currDist = interface->SpatialLocalizerI_giveDistanceFromParametricCenter(coords);
+            //currDist = interface->SpatialLocalizerI_giveDistanceFromParametricCenter(coords);
+            currDist = interface->SpatialLocalizerI_giveClosestPoint(el_lcoords, el_coords, coords);
             if ( answer == NULL || currDist < dist ) {
                 answer = ielemptr;
-                if ( ( dist = currDist ) == 0.0 ) {
+                dist = currDist;
+                if ( dist == 0.0 ) {
                     break;
                 }
             }
         }
     }
 
-    return NULL;
+    return answer;
+}
+
+
+Element *
+DummySpatialLocalizer :: giveElementClosestToPoint(FloatArray &lcoords, FloatArray &closest, const FloatArray &coords, const IntArray *regionList)
+{
+    int ielem, nelems = this->giveDomain()->giveNumberOfElements();
+    Element *ielemptr, *answer = NULL;
+    SpatialLocalizerInterface *interface;
+    double dist = 0.0, currDist;
+    FloatArray el_coords, el_lcoords;
+
+    for ( ielem = 1; ielem <= nelems; ielem++ ) {
+        ielemptr = this->giveDomain()->giveElement(ielem);
+        interface = ( SpatialLocalizerInterface * ) ielemptr->giveInterface(SpatialLocalizerInterfaceType);
+        if ( interface ) {
+            if ( regionList && ( regionList->findFirstIndexOf( ielemptr->giveRegionNumber() ) == 0 ) ) {
+                continue;
+            }
+
+            currDist = interface->SpatialLocalizerI_giveClosestPoint(el_lcoords, el_coords, coords);
+            if ( answer == NULL || (currDist < dist && currDist >= 0.0) ) {
+                answer = ielemptr;
+                lcoords = el_lcoords;
+                closest = el_coords;
+                dist = currDist;
+                if ( dist == 0.0 ) {
+                    break;
+                }
+            }
+        }
+    }
+
+    return answer;
 }
 
 
@@ -135,7 +171,6 @@ DummySpatialLocalizer :: giveClosestIP(const FloatArray &coords, int region)
 }
 
 
-
 void
 DummySpatialLocalizer :: giveAllElementsWithIpWithinBox(elementContainerType &elemSet, const FloatArray &coords, const double radius)
 {
@@ -163,6 +198,7 @@ DummySpatialLocalizer :: giveAllElementsWithIpWithinBox(elementContainerType &el
     } // end element loop
 
 }
+
 
 void
 DummySpatialLocalizer :: giveAllNodesWithinBox(nodeContainerType &nodeSet, const FloatArray &coords, const double radius)
