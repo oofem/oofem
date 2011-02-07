@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2010   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -78,8 +78,6 @@ IRResultType Tr21Stokes :: initializeFrom(InputRecord *ir)
 
 void Tr21Stokes :: computeGaussPoints()
 {
-    // Set up gausspoints for element
-
     if ( !integrationRulesArray ) {
         numberOfIntegrationRules = 1;
         integrationRulesArray = new IntegrationRule * [ 2 ];
@@ -166,6 +164,12 @@ void Tr21Stokes :: giveCharacteristicMatrix(FloatMatrix &answer,
     }
 }
 
+int Tr21Stokes :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords)
+{
+    interpolation_quad.local2global(answer, lcoords, FEIElementGeometryWrapper(this), 0.0);
+    return true;
+}
+
 void Tr21Stokes :: computeInternalForcesVector(FloatArray &answer, TimeStep *tStep)
 {
     IntegrationRule *iRule = integrationRulesArray [ 0 ];
@@ -201,8 +205,8 @@ void Tr21Stokes :: computeInternalForcesVector(FloatArray &answer, TimeStep *tSt
         //FloatArray devStress = ms->giveDeviatoricStressVector();
         epsp.beProductOf(B, a_velocity);
         mat->computeDeviatoricStressVector(devStress, gp, epsp, tStep);
-        double pressure = dotProduct(Nh, a_pressure, 3);
-        double w = dotProduct(dNv, a_velocity, 12);
+        double pressure = Nh.dotProduct(a_pressure);
+        double w = dNv.dotProduct(a_velocity);
         BTs.beTProductOf(B, devStress);
 
         momentum += ( BTs - dNv * pressure ) * dA;
@@ -252,17 +256,13 @@ void Tr21Stokes :: computeLoadVector(FloatArray &answer, TimeStep *tStep)
 
 void Tr21Stokes :: computeBodyLoadVectorAt(FloatArray &answer, Load *load, TimeStep *tStep)
 {
-    // FIXME: Untested!
-
-    answer.resize(15, 1);
-    answer.zero();
-
     IntegrationRule *iRule = this->integrationRulesArray [ 0 ];
     GaussPoint *gp;
-    FloatArray N, b, gVector, *lcoords;
+    FloatArray N, gVector, *lcoords, temparray(15);
     double dA, detJ, rho;
-
+    
     load->computeComponentArrayAt(gVector, tStep, VM_Total);
+    temparray.zero();
     if ( gVector.giveSize() ) {
         for ( int k = 0; k < iRule->getNumberOfIntegrationPoints(); k++ ) {
             gp = iRule->getIntegrationPoint(k);
@@ -273,16 +273,17 @@ void Tr21Stokes :: computeBodyLoadVectorAt(FloatArray &answer, Load *load, TimeS
             detJ = this->interpolation_quad.giveTransformationJacobian(* lcoords, FEIElementGeometryWrapper(this), 0.0);
             dA = detJ * gp->giveWeight();
 
-            //this->interpolation_quad.evalN(N, *lcoords, 0.0);
-            this->interpolation_quad.evalN(N, * lcoords, FEIElementGeometryWrapper(this), 0.0);    // Why geometry?
+            this->interpolation_quad.evalN(N, * lcoords, FEIElementGeometryWrapper(this), 0.0);
             for ( int j = 0; j < 3; j++ ) {
-                answer(2 * j)   += N(j) * rho * b(0) * dA;
-                answer(2 * j + 1) += N(j) * rho * b(1) * dA;
+                temparray(2 * j)     += N(j) * rho * gVector(0) * dA;
+                temparray(2 * j + 1) += N(j) * rho * gVector(1) * dA;
             }
         }
     }
 
-    OOFEM_ERROR("computeBodyLoadVectorAt: Not tested yet.");
+    answer.resize(15);
+    answer.zero();
+    answer.assemble( temparray, this->ordering );
 }
 
 void Tr21Stokes :: computeEdgeBCSubVectorAt(FloatArray &answer, Load *load, int iEdge, TimeStep *tStep)
@@ -396,15 +397,114 @@ void Tr21Stokes :: updateYourself(TimeStep *tStep)
     Element :: updateYourself(tStep);
 }
 
+int Tr21Stokes :: computeLocalCoordinates(FloatArray &lcoords, const FloatArray &coords)
+{
+    return this->interpolation_quad.global2local(lcoords,coords, FEIElementGeometryWrapper(this), 0.0);
+}
+
 // Some extension Interfaces to follow:
 
 Interface *Tr21Stokes :: giveInterface(InterfaceType it)
 {
-    if ( it == NodalAveragingRecoveryModelInterfaceType ) {
-        return static_cast< NodalAveragingRecoveryModelInterface * >(this);
-    } else {
-        return FMElement :: giveInterface(it);
+    switch (it) {
+        case NodalAveragingRecoveryModelInterfaceType:
+            return static_cast< NodalAveragingRecoveryModelInterface * >(this);
+        case SpatialLocalizerInterfaceType:
+            return static_cast< SpatialLocalizerInterface * >(this);
+        case EIPrimaryUnknownMapperInterfaceType:
+            return static_cast< EIPrimaryUnknownMapperInterface * >(this);
+        default:
+            return FMElement :: giveInterface(it);
     }
+}
+
+int Tr21Stokes :: SpatialLocalizerI_containsPoint(const FloatArray &coords)
+{
+    FloatArray lcoords;
+    return this->computeLocalCoordinates(lcoords, coords);
+}
+
+void Tr21Stokes :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(ValueModeType mode,
+        TimeStep *tStep, const FloatArray &lcoords, FloatArray &answer)
+{
+    FloatArray n, n_lin;
+    this->interpolation_quad.evalN(n, lcoords, FEIElementGeometryWrapper(this), 0.0);
+    this->interpolation_lin.evalN(n_lin, lcoords, FEIElementGeometryWrapper(this), 0.0);
+    answer.resize(3);
+    answer.zero();
+    for (int i = 1; i <= n.giveSize(); i++) {
+        answer(0) += n.at(i)*this->giveNode(i)->giveDofWithID(V_u)->giveUnknown(EID_MomentumBalance_ConservationEquation, mode, tStep);
+        answer(1) += n.at(i)*this->giveNode(i)->giveDofWithID(V_v)->giveUnknown(EID_MomentumBalance_ConservationEquation, mode, tStep);
+    }
+    for (int i = 1; i <= n_lin.giveSize(); i++) {
+        answer(2) += n_lin.at(i)*this->giveNode(i)->giveDofWithID(P_f)->giveUnknown(EID_MomentumBalance_ConservationEquation, mode, tStep);
+    }
+}
+
+int Tr21Stokes :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAt(ValueModeType mode, TimeStep *tStep, const FloatArray &gcoords, FloatArray &answer)
+{
+    bool ok;
+    FloatArray lcoords, n, n_lin;
+    ok = this->computeLocalCoordinates(lcoords, gcoords);
+    if (!ok) {
+        answer.resize(0);
+        return false;
+    }
+    this->EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(mode, tStep, lcoords, answer);
+    return true;
+}
+
+double Tr21Stokes :: SpatialLocalizerI_giveClosestPoint(FloatArray &lcoords, FloatArray &closest, const FloatArray &gcoords)
+{
+    bool ok = this->computeLocalCoordinates(lcoords, gcoords);
+    if (!ok) {
+        if (lcoords.giveSize() == 0) { // To far away to even give a meaningful answer, just take the center.
+            lcoords.resize(3);
+            lcoords(0) = 0.3333;
+            lcoords(1) = 0.3333;
+            lcoords(2) = 0.3333;
+        } else {
+            // This is not very accurate, only for points pretty close to the surface.
+            // I should be using normals to project it to the surface, but this is OK for points very close to the surface.2
+            double x1, x2;
+            x1 = max(lcoords(0),0.0);
+            x2 = max(lcoords(1),0.0);
+            if ( x2 > 1.0 + x1 ) {
+                x1 = 0.0;
+                x2 = 1.0;
+            } else if ( x2 < -1.0 + x1 ) {
+                x1 = 1.0;
+                x2 = 0.0;
+            } else {
+                x1 = 0.5*(1 + x1 - x2);
+                x2 = 1.0 - x1;
+            }
+            lcoords(0) = x1;
+            lcoords(1) = x2;
+            lcoords(2) = 1 - x1 - x2;
+        }
+    }
+    this->computeGlobalCoordinates(closest, lcoords);
+    return closest.distance(gcoords);
+}
+
+void Tr21Stokes :: EIPrimaryUnknownMI_givePrimaryUnknownVectorDofID(IntArray &answer)
+{
+    answer.resize(3);
+    answer(0) = V_u;
+    answer(1) = V_v;
+    answer(2) = P_f;
+}
+
+double Tr21Stokes :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords)
+{
+    FloatArray center;
+    FloatArray lcoords(3);
+    lcoords(0) = 0.33333;
+    lcoords(1) = 0.33333;
+    lcoords(2) = 0.33333;
+    interpolation_quad.local2global(center, lcoords, FEIElementGeometryWrapper(this), 0.0);
+    return center.distance(coords);
 }
 
 void Tr21Stokes :: NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side, InternalStateType type, TimeStep *tStep)
@@ -435,7 +535,7 @@ void Tr21Stokes :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer
             } else if ( node == 5 ) {
                 a = this->giveNode(2)->giveDofWithID(P_f)->giveUnknown(EID_ConservationEquation, VM_Total, tStep);
                 b = this->giveNode(3)->giveDofWithID(P_f)->giveUnknown(EID_ConservationEquation, VM_Total, tStep);
-            } else if ( node == 6 ) {
+            } else /*if ( node == 6 )*/ {
                 a = this->giveNode(3)->giveDofWithID(P_f)->giveUnknown(EID_ConservationEquation, VM_Total, tStep);
                 b = this->giveNode(1)->giveDofWithID(P_f)->giveUnknown(EID_ConservationEquation, VM_Total, tStep);
             }

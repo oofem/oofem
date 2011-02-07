@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2010   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -39,15 +39,22 @@
 #include "domain.h"
 #include "fei2dtrlin.h"
 #include "fei2dtrquad.h"
-#include "nodalaveragingrecoverymodel.h"
 
-/** Triangular Taylor-Hood element for Stokes flow.
+#include "nodalaveragingrecoverymodel.h"
+#include "spatiallocalizer.h"
+#include "eleminterpmapperinterface.h"
+
+/**
+ * Triangular Taylor-Hood element for Stokes flow.
  * Quadratic interpolation of geometry and velocity, and linear interpolation of pressures.
  * @author Carl Sandström
  * @author Mikael Öhman
  */
 namespace oofem {
-class Tr21Stokes : public FMElement, public NodalAveragingRecoveryModelInterface
+class Tr21Stokes : public FMElement,
+    public NodalAveragingRecoveryModelInterface,
+    public SpatialLocalizerInterface,
+    public EIPrimaryUnknownMapperInterface
 {
 protected:
     /// Number of gauss points. Same for pressure and velocity.
@@ -135,9 +142,9 @@ public:
     /**
      * Gives the dof ID mask for the element.
      * This element (Taylor-Hood) has V_u, V_v, P_f in node 1,2,3 and V_u, V_v in node 4,5,6.
-     * @param inode Node to check
-     * @param ut Equation ID to check
-     * @param answer List of dof IDs
+     * @param inode Node to check.
+     * @param ut Equation ID to check.
+     * @param answer List of dof IDs.
      */
     virtual void giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const;
 
@@ -145,15 +152,25 @@ public:
 
     virtual Interface *giveInterface(InterfaceType it);
 
-    /// Used to export values pressure on the edge nodes.
-    virtual void NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node,
-                                                            InternalStateType type, TimeStep *tStep);
+    int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords);
+    int computeLocalCoordinates(FloatArray &lcoords, const FloatArray &coords);
 
-    /// @see NodalAvergingRecoveryModelInterface
-    virtual void NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side,
-                                                           InternalStateType type, TimeStep *tStep);
+    // Spatial localizer interface:
+    virtual Element *SpatialLocalizerI_giveElement() { return this; }
+    virtual int SpatialLocalizerI_containsPoint(const FloatArray &coords);
+    virtual double SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords);
+    virtual double SpatialLocalizerI_giveClosestPoint(FloatArray &lcoords, FloatArray &closest, const FloatArray &gcoords);
 
-    /// @see NodalAvergingRecoveryModelInterface
+    // Element interpolation interface:
+    virtual int EIPrimaryUnknownMI_computePrimaryUnknownVectorAt(ValueModeType u,
+            TimeStep *stepN, const FloatArray &coords, FloatArray &answer);
+    virtual void EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(ValueModeType u,
+            TimeStep *stepN, const FloatArray &coords, FloatArray &answer);
+    virtual void EIPrimaryUnknownMI_givePrimaryUnknownVectorDofID(IntArray &answer);
+
+    // Nodal averaging interface:
+    virtual void NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node, InternalStateType type, TimeStep *tStep);
+    virtual void NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side, InternalStateType type, TimeStep *tStep);
     virtual int NodalAveragingRecoveryMI_giveDofManRecordSize(InternalStateType type);
 };
 } // end namespace oofem
