@@ -39,6 +39,45 @@
 #include "gausspnt.h"
 
 namespace oofem {
+
+int
+DummySpatialLocalizer :: init(bool force)
+{
+    if (!force && this->initialized) {
+        return true;
+    }
+
+    // Count the elements in each cross section.
+    int r;
+    int nregion = this->domain->giveNumberOfRegions();
+    int nelem = this->domain->giveNumberOfElements();
+
+    IntArray region_nelem(nregion);
+    region_nelem.zero();
+    for (int i = 1; i <= nelem; i++) {
+        Element *e = this->domain->giveElement(i);
+        r = e->giveRegionNumber();
+        region_nelem.at(r)++;
+    }
+
+    this->region_elements.clear(true);
+    this->region_elements.growTo(nregion);
+    // Creates a new int array of correct size for each region
+    for (int i = 1; i <= nregion; i++) {
+        this->region_elements.put(i, new IntArray(region_nelem.at(i)) );
+    }
+    // Add the numbers into the list.
+    IntArray c(nregion);
+    c.zero();
+    for (int i = 1; i <= nelem; i++) {
+        Element *e = this->domain->giveElement(i);
+        r = e->giveRegionNumber();
+        c.at(r)++;
+        this->region_elements.at(r)->at(c.at(r)) = i;
+    }
+    return this->initialized = true;
+}
+
 Element *
 DummySpatialLocalizer :: giveElementContainingPoint(const FloatArray &coords, const IntArray *regionList)
 {
@@ -72,12 +111,10 @@ DummySpatialLocalizer :: giveElementContainingPoint(const FloatArray &coords, co
 Element *
 DummySpatialLocalizer :: giveElementCloseToPoint(const FloatArray &coords, const IntArray *regionList)
 {
-    // Dummy implementation here, to be replaced ASAP
     int ielem, nelems = this->giveDomain()->giveNumberOfElements();
     Element *ielemptr, *answer = NULL;
     SpatialLocalizerInterface *interface;
     double dist = 0.0, currDist;
-    FloatArray el_coords, el_lcoords;
 
     for ( ielem = 1; ielem <= nelems; ielem++ ) {
         ielemptr = this->giveDomain()->giveElement(ielem);
@@ -87,8 +124,7 @@ DummySpatialLocalizer :: giveElementCloseToPoint(const FloatArray &coords, const
                 continue;
             }
 
-            //currDist = interface->SpatialLocalizerI_giveDistanceFromParametricCenter(coords);
-            currDist = interface->SpatialLocalizerI_giveClosestPoint(el_lcoords, el_coords, coords);
+            currDist = interface->SpatialLocalizerI_giveDistanceFromParametricCenter(coords);
             if ( answer == NULL || currDist < dist ) {
                 answer = ielemptr;
                 dist = currDist;
@@ -104,30 +140,51 @@ DummySpatialLocalizer :: giveElementCloseToPoint(const FloatArray &coords, const
 
 
 Element *
-DummySpatialLocalizer :: giveElementClosestToPoint(FloatArray &lcoords, FloatArray &closest, const FloatArray &coords, const IntArray *regionList)
+DummySpatialLocalizer :: giveElementClosestToPoint(FloatArray &lcoords, FloatArray &closest, const FloatArray &coords, int region)
 {
-    int ielem, nelems = this->giveDomain()->giveNumberOfElements();
+    int ielem, nelems;
     Element *ielemptr, *answer = NULL;
     SpatialLocalizerInterface *interface;
     double dist = 0.0, currDist;
     FloatArray el_coords, el_lcoords;
 
-    for ( ielem = 1; ielem <= nelems; ielem++ ) {
-        ielemptr = this->giveDomain()->giveElement(ielem);
-        interface = ( SpatialLocalizerInterface * ) ielemptr->giveInterface(SpatialLocalizerInterfaceType);
-        if ( interface ) {
-            if ( regionList && ( regionList->findFirstIndexOf( ielemptr->giveRegionNumber() ) == 0 ) ) {
-                continue;
+    if ( region > 0 ) {
+        IntArray *elems = this->region_elements.at(region);
+        for (ielem = 1; ielem <= elems->giveSize(); ielem++) {
+            ielemptr = this->domain->giveElement(elems->at(ielem));
+            interface = ( SpatialLocalizerInterface * ) ielemptr->giveInterface(SpatialLocalizerInterfaceType);
+            if ( interface ) {
+                currDist = interface->SpatialLocalizerI_giveClosestPoint(el_lcoords, el_coords, coords);
+                if ( answer == NULL || (currDist < dist && currDist >= 0.0) ) {
+                    answer = ielemptr;
+                    lcoords = el_lcoords;
+                    closest = el_coords;
+                    dist = currDist;
+                    if ( dist == 0.0 ) {
+                        break;
+                    }
+                }
             }
+        }
+    } else { // Check them all;
+        nelems = this->giveDomain()->giveNumberOfElements();
+        for ( ielem = 1; ielem <= nelems; ielem++ ) {
+            ielemptr = this->giveDomain()->giveElement(ielem);
+            interface = ( SpatialLocalizerInterface * ) ielemptr->giveInterface(SpatialLocalizerInterfaceType);
+            if ( interface ) {
+                if ( region > 0 && region == ielemptr->giveRegionNumber() ) {
+                    continue;
+                }
 
-            currDist = interface->SpatialLocalizerI_giveClosestPoint(el_lcoords, el_coords, coords);
-            if ( answer == NULL || (currDist < dist && currDist >= 0.0) ) {
-                answer = ielemptr;
-                lcoords = el_lcoords;
-                closest = el_coords;
-                dist = currDist;
-                if ( dist == 0.0 ) {
-                    break;
+                currDist = interface->SpatialLocalizerI_giveClosestPoint(el_lcoords, el_coords, coords);
+                if ( answer == NULL || (currDist < dist && currDist >= 0.0) ) {
+                    answer = ielemptr;
+                    lcoords = el_lcoords;
+                    closest = el_coords;
+                    dist = currDist;
+                    if ( dist == 0.0 ) {
+                        break;
+                    }
                 }
             }
         }

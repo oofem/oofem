@@ -52,25 +52,26 @@ class TimeStep;
 class DummySpatialLocalizer : public SpatialLocalizer
 {
 protected:
+    AList<IntArray> region_elements;
+    bool initialized;
 
 public:
     /// Constructor
     DummySpatialLocalizer(int n, Domain *d) : SpatialLocalizer(n, d) { }
+    /// Destructor
+    ~DummySpatialLocalizer() { this->region_elements.clear(true); }
+
+    int init(bool force = false);
 
     Element *giveElementContainingPoint(const FloatArray &coords, const IntArray *regionList = NULL);
     Element *giveElementCloseToPoint(const FloatArray &coords, const IntArray *regionList = NULL);
-    Element *giveElementClosestToPoint(FloatArray &lcoords, FloatArray &closest, const FloatArray &coords, const IntArray *regionList);
+    Element *giveElementClosestToPoint(FloatArray &lcoords, FloatArray &closest, const FloatArray &coords, int region = 0);
     GaussPoint *giveClosestIP(const FloatArray &coords, int region);
     void giveAllElementsWithIpWithinBox(elementContainerType &elemSet, const FloatArray &coords, const double radius);
     void giveAllNodesWithinBox(nodeContainerType &nodeList, const FloatArray &coords, const double radius);
+
     const char *giveClassName() const { return "DummySpatialLocalizer"; }
     classType giveClassID() const { return DummySpatialLocalizerClass; }
 };
 } // end namespace oofem
 #endif // dummylocalizer_h
-
-
-
-
-
-
