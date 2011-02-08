@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/dofmanager.h,v 1.19.4.2 2004/05/14 13:45:27 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -32,12 +31,6 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-
-
-//
-// class DofManager
-//
-
 
 #ifndef dofmanager_h
 #define dofmanager_h
@@ -62,27 +55,21 @@
 namespace oofem {
 #ifdef __PARALLEL_MODE
 class CommunicationBuffer;
-/**
- * In parallel mode, this type indicates the mode of DofManager.
- * <UL>
- * <LI>
- * DofManager_local mode - DofManager is local, there are no contribution from other domains to this DofManager.</LI>
- * <LI>
- * DofManager_shared mode - DofManager is shared by neighbouring partitions, it is necessary to
- * summ contributions from all contributing domains. Typical for node cut algorithm.</LI>
- * <LI>
- * DofManager_remote - DofManager in active domain is only mirror of some remote
- * DofManager. It is necessary to copy remote values into local ones. Typical for element cut.</LI>
- * <LI>
- * DofManager_null - DofManager in active domain is shared only by remote elements (these are only
- * introduced for nonlocal constitutive model to allow effective local averaging, so only local material
- * value to be averaged are transferred for these remote elements). Null nodes are therefore used only
- * for computing real integration point coordinates of remote elements and there is no reason to maintain
- * their unknowns (they have no equatiuon number assigned). </LI>
- *
- * </UL>
- */
-enum dofManagerParallelMode { DofManager_local, DofManager_shared, DofManager_remote, DofManager_null };
+/// In parallel mode, this type indicates the mode of DofManager.
+enum dofManagerParallelMode {
+    DofManager_local, /**< DofManager is local, there are no contribution from other domains to this DofManager.*/
+    DofManager_shared, /**< DofManager is shared by neighboring partitions,
+                            it is necessary to sum contributions from all contributing domains.
+                            Typical for node cut algorithm. */
+    DofManager_remote, /**< DofManager in active domain is only mirror of some remote DofManager.
+                            It is necessary to copy remote values into local ones.
+                            Typical for element cut.*/
+    DofManager_null, /**< DofManager in active domain is shared only by remote elements (these are only
+                          introduced for nonlocal constitutive model to allow effective local averaging, so only local material
+                          value to be averaged are transferred for these remote elements). Null nodes are therefore used only
+                          for computing real integration point coordinates of remote elements and there is no reason to maintain
+                          their unknowns (they have no equation number assigned).*/
+};
 
 #endif
 
@@ -92,8 +79,8 @@ class FloatArray;
 class IntArray;
 
 /**
- * Base class for dof managers. Dof manager is an abstraction for object posessing degrees of
- * freedom. Dof managers (respectively derived clases like nodes or sides) are usually atributes of
+ * Base class for dof managers. Dof manager is an abstraction for object possessing degrees of
+ * freedom. Dof managers (respectively derived classes like nodes or sides) are usually attributes of
  * elements and are maintained by domain. Degrees of freedom belonging to dof manager are
  * stored in 'dofArray'. Dof manager also
  * maintain a list of applied loads it is subjected to.
@@ -104,7 +91,7 @@ class IntArray;
 class DofManager : public FEMComponent
 {
     /*
-     * This class implements abstract clas - a  dof manager in a finite element mesh.
+     * This class implements abstract class - a  dof manager in a finite element mesh.
      * It is a base class for FEM nodes and element sides, having dofs.
      * A dof manager  and its children (nodes, element sides) are
      * attributes of a domain.
@@ -125,17 +112,18 @@ class DofManager : public FEMComponent
      */
 
 protected:
-    /// total number of DOFs
+    /// Total number of DOFs.
     int numberOfDofs;
-    /// array of DOFs
+    /// Array of DOFs.
     Dof **dofArray;
-    /// list of applied loads.
+    /// List of applied loads.
     IntArray loadArray;
-    // IntArray*    locationArray ;
-    /** Indicates if dofManager is boundary (true boundary or on boundary between regions) or interior.
-     * This information is required by some recovery technigues. */
+    /**
+     * Indicates if dofManager is boundary (true boundary or on boundary between regions) or interior.
+     * This information is required by some recovery techniques.
+     */
     bool isBoundaryFlag;
-    /// flag indicating whether receiver has slave dofs
+    /// Flag indicating whether receiver has slave DOFs.
     bool hasSlaveDofs;
 #if defined( __PARALLEL_MODE ) || defined( __ENABLE_COMPONENT_LABELS )
     /**
@@ -149,88 +137,104 @@ protected:
     dofManagerParallelMode parallel_mode;
     /**
      * List of partition sharing the shared dof manager or
-     * remote partion containing remote dofmanager counterpart.
+     * remote partition containing remote dofmanager counterpart.
      */
     IntArray partitions;
 #endif
 
 public:
-    /** Constructor. Creates DofManager with given number belonging to domain aDomain.
+    /**
+     * Constructor. Creates DofManager with given number belonging to domain aDomain.
      * @param n DofManager's number in domain
      * @param aDomain reference to DofManager's domain
      */
-    DofManager(int n, Domain *aDomain);                      // constructor
+    DofManager(int n, Domain *aDomain);
     /// Destructor.
-    ~DofManager();                                 // destructor
+    ~DofManager();
 
     /**@name Dof management methods */
     //@{
-    // dof management
-    /** Returns reference (pointer) to i-th dof of receiver.
+
+    /**
+     * Returns reference (pointer) to i-th dof of receiver.
      * Index of Dof with required physical meaning can be obtained by invoking
      * method findDofWithDofId.
+     * @param i The index of the DOF.
+     * @return The requested DOF.
      * @see DofManager::findDofWithDofId
      */
     Dof *giveDof(int i) const;
-    /// Returns DOF with given dofID; issues error if not present
-    Dof *giveDofWithID(int dofID) const; // termitovo
-    /** Returns total number of dofs managed by receiver */
-    int          giveNumberOfDofs() const;
+    /**
+     * Returns DOF with given dofID; issues error if not present.
+     * @param dofID The ID for the requested DOF.
+     * @return The requested DOF.
+     * @see DofIDItem
+     */
+    Dof *giveDofWithID(int dofID) const;
+    /// @return Total number of dofs managed by receiver.
+    int giveNumberOfDofs() const;
 
-    /** Returns the number of primary dofs on which receiver dofs (given in dofArray) depend on.
-     *  If receiver has only prinary dofs, the answer is the size of dofArray.
+    /**
+     * Returns the number of primary dofs on which receiver dofs (given in dofArray) depend on.
+     * If receiver has only primary dofs, the answer is the size of dofArray.
+     * @param dofArray Array with indices to DOFs.
+     * @return Number of primary dofs from given array.
      */
     int giveNumberOfPrimaryMasterDofs(IntArray &dofArray) const;
-    //virtual int          giveNumberOfDofs () const;
-    /** Returns location array (array containing for each requested dof related equation number) for
+    /**
+     * Returns location array (array containing for each requested dof related equation number) for
      * given numbering scheme.
-     * @param dofIDArry array containing dof mask. This mask containing DofIDItem values
+     * @param dofIDArry Array containing dof mask. This mask containing DofIDItem values
      * (they describe physical meaning of dofs, see cltypes.h) is used to extract only
-     * required values. If dof with requested physical meaning dos not exist in receiver,
+     * required values. If dof with requested physical meaning does not exist in receiver,
      * an error is generated and execution exits.
-     * @param locationArray - return parameter containing required equation numbers.
-     * @param s determines the equation numbering scheme
-     * @see Element::giveDofManDofIDMask function.
+     * @param locationArray Return parameter containing required equation numbers.
+     * @param s Determines the equation numbering scheme.
+     * @see Element::giveDofManDofIDMask.
      */
-    virtual void         giveLocationArray(const IntArray &dofIDArry, IntArray &locationArray,
+    virtual void giveLocationArray(const IntArray &dofIDArry, IntArray &locationArray,
                                            const UnknownNumberingScheme &s) const;
-    /** Returns full location array of receiver containing equation numbers of all dofs
+    /**
+     * Returns full location array of receiver containing equation numbers of all dofs
      * of receiver. Their order is specific to every DofManager. Mainly used at EngngModel level
      * to assemble DofManager contribution (typically load vector).
-     * @param locationArray complete location array of receiver.
-     * @param s determines the equation numbering scheme
+     * @param locationArray Complete location array of receiver.
+     * @param s Determines the equation numbering scheme.
      */
-    virtual void         giveCompleteLocationArray(IntArray &locationArray, const UnknownNumberingScheme &s) const;
-    /** Returns DOFs numbers of receiver with required physical meaning.
+    virtual void giveCompleteLocationArray(IntArray &locationArray, const UnknownNumberingScheme &s) const;
+    /**
+     * Returns DOFs numbers of receiver with required physical meaning.
      * @param dofIDArry array containing DofIDItem-type values (this is enumeration
      * identifying physical meaning of particular DOF, see cltypes.h).
-     * @param answer array with DOF numbers. They are ordered according to dofIDArry.
+     * @param answer Array with DOF numbers. They are ordered according to dofIDArry.
+     * @param dofIDArray Array with DOF IDs.
+     * @see DofIDItem
      * @see cltypes.h
      */
-    void         giveDofArray(const IntArray &dofIDArry, IntArray &answer) const;
+    void giveDofArray(const IntArray &dofIDArray, IntArray &answer) const;
     /**
      * Finds index of DOF with required physical meaning of receiver. This index can be different
      * for different DOFManagers (user can alter dof order and type in input file).
-     * @param dofID physical meaning of DOF.
-     * @return index of requested DOF. If such DOF with dofID does not exists, returns zero.
+     * @param dofID Physical meaning of DOF.
+     * @return Index of requested DOF. If such DOF with dofID does not exists, returns zero.
      */
-    int          findDofWithDofId(DofID dofID) const;
+    int findDofWithDofId(DofID dofID) const;
     /**
      * Assembles the vector of unknowns in nodal c.s for given dofs of receiver.
      * This vector may have size different from number of dofs requested,
      * because some dofs may depend on other dofs. Default implementation uses
      * Dof::giveUnknown service.
-     * @param answer result (in nodal cs.)
-     * @param dofMask  dofIDArry array containing dof mask. This mask containing DofIDItem values
+     * @param answer Result (in nodal cs.)
+     * @param dofMask Array containing DOF mask. This mask containing DofIDItem values
      * (they describe physical meaning of dofs, see cltypes.h) is used to extract only
-     * required values. If dof with requested physical meaning dos not exist in receiver,
+     * required values. If dof with requested physical meaning does not exist in receiver,
      * an error is generated and execution exits.
-     * @param type physical meaning of  unknown.
-     * @param mode mode of unknown (e.g, total value, velocity or acceleration of unknown).
-     * @stepN time step when unknown requested. See documentation of particular EngngModel
-     * class for valid StepN values (most implementaion can return only values for current
+     * @param type Physical meaning of  unknown.
+     * @param mode Mode of unknown (e.g, total value, velocity or acceleration of unknown).
+     * @param stepN Time step when unknown requested. See documentation of particular EngngModel
+     * class for valid StepN values (most implementation can return only values for current
      * and possibly for previous time step).
-     * @see Dof::giveUnknown service.
+     * @see Dof::giveUnknown
      */
     virtual void giveUnknownVector(FloatArray &answer, const IntArray &dofMask,
                                    EquationID type, ValueModeType mode, TimeStep *stepN);
@@ -239,16 +243,16 @@ public:
      * This vector may have size different from number of dofs requested,
      * because some dofs may depend on other dofs. Default implementation uses
      * Dof::giveUnknown service.
-     * @param answer result (in nodal cs.)
-     * @param dofMask  dofIDArry array containing dof mask. This mask containing DofIDItem values
+     * @param answer Result (in nodal cs.)
+     * @param dofMask Array containing DOF mask. This mask containing DofIDItem values
      * (they describe physical meaning of dofs, see cltypes.h) is used to extract only
-     * required values. If dof with requested physical meaning dos not exist in receiver,
+     * required values. If dof with requested physical meaning does not exist in receiver,
      * an error is generated and execution exits.
-     * @param field primary filed
-     * @stepN time step when unknown requested. See documentation of particular EngngModel
-     * class for valid StepN values (most implementaion can return only values for current
+     * @param field Primary field.
+     * @param stepN Time step when unknown requested. See documentation of particular EngngModel
+     * class for valid StepN values (most implementation can return only values for current
      * and possibly for previous time step).
-     * @see Dof::giveUnknown service.
+     * @see Dof::giveUnknown
      */
     virtual void giveUnknownVector(FloatArray &answer, const IntArray &dofMask,
                                    PrimaryField &field, ValueModeType mode, TimeStep *stepN);
@@ -257,25 +261,24 @@ public:
      * This vector may have size different from number of dofs requested,
      * because some dofs may depend on other dofs. Default implementation uses
      * Dof::giveBcValue and Dof::hasBc service.
-     * @param answer result (in nodal cs.)
-     * @param dofMask  dofIDArry array containing dof mask. This mask containing DofIDItem values
+     * @param answer Result (in nodal cs.)
+     * @param dofMask Array containing dof mask. This mask containing DofIDItem values
      * (they describe physical meaning of dofs, see cltypes.h) is used to extract only
-     * required values. If dof with requested physical meaning dos not exist in receiver,
+     * required values. If dof with requested physical meaning does not exist in receiver,
      * an error is generated and execution exits.
-     * @param mode mode of unknown (e.g, total value, velocity or acceleration of unknown).
-     * @stepN time step when unknown requested. See documentation of particular EngngModel
-     * class for valid StepN values (most implementaion can return only values for current
+     * @param mode Mode of unknown (e.g, total value, velocity or acceleration of unknown).
+     * @param stepN Time step when unknown requested. See documentation of particular EngngModel
+     * class for valid StepN values (most implementation can return only values for current
      * and possibly for previous time step).
-     * @see Dof::giveBcValue, Dof::hasBc service.
+     * @see Dof::giveBcValue
+     * @see Dof::hasBc
      */
     virtual void givePrescribedUnknownVector(FloatArray &answer, const IntArray &dofMask,
                                              ValueModeType mode, TimeStep *stepN);
     //virtual void givePrescribedUnknownVector (FloatArray& answer, IntArray& dofMask,
     //                       UnknownType type, ValueModeType mode, TimeStep* stepN);
-
-
-
     //@}
+
     /**@name Transformation functions
      * The governing equations can be assembled not only in global coordinate system, but
      * also in user-defined local coordinate system of each dof manager. Methods in this section
@@ -285,70 +288,84 @@ public:
      * transformation matrix is provided.
      */
     //@{
-    /** Computes receiver transformation matrix from global cs. to dofManager specific
+    /**
+     * Computes receiver transformation matrix from global cs. to dofManager specific
      * coordinate system (in which governing equations are assembled, for example the
      * local coordinate system in node).
-     * @param answer computed transformation matrix. It has generally dofIDArry.size rows and
+     * @param answer Computed transformation matrix. It has generally dofIDArry.size rows and
      * if loc is obtained using giveLocationArray(dofIDArry, loc) call, loc.giveSize() columns.
      * This is because this transformation should generally include not only transformation to
      * dof manager local coordinate system, but receiver dofs can be expressed using
-     * dofs of another dofManager (In this case, squre answer is produced anly if all
+     * dofs of another dofManager (In this case, square answer is produced only if all
      * dof transformation is required).
-     * @param dofIDArry array containing DofIDItem-type values (this is enumeration
-     * identifying physical meaning of particular DOF, see cltypes.h) for which transfromation mtrx is
+     * @param dofIDArry Array containing DofIDItem-type values (this is enumeration
+     * identifying physical meaning of particular DOF, see cltypes.h) for which transformation matrix is
      * assembled. if dofIDArry is NULL, then all receiver dofs are assumed.
+     * @param mode Mode of transformation.
      */
     virtual void computeDofTransformation(FloatMatrix &answer, const IntArray *dofIDArry, DofManTransfType mode);
     virtual void computeLoadTransformation(FloatMatrix &answer, const IntArray *dofIDArry, DofManTransfType mode);
     /**
      * Indicates, whether dofManager requires the transformation from global c.s. to
      * dof manager specific coordinate system.
-     * @return nonzero if transformation is necessary, even for single dof.
+     * @return Nonzero if transformation is necessary, even for single dof.
      */
     virtual int requiresTransformation() { return 0; }
     //@}
+
     /**@name Load related functions */
     //@{
-    // nodal load vector
-    /** Computes the load vector of receiver in given time.
-     * @param answer load vector.
-     * @param stepN time step when answer is computed.
-     * @param mode determines response mode.
+    /**
+     * Computes the load vector of receiver in given time.
+     * @param answer Load vector.
+     * @param stepN Time step when answer is computed.
+     * @param mode Determines response mode.
      */
-    virtual void         computeLoadVectorAt(FloatArray &answer, TimeStep *stepN, ValueModeType mode);
-    /// Returns the array containing applied loadings of the receiver
+    virtual void computeLoadVectorAt(FloatArray &answer, TimeStep *stepN, ValueModeType mode);
+    /**
+     * Returns the array containing applied loadings of the receiver
+     * @return Array with indices to the applied loads.
+     */
     IntArray *giveLoadArray();
-    /// Sets the array of applied loadings of the receiver
-    void setLoadArray(IntArray &);
+    /**
+     * Sets the array of applied loadings of the receiver
+     * @param load Array with indices to the applied loads.
+     */
+    void setLoadArray(IntArray &load);
     //@}
 
-    /**@name Position querry functions */
+    /**@name Position query functions */
     //@{
-    virtual bool        hasCoordinates() { return false; }
-    /// Returns i-th coordinate of node.
-    virtual double       giveCoordinate(int i) { return 0.0; }
-    /// Returns pointer to node coordinate array.
+    virtual bool hasCoordinates() { return false; }
+    /// @return The i-th coordinate of node.
+    virtual double giveCoordinate(int i) { return 0.0; }
+    /// @return Pointer to node coordinate array.
     virtual FloatArray *giveCoordinates() { return NULL; }
     //@}
 
+    virtual void printOutputAt(FILE *file, TimeStep *tStep);
+    /**
+     * Updates receiver after equilibrium in time step has been reached.
+     * @param tStep Active time step.
+     */
+    void updateYourself(TimeStep *tStep);
 
-
-    // time step termination
-    /** Prints output of receiver to stream, for given time step */
-    void         printOutputAt(FILE *, TimeStep *);
-    /// updates receiver after equlibrium in time step has been reached.
-    void         updateYourself(TimeStep *);
-
-    // miscellaneous
-    bool         isBoundary() { return isBoundaryFlag; }
-    void         setBoundaryFlag(bool _b) { this->isBoundaryFlag = _b; }
-    /// Returns true if receiver contains slave dofs
-    virtual int  hasAnySlaveDofs();
+    // Miscellaneous
+    /// @return True if dofmanager is on boundary.
+    bool isBoundary() { return isBoundaryFlag; }
+    /**
+     * Sets the boundary flag.
+     * @param isBoundary Determines if receiver is on the boundary.
+     */
+    void setBoundaryFlag(bool isBoundary) { this->isBoundaryFlag = isBoundary; }
+    /// @return True if receiver contains slave dofs
+    virtual int hasAnySlaveDofs();
     /**
      * Returns true if the receiver is linked (its slave DOFs depend on master values) to some other dof managers.
      * In this case, the masters array should contain the list of masters.
      * In both serial and parallel modes, local numbers are be provided.
-     * If the receiver contains only primary DOFs, false is returned.
+     * @param masters Indices of dof managers which receiver has slaves to.
+     * @param If receiver contains only primary DOFs, false is returned.
      */
     virtual bool giveMasterDofMans(IntArray &masters);
 
@@ -357,30 +374,19 @@ public:
      * Creates new object for following classes Node, ElementSide, RigidArmNode otherwise
      * calls global function CreateUsrDefDofManagerOfType for creating appropriate
      * instance. This function must be implemented by user.
-     * @param aClass string with DofManager name
-     * @return newly allocated DofManager with required type.
+     * @param aClass String with DofManager name.
+     * @return Newly allocated DofManager with required type.
      */
-    DofManager *ofType(char *);
-    /// Returns class name of the receiver.
+    DofManager *ofType(char *aClass);
+
     const char *giveClassName() const { return "DofManager"; }
-    /** Returns classType id of receiver.
-     * @see FEMComponent::giveClassID
-     */
-    classType    giveClassID() const { return DofManagerClass; }
-    ///Initializes receiver acording to object description stored in input record.
+    classType giveClassID() const { return DofManagerClass; }
     IRResultType initializeFrom(InputRecord *ir);
-    /// prints receiver state on stdout. Usefull for debuging.
-    void         printYourself();
-    /**
-     * Stores receiver state to output stream.
-     * @exception throws an ContextIOERR exception if error encountered
-     */
-    virtual contextIOResultType    saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-    /**
-     * Restores the receiver state previously written in stream.
-     * @exception throws an ContextIOERR exception if error encountered
-     */
-    virtual contextIOResultType    restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+
+    /// Prints receiver state on stdout. Useful for debugging.
+    void printYourself();
+    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 
     /// Returns true if dof of given type is allowed to be associated to receiver
     virtual bool isDofTypeCompatible(dofType type) const { return false; }
@@ -388,42 +394,56 @@ public:
      * Checks internal data consistency in node.
      * Current implementation checks (when receiver has slave dofs) if receiver has the same
      * coordinate system as master dofManager of slave dof.
-     * @return nonzero if receiver check is o.k.
+     * @return Nonzero if receiver check is o.k.
      */
-    virtual int    checkConsistency();
+    virtual int checkConsistency();
     /**
      * Local renumbering support. For some tasks (parallel load balancing, for example) it is necessary to
-     * renumber the entities. The various fem components (such as nodes or elements) typically contain
+     * renumber the entities. The various FEM components (such as nodes or elements) typically contain
      * links to other entities in terms of their local numbers, etc. This service allows to update
-     * these relations to reflext updated numbering. The renumbering funciton is passed, which is supposed
-     * to return an updated number of specified entyty type based on old number.
+     * these relations to reflect updated numbering. The renumbering function is passed, which is supposed
+     * to return an updated number of specified entity type based on old number.
      */
     virtual void updateLocalNumbering(EntityRenumberingFunctor &f);
 
     /**@name Advanced functions */
     //@{
-    /** Sets number of dofs of the receiver; Dealocates existing DOFs;
-     *  Resizes the dofArray accordingly */
+    /**
+     * Sets number of dofs of the receiver; Deallocates existing DOFs;
+     * Resizes the dofArray accordingly
+     */
     void setNumberOfDofs(int _ndofs);
     /** Sets i-th DOF of receiver to given DOF */
     void setDof(int i, Dof *dof);
     //@}
-    /** Adds a Dof to i-th position in dofArray */
-    void addDof(int i, Dof *dof);   // rch
-    bool hasDofID(int id); // rch
+
+    /**
+     * Adds a Dof to i-th position in dofArray
+     * @param i
+     * @param dof
+     */
+    void addDof(int i, Dof *dof);
+    /**
+     * Checks if receiver contains dof with given ID.
+     * @param id Dof ID to check for.
+     * @return True if receiver has dof with given id.
+     * @see DofIDItem
+     */
+    bool hasDofID(int id);
 
 #ifdef __OOFEG
     virtual void   drawYourself(oofegGraphicContext &context) { }
 #endif
 
 #if defined( __PARALLEL_MODE ) || defined( __ENABLE_COMPONENT_LABELS )
-    /**
-     * Returns receiver globally unique number.
-     */
+    /// @return Receivers globally unique number.
     int giveGlobalNumber() const { return globalNumber; }
     int giveLabel() const { return globalNumber; }
-    /** sets receiver global number */
-    void setGlobalNumber(int _number) { globalNumber = _number; }
+    /**
+     * Sets receiver global number.
+     * @param number New global number for receiver.
+     */
+    void setGlobalNumber(int number) { globalNumber = number; }
 #endif
 #ifdef __PARALLEL_MODE
     /**
@@ -434,38 +454,38 @@ public:
     void setParallelMode(dofManagerParallelMode _mode) { parallel_mode = _mode; }
     /**
      * Packs specific  DOF Manager's dofs unknowns into communication buffer.
-     * @param buff communication buffer to pack data.
-     * @param type physical meaning of  unknown.
-     * @param mode mode of unknown (e.g, total value, velocity or acceleration of unknown).
-     * @stepN time step when unknown requested. See documentation of particular EngngModel
-     * class for valid StepN values (most implementaion can return only values for current
+     * @param buff Communication buffer to pack data.
+     * @param type Physical meaning of  unknown.
+     * @param mode Mode of unknown (e.g, total value, velocity or acceleration of unknown).
+     * @param stepN Time step when unknown requested. See documentation of particular EngngModel
+     * class for valid StepN values (most implementation can return only values for current
      * and possibly for previous time step).
-     * @return nonzero if succesfull
+     * @return Nonzero if successful
      */
     int packDOFsUnknowns(CommunicationBuffer &buff, EquationID type, ValueModeType mode, TimeStep *stepN);
     /**
      * Returns partition list of receiver.
-     * @return partition array.
+     * @return Partition array.
      */
     const IntArray *givePartitionList()  { return & partitions; }
-    /** Sets receiver's partition list */
+    /** Sets receiver's partition list. */
     void setPartitionList(const IntArray *_p) { partitions = * _p; }
-    /// Removes given partition from receiver list
+    /// Removes given partition from receiver list.
     void removePartitionFromList(int _part) {
         int _pos = partitions.findFirstIndexOf(_part);
         if ( _pos ) { partitions.erase(_pos); } }
-    /// Merges receiver partition list with given lists
+    /// Merges receiver partition list with given lists.
     void mergePartitionList(IntArray &_p);
     /**
-     *  Returns number of partitions sharing given receiver (=number of shared partitions + local one)
+     * Returns number of partitions sharing given receiver (=number of shared partitions + local one).
      */
     const int givePartitionsConnectivitySize();
-    /// Returns true if receiver is locally maintained
+    /// Returns true if receiver is locally maintained.
     bool isLocal();
-    /// Returns true if receiver is shared
+    /// Returns true if receiver is shared.
     bool isShared() { if ( parallel_mode == DofManager_shared ) { return true; } else { return false; } }
-
 #endif
+
 protected:
     virtual IRResultType resolveDofIDArray(InputRecord *ir, IntArray &dofIDArry);
     void computeSlaveLoadTransformation(FloatMatrix &answer, const IntArray *dofMask, DofManTransfType mode);
