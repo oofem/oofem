@@ -42,7 +42,8 @@
 
 #include "nodalaveragingrecoverymodel.h"
 #include "spatiallocalizer.h"
-#include "eleminterpmapperinterface.h"
+// Temporarily removed, until the SVN copy issue is solved.
+//#include "eleminterpmapperinterface.h"
 
 /**
  * Triangular Taylor-Hood element for Stokes flow.
@@ -53,8 +54,8 @@
 namespace oofem {
 class Tr21Stokes : public FMElement,
     public NodalAveragingRecoveryModelInterface,
-    public SpatialLocalizerInterface,
-    public EIPrimaryUnknownMapperInterface
+    public SpatialLocalizerInterface/*,
+    public EIPrimaryUnknownMapperInterface*/
 {
 protected:
     /// Number of gauss points. Same for pressure and velocity.
