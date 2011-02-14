@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2010   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -52,8 +52,10 @@ IRResultType LineSurfaceTension :: initializeFrom(InputRecord *ir)
     this->Element :: initializeFrom(ir);
     IR_GIVE_FIELD(ir, gamma_s, IFT_SurfaceTension_gamma_s, "gamma_s");
 
+    this->bflag1 = false;
+    this->bflag2 = false;
 
-    if (this->boundarySides.giveSize() > 0) { // Why giveSize for IntArray, all other arrays use size()
+    if (this->boundarySides.giveSize() > 0) {
         if (this->boundarySides.giveSize() != 2) {
             OOFEM_ERROR("Boundary sides must be 2 if exists");
         }
@@ -66,6 +68,82 @@ IRResultType LineSurfaceTension :: initializeFrom(InputRecord *ir)
     }
 
     return IRRT_OK;
+}
+
+void LineSurfaceTension :: computeN(FloatArray &answer, const FloatArray &lcoords) const
+{
+	double xi = lcoords(0);
+	answer.resize(2);
+	answer(0) = 1.0 - xi;
+	answer(1) = xi;
+}
+
+int LineSurfaceTension :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords)
+{
+	FloatArray n;
+	this->computeN(n, lcoords);
+	answer.resize(2);
+    answer.zero();
+    for (int i = 1; i <= n.giveSize(); i++) {
+        answer.add(n.at(i), *this->giveNode(i)->giveCoordinates());
+    }
+    return true;
+}
+
+int LineSurfaceTension :: computeLocalCoordinates(FloatArray &answer, const FloatArray &gcoords)
+{
+    FloatArray v, u;
+    v = *this->giveNode(2)->giveCoordinates();
+    v.subtract(*this->giveNode(1)->giveCoordinates());
+    u = gcoords;
+    u.subtract(*this->giveNode(1)->giveCoordinates());
+    answer.resize(1);
+    answer(0) = u.dotProduct(v)/(u.computeNorm()*v.computeNorm());
+    return true;
+}
+
+double LineSurfaceTension :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords)
+{
+    FloatArray c;
+    c = *this->giveNode(1)->giveCoordinates();
+    c.add(*this->giveNode(2)->giveCoordinates());
+    c.times(0.5);
+    c.subtract(coords);
+    return c.computeNorm();
+}
+
+int LineSurfaceTension :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAt(ValueModeType mode,
+    TimeStep *tStep, const FloatArray &gcoords, FloatArray &answer)
+{
+	FloatArray lcoords;
+	if (!this->computeLocalCoordinates(lcoords, gcoords)) {
+	    answer.resize(0);
+	    return false;
+	}
+	this->EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(mode, tStep, lcoords, answer);
+	return true;
+}
+
+
+void LineSurfaceTension :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(ValueModeType mode,
+    TimeStep *tStep, const FloatArray &lcoords, FloatArray &answer)
+{
+    FloatArray n;
+	this->computeN(n, lcoords);
+
+    answer.resize(2);
+    answer.zero();
+    for (int i = 1; i < n.giveSize(); i++) {
+        answer(0) += n.at(i)*this->giveNode(i)->giveDofWithID(V_u)->giveUnknown(EID_MomentumBalance, mode, tStep);
+        answer(1) += n.at(i)*this->giveNode(i)->giveDofWithID(V_v)->giveUnknown(EID_MomentumBalance, mode, tStep);
+    }
+}
+
+void LineSurfaceTension :: EIPrimaryUnknownMI_givePrimaryUnknownVectorDofID(IntArray &answer)
+{
+    answer.resize(2);
+    answer(0) = V_u;
+    answer(1) = V_v;
 }
 
 void LineSurfaceTension :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const
@@ -110,23 +188,20 @@ void LineSurfaceTension :: computeLoadVector(FloatArray &answer, ValueModeType m
     domainType dt = this->giveDomain()->giveDomainType();
 
     Node *node1, *node2;
-    double x1, x2, y1, y2, dx, dy, vx, vy, length, t;
+    FloatArray v1, v2, v;
+    double x1, x2, length, t;
 
     node1 = giveNode(1);
     node2 = giveNode(2);
 
+    v = *node2->giveCoordinates();
+    v.subtract(*node1->giveCoordinates());
+
+    length = v.computeNorm();
+    v.times(1.0/length);
+
     x1 = node1->giveCoordinate(1);
-    x2 = node2->giveCoordinate(1);
-
-    y1 = node1->giveCoordinate(2);
-    y2 = node2->giveCoordinate(2);
-
-    dx = x2-x1;
-    dy = y2-y1;
-
-    length = sqrt(dx*dx + dy*dy);
-    vx = dx/length;
-    vy = dy/length;
+    x2 = node1->giveCoordinate(2);
 
     answer.resize(4);
     answer.zero();
@@ -134,33 +209,33 @@ void LineSurfaceTension :: computeLoadVector(FloatArray &answer, ValueModeType m
     if (dt == _3dAxisymmMode) {
         OOFEM_CLASS_ERROR("Not tested");
         t = M_PI*(x1+x2);
-        answer.at(1) = vx*t - length;
-        answer.at(2) = vy*t;
-        answer.at(3) = -vx*t - length;
-        answer.at(4) = -vy*t;
+        answer.at(1) = v.at(1)*t - length;
+        answer.at(2) = v.at(2)*t;
+        answer.at(3) = -v.at(1)*t - length;
+        answer.at(4) = -v.at(2)*t;
         if (this->bflag1) {
             t = 2*M_PI*x1;
-            answer.at(1) -= vx*t;
-            answer.at(2) -= vy*t;
+            answer.at(1) -= v.at(1)*t;
+            answer.at(2) -= v.at(2)*t;
         }
         if (this->bflag2) {
             t = 2*M_PI*x2;
-            answer.at(3) += vx*t;
-            answer.at(4) += vy*t;
+            answer.at(3) += v.at(1)*t;
+            answer.at(4) += v.at(2)*t;
         }
     }
     else {
         //t = this->giveDomain()->giveCrossSection(1)->give(CS_Thickness); // TODO: Should i use this?
-        t = 1;
-        // In this case, the bondary term would cancel out the edge term,
+        t = 1.0;
+        // In this case simple linear case, the boundary term would cancel out the edge term,
         // so it can be simplified to check when the boundary is not there.
         if (!this->bflag1) {
-            answer.at(1) = vx*t;
-            answer.at(2) = vy*t;
+            answer.at(1) = v.at(1)*t;
+            answer.at(2) = v.at(2)*t;
         }
         if (!this->bflag2) {
-            answer.at(3) = -vx*t;
-            answer.at(4) = -vy*t;
+            answer.at(3) = -v.at(1)*t;
+            answer.at(4) = -v.at(2)*t;
         }
     }
 
@@ -260,6 +335,20 @@ void LineSurfaceTension :: computeTangent(FloatMatrix &answer, TimeStep *tStep)
     }
 
     answer.times(this->gamma_s);*/
+}
+
+// Some extension Interfaces to follow:
+
+Interface *LineSurfaceTension :: giveInterface(InterfaceType it)
+{
+    switch ( it ) {
+        case SpatialLocalizerInterfaceType:
+            return static_cast< SpatialLocalizerInterface * >(this);
+        case EIPrimaryUnknownMapperInterfaceType:
+            return static_cast< EIPrimaryUnknownMapperInterface * >(this);
+        default:
+            return FMElement :: giveInterface(it);
+    }
 }
 
 } // end namespace oofem

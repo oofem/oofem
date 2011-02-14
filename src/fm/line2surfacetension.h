@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2010   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -40,54 +40,47 @@
 namespace oofem {
 /**
  * 3 node line elements for surface tension.
- * @see SurfaceTension2D
+ * @see LineSurfaceTension
  * @author Mikael Öhman
  */
-class Line2SurfaceTension : public LineSurfaceTension
+class Line2SurfaceTension : 
+	public LineSurfaceTension
 {
-    //protected:
+//protected:
     //static FEI2dLineQuad interpolation; // TODO: Implement this
 
 public:
     /**
      * Constructor. Creates an element with number n belonging to domain aDomain.
-     * @param n Element's number
-     * @param aDomain Pointer to the domain to which element belongs.
+     * @param n Element's number.
+     * @param d Pointer to the domain to which element belongs.
      */
-    Line2SurfaceTension(int, Domain *);
+    Line2SurfaceTension(int e, Domain *d);
     /// Destructor.
     ~Line2SurfaceTension();
 
-    /**
-     * Gives the load from surface tension.
-     * If element has no capability to compute requested type of characteristic vector
-     * error function is invoked.
-     * @param answer requested characteristic vector
-     * @param type    only supports loadvector type
-     * @param mode    ignored.
-     * @param tStep   ignored (independent).
-     */
-    //void giveCharacteristicVector(FloatArray & answer, CharType, ValueModeType, TimeStep *);
-
-    /**
-     * Gives the tangent from surface tension.
-     */
     void computeTangent(FloatMatrix &answer, TimeStep *tStep);
-
     void computeLoadVector(FloatArray &answer, ValueModeType mode, TimeStep *tStep);
 
-    /**
-     * Returns the type of geometry.
-     * @return Quadratic line element type.
-     */
-    Element_Geometry_Type giveGeometryType() const { return EGT_line_2; }
+    virtual void computeN(FloatArray &answer, const FloatArray &lcoords) const;
+    virtual int computeLocalCoordinates(FloatArray &lcoords, const FloatArray &gcoords);
 
-    /**
-     * Always 6 DOFs (V_u, V_v)*3.
-     * @param[in] ut ignored.
-     * @return 6 degrees of freedom.
-     */
+    virtual double SpatialLocalizerI_giveClosestPoint(FloatArray &lcoords, FloatArray &closest, const FloatArray &gcoords);
+    virtual int SpatialLocalizerI_containsPoint(const FloatArray &gcoords) { return false; }
+
+    virtual int EIPrimaryUnknownMI_computePrimaryUnknownVectorAt(ValueModeType mode,
+                                                                 TimeStep *tStep, const FloatArray &gcoords,
+                                                                 FloatArray &answer);
+
+    virtual void EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(ValueModeType mode,
+                                                                 TimeStep *tStep, const FloatArray &lcoords,
+                                                                 FloatArray &answer);
+
+    Element_Geometry_Type giveGeometryType() const { return EGT_line_2; }
     virtual int computeNumberOfDofs(EquationID ut) { return 6; }
+
+    const char *giveClassName() const { return "Line2SurfaceTension"; }
+    classType giveClassID() const { return FMElementClass; } // TODO
 };
 }
 

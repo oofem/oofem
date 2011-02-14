@@ -411,8 +411,8 @@ Interface *Tr21Stokes :: giveInterface(InterfaceType it)
             return static_cast< NodalAveragingRecoveryModelInterface * >(this);
         case SpatialLocalizerInterfaceType:
             return static_cast< SpatialLocalizerInterface * >(this);
-/*        case EIPrimaryUnknownMapperInterfaceType:
-            return static_cast< EIPrimaryUnknownMapperInterface * >(this);*/
+        case EIPrimaryUnknownMapperInterfaceType:
+            return static_cast< EIPrimaryUnknownMapperInterface * >(this);
         default:
             return FMElement :: giveInterface(it);
     }

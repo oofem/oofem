@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2010   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -39,10 +39,13 @@
 #include "structuralelement.h"
 #include "domain.h"
 
+#include "spatiallocalizer.h"
+#include "eleminterpmapperinterface.h"
+
 namespace oofem {
 
 /**
- * Implements the load and tangent for surfacen tension boundary potential.
+ * Implements the load and tangent for surface tension boundary potential.
  * This class is a base class for higher order and specifically introduces simplifications for linear elements, and components are exact.
  * The derivations are to long to write here, see documentation for further detail.
  *
@@ -51,10 +54,13 @@ namespace oofem {
  * The load is dependent on the solution, thus there is a "stiffness"/tangent matrix as well.
  * @author Mikael Öhman
  */
-class LineSurfaceTension : public FMElement//, public StructuralElement <-- I'd like to be both?
+class LineSurfaceTension : 
+	public FMElement, 
+	public SpatialLocalizerInterface, 
+	public EIPrimaryUnknownMapperInterface
 {
 protected:
-	/// Material parameter for the surface energy. Defines the traction as ${\bf t}_s = 2\kappa\gamma_s{\bf n}$.
+	/// Material parameter for the surface energy. Defines the traction as @f$ \mathbf{t}_s = 2\kappa\gamma_s \mathbf{n} @f$.
 	double gamma_s;
 	/// Flags denoting if a a node is on the boundary.
 	bool bflag1, bflag2;
@@ -65,9 +71,9 @@ public:
     /**
      * Constructor. Creates an element with number n belonging to domain aDomain.
      * @param n Element's number
-     * @param aDomain Pointer to the domain to which element belongs.
+     * @param d Pointer to the domain to which element belongs.
      */
-	LineSurfaceTension (int, Domain *);
+	LineSurfaceTension (int n, Domain *d);
     /// Destructor.
 	~LineSurfaceTension ();
 
@@ -78,47 +84,48 @@ public:
 	 */
 	IRResultType initializeFrom(InputRecord *);
 
-    /**
-     * Only computes internal load from surface tension.
-     * @see Element :: giveCharacteristicVector
-     */
-	virtual void giveCharacteristicVector(FloatArray & answer, CharType, ValueModeType, TimeStep *tStep);
-
-    /**
-     * The element has only a load, the characteristic matrix is always zero.
-     * @param answer 4 by 4 matrix with zeros.
-     */
-	virtual void giveCharacteristicMatrix(FloatMatrix & answer, CharType, TimeStep *tStep);
+	virtual void giveCharacteristicVector(FloatArray &answer, CharType type, ValueModeType mode, TimeStep *tStep);
+	virtual void giveCharacteristicMatrix(FloatMatrix &answer, CharType type, TimeStep *tStep);
 
 	/**
 	 * Computes the load vector.
 	 */
-	virtual void computeLoadVector(FloatArray & answer, ValueModeType, TimeStep *tStep);
+	virtual void computeLoadVector(FloatArray &answer, ValueModeType mode, TimeStep *tStep);
 
 	/**
 	 * Computes tangent to load vector.
+	 * @param answer
 	 */
-	virtual void computeTangent(FloatMatrix & answer, TimeStep *tStep);
+	virtual void computeTangent(FloatMatrix &answer, TimeStep *tStep);
+	
+	virtual void computeN(FloatArray &answer, const FloatArray &lcoords) const;
 
-	/**
-	 * Returns the type of geometry.
-	 * @return Linear line element type.
-	 */
+    virtual int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords);
+    virtual int computeLocalCoordinates(FloatArray &answer, const FloatArray &gcoords);
+
 	virtual Element_Geometry_Type giveGeometryType() const { return EGT_line_1; }
-
-	/**
-	 * (V_u, V_v)x2
-	 * @return 4 degrees of freedom.
-	 */
-	virtual int computeNumberOfDofs(EquationID ut) { return 4;}
-
-	/**
-	 * Returns the displacement or velocities, depending on the domain type.
-	 */
+	virtual int computeNumberOfDofs(EquationID ut) { return ut == EID_MomentumBalance || ut == EID_MomentumBalance_ConservationEquation ? 4 : 0;}
     virtual void giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const;
 
+    Interface *giveInterface(InterfaceType it);
+
+    // SpatialLocalizer Interface:
+    virtual Element *SpatialLocalizerI_giveElement() { return this; }
+    virtual int SpatialLocalizerI_containsPoint(const FloatArray &coords) { return false; }
+    virtual double SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &gcoords);
+
+    virtual int EIPrimaryUnknownMI_computePrimaryUnknownVectorAt(ValueModeType mode,
+                                                                 TimeStep *tStep, const FloatArray &gcoords,
+                                                                 FloatArray &answer);
+    virtual void EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(ValueModeType mode,
+                                                                 TimeStep *tStep, const FloatArray &gcoords,
+                                                                 FloatArray &answer);
+    virtual void EIPrimaryUnknownMI_givePrimaryUnknownVectorDofID(IntArray &answer);
+
+    const char *giveClassName() const { return "LineSurfaceTension"; }
+    classType giveClassID() const { return FMElementClass; } // TODO
 };
 
 } // end namespace oofem
 
-#endif /* SURFACETENSION2D_H_ */
+#endif // surfacetension2d_h
