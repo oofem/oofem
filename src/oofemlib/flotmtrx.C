@@ -45,6 +45,29 @@
 #include "datastream.h"
 #include "classtype.h"
 
+// Some forward declarations for LAPACK. Remember to append the underscore to the function name.
+#ifdef __LAPACK_MODULE
+extern "C" {
+/// Computes the reciprocal condition number for a LU decomposed function.
+extern void dgecon_(const char *norm, const int *n, const double *a, const int *lda,
+        const double *anorm, double *rcond, double *work, int *iwork, int *info, int norm_len);
+/// Replaces a with the LU-decomposition.
+extern int dgetrf_(const int *m, const int *n, double *a, const int *lda, int *lpiv, int *info);
+/// Replaces a with its inverse.
+extern int dgetri_( const int *n, double *a, const int *lda, int *ipiv, double *work, const int *lwork, int *info );
+/// Solves a system of equations.
+extern int dgesv_( const int *n, const int *nrhs, double *a, const int *lda, int *ipiv, const double *b, const int *ldb, int *info );
+/// Computes the norm.
+extern double dlange_(const char *norm, const int *m, const int *n, const double *a, const int *lda, double *work, int norm_len);
+/// Computes eigenvalues and vectors.
+extern int dsyevx_(const char *jobz,  const char *range, const char *uplo, const int *n, double *a, const int *lda,
+        const double *vl, const double *vu, const int *il, const int *iu,
+        const double *abstol, int *m, double *w, double *z, const int *ldz,
+        double *work, int *lwork, int *iwork, int *ifail, int *info,
+        int jobz_len, int range_len, int uplo_len);
+}
+#endif
+
 #ifndef __MAKEDEPEND
  #include <math.h>
 #endif
@@ -254,7 +277,7 @@ void FloatMatrix :: beProductOf(const FloatMatrix &aMatrix, const FloatMatrix &b
     }
 #  endif
 
-    p      = bMatrix.nColumns;
+    p = bMatrix.nColumns;
     this->resize(aMatrix.nRows, p);
     // answer = new FloatMatrix(nRows,p) ;
     for ( i = 1; i <= aMatrix.nRows; i++ ) {
@@ -267,8 +290,6 @@ void FloatMatrix :: beProductOf(const FloatMatrix &aMatrix, const FloatMatrix &b
             this->at(i, j) = coeff;
         }
     }
-
-    return;
 }
 
 void FloatMatrix :: beDyadicProductOf(const FloatArray &vec1, const FloatArray &vec2)
@@ -283,8 +304,6 @@ void FloatMatrix :: beDyadicProductOf(const FloatArray &vec1, const FloatArray &
             this->at(i, j) = vec1.at(i) * vec2.at(j);
         }
     }
-
-    return;
 }
 
 
@@ -314,8 +333,6 @@ void FloatMatrix :: beTProductOf(const FloatMatrix &aMatrix, const FloatMatrix &
             this->at(i, j) = coeff;
         }
     }
-
-    return;
 }
 
 
@@ -332,9 +349,8 @@ void FloatMatrix :: beProductTOf(const FloatMatrix &aMatrix, const FloatMatrix &
     }
 #  endif
 
-    p      = bMatrix.nRows;
+    p = bMatrix.nRows;
     this->resize(aMatrix.nRows, p);
-    // answer = new FloatMatrix(nRows,p) ;
     for ( i = 1; i <= aMatrix.nRows; i++ ) {
         for ( j = 1; j <= p; j++ ) {
             coeff = 0.;
@@ -345,8 +361,6 @@ void FloatMatrix :: beProductTOf(const FloatMatrix &aMatrix, const FloatMatrix &
             this->at(i, j) = coeff;
         }
     }
-
-    return;
 }
 
 
@@ -379,11 +393,10 @@ void FloatMatrix :: beSubMatrixOf(const FloatMatrix &src,
 /*
  * modifies receiver to be  submatrix of the src matrix
  * size of receiver  submatrix is determined from
- * input parametrs
+ * input parameters
  */
 {
 #ifdef DEBUG
-    // check input params
     if ( ( topRow < 1 ) || ( bottomRow < 1 ) || ( topCol < 1 ) || ( bottomCol < 1 ) ) {
         OOFEM_ERROR("FloatMatrix::beSubMatrixOf : subindexes size mismatch");
     }
@@ -407,8 +420,6 @@ void FloatMatrix :: beSubMatrixOf(const FloatMatrix &src,
             this->at(i - topRm1, j - topCm1) = src.at(i, j);
         }
     }
-
-    return;
 }
 
 
@@ -547,7 +558,6 @@ void FloatMatrix :: beInverseOf(const FloatMatrix &src)
     if ( !src.isSquare() ) {
         OOFEM_ERROR3("FloatMatrix::beInverseOf : cannot inverse a %d by %d matrix", src.nRows, src.nColumns);
     }
-
 #  endif
 
     this->resize(src.nRows, src.nColumns);
@@ -588,6 +598,28 @@ void FloatMatrix :: beInverseOf(const FloatMatrix &src)
         //p[8]= (values[0]*values[4]-values[3]*values[1])/det ;
         return;
     } else {
+#ifdef __LAPACK_MODULE
+        int n = this->nRows;
+        IntArray ipiv(n);
+        int lwork, info;
+        *this = src;
+
+        // LU-factorization
+        dgetrf_(&n, &n, this->values, &n, ipiv.givePointer(), &info);
+        if (info != 0) {
+            OOFEM_ERROR2("FloatMatrix::beInverseOf : dgetrf error %d", info);
+        }
+
+        // Inverse
+        lwork = n*n;
+        FloatArray work(lwork);
+        dgetri_( &this->nRows, this->values, &this->nRows, ipiv.givePointer(), work.givePointer(), &lwork, &info );
+        if (info > 0) {
+            OOFEM_ERROR2("FloatMatrix::beInverseOf : Singular at %d", info);
+        } else if (info < 0) {
+            OOFEM_ERROR2("FloatMatrix::beInverseOf : Error on input %d", info);
+        }
+#else
         // size >3 ... gaussian elimination - slow but safe
         //
         int i, j, k;
@@ -640,9 +672,7 @@ void FloatMatrix :: beInverseOf(const FloatMatrix &src)
                 this->at(i, j) /= tmp.at(i, i);
             }
         }
-
-        //delete tmp;
-        return;
+#endif
     }
 }
 
@@ -694,8 +724,6 @@ FloatMatrix :: beSubMatrixOf(const FloatMatrix &src, const IntArray &indx)
             }
         }
     }
-
-    return;
 }
 
 
@@ -751,8 +779,6 @@ FloatMatrix :: beSubMatrixOfSizeOf(const FloatMatrix &src, const IntArray &indx,
             }
         }
     }
-
-    return;
 }
 
 void FloatMatrix :: add(const FloatMatrix &aMatrix)
@@ -812,15 +838,7 @@ void FloatMatrix :: subtract(const FloatMatrix &aMatrix)
 
 void FloatMatrix :: solveForRhs(const FloatArray &b, FloatArray &answer)
 // solves equation b = this * x
-// returns x. this and b are kept untouched
-//
-// gaussian elimination - slow but safe
-// with row pivoting
-//
 {
-    int i, j, k, pivRow;
-    double piv, linkomb, help;
-
 #  ifdef DEBUG
     if ( !this->isSquare() ) {
         OOFEM_ERROR3("FloatMatrix::solveForRhs : cannot solve a %d by %d matrix", nRows, nColumns);
@@ -829,8 +847,19 @@ void FloatMatrix :: solveForRhs(const FloatArray &b, FloatArray &answer)
     if ( nRows != b.giveSize() ) {
         OOFEM_ERROR("FloatMatrix::solveForRhs : dimension mismatch");
     }
-
 #  endif
+
+#ifdef __LAPACK_MODULE
+    int info, nrhs = 1;
+    IntArray ipiv(this->nRows);
+    answer = b;
+    dgesv_( &this->nRows, &nrhs, this->values, &this->nRows, ipiv.givePointer(), answer.givePointer(), &this->nRows, &info );
+    if (info != 0) {
+        OOFEM_ERROR2("FloatMatrix::solveForRhs : dgesv error %d", info);
+    }
+#else
+    int i, j, k, pivRow;
+    double piv, linkomb, help;
 
     //FloatArray *answer = b -> GiveCopy();
     answer = b;
@@ -884,9 +913,7 @@ void FloatMatrix :: solveForRhs(const FloatArray &b, FloatArray &answer)
 
         answer.at(i) = ( answer.at(i) - help ) / this->at(i, i);
     }
-
-    // delete tmp;
-    return;
+#endif
 }
 
 
@@ -897,9 +924,6 @@ void FloatMatrix :: solveForRhs(const FloatMatrix &b, FloatMatrix &answer)
 // gaussian elimination - slow but safe
 //
 {
-    int i, j, k, pivRow, nPs;
-    double piv, linkomb, help;
-
 #  ifdef DEBUG
     if ( !this->isSquare() ) {
         OOFEM_ERROR3("FloatMatrix::solveForRhs : cannot solve a %d by %d matrix", nRows, nColumns);
@@ -908,11 +932,21 @@ void FloatMatrix :: solveForRhs(const FloatMatrix &b, FloatMatrix &answer)
     if ( nRows != b.giveNumberOfRows() ) {
         OOFEM_ERROR("FloatMatrix::solveForRhs : dimension mismatch");
     }
-
 #  endif
 
+#ifdef __LAPACK_MODULE
+    int info;
+    IntArray ipiv(this->nRows);
+    answer = b;
+    dgesv_( &this->nRows, &this->nColumns, this->values, &this->nRows, ipiv.givePointer(), answer.givePointer(), &this->nRows, &info );
+    if (info != 0) {
+        OOFEM_ERROR2("FloatMatrix::solveForRhs : dgesv error %d", info);
+    }
+#else
+    int i, j, k, pivRow, nPs;
+    double piv, linkomb, help;
+
     nPs = b.giveNumberOfColumns();
-    //FloatArray *answer = b -> GiveCopy();
     answer = b;
     // initialize answer to be unity matrix;
     // lower triangle elimination by columns
@@ -973,9 +1007,7 @@ void FloatMatrix :: solveForRhs(const FloatMatrix &b, FloatMatrix &answer)
             answer.at(i, k) = ( answer.at(i, k) - help ) / this->at(i, i);
         }
     }
-
-    // delete tmp;
-    return;
+#endif
 }
 
 
@@ -1123,7 +1155,7 @@ void FloatMatrix :: hardResize(int rows, int columns)
 }
 
 
-double FloatMatrix :: giveDeterminant()
+double FloatMatrix :: giveDeterminant() const
 // Returns the determinant of the receiver.
 {
 #  ifdef DEBUG
@@ -1202,8 +1234,6 @@ void FloatMatrix :: rotatedWith(const FloatMatrix &r)
     rt.beTranspositionOf(r);         //  r(transp)
     rta.beProductOf(rt, * this);     //  r(transp) . a
     this->beProductOf(rta, r);       //  r(transp) . a . r
-
-    return;
 }
 
 
@@ -1224,8 +1254,6 @@ void FloatMatrix :: symmetrized()
             this->at(i, j) = this->at(j, i);
         }
     }
-
-    return;
 }
 
 
@@ -1258,7 +1286,7 @@ void FloatMatrix :: negated()
 }
 
 
-double FloatMatrix :: computeFrobeniusNorm()
+double FloatMatrix :: computeFrobeniusNorm() const
 {
     int i, j;
     double answer = 0.0;
@@ -1271,11 +1299,125 @@ double FloatMatrix :: computeFrobeniusNorm()
     return sqrt(answer);
 }
 
+double FloatMatrix :: computeNorm(char p) const
+{
+#  ifdef __LAPACK_MODULE
+    FloatArray work(this->giveNumberOfRows());
+    int lda = max(this->nRows, 1);
+    double norm = dlange_(&p, &this->nRows, &this->nColumns, this->values, &lda, work.givePointer(), 1);
+    return norm;
+#  else
+    if (p == '1') { // Maximum absolute column sum.
+        double col_sum, max_col = 0.0;
+        for (int j = 1; j <= this->nColumns; j++) {
+            col_sum  = 0.0;
+            for (int i = 1; i <= this->nRows; i++) {
+                col_sum += fabs(this->at(i, j));
+            }
+            if (col_sum > max_col) {
+                max_col = col_sum;
+            }
+        }
+        return max_col;
+    } /*else if (p == '2') {
+        double lambda_max;
+        FloatMatrix AtA;
+        FloatArray eigs;
+        AtA.beTProductOf(*this,this);
+        Ata.eigenValues(eigs, 1); // TODO
+        return sqrt(eigs(0));
+    } */else {
+        OOFEM_ERROR2("FloatMatrix::computeNorm(p) : p == %d not implemented.\n",p);
+        return 0.0;
+    }
+#  endif
+}
+
+double FloatMatrix :: computeReciprocalCondition(char p) const
+{
+#  ifdef DEBUG
+    if ( !this->isSquare() ) {
+        OOFEM_ERROR3("FloatMatrix::computeReciprocalCondition : receiver must be square (is %d by %d)", this->nRows, this->nColumns);
+    }
+#  endif
+    double anorm = this->computeNorm(p);
+
+#  ifdef __LAPACK_MODULE
+    int n = this->nRows;
+    FloatArray work(4*n);
+    IntArray iwork(n);
+    int info;
+    double rcond;
+
+    if (n > 3) { // Only use this routine for larger matrices. (not sure if it's suitable for n = 3) // Mikael
+        FloatMatrix a_cpy = *this;
+        dgetrf_(&n, &n, a_cpy.values, &n, iwork.givePointer(), &info);
+        if (info < 0) {
+            OOFEM_ERROR2("FloatMatrix::computeReciprocalCondition : dgetfr error %d\n",info);
+        }
+        dgecon_(&p, &(this->nRows), a_cpy.values, &this->nRows, &anorm, &rcond, work.givePointer(), iwork.givePointer(), &info, 1);
+        if (info < 0) {
+            OOFEM_ERROR2("FloatMatrix::computeReciprocalCondition : dgecon error %d\n",info);
+        }
+        return rcond;
+    }
+#  endif
+    if (this->giveDeterminant() <= 1e-6*anorm) {
+        return 0.0;
+    }
+    FloatMatrix inv;
+    inv.beInverseOf(*this);
+    return 1.0/(inv.computeNorm(p)*anorm);
+}
+
+/*
+bool FloatMatrix :: computeEigenValuesSymmetric(FloatArray &lambda, FloatMatrix &v, int neigs) const
+{
+#ifdef __LAPACK_MODULE
+    double abstol = 1.0; // TODO
+    int lda, n, ldz, info, found, lwork;
+    n = this->nRows;
+    lda = n;
+    ldz = n;
+    FloatMatrix a;
+    a = *this;
+    if (neigs == 0) {
+        neigs = n;
+    }
+
+    lambda.resize(neigs);
+    v.resize(n, neigs);
+
+    IntArray ifail(n), iwork(5*n);
+    FloatArray work((n+3)*n); // maximum block size should be less than n (?)
+    lwork = (n+3)*n;
+    if ( neigs > 0 ) {
+        int one = 1;
+        dsyevx_("N", "I", "U",
+                &n, a.values, &n,
+                NULL, NULL, &one, &neigs,
+                &abstol, &found, lambda.givePointer(), v.givePointer(), &ldz,
+                work.givePointer(), &lwork, iwork.givePointer(), ifail.givePointer(), &info, 1, 1, 1);
+    } else {
+        dsyevx_("N", "A", "U",
+                &n, a.values, &n,
+                NULL, NULL, NULL, NULL,
+                &abstol, &found, lambda.givePointer(), v.givePointer(), &ldz,
+                work.givePointer(), &lwork, iwork.givePointer(), ifail.givePointer(), &info, 1, 1, 1);
+    }
+
+    return info == 0;
+#else
+    OOFEM_ERROR("FloatMatrix::computeEigenValuesSymmetric : Requires LAPACK\n");
+    return false;
+#endif
+}
+*/
 
 contextIOResultType FloatMatrix :: storeYourself(DataStream *stream, ContextMode mode)
 // writes receiver's binary image into stream
 // use id to distinguish some instances
-// return value >0 succes
+// return value >0 success
 //              =0 file i/o error
 {
     int type_id = FloatMatrixClass;
@@ -1308,7 +1450,7 @@ contextIOResultType FloatMatrix :: restoreYourself(DataStream *stream, ContextMo
 // reads receiver from stream
 // warning - overwrites existing data!
 // returns 0 if file i/o error
-//        -1 if id od class id is not correct
+//        -1 if id of class id is not correct
 {
     int class_id;
     // read class header
@@ -1381,7 +1523,7 @@ bool FloatMatrix :: jaco_(FloatArray &eval, FloatMatrix &v, int nf)
         OOFEM_ERROR("FloatMatrix::jaco_: Not square matrix");
     }
 
-    // check for symetry
+    // check for symmetry
     for ( i = 1; i <= neq; i++ ) {
         for ( j = i + 1; j <= neq; j++ ) {
             if ( this->at(i, j) != this->at(j, i) ) {

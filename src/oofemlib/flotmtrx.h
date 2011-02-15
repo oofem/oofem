@@ -31,6 +31,7 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
+
 /*
  * The original idea for this class comes from
  * Dubois-Pelerin, Y.: "Object-Oriented  Finite Elements: Programming concepts and Implementation",
@@ -187,13 +188,36 @@ public:
      * The Frobenius norm is defined as the square root of the sum of the absolute squares of its elements.
      * @return Frobenius norm.
      */
-    double computeFrobeniusNorm();
+    double computeFrobeniusNorm() const;
+    /**
+     * Computes the operator norm of the receiver.
+     * @param p Norm type, '1' for 1 norm, '2' for 2 norm.
+     * @return Norm of receiver.
+     */
+    double computeNorm(char p) const;
+    /**
+     * Computes the conditioning of the receiver. From 0 to 1, where 0 is singular and 1 best.
+     * The receiver must be square.
+     * Works identically as MATLAB/Octaves rcond().
+     * @param p Norm type, '1' for 1 norm, '2' for 2 norm.
+     * @return Conditioning of receiver.
+     */
+    double computeReciprocalCondition(char p = '1') const;
+    /**
+     * Computes the eigenvalues of a symmetric matrix.
+     * The receiver must be square and symmetric.
+     * @param lambda Eigenvalues.
+     * @param v Eigenvectors (stored column wise).
+     * @param neigs If set, only neigs largest eigenvalues are computed.
+     * @return True if successful.
+     */
+    //bool computeEigenValuesSymmetric(FloatArray &lambda, FloatMatrix &v, int neigs = 0) const;
     /**
      * Returns determinant of the receiver. Receiver should be square matrix.
      * Current implementation works for (3,3) and smaller matrices.
      * @return Determinant of receiver.
      */
-    double giveDeterminant();
+    double giveDeterminant() const;
 
     /// Zeroes all coefficient of receiver.
     void zero() const;
