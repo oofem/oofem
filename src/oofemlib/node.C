@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/node.C,v 1.12.4.1 2004/04/05 15:19:43 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -38,8 +37,6 @@
  * Dubois-Pelerin, Y.: "Object-Oriented  Finite Elements: Programming concepts and Implementation",
  * PhD Thesis, EPFL, Lausanne, 1992.
  */
-
-//   file NODE.CC
 
 #include "node.h"
 #include "dof.h"
@@ -72,8 +69,6 @@ Node :: Node(int n, Domain *aDomain) :
 {
     localCoordinateSystem = NULL;
 }
-
-
 
 
 Node :: ~Node()
@@ -245,10 +240,6 @@ void Node :: updateYourself(TimeStep *tStep)
 // Updates the receiver at end of step.
 {
     int i, ic;
-
-#  ifdef VERBOSE
-    // VERBOSE_PRINT1 ("Updating node ",number)
-#  endif
 
     fMode mode = domain->giveEngngModel()->giveFormulation();
 

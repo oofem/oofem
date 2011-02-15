@@ -304,6 +304,22 @@ public:
      * @param mode Mode of transformation.
      */
     virtual void computeDofTransformation(FloatMatrix &answer, const IntArray *dofIDArry, DofManTransfType mode);
+    /**
+     * Computes receiver load transformation matrix from global cs. to dofManager specific
+     * coordinate system. If mode == _toNodalCS, otherwise reverse transformation is computed
+     * (In the dofManager specific cs the governing equations are assembled, for example the
+     * local coordinate system in node). This transformation may not be orthogonal.
+     * @param answer Computed transformation matrix. It has generally dofIDArry.size rows and
+     * if loc is obtained using giveLocationArray(dofIDArry, loc) call, loc.giveSize() columns.
+     * This is because this transformation should generally include not only transformation to
+     * dof manager local coordinate system, but receiver dofs can be expressed using
+     * dofs of another dofManager (In this case, answer is produced only if all
+     * dof transformation is required).
+     * @param dofIDArry Array containing DofIDItem-type values (this is enumeration
+     * identifying physical meaning of particular DOF, see cltypes.h) for which transformation matrix is
+     * assembled. If dofIDArry is NULL, then all receiver dofs are assumed.
+     * @param mode Mode of transformation.
+     */
     virtual void computeLoadTransformation(FloatMatrix &answer, const IntArray *dofIDArry, DofManTransfType mode);
     /**
      * Indicates, whether dofManager requires the transformation from global c.s. to
@@ -337,7 +353,7 @@ public:
     /**@name Position query functions */
     //@{
     virtual bool hasCoordinates() { return false; }
-    /// @return The i-th coordinate of node.
+    /// @return The i-th coordinate.
     virtual double giveCoordinate(int i) { return 0.0; }
     /// @return Pointer to node coordinate array.
     virtual FloatArray *giveCoordinates() { return NULL; }
