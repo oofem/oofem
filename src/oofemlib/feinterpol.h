@@ -224,8 +224,20 @@ public:
      * Returns number of spatial dimensions
      */
     virtual int const giveNsd() = 0;
-
     //@}
+
+    // Needs the jacobian matrix to determine the condition number.
+    friend class MeshQualityErrorEstimator;
+
+protected:
+    /**
+     * Gives the jacobian matrix at the local coordinates.
+     * @param jacobianMatrix The requested matrix.
+     * @param lcoords Local coordinates.
+     * @param cellgeo Element geometry.
+     */
+    virtual void giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+    { OOFEM_ERROR("FEIInterpolation::giveJacobianMatrixAt : Not overloaded."); }
 };
 } // end namespace oofem
 #endif // feinterpol_h

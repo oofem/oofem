@@ -322,6 +322,7 @@ enum classType {
     ZZErrorEstimatorClass,
     CombinedZZSIErrorEstimatorClass,
     HuertaErrorEstimatorClass,
+    MeshQualityErrorEstimatorClass,
 
     RemeshingCriteriaClass,
     ZZRemeshingCriteriaClass,

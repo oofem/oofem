@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -32,19 +32,19 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-//
-// FILE: errorestimatortype.h
-//
-
 #ifndef errorestimatortype_h
 #define errorestimatortype_h
 
 namespace oofem {
+/**
+ * Determines the type of error estimator.
+ */
 enum ErrorEstimatorType {
-    EET_SEI,   // Scalar Error Indicator
-    EET_ZZEE,  // Zienkiewicz-Zhu EE
-    EET_CZZSI, // Combined ZZ and ScalarIndicator EE
-    EET_HEE    // Huerta EE
+    EET_SEI,         ///< Scalar Error Indicator.
+    EET_ZZEE,        ///< Zienkiewicz-Zhu EE.
+    EET_CZZSI,       ///< Combined ZZ and ScalarIndicator EE.
+    EET_HEE,         ///< Huerta EE.
+    EET_MeshQuality, ///< Mesh quality/error estimator.
 };
 } // end namespace oofem
 #endif // errorestimatortype_h
