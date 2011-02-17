@@ -295,7 +295,8 @@
  #include "tr1_2d_supg2_axi.h"
  #include "py1_3d_supg.h"
  #include "tr21_2d_supg.h"
-//#include "tr1_2d_supg99.h"
+//#include "tr10_2d_supg.h"
+ #include "q10_2d_supg.h"
  #include "twofluidmaterial.h"
  #include "binghamfluid2.h"
 
@@ -453,6 +454,12 @@ Element *CreateUsrDefElementOfType(const char *aClass, int number, Domain *domai
         newElement = new PY1_3D_SUPG(number, domain);
     } else if ( !strncasecmp(aClass, "tr21supg", 8) ) {
         newElement = new TR21_2D_SUPG(number, domain);
+    /*
+    } else if ( !strncasecmp(aClass, "tr10supg", 8) ) {
+        newElement = new TR10_2D_SUPG(number, domain);
+    */
+    } else if ( !strncasecmp(aClass, "q10supg", 7) ) {
+        newElement = new Q10_2D_SUPG(number, domain);
     } else if ( !strncasecmp(aClass, "tr21stokes", 10)) {
         newElement = new Tr21Stokes(number, domain);
     } else if ( !strncasecmp(aClass, "line2surfacetension", 19)) {

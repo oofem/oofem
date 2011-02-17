@@ -85,6 +85,7 @@ enum classType {
     RigidArmNodeClass,
     HangingNodeClass,
     ElementSideClass,
+    ElementDofManagerClass,
     RigidArmSlaveDofClass,
     HangingDofClass,
     ParticleClass,
