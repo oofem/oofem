@@ -356,6 +356,7 @@ public:
 
 
 protected:
+
     void                  computeGaussPoints();
     virtual void computeDeviatoricStress(FloatArray &answer, GaussPoint *gp, TimeStep *);
     void                  computeNMtrx(FloatArray &answer, GaussPoint *gp);

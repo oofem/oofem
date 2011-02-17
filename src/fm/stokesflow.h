@@ -85,6 +85,7 @@ public:
 
     /// @see EngngModel::giveUnknownComponent
     virtual double giveUnknownComponent(EquationID eid, ValueModeType mode, TimeStep *tStep, Domain *domain, Dof *dof);
+    virtual double    giveUnknownComponent(UnknownType, ValueModeType, TimeStep *, Domain *, Dof *);
 
     /** Numbers all equations.
      * Numbers velocities first for each node in order, then pressures.

@@ -277,6 +277,8 @@ public:
 
 protected:
 
+    virtual void giveLocalVelocityDofMap (IntArray &map);
+    virtual void giveLocalPressureDofMap (IntArray &map);
 
     virtual void computeDeviatoricStress(FloatArray &answer, GaussPoint *gp, TimeStep *);
 

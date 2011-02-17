@@ -114,9 +114,11 @@ int
 TR1_2D_SUPG2 :: computeNumberOfDofs(EquationID ut)
 {
     if ( ut == EID_MomentumBalance ) {
-        return 2;
+        return 6;
     } else if ( ut == EID_ConservationEquation ) {
-        return 1;
+        return 3;
+    } else if ( ut == EID_MomentumBalance_ConservationEquation ) {
+      return 9;
     } else {
         _error("computeNumberOfDofs: Unknown equation id encountered");
     }
@@ -2056,7 +2058,6 @@ TR1_2D_SUPG2 :: printOutputAt(FILE *file, TimeStep *stepN)
     double rho = this->giveMaterial()->giveCharacteristicValue(MRM_Density, gp, stepN);
     fprintf(file, "VOF %e, density %e\n\n", this->giveVolumeFraction(), rho);
 }
-
 
 
 contextIOResultType TR1_2D_SUPG2 :: saveContext(DataStream *stream, ContextMode mode, void *obj)

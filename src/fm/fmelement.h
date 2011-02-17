@@ -74,6 +74,9 @@ public:
     FMElement(int, Domain *);
     ~FMElement();
 
+    virtual void     updateStabilizationCoeffs(TimeStep *) { }
+
+    ///Initializes receiver acording to object description stored in input record.
     IRResultType initializeFrom(InputRecord *ir);
     const char *giveClassName() const { return "FMElement"; }
     classType giveClassID() const { return FMElementClass; }

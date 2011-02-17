@@ -107,6 +107,8 @@ TR21_2D_SUPG :: computeNumberOfDofs(EquationID ut)
         return 12;
     } else if ( ut == EID_ConservationEquation ) {
         return 3;
+    } else if ( ut == EID_MomentumBalance_ConservationEquation ) {
+        return 15;
     } else {
         _error("computeNumberOfDofs: Unknown equation id encountered");
     }
@@ -171,8 +173,8 @@ TR21_2D_SUPG :: computeGaussPoints()
 // Sets up the array containing the four Gauss points of the receiver.
 {
     if ( !integrationRulesArray ) {
-        numberOfIntegrationRules = 4;
-        integrationRulesArray = new IntegrationRule * [ 4 ];
+        numberOfIntegrationRules = 3;
+        integrationRulesArray = new IntegrationRule * [ 3 ];
 
 
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3);
@@ -186,8 +188,8 @@ TR21_2D_SUPG :: computeGaussPoints()
         integrationRulesArray [ 2 ]->setUpIntegrationPoints(_Triangle, 13, _2dFlow);
 
 
-        integrationRulesArray [ 3 ] = new GaussIntegrationRule(4, this, 1, 3);
-        integrationRulesArray [ 3 ]->setUpIntegrationPoints(_Triangle, 27, _2dFlow);
+        //integrationRulesArray [ 3 ] = new GaussIntegrationRule(4, this, 1, 3);
+        //integrationRulesArray [ 3 ]->setUpIntegrationPoints(_Triangle, 27, _2dFlow);
     }
 }
 
@@ -1728,6 +1730,32 @@ TR21_2D_SUPG :: giveInterface(InterfaceType interface)
 }
 
 
+void
+TR21_2D_SUPG :: giveLocalVelocityDofMap (IntArray &map)
+{
+  map.resize(12);
+  map.at(1) = 1;
+  map.at(2) = 2;
+  map.at(3) = 4;
+  map.at(4) = 5;
+  map.at(5) = 7;
+  map.at(6) = 8;
+  map.at(7) = 10;
+  map.at(8) = 11;
+  map.at(9) = 12;
+  map.at(10) = 13;
+  map.at(11) = 14;
+  map.at(12) = 15;
+}
+
+void
+TR21_2D_SUPG :: giveLocalPressureDofMap (IntArray &map)
+{
+  map.resize(3);
+  map.at(1)=3;
+  map.at(2)=6;
+  map.at(3)=9;
+}
 
 
 

@@ -112,7 +112,7 @@ void StokesFlow :: solveYourselfAt(TimeStep *tStep)
     this->incrementOfSolution.resize(neq);
     this->internalForces.resize(neq);
 
-#if 0
+#if 1
     this->giveNumericalMethod(tStep);
     double loadLevel, ebenorm;
     int currentIterations;
@@ -144,26 +144,40 @@ void StokesFlow :: solveYourselfAt(TimeStep *tStep)
     if ( status == NM_NoSuccess ) {
         OOFEM_ERROR2( "No success in solving problem at time step", tStep->giveNumber() );
     }
+
+    // update element stabilization 
+    Domain* d = this->giveDomain(1);
+    int i, nelem = d->giveNumberOfElements();
+    for ( i = 1; i <= nelem; ++i ) {
+      ((FMElement*)d->giveElement(i))->updateStabilizationCoeffs(tStep);
+    }  
 }
 
 void StokesFlow :: updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Domain *d)
 {
-    switch ( cmpn ) {
-    case InternalRhs:
-        this->internalForces.zero();
-        this->assembleVectorFromElements(this->internalForces, tStep, EID_MomentumBalance_ConservationEquation, NodalInternalForcesVector, VM_Total,
-                                         EModelDefaultEquationNumbering(), d);
-        return;
+   // update element stabilization 
+   //Domain* d = this->giveDomain(1);
+    int i, nelem = d->giveNumberOfElements();
+    for ( i = 1; i <= nelem; ++i ) {
+      ((FMElement*)d->giveElement(i))->updateStabilizationCoeffs(tStep);
+    }  
 
-    case NonLinearLhs:
-        this->stiffnessMatrix->zero();
-        this->assemble(this->stiffnessMatrix, tStep, EID_MomentumBalance_ConservationEquation, StiffnessMatrix,
-                       EModelDefaultEquationNumbering(), d);
-        return;
+  if (cmpn == InternalRhs) {
+    this->internalForces.zero();
+    this->assembleVectorFromElements(this->internalForces, tStep, EID_MomentumBalance_ConservationEquation, NodalInternalForcesVector, VM_Total,
+				     EModelDefaultEquationNumbering(), d);
 
-    default:
-        OOFEM_ERROR("StokesFlow::updateComponent - Unknown component");
-    }
+    return;
+    
+  } else if (cmpn == NonLinearLhs) {
+    this->stiffnessMatrix->zero();
+    this->assemble(this->stiffnessMatrix, tStep, EID_MomentumBalance_ConservationEquation, StiffnessMatrix,
+		   EModelDefaultEquationNumbering(), d);
+    return;
+    
+  } else {
+    OOFEM_ERROR("StokesFlow::updateComponent - Unknown component");
+  }
 }
 
 void StokesFlow :: updateYourself(TimeStep *tStep)
@@ -177,8 +191,9 @@ int StokesFlow :: forceEquationNumbering(int id)
 {
     // Force numbering of equations. First all velocities on domain, then pressures.
 
-    int i, j, ndofs, nnodes, nelem;
+    int i, j, k, ndofs, nnodes, nelem;
     DofManager *inode;
+    Element* elem;
     Domain *domain = this->giveDomain(id);
     TimeStep *currStep = this->giveCurrentStep();
     IntArray loc;
@@ -189,6 +204,7 @@ int StokesFlow :: forceEquationNumbering(int id)
     this->domainPrescribedNeqs.at(id) = 0;
 
     nnodes = domain->giveNumberOfDofManagers();
+    nelem = domain->giveNumberOfElements();
 
     // number first velocities
     for ( i = 1; i <= nnodes; i++ ) {
@@ -216,6 +232,17 @@ int StokesFlow :: forceEquationNumbering(int id)
         }
     }
 
+    for ( i = 1; i <= nelem; ++i ) {
+      elem = domain->giveElement(i);
+      for (k=1;k<=elem->giveNumberOfInternalDofManagers(); k++) {
+	ndofs = elem->giveInternalDofManager(k)->giveNumberOfDofs(); //define for element!!! overload for contact
+	for ( j = 1; j <= ndofs; j++ ) {
+	  elem->giveInternalDofManager(k)->giveDof(j)->askNewEquationNumber(currStep);
+	}
+      }
+    }
+
+
     // invalidate element local copies of location arrays
     nelem = domain->giveNumberOfElements();
     for ( i = 1; i <= nelem; i++ ) {
@@ -236,6 +263,13 @@ double StokesFlow :: giveUnknownComponent(EquationID chc, ValueModeType mode, Ti
 
     return 0;
 }
+
+double    
+StokesFlow::giveUnknownComponent(UnknownType ut, ValueModeType vmt, TimeStep *atTime, Domain *d, Dof *dof) {
+
+  if (ut==ReynoldsNumber) return 1.0;
+  else return 0.0;
+} // bp
 
 int StokesFlow :: checkConsistency()
 {
@@ -302,6 +336,7 @@ TimeStep *StokesFlow :: giveNextStep()
     if ( currentStep == NULL ) {
         int istep = this->giveNumberOfFirstStep();
         // first step -> generate initial step
+	previousStep = new TimeStep(giveNumberOfTimeStepWhenIcApply(), this, 0, -this->deltaT, this->deltaT, 0);
         currentStep = new TimeStep(istep, this, 1, 0.0, this->deltaT, 1);
     } else {
         int istep =  currentStep->giveNumber() + 1;

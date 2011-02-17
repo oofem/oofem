@@ -83,9 +83,11 @@ int
 TR1_2D_SUPG :: computeNumberOfDofs(EquationID ut)
 {
     if ( ut == EID_MomentumBalance ) {
-        return 2;
+        return 6;
     } else if ( ut == EID_ConservationEquation ) {
-        return 1;
+        return 3;
+    } else if ( ut == EID_MomentumBalance_ConservationEquation) {
+        return 9;
     } else {
         _error("computeNumberOfDofs: Unknown equation id encountered");
     }
@@ -131,7 +133,7 @@ TR1_2D_SUPG :: initializeFrom(InputRecord *ir)
     IRResultType result;               // Required by IR_GIVE_FIELD macro
 
     this->SUPGElement :: initializeFrom(ir);
-
+    /*
     this->vof = 0.0;
     IR_GIVE_OPTIONAL_FIELD(ir, vof, IFT_TR12DSUPG_pvof, "pvof");
     if ( vof > 0.0 ) {
@@ -142,7 +144,7 @@ TR1_2D_SUPG :: initializeFrom(InputRecord *ir)
         IR_GIVE_OPTIONAL_FIELD(ir, vof, IFT_TR12DSUPG_vof, "vof");
         this->temp_vof = this->vof;
     }
-
+    */
     this->computeGaussPoints();
     this->initGeometry();
     return IRRT_OK;
@@ -2045,6 +2047,29 @@ TR1_2D_SUPG :: LS_PCS_computeVOFFractions(FloatArray &answer, FloatArray &fi)
             OOFEM_ERROR("TR1_2D_SUPG::LS_PCS_computeVOFFractions: internal consistency error");
         }
     }
+}
+
+
+
+void
+TR1_2D_SUPG :: giveLocalVelocityDofMap (IntArray &map)
+{
+  map.resize(6);
+  map.at(1) = 1;
+  map.at(2) = 2;
+  map.at(3) = 4;
+  map.at(4) = 5;
+  map.at(5) = 7;
+  map.at(6) = 8;
+}
+
+void
+TR1_2D_SUPG :: giveLocalPressureDofMap (IntArray &map)
+{
+  map.resize(3);
+  map.at(1)=3;
+  map.at(2)=6;
+  map.at(3)=9;
 }
 
 
