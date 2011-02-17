@@ -131,10 +131,18 @@ Element :: computeVectorOf(EquationID type, ValueModeType u, TimeStep *stepN, Fl
         for ( j = 1; j <= nDofs; j++ ) {
             answer.at(++k) = vec.at(j);
         }
-
-        //delete elementNodeMask;
-        //delete dofMask;
     }
+
+    for ( i = 1; i <= giveNumberOfInternalDofManagers(); i++ ) {
+      this->giveInternalDofManDofIDMask(i, type, elementNodeMask);
+      this->giveInternalDofManager(i)->giveUnknownVector(vec, elementNodeMask, type, u, stepN);
+      nDofs = vec.giveSize();
+      for ( j = 1; j <= nDofs; j++ ) {
+	answer.at(++k) = vec.at(j);
+      }
+    }
+    
+
 
     if ( size != k ) {
         _error("computeVectorOf: Unknown vector and location array size mismatch");
@@ -163,6 +171,15 @@ Element :: computeVectorOf(PrimaryField &field, ValueModeType u, TimeStep *stepN
         for ( j = 1; j <= nDofs; j++ ) {
             answer.at(++k) = vec.at(j);
         }
+    }
+
+    for ( i = 1; i <= giveNumberOfInternalDofManagers(); i++ ) {
+      this->giveInternalDofManDofIDMask(i, field.giveEquationID(), elementNodeMask);
+      this->giveInternalDofManager(i)->giveUnknownVector(vec, elementNodeMask, field, u, stepN);
+      nDofs = vec.giveSize();
+      for ( j = 1; j <= nDofs; j++ ) {
+	answer.at(++k) = vec.at(j);
+      }
     }
 
     if ( size != k ) {
@@ -195,9 +212,15 @@ Element :: computeVectorOfPrescribed(EquationID ut, ValueModeType mode, TimeStep
         for ( j = 1; j <= nDofs; j++ ) {
             answer.at(++k) = vec.at(j);
         }
+    }
 
-        //delete elementNodeMask;
-        //delete dofMask;
+    for ( i = 1; i <= giveNumberOfInternalDofManagers(); i++ ) {
+      this->giveInternalDofManDofIDMask(i, ut, elementNodeMask);
+      this->giveInternalDofManager(i)->givePrescribedUnknownVector(vec, elementNodeMask, mode, stepN);
+      nDofs = vec.giveSize();
+      for ( j = 1; j <= nDofs; j++ ) {
+	answer.at(++k) = vec.at(j);
+      }
     }
 
     if ( size != k ) {
@@ -224,6 +247,12 @@ Element :: computeGlobalNumberOfDofs(EquationID ut)
             this->giveDofManDofIDMask(i, ut, nodeDofIDMask);
             this->giveDofManager(i)->giveDofArray(nodeDofIDMask, dofMask);
             answer += this->giveDofManager(i)->giveNumberOfPrimaryMasterDofs(dofMask);
+        }
+
+	for ( i = 1; i <= giveNumberOfInternalDofManagers(); i++ ) {
+	  this->giveInternalDofManDofIDMask(i, ut, nodeDofIDMask);
+	  this->giveInternalDofManager(i)->giveDofArray(nodeDofIDMask, dofMask);
+	  answer += this->giveDofManager(i)->giveNumberOfPrimaryMasterDofs(dofMask);
         }
 
         return answer;

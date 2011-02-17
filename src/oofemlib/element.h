@@ -218,11 +218,12 @@ public:
      */
     virtual int giveNumberOfDofs() { return 0; }
     /**
-     * Returns i-th DOF of the receiver
+     * Returns i-th internal element dof manager of the receiver
      * @param i Internal number of DOF.
      * @return DOF number i.
      */
-    virtual Dof *giveDof(int i) {
+    virtual int giveNumberOfInternalDofManagers() {return 0;}
+    virtual DofManager *giveInternalDofManager(int i) const {
         _error2("No such DOF available on Element %d", number);
         return NULL;
     }
@@ -352,6 +353,21 @@ public:
      * @param answer Mask for node.
      */
     virtual void giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const { answer.resize(0); }
+   /**
+     * Returns internal  dofmanager dof mask for node. This mask defines the dofs which are used by element
+     * in node. Mask influences the code number ordering for particular node. Code numbers are
+     * ordered acording to node order and dofs belonging to particular node are ordered
+     * according to this mask. If element requests dofs using node mask which are not in node
+     * then error is generated. This masking allows node to be shared by different elements with
+     * different dofs in same node. Elements local code numbers are extracted from node using
+     * this mask. Must be defined by particular element.
+     *
+     * @param inode Mask is computed for local dofmanager with inode number.
+     * @param ut unknown type (support for several independent numberings within problem)
+     * @param answer mask for node.
+     */
+    virtual void           giveInternalDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const
+    { answer.resize(0); }
     /**
      * Returns element dof mask for node. This mask defines the dof ordering of the element interpolation.
      * Must be defined by particular element.
