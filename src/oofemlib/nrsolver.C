@@ -65,7 +65,7 @@
 
 namespace oofem {
 #define nrsolver_ERROR_NORM_SMALL_NUM 1.e-6
-#define NRSOLVER_MAX_REL_ERROR_BOUND 1.e10
+#define NRSOLVER_MAX_REL_ERROR_BOUND 1.e20
 #define NRSOLVER_MAX_RESTARTS 4
 #define NRSOLVER_RESET_STEP_REDUCE 0.25
 #define NRSOLVER_DEFAULT_NRM_TICKS 10
@@ -904,17 +904,18 @@ NRSolver :: checkConvergence(FloatArray &RT, FloatArray &F, FloatArray &rhs,  Fl
             }
 
  #endif
-
-            _ndof = _ielemptr->giveNumberOfDofs();
-            // loop over individual dofs
-            for ( _idof = 1; _idof <= _ndof; _idof++ ) {
-                _idofptr = _ielemptr->giveDof(_idof);
+	    // loop over element internal Dofs
+	    for (_idofman=1; _idofman<=_ielemptr->giveNumberOfDofManagers(); _idofman++) {
+	      _ndof = _ielemptr->giveInternalDofManager(_idofman)->giveNumberOfDofs();
+	      // loop over individual dofs
+	      for ( _idof = 1; _idof <= _ndof; _idof++ ) {
+                _idofptr = _ielemptr->giveInternalDofManager(_idofman)->giveDof(_idof);
                 // loop over dof groups
                 for ( _dg = 1; _dg <= _ng; _dg++ ) {
-                    // test if dof ID is in active set
-                    if ( ccDofGroups.at(_dg - 1).find( _idofptr->giveDofID() ) != ccDofGroups.at(_dg - 1).end() ) {
+		  // test if dof ID is in active set
+		  if ( ccDofGroups.at(_dg - 1).find( _idofptr->giveDofID() ) != ccDofGroups.at(_dg - 1).end() ) {
                         _eq = _idofptr->giveEquationNumber(dn);
-
+			
                         if ( _eq ) {
  #if ( defined ( __PARALLEL_MODE ) && defined ( __PETSC_MODULE ) )
                             if ( !n2l->giveNewEq(_eq) ) {
@@ -933,12 +934,13 @@ NRSolver :: checkConvergence(FloatArray &RT, FloatArray &F, FloatArray &rhs,  Fl
                             _val = r.at(_eq);
                             dg_totalDisp.at(_dg) += _val * _val;
                         }
-                    }
+		  }
                 } // end loop over dof groups
-
-            } // end loop over DOFs
-
-        } // end loop over dof managers
+		
+	      } // end loop over DOFs
+	    } // end loop over element internal dofmans
+	      
+	} // end loop over elements
 
  #ifdef __PARALLEL_MODE
         // exchange individual partition contributions (simultaneously for all groups)

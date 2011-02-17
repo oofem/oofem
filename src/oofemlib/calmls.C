@@ -755,44 +755,46 @@ CylindricalALM :: checkConvergence(FloatArray &R, FloatArray *R0, FloatArray &F,
             }
 
 #endif
-
-            _ndof = _ielemptr->giveNumberOfDofs();
-            // loop over individual dofs
-            for ( _idof = 1; _idof <= _ndof; _idof++ ) {
-                _idofptr = _ielemptr->giveDof(_idof);
+	    // loop over element internal Dofs
+	    for (_idofman=1; _idofman<=_ielemptr->giveNumberOfDofManagers(); _idofman++) {
+	      _ndof = _ielemptr->giveInternalDofManager(_idofman)->giveNumberOfDofs();
+	      // loop over individual dofs
+	      for ( _idof = 1; _idof <= _ndof; _idof++ ) {
+                _idofptr = _ielemptr->giveInternalDofManager(_idofman)->giveDof(_idof);
                 // loop over dof groups
                 for ( _dg = 1; _dg <= _ng; _dg++ ) {
-                    // test if dof ID is in active set
-                    if ( ccDofGroups.at(_dg - 1).find( _idofptr->giveDofID() ) != ccDofGroups.at(_dg - 1).end() ) {
-                        _eq = _idofptr->giveEquationNumber(dn);
+		  // test if dof ID is in active set
+		  if ( ccDofGroups.at(_dg - 1).find( _idofptr->giveDofID() ) != ccDofGroups.at(_dg - 1).end() ) {
+		    _eq = _idofptr->giveEquationNumber(dn);
 
-                        if ( _eq ) {
+		    if ( _eq ) {
 #if ( defined ( __PARALLEL_MODE ) && defined ( __PETSC_MODULE ) )
-                            if ( !n2l->giveNewEq(_eq) ) {
-                                continue;
-                            }
+		      if ( !n2l->giveNewEq(_eq) ) {
+			continue;
+		      }
 
 #endif
 
-                            _val = rhs.at(_eq);
-                            dg_forceErr.at(_dg) += _val * _val;
-                            _val = rIterIncr.at(_eq);
-                            dg_dispErr.at(_dg)  += _val * _val;
-                            // missing - compute norms of total displacement and load vectors (but only for selected dofs)!
-                            if ( R0 ) {
-                                _val = R0->at(_eq);
-                                dg_totalLoadLevel.at(_dg) += _val * _val;
-                            }
-
-                            _val = R.at(_eq);
-                            dg_totalLoadLevel.at(_dg) += _val * _val * Lambda * Lambda;
-                            _val = r.at(_eq);
-                            dg_totalDisp.at(_dg) += _val * _val;
-                        }
-                    }
+		      _val = rhs.at(_eq);
+		      dg_forceErr.at(_dg) += _val * _val;
+		      _val = rIterIncr.at(_eq);
+		      dg_dispErr.at(_dg)  += _val * _val;
+		      // missing - compute norms of total displacement and load vectors (but only for selected dofs)!
+		      if ( R0 ) {
+			_val = R0->at(_eq);
+			dg_totalLoadLevel.at(_dg) += _val * _val;
+		      }
+		      
+		      _val = R.at(_eq);
+		      dg_totalLoadLevel.at(_dg) += _val * _val * Lambda * Lambda;
+		      _val = r.at(_eq);
+		      dg_totalDisp.at(_dg) += _val * _val;
+		    }
+		  }
                 } // end loop over dof groups
 
-            } // end loop over DOFs
+	      } // end loop over DOFs
+	    } // end loop over internal element dofmans
 
         } // end loop over dof managers
 

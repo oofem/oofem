@@ -235,10 +235,15 @@ EngngModel :: EngngModel(int i, char *s, EngngModel *_master) : domainNeqs(), do
 EngngModel ::  ~EngngModel()
 // destructor
 {
-    delete currentStep;
-    delete previousStep;
+    if (previousStep == currentStep) {
+      delete currentStep;
+    } else {
+      delete currentStep;
+      delete previousStep;
+    }
+    
     if(!stepWhenIcApply){
-        delete stepWhenIcApply;
+      delete stepWhenIcApply;
     }
 
     //delete nMethod;
@@ -605,7 +610,7 @@ EngngModel :: forceEquationNumbering(int id)
     // OUTPUT:
     // sets this->numberOfEquations and this->numberOfPrescribedEquations and returns this value
 
-    int i, j, ndofs, nnodes, nelem;
+  int i, j, k, ndofs, nnodes, nelem;
     DofManager *inode;
     Element *elem;
     Domain *domain = this->giveDomain(id);
@@ -630,9 +635,12 @@ EngngModel :: forceEquationNumbering(int id)
 
         for ( i = 1; i <= nelem; ++i ) {
             elem = domain->giveElement(i);
-            ndofs = elem->giveNumberOfDofs(); //define for element!!! overload for contact
-            for ( j = 1; j <= ndofs; j++ ) {
-                elem->giveDof(j)->askNewEquationNumber(currStep);
+            nnodes = elem->giveNumberOfInternalDofManagers(); //define for element!!! overload for contact
+	    for (k=1; k<=nnodes;k++) {
+	      ndofs = inode->giveNumberOfDofs();
+	      for ( j = 1; j <= ndofs; j++ ) {
+                elem->giveInternalDofManager(k)->giveDof(j)->askNewEquationNumber(currStep);
+	      }
             }
         }
     } else {
@@ -674,11 +682,14 @@ EngngModel :: forceEquationNumbering(int id)
             }
         }
 
-        for ( i = 1; i <= nelem; ++i ) {
+       for ( i = 1; i <= nelem; ++i ) {
             elem = domain->giveElement(i);
-            ndofs = elem->giveNumberOfDofs(); //define for element!!! overload for contact
-            for ( j = 1; j <= ndofs; j++ ) {
-                elem->giveDof(j)->askNewEquationNumber(currStep);
+            nnodes = elem->giveNumberOfInternalDofManagers(); //define for element!!! overload for contact
+	    for (k=1; k<=nnodes;k++) {
+	      ndofs = inode->giveNumberOfDofs();
+	      for ( j = 1; j <= ndofs; j++ ) {
+                elem->giveInternalDofManager(k)->giveDof(j)->askNewEquationNumber(currStep);
+	      }
             }
         }
     }
