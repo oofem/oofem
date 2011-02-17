@@ -968,6 +968,7 @@ VTKXMLExportModule :: exportCellVarAs(InternalStateType type, int region, FILE *
     case IST_MaterialNumber:
     case IST_ElementNumber:
     case IST_AverageTemperature:
+    case IST_Pressure:
         fprintf( stream, "<DataArray type=\"Float32\" Name=\"%s\" format=\"ascii\"> ", __InternalStateTypeToString(type) );
         for ( ielem = 1; ielem <= nelem; ielem++ ) {
             elem = d->giveElement(ielem);
@@ -996,7 +997,15 @@ VTKXMLExportModule :: exportCellVarAs(InternalStateType type, int region, FILE *
                 gp->giveMaterialStatus();
                 elem->giveIPValue(answer, gp, IST_AverageTemperature, tStep);
                 fprintf( stream, "%f ", answer.at(1) );
-            } else {
+            
+	    } else if (type == IST_Pressure) {
+	      if (elem->giveNumberOfInternalDofManagers() == 1) {
+		IntArray pmask(1); pmask.at(1) = P_f;
+		elem->giveInternalDofManager(1)->giveUnknownVector (answer, pmask,EID_ConservationEquation, VM_Total, tStep);             
+		fprintf( stream, "%f ", answer.at(1) );
+	      }
+	    } else {
+	      
                 OOFEM_ERROR2( "Unsupported Cell variable %s\n", __InternalStateTypeToString(type) );
             }
         }
