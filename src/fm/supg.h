@@ -118,6 +118,9 @@ public:
         if ( materialInterface ) { delete materialInterface; }
     }
 
+    void  updateSolutionVectors(FloatArray& solutionVector, FloatArray& accelerationVector, FloatArray& incrementalSolutionVector);
+
+
     void solveYourselfAt(TimeStep *);
     /**
      * Updates nodal values

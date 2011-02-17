@@ -1,3 +1,4 @@
+
 /* $Header: /home/cvs/bp/oofem/tm/src/nonstationarytransportproblem.C,v 1.2.4.1 2004/04/05 15:19:53 bp Exp $ */
 /*
  *
@@ -190,8 +191,9 @@ SUPG :: forceEquationNumbering(int id)
     // OUTPUT:
     // sets this->numberOfEquations and this->numberOfPrescribedEquations and returns this value
 
-    int i, j, ndofs, nnodes, nelem;
+  int i, j, k, ndofs, nnodes, nelem;
     DofManager *inode;
+    Element *elem;
     Domain *domain = this->giveDomain(id);
     TimeStep *currStep = this->giveCurrentStep();
     IntArray loc;
@@ -203,6 +205,7 @@ SUPG :: forceEquationNumbering(int id)
 
 
     nnodes = domain->giveNumberOfDofManagers();
+    nelem = domain->giveNumberOfElements();
 
     // number first velocities
     for ( i = 1; i <= nnodes; i++ ) {
@@ -230,9 +233,19 @@ SUPG :: forceEquationNumbering(int id)
         }
     }
 
+    for ( i = 1; i <= nelem; ++i ) {
+      elem = domain->giveElement(i);
+      for (k=1;k<=elem->giveNumberOfInternalDofManagers(); k++) {
+	ndofs = elem->giveInternalDofManager(k)->giveNumberOfDofs(); //define for element!!! overload for contact
+	for ( j = 1; j <= ndofs; j++ ) {
+	  elem->giveInternalDofManager(k)->giveDof(j)->askNewEquationNumber(currStep);
+	}
+      }
+    }
+
+
 
     // invalidate element local copies of location arrays
-    nelem = domain->giveNumberOfElements();
     for ( i = 1; i <= nelem; i++ ) {
         domain->giveElement(i)->invalidateLocationArray();
     }
@@ -468,9 +481,9 @@ SUPG :: solveYourselfAt(TimeStep *tStep)
             }
         }
     }
-
+    
     if ( tStep->giveNumber() != 1 ) {
-        if ( materialInterface ) {
+      if ( materialInterface ) {
             //if (this->fsflag) updateDofManVals(tStep);
 #ifdef SUPG_IMPLICIT_INTERFACE
  #ifdef TIME_REPORT
@@ -505,8 +518,8 @@ SUPG :: solveYourselfAt(TimeStep *tStep)
     // algoritmic rhs part (assembled by e-model (in giveCharComponent service) from various element contribs)
     this->assembleVectorFromElements( rhs, tStep, EID_MomentumBalance, AlgorithmicRhsTerm_MB, VM_Total,
                                      EModelDefaultEquationNumbering(), this->giveDomain(1) );
-    this->assembleVectorFromElements( rhs, tStep, EID_ConservationEquation, AlgorithmicRhsTerm_MC, VM_Total,
-                                     EModelDefaultEquationNumbering(), this->giveDomain(1) );
+      this->assembleVectorFromElements( rhs, tStep, EID_ConservationEquation, AlgorithmicRhsTerm_MC, VM_Total,
+					EModelDefaultEquationNumbering(), this->giveDomain(1) );
 
     //
     // corrector
@@ -582,35 +595,13 @@ SUPG :: solveYourselfAt(TimeStep *tStep)
         if ( requiresUnknownsDictionaryUpdate() ) {
             this->updateDofUnknownsDictionary_corrector(tStep);
         } else {
-            // update
-            accelerationVector.add(incrementalSolutionVector);
-            avn = accelerationVector.computeSquaredNorm();
-            aivn = incrementalSolutionVector.computeSquaredNorm();
 
-            for ( j = 1; j <= nman; j++ ) {
-                node = domain->giveDofManager(j);
-                nDofs = node->giveNumberOfDofs();
-
-                for ( k = 1; k <= nDofs; k++ ) {
-                    iDof  =  node->giveDof(k);
-                    if ( !iDof->isPrimaryDof() ) {
-                        continue;
-                    }
-
-                    jj = iDof->__giveEquationNumber();
-                    type = iDof->giveDofID();
-
-                    if ( jj ) {
-                        if ( ( type == V_u ) || ( type == V_v ) || ( type == V_w ) ) { // v = v + (deltaT*alpha)*da
-                            solutionVector->at(jj) += deltaT * alpha * incrementalSolutionVector.at(jj);
-                        } else {
-                            solutionVector->at(jj) += incrementalSolutionVector.at(jj); // p = p + dp
-                        }
-                    }
-                }
-            }
-        }
-
+	  //update 
+	  this->updateSolutionVectors(*solutionVector, accelerationVector, incrementalSolutionVector);
+	  avn = dotProduct(accelerationVector, accelerationVector, neq);
+	  aivn = dotProduct(incrementalSolutionVector, incrementalSolutionVector, neq);
+ 	}   // end update
+	
 #if 0
  #ifdef SUPG_IMPLICIT_INTERFACE
         if ( materialInterface ) {
@@ -656,8 +647,8 @@ SUPG :: solveYourselfAt(TimeStep *tStep)
         // algoritmic rhs part (assembled by e-model (in giveCharComponent service) from various element contribs)
         this->assembleVectorFromElements( rhs, tStep, EID_MomentumBalance, AlgorithmicRhsTerm_MB, VM_Total,
                                          EModelDefaultEquationNumbering(), this->giveDomain(1) );
-        this->assembleVectorFromElements( rhs, tStep, EID_ConservationEquation, AlgorithmicRhsTerm_MC, VM_Total,
-                                         EModelDefaultEquationNumbering(), this->giveDomain(1) );
+	       this->assembleVectorFromElements( rhs, tStep, EID_ConservationEquation, AlgorithmicRhsTerm_MC, VM_Total,
+	                                EModelDefaultEquationNumbering(), this->giveDomain(1) );
 
         rnorm = rhs.computeNorm();
 
@@ -685,12 +676,13 @@ SUPG :: solveYourselfAt(TimeStep *tStep)
                                              EModelDefaultEquationNumbering(), this->giveDomain(1) );
             // algoritmic rhs part (assembled by e-model (in giveCharComponent service) from various element contribs)
             this->assembleVectorFromElements( rhs, tStep, EID_MomentumBalance, AlgorithmicRhsTerm_MB, VM_Total,
-                                             EModelDefaultEquationNumbering(), this->giveDomain(1) );
+					      EModelDefaultEquationNumbering(), this->giveDomain(1) );
             this->assembleVectorFromElements( rhs, tStep, EID_ConservationEquation, AlgorithmicRhsTerm_MC, VM_Total,
-                                             EModelDefaultEquationNumbering(), this->giveDomain(1) );
+					      EModelDefaultEquationNumbering(), this->giveDomain(1) );
         }
+	
     } while ( ( rnorm > rtolv ) && ( _absErrResid > atolv ) && ( nite <= maxiter ) );
-
+    
     if ( nite <= maxiter ) {
         OOFEM_LOG_INFO("SUPG info: number of iterations: %d\n", nite);
     } else {
@@ -1234,7 +1226,7 @@ SUPG :: giveElementCharacteristicVector(FloatArray &answer, int num, CharType ty
         eptr->computeVectorOf(EID_ConservationEquation, VM_Total, tStep, v);
         h.beProductOf(m1, v);
         //eptr->computeVectorOfPrescribed (EID_ConservationEquation, VM_Total, tStep, vp);
-        //h.beProductOf(m1,vp); // term due to prescribed pressure
+	//h.beProductOf(m1,vp); // term due to prescribed pressure
         answer.add(h);
         answer.times(-1.0);
     } else if ( type == AlgorithmicRhsTerm_MC ) {
@@ -1271,7 +1263,7 @@ SUPG :: giveElementCharacteristicVector(FloatArray &answer, int num, CharType ty
         h.beProductOf(m1, v);
         answer.add(h);
         //h.beProductOf(m1,vp); // term due to prescribed pressure
-        //answer.add(h);
+	//answer.add(h);
         answer.times(-1.0);
     } else {
         EngngModel :: giveElementCharacteristicVector(answer, num, type, mode, tStep, domain);
@@ -1388,6 +1380,71 @@ SUPG :: giveUnknownDictHashIndx(EquationID type, ValueModeType mode, TimeStep *s
 
     return 0;
 }
+
+void
+SUPG:: updateSolutionVectors(FloatArray& solutionVector, FloatArray& accelerationVector, FloatArray& incrementalSolutionVector)
+{
+  int i, j, k, jj,ji, nDofs, ndofman,  nite = 0;
+  DofManager *node, *dofman;
+  Dof *iDof;
+  DofIDItem type;
+  Domain *domain = this->giveDomain(1);
+  int nman =  this->giveDomain(1)->giveNumberOfDofManagers();
+  Element *elem;
+  
+
+
+  accelerationVector.add(incrementalSolutionVector);
+  
+  for ( j = 1; j <= nman; j++ ) {
+    node = domain->giveDofManager(j);
+    nDofs = node->giveNumberOfDofs();
+    
+    for ( k = 1; k <= nDofs; k++ ) {
+      iDof  =  node->giveDof(k);
+      if ( !iDof->isPrimaryDof() ) {
+	continue;
+      }
+      
+      jj = iDof->__giveEquationNumber();
+      type = iDof->giveDofID();
+      
+      if ( jj ) {
+	if ( ( type == V_u ) || ( type == V_v ) || ( type == V_w ) ) { // v = v + (deltaT*alpha)*da
+	  solutionVector.at(jj) += deltaT * alpha * incrementalSolutionVector.at(jj);
+	} else {
+	  solutionVector.at(jj) += incrementalSolutionVector.at(jj); // p = p + dp
+	}
+      }
+    }
+  } // end loop over dnam
+  for (j=1; j<= domain->giveNumberOfElements(); j++) {
+    elem = domain->giveElement(j);
+    ndofman = elem->giveNumberOfInternalDofManagers();
+    for (ji=1; ji<=ndofman; ji++) {
+      dofman = elem->giveInternalDofManager(ji);
+      nDofs = dofman->giveNumberOfDofs();
+      for ( k = 1; k <= nDofs; k++ ) {
+	iDof  =  dofman->giveDof(k);
+	if ( !iDof->isPrimaryDof() ) {
+	  continue;
+	}
+	
+	jj = iDof->__giveEquationNumber();
+	type = iDof->giveDofID();
+	
+	if ( jj ) {
+	  if ( ( type == V_u ) || ( type == V_v ) || ( type == V_w ) ) { // v = v + (deltaT*alpha)*da
+	    solutionVector.at(jj) += deltaT * alpha * incrementalSolutionVector.at(jj);
+	  } else {
+	    solutionVector.at(jj) += incrementalSolutionVector.at(jj); // p = p + dp
+	  }
+	}
+      }
+    } // end loop over elem internal dofmans
+  } // end loop over elems
+}
+
 
 #define __VOF_TRESHOLD 1.e-5
 
