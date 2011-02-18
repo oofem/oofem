@@ -133,7 +133,7 @@ TR1_2D_SUPG :: initializeFrom(InputRecord *ir)
     IRResultType result;               // Required by IR_GIVE_FIELD macro
 
     this->SUPGElement :: initializeFrom(ir);
-    /*
+
     this->vof = 0.0;
     IR_GIVE_OPTIONAL_FIELD(ir, vof, IFT_TR12DSUPG_pvof, "pvof");
     if ( vof > 0.0 ) {
@@ -144,7 +144,7 @@ TR1_2D_SUPG :: initializeFrom(InputRecord *ir)
         IR_GIVE_OPTIONAL_FIELD(ir, vof, IFT_TR12DSUPG_vof, "vof");
         this->temp_vof = this->vof;
     }
-    */
+
     this->computeGaussPoints();
     this->initGeometry();
     return IRRT_OK;

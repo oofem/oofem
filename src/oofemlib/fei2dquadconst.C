@@ -95,6 +95,7 @@ double
 FEI2dQuadConst :: giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time)
 {
     OOFEM_ERROR("FEI2dQuadConst :: giveTransformationJacobian: not implemented");
+    return 0.0;
 }
 
 

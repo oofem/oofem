@@ -274,13 +274,15 @@ StaggeredProblem :: solveYourselfAt(TimeStep *stepN)
 int
 StaggeredProblem :: forceEquationNumbering()
 {
+    int neqs = 0;
     for ( int i = 1; i <= nModels; i++ ) {
         EngngModel *emodel = this->giveSlaveProblem(i);
         // renumber equations if necessary
         if ( emodel->requiresEquationRenumbering( emodel->giveCurrentStep() ) ) {
-            emodel->forceEquationNumbering();
+            neqs+=emodel->forceEquationNumbering();
         }
     }
+    return neqs;
 }
 
 void

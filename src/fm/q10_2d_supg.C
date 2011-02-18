@@ -98,7 +98,7 @@ void Q10_2D_SUPG :: giveLocationArray(IntArray &locationArray, EquationID ut, co
 {
     IntArray nodeDofIDMask;
     IntArray nodalArray;
-    int i, p;
+    int i;
     
     
     locationArray.resize(0);
@@ -366,13 +366,8 @@ Q10_2D_SUPG :: computeGradPMatrix(FloatMatrix &answer, GaussPoint *gp)
 void
 Q10_2D_SUPG :: computeDivTauMatrix(FloatMatrix &answer, GaussPoint *gp, TimeStep *atTime )
 {
-  int i;
-  FloatArray n, u, un;
-  FloatMatrix D, d2n;
-  
   answer.resize(2, 8);
   answer.zero();
-
 }
 
 
