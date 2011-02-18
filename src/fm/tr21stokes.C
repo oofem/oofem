@@ -230,8 +230,9 @@ void Tr21Stokes :: computeLoadVector(FloatArray &answer, TimeStep *tStep)
     FloatArray vec;
 
     int nLoads = this->boundaryLoadArray.giveSize() / 2;
-
-    for ( i = 1; i <= nLoads; i++ ) {  // For each Neumann boundary condition ....
+	answer.resize(15);
+    answer.zero();
+    for ( i = 1; i <= nLoads; i++ ) {  // For each Neumann boundary condition
         load_number = this->boundaryLoadArray.at(2 * i - 1);
         load_id = this->boundaryLoadArray.at(2 * i);
         load = this->domain->giveLoad(load_number);
