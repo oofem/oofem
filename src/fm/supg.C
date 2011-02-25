@@ -261,6 +261,16 @@ SUPG ::  giveUnknownComponent(EquationID chc, ValueModeType mode,
 // returns unknown quantity like displaacement, velocity of equation eq
 // This function translates this request to numerical method language
 {
+
+  if ( this->requiresUnknownsDictionaryUpdate() ) {
+    int hash = this->giveUnknownDictHashIndx(chc, mode, tStep);
+    if ( dof->giveUnknowns()->includes(hash) ) {
+      return dof->giveUnknowns()->at(hash);
+    } else {
+      OOFEM_ERROR2( "giveUnknown:  Dof unknowns dictionary does not contain unknown of value mode (%s)", __ValueModeTypeToString(mode) );
+    }
+  } else {
+
     int eq = dof->__giveEquationNumber();
     if ( eq == 0 ) {
         _error("giveUnknownComponent: invalid equation number");
@@ -287,8 +297,8 @@ SUPG ::  giveUnknownComponent(EquationID chc, ValueModeType mode,
         _error("giveUnknownComponent: Unknown is of undefined CharType for this problem");
         return 0.;
     }
-
-    return 0;
+  }
+  return 0;
 }
 
 
