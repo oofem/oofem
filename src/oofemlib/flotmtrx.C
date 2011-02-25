@@ -306,6 +306,48 @@ void FloatMatrix :: beDyadicProductOf(const FloatArray &vec1, const FloatArray &
     }
 }
 
+void FloatMatrix :: beLocalCoordSys(const FloatArray &normal)
+{
+    if (normal.giveSize() == 1) {
+        this->resize(1,1);
+        this->at(1,1) = normal(0);
+    } else if (normal.giveSize() == 2) {
+        this->resize(2,2);
+        this->at(1,1) = normal(1);
+        this->at(1,2) = -normal(0);
+
+        this->at(2,1) = normal(0);
+        this->at(2,2) = normal(1);
+    } else if (normal.giveSize() == 3) {
+        // Create a permutated vector of n, *always* length 1 and significantly different from n.
+        FloatArray t(3), b; // tangent and binormal
+        t(0) = normal(1);
+        t(1) = -normal(2);
+        t(2) = normal(0);
+
+        // Construct orthogonal vector
+        double npn = t.dotProduct(normal);
+        t.add(-npn,normal);
+        t.normalize();
+        b.beVectorProductOf(t,normal);
+
+        this->resize(3,3);
+
+        this->at(1,1) = t(0);
+        this->at(1,2) = t(1);
+        this->at(1,3) = t(2);
+
+        this->at(1,1) = b(0);
+        this->at(1,2) = b(1);
+        this->at(1,3) = b(2);
+
+        this->at(2,1) = normal(0);
+        this->at(2,2) = normal(1);
+        this->at(2,3) = normal(2);
+    } else {
+        OOFEM_ERROR("FloatMatrix :: beLocalCoordinateTransformation - Normal needs 1 to 3 components.");
+    }
+}
 
 void FloatMatrix :: beTProductOf(const FloatMatrix &aMatrix, const FloatMatrix &bMatrix)
 // Receiver = aMatrix^T * bMatrix

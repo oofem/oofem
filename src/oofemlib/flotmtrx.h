@@ -253,6 +253,12 @@ public:
      */
     void beDyadicProductOf(const FloatArray &vec1, const FloatArray &vec2);
     /**
+     * Makes receiver the local coordinate for the given normal.
+     * Implemented for 2D and 3D.
+     * @param normal Normal (normalized).
+     */
+    void beLocalCoordSys(const FloatArray &normal);
+    /**
      * Adds the given matrix as sub-matrix to receiver. The sub-matrix values will be added to receivers
      * corresponding receiver's values at positions (ri...ri+src.nrows, ci....ci+src.ncolumns).
      * The size of receiver will be adjusted, if necessary.
