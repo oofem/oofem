@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2010   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -489,13 +489,15 @@ void FloatMatrix :: addSubVectorRow(const FloatArray &src, int sr, int sc)
 void FloatMatrix :: setColumn(const FloatArray &src, int c)
 {
     int nr = src.giveSize();
+#ifdef DEBUG
+    if ( this->giveNumberOfRows() != nr || c < 1 || c > this->giveNumberOfColumns()) {
+        OOFEM_ERROR("FloatMatrix  :: setColumn - Size mismatch");
+    }
+#endif
 
-    if ( this->giveNumberOfRows() != nr || c < 1 || c > this->giveNumberOfColumns())
-        OOFEM_ERROR("Size mismatch");
-
-    double *P = this->values + c*nr;
+    double *P = this->values + (c-1)*nr;
     double *srcP = src.givePointer();
-    for (int j = 0; j < nr; j++ )
+    for (int j = 0; j < nr; ++j )
         *P++ = *srcP++;
 }
 
@@ -503,10 +505,16 @@ void FloatMatrix :: setColumn(const FloatArray &src, int c)
 void FloatMatrix :: copyColumn(FloatArray &dest, int c) const
 {
 	int nr = this->giveNumberOfRows();
+#ifdef DEBUG
+    if ( c < 1 || c > this->giveNumberOfColumns()) {
+        OOFEM_ERROR2("FloatMatrix  :: copyColumn - Column outside range (%d)", c);
+    }
+#endif
+
     dest.resize(nr);
-    double *P = this->values + c*nr;
+    double *P = this->values + (c-1)*nr;
     double *destP = dest.givePointer();
-    for (int j = 0; j < nr; j++ )
+    for (int j = 0; j < nr; ++j )
         *destP++ = *P++;
 }
 
@@ -897,7 +905,7 @@ void FloatMatrix :: solveForRhs(const FloatArray &b, FloatArray &answer)
     answer = b;
     dgesv_( &this->nRows, &nrhs, this->values, &this->nRows, ipiv.givePointer(), answer.givePointer(), &this->nRows, &info );
     if (info != 0) {
-        OOFEM_ERROR2("FloatMatrix::solveForRhs : dgesv error %d", info);
+        OOFEM_ERROR2("FloatMatrix::solveForRhs : dgesv error %d  (rcond %e)", info);
     }
 #else
     int i, j, k, pivRow;
