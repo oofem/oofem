@@ -960,6 +960,11 @@ if test x$tm_module = xyes; then
 	TEST_TARGETS="$TEST_TARGETS tm"
 fi
 
+if test x$sm_module = xyes && test x$tm_module = xyes ; then
+	TEST_TARGETS="$TEST_TARGETS tmsm"
+fi
+
+
 if test x$fm_module = xyes; then
 	MODULE_LIST="$MODULE_LIST fm"
 	MODULE_TOBUILD="$MODULE_TOBUILD fm"
