@@ -792,6 +792,15 @@ Beam3d :: computeLocalForceLoadVector(FloatArray &answer, TimeStep *stepN, Value
     return;
 }
 
+void 
+Beam3d :: computeBodyLoadVectorAt(FloatArray &answer, Load *load, TimeStep *tStep, ValueModeType mode)
+{
+  StructuralElement::computeBodyLoadVectorAt(answer, load, tStep, mode);
+  answer.times(this->giveCrossSection()->give(CS_Area));
+}
+
+
+
 /*
  * void
  * Beam3d :: computeForceLoadVector (FloatArray& answer, TimeStep* stepN, ValueModeType mode)

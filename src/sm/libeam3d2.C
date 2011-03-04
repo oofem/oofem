@@ -475,7 +475,12 @@ LIBeam3d2 :: computeLoadGToLRotationMtrx(FloatMatrix &answer)
     ;
 }
 
-
+void 
+LIBeam3d2 :: computeBodyLoadVectorAt(FloatArray &answer, Load *load, TimeStep *tStep, ValueModeType mode)
+{
+  NLStructuralElement::computeBodyLoadVectorAt(answer, load, tStep, mode);
+  answer.times(this->giveCrossSection()->give(CS_Area));
+}
 
 int
 LIBeam3d2 :: computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, GaussPoint *gp)

@@ -123,6 +123,7 @@ protected:
     void          computeNmatrixAt(GaussPoint *, FloatMatrix &);
     int           computeGtoLRotationMatrix(FloatMatrix &); // giveRotationMatrix () ;
     //  int           computeGtoNRotationMatrix (FloatMatrix&);
+    void computeBodyLoadVectorAt(FloatArray &answer, Load *load, TimeStep *tStep, ValueModeType mode);
 
     double giveKappayCoeff();
     double giveKappazCoeff();
