@@ -140,6 +140,8 @@ protected:
     int           computeGtoLRotationMatrix(FloatMatrix &); // giveRotationMatrix () ;
     //  int           computeGtoNRotationMatrix (FloatMatrix&);
 
+    void computeBodyLoadVectorAt(FloatArray &answer, Load *load, TimeStep *tStep, ValueModeType mode);
+
     double giveKappaCoeff();
     double        giveLength();
     double        givePitch();

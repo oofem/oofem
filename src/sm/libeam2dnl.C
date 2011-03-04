@@ -653,6 +653,15 @@ LIBeam2dNL :: computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, Gau
     return 0;
 }
 
+void 
+LIBeam2dNL :: computeBodyLoadVectorAt(FloatArray &answer, Load *load, TimeStep *tStep, ValueModeType mode)
+{
+  StructuralElement::computeBodyLoadVectorAt(answer, load, tStep, mode);
+  answer.times(this->giveCrossSection()->give(CS_Area));
+}
+
+
+
 #ifdef __OOFEG
 void LIBeam2dNL :: drawRawGeometry(oofegGraphicContext &gc)
 {

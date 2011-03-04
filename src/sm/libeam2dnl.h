@@ -109,6 +109,7 @@ protected:
     { computeGlobalCoordinates( answer, * ( gp->giveCoordinates() ) ); }
     int   computeLoadLEToLRotationMatrix(FloatMatrix &, int, GaussPoint *);
     int  computeLoadGToLRotationMtrx(FloatMatrix &answer);
+    void computeBodyLoadVectorAt(FloatArray &answer, Load *load, TimeStep *tStep, ValueModeType mode);
 
     //void          computeTemperatureStrainVectorAt (FloatArray& answer, GaussPoint*, TimeStep*, ValueModeType mode);
     void          computeBmatrixAt(GaussPoint *, FloatMatrix &, int = 1, int = ALL_STRAINS);

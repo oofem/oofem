@@ -637,6 +637,14 @@ Beam2d :: computeEdgeLoadVectorAt(FloatArray &answer, Load *load, int iedge, Tim
 }
 
 
+void 
+Beam2d :: computeBodyLoadVectorAt(FloatArray &answer, Load *load, TimeStep *tStep, ValueModeType mode)
+{
+  StructuralElement::computeBodyLoadVectorAt(answer, load, tStep, mode);
+  answer.times(this->giveCrossSection()->give(CS_Area));
+}
+
+
 void Beam2d :: printOutputAt(FILE *File, TimeStep *stepN)
 {
     // Performs end-of-step operations.

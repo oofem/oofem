@@ -436,6 +436,14 @@ LIBeam2d ::   computeEdgeVolumeAround(GaussPoint *aGaussPoint, int iEdge)
     return 0.5 * this->giveLength() * weight;
 }
 
+void 
+LIBeam2d :: computeBodyLoadVectorAt(FloatArray &answer, Load *load, TimeStep *tStep, ValueModeType mode)
+{
+  StructuralElement::computeBodyLoadVectorAt(answer, load, tStep, mode);
+  answer.times(this->giveCrossSection()->give(CS_Area));
+}
+
+
 
 int
 LIBeam2d :: computeLoadGToLRotationMtrx(FloatMatrix &answer)
