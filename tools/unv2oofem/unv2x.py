@@ -204,7 +204,7 @@ class UNVParser:
 
     def parse(self):
         """ parse UNV file to fill the FEM data structure"""
-        self.file=open(self.filename,'r')
+        self.file=open(self.filename,'rb')
         self.scanfile()
         for sectionId,offset in self.sections:
             if (sectionId in self.datasetsIds):
