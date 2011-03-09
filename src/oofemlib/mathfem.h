@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/mathfem.h,v 1.13 2003/05/19 13:03:57 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -34,10 +33,9 @@
  */
 
 /*
- * // This file contains some functions used in the finite element
- * // application.
- * // ref : Lippman p 104
- * // ! friend functions may not be declared inline (C++\Views p 17)
+ * This file contains some functions used in the finite element application.
+ * ref : Lippman p 104
+ * ! friend functions may not be declared inline (C++\Views p 17)
  */
 #ifndef mathfem_h
 #define mathfem_h

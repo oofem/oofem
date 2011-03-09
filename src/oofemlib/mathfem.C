@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/mathfem.C,v 1.9 2003/04/06 14:08:25 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -60,11 +59,19 @@ void cubic(double a, double b, double c, double d, double *r1, double *r2, doubl
     double aa, p, q, D, pq, u, v, phi;
     double help;
 
-    if ( fabs(a) < CUBIC_ZERO ) {
-        if ( fabs(b) < CUBIC_ZERO ) {
-            if ( fabs(c) < CUBIC_ZERO ) {
-                * num = 0;
-                return;
+    double norm = 1e-6*(fabs(a) + fabs(b) + fabs(c)) + CUBIC_ZERO;
+
+    if ( fabs(a) <= norm ) {
+        if ( fabs(b) <= norm ) {
+            if ( fabs(c) <= norm ) {
+                if ( fabs(d) <= norm ) {
+                    * r1 = 0.0;
+                    * num = 1;
+                    return;
+                } else {
+                    * num = 0;
+                    return;
+                }
             } else {
                 * r1 = -d / c;
                 * num = 1;
@@ -77,7 +84,7 @@ void cubic(double a, double b, double c, double d, double *r1, double *r2, doubl
             } else {
                 //*r1 = (-c + sqrt(D)) / 2.0 / b;
                 //*r2 = (-c - sqrt(D)) / 2.0 / b;
-                if ( fabs(c) < CUBIC_ZERO ) {
+                if ( fabs(c) < norm ) {
                     help = -d / b;
                     if ( help > 0. ) {
                         * r1 = sqrt(help);
@@ -151,6 +158,11 @@ void cubic(double a, double b, double c, double d, double *r1, double *r2, doubl
                 * r1 = 2.0 *p *cos(phi) - a / 3.0;
                 * r2 = -2.0 *p *cos(phi - M_PI / 3.0) - a / 3.0;
                 * r3 = -2.0 *p *cos(phi + M_PI / 3.0) - a / 3.0;
+
+				// I'm getting some pretty bad accuracy, a single iteration like this would help alot
+                //* r1 -= (d + c*(*r1) + b*(*r1)*(*r1) + a*(*r1)*(*r1)*(*r1))/(c + 2*b*(*r1) + 3*a*(*r1)*(*r1));
+                //* r2 -= (d + c*(*r2) + b*(*r2)*(*r2) + a*(*r2)*(*r2)*(*r2))/(c + 2*b*(*r2) + 3*a*(*r2)*(*r2));
+                //* r3 -= (d + c*(*r3) + b*(*r3)*(*r3) + a*(*r3)*(*r3)*(*r3))/(c + 2*b*(*r3) + 3*a*(*r3)*(*r3));
                 * num = 3;
             }
         }
