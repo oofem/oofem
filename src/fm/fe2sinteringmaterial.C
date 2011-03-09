@@ -67,7 +67,6 @@ void FE2SinteringMaterial::givePlaneStressStiffMtrx(FloatMatrix &answer, MatResp
 
         // Numerical ATS is just silly.
         /*
-         printf("*************************************************************************** FOO 1\n");
          FloatArray tempStrain = ms->giveTempStrainVector();
          FloatArray stress, strain, sig11, sig22, sig12, sig;
          giveRealStressVector (stress, form, gp, tempStrain, tStep);
@@ -89,11 +88,8 @@ void FE2SinteringMaterial::givePlaneStressStiffMtrx(FloatMatrix &answer, MatResp
          numericalATS.addSubVectorRow(dsig11,1,1);
          numericalATS.addSubVectorRow(dsig22,2,1);
          numericalATS.addSubVectorRow(dsig12,3,1);
-         //tempStrain.printYourself();
-         //stress.printYourself();
          answer.printYourself();
          numericalATS.printYourself();
-         OOFEM_ERROR("QUIT");
          */
     } else {
         OOFEM_ERROR("Mode or form not implemented");
@@ -177,22 +173,16 @@ bool FE2SinteringMaterialStatus::createRVE(int n, GaussPoint *gp)
     dr.finish();
     em->initMetaStepAttributes(em->giveNextStep());
 
-
     this->rve = dynamic_cast<StokesFlowStressHomogenization*> (em);
     if (!this->rve) {
-        printf("em = %p\n",em);
-        OOFEM_ERROR("WTF");
         return false;
     }
-
     char tempstring[1024];
     char newName[1024];
     this->rve->giveOutputBaseFileName(tempstring, 1024);
     sprintf(newName, "%s-%d", tempstring, n);
     this->rve->letOutputBaseFileNameBe(newName);
-
     this->rve->activateHomogenizationMode(HT_StressDirichlet);
-
     return true;
 }
 
