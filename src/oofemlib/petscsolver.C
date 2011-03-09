@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/Attic/petscsolver.C,v 1.1.2.1 2004/04/05 15:19:43 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -51,60 +50,48 @@ namespace oofem {
   #include "clock.h"
  #endif
 
-PetscSolver :: PetscSolver(int i, Domain *d, EngngModel *m) : SparseLinearSystemNM(i, d, m)
+PetscSolver :: PetscSolver(int i, Domain *d, EngngModel *m) : SparseLinearSystemNM(i, d, m) { }
+
+
+PetscSolver :: ~PetscSolver() { }
+
+
+IRResultType PetscSolver :: initializeFrom(InputRecord *ir)
 {
-    Lhs = NULL;
-    lhsVersion = 0;
-    kspInit = false;
-}
-
-
-PetscSolver :: ~PetscSolver() {
-    if ( kspInit ) {
-        KSPDestroy(ksp);
-    }
-}
-
-IRResultType
-PetscSolver :: initializeFrom(InputRecord *ir)
-{
-    /*
-     * const char *__keyword, *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
-     * IRResultType result;                               // Required by IR_GIVE_FIELD macro
-     */
+    // const char *__keyword, *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
+    // IRResultType result;                               // Required by IR_GIVE_FIELD macro
     return IRRT_OK;
 }
 
 
-NM_Status
-PetscSolver :: solve(SparseMtrx *A, FloatArray *b, FloatArray *x)
+NM_Status PetscSolver :: solve(SparseMtrx *A, FloatArray *b, FloatArray *x)
 {
     int neqs, l_eqs;
 
     // first check whether Lhs is defined
     if ( !A ) {
-        _error("solveYourselfAt: unknown Lhs");
+        _error("solve: unknown Lhs");
     }
 
     // and whether Rhs
     if ( !b ) {
-        _error("solveYourselfAt: unknown Rhs");
+        _error("solve: unknown Rhs");
     }
 
     // and whether previous Solution exist
     if ( !x ) {
-        _error("solveYourselfAt: unknown solution array");
+        _error("solve: unknown solution array");
     }
 
     if ( x->giveSize() != ( neqs = b->giveSize() ) ) {
-        _error("solveYourselfAt: size mismatch");
+        _error("solve: size mismatch");
     }
 
     if ( A->giveType() != SMT_PetscMtrx ) {
-        _error("solveYourselfAt: PetscSparseMtrx Expected");
+        _error("solve: PetscSparseMtrx Expected");
     }
 
-    Lhs = ( PetscSparseMtrx * ) A;
+    PetscSparseMtrx *Lhs = ( PetscSparseMtrx * ) A;
     l_eqs = Lhs->giveLeqs();
 
     Vec globRhsVec;
@@ -121,10 +108,9 @@ PetscSolver :: solve(SparseMtrx *A, FloatArray *b, FloatArray *x)
  #endif
 
     VecDuplicate(globRhsVec, & globSolVec);
-    /* solve */
+
     //VecView(globRhsVec,PETSC_VIEWER_STDOUT_WORLD);
     NM_Status s = this->petsc_solve(Lhs, globRhsVec, globSolVec);
-
     //VecView(globSolVec,PETSC_VIEWER_STDOUT_WORLD);
 
 
@@ -153,11 +139,10 @@ PetscSolver :: petsc_solve(PetscSparseMtrx *Lhs, Vec b, Vec x)
     int nite;
     KSPConvergedReason reason;
     if ( Lhs->giveType() != SMT_PetscMtrx ) {
-        _error("solveYourselfAt: PetscSparseMtrx Expected");
+        _error("petsc_solve: PetscSparseMtrx Expected");
     }
 
  #ifdef TIME_REPORT
-    //clock_t tstart = clock();
     oofem_timeval tstart;
     getUtime(tstart);
  #endif
@@ -165,55 +150,54 @@ PetscSolver :: petsc_solve(PetscSparseMtrx *Lhs, Vec b, Vec x)
     /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
      *  Create the linear solver and set various options
      *  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
-
-    if ( !kspInit ) {
-        /*
-         * Create linear solver context
-         */
- #ifdef __PARALLEL_MODE
-        KSPCreate(PETSC_COMM_WORLD, & ksp);
+    if ( !Lhs->kspInit ) {
+#ifdef __PARALLEL_MODE
+        KSPCreate(PETSC_COMM_WORLD, & Lhs->ksp);
  #else
-        KSPCreate(PETSC_COMM_SELF, & ksp);
+        KSPCreate(PETSC_COMM_SELF, & Lhs->ksp);
  #endif
-        kspInit = true;
+        Lhs->kspInit = true;
     }
 
     /*
      * Set operators. Here the matrix that defines the linear system
      * also serves as the preconditioning matrix.
      */
-    KSPSetOperators(ksp, * Lhs->giveMtrx(), * Lhs->giveMtrx(), DIFFERENT_NONZERO_PATTERN);
+    if ( Lhs->newValues ) { // Optimization for successive solves
+        // TODO: I'm not 100% on the choice MatStructure. SAME_NONZERO_PATTERN should be safe.
+        //KSPSetOperators(Lhs->ksp, * Lhs->giveMtrx(), * Lhs->giveMtrx(), DIFFERENT_NONZERO_PATTERN);
+        //KSPSetOperators(Lhs->ksp, * Lhs->giveMtrx(), * Lhs->giveMtrx(), SAME_PRECONDITIONER);
+        KSPSetOperators(Lhs->ksp, * Lhs->giveMtrx(), * Lhs->giveMtrx(), SAME_NONZERO_PATTERN);
+        Lhs->newValues = false;
 
-    /*
-     * Set linear solver defaults for this problem (optional).
-     * - The following two statements are optional; all of these
-     * parameters could alternatively be specified at runtime via
-     * KSPSetFromOptions().  All of these defaults can be
-     * overridden at runtime, as indicated below.
-     */
+        /*
+         * Set linear solver defaults for this problem (optional).
+         * - The following two statements are optional; all of these
+         * parameters could alternatively be specified at runtime via
+         * KSPSetFromOptions().  All of these defaults can be
+         * overridden at runtime, as indicated below.
+         */
+        KSPSetTolerances(Lhs->ksp, PETSC_DEFAULT, PETSC_DEFAULT, PETSC_DEFAULT, PETSC_DEFAULT);
 
-    //KSPSetTolerances(ksp,1.e-2/((m+1)*(n+1)),1.e-50,PETSC_DEFAULT,PETSC_DEFAULT);
-    KSPSetTolerances(ksp, PETSC_DEFAULT, PETSC_DEFAULT, PETSC_DEFAULT, PETSC_DEFAULT);
-
-    /*
-     * Set runtime options, e.g.,
-     * -ksp_type <type> -pc_type <type> -ksp_monitor -ksp_rtol <rtol>
-     * These options will override those specified above as long as
-     * KSPSetFromOptions() is called _after_ any other customization
-     * routines.
-     */
-    KSPSetFromOptions(ksp);
+        /*
+         * Set runtime options, e.g.,
+         * -ksp_type <type> -pc_type <type> -ksp_monitor -ksp_rtol <rtol>
+         * These options will override those specified above as long as
+         * KSPSetFromOptions() is called _after_ any other customization
+         * routines.
+         */
+        KSPSetFromOptions(Lhs->ksp);
+    }
 
     /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
      *  Solve the linear system
      *  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
     //MatView(*Lhs->giveMtrx(),PETSC_VIEWER_STDOUT_SELF);
-
-    //KSPSetRhs(ksp,b);
-    //KSPSetSolution(ksp,x);
-    KSPSolve(ksp, b, x);
-    KSPGetConvergedReason(ksp, & reason);
-    KSPGetIterationNumber(ksp, & nite);
+    //KSPSetRhs(Lhs->ksp,b);
+    //KSPSetSolution(Lhs->ksp,x);
+    KSPSolve(Lhs->ksp, b, x);
+    KSPGetConvergedReason(Lhs->ksp, & reason);
+    KSPGetIterationNumber(Lhs->ksp, & nite);
     OOFEM_LOG_INFO("PetscSolver::petsc_solve KSPConvergedReason: %d, number of iterations: %d\n", reason, nite); // To verbose for multiscale.
 
  #ifdef TIME_REPORT
@@ -228,15 +212,56 @@ PetscSolver :: petsc_solve(PetscSparseMtrx *Lhs, Vec b, Vec x)
     }
 }
 
-void
-PetscSolver :: reinitialize()
+
+//#ifndef __PARALLEL_MODE
+#if 0
+// TODO: Parallel mode of this.
+NM_Status PetscSolver :: solve(SparseMtrx *A, FloatMatrix &B, FloatMatrix &X)
 {
-    if ( kspInit ) {
-        KSPDestroy(ksp);
+    if ( !A ) {
+        _error("solve: Unknown Lhs");
+    }
+    if ( A->giveType() != SMT_PetscMtrx ) {
+        _error("solve: PetscSparseMtrx Expected");
     }
 
-    kspInit = false;
+    PetscSparseMtrx *Lhs = ( PetscSparseMtrx * ) A;
+
+    Vec globRhsVec;
+    Vec globSolVec;
+
+    bool newLhs = true;
+    int rows = B.giveNumberOfRows();
+    int cols = B.giveNumberOfColumns();
+    NM_Status s;
+    X.resize(rows, cols);
+    double *Xptr = X.givePointer();
+
+    for (int i = 0; i < cols; ++i) {
+        VecCreateSeqWithArray(PETSC_COMM_SELF, rows, B.givePointer() + rows*i, & globRhsVec);
+        VecDuplicate(globRhsVec, & globSolVec);
+        s = this->petsc_solve(Lhs, globRhsVec, globSolVec, newLhs);
+        if ( !(s & NM_Success) ) {
+            OOFEM_WARNING2("PetscSolver :: solve - No success at solving column %d",i+1);
+            return s;
+        }
+        newLhs = false;
+        double *ptr;
+        VecGetArray(globSolVec, & ptr);
+        for ( int j = 0; j < rows; ++j ) {
+            Xptr[ j + rows*i ] = ptr [ j ];
+        }
+        VecRestoreArray(globSolVec, & ptr);
+    }
+    VecDestroy(globSolVec);
+    VecDestroy(globRhsVec);
+    return s;
 }
+#endif
+
+
+void PetscSolver :: reinitialize() {}
+
 } // end namespace oofem
 #endif //ifdef __PETSC_MODULE
 

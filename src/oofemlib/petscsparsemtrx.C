@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -243,7 +243,6 @@ PetscSparseMtrx :: buildInternalStructure(EngngModel *eModel, int di, EquationID
      * else
      *  nColumns = eModel->giveNumberOfEquations(ut);
      */
-
     int totalEquations = eModel->giveNumberOfEquations(ut) + eModel->giveNumberOfPrescribedEquations(ut);
 
     //determine nonzero structure of matrix
@@ -263,16 +262,19 @@ PetscSparseMtrx :: buildInternalStructure(EngngModel *eModel, int di, EquationID
                 if ( ii > nRows ) {
                     nRows = ii;
                 }
-
                 for ( j = 1; j <= c_loc.giveSize(); j++ ) {
                     if ( ( jj = c_loc.at(j) ) ) {
-                        if ( jj > nColumns ) {
-                            nColumns = jj;
-                        }
-
                         rows [ ii - 1 ].insert(jj - 1);
                     }
                 }
+            }
+        }
+        // Column counting should be like this. The matrix should in all reasonable situations get
+        // the full corresponding size, regardless if elements are assembled there.
+        // Mixed matrices like this are not likely used for solving, so a zero row/column is not unreasonable.
+        for ( j = 1; j <= c_loc.giveSize(); j++ ) {
+            if ( (jj = c_loc.at(j)) > nColumns ) {
+                nColumns = jj;
             }
         }
     }
@@ -297,7 +299,8 @@ PetscSparseMtrx :: buildInternalStructure(EngngModel *eModel, int di, EquationID
     MatSeqAIJSetPreallocation( mtrx, 0, d_nnz.givePointer() );
 
 #endif
-    return TRUE;
+    this->newValues = true;
+    return true;
 }
 
 int
@@ -452,7 +455,8 @@ PetscSparseMtrx :: buildInternalStructure(EngngModel *eModel, int di, EquationID
 #endif
 
     nRows = nColumns = geqs;
-    return TRUE;
+    this->newValues = true;
+    return true;
 }
 
 int
@@ -490,6 +494,7 @@ PetscSparseMtrx :: assemble(const IntArray &loc, const FloatMatrix &mat)
 }
 #endif
     this->version++;
+    this->newValues = true;
     return 1;
 }
 
@@ -529,7 +534,7 @@ PetscSparseMtrx :: assemble(const IntArray &rloc, const IntArray &cloc, const Fl
 #endif
     // increment version
     this->version++;
-
+    this->newValues = true;
     return 1;
 }
 
@@ -542,21 +547,21 @@ PetscSparseMtrx :: assembleBegin()
 int
 PetscSparseMtrx :: assembleEnd()
 {
+    this->newValues = true;
     return MatAssemblyEnd(this->mtrx, MAT_FINAL_ASSEMBLY);
 }
-
-
 
 
 void
 PetscSparseMtrx :: zero()
 {
-    // test if receiver is aslready assembled
+    // test if receiver is already assembled
     PetscTruth assembled;
     MatAssembled(this->mtrx, & assembled);
     if ( assembled ) {
         MatZeroEntries(this->mtrx);
     }
+    this->newValues = true;
 }
 
 double &

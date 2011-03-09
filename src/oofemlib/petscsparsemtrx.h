@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2010   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -58,20 +58,25 @@ protected:
     EquationID ut;
     EngngModel *emodel;
 
+    /// Linear solver context.
+    KSP ksp;
+    /// Flag if context initialized.
+    bool kspInit;
+    /// Flag if matrix has changed since last solve.
+    bool newValues;
+
 public:
-    PetscSparseMtrx(int n, int m) : SparseMtrx(n, m)
-    {
-        di = 0;
-        leqs = n;
-        geqs = n;
-        symmFlag = false;
-        mtrx = NULL;
+    PetscSparseMtrx(int n, int m) : SparseMtrx(n, m),
+        mtrx(NULL), symmFlag(false), leqs(0), geqs(0), di(0), kspInit(false), newValues(true) {}
+    PetscSparseMtrx() : SparseMtrx(),
+        mtrx(NULL), symmFlag(false), leqs(0), geqs(0), di(0), kspInit(false), newValues(true)  {}
+
+    ~PetscSparseMtrx() {
+        MatDestroy(this->mtrx);
+        if ( this->kspInit ) {
+            KSPDestroy(this->ksp);
+        }
     }
-    PetscSparseMtrx() : SparseMtrx() {
-        di = 0;
-        mtrx = NULL;
-    }
-    ~PetscSparseMtrx() { MatDestroy(mtrx); }
 
     // Overloaded methods:
     virtual SparseMtrx *GiveCopy() const;
@@ -105,6 +110,8 @@ public:
     EquationID giveEquationID() { return ut; }
     int giveLeqs() { return leqs; }
     int giveDomainIndex() { return di; }
+
+    friend class PetscSolver;
 };
 } // end namespace oofem
 #endif

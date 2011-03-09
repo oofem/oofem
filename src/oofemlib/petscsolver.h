@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/Attic/petscsolver.h,v 1.1.2.1 2004/04/05 15:19:43 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -45,7 +44,7 @@
 
 #ifdef __PETSC_MODULE
  #ifndef __MAKEDEPEND
-  #include "petscksp.h"
+  #include <petscksp.h>
  #endif
 #endif
 
@@ -55,57 +54,58 @@ class EngngModel;
 class FloatMatrix;
 
 /**
- * Implements the solution of linear system of equation in the form Ax=b using solvers
- * from PETSC library. Can work with only PETSc sparse matrix implementation.
+ * Implements the solution of linear system of equation in the form @f$A\cdot x=b@f$ using solvers
+ * from PETSc library. Only works with the PETSc sparse matrix implementation.
  */
 class PetscSolver : public SparseLinearSystemNM
 {
 private:
 #ifdef __PETSC_MODULE
-    /// last mapped Lhs matrix
-    PetscSparseMtrx *    Lhs;
-    /// last mapped matrix version
-    SparseMtrx :: SparseMtrxVersionType lhsVersion;
+    /// Last mapped Lhs matrix
+    //PetscSparseMtrx *Lhs;
+    /// Last mapped matrix version.
+    //SparseMtrx :: SparseMtrxVersionType lhsVersion;
 
-    /// linear solver context
-    KSP ksp;
-    /// flag if context initialized
-    bool kspInit;
+    /// Linear solver context.
+    //KSP ksp;
+    /// Flag if context initialized.
+    //bool kspInit;
+
 #endif
 
 public:
     /**
-     * Constructor - creates new instance of receiver, with number i, belonging to domain d and Engngmodel m.
+     * Constructor.
+     * @param i Solver number.
+     * @param d Domain which solver belongs to.
+     * @param m Engineering model which solver belongs to.
      */
     PetscSolver(int i, Domain *d, EngngModel *m);
 
-    ///Destructor
-    ~PetscSolver(); // destructor
+    /// Destructor.
+    ~PetscSolver();
 
-    /**
-     * Solves the given linear system.
-     * @param A coefficient matrix
-     * @param b right hand side
-     * @param x solution array
-     * @return NM_Status value
-     */
     NM_Status solve(SparseMtrx *A, FloatArray *b, FloatArray *x);
+//#ifndef __PARALLEL_MODE
+#if 0
+    NM_Status solve(SparseMtrx *A, FloatMatrix &B, FloatMatrix &X);
+#endif
 #ifdef __PETSC_MODULE
     /**
      * Solves the given linear system.
-     * @param A coefficient matrix
-     * @param b right hand side (PETSC Vec(tor))
-     * @param x solution array(PETSC Vec(tor))
-     * @return NM_Status value
+     * @param A Coefficient matrix.
+     * @param b Right hand side (PETSC Vec(tor)).
+     * @param x Solution array(PETSC Vec(tor)).
+     * @return NM_Status value.
      */
     NM_Status petsc_solve(PetscSparseMtrx *A, Vec b, Vec x);
 #endif
+
     /// Initializes receiver from given record. Empty implementation.
     IRResultType initializeFrom(InputRecord *ir);
     void reinitialize();
 
-
-    // identification
+    // Identification
     const char *giveClassName() const { return "PetscSolver"; }
     classType giveClassID() const { return PetscSolverClass; }
     LinSystSolverType giveLinSystSolverType() const { return ST_Petsc; }
