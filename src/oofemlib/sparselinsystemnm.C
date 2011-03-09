@@ -34,6 +34,9 @@
  */
 
 #include "sparselinsystemnm.h"
+#include "flotmtrx.h"
+#include "flotarry.h"
+#include "sparsemtrx.h"
 
 namespace oofem {
 SparseLinearSystemNM :: SparseLinearSystemNM(int i, Domain *d, EngngModel *m) : NumericalMethod(i, d, m)
@@ -41,4 +44,21 @@ SparseLinearSystemNM :: SparseLinearSystemNM(int i, Domain *d, EngngModel *m) : 
 
 SparseLinearSystemNM :: ~SparseLinearSystemNM()
 { }
+
+NM_Status SparseLinearSystemNM :: solve(SparseMtrx *A, FloatMatrix &B, FloatMatrix &X)
+{
+    int ncol = A->giveNumberOfRows();
+    int nrhs = B.giveNumberOfColumns();
+    if (A->giveNumberOfRows() != B.giveNumberOfRows()) {
+        OOFEM_ERROR("SparseLinearSystemNM :: solve - A and B matrix mismatch");
+    }
+    FloatArray bi(ncol), xi(ncol);
+    X.resize(ncol,nrhs);
+    for (int i = 1; i <= nrhs; ++i ) {
+        B.copyColumn(bi, i);
+        this->solve(A, &bi, &xi);
+        X.setColumn(xi, i);
+    }
+}
+
 } // end namespace oofem

@@ -160,7 +160,7 @@ public:
      * @param ut unknown type
      * @return zero is successful
      */
-    virtual int buildInternalStructure(EngngModel *eModel, int di, EquationID, const UnknownNumberingScheme &r_s,
+    virtual int buildInternalStructure(EngngModel *eModel, int di, EquationID ut, const UnknownNumberingScheme &r_s,
                                        const UnknownNumberingScheme &c_s) {
         OOFEM_ERROR("SparseMtrx :: buildInternalStructure(EngngModel,di,EquationID,UnknownNumberingScheme,unknownNumberingScheme) - Not implemented");
         return 0;

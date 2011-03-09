@@ -71,7 +71,6 @@ class FloatArray;
  */
 class SparseLinearSystemNM : public NumericalMethod
 {
-protected:
 public:
     /// Constructor
     SparseLinearSystemNM(int i, Domain *d, EngngModel *m);
@@ -88,15 +87,22 @@ public:
 
     /**
      * Solves the given sparse linear system of equations @f$ A\cdot x=b @f$.
-     * @param A Coefficient matrix
-     * @param b Right hand side
+     * @param A Coefficient matrix.
+     * @param b Right hand side.
      * @param x Solution array.
      * @return Status of the solver.
      */
     virtual NM_Status solve(SparseMtrx *A, FloatArray *b, FloatArray *x) = 0;
 
-
-public:
+    /**
+     * Solves the given sparse linear system of equations @f$ A\cdot X=B @f$.
+     * Default implementation calls solve multiple times.
+     * @param A Coefficient matrix.
+     * @param B Right hand side.
+     * @param X Solution matrix.
+     * @return Status of the solver.
+     */
+    virtual NM_Status solve(SparseMtrx *A, FloatMatrix &B, FloatMatrix &X);
 };
 } // end namespace oofem
 #endif // sparselinsystemnm_h
