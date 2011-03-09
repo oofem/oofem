@@ -100,6 +100,8 @@ enum classType {
     CBSElementClass,
     SUPGElementClass,
     Tr21StokesElementClass,
+    LineSurfaceTensionElementClass,
+    Line2SurfaceTensionElementClass,
 
     TrStructuralElementClass,
     NLStructuralElementClass,
@@ -289,6 +291,9 @@ enum classType {
     BinghamFluidMaterialClass,
     BinghamFluidMaterialStatusClass,
     TwoFluidMaterialClass,
+
+    SurfaceTensionMaterialClass,
+    SurfaceTensionMaterialStatusClass,
 
     CrossSectionClass,
     StructuralCrossSectionClass,

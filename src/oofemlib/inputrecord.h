@@ -389,8 +389,6 @@ enum InputFieldType {
 
     IFT_StokesFlowStressHomogenization_homogenizationtype,
 
-    IFT_SurfaceTension_gamma_s,
-
     IFT_NLStructuralElement_nlgeoflag,
 
     IFT_Axisymm3d_nip,
@@ -470,6 +468,8 @@ enum InputFieldType {
     IFT_IsotropicLinearElasticMaterial_e,
     IFT_IsotropicLinearElasticMaterial_n,
     IFT_IsotropicLinearElasticMaterial_talpha,
+
+    IFT_SurfaceTensionMaterial_isotropic,
 
     IFT_IsotropicLinearHeatMaterial_k, // conductivity
     IFT_IsotropicLinearHeatMaterial_c, // specific heat

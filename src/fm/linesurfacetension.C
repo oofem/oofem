@@ -34,39 +34,21 @@
 
 #include "linesurfacetension.h"
 #include "domain.h"
+#include "material.h"
 #include <math.h>
 
 namespace oofem {
 
-LineSurfaceTension :: LineSurfaceTension(int n, Domain *aDomain) : FMElement (n, aDomain)
+LineSurfaceTension :: LineSurfaceTension(int n, Domain *aDomain) : FMElement (n, aDomain),
 {
-    numberOfDofMans  = 2;
+    this->numberOfDofMans = 2;
 }
+
 LineSurfaceTension :: ~LineSurfaceTension () {}
 
 IRResultType LineSurfaceTension :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom";
-    IRResultType result;
-
     this->Element :: initializeFrom(ir);
-    IR_GIVE_FIELD(ir, gamma_s, IFT_SurfaceTension_gamma_s, "gamma_s");
-
-    this->bflag1 = false;
-    this->bflag2 = false;
-
-    if (this->boundarySides.giveSize() > 0) {
-        if (this->boundarySides.giveSize() != 2) {
-            OOFEM_ERROR("Boundary sides must be 2 if exists");
-        }
-        if (this->boundarySides.at(1)) {
-            this->bflag1 = true;
-        }
-        if (this->boundarySides.at(2)) {
-            this->bflag2 = true;
-        }
-    }
-
     return IRRT_OK;
 }
 
@@ -189,7 +171,9 @@ void LineSurfaceTension :: computeLoadVector(FloatArray &answer, ValueModeType m
 
     Node *node1, *node2;
     FloatArray v1, v2, v;
-    double x1, x2, length, t;
+    double x1, x2, length, t, gamma_s;
+
+    gamma_s = this->giveMaterial()->give('g',NULL);
 
     node1 = giveNode(1);
     node2 = giveNode(2);
@@ -213,42 +197,28 @@ void LineSurfaceTension :: computeLoadVector(FloatArray &answer, ValueModeType m
         answer.at(2) = v.at(2)*t;
         answer.at(3) = -v.at(1)*t - length;
         answer.at(4) = -v.at(2)*t;
-        if (this->bflag1) {
-            t = 2*M_PI*x1;
-            answer.at(1) -= v.at(1)*t;
-            answer.at(2) -= v.at(2)*t;
-        }
-        if (this->bflag2) {
-            t = 2*M_PI*x2;
-            answer.at(3) += v.at(1)*t;
-            answer.at(4) += v.at(2)*t;
-        }
     }
     else {
         //t = this->giveDomain()->giveCrossSection(1)->give(CS_Thickness); // TODO: Should i use this?
         t = 1.0;
         // In this case simple linear case, the boundary term would cancel out the edge term,
         // so it can be simplified to check when the boundary is not there.
-        if (!this->bflag1) {
-            answer.at(1) = v.at(1)*t;
-            answer.at(2) = v.at(2)*t;
-        }
-        if (!this->bflag2) {
-            answer.at(3) = -v.at(1)*t;
-            answer.at(4) = -v.at(2)*t;
-        }
+        answer.at(1) = v.at(1)*t;
+        answer.at(2) = v.at(2)*t;
+        answer.at(3) = -v.at(1)*t;
+        answer.at(4) = -v.at(2)*t;
     }
 
-    answer.times(this->gamma_s);
+    answer.times(gamma_s);
 }
 
 void LineSurfaceTension :: computeTangent(FloatMatrix &answer, TimeStep *tStep)
 {
+#if 1
     // TODO: Not sure if it's a good idea to use this tangent.
     answer.resize(4,4);
     answer.zero();
-
-    /*
+#else
     domainType dt = this->giveDomain()->giveDomainType();
     int ndofs = this->computeNumberOfDofs(EID_MomentumBalance);
     Node *node1, *node2;
@@ -304,37 +274,16 @@ void LineSurfaceTension :: computeTangent(FloatMatrix &answer, TimeStep *tStep)
         for (int i = 0; i < 4; i++) for (int j = 0; j < 4; j++) {
             answer(i,j) = M_PI*(Ah(i)*Bh(j) + Bh(i)*Ah(j)+ rJinv*(NpTNp(i,j) - Ah(i)*Ah(j)));
         }
-        if (this->bflag1) {
-            rJinv = 2*x1/length;
-            for (int i = 0; i < 2; i++) for (int j = 0; j < 4; j++) {
-                answer(i,j) += -M_PI*(2*Ah(i)*Bh(j) + rJinv*(NpTNp(i,j) - Ah(i)*Ah(j)));
-            }
-        }
-        if (this->bflag2) {
-            rJinv = 2*x2/length;
-            for (int i = 2; i < 4; i++) for (int j = 0; j < 4; j++) {
-                answer(i,j) += -M_PI*(2*Ah(i)*Bh(j) + rJinv*(NpTNp(i,j) - Ah(i)*Ah(j)));
-            }
-        }
     }
     else {
         width = 1;
         answer.beDyadicProductOf(Ah,Ah);
         answer.add(NpTNp);
         answer.times(width/length);
-
-        // In this special case, the terms will just cancel out on each node respectively.
-        if (this->bflag1) {
-            answer.at(1,1) = answer.at(1,2) = answer.at(1,3) = answer.at(1,4) = 0;
-            answer.at(2,1) = answer.at(2,2) = answer.at(2,3) = answer.at(2,4) = 0;
-        }
-        if (this->bflag2) {
-            answer.at(3,1) = answer.at(3,2) = answer.at(3,3) = answer.at(3,4) = 0;
-            answer.at(4,1) = answer.at(4,2) = answer.at(4,3) = answer.at(4,4) = 0;
-        }
     }
 
-    answer.times(this->gamma_s);*/
+    answer.times(this->gamma_s);
+#endif
 }
 
 // Some extension Interfaces to follow:

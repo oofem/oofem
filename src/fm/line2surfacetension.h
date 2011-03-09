@@ -80,7 +80,7 @@ public:
     virtual int computeNumberOfDofs(EquationID ut) { return 6; }
 
     const char *giveClassName() const { return "Line2SurfaceTension"; }
-    classType giveClassID() const { return FMElementClass; } // TODO
+    classType giveClassID() const { return Line2SurfaceTensionElementClass; }
 };
 }
 

@@ -35,6 +35,7 @@
 #include "line2surfacetension.h"
 #include "gaussintegrationrule.h"
 #include "gausspnt.h"
+#include "material.h"
 #include "timestep.h"
 #include "mathfem.h"
 
@@ -97,13 +98,7 @@ int Line2SurfaceTension :: computeLocalCoordinates(FloatArray &lcoords, const Fl
             points++;
         }
     }
-/*
-    int points = 101;
-    double p[points];
-    for (int i = 0; i < points; i++) {
-        p[i] = -1.0 + 2.0*i/(points-1);
-    }
-*/
+
     double min_distance2 = 0.0, min_xi, distance2;
     FloatArray f(2), xi(1);
 
@@ -127,8 +122,9 @@ void Line2SurfaceTension :: computeLoadVector(FloatArray &answer, ValueModeType 
 {
     //domainType dt = this->giveDomain()->giveDomainType(); // TODO, support axisymm
     IntegrationRule *iRule = this->integrationRulesArray [ 0 ];
-    double t = 1;
-    //t = this->giveDomain()->giveCrossSection(1)->give(CS_Thickness); // TODO: Should i use this?
+    double t = 1, gamma_s;
+    //t = this->giveDomain()->giveCrossSection(1)->give(CS_Thickness); // TODO: Should i use this? Not that meaningful for flow problems.
+    gamma_s = this->giveMaterial()->give('g', NULL);
 
     FloatMatrix xy(2, 3);
     Node *node;
@@ -169,84 +165,69 @@ void Line2SurfaceTension :: computeLoadVector(FloatArray &answer, ValueModeType 
         BJ.at(1, 5) = BJ.at(2, 6) = dNdxi.at(3);
 
         A.beTProductOf(BJ, es);
-        answer.add( -this->gamma_s * t * gp->giveWeight(), A); // Note! Negative sign!
-    }
-
-    // This part is not verified yet.
-    if ( this->bflag1 ) {
-        dNdxi.at(1) = -1.5;
-        dNdxi.at(2) = -0.5;
-        dNdxi.at(3) =  2.0;
-        es.beProductOf(xy, dNdxi);
-        es.normalize();
-        answer.at(1) -= es.at(1) * this->gamma_s;
-        answer.at(2) -= es.at(2) * this->gamma_s;
-    }
-
-    if ( this->bflag2 ) {
-        dNdxi.at(1) =  0.5;
-        dNdxi.at(2) =  1.5;
-        dNdxi.at(3) = -2.0;
-        es.beProductOf(xy, dNdxi);
-        es.normalize();
-        answer.at(3) -= es.at(1) * this->gamma_s;
-        answer.at(4) -= es.at(2) * this->gamma_s;
+        answer.add( - gamma_s * t * gp->giveWeight(), A); // Note! Negative sign!
     }
 }
 
 void Line2SurfaceTension :: computeTangent(FloatMatrix &answer, TimeStep *tStep)
 {
+#if 1
     answer.resize(6, 6);
     answer.zero();
-    /*
-     *  domainType dt = this->giveDomain()->giveDomainType(); // TODO, support axisymm
-     *  IntegrationRule *iRule = this->integrationRulesArray [ 0 ];
-     *  double thickness = 1;
-     *
-     *  FloatMatrix xy(2,3);
-     *  Node *node;
-     *  for (int i = 1; i <= 3; i++) {
-     *      node = giveNode(i);
-     *      xy.at(1,i) = node->giveCoordinate(1);
-     *      xy.at(2,i) = node->giveCoordinate(2);
-     *  }
-     *
-     *  FloatArray A;
-     *  FloatArray dNdxi(3);
-     *  FloatArray es(2); // tangent vector to curve
-     *  FloatMatrix BJ(2,6);
-     *  BJ.zero();
-     *  FloatMatrix temp1,temp2;
-     *
-     *  answer.resize(6,6);
-     *  answer.zero();
-     *  for (int k = 0; k < iRule->getNumberOfIntegrationPoints(); k++ ) {
-     *      GaussPoint *gp = iRule->getIntegrationPoint(k);
-     *
-     *      double xi = gp->giveCoordinate(1);
-     *
-     *      dNdxi.at(1) = -0.5+xi;
-     *      dNdxi.at(2) =  0.5+xi;
-     *      dNdxi.at(3) =   -2*xi;
-     *
-     *      es.beProductOf(xy,dNdxi);
-     *      double J = es.computeNorm();
-     *      es.times(1/J); //es.normalize();
-     *
-     *      BJ.at(1,1) = BJ.at(2,2) = dNdxi.at(1);
-     *      BJ.at(1,3) = BJ.at(2,4) = dNdxi.at(2);
-     *      BJ.at(1,5) = BJ.at(2,6) = dNdxi.at(3);
-     *
-     *      A.beTProductOf(BJ,es);
-     *
-     *      temp1.beTProductOf(BJ,BJ);
-     *      temp2.beDyadicProductOf(A,A);
-     *      temp1.subtract(temp2);
-     *      temp1.times(this->gamma_s*thickness*gp->giveWeight()/J*(tStep->giveTimeIncrement()));
-     *      answer.add(temp1);
-     *  }
-     *  if (dt ==
-     */
+#else
+    domainType dt = this->giveDomain()->giveDomainType(); // TODO, support axisymm
+    if (dt == _3dAxisymmMode) {
+        OOFEM_ERROR("Line2SurfaceTension :: computeTangent - Axisymm not implemented");
+    }
+    IntegrationRule *iRule = this->integrationRulesArray [ 0 ];
+    double t = 1, gamma_s;
+    //t = this->giveDomain()->giveCrossSection(1)->give(CS_Thickness); // TODO: Should i use this? Not that meaningful for flow problems.
+    gamma_s = this->giveMaterial()->give('g', NULL);
+
+    FloatMatrix xy(2,3);
+    Node *node;
+    for (int i = 1; i <= 3; i++) {
+        node = giveNode(i);
+        xy.at(1,i) = node->giveCoordinate(1);
+        xy.at(2,i) = node->giveCoordinate(2);
+    }
+
+    FloatArray A;
+    FloatArray dNdxi(3);
+    FloatArray es(2); // tangent vector to curve
+    FloatMatrix BJ(2,6);
+    BJ.zero();
+    FloatMatrix temp1,temp2;
+
+    answer.resize(6,6);
+    answer.zero();
+    for (int k = 0; k < iRule->getNumberOfIntegrationPoints(); k++ ) {
+        GaussPoint *gp = iRule->getIntegrationPoint(k);
+
+        double xi = gp->giveCoordinate(1);
+
+        dNdxi.at(1) = -0.5+xi;
+        dNdxi.at(2) =  0.5+xi;
+        dNdxi.at(3) = -2.0*xi;
+
+        es.beProductOf(xy,dNdxi);
+        double J = es.computeNorm();
+        es.times(1/J); //es.normalize();
+
+        BJ.at(1,1) = BJ.at(2,2) = dNdxi.at(1);
+        BJ.at(1,3) = BJ.at(2,4) = dNdxi.at(2);
+        BJ.at(1,5) = BJ.at(2,6) = dNdxi.at(3);
+
+        A.beTProductOf(BJ,es);
+
+        temp1.beTProductOf(BJ,BJ);
+        temp2.beDyadicProductOf(A,A);
+        temp1.subtract(temp2);
+        temp1.times(t*gp->giveWeight()/J*(tStep->giveTimeIncrement()));
+        answer.add(temp1);
+    }
+    answer.times(gamma_s);
+#endif
 }
 
 double Line2SurfaceTension :: SpatialLocalizerI_giveClosestPoint(FloatArray &lcoords, FloatArray &closest, const FloatArray &gcoords)

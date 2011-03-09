@@ -60,17 +60,13 @@ class LineSurfaceTension :
 	public EIPrimaryUnknownMapperInterface
 {
 protected:
-	/// Material parameter for the surface energy. Defines the traction as @f$ \mathbf{t}_s = 2\kappa\gamma_s \mathbf{n} @f$.
-	double gamma_s;
-	/// Flags denoting if a a node is on the boundary.
-	bool bflag1, bflag2;
 	/// True if used as FMElement
 	bool fmtype;
 
 public:
     /**
      * Constructor. Creates an element with number n belonging to domain aDomain.
-     * @param n Element's number
+     * @param n Element's number.
      * @param d Pointer to the domain to which element belongs.
      */
 	LineSurfaceTension (int n, Domain *d);
@@ -79,8 +75,6 @@ public:
 
 	/**
 	 * Initializes the element.
-	 * Reads
-	 * - gamma_s (required)
 	 */
 	IRResultType initializeFrom(InputRecord *);
 
@@ -123,7 +117,7 @@ public:
     virtual void EIPrimaryUnknownMI_givePrimaryUnknownVectorDofID(IntArray &answer);
 
     const char *giveClassName() const { return "LineSurfaceTension"; }
-    classType giveClassID() const { return FMElementClass; } // TODO
+    classType giveClassID() const { return LineSurfaceTensionElementClass; } // TODO
 };
 
 } // end namespace oofem
