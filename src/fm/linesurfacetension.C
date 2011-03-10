@@ -39,7 +39,7 @@
 
 namespace oofem {
 
-LineSurfaceTension :: LineSurfaceTension(int n, Domain *aDomain) : FMElement (n, aDomain),
+LineSurfaceTension :: LineSurfaceTension(int n, Domain *aDomain) : FMElement (n, aDomain)
 {
     this->numberOfDofMans = 2;
 }
