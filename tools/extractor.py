@@ -340,18 +340,18 @@ def match_primary_rec (context, line):
     if match:
         context.rectype = rt_timestep
         context.rectime=float(match.group(1))
-        if debug: print "found time ",rectime
+        if debug: print "found time ", context.rectime
         if context.firstTimeStepFlag:
             context.firstTimeStepFlag = 0
         # print parsed record values from previous step
-        elif mode == 'e': print_step_results()
+        elif mode == 'e': print_step_results(context)
         check_time_rec (context)
         return None
     match=loadlevel_re.search(line)
     if match:
         context.rectype = rt_loadlevel
         context.recvalue= float(match.group(1))
-        if debug: print "found load level ",recvalue
+        if debug: print "found load level ", context.recvalue
         check_loadlevel_rec (context)
         return None
 
@@ -360,7 +360,7 @@ def match_primary_rec (context, line):
     if match:
         context.rectype = rt_dofman
         context.recnumber= int(match.group(1))
-        if debug: print "found  node",recnumber
+        if debug: print "found  node", context.recnumber
         nline = match_dofrec(context)
         return nline
 
@@ -368,7 +368,7 @@ def match_primary_rec (context, line):
     if match:
         context.rectype = rt_elem
         context.recnumber = int(match.group(1))
-        if debug: print "found element", recnumber
+        if debug: print "found element", context.recnumber
         nline = match_gprec(context)
         return nline
 
@@ -376,7 +376,7 @@ def match_primary_rec (context, line):
     if match:
         context.rectype = rt_elem
         context.recnumber = int(match.group(2))
-        if debug: print "found element", recnumber
+        if debug: print "found element", context.recnumber
         nline = match_beamrec(context)
         return nline
 
@@ -404,7 +404,7 @@ def match_dofrec (context):
             #rectype  = match.group(2)
             #recvalue = float(match.group(3))
             check_node_rec (context);
-            if debug: print "     dof", recdofnum
+            if debug: print "     dof", context.recdofnum
             continue
         else:
             return line
@@ -453,7 +453,7 @@ def match_singlegprec (context, line):
     if match:
         context.recirule=int(match.group(1))
         context.recgpnum=int(match.group(2))
-        if debug: print "  gp", recgpnum
+        if debug: print "  gp", context.recgpnum
         match_gpsubrec (context, line)
         for line in context.infile:
             match=gp_re.search(line)
