@@ -1,3 +1,37 @@
+/*
+ *
+ *                 #####    #####   ######  ######  ###   ###
+ *               ##   ##  ##   ##  ##      ##      ## ### ##
+ *              ##   ##  ##   ##  ####    ####    ##  #  ##
+ *             ##   ##  ##   ##  ##      ##      ##     ##
+ *            ##   ##  ##   ##  ##      ##      ##     ##
+ *            #####    #####   ##      ######  ##     ##
+ *
+ *
+ *             OOFEM : Object Oriented Finite Element Code
+ *
+ *               Copyright (C) 1993 - 2011   Borek Patzak
+ *
+ *
+ *
+ *       Czech Technical University, Faculty of Civil Engineering,
+ *   Department of Structural Mechanics, 166 29 Prague, Czech Republic
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+
 #include "fe2sinteringmaterial.h"
 #include "structuralmaterial.h"
 #include "oofemtxtdatareader.h"
@@ -106,32 +140,31 @@ int FE2SinteringMaterial::hasMaterialModeCapability(MaterialMode mode)
 
 IRResultType FE2SinteringMaterial::initializeFrom(InputRecord *ir)
 {
+    const char *__proc = "initializeFrom";
     IRResultType result;
-    result = this->StructuralMaterial::initializeFrom(ir);
-    return result;
+    printf("Hejsan\n");
+    IR_GIVE_FIELD2(ir, this->inputfile, IFT_MicroMaterialFileName, "inputfile", OOFEM_MAX_LINE_LENGTH);
+    printf("svejsan\n");
+    return this->StructuralMaterial::initializeFrom(ir);
 }
 
 int FE2SinteringMaterial::giveInputRecordString(std::string &str, bool keyword)
 {
-    char buff[1024];
-    StructuralMaterial::giveInputRecordString(str, keyword);
-    sprintf(buff, " mu %e gamma_s %e", this->mu, this->gamma_s);
-    str += buff;
-    return 1;
+    return StructuralMaterial::giveInputRecordString(str, keyword);;
 }
 
 MaterialStatus * FE2SinteringMaterial::CreateStatus(GaussPoint *gp) const
 {
-    return new FE2SinteringMaterialStatus(n++, this->giveDomain(), gp);
+    return new FE2SinteringMaterialStatus(n++, this->giveDomain(), gp, this->inputfile);
 }
 
 int FE2SinteringMaterial::checkConsistency()
 {
-    return 1;
+    return true;
 }
 
-FE2SinteringMaterialStatus::FE2SinteringMaterialStatus(int n, Domain *d, GaussPoint *gp) :
-    StructuralMaterialStatus(n, d, gp)
+FE2SinteringMaterialStatus::FE2SinteringMaterialStatus(int n, Domain *d, GaussPoint *gp, const char* inputfile) :
+            StructuralMaterialStatus(n, d, gp)
 {
     MaterialMode mmode = gp->giveMaterialMode();
     int size = 0;
@@ -147,28 +180,20 @@ FE2SinteringMaterialStatus::FE2SinteringMaterialStatus(int n, Domain *d, GaussPo
     this->oldStrainVector = this->tempStrainVector = this->strainVector;
     this->volume = 2.0;
 
-    if (!this->createRVE(n, gp)) {
+    if (!this->createRVE(n, gp, inputfile)) {
         OOFEM_ERROR("Couldn't create RVE");
     }
 }
 
 // Uses an input file for now, should eventually create the RVE itself.
-bool FE2SinteringMaterialStatus::createRVE(int n, GaussPoint *gp)
+bool FE2SinteringMaterialStatus::createRVE(int n, GaussPoint *gp, const char* inputfile)
 {
     //FloatArray *gc = gp->giveCoordinates();
     //double cx = gc->at(1);
     //double cy = gc->at(2);
-    double density = 0.84;
+    //char inputfile[1024] = "/home/mikael/workspace/OOFEM/4particle_0.84_mesh.in";
 
-    char filename[1024];
-    //sprintf(filename,"/home/mikael/workspace/OOFEM/4particle_rve.in");
-    //sprintf(filename,"/home/mikael/workspace/OOFEM/4particle_super_coarse_mesh.in");
-    //sprintf(filename,"/home/mikael/workspace/OOFEM/4particle_mega_coarse_mesh.in");
-    //sprintf(filename,"/home/mikael/workspace/OOFEM/4particle_coarse_mesh.in");
-    //sprintf(filename,"/home/mikael/workspace/OOFEM/4particle_0.88_mesh.in");
-    sprintf(filename, "/home/mikael/workspace/OOFEM/4particle_%.2f_mesh.in", density);
-
-    OOFEMTXTDataReader dr(filename);
+    OOFEMTXTDataReader dr(inputfile);
     EngngModel *em = InstanciateProblem(&dr, _processor, 0); // Everything but nrsolver is updated.
     dr.finish();
     em->initMetaStepAttributes(em->giveNextStep());
@@ -188,7 +213,7 @@ bool FE2SinteringMaterialStatus::createRVE(int n, GaussPoint *gp)
 
 void FE2SinteringMaterialStatus::printOutputAt(FILE *file, TimeStep *tNow)
 // Prints the strains and stresses on the data file.
-// Not sure i need this. I already get alot of data from every gausspoint. But the homogenized values might be of interest too.
+// Not sure i need this. I already get a lot of data from every gauss point. But the homogenized values might be of interest too.
 {
 }
 
