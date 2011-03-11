@@ -48,23 +48,22 @@ LineSurfaceTension :: ~LineSurfaceTension () {}
 
 IRResultType LineSurfaceTension :: initializeFrom(InputRecord *ir)
 {
-    this->Element :: initializeFrom(ir);
-    return IRRT_OK;
+    return Element :: initializeFrom(ir);
 }
 
 void LineSurfaceTension :: computeN(FloatArray &answer, const FloatArray &lcoords) const
 {
-	double xi = lcoords(0);
-	answer.resize(2);
-	answer(0) = 1.0 - xi;
-	answer(1) = xi;
+    double xi = lcoords(0);
+    answer.resize(2);
+    answer(0) = 1.0 - xi;
+    answer(1) = xi;
 }
 
 int LineSurfaceTension :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords)
 {
-	FloatArray n;
-	this->computeN(n, lcoords);
-	answer.resize(2);
+    FloatArray n;
+    this->computeN(n, lcoords);
+    answer.resize(2);
     answer.zero();
     for (int i = 1; i <= n.giveSize(); i++) {
         answer.add(n.at(i), *this->giveNode(i)->giveCoordinates());
@@ -95,23 +94,23 @@ double LineSurfaceTension :: SpatialLocalizerI_giveDistanceFromParametricCenter(
 }
 
 int LineSurfaceTension :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAt(ValueModeType mode,
-    TimeStep *tStep, const FloatArray &gcoords, FloatArray &answer)
+        TimeStep *tStep, const FloatArray &gcoords, FloatArray &answer)
 {
-	FloatArray lcoords;
-	if (!this->computeLocalCoordinates(lcoords, gcoords)) {
-	    answer.resize(0);
-	    return false;
-	}
-	this->EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(mode, tStep, lcoords, answer);
-	return true;
+    FloatArray lcoords;
+    if (!this->computeLocalCoordinates(lcoords, gcoords)) {
+        answer.resize(0);
+        return false;
+    }
+    this->EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(mode, tStep, lcoords, answer);
+    return true;
 }
 
 
 void LineSurfaceTension :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(ValueModeType mode,
-    TimeStep *tStep, const FloatArray &lcoords, FloatArray &answer)
+        TimeStep *tStep, const FloatArray &lcoords, FloatArray &answer)
 {
     FloatArray n;
-	this->computeN(n, lcoords);
+    this->computeN(n, lcoords);
 
     answer.resize(2);
     answer.zero();
@@ -214,7 +213,7 @@ void LineSurfaceTension :: computeLoadVector(FloatArray &answer, ValueModeType m
 
 void LineSurfaceTension :: computeTangent(FloatMatrix &answer, TimeStep *tStep)
 {
-#if 1
+#if 0
     // TODO: Not sure if it's a good idea to use this tangent.
     answer.resize(4,4);
     answer.zero();
@@ -222,7 +221,9 @@ void LineSurfaceTension :: computeTangent(FloatMatrix &answer, TimeStep *tStep)
     domainType dt = this->giveDomain()->giveDomainType();
     int ndofs = this->computeNumberOfDofs(EID_MomentumBalance);
     Node *node1, *node2;
-    double x1, x2, y1, y2, dx, dy, vx, vy, length, width;
+    double x1, x2, y1, y2, dx, dy, vx, vy, length, width, gamma_s;
+
+    gamma_s = this->giveMaterial()->give('g',NULL);
 
     node1 = giveNode(1);
     node2 = giveNode(2);
@@ -282,7 +283,7 @@ void LineSurfaceTension :: computeTangent(FloatMatrix &answer, TimeStep *tStep)
         answer.times(width/length);
     }
 
-    answer.times(this->gamma_s);
+    answer.times(gamma_s);
 #endif
 }
 

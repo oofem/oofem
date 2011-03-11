@@ -171,7 +171,7 @@ void Line2SurfaceTension :: computeLoadVector(FloatArray &answer, ValueModeType 
 
 void Line2SurfaceTension :: computeTangent(FloatMatrix &answer, TimeStep *tStep)
 {
-#if 1
+#if 0
     answer.resize(6, 6);
     answer.zero();
 #else
