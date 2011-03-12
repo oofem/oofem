@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/crosssection.C,v 1.10.4.1 2004/04/05 15:19:43 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -33,12 +32,10 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-//   file CROSSSECTION.CC
-
 #include "emptycs.h"
 
 namespace oofem {
 EmptyCS :: EmptyCS(int n, Domain *d) : CrossSection(n, d) { }
 
-EmptyCS :: ~EmptyCS()                { }
+EmptyCS :: ~EmptyCS() { }
 } // end namespace oofem

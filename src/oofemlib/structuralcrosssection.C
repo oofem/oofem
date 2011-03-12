@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/structuralcrosssection.C,v 1.10 2003/04/14 16:00:47 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -33,9 +32,6 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-
-//   file STRUCTURALCROSSSECTION.CC
-
 #include "structuralcrosssection.h"
 #include "simplecrosssection.h"
 //#include "layeredcrosssection.h"
@@ -51,7 +47,6 @@ StructuralCrossSection ::  giveRealStresses(FloatArray &answer, MatResponseForm 
                                             GaussPoint *gp,
                                             const FloatArray &strain,
                                             TimeStep *tStep)
-
 //
 // this function returns a real stresses corresponding to
 // given strain according to stressStrain mode stored
