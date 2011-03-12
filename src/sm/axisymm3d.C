@@ -658,7 +658,6 @@ Axisymm3d :: computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, Gaus
 
 
 #ifdef __OOFEG
- #include "rcm2.h"
  #define TR_LENGHT_REDUCT 0.3333
 
 void Axisymm3d :: drawRawGeometry(oofegGraphicContext &gc)
