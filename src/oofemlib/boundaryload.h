@@ -88,22 +88,16 @@ class TimeStep;
  * analysis, a boundary load load could be a  heat source.
  *
  * To summarize, the services provided include
- * <UL>
- * <LI>
- * Computing component array evaluated at specific point on boundary.</LI>
- * <LI>
- * Returning component array of "vertex values". Meaning of these values is
- * class dependent, see derived classes documentation for details. "vertexes" can generally differ from
- * element nodes.</LI>
- * <LI>
- * Returning load approximation order. Useful when numerical integrations of load vector over element
- * boundaries are used.</LI>
- * <LI>
- * Returning type of coordinate system, in which load applies. (global c.s., or entity related c.s.).</LI>
- * </UL>
- * Returning number of load approximation DOFs, which represent its geometry.
- * (number of DOFs is also size of load component array attribute and should correspond to number of DOFs on loaded
- * entity).
+ * - Computing component array evaluated at specific point on boundary.
+ * - Returning component array of "vertex values". Meaning of these values is
+ *   class dependent, see derived classes documentation for details. "vertexes" can generally differ from
+ *   element nodes.
+ * - Returning load approximation order. Useful when numerical integrations of load vector over element
+ *   boundaries are used.
+ * - Returning type of coordinate system, in which load applies. (global c.s., or entity related c.s.).
+ * - Returning number of load approximation DOFs, which represent its geometry.
+ *   (number of DOFs is also size of load component array attribute and should correspond to number of DOFs on loaded
+ *   entity).
  */
 class BoundaryLoad : public Load
 {

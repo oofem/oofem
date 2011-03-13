@@ -56,8 +56,8 @@ class BodyLoad : public Load
 public:
     /**
      * Constructor. Creates Body Load object with given number, belonging to given domain.
-     * @param n load number
-     * @param d domain to which new object will belongs.
+     * @param i Load number
+     * @param d Domain to which new load belongs.
      */
     BodyLoad(int i, Domain *d) : Load(i, d) { }
 

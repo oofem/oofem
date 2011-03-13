@@ -69,16 +69,12 @@ class Dictionary;
  * engineering model documentation for details.
  *
  * The services provided include
- * <UL>
- * <LI>
- * Returning a component, i.e., the prescribed value of an unknown
- * (displacement, velocity, temperature, etc). Determined using
- * ValueModeType (determines whether
- * for example total value or its change from previous step is requested) - method give.</LI>
- * <LI>
- * Returning a value of isImposedTimeFunction, indicating whether b.c. is imposed or not
- * in given time (nonzero indicates imposed BC) - method isImposed.</LI>
- * </UL>
+ * - Returning a component, i.e., the prescribed value of an unknown
+ *   (displacement, velocity, temperature, etc). Determined using
+ *   ValueModeType (determines whether
+ *   for example total value or its change from previous step is requested) - method give.
+ * - Returning a value of isImposedTimeFunction, indicating whether b.c. is imposed or not
+ *   in given time (nonzero indicates imposed BC) - method isImposed.
  */
 class BoundaryCondition : public GeneralBoundaryCondition
 {
@@ -95,7 +91,7 @@ protected:
 public:
     /**
      * Constructor. Creates boundary condition with given number, belonging to given domain.
-     * @param n Boundary condition number
+     * @param i Boundary condition number.
      * @param d Domain to which new object will belongs.
      */
     BoundaryCondition(int i, Domain *d) : GeneralBoundaryCondition(i, d)
@@ -109,7 +105,7 @@ public:
      * This function should only be used if the BC is imposed.
      * @see isImposed
      * @param dof Determines the dof subjected to receiver BC.
-     * @param mode Unknown char type (if total or incremental value is returned)
+     * @param mode Unknown char type (if total or incremental value is returned).
      * @param tStep Time step to give value for.
      * @return Prescribed value of unknown or zero if not prescribed.
      */

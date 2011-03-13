@@ -179,7 +179,7 @@ ExportModule *CreateUsrDefExportModuleOfType(const char *name, int number, Engng
  * @param emodel Engineering model associated to new export module.
  * @return Newly allocated object of requested type, null if keyword not supported.
  */
-InitModule *CreateUsrDefInitModuleOfType(const char *name, int n, EngngModel *emodel);
+InitModule *CreateUsrDefInitModuleOfType(const char *name, int number, EngngModel *emodel);
 
 /**
  * Creates new Instance of Nonlocal Barrier class corresponding to given name.
@@ -246,7 +246,8 @@ MaterialMappingAlgorithm *CreateUsrDefMaterialMappingAlgorithm(MaterialMappingAl
 MesherInterface *CreateUsrDefMesherInterface(MeshPackageType type, Domain *d);
 /**
  * Creates new instance of enrichment item.
- * @param type Id determining the type of enrichment item.
+ * @param name XFEM keyword.
+ * @param num Component number.
  * @param xm XFEM manager which item belongs to.
  * @param d Domain assigned to new object.
  * @return Newly allocated object of requested type, null if keyword not supported.
