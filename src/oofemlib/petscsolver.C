@@ -40,7 +40,6 @@
  #include "flotarry.h"
  #include "verbose.h"
 
-namespace oofem {
  #define TIME_REPORT
 
  #ifdef TIME_REPORT
@@ -50,6 +49,7 @@ namespace oofem {
   #include "clock.h"
  #endif
 
+namespace oofem {
 PetscSolver :: PetscSolver(int i, Domain *d, EngngModel *m) : SparseLinearSystemNM(i, d, m) { }
 
 
