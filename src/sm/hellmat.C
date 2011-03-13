@@ -3366,8 +3366,6 @@ HellmichMaterialStatus :: restoreContext(DataStream *stream, ContextMode mode, v
 }
 
 #else // #ifdef __TM_MODULE
- #include "hellmat.h"
-
 HellmichMaterial :: HellmichMaterial(int n, Domain *d) : StructuralMaterial(n, d) {
     _error("Can't create instance of this class, TM module required");
 }

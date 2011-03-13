@@ -885,7 +885,6 @@ TrPlaneStress2d :: HuertaErrorEstimatorI_setupRefinedElementProblem(RefinedEleme
 
 
 #ifdef __OOFEG
- #include "rcm2.h"
  #define TR_LENGHT_REDUCT 0.3333
 
 void TrPlaneStress2d :: drawRawGeometry(oofegGraphicContext &gc)

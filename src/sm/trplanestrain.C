@@ -973,7 +973,6 @@ TrPlaneStrain :: HuertaErrorEstimatorI_setupRefinedElementProblem(RefinedElement
 
 
 #ifdef __OOFEG
- #include "rcm2.h"
  #define TR_LENGHT_REDUCT 0.3333
 
 void TrPlaneStrain :: drawRawGeometry(oofegGraphicContext &gc)
