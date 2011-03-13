@@ -767,33 +767,16 @@ FloatArray :: givePackSize(CommunicationBuffer &buff) const
 
 #endif
 
-double dotProduct(const FloatArray &p1, const FloatArray &p2, register int i)
+double dotProduct(double *p1, double *p2, int i)
 // A non-member function. Returns the dot product of the first 'i' coef-
-// ficienst of the two arrays P1 and P2. This method applies to many
-// situations, eg row*column products with matrices.
-{
-    double answer, *v1, *v2;
-
-    answer = 0.;
-    v1 = p1.values;
-    v2 = p2.values;
-    while ( i-- ) {
-        answer += (* v1++) * (* v2++);
-    }
-
-    return answer;
-}
-
-double dotProduct(double *P1, double *P2, int i)
-// A non-member function. Returns the dot product of the first 'i' coef-
-// ficienst of the two arrays P1 and P2. This method applies to many
+// ficienst of the two arrays P1 and p2. This method applies to many
 // situations, eg row*column products with matrices.
 {
     double answer;
 
     answer = 0.;
     while ( i-- ) {
-        answer += (* P1++) * (* P2++);
+        answer += (* p1++) * (* p2++);
     }
 
     return answer;

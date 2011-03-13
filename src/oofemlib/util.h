@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/util.h,v 1.7 2003/05/19 13:03:58 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -33,7 +32,6 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-
 #ifndef util_h
 #define util_h
 
@@ -47,21 +45,44 @@ class DataReader;
 class EngngModel;
 
 /**
- * Reads the input line from file and converts all characters to lower case
- * @param line contains read line
- * @param len determines max number of read characters including terminationg '\0'
+ * Reads the input line from file and converts all characters to lower case.
+ * @param inputStream Stream to read from.
+ * @param line Contains read line.
+ * @param len Determines max number of read characters including terminationg '\0'.
+ * @return Newly allocated pointer containing string.
  */
 char *giveLineFromInput(FILE *inputStream, char *line, int len);
-/// Reads the input line from file
+/**
+ * Reads the input line from file.
+ * @param inputStream Stream to read from.
+ * @param line Contains read line.
+ * @param len Determines max number of read characters including terminationg '\0'.
+ * @return Newly allocated pointer containing string.
+ */
 char *giveRawLineFromInput(FILE *inputStream, char *line, int len);
 
-// Returns the name of the file containing the data of the problem.
+/**
+ * Returns the name of the file containing the data of the problem.
+ * @param dataInputFileName Char buffer at least the size maxlen. 
+ * @param maxlen Maximum length of file name.
+ * @return Same as dataInputFileName.
+ */
 char *giveInputDataFileName(char *dataInputFileName, int maxlen);
 
-//Instanciates the new problem
+/**
+ * Instanciates the new problem.
+ * @param dr DataReader containing the problem data.
+ * @param mode Mode determining macro or micro problem.
+ * @param contextFlag ?
+ * @param master Master problem in case of multiscale computations.
+ */
 EngngModel *InstanciateProblem(DataReader *dr, problemMode mode, int contextFlag, EngngModel *master = 0);
 
-/// static storage for temporary strings to solve compiler warnings about onversion from string constant to char*
+/** 
+ * Static storage for temporary strings to solve compiler warnings about onversion from string constant to char*.
+ * @param src Constant data to be copied over.
+ * @return Pointer to static array of data, overwritten with src.
+ */
 char *oofem_tmpstr(const char *src);
 } // end namespace oofem
 #endif // util_h

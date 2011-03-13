@@ -102,7 +102,7 @@ public:
      * @see StructurealCrossSection::giveRealStresses
      */
     void giveRealStresses(FloatArray &answer, MatResponseForm form, GaussPoint *gp,
-                          const FloatArray &answer, TimeStep *tStep);
+                          const FloatArray &reducedStrainIncrement, TimeStep *tStep);
 
     // next function is intended to be used if we would like to obtain
     // char matrix form different material which is not associated with gp and its element.

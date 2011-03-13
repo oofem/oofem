@@ -371,19 +371,14 @@ public:
      */
     double *givePointer() const { return values; }
 
+    friend double dotProduct(double *p1, double *p2, int i);
     /**
      * Returns the dot product of the first i coefficients of the two
      * arrays p1 and p2.
+     * @deprecated Use FloatArray::dotProduct.
      * @param p1 Vector in the dot product.
      * @param p2 Vector in the dot product.
-     * @return Value of the dot product.
-     */
-    friend double dotProduct(double *p1, double *p2, int);
-    /**
-     * Returns the dot product of the first i coefficients of the two
-     * arrays p1 and p2.
-     * @param p1 Vector in the dot product.
-     * @param p2 Vector in the dot product.
+     * @param i Number of coefficients to use.
      * @return Value of the dot product
      */
     friend double dotProduct(const FloatArray &p1, const FloatArray &p2, int i);
@@ -423,8 +418,17 @@ double norm(const FloatArray &x);
 double dot(const FloatArray &x, const FloatArray &y);
 #endif
 
-double dotProduct(double *, double *, int);
-double dotProduct(const FloatArray &p1, const FloatArray &p2, int i);
+/**
+ * Returns the dot product of the first i coefficients of the two
+ * arrays p1 and p2.
+ * @deprecated Prefer FloatArray::dotProduct.
+ * @param p1 Vector in the dot product.
+ * @param p2 Vector in the dot product.
+ * @param i Number of coefficients to use.
+ * @return Value of the dot product.
+ */
+double dotProduct(double *p1, double *p2, int i);
+double dotProduct(const FloatArray &p1, const FloatArray &p2, int i) { return p1.dotProduct(p2,i); }
 
 } // end namespace oofem
 #endif // flotarry_h
