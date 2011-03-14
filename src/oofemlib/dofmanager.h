@@ -204,10 +204,9 @@ public:
     virtual void giveCompleteLocationArray(IntArray &locationArray, const UnknownNumberingScheme &s) const;
     /**
      * Returns DOFs numbers of receiver with required physical meaning.
-     * @param dofIDArry array containing DofIDItem-type values (this is enumeration
+     * @param dofIDArray Array containing DofIDItem-type values (this is enumeration
      * identifying physical meaning of particular DOF, see cltypes.h).
      * @param answer Array with DOF numbers. They are ordered according to dofIDArry.
-     * @param dofIDArray Array with DOF IDs.
      * @see DofIDItem
      * @see cltypes.h
      */
@@ -249,6 +248,7 @@ public:
      * required values. If dof with requested physical meaning does not exist in receiver,
      * an error is generated and execution exits.
      * @param field Primary field.
+     * @param mode Mode of unknown (e.g, total value, velocity or acceleration of unknown).
      * @param stepN Time step when unknown requested. See documentation of particular EngngModel
      * class for valid StepN values (most implementation can return only values for current
      * and possibly for previous time step).
@@ -381,7 +381,7 @@ public:
      * In this case, the masters array should contain the list of masters.
      * In both serial and parallel modes, local numbers are be provided.
      * @param masters Indices of dof managers which receiver has slaves to.
-     * @param If receiver contains only primary DOFs, false is returned.
+     * @return If receiver contains only primary DOFs, false is returned.
      */
     virtual bool giveMasterDofMans(IntArray &masters);
 

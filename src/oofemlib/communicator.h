@@ -103,26 +103,28 @@ public:
 class Communicator
 {
 protected:
-    /// Rank of process
+    /// Rank of process.
     int rank;
-    /// Number of processes
+    /// Number of processes.
     int size;
-    /// Array of process communicators
+    /// Array of process communicators.
     ProcessCommunicator **processComms;
-    /// Engineering model
+    /// Engineering model.
     EngngModel *engngModel;
-    /// Mode
+    /// Mode.
     CommunicatorMode mode;
 
 public:
     /**
      * Constructor. Creates new communicator associated
      * to partition with number (rank) irank.
-     * @param irank Rank of associated partition.
+     * @param emodel Associated engineering model.
+     * @param buff Communicator buffer.
+     * @param rank Rank of associated partition.
      * @param size Number of collaborating processes.
      * @param mode Communicator mode.
      */
-    Communicator(EngngModel *emodel, CommunicatorBuff *b, int rank, int size, CommunicatorMode m = CommMode_Static);
+    Communicator(EngngModel *emodel, CommunicatorBuff *buff, int rank, int size, CommunicatorMode mode = CommMode_Static);
     /// Destructor
     virtual ~Communicator();
 
@@ -135,28 +137,34 @@ public:
     giveProcessCommunicator(int i) { if ( i < size ) { return processComms [ i ]; } else { return NULL; } }
 
     /**
-     * Pack all problemCommuncators data to their send buffers.
+     * Pack all problemCommunicators data to their send buffers.
+     * @param ptr Pointer problem communicator.
      * @param packFunc Function used to pack nodal data in to buffer.
      * @see NlDEIDynamic_Unpack_func
      */
     template< class T >int packAllData( T * ptr, int ( T :: *packFunc )( ProcessCommunicator & ) );
     /**
      * Pack all problemCommuncators data to their send buffers.
+     * @param ptr Pointer problem communicator.
+     * @param src Pointer to source.
      * @param packFunc Function used to pack nodal data in to buffer.
      * @see NlDEIDynamic_Unpack_func
      */
     //template <class T> int packAllData (T* ptr, FloatArray* src, int (T::*packFunc) (FloatArray*, ProcessCommunicator&));
     template< class T, class P >int packAllData( T * ptr, P * src, int ( T :: *packFunc )( P *, ProcessCommunicator & ) );
     /**
-     * Unpack all problemCommuncators data  from recv buffers.
+     * Unpack all problemCommuncators data from recv buffers.
      * Waits until receive completion before unpacking buffer.
+     * @param ptr Pointer problem communicator.
      * @param unpackFunc Function used to unpack nodal data from buffer.
      * @see NlDEIDynamic_Unpack_func
      */
     template< class T >int unpackAllData( T * ptr, int ( T :: *unpackFunc )( ProcessCommunicator & ) );
     /**
-     * Unpack all problemCommuncators data  from recv buffers.
+     * Unpack all problemCommuncators data from recv buffers.
      * Waits until receive completion before unpacking buffer.
+     * @param ptr Pointer problem communicator.
+     * @param src Pointer to source.
      * @param unpackFunc Function used to unpack nodal data from buffer.
      * @see NlDEIDynamic_Unpack_func
      */
@@ -179,10 +187,10 @@ public:
      * Initializes data receive exchange with all problems.
      * if receive pool is empty, communication is not performed.
      * @param tag Message tag.
-     * @param Nonzero if successful.
+     * @return Nonzero if successful.
      */
     int initReceive(int tag);
-    /*
+    /**
      * Finishes the exchange. After this call all communication buffers can be reused.
      * @return Nonzero if successful.
      */

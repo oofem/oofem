@@ -102,6 +102,7 @@ public:
     /**
      * Packs array of a values of given type into buffer.
      * Buffer is enlarged if isDynamic flag is set, but it requires memory allocation and deallocation.
+     * @param communicator Communicator handle.
      * @param src Address of first value in memory.
      * @param n Number of packed integers.
      * @param type Determines type of array values.
@@ -109,7 +110,8 @@ public:
      */
     int packArray(MPI_Comm communicator, const void *src, int n, MPI_Datatype type);
     /**
-     * unpacks array of values of given type from buffer.
+     * Unpacks array of values of given type from buffer.
+     * @param communicator Communicator handle.
      * @param dest Address of first value in memory, where to store values
      * @param n Number of unpacked integers.
      * @param type Determines type of array values.
@@ -124,6 +126,7 @@ public:
      * Returns pack size required to pack array of given type and size (c-style).
      * @param communicator Communicator handle.
      * @param type Type id.
+     * @param size Size of array to pack.
      * @return Pack size required.
      */
     int givePackSize(MPI_Comm communicator, MPI_Datatype type, int size);
@@ -133,7 +136,7 @@ public:
     //@{
     /**
      * Starts standard mode, nonblocking send.
-     * @param communicator Communicator (handle).
+     * @param communicator Communicator handle.
      * @param dest Rank of destination.
      * @param tag Message tag.
      * @return MPI_SUCCESS if ok.

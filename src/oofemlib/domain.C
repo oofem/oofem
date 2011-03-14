@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/domain.C,v 1.31.4.2 2004/05/14 13:45:27 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -32,8 +31,6 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-
-//   file DOMAIN.CC
 
 #include "domain.h"
 #include "element.h"
@@ -87,10 +84,10 @@
 #endif
 
 namespace oofem {
-Domain :: Domain(int n, int serNum, EngngModel *pm) : defaultNodeDofIDArry(), defaultSideDofIDArry()
+Domain :: Domain(int n, int serNum, EngngModel *e) : defaultNodeDofIDArry(), defaultSideDofIDArry()
     // Constructor. Creates a new domain.
 {
-    this->engineeringModel = pm;
+    this->engineeringModel = e;
     this->number   = n;
     this->serialNumber = serNum;
 

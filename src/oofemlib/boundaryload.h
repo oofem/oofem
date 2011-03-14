@@ -32,10 +32,6 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-//   ************************
-//   *** CLASS BOUNDARY LOAD ***
-//   ************************
-
 #ifndef boundaryload_h
 #define boundaryload_h
 
@@ -133,9 +129,9 @@ protected:
 
 public:
     /**
-     * Constructor. Creates Boundary Load object with given number, belonging to given domain.
-     * @param n load number
-     * @param d domain to which new object will belongs.
+     * Constructor. Creates a boundary load object with given number, belonging to given domain.
+     * @param i Load number.
+     * @param d Domain to which new object will belongs.
      */
     BoundaryLoad(int i, Domain *d) : Load(i, d) {
         nDofs = 0;
@@ -180,7 +176,7 @@ public:
      * @param aProperty id of property requested
      * @return property value
      */
-    virtual double giveProperty(int);
+    virtual double giveProperty(int aProperty);
 
     classType giveClassID() const { return BoundaryLoadClass; }
     const char *giveClassName() const { return "BoundaryLoad"; }
@@ -190,17 +186,17 @@ protected:
      * Abstract function, for computing approximation matrix of receiver at given  point.
      * The product of approximation matrix with "vertex" values array attribute will produce
      * load components in given  point.
-     * @param answer approximation matrix
-     * @param coords global integration point coordinates
+     * @param answer Approximation vector.
+     * @param coords Global integration point coordinates.
      */
     virtual void computeNArray(FloatArray &answer, FloatArray &coords) const  = 0;
     /**
      * Returns array of load "vertex" values evaluated at given time.
-     * @param answer load "vertex" values
-     * @param tStep time step
-     * @param mode determines response mode
+     * @param answer Load "vertex" values.
+     * @param tStep Time step.
+     * @param mode Determines response mode.
      */
-    void computeComponentArrayAt(FloatArray &answer, TimeStep *, ValueModeType mode);
+    void computeComponentArrayAt(FloatArray &answer, TimeStep *tStep, ValueModeType mode);
 };
 } // end namespace oofem
 #endif // boundaryload_h

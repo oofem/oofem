@@ -32,11 +32,6 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-
-//   **********************
-//   *** CLASS MATERIAL ***
-//   **********************
-
 #ifndef material_h
 #define material_h
 
@@ -118,8 +113,8 @@ public:
 
     /**
      * Constructor. Creates material with given number, belonging to given domain.
-     * @param n material number
-     * @param d domain to which new material will belong
+     * @param n Material number.
+     * @param d Domain to which new material will belong.
      */
     Material(int n, Domain *d) : FEMComponent(n, d)
     {
@@ -131,11 +126,11 @@ public:
 
     /**
      * Computes characteristic matrix of receiver in given integration point.
-     * @param answer contains result
-     * @param form material response form
-     * @param mode  material response mode
-     * @param gp integration point
-     * @param atTime time step
+     * @param answer Contains result.
+     * @param form Material response form.
+     * @param mode Material response mode.
+     * @param gp Integration point.
+     * @param atTime Time step.
      */
     virtual void  giveCharacteristicMatrix(FloatMatrix &answer,
                                            MatResponseForm form,
@@ -146,9 +141,9 @@ public:
      * Computes the characteristic value of receiver in given integration point, respecting its history.
      * The algorithm should use temporary or equilibrium  history variables stored in integration point status
      * to compute and return required result.
-     * @param mode material response mode
-     * @param gp integration point
-     * @param atTime time step (most models are able to respond only when atTime is current time step)
+     * @param mode Material response mode.
+     * @param gp Integration point.
+     * @param atTime Time step (most models are able to respond only when atTime is current time step).
      */
     virtual double giveCharacteristicValue(MatResponseMode mode,
                                            GaussPoint *gp,
@@ -164,8 +159,8 @@ public:
      * Updates internal state of material in integration point after finishing time step.
      * Default implementation  extract material status from integration point,
      * and invokes updateYourself function on it.
-     * @param gp integration point, where to update state
-     * @param atTime time step
+     * @param gp Integration point, where to update state.
+     * @param atTime Time step.
      */
     virtual void updateYourself(GaussPoint *gp, TimeStep *atTime);
 
@@ -173,23 +168,23 @@ public:
      * Returns the value of material property 'aProperty'. Property must be identified
      * by unique int id. Integration point also passed to allow for materials with spatially
      * varying properties
-     * @param aProperty id of property requested
-     * @param gp integration point,
-     * @return property value
+     * @param aProperty ID of property requested.
+     * @param gp Integration point,
+     * @return Property value.
      */
     virtual double give(int aProperty, GaussPoint *gp);
     /**
-     * Returns true if 'aProperty' exists on material
-     * @param aProperty id of property requested
-     * @param gp integration point
-     * @return true if 'aProperty' exists
+     * Returns true if 'aProperty' exists on material.
+     * @param aProperty ID of property requested.
+     * @param gp Integration point.
+     * @return True if 'aProperty' exists.
      */
     virtual bool hasProperty(int aProperty, GaussPoint *gp);
     /**
      * Modify 'aProperty', which already exists on material. Intended for evolving material properties.
-     * @param aProperty id of a property requested
-     * @param value assigned value
-     * @param gp integration point
+     * @param aProperty ID of a property requested.
+     * @param value Assigned value.
+     * @param gp Integration point.
      */
     virtual void modifyProperty(int aProperty, double value, GaussPoint *gp);
     /**
@@ -211,52 +206,54 @@ public:
     //virtual int hasHeatCapability       () { return 0;}
     /**
      * Returns nonzero, if receiver implements required extension.
-     * @parm ext required extension
-     * @return nonzero, if supported, zero otherwise
+     * @param ext Required extension.
+     * @return Nonzero, if supported, zero otherwise.
      */
     virtual int testMaterialExtension(MaterialExtension ext) { return 0; }
     /**
      * Tests, if material supports material mode.
-     * @param mode required material mode
-     * @return nonzero if supported, zero otherwise
+     * @param mode Required material mode.
+     * @return Nonzero if supported, zero otherwise.
      */
     virtual int hasMaterialModeCapability(MaterialMode mode);
     /**
      * Sets the value of a certain variable at a given integration point to the given value.
-     * @param value contains the value(s) to be set (in reduced form)
-     * @param aGaussPoint integration point
-     * @param type determines the type of internal variable
-     * @param type determines the type of internal variable
-     * @returns nonzero if ok, zero if var not supported
+     * @param value Contains the value(s) to be set (in reduced form).
+     * @param aGaussPoint Integration point.
+     * @param type Determines the type of internal variable.
+     * @param type Determines the type of internal variable.
+     * @returns Nonzero if ok, zero if var not supported.
      */
     virtual int setIPValue(const FloatArray value, GaussPoint *aGaussPoint, InternalStateType type)
     { return 0; }
     /**
      * Returns the integration point corresponding value in Reduced form.
-     * @param answer contain corresponding ip value, zero sized if not available
-     * @param aGaussPoint integration point to which the value refers
-     * @param type determines the type of internal variable
-     * @param atTime determines the time step
-     * @returns nonzero if the assignment can be done, zero if this type of variable is not supported
+     * @param answer Contain corresponding ip value, zero sized if not available.
+     * @param aGaussPoint Integration point to which the value refers.
+     * @param type Determines the type of internal variable.
+     * @param atTime Determines the time step.
+     * @returns Nonzero if the assignment can be done, zero if this type of variable is not supported.
      */
     virtual int giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime);
     /**
      * Returns the corresponding integration point value size in Reduced form.
-     * @param type determines the type of internal variable
-     * @returns var size, zero if var not supported
+     * @param type Determines the type of internal variable.
+     * @param aGaussPoint Integration point to which the value refers.
+     * @returns Value size, zero if var not supported.
      */
     virtual int giveIPValueSize(InternalStateType type, GaussPoint *aGaussPoint);
     /**
-     * Returns the mask of reduced indexes of Internal Variable component .
-     * @param answer mask of Full VectorSize, with components being the indexes to reduced form vectors.
-     * @param type determines the internal variable requested (physical meaning)
-     * @returns nonzero if ok or error is generated for unknown mat mode.
+     * Returns the mask of reduced indexes of Internal Variable component.
+     * @param answer Mask of Full VectorSize, with components being the indexes to reduced form vectors.
+     * @param type Determines the internal variable requested (physical meaning).
+     * @param mmode Material mode.
+     * @returns Nonzero if ok or error is generated for unknown mat mode.
      */
     virtual int giveIntVarCompFullIndx(IntArray &answer, InternalStateType type, MaterialMode mmode);
     /**
      * Returns the type of internal variable (scalar, vector, tensor,...).
-     * @param type determines the type of internal variable
-     * @returns type of internal variable
+     * @param type Determines the type of internal variable.
+     * @returns Type of internal variable.
      */
     virtual InternalStateValueType giveIPValueType(InternalStateType type)
     {
@@ -277,12 +274,11 @@ public:
      * Creates new object for following classes: IsotropicLinearElasticMaterial and IsotropicLinearHeatMaterial
      * otherwise calls directly CreateUsrDefMaterialOfType global function to allocate
      * new instance of material of given type.
-     * @param aClass string with material model name
-     * @return newly allocated material model with required type.
-     * @see CreateUsrDefMaterialOfType function.
+     * @param aClass String with material model name.
+     * @return Newly allocated material model with required type.
+     * @see CreateUsrDefMaterialOfType
      */
-    Material *ofType(char *);
-    // store & restore context functions
+    Material *ofType(char *aClass);
 
     contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
     contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
@@ -291,22 +287,22 @@ public:
      * Initialize integration point (must be inside  material region associated to receiver)
      * when new time step begins. Simply calls initTempStatus function with integration point
      * as parameter.
-     * @param gp integration point to initialize
+     * @param gp Integration point to initialize.
      */
     virtual void initGpForNewStep(GaussPoint *gp);
     /**
      * Optional function to call specific procedures when initializing a material.
      * For example, multiscale simulations need to create master and slave material statuses on specific integration points before the computation.
-     * @param element pointer to element
-     * @return zero on error.
+     * @param element Pointer to element.
+     * @return Zero on error.
      */
     virtual int initMaterial(Element *element);
     /**
      * Returns material status of receiver in given integration point.
-     * If status does not exist yet, it is created using CreateStatus  member function.
+     * If status does not exist yet, it is created using CreateStatus member function.
      * @param gp Returns reference to material status belonging to integration
      * point gp.
-     * @return material status associated with given integration point.
+     * @return Material status associated with given integration point.
      */
     virtual MaterialStatus *giveStatus(GaussPoint *gp) const;
     /*
@@ -330,9 +326,9 @@ public:
      * Typically, for material of "local" response (response depends only on integration point local state)
      * no data are exchanged. For "nonlocal" constitutive models the send/receive of local values which
      * undergo averaging is performed between local and corresponding remote elements.
-     * @param buff communication buffer
-     * @param stepN solution step
-     * @param ip integration point
+     * @param buff Communication buffer.
+     * @param stepN Solution step.
+     * @param ip Integration point.
      */
     virtual int packUnknowns(CommunicationBuffer &buff, TimeStep *stepN, GaussPoint *ip)
     { return 1; }
@@ -340,9 +336,9 @@ public:
      * Unpack and updates all necessary data of given integration point (according to element parallel_mode)
      * into given communication buffer.
      * @see packUnknowns service.
-     * @param buff communication buffer
-     * @param stepN solution step.
-     * @param ip integration point
+     * @param buff Communication buffer.
+     * @param stepN Solution step.
+     * @param ip Integration point.
      */
     virtual int unpackAndUpdateUnknowns(CommunicationBuffer &buff, TimeStep *stepN, GaussPoint *ip)
     { return 1; }
@@ -353,7 +349,7 @@ public:
     { return 0; }
     /**
      * Returns the weight representing relative computational cost of receiver
-     * The reference material model  is linear isotropic material - its weight is set to 1.0
+     * The reference material model is linear isotropic material - its weight is set to 1.0
      * The other material models should compare to this reference model.
      */
     virtual double predictRelativeComputationalCost(GaussPoint *gp) { return 1.0; }
@@ -367,7 +363,7 @@ public:
     /**
      * Creates new copy of associated status and inserts it into given integration point.
      * @param gp Integration point where newly created status will be stored.
-     * @return reference to new status.
+     * @return Reference to new status.
      */
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const
     { return NULL; }
@@ -376,9 +372,9 @@ protected:
     /**
      * Initializes temporary variables stored in integration point status
      * at the beginning of new time step.
-     * (Temporary history variables (they describe state of material during
+     * Temporary history variables (they describe state of material during
      * solution of time step) are initialized according to history variables, which
-     * describe state corresponding to previous equilibrium solution).
+     * describe state corresponding to previous equilibrium solution.
      * Default implementation simply extracts status from integration point and
      * calls its initTempStatus method.
      */

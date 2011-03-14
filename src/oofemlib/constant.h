@@ -54,20 +54,18 @@ private:
 public:
     /**
      * Constructor. Creates constant load time function with given number, belonging to given domain.
-     * @param n load time function number
-     * @param d domain to which new object will belongs.
+     * @param i Load time function number.
+     * @param d Domain to which new object will belongs.
      */
     ConstantFunction(int i, Domain *d) : LoadTimeFunction(i, d) { value = 0; }
     /// Destructor.
     ~ConstantFunction() { }
 
-    /**
-     * Returns value member of receiver.
-     */
+    /// @return Value of receiver.
     double giveValue() { return value; }
 
     // Overloaded methods:
-    virtual double __at(double) { return this->giveValue(); }
+    virtual double __at(double t) { return this->giveValue(); }
 
     IRResultType initializeFrom(InputRecord *ir);
     virtual int giveInputRecordString(std :: string &str, bool keyword = true);

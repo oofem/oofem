@@ -136,7 +136,7 @@ public:
      * @param[out] lcoords Local coordinates in element found.
      * @param[out] closest Global coordinates for found point.
      * @param coords Global problem coordinates of point of interest.
-     * @param regionList Only elements within given regions are considered, if NULL all regions are considered.
+     * @param region Only elements within given region are considered, if 0 all regions are considered.
      * @return The element belonging to associated domain, close to given point, NULL otherwise.
      */
     virtual Element *giveElementClosestToPoint(FloatArray &lcoords, FloatArray &closest,

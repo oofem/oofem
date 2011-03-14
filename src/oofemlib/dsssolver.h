@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/ldltfact.h,v 1.10 2003/04/06 14:08:24 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -32,12 +31,6 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-
-
-//   ******************************************
-//   *** CLASS LDL^T Factorization          ***
-//   ******************************************
-
 
 #ifndef dsssolver_h
 #define dsssolver_h
@@ -64,29 +57,31 @@ class DSSSolver : public SparseLinearSystemNM
 private:
 
 public:
-    /// Constructor - creates new instance of LDLTFactorization, with number i, belonging to domain d and Engngmodel m.
+    /** 
+     * Constructor. 
+     * Creates new instance of LDLTFactorization, with number i, belonging to domain d and Engngmodel m.
+     * @param i Solver number.
+     * @param d Domain which solver belongs to.
+     * @param m Engineering model which solver belongs to.
+     */
     DSSSolver(int i, Domain *d, EngngModel *m);
-    /// Destructor
-    ~DSSSolver();    // destructor
+    /// Destructor.
+    ~DSSSolver();
 
     /**
-     * Solves the given linear system by LDL^T factorization.
+     * Solves the given linear system by @f$L\cdot D\cdot L^{\mathrm{T}}@f$ factorization.
      * Implementation rely on factorization support provided by mapped sparse matrix.
      * It calls Lhs->factorized()->backSubstitutionWith(*solutionArray). Sets solved flag to 1 if o.k.
-     * @param A coefficient matrix
-     * @param b right hand side
-     * @param x solution array
-     * @return NM_Status value
-     * @param tNow time step
+     * @param A Coefficient matrix.
+     * @param b Right hand side.
+     * @param x Solution array.
+     * @return NM_Status value.
      */
     NM_Status solve(SparseMtrx *A, FloatArray *b, FloatArray *x);
-    /// Initializes receiver from given record. Empty implementation.
     IRResultType initializeFrom(InputRecord *ir);
 
     // identification
-    /// Returns "LDLTFactorization" - class name of the receiver.
     const char *giveClassName() const { return "LDLTFactorization"; }
-    /// Returns LDLTFactorizationClass - classType id of receiver.
     classType giveClassID() const { return LDLTFactorizationClass; }
     LinSystSolverType giveLinSystSolverType() const { return ST_DSS; }
 };

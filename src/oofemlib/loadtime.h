@@ -82,40 +82,40 @@ public:
     /**
      * Returns the value of load time function at given time. Abstract service.
      * Must be implemented by derived classes.
-     * @param t time. Incremental and total mode uses intrinsic time from giveIntrinsicTime().
-     * @return load time function value
+     * @param tStep Time. Incremental and total mode uses intrinsic time from giveIntrinsicTime().
+     * @return Load time function value.
      */
-    double evaluate(TimeStep *atTime, ValueModeType mode);
+    double evaluate(TimeStep *tStep, ValueModeType mode);
 
     /**
      * Returns a newly allocated load time function, with type depending on parameter.
      * Creates new object for following classes ConstantFunction
      * otherwise calls directly CreateUsrDefLoadTimeFunctionOfType global function to allocate
      * new instance of load time function of given type.
-     * @param aClass string with load time function ID  name
-     * @return newly allocated load time function of required type.
-     * @see CreateUsrDefLoadTimeFunctionOfType function.
+     * @param aClass String with load time function ID  name
+     * @return Newly allocated load time function of required type.
+     * @see CreateUsrDefLoadTimeFunctionOfType
      */
-    LoadTimeFunction *ofType(char *);
+    LoadTimeFunction *ofType(char *aClass);
 
     /**
      * Returns the value of load time function at given time.
      * @param t Time.
-     * @return @f$ f(t) @f$
+     * @return @f$ f(t) @f$.
      */
-    virtual double  __at(double) { return 0.; }
+    virtual double  __at(double t) { return 0.; }
     /**
      * Returns the first time derivative of load time function at given time.
      * @param t Time.
-     * @return @f$ f'(t) @f$
+     * @return @f$ f'(t) @f$.
      */
-    virtual double __derAt(double) { return 0.; }
+    virtual double __derAt(double t) { return 0.; }
     /**
      * Returns the second time derivative of load time function at given time.
      * @param t Time.
      * @return @f$ f''(t) @f$.
      */
-    virtual double __accelAt(double) { return 0.; }
+    virtual double __accelAt(double t) { return 0.; }
 
     // Overloaded methods:
     IRResultType initializeFrom(InputRecord *ir);

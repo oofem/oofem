@@ -71,10 +71,10 @@ public:
 
     /**
      * Constructor. Creates boundary condition with given number, belonging to given domain.
-     * @param n boundary condition number
-     * @param d domain to which new object will belongs.
+     * @param n Boundary condition number
+     * @param d Domain to which new object will belongs.
      */
-    Load(int, Domain *);
+    Load(int n, Domain *d);
     /// Destructor.
     virtual ~Load() { }
 
@@ -82,19 +82,19 @@ public:
      * Computes boundary condition value - its components values at given time.
      * Default implementation returns as the answer its component array multiplied
      * with load time function value (load response mode is taken in to account)
-     * @param answer computed boundary conditions components
-     * @param stepN time step, for which components are computed.
-     * @param mode determines response mode.
+     * @param answer Computed boundary conditions components.
+     * @param tStep Time step, for which components are computed.
+     * @param mode Determines response mode.
      */
-    virtual void computeComponentArrayAt(FloatArray &answer, TimeStep *, ValueModeType mode);
+    virtual void computeComponentArrayAt(FloatArray &answer, TimeStep *tStep, ValueModeType mode);
     /**
      * Computes components values of load at given point - global coordinates (coordinates given).
      * Default implementation computes product of approximation matrix (computeNArray service) and
      * with "vertex" value array attribute and the result is then multiplied by
      * corresponding load time function value respecting load response mode.
-     * @param answer component values at given point and time
-     * @param tStep time step representing time
-     * @param coords global (or local) problem coordinates, which are used to
+     * @param answer Component values at given point and time.
+     * @param tStep Time step representing time.
+     * @param coords Global (or local) problem coordinates, which are used to 
      * evaluate components values.
      * @param mode determines response mode.
      */
