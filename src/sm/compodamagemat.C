@@ -189,7 +189,8 @@ void CompoDamageMat :: giveRealStressVector(FloatArray &answer,  MatResponseForm
     case _1dMat:
     { //applies only for 1D, strain vectors are already in local c.s.
         if ( st->elemCharLength.at(1) == 0. ) {
-            st->elemCharLength.at(1) = gp->giveElement()->giveCharacteristicLenght(gp, NULL); //truss length
+            FloatArray normal(0);
+            st->elemCharLength.at(1) = gp->giveElement()->giveCharacteristicLenght(gp, normal); //truss length
             this->checkSnapBack(gp, mMode);
         }
 
