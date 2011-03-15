@@ -40,7 +40,7 @@
 #include "oofemtxtdatareader.h"
 
 namespace oofem {
-OOFEMTXTDataReader :: OOFEMTXTDataReader(char *inputfilename) : DataReader(), ir()
+OOFEMTXTDataReader :: OOFEMTXTDataReader(const char *inputfilename) : DataReader(), ir()
 {
     if ( ( inputStream = fopen(inputfilename, "r") ) == NULL ) {
         OOFEM_ERROR2("OOFEMTXTDataReader::OOFEMTXTDataReader: Can't open input stream (%s)", inputfilename);
