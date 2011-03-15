@@ -136,7 +136,8 @@ public:
      * constructor. Input record can be imagined as data record in component database
      * belonging to receiver. Receiver may use value-name extracting functions
      * to extract particular field from record.
-     * @see IR_GIVE_FIELD, @see IR_GIVE_OPTIONAL_FIELD
+     * @see IR_GIVE_FIELD
+     * @see IR_GIVE_OPTIONAL_FIELD
      * @param ir Input record to initialize from.
      * @return IRResultType
      */

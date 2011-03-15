@@ -95,20 +95,25 @@ class FloatArray
 {
 
 protected:
-    /// Size of array
+    /// Size of array.
     int size;
     /// allocated space size for array.
     int allocatedSize;
-    /// stored values of vector
+    /// Stored values of vector.
     double *values;
 
 public:
-    /// Constructor. Creates zero sized array.
-    FloatArray(int = 0);
+    /**
+     * Constructor. Array is not zeroed.
+     * @see FloatArray::zero
+     * @param size Size of array.
+     */
+    FloatArray(int size = 0);
     /**
      * Copy constructor. Creates the array from another array.
+     * @param x Array to copy.
      */
-    FloatArray(const FloatArray &);
+    FloatArray(const FloatArray &x);
     /// Destructor.
     virtual ~FloatArray() { if ( values ) { freeDouble(values); } }
 
@@ -295,7 +300,7 @@ public:
      * Assembles the array fe (typically, the load vector of a finite
      * element) into the receiver, using loc as location array.
      * @param fe Array to be assembled.
-     * @param loc Array of code numbers) - src(i) value will
+     * @param loc Array of code numbers. src(i) value will
      * be added to receiver value at position loc(i)
      * (if this loc(i) value is nonzero).
      */
@@ -371,18 +376,6 @@ public:
      */
     double *givePointer() const { return values; }
 
-    friend double dotProduct(double *p1, double *p2, int i);
-    /**
-     * Returns the dot product of the first i coefficients of the two
-     * arrays p1 and p2.
-     * @deprecated Use FloatArray::dotProduct.
-     * @param p1 Vector in the dot product.
-     * @param p2 Vector in the dot product.
-     * @param i Number of coefficients to use.
-     * @return Value of the dot product
-     */
-    friend double dotProduct(const FloatArray &p1, const FloatArray &p2, int i);
-
 #ifdef __PARALLEL_MODE
     int packToCommBuffer(CommunicationBuffer &buff) const;
     int unpackFromCommBuffer(CommunicationBuffer &buff);
@@ -428,7 +421,16 @@ double dot(const FloatArray &x, const FloatArray &y);
  * @return Value of the dot product.
  */
 double dotProduct(double *p1, double *p2, int i);
-double dotProduct(const FloatArray &p1, const FloatArray &p2, int i) { return p1.dotProduct(p2,i); }
+/**
+ * Returns the dot product of the first i coefficients of the two
+ * arrays p1 and p2.
+ * @deprecated Use FloatArray::dotProduct.
+ * @param p1 Vector in the dot product.
+ * @param p2 Vector in the dot product.
+ * @param i Number of coefficients to use.
+ * @return Value of the dot product
+ */
+inline double dotProduct(const FloatArray &p1, const FloatArray &p2, int i) { return p1.dotProduct(p2,i); }
 
 } // end namespace oofem
 #endif // flotarry_h
