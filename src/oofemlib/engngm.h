@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/engngm.h,v 1.32.4.1 2004/04/05 15:19:43 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -32,12 +31,6 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-
-
-//   ************************
-//   *** CLASS ENGNGMODEL ***
-//   ************************
-
 
 #ifndef engngm_h
 #define engngm_h
@@ -120,16 +113,13 @@ class ProblemCommunicator;
 class EngngModelContext
 {
 protected:
-    /// Common fieldManager providing shared field regisry for the problem
+    /// Common fieldManager providing shared field regisry for the problem.
     FieldManager fieldManager;
 public:
 
     EngngModelContext() { }
     FieldManager *giveFieldManager() { return & ( this->fieldManager ); }
 };
-
-
-
 
 
 /**
@@ -156,35 +146,27 @@ public:
  * preffered scheme is to read all attributes in initializeFrom and left updateAttributes service empty.
  *
  * The basic EngngModel tasks are following
- * <UL>
- * <LI>
- * assembling governing equations by summing contributions from problem domains (typically from nodes and elements),</LI>
- * <LI>
- * Solving the problem descibed by governing equation(s) using suitable instance of
- * numerical method. This requires interfacing numericalMethod characteristic elements
- * with components in governing equation
- * EngngModel must map each component of governing
- * equation(s) (which has physical meaning) to corresponding numerical component of Numerical
- * method. This mapping between physical components to independent numerical components
- * (uderstand by numerical method) is important, because it allows numerical method to be used by
- * many EngngModel with diferent meaning of particular components.</LI>
- * <LI>
- * Returning unknown values (acording to requsted type and mode). Used by Dofs to
- * access their corresponding unknowns.</LI>
- * <LI>
- * Terminating time step by updating nodal and element values (including integration points update).</LI>
- * <LI>
- * Updating dofs unknowns dictionaries if  model supports changes of static system (see Dof class
- * documentation for detailed explanation). In general if static system changes are not supported,
- * when dof are requested for unknowns, they use their associate equation number to ask EngngModel
- * for this unknown. Unknowns are therefore stored in EngngModel and are requested by dofs.
- * On the other hand, when static system changes are supported, the equation numbers of dofs
- * can vary during solution. Therefore, so called unknowns dictionary at dof level are introduced.
- * All unknowns are stored on dof level and dofs will use in such case their own dictionaries
- * instead of requsting EngngModel. The EngngModel is fully responsible to update this
- * dictionary for each dof with all necessary unknowns (see updateDofUnknownsDictionary function).</LI>
- * </UL>
- *
+ * - Assembling governing equations by summing contributions from problem domains (typically from nodes and elements),
+ * - Solving the problem descibed by governing equation(s) using suitable instance of
+ *   numerical method. This requires interfacing numericalMethod characteristic elements
+ *   with components in governing equation
+ *   EngngModel must map each component of governing
+ *   equation(s) (which has physical meaning) to corresponding numerical component of Numerical
+ *   method. This mapping between physical components to independent numerical components
+ *   (uderstand by numerical method) is important, because it allows numerical method to be used by
+ *   many EngngModel with diferent meaning of particular components.
+ * - Returning unknown values (acording to requsted type and mode). Used by Dofs to
+ *   access their corresponding unknowns.
+ * - Terminating time step by updating nodal and element values (including integration points update).
+ * - Updating dofs unknowns dictionaries if model supports changes of static system (see Dof class
+ *   documentation for detailed explanation). In general if static system changes are not supported,
+ *   when dof are requested for unknowns, they use their associate equation number to ask EngngModel
+ *   for this unknown. Unknowns are therefore stored in EngngModel and are requested by dofs.
+ *   On the other hand, when static system changes are supported, the equation numbers of dofs
+ *   can vary during solution. Therefore, so called unknowns dictionary at dof level are introduced.
+ *   All unknowns are stored on dof level and dofs will use in such case their own dictionaries
+ *   instead of requsting EngngModel. The EngngModel is fully responsible to update this
+ *   dictionary for each dof with all necessary unknowns (see updateDofUnknownsDictionary function).
  */
 class EngngModel
 {
@@ -192,7 +174,7 @@ class EngngModel
      * This class implements the abstract class of problem to be solved by using FEM.
      * DESCRIPTION :
      * The Engineering Model ( like Static, EigenValue , Dynamic, Thermal, ... problems)
-     * handles the problem to be solved and  governing equation of this problem
+     * handles the problem to be solved and governing equation of this problem
      * ( Kr=f, Mr"+Cr'+Kr=f, ... ).
      * The model contains key-component numericalMethod, that will be used to
      * solve governing equations. Model is responsible to recognize allowed numerical
@@ -244,86 +226,84 @@ public:
 #endif
 
 protected:
-    /// number of receiver domains
+    /// Number of receiver domains.
     int ndomains;
-    /// List of problem domains
+    /// List of problem domains.
     AList< Domain > *domainList;
-    /// Total number of time steps
+    /// Total number of time steps.
     int numberOfSteps;
-    /// total number of equation in cuurent time step
+    /// Total number of equation in cuurent time step.
     int numberOfEquations;
-    /// total number or prescribed equations in current time step
+    /// Total number or prescribed equations in current time step.
     int numberOfPrescribedEquations;
-    /// number of equations per domain
+    /// Number of equations per domain.
     IntArray domainNeqs;
-    /// number of prescribed equations per domain
+    /// Number of prescribed equations per domain.
     IntArray domainPrescribedNeqs;
-    /// renumbering flag
+    /// Renumbering flag.
     int renumberFlag;
-    /// equation numbering completed flag
+    /// Equation numbering completed flag.
     int equationNumberingCompleted;
-    /// number of meta steps
+    /// Number of meta steps.
     int nMetaSteps;
-    /// List of problem metasteps
+    /// List of problem metasteps.
     AList< MetaStep > *metaStepList;
-    /// Solution step when IC (initial conditions) apply
+    /// Solution step when IC (initial conditions) apply.
     TimeStep *stepWhenIcApply;
-    /// Currnet time step
+    /// Current time step.
     TimeStep *currentStep;
-    /// Previous time step
+    /// Previous time step.
     TimeStep *previousStep;
-    /// receivers id
+    /// Receivers id.
     int number;
 
-    /// Path to input stream
-    //char*                 dataInputFileName ;
-    /// Path to output stream
+    /// Path to input stream.
+    //char* dataInputFileName;
+    /// Path to output stream.
     char *dataOutputFileName;
-    /// Output stream
+    /// Output stream.
     FILE *outputStream;
-    /// Input stream
+    /// Input stream.
     //FILE* inputStream;
-    /// Domain context output mode
+    /// Domain context output mode.
     ContextOutputMode contextOutputMode;
     int contextOutputStep;
 
-    ///Export module manager
+    /// Export module manager.
     ExportModuleManager *exportModuleManager;
-    ///Initialization module manager
+    /// Initialization module manager.
     InitModuleManager *initModuleManager;
 
-    /// Domain mode
+    /// Domain mode.
     problemMode pMode;
-    /// Multiscale mode
+    /// Multiscale mode.
     problemScale pScale;
-    /// solution start time
+    /// Solution start time.
     time_t startTime;
     // initial value of processor time used by program
     // clock_t startClock;
 
-    /// master e-model; if defined receiver is in maintained (slave) mode
+    /// Master e-model; if defined receiver is in maintained (slave) mode.
     EngngModel *master;
-    /// context
+    /// Context.
     EngngModelContext *context;
-    /// e-model timer
+    /// E-model timer.
     EngngModelTimer timer;
-    /**
-     * flag indicating that the receiver runs in parallel.
-     */
+    /// Flag indicating that the receiver runs in parallel.
     int parallelFlag;
-    /// list of Xfemmanagers
+    /// List of Xfemmanagers.
     AList< XfemManager > *xfemManagerList;
-    /// number of Xfemmanagers
+    /// Number of Xfemmanagers.
     int nxfemman;
-    /// type of non linear formulation (total or updated formulation)
+    /// Type of non linear formulation (total or updated formulation).
     enum fMode nonLinFormulation;
 
 #ifdef __PARALLEL_MODE
-    /// domain rank in a group of colaborating processes (0..groupSize-1)
+    /// Domain rank in a group of colaborating processes (0..groupSize-1).
     int rank;
-    /// total number of colaborating processes
+    /// Total number of colaborating processes.
     int numProcs;
-    /// processor name
+    /// Processor name.
     char processor_name [ PROCESSOR_NAME_LENGTH ];
     /// Communicator mode. Determines current strategy used.
     ProblemCommunicatorMode commMode;
@@ -331,43 +311,43 @@ protected:
 
     /**@name Load balancing attributes */
     //@{
-    /// Load Balancer
+    /// Load Balancer.
     LoadBalancer *lb;
     LoadBalancerMonitor *lbm;
-    /// if set to true, load balancing is active
+    /// If set to true, load balancing is active.
     bool loadBalancingFlag;
-    /// debug flag forcing load balancing after first step
+    /// Debug flag forcing load balancing after first step.
     bool force_load_rebalance_in_first_step;
     //@}
 
 #endif // __PARALLEL_MODE
 
 #ifdef __PETSC_MODULE
-    /// list where petsc contexts are stored
+    /// List where petsc contexts are stored.
     AList< PetscContext > *petscContextList;
 #endif
-
 
 public:
     /**
      * Constructor. Creates Engng model with number i belonging to domain d.
      */
-    EngngModel(int i, EngngModel *_master = NULL);   // constructor
+    EngngModel(int i, EngngModel *_master = NULL);
     /**
      * Constructor. Creates Engng model with number i and input file given by path.
      */
     EngngModel(int i, char *s, EngngModel *_master = NULL);
     /// Destructor.
-    virtual ~EngngModel();      // destructor
+    virtual ~EngngModel();
 
     /**
      * Service for accessing particular problem domain.
      * Generates error if no such domain is defined.
-     * @param: n pointer to n-th domain is returned
+     * @param n Pointer to n-th domain is returned.
+     * @return Domain number n.
      */
     Domain *giveDomain(int n);
     /// Returns number of domains in problem.
-    int         giveNumberOfDomains() { return ndomains; }
+    int giveNumberOfDomains() { return ndomains; }
     /** Service for accessing ErrorEstimator corresponding to particular domain */
     virtual ErrorEstimator *giveDomainErrorEstimator(int n) { return NULL; }
     /** Returns material interface representation for given domain */
@@ -382,85 +362,88 @@ public:
     }
     // input / output
     /// Returns input file path.
-    //char*              giveInputDataFileName () ;
-    /// Returns file descriptor of output file
+    //char* giveInputDataFileName () ;
+    /// Returns file descriptor of output file.
     FILE *giveOutputStream();
-    /** Returns base output file name
-     *  to which extensions, like .out .vtk .osf should be added.
-     *  In current implementation, output file name is simply returned.
-     *  @param path and base file name will be copied into the array pointed to by  dest
-     *  @param not more than n bytes of src  are copied
+    /** 
+     * Returns base output file name
+     * to which extensions, like .out .vtk .osf should be added.
+     * In current implementation, output file name is simply returned.
+     * @param dest Path and base file name will be copied into the array pointed to by dest.
+     * @param n Not more than n bytes of src are copied
      */
     char *giveOutputBaseFileName(char *dest, size_t n) { return strncpy(dest, dataOutputFileName, n - 1); }
-    /** Sets the base output file name. @see giveOutputBaseFileName
-     *  @param src output file name
+    /** 
+     * Sets the base output file name. 
+     * @see giveOutputBaseFileName
+     * @param src Output file name.
      */
     void letOutputBaseFileNameBe(char *src) { strncpy(dataOutputFileName, src, MAX_FILENAME_LENGTH-1); }
-    //FILE*              giveInputStream () ;
+    //FILE* giveInputStream () ;
 
     /*
      * Returns current time in seconds as returned by time call.
      * @return current time in time_t structure.
      */
-    //time_t             getTime ();
+    //time_t getTime ();
     /*
      * Returns an approximation of processor time used by the program.
-     * The value returned is the  CPU  time  used  so  far  as  a
-     * clock_t;  to  get  the  number  of seconds used, divide by
+     * The value returned is the CPU time used so far as a
+     * clock_t; to get the number of seconds used, divide by
      * CLOCKS_PER_SEC. Calls clock ANSI C function.
      * The C standard allows for arbitrary values at the start of
-     * the   program;  take  the  difference  between  the  value
-     * returned from a call to this method at the start of  the  pro-
+     * the program; take the difference between the value
+     * returned from a call to this method at the start of the pro-
      * gram and the end to get maximum portability.
      */
-    //clock_t            getClock ();
+    //clock_t getClock ();
     /**
      * Returns domain context output mode.
      */
-    ContextOutputMode  giveContextOutputMode() { return contextOutputMode; }
+    ContextOutputMode giveContextOutputMode() { return contextOutputMode; }
     /**
      * Returns domain context output step.
      */
-    int                giveContextOutputStep() { return contextOutputStep; }
+    int giveContextOutputStep() { return contextOutputStep; }
     /**
      * Sets context output mode of receiver.
      * @param contextMode domain context mode.
      */
-    void               setContextOutputMode(ContextOutputMode contextMode)
+    void setContextOutputMode(ContextOutputMode contextMode)
     { contextOutputMode = contextMode; }
     /**
      * Sets user defined context output mode (it sets contextOutputMode to contextOutputMode),
      * setting contextOutputStep to given value.
      * @param cStep new context output step
      */
-    void               setUDContextOutputMode(int cStep)
+    void setUDContextOutputMode(int cStep)
     {
         contextOutputMode = COM_UserDefined;
         contextOutputStep = cStep;
     }
     /**
      * Sets domain mode to given mode.
-     * @param mode domain mode.
+     * @param pmode Problem mode.
      */
-    void               setProblemMode(problemMode mode) { pMode = mode; }
+    void setProblemMode(problemMode pmode) { pMode = pmode; }
     /// Returns domain mode.
-    problemMode         giveProblemMode()        { return pMode; }
+    problemMode giveProblemMode() { return pMode; }
     /**
      * Sets scale in multiscale simulation.
-     * @param mode scale mode.
+     * @param pscale Problem scale.
      */
-    void               setProblemScale(problemScale mode) { pScale = mode; }
+    void setProblemScale(problemScale pscale) { pScale = pscale; }
     /// Returns scale in multiscale simulation
-    problemScale  giveProblemScale() { return pScale; }
+    problemScale giveProblemScale() { return pScale; }
     /// Sets the renumber flag to TRUE
-    virtual void                setRenumberFlag() { this->renumberFlag = 1; }
+    virtual void setRenumberFlag() { this->renumberFlag = 1; }
     /// Sets the renumber flag to FALSE
-    virtual void                resetRenumberFlag() { this->renumberFlag = 0; }
+    virtual void resetRenumberFlag() { this->renumberFlag = 0; }
 
     /**
      * Performs analysis termination after finishing analysis.
      */
-    void               terminateAnalysis();
+    void terminateAnalysis();
 
     // solving
     /**
@@ -469,36 +452,36 @@ public:
      * using giveNextStep function (this will set current time step to newly created,
      * and updates previous step).
      */
-    virtual void               solveYourself();
+    virtual void solveYourself();
     /**
      * Solves problem for given time step. Should assemble characteristic matrices and vectors
      * if necessary and solve problem using appropriate numerical method. After finishing solution,
      * this->updateYourself function for updating solution state and then this->terminate
      * function (for updating nodal and element values) should be called.
      */
-    virtual void               solveYourselfAt(TimeStep *) { }
-    //virtual int                requiresNewLhs () {return 1;}
+    virtual void solveYourselfAt(TimeStep *) { }
+    //virtual int requiresNewLhs () {return 1;}
     /**
      * Terminates the solution of time step. Default implementation calls prinOutput() service and if specified,
      * context of whole domain is stored and output for given time step is printed.
      */
-    virtual void               terminate(TimeStep *);
+    virtual void terminate(TimeStep *);
     /**
      * Prints the ouput of the solution step (using virtual this->printOutputAtservice)
      * to the stream detemined using this->giveOutputStream() method
      * and calls exportModuleManager to do output.
      */
-    virtual void              doStepOutput(TimeStep *);
+    virtual void doStepOutput(TimeStep *);
     /**
      * Saves context of given solution step, if required (determined using this->giveContextOutputMode() method).
      */
-    void                       saveStepContext(TimeStep *);
+    void saveStepContext(TimeStep *);
     /**
      * Updates internal state after finishing time step. (for example total values may be
-     * updated according to previously solved increments).  Then element values are also updated
+     * updated according to previously solved increments). Then element values are also updated
      * (together with related integration points and material statuses).
      */
-    virtual void               updateYourself(TimeStep *stepN);
+    virtual void updateYourself(TimeStep *stepN);
     /**
      * Provides the oportunity to initialize state variables stored in element
      * integration points acording to
@@ -508,13 +491,13 @@ public:
      * somewhere from solveYourselfAt function). Implementation must be provided.
      * Default implementation is empty.
      */
-    virtual void               initializeYourself(TimeStep *) { }
+    virtual void initializeYourself(TimeStep *) { }
     /**
      * Initializes the newly generated discretization state acording to previous solution.
      * This process should typically include restoring old solution, instanciating newly
      * generated domain(s) and by mapping procedure.
      */
-    virtual int                initializeAdaptive(int stepNumber) { return 0; }
+    virtual int initializeAdaptive(int stepNumber) { return 0; }
 
     /**
      * Returns total number of equations in active (current time step) time step.
@@ -540,23 +523,23 @@ public:
      * can be numbered separately.
      */
     virtual int giveNumberOfPrescribedDomainEquations(int, EquationID);
-    //virtual IntArray*          GiveBanWidthVector ();
+    //virtual IntArray* GiveBanWidthVector ();
 
 
-    // management  components
+    // management components
     /**
      * Provides backward mapping between numerical component and characteristic
      * component on EngngModel level.
      */
-    virtual CharType  giveTypeOfComponent(NumericalCmpn) { return UnknownCharType; }
+    virtual CharType giveTypeOfComponent(NumericalCmpn) { return UnknownCharType; }
     /**
      * Returns requested unknown. Unknown at give time step is characterized by its type and mode
      * and by its equation number. This function is used by Dofs, when they are requsted for
      * their associated unknowns.
-     * @see Dof::giveUnknown method
+     * @see Dof::giveUnknown
      */
-    virtual double    giveUnknownComponent(EquationID, ValueModeType, TimeStep *, Domain *, Dof *) { return 0.0; }
-    virtual double    giveUnknownComponent(UnknownType, ValueModeType, TimeStep *, Domain *, Dof *) { return 0.0; }
+    virtual double giveUnknownComponent(EquationID, ValueModeType, TimeStep *, Domain *, Dof *) { return 0.0; }
+    virtual double giveUnknownComponent(UnknownType, ValueModeType, TimeStep *, Domain *, Dof *) { return 0.0; }
 
 #ifdef __PARALLEL_MODE
     /**
@@ -597,9 +580,9 @@ public:
      * requested. It is recomended, to implement this service in such way, that multiple calls
      * for steps belonging to same MetaStep does not change response.
      * The default implementation updates the numerical method attributes.
-     * @param TimeStep time step.
+     * @param tStep TimeStep time step.
      */
-    virtual void updateAttributes(TimeStep *);
+    virtual void updateAttributes(TimeStep *tStep);
     /**
      * Update e-model attributes attributes according to step metaStep attributes.
      * Calls updateAttributes. At the end the meta step input reader finish() service
@@ -607,26 +590,26 @@ public:
      */
     void initMetaStepAttributes(TimeStep *tStep);
     /**
-     * Stores the  state of model to output stream. Stores not only the receiver state,
+     * Stores the state of model to output stream. Stores not only the receiver state,
      * but also same function is invoked for all DofManagers and Elements in associated
-     * domain. Note that by storing element  context also contexts of all associated
+     * domain. Note that by storing element context also contexts of all associated
      * integration points (and material statuses) are stored.
      * Stored context is associated with current time step. One time step can have only
      * one associated context. Multiple call to saveContext within same time step
      * owerride previously saved context for this step.
      * By default the stream paprameter is used to store data and is not closed.
      * If stream is NULL, new file descriptor is created and this must be also closed at the end.
-     * @param stream - context stream. If NULL then new file descriptor will be openned and closed
+     * @param stream Context stream. If NULL then new file descriptor will be openned and closed
      * at the end else the stream given as parameter will be used and not closed at the end.
-     * @param mode determines ammount of info in stream
+     * @param mode Determines amount of info in stream.
      * @return contextIOResultType.
-     * @exception throws an ContextIOERR exception if error encountered
+     * @exception ContextIOERR If error encountered.
      */
-    virtual contextIOResultType                saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
     /**
-     * Restores the  state of model from output stream. Restores not only the receiver state,
+     * Restores the state of model from output stream. Restores not only the receiver state,
      * but also same function is invoked for all DofManagers and Elements in associated
-     * domain. Note that by restoring element  context also contexts of all associated
+     * domain. Note that by restoring element context also contexts of all associated
      * integration points (and material statuses) are restored.
      * Each context is associated with unique time step. Only one context per time step is
      * allowed. Restore context function will restore such contex, which is related
@@ -640,7 +623,7 @@ public:
      * @return contextIOResultType.
      * @exception throws an ContextIOERR exception if error encountered.
      */
-    virtual contextIOResultType    restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
     /**
      * Updates domain links after the domains of receiver have changed. Used mainly after
      * restoring context - the domains may change and this service is then used
@@ -650,33 +633,33 @@ public:
     virtual void updateDomainLinks() {
         this->giveExportModuleManager()->initialize();
     };
-    void               resolveCorrespondingStepNumber(int &, int &, void *obj);
+    void resolveCorrespondingStepNumber(int &, int &, void *obj);
     /// Returns current time step.
     TimeStep *giveCurrentStep() { if ( master ) { return master->giveCurrentStep(); } else { return currentStep; } }
     /// Returns previous time step.
     TimeStep *givePreviousStep() { if ( master ) { return master->givePreviousStep(); } else { return previousStep; } }
     /// Returns next time step (next to current step) of receiver.
     virtual TimeStep *giveNextStep() { return NULL; }
-    /// Returns the solution step when Initial Conditions (IC) apply
+    /// Returns the solution step when Initial Conditions (IC) apply.
     virtual TimeStep *giveSolutionStepWhenIcApply() { if ( master ) { return master->giveCurrentStep(); } else { return stepWhenIcApply; } }
     /// Returns number of first time step used by receiver.
-    virtual int        giveNumberOfFirstStep() { if ( master ) { return master->giveNumberOfFirstStep(); } else { return 1; } }
-    /// Return number of meta steps
-    int                 giveNumberOfMetaSteps() { return nMetaSteps; }
-    /// Returns the i-th meta step
+    virtual int giveNumberOfFirstStep() { if ( master ) { return master->giveNumberOfFirstStep(); } else { return 1; } }
+    /// Return number of meta steps.
+    int giveNumberOfMetaSteps() { return nMetaSteps; }
+    /// Returns the i-th meta step.
     MetaStep *giveMetaStep(int i);
     /// Returns total number of steps.
-    int                giveNumberOfSteps() { if ( master ) { return master->giveNumberOfSteps(); } else { return numberOfSteps; } }
+    int giveNumberOfSteps() { if ( master ) { return master->giveNumberOfSteps(); } else { return numberOfSteps; } }
     /// Returns end of time interest (time corresponding to end of time integration).
-    virtual double     giveEndOfTimeOfInterest() { return 0.; }
+    virtual double giveEndOfTimeOfInterest() { return 0.; }
     /// Returns the time step number, when initial conditions should apply.
-    virtual int       giveNumberOfTimeStepWhenIcApply() {
+    virtual int giveNumberOfTimeStepWhenIcApply() {
         if ( master ) { return master->giveNumberOfTimeStepWhenIcApply(); } else { return 0; } }
-    /// Returns reference to receiver's numerical method
+    /// Returns reference to receiver's numerical method.
     virtual NumericalMethod *giveNumericalMethod(TimeStep *) { return NULL; }
-    /// Returns receiver's export mudule manager
+    /// Returns receiver's export mudule manager.
     ExportModuleManager *giveExportModuleManager() { return exportModuleManager; }
-    /// Returns reference to recever timer (EngngModelTimer)
+    /// Returns reference to recever timer (EngngModelTimer).
     EngngModelTimer *giveTimer() { return & timer; }
 
     /**
@@ -686,7 +669,7 @@ public:
      * The DofIDItem parameter allows to distinguish between several possible governing equations, that
      * can be numbered separately.
      */
-    virtual int      giveNewEquationNumber(int domain, DofIDItem) { return ++domainNeqs.at(domain); }
+    virtual int giveNewEquationNumber(int domain, DofIDItem) { return ++domainNeqs.at(domain); }
     /**
      * Increases number of prescribed equations of receiver's domain and returns newly created equation number.
      * Used mainly by DofManagers to allocate their corresponding equation number if it
@@ -694,25 +677,26 @@ public:
      * The DofIDItem parameter allows to distinguish between several possible governing equations, that
      * can be numbered separately.
      */
-    virtual int      giveNewPrescribedEquationNumber(int domain, DofIDItem) { return ++domainPrescribedNeqs.at(domain); }
+    virtual int giveNewPrescribedEquationNumber(int domain, DofIDItem) { return ++domainPrescribedNeqs.at(domain); }
     /**
      * Assigns context file-descriptor for given step number to stream.
      * Returns nonzero on success.
-     * @param stepNumber solution step number to store/restore
-     * @param stepVersion version of step
-     * @param cmode determines the i/o mode of context file
-     * @param errLevel determines the amout of warning messages if errors are encountered, level 0 no warnings reported.
+     * @param contextFile Assigned file descriptor.
+     * @param stepNumber Solution step number to store/restore.
+     * @param stepVersion Version of step.
+     * @param cmode Determines the i/o mode of context file.
+     * @param errLevel Determines the amout of warning messages if errors are encountered, level 0 no warnings reported.
      */
-    int              giveContextFile(FILE **contextFile, int stepNumber, int stepVersion,
+    int giveContextFile(FILE **contextFile, int stepNumber, int stepVersion,
                                      ContextFileMode cmode, int errLevel = 1);
     /** Returns true if context file for given step and version is available */
-    bool             testContextFile(int stepNumber, int stepVersion);
+    bool testContextFile(int stepNumber, int stepVersion);
     /**
      * Creates new DataReader for given domain.
      * Returns nonzero on success.
-     * @param domainNum domain number
-     * @param domainSerNum domain seerial number
-     * @param cmode determines the i/o mode of context file
+     * @param domainNum Domain number.
+     * @param domainSerNum Domain serial number.
+     * @param cmode Determines the i/o mode of context file.
      */
     DataReader *GiveDomainDataReader(int domainNum, int domainSerNum, ContextFileMode cmode);
     /**
@@ -720,27 +704,27 @@ public:
      * Some numerical methods may require updating
      * mapped components during solution process (e.g., updating of tanget stiffness
      * when using updated Newton-Raphson method).
-     * @param tStep time when component is updated.
+     * @param tStep Time when component is updated.
      * @param cmpn Numerical component to update.
-     * @param d domain
+     * @param d Domain.
      */
-    virtual void      updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Domain *d);
+    virtual void updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Domain *d);
     /**
      * Initializes solution of new time step. Default implementation
      * resets all internal history variables (in integration points of elements)
      * to previously reached equilibrium values.
      * Can be used for time step restart.
      */
-    virtual void      initStepIncrements();
+    virtual void initStepIncrements();
     /**
      * Forces equation renumbering on given domain. All equation numbers in all dofManagers are invalidated,
      * and new equation numbers are generated starting from domainNeqs entry corresponding to given domain.
      * It will update numberOfEquations variable accordingly.
      * Should be used at startup to force equation numbering and therefore sets numberOfEquations.
-     * Must be used if model supports changes of static system to assign  new valid equation numbers
+     * Must be used if model supports changes of static system to assign new valid equation numbers
      * to dofManagers.
      */
-    virtual int       forceEquationNumbering(int i);
+    virtual int forceEquationNumbering(int i);
     /**
      * Forces equation renumbering on all domains associated to engng model.
      * All equation numbers in all domains for all dofManagers are invalidated,
@@ -750,7 +734,7 @@ public:
      * Must be used if model supports changes of static system to assign new valid equation numbers
      * to dofManagers.
      */
-    virtual int       forceEquationNumbering();
+    virtual int forceEquationNumbering();
     /**
      * Indicates if Engngmodel requires Dofs dictionaries to be updated.
      * If EngngModel does not support changes
@@ -770,7 +754,7 @@ public:
      * value (dof will use its dictionary, does not asks back EngngModel) adds corresponding increment
      * and updates total value in dictionary.
      */
-    virtual int       requiresUnknownsDictionaryUpdate() { return 0; }
+    virtual int requiresUnknownsDictionaryUpdate() { return 0; }
     /**
      * Returns true if equation renumbering is required for given solution step.
      * This may of course change the number of equation and in general there is no gauarantee
@@ -778,21 +762,21 @@ public:
      * DOF unknowns dictionaries is generally recomended.
      */
     virtual bool requiresEquationRenumbering(TimeStep *) { return false; }
-    //virtual int       supportsBoundaryConditionChange () {return 0;}
+    //virtual int supportsBoundaryConditionChange () {return 0;}
     /**
      * Updates necessary values in Dofs unknown dictionaries.
      * @see EngngModel::requiresUnknownsDictionaryUpdate
      * @see Dof::updateUnknownsDictionary
      */
-    virtual void      updateDofUnknownsDictionary(DofManager *, TimeStep *) { }
+    virtual void updateDofUnknownsDictionary(DofManager *, TimeStep *) { }
     /**
-     *  This method is responsible for computing unique dictionary id (ie hash value) from
-     *  given equationId, valueModeType and timestep. This function is used by particular dofs
-     *  to access unknown identified by given params from its dictionary using computed index.
-     *  Usually the hash algorithm shoud produce index that depend on timestep relativelly to
-     *  actual one to avoid storage of complete history.
+     * This method is responsible for computing unique dictionary id (ie hash value) from
+     * given equationId, valueModeType and timestep. This function is used by particular dofs
+     * to access unknown identified by given params from its dictionary using computed index.
+     * Usually the hash algorithm shoud produce index that depend on timestep relativelly to
+     * actual one to avoid storage of complete history.
      */
-    virtual int       giveUnknownDictHashIndx(EquationID type, ValueModeType mode, TimeStep *stepN) { return 0; }
+    virtual int giveUnknownDictHashIndx(EquationID type, ValueModeType mode, TimeStep *stepN) { return 0; }
 
     // we don't directlt call element ->GiveCharacteristicMatrix() function, because some
     // engngm classes may require special modification of base types supported on
@@ -802,11 +786,11 @@ public:
      * should not be called directly, because EngngModel may require some special modification
      * of characteristic matrices supported on element level. But default implementation does
      * the direct call to element level.
-     * @param answer characteristic matrix
-     * @param num element number
-     * @param type type of CharMatrix requsted
-     * @param tStep time step when response is computed
-     * @param domain source domain
+     * @param answer Characteristic matrix.
+     * @param num Element number.
+     * @param type Type of CharMatrix requsted.
+     * @param tStep Time step when response is computed.
+     * @param domain Source domain.
      */
     virtual void giveElementCharacteristicMatrix(FloatMatrix &answer, int num, CharType type, TimeStep *tStep, Domain *domain)
     { domain->giveElement(num)->giveCharacteristicMatrix(answer, type, tStep); }
@@ -815,11 +799,12 @@ public:
      * should not be called directly, because EngngModel may require some special modification
      * of characteristic vectors supported on element level. But default implementation does
      * the direct call to element level.
-     * @param answer characteristic vector
-     * @param num element number
-     * @param type type of vector requsted
-     * @param tStep time step when response is computed
-     * @param domain source domain
+     * @param answer Characteristic vector.
+     * @param num Element number.
+     * @param type Type of vector requsted.
+     * @param mode Mode of unknown (total, incremental, rate of change).
+     * @param tStep Time step when response is computed.
+     * @param domain Source domain.
      */
     virtual void giveElementCharacteristicVector(FloatArray &answer, int num, CharType type, ValueModeType mode, TimeStep *tStep, Domain *domain)
     { domain->giveElement(num)->giveCharacteristicVector(answer, type, mode, tStep); }
@@ -829,7 +814,7 @@ public:
      * Returns the petsc context corresponding to given domain (n) and unknown type
      * Default implementation returns i-th context from petscContextList.
      */
-    virtual PetscContext *givePetscContext(int n, EquationID ut);
+    virtual PetscContext *givePetscContext(int n, EquationID eid);
     /**
      * Creates Petsc contexts. Must be implemented by derived classes since the governing equation type is reqired
      * for context creation.
@@ -841,25 +826,25 @@ public:
      * Assembles characteristic matrix of required type into given sparse matrix.
      * @param answer assembled matrix
      * @param tStep time step, when answer is assembled.
-     * @param ut determines type of equation and corresponding element code numbers
+     * @param eid determines type of equation and corresponding element code numbers
      * @param s determines the equation numbering scheme
      * @param type characterisctic components of type type are requsted from elements and assembled.
      * @param domain source domain
      */
-    virtual void assemble(SparseMtrx *answer, TimeStep *tStep, EquationID ut,
-				CharType type, const UnknownNumberingScheme &s, Domain *domain);
+    virtual void assemble(SparseMtrx *answer, TimeStep *tStep, EquationID eid,
+            CharType type, const UnknownNumberingScheme &s, Domain *domain);
     /**
      * Assembles characteristic matrix of required type into given sparse matrix.
      * @param answer assembled matrix
      * @param tStep time step, when answer is assembled.
-     * @param ut determines type of equation and corresponding element code numbers
+     * @param eid determines type of equation and corresponding element code numbers
      * @param r_s determines the equation numbering scheme for the rows
      * @param c_s determines the equation numbering scheme for the columns
      * @param type characterisctic components of type type are requsted from elements and assembled.
      * @param domain source domain
      */
-    virtual void assemble(SparseMtrx *answer, TimeStep *tStep, EquationID ut,
-				CharType type, const UnknownNumberingScheme& rs, const UnknownNumberingScheme& cs, Domain *domain);
+    virtual void assemble(SparseMtrx *answer, TimeStep *tStep, EquationID eid,
+            CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s, Domain *domain);
     /**
      * Assembles characteristic matrix of required type into given sparse matrix.
      * @param answer assembled matrix
@@ -871,7 +856,7 @@ public:
      * @param domain source domain
      */
     virtual void assemble(SparseMtrx *answer, TimeStep *tStep, EquationID r_id, EquationID c_id,
-				CharType type, const UnknownNumberingScheme &s, Domain *domain);
+            CharType type, const UnknownNumberingScheme &s, Domain *domain);
     /**
      * Assembles characteristic vector of required type into given vector.
      * @param answer assembled vector
@@ -879,19 +864,22 @@ public:
      * @param type characterisctic components of type type are requsted
      * from dofManagers/elements and assembled.
      */
-    //virtual void       assemble (FloatArray&, TimeStep*, CharType type, Domain* domain) ;
+    //virtual void assemble (FloatArray&, TimeStep*, CharType type, Domain* domain) ;
 protected:
     /**
      * Assembles characteristic vector of required type from dofManagers into given vector.
-     * @param answer assembled vector
-     * @param tStep time step, when answer is assembled.
-     * @param type characterisctic components of type type are requsted
-     * @param s determines the equation numbering scheme
+     * @param answer Assembled vector.
+     * @param eid Determines type of equation and corresponding element code numbers.
+     * @param mode Mode of unknown (total, incremental, rate of change).
+     * @param tStep Time step, when answer is assembled.
+     * @param type Characterisctic components of type type are requsted.
+     * @param s Determines the equation numbering scheme.
+     * @param domain Domain to assemble from.
      * from dofManagers and assembled using code numbers.
      */
-    virtual void assembleVectorFromDofManagers(FloatArray &, TimeStep *, EquationID ut,
-					       CharType type, ValueModeType mode,
-					       const UnknownNumberingScheme &s, Domain *domain);
+    virtual void assembleVectorFromDofManagers(FloatArray &answer, TimeStep *tStep, EquationID eid,
+                        CharType type, ValueModeType mode,
+                        const UnknownNumberingScheme &s, Domain *domain);
     /**
      * Assembles prescribed characteristic vector of required type from dofManagers into given vector.
      * @param answer assembled vector
@@ -902,55 +890,70 @@ protected:
     // void assemblePrescribedVectorFromDofManagers(FloatArray &, TimeStep *, EquationID, CharType type, ValueModeType mode, Domain * domain);
     /**
      * Assembles characteristic vector of required type from elements into given vector.
-     * @param answer assembled vector
-     * @param tStep time step, when answer is assembled.
-     * @param type characterisctic components of type type are requsted
-     * @param s determines the equation numbering scheme
-     * from elements and assembled using  using code numbers.
+     * @param answer Assembled vector
+     * @param tStep Time step, when answer is assembled.
+     * @param eid Determines type of equation and corresponding element code numbers.
+     * @param mode Mode of unknown (total, incremental, rate of change).
+     * @param type Characterisctic components of type type are requsted
+     * from elements and assembled using prescribed eqn numbers.
+     * @param s Determines the equation numbering scheme.
+     * @param domain Domain to assemble from.
+     * from elements and assembled using using code numbers.
      */
-    void assembleVectorFromElements(FloatArray &, TimeStep *, EquationID,
+    void assembleVectorFromElements(FloatArray &answer, TimeStep *tStep, EquationID eid,
                                     CharType type, ValueModeType mode,
-                                    const UnknownNumberingScheme & s, Domain * domain);
+                                    const UnknownNumberingScheme &s, Domain *domain);
     /**
      * Assembles prescribed characteristic vector of required type from elements into given vector.
-     * @param answer assembled vector
-     * @param tStep time step, when answer is assembled.
-     * @param type characterisctic components of type type are requsted
+     * @param answer Assembled vector
+     * @param tStep Time step, when answer is assembled.
+     * @param eid Determines type of equation and corresponding element code numbers.
+     * @param mode Mode of unknown (total, incremental, rate of change).
+     * @param type Characterisctic components of type type are requsted
      * from elements and assembled using prescribed eqn numbers.
+     * @param domain Domain to assemble from.
      */
-    void assemblePrescribedVectorFromElements(FloatArray &, TimeStep *, EquationID, CharType type, ValueModeType mode, Domain * domain);
+    void assemblePrescribedVectorFromElements(FloatArray &answer, TimeStep *tStep, EquationID eid, 
+                CharType type, ValueModeType mode, Domain *domain);
 
 #ifdef __PETSC_MODULE
-    void petsc_assembleVectorFromDofManagers(Vec, TimeStep *, EquationID ut, CharType type, ValueModeType mode, Domain * domain);
-    void petsc_assemblePrescribedVectorFromDofManagers(Vec, TimeStep *, EquationID ut, CharType type, ValueModeType mode, Domain * domain);
-    void petsc_assembleVectorFromElements(Vec, TimeStep *, EquationID ut, CharType type, ValueModeType mode, Domain * domain);
-    void petsc_assemblePrescribedVectorFromElements(Vec, TimeStep *, EquationID ut, CharType type, ValueModeType mode, Domain * domain);
+    void petsc_assembleVectorFromDofManagers(Vec, TimeStep *, EquationID eid, CharType type, ValueModeType mode, Domain * domain);
+    void petsc_assemblePrescribedVectorFromDofManagers(Vec, TimeStep *, EquationID eid, CharType type, ValueModeType mode, Domain * domain);
+    void petsc_assembleVectorFromElements(Vec, TimeStep *, EquationID eid, CharType type, ValueModeType mode, Domain * domain);
+    void petsc_assemblePrescribedVectorFromElements(Vec, TimeStep *, EquationID eid, CharType type, ValueModeType mode, Domain * domain);
 #endif
 #ifdef __PARALLEL_MODE
-    /** Packs receiver data when rebalancing load. When rebalancing happens, the local numbering will be lost on majority of processors.
-     *  Instead of identifying values of solution vectors that have to be send/received and then performing renumbering, all solution vectors
-     *  are assumed to be stored in dof dictionaries before data migration. Then dofs will take care themselves for packing and unpacking. After
-     *  data migration and local renubering, the solution vectors will be restored from dof dictionary data back.
+    /** 
+     * Packs receiver data when rebalancing load. When rebalancing happens, the local numbering will be lost on majority of processors.
+     * Instead of identifying values of solution vectors that have to be send/received and then performing renumbering, all solution vectors
+     * are assumed to be stored in dof dictionaries before data migration. Then dofs will take care themselves for packing and unpacking. After
+     * data migration and local renubering, the solution vectors will be restored from dof dictionary data back.
      */
     virtual void packMigratingData(TimeStep *) { }
-    /** Unpacks receiver data when rebalancing load. When rebalancing happens, the local numbering will be lost on majority of processors.
-     *  Instead of identifying values of solution vectors that have to be send/received and then performing renumbering, all solution vectors
-     *  are assumed to be stored in dof dictionaries before data migration. Then dofs will take care themselves for packing and unpacking. After
-     *  data migration and local renubering, the solution vectors will be restored from dof dictionary data back.
+    /** 
+     * Unpacks receiver data when rebalancing load. When rebalancing happens, the local numbering will be lost on majority of processors.
+     * Instead of identifying values of solution vectors that have to be send/received and then performing renumbering, all solution vectors
+     * are assumed to be stored in dof dictionaries before data migration. Then dofs will take care themselves for packing and unpacking. After
+     * data migration and local renubering, the solution vectors will be restored from dof dictionary data back.
      */
     virtual void unpackMigratingData(TimeStep *) { }
 #endif
 public:
 
     // consistency check
-    /** Allows programmer to test some receiver's internal data, before computation begins.
-     * @return nonzero if receiver check is o.k. */
-    virtual int checkConsistency() { return 1; }    // returns nonzero if o.k.
-    /** Allows programmer to test problem its internal data, before computation begins.
-     * @return nonzero if receiver check is o.k. */
-    int checkProblemConsistency();      // returns nonzero if o.k.
-    /** Initializes the receiver state. Default implementation calls initModuleManager::doInit service to
-     *  invoke initialization by individual init modules.
+    /** 
+     * Allows programmer to test some receiver's internal data, before computation begins.
+     * @return Nonzero if receiver check is o.k.
+     */
+    virtual int checkConsistency() { return 1; }
+    /** 
+     * Allows programmer to test problem its internal data, before computation begins.
+     * @return Nonzero if receiver check is o.k.
+     */
+    int checkProblemConsistency();
+    /** 
+     * Initializes the receiver state. Default implementation calls initModuleManager::doInit service to
+     * invoke initialization by individual init modules.
      */
     virtual void init();
 
@@ -959,7 +962,7 @@ public:
      * Corresponding function for element gauss points is invoked
      * (gaussPoint::printOutputAt).
      */
-    virtual void                  printOutputAt(FILE *, TimeStep *);
+    virtual void printOutputAt(FILE *, TimeStep *);
 
 
     // input / output
@@ -1000,7 +1003,7 @@ public:
      * This value indicates, whether nodes and elements should assemble
      * total or incremental load vectors.
      *
-     * virtual  LoadResponseMode giveLoadResponseMode () {return TotalLoad;}
+     * virtual LoadResponseMode giveLoadResponseMode () {return TotalLoad;}
      */
     /// Context requesting service
     EngngModelContext *giveContext() { return this->context; }
@@ -1046,11 +1049,11 @@ public:
 #ifdef __PARALLEL_MODE
 
     /// Returns domain rank in a group of colaborating processes (0..groupSize-1)
-    int                giveRank() { return rank; }
+    int giveRank() { return rank; }
     /// Returns the number of colaborating processis
-    int                giveNumberOfProcesses() { return numProcs; }
+    int giveNumberOfProcesses() { return numProcs; }
     /// Request domain rank and problem size
-    void               initParallel();
+    void initParallel();
     /// Returns reference to itself -> required by comunicator.h
     EngngModel *giveEngngModel() { return this; }
     // returns Communicator mode. Determines current domain-decomposition strategy used.
@@ -1058,13 +1061,13 @@ public:
 #endif
 
 #ifdef __OOFEG
-    virtual void               drawYourself(oofegGraphicContext &context);
-    virtual void               drawElements(oofegGraphicContext &context);
-    virtual void               drawNodes(oofegGraphicContext &context);
+    virtual void drawYourself(oofegGraphicContext &context);
+    virtual void drawElements(oofegGraphicContext &context);
+    virtual void drawNodes(oofegGraphicContext &context);
     /**
      * Shows the sparse structure of required matrix, type == 1 stiffness.
      */
-    virtual void       showSparseMtrxStructure(int type, oofegGraphicContext &context, TimeStep *atTime) { }
+    virtual void showSparseMtrxStructure(int type, oofegGraphicContext &context, TimeStep *atTime) { }
 #endif
 
     /**@name error and warning reporting methods
@@ -1075,8 +1078,8 @@ public:
      *
      * Uses variable number of arguments, so a format string followed by optional argumens is expected
      * (according to printf conventions).
-     * @param file  source file name, where error encountered (where error* function called)
-     * @param line  source file line number, where error encountered
+     * @param file source file name, where error encountered (where error* function called)
+     * @param line source file line number, where error encountered
      */
     //@{
     /// prints error message and exits

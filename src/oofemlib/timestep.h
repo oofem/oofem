@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/timestep.h,v 1.11 2003/04/06 14:08:26 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -37,11 +36,6 @@
  * Dubois-Pelerin, Y.: "Object-Oriented  Finite Elements: Programming concepts and Implementation",
  * PhD Thesis, EPFL, Lausanne, 1992.
  */
-
-//   ***********************
-//   *** CLASS TIME STEP ***
-//   ***********************
-
 
 #ifndef timestep_h
 #define timestep_h
@@ -86,19 +80,8 @@ namespace oofem {
  */
 class TimeStep
 {
-    /*
-     * This class implements a step in a time history.
-     * DESCRIPTION :
-     * A time step n is characterized by its date 't', and by the time increment
-     * 'dt' between step n-1 and step n.
-     * The time step knows the time history 'scheme' it belongs to.
-     *
-     * TASKS :
-     * - returning its time 't' and its time increment 'dt'.
-     *
-     */
 protected:
-    /// Engng model reference.
+    /// Engineering model reference.
     EngngModel *eModel;
     /// Current target time, which represents time at the end of a time step.
     double targetTime;
@@ -108,109 +91,109 @@ protected:
     double deltaT;
     /// Solution state counter.
     StateCounterType solutionStateCounter;
-    /// receiver's number
+    /// Receiver's number.
     int number;
-    /** receiver's version, used for special applicatons; default set to 0.
+    /** 
+     * Receiver's version, used for special applicatons; default set to 0.
      * Typically, new version of same step is generated after adaptive restart, when
-     * the restarted step is equlibrated on new domain
+     * the restarted step is equlibrated on new domain.
      */
     int version;
-    /// corresponding meta step number
+    /// Corresponding meta step number.
     int mstepNumber;
 
 public:
-    /*
+    /**
      * Constructor. Creates a new solution step.
-     * @param n solution step number
-     * @param e reference to corresponding engng model
-     * @param mn meta step number
-     * @param tt intrinsic time
-     * @param dt intrinsic time increment
-     * @param counter solution state counter
+     * @param n Solution step number.
+     * @param e Reference to corresponding engng model.
+     * @param mn Meta step number.
+     * @param tt Intrinsic time.
+     * @param dt Intrinsic time increment.
+     * @param counter Solution state counter.
      */
-    TimeStep(int n, EngngModel *e, int mn, double tt, double dt, StateCounterType counter);    // constructors
+    TimeStep(int n, EngngModel *e, int mn, double tt, double dt, StateCounterType counter);
     TimeStep(const TimeStep &);
     TimeStep(EngngModel *e);
-    TimeStep &operator=(const TimeStep &); // assignment: cleanup and copy
+    TimeStep &operator=(const TimeStep &);
 
-    /// Returns receiver's number
+    /// Returns receiver's number.
     int giveNumber() { return number; }
-    /// Set receiver's number
+    /// Set receiver's number.
     void setNumber(int i) { number = i; }
-    /// Returns receiver's version
+    /// Returns receiver's version.
     int giveVersion() { return version; }
-    /// Returns receiver's meta step number
+    /// Returns receiver's meta step number.
     int giveMetaStepNumber() { return mstepNumber; }
     /**
      * Returns class name of receiver.
-     * @param s buffer to store name
-     * @return pointer to s parameter filled with name
+     * @return Pointer to s parameter filled with name.
      */
     const char *giveClassName() const { return "TimeStep"; }
     /// Returns poiter to previous solution step.
     TimeStep *givePreviousStep();
     /// Returns target time.
-    double     giveTargetTime()                { return targetTime; }
+    double giveTargetTime() { return targetTime; }
     /// Returns intrinsic time.
-    double     giveIntrinsicTime()             { return intrinsicTime; }
+    double giveIntrinsicTime() { return intrinsicTime; }
     /// Returns solution step associated time increment.
-    double     giveTimeIncrement()       { return deltaT; }
+    double giveTimeIncrement() { return deltaT; }
     /// Sets solution step time increment.
-    void       setTimeIncrement(double newDt) { deltaT = newDt; }
+    void setTimeIncrement(double newDt) { deltaT = newDt; }
     /// Sets target and intrinsic time to be equal.
-    void       setTime(double newt) { targetTime = newt; intrinsicTime = newt; }
+    void setTime(double newt) { targetTime = newt; intrinsicTime = newt; }
     /// Sets only target time.
-    void       setTargetTime(double newt) { targetTime = newt; }
+    void setTargetTime(double newt) { targetTime = newt; }
     /// Sets only intrinsic time.
-    void       setIntrinsicTime(double newt) { intrinsicTime = newt; }
+    void setIntrinsicTime(double newt) { intrinsicTime = newt; }
 
     /**
-     * Tests if solution step is not the last step.
-     * @return nonzero if not last step, zero otherwise.
+     * Check if solution step is not the last step.
+     * @return True if not last step, false otherwise.
      */
-    int        isNotTheLastStep();
+    bool isNotTheLastStep();
     /**
-     * Tests if receiver is first step.
-     * @return nonzero if receiver is the first step, zero otherwise.
+     * Check if receiver is first step.
+     * @return True if receiver is the first step, false otherwise.
      */
-    int        isTheFirstStep();
+    bool isTheFirstStep();
     /**
-     * Test if receiver is solution step when initial conditions should apply.
-     * @return nonzero if ic apply, zero otherwise.
+     * Check if receiver is currentsolution step.
+     * @returns True if receiver is current step, false otherwise.
      */
-    int        isIcApply();
+    bool isTheCurrentTimeStep();
+    /**
+     * Check if receiver is solution step when initial conditions should apply.
+     * @return True if ic apply, false otherwise.
+     */
+    bool isIcApply();
     /**
      * Returns current solution state counter.
      */
     StateCounterType giveSolutionStateCounter() { return solutionStateCounter; }
     /// Updates solution state counter.
-    void       incrementStateCounter() { solutionStateCounter++; }
-    /// Increments receiver's version
-    void       incrementVersion() { version++; }
-    // LoadResponseMode giveLoadResponseMode () {return eModel->giveLoadResponseMode();}
-    // indicate whether incremetal  or total load is used
+    void incrementStateCounter() { solutionStateCounter++; }
+    /// Increments receiver's version.
+    void incrementVersion() { version++; }
 
-    /**
-     * Tests if receiver is currentsolution step.
-     * @returns nonzero, if receiver is current step, zero otherwise.
-     */
-    int        isTheCurrentTimeStep();
-    //int        requiresNewLhs () {return eModel->requiresNewLhs();}
     IRResultType initializeFrom(InputRecord *ir) { return IRRT_OK; }
-    /** Stores receiver state to output stream.
+    /** 
+     * Stores receiver state to output stream.
      * Receiver should write class-id first in order to allow test
      * whether correct data are then restored.
-     * @param stream output stream
-     * @param mode determines ammount of info required in stream (state, definition,...)
-     * @param obj special parameter, used only to send particular integration
+     * @param stream Output stream.
+     * @param mode Determines ammount of info required in stream (state, definition,...).
+     * @param obj Special parameter, used only to send particular integration.
      * point to material class version of this method. Except this
      * case, obj parameter is always NULL pointer.
-     * @exception throws an ContextIOERR exception if error encountered.
+     * @exception ContextIOERR If error encountered.
      */
-    contextIOResultType    saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-    /** Restores the receiver state previously written in stream.
-     * @see saveContext member function.*/
-    contextIOResultType    restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    /** 
+     * Restores the receiver state previously written in stream.
+     * @see saveContext member function.
+     */
+    contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 };
 } // end namespace oofem
 #endif // timestep_h

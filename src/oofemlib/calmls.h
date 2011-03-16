@@ -32,11 +32,6 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-//   ********************************************
-//   *** CLASS CYLINDRICAL ARC LENGTH METHOD  ***
-//   ********************************************
-
-
 #ifndef calmls_h
 #define calmls_h
 
@@ -202,7 +197,7 @@ public:
                             double &internalForcesEBENorm, double &ReachedLambda, referenceLoadInputModeType rlm,
                             int &nite, TimeStep *);
     virtual double giveCurrentStepLength() { return deltaL; }
-    virtual void setStepLength(double l) { deltaL = l; }
+    virtual void setStepLength(double s) { deltaL = s; }
     IRResultType initializeFrom(InputRecord *ir);
     contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
     contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);

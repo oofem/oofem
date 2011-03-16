@@ -95,39 +95,32 @@ enum elementParallelMode {
  * specific member functions (these must be overloaded by derived analysis-specific
  * classes in order to invoke proper method according to type of component requested).
  * In general, element class member functions are called in following cases:
- * <UL>
- * <LI>
- * When Engineering model assembles governing equation(s) from element's contributions.
- * Typically when assembles some characteristic matrix of analyzed structure (method assemble),
- * asks each element for its code numbers and for corresponding characteristic matrix, vector or
- * value. This will typically uses above mentioned general method for obtaining characteristic
- * matrices, vectors and values from elements.</LI>
- * <LI>
- * When Engineering model has some characteristic matrix stored in sparse form, then is necessary
- * to build internal profile of such sparse matrix. Engineering model then typically calls
- * buildInternalStructure member function of sparse matrix. This method then requests element code
- * numbers from elements and builds its internal profile. This could look strange, because
- * class sparse matrix should know "something about elements", but only sparse matrix knows, how
- * to build its internal structure (this may require one or more loops over elements code number).</LI>
- * <LI>
- * When element computes its contribution, then it communicates with its cross-section (and cross
- * section with corresponding material). For some cross-section or material models some further
- * communication between these classes and element may be necessary (for example in cases of
- * layered cross section model strains in each layer has to be evaluated from "integrated"
- * strains (integrated means element-like strains including curvatures in case of beams and plates)
- * by element, in cases of non local material and many other examples can be found).</LI>
- * </UL>
+ * - When Engineering model assembles governing equation(s) from element's contributions.
+ *   Typically when assembles some characteristic matrix of analyzed structure (method assemble),
+ *   asks each element for its code numbers and for corresponding characteristic matrix, vector or
+ *   value. This will typically uses above mentioned general method for obtaining characteristic
+ *   matrices, vectors and values from elements.
+ * - When Engineering model has some characteristic matrix stored in sparse form, then is necessary
+ *   to build internal profile of such sparse matrix. Engineering model then typically calls
+ *   buildInternalStructure member function of sparse matrix. This method then requests element code
+ *   numbers from elements and builds its internal profile. This could look strange, because
+ *   class sparse matrix should know "something about elements", but only sparse matrix knows, how
+ *   to build its internal structure (this may require one or more loops over elements code number).
+ * - When element computes its contribution, then it communicates with its cross-section (and cross
+ *   section with corresponding material). For some cross-section or material models some further
+ *   communication between these classes and element may be necessary (for example in cases of
+ *   layered cross section model strains in each layer has to be evaluated from "integrated"
+ *   strains (integrated means element-like strains including curvatures in case of beams and plates)
+ *   by element, in cases of non local material and many other examples can be found).
+ * 
  * There are some general rules, that programmer must take into account.
- * <UL>
- * <LI>
- * Element stores the numbers of its dofmanagers in dofManArray.
- * These include nodes, element sides and internal DOFs that are not condensed at element level.
- * Their order and meaning are determined by element definition.
- * Local ordering of dofs for particular element is determined by local numbering of
- * dofmanagers and their corresponding dofs. DOFS necessary for particular node/side is specified using node/side dof mask.
- * Local DOF ordering must be taken into account when assembling various local characteristic
- * vectors and matrices.</LI>
- * </UL>
+ * - Element stores the numbers of its dofmanagers in dofManArray.
+ *   These include nodes, element sides and internal DOFs that are not condensed at element level.
+ *   Their order and meaning are determined by element definition.
+ *   Local ordering of dofs for particular element is determined by local numbering of
+ *   dofmanagers and their corresponding dofs. DOFS necessary for particular node/side is specified using node/side dof mask.
+ *   Local DOF ordering must be taken into account when assembling various local characteristic
+ *   vectors and matrices.
  */
 class Element : public FEMComponent
 {
@@ -214,15 +207,18 @@ public:
      */
     void invalidateLocationArray();
     /**
-     * @return Number of internal element dofs
+     * @return Number of DOFs in element.
      */
     virtual int giveNumberOfDofs() { return 0; }
+    /**
+     * @return Number of internal DOF managers of element.
+     */
+    virtual int giveNumberOfInternalDofManagers() {return 0;}
     /**
      * Returns i-th internal element dof manager of the receiver
      * @param i Internal number of DOF.
      * @return DOF number i.
      */
-    virtual int giveNumberOfInternalDofManagers() {return 0;}
     virtual DofManager *giveInternalDofManager(int i) const {
         _error2("No such DOF available on Element %d", number);
         return NULL;
@@ -240,7 +236,6 @@ public:
      * @param answer requested characteristic matrix.
      * If element has no capability to compute requested type of characteristic matrix
      * error function is invoked.
-     * @see CharType
      * @param answer Requested characteristic matrix.
      * @param type   Id of characteristic component requested.
      * @param tStep  Time step when answer is computed.
@@ -250,8 +245,6 @@ public:
      * Computes characteristic vector of receiver of requested type in given time step.
      * If element has no capability to compute requested type of characteristic vector
      * error function is invoked.
-     * @see CharType
-     * @see ValueModeType
      * @param answer Requested characteristic vector.
      * @param type   Id  of characteristic component requested.
      * @param mode   Determines mode of answer.
@@ -262,7 +255,6 @@ public:
      * Computes characteristic value of receiver of requested type in given time step.
      * If element has no capability to compute requested type of characteristic value
      * error function is invoked.
-     * @see CharType
      * @param type  Id of characteristic component requested.
      * @param tStep Time step when answer is computed.
      * @return Requested value.
@@ -796,7 +788,7 @@ public:
      * @param answer Contains result, zero sized if not supported.
      * @param type Determines the internal variable requested (physical meaning).
      * @param mode Determines the mode of variable (recovered, local, ...).
-     * @param node Node number, for which variable is required.
+     * @param side Side number, for which variable is required.
      * @param atTime Time step.
      * @return Nonzero if o.k, zero otherwise.
      */

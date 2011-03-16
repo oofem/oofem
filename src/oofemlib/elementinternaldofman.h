@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/elementside.h,v 1.8 2003/04/06 14:08:24 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -32,12 +31,6 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-
-
-//   **************************
-//   *** CLASS Element Side ***
-//   **************************
-
 
 #ifndef elementdofman_h
 #define elementdofman_h
@@ -68,48 +61,38 @@ private:
   Element* element;
 public:
     /**
-     * Constructor. Creates a element side belonging to domain.
-     * @param n side number in domain aDomain
-     * @param element  to which receiver belongs
+     * Constructor.
+     * @param n Element dof manager number.
+     * @param aDomain Domain which receiver belongs to.
+     * @param elem Element to which receiver belongs.
      */
-  ElementDofManager(int n, Domain *aDomain, Element* elem);            // constructor
+    ElementDofManager(int n, Domain *aDomain, Element* elem);
     /// Destructor.
-    ~ElementDofManager();                                 // destructor
+    ~ElementDofManager();
 
     // miscellaneous
-    /// Returns class name of the receiver.
     const char *giveClassName() const { return "ElementDofManager"; }
-    /** Returns classType id of receiver.
-     * @see FEMComponent::giveClassID
-     */
-    classType    giveClassID() const { return ElementDofManagerClass; }
-    ///Initializes receiver acording to object description stored in input record.
+    classType giveClassID() const { return ElementDofManagerClass; }
     IRResultType initializeFrom(InputRecord *ir);
     //virtual IntArray* ResolveDofIDArray (char* initString);
-    /// prints receiver state on stdout. Usefull for debuging.
-    void         printYourself();
+    void printYourself();
 
-    /** Computes receiver transformation matrix from global cs. to dofManager specific
-     * coordinate system (in which governing equations are assembled, for example the
-     * local coordinate system in node).
-     * @param answer computed transformation matrix. It has generally dofIDArry.size rows and
+    /** 
+     * Computes receiver transformation matrix from global CS to dofManager specific
+     * coordinate system. In which governing equations are assembled, for example the
+     * local coordinate system in node.
+     * @param answer Computed transformation matrix. It has generally dofIDArry.size rows and
      * if loc is obtained using giveLocationArray(dofIDArry, loc) call, loc.giveSize() columns.
      * This is because this transformation should generally include not only transformation to
      * dof manager local coordinate system, but receiver dofs can be expressed using
      * dofs of another dofManager (In this case, squre answer is produced anly if all
      * dof transformation is required).
-     * @param dofIDArry array containing DofIDItem-type values (this is enumeration
+     * @param dofIDArry Array containing DofIDItem-type values (this is enumeration
      * identifying physical meaning of particular DOF, see cltypes.h) for which transfromation mtrx is
      * assembled. if dofIDArry is NULL, then all receiver dofs are assumed.
      */
     virtual void computeTransformation(FloatMatrix &answer, const IntArray *dofIDArry);
-    /**
-     * Indicates, whether dofManager requires the transformation from global c.s. to
-     * dof manager specific coordinate system.
-     * @return nonzero if transformation is necessary, even for single dof.
-     */
     virtual int requiresTransformation() { return 0; }
-    /// Returns true if dof of given type is allowed to be associated to receiver
     virtual bool isDofTypeCompatible(dofType type) const { return ( type == DT_master || type == DT_simpleSlave ); }
 };
 } // end namespace oofem

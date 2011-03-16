@@ -125,7 +125,7 @@ public:
     /**
      * Sets the step length.
      * @see solve For more details on the step length s.
-     * @param l New step length.
+     * @param s New step length.
      */
     virtual void setStepLength(double s) { this->deltaL = s; }
     /**

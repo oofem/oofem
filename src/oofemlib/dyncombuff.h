@@ -1,4 +1,3 @@
-/* $Header:$ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -32,10 +31,6 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-
-//
-// class CommunicationPacket
-//
 
 #ifndef dyncombuff_h
 #define dyncombuff_h
@@ -75,9 +70,9 @@ protected:
 public:
 
  #ifdef __USE_MPI
-    /// Constructor. Creeates buffer of given size, using given communicator for packing
+    /// Constructor. Creeates buffer of given size, using given communicator for packing.
     CommunicationPacket(MPI_Comm comm, int size, int num);
-    /// Constructor. Creeates empty buffer, using given communicator for packing
+    /// Constructor. Creeates empty buffer, using given communicator for packing.
     CommunicationPacket(MPI_Comm comm, int num);
  #endif
     /// Destructor.
@@ -93,20 +88,20 @@ public:
  #ifdef __USE_MPI
     /**
      * Starts standard mode, nonblocking send.
-     * @param dest rank of destination
-     * @param tag message tag
-     * @param communicator (handle)
-     * @return sends MIP_Succes if ok
+     * @param dest Rank of destination.
+     * @param tag Message tag.
+     * @param communicator Communicator request handle.
+     * @return Sends MIP_Succes if ok.
      */
     int iSend(MPI_Comm communicator, int dest, int tag);
     /**
      * Starts standard mode, nonblocking receive. The buffer must be large enough to receive all data.
-     * @param source rank of source
-     * @param tag message tag
-     * @param count number of elements to receive (bytes). Causes receive buffer to resize to count elements.
+     * @param source Rank of source.
+     * @param tag Message tag.
+     * @param count Number of elements to receive (bytes). Causes receive buffer to resize to count elements.
      * If zero (default value) buffer is not resized.
-     * @param reguest communicator request (handle)
-     * @return MIP_Succes if ok
+     * @param communicator Communicator request handle.
+     * @return MIP_Succes if ok.
      */
     int iRecv(MPI_Comm communicator, int source, int tag, int count = 0);
     /**
@@ -114,7 +109,7 @@ public:
      * In such case, true is returned and
      * if communication was initiated by nonblocking send/receive, then request handle
      * is set to MPI_REQUEST_NULL. Otherwise call returns flag=false.
-     * @return true if operation complete, false otherwise.
+     * @return True if operation complete, false otherwise.
      */
     virtual int testCompletion();
     /**
@@ -123,7 +118,7 @@ public:
      * receive buffer contains the received message, the receiver is now free to access it, and that the status object is set.
      * If the communication object associated with this request was created (nonblocking send or receive call),
      * then the object is deallocated by the call to MPI_WAIT and the request handle is set to MPI_REQUEST_NULL.
-     *
+     * @return True if request is successful.
      */
     virtual int waitCompletion();
  #endif
@@ -134,7 +129,7 @@ public:
     int getNumber() { return number; }
     bool hasEOFFlag() { return EOF_Flag; }
 
-    /// packs packet header info at receiver beginning
+    /// Packs packet header info at receiver beginning
     int packHeader(MPI_Comm);
     int unpackHeader(MPI_Comm);
 };
@@ -164,24 +159,24 @@ class DynamicCommunicationBuffer : public CommunicationBuffer
 {
 protected:
     std :: list< CommunicationPacket * >packet_list;
-    /// iterator to iterate over received packets
+    /// Iterator to iterate over received packets.
     std :: list< CommunicationPacket * > :: iterator recvIt;
-    /// active packet
+    /// Active packet.
     CommunicationPacket *active_packet;
-    /// active rank and tag  (send by initSend,initReceive, and initExchange)
+    /// Active rank and tag (send by initSend,initReceive, and initExchange).
     int active_tag, active_rank;
     int number_of_packets;
 
-    // receiver mode
+    /// Receiver mode.
     enum DCB_Mode { DCB_null, DCB_send, DCB_receive } mode;
-    // static packet pool
+    /// Static packet pool.
     static CommunicationPacketPool packetPool;
-    // communication completion flag
+    /// Communication completion flag.
     bool completed;
 public:
-    /// Constructor. Creeates buffer of given size, using given communicator for packing
+    /// Constructor. Creeates buffer of given size, using given communicator for packing.
     DynamicCommunicationBuffer(MPI_Comm comm, int size, bool dynamic = 0);
-    /// Constructor. Creeates empty buffer, using given communicator for packing
+    /// Constructor. Creeates empty buffer, using given communicator for packing.
     DynamicCommunicationBuffer(MPI_Comm comm, bool dynamic = 0);
     /// Destructor.
     virtual ~DynamicCommunicationBuffer();
@@ -189,9 +184,9 @@ public:
     virtual int resize(int newSize) { return 1; }
     virtual void init();
 
-    /// Initialize for packing
+    /// Initialize for packing.
     virtual void initForPacking();
-    /// Initialize for Unpacking (data already received)
+    /// Initialize for Unpacking (data already received).
     virtual void initForUnpacking();
 
     virtual int packArray(const int *src, int n)
@@ -226,9 +221,7 @@ public:
      * In such case, true is returned and
      * if communication was initiated by nonblocking send/receive, then request handle
      * is set to MPI_REQUEST_NULL. Otherwise call returns flag=false.
-     * @param source contain the source tag
-     * @param tag contain the tag of received message
-     * @return true if operation complete, false otherwise.
+     * @return True if operation complete, false otherwise.
      */
     int testCompletion();
     /**
@@ -237,7 +230,7 @@ public:
      * receive buffer contains the received message, the receiver is now free to access it, and that the status object is set.
      * If the communication object associated with this request was created (nonblocking send or receive call),
      * then the object is deallocated by the call to MPI_WAIT and the request handle is set to MPI_REQUEST_NULL.
-     *
+     * @return True if request is successful.
      */
     virtual int waitCompletion();
 
@@ -257,9 +250,10 @@ protected:
     void clear();
     int giveFitSize(MPI_Datatype type, int availableSpace, int arrySize);
 
-    /** templated low-level array packing method.
-     *  templated version used since implementation is similar for different types
-     *  but type info is needed since implementation is relying on pointer arithmetic
+    /** 
+     * Templated low-level array packing method.
+     * Templated version used since implementation is similar for different types
+     * but type info is needed since implementation is relying on pointer arithmetic.
      */
     template< class T >int __packArray(T *src, int n, MPI_Datatype type) {
         int _result = 1;
@@ -284,9 +278,10 @@ protected:
         return _result;
     }
 
-    /** templated low-level array unpacking method.
-     *  templated version used since implementation is similar for different types
-     *  but type info is needed since implementation is relying on pointer arithmetic
+    /** 
+     * Templated low-level array unpacking method.
+     * Templated version used since implementation is similar for different types
+     * but type info is needed since implementation is relying on pointer arithmetic.
      */
     template< class T >int __unpackArray(T *dest, int n, MPI_Datatype type) {
         int _result = 1;

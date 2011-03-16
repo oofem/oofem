@@ -72,26 +72,28 @@ public:
 template< class T >class dynaList
 {
 public:
-    /// List iterator type
+    /// List iterator type.
     typedef dynaListIterator< T >iterator;
-    /// Link type
+    /// Link type.
     typedef listItem< T > *linkType;
+
 protected:
     linkType last; // last->next is head of list
+
 public:
-    /// Constructor, creates the empty list
+    /// Constructor, creates the empty list.
     dynaList() {
         T val;
         last = new listItem< T >(val);
         last->next = last;
         last->prev = last;
     }
-    /// Destructor
+    /// Destructor.
     ~dynaList();
 
     /**
      * Inserts at iterator position a copy of value and returns the position of new element.
-     * @param Position where to insert value.
+     * @param position Where to insert value.
      * @param value Value to insert.
      */
     iterator insert(iterator position, const T &value);

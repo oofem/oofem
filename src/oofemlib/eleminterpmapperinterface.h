@@ -70,7 +70,7 @@ public:
      * @see EIPrimaryUnknownMI_computePrimaryUnknownVectorAt
      * @param mode    Identifies mode of unknown (eg. total value or velocity of unknown).
      * @param tStep   Time step, when vector of unknowns is requested.
-     * @param gcoords Global coordinates of point of interest.
+     * @param lcoords Local coordinates of point of interest.
      * @param answer  Vector of unknowns.
      * @return Nonzero if given point is in receiver volume otherwise zero
      */

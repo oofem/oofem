@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/gaussintegrationrule.h,v 1.7 2003/04/06 14:08:24 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -32,11 +31,6 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-
-
-//
-// class gaussIntegrationRule
-//
 
 #ifndef gaussintegrationrule_h
 #define gaussintegrationrule_h
@@ -72,8 +66,6 @@ class GaussIntegrationRule : public IntegrationRule
      * initializing for new time step
      * saving & restoring context
      */
-private:
-
 public:
     /**
      * Constructor.
@@ -83,8 +75,8 @@ public:
      * @param endIndx last component, for which rule applies
      * @param dynamic flag indicating that receiver can change
      */
-    GaussIntegrationRule(int, Element *, int, int, bool dynamic = false);
-    GaussIntegrationRule(int, Element *);
+    GaussIntegrationRule(int n, Element *e, int startIndx, int endIndx, bool dynamic = false);
+    GaussIntegrationRule(int n, Element *e);
     /// Destructor
     virtual ~GaussIntegrationRule();
 

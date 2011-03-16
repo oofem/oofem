@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/integrationrule.h,v 1.9 2003/04/06 14:08:24 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -32,11 +31,6 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-
-
-//
-// class IntegrationRule
-//
 
 #ifndef integrationrule_h
 #define integrationrule_h
@@ -87,11 +81,11 @@ class IntegrationRule
      * integration rules corresponding to  different strains.
      *
      * TASKS:
-     * -   instanciating yourself
-     * -  returning number of integration points used
-     * -  returning requested integration point - method getIntegrationPoint
-     * -  returning inteval of components (i.e.of local strain vector), where apply
-     * -   returning array of gauss points, according to specific
+     * - instanciating yourself
+     * - returning number of integration points used
+     * - returning requested integration point - method getIntegrationPoint
+     * - returning inteval of components (i.e.of local strain vector), where apply
+     * - returning array of gauss points, according to specific
      *   integration rule (Gauss -rule, Newton-Cortes rule ...).
      *   integration points and corresponding weights are stored in
      *   Gauss point class.
@@ -101,7 +95,6 @@ class IntegrationRule
      * initializing for new time step
      * saving & restoring context
      *
-     *
      * REMARK
      * The Integrator is a rather passive object : it does not perform numerical
      * integration - it just provide way how to set up correct integration points
@@ -109,14 +102,14 @@ class IntegrationRule
      */
 protected:
 
-    /// number
+    /// Number.
     int number;
-    // pointer to Element
+    /// Element which integration rule is coupled to.
     Element *elem;
 
-    /// Array containing integration points
+    /// Array containing integration points.
     GaussPoint **gaussPointArray;
-    /// Number of integration point of receiver
+    /// Number of integration point of receiver.
     int numberOfIntegrationPoints;
     /**
      * firstLocalStrainIndx and lastLocalStrainIndx indexes describe range of components (strains for example)
@@ -124,20 +117,27 @@ protected:
      */
     int firstLocalStrainIndx, lastLocalStrainIndx;
 
-    /** flag indicating that rule is dynamic, ie, its gauss points (their number, coordinates, weights) can change during
-     *  computation. Then some more data should be stored/restored from context file to reflect such dynamic feature */
+    /** 
+     * Flag indicating that rule is dynamic, ie, its gauss points (their number, coordinates, weights) can change during
+     * computation. Then some more data should be stored/restored from context file to reflect such dynamic feature.
+     */
     bool isDynamic;
-public:
 
+public:
     /**
      * Constructor.
-     * @param n number associated with receiver
-     * @param domain reference to domain.
-     * @param startIndx first component, for which rule applies
-     * @param endIndx last component, for which rule applies
-     * @param dynamic flag indicating that receiver can change
+     * @param n Number associated with receiver.
+     * @param e Reference to element.
+     * @param startIndx First component, for which rule applies.
+     * @param endIndx Last component, for which rule applies.
+     * @param dynamic Flag indicating that receiver can change.
      */
     IntegrationRule(int n, Element *e, int startIndx, int endIndx, bool dynamic);
+    /**
+     * Constructor.
+     * @param n Number associated with reciever.
+     * @param e Reference to element.
+     */
     IntegrationRule(int n, Element *e);
     /// Destructor.
     virtual ~IntegrationRule();
@@ -148,31 +148,33 @@ public:
     int getNumberOfIntegrationPoints() const { return numberOfIntegrationPoints; }
     /**
      * Access particular integration point of receiver.
-     * @param n integration point number (should be in range 0,.., getNumberOfIntegrationPoints()-1).
+     * @param n Integration point number (should be in range 0,.., getNumberOfIntegrationPoints()-1).
      */
     GaussPoint *getIntegrationPoint(int n);
     /**
      * Returns starting component index, for which receiver applies.
+     * @return First local strain index.
      */
     int getStartIndexOfLocalStrainWhereApply() { return firstLocalStrainIndx; }
     /**
      * Returns last component index, for which receiver applies.
+     * @return Last local strain index.
      */
     int getEndIndexOfLocalStrainWhereApply() { return lastLocalStrainIndx; }
     /**
      * Initializes the receiver. Receiver integration points are created according to given parameters.
-     * @param mode describes integration domain
-     * @param nPoints required number of integration points of receiver
-     * @param matMode material mode of receiver's integration points
-     * @return nPoints
+     * @param mode Describes integration domain.
+     * @param nPoints Required number of integration points of receiver.
+     * @param matMode Material mode of receiver's integration points.
+     * @return Number of points.
      */
     int setUpIntegrationPoints(integrationDomain mode, int nPoints, MaterialMode matMode);
     /**
      * Initializes the receiver. Receiver integration points are created according to given parameters.
-     * @param mode describes integration domain
-     * @param nPoints required number of integration points of receiver
-     * @param matMode material mode of receiver's integration points
-     * @return nPoints
+     * @param mode Describes integration domain.
+     * @param nPoints Required number of integration points of receiver.
+     * @param matMode Material mode of receiver's integration points.
+     * @return Number of points.
      */
     int setUpEmbeddedIntegrationPoints(integrationDomain mode, int nPoints, MaterialMode matMode,
                                        const FloatArray **coords);
@@ -200,7 +202,7 @@ public:
     /** Returns receiver number */
     int giveNumber() { return this->number; }
     /**
-     * Abstract service.`
+     * Abstract service.
      * Returns requred number of integration points to exactly integrate
      * polynomial of order approxOrder on given domain.
      * When approxOrder is too large and is not supported by implementation
@@ -213,7 +215,7 @@ public:
      * Calls saveContext service for all receiver's integration points.
      * Note: does not call the FEMComponent::saveContext service, in order not
      * to write class id info for each integration rule.
-     * @exception throws an ContextIOERR exception if error encountered.
+     * @exception ContextIOERR If error encountered.
      */
     virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj);
     /**
@@ -221,8 +223,8 @@ public:
      * Calls restoreContext service for all receiver's integration points.
      * Note: does not call the FEMComponent::restoreContext service, in order not
      * to write class id info for each integration rule.
-     * @param obj should be a pointer to invoking element, ie., to which the receiver will belong to.
-     * @exception throws an ContextIOERR exception if error encountered.
+     * @param obj Should be a pointer to invoking element, ie., to which the receiver will belong to.
+     * @exception ContextIOERR If error encountered.
      */
     virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj);
     /**
@@ -230,49 +232,51 @@ public:
      */
     void clear();
 
-    ///Returns classType id of receiver.
+    /// Returns receiver sub patch idices (if apply).
+    virtual const IntArray *giveKnotSpan() { return NULL; }
+
+    /// Returns classType id of receiver.
     virtual classType giveClassID() const { return IntegrationRuleClass; }
     /// Returns class name of the receiver.
     virtual const char *giveClassName() const { return "IntegrationRule"; }
     virtual IRResultType initializeFrom(InputRecord *ir) { return IRRT_OK; }
-    /// Returns receiver sub patch idices (if apply)
-    virtual const IntArray *giveKnotSpan() { return NULL; }
+
 protected:
     /**
      * Sets up receiver's  integration points on unit line integration domain.
      * Default implementaion does not sets up any integration points and returns 0.
      * Must be overloaded by deived classes.
-     * @returns number of integration points.
+     * @returns Number of integration points.
      */
-    virtual int  SetUpPointsOnLine(int, MaterialMode, GaussPoint ***) { return 0; }
+    virtual int SetUpPointsOnLine(int, MaterialMode mode, GaussPoint ***gp) { return 0; }
     /**
      * Sets up receiver's  integration points on triangular (area coords) integration domain.
      * Default implementaion does not sets up any integration points and returns 0.
      * Must be overloaded by deived classes.
-     * @returns number of integration points.
+     * @returns Number of integration points.
      */
-    virtual int  SetUpPointsOnTriagle(int, MaterialMode, GaussPoint ***) { return 0; }
+    virtual int SetUpPointsOnTriagle(int, MaterialMode mode, GaussPoint ***gp) { return 0; }
     /**
      * Sets up receiver's  integration points on unit square integration domain.
      * Default implementaion does not sets up any integration points and returns 0.
      * Must be overloaded by deived classes.
-     * @returns number of integration points.
+     * @returns Number of integration points.
      */
-    virtual int  SetUpPointsOnSquare(int, MaterialMode, GaussPoint ***) { return 0; }
+    virtual int SetUpPointsOnSquare(int, MaterialMode mode, GaussPoint ***gp) { return 0; }
     /**
      * Sets up receiver's  integration points on unit cube integration domain.
      * Default implementaion does not sets up any integration points and returns 0.
      * Must be overloaded by deived classes.
-     * @returns number of integration points.
+     * @returns Number of integration points.
      */
-    virtual int  SetUpPointsOnCube(int, MaterialMode, GaussPoint ***) { return 0; }
+    virtual int SetUpPointsOnCube(int, MaterialMode mode, GaussPoint ***gp) { return 0; }
     /**
      * Sets up receiver's  integration points on tetrahedra (volume coords) integration domain.
      * Default implementaion does not sets up any integration points and returns 0.
      * Must be overloaded by deived classes.
-     * @returns number of integration points.
+     * @returns Number of integration points.
      */
-    virtual int  SetUpPointsOnTetrahedra(int, MaterialMode, GaussPoint ***) { return 0; }
+    virtual int SetUpPointsOnTetrahedra(int, MaterialMode mode, GaussPoint ***gp) { return 0; }
     /**
      * Sets up integration points on 2D embedded line inside 2D volume (the list of local coordinates
      * should be provided).

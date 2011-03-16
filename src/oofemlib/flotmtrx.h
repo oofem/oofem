@@ -203,7 +203,7 @@ public:
      * @return Conditioning of receiver.
      */
     double computeReciprocalCondition(char p = '1') const;
-    /**
+    /*
      * Computes the eigenvalues of a symmetric matrix.
      * The receiver must be square and symmetric.
      * @param lambda Eigenvalues.

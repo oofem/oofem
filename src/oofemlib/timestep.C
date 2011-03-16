@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/timestep.C,v 1.10.4.1 2004/04/05 15:19:44 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -38,8 +37,6 @@
  * Dubois-Pelerin, Y.: "Object-Oriented  Finite Elements: Programming concepts and Implementation",
  * PhD Thesis, EPFL, Lausanne, 1992.
  */
-
-//   file TIMESTEP.CC
 
 #include "timestep.h"
 #include "domain.h"
@@ -121,14 +118,14 @@ TimeStep *TimeStep :: givePreviousStep()
 }
 
 
-int TimeStep :: isNotTheLastStep()
+bool TimeStep :: isNotTheLastStep()
 // Returns True if the time history contains steps after the receiver,
 // else returns False.
 {
     return  ( number != eModel->giveNumberOfSteps() );
 }
 
-int TimeStep :: isTheFirstStep()
+bool TimeStep :: isTheFirstStep()
 {
     // Returns True if the receiver is the first time step,
     // according to first step number
@@ -138,7 +135,7 @@ int TimeStep :: isTheFirstStep()
 }
 
 
-int TimeStep :: isIcApply()
+bool TimeStep :: isIcApply()
 {
     // Returns True if the receiver is the  time step,
     // when Initial conditions apply
@@ -149,7 +146,7 @@ int TimeStep :: isIcApply()
 
 
 
-int TimeStep :: isTheCurrentTimeStep()
+bool TimeStep :: isTheCurrentTimeStep()
 // Not accepted in-line.
 {
     return this == eModel->giveCurrentStep();
@@ -200,7 +197,7 @@ TimeStep :: saveContext(DataStream *stream, ContextMode mode, void *obj)
 }
 
 contextIOResultType
-TimeStep ::  restoreContext(DataStream *stream, ContextMode mode, void *obj)
+TimeStep :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
 {
     int class_id;
     // read class header

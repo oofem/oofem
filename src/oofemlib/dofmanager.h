@@ -289,9 +289,9 @@ public:
      */
     //@{
     /**
-     * Computes receiver transformation matrix from global cs. to dofManager specific
-     * coordinate system (in which governing equations are assembled, for example the
-     * local coordinate system in node).
+     * Computes receiver transformation matrix from global CS to dofManager specific
+     * coordinate system. In which governing equations are assembled, for example the
+     * local coordinate system in node.
      * @param answer Computed transformation matrix. It has generally dofIDArry.size rows and
      * if loc is obtained using giveLocationArray(dofIDArry, loc) call, loc.giveSize() columns.
      * This is because this transformation should generally include not only transformation to
@@ -305,7 +305,7 @@ public:
      */
     virtual void computeDofTransformation(FloatMatrix &answer, const IntArray *dofIDArry, DofManTransfType mode);
     /**
-     * Computes receiver load transformation matrix from global cs. to dofManager specific
+     * Computes receiver load transformation matrix from global CS to dofManager specific
      * coordinate system. If mode == _toNodalCS, otherwise reverse transformation is computed
      * (In the dofManager specific cs the governing equations are assembled, for example the
      * local coordinate system in node). This transformation may not be orthogonal.
@@ -322,7 +322,7 @@ public:
      */
     virtual void computeLoadTransformation(FloatMatrix &answer, const IntArray *dofIDArry, DofManTransfType mode);
     /**
-     * Indicates, whether dofManager requires the transformation from global c.s. to
+     * Indicates, whether dofManager requires the transformation from global CS to
      * dof manager specific coordinate system.
      * @return Nonzero if transformation is necessary, even for single dof.
      */
@@ -405,7 +405,7 @@ public:
     virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 
     /// Returns true if dof of given type is allowed to be associated to receiver
-    virtual bool isDofTypeCompatible(dofType type) const { return false; }
+    virtual bool esDofTypeCompatible(dofType type) const { return false; }
     /**
      * Checks internal data consistency in node.
      * Current implementation checks (when receiver has slave dofs) if receiver has the same
