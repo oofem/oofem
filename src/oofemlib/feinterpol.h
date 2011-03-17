@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/feinterpol.h,v 1.1 2003/04/06 14:08:24 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -33,11 +32,6 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-//   *****************************
-//   *** CLASS FEInterpolation ***
-//   *****************************
-
-
 #ifndef feinterpol_h
 #define feinterpol_h
 
@@ -53,7 +47,6 @@ class Element;
  * The aim here is to hide and encapsulate as much as possible from actual cell geometry specification,
  * elements describe its geometry using nodes, which are independent objects, some cells may be
  * directly specified using vertices, etc.
- *
  */
 class FEICellGeometry
 {
@@ -65,7 +58,8 @@ public:
 
 
 /**
- * void cell geometry wrapper. Alows to use some interpolation servises not needing the reference to cell geometry.
+ * Void cell geometry wrapper. 
+ * Allows to use some interpolation servises not needing the reference to cell geometry.
  */
 class FEIVoidCellGeometry : public FEICellGeometry
 {
@@ -80,7 +74,7 @@ public:
 };
 
 /**
- * wrapper around element definition to provide FEICellGeometry interface
+ * Wrapper around element definition to provide FEICellGeometry interface.
  */
 class FEIElementGeometryWrapper : public FEICellGeometry
 {
@@ -94,7 +88,7 @@ public:
 
 
 /**
- * Wrapper around cell with vertex coordinates stored in FloatArray**
+ * Wrapper around cell with vertex coordinates stored in FloatArray**.
  */
 class FEIVertexListGeometryWrapper : public FEICellGeometry
 {
@@ -121,107 +115,102 @@ public:
     FEInterpolation(int o) { order = o; }
     virtual ~FEInterpolation() { }
     /**
-     * Returns the interpolation order
+     * Returns the interpolation order.
      */
     int giveInterpolationOrder() { return order; }
     /**
      * Evaluates the array of interpolation functions (shape functions) at given point.
-     * @param answer contains resulting array of evaluated interpolation functions
-     * @param lcoords array containing (local) coordinates
-     * @param cellgeo underlying cell geometry
-     * @param time time
+     * @param answer Contains resulting array of evaluated interpolation functions.
+     * @param lcoords Array containing (local) coordinates.
+     * @param cellgeo Underlying cell geometry.
+     * @param time Time.
      */
-    virtual void evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time) = 0;
+    virtual void evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time=0.0) = 0;
     /**
      * Evaluates the matrix of derivatives of interpolation functions (shape functions) at given point.
      * These derivatives are in global coordinate system (where the nodal coordinates are defined)
-     * @param matrix contains resulting matrix of derivatives, the member at i,j position contains value of dNi/dxj
-     * @param lcoords array containing (local) coordinates
-     * @param cellgeo underlying cell geometry
-     * @param time time
+     * @param answer Contains resulting matrix of derivatives, the member at i,j position contains value of dNi/dxj.
+     * @param lcoords Array containing (local) coordinates.
+     * @param cellgeo Underlying cell geometry.
+     * @param time Time.
      */
-    virtual void evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time) = 0;
+    virtual void evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time=0.0) = 0;
     /**
      * Evaluates the matrix of second derivatives of interpolation functions (shape functions) at given point.
      * These derivatives are in global coordinate system (where the nodal coordinates are defined)
-     * @param matrix contains resulting matrix of derivatives, the member at i,j position contains value of dNi/dxj
-     * @param nodes array of node numbers defining the interpolation geometry
-     * @param lcoords array containing (local) coordinates
-     * @param time time
+     * @param answer Contains resulting matrix of derivatives, the member at i,j position contains value of dNi/dxj.
+     * @param lcoords Array containing (local) coordinates.
+     * @param cellgeo Underlying cell geometry.
+     * @param time Time.
      */
-    virtual void evald2Ndx2(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time) {
+    virtual void evald2Ndx2(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time=0.0) {
         OOFEM_ERROR("FEInterpolation::evald2Ndx2: not implemented");
     }
     /**
-     * Evaluates global coordinates from given local ones
-     * These derivatives are in global coordinate system (where the nodal coordinates are defined)
-     * @param answer contains resulting global coordinates
-     * @param lcoords array containing (local) coordinates
-     * @param cellgeo underlying cell geometry
-     * @param time time
+     * Evaluates global coordinates from given local ones.
+     * @param answer Contains resulting global coordinates.
+     * @param lcoords Array containing (local) coordinates.
+     * @param cellgeo Underlying cell geometry.
+     * @param time Time.
      */
-    virtual void local2global(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time) = 0;
+    virtual void local2global(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time=0.0) = 0;
     /**
-     * Evaluates local coordinates from given global ones. Returns nonzero if local coordinates are interpolating,
-     * zero if extrapolating (nonzero is returned if point is within the element geometry, zero otherwise).
-     * These derivatives are in global coordinate system (where the nodal coordinates are defined)
-     * @param answer contains evaluated local coordinates
-     * @param gcoords array containing global coordinates
-     * @param cellgeo underlying cell geometry
-     * @param time time
-     * @return nonzero is returned if point is within the element geometry, zero otherwise
+     * Evaluates local coordinates from given global ones. 
+     * @param answer Contains evaluated local coordinates.
+     * @param gcoords Array containing global coordinates.
+     * @param cellgeo Underlying cell geometry.
+     * @param time Time.
+     * @return Nonzero is returned if point is within the element geometry, zero otherwise.
      */
-    virtual int  global2local(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time) = 0;
+    virtual int global2local(FloatArray &answer, const FloatArray &gcoords, const FEICellGeometry &cellgeo, double time=0.0) = 0;
     /**
-     * Evaluates local coordinates from given global ones. Returns nonzero if local coordinates are interpolating,
-     * zero if extrapolating (nonzero is returned if point is within the element geometry, zero otherwise).
-     * These derivatives are in global coordinate system (where the nodal coordinates are defined)
-     * @param answer contains evaluated local coordinates
-     * @param coords coordinates of nodes defining the interpolation geometry
-     * @param gcoords array containing global coordinates
-     * @param time time
-     * @return nonzero is returned if point is within the element geometry, zero otherwise
+     * Evaluates the determinant of the transformation.
+     * @param lcoords Array containing (local) coordinates.
+     * @param cellgeo Underlying cell geometry.
+     * @param time Time.
+     * @return Determinant of the transformation.
      */
-    virtual double giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time) = 0;
+    virtual double giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time=0.0) = 0;
 
-    /**
-     * Returns indices (zero based) of nonzero basis functions for given knot span
-     * The knot span identifies the sub-region of the finite element
-     * @returns nonzero if mask is provided, zero otherwise meaning that all
-     * basis functions are generally nonzero
-     */
-    ///Initializes receiver acording to object description stored in input record.
+    /// Initializes receiver acording to object description stored in input record.
     virtual IRResultType initializeFrom(InputRecord *ir) { return IRRT_OK; }
 
-    /**@name Methods to support interpolation defined on patch by patch basis*/
+    /**@name Methods to support interpolation defined on patch by patch basis. */
     //@{
+    /**
+     * Returns indices (zero based) of nonzero basis functions for given knot span.
+     * The knot span identifies the sub-region of the finite element.
+     * @return Nonzero if mask is provided, zero otherwise meaning that all
+     * basis functions are generally nonzero.
+     */
     virtual int giveKnotSpanBasisFuncMask(const IntArray &knotSpan, IntArray &mask) { return 0; }
-    /** Returns the number of nonzero basis functions at individual knot span,
-     *  @param returns zero in case of all basis functions generally nonzero, answer otherwise */
+    /** 
+     * Returns the number of nonzero basis functions at individual knot span,
+     * @return Zero in case of all basis functions generally nonzero, answer otherwise.
+     */
     virtual int giveNumberOfKnotSpanBasisFunctions(const IntArray &knotSpan) { return 0; }
     /**
-     * Returns true, if receiver is formulated on sub-patch basis
+     * Returns true, if receiver is formulated on sub-patch basis.
      */
     virtual bool hasSubPatchFormulation() { return false; }
     /**
-     *
      * Returns the subdivision of patch parametric space
      */
     virtual double **const giveKnotVector() { return NULL; }
     /**
-     * Returns the number of knot spans of the receiver
+     * Returns the number of knot spans of the receiver.
      */
     virtual int giveNumberOfKnotSpans(int dim) { return 0; }
     /**
-     * Returns the knot values of the receiver
+     * Returns the knot values of the receiver.
      */
     virtual FloatArray *const giveKnotValues(int dim) { return NULL; }
     /**
-     * Returns the knot multiplicity of the receiver
+     * Returns the knot multiplicity of the receiver.
      */
     virtual IntArray *const giveKnotMultiplicity(int dim) { return NULL; }
     /**
-     * Returns number of spatial dimensions
+     * Returns number of spatial dimensions.
      */
     virtual int const giveNsd() = 0;
     //@}

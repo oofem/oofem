@@ -166,7 +166,6 @@ public:
     const char *giveClassName() const { return "PerfectlyPlasticMaterial"; }
     classType giveClassID()         const { return PerfectlyPlasticMaterialClass; }
     IRResultType initializeFrom(InputRecord *ir);
-    void     printYourself();
     LinearElasticMaterial *giveLinearElasticMaterial() { return linearElasticMaterial; }
 
     contextIOResultType    saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);

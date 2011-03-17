@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/feinterpol.h,v 1.1 2003/04/06 14:08:24 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -37,21 +36,6 @@
 #include "element.h"
 
 namespace oofem {
-/*
- * void
- * FEInterpolation :: nodes2coords(Domain *d, IntArray &nodes, const FloatArray **c, int n)
- * {
- *  int i, nnode = nodes.giveSize();
- *  if ( n < nnode ) {
- *      OOFEM_ERROR("FEInterpolation::nodes2coords: size mismatch");
- *  }
- *
- *  for ( i = 0; i < nnode; i++ ) {
- *      c [ i ] = d->giveNode( nodes(i) )->giveCoordinates();
- *  }
- * }
- */
-
 int FEIElementGeometryWrapper :: giveNumberOfVertices() const { return elem->giveNumberOfNodes(); }
 const FloatArray *FEIElementGeometryWrapper :: giveVertexCoordinates(int i) const { return elem->giveNode(i)->giveCoordinates(); }
 } // end namespace oofem

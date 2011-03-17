@@ -191,7 +191,6 @@ public:
     const char *giveClassName() const { return "RheoChainMaterial"; }
     classType giveClassID()         const { return RheoChainMaterialClass; }
     IRResultType initializeFrom(InputRecord *ir);
-    void     printYourself();
 
     // store & restore context functions
     contextIOResultType    saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);

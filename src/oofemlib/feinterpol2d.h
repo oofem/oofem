@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/feinterpol2d.h,v 1.1 2003/04/06 14:08:24 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -33,14 +32,8 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-//   ************************************
-//   *** CLASS FEInterpolation2d ***
-//   ************************************
-
-
 #ifndef feinterpol2d_h
 #define feinterpol2d_h
-
 
 #include "flotarry.h"
 #include "intarray.h"
@@ -48,7 +41,7 @@
 #include "feinterpol.h"
 
 namespace oofem {
-/*
+/**
  * Class representing a general abstraction for surface finite element interpolation class.
  */
 class FEInterpolation2d : public FEInterpolation
@@ -56,12 +49,10 @@ class FEInterpolation2d : public FEInterpolation
 protected:
 public:
     FEInterpolation2d(int o) : FEInterpolation(o) { }
-    /**
-     * Returns number of spatial dimensions
-     */
+
     int const giveNsd() { return 2; }
 
-    /**@name Edge interpolation services */
+    /**@name Edge interpolation services. */
     //@{
     virtual void computeLocalEdgeMapping(IntArray &edgeNodes, int iedge) = 0;
     void computeEdgeMapping(IntArray &edgeNodes, IntArray &elemNodes, int iedge) {
@@ -74,40 +65,45 @@ public:
     }
     /**
      * Evaluates the array of edge interpolation functions (shape functions) at given point.
-     * @param answer contains resulting array of evaluated interpolation functions
-     * @param lcoords array containing (local) coordinates
-     * @param cellgeo underlying cell geometry
-     * @param time time
+     * @param answer Contains resulting array of evaluated interpolation functions.
+     * @param lcoords Array containing (local) coordinates.
+     * @param cellgeo Underlying cell geometry.
+     * @param time Time.
      */
-    virtual void edgeEvalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time) = 0;
+    virtual void edgeEvalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time=0.0) = 0;
     /**
      * Evaluates the matrix of derivatives of edge interpolation functions (shape functions) at given point.
-     * These derivatives are in global coordinate system (where the nodal coordinates are defined)
-     * @param answer contains resulting matrix of derivatives, the member at i,j position contains value of dNi/dxj
-     * @param iedge determines the edge number
-     * @param lcoords array containing (local) coordinates
-     * @param cellgeo underlying cell geometry
-     * @param time time
+     * These derivatives are in global coordinate system (where the nodal coordinates are defined).
+     * @param answer Contains resulting matrix of derivatives, the member at i,j position contains value of dNi/dxj.
+     * @param iedge Determines the edge number.
+     * @param lcoords Array containing (local) coordinates.
+     * @param cellgeo Underlying cell geometry.
+     * @param time Time.
      */
     virtual void edgeEvaldNdx(FloatMatrix &answer, int iedge,
                               const FloatArray &lcoords,
                               const FEICellGeometry &cellgeo, double time) = 0;
     /**
-     * Evaluates edge global coordinates from given local ones
-     * These derivatives are in global coordinate system (where the nodal coordinates are defined)
-     * @param answer contains resulting global coordinates
-     * @param iedge determines edge number
-     * @param lcoords array containing (local) coordinates
-     * @param cellgeo underlying cell geometry
-     * @param time time
+     * Evaluates edge global coordinates from given local ones.
+     * These derivatives are in global coordinate system (where the nodal coordinates are defined).
+     * @param answer Contains resulting global coordinates.
+     * @param iedge Determines edge number.
+     * @param lcoords Array containing (local) coordinates.
+     * @param cellgeo Underlying cell geometry.
+     * @param time Time.
      */
     virtual void edgeLocal2global(FloatArray &answer, int iedge,
-                                  const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time) = 0;
+                                  const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time=0.0) = 0;
     /**
      * Evaluates the edge jacobian of transformation between local and global coordinates.
+     * @param iedge Determines edge number.
+     * @param lcoords Array containing (local) coordinates.
+     * @param cellgeo Underlying cell geometry.
+     * @param time Time.
+     * @return Determinant of the mapping on the given edge.
      */
     virtual double edgeGiveTransformationJacobian(int iedge, const FloatArray &lcoords,
-                                                  const FEICellGeometry &cellgeo, double time) = 0;
+                                                  const FEICellGeometry &cellgeo, double time=0.0) = 0;
     //@}
 };
 } // end namespace oofem

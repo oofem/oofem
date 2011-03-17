@@ -117,7 +117,6 @@ public:
     const char *giveClassName() const { return "KelvinChainMaterial"; }
     classType giveClassID()         const { return KelvinChainMaterialClass; }
     IRResultType initializeFrom(InputRecord *ir);
-    void     printYourself();
 
     // store & restore context functions
     contextIOResultType    saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);

@@ -119,7 +119,6 @@ public:
     const char *giveClassName() const { return "MaxwellChainMaterial"; }
     classType giveClassID()         const { return MaxwellChainMaterialClass; }
     IRResultType initializeFrom(InputRecord *ir);
-    void     printYourself();
 
     // store & restore context functions
     contextIOResultType    saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
