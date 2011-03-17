@@ -405,7 +405,7 @@ public:
     virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 
     /// Returns true if dof of given type is allowed to be associated to receiver
-    virtual bool esDofTypeCompatible(dofType type) const { return false; }
+    virtual bool isDofTypeCompatible(dofType type) const { return false; }
     /**
      * Checks internal data consistency in node.
      * Current implementation checks (when receiver has slave dofs) if receiver has the same
