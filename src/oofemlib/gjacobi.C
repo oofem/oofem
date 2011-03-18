@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/gjacobi.C,v 1.3.4.1 2004/04/05 15:19:43 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -32,10 +31,6 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-
-//
-// file gjacobi.cc
-//
 
 #ifndef __MAKEDEPEND
  #include <stdio.h>
@@ -65,11 +60,7 @@ GJacobi :: GJacobi(int i, Domain *d, EngngModel *m) :
     solved = 0;
 }
 
-GJacobi ::  ~GJacobi() {
-    //
-    // destructor
-    //
-}
+GJacobi ::  ~GJacobi() { }
 
 
 #define GJacobi_ZERO_CHECK_TOL 1.e-40
@@ -357,14 +348,8 @@ label280:
     return NM_Success;
 }
 
-
-
-
 IRResultType
 GJacobi :: initializeFrom(InputRecord *ir)
-//
-//
-//
 {
     return IRRT_OK;
 }

@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/gjacobi.h,v 1.4 2003/04/06 14:08:24 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -33,11 +32,6 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-//   ***************************************************
-//   *** CLASS GENERALIZED JACOBI EIGEN VALUE SOLVER ***
-//   ***************************************************
-
-
 #ifndef gjacobi_h
 #define gjacobi_h
 
@@ -54,80 +48,45 @@ namespace oofem {
 class Domain;
 class EngngModel;
 
-
+/**
+ * This class implements the Generalized Jacobi Eigenvalue Problem Solver.
+ * Perform solution of eigenvalue problem in the form
+ * @f[
+ *  K\cdot x = \omega^2 M\cdot x
+ * @f]
+ */
 class GJacobi : public NumericalMethod
 {
-    /*
-     * This class implements the class NumericalMethod instance Generalized Jacobi
-     * Eigen Value Problem Solver
-     *
-     * DESCRIPTION :
-     * Perform solution of eigen value problem in the form
-     * K y = (omega)^2 M y
-     *
-     * TASKS :
-     *
-     * - solving problem
-     *   solveYourselfAt.
-     * - returning results (eigen values and associated eigen vectors).
-     *
-     * Variable description  :
-     *
-     *       A(N,N)    = STIFFNESS MATRIX (ASSUMED POZITIVE DEFINITE)        *
-     *       B(N,N)    = MASS MATRIX (ASSUMED POZITIVE DEFINITE)             *
-     *       X(N,N)    = MATRIX STORING EIGENVECTORS ON SOLUTION EXIT        *
-     *       EIGV(N)   = VECTOR STORING EIGENVALUES ON SOLUTION EXIT         *
-     *       D(N)      = WORKING VECTOR                                      *
-     *       N         = ORDER OF WORKING AREA MATRICES A AND B              *
-     *       RTOL      = CONVERGENCE TOLERANCE (USUALLY SET TO 10.**-12)     *
-     *       NSMAX     = MAXIMUM NUMBER OF SWEEPS ALLOVED                    *
-     *                                 (USUALLY SET TO 15)                   *
-     *
-     * OUTPUT : (after call solveYourselfAt)
-     *       A(N,N)    = DIAGONALIZED STIFFNESS MATRIX                       *
-     *       B(N,N)    = DIAGONALIZED MASS MATRIX                            *
-     *       X(N,N)    = EIGENVECTORS STORED COLUMNWISE                      *
-     *       EIGV(N)   = EIGENVALUES                                         *
-     *
-     *
-     */
 private:
     FloatMatrix *a;
     FloatMatrix *b;
-    FloatArray *eigv;    // only pointer to caller data, not ownership
-    FloatMatrix *x;      // only pointer to caller data, not ownership
+    FloatArray *eigv; // only pointer to caller data, not ownership
+    FloatMatrix *x;   // only pointer to caller data, not ownership
     int n, nsmax;
     double rtol;
     int solved;
 
-
 public:
     GJacobi(int i, Domain *d, EngngModel *m);
-    // constructor
-    ~GJacobi();                         // destructor
+    ~GJacobi();
 
-    // solving
-    void               solveYourselfAt(TimeStep *);
-    void               updateYourself();
-    void               updateYourselfExceptLhs();
-
+    void solveYourselfAt(TimeStep *tStep);
+    void updateYourself();
+    void updateYourselfExceptLhs();
 
     /**
-     * Solves the given sparse generalized eigen value system of equations Ax = o^2 Bx.
-     * @param A coefficient matrix
-     * @param B coefficient matrix
-     * @param x eigen vector(s)
-     * @param o eigen value(s)
-     * @return NM_Status value
+     * Solves the given sparse generalized eigenvalue system of equations @f$ K\cdot x = w^2 M\cdot x @f$.
+     * @param K Coefficient matrix.
+     * @param M Coefficient matrix.
+     * @param x Eigenvector(s).
+     * @param w Eigenvalue(s).
+     * @return Status.
      */
-    virtual NM_Status solve(FloatMatrix *a, FloatMatrix *b, FloatArray *eigv, FloatMatrix *x);
+    virtual NM_Status solve(FloatMatrix *K, FloatMatrix *M, FloatArray *w, FloatMatrix *x);
 
     IRResultType initializeFrom(InputRecord *ir);
-
-    // identification
     const char *giveClassName() const { return "GeneralizedJacobiSolver"; }
     classType giveClassID() const { return GeneralizedJacobiSolverClass; }
-protected:
 };
 } // end namespace oofem
 #endif // gjacobi_h

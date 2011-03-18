@@ -52,10 +52,10 @@ class FEInterpolation;
  * Abstract base class representing integration rule. The integration rule is
  * a collection of integration points used to  numerically integrate some formula.
  * The number of integration points and their coordinates and integration weights depends on
- * integration rule type (rule for integration in 1d, 2d, 3d) and required  acurracy.
- * General services for inicialization are declared. Services for integration point retrieval are provided.
+ * integration rule type (rule for integration in 1d, 2d, 3d) and required  accuracy.
+ * General services for initialization are declared. Services for integration point retrieval are provided.
  *
- * In general, finite elements can have multiple integration rules, for diferrent tasks or
+ * In general, finite elements can have multiple integration rules, for different tasks or
  * when some components are integrated using reduced or selective integration.
  * Therefore, first and last index variables are introduced to characterize components
  * for which given integration rule applies.
@@ -64,7 +64,7 @@ class FEInterpolation;
  * integration - it just provide way how to set up correct integration points
  * and weights.
  *
- * Because integration points contain related history parameters (using matarial status),
+ * Because integration points contain related history parameters (using material status),
  * the unique copy of integration rule must exist on each element. The integration rule is
  * exclusively possessed by particular finite element.
  */
@@ -74,7 +74,7 @@ class IntegrationRule
      * DESCRIPTION:
      * Implements integration rule class.
      * Stores integration points used for integration
-     * of necesary terms (for example computation of  stiffness matrix
+     * of necessary terms (for example computation of  stiffness matrix
      * or computation of element nodal force vector )
      * and it  corresponds to some local strains
      * on finite element level. Finite element can have many
@@ -84,19 +84,17 @@ class IntegrationRule
      * - instanciating yourself
      * - returning number of integration points used
      * - returning requested integration point - method getIntegrationPoint
-     * - returning inteval of components (i.e.of local strain vector), where apply
+     * - returning interval of components (i.e.of local strain vector), where apply
      * - returning array of gauss points, according to specific
      *   integration rule (Gauss -rule, Newton-Cortes rule ...).
      *   integration points and corresponding weights are stored in
      *   Gauss point class.
+     * - printing yourself
+     * - updating yourself
+     * - initializing for new time step
+     * - saving & restoring context
      *
-     * printing yourself
-     * updating yourself
-     * initializing for new time step
-     * saving & restoring context
-     *
-     * REMARK
-     * The Integrator is a rather passive object : it does not perform numerical
+     * The integrator is a rather passive object : it does not perform numerical
      * integration - it just provide way how to set up correct integration points
      * and weights. Integration is performed by elements.
      */
@@ -135,7 +133,7 @@ public:
     IntegrationRule(int n, Element *e, int startIndx, int endIndx, bool dynamic);
     /**
      * Constructor.
-     * @param n Number associated with reciever.
+     * @param n Number associated with receiver.
      * @param e Reference to element.
      */
     IntegrationRule(int n, Element *e);
@@ -174,6 +172,7 @@ public:
      * @param mode Describes integration domain.
      * @param nPoints Required number of integration points of receiver.
      * @param matMode Material mode of receiver's integration points.
+     * @param coords
      * @return Number of points.
      */
     int setUpEmbeddedIntegrationPoints(integrationDomain mode, int nPoints, MaterialMode matMode,
@@ -197,13 +196,13 @@ public:
 
     /** Returns reference to element containing receiver */
     Element *giveElement() { return elem; }
-    /** Returns reference to interpolation asscoiated with GaussPoint */
+    /** Returns reference to interpolation associated with GaussPoint */
     FEInterpolation *giveInterpolation(GaussPoint *gp);
     /** Returns receiver number */
     int giveNumber() { return this->number; }
     /**
      * Abstract service.
-     * Returns requred number of integration points to exactly integrate
+     * Returns required number of integration points to exactly integrate
      * polynomial of order approxOrder on given domain.
      * When approxOrder is too large and is not supported by implementation
      * method returns -1. Must be overloaded by derived classes.
@@ -228,11 +227,11 @@ public:
      */
     virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj);
     /**
-     * Clears the receiver, ie dealocates all integration points
+     * Clears the receiver, ie deallocates all integration points
      */
     void clear();
 
-    /// Returns receiver sub patch idices (if apply).
+    /// Returns receiver sub patch indices (if apply).
     virtual const IntArray *giveKnotSpan() { return NULL; }
 
     /// Returns classType id of receiver.
@@ -244,36 +243,36 @@ public:
 protected:
     /**
      * Sets up receiver's  integration points on unit line integration domain.
-     * Default implementaion does not sets up any integration points and returns 0.
-     * Must be overloaded by deived classes.
+     * Default implementation does not sets up any integration points and returns 0.
+     * Must be overloaded by derived classes.
      * @returns Number of integration points.
      */
     virtual int SetUpPointsOnLine(int, MaterialMode mode, GaussPoint ***gp) { return 0; }
     /**
      * Sets up receiver's  integration points on triangular (area coords) integration domain.
-     * Default implementaion does not sets up any integration points and returns 0.
-     * Must be overloaded by deived classes.
+     * Default implementation does not sets up any integration points and returns 0.
+     * Must be overloaded by derived classes.
      * @returns Number of integration points.
      */
     virtual int SetUpPointsOnTriagle(int, MaterialMode mode, GaussPoint ***gp) { return 0; }
     /**
      * Sets up receiver's  integration points on unit square integration domain.
-     * Default implementaion does not sets up any integration points and returns 0.
-     * Must be overloaded by deived classes.
+     * Default implementation does not sets up any integration points and returns 0.
+     * Must be overloaded by derived classes.
      * @returns Number of integration points.
      */
     virtual int SetUpPointsOnSquare(int, MaterialMode mode, GaussPoint ***gp) { return 0; }
     /**
      * Sets up receiver's  integration points on unit cube integration domain.
-     * Default implementaion does not sets up any integration points and returns 0.
-     * Must be overloaded by deived classes.
+     * Default implementation does not sets up any integration points and returns 0.
+     * Must be overloaded by derived classes.
      * @returns Number of integration points.
      */
     virtual int SetUpPointsOnCube(int, MaterialMode mode, GaussPoint ***gp) { return 0; }
     /**
      * Sets up receiver's  integration points on tetrahedra (volume coords) integration domain.
-     * Default implementaion does not sets up any integration points and returns 0.
-     * Must be overloaded by deived classes.
+     * Default implementation does not sets up any integration points and returns 0.
+     * Must be overloaded by derived classes.
      * @returns Number of integration points.
      */
     virtual int SetUpPointsOnTetrahedra(int, MaterialMode mode, GaussPoint ***gp) { return 0; }

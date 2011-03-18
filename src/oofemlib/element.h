@@ -905,7 +905,7 @@ public:
     IRResultType initializeFrom(InputRecord *ir);
     contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
     contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-    void printOutputAt(FILE *, TimeStep *);
+    void printOutputAt(FILE *file, TimeStep *tStep);
     const char *giveClassName() const { return "Element"; }
     classType giveClassID() const { return ElementClass; }
 

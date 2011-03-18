@@ -265,8 +265,6 @@ public:
     classType giveClassID() const { return MaterialClass; }
     IRResultType initializeFrom(InputRecord *ir);
     virtual int giveInputRecordString(std :: string &str, bool keyword = true);
-
-    /// Prints receiver state on stdout. Useful for debugging.
     void printYourself();
 
     /**
