@@ -114,7 +114,8 @@ IsotropicDamageMaterial2 :: computeDamageParam(double &omega, double kappa, cons
         wf = 2 * gf / E / eps0;
         ef = wf / status->giveLe();
         if ( ef < eps0 ) {
-            OOFEM_WARNING4("ef %f < eps0 %f, this leads to material snapback in element %d", gp->giveElement()->giveNumber(), ef, eps0);
+            OOFEM_WARNING5("ef %f < eps0 %f, this leads to material snapback in element %d, characteristic length %f", gp->giveElement()->giveNumber(), ef, eps0, status->giveLe() );
+            OOFEM_WARNING4("Material number %d, Decrease eps0, or increase Gf from %f to Gf=%f", this->giveNumber(), gf, E*eps0*E*eps0*status->giveLe()/2./E );
         }
 
         switch ( this->SofteningType ) {
@@ -139,7 +140,7 @@ IsotropicDamageMaterial2 :: computeDamageParam(double &omega, double kappa, cons
             } while ( fabs(R) >= IDM1_ITERATION_LIMIT );
 
             if ( ( omega > 1.0 ) || ( omega < 0.0 ) ) {
-                _error("computeDamageParam: internal error");
+                _error("computeDamageParam: damage parameter out of range, snap-back problems");
             }
 
             break;

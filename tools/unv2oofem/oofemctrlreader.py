@@ -147,7 +147,7 @@ class CTRLParser:
                             for igroup in groups:
                                 __gr=self.getNodeGroup(FEM,igroup)
                                 if __gr:
-                                    __gr.oofem_properties=match.group(2).lower()
+                                    __gr.oofem_properties=match.group(2).lower().rstrip('\n')
                                     str = "\t\tGroup of nodes \"%s\" has properties: %s" % (igroup, __gr.oofem_properties)
                                     print str
                                 else:
@@ -169,7 +169,7 @@ class CTRLParser:
                                 for igroup in groups:
                                     __gr=self.getElementGroup(FEM,igroup)
                                     if __gr:
-                                        __gr.oofem_properties=match.group(2).lower()
+                                        __gr.oofem_properties=match.group(2).lower().rstrip('\n')
                                         str = "\t\tGroup of elements \"%s\" has properties: %s" % (igroup, __gr.oofem_properties)
                                         print str
                                     else:
@@ -184,7 +184,7 @@ class CTRLParser:
                                     if (__gr.oofem_boundaryLoadsNum):
                                         elemName = 'RepresentsBoundaryLoad'#assign this name to an element so we know it represents a boundary load
                                     else:
-                                        elemName = match.group(2).strip()
+                                        elemName = match.group(2).strip().rstrip('\n')
                                     #check that elemName exists in a list and assign
                                     for n in range(len(self.oofem_elemProp)):
                                         if(self.oofem_elemProp[n].name.lower() == elemName.lower()):
