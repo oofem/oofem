@@ -35,6 +35,7 @@
 #include "linesurfacetension.h"
 #include "domain.h"
 #include "material.h"
+#include "mathfem.h"
 #include <math.h>
 
 namespace oofem {

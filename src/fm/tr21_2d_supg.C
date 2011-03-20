@@ -632,16 +632,13 @@ TR21_2D_SUPG :: LS_PCS_computeS(LevelSetPCS *ls, TimeStep *atTime)
     FloatArray voff(2), fi(6), un, n;
     GaussPoint *gp;
     IntegrationRule *iRule = this->integrationRulesArray [ 1 ];
-    ;
-    //<FloatMatrix n;
-    double vol, eps = 0.0, _fi, dV, S = 0.0;
+
+    double vol = 0.0, eps = 0.0, _fi, dV, S = 0.0;
 
     for ( i = 1; i <= 6; i++ ) {
         fi.at(i) = ls->giveLevelSetDofManValue( dofManArray.at(i) );
     }
 
-    //norm = sqrt( dotProduct(gfi, gfi, 6) );
-    //this->computeVectorOf(EID_MomentumBalance, VM_Total, atTime, un);
     for ( k = 0; k < iRule->getNumberOfIntegrationPoints(); k++ ) {
         gp = iRule->getIntegrationPoint(k);
         dV  = this->computeVolumeAround(gp);

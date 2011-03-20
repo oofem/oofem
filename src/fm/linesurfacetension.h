@@ -66,7 +66,7 @@ protected:
 public:
     /**
      * Constructor. Creates an element with number n belonging to domain aDomain.
-     * @param n Element's number.
+     * @param n Elements number.
      * @param d Pointer to the domain to which element belongs.
      */
 	LineSurfaceTension (int n, Domain *d);
