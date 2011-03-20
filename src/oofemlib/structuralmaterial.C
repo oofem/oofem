@@ -1760,8 +1760,8 @@ StructuralMaterial :: give3dShellLayerStiffMtrx(FloatMatrix &answer,
 void
 StructuralMaterial :: computePrincipalValues(FloatArray &answer, const FloatArray &s, stressStrainPrincMode mode)
 //
-// This function cumputes Principal values of strains or streses.
-// strains/streses are stored in vector form in array s.
+// This function computes Principal values of strains or stresses.
+// strains/stresses are stored in vector form in array s.
 // Engineering notation is used.
 //
 // Problem size (3D/2D) is recognized automatically according to
@@ -2068,7 +2068,7 @@ StructuralMaterial :: computePrincipalValDir(FloatArray &answer, FloatMatrix &di
 void
 StructuralMaterial :: giveStrainVectorTranformationMtrx(FloatMatrix &answer,
                                                         const FloatMatrix &base,
-                                                        int transpose) const
+                                                        bool transpose) const
 //
 // returns transformation matrix for 3d - strains to another system of axes,
 // given by base.
@@ -2083,7 +2083,7 @@ StructuralMaterial :: giveStrainVectorTranformationMtrx(FloatMatrix &answer,
     answer.resize(6, 6);
     answer.zero();
 
-    if ( transpose == 1 ) {
+    if ( transpose ) {
         t.beTranspositionOf(base);
     } else {
         t = base;
@@ -2140,7 +2140,7 @@ StructuralMaterial :: giveStrainVectorTranformationMtrx(FloatMatrix &answer,
 void
 StructuralMaterial :: giveStressVectorTranformationMtrx(FloatMatrix &answer,
                                                         const FloatMatrix &base,
-                                                        int transpose) const
+                                                        bool transpose) const
 //
 // returns transformation matrix for 3d - stress to another system of axes,
 // given by base.
@@ -2155,7 +2155,7 @@ StructuralMaterial :: giveStressVectorTranformationMtrx(FloatMatrix &answer,
     answer.resize(6, 6);
     answer.zero();
 
-    if ( transpose == 1 ) {
+    if ( transpose ) {
         t.beTranspositionOf(base);
     } else {
         t = base;
@@ -2211,7 +2211,7 @@ StructuralMaterial :: giveStressVectorTranformationMtrx(FloatMatrix &answer,
 
 void
 StructuralMaterial :: transformStrainVectorTo(FloatArray &answer, const FloatMatrix &base,
-                                              const FloatArray &strainVector, int transpose) const
+                                              const FloatArray &strainVector, bool transpose) const
 //
 // performs transformation of 3d-strain vector to another system of axes,
 // given by base.
@@ -2235,7 +2235,7 @@ StructuralMaterial :: transformStrainVectorTo(FloatArray &answer, const FloatMat
 
 void
 StructuralMaterial :: transformStressVectorTo(FloatArray &answer, const FloatMatrix &base,
-                                              const FloatArray &stressVector, int transpose) const
+                                              const FloatArray &stressVector, bool transpose) const
 //
 //
 // performs transformation of 3d-stress vector to another system of axes,
