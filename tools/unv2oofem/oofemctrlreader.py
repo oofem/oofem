@@ -141,66 +141,70 @@ class CTRLParser:
                     line=self.file.readline()
                     if not line:
                         break
-                    match=re.search('^(nodeprop|elemprop|etype\[\d+\]|#)\s+([\w\s\+\-$]+)', line, re.IGNORECASE)
-                    if match:
-                        if match.group(1).lower() == 'nodeprop':
-                            for igroup in groups:
-                                __gr=self.getNodeGroup(FEM,igroup)
-                                if __gr:
-                                    __gr.oofem_properties=match.group(2).lower().rstrip('\n')
-                                    str = "\t\tGroup of nodes \"%s\" has properties: %s" % (igroup, __gr.oofem_properties)
-                                    print str
-                                else:
-                                    str = "WARNING: Group of nodes \"%s\" does not exist" % igroup
-                                    print str
-                        elif match.group(1).lower() == 'elemprop':
-                            if (match.group(2)[:8].lower()=='bloadnum'):#check if the group represents a boundary load
-                                loadNumbers = Line2Int(match.group(2)[8:])
-                                for igroup in groups:
-                                    __gr=self.getElementGroup(FEM,igroup)
-                                    if __gr:
-                                        __gr.oofem_boundaryLoadsNum=loadNumbers
-                                        __gr.oofem_groupNameForLoads=igroup.lstrip()
-                                        str = "\t\tGroup of elements \"%s\" has boundary loads with numbers: %s" % (igroup, loadNumbers)
-                                        print str
-                                    else:
-                                        str = "WARNING: Group of elements \"%s\" for boundary load does no exist" % (igroup)
-                            else:#not boundary loads
-                                for igroup in groups:
-                                    __gr=self.getElementGroup(FEM,igroup)
-                                    if __gr:
-                                        __gr.oofem_properties=match.group(2).lower().rstrip('\n')
-                                        str = "\t\tGroup of elements \"%s\" has properties: %s" % (igroup, __gr.oofem_properties)
-                                        print str
-                                    else:
-                                        str = "WARNING: Group of elements \"%s\" does no exist" % (igroup)
-                                        print str
-                        elif match.group(1)[:5].lower() == 'etype':
-                            etmatch=re.search('etype\[(\d+)\]*', match.group(1), re.IGNORECASE)
-                            unvetype = int(etmatch.group(1))
+                    lineSplit = line.split()
+                    if len(lineSplit) == 0:
+                        break;
+                    #print "Line: ", line,
+                    if lineSplit[0].lower() == 'nodeprop':
+                        for igroup in groups:
+                            __gr=self.getNodeGroup(FEM,igroup)
+                            if __gr:
+                                __gr.oofem_properties=' '.join(lineSplit[1:])
+                                str = "\t\tGroup of nodes \"%s\" has properties: %s" % (igroup, __gr.oofem_properties)
+                                print str
+                            else:
+                                str = "WARNING: Group of nodes \"%s\" does not exist" % igroup
+                                print str
+                    elif lineSplit[0].lower() == 'elemprop':
+                        if (lineSplit[1].lower()=='bloadnum'):#check if the group represents a boundary load
                             for igroup in groups:
                                 __gr=self.getElementGroup(FEM,igroup)
                                 if __gr:
-                                    if (__gr.oofem_boundaryLoadsNum):
-                                        elemName = 'RepresentsBoundaryLoad'#assign this name to an element so we know it represents a boundary load
-                                    else:
-                                        elemName = match.group(2).strip().rstrip('\n')
-                                    #check that elemName exists in a list and assign
-                                    for n in range(len(self.oofem_elemProp)):
-                                        if(self.oofem_elemProp[n].name.lower() == elemName.lower()):
-                                            __gr.oofem_etypemap[unvetype]= n
-                                            break
-                                    else:
-                                        print "OOFEM element %s not found in OOFEM's list of eligible elements" % elemName
-                                        sys.exit(0)
-
-                                    str = "\t\tGroup of elements \"%s\" of unv_element_type[%d] = %s" % (igroup, unvetype, elemName)
+                                    __gr.oofem_boundaryLoadsNum=[int(s) for s in lineSplit[2:]]
+                                    __gr.oofem_groupNameForLoads=igroup.lstrip()
+                                    str = "\t\tGroup of elements \"%s\" has boundary loads with numbers: %s" % (igroup, __gr.oofem_boundaryLoadsNum)
                                     print str
                                 else:
-                                    str = "WARNING: Group of elements \"%s\" not found" % (igroup)
+                                    str = "WARNING: Group of elements \"%s\" for boundary load does no exist" % (igroup)
+                        else:#not boundary loads
+                            for igroup in groups:
+                                __gr=self.getElementGroup(FEM,igroup)
+                                if __gr:
+                                    __gr.oofem_properties=' '.join(lineSplit[1:])
+                                    str = "\t\tGroup of elements \"%s\" has properties: %s" % (igroup, __gr.oofem_properties)
                                     print str
-                    else:
-                        break
+                                else:
+                                    str = "WARNING: Group of elements \"%s\" does no exist" % (igroup)
+                                    print str
+                    elif lineSplit[0][:5].lower() == 'etype':
+                        etmatch=re.search('^etype\[(\d+)\]', lineSplit[0], re.IGNORECASE)
+                        unvetype = int(etmatch.group(1))
+                        for igroup in groups:
+                            __gr=self.getElementGroup(FEM,igroup)
+                            if __gr:
+                                if (__gr.oofem_boundaryLoadsNum):
+                                    elemName = 'RepresentsBoundaryLoad'#assign this name to an element so we know it represents a boundary load
+                                else:
+                                    elemName = lineSplit[1].strip().rstrip('\n')
+                                #check that elemName exists in a list and assign
+                                for n in range(len(self.oofem_elemProp)):
+                                    if(self.oofem_elemProp[n].name.lower() == elemName.lower()):
+                                        __gr.oofem_etypemap[unvetype]= n
+                                        break
+                                else:
+                                    print "OOFEM element %s not found in OOFEM's list of eligible elements" % elemName
+                                    sys.exit(0)
+
+                                str = "\t\tGroup of elements \"%s\" of unv_element_type[%d] = %s" % (igroup, unvetype, elemName)
+                                print str
+                            else:
+                                str = "WARNING: Group of elements \"%s\" not found" % (igroup)
+                                print str
+                    elif lineSplit[0].lower() == '#':
+                        continue;
+
+                else:
+                    break
 
 
     def parse(self, FEM):

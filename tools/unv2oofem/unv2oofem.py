@@ -120,7 +120,7 @@ UNV2OOFEM: Converts UNV file from Salome to OOFEM native file format
         for belem in FEM.elems:#loop over all elements from unv file
             #resolve element properties
             #for igroup in elem.oofem_groups:#unv element with boundary load is assigned to some ctrl element group
-                #print elem.id, igroup.oofem_boundaryLoadsNum
+                #print belem.id, belem.oofem_elemtype, CTRL.oofem_elemProp[belem.oofem_elemtype].name
                 if CTRL.oofem_elemProp[belem.oofem_elemtype].name == 'RepresentsBoundaryLoad':#found element, which represents boundary load
                     nodesOnBoundary = belem.cntvt
                     nodesOnBoundary.sort()
