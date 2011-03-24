@@ -85,7 +85,7 @@ public:
      */
     FloatArray solve(const FloatArray &rhs) const {
         FloatArray y;
-        this->solve(x, y);
+        this->solve(rhs, y);
         return y;
     }
     /**
@@ -93,9 +93,9 @@ public:
      * @param rhs Right hand side.
      * @return Solution.
      */
-    FloatArray trans_solve(const FloatArray &x) const {
+    FloatArray trans_solve(const FloatArray &rhs) const {
         FloatArray y;
-        this->trans_solve(x, y);
+        this->trans_solve(rhs, y);
         return y;
     }
     /** 
