@@ -1,0 +1,93 @@
+/*
+
+                   *****    *****   ******  ******  ***   ***
+                 **   **  **   **  **      **      ** *** **
+                **   **  **   **  ****    ****    **  *  **
+               **   **  **   **  **      **      **     **
+              **   **  **   **  **      **      **     **
+              *****    *****   **      ******  **     **
+
+               OOFEM : Object Oriented Finite Element Code
+
+                 Copyright (C) 1993 - 2011   Borek Patzak
+
+         Czech Technical University, Faculty of Civil Engineering,
+          Department of Mechanics, 166 29 Prague, Czech Republic
+                  www.oofem.org    e-mail: info@oofem.org
+     
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.                                                                              
+*/
+
+CONTENTS:
+
+[1]   What is here
+[2]   Pre-requisites
+[3]   Installation
+[4]   Related Links
+
+[1] What is here
+==============================================================================
+The directory tree below holds source code to generate OOFEM Python interface
+using Boost.Python. This interface allows to use oofem just like regular Python
+modules.
+
+[2]   Pre-requisites
+==============================================================================
+- Get Boost (www.boost.org)
+- Get the bjam build driver
+ 
+
+[3]   Installation
+==============================================================================
+- configure and build oofem-debug target with dss module.
+- change directory to python located in oofem top directory.
+- open Jamroot file and adjust path refering to the Boost root directory.
+  To do this, locate line after "use-project boost" directive and edit the path.
+- run bjam
+
+- Optionally, to run a simple example:
+  - Set PYTHONPATH to contain paths to directory containing oofem python directory:
+    export PYTHONPATH=$PYTHONPATH:{PATH_TO_OOFEM_TOP_DIR}/python/bin/gcc-4.4.3/debug
+
+  - Set LD_LIBRARY_PATH to point to boost generated libraries of oofem 
+    python module. This path can be best obtained from "bjam -d+2" 
+    when compiling oofem python module.
+
+    export LD_LIBRARY_PATH={PATH_TO_BOOST_ROOT}/bin.v2/libs/python/build/gcc-4.4.3/debug:\
+           {PATH_TO_OOFEM_TOP_DIR}/python/bin/gcc-4.4.3/debug:$LD_LIBRARY_PATH
+	   
+    Replace {PATH_TO_BOOST_ROOT} by the path to your Boost root dir and {PATH_TO_OOFEM_TOP_DIR}
+    by the path to oofem top directory
+
+   - Run the test as:
+     python test.py
+
+
+[4] Further documentation
+==============================================================================
+- Boost C++ libraries (www.boost.org)
+- OOFEM project (www.oofem.org)
+
+Bugs
+==============================================================================
+
+Please mail all bug reports and suggestions to [info@oofem.org]. I will try to
+give satisfaction, if the time is at least partially on my side. 
+
+
+                                Enjoy
+                                        Borek Patzak
+
