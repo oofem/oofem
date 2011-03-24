@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/fei2dtrlin.C,v 1.1.4.1 2004/04/05 15:19:43 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -45,23 +44,15 @@ void
 FEI2dTrConst :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time)
 {
     answer.resize(1);
-
     answer.at(1) = 1;
-    
-
     return;
 }
 
 void
 FEI2dTrConst :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time)
 {
-    
     answer.resize(1, 2);
-
-    answer.at(1, 1) = 0;
-    answer.at(1, 2) = 0;
-
-   
+    answer.zero();
 }
 
 void
@@ -142,48 +133,34 @@ FEI2dTrConst :: giveTransformationJacobian(const FloatArray &lcoords, const FEIC
 void
 FEI2dTrConst :: edgeEvalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time)
 {
-    double ksi = lcoords.at(1);
-    answer.resize(2);
-
-    answer.at(1) = ( 1. - ksi ) * 0.5;
-    answer.at(2) = ( 1. + ksi ) * 0.5;
-
-    OOFEM_ERROR("FEI2dTrConst :: edgeEvalN: not implemented");
+    answer.resize(1);
+    answer.at(1) = 1.0;
 }
 
 void
 FEI2dTrConst :: edgeEvaldNdx(FloatMatrix &answer, int iedge,
                            const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time)
 {
-  /*double l;
-    IntArray edgeNodes;
-    this->computeLocalEdgeMapping(edgeNodes, iedge);
-    l = this->edgeComputeLength(edgeNodes, cellgeo);
-
-    answer.resize(2, 1);
-    answer.at(1, 1) = -1.0 / l;
-    answer.at(2, 1) =  1.0 / l;*/
-
-    OOFEM_ERROR("FEI2dTrConst :: edgeEvaldNdx: not implemented");
+    answer.resize(1,2);
+    answer.zero();
 }
 
 void
 FEI2dTrConst :: edgeLocal2global(FloatArray &answer, int iedge,
                                const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time)
 {
-  /*IntArray edgeNodes;
-    FloatArray n;
+    IntArray edgeNodes;
+    FloatArray n(2);
+    n.at(1) = (1 - lcoords(0))*0.5;
+    n.at(2) = (1 + lcoords(0))*0.5;
     this->computeLocalEdgeMapping(edgeNodes, iedge);
-    this->edgeEvalN(n, lcoords, cellgeo, time);
 
     answer.resize(2);
     answer.at(1) = ( n.at(1) * cellgeo.giveVertexCoordinates( edgeNodes.at(1) )->at(xind) +
-                    n.at(2) * cellgeo.giveVertexCoordinates( edgeNodes.at(2) )->at(xind) );
+                     n.at(2) * cellgeo.giveVertexCoordinates( edgeNodes.at(2) )->at(xind) );
     answer.at(2) = ( n.at(1) * cellgeo.giveVertexCoordinates( edgeNodes.at(1) )->at(yind) +
-    n.at(2) * cellgeo.giveVertexCoordinates( edgeNodes.at(2) )->at(yind) );*/
-    OOFEM_ERROR("FEI2dTrConst :: edgeLocal2global: not implemented");
+                     n.at(2) * cellgeo.giveVertexCoordinates( edgeNodes.at(2) )->at(yind) );
 }
-
 
 double
 FEI2dTrConst :: edgeGiveTransformationJacobian(int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time)

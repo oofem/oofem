@@ -152,7 +152,7 @@ public:
      * Stores receiver state to output stream.
      * Writes the FEMComponent class-id in order to allow test whether correct data are then restored.
      * @param stream Output stream.
-     * @param mode Determines amount of info required in stream (state, definition,...).
+     * @param mode Determines amount of info required in stream (state, definition, ...).
      * @param obj Special parameter, used only to send particular integration point to material class version of this method.
      * @return contextIOResultType.
      * @exception throws an ContextIOERR exception if error encountered.
@@ -161,7 +161,10 @@ public:
     /**
      * Restores the receiver state previously written in stream.
      * Reads the FEMComponent class-id in order to allow test consistency.
-     * @see saveContext member function.
+     * @see saveContext
+     * @param stream Input stream.
+     * @param mode Determines amount of info available in stream (state, definition, ...).
+     * @param obj Special parameter for sending extra information.
      * @return contextIOResultType.
      * @exception throws an ContextIOERR exception if error encountered.
      */

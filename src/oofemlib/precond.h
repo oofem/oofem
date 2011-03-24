@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/precond.h,v 1.7 2003/04/06 14:08:25 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -33,11 +32,6 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-//   ****************************
-//   *** CLASS PRECONDITIONER ***
-//   ****************************
-
-
 #ifndef precond_h
 #define precond_h
 
@@ -54,7 +48,7 @@ namespace oofem {
  * Each preconditioner provides solve() and transpose_solve() functionality,
  * so that they can be used interchangeably in the same base iterative method code.
  *
- * Preconditioner matrix M is typically used to compute M^{-1}x or (M^T)^{-1}x during the
+ * Preconditioner matrix M is typically used to compute @f$ M^{-1}\cdot x @f$ or @f$ (M^{\mathrm{T}})^{-1}\cdot x @f$ during the
  * course of a basic iterartion, and thus can be seen as taking some input vector
  * and return a corresponding vector.
  */
@@ -62,14 +56,16 @@ class Preconditioner
 {
 public:
     /**
-     * Constructor. Initializes the the receiver (constructs the precontioning matrix M) of given matrix.
+     * Constructor.
+     * Initializes the the receiver (constructs the precontioning matrix M) of given matrix.
      * Calls virtual init service.
-     * @param a sparse matrix to be preconditioned
-     * @param attributes attributes of receiver
+     * @param a Sparse matrix to be preconditioned.
+     * @param attributes Attributes of receiver.
      */
     Preconditioner(const SparseMtrx &a, InputRecord &attributes);
     /**
-     * Constructor. The user should call initializeFrom and init services in this given order to ensure consistency.
+     * Constructor. 
+     * The user should call initializeFrom and init services in this given order to ensure consistency.
      */
     Preconditioner() { }
     /// Destructor
@@ -78,27 +74,44 @@ public:
     /**
      * Initializes the receiver (constructs the precontioning matrix M) of given matrix.
      * Virtual service, to be implemented by derived classes. Should be called after initializeFrom service.
-     * @param a sparse matrix to be preconditioned
+     * @param a Sparse matrix to be preconditioned.
      */
     virtual void init(const SparseMtrx &a) { };
 
-    /// Solves the linear system
-    FloatArray solve(const FloatArray &x) const {
+    /**
+     * Solves the linear system.
+     * @param rhs Right hand side
+     * @return Solution.
+     */
+    FloatArray solve(const FloatArray &rhs) const {
         FloatArray y;
         this->solve(x, y);
         return y;
     }
-    /// Solves transposed system
+    /**
+     * Solves transposed system.
+     * @param rhs Right hand side.
+     * @return Solution.
+     */
     FloatArray trans_solve(const FloatArray &x) const {
         FloatArray y;
         this->trans_solve(x, y);
         return y;
     }
-    /// Solves the linear system
-    virtual void solve(const FloatArray &x, FloatArray &y) const = 0;
-    /// Solves transposed system
-    virtual void trans_solve(const FloatArray &x, FloatArray &y) const = 0;
-    /// returns the preconditioner name
+    /** 
+     * Solves the linear system.
+     * @param rhs Right hand side.
+     * @param solution Solution.
+     */
+    virtual void solve(const FloatArray &rhs, FloatArray &solution) const = 0;
+    /** 
+     * Solves the transposed system.
+     * @param rhs Right hand side.
+     * @param solution Solution.
+     */
+    virtual void trans_solve(const FloatArray &rhs, FloatArray &solution) const = 0;
+
+    /// Returns the preconditioner name.
     virtual const char *giveClassName() const { return "Preconditioner"; }
     /// Initializes receiver from given record. Empty implementation.
     virtual IRResultType initializeFrom(InputRecord *ir) { return IRRT_OK; }

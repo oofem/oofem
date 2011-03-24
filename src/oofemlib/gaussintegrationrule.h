@@ -42,7 +42,7 @@ namespace oofem {
 /**
  * Class representing Gaussian-quadrature integration rule.
  * The number of integration points and their coordinates and integration weights depends on
- * integration rule type (rule for integration in 1d, 2d, 3d) and required  acurracy.
+ * integration rule type (rule for integration in 1d, 2d, 3d) and required acurracy.
  */
 class GaussIntegrationRule : public IntegrationRule
 {
@@ -69,20 +69,20 @@ class GaussIntegrationRule : public IntegrationRule
 public:
     /**
      * Constructor.
-     * @param n number associated with receiver
-     * @param domain reference to domain.
-     * @param startIndx first component, for which rule applies
-     * @param endIndx last component, for which rule applies
-     * @param dynamic flag indicating that receiver can change
+     * @param n Number associated with receiver.
+     * @param e Element associated with receiver.
+     * @param startIndx First component, for which rule applies.
+     * @param endIndx Last component, for which rule applies.
+     * @param dynamic Flag indicating that receiver can change.
      */
     GaussIntegrationRule(int n, Element *e, int startIndx, int endIndx, bool dynamic = false);
     GaussIntegrationRule(int n, Element *e);
     /// Destructor
     virtual ~GaussIntegrationRule();
 
-    ///Returns classType id of receiver.
+    /// Returns classType id of receiver.
     classType giveClassID() const { return GaussIntegrationRuleClass; }
-    ///Returns class name of the receiver.
+    /// Returns class name of the receiver.
     const char *giveClassName() const { return "GaussIntegrationRule"; }
     IRResultType initializeFrom(InputRecord *ir) { return IRRT_OK; }
 
@@ -97,27 +97,27 @@ public:
 protected:
     /**
      * Sets up receiver's  integration points on unit line integration domain.
-     * @returns number of integration points.
+     * @returns Number of integration points.
      */
     int SetUpPointsOnLine(int, MaterialMode, GaussPoint * * *);
     /**
      * Sets up receiver's  integration points on triangular (area coords) integration domain.
-     * @returns number of integration points.
+     * @returns Number of integration points.
      */
     virtual int SetUpPointsOnTriagle(int, MaterialMode, GaussPoint * * *);
     /**
      * Sets up receiver's  integration points on unit square integration domain.
-     * @returns number of integration points.
+     * @returns Number of integration points.
      */
     int SetUpPointsOnSquare(int, MaterialMode, GaussPoint * * *);
     /**
      * Sets up receiver's  integration points on unit cube integration domain.
-     * @returns number of integration points.
+     * @returns Number of integration points.
      */
     int SetUpPointsOnCube(int, MaterialMode, GaussPoint * * *);
     /**
      * Sets up receiver's  integration points on tetrahedra (volume coords) integration domain.
-     * @returns number of integration points.
+     * @returns Number of integration points.
      */
     int SetUpPointsOnTetrahedra(int, MaterialMode, GaussPoint * * *);
     /**

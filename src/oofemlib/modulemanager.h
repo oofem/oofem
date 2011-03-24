@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/modulemanager.h,v 1.4.4.1 2004/04/05 15:19:43 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -32,12 +31,6 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-
-
-//   *********************************
-//   *** CLASS ModuleManager ***
-//   *********************************
-
 
 #ifndef modulemanager_h
 #define modulemanager_h
@@ -62,9 +55,9 @@ template< class M >
 class ModuleManager
 {
 protected:
-    /// module list
+    /// Module list.
     AList< M > *moduleList;
-    /// number of modules
+    /// Number of modules.
     int numberOfModules;
     /// Associated Engineering model.
     EngngModel *emodel;
@@ -79,20 +72,27 @@ public:
     virtual ~ModuleManager() {
         delete moduleList;
     }
-    /** Creates new instance of module of given name, belonging to given EngngModel */
+    /** 
+     * Creates new instance of module.
+     * @param name Name of module.
+     * @param n Number associated with module.
+     * @param emodel Engineering model which receiver belongs to.
+     */
     virtual M *CreateModuleOfType(char *name, int n, EngngModel *emodel) = 0;
     /**
+
      * Reads receiver description from input stream and creates corresponding modules components accordingly.
      * It scans input file, each line is assumed to be single record describing particular module.
      * The record line is converted to lowercase letters.
      * Corresponding component is created using ofType function.
      * After new output module object is created, its initializeForm member function is
      * called with its record as parameter.
-     * @param inputStream input stream with domain description
-     * @initString the e-model record containing export module manager record
+     * @param dr Data reader for input records.
+     * @param ir Record for receiver.
      * @return nonzero if o.k.
      */
-    virtual int                instanciateYourself(DataReader *dr, InputRecord *ir) {
+    virtual int instanciateYourself(DataReader *dr, InputRecord *ir)
+    {
         const char *__proc = "instanciateYourself"; // Required by IR_GIVE_FIELD macro
         IRResultType result;                   // Required by IR_GIVE_FIELD macro
 
@@ -131,13 +131,14 @@ public:
      * from corresponding record. Should be caled before instanciateYourself.
      */
     virtual IRResultType initializeFrom(InputRecord *ir) = 0;
-    /** returns classname of the receiver */
+    /// Returns classname of the receiver
     virtual const char *giveClassName() const { return "ModuleManager"; }
+
 protected:
 
     /**
      * Returns the required module.
-     * @param num module number
+     * @param num Module number.
      */
     M *giveModule(int num) {
         M *elem = NULL;

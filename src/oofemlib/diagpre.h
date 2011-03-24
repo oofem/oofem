@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/diagpre.h,v 1.6 2003/04/06 14:08:23 bp Exp $ */
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*             ********   ***                                 SparseLib++    */
 /*          *******  **  ***       ***      ***               v. 1.5c        */
@@ -53,16 +52,11 @@ public:
     /// Destructor
     ~DiagPreconditioner(void) { };
 
-    /**
-     * Initializes the receiver (constructs the precontioning matrix M) of given matrix.
-     */
     virtual void init(const SparseMtrx &a);
 
-    /// Solves the linear system
-    void solve(const FloatArray &x, FloatArray &y) const;
-    /// Solves transposed system
-    void trans_solve(const FloatArray &x, FloatArray &y) const;
-    /// returns the preconditioner name
+    void solve(const FloatArray &rhs, FloatArray &solution) const;
+    void trans_solve(const FloatArray &rhs, FloatArray &solution) const;
+
     virtual const char *giveClassName() const { return "DiagPre"; }
 
     const double &diag(int i) const { return diag_(i); }

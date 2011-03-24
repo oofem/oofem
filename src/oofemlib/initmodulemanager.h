@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/initmodulemanager.h,v 1.4.4.1 2004/04/05 15:19:43 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -32,12 +31,6 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-
-
-//   *********************************
-//   *** CLASS InitModuleManager ***
-//   *********************************
-
 
 #ifndef initmodulemanager_h
 #define initmodulemanager_h
@@ -61,25 +54,20 @@ class EngngModel;
  */
 class InitModuleManager : public ModuleManager< InitModule >
 {
-private:
 public:
     InitModuleManager(EngngModel *emodel);
     ~InitModuleManager();
 
-    /**
-     * Instanciates the receiver from input record. Called from instanciateYourself to initialize yourself
-     * from corresponding record. Should be caled before instanciateYourself.
-     */
-    IRResultType initializeFrom(InputRecord *ir);
-
-    /** Creates new instance of module of given name, with number n, belonging to given EngngModel */
     InitModule *CreateModuleOfType(char *name, int n, EngngModel *emodel);
 
     /**
-     * Performs the initialization of individual modules. Loops over all modules and calls corresponding doInit module service.
-     * @param tStep time step.
+     * Performs the initialization of individual modules.
+     * Loops over all modules and calls corresponding doInit module service.
      */
-    void              doInit();
+    void doInit();
+
+    IRResultType initializeFrom(InputRecord *ir);
+
     const char *giveClassName() const { return "InitModuleManager"; }
 
 protected:

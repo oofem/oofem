@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2010   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -77,7 +77,7 @@ private:
 public:
     /**
      * Creates initial condition with given number, belonging to given domain.
-     * @param n Initial condition number.
+     * @param i Initial condition number.
      * @param d Domain to which new object will belongs.
      */
     InitialCondition(int i, Domain *d) : FEMComponent(i, d), initialValueDictionary() { }
@@ -90,7 +90,7 @@ public:
      * @param mode Characteristic mode of unknown, characteristic type depends on DOF (represent physical meaning).
      * @return Value of initial condition for given mode.
      */
-    double give(ValueModeType);
+    double give(ValueModeType mode);
     /**
      * Returns receiver load type. It distinguish particular boundary conditions according to
      * their "physical" meaning (like StructuralTemperatureLoadLT, StructuralLoadLT).

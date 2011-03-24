@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/iluprecond.h,v 1.3 2003/04/06 14:08:24 bp Exp $ */
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*             ********   ***                                 SparseLib++    */
 /*          *******  **  ***       ***      ***               v. 1.5c        */
@@ -69,25 +68,15 @@ public:
     /// Destructor
     ~CompCol_ILUPreconditioner(void) { };
 
-    /**
-     * Initializes the receiver (constructs the precontioning matrix M) of given matrix.
-     * @param a sparse matrix to be preconditioned
-     */
     virtual void init(const SparseMtrx &);
 
     void initialize(const CompCol &A);
     void initialize(const DynCompCol &A);
 
+    void solve(const FloatArray &x, FloatArray &y) const;
+    void trans_solve(const FloatArray &x, FloatArray &y) const;
 
-    /// Solves the linear system
-    void           solve(const FloatArray &x, FloatArray &y) const;
-    /// Solves transposed system
-    void           trans_solve(const FloatArray &x, FloatArray &y) const;
-
-    /// returns the preconditioner name
     virtual const char *giveClassName() const { return "ILU"; }
-
-    /// Initializes receiver from given record. Empty implementation.
     virtual IRResultType initializeFrom(InputRecord *ir);
 
 protected:

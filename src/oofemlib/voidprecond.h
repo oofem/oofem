@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/voidprecond.h,v 1.6 2003/04/06 14:08:26 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -32,7 +31,6 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-
 
 #ifndef voidprecond_h
 #define voidprecond_h
@@ -57,13 +55,10 @@ public:
     /// Destructor
     ~VoidPreconditioner(void) { };
 
-    /// Construct preconditioning matrix of given matrix
     void init(const SparseMtrx &a) { };
-    /// Solves the linear system
-    void solve(const FloatArray &x, FloatArray &y) const { y = x; }
-    /// Solves transposed system
-    void trans_solve(const FloatArray &x, FloatArray &y) const { y = x; };
-    /// returns the preconditioner name
+    void solve(const FloatArray &rhs, FloatArray &solution) const { solution = rhs; }
+    void trans_solve(const FloatArray &rhs, FloatArray &solution) const { solution = rhs; };
+
     virtual const char *giveClassName() const { return "VoidPreconditioner"; }
 };
 } // end namespace oofem

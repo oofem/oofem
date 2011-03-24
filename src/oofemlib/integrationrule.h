@@ -214,6 +214,9 @@ public:
      * Calls saveContext service for all receiver's integration points.
      * Note: does not call the FEMComponent::saveContext service, in order not
      * to write class id info for each integration rule.
+     * @param stream Output stream.
+     * @param mode Determines amount of info required in stream (state, definition, ...).
+     * @param obj Special parameter.
      * @exception ContextIOERR If error encountered.
      */
     virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj);
@@ -222,6 +225,8 @@ public:
      * Calls restoreContext service for all receiver's integration points.
      * Note: does not call the FEMComponent::restoreContext service, in order not
      * to write class id info for each integration rule.
+     * @param stream Input stream.
+     * @param mode Determines amount of info available in stream (state, definition, ...).
      * @param obj Should be a pointer to invoking element, ie., to which the receiver will belong to.
      * @exception ContextIOERR If error encountered.
      */

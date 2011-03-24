@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/ilucomprowprecond.h,v 1.3 2003/04/06 14:08:24 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -33,11 +32,6 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-/*
- * Implemantation of ILU (Incomplete LU) Preconditioner for compressed row sparse matrices.
- * Fill - up supported
- */
-
 
 #ifndef ilucomprowprecond_h
 #define ilucomprowprecond_h
@@ -49,6 +43,10 @@
 #include "precond.h"
 
 namespace oofem {
+/**
+ * Implemantation of ILU (Incomplete LU) Preconditioner for compressed row sparse matrices.
+ * Fill - up supported.
+ */
 class CompRow_ILUPreconditioner : public Preconditioner
 {
 private:
@@ -67,9 +65,9 @@ public:
 
     /**
      * Initializes the receiver (constructs the precontioning matrix M) of given matrix.
-     * @param a sparse matrix to be preconditioned
+     * @param a Sparse matrix to be preconditioned
      */
-    virtual void init(const SparseMtrx &);
+    virtual void init(const SparseMtrx &a);
 
     //void initialize (const CompCol &A);
     void initialize(const DynCompRow &A);

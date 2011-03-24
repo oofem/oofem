@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/fei1dlin.h,v 1.1 2003/04/06 14:08:24 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -53,49 +52,18 @@ protected:
 public:
     FEI1dLin(int coordIndx) : FEInterpolation1d(1) { cindx = coordIndx; }
 
-    /**
-     * Evaluates the array of interpolation functions (shape functions) at given point.
-     * @param answer contains resulting array of evaluated interpolation functions
-     * @param lcoords array containing (local) coordinates
-     * @param cellgeo underlying cell geometry
-     * @param time time
-     */
     virtual void evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time);
-    /**
-     * Evaluates the matrix of derivatives of interpolation functions (shape functions) at given point.
-     * These derivatives are in global coordinate system (where the nodal coordinates are defined)
-     * @param matrix contains resulting matrix of derivatives, the member at i,j position contains value of dNi/dxj
-     * @param lcoords array containing (local) coordinates
-     * @param cellgeo underlying cell geometry
-     * @param time time
-     */
     virtual void evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time);
-    /**
-     * Evaluates global coordinates from given local ones
-     * These derivatives are in global coordinate system (where the nodal coordinates are defined)
-     * @param answer contains resulting global coordinates
-     * @param lcoords array containing (local) coordinates
-     * @param cellgeo underlying cell geometry
-     * @param time time
-     */
     virtual void local2global(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time);
-    /**
-     * Evaluates local coordinates from given global ones. Returns nonzero if local coordinates are interpolating,
-     * zero if extrapolating (nonzero is returned if point is within the element geometry, zero otherwise).
-     * These derivatives are in global coordinate system (where the nodal coordinates are defined)
-     * @param answer contains evaluated local coordinates
-     * @param gcoords array containing global coordinates
-     * @param time time
-     * @param cellgeo underlying cell geometry
-     * @return nonzero is returned if point is within the element geometry, zero otherwise
-     */
     virtual int  global2local(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time);
-    /**
-     * Evaluates the jacobian of transformation between local and global coordinates.
-     */
     virtual double giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time);
 
 protected:
+    /**
+     * Computes the real length of element geometry.
+     * @param cellgeo Cell geometry.
+     * @return Length of cell.
+     */
     double computeLength(const FEICellGeometry &cellgeo);
 };
 } // end namespace oofem
