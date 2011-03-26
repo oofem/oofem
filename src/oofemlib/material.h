@@ -130,7 +130,7 @@ public:
      * @param form Material response form.
      * @param mode Material response mode.
      * @param gp Integration point.
-     * @param atTime Time step.
+     * @param atTime Time step (most models are able to respond only when atTime is current time step).
      */
     virtual void  giveCharacteristicMatrix(FloatMatrix &answer,
                                            MatResponseForm form,
@@ -211,7 +211,7 @@ public:
      */
     virtual int testMaterialExtension(MaterialExtension ext) { return 0; }
     /**
-     * Tests, if material supports material mode.
+     * Tests if material supports material mode.
      * @param mode Required material mode.
      * @return Nonzero if supported, zero otherwise.
      */

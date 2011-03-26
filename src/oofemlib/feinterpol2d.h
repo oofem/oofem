@@ -35,9 +35,6 @@
 #ifndef feinterpol2d_h
 #define feinterpol2d_h
 
-#include "flotarry.h"
-#include "intarray.h"
-#include "domain.h"
 #include "feinterpol.h"
 
 namespace oofem {

@@ -35,11 +35,7 @@
 #ifndef fei2dquadlin_h
 #define fei2dquadlin_h
 
-#include "flotarry.h"
-#include "intarray.h"
-#include "domain.h"
 #include "feinterpol2d.h"
-#include "fei1dlin.h"
 
 namespace oofem {
 /**

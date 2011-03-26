@@ -35,12 +35,15 @@
 #ifndef feinterpol_h
 #define feinterpol_h
 
-#include "flotarry.h"
-#include "intarray.h"
-#include "domain.h"
+#include "error.h"
+#include "inputrecord.h"
 
 namespace oofem {
 class Element;
+class FloatArray;
+class FloatMatrix;
+class IntArray;
+
 /**
  * Class representing a general abstraction for cell geometry.
  * The motivation for this class is that the interpolation classes require to pass underlying cell geometry.
@@ -226,13 +229,8 @@ protected:
      * @param cellgeo Element geometry.
      */
     virtual void giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
-    { OOFEM_ERROR("FEIInterpolation::giveJacobianMatrixAt : Not overloaded."); }
+    { OOFEM_ERROR("FEInterpolation::giveJacobianMatrixAt : Not overloaded."); }
 };
 } // end namespace oofem
 #endif // feinterpol_h
-
-
-
-
-
 

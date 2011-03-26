@@ -124,8 +124,8 @@ class StructuralMaterial : public Material
 protected:
     /// Reference temperature (temperature, when material has been built into structure).
     double referenceTemperature;
-public:
 
+public:
     /**
      * Constructor. Creates material with given number, belonging to given domain.
      * @param n Material number.
@@ -582,7 +582,7 @@ protected:
                                           MatResponseForm form , MatResponseMode mmode, GaussPoint * gp,
                                           TimeStep * tStep);
     /**
-     * Method for computing 1d  stiffness matrix of receiver.
+     * Method for computing 1d stiffness matrix of receiver.
      * Default implementation computes 3d stiffness matrix using give3dMaterialStiffnessMatrix and
      * reduces it to 1d stiffness using reduce method described above.
      * However, this reduction is quite time consuming and if it is possible,

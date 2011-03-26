@@ -35,9 +35,6 @@
 #ifndef fei2dquadconst_h
 #define fei2dquadconst_h
 
-#include "flotarry.h"
-#include "intarray.h"
-#include "domain.h"
 #include "feinterpol2d.h"
 
 namespace oofem {
