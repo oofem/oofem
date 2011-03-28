@@ -239,4 +239,22 @@ FEI2dTrLin :: edgeComputeLength(IntArray &edgeNodes, const FEICellGeometry &cell
     dy      = cellgeo.giveVertexCoordinates(nodeB)->at(yind) - cellgeo.giveVertexCoordinates(nodeA)->at(yind);
     return ( sqrt(dx * dx + dy * dy) );
 }
+
+double FEI2dTrLin :: giveArea(const FEICellGeometry &cellgeo)
+{
+    const FloatArray *p;
+    double x1, x2, x3, y1, y2, y3;
+
+    p = cellgeo.giveVertexCoordinates(1);
+    x1 = p->at(1);
+    y1 = p->at(2);
+    p = cellgeo.giveVertexCoordinates(2);
+    x2 = p->at(1);
+    y2 = p->at(2);
+    p = cellgeo.giveVertexCoordinates(3);
+    x3 = p->at(1);
+    y3 = p->at(2);
+
+    return 0.5 * ( x1*(y2-y3) + x2*(-y1+y3) + x3*(y1-y2) ); // TODO: Absolute value or not?
+}
 } // end namespace oofem

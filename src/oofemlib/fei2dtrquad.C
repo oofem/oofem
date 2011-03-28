@@ -151,9 +151,7 @@ FEI2dTrQuad :: local2global(FloatArray &answer, const FloatArray &lcoords, const
 
 double FEI2dTrQuad :: giveCharacteristicLength(const FEICellGeometry &cellgeo) const
 {
-    const FloatArray *n1 = cellgeo.giveVertexCoordinates(1);
-    const FloatArray *n2 = cellgeo.giveVertexCoordinates(2);
-    return n1->distance(n2);
+    return sqrt(this->giveArea(cellgeo));
 }
 
 
@@ -407,4 +405,33 @@ FEI2dTrQuad :: giveDerivativeEta(FloatArray &n, const FloatArray &lc)
     n.at(5) = 4.0 * l3 - 4.0 * l2;
     n.at(6) = -4.0 * l1;
 }
+
+double FEI2dTrQuad :: giveArea(const FEICellGeometry &cellgeo) const
+{
+    const FloatArray *p;
+    double x1, x2, x3, x4, x5, x6, y1, y2, y3, y4, y5, y6;
+
+    p = cellgeo.giveVertexCoordinates(1);
+    x1 = p->at(1);
+    y1 = p->at(2);
+    p = cellgeo.giveVertexCoordinates(2);
+    x2 = p->at(1);
+    y2 = p->at(2);
+    p = cellgeo.giveVertexCoordinates(3);
+    x3 = p->at(1);
+    y3 = p->at(2);
+    p = cellgeo.giveVertexCoordinates(4);
+    x4 = p->at(1);
+    y4 = p->at(2);
+    p = cellgeo.giveVertexCoordinates(5);
+    x5 = p->at(1);
+    y5 = p->at(2);
+    p = cellgeo.giveVertexCoordinates(6);
+    x6 = p->at(1);
+    y6 = p->at(2);
+
+    return (4*(-(x4*y1) + x6*y1 + x4*y2 - x5*y2 + x5*y3 - x6*y3) + x2*(y1 - y3 - 4*y4 + 4*y5) +
+            x1*(-y2 + y3 + 4*y4 - 4*y6) + x3*(-y1 + y2 - 4*y5 + 4*y6))/6;
+}
+
 } // end namespace oofem

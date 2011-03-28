@@ -59,10 +59,17 @@ public:
     virtual void local2global(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time);
     virtual int  global2local(FloatArray &answer, const FloatArray &gcoords, const FEICellGeometry &cellgeo, double time);
     virtual double giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time);
+    // Help functions
+    /**
+     * Computes the exact area of the triangle.
+     * @param cellgeo Cell geometry for the element.
+     * @return Area of triangle.
+     */
+    virtual double giveArea(const FEICellGeometry &cellgeo) const;
     /**
      * Returns a characteristic length of the geometry, typically a diagonal or edge length.
-     * @param cellgeo underlying cell geometry
-     * @return distance from node 1 to 3
+     * @param cellgeo Underlying cell geometry.
+     * @return Square root of area.
      */
     virtual double giveCharacteristicLength(const FEICellGeometry &cellgeo) const;
 
