@@ -61,6 +61,11 @@ FloatArray :: FloatArray(int n)
     allocatedSize = size = n;
     if ( size ) {
         values = allocDouble(size);
+#ifdef DEBUG
+        if (!values) {
+            OOFEM_FATAL2("FloatArray :: FloatArray - Failed in allocating %d doubles",n);
+        }
+#endif
     } else {
         values = NULL;
     }
@@ -75,6 +80,11 @@ FloatArray :: FloatArray(const FloatArray &src)
     allocatedSize = size = src.size;
     if ( size ) {
         values = allocDouble(size);
+#ifdef DEBUG
+        if (!values) {
+            OOFEM_FATAL2("FloatArray :: FloatArray - Failed in allocating %d doubles",size);
+        }
+#endif
     } else {
         values = NULL;
     }
@@ -427,7 +437,11 @@ void FloatArray :: resize(int n, int allocChunk)
     }
 
     newValues = allocDouble(n + allocChunk);
-
+#ifdef DEBUG
+        if (!newValues) {
+            OOFEM_FATAL2("FloatArray :: resize - Failed in allocating %d doubles",n+allocChunk);
+        }
+#endif
     p1 = values;
     p2 = newValues;
     i  = size;
@@ -455,7 +469,11 @@ void FloatArray :: hardResize(int n)
     // if (n <= allocatedSize) {size = n; return;}
 
     newValues = allocDouble(n);
-
+#ifdef DEBUG
+        if (!newValues) {
+            OOFEM_FATAL2("FloatArray :: hardResize - Failed in allocating %d doubles",n);
+        }
+#endif
     p1 = values;
     p2 = newValues;
     i  = min(size, n);
@@ -718,6 +736,11 @@ contextIOResultType FloatArray :: restoreYourself(DataStream *stream, ContextMod
         }
 
         values = allocDouble(size);
+#ifdef DEBUG
+        if (!values) {
+            OOFEM_FATAL2("FloatArray :: restoreYourself - Failed in allocating %d doubles",size);
+        }
+#endif
         allocatedSize = size;
     }
 
