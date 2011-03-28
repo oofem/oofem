@@ -52,42 +52,38 @@
 
 #include "materialinterface.h"
 #ifndef __MAKEDEPEND
-#include <math.h>
-#include <stdio.h>
+ #include <math.h>
+ #include <stdio.h>
 #endif
 #include "contextioerr.h"
 
 #ifdef __OOFEG
-#include "oofeggraphiccontext.h"
-#include "conTable.h"
+ #include "oofeggraphiccontext.h"
+ #include "conTable.h"
 #endif
 
 namespace oofem {
-
 FEI2dQuadLin Q10_2D_SUPG :: velocityInterpolation(1, 2);
 FEI2dQuadConst Q10_2D_SUPG :: pressureInterpolation(1, 2);
 
 
 Q10_2D_SUPG :: Q10_2D_SUPG(int n, Domain *aDomain) :
-  SUPGElement2(n, aDomain), pressureNode(1, aDomain, this)
+    SUPGElement2(n, aDomain), pressureNode(1, aDomain, this)
     // Constructor.
 {
     numberOfDofMans  = 4;
-    
 }
 
 Q10_2D_SUPG :: ~Q10_2D_SUPG()
 // Destructor
-{ 
- 
-}
+{ }
 
 
-DofManager* 
+DofManager *
 Q10_2D_SUPG :: giveInternalDofManager(int i) const
 {
-      //_error2("No such DOF available on Element %d", number);
-  return ( DofManager*) &pressureNode;
+    //_error2("No such DOF available on Element %d", number);
+    return ( DofManager * ) & pressureNode;
 }
 
 
@@ -99,19 +95,19 @@ void Q10_2D_SUPG :: giveLocationArray(IntArray &locationArray, EquationID ut, co
     IntArray nodeDofIDMask;
     IntArray nodalArray;
     int i;
-    
-    
+
+
     locationArray.resize(0);
     for ( i = 1; i <= numberOfDofMans; i++ ) {
-      this->giveDofManDofIDMask(i, ut, nodeDofIDMask);
-      this->giveDofManager(i)->giveLocationArray(nodeDofIDMask, nodalArray, s);
-      locationArray.followedBy(nodalArray);
+        this->giveDofManDofIDMask(i, ut, nodeDofIDMask);
+        this->giveDofManager(i)->giveLocationArray(nodeDofIDMask, nodalArray, s);
+        locationArray.followedBy(nodalArray);
     }
- 
+
     for ( i = 1; i <= 1; i++ ) {
-      this->giveInternalDofManDofIDMask(i, ut, nodeDofIDMask);
-      this->giveInternalDofManager(i)->giveLocationArray(nodeDofIDMask, nodalArray, s);
-      locationArray.followedBy(nodalArray);
+        this->giveInternalDofManDofIDMask(i, ut, nodeDofIDMask);
+        this->giveInternalDofManager(i)->giveLocationArray(nodeDofIDMask, nodalArray, s);
+        locationArray.followedBy(nodalArray);
     }
 }
 
@@ -120,32 +116,32 @@ void Q10_2D_SUPG :: giveLocationArray(IntArray &locationArray, EquationID ut, co
 int
 Q10_2D_SUPG :: giveTermIntergationRuleIndex(CharType termType)
 {
-  if (( termType == AccelerationTerm_MB ) || (termType == AdvectionTerm_MB) || 
-      (termType == AdvectionDerivativeTerm_MB)) {
+    if ( ( termType == AccelerationTerm_MB ) || ( termType == AdvectionTerm_MB ) ||
+        ( termType == AdvectionDerivativeTerm_MB ) ) {
+        return 0;
+    } else if ( ( termType == DiffusionTerm_MB ) || ( termType == DiffusionDerivativeTerm_MB ) ||
+               ( termType == PressureTerm_MB ) || ( termType == AdvectionTerm_MC ) || ( termType == AdvectionDerivativeTerm_MC ) ||
+               ( termType == DiffusionDerivativeTerm_MC ) || ( termType == BCRhsTerm_MC ) ) {
+        return 0;
+    } else if ( ( termType == LSICStabilizationTerm_MB ) || ( termType == LinearAdvectionTerm_MC ) ||
+               ( termType == DiffusionTerm_MC ) || ( termType == AccelerationTerm_MC ) ||
+               ( termType == PressureTerm_MC ) || ( termType ==  BCRhsTerm_MB ) ) {
+        return 0;
+    } else {
+        _error2( "giveTermIntergationRuleIndex: Unknown CharType encountered [%s]", __CharTypeToString(termType) );
+    }
+
     return 0;
-  } else if (( termType == DiffusionTerm_MB ) || ( termType == DiffusionDerivativeTerm_MB ) || 
-	     ( termType == PressureTerm_MB ) || (termType == AdvectionTerm_MC) || (termType == AdvectionDerivativeTerm_MC) || 
-	     ( termType == DiffusionDerivativeTerm_MC) || (termType == BCRhsTerm_MC)) {
-    return 0;
-  } else if (( termType == LSICStabilizationTerm_MB ) || (termType == LinearAdvectionTerm_MC) || 
-	     (termType == DiffusionTerm_MC) || (termType == AccelerationTerm_MC) || 
-	     (termType == PressureTerm_MC) || (termType ==  BCRhsTerm_MB) ) {
-    return 0;
-  } else                                                         {
-      _error2 ("giveTermIntergationRuleIndex: Unknown CharType encountered [%s]", __CharTypeToString(termType));
-  }
-  
-  return 0;
 }
-  
+
 int
 Q10_2D_SUPG :: computeNumberOfDofs(EquationID ut)
 {
     if ( ut == EID_MomentumBalance ) {
         return 8;
-    } else if ( ut == EID_ConservationEquation )  {
+    } else if ( ut == EID_ConservationEquation ) {
         return 1;
-    } else if (ut == EID_MomentumBalance_ConservationEquation) {
+    } else if ( ut == EID_MomentumBalance_ConservationEquation ) {
         return 9;
     } else {
         _error("computeNumberOfDofs: Unknown equation id encountered");
@@ -164,10 +160,9 @@ Q10_2D_SUPG ::   giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer)
         answer.resize(2);
         answer.at(1) = V_u;
         answer.at(2) = V_v;
-    } else if (ut == EID_ConservationEquation){
-      
-      answer.resize(0);
-    }else {
+    } else if ( ut == EID_ConservationEquation ) {
+        answer.resize(0);
+    } else  {
         _error("giveDofManDofIDMask: Unknown equation id encountered");
     }
 }
@@ -175,44 +170,42 @@ Q10_2D_SUPG ::   giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer)
 void
 Q10_2D_SUPG ::   giveInternalDofManDofIDMask(int i, EquationID ut, IntArray &answer) const
 {
-  if ( ( ut == EID_MomentumBalance ) || ( ut == EID_AuxMomentumBalance ) ) {
+    if ( ( ut == EID_MomentumBalance ) || ( ut == EID_AuxMomentumBalance ) ) {
         answer.resize(0);
-  } else if ( (ut == EID_ConservationEquation) || (ut == EID_MomentumBalance_ConservationEquation ) ) {
-      answer.resize(1);
-      answer.at(1)=P_f;
-    }else {
+    } else if ( ( ut == EID_ConservationEquation ) || ( ut == EID_MomentumBalance_ConservationEquation ) ) {
+        answer.resize(1);
+        answer.at(1) = P_f;
+    } else  {
         _error("giveDofManDofIDMask: Unknown equation id encountered");
     }
-
 }
 
 
 IRResultType
 Q10_2D_SUPG :: initializeFrom(InputRecord *ir)
 {
-  SUPGElement2::initializeFrom (ir);
-  this->pressureNode.initializeFrom (ir);
-  
-  return IRRT_OK;
+    SUPGElement2 :: initializeFrom(ir);
+    this->pressureNode.initializeFrom(ir);
+
+    return IRRT_OK;
 }
-  
+
 void
 Q10_2D_SUPG :: computeGaussPoints()
 // Sets up the array containing the four Gauss points of the receiver.
 {
-  if (!integrationRulesArray) {
-    numberOfIntegrationRules = 2;
-    integrationRulesArray = new IntegrationRule * [ 2 ];
-    
+    if ( !integrationRulesArray ) {
+        numberOfIntegrationRules = 2;
+        integrationRulesArray = new IntegrationRule * [ 2 ];
 
-    integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3);
-    integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Square, 4, _2dFlow);
-  
-    //seven point Gauss integration
-    integrationRulesArray [ 1 ] = new GaussIntegrationRule(2, this, 1, 3);
-    integrationRulesArray [ 1 ]->setUpIntegrationPoints(_Square, 4, _2dFlow);
 
-  }
+        integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3);
+        integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Square, 4, _2dFlow);
+
+        //seven point Gauss integration
+        integrationRulesArray [ 1 ] = new GaussIntegrationRule(2, this, 1, 3);
+        integrationRulesArray [ 1 ]->setUpIntegrationPoints(_Square, 4, _2dFlow);
+    }
 }
 
 
@@ -221,16 +214,14 @@ Q10_2D_SUPG :: computeNuMatrix(FloatMatrix &answer, GaussPoint *gp)
 {
     int i;
     FloatArray n;
-    
-    this->velocityInterpolation.evalN(n, *gp->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0);
+
+    this->velocityInterpolation.evalN(n, * gp->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0);
     answer.resize(2, 8);
     answer.zero();
 
     for ( i = 1; i <= 4; i++ ) {
         answer.at(1, 2 * i - 1)  = n.at(i);
         answer.at(2, 2 * i - 0)  = n.at(i);
-
-
     }
 
     return;
@@ -242,12 +233,12 @@ Q10_2D_SUPG :: computeUDotGradUMatrix(FloatMatrix &answer, GaussPoint *gp, TimeS
     int i;
     FloatMatrix n, dn;
     FloatArray u, un;
-    this->velocityInterpolation.evaldNdx(dn, *gp->giveCoordinates(), FEIElementGeometryWrapper(this), atTime->giveIntrinsicTime());
+    this->velocityInterpolation.evaldNdx( dn, * gp->giveCoordinates(), FEIElementGeometryWrapper(this), atTime->giveIntrinsicTime() );
     this->computeNuMatrix(n, gp);
     this->computeVectorOf(EID_MomentumBalance, VM_Total, atTime, un);
-    
+
     if ( this->updateRotationMatrix() ) {
-      un.rotatedWith(this->rotationMatrix, 't');
+        un.rotatedWith(this->rotationMatrix, 'n');
     }
 
 
@@ -256,10 +247,8 @@ Q10_2D_SUPG :: computeUDotGradUMatrix(FloatMatrix &answer, GaussPoint *gp, TimeS
     answer.resize(2, 8);
     answer.zero();
     for ( i = 1; i <= 4; i++ ) {
-          
-	answer.at(1, 2*i-1) = dn.at(i,1) * u.at(1) + dn.at(i,2) * u.at(2);
-        answer.at(2, 2*i)   = dn.at(i,1) * u.at(1) + dn.at(i,2) * u.at(2);
-	
+        answer.at(1, 2 * i - 1) = dn.at(i, 1) * u.at(1) + dn.at(i, 2) * u.at(2);
+        answer.at(2, 2 * i)   = dn.at(i, 1) * u.at(1) + dn.at(i, 2) * u.at(2);
     }
 }
 
@@ -267,20 +256,17 @@ void
 Q10_2D_SUPG :: computeBMatrix(FloatMatrix &answer, GaussPoint *gp)
 {
     int i;
-    FloatMatrix dn (4, 2);
+    FloatMatrix dn(4, 2);
     this->velocityInterpolation.evaldNdx(dn, * gp->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0);
 
     answer.resize(3, 8);
     answer.zero();
 
     for ( i = 1; i <= 4; i++ ) {
-                 
-        answer.at(1, 2*i-1) = dn.at(i, 1);
-        answer.at(2, 2*i)   = dn.at(i, 2);
-        answer.at(3, 2*i-1) = dn.at(i, 2);
-        answer.at(3, 2*i)   = dn.at(i, 1);
-
-
+        answer.at(1, 2 * i - 1) = dn.at(i, 1);
+        answer.at(2, 2 * i)   = dn.at(i, 2);
+        answer.at(3, 2 * i - 1) = dn.at(i, 2);
+        answer.at(3, 2 * i)   = dn.at(i, 1);
     }
 }
 
@@ -291,15 +277,12 @@ Q10_2D_SUPG :: computeDivUMatrix(FloatMatrix &answer, GaussPoint *gp)
     FloatMatrix dn(4, 2);
     velocityInterpolation.evaldNdx(dn, * gp->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0);
 
-    answer.resize(1,8);
+    answer.resize(1, 8);
     answer.zero();
 
     for ( i = 1; i <= 4; i++ ) {
-        
-      
-      answer.at(1,2*i-1) = dn.at(i, 1);
-      answer.at(1,2*i) = dn.at(i, 2);
-             
+        answer.at(1, 2 * i - 1) = dn.at(i, 1);
+        answer.at(1, 2 * i) = dn.at(i, 2);
     }
 }
 
@@ -313,42 +296,41 @@ Q10_2D_SUPG :: computeNpMatrix(FloatMatrix &answer, GaussPoint *gp)
     answer.zero();
 
     answer.at(1, 1)  = n.at(1);
-        
+
     return;
 }
 
 
 void
-Q10_2D_SUPG :: computeGradUMatrix(FloatMatrix &answer, GaussPoint *gp, TimeStep *atTime )
+Q10_2D_SUPG :: computeGradUMatrix(FloatMatrix &answer, GaussPoint *gp, TimeStep *atTime)
 {
-  int i;
-  FloatArray dnx(4), dny(4), u, u1(4), u2(4);
-  FloatMatrix dn;
- 
-  answer.resize(2, 2);
-  answer.zero();
-  
-  this->computeVectorOf(EID_MomentumBalance, VM_Total, atTime, u);
-  
-  if ( this->updateRotationMatrix() ) {
-      u.rotatedWith(this->rotationMatrix, 't');
-  }
+    int i;
+    FloatArray dnx(4), dny(4), u, u1(4), u2(4);
+    FloatMatrix dn;
 
-  velocityInterpolation.evaldNdx(dn, * gp->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0);
-  for (i = 1; i <= 4; i++){
-    dnx.at(i) = dn.at(i, 1);
-    dny.at(i) = dn.at(i, 2);
-    
-    u1.at(i) = u.at(2*i-1);
-    u2.at(i) = u.at(2*i);
-  }
-  
- 
-  answer.at(1, 1) =  dotProduct(dnx, u1, 4);
-  answer.at(1, 2) =  dotProduct(dny, u1, 4); 
-  answer.at(2, 1) =  dotProduct(dnx, u2, 4);
-  answer.at(2, 2) =  dotProduct(dny, u2, 4);
-    
+    answer.resize(2, 2);
+    answer.zero();
+
+    this->computeVectorOf(EID_MomentumBalance, VM_Total, atTime, u);
+
+    if ( this->updateRotationMatrix() ) {
+        u.rotatedWith(this->rotationMatrix, 'n');
+    }
+
+    velocityInterpolation.evaldNdx(dn, * gp->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0);
+    for ( i = 1; i <= 4; i++ ) {
+        dnx.at(i) = dn.at(i, 1);
+        dny.at(i) = dn.at(i, 2);
+
+        u1.at(i) = u.at(2 * i - 1);
+        u2.at(i) = u.at(2 * i);
+    }
+
+
+    answer.at(1, 1) =  dotProduct(dnx, u1, 4);
+    answer.at(1, 2) =  dotProduct(dny, u1, 4);
+    answer.at(2, 1) =  dotProduct(dnx, u2, 4);
+    answer.at(2, 2) =  dotProduct(dny, u2, 4);
 }
 
 void
@@ -364,110 +346,113 @@ Q10_2D_SUPG :: computeGradPMatrix(FloatMatrix &answer, GaussPoint *gp)
 
 
 void
-Q10_2D_SUPG :: computeDivTauMatrix(FloatMatrix &answer, GaussPoint *gp, TimeStep *atTime )
+Q10_2D_SUPG :: computeDivTauMatrix(FloatMatrix &answer, GaussPoint *gp, TimeStep *atTime)
 {
-  answer.resize(2, 8);
-  answer.zero();
+    answer.resize(2, 8);
+    answer.zero();
 }
 
 
 void
 Q10_2D_SUPG :: updateStabilizationCoeffs(TimeStep *atTime)
 {
-  double Re, norm_un, mu, mu_min, nu, norm_N, norm_N_d, norm_M_d,norm_LSIC, norm_G_c, norm_M_c, norm_N_c, t_p1, t_p2, t_p3, t_s1, t_s2, t_s3, rho;
-  FloatMatrix dn, N, N_d, M_d, LSIC, G_c, M_c, N_c;
-  FloatArray dN, s, lcoords_nodes, u, lcn, dn_a(2), n, u1(8), u2(8);
-  GaussPoint *gp;
-  int j;
-  IntegrationRule *iRule;
-  
+    double Re, norm_un, mu, mu_min, nu, norm_N, norm_N_d, norm_M_d, norm_LSIC, norm_G_c, norm_M_c, norm_N_c, t_p1, t_p2, t_p3, t_s1, t_s2, t_s3, rho;
+    FloatMatrix dn, N, N_d, M_d, LSIC, G_c, M_c, N_c;
+    FloatArray dN, s, lcoords_nodes, u, lcn, dn_a(2), n, u1(8), u2(8);
+    GaussPoint *gp;
+    int j;
+    IntegrationRule *iRule;
 
-  iRule = integrationRulesArray [ 1 ];
-  mu_min = 1;
-  rho = this->giveMaterial()->giveCharacteristicValue(MRM_Density, integrationRulesArray [ 0 ]->getIntegrationPoint(0), atTime);
-  for ( j = 0; j < iRule->getNumberOfIntegrationPoints(); j++ ) {
-    gp = iRule->getIntegrationPoint(j);  
-    mu = this->giveMaterial()->giveCharacteristicValue(MRM_Viscosity, gp, atTime);
-    if( mu_min > mu){
-      mu_min = mu;
+
+    iRule = integrationRulesArray [ 1 ];
+    mu_min = 1;
+    rho = this->giveMaterial()->giveCharacteristicValue(MRM_Density, integrationRulesArray [ 0 ]->getIntegrationPoint(0), atTime);
+    for ( j = 0; j < iRule->getNumberOfIntegrationPoints(); j++ ) {
+        gp = iRule->getIntegrationPoint(j);
+        mu = this->giveMaterial()->giveCharacteristicValue(MRM_Viscosity, gp, atTime);
+        if ( mu_min > mu ) {
+            mu_min = mu;
+        }
+
+        nu = mu_min / rho;
     }
+
     nu = mu_min / rho;
-  }
-  
-  nu = mu_min / rho;
-  
-  //this->computeVectorOf(EID_MomentumBalance, VM_Total, atTime->givePreviousStep(), un);  
-  this->computeVectorOf(EID_MomentumBalance, VM_Total, atTime, u);
-  
-    norm_un = sqrt(dotProduct(u,u,8));
-  
-  this -> computeAdvectionTerm(N, atTime);
-  this -> computeAdvectionDeltaTerm(N_d, atTime);
-  this -> computeMassDeltaTerm(M_d, atTime);
-  this -> computeLSICTerm(LSIC, atTime);
-  this -> computeLinearAdvectionTerm_MC(G_c, atTime);
-  this -> computeMassEpsilonTerm(M_c, atTime);
-  this -> computeAdvectionEpsilonTerm(N_c, atTime);
-  
 
-  norm_N = N.computeFrobeniusNorm();
-  norm_N_d = N_d.computeFrobeniusNorm();
-  norm_M_d = M_d.computeFrobeniusNorm();
-  norm_LSIC = LSIC.computeFrobeniusNorm();
-  norm_G_c = G_c.computeFrobeniusNorm();
-  norm_M_c = M_c.computeFrobeniusNorm();
-  norm_N_c = N_c.computeFrobeniusNorm();
+    //this->computeVectorOf(EID_MomentumBalance, VM_Total, atTime->givePreviousStep(), un);
+    this->computeVectorOf(EID_MomentumBalance, VM_Total, atTime, u);
 
-  if((norm_N == 0) ||(norm_N_d == 0)||(norm_M_d == 0)){
-    t_supg = 0;
-  }
-  else{
-  Re = (norm_un / nu)*(norm_N/norm_N_d);
-  
-  t_s1 = norm_N/norm_N_d;
-  
-  t_s2 = atTime->giveTimeIncrement() * (norm_N/norm_M_d) * 0.5;
-  
-  t_s3 = t_s1 * Re;
+    if ( this->updateRotationMatrix() ) {
+        u.rotatedWith(this->rotationMatrix, 'n');
+    }
 
-  t_supg =  1. / sqrt( 1. / ( t_s1 * t_s1 ) + 1. / ( t_s2 * t_s2 ) + 1. / ( t_s3 * t_s3 ) );
-  // t_supg = 0;
-  }
+    norm_un = sqrt( dotProduct(u, u, 8) );
 
-  if (norm_LSIC == 0){
+    this->computeAdvectionTerm(N, atTime);
+    this->computeAdvectionDeltaTerm(N_d, atTime);
+    this->computeMassDeltaTerm(M_d, atTime);
+    this->computeLSICTerm(LSIC, atTime);
+    this->computeLinearAdvectionTerm_MC(G_c, atTime);
+    this->computeMassEpsilonTerm(M_c, atTime);
+    this->computeAdvectionEpsilonTerm(N_c, atTime);
+
+
+    norm_N = N.computeFrobeniusNorm();
+    norm_N_d = N_d.computeFrobeniusNorm();
+    norm_M_d = M_d.computeFrobeniusNorm();
+    norm_LSIC = LSIC.computeFrobeniusNorm();
+    norm_G_c = G_c.computeFrobeniusNorm();
+    norm_M_c = M_c.computeFrobeniusNorm();
+    norm_N_c = N_c.computeFrobeniusNorm();
+
+    if ( ( norm_N == 0 ) || ( norm_N_d == 0 ) || ( norm_M_d == 0 ) ) {
+        t_supg = 0;
+    } else   {
+        Re = ( norm_un / nu ) * ( norm_N / norm_N_d );
+
+        t_s1 = norm_N / norm_N_d;
+
+        t_s2 = atTime->giveTimeIncrement() * ( norm_N / norm_M_d ) * 0.5;
+
+        t_s3 = t_s1 * Re;
+
+        t_supg =  1. / sqrt( 1. / ( t_s1 * t_s1 ) + 1. / ( t_s2 * t_s2 ) + 1. / ( t_s3 * t_s3 ) );
+        // t_supg = 0;
+    }
+
+    if ( norm_LSIC == 0 ) {
         t_lsic = 0;
-  }
-  else{
-   t_lsic = norm_N / norm_LSIC;
-  
-   // t_lsic = 0;
-  }
-  
-  if((norm_G_c == 0) ||(norm_N_c == 0)||(norm_M_c == 0)){
-  t_pspg = 0;
-  }else{
-    Re = (norm_un / nu)*(norm_N/norm_N_d);
-    
-    t_p1 = norm_G_c/norm_N_c;
-    
-    t_p2 = atTime->giveTimeIncrement() * (norm_G_c/norm_M_c) * 0.5;
-    
-    t_p3 = t_p1 * Re;
-    
-    t_pspg =  1. / sqrt( 1. / ( t_p1 * t_p1 ) + 1. / ( t_p2 * t_p2 ) + 1. / ( t_p3 * t_p3 ) );
-    // t_pspg = 0;
-  }
-  
-  //t_pspg = 0;
+    } else   {
+        t_lsic = norm_N / norm_LSIC;
+
+        // t_lsic = 0;
+    }
+
+    if ( ( norm_G_c == 0 ) || ( norm_N_c == 0 ) || ( norm_M_c == 0 ) ) {
+        t_pspg = 0;
+    } else  {
+        Re = ( norm_un / nu ) * ( norm_N / norm_N_d );
+
+        t_p1 = norm_G_c / norm_N_c;
+
+        t_p2 = atTime->giveTimeIncrement() * ( norm_G_c / norm_M_c ) * 0.5;
+
+        t_p3 = t_p1 * Re;
+
+        t_pspg =  1. / sqrt( 1. / ( t_p1 * t_p1 ) + 1. / ( t_p2 * t_p2 ) + 1. / ( t_p3 * t_p3 ) );
+        // t_pspg = 0;
+    }
+
+    //t_pspg = 0;
 }
-  
-  
 
 
-void 
+
+
+void
 Q10_2D_SUPG :: computeAdvectionTerm(FloatMatrix &answer, TimeStep *atTime)
 {
-   FloatMatrix n, b;
+    FloatMatrix n, b;
     double dV, rho;
     int k, undofs = this->computeNumberOfDofs(EID_MomentumBalance);
     GaussPoint *gp;
@@ -480,21 +465,18 @@ Q10_2D_SUPG :: computeAdvectionTerm(FloatMatrix &answer, TimeStep *atTime)
     for ( k = 0; k < iRule->getNumberOfIntegrationPoints(); k++ ) {
         gp = iRule->getIntegrationPoint(k);
         this->computeNuMatrix(n, gp);
-        this->computeUDotGradUMatrix( b, gp, atTime);
+        this->computeUDotGradUMatrix(b, gp, atTime);
         dV  = this->computeVolumeAround(gp);
         rho = this->giveMaterial()->giveCharacteristicValue(MRM_Density, gp, atTime);
         answer.plusProductUnsym(n, b, rho * dV);
     }
-   
 }
 
 
-void 
+void
 Q10_2D_SUPG :: computeAdvectionDeltaTerm(FloatMatrix &answer, TimeStep *atTime)
 {
-
-  
-      FloatMatrix n, b;
+    FloatMatrix n, b;
     double dV, rho;
     int k, undofs = this->computeNumberOfDofs(EID_MomentumBalance);
     GaussPoint *gp;
@@ -507,21 +489,20 @@ Q10_2D_SUPG :: computeAdvectionDeltaTerm(FloatMatrix &answer, TimeStep *atTime)
     for ( k = 0; k < iRule->getNumberOfIntegrationPoints(); k++ ) {
         gp = iRule->getIntegrationPoint(k);
         this->computeNuMatrix(n, gp);
-        this->computeUDotGradUMatrix( b, gp, atTime );
+        this->computeUDotGradUMatrix(b, gp, atTime);
         dV  = this->computeVolumeAround(gp);
         rho = this->giveMaterial()->giveCharacteristicValue(MRM_Density, gp, atTime);
-        
+
         answer.plusProductUnsym(b, b, rho * dV);
     }
-       
 }
 
 
 
-void 
+void
 Q10_2D_SUPG :: computeMassDeltaTerm(FloatMatrix &answer, TimeStep *atTime)
 {
-  FloatMatrix n, b;
+    FloatMatrix n, b;
     double dV, rho;
     int k, undofs = this->computeNumberOfDofs(EID_MomentumBalance);
     GaussPoint *gp;
@@ -533,13 +514,12 @@ Q10_2D_SUPG :: computeMassDeltaTerm(FloatMatrix &answer, TimeStep *atTime)
     for ( k = 0; k < iRule->getNumberOfIntegrationPoints(); k++ ) {
         gp = iRule->getIntegrationPoint(k);
         this->computeNuMatrix(n, gp);
-        this->computeUDotGradUMatrix( b, gp, atTime);
+        this->computeUDotGradUMatrix(b, gp, atTime);
         dV  = this->computeVolumeAround(gp);
         rho = this->giveMaterial()->giveCharacteristicValue(MRM_Density, gp, atTime);
-        
-	answer.plusProductUnsym(b, n, rho * dV);
-    }
 
+        answer.plusProductUnsym(b, n, rho * dV);
+    }
 }
 
 void
@@ -570,34 +550,33 @@ Q10_2D_SUPG :: computeLSICTerm(FloatMatrix &answer, TimeStep *atTime)
 void
 Q10_2D_SUPG :: computeAdvectionEpsilonTerm(FloatMatrix &answer, TimeStep *atTime)
 {
- //  to compute t_pspg 
-  int pndofs = this->computeNumberOfDofs(EID_ConservationEquation);
-  int undofs = this->computeNumberOfDofs(EID_MomentumBalance);
-  GaussPoint *gp;
-  FloatMatrix g, b;
-  double dV;
-  int k;
-  
-  answer.resize(pndofs, undofs);
-  answer.zero();
-  
-  IntegrationRule *iRule = this->integrationRulesArray [ 1 ];
+    //  to compute t_pspg
+    int pndofs = this->computeNumberOfDofs(EID_ConservationEquation);
+    int undofs = this->computeNumberOfDofs(EID_MomentumBalance);
+    GaussPoint *gp;
+    FloatMatrix g, b;
+    double dV;
+    int k;
 
-  for ( k = 0; k < iRule->getNumberOfIntegrationPoints(); k++ ) {
-    gp = iRule->getIntegrationPoint(k);
-    this->computeGradPMatrix(g, gp);
-    this->computeUDotGradUMatrix( b, gp, atTime);
-    dV  = this->computeVolumeAround(gp);
-    
-    answer.plusProductUnsym(g, b, dV);
-  }
-  
+    answer.resize(pndofs, undofs);
+    answer.zero();
+
+    IntegrationRule *iRule = this->integrationRulesArray [ 1 ];
+
+    for ( k = 0; k < iRule->getNumberOfIntegrationPoints(); k++ ) {
+        gp = iRule->getIntegrationPoint(k);
+        this->computeGradPMatrix(g, gp);
+        this->computeUDotGradUMatrix(b, gp, atTime);
+        dV  = this->computeVolumeAround(gp);
+
+        answer.plusProductUnsym(g, b, dV);
+    }
 }
 
 void
 Q10_2D_SUPG :: computeMassEpsilonTerm(FloatMatrix &answer, TimeStep *atTime)
 {
-  // to compute t_pspg 
+    // to compute t_pspg
     int pndofs = this->computeNumberOfDofs(EID_ConservationEquation);
     int undofs = this->computeNumberOfDofs(EID_MomentumBalance);
     int k;
@@ -607,7 +586,7 @@ Q10_2D_SUPG :: computeMassEpsilonTerm(FloatMatrix &answer, TimeStep *atTime)
 
     answer.resize(pndofs, undofs);
     answer.zero();
-    
+
     IntegrationRule *iRule = this->integrationRulesArray [ 1 ];
 
     for ( k = 0; k < iRule->getNumberOfIntegrationPoints(); k++ ) {
@@ -615,10 +594,9 @@ Q10_2D_SUPG :: computeMassEpsilonTerm(FloatMatrix &answer, TimeStep *atTime)
         this->computeGradPMatrix(g, gp);
         this->computeNuMatrix(n, gp);
         dV  = this->computeVolumeAround(gp);
-        
+
         answer.plusProductUnsym(g, n, dV);
     }
-
 }
 
 int
@@ -632,44 +610,42 @@ Q10_2D_SUPG :: giveNumberOfSpatialDimensions()
 double
 Q10_2D_SUPG :: LS_PCS_computeF(LevelSetPCS *ls, TimeStep *atTime)
 {
-
-  /*
-    int i;
-    double answer;
-    FloatArray fi(3), un(6);
-
-    this->computeVectorOf(EID_MomentumBalance, VM_Total, atTime, un);
-    for ( i = 1; i <= 3; i++ ) {
-        fi.at(i) = ls->giveLevelSetDofManValue( dofManArray.at(i) );
-    }
-
-    double fix = b [ 0 ] * fi.at(1) + b [ 1 ] * fi.at(2) + b [ 2 ] * fi.at(3);
-    double fiy = c [ 0 ] * fi.at(1) + c [ 1 ] * fi.at(2) + c [ 2 ] * fi.at(3);
-    double norm = sqrt(fix * fix + fiy * fiy);
-
-    answer = ( 1. / 3. ) * ( fix * ( un.at(1) + un.at(3) + un.at(5) ) + fiy * ( un.at(2) + un.at(4) + un.at(6) ) ) / norm;
-    return answer;
-  */
-  return 0.0;
+    /*
+     * int i;
+     * double answer;
+     * FloatArray fi(3), un(6);
+     *
+     * this->computeVectorOf(EID_MomentumBalance, VM_Total, atTime, un);
+     * for ( i = 1; i <= 3; i++ ) {
+     *    fi.at(i) = ls->giveLevelSetDofManValue( dofManArray.at(i) );
+     * }
+     *
+     * double fix = b [ 0 ] * fi.at(1) + b [ 1 ] * fi.at(2) + b [ 2 ] * fi.at(3);
+     * double fiy = c [ 0 ] * fi.at(1) + c [ 1 ] * fi.at(2) + c [ 2 ] * fi.at(3);
+     * double norm = sqrt(fix * fix + fiy * fiy);
+     *
+     * answer = ( 1. / 3. ) * ( fix * ( un.at(1) + un.at(3) + un.at(5) ) + fiy * ( un.at(2) + un.at(4) + un.at(6) ) ) / norm;
+     * return answer;
+     */
+    return 0.0;
 }
 
 
 double
 Q10_2D_SUPG :: LS_PCS_computeS(LevelSetPCS *ls, TimeStep *atTime)
 {
-  return 0.0;
+    return 0.0;
 }
 
 
 void
 Q10_2D_SUPG :: LS_PCS_computedN(FloatMatrix &answer)
-{
-}
+{ }
 
 
 void
 Q10_2D_SUPG :: LS_PCS_computeVOFFractions(FloatArray &answer, FloatArray &fi)
-{}
+{ }
 
 
 
@@ -711,12 +687,13 @@ Q10_2D_SUPG :: ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatMatrix &
     } else {
         return;
     }
+
     //answer.resize(6);
 
     answer.at(1, 1) = l1;
     answer.at(1, 2) = l2;
     answer.at(1, 3) = l3;
-    
+
     return;
 }
 
@@ -751,9 +728,7 @@ Q10_2D_SUPG :: NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int
 void
 Q10_2D_SUPG :: computeDeviatoricStress(FloatArray &answer, GaussPoint *gp, TimeStep *tStep)
 {
-
-  //( ( FluidDynamicMaterial * ) this->giveMaterial() )->computeDeviatoricStressVector(answer, integrationRulesArray [ 0 ]->getIntegrationPoint(0), this->eps, *tStep);
-                                                                                      
+    //( ( FluidDynamicMaterial * ) this->giveMaterial() )->computeDeviatoricStressVector(answer, integrationRulesArray [ 0 ]->getIntegrationPoint(0), this->eps, *tStep);
 }
 
 
@@ -773,7 +748,7 @@ Q10_2D_SUPG :: updateYourself(TimeStep *tStep)
 int
 Q10_2D_SUPG :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime)
 {
-  if ( type == IST_VOFFraction ) {
+    if ( type == IST_VOFFraction ) {
         MaterialInterface *mi = domain->giveEngngModel()->giveMaterialInterface( domain->giveNumber() );
         if ( mi ) {
             FloatArray val;
@@ -790,9 +765,9 @@ Q10_2D_SUPG :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, Internal
         answer.resize(1);
         answer.at(1) = this->giveMaterial()->giveCharacteristicValue(MRM_Density, aGaussPoint, atTime);
         return 1;
-    } else { 
-  return SUPGElement :: giveIPValue(answer, aGaussPoint, type, atTime);
-  }
+    } else {
+        return SUPGElement :: giveIPValue(answer, aGaussPoint, type, atTime);
+    }
 }
 
 int
@@ -803,10 +778,8 @@ Q10_2D_SUPG :: giveIntVarCompFullIndx(IntArray &answer, InternalStateType type)
         answer.at(1) = 1;
         return 1;
     } else {
-
-  return SUPGElement :: giveIntVarCompFullIndx(answer, type);
-}
-
+        return SUPGElement :: giveIntVarCompFullIndx(answer, type);
+    }
 }
 
 InternalStateValueType
@@ -841,7 +814,7 @@ Q10_2D_SUPG :: giveIPValueSize(InternalStateType type, GaussPoint *gp)
 
 
 
-contextIOResultType 
+contextIOResultType
 Q10_2D_SUPG :: saveContext(DataStream *stream, ContextMode mode, void *obj)
 //
 // saves full element context (saves state variables, that completely describe
@@ -853,6 +826,7 @@ Q10_2D_SUPG :: saveContext(DataStream *stream, ContextMode mode, void *obj)
     if ( ( iores = SUPGElement :: saveContext(stream, mode, obj) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
+
     return CIO_OK;
 }
 
@@ -879,7 +853,7 @@ Q10_2D_SUPG :: computeVolumeAround(GaussPoint *aGaussPoint)
 // Returns the portion of the receiver which is attached to aGaussPoint.
 {
     double determinant, weight, volume;
-       
+
     determinant = fabs( this->velocityInterpolation.giveTransformationJacobian(* aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0) );
 
 
@@ -890,12 +864,12 @@ Q10_2D_SUPG :: computeVolumeAround(GaussPoint *aGaussPoint)
 }
 
 
-  //double
-  //Q10_2D_SUPG :: computeVolumeAroundPressure(FEInterpolation2d& interpol, GaussPoint *aGaussPoint)
+//double
+//Q10_2D_SUPG :: computeVolumeAroundPressure(FEInterpolation2d& interpol, GaussPoint *aGaussPoint)
 // Returns the portion of the receiver which is attached to aGaussPoint.
 //{
 //  double determinant, weight, volume;
-        
+
 //  determinant = fabs( interpol.giveTransformationJacobian(domain, pressureDofManArray,
 //						    * aGaussPoint->giveCoordinates(), 0.0) );
 
@@ -911,16 +885,13 @@ Q10_2D_SUPG :: giveInterface(InterfaceType interface)
 {
     if ( interface == LevelSetPCSElementInterfaceType ) {
         return ( LevelSetPCSElementInterface * ) this;
-    
-    }else if ( interface == ZZNodalRecoveryModelInterfaceType ) {
+    } else if ( interface == ZZNodalRecoveryModelInterfaceType )  {
         return ( ZZNodalRecoveryModelInterface * ) this;
-    
-    }else if ( interface == NodalAveragingRecoveryModelInterfaceType )  {
+    } else if ( interface == NodalAveragingRecoveryModelInterfaceType )  {
         return ( NodalAveragingRecoveryModelInterface * ) this;
-
     }
 
-      return NULL;
+    return NULL;
 }
 
 
@@ -944,20 +915,21 @@ Q10_2D_SUPG :: printOutputAt(FILE *file, TimeStep *stepN)
 
 
 
-void 
-Q10_2D_SUPG :: giveLocalVelocityDofMap (IntArray &map) 
+void
+Q10_2D_SUPG :: giveLocalVelocityDofMap(IntArray &map)
 {
-  map.resize(8);
-  int i;
+    map.resize(8);
+    int i;
 
-  for (i=1;i<=8;i++) map.at(i) = i;
+    for ( i = 1; i <= 8; i++ ) {
+        map.at(i) = i;
+    }
 }
 void
-Q10_2D_SUPG :: giveLocalPressureDofMap (IntArray &map)
+Q10_2D_SUPG :: giveLocalPressureDofMap(IntArray &map)
 {
-  map.resize(1);
-  map.at(1) = 9;
-
+    map.resize(1);
+    map.at(1) = 9;
 }
 
 
@@ -967,7 +939,7 @@ int
 Q10_2D_SUPG :: giveInternalStateAtNode(FloatArray &answer, InternalStateType type, InternalStateMode mode,
                                        int node, TimeStep *atTime)
 {
-  return SUPGElement :: giveInternalStateAtNode(answer, type, mode, node, atTime);
+    return SUPGElement :: giveInternalStateAtNode(answer, type, mode, node, atTime);
 }
 
 

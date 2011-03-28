@@ -71,8 +71,7 @@ SUPGElement2 :: SUPGElement2(int n, Domain *aDomain) :
 
 SUPGElement2 :: ~SUPGElement2()
 // Destructor.
-{
-}
+{ }
 
 IRResultType
 SUPGElement2 :: initializeFrom(InputRecord *ir)
@@ -121,22 +120,31 @@ SUPGElement2 ::  giveCharacteristicMatrix(FloatMatrix &answer,
         this->computePressureTerm_MC(answer, tStep);
     } else if ( mtrx == LSICStabilizationTerm_MB ) {
         this->computeLSICStabilizationTerm_MB(answer, tStep);
-    } else if ( mtrx == StiffnessMatrix) {
-      // support for stokes solver
-      IntArray vloc, ploc;
-      FloatMatrix h;
-      int size = this->computeNumberOfDofs(EID_MomentumBalance_ConservationEquation);
-      this->giveLocalVelocityDofMap(vloc);
-      this->giveLocalPressureDofMap(ploc);
-      answer.resize(size,size); answer.zero();
-      this->computeAdvectionDerivativeTerm_MB(h, tStep);  answer.assemble(h, vloc);
-      this->computeDiffusionDerivativeTerm_MB(h, TangentStiffness, tStep); answer.assemble(h, vloc);
-      this->computePressureTerm_MB(h, tStep); answer.assemble(h, vloc, ploc);     
-      this->computeLinearAdvectionTerm_MC(h, tStep); answer.assemble(h, ploc, vloc);     
-      this->computeAdvectionDerivativeTerm_MC(h, tStep); answer.assemble(h, ploc, vloc);     
-      this->computeDiffusionDerivativeTerm_MC(h, tStep); answer.assemble(h, ploc, vloc);     
-      this->computePressureTerm_MC(h, tStep); answer.assemble(h, ploc);     
-      this->computeLSICStabilizationTerm_MB(h, tStep); answer.assemble(h, vloc);
+    } else if ( mtrx == StiffnessMatrix ) {
+        // support for stokes solver
+        IntArray vloc, ploc;
+        FloatMatrix h;
+        int size = this->computeNumberOfDofs(EID_MomentumBalance_ConservationEquation);
+        this->giveLocalVelocityDofMap(vloc);
+        this->giveLocalPressureDofMap(ploc);
+        answer.resize(size, size);
+        answer.zero();
+        this->computeAdvectionDerivativeTerm_MB(h, tStep);
+        answer.assemble(h, vloc);
+        this->computeDiffusionDerivativeTerm_MB(h, TangentStiffness, tStep);
+        answer.assemble(h, vloc);
+        this->computePressureTerm_MB(h, tStep);
+        answer.assemble(h, vloc, ploc);
+        this->computeLinearAdvectionTerm_MC(h, tStep);
+        answer.assemble(h, ploc, vloc);
+        this->computeAdvectionDerivativeTerm_MC(h, tStep);
+        answer.assemble(h, ploc, vloc);
+        this->computeDiffusionDerivativeTerm_MC(h, tStep);
+        answer.assemble(h, ploc, vloc);
+        this->computePressureTerm_MC(h, tStep);
+        answer.assemble(h, ploc);
+        this->computeLSICStabilizationTerm_MB(h, tStep);
+        answer.assemble(h, vloc);
     } else {
         _error("giveCharacteristicMatrix: Unknown Type of characteristic mtrx.");
     }
@@ -164,55 +172,62 @@ SUPGElement2 ::  giveCharacteristicVector(FloatArray &answer, CharType mtrx, Val
         this->computeBCRhsTerm_MC(answer, tStep);
     } else if ( mtrx == DiffusionTerm_MC ) {
         this->computeDiffusionTerm_MC(answer, tStep);
-    } else if ( mtrx == LoadVector) {
-      // stokes flow
-      IntArray vloc, ploc;
-      FloatArray h;
-      int size = this->computeNumberOfDofs(EID_MomentumBalance_ConservationEquation);
-      this->giveLocalVelocityDofMap(vloc);
-      this->giveLocalPressureDofMap(ploc);
-      answer.resize(size); answer.zero();
-      this->computeBCRhsTerm_MB(h, tStep); answer.assemble(h, vloc);
-      this->computeBCRhsTerm_MC(h, tStep); answer.assemble(h, ploc);
-    } else if ( mtrx == NodalInternalForcesVector) {
-      // stokes flow
-      IntArray vloc, ploc;
-      FloatArray h;
-      int size = this->computeNumberOfDofs(EID_MomentumBalance_ConservationEquation);
-      this->giveLocalVelocityDofMap(vloc);
-      this->giveLocalPressureDofMap(ploc);
-      answer.resize(size); answer.zero();
-      this->computeAdvectionTerm_MB(h, tStep); answer.assemble(h, vloc);
-      this->computeAdvectionTerm_MC(h, tStep); answer.assemble(h, ploc);
-      this->computeDiffusionTerm_MB(h, tStep); answer.assemble(h, vloc);
-      this->computeDiffusionTerm_MC(h, tStep); answer.assemble(h, ploc);
+    } else if ( mtrx == LoadVector ) {
+        // stokes flow
+        IntArray vloc, ploc;
+        FloatArray h;
+        int size = this->computeNumberOfDofs(EID_MomentumBalance_ConservationEquation);
+        this->giveLocalVelocityDofMap(vloc);
+        this->giveLocalPressureDofMap(ploc);
+        answer.resize(size);
+        answer.zero();
+        this->computeBCRhsTerm_MB(h, tStep);
+        answer.assemble(h, vloc);
+        this->computeBCRhsTerm_MC(h, tStep);
+        answer.assemble(h, ploc);
+    } else if ( mtrx == NodalInternalForcesVector ) {
+        // stokes flow
+        IntArray vloc, ploc;
+        FloatArray h;
+        int size = this->computeNumberOfDofs(EID_MomentumBalance_ConservationEquation);
+        this->giveLocalVelocityDofMap(vloc);
+        this->giveLocalPressureDofMap(ploc);
+        answer.resize(size);
+        answer.zero();
+        this->computeAdvectionTerm_MB(h, tStep);
+        answer.assemble(h, vloc);
+        this->computeAdvectionTerm_MC(h, tStep);
+        answer.assemble(h, ploc);
+        this->computeDiffusionTerm_MB(h, tStep);
+        answer.assemble(h, vloc);
+        this->computeDiffusionTerm_MC(h, tStep);
+        answer.assemble(h, ploc);
 
-      FloatMatrix m1;
-      FloatArray v,p;
-      // add lsic stabilization term
-      this->giveCharacteristicMatrix(m1, LSICStabilizationTerm_MB, tStep);
-      //m1.times( lscale / ( dscale * uscale * uscale ) );
-      this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, v);
-      h.beProductOf(m1, v);
-      answer.assemble(h, vloc);
-      this->giveCharacteristicMatrix(m1, LinearAdvectionTerm_MC, tStep);
-      //m1.times( 1. / ( dscale * uscale ) );
-      h.beProductOf(m1, v);
-      answer.assemble(h,ploc);
+        FloatMatrix m1;
+        FloatArray v, p;
+        // add lsic stabilization term
+        this->giveCharacteristicMatrix(m1, LSICStabilizationTerm_MB, tStep);
+        //m1.times( lscale / ( dscale * uscale * uscale ) );
+        this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, v);
+        h.beProductOf(m1, v);
+        answer.assemble(h, vloc);
+        this->giveCharacteristicMatrix(m1, LinearAdvectionTerm_MC, tStep);
+        //m1.times( 1. / ( dscale * uscale ) );
+        h.beProductOf(m1, v);
+        answer.assemble(h, ploc);
 
 
-      // add pressure term
-      this->giveCharacteristicMatrix(m1, PressureTerm_MB, tStep);
-      this->computeVectorOf(EID_ConservationEquation, VM_Total, tStep, v);
-      h.beProductOf(m1, v);
-      answer.assemble(h, vloc);
+        // add pressure term
+        this->giveCharacteristicMatrix(m1, PressureTerm_MB, tStep);
+        this->computeVectorOf(EID_ConservationEquation, VM_Total, tStep, v);
+        h.beProductOf(m1, v);
+        answer.assemble(h, vloc);
 
-      // pressure term
-      this->giveCharacteristicMatrix(m1, PressureTerm_MC, tStep);
-      this->computeVectorOf(EID_ConservationEquation, VM_Total, tStep, v);
-      h.beProductOf(m1, v);
-      answer.assemble(h, ploc);
-
+        // pressure term
+        this->giveCharacteristicMatrix(m1, PressureTerm_MC, tStep);
+        this->computeVectorOf(EID_ConservationEquation, VM_Total, tStep, v);
+        h.beProductOf(m1, v);
+        answer.assemble(h, ploc);
     } else {
         _error("giveCharacteristicVector: Unknown Type of characteristic mtrx.");
     }
@@ -409,10 +424,7 @@ SUPGElement2 :: computeAccelerationTerm_MB(FloatMatrix &answer, TimeStep *atTime
     }
 
     if ( this->updateRotationMatrix() ) {
-        //answer.rotatedWith(this->rotationMatrix);
-        FloatMatrix trans;
-        trans.beTranspositionOf(this->rotationMatrix);
-        answer.rotatedWith(trans);
+        answer.rotatedWith(this->rotationMatrix);
     }
 }
 
@@ -433,7 +445,7 @@ SUPGElement2 :: computeAdvectionTerm_MB(FloatArray &answer, TimeStep *atTime)
 
 
     if ( this->updateRotationMatrix() ) {
-        u.rotatedWith(this->rotationMatrix, 't');
+        u.rotatedWith(this->rotationMatrix, 'n');
     }
 
     int rule = this->giveTermIntergationRuleIndex(AdvectionTerm_MB);
@@ -469,7 +481,7 @@ SUPGElement2 :: computeAdvectionTerm_MB(FloatArray &answer, TimeStep *atTime)
     }
 
     if ( this->updateRotationMatrix() ) {
-        answer.rotatedWith(this->rotationMatrix, 'n');
+        answer.rotatedWith(this->rotationMatrix, 't');
     }
 }
 
@@ -511,10 +523,7 @@ SUPGElement2 :: computeAdvectionDerivativeTerm_MB(FloatMatrix &answer, TimeStep 
     }
 
     if ( this->updateRotationMatrix() ) {
-        //answer.rotatedWith(this->rotationMatrix);
-        FloatMatrix trans;
-        trans.beTranspositionOf(this->rotationMatrix);
-        answer.rotatedWith(trans);
+        answer.rotatedWith(this->rotationMatrix);
     }
 }
 
@@ -534,7 +543,7 @@ SUPGElement2 :: computeDiffusionTerm_MB(FloatArray &answer, TimeStep *atTime)
     this->computeVectorOf(EID_MomentumBalance, VM_Total, atTime, u);
 
     if ( this->updateRotationMatrix() ) {
-        u.rotatedWith(this->rotationMatrix, 't');
+        u.rotatedWith(this->rotationMatrix, 'n');
     }
 
     int rule = this->giveTermIntergationRuleIndex(DiffusionTerm_MB);
@@ -567,7 +576,7 @@ SUPGElement2 :: computeDiffusionTerm_MB(FloatArray &answer, TimeStep *atTime)
     }
 
     if ( this->updateRotationMatrix() ) {
-        answer.rotatedWith(this->rotationMatrix, 'n');
+        answer.rotatedWith(this->rotationMatrix, 't');
     }
 }
 
@@ -606,10 +615,7 @@ SUPGElement2 :: computeDiffusionDerivativeTerm_MB(FloatMatrix &answer, MatRespon
 
 
     if ( this->updateRotationMatrix() ) {
-        //answer.rotatedWith(this->rotationMatrix);
-        FloatMatrix trans;
-        trans.beTranspositionOf(this->rotationMatrix);
-        answer.rotatedWith(trans);
+        answer.rotatedWith(this->rotationMatrix);
     }
 }
 
@@ -632,17 +638,17 @@ SUPGElement2 :: computePressureTerm_MB(FloatMatrix &answer, TimeStep *atTime)
     for ( k = 0; k < iRule->getNumberOfIntegrationPoints(); k++ ) {
         gp = iRule->getIntegrationPoint(k);
         dV  = this->computeVolumeAround(gp);
-	this->computeDivUMatrix(gu, gp);
-	this->computeNpMatrix(np, gp);
-	
-	 /*alternative computing*/
-	 //this->computeNuMatrix(gu, gp);
-	 //this->computeGradPMatrix(np, gp);
-	
-        /* standard term */
-        
+        this->computeDivUMatrix(gu, gp);
+        this->computeNpMatrix(np, gp);
 
-	answer.plusProductUnsym(gu, np, ( -1.0 ) * dV);
+        /*alternative computing*/
+        //this->computeNuMatrix(gu, gp);
+        //this->computeGradPMatrix(np, gp);
+
+        /* standard term */
+
+
+        answer.plusProductUnsym(gu, np, ( -1.0 ) * dV);
     }
 
     iRule = this->integrationRulesArray [ 1 ];
@@ -658,7 +664,7 @@ SUPGElement2 :: computePressureTerm_MB(FloatMatrix &answer, TimeStep *atTime)
 
     if ( this->updateRotationMatrix() ) {
         FloatMatrix tmp = answer;
-        answer.beProductOf(rotationMatrix, tmp);
+        answer.beTProductOf(rotationMatrix, tmp);
     }
 }
 void
@@ -686,10 +692,7 @@ SUPGElement2 :: computeLSICStabilizationTerm_MB(FloatMatrix &answer, TimeStep *a
     answer.symmetrized();
 
     if ( this->updateRotationMatrix() ) {
-        //answer.rotatedWith(this->rotationMatrix);
-        FloatMatrix trans;
-        trans.beTranspositionOf(this->rotationMatrix);
-        answer.rotatedWith(trans);
+        answer.rotatedWith(this->rotationMatrix);
     }
 }
 
@@ -715,16 +718,14 @@ SUPGElement2 :: computeLinearAdvectionTerm_MC(FloatMatrix &answer, TimeStep *atT
         this->computeNpMatrix(np, gp);
 
         /* standard term */
-     
 
-	answer.plusProductUnsym(np, gu, dV);
+
+        answer.plusProductUnsym(np, gu, dV);
     }
 
     if ( this->updateRotationMatrix() ) {
         FloatMatrix tmp = answer;
-        FloatMatrix trans;
-        trans.beTranspositionOf(this->rotationMatrix);
-        answer.beProductOf(tmp, trans);
+        answer.beProductOf(tmp, this->rotationMatrix);
     }
 }
 
@@ -747,7 +748,7 @@ SUPGElement2 :: computeAdvectionTerm_MC(FloatArray &answer, TimeStep *atTime)
     this->computeVectorOf(EID_MomentumBalance, VM_Total, atTime, u);
 
     if ( this->updateRotationMatrix() ) {
-        u.rotatedWith(this->rotationMatrix, 't');
+        u.rotatedWith(this->rotationMatrix, 'n');
     }
 
     /* pspg stabilization term */
@@ -796,9 +797,7 @@ SUPGElement2 :: computeAdvectionDerivativeTerm_MC(FloatMatrix &answer, TimeStep 
 
     if ( this->updateRotationMatrix() ) {
         FloatMatrix tmp = answer;
-        FloatMatrix trans;
-        trans.beTranspositionOf(this->rotationMatrix);
-        answer.beProductOf(tmp, trans);
+        answer.beProductOf(tmp, this->rotationMatrix);
     }
 }
 
@@ -909,9 +908,7 @@ SUPGElement2 :: computeAccelerationTerm_MC(FloatMatrix &answer, TimeStep *atTime
 
     if ( this->updateRotationMatrix() ) {
         FloatMatrix tmp = answer;
-        FloatMatrix trans;
-        trans.beTranspositionOf(this->rotationMatrix);
-        answer.beProductOf(tmp, trans);
+        answer.beProductOf(tmp, this->rotationMatrix);
     }
 }
 
@@ -1013,12 +1010,7 @@ SUPGElement2 :: computeBCRhsTerm_MB(FloatArray &answer, TimeStep *atTime)
     }
 
     if ( this->updateRotationMatrix() ) {
-        //FloatMatrix *T;
-        //int p, i, j, k;
-        //double coeff;
-        //T =  this->rotationMatrix;
-
-        answer.rotatedWith(this->rotationMatrix, 'n');
+        answer.rotatedWith(this->rotationMatrix, 't');
     }
 }
 
@@ -1118,6 +1110,11 @@ SUPGElement2 :: computeDeviatoricStress(FloatArray &answer, GaussPoint *gp, Time
     FloatArray u, eps;
     FloatMatrix b;
     this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
+
+    if ( this->updateRotationMatrix() ) {
+        u.rotatedWith(this->rotationMatrix, 'n');
+    }
+
     this->computeBMatrix(b, gp);
     eps.beProductOf(b, u);
     ( ( FluidDynamicMaterial * ) this->giveMaterial() )->computeDeviatoricStressVector(answer, gp, eps, tStep);
@@ -1144,7 +1141,7 @@ SUPGElement2 :: updateRotationMatrix()
 
     rotationMatrixDefined = 1;
     isT_GtoL = this->computeGtoLRotationMatrix(T_GtoL);
-    isT_NtoG = this->computeGNDofRotationMatrix(T_NtoG, _toNodalCS);
+    isT_NtoG = this->computeGNDofRotationMatrix(T_NtoG, _toGlobalCS);
 
 #ifdef DEBUG
     if ( isT_GtoL ) {
@@ -1173,6 +1170,7 @@ SUPGElement2 :: updateRotationMatrix()
         rotationMatrix.beEmptyMtrx();
         return false;
     }
+
     return true;
 }
 

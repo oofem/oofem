@@ -226,10 +226,6 @@ public:
      * necessary sets answer to empty mtrx and returns zero value.
      * @return nonzero if transformation is necessary, zero otherwise.
      */
-
-
-
-
     virtual int  computeGNDofRotationMatrix(FloatMatrix &answer, DofManTransfType mode);
 
     virtual int computeGNLoadRotationMatrix(FloatMatrix &answer, DofManTransfType mode);

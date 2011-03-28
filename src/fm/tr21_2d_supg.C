@@ -76,7 +76,7 @@ TR21_2D_SUPG :: TR21_2D_SUPG(int n, Domain *aDomain) :
 
 TR21_2D_SUPG :: ~TR21_2D_SUPG()
 // Destructor
-{}
+{ }
 
 
 int
@@ -223,7 +223,7 @@ TR21_2D_SUPG :: computeUDotGradUMatrix(FloatMatrix &answer, GaussPoint *gp, Time
     this->computeVectorOf(EID_MomentumBalance, VM_Total, atTime, un);
 
     if ( this->updateRotationMatrix() ) {
-        un.rotatedWith(this->rotationMatrix, 't');
+        un.rotatedWith(this->rotationMatrix, 'n');
     }
 
 
@@ -292,15 +292,15 @@ void
 TR21_2D_SUPG :: computeGradUMatrix(FloatMatrix &answer, GaussPoint *gp, TimeStep *atTime)
 {
     FloatArray u;
-    FloatMatrix dn, um(2,6);
+    FloatMatrix dn, um(2, 6);
     this->computeVectorOf(EID_MomentumBalance, VM_Total, atTime, u);
 
     if ( this->updateRotationMatrix() ) {
-        u.rotatedWith(this->rotationMatrix, 't');
+        u.rotatedWith(this->rotationMatrix, 'n');
     }
 
     velocityInterpolation.evaldNdx(dn, * gp->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0);
-    for (int i = 1; i <= 6; i++ ) {
+    for ( int i = 1; i <= 6; i++ ) {
         um.at(1, i) = u.at(2 * i - 1);
         um.at(2, i) = u.at(2 * i);
     }
@@ -372,6 +372,10 @@ TR21_2D_SUPG :: updateStabilizationCoeffs(TimeStep *atTime)
     //this->computeVectorOf(EID_MomentumBalance, VM_Total, atTime->givePreviousStep(), un);
     this->computeVectorOf(EID_MomentumBalance, VM_Total, atTime, u);
 
+    if ( this->updateRotationMatrix() ) {
+        u.rotatedWith(this->rotationMatrix, 'n');
+    }
+
     norm_un = u.computeNorm();
 
     this->computeAdvectionTerm(N, atTime);
@@ -386,7 +390,7 @@ TR21_2D_SUPG :: updateStabilizationCoeffs(TimeStep *atTime)
 
     if ( ( norm_N == 0 ) || ( norm_N_d == 0 ) || ( norm_M_d == 0 ) ) {
         t_supg = 0;
-    } else   {
+    } else {
         Re = ( norm_un / nu ) * ( norm_N / norm_N_d );
 
         t_s1 = norm_N / norm_N_d;
@@ -401,7 +405,7 @@ TR21_2D_SUPG :: updateStabilizationCoeffs(TimeStep *atTime)
 
     if ( norm_LSIC == 0 ) {
         t_lsic = 0;
-    } else   {
+    } else {
         //t_lsic = norm_N / norm_LSIC;
 
         t_lsic = 0;
@@ -539,6 +543,10 @@ TR21_2D_SUPG :: LS_PCS_computeF(LevelSetPCS *ls, TimeStep *atTime)
     GaussPoint *gp;
 
     this->computeVectorOf(EID_MomentumBalance, VM_Total, atTime, un);
+    if ( this->updateRotationMatrix() ) {
+        un.rotatedWith(this->rotationMatrix, 'n');
+    }
+
     for ( i = 1; i <= 6; i++ ) {
         fi.at(i) = ls->giveLevelSetDofManValue( dofManArray.at(i) );
     }
@@ -847,7 +855,7 @@ TR21_2D_SUPG :: LS_PCS_computeVOFFractions(FloatArray &answer, FloatArray &fi)
 
             if ( r11 > line.at(6) || r11 < line.at(1) ) {
                 r1 = r12;
-            } else  {
+            } else {
                 r1 = r11;
             }
 
@@ -906,7 +914,7 @@ TR21_2D_SUPG :: LS_PCS_computeVOFFractions(FloatArray &answer, FloatArray &fi)
             if ( inter_case == 11 ) {
                 answer.at(2) = vol_1 / vol;
                 answer.at(1) = 1.0 - answer.at(2);
-            } else  {
+            } else {
                 answer.at(1) = vol_1 / vol;
                 answer.at(2) = 1.0 - answer.at(1);
             }
@@ -988,7 +996,7 @@ TR21_2D_SUPG :: LS_PCS_computeVOFFractions(FloatArray &answer, FloatArray &fi)
 
             if ( r11 > line.at(6) || r11 < line.at(1) ) {
                 r1 = r12;
-            } else  {
+            } else {
                 r1 = r11;
             }
 
@@ -1070,7 +1078,7 @@ TR21_2D_SUPG :: LS_PCS_computeVOFFractions(FloatArray &answer, FloatArray &fi)
                 c1 [ 3 ] = & Mid1;
                 c1 [ 4 ] = & M;
                 c1 [ 5 ] = & X_qsi;
-            } else  {
+            } else {
                 c1 [ 0 ] = & X_si;
                 c1 [ 1 ] = & inter1;
                 c1 [ 2 ] = & inter2;
@@ -1090,13 +1098,13 @@ TR21_2D_SUPG :: LS_PCS_computeVOFFractions(FloatArray &answer, FloatArray &fi)
                 if ( fi(si) < 0 ) {
                     answer.at(2) = vol_1 / vol;
                     answer.at(1) = 1.0 - answer.at(2);
-                } else  {
+                } else {
                     answer.at(1) = vol_1 / vol;
                     answer.at(2) = 1.0 - answer.at(1);
                 }
             } //end case inter_case == 2
 
-        } else  { //inter_case == 3
+        } else {  //inter_case == 3
             //kontrola!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
             int second_control3 = 0;
             second_control3 = this->giveNumber();
@@ -1171,7 +1179,7 @@ TR21_2D_SUPG :: LS_PCS_computeVOFFractions(FloatArray &answer, FloatArray &fi)
 
             if ( r11 > line.at(6) || r11 < line.at(1) ) {
                 r1 = r12;
-            } else  {
+            } else {
                 r1 = r11;
             }
 
@@ -1215,7 +1223,7 @@ TR21_2D_SUPG :: LS_PCS_computeVOFFractions(FloatArray &answer, FloatArray &fi)
             if ( fi(si) < 0 ) {
                 answer.at(2) = vol_1 / vol;
                 answer.at(1) = 1.0 - answer.at(2);
-            } else  {
+            } else {
                 answer.at(1) = vol_1 / vol;
                 answer.at(2) = 1.0 - answer.at(1);
             }
@@ -1245,7 +1253,7 @@ TR21_2D_SUPG :: computeIntersection(int iedge, FloatArray &intcoords, FloatArray
 
     if ( r11 > 1.0 || r11 < -1.0 ) {
         r1 = r12;
-    } else  {
+    } else {
         r1 = r11;
     }
 
@@ -1569,13 +1577,13 @@ TR21_2D_SUPG :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &l
     l6 = 4. * lc3 * lc1;
 
     answer.resize(2);
-    answer.at(1) = l1 * this->giveNode(1)->giveCoordinate(1) + l2 *this->giveNode(2)->giveCoordinate(1) +
-                   l3 *this->giveNode(3)->giveCoordinate(1) + l4 *this->giveNode(4)->giveCoordinate(1) + l5 *this->giveNode(5)->giveCoordinate(1) +
-                   l6 *this->giveNode(6)->giveCoordinate(1);
+    answer.at(1) = l1 * this->giveNode(1)->giveCoordinate(1) + l2 * this->giveNode(2)->giveCoordinate(1) +
+    l3 * this->giveNode(3)->giveCoordinate(1) + l4 * this->giveNode(4)->giveCoordinate(1) + l5 * this->giveNode(5)->giveCoordinate(1) +
+    l6 * this->giveNode(6)->giveCoordinate(1);
 
-    answer.at(2) = l1 * this->giveNode(1)->giveCoordinate(2) + l2 *this->giveNode(2)->giveCoordinate(2) +
-                   l3 *this->giveNode(3)->giveCoordinate(2) + l4 *this->giveNode(4)->giveCoordinate(2) + l5 *this->giveNode(5)->giveCoordinate(2) +
-                   l6 *this->giveNode(6)->giveCoordinate(2);
+    answer.at(2) = l1 * this->giveNode(1)->giveCoordinate(2) + l2 * this->giveNode(2)->giveCoordinate(2) +
+    l3 * this->giveNode(3)->giveCoordinate(2) + l4 * this->giveNode(4)->giveCoordinate(2) + l5 * this->giveNode(5)->giveCoordinate(2) +
+    l6 * this->giveNode(6)->giveCoordinate(2);
 
     return 1;
 }
@@ -1595,7 +1603,7 @@ TR21_2D_SUPG :: computeDeviatoricStress(FloatArray &answer, GaussPoint *gp, Time
 
 void
 TR21_2D_SUPG :: initGeometry()
-{}
+{ }
 
 
 int
@@ -1717,9 +1725,9 @@ TR21_2D_SUPG :: giveInterface(InterfaceType interface)
 {
     if ( interface == LevelSetPCSElementInterfaceType ) {
         return ( LevelSetPCSElementInterface * ) this;
-    } else if ( interface == ZZNodalRecoveryModelInterfaceType )  {
+    } else if ( interface == ZZNodalRecoveryModelInterfaceType ) {
         return ( ZZNodalRecoveryModelInterface * ) this;
-    } else if ( interface == NodalAveragingRecoveryModelInterfaceType )  {
+    } else if ( interface == NodalAveragingRecoveryModelInterfaceType ) {
         return ( NodalAveragingRecoveryModelInterface * ) this;
     }
 
@@ -1728,30 +1736,30 @@ TR21_2D_SUPG :: giveInterface(InterfaceType interface)
 
 
 void
-TR21_2D_SUPG :: giveLocalVelocityDofMap (IntArray &map)
+TR21_2D_SUPG :: giveLocalVelocityDofMap(IntArray &map)
 {
-  map.resize(12);
-  map.at(1) = 1;
-  map.at(2) = 2;
-  map.at(3) = 4;
-  map.at(4) = 5;
-  map.at(5) = 7;
-  map.at(6) = 8;
-  map.at(7) = 10;
-  map.at(8) = 11;
-  map.at(9) = 12;
-  map.at(10) = 13;
-  map.at(11) = 14;
-  map.at(12) = 15;
+    map.resize(12);
+    map.at(1) = 1;
+    map.at(2) = 2;
+    map.at(3) = 4;
+    map.at(4) = 5;
+    map.at(5) = 7;
+    map.at(6) = 8;
+    map.at(7) = 10;
+    map.at(8) = 11;
+    map.at(9) = 12;
+    map.at(10) = 13;
+    map.at(11) = 14;
+    map.at(12) = 15;
 }
 
 void
-TR21_2D_SUPG :: giveLocalPressureDofMap (IntArray &map)
+TR21_2D_SUPG :: giveLocalPressureDofMap(IntArray &map)
 {
-  map.resize(3);
-  map.at(1)=3;
-  map.at(2)=6;
-  map.at(3)=9;
+    map.resize(3);
+    map.at(1) = 3;
+    map.at(2) = 6;
+    map.at(3) = 9;
 }
 
 

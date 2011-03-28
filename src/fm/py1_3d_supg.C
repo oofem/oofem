@@ -213,6 +213,11 @@ PY1_3D_SUPG :: computeUDotGradUMatrix(FloatMatrix &answer, GaussPoint *gp, TimeS
     interpolation.evaldNdx(dn, * gp->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0);
     this->computeNuMatrix(n, gp);
     this->computeVectorOf(EID_MomentumBalance, VM_Total, atTime, un);
+
+    if ( this->updateRotationMatrix() ) {
+        un.rotatedWith(this->rotationMatrix, 'n');
+    }
+
     u.beProductOf(n, un);
 
     answer.resize(3, 12);
@@ -236,21 +241,22 @@ void
 PY1_3D_SUPG :: computeGradUMatrix(FloatMatrix &answer, GaussPoint *gp, TimeStep *atTime)
 {
     FloatArray u;
-    FloatMatrix dn, um(3,4);
+    FloatMatrix dn, um(3, 4);
 
     this->computeVectorOf(EID_MomentumBalance, VM_Total, atTime, u);
 
     if ( this->updateRotationMatrix() ) {
-        u.rotatedWith(this->rotationMatrix, 't');
+        u.rotatedWith(this->rotationMatrix, 'n');
     }
 
     interpolation.evaldNdx(dn, * gp->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0);
-    for (int i = 1; i <= 4; i++ ) {
-        um.at(1,i) = u.at(3 * i - 2);
-        um.at(2,i) = u.at(3 * i - 1);
-        um.at(3,i) = u.at(3 * i - 0);
+    for ( int i = 1; i <= 4; i++ ) {
+        um.at(1, i) = u.at(3 * i - 2);
+        um.at(2, i) = u.at(3 * i - 1);
+        um.at(3, i) = u.at(3 * i - 0);
     }
-    answer.beProductOf(um,dn);
+
+    answer.beProductOf(um, dn);
 }
 
 
@@ -346,6 +352,10 @@ PY1_3D_SUPG :: updateStabilizationCoeffs(TimeStep *atTime)
     dscale = domain->giveEngngModel()->giveVariableScale(VST_Density);
 
     this->computeVectorOf(EID_MomentumBalance, VM_Total, atTime, u);
+    if ( this->updateRotationMatrix() ) {
+        u.rotatedWith(this->rotationMatrix, 'n');
+    }
+
     u.times(uscale);
     double nu;
 
@@ -439,6 +449,10 @@ PY1_3D_SUPG :: computeCriticalTimeStep(TimeStep *tStep)
 
     this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
 
+    if ( this->updateRotationMatrix() ) {
+        u.rotatedWith(this->rotationMatrix, 'n');
+    }
+
     double vn1 = sqrt( u.at(1) * u.at(1) + u.at(2) * u.at(2) + u.at(3) * u.at(3) );
     double vn2 = sqrt( u.at(4) * u.at(4) + u.at(5) * u.at(5) + u.at(6) * u.at(6) );
     double vn3 = sqrt( u.at(7) * u.at(7) + u.at(8) * u.at(8) + u.at(9) * u.at(9) );
@@ -510,6 +524,10 @@ PY1_3D_SUPG :: LS_PCS_computeF(LevelSetPCS *ls, TimeStep *atTime)
     GaussPoint *gp;
 
     this->computeVectorOf(EID_MomentumBalance, VM_Total, atTime, un);
+    if ( this->updateRotationMatrix() ) {
+        un.rotatedWith(this->rotationMatrix, 'n');
+    }
+
     for ( i = 1; i <= 4; i++ ) {
         fi.at(i) = ls->giveLevelSetDofManValue( dofManArray.at(i) );
     }
