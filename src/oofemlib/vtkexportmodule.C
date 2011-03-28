@@ -814,7 +814,7 @@ VTKExportModule :: exportIntVarAs(InternalStateType valID, InternalStateValueTyp
         } else if ( type == ISVT_TENSOR_G ) {
             fprintf(stream, "SCALARS %s_%d float 1\n", __InternalStateTypeToString(valID), indx);
         } else {
-            fprintf(stderr, "exportIntVarAs: unsupported variable type\n");
+            fprintf(stderr, "VTKExportModule :: exportIntVarAs: unsupported variable type\n");
         }
 
         if ( ( type == ISVT_SCALAR ) || ( type == ISVT_TENSOR_G ) ) {
