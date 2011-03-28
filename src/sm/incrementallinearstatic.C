@@ -187,6 +187,10 @@ void IncrementalLinearStatic :: solveYourselfAt(TimeStep *tStep)
 
     int neq = this->giveNumberOfEquations(EID_MomentumBalance);
 
+    if (neq == 0) { // Allows for fully prescribed/empty problems.
+        return;
+    }
+
     incrementOfDisplacementVector.resize(neq);
     incrementOfDisplacementVector.zero();
 
