@@ -55,7 +55,7 @@ double *allocDouble(int n)
     if ( answer ) {
         return answer;
     } else {
-        freeStoreError();
+        OOFEM_FATAL2("allocDouble : free store exhausted (tried to allocate %d doubles)",n);
     }
 
     return NULL;
@@ -76,7 +76,7 @@ int *allocInt(int n)
     if ( answer ) {
         return answer;
     } else {
-        freeStoreError();
+        OOFEM_FATAL2("allocInt : free store exhausted (tried to allocate %d ints)",n);
     }
 
     return NULL;

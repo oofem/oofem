@@ -43,14 +43,14 @@ namespace oofem {
 
 /**
  * Allocates space for given number of doubles and returns pointer to newly allocated space in memory.
- * Uses standard malloc. If not enough memory is available, freeStoreError procedure is called.
+ * Uses standard malloc. If not enough memory is available, error is printed then freeStoreError is called.
  * @param n Number of doubles to allocate.
  * @return Pointer to newly allocated space.
  */
 double *allocDouble(int n);
 /**
  * Allocates space for given number of ints and returns pointer to newly allocated space in memory.
- * Uses standard malloc. If not enough memory is available, freeStoreError procedure is called.
+ * Uses standard malloc. If not enough memory is available, error is printed then freeStoreError is called.
  * @param n Number of integers to allocate.
  * @return Pointer to newly allocated space.
  */
