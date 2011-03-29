@@ -395,18 +395,19 @@ public:
      * @return Element length.
      */
     virtual double computeLength() const { return 0.0; }
+    // If the need arises;
     /**
      * Computes the length of an edge.
      * @param iedge Edge number.
      * @return Edge length.
      */
-    virtual double computeEdgeLength(int iedge) const { return 0.0; }
+    //virtual double computeEdgeLength(int iedge) const { return 0.0; }
     /**
      * Computes the area of a surface.
      * @param isurf Surface number.
      * @param Surface area.
      */
-    virtual double computeSurfaceArea(int isurf) const { return 0.0; }
+    //virtual double computeSurfaceArea(int isurf) const { return 0.0; }
 
     // data management
     /**
@@ -456,13 +457,13 @@ public:
     void setCrossSection(int csIndx) { this->crossSection = csIndx; }
 
     /// @return Number of dofmanagers of receiver.
-    int giveNumberOfDofManagers() { return numberOfDofMans; }
+    int giveNumberOfDofManagers() const { return numberOfDofMans; }
     /**
      * Returns number of nodes of receiver.
      * Default implementation returns number of dofmanagers of element
      * @return Number of nodes of element.
      */
-    virtual int giveNumberOfNodes() { return numberOfDofMans; }
+    virtual int giveNumberOfNodes() const { return numberOfDofMans; }
     /**
      * Sets receiver dofManagers.
      * @param dmans Array with dof manager indices.
