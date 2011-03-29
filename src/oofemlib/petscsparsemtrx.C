@@ -51,9 +51,26 @@ namespace oofem {
 SparseMtrx *
 PetscSparseMtrx :: GiveCopy() const
 {
-    OOFEM_ERROR("PetscSparseMtrx :: GiveCopy - Not implemented");
-    //MatDuplicate(this->mtrx, MAT_COPY_VALUES, B);
+  
+  PetscSparseMtrx* answer = new PetscSparseMtrx(nRows, nColumns);
+  if (answer) {
+    MatDuplicate(this->mtrx, MAT_COPY_VALUES, &(answer->mtrx));
+    answer->symmFlag = this->symmFlag;
+    answer->mType    = this->mType;
+    answer->leqs     = this->leqs;
+    answer->geqs     = this->geqs;
+    answer->di       = this->di;
+    answer->ut       = this->ut;
+    answer->emodel   = this->emodel;
+    answer->kspInit  = true; // force ksp to be initialized
+    answer->newValues= this->newValues;
+
+    return answer;
+
+  } else {
+    OOFEM_FATAL("PetscSparseMtrx :: GiveCopy allocation failed");
     return NULL;
+  }
 }
 
 void
