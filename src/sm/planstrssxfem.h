@@ -25,15 +25,15 @@ public:
     const char *giveClassName() const { return "PlaneStress2dXfem"; }
     classType giveClassID() const { return PlaneStress2dXfemClass; }
     int computeNumberOfDofs(EquationID ut);
-    void  computeBmatrixAt(GaussPoint *, FloatMatrix &answer,
-                           int lowerIndx = 1, int upperIndx = ALL_STRAINS);
+    void computeBmatrixAt(GaussPoint *, FloatMatrix &answer,
+                          int lowerIndx = 1, int upperIndx = ALL_STRAINS);
     void giveDofManDofIDMask(int inode, EquationID, IntArray & answer) const;
     void computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *, TimeStep *tStep);
     void computeVectorOf(EquationID type, ValueModeType u, TimeStep *stepN, FloatArray &answer);
     void computeStressVector(FloatArray &answer, GaussPoint *gp, TimeStep *stepN);
     void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep);
     void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord);
-    double computeVolume();
+    double computeArea() const;
 
 #ifdef __OOFEG
     void          drawRawGeometry(oofegGraphicContext &);

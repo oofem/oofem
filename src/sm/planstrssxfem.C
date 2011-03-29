@@ -260,7 +260,7 @@ PlaneStress2dXfem :: giveInternalForcesVector(FloatArray &answer,
 }
 
 
-double PlaneStress2dXfem :: computeVolume() {
+double PlaneStress2dXfem :: computeArea() const {
     FloatArray *node1 = this->giveDofManager(1)->giveCoordinates();
     FloatArray *node2 = this->giveDofManager(2)->giveCoordinates();
     FloatArray *node3 = this->giveDofManager(3)->giveCoordinates();

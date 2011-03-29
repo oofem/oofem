@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2010   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -31,10 +31,6 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-
-//   *********************
-//   *** CLASS ELEMENT ***
-//   *********************
 
 #ifndef element_h
 #define element_h
@@ -355,10 +351,10 @@ public:
      * this mask. Must be defined by particular element.
      *
      * @param inode Mask is computed for local dofmanager with inode number.
-     * @param ut unknown type (support for several independent numberings within problem)
+     * @param ut Unknown type (support for several independent numberings within problem)
      * @param answer mask for node.
      */
-    virtual void           giveInternalDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const
+    virtual void giveInternalDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const
     { answer.resize(0); }
     /**
      * Returns element dof mask for node. This mask defines the dof ordering of the element interpolation.
@@ -377,11 +373,40 @@ public:
      * @return Volume for integration point.
      */
     virtual double computeVolumeAround(GaussPoint *gp) { return 0.; }
+    /// Computes the volume, area or length of the element depending on its spatial dimension.
+    double computeVolumeAreaOrLength();
     /**
-     * Computes the overall volume, area, or length (depending on element dimension)
-     * @return Volume, area or length of element.
+     * Computes the size of the element defined as its length.
+     * @return Length, square root of area or cube root of volume (depending on spatial dimension).
      */
-    virtual double computeVolume() { return 0.0; }
+    double computeMeanSize();
+    /**
+     * Computes the volume.
+     * @return Volume of element.
+     */
+    virtual double computeVolume() const { return 0.0; }
+    /**
+     * Computes the area (zero for all but 2d geometries).
+     * @return Element area.
+     */
+    virtual double computeArea() const { return 0.0; }
+    /**
+     * Computes the length (zero for all but 1D geometries)
+     * @return Element length.
+     */
+    virtual double computeLength() const { return 0.0; }
+    /**
+     * Computes the length of an edge.
+     * @param iedge Edge number.
+     * @return Edge length.
+     */
+    virtual double computeEdgeLength(int iedge) const { return 0.0; }
+    /**
+     * Computes the area of a surface.
+     * @param isurf Surface number.
+     * @param Surface area.
+     */
+    virtual double computeSurfaceArea(int isurf) const { return 0.0; }
 
     // data management
     /**
@@ -460,7 +485,7 @@ public:
      * Returns material mode for receiver integration points. Should be specialized.
      * @return Material mode of element.
      */
-    virtual MaterialMode giveMaterialMode()  { return _Unknown; }
+    virtual MaterialMode giveMaterialMode() { return _Unknown; }
     /**
      * Assembles the code numbers of given integration element (sub-patch)
      * This is done by obtaining list of nonzero shape functions and
@@ -566,11 +591,11 @@ public:
      * This is completely based on the geometrical shape, so a plane in space counts as 2 dimensions.
      * @return Number of spatial dimensions of element.
      */
-    int giveSpatialDimension();
+    virtual int giveSpatialDimension() const;
     /**
      * @return Number of boundaries of element.
      */
-    int giveNumberOfBoundarySides();
+    virtual int giveNumberOfBoundarySides() const;
     /**
      * Returns id of default integration rule. Various element types can use
      * different integration rules for implementation of selective or reduced
@@ -579,8 +604,7 @@ public:
      * by parent analysis type class) which use default integration rule.
      * @return Id of default integration rule. (index into integrationRulesArray).
      */
-    virtual int giveDefaultIntegrationRule() { return 0; }
-
+    virtual int giveDefaultIntegrationRule() const { return 0; }
     /**
      * Access method for default integration rule.
      * @return Pointer to default integration rule.
@@ -635,13 +659,6 @@ public:
      * @return Nonzero if o.k, zero otherwise.
      */
     virtual int giveIntVarCompFullIndx(IntArray &answer, InternalStateType type);
-    /// Computes the volume, area or length of the element depending on its spatial dimension
-    double computeVolumeAreaOrLength(); // TODO: Isn't this identical to computeVolume? / Mikael
-    /**
-     * Computes the size of the element defined as its length.
-     * @return Square root of area or cube root of volume (depending on spatial dimension)
-     */
-    double computeMeanSize();
 
     // characteristic length in gp (for some material models)
     /**

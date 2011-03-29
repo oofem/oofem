@@ -82,9 +82,9 @@ public:
 class FEIElementGeometryWrapper : public FEICellGeometry
 {
 protected:
-    Element *elem;
+    const Element *elem;
 public:
-    FEIElementGeometryWrapper(Element *elem) : FEICellGeometry() { this->elem = elem; }
+    FEIElementGeometryWrapper(const Element *elem) : FEICellGeometry() { this->elem = elem; }
     int giveNumberOfVertices() const;
     const FloatArray *giveVertexCoordinates(int i) const;
 };

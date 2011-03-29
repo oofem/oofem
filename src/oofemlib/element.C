@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2010   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -886,7 +886,7 @@ Element :: computeMeanSize()
 
     case 2: return sqrt(volume);
 
-    case 3: return pow(volume, 1. / 3.);
+    case 3: return cbrt(volume);
     }
 
     return -1.; // means "cannot be evaluated"
@@ -1023,7 +1023,7 @@ Element :: giveIPValueSize(InternalStateType type, GaussPoint *gp)
 
 
 int
-Element :: giveSpatialDimension(void)
+Element :: giveSpatialDimension(void) const
 {
     switch ( this->giveGeometryType() ) {
     case EGT_point:
@@ -1056,7 +1056,7 @@ Element :: giveSpatialDimension(void)
 
 
 int
-Element :: giveNumberOfBoundarySides(void)
+Element :: giveNumberOfBoundarySides(void) const
 {
     switch ( this->giveGeometryType() ) {
     case EGT_point:
