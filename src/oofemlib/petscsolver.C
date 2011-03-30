@@ -165,9 +165,12 @@ PetscSolver :: petsc_solve(PetscSparseMtrx *Lhs, Vec b, Vec x)
      */
     if ( Lhs->newValues ) { // Optimization for successive solves
         // TODO: I'm not 100% on the choice MatStructure. SAME_NONZERO_PATTERN should be safe.
-        //KSPSetOperators(Lhs->ksp, * Lhs->giveMtrx(), * Lhs->giveMtrx(), DIFFERENT_NONZERO_PATTERN);
-        //KSPSetOperators(Lhs->ksp, * Lhs->giveMtrx(), * Lhs->giveMtrx(), SAME_PRECONDITIONER);
-        KSPSetOperators(Lhs->ksp, * Lhs->giveMtrx(), * Lhs->giveMtrx(), SAME_NONZERO_PATTERN);
+        if (this->engngModel->requiresUnknownsDictionaryUpdate()) {
+	  KSPSetOperators(Lhs->ksp, * Lhs->giveMtrx(), * Lhs->giveMtrx(), DIFFERENT_NONZERO_PATTERN);
+	} else {
+	  //KSPSetOperators(Lhs->ksp, * Lhs->giveMtrx(), * Lhs->giveMtrx(), SAME_PRECONDITIONER);
+	  KSPSetOperators(Lhs->ksp, * Lhs->giveMtrx(), * Lhs->giveMtrx(), SAME_NONZERO_PATTERN);
+	}
         Lhs->newValues = false;
 
         /*

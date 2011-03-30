@@ -62,7 +62,7 @@ PetscSparseMtrx :: GiveCopy() const
     answer->di       = this->di;
     answer->ut       = this->ut;
     answer->emodel   = this->emodel;
-    answer->kspInit  = true; // force ksp to be initialized
+    answer->kspInit  = false; 
     answer->newValues= this->newValues;
 
     return answer;
@@ -245,6 +245,11 @@ PetscSparseMtrx :: buildInternalStructure(EngngModel *eModel, int di, EquationID
         MatDestroy(mtrx);
     }
 
+    if ( this->kspInit ) {
+      KSPDestroy(ksp);
+      this->kspInit  = false; // force ksp to be initialized
+    }
+
     this->ut = ut;
     // This should be based on the numberingscheme. Also, geqs seems redundant.
 
@@ -329,6 +334,11 @@ PetscSparseMtrx :: buildInternalStructure(EngngModel *eModel, int di, EquationID
 
     if ( mtrx ) {
         MatDestroy(mtrx);
+    }
+
+    if ( this->kspInit ) {
+      KSPDestroy(ksp);
+      this->kspInit  = false; // force ksp to be initialized
     }
 
     this->ut = ut;
