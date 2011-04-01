@@ -147,6 +147,8 @@ DummySpatialLocalizer :: giveElementClosestToPoint(FloatArray &lcoords, FloatArr
     SpatialLocalizerInterface *interface;
     double dist = 0.0, currDist;
     FloatArray el_coords, el_lcoords;
+    lcoords.resize(0);
+    closest.resize(0);
 
     if ( region > 0 ) {
         IntArray *elems = this->region_elements.at(region);
