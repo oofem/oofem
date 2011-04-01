@@ -272,8 +272,6 @@ public:
     virtual void giveLocalVelocityDofMap (IntArray &map);
     virtual void giveLocalPressureDofMap (IntArray &map);
   
-    virtual void computeDeviatoricStress(FloatArray &answer, GaussPoint *gp, TimeStep *);
-   
     void                  computeGaussPoints();
     virtual void computeNuMatrix(FloatMatrix &answer, GaussPoint *gp);
     virtual void computeUDotGradUMatrix(FloatMatrix &answer, GaussPoint *gp, TimeStep *atTime);

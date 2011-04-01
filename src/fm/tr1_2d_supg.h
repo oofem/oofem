@@ -408,7 +408,8 @@ protected:
 
     void                  computeNMtrx(FloatArray &answer, GaussPoint *gp);
     void                  computeGaussPoints();
-    virtual void computeDeviatoricStress(FloatArray &answer, GaussPoint *gp, TimeStep *);
+
+    virtual void computeDeviatoricStrain(FloatArray &answer, GaussPoint *gp, TimeStep *);
     virtual void initGeometry();
 };
 } // end namespace oofem

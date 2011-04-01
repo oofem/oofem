@@ -216,6 +216,17 @@ SUPGElement ::  giveCharacteristicVector(FloatArray &answer, CharType mtrx, Valu
 }
 
 
+void
+SUPGElement :: computeDeviatoricStress(FloatArray &answer, GaussPoint *gp, TimeStep *tStep)
+{
+    FloatArray eps;
+
+    // compute deviatoric strain
+    this->computeDeviatoricStrain(eps, gp, tStep);
+    // call material to compute stress
+    ( ( FluidDynamicMaterial * ) this->giveMaterial() )->computeDeviatoricStressVector(answer, gp, eps, tStep);
+}
+
 
 
 double

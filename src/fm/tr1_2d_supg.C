@@ -1300,10 +1300,10 @@ TR1_2D_SUPG :: computeLocalCoordinates(FloatArray &answer, const FloatArray &coo
 
 
 void
-TR1_2D_SUPG :: computeDeviatoricStress(FloatArray &answer, GaussPoint *gp, TimeStep *tStep)
+TR1_2D_SUPG :: computeDeviatoricStrain(FloatArray &answer, GaussPoint *gp, TimeStep *tStep)
 {
     /* one should call material driver instead */
-    FloatArray u(6), eps(3);
+    FloatArray u(6);
     answer.resize(3);
 
 
@@ -1312,11 +1312,9 @@ TR1_2D_SUPG :: computeDeviatoricStress(FloatArray &answer, GaussPoint *gp, TimeS
         u.rotatedWith(this->rotationMatrix, 'n');
     }
 
-    eps.at(1) = ( b [ 0 ] * u.at(1) + b [ 1 ] * u.at(3) + b [ 2 ] * u.at(5) );
-    eps.at(2) = ( c [ 0 ] * u.at(2) + c [ 1 ] * u.at(4) + c [ 2 ] * u.at(6) );
-    eps.at(3) = ( b [ 0 ] * u.at(2) + b [ 1 ] * u.at(4) + b [ 2 ] * u.at(6) + c [ 0 ] * u.at(1) + c [ 1 ] * u.at(3) + c [ 2 ] * u.at(5) );
-
-    ( ( FluidDynamicMaterial * ) this->giveMaterial() )->computeDeviatoricStressVector(answer, gp, eps, tStep);
+    answer.at(1) = ( b [ 0 ] * u.at(1) + b [ 1 ] * u.at(3) + b [ 2 ] * u.at(5) );
+    answer.at(2) = ( c [ 0 ] * u.at(2) + c [ 1 ] * u.at(4) + c [ 2 ] * u.at(6) );
+    answer.at(3) = ( b [ 0 ] * u.at(2) + b [ 1 ] * u.at(4) + b [ 2 ] * u.at(6) + c [ 0 ] * u.at(1) + c [ 1 ] * u.at(3) + c [ 2 ] * u.at(5) );
 }
 
 void

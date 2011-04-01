@@ -636,18 +636,27 @@ TR1_2D_SUPG_AXI :: computePressureTerm_MC(FloatMatrix &answer, TimeStep *atTime)
 }
 
 void
-TR1_2D_SUPG_AXI :: computeDeviatoricStress(FloatArray &answer, GaussPoint *gp, TimeStep *tStep)
+TR1_2D_SUPG_AXI :: computeDeviatoricStrain(FloatArray &answer, GaussPoint *gp, TimeStep *tStep)
 {
     /* one should call material driver instead */
-    FloatArray u(6), eps(4);
+    FloatArray u(6);
     FloatMatrix _b(4, 6);
-    answer.resize(3);
+    answer.resize(4);
 
 
     this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
     this->computeBMtrx(_b, gp);
-    eps.beProductOf(_b, u);
+    answer.beProductOf(_b, u);
+}
 
+void
+TR1_2D_SUPG_AXI :: computeDeviatoricStress(FloatArray &answer, GaussPoint *gp, TimeStep *tStep)
+{
+    /* one should call material driver instead */
+    FloatArray eps(4);
+    answer.resize(3);
+
+    this->computeDeviatoricStrain(eps, gp, tStep);
     ( ( FluidDynamicMaterial * ) this->giveMaterial() )->computeDeviatoricStressVector(answer, gp, eps, tStep);
 }
 

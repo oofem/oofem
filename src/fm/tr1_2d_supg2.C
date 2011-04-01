@@ -1483,19 +1483,10 @@ TR1_2D_SUPG2 :: computeDeviatoricStress(FloatArray &answer, GaussPoint *gp, Time
 {
     /* one computes here average deviatoric stress, based on rule of mixture (this is used only for postprocessing) */
     int i;
-    FloatArray u(6), eps(3), s0(3), s1(3);
+    FloatArray eps(3), s0(3), s1(3);
     answer.resize(3);
 
-
-    this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
-
-    if ( this->updateRotationMatrix() ) {
-        u.rotatedWith(this->rotationMatrix, 'n');
-    }
-
-    eps.at(1) = 2.0 * ( b [ 0 ] * u.at(1) + b [ 1 ] * u.at(3) + b [ 2 ] * u.at(5) );
-    eps.at(2) = 2.0 * ( c [ 0 ] * u.at(2) + c [ 1 ] * u.at(4) + c [ 2 ] * u.at(6) );
-    eps.at(3) = ( b [ 0 ] * u.at(2) + b [ 1 ] * u.at(4) + b [ 2 ] * u.at(6) + c [ 0 ] * u.at(1) + c [ 1 ] * u.at(3) + c [ 2 ] * u.at(5) );
+    this->computeDeviatoricStrain(eps, gp, tStep);
 
     ( ( FluidDynamicMaterial * ) this->_giveMaterial(0) )->computeDeviatoricStressVector(s0, gp, eps, tStep);
     ( ( FluidDynamicMaterial * ) this->_giveMaterial(1) )->computeDeviatoricStressVector(s1, gp, eps, tStep);

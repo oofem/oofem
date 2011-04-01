@@ -724,14 +724,6 @@ Q10_2D_SUPG :: NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int
 #define POINT_TOL 1.e-3
 
 
-
-void
-Q10_2D_SUPG :: computeDeviatoricStress(FloatArray &answer, GaussPoint *gp, TimeStep *tStep)
-{
-    //( ( FluidDynamicMaterial * ) this->giveMaterial() )->computeDeviatoricStressVector(answer, integrationRulesArray [ 0 ]->getIntegrationPoint(0), this->eps, *tStep);
-}
-
-
 int
 Q10_2D_SUPG :: checkConsistency()
 {

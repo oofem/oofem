@@ -236,6 +236,7 @@ protected:
      */
     virtual int giveTermIntergationRuleIndex(CharType termType) = 0;
 
+    virtual void computeDeviatoricStrain(FloatArray &answer, GaussPoint *gp, TimeStep *);
     virtual void computeDeviatoricStress(FloatArray &answer, GaussPoint *gp, TimeStep *);
     virtual void computeNuMatrix(FloatMatrix &answer, GaussPoint *gp) = 0;
     virtual void computeUDotGradUMatrix(FloatMatrix &answer, GaussPoint *gp, TimeStep *atTime) = 0;

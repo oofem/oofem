@@ -1103,11 +1103,11 @@ SUPGElement2 :: computeSurfaceLoadVector_MC(FloatArray &answer, Load *load, int 
     _error("computeEdgeLoadVectorAt_MC: not implemented");
 }
 
+
 void
-SUPGElement2 :: computeDeviatoricStress(FloatArray &answer, GaussPoint *gp, TimeStep *tStep)
+SUPGElement2 :: computeDeviatoricStrain(FloatArray &answer, GaussPoint *gp, TimeStep *tStep)
 {
-    /* one should call material driver instead */
-    FloatArray u, eps;
+    FloatArray u;
     FloatMatrix b;
     this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
 
@@ -1116,12 +1116,19 @@ SUPGElement2 :: computeDeviatoricStress(FloatArray &answer, GaussPoint *gp, Time
     }
 
     this->computeBMatrix(b, gp);
-    eps.beProductOf(b, u);
-    ( ( FluidDynamicMaterial * ) this->giveMaterial() )->computeDeviatoricStressVector(answer, gp, eps, tStep);
+    answer.beProductOf(b, u);
 }
 
+void
+SUPGElement2 :: computeDeviatoricStress(FloatArray &answer, GaussPoint *gp, TimeStep *tStep)
+{
+    FloatArray eps;
 
-
+    // compute deviatoric strain
+    this->computeDeviatoricStrain(eps, gp, tStep);
+    // call material to compute stress
+    ( ( FluidDynamicMaterial * ) this->giveMaterial() )->computeDeviatoricStressVector(answer, gp, eps, tStep);
+}
 
 
 int

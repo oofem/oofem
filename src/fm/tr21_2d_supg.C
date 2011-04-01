@@ -1596,12 +1596,6 @@ TR21_2D_SUPG :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &l
 
 
 void
-TR21_2D_SUPG :: computeDeviatoricStress(FloatArray &answer, GaussPoint *gp, TimeStep *tStep)
-{
-    //( ( FluidDynamicMaterial * ) this->giveMaterial() )->computeDeviatoricStressVector(answer, integrationRulesArray [ 0 ]->getIntegrationPoint(0), this->eps, *tStep);
-}
-
-void
 TR21_2D_SUPG :: initGeometry()
 { }
 

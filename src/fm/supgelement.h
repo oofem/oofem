@@ -187,7 +187,8 @@ protected:
     virtual void giveLocalVelocityDofMap (IntArray &map) {}
     virtual void giveLocalPressureDofMap (IntArray &map) {}
 
-    virtual void computeDeviatoricStress(FloatArray &answer, GaussPoint *gp, TimeStep *) = 0;
+    virtual void computeDeviatoricStrain(FloatArray &answer, GaussPoint *gp, TimeStep *) = 0;
+    virtual void computeDeviatoricStress(FloatArray &answer, GaussPoint *gp, TimeStep *);
 };
 } // end namespace oofem
 #endif // supgelement_h

@@ -128,6 +128,7 @@ public:
 
 protected:
     void                  computeGaussPoints();
+    virtual void computeDeviatoricStrain(FloatArray &answer, GaussPoint *gp, TimeStep *);
     virtual void computeDeviatoricStress(FloatArray &answer, GaussPoint *gp, TimeStep *);
     virtual void initGeometry();
     double computeRadiusAt(GaussPoint *);
