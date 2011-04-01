@@ -150,8 +150,11 @@ void FloatArray :: add(const double factor, const FloatArray &b)
     }
 
     if ( !size ) {
-        *this = b;
-        this->times(factor);
+        this->resize(b.size);
+        for (int i = 0; i < this->size; ++i){
+            this->values[i] = factor*b.values[i];
+        }
+        return;
     }
 
 #  ifdef DEBUG
@@ -160,7 +163,7 @@ void FloatArray :: add(const double factor, const FloatArray &b)
     }
 #  endif
 
-    for (int i = 0; i < this->size; i++){
+    for (int i = 0; i < this->size; ++i){
         this->values[i] += factor*b.values[i];
     }
 }
@@ -174,8 +177,11 @@ void FloatArray :: subtract(const FloatArray &src)
     }
 
     if ( !size ) {
-        this->resize(size = src.size);
-        this->zero();
+        this->resize(src.size);
+        for (int i = 0; i < this->size; ++i){
+            this->values[i] = -src.values[i];
+        }
+        return;
     }
 
 #  ifdef DEBUG
@@ -184,7 +190,7 @@ void FloatArray :: subtract(const FloatArray &src)
     }
 #  endif
 
-    for (int i = 0; i < this->size; i++){
+    for (int i = 0; i < this->size; ++i){
         this->values[i] -= src.values[i];
     }
 }
