@@ -59,6 +59,7 @@
  #include "oofeggraphiccontext.h"
  #include "conTable.h"
  #include "oofegutils.h"
+  #include "rcm2.h"
 #endif
 
 namespace oofem {
