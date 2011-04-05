@@ -7,6 +7,7 @@ using namespace boost::python;
 #include "flotmtrx.h"
 #include "intarray.h"
 #include "engngm.h"
+#include "dofmanager.h"
 #include "domain.h"
 #include "sparsemtrx.h"
 #include "load.h"
@@ -213,9 +214,14 @@ public:
     
 };
 
+void (DofManager::*giveUnknownVector_1)(FloatArray &answer, const IntArray &dofMask,
+					EquationID type, ValueModeType mode, TimeStep *stepN) = &DofManager::giveUnknownVector;
+
 
 BOOST_PYTHON_MODULE (oofemlib)
 {
+  class_<TimeStep, boost::noncopyable>("TimeStep", no_init)
+    ;
 
   class_<FloatArray>("FloatArray")
     .def(init< optional<int> >())
@@ -288,6 +294,9 @@ BOOST_PYTHON_MODULE (oofemlib)
     .def("assembleu", sm_assemble_2)
     //.def("zero", zero)
     ;
+
+
+
   
   class_<PyEngngModel, boost::noncopyable>("EngngModel", no_init)
     //.def(init<int, optional<EngngModel*> > ())
@@ -304,6 +313,7 @@ BOOST_PYTHON_MODULE (oofemlib)
     .def("printDofOutputAt", pure_virtual(&EngngModel::printDofOutputAt))
     .def("checkProblemConsistency", &PyEngngModel::checkProblemConsistency)
     .def("setRenumberFlag", &PyEngngModel::setRenumberFlag)
+    .def("giveCurrentStep", &EngngModel::giveCurrentStep, return_internal_reference<>())
     ;
 
   class_<Domain>("Domain", init<int, int, EngngModel* >())
@@ -326,6 +336,7 @@ BOOST_PYTHON_MODULE (oofemlib)
   .def("giveNumberOfBoundaryConditions", &Domain::giveNumberOfBoundaryConditions)
   .def("giveNumberOfInitialConditions", &Domain::giveNumberOfInitialConditions)
   .def("giveNumberOfLoadTimeFunctions", &Domain::giveNumberOfLoadTimeFunctions)
+    .def("giveNumberOfSpatialDimensions", &Domain::giveNumberOfSpatialDimensions)
   
   .def("checkConsistency", &Domain::checkConsistency)
   .def("giveConnectivityTable", &Domain::giveConnectivityTable, return_internal_reference<>())
@@ -344,6 +355,50 @@ BOOST_PYTHON_MODULE (oofemlib)
     .value("_postProcessor", _postProcessor)
     ;
 
+  enum_<DofIDItem>("DofIDItem")
+    .value("D_u", D_u)
+    .value("D_v", D_v)
+    .value("D_w", D_w)
+    .value("R_u", R_u)
+    .value("R_v", R_w)
+    .value("R_v", R_w)
+    .value("T_f", T_f)
+    .value("P_f", P_f)
+    ;
+
+  enum_<EquationID>("EquationID")
+    .value("EID_MomentumBalance",EID_MomentumBalance)
+    .value("EID_ConservationEquation",EID_ConservationEquation)
+    .value("EID_MomentumBalance_ConservationEquation",EID_MomentumBalance_ConservationEquation)
+    ;
+
+  enum_<ValueModeType>("ValueModeType")
+    .value("VM_Total", VM_Total)
+    .value("VM_Velocity", VM_Velocity)
+    .value("VM_Incremental", VM_Incremental)
+    ;
+
+  enum_<DofManTransfType>("DofManTransfType")
+    .value("_toGlobalCS", _toGlobalCS)
+    .value("_toNodalCS", _toNodalCS)
+    ;
+
+  enum_<Element_Geometry_Type>("Element_Geometry_Type")
+    .value("EGT_point", EGT_point)
+    .value("EGT_line_1", EGT_line_1)
+    .value("EGT_line_2", EGT_line_2)
+    .value("EGT_triangle_1", EGT_triangle_1)
+    .value("EGT_triangle_2", EGT_triangle_2)
+    .value("EGT_quad_1", EGT_quad_1)
+    .value("EGT_quad_2", EGT_quad_2)
+    .value("EGT_tetra_1", EGT_tetra_1)
+    .value("EGT_tetra_2", EGT_tetra_2)
+    .value("EGT_hexa_1", EGT_hexa_1)
+    .value("EGT_hexa_2", EGT_hexa_2)
+    .value("EGT_Composite", EGT_Composite)
+    .value("EGT_unknown", EGT_unknown)
+    ;
+
   def("InstanciateProblem", InstanciateProblem_1, return_value_policy<manage_new_object>());
   //def("make_foo", make_foo, return_value_policy<manage_new_object>())
     
@@ -355,8 +410,18 @@ BOOST_PYTHON_MODULE (oofemlib)
     .def("giveCharacteristicValue", &PyElement::giveCharacteristicValue)
     .def("computeNumberOfDofs", &PyElement::computeNumberOfDofs)
     .def("giveGeometryType", &PyElement::giveGeometryType)
+    .def("giveLabel", &Element::giveLabel)
+    .def("giveDofManagerNumber", &Element::giveDofManagerNumber)
     ;
 
+  class_<DofManager, boost::noncopyable>("DofManager", init<int, Domain* >())
+    .def("giveCoordinate", &DofManager::giveCoordinate)
+    .def("giveCoordinates", &DofManager::giveCoordinates, return_internal_reference<>())
+    .def("hasCoordinates", &DofManager::hasCoordinates)
+    .def("giveLabel", &DofManager::giveLabel)
+    .def("giveUnknownVector", giveUnknownVector_1)
+    .def("computeDofTransformation", &DofManager::computeDofTransformation)
+    ;
 
 }
 } // end namespace oofem
