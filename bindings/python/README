@@ -60,14 +60,14 @@ modules.
 
 - Optionally, to run a simple example:
   - Set PYTHONPATH to contain paths to directory containing oofem python directory:
-    export PYTHONPATH=$PYTHONPATH:{PATH_TO_OOFEM_TOP_DIR}/python/bin/gcc-4.4.3/debug
+    export PYTHONPATH=$PYTHONPATH:{PATH_TO_OOFEM_TOP_DIR}/bindings/python/bin/gcc-4.4.3/debug
 
   - Set LD_LIBRARY_PATH to point to boost generated libraries of oofem 
     python module. This path can be best obtained from "bjam -d+2" 
     when compiling oofem python module.
 
     export LD_LIBRARY_PATH={PATH_TO_BOOST_ROOT}/bin.v2/libs/python/build/gcc-4.4.3/debug:\
-           {PATH_TO_OOFEM_TOP_DIR}/python/bin/gcc-4.4.3/debug:$LD_LIBRARY_PATH
+           {PATH_TO_OOFEM_TOP_DIR}/bindings/python/bin/gcc-4.4.3/debug:$LD_LIBRARY_PATH
 	   
     Replace {PATH_TO_BOOST_ROOT} by the path to your Boost root dir and {PATH_TO_OOFEM_TOP_DIR}
     by the path to oofem top directory
