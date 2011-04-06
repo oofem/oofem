@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2010   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -38,8 +38,11 @@
 #include "dof.h"
 #include "valuemodetype.h"
 #include "classtype.h"
+
 #include "flotarry.h"
 #include "flotmtrx.h"
+#include "loadtime.h"
+#include "engngm.h"
 
 namespace oofem {
 double PrescribedGradient :: give(Dof *dof, ValueModeType mode, TimeStep *tStep)
@@ -48,7 +51,7 @@ double PrescribedGradient :: give(Dof *dof, ValueModeType mode, TimeStep *tStep)
     FloatArray *coords = dof->giveDofManager()->giveCoordinates();
 
     if ( coords == NULL || coords->giveSize() != this->centerCoord.giveSize() ) {
-        OOFEM_ERROR("give: Size of coordinatesystem different from center coordinate in b.c.");
+        OOFEM_ERROR("PrescribedGradient :: give - Size of coordinate system different from center coordinate in b.c.");
     }
 
     // Reminder: u_i = d_ij . (x_j - xb_j) = d_ij . dx_j
@@ -57,6 +60,7 @@ double PrescribedGradient :: give(Dof *dof, ValueModeType mode, TimeStep *tStep)
 
     FloatArray u;
     u.beProductOf(gradient, dx);
+    u.times(this->giveLoadTimeFunction()->evaluate(tStep, mode));
 
     switch ( id ) {
     case D_u:
@@ -70,7 +74,7 @@ double PrescribedGradient :: give(Dof *dof, ValueModeType mode, TimeStep *tStep)
         if ( u.giveSize() >= 2 ) {
             return u.at(2);
         } else {
-            OOFEM_ERROR("give: Prescribed tensor dimensions to small for D_v or V_v.");
+            OOFEM_ERROR("PrescribedGradient :: give - Prescribed tensor dimensions to small for D_v or V_v.");
         }
 
     case D_w:
@@ -78,7 +82,7 @@ double PrescribedGradient :: give(Dof *dof, ValueModeType mode, TimeStep *tStep)
         if ( u.giveSize() >= 3 ) {
             return u.at(3);
         } else {
-            OOFEM_ERROR("give: Prescribed tensor dimensions to small for D_w or V_w.");
+            OOFEM_ERROR("PrescribedGradient :: give - Prescribed tensor dimensions to small for D_w or V_w.");
         }
 
     default:
@@ -94,7 +98,7 @@ void PrescribedGradient :: setPrescribedGradientVoigt(const FloatArray &t)
         this->gradient.at(1, 1) = t.at(1);
         this->gradient.at(2, 2) = t.at(2);
         this->gradient.at(1, 2) = this->gradient.at(2, 1) = t.at(3);
-    } else if ( n == 6 ) {     // Then 3D
+    } else if ( n == 6 ) { // Then 3D
         OOFEM_ERROR("setPrescribedTensorVoigt: Check the order of voigt vectors in OOFEM");
         this->gradient.resize(2, 2, 0);
         this->gradient.at(1, 1) = t.at(1);
@@ -109,6 +113,87 @@ void PrescribedGradient :: setPrescribedGradientVoigt(const FloatArray &t)
     }
 }
 
+void PrescribedGradient :: updateCoefficientMatrix(FloatMatrix &C)
+// This is written in a very general way, supporting both fm and sm problems.
+// v_prescribed = C.d = (x-xbar).d;
+// C = [x 0 y]
+//     [0 y x]
+//     [ ... ] in 2D, voigt form [d_11, d_22, d_12]
+// C = [x 0 0 y z 0]
+//     [0 y 0 x 0 z]
+//     [0 0 z 0 x y]
+//     [ ......... ] in 3D, voigt form [d_11, d_22, d_33, d_23, d_13, d_12]
+{
+    Domain *domain = this->giveDomain();
+    int nNodes = domain->giveNumberOfDofManagers();
+
+    int dofType [ 3 ] = {
+        0, 0, 0
+    };
+    domainType d = domain->giveDomainType();
+    if ( d == _2dIncompressibleFlow || d == _3dIncompressibleFlow ) {
+        dofType [ 0 ] = V_u;
+        dofType [ 1 ] = V_v;
+        dofType [ 2 ] = V_w;
+    } else if ( d == _3dMode || d == _2dPlaneStressMode || d == _PlaneStrainMode || d == _2dTrussMode )     {
+        dofType [ 0 ] = D_u;
+        dofType [ 1 ] = D_v;
+        dofType [ 2 ] = D_w;
+    } else   {
+        OOFEM_ERROR("PrescribedGradient :: updateCoefficientMatrix - Unsupported domain type to construct C matrix");
+    }
+
+    int nsd = domain->giveNumberOfSpatialDimensions();
+    int npeq = domain->giveEngngModel()->giveNumberOfPrescribedDomainEquations(1, EID_MomentumBalance);
+    C.resize(npeq, nsd*(nsd+1)/2);
+
+    FloatArray &cCoords = this->giveCenterCoordinate();
+    double xbar = cCoords.at(1), ybar = cCoords.at(2), zbar = 0.0;
+    if ( nsd == 3 ) {
+        zbar = cCoords.at(3);
+    }
+
+    for ( int i = 1; i <= nNodes; i++ ) {
+        Node *n = domain->giveNode(i);
+        FloatArray *coords = n->giveCoordinates();
+        Dof *d1 = n->giveDofWithID(dofType [ 0 ]);
+        Dof *d2 = n->giveDofWithID(dofType [ 1 ]);
+        int k1 = d1->__givePrescribedEquationNumber();
+        int k2 = d2->__givePrescribedEquationNumber();
+        if ( nsd == 2 ) {
+            if ( k1 ) {
+                C.at(k1, 1) = coords->at(1) - xbar;
+                C.at(k1, 3) = coords->at(2) - ybar;
+            }
+
+            if ( k2 ) {
+                C.at(k2, 2) = coords->at(2) - ybar;
+                C.at(k2, 3) = coords->at(1) - xbar;
+            }
+        } else   { // nsd == 3
+            OOFEM_ERROR("PrescribedGradient :: updateCoefficientMatrix - 3D Not tested yet!");
+            Dof *d3 = n->giveDofWithID(dofType [ 2 ]);
+            int k3 = d3->__givePrescribedEquationNumber();
+
+            if ( k1 ) {
+                C.at(k1, 1) = coords->at(1) - xbar;
+                C.at(k1, 4) = coords->at(2) - ybar;
+                C.at(k1, 5) = coords->at(3) - zbar;
+            }
+            if ( k2 ) {
+                C.at(k2, 2) = coords->at(2) - ybar;
+                C.at(k2, 4) = coords->at(1) - xbar;
+                C.at(k2, 6) = coords->at(3) - zbar;
+            }
+            if ( k3 ) {
+                C.at(k3, 3) = coords->at(3) - zbar;
+                C.at(k3, 5) = coords->at(1) - xbar;
+                C.at(k3, 6) = coords->at(2) - ybar;
+            }
+        }
+    }
+}
+
 IRResultType PrescribedGradient :: initializeFrom(InputRecord *ir)
 {
     const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
@@ -118,7 +203,7 @@ IRResultType PrescribedGradient :: initializeFrom(InputRecord *ir)
 
     IR_GIVE_FIELD(ir, this->gradient, IFT_PrescribedTensor_gradient, "gradient");
     IRResultType rt = IR_GIVE_OPTIONAL_FIELD(ir, this->centerCoord, IFT_PrescribedTensor_centercoords, "ccoord")
-                      if ( rt == IRRT_OK ) {
+    if ( rt == IRRT_OK ) {
         this->centerCoord.resize( this->gradient.giveNumberOfColumns() );
         this->centerCoord.zero();
     }

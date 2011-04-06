@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2010   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -50,7 +50,6 @@ namespace oofem {
  * This is typical boundary condition in multiscale analysis where @f$ d = \partial_x s@f$
  * would a macroscopic gradient at the integration point, i.e. this is a boundary condition for prolongation.
  * It is also convenient to use when one wants to test a arbitrary specimen for shear.
- * @date 2010-04-22
  * @author Mikael Öhman
  */
 class PrescribedGradient : public BoundaryCondition
@@ -63,30 +62,22 @@ protected:
     FloatArray centerCoord;
 
 public:
-    /** Creates boundary condition with given number, belonging to given domain.
-     * @param n boundary condition number
-     * @param d domain to which new object will belongs
+    /**
+     * Creates boundary condition with given number, belonging to given domain.
+     * @param n Boundary condition number.
+     * @param d Domain to which new object will belongs.
      */
     PrescribedGradient(int i, Domain *d) : BoundaryCondition(i, d) { }
 
     /// Destructor
     ~PrescribedGradient() { }
 
-    /** Returns the value of a prescribed unknown, respecting requested mode for given time.
-     * Its physical meaning is determined by corresponding DOF.
-     * @param dof determines the dof subjected to receiver bc.
-     * @param mode unknown char type (if total or incremental value is returned)
-     * @return prescribed value of unknown or zero if not prescribed
-     */
     virtual double give(Dof *dof, ValueModeType mode, TimeStep *tStep);
 
-    /** Returns receiver load type. It distinguish particular boundary conditions according to
-     * their "physical" meaning (like StructuralTemperatureLoadLT, StructuralLoadLT).
-     * @return returns BoundaryConditionLT value.
-     */
     bcType giveType() const { return DirichletBT; }
 
-    /** Initializes receiver acording to object description stored in input record.
+    /**
+     * Initializes receiver according to object description stored in input record.
      * The input record contains two fields;
      * - gradient #rows #columns { d_11 d_12 ... ; d_21 ... } (required)
      * - cCoords #columns x_1 x_2 ... (optional, default 0)
@@ -95,24 +86,32 @@ public:
      */
     IRResultType initializeFrom(InputRecord *ir);
 
-    /** Setups the input record string of receiver.
+    /**
+     * Constructs a coefficient matrix for all prescribed unknowns.
+     * Helper routine for computational homogenization.
+     * @todo Perhaps this routine should only give results for the dof it prescribes?
+     * @param C Coefficient matrix to fill.
+     */
+    virtual void updateCoefficientMatrix(FloatMatrix &C);
+
+    /**
+     * Setups the input record string of receiver.
      * keyword parameter is ignored as I don't know what it does (nor is it documented).
      * @param str string to be filled by input record
      * @param keyword print record keyword (default true)
      */
     virtual int giveInputRecordString(std :: string &str, bool keyword = true);
 
-    /** Scales the receiver according to given value.
-     * @param s scaling factor for entire tensor
-     */
     virtual void scale(double s) { gradient.times(s); }
 
-    /** Set prescribed tensor.
-     *  @param s prescribed value
+    /**
+     * Set prescribed tensor.
+     * @param s prescribed value
      */
     virtual void setPrescribedGradient(const FloatMatrix &t) { gradient = t; }
 
-    /** Set prescribed value at Expresses the matrix from given voigt notation.
+    /**
+     * Sets the prescribed tensor from the matrix from given voigt notation.
      * Assumes use of double values for off-diagonal, usually the way for strain in Voigt form.
      * @param t Vector in voigt format.
      */
@@ -121,18 +120,15 @@ public:
     /// @warning Not used. Do not call.
     virtual void setPrescribedValue(double) { OOFEM_ERROR("Scalar value not used for prescribed tensors."); }
 
-    /** Set the center coordinate for the prescribed values to be set for.
-     *  @param x center coordinate.
+    /**
+     * Set the center coordinate for the prescribed values to be set for.
+     * @param x Center coordinate.
      */
     virtual void setCenterCoordinate(const FloatArray &x) { centerCoord = x; }
-
     /// Returns the center coordinate
     virtual FloatArray &giveCenterCoordinate() { return centerCoord; }
 
-    /// Returns class name of the receiver.
     const char *giveClassName() const { return "PrescribedGradient"; }
-
-    /// Returns classType id of receiver.
     classType giveClassID() const { return PrescribedGradientClass; }
 };
 } // end namespace oofem
