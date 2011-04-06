@@ -106,7 +106,6 @@ int LineSurfaceTension :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAt(Value
     return true;
 }
 
-
 void LineSurfaceTension :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(ValueModeType mode,
         TimeStep *tStep, const FloatArray &lcoords, FloatArray &answer)
 {
@@ -214,7 +213,7 @@ void LineSurfaceTension :: computeLoadVector(FloatArray &answer, ValueModeType m
 
 void LineSurfaceTension :: computeTangent(FloatMatrix &answer, TimeStep *tStep)
 {
-#if 0
+#if 1
     // TODO: Not sure if it's a good idea to use this tangent.
     answer.resize(4,4);
     answer.zero();

@@ -88,7 +88,7 @@ public:
 
 	/**
 	 * Computes tangent to load vector.
-	 * @param answer
+	 * @param answer Tangent @f$ \frac{\partial F}{\partial x}\Delta t@f$.
 	 */
 	virtual void computeTangent(FloatMatrix &answer, TimeStep *tStep);
 	
@@ -117,7 +117,7 @@ public:
     virtual void EIPrimaryUnknownMI_givePrimaryUnknownVectorDofID(IntArray &answer);
 
     const char *giveClassName() const { return "LineSurfaceTension"; }
-    classType giveClassID() const { return LineSurfaceTensionElementClass; } // TODO
+    classType giveClassID() const { return LineSurfaceTensionElementClass; }
 };
 
 } // end namespace oofem

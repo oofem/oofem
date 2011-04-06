@@ -118,6 +118,26 @@ int Line2SurfaceTension :: computeLocalCoordinates(FloatArray &lcoords, const Fl
     return true;
 }
 
+double Line2SurfaceTension :: computeNXIntegral() const
+{
+    Node *node;
+    double x1, x2, x3, y1, y2, y3;
+
+    node = this->giveNode(1);
+    x1 = node->giveCoordinate(1);
+    y1 = node->giveCoordinate(2);
+
+    node = this->giveNode(2);
+    x2 = node->giveCoordinate(1);
+    y2 = node->giveCoordinate(2);
+
+    node = this->giveNode(3);
+    x3 = node->giveCoordinate(1);
+    y3 = node->giveCoordinate(2);
+
+    return (x3*(8*y1 - y2) + 2*x1*(y2 - 4*y3) + x2*(-2*y1 + y3))/6;
+}
+
 void Line2SurfaceTension :: computeLoadVector(FloatArray &answer, ValueModeType mode, TimeStep *tStep)
 {
     //domainType dt = this->giveDomain()->giveDomainType(); // TODO, support axisymm
@@ -171,7 +191,7 @@ void Line2SurfaceTension :: computeLoadVector(FloatArray &answer, ValueModeType 
 
 void Line2SurfaceTension :: computeTangent(FloatMatrix &answer, TimeStep *tStep)
 {
-#if 0
+#if 1
     answer.resize(6, 6);
     answer.zero();
 #else

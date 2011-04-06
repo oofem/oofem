@@ -55,12 +55,19 @@ public:
      * @param n Element's number.
      * @param d Pointer to the domain to which element belongs.
      */
-    Line2SurfaceTension(int e, Domain *d);
+    Line2SurfaceTension(int n, Domain *d);
     /// Destructor.
     ~Line2SurfaceTension();
 
     void computeTangent(FloatMatrix &answer, TimeStep *tStep);
     void computeLoadVector(FloatArray &answer, ValueModeType mode, TimeStep *tStep);
+
+    /**
+     * Computes the integral @f$ \int n \cdot x \mathrm{d}s @f$.
+     * The normal is defined as left in the direction parameterization.
+     * @return Evaluated integral.
+     */
+    virtual double computeNXIntegral() const;
 
     virtual void computeN(FloatArray &answer, const FloatArray &lcoords) const;
     virtual int computeLocalCoordinates(FloatArray &lcoords, const FloatArray &gcoords);
