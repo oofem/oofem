@@ -152,8 +152,10 @@ public:
 
     virtual Interface *giveInterface(InterfaceType it);
 
-    int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords);
-    int computeLocalCoordinates(FloatArray &lcoords, const FloatArray &coords);
+    virtual double computeArea() const;
+
+    virtual int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords);
+    virtual int computeLocalCoordinates(FloatArray &lcoords, const FloatArray &coords);
 
     // Spatial localizer interface:
     virtual Element *SpatialLocalizerI_giveElement() { return this; }

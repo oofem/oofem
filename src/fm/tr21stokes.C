@@ -62,8 +62,9 @@ bool Tr21Stokes :: __initialized = Tr21Stokes :: initOrdering();
 
 Tr21Stokes :: Tr21Stokes(int n, Domain *aDomain) : FMElement(n, aDomain)
 {
-    numberOfDofMans = 6;
-    numberOfGaussPoints = 4;
+    this->numberOfDofMans = 6;
+    this->numberOfGaussPoints = 4;
+    this->computeGaussPoints();
 }
 
 Tr21Stokes :: ~Tr21Stokes()
@@ -72,7 +73,6 @@ Tr21Stokes :: ~Tr21Stokes()
 IRResultType Tr21Stokes :: initializeFrom(InputRecord *ir)
 {
     this->FMElement :: initializeFrom(ir);
-    this->computeGaussPoints();
     return IRRT_OK;
 }
 
@@ -82,7 +82,7 @@ void Tr21Stokes :: computeGaussPoints()
         numberOfIntegrationRules = 1;
         integrationRulesArray = new IntegrationRule * [ 2 ];
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3);
-        integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Triangle, numberOfGaussPoints, _2dFlow);
+        integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Triangle, this->numberOfGaussPoints, _2dFlow);
     }
 }
 
@@ -176,10 +176,8 @@ void Tr21Stokes :: computeInternalForcesVector(FloatArray &answer, TimeStep *tSt
     FluidDynamicMaterial *mat = ( FluidDynamicMaterial * ) this->domain->giveMaterial(this->material);
     FloatArray a_pressure, a_velocity, devStress, epsp, BTs, Nh, dNv(12);
     FloatMatrix dN, B(3, 12);
-
     this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, a_velocity);
     this->computeVectorOf(EID_ConservationEquation, VM_Total, tStep, a_pressure);
-
     FloatArray momentum(12), conservation(3);
     momentum.zero();
     conservation.zero();
@@ -188,12 +186,9 @@ void Tr21Stokes :: computeInternalForcesVector(FloatArray &answer, TimeStep *tSt
         gp = iRule->getIntegrationPoint(i);
         FloatArray *lcoords = gp->giveCoordinates();
 
-        //double detJ = this->interpolation_quad.giveTransformationJacobian(this->domain, dofManArray, *lcoords, 0.0);
         double detJ = this->interpolation_quad.giveTransformationJacobian(* lcoords, FEIElementGeometryWrapper(this), 0.0);
-        //this->interpolation_quad.evaldNdx(dN, this->domain, dofManArray, *lcoords, 0.0);
         this->interpolation_quad.evaldNdx(dN, * lcoords, FEIElementGeometryWrapper(this), 0.0);
-        //this->interpolation_lin.evalN(Nh, *lcoords, 0.0);
-        this->interpolation_lin.evalN(Nh, * lcoords, FEIElementGeometryWrapper(this), 0.0);        // Why FEI?
+        this->interpolation_lin.evalN(Nh, * lcoords, FEIElementGeometryWrapper(this), 0.0);
         double dA = detJ * gp->giveWeight();
 
         for ( int j = 0, k = 0; j < 6; j++, k += 2 ) {
@@ -391,6 +386,11 @@ void Tr21Stokes :: computeStiffnessMatrix(FloatMatrix &answer, TimeStep *tStep)
     answer.resize(15, 15);
     answer.zero();
     answer.assemble(temp, this->ordering);
+}
+
+double Tr21Stokes :: computeArea() const
+{
+    return this->interpolation_quad.giveArea(FEIElementGeometryWrapper(this));
 }
 
 void Tr21Stokes :: updateYourself(TimeStep *tStep)
