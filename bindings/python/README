@@ -54,9 +54,15 @@ modules.
 ==============================================================================
 - configure and build oofem-debug target with dss module.
 - change directory to python located in oofem top directory.
-- open Jamroot file and adjust path refering to the Boost root directory.
-  To do this, locate line after "use-project boost" directive and edit the path.
+- make a symbolic link named "boost" in this directory, pointing to your 
+  Boost root directory. 
+  Or, alternatively, edit Jamroot and oost-build.jam files and adjust path
+  refering to the Boost root directory.
+
 - run bjam
+
+- If glibc error is reported (*** glibc detected *** malloc() / free()/ double), use
+  export MALLOC_CHECK_=0
 
 - Optionally, to run a simple example:
   - Set PYTHONPATH to contain paths to directory containing oofem python directory:
