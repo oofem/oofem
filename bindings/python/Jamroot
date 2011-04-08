@@ -6,7 +6,7 @@
 # Specify the path to the Boost project.  If you move this project,
 # adjust this path to refer to the Boost root directory.
 use-project boost
-  : /home/bp/apps/boost_1_44_0 ;
+  : boost ;
 
 # Set up the project-wide requirements that everything uses the
 # boost_python library defined in the project whose global ID is
