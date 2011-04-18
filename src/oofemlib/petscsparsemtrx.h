@@ -95,6 +95,7 @@ public:
     virtual SparseMtrx *factorized() { return NULL; }
     virtual FloatArray *backSubstitutionWith(FloatArray &y) const { return NULL; }
     virtual void zero();
+    virtual double computeNorm() const;
     virtual double &at(int i, int j);
     virtual double at(int i, int j) const;
     virtual void toFloatMatrix(FloatMatrix &answer) const;

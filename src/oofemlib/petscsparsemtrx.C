@@ -591,6 +591,14 @@ PetscSparseMtrx :: zero()
     this->newValues = true;
 }
 
+double
+PetscSparseMtrx :: computeNorm() const
+{
+    double norm;
+    MatNorm(this->mtrx, NORM_1, &norm);
+    return norm;
+}
+
 double &
 PetscSparseMtrx :: at(int i, int j)
 {

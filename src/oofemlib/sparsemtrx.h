@@ -210,6 +210,9 @@ public:
     /// Zeroes the receiver.
     virtual void zero() = 0;
 
+    /// Returns the norm of receiver.
+    virtual double computeNorm() const { OOFEM_ERROR("SparseMtrx :: computeNorm - Not implemented"); return 0.0; }
+
     /// Returns coefficient at position (i,j).
     virtual double &at(int i, int j) = 0;
     /// Returns coefficient at position (i,j).
