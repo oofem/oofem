@@ -82,7 +82,7 @@ class ProcessCommunicator;
 class LoadBalancer;
 #endif
 /**
- * Class and object Domain. Domain contains mesh description, or if program runs in parrallel then it contains
+ * Class and object Domain. Domain contains mesh description, or if program runs in parallel then it contains
  * description of domain associated to particular processor or thread of execution. Generally, it contain and
  * manages lists of Dof managers, elements, boundary conditions, cross sections and materials - these describe
  * the geometry of problem, its constitutive properties and applied boundary conditions. Services for accessing
@@ -90,37 +90,13 @@ class LoadBalancer;
  * which should be performed.
  *
  * Domain also provides services for reading its description from
- * input stream and instantiating corresponding components acordingly. The basic Domain task are following
+ * input stream and instantiating corresponding components accordingly. The basic Domain task are following
  * - Reading its description from input and creating corresponding objects.
  * - Provides services for accessing its particular components.
  * - Checking yourself.
  */
 class Domain
 {
-    /*
-     * This class implements the domain of a finite element problem.
-     * DESCRIPTION :
-     * The domain stores its components (elements, nodes, materials, loads, load-
-     * time functions) in lists : 'elementList', 'nodeList', etc. Its component
-     * 'timeIntegrationScheme' needs no list, since it is unique.
-     *
-     * The domain possesses two streams 'inputStream' and 'outputStream' that
-     * the components use in order to read their input and write their output in
-     * the data file.
-     * TASKS :
-     * - User interfacing. The domain is the primary interlocutor of the user.
-     *   In particular, it understands the message 'solveYourself', which trig-
-     *   gers the solving process.
-     * - Managing its components and the linear system.
-     *   The domain maintains lists of its components. The domain is responsible
-     *   for creating these components (methods 'giveElement','giveLinearSystem',
-     *   etc). Asking the domain is the only way for a component (e.g., an ele-
-     *   ment) to have access to another component (e.g., its material), or to
-     *   the data file, or to the Engineering Method.
-     * - Returning the input/output streams.
-     *
-     */
-
 private:
     /// Element list.
     AList< Element > *elementList;
@@ -136,12 +112,12 @@ private:
     AList< InitialCondition > *icList;
     /// Load time function list.
     AList< LoadTimeFunction > *loadTimeFunctionList;
-    /// Nonlocal barier list.
+    /// Nonlocal barrier list.
     AList< NonlocalBarrier > *nonlocalBarierList;
     /// List of Random generators.
     AList< RandomFieldGenerator > *randomFieldGeneratorList;
 
-    // numberOfDefaultDofsPerNode specifyies default number of dofs per node
+    // numberOfDefaultDofsPerNode specifies default number of dofs per node
     // for current domain type. The defaultDofMask describes the physical meaning of these
     // dofs.
     int numberOfDefaultDofsPerNode;                     // per node
@@ -286,13 +262,13 @@ public:
      */
     CrossSection *giveCrossSection(int n);
     /**
-     * Service for accessing particular domain nonlocal barier representation.
+     * Service for accessing particular domain nonlocal barrier representation.
      * Generates error if no such barrier  model is defined.
      * @param n Pointer to n-th barrier is returned.
      */
     NonlocalBarrier *giveNonlocalBarrier(int n);
     /**
-     * Service for accessing particular domain andom field generator.
+     * Service for accessing particular domain random field generator.
      * Generates error if no such generator is defined.
      * @param n Pointer to n-th object is returned.
      */
@@ -322,7 +298,7 @@ public:
     /**
      * Reads receiver description from input stream and creates corresponding components accordingly.
      * It scans input file, each line is assumed to be single record describing type and parameters for
-     * specific entity in domain. The record line is converted to lowercase letters.
+     * specific entity in domain. The record line is converted to lower case letters.
      * Corresponding component is created using ofType member function of
      * corresponding base class, sending component name (extracted from corresponding record)
      * as parameter. After new object is created, its initializeFrom member function is
@@ -377,36 +353,34 @@ public:
     /// Resizes the internal data structure to accommodate space for _newSize load time functions.
     void resizeLoadTimeFunctions(int _newSize);
 
-    /// Sets i-th component. The component will be futher managed and maintained by domain object.
+    /// Sets i-th component. The component will be further managed and maintained by domain object.
     void setDofManager(int i, DofManager *obj);
-    /// Sets i-th component. The component will be futher managed and maintained by domain object.
+    /// Sets i-th component. The component will be further managed and maintained by domain object.
     void setElement(int i, Element *obj);
-    /// Sets i-th component. The component will be futher managed and maintained by domain object.
+    /// Sets i-th component. The component will be further managed and maintained by domain object.
     void setCrossSection(int i, CrossSection *obj);
-    /// Sets i-th component. The component will be futher managed and maintained by domain object.
+    /// Sets i-th component. The component will be further managed and maintained by domain object.
     void setMaterial(int i, Material *obj);
-    /// Sets i-th component. The component will be futher managed and maintained by domain object.
+    /// Sets i-th component. The component will be further managed and maintained by domain object.
     void setNonlocalBarrier(int i, NonlocalBarrier *obj);
-    /// Sets i-th component. The component will be futher managed and maintained by domain object.
+    /// Sets i-th component. The component will be further managed and maintained by domain object.
     void setBoundaryCondition(int i, GeneralBoundaryCondition *obj);
-    /// Sets i-th component. The component will be futher managed and maintained by domain object.
+    /// Sets i-th component. The component will be further managed and maintained by domain object.
     void setInitialCondition(int i, InitialCondition *obj);
-    /// Sets i-th component. The component will be futher managed and maintained by domain object.
+    /// Sets i-th component. The component will be further managed and maintained by domain object.
     void setLoadTimeFunction(int i, LoadTimeFunction *obj);
     /// Temporary function, sets xfemManager.
     void setXfemManager(XfemManager *xfemManager);
-
     /// Clear all boundary conditions.
     void clearBoundaryConditions();
-
     //@}
     /**
-     * Returns default DofID array which defines physical meaning of partucular DOFs.
+     * Returns default DofID array which defines physical meaning of particular DOFs.
      * of nodal dofs. Default values are determined using current domain type.
      */
     const IntArray &giveDefaultNodeDofIDArry();
     /**
-     * Returns default DofID array which defines physical meaning of partucular DOFs.
+     * Returns default DofID array which defines physical meaning of particular DOFs.
      * of element side dofs. Default values are determined using current domain type.
      */
     const IntArray &giveDefaultSideDofIDArry();
@@ -425,12 +399,23 @@ public:
     void setDomainType(domainType _dType) { this->dType = _dType; }
     // consistency check
     /**
-     * Checks internal consistency of domain and all domain componenets.
+     * Checks internal consistency of domain and all domain components.
      * The checkConsistency of all domain components is invoked.
      * @return nonzero if test is o.k.
      * @see FEMComponent::checkConsistency
      */
     int checkConsistency();
+
+    /**
+     * Gives the sum of the area of all elements.
+     * @return Total area.
+     */
+    double giveArea();
+    /**
+     * Gives the sum of the volume of all elements.
+     * @return Total volume.
+     */
+    double giveVolume();
 
     /**
      * Returns receiver's associated connectivity table.
@@ -464,9 +449,9 @@ public:
 
 #ifdef __PARALLEL_MODE
     /**@name Domain transaction support methods.
-     * The purpose of these methods is to privide a unified approach
+     * The purpose of these methods is to provide a unified approach
      * for changing domain at runtime (meaning mainly adding and deleting dofmanagers and elements).
-     * The changes are recorded in transaction manager and untill the are commited,
+     * The changes are recorded in transaction manager and until the are committed,
      * no change is reflected in domain itself.
      */
     //@{
@@ -478,8 +463,8 @@ public:
      * Commits transactions recorded in transaction manager. The purpose of transaction manager is to
      * make the domain modification (adding and deleting components) possible and versatile.
      *
-     * The changes are recorded in transaction manager and untill the are commited,
-     * no change is reflected in domain itself. After transactions are commited, the local numbering can change.
+     * The changes are recorded in transaction manager and until the are committed,
+     * no change is reflected in domain itself. After transactions are committed, the local numbering can change.
      * A message to the system is sent to update the numbering.
      * @param tm Manager to commit transactions to.
      */

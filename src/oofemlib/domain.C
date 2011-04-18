@@ -1378,6 +1378,24 @@ Domain :: checkConsistency()
     return result;
 }
 
+double Domain :: giveArea()
+{
+    double area = 0.0;
+    for (int i = 1; i <= this->giveNumberOfElements(); ++i) {
+        area += this->giveElement(i)->computeArea();
+    }
+    return area;
+}
+
+double Domain :: giveVolume()
+{
+    double volume = 0.0;
+    for (int i = 1; i <= this->giveNumberOfElements(); ++i) {
+        volume += this->giveElement(i)->computeVolume();
+    }
+    return volume;
+}
+
 ErrorEstimator *
 Domain :: giveErrorEstimator() {
     return engineeringModel->giveDomainErrorEstimator(this->number);
