@@ -282,6 +282,12 @@ public:
      */
     void beMinOf(const FloatArray &a, const FloatArray &b);
     /**
+     * Sets receiver to be a - b.
+     * @param a Array which receiver goes to.
+     * @param b Array which receiver comes from.
+     */
+    void beDifferenceOf(const FloatArray &a, const FloatArray &b);
+    /**
      * Extract sub vector form src array and stores the result into receiver.
      * @param src source vector for sub vector
      * @param indx Determines sub vector. Receiver size will be indx max value,

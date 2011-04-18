@@ -230,6 +230,20 @@ void FloatArray :: beMinOf(const FloatArray &a, const FloatArray &b)
 }
 
 
+void FloatArray :: beDifferenceOf(const FloatArray &a, const FloatArray &b)
+{
+#ifdef DEBUG
+     if ( a.size != b.size ) {
+         OOFEM_ERROR3("FloatArray :: beDifferenceOf - size mismatch", a.size, b.size);
+     }
+#endif
+     this->resize(a.size);
+     for (int i = 0; i < this->size; ++i) {
+         this->values[i] = a.values[i] - b.values[i];
+     }
+}
+
+
 void FloatArray :: beSubArrayOf(const FloatArray &src, const IntArray &indx)
 //
 // returns subVector from receiver
