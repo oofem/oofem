@@ -146,6 +146,7 @@ void PrescribedGradient :: updateCoefficientMatrix(FloatMatrix &C)
     int nsd = domain->giveNumberOfSpatialDimensions();
     int npeq = domain->giveEngngModel()->giveNumberOfPrescribedDomainEquations(1, EID_MomentumBalance);
     C.resize(npeq, nsd*(nsd+1)/2);
+    C.zero();
 
     FloatArray &cCoords = this->giveCenterCoordinate();
     double xbar = cCoords.at(1), ybar = cCoords.at(2), zbar = 0.0;
