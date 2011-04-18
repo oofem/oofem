@@ -94,9 +94,18 @@ IRResultType IncrementalLinearStatic :: initializeFrom(InputRecord *ir)
     IRResultType result;
 
     //StructuralEngngModel::initializeFrom (ir);
-    IR_GIVE_FIELD(ir, endOfTimeOfInterest, IFT_IncrementalLinearStatic_endoftimeofinterest, "endoftimeofinterest"); // Macro
-    IR_GIVE_FIELD(ir, discreteTimes, IFT_IncrementalLinearStatic_prescribedtimes, "prescribedtimes"); // Macro
-    numberOfSteps = discreteTimes.giveSize();
+    IR_GIVE_OPTIONAL_FIELD(ir, discreteTimes, IFT_IncrementalLinearStatic_prescribedtimes, "prescribedtimes");
+    if ( discreteTimes.giveSize() > 0 ) {
+        numberOfSteps = discreteTimes.giveSize();
+        endOfTimeOfInterest = discreteTimes.at(discreteTimes.giveSize());
+        fixedSteps = false;
+    } else {
+        IR_GIVE_FIELD(ir, deltaT, IFT_IncrementalLinearStatic_deltat, "deltat");
+        IR_GIVE_FIELD(ir, numberOfSteps, IFT_EngngModel_nsteps, "nsteps");
+        endOfTimeOfInterest = deltaT*numberOfSteps;
+        fixedSteps = true;
+    }
+    IR_GIVE_OPTIONAL_FIELD(ir, endOfTimeOfInterest, IFT_IncrementalLinearStatic_endoftimeofinterest, "endoftimeofinterest");
 
     int val = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_IncrementalLinearStatic_lstype, "lstype"); // Macro
@@ -112,8 +121,12 @@ IRResultType IncrementalLinearStatic :: initializeFrom(InputRecord *ir)
 
 double IncrementalLinearStatic :: giveDiscreteTime(int iStep)
 {
-    if ( ( iStep > 0 ) && ( iStep <= discreteTimes.giveSize() ) ) {
-        return ( discreteTimes.at(iStep) );
+    if (this->fixedSteps) {
+       return this->deltaT*iStep;
+    } else {
+        if ( ( iStep > 0 ) && ( iStep <= discreteTimes.giveSize() ) ) {
+            return ( discreteTimes.at(iStep) );
+        }
     }
 
     _error("giveDiscreteTime: invalid iStep");

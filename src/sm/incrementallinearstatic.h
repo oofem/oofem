@@ -64,7 +64,8 @@ protected:
     FloatArray internalLoadVector;
     FloatArray incrementOfDisplacementVector;
     FloatArray discreteTimes;
-
+    bool fixedSteps;
+    double deltaT;
     double endOfTimeOfInterest;
     /// Numerical method used to solve the problem
     SparseLinearSystemNM *nMethod;
