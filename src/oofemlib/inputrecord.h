@@ -119,6 +119,7 @@ enum InputFieldType {
 
     IFT_IncrementalLinearStatic_endoftimeofinterest,
     IFT_IncrementalLinearStatic_prescribedtimes,
+    IFT_IncrementalLinearStatic_deltat,
     IFT_IncrementalLinearStatic_lstype,
     IFT_IncrementalLinearStatic_smtype,
 
@@ -642,6 +643,8 @@ enum InputFieldType {
     IFT_CompoDamageMat_components,
     IFT_CompoDamageMat_afteriter,
     IFT_CompoDamageMat_allowSnapBack,
+
+    IFT_FE2SinteringMaterial_porosity,
 
     IFT_MicroMaterialFileName,
     IFT_MacroLspace_microMasterNodes,
