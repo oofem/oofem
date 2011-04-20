@@ -282,6 +282,7 @@
  #include "tr21stokes.h"
  #include "linesurfacetension.h"
  #include "line2surfacetension.h"
+ #include "line2boundaryelement.h"
 // materials
  #include "newtonianfluid.h"
  #include "fe2sinteringmaterial.h"
@@ -299,6 +300,8 @@
  #include "q10_2d_supg.h"
  #include "twofluidmaterial.h"
  #include "binghamfluid2.h"
+
+ #include "surfacetensionmaterial.h"
 
 #endif // __FM_Module
 
@@ -462,10 +465,12 @@ Element *CreateUsrDefElementOfType(const char *aClass, int number, Domain *domai
         newElement = new Q10_2D_SUPG(number, domain);
     } else if ( !strncasecmp(aClass, "tr21stokes", 10)) {
         newElement = new Tr21Stokes(number, domain);
-    } else if ( !strncasecmp(aClass, "line2surfacetension", 19)) {
-        newElement = new Line2SurfaceTension(number, domain);
     } else if ( !strncasecmp(aClass, "linesurfacetension", 18)) {
         newElement = new LineSurfaceTension(number, domain);
+    } else if ( !strncasecmp(aClass, "line2surfacetension", 19)) {
+        newElement = new Line2SurfaceTension(number, domain);
+    } else if ( !strncasecmp(aClass, "line2boundaryelement", 20)) {
+        newElement = new Line2BoundaryElement(number, domain);
     }
 
 #endif //__FM_MODULE
@@ -754,8 +759,9 @@ Material *CreateUsrDefMaterialOfType(const char *aClass, int number, Domain *dom
         newMaterial = new BinghamFluidMaterial2(number, domain);
     } else if ( !strncasecmp(aClass, "fe2sinteringmaterial", 20) ) {
         newMaterial = new FE2SinteringMaterial(number, domain);
+    } else if ( !strncasecmp(aClass, "surfacetension", 22)) {
+        newMaterial = new SurfaceTensionMaterial(number, domain);
     }
-
 
 #endif // __FM_MODULE
 
@@ -996,7 +1002,17 @@ Element *CreateUsrDefElementOfType(classType type, int number, Domain *domain)
     } else if ( type == TrPlaneStrainClass ) {
         answer = new TrPlaneStrain(number, domain);
     }
-
+#endif
+#ifdef __FM_MODULE
+    if ( type == Tr21StokesElementClass ) {
+        answer = new Tr21Stokes(number, domain);
+    } else if ( type == LineSurfaceTensionElementClass ) {
+        answer = new LineSurfaceTension(number, domain);
+    } else if ( type == Line2SurfaceTensionElementClass ) {
+        answer = new Line2SurfaceTension(number, domain);
+    } else if ( type == Line2BoundaryElementClass ) {
+        answer = new Line2BoundaryElement(number, domain);
+    }
 #endif
 
     if ( answer == NULL ) {
