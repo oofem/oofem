@@ -1,6 +1,35 @@
-/**
- * @date 2010-09-06
- * @author Mikael Öhman
+/*
+ *
+ *                 #####    #####   ######  ######  ###   ###
+ *               ##   ##  ##   ##  ##      ##      ## ### ##
+ *              ##   ##  ##   ##  ####    ####    ##  #  ##
+ *             ##   ##  ##   ##  ##      ##      ##     ##
+ *            ##   ##  ##   ##  ##      ##      ##     ##
+ *            #####    #####   ##      ######  ##     ##
+ *
+ *
+ *             OOFEM : Object Oriented Finite Element Code
+ *
+ *               Copyright (C) 1993 - 2011   Borek Patzak
+ *
+ *
+ *
+ *       Czech Technical University, Faculty of Civil Engineering,
+ *   Department of Structural Mechanics, 166 29 Prague, Czech Republic
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
 #ifndef stokesflowstressrve_h
@@ -14,84 +43,71 @@
 #include "linsystsolvertype.h"
 
 namespace oofem {
-enum HomogenizationType {
-    HT_None = 0,
-    HT_StressDirichlet = 1, ///< Dirichlet boundary condition
-    HT_StressNeumann = 2,   ///< Neumann boundary condition
-    HT_StressPeriodic = 3,  ///< Periodic boundary condition
-};
+class PrescribedGradient;
 
-
-/** Stokes flow model with homogenization for stress.
+/**
+ * Stokes flow model with homogenization for stress-strainrate.
  * @author Mikael Öhman
  */
 class StokesFlowStressHomogenization : public StokesFlow
 {
 protected:
-    HomogenizationType ht;
-
-    /// Non-free submatrices of the total stiffness matrix.
+    /// Non-free sub-matrices of the total stiffness matrix.
     SparseMtrx *K_cf, *K_cc;
     /// Coefficient matrix for values of prescribed dofs.
-    FloatMatrix *C;
-    /// Solver type for homogenization
+    FloatMatrix C;
+    /// Solver type for homogenization.
     LinSystSolverType solverType;
-    /// Numerical method for homogenization
+    /// Numerical method for homogenization.
     SparseLinearSystemNM *linNumericalMethod;
 
 public:
     StokesFlowStressHomogenization(int i, EngngModel *_master = NULL);
     virtual ~StokesFlowStressHomogenization();
 
-    /** Initialization from given input record.
-     * Reads
-     * - lstype Linear solver type (enum, optional, default ST_Petsc). Should conform to the non-linear solver.
-     * - homogenizationtype Sets which type of homogenization to use for multiscale analysis (enum, optional, default HT_None)
-     * @see StokesFlow::initializeFrom
-     */
-    IRResultType initializeFrom(InputRecord *ir);
+    virtual void updateYourself(TimeStep *tStep);
 
-    /** Updates the coefficient matrix C.
-     * @param tStep Current time step
-     */
-    virtual void updateYourself(TimeStep *tStep) { StokesFlow :: updateYourself(tStep);
-                                                   this->updateC(); };
+    PrescribedGradient *giveDirichletBC();
 
     /**
+     * Computes the volume of the whole microscopic domain (pores included).
+     * @param di Domain index.
+     * @return RVE size (volume or area).
+     */
+    virtual double computeSize(int di);
+    /**
      * Computes the macroscopic stress.
-     * @param answer Macroscopic stress
-     * @param input Strain rate
-     * @param tStep Time step to evaluate for
-     * @return True if successfull.
+     * @param answer Macroscopic stress.
+     * @param input Strain rate.
+     * @param tStep Time step to evaluate at.
+     * @return True if successful.
      */
     virtual bool computeMacroStress(FloatArray &answer, const FloatArray &input, TimeStep *tStep);
 
     /** Computes the macroscopic tangent.
-     * @param answer Macroscopic tangent
-     * @param tStep Time step to evaluate for
+     * @param answer Macroscopic tangent.
+     * @param tStep Time step to evaluate at.
      */
     virtual void computeMacroTangent(FloatMatrix &answer, TimeStep *tStep);
 
-    /** Computes the macroscopic stress for the given input.
-     * @param answer Macroscopic stress
-     * @param tStep Time step to evaluate for
+    /**
+     * Computes the macroscopic stress for the given input.
+     * @param answer Macroscopic stress.
+     * @param tStep Time step to evaluate at.
      */
     virtual void computeMacroStressFromDirichlet(FloatArray &answer, TimeStep *tStep);
 
-    /** Computes the macroscopic tangent for the previously last stress computated stress.
+    /**
+     * Computes the macroscopic tangent for the previously last stress computed stress.
      * May not be called before computeMacroStressFromDirichlet.
-     * @param answer The macroscopic stress-strainrate tangent
-     * @param tStep Time step to evaluate for
+     * @param answer The macroscopic stress-strain rate tangent.
+     * @param tStep Time step to evaluate at.
      */
     virtual void computeMacroStressTangentFromDirichlet(FloatMatrix &answer, TimeStep *tStep);
 
-    /** Activates type of homogenization.
-     * @return True if mode is supported
-     */
-    virtual bool activateHomogenizationMode(HomogenizationType ht);
+    virtual int forceEquationNumbering(int di);
 
-    /// Updates coefficient vectors for new nodal positions.
-    void updateC();
+    virtual SparseLinearSystemNM *giveLinearNumericalMethod();
 
     const char *giveClassName() const { return "StokesFlowStressRVE"; }
     classType giveClassID() const { return StokesFlowStressHomogenizationClass; }

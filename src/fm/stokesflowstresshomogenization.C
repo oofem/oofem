@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2010   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -37,14 +37,17 @@
 #include "inputrecord.h"
 #include "usrdefsub.h"
 
+#include "line2boundaryelement.h"
+
+#include "tr21stokes.h"
+
 namespace oofem {
 StokesFlowStressHomogenization :: StokesFlowStressHomogenization(int i, EngngModel *_master) : StokesFlow(i, _master)
 {
-    // Homogenization related variables
-    this->ht = HT_None;
     this->K_cf = NULL;
     this->K_cc = NULL;
-    this->C = NULL;
+    this->linNumericalMethod = NULL;
+    this->C.beEmptyMtrx();
 }
 
 StokesFlowStressHomogenization :: ~StokesFlowStressHomogenization()
@@ -52,149 +55,88 @@ StokesFlowStressHomogenization :: ~StokesFlowStressHomogenization()
     if ( this->K_cf ) {
         delete this->K_cf;
     }
-
     if ( this->K_cc ) {
         delete this->K_cc;
     }
-
-    if ( this->C ) {
-        delete this->C;
+    if ( this->linNumericalMethod ) {
+        delete this->linNumericalMethod;
     }
 }
 
-bool StokesFlowStressHomogenization :: activateHomogenizationMode(HomogenizationType ht) {
-    this->ht = ht;
-    if ( ht == HT_StressDirichlet ) {
-        this->updateC();
-        return true;
+SparseLinearSystemNM *StokesFlowStressHomogenization :: giveLinearNumericalMethod()
+{
+    if (!this->linNumericalMethod) {
+        this->linNumericalMethod = CreateUsrDefSparseLinSolver(ST_Petsc, 1, this->giveDomain(1), this);
     }
+    return this->linNumericalMethod;
+}
 
-    return false;
+PrescribedGradient *StokesFlowStressHomogenization :: giveDirichletBC()
+{
+    PrescribedGradient *pt = dynamic_cast< PrescribedGradient * >( this->giveDomain(1)->giveBc(1) );
+    if ( pt == NULL ) {
+        OOFEM_ERROR("StokesFlowStressHomogenization :: computeMacroStress - Wrong boundary conditions");
+    }
+    return pt;
 }
 
 bool StokesFlowStressHomogenization :: computeMacroStress(FloatArray &answer, const FloatArray &input, TimeStep *tStep)
 {
-    if ( this->ht == HT_StressDirichlet ) {
-        PrescribedGradient *pt = dynamic_cast< PrescribedGradient * >( this->giveDomain(1)->giveBc(1) );
-        if ( pt == NULL ) {
-            OOFEM_ERROR("Wrong boundary conditions");
-        }
-
-        pt->setPrescribedGradientVoigt(input);
-        this->solveYourselfAt(tStep);
-        this->computeMacroStressFromDirichlet(answer, tStep);
-        return true;
-    } else  {
-        OOFEM_ERROR("Unknown homogenization type");
-    }
-
-    return false;
+    this->giveDirichletBC()->setPrescribedGradientVoigt(input);
+    this->solveYourselfAt(tStep);
+    this->computeMacroStressFromDirichlet(answer, tStep);
+    return true;
 }
 
-void StokesFlowStressHomogenization :: computeMacroTangent(FloatMatrix &answer, TimeStep *tStep) {
-    if ( this->ht == HT_StressDirichlet ) {
-        this->computeMacroStressTangentFromDirichlet(answer, tStep);
-    } else {
-        OOFEM_ERROR("Unknown homogenization type");
-    }
-}
-
-void StokesFlowStressHomogenization :: updateC()
-// This is written in a very general way, even if this class only supports incompressible flow.
-// Remove C when remeshing and it'll be recreated.
-// v_prescribed = C.d = (x-xbar).d;
-// C = [x 0 y]
-//     [0 y x]
-//     [ ... ] in 2D, voigt form [d_11, d_22, d_12]
-// C = [x 0 0 y z 0]
-//     [0 y 0 x 0 z]
-//     [0 0 z 0 x y]
-//     [ ......... ] in 3D, voigt form [d_11, d_22, d_33, d_23, d_13, d_12]
+void StokesFlowStressHomogenization :: computeMacroTangent(FloatMatrix &answer, TimeStep *tStep)
 {
-    Domain *domain = this->giveDomain(1);
-    int nNodes = domain->giveNumberOfDofManagers();
+    this->computeMacroStressTangentFromDirichlet(answer, tStep);
+}
 
-    int dofType [ 3 ] = {
-        0, 0, 0
-    };
-    domainType d = domain->giveDomainType();
-    if ( d == _2dIncompressibleFlow || d == _3dIncompressibleFlow ) {
-        dofType [ 0 ] = V_u;
-        dofType [ 1 ] = V_v;
-        dofType [ 2 ] = V_w;
-    } else if ( d == _3dMode || d == _2dPlaneStressMode || d == _PlaneStrainMode || d == _2dTrussMode )     {
-        dofType [ 0 ] = D_u;
-        dofType [ 1 ] = D_v;
-        dofType [ 2 ] = D_w;
-    } else   {
-        OOFEM_ERROR("Unsupported domain type to construct C matrix");
-    }
+double StokesFlowStressHomogenization :: computeSize(int di)
+{
+    // This could be based on the topology description as well.
+    Domain *d = this->giveDomain(di);
+    int nsd = d->giveNumberOfSpatialDimensions();
+    double domain_size = 0.0;
 
-    int nsd = domain->giveNumberOfSpatialDimensions();
-    int npeq = this->giveNumberOfPrescribedDomainEquations(1, EID_MomentumBalance);
-    if ( !C ) {
-        C = new FloatMatrix(npeq, nsd *( nsd + 1 ) / 2);
-    }
-
-    C->zero();
-
-    PrescribedGradient *pt = dynamic_cast< PrescribedGradient * >( domain->giveBc(1) );
-    if ( !pt ) {
-        OOFEM_ERROR("Incorrect boundary condition, should be prescribed gradient.");
-    }
-
-    FloatArray &cCoords = pt->giveCenterCoordinate();
-    double xbar = cCoords.at(1), ybar = cCoords.at(2), zbar;
-    if ( nsd == 3 ) {
-        zbar = cCoords.at(3);
-    }
-
-    for ( int i = 1; i <= nNodes; i++ ) {
-        Node *n = domain->giveNode(i);
-        FloatArray *coords = n->giveCoordinates();
-        Dof *d1 = n->giveDofWithID(dofType [ 0 ]);
-        Dof *d2 = n->giveDofWithID(dofType [ 1 ]);
-        int k1 = d1->__givePrescribedEquationNumber();
-        int k2 = d2->__givePrescribedEquationNumber();
-        if ( nsd == 2 ) {
-            if ( k1 ) {
-                C->at(k1, 1) = coords->at(1) - xbar;
-                C->at(k1, 3) = coords->at(2) - ybar;
-            }
-
-            if ( k2 ) {
-                C->at(k2, 2) = coords->at(2) - ybar;
-                C->at(k2, 3) = coords->at(1) - xbar;
-            }
-        } else   { // nsd == 3
-            OOFEM_ERROR("COMPLETELY UNTESTED!");
-            Dof *d3 = n->giveDofWithID(dofType [ 2 ]);
-            int k3 = d3->__givePrescribedEquationNumber();
-
-            if ( k1 ) {
-                C->at(k1, 1) = coords->at(1) - xbar;
-                C->at(k1, 4) = coords->at(2) - ybar;
-                C->at(k1, 5) = coords->at(3) - zbar;
-            }
-
-            if ( k2 ) {
-                C->at(k2, 2) = coords->at(2) - ybar;
-                C->at(k2, 4) = coords->at(1) - xbar;
-                C->at(k2, 6) = coords->at(3) - zbar;
-            }
-
-            if ( k3 ) {
-                C->at(k3, 3) = coords->at(3) - zbar;
-                C->at(k3, 5) = coords->at(1) - xbar;
-                C->at(k3, 6) = coords->at(2) - ybar;
-            }
+    // This requires the boundary to be consistent and ordered correctly.
+    for (int i = 1; i <= d->giveNumberOfElements(); ++i) {
+        //BoundaryElement *e = dynamic_cast< BoundaryElement* >(d->giveElement(i));
+        Line2BoundaryElement *e = dynamic_cast< Line2BoundaryElement* >(d->giveElement(i));
+        if (e) {
+            domain_size += e->computeNXIntegral();
         }
     }
+    return domain_size/nsd;
+}
+
+int StokesFlowStressHomogenization :: forceEquationNumbering(int di)
+{
+    int rs = StokesFlow :: forceEquationNumbering(di);
+    // Then mesh is replaced, all the stored structures are trashed.
+    if ( this->K_cf ) {
+        delete this->K_cf;
+        this->K_cf = NULL;
+    }
+    if ( this->K_cc ) {
+        delete this->K_cc;
+        this->K_cc = NULL;
+    }
+    this->C.beEmptyMtrx();
+    return rs;
+}
+
+void StokesFlowStressHomogenization :: updateYourself(TimeStep *tStep)
+{
+    StokesFlow :: updateYourself(tStep);
+    this->C.beEmptyMtrx();
 }
 
 void StokesFlowStressHomogenization :: computeMacroStressFromDirichlet(FloatArray &answer, TimeStep *tStep)
 // stress = C'.R_c
 {
+    double volume;
     int npeq = this->giveNumberOfPrescribedEquations(EID_MomentumBalance_ConservationEquation);
     FloatArray R_c(npeq), R_ext(npeq);
     R_c.zero();
@@ -204,7 +146,23 @@ void StokesFlowStressHomogenization :: computeMacroStressFromDirichlet(FloatArra
     this->assembleVectorFromElements( R_ext, tStep, EID_MomentumBalance_ConservationEquation, LoadVector, VM_Total,
                                      EModelDefaultPrescribedEquationNumbering(), this->giveDomain(1) );
     R_c.subtract(R_ext);
-    answer.beTProductOf(* this->C, R_c);
+    if (!this->C.isNotEmpty()) {
+        this->giveDirichletBC()->updateCoefficientMatrix(this->C);
+    }
+    answer.beTProductOf(this->C, R_c);
+    volume = this->computeSize(1);
+    answer.times(1/volume);
+
+    // DEBUGGING;
+//    FloatArray stress(3); stress.zero();
+//    for (int i = 1; i <= this->giveDomain(1)->giveNumberOfElements(); ++i) {
+//        Tr21Stokes *e = dynamic_cast<Tr21Stokes*>(this->giveDomain(1)->giveElement(i));
+//        if (e) e->computeStressIntegral(stress, tStep);
+//    }
+//    stress.times(1/volume);
+//    answer.printYourself();
+//    stress.printYourself();
+//    OOFEM_ERROR("DEBUG QUIT");
 }
 
 void StokesFlowStressHomogenization :: computeMacroStressTangentFromDirichlet(FloatMatrix &tangent, TimeStep *tStep)
@@ -217,82 +175,44 @@ void StokesFlowStressHomogenization :: computeMacroStressTangentFromDirichlet(Fl
 //   = C'.(K_cc.C - K_cf.a)
 //   = C'.X
 {
-    int neq = this->giveNumberOfEquations(EID_MomentumBalance_ConservationEquation);
-
+    double volume;
     // The matrices at the last step (if the mesh is changed, equations renumbered, these should be removed.)
+    if (!this->C.isNotEmpty()) {
+        this->giveDirichletBC()->updateCoefficientMatrix(this->C);
+    }
     if ( !this->stiffnessMatrix ) {
         OOFEM_ERROR("Trying to compute the tangent before solving the actual problem!");
     }
-
     if ( !this->K_cc ) {
         this->K_cc = CreateUsrDefSparseMtrx(sparseMtrxType);
         this->K_cc->buildInternalStructure( this, 1, EID_MomentumBalance_ConservationEquation,
                                            EModelDefaultPrescribedEquationNumbering(),
                                            EModelDefaultPrescribedEquationNumbering() );
     }
-
     if ( !this->K_cf ) {
         this->K_cf = CreateUsrDefSparseMtrx(sparseMtrxType);
         this->K_cf->buildInternalStructure( this, 1, EID_MomentumBalance_ConservationEquation,
                                            EModelDefaultPrescribedEquationNumbering(),
                                            EModelDefaultEquationNumbering() );
     }
-
     this->K_cc->zero();
     this->assemble( this->K_cc, tStep, EID_MomentumBalance_ConservationEquation,
                    StiffnessMatrix, EModelDefaultPrescribedEquationNumbering(),
                    this->giveDomain(1) );
-
     this->K_cf->zero();
     this->assemble( this->K_cf, tStep, EID_MomentumBalance_ConservationEquation,
                    StiffnessMatrix, EModelDefaultPrescribedEquationNumbering(),
                    EModelDefaultEquationNumbering(), this->giveDomain(1) );
 
-    int dim = this->C->giveNumberOfColumns();
-    FloatMatrix X, K_cfa, K_fcC, a(neq, dim);
-
-    this->K_cf->timesT(* this->C, K_fcC);
-
-    // This could be done in a more efficient way.
-    //nMethod->solve(this->stiffnessMatrix, &K_fcC, a);
-    // I propose to add this routine. Default implementation would be to solve for each column.
-    // But since we can only solve for vectors, we have to copy it up.
-    SparseLinearSystemNM *linMethod = CreateUsrDefSparseLinSolver(ST_Petsc, 1, this->giveDomain(1), this);
-    FloatArray ai(neq), K_fcCi(neq);
-    for ( int i = 0; i < dim; i++ ) {
-        for ( int j = 0; j < neq; j++ ) {
-            K_fcCi(j) = K_fcC(j, i);
-        }
-
-        linMethod->solve(this->stiffnessMatrix, & K_fcCi, & ai);
-        for ( int j = 0; j < neq; j++ ) {
-            a(j, i) = ai(j);
-        }
-    }
-
-    delete(linMethod);
-    this->K_cc->times(* this->C, X);
+    FloatMatrix X, K_cfa, K_fcC, a;
+    this->K_cf->timesT(this->C, K_fcC);
+    this->giveLinearNumericalMethod()->solve(this->stiffnessMatrix, K_fcC, a);
+    this->K_cc->times(this->C, X);
     this->K_cf->times(a, K_cfa);
     X.subtract(K_cfa);
-    tangent.beTProductOf(* this->C, X);
+    tangent.beTProductOf(this->C, X);
+    volume = this->computeSize(1);
+    tangent.times(1/volume);
 }
 
-IRResultType StokesFlowStressHomogenization :: initializeFrom(InputRecord *ir)
-{
-    const char *__proc = "initializeFrom";
-    IRResultType result;
-    int val;
-
-    StokesFlow :: initializeFrom(ir);
-
-    val = ( int ) ST_Petsc;
-    IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_StokesFlow_lstype, "lstype");
-    this->solverType = ( LinSystSolverType ) val;
-
-    val = ( int ) HT_None;
-    IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_StokesFlowStressHomogenization_homogenizationtype, "homogenizationtype");
-    this->ht = ( HomogenizationType ) val;
-
-    return IRRT_OK;
-}
 } // end namespace oofem
