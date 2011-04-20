@@ -103,6 +103,9 @@ enum classType {
     LineSurfaceTensionElementClass,
     Line2SurfaceTensionElementClass,
 
+    BoundaryElementClass,
+    Line2BoundaryElementClass,
+
     TrStructuralElementClass,
     NLStructuralElementClass,
     PlaneStress2dClass,
