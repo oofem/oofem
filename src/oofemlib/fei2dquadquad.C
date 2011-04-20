@@ -140,8 +140,7 @@ FEI2dQuadQuad :: global2local(FloatArray &answer, const FloatArray &gcoords, con
     for (int nite = 0; nite < 10; nite++) {
         // compute the residual
         this->local2global(guess, answer, cellgeo, time);
-        res = gcoords;
-        res.subtract(guess);
+        res.beDifferenceOf(gcoords, guess);
 
         // check for convergence
         error = res.computeNorm();

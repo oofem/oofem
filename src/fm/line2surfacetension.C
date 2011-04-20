@@ -66,18 +66,15 @@ void Line2SurfaceTension :: computeN(FloatArray &answer, const FloatArray &lcoor
 int Line2SurfaceTension :: computeLocalCoordinates(FloatArray &lcoords, const FloatArray &gcoords)
 {
     FloatArray x1_x2, p_x3, x3_x2_x1;
-    x1_x2 = *this->giveNode(1)->giveCoordinates();
-    x1_x2.subtract(*this->giveNode(2)->giveCoordinates());
-    p_x3 = gcoords;
-    p_x3.subtract(*this->giveNode(3)->giveCoordinates());
-    x3_x2_x1 = *this->giveNode(3)->giveCoordinates();
+    x1_x2.beDifferenceOf(*this->giveNode(1)->giveCoordinates(), *this->giveNode(2)->giveCoordinates());
+    p_x3.beDifferenceOf(gcoords, *this->giveNode(3)->giveCoordinates());
+    x3_x2_x1.beDifferenceOf(*this->giveNode(3)->giveCoordinates(), *this->giveNode(1)->giveCoordinates());
     x3_x2_x1.add(*this->giveNode(3)->giveCoordinates());
     x3_x2_x1.subtract(*this->giveNode(2)->giveCoordinates());
-    x3_x2_x1.subtract(*this->giveNode(1)->giveCoordinates());
 
     double b0 = 0.50*x1_x2.dotProduct(p_x3); // 1/2*(x1 - x2).(p - x3)
     double b1 = 0.25*x1_x2.computeSquaredNorm() + x3_x2_x1.dotProduct(p_x3); // 1/4*(x1 - x2)^2 + (2*x3 - x2 - x1).(p - x3)
-    double b2 = 0.75*x1_x2.dotProduct(x3_x2_x1); // 3/4*(x1-x2).(2x3 - x2 - x1)
+    double b2 = 0.75*x1_x2.dotProduct(x3_x2_x1); // 3/4*(x1 - x2).(2x3 - x2 - x1)
     double b3 = 0.50*x3_x2_x1.computeSquaredNorm(); // 1/2*(2*x3 - x2 - x3)^2
 
     double r[3];

@@ -147,8 +147,8 @@ FastMarchingMethod :: updateTrialValue(FloatArray &dmanValues, int id, double F)
     ConnectivityTable *ct = domain->giveConnectivityTable();
 
 
-    // first look for suitable element that can produce admisible value
-    // algorithm limitted to non-obtuse 2d triangulations
+    // first look for suitable element that can produce admissible value
+    // algorithm limited to non-obtuse 2d triangulations
     neighborElemList = ct->giveDofManConnectivityArray(id);
     for ( i = 1; i <= neighborElemList->giveSize(); i++ ) {
         // test element if admissible
@@ -187,11 +187,9 @@ FastMarchingMethod :: updateTrialValue(FloatArray &dmanValues, int id, double F)
                 // b = distance of AC
                 b = cc->distance(ac);
                 // compute fi angle
-                cb = * bc;
-                cb.subtract(*cc);
+                cb.beDifferenceOf(*bc, *cc);
                 cb.normalize();
-                ca = * ac;
-                ca.subtract(*cc);
+                ca.beDifferenceOf(*ac, *cc);
                 ca.normalize();
                 cos_fi = cb.dotProduct(ca);
                 sin_fi = sqrt(1.0 - cos_fi * cos_fi);

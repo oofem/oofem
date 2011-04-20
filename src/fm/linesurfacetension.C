@@ -75,10 +75,8 @@ int LineSurfaceTension :: computeGlobalCoordinates(FloatArray &answer, const Flo
 int LineSurfaceTension :: computeLocalCoordinates(FloatArray &answer, const FloatArray &gcoords)
 {
     FloatArray v, u;
-    v = *this->giveNode(2)->giveCoordinates();
-    v.subtract(*this->giveNode(1)->giveCoordinates());
-    u = gcoords;
-    u.subtract(*this->giveNode(1)->giveCoordinates());
+    u.beDifferenceOf(gcoords, *this->giveNode(1)->giveCoordinates());
+    v.beDifferenceOf(*this->giveNode(2)->giveCoordinates(), *this->giveNode(1)->giveCoordinates());
     answer.resize(1);
     answer(0) = u.dotProduct(v)/(u.computeNorm()*v.computeNorm());
     return true;
@@ -177,9 +175,7 @@ void LineSurfaceTension :: computeLoadVector(FloatArray &answer, ValueModeType m
     node1 = giveNode(1);
     node2 = giveNode(2);
 
-    v = *node2->giveCoordinates();
-    v.subtract(*node1->giveCoordinates());
-
+    v.beDifferenceOf(*node2->giveCoordinates(), *node1->giveCoordinates());
     length = v.computeNorm();
     v.times(1.0/length);
 
@@ -196,8 +192,7 @@ void LineSurfaceTension :: computeLoadVector(FloatArray &answer, ValueModeType m
         answer.at(2) = v.at(2)*t;
         answer.at(3) = -v.at(1)*t - length;
         answer.at(4) = -v.at(2)*t;
-    }
-    else {
+    } else {
         //t = this->giveDomain()->giveCrossSection(1)->give(CS_Thickness); // TODO: Should i use this?
         t = 1.0;
         // In this case simple linear case, the boundary term would cancel out the edge term,

@@ -164,9 +164,9 @@ void Line :: computeTransformationMatrix(FloatMatrix &answer) {
 void Line :: transformIntoPolar(FloatArray *point, FloatArray &answer) {
     FloatArray xp;
     FloatMatrix Qt;
+    FloatArray help;
     this->computeTransformationMatrix(Qt);
-    FloatArray help = * point;
-    help.subtract(* vertices->at(2));
+    help.beDifferenceOf(* point, * vertices->at(2));
     xp.beProductOf(Qt,help);
     answer.resize(2);
     answer.at(1) = xp.computeNorm();

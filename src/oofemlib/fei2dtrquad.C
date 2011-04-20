@@ -175,8 +175,7 @@ FEI2dTrQuad :: global2local(FloatArray &answer, const FloatArray &gcoords, const
     for (int nite = 0; nite < 10; nite++) {
         // compute the residual
         this->local2global(guess, lcoords_guess, cellgeo, time);
-        res = gcoords;
-        res.subtract(guess);
+        res.beDifferenceOf(gcoords, guess);
 
         // check for convergence
         error = res.computeNorm();
