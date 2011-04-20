@@ -311,10 +311,8 @@ QSpace :: computeLoadLSToLRotationMatrix(FloatMatrix &answer, int iSurf, GaussPo
     // determine "average normal"
     for ( i = 1; i <= 4; i++ ) {
         j = ( i ) % 4 + 1;
-        h1 = * domain->giveNode( snodes.at(i) )->giveCoordinates();
-        h1.subtract(gc);
-        h2 = * domain->giveNode( snodes.at(j) )->giveCoordinates();
-        h2.subtract(gc);
+        h1.beDifferenceOf(* domain->giveNode( snodes.at(i) )->giveCoordinates(), gc);
+        h2.beDifferenceOf(* domain->giveNode( snodes.at(j) )->giveCoordinates(), gc);
         n.beVectorProductOf(h1, h2);
         if ( dotProduct(n, n, 3) > 1.e-6 ) {
             n.normalize();

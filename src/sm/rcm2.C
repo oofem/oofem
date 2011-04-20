@@ -259,8 +259,7 @@ RCM2Material ::  giveRealPrincipalStressVector3d(FloatArray &answer, GaussPoint 
     //
     // local strain increment
     status->givePrevPrincStrainVector(prevPrincipalStrain);
-    strainIncrement = principalStrain;
-    strainIncrement.subtract(prevPrincipalStrain);
+    strainIncrement.beDifferenceOf(principalStrain, prevPrincipalStrain);
     status->letPrincipalStrainVectorBe(principalStrain);
 
     this->giveNormalElasticStiffnessMatrix(de, FullForm, TangentStiffness,
@@ -317,8 +316,7 @@ RCM2Material ::  giveRealPrincipalStressVector3d(FloatArray &answer, GaussPoint 
             this->checkIfClosedCracks(gp, crackStrainVector, crackMapping);
 
             // elastic strain component
-            elastStrain = principalStrain;
-            elastStrain.subtract(crackStrainVector);
+            elastStrain.beDifferenceOf(principalStrain, crackStrainVector);
             sigmaEl.beProductOf(de, elastStrain);
             //delete elastStrain;
 
@@ -336,8 +334,7 @@ RCM2Material ::  giveRealPrincipalStressVector3d(FloatArray &answer, GaussPoint 
             //
             // no active crack exist - elastic behaviour
             //
-            elastStrain = principalStrain;
-            elastStrain.subtract(crackStrainVector);
+            elastStrain.beDifferenceOf(principalStrain, crackStrainVector);
             sigmaEl.beProductOf(de, elastStrain);
             sigmaCr.zero();
             //delete elastStrain;

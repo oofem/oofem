@@ -152,8 +152,7 @@ M4Material :: giveRealMicroplaneStressVector(FloatArray &answer,
     // ask status for tempVH parameter
     previousStress = status->giveStressVector();
     previousStrain = status->giveStrainVector();
-    strainIncrement = strain;
-    strainIncrement.subtract( status->giveStrainVector() );
+    strainIncrement.beDifferenceOf(strain, status->giveStrainVector() );
     if ( !previousStress.isNotEmpty() ) {
         previousStress.resize(4);
         previousStress.zero();

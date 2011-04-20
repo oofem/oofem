@@ -201,8 +201,7 @@ PlasticMaterial :: giveRealStressVector(FloatArray &answer,
     // delete elasticModuli;
 
     do {
-        elasticStrainVectorR = strainVectorR;
-        elasticStrainVectorR.subtract(plasticStrainVectorR);
+        elasticStrainVectorR.beDifferenceOf(strainVectorR, plasticStrainVectorR);
         // stress vector in full form due to computational convinience
         //if (fullStressVector) delete fullStressVector;
         this->computeTrialStressIncrement(fullStressVector, gp, elasticStrainVectorR, atTime);

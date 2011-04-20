@@ -119,8 +119,7 @@ PerfectlyPlasticMaterial :: giveRealStressVector(FloatArray &answer, MatResponse
     this->giveStressDependentPartOfStrainVector(reducedStrain, gp, totalStrain,
                                                 atTime, VM_Total);
 
-    reducedStrainIncrement = reducedStrain;
-    reducedStrainIncrement.subtract( status->giveStrainVector() );
+    reducedStrainIncrement.beDifferenceOf(reducedStrain, status->giveStrainVector());
 
     crossSection->giveFullCharacteristicVector(strainIncrement, gp, reducedStrainIncrement);
     //delete reducedStrainIncrement;

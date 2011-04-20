@@ -454,8 +454,7 @@ NLTransientTransportProblem :: assembleAlgorithmicPartOfRhs(FloatArray &answer, 
             element->computeVectorOf(EID_ConservationEquation, VM_Total, previousStep, rp);
 
             //approximate derivative with a difference
-            drdt = rc;
-            drdt.subtract(rp);
+            drdt.beDifferenceOf(rc, rp);
             drdt.times( 1. / currentStep->giveTimeIncrement() );
             //approximate current solution from linear interpolation
             rp.times(1 - alpha);
