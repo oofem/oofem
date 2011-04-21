@@ -41,7 +41,6 @@
 #include "mathfem.h"
 #include "datastream.h"
 #include "contextioerr.h"
-
 #include "util.h"
 
 #include <stdlib.h>
@@ -61,15 +60,16 @@ void FE2SinteringMaterialStatus::setTimeStep(TimeStep *tStep)
 void FE2SinteringMaterial::giveRealStressVector(FloatArray &answer, MatResponseForm form, GaussPoint *gp,
         const FloatArray &strain, TimeStep *tStep)
 {
-    FE2SinteringMaterialStatus *ms = static_cast<FE2SinteringMaterialStatus*> (this->giveStatus(gp));
     FloatMatrix d, tangent;
+    FloatArray strainRate;
+    FE2SinteringMaterialStatus *ms = static_cast<FE2SinteringMaterialStatus*> (this->giveStatus(gp));
 
     ms->setTimeStep(tStep);
 
     // First we construct the prescribed tensor
     double dt = tStep->giveTimeIncrement();
-    FloatArray oldStrain = ms->giveOldStrainVector();
-    FloatArray strainRate = (strain - oldStrain) * (1 / dt); // Since we update the geometry, we need to increment only, and the rate.
+    strainRate.beDifferenceOf(strain, ms->giveStrainVector());
+    strainRate.times(1/dt);
 
     bool success = ms->giveRVE()->computeMacroStress(answer, strainRate, tStep);
 
@@ -99,32 +99,33 @@ void FE2SinteringMaterial::givePlaneStressStiffMtrx(FloatMatrix &answer, MatResp
         rve->computeMacroTangent(answer, tStep);
         answer.times(1 / tStep->giveTimeIncrement());
 
-        // Numerical ATS is just silly.
-        /*
-         FloatArray tempStrain = ms->giveTempStrainVector();
-         FloatArray stress, strain, sig11, sig22, sig12, sig;
-         giveRealStressVector (stress, form, gp, tempStrain, tStep);
-         double h = 0.001; // Linear problem, size of this doesn't matter.
-         strain.resize(3);
-         strain.zero(); strain.at(1) += h;
-         giveRealStressVector (sig11, ReducedForm, gp, strain, tStep);
-         strain.zero(); strain.at(2) += h;
-         giveRealStressVector (sig22, ReducedForm, gp, strain, tStep);
-         strain.zero(); strain.at(3) += h;
-         giveRealStressVector (sig12, ReducedForm, gp, strain, tStep);
+#if 0 // Numerical ATS for debugging
+        FloatArray tempStrain = ms->giveTempStrainVector();
+        FloatArray stress, strain, sig11, sig22, sig12, sig;
+        giveRealStressVector (stress, form, gp, tempStrain, tStep);
+        double h = 0.001; // Linear problem, size of this doesn't matter.
+        strain.resize(3);
+        strain = tempStrain; strain.at(1) += h;
+        giveRealStressVector (sig11, ReducedForm, gp, strain, tStep);
+        strain = tempStrain; strain.at(2) += h;
+        giveRealStressVector (sig22, ReducedForm, gp, strain, tStep);
+        strain = tempStrain; strain.at(3) += h;
+        giveRealStressVector (sig12, ReducedForm, gp, strain, tStep);
 
-         FloatArray dsig11 = (sig11 - stress)*(1/h);
-         FloatArray dsig22 = (sig22 - stress)*(1/h);
-         FloatArray dsig12 = (sig12 - stress)*(1/h);
+        FloatArray dsig11 = (sig11 - stress)*(1/h);
+        FloatArray dsig22 = (sig22 - stress)*(1/h);
+        FloatArray dsig12 = (sig12 - stress)*(1/h);
 
-         FloatMatrix numericalATS;
-         numericalATS.resize(3,3);
-         numericalATS.addSubVectorRow(dsig11,1,1);
-         numericalATS.addSubVectorRow(dsig22,2,1);
-         numericalATS.addSubVectorRow(dsig12,3,1);
-         answer.printYourself();
-         numericalATS.printYourself();
-         */
+        FloatMatrix numericalATS;
+        numericalATS.resize(3,3);
+        numericalATS.zero();
+        numericalATS.addSubVectorRow(dsig11,1,1);
+        numericalATS.addSubVectorRow(dsig22,2,1);
+        numericalATS.addSubVectorRow(dsig12,3,1);
+        answer.printYourself();
+        numericalATS.printYourself();
+        OOFEM_ERROR("QUIT");
+#endif
     } else {
         OOFEM_ERROR("Mode or form not implemented");
     }
@@ -142,15 +143,25 @@ IRResultType FE2SinteringMaterial::initializeFrom(InputRecord *ir)
 {
     const char *__proc = "initializeFrom";
     IRResultType result;
-    printf("Hejsan\n");
     IR_GIVE_FIELD2(ir, this->inputfile, IFT_MicroMaterialFileName, "inputfile", OOFEM_MAX_LINE_LENGTH);
-    printf("svejsan\n");
     return this->StructuralMaterial::initializeFrom(ir);
+}
+
+int FE2SinteringMaterial::giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep)
+{
+    FE2SinteringMaterialStatus *status = static_cast<FE2SinteringMaterialStatus *>(this->giveStatus(gp));
+    if (type == IST_VOFFraction) {
+        answer.resize(1);
+        answer(0) = status->giveVOFFraction();
+        return true;
+    } else {
+        return StructuralMaterial::giveIPValue(answer, gp, type, tStep);
+    }
 }
 
 int FE2SinteringMaterial::giveInputRecordString(std::string &str, bool keyword)
 {
-    return StructuralMaterial::giveInputRecordString(str, keyword);;
+    return StructuralMaterial::giveInputRecordString(str, keyword);
 }
 
 MaterialStatus * FE2SinteringMaterial::CreateStatus(GaussPoint *gp) const
@@ -177,8 +188,8 @@ FE2SinteringMaterialStatus::FE2SinteringMaterialStatus(int n, Domain *d, GaussPo
 
     this->strainVector.resize(size);
     this->strainVector.zero();
-    this->oldStrainVector = this->tempStrainVector = this->strainVector;
-    this->volume = 2.0;
+    this->tempStrainVector = this->strainVector;
+    this->voffraction = 0.0;
 
     if (!this->createRVE(n, gp, inputfile)) {
         OOFEM_ERROR("Couldn't create RVE");
@@ -188,11 +199,6 @@ FE2SinteringMaterialStatus::FE2SinteringMaterialStatus(int n, Domain *d, GaussPo
 // Uses an input file for now, should eventually create the RVE itself.
 bool FE2SinteringMaterialStatus::createRVE(int n, GaussPoint *gp, const char* inputfile)
 {
-    //FloatArray *gc = gp->giveCoordinates();
-    //double cx = gc->at(1);
-    //double cy = gc->at(2);
-    //char inputfile[1024] = "/home/mikael/workspace/OOFEM/4particle_0.84_mesh.in";
-
     OOFEMTXTDataReader dr(inputfile);
     EngngModel *em = InstanciateProblem(&dr, _processor, 0); // Everything but nrsolver is updated.
     dr.finish();
@@ -207,23 +213,32 @@ bool FE2SinteringMaterialStatus::createRVE(int n, GaussPoint *gp, const char* in
     this->rve->giveOutputBaseFileName(tempstring, 1024);
     sprintf(newName, "%s-%d", tempstring, n);
     this->rve->letOutputBaseFileNameBe(newName);
-    this->rve->activateHomogenizationMode(HT_StressDirichlet);
     return true;
 }
 
-void FE2SinteringMaterialStatus::printOutputAt(FILE *file, TimeStep *tNow)
-// Prints the strains and stresses on the data file.
-// Not sure i need this. I already get a lot of data from every gauss point. But the homogenized values might be of interest too.
+void FE2SinteringMaterialStatus::printOutputAt(FILE *file, TimeStep *tStep)
 {
+    StructuralMaterialStatus :: printOutputAt(file, tStep);
 }
 
 void FE2SinteringMaterialStatus::updateYourself(TimeStep *tStep)
 {
-    this->oldStrainVector = this->strainVector;
+    // Must be done before sms updates;
+    FloatArray strainIncrement = this->tempStrainVector;
+    strainIncrement.subtract(this->strainVector);
+
+    double fluid_area = this->rve->giveDomain(1)->giveArea();
+    double total_area = this->rve->computeSize(1);
+    //printf("Fluid area = %e\n",area);
+    this->voffraction = fluid_area/total_area;
+    //double de_vol = strainIncrement.at(1) + strainIncrement.at(2);
+    //this->porosity = 1.0 - (1.0 - this->porosity)*exp(-de_vol);
+    //printf("* porosity = %e\n",this->porosity);
+
     StructuralMaterialStatus::updateYourself(tStep);
-    this->volume += strainVector.at(1) + strainVector.at(2) + strainVector.at(3); // must be after strain is updated.
+
     this->rve->updateYourself(tStep);
-    this->rve->terminate(tStep); // I think updateYourself(tStep) should be part of this.
+    this->rve->terminate(tStep);
 }
 
 void FE2SinteringMaterialStatus::initTempStatus()

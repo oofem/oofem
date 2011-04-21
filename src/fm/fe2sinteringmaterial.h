@@ -46,35 +46,35 @@ namespace oofem {
 class GaussPoint;
 
 /**
- * Class representing material status for the mesoscale sintering material
+ * Class representing material status for the mesoscale sintering material.
  * @author Mikael Öhman
  */
 class FE2SinteringMaterialStatus : public StructuralMaterialStatus
 {
 protected:
-    double volume;
-
-    /// Input file (for now)
-    char file[1024];
+    /// Input file
+    char file[OOFEM_MAX_LINE_LENGTH];
 
     StokesFlowStressHomogenization *rve;
-	FloatArray oldStrainVector;
+
+	double voffraction;
 
 public:
-    /** Creates new material status.
+    /**
+     * Creates new material status.
      * @param n Material status number.
      * @param d Domain that status belongs to.
-     * @param g Gauss point that the status belongs to.
+     * @param gp Gauss point that the status belongs to.
      * @param inputfile The input file describing the micro problem.
+     * @param porosity Initial porosity.
      */
-	FE2SinteringMaterialStatus(int n, Domain *d, GaussPoint *g, const char* inputfile);
+	FE2SinteringMaterialStatus(int n, Domain *d, GaussPoint *gp, const char* inputfile);
     /// Destructor
     ~FE2SinteringMaterialStatus() { delete this->rve; }
 
-    double giveVolume() { return this->volume; }
     StokesFlowStressHomogenization *giveRVE() { return this->rve; }
 
-    FloatArray &giveOldStrainVector() { return this->oldStrainVector; }
+    double giveVOFFraction() { return this->voffraction; }
 
     /// Creates/Initiates the RVE problem.
     bool createRVE(int n, GaussPoint *gp, const char *inputfile);
@@ -82,10 +82,10 @@ public:
     /// Copies time step data to RVE.
     void setTimeStep(TimeStep *tStep);
 
-    void printOutputAt(FILE *, TimeStep *);
+    void printOutputAt(FILE *file, TimeStep *tStep);
 
     virtual void initTempStatus();
-    virtual void updateYourself(TimeStep *);
+    virtual void updateYourself(TimeStep *tStep);
 
     contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
     contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
@@ -116,6 +116,7 @@ public:
 
     virtual void giveRealStressVector (FloatArray &answer, MatResponseForm, GaussPoint *, const FloatArray &, TimeStep *);
     virtual void givePlaneStressStiffMtrx (FloatMatrix &answer, MatResponseForm, MatResponseMode, GaussPoint *gp, TimeStep *atTime);
+    virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
 
     IRResultType initializeFrom(InputRecord *ir);
     virtual int giveInputRecordString(std :: string &str, bool keyword = true);
