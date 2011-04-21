@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -32,10 +32,6 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-//
-// FILE: numericalcmpn.h
-//
-
 #ifndef numericalcmpn_h
 #define numericalcmpn_h
 
@@ -48,8 +44,12 @@ namespace oofem {
  * without changing any code.
  */
 enum NumericalCmpn {
+    InternalRhs,
+    NonLinearLhs,
+    NonLinearRhs_Incremental,
+    // Deprecated:
     LinearEquationLhs,
-    LinearEquationRhs,   /* for linear equation problem in the form Ax=b */
+    LinearEquationRhs,
     LinearEquationSolution,
     EigenValues,
     EigenVectors,
@@ -60,14 +60,11 @@ enum NumericalCmpn {
     ReachedLevel,
     IncrementOfSolution,
     RequiredIterations,
-    NonLinearLhs,
     NonLinearRhs_Total,
-    NonLinearRhs_Incremental,
     InitialNonLinearRhs,
     TotalNonLinearSolution,
     StepLength,
     CurrentLevel,
-    InternalRhs,
     IncrementOfNonlinearSolution,
     InternalState
 };
