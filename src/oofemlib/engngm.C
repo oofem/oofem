@@ -73,7 +73,7 @@
 #include "contextioerr.h"
 #include "xfemmanager.h"
 #include "material.h"
-#ifdef __TM_MODULE //OOFEM transport module
+#ifdef __CEMHYD_MODULE //OOFEM transport module
  #include "cemhydmat.h"
 #endif
 
@@ -883,7 +883,7 @@ EngngModel :: updateYourself(TimeStep *stepN)
             elem->updateYourself(stepN);
             //elem -> printOutputAt(File, stepN) ;
 
-#ifdef __TM_MODULE
+#ifdef __CEMHYD_MODULE
             //store temperature and associated volume on earch GP before performing averaging
             if ( elem->giveMaterial()->giveClassID() == CemhydMatClass ) {
                 TransportElement *element = ( TransportElement * ) elem;
@@ -891,7 +891,6 @@ EngngModel :: updateYourself(TimeStep *stepN)
                 cem->clearWeightTemperatureProductVolume(element);
                 cem->storeWeightTemperatureProductVolume(element, stepN);
             }
-
 #endif
         }
 
@@ -899,7 +898,7 @@ EngngModel :: updateYourself(TimeStep *stepN)
         VERBOSE_PRINT0("Updated Elements ", nelem)
 #  endif
 
-#ifdef __TM_MODULE
+#ifdef __CEMHYD_MODULE
         //perform averaging on each material instance
         for ( j = 1; j <= domain->giveNumberOfMaterialModels(); j++ ) {
             if ( domain->giveMaterial(j)->giveClassID() == CemhydMatClass ) {
@@ -907,7 +906,6 @@ EngngModel :: updateYourself(TimeStep *stepN)
                 cem->averageTemperature();
             }
         }
-
 #endif
 
 #  ifdef VERBOSE

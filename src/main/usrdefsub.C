@@ -268,7 +268,9 @@
  #include "hemotkmat.h"
  #include "hydratingisoheatmat.h"
  #include "hydratinghemomat.h"
+#ifdef __CEMHYD_MODULE
  #include "cemhydmat.h"
+#endif
 #endif //__TM_MODULE
 
 
@@ -733,10 +735,12 @@ Material *CreateUsrDefMaterialOfType(const char *aClass, int number, Domain *dom
         newMaterial = new IsotropicHeatTransferMaterial(number, domain);
     } else if ( !strncasecmp(aClass, "hemotk", 6) ) {
         newMaterial = new HeMoTKMaterial(number, domain);
-    } else if ( !strncmp(aClass, "cemhydmat", 9) ) {
+    }
+#ifdef __CEMHYD_MODULE
+    else if ( !strncmp(aClass, "cemhydmat", 9) ) {
         newMaterial = new CemhydMat(number, domain);
     }
-
+#endif //__CEMHYD_MODULE
 #endif //__TM_MODULE
 
 #if defined( __SM_MODULE ) && defined ( __TM_MODULE )

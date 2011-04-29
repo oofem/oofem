@@ -45,6 +45,10 @@
 #include "elementside.h"
 #include "dof.h"
 
+#ifdef __CEMHYD_MODULE
+#include "cemhydmat.h"
+#endif //__CEMHYD_MODULE
+
 #include "verbose.h"
 #include "conTable.h"
 #include "transportelement.h"
@@ -678,6 +682,7 @@ NonStationaryTransportProblem :: applyIC(TimeStep *stepWhenIcApply)
         }
     }
 
+#ifdef __CEMHYD_MODULE
     // Not relevant in linear case, but needed for CemhydMat for temperature averaging before solving balance equations
     // Update element state according to given ic
     int nelem = domain->giveNumberOfElements();
@@ -704,6 +709,7 @@ NonStationaryTransportProblem :: applyIC(TimeStep *stepWhenIcApply)
             cem->averageTemperature();
         }
     }
+#endif //__CEMHYD_MODULE
 }
 
 

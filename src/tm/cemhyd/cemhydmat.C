@@ -1240,11 +1240,21 @@ void CemhydMatStatus :: QueryStringAttributeExt(TiXmlDocument *xmlFile, const ch
     }
 
     sprintf(key, "key%d", position);
-    success = elemSelected->QueryStringAttribute(key, & str1);
+    //success = elemSelected->QueryStringAttribute(key, & str1);
+    // Since ubuntu/debian is still stuck at 2.5.3, lacking QueryStringAttribute.
+    // Change with above whenever packages are updated.
+    printf("HONK");
+    const char *cstr = elemSelected->Attribute(key);
+    if (cstr) {
+        success = TIXML_SUCCESS;
+    } else {
+        success = TIXML_NO_ATTRIBUTE;
+    }
     if ( success != TIXML_SUCCESS ) {
         printf("Cannot read string value or key %s from the entry %s, terminating, file %s, line %d\n", key, elementName, __FILE__, __LINE__);
         exit(0);
     }
+    str1 = std :: string(cstr);
 
     strcpy( chars, str1.c_str() );
 }

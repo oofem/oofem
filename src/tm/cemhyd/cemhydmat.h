@@ -12,13 +12,11 @@
  #define M_PI 3.1415926535897932384626433832795029L /* pi */
 #endif
 
-#define TINYXML //read CEMHYD3D input file through tinyXML library
-//#define CMLFILE //read CEMHYD3D input file through cmlfile library - outdated, use XML
-
-#ifdef TINYXML
+#ifdef __TINYXML_MODULE
+ #define TINYXML //read CEMHYD3D input file through tinyXML library
  #include "tinyxml.h"
-#endif
-#ifdef CMLFILE
+#else
+ #define CMLFILE //read CEMHYD3D input file through cmlfile library - outdated, use XML
  #include "cmlfile.h"
 #endif
 
