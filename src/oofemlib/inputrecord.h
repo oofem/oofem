@@ -295,6 +295,7 @@ enum InputFieldType {
     IFT_BoundaryCondition_IsImposedTimeFunct,
     IFT_BoundaryCondition_PrescribedValue,
     IFT_GeneralBoundaryCondition_valType,
+    IFT_GeneralBoundaryCondition_defaultDofs,
 
     IFT_PrescribedTensor_centercoords,
     IFT_PrescribedTensor_gradient,
@@ -327,6 +328,7 @@ enum InputFieldType {
     IFT_Domain_nloadtimefunct,
     IFT_Domain_nbarrier,
     IFT_Domain_nrfg,
+    IFT_Domain_topology,
 
     IFT_DofManager_ndofs,
     IFT_DofManager_dofidmask,
@@ -387,8 +389,6 @@ enum InputFieldType {
     IFT_StokesFlow_lstype,
     IFT_StokesFlow_smtype,
     IFT_StokesFlow_deltat,
-
-    IFT_StokesFlowStressHomogenization_homogenizationtype,
 
     IFT_NLStructuralElement_nlgeoflag,
 
@@ -1030,11 +1030,31 @@ enum InputFieldType {
     IFT_XfemManager_numberOfEnrichmentFunctions,
     IFT_XfemManager_name,
 
+    IFT_Identification,
+
     IFT_Circle_center,
     IFT_Circle_radius,
+    IFT_Circle_start,
+    IFT_Circle_end,
 
     IFT_Line_start,
     IFT_Line_end,
+
+    IFT_Point_coords,
+
+    IFT_ParticleTopology_nsd,
+    IFT_ParticleTopology_baseResolution,
+    IFT_ParticleTopology_tubeWidth,
+    IFT_ParticleTopology_neighbors,
+    IFT_ParticleTopology_boundingBoxA,
+    IFT_ParticleTopology_boundingBoxB,
+    IFT_ParticleTopology_numberOfSegments,
+    IFT_ParticleTopology_regionOutside,
+    IFT_ParticleTopology_regionInside,
+
+    IFT_Meshing_elementType,
+    IFT_Meshing_material,
+    IFT_Meshing_bc,
 
     IFT_EnrichmentItem_geometryItemNr,
     IFT_EnrichmentItem_enrichmentFunctionNr,

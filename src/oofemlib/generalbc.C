@@ -114,6 +114,7 @@ GeneralBoundaryCondition :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_GeneralBoundaryCondition_valType, "valtype"); // Macro
     valType = ( bcValType ) val;
 
+    IR_GIVE_OPTIONAL_FIELD(ir, defaultDofs, IFT_GeneralBoundaryCondition_defaultDofs, "defaultdofs"); // Macro
 
     return IRRT_OK;
 }

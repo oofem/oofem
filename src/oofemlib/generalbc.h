@@ -75,6 +75,8 @@ protected:
     int loadTimeFunction;
     /// Physical meaning of BC value.
     bcValType valType;
+    /// Default dofs (for remeshing/adaptivity).
+    IntArray defaultDofs;
 
 public:
 
@@ -109,6 +111,11 @@ public:
      * See cltypes.h file for details.
      */
     virtual bcValType giveBCValType() const { return this->valType; }
+    /**
+     * Array with default dofs which b.c. acts on.
+     * @return Array with dof IDs.
+     */
+    virtual const IntArray& giveDefaultDofs() const { return defaultDofs; }
     /**
      * @return Type of boundary condition. It allows to distinguish BC according its
      * mathematical meaning, ie. like Dirichlet, Neumann, or Newton type.
