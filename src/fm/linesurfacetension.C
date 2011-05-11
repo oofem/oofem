@@ -64,8 +64,7 @@ int LineSurfaceTension :: computeGlobalCoordinates(FloatArray &answer, const Flo
 {
     FloatArray n;
     this->computeN(n, lcoords);
-    answer.resize(2);
-    answer.zero();
+    answer.resize(0);
     for (int i = 1; i <= n.giveSize(); i++) {
         answer.add(n.at(i), *this->giveNode(i)->giveCoordinates());
     }

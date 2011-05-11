@@ -90,13 +90,12 @@ int Line2SurfaceTension :: computeLocalCoordinates(FloatArray &lcoords, const Fl
             // which typically improves the solution by many many orders of magnitude.
             // TODO: Move this to the cubic solver.
             r[i] -= (b0 + b1*r[i] + b2*r[i]*r[i] + b3*r[i]*r[i]*r[i])/(b1 + 2*b2*r[i] + 3*b3*r[i]*r[i]);
-            //printf("r[%d] -> %e\n",i, (b0 + b1*r[i] + b2*r[i]*r[i] + b3*r[i]*r[i]*r[i]));
             p[points] = r[i];
             points++;
         }
     }
 
-    double min_distance2 = 0.0, min_xi, distance2;
+    double min_distance2 = 0.0, min_xi = 0, distance2;
     FloatArray f(2), xi(1);
 
     for (int i = 0; i < points; i++) {

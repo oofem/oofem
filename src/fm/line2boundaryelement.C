@@ -103,7 +103,7 @@ int Line2BoundaryElement :: computeLocalCoordinates(FloatArray &lcoords, const F
         }
     }
 
-    double min_distance2 = 0.0, min_xi, distance2;
+    double min_distance2 = 0.0, min_xi = 0, distance2;
     FloatArray f(2), xi(1);
 
     for (int i = 0; i < points; i++) {
@@ -126,8 +126,7 @@ int Line2BoundaryElement :: computeGlobalCoordinates(FloatArray &answer, const F
 {
     FloatArray n;
     this->computeN(n, lcoords);
-    answer.resize(2);
-    answer.zero();
+    answer.resize(0);
     for (int i = 1; i <= n.giveSize(); ++i) {
         answer.add(n.at(i), *this->giveNode(i)->giveCoordinates());
     }
