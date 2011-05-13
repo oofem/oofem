@@ -113,6 +113,15 @@
  #include "libeam2d.h"
  #include "planstrss.h"
  #include "quad1planestrain.h"
+ #include "qplanestrain.h"
+ #include "qplanestraingrad.h"
+ #include "qtrplanestraingrad.h"
+ #include "qtrplanestrain.h"
+ #include "qtruss1d.h"
+ #include "misesmatgrad.h"
+ #include "misesmatnl.h"
+ #include "qtruss1dgrad.h"
+ #include "qspacegrad.h"
  #include "qplanstrss.h"
  #include "qtrplstr.h"
  #include "lspace.h"
@@ -331,6 +340,14 @@ Element *CreateUsrDefElementOfType(const char *aClass, int number, Domain *domai
 
     if ( !strncasecmp(aClass, "quad1planestrain", 16) ) {
         newElement = new Quad1PlaneStrain(number, domain);
+    } else if ( !strncasecmp(aClass, "qtrplanestraingrad", 18) ) {
+      newElement = new QTrPlaneStrainGrad(number, domain);
+    } else if ( !strncasecmp(aClass, "qtrplanestrain", 14) ) {
+      newElement = new QTrPlaneStrain(number, domain);
+    }else if ( !strncasecmp(aClass, "qplanestraingrad", 16) ) {
+      newElement = new QPlaneStrainGrad(number, domain);
+    } else if ( !strncasecmp(aClass, "qplanestrain", 12) ) {
+      newElement = new QPlaneStrain(number, domain);
     } else if ( !strncasecmp(aClass, "trplanestress2d", 15) ) {
         newElement = new TrPlaneStress2d(number, domain);
     } else if ( !strncasecmp(aClass, "trplanestrrot3d", 15) ) {
@@ -351,6 +368,8 @@ Element *CreateUsrDefElementOfType(const char *aClass, int number, Domain *domai
         newElement = new LSpaceBB(number, domain);
     } else if ( !strncasecmp(aClass, "lspace", 6) ) {
         newElement = new LSpace(number, domain);
+    } else if ( !strncasecmp(aClass, "qspacegrad", 10) ) {
+        newElement = new QSpaceGrad(number, domain);
     } else if ( !strncasecmp(aClass, "qspace", 6) ) {
         newElement = new QSpace(number, domain);
     } else if ( !strncasecmp(aClass, "cctplate3d", 10) ) {
@@ -388,6 +407,10 @@ Element *CreateUsrDefElementOfType(const char *aClass, int number, Domain *domai
         newElement = new LIBeam3d2(number, domain);
     } else if ( !strncasecmp(aClass, "libeam3d", 8) ) {
         newElement = new LIBeam3d(number, domain);
+    } else if ( !strncasecmp(aClass, "qtruss1dgrad", 12) ) {
+        newElement = new QTruss1dGrad(number,domain);
+    } else if ( !strncasecmp(aClass, "qtruss1d", 8) ) {
+        newElement = new QTruss1d(number, domain);
     } else if ( !strncasecmp(aClass, "truss1d", 7) ) {
         newElement = new Truss1d(number, domain);
     } else if ( !strncasecmp(aClass, "interface2dquad", 15) ) {
@@ -705,6 +728,10 @@ Material *CreateUsrDefMaterialOfType(const char *aClass, int number, Domain *dom
         newMaterial = new MicroMaterial(number, domain);
     } else if ( !strncasecmp(aClass, "hyperelmat", 10) ) {
         newMaterial = new HyperElasticMaterial(number, domain);
+    }else if ( !strncasecmp(aClass, "misesmatgrad", 12) ) {
+        newMaterial = new MisesMatGrad(number, domain);
+    } else if ( !strncasecmp(aClass, "misesmatnl", 10) ) {
+        newMaterial = new MisesMatNl(number, domain);
     } else if ( !strncasecmp(aClass, "misesmat", 8) ) {
         newMaterial = new MisesMat(number, domain);
     } else if ( !strncasecmp(aClass, "trabbonenl3d", 12) ) {

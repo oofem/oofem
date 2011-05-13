@@ -707,6 +707,8 @@ protected:
 
     friend class IDNLMaterial;
     friend class TrabBoneNL3D;
+    friend class MisesMatNl;
+    friend class GradDpElement;
 };
 } // end namespace oofem
 #endif // structuralelement_h

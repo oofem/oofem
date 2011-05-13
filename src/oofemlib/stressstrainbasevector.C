@@ -198,6 +198,18 @@ StressStrainBaseVector :: giveReducedSize(MaterialMode mode)
     case _Unknown:
         return 0;
 
+    case _3dMatGrad:
+        return 7;
+      
+    case _PlaneStressGrad:
+        return 4;
+      
+    case _PlaneStrainGrad:
+        return 5;
+      
+    case _1dMatGrad:
+        return 2;
+
     default:
         OOFEM_ERROR2( "StressStrainBaseVector::giveReducedSize : unknown mode (%s)", __MaterialModeToString(mode) );
     }

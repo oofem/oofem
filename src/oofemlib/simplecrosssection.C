@@ -133,12 +133,12 @@ SimpleCrossSection :: giveFullCharacteristicVector(FloatArray &answer,
 
     //if (mode ==  _3dShell) {answer =  strainVector; return ;}
     //if (mode ==  _3dBeam)  {answer =  strainVector; return ;}
-    if ( ( mode == _3dShell ) || ( mode ==  _3dBeam ) || ( mode == _2dPlate ) || ( mode == _2dBeam ) || ( mode == _PlaneStressRot ) ) {
+    if ( ( mode == _3dShell ) || ( mode ==  _3dBeam ) || ( mode == _2dPlate ) || ( mode == _2dBeam ) || ( mode == _PlaneStressRot ) ||(mode == _3dMatGrad)||(mode == _1dMatGrad)||(mode == _PlaneStrainGrad)||(mode == _PlaneStressGrad) ) {
         if ( ( mode == _3dShell ) || ( mode ==  _3dBeam ) || ( mode == _2dPlate ) || ( mode == _2dBeam ) ) {
             answerSize = 12;
         }
 
-        if ( mode == _PlaneStressRot ) {
+        if ( mode == _PlaneStressRot || (mode == _3dMatGrad) || (mode == _1dMatGrad) || (mode == _PlaneStrainGrad) || (mode == _PlaneStressGrad) ) {
             answerSize = 7;
         }
 

@@ -301,6 +301,18 @@ StructuralMaterial :: giveSizeOfReducedStressStrainVector(MaterialMode mode)
     case _1dFiber:
         return 3;
 
+    case _1dMatGrad:
+        return 2;
+
+    case _PlaneStressGrad:
+        return 4;
+
+    case _PlaneStrainGrad:
+        return 5;
+
+    case _3dMatGrad:
+        return 7;
+
     default:
         _error2( "giveSizeOfReducedStressStrainVector : unknown mode (%s)", __MaterialModeToString(mode) );
     }
@@ -430,7 +442,43 @@ StructuralMaterial :: giveStressStrainComponentIndOf(MatResponseForm form, Mater
 
             return ind;
 
+	case _3dMatGrad:
+	    return ind;
+	  
+	case _PlaneStressGrad:
+	  if ( ind == 1 ) {
+	    return 1;
+	  } else if ( ind == 2 ) {
+	    return 2;
+	  } else if ( ind == 3 ) {
+	    return 6;
+	  } else if ( ind == 4 ) {
+	    return 7;
+	  }  
+	  break;
 
+	case _PlaneStrainGrad:
+	  if ( ind == 1 ) {
+	    return 1;
+	  } else if ( ind == 2 ) {
+	    return 2;
+	  } else if ( ind == 3 ) {
+	    return 3;
+	  } else if ( ind == 4 ) {
+	    return 6;
+	  } else if ( ind == 5 ) {
+	    return 7;
+	  }	  
+	  break;
+	  
+	case _1dMatGrad:
+	  if ( ind == 1 ) {
+	    return 1;
+	  } else if (ind == 2){
+	    return 7;
+	  }
+	  break;
+	  
         default:
             _error2( "giveStressStrainComponentIndIn : unknown mode (%s)", __MaterialModeToString(mmode) );
         }
@@ -546,7 +594,46 @@ StructuralMaterial :: giveStressStrainComponentIndOf(MatResponseForm form, Mater
             }
 
             break;
-        default:
+
+	case _3dMatGrad:
+            return ind;
+
+        case _PlaneStressGrad:
+            if ( ind == 1 ) {
+                return 1;
+            } else if ( ind == 2 ) {
+                return 2;
+            } else if ( ind == 6 ) {
+                return 3;
+            } else if ( ind == 7 ) {
+                return 4;
+            }
+            break;
+
+        case _PlaneStrainGrad:
+            if ( ind == 1 ) {
+                return 1;
+            } else if ( ind == 2 ) {
+                return 2;
+            } else if ( ind == 3 ) {
+                return 3;
+            } else if ( ind == 6 ) {
+                return 4;
+            } else if ( ind == 7 ) {
+                return 5;
+            }
+            break;
+
+        case _1dMatGrad:
+            if ( ind == 1 ) {
+                return 1;
+            } else if (ind == 7){
+	      return 2;
+	    }
+            break;
+
+
+                default:
             _error2( "giveStressStrainComponentIndIn : unknown mode (%s)", __MaterialModeToString(mmode) );
         }
 
@@ -664,6 +751,32 @@ StructuralMaterial :: giveStressStrainMask(IntArray &answer, MatResponseForm for
             answer.at(7) = 5;
             answer.at(8) = 4;
             break;
+	case _3dMatGrad:
+	  answer.resize(7);
+	  for ( i = 1; i <= 7; i++ ) {
+	    answer.at(i) = i;
+	  }
+	  break;
+        case _PlaneStressGrad:
+	  answer.resize(4);
+	  answer.at(1) = 1;
+	  answer.at(2) = 2;
+	  answer.at(3) = 6;
+	  answer.at(4) = 7;
+	  break;
+        case _PlaneStrainGrad:
+	  answer.resize(5);
+	  answer.at(1) = 1;
+	  answer.at(2) = 2;
+	  answer.at(3) = 3;
+	  answer.at(4) = 6;
+	  answer.at(5) = 7;
+	  break;
+        case _1dMatGrad:
+	  answer.resize(2);
+	  answer.at(1) = 1;
+	  answer.at(2) = 7;
+	  break;
         default:
             _error2( "giveStressStrainMask : unknown mode (%s)", __MaterialModeToString(mmode) );
         }
@@ -757,6 +870,36 @@ StructuralMaterial :: giveStressStrainMask(IntArray &answer, MatResponseForm for
             answer.at(5) = 7;
             answer.at(4) = 8;
             break;
+	case _3dMatGrad:
+	  answer.resize(7);
+	  answer.zero();
+            for ( i = 1; i <= 7; i++ ) {
+	      answer.at(i) = i;
+            }
+            break;
+        case _PlaneStressGrad:
+	  answer.resize(7);
+	  answer.zero();
+	  answer.at(1) = 1;
+	  answer.at(2) = 2;
+	  answer.at(6) = 3;
+	  answer.at(7) = 4;
+	  break;
+        case _PlaneStrainGrad:
+	  answer.resize(7);
+	  answer.zero();
+	  answer.at(1) = 1;
+	  answer.at(2) = 2;
+	  answer.at(3) = 3;
+	  answer.at(6) = 4;
+	  answer.at(7) = 5;
+	  break;
+        case _1dMatGrad:
+	  answer.resize(7);
+	  answer.zero();
+	  answer.at(1) = 1;
+	  answer.at(7) = 2;
+	  break;
 
         default:
             _error2( "giveStressStrainMask : unknown mode (%s)", __MaterialModeToString(mmode) );

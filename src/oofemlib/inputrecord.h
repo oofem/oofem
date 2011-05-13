@@ -403,6 +403,7 @@ enum InputFieldType {
     IFT_RerShell_nip,
     IFT_QPlaneStress2d_nip,
     IFT_QSpace_nip,
+    IFT_QSpaceGrad_nip,
     IFT_QTrPlaneStress2d_nip,
     IFT_Q4Axisymm_nip,
     IFT_Q4Axisymm_nipfish,
@@ -423,6 +424,10 @@ enum InputFieldType {
     IFT_SpringElement_mode,
     IFT_SpringElement_orientation,
     IFT_SpringElement_springConstant,
+    IFT_QPlaneStrain_nip,
+    IFT_QTrPlaneStrain_nip,
+    IFT_QTruss1d_nip,
+    IFT_QTruss1dGrad_nip,
     
 
     IFT_Quad1_ht_nip,
@@ -791,6 +796,11 @@ enum InputFieldType {
     IFT_MisesMat_h,
     IFT_MisesMat_omega_crit,
     IFT_MisesMat_a,
+    
+    IFT_MisesMatGrad_r,
+    IFT_MisesMatGrad_m,
+
+    IFT_MisesMatNl_averagingtype,
 
     IFT_CohSur3d_kx,
     IFT_CohSur3d_ky,
