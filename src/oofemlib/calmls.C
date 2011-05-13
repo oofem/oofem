@@ -756,7 +756,7 @@ CylindricalALM :: checkConvergence(FloatArray &R, FloatArray *R0, FloatArray &F,
 
 #endif
 	    // loop over element internal Dofs
-	    for (_idofman=1; _idofman<=_ielemptr->giveNumberOfDofManagers(); _idofman++) {
+	    for (_idofman=1; _idofman<=_ielemptr->giveNumberOfInternalDofManagers(); _idofman++) {
 	      _ndof = _ielemptr->giveInternalDofManager(_idofman)->giveNumberOfDofs();
 	      // loop over individual dofs
 	      for ( _idof = 1; _idof <= _ndof; _idof++ ) {
