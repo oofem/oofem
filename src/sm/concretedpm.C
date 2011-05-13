@@ -423,6 +423,8 @@ ConcreteDPM :: giveRealStressVector(FloatArray &answer,
                                     const FloatArray &strainVector,
                                     TimeStep *atTime)
 {
+    FloatArray reducedTotalStrainVector;
+
     if ( matMode == _Unknown ) {
         matMode = gp->giveMaterialMode();
     }
@@ -438,7 +440,10 @@ ConcreteDPM :: giveRealStressVector(FloatArray &answer,
 
     StructuralCrossSection *crossSection = ( StructuralCrossSection * ) gp->giveElement()->giveCrossSection();
 
-    StrainVector strain( strainVector, gp->giveMaterialMode() );
+    // subtract stress-independent part of strain
+    // (due to temperature changes, shrinkage, etc.)
+    this->giveStressDependentPartOfStrainVector(reducedTotalStrainVector, gp, strainVector, atTime, VM_Total);
+    StrainVector strain( reducedTotalStrainVector, gp->giveMaterialMode() );
 
     // perform plasticity return
     performPlasticityReturn(gp, strain);
