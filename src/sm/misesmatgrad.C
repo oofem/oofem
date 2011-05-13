@@ -228,7 +228,7 @@ MisesMatGrad :: give1dStressStiffMtrx(FloatMatrix &answer, MatResponseForm form,
 
   // === plastic loading ===
   // yield stress at the beginning of the step
-  double sigmaY = sig0 + H*tempKappa;
+  // double sigmaY = sig0 + H*tempKappa;
   status->giveTempEffectiveStress(stressVector);
   double stress = stressVector.at(1);
 
@@ -324,7 +324,7 @@ MisesMatGrad::give3dMaterialStiffnessMatrix (FloatMatrix& answer,MatResponseForm
   
      if (dKappa > 0.0)
        {
-	 double tempDamage,damage;
+	 double tempDamage;
 	 nlStatus->giveTempDamage(tempDamage);
 	 double sigmaY = sig0 + H*tempKappa;
 	 // trial deviatoric stress and its norm
@@ -452,7 +452,7 @@ MisesMatGrad::give1dGprime(FloatMatrix& answer,MatResponseForm form,MatResponseM
   double nlKappa;
   double kappa;
   double tempKappa = nlStatus -> giveTempCumulativePlasticStrain();
-  double dKappa = tempKappa-nlStatus -> giveCumulativePlasticStrain();;
+  //double dKappa = tempKappa-nlStatus -> giveCumulativePlasticStrain();;
   FloatArray tempEffStress,strain;
   double gPrime;
   answer.resize(1,1);
@@ -481,9 +481,8 @@ MisesMatGrad :: givePlaneStrainGprime(FloatMatrix& answer,MatResponseForm form,M
   double nlKappa;
   answer.resize(4,1);
   answer.zero();
-  double kappa = nlStatus -> giveCumulativePlasticStrain();
-  double tempKappa = nlStatus -> giveTempCumulativePlasticStrain();
-  double dKappa = tempKappa-kappa;
+  //double kappa = nlStatus -> giveCumulativePlasticStrain();
+  //double tempKappa = nlStatus -> giveTempCumulativePlasticStrain();
   FloatArray tempEffStress;
   double gPrime;
   nlStatus ->giveDamage(damage);
@@ -552,7 +551,6 @@ MisesMatGrad::giveRealStressVector(FloatArray& answer, MatResponseForm form, Gau
   MisesMatGradStatus *nlStatus = (MisesMatGradStatus*) this -> giveStatus (gp);
   this->initGpForNewStep(gp);
 
-  int i;
   double tempDam;
   FloatArray tempEffStress, totalStress, densStress;
   MisesMat::  performPlasticityReturn(gp, totalStrain);

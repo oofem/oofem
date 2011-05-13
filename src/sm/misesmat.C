@@ -164,10 +164,6 @@ MisesMat :: giveRealStressVectorComputedFromDefGrad(FloatArray &answer,
                                           const FloatArray &totalDefGrad,
                                           TimeStep *atTime)
 {
-
-
-  StructuralCrossSection *crossSection = ( StructuralCrossSection * )
-                                           ( gp->giveElement()->giveCrossSection() );
   MisesMatStatus *status = ( MisesMatStatus * ) this->giveStatus(gp);
 
   this->initTempStatus(gp);
@@ -208,9 +204,9 @@ MisesMat :: giveRealStressVectorComputedFromDefGrad(FloatArray &answer,
   help.resize(3,3);
   
   f.times(pow(f.giveDeterminant(),-1./3.));
-  if(f.at(1,1)!=f.at(1,1)){
-    double abcd = 1;
-  }
+  //if(f.at(1,1)!=f.at(1,1)){
+  //  double abcd = 1;
+  //}
   f_T.beTranspositionOf(f);
   ////////////////////////////////////////////////////////////////
   //status->giveLeftCauchyGreen(oldLeftCauchyGreen);
@@ -218,7 +214,6 @@ MisesMat :: giveRealStressVectorComputedFromDefGrad(FloatArray &answer,
   status->giveTempLeftCauchyGreen(oldLeftCauchyGreen);
   help.beProductOf(f,oldLeftCauchyGreen);
   trialLeftCauchyGreen.beProductOf(help,f_T);
-  double test = trialLeftCauchyGreen.giveDeterminant();
   FloatMatrix def,F_T;
   F_T.beTranspositionOf(F);
   def.beProductOf(F,F_T);
@@ -397,8 +392,6 @@ MisesMat :: giveRealStressVectorComputedFromStrain(FloatArray &answer,
                                           const FloatArray &totalStrain,
                                           TimeStep *atTime)
 {
-  StructuralCrossSection *crossSection = ( StructuralCrossSection * )
-                                           ( gp->giveElement()->giveCrossSection() );
   MisesMatStatus *status = ( MisesMatStatus * ) this->giveStatus(gp);
     MaterialMode mode = gp->giveMaterialMode();
   this->initTempStatus(gp);
@@ -413,20 +406,13 @@ MisesMat :: giveRealStressVectorComputedFromStrain(FloatArray &answer,
   status -> setTempDamage(omega);
   status -> letTempStrainVectorBe(totalStrain);
   status -> letTempStressVectorBe(answer);
-    
 }
-
-
 
   void MisesMat::performPlasticityReturn(GaussPoint* gp,const FloatArray &totalStrain)
 {
-  
-    
-
   double kappa, yieldValue, dKappa;
   FloatArray reducedStress;
   FloatArray strain, plStrain;
-  StructuralCrossSection *crossSection = ( StructuralCrossSection * )( gp->giveElement()->giveCrossSection() );
   MaterialMode mode = gp->giveMaterialMode();
   MisesMatStatus *status = ( MisesMatStatus * ) this->giveStatus(gp);
   StressVector fullStress(mode);
@@ -687,7 +673,7 @@ MisesMat :: give1dStressStiffMtrx(FloatMatrix &answer, MatResponseForm form,
 
   // === plastic loading ===
   // yield stress at the beginning of the step
-  double sigmaY = sig0 + H*kappa;
+  // double sigmaY = sig0 + H*kappa;
   status->giveTempEffectiveStress(stressVector);
   double stress = stressVector.at(1);
   answer.resize(1,1);
@@ -1011,7 +997,6 @@ MisesMat :: giveIPValueType(InternalStateType type)
 int
 MisesMat::giveIntVarCompFullIndx(IntArray &answer, InternalStateType type, MaterialMode mmode)
 {
-  
     if ( type == IST_PlasticStrainTensor){
       
       if((mmode == _3dMat)||(mmode == _3dMat_F))
@@ -1042,7 +1027,7 @@ MisesMat::giveIntVarCompFullIndx(IntArray &answer, InternalStateType type, Mater
 	answer.at(1) = 1;
 	return 1;
       }
-    else  return StructuralMaterial :: giveIntVarCompFullIndx(answer, type, mmode);
+    return StructuralMaterial :: giveIntVarCompFullIndx(answer, type, mmode);
 }
 
 

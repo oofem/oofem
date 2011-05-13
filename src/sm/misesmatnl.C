@@ -310,8 +310,6 @@ MisesMatNl :: computeCumPlasticStrain(double &kappa,GaussPoint *gp, TimeStep *at
     this->buildNonlocalPointTable(gp);
     this->updateDomainBeforeNonlocAverage(atTime);
     double localCumPlasticStrain = status->giveLocalCumPlasticStrainForAverage();
-    if(localCumPlasticStrain>0)
-      double xy = 1;
     // compute nonlocal cumulative plastic strain
     dynaList< localIntegrationRecord > *list = this->giveIPIntegrationList(gp); 
     dynaList< localIntegrationRecord > :: iterator pos;
@@ -510,7 +508,7 @@ MisesMatNl :: giveLocalNonlocalStiffnessContribution(GaussPoint *gp, IntArray &l
 	
       }
 
-    
+    return 1;
 }
 
 
@@ -519,9 +517,8 @@ MisesMatNl :: giveRemoteNonlocalStiffnessContribution(GaussPoint *gp, IntArray &
                                                         FloatArray &rcontrib, TimeStep *atTime)
 {
     int ncols, nsize, i, j;
-    double coeff = 0.0, sum,kappa,tempKappa;
+    double sum,kappa,tempKappa;
     MisesMatNlStatus *status = ( MisesMatNlStatus * ) this->giveStatus(gp);
-    StructuralCrossSection *crossSection = ( StructuralCrossSection * ) gp->giveElement()->giveCrossSection();
     StructuralElement *elem = ( StructuralElement * ) ( gp->giveElement() );
     FloatMatrix b;
     FloatArray stress;

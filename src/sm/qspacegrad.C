@@ -133,7 +133,6 @@ QSpaceGrad :: computeNkappaMatrixAt (GaussPoint* aGaussPoint,FloatMatrix& answer
   // Returns the displacement interpolation matrix {N} of the receiver, eva-
   // luated at aGaussPoint.
 {
-  int i;
   FloatArray n(8);
   this->interpolation.evalN (n, *aGaussPoint->giveCoordinates(),FEIElementGeometryWrapper(this), 0.0);
   answer.resize(1,8);
