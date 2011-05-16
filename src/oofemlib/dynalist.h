@@ -65,7 +65,7 @@ public:
  * and comes with default constructor with no parameters.
  * A list does not provide random access. For example to access the fifth element, you must navigate
  * the first forth following the chain of elements. Thus accessing the arbitrary element is very slow.
- * <em>Inserting and removing elements at each position is fast.</em>. The insertion and deletion takes always
+ * THE INSERTING AND REMOVING ELEMENTS AT EACH POSITION IS FAST. The insertion and deletion takes always
  * constant time, no elements are moved, only internal pointers are manipulated.
  * To access elements in a list, you must use iterators. List provide efficient bidirectional iterator.
  */
@@ -107,11 +107,8 @@ public:
      * @param value Value to insert.
      */
     void pushBack(const T &value);
-    /**
-     * Removes all elements (makes container empty)
-     * @param delteObjectFlag Determines if contained objects should be deleted.
-     */
-    void clear(bool deleteObjectFlag = true);
+    /// Removes all elements (makes container empty)
+    void clear();
     /**
      * Removes the element at iterator position and returns the position of next element.
      * @param position Position where to erase.
@@ -217,15 +214,13 @@ template< class T >void dynaList< T > :: pushBack(const T &value)
 }
 
 
-template< class T >void dynaList< T > :: clear(bool deleteObjectFlag)
+template< class T >void dynaList< T > :: clear()
 {
     linkType cur = last->next;
     while ( cur != last ) {
         linkType tmp = cur;
         cur = cur->next;
-        if (deleteObjectFlag) {
-            delete ( tmp );
-        }
+        delete ( tmp );
     }
 
     last->next = last;
