@@ -45,9 +45,9 @@ namespace oofem {
  */
 enum fMode {
     // type of formulation (non-linear computation only)
-    UNKNOWN,
-    TL,      // Total Lagrange
-    AL       // Updated Lagrange
+    UNKNOWN = 0,
+    TL = 1,      // Total Lagrange
+    AL = 2       // Updated Lagrange
 };
 } // end namespace oofem
 #endif // fmode_h
