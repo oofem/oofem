@@ -41,7 +41,7 @@
 #define mathfem_h
 
 #ifndef __MAKEDEPEND
- #include <math.h>
+ #include <cmath>
  #include "error.h"
 #endif
 #include "compiler.h"
@@ -53,6 +53,8 @@ namespace oofem {
 #ifndef HAVE_M_LN2
  #define M_LN2 0.6931471805599453094172321214581766L /* log_e 2 */
 #endif
+
+class FloatArray;
 
 //#ifdef LINUX_PLATFORM
 /**
@@ -104,6 +106,9 @@ inline double clamp(double a, double lower, double upper)
 /// Returns the signum of given value (if value is < 0 returns -1, otherwise returns 1)
 inline double sgn(double i)
 { return ( i < 0. ? -1. : 1. ); }
+/// Returns the cubic root of x.
+//inline double cbrt(double x)
+//{ return sgn(x)*pow(fabs(x),1.0/3.0); }
 
 /// Returns the positive part of given float
 inline double macbra(double x) { return ( x >= 0 ? x : 0 ); }
@@ -125,7 +130,7 @@ inline double negbra(double x) { return ( x <= 0 ? x : 0 ); }
 void cubic(double a, double b, double c, double d, double *r1, double *r2, double *r3, int *num);
 
 /**
- * Solves cubic equation for real roots, assuming that if cubic polynomial given then only possibility
+ * Solves cubic equation for real roots, assuming that if cubic polynomial given then the only possibility
  * is that only three real roots exists. But also accepts cubic coefficient degenerated to
  * quadratic or linear equation.
  * This is used by algorithms for computing principal strain/stresses to
@@ -340,5 +345,14 @@ template< class T >double brent(double ax, double bx, double cx, const T &f,
     xmin = x;
     return fx;
 }
+
+/**
+ * Least-square fit of 2nd degree polynomial @f$ y = a_0 + a_1 x + a_2 x^2 @f$.
+ * @param x X-values.
+ * @param y Y-values.
+ * @param a Computed coefficients.
+ */
+void ls2fit(const FloatArray &x, const FloatArray &y, FloatArray &a);
+
 } // end namespace oofem
 #endif // mathfem_h
