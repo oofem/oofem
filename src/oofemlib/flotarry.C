@@ -145,11 +145,7 @@ void FloatArray :: add(const double factor, const FloatArray &b)
 // Performs the operation a=a+factor*b, where a stands for the receiver. If the
 // receiver's size is 0, adjusts its size to that of b.
 {
-    if ( b.giveSize() == 0 ) {
-        return;
-    }
-
-    if ( !size ) {
+    if ( this->size == 0 ) {
         this->resize(b.size);
         for (int i = 0; i < this->size; ++i){
             this->values[i] = factor*b.values[i];
@@ -441,26 +437,26 @@ void FloatArray :: checkSizeTowards(const IntArray &loc)
 
 
 void FloatArray :: resize(int n, int allocChunk)
-// Expands the receiver up to size n (n is assumed larger than 'size').
-// Initializes all new coefficients to zero.
 {
     int i;
     double *newValues, *p1, *p2;
+
+#ifdef DEBUG
+    if ( allocChunk < 0 ) {
+        OOFEM_FATAL2("FloatArray :: resize - allocChunk must be non-negative; %d", allocChunk);
+    }
+#endif
 
     if ( n <= allocatedSize ) {
         size = n;
         return;
     }
 
-    if ( allocChunk < 0 ) {
-        allocChunk = 0;
-    }
-
     newValues = allocDouble(n + allocChunk);
 #ifdef DEBUG
-        if (!newValues) {
-            OOFEM_FATAL2("FloatArray :: resize - Failed in allocating %d doubles",n+allocChunk);
-        }
+    if (!newValues) {
+        OOFEM_FATAL2("FloatArray :: resize - Failed in allocating %d doubles",n+allocChunk);
+    }
 #endif
     p1 = values;
     p2 = newValues;
@@ -475,7 +471,7 @@ void FloatArray :: resize(int n, int allocChunk)
 
     values = newValues;
     allocatedSize = n + allocChunk;
-    size   = n;
+    size = n;
 }
 
 
@@ -490,9 +486,9 @@ void FloatArray :: hardResize(int n)
 
     newValues = allocDouble(n);
 #ifdef DEBUG
-        if (!newValues) {
-            OOFEM_FATAL2("FloatArray :: hardResize - Failed in allocating %d doubles",n);
-        }
+    if (!newValues) {
+        OOFEM_FATAL2("FloatArray :: hardResize - Failed in allocating %d doubles",n);
+    }
 #endif
     p1 = values;
     p2 = newValues;
