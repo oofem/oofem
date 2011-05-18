@@ -135,6 +135,7 @@ InternalStateValueType giveInternalStateValueType(InternalStateType type)
     case IST_MaxEquivalentStrainLevel:
     case IST_CumPlasticStrain:
     case IST_CumPlasticStrain_2:
+    case IST_DeviatoricStrain:
         return ISVT_TENSOR_S3;
 
     case IST_BeamForceMomentumTensor:

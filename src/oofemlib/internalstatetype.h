@@ -131,6 +131,8 @@ namespace oofem {
     ENUM_ITEM_WITH_VALUE(IST_YoungModulusConcrete, 72) \
     ENUM_ITEM_WITH_VALUE(IST_PoissonRatioConcrete, 73) \
     ENUM_ITEM_WITH_VALUE(IST_VolumetricPlasticStrain, 74) \
+    ENUM_ITEM_WITH_VALUE(IST_DeviatoricStrain, 75) \
+      
 
 enum InternalStateType {
     InternalStateType_DEF
