@@ -75,6 +75,12 @@ public:
      */
     int SpatialLocalizerI_BBoxContainsPoint(const FloatArray &coords);
     /**
+     * Creates a bounding box of the nodes and checks if it includes the given coordinate.
+     * @param bb0 Lower bounding box.
+     * @param bb1 Upper bounding box.
+     */
+    virtual void SpatialLocalizerI_giveBBox(FloatArray &bb0, FloatArray &bb1);
+    /**
      * Check the distance from the parametric center.
      * @param coords Global coordinate.
      * @return Distance of given point from element parametric center.
