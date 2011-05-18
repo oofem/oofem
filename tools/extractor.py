@@ -500,9 +500,9 @@ def match_beamrec (context):
 def check_results (context, tolerance):
     success = 1
     if ( context.parentfilename):
-        header= "Checker.py: "+(os.path.basename(context.parentfilename)+'->'+os.path.basename(context.infilename)).ljust(50)
+        header= "Checker.py: "+(os.path.basename(context.parentfilename)+'->'+os.path.basename(context.infilename)).ljust(55)[:55]
     else :
-        header= "Checker.py: "+(os.path.basename(context.infilename)).ljust(50)
+        header= "Checker.py: "+(os.path.basename(context.infilename)).ljust(55)[:55]
 
     # loop over recVal items
     for irec, rec in enumerate(context.userrec):
