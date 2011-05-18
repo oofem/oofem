@@ -95,15 +95,15 @@ QTrPlaneStrainGrad ::   giveDofManDofIDMask(int inode, EquationID ut, IntArray &
 IRResultType
 QTrPlaneStrainGrad :: initializeFrom(InputRecord *ir)
 {
-  const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
-  IRResultType result;                 // Required by IR_GIVE_FIELD macro
+  //const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
+  //IRResultType result;                 // Required by IR_GIVE_FIELD macro
   this->StructuralElement :: initializeFrom(ir);
-    numberOfGaussPoints = 4;
-    //IR_GIVE_OPTIONAL_FIELD(ir, numberOfGaussPoints, IFT_QPlaneStrain_nip, "nip"); // Macro
+  numberOfGaussPoints = 4;
+  //IR_GIVE_OPTIONAL_FIELD(ir, numberOfGaussPoints, IFT_QPlaneStrain_nip, "nip"); // Macro
 
     
-    this->computeGaussPoints();
-    return IRRT_OK;
+  this->computeGaussPoints();
+  return IRRT_OK;
   this->computeGaussPoints();
   return IRRT_OK;
 }

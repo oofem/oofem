@@ -121,8 +121,8 @@ QPlaneStrain :: computeNmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
 IRResultType
 QPlaneStrain :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
+    //const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
+    //IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     this->Element :: initializeFrom(ir);
     numberOfGaussPoints = 4;
