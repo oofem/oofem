@@ -886,7 +886,7 @@ Element :: computeMeanSize()
 
     case 2: return sqrt(volume);
 
-    case 3: return cbrt(volume);
+    case 3: return pow(volume, 1./3.);
     }
 
     return -1.; // means "cannot be evaluated"

@@ -298,7 +298,7 @@ MisesMatGrad :: givePlaneStrainStiffMtrx(FloatMatrix &answer, MatResponseForm fo
        double nlKappa = effStress.at(5);
        effStress.resize(4);
        double omegaPrime = omega_crit*a*exp(-a*nlKappa);
-       double scalar = -omegaPrime*sqrt(6)*G/(3.*G+H)/trialS;
+       double scalar = -omegaPrime*sqrt(6.0)*G/(3.*G+H)/trialS;
        stiffnessCorrection.beDyadicProductOf(effStress,trialStressDev);
        stiffnessCorrection.times(scalar*(1-mParam));
        answer.add(stiffnessCorrection);
@@ -356,7 +356,7 @@ MisesMatGrad::give3dMaterialStiffnessMatrix (FloatMatrix& answer,MatResponseForm
 	 FloatArray effStress;
 	 nlStatus ->giveTempEffectiveStress(effStress);
 	 double omegaPrime = omega_crit*a*exp(-a*tempKappa);
-	 double scalar = -omegaPrime*sqrt(6)*G/(3.*G+H)/trialS;
+	 double scalar = -omegaPrime*sqrt(6.0)*G/(3.*G+H)/trialS;
 	 stiffnessCorrection.beDyadicProductOf(effStress,trialStressDev);
 	 stiffnessCorrection.times(scalar);
 	 answer.add(stiffnessCorrection);
@@ -412,7 +412,7 @@ MisesMatGrad:: givePlaneStrainKappaMatrix(FloatMatrix& answer,MatResponseForm fo
       answer.at(1,2) = trialStressDev.at(2);
       answer.at(1,3) = trialStressDev.at(3);
       answer.at(1,4) = trialStressDev.at(4);
-      double factor = sqrt(6)*G/(3*G+H)/trialS;
+      double factor = sqrt(6.0)*G/(3*G+H)/trialS;
       answer.times(factor);
     }    
   return;
@@ -436,7 +436,7 @@ MisesMatGrad::give3dKappaMatrix (FloatMatrix& answer,MatResponseForm form,MatRes
       trialS = sqrt(trialS);
       for(int i = 1; i<=6;i++)
 	answer.at(1,i) = trialStressDev.at(i);
-      double factor = sqrt(6)*G/(3*G+H)/trialS;
+      double factor = sqrt(6.0)*G/(3*G+H)/trialS;
       answer.times(factor);
     }    
   return;

@@ -640,7 +640,7 @@ MisesMat :: give3dSSMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseForm
   FloatArray effStress;
   status ->giveTempEffectiveStress(effStress);
   double omegaPrime = omega_crit*a*exp(-a*tempKappa);
-  double scalar = -omegaPrime*sqrt(6)*G/(3.*G+H)/trialS;
+  double scalar = -omegaPrime*sqrt(6.0)*G/(3.*G+H)/trialS;
   stiffnessCorrection.beDyadicProductOf(effStress,trialStressDev);
   stiffnessCorrection.times(scalar);
   answer.add(stiffnessCorrection);
@@ -741,7 +741,7 @@ MisesMat :: givePlaneStrainStiffMtrx(FloatMatrix &answer, MatResponseForm form,
   FloatArray effStress;
   status ->giveTempEffectiveStress(effStress);
   double omegaPrime = omega_crit*a*exp(-a*tempKappa);
-  double scalar = -omegaPrime*sqrt(6)*G/(3.*G+H)/trialS;
+  double scalar = -omegaPrime*sqrt(6.0)*G/(3.*G+H)/trialS;
   stiffnessCorrection.beDyadicProductOf(effStress,trialStressDev);
   stiffnessCorrection.times(scalar);
   answer.add(stiffnessCorrection);
