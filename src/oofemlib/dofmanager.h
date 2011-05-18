@@ -434,11 +434,19 @@ public:
     //@}
 
     /**
-     * Adds a Dof to i-th position in dofArray
-     * @param i
+     * Adds the given Dof into the receiver. The dofID of scheduled DOF should not be present 
+     * in receiver as multiple DOFs with same DofID are not allowed. The given DOF is appended 
+     * at the end of the dofArray.
      * @param dof
      */
-    void addDof(int i, Dof *dof);
+    void appendDof( Dof *dof);
+
+    /**
+     * Removes Dof with given id from dofArray
+     * @param id
+     */
+    void removeDof(DofIDItem id);
+
     /**
      * Checks if receiver contains dof with given ID.
      * @param id Dof ID to check for.

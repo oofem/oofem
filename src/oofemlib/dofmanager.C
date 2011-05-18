@@ -190,40 +190,51 @@ DofManager :: setDof(int i, Dof *dof)
 }
 
 void
-DofManager :: addDof(int i, Dof *dof)
-// adds a Dof to a position i in dofArray
+DofManager :: appendDof(Dof *dof)
+// appends a Dof to the end position in dofArray
 // because dofArray is not resizeable, the data need
 // to be copied out of the dofArray, dofArray deleted
 // and again constructed with new Dof
 {
-    if ( i > numberOfDofs ) {
-        AList< Dof >dofArrayCp;
-        for ( int j = 0; j < numberOfDofs; j++ ) {
-            DofIDItem did = dofArray [ j ]->giveDofID();
-            Dof *dofCp = new MasterDof(j + 1, this, dofArray [ j ]->giveBcId(), dofArray [ j ]->giveIcId(), ( DofID ) did);
-            int eqN = dofArray [ j ]->giveEqn();
-            dofCp->setEquationNumber(eqN);
-            /*
-             *        Dictionary* dn = new Dictionary();
-             *        dofCp->setUnknowns(dn);
-             */
-            dofArrayCp.put(j + 1, dofCp);
-            delete dofArray [ j ];
-        }
+#ifdef DEBUG
+  // check if dofID of DOF to be added not already present
+  if (this->findDofWithDofId(dof->giveDofID()) != 0) {
+    _error3("DofManager::addDof: DOF with dofID %d already present (dofman %d)", dof->giveDofID(), this->number);
+  }
+#endif
 
-        delete [] dofArray;
-        numberOfDofs++;
-        dofArray = new Dof * [ numberOfDofs ];
-        for ( int j = 0; j < numberOfDofs - 1; j++ ) {
-            dofArray [ j ] = dofArrayCp.at(j + 1);
-            dofArrayCp.unlink(j + 1);
-        }
-
-        dofArray [ numberOfDofs - 1 ] = dof;
-    } else {
-        _error("addDof: Overwriting current dof");
-    }
+   Dof **dofArray_new = new Dof * [ numberOfDofs + 1 ];
+   for ( int j = 0; j < numberOfDofs; j++ ) {
+     dofArray_new[j]=dofArray[j];
+   }
+   dofArray_new[numberOfDofs]=dof;
+   delete [] dofArray;
+   this->dofArray = dofArray_new;
+   numberOfDofs++;
 }
+
+void 
+DofManager :: removeDof(DofIDItem id) {
+  int position = this->findDofWithDofId(id);
+  if (position) { // dof id found
+    Dof **dofArray_new = new Dof * [ numberOfDofs - 1 ];
+    for ( int j = 0; j < position-1; j++ ) {
+      dofArray_new[j]=dofArray[j];
+    }
+
+    for ( int j = position; j < numberOfDofs; j++ ) {
+      dofArray_new[j-1]=dofArray[j];
+    }
+    // delete dof
+    delete dofArray[position-1];
+    delete []dofArray;
+    dofArray=dofArray_new;
+    numberOfDofs--;
+  } else {
+    _error2("removeDof::no DOF with dofID %d found", id);
+  }
+}
+
 
 bool DofManager :: hasDofID(int id)
 {
