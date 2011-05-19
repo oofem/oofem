@@ -104,8 +104,8 @@ MisesMatNl::giveRealStressVector(FloatArray& answer, MatResponseForm form, Gauss
 
   double tempDam;
   FloatArray tempEffStress, totalStress;
-
-  performPlasticityReturn(gp, totalStrain);
+  MaterialMode mode = gp->giveMaterialMode();
+  performPlasticityReturn(gp, totalStrain,mode);
   tempDam = this-> computeDamage(gp, atTime);
   nlStatus -> giveTempEffectiveStress(tempEffStress);
   answer = (1-tempDam)*tempEffStress; 
@@ -189,8 +189,8 @@ MisesMatNl :: updateBeforeNonlocAverage(const FloatArray &strainVector, GaussPoi
 
     this->initTempStatus(gp);
     this->initGpForNewStep(gp);
-
-    this->performPlasticityReturn(gp,strainVector);
+    MaterialMode mode = gp->giveMaterialMode();
+    this->performPlasticityReturn(gp,strainVector,mode);
     this->computeLocalCumPlasticStrain(cumPlasticStrain, gp, atTime);
     // standard formulation based on averaging of equivalent strain
     nlstatus->setLocalCumPlasticStrainForAverage(cumPlasticStrain);
@@ -655,5 +655,48 @@ MisesMatNlStatus :: giveInterface(InterfaceType type)
     }
 }
 
+  
+#ifdef __PARALLEL_MODE
+int
+MisesMatNl :: packUnknowns(CommunicationBuffer &buff, TimeStep *stepN, GaussPoint *ip)
+{
+  
+ 
+    MisesMatNlStatus *nlStatus = ( MisesMatNlStatus * ) this->giveStatus(ip);
+
+    this->buildNonlocalPointTable(ip);
+    this->updateDomainBeforeNonlocAverage(stepN);
+
+    return buff.packDouble( nlStatus->giveLocalCumPlasticStrainForAverage() );
+
+ 
+}
+
+int
+MisesMatNl :: unpackAndUpdateUnknowns(CommunicationBuffer &buff, TimeStep *stepN, GaussPoint *ip)
+{
+   
+
+    int result;
+    MisesMatNlStatus *nlStatus = ( MisesMatNlStatus * ) this->giveStatus(ip);
+    double localCumPlasticStrainForAverage;
+
+    result = buff.unpackDouble(localCumPlasticStrainForAverage);
+    nlStatus->setLocalCumPlasticStrainForAverage(localCumPlasticStrainForAverage);
+    return result;
+
+
+}
+
+int
+MisesMatNl :: estimatePackSize(CommunicationBuffer &buff, GaussPoint *ip)
+{
+    // Note: nlStatus localStrainVectorForAverage memeber must be properly sized!
+    // IDNLMaterialStatus *nlStatus = (IDNLMaterialStatus*) this -> giveStatus (ip);
+    return buff.givePackSize(MPI_DOUBLE, 1);
+
+}
+#endif
+  
 
 } // end namespace oofem

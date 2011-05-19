@@ -454,6 +454,16 @@ StrainVector :: applyDeviatoricElasticStiffness(StressVector &stress,
         stress(1) = 2. * GModulus * values [ 1 ];
         stress(2) = 2. * GModulus * values [ 2 ];
         stress(3) = GModulus * values [ 3 ];
+    } else if ( myMode == _PlaneStrainGrad ) {
+        if ( stress.giveStressStrainMode() != _PlaneStrainGrad ) {
+            stress.letStressStrainModeBe(_PlaneStrainGrad);
+        }
+
+        stress(0) = 2. * GModulus * values [ 0 ];
+        stress(1) = 2. * GModulus * values [ 1 ];
+        stress(2) = 2. * GModulus * values [ 2 ];
+        stress(3) = GModulus * values [ 3 ];
+	stress(4) = values[4];
     } else if ( myMode == _3dRotContinuum ) {
         if ( stress.giveStressStrainMode() != _3dRotContinuum ) {
             stress.letStressStrainModeBe(_3dRotContinuum);

@@ -85,13 +85,16 @@ StructuralMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
     MaterialMode mMode = gp->giveMaterialMode();
     switch ( mMode ) {
     case _3dMat:
+    case _3dMatGrad:
     case _3dMat_F: // even if material uses deformation gradient, stiffness is computed in the usual way
         this->give3dMaterialStiffnessMatrix(answer, form, rMode, gp, atTime);
         break;
     case _PlaneStress:
+    case _PlaneStressGrad:
         this->givePlaneStressStiffMtrx(answer, form, rMode, gp, atTime);
         break;
     case _PlaneStrain:
+    case _PlaneStrainGrad:
         this->givePlaneStrainStiffMtrx(answer, form, rMode, gp, atTime);
         break;
     case _1dMat:

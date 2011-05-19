@@ -88,7 +88,7 @@ protected:
 public:
     MisesMat(int n, Domain *d);
     ~MisesMat();
-  void performPlasticityReturn (GaussPoint* gp, const FloatArray& totalStrain);
+  void performPlasticityReturn (GaussPoint* gp, const FloatArray& totalStrain,MaterialMode mode);
   double computeDamage (GaussPoint* gp, TimeStep* atTime);
   double computeDamageParam (double tempKappa,GaussPoint* gp);
   virtual void computeCumPlastStrain (double& kappa, GaussPoint* gp, TimeStep* atTime);

@@ -856,6 +856,7 @@ enum InputFieldType {
     IFT_TrabBone3D_chi0Pos,
     IFT_TrabBone3D_chi0Neg,
     IFT_TrabBone3D_tau0,
+    IFT_TrabBone3D_expp,
     IFT_TrabBone3D_expq,
     IFT_TrabBone3D_plasHardFactor,
     IFT_TrabBone3D_expPlasHard,

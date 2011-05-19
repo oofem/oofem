@@ -526,6 +526,12 @@ StressVector :: applyDeviatoricElasticCompliance(StrainVector &strain,
         strain(1) = 1. / ( 2. * GModulus ) * values [ 1 ];
         strain(2) = 1. / ( 2. * GModulus ) * values [ 2 ];
         strain(3) = 1. / GModulus * values [ 3 ];
+    } else if ( myMode == _PlaneStrainGrad ) {
+        strain(0) = 1. / ( 2. * GModulus ) * values [ 0 ];
+        strain(1) = 1. / ( 2. * GModulus ) * values [ 1 ];
+        strain(2) = 1. / ( 2. * GModulus ) * values [ 2 ];
+        strain(3) = 1. / GModulus * values [ 3 ];
+	strain(4) = values[4];
     } else if ( myMode == _3dRotContinuum ) {
         // Order: r,  theta,  z,  zr
         strain(0) = 1. / ( 2. * GModulus ) * values [ 0 ];
@@ -556,6 +562,10 @@ StressVector :: computeStressNorm() const
         // 2d problem: plane stress
         return sqrt(values [ 0 ] * values [ 0 ] + values [ 1 ] * values [ 1 ] + 2. * values [ 2 ] * values [ 2 ]);
     } else if ( myMode == _PlaneStrain || myMode == _3dRotContinuum ) {
+        //  plane strain or axisymmetry
+        return sqrt(values [ 0 ] * values [ 0 ] + values [ 1 ] * values [ 1 ] + values [ 2 ] * values [ 2 ] +
+                    2. * values [ 3 ] * values [ 3 ]);
+    } else if ( myMode == _PlaneStrainGrad) {
         //  plane strain or axisymmetry
         return sqrt(values [ 0 ] * values [ 0 ] + values [ 1 ] * values [ 1 ] + values [ 2 ] * values [ 2 ] +
                     2. * values [ 3 ] * values [ 3 ]);

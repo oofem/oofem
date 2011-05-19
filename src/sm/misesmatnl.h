@@ -239,7 +239,7 @@ virtual  void give1dStressStiffMtrx(FloatMatrix& answer, MatResponseForm, MatRes
  
   // Determines the width (radius) of limited support of weighting function
   // virtual void giveSupportRadius (double& radius) {radius = this-> R;}
-
+  
 
   #ifdef __PARALLEL_MODE
   // Updates domain before nonloc average (using updateDomainBeforeNonlocAverage service)
@@ -261,7 +261,7 @@ virtual  void give1dStressStiffMtrx(FloatMatrix& answer, MatResponseForm, MatRes
   // Estimates the necessary pack size to hold all packed data of receiver.
   int estimatePackSize (CommunicationBuffer& buff, GaussPoint* ip);
   #endif
-
+  
 
   protected: 
   // Creates the corresponding material status

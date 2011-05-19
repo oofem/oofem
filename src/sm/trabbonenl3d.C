@@ -137,12 +137,12 @@ TrabBoneNL3D :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
     FloatMatrix elasticity, compliance, SSaTensor, secondTerm, thirdTerm, tangentMatrix;
 
     if ( mode == ElasticStiffness ) {
-        this->constructAnisoComplTensor(compliance, m1, m2, ( 3.0 - ( m1 + m2 ) ), rho, eps0, nu0, mu0, expk, expl);
+        this->constructAnisoComplTensor(compliance);
         elasticity.beInverseOf(compliance);
 
         answer = elasticity;
     } else if ( mode == SecantStiffness )     {
-        this->constructAnisoComplTensor(compliance, m1, m2, ( 3.0 - ( m1 + m2 ) ), rho, eps0, nu0, mu0, expk, expl);
+        this->constructAnisoComplTensor(compliance);
         elasticity.beInverseOf(compliance);
         tempDam = nlStatus->giveTempDam();
 
@@ -190,7 +190,7 @@ TrabBoneNL3D :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
             // Import of state variables
             tempDam = nlStatus->giveTempDam();
             // Construction of the tangent stiffness
-            this->constructAnisoComplTensor(compliance, m1, m2, ( 3.0 - ( m1 + m2 ) ), rho, eps0, nu0, mu0, expk, expl);
+            this->constructAnisoComplTensor(compliance);
             elasticity.beInverseOf(compliance);
             answer = elasticity;
             answer.times(1.0 - tempDam);
@@ -307,11 +307,9 @@ TrabBoneNL3D :: giveRemoteNonlocalStiffnessContribution(GaussPoint *gp, IntArray
     StructuralElement *elem = ( StructuralElement * ) ( gp->giveElement() );
 
     int ncols, nsize, i, j;
-    double sum, deltaKappa, beta;
+    double sum, beta;
     FloatArray remoteNu, plasFlowDirec, prodTensor;
     FloatMatrix b, SSaTensor;
-
-    deltaKappa = nlStatus->giveDeltaKappa();
 
     elem->giveLocationArray(rloc, EID_MomentumBalance, s);
     elem->computeBmatrixAt(gp, b);

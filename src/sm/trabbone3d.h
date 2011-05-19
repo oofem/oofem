@@ -74,12 +74,12 @@ protected:
     // STATE VARIABLE DECLARATION
     //
 
-    double kappa, tempKappa, dam, tempDam, tempPSED, tempTSED, tsed, deltaKappa, beta;
-    FloatArray densStress, tempPlasDef, plasDef, effectiveStress, tempEffectiveStress, plasFlowDirec;
+    double kappa, tempKappa, dam, tempDam, tempPSED, tempTSED, tsed, beta;
+    FloatArray tempPlasDef, plasDef, effectiveStress, tempEffectiveStress, plasFlowDirec;
     FloatMatrix smtrx, tangentMatrix, SSaTensor;
+    /// number of substeps in the last iteration 
+    int nss;
 
-    /// trial stress - needed for tangent stiffness
-    FloatArray trialStress;
 public:
 
     /////////////////////////////////////////////////////////////////
@@ -114,9 +114,9 @@ public:
     double giveTempPSED();
     double giveTSED();
     double giveTempTSED();
-    double giveDeltaKappa();
     double giveBeta();
-    void giveTrialEffectiveStress(FloatArray &answer) { answer = trialStress; }
+    int giveNsubsteps() {return nss;}
+
     const FloatArray *givePlasDef();
     const FloatArray *giveTempPlasDef();
     const FloatArray *giveTempEffectiveStress();
@@ -125,12 +125,10 @@ public:
     const FloatMatrix *giveSmtrx();
     const FloatMatrix *giveSSaTensor();
 
-    void letTrialEffectiveStressBe(FloatArray values) { trialStress = values; }
     void setTempKappa(double al) { tempKappa = al; }
     void setTempDam(double da) { tempDam = da; }
     void setTempPSED(double pse) { tempPSED = pse; }
     void setTempTSED(double tse) { tempTSED = tse; }
-    void setDeltaKappa(double la) { deltaKappa = la; }
     void setBeta(double be) { beta = be; }
     void setTempEffectiveStress(FloatArray sc) { tempEffectiveStress = sc; }
     void setTempPlasDef(FloatArray epsip) { tempPlasDef = epsip; }
@@ -138,7 +136,7 @@ public:
     void setSmtrx(FloatMatrix smt) { smtrx = smt; }
     void setTangentMatrix(FloatMatrix tmm) { tangentMatrix = tmm; }
     void setSSaTensor(FloatMatrix ssa) { SSaTensor = ssa; }
-
+    void setNsubsteps(int n) { nss = n; }
 
     /////////////////////////////////////////////////////////////////
     // DEFINITION
@@ -201,6 +199,8 @@ protected:
 
     double m1, m2, rho, eps0, nu0, mu0, expk, expl, sig0Pos, sig0Neg, chi0Pos, chi0Neg, tau0, expq, expp;
     double plasHardFactor, expPlasHard, expDam, critDam, gamDens, tDens, JCrit;
+    int printflag, abaqus, max_num_iter, max_num_substeps;
+    double rel_yield_tol, strain_tol;
 
 public:
 
@@ -221,6 +221,9 @@ public:
     // INITIALIZATION OF FUNCTION/SUBROUTINE
     //
     bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) { return false; }
+    double evaluateCurrentYieldStress(const double kappa);
+    double evaluateCurrentPlasticModulus(const double kappa);
+    bool projectOnYieldSurface(double &tempKappa, FloatArray &tempEffectiveStress, FloatArray &tempPlasDef, const FloatArray &trialEffectiveStress, const FloatMatrix &elasticity, const FloatMatrix &compliance, TrabBone3DStatus *status);
     void performPlasticityReturn(GaussPoint *gp, const FloatArray &totalStrain);
 
     double computeDamageParam(double kappa, GaussPoint *gp);
@@ -234,13 +237,11 @@ public:
     void computeDensificationStress(FloatArray &answer, GaussPoint *gp, const FloatArray &totalStrain, TimeStep *atTime);
 
     // Construct anisotropic compliance tensor.
-    void          constructAnisoComplTensor(FloatMatrix &answer, const double m1, const double m2, const double m3, const double rho, const double eps0, const double nu0, const double mu0,    const double expk, const double expl);
+    void          constructAnisoComplTensor(FloatMatrix &answer);
 
     // Construct anisotropic fabric tensor.
-    void          constructAnisoFabricTensor(FloatMatrix &answer, const double m1, const double m2, const double m3, const double rho, const double sig0, const double chi0, const double tau0, const double expp, const double expq);
+    void          constructAnisoFabricTensor(FloatMatrix &answer, const int posSignFlag);
 
-    // Construct Identity tensor.
-    void         constructIdentityTensor(FloatMatrix &answer);
     // Construct Tensor to adjust Norm.
     void         constructNormAdjustTensor(FloatMatrix &answer);
 
