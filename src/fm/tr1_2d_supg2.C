@@ -2104,7 +2104,7 @@ TR1_2D_SUPG2 :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, Interna
         answer.at(1) = this->giveMaterial()->giveCharacteristicValue(MRM_Density, aGaussPoint, atTime);
         return 1;
     } else {
-        return SUPGElement :: giveIPValue(answer, aGaussPoint, type, atTime);
+        return TR1_2D_SUPG :: giveIPValue(answer, aGaussPoint, type, atTime);
     }
 }
 
@@ -2116,7 +2116,7 @@ TR1_2D_SUPG2 :: giveIntVarCompFullIndx(IntArray &answer, InternalStateType type)
         answer.at(1) = 1;
         return 1;
     } else {
-        return SUPGElement :: giveIntVarCompFullIndx(answer, type);
+        return TR1_2D_SUPG :: giveIntVarCompFullIndx(answer, type);
     }
 }
 
@@ -2127,7 +2127,7 @@ TR1_2D_SUPG2 :: giveIPValueType(InternalStateType type)
     if ( ( type == IST_VOFFraction ) || ( type == IST_Density ) ) {
         return ISVT_SCALAR;
     } else {
-        return SUPGElement :: giveIPValueType(type);
+        return TR1_2D_SUPG :: giveIPValueType(type);
     }
 }
 
@@ -2138,7 +2138,7 @@ TR1_2D_SUPG2 :: giveIPValueSize(InternalStateType type, GaussPoint *gp)
     if ( ( type == IST_VOFFraction ) || ( type == IST_Density ) ) {
         return 1;
     } else {
-        return this->giveCrossSection()->giveIPValueSize(type, gp);
+      return TR1_2D_SUPG::giveIPValueSize(type, gp);
     }
 }
 

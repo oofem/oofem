@@ -335,35 +335,82 @@ SUPGElement :: giveInternalStateAtNode(FloatArray &answer, InternalStateType typ
 
 #endif
 
-int
-SUPGElement :: giveIntVarCompFullIndx(IntArray &answer, InternalStateType type)
+int 
+SUPGElement::giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep) 
 {
-    if ( ( type == IST_Velocity ) ) {
-        IntArray mask;
-        int indx = 1;
-        answer.resize(3);
-        this->giveElementDofIDMask(EID_MomentumBalance, mask);
-        if ( mask.findFirstIndexOf(V_u) ) {
-            answer.at(1) = indx++;
-        }
-
-        if ( mask.findFirstIndexOf(V_v) ) {
-            answer.at(2) = indx++;
-        }
-
-        if ( mask.findFirstIndexOf(V_w) ) {
-            answer.at(3) = indx++;
-        }
-
-        return 1;
-    } else if ( type == IST_Pressure ) {
-        answer.resize(1);
-        answer.at(1) = 1;
-        return 1;
-    } else {
-        return Element :: giveIntVarCompFullIndx(answer, type);
-    }
+  if ( type == IST_DeviatoricStrain ) {
+    this->computeDeviatoricStrain (answer, gp, tStep);
+    return 1;
+  } else if ( type == IST_DeviatoricStress ) {
+    this->computeDeviatoricStress (answer, gp, tStep);
+    return 1;
+  } else {
+    return FMElement::giveIPValue(answer, gp, type, tStep);
+  }
 }
+
+int 
+SUPGElement::giveIPValueSize(InternalStateType type, GaussPoint *gp)
+{
+  MaterialMode mmode = gp->giveMaterialMode();
+  if ( ( type == IST_DeviatoricStrain ) || (type == IST_DeviatoricStress) ) {
+      if ( mmode == _2dFlow ) {
+	return 3;
+      } else if (mmode == _2dAxiFlow ) {
+	return 4;
+      } else if (mmode == _3dFlow ) {
+	return 6;
+      } else {
+	OOFEM_ERROR ("SUPGElement::giveIPValueSize: material mode not supported");
+	return 0;
+      }
+  } else {
+    return FMElement::giveIPValueSize(type, gp);
+  }
+}
+
+InternalStateValueType
+SUPGElement::giveIPValueType(InternalStateType type)
+{
+  if ( ( type == IST_DeviatoricStrain ) || (type == IST_DeviatoricStress ) ) {
+    return ISVT_TENSOR_S3;
+  } else {
+    return FMElement::giveIPValueType(type);
+  }
+}
+
+int
+SUPGElement::giveIntVarCompFullIndx(IntArray &answer, InternalStateType type)
+{
+  MaterialMode mmode = this->giveMaterialMode();
+  if ( ( type == IST_DeviatoricStrain ) || ( type == IST_DeviatoricStress ) ) {
+      if ( mmode == _2dFlow ) {
+	answer.resize(6);
+	answer.at(1) = 1;
+	answer.at(2) = 2;
+	answer.at(6) = 3;
+	return 1;
+      } else if (mmode == _2dAxiFlow ) {
+	answer.resize(6);
+	answer.at(1) = 1;
+	answer.at(2) = 2;
+	answer.at(3) = 3;
+	answer.at(6) = 4;
+	return 1;
+      } else if (mmode == _3dFlow ) {
+	answer.resize(6);
+	int i;
+	for (i=1; i<=6; i++) answer.at(i) = i;
+	return 1;
+      } else {
+	OOFEM_ERROR ("FluidDynamicMaterial :: giveIntVarCompFullIndx: material mode not supported");
+	return 0;
+      }
+  } else {
+    return FMElement::giveIntVarCompFullIndx(answer, type);
+  }
+}
+
 
 /*
  * void

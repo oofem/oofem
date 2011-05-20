@@ -101,6 +101,7 @@ public:
     const char *giveClassName() const { return "TR21_2D_SUPG"; }
     classType                giveClassID() const { return SUPGElementClass; }
     Element_Geometry_Type giveGeometryType() const { return EGT_triangle_2; }
+    MaterialMode giveMaterialMode() { return _2dFlow; }
 
     virtual void giveElementDofIDMask(EquationID, IntArray & answer) const;
     virtual void           giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const;

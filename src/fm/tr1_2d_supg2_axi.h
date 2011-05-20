@@ -142,6 +142,7 @@ public:
     // definition
     const char *giveClassName() const { return "TR1_2D_SUPG_AXI"; }
     classType                giveClassID() const { return SUPGElementClass; }
+    MaterialMode giveMaterialMode() { return _2dAxiFlow; }
     IRResultType           initializeFrom(InputRecord *ir);
     /**
      * Computes the global coordinates from given element's local coordinates.

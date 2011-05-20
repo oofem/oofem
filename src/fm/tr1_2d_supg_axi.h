@@ -125,7 +125,7 @@ public:
     // definition
     const char *giveClassName() const { return "TR1_2D_SUPG_AXI"; }
     classType                giveClassID() const { return SUPGElementClass; }
-
+    MaterialMode giveMaterialMode() { return _2dAxiFlow; }
 protected:
     void                  computeGaussPoints();
     virtual void computeDeviatoricStrain(FloatArray &answer, GaussPoint *gp, TimeStep *);

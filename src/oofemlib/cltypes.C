@@ -136,6 +136,7 @@ InternalStateValueType giveInternalStateValueType(InternalStateType type)
     case IST_CumPlasticStrain:
     case IST_CumPlasticStrain_2:
     case IST_DeviatoricStrain:
+    case IST_DeviatoricStress:
         return ISVT_TENSOR_S3;
 
     case IST_BeamForceMomentumTensor:
@@ -190,6 +191,7 @@ InternalStateValueType giveInternalStateValueType(InternalStateType type)
     case IST_PoissonRatioVirginPaste:
     case IST_YoungModulusConcrete:
     case IST_PoissonRatioConcrete:
+    case IST_Viscosity:
         return ISVT_SCALAR;
 
     default:

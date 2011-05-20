@@ -163,12 +163,9 @@ public:
     const char *giveClassName() const { return "SUPGElement"; }
     classType                giveClassID() const { return SUPGElementClass; }
 
-    /**
-     * Returns the mask of reduced indexes of Internal Variable component .
-     * @param answer mask of Full VectorSize, with components beeing the indexes to reduced form vectors.
-     * @param type determines the internal variable requested (physical meaning)
-     * @returns nonzero if ok or error is generated for unknown mat mode.
-     */
+    virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
+    virtual int giveIPValueSize(InternalStateType type, GaussPoint *gp);
+    virtual InternalStateValueType giveIPValueType(InternalStateType type);
     virtual int giveIntVarCompFullIndx(IntArray &answer, InternalStateType type);
 
 #ifdef __OOFEG

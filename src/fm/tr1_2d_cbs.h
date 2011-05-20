@@ -125,6 +125,7 @@ public:
     const char *giveClassName() const { return "CBSElement"; }
     classType                giveClassID() const { return CBSElementClass; }
     Element_Geometry_Type giveGeometryType() const { return EGT_triangle_1; }
+    MaterialMode giveMaterialMode() { return _2dFlow; }
 
     virtual void giveElementDofIDMask(EquationID, IntArray & answer) const;
     virtual void           giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const;

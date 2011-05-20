@@ -791,7 +791,7 @@ Q10_2D_SUPG :: giveIPValueSize(InternalStateType type, GaussPoint *gp)
     if ( ( type == IST_VOFFraction ) || ( type == IST_Density ) ) {
         return 1;
     } else {
-        return this->giveCrossSection()->giveIPValueSize(type, gp);
+      return SUPGElement::giveIPValueSize(type, gp);
     }
 }
 

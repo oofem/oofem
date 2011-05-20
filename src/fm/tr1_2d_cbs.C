@@ -1201,7 +1201,7 @@ TR1_2D_CBS :: giveIPValueType(InternalStateType type)
 int
 TR1_2D_CBS :: giveIPValueSize(InternalStateType type, GaussPoint *gp)
 {
-    return this->giveCrossSection()->giveIPValueSize(type, gp);
+  return CBSElement::giveIPValueSize(type, gp);
 }
 
 

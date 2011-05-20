@@ -135,6 +135,7 @@ public:
     Element_Geometry_Type giveGeometryType() const { return EGT_triangle_2; }
     const char *giveClassName() const { return "Tr21Stokes"; }
     classType giveClassID() const { return Tr21StokesElementClass; }
+    MaterialMode giveMaterialMode() { return _2dFlow; }
 
     /// @see Element::computeNumberOfDofs
     virtual int computeNumberOfDofs(EquationID ut);

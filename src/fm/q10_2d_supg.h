@@ -88,6 +88,7 @@ public:
     const char *giveClassName() const { return "Q10_2D_SUPG"; }
     classType                giveClassID() const { return SUPGElementClass; }
     Element_Geometry_Type giveGeometryType() const { return EGT_quad_1; }
+    MaterialMode giveMaterialMode() { return _2dFlow; }
 
     virtual void giveInternalDofManDofIDMask(int i, EquationID, IntArray & answer) const;
     virtual void           giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const;

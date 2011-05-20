@@ -80,7 +80,7 @@ public:
     const char *giveClassName() const { return "PY1_3D_SUPG"; }
     classType                giveClassID() const { return SUPGElementClass; }
     Element_Geometry_Type giveGeometryType() const { return EGT_tetra_1; }
-
+    MaterialMode giveMaterialMode() { return _3dFlow; }
     virtual void giveElementDofIDMask(EquationID, IntArray & answer) const;
     virtual void           giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const;
     virtual int            computeNumberOfDofs(EquationID ut);

@@ -1616,27 +1616,27 @@ TR21_2D_SUPG :: updateYourself(TimeStep *tStep)
 int
 TR21_2D_SUPG :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime)
 {
-    return SUPGElement :: giveIPValue(answer, aGaussPoint, type, atTime);
+    return SUPGElement2 :: giveIPValue(answer, aGaussPoint, type, atTime);
 }
 
 int
 TR21_2D_SUPG :: giveIntVarCompFullIndx(IntArray &answer, InternalStateType type)
 {
-    return SUPGElement :: giveIntVarCompFullIndx(answer, type);
+    return SUPGElement2 :: giveIntVarCompFullIndx(answer, type);
 }
 
 
 InternalStateValueType
 TR21_2D_SUPG :: giveIPValueType(InternalStateType type)
 {
-    return SUPGElement :: giveIPValueType(type);
+    return SUPGElement2 :: giveIPValueType(type);
 }
 
 
 int
 TR21_2D_SUPG :: giveIPValueSize(InternalStateType type, GaussPoint *gp)
 {
-    return this->giveCrossSection()->giveIPValueSize(type, gp);
+  return SUPGElement2::giveIPValueSize(type, gp);
 }
 
 
