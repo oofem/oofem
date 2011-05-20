@@ -75,8 +75,8 @@ Interface *
 QTrPlaneStrain :: giveInterface(InterfaceType interface)
 {
     //if (interface == NodalAveragingRecoveryModelInterfaceType) return (NodalAveragingRecoveryModelInterface*) this;
-    if (interface == ZZNodalRecoveryModelInterfaceType){
-        return (ZZNodalRecoveryModelInterface*) this;
+    if ( interface == ZZNodalRecoveryModelInterfaceType ) {
+        return ( ZZNodalRecoveryModelInterface * ) this;
     } else if ( interface == SPRNodalRecoveryModelInterfaceType ) {
         return ( SPRNodalRecoveryModelInterface * ) this;
     } else if ( interface == SpatialLocalizerInterfaceType ) {
@@ -125,7 +125,7 @@ QTrPlaneStrain :: initializeFrom(InputRecord *ir)
     numberOfGaussPoints = 4;
     IR_GIVE_OPTIONAL_FIELD(ir, numberOfGaussPoints, IFT_QTrPlaneStrain_nip, "nip"); // Macro
 
-   
+
     this->computeGaussPoints();
     return IRRT_OK;
 }
@@ -445,56 +445,58 @@ QTrPlaneStrain :: drawSpecial(oofegGraphicContext &gc)
 int
 QTrPlaneStrain :: ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type)
 {
-     if ((type == IST_StressTensor)||(type ==IST_StrainTensor) || ( type == IST_DamageTensor )) return 3;
+    if ( ( type == IST_StressTensor ) || ( type == IST_StrainTensor ) || ( type == IST_DamageTensor ) ) {
+        return 3;
+    }
 
-     GaussPoint *gp = integrationRulesArray[0]-> getIntegrationPoint(0) ;
-     return this->giveIPValueSize (type, gp);
+    GaussPoint *gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
+    return this->giveIPValueSize(type, gp);
 }
 
 
 void
-QTrPlaneStrain :: ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx (FloatMatrix& answer, GaussPoint* aGaussPoint, InternalStateType type)
- {
- // evaluates N matrix (interpolation estimated stress matrix)
- // according to Zienkiewicz & Zhu paper
- // N(nsigma, nsigma*nnodes)
- // Definition : sigmaVector = N * nodalSigmaVector
-     int i;
-     FloatArray n;
+QTrPlaneStrain :: ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatMatrix &answer, GaussPoint *aGaussPoint, InternalStateType type)
+{
+    // evaluates N matrix (interpolation estimated stress matrix)
+    // according to Zienkiewicz & Zhu paper
+    // N(nsigma, nsigma*nnodes)
+    // Definition : sigmaVector = N * nodalSigmaVector
+    int i;
+    FloatArray n;
 
-     this->interpolation.evalN(n, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0);
+    this->interpolation.evalN(n, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0);
 
-     if (this->giveIPValueSize(type, aGaussPoint)){
-         answer.resize(1,6) ;
-     } else {
-         return;
-     }
-     
-     for ( i = 1; i <= 6; i++ ) {
+    if ( this->giveIPValueSize(type, aGaussPoint) ) {
+        answer.resize(1, 6);
+    } else {
+        return;
+    }
+
+    for ( i = 1; i <= 6; i++ ) {
         answer.at(1, i)  = n.at(i);
-     }
+    }
 
-//  double l1,l2,l3;
-//  l1 = aGaussPoint -> giveCoordinate(1);
-//  l2 = aGaussPoint -> giveCoordinate(2);
-//  l3 = 1.0 - l1 - l2;
-// 
-//  if (this->giveIPValueSize(type, aGaussPoint)){
-//      answer.resize(1,6) ;
-//  } else {
-//      return;
-//  }
-// 
-//  answer.at(1,1)  = (2.*l1-1.)*l1;
-//  answer.at(1,2)  = (2.*l2-1.)*l2;
-//  answer.at(1,3)  = (2.*l3-1.)*l3;
-//  answer.at(1,4)  = 4.*l1*l2;
-//  answer.at(1,5)  = 4.*l2*l3;
-//  answer.at(1,6)  = 4.*l3*l1;
+    //  double l1,l2,l3;
+    //  l1 = aGaussPoint -> giveCoordinate(1);
+    //  l2 = aGaussPoint -> giveCoordinate(2);
+    //  l3 = 1.0 - l1 - l2;
+    //
+    //  if (this->giveIPValueSize(type, aGaussPoint)){
+    //      answer.resize(1,6) ;
+    //  } else {
+    //      return;
+    //  }
+    //
+    //  answer.at(1,1)  = (2.*l1-1.)*l1;
+    //  answer.at(1,2)  = (2.*l2-1.)*l2;
+    //  answer.at(1,3)  = (2.*l3-1.)*l3;
+    //  answer.at(1,4)  = 4.*l1*l2;
+    //  answer.at(1,5)  = 4.*l2*l3;
+    //  answer.at(1,6)  = 4.*l3*l1;
 
- return ;
- }
- 
+    return;
+}
+
 
 int
 QTrPlaneStrain :: SPRNodalRecoveryMI_giveDofManRecordSize(InternalStateType type)
@@ -576,8 +578,8 @@ QTrPlaneStrain :: DirectErrorIndicatorRCI_giveCharacteristicSize() {
 
 int
 QTrPlaneStrain :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAt(ValueModeType mode,
-                                                                     TimeStep *stepN, const FloatArray &coords,
-                                                                     FloatArray &answer)
+                                                                   TimeStep *stepN, const FloatArray &coords,
+                                                                   FloatArray &answer)
 {
     FloatArray lcoords, u, nn;
     FloatMatrix n(2, 12);

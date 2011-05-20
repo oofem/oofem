@@ -47,15 +47,14 @@
 #include "flotmtrx.h"
 
 namespace oofem {
-
 class GaussPoint;
 class Domain;
 
 class MisesMat : public StructuralMaterial
 {
     /*
-     * This class implements an isotropic elastoplastic material 
-     * with Mises yield condition, associated flow rule 
+     * This class implements an isotropic elastoplastic material
+     * with Mises yield condition, associated flow rule
      * and linear isotropic hardening.
      *
      * It differs from other similar materials (such as J2Mat)
@@ -76,22 +75,22 @@ protected:
     double K;
 
     /// hardening modulus
-    double H;   
- 
-    /// initial (uniaxial) yield stress 
-    double sig0; 
+    double H;
 
-/*********************************************************/
+    /// initial (uniaxial) yield stress
+    double sig0;
+
+    /*********************************************************/
     double omega_crit;
     double a;
-/*************************************************************/
+    /*************************************************************/
 public:
     MisesMat(int n, Domain *d);
     ~MisesMat();
-  void performPlasticityReturn (GaussPoint* gp, const FloatArray& totalStrain,MaterialMode mode);
-  double computeDamage (GaussPoint* gp, TimeStep* atTime);
-  double computeDamageParam (double tempKappa,GaussPoint* gp);
-  virtual void computeCumPlastStrain (double& kappa, GaussPoint* gp, TimeStep* atTime);
+    void performPlasticityReturn(GaussPoint *gp, const FloatArray &totalStrain, MaterialMode mode);
+    double computeDamage(GaussPoint *gp, TimeStep *atTime);
+    double computeDamageParam(double tempKappa, GaussPoint *gp);
+    virtual void computeCumPlastStrain(double &kappa, GaussPoint *gp, TimeStep *atTime);
     /// specifies whether a given material mode is supported by this model
     int hasMaterialModeCapability(MaterialMode mode);
 
@@ -114,13 +113,13 @@ public:
     /// creates a new material status  corresponding to this class
     MaterialStatus *CreateStatus(GaussPoint *gp) const;
 
-    /// evaluates the material stiffness matrix 
+    /// evaluates the material stiffness matrix
     void give3dMaterialStiffnessMatrix(FloatMatrix & answer,
-                                               MatResponseForm, MatResponseMode,
-                                               GaussPoint * gp,
-                                               TimeStep * atTime);
+                                       MatResponseForm, MatResponseMode,
+                                       GaussPoint * gp,
+                                       TimeStep * atTime);
 
-    /// evaluates the stress 
+    /// evaluates the stress
     void giveRealStressVector(FloatArray & answer,  MatResponseForm, GaussPoint *,
                               const FloatArray &, TimeStep *);
 
@@ -142,56 +141,55 @@ public:
      */
     //    int giveIntVarCompFullIndx(IntArray &answer, InternalStateType type, MaterialMode mmode);
 
- protected:
+protected:
 
     /// evaluates the stress from strain E
     void giveRealStressVectorComputedFromStrain(FloatArray & answer,  MatResponseForm, GaussPoint *,
-						const FloatArray & E, TimeStep *);
-    
+                                                const FloatArray & E, TimeStep *);
+
     /// evaluates the stress from deformation gradient F
     void giveRealStressVectorComputedFromDefGrad(FloatArray & answer,  MatResponseForm, GaussPoint *,
-						 const FloatArray & F, TimeStep *);
-    
-    /// converts the deformation gradient F into the Green-Lagrange strain E 
-    void convertDefGradToGLStrain(const FloatMatrix & F, FloatMatrix & E);
-    void computeGLPlasticStrain(const FloatMatrix& F, FloatMatrix& Ep, FloatMatrix b, double J);
- 
+                                                 const FloatArray & F, TimeStep *);
 
- void give3dSSMaterialStiffnessMatrix(FloatMatrix & answer,
-                                               MatResponseForm, MatResponseMode,
-                                               GaussPoint * gp,
-                                               TimeStep * atTime);
-  void give1dStressStiffMtrx(FloatMatrix& answer, MatResponseForm, MatResponseMode,GaussPoint * gp,TimeStep * atTime);
-  void givePlaneStrainStiffMtrx(FloatMatrix& answer,MatResponseForm, MatResponseMode,GaussPoint * gp,TimeStep * atTime);
-  void give3dLSMaterialStiffnessMatrix(FloatMatrix & answer,
-                                               MatResponseForm, MatResponseMode,
-                                               GaussPoint * gp,
-                                               TimeStep * atTime);
+    /// converts the deformation gradient F into the Green-Lagrange strain E
+    void convertDefGradToGLStrain(const FloatMatrix &F, FloatMatrix &E);
+    void computeGLPlasticStrain(const FloatMatrix &F, FloatMatrix &Ep, FloatMatrix b, double J);
 
- virtual int giveIPValue (FloatArray& answer, GaussPoint* aGaussPoint, InternalStateType type, TimeStep* atTime);
 
- /**
-  Returns the mask of reduced indexes of Internal Variable component .
-  @param answer mask of Full VectorSize, with components beeing the indexes to reduced form vectors.
-  @param type determines the internal variable requested (physical meaning)
-  @returns nonzero if ok or error is generated for unknown mat mode.
-  */
- virtual int giveIntVarCompFullIndx (IntArray& answer, InternalStateType type, MaterialMode mmode);
+    void give3dSSMaterialStiffnessMatrix(FloatMatrix & answer,
+                                         MatResponseForm, MatResponseMode,
+                                         GaussPoint * gp,
+                                         TimeStep * atTime);
+    void give1dStressStiffMtrx(FloatMatrix & answer, MatResponseForm, MatResponseMode, GaussPoint * gp, TimeStep * atTime);
+    void givePlaneStrainStiffMtrx(FloatMatrix & answer, MatResponseForm, MatResponseMode, GaussPoint * gp, TimeStep * atTime);
+    void give3dLSMaterialStiffnessMatrix(FloatMatrix & answer,
+                                         MatResponseForm, MatResponseMode,
+                                         GaussPoint * gp,
+                                         TimeStep * atTime);
 
- /**
-  Returns the type of internal variable (scalar, vector, tensor,...).
-  @param type determines the type of internal variable
-  @returns type of internal variable
-  */
- virtual  InternalStateValueType giveIPValueType (InternalStateType type) ;
+    virtual int giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime);
 
- /**
-  Returns the corresponding integration point  value size in Reduced form.
-  @param type determines the type of internal variable
-  @returns var size, zero if var not supported
-  */
- virtual int giveIPValueSize (InternalStateType type, GaussPoint* aGaussPoint) ;
+    /**
+     * Returns the mask of reduced indexes of Internal Variable component .
+     * @param answer mask of Full VectorSize, with components beeing the indexes to reduced form vectors.
+     * @param type determines the internal variable requested (physical meaning)
+     * @returns nonzero if ok or error is generated for unknown mat mode.
+     */
+    virtual int giveIntVarCompFullIndx(IntArray &answer, InternalStateType type, MaterialMode mmode);
 
+    /**
+     * Returns the type of internal variable (scalar, vector, tensor,...).
+     * @param type determines the type of internal variable
+     * @returns type of internal variable
+     */
+    virtual InternalStateValueType giveIPValueType(InternalStateType type);
+
+    /**
+     * Returns the corresponding integration point  value size in Reduced form.
+     * @param type determines the type of internal variable
+     * @returns var size, zero if var not supported
+     */
+    virtual int giveIPValueSize(InternalStateType type, GaussPoint *aGaussPoint);
 };
 
 //=============================================================================
@@ -209,10 +207,10 @@ protected:
     /// deviatoric trial stress - needed for tangent stiffness
     FloatArray trialStressD;
     /**************************************************/
-    double  trialStressV;
+    double trialStressV;
     /**************************************************/
 
-    FloatArray effStress,tempEffStress;
+    FloatArray effStress, tempEffStress;
 
     /// cumulative plastic strain (initial)
     double kappa;
@@ -220,93 +218,93 @@ protected:
     /// cumulative plastic strain (final)
     double tempKappa;
 
- /// deformation gradient(final)
-    FloatMatrix tempDefGrad,defGrad;
-   /************************/
-    double tempDamage,damage;
-   /******************************/
-   /// Left Cauchy-Green deformation gradient(final)
-   FloatMatrix tempLeftCauchyGreen,leftCauchyGreen;
+    /// deformation gradient(final)
+    FloatMatrix tempDefGrad, defGrad;
+    /************************/
+    double tempDamage, damage;
+    /******************************/
+    /// Left Cauchy-Green deformation gradient(final)
+    FloatMatrix tempLeftCauchyGreen, leftCauchyGreen;
 
 public:
     MisesMatStatus(int n, Domain *d, GaussPoint *g);
     ~MisesMatStatus();
 
-    void givePlasticStrain(FloatArray& answer)
-    {answer = plasticStrain;}
+    void givePlasticStrain(FloatArray &answer)
+    { answer = plasticStrain; }
 
-    void giveTrialStressDev(FloatArray& answer)
-    {answer = trialStressD;}
+    void giveTrialStressDev(FloatArray &answer)
+    { answer = trialStressD; }
 
     /*******************************************/
-    void giveTrialStressVol(double& answer)
-    {answer = trialStressV;}
+    void giveTrialStressVol(double &answer)
+    { answer = trialStressV; }
     /*******************************************/
-    void giveDamage(double& answer)
-    {answer = damage;}
-    void giveTempDamage(double& answer)
-    {answer = tempDamage;}
+    void giveDamage(double &answer)
+    { answer = damage; }
+    void giveTempDamage(double &answer)
+    { answer = tempDamage; }
 
     double giveCumulativePlasticStrain()
-    {return kappa;}
+    { return kappa; }
 
     double giveTempCumulativePlasticStrain()
-    {return tempKappa;}
- 
-    void giveTempDefGrad(FloatMatrix& answer)
-    {answer = tempDefGrad;}
+    { return tempKappa; }
 
-    void giveDefGrad(FloatMatrix& answer)
-    {answer = defGrad;}
+    void giveTempDefGrad(FloatMatrix &answer)
+    { answer = tempDefGrad; }
 
-    void giveTempLeftCauchyGreen(FloatMatrix& answer)
-    {answer = tempLeftCauchyGreen;}
-    void giveLeftCauchyGreen(FloatMatrix& answer)
-    {answer = leftCauchyGreen;}
-    
-    void giveEffectiveStress(FloatArray& answer)
-    {answer = effStress;}
+    void giveDefGrad(FloatMatrix &answer)
+    { answer = defGrad; }
 
-    void giveTempEffectiveStress(FloatArray& answer)
-    {answer = tempEffStress;}
+    void giveTempLeftCauchyGreen(FloatMatrix &answer)
+    { answer = tempLeftCauchyGreen; }
+    void giveLeftCauchyGreen(FloatMatrix &answer)
+    { answer = leftCauchyGreen; }
+
+    void giveEffectiveStress(FloatArray &answer)
+    { answer = effStress; }
+
+    void giveTempEffectiveStress(FloatArray &answer)
+    { answer = tempEffStress; }
 
 
     void letTempPlasticStrainBe(FloatArray values)
-    {tempPlasticStrain = values;}
+    { tempPlasticStrain = values; }
 
     void letTrialStressDevBe(FloatArray values)
-    {trialStressD = values;}
+    { trialStressD = values; }
 
     void letEffectiveStressBe(FloatArray values)
-    {effStress = values;}
-    
-    void letTempEffectiveStressBe(FloatArray values)
-    {tempEffStress = values;}
+    { effStress = values; }
 
-    
+    void letTempEffectiveStressBe(FloatArray values)
+    { tempEffStress = values; }
+
+
     void setTrialStressVol(double value)
-    {trialStressV = value;}
+    { trialStressV = value; }
 
     void setTempCumulativePlasticStrain(double value)
-    {tempKappa = value;}
+    { tempKappa = value; }
     /****************************************/
     void setTempDamage(double value)
-    {tempDamage = value;}
- /************************************************/
- void letDefGradBe(FloatMatrix values)
- {defGrad = values;}
- void letTempDefGradBe(FloatMatrix values)
- {tempDefGrad = values;}
- 
- void letTempLeftCauchyGreenBe(FloatMatrix values)
- {tempLeftCauchyGreen = values;}
- void letLeftCauchyGreenBe(FloatMatrix values)
- {leftCauchyGreen = values;}
+    { tempDamage = value; }
+    /************************************************/
+    void letDefGradBe(FloatMatrix values)
+    { defGrad = values; }
+    void letTempDefGradBe(FloatMatrix values)
+    { tempDefGrad = values; }
 
- const FloatArray *givePlasDef();
+    void letTempLeftCauchyGreenBe(FloatMatrix values)
+    { tempLeftCauchyGreen = values; }
+    void letLeftCauchyGreenBe(FloatMatrix values)
+    { leftCauchyGreen = values; }
 
- /// prints the output variables into the *.out file
- void printOutputAt(FILE *file, TimeStep *tStep);
+    const FloatArray *givePlasDef();
+
+    /// prints the output variables into the *.out file
+    void printOutputAt(FILE *file, TimeStep *tStep);
 
     /// initializes the temporary status
     virtual void initTempStatus();
@@ -327,6 +325,5 @@ public:
     classType             giveClassID() const
     { return MisesMatStatusClass; }
 };
-
 } // end namespace oofem
 #endif // misesmat_h
