@@ -116,7 +116,7 @@ MisesMat :: CreateStatus(GaussPoint *gp) const
 double signum(double number) {
     if ( number < 0 ) {
         return -1;
-    } else if ( number > 0 )  {
+    } else if ( number > 0 ) {
         return 1;
     } else {
         return 0;
@@ -428,7 +428,7 @@ void MisesMat :: performPlasticityReturn(GaussPoint *gp, const FloatArray &total
             fullStress.at(1) = fullStress.at(1) - dKappa *E *signum( fullStress.at(1) );
             plStrain.at(1) = plStrain.at(1) + dKappa *signum( fullStress.at(1) );
         }
-    } else if ( ( mode == _PlaneStrain ) || ( mode == _3dMat ) )              {
+    } else if ( ( mode == _PlaneStrain ) || ( mode == _3dMat ) ) {
         // elastic predictor
         StrainVector elStrain(totalStrain, mode);
         elStrain.subtract(plStrain);
@@ -479,13 +479,26 @@ void MisesMat :: performPlasticityReturn(GaussPoint *gp, const FloatArray &total
 
 
 double
-MisesMat :: computeDamageParam(double tempKappa, GaussPoint *gp)
+MisesMat :: computeDamageParam(double tempKappa)
 {
     double tempDam;
-    if ( tempKappa > 0 ) {
+    if ( tempKappa > 0. ) {
         tempDam = omega_crit * ( 1.0 - exp(-a * tempKappa) );
-    } else   {
-        tempDam = 0.0;
+    } else {
+        tempDam = 0.;
+    }
+
+    return tempDam;
+}
+
+double
+MisesMat :: computeDamageParamPrime(double tempKappa)
+{
+    double tempDam;
+    if ( tempKappa >= 0. ) {
+        tempDam = omega_crit * a * exp(-a * tempKappa);
+    } else {
+        tempDam = 0.;
     }
 
     return tempDam;
@@ -498,9 +511,9 @@ MisesMat :: computeDamage(GaussPoint *gp,  TimeStep *atTime)
 {
     double tempKappa, dam;
     MisesMatStatus *status = ( MisesMatStatus * ) this->giveStatus(gp);
-    status->giveDamage(dam);
+    dam = status->giveDamage();
     computeCumPlastStrain(tempKappa, gp, atTime);
-    double tempDam = computeDamageParam(tempKappa, gp);
+    double tempDam = computeDamageParam(tempKappa);
     if ( dam > tempDam ) {
         tempDam = dam;
     }
@@ -546,14 +559,10 @@ MisesMat :: give3dSSMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseForm
     }
 
     MisesMatStatus *status = ( MisesMatStatus * ) this->giveStatus(gp);
-    //StructuralCrossSection *crossSection = ( StructuralCrossSection * ) ( gp->giveElement()->giveCrossSection() );
     double kappa = status->giveCumulativePlasticStrain();
     double tempKappa = status->giveTempCumulativePlasticStrain();
     // increment of cumulative plastic strain as an indicator of plastic loading
     double dKappa = tempKappa - kappa;
-    /********************************************************************/
-    double omega = omega_crit * ( 1 - exp(-a * tempKappa) );
-    /*********************************************************************/
 
     if ( dKappa <= 0.0 ) { // elastic loading - elastic stiffness plays the role of tangent stiffness
         return;
@@ -562,19 +571,12 @@ MisesMat :: give3dSSMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseForm
     // === plastic loading ===
 
     // yield stress at the beginning of the step
-    double sigmaY = sig0 + H * tempKappa;
-    // mj - modification
-    sigmaY = sig0 + H * ( status->giveCumulativePlasticStrain() );
+    double sigmaY = sig0 + H * kappa;
 
     // trial deviatoric stress and its norm
     StressVector trialStressDev(_3dMat);
-
-    /*****************************************************/
     double trialStressVol;
     status->giveTrialStressVol(trialStressVol);
-    /****************************************************/
-
-
     status->giveTrialStressDev(trialStressDev);
     double trialS = trialStressDev.computeStressNorm();
 
@@ -592,37 +594,17 @@ MisesMat :: give3dSSMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseForm
     stiffnessCorrection.times(factor2);
     answer.add(stiffnessCorrection);
 
-    /********************************************************************************************/
     //influence of damage
-    answer.times( ( 1 - omega ) );
-    /*
-     * double scalar1 = -2./3.*omega_crit*a*exp(-a*tempKappa)*sigmaY/trialS/trialS;
-     * double scalar2 = -sqrt(2./3.)*omega_crit*a*exp(-a*tempKappa)*trialStressVol/trialS;
-     * FloatArray delta(6);
-     * delta.at(1) = 1;
-     * delta.at(2) = 1;
-     * delta.at(3) = 1;
-     *
-     * stiffnessCorrection.beDyadicProductOf(trialStressDev,trialStressDev);
-     * stiffnessCorrection.times(scalar1);
-     *
-     * answer.add(stiffnessCorrection);
-     *
-     * stiffnessCorrection.beDyadicProductOf(delta,trialStressDev);
-     *
-     * stiffnessCorrection.times(scalar2);
-     *
-     * answer.add(stiffnessCorrection);*/
-
-
+    //    double omega = computeDamageParam(tempKappa);
+    double omega = status->giveTempDamage();
+    answer.times(1. - omega);
     FloatArray effStress;
     status->giveTempEffectiveStress(effStress);
-    double omegaPrime = omega_crit * a * exp(-a * tempKappa);
+    double omegaPrime = computeDamageParamPrime(tempKappa);
     double scalar = -omegaPrime *sqrt(6.) * G / ( 3. * G + H ) / trialS;
     stiffnessCorrection.beDyadicProductOf(effStress, trialStressDev);
     stiffnessCorrection.times(scalar);
     answer.add(stiffnessCorrection);
-    /*********************************************************************************/
     return;
 }
 
@@ -638,8 +620,7 @@ MisesMat :: give1dStressStiffMtrx(FloatMatrix &answer, MatResponseForm form,
     double kappa = status->giveCumulativePlasticStrain();
     // increment of cumulative plastic strain as an indicator of plastic loading
     double tempKappa = status->giveTempCumulativePlasticStrain();
-    double omega;
-    status->giveTempDamage(omega);
+    double omega = status->giveTempDamage();
     double E = answer.at(1, 1);
     if ( mode != TangentStiffness ) {
         return;
@@ -656,7 +637,7 @@ MisesMat :: give1dStressStiffMtrx(FloatMatrix &answer, MatResponseForm form,
     status->giveTempEffectiveStress(stressVector);
     double stress = stressVector.at(1);
     answer.resize(1, 1);
-    answer.at(1, 1) = ( 1 - omega ) * E * H / ( E + H ) - omega_crit *a *exp(-a *tempKappa) * E / ( E + H ) * stress * signum(stress);
+    answer.at(1, 1) = ( 1 - omega ) * E * H / ( E + H ) - computeDamageParamPrime(tempKappa) * E / ( E + H ) * stress * signum(stress);
 }
 
 void
@@ -671,10 +652,9 @@ MisesMat :: givePlaneStrainStiffMtrx(FloatMatrix &answer, MatResponseForm form,
     }
 
     MisesMatStatus *status = ( MisesMatStatus * ) this->giveStatus(gp);
-    double omega;
-    status->giveTempDamage(omega);
     double tempKappa = status->giveTempCumulativePlasticStrain();
-    double dKappa = tempKappa - status->giveCumulativePlasticStrain();
+    double kappa = status->giveCumulativePlasticStrain();
+    double dKappa = tempKappa - kappa;
 
     if ( dKappa <= 0.0 ) { // elastic loading - elastic stiffness plays the role of tangent stiffness
         return;
@@ -682,22 +662,15 @@ MisesMat :: givePlaneStrainStiffMtrx(FloatMatrix &answer, MatResponseForm form,
 
     // === plastic loading ===
     // yield stress at the beginning of the step
-    double sigmaY = sig0 + H * tempKappa;
-    // mj - modification
-    sigmaY = sig0 + H * ( status->giveCumulativePlasticStrain() );
+    double sigmaY = sig0 + H * kappa;
 
-    // trial deviatoric stress and its norm
     // trial deviatoric stress and its norm
     StressVector trialStressDev(_PlaneStrain);
-
-    /*****************************************************/
     double trialStressVol;
     status->giveTrialStressVol(trialStressVol);
-    /****************************************************/
-
-
     status->giveTrialStressDev(trialStressDev);
     double trialS = trialStressDev.computeStressNorm();
+
     // one correction term
     FloatMatrix stiffnessCorrection(4, 4);
     stiffnessCorrection.beDyadicProductOf(trialStressDev, trialStressDev);
@@ -716,18 +689,17 @@ MisesMat :: givePlaneStrainStiffMtrx(FloatMatrix &answer, MatResponseForm form,
     double factor2 = factor * dKappa;
     stiffnessCorrection.times(factor2);
     answer.add(stiffnessCorrection);
-    /********************************************************************************************/
-    //influence of damage
-    answer.times( ( 1 - omega ) );
 
+    //influence of damage
+    double omega = status->giveTempDamage();
+    answer.times(1. - omega);
     FloatArray effStress;
     status->giveTempEffectiveStress(effStress);
-    double omegaPrime = omega_crit * a * exp(-a * tempKappa);
+    double omegaPrime = computeDamageParamPrime(tempKappa);
     double scalar = -omegaPrime *sqrt(6.) * G / ( 3. * G + H ) / trialS;
     stiffnessCorrection.beDyadicProductOf(effStress, trialStressDev);
     stiffnessCorrection.times(scalar);
     answer.add(stiffnessCorrection);
-    /*********************************************************************************/
 
     return;
 }
@@ -758,7 +730,7 @@ MisesMat :: give3dLSMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseForm
     n = trialStressDev;
     if ( trialS == 0 ) {
         n.resize(6);
-    } else                 {
+    } else {
         n.times(1 / trialS);
     }
 
@@ -877,7 +849,7 @@ MisesMat :: give3dLSMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseForm
         beta2 = 0;
         beta3 = beta1;
         beta4 = 0;
-    } else   {
+    } else {
         beta0 = 1 + H / 3 / trialStressVol;
         beta2 = ( 1 - 1 / beta0 ) * 2. / 3. * trialS * dKappa / trialStressVol;
         beta3 = 1 / beta0 - beta1 + beta2;
@@ -930,13 +902,6 @@ MisesMat :: give3dLSMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseForm
 #ifdef __OOFEG
 #endif
 
-
-const FloatArray *
-MisesMatStatus :: givePlasDef()
-{
-    return & plasticStrain;
-}
-
 int
 MisesMat :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime)
 {
@@ -944,15 +909,15 @@ MisesMat :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalSta
     if ( type == IST_PlasticStrainTensor ) {
         answer  = * status->givePlasDef();
         return 1;
-    } else if ( type == IST_MaxEquivalentStrainLevel )       {
+    } else if ( type == IST_MaxEquivalentStrainLevel ) {
         answer.resize(1);
         answer.at(1) = status->giveCumulativePlasticStrain();
         return 1;
-    } else if ( type == IST_DamageScalar )        {
+    } else if ( type == IST_DamageScalar ) {
         answer.resize(1);
-        status->giveDamage( answer.at(1) );
+        answer.at(1) = status->giveDamage();
         return 1;
-    } else     {
+    } else {
         return StructuralMaterial :: giveIPValue(answer, aGaussPoint, type, atTime);
     }
 }
@@ -965,9 +930,9 @@ MisesMat :: giveIPValueType(InternalStateType type)
 {
     if ( type == IST_PlasticStrainTensor ) {
         return ISVT_TENSOR_S3;
-    } else if ( type == IST_MaxEquivalentStrainLevel )   {
+    } else if ( type == IST_MaxEquivalentStrainLevel ) {
         return ISVT_SCALAR;
-    } else                                                                        {
+    } else {
         return StructuralMaterial :: giveIPValueType(type);
     }
 }
@@ -986,15 +951,15 @@ MisesMat :: giveIntVarCompFullIndx(IntArray &answer, InternalStateType type, Mat
             answer.at(5) = 5;
             answer.at(6) = 6;
             return 1;
-        } else if ( mmode == _1dMat )        {
+        } else if ( mmode == _1dMat ) {
             answer.resize(1);
             answer.at(1) = 1;
         }
-    } else if ( type == IST_MaxEquivalentStrainLevel )     {
+    } else if ( type == IST_MaxEquivalentStrainLevel ) {
         answer.resize(1);
         answer.at(1) = 1;
         return 1;
-    } else if ( type == IST_DamageScalar )     {
+    } else if ( type == IST_DamageScalar ) {
         answer.resize(1);
         answer.at(1) = 1;
         return 1;
@@ -1009,11 +974,11 @@ MisesMat :: giveIPValueSize(InternalStateType type, GaussPoint *aGaussPoint)
 {
     if ( type == IST_PlasticStrainTensor ) {
         return 1;
-    } else if ( type == IST_MaxEquivalentStrainLevel )       {
+    } else if ( type == IST_MaxEquivalentStrainLevel ) {
         return 1;
-    } else if ( type == IST_DamageScalar )                                                                      {
+    } else if ( type == IST_DamageScalar ) {
         return 1;
-    } else                                                                                                                       {
+    } else {
         return StructuralMaterial :: giveIPValueSize(type, aGaussPoint);
     }
 }

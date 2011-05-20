@@ -159,7 +159,6 @@ public:
     // @param atTime time step
     virtual void computeCumPlasticStrain(double &kappa, GaussPoint *gp, TimeStep *atTime);
     double computeDamage(GaussPoint *gp, TimeStep *atTime);
-    void computeDamageParam(double &omega, double tempKappa, GaussPoint *gp);
     void modifyNonlocalWeightFunctionAround(GaussPoint *gp);
     double computeDistanceModifier(double damage);
     void computeLocalCumPlasticStrain(double &kappa, GaussPoint *gp, TimeStep *atTime)

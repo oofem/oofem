@@ -70,7 +70,7 @@ double sign(double number)
 {
     if ( number > 0 ) {
         return 1;
-    } else if ( number < 0 )  {
+    } else if ( number < 0 ) {
         return -1;
     } else {
         return 0;
@@ -129,26 +129,25 @@ MisesMatNl :: give1dStressStiffMtrx(FloatMatrix &answer, MatResponseForm form, M
     MisesMatNlStatus *status = ( MisesMatNlStatus * ) this->giveStatus(gp);
     double kappa = status->giveCumulativePlasticStrain();
     double tempKappa = status->giveTempCumulativePlasticStrain();
-    double tempDamage, damage;
-    status->giveTempDamage(tempDamage);
-    status->giveDamage(damage);
+    double tempDamage = status->giveTempDamage();
+    double damage = status->giveDamage();
     FloatArray stressVector;
     answer.at(1, 1) = ( 1 - tempDamage ) * E;
     if ( mode != TangentStiffness ) {
         return;
     }
 
-    if ( ( tempKappa - kappa ) <= 0.0 ) { // elastic loading - elastic stiffness plays the role of tangent stiffness
+    if ( tempKappa <= kappa ) { // elastic loading - elastic stiffness plays the role of tangent stiffness
         return;
     }
 
     // === plastic loading ===
     status->giveTempEffectiveStress(stressVector);
     double stress = stressVector.at(1);
-    answer.at(1, 1) = ( 1 - tempDamage ) * E * H / ( E + H );
-    if ( ( tempDamage - damage ) > 0 ) {
+    answer.at(1, 1) = ( 1. - tempDamage ) * E * H / ( E + H );
+    if ( tempDamage > damage ) {
         this->computeCumPlasticStrain(nlKappa, gp, atTime);
-        answer.at(1, 1) = answer.at(1, 1) - ( 1 - mm ) * omega_crit * a * exp(-a * nlKappa) * E / ( E + H ) * stress * sign(stress);
+        answer.at(1, 1) = answer.at(1, 1) - ( 1 - mm ) * computeDamageParamPrime(nlKappa) * E / ( E + H ) * stress * sign(stress);
     }
 }
 /*
@@ -232,7 +231,7 @@ MisesMatNl :: modifyNonlocalWeightFunctionAround(GaussPoint *gp)
         nearElem->computeGlobalCoordinates( coords, * ( ( ( * pos ).nearGp )->giveCoordinates() ) );
         x = coords.at(1);
         nonlocStatus = ( MisesMatNlStatus * ) this->giveStatus( ( * pos ).nearGp );
-        nonlocStatus->giveTempDamage(damage);
+        damage = nonlocStatus->giveTempDamage();
         if ( pos != postarget ) {
             distance += ( x - xprev ) * 0.5 * ( computeDistanceModifier(damage) + computeDistanceModifier(damageprev) );
         }
@@ -251,7 +250,7 @@ MisesMatNl :: modifyNonlocalWeightFunctionAround(GaussPoint *gp)
         nearElem->computeGlobalCoordinates( coords, * ( ( ( * pos ).nearGp )->giveCoordinates() ) );
         x = coords.at(1);
         nonlocStatus = ( MisesMatNlStatus * ) this->giveStatus( ( * pos ).nearGp );
-        nonlocStatus->giveTempDamage(damage);
+        damage = nonlocStatus->giveTempDamage();
         if ( pos != postarget ) {
             distance += ( xprev - x ) * 0.5 * ( computeDistanceModifier(damage) + computeDistanceModifier(damageprev) );
             w = computeWeightFunction(distance) * nearElem->computeVolumeAround( ( * pos ).nearGp );
@@ -270,7 +269,7 @@ MisesMatNl :: modifyNonlocalWeightFunctionAround(GaussPoint *gp)
         nearElem->computeGlobalCoordinates( coords, * ( ( ( * pos ).nearGp )->giveCoordinates() ) );
         x = coords.at(1);
         nonlocStatus = ( MisesMatNlStatus * ) this->giveStatus( ( * pos ).nearGp );
-        nonlocStatus->giveTempDamage(damage);
+        damage = nonlocStatus->giveTempDamage();
         n = ( ( * pos ).nearGp )->giveElement()->giveNumber();
         distance += ( xprev - x ) * 0.5 * ( computeDistanceModifier(damage) + computeDistanceModifier(damageprev) );
         w = computeWeightFunction(distance) * nearElem->computeVolumeAround( ( * pos ).nearGp );
@@ -396,18 +395,6 @@ MisesMatNl :: giveInputRecordString(std :: string &str, bool keyword)
 }
 
 
-
-
-void
-MisesMatNl :: computeDamageParam(double &omega, double kappa, GaussPoint *gp)
-{
-    if ( kappa > 0. ) {
-        omega = omega_crit * ( 1 - exp(-a * kappa) );
-    } else {
-        omega = 0.;
-    }
-}
-
 double
 MisesMatNl :: computeDamage(GaussPoint *gp, TimeStep *atTime)
 {
@@ -415,8 +402,8 @@ MisesMatNl :: computeDamage(GaussPoint *gp, TimeStep *atTime)
     double nlKappa;
     this->computeCumPlasticStrain(nlKappa, gp, atTime);
     double dam, tempDam;
-    nlStatus->giveDamage(dam);
-    this->computeDamageParam(tempDam, nlKappa, gp);
+    dam = nlStatus->giveDamage();
+    tempDam = this->computeDamageParam(nlKappa);
     if ( tempDam < dam ) {
         tempDam = dam;
     }
@@ -483,13 +470,13 @@ MisesMatNl :: giveLocalNonlocalStiffnessContribution(GaussPoint *gp, IntArray &l
     FloatArray stress;
 
     this->computeCumPlasticStrain(nlKappa, gp, atTime);
-    status->giveDamage(damage);
-    status->giveTempDamage(tempDamage);
+    damage = status->giveDamage();
+    tempDamage = status->giveTempDamage();
     if ( ( tempDamage - damage ) > 0 ) {
         elem->giveLocationArray(loc, EID_MomentumBalance, s);
         status->giveTempEffectiveStress(stress);
         elem->computeBmatrixAt(gp, b);
-        dDamF = a * omega_crit * exp(-a * nlKappa);
+        dDamF = computeDamageParamPrime(nlKappa);
         nrows = b.giveNumberOfColumns();
         nsize = stress.giveSize();
         lcontrib.resize(nrows);
@@ -542,7 +529,7 @@ MisesMatNl :: giveRemoteNonlocalStiffnessContribution(GaussPoint *gp, IntArray &
                 rcontrib.at(i) = sum;
             }
         }
-    } else     {
+    } else {
         rcontrib.zero();
     }
 }

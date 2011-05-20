@@ -89,7 +89,8 @@ public:
     ~MisesMat();
     void performPlasticityReturn(GaussPoint *gp, const FloatArray &totalStrain, MaterialMode mode);
     double computeDamage(GaussPoint *gp, TimeStep *atTime);
-    double computeDamageParam(double tempKappa, GaussPoint *gp);
+    double computeDamageParam(double tempKappa);
+    double computeDamageParamPrime(double tempKappa);
     virtual void computeCumPlastStrain(double &kappa, GaussPoint *gp, TimeStep *atTime);
     /// specifies whether a given material mode is supported by this model
     int hasMaterialModeCapability(MaterialMode mode);
@@ -240,10 +241,10 @@ public:
     void giveTrialStressVol(double &answer)
     { answer = trialStressV; }
     /*******************************************/
-    void giveDamage(double &answer)
-    { answer = damage; }
-    void giveTempDamage(double &answer)
-    { answer = tempDamage; }
+    double giveDamage()
+    { return damage; }
+    double giveTempDamage()
+    { return tempDamage; }
 
     double giveCumulativePlasticStrain()
     { return kappa; }
@@ -301,7 +302,8 @@ public:
     void letLeftCauchyGreenBe(FloatMatrix values)
     { leftCauchyGreen = values; }
 
-    const FloatArray *givePlasDef();
+    const FloatArray *givePlasDef() { return & plasticStrain; }
+
 
     /// prints the output variables into the *.out file
     void printOutputAt(FILE *file, TimeStep *tStep);
