@@ -130,7 +130,7 @@ VTKExportModule :: doOutput(TimeStep *tStep)
 
     if ( ( this->mode == wdmode ) || ( ( this->mode == rbrmode ) && ( this->outMode == wdmode ) ) ) {
         int nnodes = this->giveTotalRBRNumberOfNodes(d);
-        fprintf(stream, "POINTS %d float\n", nnodes);
+        fprintf(stream, "POINTS %d double\n", nnodes);
         int ireg = -1;
         int regionDofMans;
         IntArray map( d->giveNumberOfDofManagers() );
@@ -170,7 +170,7 @@ VTKExportModule :: doOutput(TimeStep *tStep)
     } else { // outMode = rbrmode (Region By Region)
         // output nodes Region By Region
         int nnodes = this->giveTotalRBRNumberOfNodes(d);
-        fprintf(stream, "POINTS %d float\n", nnodes);
+        fprintf(stream, "POINTS %d double\n", nnodes);
         int ireg, nregions = this->smoother->giveNumberOfVirtualRegions();
         int regionDofMans;
         IntArray map( d->giveNumberOfDofManagers() );
@@ -605,7 +605,7 @@ VTKExportModule :: exportCellVars(FILE *stream, int elemToProcess, TimeStep *tSt
                 pos = 3;
             }
 
-            fprintf( stream, "VECTORS %s float\n", __InternalStateTypeToString(type) );
+            fprintf( stream, "VECTORS %s double\n", __InternalStateTypeToString(type) );
             for ( ielem = 1; ielem <= nelem; ielem++ ) {
                 if ( !d->giveElement(ielem)->giveLocalCoordinateSystem(mtrx) ) {
                     mtrx.resize(3, 3);
@@ -806,13 +806,13 @@ VTKExportModule :: exportIntVarAs(InternalStateType valID, InternalStateValueTyp
     for ( int indx = 1; indx <= nindx; indx++ ) {
         // print header
         if ( type == ISVT_SCALAR ) {
-            fprintf( stream, "SCALARS %s float 1\n", __InternalStateTypeToString(valID) );
+            fprintf( stream, "SCALARS %s double 1\n", __InternalStateTypeToString(valID) );
         } else if ( type == ISVT_VECTOR ) {
-            fprintf( stream, "VECTORS %s float\n", __InternalStateTypeToString(valID) );
+            fprintf( stream, "VECTORS %s double\n", __InternalStateTypeToString(valID) );
         } else if ( ( type == ISVT_TENSOR_S3 ) || ( type == ISVT_TENSOR_S3E ) ) {
-            fprintf( stream, "TENSORS %s float\n", __InternalStateTypeToString(valID) );
+            fprintf( stream, "TENSORS %s double\n", __InternalStateTypeToString(valID) );
         } else if ( type == ISVT_TENSOR_G ) {
-            fprintf(stream, "SCALARS %s_%d float 1\n", __InternalStateTypeToString(valID), indx);
+            fprintf(stream, "SCALARS %s_%d double 1\n", __InternalStateTypeToString(valID), indx);
         } else {
             fprintf(stderr, "VTKExportModule :: exportIntVarAs: unsupported variable type\n");
         }
@@ -1108,9 +1108,9 @@ VTKExportModule :: exportPrimVarAs(UnknownType valID, FILE *stream, TimeStep *tS
 
     // print header
     if ( type == ISVT_SCALAR ) {
-        fprintf(stream, "SCALARS %s float %d\n",  __UnknownTypeToString(valID), nScalarComp);
+        fprintf(stream, "SCALARS %s double %d\n",  __UnknownTypeToString(valID), nScalarComp);
     } else if ( type == ISVT_VECTOR ) {
-        fprintf( stream, "VECTORS %s float\n", __UnknownTypeToString(valID) );
+        fprintf( stream, "VECTORS %s double\n", __UnknownTypeToString(valID) );
     } else {
         fprintf(stderr, "exportPrimVarAs: unsupported variable type\n");
     }

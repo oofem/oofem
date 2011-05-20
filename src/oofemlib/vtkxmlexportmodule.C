@@ -142,7 +142,7 @@ VTKXMLExportModule :: doOutput(TimeStep *tStep)
             fprintf(stream, "<Piece NumberOfPoints=\"%d\" NumberOfCells=\"%d\">\n", regionDofMans, totalcells);
 
             // export nodes in region as vtk vertices
-            fprintf(stream, "<Points>\n <DataArray type=\"Float32\" NumberOfComponents=\"3\" format=\"ascii\"> ");
+            fprintf(stream, "<Points>\n <DataArray type=\"Float64\" NumberOfComponents=\"3\" format=\"ascii\"> ");
             for ( inode = 1; inode <= regionDofMans; inode++ ) {
                 coords = d->giveNode( mapL2G.at(inode) )->giveCoordinates();
                 for ( i = 1; i <= coords->giveSize(); i++ ) {
@@ -630,15 +630,15 @@ VTKXMLExportModule :: exportIntVarAs(InternalStateType valID, InternalStateValue
     this->giveSmoother();
 
     if ( type == ISVT_SCALAR ) {
-        fprintf( stream, "<DataArray type=\"Float32\" Name=\"%s\" format=\"ascii\"> ", __InternalStateTypeToString(valID) );
+        fprintf( stream, "<DataArray type=\"Float64\" Name=\"%s\" format=\"ascii\"> ", __InternalStateTypeToString(valID) );
     } else if ( type == ISVT_VECTOR ) {
-        fprintf( stream, "<DataArray type=\"Float32\" Name=\"%s\" NumberOfComponents=\"3\" format=\"ascii\"> ",
+        fprintf( stream, "<DataArray type=\"Float64\" Name=\"%s\" NumberOfComponents=\"3\" format=\"ascii\"> ",
                 __InternalStateTypeToString(valID) );
     } else if ( ( type == ISVT_TENSOR_S3 ) || ( type == ISVT_TENSOR_S3E ) ) {
-        fprintf( stream, "<DataArray type=\"Float32\" Name=\"%s\" NumberOfComponents=\"9\" format=\"ascii\"> ",
+        fprintf( stream, "<DataArray type=\"Float64\" Name=\"%s\" NumberOfComponents=\"9\" format=\"ascii\"> ",
                 __InternalStateTypeToString(valID) );
     } else if ( type == ISVT_TENSOR_G ) {
-        fprintf( stream, "<DataArray type=\"Float32\" Name=\"%s\" NumberOfComponents=\"9\" format=\"ascii\"> ",
+        fprintf( stream, "<DataArray type=\"Float64\" Name=\"%s\" NumberOfComponents=\"9\" format=\"ascii\"> ",
                 __InternalStateTypeToString(valID) );
     } else {
         fprintf( stderr, "VTKXMLExportModule::exportIntVarAs: unsupported variable type %s\n", __InternalStateTypeToString(valID) );
@@ -805,9 +805,9 @@ VTKXMLExportModule :: exportPrimVarAs(UnknownType valID, IntArray &mapG2L, IntAr
 
     // print header
     if ( type == ISVT_SCALAR ) {
-        fprintf( stream, "<DataArray type=\"Float32\" Name=\"%s\" format=\"ascii\"> ", __UnknownTypeToString(valID) );
+        fprintf( stream, "<DataArray type=\"Float64\" Name=\"%s\" format=\"ascii\"> ", __UnknownTypeToString(valID) );
     } else if ( type == ISVT_VECTOR ) {
-        fprintf( stream, "<DataArray type=\"Float32\" Name=\"%s\" NumberOfComponents=\"3\" format=\"ascii\"> ", __UnknownTypeToString(valID) );
+        fprintf( stream, "<DataArray type=\"Float64\" Name=\"%s\" NumberOfComponents=\"3\" format=\"ascii\"> ", __UnknownTypeToString(valID) );
     } else {
         fprintf( stderr, "VTKXMLExportModule::exportPrimVarAs: unsupported variable type %s\n", __UnknownTypeToString(valID) );
     }
@@ -969,7 +969,7 @@ VTKXMLExportModule :: exportCellVarAs(InternalStateType type, int region, FILE *
     case IST_ElementNumber:
     case IST_AverageTemperature:
     case IST_Pressure:
-        fprintf( stream, "<DataArray type=\"Float32\" Name=\"%s\" format=\"ascii\"> ", __InternalStateTypeToString(type) );
+        fprintf( stream, "<DataArray type=\"Float64\" Name=\"%s\" format=\"ascii\"> ", __InternalStateTypeToString(type) );
         for ( ielem = 1; ielem <= nelem; ielem++ ) {
             elem = d->giveElement(ielem);
 
@@ -1015,7 +1015,7 @@ VTKXMLExportModule :: exportCellVarAs(InternalStateType type, int region, FILE *
     case IST_MaterialOrientation_x:
     case IST_MaterialOrientation_y:
     case IST_MaterialOrientation_z:
-        fprintf( stream, "<DataArray type=\"Float32\" Name=\"%s\" NumberOfComponents=\"3\" format=\"ascii\"> ", __InternalStateTypeToString(type) );
+        fprintf( stream, "<DataArray type=\"Float64\" Name=\"%s\" NumberOfComponents=\"3\" format=\"ascii\"> ", __InternalStateTypeToString(type) );
         if ( type == IST_MaterialOrientation_x ) {
             pos = 1;
         }
