@@ -301,5 +301,182 @@ void QPlaneStress2d :: drawDeformedGeometry(oofegGraphicContext &gc, UnknownType
     EMAddGraphicsToModel(ESIModel(), go);
 }
 
+
+void QPlaneStress2d :: drawScalar(oofegGraphicContext &context)
+{
+    int i, indx, result = 0;
+    WCRec p [ 4 ];
+    GraphicObj *tr;
+    TimeStep *tStep = this->giveDomain()->giveEngngModel()->giveCurrentStep();
+    FloatArray v [ 4 ];
+    double s [ 4 ], defScale;
+    IntArray map;
+
+    if ( !context.testElementGraphicActivity(this) ) {
+        return;
+    }
+
+    EASValsSetLayer(OOFEG_VARPLOT_PATTERN_LAYER);
+    if ( context.giveIntVarMode() == ISM_recovered ) {
+      // ============ plot the recovered values (smoothed data) ===============
+      /*
+        for ( i = 1; i <= 4; i++ ) {
+            result += this->giveInternalStateAtNode(v [ i - 1 ], context.giveIntVarType(), context.giveIntVarMode(), i, tStep);
+        }
+
+        if ( result != 4 ) {
+            return;
+        }
+
+        this->giveIntVarCompFullIndx( map, context.giveIntVarType() );
+        if ( ( indx = map.at( context.giveIntVarIndx() ) ) == 0 ) {
+            return;
+        }
+
+        for ( i = 1; i <= 4; i++ ) {
+            s [ i - 1 ] = v [ i - 1 ].at(indx);
+        }
+
+        if ( context.getScalarAlgo() == SA_ISO_SURF ) {
+            for ( i = 0; i < 4; i++ ) {
+                if ( context.getInternalVarsDefGeoFlag() ) {
+                    // use deformed geometry
+                    defScale = context.getDefScale();
+                    p [ i ].x = ( FPNum ) this->giveNode(i + 1)->giveUpdatedCoordinate(1, tStep, EID_MomentumBalance, defScale);
+                    p [ i ].y = ( FPNum ) this->giveNode(i + 1)->giveUpdatedCoordinate(2, tStep, EID_MomentumBalance, defScale);
+                    p [ i ].z = 0.;
+                } else {
+                    p [ i ].x = ( FPNum ) this->giveNode(i + 1)->giveCoordinate(1);
+                    p [ i ].y = ( FPNum ) this->giveNode(i + 1)->giveCoordinate(2);
+                    p [ i ].z = 0.;
+                }
+            }
+
+            //EASValsSetColor(gc.getYieldPlotColor(ratio));
+            context.updateFringeTableMinMax(s, 4);
+            tr =  CreateQuadWD3D(p, s [ 0 ], s [ 1 ], s [ 2 ], s [ 3 ]);
+            EGWithMaskChangeAttributes(LAYER_MASK, tr);
+            EMAddGraphicsToModel(ESIModel(), tr);
+        } else if ( ( context.getScalarAlgo() == SA_ZPROFILE ) || ( context.getScalarAlgo() == SA_COLORZPROFILE ) ) {
+            double landScale = context.getLandScale();
+
+            for ( i = 0; i < 4; i++ ) {
+                if ( context.getInternalVarsDefGeoFlag() ) {
+                    // use deformed geometry
+                    defScale = context.getDefScale();
+                    p [ i ].x = ( FPNum ) this->giveNode(i + 1)->giveUpdatedCoordinate(1, tStep, EID_MomentumBalance, defScale);
+                    p [ i ].y = ( FPNum ) this->giveNode(i + 1)->giveUpdatedCoordinate(2, tStep, EID_MomentumBalance, defScale);
+                    p [ i ].z = s [ i ] * landScale;
+                } else {
+                    p [ i ].x = ( FPNum ) this->giveNode(i + 1)->giveCoordinate(1);
+                    p [ i ].y = ( FPNum ) this->giveNode(i + 1)->giveCoordinate(2);
+                    p [ i ].z = s [ i ] * landScale;
+                }
+
+                // this fixes a bug in ELIXIR
+                if ( fabs(s [ i ]) < 1.0e-6 ) {
+                    s [ i ] = 1.0e-6;
+                }
+            }
+
+            if ( context.getScalarAlgo() == SA_ZPROFILE ) {
+                EASValsSetColor( context.getDeformedElementColor() );
+                EASValsSetLineWidth(OOFEG_DEFORMED_GEOMETRY_WIDTH);
+                tr =  CreateQuad3D(p);
+                EGWithMaskChangeAttributes(WIDTH_MASK | COLOR_MASK | LAYER_MASK, tr);
+            } else {
+                context.updateFringeTableMinMax(s, 4);
+                tr =  CreateQuadWD3D(p, s [ 0 ], s [ 1 ], s [ 2 ], s [ 3 ]);
+                EGWithMaskChangeAttributes(LAYER_MASK, tr);
+            }
+
+            EMAddGraphicsToModel(ESIModel(), tr);
+        }
+      */
+    } else if ( context.giveIntVarMode() == ISM_local ) {
+      // ========== plot the local values (raw data) =====================
+        if ( numberOfGaussPoints != 4 ) {
+            return;
+        }
+
+        int ip;
+        GaussPoint *gp;
+        IntArray ind(4);
+        FloatArray *gpCoords;
+        WCRec pp [ 9 ];
+
+        for ( i = 0; i < 8; i++ ) {
+            if ( context.getInternalVarsDefGeoFlag() ) {
+                // use deformed geometry
+                defScale = context.getDefScale();
+                pp [ i ].x = ( FPNum ) this->giveNode(i + 1)->giveUpdatedCoordinate(1, tStep, EID_MomentumBalance, defScale);
+                pp [ i ].y = ( FPNum ) this->giveNode(i + 1)->giveUpdatedCoordinate(2, tStep, EID_MomentumBalance, defScale);
+                pp [ i ].z = 0.;
+            } else {
+                pp [ i ].x = ( FPNum ) this->giveNode(i + 1)->giveCoordinate(1);
+                pp [ i ].y = ( FPNum ) this->giveNode(i + 1)->giveCoordinate(2);
+                pp [ i ].z = 0.;
+            }
+        }
+
+        pp [ 8 ].x = 0.25 * ( pp [ 0 ].x + pp [ 1 ].x + pp [ 2 ].x + pp [ 3 ].x );
+        pp [ 8 ].y = 0.25 * ( pp [ 0 ].y + pp [ 1 ].y + pp [ 2 ].y + pp [ 3 ].y );
+        pp [ 8 ].z = 0.;
+
+        for ( ip = 1; ip <= numberOfGaussPoints; ip++ ) {
+            gp = integrationRulesArray [ 0 ]->getIntegrationPoint(ip - 1);
+            gpCoords = gp->giveCoordinates();
+            if ( ( gpCoords->at(1) > 0. ) && ( gpCoords->at(2) > 0. ) ) {
+                ind.at(1) = 0;
+                ind.at(2) = 4;
+                ind.at(3) = 8;
+                ind.at(4) = 7;
+            } else if ( ( gpCoords->at(1) < 0. ) && ( gpCoords->at(2) > 0. ) ) {
+                ind.at(1) = 4;
+                ind.at(2) = 1;
+                ind.at(3) = 5;
+                ind.at(4) = 8;
+            } else if ( ( gpCoords->at(1) < 0. ) && ( gpCoords->at(2) < 0. ) ) {
+                ind.at(1) = 5;
+                ind.at(2) = 2;
+                ind.at(3) = 6;
+                ind.at(4) = 8;
+            } else {
+                ind.at(1) = 6;
+                ind.at(2) = 3;
+                ind.at(3) = 7;
+                ind.at(4) = 8;
+            }
+
+            if ( giveIPValue(v [ 0 ], gp, context.giveIntVarType(), tStep) == 0 ) {
+                return;
+            }
+
+            this->giveIntVarCompFullIndx( map, context.giveIntVarType() );
+            if ( ( indx = map.at( context.giveIntVarIndx() ) ) == 0 ) {
+                return;
+            }
+
+            for ( i = 1; i <= 4; i++ ) {
+                s [ i - 1 ] = v [ 0 ].at(indx);
+            }
+
+            for ( i = 0; i < 4; i++ ) {
+                p [ i ].x = pp [ ind.at(i + 1) ].x;
+                p [ i ].y = pp [ ind.at(i + 1) ].y;
+                p [ i ].z = pp [ ind.at(i + 1) ].z;
+            }
+
+            context.updateFringeTableMinMax(s, 4);
+            tr =  CreateQuadWD3D(p, s [ 0 ], s [ 1 ], s [ 2 ], s [ 3 ]);
+            EGWithMaskChangeAttributes(LAYER_MASK, tr);
+            EMAddGraphicsToModel(ESIModel(), tr);
+        }
+    }
+
+    return;
+}
+
+
 #endif
 } // end namespace oofem

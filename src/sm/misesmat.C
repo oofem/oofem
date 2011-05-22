@@ -913,7 +913,7 @@ MisesMat :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalSta
         answer.resize(1);
         answer.at(1) = status->giveCumulativePlasticStrain();
         return 1;
-    } else if ( type == IST_DamageScalar ) {
+    } else if ( ( type == IST_DamageScalar ) || (type == IST_DamageTensor ) ) {
         answer.resize(1);
         answer.at(1) = status->giveDamage();
         return 1;
@@ -930,7 +930,7 @@ MisesMat :: giveIPValueType(InternalStateType type)
 {
     if ( type == IST_PlasticStrainTensor ) {
         return ISVT_TENSOR_S3;
-    } else if ( type == IST_MaxEquivalentStrainLevel ) {
+    } else if ( ( type == IST_MaxEquivalentStrainLevel ) || ( type == IST_DamageScalar ) ) {
         return ISVT_SCALAR;
     } else {
         return StructuralMaterial :: giveIPValueType(type);
@@ -951,15 +951,23 @@ MisesMat :: giveIntVarCompFullIndx(IntArray &answer, InternalStateType type, Mat
             answer.at(5) = 5;
             answer.at(6) = 6;
             return 1;
-        } else if ( mmode == _1dMat ) {
+        } else if ( mmode == _PlaneStrain ) {
+	    answer.resize(6);
+            answer.at(1) = 1;
+            answer.at(2) = 2;
+            answer.at(3) = 3;
+            answer.at(6) = 4;
+	    return 1;
+	} else if ( mmode == _1dMat ) {
             answer.resize(1);
             answer.at(1) = 1;
+	    return 1;
         }
     } else if ( type == IST_MaxEquivalentStrainLevel ) {
         answer.resize(1);
         answer.at(1) = 1;
         return 1;
-    } else if ( type == IST_DamageScalar ) {
+    } else if ( ( type == IST_DamageScalar ) || ( type == IST_DamageTensor) ) {
         answer.resize(1);
         answer.at(1) = 1;
         return 1;
@@ -970,16 +978,26 @@ MisesMat :: giveIntVarCompFullIndx(IntArray &answer, InternalStateType type, Mat
 
 
 int
-MisesMat :: giveIPValueSize(InternalStateType type, GaussPoint *aGaussPoint)
+MisesMat :: giveIPValueSize(InternalStateType type, GaussPoint *gp)
 {
     if ( type == IST_PlasticStrainTensor ) {
-        return 1;
+      MaterialMode mode = gp->giveMaterialMode();
+      if (mode == _3dMat || mode == _3dMat_F)
+	return 6;
+      else if (mode == _PlaneStrain)
+	return 4;
+      else if (mode == _PlaneStress)
+	return 3;
+      else if (mode == _1dMat)
+	return 1;
+      else
+	return 0;
     } else if ( type == IST_MaxEquivalentStrainLevel ) {
         return 1;
     } else if ( type == IST_DamageScalar ) {
         return 1;
     } else {
-        return StructuralMaterial :: giveIPValueSize(type, aGaussPoint);
+        return StructuralMaterial :: giveIPValueSize(type, gp);
     }
 }
 
@@ -997,14 +1015,16 @@ MisesMatStatus :: MisesMatStatus(int n, Domain *d, GaussPoint *g) :
     kappa = tempKappa = 0.;
     effStress.resize(6);
     tempEffStress.resize(6);
-    defGrad.resize(3, 3);
-    defGrad.at(1, 1) = defGrad.at(2, 2) = defGrad.at(3, 3) = 1;
-    tempDefGrad.resize(3, 3);
-    tempDefGrad.at(1, 1) = tempDefGrad.at(2, 2) = tempDefGrad.at(3, 3) = 1;
-    //tempLeftCauchyGreen.resize(3,3);
-    //tempLeftCauchyGreen.at(1,1) = tempLeftCauchyGreen.at(2,2) = tempLeftCauchyGreen.at(3,3) = 1;
-    leftCauchyGreen.resize(3, 3);
-    leftCauchyGreen.at(1, 1) = leftCauchyGreen.at(2, 2) = leftCauchyGreen.at(3, 3) = 1;
+    if(gp->giveMaterialMode() == _3dMat_F){
+      defGrad.resize(3, 3);
+      defGrad.at(1, 1) = defGrad.at(2, 2) = defGrad.at(3, 3) = 1;
+      tempDefGrad.resize(3, 3);
+      tempDefGrad.at(1, 1) = tempDefGrad.at(2, 2) = tempDefGrad.at(3, 3) = 1;
+      //tempLeftCauchyGreen.resize(3,3);
+      //tempLeftCauchyGreen.at(1,1) = tempLeftCauchyGreen.at(2,2) = tempLeftCauchyGreen.at(3,3) = 1;
+      leftCauchyGreen.resize(3, 3);
+      leftCauchyGreen.at(1, 1) = leftCauchyGreen.at(2, 2) = leftCauchyGreen.at(3, 3) = 1;
+    }
 }
 
 MisesMatStatus :: ~MisesMatStatus()
@@ -1085,9 +1105,11 @@ void MisesMatStatus :: initTempStatus()
     tempDamage = damage;
     tempPlasticStrain = plasticStrain;
     tempKappa = kappa;
-    tempDefGrad = defGrad;
-    tempLeftCauchyGreen = leftCauchyGreen;
     trialStressD.resize(0); // to indicate that it is not defined yet
+    if(gp->giveMaterialMode()== _3dMat_F){
+      tempDefGrad = defGrad;
+      tempLeftCauchyGreen = leftCauchyGreen;
+    }
 }
 
 
@@ -1099,10 +1121,12 @@ MisesMatStatus :: updateYourself(TimeStep *atTime)
 
     plasticStrain = tempPlasticStrain;
     kappa = tempKappa;
-    trialStressD.resize(0); // to indicate that it is not defined any more
-    defGrad = tempDefGrad;
-    leftCauchyGreen = tempLeftCauchyGreen;
     damage = tempDamage;
+    trialStressD.resize(0); // to indicate that it is not defined any more
+    if(gp->giveMaterialMode()==_3dMat_F){
+      defGrad = tempDefGrad;
+      leftCauchyGreen = tempLeftCauchyGreen;
+    }
 }
 
 
@@ -1127,6 +1151,11 @@ MisesMatStatus :: saveContext(DataStream *stream, ContextMode mode, void *obj)
 
     // write cumulative plastic strain (scalar)
     if ( !stream->write(& kappa, 1) ) {
+        THROW_CIOERR(CIO_IOERR);
+    }
+
+    // write damage (scalar)
+    if ( !stream->write(& damage, 1) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
@@ -1155,6 +1184,11 @@ MisesMatStatus :: restoreContext(DataStream *stream, ContextMode mode, void *obj
 
     // read cumulative plastic strain (scalar)
     if ( !stream->read(& kappa, 1) ) {
+        THROW_CIOERR(CIO_IOERR);
+    }
+
+    // read damage (scalar)
+    if ( !stream->read(& damage, 1) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 

@@ -121,6 +121,7 @@ public:
 #ifdef __OOFEG
     void          drawRawGeometry(oofegGraphicContext &);
     void drawDeformedGeometry(oofegGraphicContext &, UnknownType);
+    void drawScalar(oofegGraphicContext &context);
     //      void          drawInternalState (DrawMode mode);
 #endif
     integrationDomain  giveIntegrationDomain() { return _Square; }

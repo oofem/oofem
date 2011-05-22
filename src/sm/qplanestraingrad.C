@@ -112,8 +112,6 @@ QPlaneStrainGrad :: initializeFrom(InputRecord *ir)
 
     this->computeGaussPoints();
     return IRRT_OK;
-  this->computeGaussPoints();
-  return IRRT_OK;
 }
 
 void 
@@ -124,7 +122,7 @@ QPlaneStrainGrad :: computeGaussPoints()
     numberOfIntegrationRules = 1;
     integrationRulesArray = new IntegrationRule* [numberOfIntegrationRules];
     integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3);
-    integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Triangle, numberOfGaussPoints, _PlaneStrainGrad);
+    integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Square, numberOfGaussPoints, _PlaneStrainGrad);
   }
 }
 
