@@ -42,7 +42,9 @@
 #include "node.h"
 #include "elementside.h"
 #include "integrationrule.h"
+#include "feinterpol.h"
 #include "mathfem.h"
+#include "error.h"
 #ifndef __MAKEDEPEND
  #include <stdio.h>
 #endif
@@ -336,6 +338,51 @@ ZZNodalRecoveryModelInterface :: ZZNodalRecoveryMI_computeNNMatrix(FloatArray &a
     return;
 }
 
+void
+ZZNodalRecoveryModelInterface :: ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatMatrix &answer, GaussPoint *aGaussPoint, InternalStateType type)
+{
+    // evaluates N matrix (interpolation estimated stress matrix)
+    // according to Zienkiewicz & Zhu paper
+    // N(nsigma, nsigma*nnodes)
+    // Definition : sigmaVector = N * nodalSigmaVector
+
+  int i, size;
+  Element* elem = ZZNodalRecoveryMI_giveElement();
+  FEInterpolation* interpol = elem->giveInterpolation();
+
+  // test if underlying element provides interpolation
+  if (interpol) {
+
+    FloatArray n;
+    interpol->evalN(n, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(elem), 0.0);
+
+    size = n.giveSize();
+    answer.resize (1,size);
+    for ( i = 1; i <= size; i++ ) {
+      answer.at(1, i) = n.at(i);
+    }
+  } else {
+    // ok default implementation can not work, as element is not providing valid interpolation 
+    // to resolve this, one can overload this method for element implementing ZZNodalRecoveryModelInterface
+    // or element should provide interpolation.
+    OOFEM_ERROR2 ("ZZNodalRecoveryMI_computeNNMatrix: Element %d not providing valid interpolation", ZZNodalRecoveryMI_giveElement()->giveNumber());
+  }
+
+    
+    return;
+
+}
+
+int
+ZZNodalRecoveryModelInterface :: ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type)
+{
+  IntegrationRule* iRule = ZZNodalRecoveryMI_giveElement()->giveDefaultIntegrationRulePtr();
+  if (iRule) {
+    return ZZNodalRecoveryMI_giveElement()->giveIPValueSize(type, iRule->getIntegrationPoint(0));
+  } else {
+    return 0;
+  }
+}
 
 
 

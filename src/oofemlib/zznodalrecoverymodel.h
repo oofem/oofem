@@ -127,19 +127,21 @@ public:
     virtual void ZZNodalRecoveryMI_computeNNMatrix(FloatArray &answer, InternalStateType type);
     /**
      * Returns the size of DofManger record required to hold recovered values for given mode.
+     * Default implementation uses element giveIPValueSize method.
      * @param type determines the type of internal variable to be recovered
      * @return size of DofManger record required to hold recovered values
      */
-    virtual int ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type) = 0;
+    virtual int ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type) ;
     /**
      * Returns the corresponding element to interface
      */
     virtual Element *ZZNodalRecoveryMI_giveElement() = 0;
     /**
-     * Evaluates N matrix (interpolation estimated value matrix).
+     * Evaluates N matrix (interpolation estimated value matrix). 
+     * Default implementation requires element to provide valid interpolation via giveInterpolation method.
      */
     virtual void ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatMatrix &answer, GaussPoint *aGaussPoint,
-                                                                     InternalStateType type) = 0;
+                                                                     InternalStateType type) ;
 };
 } // end namespace oofem
 #endif // zznodalrecoverymodel_h
