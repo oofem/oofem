@@ -909,6 +909,7 @@ enum InputFieldType {
     IFT_BinghamFluidMaterial_mu0,
     IFT_BinghamFluidMaterial_tau0,
     IFT_BinghamFluidMaterial_muinf,
+    IFT_BinghamFluidMaterial_stressGrowthRate,
 
     IFT_TwoFluidMaterial_mat,
 

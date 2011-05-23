@@ -51,13 +51,7 @@
 
 namespace oofem {
 #define BINGHAM_ALT 1
-#define BINGHAM_STRESS_GROWTH_RATE 4000.0
 #define BINGHAM_MIN_SHEAR_RATE     1.e-12
-
-//#define BINGHAM_STRESS_GROWTH_RATE 400.0
-//#define BINGHAM_MIN_SHEAR_RATE     1.e-10
-
-
 
 int
 BinghamFluidMaterial2 :: hasMaterialModeCapability(MaterialMode mode)
@@ -86,6 +80,7 @@ BinghamFluidMaterial2 :: initializeFrom(InputRecord *ir)
     IR_GIVE_FIELD(ir, mu_0, IFT_BinghamFluidMaterial_mu0, "mu0"); // Macro
     IR_GIVE_FIELD(ir, tau_0, IFT_BinghamFluidMaterial_tau0, "tau0"); // Macro
     IR_GIVE_OPTIONAL_FIELD(ir, mu_inf, IFT_BinghamFluidMaterial_muinf, "muinf"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, stressGrowthRate, IFT_BinghamFluidMaterial_stressGrowthRate, "stressgrowthrate"); // Macro
     tau_c = tau_0 * mu_inf / ( mu_inf - mu_0 );
     //tau_c = tau_0;
     return IRRT_OK;
@@ -130,9 +125,9 @@ BinghamFluidMaterial2 :: giveCharacteristicValue(MatResponseMode mode,
          *  dmudg = dgde1 = dgde2 = dgde3 = 0.0;
          *  mu = computeActualViscosity(tau_0, gamma);
          * } else {
-         *  dmudg = ( -1.0 ) * tau_0 * ( 1.0 - exp(-BINGHAM_STRESS_GROWTH_RATE * gamma) ) / gamma2 +
-         *          tau_0 *BINGHAM_STRESS_GROWTH_RATE *exp(-BINGHAM_STRESS_GROWTH_RATE * gamma) / gamma;
-         *  mu = mu_0 + tau_0 * ( 1. - exp(-BINGHAM_STRESS_GROWTH_RATE * gamma) ) / gamma;
+         *  dmudg = ( -1.0 ) * tau_0 * ( 1.0 - exp(-this->stressGrowthRate * gamma) ) / gamma2 +
+         *          tau_0 *this->stressGrowthRate *exp(-this->stressGrowthRate * gamma) / gamma;
+         *  mu = mu_0 + tau_0 * ( 1. - exp(-this->stressGrowthRate * gamma) ) / gamma;
          *
          *  dgde1 = 2.0 * fabs( epsd.at(1) ) / gamma;
          *  dgde2 = 2.0 * fabs( epsd.at(2) ) / gamma;
@@ -270,9 +265,9 @@ BinghamFluidMaterial2 :: giveDeviatoricStiffnessMatrix(FloatMatrix &answer, MatR
                 dmudg = dgde1 = dgde2 = dgde3 = dgde4 = 0.0;
                 mu = computeActualViscosity(tau_0, gamma);
             } else {
-                dmudg = ( -1.0 ) * tau_0 * ( 1.0 - exp(-BINGHAM_STRESS_GROWTH_RATE * gamma) ) / gamma2 +
-                        tau_0 *BINGHAM_STRESS_GROWTH_RATE *exp(-BINGHAM_STRESS_GROWTH_RATE *gamma) / gamma;
-                mu = mu_0 + tau_0 * ( 1. - exp(-BINGHAM_STRESS_GROWTH_RATE * gamma) ) / gamma;
+                dmudg = ( -1.0 ) * tau_0 * ( 1.0 - exp(-this->stressGrowthRate * gamma) ) / gamma2 +
+                        tau_0 *this->stressGrowthRate *exp(-this->stressGrowthRate *gamma) / gamma;
+                mu = mu_0 + tau_0 * ( 1. - exp(-this->stressGrowthRate * gamma) ) / gamma;
 
 #if 1
                 dgde1 = 2.0 * fabs( epsd.at(1) ) / gamma;
@@ -331,9 +326,9 @@ BinghamFluidMaterial2 :: giveDeviatoricStiffnessMatrix(FloatMatrix &answer, MatR
                 dmudg = dgde1 = dgde2 = dgde3 = dgde4 = 0.0;
                 mu = computeActualViscosity(tau_0, gamma);
             } else {
-                dmudg = ( -1.0 ) * tau_0 * ( 1.0 - exp(-BINGHAM_STRESS_GROWTH_RATE * gamma) ) / gamma2 +
-                        tau_0 *BINGHAM_STRESS_GROWTH_RATE *exp(-BINGHAM_STRESS_GROWTH_RATE *gamma) / gamma;
-                mu = mu_0 + tau_0 * ( 1. - exp(-BINGHAM_STRESS_GROWTH_RATE * gamma) ) / gamma;
+                dmudg = ( -1.0 ) * tau_0 * ( 1.0 - exp(-this->stressGrowthRate * gamma) ) / gamma2 +
+                        tau_0 *this->stressGrowthRate *exp(-this->stressGrowthRate *gamma) / gamma;
+                mu = mu_0 + tau_0 * ( 1. - exp(-this->stressGrowthRate * gamma) ) / gamma;
 
 #if 1
                 dgde1 = 2.0 * fabs( epsd.at(1) ) / gamma;
@@ -398,7 +393,7 @@ BinghamFluidMaterial2 :: computeActualViscosity(double Tau, double shearRate)
 {
 #ifdef BINGHAM_ALT
     shearRate = max(shearRate, BINGHAM_MIN_SHEAR_RATE);
-    return ( mu_0 + tau_0 * ( 1. - exp(-BINGHAM_STRESS_GROWTH_RATE * shearRate) ) / shearRate );
+    return ( mu_0 + tau_0 * ( 1. - exp(-this->stressGrowthRate * shearRate) ) / shearRate );
 
 #else
     if ( Tau <= tau_c ) {

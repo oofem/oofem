@@ -47,6 +47,8 @@
 namespace oofem {
 class GaussPoint;
 
+#define BINGHAM_DEFAULT_STRESS_GROWTH_RATE 4000.0
+
 /**
  * Class representing material status for Bingham material
  */
@@ -60,7 +62,7 @@ protected:
     double devStressMagnitude, temp_devStressMagnitude;
     /// devaitoric stresses and strains
     FloatArray deviatoricStrainVector, temp_deviatoricStrainVector;  // reduced form
-
+    
 public:
     /// Constructor - creates new BinghamFluidMaterial2Status with number n, belonging to domain d and IntegrationPoint g.
     BinghamFluidMaterial2Status(int n, Domain *d, GaussPoint *g);
@@ -140,6 +142,8 @@ protected:
     double tau_0;
     double tau_c;
     double mu_inf;
+    // stress growth rate - parameter controlling the shape of regularized model
+    double stressGrowthRate;
 public:
 
     /**
@@ -147,7 +151,7 @@ public:
      * @param n material number
      * @param d domain to which new material will belong
      */
-    BinghamFluidMaterial2(int n, Domain *d) : FluidDynamicMaterial(n, d) { mu_inf = 1.e6; }
+    BinghamFluidMaterial2(int n, Domain *d) : FluidDynamicMaterial(n, d) { mu_inf = 1.e6; stressGrowthRate=BINGHAM_DEFAULT_STRESS_GROWTH_RATE;}
     /// Destructor.
     ~BinghamFluidMaterial2()                { }
 
