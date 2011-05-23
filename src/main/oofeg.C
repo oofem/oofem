@@ -218,7 +218,7 @@ static const char *OOFEG_layer_names[] = {
 
 
 static SmootherType oofeg_smoother_modes [] = {
-    Smother_NA, Smoother_ZZ, Smoother_SPR
+    Smoother_NA, Smoother_ZZ, Smoother_SPR
 };
 
 
@@ -376,7 +376,7 @@ main(int argc, char *argv[])
     EMSetAssocFringeTable( age_model, gc [ 0 ].getFringeTable() );
     EVSetAssocFringeTable( myview, gc [ 0 ].getFringeTable() );
 
-    setSmoother(Smother_NA);
+    setSmoother(Smoother_ZZ);
     //gc.setSmoother (new ZZNodalRecoveryModel(problem));
     //problem -> instanciateYourself () ;
     //problem -> giveEngngModel()->forceEquationNumbering();
@@ -1692,7 +1692,7 @@ void setSmoother(Widget w, XtPointer ptr, XtPointer call_data)
 void setSmoother(SmootherType mode)
 {
     for ( int id = 1; id <= gc [ 0 ].getActiveProblem()->giveNumberOfDomains(); id++ ) {
-        if ( mode == Smother_NA ) {
+        if ( mode == Smoother_NA ) {
             gc [ 0 ].getActiveProblem()->giveDomain(id)->
             setSmoother( new NodalAveragingRecoveryModel( gc [ 0 ].getActiveProblem()->giveDomain(id) ) );
         } else if ( mode == Smoother_ZZ ) {

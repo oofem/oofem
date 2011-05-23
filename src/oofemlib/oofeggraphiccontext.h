@@ -120,7 +120,7 @@ enum OGC_PlotModeType {
 
 
 enum ScalarAlgorithmType { SA_ISO_SURF, SA_ISO_LINE, SA_ZPROFILE, SA_COLORZPROFILE };
-enum SmootherType { Smother_NA, Smoother_ZZ, Smoother_SPR };
+enum SmootherType { Smoother_NA, Smoother_ZZ, Smoother_SPR };
 enum ScaleMode { SM_Autoscale, SM_UserDefined };
 
  #define OOFEG_YIELD_STEPS 3
