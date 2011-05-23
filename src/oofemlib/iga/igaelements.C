@@ -286,7 +286,7 @@ void NURBSPlaneStressElement :: drawScalar(oofegGraphicContext &context) {
         return;
     }
 
-		double maxs=-1.0e10, mins=1.0e10;
+    //double maxs=-1.0e10, mins=1.0e10;
 
     // loop over individual integration rules (i.e., knot spans)
     for ( ir = 0; ir < numberOfIntegrationRules; ir++ ) {
@@ -558,7 +558,7 @@ void NURBSSpace3dElement :: drawScalar(oofegGraphicContext &context) {
     IntArray map;
     FEInterpolation *interp = this->giveInterpolation();
     FloatArray val;
-		int huhu = 0;
+    //int huhu = 0;
 
     if ( !context.testElementGraphicActivity(this) ) {
         return;
@@ -626,7 +626,7 @@ void NURBSSpace3dElement :: drawScalar(oofegGraphicContext &context) {
 		}
 #endif
 
-		double maxs=-1.0e10, mins=1.0e10;
+		//double maxs=-1.0e10, mins=1.0e10;
 
     // loop over individual integration rules (i.e., knot spans)
     for ( ir = 0; ir < numberOfIntegrationRules; ir++ ) {
