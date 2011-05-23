@@ -78,7 +78,7 @@ VTKXMLExportModule :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, internalVarsToExport, IFT_VTKXMLExportModule_vars, "vars"); // Macro - see internalstatetype.h
     IR_GIVE_OPTIONAL_FIELD(ir, primaryVarsToExport, IFT_VTKXMLExportModule_primvars, "primvars"); // Macro - see unknowntype.h
 
-    val = 0;
+    val = 1;
     IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_VTKXMLExportModule_stype, "stype"); // Macro
     stype = ( NodalRecoveryModel::NodalRecoveryModelType ) val;
 
