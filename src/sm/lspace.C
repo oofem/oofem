@@ -340,50 +340,6 @@ LSpace :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords
 }
 
 
-int
-LSpace :: ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type)
-{
-    if ( ( type == IST_StressTensor ) || ( type == IST_StrainTensor ) ) {
-        return 6;
-    }
-
-    GaussPoint *gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
-    return this->giveIPValueSize(type, gp);
-}
-
-
-void
-LSpace :: ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatMatrix &answer, GaussPoint *aGaussPoint, InternalStateType type)
-{
-    // evaluates N matrix (interpolation estimated stress matrix)
-    // according to Zienkiewicz & Zhu paper
-    // N(nsigma, nsigma*nnodes)
-    // Definition : sigmaVector = N * nodalSigmaVector
-    int i;
-    FloatArray n;
-    this->interpolation.evalN(n, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0);
-
-    ////if (type == StressVector) answer.resize(6,48) ;
-    if ( this->giveIPValueSize(type, aGaussPoint) ) {
-        answer.resize(1, 8);
-    } else {
-        return;
-    }
-
-    for ( i = 1; i <= 8; i++ ) {
-        answer.at(1, i)  = n.at(i);
-    }
-
-
-    /******
-     * answer.zero();
-     * for (i=1; i<=6; i++)
-     * for (j=1; j<=8; j++)
-     * answer.at(i,i+(j-1)*6) = n.at(j);
-     *******/
-    return;
-}
-
 void
 LSpace :: SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap)
 {

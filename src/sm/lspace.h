@@ -79,6 +79,7 @@ public:
     virtual int            computeNumberOfDofs(EquationID ut) { return 24; }
     virtual void giveDofManDofIDMask(int inode, EquationID, IntArray &) const;
     double             computeVolumeAround(GaussPoint *);
+    FEInterpolation *giveInterpolation() { return & interpolation; } 
     /**
      * Computes the global coordinates from given element's local coordinates.
      * Required by nonlocal material models.
@@ -105,20 +106,9 @@ public:
      */
     //@{
     /**
-     * Returns the size of DofManger record required to hold recovered values for given mode.
-     * @param type determines the type of internal variable to be recovered
-     * @return size of DofManger record required to hold recovered values
-     */
-    int ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type);
-    /**
      * Returns the corresponding element to interface
      */
     Element *ZZNodalRecoveryMI_giveElement() { return this; }
-    /**
-     * Evaluates N matrix (interpolation estimated stress matrix).
-     */
-    void ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatMatrix &answer, GaussPoint *aGaussPoint,
-                                                             InternalStateType type);
     //@}
     /**
      * @name The element interface required by SPRNodalRecoveryModelInterface
