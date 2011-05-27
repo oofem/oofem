@@ -37,12 +37,15 @@
 
 #include "fmelement.h"
 #include "domain.h"
-#include "fei2dtrlin.h"
-#include "fei2dtrquad.h"
 
 #include "nodalaveragingrecoverymodel.h"
 #include "spatiallocalizer.h"
 #include "eleminterpmapperinterface.h"
+
+namespace oofem {
+
+class FEI2dTrLin;
+class FEI2dTrQuad;
 
 /**
  * Triangular Taylor-Hood element for Stokes flow.
@@ -50,7 +53,6 @@
  * @author Carl Sandström
  * @author Mikael Öhman
  */
-namespace oofem {
 class Tr21Stokes : public FMElement,
     public NodalAveragingRecoveryModelInterface,
     public SpatialLocalizerInterface,

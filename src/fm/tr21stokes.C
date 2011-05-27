@@ -44,6 +44,8 @@
 #include "boundaryload.h"
 #include "mathfem.h"
 #include "fluiddynamicmaterial.h"
+#include "fei2dtrlin.h"
+#include "fei2dtrquad.h"
 
 #ifndef __MAKEDEPEND
  #include <math.h>
