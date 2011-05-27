@@ -89,7 +89,7 @@ public:
      * called with its record as parameter.
      * @param dr Data reader for input records.
      * @param ir Record for receiver.
-     * @return nonzero if o.k.
+     * @return Nonzero if o.k.
      */
     virtual int instanciateYourself(DataReader *dr, InputRecord *ir)
     {
@@ -128,14 +128,13 @@ public:
 
     /**
      * Instanciates the receiver from input record. Called from instanciateYourself to initialize yourself
-     * from corresponding record. Should be caled before instanciateYourself.
+     * from corresponding record. Should be called before instanciateYourself.
      */
     virtual IRResultType initializeFrom(InputRecord *ir) = 0;
-    /// Returns classname of the receiver
+    /// Returns class name of the receiver.
     virtual const char *giveClassName() const { return "ModuleManager"; }
 
 protected:
-
     /**
      * Returns the required module.
      * @param num Module number.
