@@ -38,6 +38,8 @@
 #include "linesurfacetension.h"
 
 namespace oofem {
+class FEI2dLineQuad;
+
 /**
  * 3 node line elements for surface tension.
  * @see LineSurfaceTension
@@ -46,8 +48,8 @@ namespace oofem {
 class Line2SurfaceTension : 
 	public LineSurfaceTension
 {
-//protected:
-    //static FEI2dLineQuad interpolation; // TODO: Implement this
+protected:
+    static FEI2dLineQuad fei;
 
 public:
     /**

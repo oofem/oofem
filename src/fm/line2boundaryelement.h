@@ -40,6 +40,8 @@
 #include "eleminterpmapperinterface.h"
 
 namespace oofem {
+class FEI2dLineQuad;
+
 /**
  * Boundary element used for tracking solutions on arbitrary sections.
  * Also convenient for computing the RVE volume.
@@ -52,6 +54,7 @@ class Line2BoundaryElement :
 {
 protected:
     int boundaryNumber;
+    static FEI2dLineQuad fei;
 
 public:
     /**
@@ -82,6 +85,7 @@ public:
     /**
      * Computes the integral @f$ \int_S n \cdot x \mathrm{d}s @f$.
      * The normal is defined as left in the direction parameterization.
+     * @todo{Move actual computations to FEI class}
      * @return Evaluated integral.
      */
     virtual double computeNXIntegral() const;

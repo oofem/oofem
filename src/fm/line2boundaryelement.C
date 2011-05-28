@@ -33,6 +33,7 @@
  */
 
 #include "line2boundaryelement.h"
+#include "fei2dlinequad.h"
 #include "timestep.h"
 #include "mathfem.h"
 
@@ -40,6 +41,8 @@
 #include <math.h>
 
 namespace oofem {
+FEI2dLineQuad Line2BoundaryElement :: fei(1, 2);
+
 Line2BoundaryElement :: Line2BoundaryElement(int n, Domain *aDomain) : FMElement(n, aDomain)
 {
     this->numberOfDofMans = 3;
@@ -55,86 +58,24 @@ IRResultType Line2BoundaryElement :: initializeFrom(InputRecord *ir)
 
 void Line2BoundaryElement :: computeN(FloatArray &answer, const FloatArray &lcoords) const
 {
-    double xi = lcoords(0);
-    answer.resize(3);
-    answer(0) = 0.5*(xi-1.0)*xi;
-    answer(1) = 0.5*(xi+1.0)*xi;
-    answer(2) = 1.0-xi*xi;
+    this->fei.evalN(answer, lcoords, FEIElementGeometryWrapper(this), 0.0);
 }
 
 int Line2BoundaryElement :: computeLocalCoordinates(FloatArray &lcoords, const FloatArray &gcoords)
 {
-    FloatArray x1_x2, p_x3, x3_x2_x1;
-    x1_x2.beDifferenceOf(*this->giveNode(1)->giveCoordinates(), *this->giveNode(2)->giveCoordinates());
-    p_x3.beDifferenceOf(gcoords, *this->giveNode(3)->giveCoordinates());
-    x3_x2_x1.beDifferenceOf(*this->giveNode(3)->giveCoordinates(), *this->giveNode(1)->giveCoordinates());
-    x3_x2_x1.add(*this->giveNode(3)->giveCoordinates());
-    x3_x2_x1.subtract(*this->giveNode(2)->giveCoordinates());
-    //x1_x2 = *this->giveNode(1)->giveCoordinates();
-    //x1_x2.subtract(*this->giveNode(2)->giveCoordinates());
-    //p_x3 = gcoords;
-    //p_x3.subtract(*this->giveNode(3)->giveCoordinates());
-    //x3_x2_x1 = *this->giveNode(3)->giveCoordinates();
-    //x3_x2_x1.add(*this->giveNode(3)->giveCoordinates());
-    //x3_x2_x1.subtract(*this->giveNode(2)->giveCoordinates());
-    //x3_x2_x1.subtract(*this->giveNode(1)->giveCoordinates());
-
-    double b0 = 0.50*x1_x2.dotProduct(p_x3); // 1/2*(x1 - x2).(p - x3)
-    double b1 = 0.25*x1_x2.computeSquaredNorm() + x3_x2_x1.dotProduct(p_x3); // 1/4*(x1 - x2)^2 + (2*x3 - x2 - x1).(p - x3)
-    double b2 = 0.75*x1_x2.dotProduct(x3_x2_x1); // 3/4*(x1-x2).(2x3 - x2 - x1)
-    double b3 = 0.50*x3_x2_x1.computeSquaredNorm(); // 1/2*(2*x3 - x2 - x3)^2
-
-    double r[3];
-    int roots;
-    cubic(b3, b2, b1, b0, &r[0], &r[1], &r[2], &roots);
-
-    // Copy them over, along with boundary cases.
-    int points = 2;
-    double p[5] = {-1.0, 1.0};
-    for (int i = 0; i < roots; i++) {
-        if (r[i] > -1.0 && r[i] < 1.0) {
-            // The cubic solver has pretty bad accuracy, performing a single newton iteration
-            // which typically improves the solution by many many orders of magnitude.
-            // TODO: Move this to the cubic solver.
-            r[i] -= (b0 + b1*r[i] + b2*r[i]*r[i] + b3*r[i]*r[i]*r[i])/(b1 + 2*b2*r[i] + 3*b3*r[i]*r[i]);
-            //printf("r[%d] -> %e\n",i, (b0 + b1*r[i] + b2*r[i]*r[i] + b3*r[i]*r[i]*r[i]));
-            p[points] = r[i];
-            points++;
-        }
-    }
-
-    double min_distance2 = 0.0, min_xi = 0, distance2;
-    FloatArray f(2), xi(1);
-
-    for (int i = 0; i < points; i++) {
-        xi(0) = p[i];
-        this->computeGlobalCoordinates(f,xi);
-        distance2 = f.distance_square(gcoords);
-        if ( i == 0 || distance2 < min_distance2 ) {
-            min_distance2 = distance2;
-            min_xi = xi(0);
-        }
-    }
-
-    lcoords.resize(1);
-    lcoords(0) = min_xi;
-
+    this->fei.global2local(lcoords, gcoords, FEIElementGeometryWrapper(this), 0.0);
     return true;
 }
 
 int Line2BoundaryElement :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords)
 {
-    FloatArray n;
-    this->computeN(n, lcoords);
-    answer.resize(0);
-    for (int i = 1; i <= n.giveSize(); ++i) {
-        answer.add(n.at(i), *this->giveNode(i)->giveCoordinates());
-    }
+    this->fei.local2global(answer, lcoords, FEIElementGeometryWrapper(this), 0.0);
     return true;
 }
 
 double Line2BoundaryElement :: computeNXIntegral() const
 {
+    //return this->fei.evalNXIntegral(FEIElementGeometryWrapper(this));
     Node *node;
     double x1, x2, x3, y1, y2, y3;
 
