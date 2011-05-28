@@ -885,7 +885,7 @@ OctreeSpatialLocalizer :: giveElementClosestToPoint(FloatArray &lcoords, FloatAr
     // Look in center, then expand.
     this->giveElementClosestToPointWithinOctant(currCell, gcoords, minDist, lcoords, closest, answer, region);
     prevRadius = 0;
-    radius = w;
+    radius = currCell->giveSize();
     while (radius < minDist) {
         this->giveListOfTerminalCellsInBoundingBox(cellList, gcoords, radius, prevRadius, this->rootCell);
         for (std :: list< OctantRec * > :: iterator it = cellList.begin(); it != cellList.end(); ++it) {
