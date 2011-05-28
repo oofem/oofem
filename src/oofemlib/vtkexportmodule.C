@@ -94,7 +94,7 @@ VTKExportModule :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, internalVarsToExport, IFT_VTKExportModule_vars, "vars"); // Macro - see internalstatetype.h
     IR_GIVE_OPTIONAL_FIELD(ir, primaryVarsToExport, IFT_VTKExportModule_primvars, "primvars");  // Macro - see unknowntype.h
 
-    val = 1;
+    val = NodalRecoveryModel::NRM_ZienkiewiczZhu;
     IR_GIVE_OPTIONAL_FIELD(ir, val, IFT_VTKExportModule_stype, "stype"); // Macro
     stype = ( NodalRecoveryModel::NodalRecoveryModelType ) val;
 
@@ -1340,7 +1340,7 @@ VTKExportModule :: getDofManPrimaryVariable(FloatArray &answer, DofManager *dman
             if ( size == recoveredVal->giveSize() ) {
                 answer.at(j) = recoveredVal->at(j);
             } else {
-                OOFEM_WARNING("VTKExportModule :: getDofManPrimaryVariable: recovered variable size mismatch");
+                OOFEM_WARNING2("VTKExportModule :: getDofManPrimaryVariable: recovered variable size mismatch for %d", iType);
                 answer.at(j) = 0.0;
             }
         }

@@ -76,7 +76,7 @@ class TimeStep;
 class NodalRecoveryModel
 {
 public:
-  enum NodalRecoveryModelType { NRM_NodalAveraging, NRM_ZienkiewiczZhu,  NRM_SPR};
+  enum NodalRecoveryModelType { NRM_NodalAveraging = 0, NRM_ZienkiewiczZhu = 1,  NRM_SPR = 2};
 protected:
     typedef TDictionary< int, FloatArray >vectorDictType;
     /**
