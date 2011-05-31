@@ -218,7 +218,7 @@ OutputManager :: _testElementOutput(int number)
     } else {
         // test for particular element selection
         dynaList< Range > :: iterator elemOutIter;
-        int _label = domain->giveDofManager(number)->giveLabel();
+        int _label = domain->giveElement(number)->giveLabel();
 
         for ( elemOutIter = element_out.begin(); elemOutIter != element_out.end(); ++elemOutIter ) {
             if ( ( * elemOutIter ).test(_label) ) {
@@ -235,7 +235,7 @@ OutputManager :: _testElementOutput(int number)
 
     // if selected check exclude list
     dynaList< Range > :: iterator elemExceptIter;
-    int _label = domain->giveDofManager(number)->giveLabel();
+    int _label = domain->giveElement(number)->giveLabel();
 
     for ( elemExceptIter = element_except.begin(); elemExceptIter != element_except.end(); ++elemExceptIter ) {
         // test if excluded
