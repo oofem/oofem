@@ -38,6 +38,7 @@
 #include "dof.h"
 #include "element.h"
 #include "timestep.h"
+#include "flotarry.h"
 
 namespace oofem {
 DofDistributedPrimaryField :: DofDistributedPrimaryField(EngngModel *a, int idomain,

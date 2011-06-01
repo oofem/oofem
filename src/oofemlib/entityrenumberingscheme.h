@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -31,10 +31,6 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-
-//
-// FILE: entityrenumberingscheme.h
-//
 
 #ifndef entityrenumberingscheme_h
 #define entityrenumberingscheme_h
@@ -62,11 +58,13 @@ public:
     // two possible functions to call member function. virtual cause derived
     // classes will use a pointer to an object and a pointer to a member function
     // to make the function call
-    virtual int operator()(int, EntityRenumberingScheme) = 0; // call using operator
-    virtual int call(int, EntityRenumberingScheme) = 0;    // call using function
+    /// Call using operator.
+    virtual int operator()(int, EntityRenumberingScheme) = 0;
+    /// Call using function.
+    virtual int call(int, EntityRenumberingScheme) = 0;
 };
 
-// derived template class
+/// Derived template class
 template< class TClass >class SpecificEntityRenumberingFunctor : public EntityRenumberingFunctor
 {
 private:
@@ -81,17 +79,15 @@ public:
     { pt2Object = _pt2Object;
       fpt = _fpt; };
 
-    // override operator "()"
     virtual int operator()(int n, EntityRenumberingScheme ers)
-    { return ( * pt2Object.*fpt )(n, ers); };        // execute member function
+    { return ( * pt2Object.*fpt )(n, ers); };
 
-    // override function "Call"
     virtual int call(int n, EntityRenumberingScheme ers)
-    { return ( * pt2Object.*fpt )(n, ers); };       // execute member function
+    { return ( * pt2Object.*fpt )(n, ers); };
 };
 
 
-// renumbering functor based on provided maps
+/// Renumbering functor based on provided maps.
 class MapBasedEntityRenumberingFunctor : public EntityRenumberingFunctor
 {
 private:
@@ -102,7 +98,6 @@ public:
         dofmanMap(_dofmanMap), elemMap(_elemMap)
     {}
 
-    // override operator "()"
     virtual int operator()(int n, EntityRenumberingScheme ers)
     {
         std :: map< int, int > :: const_iterator it;
@@ -116,9 +111,8 @@ public:
         return 0;
     }
 
-    // override function "Call"
     virtual int call(int n, EntityRenumberingScheme ers)
-    { return this->operator()(n, ers); };          // execute member function
+    { return this->operator()(n, ers); };
 };
 } // end namespace oofem
 #endif // entityrenumberingscheme_h

@@ -53,11 +53,11 @@ class FloatMatrix;
 /**
  * Class CommunicationPacket represent a data-packet, that is used to implement dynamic
  * communicator. Dynamic Communicator can pack messages into a dynamic message.
- * This dynamic message is splitted into a series
+ * This dynamic message is split into a series
  * of data packets of fixed size (this is not necessary) that are send over network.
  *
- * A special header is put at the begining of each packet buffer. This header keeps the message number
- * as well as the EOF flag indicating the last packet in message. This header is packed at the begining
+ * A special header is put at the beginning of each packet buffer. This header keeps the message number
+ * as well as the EOF flag indicating the last packet in message. This header is packed at the beginning
  * of each packet.
  */
 
@@ -70,9 +70,9 @@ protected:
 public:
 
  #ifdef __USE_MPI
-    /// Constructor. Creeates buffer of given size, using given communicator for packing.
+    /// Constructor. Creates buffer of given size, using given communicator for packing.
     CommunicationPacket(MPI_Comm comm, int size, int num);
-    /// Constructor. Creeates empty buffer, using given communicator for packing.
+    /// Constructor. Creates empty buffer, using given communicator for packing.
     CommunicationPacket(MPI_Comm comm, int num);
  #endif
     /// Destructor.
@@ -174,9 +174,9 @@ protected:
     /// Communication completion flag.
     bool completed;
 public:
-    /// Constructor. Creeates buffer of given size, using given communicator for packing.
+    /// Constructor. Creates buffer of given size, using given communicator for packing.
     DynamicCommunicationBuffer(MPI_Comm comm, int size, bool dynamic = 0);
-    /// Constructor. Creeates empty buffer, using given communicator for packing.
+    /// Constructor. Creates empty buffer, using given communicator for packing.
     DynamicCommunicationBuffer(MPI_Comm comm, bool dynamic = 0);
     /// Destructor.
     virtual ~DynamicCommunicationBuffer();

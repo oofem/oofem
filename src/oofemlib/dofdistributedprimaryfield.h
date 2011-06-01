@@ -37,15 +37,11 @@
 
 #include "primaryfield.h"
 
-#include "flotarry.h"
 #ifndef __MAKEDEPEND
  #include <vector>
 #endif
 
 namespace oofem {
-class PrimaryField;
-class Dof;
-
 /**
  * Class representing field of primary variables, which are typically allocated on nodes.
  * The field is determined by DOF values stored in DOF repositories (unknown dictionary).
@@ -56,10 +52,6 @@ class Dof;
  */
 class DofDistributedPrimaryField : public PrimaryField
 {
-public:
-
-
-protected:
 public:
     /**
      * Constructor. Creates a field of given type associated to given domain.
@@ -85,10 +77,8 @@ public:
 
     virtual void advanceSolution(TimeStep *atTime);
 
-    virtual contextIOResultType    saveContext(DataStream *stream, ContextMode mode);
-    virtual contextIOResultType    restoreContext(DataStream *stream, ContextMode mode);
-
-protected:
+    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode);
+    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode);
 };
 } // end namespace oofem
 #endif // dofdistributedprimaryfield_h

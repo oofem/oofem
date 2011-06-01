@@ -32,29 +32,26 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-
 #ifndef emptymaterial_h
 #define emptymaterial_h
 
 #include "material.h"
-#include "flotarry.h"
-#include "flotmtrx.h"
 
 namespace oofem {
 class GaussPoint;
 class Domain;
 class InputRecord;
+
 /**
- * Dummy material model, no functionality. Conveniniet for special-purpose elements not 
+ * Dummy material model, no functionality. Convenient for special-purpose elements not
  * requiring real material.
  */
 class DummyMaterial : public Material
 {
-protected:
 public:
-    DummyMaterial (int n, Domain* d);
+    DummyMaterial (int n, Domain* d) : Material(n,d) {};
     virtual int testMaterialExtension(MaterialExtension ext) { return 0; }
-    virtual int hasMaterialModeCapability(MaterialMode mode) {return 0;}
+    virtual int hasMaterialModeCapability(MaterialMode mode) { return 0;}
 
     const char *giveClassName() const { return "DummyMaterial"; }
     classType giveClassID() const { return DummyMaterialClass; }

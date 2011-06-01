@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/error.h,v 1.5.4.1 2004/04/05 15:19:43 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -33,7 +32,6 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-
 //   ************************************
 //   *** Error macros                 ***
 //   ************************************
@@ -48,7 +46,7 @@
 #endif
 
 namespace oofem {
-/** cause oofem  program termination by calling exit */
+/** Cause oofem program termination by calling exit. */
 void oofem_exit(int code);
 
 /**@
@@ -61,13 +59,13 @@ void oofem_exit(int code);
  * final message and uses oofem default loggers to report message.
  *
  * These macros add to given message also file and line information.
- * They can be implemnted in a very elegant way using macro with variable
+ * They can be implemented in a very elegant way using macro with variable
  * number of arguments (__VA_ARGS__). But since the many compilers do not support
  * macros with variable number of arguments we have two choices:
- * to implement this as a function with variable num of args, but then we can not
+ * to implement this as a function with variable number of arguments, but then we can not
  * add file and line info via __FILE__ and __LINE__ macros. Or if file and line
- * info is prefered, then instead of single macro vith var num of args we can have
- * series of "clasical" macros with increasing number of parameters.
+ * info is preferred, then instead of single macro with variable number of arguments we can have
+ * series of "classical" macros with increasing number of parameters.
  * The latter approach is used here.
  *
  */
@@ -115,7 +113,7 @@ void oofem_exit(int code);
  */
 
 /**@
- * log-family macros that use OOFEM loggers and exit (for errors and fatals)
+ * Log-family macros that use OOFEM loggers and exit (for errors and fatals).
  */
 //@{
 #define OOFEM_FATAL1(_1) { oofem_errLogger.writeELogMsg(Logger :: LOG_LEVEL_FATAL, __FILE__, __LINE__, _1); oofem_exit(1); }
@@ -142,7 +140,7 @@ void oofem_exit(int code);
 //@}
 
 /**@
- * log-family macros that allow to pass file and line info. They use OOFEM loggers and exit (fatals and errors)
+ * Log-family macros that allow to pass file and line info. They use OOFEM loggers and exit (fatals and errors).
  */
 //@{
 #define __OOFEM_FATAL1(_file, _line, _1) { oofem_errLogger.writeELogMsg(Logger :: LOG_LEVEL_FATAL, _file, _line, _1); oofem_exit(1); }

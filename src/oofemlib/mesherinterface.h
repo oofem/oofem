@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/mesherinterface.h,v 1.5 2003/04/06 14:08:25 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -48,9 +47,9 @@ class TimeStep;
 
 /**
  * The base class representing the interface to mesh generation package.
- * This interface is rimarly responsible for two main tasks:
- * - to create input mesher file, containing all informations including the mesh density informations
- * based on informations from remeshing criteria.
+ * This interface is primarily responsible for two main tasks:
+ * - to create input mesher file, containing all information including the mesh density informations
+ *   based on informations from remeshing criteria.
  * - possibly to launch the mesher and transform its output to oofem input
  */
 class MesherInterface
@@ -72,12 +71,13 @@ public:
      * @param newly allocated domain, representing new mesh or set to NULL if external generation has to be performed.
      */
     virtual returnCode createMesh(TimeStep *, int domainNumber, int domainSerNum, Domain **dNew) = 0;
-    /** Initializes receiver acording to object description stored in input record.
-     *  This function is called immediately after creating object using
+    /**
+     * Initializes receiver according to object description stored in input record.
+     * This function is called immediately after creating object using
      * constructor. Input record can be imagined as data record in component database
      * belonging to receiver. Receiver may use value-name extracting functions
      * to extract particular field from record.
-     * @see readInteger, readDouble and similar functions */
+     */
     virtual IRResultType initializeFrom(InputRecord *ir) { return IRRT_OK; }
 };
 } // end namespace oofem

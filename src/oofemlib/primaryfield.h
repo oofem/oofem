@@ -95,9 +95,6 @@ public:
  */
 class PrimaryField : public Field
 {
-public:
-
-
 protected:
     int actualStepNumber;
     int actualStepIndx;
@@ -107,6 +104,7 @@ protected:
     EngngModel *emodel;
     int domainIndx;
     EquationID ut;
+
 public:
     /**
      * Constructor. Creates a field of given type associated to given domain.

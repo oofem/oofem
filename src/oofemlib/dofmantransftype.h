@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -32,26 +32,19 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-//
-// FILE: dofmantransftype.h
-//
-
 #ifndef dofmantransftype_h
 #define dofmantransftype_h
 
 namespace oofem {
 /**
- * Enumerative type, used to specify type of trasformation required from dofManager (node).
- * The _toGlobalCS value requires transformation from node-depenedent coordinate system
- * to gbal coordinte system in node to be assebled. Then global vector fg can be obtained by
- * followwing operation fg = T fn, where T is transformation matrix and fn is vector expressed in
- * nodal coordinate system).
- * The _toNodalCS value represent transformation from global c.s in node to node-dependent
- * coordinate system.
+ * Enumerative type, used to specify type of transformation required from dofManager (node).
+ * Then global vector @f$ f_g @f$ can be obtained by following operation
+ * @f$ f_g = T\cdot f_n@f$, where @f$T@f$ is transformation matrix and @f$f_n@f$ is vector expressed in
+ * nodal coordinate system.
  */
 enum DofManTransfType {
-    _toGlobalCS,
-    _toNodalCS
+    _toGlobalCS, ///< Transformation from global c.s in node to node-dependent coordinate system.
+    _toNodalCS, ///< Transformation from node-dependent coordinate system to global coordinate system in node.
 };
 } // end namespace oofem
 #endif // dofmantransftype_h

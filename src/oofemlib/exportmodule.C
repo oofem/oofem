@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/exportmodule.C,v 1.5.4.1 2004/04/05 15:19:43 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -38,6 +37,7 @@
 #include "engngm.h"
 #include "logger.h"
 #include "oofem_limits.h"
+#include "range.h"
 
 #ifndef __MAKEDEPEND
  #include <stdarg.h>
@@ -68,7 +68,7 @@ ExportModule :: initializeFrom(InputRecord *ir)
 
     IR_GIVE_OPTIONAL_FIELD(ir, tsteps_out, IFT_ExportModule_tstepsout, "tsteps_out"); // Macro
 
-    domain_all_flag     = ir->hasField(IFT_ExportModule_domainall, "domain_all");
+    domain_all_flag = ir->hasField(IFT_ExportModule_domainall, "domain_all");
 
     if ( !domain_all_flag ) {
         domainMask.resize(0);
@@ -78,11 +78,11 @@ ExportModule :: initializeFrom(InputRecord *ir)
     return IRRT_OK;
 }
 
-int
+bool
 ExportModule :: testTimeStepOutput(TimeStep *tStep)
 {
     if ( tstep_all_out_flag ) {
-        return 1;
+        return true;
     }
 
     if ( tstep_step_out ) {
@@ -96,24 +96,22 @@ ExportModule :: testTimeStepOutput(TimeStep *tStep)
     for ( tstepsIter = tsteps_out.begin(); tstepsIter != tsteps_out.end(); ++tstepsIter ) {
         // test if INCLUDED
         if ( ( * tstepsIter ).test( tStep->giveNumber() ) ) {
-            return 1;
+            return true;
         }
     }
 
     return 0;
 }
 
-int
+bool
 ExportModule :: testDomainOutput(int n)
 {
     if ( domain_all_flag ) {
-        return 1;
+        return true;
     }
 
     return domainMask.findFirstIndexOf(n);
 }
-
-
 
 void ExportModule :: error(const char *file, int line, const char *format, ...) const
 {

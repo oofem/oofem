@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/elementside.C,v 1.6 2003/04/06 14:08:24 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -32,9 +31,6 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-
-
-//   file ElementSide.C
 
 #include "elementside.h"
 #include "dof.h"
@@ -57,11 +53,10 @@ ElementSide :: ElementSide(int n, Domain *aDomain) :
 { }
 
 
-
-
 ElementSide :: ~ElementSide()
 // Destructor.
 { }
+
 
 IRResultType
 ElementSide :: initializeFrom(InputRecord *ir)
@@ -76,7 +71,6 @@ ElementSide :: initializeFrom(InputRecord *ir)
 
     return DofManager :: initializeFrom(ir);
 }
-
 
 
 void ElementSide :: printYourself()
@@ -98,11 +92,12 @@ void ElementSide :: printYourself()
     printf("\n");
 }
 
+
 void
 ElementSide :: computeTransformation(FloatMatrix &answer, const IntArray *map)
 {
     //
-    // computes transfromation of receiver from global cs to nodal (user-defined) cs.
+    // computes transformation of receiver from global cs to nodal (user-defined) cs.
     // Note: implementation rely on D_u, D_v and D_w (R_u, R_v, R_w) order in cltypes.h
     // file. Do not change their order and do not insert any values between these values.
     //

@@ -51,14 +51,14 @@ class IntArray;
 
 /**
  * Class implementing internal element dof manager having some DOFs.
- * It posses degrees of freedom (see base class DofManager).
+ * It possess degrees of freedom (see base class DofManager).
  * This class is usually attribute only of a single element, as its DOFs are internal element degrees of freedom.
  */
 class ElementDofManager : public DofManager
 {
-
 private:
   Element* element;
+
 public:
     /**
      * Constructor.
@@ -77,19 +77,18 @@ public:
     //virtual IntArray* ResolveDofIDArray (char* initString);
     void printYourself();
 
-    /** 
-     * Computes receiver transformation matrix from global CS to dofManager specific
-     * coordinate system. In which governing equations are assembled, for example the
-     * local coordinate system in node.
+    /**
+     * Computes receiver transformation matrix from global cs. to dofManager specific
+     * coordinate system (in which governing equations are assembled, for example the
+     * local coordinate system in node).
      * @param answer Computed transformation matrix. It has generally dofIDArry.size rows and
      * if loc is obtained using giveLocationArray(dofIDArry, loc) call, loc.giveSize() columns.
      * This is because this transformation should generally include not only transformation to
      * dof manager local coordinate system, but receiver dofs can be expressed using
-     * dofs of another dofManager (In this case, squre answer is produced anly if all
+     * dofs of another dofManager (In this case, square answer is produced only if all
      * dof transformation is required).
-     * @param dofIDArry Array containing DofIDItem-type values (this is enumeration
-     * identifying physical meaning of particular DOF, see cltypes.h) for which transfromation mtrx is
-     * assembled. if dofIDArry is NULL, then all receiver dofs are assumed.
+     * @param dofIDArry Array containing DofIDItem values for which transformation matrix is
+     * assembled. If dofIDArry is NULL, then all receiver dofs are assumed.
      */
     virtual void computeTransformation(FloatMatrix &answer, const IntArray *dofIDArry);
     virtual int requiresTransformation() { return 0; }

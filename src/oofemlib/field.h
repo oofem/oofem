@@ -43,7 +43,6 @@
 
 namespace oofem {
 
-/// Physical type of field.
 #define FieldType_DEF \
     ENUM_ITEM_WITH_VALUE(FT_Unknown, 0) \
     ENUM_ITEM_WITH_VALUE(FT_Velocity, 1) \
@@ -54,6 +53,7 @@ namespace oofem {
     ENUM_ITEM_WITH_VALUE(FT_HumidityConcentration, 6) \
     ENUM_ITEM_WITH_VALUE(FT_TransportProblemUnknowns, 7)
 
+/// Physical type of field.
 enum FieldType {
     FieldType_DEF
 };
@@ -62,7 +62,6 @@ enum FieldType {
 #undef enumitem_h
 
 const FieldType __StringToFieldType(std::string _value);
-
 
 /**
  * Abstract class representing field. Field represent the spatial distribution of certain variable.

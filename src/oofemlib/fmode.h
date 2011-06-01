@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -32,10 +32,6 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-//
-// FILE: fmode.h
-//
-
 #ifndef fmode_h
 #define fmode_h
 
@@ -44,10 +40,9 @@ namespace oofem {
  * Type representing the type of formulation (total or updated) of non-linear computation.
  */
 enum fMode {
-    // type of formulation (non-linear computation only)
-    UNKNOWN = 0,
-    TL = 1,      // Total Lagrange
-    AL = 2       // Updated Lagrange
+    UNKNOWN = 0, ///< Unknown.
+    TL = 1,      ///< Total Lagrange.
+    AL = 2,      ///< Updated Lagrange.
 };
 } // end namespace oofem
 #endif // fmode_h

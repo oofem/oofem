@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -32,23 +32,19 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-//
-// FILE: doftype.h
-//
-
 #ifndef doftype_h
 #define doftype_h
 
 #include "enumitem.h"
 
 namespace oofem {
-/* Dof Type, determines the type of DOF created
- */
+
 #define dofType_DEF \
     ENUM_ITEM_WITH_VALUE(DT_master, 0) \
     ENUM_ITEM_WITH_VALUE(DT_simpleSlave, 1) \
     ENUM_ITEM_WITH_VALUE(DT_slave, 2)
 
+/// Dof Type, determines the type of DOF created.
 enum dofType {
     dofType_DEF
 };

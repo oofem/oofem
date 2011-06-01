@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -32,21 +32,13 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-//
-// FILE: domaintype.h
-//
-
 #ifndef domaintype_h
 #define domaintype_h
 
 #include "enumitem.h"
 
 namespace oofem {
-/**
- * Type representing type of domain.
- * Domain type (the member value of Domain class) is used to determine the default
- * number of DOFs per node and side and to determine their corresponding physical meaning.
- */
+
 #define domainType_DEF \
     ENUM_ITEM(_unknownMode) \
     ENUM_ITEM(_2dPlaneStressMode) \
@@ -64,6 +56,11 @@ namespace oofem {
     ENUM_ITEM(_2dIncompressibleFlow) /* 2d Incompressible flow, no energy eq */ \
     ENUM_ITEM(_3dIncompressibleFlow) /* 3d Incompressible flow, no energy eq */
 
+/**
+ * Type representing type of domain.
+ * Domain type (the member value of Domain class) is used to determine the default
+ * number of DOFs per node and side and to determine their corresponding physical meaning.
+ */
 enum domainType {
     domainType_DEF
 };

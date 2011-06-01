@@ -87,6 +87,12 @@ class IntArray;
  * Number and physical meaning of dofs can be specified by user in input file
  * (see input file description). If it is not specified, default values are obtained from domain,
  * based on domain type of problem.
+ *
+ * Tasks:
+ * - managing its degrees of freedom (giveDof).
+ * - calculating its nodal vector.
+ * - printing and updating at end of step .
+ * - managing its swapping to and from disk.
  */
 class DofManager : public FEMComponent
 {
@@ -104,11 +110,6 @@ class DofManager : public FEMComponent
      * This location array is used by the manager for assembling its load vector to
      * the right-hand side of the linear system ; it is also used by elements for
      * calculating their own location arrays.
-     * TASKS
-     * - managing its degrees of freedom (method 'giveDof') ;
-     * - calculating its nodal  vector;
-     * - printing and updating at end of step ;
-     * - managing its swapping to and from disk.
      */
 
 protected:

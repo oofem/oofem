@@ -49,13 +49,11 @@ class FloatMatrix;
 
 /**
  * Implements the solution of linear system of equation in the form Ax=b using direct factorization method.
- * Can work with any sparse matrix implementation. Hovewer, the sparse matrix implementation have to support
+ * Can work with any sparse matrix implementation. However, the sparse matrix implementation have to support
  * its factorization (canBeFactorized method).
  */
 class DSSSolver : public SparseLinearSystemNM
 {
-private:
-
 public:
     /** 
      * Constructor. 

@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/exportmodule.h,v 1.5.4.1 2004/04/05 15:19:43 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -33,25 +32,22 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-//
-// class ExportModule
-//
-
 #ifndef exportmodule_h
 #define exportmodule_h
+
+#include "intarray.h"
+#include "dynalist.h"
+#include "inputrecord.h"
 
 #ifndef __MAKEDEPEND
  #include <stdio.h>
  #include <string.h>
 #endif
-#include "intarray.h"
-#include "dynalist.h"
-#include "range.h"
-#include "inputrecord.h"
 
 namespace oofem {
 class EngngModel;
 class TimeStep;
+class Range;
 
 /**
  * Represents export output module - a base class for all output modules. ExportModule is an abstraction
@@ -65,69 +61,64 @@ class TimeStep;
 class ExportModule
 {
 protected:
-
-    /// Component number
+    /// Component number.
     int number;
-    /// Problem pointer
+    /// Problem pointer.
     EngngModel *emodel;
-    /// Indicates all steps selection
-    int tstep_all_out_flag;
+    /// Indicates all steps selection.
+    bool tstep_all_out_flag;
     /// User timeStep Output step. Indicates every tstep_step_out-th step selected.
     int tstep_step_out;
     /// List of user selected step numbers.
     dynaList< Range >tsteps_out;
 
-    /// Indicates all domains
-    int domain_all_flag;
-    /// Domain selection mask
+    /// Indicates all domains.
+    bool domain_all_flag;
+    /// Domain selection mask.
     IntArray domainMask;
 
 public:
 
-    /// Constructor. Creates empty Output Manager with number n. By default all components are selected.
+    /// Constructor. Creates empty Output Manager with number n.
     ExportModule(int n, EngngModel *e);
     /// Destructor
     virtual ~ExportModule();
-    /// Initializes receiver acording to object description stored in input record.
+    /// Initializes receiver according to object description stored in input record.
     virtual IRResultType initializeFrom(InputRecord *ir);
     /**
      * Writes the output. Abstract service.
      * @param tStep time step.
      */
-    virtual void                  doOutput(TimeStep *tStep) = 0;
+    virtual void doOutput(TimeStep *tStep) = 0;
     /**
      * Initializes receiver.
      * The init file messages should be printed.
      */
-    virtual void                  initialize() { }
+    virtual void initialize() { }
     /**
      * Terminates the receiver.
      * The terminating messages should be printed.
      * All the streams should be closed.
      */
-    virtual void                  terminate() { }
+    virtual void terminate() { }
     /// Returns class name of the receiver.
     virtual const char *giveClassName() const { return "ExportModule"; }
-
-
-
 
 protected:
     /**
      * Tests if given time step output is required.
-     * @return nonzero if output required.
+     * @param tStep Time step to check.
+     * @return True if output required.
      */
-    int testTimeStepOutput(TimeStep *);
+    bool testTimeStepOutput(TimeStep *tStep);
     /**
      * Test if domain output is required.
-     * @return nonzero if required
+     * @return True if required.
      */
-    int testDomainOutput(int n);
+    bool testDomainOutput(int n);
 
-    /// prints simple error message and exits
+    /// Prints simple error message and exits.
     void error(const char *file, int line, const char *format, ...) const;
-
-protected:
 };
 } // end namespace oofem
 #endif // exportmodule_h

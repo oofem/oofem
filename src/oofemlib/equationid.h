@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -32,18 +32,12 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-//
-// FILE: equationid.h
-//
-
 #ifndef equationid_h
 #define equationid_h
 #include "enumitem.h"
 
 namespace oofem {
-/**
- * This type identifies the governing equation
- */
+
 //EID_AuxMomentumBalance - Auxiliary equation for characteristic-split based methods
 //EID_MomentumBalance_ConservationEquation - Coupled system
 
@@ -54,15 +48,18 @@ namespace oofem {
     ENUM_ITEM_WITH_VALUE(EID_ConservationEquation, 3) \
     ENUM_ITEM_WITH_VALUE(EID_MomentumBalance_ConservationEquation, 4) \
 
+/**
+ * This type identifies the governing equation.
+ */
 enum EquationID {
     EquationID_DEF
 };
 
 // enum EquationID {
-//     EID_MomentumBalance,
-//     EID_AuxMomentumBalance,
-//     EID_ConservationEquation,
-//     EID_MomentumBalance_ConservationEquation,
+//     EID_MomentumBalance, ///< Momentum balance equation.
+//     EID_AuxMomentumBalance, ///< @todo{What is this?}
+//     EID_ConservationEquation, ///< Conservation equation.
+//     EID_MomentumBalance_ConservationEquation, ///< Coupled momentum balance and conservation equation.
 // };
 #undef ENUM_ITEM
 #undef ENUM_ITEM_WITH_VALUE

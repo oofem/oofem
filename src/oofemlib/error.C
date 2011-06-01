@@ -1,4 +1,3 @@
-/* $Header $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -43,7 +42,7 @@
 namespace oofem {
 /**
  * Global variable containing warning level, should be in interval (0,3).
- * Zero level supress all warning messafes, level 3 causes to report all
+ * Zero level suppress all warning messages, level 3 causes to report all
  * warning messages. Default level is set to maximum level.
  */
 //int oofem_warningLevel = 3;
