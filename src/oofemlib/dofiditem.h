@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -32,51 +32,50 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-//
-// FILE: dofiditem.h
-//
-
 #ifndef dofiditemh
 #define dofiditemh
 
 #include "enumitem.h"
 
 namespace oofem {
-/* mask definning the physical meaning of particular DOF in node.
- * mask array are also used in elements, where these arrays
+/* *
+ * Mask defining the physical meaning of particular DOF in node.
+ * Mask arrays are also used in elements, where these arrays
  * are determining required DOFs needed by element and which are then
- * requsted on particular nodes. They are used in function
- * Node::giveLOcationArray which returns equations numbers
+ * requested on particular nodes. They are used in function
+ * Node::giveLocationArray which returns equations numbers
  * corresponding to selected dofs.
+ * @deprecated{Use DofIDItem}
  */
 typedef char DofID;
-/**
- * Type representing particular dof type. Values of this type describe the physical meaning of
- * available DOFs.
- * Note: implementation of Node::computeGNTransformation rely on D_u, D_v and D_w (R_u, R_v, R_w) order.
- * Do not change their order and do not insert any values between these values.
- */
+
 #define DofIDItem_DEF \
-    ENUM_ITEM_WITH_VALUE(Undef, 0) /* Erorr value */ \
+    ENUM_ITEM_WITH_VALUE(Undef, 0) /* Error value */ \
     ENUM_ITEM_WITH_VALUE(D_u, 1) /* u-displacement (in direction of x-axis) */ \
     ENUM_ITEM_WITH_VALUE(D_v, 2) /* v-displacement (in direction of y-axis) */ \
     ENUM_ITEM_WITH_VALUE(D_w, 3) /* w-displacement (in direction of z-axis) */ \
-    ENUM_ITEM_WITH_VALUE(R_u, 4) /* rotation around x-axis (right hand rule assumed) */ \
-    ENUM_ITEM_WITH_VALUE(R_v, 5) /* rotation around y-axis */ \
-    ENUM_ITEM_WITH_VALUE(R_w, 6) /* rotation around z-axis */ \
+    ENUM_ITEM_WITH_VALUE(R_u, 4) /* Rotation around x-axis (right hand rule assumed) */ \
+    ENUM_ITEM_WITH_VALUE(R_v, 5) /* Rotation around y-axis */ \
+    ENUM_ITEM_WITH_VALUE(R_w, 6) /* Rotation around z-axis */ \
   \
     ENUM_ITEM_WITH_VALUE(V_u, 7) /* u-velocity (in direction of x-axis) */ \
     ENUM_ITEM_WITH_VALUE(V_v, 8) /* v-velocity (in direction of y-axis) */ \
     ENUM_ITEM_WITH_VALUE(V_w, 9) /* w-velocity (in direction of z-axis) */ \
   \
-    ENUM_ITEM_WITH_VALUE(T_f, 10) /* temperature field */ \
-    ENUM_ITEM_WITH_VALUE(P_f, 11) /* pressure field */ \
+    ENUM_ITEM_WITH_VALUE(T_f, 10) /* Temperature field */ \
+    ENUM_ITEM_WITH_VALUE(P_f, 11) /* Pressure field */ \
     ENUM_ITEM_WITH_VALUE(G_0, 12) /* DOF for gradient formulation no. 0 */ \
     ENUM_ITEM_WITH_VALUE(G_1, 13) /* DOF for gradient formulation no. 1 */ \
-    ENUM_ITEM_WITH_VALUE(C_1, 14) /* mass concentration of the first constituent */ \
-    ENUM_ITEM_WITH_VALUE(X_1, 15) /* start of xfemManager xfemdof pool */ \
-    ENUM_ITEM_WITH_VALUE(X_N, 30) /* end of xfemManager xfemdof pool */ \
+    ENUM_ITEM_WITH_VALUE(C_1, 14) /* Mass concentration of the first constituent */ \
+    ENUM_ITEM_WITH_VALUE(X_1, 15) /* Start of xfemManager xfemdof pool */ \
+    ENUM_ITEM_WITH_VALUE(X_N, 30) /* End of xfemManager xfemdof pool */ \
 
+/**
+ * Type representing particular dof type. Values of this type describe the physical meaning of
+ * available DOFs.
+ * @note{The implementation of Node::computeGNTransformation rely on D_u, D_v and D_w (R_u, R_v, R_w) order.
+ * Do not change their order and do not insert any values between these values.}
+ */
 enum DofIDItem {
     DofIDItem_DEF
 };
@@ -85,11 +84,7 @@ enum DofIDItem {
 #undef ENUM_ITEM_WITH_VALUE
 #undef enumitem_h
 
-
 const char *__DofIDItemToString(DofIDItem _value);
 
-// max length of text string with DofIdName + 1
-// see Dof::giveDofIDName function
-#define DofIdNameMaxLength 5
 } // end namespace oofem
 #endif // dofiditem_h

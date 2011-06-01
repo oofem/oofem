@@ -187,9 +187,8 @@ restart:
             //F->negated();
         }
 
-        rhs = RT;
+        rhs.beDifferenceOf(RT, *F);
         //if (R0) rhs.add(*R0);
-        rhs.subtract(*F);
 
         //
         // compute forceError

@@ -3718,18 +3718,18 @@ Subdivision :: createMesh(TimeStep *stepN, int domainNumber, int domainSerNum, D
                         if ( coords->at(2) > 70.000001 ) {
                             if ( fabs(dist - 7.0 * 7.0) < 0.01 ) {                            // be very tolerant (geometry is not precise)
                                 if ( idof == 1 || idof == 3 ) {
-                                    dof = new MasterDof( idof, node, 1, 0, dofIDArrayPtr.at(idof) );
+                                    dof = new MasterDof( idof, node, 1, 0, (DofIDItem)dofIDArrayPtr.at(idof) );
                                 }
                             }
                         } else if ( coords->at(2) > 67.9999999 ) {
                             rad = 18.0 - 11.0 / 5.5 * ( coords->at(2) - 64.5 );
                             if ( fabs(dist - rad * rad) < 0.01 ) {                            // be very tolerant (geometry is not precise)
                                 if ( idof == 1 || idof == 3 ) {
-                                    dof = new MasterDof( idof, node, 1, 0, dofIDArrayPtr.at(idof) );
+                                    dof = new MasterDof( idof, node, 1, 0, (DofIDItem)dofIDArrayPtr.at(idof) );
                                 }
 
                                 if ( idof == 2 ) {
-                                    dof = new MasterDof( idof, node, 2, 0, dofIDArrayPtr.at(idof) );
+                                    dof = new MasterDof( idof, node, 2, 0, (DofIDItem)dofIDArrayPtr.at(idof) );
                                 }
                             }
                         }
@@ -3738,20 +3738,20 @@ Subdivision :: createMesh(TimeStep *stepN, int domainNumber, int domainSerNum, D
 
                 if ( !dof ) {
                     if ( coords->at(1) > 299.999999 || coords->at(3) > 299.999999 ) {
-                        dof = new MasterDof( idof, node, 1, 0, dofIDArrayPtr.at(idof) );
+                        dof = new MasterDof( idof, node, 1, 0, (DofIDItem)dofIDArrayPtr.at(idof) );
                     }
                 }
 
                 if ( !dof ) {
                     if ( coords->at(1) < 0.00000001 ) {
                         if ( idof == 1 ) {
-                            dof = new MasterDof( idof, node, 1, 0, dofIDArrayPtr.at(idof) );
+                            dof = new MasterDof( idof, node, 1, 0, (DofIDItem)dofIDArrayPtr.at(idof) );
                         }
                     }
                 }
 
                 if ( !dof ) {
-                    dof = new MasterDof( idof, node, 0, 0, dofIDArrayPtr.at(idof) );
+                    dof = new MasterDof( idof, node, 0, 0, (DofIDItem)dofIDArrayPtr.at(idof) );
                 }
 
    #else

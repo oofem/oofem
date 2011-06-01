@@ -56,13 +56,13 @@
 #endif
 
 namespace oofem {
-Dof :: Dof(int i, DofManager *aNode, DofID id)
+Dof :: Dof(int i, DofManager *aNode, DofIDItem id)
 // Constructor. Creates a new d.o.f., with number i, belonging
 // to aNode
 {
     number         = i;
     dofManager     = aNode;
-    dofID          = ( DofIDItem ) id;
+    dofID          = id;
     ;
 }
 

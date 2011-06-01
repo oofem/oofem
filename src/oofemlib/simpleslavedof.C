@@ -52,7 +52,7 @@
 #endif
 
 namespace oofem {
-SimpleSlaveDof :: SimpleSlaveDof(int i, DofManager *aNode, int master, DofID id) : Dof(i, aNode, id)
+SimpleSlaveDof :: SimpleSlaveDof(int i, DofManager *aNode, int master, DofIDItem id) : Dof(i, aNode, id)
     // Constructor. Creates a new d.o.f., with number i, belonging
     // to aNode with bc=nbc, ic=nic
 {
@@ -61,7 +61,7 @@ SimpleSlaveDof :: SimpleSlaveDof(int i, DofManager *aNode, int master, DofID id)
 }
 
 
-SimpleSlaveDof :: SimpleSlaveDof(int i, DofManager *aNode, DofID id) : Dof(i, aNode, id)
+SimpleSlaveDof :: SimpleSlaveDof(int i, DofManager *aNode, DofIDItem id) : Dof(i, aNode, id)
     // Constructor. Creates a new d.o.f., with number i, belonging
     // to aNode with bc=nbc, ic=nic
 {

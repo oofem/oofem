@@ -52,7 +52,7 @@
 #endif
 
 namespace oofem {
-MasterDof :: MasterDof(int i, DofManager *aNode, int nbc, int nic, DofID id) : Dof(i, aNode, id)
+MasterDof :: MasterDof(int i, DofManager *aNode, int nbc, int nic, DofIDItem id) : Dof(i, aNode, id)
     // Constructor. Creates a new d.o.f., with number i, belonging
     // to aNode with bc=nbc, ic=nic
 {
@@ -64,10 +64,10 @@ MasterDof :: MasterDof(int i, DofManager *aNode, int nbc, int nic, DofID id) : D
      * pastUnknowns   = NULL ; */
 }
 
-MasterDof :: MasterDof(int i, DofManager *aNode, DofID id) : Dof(i, aNode, id)
+MasterDof :: MasterDof(int i, DofManager *aNode, DofIDItem id) : Dof(i, aNode, id)
 {
     ic = bc = equationNumber = 0;                        // means "uninitialized"
-    unknowns       = new Dictionary();
+    unknowns = new Dictionary();
 }
 
 BoundaryCondition *MasterDof :: giveBc()

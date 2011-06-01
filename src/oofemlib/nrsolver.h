@@ -83,7 +83,7 @@ class NRSolver : public SparseNonLinearSystemNM
 private:
 
     enum nrsolver_ModeType { nrsolverModifiedNRM, nrsolverFullNRM, nrsolverAccelNRM };
-    typedef std :: set< DofID >__DofIDSet;
+    typedef std :: set< DofIDItem >__DofIDSet;
 
     int nite, nsmax, minIterations;
     double rtol;

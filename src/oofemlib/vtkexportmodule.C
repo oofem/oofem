@@ -1120,7 +1120,7 @@ VTKExportModule :: exportPrimVarAs(UnknownType valID, FILE *stream, TimeStep *tS
     }
 
     DofManager *dman;
-    DofID id;
+    DofIDItem id;
     int numberOfDofs;
 
     if ( this->mode == wdmode ) { // (Whole Domain)
@@ -1326,7 +1326,7 @@ VTKExportModule :: getDofManPrimaryVariable(FloatArray &answer, DofManager *dman
     answer.zero();
 
     for ( j = 1; j <= size; j++ ) {
-        if ( ( indx = dman->findDofWithDofId( dofIDMask.at(j) ) ) ) {
+        if ( ( indx = dman->findDofWithDofId( (DofIDItem)dofIDMask.at(j) ) ) ) {
             // primary variable available directly in dof manager
             answer.at(j) = dman->giveDof(indx)->giveUnknown(EID_MomentumBalance, VM_Total, tStep);
         } else if ( iType != IST_Undefined ) {

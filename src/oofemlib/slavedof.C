@@ -44,7 +44,7 @@
 #endif
 
 namespace oofem {
-SlaveDof :: SlaveDof(int n, DofManager *aNode, DofID id) : Dof(n, aNode, id), masterContribution()
+SlaveDof :: SlaveDof(int n, DofManager *aNode, DofIDItem id) : Dof(n, aNode, id), masterContribution()
 {
     countOfPrimaryMasterDofs = -1;
 }

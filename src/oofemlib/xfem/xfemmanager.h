@@ -86,7 +86,7 @@ public:
     void updateGeometry(TimeStep *tStep);
 protected:
     // changes dofIdPos to next index
-    DofID allocateNewDofID();
+    DofIDItem allocateNewDofID();
 };
 } // end namespace oofem
 #endif  /* _XFEMMANAGER_H */

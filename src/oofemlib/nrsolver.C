@@ -263,8 +263,7 @@ restart:
         }
 
         // evaluate residual of momentum balance
-        rhs = RT;
-        rhs.subtract(*F);
+        rhs.beDifferenceOf(RT, *F);
         // account for quasi BC
         for ( int ii = 1; ii <= numberOfPrescribedDofs; ii++ ) {
             rhs.at( prescribedEqs.at(ii) ) = 0.0;
@@ -455,7 +454,7 @@ NRSolver :: initializeFrom(InputRecord *ir)
             IR_GIVE_FIELD(ir, _val, IFT_NRSolver_ccdg, name); // Macro
             // convert aray into set
             for ( _j = 1; _j <= _val.giveSize(); _j++ ) {
-                ccDofGroups.at(_i).insert( _val.at(_j) );
+                ccDofGroups.at(_i).insert( (DofIDItem)_val.at(_j) );
             }
         }
 

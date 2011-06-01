@@ -264,14 +264,14 @@ XfemManager :: instanciateYourself(DataReader *dr) {
     return 1;
 }
 
-DofID XfemManager :: allocateNewDofID() {
+DofIDItem XfemManager :: allocateNewDofID() {
     int answer = 0;
     if ( dofIdPos < ( X_N - X_1 ) ) {
         answer = dofIdPos + X_1;
         dofIdPos++;
     }
 
-    return answer;
+    return (DofIDItem)answer;
 }
 
 

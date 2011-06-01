@@ -813,7 +813,7 @@ VTKXMLExportModule :: exportPrimVarAs(UnknownType valID, IntArray &mapG2L, IntAr
     }
 
     DofManager *dman;
-    DofID id;
+    DofIDItem id;
     int numberOfDofs;
     IntArray mask(3);
     FloatArray dl, dg;

@@ -165,7 +165,7 @@ Dof *DofManager :: giveDof(int i) const
 Dof *DofManager :: giveDofWithID(int dofID) const
 // Returns the degree of freedom of the receiver with 'dofID'.
 {
-    int indx = this->findDofWithDofId( ( DofID ) dofID );
+    int indx = this->findDofWithDofId( ( DofIDItem ) dofID );
 
     // musi zde byt error - spoleham na to
     if ( !indx ) {
@@ -281,7 +281,7 @@ DofManager :: giveLocationArray(const IntArray &dofIDArry, IntArray &locationArr
         size = dofIDArry.giveSize();
         locationArray.resize(size);
         for ( i = 1; i <= size; i++ ) {
-            if ( ( indx = this->findDofWithDofId( ( DofID ) dofIDArry.at(i) ) ) == 0 ) {
+            if ( ( indx = this->findDofWithDofId( ( DofIDItem ) dofIDArry.at(i) ) ) == 0 ) {
                 _error("giveLocationArray: incompatible dof requested");
             }
 
@@ -308,7 +308,6 @@ DofManager :: giveLocationArray(const IntArray &dofIDArry, IntArray &locationArr
 
     return;
 }
-
 
 
 void DofManager :: giveCompleteLocationArray(IntArray &locationArray, const UnknownNumberingScheme &s) const
@@ -345,7 +344,7 @@ DofManager :: giveDofArray(const IntArray &dofIDArry, IntArray &answer) const
     //answer = new IntArray(size) ;
     answer.resize(size);
     for ( i = 1; i <= size; i++ ) {
-        if ( ( answer.at(i) = this->findDofWithDofId( ( DofID ) dofIDArry.at(i) ) ) == 0 ) {
+        if ( ( answer.at(i) = this->findDofWithDofId( ( DofIDItem ) dofIDArry.at(i) ) ) == 0 ) {
             _error("giveDofArray : incompatible dof requested");
         }
     }
@@ -354,7 +353,7 @@ DofManager :: giveDofArray(const IntArray &dofIDArry, IntArray &answer) const
 }
 
 int
-DofManager :: findDofWithDofId(DofID dofID) const
+DofManager :: findDofWithDofId(DofIDItem dofID) const
 {
     // finds index of DOF in receivers node with dofID
     // if such DOF does not exists, returns zero value
@@ -564,7 +563,7 @@ DofManager :: initializeFrom(InputRecord *ir)
                     dofBc = bc.at(j + 1);
                 }
 
-                dofArray [ j ] = new MasterDof( j + 1, this, dofBc, dofIc, ( DofID ) dofIDArry.at(j + 1) );
+                dofArray [ j ] = new MasterDof( j + 1, this, dofBc, dofIc, ( DofIDItem ) dofIDArry.at(j + 1) );
             } else if ( dtype == DT_simpleSlave ) { // Simple slave dof
                 if ( masterMask.giveSize() == 0 ) {
                     IR_GIVE_FIELD(ir, masterMask, IFT_DofManager_mastermask, "mastermask"); // Macro
@@ -573,9 +572,9 @@ DofManager :: initializeFrom(InputRecord *ir)
                     }
                 }
 
-                dofArray [ j ] = new SimpleSlaveDof( j + 1, this, masterMask.at(j + 1), ( DofID ) dofIDArry.at(j + 1) );
+                dofArray [ j ] = new SimpleSlaveDof( j + 1, this, masterMask.at(j + 1), ( DofIDItem ) dofIDArry.at(j + 1) );
             } else if ( dtype == DT_slave ) { // Slave dof
-                dofArray [ j ] = new SlaveDof( j + 1, this, ( DofID ) dofIDArry.at(j + 1) );
+                dofArray [ j ] = new SlaveDof( j + 1, this, ( DofIDItem ) dofIDArry.at(j + 1) );
             } else {
                 _error2( "initializeFrom: unknown dof type (%s)",  __dofTypeToString(dtype) );
             }

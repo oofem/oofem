@@ -249,7 +249,7 @@ void Node :: updateYourself(TimeStep *tStep)
             ic = domain->giveCorrespondingCoordinateIndex(i);
             if ( ic != 0 ) {
                 Dof *d = this->giveDof(i);
-                DofID id = d->giveDofID();
+                DofIDItem id = d->giveDofID();
                 if ( id == D_u || id == D_v || id == D_w ) {
                     coordinates.at(ic) += d->giveUnknown(EID_MomentumBalance, VM_Incremental, tStep);
                 } else if ( id == V_u || id == V_v || id == V_w )     {

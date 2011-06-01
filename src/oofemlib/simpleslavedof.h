@@ -92,8 +92,8 @@ public:
      * @param master number of dofManager which contain master dof
      * @param id DofID of master dof (and slave too).
      */
-    SimpleSlaveDof(int i, DofManager *aNode, int master, DofID id);
-    SimpleSlaveDof(int i, DofManager *aNode, DofID id = Undef);
+    SimpleSlaveDof(int i, DofManager *aNode, int master, DofIDItem id);
+    SimpleSlaveDof(int i, DofManager *aNode, DofIDItem id = Undef);
     /// Destructor.
     ~SimpleSlaveDof() { }
 

@@ -151,9 +151,9 @@ public:
      * @param i DOF number.
      * @param aNode DofManager which possess DOF.
      * @param id Physical meaning type.
-     * @see cltypes.h, DofID type
+     * @see cltypes.h, DofIDItem type
      */
-    Dof(int i, DofManager *aNode, DofID id = Undef);
+    Dof(int i, DofManager *aNode, DofIDItem id = Undef);
     /// Destructor.
     virtual ~Dof() { }
 

@@ -70,7 +70,7 @@ public:
      * @param aNode Node receiver will belong to.
      * @param id DofID of slave dof.
      */
-    SlaveDof(int n, DofManager *aNode, DofID id = Undef);
+    SlaveDof(int n, DofManager *aNode, DofIDItem id = Undef);
     /// Destructor.
     ~SlaveDof(void) { }
 

@@ -1096,7 +1096,7 @@ CylindricalALM :: initializeFrom(InputRecord *ir)
             IR_GIVE_FIELD(ir, _val, IFT_CylindricalALM_ccdg, name); // Macro
             // convert aray into set
             for ( _j = 1; _j <= _val.giveSize(); _j++ ) {
-                ccDofGroups.at(_i).insert( _val.at(_j) );
+                ccDofGroups.at(_i).insert( (DofIDItem)_val.at(_j) );
             }
         }
 

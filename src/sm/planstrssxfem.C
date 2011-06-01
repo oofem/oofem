@@ -125,7 +125,7 @@ void PlaneStress2dXfem :: giveLocationArray(IntArray &locationArray, EquationID,
                 for ( int k = 1; k <= dofIdAr->giveSize(); k++ ) {
                     if ( dm->hasDofID( dofIdAr->at(k) ) == false ) {
                         int sz = dm->giveNumberOfDofs();
-                        Dof *df = new MasterDof( sz + 1, dm, 0, 0, dofIdAr->at(k) );
+                        Dof *df = new MasterDof( sz + 1, dm, 0, 0, (DofIDItem)dofIdAr->at(k) );
                         int eqN = xf->giveFictPosition( dofManArray.at(i) )->at(k);
                         df->setEquationNumber(eqN);
                         dm->appendDof(df);

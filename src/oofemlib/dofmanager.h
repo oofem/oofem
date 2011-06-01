@@ -217,7 +217,7 @@ public:
      * @param dofID Physical meaning of DOF.
      * @return Index of requested DOF. If such DOF with dofID does not exists, returns zero.
      */
-    int findDofWithDofId(DofID dofID) const;
+    int findDofWithDofId(DofIDItem dofID) const;
     /**
      * Assembles the vector of unknowns in nodal c.s for given dofs of receiver.
      * This vector may have size different from number of dofs requested,

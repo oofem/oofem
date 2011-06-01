@@ -138,7 +138,7 @@ protected:
         calm_accelNRM,
     };
 
-    typedef std :: set< DofID >__DofIDSet;
+    typedef std :: set< DofIDItem >__DofIDSet;
 
     int nsmax;
     double Psi;

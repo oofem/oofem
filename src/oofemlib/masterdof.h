@@ -121,10 +121,10 @@ public:
      * @param nbc number of associated boundary condition, zero if none.
      * @param nic number of associated initial condition, zero if none.
      * @param id Physical meaning type.
-     * @see cltypes.h, DofID type
+     * @see cltypes.h, DofIDItem type 
      */
-    MasterDof(int i, DofManager *aNode, int nbc, int nic, DofID id);
-    MasterDof(int i, DofManager *aNode, DofID id = Undef);
+    MasterDof(int i, DofManager *aNode, int nbc, int nic, DofIDItem id);
+    MasterDof(int i, DofManager *aNode, DofIDItem id = Undef);
     /// Destructor.
     ~MasterDof()   { delete unknowns; /*delete pastUnknowns ;*/ }
 
