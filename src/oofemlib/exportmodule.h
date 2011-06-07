@@ -106,6 +106,13 @@ public:
 
 protected:
     /**
+     * Gives the appropriate name (minus specific file extension).
+     * @param name Char array with at least num bytes.
+     * @param num Maximum number of bytes in array.
+     * @param tStep Active time step.
+     */
+    void giveOutputBaseFileName(char *name, int num, TimeStep *tStep);
+    /**
      * Tests if given time step output is required.
      * @param tStep Time step to check.
      * @return True if output required.

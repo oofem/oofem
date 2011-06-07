@@ -190,8 +190,8 @@ GPExportModule :: giveOutputStream(TimeStep *tStep)
     char fileName [ MAX_FILENAME_LENGTH ];
     FILE *answer;
 
-    emodel->giveOutputBaseFileName(baseFileName, MAX_FILENAME_LENGTH);
-    sprintf( fileName, "%s.%d.gp", baseFileName, tStep->giveNumber() );
+    this->giveOutputBaseFileName(baseFileName, MAX_FILENAME_LENGTH, tStep);
+    sprintf( fileName, "%s.gp", baseFileName );
     if ( ( answer = fopen(fileName, "w") ) == NULL ) {
         OOFEM_ERROR2("GPExportModule::giveOutputStream: failed to open file %s", fileName);
     }

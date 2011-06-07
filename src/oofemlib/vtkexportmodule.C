@@ -373,20 +373,11 @@ VTKExportModule :: giveOutputStream(TimeStep *tStep)
     char fileName [ MAX_FILENAME_LENGTH ];
     FILE *answer;
 
-    emodel->giveOutputBaseFileName(baseFileName, MAX_FILENAME_LENGTH);
-    // try to remove last extension, if any
-    char* dotPtr=strrchr(baseFileName,'.');
-    if (dotPtr) baseFileName[dotPtr-baseFileName]='\0';
-    
-#ifdef __PARALLEL_MODE
-    sprintf( fileName, "%s_%03d.m%d.%d.vtk", baseFileName, emodel->giveRank(), this->number, tStep->giveNumber() );
-#else
-    sprintf( fileName, "%s.m%d.%d.vtk", baseFileName, this->number, tStep->giveNumber() );
-#endif
+    this->giveOutputBaseFileName(baseFileName, MAX_FILENAME_LENGTH, tStep);
+    sprintf( fileName, "%s.vtk", baseFileName );
     if ( ( answer = fopen(fileName, "w") ) == NULL ) {
         OOFEM_ERROR2("VTKExportModule::giveOutputStream: failed to open file %s", fileName);
     }
-
     return answer;
 }
 

@@ -41,6 +41,7 @@
 
 #ifndef __MAKEDEPEND
  #include <stdarg.h>
+ #include <cmath>
 #endif
 
 namespace oofem {
@@ -76,6 +77,18 @@ ExportModule :: initializeFrom(InputRecord *ir)
     }
 
     return IRRT_OK;
+}
+
+void
+ExportModule :: giveOutputBaseFileName(char *name, int num, TimeStep *tStep)
+{
+    char baseFileName [ MAX_FILENAME_LENGTH ];
+    this->emodel->giveOutputBaseFileName(baseFileName, MAX_FILENAME_LENGTH);
+#ifdef __PARALLEL_MODE
+    sprintf( name, "%s_%03d.m%d.%d", baseFileName, emodel->giveRank(), this->number, tStep->giveNumber() );
+#else
+    sprintf( name, "%s.m%d.%d", baseFileName, this->number, tStep->giveNumber() );
+#endif
 }
 
 bool
