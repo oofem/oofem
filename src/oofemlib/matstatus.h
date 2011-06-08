@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/matstatus.h,v 1.11 2003/04/06 14:08:25 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -45,7 +44,7 @@
 
 namespace oofem {
 /*
- * This class implements a material status information. It is atribute of
+ * This class implements a material status information. It is attribute of
  * gaussPoint. This is only an abstract class, for every instance of material class
  * there should be specialized derived class, which handles are history variables.
  *
@@ -57,17 +56,17 @@ namespace oofem {
  * state history variables.
  * storing and restoring context is invoked at material(yield criteria)
  * level, so correspondent material(y.c) will create a new corresponding
- * conntext if needed (happen when restoreContext invoked for the first time)
+ * context if needed (happen when restoreContext invoked for the first time)
  * Statuses of such objects are stored in GaussPoint.
  *
  * TASKS
  * This is abstract class - only basic functionality is supported like:
  * - storing and restoring status on tape
  * - printingYourself()
- * - updating Yourself after a new equlibrium state has been reached.
+ * - updating Yourself after a new equilibrium state has been reached.
  *
  * REMARK
- * Materials statuses are atributes of GaussPoints, they are stored in
+ * Materials statuses are attributes of GaussPoints, they are stored in
  * MatStatus variable of GaussPoint class instance.
  */
 
@@ -79,14 +78,14 @@ class NonlocalMaterialStatusExtension;
 /**
  * Abstract base class representing  a material status information.
  *
- * To provide oportunity for storing arbitrary material model related history variables
+ * To provide opportunity for storing arbitrary material model related history variables
  * in integration points, associated material status class is introduced.
- * Each new material model class should be declared together with its associted status class
+ * Each new material model class should be declared together with its associated status class
  * (derived from MaterialStatus class). This status can be seen as simple container,
  * storing necessary history variables and providing some access and modification methods.
  * Each integration point can contain material status. Material model should create
  * unique copy of its associated status in each integration point.
- * Because integration point is parameter of all mesages to material model
+ * Because integration point is parameter of all messages to material model
  * class, material model therefore can easily access  all history variables it needs.
  *
  * Generally, two sets of internal history variables are defined inside material status.
@@ -110,8 +109,8 @@ class MaterialStatus : public FEMComponent
 protected:
     /// Associated integration point.
     GaussPoint *gp;
-public:
 
+public:
     /**
      * Constructor.
      * @param n receiver's number
@@ -122,7 +121,7 @@ public:
     /// Destructor.
     ~MaterialStatus() { }
     /// Print receiver's output to given stream.
-    void   printOutputAt(FILE *, TimeStep *) { }
+    void printOutputAt(FILE *, TimeStep *) { }
 
     /**
      * Initializes the temporary internal variables, describing the current state according to
@@ -137,14 +136,14 @@ public:
     /**
      * Returns the value of material model property stored in receiving status.
      * This is typically used when random variation of some material property is considered,
-     * in this case the individual values are to be stored in status (they are no longer material constatnts)
+     * in this case the individual values are to be stored in status (they are no longer material constants)
      * Returns true if property is available in status,  false
      */
     virtual bool giveMaterialProperty(int propID, double &value) { return false; }
     /**
      * Allows to set the value of material model property to be stored in receiving status.
      * This is typically used when random variation of some material property is considered,
-     * in this case the individual values are to be stored in status (they are no longer material constatnts)
+     * in this case the individual values are to be stored in status (they are no longer material constants)
      */
     virtual void setMaterialProperty(int propID, double value) {}
 
@@ -165,13 +164,8 @@ public:
      */
     virtual void restoreConsistency() {}
 
-    // definition
-    /// Returns class name of the receiver.
     const char *giveClassName() const { return "MaterialStatus"; }
-    /// Returns classType id of receiver.
-    classType                giveClassID() const
-    { return MaterialStatusClass; }
-
+    classType giveClassID() const { return MaterialStatusClass; }
     IRResultType initializeFrom(InputRecord *ir) { return IRRT_OK; }
 };
 } // end namespace oofem

@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/gausspnt.C,v 1.8.4.1 2004/04/05 15:19:43 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -33,9 +32,6 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-
-//   file GAUSSPNT.CC
-
 #include "gausspnt.h"
 #include "element.h"
 #include "domain.h"
@@ -54,12 +50,6 @@ GaussPoint :: GaussPoint(IntegrationRule *ir, int n, FloatArray *a, double w, Ma
     number       = n;
     coordinates  = a;
     weight       = w;
-    //   strainVector = NULL ;
-    //   stressVector = NULL ;
-    // stressIncrementVector = NULL;
-    // strainIncrementVector = NULL;
-    // plasticStrainVector = NULL;
-    // plasticStrainIncrementVector = NULL;
     matStatus    = NULL;
     numberOfGp   = 0;
     gaussPointArray = NULL;
@@ -73,12 +63,6 @@ GaussPoint :: ~GaussPoint()
 // Destructor.
 {
     delete coordinates;
-    //   delete strainVector ;
-    //   delete stressVector ;
-    // delete stressIncrementVector;
-    // delete strainIncrementVector;
-    // delete plasticStrainVector;
-    // delete plasticStrainIncrementVector;
     if ( matStatus ) {
         delete matStatus;
     }
@@ -109,18 +93,6 @@ void GaussPoint :: printOutputAt(FILE *File, TimeStep *stepN)
     }
 
     fprintf(File, "  GP %2d.%-2d :", iruleNumber, number);
-    /*
-     * n = strainVector -> giveSize() ;
-     * for (i=1 ; i<=n ; i++)
-     *   fprintf (File," % .4e",strainVector->at(i)) ;
-     *
-     * fprintf (File,"\n          stresses") ;
-     * n = stressVector -> giveSize() ;
-     * for (i=1 ; i<=n ; i++)
-     *   fprintf (File," % .4e",stressVector->at(i)) ;
-     *
-     * fprintf (File,"\n") ;
-     */
     if ( matStatus ) {
         matStatus->printOutputAt(File, stepN);
     }
@@ -137,10 +109,9 @@ void GaussPoint :: printOutputAt(FILE *File, TimeStep *stepN)
 
 
 GaussPoint *GaussPoint :: giveSlaveGaussPoint(int index)
-//
 // returns receivers slave gauss point
 // 'slaves' are introduced in order to support various type
-// of cross sections models (for example layered material, whwre
+// of cross sections models (for example layered material, where
 // each separate layer has its own slave gp.)
 //
 {
@@ -159,65 +130,13 @@ GaussPoint *GaussPoint :: giveSlaveGaussPoint(int index)
 void GaussPoint :: updateYourself(TimeStep *tStep)
 // Performs end-of-step updates.
 {
-    this->giveMaterial()->updateYourself(this, tStep);   // updates MatStatus record
-    /*
-     * if (stressIncrementVector) {
-     * if (stressVector) {
-     * stressVector->add(stressIncrementVector);
-     * delete stressIncrementVector;
-     * } else {
-     * stressVector = stressIncrementVector;
-     * }
-     * stressIncrementVector = NULL;
-     * }
-     * if (strainIncrementVector) {
-     * if(strainVector) {
-     * strainVector->add(strainIncrementVector);
-     * delete strainIncrementVector;
-     * } else {
-     * strainVector = strainIncrementVector;
-     * }
-     * strainIncrementVector = NULL;
-     * }
-     * if (plasticStrainIncrementVector) {
-     * if(plasticStrainVector) {
-     * plasticStrainVector->add(plasticStrainIncrementVector);
-     * delete plasticStrainIncrementVector;
-     * } else {
-     * plasticStrainVector = plasticStrainIncrementVector;
-     * }
-     * plasticStrainIncrementVector = NULL;
-     * }
-     */
+    this->giveMaterial()->updateYourself(this, tStep);
     if ( numberOfGp != 0 ) { // layered material
         for ( int i = 0; i < numberOfGp; i++ ) {
             gaussPointArray [ i ]->updateYourself(tStep);
         }
     }
 }
-
-/*
- * void GaussPoint :: resetYourself()
- * // Resets Receiver to zero state
- * {
- * delete stressVector;  stressVector= NULL;
- * delete strainVector;  strainVector= NULL;
- * delete plasticStrainVector;   plasticStrainVector= NULL;
- * delete strainIncrementVector; strainIncrementVector= NULL;
- * delete stressIncrementVector; stressIncrementVector= NULL;
- * delete plasticStrainIncrementVector; plasticStrainIncrementVector= NULL;
- *
- * if ( numberOfGp != 0)  // layered material
- * {
- * for (int i = 0; i< numberOfGp ; i++)
- *  {
- *   gaussPointArray[i]->resetYourself ();
- *  }
- * }
- *
- * }
- */
-
 
 /*
  * contextIOResultType

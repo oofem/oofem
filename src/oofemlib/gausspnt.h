@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/gausspnt.h,v 1.11.4.1 2004/04/05 15:19:43 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -32,16 +31,12 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
+
 /*
  * The original idea for this class comes from
  * Dubois-Pelerin, Y.: "Object-Oriented  Finite Elements: Programming concepts and Implementation",
  * PhD Thesis, EPFL, Lausanne, 1992.
  */
-
-
-//   *************************
-//   *** CLASS GAUSS POINT ***
-//   *************************
 
 #ifndef gausspnt_h
 #define gausspnt_h
@@ -69,20 +64,20 @@ class IntegrationRule;
  * is also maintained.
  * Integration point generally can contain list of slave integration points
  * therefore is called as master point. Slaves are used for example to implement
- * layered or fibred cross sections by cross section class. Then in one
+ * layered or fibered cross sections by cross section class. Then in one
  * "macro" master gauss point, cross section creates few slaves (one per layer)
  * and puts them into master list. When cross sections completes requests for
  * particular master integration point, it performs integration over layers.
  * It therefore calls material class for each layer, sending corresponding
  * slave as parameter and integrates results.
- * Generally, every integretion point must hold
+ * Generally, every integration point must hold
  * its own copy of history variables (which are related to corresponding
  * material model used). These material type dependent history variables
  * are stored in material type related material status, which can be
  * managed by integration point.
  * Each material model class should introduce related material status class
- * (derived from material status class or from its children), where necesary
- * history variables are kept and can be accesed by material.
+ * (derived from material status class or from its children), where necessary
+ * history variables are kept and can be accessed by material.
  * Material class then creates unique copy of related status in all necessary
  * integration points. Because integration point is compulsory parameter of
  * all member functions of material class, particular material then can
@@ -90,63 +85,29 @@ class IntegrationRule;
  * history variables for particular integration point.
  *
  * To provide support to integrate element contribution by parts from element subVolumes
- * (posibly with different material parameters etc), the integration point can maintain not
- * only its element natural coordinates, but also its subVolume local coordinates, that are neceessary
- * to compute its jacobian, for examle. These coordinates are stored in localCoordinates attribute.
+ * (possibly with different material parameters etc), the integration point can maintain not
+ * only its element natural coordinates, but also its subVolume local coordinates, that are necessary
+ * to compute its jacobian, for example. These coordinates are stored in localCoordinates attribute.
  *
  */
 class GaussPoint
 {
-    /*
-     * This class implements a point for a gaussian quadrature. A Gauss point is
-     * usually attribute of an element.
-     * DESCRIPTION
-     * A Gauss point is identified by its 'number' and by 'element' - the element
-     * it belongs to. The array 'coordinates' defines its position in an axis sys-
-     * tem defined by its element. 'weight' is the pondaration of the point in the
-     * numerical integration ; 'weight' is naturally positive and smaller than 2.
-     * stress and srain vectors  store the current values of strain and stresess ;
-     * the size of these
-     * arrays and the nature of their values is determined by the element .
-     *
-     * materialStatusDict stores corresponding MaterialStatuses (Base MaterialStatus)
-     * as required by materials, yieldconditions,... They store their corresponding
-     * instances of MaterialStatus Class with key = (int)obj->giveClassID(), where
-     * obj is instance of material, yield crit which is associated with this gp.
-     *
-     * TASKS
-     * - returning its coordinates, its weight and the strains and stresses ;
-     * - reading/writing its attribute in a file.
-     * REMARK
-     * The Gauss point is a rather passive object : it does not compute its strains
-     * and stresses - it just stores them. They are computed by the element. If ever
-     * materially nonlinearity is implemented, the role of the Gauss point is
-     * likely to grow.
-     */
-
 private:
-    /// Number
+    /// Number.
     int number;
     /// Reference to parent integration rule.
     IntegrationRule *irule;
     /// Natural Element Coordinates of receiver.
     FloatArray *coordinates;
-    /// Optional local subpatch (subpatches form element volume) coordinates of the receiver
+    /// Optional local sub-patch (sub-patches form element volume) coordinates of the receiver.
     FloatArray *localCoordinates;
-    /// Integraation weight.
+    /// Integration weight.
     double weight;
-    //    FloatArray*  strainVector ;  // full form
-    //    FloatArray*  stressVector ;  // full form
-    //    FloatArray*  stressIncrementVector;// increments are used mainly in nonlinear analysis
-    //    FloatArray*  strainIncrementVector;// to find balanced state. for update call gp->update()
-    //    FloatArray*  plasticStrainVector; // full form
-    //    FloatArray*  plasticStrainIncrementVector;
     /// Material mode of receiver.
     MaterialMode materialMode;
 
 protected:
-
-    // layer and fibred material support
+    // layer and fibered material support
     /// Number of slaves.
     int numberOfGp;
     /// List of slave integration points.
@@ -156,64 +117,55 @@ protected:
 
 public:
     /**
-     * Constructor.  Creates integration point belonging to given integration rule,
+     * Creates integration point belonging to given integration rule,
      * with given number, integration weight, coordinates and material mode.
-     * @param ir integration rule to which integration point belongs to.
-     * @param n integration point number
-     * @param a coordinates
-     * @param w integration weight
-     * @param mode material mode
+     * @param ir Integration rule to which integration point belongs to.
+     * @param n Integration point number.
+     * @param a Coordinates.
+     * @param w Integration weight.
+     * @param mode Material mode.
      */
-    GaussPoint(IntegrationRule *ir, int n, FloatArray *a, double w, MaterialMode mode); // constructor
+    GaussPoint(IntegrationRule *ir, int n, FloatArray *a, double w, MaterialMode mode);
     /// Destructor
-    virtual ~GaussPoint();                                  // destructor
+    virtual ~GaussPoint();
 
     /// Returns i-th natural element coordinate of receiver
-    double       giveCoordinate(int i)      { return coordinates->at(i); }
+    double giveCoordinate(int i) { return coordinates->at(i); }
     /// Returns coordinate array of receiver.
-    FloatArray *giveCoordinates()          { return coordinates; }
-    void         setCoordinates(const FloatArray &c) { * coordinates = c; }
+    FloatArray *giveCoordinates() { return coordinates; }
+    void setCoordinates(const FloatArray &c) { * coordinates = c; }
 
-    /// Returns local subpatch coordinates of the receiver
+    /// Returns local sub-patch coordinates of the receiver
     FloatArray *giveLocalCoordinates() { if ( localCoordinates ) { return localCoordinates; } else { return coordinates; } }
-    void         setLocalCoordinates(const FloatArray &c)
+    void setLocalCoordinates(const FloatArray &c)
     { if ( localCoordinates ) { * localCoordinates = c; } else { localCoordinates = new FloatArray(c); } }
 
-
-    //      FloatArray*  giveStrainVector ()         { return strainVector ;}
-    //      FloatArray*  giveStressVector ()         { return stressVector ;}
-    //    FloatArray*  givePlasticStrainVector()   { return plasticStrainVector;}
-    //    FloatArray*  giveStrainIncrementVector() { return strainIncrementVector;}
-    //    FloatArray*  giveStressIncrementVector() { return stressIncrementVector;}
-    //    FloatArray*  givePlasticStrainIncrementVector() {return plasticStrainIncrementVector;}
-    //    FloatArray*  giveHardeningParam ()       { return NULL; }
-
-    /// Returns  integration weight odf receiver.
-    virtual double       giveWeight()               { return weight; }
-    void                 setWeight(double w) { weight = w; }
+    /// Returns  integration weight of receiver.
+    virtual double giveWeight() { return weight; }
+    void setWeight(double w) { weight = w; }
     /// Returns number of receiver.
-    int          giveNumber()               { return number; }
-    /// Returns corresponding integration rule to receiver
-    IntegrationRule *giveIntegrationRule()   { return irule; }
+    int giveNumber() { return number; }
+    /// Returns corresponding integration rule to receiver.
+    IntegrationRule *giveIntegrationRule() { return irule; }
     /// Returns corresponding element to receiver.
-    Element *giveElement()               { return irule->giveElement(); }
-    /// Sets element of gp
-    //void         setElement (Element* e)     { element=e;}
+    Element *giveElement() { return irule->giveElement(); }
+    /// Sets element of gp.
+    //void setElement(Element* e) { element=e;}
     /// Returns corresponding material mode of receiver.
-    MaterialMode giveMaterialMode()          { return this->materialMode; }
+    MaterialMode giveMaterialMode() { return this->materialMode; }
     /// Sets material mode of receiver.
-    void         setMaterialMode(MaterialMode newMode) { this->materialMode = newMode; }
+    void setMaterialMode(MaterialMode newMode) { this->materialMode = newMode; }
     /// Returns reference to material associated to related element of receiver.
-    Material *giveMaterial()             { return giveElement()->giveMaterial(); }
+    Material *giveMaterial() { return giveElement()->giveMaterial(); }
     /// Returns reference to cross section associated to related element of receiver.
-    CrossSection *giveCrossSection()        { return giveElement()->giveCrossSection(); }
-    /// Returns reference to associated material status (NULL if not defined)
-    MaterialStatus *giveMaterialStatus()    { return matStatus; }
+    CrossSection *giveCrossSection() { return giveElement()->giveCrossSection(); }
+    /// Returns reference to associated material status (NULL if not defined).
+    MaterialStatus *giveMaterialStatus() { return matStatus; }
     /**
      * Sets Material status managed by receiver.
      * Old status, if exist will be lost.
-     * @param ptr poiter to new status of receiver.
-     * @return pointer to new status.
+     * @param ptr Pointer to new status of receiver.
+     * @return Pointer to new status.
      */
     MaterialStatus *setMaterialStatus(MaterialStatus *ptr)
     {
@@ -222,35 +174,23 @@ public:
     }
     /**
      * Returns index-th slave gauss point of receiver.
-     * @param index of retuned slave
+     * @param index Index of returned slave.
+     * @return Slave gp.
      */
     GaussPoint *giveSlaveGaussPoint(int index);
-    //      void         letStrainVectorBe (FloatArray* v)
-    //   { delete strainVector ; strainVector = v ;}
-    //      void         letStressVectorBe (FloatArray* v)
-    //   { delete stressVector ; stressVector = v ;}
-    //    void         letPlasticStrainVectorBe (FloatArray* v)
-    //   { delete plasticStrainVector; plasticStrainVector = v;}
-    //    void         letStressIncrementVectorBe (FloatArray* v)
-    //   { delete stressIncrementVector ; stressIncrementVector = v ;}
-    //    void         letStrainIncrementVectorBe (FloatArray* v)
-    //   { delete strainIncrementVector ; strainIncrementVector = v ;}
-    //    void         letPlasticStrainIncrementVectorBe (FloatArray* v)
-    //   { delete plasticStrainIncrementVector; plasticStrainIncrementVector = v;}
     /**
      * Prints output of receiver to file. Corresponding printOutputAt  function for
-     * associated status is called. The same fuction is also invoked for all available
+     * associated status is called. The same function is also invoked for all available
      * slaves of receiver.
      */
-    virtual void         printOutputAt(FILE *, TimeStep *);
+    virtual void printOutputAt(FILE *file, TimeStep *tStep);
     /**
      * Updates internal state of receiver after finishing time step.
      * Material::updateYourself (receiver, tStep) function is called to
-     * update material status. Same fuction is also invoked for
+     * update material status. Same function is also invoked for
      * all receiver's slaves.
      */
-    virtual void         updateYourself(TimeStep *);
-    //    void         resetYourself () ;
+    virtual void updateYourself(TimeStep *tStep);
 
     // store & restore context functions
     /*
@@ -260,12 +200,12 @@ public:
      * This is because they may have special weights and coordinates,
      * and these are not saved into context file, because they remain the same
      * during whole solution (only variables which vary are stored into context).
-     * Note: does not invoke FEMComponents saveContext, since this wrires only
+     * Note: does not invoke FEMComponents saveContext, since this writes only
      * class id header, but typically due to large number of IPs,
      * this is avoided.
      * @exception throws an ContextIOERR exception if error encountered.
      */
-    //contextIOResultType    saveContext (FILE* stream, void *obj = NULL);
+    //contextIOResultType saveContext (FILE* stream, void *obj = NULL);
     /*
      * Restores receiver state to output stream, including associated material status.
      * Warning: Slaves are not restored, they must be restored by corresponding
@@ -273,24 +213,25 @@ public:
      * This is because they may have special weights and coordinates,
      * and these are not saved into context file, because they remain the same
      * during whole solution (only variables which vary are stored into context).
-     * Note: does not invoke FEMComponents restoreContext, since this wrires only
+     * Note: does not invoke FEMComponents restoreContext, since this writes only
      * class id header, but typically due to large number of IPs,
      * this is avoided.
      * @exception throws an ContextIOERR exception if error encountered.
      */
-    //contextIOResultType    restoreContext(FILE* stream, void *obj = NULL);
+    //contextIOResultType restoreContext(FILE* stream, void *obj = NULL);
+
     /// Returns classType id of receiver.
     virtual classType giveClassID() const { return GaussPointClass; }
     /// Returns class name of the receiver.
     virtual const char *giveClassName() const { return "GaussPoint"; }
-    ///Initializes receiver acording to object description stored in initString.
+    /// Initializes receiver according to object description stored in input record.
     virtual IRResultType initializeFrom(InputRecord *ir) { return IRRT_OK; }
 
     friend class LayeredCrossSection;
     friend class MicroplaneMaterial;
     friend class FiberedCrossSection;
-    /*   friend Material;
-     * friend LayeredMaterial ; */
+    //friend class Material;
+    //friend class LayeredMaterial;
 };
 } // end namespace oofem
 #endif // gausspnt_h
