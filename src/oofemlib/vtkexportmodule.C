@@ -554,6 +554,9 @@ VTKExportModule :: exportCellVars(FILE *stream, int elemToProcess, TimeStep *tSt
     Domain *d  = emodel->giveDomain(1);
     int nelem = d->giveNumberOfElements();
     FloatMatrix mtrx(3, 3);
+    FloatArray temp, vec;
+    GaussPoint *gp;
+    double gptot;
 
     fprintf(stream, "\nCELL_DATA %d\n", elemToProcess);
     for ( i = 1; i <= cellVarsToExport.giveSize(); i++ ) {
@@ -568,7 +571,6 @@ VTKExportModule :: exportCellVars(FILE *stream, int elemToProcess, TimeStep *tSt
                 if ( elem->giveParallelMode() != Element_local ) {
                     continue;
                 }
-
 #endif
                 if ( type == IST_MaterialNumber ) {
                     fprintf( stream, "%d\n", elem->giveMaterial()->giveNumber() );
@@ -607,9 +609,56 @@ VTKExportModule :: exportCellVars(FILE *stream, int elemToProcess, TimeStep *tSt
             }
 
             break;
-
         default:
-            OOFEM_ERROR2( "Quantity %s not defined on cells", __InternalStateTypeToString(type) );
+            // TODO: Mean value, or all gauss points?
+            InternalStateValueType vt = giveInternalStateValueType(type);
+            switch ( vt ) {
+            case ISVT_TENSOR_S3: // These could be written as tensors as well, if one wants to.
+            case ISVT_TENSOR_S3E:
+            case ISVT_VECTOR:
+            case ISVT_SCALAR:
+                if (vt == ISVT_SCALAR) {
+                    fprintf( stream, "SCALARS %s double\nLOOKUP_TABLE default\n", __InternalStateTypeToString(type) );
+                } else {
+                    fprintf( stream, "VECTORS %s double\nLOOKUP_TABLE default\n", __InternalStateTypeToString(type) );
+                }
+                for ( ielem = 1; ielem <= nelem; ielem++ ) {
+                    elem = d->giveElement(ielem);
+#ifdef __PARALLEL_MODE
+                    if ( elem->giveParallelMode() != Element_local ) {
+                        continue;
+                    }
+#endif
+                    gptot = 0;
+                    vec.resize(0);
+                    for (int i = 0; i < elem->giveDefaultIntegrationRulePtr()->getNumberOfIntegrationPoints(); ++i) {
+                        gp = elem->giveDefaultIntegrationRulePtr()->getIntegrationPoint(i);
+                        elem->giveMaterial()->giveIPValue(temp, gp, type, tStep);
+                        gptot += gp->giveWeight();
+                        vec.add(gp->giveWeight(), temp);
+                    }
+                    vec.times(1/gptot);
+                    for (int i = 1; i <= vec.giveSize(); ++i) {
+                        fprintf( stream, "%e ", vec.at(i) );
+                    }
+                    fprintf( stream, "\n" );
+                }
+                break;
+#if 0 // Hardly even worth the effort...
+            case ISVT_TENSOR_G:
+                for (int indx = 1; indx < 9; ++indx)  {
+                    fprintf(stream, "SCALARS %s_%d double 1\n", __InternalStateTypeToString(valID), indx);
+
+                    for ( ielem = 1; ielem <= nelem; ielem++ ) {
+                        elem = d->giveElement(ielem);
+                        elem->giveMaterial()->giveIPValue(vec, elem->giveDefaultIntegrationRulePtr()->getIntegrationPoint(1), type, tStep);
+                        fprintf( stream, "%e ", vec.at(indx) );
+                    }
+                }
+#endif
+            default:
+                OOFEM_ERROR2("Quantity %s not handled yet.", __InternalStateTypeToString(type) );
+            }
         }
 
         fprintf(stream, "\n\n");
