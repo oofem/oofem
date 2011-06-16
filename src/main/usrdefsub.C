@@ -123,7 +123,9 @@
  #include "qtruss1dgrad.h"
  #include "qspacegrad.h"
  #include "qplanstrss.h"
+ #include "qplanestressgrad.h"
  #include "qtrplstr.h"
+ #include "qtrplstrgrad.h"
  #include "lspace.h"
  #include "lspacebb.h"
  #include "qspace.h"
@@ -218,6 +220,8 @@
  #include "micromaterial.h"
  #include "hyperelasticmaterial.h"
  #include "misesmat.h"
+ #include "rankinematnl.h"
+ #include "rankinematgrad.h"
  #include "trabbonematerial.h"
  #include "trabbonenl.h"
  #include "trabbone3d.h"
@@ -277,9 +281,9 @@
  #include "hemotkmat.h"
  #include "hydratingisoheatmat.h"
  #include "hydratinghemomat.h"
-#ifdef __CEMHYD_MODULE
- #include "cemhydmat.h"
-#endif
+ #ifdef __CEMHYD_MODULE
+  #include "cemhydmat.h"
+ #endif
 #endif //__TM_MODULE
 
 
@@ -334,28 +338,32 @@ Element *CreateUsrDefElementOfType(const char *aClass, int number, Domain *domai
 #ifdef __SM_MODULE
     if ( !strncasecmp(aClass, "planestress2dxfem", 17) ) {
         newElement = new PlaneStress2dXfem(number, domain);
-    } else if ( !strncasecmp(aClass, "planestress2d", 13) )   {
+    } else if ( !strncasecmp(aClass, "planestress2d", 13) ) {
         newElement = new PlaneStress2d(number, domain);
     }
 
     if ( !strncasecmp(aClass, "quad1planestrain", 16) ) {
         newElement = new Quad1PlaneStrain(number, domain);
     } else if ( !strncasecmp(aClass, "qtrplanestraingrad", 18) ) {
-      newElement = new QTrPlaneStrainGrad(number, domain);
+        newElement = new QTrPlaneStrainGrad(number, domain);
     } else if ( !strncasecmp(aClass, "qtrplanestrain", 14) ) {
-      newElement = new QTrPlaneStrain(number, domain);
-    }else if ( !strncasecmp(aClass, "qplanestraingrad", 16) ) {
-      newElement = new QPlaneStrainGrad(number, domain);
+        newElement = new QTrPlaneStrain(number, domain);
+    } else if ( !strncasecmp(aClass, "qplanestraingrad", 16) )  {
+        newElement = new QPlaneStrainGrad(number, domain);
     } else if ( !strncasecmp(aClass, "qplanestrain", 12) ) {
-      newElement = new QPlaneStrain(number, domain);
+        newElement = new QPlaneStrain(number, domain);
     } else if ( !strncasecmp(aClass, "trplanestress2d", 15) ) {
         newElement = new TrPlaneStress2d(number, domain);
     } else if ( !strncasecmp(aClass, "trplanestrrot3d", 15) ) {
         newElement = new TrPlaneStrRot3d(number, domain);
     } else if ( !strncasecmp(aClass, "trplanestrrot", 13) ) {
         newElement = new TrPlaneStrRot(number, domain);
+    } else if ( !strncasecmp(aClass, "qplanestressgrad", 16) ) {
+        newElement = new QPlaneStressGrad(number, domain);
     } else if ( !strncasecmp(aClass, "qplanestress2d", 14) ) {
         newElement = new QPlaneStress2d(number, domain);
+    } else if ( !strncasecmp(aClass, "qtrplstrgrad", 12) ) {
+        newElement = new QTrPlaneStressGrad(number, domain);
     } else if ( !strncasecmp(aClass, "qtrplstr", 8) ) {
         newElement = new QTrPlaneStress2d(number, domain);
     } else if ( !strncasecmp(aClass, "axisymm3d", 9) ) {
@@ -408,7 +416,7 @@ Element *CreateUsrDefElementOfType(const char *aClass, int number, Domain *domai
     } else if ( !strncasecmp(aClass, "libeam3d", 8) ) {
         newElement = new LIBeam3d(number, domain);
     } else if ( !strncasecmp(aClass, "qtruss1dgrad", 12) ) {
-        newElement = new QTruss1dGrad(number,domain);
+        newElement = new QTruss1dGrad(number, domain);
     } else if ( !strncasecmp(aClass, "qtruss1d", 8) ) {
         newElement = new QTruss1d(number, domain);
     } else if ( !strncasecmp(aClass, "truss1d", 7) ) {
@@ -482,19 +490,19 @@ Element *CreateUsrDefElementOfType(const char *aClass, int number, Domain *domai
         newElement = new PY1_3D_SUPG(number, domain);
     } else if ( !strncasecmp(aClass, "tr21supg", 8) ) {
         newElement = new TR21_2D_SUPG(number, domain);
-    /*
-    } else if ( !strncasecmp(aClass, "tr10supg", 8) ) {
-        newElement = new TR10_2D_SUPG(number, domain);
-    */
+        /*
+         * } else if ( !strncasecmp(aClass, "tr10supg", 8) ) {
+         *  newElement = new TR10_2D_SUPG(number, domain);
+         */
     } else if ( !strncasecmp(aClass, "q10supg", 7) ) {
         newElement = new Q10_2D_SUPG(number, domain);
-    } else if ( !strncasecmp(aClass, "tr21stokes", 10)) {
+    } else if ( !strncasecmp(aClass, "tr21stokes", 10) ) {
         newElement = new Tr21Stokes(number, domain);
-    } else if ( !strncasecmp(aClass, "linesurfacetension", 18)) {
+    } else if ( !strncasecmp(aClass, "linesurfacetension", 18) ) {
         newElement = new LineSurfaceTension(number, domain);
-    } else if ( !strncasecmp(aClass, "line2surfacetension", 19)) {
+    } else if ( !strncasecmp(aClass, "line2surfacetension", 19) ) {
         newElement = new Line2SurfaceTension(number, domain);
-    } else if ( !strncasecmp(aClass, "line2boundaryelement", 20)) {
+    } else if ( !strncasecmp(aClass, "line2boundaryelement", 20) ) {
         newElement = new Line2BoundaryElement(number, domain);
     }
 
@@ -728,12 +736,18 @@ Material *CreateUsrDefMaterialOfType(const char *aClass, int number, Domain *dom
         newMaterial = new MicroMaterial(number, domain);
     } else if ( !strncasecmp(aClass, "hyperelmat", 10) ) {
         newMaterial = new HyperElasticMaterial(number, domain);
-    }else if ( !strncasecmp(aClass, "misesmatgrad", 12) ) {
+    } else if ( !strncasecmp(aClass, "misesmatgrad", 12) )  {
         newMaterial = new MisesMatGrad(number, domain);
     } else if ( !strncasecmp(aClass, "misesmatnl", 10) ) {
         newMaterial = new MisesMatNl(number, domain);
     } else if ( !strncasecmp(aClass, "misesmat", 8) ) {
         newMaterial = new MisesMat(number, domain);
+    } else if ( !strncasecmp(aClass, "rankmatgrad", 11) ) {
+        newMaterial = new RankineMatGrad(number, domain);
+    } else if ( !strncasecmp(aClass, "rankmatnl", 9) ) {
+        newMaterial = new RankineMatNl(number, domain);
+    } else if ( !strncasecmp(aClass, "rankmat", 7) ) {
+        newMaterial = new RankineMat(number, domain);
     } else if ( !strncasecmp(aClass, "trabbonenl3d", 12) ) {
         newMaterial = new TrabBoneNL3D(number, domain);
     } else if ( !strncasecmp(aClass, "trabboneembed", 13) ) {
@@ -763,11 +777,12 @@ Material *CreateUsrDefMaterialOfType(const char *aClass, int number, Domain *dom
     } else if ( !strncasecmp(aClass, "hemotk", 6) ) {
         newMaterial = new HeMoTKMaterial(number, domain);
     }
-#ifdef __CEMHYD_MODULE
+
+ #ifdef __CEMHYD_MODULE
     else if ( !strncmp(aClass, "cemhydmat", 9) ) {
         newMaterial = new CemhydMat(number, domain);
     }
-#endif //__CEMHYD_MODULE
+ #endif //__CEMHYD_MODULE
 #endif //__TM_MODULE
 
 #if defined( __SM_MODULE ) && defined ( __TM_MODULE )
@@ -790,7 +805,7 @@ Material *CreateUsrDefMaterialOfType(const char *aClass, int number, Domain *dom
         newMaterial = new BinghamFluidMaterial2(number, domain);
     } else if ( !strncasecmp(aClass, "fe2sinteringmaterial", 20) ) {
         newMaterial = new FE2SinteringMaterial(number, domain);
-    } else if ( !strncasecmp(aClass, "surfacetension", 22)) {
+    } else if ( !strncasecmp(aClass, "surfacetension", 22) ) {
         newMaterial = new SurfaceTensionMaterial(number, domain);
     }
 
@@ -936,9 +951,9 @@ ExportModule *CreateUsrDefExportModuleOfType(const char *aClass, int number, Eng
     ExportModule *answer = NULL;
 
     if ( !strncasecmp(aClass, "vtkxml", 6) ) {
-       answer = new VTKXMLExportModule(number, emodel);
+        answer = new VTKXMLExportModule(number, emodel);
     } else if ( !strncasecmp(aClass, "vtk", 3) ) {
-       answer = new VTKExportModule(number, emodel);
+        answer = new VTKExportModule(number, emodel);
     }
 
 #ifdef __SM_MODULE
@@ -963,7 +978,7 @@ InitModule *CreateUsrDefInitModuleOfType(const char *aClass, int n, EngngModel *
 
 #ifdef __SM_MODULE
     if ( !strncasecmp(aClass, "gpinitmodule", 12) ) {
-       answer = new GPInitModule(n, emodel);
+        answer = new GPInitModule(n, emodel);
     }
 
 #endif //__SM_MODULE
@@ -1033,6 +1048,7 @@ Element *CreateUsrDefElementOfType(classType type, int number, Domain *domain)
     } else if ( type == TrPlaneStrainClass ) {
         answer = new TrPlaneStrain(number, domain);
     }
+
 #endif
 #ifdef __FM_MODULE
     if ( type == Tr21StokesElementClass ) {
@@ -1044,6 +1060,7 @@ Element *CreateUsrDefElementOfType(classType type, int number, Domain *domain)
     } else if ( type == Line2BoundaryElementClass ) {
         answer = new Line2BoundaryElement(number, domain);
     }
+
 #endif
 
     if ( answer == NULL ) {
@@ -1147,7 +1164,7 @@ EnrichmentFunction *CreateUsrDefEnrichmentFunction(const char *aClass, int num, 
         answer = new DiscontinuousFunction(num, d);
     } else if ( !strncasecmp(aClass, "branchfunction", 14) ) {
         answer = new BranchFunction(num, d);
-    } else if ( !strncasecmp(aClass, "rampfunction", 14) )   {
+    } else if ( !strncasecmp(aClass, "rampfunction", 14) ) {
         answer = new RampFunction(num, d);
     }
 
@@ -1179,15 +1196,15 @@ Patch *CreateUsrDefPatch(Patch :: PatchType ptype, Element *e) {
 NodalRecoveryModel *
 CreateUsrDefNodalRecoveryModel(NodalRecoveryModel :: NodalRecoveryModelType type, Domain *d)
 {
-    NodalRecoveryModel* answer = NULL;
-    if ( type == NodalRecoveryModel::NRM_NodalAveraging ) {
-      answer = new NodalAveragingRecoveryModel(d);
-    } else if ( type == NodalRecoveryModel::NRM_ZienkiewiczZhu ) {
-      answer = new ZZNodalRecoveryModel(d);
-    } else if ( type == NodalRecoveryModel::NRM_SPR ) {
-      answer = new SPRNodalRecoveryModel(d);
+    NodalRecoveryModel *answer = NULL;
+    if ( type == NodalRecoveryModel :: NRM_NodalAveraging ) {
+        answer = new NodalAveragingRecoveryModel(d);
+    } else if ( type == NodalRecoveryModel :: NRM_ZienkiewiczZhu ) {
+        answer = new ZZNodalRecoveryModel(d);
+    } else if ( type == NodalRecoveryModel :: NRM_SPR ) {
+        answer = new SPRNodalRecoveryModel(d);
     } else {
-      OOFEM_ERROR2("CreateUsrDefNodalRecoveryModel: unsupported NodalRecoveryModelType [%d]", type);
+        OOFEM_ERROR2("CreateUsrDefNodalRecoveryModel: unsupported NodalRecoveryModelType [%d]", type);
     }
 
     return answer;

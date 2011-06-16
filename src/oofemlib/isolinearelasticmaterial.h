@@ -134,7 +134,7 @@ public:
     const char *giveInputRecordName() const { return "IsoLE"; }
     /**
      * Initializes receiver acording to object description stored in input record.
-     * The E modulus (keyword "E"), Poisson ration ("nu") and coefficient of thermal dilatation
+     * The E modulus (keyword "E"), Poisson ratio ("nu") and coefficient of thermal dilatation
      * alpha ("talpha") are read. The parent class instanciateFrom method is called.
      */
     IRResultType initializeFrom(InputRecord *ir);
@@ -153,6 +153,14 @@ public:
      * @return property value
      */
     double   give(int, GaussPoint *);
+
+    /// returns Young's modulus
+    double giveYoungsModulus()
+    { return E; }
+
+    /// returns Poisson's ratio
+    double givePoissonsRatio()
+    { return nu; }
 
     /// returns the shear elastic modulus G = E / (2*(1+nu))
     double giveShearModulus()

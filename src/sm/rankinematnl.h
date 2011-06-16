@@ -33,12 +33,12 @@
  */
 
 //   *************************************************
-//   *** CLASS NONLOCAL MISES DAMAGE-PLASTIC MODEL ***
+//   *** CLASS NONLOCAL RANKINE DAMAGE-PLASTIC MODEL ***
 //   *************************************************
 
-#ifndef misesmatnl_h
+#ifndef rankinematnl_h
 
-#include "misesmat.h"
+#include "rankinemat.h"
 #include "structuralnonlocalmaterialext.h"
 #include "nonlocmatstiffinterface.h"
 #include "cltypes.h"
@@ -56,23 +56,27 @@ class GaussPoint;
 
 
 /////////////////////////////////////////////////////////////////
-///////// MISES NONLOCAL MATERIAL STATUS////////////////
+///////// RANKINE NONLOCAL MATERIAL STATUS////////////////
 /////////////////////////////////////////////////////////////////
 
 
-class MisesMatNlStatus : public MisesMatStatus, public StructuralNonlocalMaterialStatusExtensionInterface
+class RankineMatNlStatus : public RankineMatStatus, public StructuralNonlocalMaterialStatusExtensionInterface
 {
 protected:
     // STATE VARIABLE DECLARATION
     // Equivalent strain for avaraging
     double localCumPlasticStrainForAverage;
 
+    // for printing only
+    double kappa_nl;
+    double kappa_hat;
+
 public:
     // CONSTRUCTOR
-    MisesMatNlStatus(int n, Domain *d, GaussPoint *g);
+    RankineMatNlStatus(int n, Domain *d, GaussPoint *g);
 
     // DESTRUCTOR
-    ~MisesMatNlStatus();
+    ~RankineMatNlStatus();
 
     // OUTPUT PRINT
     // Prints the receiver state to stream
@@ -85,8 +89,8 @@ public:
     void setLocalCumPlasticStrainForAverage(double ls) { localCumPlasticStrainForAverage = ls; }
 
     // DEFINITION
-    const char *giveClassName() const { return "MisesMatNlStatus"; }
-    classType   giveClassID() const { return MisesMatClass; }
+    const char *giveClassName() const { return "RankineMatNlStatus"; }
+    classType   giveClassID() const { return RankineMatClass; }
 
     // INITIALISATION OF TEMPORARY VARIABLES
     // Initializes the temporary internal variables, describing the current state according to
@@ -97,6 +101,12 @@ public:
     // Update equilibrium history variables according to temp-variables.
     // Invoked, after new equilibrium state has been reached.
     virtual void updateYourself(TimeStep *); // update after new equilibrium state reached
+
+    void setKappa_nl(double kap) { kappa_nl = kap; }
+    void setKappa_hat(double kap) { kappa_hat = kap; }
+    double giveKappa_nl() { return kappa_nl; }
+    double giveKappa_hat() { return kappa_hat; }
+
     /// saves the current context(state) into a stream
     contextIOResultType    saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 
@@ -118,30 +128,28 @@ public:
 
 
 /////////////////////////////////////////////////////////////////
-////////////  MISES NONLOCAL MATERIAL////////////////////
+////////////  RANKINE NONLOCAL MATERIAL////////////////////
 /////////////////////////////////////////////////////////////////
 
 
-class MisesMatNl : public MisesMat, public StructuralNonlocalMaterialExtensionInterface,
+class RankineMatNl : public RankineMat, public StructuralNonlocalMaterialExtensionInterface,
     public NonlocalMaterialStiffnessInterface
 {
 protected:
     // STATE VARIABLE DECLARATION
     // declare material properties here
-    double Rf;
-    double exponent;
-    int averType;
+
 public:
     // CONSTRUCTOR
-    MisesMatNl(int n, Domain *d);
+    RankineMatNl(int n, Domain *d);
 
     // DESTRUCTOR
-    ~MisesMatNl();
+    ~RankineMatNl() {; }
 
     // INITIALIZATION OF FUNCTION/SUBROUTINE
-    const char *giveClassName() const { return "MisesMatNl"; }
-    classType   giveClassID()   const { return MisesMatClass; }
-    const char *giveInputRecordName() const { return "MisesMatNl"; }
+    const char *giveClassName() const { return "RankineMatNl"; }
+    classType   giveClassID()   const { return RankineMatClass; }
+    const char *giveInputRecordName() const { return "RankineMatNl"; }
 
     // Initializes the receiver from given record
     IRResultType initializeFrom(InputRecord *ir);
@@ -162,12 +170,12 @@ public:
     double computeDistanceModifier(double damage);
     void computeLocalCumPlasticStrain(double &kappa, GaussPoint *gp, TimeStep *atTime)
     {
-        MisesMat :: computeCumPlastStrain(kappa, gp, atTime);
+        RankineMat :: computeCumPlastStrain(kappa, gp, atTime);
     }
 
     /////////////////////////////////////////////////////////////////
     // NONLOCAL STIFFNESS FUNCTION/SUBROUTINE
-    virtual void give1dStressStiffMtrx(FloatMatrix & answer, MatResponseForm, MatResponseMode, GaussPoint * gp, TimeStep * atTime);
+    virtual void givePlaneStressStiffMtrx(FloatMatrix & answer, MatResponseForm, MatResponseMode, GaussPoint * gp, TimeStep * atTime);
     //virtual void givePlaneStrainStiffMtrx(FloatMatrix& answer,MatResponseForm, MatResponseMode,GaussPoint * gp,TimeStep * atTime);
     // virtual void give3dMaterialStiffnessMatrix (FloatMatrix& answer,  MatResponseForm, MatResponseMode,GaussPoint* gp,  TimeStep* atTime);
 
@@ -235,6 +243,10 @@ public:
 
     // Determines the width (radius) of limited support of weighting function
     // virtual void giveSupportRadius (double& radius) {radius = this-> R;}
+    int giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime);
+    InternalStateValueType giveIPValueType(InternalStateType type);
+    int giveIntVarCompFullIndx(IntArray &answer, InternalStateType type, MaterialMode mmode);
+    int giveIPValueSize(InternalStateType type, GaussPoint *gp);
 
 
 #ifdef __PARALLEL_MODE
@@ -261,8 +273,8 @@ public:
 
 protected:
     // Creates the corresponding material status
-    MaterialStatus *CreateStatus(GaussPoint *gp) const { return new MisesMatNlStatus(1, MisesMat :: domain, gp); }
+    MaterialStatus *CreateStatus(GaussPoint *gp) const { return new RankineMatNlStatus(1, RankineMat :: domain, gp); }
 };
 } // end namespace oofem
-#define misesmatnl_h
+#define rankinematnl_h
 #endif

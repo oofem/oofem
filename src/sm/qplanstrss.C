@@ -55,7 +55,7 @@ namespace oofem {
 FEI2dQuadQuad QPlaneStress2d :: interpolation(1, 2);
 
 QPlaneStress2d :: QPlaneStress2d(int n, Domain *aDomain) :
-    StructuralElement(n, aDomain), ZZNodalRecoveryModelInterface()
+    StructuralElement(n, aDomain), ZZNodalRecoveryModelInterface(), NodalAveragingRecoveryModelInterface()
     // Constructor.
 {
     numberOfDofMans  = 8;
@@ -67,6 +67,8 @@ QPlaneStress2d :: giveInterface(InterfaceType interface)
 {
     if ( interface == ZZNodalRecoveryModelInterfaceType ) {
         return ( ZZNodalRecoveryModelInterface * ) this;
+    } else if ( interface == NodalAveragingRecoveryModelInterfaceType ) {
+        return ( NodalAveragingRecoveryModelInterface * ) this;
     }
 
     return NULL;
@@ -264,13 +266,15 @@ void QPlaneStress2d :: drawDeformedGeometry(oofegGraphicContext &gc, UnknownType
 
 void QPlaneStress2d :: drawScalar(oofegGraphicContext &context)
 {
-    int i, indx, result = 0;
-    WCRec p [ 4 ];
+    int i, indx,  n [ 4 ], result = 0;
+    WCRec p [ 4 ], pp [ 9 ];
     GraphicObj *tr;
     TimeStep *tStep = this->giveDomain()->giveEngngModel()->giveCurrentStep();
-    FloatArray v [ 4 ];
-    double s [ 4 ], defScale;
+    FloatArray v [ 8 ];
+    double s [ 9 ], ss [ 4 ], defScale;
     IntArray map;
+    int ip;
+    GaussPoint *gp;
 
     if ( !context.testElementGraphicActivity(this) ) {
         return;
@@ -278,13 +282,12 @@ void QPlaneStress2d :: drawScalar(oofegGraphicContext &context)
 
     EASValsSetLayer(OOFEG_VARPLOT_PATTERN_LAYER);
     if ( context.giveIntVarMode() == ISM_recovered ) {
-      // ============ plot the recovered values (smoothed data) ===============
-      /*
-        for ( i = 1; i <= 4; i++ ) {
+        // ============ plot the recovered values (smoothed data) ===============
+        for ( i = 1; i <= 8; i++ ) {
             result += this->giveInternalStateAtNode(v [ i - 1 ], context.giveIntVarType(), context.giveIntVarMode(), i, tStep);
         }
 
-        if ( result != 4 ) {
+        if ( result != 8 ) {
             return;
         }
 
@@ -293,74 +296,148 @@ void QPlaneStress2d :: drawScalar(oofegGraphicContext &context)
             return;
         }
 
-        for ( i = 1; i <= 4; i++ ) {
+        for ( i = 1; i <= 8; i++ ) {
             s [ i - 1 ] = v [ i - 1 ].at(indx);
         }
 
-        if ( context.getScalarAlgo() == SA_ISO_SURF ) {
-            for ( i = 0; i < 4; i++ ) {
-                if ( context.getInternalVarsDefGeoFlag() ) {
-                    // use deformed geometry
-                    defScale = context.getDefScale();
-                    p [ i ].x = ( FPNum ) this->giveNode(i + 1)->giveUpdatedCoordinate(1, tStep, EID_MomentumBalance, defScale);
-                    p [ i ].y = ( FPNum ) this->giveNode(i + 1)->giveUpdatedCoordinate(2, tStep, EID_MomentumBalance, defScale);
-                    p [ i ].z = 0.;
-                } else {
-                    p [ i ].x = ( FPNum ) this->giveNode(i + 1)->giveCoordinate(1);
-                    p [ i ].y = ( FPNum ) this->giveNode(i + 1)->giveCoordinate(2);
-                    p [ i ].z = 0.;
-                }
+        // auxiliary value at an added central node
+        // computed as average of the values at all Gauss points
+
+        s [ 8 ] = 0.;
+        for ( ip = 1; ip <= numberOfGaussPoints; ip++ ) {
+            gp = integrationRulesArray [ 0 ]->getIntegrationPoint(ip - 1);
+            if ( giveIPValue(v [ 0 ], gp, context.giveIntVarType(), tStep) == 0 ) {
+                return;
             }
 
-            //EASValsSetColor(gc.getYieldPlotColor(ratio));
-            context.updateFringeTableMinMax(s, 4);
-            tr =  CreateQuadWD3D(p, s [ 0 ], s [ 1 ], s [ 2 ], s [ 3 ]);
-            EGWithMaskChangeAttributes(LAYER_MASK, tr);
-            EMAddGraphicsToModel(ESIModel(), tr);
-        } else if ( ( context.getScalarAlgo() == SA_ZPROFILE ) || ( context.getScalarAlgo() == SA_COLORZPROFILE ) ) {
-            double landScale = context.getLandScale();
-
-            for ( i = 0; i < 4; i++ ) {
-                if ( context.getInternalVarsDefGeoFlag() ) {
-                    // use deformed geometry
-                    defScale = context.getDefScale();
-                    p [ i ].x = ( FPNum ) this->giveNode(i + 1)->giveUpdatedCoordinate(1, tStep, EID_MomentumBalance, defScale);
-                    p [ i ].y = ( FPNum ) this->giveNode(i + 1)->giveUpdatedCoordinate(2, tStep, EID_MomentumBalance, defScale);
-                    p [ i ].z = s [ i ] * landScale;
-                } else {
-                    p [ i ].x = ( FPNum ) this->giveNode(i + 1)->giveCoordinate(1);
-                    p [ i ].y = ( FPNum ) this->giveNode(i + 1)->giveCoordinate(2);
-                    p [ i ].z = s [ i ] * landScale;
-                }
-
-                // this fixes a bug in ELIXIR
-                if ( fabs(s [ i ]) < 1.0e-6 ) {
-                    s [ i ] = 1.0e-6;
-                }
-            }
-
-            if ( context.getScalarAlgo() == SA_ZPROFILE ) {
-                EASValsSetColor( context.getDeformedElementColor() );
-                EASValsSetLineWidth(OOFEG_DEFORMED_GEOMETRY_WIDTH);
-                tr =  CreateQuad3D(p);
-                EGWithMaskChangeAttributes(WIDTH_MASK | COLOR_MASK | LAYER_MASK, tr);
-            } else {
-                context.updateFringeTableMinMax(s, 4);
-                tr =  CreateQuadWD3D(p, s [ 0 ], s [ 1 ], s [ 2 ], s [ 3 ]);
-                EGWithMaskChangeAttributes(LAYER_MASK, tr);
-            }
-
-            EMAddGraphicsToModel(ESIModel(), tr);
+            s [ 8 ] +=  v [ 0 ].at(indx);
         }
-      */
+
+        s [ 8 ] /= numberOfGaussPoints;
+        //s[8] = (s[4]+s[5]+s[6]+s[7])/4.;
+
+        for ( i = 0; i < 8; i++ ) {
+            if ( context.getInternalVarsDefGeoFlag() ) {
+                // use deformed geometry
+                defScale = context.getDefScale();
+                pp [ i ].x = ( FPNum ) this->giveNode(i + 1)->giveUpdatedCoordinate(1, tStep, EID_MomentumBalance, defScale);
+                pp [ i ].y = ( FPNum ) this->giveNode(i + 1)->giveUpdatedCoordinate(2, tStep, EID_MomentumBalance, defScale);
+                pp [ i ].z = 0.;
+            } else {
+                // use initial geometry
+                pp [ i ].x = ( FPNum ) this->giveNode(i + 1)->giveCoordinate(1);
+                pp [ i ].y = ( FPNum ) this->giveNode(i + 1)->giveCoordinate(2);
+                pp [ i ].z = 0.;
+            }
+        }
+
+        pp [ 8 ].x = ( pp [ 4 ].x + pp [ 5 ].x + pp [ 6 ].x + pp [ 7 ].x ) / 4.;
+        pp [ 8 ].y = ( pp [ 4 ].y + pp [ 5 ].y + pp [ 6 ].y + pp [ 7 ].y ) / 4.;
+        pp [ 8 ].z = 0.;
+
+
+        for ( int t = 1; t <= 4; t++ ) {
+            if ( t == 1 ) {
+                n [ 0 ] = 0;
+                n [ 1 ] = 4;
+                n [ 2 ] = 8;
+                n [ 3 ] = 7;
+            } else if ( t == 2 ) {
+                n [ 0 ] = 4;
+                n [ 1 ] = 1;
+                n [ 2 ] = 5;
+                n [ 3 ] = 8;
+            } else if ( t == 3 ) {
+                n [ 0 ] = 5;
+                n [ 1 ] = 2;
+                n [ 2 ] = 6;
+                n [ 3 ] = 8;
+            } else {
+                n [ 0 ] = 6;
+                n [ 1 ] = 3;
+                n [ 2 ] = 7;
+                n [ 3 ] = 8;
+            }
+
+            ss [ 0 ] = s [ n [ 0 ] ];
+            ss [ 1 ] = s [ n [ 1 ] ];
+            ss [ 2 ] = s [ n [ 2 ] ];
+            ss [ 3 ] = s [ n [ 3 ] ];
+
+
+            for ( i = 0; i < 4; i++ ) {
+                p [ i ].x = pp [ n [ i ] ].x;
+                p [ i ].y = pp [ n [ i ] ].y;
+                p [ i ].z = 0.;
+            }
+
+            if ( context.getScalarAlgo() == SA_ISO_SURF ) {
+                /*
+                 * for ( i = 0; i < 4; i++ ) {
+                 *    if ( context.getInternalVarsDefGeoFlag() ) {
+                 *        // use deformed geometry
+                 *        defScale = context.getDefScale();
+                 *        p [ i ].x = ( FPNum ) this->giveNode(n[i] + 1)->giveUpdatedCoordinate(1, tStep, EID_MomentumBalance, defScale);
+                 *        p [ i ].y = ( FPNum ) this->giveNode(n[i] + 1)->giveUpdatedCoordinate(2, tStep, EID_MomentumBalance, defScale);
+                 *        p [ i ].z = 0.;
+                 *    } else {
+                 *        // use initial geometry
+                 *        p [ i ].x = ( FPNum ) this->giveNode(n[i] + 1)->giveCoordinate(1);
+                 *        p [ i ].y = ( FPNum ) this->giveNode(n[i] + 1)->giveCoordinate(2);
+                 *        p [ i ].z = 0.;
+                 *    }
+                 * }
+                 */
+                //EASValsSetColor(gc.getYieldPlotColor(ratio));
+                context.updateFringeTableMinMax(ss, 4);
+                tr =  CreateQuadWD3D(p, ss [ 0 ], ss [ 1 ], ss [ 2 ], ss [ 3 ]);
+                EGWithMaskChangeAttributes(LAYER_MASK, tr);
+                EMAddGraphicsToModel(ESIModel(), tr);
+            } else if ( ( context.getScalarAlgo() == SA_ZPROFILE ) || ( context.getScalarAlgo() == SA_COLORZPROFILE ) ) {
+	      //double landScale = context.getLandScale();
+
+                for ( i = 0; i < 4; i++ ) {
+                    /*
+                     * if ( context.getInternalVarsDefGeoFlag() ) {
+                     *    // use deformed geometry
+                     *    defScale = context.getDefScale();
+                     *    p [ i ].x = ( FPNum ) this->giveNode(i + 1)->giveUpdatedCoordinate(1, tStep, EID_MomentumBalance, defScale);
+                     *    p [ i ].y = ( FPNum ) this->giveNode(i + 1)->giveUpdatedCoordinate(2, tStep, EID_MomentumBalance, defScale);
+                     *    p [ i ].z = ss [ i ] * landScale;
+                     * } else {
+                     *    // use initial geometry
+                     *    p [ i ].x = ( FPNum ) this->giveNode(i + 1)->giveCoordinate(1);
+                     *    p [ i ].y = ( FPNum ) this->giveNode(i + 1)->giveCoordinate(2);
+                     *    p [ i ].z = ss [ i ] * landScale;
+                     * }
+                     */
+
+                    // this fixes a bug in ELIXIR
+                    if ( fabs(ss [ i ]) < 1.0e-6 ) {
+                        ss [ i ] = 1.0e-6;
+                    }
+                }
+
+                if ( context.getScalarAlgo() == SA_ZPROFILE ) {
+                    EASValsSetColor( context.getDeformedElementColor() );
+                    EASValsSetLineWidth(OOFEG_DEFORMED_GEOMETRY_WIDTH);
+                    tr =  CreateQuad3D(p);
+                    EGWithMaskChangeAttributes(WIDTH_MASK | COLOR_MASK | LAYER_MASK, tr);
+                } else {
+                    context.updateFringeTableMinMax(s, 4);
+                    tr =  CreateQuadWD3D(p, ss [ 0 ], ss [ 1 ], ss [ 2 ], ss [ 3 ]);
+                    EGWithMaskChangeAttributes(LAYER_MASK, tr);
+                }
+
+                EMAddGraphicsToModel(ESIModel(), tr);
+            }
+        }
     } else if ( context.giveIntVarMode() == ISM_local ) {
-      // ========== plot the local values (raw data) =====================
+        // ========== plot the local values (raw data) =====================
         if ( numberOfGaussPoints != 4 ) {
             return;
         }
 
-        int ip;
-        GaussPoint *gp;
         IntArray ind(4);
         FloatArray *gpCoords;
         WCRec pp [ 9 ];
@@ -436,7 +513,110 @@ void QPlaneStress2d :: drawScalar(oofegGraphicContext &context)
 
     return;
 }
-
-
 #endif
+
+int
+QPlaneStress2d :: ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type)
+{
+    if ( ( type == IST_StressTensor ) || ( type == IST_StrainTensor ) || ( type == IST_DamageTensor ) ) {
+        return 3;
+    }
+
+    GaussPoint *gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
+    return this->giveIPValueSize(type, gp);
+}
+
+void
+QPlaneStress2d :: ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatMatrix &answer, GaussPoint *aGaussPoint, InternalStateType type)
+{
+    // evaluates N matrix (interpolation estimated stress matrix)
+    // according to Zienkiewicz & Zhu paper
+    // N(nsigma, nsigma*nnodes)
+    // Definition : sigmaVector = N * nodalSigmaVector
+    int i;
+    FloatArray n;
+
+    this->interpolation.evalN(n, * aGaussPoint->giveCoordinates(), FEIElementGeometryWrapper(this), 0.0);
+
+    if ( this->giveIPValueSize(type, aGaussPoint) ) {
+        answer.resize(1, 8);
+    } else {
+        return;
+    }
+
+    for ( i = 1; i <= 8; i++ ) {
+        answer.at(1, i)  = n.at(i);
+    }
+
+    return;
+}
+
+
+void
+QPlaneStress2d :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node,
+                                                             InternalStateType type, TimeStep *tStep)
+{
+    if ( numberOfGaussPoints != 4 ) {
+        return;
+    }
+
+    int i, i1, i2;
+    GaussPoint *gp;
+
+    if ( node < 5 ) {
+        switch ( node ) {
+        case 1: i = 4;
+            break;
+        case 2: i = 2;
+            break;
+        case 3: i = 1;
+            break;
+        case 4: i = 3;
+            break;
+        }
+
+        gp = integrationRulesArray [ 0 ]->getIntegrationPoint(i - 1);
+        this->giveIPValue(answer, gp, type, tStep);
+    } else   {
+        switch ( node ) {
+        case 5: i1 = 4;
+            i2 = 2;
+            break;
+        case 6: i1 = 2;
+            i2 = 1;
+            break;
+        case 7: i1 = 1;
+            i2 = 3;
+            break;
+        case 8: i1 = 3;
+            i2 = 4;
+            break;
+        }
+
+        FloatArray contrib;
+        gp = integrationRulesArray [ 0 ]->getIntegrationPoint(i1 - 1);
+        this->giveIPValue(contrib, gp, type, tStep);
+        gp = integrationRulesArray [ 0 ]->getIntegrationPoint(i2 - 1);
+        this->giveIPValue(answer, gp, type, tStep);
+        answer.add(contrib);
+        answer.times(0.5);
+    }
+
+    /*
+     * if (type == IST_StressTensor) {
+     * gp = integrationRulesArray[0]-> getIntegrationPoint(0) ;
+     * answer = ((StructuralMaterialStatus*) this->giveMaterial()->giveStatus(gp)) -> giveStressVector();
+     * } else if (type == IST_StrainTensor) {
+     * gp = integrationRulesArray[0]-> getIntegrationPoint(0) ;
+     * answer = ((StructuralMaterialStatus*) this->giveMaterial()->giveStatus(gp)) -> giveStrainVector();
+     * }else answer.resize(0);
+     */
+}
+
+void
+QPlaneStress2d :: NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side,
+                                                            InternalStateType type, TimeStep *tStep)
+{
+    answer.resize(0);
+}
 } // end namespace oofem

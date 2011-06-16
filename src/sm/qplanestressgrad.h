@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/sm/src/truss1d.h,v 1.8 2003/04/06 14:08:32 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -33,21 +32,16 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-//   *********************
-//   *** CLASS TRUSS2D ***
-//   *********************
-
-
-#ifndef qplanestraingrad_h
-#define qplanestraingrad_h
+#ifndef qplanestressgrad_h
+#define qplanestressgrad_h
 #include "structuralelement.h"
 #include "gaussintegrationrule.h"
 #include "graddpelement.h"
-#include "qplanestrain.h"
+#include "qplanstrss.h"
 #include "fei2dquadlin.h"
 
 namespace oofem {
-class QPlaneStrainGrad : public QPlaneStrain, public GradDpElement
+class QPlaneStressGrad : public QPlaneStress2d, public GradDpElement
 {
 protected:
 
@@ -55,17 +49,17 @@ protected:
     static FEI2dQuadLin interpolation;
 
 public:
-    QPlaneStrainGrad(int, Domain *);                         // constructor
-    ~QPlaneStrainGrad()   { }                                // destructor
+    QPlaneStressGrad(int, Domain *);                         // constructor
+    ~QPlaneStressGrad()   { }                                // destructor
 
 
 
-    const char *giveClassName() const { return "QPlaneStrainGrad"; }
-    classType            giveClassID() const { return QPlaneStrainGradClass; }
+    const char *giveClassName() const { return "QPlaneStressGrad"; }
+    classType            giveClassID() const { return QPlaneStressGradClass; }
     //IRResultType initializeFrom(InputRecord *ir);
     Element_Geometry_Type giveGeometryType() const { return EGT_quad_2; }
     integrationDomain  giveIntegrationDomain() { return _Square; }
-    MaterialMode          giveMaterialMode()  { return _PlaneStrainGrad; }
+    MaterialMode          giveMaterialMode()  { return _PlaneStressGrad; }
     virtual int  computeNumberOfDofs(EquationID ut) { return 20; }
     IRResultType initializeFrom(InputRecord *ir);
 
@@ -81,4 +75,4 @@ protected:
     StructuralElement *giveStructuralElement() { return this; }
 };
 } // end namespace oofem
-#endif // qplanestraingrad_h
+#endif // qplanestressgrad_h

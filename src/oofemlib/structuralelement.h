@@ -68,7 +68,7 @@ class IDNLMaterial;
  * will participate in geometrically nonlinear computations, it should be derived from derived
  * NLStructuralElement class, which provide support for this cases.
  *
-  * The basic data of an element are the numbers of its 'numberOfNodes' nodes,
+ * The basic data of an element are the numbers of its 'numberOfNodes' nodes,
  * stored in 'nodeArray', of its 'material', of its body loads (eg, the dead
  * weight) stored in 'loadArray'. These data are obtained from the domain.
  * The element contains logical reference to Volume object (
@@ -118,7 +118,7 @@ public:
     /// Destructor.
     ~StructuralElement();
 
-    void giveCharacteristicMatrix(FloatMatrix &answer, CharType, TimeStep *);
+    void giveCharacteristicMatrix(FloatMatrix & answer, CharType, TimeStep *);
     void  giveCharacteristicVector(FloatArray &answer, CharType type, ValueModeType mode, TimeStep *);
 
     /**
@@ -360,7 +360,7 @@ public:
      * @return Nonzero if o.k, zero otherwise.
      */
     virtual int giveInternalStateAtNode(FloatArray &answer, InternalStateType type, InternalStateMode mode,
-                                          int node, TimeStep *atTime);
+                                        int node, TimeStep *atTime);
     /// Shows sparse structure
     void showSparseMtrxStructure(CharType mtrx, oofegGraphicContext &gc, TimeStep *atTime);
     /// Shows extended sparse structure (for example, due to nonlocal interactions for tangent stiffness)
@@ -625,7 +625,7 @@ protected:
      * This parameter has default value ALL_STRAINS (answer is formed for all strains).
      */
     virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer,
-                                   int lowerIndx = 1, int upperIndx = ALL_STRAINS) = 0;
+                                  int lowerIndx = 1, int upperIndx = ALL_STRAINS) = 0;
     /**
      * Computes interpolation matrix for element unknowns.
      * The order and meaning of unknowns is element dependent.
@@ -708,6 +708,7 @@ protected:
     friend class IDNLMaterial;
     friend class TrabBoneNL3D;
     friend class MisesMatNl;
+    friend class RankineMatNl;
     friend class GradDpElement;
 };
 } // end namespace oofem

@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/sm/src/idmnl1.h,v 1.9 2003/04/06 14:08:30 bp Exp $ */
 /*
  *
  *****    *****   ******  ******  ***   ***
@@ -34,12 +33,12 @@
  */
 
 //   *************************************************
-//   *** CLASS GRADIENT MISES DAMAGE-PLASTIC MODEL ***
+//   *** CLASS GRADIENT RANKINE DAMAGE-PLASTIC MODEL ***
 //   *************************************************
 
-#ifndef MisesMatGrad_h
+#ifndef RankineMatGrad_h
 
-#include "misesmat.h"
+#include "rankinemat.h"
 #include "structuralnonlocalmaterialext.h"
 #include "nonlocmatstiffinterface.h"
 #include "cltypes.h"
@@ -57,31 +56,33 @@ class GaussPoint;
 
 
 /////////////////////////////////////////////////////////////////
-///////// GRADIENT MISES NONLOCAL MATERIAL STATUS////////////////
+///////// GRADIENT RANKINE NONLOCAL MATERIAL STATUS////////////////
 /////////////////////////////////////////////////////////////////
 
 
-class MisesMatGradStatus : public MisesMatStatus
+class RankineMatGradStatus : public RankineMatStatus
 {
 protected:
     // STATE VARIABLE DECLARATION
-    // Equivalent strain for avaraging
-    double localCumPlastStrainForAverage;
+
+    // for printing only
+    double kappa_nl;
+    double kappa_hat;
 
 public:
     // CONSTRUCTOR
-    MisesMatGradStatus(int n, Domain *d, GaussPoint *g);
+    RankineMatGradStatus(int n, Domain *d, GaussPoint *g);
 
     // DESTRUCTOR
-    ~MisesMatGradStatus();
+    ~RankineMatGradStatus() {; }
 
     // OUTPUT PRINT
     // Prints the receiver state to stream
     void   printOutputAt(FILE *file, TimeStep *tStep);
 
     // DEFINITION
-    const char *giveClassName() const { return "MisesMatGradStatus"; }
-    classType   giveClassID() const { return MisesMatClass; }
+    const char *giveClassName() const { return "RankineMatGradStatus"; }
+    classType   giveClassID() const { return RankineMatClass; }
 
     // INITIALISATION OF TEMPORARY VARIABLES
     // Initializes the temporary internal variables, describing the current state according to
@@ -92,33 +93,39 @@ public:
     // Update equilibrium history variables according to temp-variables.
     // Invoked, after new equilibrium state has been reached.
     virtual void updateYourself(TimeStep *); // update after new equilibrium state reached
+
+    void setKappa_nl(double kap) { kappa_nl = kap; }
+    void setKappa_hat(double kap) { kappa_hat = kap; }
+    double giveKappa_nl() { return kappa_nl; }
+    double giveKappa_hat() { return kappa_hat; }
 };
 
 
 /////////////////////////////////////////////////////////////////
-//////////// GRADIENT MISES MATERIAL////////////////////
+//////////// GRADIENT RANKINE MATERIAL////////////////////
 /////////////////////////////////////////////////////////////////
 
 
-class MisesMatGrad : public MisesMat
+class RankineMatGrad : public RankineMat
 {
 protected:
     // STATE VARIABLE DECLARATION
     // declare material properties here
     double R;
     double mParam;
+    double negligible_damage;
 
 public:
     // CONSTRUCTOR
-    MisesMatGrad(int n, Domain *d);
+    RankineMatGrad(int n, Domain *d);
 
     // DESTRUCTOR
-    ~MisesMatGrad();
+    ~RankineMatGrad() {; }
 
     // INITIALIZATION OF FUNCTION/SUBROUTINE
-    const char *giveClassName() const { return "MisesMatGrad"; }
-    classType   giveClassID()   const { return MisesMatClass; }
-    const char *giveInputRecordName() const { return "MisesMatGrad"; }
+    const char *giveClassName() const { return "RankineMatGrad"; }
+    classType   giveClassID()   const { return RankineMatClass; }
+    const char *giveInputRecordName() const { return "RankineMatGrad"; }
 
     // Initializes the receiver from given record
     IRResultType initializeFrom(InputRecord *ir);
@@ -126,28 +133,34 @@ public:
 
     void giveCharacteristicMatrix(FloatMatrix &answer, MatResponseForm form, MatResponseMode rMode, GaussPoint *gp, TimeStep *atTime);
     /*******************************************************************/
-    virtual void give1dStressStiffMtrx(FloatMatrix & answer,  MatResponseForm, MatResponseMode, GaussPoint * gp,  TimeStep * atTime);
-    virtual void givePlaneStrainStiffMtrx(FloatMatrix & answer,  MatResponseForm, MatResponseMode, GaussPoint * gp,  TimeStep * atTime);
-    virtual void give3dMaterialStiffnessMatrix(FloatMatrix & answer,  MatResponseForm, MatResponseMode, GaussPoint * gp,  TimeStep * atTime);
+    //virtual void give1dStressStiffMtrx(FloatMatrix & answer,  MatResponseForm, MatResponseMode, GaussPoint * gp,  TimeStep * atTime);
+    virtual void givePlaneStressStiffMtrx(FloatMatrix & answer,  MatResponseForm, MatResponseMode, GaussPoint * gp,  TimeStep * atTime);
+    //virtual void give3dMaterialStiffnessMatrix(FloatMatrix & answer,  MatResponseForm, MatResponseMode, GaussPoint * gp,  TimeStep * atTime);
     /*********************************************************************/
-    void give1dKappaMatrix(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime);
-    void givePlaneStrainKappaMatrix(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime);
-    void give3dKappaMatrix(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime);
+    //void give1dKappaMatrix(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime);
+    void givePlaneStressKappaMatrix(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime);
+    //void give3dKappaMatrix(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime);
     /*********************************************************************/
-    void give1dGprime(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime);
-    void givePlaneStrainGprime(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime);
-    void give3dGprime(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime);
+    //void give1dGprime(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime);
+    void givePlaneStressGprime(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime);
+    //void give3dGprime(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime);
     /**********************************************************************/
     void giveInternalLength(FloatMatrix &answer, MatResponseForm form, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime);
     /********************************************************************/
     void giveRealStressVector(FloatArray &answer,  MatResponseForm form, GaussPoint *gp, const FloatArray &strainVector, TimeStep *atTime);
     void computeCumPlastStrain(double &kappa, GaussPoint *gp, TimeStep *atTime);
+    double giveNonlocalCumPlasticStrain(GaussPoint *gp);
     void performPlasticityReturn(GaussPoint *gp, const FloatArray &totalStrain);
     LinearElasticMaterial *giveLinearElasticMaterial() { return linearElasticMaterial; }
+    int giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime);
+    InternalStateValueType giveIPValueType(InternalStateType type);
+    int giveIntVarCompFullIndx(IntArray &answer, InternalStateType type, MaterialMode mmode);
+    int giveIPValueSize(InternalStateType type, GaussPoint *gp);
+
 protected:
     // Creates the corresponding material status
-    MaterialStatus *CreateStatus(GaussPoint *gp) const { return new MisesMatGradStatus(1, MisesMat :: domain, gp); }
+    MaterialStatus *CreateStatus(GaussPoint *gp) const { return new RankineMatGradStatus(1, RankineMat :: domain, gp); }
 };
 } // end namespace oofem
-#define MisesMatGrad_h
+#define RankineMatGrad_h
 #endif

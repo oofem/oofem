@@ -62,9 +62,10 @@ FloatArray :: FloatArray(int n)
     if ( size ) {
         values = allocDouble(size);
 #ifdef DEBUG
-        if (!values) {
-            OOFEM_FATAL2("FloatArray :: FloatArray - Failed in allocating %d doubles",n);
+        if ( !values ) {
+            OOFEM_FATAL2("FloatArray :: FloatArray - Failed in allocating %d doubles", n);
         }
+
 #endif
     } else {
         values = NULL;
@@ -81,9 +82,10 @@ FloatArray :: FloatArray(const FloatArray &src)
     if ( size ) {
         values = allocDouble(size);
 #ifdef DEBUG
-        if (!values) {
-            OOFEM_FATAL2("FloatArray :: FloatArray - Failed in allocating %d doubles",size);
+        if ( !values ) {
+            OOFEM_FATAL2("FloatArray :: FloatArray - Failed in allocating %d doubles", size);
         }
+
 #endif
     } else {
         values = NULL;
@@ -119,7 +121,7 @@ void FloatArray :: add(const FloatArray &b)
     }
 
     if ( !size ) {
-        *this = b;
+        * this = b;
         return;
     }
 
@@ -127,16 +129,16 @@ void FloatArray :: add(const FloatArray &b)
         OOFEM_ERROR3("FloatArray :: add :  dimension mismatch in a[%d]->add(b[%d])\n", size, b.size);
     }
 
-    for (int i = 0; i < this->size; i++) {
-        this->values[i] += b.values[i];
+    for ( int i = 0; i < this->size; i++ ) {
+        this->values [ i ] += b.values [ i ];
     }
 }
 
 
 void FloatArray :: add(double offset)
 {
-    for (int i = 0; i < this->size; i++){
-        this->values[i] += offset;
+    for ( int i = 0; i < this->size; i++ ) {
+        this->values [ i ] += offset;
     }
 }
 
@@ -147,9 +149,10 @@ void FloatArray :: add(const double factor, const FloatArray &b)
 {
     if ( this->size == 0 ) {
         this->resize(b.size);
-        for (int i = 0; i < this->size; ++i){
-            this->values[i] = factor*b.values[i];
+        for ( int i = 0; i < this->size; ++i ) {
+            this->values [ i ] = factor * b.values [ i ];
         }
+
         return;
     }
 
@@ -157,10 +160,11 @@ void FloatArray :: add(const double factor, const FloatArray &b)
     if ( size != b.size ) {
         OOFEM_ERROR3("FloatArray :: add :  dimension mismatch in a[%d]->add(b[%d])\n", size, b.size);
     }
+
 #  endif
 
-    for (int i = 0; i < this->size; ++i){
-        this->values[i] += factor*b.values[i];
+    for ( int i = 0; i < this->size; ++i ) {
+        this->values [ i ] += factor * b.values [ i ];
     }
 }
 
@@ -174,9 +178,10 @@ void FloatArray :: subtract(const FloatArray &src)
 
     if ( !size ) {
         this->resize(src.size);
-        for (int i = 0; i < this->size; ++i){
-            this->values[i] = -src.values[i];
+        for ( int i = 0; i < this->size; ++i ) {
+            this->values [ i ] = -src.values [ i ];
         }
+
         return;
     }
 
@@ -184,10 +189,11 @@ void FloatArray :: subtract(const FloatArray &src)
     if ( this->size != src.size ) {
         OOFEM_ERROR3("FloatArray dimension mismatch in a[%d]->add(b[%d])\n", size, src.size);
     }
+
 #  endif
 
-    for (int i = 0; i < this->size; ++i){
-        this->values[i] -= src.values[i];
+    for ( int i = 0; i < this->size; ++i ) {
+        this->values [ i ] -= src.values [ i ];
     }
 }
 
@@ -197,14 +203,15 @@ void FloatArray :: beMaxOf(const FloatArray &a, const FloatArray &b)
     int n = a.giveSize();
 
 #  ifdef DEBUG
-    if ( n != b.size) {
+    if ( n != b.size ) {
         OOFEM_ERROR3("FloatArray dimension mismatch in beMaxOf(a[%d],b[%d])\n", n, b.size);
     }
+
 #  endif
 
     this->resize(n);
-    for (int i = 0; i < n; i++) {
-        values[i] = max(a(i), b(i));
+    for ( int i = 0; i < n; i++ ) {
+        values [ i ] = max( a(i), b(i) );
     }
 }
 
@@ -214,14 +221,15 @@ void FloatArray :: beMinOf(const FloatArray &a, const FloatArray &b)
     int n = a.giveSize();
 
 #  ifdef DEBUG
-    if ( n != b.size) {
+    if ( n != b.size ) {
         OOFEM_ERROR3("FloatArray dimension mismatch in beMinOf(a[%d],b[%d])\n", n, b.size);
     }
+
 #  endif
 
     this->resize(n);
-    for (int i = 0; i < n; i++) {
-        values[i] = min(a(i), b(i));
+    for ( int i = 0; i < n; i++ ) {
+        values [ i ] = min( a(i), b(i) );
     }
 }
 
@@ -229,14 +237,29 @@ void FloatArray :: beMinOf(const FloatArray &a, const FloatArray &b)
 void FloatArray :: beDifferenceOf(const FloatArray &a, const FloatArray &b)
 {
 #ifdef DEBUG
-     if ( a.size != b.size ) {
-         OOFEM_ERROR3("FloatArray :: beDifferenceOf - size mismatch", a.size, b.size);
-     }
+    if ( a.size != b.size ) {
+        OOFEM_ERROR3("FloatArray :: beDifferenceOf - size mismatch", a.size, b.size);
+    }
+
 #endif
-     this->resize(a.size);
-     for (int i = 0; i < this->size; ++i) {
-         this->values[i] = a.values[i] - b.values[i];
-     }
+    this->resize(a.size);
+    for ( int i = 0; i < this->size; ++i ) {
+        this->values [ i ] = a.values [ i ] - b.values [ i ];
+    }
+}
+
+void FloatArray :: beDifferenceOf(const FloatArray &a, const FloatArray &b, const int &n)
+{
+#ifdef DEBUG
+    if ( a.size < n || b.size < n ) {
+        OOFEM_ERROR3("FloatArray :: beDifferenceOf - wrong size ", a.size, b.size);
+    }
+
+#endif
+    this->resize(n);
+    for ( int i = 0; i < n; ++i ) {
+        this->values [ i ] = a.values [ i ] - b.values [ i ];
+    }
 }
 
 
@@ -252,9 +275,10 @@ void FloatArray :: beSubArrayOf(const FloatArray &src, const IntArray &indx)
     n = indx.giveSize();
 
 #ifdef DEBUG
-     if ( src.size != n ) {
-         OOFEM_ERROR("FloatArray :: beSubArrayOf - size mismatch");
-     }
+    if ( src.size != n ) {
+        OOFEM_ERROR("FloatArray :: beSubArrayOf - size mismatch");
+    }
+
 #endif
 
     for ( isize = 0, i = 1; i <= n; i++ ) {
@@ -284,7 +308,7 @@ void FloatArray :: addSubVector(const FloatArray &src, int si)
     }
 
     for ( i = 1; i <= n; i++ ) {
-        this->at(si+i) += src.at(i);
+        this->at(si + i) += src.at(i);
     }
 }
 
@@ -307,15 +331,17 @@ void FloatArray :: beVectorProductOf(const FloatArray &v1, const FloatArray &v2)
 double FloatArray :: dotProduct(const FloatArray &x) const
 {
 #  ifdef DEBUG
-    if (this->size != x.size) {
+    if ( this->size != x.size ) {
         OOFEM_ERROR3("FloatArray :: dotProduct :  dimension mismatch in a[%d]->dotProduct(b[%d])\n", this->size, x.size);
     }
+
 #  endif
 
     double dp = 0;
-    for (int i = 0; i < this->size; i++) {
-        dp += this->values[i]*x.values[i];
+    for ( int i = 0; i < this->size; i++ ) {
+        dp += this->values [ i ] * x.values [ i ];
     }
+
     return dp;
 }
 
@@ -323,22 +349,24 @@ double FloatArray :: dotProduct(const FloatArray &x) const
 double FloatArray :: dotProduct(const FloatArray &x, int size) const
 {
 #  ifdef DEBUG
-    if (size > this->size || size > x.size) {
+    if ( size > this->size || size > x.size ) {
         OOFEM_ERROR3("FloatArray :: dotProduct :  dimension mismatch in a[%d]->dotProduct(b[%d])\n", this->size, x.size);
     }
+
 #  endif
 
     double dp = 0;
-    for (int i = 0; i < size; i++) {
-        dp += this->values[i]*x.values[i];
+    for ( int i = 0; i < size; i++ ) {
+        dp += this->values [ i ] * x.values [ i ];
     }
+
     return dp;
 }
 
 
 double FloatArray :: distance(const FloatArray &x) const
 {
-    return sqrt(this->distance_square(x));
+    return sqrt( this->distance_square(x) );
 }
 
 
@@ -350,13 +378,14 @@ double FloatArray :: distance_square(const FloatArray &from) const
 
     p1 = this->values;
     p2 = from.values;
-    int s = min( size, from.size );
+    int s = min(size, from.size);
     while ( s-- ) {
-        dx = (*p1) - (*p2);
-        dist += dx*dx;
+        dx = ( * p1 ) - ( * p2 );
+        dist += dx * dx;
         p1++;
         p2++;
     }
+
     return dist;
 }
 
@@ -445,6 +474,7 @@ void FloatArray :: resize(int n, int allocChunk)
     if ( allocChunk < 0 ) {
         OOFEM_FATAL2("FloatArray :: resize - allocChunk must be non-negative; %d", allocChunk);
     }
+
 #endif
 
     if ( n <= allocatedSize ) {
@@ -454,9 +484,10 @@ void FloatArray :: resize(int n, int allocChunk)
 
     newValues = allocDouble(n + allocChunk);
 #ifdef DEBUG
-    if (!newValues) {
-        OOFEM_FATAL2("FloatArray :: resize - Failed in allocating %d doubles",n+allocChunk);
+    if ( !newValues ) {
+        OOFEM_FATAL2("FloatArray :: resize - Failed in allocating %d doubles", n + allocChunk);
     }
+
 #endif
     p1 = values;
     p2 = newValues;
@@ -486,9 +517,10 @@ void FloatArray :: hardResize(int n)
 
     newValues = allocDouble(n);
 #ifdef DEBUG
-    if (!newValues) {
-        OOFEM_FATAL2("FloatArray :: hardResize - Failed in allocating %d doubles",n);
+    if ( !newValues ) {
+        OOFEM_FATAL2("FloatArray :: hardResize - Failed in allocating %d doubles", n);
     }
+
 #endif
     p1 = values;
     p2 = newValues;
@@ -509,18 +541,19 @@ void FloatArray :: hardResize(int n)
 
 bool FloatArray :: containsOnlyZeroes() const
 {
-    for (int i = 0; i < this->size; i++) {
-        if (this->values[i] != 0.) {
+    for ( int i = 0; i < this->size; i++ ) {
+        if ( this->values [ i ] != 0. ) {
             return false;
         }
     }
+
     return true;
 }
 
 
 void FloatArray :: zero()
 {
-    for (int i = 0; i < this->size; i++ ) {
+    for ( int i = 0; i < this->size; i++ ) {
         this->values [ i ] = 0.;
     }
 }
@@ -536,6 +569,7 @@ void FloatArray :: beProductOf(const FloatMatrix &aMatrix, const FloatArray &anA
     if ( ( nColumns = aMatrix.giveNumberOfColumns() ) - anArray.giveSize() ) {
         OOFEM_ERROR("FloatArray :: beProductOf : dimension mismatch");
     }
+
 #  endif
 
     nColumns = aMatrix.giveNumberOfColumns();
@@ -561,6 +595,7 @@ void FloatArray :: beTProductOf(const FloatMatrix &aMatrix, const FloatArray &an
     if ( ( nColumns = aMatrix.giveNumberOfRows() ) - anArray.giveSize() ) {
         OOFEM_ERROR("FloatArray :: beTProductOf : dimension mismatch");
     }
+
 #  endif
 
     nColumns = aMatrix.giveNumberOfRows();
@@ -578,8 +613,8 @@ void FloatArray :: beTProductOf(const FloatMatrix &aMatrix, const FloatArray &an
 
 void FloatArray :: negated()
 {
-    for (int i = 0; i < this->size; i++) {
-        this->values[i] = -this->values[i];
+    for ( int i = 0; i < this->size; i++ ) {
+        this->values [ i ] = -this->values [ i ];
     }
 }
 
@@ -630,8 +665,8 @@ void FloatArray :: rotatedWith(FloatMatrix &r, char mode)
 void FloatArray :: times(double factor)
 // Multiplies every coefficient of the receiver by factor.
 {
-    for (int i = 0; i < this->size; i++ ) {
-        this->values[i] *= factor;
+    for ( int i = 0; i < this->size; i++ ) {
+        this->values [ i ] *= factor;
     }
 }
 
@@ -642,13 +677,14 @@ void FloatArray :: normalize()
     if ( norm < 1.e-80 ) {
         OOFEM_ERROR("FloatArray::normalize : cannot norm receiver, norm is too small");
     }
+
     this->times(1. / norm);
 }
 
 
 double FloatArray :: computeNorm() const
 {
-    return sqrt(this->computeSquaredNorm());
+    return sqrt( this->computeSquaredNorm() );
 }
 
 
@@ -659,10 +695,11 @@ double FloatArray :: computeSquaredNorm() const
 
     p = this->values;
     i = this->size;
-    while (i--) {
-        norm2 += (*p) * (*p);
+    while ( i-- ) {
+        norm2 += ( * p ) * ( * p );
         p++;
     }
+
     return norm2;
 }
 
@@ -753,9 +790,10 @@ contextIOResultType FloatArray :: restoreYourself(DataStream *stream, ContextMod
 
         values = allocDouble(size);
 #ifdef DEBUG
-        if (!values) {
-            OOFEM_FATAL2("FloatArray :: restoreYourself - Failed in allocating %d doubles",size);
+        if ( !values ) {
+            OOFEM_FATAL2("FloatArray :: restoreYourself - Failed in allocating %d doubles", size);
         }
+
 #endif
         allocatedSize = size;
     }
@@ -815,7 +853,7 @@ double dotProduct(double *p1, double *p2, int i)
 
     answer = 0.;
     while ( i-- ) {
-        answer += (* p1++) * (* p2++);
+        answer += ( * p1++ ) * ( * p2++ );
     }
 
     return answer;
@@ -823,7 +861,7 @@ double dotProduct(double *p1, double *p2, int i)
 
 #ifdef IML_COMPAT
 
-FloatArray &FloatArray :: operator =( const double & val )
+FloatArray &FloatArray :: operator = ( const double & val )
 {
     for ( int i = 0; i < size; i++ ) {
         values [ i ] = val;
@@ -832,7 +870,7 @@ FloatArray &FloatArray :: operator =( const double & val )
     return * this;
 }
 
-FloatArray &operator *=( FloatArray & x, const double & a )
+FloatArray &operator *= ( FloatArray & x, const double & a )
 {
     int N = x.giveSize();
     for ( int i = 0; i < N; i++ ) {
@@ -873,7 +911,7 @@ FloatArray operator *( const FloatArray & x, const double & a )
     return result;
 }
 
-FloatArray operator +( const FloatArray & x, const FloatArray & y )
+FloatArray operator + ( const FloatArray & x, const FloatArray & y )
 {
     int N = x.giveSize();
     if ( N != y.giveSize() ) {
@@ -888,7 +926,7 @@ FloatArray operator +( const FloatArray & x, const FloatArray & y )
     return result;
 }
 
-FloatArray operator -( const FloatArray & x, const FloatArray & y )
+FloatArray operator - ( const FloatArray & x, const FloatArray & y )
 {
     int N = x.giveSize();
     if ( N != y.giveSize() ) {

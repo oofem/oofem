@@ -304,7 +304,7 @@ void QPlaneStrain :: drawDeformedGeometry(oofegGraphicContext &gc, UnknownType t
 
 void QPlaneStrain :: drawScalar(oofegGraphicContext &context)
 {
-    int i, indx, result = 0;
+    int i, indx;
     WCRec p [ 4 ];
     GraphicObj *tr;
     TimeStep *tStep = this->giveDomain()->giveEngngModel()->giveCurrentStep();

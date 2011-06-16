@@ -61,7 +61,7 @@ public:
     virtual void evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time);
     virtual void evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time);
     virtual double giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time);
-    virtual double giveArea(const FEICellGeometry &cellgeo) { return 0.0;};
+    virtual double giveArea(const FEICellGeometry &cellgeo) { return 0.0; };
 
     // Edge (same as bulk for this type, so they are all ignored) (perhaps do it the other way around?).
     virtual void computeLocalEdgeMapping(IntArray &edgeNodes, int iedge) {};
@@ -71,7 +71,7 @@ public:
     virtual void edgeLocal2global(FloatArray &answer, int iedge,
                                   const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time) {};
     virtual double edgeGiveTransformationJacobian(int iedge, const FloatArray &lcoords,
-                                                  const FEICellGeometry &cellgeo, double time) {};
+                                                  const FEICellGeometry &cellgeo, double time) { return 1.; };
 
 protected:
     double edgeComputeLength(IntArray &edgeNodes, const FEICellGeometry &cellgeo);

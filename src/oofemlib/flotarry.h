@@ -93,7 +93,6 @@ class CommunicationBuffer;
  */
 class FloatArray
 {
-
 protected:
     /// Size of array.
     int size;
@@ -118,7 +117,7 @@ public:
     virtual ~FloatArray() { if ( values ) { freeDouble(values); } }
 
     /// Assignment operator
-    FloatArray & operator=(const FloatArray &);  // assignment: cleanup and copy
+    FloatArray &operator=(const FloatArray &);   // assignment: cleanup and copy
 
     /**
      * Coefficient access function. Returns value of coefficient at given
@@ -152,6 +151,7 @@ public:
         if ( i >= size ) {
             OOFEM_ERROR2("FloatArray :: operator() : array error on index : %d <= 0 \n", i);
         }
+
 #endif
         return values [ i ];
     }
@@ -166,6 +166,7 @@ public:
         if ( i >= size ) {
             OOFEM_ERROR2("FloatArray :: operator() : array error on index : %d <= 0 \n", i);
         }
+
 #endif
         return values [ i ];
     }
@@ -182,14 +183,14 @@ public:
      * @param loc Array with indices.
      */
     void checkSizeTowards(const IntArray &loc);
-    /** 
+    /**
      * Checks size of receiver towards requested bounds.
      * If dimension mismatch, size is adjusted accordingly.
      * @param s New size.
      * @param allocChunk Additional space to allocate.
      */
     void resize(int s, int allocChunk = 0);
-    /** 
+    /**
      * Resizes the size of the receiver to requested bounds. Memory allocation always happens, more preferably use
      * resize() function instead.
      * @param s New size.
@@ -288,6 +289,12 @@ public:
      */
     void beDifferenceOf(const FloatArray &a, const FloatArray &b);
     /**
+     * Sets receiver to be a - b, using only the first n entries.
+     * @param a Array which receiver goes to.
+     * @param b Array which receiver comes from.
+     */
+    void beDifferenceOf(const FloatArray &a, const FloatArray &b, const int &n);
+    /**
      * Extract sub vector form src array and stores the result into receiver.
      * @param src source vector for sub vector
      * @param indx Determines sub vector. Receiver size will be indx max value,
@@ -325,7 +332,7 @@ public:
      */
     double distance(const FloatArray &x) const;
     /// @see distance
-    double distance(const FloatArray *x) const { return this->distance(*x); }
+    double distance(const FloatArray *x) const { return this->distance(* x); }
     /**
      * Computes the square of distance between position represented by receiver and position given as parameter.
      * @param x Coordinate to calculate squared distance from.
@@ -393,7 +400,7 @@ public:
 
 #ifdef IML_COMPAT
     /// Assignment of scalar to all components of receiver
-    FloatArray & operator=(const double &);
+    FloatArray &operator=(const double &);
 #endif
 
 #ifdef BOOST_PYTHON
@@ -405,7 +412,7 @@ public:
 
 #ifdef IML_COMPAT
 /// Vector multiplication by scalar
-FloatArray & operator*=(FloatArray &x, const double &a);
+FloatArray &operator*=(FloatArray &x, const double &a);
 FloatArray operator*(const double &a, const FloatArray &x);
 FloatArray operator*(const FloatArray &x, const double &a);
 FloatArray operator+(const FloatArray &x, const FloatArray &y);
@@ -436,7 +443,6 @@ double dotProduct(double *p1, double *p2, int i);
  * @param i Number of coefficients to use.
  * @return Value of the dot product
  */
-inline double dotProduct(const FloatArray &p1, const FloatArray &p2, int i) { return p1.dotProduct(p2,i); }
-
+inline double dotProduct(const FloatArray &p1, const FloatArray &p2, int i) { return p1.dotProduct(p2, i); }
 } // end namespace oofem
 #endif // flotarry_h

@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/sm/src/truss1d.C,v 1.6 2003/04/06 14:08:32 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -33,9 +32,7 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-//   file Truss1d.C
-
-#include "qplanestraingrad.h"
+#include "qplanestressgrad.h"
 #include "domain.h"
 #include "node.h"
 #include "material.h"
@@ -56,9 +53,9 @@
 #endif
 
 namespace oofem {
-FEI2dQuadLin QPlaneStrainGrad :: interpolation(1, 2);
+FEI2dQuadLin QPlaneStressGrad :: interpolation(1, 2);
 
-QPlaneStrainGrad :: QPlaneStrainGrad(int n, Domain *aDomain) : QPlaneStrain(n, aDomain), GradDpElement()
+QPlaneStressGrad :: QPlaneStressGrad(int n, Domain *aDomain) : QPlaneStress2d(n, aDomain), GradDpElement()
     // Constructor.
 {
     nPrimNodes = 8;
@@ -72,7 +69,7 @@ QPlaneStrainGrad :: QPlaneStrainGrad(int n, Domain *aDomain) : QPlaneStrain(n, a
 
 
 void
-QPlaneStrainGrad ::   giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const
+QPlaneStressGrad ::   giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const
 
 {
     if ( inode <= nSecNodes ) {
@@ -89,13 +86,13 @@ QPlaneStrainGrad ::   giveDofManDofIDMask(int inode, EquationID ut, IntArray &an
     return;
 }
 IRResultType
-QPlaneStrainGrad :: initializeFrom(InputRecord *ir)
+QPlaneStressGrad :: initializeFrom(InputRecord *ir)
 {
-    //const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
-    //IRResultType result;                 // Required by IR_GIVE_FIELD macro
+    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
+    IRResultType result;               // Required by IR_GIVE_FIELD macro
     this->StructuralElement :: initializeFrom(ir);
     numberOfGaussPoints = 4;
-    //IR_GIVE_OPTIONAL_FIELD(ir, numberOfGaussPoints, IFT_QPlaneStrain_nip, "nip"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, numberOfGaussPoints, IFT_QPlaneStress2d_nip, "nip");
 
     if ( !( ( numberOfGaussPoints == 1 ) ||
            ( numberOfGaussPoints == 4 ) ||
@@ -109,18 +106,18 @@ QPlaneStrainGrad :: initializeFrom(InputRecord *ir)
 }
 
 void
-QPlaneStrainGrad :: computeGaussPoints()
+QPlaneStressGrad :: computeGaussPoints()
 {
     if ( !integrationRulesArray ) {
         numberOfIntegrationRules = 1;
         integrationRulesArray = new IntegrationRule * [ numberOfIntegrationRules ];
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3);
-        integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Square, numberOfGaussPoints, _PlaneStrainGrad);
+        integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Square, numberOfGaussPoints, _PlaneStressGrad);
     }
 }
 
 void
-QPlaneStrainGrad :: computeNkappaMatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
+QPlaneStressGrad :: computeNkappaMatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
 // Returns the displacement interpolation matrix {N} of the receiver, eva-
 // luated at aGaussPoint.
 {
@@ -139,9 +136,7 @@ QPlaneStrainGrad :: computeNkappaMatrixAt(GaussPoint *aGaussPoint, FloatMatrix &
 }
 
 void
-QPlaneStrainGrad :: computeBkappaMatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
-// Returns the [1x8] strain-displacement matrix {B} of the receiver, eva-
-// luated at aGaussPoint.
+QPlaneStressGrad :: computeBkappaMatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer)
 {
     int i;
     FloatMatrix dnx;

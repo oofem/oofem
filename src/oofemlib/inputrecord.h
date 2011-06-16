@@ -428,7 +428,7 @@ enum InputFieldType {
     IFT_QTrPlaneStrain_nip,
     IFT_QTruss1d_nip,
     IFT_QTruss1dGrad_nip,
-    
+
 
     IFT_Quad1_ht_nip,
     IFT_Brick1_ht_nip,
@@ -796,11 +796,18 @@ enum InputFieldType {
     IFT_MisesMat_h,
     IFT_MisesMat_omega_crit,
     IFT_MisesMat_a,
-    
+
     IFT_MisesMatGrad_r,
     IFT_MisesMatGrad_m,
 
     IFT_MisesMatNl_averagingtype,
+
+    IFT_RankineMat_sig0,
+    IFT_RankineMat_h,
+    IFT_RankineMat_a,
+
+    IFT_RankineMatGrad_r,
+    IFT_RankineMatGrad_m,
 
     IFT_CohSur3d_kx,
     IFT_CohSur3d_ky,
@@ -1164,7 +1171,7 @@ public:
     /// Destructor
     virtual ~InputRecord() { }
     // Assingnment operator
-    InputRecord & operator=(const InputRecord &);
+    InputRecord &operator=(const InputRecord &);
 
     /** Creates a newly allocated copy of the receiver */
     virtual InputRecord *GiveCopy() = 0;

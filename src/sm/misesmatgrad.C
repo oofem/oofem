@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/sm/src/idmnl1.C,v 1.7 2003/04/06 14:08:30 bp Exp $ */
 /*
  *
  *****    *****   ******  ******  ***   ***
@@ -234,6 +233,7 @@ MisesMatGrad :: givePlaneStrainStiffMtrx(FloatMatrix &answer, MatResponseForm fo
     if ( dKappa <= 0.0 ) { // elastic loading - elastic stiffness plays the role of tangent stiffness
         return;
     }
+
     // === plastic loading ===
     // yield stress at the beginning of the step
     double sigmaY = sig0 + H * kappa;
@@ -291,7 +291,7 @@ MisesMatGrad :: give3dMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseFo
     double tempKappa = status->giveTempCumulativePlasticStrain();
     double kappa = status->giveCumulativePlasticStrain();
     double dKappa = tempKappa - kappa;
-    
+
     if ( dKappa > 0.0 ) {
         double tempDamage = status->giveTempDamage();
         double damage = status->giveDamage();
@@ -442,7 +442,7 @@ MisesMatGrad :: givePlaneStrainGprime(FloatMatrix &answer, MatResponseForm form,
     damage = status->giveDamage();
     tempDamage = status->giveTempDamage();
     nlKappa =  status->giveTempStrainVector().at(5);
-    kappa = mParam * tempKappa + ( 1 - mParam ) * nlKappa;
+    kappa = mParam * nlKappa + ( 1. - mParam ) * tempKappa;
     status->giveTempEffectiveStress(tempEffStress);
     if ( ( tempDamage - damage ) > 0 ) {
         answer.at(1, 1) = tempEffStress.at(1);
@@ -470,7 +470,7 @@ MisesMatGrad :: give3dGprime(FloatMatrix &answer, MatResponseForm form, MatRespo
     tempDamage = status->giveTempDamage();
     nlKappa =  status->giveTempStrainVector().at(7);
     status->giveTempEffectiveStress(tempEffStress);
-    kappa = mParam * tempKappa + ( 1 - mParam ) * nlKappa;
+    kappa = mParam * nlKappa + ( 1. - mParam ) * tempKappa;
     if ( ( tempDamage - damage ) > 0 ) {
         for ( int i = 1; i <= 6; i++ ) {
             answer.at(i, 1) = tempEffStress.at(i);
@@ -523,8 +523,8 @@ MisesMatGrad :: giveRealStressVector(FloatArray &answer, MatResponseForm form, G
     answer = ( 1 - tempDam ) * tempEffStress;
     size = tempEffStress.giveSize();
     answer.resize(size + 1);
-    answer.at(size + 1) = localCumPlastStrain;    
-  
+    answer.at(size + 1) = localCumPlastStrain;
+
     status->setTempDamage(tempDam);
     status->letTempEffectiveStressBe(tempEffStress);
     status->letTempStressVectorBe(answer);

@@ -101,7 +101,7 @@ static Widget deformations_menu, activeStep_palette,
               scalarstrain_palette, plotalgo_palette, valmode_palette, scalarerror_palette,
               scalardamage_palette, scalarplasticstrain_palette, color_scale_palette,
               oofeg_file_palette, frame_palette, view_palette, render_palette, bgcolor_palette,
-              layers_update_palette, debug_palette;
+              layers_update_palette;
 
 static void OOFEGReturnHitInCmd(Widget w, XEvent *event, String *params,
                                 Cardinal *num_params);
@@ -140,6 +140,14 @@ void princstraincompPlot(Widget w, XtPointer ptr, XtPointer call_data);
 void plaststraincompPlot(Widget w, XtPointer ptr, XtPointer call_data);
 void princplaststraincompPlot(Widget w, XtPointer ptr, XtPointer call_data);
 void damagecompPlot(Widget w, XtPointer ptr, XtPointer call_data);
+//mj
+void epseqcompPlot(Widget w, XtPointer ptr, XtPointer call_data);
+void kappacompPlot(Widget w, XtPointer ptr, XtPointer call_data);
+void kappa2compPlot(Widget w, XtPointer ptr, XtPointer call_data);
+void dissworkcompPlot(Widget w, XtPointer ptr, XtPointer call_data);
+void stressworkcompPlot(Widget w, XtPointer ptr, XtPointer call_data);
+void freeenergycompPlot(Widget w, XtPointer ptr, XtPointer call_data);
+//emj
 void princdamagecompPlot(Widget w, XtPointer ptr, XtPointer call_data);
 void emptyaction(Widget w, XtPointer ptr, XtPointer call_data);
 void plotAlgosel(Widget w, XtPointer ptr, XtPointer call_data);
@@ -678,8 +686,8 @@ void ESICustomize(Widget parent_pane)
         oofeg_add_button("DOFMANNUM_PLOT", "DofMan Numbers", commandWidgetClass, dofman_menu, nodeAnnPlot, NULL);
         oofeg_add_button("ELEMNUM_PLOT", "Element Numbers", commandWidgetClass, dofman_menu, elementAnnPlot, NULL);
 
-        oofeg_add_button( "BCE_PLOT", "essential BC", commandWidgetClass, dofman_menu, bcPlot, ( XtPointer ) ( vectorAddr + 0 ) );
-        oofeg_add_button( "BCN_PLOT", "natural   BC", commandWidgetClass, dofman_menu, bcPlot, ( XtPointer ) ( vectorAddr + 1 ) );
+        oofeg_add_button( "BCE_PLOT", "essential BC", commandWidgetClass, dofman_menu, bcPlot, ( XtPointer )(vectorAddr + 0) );
+        oofeg_add_button( "BCN_PLOT", "natural   BC", commandWidgetClass, dofman_menu, bcPlot, ( XtPointer )(vectorAddr + 1) );
 
         oofeg_add_palette("< Deformations >", plot_palette, & deformations_menu);
         oofeg_add_button("DEF_PLOT", "DefGeom Plot", commandWidgetClass, deformations_menu, defPlot, NULL);
@@ -697,17 +705,17 @@ void ESICustomize(Widget parent_pane)
 
             oofeg_add_popdown_menu("< Data Mode >", varplot_palette, & valmode_palette);
             {
-                oofeg_add_menu_item( "VALUE_MODE_RECOVERED", "Recovered Values", valmode_palette, valmodesel, ( XtPointer ) ( vectorAddr + 0 ) );
-                oofeg_add_menu_item( "VALUE_MODE_LOCAL", "Local Values", valmode_palette, valmodesel, ( XtPointer ) ( vectorAddr + 1 ) );
+                oofeg_add_menu_item( "VALUE_MODE_RECOVERED", "Recovered Values", valmode_palette, valmodesel, ( XtPointer )(vectorAddr + 0) );
+                oofeg_add_menu_item( "VALUE_MODE_LOCAL", "Local Values", valmode_palette, valmodesel, ( XtPointer )(vectorAddr + 1) );
             }
 
             oofeg_add_popdown_menu("< Plot Algorithm >", varplot_palette, & plotalgo_palette);
             {
-                oofeg_add_menu_item( "ISO_SURF_PLOT", "IsoSurf Plot", plotalgo_palette, plotAlgosel, ( XtPointer ) ( vectorAddr + 0 ) );
-                oofeg_add_menu_item( "ISO_LINE_PLOT", "IsoLine Plot", plotalgo_palette, plotAlgosel, ( XtPointer ) ( vectorAddr + 1 ) );
-                oofeg_add_menu_item( "ISO_LANDPROFILE", "Z-Profile Plot", plotalgo_palette, plotAlgosel, ( XtPointer ) ( vectorAddr + 2 ) );
+                oofeg_add_menu_item( "ISO_SURF_PLOT", "IsoSurf Plot", plotalgo_palette, plotAlgosel, ( XtPointer )(vectorAddr + 0) );
+                oofeg_add_menu_item( "ISO_LINE_PLOT", "IsoLine Plot", plotalgo_palette, plotAlgosel, ( XtPointer )(vectorAddr + 1) );
+                oofeg_add_menu_item( "ISO_LANDPROFILE", "Z-Profile Plot", plotalgo_palette, plotAlgosel, ( XtPointer )(vectorAddr + 2) );
                 oofeg_add_menu_item( "ISO_LANDCOLORPROFILE", "Z-ColorProfile Plot", plotalgo_palette,
-                                    plotAlgosel, ( XtPointer ) ( vectorAddr + 3 ) );
+                                    plotAlgosel, ( XtPointer )(vectorAddr + 3) );
             }
 
             oofeg_add_palette("< Scalar plot >", varplot_palette, & scalarplot_palette);
@@ -715,113 +723,125 @@ void ESICustomize(Widget parent_pane)
                 oofeg_add_button("CYLINDRICAL_CS_FLAG", "Cylindrical cs", toggleWidgetClass, scalarplot_palette, NULL, NULL);
                 oofeg_add_popdown_menu("< Stress/Force plot >", scalarplot_palette, & stressForce_palette);
                 {
-                    oofeg_add_menu_item( "SX_PLOT", "Sxx Stress/Force Plot", stressForce_palette, stresscompPlot, ( XtPointer ) ( vectorAddr + 0 ) );
-                    oofeg_add_menu_item( "SY_PLOT", "Syy Stress/Force Plot", stressForce_palette, stresscompPlot, ( XtPointer ) ( vectorAddr + 1 ) );
-                    oofeg_add_menu_item( "SZ_PLOT", "Szz Stress/Force Plot", stressForce_palette, stresscompPlot, ( XtPointer ) ( vectorAddr + 2 ) );
-                    oofeg_add_menu_item( "SYZ_PLOT", "Syz Stress/Force Plot", stressForce_palette, stresscompPlot, ( XtPointer ) ( vectorAddr + 3 ) );
-                    oofeg_add_menu_item( "SZX_PLOT", "Szx Stress/Force Plot", stressForce_palette, stresscompPlot, ( XtPointer ) ( vectorAddr + 4 ) );
-                    oofeg_add_menu_item( "SXY_PLOT", "Sxy Stress/Force Plot", stressForce_palette, stresscompPlot, ( XtPointer ) ( vectorAddr + 5 ) );
+                    oofeg_add_menu_item( "SX_PLOT", "Sxx Stress/Force Plot", stressForce_palette, stresscompPlot, ( XtPointer )(vectorAddr + 0) );
+                    oofeg_add_menu_item( "SY_PLOT", "Syy Stress/Force Plot", stressForce_palette, stresscompPlot, ( XtPointer )(vectorAddr + 1) );
+                    oofeg_add_menu_item( "SZ_PLOT", "Szz Stress/Force Plot", stressForce_palette, stresscompPlot, ( XtPointer )(vectorAddr + 2) );
+                    oofeg_add_menu_item( "SYZ_PLOT", "Syz Stress/Force Plot", stressForce_palette, stresscompPlot, ( XtPointer )(vectorAddr + 3) );
+                    oofeg_add_menu_item( "SZX_PLOT", "Szx Stress/Force Plot", stressForce_palette, stresscompPlot, ( XtPointer )(vectorAddr + 4) );
+                    oofeg_add_menu_item( "SXY_PLOT", "Sxy Stress/Force Plot", stressForce_palette, stresscompPlot, ( XtPointer )(vectorAddr + 5) );
                     oofeg_add_menu_item("SEPARATOR", "--------------------", stressForce_palette, emptyaction, NULL);
                     oofeg_add_menu_item( "S11_PLOT", "S11 Stress/Force Plot", stressForce_palette,
-                                        princstresscompPlot, ( XtPointer ) ( vectorAddr + 0 ) );
+                                        princstresscompPlot, ( XtPointer )(vectorAddr + 0) );
                     oofeg_add_menu_item( "S22_PLOT", "S22 Stress/Force Plot", stressForce_palette,
-                                        princstresscompPlot, ( XtPointer ) ( vectorAddr + 1 ) );
+                                        princstresscompPlot, ( XtPointer )(vectorAddr + 1) );
                     oofeg_add_menu_item( "S33_PLOT", "S33 Stress/Force Plot", stressForce_palette,
-                                        princstresscompPlot, ( XtPointer ) ( vectorAddr + 2 ) );
+                                        princstresscompPlot, ( XtPointer )(vectorAddr + 2) );
                 }
                 oofeg_add_popdown_menu("< Strain plot >", scalarplot_palette, & scalarstrain_palette);
                 {
-                    oofeg_add_menu_item( "SX_PLOT", "Eps_x ", scalarstrain_palette, straincompPlot, ( XtPointer ) ( vectorAddr + 0 ) );
-                    oofeg_add_menu_item( "SY_PLOT", "Eps_y", scalarstrain_palette, straincompPlot, ( XtPointer ) ( vectorAddr + 1 ) );
-                    oofeg_add_menu_item( "SZ_PLOT", "Eps_z", scalarstrain_palette, straincompPlot, ( XtPointer ) ( vectorAddr + 2 ) );
-                    oofeg_add_menu_item( "SYZ_PLOT", "Gam_yz", scalarstrain_palette, straincompPlot, ( XtPointer ) ( vectorAddr + 3 ) );
-                    oofeg_add_menu_item( "SZX_PLOT", "Gam_xz", scalarstrain_palette, straincompPlot, ( XtPointer ) ( vectorAddr + 4 ) );
-                    oofeg_add_menu_item( "SXY_PLOT", "Gam_xy", scalarstrain_palette, straincompPlot, ( XtPointer ) ( vectorAddr + 5 ) );
+                    oofeg_add_menu_item( "SX_PLOT", "Eps_x ", scalarstrain_palette, straincompPlot, ( XtPointer )(vectorAddr + 0) );
+                    oofeg_add_menu_item( "SY_PLOT", "Eps_y", scalarstrain_palette, straincompPlot, ( XtPointer )(vectorAddr + 1) );
+                    oofeg_add_menu_item( "SZ_PLOT", "Eps_z", scalarstrain_palette, straincompPlot, ( XtPointer )(vectorAddr + 2) );
+                    oofeg_add_menu_item( "SYZ_PLOT", "Gam_yz", scalarstrain_palette, straincompPlot, ( XtPointer )(vectorAddr + 3) );
+                    oofeg_add_menu_item( "SZX_PLOT", "Gam_xz", scalarstrain_palette, straincompPlot, ( XtPointer )(vectorAddr + 4) );
+                    oofeg_add_menu_item( "SXY_PLOT", "Gam_xy", scalarstrain_palette, straincompPlot, ( XtPointer )(vectorAddr + 5) );
                     oofeg_add_menu_item("SEPARATOR", "--------------------", scalarstrain_palette, emptyaction, NULL);
-                    oofeg_add_menu_item( "E11_PLOT", "Eps_11 ", scalarstrain_palette, princstraincompPlot, ( XtPointer ) ( vectorAddr + 0 ) );
-                    oofeg_add_menu_item( "E22_PLOT", "Eps_22", scalarstrain_palette, princstraincompPlot, ( XtPointer ) ( vectorAddr + 1 ) );
-                    oofeg_add_menu_item( "E33_PLOT", "Eps_33", scalarstrain_palette, princstraincompPlot, ( XtPointer ) ( vectorAddr + 2 ) );
+                    oofeg_add_menu_item( "E11_PLOT", "Eps_11 ", scalarstrain_palette, princstraincompPlot, ( XtPointer )(vectorAddr + 0) );
+                    oofeg_add_menu_item( "E22_PLOT", "Eps_22", scalarstrain_palette, princstraincompPlot, ( XtPointer )(vectorAddr + 1) );
+                    oofeg_add_menu_item( "E33_PLOT", "Eps_33", scalarstrain_palette, princstraincompPlot, ( XtPointer )(vectorAddr + 2) );
                     oofeg_add_menu_item("SEPARATOR", "--------------------", scalarstrain_palette, emptyaction, NULL);
-                    oofeg_add_menu_item( "EES_PLOT", "Equiv_Strain", scalarstrain_palette, equivstraincompPlot, ( XtPointer ) ( vectorAddr + 0 ) );
+                    oofeg_add_menu_item( "EES_PLOT", "Equiv_Strain", scalarstrain_palette, equivstraincompPlot, ( XtPointer )(vectorAddr + 0) );
                 }
 
                 oofeg_add_popdown_menu("< Plastic strain plot >", scalarplot_palette, & scalarplasticstrain_palette);
                 {
-                    oofeg_add_menu_item( "SX_PLOT", "Eps_x ", scalarplasticstrain_palette, plaststraincompPlot, ( XtPointer ) ( vectorAddr + 0 ) );
-                    oofeg_add_menu_item( "SY_PLOT", "Eps_y", scalarplasticstrain_palette, plaststraincompPlot, ( XtPointer ) ( vectorAddr + 1 ) );
-                    oofeg_add_menu_item( "SZ_PLOT", "Eps_z", scalarplasticstrain_palette, plaststraincompPlot, ( XtPointer ) ( vectorAddr + 2 ) );
-                    oofeg_add_menu_item( "SYZ_PLOT", "Gam_yz", scalarplasticstrain_palette, plaststraincompPlot, ( XtPointer ) ( vectorAddr + 3 ) );
-                    oofeg_add_menu_item( "SZX_PLOT", "Gam_xz", scalarplasticstrain_palette, plaststraincompPlot, ( XtPointer ) ( vectorAddr + 4 ) );
-                    oofeg_add_menu_item( "SXY_PLOT", "Gam_xy", scalarplasticstrain_palette, plaststraincompPlot, ( XtPointer ) ( vectorAddr + 5 ) );
+                    oofeg_add_menu_item( "SX_PLOT", "Eps_x ", scalarplasticstrain_palette, plaststraincompPlot, ( XtPointer )(vectorAddr + 0) );
+                    oofeg_add_menu_item( "SY_PLOT", "Eps_y", scalarplasticstrain_palette, plaststraincompPlot, ( XtPointer )(vectorAddr + 1) );
+                    oofeg_add_menu_item( "SZ_PLOT", "Eps_z", scalarplasticstrain_palette, plaststraincompPlot, ( XtPointer )(vectorAddr + 2) );
+                    oofeg_add_menu_item( "SYZ_PLOT", "Gam_yz", scalarplasticstrain_palette, plaststraincompPlot, ( XtPointer )(vectorAddr + 3) );
+                    oofeg_add_menu_item( "SZX_PLOT", "Gam_xz", scalarplasticstrain_palette, plaststraincompPlot, ( XtPointer )(vectorAddr + 4) );
+                    oofeg_add_menu_item( "SXY_PLOT", "Gam_xy", scalarplasticstrain_palette, plaststraincompPlot, ( XtPointer )(vectorAddr + 5) );
                     oofeg_add_menu_item("SEPARATOR", "--------------------", scalarplasticstrain_palette, emptyaction, NULL);
                     oofeg_add_menu_item( "E11_PLOT", "Eps_11 ", scalarplasticstrain_palette,
-                                        princplaststraincompPlot, ( XtPointer ) ( vectorAddr + 0 ) );
+                                        princplaststraincompPlot, ( XtPointer )(vectorAddr + 0) );
                     oofeg_add_menu_item( "E22_PLOT", "Eps_22", scalarplasticstrain_palette,
-                                        princplaststraincompPlot, ( XtPointer ) ( vectorAddr + 1 ) );
+                                        princplaststraincompPlot, ( XtPointer )(vectorAddr + 1) );
                     oofeg_add_menu_item( "E33_PLOT", "Eps_33", scalarplasticstrain_palette,
-                                        princplaststraincompPlot, ( XtPointer ) ( vectorAddr + 2 ) );
+                                        princplaststraincompPlot, ( XtPointer )(vectorAddr + 2) );
                 }
 
                 oofeg_add_popdown_menu("< Beam Forces/Moments>", scalarplot_palette, & bendingMoment_palette);
                 {
-                    oofeg_add_menu_item( "NX_PLOT", "Nx Plot", bendingMoment_palette, beamForcePlot, ( XtPointer ) ( vectorAddr + 0 ) );
-                    oofeg_add_menu_item( "NY_PLOT", "Ny Plot", bendingMoment_palette, beamForcePlot, ( XtPointer ) ( vectorAddr + 1 ) );
-                    oofeg_add_menu_item( "NZ_PLOT", "Nz Plot", bendingMoment_palette, beamForcePlot, ( XtPointer ) ( vectorAddr + 2 ) );
-                    oofeg_add_menu_item( "VYZ_PLOT", "Vyz Plot", bendingMoment_palette, beamForcePlot, ( XtPointer ) ( vectorAddr + 3 ) );
-                    oofeg_add_menu_item( "VXZ_PLOT", "Vxz Plot", bendingMoment_palette, beamForcePlot, ( XtPointer ) ( vectorAddr + 4 ) );
-                    oofeg_add_menu_item( "VXY_PLOT", "Vxy Plot", bendingMoment_palette, beamForcePlot, ( XtPointer ) ( vectorAddr + 5 ) );
+                    oofeg_add_menu_item( "NX_PLOT", "Nx Plot", bendingMoment_palette, beamForcePlot, ( XtPointer )(vectorAddr + 0) );
+                    oofeg_add_menu_item( "NY_PLOT", "Ny Plot", bendingMoment_palette, beamForcePlot, ( XtPointer )(vectorAddr + 1) );
+                    oofeg_add_menu_item( "NZ_PLOT", "Nz Plot", bendingMoment_palette, beamForcePlot, ( XtPointer )(vectorAddr + 2) );
+                    oofeg_add_menu_item( "VYZ_PLOT", "Vyz Plot", bendingMoment_palette, beamForcePlot, ( XtPointer )(vectorAddr + 3) );
+                    oofeg_add_menu_item( "VXZ_PLOT", "Vxz Plot", bendingMoment_palette, beamForcePlot, ( XtPointer )(vectorAddr + 4) );
+                    oofeg_add_menu_item( "VXY_PLOT", "Vxy Plot", bendingMoment_palette, beamForcePlot, ( XtPointer )(vectorAddr + 5) );
 
 
-                    oofeg_add_menu_item( "MX_PLOT", "Mx Plot", bendingMoment_palette, beamForcePlot, ( XtPointer ) ( vectorAddr + 6 ) );
-                    oofeg_add_menu_item( "MY_PLOT", "My Plot", bendingMoment_palette, beamForcePlot, ( XtPointer ) ( vectorAddr + 7 ) );
-                    oofeg_add_menu_item( "MZ_PLOT", "Mz Plot", bendingMoment_palette, beamForcePlot, ( XtPointer ) ( vectorAddr + 8 ) );
-                    oofeg_add_menu_item( "MYZ_PLOT", "Myz Plot", bendingMoment_palette, beamForcePlot, ( XtPointer ) ( vectorAddr + 9 ) );
-                    oofeg_add_menu_item( "MXZ_PLOT", "Mxz Plot", bendingMoment_palette, beamForcePlot, ( XtPointer ) ( vectorAddr + 10 ) );
-                    oofeg_add_menu_item( "MXY_PLOT", "Mxy Plot", bendingMoment_palette, beamForcePlot, ( XtPointer ) ( vectorAddr + 11 ) );
+                    oofeg_add_menu_item( "MX_PLOT", "Mx Plot", bendingMoment_palette, beamForcePlot, ( XtPointer )(vectorAddr + 6) );
+                    oofeg_add_menu_item( "MY_PLOT", "My Plot", bendingMoment_palette, beamForcePlot, ( XtPointer )(vectorAddr + 7) );
+                    oofeg_add_menu_item( "MZ_PLOT", "Mz Plot", bendingMoment_palette, beamForcePlot, ( XtPointer )(vectorAddr + 8) );
+                    oofeg_add_menu_item( "MYZ_PLOT", "Myz Plot", bendingMoment_palette, beamForcePlot, ( XtPointer )(vectorAddr + 9) );
+                    oofeg_add_menu_item( "MXZ_PLOT", "Mxz Plot", bendingMoment_palette, beamForcePlot, ( XtPointer )(vectorAddr + 10) );
+                    oofeg_add_menu_item( "MXY_PLOT", "Mxy Plot", bendingMoment_palette, beamForcePlot, ( XtPointer )(vectorAddr + 11) );
                 }
 
                 oofeg_add_popdown_menu("< Plot Damage >", scalarplot_palette, & scalardamage_palette);
                 {
-                    oofeg_add_menu_item( "DX_PLOT", "D_x ", scalardamage_palette, damagecompPlot, ( XtPointer ) ( vectorAddr + 0 ) );
-                    oofeg_add_menu_item( "DY_PLOT", "D_y", scalardamage_palette, damagecompPlot, ( XtPointer ) ( vectorAddr + 1 ) );
-                    oofeg_add_menu_item( "DZ_PLOT", "D_z", scalardamage_palette, damagecompPlot, ( XtPointer ) ( vectorAddr + 2 ) );
-                    oofeg_add_menu_item( "DYZ_PLOT", "D_yz", scalardamage_palette, damagecompPlot, ( XtPointer ) ( vectorAddr + 3 ) );
-                    oofeg_add_menu_item( "DZX_PLOT", "D_zz", scalardamage_palette, damagecompPlot, ( XtPointer ) ( vectorAddr + 4 ) );
-                    oofeg_add_menu_item( "DXY_PLOT", "D_xy", scalardamage_palette, damagecompPlot, ( XtPointer ) ( vectorAddr + 5 ) );
+                    oofeg_add_menu_item( "DX_PLOT", "D_x ", scalardamage_palette, damagecompPlot, ( XtPointer )(vectorAddr + 0) );
+                    oofeg_add_menu_item( "DY_PLOT", "D_y", scalardamage_palette, damagecompPlot, ( XtPointer )(vectorAddr + 1) );
+                    oofeg_add_menu_item( "DZ_PLOT", "D_z", scalardamage_palette, damagecompPlot, ( XtPointer )(vectorAddr + 2) );
+                    oofeg_add_menu_item( "DYZ_PLOT", "D_yz", scalardamage_palette, damagecompPlot, ( XtPointer )(vectorAddr + 3) );
+                    oofeg_add_menu_item( "DZX_PLOT", "D_zz", scalardamage_palette, damagecompPlot, ( XtPointer )(vectorAddr + 4) );
+                    oofeg_add_menu_item( "DXY_PLOT", "D_xy", scalardamage_palette, damagecompPlot, ( XtPointer )(vectorAddr + 5) );
                     oofeg_add_menu_item("SEPARATOR", "--------------------", scalardamage_palette, emptyaction, NULL);
-                    oofeg_add_menu_item( "D11_PLOT", "D_11 ", scalardamage_palette, princdamagecompPlot, ( XtPointer ) ( vectorAddr + 0 ) );
-                    oofeg_add_menu_item( "D22_PLOT", "D_22", scalardamage_palette, princdamagecompPlot, ( XtPointer ) ( vectorAddr + 1 ) );
-                    oofeg_add_menu_item( "D33_PLOT", "D_33", scalardamage_palette, princdamagecompPlot, ( XtPointer ) ( vectorAddr + 2 ) );
+                    oofeg_add_menu_item( "D11_PLOT", "D_11 ", scalardamage_palette, princdamagecompPlot, ( XtPointer )(vectorAddr + 0) );
+                    oofeg_add_menu_item( "D22_PLOT", "D_22", scalardamage_palette, princdamagecompPlot, ( XtPointer )(vectorAddr + 1) );
+                    oofeg_add_menu_item( "D33_PLOT", "D_33", scalardamage_palette, princdamagecompPlot, ( XtPointer )(vectorAddr + 2) );
                 }
 
+                //mj
+                oofeg_add_popdown_menu("< Internal Vars >", scalarplot_palette, & scalardamage_palette);
+                {
+                    oofeg_add_menu_item( "EQUIV_STRAIN", "eps_eq ", scalardamage_palette, epseqcompPlot, ( XtPointer )(vectorAddr + 0) );
+                    oofeg_add_menu_item( "CUM_PLAST_STRAIN", "kappa ", scalardamage_palette, kappacompPlot, ( XtPointer )(vectorAddr + 0) );
+                    oofeg_add_menu_item( "CUM_PLAST_STRAIN_2", "kappa_nl ", scalardamage_palette, kappa2compPlot, ( XtPointer )(vectorAddr + 0) );
+                    oofeg_add_menu_item( "DISS_WORK", "diss_work ", scalardamage_palette, dissworkcompPlot, ( XtPointer )(vectorAddr + 0) );
+                    oofeg_add_menu_item( "STRESS_WORK", "stress_work ", scalardamage_palette, stressworkcompPlot, ( XtPointer )(vectorAddr + 0) );
+                    oofeg_add_menu_item( "FREE_ENERGY", "free_energy ", scalardamage_palette, freeenergycompPlot, ( XtPointer )(vectorAddr + 0) );
+                }
+                //emj
+
                 oofeg_add_button( "TEMPERATURE_PLOT", "Temperature field", commandWidgetClass, scalarplot_palette,
-                                 varPlot, ( XtPointer ) ( oofeg_draw_modes + 17 ) );
+                                 varPlot, ( XtPointer )(oofeg_draw_modes + 17) );
 
                 oofeg_add_button( "CONCENTRATION1_PLOT", "MassConcentration(1)", commandWidgetClass, scalarplot_palette,
-                                 varPlot, ( XtPointer ) ( oofeg_draw_modes + 18 ) );
+                                 varPlot, ( XtPointer )(oofeg_draw_modes + 18) );
 
                 oofeg_add_button( "PRESSURE_PLOT", "Pressure", commandWidgetClass, scalarplot_palette,
-                                 varPlot, ( XtPointer ) ( oofeg_draw_modes + 20 ) );
+                                 varPlot, ( XtPointer )(oofeg_draw_modes + 20) );
 
                 oofeg_add_button( "VOF_PLOT", "VOF Fraction", commandWidgetClass, scalarplot_palette,
-                                 varPlot, ( XtPointer ) ( oofeg_draw_modes + 21 ) );
+                                 varPlot, ( XtPointer )(oofeg_draw_modes + 21) );
 
                 oofeg_add_button( "DENSITY_PLOT", "Density", commandWidgetClass, scalarplot_palette,
-                                 varPlot, ( XtPointer ) ( oofeg_draw_modes + 22 ) );
+                                 varPlot, ( XtPointer )(oofeg_draw_modes + 22) );
 
 
                 oofeg_add_popdown_menu("< Error plot >", scalarplot_palette, & scalarerror_palette);
                 {
                     oofeg_add_menu_item( "Error_Indicator", "Error Indicator ", scalarerror_palette,
-                                        errorcompPlot, ( XtPointer ) ( vectorAddr + 0 ) );
+                                        errorcompPlot, ( XtPointer )(vectorAddr + 0) );
                     oofeg_add_menu_item( "ERROR_STRESSINTERRIOR", "Stress Error", scalarerror_palette,
-                                        errorcompPlot, ( XtPointer ) ( vectorAddr + 1 ) );
+                                        errorcompPlot, ( XtPointer )(vectorAddr + 1) );
                     oofeg_add_menu_item( "ERROR_PRIMARYUNKNOWN", "Unknown Error", scalarerror_palette,
-                                        errorcompPlot, ( XtPointer ) ( vectorAddr + 2 ) );
+                                        errorcompPlot, ( XtPointer )(vectorAddr + 2) );
                 }
 
                 oofeg_add_button( "MESHDENS_PLOT", "RelMesh Density", commandWidgetClass, scalarplot_palette,
-                                 varPlot, ( XtPointer ) ( oofeg_draw_modes + 16 ) );
+                                 varPlot, ( XtPointer )(oofeg_draw_modes + 16) );
 
                 oofeg_add_dialog(NULL, "Set ZProfScale", "Input z-Profile Scale (0 <= scale < MAX_Scale)", "0.0", scalarplot_palette,
                                  apply_change, "SET_ZPROF_SCALE", ESIDialogValueNumber, NULL);
@@ -829,28 +849,28 @@ void ESICustomize(Widget parent_pane)
 
             oofeg_add_palette("< Vector plot >", varplot_palette, & vectorplot_palette);
             oofeg_add_button( "VELOCITY_PLOT", "Velocity", commandWidgetClass, vectorplot_palette,
-                             varPlot, ( XtPointer ) ( oofeg_draw_modes + 19 ) );
+                             varPlot, ( XtPointer )(oofeg_draw_modes + 19) );
 
             oofeg_add_palette("< Tensor plot >", varplot_palette, & tensorplot_palette);
 
 
             oofeg_add_button( "YIELD_PLOT", "Plot YieldedElems",
-                             commandWidgetClass, varplot_palette, varPlot, ( XtPointer ) ( oofeg_draw_modes + 12 ) );
+                             commandWidgetClass, varplot_palette, varPlot, ( XtPointer )(oofeg_draw_modes + 12) );
 
             oofeg_add_button( "CRACK_PLOT", "Plot CrackPattern",
-                             commandWidgetClass, varplot_palette, varPlot, ( XtPointer ) ( oofeg_draw_modes + 13 ) );
+                             commandWidgetClass, varplot_palette, varPlot, ( XtPointer )(oofeg_draw_modes + 13) );
         }
 
         oofeg_add_palette("< Set smoother >", varplot_palette, & smoother_palette);
         {
             oofeg_add_button( "NodalAveraging", "NodalAveraging Smoother",
-                             commandWidgetClass, smoother_palette, setSmoother, ( XtPointer ) ( oofeg_smoother_modes + 0 ) );
+                             commandWidgetClass, smoother_palette, setSmoother, ( XtPointer )(oofeg_smoother_modes + 0) );
 
             oofeg_add_button( "ZieZhu", "ZZ Smoother",
-                             commandWidgetClass, smoother_palette, setSmoother, ( XtPointer ) ( oofeg_smoother_modes + 1 ) );
+                             commandWidgetClass, smoother_palette, setSmoother, ( XtPointer )(oofeg_smoother_modes + 1) );
 
             oofeg_add_button( "SPR", "SPR Smoother",
-                             commandWidgetClass, smoother_palette, setSmoother, ( XtPointer ) ( oofeg_smoother_modes + 2 ) );
+                             commandWidgetClass, smoother_palette, setSmoother, ( XtPointer )(oofeg_smoother_modes + 2) );
         }
     }
 
@@ -1416,6 +1436,85 @@ void princplaststraincompPlot(Widget w, XtPointer ptr, XtPointer call_data)
     }
 }
 
+//mj
+void epseqcompPlot(Widget w, XtPointer ptr, XtPointer call_data)
+{
+    updateDefPlotFlag();
+    gc [ OOFEG_VARPLOT_PATTERN_LAYER ].setInternalStateType(IST_MaxEquivalentStrainLevel);
+    gc [ OOFEG_VARPLOT_PATTERN_LAYER ].setIntVarIndx(1);
+    gc [ OOFEG_VARPLOT_PATTERN_LAYER ].setPlotMode(OGC_scalarPlot);
+
+    setupData(gc [ OOFEG_VARPLOT_PATTERN_LAYER ]);
+    if ( gc [ OOFEG_VARPLOT_PATTERN_LAYER ].getActiveStep() != -1 ) {
+        drawData(gc [ OOFEG_VARPLOT_PATTERN_LAYER ]);
+    }
+}
+
+void kappacompPlot(Widget w, XtPointer ptr, XtPointer call_data)
+{
+    updateDefPlotFlag();
+    gc [ OOFEG_VARPLOT_PATTERN_LAYER ].setInternalStateType(IST_CumPlasticStrain);
+    gc [ OOFEG_VARPLOT_PATTERN_LAYER ].setIntVarIndx(1);
+    gc [ OOFEG_VARPLOT_PATTERN_LAYER ].setPlotMode(OGC_scalarPlot);
+
+    setupData(gc [ OOFEG_VARPLOT_PATTERN_LAYER ]);
+    if ( gc [ OOFEG_VARPLOT_PATTERN_LAYER ].getActiveStep() != -1 ) {
+        drawData(gc [ OOFEG_VARPLOT_PATTERN_LAYER ]);
+    }
+}
+
+void kappa2compPlot(Widget w, XtPointer ptr, XtPointer call_data)
+{
+    updateDefPlotFlag();
+    gc [ OOFEG_VARPLOT_PATTERN_LAYER ].setInternalStateType(IST_CumPlasticStrain_2);
+    gc [ OOFEG_VARPLOT_PATTERN_LAYER ].setIntVarIndx(1);
+    gc [ OOFEG_VARPLOT_PATTERN_LAYER ].setPlotMode(OGC_scalarPlot);
+
+    setupData(gc [ OOFEG_VARPLOT_PATTERN_LAYER ]);
+    if ( gc [ OOFEG_VARPLOT_PATTERN_LAYER ].getActiveStep() != -1 ) {
+        drawData(gc [ OOFEG_VARPLOT_PATTERN_LAYER ]);
+    }
+}
+
+void dissworkcompPlot(Widget w, XtPointer ptr, XtPointer call_data)
+{
+    updateDefPlotFlag();
+    gc [ OOFEG_VARPLOT_PATTERN_LAYER ].setInternalStateType(IST_DissWorkDensity);
+    gc [ OOFEG_VARPLOT_PATTERN_LAYER ].setIntVarIndx(1);
+    gc [ OOFEG_VARPLOT_PATTERN_LAYER ].setPlotMode(OGC_scalarPlot);
+
+    setupData(gc [ OOFEG_VARPLOT_PATTERN_LAYER ]);
+    if ( gc [ OOFEG_VARPLOT_PATTERN_LAYER ].getActiveStep() != -1 ) {
+        drawData(gc [ OOFEG_VARPLOT_PATTERN_LAYER ]);
+    }
+}
+
+void stressworkcompPlot(Widget w, XtPointer ptr, XtPointer call_data)
+{
+    updateDefPlotFlag();
+    gc [ OOFEG_VARPLOT_PATTERN_LAYER ].setInternalStateType(IST_StressWorkDensity);
+    gc [ OOFEG_VARPLOT_PATTERN_LAYER ].setIntVarIndx(1);
+    gc [ OOFEG_VARPLOT_PATTERN_LAYER ].setPlotMode(OGC_scalarPlot);
+
+    setupData(gc [ OOFEG_VARPLOT_PATTERN_LAYER ]);
+    if ( gc [ OOFEG_VARPLOT_PATTERN_LAYER ].getActiveStep() != -1 ) {
+        drawData(gc [ OOFEG_VARPLOT_PATTERN_LAYER ]);
+    }
+}
+
+void freeenergycompPlot(Widget w, XtPointer ptr, XtPointer call_data)
+{
+    updateDefPlotFlag();
+    gc [ OOFEG_VARPLOT_PATTERN_LAYER ].setInternalStateType(IST_FreeEnergyDensity);
+    gc [ OOFEG_VARPLOT_PATTERN_LAYER ].setIntVarIndx(1);
+    gc [ OOFEG_VARPLOT_PATTERN_LAYER ].setPlotMode(OGC_scalarPlot);
+
+    setupData(gc [ OOFEG_VARPLOT_PATTERN_LAYER ]);
+    if ( gc [ OOFEG_VARPLOT_PATTERN_LAYER ].getActiveStep() != -1 ) {
+        drawData(gc [ OOFEG_VARPLOT_PATTERN_LAYER ]);
+    }
+}
+//emj
 
 void damagecompPlot(Widget w, XtPointer ptr, XtPointer call_data)
 {
@@ -1700,9 +1799,10 @@ void setSmoother(SmootherType mode)
         } else if ( mode == Smoother_SPR ) {
             gc [ 0 ].getActiveProblem()->giveDomain(id)->setSmoother( new SPRNodalRecoveryModel( gc [ 0 ].getActiveProblem()->giveDomain(id) ) );
         } else {
-	  OOFEM_ERROR ("Unrecognized nodal recovery model");
-	}
-	gc [ 0 ].getActiveProblem()->giveDomain(id)->giveSmoother()->setRecoveryMode (-1, IntArray());
+            OOFEM_ERROR("Unrecognized nodal recovery model");
+        }
+
+        gc [ 0 ].getActiveProblem()->giveDomain(id)->giveSmoother()->setRecoveryMode( -1, IntArray() );
     }
 
     gc [ 0 ].setSmootherType(mode);
@@ -1999,7 +2099,7 @@ pass_setscale_command(Widget w, XtPointer ptr, XtPointer call_data)
     int ac;
     Arg al [ 2 ];
     char *s;
-    double delta, max, min;
+    double max, min;
 
     ac = 0;
     XtSetArg(al [ ac ], XtNstring, & s);
@@ -2031,7 +2131,7 @@ pass_setscale_command(Widget w, XtPointer ptr, XtPointer call_data)
     // problem->giveConnectivityTable()->giveMinMaxVal(gc,&min,&max);
 
 #if 0
-#define COLOR_SCALE_NUM_LABELS 11
+ #define COLOR_SCALE_NUM_LABELS 11
     delta = ( max - min ) / ( COLOR_SCALE_NUM_LABELS - 2 );
     max += delta;
     min -= delta;
@@ -2444,7 +2544,7 @@ oofeg_open_frame(Widget w, XtPointer ptr, XtPointer call_data)
 void
 oofeg_close_frame(Widget w, XtPointer ptr, XtPointer call_data)
 {
-    EVSetApplyToViewFunction( ( void ( * )(EView *, caddr_t, WCRec *) )oofeg_destroy_frame, NULL, NULL );
+    EVSetApplyToViewFunction( ( void(*) (EView *, caddr_t, WCRec *) )oofeg_destroy_frame, NULL, NULL );
     EVSetApplyToViewPreventRedisplay(YES);
     EMPushHandler(ESIModel(), EVApplyToViewHandler, NULL);
 }

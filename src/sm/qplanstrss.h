@@ -43,10 +43,11 @@
 #include "structuralelement.h"
 #include "fei2dquadquad.h"
 #include "zznodalrecoverymodel.h"
+#include "nodalaveragingrecoverymodel.h"
 #include "mathfem.h"
 
 namespace oofem {
-class QPlaneStress2d : public StructuralElement, public ZZNodalRecoveryModelInterface
+class QPlaneStress2d : public StructuralElement, public ZZNodalRecoveryModelInterface, public NodalAveragingRecoveryModelInterface
 {
     /*
      * This class implements an Quadratic isoparametric eight-node quadrilateral plane-
@@ -80,7 +81,7 @@ public:
     const char *giveClassName() const { return "QPlaneStress2d"; }
     classType        giveClassID()   const { return QPlaneStress2dClass; }
     Element_Geometry_Type giveGeometryType() const { return EGT_quad_2; }
-    FEInterpolation *giveInterpolation() { return & interpolation; } 
+    FEInterpolation *giveInterpolation() { return & interpolation; }
     IRResultType initializeFrom(InputRecord *ir);
 
     virtual int testElementExtension(ElementExtension ext) { return 0; }
@@ -104,6 +105,14 @@ public:
     //@{
     Element *ZZNodalRecoveryMI_giveElement() { return this; }
     //@}
+    int ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type);
+    void ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatMatrix &answer, GaussPoint *aGaussPoint, InternalStateType type);
+    void NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node,
+                                                    InternalStateType type, TimeStep *tStep);
+    void NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side,
+                                                   InternalStateType type, TimeStep *tStep);
+    virtual int NodalAveragingRecoveryMI_giveDofManRecordSize(InternalStateType type)
+    { return ZZNodalRecoveryMI_giveDofManRecordSize(type); }
 
 #ifdef __OOFEG
     void          drawRawGeometry(oofegGraphicContext &);

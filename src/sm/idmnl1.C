@@ -158,6 +158,10 @@ IDNLMaterial :: modifyNonlocalWeightFunctionAround(GaussPoint *gp)
         x = coords.at(1);
         nonlocStatus = ( IDNLMaterialStatus * ) this->giveStatus( ( * pos ).nearGp );
         damage = nonlocStatus->giveTempDamage();
+        if ( damage == 0. ) {
+            damage = nonlocStatus->giveDamage();
+        }
+
         if ( pos != postarget ) {
             distance += ( x - xprev ) * 0.5 * ( computeDistanceModifier(damage) + computeDistanceModifier(damageprev) );
         }
@@ -177,6 +181,10 @@ IDNLMaterial :: modifyNonlocalWeightFunctionAround(GaussPoint *gp)
         x = coords.at(1);
         nonlocStatus = ( IDNLMaterialStatus * ) this->giveStatus( ( * pos ).nearGp );
         damage = nonlocStatus->giveTempDamage();
+        if ( damage == 0. ) {
+            damage = nonlocStatus->giveDamage();
+        }
+
         if ( pos != postarget ) {
             distance += ( xprev - x ) * 0.5 * ( computeDistanceModifier(damage) + computeDistanceModifier(damageprev) );
             w = computeWeightFunction(distance) * nearElem->computeVolumeAround( ( * pos ).nearGp );
@@ -196,6 +204,10 @@ IDNLMaterial :: modifyNonlocalWeightFunctionAround(GaussPoint *gp)
         x = coords.at(1);
         nonlocStatus = ( IDNLMaterialStatus * ) this->giveStatus( ( * pos ).nearGp );
         damage = nonlocStatus->giveTempDamage();
+        if ( damage == 0. ) {
+            damage = nonlocStatus->giveDamage();
+        }
+
         n = ( ( * pos ).nearGp )->giveElement()->giveNumber();
         distance += ( xprev - x ) * 0.5 * ( computeDistanceModifier(damage) + computeDistanceModifier(damageprev) );
         w = computeWeightFunction(distance) * nearElem->computeVolumeAround( ( * pos ).nearGp );
@@ -204,6 +216,40 @@ IDNLMaterial :: modifyNonlocalWeightFunctionAround(GaussPoint *gp)
     }
 
     status->setIntegrationScale(wsum);
+
+    // print it
+    /*
+     * if (fabs(fabs(xtarget)-0.049835)<1e-6 ||
+     *  fabs(fabs(xtarget)-0.039934)<1e-6 ||
+     *  fabs(fabs(xtarget)-0.030033)<1e-6 ||0.0250825
+     *  fabs(fabs(xtarget)-0.020132)<1e-6 ||
+     *  fabs(fabs(xtarget)-0.009901)<1e-6 ||
+     *  fabs(fabs(xtarget)-0.00)<1e-6)
+     */
+    /*
+     * if (fabs(fabs(xtarget)-0.049835)<1e-6 ||
+     *  fabs(fabs(xtarget)-0.030033)<1e-6 ||
+     *  fabs(fabs(xtarget)-0.009901)<1e-6 ||
+     *  fabs(fabs(xtarget)-0.00)<1e-6)
+     * {
+     *
+     * for ( pos = list->begin(); pos != list->end(); ++pos ) {
+     * nearElem = ((*pos).nearGp)->giveElement();
+     * nearElem->computeGlobalCoordinates (coords, *(((*pos).nearGp)->giveCoordinates()));
+     * x = coords.at(1);
+     * w = ((*pos).weight/wsum)/(nearElem->computeVolumeAround((*pos).nearGp));
+     * nonlocStatus = ( IDNLMaterialStatus * ) this->giveStatus((*pos).nearGp);
+     * damage = nonlocStatus->giveDamage();
+     * printf("%g %g %g\n",x,w,damage);
+     * }
+     * printf("\n");
+     * }
+     */
+    /*
+     * printf("%g %g\n",xtarget,wsum);
+     * if (fabs(xtarget-0.049835)<1e-6)
+     * exit(0);
+     */
 }
 
 double
@@ -270,7 +316,7 @@ IDNLMaterial :: computeEquivalentStrain(double &kappa, const FloatArray &strain,
             } else {
                 nonlocalEquivalentStrain = 0.;
             }
-        } else   { // arithmetic averaging, -mm is used instead of mm
+        } else {   // arithmetic averaging, -mm is used instead of mm
             nonlocalEquivalentStrain = -mm * nonlocalEquivalentStrain + ( 1. + mm ) * localEquivalentStrain;
         }
     }
@@ -407,7 +453,7 @@ IDNLMaterial :: NonlocalMaterialStiffnessInterface_addIPContribution(SparseMtrx 
     }
 
     for ( pos = list->begin(); pos != list->end(); ++pos ) {
-        rmat = ( IDNLMaterial * ) ( ( * pos ).nearGp )->giveMaterial();
+        rmat = ( IDNLMaterial * )( ( * pos ).nearGp )->giveMaterial();
         if ( rmat->giveClassID() == this->giveClassID() ) {
             rmat->giveRemoteNonlocalStiffnessContribution( ( * pos ).nearGp, rloc, s, rcontrib, atTime );
             coeff = gp->giveElement()->computeVolumeAround(gp) * ( * pos ).weight / status->giveIntegrationScale();
@@ -485,7 +531,7 @@ IDNLMaterial :: NonlocalMaterialStiffnessInterface_showSparseMtrxStructure(Gauss
     dynaList< localIntegrationRecord > *list = status->giveIntegrationDomainList();
     dynaList< localIntegrationRecord > :: iterator pos;
     for ( pos = list->begin(); pos != list->end(); ++pos ) {
-        rmat = ( IDNLMaterial * ) ( ( * pos ).nearGp )->giveMaterial();
+        rmat = ( IDNLMaterial * )( ( * pos ).nearGp )->giveMaterial();
         if ( rmat->giveClassID() == this->giveClassID() ) {
             ( ( * pos ).nearGp )->giveElement()->giveLocationArray( rloc, EID_MomentumBalance, EModelDefaultEquationNumbering() );
         }
@@ -544,7 +590,7 @@ IDNLMaterial :: giveLocalNonlocalStiffnessContribution(GaussPoint *gp, IntArray 
     int nrows, nsize, i, j;
     double sum, f, equivStrain;
     IDNLMaterialStatus *status = ( IDNLMaterialStatus * ) this->giveStatus(gp);
-    StructuralElement *elem = ( StructuralElement * ) ( gp->giveElement() );
+    StructuralElement *elem = ( StructuralElement * )( gp->giveElement() );
     FloatMatrix b, de;
     FloatArray stress, strain;
 
@@ -624,7 +670,7 @@ IDNLMaterial :: giveRemoteNonlocalStiffnessContribution(GaussPoint *gp, IntArray
     double coeff = 0.0, sum;
     IDNLMaterialStatus *status = ( IDNLMaterialStatus * ) this->giveStatus(gp);
     StructuralCrossSection *crossSection = ( StructuralCrossSection * ) gp->giveElement()->giveCrossSection();
-    StructuralElement *elem = ( StructuralElement * ) ( gp->giveElement() );
+    StructuralElement *elem = ( StructuralElement * )( gp->giveElement() );
     FloatMatrix b, de, den, princDir(3, 3), t;
     FloatArray stress, fullStress, strain, principalStress, help, nu;
 
@@ -821,7 +867,7 @@ IDNLMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)
 
 #ifdef keep_track_of_dissipated_energy
         fprintf(file, ", dissW %f, freeE %f, stressW %f ", this->dissWork, ( this->stressWork ) - ( this->dissWork ), this->stressWork);
-    } else   {
+    } else {
         fprintf(file, "stressW %f ", this->stressWork);
 #endif
     }
