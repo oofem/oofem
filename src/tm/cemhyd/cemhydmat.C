@@ -161,6 +161,7 @@ double CemhydMat :: giveDoHActual(GaussPoint *gp) {
     return ms->GiveDoHActual();
 }
 
+//standard units are [Wm-1K-1]
 double CemhydMat :: giveConcreteConductivity(GaussPoint *gp) {
     CemhydMatStatus *ms = ( CemhydMatStatus * ) gp->giveMaterialStatus();
     double conduct;
@@ -190,6 +191,7 @@ double CemhydMat :: giveConcreteConductivity(GaussPoint *gp) {
     return conduct;
 }
 
+//normally it returns J/kg/K of concrete
 double CemhydMat :: giveConcreteCapacity(GaussPoint *gp) {
     CemhydMatStatus *ms = ( CemhydMatStatus * ) gp->giveMaterialStatus();
     double capacityConcrete;
