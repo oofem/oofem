@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/strreader.h,v 1.7 2003/04/06 14:08:26 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -33,11 +32,6 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-
-//
-// Class stringReader
-//
-
 #ifndef strreader_h
 #define strreader_h
 
@@ -53,26 +47,17 @@
 namespace oofem {
 class Range;
 
+/**
+ * This class implements simple string reader.
+ * Reads number (integer or double ) or array (integer or double) depicted by string identifier.
+ * The domain class converts all record characters to lower case.
+ * But the StringReader is case sensitive.
+ */
 class StringReader
 {
-    //
-    // DESCRIPTION:
-    //   This class implements simple string reader
-    // TASKS
-    //
-    //   Read number (integer or double ) or array (integer or double)
-    //   depicted by string identifier.
-    //
-    // Note
-    //   The domain class converts all record characters to lowercase.
-    //   But the StringReader is case sensitive.
-    //
-
-
 public:
     StringReader() { }
     ~StringReader() { }
-
 
     int readInteger(const char *source, const char *idString);
     double readDouble(const char *source, const char *idString);
@@ -80,11 +65,11 @@ public:
     /**
      * Reads quoted string identified by keyword.
      * The read string must be bounded by " characters.
-     * @param source source record
-     * @param idString keyword identifiing the value
-     * @param string buffer to store result. Should be at least of  maxchar size.
-     * @param maxchar maximum character to be read.
-     * @return pointer to string parameter.
+     * @param source Source record.
+     * @param idString Keyword identifying the value.
+     * @param string Buffer to store result. Should be at least of maxchar size.
+     * @param maxchar Maximum character to be read.
+     * @return Pointer to string parameter.
      */
     const char *readQuotedString(const char *source, const char *idString, char *string, int maxchar);
     IntArray *ReadIntArray(const char *source, const char *idString);
@@ -93,27 +78,32 @@ public:
     char *readSimpleString(const char *source, char *simpleString, int maxchar, const char **remain);
     const char *readKeyAndVal(const char *source, char *key, int *val, int maxchar, const char **remain);
     const char *readKeyAndVal(const char *source, char *key, double *val, int maxchar, const char **remain);
-    int    hasString(const char *source, const char *idString);
+    /**
+     * Checks for keywords in strings.
+     * @param idString Keyword identifying the value.
+     * @param source Source record.
+     * @return Nonzero if idString is present in source.
+     */
+    bool hasString(const char *source, const char *idString);
 
     /**
      * Reads range list. The range syntax is "range_list_name { number, (start end) }",
-     * where range_list_name is name of list in source record. It is necessary to encose list definition into
-     * {}. THe single number is shortcut for one value range. The range is pecified using two numbers
-     * in parenthesis.
-     * @param list list to be read. Actually items are added into this list.
-     * @param source source string with corresponding record.
-     * @param idString string containing range_list_name.
+     * where range_list_name is name of list in source record. It is necessary to enclose list definition into {}.
+     * The single number is shortcut for one value range. The range is specified using two numbers in parenthesis.
+     * @param list List to be read. Actually items are added into this list.
+     * @param source Source string with corresponding record.
+     * @param idString String containing range_list_name.
      */
-    void   readRangeList(dynaList< Range > &list, const char *source, const char *idString);
+    void readRangeList(dynaList< Range > &list, const char *source, const char *idString);
     /**
-     * Reads single range record from input record represented by *helpSource  string.
-     * @param helpSource pointer to current string possition, on return helpSource points
-     * to next charcter after reading range record.
-     * @param li starting range index
-     * @param hi end range index
-     * @return on success nonzero valur returned
+     * Reads single range record from input record represented by helpSource string.
+     * @param helpSource Pointer to current string position, on return helpSource points
+     * to next character after reading range record.
+     * @param li Starting range index.
+     * @param hi End range index.
+     * @return Nonzero on success.
      */
-    int    readRange(const char **helpSource, int &li, int &hi);
+    int readRange(const char **helpSource, int &li, int &hi);
 
     //
 private:

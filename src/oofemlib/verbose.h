@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/verbose.h,v 1.5.4.1 2004/04/05 15:19:44 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -33,18 +32,18 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-/*
- * file VERBOSE.DEF
+/**
+ * @file verbose.h
  *
- * initializes the variable VERBOSE, in order to get a few intermediate
- * printings on screen : beginning and end of every time step, assembly of
+ * Initializes the variable VERBOSE, in order to get a few intermediate
+ * messages on screen: beginning and end of every time step, assembly of
  * every element, assembly of every node's load vector.
  *
- * initializes the variable DETAILED_REPORT, in order to get a very detailed
- * printings on screen.
+ * Initializes the variable DETAILED_REPORT, in order to get a very detailed
+ * messages on screen.
  *
- * initializes the variable TIME_REPORT, in order to get a detailed
- * time summary of solution (assembly time, factoriazation time, time per solution step, etc.).
+ * Initializes the variable TIME_REPORT, in order to get a detailed
+ * time summary of solution (assembly time, factorization time, time per solution step, etc.).
  */
 
 #ifndef verbose_h
@@ -53,11 +52,8 @@
 namespace oofem {
 #define VERBOSE             // please activate or de-activate this line
 
-
 #define VERBOSE_PRINTS(str, str1) OOFEM_LOG_INFO("%-30s %6s\n", str, str1);
 #define VERBOSE_PRINT0(str, number) OOFEM_LOG_INFO("%-30s %6d\n", str, number);
-
-
 
 #define TIME_REPORT        // please activate or de-activate this line
 

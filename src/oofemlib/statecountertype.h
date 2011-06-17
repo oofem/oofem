@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -32,18 +32,12 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-//   ********************************
-//   *** CLASS STATE COUNTER TYPE ***
-//   ********************************
-
-
 #ifndef statecountertype_h
 #define statecountertype_h
 
 namespace oofem {
 /// StateCounterType type used to indicate solution state.
 typedef long StateCounterType;
-//typedef unsigned long StateCounterType;
 } // end namespace oofem
 #endif // statecountertype_h
 

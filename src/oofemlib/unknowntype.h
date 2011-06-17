@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -32,19 +32,12 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-//
-// FILE: unknowntype.h
-//
-
 #ifndef unknowntype_h
 #define unknowntype_h
 
 #include "enumitem.h"
 
 namespace oofem {
-/**
- * Type representing particular unknown (its physical meaning).
- */
 
 #define UnknownType_DEF \
     ENUM_ITEM_WITH_VALUE(UnknownType_Unknown, 0) \
@@ -58,11 +51,14 @@ namespace oofem {
     ENUM_ITEM_WITH_VALUE(EigenVector, 8)                        \
     ENUM_ITEM_WITH_VALUE(TotalLoadLevel, 9)                     \
     ENUM_ITEM_WITH_VALUE(ReynoldsNumber, 10)                                             \
-    ENUM_ITEM_WITH_VALUE(Theta_1, 11) /* CBS integration constan)*/ \
-    ENUM_ITEM_WITH_VALUE(Theta_2, 12) /* CBS integration constan)*/ \
-    ENUM_ITEM_WITH_VALUE(PrescribedTractionPressure, 13) /* CBS prescribed pressure due to applied tractio)*/ \
+    ENUM_ITEM_WITH_VALUE(Theta_1, 11) /* CBS integration constant)*/ \
+    ENUM_ITEM_WITH_VALUE(Theta_2, 12) /* CBS integration constant)*/ \
+    ENUM_ITEM_WITH_VALUE(PrescribedTractionPressure, 13) /* CBS prescribed pressure due to applied traction)*/ \
     ENUM_ITEM_WITH_VALUE(InternalForcesEBENorm, 14) /* Norm of nodal internal forces evaluated on element by element basis*/
 
+/**
+ * Type representing particular unknown (its physical meaning).
+ */
 enum UnknownType {
     UnknownType_DEF
 };
@@ -70,7 +66,6 @@ enum UnknownType {
 #undef ENUM_ITEM
 #undef ENUM_ITEM_WITH_VALUE
 #undef enumitem_h
-
 
 const char *__UnknownTypeToString(UnknownType _value);
 } // end namespace oofem

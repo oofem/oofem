@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/tdictionary.h,v 1.10.4.1 2004/04/05 15:19:44 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -33,11 +32,6 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-//   *********************************
-//   *** CLASS TEMPLATE DICTIONARY ***
-//   *********************************
-
-
 #ifndef tdictionary_h
 #define tdictionary_h
 
@@ -51,28 +45,27 @@ namespace oofem {
 template< class Key, class T >class TDictionaryIterator;
 template< class Key, class T >class TDictionary;
 
+/*
+ * This class implements key/value associations,
+ * A pair is used as an entry in a dictionary.
 
+ * A pair has three components : its name (a character), its value (a class FEMComponent),
+ * a pointer to the next pair in the dictionary.
+ * Tasks:
+ * - Returning its key, or its value, or the next pair ;
+ * - Appending another pair to itself.
+ * @note{ FEMComponent is assumed to have overloaded operator << }
+ * @note{ FEMComponent is assumed to have printYourself() function }
+ */
 template< class Key, class T >class TPair
 {
-    /*
-     * This class implements key/value associations,
-     * A pair is used as an entry in a dictionary.
-     * DESCRIPTION :
-     * A pair has three components : its name (a character), its value (a class FEMComponent),
-     * a pointer to the next pair in the dictionary.
-     * TASKS :
-     * - Returning its key, or its value, or the next pair ;
-     * - Appending another pair to itself.
-     * ATTENTION :
-     * // class FEMComponent is assumed to have overloaded operator <<
-     * class FEMComponent is assumed to have printYourself() function
-     */
-
-
 protected:
-    Key key;         // key, from client
-    T *data;         // data, from client
-    TPair< Key, T > *next; // link to next TPair
+    /// Key, from client.
+    Key key;
+    /// Data, from client.
+    T *data;
+    /// Link to next TPair.
+    TPair< Key, T > *next;
 public:
     TPair(Key k, T *d) {
         key = k;
@@ -87,24 +80,20 @@ public:
     T *giveValue()         { return data; }
 };
 
-
+/**
+ * This class implements a linked list whose entries are TPairs (see below).
+ * Dictionaries are typically used by degrees of freedom for storing their
+ * unknowns.
+ *
+ * A dictionary stores its pairs in a linked list form. It knows the first
+ * pair (attribute 'first') of the list. It also knows the last one (attribute
+ * last) in order to append an additional pair quickly.
+ * Tasks:
+ * - Storing pairs (method add) and returning the value of a pair (method at).
+ */
 template< class Key, class T >class TDictionary
 {
-    /*
-     * This class implements a linked list whose entries are TPairs (see below).
-     * Dictionaries are typically used by degrees of freedom for storing their
-     * unknowns.
-     * DESCRIPTION :
-     * A dictionary stores its pairs in a linked list form. It knows the first
-     * pair (attribute 'first') of the list. It also knows the last one (attri-
-     * bute 'last') in order to append fastly an additional pair.
-     * TASK :
-     * Storing pairs (method 'add') and returning the value of a pair (method
-     * 'at').
-     */
-
 protected:
-
     TPair< Key, T > *first;
     TPair< Key, T > *last;
 

@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/strreader.C,v 1.17.4.1 2004/04/05 15:19:44 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -33,15 +32,9 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-
-//
-// file strreader.cc
-//
-
 #include "strreader.h"
 
-// Range class is defined here
-#include "outputmanager.h"
+#include "range.h"
 #include "oofem_limits.h"
 
 #ifndef __MAKEDEPEND
@@ -51,8 +44,8 @@
 namespace oofem {
 const char *StringReader :: getPosAfter(const char *source, const char *idString)
 //
-// returns possition of substring idString in source
-// return value pointer at the end of occurence idString in source
+// returns position of substring idString in source
+// return value pointer at the end of occurrence idString in source
 // (idString must be separated from rest by blank or by tabulator
 //
 {
@@ -86,7 +79,7 @@ const char *StringReader :: skipNextWord(const char *src)
         src++;
     }
 
-    // skips whitespaces if any
+    // skips white spaces if any
     while ( !( isspace(* src) || !* src ) ) {
         src++;
     }
@@ -311,10 +304,10 @@ Dictionary *StringReader :: ReadDictionary(const char *source, const char *idStr
 
 char *StringReader :: readSimpleString(const char *source, char *simpleString, int maxchar, const char **remain)
 // reads Simple string from source according to following rules:
-// at begining skips whitespace (blank, tab)
+// at beginning skips whitespace (blank, tab)
 // read string terminated by whitespace or end-of-line
 // remain is unread remain of source string.
-// maximum of maxchar (including terminating '\0') is copyied into simpleString.
+// maximum of maxchar (including terminating '\0') is copied into simpleString.
 {
     const char *curr = source;
     char *ss = simpleString;
@@ -345,9 +338,6 @@ char *StringReader :: readSimpleString(const char *source, char *simpleString, i
 
 
 const char *StringReader :: readKeyAndVal(const char *source, char *key, int *val, int maxchar, const char **remain)
-//
-//
-//
 {
     key = readSimpleString(source, key, maxchar, remain);
     * remain = scanInteger(* remain, val);
@@ -355,11 +345,7 @@ const char *StringReader :: readKeyAndVal(const char *source, char *key, int *va
 }
 
 
-const char *StringReader ::
-readKeyAndVal(const char *source, char *key, double *val, int maxchar, const char **remain)
-//
-//
-//
+const char *StringReader :: readKeyAndVal(const char *source, char *key, double *val, int maxchar, const char **remain)
 {
     key = readSimpleString(source, key, maxchar, remain);
     * remain = scanDouble(* remain, val);
@@ -367,26 +353,21 @@ readKeyAndVal(const char *source, char *key, double *val, int maxchar, const cha
 }
 
 
-int
-StringReader :: hasString(const char *source, const char *idString)
+bool StringReader :: hasString(const char *source, const char *idString)
 {
     //returns nonzero if idString is present in source
     const char *str = strstr(source, idString);
-    if ( str == NULL ) {
-        return 0;
-    }
-
-    return 1;
+    return str != NULL;
 }
 
-void
-StringReader :: readRangeList(dynaList< Range > &list, const char *source, const char *idString)
+
+void StringReader :: readRangeList(dynaList< Range > &list, const char *source, const char *idString)
 {
     int li, hi;
     const char *str1, *helpSource = source;
     // Range* range;
 
-    // find first valid occurence of idString
+    // find first valid occurrence of idString
     int len = strlen(idString);
     do {
         if ( ( str1 = strstr(helpSource, idString) ) == NULL ) {
@@ -398,13 +379,13 @@ StringReader :: readRangeList(dynaList< Range > &list, const char *source, const
 
 
     helpSource = str1 + len;
-    // find first nonwhitespace character
+    // find first non whitespace character
     // skip whitespaces
     while ( isspace(* helpSource) ) {
         helpSource++;
     }
 
-    // test if list left bracked found
+    // test if list left bracketed found
     if ( * helpSource != '{' ) {
         OOFEM_WARNING("StringReader::readRangeList: parse error - missing left '{'");
         list.clear();
@@ -418,7 +399,7 @@ StringReader :: readRangeList(dynaList< Range > &list, const char *source, const
         list.pushBack(range);
     }
 
-    // skip whitespces after last range
+    // skip whitespaces after last range
     while ( isspace(* helpSource) ) {
         helpSource++;
     }
@@ -432,8 +413,7 @@ StringReader :: readRangeList(dynaList< Range > &list, const char *source, const
 }
 
 
-int
-StringReader :: readRange(const char **helpSource, int &li, int &hi)
+int StringReader :: readRange(const char **helpSource, int &li, int &hi)
 {
     char *endptr;
     // skip whitespaces

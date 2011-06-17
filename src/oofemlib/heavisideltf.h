@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2010   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -51,7 +51,6 @@ namespace oofem {
  */
 class HeavisideLTF : public LoadTimeFunction
 {
-
 private:
     double origin, value;
 
@@ -60,14 +59,12 @@ public:
     { origin = value = 0.; }
     ~HeavisideLTF() { }
 
-    //      void    getPoints () ;
     IRResultType initializeFrom(InputRecord *ir);
     int giveInputRecordString(std :: string &str, bool keyword = true);
-
-    classType    giveClassID() const { return HeavisideLTFClass; }
+    classType giveClassID() const { return HeavisideLTFClass; }
     const char *giveClassName() const { return "HeavisideLTF"; }
 
-    double  __at(double);
+    double __at(double);
 };
 } // end namespace oofem
 #endif // heavisideltf_h

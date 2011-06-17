@@ -55,7 +55,7 @@ namespace oofem {
 /**
  * Class representing solution step. The timeStep instance may represent either
  * time step, load increment, or load case depending on used Engineering model.
- * See corresponding Engng model reference for details. TimeStep maintains a reference to correspoding 
+ * See corresponding EngngModel reference for details. TimeStep maintains a reference to corresponding
  * Engineering model class instance.
  *
  * The class hold target time, which may represent the end of time interval. In addition, there is
@@ -75,7 +75,7 @@ namespace oofem {
  * The solution state counter is guaranteed to grow up smoothly (it newer decreases) during solution process.
  * Other components of program (integration points) can then store their computationally expensive values
  * but have to store also corresponding solution state counter value valid when these were computed.
- * Then, easy check is done for finding differences between freezed solution state counter and their value with
+ * Then, easy check is done for finding differences between frozen solution state counter and their value with
  * current solution state requested from solution step and recompute the values if necessary.
  */
 class TimeStep
@@ -94,9 +94,9 @@ protected:
     /// Receiver's number.
     int number;
     /** 
-     * Receiver's version, used for special applicatons; default set to 0.
+     * Receiver's version, used for special applications; default set to 0.
      * Typically, new version of same step is generated after adaptive restart, when
-     * the restarted step is equlibrated on new domain.
+     * the restarted step is equilibrated on new domain.
      */
     int version;
     /// Corresponding meta step number.
@@ -130,7 +130,7 @@ public:
      * @return Pointer to s parameter filled with name.
      */
     const char *giveClassName() const { return "TimeStep"; }
-    /// Returns poiter to previous solution step.
+    /// Returns pointer to previous solution step.
     TimeStep *givePreviousStep();
     /// Returns target time.
     double giveTargetTime() { return targetTime; }
@@ -158,7 +158,7 @@ public:
      */
     bool isTheFirstStep();
     /**
-     * Check if receiver is currentsolution step.
+     * Check if receiver is current solution step.
      * @returns True if receiver is current step, false otherwise.
      */
     bool isTheCurrentTimeStep();
@@ -182,7 +182,7 @@ public:
      * Receiver should write class-id first in order to allow test
      * whether correct data are then restored.
      * @param stream Output stream.
-     * @param mode Determines ammount of info required in stream (state, definition,...).
+     * @param mode Determines amount of info required in stream (state, definition,...).
      * @param obj Special parameter, used only to send particular integration.
      * point to material class version of this method. Except this
      * case, obj parameter is always NULL pointer.

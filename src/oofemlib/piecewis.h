@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/sm/src/piecewis.h,v 1.4 2003/04/06 14:08:31 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -33,30 +32,21 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-//   ***************************************
-//   *** CLASS PIECEWISE LINEAR FUNCTION ***
-//   ***************************************
-
-
 #ifndef piecewis_h
 #define piecewis_h
-
-
 
 #include "flotarry.h"
 #include "loadtime.h"
 
-
 namespace oofem {
+
+/**
+ * This class implements a piecewise linear function.
+ * The function is defined by 'numberOfPoints' points. 'dates' and 'values'
+ * store respectively the abscissas (t) and the values (f(t)) of the points
+ */
 class PiecewiseLinFunction : public LoadTimeFunction
 {
-    /*
-     * This class implements a piecewise linear function.
-     * DESCRIPTION
-     * The function is defined by 'numberOfPoints' points. 'dates' and 'values'
-     * store respectively the abscissas (t) and the values (f(t)) of the points
-     */
-
 protected:
     int numberOfPoints;
     FloatArray dates;
@@ -65,41 +55,17 @@ protected:
 public:
     PiecewiseLinFunction(int i, Domain *d) : LoadTimeFunction(i, d), dates(), values()
     { numberOfPoints = 0; }
-    ~PiecewiseLinFunction()             { }
+    ~PiecewiseLinFunction() { }
 
-    //      void    getPoints () ;
     IRResultType initializeFrom(InputRecord *ir);
-    /** Setups the input record string of receiver
-     * @param str string to be filled by input record
-     * @param keyword print record keyword (default true)
-     */
     virtual int giveInputRecordString(std :: string &str, bool keyword = true);
-    classType    giveClassID() const { return PiecewiceClass; }
+    classType giveClassID() const { return PiecewiceClass; }
     const char *giveClassName() const { return "PiecewiceClass"; }
-    /// Returns input record name of the receiver.
     const char *giveInputRecordName() const { return "PiecewiseLinFunction"; }
 
-    /**
-     * Returns the value of load time function at given time. Abstract service.
-     * Must be implemented by derived classes.
-     * @param t time
-     * @return load time function value
-     */
-    virtual double     __at(double);
-    /**
-     * Returns the first time derivative of load time function at given time. Abstract service.
-     * Must be implemented by derived classes.
-     * @param t time
-     * @return load time function value
-     */
-    virtual double    __derAt(double);
-    /**
-     * Returns the second time derivative of load time function at given time. Abstract service.
-     * Must be implemented by derived classes.
-     * @param t time
-     * @return load time function value
-     */
-    virtual double    __accelAt(double) { return 0.; }
+    virtual double __at(double);
+    virtual double __derAt(double);
+    virtual double __accelAt(double) { return 0.; }
 };
 } // end namespace oofem
 #endif // piecewis_h

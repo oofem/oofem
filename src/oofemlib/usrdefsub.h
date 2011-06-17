@@ -128,7 +128,14 @@ LoadTimeFunction *CreateUsrDefLoadTimeFunctionOfType(const char *name, int num, 
  * @return Newly allocated object of requested type, null if keyword not supported.
  */
 Material *CreateUsrDefMaterialOfType(const char *name, int num, Domain *d);
-
+/**
+ * Creates new instance of user defined engineering model corresponding to given keyword.
+ * @param name Keyword string determining the type of new instance.
+ * @param num  Component number.
+ * @param master Master engineering model.
+ * @return Newly allocated object of requested type, null if keyword not supported.
+ */
+TopologyDescription *CreateUsrDefTopologyOfType(const char *name, Domain *d);
 /**
  * Creates new empty instance of sparse matrix of given type (the constructor with no parameters is called).
  * @param type Determines sparseMtrx type.
@@ -226,13 +233,13 @@ DofManager *CreateUsrDefDofManagerOfType(classType type, int num, Domain *d);
 /**
  * Creates new instance of user defined dof corresponding to given keyword.
  * @param type Id determining the type of new instance.
- * @param num  Domponent number.
+ * @param num  Component number.
  * @param d    Dofmanager to which new dof belongs.
  * @return Newly allocated object of requested type, null if keyword not supported.
  */
 Dof *CreateUsrDefDofOfType(classType type, int num, DofManager *d);
 /**
- * Creates new instance of matrial mapping algorithm, corresponding to given MaterialMappingAlgorithmType.
+ * Creates new instance of material mapping algorithm, corresponding to given MaterialMappingAlgorithmType.
  * @param type Id determining the type of new instance.
  * @return Newly allocated object of requested type, null if keyword not supported.
  */

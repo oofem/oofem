@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/stressvector.h,v 1.1.4.1 2004/04/05 15:19:44 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -54,7 +53,7 @@ public:
     StressVector(MaterialMode);
     /// Constructor. Creates stress/strain vector, values taken from given vector, mode is parameter.
     StressVector(const FloatArray &, MaterialMode);
-    /// Destructor
+    /// Destructor.
     ~StressVector() { }
     /**
      * Member function that computes principal values of receiver (stress vector).
@@ -140,7 +139,6 @@ public:
     void applyDeviatoricElasticCompliance(StrainVector &strain,
                                           const double EModulus,
                                           const double nu) const;
-
     /**
      * Applies the isotropic elastic stiffness to the deviatoric stress.
      * @param strain Computed strain.

@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -32,15 +32,11 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-//
-// FILE: varscaletype.h
-//
-
 #ifndef varscaletype_h
 #define varscaletype_h
 
 namespace oofem {
-/// type determining the scale corresponding to particular variable
+/// Type determining the scale corresponding to particular variable.
 enum VarScaleType {
     VST_Length,
     VST_Velocity,

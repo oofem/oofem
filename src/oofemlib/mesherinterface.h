@@ -64,13 +64,13 @@ public:
     virtual ~MesherInterface() { }
 
     /**
-     * Runs the mesh generation, mesh will be written to corresponding domain din file
-     * @param time step
-     * @param domainNumber new domain number
-     * @param domainSerNum new domain serial number
-     * @param newly allocated domain, representing new mesh or set to NULL if external generation has to be performed.
+     * Runs the mesh generation, mesh will be written to corresponding domain din file.
+     * @param tStep Time step.
+     * @param domainNumber New domain number.
+     * @param domainSerNum New domain serial number.
+     * @param dNew Newly allocated domain, representing new mesh or set to NULL if external generation has to be performed.
      */
-    virtual returnCode createMesh(TimeStep *, int domainNumber, int domainSerNum, Domain **dNew) = 0;
+    virtual returnCode createMesh(TimeStep *tStep, int domainNumber, int domainSerNum, Domain **dNew) = 0;
     /**
      * Initializes receiver according to object description stored in input record.
      * This function is called immediately after creating object using

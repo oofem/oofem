@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/sm/src/piecewis.C,v 1.3 2003/04/06 14:08:31 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -32,9 +31,6 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-
-//   file PIECEWIS.CC
-
 
 #include "piecewis.h"
 #ifndef __MAKEDEPEND
@@ -116,28 +112,6 @@ double PiecewiseLinFunction :: __derAt(double time)
 
     return 0.;
 }
-
-
-
-/*
- * void  PiecewiseLinFunction :: getPoints ()
- * // Reads in the data file the date and the value of every point of the
- * // receiver.
- * {
- * int i ;
- *
- * numberOfPoints = this->readInteger("npoints") ;
- *
- * dates = new double [numberOfPoints] ;
- * for (i=0 ; i<numberOfPoints ; i++)
- *    dates[i] = this -> read("t",i+1) ;
- *
- * values = new double [numberOfPoints] ;
- * for (i=0 ; i<numberOfPoints ; i++)
- *    values[i] = this -> read("f(t)",i+1) ;
- * }
- */
-
 
 IRResultType
 PiecewiseLinFunction :: initializeFrom(InputRecord *ir)
