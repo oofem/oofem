@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/dofmanager.C,v 1.18.4.1 2004/04/05 15:19:43 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -48,29 +47,27 @@ class IntArray;
 
 /**
  * Class implementing hanging node connected to other nodes (masters) using interpolation.
- * Hanging node posses no degrees of freedom - all values are interpolated from corresponding master dofs.
+ * Hanging node possess no degrees of freedom - all values are interpolated from corresponding master dofs.
  *
  * The introduction of hanging nodes allows, for example, to include reinforcing bar elements inside
- * arbitrary fe mesh of concrete specimen or facilitates the local refinment of fe-mesh.
+ * arbitrary FE-mesh of concrete specimen or facilitates the local refinement of FE-mesh.
  *
  * The contributions of hanging node are localized directly to master related equations.
  * The hanging node can not have its own boundary or initial conditions,
  * they are determined completely from master dof conditions.
- * The local coordinate system in slave is not supported in current implementation, the global lcs applies.
+ * The local coordinate system in slave is not supported in current implementation, the global cs applies.
  * On the other hand, hanging node can be loaded independently of master.
  *
- * To do: Implement evaluation of natural coordinates using Interpolation classes, instead of
- * using local formulas or supplying then on input.
+ * @todo{Move all the grunt work to the FEI classes.}
  *
- * !!!  Pri pouziti slavemask je treba si to dobre rozmyslet, aby nevznikaly nejake nespojitosti.
- * !!!  Uzlove zatizeni je treba si dobre rozmyslet vzdy.
- *
+ * @note{When using slavemask it is necessary to be careful to avoid any discontinuities.}
+ * @note{Nodal loads also require some thought.}
  */
 class HangingNode : public Node
 {
 protected:
     /**
-     * type of interpolation from hangingnodes = 100*(number of master nodes) + 10*(order of polynomial approximation) + dimension
+     * Type of interpolation from hangingnodes = 100*(number of master nodes) + 10*(order of polynomial approximation) + dimension
      * 211 - linear truss         321 - quadratic truss
      * 312 - linear triangle      622 - quadratic triangle
      * 412 - linear rectangle     822 - quadratic rectangle
@@ -78,74 +75,48 @@ protected:
      * 813 - linear hexahedron   2023 - quadratic hexahedron
      */
     int typeOfContrib;
-    /// natural(triangular)~local coordinates
-    FloatArray *locoords;
-
-    /// count of Master Nodes
+    /// Local coordinates.
+    FloatArray locoords;
+    /// Count of Master Nodes.
     int countOfMasterNodes;
-    /// array of numbers of master DofManagers
-    IntArray *masterDofMngr;
-    /// array of pointers to master Nodes
+    /// Array of numbers of master DofManagers.
+    IntArray masterDofMngr;
+    /// Array of pointers to master Nodes.
     Node **masterNode;
-    /// vector of master contribution coefficients - SUMA of contributions == 1.0 ; if node has LCS, contribs are specified in this local coordinate system.
-    FloatArray *masterContribution;
+    /// Vector of master contribution coefficients - SUMA of contributions == 1.0 ; if node has LCS, contributions are specified in this local coordinate system.
+    FloatArray masterContribution;
 #ifdef __OOFEG
-		/// flag whether consistency check already completed
-		bool consistencyChecked;
+    /// Flag whether consistency check already completed.
+    bool consistencyChecked;
 #endif
 
 private:
-    void allocAuxArrays(void);
     void deallocAuxArrays(void);
-    //get natural coordinates from the hanging node coordinates
+    /// Get natural coordinates from the hanging node coordinates.
     int computeNaturalCoordinates(void);
 
 public:
     /**
      * Constructor. Creates a hanging node with number n, belonging to aDomain.
-     * @param n node number in domain aDomain
-     * @param aDomain domain to which node belongs
+     * @param n Node number in domain aDomain.
+     * @param aDomain Domain to which node belongs.
      */
     HangingNode(int n, Domain *aDomain);
-    /**
-     * Destructor.
-     */
+    /// Destructor.
     ~HangingNode(void) { }
 
-    /**
-     * Initializes receiver acording to object description stored in input record.
-     */
     IRResultType initializeFrom(InputRecord *ir);
-    /**
-     * Checks internal data consistency in node.
-     * @return nonzero if receiver check is o.k.
-     */
     int checkConsistency();
-    /**
-     * Local renumbering support. For some tasks (parallel load balancing, for example) it is necessary to
-     * renumber the entities. The various fem components (such as nodes or elements) typically contain
-     * links to other entities in terms of their local numbers, etc. This service allows to update
-     * these relations to reflext updated numbering. The renumbering funciton is passed, which is supposed
-     * to return an updated number of specified entyty type based on old number.
-     */
     virtual void updateLocalNumbering(EntityRenumberingFunctor &f);
     
     /**
-     * compute vector of master contribution coefficients - SUMA of contributions == 1.0
+     * Compute vector of master contribution coefficients - SUMA of contributions == 1.0
      */
     int computeMasterContribution();
 
-    /**
-     * Returns class name of the receiver.
-     */
     const char *giveClassName() const { return "HangingNode"; }
-    /**
-     * Returns classType id of receiver.
-     * @see FEMComponent::giveClassID
-     */
     classType giveClassID() const { return HangingNodeClass; }
-    /// Returns true if dof of given type is allowed to be associated to receiver
-    bool isDofTypeCompatible(dofType type) const { return ( type == DT_master || type == DT_slave ); } // termitovo
+    bool isDofTypeCompatible(dofType type) const { return ( type == DT_master || type == DT_slave ); }
 };
 } // end namespace oofem
 #endif // hangingnode_h

@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/Attic/lobattoir.C,v 1.1.2.1 2004/04/05 15:19:43 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -52,7 +51,6 @@ LobattoIntegrationRule :: LobattoIntegrationRule(int n, Element *e,
 
 LobattoIntegrationRule :: ~LobattoIntegrationRule()
 { }
-
 
 
 int

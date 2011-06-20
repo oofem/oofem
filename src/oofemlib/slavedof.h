@@ -58,7 +58,7 @@ protected:
     int countOfPrimaryMasterDofs;
     /// Array of master  DofManagers.
     IntArray masterDofMans;
-    /// Array of master dofIDs
+    /// Array of master dofIDs.
     IntArray dofIDs;
     /// Vector of master contribution coefficients.
     FloatArray masterContribution;
@@ -74,7 +74,7 @@ public:
     /// Destructor.
     ~SlaveDof(void) { }
 
-    void initialize(int cntOfMstrDfMngr, Node **mstrNode, const IntArray *mstrDofID, const FloatArray *mstrContribution);
+    void initialize(int cntOfMstrDfMngr, Node **mstrNode, const IntArray *mstrDofID, const FloatArray &mstrContribution);
     int giveNumberOfPrimaryMasterDofs(void);
     void giveMasterDofManArray(IntArray &answer);
     void giveUnknowns(FloatArray &masterUnknowns, EquationID type, ValueModeType mode, TimeStep *stepN);

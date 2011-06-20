@@ -83,19 +83,6 @@ class IntArray;
  */
 class Node : public DofManager
 {
-    /*
-     * This class implements a node in a finite element mesh. A node is an attribute
-     * of a domain. It is usually also attribute of a few elements.
-     * DESCRIPTION
-     * The node possesses 'numberOfDofs' degrees of freedom, stored in 'dofArray'.
-     * In 'loadArray' it stores the number of every nodal load it is subjected to
-     * (typically, concentrated forces and moments).
-     * In 'locationArray' the node stores the equation number of each of its dofs.
-     * This location array is used by the node for assembling its load vector to
-     * the right-hand side of the linear system ; it is also used by elements for
-     * calculating their own location arrays.
-     */
-
 protected:
     /// Array storing nodal coordinates.
     FloatArray coordinates;

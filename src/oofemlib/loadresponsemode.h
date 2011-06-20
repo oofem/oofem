@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -32,10 +32,6 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-//
-// FILE: loadresponsemode.h
-//
-
 #ifndef loadresponsemode_h
 #define loadresponsemode_h
 
@@ -45,7 +41,7 @@ namespace oofem {
  */
 enum LoadResponseMode {
     TotalLoad,
-    IncrementOfLoad
+    IncrementOfLoad,
 };
 } // end namespace oofem
 #endif // loadresponsemode_h

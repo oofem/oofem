@@ -67,37 +67,23 @@ class FEInterpolation;
  * Because integration points contain related history parameters (using material status),
  * the unique copy of integration rule must exist on each element. The integration rule is
  * exclusively possessed by particular finite element.
+ *
+ *
+ * Tasks:
+ * - instanciating yourself
+ * - returning number of integration points used
+ * - returning requested integration point - method getIntegrationPoint
+ * - returning interval of components (i.e.of local strain vector), where apply
+ * - returning array of gauss points, according to specific
+ *   integration rule (Gauss rule, Newton-Cotes rule, ...).
+ *   integration points and corresponding weights are stored in Gauss point class.
+ * - printing yourself
+ * - updating yourself
+ * - initializing for new time step
+ * - saving & restoring context
  */
 class IntegrationRule
 {
-    /*
-     * DESCRIPTION:
-     * Implements integration rule class.
-     * Stores integration points used for integration
-     * of necessary terms (for example computation of  stiffness matrix
-     * or computation of element nodal force vector )
-     * and it  corresponds to some local strains
-     * on finite element level. Finite element can have many
-     * integration rules corresponding to  different strains.
-     *
-     * TASKS:
-     * - instanciating yourself
-     * - returning number of integration points used
-     * - returning requested integration point - method getIntegrationPoint
-     * - returning interval of components (i.e.of local strain vector), where apply
-     * - returning array of gauss points, according to specific
-     *   integration rule (Gauss -rule, Newton-Cortes rule ...).
-     *   integration points and corresponding weights are stored in
-     *   Gauss point class.
-     * - printing yourself
-     * - updating yourself
-     * - initializing for new time step
-     * - saving & restoring context
-     *
-     * The integrator is a rather passive object : it does not perform numerical
-     * integration - it just provide way how to set up correct integration points
-     * and weights. Integration is performed by elements.
-     */
 protected:
 
     /// Number.

@@ -41,9 +41,12 @@
 
 #include "primaryfield.h"
 #include "integrationrule.h"
-#include "elementheaders.h"
+#include "classtype.h"
+#include "chartype.h"
+#include "elementgeometrytype.h"
 #include "equationid.h"
 #include "valuemodetype.h"
+#include "internalstatetype.h"
 #include "internalstatevaluetype.h"
 #include "elementextension.h"
 #include "entityrenumberingscheme.h"

@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/combuff.h,v 1.5 2003/04/06 14:08:23 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -57,7 +56,7 @@ class TimeStep;
  #define MIGRATE_LOAD_TAG       9998
 /**
  * End-of-data marker, used to identify end of data stream received.
- * The value should not conflict with any classType value
+ * The value should not conflict with any classType value.
  */
  #define LOADBALANCER_END_DATA -1
 
@@ -66,7 +65,7 @@ class TimeStep;
  * detect the imbalance and to make the decision, whether to redistribute the work or to continue
  * with existing partitioning.
  * It provides partition weights, reflecting their relative computational performance. These weights should
- * be continuosly updated to reflect changing work load during solution process.
+ * be continuously updated to reflect changing work load during solution process.
  */
 class LoadBalancerMonitor
 {
@@ -80,14 +79,14 @@ public:
     LoadBalancerMonitor(EngngModel *em) { emodel = em; }
     virtual ~LoadBalancerMonitor() { }
 
-    ///Initializes receiver acording to object description stored in input record.
+    /// Initializes receiver according to object description stored in input record.
     virtual IRResultType initializeFrom(InputRecord *ir);
 
     /**@name Load evaluation and imbalance detection methods*/
     //@{
-    /// returns flag indicating whether rebalancing is necessary; should update node weights as well
+    /// Returns flag indicating whether rebalancing is necessary; should update node weights as well.
     virtual LoadBalancerDecisionType decide(TimeStep *) = 0;
-    /// Returns processor weights; the larger weight means more powerfull node, sum of weights should equal to one.
+    /// Returns processor weights; the larger weight means more powerful node, sum of weights should equal to one.
     void giveProcessorWeights(FloatArray &answer) { answer = nodeWeights; }
     //@}
 
@@ -97,25 +96,25 @@ public:
 
 /**
  * Implementation of simple wall-clock based monitor.
- * It detect imbalance based on waal clock diference required for slotion step
+ * It detect imbalance based on wall clock difference required for solution step
  * on particular nodes. When difference in wall clock solution times is greater
- * than a treshold value, the load migration is performed.
+ * than a threshold value, the load migration is performed.
  */
 class WallClockLoadBalancerMonitor : public LoadBalancerMonitor
 {
 protected:
-    /// minAbsWallClockImbalanceTreshold declares min abs imbalance to perform relative imbalance check
+    /// Declares min abs imbalance to perform relative imbalance check.
     double relWallClockImbalanceTreshold, absWallClockImbalanceTreshold, minAbsWallClockImbalanceTreshold;
-    /// the rebalancing done every lbstep
+    /// The rebalancing done every lbstep.
     int lbstep;
  #ifdef __LB_DEBUG
-    // list of steps with perturbed ballancing
+    // list of steps with perturbed balancing.
     dynaList< Range >perturbedSteps;
     // perturbing factor
     double perturbFactor;
-    // list of step at which to performed lb recovery
+    // list of step at which to performed lb recovery.
     IntArray recoveredSteps;
-    // processing weights for lb recovery
+    // processing weights for lb recovery.
     FloatArray processingWeights;
  #endif
 public:
@@ -126,7 +125,7 @@ public:
         lbstep = 5;
     }
     LoadBalancerDecisionType decide(TimeStep *);
-    ///Initializes receiver acording to object description stored in input record.
+    ///Initializes receiver according to object description stored in input record.
     virtual IRResultType initializeFrom(InputRecord *ir);
 };
 
@@ -148,18 +147,14 @@ class LoadBalancer
 public:
     /**
      * Describes the state of dofmanager after load balancing
-     * on the local partition:
-     * DM_NULL  - undefined (undetermined) state, if assigned means internal error
-     * DM_Local - local dofman that remains local
-     * DM_Remote- local dofman that becames remote (becames local on remote partition)
-     * //DM_SharedNew - local shared that became shared
-     * DM_Shared- shared dofman that remains shared.
-     * //DM_SharedExlude - shared dofman that remains shared,
-     *                   possibly with changed partitions, but local partition
-     *                   is no more in shared list (should be exluded on remote partitions).
-     * //DM_SharedUpdate - Shared dofman that remains shared, the partition list may changed.
+     * on the local partition.
      */
-    enum DofManMode { DM_NULL, DM_Local, DM_Shared, DM_Remote };
+    enum DofManMode {
+        DM_NULL,   ///< Undefined (undetermined) state, if assigned means internal error.
+        DM_Local,  ///< Local dofman that remains local.
+        DM_Shared, ///< Shared dofman that remains shared.
+        DM_Remote, ///< Local dofman that became remote (became local on remote partition).
+    };
 protected:
     Domain *domain;
 
@@ -175,7 +170,7 @@ public:
     virtual void calculateLoadTransfer() = 0;
     //@}
 
-    /**@name Work migration methods  */
+    /**@name Work migration methods */
     //@{
     void migrateLoad(Domain *d);
     //@}
@@ -185,20 +180,20 @@ public:
 
     /**@name Query methods after work transfer calculation */
     //@{
-    /// Returns the label of dofmanager after load balancing
+    /// Returns the label of dofmanager after load balancing.
     virtual DofManMode giveDofManState(int idofman) = 0;
 
-    /// Returns the partition list of given dofmanager after load balancing
+    /// Returns the partition list of given dofmanager after load balancing.
     virtual IntArray *giveDofManPartitions(int idofman) = 0;
 
-    /// Returns the new partition number assigned to local element after LB
+    /// Returns the new partition number assigned to local element after LB.
     virtual int giveElementPartition(int ielem) = 0;
 
     //@}
-    ///Initializes receiver acording to object description stored in input record.
+    ///Initializes receiver according to object description stored in input record.
     virtual IRResultType initializeFrom(InputRecord *ir);
 
-    /// Returns reference to its domain
+    /// Returns reference to its domain.
     Domain *giveDomain() { return domain; }
     /// sets associated Domain
     virtual void         setDomain(Domain *d) { this->domain = d; }
@@ -236,13 +231,13 @@ public:
          *
          * This involves several steps:
          * - send and receive nonlocElementDependencyArry of migrating regular
-         * elements to remote partition
+         *   elements to remote partition
          * - build domain nonlocal element dependency list.
          * - then exclude local elements - what remains are unsatisfied
-         * remote dependencies that have to be broadcasted
-         * and received from partitions owning relevant elements
+         *   emote dependencies that have to be broadcasted
+         *   and received from partitions owning relevant elements
          * - transfer of local elements and nodes to remote partitions
-         * (remote elements and null dofmans)
+         *   (remote elements and null dofmans)
          */
         virtual void migrate() = 0;
         /*
@@ -254,7 +249,7 @@ public:
     };
 
 protected:
-    /// list of work transfer plugins
+    /// List of work transfer plugins.
     AList< WorkTransferPlugin >wtpList;
 };
 

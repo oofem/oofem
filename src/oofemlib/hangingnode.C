@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/dofmanager.C,v 1.18.4.1 2004/04/05 15:19:43 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -33,7 +32,6 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-
 #include "hangingnode.h"
 #include "slavedof.h"
 #include "timestep.h"
@@ -43,7 +41,6 @@
 #include "intarray.h"
 
 #ifndef __MAKEDEPEND
- #include <math.h>
  #include <stdlib.h>
 #endif
 
@@ -54,9 +51,6 @@
 #include "mathfem.h"
 
 namespace oofem {
-/**
- * Constructor. Creates a hanging node with number n, belonging to aDomain.
- */
 HangingNode :: HangingNode(int n, Domain *aDomain) : Node(n, aDomain)
 { 
 #ifdef __OOFEG
@@ -64,53 +58,38 @@ HangingNode :: HangingNode(int n, Domain *aDomain) : Node(n, aDomain)
 #endif
 }
 
-
-void
-HangingNode :: allocAuxArrays(void)
-{
-    locoords = new FloatArray(3);
-    masterDofMngr = new IntArray;
-    masterContribution = new FloatArray;
-}
-
 void
 HangingNode :: deallocAuxArrays(void)
 {
-    delete locoords;
-    delete masterDofMngr;
-    delete masterContribution;
-
-    // only delete
     delete masterNode;
 }
 
 
-/**
- * Gets from the source line from the data file all the data of the receiver.
- */
 IRResultType
 HangingNode :: initializeFrom(InputRecord *ir)
 {
     const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
-    IRResultType result;                 // Required by IR_GIVE_FIELD macro
+    IRResultType result;                   // Required by IR_GIVE_FIELD macro
 
     Node :: initializeFrom(ir);
 
-    // allocate auxiliary arrays
-    allocAuxArrays();
+    locoords.resize(3);
 
-    IR_GIVE_FIELD(ir, * masterDofMngr, IFT_HangingNode_masters, "masters"); // Macro
-    countOfMasterNodes = masterDofMngr->giveSize();
+    // This would be convenient. Renders everything else deprecated / Mikael
+    //IR_GIVE_FIELD(ir, masterElement, IFT_HangingNode_masterElement, "masterelement");
+    IR_GIVE_FIELD(ir, masterDofMngr, IFT_HangingNode_masters, "masters");
+    countOfMasterNodes = masterDofMngr.giveSize();
 
-    IR_GIVE_FIELD(ir, typeOfContrib, IFT_HangingNode_type, "type"); // Macro
+    IR_GIVE_FIELD(ir, typeOfContrib, IFT_HangingNode_type, "type");
 
     if ( typeOfContrib == 0 ) {
-        IR_GIVE_FIELD(ir, * masterContribution, IFT_HangingNode_weigths, "weights"); // Macro
-    } else if ( typeOfContrib < 0 )     { //determine ksi, eta, dzeta directly from element-like configuration defined by nodes
-    } else   {
-        IR_GIVE_FIELD(ir, locoords->at(1), IFT_HangingNode_ksi, "ksi");      // Macro
-        IR_GIVE_OPTIONAL_FIELD(ir, locoords->at(2), IFT_HangingNode_eta, "eta"); // Macro
-        IR_GIVE_OPTIONAL_FIELD(ir, locoords->at(3), IFT_HangingNode_dzeta, "dzeta"); // Macro
+        IR_GIVE_FIELD(ir, masterContribution, IFT_HangingNode_weigths, "weights");
+    } else if ( typeOfContrib < 0 ) {
+        //determine ksi, eta, dzeta directly from element-like configuration defined by nodes
+    } else {
+        IR_GIVE_FIELD(ir, locoords.at(1), IFT_HangingNode_ksi, "ksi");
+        IR_GIVE_OPTIONAL_FIELD(ir, locoords.at(2), IFT_HangingNode_eta, "eta");
+        IR_GIVE_OPTIONAL_FIELD(ir, locoords.at(3), IFT_HangingNode_dzeta, "dzeta");
     }
 
     return IRRT_OK;
@@ -119,18 +98,10 @@ HangingNode :: initializeFrom(InputRecord *ir)
 
 bool nonzero(double x, double tolerance = 10e-10)
 {
-    if ( fabs(x) > tolerance ) {
-        return 1;
-    } else {
-        return 0;
-    }
+    return fabs(x) > tolerance;
 }
 
-/**
- * Checks internal data consistency in node.
- * Current implementation checks (when receiver has slave dofs) if receiver has the same
- * coordinate system as master dofManager of slave dof.
- */
+
 int
 HangingNode :: checkConsistency()
 {
@@ -148,7 +119,7 @@ HangingNode :: checkConsistency()
     // finds master node
     masterNode = new Node * [ countOfMasterNodes ];
     for ( i = 1; i <= countOfMasterNodes; i++ ) {
-        masterNode [ i - 1 ] = dynamic_cast< Node * >( this->domain->giveDofManager( masterDofMngr->at(i) ) );
+        masterNode [ i - 1 ] = dynamic_cast< Node * >( this->domain->giveDofManager( masterDofMngr.at(i) ) );
         if ( !masterNode [ i - 1 ] ) {
             _warning2("checkConsistency: master dofManager is not compatible", 1);
             result = 0;
@@ -171,12 +142,12 @@ HangingNode :: checkConsistency()
     result = result && computeMasterContribution();
 
     // check of master contribution coefficients - SUMA of contributions == 1.0
-    if ( masterContribution->giveSize() != countOfMasterNodes ) {
-        _warning3("checkConsistency: masterContribution.giveSize()(%f) != countOfMasterDofMngr(%f)", masterContribution->giveSize(), countOfMasterNodes);
+    if ( masterContribution.giveSize() != countOfMasterNodes ) {
+        _warning3("checkConsistency: masterContribution.giveSize()(%f) != countOfMasterDofMngr(%f)", masterContribution.giveSize(), countOfMasterNodes);
         result = 0;
     }
 
-    suma = masterContribution->sum();
+    suma = masterContribution.sum();
     // TEMPORARILY TURNED OFF !!!!
     /*
      * if ( nonzero(suma - 1.0, 10e-9) ) {
@@ -197,7 +168,7 @@ HangingNode :: checkConsistency()
         coords.zero();
         for ( i = 1; i <= 3; i++ ) {
             for ( j = 1; j <= countOfMasterNodes; j++ ) {
-                coords.at(i) += masterContribution->at(j) * mnc [ j - 1 ]->at(i);
+                coords.at(i) += masterContribution.at(j) * mnc [ j - 1 ]->at(i);
             }
         }
 
@@ -241,17 +212,13 @@ HangingNode :: checkConsistency()
 void
 HangingNode :: updateLocalNumbering(EntityRenumberingFunctor &f)
 {
-
   int i;
-  for (i=1; i<= masterDofMngr->giveSize(); i++) {
-    masterDofMngr->at(i) = f(masterDofMngr->at(i), ERS_DofManager);
+  for (i=1; i<= masterDofMngr.giveSize(); i++) {
+    masterDofMngr.at(i) = f(masterDofMngr.at(i), ERS_DofManager);
   }
 
   DofManager::updateLocalNumbering(f);
 }
-
-
-
 
 int
 HangingNode :: computeMasterContribution()
@@ -260,97 +227,104 @@ HangingNode :: computeMasterContribution()
         _error("computeMasterContribution: local cross-section is not supported with this type of contribution");
     }
 
+    // Something like this would be elegant and convenient.
+    //Element *e = this->giveDomain()->giveElement(this->masterElement);
+    //e->giveDefaultInterpolator()->evalN(masterContribution, locoords, FEIElementGeometryWrapper(e), 0.0);
+
     switch ( abs(typeOfContrib) ) {
     case 211: {  // linear truss
-        FEI1dLin(0).evalN(* masterContribution, * locoords, FEIVoidCellGeometry(), 0.0);
+        FEI1dLin(0).evalN(masterContribution, locoords, FEIVoidCellGeometry(), 0.0);
         break;
     }
     case 312: { // linear triangle
-        FEI2dTrLin(0, 0).evalN(* masterContribution, * locoords, FEIVoidCellGeometry(), 0.0);
+        FEI2dTrLin(0, 0).evalN(masterContribution, locoords, FEIVoidCellGeometry(), 0.0);
         break;
     }
     case 412: { // linear rectangle
-        FEI2dQuadLin(0, 0).evalN(* masterContribution, * locoords, FEIVoidCellGeometry(), 0.0);
+        FEI2dQuadLin(0, 0).evalN(masterContribution, locoords, FEIVoidCellGeometry(), 0.0);
         break;
     }
     case 813: { // linear hexahedron
-        double x = locoords->at(1), y = locoords->at(2), z = locoords->at(3);
+        //FEI3dHexaLin(0, 0).evalN(masterContribution, locoords, FEIVoidCellGeometry(), 0.0);
+        double x = locoords.at(1), y = locoords.at(2), z = locoords.at(3);
 
-        masterContribution->resize(8);
-        masterContribution->at(1)  = 0.125 * ( 1. - x ) * ( 1. - y ) * ( 1. + z );
-        masterContribution->at(2)  = 0.125 * ( 1. - x ) * ( 1. + y ) * ( 1. + z );
-        masterContribution->at(3)  = 0.125 * ( 1. + x ) * ( 1. + y ) * ( 1. + z );
-        masterContribution->at(4)  = 0.125 * ( 1. + x ) * ( 1. - y ) * ( 1. + z );
-        masterContribution->at(5)  = 0.125 * ( 1. - x ) * ( 1. - y ) * ( 1. - z );
-        masterContribution->at(6)  = 0.125 * ( 1. - x ) * ( 1. + y ) * ( 1. - z );
-        masterContribution->at(7)  = 0.125 * ( 1. + x ) * ( 1. + y ) * ( 1. - z );
-        masterContribution->at(8)  = 0.125 * ( 1. + x ) * ( 1. - y ) * ( 1. - z );
+        masterContribution.resize(8);
+        masterContribution.at(1)  = 0.125 * ( 1. - x ) * ( 1. - y ) * ( 1. + z );
+        masterContribution.at(2)  = 0.125 * ( 1. - x ) * ( 1. + y ) * ( 1. + z );
+        masterContribution.at(3)  = 0.125 * ( 1. + x ) * ( 1. + y ) * ( 1. + z );
+        masterContribution.at(4)  = 0.125 * ( 1. + x ) * ( 1. - y ) * ( 1. + z );
+        masterContribution.at(5)  = 0.125 * ( 1. - x ) * ( 1. - y ) * ( 1. - z );
+        masterContribution.at(6)  = 0.125 * ( 1. - x ) * ( 1. + y ) * ( 1. - z );
+        masterContribution.at(7)  = 0.125 * ( 1. + x ) * ( 1. + y ) * ( 1. - z );
+        masterContribution.at(8)  = 0.125 * ( 1. + x ) * ( 1. - y ) * ( 1. - z );
         break;
     }
     case 321: { // quadratic truss
-        masterContribution->resize(3);
-        masterContribution->at(1) = 0.5 * locoords->at(1) * ( locoords->at(1) - 1.0 );
-        masterContribution->at(2) = 0.5 * locoords->at(1) * ( locoords->at(1) + 1.0 );
-        masterContribution->at(3) = 1.0 - locoords->at(1) *  locoords->at(1);
+        masterContribution.resize(3);
+        masterContribution.at(1) = 0.5 * locoords.at(1) * ( locoords.at(1) - 1.0 );
+        masterContribution.at(2) = 0.5 * locoords.at(1) * ( locoords.at(1) + 1.0 );
+        masterContribution.at(3) = 1.0 - locoords.at(1) *  locoords.at(1);
         break;
     }
     case 622: { // quadratic triangle
-        masterContribution->resize(6);
-        locoords->at(3) = 1. - locoords->at(1) - locoords->at(2);
-        masterContribution->at(1) = ( 2. * locoords->at(1) - 1. ) * locoords->at(1);
-        masterContribution->at(2) = ( 2. * locoords->at(2) - 1. ) * locoords->at(2);
-        masterContribution->at(3) = ( 2. * locoords->at(3) - 1. ) * locoords->at(3);
-        masterContribution->at(4) =  4. * locoords->at(1) * locoords->at(2);
-        masterContribution->at(5) =  4. * locoords->at(2) * locoords->at(3);
-        masterContribution->at(6) =  4. * locoords->at(3) * locoords->at(1);
+        //FEI2dTrQuad(0, 0).evalN(masterContribution, locoords, FEIVoidCellGeometry(), 0.0);
+        masterContribution.resize(6);
+        locoords.at(3) = 1. - locoords.at(1) - locoords.at(2);
+        masterContribution.at(1) = ( 2. * locoords.at(1) - 1. ) * locoords.at(1);
+        masterContribution.at(2) = ( 2. * locoords.at(2) - 1. ) * locoords.at(2);
+        masterContribution.at(3) = ( 2. * locoords.at(3) - 1. ) * locoords.at(3);
+        masterContribution.at(4) =  4. * locoords.at(1) * locoords.at(2);
+        masterContribution.at(5) =  4. * locoords.at(2) * locoords.at(3);
+        masterContribution.at(6) =  4. * locoords.at(3) * locoords.at(1);
         break;
     }
     case 822: { // quadratic rectangle
-        masterContribution->resize(8);
-        masterContribution->at(1) = ( 1. + locoords->at(1) ) * ( 1. + locoords->at(2) ) * 0.25 * ( locoords->at(1) + locoords->at(2) - 1. );
-        masterContribution->at(2) = ( 1. - locoords->at(1) ) * ( 1. + locoords->at(2) ) * 0.25 * ( -locoords->at(1) + locoords->at(2) - 1. );
-        masterContribution->at(3) = ( 1. - locoords->at(1) ) * ( 1. - locoords->at(2) ) * 0.25 * ( -locoords->at(1) - locoords->at(2) - 1. );
-        masterContribution->at(4) = ( 1. + locoords->at(1) ) * ( 1. - locoords->at(2) ) * 0.25 * ( locoords->at(1) - locoords->at(2) - 1. );
-        masterContribution->at(5) = 0.5 * ( 1. - locoords->at(1) * locoords->at(1) ) * ( 1. + locoords->at(2) );
-        masterContribution->at(6) = 0.5 * ( 1. - locoords->at(1) ) * ( 1. - locoords->at(2) * locoords->at(2) );
-        masterContribution->at(7) = 0.5 * ( 1. - locoords->at(1) * locoords->at(1) ) * ( 1. - locoords->at(2) );
-        masterContribution->at(8) = 0.5 * ( 1. + locoords->at(1) ) * ( 1. - locoords->at(2) * locoords->at(2) );
+        //FEI2dQuadQuad(0, 0).evalN(masterContribution, locoords, FEIVoidCellGeometry(), 0.0);
+        masterContribution.resize(8);
+        masterContribution.at(1) = ( 1. + locoords.at(1) ) * ( 1. + locoords.at(2) ) * 0.25 * ( locoords.at(1) + locoords.at(2) - 1. );
+        masterContribution.at(2) = ( 1. - locoords.at(1) ) * ( 1. + locoords.at(2) ) * 0.25 * ( -locoords.at(1) + locoords.at(2) - 1. );
+        masterContribution.at(3) = ( 1. - locoords.at(1) ) * ( 1. - locoords.at(2) ) * 0.25 * ( -locoords.at(1) - locoords.at(2) - 1. );
+        masterContribution.at(4) = ( 1. + locoords.at(1) ) * ( 1. - locoords.at(2) ) * 0.25 * ( locoords.at(1) - locoords.at(2) - 1. );
+        masterContribution.at(5) = 0.5 * ( 1. - locoords.at(1) * locoords.at(1) ) * ( 1. + locoords.at(2) );
+        masterContribution.at(6) = 0.5 * ( 1. - locoords.at(1) ) * ( 1. - locoords.at(2) * locoords.at(2) );
+        masterContribution.at(7) = 0.5 * ( 1. - locoords.at(1) * locoords.at(1) ) * ( 1. - locoords.at(2) );
+        masterContribution.at(8) = 0.5 * ( 1. + locoords.at(1) ) * ( 1. - locoords.at(2) * locoords.at(2) );
         break;
     }
     case 0: // contribution set in input file
         break;
-    default: {
+    default:
         _warning("computeMasterContribution: unknown type");
         return 0;
-
-        break;
-    }
     }
 
     return 1;
 }
 
 int
-HangingNode :: computeNaturalCoordinates() {
+HangingNode :: computeNaturalCoordinates()
+{
+    //Element *e = this->giveDomain()->giveElement(this->masterElement);
+    //e->giveDefaultInterpolator()->global2local(locoords, coordinates, FEIElementGeometryWrapper(e), 0.0);
     int i, j;
     //const FloatArray *masterCoords [ countOfMasterNodes ];
     const FloatArray **masterCoords = new const FloatArray * [ countOfMasterNodes ];
 
-    locoords->zero();
+    locoords.zero();
 
     for ( i = 1; i <= countOfMasterNodes; i++ ) { //master nodes of element-like topology
-        j = masterDofMngr->at(i);
+        j = masterDofMngr.at(i);
         masterCoords [ i - 1 ] = new const FloatArray( *this->domain->giveNode( j )->giveCoordinates() );
     }
 
     //need to extend to other elements
     switch ( typeOfContrib ) {
     case -412: { // linear rectangle
-        FEI2dQuadLin(1, 2).global2local(* this->locoords, coordinates, FEIVertexListGeometryWrapper(countOfMasterNodes, masterCoords), 0.0);
+        FEI2dQuadLin(1, 2).global2local(this->locoords, coordinates, FEIVertexListGeometryWrapper(countOfMasterNodes, masterCoords), 0.0);
         break;
     }
     case -813: { // linear hexahedron
-        FEI3dHexaLin().global2local(* this->locoords, coordinates, FEIVertexListGeometryWrapper(countOfMasterNodes, masterCoords), 0.0);
+        FEI3dHexaLin().global2local(this->locoords, coordinates, FEIVertexListGeometryWrapper(countOfMasterNodes, masterCoords), 0.0);
         break;
     }
     default: {

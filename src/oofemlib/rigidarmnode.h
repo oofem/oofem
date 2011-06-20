@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/dofmanager.C,v 1.18.4.1 2004/04/05 15:19:43 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -33,7 +32,6 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-
 #ifndef rigidarmnode_h
 #define rigidarmnode_h
 
@@ -49,20 +47,20 @@ class IntArray;
 
 /**
  * Class implementing node connected to other node (master) using rigid arm in finite element mesh.
- * Rigid arm node posses no degrees of freedom - all dofs are mapped to master dofs.
- ++ added on August 28, the Rigid arm node supports not only slave dofs mapped to master
- * but also some dofs can be primary doofs. Introduced masterDofMask allowing to
+ * Rigid arm node possess no degrees of freedom - all dofs are mapped to master dofs.
+ * The Rigid arm node supports not only slave dofs mapped to master
+ * but also some dofs can be primary dofs. Introduced masterDofMask allowing to
  * distinguish between primary and mapped (slave) dofs. The primary DOFs can have their own BCs, ICs.
  *
  * The introduction of rigid arm connected nodes allows to avoid very stiff elements used
- * for modelling the rigid-arm connection. The rigid arm node maps its dofs to master dofs
+ * for modeling the rigid-arm connection. The rigid arm node maps its dofs to master dofs
  * using simple transformations (small rotations are assumed). Therefore, the contribution
  * to rigid arm node are localized directly to master related equations.
  * The rigid arm node can not have its own boundary or initial conditions,
  * they are determined completely from master dof conditions.
- * The local coordinate system in slave is not supported in current implementation, the global lcs applies.
+ * The local coordinate system in slave is not supported in current implementation, the global cs applies.
  * On the other hand, rigid arm node can be loaded independently of master.
- * The transformation for DOFs and load is not ortogonal - the inverse transformation can
+ * The transformation for DOFs and load is not orthogonal - the inverse transformation can
  * not be constructed by transposition. Because of time consuming inversion, methods
  * can generally compute both transformations for dofs as well as loads.
  */
@@ -71,16 +69,15 @@ class RigidArmNode : public Node
 protected:
     ///
     IntArray *masterMask;
-
-    /// count of Master Dofs
+    /// Count of Master Dofs
     IntArray *countOfMasterDofs;
-    /// number of master DofManager (Node)
+    /// Number of master DofManager (Node)
     int masterDofMngr;
-    /// pointer to master Node
+    /// Pointer to master Node
     Node **masterNode;
     ///
     IntArray **masterDofID;
-    /// array of vectors of master contribution coefficients
+    /// Array of vectors of master contribution coefficients
     FloatArray **masterContribution;
 
 private:
@@ -90,42 +87,25 @@ private:
 public:
     /**
      * Constructor. Creates a rigid-arm node with number n, belonging to aDomain.
-     * @param n node number in domain aDomain
-     * @param aDomain domain to which node belongs
+     * @param n Node number in domain aDomain.
+     * @param aDomain Domain to which node belongs.
      */
     RigidArmNode(int n, Domain *aDomain);
-    /**
-     * Destructor.
-     */
+    /// Destructor.
     ~RigidArmNode(void) { }
 
-    /**
-     * Initializes receiver acording to object description stored in input record.
-     */
     IRResultType initializeFrom(InputRecord *ir);
-    /**
-     * Checks internal data consistency in node.
-     * @return nonzero if receiver check is o.k.
-     */
     int checkConsistency();
     /**
-     * compute vector of master contribution coefficients - SUMA of contributions == 1.0
+     * Compute vector of master contribution coefficients - SUMA of contributions == 1.0
      */
     int computeMasterContribution();
 
-    /**
-     * Returns class name of the receiver.
-     */
     const char *giveClassName() const { return "RigidArmNode"; }
-    /**
-     * Returns classType id of receiver.
-     * @see FEMComponent::giveClassID
-     */
     classType giveClassID() const { return RigidArmNodeClass; }
-    /// Returns true if dof of given type is allowed to be associated to receiver
     bool isDofTypeCompatible(dofType type) const { return ( type == DT_master || type == DT_slave ); }
 
-    /// returns reference to master dof. Public because RigidArmSlaveDof need to access.
+    /// Returns reference to master dof. Public because RigidArmSlaveDof need to access.
     Node *giveMasterDofMngr() const { return * masterNode; }
 };
 } // end namespace oofem

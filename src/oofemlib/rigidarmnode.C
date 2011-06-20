@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/rigidarmnode.C,v 1.18.4.1 2004/04/05 15:19:43 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -33,7 +32,6 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-
 #include "rigidarmnode.h"
 #include "slavedof.h"
 #include "timestep.h"
@@ -48,9 +46,6 @@
 #endif
 
 namespace oofem {
-/**
- * Constructor. Creates a rigid arm node with number n, belonging to aDomain.
- */
 RigidArmNode :: RigidArmNode(int n, Domain *aDomain) : Node(n, aDomain)
 { }
 
@@ -94,9 +89,6 @@ RigidArmNode :: deallocAuxArrays(void)
 }
 
 
-/**
- * Gets from the source line from the data file all the data of the receiver.
- */
 IRResultType
 RigidArmNode :: initializeFrom(InputRecord *ir)
 {
@@ -118,14 +110,14 @@ RigidArmNode :: initializeFrom(InputRecord *ir)
     return IRRT_OK;
 }
 
-/**
- * Checks internal data consistency in node.
- * Current implementation checks (when receiver has slave dofs) if receiver has the same
- * coordinate system as master dofManager of slave dof.
- * If requested, computes natural coordinates on element-like masternodes
- */
+
 int
 RigidArmNode :: checkConsistency()
+// Checks internal data consistency in node.
+// Current implementation checks (when receiver has slave dofs) if receiver has the same
+// coordinate system as master dofManager of slave dof.
+// If requested, computes natural coordinates on element-like masternodes
+
 {
     int result = 1;
     int i, ndofs;
@@ -174,7 +166,7 @@ RigidArmNode :: checkConsistency()
     // initialize slave dofs (inside check of consistency of receiver and master dof)
     for ( i = 1; i <= numberOfDofs; i++ ) {
         if ( dofArray [ i - 1 ]->giveClassID() == SlaveDofClass ) {
-            ( ( SlaveDof * ) dofArray [ i - 1 ] )->initialize(countOfMasterDofs->at(i), masterNode, masterDofID [ i - 1 ], masterContribution [ i - 1 ]);
+            ( ( SlaveDof * ) dofArray [ i - 1 ] )->initialize(countOfMasterDofs->at(i), masterNode, masterDofID [ i - 1 ], *masterContribution [ i - 1 ]);
         }
     }
 

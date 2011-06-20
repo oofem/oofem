@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -33,9 +33,6 @@
  */
 
 #include "initmodule.h"
-//#include "timestep.h"
-//#include "engngm.h"
-//#include "logger.h"
 #include "oofem_limits.h"
 
 #ifndef __MAKEDEPEND
@@ -61,7 +58,7 @@ InitModule :: initializeFrom(InputRecord *ir)
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     char initFileName [ MAX_FILENAME_LENGTH ];
-    IR_GIVE_FIELD2(ir, initFileName, IFT_InitModule_initfilename, "initfile", MAX_FILENAME_LENGTH); // Macro
+    IR_GIVE_FIELD2(ir, initFileName, IFT_InitModule_initfilename, "initfile", MAX_FILENAME_LENGTH);
     if ( ( initStream = fopen(initFileName, "r") ) == NULL ) {
         OOFEM_ERROR2("InitModule::initializeFrom: failed to open file %s", initFileName);
     }

@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -32,15 +32,11 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-//
-// FILE: linsystsolvertype.h
-//
-
 #ifndef linsystsolvertype_h
 #define linsystsolvertype_h
 
 namespace oofem {
-/*
+/**
  * The values of this type should be related not to specific solvers,
  * but more to specific packages that provide linear solver interface
  * (possibly with many solver types) and are represented by a class

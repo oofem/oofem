@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/Attic/lobattoir.h,v 1.1.2.1 2004/04/05 15:19:43 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -33,11 +32,6 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-
-//
-// class lobattoIntegrationRule
-//
-
 #ifndef lobattoir_h
 #define lobattoir_h
 
@@ -47,32 +41,10 @@ namespace oofem {
 /**
  * Class representing Lobatto-quadrature integration rule.
  * The number of integration points and their coordinates and integration weights depends on
- * integration rule type (rule for integration in 1d, 2d, 3d) and required  acurracy.
+ * integration rule type (rule for integration in 1d, 2d, 3d) and required  accuracy.
  */
 class LobattoIntegrationRule : public IntegrationRule
 {
-    /*
-     * DESCRIPTION:
-     * Implements integration rule class.
-     * Stores integration points used for integration
-     * of necesary terms (for example computation of  stiffness matrix
-     * or computation of element nodal force vector )
-     * and it  corresponds to some local strains
-     * on finite element level. Finite element can have many
-     * integration rules corresponding to  different strains.
-     *
-     * TASKS:
-     * instanciating yourself
-     * returning number of integration points used
-     * returning requested integration point - method getIntegrationPoint
-     * returning inteval of components (i.e.of local strain vector), where apply
-     * printing yourself
-     * updating yourself
-     * initializing for new time step
-     * saving & restoring context
-     */
-private:
-
 public:
     /**
      * Constructor.
@@ -86,46 +58,18 @@ public:
     /// Destructor
     ~LobattoIntegrationRule();
 
-    ///Returns classType id of receiver.
     classType giveClassID() const { return LobattoIntegrationRuleClass; }
-    ///Returns class name of the receiver.
     const char *giveClassName() const { return "LobattoIntegrationRule"; }
     IRResultType initializeFrom(InputRecord *ir) { return IRRT_OK; }
 
-    /**
-     * Returns requred number of integration points to exactly integrate
-     * polynomial of order approxOrder on given domain.
-     * When approxOrder is too large and is not supported by implementation
-     * method returns -1.
-     */
     int getRequiredNumberOfIntegrationPoints(integrationDomain dType, int approxOrder);
 
 protected:
-    /**
-     * Sets up receiver's  integration points on unit line integration domain.
-     * @returns number of integration points.
-     */
-    int SetUpPointsOnLine(int, Element *, MaterialMode, GaussPoint * * *);
-    /**
-     * Sets up receiver's  integration points on triangular (area coords) integration domain.
-     * @returns number of integration points.
-     */
-    int SetUpPointsOnTriagle(int, Element *, MaterialMode, GaussPoint * * *);
-    /**
-     * Sets up receiver's  integration points on unit square integration domain.
-     * @returns number of integration points.
-     */
-    int SetUpPointsOnSquare(int, Element *, MaterialMode, GaussPoint * * *);
-    /**
-     * Sets up receiver's  integration points on unit cube integration domain.
-     * @returns number of integration points.
-     */
-    int SetUpPointsOnCube(int, Element *, MaterialMode, GaussPoint * * *);
-    /**
-     * Sets up receiver's  integration points on tetrahedra (volume coords) integration domain.
-     * @returns number of integration points.
-     */
-    int SetUpPointsOnTetrahedra(int, Element *, MaterialMode, GaussPoint * * *);
+    int SetUpPointsOnLine(int, Element *, MaterialMode mode, GaussPoint ***gp);
+    int SetUpPointsOnTriagle(int, Element *, MaterialMode mode, GaussPoint ***gp);
+    int SetUpPointsOnSquare(int, Element *, MaterialMode mode, GaussPoint ***gp);
+    int SetUpPointsOnCube(int, Element *, MaterialMode mode, GaussPoint ***gp);
+    int SetUpPointsOnTetrahedra(int, Element *, MaterialMode mode, GaussPoint ***gp);
 };
 } // end namespace oofem
 #endif // lobattoir_h

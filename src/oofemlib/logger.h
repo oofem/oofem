@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/Attic/logger.h,v 1.1.2.1 2004/04/05 15:19:43 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -45,7 +44,7 @@ namespace oofem {
 class Logger
 {
 public:
-    /// Type defining basic log levels
+    /// Type defining basic log levels.
     enum logLevelType {
         LOG_LEVEL_FORCED=-1,
         LOG_LEVEL_FATAL=0, LOG_LEVEL_ERROR=0,
@@ -55,33 +54,33 @@ public:
         LOG_LEVEL_ALL = 4, LOG_LEVEL_DEBUG = 4
     };
 protected:
-    /// Stream used for logging
+    /// Stream used for logging.
     FILE *mylogStream;
-    /// flag indicating whether to close mylogStream
+    /// flag indicating whether to close mylogStream.
     bool closeFlag;
-    /// Current log level, messages with higher level are not reported
+    /// Current log level, messages with higher level are not reported.
     logLevelType logLevel;
-    /// Counter of all warning and error messages
+    /// Counter of all warning and error messages.
     int numberOfWrn, numberOfErr;
 
 public:
     Logger(logLevelType level, FILE *stream);
     ~Logger();
-    /* redirects log output to given file name (with path) */
+    /// Redirects log output to given file name (with path).
     void appendlogTo(char *fname);
 
-    /* writes the normal log message */
+    /// Writes the normal log message.
     void writeLogMsg(logLevelType level, const char *format, ...);
-    /* writes extended log message with file and line info */
+    /// Writes extended log message with file and line info.
     void writeELogMsg(logLevelType level, const char *_file, int _line, const char *format, ...);
-    /* flushes the log stream */
+    /// Flushes the log stream.
     void flush() { fflush(mylogStream); }
 
-    /* sets log level to given one. Only log messages with level less or equal given treshold will be printed*/
+    /// Sets log level to given one. Only log messages with level less or equal given threshold will be printed.
     void setLogLevel(logLevelType level) { logLevel = level; }
-    /* sets log level to given one. Only log messages with level less or equal given treshold will be printed*/
+    /// Sets log level to given one. Only log messages with level less or equal given threshold will be printed.
     void setLogLevel(int level);
-    /* prints number of errors and warning logged */
+    /// Prints number of errors and warning logged.
     void printStatistics();
 
 protected:
@@ -95,13 +94,13 @@ extern Logger oofem_errLogger;
 /**@
  * General log-family macros (those for error and warning reporting).
  * These macros add to given message also file and line information.
- * They can be implemnted in a very elegant way using macro with variable
+ * They can be implemented in a very elegant way using macro with variable
  * number of arguments (__VA_ARGS__). But since the many compilers do not support
  * macros with variable number of arguments we have two choices:
- * to implement this as a function with variable num of args, but then we can not
+ * to implement this as a function with variable number of arguments, but then we can not
  * add file and line info via __FILE__ and __LINE__ macros. Or if file and line
- * info is prefered, then instead of single macro vith var num of args we can have
- * series of "clasical" macros with increasing number of parameters.
+ * info is preferred, then instead of single macro with variable number of arguments we can have
+ * series of "classical" macros with increasing number of parameters.
  * The latter approach is used here.
  */
 //@{
@@ -143,7 +142,7 @@ extern Logger oofem_errLogger;
 #ifdef HAVE_MACRO_VA_ARGS
 /// used internally
 /**@
- * Log reporting macross (those that do add file and line info)
+ * Log reporting macros (those that do add file and line info)
  */
 //@{
  #define __LOG_E_MESSAGE(logger, level, _file, _line, ...) logger.writeELogMsg(level, _file, _line, __VA_ARGS__)

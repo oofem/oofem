@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/initmodule.h,v 1.5.4.1 2004/04/05 15:19:43 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2010   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -32,10 +31,6 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-
-//
-// class InitModule
-//
 
 #ifndef initmodule_h
 #define initmodule_h
@@ -62,28 +57,24 @@ class TimeStep;
 class InitModule
 {
 protected:
-    /// number
+    /// Number.
     int number;
-    /// Problem pointer
+    /// Problem pointer.
     EngngModel *emodel;
-    /// Initialization file
+    /// Initialization file.
     FILE *initStream;
-public:
 
+public:
     /// Constructor. Creates empty Init Module with number n.
     InitModule(int n, EngngModel *e);
     /// Destructor
     virtual ~InitModule();
-    /// Initializes receiver acording to object description stored in input record.
+    /// Initializes receiver according to object description stored in input record.
     virtual IRResultType initializeFrom(InputRecord *ir) = 0;
-    /**
-     * Reads the input. Abstract service.
-     */
+    /// Reads the input. Abstract service.
     virtual void doInit() = 0;
     /// Returns class name of the receiver.
     virtual const char *giveClassName() const { return "InitModule"; }
-
-protected:
 };
 } // end namespace oofem
 #endif // initmodule_h
