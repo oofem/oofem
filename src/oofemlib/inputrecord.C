@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/inputrecord.C,v 1.4.4.1 2004/04/05 15:19:43 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -33,11 +32,6 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-
-//
-// file inputrecord.cc
-//
-
 #include "inputrecord.h"
 #ifndef __MAKEDEPEND
  #include <ctype.h>
@@ -49,8 +43,6 @@ InputRecord :: InputRecord()
 
 InputRecord :: InputRecord(const InputRecord &src)
 { }
-
-
 
 InputRecord &
 InputRecord :: operator = ( const InputRecord & src )

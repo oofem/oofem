@@ -1970,53 +1970,30 @@ corresponding dofType value equal to 2) the corresponding value of
 \item Hanging node
 
   \begin{record}[0.9\textwidth]
-    \recentry{\entKeywordInst{HangingNode~}}{\field{coords}{ra}}
-    \recentry{}{\field{type}{in}} \recentry{}{\field{masters}{ia}}
-    \recentry{}{\optField{ksi}{rn}}
-    \recentry{}{\optField{eta}{rn}} \recentry{}{\optField{dzeta}{rn}} \recentry{}{\optField{weights}{ra}}
+    \recentry{\entKeywordInst{HangingNode}}{\field{coords}{ra}}
+    \recentry{}{\field{type}{in}} \recentry{}{\field{masterElement}{in}}
   \end{record}
-Hanging node connected to other nodes (masters) using generalized interpolation.
-Hanging node posses no degrees of freedom	(except unlined dofs) - all values are
-interpolated from corresponding master nodes and their DOFs.
-The introduction of hanging nodes allows, for example, to include reinforcing bar elements inside
+
+Hanging node is connected to an a master element using generalized interpolation.
+Hanging node posses no degrees of freedom (except unlined dofs) - all values are
+interpolated from corresponding master elements and its DOFs.
 arbitrary FE mesh of concrete specimen or to facilitate the local
 refinment of FE mesh. The hanging nodes can be in a chain.
+
 The contributions of hanging node are localized directly to master related equations.
 The hanging node can have its own boundary or initial conditions, but
-only for primary unlinked DOFs, for linked DOFs, these conditions are
+only for primary unlinked DOFs. For linked DOFs, these conditions are
 determined completely from master DOF conditions.
 The local coordinate system should be same for all master nodes.
 The hanging node can be loaded independently of its master.
 
-The array \param{masters} contains nodes, which create a virtual element-like interpolation. The sequence of
-nodes must correspond to element numbering, e.g. anti-clockwise numbering for a linear quadrilateral.
-Under normal circumstances, the nodes in the array are the same as a nodal array for some element. However, the array
-may have nodes combined from more than one element.
+Values of array \param{dofType} can have following values:
+0-primary DOF, 2-linked DOF.
 
-Values of array \param{dofType} can have following values: {0-primary DOF, 2-linked DOF}.
-
-If parameter \param{type} equals to zero, then user have to specify
-for each master its weight (determined by \param{weights} array).
-Currently, there is no possibility to have different weights for
-different DOFs - all DOFs share the same weight).
-
-If parameter \param{type} is positive, then the value determines the type of interpolation used to
-evalueate receiver unknowns and position and \param{weights} array is not required. The value is
-defined as 100*(number of master nodes) + 10*(order of polynomial
-approximation) + dimension. For example: 211 - linear truss, 312 -
-linear triangle, 412 - linear rectangle, or 413 - linear tetrahedron.
-On input, the hanging node coordinates (specified using
-\param{coord} array) as well as its natural coordinates (parameters
-\param{ksi, eta, dzeta} determine first, second, and third natural
-coordinate) should be provided. Natural coordinates are
-defined as a local coordinate that yield node global coordinates for
-selected interpolation type (isoparametric interpolation with the same order
-for geometry and unknowns is assumed).
-
-Negative value of \param{type} signalizes that the interpolation uses directly
-\param{masters} array and calculates natural coordinates from given coordinates
-of the hanging node. The negative number is calculated in the same way as a positive one.
-For example -413 refers to a linear tetrahedron.
+The value of \param{masterElement} specifies the element number to which the hanging node is attached. 
+The node can be attached to any arbitrary coordinate within the master element.
+The element must support the necessary interpolation classes.
+The same interpolation for unknowns and geometry is assumed.
 
 \item Element side
 

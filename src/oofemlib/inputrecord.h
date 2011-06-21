@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/inputrecord.h,v 1.4 2003/05/19 13:03:57 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -33,14 +32,8 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-
-//
-// Class stringReader
-//
-
 #ifndef inputrecord_h
 #define inputrecord_h
-
 
 #include "intarray.h"
 #include "flotarry.h"
@@ -64,7 +57,7 @@ namespace oofem {
 enum IRResultType { IRRT_OK = 0, IRRT_NOTFOUND, IRRT_BAD_FORMAT };
 
 /**
- * Enumeration type used to determine particular field in record
+ * Enumeration type used to determine particular field in record.
  */
 enum InputFieldType {
     IFT_RecordIDField,
@@ -360,12 +353,7 @@ enum InputFieldType {
     IFT_RigidArmNode_remote,
     IFT_RigidArmNode_null,
 
-    IFT_HangingNode_type,
-    IFT_HangingNode_masters,
-    IFT_HangingNode_weigths,
-    IFT_HangingNode_ksi,
-    IFT_HangingNode_eta,
-    IFT_HangingNode_dzeta,
+    IFT_HangingNode_masterElement,
 
     IFT_Element_mat,
     IFT_Element_crosssect,
@@ -1202,7 +1190,7 @@ public:
     InputRecord(const InputRecord &);
     /// Destructor
     virtual ~InputRecord() { }
-    // Assingnment operator
+    /// Assignment operator.
     InputRecord &operator=(const InputRecord &);
 
     /** Creates a newly allocated copy of the receiver */
@@ -1215,27 +1203,27 @@ public:
      * @return IRResultType
      */
     //@{
-    /// Reads the record id field  (type of record) and its corresponding number
+    /// Reads the record id field  (type of record) and its corresponding number.
     virtual IRResultType giveRecordKeywordField(char *answer, int &value, int maxchar) = 0;
-    /// Reads the record id field  (type of record)
+    /// Reads the record id field  (type of record).
     virtual IRResultType giveRecordKeywordField(char *answer, int maxchar) = 0;
-    /// Reads the integer field value
+    /// Reads the integer field value.
     virtual IRResultType giveField(int &answer, const InputFieldType fieldID, const char *idString) = 0;
-    /// Reads the double field value
+    /// Reads the double field value.
     virtual IRResultType giveField(double &answer, const InputFieldType fieldID, const char *idString) = 0;
-    /// Reads the char* field value
+    /// Reads the char* field value.
     virtual IRResultType giveField(char *answer, int maxchar, const InputFieldType fieldI, const char *idString) = 0;
-    /// Reads the FloatArray field value
+    /// Reads the FloatArray field value.
     virtual IRResultType giveField(FloatArray &answer, const InputFieldType fieldI, const char *idString) = 0;
-    /// Reads the IntArray field value
+    /// Reads the IntArray field value.
     virtual IRResultType giveField(IntArray &answer, const InputFieldType fieldID, const char *idString) = 0;
-    /// Reads the FloatMatrix field value
+    /// Reads the FloatMatrix field value.
     virtual IRResultType giveField(FloatMatrix &answer, const InputFieldType fieldI, const char *idString) = 0;
-    //// Reads the array of strings
+    //// Reads the array of strings.
     //virtual IRResultType giveField(std::string *answer, int maxchar, const InputFieldType fieldID, const char *idString) = 0;
-    /// Reads the Dictionary field value
+    /// Reads the Dictionary field value.
     virtual IRResultType giveField(Dictionary &answer, const InputFieldType fieldID, const char *idString) = 0;
-    /// Reads the dynaList<Range> field value
+    /// Reads the dynaList<Range> field value.
     virtual IRResultType giveField(dynaList< Range > &answer, const InputFieldType fieldID, const char *idString) = 0;
     //@}
 
@@ -1246,35 +1234,35 @@ public:
      * @return IRResultType
      */
     //@{
-    /// Reads the integer field value
+    /// Reads the integer field value.
     virtual IRResultType giveOptionalField(int &answer, const InputFieldType fieldID, const char *idString) = 0;
-    /// Reads the double field value
+    /// Reads the double field value.
     virtual IRResultType giveOptionalField(double &answer, const InputFieldType fieldID, const char *idString) = 0;
-    /// Reads the char* field value
+    /// Reads the char* field value.
     virtual IRResultType giveOptionalField(char *answer, int maxchar, const InputFieldType fieldID, const char *idString) = 0;
-    /// Reads the FloatArray field value
+    /// Reads the FloatArray field value.
     virtual IRResultType giveOptionalField(FloatArray &answer, const InputFieldType fieldID, const char *idString) = 0;
-    /// Reads the IntArray field value
+    /// Reads the IntArray field value.
     virtual IRResultType giveOptionalField(IntArray &answer, const InputFieldType fieldID, const char *idString) = 0;
-    /// Reads the FloatMatrix field value
+    /// Reads the FloatMatrix field value.
     virtual IRResultType giveOptionalField(FloatMatrix &answer, const InputFieldType fieldID, const char *idString) = 0;
-    /// Reads the Dictionary field value
+    /// Reads the Dictionary field value.
     virtual IRResultType giveOptionalField(Dictionary &answer, const InputFieldType fieldID, const char *idString) = 0;
-    /// Reads the dynaList<Range> field value
+    /// Reads the dynaList<Range> field value.
     virtual IRResultType giveOptionalField(dynaList< Range > &answer, const InputFieldType fieldID, const char *idString) = 0;
     //@}
 
-    /// Returns true if record contains field identified by idString keyword
-    virtual bool         hasField(const InputFieldType fieldID, const char *idString) = 0;
+    /// Returns true if record contains field identified by idString keyword.
+    virtual bool hasField(const InputFieldType fieldID, const char *idString) = 0;
 
-    /// Returns error string corresponding to given value of IRResultType type
+    /// Returns error string corresponding to given value of IRResultType type.
     const char *strerror(IRResultType);
 
-    /// Prints the error message
+    /// Prints the error message.
     void report_error(const char *_class, const char *proc, const InputFieldType fieldID, const char *kwd,
                       IRResultType result, const char *file, int line);
 
-    /** terminates the current record session and if the flag is true, warning is printed for unscanned tokens */
+    /// Terminates the current record session and if the flag is true, warning is printed for unscanned tokens.
     virtual void finish(bool wrn = true) = 0;
 };
 } // end namespace oofem
