@@ -135,7 +135,7 @@ Material *CreateUsrDefMaterialOfType(const char *name, int num, Domain *d);
  * @param master Master engineering model.
  * @return Newly allocated object of requested type, null if keyword not supported.
  */
-TopologyDescription *CreateUsrDefTopologyOfType(const char *name, Domain *d);
+//TopologyDescription *CreateUsrDefTopologyOfType(const char *name, Domain *d);
 /**
  * Creates new empty instance of sparse matrix of given type (the constructor with no parameters is called).
  * @param type Determines sparseMtrx type.
