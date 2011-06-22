@@ -63,6 +63,7 @@ class FloatArray;
 class IntArray;
 class CrossSection;
 class ElementSide;
+class FEInterpolation;
 
 #ifdef __PARALLEL_MODE
 class CommunicationBuffer;

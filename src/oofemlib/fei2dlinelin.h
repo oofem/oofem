@@ -32,42 +32,50 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#ifndef fei1dlin_h
-#define fei1dlin_h
+#ifndef fei2dlinequad_h
+#define fei2dlinequad_h
 
-#include "feinterpol1d.h"
+#include "feinterpol2d.h"
 
 namespace oofem {
 /**
- * Class representing a 1d linear isoparametric interpolation.
+ * Class representing a 2d line with linear interpolation.
+ * @todo{Some more routines to be implemented here}
+ * @author Mikael Öhman
  */
-class FEI1dLin : public FEInterpolation1d
+class FEI2dLineLin : public FEInterpolation2d
 {
 protected:
-    int cindx;
+    int xind, yind;
 
 public:
-    FEI1dLin(int coordIndx) : FEInterpolation1d(1) { cindx = coordIndx; }
+    FEI2dLineLin(int ind1, int ind2) : FEInterpolation2d(1) {
+        xind = ind1;
+        yind = ind2;
+    }
+    ~FEI2dLineLin() { }
 
+    virtual void local2global(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time);
+    virtual int  global2local(FloatArray &answer, const FloatArray &gcoords, const FEICellGeometry &cellgeo, double time);
+
+    // "Bulk"
     virtual void evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time);
     virtual void evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time);
-    virtual void local2global(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time);
-    virtual int  global2local(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time);
     virtual double giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time);
+    virtual double giveArea(const FEICellGeometry &cellgeo) { return 0.0;};
+
+    // Edge (same as bulk for this type, so they are all ignored) (perhaps do it the other way around?).
+    virtual void computeLocalEdgeMapping(IntArray &edgeNodes, int iedge) {};
+    virtual void edgeEvalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time) { };
+    virtual void edgeEvaldNdx(FloatMatrix &answer, int iedge,
+                              const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time) {};
+    virtual void edgeLocal2global(FloatArray &answer, int iedge,
+                                  const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time) {};
+    virtual double edgeGiveTransformationJacobian(int iedge, const FloatArray &lcoords,
+                                                  const FEICellGeometry &cellgeo, double time) {};
 
 protected:
-    /**
-     * Computes the real length of element geometry.
-     * @param cellgeo Cell geometry.
-     * @return Length of cell.
-     */
-    double computeLength(const FEICellGeometry &cellgeo);
+    double edgeComputeLength(IntArray &edgeNodes, const FEICellGeometry &cellgeo);
 };
 } // end namespace oofem
-#endif // fei1dlin_h
-
-
-
-
-
-
+#endif // fei2dlinequad_h

@@ -123,8 +123,8 @@ int FEI2dLineQuad :: global2local(FloatArray &answer, const FloatArray &gcoords,
 
 double FEI2dLineQuad :: giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time)
 {
-    OOFEM_ERROR("FEI2DLineQuad :: edgeComputeLength - Not implemented");
-    return 0.0;
+    OOFEM_ERROR("FEI2DLineQuad :: giveTransformationJacobian - Not implemented");
+    return 1.0;
 }
 
 double FEI2dLineQuad :: edgeComputeLength(IntArray &edgeNodes, const FEICellGeometry &cellgeo)
