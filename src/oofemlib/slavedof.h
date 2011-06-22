@@ -74,7 +74,7 @@ public:
     /// Destructor.
     ~SlaveDof(void) { }
 
-    void initialize(int cntOfMstrDfMngr, Node **mstrNode, const IntArray *mstrDofID, const FloatArray &mstrContribution);
+    void initialize(int cntOfMstrDfMngr, const IntArray &masterNodes, const IntArray *mstrDofID, const FloatArray &mstrContribution);
     int giveNumberOfPrimaryMasterDofs(void);
     void giveMasterDofManArray(IntArray &answer);
     void giveUnknowns(FloatArray &masterUnknowns, EquationID type, ValueModeType mode, TimeStep *stepN);

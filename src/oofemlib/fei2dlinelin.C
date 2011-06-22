@@ -57,11 +57,12 @@ void FEI2dLineLin :: local2global(FloatArray &answer, const FloatArray &lcoords,
 {
     FloatArray n;
     this->evalN(n, lcoords, cellgeo, time);
-    answer.resize(2);
-    answer.at(1) = ( n(0) * cellgeo.giveVertexCoordinates(1)->at(xind) +
-                     n(1) * cellgeo.giveVertexCoordinates(2)->at(xind) );
-    answer.at(2) = ( n(0) * cellgeo.giveVertexCoordinates(1)->at(yind) +
-                     n(1) * cellgeo.giveVertexCoordinates(2)->at(yind) );
+    answer.resize(max(xind,yind));
+    answer.zero();
+    answer.at(xind) = ( n(0) * cellgeo.giveVertexCoordinates(1)->at(xind) +
+                        n(1) * cellgeo.giveVertexCoordinates(2)->at(xind) );
+    answer.at(yind) = ( n(0) * cellgeo.giveVertexCoordinates(1)->at(yind) +
+                        n(1) * cellgeo.giveVertexCoordinates(2)->at(yind) );
 }
 
 int FEI2dLineLin :: global2local(FloatArray &answer, const FloatArray &gcoords, const FEICellGeometry &cellgeo, double time)

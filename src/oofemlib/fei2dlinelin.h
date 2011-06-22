@@ -32,8 +32,8 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#ifndef fei2dlinequad_h
-#define fei2dlinequad_h
+#ifndef fei2dlinelin_h
+#define fei2dlinelin_h
 
 #include "feinterpol2d.h"
 
@@ -78,4 +78,4 @@ protected:
     double edgeComputeLength(IntArray &edgeNodes, const FEICellGeometry &cellgeo);
 };
 } // end namespace oofem
-#endif // fei2dlinequad_h
+#endif // fei2dlinelin_h

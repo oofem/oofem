@@ -443,8 +443,15 @@ public:
      * @return Requested element side.
      */
     virtual ElementSide *giveSide(int i) const;
-    /// @return Interpolation of Element.
+    /// @return Interpolation of the element geometry, or NULL if none exist.
     virtual FEInterpolation *giveInterpolation() { return NULL; }
+    /**
+     * Returns the interpolation for the specific dof id.
+     * Special elements which uses a mixed interpolation should reimplement this method.
+     * @param id ID of the dof for the for the requested interpolation.
+     * @return Appropriate interpolation, or NULL if none exists.
+     */
+    virtual FEInterpolation *giveInterpolation(DofIDItem id) { return giveInterpolation(); }
     /// @return Reference to the associated material of element.
     Material *giveMaterial();
     /// @return Reference to the associated crossSection of element.

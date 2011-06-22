@@ -156,9 +156,11 @@ RigidArmNode :: checkConsistency()
         }
     }
 
+    IntArray masterNodes(ndofs);
     masterNode = new Node * [ ndofs ];
     for ( i = 1; i <= ndofs; i++ ) {
         masterNode [ i - 1 ] = master;
+        masterNodes.at(i) = master->giveNumber();
     }
 
     result = result && computeMasterContribution();
@@ -166,7 +168,7 @@ RigidArmNode :: checkConsistency()
     // initialize slave dofs (inside check of consistency of receiver and master dof)
     for ( i = 1; i <= numberOfDofs; i++ ) {
         if ( dofArray [ i - 1 ]->giveClassID() == SlaveDofClass ) {
-            ( ( SlaveDof * ) dofArray [ i - 1 ] )->initialize(countOfMasterDofs->at(i), masterNode, masterDofID [ i - 1 ], *masterContribution [ i - 1 ]);
+            ( ( SlaveDof * ) dofArray [ i - 1 ] )->initialize(countOfMasterDofs->at(i), masterNodes, masterDofID [ i - 1 ], *masterContribution [ i - 1 ]);
         }
     }
 

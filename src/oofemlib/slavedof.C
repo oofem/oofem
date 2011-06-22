@@ -51,7 +51,7 @@ SlaveDof :: SlaveDof(int n, DofManager *aNode, DofIDItem id) : Dof(n, aNode, id)
 
 
 void
-SlaveDof :: initialize(int cntOfMstrDfMngr, Node **mstrNode, const IntArray *mstrDofID, const FloatArray &mstrContribution)
+SlaveDof :: initialize(int cntOfMstrDfMngr, const IntArray &masterNodes, const IntArray *mstrDofID, const FloatArray &mstrContribution)
 {
     int i, id;
     bool idSame = false;
@@ -82,7 +82,7 @@ SlaveDof :: initialize(int cntOfMstrDfMngr, Node **mstrNode, const IntArray *mst
             id = mstrDofID->at(i);
         }
 
-        masterDofMans.at(i) = mstrNode [ i - 1 ]->giveNumber();
+        masterDofMans.at(i) = masterNodes.at(i);
         dofIDs.at(i) = id;
     }
 }

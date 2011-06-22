@@ -94,27 +94,51 @@ int HangingNode :: checkConsistency()
     }
 #endif
 #endif
-
-
-    fei->global2local(lcoords, coordinates, FEIElementGeometryWrapper(e), 0.0);
-    fei->evalN(masterContribution, lcoords, FEIElementGeometryWrapper(e), 0.0);
-
-    // Initialize slave dofs (inside check of consistency of receiver and master dof)
-    //AList<Node*> masterNode(e->giveNumberOfNodes()); // TODO: Change to AList, avoiding pointers.
-    Node **masterNode = new Node * [ e->giveNumberOfNodes() ];
+    // Check local coordinate systems
     for ( int i = 1; i <= e->giveNumberOfNodes(); ++i ) {
-        masterNode[i-1] = e->giveNode(i);
         if ( !this->hasSameLCS(e->giveNode(i)) ) {
             OOFEM_WARNING("HangingNode :: checkConsistency - Different lcs for master/slave nodes.");
             result = false;
         }
     }
+
+    fei->global2local(lcoords, coordinates, FEIElementGeometryWrapper(e), 0.0);
+
+    // Initialize slave dofs (inside check of consistency of receiver and master dof)
+    const IntArray &masterNodes = e->giveDofManArray();
     for ( int i = 1; i <= numberOfDofs; i++ ) {
         if ( dofArray [ i - 1 ]->giveClassID() == SlaveDofClass ) {
-            ( ( SlaveDof * ) dofArray [ i - 1 ] )->initialize(masterContribution.giveSize(), masterNode, NULL, masterContribution);
+            SlaveDof *sdof = ( SlaveDof * ) dofArray [ i - 1 ];
+            DofIDItem id = sdof->giveDofID();
+            fei = e->giveInterpolation(id);
+            if (!fei) {
+                OOFEM_WARNING3("HangingNode :: checkConsistency - Requested interpolation for dof id %d doesn't exist in element %d.",
+                        id, this->masterElement);
+                return false;
+            }
+#if 0// This won't work (yet), as it requires some more general FEI classes, or something similar.
+            if (fei->hasMultiField()) {
+                FloatMatrix multiContribution;
+                IntArray masterDofIDs, masterNodesDup, dofids;
+                fei->evalMultiN(multiContribution, dofids, lcoords, FEIElementGeometryWrapper(e), 0.0);
+                masterContribution.flatten(multiContribution);
+                masterDofIDs.resize(0);
+                for (int i = 0; i <= multiContribution.giveNumberOfColumns(); ++i) {
+                    masterDofIDs.followedBy(dofids);
+                    masterNodesDup.followedBy(masterNodes);
+                }
+                sdof->initialize(masterContribution.giveSize(), masterNodesDup, &masterDofIDs, masterContribution);
+            } else { }
+#else
+            // Note: There can be more masterNodes than masterContributions, since all the
+            // FEI classes are based on that the first nodes correspond to the simpler/linear interpolation.
+            // If this assumption is changed in FEIElementGeometryWrapper + friends,
+            // masterNode will also need to be modified for each dof accordingly.
+            fei->evalN(masterContribution, lcoords, FEIElementGeometryWrapper(e), 0.0);
+            sdof->initialize(masterContribution.giveSize(), masterNodes, NULL, masterContribution);
+#endif
         }
     }
-    delete masterNode;
 
     return true;
 }
