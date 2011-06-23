@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/nonlocmatstiffinterface.h,v 1.5 2003/04/06 14:08:25 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -33,19 +32,8 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-
-//   ***************************************************
-//   *** CLASS NONLOCAL MATERIAL STIFFNESS INTERFACE ***
-//   ***************************************************
-
 #ifndef nonlocmatstiffinterface_h
 #define nonlocmatstiffinterface_h
-
-/**
- * Class Nonlocal Material Stiffness Interface. This is only abstract class.
- * This interface allows material model to add those services required to
- * compute and assemble nonlocal contribution to stiffness matrix.
- */
 
 #include "interface.h"
 #include "nonlocalmaterialext.h"
@@ -60,13 +48,18 @@ class SparseMtrx;
 class GaussPoint;
 class TimeStep;
 
+/**
+ * Class Nonlocal Material Stiffness Interface. This is only abstract class.
+ * This interface allows material model to add those services required to
+ * compute and assemble nonlocal contribution to stiffness matrix.
+ */
 class NonlocalMaterialStiffnessInterface : public Interface
 {
 public:
-    /// Constructor
+    /// Constructor.
     NonlocalMaterialStiffnessInterface() : Interface() { }
 
-    /// compute ans add IP contributions to destination matrix
+    /// Computes and adds IP contributions to destination matrix.
     virtual void NonlocalMaterialStiffnessInterface_addIPContribution(SparseMtrx &dest, const UnknownNumberingScheme &s,
                                                                       GaussPoint *gp, TimeStep *atTime) = 0;
     /**

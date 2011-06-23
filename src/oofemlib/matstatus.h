@@ -32,7 +32,6 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-
 #ifndef matstatus_h
 #define matstatus_h
 
@@ -43,32 +42,6 @@
 #include "classtype.h"
 
 namespace oofem {
-/*
- * This class implements a material status information. It is attribute of
- * gaussPoint. This is only an abstract class, for every instance of material class
- * there should be specialized derived class, which handles are history variables.
- *
- * DESCRIPTION
- *
- * A Material status is intended to be a "status" object, for every instance of
- * material class there should exist corresponding instance of base material
- * status class, which provides specialized interface to capture possible
- * state history variables.
- * storing and restoring context is invoked at material(yield criteria)
- * level, so correspondent material(y.c) will create a new corresponding
- * context if needed (happen when restoreContext invoked for the first time)
- * Statuses of such objects are stored in GaussPoint.
- *
- * TASKS
- * This is abstract class - only basic functionality is supported like:
- * - storing and restoring status on tape
- * - printingYourself()
- * - updating Yourself after a new equilibrium state has been reached.
- *
- * REMARK
- * Materials statuses are attributes of GaussPoints, they are stored in
- * MatStatus variable of GaussPoint class instance.
- */
 
 class GaussPoint;
 class Dictionary;
@@ -103,6 +76,15 @@ class NonlocalMaterialStatusExtension;
  *
  * The unique copy of material status class instance corresponding to material model is
  * created and associated with any integration point.
+ *
+ * Tasks:
+ * This is abstract class - only basic functionality is supported like:
+ * - storing and restoring status on tape
+ * - printingYourself()
+ * - updating Yourself after a new equilibrium state has been reached.
+ *
+ * @note{Materials statuses are attributes of GaussPoints, they are stored in
+ * MatStatus variable of GaussPoint class instance.}
  */
 class MaterialStatus : public FEMComponent
 {
@@ -121,7 +103,7 @@ public:
     /// Destructor.
     ~MaterialStatus() { }
     /// Print receiver's output to given stream.
-    void printOutputAt(FILE *, TimeStep *) { }
+    void printOutputAt(FILE *file, TimeStep *tStep) { }
 
     /**
      * Initializes the temporary internal variables, describing the current state according to

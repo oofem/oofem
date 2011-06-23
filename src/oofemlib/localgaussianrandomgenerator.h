@@ -1,4 +1,3 @@
-/* $Header: $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -33,17 +32,6 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-/*
- * Author: Peter Grassl
- */
-
-// file: localrandomgenerator.h
-
-// **********************************************************
-// CLASS LOCAL RANDOM GENERATOR
-// **********************************************************
-
-
 #ifndef localrandomgenerator_h
 #define localrandomgenerator_h
 
@@ -52,57 +40,52 @@
 
 namespace oofem {
 /**
- *  This class implements a local (no spatial correlation) random generator using Guassian distribution.
+ * This class implements a local (no spatial correlation) random generator using Gaussian distribution.
+ * @author Peter Grassl
  */
 class LocalGaussianRandomGenerator : public RandomFieldGenerator
 {
 protected:
-    /// integer which is the input of the pseudo-random number generator
+    /// Integer which is the input of the pseudo-random number generator.
     long randomInteger;
-    /// gauss distribution parameters
+    /// Gauss distribution parameters.
     double mean, variance;
-public:
 
+public:
     /// Constructor. Creates empty RandomFieldGenerator
     LocalGaussianRandomGenerator(int n, Domain *d);
-
     /// Destructor
     virtual ~LocalGaussianRandomGenerator();
 
-    /**
-     * Computes the random value.
-     */
     void generateRandomValue(double &value, FloatArray *position);
     void generateRandomValueAt(double &value, GaussPoint *gp) {
         this->generateRandomValue(value, NULL);
     }
 
     virtual IRResultType initializeFrom(InputRecord *ir);
-    /// Returns class name of the receiver.
     virtual const char *giveClassName() const { return "LocalGaussianRandomGenerator"; }
-
 
 protected:
     /**
      * Computes pseudo-random numbers.
-     * @param idum Pointer to start integer (must be negative)
-     * @return Random number between 0 and 1
+     * @param idum Pointer to start integer (must be negative).
+     * @return Random number between 0 and 1.
      */
     double ran1(long *idum);
 
     /**
      * Computes the inverse of the Gaussian CDF
-     * @param x Input probability
-     * @param a Mean
-     * @param b Standard deviation
-     * @returns Inverse
+     * @param cdf Input probability.
+     * @param a Mean.
+     * @param b Standard deviation.
+     * @return Inverse.
      */
     double normalCdfInverse(double cdf, double a, double b);
 
     /**
-     * Computes the inverse of the normal distribution
-     * @param p Input probability
-     * @returns Inverse
+     * Computes the inverse of the normal distribution.
+     * @param p Input probability.
+     * @return Inverse.
      */
     double normal01CdfInverse(double p);
 

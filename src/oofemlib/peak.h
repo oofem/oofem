@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/sm/src/peak.h,v 1.4 2003/04/06 14:08:31 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -33,28 +32,22 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-//   ***************************
-//   *** CLASS PEAK FUNCTION ***
-//   ***************************
 #ifndef peak_h
 #define peak_h
 
 #include "loadtime.h"
 
 namespace oofem {
+/**
+ * This class implements a function that is 0 everywhere, except in a single
+ * point.
+ */
 class PeakFunction : public LoadTimeFunction
 {
-    /*
-     * This class implements a function that is 0 everywhere, except in a single
-     * point.
-     * DESCRIPTION
-     * 't' is the only abscissa (time) where the function is not 0. 'value' is
-     * the value of the function 't'. Both 't' and 'value' are pointers, rather
-     * than numbers, so that their state (initialized or not) can be checked.
-     */
-
 private:
+    /// Specific time when function is nonzero.
     double t;
+    /// Value of function at nonzero time.
     double value;
 
 public:
@@ -63,9 +56,8 @@ public:
         t = 0.0;
         value = 0.0;
     }
-    ~PeakFunction()                       { }
+    ~PeakFunction() { }
 
-    //      void    getCoefficients () ;
     IRResultType initializeFrom(InputRecord *ir);
     classType   giveClassID() const { return PeakFunctionClass; }
     const char *giveClassName()  const { return "PeakFunction"; }

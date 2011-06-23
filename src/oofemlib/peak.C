@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/sm/src/peak.C,v 1.3 2003/04/06 14:08:31 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -33,9 +32,6 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-
-//   file PEAK.CC
-
 #include "peak.h"
 #ifndef __MAKEDEPEND
  #include <math.h>
@@ -45,7 +41,7 @@ namespace oofem {
 double PeakFunction :: __at(double time)
 // Returns the value of the receiver at time 'time'.
 {
-    const double precision = 0.000001;
+    double precision = 1e-6;
 
     if ( fabs(t - time) < precision ) {
         return value;
@@ -54,27 +50,15 @@ double PeakFunction :: __at(double time)
     }
 }
 
-
-/* void  PeakFunction :: getCoefficients ()
- * // Reads the date anf the time increment of the receiver in the data file.
- * {
- * t     = new double[1] ;
- * value = new double[1] ;
- *
- **t     = this -> read("t") ;
- **value = this -> read("f(t)") ;
- * }*/
-
-
 IRResultType
 PeakFunction :: initializeFrom(InputRecord *ir)
 {
     const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
+    IRResultType result;                   // Required by IR_GIVE_FIELD macro
 
     LoadTimeFunction :: initializeFrom(ir);
-    IR_GIVE_FIELD(ir, t, IFT_PeakFunction_t, "t"); // Macro
-    IR_GIVE_FIELD(ir, value, IFT_PeakFunction_ft, "f(t)"); // Macro
+    IR_GIVE_FIELD(ir, t, IFT_PeakFunction_t, "t");
+    IR_GIVE_FIELD(ir, value, IFT_PeakFunction_ft, "f(t)");
 
     return IRRT_OK;
 }

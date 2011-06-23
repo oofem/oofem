@@ -32,9 +32,6 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-
-//   file linearelasticmaterial.CC
-
 #include "linearelasticmaterial.h"
 #include "gausspnt.h"
 #include "simplecrosssection.h"
@@ -359,7 +356,7 @@ LinearElasticMaterial :: giveStressStrainMask(IntArray &answer, MatResponseForm 
 // this function returns mask of reduced(if form == ReducedForm)
 // or Full(if form==FullForm) stressStrain vector in full or
 // reduced StressStrainVector
-// acording to stressStrain mode of given gp.
+// according to stressStrain mode of given gp.
 //
 // mask has size of reduced or full StressStrain Vector and  i-th component
 // is index to full or reduced StressStrainVector where corresponding

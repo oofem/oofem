@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/linearedgeload.h,v 1.1 2003/04/06 14:08:24 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -33,10 +32,6 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-//   ******************************
-//   *** CLASS LINEAR EDGE LOAD ***
-//   ******************************
-
 #ifndef linearedgeload_h
 #define linearedgeload_h
 
@@ -47,48 +42,40 @@
 namespace oofem {
 class TimeStep;
 
-
+/**
+ * This class implements a linear boundary load (force, moment,...) that acts
+ * on straight segment.
+ * A boundary load is usually attribute of one or more elements.
+ *
+ * The boundary load describes its geometry and values (it is assumed, that user will specify
+ * all necessary dofs) on element boundary using isoparametric approximation.
+ * Elements can request the order of approximation (for setting up the appropriate
+ * integration rule order) and the array of values (for each dof) at specific integration point
+ * on the boundary.
+ *
+ * Elements must take care, on which boundary the load acts on (side number, ...).
+ *
+ * @note{This class is not restricted to structural problems. For example, in thermal analysis,
+ * a boundary load load would be a  heat source.}
+ */
 class LinearEdgeLoad : public BoundaryLoad
 {
-    /*
-     * This class implements a linear boundary load (force, moment,...) that acts
-     * on straight segment.
-     * A boundary load is usually attribute of one or more elements.
-     *
-     * DESCRIPTION
-     * The boundary load describes its geometry and values (it is assumed, that user will specify
-     * all necessary dofs) on element boundary using isoparametric approximation.
-     * Elements can request the order of approximation (for setting up the appropriate
-     * integration rule order) and the array of values (for each dof) at specific integration point
-     * on the boundary.
-     *
-     * Elements must take care, on which boundary the load acts on (side number, ...).
-     *
-     * REMARK
-     * This class is not restricted to structural problems. For example, in ther-
-     * mal analysis, a boundary load load would be a  heat source.
-     */
 protected:
-
     /// Coordinates of start and end point
     FloatArray startCoords, endCoords;
     BL_FormulationType formulation;
 
 
 public:
-    LinearEdgeLoad(int i, Domain *d) : BoundaryLoad(i, d) { }        // constructor
+    LinearEdgeLoad(int i, Domain *d) : BoundaryLoad(i, d) { }
 
-    int          giveApproxOrder() { return 1; }
+    int giveApproxOrder() { return 1; }
     IRResultType initializeFrom(InputRecord *ir);
-    /** Setups the input record string of receiver
-     * @param str string to be filled by input record
-     * @param keyword print record keyword (default true)
-     */
     virtual int giveInputRecordString(std :: string &str, bool keyword = true);
     bcGeomType giveBCGeoType() const { return EdgeLoadBGT; }
-    BL_FormulationType   giveFormulationType() { return formulation; }
+    BL_FormulationType giveFormulationType() { return formulation; }
 
-    classType    giveClassID() const { return LinearEdgeLoadClass; }
+    classType giveClassID() const { return LinearEdgeLoadClass; }
     const char *giveClassName() const { return "LinearEdgeLoad"; }
 
 protected:

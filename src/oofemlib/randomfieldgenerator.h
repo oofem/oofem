@@ -1,4 +1,3 @@
-/* $Header: $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -35,21 +34,24 @@
 
 #ifndef randomfieldgenerator_h
 #define randomfieldgenerator_h
-#include "gausspnt.h"
+
 #include "flotarry.h"
+#include "gausspnt.h"
 
 namespace oofem {
+
 class RandomFieldGenerator
 {
 protected:
     Domain *domain;
+
 public:
-    /// Constructor. Creates empty RandomFieldGenerator
+    /// Constructor. Creates empty RandomFieldGenerator.
     RandomFieldGenerator(int n, Domain *d) { this->domain = d; }
-    /// Destructor
+    /// Destructor.
     virtual ~RandomFieldGenerator() {}
     /**
-     * Generates random value
+     * Generates random value.
      */
     virtual void generateRandomValue(double &value, FloatArray *position) {; }
     virtual void generateRandomValueAt(double &value, GaussPoint *gp) {
@@ -60,7 +62,10 @@ public:
             OOFEM_ERROR("RandomFieldGenerator::generateRandomValue computeGlobalCoordinates failed");
         }
     }
-
+    /**
+     * Initializes the receiver.
+     * @see{FEMComponent::initializeFrom}
+     */
     virtual IRResultType initializeFrom(InputRecord *ir) { return IRRT_OK; }
     /// Returns class name of the receiver.
     virtual const char *giveClassName() const { return "RandomFieldGenerator"; }

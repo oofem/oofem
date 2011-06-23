@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/plaintextdatareader.h,v 1.2 2003/05/19 13:03:57 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -33,11 +32,6 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-
-//
-// Class OOFEMTXTDataReader
-//
-
 #ifndef oofemtxtdatareader_h
 #define oofemtxtdatareader_h
 
@@ -51,11 +45,11 @@
 
 namespace oofem {
 /**
- * Class representing the implemantaion of plain text date reader.
- * It reads a sequentional seqence of input records from data file
+ * Class representing the implementation of plain text date reader.
+ * It reads a sequence of input records from data file
  * and creates the corresponding input records.
  * There is no check for record type requested, it is assumed that records are
- * written in coorrect order, which determined by the coded sequence of
+ * written in correct order, which determined by the coded sequence of
  * component initialization and described in input manual.
  */
 class OOFEMTXTDataReader : public DataReader
@@ -64,16 +58,14 @@ protected:
     OOFEMTXTInputRecord ir;
     FILE *inputStream;
     char dataSourceName [ MAX_FILENAME_LENGTH ];
+
 public:
-
-
-    /** Constructor. */
+    /// Constructor.
     OOFEMTXTDataReader(const char *inputfilename);
     ~OOFEMTXTDataReader();
 
     virtual InputRecord *giveInputRecord(InputRecordType, int recordId);
     virtual void finish();
-    /// prints the name (shortened) of data source
     virtual const char *giveDataSourceName() const { return dataSourceName; }
 
 protected:

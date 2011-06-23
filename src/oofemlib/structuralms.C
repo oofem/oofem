@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/structuralms.C,v 1.6 2003/04/06 14:08:26 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -33,9 +32,6 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-
-//   file STRUCTURALMATERIALSTATUS.C
-
 #include "structuralms.h"
 #include "structuralcrosssection.h"
 #include "structuralmaterial.h"
@@ -56,27 +52,10 @@ StructuralMaterialStatus :: StructuralMaterialStatus(int n, Domain *d, GaussPoin
     // reset temp vars.
     tempStressVector = stressVector;
     tempStrainVector = strainVector;
-
-    /*
-     * strainVector = NULL ;
-     * stressVector = NULL ;
-     * stressIncrementVector = NULL;
-     * strainIncrementVector = NULL;
-     */
 }
 
 
-StructuralMaterialStatus :: ~StructuralMaterialStatus()
-// Destructor.
-{
-    /*
-     * delete strainVector ;
-     * delete stressVector ;
-     * delete stressIncrementVector;
-     * delete strainIncrementVector;
-     */
-}
-
+StructuralMaterialStatus :: ~StructuralMaterialStatus() { }
 
 
 void StructuralMaterialStatus :: printOutputAt(FILE *File, TimeStep *tNow)
@@ -95,8 +74,6 @@ void StructuralMaterialStatus :: printOutputAt(FILE *File, TimeStep *tNow)
         fprintf( File, " % .4e", helpVec.at(i) );
     }
 
-    // delete helpVec;
-
     fprintf(File, "\n              stresses");
     ( ( StructuralCrossSection * )
      gp->giveCrossSection() )->giveFullCharacteristicVector(helpVec, gp, stressVector);
@@ -105,9 +82,6 @@ void StructuralMaterialStatus :: printOutputAt(FILE *File, TimeStep *tNow)
     for ( i = 1; i <= n; i++ ) {
         fprintf( File, " % .4e", helpVec.at(i) );
     }
-
-    //delete helpVec;
-
     fprintf(File, "\n");
 }
 
@@ -124,8 +98,7 @@ void StructuralMaterialStatus :: updateYourself(TimeStep *tStep)
 }
 
 
-void
-StructuralMaterialStatus :: initTempStatus()
+void StructuralMaterialStatus :: initTempStatus()
 //
 // initialize record at the begining of new load step
 //
@@ -184,7 +157,6 @@ StructuralMaterialStatus :: restoreContext(DataStream *stream, ContextMode mode,
 // current state)
 //
 {
-    // FloatArray *s;
     contextIOResultType iores;
     if ( stream == NULL ) {
         _error("saveContex : can't write into NULL stream");

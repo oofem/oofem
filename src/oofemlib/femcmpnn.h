@@ -183,7 +183,7 @@ public:
      * @param tStep Time step to write for.
      */
     virtual void printOutputAt(FILE *file, TimeStep *tStep) { }
-    /// Prints receiver state on stdout. Usefull for debuging.
+    /// Prints receiver state on stdout. Useful for debugging.
     virtual void printYourself() { }
     /**
      * Interface requesting service.

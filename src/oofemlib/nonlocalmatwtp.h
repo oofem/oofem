@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -31,6 +31,7 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
+
 #ifndef nonlocalmatwtp_h
 #define nonlocalmatwtp_h
 
@@ -74,9 +75,9 @@ public:
         LoadBalancer :: WorkTransferPlugin(_lb) { }
 
     /**
-     *  initializes receiver; should be called before any work transfer.
-     *  Current implementation assembles for each local element the list
-     *  of contributing global element numbers. This is extracted from IP nonlocal tables;
+     * Initializes receiver; should be called before any work transfer.
+     * Current implementation assembles for each local element the list
+     * of contributing global element numbers. This is extracted from IP nonlocal tables;
      */
     void init(Domain *d);
     /*
@@ -85,7 +86,7 @@ public:
      *
      * This involves several steps:
      * - send and receive nonlocElementDependencyArry of migrating regular
-     * elements to remote partition
+     *   elements to remote partition
      * - build domain nonlocal element dependency list. Then exclude local elements - what remains are unsatisfied remote dependencies that have to be broadcasted and received from partitions owning relevant elements
      * - transfer of local elements and nodes to remote partitions (remote elements and null dofmans)
      */
@@ -103,7 +104,7 @@ protected:
     int packRemoteElements(Domain *d, ProcessCommunicator &pc);
     int unpackRemoteElements(Domain *d, ProcessCommunicator &pc);
     /**
-     * plugin for Element::ipEvaluator service to compile nonlocal dependency
+     * Plugin for Element::ipEvaluator service to compile nonlocal dependency
      * array for given element (in case of nonlocal material)
      */
     void giveNonlocalDepArryElementPlugin(GaussPoint *gp, std :: set< int > &s);

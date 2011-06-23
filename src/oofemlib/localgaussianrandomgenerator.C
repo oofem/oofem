@@ -1,4 +1,3 @@
-/* $Header: $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -33,11 +32,6 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-/*
- * Author: Peter Grassl
- */
-
-#include <stdio.h>
 #include "localgaussianrandomgenerator.h"
 #include "cltypes.h"
 #include "material.h"
@@ -62,7 +56,7 @@ IRResultType
 LocalGaussianRandomGenerator :: initializeFrom(InputRecord *ir)
 {
     const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
-    IRResultType result;                            // Required by IR_GIVE_FIELD macro
+    IRResultType result;                   // Required by IR_GIVE_FIELD macro
 
     IR_GIVE_FIELD(ir, mean, IFT_LocalGaussianRandomGenerator_mean, "mean"); // Macro
     IR_GIVE_FIELD(ir, variance, IFT_LocalGaussianRandomGenerator_variance, "variance"); // Macro
@@ -132,8 +126,6 @@ double LocalGaussianRandomGenerator :: ran1(long *idum)
         return temp;
     }
 }
-
-#define MYPI 3.14159265
 
 double LocalGaussianRandomGenerator :: normalCdfInverse(double cdf, double a, double b)
 {

@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/linearedgeload.C,v 1.2.4.1 2004/04/05 15:19:43 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -32,8 +31,6 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-
-//   file linearedgeload.C
 
 #include "linearedgeload.h"
 #include "loadtime.h"
@@ -105,9 +102,8 @@ LinearEdgeLoad :: giveInputRecordString(std :: string &str, bool keyword)
 void
 LinearEdgeLoad :: computeNArray(FloatArray &answer, FloatArray &coords) const
 {
-    // compute local isparametric coordinates of given point
+    // compute local isoparametric coordinates of given point
     double ksi;
-
 
     if ( formulation == BL_GlobalFormulation ) {
         int i;

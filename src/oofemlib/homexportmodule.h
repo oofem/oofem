@@ -1,16 +1,16 @@
 /*
  *
- *****    *****   ******  ******  ***   ***
- **   **  **   **  **      **      ** *** **
- **   **  **   **  ****    ****    **  *  **
- **   **  **   **  **      **      **     **
- **   **  **   **  **      **      **     **
- *****    *****   **      ******  **     **
+ *                 #####    #####   ######  ######  ###   ###
+ *               ##   ##  ##   ##  ##      ##      ## ### ##
+ *              ##   ##  ##   ##  ####    ####    ##  #  ##
+ *             ##   ##  ##   ##  ##      ##      ##     ##
+ *            ##   ##  ##   ##  ##      ##      ##     ##
+ *            #####    #####   ##      ######  ##     ##
  *
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 2009 - 2009   Borek Patzak, Vit Smilauer
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -32,10 +32,6 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-//
-// class HOMExportModule
-//
-
 #ifndef homexportmodule_h
 
 #ifndef __MAKEDEPEND
@@ -50,13 +46,16 @@
 namespace oofem {
 /**
  * Represents HOM (Homogenization) export module. It averages strain and stress tensors over the whole domain
- * and all elements in global coordinate system. The strain and stress tensor (reduced to six components) is used through whole procedure. Appropriate element strain and stress components are placed using the mask of tensor indexes. Thus various element types (beam, plane element, brick) can be combined and will give correct macroscopic response.
+ * and all elements in global coordinate system. The strain and stress tensor (reduced to six components) is used through whole procedure.
+ * Appropriate element strain and stress components are placed using the mask of tensor indexes.
+ * Thus various element types (beam, plane element, brick) can be combined and will give correct macroscopic response.
+ *
+ * @author Vit Smilauer
  */
 class HOMExportModule : public ExportModule, public LinearElasticMaterial
 {
 protected:
-
-    /// scale all homogenized values
+    /// Scale of all homogenized values.
     double scale;
 #ifdef RBR_SUPPORT
     enum omodeType { wdmode, rbrmode }; // WholeDomain or RegionByRegion output
@@ -64,37 +63,20 @@ protected:
 #endif
 
 public:
-
     /// Constructor. Creates empty Output Manager.
     HOMExportModule(int n, EngngModel *e);
-    /// Destructor
+    /// Destructor.
     ~HOMExportModule();
-    /// Initializes receiver acording to object description stored in input record.
     virtual IRResultType initializeFrom(InputRecord *ir);
-    /**
-     * Writes the output.
-     * @param tStep time step.
-     */
-    void              doOutput(TimeStep *tStep);
-    /**
-     * Initializes receiver.
-     * The init file messages should be printed.
-     */
-    void              initialize();
-    /**
-     * Terminates the receiver.
-     * The terminating messages should be printed.
-     * All the streams should be closed.
-     */
-    void              terminate();
-    /// Returns class name of the receiver.
+    void doOutput(TimeStep *tStep);
+    void initialize();
+    void terminate();
     virtual const char *giveClassName() const { return "HOMExportModule"; }
 
-
 protected:
-    /// stream for file
+    /// Stream for file.
     FILE *stream;
-    ///Material numbers over which averaging is performed
+    /// Material numbers over which averaging is performed.
     IntArray matnum;
 };
 } // end namespace oofem

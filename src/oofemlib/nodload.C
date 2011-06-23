@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/nodload.C,v 1.4 2003/04/06 14:08:25 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -33,9 +32,6 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-
-//   file NODLOAD.CC
-
 #include "nodload.h"
 #include "loadtime.h"
 #include "flotarry.h"
@@ -50,7 +46,7 @@ NodalLoad :: initializeFrom(InputRecord *ir)
 
     result = Load :: initializeFrom(ir);
     int value = 1;
-    IR_GIVE_OPTIONAL_FIELD(ir, value, IFT_BoundaryLoad_cstype, "cstype"); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, value, IFT_BoundaryLoad_cstype, "cstype");
     coordSystemType = ( BL_CoordSystType ) value;
 
     return IRRT_OK;
@@ -61,7 +57,6 @@ int
 NodalLoad :: giveInputRecordString(std :: string &str, bool keyword)
 {
     char buff [ 1024 ];
-
 
     Load :: giveInputRecordString(str, keyword);
     sprintf(buff, " cstype %d", ( int ) this->coordSystemType);

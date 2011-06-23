@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/plaintextdatareader.C,v 1.2.4.1 2004/04/05 15:19:43 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -82,7 +81,6 @@ OOFEMTXTDataReader :: finish()
 void
 OOFEMTXTDataReader :: giveLineFromInput(char *line)
 {
-    //
     // reads one line from inputStream - for private use only.
     // if " detected, start/stop changing to lower case characters
     char *ptr;
@@ -99,10 +97,6 @@ OOFEMTXTDataReader :: giveLineFromInput(char *line)
             * ptr = tolower(* ptr); // convert line to lowercase
         }
     }
-
-    //     for ( ptr = line; ( * ptr = tolower(* ptr) ); ptr++ ) {
-    //         ;
-    //     }
 }
 
 void

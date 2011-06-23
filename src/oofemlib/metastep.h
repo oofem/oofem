@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/metastep.h,v 1.7 2003/04/06 14:08:25 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -33,12 +32,6 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-
-//   ***********************
-//   *** CLASS META STEP ***
-//   ***********************
-
-
 #ifndef metastep_h
 #define metastep_h
 
@@ -52,73 +45,69 @@ namespace oofem {
 /**
  * Class representing meta step. The meta step instance represent sequence of
  * solution steps (timeSteps). The meta step role is to describe the common
- * attributes related to solution steps it represent from the point of view of Engng model.
+ * attributes related to solution steps it represent from the point of view of engineering model.
  * For example, meta step may represent series of solution steps, for which particular
- * solution controll is used. The common attributes it represent depend on Engng model
+ * solution control is used. The common attributes it represent depend on engineering model
  * representation. To store these dependent attributes, the metaStep record (currently string)
- * is read from input and is provided to Engng model upon request.
+ * is read from input and is provided to engineering model upon request.
  *
  * The meta step maintains its number, the total number of steps it represent, time increment and
  * its e-model attributes.
- *
  */
-
 class MetaStep
 {
 protected:
-    /// Engng model of receiver
+    /// Engineering model of receiver.
     EngngModel *eModel;
-    /// number of subsequent steps the receiver represent
+    /// Number of subsequent steps the receiver represent
     int numberOfSteps;
     /// Intrinsic time increment.
     double deltaT;
-    /// e-model attributes
+    /// Engineering model attributes.
     InputRecord *attributes;
-    /// Start solution step number for which receiver is responsible
+    /// Start solution step number for which receiver is responsible.
     int sindex;
-    /// receiver number
+    /// Receiver number.
     int number;
 public:
-    /*
+    /**
      * Constructor. Creates a new meta step.
-     * @param n meta step number
-     * @param e reference to corresponding engng model
+     * @param n Meta step number.
+     * @param e Reference to corresponding engineering model.
      */
-    MetaStep(int n, EngngModel *e);     // constructor
-    MetaStep(int n, EngngModel *e, int nsteps, InputRecord &attrib); // constructor
-    /// destructor
+    MetaStep(int n, EngngModel *e);
+    MetaStep(int n, EngngModel *e, int nsteps, InputRecord &attrib);
+    /// Destructor.
     ~MetaStep() { if ( attributes ) { delete attributes; } }
 
-    /// Returns receiver's number
+    /// Returns receiver's number.
     int giveNumber() { return number; }
-    /// Returns number of Steps it represent
+    /// Returns number of Steps it represent.
     int giveNumberOfSteps() { return this->numberOfSteps; }
-    /// Returns time increment
+    /// Returns time increment.
     double giveTimeIncrement() { return this->deltaT; }
-    /// Returns e-model attributes
+    /// Returns e-model attributes.
     InputRecord *giveAttributesRecord() { return this->attributes; }
     /**
      * Instanciates the receiver from input record.
      */
     IRResultType initializeFrom(InputRecord *ir);
-    /// Sets the receiver bounds according to given solution step number, returns end index
+    /// Sets the receiver bounds according to given solution step number, returns end index.
     int setStepBounds(int startStepNumber);
-    /// Sets the number of steps (keyword nsteps in input file)
+    /// Sets the number of steps within the metastep.
     void setNumberOfSteps(int numberOfSteps);
-    /// Tests if step number is maintained by receiver
+    /// Tests if step number is maintained by receiver.
     int isStepValid(int solStepNumber);
-    /// Returns the step relative number  to receiver
+    /// Returns the step relative number  to receiver.
     int giveStepRelativeNumber(int stepNumber) { return ( stepNumber - sindex + 1 ); }
-    /// Returns first step number
+    /// Returns first step number.
     int giveFirstStepNumber() { return sindex; }
-    /// Returns last step number
+    /// Returns last step number.
     int giveLastStepNumber() { return ( sindex + numberOfSteps - 1 ); }
     /// Returns class name of receiver.
     const char *giveClassName() const { return "MetaStep"; }
     /// Returns class ID of receiver.
     classType giveClassID() const { return MetaStepClass; }
-
-protected:
 };
 } // end namespace oofem
 #endif // metastep_h

@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/domain.C,v 1.31.4.2 2004/05/14 13:45:27 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -65,7 +64,7 @@ NonlocalMaterialWTP :: giveElementNonlocalDepArry(IntArray &answer, Domain *d, i
     if ( ielem->giveMaterial()->giveInterface(NonlocalMaterialExtensionInterfaceType) ) {
         relems.clear();
         // loop over element IRules and their IPs to retrieve remote (nonlocal) elements
-        // store their global numbers in the relems set (to avoid renundancy)
+        // store their global numbers in the relems set (to avoid redundancy)
         // and then keep them in nonlocTables array.
         ielem->ipEvaluator(this, & NonlocalMaterialWTP :: giveNonlocalDepArryElementPlugin, relems);
 
@@ -494,7 +493,7 @@ int NonlocalMaterialWTP :: unpackRemoteElements(Domain *d, ProcessCommunicator &
 }
 
 /* Now the question is how to use nonlocElementDependencyMap, which is available for
- * each element, to fastly reinitialize nonlocal integration tables.
+ * each element, to quickly reinitialize nonlocal integration tables.
  *
  * if not needed, should be deleted at the end of migrate method, to free memory
  *
