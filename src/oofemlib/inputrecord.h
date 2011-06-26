@@ -352,7 +352,8 @@ enum InputFieldType {
     IFT_RigidArmNode_shared,
     IFT_RigidArmNode_remote,
     IFT_RigidArmNode_null,
-
+    IFT_SlaveNode_masterDofManagers,
+    IFT_SlaveNode_weights,
     IFT_HangingNode_masterElement,
 
     IFT_Element_mat,

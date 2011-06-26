@@ -82,6 +82,7 @@ enum classType {
     SlaveDofClass,
     DofManagerClass,
     NodeClass,
+    SlaveNodeClass,
     RigidArmNodeClass,
     HangingNodeClass,
     ElementSideClass,
@@ -340,6 +341,7 @@ enum classType {
     MetaStepClass,
 
     TopologyDescriptionClass,
+    MeshTopologyDescriptionClass,
     ParticleTopologyDescriptionClass,
 
     DofManExportModuleClass,
