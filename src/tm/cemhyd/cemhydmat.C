@@ -1245,7 +1245,6 @@ void CemhydMatStatus :: QueryStringAttributeExt(TiXmlDocument *xmlFile, const ch
     //success = elemSelected->QueryStringAttribute(key, & str1);
     // Since ubuntu/debian is still stuck at 2.5.3, lacking QueryStringAttribute.
     // Change with above whenever packages are updated.
-    printf("HONK");
     const char *cstr = elemSelected->Attribute(key);
     if (cstr) {
         success = TIXML_SUCCESS;
