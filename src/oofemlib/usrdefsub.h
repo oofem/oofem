@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2010   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -32,10 +32,10 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-//   ********************************************
-//   file: usrdefsub.h - User defined Subroutines
-//   ********************************************
-
+/**
+ * @file: usrdefsub.h
+ * User defined Subroutines
+ */
 
 #ifndef usrdefsub_h
 #define usrdefsub_h
@@ -135,7 +135,7 @@ Material *CreateUsrDefMaterialOfType(const char *name, int num, Domain *d);
  * @param master Master engineering model.
  * @return Newly allocated object of requested type, null if keyword not supported.
  */
-//TopologyDescription *CreateUsrDefTopologyOfType(const char *name, Domain *d);
+TopologyDescription *CreateUsrDefTopologyOfType(const char *name, Domain *d);
 /**
  * Creates new empty instance of sparse matrix of given type (the constructor with no parameters is called).
  * @param type Determines sparseMtrx type.

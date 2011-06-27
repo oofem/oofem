@@ -66,6 +66,7 @@
 #include "logger.h"
 #include "domaintransactionmanager.h"
 #include "xfemmanager.h"
+#include "topologydescription.h"
 
 #ifdef __PARALLEL_MODE
  #include "parallel.h"
@@ -101,7 +102,7 @@ Domain :: Domain(int n, int serNum, EngngModel *e) : defaultNodeDofIDArry(), def
     nonlocalBarierList    = new AList< NonlocalBarrier >(0);
     randomFieldGeneratorList = new AList< RandomFieldGenerator >(0);
     // yieldCriteriaList     = new AList(0) ;
-    xfemManager = NULL;
+    xfemManager           = NULL;
 
     numberOfDefaultDofsPerNode = -1;
     numberOfDefaultDofsPerSide = -1;
@@ -110,7 +111,8 @@ Domain :: Domain(int n, int serNum, EngngModel *e) : defaultNodeDofIDArry(), def
     connectivityTable     = NULL;
     spatialLocalizer      = NULL;
     outputManager         = new OutputManager(this);
-    smoother = NULL;
+    smoother              = NULL;
+    topology              = NULL;
 
     nonlocalUpdateStateCounter = 0;
 
@@ -139,6 +141,9 @@ Domain :: ~Domain()
     delete outputManager;
     if ( smoother ) {
         delete smoother;
+    }
+    if ( topology ) {
+        delete topology;
     }
 
 #ifdef __PARALLEL_MODE
@@ -266,22 +271,21 @@ Material *Domain :: giveMaterial(int n)
 
 
 Node *Domain :: giveNode(int n)
-// Returns the n-th node. Creates this node if it does not exist yet.
+// Returns the n-th node if it exists.
 {
-    DofManager *node = NULL;
+    Node *node = NULL;
 
-    if ( dofManagerList->includes(n) ) {
-        node = dofManagerList->at(n);
-        if ( ( node->giveClassID() != NodeClass ) && ( node->giveClassID() != RigidArmNodeClass ) && ( node->giveClassID() != HangingNodeClass ) && ( node->giveClassID() != ParticleClass ) ) {
-            _error2("giveNode: incompatible type of dofManager %d, can not convert", n);
-        }
-    } else {
+#ifdef DEBUG
+    if ( !dofManagerList->includes(n) ) {
         _error2("giveNode: undefined dofManager (%d)", n);
-        //      node = new Node(n,this) ;
-        //      nodeList  -> put(n,node) ;}
+    }
+#endif
+    node = dynamic_cast<Node*>(dofManagerList->at(n));
+    if ( node == NULL ) {
+        _error2("giveNode: incompatible type of dofManager %d, can not convert", n);
     }
 
-    return ( Node * ) node;
+    return node;
 }
 
 ElementSide *Domain :: giveSide(int n)
@@ -413,7 +417,7 @@ int Domain :: instanciateYourself(DataReader *dr)
     IRResultType result;                            // Required by IR_GIVE_FIELD macro
 
     int i, num;
-    char name [ MAX_NAME_LENGTH ];
+    char name [ MAX_NAME_LENGTH ], topologytype[ MAX_NAME_LENGTH ];
     int nnode, nelem, nmat, nload, nic, nloadtimefunc, ncrossSections, nbarrier, nrfg;
     DofManager *node;
     Element *elem;
@@ -465,6 +469,8 @@ int Domain :: instanciateYourself(DataReader *dr)
     IR_GIVE_FIELD(ir, nload, IFT_Domain_nbc, "nbc"); // Macro
     IR_GIVE_FIELD(ir, nic, IFT_Domain_nic, "nic"); // Macro
     IR_GIVE_FIELD(ir, nloadtimefunc, IFT_Domain_nloadtimefunct, "nltf"); // Macro
+    topologytype[0] = 0;
+    IR_GIVE_OPTIONAL_FIELD2(ir, topologytype, IFT_Domain_topology, "topology", MAX_NAME_LENGTH); // Macro
 
     // read optional number of nonlocalBarriers
     nbarrier = 0;
@@ -800,7 +806,14 @@ int Domain :: instanciateYourself(DataReader *dr)
     }
 
 #endif
-
+    this->topology = NULL;
+    if (strlen(topologytype) > 0) {
+        this->topology = CreateUsrDefTopologyOfType(topologytype, this);
+        if (!this->topology) {
+            OOFEM_ERROR2("Domain :: instanciateYourself - Couldn't create topology of type '%s'", topologytype);
+        }
+        return this->topology->instanciateYourself(dr);
+    }
     return 1;
 }
 

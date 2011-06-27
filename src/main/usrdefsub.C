@@ -100,6 +100,10 @@
 #include "nodalaveragingrecoverymodel.h"
 #include "sprnodalrecoverymodel.h"
 
+#if 0 // Soon
+#include "particletopologydescription.h"
+#endif
+
 // end __OOFEMLIB_MODULE
 
 
@@ -815,6 +819,17 @@ Material *CreateUsrDefMaterialOfType(const char *aClass, int number, Domain *dom
 #endif // __FM_MODULE
 
     return newMaterial;
+}
+
+TopologyDescription *CreateUsrDefTopologyOfType(const char *aClass, Domain *d)
+{
+    TopologyDescription *newTopology = NULL;
+#if 0 // Soon..
+    if ( !strncasecmp(aClass, "particletopology", 16) ) {
+        newTopology = new ParticleTopologyDescription(d);
+    }
+#endif
+    return newTopology;
 }
 
 SparseMtrx *CreateUsrDefSparseMtrx(SparseMtrxType type)

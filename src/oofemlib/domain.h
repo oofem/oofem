@@ -76,6 +76,7 @@ class NonlocalBarrier;
 class DomainTransactionManager;
 class RandomFieldGenerator;
 class XfemManager;
+class TopologyDescription;
 
 #ifdef __PARALLEL_MODE
 class ProcessCommunicator;
@@ -170,6 +171,8 @@ private:
     StateCounterType nonlocalUpdateStateCounter;
     /// XFEM Manager.
     XfemManager *xfemManager;
+    /// Topology description
+    TopologyDescription *topology;
 
 #ifdef __PARALLEL_MODE
     /**
@@ -439,6 +442,10 @@ public:
      * Creates the default, if no one associated.
      */
     NodalRecoveryModel *giveSmoother();
+    /**
+     * Returns receiver's associated topology description.
+     */
+    TopologyDescription *giveTopology() { return topology; }
     /**
      * Sets the given smoother as an actual smoother for receiver.
      * Deletes the old one, unless the destroyOld flag has zero value.
