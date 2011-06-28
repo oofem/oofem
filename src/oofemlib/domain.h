@@ -374,6 +374,11 @@ public:
     void setLoadTimeFunction(int i, LoadTimeFunction *obj);
     /// Temporary function, sets xfemManager.
     void setXfemManager(XfemManager *xfemManager);
+    /**
+     * Sets receiver's associated topology description.
+     * @param destroyOld Determines if any preexisting topology description should be deleted.
+     */
+    void setTopology(TopologyDescription *topo, bool destroyOld = true);
     /// Clear all boundary conditions.
     void clearBoundaryConditions();
     //@}
@@ -448,11 +453,9 @@ public:
     TopologyDescription *giveTopology() { return topology; }
     /**
      * Sets the given smoother as an actual smoother for receiver.
-     * Deletes the old one, unless the destroyOld flag has zero value.
-     * In the latter case, the reference to old smoother must be kept outside,
-     * the receiver does not provide any support for this at the moment.
+     * @param destroyOld Determines if any preexisting smoother should be deleted.
      */
-    void setSmoother(NodalRecoveryModel *smoother, int destroyOld = 1);
+    void setSmoother(NodalRecoveryModel *smoother, bool destroyOld = true);
 
 #ifdef __PARALLEL_MODE
     /**@name Domain transaction support methods.

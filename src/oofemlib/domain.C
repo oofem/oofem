@@ -1149,16 +1149,23 @@ Domain :: giveSmoother()
 }
 
 void
-Domain :: setSmoother(NodalRecoveryModel *smoother, int destroyOld)
+Domain :: setSmoother(NodalRecoveryModel *smoother, bool destroyOld)
 {
     if ( destroyOld && this->smoother ) {
         delete this->smoother;
     }
-
     this->smoother = smoother;
 }
 
 
+void
+Domain :: setTopology(TopologyDescription *topo, bool destroyOld)
+{
+    if ( destroyOld && this->topology ) {
+        delete this->topology;
+    }
+    this->topology = topo;
+}
 
 
 ConnectivityTable *Domain :: giveConnectivityTable()
