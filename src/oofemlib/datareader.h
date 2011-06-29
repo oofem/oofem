@@ -53,7 +53,7 @@ public:
     /// Determines the type of input record.
     enum InputRecordType {
         IR_outFileRec, IR_jobRec, IR_domainRec, IR_outManRec, IR_domainCompRec, IR_geometryRec, IR_gbpmRec,
-        IR_emodelRec, IR_mstepRec, IR_expModuleRec, IR_dofmanRec, IR_elemRec,
+        IR_emodelRec, IR_externalAnalysisRec, IR_mstepRec, IR_expModuleRec, IR_dofmanRec, IR_elemRec,
         IR_crosssectRec, IR_matRec, IR_nlocBarRec, IR_bcRec, IR_icRec, IR_ltfRec,
         IR_nRandomFieldGenRec, IR_xfemManRec, IR_enrichFuncRec, IR_geoRec, IR_enrichItemRec
     };

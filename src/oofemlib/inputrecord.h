@@ -71,6 +71,7 @@ enum InputFieldType {
     IFT_EngngModel_probdescription,
     IFT_EngngModel_nxfemman,
     IFT_EngngModel_nonLinFormulation,
+    IFT_EngngModel_externalAnalysis,
 
     IFT_MetaStep_nsteps,
 

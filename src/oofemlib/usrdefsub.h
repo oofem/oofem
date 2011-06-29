@@ -37,9 +37,6 @@
  * User defined Subroutines
  */
 
-#ifndef usrdefsub_h
-#define usrdefsub_h
-
 #include "domain.h"
 #include "element.h"
 #include "crosssection.h"
@@ -65,11 +62,14 @@
 #include "initmodule.h"
 #include "patch.h"
 #include "nodalrecoverymodel.h"
-
 #include "errorestimator.h"
 #ifdef __PARALLEL_MODE
  #include "loadbalancer.h"
 #endif
+
+
+#ifndef usrdefsub_h
+#define usrdefsub_h
 
 namespace oofem {
 /**
@@ -104,6 +104,13 @@ CrossSection *CreateUsrDefCrossSectionOfType(const char *name, int num, Domain *
  * @return Newly allocated object of requested type, null if keyword not supported.
  */
 EngngModel *CreateUsrDefEngngModelOfType(const char *name, int num, EngngModel *master = NULL);
+/**
+ * Creates new instance of user defined external analysis model corresponding to given keyword.
+ * @param name Keyword string determining the type of new instance.
+ * @param m Master engineering model.
+ * @return Newly allocated object of requested type, null if keyword not supported.
+ */
+ExternalAnalysis *CreateUsrDefExternalAnalysisOfType(const char *name, EngngModel *m);
 /**
  * Creates new instance of user defined load  corresponding to given keyword.
  * @param name Keyword string determining the type of new instance.
