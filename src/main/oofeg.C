@@ -102,6 +102,9 @@ static Widget deformations_menu, activeStep_palette,
               scalardamage_palette, scalarplasticstrain_palette, color_scale_palette,
               oofeg_file_palette, frame_palette, view_palette, render_palette, bgcolor_palette,
               layers_update_palette;
+#ifdef OOFEG_DEVEL
+static Widget debug_palette;
+#endif
 
 static void OOFEGReturnHitInCmd(Widget w, XEvent *event, String *params,
                                 Cardinal *num_params);
