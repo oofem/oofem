@@ -314,7 +314,7 @@ protected:
      * Return desired number of integration points for consistent mass matrix
      * computation, if required.
      */
-    int  giveNumberOfIPForMassMtrxIntegration() { return 1; }
+    int  giveNumberOfIPForMassMtrxIntegration() { return 4; }
 };
 } // end namespace oofem
 #endif // trplanstrss_h
