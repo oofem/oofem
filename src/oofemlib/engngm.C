@@ -2247,47 +2247,6 @@ EngngModel :: giveOutputStream()
     return outputStream;
 }
 
-
-/*
- * char*
- * EngngModel :: giveLineFromInput (char* line)
- * //
- * // reads one line from inputStream - for private use only.
- * //
- * {
- * char *ptr;
- * do {
- *  fgets(line,OOFEM_MAX_LINE_LENGTH,this->giveInputStream());
- *  if (line == NULL) {
- *    fprintf (stderr,"\nEnd of file encountered \a\n");
- *    exit (1);
- *  }
- * } while (*line == '#');   // skip comments
- * // convert line to lowercase
- * for (ptr=line; (*ptr = tolower (*ptr)); ptr++);
- * return line;
- * }
- */
-
-/*
- * time_t
- * EngngModel ::  getTime ()
- * {
- * time_t t;
- * t = time(NULL);
- * return t;
- * }
- *
- * clock_t
- * EngngModel ::  getClock ()
- * {
- * clock_t t;
- * t = clock();
- * return t;
- * }
- */
-
-
 void
 EngngModel :: terminateAnalysis()
 {

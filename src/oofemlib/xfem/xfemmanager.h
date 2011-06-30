@@ -1,12 +1,39 @@
 /*
- * File:   xfemmanager.h
- * Author: chamrova
  *
- * Created on October 30, 2008, 10:43 AM
+ *                 #####    #####   ######  ######  ###   ###
+ *               ##   ##  ##   ##  ##      ##      ## ### ##
+ *              ##   ##  ##   ##  ####    ####    ##  #  ##
+ *             ##   ##  ##   ##  ##      ##      ##     ##
+ *            ##   ##  ##   ##  ##      ##      ##     ##
+ *            #####    #####   ##      ######  ##     ##
+ *
+ *
+ *             OOFEM : Object Oriented Finite Element Code
+ *
+ *               Copyright (C) 1993 - 2011   Borek Patzak
+ *
+ *
+ *
+ *       Czech Technical University, Faculty of Civil Engineering,
+ *   Department of Structural Mechanics, 166 29 Prague, Czech Republic
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#ifndef _XFEMMANAGER_H
-#define _XFEMMANAGER_H
+#ifndef xfemmanager_h
+#define xfemmanager_h
 
 #include "enrichmentitem.h"
 #include "alist.h"
@@ -17,24 +44,27 @@
 #include "patch.h"
 
 namespace oofem {
-/* this class manages the xfem part as well as takes over some functions which would appear
- * in the Domain and Node class */
+/**
+ * This class manages the xfem part as well as takes over some functions which would appear
+ * in the Domain and Node class.
+ * @author chamrova
+ */
 class XfemManager
 {
 protected:
-    /// associated EngineeringModel
+    /// Associated EngineeringModel.
     EngngModel *emodel;
-    /// index of the associated domain
+    /// Index of the associated domain.
     int domainIndex;
-    /// Enrichment item list
+    /// Enrichment item list.
     AList< EnrichmentItem > *enrichmentItemList;
-    /// Geometry list
+    /// Geometry list.
     AList< BasicGeometry > *geometryList;
-    /// Enrichment function list
+    /// Enrichment function list.
     AList< EnrichmentFunction > *enrichmentFunctionList;
-    /// map giving for a node a position of its fictitious node
+    /// Map giving for a node a position of its fictitious node.
     AList< IntArray > *fictPosition;
-    /// index of next available dofId from pool
+    /// Index of next available dofId from pool.
     int dofIdPos;
     int numberOfEnrichmentItems;
     int numberOfEnrichmentFunctions;
@@ -44,51 +74,52 @@ public:
     enum XfemType {
         SPLIT = 1, TIP = 4, STANDARD = 0
     };
-    /// Constructor
+    /// Constructor.
     XfemManager(EngngModel *emodel, int index);
-    /// destructor
+    /// Destructor.
     ~XfemManager();
-    /* gets interacted enrichment items for a particular element, the enrichment items
-     * are referenced by a number from the domain */
+    /**
+     * Gets interacted enrichment items for a particular element, the enrichment items
+     * are referenced by a number from the domain
+     */
     void getInteractedEI(IntArray &answer, Element *elem);
     /// checks whether an element is interacted
     bool isInteracted(Element *elem);
     /// checks whether a node is interacted
     bool isEnriched(int nodeNumber);
-    /// Accessor
+    /// Accessor.
     EnrichmentItem *giveEnrichmentItem(int n);
-    /// Accessor
+    /// Accessor.
     BasicGeometry *giveGeometry(int n);
-    /// Accessor
+    /// Accessor.
     EnrichmentFunction *giveEnrichmentFunction(int n);
     int giveNumberOfEnrichmentItems() { return enrichmentItemList->giveSize(); }
-    /// computes for each node position of its fictitious node
+    /// Computes for each node position of its fictitious node.
     int computeFictPosition();
-    /// computes the type of node enrichment, returns zero if the node is not enriched
+    /// Computes the type of node enrichment, returns zero if the node is not enriched.
     XfemType computeNodeEnrichmentType(int nodeNumber);
-    /// Initializes receiver acording to object description stored in input record.
+    /// Initializes receiver according to object description stored in input record.
     IRResultType initializeFrom(InputRecord *ir);
-    /// Instantiates the xfem components
+    /// Instantiates the Xfem components.
     int instanciateYourself(DataReader *dr);
     const char *giveClassName() const { return "XfemManager"; }
     const char *giveInputRecordName() const { return "XfemManager"; }
-    /// wrapper for updating the integration rule
+    /// Wrapper for updating the integration rule.
     void updateIntegrationRule();
-    /// gives Domain
+    /// Gives Domain.
     Domain *giveDomain();
-    /// accessor
+    /// Accessor.
     IntArray *giveFictPosition(int nodeNumber) { return fictPosition->at(nodeNumber); }
     /// Stores receiver state to output stream.
-    contextIOResultType    saveContext(DataStream *stream, ContextMode mode, void *obj = NULL) { return CIO_OK; }
+    contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL) { return CIO_OK; }
     /// Restores the receiver state previously written in stream.
-    contextIOResultType    restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL) { return CIO_OK; }
-    /// geometry update; calls individual enrichment item updateGeometry method
+    contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL) { return CIO_OK; }
+    /// Geometry update; calls individual enrichment item updateGeometry method.
     void updateGeometry(TimeStep *tStep);
+
 protected:
-    // changes dofIdPos to next index
+    // Changes dofIdPos to next index.
     DofIDItem allocateNewDofID();
 };
 } // end namespace oofem
-#endif  /* _XFEMMANAGER_H */
-
-
+#endif // xfemmanager_h

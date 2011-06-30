@@ -1,50 +1,78 @@
+/*
+ *
+ *                 #####    #####   ######  ######  ###   ###
+ *               ##   ##  ##   ##  ##      ##      ## ### ##
+ *              ##   ##  ##   ##  ####    ####    ##  #  ##
+ *             ##   ##  ##   ##  ##      ##      ##     ##
+ *            ##   ##  ##   ##  ##      ##      ##     ##
+ *            #####    #####   ##      ######  ##     ##
+ *
+ *
+ *             OOFEM : Object Oriented Finite Element Code
+ *
+ *               Copyright (C) 1993 - 2011   Borek Patzak
+ *
+ *
+ *
+ *       Czech Technical University, Faculty of Civil Engineering,
+ *   Department of Structural Mechanics, 166 29 Prague, Czech Republic
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+
 #include "enrichmentfunction.h"
 #include "enrichmentitem.h"
 #include "domain.h"
-#include <math.h>
 #include "xfemmanager.h"
 #include "mathfem.h"
 
 namespace oofem {
-/*
- * void EnrichmentFunction :: insertEnrichmentItem(EnrichmentItem *er) {
- *  int sz = assocEnrItemArray.giveSize();
- *  assocEnrItemArray.resize(sz + 1);
- *  this->assocEnrItemArray.at(sz + 1) = er->giveNumber();
- * }
- *
- * void EnrichmentFunction :: setActive(EnrichmentItem *er) {
- *  this->activeEnrItem = er;
- * }
- */
-IRResultType EnrichmentFunction :: initializeFrom(InputRecord *ir) {
+IRResultType EnrichmentFunction :: initializeFrom(InputRecord *ir)
+{
     return IRRT_OK;
 }
 
-double EnrichmentFunction :: evaluateFunctionAt(GaussPoint *gp, EnrichmentItem *ei) {
+double EnrichmentFunction :: evaluateFunctionAt(GaussPoint *gp, EnrichmentItem *ei)
+{
     FloatArray gcoords;
     gp->giveElement()->computeGlobalCoordinates( gcoords, * gp->giveCoordinates() );
     return this->evaluateFunctionAt(& gcoords, ei);
 }
 
-void EnrichmentFunction :: evaluateDerivativeAt(FloatArray &answer, GaussPoint *gp, EnrichmentItem *ei) {
+void EnrichmentFunction :: evaluateDerivativeAt(FloatArray &answer, GaussPoint *gp, EnrichmentItem *ei)
+{
     FloatArray gc;
     gp->giveElement()->computeGlobalCoordinates( gc, * gp->giveCoordinates() );
     this->evaluateDerivativeAt(answer, & gc, ei);
 }
 
 
-double DiscontinuousFunction :: evaluateFunctionAt(FloatArray *point, EnrichmentItem *ei) {
+double DiscontinuousFunction :: evaluateFunctionAt(FloatArray *point, EnrichmentItem *ei)
+{
     double dist = ei->giveGeometry()->computeDistanceTo(point);
     return sgn(dist);
 }
 
-void DiscontinuousFunction :: evaluateDerivativeAt(FloatArray &answer, FloatArray *point, EnrichmentItem *ei) {
+void DiscontinuousFunction :: evaluateDerivativeAt(FloatArray &answer, FloatArray *point, EnrichmentItem *ei)
+{
     answer.resize(2);
     answer.zero();
 }
 
-double RampFunction :: evaluateFunctionAt(FloatArray *point, EnrichmentItem *ei) {
+double RampFunction :: evaluateFunctionAt(FloatArray *point, EnrichmentItem *ei)
+{
     double dist = ei->giveGeometry()->computeDistanceTo(point);
     double absDist;
     if ( dist < 0.0000 ) {
@@ -56,7 +84,8 @@ double RampFunction :: evaluateFunctionAt(FloatArray *point, EnrichmentItem *ei)
     return absDist;
 }
 
-void RampFunction :: evaluateDerivativeAt(FloatArray &answer, FloatArray *point, EnrichmentItem *ei) {
+void RampFunction :: evaluateDerivativeAt(FloatArray &answer, FloatArray *point, EnrichmentItem *ei)
+{
     double dist = ei->giveGeometry()->computeDistanceTo(point);
     double absDist;
     if ( dist < 0.0000 ) {
@@ -70,7 +99,8 @@ void RampFunction :: evaluateDerivativeAt(FloatArray &answer, FloatArray *point,
     answer.at(1) = answer.at(2) = absDist / dist;
 }
 
-double RampFunction :: evaluateFunctionAt(GaussPoint *gp, EnrichmentItem *ei) {
+double RampFunction :: evaluateFunctionAt(GaussPoint *gp, EnrichmentItem *ei)
+{
     FloatArray N;
     Element *el = gp->giveElement();
     el->giveInterpolation()->evalN(N, * gp->giveCoordinates(), FEIElementGeometryWrapper(el), 0.0);
@@ -91,7 +121,8 @@ double RampFunction :: evaluateFunctionAt(GaussPoint *gp, EnrichmentItem *ei) {
     return absMember;
 }
 
-void RampFunction :: evaluateDerivativeAt(FloatArray &answer, GaussPoint *gp, EnrichmentItem *ei) {
+void RampFunction :: evaluateDerivativeAt(FloatArray &answer, GaussPoint *gp, EnrichmentItem *ei)
+{
     FloatArray N;
     Element *el = gp->giveElement();
     el->giveInterpolation()->evalN(N, * gp->giveCoordinates(), FEIElementGeometryWrapper(el), 0.0);
@@ -120,7 +151,8 @@ void RampFunction :: evaluateDerivativeAt(FloatArray &answer, GaussPoint *gp, En
 }
 
 // to change
-double BranchFunction :: evaluateFunctionAt(FloatArray *point, EnrichmentItem *ei) {
+double BranchFunction :: evaluateFunctionAt(FloatArray *point, EnrichmentItem *ei)
+{
     /*
      *  double ret = 0;
      *  CrackTip *cr = (CrackTip*) activeEnrItem;
@@ -141,7 +173,8 @@ double BranchFunction :: evaluateFunctionAt(FloatArray *point, EnrichmentItem *e
 }
 
 // to change
-void BranchFunction :: evaluateDerivativeAt(FloatArray &answer, FloatArray *point, EnrichmentItem *ei) {
+void BranchFunction :: evaluateDerivativeAt(FloatArray &answer, FloatArray *point, EnrichmentItem *ei)
+{
     /*
      *  answer.resize(2);
      *  CrackTip *cr = (CrackTip*) activeEnrItem;

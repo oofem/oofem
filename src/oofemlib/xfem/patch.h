@@ -1,12 +1,39 @@
 /*
- * File:   subpatchintegrationrule.h
- * Author: chamrova
  *
- * Created on November 2, 2008, 1:27 PM
+ *                 #####    #####   ######  ######  ###   ###
+ *               ##   ##  ##   ##  ##      ##      ## ### ##
+ *              ##   ##  ##   ##  ####    ####    ##  #  ##
+ *             ##   ##  ##   ##  ##      ##      ##     ##
+ *            ##   ##  ##   ##  ##      ##      ##     ##
+ *            #####    #####   ##      ######  ##     ##
+ *
+ *
+ *             OOFEM : Object Oriented Finite Element Code
+ *
+ *               Copyright (C) 1993 - 2011   Borek Patzak
+ *
+ *
+ *
+ *       Czech Technical University, Faculty of Civil Engineering,
+ *   Department of Structural Mechanics, 166 29 Prague, Czech Republic
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#ifndef _PATCH_H
-#define _PATCH_H
+#ifndef patch_h
+#define patch_h
 
 #include "delaunay.h"
 #include "gausspnt.h"
@@ -15,45 +42,50 @@
 #include "node.h"
 
 namespace oofem {
-/** abstract representation of a part of element after subdivision  */
+/**
+ * Abstract representation of a part of element after subdivision.
+ * @author chamrova
+ */
 class Patch : public BasicGeometry
 {
 public:
     enum PatchType { PT_Unknown, PT_TrianglePatch };
+
 protected:
-    /// parental element
+    /// Parental element.
     Element *parent;
-    /// Material of the patch
+    /// Material of the patch.
     int material;
+
 public:
     Patch(Element *parent);
     Patch(Element *parent, int material);
     Patch(Element *parent, AList< FloatArray > *vertices);
     virtual ~Patch() { }
-    /// converts the GP into the parental system of an element
+    /// converts the GP into the parental system of an element.
     virtual void convertGPIntoParental(GaussPoint *gp) = 0;
-    /// returns material id associated to receiver
+    /// returns material id associated to receiver.
     int giveMaterial() { return this->material; }
-    /// returns reference to parent element
+    /// returns reference to parent element.
     Element *giveParent() { return this->parent; }
-    /// Returns patch type id of receiver
+    /// Returns patch type id of receiver.
     virtual PatchType givePatchType() { return PT_Unknown; }
     /**
      * Stores receiver state to output stream.
-     * @exception throws an ContextIOERR exception if error encountered
+     * @exception ContextIOERR If error encountered.
      */
-    virtual contextIOResultType   saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
     /**
      * Restores the receiver state previously written in stream.
-     * @exception throws an ContextIOERR exception if error encountered
+     * @exception ContextIOERR If error encountered.
      */
-    virtual contextIOResultType   restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 
 #ifdef __OOFEG
-    /// draw pure geometry
-    void          draw(oofegGraphicContext &gc) { BasicGeometry :: draw(gc); }
-    /// draw with vertex data
-    virtual void  drawWD(oofegGraphicContext &gc, FloatArray &vd) { };
+    /// Draw pure geometry.
+    void draw(oofegGraphicContext &gc) { BasicGeometry :: draw(gc); }
+    /// Draw with vertex data.
+    virtual void drawWD(oofegGraphicContext &gc, FloatArray &vd) { };
 #endif
 };
 
@@ -70,9 +102,9 @@ public:
     /// Returns patch type id of receiver
     PatchType givePatchType() { return PT_TrianglePatch; }
 #ifdef __OOFEG
-    void          draw(oofegGraphicContext &gc);
-    void  drawWD(oofegGraphicContext &gc, FloatArray &vd);
+    void draw(oofegGraphicContext &gc);
+    void drawWD(oofegGraphicContext &gc, FloatArray &vd);
 #endif
 };
 } // end namespace oofem
-#endif
+#endif // patch_h

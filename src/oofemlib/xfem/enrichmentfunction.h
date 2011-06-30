@@ -1,12 +1,39 @@
 /*
- * File:   enrichmentfunction.h
- * Author: chamrova
  *
- * Created on October 26, 2008, 3:15 PM
+ *                 #####    #####   ######  ######  ###   ###
+ *               ##   ##  ##   ##  ##      ##      ## ### ##
+ *              ##   ##  ##   ##  ####    ####    ##  #  ##
+ *             ##   ##  ##   ##  ##      ##      ##     ##
+ *            ##   ##  ##   ##  ##      ##      ##     ##
+ *            #####    #####   ##      ######  ##     ##
+ *
+ *
+ *             OOFEM : Object Oriented Finite Element Code
+ *
+ *               Copyright (C) 1993 - 2011   Borek Patzak
+ *
+ *
+ *
+ *       Czech Technical University, Faculty of Civil Engineering,
+ *   Department of Structural Mechanics, 166 29 Prague, Czech Republic
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#ifndef _ENRICHMENTFUNCTION_H
-#define _ENRICHMENTFUNCTION_H
+#ifndef enrichmentfunction_h
+#define enrichmentfunction_h
 
 #include "femcmpnn.h"
 #include "gausspnt.h"
@@ -15,15 +42,16 @@ namespace oofem {
 class EnrichmentItem;
 class BasicGeometry;
 
-/** Abstract class representing global shape function
- *  Base class declares abstract interface common to all enrichment functions.
- *  Particularly, evaluateAt() and evaluateDerivativeAt() services are declared
- *  to evaluate the value and spatial derivatives at a given point of the receiver.
+/**
+ * Abstract class representing global shape function
+ * Base class declares abstract interface common to all enrichment functions.
+ * Particularly, evaluateAt() and evaluateDerivativeAt() services are declared
+ * to evaluate the value and spatial derivatives at a given point of the receiver.
+ * @author chamrova
  */
 class EnrichmentFunction : public FEMComponent
 {
 public:
-
     /**
      * Constructor.
      * @param n number associated with receiver
@@ -50,19 +78,19 @@ public:
     const char *giveClassName() const {
         return "EnrichmentFunction";
     }
-    /// Accessor
+    /// Accessor.
     int giveNumberOfDofs() { return numberOfDofs; }
 
 protected:
-    /// EnrichmentItems associated with this EnrichmentFunction
+    /// EnrichmentItems associated with this EnrichmentFunction.
     IntArray assocEnrItemArray;
-    /// active EnrichmentItem
+    /// Active EnrichmentItem.
     EnrichmentItem *activeEnrItem;
-    // number of dofs to enrich
+    /// Number of dofs to enrich.
     int numberOfDofs;
 };
 
-/** Class representing Heaviside EnrichmentFunction */
+/** Class representing Heaviside EnrichmentFunction. */
 class DiscontinuousFunction : public EnrichmentFunction
 {
 public:
@@ -74,7 +102,7 @@ public:
     void evaluateDerivativeAt(FloatArray &answer, FloatArray *point, EnrichmentItem *ei);
 };
 
-/** Class representing Branch EnrichmentFunction */
+/** Class representing Branch EnrichmentFunction. */
 class BranchFunction : public EnrichmentFunction
 {
 public:
@@ -86,7 +114,7 @@ public:
     void evaluateDerivativeAt(FloatArray &answer, FloatArray *point, EnrichmentItem *ei);
 };
 
-/** Class representing bimaterial interface */
+/** Class representing bimaterial interface. */
 class RampFunction : public EnrichmentFunction
 {
 public:
@@ -100,4 +128,4 @@ public:
     void evaluateDerivativeAt(FloatArray &answer, GaussPoint *gp, EnrichmentItem *ei);
 };
 } // end namespace oofem
-#endif  /* _ENRICHMENTFUNCTION_H */
+#endif  // enrichmentfunction_h

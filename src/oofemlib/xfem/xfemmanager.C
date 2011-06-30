@@ -1,3 +1,37 @@
+/*
+ *
+ *                 #####    #####   ######  ######  ###   ###
+ *               ##   ##  ##   ##  ##      ##      ## ### ##
+ *              ##   ##  ##   ##  ####    ####    ##  #  ##
+ *             ##   ##  ##   ##  ##      ##      ##     ##
+ *            ##   ##  ##   ##  ##      ##      ##     ##
+ *            #####    #####   ##      ######  ##     ##
+ *
+ *
+ *             OOFEM : Object Oriented Finite Element Code
+ *
+ *               Copyright (C) 1993 - 2011   Borek Patzak
+ *
+ *
+ *
+ *       Czech Technical University, Faculty of Civil Engineering,
+ *   Department of Structural Mechanics, 166 29 Prague, Czech Republic
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+
 #include "inputrecord.h"
 #include "intarray.h"
 #include "femcmpnn.h"
@@ -27,7 +61,8 @@
 #include "patchintegrationrule.h"
 
 namespace oofem {
-XfemManager :: XfemManager(EngngModel *emodel, int domainIndex) {
+XfemManager :: XfemManager(EngngModel *emodel, int domainIndex)
+{
     this->emodel = emodel;
     this->domainIndex = domainIndex;
     this->enrichmentFunctionList = new AList< EnrichmentFunction >(0);
@@ -40,12 +75,14 @@ XfemManager :: XfemManager(EngngModel *emodel, int domainIndex) {
     dofIdPos = 0;
 }
 
-XfemManager :: ~XfemManager() {
+XfemManager :: ~XfemManager()
+{
     delete enrichmentItemList;
     delete geometryList;
     delete enrichmentFunctionList;
     delete fictPosition;
 }
+
 Domain *XfemManager :: giveDomain() { return emodel->giveDomain(domainIndex); }
 
 void XfemManager :: getInteractedEI(IntArray &answer, Element *elem) {
@@ -105,7 +142,8 @@ EnrichmentFunction *XfemManager :: giveEnrichmentFunction(int n)
     return NULL;
 }
 
-int XfemManager :: computeFictPosition() {
+int XfemManager :: computeFictPosition()
+{
     // gives for a particular node position of its fictitious node
     // it is supposed that the fictitious nodes are at the very end
     // this is supposed to be used for creation of locationArray for a dofmanager
@@ -135,7 +173,8 @@ int XfemManager :: computeFictPosition() {
     return count;
 }
 
-bool XfemManager :: isEnriched(int nodeNumber) {
+bool XfemManager :: isEnriched(int nodeNumber)
+{
     XfemManager :: XfemType nodeEnrType = this->computeNodeEnrichmentType(nodeNumber);
     if ( nodeEnrType != 0 ) {
         return true;
@@ -144,7 +183,8 @@ bool XfemManager :: isEnriched(int nodeNumber) {
     }
 }
 
-XfemManager :: XfemType XfemManager :: computeNodeEnrichmentType(int nodeNumber) {
+XfemManager :: XfemType XfemManager :: computeNodeEnrichmentType(int nodeNumber)
+{
     XfemType ret;
     int intersectionCount = 0;
     const IntArray *neighbours = emodel->giveDomain(domainIndex)->giveConnectivityTable()->giveDofManConnectivityArray(nodeNumber);
@@ -169,8 +209,7 @@ XfemManager :: XfemType XfemManager :: computeNodeEnrichmentType(int nodeNumber)
     return ret;
 }
 
-IRResultType
-XfemManager :: initializeFrom(InputRecord *ir) {
+IRResultType XfemManager :: initializeFrom(InputRecord *ir) {
     const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result; // Required by IR_GIVE_FIELD macro
 
@@ -184,8 +223,8 @@ XfemManager :: initializeFrom(InputRecord *ir) {
     return IRRT_OK;
 }
 
-int
-XfemManager :: instanciateYourself(DataReader *dr) {
+int XfemManager :: instanciateYourself(DataReader *dr)
+{
     const char *__proc = "instanciateYourself"; // Required by IR_GIVE_FIELD macro
     IRResultType result; // Required by IR_GIVE_FIELD macro
     int i;
@@ -264,7 +303,8 @@ XfemManager :: instanciateYourself(DataReader *dr) {
     return 1;
 }
 
-DofIDItem XfemManager :: allocateNewDofID() {
+DofIDItem XfemManager :: allocateNewDofID()
+{
     int answer = 0;
     if ( dofIdPos < ( X_N - X_1 ) ) {
         answer = dofIdPos + X_1;
@@ -274,8 +314,8 @@ DofIDItem XfemManager :: allocateNewDofID() {
     return (DofIDItem)answer;
 }
 
-
-void XfemManager :: updateIntegrationRule() {
+void XfemManager :: updateIntegrationRule()
+{
     for ( int i = 1; i <= this->giveDomain()->giveNumberOfElements(); i++ ) {
         Element *el = this->giveDomain()->giveElement(i);
         XfemElementInterface *xei = ( XfemElementInterface * ) el->giveInterface(XfemElementInterfaceType);
@@ -283,8 +323,8 @@ void XfemManager :: updateIntegrationRule() {
     }
 }
 
-void
-XfemManager :: updateGeometry(TimeStep *tStep) {
+void XfemManager :: updateGeometry(TimeStep *tStep)
+{
     for ( int i = 1; i <= this->enrichmentItemList->giveSize(); i++ ) {
         enrichmentItemList->at(i)->updateGeometry(tStep);
     }

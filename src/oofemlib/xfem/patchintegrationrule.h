@@ -1,5 +1,39 @@
-#ifndef _PATCHINTEGRATIONRULE_H
-#define _PATCHINTEGRATIONRULE_H
+/*
+ *
+ *                 #####    #####   ######  ######  ###   ###
+ *               ##   ##  ##   ##  ##      ##      ## ### ##
+ *              ##   ##  ##   ##  ####    ####    ##  #  ##
+ *             ##   ##  ##   ##  ##      ##      ##     ##
+ *            ##   ##  ##   ##  ##      ##      ##     ##
+ *            #####    #####   ##      ######  ##     ##
+ *
+ *
+ *             OOFEM : Object Oriented Finite Element Code
+ *
+ *               Copyright (C) 1993 - 2011   Borek Patzak
+ *
+ *
+ *
+ *       Czech Technical University, Faculty of Civil Engineering,
+ *   Department of Structural Mechanics, 166 29 Prague, Czech Republic
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+
+#ifndef patchintegrationrule_h
+#define patchintegrationrule_h
 
 #include "integrationrule.h"
 #include "patch.h"
@@ -7,43 +41,21 @@
 #include "gaussintegrationrule.h"
 
 namespace oofem {
-/*
- * class PatchIntegrationRule : public IntegrationRule
- * {
- * protected:
- *  /// list of patches
- *  AList< Patch > *patchSet;
- * public:
- *  /// Constructor
- *  PatchIntegrationRule(int n, Element *e, AList< Triangle > *patchSet);
- *  /// Destructor
- *  ~PatchIntegrationRule();
- *  /// Performes integration over the whole patchset
- *  void computeGps(MaterialMode matMode);
- *  /// Accessor
- *  Patch *givePatch(int n) { return patchSet->at(n); }
- *  /// Computes gps on a single patch
- *  void computeGpsForPatch(Patch *patch, AList< GaussPoint > *answer, MaterialMode matMode);
- *  /// Wrap up function for computeGps
- *  int SetUpPointsOnSquare(int, MaterialMode matMode, GaussPoint ***);
- *  int giveNumberOfPatches() { return patchSet->giveSize(); }
- * };*/
-
 /**
  * Represents an IntegrationRule for an interacted element
  * the standard integration is replaced by an integration over a
- * patchset
+ * patchset.
  */
 class PatchIntegrationRule : public GaussIntegrationRule
 {
 protected:
-    /// patch
+    /// Patch.
     Patch *patch;
 
 public:
-    /// Constructor
+    /// Constructor.
     PatchIntegrationRule(int n, Element *e, Patch *p);
-    /// Destructor
+    /// Destructor.
     ~PatchIntegrationRule();
     int SetUpPointsOnTriagle(int, MaterialMode, GaussPoint * * *);
     int giveMaterial() { return this->patch->giveMaterial(); }
@@ -54,4 +66,4 @@ public:
     virtual classType giveClassID() const { return PatchIntegrationRuleClass; }
 };
 } // end namespace oofem
-#endif
+#endif // patchintegrationrule_h
