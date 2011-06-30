@@ -105,13 +105,6 @@ CrossSection *CreateUsrDefCrossSectionOfType(const char *name, int num, Domain *
  */
 EngngModel *CreateUsrDefEngngModelOfType(const char *name, int num, EngngModel *master = NULL);
 /**
- * Creates new instance of user defined external analysis model corresponding to given keyword.
- * @param name Keyword string determining the type of new instance.
- * @param m Master engineering model.
- * @return Newly allocated object of requested type, null if keyword not supported.
- */
-ExternalAnalysis *CreateUsrDefExternalAnalysisOfType(const char *name, EngngModel *m);
-/**
  * Creates new instance of user defined load  corresponding to given keyword.
  * @param name Keyword string determining the type of new instance.
  * @param num  Component number.
