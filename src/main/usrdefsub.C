@@ -936,10 +936,7 @@ SparseGeneralEigenValueSystemNM *CreateUsrDefGeneralizedEigenValueSolver(GenEigv
     return nm;
 }
 
-
-
-ErrorEstimator *
-CreateUsrDefErrorEstimator(ErrorEstimatorType type, int number, Domain *d)
+ErrorEstimator *CreateUsrDefErrorEstimator(ErrorEstimatorType type, int number, Domain *d)
 {
     ErrorEstimator *answer = NULL;
 

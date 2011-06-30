@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -32,10 +32,6 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-//
-// file zznodalrecoverymodel.C
-//
-
 #include "zznodalrecoverymodel.h"
 #include "timestep.h"
 #include "element.h"
@@ -45,9 +41,6 @@
 #include "feinterpol.h"
 #include "mathfem.h"
 #include "error.h"
-#ifndef __MAKEDEPEND
- #include <stdio.h>
-#endif
 
 #ifdef __PARALLEL_MODE
  #include "communicator.h"

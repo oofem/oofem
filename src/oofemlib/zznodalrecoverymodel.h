@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/zznodalrecoverymodel.h,v 1.2 2003/04/06 14:08:26 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -33,10 +32,6 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-//   **************************************************
-//   *** CLASS Zienkiewicz-Zhu NODAL RECOVERY MODEL ***
-//   **************************************************
-
 #ifndef zznodalrecoverymodel_h
 #define zznodalrecoverymodel_h
 
@@ -52,50 +47,51 @@ class ZZNodalRecoveryModelInterface;
 /**
  * The nodal recovery model based on paper of Zienkiewicz and Zhu "A Simple Estimator and Adaptive
  * Procedure for Practical Engineering Analysis". The recovery is based
- * on nodal averaging or projection process in which it is assumed that the stress sigma_star is
+ * on nodal averaging or projection process in which it is assumed that the stress @f$ \sigma_\star @f$ is
  * interpolated by the same function as the displacement.
  */
 class ZZNodalRecoveryModel : public NodalRecoveryModel
 {
 protected:
-
-    /** Helper structure to pass required argumets to packing/unpacking functions
-     *  needed in parallel mode */
+    /**
+     * Helper structure to pass required arguments to packing/unpacking functions
+     * needed in parallel mode.
+     */
     struct parallelStruct {
         FloatArray *lhs;
         FloatMatrix *rhs;
         IntArray *regionNodalNumbers;
-        parallelStruct(FloatArray *a, FloatMatrix *b, IntArray *c) { lhs = a;
-                                                                     rhs = b;
-                                                                     regionNodalNumbers = c; }
+        parallelStruct(FloatArray *a, FloatMatrix *b, IntArray *c):
+            lhs(a), rhs(b) regioNodalNumbers(c) { }
     };
 
 public:
-    /// Constructor
+    /// Constructor.
     ZZNodalRecoveryModel(Domain *d);
-    /// Destructor
+    /// Destructor.
     ~ZZNodalRecoveryModel();
-    /** Recovers the nodal values for all regions of given Domain.
-     * @param d domain of interest
-     * @param type determines the type of internal variable to be recovered
-     * @param tStep time step
+    /**
+     * Recovers the nodal values for all regions.
+     * @param type Determines the type of internal variable to be recovered.
+     * @param tStep Time step.
      */
     int recoverValues(InternalStateType type, TimeStep *tStep);
+
 private:
     /**
      * Initializes the region table indicating regions to skip.
-     * @param regionMap region tabl, the nonzero entry for region indicates region to skip due to
-     * unsupported elements or incompatible value size
-     * @param regionValSize contains the record size for each region
-     * @param type determines the type of internal variable to be recovered
+     * @param regionMap Region table, the nonzero entry for region indicates region to skip due to
+     * unsupported elements or incompatible value size.
+     * @param regionValSize Contains the record size for each region.
+     * @param type Determines the type of internal variable to be recovered.
      */
     void initRegionMap(IntArray &regionMap, IntArray &regionValSize, InternalStateType type);
 
 #ifdef __PARALLEL_MODE
     void initCommMaps();
     void exchangeDofManValues(int ireg, FloatArray &lhs, FloatMatrix &rhs, IntArray &rn);
-    int  packSharedDofManData(parallelStruct *s, ProcessCommunicator &processComm);
-    int  unpackSharedDofManData(parallelStruct *s, ProcessCommunicator &processComm);
+    int packSharedDofManData(parallelStruct *s, ProcessCommunicator &processComm);
+    int unpackSharedDofManData(parallelStruct *s, ProcessCommunicator &processComm);
 #endif
 };
 
@@ -109,31 +105,30 @@ public:
     ZZNodalRecoveryModelInterface() { }
 
     /**
-     * Computes the element contribution to \f$\int_\Omega N^T\alpha\;d\Omega\f$,
-     * where \f$\alpha\f$ is quantity to be recovered (for example stress or strain vector).
+     * Computes the element contribution to @f$ \int_\Omega N^{\mathrm{T}}\alpha\;\mathrm{d}\Omega @f$,
+     * where @f$ \alpha @f$ is quantity to be recovered (for example stress or strain vector).
      * The size of answer should be recordSize*numberofDofManagers.
-     * @param answer contains the result
-     * @param type determines the type of internal variable to be recovered
-     * @param tStep time step
+     * @param answer Contains the result.
+     * @param type Determines the type of internal variable to be recovered.
+     * @param tStep Time step.
      */
-    // virtual void ZZNodalRecoveryMI_computeNValProduct (FloatArray& answer, InternalStateType type, TimeStep* tStep);
     virtual void ZZNodalRecoveryMI_computeNValProduct(FloatMatrix &answer, InternalStateType type, TimeStep *tStep);
     /**
-     * Computes the element contribution to \f$\int_\Omega N^TN\;d\Omega\f$ term.
+     * Computes the element contribution to @f$\int_\Omega N^{\mathrm{T}} \cdot N\;\mathrm{d}\Omega @f$ term.
      * The size of answer should be [recordSize*numberofDofManagers].
-     * @param answer contain diagonalized result
-     * @param type determines the type of internal variable to be recovered
+     * @param answer Contain diagonalized result.
+     * @param type Determines the type of internal variable to be recovered.
      */
     virtual void ZZNodalRecoveryMI_computeNNMatrix(FloatArray &answer, InternalStateType type);
     /**
      * Returns the size of DofManger record required to hold recovered values for given mode.
      * Default implementation uses element giveIPValueSize method.
-     * @param type determines the type of internal variable to be recovered
-     * @return size of DofManger record required to hold recovered values
+     * @param type Determines the type of internal variable to be recovered.
+     * @return Size of DofManger record required to hold recovered values.
      */
     virtual int ZZNodalRecoveryMI_giveDofManRecordSize(InternalStateType type) ;
     /**
-     * Returns the corresponding element to interface
+     * Returns the corresponding element to interface.
      */
     virtual Element *ZZNodalRecoveryMI_giveElement() = 0;
     /**
