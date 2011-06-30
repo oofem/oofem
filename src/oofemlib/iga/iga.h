@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/element.h,v 1.27 2003/04/06 14:08:24 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -36,23 +35,6 @@
 #ifndef iga_h
 #define iga_h
 
-/*
- * oofem nodes - control points (coordinates ) + dofs
- * oofem elements - NURBS patches as well as integration elements
- *
- *
- * NURBS PATCH:
- * knot vector - store knot coordinates + multiplicity
- * patch integration rule - keep list of elements
- *
- * integration element
- *
- * FEInterpolation:
- * - need to be enriched, as one should (or can) pass knot span to evaluation routines
- * (in this way the patch by patch evaluation can be faster)
- *
- */
-
 #include "inputrecord.h"
 #include "flotarry.h"
 #include "flotmtrx.h"
@@ -69,9 +51,9 @@ class StructuralElementEvaluator;
 void drawIGAPatchDeformedGeometry(Element * elem, StructuralElementEvaluator * se, oofegGraphicContext & gc, UnknownType);
 #endif
 
-
-
-
+/**
+ * Geometry wrapper for IGA elements.
+ */
 class FEIIGAElementGeometryWrapper : public FEICellGeometry
 {
 public:
@@ -93,8 +75,7 @@ public:
 
 
 /**
- * IntegrationElement represent nonzero knot span, derived from Integration Rule;
- *
+ * IntegrationElement represent nonzero knot span, derived from Integration Rule.
  */
 class IGAIntegrationElement : public GaussIntegrationRule
 {
@@ -107,7 +88,6 @@ public:
     const IntArray *giveKnotSpan() { return & this->knotSpan; }
     void setKnotSpan(IntArray &src) { this->knotSpan = src; }
 };
-
 
 
 /**
@@ -129,12 +109,8 @@ public:
 #endif
 
 #ifdef __OOFEG
-    //
-    // Graphics output
-    //
     virtual void  drawRawGeometry(oofegGraphicContext &mode);
 #endif
-
 
 protected:
     virtual int giveNsd() = 0; // this info is available also from interpolation. Do we need it here ???
@@ -142,7 +118,7 @@ protected:
 
 
 /**
- *       IGATSplineElement setups integration rules differently from IGAElement
+ * IGATSplineElement setups integration rules differently from IGAElement.
  */
 class IGATSplineElement : public IGAElement
 {

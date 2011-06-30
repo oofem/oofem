@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/element.h,v 1.27 2003/04/06 14:08:24 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -48,7 +47,8 @@
 #include "iga.h"
 
 namespace oofem {
-StructuralElementEvaluator :: StructuralElementEvaluator() {
+StructuralElementEvaluator :: StructuralElementEvaluator()
+{
     this->rotationMatrix.beEmptyMtrx();
 }
 
@@ -78,7 +78,8 @@ StructuralElementEvaluator :: StructuralElementEvaluator() {
  */
 
 int StructuralElementEvaluator :: giveIntegrationElementLocalCodeNumbers(IntArray &answer, Element *elem,
-                                                                         IntegrationRule *ie, EquationID ut) {
+                                                                         IntegrationRule *ie, EquationID ut)
+{
     int i, j, nsd;
     IntArray mask, nodeDofIDMask, nodalArray;
     int dofmandof;
@@ -447,7 +448,7 @@ void StructuralElementEvaluator :: computeStiffnessMatrix(FloatMatrix &answer, M
 int
 StructuralElementEvaluator :: updateRotationMatrix()
 {
-    /* returns a tranformation matrix between local coordinate system
+    /* returns a transformation matrix between local coordinate system
      * and global coordinate system, taking into account possible local
      * coordinate system in nodes.
      * if no transformation necessary - returns NULL
@@ -526,7 +527,7 @@ StructuralElementEvaluator :: computeGNDofRotationMatrix(FloatMatrix &answer, Do
 int
 StructuralElementEvaluator :: updateRotationMatrix()
 {
-    /* returns a tranformation matrix between local coordinate system
+    /* returns a transformation matrix between local coordinate system
      * and global coordinate system, taking into account possible local
      * coordinate system in nodes.
      * if no transformation necessary - returns NULL

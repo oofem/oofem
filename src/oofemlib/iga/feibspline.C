@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/element.h,v 1.27 2003/04/06 14:08:24 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -32,14 +31,15 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
+
 #include "flotarry.h"
 #include "flotmtrx.h"
 #include "iga.h"
 #include "feibspline.h"
 
-
 namespace oofem {
-BSplineInterpolation :: ~BSplineInterpolation() {
+BSplineInterpolation :: ~BSplineInterpolation()
+{
     int i;
 
     delete [] degree;
@@ -57,7 +57,8 @@ BSplineInterpolation :: ~BSplineInterpolation() {
 
 
 IRResultType
-BSplineInterpolation :: initializeFrom(InputRecord *ir) {
+BSplineInterpolation :: initializeFrom(InputRecord *ir)
+{
     const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                 // Required by IR_GIVE_FIELD macro
 
@@ -176,8 +177,8 @@ BSplineInterpolation :: initializeFrom(InputRecord *ir) {
 }
 
 
-
-void BSplineInterpolation :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time) {
+void BSplineInterpolation :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time)
+{
     FEIIGAElementGeometryWrapper *gw = ( FEIIGAElementGeometryWrapper * ) & cellgeo;
     IntArray span(nsd);
     int i, l, k, m, c = 1, count;
@@ -231,7 +232,8 @@ void BSplineInterpolation :: evalN(FloatArray &answer, const FloatArray &lcoords
 }
 
 
-void BSplineInterpolation :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time) {
+void BSplineInterpolation :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time)
+{
     FEIIGAElementGeometryWrapper *gw = ( FEIIGAElementGeometryWrapper * ) & cellgeo;
     const FloatArray *vertexCoordsPtr;
     FloatMatrix jacobian(nsd, nsd);
@@ -419,7 +421,8 @@ void BSplineInterpolation :: evaldNdx(FloatMatrix &answer, const FloatArray &lco
 }
 
 
-void BSplineInterpolation :: local2global(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time) {
+void BSplineInterpolation :: local2global(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time)
+{
     /* Based on SurfacePoint A3.5 implementation*/
     FEIIGAElementGeometryWrapper *gw = ( FEIIGAElementGeometryWrapper * ) & cellgeo;
     const FloatArray *vertexCoordsPtr;
@@ -516,7 +519,8 @@ void BSplineInterpolation :: local2global(FloatArray &answer, const FloatArray &
 }
 
 
-double BSplineInterpolation :: giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time) {
+double BSplineInterpolation :: giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo, double time)
+{
     FEIIGAElementGeometryWrapper *gw = ( FEIIGAElementGeometryWrapper * ) & cellgeo;
     const FloatArray *vertexCoordsPtr;
     FloatMatrix jacobian(nsd, nsd);
@@ -652,7 +656,8 @@ double BSplineInterpolation :: giveTransformationJacobian(const FloatArray &lcoo
 }
 
 
-int BSplineInterpolation :: giveKnotSpanBasisFuncMask(const IntArray &knotSpan, IntArray &mask) {
+int BSplineInterpolation :: giveKnotSpanBasisFuncMask(const IntArray &knotSpan, IntArray &mask)
+{
     int size, c = 1, i, j, k, iindx, jindx, kindx;
 
     size = giveNumberOfKnotSpanBasisFunctions(knotSpan);
@@ -683,15 +688,15 @@ int BSplineInterpolation :: giveKnotSpanBasisFuncMask(const IntArray &knotSpan, 
             }
         }
     } else {
-        OOFEM_ERROR2("giveKnotSpanBasisFunctMask not implemented for nsd = %d", nsd);
+        OOFEM_ERROR2("BSplineInterpolation :: giveKnotSpanBasisFunctMask not implemented for nsd = %d", nsd);
     }
-
     return 1;
 }
 
 
 // for pure Bspline the number of nonzero basis functions is the same for each knot span
-int BSplineInterpolation :: giveNumberOfKnotSpanBasisFunctions(const IntArray &knotSpan) {
+int BSplineInterpolation :: giveNumberOfKnotSpanBasisFunctions(const IntArray &knotSpan)
+{
     int i, answer = 1;
     // there are always degree+1 nonzero basis functions on each knot span
     for ( i = 0; i < nsd; i++ ) {
@@ -706,9 +711,10 @@ int BSplineInterpolation :: giveNumberOfKnotSpanBasisFunctions(const IntArray &k
 // and can be retrieved for given spatial dimension;
 // however in such a case this function could not be used for calculation on local knot vector of TSpline;
 // it is also redundant to pass the span which can be calculated
-// but we want to profit from knowing the span appriori
+// but we want to profit from knowing the span a priori
 
-void BSplineInterpolation :: basisFuns(FloatArray &N, int span, double u, int p, const double *U) {
+void BSplineInterpolation :: basisFuns(FloatArray &N, int span, double u, int p, const double *U)
+{
     //
     // Based on Algorithm A2.2 (p. 70)
     //
@@ -738,9 +744,10 @@ void BSplineInterpolation :: basisFuns(FloatArray &N, int span, double u, int p,
 // and can be retrieved for given spatial dimension;
 // however in such a case this function could not be used for calculation on local knot vector of TSpline;
 // it is also redundant to pass the span which can be calculated
-// but we want to profit from knowing the span appriori
+// but we want to profit from knowing the span a priori
 
-void BSplineInterpolation :: dersBasisFuns(int n, double u, int span, int p, double *const U, FloatMatrix &ders) {
+void BSplineInterpolation :: dersBasisFuns(int n, double u, int span, int p, double *const U, FloatMatrix &ders)
+{
     //
     // Based on Algorithm A2.3 (p. 72)
     //
@@ -842,7 +849,8 @@ void BSplineInterpolation :: dersBasisFuns(int n, double u, int span, int p, dou
 
 // jaky ma vyznam const = ve funkci se objekt nesmi zmenit
 
-int BSplineInterpolation :: findSpan(int n, int p, double u, const double *U) const {
+int BSplineInterpolation :: findSpan(int n, int p, double u, const double *U) const
+{
     if ( u == U [ n + 1 ] ) {
         return n;
     }

@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/element.h,v 1.27 2003/04/06 14:08:24 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -41,7 +40,6 @@
 
 namespace oofem {
 /**
- *
  * This class represent a new concept on how to define elements.
  * Traditionally, Elements are derived from problem specific class (structural element, for example)
  * define their interpolation and implement methods to evaluate shape function matrix, geometrical matrix, etc.
@@ -53,13 +51,13 @@ namespace oofem {
  *
  * StructuralElementEvaluator - base class of all structural elements
  * Individual elements supposed to be derived from StructuralElementEvaluator and IGAElement
- *
+ * @todo{Class is missing much documentation.}
  */
 class StructuralElementEvaluator
 {
 protected:
     FloatMatrix rotationMatrix;
-    /// Flag indicating if tranformation matrix has been already computed
+    /// Flag indicating if transformation matrix has been already computed
     int rotationMatrixDefined;
 
     StructuralElementEvaluator();
@@ -78,8 +76,8 @@ protected:
     virtual void computeBMatrixAt(FloatMatrix &answer, GaussPoint *gp) = 0;
     virtual void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep);
     virtual double computeVolumeAround(GaussPoint *gp) { return 0.; }
-    void  computeNonForceLoadVector(FloatArray &answer, TimeStep *stepN, ValueModeType mode);
-    void  computeBcLoadVectorAt(FloatArray &answer, TimeStep *, ValueModeType mode);
+    void computeNonForceLoadVector(FloatArray &answer, TimeStep *stepN, ValueModeType mode);
+    void computeBcLoadVectorAt(FloatArray &answer, TimeStep *, ValueModeType mode);
     virtual void giveInternalForcesVector(FloatArray &answer,
                                           TimeStep *, int useUpdatedGpRecord = 0) {
         answer.resize(0);
@@ -94,51 +92,50 @@ protected:
     void computeVectorOfPrescribed(EquationID ut, ValueModeType type, TimeStep *stepN, FloatArray &answer) {
         this->giveElement()->computeVectorOfPrescribed(ut, type, stepN, answer);
     }
-    bool   isActivated(TimeStep *atTime) { return true; }
-    void   updateInternalState(TimeStep *stepN);
-    void   computeStressVector(FloatArray &answer, GaussPoint *gp, TimeStep *stepN);
-    void   computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *stepN);
-    /* Optimized version, allowing to pass element displacents as parameter.
-     * Standart version has a huge performance leak; in typical iga element the element vector is VERY large
+    bool isActivated(TimeStep *atTime) { return true; }
+    void updateInternalState(TimeStep *stepN);
+    void computeStressVector(FloatArray &answer, GaussPoint *gp, TimeStep *stepN);
+    void computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *stepN);
+    /*
+     * Optimized version, allowing to pass element displacements as parameter.
+     * Standard version has a huge performance leak; in typical IGA element the element vector is VERY large
      * and its querying for each point take more time than strain evaluation. And this has to be done for each
      * integration point. This optimized version allows to assemble displacement vector only once (for all IP)
      * and pass this vector as parameter
      */
-    void   computeStressVector(FloatArray &answer, GaussPoint *gp, TimeStep *stepN, FloatArray &u);
-    void   computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *stepN, FloatArray &u);
+    void computeStressVector(FloatArray &answer, GaussPoint *gp, TimeStep *stepN, FloatArray &u);
+    void computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *stepN, FloatArray &u);
 
     /**
      * Updates rotation matrix r(l)=T r(g*) between  local and global coordinate system
      * taking into account also possible local - coordinate system in some elements
      * nodes.
-     * Default implementation uses \ref computeGtoLRotationMatrix and
-     * \ref computeGNDofRotationMatrix  services to compute result.
+     * Default implementation uses computeGtoLRotationMatrix and
+     * computeGNDofRotationMatrix  services to compute result.
      * Default implementation uses cached rotation matrix in
      * rotationMatrix attribute, so rotation matrix is computed only once.
-     * @return nonzero if transformation is necessary.
+     * @return Nonzero if transformation is necessary.
      */
     virtual int updateRotationMatrix();
-    // give Transformation matrix from global coord. sysyt. to element-local c.s
-    // i.e. r(l)=T r(h), if no trasformation necessary set anser to empty mtrx
     /**
      * Returns  transformation matrix from global coord. system to local element
-     * coordinate system ( i.e. r(l)=T r(g)). If no trasformation is necessary
-     * then answer is empty mtrx and zero value is returned.
-     * @return nonzero if transformation is necessary, zero otherwise.
+     * coordinate system ( i.e. r(l)=T r(g)). If no transformation is necessary
+     * then answer is empty matrix and zero value is returned.
+     * @return Nonzero if transformation is necessary, zero otherwise.
      */
-    virtual int  computeGtoLRotationMatrix(FloatMatrix &answer) {
+    virtual int computeGtoLRotationMatrix(FloatMatrix &answer) {
         answer.beEmptyMtrx();
         return 0;
     }
     /**
      * Returns transformation matrix for DOFs from global coordinate system
      * to local coordinate system in nodes (i.e. r(n)=T r(g)) if mode == _toNodalCS.
-     * If mode == _toGlobalCS, the transformation from local nodal cs to
-     * global cs in node is returned. If no trasformation is
-     * necessary sets answer to empty mtrx and returns zero value.
+     * If mode == _toGlobalCS, the transformation from local nodal c.s. to
+     * global c.s. in node is returned. If no transformation is
+     * necessary sets answer to empty matrix and returns zero value.
      * @return nonzero if transformation is necessary, zero otherwise.
      */
-    virtual int  computeGNDofRotationMatrix(FloatMatrix &answer, DofManTransfType mode);
+    virtual int computeGNDofRotationMatrix(FloatMatrix &answer, DofManTransfType mode);
     /**
      * Assembles the code numbers of given integration element (sub-patch)
      * This is done by obtaining list of nonzero shape functions and
@@ -154,7 +151,7 @@ protected:
      * This is done by obtaining list of nonzero shape functions and
      * by collecting the code numbers of nodes corresponding to these
      * shape functions
-     * @returns returns nonzero if integration rule code numbers differ from element code numbers
+     * @return Nonzero if integration rule code numbers differ from element code numbers
      */
     virtual int giveIntegrationElementLocalCodeNumbers(IntArray &answer, Element *elem,
                                                        IntegrationRule *ie, EquationID ut);

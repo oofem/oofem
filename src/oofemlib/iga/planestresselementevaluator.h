@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/element.h,v 1.27 2003/04/06 14:08:24 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -40,7 +39,7 @@
 
 namespace oofem {
 /**
- * general purpose Plane stress structural element evaluator
+ * General purpose Plane stress structural element evaluator.
  */
 class PlaneStressStructuralElementEvaluator : public StructuralElementEvaluator
 {
@@ -48,15 +47,17 @@ public:
     PlaneStressStructuralElementEvaluator() : StructuralElementEvaluator() { }
 
 protected:
-    /// Cached transformation matrix of receiver
-    FloatMatrix *rotationMatrix; // to be moved from structural element
+    /// Cached transformation matrix of receiver. @todo{To be moved from structural element}
+    FloatMatrix *rotationMatrix;
 
-    /** Assemble interpolation matrix at given IP
-     *  In case of IGAElements, N is assumed to contain only nonzero interpolation functions
+    /**
+     * Assemble interpolation matrix at given IP.
+     * In case of IGAElements, N is assumed to contain only nonzero interpolation functions.
      */
     void computeNMatrixAt(FloatMatrix &answer, GaussPoint *gp);
-    /** Assembles the strain-displacement matrix of the receiver at given integration point
-     *  In case of IGAElements, B is assumed to contain only contribution from nonzero interpolation functions
+    /**
+     * Assembles the strain-displacement matrix of the receiver at given integration point.
+     * In case of IGAElements, B is assumed to contain only contribution from nonzero interpolation functions.
      */
     void computeBMatrixAt(FloatMatrix &answer, GaussPoint *gp);
     double computeVolumeAround(GaussPoint *gp);

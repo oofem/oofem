@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/element.h,v 1.27 2003/04/06 14:08:24 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -155,16 +154,13 @@ public:
     virtual int computeNumberOfDofs(EquationID ut) { return numberOfDofMans * 2; }
     void updateInternalState(TimeStep *stepN) { PlaneStressStructuralElementEvaluator :: updateInternalState(stepN); }
 #ifdef __OOFEG
-    //
     // Graphics output
-    //
     virtual void  drawScalar(oofegGraphicContext &context);
 #endif
 
 protected:
     virtual int giveNsd() { return 2; }
 };
-
 
 
 class NURBSSpace3dElement : public IGAElement, public Space3dStructuralElementEvaluator
@@ -191,10 +187,8 @@ public:
     virtual int computeNumberOfDofs(EquationID ut) { return numberOfDofMans * 3; }
     void updateInternalState(TimeStep *stepN) { Space3dStructuralElementEvaluator :: updateInternalState(stepN); }
 #ifdef __OOFEG
-    //
     // Graphics output
-    //
-    virtual void  drawScalar(oofegGraphicContext &context);
+    virtual void drawScalar(oofegGraphicContext &context);
     virtual void drawDeformedGeometry(oofegGraphicContext &mode, UnknownType ut) {
         drawIGAPatchDeformedGeometry(this, this, mode, ut);
     }

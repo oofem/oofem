@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/element.h,v 1.27 2003/04/06 14:08:24 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -40,7 +39,7 @@
 
 namespace oofem {
 /**
- * general purpose 3d structural element evaluator
+ * General purpose 3d structural element evaluator.
  */
 class Space3dStructuralElementEvaluator : public StructuralElementEvaluator
 {
@@ -48,13 +47,14 @@ public:
     Space3dStructuralElementEvaluator() : StructuralElementEvaluator() { }
 
 protected:
-
-    /** Assemble interpolation matrix at given IP
-     *  In case of IGAElements, N is assumed to contain only nonzero interpolation functions
+    /**
+     * Assemble interpolation matrix at given IP
+     * In case of IGAElements, N is assumed to contain only nonzero interpolation functions
      */
     void computeNMatrixAt(FloatMatrix &answer, GaussPoint *gp);
-    /** Assembles the strain-displacement matrix of the receiver at given integration point
-     *  In case of IGAElements, B is assumed to contain only contribution from nonzero interpolation functions
+    /**
+     * Assembles the strain-displacement matrix of the receiver at given integration point
+     * In case of IGAElements, B is assumed to contain only contribution from nonzero interpolation functions
      */
     void computeBMatrixAt(FloatMatrix &answer, GaussPoint *gp);
     double computeVolumeAround(GaussPoint *gp);
@@ -64,6 +64,6 @@ protected:
         answer.at(2) = D_v;
         answer.at(3) = D_w;
     }
-}; // end of SpaceStructuralElementEvaluator definition
+};
 } // end namespace oofem
 #endif //space3delementevaluator_h

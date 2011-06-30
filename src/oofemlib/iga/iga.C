@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/element.h,v 1.27 2003/04/06 14:08:24 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -31,24 +30,6 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
- */
-
-
-/*
- * oofem nodes - control points (coordinates ) + dofs
- * oofem elements - NURBS patches as well as integration elements
- *
- *
- * NURBS PATCH:
- * knot vector - store knot coordinates + multiplicity
- * patch integration rule - keep list of elements
- *
- * integration element
- *
- * FEInterpolation:
- * - need to be enriched, as one should (or can) pass knot span to evaluation routines
- * (in this way the patch by patch evaluation can be faster)
- *
  */
 
 #include "inputrecord.h"
