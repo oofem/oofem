@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/nodalrecoverymodel.C,v 1.9.4.1 2004/04/05 15:19:43 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -33,19 +32,12 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-//
-// file nodalrecoverymodel.C
-//
-
 #include "nodalrecoverymodel.h"
 #include "timestep.h"
 #include "element.h"
 #include "node.h"
 #include "elementside.h"
 #include "crosssection.h"
-#ifndef __MAKEDEPEND
- #include <stdio.h>
-#endif
 
 namespace oofem {
 NodalRecoveryModel :: NodalRecoveryModel(Domain *d) : nodalValList(0), virtualRegionMap(0)
@@ -68,7 +60,6 @@ NodalRecoveryModel :: NodalRecoveryModel(Domain *d) : nodalValList(0), virtualRe
 
 NodalRecoveryModel :: ~NodalRecoveryModel()
 {
-    //printf ("NodalRecoveryModel::~NodalRecoveryModel()\n");
 #ifdef __PARALLEL_MODE
     delete communicator;
     delete commBuff;
@@ -167,10 +158,6 @@ NodalRecoveryModel :: init()
     //
     return 1;
 }
-
-//int NodalRecoveryModel :: giveElementRegion (Element* element) {return element->giveCrossSection()->giveNumber();}
-//int NodalRecoveryModel :: giveNumberOfRegions () {return domain->giveNumberOfCrossSectionModels();}
-
 
 int
 NodalRecoveryModel :: updateRegionRecoveredValues(const int ireg, const IntArray &regionNodalNumbers,

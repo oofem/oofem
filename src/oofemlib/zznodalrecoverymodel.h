@@ -62,7 +62,7 @@ protected:
         FloatMatrix *rhs;
         IntArray *regionNodalNumbers;
         parallelStruct(FloatArray *a, FloatMatrix *b, IntArray *c):
-            lhs(a), rhs(b) regioNodalNumbers(c) { }
+            lhs(a), rhs(b), regionNodalNumbers(c) { }
     };
 
 public:
@@ -70,11 +70,7 @@ public:
     ZZNodalRecoveryModel(Domain *d);
     /// Destructor.
     ~ZZNodalRecoveryModel();
-    /**
-     * Recovers the nodal values for all regions.
-     * @param type Determines the type of internal variable to be recovered.
-     * @param tStep Time step.
-     */
+
     int recoverValues(InternalStateType type, TimeStep *tStep);
 
 private:

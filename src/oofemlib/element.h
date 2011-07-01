@@ -233,10 +233,9 @@ public:
     //@{
     /**
      * Computes characteristic matrix of receiver of requested type in given time step.
-     * @param answer requested characteristic matrix.
+     * @param answer Requested characteristic matrix.
      * If element has no capability to compute requested type of characteristic matrix
      * error function is invoked.
-     * @param answer Requested characteristic matrix.
      * @param type   Id of characteristic component requested.
      * @param tStep  Time step when answer is computed.
      */
@@ -312,7 +311,7 @@ public:
      * Computes or simply returns total number of element's local dofs.
      * Must be defined by particular element.
      * @param ut Id of equation that dofs belong to.
-     * @return Number of dofs belonging to 'ut'.
+     * @return Number of dofs belonging to ut.
      */
     virtual int computeNumberOfDofs(EquationID ut) { return 0; }
     /**
@@ -321,7 +320,7 @@ public:
      * The transition from global cs to nodal one can change the value, as rigid arm and other transformations could
      * be included.
      * @param ut Id of equation that DOFs belong to.
-     * @return int Total number of DOFs belonging to 'ut'.
+     * @return Total number of DOFs belonging to ut.
      */
     virtual int computeGlobalNumberOfDofs(EquationID ut);
     /**
@@ -348,7 +347,7 @@ public:
    /**
      * Returns internal  dofmanager dof mask for node. This mask defines the dofs which are used by element
      * in node. Mask influences the code number ordering for particular node. Code numbers are
-     * ordered acording to node order and dofs belonging to particular node are ordered
+     * ordered according to node order and dofs belonging to particular node are ordered
      * according to this mask. If element requests dofs using node mask which are not in node
      * then error is generated. This masking allows node to be shared by different elements with
      * different dofs in same node. Elements local code numbers are extracted from node using
@@ -400,13 +399,13 @@ public:
      */
     virtual double computeLength() const { return 0.0; }
     // If the need arises;
-    /**
+    /*
      * Computes the length of an edge.
      * @param iedge Edge number.
      * @return Edge length.
      */
     //virtual double computeEdgeLength(int iedge) const { return 0.0; }
-    /**
+    /*
      * Computes the area of a surface.
      * @param isurf Surface number.
      * @param Surface area.

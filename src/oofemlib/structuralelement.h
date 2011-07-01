@@ -102,32 +102,32 @@ class StructuralElement : public Element
 protected:
     /// Cached transformation matrix of receiver.
     FloatMatrix rotationMatrix;
-    /// Flag indicating if transformation matrix has been already computed
+    /// Flag indicating if transformation matrix has been already computed.
     bool rotationMatrixDefined;
     /// Element activity time function. If defined, nonzero value indicates active receiver, zero value inactive element.
     int activityLtf;
-    /// Initial displacement vector, describes the initial nodal displacements when element has been casted
+    /// Initial displacement vector, describes the initial nodal displacements when element has been casted.
     FloatArray *initialDisplacements;
 public:
     /**
      * Constructor. Creates structural element with given number, belonging to given domain.
-     * @param n element number
-     * @param d domain to which new material will belong
+     * @param n Element number.
+     * @param d Domain to which new material will belong.
      */
     StructuralElement(int n, Domain *d);
     /// Destructor.
     ~StructuralElement();
 
     void giveCharacteristicMatrix(FloatMatrix & answer, CharType, TimeStep *);
-    void  giveCharacteristicVector(FloatArray &answer, CharType type, ValueModeType mode, TimeStep *);
+    void giveCharacteristicVector(FloatArray &answer, CharType type, ValueModeType mode, TimeStep *);
 
     /**
      * Computes mass matrix of receiver. Default implementation returns consistent mass matrix and uses
      * numerical integration. Returns result of this->computeConsistentMassMatrix service, transformed into
      * nodal coordinate system.
      * Requires the computeNmatrixAt and giveMassMtrxIntegrationgMask services to be implemented.
-     * @param answer mass matrix
-     * @param tStep time step
+     * @param answer Mass matrix.
+     * @param tStep Time step.
      */
     virtual void computeMassMatrix(FloatMatrix &answer, TimeStep *tStep);
     /**
@@ -143,7 +143,7 @@ public:
     virtual void computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep);
     /**
      * Computes consistent mass matrix of receiver using numerical integration over element volume.
-     * Mass matrix is computed as \f$M=\int_V N^T \rho N dV\f$, where \f$N\f$ is displacement approximation matrix.
+     * Mass matrix is computed as @f$ M = \int_V N^{\mathrm{T}} \rho N dV @f$, where @f$ N @f$ is displacement approximation matrix.
      * The number of necessary integration points  is determined using this->giveNumberOfIPForMassMtrxIntegration
      * service. Only selected degrees of freedom participate in integration of mass matrix. This is described
      * using dof mass integration mask. This mask is obtained from this->giveMassMtrxIntegrationgMask service.
@@ -256,10 +256,10 @@ public:
                                                                TimeStep *tStep, int useUpdatedGpRecord = 0);
 
     /**
-     * Compute strain vector of receiver evaluated at given integration point at time
-     * step stepN from element displacement vector.
+     * Compute strain vector of receiver evaluated at given integration point at given time
+     * step from element displacement vector.
      * The nature of strain vector depends on the element type.
-     * @param answer Requeted strain vector.
+     * @param answer Requested strain vector.
      * @param gp Integration point where to calculate the strain.
      * @param tStep Time step.
      */
@@ -267,9 +267,9 @@ public:
 
     /*
      * Returns the integration point corresponding value.
-     * @param answer contain corresponding ip value, zero sized if not available
-     * @param aGaussPoint integration point
-     * @param type determines the type of internal variable
+     * @param answer Contain corresponding ip value, zero sized if not available.
+     * @param aGaussPoint Integration point.
+     * @param type Determines the type of internal variable.
      */
     virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
     /**
@@ -392,7 +392,7 @@ protected:
     void computeBcLoadVectorAt(FloatArray &answer, TimeStep *tStep, ValueModeType mode);
     /**
      * Computes the load vector due to body load acting on receiver, at given time step.
-     * Default implementation computes body load vector numerically as @f$ l=\int_V N^{\mathrm{T}} f \rho \mathrm{d}V @f$
+     * Default implementation computes body load vector numerically as @f$ l=\int_V N^{\mathrm{T}} f \rho\;\mathrm{d}V @f$
      * using default integration rule. Result is transformed to global c.s.
      * @param answer Computed load vector due to body load
      * @param load Body load which contribution is computed.
@@ -418,14 +418,10 @@ protected:
      * The default implementation does integration of load vector in local edge space
      * (i.e. one dimensional integration is performed on line). This general implementation requires
      * that element must provide following services:
-     * <UL>
-     * <LI>
-     * ComputeEgdeNMatrixAt - returns interpolation matrix of local edge DOFs in the local edge space.</LI>
-     * <LI>
-     * computeEdgeVolumeAround - returns volume corresponding to integration point at local edge.</LI>
-     * <LI>
-     * GiveEdgeDofMapping - returns integer array specifying local dof edge mapping to "global" element dofs.</LI>
-     * </UL>
+     * - computeEgdeNMatrixAt - returns interpolation matrix of local edge DOFs in the local edge space.
+     * - computeEdgeVolumeAround - returns volume corresponding to integration point at local edge.
+     * - giveEdgeDofMapping - returns integer array specifying local dof edge mapping to "global" element dofs.
+     *
      * Integration rule is set up automatically, based on element interpolation order and load approximation.
      * Integration points are set-up using standard integration rule services (setUpIntegrationPoints method).
      * Gauss integration rule is used.
@@ -446,16 +442,11 @@ protected:
      * (i.e. two dimensional integration is performed on triangle or square).
      * This general implementation requires
      * that element must provide following services:
-     * <UL>
-     * <LI>
-     * GetSurfaceIntegrationRule - returns integration rule for surface for given polynomial order.</LI>
-     * <LI>
-     * ComputeSurfaceNMatrixAt - returns interpolation matrix of local surface DOFs in the local edge space.</LI>
-     * <LI>
-     * computeSurfaceVolumeAround - returns volume corresponding to integration point of local surface.</LI>
-     * <LI>
-     * GiveSurfaceDofMapping - returns integer array specifying local dof surface mapping to "global" element dofs.</LI>
-     * </UL>
+     * - getSurfaceIntegrationRule - returns integration rule for surface for given polynomial order.
+     * - computeSurfaceNMatrixAt - returns interpolation matrix of local surface DOFs in the local edge space.
+     * - computeSurfaceVolumeAround - returns volume corresponding to integration point of local surface.
+     * - giveSurfaceDofMapping - returns integer array specifying local dof surface mapping to "global" element dofs.
+     *
      * Integration rule is set up automatically, based on element interpolation order and load approximation.
      * Integration points are set-up using standard integration rule services (setUpIntegrationPoints method).
      * Gauss integration rule is used.
@@ -469,11 +460,6 @@ protected:
      * @param mode Determines response mode.
      */
     virtual void computeSurfaceLoadVectorAt(FloatArray &answer, Load *load, int iSurf, TimeStep *tStep, ValueModeType mode);
-    // interpolation matrices for nonzero unknowns
-    // mapping to global element dofs is done using maps obtained
-    // from GiveEdgeDofMapping or GiveSurfaceDofMapping functions with
-    // particular edge or surface number as a parameter.
-
     /**
      * Computes Edge interpolation matrix. Interpolation matrix provide way, how to compute
      * local edge unknowns (nonzero element unknowns on edge) at any integration point of edge, based on

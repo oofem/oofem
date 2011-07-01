@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -32,19 +32,13 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-//
-// FILE: matesponsemode.h
-//
-
 #ifndef matesponsemode_h
 #define matesponsemode_h
 
 #include "enumitem.h"
 
 namespace oofem {
-/**
- * Describes the character of characteristic material matrix.
- */
+
 #define MatResponseMode_DEF \
     ENUM_ITEM(TangentStiffness) \
     ENUM_ITEM(SecantStiffness) \
@@ -67,6 +61,9 @@ namespace oofem {
     ENUM_ITEM(MRM_Density) /* material density */  \
     ENUM_ITEM(MRM_Viscosity)
 
+/**
+ * Describes the character of characteristic material matrix.
+ */
 enum MatResponseMode {
     MatResponseMode_DEF
 };

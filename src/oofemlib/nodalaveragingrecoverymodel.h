@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2010   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -36,7 +36,6 @@
 #define nodalaveragingrecoverymodel_h
 
 #include "compiler.h"
-
 #include "nodalrecoverymodel.h"
 #include "interface.h"
 
@@ -51,38 +50,34 @@ class GaussPoint;
 class NodalAveragingRecoveryModel : public NodalRecoveryModel
 {
 protected:
-    /** Helper structure to pass required argumets to packing/unpacking functions
-     *  needed in parallel mode */
+    /**
+     * Helper structure to pass required arguments to packing/unpacking functions
+     * needed in parallel mode
+     */
     struct parallelStruct {
         FloatArray *lhs;
         IntArray *regionDofMansConnectivity;
         IntArray *regionNodalNumbers;
         int regionValSize;
-        parallelStruct(FloatArray *a, IntArray *b, IntArray *c, int d) {
-            lhs = a;
-            regionDofMansConnectivity = b;
-            regionNodalNumbers = c, regionValSize = d;
-        }
+        parallelStruct(FloatArray *a, IntArray *b, IntArray *c, int d):
+            lhs(a), regionDofMansConnectivity(b), regionNodalNumbers(c), regionValSize(d) { }
     };
 
 public:
-    /// Constructor
+    /// Constructor.
     NodalAveragingRecoveryModel(Domain *d);
-    /// Destructor
+    /// Destructor.
     ~NodalAveragingRecoveryModel();
-    /** Recovers the nodal values for all regions of given Domain.
-     * @param d domain of interest
-     * @param type determines the type of internal variable to be recovered
-     * @param tStep time step
-     */
+
     int recoverValues(InternalStateType type, TimeStep *tStep);
+
 private:
     /**
      * Initializes the region table indicating regions to skip.
-     * @param regionMap region tabl, the nonzero entry for region indicates region to skip due to
-     * unsupported elements or incompatible value size
-     * @param regionValSize contains the record size for each region
-     * @param type determines the type of internal variable to be recovered
+     * @param regionMap Region table, the nonzero entry for region indicates region to skip due to
+     * unsupported elements or incompatible value size.
+     * @param regionValSize Contains the record size for each region.
+     * @param type Determines the type of internal variable to be recovered.
      */
     void initRegionMap(IntArray &regionMap, IntArray &regionValSize, InternalStateType type);
 
@@ -95,7 +90,7 @@ private:
 };
 
 /**
- * The element interface required by ZZNodalRecoveryModel.
+ * The element interface required by NodalAvergagingRecoveryModel.
  */
 class NodalAveragingRecoveryModelInterface : public Interface
 {
@@ -105,26 +100,26 @@ public:
 
     /**
      * Computes the element value in given node.
-     * @param answer contains the result
-     * @param node element node number
-     * @param type determines the type of internal variable to be recovered
-     * @param tStep time step
+     * @param answer Contains the result.
+     * @param node Element node number.
+     * @param type Determines the type of internal variable to be recovered.
+     * @param tStep Time step.
      */
     virtual void NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node,
                                                             InternalStateType type, TimeStep *tStep) = 0;
     /**
      * Computes the element value in given side.
-     * @param answer contains the result
-     * @param node element side number
-     * @param type determines the type of internal variable to be recovered
-     * @param tStep time step
+     * @param answer Contains the result.
+     * @param side Element side number.
+     * @param type Determines the type of internal variable to be recovered.
+     * @param tStep Time step.
      */
     virtual void NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side,
                                                            InternalStateType type, TimeStep *tStep) = 0;
     /**
      * Returns the size of DofManger record required to hold recovered values for given mode.
-     * @param type determines the type of internal variable to be recovered
-     * @return size of DofManger record required to hold recovered values
+     * @param type Determines the type of internal variable to be recovered.
+     * @return Size of DofManger record required to hold recovered values.
      */
     virtual int NodalAveragingRecoveryMI_giveDofManRecordSize(InternalStateType type) = 0;
 };

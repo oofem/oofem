@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -32,19 +32,13 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-//
-// FILE: materialmode.h
-//
-
 #ifndef materialmode_h
 #define materialmode_h
 
 #include "enumitem.h"
 
 namespace oofem {
-/**
- * Type representing material mode of integration point.
- */
+
 #define MaterialMode_DEF \
     ENUM_ITEM(_Unknown)   \
     ENUM_ITEM(_3dMat) \
@@ -84,6 +78,9 @@ namespace oofem {
     ENUM_ITEM(_2dAxiFlow) \
     ENUM_ITEM(_3dFlow) \
 
+/**
+ * Type representing material mode of integration point.
+ */
 enum MaterialMode {
     MaterialMode_DEF
 };

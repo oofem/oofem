@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/nlstructuralelement.C,v 1.15 2003/04/06 14:08:25 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -32,10 +31,6 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-
-
-//   file NLSTRUCTURALELEMENT.CC
-
 
 #include "nlstructuralelement.h"
 #include "structuralms.h"
@@ -65,43 +60,6 @@ NLStructuralElement :: NLStructuralElement(int n, Domain *aDomain) :
 {
     nlGeometry = 0;
 }
-
-/*
- * void
- * NLStructuralElement ::  giveCharacteristicMatrix (FloatMatrix& answer,
- *                       CharType mtrx, TimeStep *tStep)
- * //
- * // returns characteristics matrix of receiver according to mtrx
- * //
- * {
- * if (mtrx == StiffnessMatrix)
- * this -> computeStiffnessMatrix(answer, TangentStiffness, tStep);
- * else if (mtrx == TangentStiffnessMatrix)
- * this -> computeStiffnessMatrix(answer, TangentStiffness, tStep);
- * else if (mtrx == SecantStiffnessMatrix)
- * this -> computeStiffnessMatrix(answer, SecantStiffness, tStep);
- * else if (mtrx == MassMatrix)
- * this ->  computeMassMatrix(answer, tStep);
- * else _error("giveCharacteristicMatrix: Unknown Type of characteristic mtrx.");
- *
- * return ;
- * }
- *
- *
- * void
- * NLStructuralElement ::  giveCharacteristicVector (FloatArray& answer, CharType mtrx,
- *                       TimeStep *tStep)
- * //
- * // returns characteristics vector of receiver according to mtrx
- * //
- * {
- * if (mtrx == ElementLoadVector) this -> computeLoadVectorAt (answer, tStep);
- * else if (mtrx == NodalInternalForcesVector ) this ->giveInternalForcesVector (answer, tStep) ;
- * else _error("giveCharacteristicVector: Unknown Type of characteristic mtrx.");
- *
- * return ;
- * }
- */
 
 
 void

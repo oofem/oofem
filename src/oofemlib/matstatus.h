@@ -35,9 +35,6 @@
 #ifndef matstatus_h
 #define matstatus_h
 
-#ifndef __MAKEDEPEND
- #include <stdio.h>
-#endif
 #include "femcmpnn.h"
 #include "classtype.h"
 

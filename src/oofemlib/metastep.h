@@ -35,13 +35,12 @@
 #ifndef metastep_h
 #define metastep_h
 
-#include "engngm.h"
-#include "compiler.h"
-#ifndef __MAKEDEPEND
- #include <stdio.h>
-#endif
+#include "classtype.h"
+#include "inputrecord.h"
 
 namespace oofem {
+class EngngModel;
+
 /**
  * Class representing meta step. The meta step instance represent sequence of
  * solution steps (timeSteps). The meta step role is to describe the common

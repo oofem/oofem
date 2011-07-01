@@ -33,6 +33,7 @@
  */
 
 #include "metastep.h"
+#include "engngm.h"
 
 namespace oofem {
 MetaStep :: MetaStep(int n, EngngModel *e)

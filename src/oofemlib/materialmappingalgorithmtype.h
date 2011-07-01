@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -32,25 +32,22 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-//   **********************************************
-//   *** CLASS MATERIAL MAPPING ALGORITHM TYPE  ***
-//   **********************************************
-
 #ifndef materialmappingalgorithmtype_h
 #define materialmappingalgorithmtype_h
 
 #include "enumitem.h"
 
 namespace oofem {
-/**
- * Enumerative type used to classify supported
- * MaterialMappingAlgorithms
- */
+
 #define MaterialMappingAlgorithmType_DEF \
     ENUM_ITEM(MMA_ClosestPoint) \
     ENUM_ITEM(MMA_LeastSquareProjection) \
     ENUM_ITEM(MMA_ShapeFunctionProjection)
 
+/**
+ * Enumerative type used to classify supported
+ * MaterialMappingAlgorithms
+ */
 enum MaterialMappingAlgorithmType {
     MaterialMappingAlgorithmType_DEF
 };

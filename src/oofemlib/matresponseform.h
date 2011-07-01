@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -32,10 +32,6 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-//
-// FILE: matesponseform.h
-//
-
 #ifndef matesponseform_h
 #define matesponseform_h
 
@@ -46,17 +42,16 @@ namespace oofem {
  * Generally, the full form contain all components, even if they are generally always zero (based on MaterialMode of
  * given integration point). On the other hand, the reduced form contain only generally nonzero components.
  * For example the "full-like" strain vector contains six components. For integration point in plane stress mode
- * the "reduced-like" strain vector contains only 3 generally nonzero components. The contens of full and reduced forms
+ * the "reduced-like" strain vector contains only 3 generally nonzero components. The contents of full and reduced forms
  * is defined by corresponding (material or cross section level) base classes.
  */
 enum MatResponseForm {
-    // identifies return form for material stiffness matrix
-    ReducedForm, // only stiffness for necesarry stresses are given
-    FullForm,  // all component of 3d stresses are available, even if they equal 0
-    PDGrad_uu,  /* gradient model, left upper block */
-    PDGrad_ku,  /* gradient model, left lower block */
-    PDGrad_uk,  /* gradient model, right upper block */
-    PDGrad_kk  /* gradient model, right lower block */
+    ReducedForm, ///< Only stiffness for necessary stresses are given.
+    FullForm,    ///< all component of 3d stresses are available, even if they equal 0.
+    PDGrad_uu,   ///< gradient model, left upper block.
+    PDGrad_ku,   ///< gradient model, left lower block.
+    PDGrad_uk,   ///< gradient model, right upper block.
+    PDGrad_kk,   ///< gradient model, right lower block.
 };
 } // end namespace oofem
 #endif // matesponseform_h

@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -32,26 +32,22 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-//   ********************************
-//   *** CLASS MESH PACKAGE TYPE  ***
-//   ********************************
-
 #ifndef meshpackagetype_h
 #define meshpackagetype_h
 
 #include "enumitem.h"
 
 namespace oofem {
-/**
- * Enumerative type used to classify supported
- * MeshPackages
- */
+
 #define MeshPackageType_DEF \
     ENUM_ITEM(MPT_T3D) \
     ENUM_ITEM(MPT_TARGE2) \
     ENUM_ITEM(MPT_FREEM) \
     ENUM_ITEM(MPT_SUBDIVISION)
 
+/**
+ * Enumerative type used to classify supported mesh packages.
+ */
 enum MeshPackageType {
     MeshPackageType_DEF
 };
@@ -59,7 +55,6 @@ enum MeshPackageType {
 #undef ENUM_ITEM
 #undef ENUM_ITEM_WITH_VALUE
 #undef enumitem_h
-
 
 const char *__MeshPackageTypeToString(MeshPackageType _value);
 } // end namespace oofem

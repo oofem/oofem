@@ -52,18 +52,18 @@ namespace oofem {
 class Matrix
 {
 protected:
-    /// Number of rows
+    /// Number of rows.
     int nRows;
-    /// Number of columns
+    /// Number of columns.
     int nColumns;
 
 public:
-    /// Constructor, creates zero sized matrix
+    /// Constructor, creates zero sized matrix.
     Matrix() { nRows = nColumns = 0; }
     /**
      * Constructor, creates zero matrix, with given size.
-     * @param n number of rows
-     * @param m number of rows
+     * @param n Number of rows.
+     * @param m Number of rows.
      */
     Matrix(int n, int m)  {
         nRows = n;
@@ -75,19 +75,19 @@ public:
     /**
      * Checks size of receiver towards requested bounds.
      * Current implementation will call exit(1), if positions are outside bounds.
-     * @param i required number of rows
-     * @param j required number of columns
+     * @param i Required number of rows.
+     * @param j Required number of columns.
      */
     void checkBounds(int i, int j) const;
-    /// Returns number of rows of receiver
+    /// Returns number of rows of receiver.
     int giveNumberOfRows() const { return nRows; }
-    /// Returns number of columns of receiver
+    /// Returns number of columns of receiver.
     int giveNumberOfColumns() const { return nColumns; }
     /// Returns nonzero if receiver is square matrix.
     bool isSquare() const { return nRows == nColumns; }
     /// Tests for empty matrix.
     bool isNotEmpty() const { return nRows > 0 && nColumns > 0; }
-    /// Prints receiver on stdout. Useful mainly for debugging
+    /// Prints receiver on stdout. Useful mainly for debugging.
     virtual void printYourself() const { OOFEM_LOG_INFO("Matrix :: printYourself - Not implemented"); }
 };
 } // end namespace oofem

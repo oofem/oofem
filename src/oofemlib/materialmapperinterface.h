@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/materialmapperinterface.h,v 1.6 2003/04/06 14:08:25 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -33,15 +32,8 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-
-//   **********************************************
-//   *** CLASS MATERIAL MODEL MAPPING INTERFACE ***
-//   **********************************************
-
-#ifndef materilmapperinterface_h
-#define materilmapperinterface_h
-
-#include "compiler.h"
+#ifndef materialmapperinterface_h
+#define materialmapperinterface_h
 
 #include "interface.h"
 
@@ -60,36 +52,36 @@ class MaterialModelMapperInterface : public Interface
 protected:
 
 public:
-    /// Constructor
+    /// Constructor.
     MaterialModelMapperInterface() : Interface() { }
-    /// Destructor
+    /// Destructor.
     virtual ~MaterialModelMapperInterface() { }
     /** Maps the required internal state variables from
      * old mesh oldd to given ip. The result is stored in gp status.
      * @param gp Integration point belonging to new domain which values will be mapped
-     * @param oldd old mesh reference
-     * @param tStep time step
-     * @return nonzero if o.k.
+     * @param oldd Old mesh reference.
+     * @param tStep Time step.
+     * @return Nonzero if o.k.
      */
     virtual int MMI_map(GaussPoint *gp, Domain *oldd, TimeStep *tStep) = 0;
     /** Updates the required internal state variables from previously mapped values.
      * The result is stored in gp status. This map and update splitting is necessary,
-     * for example for nonlocal models tahe local quantity to be averaged must be mapped in all ips
+     * for example for nonlocal models that local quantity to be averaged must be mapped in all integration points
      * and then update can happen, because it may depend on nonlocal variable, which is computed
      * from local values.
-     * @param gp Integration point belonging to new domain which values will be mapped
-     * @param oldd old mesh reference
-     * @param tStep time step
-     * @param elemGPVec vector passed to MMI_update at material level, probably computed from primary unknowns
+     * @param gp Integration point belonging to new domain which values will be mapped.
+     * @param oldd Old mesh reference.
+     * @param tStep Time step.
+     * @param elemGPVec Vector passed to MMI_update at material level, probably computed from primary unknowns
      * (for structural elements this represent strain vector).
      * @return nonzero if o.k.
      */
     virtual int MMI_update(GaussPoint *gp, TimeStep *tStep, FloatArray *elemGPVec = NULL) = 0;
     /**
      * Finishes the mapping for given time step. Used to perform cleanup.
-     * Typically some mappers reguire to compute some global mesh data related to
+     * Typically some mappers require to compute some global mesh data related to
      * current step, which are valid for example to all IPs - so they are computed only once for
-     * all IPs, stored and they need to be dealocated. These mappers are typically class variables,
+     * all IPs, stored and they need to be deallocated. These mappers are typically class variables,
      * but their finish is invoked by all members.
      */
     virtual int MMI_finish(TimeStep *tStep) = 0;
@@ -97,4 +89,4 @@ public:
 protected:
 };
 } // end namespace oofem
-#endif // materilmapperinterface_h
+#endif // materialmapperinterface_h
