@@ -99,7 +99,7 @@ public:
 
     /**
      * Changes the connected domain of receiver.
-     * Topology descriptions might
+     * @note{Does not delete any existing objects.}
      */
     virtual void setDomain(Domain *newDomain) { d = newDomain; }
 

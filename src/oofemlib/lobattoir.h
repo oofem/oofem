@@ -48,13 +48,13 @@ class LobattoIntegrationRule : public IntegrationRule
 public:
     /**
      * Constructor.
-     * @param n number associated with receiver
-     * @param domain reference to domain.
-     * @param startIndx first component, for which rule applies
-     * @param endIndx last component, for which rule applies
-     * @param dynamic flag indicating that receiver can change
+     * @param n Number associated with receiver
+     * @param e Reference to engineering model.
+     * @param startIndx First component, for which rule applies.
+     * @param endIndx Last component, for which rule applies.
+     * @param dynamic Flag indicating that receiver can change.
      */
-    LobattoIntegrationRule(int, Element *, int, int, bool dynamic);
+    LobattoIntegrationRule(int n, Element *e, int startIndx, int endIndx, bool dynamic);
     /// Destructor
     ~LobattoIntegrationRule();
 

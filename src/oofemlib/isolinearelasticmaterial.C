@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/isolinearelasticmaterial.C,v 1.8 2003/04/06 14:08:24 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -33,9 +32,6 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-
-//   file HOOK.CC
-
 #include "linearelasticmaterial.h"
 #include "isolinearelasticmaterial.h"
 #include "simplecrosssection.h"
@@ -44,9 +40,6 @@
 #include "domain.h"
 #include "flotmtrx.h"
 #include "gausspnt.h"
-#ifndef __MAKEDEPEND
- #include <stdlib.h>
-#endif
 
 namespace oofem {
 IsotropicLinearElasticMaterial :: IsotropicLinearElasticMaterial(int n, Domain *d,

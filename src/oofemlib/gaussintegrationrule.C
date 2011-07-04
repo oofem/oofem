@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/gaussintegrationrule.C,v 1.5.4.1 2004/04/05 15:19:43 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -33,16 +32,10 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-
-// file integrationRule.C
-
 #include "gaussintegrationrule.h"
 #include "gausspnt.h"
 #include "flotarry.h"
 #include "mathfem.h"
-#ifndef __MAKEDEPEND
- #include <stdio.h>
-#endif
 
 namespace oofem {
 // initialize class member

@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/nonlocalmaterialext.C,v 1.14.4.1 2004/04/05 15:19:43 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -32,9 +31,6 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-
-
-// file: randommaterialext.C
 
 #include "gausspnt.h"
 #include "inputrecord.h"
@@ -101,7 +97,6 @@ RandomMaterialExtensionInterface :: _generateStatusVariables(GaussPoint *gp) con
     double value;
     RandomMaterialStatusExtensionInterface *status = ( RandomMaterialStatusExtensionInterface * )
                                                      gp->giveMaterialStatus()->giveInterface(RandomMaterialStatusExtensionInterfaceType);
-    ;
 
     for ( i = 1; i <= size; i++ ) {
         gp->giveElement()->giveDomain()->

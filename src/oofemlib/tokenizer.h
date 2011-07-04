@@ -77,7 +77,7 @@ public:
 protected:
     /**
      * Reads next token.
-     * @param current Position (index) in token buffer.
+     * @param bpos Position (index) in token buffer.
      * @param line Pointer pointer to record from which token is parsed.
      * @param token Pointer to next free token buffer position.
      * @param sep Separator.
@@ -85,18 +85,16 @@ protected:
     void readToken(int &bpos, const char * &line, char * &token, char sep);
     /**
      * Reads next structured token (bounded by '{' '}' pairs, possibly nested).
-     * @param current Position (index) in token buffer.
+     * @param bpos Position (index) in token buffer.
      * @param line Pointer pointer to record from which token is parsed.
      * @param token Pointer to next free token buffer position.
-     * @param sep Separator.
      */
     void readStructToken(int &bpos, const char * &line, char * &token);
     /**
      * Reads next string token (quoted).
-     * @param current Position (index) in token buffer.
+     * @param bpos Position (index) in token buffer.
      * @param line Pointer pointer to record from which token is parsed.
      * @param token Pointer to next free token buffer position.
-     * @param sep Separator.
      */
     void readStringToken(int &bpos, const char * &line, char * &token);
 };

@@ -39,7 +39,7 @@
 
 namespace oofem {
 /**
- * Class representing a 1d linear isparametric interpolation.
+ * Class representing a 1d linear isoparametric interpolation.
  */
 class FEI1dQuad : public FEInterpolation1d
 {

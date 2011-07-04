@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -32,23 +32,19 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-//
-// FILE: materialextension.h
-//
-
 #ifndef materialextension_h
 #define materialextension_h
 
 namespace oofem {
 /**
  * Type representing material model extension.
+ * for run time testing.
  */
 enum MaterialExtension {
-    // id indicating material class extensions for run time testing
     Material_StructuralCapability,
     Material_HeatCapability,
     Material_TransportCapability,
-    Material_FluidDynamicsCapability
+    Material_FluidDynamicsCapability,
 };
 } // end namespace oofem
 #endif // materialextension_h

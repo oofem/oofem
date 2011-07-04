@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/parser.h,v 1.5 2003/04/06 14:08:25 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2010   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -50,7 +49,7 @@ namespace oofem {
  * Strings should be in MATLAB syntax. The parser understands variable names with values set by "x=expression;"
  * The following binary operators are recognized: < > == + - * /
  * and the following functions: sqrt, sin, cos, tan, atan, asin, acos, exp,
- * as well as parantheses ( )
+ * as well as parentheses ( )
  *
  * Example string:
  * x=3;y=7;sqrt(x*(x/y+3))

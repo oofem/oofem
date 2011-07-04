@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2010   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -38,63 +38,14 @@
 #include "verbose.h"
 
 namespace oofem {
-/*
- * double  BoundaryCondition :: give (char u, TimeStep* stepN)
- * // Returns the value at stepN of the prescribed value of the kinematic
- * // unknown 'u'. Returns 0 if 'u' has no prescribed value.
- * {
- * double value,factor ;
- *
- * if (! prescribedValueDictionary)
- *    _error ("give: prescribedValueDictionary is not defined");
- *
- * if (prescribedValueDictionary -> includes(u)) {
- *    value  = prescribedValueDictionary -> at(u) ;
- *    factor = this -> giveLoadTimeFunction() -> at(stepN->giveTime()) ;
- * if ((stepN->giveLoadResponseMode()==IncrementOfLoad) && (!stepN->isTheFirstStep()))
- *  //factor -= this->giveLoadTimeFunction()->at(stepN->givePreviousStep()->giveTime()) ;
- *  factor -= this->giveLoadTimeFunction()->at(stepN->giveTime()-stepN->giveTimeIncrement()) ;
- *
- *    return value*factor ;}
- * else
- *    return 0. ;
- * }
- */
-
 double BoundaryCondition :: give(Dof *dof, ValueModeType mode, TimeStep *stepN)
 // Returns the value at stepN of the prescribed value of the kinematic
 // unknown 'u'. Returns 0 if 'u' has no prescribed value.
 {
     double factor;
 
-    /*
-     * factor = this -> giveLoadTimeFunction() -> at(stepN->giveTime()) ;
-     * if ((isUnknownTypeModeIncremental(mode)) && (!stepN->isTheFirstStep()))
-     * //factor -= this->giveLoadTimeFunction()->at(stepN->givePreviousStep()->giveTime()) ;
-     * factor -= this->giveLoadTimeFunction()->at(stepN->giveTime()-stepN->giveTimeIncrement());
-     */
     factor = this->giveLoadTimeFunction()->evaluate(stepN, mode);
     return prescribedValue * factor;
-
-    /*
-     * double value,factor ;
-     * char u;
-     *
-     * if (! prescribedValueDictionary)
-     *    _error ("give: prescribedValueDictionary is not defined");
-     *
-     * u = cltypesGiveUnknownTypeKey (type);
-     * if (prescribedValueDictionary -> includes(u)) {
-     *    value  = prescribedValueDictionary -> at(u) ;
-     *    factor = this -> giveLoadTimeFunction() -> at(stepN->giveTime()) ;
-     * if ((isUnknownTypeModeIncremental(mode)) && (!stepN->isTheFirstStep()))
-     *  //factor -= this->giveLoadTimeFunction()->at(stepN->givePreviousStep()->giveTime()) ;
-     *  factor -= this->giveLoadTimeFunction()->at(stepN->giveTime()-stepN->giveTimeIncrement());
-     *
-     *    return value*factor ;}
-     * else
-     *    return 0. ;
-     */
 }
 
 

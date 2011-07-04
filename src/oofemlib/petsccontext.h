@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/Attic/petsccontext.h,v 1.1.2.1 2004/04/05 15:19:43 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -32,6 +31,7 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
+
 #ifndef petscscontext_h
 #define petscscontext_h
 
@@ -49,7 +49,7 @@ class EngngModel;
 class FloatArray;
 
 /*
- * This class provides an communcaton context to petsc library
+ * This class provides an communication context to PETSc library.
  */
 class PetscContext
 {
@@ -77,14 +77,15 @@ public:
     int giveNumberOfNaturalEqs();
 
 
-    /// scatters global vector to natural one
+    /// Scatters global vector to natural one.
     int scatterG2N(Vec src, Vec dest, InsertMode mode);
     int scatterG2N(Vec src, FloatArray *dest, InsertMode mode);
-    /// scatters and gathers vector in natural ordering (sequentional) to global (parallel) one
+    /// Scatters and gathers vector in natural ordering (sequential) to global (parallel) one.
     int scatterN2G(Vec src, Vec dest, InsertMode mode);
     int scatterN2G(FloatArray *src, Vec dest, InsertMode mode);
-    /** scatters and gathers vector in natural ordering to global (parallel) one,
-     *  but only local entries are processed
+    /**
+     * Scatters and gathers vector in natural ordering to global (parallel) one,
+     * but only local entries are processed.
      */
     int scatterL2G(FloatArray *src, Vec dest, InsertMode mode);
 

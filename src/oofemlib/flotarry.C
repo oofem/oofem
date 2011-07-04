@@ -248,7 +248,7 @@ void FloatArray :: beDifferenceOf(const FloatArray &a, const FloatArray &b)
     }
 }
 
-void FloatArray :: beDifferenceOf(const FloatArray &a, const FloatArray &b, const int &n)
+void FloatArray :: beDifferenceOf(const FloatArray &a, const FloatArray &b, int n)
 {
 #ifdef DEBUG
     if ( a.size < n || b.size < n ) {

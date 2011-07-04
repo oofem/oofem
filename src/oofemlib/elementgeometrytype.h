@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -32,16 +32,28 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-//
-// FILE: elementgeometrytype.h
-//
-
 #ifndef elementgeometrytype_h
 #define elementgeometrytype_h
 
 #include "enumitem.h"
 
 namespace oofem {
+
+#define Element_Geometry_Type_DEF \
+    ENUM_ITEM(EGT_point) /* point in space */   \
+    ENUM_ITEM(EGT_line_1) /* line elements with two nodes  1-------2 */   \
+    ENUM_ITEM(EGT_line_2) /* line element with three nodes 1---3---2 */   \
+    ENUM_ITEM(EGT_triangle_1) /* triangle element with three nodes */ \
+    ENUM_ITEM(EGT_triangle_2) /* triangle element with 6 nodes */ \
+    ENUM_ITEM(EGT_quad_1)   /* quadrialateral with 4 nodes */   \
+    ENUM_ITEM(EGT_quad_2)   /* quadratic quadrialateral with 8 nodes */   \
+    ENUM_ITEM(EGT_tetra_1)  /* tetrahedron with 4 nodes */   \
+    ENUM_ITEM(EGT_tetra_2)  /* tetrahedron with 10 nodes */   \
+    ENUM_ITEM(EGT_hexa_1)   /* hexahedron with 8 nodes */   \
+    ENUM_ITEM(EGT_hexa_2)   /* hexahedron with 20 nodes */   \
+    ENUM_ITEM(EGT_Composite) /* Composite geometry, vtk export supported by individual elements */ \
+    ENUM_ITEM(EGT_unknown)  /* unknown element geometry type */
+
 /**
  * Enumerative type used to classify element geometry
  * Possible values are:
@@ -61,21 +73,6 @@ namespace oofem {
  * EGT_hexa_1  - hexahedron with 8 nodes
  * EGT_hexa_2  - hexahedron with 20 nodes
  */
-#define Element_Geometry_Type_DEF \
-    ENUM_ITEM(EGT_point) /* point in space */   \
-    ENUM_ITEM(EGT_line_1) /* line elements with two nodes  1-------2 */   \
-    ENUM_ITEM(EGT_line_2) /* line element with three nodes 1---3---2 */   \
-    ENUM_ITEM(EGT_triangle_1) /* triangle element with three nodes */ \
-    ENUM_ITEM(EGT_triangle_2) /* triangle element with 6 nodes */ \
-    ENUM_ITEM(EGT_quad_1)   /* quadrialateral with 4 nodes */   \
-    ENUM_ITEM(EGT_quad_2)   /* quadratic quadrialateral with 8 nodes */   \
-    ENUM_ITEM(EGT_tetra_1)  /* tetrahedron with 4 nodes */   \
-    ENUM_ITEM(EGT_tetra_2)  /* tetrahedron with 10 nodes */   \
-    ENUM_ITEM(EGT_hexa_1)   /* hexahedron with 8 nodes */   \
-    ENUM_ITEM(EGT_hexa_2)   /* hexahedron with 20 nodes */   \
-    ENUM_ITEM(EGT_Composite) /* Composite geometry, vtk export supported by individual elements */ \
-    ENUM_ITEM(EGT_unknown)  /* unknown element geometry type */
-
 enum Element_Geometry_Type {
     Element_Geometry_Type_DEF
 };

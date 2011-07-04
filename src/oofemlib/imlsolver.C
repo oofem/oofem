@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/imlsolver.C,v 1.5.4.1 2004/04/05 15:19:43 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -53,13 +52,13 @@ IMLSolver :: solve(SparseMtrx *A, FloatArray *b, FloatArray *x) { return NM_NoSu
 
 #ifdef __IML_MODULE
 
+ #include <iml/cg.h>
+ #include <iml/gmres.h>
  #include "imlsolver.h"
  #include "sparsemtrx.h"
  #include "flotarry.h"
  #include "diagpre.h"
  #include "voidprecond.h"
- #include "cg.h"
- #include "gmres.h"
  #include "compcol.h"
  #include "iluprecond.h"
  #include "icprecond.h"

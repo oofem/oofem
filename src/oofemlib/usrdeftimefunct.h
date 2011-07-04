@@ -63,12 +63,12 @@ private:
 public:
     /**
      * Constructor. Creates load time function with given number, belonging to given domain.
-     * @param n load time function number
-     * @param d domain to which new object will belongs.
+     * @param n Load time function number.
+     * @param d Domain to which new object will belongs..
      */
-    UserDefinedLoadTimeFunction(int i, Domain *d) : LoadTimeFunction(i, d), myParser()
+    UserDefinedLoadTimeFunction(int n, Domain *d) : LoadTimeFunction(n, d), myParser()
     { dfdtExpression [ 0 ] = d2fdt2Expression [ 0 ] = '\0'; }
-    /// Destructor
+    /// Destructor.
     virtual ~UserDefinedLoadTimeFunction()  { }
 
     virtual double __at(double);
@@ -82,7 +82,7 @@ public:
      * - d2fdt2(t) (optional)
      */
     IRResultType initializeFrom(InputRecord *ir);
-    classType   giveClassID() const { return UserDefinedLoadTimeFunctionClass; }
+    classType giveClassID() const { return UserDefinedLoadTimeFunctionClass; }
     const char *giveClassName() const { return "UserDefinedLoadTimeFunction"; }
 };
 } // end namespace oofem

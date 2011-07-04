@@ -1,4 +1,3 @@
-/* v 1.9 2010/01/05 vs */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 2009   Vit Smilauer
+ *               Copyright (C) 2011   Vit Smilauer
  *
  *
  *
@@ -32,7 +31,6 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-
 
 #include "structeigenstrainload.h"
 #include "element.h"

@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/range.h,v 1.3 2003/04/06 14:08:25 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -38,36 +37,35 @@
 
 namespace oofem {
 /**
- * Class Range is an abstraction for interval of integer numbers. It is decribed using its start and end values of interval
- * it represents. The inteval is defined to represent all valus between start and end values, including start and end values.
+ * Class Range is an abstraction for interval of integer numbers. It is described using its start and end values of interval
+ * it represents. The interval is defined to represent all values between start and end values, including start and end values.
  * Function for testing if number is in interval is provided. Used by OutputManager
- * to eficiently maintain intervals.
+ * to efficiently maintain intervals.
  */
 class Range
 {
 protected:
-    /// interval start value
+    /// Interval start value.
     int startIndx;
-    /// interval end value
+    /// Interval end value.
     int endIndx;
 
 public:
     /// Constructor. Creates Range containing only given single number
     Range(int indx) { startIndx = endIndx = indx; }
-    /// Consructor. Creates range <li, hi>
+    /// Constructor. Creates range <li, hi>
     Range(int li, int hi) {
         startIndx = li;
         endIndx = hi;
     }
-    /// Empty range constructor
+    /// Empty range constructor.
     Range() {
         startIndx = 0;
         endIndx = -1;
     }
 
-
-    /// tests if number is in range
-    int test(int i) { return ( ( i >= startIndx ) && ( i <= endIndx ) ) ? 1 : 0; }
+    /// Tests if number is in range.
+    bool test(int i) { return ( i >= startIndx ) && ( i <= endIndx ); }
 };
 } // end namespace oofem
 #endif // range_h

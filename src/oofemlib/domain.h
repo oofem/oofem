@@ -121,8 +121,8 @@ private:
     // numberOfDefaultDofsPerNode specifies default number of dofs per node
     // for current domain type. The defaultDofMask describes the physical meaning of these
     // dofs.
-    int numberOfDefaultDofsPerNode;                     // per node
-    int numberOfDefaultDofsPerSide;                     // per side
+    int numberOfDefaultDofsPerNode;
+    int numberOfDefaultDofsPerSide;
     IntArray defaultNodeDofIDArry;
     IntArray defaultSideDofIDArry;
 
@@ -376,6 +376,7 @@ public:
     void setXfemManager(XfemManager *xfemManager);
     /**
      * Sets receiver's associated topology description.
+     * @param topo New topology description for receiver.
      * @param destroyOld Determines if any preexisting topology description should be deleted.
      */
     void setTopology(TopologyDescription *topo, bool destroyOld = true);
@@ -453,6 +454,7 @@ public:
     TopologyDescription *giveTopology() { return topology; }
     /**
      * Sets the given smoother as an actual smoother for receiver.
+     * @param smoother New smoother for receiver.
      * @param destroyOld Determines if any preexisting smoother should be deleted.
      */
     void setSmoother(NodalRecoveryModel *smoother, bool destroyOld = true);
@@ -521,12 +523,4 @@ private:
 };
 } // end namespace oofem
 #endif // domain_h
-
-
-
-
-
-
-
-
 

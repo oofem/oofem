@@ -72,17 +72,18 @@ public:
 
     /**
      * Constructor. Creates load time function with given number, belonging to given domain.
-     * @param n load time function number
-     * @param d domain to which new object will belongs.
+     * @param n Load time function number.
+     * @param d Domain to which new object will belongs.
      */
-    LoadTimeFunction(int i, Domain *d) : FEMComponent(i, d) { initialValue = 0.0; }
+    LoadTimeFunction(int n, Domain *d) : FEMComponent(n, d) { initialValue = 0.0; }
     /// Destructor
     virtual ~LoadTimeFunction() { }
 
     /**
      * Returns the value of load time function at given time. Abstract service.
      * Must be implemented by derived classes.
-     * @param tStep Time. Incremental and total mode uses intrinsic time from giveIntrinsicTime().
+     * @param tStep Time. Incremental and total mode uses intrinsic time from giveIntrinsicTime.
+     * @param mode Determines the mode of the requested value.
      * @return Load time function value.
      */
     double evaluate(TimeStep *tStep, ValueModeType mode);

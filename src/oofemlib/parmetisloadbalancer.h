@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -31,6 +31,7 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
+
 #ifndef parmetisloadbalancer_h
 #define parmetisloadbalancer_h
 
@@ -47,7 +48,7 @@
 namespace oofem {
 /**
  * End-of-data marker, used to identify end of data stream received.
- * The value should not conflict with any globnum id
+ * The value should not conflict with any globnum id.
  */
  #define PARMETISLB_END_DATA -1
  #define SHARED_DOFMAN_PARTITIONS_TAG 9998
@@ -60,17 +61,17 @@ class ParmetisLoadBalancer : public LoadBalancer
 protected:
 
  #ifdef __PARMETIS_MODULE
-    // element numbering maps
+    // Element numbering maps.
     IntArray gToLMap, lToGMap;
     idxtype *elmdist;
     int myGlobNumOffset;
-    // partition weights (user input)
+    // Partition weights (user input).
     float *tpwgts;
-    // array of DofManMode(s)
+    // Array of DofManMode(s).
     IntArray dofManState;
-    // array of dof man partitions
+    // Array of dof man partitions.
     std :: vector< IntArray >dofManPartitions;
-    /// partition vector of the locally-stored elements
+    /// Partition vector of the locally-stored elements.
     IntArray elementPart;
  #endif
 
@@ -94,9 +95,9 @@ protected:
     int  giveGlobalElementNumber(int locnum) { return lToGMap.at(locnum); }
 
     /**
-     * Label local partition nodes (thode that are local or shared).
+     * Label local partition nodes (the nodes that are local or shared).
      * Labeling consist of assigning corresponding id that characterize the
-     * status of local dof managar after balancing the load. Labeling determines
+     * status of local dof manager after balancing the load. Labeling determines
      * which of local nodes remain local, or became local on other partition,
      * or became shared, etc.
      */

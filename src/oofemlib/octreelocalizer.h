@@ -351,10 +351,10 @@ protected:
                                              const IntArray *regionList);
     /**
      * Returns the element closest to the given point within the
-     * @param cell Terminal cell to look in.
+     * @param currCell Terminal cell to look in.
      * @param gcoords Point coordinates.
      * @param lcoords Local coordinates in closest element.
-     * @param minDist[in,out] Distance from the center of returned element.
+     * @param[in,out] minDist Distance from the center of returned element.
      * @param closest Coordinates in closest element.
      * @param answer Requested element.
      * @param region Region to consider.

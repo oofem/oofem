@@ -531,6 +531,8 @@ public:
      * @param stream Context stream. If NULL then new file descriptor will be opened and closed
      * at the end else the stream given as parameter will be used and not closed at the end.
      * @param mode Determines amount of info in stream.
+     * @param obj Void pointer to an int array containing two values:time step number and
+     * version of a context file to be restored.
      * @return contextIOResultType.
      * @exception ContextIOERR If error encountered.
      */

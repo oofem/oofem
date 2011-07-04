@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2010   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -57,28 +57,6 @@
 #endif
 
 namespace oofem {
-/*
- * Function used only by BoundaryCondition and InitialCondition in order to
- * store informations in convenient form for debugging.
- */
-/*
- * char cltypesGiveUnknownTypeKey (UnknownType type)
- * {
- * switch(type){
- * case  DisplacementVector : return 'd';
- * //  case TotalDisplacementVector: return 'd';
- * //  case IncrementOfDisplacementVector: return 'd';
- * //  case TotalIncrementOfDisplacementVector: return 'd';
- * //  case  VelocityVector : return 'v';
- * //  case  AccelerationVector : return 'a';
- * //  case  EigenVector : return 'd';
- * case  FluxVector : return 'f' ;
- * //  case  TotalFluxVector : return 't' ;
- * default : fprintf(stderr," cltypesGiveUnknownTypeKey :: Unsupported conversion \n\a\a");
- * }
- * return 0;
- * }
- */
 
 char cltypesGiveUnknownTypeModeKey(ValueModeType mode)
 {

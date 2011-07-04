@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/sparselinsystemnm.h,v 1.3 2003/04/06 14:08:26 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -33,31 +32,18 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-
-//   **********************************
-//   *** CLASS SparseLinearSystemNM ***
-//   **********************************
-
-
 #ifndef sparselinsystemnm_h
 #define sparselinsystemnm_h
 
-
 #include "nummet.h"
-
 #include "classtype.h"
 #include "nmstatus.h"
 #include "linsystsolvertype.h"
-
-#ifndef __MAKEDEPEND
- #include <stdio.h>
-#endif
 
 namespace oofem {
 class EngngModel;
 class SparseMtrx;
 class FloatArray;
-
 
 /**
  * This base class is an abstraction for all numerical methods solving sparse
@@ -72,9 +58,9 @@ class FloatArray;
 class SparseLinearSystemNM : public NumericalMethod
 {
 public:
-    /// Constructor
+    /// Constructor.
     SparseLinearSystemNM(int i, Domain *d, EngngModel *m);
-    /// Destructor
+    /// Destructor.
     ~SparseLinearSystemNM();
 
     const char *giveClassName() const { return "SparseLinearSystemNM"; }

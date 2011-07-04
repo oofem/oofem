@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/oofeggraphiccontext.h,v 1.16.4.1 2004/04/05 15:19:43 bp Exp $*/
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -45,7 +44,7 @@
  #include "nodalrecoverymodel.h"
  #include "internalstatemode.h"
 //
-// for c++ compiler to be succesfull on some c files
+// for c++ compiler to be successful on some c files
 //
 
 extern "C" {
@@ -130,7 +129,7 @@ class oofegGraphicContext
 protected:
 
     /*
-     * Common membrs to all contexts
+     * Common members to all contexts
      */
     static EngngModel *emodel;
     static EFringeTable ft;
@@ -163,11 +162,11 @@ protected:
     // smoother type
     static SmootherType smootherType;
 
-    // deformed geometry internal varibles plot flag
+    // deformed geometry internal variables plot flag
     // nonzero indicate to use deformed shape
     static int intVarDefGeoFlag;
 
-    // Sparse matrx profile mode (1=marker mode, 0=grid mode)
+    // Sparse matrix profile mode (1=marker mode, 0=grid mode)
     static int sparseProfileMode;
 
     // EFringeTable ft;
@@ -290,20 +289,20 @@ public:
     // element filter
     /**
      * Test if particular element passed fulfills various filtering criteria for its graphics output.
-     * @return nonzero if output requested, zero otherwise.
+     * @return Nonzero if output requested, zero otherwise..
      */
     int testElementGraphicActivity(Element *);
     /**
-     * Returns the state of material model (region) filter for particular model
+     * Returns the state of material model (region) filter for particular mod.el
      */
     int getMaterialModelFilterState(int i);
     /**
-     * Sets the state of material model (region) filter for particular model
+     * Sets the state of material model (region) filter for particular model.
      */
     void setMaterialModelFilterState(int i, int state);
     /**
      * Sets the state of element filter for particular model
-     * @param initstring string containing valid range string representation, with element_filter keyword
+     * @param initString String containing valid range string representation, with element_filter keyword.
      */
     void setElementFilterState(char *initString);
 

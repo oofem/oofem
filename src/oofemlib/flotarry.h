@@ -292,8 +292,9 @@ public:
      * Sets receiver to be a - b, using only the first n entries.
      * @param a Array which receiver goes to.
      * @param b Array which receiver comes from.
+     * @param n Only first n entries are taken.
      */
-    void beDifferenceOf(const FloatArray &a, const FloatArray &b, const int &n);
+    void beDifferenceOf(const FloatArray &a, const FloatArray &b, int n);
     /**
      * Extract sub vector form src array and stores the result into receiver.
      * @param src source vector for sub vector

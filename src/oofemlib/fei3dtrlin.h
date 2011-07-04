@@ -39,7 +39,7 @@
 
 namespace oofem {
 /**
- * Class representing implementation of linar tetrahedra interpolation class.
+ * Class representing implementation of linear tetrahedra interpolation class.
  */
 class FEI3dTrLin : public FEInterpolation3d
 {

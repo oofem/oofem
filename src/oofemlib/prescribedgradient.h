@@ -67,7 +67,7 @@ public:
      * @param n Boundary condition number.
      * @param d Domain to which new object will belongs.
      */
-    PrescribedGradient(int i, Domain *d) : BoundaryCondition(i, d) { }
+    PrescribedGradient(int n, Domain *d) : BoundaryCondition(n, d) { }
 
     /// Destructor
     ~PrescribedGradient() { }
@@ -79,8 +79,8 @@ public:
     /**
      * Initializes receiver according to object description stored in input record.
      * The input record contains two fields;
-     * - gradient #rows #columns { d_11 d_12 ... ; d_21 ... } (required)
-     * - cCoords #columns x_1 x_2 ... (optional, default 0)
+     * - gradient \#rows \#columns { d_11 d_12 ... ; d_21 ... } (required)
+     * - cCoords \#columns x_1 x_2 ... (optional, default 0)
      * The prescribed tensor's columns must be equal to the size of the center coordinates.
      * The size of the center coordinates must be equal to the size of the coordinates in the applied nodes.
      */
@@ -106,7 +106,7 @@ public:
 
     /**
      * Set prescribed tensor.
-     * @param s prescribed value
+     * @param t New prescribed value.
      */
     virtual void setPrescribedGradient(const FloatMatrix &t) { gradient = t; }
 

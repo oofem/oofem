@@ -1,4 +1,3 @@
-/* $Header: $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -47,13 +46,13 @@ namespace oofem {
  */
 class MaterialInterface : public FEMComponent
 {
-protected:
 public:
-    /** Constructor. Takes two two arguments. Creates
-     *  MaterialInterface instance with given number and belonging to given domain.
-     *  @param n component number in particular domain. For instance, can represent
-     *  node number in particular domain.
-     *  @param d domain to which component belongs to
+    /**
+     * Constructor. Takes two two arguments. Creates
+     * MaterialInterface instance with given number and belonging to given domain.
+     * @param n Component number in particular domain. For instance, can represent
+     * node number in particular domain.
+     * @param d Domain to which component belongs to.
      */
     MaterialInterface(int n, Domain *d) : FEMComponent(n, d) { }
 
@@ -66,9 +65,9 @@ public:
      */
     virtual void updatePosition(TimeStep *atTime) = 0;
     /**
-     * Updates element state after equlibrium in time step has been reached.
+     * Updates element state after equilibrium in time step has been reached.
      * All temporary history variables,
-     * which now describe equlibrium state should be copied into equilibrium ones.
+     * which now describe equilibrium state should be copied into equilibrium ones.
      * The existing internal state is used for update.
      */
     virtual void updateYourself(TimeStep *tStep) = 0;
@@ -78,12 +77,12 @@ public:
     virtual double computeCriticalTimeStep(TimeStep *) = 0;
 
     /**
-     * Returns relative material contens at given point. Usually only one material is presented in given point,
+     * Returns relative material contents at given point. Usually only one material is presented in given point,
      * but some smoothing may be applied close to material interface to make transition smooth
      */
     virtual void giveMaterialMixtureAt(FloatArray &answer, FloatArray &position) = 0;
     /**
-     * Returns volumetric (or other based measure) of relative material contens in given element.
+     * Returns volumetric (or other based measure) of relative material contents in given element.
      */
     virtual void giveElementMaterialMixture(FloatArray &answer, int ielem) = 0;
     /** Returns scalar value representation of material Interface at given point. For visualization */

@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/structuralnonlocalmaterialext.h,v 1.8 2003/04/06 14:08:26 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -33,10 +32,6 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-//
-// class StructuralNonlocalMaterialExtension
-//
-
 #ifndef structuralnonlocalmaterialext_h
 #define structuralnonlocalmaterialext_h
 
@@ -49,15 +44,10 @@ namespace oofem {
  */
 class StructuralNonlocalMaterialStatusExtensionInterface : public NonlocalMaterialStatusExtensionInterface
 {
-protected:
-
 public:
-    // StructuralNonlocalMaterialStatus(int n, Domain* d, GaussPoint* g) : NonlocalMaterialStatus (n,d,g) {}
     StructuralNonlocalMaterialStatusExtensionInterface() : NonlocalMaterialStatusExtensionInterface() { }
     ~StructuralNonlocalMaterialStatusExtensionInterface() { }
 };
-
-
 
 
 /**
@@ -70,19 +60,15 @@ public:
  */
 class StructuralNonlocalMaterialExtensionInterface : public NonlocalMaterialExtensionInterface
 {
-protected:
-
 public:
     /**
-     * Constructor. Creates material with given number, belonging to given domain.
-     * @param n material number
-     * @param d domain to which new material will belong
+     * Constructor.
+     * @param d Domain to which new material will belong.
      */
-    //StructuralNonlocalMaterial (int n,Domain* d) : NonlocalMaterial(n,d)
     StructuralNonlocalMaterialExtensionInterface(Domain *d) : NonlocalMaterialExtensionInterface(d)
     { }
     /// Destructor.
-    ~StructuralNonlocalMaterialExtensionInterface()                { }
+    ~StructuralNonlocalMaterialExtensionInterface() { }
 
     /**
      * Declares the service updating local variables in given integration points,
@@ -93,11 +79,11 @@ public:
      * The implementation is left on derived classes.
      * Provide material local strain increment - as is provided to computeRealStresVector.
      * This allows to update internal vars to be averaged to new state
-     * @param strainVector total strain vector in given integration point.
-     * @param gp integration point to update.
-     * @param atTime solution step indicating time of update.
+     * @param strainVector Total strain vector in given integration point.
+     * @param gp Integration point to update.
+     * @param tStep Solution step indicating time of update.
      */
-    virtual void updateBeforeNonlocAverage(const FloatArray &strainVector, GaussPoint *gp, TimeStep *atTime) = 0;
+    virtual void updateBeforeNonlocAverage(const FloatArray &strainVector, GaussPoint *gp, TimeStep *tStep) = 0;
 };
 } // end namespace oofem
 #endif // structuralnonlocalmaterialext_h

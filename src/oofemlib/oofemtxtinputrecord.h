@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/inputrecord.h,v 1.4 2003/05/19 13:03:57 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -36,11 +35,6 @@
 #ifndef oofemtxtinputrecord_h
 #define oofemtxtinputrecord_h
 
-
-#ifndef __MAKEDEPEND
- #include <stdio.h>
- #include <string.h>
-#endif
 #include "inputrecord.h"
 #include "intarray.h"
 #include "flotarry.h"
@@ -53,110 +47,69 @@
 namespace oofem {
 #define IR_MAX_ERROR_LENGTH 100
 
-/** Tokenizer is used to parse records.
- *  This also enables to perform additional check for input records, since
- *  unread fields can be detected
- */
-
 /**
  * Class representing the Input Record for OOFEM txt input file format. The input record is represented as string consisting of several fields.
  */
 class OOFEMTXTInputRecord : public InputRecord
 {
 protected:
-
+    /**
+     * Tokenizer is used to parse records.
+     * This also enables to perform additional check for input records, since
+     * unread fields can be detected
+     */
     Tokenizer tokenizer;
     bool readFlag [ OOFEM_MAX_TOKENS ];
 
-    // record representation
+    // Record representation.
     char record [ OOFEM_MAX_LINE_LENGTH ];
 
 public:
     /// Constructor. Creates an empty input record.
     OOFEMTXTInputRecord();
-    /// Constructor. Creates the input record corresponding to given string
+    /// Constructor. Creates the input record corresponding to given string.
     OOFEMTXTInputRecord(char *source);
-    /// Copy constructor
+    /// Copy constructor.
     OOFEMTXTInputRecord(const OOFEMTXTInputRecord &);
-    /// Destructor
+    /// Destructor.
     ~OOFEMTXTInputRecord() { }
-    /// Assingnment operator
+    /// Assignment operator.
     OOFEMTXTInputRecord & operator=(const OOFEMTXTInputRecord &);
 
-    /** Creates a newly allocated copy of the receiver */
     virtual InputRecord *GiveCopy() { return new OOFEMTXTInputRecord(* this); }
 
 public:
-    /// Sets the record string
+    /// Sets the record string.
     void setRecordString(const char *);
-    /// Returns record string
+    /// Returns record string.
     char *giveRecordAsString() { return this->record; }
 
-    /** terminates the current record session and if flag is true warnin is printed for unscanned tokens */
     void finish(bool wrn = true);
 
-
-
 public:
-    /**@name Compulsory field extraction methods
-     * Reads the field value identified by keyword
-     * @param answer contains result
-     * @param idString field keyword
-     * @return IRResultType
-     */
-    //@{
-    /// Reads the record id field  (type of record) and its corresponding number
     virtual IRResultType giveRecordKeywordField(char *answer, int &value, int maxchar);
-    /// Reads the record id field  (type of record)
     virtual IRResultType giveRecordKeywordField(char *answer, int maxchar);
-    /// Reads the integer field value
     virtual IRResultType giveField(int &answer, const InputFieldType fieldID, const char *idString);
-    /// Reads the double field value
     virtual IRResultType giveField(double &answer, const InputFieldType fieldID, const char *idString);
-    /// Reads the char* field value
     virtual IRResultType giveField(char *answer, int maxchar, const InputFieldType fieldI, const char *idString);
-    /// Reads the FloatArray field value
     virtual IRResultType giveField(FloatArray &answer, const InputFieldType fieldI, const char *idString);
-    /// Reads the IntArray field value
     virtual IRResultType giveField(IntArray &answer, const InputFieldType fieldID, const char *idString);
-    /// Reads the FloatMatrix field value
     virtual IRResultType giveField(FloatMatrix &answer, const InputFieldType fieldI, const char *idString);
-    /// Reads the Dictionary field value
     virtual IRResultType giveField(Dictionary &answer, const InputFieldType fieldID, const char *idString);
-    /// Reads the dynaList<Range> field value
     virtual IRResultType giveField(dynaList< Range > &answer, const InputFieldType fieldID, const char *idString);
-    //@}
 
-    /**@name Optional field extraction methods
-     * Reads the field value identified by keyword
-     * @param answer contains result
-     * @param idString field keyword
-     * @return IRResultType
-     */
-    //@{
-    /// Reads the integer field value
     virtual IRResultType giveOptionalField(int &answer, const InputFieldType fieldID, const char *idString);
-    /// Reads the double field value
     virtual IRResultType giveOptionalField(double &answer, const InputFieldType fieldID, const char *idString);
-    /// Reads the char* field value
     virtual IRResultType giveOptionalField(char *answer, int maxchar, const InputFieldType fieldID, const char *idString);
-    /// Reads the FloatArray field value
     virtual IRResultType giveOptionalField(FloatArray &answer, const InputFieldType fieldID, const char *idString);
-    /// Reads the IntArray field value
     virtual IRResultType giveOptionalField(IntArray &answer, const InputFieldType fieldID, const char *idString);
-    /// Reads the FloatMatrix field value
     virtual IRResultType giveOptionalField(FloatMatrix &answer, const InputFieldType fieldID, const char *idString);
-    /// Reads the Dictionary field value
     virtual IRResultType giveOptionalField(Dictionary &answer, const InputFieldType fieldID, const char *idString);
-    /// Reads the dynaList<Range> field value
     virtual IRResultType giveOptionalField(dynaList< Range > &answer, const InputFieldType fieldID, const char *idString);
-    //@}
 
-    /// Returns true if record contains field identified by idString keyword
-    virtual bool         hasField(const InputFieldType fieldID, const char *idString);
+    virtual bool hasField(const InputFieldType fieldID, const char *idString);
 
 protected:
-
     int giveKeywordIndx(const char *kwd);
     int scanInteger(const char *source, int &value);
     int scanDouble(const char *source, double &value);
@@ -174,22 +127,23 @@ protected:
 
     /**
      * Reads single range record from input record represented by *helpSource  string.
-     * @param helpSource pointer to current string possition, on return helpSource points
-     * to next charcter after reading range record.
-     * @param li starting range index
-     * @param hi end range index
-     * @return on success nonzero valur returned
+     * @param helpSource Pointer to current string position, on return helpSource points
+     * to next character after reading range record.
+     * @param li Starting range index.
+     * @param hi End range index.
+     * @return Nonzero on success.
      */
-    int    readRange(const char **helpSource, int &li, int &hi);
+    int readRange(const char **helpSource, int &li, int &hi);
     /**
      * Reads single matrix record from input record represented by *helpSource  string.
-     * @param helpSource pointer to current string possition, on return helpSource points
-     * to next charcter after reading range record.
-     * @param r,c matrix dimensions
-     * @param ans float matrix
-     * @return on success nonzero valur returned
+     * @param helpSource Pointer to current string position, on return helpSource points
+     * to next character after reading range record.
+     * @param r Matrix rows.
+     * @param c Matrix columns.
+     * @param ans Float matrix.
+     * @return Nonzero on success.
      */
-    int    readMatrix(const char *helpSource, int r, int c, FloatMatrix &ans);
+    int readMatrix(const char *helpSource, int r, int c, FloatMatrix &ans);
 };
 } // end namespace oofem
 #endif // oofemtxtinputrecord_h

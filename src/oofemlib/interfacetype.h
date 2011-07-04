@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -32,18 +32,13 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-//
-// FILE: interfacetype.h
-//
-
 #ifndef interfacetype_h
 #define interfacetype_h
-
 
 namespace oofem {
 /**
  * Enumerative type, used to identify interface type.
- * @see Interface class for details
+ * @see Interface More details.
  */
 enum InterfaceType {
     UnknownInterfaceType,

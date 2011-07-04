@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/imlsolver.h,v 1.4 2003/04/06 14:08:24 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -33,11 +32,6 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-//   *****************************************************
-//   *** CLASS IML++ Library interface solver          ***
-//   *****************************************************
-
-
 #ifndef imlsolver_h
 #define imlsolver_h
 
@@ -56,63 +50,55 @@ class EngngModel;
 class FloatMatrix;
 
 /**
- * Implements the solution of linear system of equation in the form Ax=b using iterative solvers
- * from iml library. Can work with any sparse matrix implementation.
+ * Implements the solution of linear system of equation in the form @f$ A\cdot x=b @f$ using iterative solvers
+ * from IML++ library. Can work with any sparse matrix implementation.
  */
 class IMLSolver : public SparseLinearSystemNM
 {
 private:
-    /// solver type
+    /// Solver type.
     enum IMLSolverType { IML_ST_CG, IML_ST_GMRES };
-    /// Preconditioner type
+    /// Preconditioner type.
     enum IMLPrecondType { IML_VoidPrec, IML_DiagPrec, IML_ILU_CompColPrec, IML_ILU_CompRowPrec, IML_ICPrec };
 
-    /// last mapped Lhs matrix
+    /// Last mapped Lhs matrix
     SparseMtrx *Lhs;
-    /// last mapped matrix version
+    /// Last mapped matrix version
     SparseMtrx :: SparseMtrxVersionType lhsVersion;
-    /// Preconditioner
+    /// Preconditioner.
     Preconditioner *M;
-    /// IML Solver type
+    /// IML Solver type.
     IMLSolverType solverType;
-    /// IML Preconditioner type
+    /// IML Preconditioner type.
     IMLPrecondType precondType;
-    /// precond init flag
+    /// Precond. init flag.
     bool precondInit;
     // Preconditioner attribute string
     // InputRecord precondAttributes;
 
-    /// tolerance of resudual
+    /// Tolerance of residual.
     double tol;
-    /// max number of iterations
+    /// Max number of iterations.
     int maxite;
 
 
 public:
-    /// Constructor - creates new instance of LDLTFactorization, with number i, belonging to domain d and Engngmodel m.
+    /// Constructor. Creates new instance of LDLTFactorization, with number i, belonging to domain d and Engngmodel m.
     IMLSolver(int i, Domain *d, EngngModel *m);
     /// Destructor
-    ~IMLSolver();    // destructor
+    ~IMLSolver();
 
     /**
-     * Solves the given linear system by LDL^T factorization.
-     * Implementation rely on factorization support provided by mapped sparse matrix.
-     * It calls Lhs->factorized()->backSubstitutionWith(*solutionArray). Sets solved flag to 1 if o.k.
-     * @param A coefficient matrix
-     * @param b right hand side
-     * @param x solution array
-     * @return NM_Status value
-     * @param tNow time step
+     * Solves the given linear system iteratively by method described by IMLSolverType.
+     * @param A Coefficient matrix.
+     * @param b Right hand side.
+     * @param x Solution array.
+     * @return Status value.
      */
     NM_Status solve(SparseMtrx *A, FloatArray *b, FloatArray *x);
 
-    /// Initializes receiver from given record. Empty implementation.
     IRResultType initializeFrom(InputRecord *ir);
-
-    // identification
-    /// Returns "LDLTFactorization" - class name of the receiver.
     const char *giveClassName() const { return "IMLSolver"; }
-    /// Returns LDLTFactorizationClass - classType id of receiver.
     classType giveClassID() const { return IMLSolverClass; }
     LinSystSolverType giveLinSystSolverType() const { return ST_IML; }
 };

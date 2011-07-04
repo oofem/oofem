@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -32,15 +32,11 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-//
-// FILE: oofem_terminate.h
-//
-
 #ifndef oofem_terminate_h
 #define oofem_terminate_h
 
 namespace oofem {
-/// oofem terminate exception class
+/// OOFEM terminate exception class.
 class OOFEM_Terminate
 {
 public:

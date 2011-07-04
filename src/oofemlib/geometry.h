@@ -1,55 +1,84 @@
 /*
- * File:   geometry.h
- * Author: chamrova
  *
- * Created on October 26, 2008, 12:04 PM
+ *                 #####    #####   ######  ######  ###   ###
+ *               ##   ##  ##   ##  ##      ##      ## ### ##
+ *              ##   ##  ##   ##  ####    ####    ##  #  ##
+ *             ##   ##  ##   ##  ##      ##      ##     ##
+ *            ##   ##  ##   ##  ##      ##      ##     ##
+ *            #####    #####   ##      ######  ##     ##
+ *
+ *
+ *             OOFEM : Object Oriented Finite Element Code
+ *
+ *               Copyright (C) 1993 - 2011   Borek Patzak
+ *
+ *
+ *
+ *       Czech Technical University, Faculty of Civil Engineering,
+ *   Department of Structural Mechanics, 166 29 Prague, Czech Republic
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#ifndef _GEOMETRY_H
-#define _GEOMETRY_H
+#ifndef geometry_h
+#define geometry_h
 
 #include "domain.h"
 #include "flotarry.h"
 #include "node.h"
 
 namespace oofem {
-/** Abstract representation of Geometry
- *  Patch inherits from this class
+/**
+ * Abstract representation of Geometry
+ * Patch inherits from this class
+ * @author chamrova
  */
 class BasicGeometry //: public Geometry
 {
 protected:
-    /// List of geometry vertices
+    /// List of geometry vertices.
     AList< FloatArray > *vertices;
 public:
-    /// Constructor
+    /// Constructor.
     BasicGeometry();
-    /// Destructor
+    /// Destructor.
     ~BasicGeometry();
-    /// computes normal signed distance between this object and a point
+    /// computes normal signed distance between this object and a point.
     virtual double computeDistanceTo(FloatArray *point) { return 0; }
-    /// checks whether an element is interacted, Element reference will be later replaced by Geometry
+    /// checks whether an element is interacted, Element reference will be later replaced by Geometry.
     virtual bool intersects(Element *element) { return false; }
-    /// gives number of intersection points of Geometry entity with an element, Element reference will be later replaced by Geometry
+    /// gives number of intersection points of Geometry entity with an element, Element reference will be later replaced by Geometry.
     virtual int computeNumberOfIntersectionPoints(Element *element) { return 0; }
-    // gives intersection points between this Geometry and Element
+    // gives intersection points between this Geometry and Element.
     virtual void computeIntersectionPoints(Element *element, AList< FloatArray > *intersecPoints) { }
-    /// Accessor
+    /// Accessor.
     FloatArray *giveVertex(int n);
-    /// Modifier
+    /// Modifier.
     void setVertex(FloatArray *vertex);
-    /// Accessor
+    /// Accessor.
     AList< FloatArray > *giveVertices() { return this->vertices; }
-    /// Initializes the Geometry from the InputRecord
+    /// Initializes the Geometry from the InputRecord.
     virtual IRResultType initializeFrom(InputRecord *ir) { return IRRT_OK; }
-    /// gives class name
+    /// Gives class name.
     virtual const char *giveClassName() const { return NULL; }
-    /// returns number of Geometry vertices
+    /// Returns number of Geometry vertices.
     int giveNrVertices() { return this->vertices->giveSize(); }
     virtual bool isOutside(BasicGeometry *bg) { return false; }
     virtual void printYourself() { }
 #ifdef __OOFEG
-    virtual void          draw(oofegGraphicContext &gc) { }
+    virtual void draw(oofegGraphicContext &gc) { }
 #endif
 };
 
@@ -59,9 +88,9 @@ public:
     Line() : BasicGeometry() { }
     ~Line() { }
     Line(FloatArray *pointA, FloatArray *pointB);
-    /// computes normal distance to a point
+    /// Computes normal distance to a point
     double computeDistanceTo(FloatArray *point);
-    /// computes tangential distance to a point
+    /// Computes tangential distance to a point
     double computeTangentialDistanceToEnd(FloatArray *point);
     void computeProjection(FloatArray &answer);
     int computeNumberOfIntersectionPoints(Element *element);
@@ -97,7 +126,7 @@ public:
     Circle() : BasicGeometry() { }
     ~Circle() { }
     Circle(FloatArray *center, double radius);
-    // normal distance to the surface not to the centre
+    /// Computes the normal distance to the surface not to the center.
     double computeDistanceTo(FloatArray *point);
     IRResultType initializeFrom(InputRecord *ir);
     const char *giveClassName() const { return "Circle"; }
@@ -108,7 +137,7 @@ public:
     void printYourself();
 };
 } // end namespace oofem
-#endif  /* _GEOMETRY_H */
+#endif  // geometry_h
 
 
 

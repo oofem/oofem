@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -32,14 +32,13 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-//
-// FILE: geneigvalsolvertype.h
-//
-
 #ifndef geneigvalsolvertype_h
 #define geneigvalsolvertype_h
 
 namespace oofem {
+/**
+ * Types of general eigenvalue solvers.
+ */
 enum GenEigvalSolverType {
     GES_SubspaceIt,
     GES_InverseIt,

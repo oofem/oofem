@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -32,10 +32,6 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-//
-// FILE: problemmode.h
-//
-
 #ifndef problemmode_h
 #define problemmode_h
 
@@ -45,8 +41,7 @@ enum problemMode {
     _postProcessor
 };
 
-
-///corresponds to macro and microproblem in multiscale simulations
+/// Corresponds to macro- and micro-problem in multiscale simulations.
 enum problemScale {
     macroScale,
     microScale

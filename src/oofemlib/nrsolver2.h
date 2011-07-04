@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/nrsolver2.h,v 1.8 2003/04/06 14:08:25 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -32,11 +31,6 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-
-//   ***********************************
-//   *** CLASS NEWTON RAPHSON SOLVER ***
-//   ***********************************
-
 
 #ifndef nrsolver2_h
 #define nrsolver2_h
@@ -124,8 +118,7 @@ class NRSolver2 : public SparseNonLinearSystemNM
      *
      */
 private:
-
-    enum    nrsolver_ModeType { nrsolverModifiedNRM, nrsolverFullNRM, nrsolverAccelNRM };
+    enum nrsolver_ModeType { nrsolverModifiedNRM, nrsolverFullNRM, nrsolverAccelNRM };
 
     int nite, nsmax, minIterations;
     double rtol;
@@ -134,15 +127,14 @@ private:
     nrsolver_ModeType NR_Mode, NR_OldMode;
     int NR_ModeTick;
     int MANRMSteps;
-    // Linear system solver
+    // Linear system solver.
     SparseLinearSystemNM *linSolver;
-    // Linear system solver ID
+    // Linear system solver ID.
     LinSystSolverType solverType;
-    /// Flag indicating whether to use line-search
+    /// Flag indicating whether to use line-search.
     int lsFlag;
-    /// Line search solver
+    /// Line search solver.
     LineSearchNM *linesearchSolver;
-
 
 public:
     NRSolver2(int i, Domain *d, EngngModel *m, EquationID ut);

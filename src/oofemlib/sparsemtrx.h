@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2010   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -31,11 +31,6 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-
-
-//   *************************************************************************
-//   *** CLASS SPARSE MATRIX BASE CLASS                           ************
-//   *************************************************************************
 
 #ifndef sparsemtrx_h
 #define sparsemtrx_h
@@ -95,13 +90,13 @@ public:
     //SparseMtrx& SparseMtrx::operator=(const SparseMtrx &C)  ;
     //SparseMtrx::SparseMtrx(const SparseMtrx &S) ;
 
-    /// Return receiver version
+    /// Return receiver version.
     SparseMtrxVersionType giveVersion() { return this->version; }
 
     /**
-     * Returns <em>newly allocated</em> copy of receiver. Programmer must take
+     * Returns a <em>newly allocated</em> copy of receiver. Programmer must take
      * care about proper deallocation of allocated space.
-     * @return newly allocated copy of receiver
+     * @return Newly allocated copy of receiver.
      */
     virtual SparseMtrx *GiveCopy() const { OOFEM_ERROR("SparseMtrx :: GiveCopy - Not implemented"); return NULL; }
 
@@ -119,19 +114,19 @@ public:
     virtual void timesT(const FloatArray &x, FloatArray &answer) const { OOFEM_ERROR("SparseMtrx :: timesT(FloatArray,FloatArray) - Not implemented"); };
     /**
      * Evaluates @f$ C = A^{\mathrm{T}} \cdot B @f$
-     * @param B array to be multiplied with receiver.
+     * @param B Array to be multiplied with receiver.
      * @param answer C.
      */
     virtual void times(const FloatMatrix &B, FloatMatrix &answer) const { OOFEM_ERROR("SparseMtrx :: times(FloatMatrix,FloatMatrix) - Not implemented"); };
     /**
      * Evaluates @f$ C = A^{\mathrm{T}} \cdot B @f$
-     * @param x matrix to be multiplied with receiver.
+     * @param B Matrix to be multiplied with receiver.
      * @param answer C.
      */
     virtual void timesT(const FloatMatrix &B, FloatMatrix &answer) const { OOFEM_ERROR("SparseMtrx :: timesT(FloatMatrix,FloatMatrix) - Not implemented"); };
     /**
      * Multiplies receiver by scalar value.
-     * @param x value to multiply receiver
+     * @param x Value to multiply receiver.
      */
     virtual void times(double x) { OOFEM_ERROR("SparseMtrx :: times(double) - Not implemented"); };
 
@@ -142,23 +137,24 @@ public:
      * using one (or more) loop over local code numbers of elements.
      * This method must be called before any operation, like assembly, zeroing,
      * or multiplication.
-     * The UnknownType parameter allows to distinguish between several possible governing equations, that
+     * The EquationID parameter allows to distinguish between several possible governing equations, that
      * can be numbered separately.
-     * @param eModel pointer to corresponding engineering model
-     * @param di domain index specify which domain to use
-     * @param s determines unknown numbering scheme
-     * @param ut unknown type
-     * @return zero is successful
+     * @param eModel Pointer to corresponding engineering model.
+     * @param di Domain index specify which domain to use.
+     * @param s Determines unknown numbering scheme.
+     * @param ut Equation ID.
+     * @return Zero iff successful.
      */
     virtual int buildInternalStructure(EngngModel *eModel, int di, EquationID ut, const UnknownNumberingScheme &s) = 0;
     /**
-     * Build internal structure of receiver. @see buildInternalStructure for details.
-     * @param eModel pointer to corresponding engineering model
-     * @param di domain index specify which domain to use
-     * @param r_s determines unknown numbering scheme for the rows
-     * @param c_s determines unknown numbering scheme for the columns
-     * @param ut unknown type
-     * @return zero is successful
+     * Build internal structure of receiver.
+     * @see buildInternalStructure
+     * @param eModel Pointer to corresponding engineering model.
+     * @param di Domain index specify which domain to use.
+     * @param r_s Determines unknown numbering scheme for the rows.
+     * @param c_s Determines unknown numbering scheme for the columns.
+     * @param ut Equation ID.
+     * @return Zero iff successful.
      */
     virtual int buildInternalStructure(EngngModel *eModel, int di, EquationID ut, const UnknownNumberingScheme &r_s,
                                        const UnknownNumberingScheme &c_s) {
@@ -169,9 +165,9 @@ public:
      * Assembles sparse matrix from contribution of local elements. This method for
      * each element adds its contribution to itself. Mapping between local element
      * contribution and its global position is given by local code numbers of element.
-     * @param loc location array. The values corresponding to zero loc array value are not assembled.
-     * @param mat contribution to be assembled using loc array.
-     * @return zero is successful
+     * @param loc Location array. The values corresponding to zero loc array value are not assembled.
+     * @param mat Contribution to be assembled using loc array.
+     * @return Zero iff successful.
      */
     virtual int assemble(const IntArray &loc, const FloatMatrix &mat) = 0;
     /**
@@ -182,7 +178,7 @@ public:
      * @param cloc Column location array. The values corresponding to zero loc array value are not assembled.
      * @param mat Contribution to be assembled using rloc and cloc arrays. The rloc position determines the row, the
      * cloc position determines the corresponding column.
-     * @return zero is successful
+     * @return Zero iff successful.
      */
     virtual int assemble(const IntArray &rloc, const IntArray &cloc, const FloatMatrix &mat) = 0;
 
@@ -202,9 +198,8 @@ public:
      * Computes the solution of linear system @f$ A\cdot x = y @f$ where A is receiver.
      * Solution vector x overwrites the right hand side vector y.
      * Receiver must be in factorized form.
-     * @param y right hand side on input, solution on output.
-     * @return pointer to y array
-     * @see factorized method
+     * @param y Right hand side on input, solution on output.
+     * @return Pointer to y array.
      */
     virtual FloatArray *backSubstitutionWith(FloatArray &y) const { return NULL; }
     /// Zeroes the receiver.

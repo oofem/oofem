@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/iml.h,v 1.3 2003/04/06 14:08:24 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -33,14 +32,11 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-/*
- * Turns on/off IML++ compilation support
- */
-
 #ifndef iml_h
 #define iml_h
 
 namespace oofem {
+/// Turns on IML++ compilation support.
 #define IML_COMPAT
 } // end namespace oofem
 #endif // iml_h

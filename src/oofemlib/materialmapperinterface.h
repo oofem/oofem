@@ -56,7 +56,8 @@ public:
     MaterialModelMapperInterface() : Interface() { }
     /// Destructor.
     virtual ~MaterialModelMapperInterface() { }
-    /** Maps the required internal state variables from
+    /**
+     * Maps the required internal state variables from
      * old mesh oldd to given ip. The result is stored in gp status.
      * @param gp Integration point belonging to new domain which values will be mapped
      * @param oldd Old mesh reference.
@@ -64,17 +65,17 @@ public:
      * @return Nonzero if o.k.
      */
     virtual int MMI_map(GaussPoint *gp, Domain *oldd, TimeStep *tStep) = 0;
-    /** Updates the required internal state variables from previously mapped values.
+    /**
+     * Updates the required internal state variables from previously mapped values.
      * The result is stored in gp status. This map and update splitting is necessary,
      * for example for nonlocal models that local quantity to be averaged must be mapped in all integration points
      * and then update can happen, because it may depend on nonlocal variable, which is computed
      * from local values.
      * @param gp Integration point belonging to new domain which values will be mapped.
-     * @param oldd Old mesh reference.
      * @param tStep Time step.
      * @param elemGPVec Vector passed to MMI_update at material level, probably computed from primary unknowns
      * (for structural elements this represent strain vector).
-     * @return nonzero if o.k.
+     * @return Nonzero if o.k.
      */
     virtual int MMI_update(GaussPoint *gp, TimeStep *tStep, FloatArray *elemGPVec = NULL) = 0;
     /**

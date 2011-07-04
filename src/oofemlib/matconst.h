@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/matconst.h,v 1.4 2003/04/06 14:08:25 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -34,13 +33,13 @@
  */
 
 
-/*
- * This file matconst.h defines several material constant (respective their
+/**
+ * @file matconst.h
+ * Defines several material constant (respective their
  * representative number).
  *
- * These constant are used to acces material parameters  at material level from
- * property dictionary
- *
+ * These constant are used to access material parameters  at material level from
+ * property dictionary.
  */
 
 #ifndef matconst_h

@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/remeshingcrit.h,v 1.7 2003/04/06 14:08:25 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -32,11 +31,6 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-
-
-//   ********************************
-//   *** CLASS REMESHING CRITERIA ***
-//   ********************************
 
 #ifndef remeshingcrit_h
 #define remeshingcrit_h
@@ -63,7 +57,7 @@ enum RemeshingStrategy { NoRemeshing_RS, RemeshingFromCurrentState_RS, Remeshing
 /**
  * The base class for all remeshing criteria.
  * The basic task is to evaluate the required mesh density (at nodes) on given domain,
- * based on informations provided by the compatible error ertimator.
+ * based on informations provided by the compatible error estimator.
  * If this task requires the special element algorithms, these should be included using interface concept.
  *
  * The remeshing criteria is maintained by the corresponding error estimator. This is mainly due to fact, that is
@@ -76,11 +70,11 @@ protected:
     ErrorEstimator *ee;
 
 #ifdef __PARALLEL_MODE
-    /// Common Communicator buffer
+    /// Common Communicator buffer.
     CommunicatorBuff *commBuff;
     /// Communicator.
     ProblemCommunicator *communicator;
-    /// communicato init flag
+    /// Communication init flag.
     bool initCommMap;
 #endif
 
@@ -92,41 +86,31 @@ public:
     /** Returns the required mesh size n given dof manager.
      * The mesh density is defined as a required element size
      * (in 1D the element length, in 2D the square from element area).
-     * @param num dofman  number
-     * @param tStep time step
-     * @param relative if zero, then actual density is returned, otherwise the relative density to current is returned.
+     * @param num Dofman number.
+     * @param tStep Time step.
+     * @param relative If zero, then actual density is returned, otherwise the relative density to current is returned.
      */
     virtual double giveRequiredDofManDensity(int num, TimeStep *tStep, int relative = 0) = 0;
     /**
      * Returns existing mesh size for given dof manager.
-     * @param num dofMan number
+     * @param num DofMan number.
      */
     virtual double giveDofManDensity(int num) = 0;
 
     /**
-     * Determines, if the remeshing is needed, and if nedded, the type of strategy used
+     * Determines, if the remeshing is needed, and if needed, the type of strategy used.
+     * @param tStep Time step.
      */
     virtual RemeshingStrategy giveRemeshingStrategy(TimeStep *tStep) = 0;
     /**
      * Estimates the nodal densities.
-     * @param tStep time step
+     * @param tStep Time step.
      */
     virtual int estimateMeshDensities(TimeStep *tStep) = 0;
 
-
-    /// Returns class name of the receiver.
     const char *giveClassName() const { return "ErrorEstimator"; }
-    /** Returns classType id of receiver.
-     * @see FEMComponent::giveClassID
-     */
-    classType                giveClassID() const { return RemeshingCriteriaClass; }
+    classType giveClassID() const { return RemeshingCriteriaClass; }
     virtual void reinitialize() {}
-
-
-#ifdef __OOFEG
-#endif
-
-protected:
 };
 } // end namespace oofem
 #endif // remeshingcrit_h

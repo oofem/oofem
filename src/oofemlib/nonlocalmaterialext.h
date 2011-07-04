@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/nonlocalmaterialext.h,v 1.14.4.1 2004/04/05 15:19:43 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -33,15 +32,8 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-
-//
-// class NonlocalMaterialExtension
-//
-
 #ifndef nonlocalmaterialext_h
 #define nonlocalmaterialext_h
-
-//#include "material.h"
 
 #include "matstatus.h"
 #include "dynalist.h"
@@ -60,13 +52,11 @@ namespace oofem {
  * This structure encapsulates the reference to influencing integration point and its corresponding weight.
  */
 struct localIntegrationRecord {
-    /// Refence to influencing integration point.
+    /// Reference to influencing integration point.
     GaussPoint *nearGp;
     /// Corresponding integration weight.
     double weight;
 };
-
-//template <class localIntegrationRecord> class dynaList;
 
 /**
  * Abstract base class for all nonlocal constitutive model statuses. Introduces the list of
@@ -78,16 +68,15 @@ struct localIntegrationRecord {
  * When nonlocal weight function unbounded support is used, then keeping the list of
  * influencing integration points has no sense (because all integration points in domain participate)
  * and should be appropriate not to use afore mentioned list and redefine the
- * MaterialStatus::buildNonlocalPointTable sevice to void service.
+ * MaterialStatus::buildNonlocalPointTable service to void service.
  *
- * @see localIntegrationRecord structure.
- * @see MaterialStatus::buildNonlocalPointTable service.
+ * @see localIntegrationRecord
+ * @see MaterialStatus::buildNonlocalPointTable
  */
 class NonlocalMaterialStatusExtensionInterface : public Interface
 {
 protected:
-    /** List containing localIntegrationRecord values.
-     */
+    /// List containing localIntegrationRecord values.
     dynaList< localIntegrationRecord >integrationDomainList;
     /// Nonlocal volume of corresponding integration point.
     double integrationScale;
@@ -116,10 +105,8 @@ public:
 };
 
 
-
-
 /**
- * Abstract base class for all nonlocal materials. Nonlocal in sence, that response in particular
+ * Abstract base class for all nonlocal materials. Nonlocal in sense, that response in particular
  * point depends not only on state in that point, but also takes into account state of surrounding
  * points. Response typically depends on some nonlocal quantity obtained as nonlocal average over
  * some characteristic volume.
@@ -141,7 +128,7 @@ protected:
      * The loop over all  integration points is typically made to compute these variables.
      * To prevent doing this multiple times at the same solution state,
      * the modification time mark is kept.
-     * In the present implementation, there is one comon stateCounter for the whole domain.
+     * In the present implementation, there is one common stateCounter for the whole domain.
      * This implies, that all variables (which undergo averaging) for all material models of the domain
      * should be prepared at the same time in updateDomainBeforeNonlocAverage method.
      * It is believed that this is general enough and can somehow handle even the case of multiple models
@@ -149,52 +136,53 @@ protected:
      * If this scheme will not be enough general, then the state counter
      * can be kept as attribute of NonlocalMaterialExtensionInterface, so independently for
      * each material model. Each model will be then updated in separate call. But in the case of
-     * several material models of the same type (with diferent params) this will lead to
-     * multiple update, which can not be avoided, although it is renundant.
+     * several material models of the same type (with different parameters) this will lead to
+     * multiple update, which can not be avoided, although it is redundant.
      *
      * StateCounterType lastUpdatedStateCounter;
      */
     Domain *domain;
-    /// map indicating regions to skip (region - cross section model)
+    /// Map indicating regions to skip (region - cross section model).
     IntArray regionMap;
-    /// flag indicating whether to keep nonlocal interaction tables of integration points cached
+    /// Flag indicating whether to keep nonlocal interaction tables of integration points cached.
     bool permanentNonlocTableFlag;
 
-    /// type characterizing the nonlocal weight function
+    /// Type characterizing the nonlocal weight function.
     enum WeightFunctionType { WFT_Unknown, WFT_Bell, WFT_Gauss, WFT_Green, WFT_Uniform, WFT_UniformOverElement };
-    /// parameter specifying the type of nonlocal weight function
+    /// Parameter specifying the type of nonlocal weight function.
     WeightFunctionType weightFun;
 
-    /// characteristic length of the nonlocal model
-    /// (its interpretation depends on the type of weight function)
+    /**
+     * Characteristic length of the nonlocal model
+     * (its interpretation depends on the type of weight function).
+     */
     double cl;
 
-    /// support radius
+    /// Support radius.
     double suprad;
 
-    /// parameter "m" for "undernonlocal" or "overnonlocal" formulation
+    /// For "undernonlocal" or "overnonlocal" formulation.
     double mm;
 
-    /// type characterizing the scaling approach
+    /// Type characterizing the scaling approach.
     enum ScalingType { ST_Unknown, ST_Standard, ST_Noscaling, ST_Borino };
-    /// parameter specifying the type of scaling of nonlocal weight function
+    /// Parameter specifying the type of scaling of nonlocal weight function.
     ScalingType scaling;
 
-    /// type characterizing the averaged (nonlocal) variable
+    /// Type characterizing the averaged (nonlocal) variable.
     enum AveragedVarType { AVT_Unknown, AVT_EqStrain, AVT_Compliance };
-    /// parameter specifying the type of averaged (nonlocal) variable
+    /// Parameter specifying the type of averaged (nonlocal) variable.
     AveragedVarType averagedVar;
 
 
 public:
     /**
      * Constructor. Creates material with given number, belonging to given domain.
-     * @param n material number
-     * @param d domain to which new material will belong
+     * @param d Domain to which new material will belong.
      */
     NonlocalMaterialExtensionInterface(Domain *d);
     /// Destructor.
-    ~NonlocalMaterialExtensionInterface()                { }
+    ~NonlocalMaterialExtensionInterface() { }
 
 
     /**
@@ -207,10 +195,10 @@ public:
      * Element::updateBeforeNonlocalAverage abstract service, which in turn updates all
      * integration points associated with particular element.
      * The service used to update element integration point depends on analysis type and
-     * is specified by element-specific type (like StructuralElement) corresponding to anlysis type.
+     * is specified by element-specific type (like StructuralElement) corresponding to analysis type.
      * This service can be invoked multiple times, but update for specific material is done only once, because
      * last modification time mark is kept.
-     * @see Element::updateBeforeNonlocalAverage.
+     * @see Element::updateBeforeNonlocalAverage
      */
     void updateDomainBeforeNonlocAverage(TimeStep *atTime);
 
@@ -228,7 +216,7 @@ public:
      * Rebuild list of integration points which take part
      * in nonlocal average in given integration point.
      * if contributingElems param is not NULL, then it is assumed that it contains
-     * a COMPLETE list of elements contributing to receiver. Ifis equal to NULL
+     * a <em>complete</em> list of elements contributing to receiver. If equal to NULL
      * existing list is cleared and  buildNonlocalPointTable service is invoked.
      */
     void rebuildNonlocalPointTable(GaussPoint *gp, IntArray *contributingElems);
@@ -237,7 +225,7 @@ public:
      * Contains localIntegrationRecord structures, containing
      * references to integration points and their weights that influence to nonlocal average in
      * receiver's associated integration point.
-     * Rebuilds the IP list by calling  buildNonlocalPointTable(GaussPoint *gp) if not available
+     * Rebuilds the IP list by calling  buildNonlocalPointTable if not available.
      */
     dynaList< localIntegrationRecord > *giveIPIntegrationList(GaussPoint *gp);
 
@@ -245,8 +233,8 @@ public:
      * Evaluates the basic nonlocal weight function for a given distance
      * between interacting points. This function is NOT normalized by the
      * condition of unit integral.
-     * @param distance distance between interacting points
-     * @return value of weight function
+     * @param distance Distance between interacting points.
+     * @return Value of weight function.
      */
     virtual double computeWeightFunction(double distance);
 
@@ -254,20 +242,20 @@ public:
      * Evaluates the basic nonlocal weight function for two points
      * with given coordinates. This function is NOT normalized by the
      * condition of unit integral.
-     * @param src coordinates of source point
-     * @param coord coordinates of receiver point
-     * @return value of weight function
+     * @param src Coordinates of source point.
+     * @param coord Coordinates of receiver point.
+     * @return Value of weight function.
      */
     virtual double computeWeightFunction(const FloatArray &src, const FloatArray &coord);
 
     /**
      * Provides the integral of the weight function
-     * over the contributing volume in 1, 2 or 3D
+     * over the contributing volume in 1, 2 or 3D.
      */
     double giveIntegralOfWeightFunction(const int spatial_dimension);
 
 
-    /// Determines the maximum value of the nonlocal weight function
+    /// Determines the maximum value of the nonlocal weight function.
     virtual double maxValueOfWeightFunction();
 
     /**
@@ -275,31 +263,31 @@ public:
      * In the current implementation the region is associated with cross section model.
      */
     int giveNumberOfRegions();
-    /**
+    /*
      * Returns the region id of given element
-     * @param element pointer to element which region id is requsted
-     * @return region id (number) for this element
+     * @param element pointer to element which region id is requested.
+     * @return Region id (number) for this element.
      */
     //int giveElementRegion (Element* element);
     /**
-     * Determines, whether receiver has bounded weighting function (limited support)
-     * @return true if weighting function bounded, zero otherwise
+     * Determines, whether receiver has bounded weighting function (limited support).
+     * @return True if weighting function bounded, zero otherwise.
      */
     virtual int hasBoundedSupport() { return 1; }
     /**
-     * Determines the width (radius) of limited support of weighting function
+     * Determines the width (radius) of limited support of weighting function.
+     * i.e., the distance at which the interaction weight becomes zero.
      */
-    /// Determines the radius of support of the nonlocal weight function
-    /// (i.e., the distance at which the interaction weight becomes zero)
     virtual double evaluateSupportRadius();
 
-    /// returns reference to domain
+    /// Returns reference to domain.
     Domain *giveDomain() { return this->domain; }
 
     IRResultType initializeFrom(InputRecord *ir);
-    /** Sets up the input record string of receiver
-     * @param str string to be filled by input record
-     * @param keyword print record keyword (default true)
+    /**
+     * Sets up the input record string of receiver.
+     * @param str String to be filled by input record.
+     * @param keyword Print record keyword (default true).
      */
     virtual int giveInputRecordString(std :: string &str, bool keyword = true);
     /*
@@ -311,32 +299,32 @@ public:
     // {return  new NonlocalMaterialStatus (1,this->giveDomain(), gp);;}
     /**
      * Notifies the receiver, that the nonlocal averaging has been finished for given ip.
-     * It deletes IP nonlocal table if permanentNonlocTableFlag is flase.
-     * This can save significat memory, since nonlocal tables are not stored, but every time computed when needed,
+     * It deletes IP nonlocal table if permanentNonlocTableFlag is false.
+     * This can save significant memory, since nonlocal tables are not stored, but every time computed when needed,
      * but on the other hand computational time may significantly grow.
      */
     void endIPNonlocalAverage(GaussPoint *gp);
 
 protected:
-    /**
+    /*
      * Returns true if the barrier is activated
      * by interaction of two given points. In this case the nonlocal influence
-     * is not considered. Otherwise returns false.
-     * @param gpCoords coordinates of first point
-     * @param jGpCoords coordinates of second point
-     * @param weight set to zero if the GP are across the barrier
+     * is not considered.
+     * @param gpCoords Coordinates of first point.
+     * @param jGpCoords Coordinates of second point.
+     * @param weight Set to zero if the GP are across the barrier.
      */
     //bool isBarrierActivated (const FloatArray& c1, const FloatArray& c2) const;
+
     void applyBarrierConstraints(const FloatArray &gpCoords, const FloatArray &jGpCoords, double &weight);
 
     /**
      * Manipulates weight on integration point in the element.
      * By default is off, keyword 'averagingtype' specifies various methods.
      * For example, a boundary layer method averages strains over the whole element without any radius.
-     * @param weight modifies the weight with the jGp-th item
-     * @param gp pointer to the GP owing the PointTable
-     * @param jGp pointer to GP in the PointTable
-     * @return true if barrier is activated, false otherwise
+     * @param weight Modifies the weight with the jGp-th item.
+     * @param gp Pointer to the GP owing the PointTable.
+     * @param jGp Pointer to GP in the PointTable.
      */
     void manipulateWeight(double &weight, GaussPoint *gp, GaussPoint *jGp);
 };

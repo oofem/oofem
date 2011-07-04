@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2010   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -79,9 +79,6 @@ class Dictionary;
 class BoundaryCondition : public GeneralBoundaryCondition
 {
 protected:
-    // Dictionary of prescribed values. - not used
-    // Dictionary*  prescribedValueDictionary ;
-
     /// Prescribed value of DOF.
     double prescribedValue;
 

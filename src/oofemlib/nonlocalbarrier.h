@@ -65,7 +65,7 @@ public:
     /// Destructor.
     virtual ~NonlocalBarrier() { };
 
-    /**
+    /*
      * Abstract method returning true if the barrier is activated
      * by interaction of two given points. In this case the nonlocal influence
      * is not considered. Otherwise returns false.
@@ -80,7 +80,8 @@ public:
      * @param c1 Coordinates of master point.
      * @param c2 Coordinates of source point.
      * @param weight Original integration weight; on output modified weight.
-     * @param shieldFlag[out] Set to true if shielding is activated.
+     * @param[out] shieldFlag Set to true if shielding is activated.
+     * @param nei The element with the non local material extension.
      */
     virtual void applyConstraint(const FloatArray &c1, const FloatArray &c2, double &weight,
                                  bool &shieldFlag, NonlocalMaterialExtensionInterface *nei) = 0;

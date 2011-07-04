@@ -39,8 +39,6 @@
 #include "internalstatevaluetype.h"
 
 namespace oofem {
-//char cltypesGiveUnknownTypeKey (UnknownType type);
-
 /// @return Character corresponding to given ValueModeType.
 char cltypesGiveUnknownTypeModeKey(ValueModeType mode);
 

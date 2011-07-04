@@ -1,4 +1,3 @@
-/* $Header: $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -85,7 +84,7 @@ public:
  * Class representing 2D polygon.
  * Polygon is represented as a sequence of vertices. THe services for adding vertices, computing volume,
  * testing if point is inside polygon are provided. Also iterators over polygon vertices and edges are provided.
- * This class is a part of gemetry toolbox
+ * This class is a part of geometry toolbox.
  */
 class Polygon
 {
@@ -165,14 +164,14 @@ public:
 };
 
 /**
- * Class representing the special graph constucted from two polygons that is used to perform
+ * Class representing the special graph constructed from two polygons that is used to perform
  * boolean operation on polygons (polygon clipping in current implementation).
  * In short, the graph contains polygon vertices and intersections of polygon edges.
- * Then graph edges represent the edges between graph nodes (graph edge coorespond to polygon edge if
+ * Then graph edges represent the edges between graph nodes (graph edge correspond to polygon edge if
  * this edge has no intersection with other edges of second polygon, or single polygon edge can be represented by two or more
  * graph edges if intersections are present). Each polygon vertex representing intersection contain link to its
- * twin representing the same intersection on second polygon. This allows to perform transwersal walk over graph edges and vertices
- * that can represent various boolean opreations.
+ * twin representing the same intersection on second polygon. This allows to perform traversal walk over graph edges and vertices
+ * that can represent various boolean operations.
  * This class is a part of geometry toolbox.
  */
 class Graph
@@ -185,12 +184,12 @@ protected:
         struct node *next;
         struct node *prev;
         struct node *nextPoly;     /* pointer to the next polygon */
-        struct node *neighbor;     /* the coresponding intersection point */
+        struct node *neighbor;     /* the corresponding intersection point */
         //int intersect;            /* 1 if an intersection point, 0 otherwise */
         nodeStatus status;
         int entry;            /* 1 if entry point (edge starting at this node is inside), -1 boundary edge, 0 otherwise */
         int visited;          /* 1 if the node has been visited, 0 otherwise */
-        double alpha;          /* intersection point placemet */
+        double alpha;          /* intersection point placement */
     };
 
     node *s, *c;

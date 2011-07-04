@@ -37,9 +37,6 @@
 #include "gausspnt.h"
 #include "flotarry.h"
 #include "mathfem.h"
-#ifndef __MAKEDEPEND
- #include <stdio.h>
-#endif
 
 namespace oofem {
 // initialize class member

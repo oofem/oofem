@@ -131,8 +131,7 @@ Material *CreateUsrDefMaterialOfType(const char *name, int num, Domain *d);
 /**
  * Creates new instance of user defined engineering model corresponding to given keyword.
  * @param name Keyword string determining the type of new instance.
- * @param num  Component number.
- * @param master Master engineering model.
+ * @param d    Domain assigned to new object.
  * @return Newly allocated object of requested type, null if keyword not supported.
  */
 TopologyDescription *CreateUsrDefTopologyOfType(const char *name, Domain *d);

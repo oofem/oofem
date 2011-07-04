@@ -87,7 +87,7 @@ public:
      */
     void give2dPlateStiffMtrx(FloatMatrix &answer,
                               MatResponseForm form,
-                              MatResponseMode rMode,
+                              MatResponseMode mode,
                               GaussPoint *gp,
                               TimeStep *tStep);
     /**
@@ -100,7 +100,7 @@ public:
      */
     void give3dShellStiffMtrx(FloatMatrix &answer,
                               MatResponseForm form,
-                              MatResponseMode rMode,
+                              MatResponseMode mode,
                               GaussPoint *gp,
                               TimeStep *tStep);
     /**
@@ -114,7 +114,7 @@ public:
      */
     void give2dPlaneStressRotStiffMtrx(FloatMatrix &answer,
                                        MatResponseForm form,
-                                       MatResponseMode rMode,
+                                       MatResponseMode mode,
                                        GaussPoint *gp,
                                        TimeStep *tStep);
 

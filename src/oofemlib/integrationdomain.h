@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -32,21 +32,16 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-//
-// FILE: integrationdomain.h
-//
-
 #ifndef integrationdomain_h
 #define integrationdomain_h
 
 namespace oofem {
+/**
+ * Used by integrator class to supply
+ * integration points for proper domain to be
+ * integrated (Area,Volume and its shape)
+ */
 enum integrationDomain {
-    /*
-     * Used by integrator class to suply
-     * integration points for proper domain to be
-     * integrated (Area,Volume and its shape)
-     *
-     */
     _Unknown_integrationDomain,
     _Point,
     _Line,
@@ -54,8 +49,7 @@ enum integrationDomain {
     _Square,
     _Cube,
     _Tetrahedra,
-
-    _Embedded2dLine
+    _Embedded2dLine,
 };
 } // end namespace oofem
 #endif // integrationdomain_h

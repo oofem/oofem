@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/Attic/problemcomm.h,v 1.1.2.1 2004/04/05 15:19:43 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -33,10 +32,6 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-//
-// Class ProblemComunicator
-//
-
 #ifndef problemcommunicatormode_h
 #define problemcommunicatormode_h
 
@@ -47,12 +42,14 @@ namespace oofem {
  * ProblemCommunicatorMode determines the valid mode.
  * The mode is used to set up communication pattern, which differ for
  * node and element cut algorithms.
- * Additional remote element mode hass been added to capture the case, when CommunicatorM is intended to
+ * Additional remote element mode has been added to capture the case, when CommunicatorM is intended to
  * support remote element data exchange (for example when nonlocal material models are present).
  */
 enum ProblemCommunicatorMode {
-    ProblemCommMode__UNKNOWN_MODE, ProblemCommMode__NODE_CUT,
-    ProblemCommMode__ELEMENT_CUT, ProblemCommMode__REMOTE_ELEMENT_MODE
+    ProblemCommMode__UNKNOWN_MODE,
+    ProblemCommMode__NODE_CUT,
+    ProblemCommMode__ELEMENT_CUT,
+    ProblemCommMode__REMOTE_ELEMENT_MODE,
 };
 } // end namespace oofem
 #endif

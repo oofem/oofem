@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -32,27 +32,23 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-//
-// FILE: oofem_limits.h
-//
-
 #ifndef oofem_limits_h
 #define oofem_limits_h
 
 namespace oofem {
 /// Maximum input line length read.
 #define OOFEM_MAX_LINE_LENGTH 32768
-// size of token buffer, which holds tokens
+/// Maximum size of token buffer, which holds tokens.
 #define OOFEM_MAX_TOKENS_LENGTH 32768
 /// Maximum keyword name string length.
 #define MAX_NAME_LENGTH 40
 /// Maximum file name path string length.
 #define MAX_FILENAME_LENGTH 120
-/// Maximum class name string length
+/// Maximum class name string length.
 #define MAX_CLASSNAME_LENGTH 50
-/// max number of tokens
+/// Maximum number of tokens.
 #define OOFEM_MAX_TOKENS 8000
-/// max legth of error message
+/// Maximum length of error message.
 #define MAX_ERROR_MSG_LENGTH 2048
 } // end namespace oofem
 #endif // oofem_limits_h

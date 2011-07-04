@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/Attic/processcomm.h,v 1.1.2.1 2004/04/05 15:19:43 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -46,7 +45,7 @@
 
 
  #ifndef __MAKEDEPEND
-  #include "mpi.h"
+  #include <mpi.h>
  #endif
 
 namespace oofem {
@@ -56,9 +55,9 @@ namespace oofem {
  * Here sharing means reusing for different but NON-OVERLAPPING communications.
  * if communications overlap, the different instances of ProcessCommunicatorBuff should be used!
  * The ProcessCommunicatorBuff objects are registered in corresponding communicator,
- * then if maps are available, comBuff should be resized and used in subsequent ops.
+ * then if maps are available, comBuff should be resized and used in subsequent operations.
  *
- * The registration is necessary, otherwise before each send op the buffers (given probably as parameter)
+ * The registration is necessary, otherwise before each send operation the buffers (given probably as parameter)
  * will be resized again (size have to be computed again) and this is probably quite cost operation.
  * When comBuff will be registered, resize is needed only when maps change, and this will not occur frequently
  * (its even quite rare).
@@ -66,12 +65,12 @@ namespace oofem {
 class ProcessCommunicatorBuff
 {
 protected:
-    /// Send buffer
+    /// Send buffer.
     CommunicationBuffer *send_buff;
-    /// Receive buffer
+    /// Receive buffer.
     CommunicationBuffer *recv_buff;
 public:
-    /// Constructor, creates empty send and receive com buffs in MPI_COMM_WORLD
+    /// Constructor, creates empty send and receive com buffs in MPI_COMM_WORLD.
     ProcessCommunicatorBuff(CommBuffType t);
     ~ProcessCommunicatorBuff() {
         if ( send_buff ) { delete send_buff; }
@@ -82,22 +81,22 @@ public:
     //@{
     /**
      *  Packs single integer value into buffer.
-     *  Buffer is enlarged if isDynamic flag is set, but it requires memory allocation and dealocation.
-     *  @return nonzero if succesfull
+     *  Buffer is enlarged if isDynamic flag is set, but it requires memory allocation and deallocation.
+     *  @return Nonzero if successful.
      */
     int packInt(int value) { return packArray(& value, 1); }
     /**
      *  Packs single double value into buffer.
-     *  Buffer is enlarged if isDynamic flag is set, but it requires memory allocation and dealocation.
-     *  @return nonzero if succesfull
+     *  Buffer is enlarged if isDynamic flag is set, but it requires memory allocation and deallocation.
+     *  @return Nonzero if successful.
      */
     int packDouble(double value)  { return packArray(& value, 1); }
     /**
      * Packs array of values of given type into buffer.
-     * Buffer is enlarged if isDynamic flag is set, but it requires memory allocation and dealocation.
-     * @param src adress of first value in memory
-     * @param n number of packed integers
-     * @return nonzero if succesfull
+     * Buffer is enlarged if isDynamic flag is set, but it requires memory allocation and deallocation.
+     * @param src Address of first value in memory.
+     * @param n Number of packed integers.
+     * @return Nonzero if successful.
      */
     //@{
     int packArray(const int *src, int n) { return send_buff->packArray(src, n); }
@@ -109,37 +108,37 @@ public:
 
     /**
      * Packs given IntArray  value into buffer.
-     * Buffer is enlarged if isDynamic flag is set, but it requires memory allocation and dealocation.
-     * @return nonzero if succesfull
+     * Buffer is enlarged if isDynamic flag is set, but it requires memory allocation and deallocation.
+     * @return Nonzero if successful.
      */
     int packIntArray(const IntArray &arry) { return arry.packToCommBuffer(* send_buff); }
     /**
      * Packs given FloatArray  value into buffer.
-     * Buffer is enlarged if isDynamic flag is set, but it requires memory allocation and dealocation.
-     * @return nonzero if succesfull
+     * Buffer is enlarged if isDynamic flag is set, but it requires memory allocation and deallocation.
+     * @return Nonzero if successful.
      */
     int packFloatArray(const FloatArray &arry) { return arry.packToCommBuffer(* send_buff); }
     /**
      * Packs given FloatMatrix  value into buffer.
-     * Buffer is enlarged if isDynamic flag is set, but it requires memory allocation and dealocation.
-     * @return nonzero if succesfull
+     * Buffer is enlarged if isDynamic flag is set, but it requires memory allocation and deallocation.
+     * @return Nonzero if successful.
      */
     int packFloatMatrix(const FloatMatrix &mtrx) { return mtrx.packToCommBuffer(* send_buff); }
     /**
      *  Unpacks single integer value from buffer.
-     *  @return nonzero if succesfull
+     *  @return Nonzero if successful.
      */
     int unpackInt(int &value)  { return unpackArray(& value, 1); }
     /**
      *  Unpacks single double value from buffer.
-     *  @return nonzero if succesfull
+     *  @return Nonzero if successful.
      */
     int unpackDouble(double &value) { return unpackArray(& value, 1); }
     /**
      * unpacks array of value of given type from buffer.
-     * @param dest adress of first value in memory, where to store values
-     * @param n number of unpacked integers
-     * @return nonzero if succesfull
+     * @param dest Address of first value in memory, where to store values.
+     * @param n Number of unpacked integers.
+     * @return Nonzero if successful.
      */
     //@{
     int unpackArray(int *dest, int n) { return recv_buff->unpackArray(dest, n); }
@@ -150,17 +149,17 @@ public:
     //@}
     /**
      * Unpacks given IntArray  value from buffer.
-     * @return nonzero if succesfull
+     * @return Nonzero if successful.
      */
     int unpackIntArray(IntArray &arry) { return arry.unpackFromCommBuffer(* recv_buff); }
     /**
      * Unpacks given FloatArray  value from buffer.
-     * @return nonzero if succesfull
+     * @return Nonzero if successful.
      */
     int unpackFloatArray(FloatArray &arry) { return arry.unpackFromCommBuffer(* recv_buff); }
     /**
      * Unpacks given FloatMatrix  value from buffer.
-     * @return nonzero if succesfull
+     * @return Nonzero if successful.
      */
     int unpackFloatMatrix(FloatMatrix &mtrx) { return mtrx.unpackFromCommBuffer(* recv_buff); }
     //@}
@@ -170,9 +169,9 @@ public:
     //@{
     /**
      *  Returns pack size required to pack an array (c-style).
-     *  @param array size
-     *  @param type type id
-     *  @return  pack size required
+     *  @param size Array size.
+     *  @param type Type id.
+     *  @return Pack size required.
      */
     int givePackSize(MPI_Datatype type, int size) {
         int requredSpace;
@@ -186,22 +185,23 @@ public:
     void initSendBuff() { send_buff->init(); }
     /// Initializes send buffer to empty state. All packed data are lost.
     void initRecvBuff() { recv_buff->init(); }
-    /// initializes receiver buffers
+    /// Initializes receiver buffers.
     void init() {
         initSendBuff();
         initRecvBuff();
     }
 
-    /// Initialize for packing
+    /// Initialize for packing.
     void initForPacking() { send_buff->initForPacking(); }
-    /// Initialize for Unpacking (data already received)
+    /// Initialize for Unpacking (data already received).
     void initForUnpacking() { recv_buff->initForUnpacking(); }
 
     /**
      * Initializes data exchange with associated problem.
-     * if send or receive pool is empty, the send or receive communication is not preformed.
-     * @param tag message tag
-     * @return nonzero if success
+     * if send or receive pool is empty, the send or receive communication is not performed.
+     * @param rank Partition number.
+     * @param tag Message tag.
+     * @return Nonzero if success.
      */
     int initExchange(int rank, int tag) {
         int result = 1;
@@ -213,20 +213,22 @@ public:
     /**
      * Initialize the send data exchange with associate problem.
      * if send pool is empty, the send communication is not performed.
-     * @param tag message tag
-     * @return nonzero if success
+     * @param rank Partition number.
+     * @param tag Message tag.
+     * @return Nonzero if success.
      */
     int initSend(int rank, int tag) { return send_buff->iSend(rank, tag); }
-    /**
+i    /**
      * Initialize the receive data exchange with associate problem.
      * if receive pool is empty, the receive communication is not performed.
-     * @param tag message tag
-     * @return nonzero if success
+     * @param rank Partition number.
+     * @param tag Message tag.
+     * @return Nonzero if success.
      */
     int initReceive(int rank, int tag) { return recv_buff->iRecv(rank, tag); }
 
     /**
-     *  Clears all buffer contens.
+     *  Clears all buffer contents.
      */
     void clearBuffers() { }
 
@@ -252,43 +254,39 @@ public:
 };
 
 
-
-
-
 /**
  * Class representing process communicator for NlDEIDynamic engng model.
- * Processs comunicator provides all services for communication with
+ * Process communicator provides all services for communication with
  * associated remote process (problem or task).
  */
 class ProcessCommunicator
 {
 protected:
-    /// associated partition (problem) number (rank)
+    /// Associated partition (problem) number (rank)
     int rank; // remote problem id = rank
-    ///
-    /// local problem
+    /// Local problem.
     EngngModel *localProblem;
 
-    /// Comm Buffers representation
+    /// Communicator buffers representation.
     ProcessCommunicatorBuff *pcBuffer;
 
-    /// nodes to send
+    /// Nodes to send.
     IntArray toSend;
-    /// nodes to receive
+    /// Nodes to receive.
     IntArray toReceive;
-    /// mode
+    /// Mode.
     CommunicatorMode mode;
 
 public:
-
     /**
      * Constructor. Creates new problem (partition) communicator associated
      * to partition with number (rank) irank.
-     * @param d local problem pointer
-     * @param b ProcessCommunicatorBuff to use
-     * @param irank rank of associated partition
+     * @param emodel Local problem pointer.
+     * @param b ProcessCommunicatorBuff to use.
+     * @param irank Rank of associated partition.
+     * @param m Mode of communicator.
      */
-    ProcessCommunicator(EngngModel *d, ProcessCommunicatorBuff *b, int irank, CommunicatorMode m = CommMode_Static);
+    ProcessCommunicator(EngngModel *emodel, ProcessCommunicatorBuff *b, int irank, CommunicatorMode m = CommMode_Static);
     /// Destructor
     ~ProcessCommunicator() { }
 
@@ -297,23 +295,7 @@ public:
      */
     int giveRank() { return rank; }
 
-
-    /*
-     * ///  Returns send buffer of receiver.
-     * CommunicationBuffer* giveSendBuff () {
-     * if (pcBuffer) return pcBuffer->giveSendBuff();
-     * OOFEM_ERROR ("ProcessCommunicator::giveSendBuff : ProcessCommunicatorBuff undefined");
-     * return NULL;
-     * }
-     * /// Returns receive buffer of receiver.
-     * CommunicationBuffer* giveRecvBuff () {
-     * if (pcBuffer) return pcBuffer->giveRecvBuff();
-     * OOFEM_ERROR ("ProcessCommunicator::giveRecvBuff : ProcessCommunicatorBuff undefined");
-     * return NULL;
-     * }
-     */
-
-    ///  Returns CommunicationBuffer
+    ///  Returns communication buffer.
     ProcessCommunicatorBuff *giveProcessCommunicatorBuff() {
         if ( pcBuffer ) { return pcBuffer; }
 
@@ -337,9 +319,9 @@ public:
      * to global number associated to corresponding components given in src array. THis is necessary to
      * ensure proper pack/unpack order on local and remote problem. Send buff is resized to  hold all
      * necessary data.
-     * @param emode Engng model
-     * @param src source of toSend array
-     * @param packUnpackType determines the type of packed quantity, used by emodel estimateMaxPackSize
+     * @param emodel Engng model.
+     * @param src Source of toSend array.
+     * @param packUnpackType Determines the type of packed quantity, used by emodel estimateMaxPackSize
      * service to estimate the size of pack/unpack buffer accordingly.
      */
     template< class T >void setToSendArry(T *emodel, const IntArray &src, int packUnpackType);
@@ -348,15 +330,16 @@ public:
      * to global number associated to corresponding components given in src array. THis is necessary to
      * ensure proper pack/unpack order on local and remote problem. Recv buff is resized to
      * hold all necessary data.
-     * @param emodel Engng model
-     * @param src source of toRecv array
-     * @param packUnpackType determines the type of packed quantity, used by emodel estimateMaxPackSize
+     * @param emodel Engng model.
+     * @param src Source of toRecv array.
+     * @param packUnpackType Determines the type of packed quantity, used by emodel estimateMaxPackSize
      * service to estimate the size of pack/unpack buffer accordingly.
      */
     template< class T >void setToRecvArry(T *emodel, const IntArray &src, int packUnpackType);
     /**
      * Pack nodal data to send buff.
-     * @param packFunc function used to pack nodal data in to buffer. It uses toSend array
+     * @param emodel Engineering model to pack.
+     * @param packFunc Function used to pack nodal data in to buffer. It uses toSend array
      * to loop over required nodes.
      * @see NlDEIDynamic_Unpack_func
      */
@@ -368,7 +351,9 @@ public:
         } else { return 1; } }
     /**
      * Pack nodal data to send buff.
-     * @param packFunc function used to pack nodal data in to buffer. It uses toSend array
+     * @param emodel Engineering model to pack.
+     * @param src Source to pack from.
+     * @param packFunc Function used to pack nodal data in to buffer. It uses toSend array
      * to loop over required nodes.
      * @see NlDEIDynamic_Unpack_func
      */
@@ -380,7 +365,8 @@ public:
         } else { return 1; } }
     /**
      * Unpack nodal data from recv buff.
-     * @param unpackFunc function used to unpack nodal data from buffer. It uses toRecv array
+     * @param emodel Engineering model to unpack from.
+     * @param unpackFunc Function used to unpack nodal data from buffer. It uses toRecv array
      * to loop over required nodes.
      * @see NlDEIDynamic_Unpack_func
      */
@@ -392,7 +378,9 @@ public:
         } else { return 1; } }
     /**
      * Unpack nodal data from recv buff.
-     * @param unpackFunc function used to unpack nodal data from buffer. It uses toRecv array
+     * @param emodel Engineering model to unpack from.
+     * @param dest Destination.
+     * @param unpackFunc Function used to unpack nodal data from buffer. It uses toRecv array
      * to loop over required nodes.
      * @see NlDEIDynamic_Unpack_func
      */
@@ -404,29 +392,26 @@ public:
         } else { return 1; } }
     /**
      * Initializes data exchange with associated problem.
-     * if send or receive pool is empty, the send or receive communication is not preformed.
-     * @param tag message tag
-     * @return nonzero if success
+     * if send or receive pool is empty, the send or receive communication is not performed.
+     * @param tag Message tag.
+     * @return Nonzero if success.
      */
     int initExchange(int tag);
     /**
      * Initialize the send data exchange with associate problem.
      * if send pool is empty, the send communication is not performed.
-     * @param tag message tag
-     * @return nonzero if success
+     * @param tag Message tag.
+     * @return Nonzero if success.
      */
     int initSend(int tag);
     /**
      * Initialize the receive data exchange with associate problem.
      * if receive pool is empty, the receive communication is not performed.
-     * @param tag message tag
-     * @return nonzero if success
+     * @param tag Message tag.
+     * @return Nonzero if success.
      */
     int initReceive(int tag);
-    /*
-     * Finishes the exchange. After this call all communication buffers can be reused.
-     *
-     */
+    /// Finishes the exchange. After this call all communication buffers can be reused.
     int finishExchange();
 
 
@@ -438,9 +423,7 @@ public:
     int waitCompletion();
 
     //@}
-    /**
-     * Clears all buffer contens.
-     */
+    /// Clears all buffer contents.
     void clearBuffers();
 
 private:
@@ -448,20 +431,20 @@ private:
      * Resizes send buffer to needs according to toSend  array.
      * Current implementation uses EngngModel::estimateMaxPackSize function,
      * sending toSend map as parameter.
-     * @param emodel current engngModel.
-     * @param packUnpackType determines the type of packed quantity, used by emodel estimateMaxPackSize
+     * @param emodel Current engngModel.
+     * @param packUnpackType Determines the type of packed quantity, used by emodel estimateMaxPackSize
      * service to estimate the size of pack/unpack buffer accordingly.
-     * @return nonzero if success.
+     * @return Nonzero if success.
      */
     template< class T >int resizeSendBuff(T *emodel, int packUnpackType);
     /**
      * Resizes receive buffer to needs according to toRecv  array.
      * Current implementation uses EngngModel::estimateMaxPackSize function,
      * sending toSend map as parameter.
-     * @param emodel current engngModel.
-     * @param packUnpackType determines the type of packed quantity, used by emodel estimateMaxPackSize
+     * @param emodel Current engngModel.
+     * @param packUnpackType Determines the type of packed quantity, used by emodel estimateMaxPackSize
      * service to estimate the size of pack/unpack buffer accordingly.
-     * @return nonzero if success.
+     * @return Nonzero if success.
      */
     template< class T >int resizeRecvBuff(T *emodel, int packUnpackType);
 };

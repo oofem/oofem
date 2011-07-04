@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/structuralnonlocalmaterialext.C,v 1.6 2003/04/06 14:08:26 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -33,18 +32,6 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-
-// file: structuralnonlocalmaterialext.C
-
-
 #include "structuralnonlocalmaterialext.h"
 
-
-namespace oofem {} // end namespace oofem
-
-
-
-
-
-
-
+// TODO: Remove me

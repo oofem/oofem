@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/Attic/petscordering.h,v 1.1.2.1 2004/04/05 15:19:43 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -52,23 +51,25 @@ protected:
 public:
     PetscOrdering_Base() : ApplicationOrdering() { }
 
-    /// Returns true if given DofManager is local (ie maintained by the receiver processor)
+    /// Returns true if given DofManager is local (ie maintained by the receiver processor).
     bool isLocal(DofManager *);
-    /// Returns true if given DofManager is shared between partitions
+    /// Returns true if given DofManager is shared between partitions.
     bool isShared(DofManager *);
 };
 
 /**
  * Ordering from oofem natural ordering (includes all local and shared eqs)
- * to global ordering
+ * to global ordering.
  */
 class PetscNatural2GlobalOrdering : public PetscOrdering_Base
 {
 protected:
-    IntArray locGlobMap; // old->new; uses 0-baseg global eq ordering; 1-based local ordering
-    std :: map< int, int >globLocMap; // new->old
+    // Old to new mapping; uses 0-based global eq ordering; 1-based local ordering.
+    IntArray locGlobMap;
+    // New to old mapping.
+    std :: map< int, int >globLocMap;
 
-    // number of local and global eqs.
+    // Number of local and global eqs.
     int l_neqs, g_neqs;
 
 public:
@@ -93,11 +94,12 @@ public:
  * Ordering from oofem natural ordering (includes all local and shared eqs)
  * to local ordering, where only locally maintained eqs are considered.
  */
-
 class PetscNatural2LocalOrdering : public PetscOrdering_Base
 {
 protected:
-    IntArray n2l; // natural->local
+    // Natural to local
+    IntArray n2l;
+
 public:
     PetscNatural2LocalOrdering();
     ~PetscNatural2LocalOrdering() { }

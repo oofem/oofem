@@ -34,9 +34,6 @@
 #ifndef spoolessolver_h
 #define spoolessolver_h
 
-#ifndef __MAKEDEPEND
- #include <stdio.h>
-#endif
 #include "sparselinsystemnm.h"
 #include "sparsemtrx.h"
 #include "flotarry.h"
@@ -57,7 +54,7 @@ class SpoolesSolver : public SparseLinearSystemNM
 private:
 #ifdef __SPOOLES_MODULE
     /// Last mapped LHS matrix
-    SparseMtrx *    Lhs;
+    SparseMtrx *Lhs;
     /// Last mapped matrix version
     SparseMtrx :: SparseMtrxVersionType lhsVersion;
     int msglvl;

@@ -31,6 +31,7 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
+
 #ifndef domaintransactionmanager_h
 #define domaintransactionmanager_h
 

@@ -1,4 +1,3 @@
-/* v 1.9 2010/01/05 vs */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 2009   Vit Smilauer
+ *               Copyright (C) 2011   Vit Smilauer
  *
  *
  *
@@ -43,35 +42,30 @@ namespace oofem {
 class Element;
 class TimeStep;
 
-
+/**
+ * This class implements prescribed eigenstrain (stress-free strain). It reads six
+ * strain components (xx, yy, zz, yz, zx, xy) in the global coordinate system. 2D, 1D?
+ */
 class StructuralEigenstrainLoad : public Load
 {
-    /* This class implements prescribed eigenstrain (stress-free strain). It reads six
-     * strain components (xx, yy, zz, yz, zx, xy) in the global coordinate system. 2D, 1D?
-     */
-
 public:
-    StructuralEigenstrainLoad(int i, Domain *d) : Load(i, d) { }  // constructor
+    StructuralEigenstrainLoad(int i, Domain *d) : Load(i, d) { }
 
     /**
      * Computes components values of eigenstrain field at given point (coordinates given in Global c.s.).
      * taking into account corresponding load time function value while respecting load response mode.
-     * @param answer component values at given point and time
-     * @param stepN time step representing time
-     * @param coords gp global coordinates, which are used to evaluate components values
-     * @param mode determines response mode
+     * @param answer Component values at given point and time.
+     * @param tStep Time step representing time.
+     * @param coords Integration point global coordinates, which are used to evaluate components values.
+     * @param mode Determines response mode.
      */
-    virtual void         computeValueAt(FloatArray &answer, TimeStep *tStep, FloatArray &coords, ValueModeType mode)
+    virtual void computeValueAt(FloatArray &answer, TimeStep *tStep, FloatArray &coords, ValueModeType mode)
     { this->computeComponentArrayAt(answer, tStep, mode); }
 
-    ///Returns type of class
-    classType    giveClassID() const { return StructuralEigenstrainLoadClass; }
-    ///Returns name of class
+    classType giveClassID() const { return StructuralEigenstrainLoadClass; }
     const char *giveClassName() const { return "StructuralEigenstrainLoad"; }
-    ///Returns type of boundary condition
-    bcValType    giveBCValType() const { return EigenstrainBVT; }
-    ///Returns type of load
-    bcGeomType   giveBCGeoType() const { return BodyLoadBGT; }
+    bcValType giveBCValType() const { return EigenstrainBVT; }
+    bcGeomType giveBCGeoType() const { return BodyLoadBGT; }
 };
 } // end namespace oofem
 #endif // structeigenstrainload_h

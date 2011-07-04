@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -32,10 +32,6 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-//
-// FILE: internalstatetype.h
-//
-
 #ifndef internalstatetype_h
 #define internalstatetype_h
 
@@ -50,11 +46,6 @@ namespace oofem {
 // both totalLoadVector and incrementalLoadVector charTypes.
 // The particular type of response is then requested using parameter of ValueModeType type.
 //
-
-/**
- * Type  representing the physical meaning of element or constitutive model internal variable.
- * Values of this type are used, when these internal variables are requested.
- */
 #define InternalStateType_DEF \
     ENUM_ITEM_WITH_VALUE(IST_Undefined, 0) \
     ENUM_ITEM_WITH_VALUE(IST_StressTensor, 1) \
@@ -135,7 +126,10 @@ namespace oofem {
     ENUM_ITEM_WITH_VALUE(IST_DeviatoricStress, 76) \
     ENUM_ITEM_WITH_VALUE(IST_Viscosity, 77)	\
       
-
+/**
+ * Type  representing the physical meaning of element or constitutive model internal variable.
+ * Values of this type are used, when these internal variables are requested.
+ */
 enum InternalStateType {
     InternalStateType_DEF
 };

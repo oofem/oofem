@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/boundaryload.C,v 1.7 2003/04/06 14:08:23 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -33,8 +32,6 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-//   file boundaryload.C
-
 #include "pointload.h"
 #include "loadtime.h"
 #include "flotarry.h"
@@ -48,12 +45,6 @@ PointLoad :: computeValueAt(FloatArray &answer, TimeStep *tStep, FloatArray &coo
     Load :: computeComponentArrayAt(answer, tStep, mode);
 
     // time distribution
-    /*
-     * factor = this -> giveLoadTimeFunction() -> at(tStep->giveTime()) ;
-     * if ((mode==VM_Incremental) && (!tStep->isTheFirstStep()))
-     * //factor -= this->giveLoadTimeFunction()->at(stepN->givePreviousStep()->giveTime()) ;
-     * factor -= this->giveLoadTimeFunction()->at(tStep->giveTime()-tStep->giveTimeIncrement());
-     */
     factor = this->giveLoadTimeFunction()->evaluate(tStep, mode);
     answer.times(factor);
     return;

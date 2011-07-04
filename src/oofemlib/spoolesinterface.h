@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/spoolesinterface.h,v 1.1 2003/04/06 14:08:26 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -43,5 +42,5 @@ extern "C" {
  #include <spooles/SymbFac.h>
 };
 
-#endif //ifdef __SPOOLES_MODULE
+#endif // __SPOOLES_MODULE
 #endif // spoolesinterface_h

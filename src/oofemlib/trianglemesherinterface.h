@@ -98,12 +98,13 @@ public:
      * The PSLG needs to be oriented correctly, as every segment determines the bulk region number at both sides,
      * which then spreads to surrounding elements. The length of those arrays must be at least as big as the largest segment region number.
      * Inconsistent regions are automatically detected.
-     * @param pslg[in] Input PSLG.
-     * @param outside[in] Segment region to bulk region mapping.
-     * @param inside[in] Segment region to bulk region mapping.
+     * @param[in] pslg Input PSLG.
+     * @param[in] outside Segment region to bulk region mapping.
+     * @param[in] inside Segment region to bulk region mapping.
      * @param[out] nodes Output nodes.
+     * @param[out] n_markers Node markers.
      * @param[out] triangles Output triangles (3 or 6 nodes depending on option).
-     * @param[out] t_attr Triangle markers
+     * @param[out] t_markers Triangle markers
      * @param[out] segments Output segments (2 or 3 nodes depending on option).
      * @param[out] s_markers Segment markers.
      * @return True if mesh generation was successful.

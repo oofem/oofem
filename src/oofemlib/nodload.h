@@ -80,10 +80,10 @@ protected:
 public:
     /**
      * Constructor. Creates nodal load object with given number, belonging to given domain.
-     * @param n load  number
-     * @param d domain to which new object will belongs.
+     * @param n Load  number.
+     * @param d Domain to which new object will belongs.
      */
-    NodalLoad(int i, Domain *d) : Load(i, d) { }
+    NodalLoad(int n, Domain *d) : Load(n, d) { }
 
     bcGeomType giveBCGeoType() const { return NodalLoadBGT; }
     const char *giveInputRecordName() const { return "NodalLoad"; }

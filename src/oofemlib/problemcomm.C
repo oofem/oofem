@@ -1,4 +1,3 @@
-/* $Header: /home/cvs/bp/oofem/oofemlib/src/Attic/problemcomm.C,v 1.1.2.1 2004/04/05 15:19:43 bp Exp $ */
 /*
  *
  *                 #####    #####   ######  ######  ###   ###
@@ -11,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -89,7 +88,7 @@ ProblemCommunicator :: setUpCommunicationMapsForNodeCut(EngngModel *pm, bool exc
         }
     }
 
-    // build maps simultaneosly
+    // build maps simultaneously
     IntArray pos(size);
     IntArray **maps = new IntArray * [ size ];
     for ( i = 0; i < size; i++ ) {
@@ -137,7 +136,7 @@ ProblemCommunicator :: setUpCommunicationMapsForElementCut(EngngModel *pm,
 
     if ( this->mode == ProblemCommMode__ELEMENT_CUT ) {
         /*
-         * Initaially, each partition knows for which nodes a receive
+         * Initially, each partition knows for which nodes a receive
          * is needed (and can therefore compute easily the recv map),
          * but does not know for which nodes it should send data to which
          * partition. Hence, the communication setup is performed by
@@ -148,7 +147,7 @@ ProblemCommunicator :: setUpCommunicationMapsForElementCut(EngngModel *pm,
          * converted into send maps.
          */
 
-        // receive maps can be build localy,
+        // receive maps can be build locally,
         // but send maps should be assembled from broadcasted lists (containing
         // expected receive nodes) of remote partitions.
 
@@ -174,7 +173,7 @@ ProblemCommunicator :: setUpCommunicationMapsForElementCut(EngngModel *pm,
             }
         }
 
-        // build maps simultaneosly
+        // build maps simultaneously
         IntArray pos(size);
         IntArray **maps = new IntArray * [ size ];
         for ( i = 0; i < size; i++ ) {
@@ -351,7 +350,7 @@ ProblemCommunicator :: setUpCommunicationMapsForRemoteElementMode(EngngModel *pm
 
     if ( this->mode == ProblemCommMode__REMOTE_ELEMENT_MODE ) {
         /*
-         * Initaially, each partition knows for which nodes a receive
+         * Initially, each partition knows for which nodes a receive
          * is needed (and can therefore compute easily the recv map),
          * but does not know for which nodes it should send data to which
          * partition. Hence, the communication setup is performed by
@@ -362,7 +361,7 @@ ProblemCommunicator :: setUpCommunicationMapsForRemoteElementMode(EngngModel *pm
          * converted into send maps.
          */
 
-        // receive maps can be build localy,
+        // receive maps can be build locally,
         // but send maps should be assembled from broadcasted lists (containing
         // expected receive nodes) of remote partitions.
 
@@ -389,7 +388,7 @@ ProblemCommunicator :: setUpCommunicationMapsForRemoteElementMode(EngngModel *pm
             }
         }
 
-        // build maps simultaneosly
+        // build maps simultaneously
         IntArray pos(size);
         IntArray **maps = new IntArray * [ size ];
         for ( i = 0; i < size; i++ ) {

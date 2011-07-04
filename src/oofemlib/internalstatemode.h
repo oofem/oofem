@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -32,15 +32,11 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-//
-// FILE: internalstatemode.h
-//
-
 #ifndef internalstatemode_h
 #define internalstatemode_h
 
 namespace oofem {
-/// enum determining the mode of internal variable
+/// Determines the mode of internal variable.
 enum InternalStateMode {
     ISM_local,
     ISM_recovered

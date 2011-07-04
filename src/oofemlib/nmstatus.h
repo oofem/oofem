@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2008   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -32,40 +32,21 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-//
-// FILE: nmstatus.h
-//
-
 #ifndef nmstatus_h
 #define nmstatus_h
 
 namespace oofem {
-/* mask defing NumMetod Status; which can be asked after
+/**
+ * Mask defining NumMetod Status; which can be asked after
  * finishing computation by Numerical Method.
- * this mask should report some sitiuation, for
- * exaple:
- * None,
- * Success, NoSuccess  -> at now inform about succes,
- * if no succes, currently NoSuccess is not reported
- * but NoSuccess causes exit();
- *
- * some more detailed messages can be incorporated,
- * like:
- *
- * KeepTangent -> used by some non-linear solvers telling
- *              don't assemble new tangent, but use previous.
- *
- * note: every mask flag begins with NM_ to avoid possible multiple
- * definition
+ * this mask should report some situation.
  */
-
 typedef unsigned long NM_Status;
-/* Mask selecting status */
 
 #define NM_None         0
-#define NM_Success      ( 1L << 1 )
-#define NM_NoSuccess    ( 1L << 2 )
-#define NM_KeepTangent  ( 1L << 3 )
+#define NM_Success      ( 1L << 1 ) ///< Numerical method exited with success.
+#define NM_NoSuccess    ( 1L << 2 ) ///< Numerical method failed to solve problem.
+#define NM_KeepTangent  ( 1L << 3 ) ///< Don't assemble new tangent, but use previous.
 #define NM_ForceRestart ( 1L << 4 )
 } // end namespace oofem
 #endif // nmstatus_h
