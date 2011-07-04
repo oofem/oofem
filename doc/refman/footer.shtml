@@ -3,8 +3,8 @@ This page is part of the <OOFEM> documentation. Copyright <COPYRIGHT_WL><BR> Pro
 <BR clear=all>
 <address><small>
 Generated at $datetime for $projectname by <a href="http://www.doxygen.org/index.html">
-<img src="doxygen.gif" alt="doxygen" align="middle" border=0 width=110 height=53>
+doxygen
 </a> $doxygenversion written by <a href="mailto:dimitri@stack.nl">Dimitri van Heesch</a>,
- &copy;&nbsp;1997-2001</small></address>
+ &copy;&nbsp;1997-2011</small></address>
 </body>
 </html>
