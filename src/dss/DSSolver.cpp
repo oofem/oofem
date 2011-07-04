@@ -592,7 +592,7 @@ bool DSSolver :: StartSolver()
         return false;
     }
 
-    long usedmem =  0;    //GC.GetTotalMemory(true);
+    //long usedmem =  0;    //GC.GetTotalMemory(true);
     clock_t solution_start = clock();
 
     StartSolverWriteInfo();
@@ -611,7 +611,7 @@ bool DSSolver :: StartSolver()
     sprintf(str, "Whole solution (end-start)  : %0.3f s", solution_duration);
     eMT->Writeln(str);
 
-    usedmem =  0;    //GC.GetTotalMemory(true);
+    //usedmem =  0;    //GC.GetTotalMemory(true);
     //sprintf(str,"%ld of used memory",usedmem);
     //eMT->Writeln(str);
     return true;
