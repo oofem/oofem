@@ -77,6 +77,7 @@ QSpace :: initializeFrom(InputRecord *ir)
     IRResultType result;                 // Required by IR_GIVE_FIELD macro
 
     this->StructuralElement :: initializeFrom(ir);
+    numberOfGaussPoints = 27;
     IR_GIVE_OPTIONAL_FIELD(ir, numberOfGaussPoints, IFT_QSpace_nip, "nip"); // Macro
 
     if ( ( numberOfGaussPoints != 8 ) && ( numberOfGaussPoints != 14 ) && ( numberOfGaussPoints != 27 ) && ( numberOfGaussPoints != 64 ) ) {
