@@ -218,7 +218,7 @@ public:
      * @return Nonzero if success.
      */
     int initSend(int rank, int tag) { return send_buff->iSend(rank, tag); }
-i    /**
+    /**
      * Initialize the receive data exchange with associate problem.
      * if receive pool is empty, the receive communication is not performed.
      * @param rank Partition number.
