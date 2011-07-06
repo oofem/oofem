@@ -37,62 +37,33 @@
 #include "elementgeometrytype.h"
 #include "mathfem.h"
 
-#include "gaussintegrationrule.h"
-#include "gausspnt.h"
+#include "integrationrule.h"
 #include "feinterpol.h"
-#include "fei2dtrlin.h"
-#include "fei2dtrquad.h"
-#include "fei2dquadlin.h"
-#include "fei2dquadquad.h"
-#include "fei3dtrlin.h"
-//#include "fei3dtrquad.h"
-#include "fei3dhexalin.h"
-#include "fei3dhexaquad.h"
-
+#include "gausspnt.h"
 
 namespace oofem {
-
-// Set up the FEI.
-FEI2dTrLin MeshQualityErrorEstimator :: fei2dtrlin(1, 2);
-FEI2dTrQuad MeshQualityErrorEstimator :: fei2dtrquad(1, 2);
-FEI2dQuadLin MeshQualityErrorEstimator :: fei2dquadlin(1, 2);
-FEI2dQuadQuad MeshQualityErrorEstimator :: fei2dquadquad(1, 2);
-
-
-FEI3dTrLin MeshQualityErrorEstimator :: fei3dtetlin;
-//FEI3dTrQuad MeshQualityErrorEstimator :: fei3dtetquad;
-FEI3dHexaLin MeshQualityErrorEstimator :: fei3dhexalin;
-FEI3dHexaQuad MeshQualityErrorEstimator :: fei3dhexaquad;
-
 
 double MeshQualityErrorEstimator :: giveElementError(EE_ErrorType type, Element *elem, TimeStep *tStep)
 {
     // A good plan would probably be to let the element determines its own quality if they implement some interface.
     // otherwise use a sane default.
     double error;
-
-    switch (elem->giveGeometryType()) {
+    FEInterpolation *fei = elem->giveInterpolation();
+    IntegrationRule *ir = elem->giveDefaultIntegrationRulePtr();
+    if (fei && ir) {
+        error = this->computeJacobianError(*fei, *ir, elem);
+    } else {
+        switch (elem->giveGeometryType()) {
         case EGT_triangle_1:
-            {
-                GaussIntegrationRule ir(1, elem, 1, 3);
-                ir.setUpIntegrationPoints(_Triangle, 1, _2dFlow);
-                error = computeJacobianError(MeshQualityErrorEstimator::fei2dtrlin, ir, elem);
-            }
-            // Alternative;
-            // error = this->computeTriangleRadiusError(elem);
+            error = this->computeTriangleRadiusError(elem);
             break;
         case EGT_triangle_2:
-            {
-                GaussIntegrationRule ir(1, elem, 1, 3);
-                ir.setUpIntegrationPoints(_Triangle, 4, _2dFlow);
-                error = computeJacobianError(MeshQualityErrorEstimator::fei2dtrquad, ir, elem);
-            }
+            error = this->computeTriangleRadiusError(elem);
             break;
-        // EGT_line_2, EGT_quad, EGT_quad2, tetra1, tetra2, hexa, hexa_2, Composite, unknown?
-        // EGT_point EGT_line_1 EGT_unknown
         default:
             error = 0.0;
             break;
+        }
     }
     return error;
 }
@@ -128,7 +99,7 @@ double MeshQualityErrorEstimator :: computeJacobianError(FEInterpolation &fei, I
             min_rcond = rcond;
         }
     }
-    return min_rcond < 0.001 ? 1000.0 : 1.0/min_rcond; // Cap it to avoid overflow.
+    return min_rcond < 1e-6 ? 1e6 : 1.0/min_rcond; // Cap it to avoid overflow.
 }
 
 double MeshQualityErrorEstimator :: giveValue(EE_ValueType type, TimeStep *tStep)

@@ -43,18 +43,8 @@ namespace oofem {
 class Domain;
 class Element;
 class TimeStep;
-
 class IntegrationRule;
 class FEInterpolation;
-class FEI2dTrLin;
-class FEI2dTrQuad;
-class FEI2dQuadLin;
-class FEI2dQuadQuad;
-class FEI3dTrLin;
-//class FEI3dTrQuad;
-class FEI3dHexaLin;
-class FEI3dHexaQuad;
-
 /**
  * This error estimator measures the quality of the elements.
  * This is useful when elements are deformed during the simulation.
@@ -63,7 +53,7 @@ class FEI3dHexaQuad;
  * Zero error should reflect a perfect element.
  * Error value of one should reflect an element of acceptable quality.
  *
- * @note{Its open for discussion whether the routine should give the reciprocal error to handle extremely badly shaped elements.}
+ * @note Its open for discussion whether the routine should give the reciprocal error to handle extremely badly shaped elements.
  *
  * @author Mikael Öhman
  */
@@ -81,21 +71,6 @@ protected:
      * @return Error value for the element.
      */
     static double computeJacobianError(FEInterpolation &fei, IntegrationRule &ir, Element *elem);
-
-    /**
-     * @name Interpolating classes.
-     * Used for checking the conditioning of the mapping.
-     */
-    //@{
-    static FEI2dTrLin fei2dtrlin;
-    static FEI2dTrQuad fei2dtrquad;
-    static FEI2dQuadLin fei2dquadlin;
-    static FEI2dQuadQuad fei2dquadquad;
-    static FEI3dTrLin fei3dtetlin;
-    //static FEI3dTrQuad fei3dtetquad;
-    static FEI3dHexaLin fei3dhexalin;
-    static FEI3dHexaQuad fei3dhexaquad;
-    //@}
 
 public:
     /// Constructor

@@ -119,18 +119,18 @@ protected:
     }
 
 public:
-    Tr21Stokes(int, Domain *);
+    Tr21Stokes(int n, Domain *d);
     ~Tr21Stokes();
 
-    IRResultType initializeFrom(InputRecord *);
+    IRResultType initializeFrom(InputRecord *ir);
 
     void computeGaussPoints();
-    void giveCharacteristicVector(FloatArray & answer, CharType, ValueModeType, TimeStep *);
-    void giveCharacteristicMatrix(FloatMatrix & answer, CharType, TimeStep *);
+    void giveCharacteristicVector(FloatArray &answer, CharType type, ValueModeType mode, TimeStep *tStep);
+    void giveCharacteristicMatrix(FloatMatrix &answer, CharType type, TimeStep *tStep);
 
     void computeInternalForcesVector(FloatArray &answer, TimeStep *tStep);
-    void computeLoadVector(FloatArray &answer, TimeStep *atTime);
-    void computeStiffnessMatrix(FloatMatrix &answer, TimeStep *atTime);
+    void computeLoadVector(FloatArray &answer, TimeStep *tStep);
+    void computeStiffnessMatrix(FloatMatrix &answer, TimeStep *tStep);
     void computeEdgeBCSubVectorAt(FloatArray &answer, Load *load, int iEdge, TimeStep *tStep);
     void computeBodyLoadVectorAt(FloatArray &answer, Load *load, TimeStep *tStep);
 
@@ -141,6 +141,9 @@ public:
 
     /// @see Element::computeNumberOfDofs
     virtual int computeNumberOfDofs(EquationID ut);
+
+    virtual FEInterpolation *giveInterpolation();
+    virtual FEInterpolation *giveInterpolation(DofIDItem id);
 
     /**
      * Gives the dof ID mask for the element.

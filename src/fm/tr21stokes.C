@@ -395,6 +395,16 @@ double Tr21Stokes :: computeArea() const
     return this->interpolation_quad.giveArea(FEIElementGeometryWrapper(this));
 }
 
+FEInterpolation *Tr21Stokes :: giveInterpolation()
+{
+    return &interpolation_quad;
+}
+
+FEInterpolation *Tr21Stokes :: giveInterpolation(DofIDItem id)
+{
+    if (id == P_f) return &interpolation_lin; else return &interpolation_quad;
+}
+
 void Tr21Stokes :: updateYourself(TimeStep *tStep)
 {
     Element :: updateYourself(tStep);
