@@ -966,6 +966,21 @@ void FloatMatrix :: solveForRhs(const FloatArray &b, FloatArray &answer)
 #endif
 }
 
+#if 0
+SUBROUTINE DGESV( N, NRHS, A, LDA, IPIV, B, LDB, INFO )
+*
+*  -- LAPACK driver routine (version 3.2) --
+*  -- LAPACK is a software package provided by Univ. of Tennessee,    --
+*  -- Univ. of California Berkeley, Univ. of Colorado Denver and NAG Ltd..--
+*     November 2006
+*
+*     .. Scalar Arguments ..
+INTEGER            INFO, LDA, LDB, N, NRHS
+*     ..
+*     .. Array Arguments ..
+INTEGER            IPIV( * )
+DOUBLE PRECISION   A( LDA, * ), B( LDB, * )
+#endif
 
 void FloatMatrix :: solveForRhs(const FloatMatrix &b, FloatMatrix &answer)
 // solves equation b = this * x
@@ -988,7 +1003,7 @@ void FloatMatrix :: solveForRhs(const FloatMatrix &b, FloatMatrix &answer)
     int info;
     IntArray ipiv(this->nRows);
     answer = b;
-    dgesv_( &this->nRows, &this->nColumns, this->values, &this->nRows, ipiv.givePointer(), answer.givePointer(), &this->nRows, &info );
+    dgesv_( &this->nRows, &answer.nColumns, this->values, &this->nRows, ipiv.givePointer(), answer.givePointer(), &this->nRows, &info );
     if (info != 0) {
         OOFEM_ERROR2("FloatMatrix::solveForRhs : dgesv error %d", info);
     }
