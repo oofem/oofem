@@ -1,4 +1,4 @@
-dnl Process this file with autoconf to produce a configure scrip.t
+dnl Process this file with autoconf to produce a configure script
 
 dnl - following options added
 dnl
@@ -57,13 +57,13 @@ dnl --------------------------------------------------------------------
 dnl check if PWD variable is defined
 dnl --------------------------------------------------------------------
 if test x"$PWD" = x""; then
-  PWD=`pwd`
+    PWD=`pwd`
 fi
 
 if test x"$CXXFLAGS" = x""; then
-	cflags=no
+    cflags=no
 else
-	cflags=yes
+    cflags=yes
 fi
 
 dnl --------------------------------------------------------------------
@@ -81,10 +81,10 @@ dnl --------------------------------------------------------------------
 AC_ARG_VAR(OOFEM_DIR, sets the oofem top dir)
 AC_MSG_CHECKING(OOFEM_DIR)
 if test -f $OOFEM_DIR/src/oofemlib/cltypes.h; then
-   AC_MSG_RESULT($OOFEM_DIR)			         
+     AC_MSG_RESULT($OOFEM_DIR)                     
 elif test -f $PWD/src/oofemlib/cltypes.h; then
      OOFEM_DIR=$PWD
-     AC_MSG_RESULT($OOFEM_DIR)			         
+     AC_MSG_RESULT($OOFEM_DIR)                     
 else
      AC_MSG_ERROR("DSS slover not found in $PWD/dss")     
 fi
@@ -92,36 +92,36 @@ fi
 dnl --------------------------------------------------------------------
 dnl Check target
 dnl --------------------------------------------------------------------
-AC_ARG_VAR(OOFEM_TARGET,sets the target name)
+AC_ARG_VAR(OOFEM_TARGET, sets the target name)
 if test x"$OOFEM_TARGET" = x"";  then
-   echo OOFEM_TARGET not specified, using default 
-   OOFEM_TARGET=default
+     echo OOFEM_TARGET not specified, using default 
+     OOFEM_TARGET=default
 fi
 
 echo configuring OOFEM_TARGET="$OOFEM_TARGET"
 if test -d targets/$OOFEM_TARGET; then
-   echo existing target directory found
+     echo existing target directory found
 else
-   mkdir -p targets/$OOFEM_TARGET
+     mkdir -p targets/$OOFEM_TARGET
 fi
-   mkdir  -p targets/$OOFEM_TARGET/lib
-   mkdir  -p targets/$OOFEM_TARGET/lib/oofemlib
-   mkdir  -p targets/$OOFEM_TARGET/lib/sm
-   mkdir  -p targets/$OOFEM_TARGET/lib/tm
-   mkdir  -p targets/$OOFEM_TARGET/lib/fm
-   mkdir  -p targets/$OOFEM_TARGET/lib/dss
-   mkdir  -p targets/$OOFEM_TARGET/lib/main
-   mkdir  -p targets/$OOFEM_TARGET/include
-   cp base/target_makefile.in targets/$OOFEM_TARGET/makefile.in
-   cp base/oofemlib_makefile.in targets/$OOFEM_TARGET/lib/oofemlib/makefile.in
-   cp base/sm_makefile.in targets/$OOFEM_TARGET/lib/sm/makefile.in
-   cp base/tm_makefile.in targets/$OOFEM_TARGET/lib/tm/makefile.in
-   cp base/fm_makefile.in targets/$OOFEM_TARGET/lib/fm/makefile.in
-   cp base/dss_makefile.in targets/$OOFEM_TARGET/lib/dss/makefile.in
-   cp base/main_makefile.in targets/$OOFEM_TARGET/lib/main/makefile.in
-   cp base/oofemcfg.h.in targets/$OOFEM_TARGET/include
-   cp base/oofemdef.h.in targets/$OOFEM_TARGET/include
-   echo target directory configured
+mkdir  -p targets/$OOFEM_TARGET/lib
+mkdir  -p targets/$OOFEM_TARGET/lib/oofemlib
+mkdir  -p targets/$OOFEM_TARGET/lib/sm
+mkdir  -p targets/$OOFEM_TARGET/lib/tm
+mkdir  -p targets/$OOFEM_TARGET/lib/fm
+mkdir  -p targets/$OOFEM_TARGET/lib/dss
+mkdir  -p targets/$OOFEM_TARGET/lib/main
+mkdir  -p targets/$OOFEM_TARGET/include
+cp base/target_makefile.in targets/$OOFEM_TARGET/makefile.in
+cp base/oofemlib_makefile.in targets/$OOFEM_TARGET/lib/oofemlib/makefile.in
+cp base/sm_makefile.in targets/$OOFEM_TARGET/lib/sm/makefile.in
+cp base/tm_makefile.in targets/$OOFEM_TARGET/lib/tm/makefile.in
+cp base/fm_makefile.in targets/$OOFEM_TARGET/lib/fm/makefile.in
+cp base/dss_makefile.in targets/$OOFEM_TARGET/lib/dss/makefile.in
+cp base/main_makefile.in targets/$OOFEM_TARGET/lib/main/makefile.in
+cp base/oofemcfg.h.in targets/$OOFEM_TARGET/include
+cp base/oofemdef.h.in targets/$OOFEM_TARGET/include
+echo target directory configured
 
 
 dnl --------------------------------------------------------------------
@@ -291,11 +291,11 @@ dnl test for poofem related stuff
 dnl --------------------------------------------------------------------
 dnl
 
-AC_ARG_ENABLE(poofem, [  --enable-poofem        builds and installs poofem],
- 	[
- 			poofem_val=$enableval
-			PROG_NAME="poofem"
- 	]
+AC_ARG_ENABLE(poofem, [  --enable-poofem         builds and installs poofem],
+    [
+        poofem_val=$enableval
+        PROG_NAME="poofem"
+    ]
 )
 
 
@@ -308,34 +308,34 @@ dnl
 dnl --------------------------------------------------------------------
 dnl Check for iml module
 dnl --------------------------------------------------------------------
-AC_ARG_ENABLE(iml, [  --enable-iml       adds iml module],
- 	[
- 		iml_module=$enableval
- 	],
-	[
-	iml_module=no
-	]
+AC_ARG_ENABLE(iml, [  --enable-iml            adds iml module],
+    [
+        iml_module=$enableval
+    ],
+    [
+        iml_module=no
+    ]
 )
 
-AC_ARG_WITH(IMLDIR, [  --with-IMLDIR=dir  allows to specify IML_DIR] , 
- [
-     IML_DIR=$withval
- ]
+AC_ARG_WITH(IMLDIR, [  --with-IMLDIR=dir       allows to specify IML_DIR] , 
+   [
+       IML_DIR=$withval
+   ]
 )
 
 dnl --------------------------------------------------------------------
 dnl Check for spooles module
 dnl --------------------------------------------------------------------
-AC_ARG_ENABLE(spooles, [  --enable-spooles       adds spooles module support],
- 	[
- 		spooles_module=$enableval
- 	],
-	[
-	spooles_module=no
-	]
+AC_ARG_ENABLE(spooles, [  --enable-spooles        adds spooles module support],
+     [
+         spooles_module=$enableval
+     ],
+    [
+    spooles_module=no
+    ]
 )
 
-AC_ARG_WITH(SPOOLESDIR, [  --with-SPOOLESDIR=dir  allows to specify SPOOLES_DIR] , 
+AC_ARG_WITH(SPOOLESDIR, [  --with-SPOOLESDIR=dir   allows to specify SPOOLES_DIR] , 
  [
      SPOOLES_DIR=$withval
  ]
@@ -344,19 +344,19 @@ AC_ARG_WITH(SPOOLESDIR, [  --with-SPOOLESDIR=dir  allows to specify SPOOLES_DIR]
 dnl --------------------------------------------------------------------
 dnl Check for dss module
 dnl --------------------------------------------------------------------
-AC_ARG_ENABLE(dss, [  --enable-dss       adds dss module support],
- 	[
- 		dss_module=$enableval
- 	],
-	[
+AC_ARG_ENABLE(dss, [  --enable-dss            adds dss module support],
+     [
+         dss_module=$enableval
+     ],
+    [
      dss_module=no
-	]
+    ]
 )
 
 dnl--------------------------------------------------------------------
 dnl Check for MPI
 dnl --------------------------------------------------------------------
-AC_ARG_WITH(MPIDIR, [  --with-MPIDIR=dir  allows to specify MPI_DIR] , 
+AC_ARG_WITH(MPIDIR, [  --with-MPIDIR=dir       allows to specify MPI_DIR] , 
  [
      MPI_DIR=$withval
  ]
@@ -367,16 +367,16 @@ AC_ARG_WITH(MPIDIR, [  --with-MPIDIR=dir  allows to specify MPI_DIR] ,
 dnl --------------------------------------------------------------------
 dnl Check for petsc module
 dnl --------------------------------------------------------------------
-AC_ARG_ENABLE(petsc, [  --enable-petsc       adds PETSc module support],
+AC_ARG_ENABLE(petsc, [  --enable-petsc          adds PETSc module support],
  [
-  		petsc_module=$enableval
+          petsc_module=$enableval
  ],                  
  [
-	  petsc_module=no
+      petsc_module=no
  ]
 )
 
-AC_ARG_WITH(PETSCDIR, [  --with-PETSCDIR=dir  allows to specify PETSC_DIR] , 
+AC_ARG_WITH(PETSCDIR, [  --with-PETSCDIR=dir     allows to specify PETSC_DIR] , 
  [
 dnl   if test -d $withval
 dnl   then
@@ -385,7 +385,7 @@ dnl   fi
  ]
 )
 
-AC_ARG_WITH(PETSCARCH, [  --with-PETSCARCH=val allows to specify PETSC_ARCH] , 
+AC_ARG_WITH(PETSCARCH, [  --with-PETSCARCH=val    allows to specify PETSC_ARCH] , 
  [
    PETSC_ARCH=$withval
  ]
@@ -394,16 +394,16 @@ AC_ARG_WITH(PETSCARCH, [  --with-PETSCARCH=val allows to specify PETSC_ARCH] ,
 dnl --------------------------------------------------------------------
 dnl Check for slepc module
 dnl --------------------------------------------------------------------
-AC_ARG_ENABLE(slepc, [  --enable-slepc       adds SLEPc module support],
+AC_ARG_ENABLE(slepc, [  --enable-slepc          adds SLEPc module support],
  [
-  		slepc_module=$enableval
+          slepc_module=$enableval
  ],                  
  [
-	  slepc_module=no
+      slepc_module=no
  ]
 )
 
-AC_ARG_WITH(SLEPCDIR, [  --with-SLEPCDIR=dir  allows to specify SLEPC_DIR] , 
+AC_ARG_WITH(SLEPCDIR, [  --with-SLEPCDIR=dir     allows to specify SLEPC_DIR] , 
  [
 dnl   if test -d $withval
 dnl   then
@@ -417,10 +417,10 @@ dnl Check for parmetis module
 dnl --------------------------------------------------------------------
 AC_ARG_ENABLE(parmetis, [  --enable-parmetis       adds ParMETIS module support],
  [
-  		parmetis_module=$enableval
+          parmetis_module=$enableval
  ],                  
  [
-	  parmetis_module=no
+      parmetis_module=no
  ]
 )
 
@@ -440,31 +440,31 @@ dnl AC_ARG_VAR(PETSC_ARCH, Allows to set PETSC_ARCH, a variable determining PETS
 dnl --------------------------------------------------------------------
 dnl Check for internal oofem modules
 dnl --------------------------------------------------------------------
-AC_ARG_ENABLE(sm, [  --enable-sm        adds sm module],
- 	[
- 		sm_module=$enableval
- 	],
-	[
-	sm_module=yes
-	]
+AC_ARG_ENABLE(sm, [  --enable-sm             adds sm module],
+     [
+         sm_module=$enableval
+     ],
+    [
+    sm_module=yes
+    ]
 )
 
-AC_ARG_ENABLE(tm, [  --enable-tm        adds tm module],
- 	[
- 		tm_module=$enableval
- 	],
-	[
-	tm_module=yes
-	]
+AC_ARG_ENABLE(tm, [  --enable-tm             adds tm module],
+     [
+         tm_module=$enableval
+     ],
+    [
+    tm_module=yes
+    ]
 )
 
-AC_ARG_ENABLE(fm, [  --enable-fm        adds fm module],
- 	[
- 		fm_module=$enableval
- 	],
-	[
-  	fm_module=yes
-	]
+AC_ARG_ENABLE(fm, [  --enable-fm             adds fm module],
+     [
+         fm_module=$enableval
+     ],
+    [
+      fm_module=yes
+    ]
 )
 
 dnl --------------------------------------------------------------------
@@ -474,12 +474,12 @@ dnl --------------------------------------------------------------------
 dnl Replace `main' with a function in -lm:
 AC_CHECK_LIB(m, sqrt)
 
-AC_ARG_ENABLE(oofeg, [  --enable-oofeg        builds and installs oofeg],
- 	[
- 		oofeg_val=$enableval
-		PROG_NAME="oofeg"
+AC_ARG_ENABLE(oofeg, [  --enable-oofeg          builds and installs oofeg],
+     [
+         oofeg_val=$enableval
+        PROG_NAME="oofeg"
 
- 	]
+     ]
 )
 
 dnl --------------------------------------------------------------------
@@ -490,7 +490,7 @@ if test x$poofem_val = xyes; then
 elif test x$oofeg_val = xyes; then
    MODULE_SYMBOLS="-D__OOFEG"
 else
-   MODULE_SYMBOLS="-D__OOFEM"	
+   MODULE_SYMBOLS="-D__OOFEM"    
 fi
 
 
@@ -498,18 +498,24 @@ dnl --------------------------------------------------------------------
 dnl Search for iml module
 dnl --------------------------------------------------------------------
 if test x$iml_module = xyes; then
-	AC_MSG_CHECKING(IML module location)
-		dir=$IML_DIR/iml
-		if test -f $IML_DIR/gmres.h; then
-			AC_MSG_RESULT($IML_DIR)
-		else
-			while test ! -f $IML_DIR/gmres.h; do
-				echo "IML includes not found in $dir."
-				echo "Type in directory (use absolute path):"
-				read IML_DIR
-			done;
-		fi
-		IML_INCLUDES="-I$IML_DIR"
+    AC_MSG_CHECKING(IML module location)
+    if test -f ${PWD}/iml/gmres.h && test -z ${IML_DIR} ; then
+        AC_MSG_RESULT(${PWD}/iml)
+        IML_INCLUDES="-I${PWD}"
+    elif test -f $IML_DIR/iml/gmres.h; then
+          IML_INCLUDES="-I${IML_DIR}"
+          AC_MSG_RESULT(${PWD}/iml)
+    else
+        while true; do
+            read -p "Type in IML directory (use absolute path, excluding the last iml/ directory):" IML_DIR
+            if test -e ${IML_DIR}/iml/gmres.h ; then
+                IML_INCLUDES="-I${IML_DIR}"
+                break;
+            else
+                echo "IML includes not found under ${IML_DIR}/iml"
+            fi
+        done
+    fi
 fi
 
 
@@ -518,14 +524,14 @@ dnl --------------------------------------------------------------------
 dnl Search for dss module
 dnl --------------------------------------------------------------------
 if test x$dss_module = xyes; then
-	AC_MSG_CHECKING(dss module location)
-		dir=src/dss
-		if test -f $dir/DSSolver.h; then
-			AC_MSG_RESULT($dir)
-		else
-			AC_MSG_ERROR("DSS slover not found in $PWD/dss")
-		fi
-		DSS_INCLUDES="-I$PWD/$dir"
+    AC_MSG_CHECKING(dss module location)
+        dir=src/dss
+        if test -f $dir/DSSolver.h; then
+            AC_MSG_RESULT($dir)
+        else
+            AC_MSG_ERROR("DSS slover not found in $PWD/dss")
+        fi
+        DSS_INCLUDES="-I$PWD/$dir"
     DSS_DIR="$PWD/$dir"
     DSS_MAKEFILE="$dir/makefile"
 fi
@@ -535,9 +541,9 @@ dnl --------------------------------------------------------------------
 dnl Search for spooles module
 dnl --------------------------------------------------------------------
 if test x$spooles_module = xyes; then
-	AC_MSG_CHECKING(SPOOLES module location)
+    AC_MSG_CHECKING(SPOOLES module location)
   dir=$SPOOLES_DIR
-  	dnl $PWD/../spooles
+      dnl $PWD/../spooles
   if test -f $dir/InpMtx.h; then
     AC_MSG_RESULT($dir)
   else
@@ -551,25 +557,25 @@ if test x$spooles_module = xyes; then
 
   SPOOLES_LIB="-L?"
   AC_CHECK_LIB(spooles, InpMtx_new,
-	[
-		SPOOLES_LIB="-lspooles"
-		AC_DEFINE(HAVE_LIBSPOOLES)
-	],
-	[
-		dir=$SPOOLES_DIR
-		AC_MSG_CHECKING(guess of spooles.a location)
-		if test -f $dir/spooles.a; then
-			AC_MSG_RESULT($dir)
-		else
-			while test ! -f $dir/spooles.a; do
-				echo "Spooles library not found in $dir."
-				echo "Type in directory (use absolute path):"
-				read dir
-			done;
-		fi
-		SPOOLES_LIB="$dir/spooles.a"
-		AC_DEFINE(HAVE_LIBSPOOLES)
-	]
+    [
+        SPOOLES_LIB="-lspooles"
+        AC_DEFINE(HAVE_LIBSPOOLES)
+    ],
+    [
+        dir=$SPOOLES_DIR
+        AC_MSG_CHECKING(guess of spooles.a location)
+        if test -f $dir/spooles.a; then
+            AC_MSG_RESULT($dir)
+        else
+            while test ! -f $dir/spooles.a; do
+                echo "Spooles library not found in $dir."
+                echo "Type in directory (use absolute path):"
+                read dir
+            done;
+        fi
+        SPOOLES_LIB="$dir/spooles.a"
+        AC_DEFINE(HAVE_LIBSPOOLES)
+    ]
   )
 fi
 
@@ -605,7 +611,7 @@ if test x$mpi_module = xyes; then
 dnl check for mpi Compiler batch
  AC_PATH_PROG(CXX, mpicxx, "x", ${MPI_DIR}/bin)
  if test x$CXX = xx; then
-	 echo "MPI compiler not found in $dir."
+     echo "MPI compiler not found in $dir."
    exit
  fi
 fi
@@ -633,7 +639,7 @@ if test x$petsc_module = xyes; then
   fi
   dnl PETSC_ARCH=`PETSC_DIR=${PETSC_DIR} ${PETSC_DIR}/bin/petscarch`
   dnl PETSC_MAKE_INCLUDE="include ${PETSC_DIR}/conf/base"
-  PETSC_MAKE_INCLUDE="include ${PETSC_DIR}/conf/variables ${PETSC_DIR}/conf/rules"	
+  PETSC_MAKE_INCLUDE="include ${PETSC_DIR}/conf/variables ${PETSC_DIR}/conf/rules"    
   PETSC_INCLUDES="\${PETSC_INCLUDE}"
   AC_MSG_CHECKING(PETSC_ARCH)
   if test -f ${PETSC_DIR}/$PETSC_ARCH/lib/libpetsc.a; then
@@ -718,9 +724,9 @@ dnl oofeg active - check graphics libraries
 dnl
 if test x$oofeg_val = xyes; then
 AC_ARG_ENABLE(oofeg-devel-interface, [  --enable-oofeg-devel-interface   enables devel oofeg interface],
- 	[
- 		oofeg_di=$enableval
- 	]
+     [
+         oofeg_di=$enableval
+     ]
 )
 
 dnl --------------------------------------------------------------------
@@ -739,14 +745,14 @@ dnl Replace `main' with a function in -lXt:
 dnl AC_CHECK_LIB(Xt, XtNameToWidget)
 
 AC_CHECK_LIB(Xt, XtNameToWidget, 
-	[
-		AC_DEFINE(HAVE_LIBX)
-		X_LIBS="$X_LIBS -lXaw -lXmu -lXt -lXext -lX11"
-	],
-	[
-		AC_MSG_WARN(No support for X11 libraries)
-	], 
-	$X_PRE_LIBS $X_LIBS -lXaw -lXmu -lXt -lXext -lX11 $X_EXTRA_LIBS
+    [
+        AC_DEFINE(HAVE_LIBX)
+        X_LIBS="$X_LIBS -lXaw -lXmu -lXt -lXext -lX11"
+    ],
+    [
+        AC_MSG_WARN(No support for X11 libraries)
+    ], 
+    $X_PRE_LIBS $X_LIBS -lXaw -lXmu -lXt -lXext -lX11 $X_EXTRA_LIBS
 )
 
 
@@ -756,13 +762,13 @@ dnl --------------------------------------------------------------------
 dnl --------------------------------------------------------------------
 dnl Check for ckit and elixir libs location
 dnl --------------------------------------------------------------------
-AC_ARG_WITH(CKITDIR, [  --with-CKITDIR=dir  allows to specify CKIT_DIR] , 
+AC_ARG_WITH(CKITDIR, [  --with-CKITDIR=dir      allows to specify CKIT_DIR] , 
  [
      CKIT_DIR=$withval
  ]
 )
 
-AC_ARG_WITH(ELIXIRDIR, [  --with-ELIXIRDIR=dir  allows to specify ELIXIR_DIR] , 
+AC_ARG_WITH(ELIXIRDIR, [  --with-ELIXIRDIR=dir    allows to specify ELIXIR_DIR] , 
  [
      ELIXIR_DIR=$withval
  ]
@@ -772,47 +778,47 @@ AC_ARG_WITH(ELIXIRDIR, [  --with-ELIXIRDIR=dir  allows to specify ELIXIR_DIR] ,
 
 CKIT_INCLUDES="-I."
 AC_CHECK_HEADER(ckitcfg.h,
-	[
-		AC_DEFINE(HAVE_CKIT_H)
-	],
-	[
-		dir=$CKIT_DIR/include
-		AC_MSG_CHECKING(guess of Ckit includes location)
-		if test -f $dir/ckitcfg.h; then
-			AC_MSG_RESULT($dir)
-		else
-			while test ! -f $dir/ckitcfg.h; do
-				echo "Ckit includes not found in $dir."
-				echo "Type in directory (use absolute path):"
-				read dir
-			done;
-		fi
-		CKIT_INCLUDES="-I$dir"
-		AC_DEFINE(HAVE_CKIT_H)
-	]
+    [
+        AC_DEFINE(HAVE_CKIT_H)
+    ],
+    [
+        dir=$CKIT_DIR/include
+        AC_MSG_CHECKING(guess of Ckit includes location)
+        if test -f $dir/ckitcfg.h; then
+            AC_MSG_RESULT($dir)
+        else
+            while test ! -f $dir/ckitcfg.h; do
+                echo "Ckit includes not found in $dir."
+                echo "Type in directory (use absolute path):"
+                read dir
+            done;
+        fi
+        CKIT_INCLUDES="-I$dir"
+        AC_DEFINE(HAVE_CKIT_H)
+    ]
 )
 
 CKIT_LIB="-L?"
 AC_CHECK_LIB(ckit, _get_list_next,
-	[
-		CKIT_LIB="-lckit"
-		AC_DEFINE(HAVE_LIBCKIT)
-	],
-	[
-		dir=$CKIT_DIR/src
-		AC_MSG_CHECKING(guess of libckit.a location)
-		if test -f $dir/libckit.a; then
-			AC_MSG_RESULT($dir)
-		else	
-			while test ! -f $dir/libckit.a; do
-				echo "Ckit library not found in $dir."
-				echo "Type in directory (use absolute path):"
-				read dir
-			done;
-		fi
-		CKIT_LIB="$dir/libckit.a"
-		AC_DEFINE(HAVE_LIBCKIT)
-	]
+    [
+        CKIT_LIB="-lckit"
+        AC_DEFINE(HAVE_LIBCKIT)
+    ],
+    [
+        dir=$CKIT_DIR/src
+        AC_MSG_CHECKING(guess of libckit.a location)
+        if test -f $dir/libckit.a; then
+            AC_MSG_RESULT($dir)
+        else    
+            while test ! -f $dir/libckit.a; do
+                echo "Ckit library not found in $dir."
+                echo "Type in directory (use absolute path):"
+                read dir
+            done;
+        fi
+        CKIT_LIB="$dir/libckit.a"
+        AC_DEFINE(HAVE_LIBCKIT)
+    ]
 )
 
 dnl
@@ -823,24 +829,24 @@ dnl
 
 ELIXIR_INCLUDES="-I."
 AC_CHECK_HEADER(Ecfg.h,
-	[
-		AC_DEFINE(HAVE_ELIXIR_H)
-	],
-	[
-		dir=$ELIXIR_DIR/include
-		AC_MSG_CHECKING(guess of Elixir includes location)
-		if test -f $dir/Ecfg.h; then
-			AC_MSG_RESULT($dir)
-		else
-			while test ! -f $dir/Ecfg.h; do
-				echo "Elixir includes not found in $dir."
-				echo "Type in directory (use absolute path):"
-				read dir
-			done;
-		fi
-		ELIXIR_INCLUDES="-I$dir"
-		AC_DEFINE(HAVE_ELIXIR_H)
-	]
+    [
+        AC_DEFINE(HAVE_ELIXIR_H)
+    ],
+    [
+        dir=$ELIXIR_DIR/include
+        AC_MSG_CHECKING(guess of Elixir includes location)
+        if test -f $dir/Ecfg.h; then
+            AC_MSG_RESULT($dir)
+        else
+            while test ! -f $dir/Ecfg.h; do
+                echo "Elixir includes not found in $dir."
+                echo "Type in directory (use absolute path):"
+                read dir
+            done;
+        fi
+        ELIXIR_INCLUDES="-I$dir"
+        AC_DEFINE(HAVE_ELIXIR_H)
+    ]
 )
 
 
@@ -851,56 +857,56 @@ EOF
 
 ELIXIR_LIB="-L?"
 AC_CHECK_LIB(elixir, ElixirInit,
-	[
-		ELIXIR_LIB="-lelixir"
-		AC_DEFINE(HAVE_LIBELIXIR)
-	],
-	[
-		dir=$ELIXIR_DIR/src
-		AC_MSG_CHECKING(guess of libelixir.a location)
-		if test -f $ELIXIR_DIR/lib/libelixir.a; then
-			dir=$ELIXIR_DIR/lib
-			AC_MSG_RESULT($ELIXIR_DIR/lib);
-		elif test -f $dir/libelixir.a; then
-			AC_MSG_RESULT($dir)
-		else
-			while test ! -f $dir/libelixir.a; do
-				echo "Elixir library not found in $dir."
-				echo "Type in directory (use absolute path):"
-				read dir
-			done;
-		fi
-		ELIXIR_LIB="$dir/libelixir.a"
-		AC_DEFINE(HAVE_LIBELIXIR)
-	],
-	elixirtest.c -lesi -lelixir $CKIT_LIB $X_PRE_LIBS $X_LIBS $X_EXTRA_LIBS
+    [
+        ELIXIR_LIB="-lelixir"
+        AC_DEFINE(HAVE_LIBELIXIR)
+    ],
+    [
+        dir=$ELIXIR_DIR/src
+        AC_MSG_CHECKING(guess of libelixir.a location)
+        if test -f $ELIXIR_DIR/lib/libelixir.a; then
+            dir=$ELIXIR_DIR/lib
+            AC_MSG_RESULT($ELIXIR_DIR/lib);
+        elif test -f $dir/libelixir.a; then
+            AC_MSG_RESULT($dir)
+        else
+            while test ! -f $dir/libelixir.a; do
+                echo "Elixir library not found in $dir."
+                echo "Type in directory (use absolute path):"
+                read dir
+            done;
+        fi
+        ELIXIR_LIB="$dir/libelixir.a"
+        AC_DEFINE(HAVE_LIBELIXIR)
+    ],
+    elixirtest.c -lesi -lelixir $CKIT_LIB $X_PRE_LIBS $X_LIBS $X_EXTRA_LIBS
 )
 
 ESI_LIB="-L?"
 AC_CHECK_LIB(esi, ESIBuildInterface,
-	[
-		ESI_LIB="-lesi"
-		AC_DEFINE(HAVE_LIBESI)
-	],
-	[
-		dir=$ELIXIR_DIR/src
-		AC_MSG_CHECKING(guess of libesi.a location)
-		if test -f $ELIXIR_DIR/lib/libesi.a; then
-			dir=$ELIXIR_DIR/lib
-			AC_MSG_RESULT($ELIXIR_DIR/lib);
-		elif test -f $dir/libesi.a; then
-			AC_MSG_RESULT($dir)
-		else
-			while test ! -f $dir/libesi.a; do
-				echo "Esi library not found in $dir."
-				echo "Type in directory (use absolute path):"
-				read dir
-			done;
-		fi
-		ESI_LIB="$dir/libesi.a"
-		AC_DEFINE(HAVE_LIBESI)
-	],
-	elixirtest.c -lesi -lelixir $CKIT_LIB $X_PRE_LIBS $X_LIBS $X_EXTRA_LIBS
+    [
+        ESI_LIB="-lesi"
+        AC_DEFINE(HAVE_LIBESI)
+    ],
+    [
+        dir=$ELIXIR_DIR/src
+        AC_MSG_CHECKING(guess of libesi.a location)
+        if test -f $ELIXIR_DIR/lib/libesi.a; then
+            dir=$ELIXIR_DIR/lib
+            AC_MSG_RESULT($ELIXIR_DIR/lib);
+        elif test -f $dir/libesi.a; then
+            AC_MSG_RESULT($dir)
+        else
+            while test ! -f $dir/libesi.a; do
+                echo "Esi library not found in $dir."
+                echo "Type in directory (use absolute path):"
+                read dir
+            done;
+        fi
+        ESI_LIB="$dir/libesi.a"
+        AC_DEFINE(HAVE_LIBESI)
+    ],
+    elixirtest.c -lesi -lelixir $CKIT_LIB $X_PRE_LIBS $X_LIBS $X_EXTRA_LIBS
 )
 
 dnl Ordering -lesi -lelixir is relevant
@@ -910,7 +916,7 @@ LOCAL_LIBS="${LOCAL_LIBS} ${ELIXIR_LIBS}"
 LOCAL_LIBS="${LOCAL_LIBS} ${CKIT_LIB}"
 
 else
- 	oofeg_val=no
+     oofeg_val=no
 fi
 
 
@@ -939,85 +945,85 @@ MODULE_INCLUDES="$OOFEMLIB_INCLUDES"
 OOFEM_LIBS="$PWD/targets/$OOFEM_TARGET/lib/oofemlib/oofemlib.a"
 
 MODULE_LIST="oofemlib"
-MODULE_TOBUILD="oofemlib"	
+MODULE_TOBUILD="oofemlib"    
 MODULE_SYMBOLS="$MODULE_SYMBOLS -D__OOFEMLIB_MODULE -DTIXML_USE_STL"
 
 if test x$sm_module = xyes; then
-	MODULE_LIST="$MODULE_LIST sm"
-	MODULE_TOBUILD="$MODULE_TOBUILD sm"
-	MODULE_SYMBOLS="$MODULE_SYMBOLS -D__SM_MODULE"
-	MODULE_INCLUDES="$MODULE_INCLUDES $SM_INCLUDES"
-	OOFEM_LIBS="$PWD/targets/$OOFEM_TARGET/lib/sm/smlib.a $OOFEM_LIBS"	
-	TEST_TARGETS="sm"
+    MODULE_LIST="$MODULE_LIST sm"
+    MODULE_TOBUILD="$MODULE_TOBUILD sm"
+    MODULE_SYMBOLS="$MODULE_SYMBOLS -D__SM_MODULE"
+    MODULE_INCLUDES="$MODULE_INCLUDES $SM_INCLUDES"
+    OOFEM_LIBS="$PWD/targets/$OOFEM_TARGET/lib/sm/smlib.a $OOFEM_LIBS"    
+    TEST_TARGETS="sm"
 fi
 
 if test x$tm_module = xyes; then
-	MODULE_LIST="$MODULE_LIST tm"
-	MODULE_TOBUILD="$MODULE_TOBUILD tm"
-	MODULE_SYMBOLS="$MODULE_SYMBOLS -D__TM_MODULE -D__CEMHYD_MODULE -D__TINYXML_MODULE -DTIXML_USE_STL"
-	MODULE_INCLUDES="$MODULE_INCLUDES $TM_INCLUDES"
-	OOFEM_LIBS="$PWD/targets/$OOFEM_TARGET/lib/tm/tmlib.a $OOFEM_LIBS"	
-	TEST_TARGETS="$TEST_TARGETS tm"
+    MODULE_LIST="$MODULE_LIST tm"
+    MODULE_TOBUILD="$MODULE_TOBUILD tm"
+    MODULE_SYMBOLS="$MODULE_SYMBOLS -D__TM_MODULE -D__CEMHYD_MODULE -D__TINYXML_MODULE -DTIXML_USE_STL"
+    MODULE_INCLUDES="$MODULE_INCLUDES $TM_INCLUDES"
+    OOFEM_LIBS="$PWD/targets/$OOFEM_TARGET/lib/tm/tmlib.a $OOFEM_LIBS"    
+    TEST_TARGETS="$TEST_TARGETS tm"
 fi
 
 if test x$sm_module = xyes && test x$tm_module = xyes ; then
-	TEST_TARGETS="$TEST_TARGETS tmsm"
+    TEST_TARGETS="$TEST_TARGETS tmsm"
 fi
 
 
 if test x$fm_module = xyes; then
-	MODULE_LIST="$MODULE_LIST fm"
-	MODULE_TOBUILD="$MODULE_TOBUILD fm"
-	MODULE_SYMBOLS="$MODULE_SYMBOLS -D__FM_MODULE"
-	MODULE_INCLUDES="$MODULE_INCLUDES $FM_INCLUDES"
-	OOFEM_LIBS="$PWD/targets/$OOFEM_TARGET/lib/fm/fmlib.a $OOFEM_LIBS"	
-	TEST_TARGETS="$TEST_TARGETS fm"
+    MODULE_LIST="$MODULE_LIST fm"
+    MODULE_TOBUILD="$MODULE_TOBUILD fm"
+    MODULE_SYMBOLS="$MODULE_SYMBOLS -D__FM_MODULE"
+    MODULE_INCLUDES="$MODULE_INCLUDES $FM_INCLUDES"
+    OOFEM_LIBS="$PWD/targets/$OOFEM_TARGET/lib/fm/fmlib.a $OOFEM_LIBS"    
+    TEST_TARGETS="$TEST_TARGETS fm"
 fi
 
 if test x$iml_module = xyes; then
-	MODULE_LIST="$MODULE_LIST iml"
-	MODULE_SYMBOLS="$MODULE_SYMBOLS -D__IML_MODULE"
-	IML_MODULE_SYMBOL="-D__IML_MODULE"
-	MODULE_INCLUDES="$MODULE_INCLUDES $IML_INCLUDES"
+    MODULE_LIST="$MODULE_LIST iml"
+    MODULE_SYMBOLS="$MODULE_SYMBOLS -D__IML_MODULE"
+    IML_MODULE_SYMBOL="-D__IML_MODULE"
+    MODULE_INCLUDES="$MODULE_INCLUDES $IML_INCLUDES"
 fi
 
 if test x$dss_module = xyes; then
-	MODULE_LIST="$MODULE_LIST dss"
-	MODULE_TOBUILD="$MODULE_TOBUILD dss"
-	MODULE_SYMBOLS="$MODULE_SYMBOLS -D__DSS_MODULE"
-	DSS_MODULE_SYMBOL="-D__DSS_MODULE"
-	MODULE_INCLUDES="$MODULE_INCLUDES $DSS_INCLUDES"
-	OOFEM_LIBS="$OOFEM_LIBS $PWD/targets/$OOFEM_TARGET/lib/dss/dsslib.a"	
+    MODULE_LIST="$MODULE_LIST dss"
+    MODULE_TOBUILD="$MODULE_TOBUILD dss"
+    MODULE_SYMBOLS="$MODULE_SYMBOLS -D__DSS_MODULE"
+    DSS_MODULE_SYMBOL="-D__DSS_MODULE"
+    MODULE_INCLUDES="$MODULE_INCLUDES $DSS_INCLUDES"
+    OOFEM_LIBS="$OOFEM_LIBS $PWD/targets/$OOFEM_TARGET/lib/dss/dsslib.a"    
 fi
 
 if test x$petsc_module = xyes; then
-	MODULE_LIST="$MODULE_LIST petsc"
-	MODULE_SYMBOLS="$MODULE_SYMBOLS -D__PETSC_MODULE"
-	SPOOLES_MODULE_SYMBOL="-D__PETSC_MODULE"
-	MODULE_INCLUDES="$MODULE_INCLUDES \${PETSC_INCLUDE}"
-	LOCAL_LIBS="$LOCAL_LIBS \${PETSC_C_SH_LIB_PATH} \${PETSC_LIB}"
+    MODULE_LIST="$MODULE_LIST petsc"
+    MODULE_SYMBOLS="$MODULE_SYMBOLS -D__PETSC_MODULE"
+    SPOOLES_MODULE_SYMBOL="-D__PETSC_MODULE"
+    MODULE_INCLUDES="$MODULE_INCLUDES \${PETSC_INCLUDE}"
+    LOCAL_LIBS="$LOCAL_LIBS \${PETSC_C_SH_LIB_PATH} \${PETSC_LIB}"
 fi
 
 if test x$slepc_module = xyes; then
-	MODULE_LIST="$MODULE_LIST slepc"
-	MODULE_SYMBOLS="$MODULE_SYMBOLS -D__SLEPC_MODULE"
-	MODULE_INCLUDES="$MODULE_INCLUDES \${SLEPC_INCLUDE}"
-	LOCAL_LIBS="$LOCAL_LIBS \${SLEPC_C_SH_LIB_PATH} \${SLEPC_LIB}"
+    MODULE_LIST="$MODULE_LIST slepc"
+    MODULE_SYMBOLS="$MODULE_SYMBOLS -D__SLEPC_MODULE"
+    MODULE_INCLUDES="$MODULE_INCLUDES \${SLEPC_INCLUDE}"
+    LOCAL_LIBS="$LOCAL_LIBS \${SLEPC_C_SH_LIB_PATH} \${SLEPC_LIB}"
 fi
 
 if test x$parmetis_module = xyes; then
-	MODULE_LIST="$MODULE_LIST parmetis"
-	MODULE_SYMBOLS="$MODULE_SYMBOLS -D__PARMETIS_MODULE"
-	MODULE_INCLUDES="$MODULE_INCLUDES ${PARMETIS_INCLUDES}"
-	LOCAL_LIBS="$LOCAL_LIBS ${PARMETIS_LIB}"
+    MODULE_LIST="$MODULE_LIST parmetis"
+    MODULE_SYMBOLS="$MODULE_SYMBOLS -D__PARMETIS_MODULE"
+    MODULE_INCLUDES="$MODULE_INCLUDES ${PARMETIS_INCLUDES}"
+    LOCAL_LIBS="$LOCAL_LIBS ${PARMETIS_LIB}"
 fi
 
 if test x$spooles_module = xyes; then
-	MODULE_LIST="$MODULE_LIST spooles"
-	MODULE_SYMBOLS="$MODULE_SYMBOLS -D__SPOOLES_MODULE"
-	SPOOLES_MODULE_SYMBOL="-D__SPOOLES_MODULE"
-	MODULE_INCLUDES="$MODULE_INCLUDES $SPOOLES_INCLUDES"
-	LOCAL_LIBS="$LOCAL_LIBS $SPOOLES_LIB"
+    MODULE_LIST="$MODULE_LIST spooles"
+    MODULE_SYMBOLS="$MODULE_SYMBOLS -D__SPOOLES_MODULE"
+    SPOOLES_MODULE_SYMBOL="-D__SPOOLES_MODULE"
+    MODULE_INCLUDES="$MODULE_INCLUDES $SPOOLES_INCLUDES"
+    LOCAL_LIBS="$LOCAL_LIBS $SPOOLES_LIB"
 fi
 
 dnl
@@ -1027,7 +1033,7 @@ dnl --------------------------------------------------------------------
 dnl
 
 if test x$cflags = xno; then
- 	CXXFLAGS="-O"
+     CXXFLAGS="-O"
 fi
 
 dnl get host name
