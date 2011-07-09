@@ -208,7 +208,6 @@
  #include "rcsdnl.h"
  #include "m4.h"
  #include "idm1.h"
- #include "idm2.h"
  #include "idmnl1.h"
  #include "mazarsmodel.h"
  #include "mazarsmodelnl.h"
@@ -711,8 +710,6 @@ Material *CreateUsrDefMaterialOfType(const char *aClass, int number, Domain *dom
         newMaterial = new M4Material(number, domain);
     } else if ( !strncasecmp(aClass, "idm1", 4) ) {
         newMaterial = new IsotropicDamageMaterial1(number, domain);
-    } else if ( !strncasecmp(aClass, "idm2", 4) ) {
-        newMaterial = new IsotropicDamageMaterial2(number, domain);
     } else if ( !strncasecmp(aClass, "idmnl1", 6) ) {
         newMaterial = new IDNLMaterial(number, domain);
     } else if ( !strncasecmp(aClass, "mazarsmodelnl", 13) ) {

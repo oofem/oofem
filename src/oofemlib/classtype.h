@@ -239,7 +239,6 @@ enum classType {
     M4MaterialClass,
     IsotropicDamageMaterialClass,
     IsotropicDamageMaterial1Class,
-    IsotropicDamageMaterial2Class,
     MazarsMaterialClass,
     CompositeDamageMaterialClass,
     MicroplaneDamageMaterialClass,

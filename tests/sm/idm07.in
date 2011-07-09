@@ -1,16 +1,16 @@
-idm03.out
-Test of damage law with exponential softening on a 1D truss element, fracture energy
+idm07.out
+Test of damage law with bilinear softening on a 1D truss element, fracture energy
 NonLinearStatic nsteps 15 rtolv 0.0001 MaxIter 20 stiffMode 1 controllmode 0 psi 0.0 renumber 0 hpcmode 1 hpc 2 2 1 stepLength 0.05 minsteplength 0.05 nmodules 0
 #vtkxml tstep_all domain_all primvars 1 1
 domain 1dtruss
 OutputManager tstep_all dofman_all element_all
 ndofman 2 nelem 1 ncrosssect 1 nmat 1 nbc 2 nltf 1 nic 0
 node 1 coords 3 0.0 0.0 0.0 bc 1 1
-node 2 coords 3 0.5 0.0 0.0 load 1 2
+node 2 coords 3 1.0 0.0 0.0 load 1 2
 truss1d 1 nodes 2 1 2 mat 1 crossSect 1
 SimpleCS 1 thick 1.0 width 10.0
-#exponential softening, fracture energy
-idm1 1 d 1.0  E 10. n 0.2 e0 0.5 gf 1.5 equivstraintype 0 talpha 0.0 damlaw 0
+#bilinear softening, fracture energy
+idm1 1 d 1.0  E 10. n 0.2  e0 0.5 gf 1.8 gft 2.2 ek 0.60 equivstraintype 0 talpha 0.0 damlaw 2
 BoundaryCondition 1 loadTimeFunction 1 prescribedvalue 0.0
 NodalLoad 2 loadTimeFunction 1 components 1 1.0
 ConstantFunction 1 f(t) 1.0
@@ -19,9 +19,9 @@ ConstantFunction 1 f(t) 1.0
 ###
 #%BEGIN_CHECK% tolerance 1.e-4
 #NODE tStep 10 number 2 dof 1 unknown d value 5.50000000e-01
-#LOADLEVEL tStep 10 value 2.452618e+01
-#LOADLEVEL tStep 11 value 2.211659e+01
-#LOADLEVEL tStep 12 value 1.999098e+01
-#LOADLEVEL tStep 13 value 1.810592e+01
-#LOADLEVEL tStep 14 value 1.642678e+01
+#LOADLEVEL tStep 10 value 38.636364
+#LOADLEVEL tStep 11 value 27.272727
+#LOADLEVEL tStep 12 value 2.397361e+01
+#LOADLEVEL tStep 13 value 2.067449e+01
+#LOADLEVEL tStep 14 value 1.737537e+01
 #%END_CHECK%

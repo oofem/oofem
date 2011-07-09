@@ -82,6 +82,10 @@ namespace oofem {
 /* parameters of damage model */
 #define e0_ID  800
 #define ef_ID  801
+#define gf_ID  802
+#define ek_ID  803
+#define wf_ID  804
+#define gft_ID 805
 
 /* nonlocal material parameters */
 #define AVERAGING_TYPE 901

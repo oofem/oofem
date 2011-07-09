@@ -1177,13 +1177,14 @@ For other values of {\it damlaw}, or if parameter {\it ef}
 is specified instead of {\it wf}, the stress-strain curve does not depend
 on element size and the model would exhibit pathological sensitivity
 to the mesh size. These cases are intended to be used in combination
-with a nonlocal formulation. 
+with a nonlocal formulation. An alternative formulation uses fracture energy
+to determine fracturing strain.
 
-The model parameters are summarized
-in Table~\ref{id_table}. 
+The model parameters are summarized in Table~\ref{id_table}. 
 
-\begin{table}[p]
+\begin{table}[!htb]
 %\begin{center}
+  \small
 \begin{tabular}{|l|p{9cm}|}
 \hline
 Description & Isotropic damage model for concrete in tension\\
@@ -1199,7 +1200,10 @@ Record Format & \descitem{idm1}
 [\elemparam{damlaw}{in}] 
 \elemparam{e0}{rn}
 [\elemparam{wf}{rn}] 
-[\elemparam{ef}{rn}] 
+[\elemparam{ef}{rn}]
+[\elemparam{ek}{rn}]
+[\elemparam{gf}{rn}]
+[\elemparam{gft}{rn}]
 [\elemparam{At}{rn}] 
 [\elemparam{Bt}{rn}] 
 [\elemparam{md}{rn}] 
@@ -1222,7 +1226,7 @@ of equivalent strain:
 \begin{itemize}\setlength{\itemsep}{-3pt}
 \item[0 -] exponential softening (default) with parameters e0 and wf $\vert$ ef
 \item[1 -] linear softening with parameters e0 and wf $\vert$ ef
-\item[2 -] bilinear softening (not implemented yet)
+\item[2 -] bilinear softening with gf, gft, ek
 \item[3 -] Hordijk softening (not implemented yet)
 \item[4 -] Mazars damage law with parameters At and Bt
 \item[5 -] smooth stress-strain curve with parameters e0 and md
@@ -1230,6 +1234,9 @@ of equivalent strain:
 &- \param{e0} strain at peak stress (for damage laws 0,1,2,3), limit elastic strain (for damage law 4), characteristic strain (for damage law 5)\\
 &- \param{wf} parameter controling ductility, has the meaning of crack opening (for damage laws 0 and 1)\\
 &- \param{ef} parameter controling ductility, has the meaning of strain (for damage laws 0 and 1)\\
+&- \param{ek} strain at knee point in bilinear softening type (for damage law 2)\\
+&- \param{gf} fracture energy (for damage laws 0--2)\\
+&- \param{gft} total fracture energy (for damage law 2)\\
 &- \param{At} parameter of Mazars damage law, used only by law 4\\
 &- \param{Bt} parameter of Mazars damage law, used only by law 4\\
 &- \param{md} exponent, used only by damage law 5, default value 1\\
@@ -1244,8 +1251,6 @@ Features & Adaptivity support\\
 \label{id_table}
 %\end{center}
 \end{table}
-
-
 
 \subsubsection{Nonlocal isotropic damage model for tensile failure}
 \label{sec:nidm}

@@ -181,11 +181,25 @@ class IsotropicDamageMaterial1 : public IsotropicDamageMaterial, public RandomMa
 
 protected:
 
-    /// equivalent strain at peak (or a similar parameter)
+    /// equivalent strain at stress peak (or a similar parameter)
     double e0;
-    /// determines ductility -> corresponds to crack opening or strain, depending on the type of damage law (cohesive crack or not)
+    /// determines ductility -> corresponds to fracturing strain
     double ef;
-
+    /// determines ductility -> corresponds to crack opening in the cohesive crack model
+    double wf;
+    
+    /**Determines the softening -> corresponds to the initial fracture energy. For a linear law, it is the area 
+    *  under the stress/strain curve. For an exponential law, it is the area bounded by the elastic range 
+    *  and a tangent to the softening part of the curve at the peak stress. For a bilinear law, 
+    *  Gf corresponds to area bounded by elasticity and the first linear softening line projected to zero stress
+    */
+    double gf;
+    
+    /// Determines the softening for the bilinear law -> corresponds to the strain at the knee point
+    double ek;
+     /// Determines the softening for the bilinear law -> corresponds to the total energy
+    double gft;
+    
     /// type characterizing the algorithm used to compute equivalent strain measure
     enum EquivStrainType { EST_Unknown, EST_Mazars, EST_Rankine, EST_ElasticEnergy, EST_Mises };
     /// parameter specifying the definition of equivalent strain
@@ -194,8 +208,11 @@ protected:
     /// parameter used in Mises definition of equivalent strain
     double k;
 
+    /// temporary parameter reading type of softening law, used in other isotropic damage material models
+    int damageLaw;
+    
     /// type characterizing the formula for the damage law
-    enum SofteningType { ST_Unknown, ST_Exponential, ST_Linear, ST_Mazars, ST_Smooth, ST_SmoothExtended, ST_Exponential_Cohesive_Crack, ST_Linear_Cohesive_Crack };
+    enum SofteningType { ST_Unknown, ST_Exponential, ST_Linear, ST_Mazars, ST_Smooth, ST_SmoothExtended, ST_Exponential_Cohesive_Crack, ST_Linear_Cohesive_Crack, ST_BiLinear_Cohesive_Crack };
     /// parameter specifying the type of softening (damage law)
     SofteningType softType;
 
