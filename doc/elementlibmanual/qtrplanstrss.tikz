@@ -1,0 +1,11 @@
+\tikzstyle{elemnode} = [draw,circle,inner sep=1,fill=white]
+\begin{tikzpicture}[scale=6,>=stealth]
+ \draw[->] (-0.05,0) -- (0.8,0) node[above] {$x$};
+ \draw[->] (0,-0.05) -- (0,0.5) node[right] {$y$};
+ 
+ \draw[thick,xshift=-2] 
+     (0.2,0.1) node[elemnode] {} node[below] {1}
+  to[out=-10,in=210] node[elemnode,midway] {} node[below,midway] {4} (0.7,0.2) node[elemnode] {} node[below right] {2}
+  to[out=110,in=-20] node[elemnode,midway] {} node[above right,midway] {5} (0.4,0.5) node[elemnode] {} node[above] {3}
+  to[out=-90,in=40] node[elemnode,midway] {} node[above left,midway] {6} (0.2,0.1);
+\end{tikzpicture}

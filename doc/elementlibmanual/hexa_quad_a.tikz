@@ -1,0 +1,48 @@
+\begin{tikzpicture}[scale=2,>=stealth,
+  x={(-0.4cm,-0.3cm)}, y={ (1cm,0cm) }, z={(0cm,1cm)}]
+ \tikzstyle{elemnode} = [fill,circle,inner sep=2]
+ \tikzstyle{background} = [densely dashed]
+ \newcommand{\fs}{0.25}
+ 
+% Coord.sys. (shifted for readability)
+ \draw[->,xshift=-5] (-0.1,0,0) -- (1.5,0,0) node[at end,below] {$\xi$};
+ \draw[->,xshift=-5] (0,-0.1,0) -- (0,1,0) node[at end,below] {$\eta$};
+ \draw[->,xshift=-5] (0,0,-0.1) -- (0,0,0.8) node[at end,right] {$\zeta$};
+
+% Can't use rectangle in 3d
+ \draw[thick] (-1,-1,1) -- (-1,1,1) -- (1,1,1) -- (1,-1,1) -- cycle;
+ \draw[thick,background] (-1,-1,-1) -- (-1,1,-1);
+ \draw[thick] (-1,1,-1)-- (1,1,-1);
+ \draw[thick] (1,1,-1) -- (1,-1,-1);
+ \draw[thick,background] (1,-1,-1) -- (-1,-1,-1);
+ \draw[thick,background] (-1,-1,1) -- (-1,-1,-1);
+ \draw[thick] (-1,1,1) -- (-1,1,-1);
+ \draw[thick] (1,-1,1) -- (1,-1,-1);
+ \draw[thick] (1,1,1) -- (1,1,-1);
+
+% Nodes
+ \node[elemnode] (n1) at (-1,-1, 1) {}; \node[above left] at (n1) {1};
+ \node[elemnode] (n2) at (-1, 1, 1) {}; \node[above right] at (n2) {2};
+ \node[elemnode] (n3) at ( 1, 1, 1) {}; \node[above left] at (n3) {3};
+ \node[elemnode] (n4) at ( 1,-1, 1) {}; \node[above left] at (n4) {4};
+ \node[elemnode] (n5) at (-1,-1,-1) {}; \node[below right] at (n5) {5};
+ \node[elemnode] (n6) at (-1, 1,-1) {}; \node[below right] at (n6) {6};
+ \node[elemnode] (n7) at ( 1, 1,-1) {}; \node[below right] at (n7) {7};
+ \node[elemnode] (n8) at ( 1,-1,-1) {}; \node[below right] at (n8) {8};
+
+ \node[elemnode] (n9)  at (-1, 0, 1) {}; \node[above] at (n9) {9};
+ \node[elemnode] (n10) at ( 0, 1, 1) {}; \node[above left] at (n10) {10};
+ \node[elemnode] (n11) at ( 1, 0, 1) {}; \node[above] at (n11) {11};
+ \node[elemnode] (n12) at ( 0,-1, 1) {}; \node[above left] at (n12) {12};
+
+ \node[elemnode] (n13) at (-1, 0,-1) {}; \node[below] at (n13) {13};
+ \node[elemnode] (n14) at ( 0, 1,-1) {}; \node[below right] at (n14) {14};
+ \node[elemnode] (n15) at ( 1, 0,-1) {}; \node[below] at (n15) {15};
+ \node[elemnode] (n16) at ( 0,-1,-1) {}; \node[below right] at (n16) {16};
+
+ \node[elemnode] (n17) at (-1,-1, 0) {}; \node[right] at (n17) {17};
+ \node[elemnode] (n18) at (-1, 1, 0) {}; \node[right] at (n18) {18};
+ \node[elemnode] (n19) at ( 1, 1, 0) {}; \node[right] at (n19) {19};
+ \node[elemnode] (n20) at ( 1,-1, 0) {}; \node[right] at (n20) {20};
+
+\end{tikzpicture}

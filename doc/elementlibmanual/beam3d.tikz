@@ -1,0 +1,48 @@
+\tikzstyle{elemnode} = [solid,draw,thin,circle,inner sep=1,fill=white]
+
+\begin{tikzpicture}[scale=7,>=stealth,
+  x={(1cm,0cm)}, y={(-0.5cm,-0.5cm)}, z={(0cm,-1cm)}]
+ %\coordinate (a) at (0.1,-0.2);
+ %\coordinate (b) at (0.6,-0.1);
+ \newcommand{\beamlength}{0.4};
+
+ \begin{scope}[yshift=-3]
+ \draw[->] (-0.05,0,0) -- (0.5,0,0) node[at end, below] {$x_g$};
+ \draw[->] (0,-0.05,0) -- (0,0.5,0) node[at end, below] {$y_g$};
+ \draw[->] (0,0,-0.05) -- (0,0,0.25) node[at end, right] {$z_g$};
+ \end{scope}
+
+ \coordinate (i) (0,0,0.5);
+ \coordinate (j) (0.7,0,0.25);
+
+ \draw[very thick,-] (0,0,0.5) coordinate (i) -- (0.7,0,0.25) coordinate(j)
+   node[elemnode,at start] {} node[at start,above left] {1,i}
+   node[elemnode,at end] {} node[at end,above left] {2,j};
+ \draw[dashed,->] (0,0,0.5) -- (0.4,0,0.5) 
+   node[elemnode,at end] {} node[at end,right] {k};
+ \draw[->] (j) -- +(0.7*0.4,0,-0.25*0.4) node[right] {$x_1$};
+ \draw[->] (i) -- +(0.3,0.0,0.1) node[above] {$y_1$};
+ \draw[->] (i) -- +(0,0,0.3) node[right] {$z_1$};
+
+ \begin{scope}[xshift=20,yshift=0] 
+  \draw[very thick,-] (0,0,0.5) coordinate (i) -- (0.7,0,0.25) coordinate(j)
+   node[elemnode,at start] {}
+   node[elemnode,at end] {};
+  \draw[<-] (i)++(-0.7*0.02,0,0.25*0.02) -- +(-0.7*0.18,0,0.25*0.18) node[above,midway] {1};
+  \draw[<<-] (i)++(-0.7*0.21,0,0.25*0.21) -- +(-0.7*0.2,0,0.25*0.2) node[above,midway] {4};
+  \draw[->] (i)+(0.015,0.0,0.005) -- +(0.15,0.0,0.05) node[above,near end] {2};
+  \draw[->>] (i)++(0.16,0.0,0.0533) -- +(0.15,0.0,0.05) node[above,near end] {5};
+  \draw[->] (i)+(0,0,0.02) -- ++(0,0,0.15) node[left,midway] {3};
+  \draw[->>] (i)++(0,0,0.16) -- +(0,0,0.16) node[left,midway] {6};
+
+  \draw[->] (j)++(0.7*0.02,0,-0.25*0.02) -- +(0.7*0.2,0,-0.25*0.2) node[above,midway] {7};
+  \draw[->>] (j)++(0.7*0.23,0,-0.25*0.23) -- +(0.7*0.18,0,-0.25*0.18) node[above,midway] {4};
+  \draw[->] (j)+(0.015,0.0,0.005) -- +(0.15,0.0,0.05) node[above,near end] {8};
+  \draw[->>] (j)++(0.16,0.0,0.0533) -- +(0.15,0.0,0.05) node[above,near end] {11};
+  \draw[->] (j)+(0,0,0.02) -- ++(0,0,0.15) node[left,midway] {9};
+  \draw[->>] (j)++(0,0,0.16) -- +(0,0,0.16) node[left,midway] {12};
+
+ \end{scope}
+
+ 
+\end{tikzpicture}

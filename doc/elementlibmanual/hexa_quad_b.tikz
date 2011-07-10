@@ -1,0 +1,50 @@
+\begin{tikzpicture}[scale=2,>=stealth,
+  x={(-0.4cm,-0.3cm)}, y={ (1cm,0cm) }, z={(0cm,1cm)}]
+ \tikzstyle{elemnode} = [fill,circle,inner sep=2]
+ \tikzstyle{background} = [densely dashed]
+ \newcommand{\fs}{0.25}
+ 
+% Coord.sys. (shifted for readability)
+ \draw[->,xshift=-5] (-0.1,0,0) -- (1.5,0,0) node[at end,below] {$\xi$};
+ \draw[->,xshift=-5] (0,-0.1,0) -- (0,1,0) node[at end,below] {$\eta$};
+ \draw[->,xshift=-5] (0,0,-0.1) -- (0,0,0.8) node[at end,right] {$\zeta$};
+
+% Can't use rectangle in 3d
+ \draw[thick] (-1,-1,1) -- (-1,1,1) -- (1,1,1) -- (1,-1,1) -- cycle;
+ \draw[thick,background] (-1,-1,-1) -- (-1,1,-1);
+ \draw[thick] (-1,1,-1)-- (1,1,-1);
+ \draw[thick] (1,1,-1) -- (1,-1,-1);
+ \draw[thick,background] (1,-1,-1) -- (-1,-1,-1);
+ \draw[thick,background] (-1,-1,1) -- (-1,-1,-1);
+ \draw[thick] (-1,1,1) -- (-1,1,-1);
+ \draw[thick] (1,-1,1) -- (1,-1,-1);
+ \draw[thick] (1,1,1) -- (1,1,-1);
+
+% Faces
+ \draw[red] (1,-\fs,-\fs) -- (1,-\fs,\fs) -- (1,\fs,\fs) -- (1,\fs,-\fs) -- cycle;
+ \node[red] at (1,0,0) {5};
+ \draw[red] (-\fs,1,-\fs) -- (-\fs,1,\fs) -- (\fs,1,\fs) -- (\fs,1,-\fs) -- cycle;
+ \node[red] at (0,1,0) {4};
+ \draw[red] (-\fs,-\fs,1) -- (-\fs,\fs,1) -- (\fs,\fs,1) -- (\fs,-\fs,1) -- cycle;
+ \node[red] at (0,0,1) {1};
+ \draw[red!50!black,background] (-1,-\fs,-\fs) -- (-1,-\fs,\fs) -- (-1,\fs,\fs) -- (-1,\fs,-\fs) -- cycle;
+ \node[red!50!black] at (-1,0,0) {3};
+ \draw[red!50!black,background] (-\fs,-1,-\fs) -- (-\fs,-1,\fs) -- (\fs,-1,\fs) -- (\fs,-1,-\fs) -- cycle;
+ \node[red!50!black] at (0,-1,0) {6};
+ \draw[red!50!black,background] (-\fs,-\fs,-1) -- (-\fs,\fs,-1) -- (\fs,\fs,-1) -- (\fs,-\fs,-1) -- cycle;
+ \node[red!50!black] at (0,0,-1) {2};
+
+% Edges
+% \node[blue,above] at (-1,0,1) {1};
+% \node[blue,above left] at (0,1,1) {2};
+% \node[blue,above left] at (1,0,1) {3};
+% \node[blue,above left] at (0,-1,1) {4};
+% \node[blue!50!black,left] at (-1,-1,0) {5};
+% \node[blue,left] at (-1,1,0) {6};
+% \node[blue,left] at (1,1,0) {7};
+% \node[blue,left] at (1,-1,0) {8};
+% \node[blue!50!black,above] at (-1,0,-1) {9};
+% \node[blue,above left] at (0,1,-1) {10};
+% \node[blue,above left] at (1,0,-1) {11};
+% \node[blue!50!black,above left] at (0,-1,-1) {12};
+\end{tikzpicture}

@@ -1,0 +1,29 @@
+\tikzstyle{elemnode} = [draw,thin,circle,inner sep=1,fill=white]
+
+\begin{tikzpicture}[scale=7,>=stealth]
+ \coordinate (a) at (0.1,-0.2);
+ \coordinate (b) at (0.6,-0.1);
+ \newcommand{\beamlength}{0.4};
+
+ \draw[->] (-0.05,0) -- (1.1,0) node[below,at end] {$x_g$};
+ \draw[->] (0,0.05) -- (0,-0.5) node[right,at end] {$Z_g$};
+ \draw[very thick] (a) --  +(-30:0.4) 
+    node[at start,elemnode] {} node[at start,above right] {1}
+    node[at end,elemnode] {} node[at end,above right] {2}
+    node[midway,below left,inner sep=2] {(a)};
+ \draw[dotted,->] (a)++(-30:0.42) -- +(-30:0.1) node[below] {$X_1$};
+ \draw[dotted,->] (a)++(-30-90:0.02) -- +(-120:0.1) node[right] {$Z_1$};
+
+ \draw[very thick] (b) -- +(-30:0.4)
+    node[midway,below left, inner sep=2] {(b)}
+    coordinate[at end] (bend);
+ \draw[dotted,->] (b)++(-30-90:0.1) -- +(-120:0.1);
+ \draw[dotted,->] (bend)++(-30:0.1) -- +(-30:0.1);
+
+ \draw[thin,<-] (b) -- +(-30:-0.1) node[below left,midway] {1};
+ \draw[thin,->] (b) -- +(-120:0.1) node[below right,at end] {2};
+ \draw[thin,->] (bend) -- +(-30:0.1) node[below left,at end] {4};
+ \draw[thin,->] (bend) -- +(-120:0.1) node[below right,at end] {5};
+ \draw[thin,->] (b)++(-20:0.05) arc (-30:120:0.05); \node at (0.68,-0.05) {3};
+ \draw[thin,->] (bend)++(-20:0.05) arc (-30:120:0.05); \node at (1.03,-0.27) {6};
+\end{tikzpicture}

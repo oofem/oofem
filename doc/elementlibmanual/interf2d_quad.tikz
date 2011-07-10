@@ -1,0 +1,35 @@
+\tikzstyle{elemnode} = [solid,thin,draw,circle,inner sep=1,fill=white]
+\begin{tikzpicture}[scale=3,>=stealth]
+ \newcommand{\eoff}{0.03}
+ \draw[dashed] 
+    (0,0) -- (1,0) node[at start,elemnode] {} node[midway,elemnode] {}
+    to[out=90,in=-30] node[at start,elemnode] {} node[midway,elemnode] {}
+    (0.5,1) -- (0,0) node[at start,elemnode] {} node[midway,elemnode] {};
+ 
+ \draw[dashed,xshift=15,yshift=5] 
+    (1,0) to[out=90,in=-30] node[at start,elemnode] {} node[midway,elemnode] {}
+    (0.5,1) -- (1.5,1) node[at start,elemnode] {} node[midway,elemnode] {}
+    to[out=-90,in=45] node[at start,elemnode] {} node[midway,elemnode] {} (1,0);
+
+ \begin{scope}[xshift=7.5,yshift=2.5]
+  \draw[<->] (0.5,1)+(60:0.3) -- (0.5,1) node[at start,left] {$\eta$}
+    to[out=-30,in=90] (1,0) -- (1,-0.3) node[at end,right] {$\xi$};
+
+  \draw[thick] (0.5,1)+(60:-\eoff) to[out=-30,in=90] 
+    node[at start,elemnode] (n1) {}
+    node[at end,elemnode] (n2) {}
+    node[midway,elemnode] (n3) {}
+    (1-\eoff,0)
+    (0.5,1)+(60:\eoff) to[out=-30,in=90] 
+    node[at start,elemnode] (n4) {}
+    node[at end,elemnode] (n5) {}
+    node[midway,elemnode] (n6) {}
+    (1+\eoff,0);
+   \node[left] at (n1) {1};
+   \node[left] at (n2) {2};
+   \node[left] at (n3) {3};
+   \node[yshift=2,right] at (n4) {4}; % Fine adjustments
+   \node[right] at (n5) {5};
+   \node[right] at (n6) {6};
+ \end{scope}
+\end{tikzpicture}
