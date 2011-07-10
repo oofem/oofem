@@ -379,7 +379,7 @@ IsotropicDamageMaterial1 :: computeDamageParamForCohesiveCrack(double &omega, do
             if ( kappa < ef ) {
                 omega = ( ef / kappa ) * ( kappa - e0 ) / ( ef - e0 );
             } else {
-                omega = 1.0;
+                omega = 1.0;//maximum omega (maxOmega) is adjusted just for stiffness matrix in isodamagemodel.C
             }
         } else if (  this->softType == ST_BiLinear_Cohesive_Crack ) {
             double ek = this->give(ek_ID, gp);
@@ -447,7 +447,7 @@ IsotropicDamageMaterial1 :: damageFunction(double kappa, GaussPoint *gp)
         } else if ( kappa < ef ) {
             return ( ef / kappa ) * ( kappa - e0 ) / ( ef - e0 );
         } else {
-            return maxOmega;
+            return 1.0;//maximum omega (maxOmega) is adjusted just for stiffness matrix in isodamagemodel.C
         }
 
     case ST_Exponential:
