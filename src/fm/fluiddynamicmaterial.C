@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2010   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -40,13 +40,10 @@
 #include "flotarry.h"
 
 #include "mathfem.h"
-
-#include "engngm.h"
 #include "fieldmanager.h"
 
 #ifndef __MAKEDEPEND
  #include <stdlib.h>
- #include <math.h>
 #endif
 #include "contextioerr.h"
 
@@ -101,17 +98,15 @@ FluidDynamicMaterial :: giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint,
     if ( type == IST_DeviatoricStrain ) {
         answer = status->giveDeviatoricStressVector();
         return 1;
-    } 
+    }
   */
-  if (type == IST_Viscosity ) {
-    answer.resize(1); answer.at(1) = this->giveCharacteristicValue (MRM_Viscosity, aGaussPoint, atTime);
-    return 1;
-  } else {
-    return Material :: giveIPValue(answer, aGaussPoint, type, atTime);
-  }
+    if (type == IST_Viscosity ) {
+        answer.resize(1); answer.at(1) = this->giveCharacteristicValue (MRM_Viscosity, aGaussPoint, atTime);
+        return 1;
+    } else {
+        return Material :: giveIPValue(answer, aGaussPoint, type, atTime);
+    }
 }
-
-
 
 
 InternalStateValueType
@@ -121,11 +116,11 @@ FluidDynamicMaterial :: giveIPValueType(InternalStateType type)
   if ( ( type == IST_DeviatoricStrain ) ) {
     return ISVT_TENSOR_S3;
   } */
-  if (type == IST_Viscosity ) {
-    return ISVT_SCALAR;
-  } else {
-    return Material :: giveIPValueType(type);
-  }
+    if (type == IST_Viscosity ) {
+        return ISVT_SCALAR;
+    } else {
+        return Material :: giveIPValueType(type);
+    }
 }
 
 
@@ -158,12 +153,12 @@ FluidDynamicMaterial :: giveIntVarCompFullIndx(IntArray &answer, InternalStateTy
       }
     }
   */
-  if (type == IST_Viscosity ) {
-    answer.resize(1); answer.at(1) = 1;
-    return 1;
-  }  else {
-    return Material :: giveIntVarCompFullIndx(answer, type, mmode);
-  }
+    if (type == IST_Viscosity ) {
+        answer.resize(1); answer.at(1) = 1;
+        return 1;
+    }  else {
+        return Material :: giveIntVarCompFullIndx(answer, type, mmode);
+    }
 }
 
 
@@ -186,9 +181,9 @@ FluidDynamicMaterial :: giveIPValueSize(InternalStateType type, GaussPoint *aGau
    }
   */
     if (type == IST_Viscosity ) {
-      return 1;
+        return 1;
     } else {
-      return Material :: giveIPValueSize(type, aGaussPoint);
+        return Material :: giveIPValueSize(type, aGaussPoint);
     }
 }
 

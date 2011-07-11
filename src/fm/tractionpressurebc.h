@@ -33,19 +33,10 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-//   ********************************
-//   *** CLASS BOUNDARY CONDITION ***
-//   ********************************
-
-
 #ifndef tractionpressurebc_h
 #define tractionpressurebc_h
 
 #include "boundary.h"
-
-#ifndef __MAKEDEPEND
- #include <string.h>
-#endif
 
 namespace oofem {
 /**
@@ -54,39 +45,20 @@ namespace oofem {
  */
 class TractionPressureBC : public BoundaryCondition
 {
-private:
 public:
     /**
      * Constructor. Creates boundary condition with given number, belonging to given domain.
-     * @param n boundary condition number
-     * @param d domain to which new object will belongs.
+     * @param n Boundary condition number.
+     * @param d Domain to which new object will belongs.
      */
-    TractionPressureBC(int i, Domain *d) : BoundaryCondition(i, d)
-    { }
-    /// Destructor
-    ~TractionPressureBC()            { }
+    TractionPressureBC(int i, Domain *d) : BoundaryCondition(i, d) { }
+    /// Destructor.
+    ~TractionPressureBC() { }
 
+    virtual double give(Dof *dof, ValueModeType mode, TimeStep *tStep);
 
-    /**
-     * Returns the value of a prescribed unknown, respecting requested mode for given time.
-     * Its physical meaning is determined by corresponding DOF.
-     * @param dof determines the dof subjected to receiver bc
-     * @param mode unknown char type (if total or incremental value is returned)
-     * @return prescribed value of unknown or zero if not prescribed
-     */
-    virtual double give(Dof *, ValueModeType, TimeStep *);
-
-    /// Initializes receiver acording to object description stored in input record.
     IRResultType initializeFrom(InputRecord *ir);
-
-    /** Setups the input record string of receiver
-     *  @param str string to be filled by input record
-     *  @param keyword print record keyword (default true)
-     */
     virtual int giveInputRecordString(std :: string &str, bool keyword = true);
-    /**
-     * Scales the receiver according to given value. Typically used in nondimensional analysis to scale down BCs and ICs.
-     */
     virtual void scale(double s) { }
 };
 } // end namespace oofem

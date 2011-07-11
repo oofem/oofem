@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2010   Borek Patzak
+ *               Copyright (C) 1993 - 2011   Borek Patzak
  *
  *
  *
@@ -61,54 +61,29 @@ class GaussPoint;
 class FluidDynamicMaterialStatus : public MaterialStatus
 {
 protected:
-
-    /// Equilibrated state vector in reduced form
-    FloatArray deviatoricStressVector;  // reduced form
+    /// Equilibrated state vector in reduced form.
+    FloatArray deviatoricStressVector;
 
 public:
-    /// Constructor - creates new TransportMaterialStatus with number n, belonging to domain d and IntegrationPoint g.
+    /// Constructor - creates new TransportMaterialStatus with number n, belonging to domain d and integration point g.
     FluidDynamicMaterialStatus(int n, Domain *d, GaussPoint *g);
-    /// Destructor
+    /// Destructor.
     ~FluidDynamicMaterialStatus() { }
 
-    /// Print receiver's output to given stream.
-    void printOutputAt(FILE *, TimeStep *);
-
-    /**
-     * Initializes the temporary internal variables (stresses and strains vectors),
-     * describing the current state according to
-     * previously reached equilibrium internal variables.
-     */
+    void printOutputAt(FILE *file, TimeStep *tStep);
     virtual void initTempStatus();
-    /**
-     * Update equilibrium history variables according to temp-variables.
-     * Invoked, after new equilibrium state has been reached.
-     */
-    virtual void updateYourself(TimeStep *); // update after new equilibrium state reached
+    virtual void updateYourself(TimeStep *tStep);
 
-
-    /**
-     * Stores context of receiver into given stream (the equilibrium stress and strains vectors are stored).
-     * Generally, only non-temp internal history variables should be stored.
-     * @param stream stream where to write data
-     * @param mode determines amount of info required in stream (state, definition,...)
-     * @param obj pointer to integration point, which invokes this method
-     * @return contextIOResultType.
-     * @exception throws an ContextIOERR exception if error encountered.
-     */
     contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-    /**
-     * Restores context of receiver from given stream (the equilibrium stress and strains vectors are restored).
-     * @param stream stream where to read data
-     * @param mode determines amount of info required in stream (state, definition,...)
-     * @param obj pointer to integration point, which invokes this method
-     * @return contextIOResultType.
-     * @exception throws an ContextIOERR exception if error encountered.
-     */
     contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 
-    /// Returns the const pointer to receiver's stateVector attribute
+    /**
+     * Gives the deviatoric stress.
+     */
     const FloatArray &giveDeviatoricStressVector() { return deviatoricStressVector; }
+    /**
+     * Sets the deviatoric stress.
+     */
     void letTempDeviatoricStressVectorBe(const FloatArray &v) { deviatoricStressVector = v; }
 
     const char *giveClassName() const { return "FluidDynamicMaterialStatus"; }
@@ -121,7 +96,7 @@ public:
  * by all structural material models. The implementation of these services is partly left on derived classes,
  * which will implement constitutive model dependent part.
  * Some general purpose services are implemented on this level. For details, how to store
- * material model related history variables in integration points, see base class \ref Material documentation.
+ * material model related history variables in integration points, see base class @ref Material documentation.
  *
  * The constitutive model can in general support several material modes (plane stress, plane strain ,... modes).
  * Its capabilities can be examined using hasMaterialModeCapability  service.
@@ -131,41 +106,43 @@ public:
  */
 class FluidDynamicMaterial : public Material
 {
-protected:
 public:
-
     /**
      * Constructor. Creates material with given number, belonging to given domain.
-     * @param n material number
-     * @param d domain to which new material will belong
+     * @param n Material number.
+     * @param d Domain to which new material will belong.
      */
     FluidDynamicMaterial(int n, Domain *d) : Material(n, d) { }
     /// Destructor.
     ~FluidDynamicMaterial() { }
 
     /**
-     * Computes deviatoric stress vector from given strain
+     * Computes the deviatoric stress vector from given strain.
+     * @param answer Deviatoric stress.
+     * @param gp Integration point.
+     * @param eps Stress rate.
+     * @param tStep Time step.
      */
     virtual void computeDeviatoricStressVector(FloatArray &answer, GaussPoint *gp, const FloatArray &eps, TimeStep *tStep) = 0;
 
     /**
-     * Computes the deviatoric stiffness (derivative of deviatoric stress tensor with respect to strain)
+     * Computes the deviatoric stiffness (derivative of deviatoric stress tensor with respect to strain).
+     * @param answer Stiffness matrix.
+     * @param mode Mode of result.
+     * @param gp Integration point.
+     * @param tStep Time step.
      */
-    virtual void giveDeviatoricStiffnessMatrix(FloatMatrix & answer, MatResponseMode, GaussPoint * gp,
-                                               TimeStep * atTime) = 0;
+    virtual void giveDeviatoricStiffnessMatrix(FloatMatrix & answer, MatResponseMode mode, GaussPoint * gp,
+                                               TimeStep * tStep) = 0;
 
     /**
      * Updates internal state of material according to new state vector.
-     * @param vec new state vector
-     * @param gp integration point
-     * @param tStep solution step
+     * @param vec New state vector.
+     * @param gp Integration point.
+     * @param tStep Solution step.
      */
     virtual void updateInternalState(const FloatArray &vec, GaussPoint *gp, TimeStep *);
-    /**
-     * Request material extension.
-     * @param ext material extension tested
-     * @return nonzero if implemented
-     */
+
     virtual int testMaterialExtension(MaterialExtension ext) { return ( ( ext == Material_FluidDynamicsCapability ) ? 1 : 0 ); }
 
     virtual int giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime);
@@ -173,10 +150,8 @@ public:
     virtual int giveIntVarCompFullIndx(IntArray &answer, InternalStateType type, MaterialMode mmode);
     virtual InternalStateValueType giveIPValueType(InternalStateType type);
 
-
-
     const char *giveClassName() const { return "FluidDynamicMaterial"; }
-    classType giveClassID()         const { return FluidDynamicMaterialClass; }
+    classType giveClassID() const { return FluidDynamicMaterialClass; }
 };
 } // end namespace oofem
 #endif // fluiddynamicmaterial_h

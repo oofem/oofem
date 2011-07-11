@@ -44,19 +44,13 @@
 #include "primaryfield.h"
 
 namespace oofem {
-// declaration of basic boundary codes
+///@name Declaration of basic boundary codes.
+//@{
 #define FMElement_PrescribedTractionBC ( 1 << 0 )
 #define FMElement_PrescribedUnBC       ( 1 << 1 )
 #define FMElement_PrescribedUsBC       ( 1 << 2 )
 #define FMElement_PrescribedPressureBC ( 1 << 3 )
-
-class TimeStep;
-class Node;
-class Material;
-class GaussPoint;
-class FloatMatrix;
-class FloatArray;
-class IntArray;
+//@}
 
 /**
  * This abstract class represent a general base element class for
@@ -71,12 +65,15 @@ protected:
     IntArray boundaryCodes;
 
 public:
-    FMElement(int, Domain *);
+    FMElement(int n, Domain *aDomain);
     ~FMElement();
 
-    virtual void     updateStabilizationCoeffs(TimeStep *) { }
+    /**
+     * Updates the stabilization coefficients used for CBS and SUPG algorithms.
+     * @param tStep Active time step.
+     */
+    virtual void updateStabilizationCoeffs(TimeStep *tStep) { }
 
-    ///Initializes receiver acording to object description stored in input record.
     IRResultType initializeFrom(InputRecord *ir);
     const char *giveClassName() const { return "FMElement"; }
     classType giveClassID() const { return FMElementClass; }

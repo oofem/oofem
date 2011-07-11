@@ -229,12 +229,7 @@ void FE2SinteringMaterialStatus::updateYourself(TimeStep *tStep)
 
     double fluid_area = this->rve->giveDomain(1)->giveArea();
     double total_area = this->rve->computeSize(1);
-    //printf("Fluid area = %e\n",area);
     this->voffraction = fluid_area/total_area;
-    //double de_vol = strainIncrement.at(1) + strainIncrement.at(2);
-    //this->porosity = 1.0 - (1.0 - this->porosity)*exp(-de_vol);
-    //printf("* porosity = %e\n",this->porosity);
-
     StructuralMaterialStatus::updateYourself(tStep);
 
     this->rve->updateYourself(tStep);
